@@ -72,10 +72,13 @@ const commitBody = [
   `Co-authored-by: Google Gemini <gemini@google.com>`,
 ].filter(Boolean).join("\n");
 
+import { recordAudit } from "./audit-tracker";
+
 try {
+  recordAudit(agent, (type.toUpperCase() || "FEAT") as any, message);
   run("git add .");
   execSync(`git commit -m "${commitTitle}" -m "${commitBody}"`, { stdio: "inherit" });
-  console.log(`\n✨ [Commit สำเร็จ] บันทึก Attribution ชัดเจน: "${commitTitle}"`);
+  console.log(`\n✨ [Commit สำเร็จ] บันทึก Attribution & Audit Trail ชัดเจน: "${commitTitle}"`);
 } catch (e: any) {
   console.error("❌ Commit ล้มเหลว:", e.message);
   process.exit(1);

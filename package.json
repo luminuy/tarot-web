@@ -24,7 +24,9 @@
     "repo:verify": "tsx scripts/github-auto.ts verify-all",
     "pr:auto": "tsx scripts/github-auto.ts pr",
     "commit": "tsx scripts/git-author-guard.ts",
-    "hooks:setup": "git config core.hooksPath .githooks"
+    "hooks:setup": "git config core.hooksPath .githooks",
+    "audit:show": "tsx scripts/audit-tracker.ts show",
+    "audit:track": "tsx scripts/audit-tracker.ts track"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
