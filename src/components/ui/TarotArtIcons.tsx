@@ -385,3 +385,92 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
     })}
   </div>
 );
+
+// ============================================================================
+// 11. CATEGORY TAB ICONS (Minimal Line-Art, ออกแบบเฉพาะสำหรับแท็บกรองผัง)
+// ============================================================================
+// ต่างจากไอคอนด้านบนที่ใช้ภาพไพ่จริง — ชุดนี้เป็นเส้นบางล้วน (stroke="currentColor")
+// เพื่อให้สืบสีจาก class ของปุ่มพ่อแม่โดยอัตโนมัติ (active/inactive/hover ไม่ต้อง
+// เขียน logic สีซ้ำที่ไอคอน) ทุกไอคอน viewBox 24x24, strokeWidth 1.6,
+// linecap/linejoin round สม่ำเสมอกันทั้งชุด ให้ความรู้สึกเป็นครอบครัวเดียวกัน
+// แรงบันดาลใจจากสัญลักษณ์จริงในไพ่ทาโรต์ (เพนตาเคิล, ลูกแก้ว) แทน emoji ทั่วไป
+
+interface IconProps {
+  className?: string;
+}
+
+/** ยอดนิยมแนะนำ — ประกายดาวสี่แฉก (ใช้โมทีฟ ✦ เดียวกับที่ใช้แต้มมุมการ์ดทั่วเว็บ) */
+export const SparkleTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M12 3L13.5 9.5L20 11L13.5 12.5L12 19L10.5 12.5L4 11L10.5 9.5L12 3Z" />
+  </svg>
+);
+
+/** ความรัก & คนในใจ — หัวใจเส้นเรียบ ไม่ใช้ emoji สีชมพูตรง ๆ เพื่อให้เข้าธีมทอง */
+export const HeartTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M12 20.3c-.3 0-.6-.1-.8-.3C7.6 17 4 13.6 4 9.7 4 7 6.1 5 8.7 5c1.4 0 2.7.7 3.3 1.9C12.6 5.7 13.9 5 15.3 5 17.9 5 20 7 20 9.7c0 3.9-3.6 7.3-7.2 10.3-.2.2-.5.3-.8.3Z" />
+  </svg>
+);
+
+/** การงาน & การเงิน — เพนตาเคิล (ดาวห้าแฉกในวงกลม) สัญลักษณ์จริงของไพ่ชุดเงิน/งาน */
+export const PentacleTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.4}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="8.3" />
+    <path d="M12 7 L13.2 10.4 L16.8 10.5 L13.9 12.6 L14.9 16.1 L12 14 L9.1 16.1 L10.1 12.6 L7.2 10.5 L10.8 10.4 Z" />
+  </svg>
+);
+
+/** ผังใหญ่เจาะลึก — ลูกแก้วทำนายพร้อมฐาน สื่อถึงการมองลึกและผังขนาดใหญ่ */
+export const CrystalBallTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="10" r="6.3" />
+    <path d="M8.4 7.6a4.3 4.3 0 0 1 3.2-2.4" />
+    <path d="M7 19h10M8.5 16.5h7" />
+  </svg>
+);
+
+/** ผังทั้งหมด — ไพ่สามใบคลี่พัด สื่อถึงการเห็นทุกผังในสำรับเดียวกัน */
+export const AllSpreadsTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <rect x="4" y="6" width="7.5" height="11.5" rx="1.4" transform="rotate(-13 7.75 11.75)" />
+    <rect x="8.3" y="4.5" width="7.5" height="11.5" rx="1.4" />
+    <rect x="12.5" y="6" width="7.5" height="11.5" rx="1.4" transform="rotate(13 16.25 11.75)" />
+  </svg>
+);

@@ -14,6 +14,11 @@ import {
   DecisionSpreadArt,
   CelticCrossSpreadArt,
   TwelveMonthsSpreadArt,
+  SparkleTabIcon,
+  HeartTabIcon,
+  PentacleTabIcon,
+  CrystalBallTabIcon,
+  AllSpreadsTabIcon,
 } from "@/components/ui/TarotArtIcons";
 
 interface SpreadCardSelectorProps {
@@ -27,7 +32,7 @@ type SpreadCategory = "all" | "recommended" | "love" | "career" | "master";
 interface CategoryTab {
   id: SpreadCategory;
   label: string;
-  icon: string;
+  Icon: React.FC<{ className?: string }>;
   count: number;
 }
 
@@ -67,11 +72,11 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
   const categories: CategoryTab[] = useMemo(
     () => [
-      { id: "recommended", label: "ยอดนิยมแนะนำ", icon: "⭐", count: 4 },
-      { id: "love", label: "ความรัก & คนในใจ", icon: "💖", count: 2 },
-      { id: "career", label: "การงาน & การเงิน", icon: "💼", count: 3 },
-      { id: "master", label: "ผังใหญ่เจาะลึก", icon: "🔮", count: 3 },
-      { id: "all", label: "ผังทั้งหมด", icon: "✦", count: SPREADS.length },
+      { id: "recommended", label: "ยอดนิยมแนะนำ", Icon: SparkleTabIcon, count: 4 },
+      { id: "love", label: "ความรัก & คนในใจ", Icon: HeartTabIcon, count: 2 },
+      { id: "career", label: "การงาน & การเงิน", Icon: PentacleTabIcon, count: 3 },
+      { id: "master", label: "ผังใหญ่เจาะลึก", Icon: CrystalBallTabIcon, count: 3 },
+      { id: "all", label: "ผังทั้งหมด", Icon: AllSpreadsTabIcon, count: SPREADS.length },
     ],
     []
   );
@@ -121,7 +126,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   : "bg-[#100b20]/90 text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20 hover:border-[#e5c07b]/40 hover:bg-[#16102c]"
               }`}
             >
-              <span>{cat.icon}</span>
+              <cat.Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
               <span>{cat.label}</span>
               <span
                 className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
