@@ -7,7 +7,7 @@
 
 ## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `31/8/2569 04:29:25` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `31/8/2569 04:34:34` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
@@ -227,10 +227,17 @@
   - `src/services/interpretation.service.ts`
   - `src/services/index.ts`
   - `src/components/verification/TurnstileWidget.tsx`
-  - `docs/WORK_LOG.md`
+#### 14. GitHub Repository Connection & CI/CD Auto-Deploy Activation
+- **สิ่งที่ทำ**:
+  - สร้าง Repository และ Push โค้ดทั้งหมดขึ้น GitHub: `https://github.com/luminuy/tarot-web`
+  - ติดตั้ง GitHub Actions Workflow อัตโนมัติ:
+    - `.github/workflows/deploy.yml`: Production Auto-Deploy เมื่อมี push/merge เข้า `main`
+    - `.github/workflows/pr.yml`: PR Automated CI & Verification
+  - เพิ่ม `.gitignore` สำหรับ Cloudflare OpenNext/Wrangler build outputs
 - **ผลการทดสอบ**:
-  - `npm run typecheck`: **0 errors**
-  - `npm run log:sync`: **ผ่านและอัปเดตสถานะสำเร็จ 100%**
+  - `git push -u origin main`: **สำเร็จ 100% (tracking origin/main)**
+  - GitHub Actions Workflow: **Triggered & Active**
+  - `npm run log:sync`: **ผ่านและอัปเดตสถานะสำเร็จ**
 
 ---
 
