@@ -249,117 +249,108 @@ export const ThreeCardSpreadArt: React.FC<{ className?: string }> = ({ className
 );
 
 // 5. ความรักสองหัวใจ (5 ใบ) — Relationship Layout
-export const LoveSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-34" }) => (
-  <div className={`flex items-center justify-center gap-2 sm:gap-2.5 relative ${className}`}>
-    <MiniRwsCard src="/cards/cups-02.jpg" label="1. คุณ" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" />
+export const LoveSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-1.5 sm:gap-2 relative ${className}`}>
+    <MiniRwsCard src="/cards/cups-02.jpg" label="1. คุณ" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
     <div className="flex flex-col items-center gap-1">
-      <MiniRwsCard src="/cards/major-06.jpg" label="3. จุดเชื่อมโยง" borderColor="#ec4899" glowColor="rgba(236,72,153,0.5)" className="w-12 h-[82px] sm:w-13 sm:h-[88px]" highlight />
-      <MiniRwsCard src="/cards/swords-04.jpg" label="4. อุปสรรค" className="w-10 h-[68px] sm:w-11 sm:h-[75px] opacity-80" />
+      <MiniRwsCard src="/cards/major-06.jpg" label="3. จุดเชื่อมใจ" borderColor="#ec4899" glowColor="rgba(236,72,153,0.5)" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" highlight />
+      <MiniRwsCard src="/cards/swords-04.jpg" label="4. อุปสรรค" className="w-9 h-[62px] sm:w-10 sm:h-[68px] opacity-80" />
     </div>
-    <MiniRwsCard src="/cards/cups-03.jpg" label="2. เขา" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" />
-    <MiniRwsCard src="/cards/cups-10.jpg" label="5. ทิศทาง" borderColor="#38bdf8" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" />
+    <MiniRwsCard src="/cards/cups-03.jpg" label="2. เขา" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <MiniRwsCard src="/cards/cups-10.jpg" label="5. ทิศทาง" borderColor="#38bdf8" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
   </div>
 );
 
 // 6. เส้นทางการงาน (5 ใบ) — Career Pyramid
-export const CareerSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-34" }) => (
-  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+export const CareerSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1 relative ${className}`}>
     {/* Apex */}
-    <MiniRwsCard src="/cards/major-04.jpg" label="1. ศักยภาพหลัก" borderColor="#ffd700" glowColor="rgba(255,215,0,0.5)" className="w-12 h-[82px] sm:w-13 sm:h-[88px]" highlight />
+    <MiniRwsCard src="/cards/major-04.jpg" label="1. ศักยภาพหลัก" borderColor="#ffd700" glowColor="rgba(255,215,0,0.5)" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" highlight />
     {/* Base Row */}
-    <div className="flex items-center justify-center gap-2">
-      <MiniRwsCard src="/cards/wands-03.jpg" label="2. อุปสรรค" className="w-10 h-[68px] opacity-85" />
-      <MiniRwsCard src="/cards/pentacles-08.jpg" label="3. ตัวช่วย" className="w-10 h-[68px]" />
-      <MiniRwsCard src="/cards/wands-06.jpg" label="4. โอกาส" className="w-10 h-[68px]" />
-      <MiniRwsCard src="/cards/pentacles-01.jpg" label="5. ผลลัพธ์" borderColor="#10b981" className="w-10 h-[68px]" />
+    <div className="flex items-center justify-center gap-1.5">
+      <MiniRwsCard src="/cards/wands-03.jpg" label="2. อุปสรรค" className="w-9 h-[62px] opacity-85" />
+      <MiniRwsCard src="/cards/pentacles-08.jpg" label="3. ตัวช่วย" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/wands-06.jpg" label="4. โอกาส" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/pentacles-01.jpg" label="5. ผลลัพธ์" borderColor="#10b981" className="w-9 h-[62px]" />
     </div>
   </div>
 );
 
 // 7. การเงินและความมั่นคง (4 ใบ) — Apex + Base Row
-// เดิมใช้ grid 2x2 กับ max-w-[150px] ทำให้ขนาดโดยรวมเล็ก/แคบกว่าการ์ดข้างเคียง
-// (CareerSpreadArt, DecisionSpreadArt) อย่างเห็นได้ชัดเมื่อวางเรียงกันในกริดเดียวกัน
-// เปลี่ยนมาใช้โครง "การ์ดเด่นด้านบน + แถวฐาน" แบบเดียวกับสองผังนั้นเพื่อให้ขนาด
-// และสัดส่วนโดยรวมสม่ำเสมอกันทั้งแถว — การ์ดเด่นคือ "ความมั่งคั่ง" (เป้าหมายปลายทาง)
-// เหมือนกับที่ Career ใช้ "ศักยภาพหลัก" เป็นการ์ดยอด
-export const MoneySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-34" }) => (
+export const MoneySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
-    {/* Apex — เป้าหมายปลายทาง */}
+    {/* Apex */}
     <MiniRwsCard
       src="/cards/pentacles-10.jpg"
       label="4. ความมั่งคั่ง"
       borderColor="#ffd700"
       glowColor="rgba(255,215,0,0.5)"
-      className="w-12 h-[82px] sm:w-13 sm:h-[88px]"
+      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
       highlight
     />
     {/* Base Row */}
     <div className="flex items-center justify-center gap-2">
-      <MiniRwsCard src="/cards/pentacles-04.jpg" label="1. สภาพคล่อง" className="w-10 h-[68px]" />
-      <MiniRwsCard src="/cards/pentacles-05.jpg" label="2. จุดรั่วไหล" borderColor="#f43f5e" className="w-10 h-[68px] opacity-85" />
-      <MiniRwsCard src="/cards/pentacles-09.jpg" label="3. แหล่งเงิน" className="w-10 h-[68px]" />
+      <MiniRwsCard src="/cards/pentacles-04.jpg" label="1. สภาพคล่อง" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/pentacles-05.jpg" label="2. จุดรั่วไหล" borderColor="#f43f5e" className="w-9 h-[62px] opacity-85" />
+      <MiniRwsCard src="/cards/pentacles-09.jpg" label="3. แหล่งเงิน" className="w-9 h-[62px]" />
     </div>
   </div>
 );
 
 // 8. ทางแยกสองทาง (5 ใบ) — Decision Tree
-export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-34" }) => (
-  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
-    {/* Apex */}
-    <MiniRwsCard src="/cards/major-07.jpg" label="1. ทางแยกการตัดสินใจ" borderColor="#ffd700" glowColor="rgba(255,215,0,0.5)" className="w-12 h-[82px] sm:w-13 sm:h-[88px]" highlight />
-    {/* 2 Branches */}
-    <div className="flex items-center justify-center gap-3">
-      <div className="flex gap-1.5 p-1 rounded-lg border border-[#38bdf8]/30 bg-[#38bdf8]/5">
-        <MiniRwsCard src="/cards/swords-02.jpg" label="ทางเลือก A" className="w-10 h-[68px]" />
-        <MiniRwsCard src="/cards/wands-07.jpg" label="ผลลัพธ์ A" className="w-10 h-[68px]" />
+export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1 relative ${className}`}>
+    <MiniRwsCard src="/cards/major-07.jpg" label="1. ทางแยก" borderColor="#ffd700" glowColor="rgba(255,215,0,0.5)" className="w-10 h-[68px]" highlight />
+    <div className="flex items-center justify-center gap-2">
+      <div className="flex gap-1 p-0.5 rounded border border-[#38bdf8]/30 bg-[#38bdf8]/5">
+        <MiniRwsCard src="/cards/swords-02.jpg" label="ทางเลือก A" className="w-8 h-[55px]" />
+        <MiniRwsCard src="/cards/wands-07.jpg" label="ผลลัพธ์ A" className="w-8 h-[55px]" />
       </div>
-      <div className="flex gap-1.5 p-1 rounded-lg border border-[#a855f7]/30 bg-[#a855f7]/5">
-        <MiniRwsCard src="/cards/pentacles-02.jpg" label="ทางเลือก B" className="w-10 h-[68px]" />
-        <MiniRwsCard src="/cards/cups-09.jpg" label="ผลลัพธ์ B" className="w-10 h-[68px]" />
+      <div className="flex gap-1 p-0.5 rounded border border-[#a855f7]/30 bg-[#a855f7]/5">
+        <MiniRwsCard src="/cards/pentacles-02.jpg" label="ทางเลือก B" className="w-8 h-[55px]" />
+        <MiniRwsCard src="/cards/cups-09.jpg" label="ผลลัพธ์ B" className="w-8 h-[55px]" />
       </div>
     </div>
   </div>
 );
 
 // 9. Celtic Cross (10 ใบ) — Authentic 10-Card Formation
-export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-34" }) => (
-  <div className={`flex items-center justify-center gap-4 relative ${className}`}>
+export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-3 relative ${className}`}>
     {/* Left: Cross Formation */}
-    <div className="relative w-24 h-24 sm:w-26 sm:h-26 flex items-center justify-center">
-      {/* 4 Cardinal Cards */}
-      <div className="absolute top-0 w-7 h-[46px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-75 shadow">
+    <div className="relative w-22 h-22 sm:w-24 sm:h-24 flex items-center justify-center">
+      <div className="absolute top-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-75 shadow">
         <img src="/cards/major-04.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute bottom-0 w-7 h-[46px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-75 shadow">
+      <div className="absolute bottom-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-75 shadow">
         <img src="/cards/major-18.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute left-0 w-7 h-[46px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-75 shadow">
+      <div className="absolute left-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-75 shadow">
         <img src="/cards/major-19.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute right-0 w-7 h-[46px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-75 shadow">
+      <div className="absolute right-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-75 shadow">
         <img src="/cards/major-17.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      {/* Center 2 crossed cards */}
-      <div className="relative z-10 w-8 h-[54px] rounded border-2 border-[#ffd700] overflow-hidden shadow-xl">
+      <div className="relative z-10 w-7 h-[48px] rounded border-2 border-[#ffd700] overflow-hidden shadow-xl">
         <img src="/cards/major-00.jpg" alt="Center" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute z-20 w-8 h-[54px] rounded border border-[#e5c07b] overflow-hidden rotate-90 shadow-lg opacity-90">
+      <div className="absolute z-20 w-7 h-[48px] rounded border border-[#e5c07b] overflow-hidden rotate-90 shadow-lg opacity-90">
         <img src="/cards/major-10.jpg" alt="Cross" className="w-full h-full object-cover" />
       </div>
     </div>
 
     {/* Right: Vertical Staff of 4 Cards */}
-    <div className="flex flex-col gap-1">
-      <div className="w-7 h-[46px] rounded border border-[#ffd700]/70 overflow-hidden shadow">
+    <div className="flex flex-col gap-0.5">
+      <div className="w-6 h-[40px] rounded border border-[#ffd700]/70 overflow-hidden shadow">
         <img src="/cards/major-21.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="w-7 h-[46px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
+      <div className="w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
         <img src="/cards/major-14.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="w-7 h-[46px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
+      <div className="w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
         <img src="/cards/major-11.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="w-7 h-[46px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
+      <div className="w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
         <img src="/cards/major-09.jpg" alt="" className="w-full h-full object-cover" />
       </div>
     </div>
@@ -367,17 +358,15 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
 );
 
 // 10. ผัง 12 เดือน / วงล้อจักรราศี (12 ใบ) — Zodiac Wheel
-export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-34" }) => (
-  <div className={`relative w-30 h-30 sm:w-32 sm:h-32 mx-auto flex items-center justify-center ${className}`}>
-    {/* Center Sun Sigil */}
-    <div className="w-7 h-7 rounded-full border border-[#ffd700] bg-black/90 flex items-center justify-center text-[10px] text-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.6)] z-10">
-      ☀️
+export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`relative w-28 h-28 sm:w-30 sm:h-30 mx-auto flex items-center justify-center ${className}`}>
+    <div className="w-6 h-6 rounded-full border border-[#ffd700] bg-black/90 flex items-center justify-center text-[9px] text-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.6)] z-10 font-bold">
+      ✦
     </div>
-    {/* Outer 12 cards in orbit */}
     {Array.from({ length: 12 }).map((_, i) => {
       const angle = (i * 360) / 12 - 90;
       const rad = (angle * Math.PI) / 180;
-      const radius = 46; // px
+      const radius = 42;
       const x = Math.cos(rad) * radius;
       const y = Math.sin(rad) * radius;
       const cardNum = String(i + 1).padStart(2, "0");
@@ -385,7 +374,7 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
       return (
         <div
           key={i}
-          className="absolute w-5 h-[34px] sm:w-5.5 sm:h-[37px] rounded border border-[#e5c07b]/60 overflow-hidden shadow-sm hover:scale-125 transition-transform"
+          className="absolute w-4.5 h-[30px] sm:w-5 sm:h-[34px] rounded border border-[#e5c07b]/60 overflow-hidden shadow-sm hover:scale-125 transition-transform"
           style={{
             transform: `translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
           }}
@@ -401,6 +390,196 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
     })}
   </div>
 );
+
+// 11. สถานการณ์ อุปสรรค ทางออก (3 ใบ)
+export const SituationSolutionSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-2.5 sm:gap-3.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/swords-08.jpg" label="1. ปัญหา" className="w-13 h-[88px] sm:w-14 sm:h-[95px] opacity-90" />
+    <MiniRwsCard src="/cards/swords-10.jpg" label="2. อุปสรรค" borderColor="#f43f5e" glowColor="rgba(244,63,94,0.4)" className="w-14 h-[95px] sm:w-15 sm:h-[102px]" highlight />
+    <MiniRwsCard src="/cards/major-01.jpg" label="3. ทางออก" borderColor="#10b981" glowColor="rgba(16,185,129,0.5)" className="w-16 h-[108px] sm:w-17 sm:h-[115px]" highlight />
+  </div>
+);
+
+// 12. กาย จิต วิญญาณ (3 ใบ)
+export const MindBodySpiritSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-2.5 sm:gap-3.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/pentacles-04.jpg" label="1. ร่างกาย" borderColor="#10b981" className="w-13 h-[88px] sm:w-14 sm:h-[95px]" />
+    <MiniRwsCard src="/cards/cups-14.jpg" label="2. จิตใจ" borderColor="#38bdf8" glowColor="rgba(56,189,248,0.5)" className="w-15 h-[102px] sm:w-16 sm:h-[108px]" highlight />
+    <MiniRwsCard src="/cards/major-17.jpg" label="3. จิตวิญญาณ" borderColor="#a855f7" glowColor="rgba(168,85,247,0.5)" className="w-15 h-[102px] sm:w-16 sm:h-[108px]" highlight />
+  </div>
+);
+
+// 13. ความในใจของเขา (4 ใบ)
+export const HowTheyFeelSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/swords-02.jpg" label="2. ความรู้สึกจริง" borderColor="#ec4899" glowColor="rgba(236,72,153,0.5)" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" highlight />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/cups-02.jpg" label="1. ท่าทีภายนอก" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/cups-04.jpg" label="3. สิ่งที่หวัง" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/wands-01.jpg" label="4. ก้าวต่อไป" borderColor="#ffd700" className="w-9 h-[62px]" />
+    </div>
+  </div>
+);
+
+// 14. คนรักเก่าจะกลับมาไหม (4 ใบ)
+export const ExReconciliationSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/major-20.jpg" label="3. โอกาสรีเทิร์น" borderColor="#ffd700" glowColor="rgba(255,215,0,0.5)" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" highlight />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/cups-05.jpg" label="1. ความรู้สึก" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/swords-03.jpg" label="2. สาเหตุ" borderColor="#f43f5e" className="w-9 h-[62px] opacity-85" />
+      <MiniRwsCard src="/cards/cups-06.jpg" label="4. คำแนะนำ" borderColor="#10b981" className="w-9 h-[62px]" />
+    </div>
+  </div>
+);
+
+// 15. ตามหาเนื้อคู่ & ความรักแท้ (5 ใบ)
+export const SoulmateSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1 relative ${className}`}>
+    <MiniRwsCard src="/cards/major-06.jpg" label="1. ลักษณะเนื้อคู่" borderColor="#ec4899" glowColor="rgba(236,72,153,0.5)" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" highlight />
+    <div className="flex items-center justify-center gap-1.5">
+      <MiniRwsCard src="/cards/cups-02.jpg" label="2. ที่จะพบ" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/wands-04.jpg" label="3. บททดสอบ" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/major-17.jpg" label="4. สิ่งที่ต้องปรับ" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/major-21.jpg" label="5. บทสรุป" borderColor="#ffd700" className="w-9 h-[62px]" />
+    </div>
+  </div>
+);
+
+// 16. ย้ายงานหรืออยู่ที่เดิม (5 ใบ)
+export const CareerSwitchSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1 relative ${className}`}>
+    <MiniRwsCard src="/cards/major-07.jpg" label="5. ทางเลือกดีสุด" borderColor="#10b981" glowColor="rgba(16,185,129,0.5)" className="w-11 h-[75px]" highlight />
+    <div className="flex items-center justify-center gap-1.5">
+      <MiniRwsCard src="/cards/wands-02.jpg" label="1. ที่เดิม" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/pentacles-03.jpg" label="2. ถ้าอยู่ที่เดิม" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/wands-08.jpg" label="3. ถ้าไปที่ใหม่" borderColor="#ffd700" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/major-00.jpg" label="4. ปัจจัยซ่อน" className="w-9 h-[62px]" />
+    </div>
+  </div>
+);
+
+// 17. ปลดล็อกศักยภาพในตัวคุณ (4 ใบ)
+export const InnerPotentialSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/major-08.jpg" label="2. พรสวรรค์ซ่อน" borderColor="#ffd700" glowColor="rgba(255,215,0,0.5)" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" highlight />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/major-01.jpg" label="1. ตัวตนปัจจุบัน" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/swords-09.jpg" label="3. ความกลัว" borderColor="#f43f5e" className="w-9 h-[62px] opacity-80" />
+      <MiniRwsCard src="/cards/major-19.jpg" label="4. กุญแจสู่พลัง" borderColor="#10b981" className="w-9 h-[62px]" />
+    </div>
+  </div>
+);
+
+// 18. ดวงประจำสัปดาห์ 7 วัน (7 ใบ) — 2-Tier Balanced Formation (No Overflow)
+export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1 relative ${className}`}>
+    {/* Tier 1: Mon - Thu */}
+    <div className="flex items-center justify-center gap-1">
+      {[
+        { day: "จันทร์", card: "01" },
+        { day: "อังคาร", card: "04" },
+        { day: "พุธ", card: "07" },
+        { day: "พฤหัส", card: "10" },
+      ].map((item, idx) => (
+        <MiniRwsCard
+          key={idx}
+          src={`/cards/major-${item.card}.jpg`}
+          label={item.day}
+          className="w-8 h-[55px] sm:w-9 sm:h-[62px]"
+        />
+      ))}
+    </div>
+    {/* Tier 2: Fri - Sun */}
+    <div className="flex items-center justify-center gap-1">
+      {[
+        { day: "ศุกร์", card: "14", highlight: true },
+        { day: "เสาร์", card: "17", highlight: false },
+        { day: "อาทิตย์", card: "19", highlight: false },
+      ].map((item, idx) => (
+        <MiniRwsCard
+          key={idx}
+          src={`/cards/major-${item.card}.jpg`}
+          label={item.day}
+          borderColor={item.highlight ? "#ffd700" : undefined}
+          className={`w-8 h-[55px] sm:w-9 sm:h-[62px] ${item.highlight ? "scale-105 z-10" : ""}`}
+          highlight={item.highlight}
+        />
+      ))}
+    </div>
+  </div>
+);
+
+// 19. ดวงประจำเดือน 4 สัปดาห์ (4 ใบ)
+export const MonthlySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-1.5 sm:gap-2 relative ${className}`}>
+    {["สัปดาห์ 1", "สัปดาห์ 2", "สัปดาห์ 3", "สัปดาห์ 4"].map((wk, idx) => (
+      <MiniRwsCard
+        key={idx}
+        src={`/cards/major-${String((idx * 5 + 3) % 22).padStart(2, "0")}.jpg`}
+        label={wk}
+        className="w-10 h-[68px] sm:w-11 sm:h-[75px]"
+        highlight={idx === 2}
+      />
+    ))}
+  </div>
+);
+
+// 20. ผังจักระทั้ง 7 (7 ใบ) — Luminous 7-Chakra Rainbow Arc (Zero Text Collision)
+export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => {
+  const chakras = [
+    { num: 1, card: "00", color: "#ef4444" },
+    { num: 2, card: "03", color: "#f97316" },
+    { num: 3, card: "06", color: "#eab308" },
+    { num: 4, card: "09", color: "#10b981", highlight: true },
+    { num: 5, card: "15", color: "#06b6d4" },
+    { num: 6, card: "18", color: "#6366f1" },
+    { num: 7, card: "21", color: "#a855f7" },
+  ];
+
+  return (
+    <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+      {/* 7 Glowing Chakra Cards Arc */}
+      <div className="flex items-center justify-center -space-x-1 sm:space-x-0.5 relative z-10">
+        {chakras.map((chk) => (
+          <div
+            key={chk.num}
+            className={`relative rounded-md overflow-hidden border transition-all duration-200 flex-shrink-0 ${
+              chk.highlight
+                ? "w-8.5 h-[58px] sm:w-9.5 sm:h-[64px] z-20 scale-110 -translate-y-1"
+                : "w-7.5 h-[50px] sm:w-8 sm:h-[55px] opacity-90 hover:opacity-100"
+            }`}
+            style={{
+              borderColor: chk.color,
+              boxShadow: `0 0 10px ${chk.color}40`,
+            }}
+          >
+            <img
+              src={`/cards/major-${chk.card}.jpg`}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            {/* Minimalist Top Chakra Number Badge */}
+            <span
+              className="absolute top-0.5 right-0.5 text-[6.5px] font-bold px-0.8 rounded font-mono"
+              style={{
+                backgroundColor: `${chk.color}ee`,
+                color: "#05040a",
+              }}
+            >
+              {chk.num}
+            </span>
+          </div>
+        ))}
+      </div>
+      {/* Sleek Sub-Label Underneath */}
+      <span className="text-[9px] font-serif-th font-semibold text-[#e5c07b] flex items-center gap-1">
+        <span>✦</span> สมดุล 7 ศูนย์พลังชีวิต <span>✦</span>
+      </span>
+    </div>
+  );
+};
 
 // ============================================================================
 // 11. CATEGORY TAB ICONS (Minimal Line-Art, ออกแบบเฉพาะสำหรับแท็บกรองผัง)

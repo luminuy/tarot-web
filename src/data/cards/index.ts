@@ -31,6 +31,9 @@ export const DECK: readonly TarotCard[] = Object.freeze([
 
 export const DECK_SIZE = DECK.length;
 
+export const ALL_CARDS = DECK;
+export const TOTAL_CARDS = DECK_SIZE;
+
 const BY_ID = new Map(DECK.map((card) => [card.id, card]));
 
 export function cardById(id: string): TarotCard | undefined {
@@ -44,3 +47,4 @@ export function cardByIndex(index: number): TarotCard {
 }
 
 export type { TarotCard } from "./types";
+

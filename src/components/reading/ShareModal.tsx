@@ -434,7 +434,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               disabled={isGenerating}
               className="py-3 px-3 rounded-xl bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] font-serif-th font-bold text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <span>{isGenerating ? "⏳" : "💾"}</span>
+              <span>{isGenerating ? "✦" : "✦"}</span>
               <span>{isGenerating ? "กำลังสร้าง..." : "บันทึกภาพ (4:5)"}</span>
             </button>
 
@@ -443,7 +443,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               disabled={isGenerating}
               className="py-3 px-3 rounded-xl bg-[#22133c] hover:bg-[#341b5c] border border-[#e5c07b]/70 text-[#f5deaa] font-serif-th font-bold text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <span>📱</span>
+              <span className="text-[#e5c07b]">✦</span>
               <span>บันทึก IG Story (9:16)</span>
             </button>
 
@@ -451,7 +451,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               onClick={handleCopyText}
               className="py-3 px-3 rounded-xl bg-[#170e28] border border-[#e5c07b]/40 text-[#f5deaa] font-serif-th font-semibold text-xs hover:bg-[#25183f] transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow"
             >
-              <span>{copied ? "✓" : "📋"}</span>
+              <span className="text-[#e5c07b]">{copied ? "✓" : "✦"}</span>
               <span>{copied ? "คัดลอกแล้ว!" : "คัดลอกข้อความ"}</span>
             </button>
 
@@ -459,7 +459,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               onClick={handleNativeShare}
               className="py-3 px-3 rounded-xl bg-[#170e28] border border-[#e5c07b]/40 text-[#f5deaa] font-serif-th font-semibold text-xs hover:bg-[#25183f] transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow"
             >
-              <span>📲</span>
+              <span className="text-[#e5c07b]">✨</span>
               <span>แชร์ให้เพื่อน</span>
             </button>
           </div>

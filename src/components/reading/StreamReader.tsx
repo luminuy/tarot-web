@@ -128,7 +128,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
           }`}
         >
-          <span>📜</span>
+          <span className="text-[#e5c07b]">✨</span>
           <span>สรุปภาพรวม & คำแนะนำ</span>
         </button>
 
@@ -142,7 +142,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
             }`}
           >
-            <span>💬</span>
+            <span className="text-[#e5c07b]">✦</span>
             <span>ถามแม่หมอต่อ</span>
           </button>
         )}
@@ -340,7 +340,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <div className="p-5 rounded-2xl bg-gradient-to-br from-[#1c1338] to-[#0d071a] border-2 border-[#e5c07b]/50 space-y-2 shadow-xl">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h5 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold flex items-center gap-2">
-                  <span>🌟</span> บทสรุปและแก่นแท้แห่งโชคชะตา
+                  <span>✦</span> บทสรุปและแก่นแท้แห่งโชคชะตา
                 </h5>
                 <div className="flex items-center gap-2">
                   {reading.yesNoAnswer && (
@@ -373,7 +373,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               </p>
               {reading.timing && (
                 <p className="text-xs text-[#e5c07b] pt-1 font-mono">
-                  ⏳ จังหวะเวลา: {reading.timing}
+                  ✦ จังหวะเวลา: {reading.timing}
                 </p>
               )}
             </div>
@@ -383,7 +383,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {reading?.advice && reading.advice.length > 0 && (
             <div className="p-5 rounded-2xl bg-[#090614] border border-[#e5c07b]/25 space-y-2.5">
               <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#e5c07b] flex items-center gap-2">
-                <span>🌱</span> คำแนะนำที่ลงมือทำได้จริง (Actionable Wisdom)
+                <span>✦</span> คำแนะนำที่ลงมือทำได้จริง (Actionable Wisdom)
               </h5>
               <ul className="space-y-2">
                 {reading.advice.map((item, idx) => (

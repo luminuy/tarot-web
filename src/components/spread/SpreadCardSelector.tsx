@@ -14,6 +14,16 @@ import {
   DecisionSpreadArt,
   CelticCrossSpreadArt,
   TwelveMonthsSpreadArt,
+  SituationSolutionSpreadArt,
+  MindBodySpiritSpreadArt,
+  HowTheyFeelSpreadArt,
+  ExReconciliationSpreadArt,
+  SoulmateSpreadArt,
+  CareerSwitchSpreadArt,
+  InnerPotentialSpreadArt,
+  WeeklySpreadArt,
+  MonthlySpreadArt,
+  ChakraSpreadArt,
   SparkleTabIcon,
   HeartTabIcon,
   PentacleTabIcon,
@@ -36,7 +46,7 @@ interface CategoryTab {
   count: number;
 }
 
-const renderSpreadIllustration = (spreadId: string) => {
+export const renderSpreadIllustration = (spreadId: string) => {
   switch (spreadId) {
     case "daily":
       return <DailySpreadArt className="w-full h-34" />;
@@ -46,14 +56,34 @@ const renderSpreadIllustration = (spreadId: string) => {
       return <YesNoSpreadArt className="w-full h-34" />;
     case "three-card":
       return <ThreeCardSpreadArt className="w-full h-34" />;
+    case "situation-solution":
+      return <SituationSolutionSpreadArt className="w-full h-34" />;
+    case "mind-body-spirit":
+      return <MindBodySpiritSpreadArt className="w-full h-34" />;
     case "love":
       return <LoveSpreadArt className="w-full h-34" />;
+    case "how-they-feel":
+      return <HowTheyFeelSpreadArt className="w-full h-34" />;
+    case "ex-reconciliation":
+      return <ExReconciliationSpreadArt className="w-full h-34" />;
+    case "soulmate":
+      return <SoulmateSpreadArt className="w-full h-34" />;
     case "career":
       return <CareerSpreadArt className="w-full h-34" />;
     case "money":
       return <MoneySpreadArt className="w-full h-34" />;
+    case "career-switch":
+      return <CareerSwitchSpreadArt className="w-full h-34" />;
     case "decision":
       return <DecisionSpreadArt className="w-full h-34" />;
+    case "inner-potential":
+      return <InnerPotentialSpreadArt className="w-full h-34" />;
+    case "weekly":
+      return <WeeklySpreadArt className="w-full h-34" />;
+    case "monthly":
+      return <MonthlySpreadArt className="w-full h-34" />;
+    case "chakra":
+      return <ChakraSpreadArt className="w-full h-34" />;
     case "celtic-cross":
       return <CelticCrossSpreadArt className="w-full h-34" />;
     case "year-ahead":
@@ -72,10 +102,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
   const categories: CategoryTab[] = useMemo(
     () => [
-      { id: "recommended", label: "ยอดนิยมแนะนำ", Icon: SparkleTabIcon, count: 4 },
-      { id: "love", label: "ความรัก & คนในใจ", Icon: HeartTabIcon, count: 2 },
-      { id: "career", label: "การงาน & การเงิน", Icon: PentacleTabIcon, count: 3 },
-      { id: "master", label: "ผังใหญ่เจาะลึก", Icon: CrystalBallTabIcon, count: 3 },
+      { id: "recommended", label: "ยอดนิยมแนะนำ", Icon: SparkleTabIcon, count: 6 },
+      { id: "love", label: "ความรัก & คนในใจ", Icon: HeartTabIcon, count: 5 },
+      { id: "career", label: "การงาน & การเงิน", Icon: PentacleTabIcon, count: 5 },
+      { id: "master", label: "ผังใหญ่เจาะลึก", Icon: CrystalBallTabIcon, count: 5 },
       { id: "all", label: "ผังทั้งหมด", Icon: AllSpreadsTabIcon, count: SPREADS.length },
     ],
     []
@@ -85,17 +115,19 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     switch (activeCategory) {
       case "recommended":
         return SPREADS.filter((s) =>
-          ["three-card", "daily", "yes-no", "quick"].includes(s.id)
+          ["daily", "quick", "yes-no", "three-card", "situation-solution", "celtic-cross"].includes(s.id)
         );
       case "love":
-        return SPREADS.filter((s) => ["love", "three-card"].includes(s.id));
+        return SPREADS.filter((s) =>
+          ["love", "how-they-feel", "ex-reconciliation", "soulmate", "three-card"].includes(s.id)
+        );
       case "career":
         return SPREADS.filter((s) =>
-          ["career", "money", "decision"].includes(s.id)
+          ["career", "money", "career-switch", "decision", "inner-potential"].includes(s.id)
         );
       case "master":
         return SPREADS.filter((s) =>
-          ["celtic-cross", "year-ahead", "decision"].includes(s.id)
+          ["celtic-cross", "year-ahead", "weekly", "chakra", "monthly"].includes(s.id)
         );
       case "all":
       default:
@@ -167,7 +199,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#e5c07b] ring-2 ring-[#e5c07b]/90 shadow-[0_0_40px_rgba(229,192,123,0.5)]"
                     : "bg-gradient-to-b from-[#130d24]/90 to-[#07040f]/90 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
                 }`}
-                style={{ minHeight: "320px" }}
+                style={{ minHeight: "335px" }}
               >
                 {/* Card Header Tag */}
                 <div className="flex items-center justify-between z-10">
@@ -175,8 +207,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     {spread.positions.length} ใบ
                   </span>
                   {isRecommended && (
-                    <span className="text-[9px] text-[#05040a] bg-gradient-to-r from-[#c59b27] to-[#f5deaa] px-2 py-0.5 rounded-full font-bold shadow">
-                      ⭐ ยอดนิยม
+                    <span className="text-[9px] text-[#05040a] bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] px-2 py-0.5 rounded-full font-bold shadow flex items-center gap-0.5">
+                      <span>✦</span> ยอดนิยม
                     </span>
                   )}
                 </div>

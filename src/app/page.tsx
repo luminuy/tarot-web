@@ -182,11 +182,11 @@ export default function TarotPage() {
       });
 
       setDrawnCards(enrichedCards);
-      setRevealedOrders([0]);
+      setRevealedOrders([]);
       setActiveCardIndex(0);
       setCurrentStep("READING");
 
-      // Auto start streaming AI interpretation
+      // Auto start streaming AI interpretation in background
       startAIStreaming(activeId, enrichedCards);
     } catch (err: any) {
       setErrorMsg(err.message || "เกิดข้อผิดพลาดในการประมวลผลไพ่");
@@ -235,9 +235,6 @@ export default function TarotPage() {
               if (eventType === "opening") {
                 setReadingResult((prev) => ({ ...prev, opening: data.text }));
               } else if (eventType === "card") {
-                setRevealedOrders((prev) => Array.from(new Set([...prev, data.position])));
-                setActiveCardIndex(data.position);
-                soundManager.playCardSelectSound();
                 setReadingResult((prev) => {
                   const existing = prev?.cards || [];
                   const filtered = existing.filter((c) => c.position !== data.position);
@@ -250,7 +247,6 @@ export default function TarotPage() {
               } else if (eventType === "done") {
                 setReadingResult(data.reading);
                 setProof(data.proof || {});
-                setRevealedOrders(cards.map((c) => c.order));
                 setIsStreaming(false);
                 setCurrentStep("SUMMARY");
                 soundManager.playOracleRevealSound();
@@ -372,7 +368,7 @@ export default function TarotPage() {
               }}
               className="text-xs text-[#e2d9f3] hover:text-[#f5deaa] border border-[#e5c07b]/25 hover:border-[#e5c07b]/60 px-3 py-1.5 rounded-full bg-[#100b20]/90 backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 shadow"
             >
-              <span>📖</span>
+              <span className="text-[#e5c07b]">✦</span>
               <span className="hidden sm:inline font-medium">คัมภีร์ 78 ใบ</span>
             </button>
 
@@ -385,7 +381,7 @@ export default function TarotPage() {
               }}
               className="text-xs text-[#e2d9f3] hover:text-[#f5deaa] border border-[#e5c07b]/25 hover:border-[#e5c07b]/60 px-3 py-1.5 rounded-full bg-[#100b20]/90 backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 shadow"
             >
-              <span>📜</span>
+              <span className="text-[#e5c07b]">✦</span>
               <span className="hidden sm:inline font-medium">ประวัติดวง</span>
             </button>
 
@@ -426,23 +422,46 @@ export default function TarotPage() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
-              <div className="text-center space-y-3">
-                <div className="flex justify-center mb-1">
-                  {/* เอฟเฟกต์เดียวกับการ์ดตอนสับไพ่ (ShuffleRitual idle state) —
-                      ลอยเบา ๆ, กรอบเรืองแรงขึ้น, ป้าย SACRED ORACLE, gold-foil-sheen ตอน hover */}
+              <div className="text-center space-y-3 relative">
+                {/* 3D Floating Tarot Stage with Sacred Geometric Aura (Matching Step 3 Shuffle) */}
+                <div className="h-64 sm:h-72 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1400 }}>
+                  {/* Background Sacred Geometric Aura */}
+                  <div className="absolute inset-0 flex items-center justify-center -z-10 opacity-40 pointer-events-none">
+                    <div className="w-72 h-72 sm:w-[420px] sm:h-[420px] rounded-full border border-dashed border-[#e5c07b] animate-[spin_60s_linear_infinite]" />
+                    <div className="absolute w-52 h-52 sm:w-[300px] sm:h-[300px] rounded-full border border-[#8b5cf6]/60 animate-[spin_40s_linear_infinite_reverse]" />
+                    <div className="absolute w-full h-full bg-radial from-[#e5c07b]/15 via-transparent to-transparent blur-3xl" />
+                  </div>
+
+                  {/* Idle Floating Deck with Parallax Hover */}
                   <motion.div
-                    animate={{ y: [-4, 4, -4], rotateZ: [-1, 1, -1] }}
-                    transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+                    animate={{
+                      y: [-6, 6, -6],
+                      rotateZ: [-1.2, 1.2, -1.2],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 4.5,
+                      ease: "easeInOut",
+                    }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.96 }}
                     onClick={() => soundManager.playCardSelectSound()}
-                    className="w-28 h-44 rounded-2xl border-2 border-[#e5c07b] card-back-pattern shadow-[0_0_50px_rgba(229,192,123,0.45)] flex flex-col items-center justify-center p-3 cursor-pointer overflow-hidden group relative"
+                    className="w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#e5c07b] card-back-pattern shadow-[0_0_50px_rgba(229,192,123,0.45)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative"
                   >
-                    <div className="absolute top-3 w-full flex justify-center items-center opacity-75">
-                      <span className="text-[7px] font-serif-th text-[#f5deaa] tracking-[0.2em] uppercase font-bold">
+                    <div className="w-full flex justify-center items-center opacity-75">
+                      <span className="text-[9px] font-serif-th text-[#f5deaa] tracking-[0.2em] uppercase font-bold">
                         SACRED ORACLE
                       </span>
                     </div>
+
+                    {/* Clean Center */}
+                    <div className="my-auto" />
+
+                    <span className="text-xs font-serif-th font-bold font-mystic-gold tracking-wide">
+                      วิหารไพ่ทาโรต์ 1909
+                    </span>
+
+                    {/* Dynamic Gold Sheen */}
                     <div className="gold-foil-sheen absolute inset-0 opacity-40 group-hover:opacity-75 transition-opacity" />
                   </motion.div>
                 </div>
@@ -622,7 +641,7 @@ export default function TarotPage() {
               {/* Bottom Quick Luxury Actions Deck */}
               <div className="p-5 sm:p-6 rounded-3xl altar-panel flex flex-wrap items-center justify-between gap-4 shadow-2xl border border-[#e5c07b]/30">
                 <div className="flex items-center gap-2 text-xs text-[#9c93b8]">
-                  <span>🔮</span>
+                  <span className="text-[#e5c07b]">✦</span>
                   <span>บันทึกหรือแบ่งปันคำพยากรณ์นี้เพื่อเตือนสติตนเอง</span>
                 </div>
 
@@ -635,7 +654,7 @@ export default function TarotPage() {
                     }}
                     className="py-3 px-5 rounded-xl bg-[#100b20] border border-[#e5c07b]/40 text-[#f5deaa] font-serif-th text-xs hover:bg-[#191230] transition-all cursor-pointer flex items-center gap-2 shadow"
                   >
-                    <span>📸</span> แชร์การ์ดคำทำนาย
+                    <span className="text-[#e5c07b]">✨</span> แชร์การ์ดคำทำนาย
                   </button>
 
                   <button

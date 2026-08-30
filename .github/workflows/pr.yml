@@ -1,0 +1,39 @@
+name: 🔍 Pull Request CI & Cloudflare Preview
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-verification:
+    name: 🧪 PR Quality Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: 🃏 Verify 78 Cards Integrity
+        run: ./node_modules/.bin/tsx scripts/verify-cards.ts
+
+      - name: 📐 Verify 20 Spreads Geometry
+        run: ./node_modules/.bin/tsx scripts/qa/test-spreads.ts
+
+      - name: ⚡ Test Build Worker Bundle
+        run: npm run build

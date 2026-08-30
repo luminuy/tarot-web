@@ -1,8 +1,12 @@
 node_modules/
 .next/
+.open-next/
+.wrangler/
 out/
+dist/
 .env
 .env.local
+.env.*.local
 *.log
 .DS_Store
 next-env.d.ts

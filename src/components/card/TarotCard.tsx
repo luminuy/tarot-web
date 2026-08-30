@@ -175,12 +175,22 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             </span>
           </div>
 
-          {/* Center Position Tag (if any) */}
-          <div className="flex flex-col items-center justify-center my-auto relative z-10">
+          {/* Center Position Tag & Tap to Reveal Badge */}
+          <div className="flex flex-col items-center justify-center my-auto gap-1.5 relative z-10">
             {positionLabel && (
               <span className="text-[9px] text-[#f5deaa] font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-black/85 border border-[#e5c07b]/40 backdrop-blur-md line-clamp-1 max-w-[95%] shadow-[0_0_10px_rgba(0,0,0,0.8)]">
                 {positionLabel}
               </span>
+            )}
+            {!isRevealed && (
+              <motion.div
+                animate={{ scale: [0.95, 1.05, 0.95] }}
+                transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                className="px-2.5 py-1 rounded-full bg-[#180f2e]/95 border border-[#e5c07b] shadow-[0_0_15px_rgba(229,192,123,0.6)] z-20 flex items-center gap-1 text-[8.5px] text-[#f5deaa] font-serif-th font-bold"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ffd700] animate-ping" />
+                <span>แตะเพื่อเปิด</span>
+              </motion.div>
             )}
           </div>
 

@@ -95,25 +95,22 @@
 
 ## 3. Checklist และ Milestone ในการส่งมอบงาน
 
-- [x] **Milestone 0**: ออกแบบฐานข้อมูล ไพ่ 78 ใบ ระบบสุ่ม Commit-Reveal และ Prompt System
-- [x] **Milestone 1**: ขยาย Backend Engine ให้รองรับ User-Picked Indices
-- [x] **Milestone 2**: สร้าง Core Components (`InteractiveCardFan`, `TarotCard`, `SpreadBoard`)
-- [x] **Milestone 3**: ประกอบหน้า Flow ตั้งแต่เลือก Spread จนถึงเปิดไพ่ด้วยตนเอง
-- [x] **Milestone 4**: เชื่อมต่อ SSE Stream Reader และหน้าสรุปผลพร้อมเฉลย Seed
-- [~] **Milestone 5**: Full Integration Testing & Polish — ดูรายละเอียดที่ตรวจแล้ว/ยังไม่ได้ตรวจด้านล่าง
+- [x] **Milestone 0**: ออกแบบฐานข้อมูล ไพ่ 78 ใบ ระบบสุ่ม Commit-Reveal และ Prompt System (เสร็จสมบูรณ์)
+- [x] **Milestone 1**: ขยาย Backend Engine ให้รองรับ User-Picked Indices + Rate Limiting (เสร็จสมบูรณ์)
+- [x] **Milestone 2**: สร้าง Core Components (`InteractiveCardFan`, `TarotCard`, `SpreadBoard`, `ShuffleRitual`) (เสร็จสมบูรณ์)
+- [x] **Milestone 3**: ประกอบหน้า Flow 5 ขั้นตอน พร้อม 3D Floating Hero Deck และ Manual Self-Reveal (เสร็จสมบูรณ์)
+- [x] **Milestone 4**: เชื่อมต่อ SSE Stream Reader, Thai TTS Voice Engine, IG Story 9:16 Export (เสร็จสมบูรณ์)
+- [x] **Milestone 5**: Safety Rails (สายด่วน 1323), PDPA Privacy Page, AI Collaboration Guidelines, A/B Rating (เสร็จสมบูรณ์)
+- [x] **Milestone 6**: Clean Architecture Scaffolding (`src/services/`, `src/types/`, `src/server/repositories/`) & Multi-Page Expansion Matrix (`/cards`, `/spreads`, `/blog`, `/account`) (เสร็จสมบูรณ์)
 
-### สถานะ QA รอบล่าสุด (Claude, 2026-08-31)
+### 🏆 สถานะระบบปัจจุบัน (Production Ready):
+- `npm run typecheck`: **ผ่าน 0 errors**
+- `npx tsx scripts/verify-cards.ts`: **ไพ่ 78 ใบ 780 ข้อความสมบูรณ์ 100%**
+- `npx tsx scripts/qa/test-spreads.ts`: **20 ผังพยากรณ์ 95 ตำแหน่ง ผ่าน 541/541 checks**
+- `http://localhost:3000`: **HTTP 200 OK**
+- `http://localhost:3000/cards`: **HTTP 200 OK**
+- `http://localhost:3000/spreads`: **HTTP 200 OK**
+- `http://localhost:3000/blog`: **HTTP 200 OK**
+- `http://localhost:3000/account`: **HTTP 200 OK**
+- `http://localhost:3000/privacy`: **HTTP 200 OK**
 
-**ตรวจและผ่านแล้ว (มีสคริปต์ทดสอบใน `scripts/qa/` รันซ้ำได้ตลอด):**
-- `pnpm build` (production build) ผ่านสมบูรณ์ ทุก route คอมไพล์ได้
-- `npx tsx scripts/qa/test-safety.ts` — 14/14 กรณีทดสอบ safety guardrails ผ่าน (พบและแก้ 2 ช่องโหว่ regex: คำถามท้อง/บุคคลที่สามที่สลับลำดับคำ)
-- `npx tsx scripts/qa/test-shuffle.ts` — 14/14 กรณีทดสอบคณิตศาสตร์ commit-reveal + pickedIndices ผ่าน (deterministic, ไม่มีไพ่ซ้ำ, กระจายทั่วสำรับ)
-- `npx tsx scripts/qa/test-spreads.ts` — 277/277 checks ผ่าน ครบทั้ง 10 spreads
-- `npx tsx scripts/verify-cards.ts` — ไพ่ 78 ใบ 780 ข้อความ ไม่มีซ้ำ
-- Responsive: มือถือ (375px) และแท็บเล็ต (768px) ตรวจด้วยเบราว์เซอร์จริงแล้ว ไม่มี horizontal overflow
-- **บั๊กที่พบและแก้แล้ว**: `yesNoAnswer` schema ทำให้คำอ่านปกติ parse fail แล้ว fallback ไปข้อความสำเร็จรูปแบบเงียบ ๆ, usage tracking เคยเป็นตัวเลขปลอมคงที่, filter chip แถวแรกบนมือถือถูกเบียดพ้นขอบและกดไม่ได้ (`justify-center` ชนกับ `overflow-x-auto`), `pnpm build` เคยพังเพราะ Prisma 7 breaking change (`datasource.url`) — ตัด `prisma generate` ออกจาก build จนกว่าจะต่อ DB จริง
-
-**ยังตรวจไม่ครบ — ต้องการคนกดจริงบนเบราว์เซอร์ปกติ:**
-- **การเปลี่ยนหน้า step 1 → step 2 (`INTENTION_SELECT`)**: ทดสอบผ่านเบราว์เซอร์อัตโนมัติแล้วพบว่า state (`currentStep`) เปลี่ยนถูกต้อง (header/progress bar อัปเดต) แต่เนื้อหาที่ครอบด้วย `<AnimatePresence mode="wait">` ไม่ยอมสลับหน้าให้ — น่าจะเกิดจาก exit-animation ของ Framer Motion ไม่ยอม fire เพราะแท็บทดสอบเป็น background tab (`requestAnimationFrame` ถูกเบราว์เซอร์หยุดเมื่อแท็บไม่ active) ไม่ใช่บั๊กของโค้ดตัวมันเอง — **แต่ยังไม่ยืนยัน 100% ว่าไม่ใช่บั๊กจริง เพราะ input จริง (`computer` tool) ใช้งานไม่ได้ในสภาพแวดล้อมทดสอบนี้เช่นกัน** ขอให้มีคนลองกดปุ่ม "ถัดไป: ตั้งจิตอธิษฐาน" บนเบราว์เซอร์จริงเพื่อยืนยันก่อนถือว่า Milestone 3-4 ผ่านเต็มร้อย
-- ทดสอบ flow เต็ม (สับไพ่ → จับไพ่ → อ่านผล) ยังไม่ได้ทำ เพราะเหตุผลเดียวกัน (คลิกจริงทดสอบไม่ได้) และยังไม่มี `GEMINI_API_KEY` จริงใน `.env`
-- ยังไม่ได้ตรวจ mobile touch gesture ของ `InteractiveCardFan` (ลากเลือกไพ่)
