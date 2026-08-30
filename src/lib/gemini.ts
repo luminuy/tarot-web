@@ -77,9 +77,11 @@ export const CANDIDATE_GEMINI_MODELS = [
   "gemini-1.5-flash",
 ];
 
+// ค่าเริ่มต้นก่อนได้ usageMetadata จริงจาก Gemini — ตั้งเป็นศูนย์แทนการเดาตัวเลข
+// เพื่อไม่ให้ระบบคิดต้นทุน/เครดิตหลงเชื่อตัวเลขปลอมถ้า Gemini เปลี่ยน API แล้วไม่ส่ง usageMetadata มา
 const DEFAULT_USAGE: UsageInfo = {
-  inputTokens: 350,
-  outputTokens: 600,
+  inputTokens: 0,
+  outputTokens: 0,
   cacheReadTokens: 0,
   cacheWriteTokens: 0,
 };
@@ -150,6 +152,9 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   let sentConnections = false;
   let sentSummary = false;
   let cardsSent = 0;
+  // เก็บ usageMetadata จริงจาก chunk ล่าสุดที่มันมากับ Gemini stream
+  // (ไม่ใช้ตัวเลขคงที่ เพราะระบบเครดิต/สมาชิกต้องคิดต้นทุนจากของจริง ไม่งั้นบิลกับที่คิดราคาขายไม่ตรงกัน)
+  let usage: UsageInfo = { ...DEFAULT_USAGE };
 
   try {
     while (true) {
@@ -167,6 +172,19 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
           try {
             const chunk = JSON.parse(jsonStr);
+
+            // usageMetadata มักมากับ chunk สุดท้ายของสตรีม เก็บล่าสุดที่เจอไว้เสมอ
+            const meta = chunk.usageMetadata;
+            if (meta) {
+              usage = {
+                inputTokens: meta.promptTokenCount ?? usage.inputTokens,
+                outputTokens: meta.candidatesTokenCount ?? usage.outputTokens,
+                // Gemini ไม่มี prompt caching แบบเดียวกับ Claude จึงเป็น 0 เสมอในตอนนี้
+                cacheReadTokens: meta.cachedContentTokenCount ?? 0,
+                cacheWriteTokens: 0,
+              };
+            }
+
             const textPart = chunk.candidates?.[0]?.content?.parts?.[0]?.text;
             if (textPart) {
               jsonAccumulator += textPart;
@@ -222,9 +240,9 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         mood: "ครุ่นคิด",
         yesNoAnswer: null,
       };
-      yield { type: "done", reading: fallbackReading, usage: DEFAULT_USAGE };
+      yield { type: "done", reading: fallbackReading, usage };
     } else {
-      yield { type: "done", reading: parsed.data, usage: DEFAULT_USAGE };
+      yield { type: "done", reading: parsed.data, usage };
     }
   } catch (error) {
     console.error("Gemini stream failed:", error);
