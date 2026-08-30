@@ -2,6 +2,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { DECK, cardById } from "@/data/cards";
 import { CardDetailView } from "@/components/encyclopedia/CardDetailView";
+import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
 import type { Metadata } from "next";
 
 interface CardPageProps {
@@ -43,7 +44,8 @@ export default async function CardDetailPage({ params }: CardPageProps) {
   const nextCard = currentIndex < DECK.length - 1 ? DECK[currentIndex + 1] : undefined;
 
   return (
-    <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700]">
+    <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700] relative overflow-hidden">
+      <MysticAltarCanvas />
       <CardDetailView
         card={card}
         prevCard={prevCard}
