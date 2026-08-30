@@ -1,7 +1,7 @@
-import { parsePartialReading } from "@/lib/partial-json";
-import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/prompt";
-import { type Reading, ReadingSchema } from "@/lib/reading-schema";
-import type { ReadingEvent, UsageInfo } from "@/lib/claude";
+import { parsePartialReading } from "@/lib/utils/partial-json";
+import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
+import { type Reading, ReadingSchema } from "@/lib/schema/reading";
+import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
 
 /**
  * ตัวเชื่อมกับ Google Gemini API (Ultra-Low Latency Streaming)

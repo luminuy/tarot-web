@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import type { Persona } from "@/lib/personas";
+import type { Persona } from "@/data/personas";
 
 interface Message {
   id: string;

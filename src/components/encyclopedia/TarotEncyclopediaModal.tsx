@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { DECK, type TarotCard } from "@/data/cards";
 import { TarotCard as TarotCardComponent } from "@/components/card/TarotCard";
-import { soundManager } from "@/lib/audio";
+import { soundManager } from "@/lib/utils/audio";
 
 interface TarotEncyclopediaModalProps {
   isOpen: boolean;

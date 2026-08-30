@@ -1,8 +1,8 @@
 import type { Category, TarotCard } from "@/data/cards/types";
 import type { Spread } from "@/data/spreads";
-import { getPersona } from "@/lib/personas";
-import type { DrawnCard } from "@/lib/shuffle";
-import type { SafetyVerdict } from "@/lib/safety";
+import { getPersona } from "@/data/personas";
+import type { DrawnCard } from "@/lib/tarot/shuffle";
+import type { SafetyVerdict } from "@/lib/safety/guardrails";
 
 /**
  * สถาปัตยกรรม Prompt Caching & AI Engine (World-Class Caching Architecture)

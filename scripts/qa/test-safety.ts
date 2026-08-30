@@ -1,4 +1,4 @@
-import { checkQuestion } from "../../src/lib/safety";
+import { checkQuestion } from "../../src/lib/safety/guardrails";
 
 /**
  * QA — ทดสอบระบบคัดกรองความปลอดภัยด้วยคำถามตัวอย่างจริง

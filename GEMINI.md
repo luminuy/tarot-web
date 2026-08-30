@@ -17,8 +17,8 @@
 
 - ✅ **ชุดข้อมูลไพ่ 78 ใบครบถ้วน**: `src/data/cards/` พร้อมคำแปล ความหมาย 5 หมวด และ Keywords ภาษาไทย
 - ✅ **รูปแบบการวางไพ่ (Spreads)**: `src/data/spreads.ts` 8 รูปแบบ พร้อมพิกัด $x, y$ และองศาหมุน
-- ✅ **เอนจินความสุ่มที่ตรวจสอบได้**: `src/lib/shuffle.ts` (Commit-Reveal SHA-256)
-- ✅ **โครงสร้างและ Prompt แม่หมอ AI**: `src/lib/prompt.ts`, `src/lib/personas.ts`, `src/lib/reading-schema.ts`
+- ✅ **เอนจินความสุ่มที่ตรวจสอบได้**: `src/lib/tarot/shuffle.ts` (Commit-Reveal SHA-256)
+- ✅ **โครงสร้างและ Prompt แม่หมอ AI**: `src/lib/ai/prompt.ts`, `src/data/personas.ts`, `src/lib/schema/reading.ts`
 - ✅ **API Backend**: `/api/reading/start`, `/api/reading/[id]/shuffle`, `/api/reading/[id]/read`
 - ✅ **ธีมและสไตล์**: `src/app/globals.css` (Starry Sky gradient, 3D card perspective, card-back pattern)
 
@@ -26,7 +26,7 @@
 
 ## 🎯 สิ่งที่ต้องทำต่อไป (Next Steps for Agents)
 
-1. **Backend Enhancement**: อัปเดต `src/lib/shuffle.ts` และ `src/app/api/reading/[id]/shuffle/route.ts` ให้รับ `pickedIndices` จากหน้าบ้าน
+1. **Backend Enhancement**: อัปเดต `src/lib/tarot/shuffle.ts` และ `src/app/api/reading/[id]/shuffle/route.ts` ให้รับ `pickedIndices` จากหน้าบ้าน
 2. **Interactive UI Components**:
    - `src/components/deck/InteractiveCardFan.tsx`: พัดสำรับ 78 ใบที่เลื่อนและจิ้มเลือกได้
    - `src/components/card/TarotCard.tsx`: การ์ด 3D พร้อมเอฟเฟกต์พลิก

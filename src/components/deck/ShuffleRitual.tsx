@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { soundManager } from "@/lib/audio";
+import { soundManager } from "@/lib/utils/audio";
 
 interface ShuffleRitualProps {
   commitment: string;

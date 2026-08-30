@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getSpread } from "@/data/spreads";
-import { checkQuestion } from "@/lib/safety";
-import { createCommitment } from "@/lib/shuffle";
+import { checkQuestion } from "@/lib/safety/guardrails";
+import { createCommitment } from "@/lib/tarot/shuffle";
 import { checkRateLimit, clientKeyFromRequest, saveReading } from "@/server/store";
 
 export const runtime = "nodejs";

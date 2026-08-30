@@ -1,9 +1,9 @@
 import { cardByIndex } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
-import { streamGeminiReading } from "@/lib/gemini";
-import { AI_DISCLOSURE } from "@/lib/safety";
+import { streamGeminiReading } from "@/lib/ai/gemini";
+import { AI_DISCLOSURE } from "@/lib/safety/guardrails";
 import { getReading, updateReading } from "@/server/store";
-import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
@@ -120,7 +120,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 }
 
 /** ส่งผลที่เคยอ่านไว้แล้วกลับไปในรูปแบบเดียวกัน เพื่อให้ฝั่งหน้าเว็บใช้โค้ดชุดเดิม */
-function streamCached(reading: import("@/lib/reading-schema").Reading, serverSeed: string) {
+function streamCached(reading: import("@/lib/schema/reading").Reading, serverSeed: string) {
   const encoder = new TextEncoder();
   const body = new ReadableStream({
     start(controller) {

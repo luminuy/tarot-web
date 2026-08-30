@@ -3,8 +3,8 @@ import { z } from "zod";
 import { getReading } from "@/server/store";
 import { cardByIndex } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
-import { buildSystemPrompt } from "@/lib/prompt";
-import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/rate-limit";
+import { buildSystemPrompt } from "@/lib/ai/prompt";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 

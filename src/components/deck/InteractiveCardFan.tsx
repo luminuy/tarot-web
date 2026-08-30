@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { soundManager } from "@/lib/audio";
+import { soundManager } from "@/lib/utils/audio";
 
 interface InteractiveCardFanProps {
   totalCards?: number;

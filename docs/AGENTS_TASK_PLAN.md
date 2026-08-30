@@ -38,7 +38,7 @@
 
 ### 🧩 Agent 1: Backend & Provably Fair Architect
 - **หน้าที่รับผิดชอบ**:
-  1. ปรับปรุง `src/lib/shuffle.ts` ให้ฟังก์ชัน `drawCards` รองรับพารามิเตอร์ `pickedIndices?: number[]`
+  1. ปรับปรุง `src/lib/tarot/shuffle.ts` ให้ฟังก์ชัน `drawCards` รองรับพารามิเตอร์ `pickedIndices?: number[]`
   2. อัปเดต `src/app/api/reading/[id]/shuffle/route.ts` ให้อนุญาตให้ Client ส่ง `pickedIndices`
   3. ตรวจสอบให้มั่นใจว่าการคำนวณ Hash Commit–Reveal ถูกต้องตรงกัน 100%
   4. เพิ่มฟังก์ชัน Helper สำหรับ Client ตรวจสอบ Seed ย้อนหลัง (Client Verification Tool)

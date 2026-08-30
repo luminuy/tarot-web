@@ -1,7 +1,7 @@
 import type { Category } from "@/data/cards/types";
-import type { DrawnCard } from "@/lib/shuffle";
-import type { Reading } from "@/lib/reading-schema";
-import type { SafetyFlag } from "@/lib/safety";
+import type { DrawnCard } from "@/lib/tarot/shuffle";
+import type { Reading } from "@/lib/schema/reading";
+import type { SafetyFlag } from "@/lib/safety/guardrails";
 
 /**
  * ที่เก็บสถานะการเปิดไพ่ระหว่างขั้นตอน

@@ -1,9 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
-import { parsePartialReading } from "@/lib/partial-json";
-import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/prompt";
-import { type Reading, ReadingSchema } from "@/lib/reading-schema";
+import { parsePartialReading } from "@/lib/utils/partial-json";
+import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
+import { type Reading, ReadingSchema } from "@/lib/schema/reading";
 
 /**
  * ตัวเชื่อมกับ Claude
@@ -173,7 +173,7 @@ async function* streamMockReading(ctx: ReadingContext): AsyncGenerator<ReadingEv
     text: `สวัสดีค่ะ${name} เมื่อสัมผัสถึงพลังงานของไพ่ที่คุณเลือกด้วยตัวเองในสำรับนี้ ไพ่ทั้ง ${spread.positions.length} ใบสื่อสารเรื่องราวที่น่าสนใจและมีพลังชัดเจนมากค่ะ`,
   };
 
-  const cardReadings: import("@/lib/reading-schema").CardReading[] = [];
+  const cardReadings: import("@/lib/schema/reading").CardReading[] = [];
 
   for (let i = 0; i < drawn.length; i++) {
     await new Promise((r) => setTimeout(r, 600));

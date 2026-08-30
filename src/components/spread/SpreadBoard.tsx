@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "motion/react";
 import type { Spread, SpreadPosition } from "@/data/spreads";
 import { TarotCard } from "@/components/card/TarotCard";
-import { soundManager } from "@/lib/audio";
+import { soundManager } from "@/lib/utils/audio";
 
 export interface DrawnSlotCard {
   order: number;

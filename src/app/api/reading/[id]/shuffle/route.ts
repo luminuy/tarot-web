@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { cardByIndex, DECK_SIZE } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
-import { drawCards, normalizeClientSeed } from "@/lib/shuffle";
+import { drawCards, normalizeClientSeed } from "@/lib/tarot/shuffle";
 import { getReading, updateReading } from "@/server/store";
 
 export const runtime = "nodejs";
@@ -39,7 +39,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const clientSeed = record.clientSeed ?? normalizeClientSeed(parsed.success ? parsed.data.clientSeed : undefined);
   const pickedIndices = parsed.success ? parsed.data.pickedIndices : undefined;
 
-  let drawn: import("@/lib/shuffle").DrawnCard[];
+  let drawn: import("@/lib/tarot/shuffle").DrawnCard[];
   try {
     drawn =
       pickedIndices && pickedIndices.length > 0

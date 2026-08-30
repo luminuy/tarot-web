@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { getReadings, deleteReading, clearAllReadings, type SavedReadingItem } from "@/lib/history";
-import { soundManager } from "@/lib/audio";
+import { getReadings, deleteReading, clearAllReadings, type SavedReadingItem } from "@/lib/utils/history";
+import { soundManager } from "@/lib/utils/audio";
 
 interface ReadingHistoryModalProps {
   isOpen: boolean;

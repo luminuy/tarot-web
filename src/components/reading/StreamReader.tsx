@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import type { Reading } from "@/lib/reading-schema";
-import type { Persona } from "@/lib/personas";
+import type { Reading } from "@/lib/schema/reading";
+import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { cardByIndex } from "@/data/cards";
-import { soundManager } from "@/lib/audio";
+import { soundManager } from "@/lib/utils/audio";
 import { FollowUpChat } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
 

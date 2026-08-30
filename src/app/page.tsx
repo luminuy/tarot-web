@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { SPREADS, type Spread } from "@/data/spreads";
-import { PERSONAS, type Persona } from "@/lib/personas";
+import { PERSONAS, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
 import { cardByIndex } from "@/data/cards";
-import type { Reading } from "@/lib/reading-schema";
+import type { Reading } from "@/lib/schema/reading";
 import { ShuffleRitual } from "@/components/deck/ShuffleRitual";
 import { InteractiveCardFan } from "@/components/deck/InteractiveCardFan";
 import { SpreadBoard, type DrawnSlotCard } from "@/components/spread/SpreadBoard";
@@ -20,8 +20,8 @@ import { ReadingHistoryModal } from "@/components/history/ReadingHistoryModal";
 import { TarotEncyclopediaModal } from "@/components/encyclopedia/TarotEncyclopediaModal";
 import { CardZoomModal } from "@/components/card/CardZoomModal";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
-import { soundManager } from "@/lib/audio";
-import { saveReading } from "@/lib/history";
+import { soundManager } from "@/lib/utils/audio";
+import { saveReading } from "@/lib/utils/history";
 
 export default function TarotPage() {
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");

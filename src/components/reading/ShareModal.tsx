@@ -2,10 +2,10 @@
 
 import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import type { Persona } from "@/lib/personas";
+import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
-import type { Reading } from "@/lib/reading-schema";
-import { soundManager } from "@/lib/audio";
+import type { Reading } from "@/lib/schema/reading";
+import { soundManager } from "@/lib/utils/audio";
 
 interface ShareModalProps {
   isOpen: boolean;

@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import type { Category } from "@/data/cards/types";
-import type { Persona } from "@/lib/personas";
+import type { Persona } from "@/data/personas";
 
 interface IntentionAltarInputProps {
   question: string;

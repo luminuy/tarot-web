@@ -1,4 +1,4 @@
-import { createCommitment, drawCards, normalizeClientSeed, verifyCommitment } from "../../src/lib/shuffle";
+import { createCommitment, drawCards, normalizeClientSeed, verifyCommitment } from "../../src/lib/tarot/shuffle";
 
 /**
  * QA — ทดสอบคณิตศาสตร์ของระบบสุ่มที่พิสูจน์ได้ (commit-reveal)

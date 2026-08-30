@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "motion/react";
-import { PERSONAS, type Persona } from "@/lib/personas";
+import { PERSONAS, type Persona } from "@/data/personas";
 import {
   HighPriestessIllustration,
   JusticeIllustration,
