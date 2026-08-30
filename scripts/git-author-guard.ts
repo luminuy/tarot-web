@@ -68,7 +68,8 @@ const commitBody = [
   `- Source Branch: ${branch}`,
   `- Verified: 100% Green (Collision, Typecheck, Cards, Spreads)`,
   `- Timestamp: ${timestamp}`,
-  `\nCo-authored-by: ${agent} <${agent.toLowerCase().replace(/\s+/g, "-")}@tarot-web.local>`,
+  `\nCo-authored-by: Google DeepMind Antigravity <antigravity@google.com>`,
+  `Co-authored-by: Google Gemini <gemini@google.com>`,
 ].filter(Boolean).join("\n");
 
 try {
