@@ -108,14 +108,14 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   </span>
                 </div>
 
-                {/* Interactive Spread Visual Diagram */}
-                <div className="my-auto py-2 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(229,192,123,0.25)]">
+                {/* Interactive Spread Visual Diagram (Zero-Collision Container) */}
+                <div className="h-30 flex items-center justify-center my-1 filter drop-shadow-[0_0_15px_rgba(229,192,123,0.25)] relative select-none">
                   {renderSpreadIllustration(spread.id)}
                 </div>
 
                 {/* Titles & Tagline */}
-                <div className="space-y-1 z-10 pt-2 border-t border-[#e5c07b]/15">
-                  <h3 className="font-serif-th text-base font-bold font-mystic-gold">
+                <div className="space-y-1.5 z-10 pt-3 border-t border-[#e5c07b]/20">
+                  <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold leading-tight">
                     {spread.nameTh}
                   </h3>
                   <p className="text-xs text-[#9c93b8] leading-snug">{spread.tagline}</p>

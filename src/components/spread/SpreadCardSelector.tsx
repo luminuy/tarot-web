@@ -49,47 +49,47 @@ interface CategoryTab {
 export const renderSpreadIllustration = (spreadId: string) => {
   switch (spreadId) {
     case "daily":
-      return <DailySpreadArt className="w-full h-34" />;
+      return <DailySpreadArt className="w-full h-28" />;
     case "quick":
-      return <QuickSpreadArt className="w-full h-34" />;
+      return <QuickSpreadArt className="w-full h-28" />;
     case "yes-no":
-      return <YesNoSpreadArt className="w-full h-34" />;
+      return <YesNoSpreadArt className="w-full h-28" />;
     case "three-card":
-      return <ThreeCardSpreadArt className="w-full h-34" />;
+      return <ThreeCardSpreadArt className="w-full h-28" />;
     case "situation-solution":
-      return <SituationSolutionSpreadArt className="w-full h-34" />;
+      return <SituationSolutionSpreadArt className="w-full h-28" />;
     case "mind-body-spirit":
-      return <MindBodySpiritSpreadArt className="w-full h-34" />;
+      return <MindBodySpiritSpreadArt className="w-full h-28" />;
     case "love":
-      return <LoveSpreadArt className="w-full h-34" />;
+      return <LoveSpreadArt className="w-full h-28" />;
     case "how-they-feel":
-      return <HowTheyFeelSpreadArt className="w-full h-34" />;
+      return <HowTheyFeelSpreadArt className="w-full h-28" />;
     case "ex-reconciliation":
-      return <ExReconciliationSpreadArt className="w-full h-34" />;
+      return <ExReconciliationSpreadArt className="w-full h-28" />;
     case "soulmate":
-      return <SoulmateSpreadArt className="w-full h-34" />;
+      return <SoulmateSpreadArt className="w-full h-28" />;
     case "career":
-      return <CareerSpreadArt className="w-full h-34" />;
+      return <CareerSpreadArt className="w-full h-28" />;
     case "money":
-      return <MoneySpreadArt className="w-full h-34" />;
+      return <MoneySpreadArt className="w-full h-28" />;
     case "career-switch":
-      return <CareerSwitchSpreadArt className="w-full h-34" />;
+      return <CareerSwitchSpreadArt className="w-full h-28" />;
     case "decision":
-      return <DecisionSpreadArt className="w-full h-34" />;
+      return <DecisionSpreadArt className="w-full h-28" />;
     case "inner-potential":
-      return <InnerPotentialSpreadArt className="w-full h-34" />;
+      return <InnerPotentialSpreadArt className="w-full h-28" />;
     case "weekly":
-      return <WeeklySpreadArt className="w-full h-34" />;
+      return <WeeklySpreadArt className="w-full h-28" />;
     case "monthly":
-      return <MonthlySpreadArt className="w-full h-34" />;
+      return <MonthlySpreadArt className="w-full h-28" />;
     case "chakra":
-      return <ChakraSpreadArt className="w-full h-34" />;
+      return <ChakraSpreadArt className="w-full h-28" />;
     case "celtic-cross":
-      return <CelticCrossSpreadArt className="w-full h-34" />;
+      return <CelticCrossSpreadArt className="w-full h-28" />;
     case "year-ahead":
-      return <TwelveMonthsSpreadArt className="w-full h-34" />;
+      return <TwelveMonthsSpreadArt className="w-full h-28" />;
     default:
-      return <ThreeCardSpreadArt className="w-full h-34" />;
+      return <ThreeCardSpreadArt className="w-full h-28" />;
   }
 };
 
