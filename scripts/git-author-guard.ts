@@ -67,9 +67,8 @@ const commitBody = [
   `- Agent/Author: ${agent}`,
   `- Source Branch: ${branch}`,
   `- Verified: 100% Green (Collision, Typecheck, Cards, Spreads)`,
-  `- Timestamp: ${timestamp}`,
-  `\nCo-authored-by: Google DeepMind Antigravity <antigravity@google.com>`,
-  `Co-authored-by: Google Gemini <gemini@google.com>`,
+  `\nCo-authored-by: Antigravity AI <antigravity-ai@users.noreply.github.com>`,
+  `Co-authored-by: Google Gemini <gemini-ai@users.noreply.github.com>`,
 ].filter(Boolean).join("\n");
 
 import { recordAudit } from "./audit-tracker";
