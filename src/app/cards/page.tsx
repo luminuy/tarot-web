@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DECK } from "@/data/cards";
 import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
+import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 
 export const metadata = {
   title: "คัมภีร์ไพ่ทาโรต์ 78 ใบ (1909 Rider-Waite-Smith) | สารานุกรมความหมายไพ่",
@@ -16,15 +17,15 @@ export default function CardsPage() {
       <MysticAltarCanvas />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        {/* Top Breadcrumb Header */}
+        {/* Top Breadcrumbs & Dropdown */}
         <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1 px-3 rounded-full bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50"
+            className="inline-flex items-center gap-1.5 text-xs text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1.5 px-3.5 rounded-2xl bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50"
           >
             <span>←</span> กลับสู่วิหารพยากรณ์
           </Link>
-          <span className="text-xs font-mono text-[#9c93b8]">78 Cards Sacred Encyclopedia</span>
+          <SacredNavDropdown />
         </div>
 
         {/* Hero Header */}

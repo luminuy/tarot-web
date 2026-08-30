@@ -21,7 +21,8 @@ import { ReadingHistoryModal } from "@/components/history/ReadingHistoryModal";
 import { TarotEncyclopediaModal } from "@/components/encyclopedia/TarotEncyclopediaModal";
 import { CardZoomModal } from "@/components/card/CardZoomModal";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
-import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon, TarotSpreadNavIcon, TarotDeckNavIcon, JournalScrollNavIcon } from "@/components/ui/TarotArtIcons";
+import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/components/ui/TarotArtIcons";
+import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 
@@ -345,46 +346,24 @@ export default function TarotPage() {
             </div>
           </div>
 
-          {/* Right Toolbar Controls (Tarot Spreads, 78 Encyclopedia & History) */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* 20 Spreads Library */}
-            <Link
-              href="/spreads"
-              className="text-xs text-[#e2d9f3] hover:text-[#ffd700] border border-[#e5c07b]/25 hover:border-[#ffd700]/60 px-3 sm:px-3.5 py-1.5 rounded-2xl bg-[#100b20]/90 hover:bg-[#181033] hover:shadow-[0_0_16px_rgba(229,192,123,0.25)] backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
-            >
-              <TarotSpreadNavIcon className="w-3.5 h-3.5 text-[#e5c07b] group-hover:text-[#ffd700]" />
-              <span className="font-serif-th font-semibold whitespace-nowrap">คลัง 20 ผัง</span>
-            </Link>
-
-            {/* 78-Card Encyclopedia */}
-            <Link
-              href="/cards"
-              className="text-xs text-[#e2d9f3] hover:text-[#ffd700] border border-[#e5c07b]/25 hover:border-[#ffd700]/60 px-3 sm:px-3.5 py-1.5 rounded-2xl bg-[#100b20]/90 hover:bg-[#181033] hover:shadow-[0_0_16px_rgba(229,192,123,0.25)] backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
-            >
-              <TarotDeckNavIcon className="w-3.5 h-3.5 text-[#e5c07b] group-hover:text-[#ffd700]" />
-              <span className="font-serif-th font-semibold whitespace-nowrap">คัมภีร์ 78 ใบ</span>
-            </Link>
-
-            {/* Reading History */}
-            <button
-              type="button"
-              onClick={() => {
+          {/* Right Toolbar Controls (Sacred Dropdown & Reset Button) */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <SacredNavDropdown
+              onOpenHistory={() => {
                 soundManager.playCardSelectSound();
                 setIsHistoryOpen(true);
               }}
-              className="text-xs text-[#e2d9f3] hover:text-[#ffd700] border border-[#e5c07b]/25 hover:border-[#ffd700]/60 px-3 sm:px-3.5 py-1.5 rounded-2xl bg-[#100b20]/90 hover:bg-[#181033] hover:shadow-[0_0_16px_rgba(229,192,123,0.25)] backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
-            >
-              <JournalScrollNavIcon className="w-3.5 h-3.5 text-[#e5c07b]" />
-              <span className="font-serif-th font-semibold whitespace-nowrap hidden sm:inline">ประวัติดวง</span>
-            </button>
+              onReset={handleReset}
+              canReset={currentStep !== "SPREAD_SELECT"}
+            />
 
             {currentStep !== "SPREAD_SELECT" && (
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-[#05040a] font-bold bg-gradient-to-r from-[#c59b27] via-[#e5c07b] to-[#f5deaa] hover:opacity-90 px-3.5 py-1.5 rounded-full shadow-[0_0_15px_rgba(229,192,123,0.4)] transition-all cursor-pointer whitespace-nowrap"
+                className="text-xs text-[#05040a] font-bold bg-gradient-to-r from-[#c59b27] via-[#e5c07b] to-[#f5deaa] hover:opacity-90 px-3.5 py-1.5 sm:py-2 rounded-2xl shadow-[0_0_15px_rgba(229,192,123,0.4)] transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1"
               >
-                ✦ เริ่มใหม่
+                <span>✦</span> เริ่มใหม่
               </button>
             )}
           </div>

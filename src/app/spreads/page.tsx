@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SPREADS } from "@/data/spreads";
 import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
+import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 
 export const metadata = {
   title: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม | Spreads Library",
@@ -16,15 +17,15 @@ export default function SpreadsPage() {
       <MysticAltarCanvas />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        {/* Top Breadcrumbs */}
+        {/* Top Breadcrumbs & Dropdown */}
         <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1 px-3 rounded-full bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50"
+            className="inline-flex items-center gap-1.5 text-xs text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1.5 px-3.5 rounded-2xl bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50"
           >
             <span>←</span> กลับสู่วิหารพยากรณ์
           </Link>
-          <span className="text-xs font-mono text-[#9c93b8]">20 Authentic Sacred Spreads</span>
+          <SacredNavDropdown />
         </div>
 
         {/* Hero Header */}
