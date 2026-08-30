@@ -36,18 +36,18 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
   const navItems = [
     {
-      label: "คลัง 20 ผังพยากรณ์",
-      sublabel: "สำรวจผังความรัก การงาน สัปดาห์ & Celtic Cross",
+      label: "ผังการเปิดไพ่ (20 แบบ)",
+      sublabel: "เลือกดูผังความรัก การงาน การเงิน และอื่นๆ",
       href: "/spreads",
       Icon: TarotSpreadNavIcon,
-      badge: "20 Spreads",
+      badge: "20 ผัง",
     },
     {
-      label: "คัมภีร์ไพ่ 78 ใบ",
-      sublabel: "สารานุกรมความหมาย Major & Minor Arcana",
+      label: "ความหมายไพ่ (78 ใบ)",
+      sublabel: "เปิดดูคำแปลและความหมายไพ่ทั้งหมด",
       href: "/cards",
       Icon: TarotDeckNavIcon,
-      badge: "78 Cards",
+      badge: "78 ใบ",
     },
   ];
 
@@ -63,10 +63,10 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             : "bg-[#100b20]/90 text-[#f5deaa] hover:text-[#ffd700] border-[#e5c07b]/25 hover:border-[#ffd700]/60 hover:bg-[#181033] hover:shadow-[0_0_15px_rgba(229,192,123,0.2)]"
         }`}
         aria-expanded={isOpen}
-        aria-label="เมนูวิหารพยากรณ์"
+        aria-label="เมนูหลัก"
       >
         <TarotDeckNavIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 ${isOpen ? "text-[#0a0715]" : "text-[#ffd700]"}`} />
-        <span className="tracking-wide">เมนูวิหาร</span>
+        <span className="tracking-wide">เมนู</span>
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
@@ -87,9 +87,9 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             className="absolute right-0 top-full mt-2.5 w-64 sm:w-72 rounded-2xl bg-[#0c071c]/98 backdrop-blur-2xl border border-[#e5c07b]/35 shadow-[0_18px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(229,192,123,0.2)] p-2 z-50 overflow-hidden space-y-1"
           >
             {/* Header Title inside Dropdown */}
-            <div className="px-3 py-1.5 border-b border-[#e5c07b]/15 flex items-center justify-between text-[10px] text-[#a99fc2] font-mono">
-              <span>✦ SACRED SANCTUARY</span>
-              <span className="text-[#ffd700]">1909 RWS</span>
+            <div className="px-3 py-1.5 border-b border-[#e5c07b]/15 flex items-center justify-between text-[11px] font-serif-th font-semibold text-[#a99fc2]">
+              <span>✦ เมนูไพ่ทาโรต์</span>
+              <span className="text-[#ffd700] text-[10px] font-mono">1909 RWS</span>
             </div>
 
             {/* Navigation Links */}
@@ -110,11 +110,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                       <span className="text-xs font-serif-th font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors">
                         {item.label}
                       </span>
-                      <span className="text-[9px] font-mono text-[#8f85aa] bg-white/5 px-1.5 py-0.2 rounded-full border border-white/5">
+                      <span className="text-[9px] font-serif-th text-[#8f85aa] bg-white/5 px-1.5 py-0.2 rounded-full border border-white/5">
                         {item.badge}
                       </span>
                     </div>
-                    <p className="text-[10px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
+                    <p className="text-[10.5px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
                       {item.sublabel}
                     </p>
                   </div>
@@ -140,12 +140,12 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                     <span className="text-xs font-serif-th font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors">
                       ประวัติการดูดวง
                     </span>
-                    <span className="text-[9px] font-mono text-[#8f85aa] bg-white/5 px-1.5 py-0.2 rounded-full border border-white/5">
-                      Journal
+                    <span className="text-[9px] font-serif-th text-[#8f85aa] bg-white/5 px-1.5 py-0.2 rounded-full border border-white/5">
+                      บันทึก
                     </span>
                   </div>
-                  <p className="text-[10px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
-                    สมุดบันทึกคำทำนายและไพ่ที่เคยเปิด
+                  <p className="text-[10.5px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
+                    ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้
                   </p>
                 </div>
               </button>
@@ -163,7 +163,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                   }}
                   className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#200e18] hover:bg-[#301222] border border-[#f43f5e]/30 text-[#fca5a5] hover:text-[#fecdd3] text-xs font-serif-th font-bold transition-all cursor-pointer"
                 >
-                  <span>✦</span> เริ่มต้นพิธีกรรมใหม่
+                  <span>✦</span> เริ่มดูดวงใหม่
                 </button>
               </>
             )}
