@@ -20,10 +20,14 @@ import { ReadingHistoryModal } from "@/components/history/ReadingHistoryModal";
 import { TarotEncyclopediaModal } from "@/components/encyclopedia/TarotEncyclopediaModal";
 import { CardZoomModal } from "@/components/card/CardZoomModal";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
+import { QuickStartWelcome } from "@/components/onboarding/QuickStartWelcome";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 
 export default function TarotPage() {
+  // true เมื่อผ่านหน้าเริ่มต้นแบบเร็ว (QuickStartWelcome) แล้ว ไม่ว่าจะเลือกครบ
+  // หรือกด "ข้าม" — ควบคุมแค่ว่าจะโชว์ welcome หรือ step tracker เดิม ไม่ใช่ RitualStep
+  const [hasStarted, setHasStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
 
   // Modals state
@@ -403,19 +407,34 @@ export default function TarotPage() {
 
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
-        {/* Step Tracker Progress Bar */}
-        <RitualStepProgress
-          currentStep={currentStep}
-          onStepClick={(step) => setCurrentStep(step)}
-        />
+        {!hasStarted ? (
+          // หน้าเริ่มต้นแบบเร็ว — เพิ่มก่อนกริดเลือกผังเดิม ไม่ได้แทนที่
+          // เลือกครบ (หมวด+ความลึก) หรือกด "ข้าม" ก็ไปที่กริดเดิมทั้งคู่ ต่างกันแค่ว่า
+          // เลือกครบจะข้ามกริดไปเข้า INTENTION_SELECT เลย (เร็วกว่าสำหรับคนใหม่)
+          <QuickStartWelcome
+            onComplete={(spread, category) => {
+              setSelectedSpread(spread);
+              setSelectedCategory(category);
+              setCurrentStep("INTENTION_SELECT");
+              setHasStarted(true);
+            }}
+            onSkip={() => setHasStarted(true)}
+          />
+        ) : (
+          <>
+            {/* Step Tracker Progress Bar */}
+            <RitualStepProgress
+              currentStep={currentStep}
+              onStepClick={(step) => setCurrentStep(step)}
+            />
 
-        {errorMsg && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-950/90 border border-rose-700 text-rose-200 text-xs sm:text-sm text-center shadow-2xl backdrop-blur">
-            {errorMsg}
-          </div>
-        )}
+            {errorMsg && (
+              <div className="mb-6 p-4 rounded-2xl bg-rose-950/90 border border-rose-700 text-rose-200 text-xs sm:text-sm text-center shadow-2xl backdrop-blur">
+                {errorMsg}
+              </div>
+            )}
 
-        <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait">
           {/* STEP 1: SPREAD SELECTION */}
           {currentStep === "SPREAD_SELECT" && (
             <motion.div
@@ -636,7 +655,9 @@ export default function TarotPage() {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
+            </AnimatePresence>
+          </>
+        )}
       </div>
 
       {/* Global Modals & Drawers */}
