@@ -21,7 +21,7 @@ import { ReadingHistoryModal } from "@/components/history/ReadingHistoryModal";
 import { TarotEncyclopediaModal } from "@/components/encyclopedia/TarotEncyclopediaModal";
 import { CardZoomModal } from "@/components/card/CardZoomModal";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
-import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon, TarotSpreadNavIcon, TarotDeckNavIcon, JournalScrollNavIcon, SacredSoundNavIcon } from "@/components/ui/TarotArtIcons";
+import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon, TarotSpreadNavIcon, TarotDeckNavIcon, JournalScrollNavIcon } from "@/components/ui/TarotArtIcons";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 
@@ -33,7 +33,6 @@ export default function TarotPage() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isEncyclopediaOpen, setIsEncyclopediaOpen] = useState(false);
   const [zoomedCard, setZoomedCard] = useState<DrawnSlotCard | null>(null);
-  const [isSoundActive, setIsSoundActive] = useState(true);
 
   // Selection state
   const [selectedSpread, setSelectedSpread] = useState<Spread>(SPREADS[3]); // Default: 3-card
@@ -61,9 +60,7 @@ export default function TarotPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    setIsSoundActive(soundManager.isEnabled());
-  }, []);
+
 
   // Step 1 -> Step 2: Start Reading Session
   const handleStartSession = async () => {
@@ -348,22 +345,8 @@ export default function TarotPage() {
             </div>
           </div>
 
-          {/* Right Toolbar Controls (Sound, Tarot Spreads, 78 Encyclopedia & History) */}
+          {/* Right Toolbar Controls (Tarot Spreads, 78 Encyclopedia & History) */}
           <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* Sound FX Toggle (Sacred Chime SVG) */}
-            <button
-              type="button"
-              onClick={() => setIsSoundActive(soundManager.toggleSound())}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-2xl border transition-all duration-300 flex items-center justify-center cursor-pointer shadow ${
-                isSoundActive
-                  ? "bg-[#16102c] border-[#ffd700]/50 text-[#ffd700] shadow-[0_0_12px_rgba(229,192,123,0.3)]"
-                  : "bg-[#100b20]/90 border-[#e5c07b]/20 text-[#8f85aa] hover:border-[#e5c07b]/40"
-              }`}
-              title={isSoundActive ? "ปิดเสียงเอฟเฟกต์ (Mute)" : "เปิดเสียงเอฟเฟกต์ (Unmute)"}
-            >
-              <SacredSoundNavIcon isActive={isSoundActive} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
-
             {/* 20 Spreads Library */}
             <Link
               href="/spreads"
