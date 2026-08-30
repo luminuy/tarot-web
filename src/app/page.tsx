@@ -21,7 +21,7 @@ import { ReadingHistoryModal } from "@/components/history/ReadingHistoryModal";
 import { TarotEncyclopediaModal } from "@/components/encyclopedia/TarotEncyclopediaModal";
 import { CardZoomModal } from "@/components/card/CardZoomModal";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
-import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/components/ui/TarotArtIcons";
+import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon, TarotSpreadNavIcon, TarotDeckNavIcon, JournalScrollNavIcon, SacredSoundNavIcon } from "@/components/ui/TarotArtIcons";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 
@@ -348,34 +348,38 @@ export default function TarotPage() {
             </div>
           </div>
 
-          {/* Right Toolbar Controls (Sound, Encyclopedia, History & Reset) */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Sound FX Toggle */}
+          {/* Right Toolbar Controls (Sound, Tarot Spreads, 78 Encyclopedia & History) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            {/* Sound FX Toggle (Sacred Chime SVG) */}
             <button
               type="button"
               onClick={() => setIsSoundActive(soundManager.toggleSound())}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#100b20]/90 border border-[#e5c07b]/30 text-xs text-[#f5deaa] flex items-center justify-center hover:bg-[#191230] transition-all cursor-pointer shadow"
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-2xl border transition-all duration-300 flex items-center justify-center cursor-pointer shadow ${
+                isSoundActive
+                  ? "bg-[#16102c] border-[#ffd700]/50 text-[#ffd700] shadow-[0_0_12px_rgba(229,192,123,0.3)]"
+                  : "bg-[#100b20]/90 border-[#e5c07b]/20 text-[#8f85aa] hover:border-[#e5c07b]/40"
+              }`}
               title={isSoundActive ? "ปิดเสียงเอฟเฟกต์ (Mute)" : "เปิดเสียงเอฟเฟกต์ (Unmute)"}
             >
-              {isSoundActive ? "🔊" : "🔇"}
+              <SacredSoundNavIcon isActive={isSoundActive} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
             {/* 20 Spreads Library */}
             <Link
               href="/spreads"
-              className="text-xs text-[#e2d9f3] hover:text-[#f5deaa] border border-[#e5c07b]/25 hover:border-[#e5c07b]/60 px-3 py-1.5 rounded-full bg-[#100b20]/90 backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 shadow"
+              className="text-xs text-[#e2d9f3] hover:text-[#ffd700] border border-[#e5c07b]/25 hover:border-[#ffd700]/60 px-3 sm:px-3.5 py-1.5 rounded-2xl bg-[#100b20]/90 hover:bg-[#181033] hover:shadow-[0_0_16px_rgba(229,192,123,0.25)] backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
             >
-              <span className="text-[#e5c07b]">✦</span>
-              <span className="hidden sm:inline font-medium">คลัง 20 ผัง</span>
+              <TarotSpreadNavIcon className="w-3.5 h-3.5 text-[#e5c07b] group-hover:text-[#ffd700]" />
+              <span className="font-serif-th font-semibold whitespace-nowrap">คลัง 20 ผัง</span>
             </Link>
 
             {/* 78-Card Encyclopedia */}
             <Link
               href="/cards"
-              className="text-xs text-[#e2d9f3] hover:text-[#f5deaa] border border-[#e5c07b]/25 hover:border-[#e5c07b]/60 px-3 py-1.5 rounded-full bg-[#100b20]/90 backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 shadow"
+              className="text-xs text-[#e2d9f3] hover:text-[#ffd700] border border-[#e5c07b]/25 hover:border-[#ffd700]/60 px-3 sm:px-3.5 py-1.5 rounded-2xl bg-[#100b20]/90 hover:bg-[#181033] hover:shadow-[0_0_16px_rgba(229,192,123,0.25)] backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
             >
-              <span className="text-[#e5c07b]">✦</span>
-              <span className="hidden sm:inline font-medium">คัมภีร์ 78 ใบ</span>
+              <TarotDeckNavIcon className="w-3.5 h-3.5 text-[#e5c07b] group-hover:text-[#ffd700]" />
+              <span className="font-serif-th font-semibold whitespace-nowrap">คัมภีร์ 78 ใบ</span>
             </Link>
 
             {/* Reading History */}
@@ -385,10 +389,10 @@ export default function TarotPage() {
                 soundManager.playCardSelectSound();
                 setIsHistoryOpen(true);
               }}
-              className="text-xs text-[#e2d9f3] hover:text-[#f5deaa] border border-[#e5c07b]/25 hover:border-[#e5c07b]/60 px-3 py-1.5 rounded-full bg-[#100b20]/90 backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 shadow"
+              className="text-xs text-[#e2d9f3] hover:text-[#ffd700] border border-[#e5c07b]/25 hover:border-[#ffd700]/60 px-3 sm:px-3.5 py-1.5 rounded-2xl bg-[#100b20]/90 hover:bg-[#181033] hover:shadow-[0_0_16px_rgba(229,192,123,0.25)] backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow"
             >
-              <span className="text-[#e5c07b]">✦</span>
-              <span className="hidden sm:inline font-medium">ประวัติดวง</span>
+              <JournalScrollNavIcon className="w-3.5 h-3.5 text-[#e5c07b]" />
+              <span className="font-serif-th font-semibold whitespace-nowrap hidden sm:inline">ประวัติดวง</span>
             </button>
 
             {currentStep !== "SPREAD_SELECT" && (

@@ -700,3 +700,58 @@ export const EmergencyTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" })
     <path d="M12 8.3v7.4M8.3 12h7.4" />
   </svg>
 );
+
+// ============================================================================
+// 5. NAVBAR SACRED TAROT ICONS (Bespoke 1909 Tarot Card Icons for Top Nav)
+// ============================================================================
+
+/** คลัง 20 ผัง — ไพ่ 3 ใบเรียงผังพยากรณ์ศักดิ์สิทธิ์ */
+export const TarotSpreadNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+    {/* Left Card */}
+    <rect x="3" y="6" width="6" height="13" rx="1.2" transform="rotate(-10 6 12.5)" />
+    {/* Right Card */}
+    <rect x="15" y="6" width="6" height="13" rx="1.2" transform="rotate(10 18 12.5)" />
+    {/* Center Elevated Master Card */}
+    <rect x="8.5" y="3.5" width="7" height="15" rx="1.4" className="fill-[#e5c07b]/15 stroke-[#ffd700]" />
+    <circle cx="12" cy="9.5" r="1.5" className="fill-[#ffd700]" />
+    <path d="M12 13v2.5" className="stroke-[#ffd700]" />
+  </svg>
+);
+
+/** คัมภีร์ 78 ใบ — ไพ่ทาโรต์เดี่ยวทรงสูงพร้อมลายเรขาคณิตศักดิ์สิทธิ์และดวงดาว */
+export const TarotDeckNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+    <rect x="5.5" y="2.5" width="13" height="19" rx="2" className="fill-[#e5c07b]/10 stroke-[#ffd700]" />
+    <rect x="7.5" y="4.5" width="9" height="15" rx="1.2" strokeWidth={1} strokeDasharray="1.5 1.5" className="stroke-[#e5c07b]/60" />
+    {/* Sacred 4-Point Star in Center */}
+    <path d="M12 7.5L13 11L16.5 12L13 13L12 16.5L11 13L7.5 12L11 11Z" className="fill-[#ffd700] stroke-none" />
+  </svg>
+);
+
+/** ประวัติดวง / สมุดบันทึกคำทำนาย — คัมภีร์ศักดิ์สิทธิ์พร้อมตราประทับ */
+export const JournalScrollNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" className="fill-[#e5c07b]/10 stroke-[#ffd700]" />
+    <path d="M6 6h10M6 10h10M6 14h6" strokeWidth={1.3} className="stroke-[#e5c07b]/80" />
+    <path d="M16 14l2 2 3-3" strokeWidth={1.5} className="stroke-[#10b981]" />
+  </svg>
+);
+
+/** สวิตช์เสียงศักดิ์สิทธิ์ — กระดิ่ง / คลื่นพลังงานเสียง */
+export const SacredSoundNavIcon: React.FC<{ isActive: boolean; className?: string }> = ({ isActive, className = "w-3.5 h-3.5" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" className={isActive ? "fill-[#ffd700]/20 stroke-[#ffd700]" : "stroke-gray-400"} />
+    {isActive ? (
+      <>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" className="stroke-[#ffd700]" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" className="stroke-[#e5c07b]" />
+      </>
+    ) : (
+      <>
+        <line x1="23" y1="9" x2="17" y2="15" className="stroke-gray-400" />
+        <line x1="17" y1="9" x2="23" y2="15" className="stroke-gray-400" />
+      </>
+    )}
+  </svg>
+);
