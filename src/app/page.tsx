@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { SPREADS, type Spread } from "@/data/spreads";
 import { PERSONAS, type Persona } from "@/data/personas";
@@ -359,18 +360,23 @@ export default function TarotPage() {
               {isSoundActive ? "🔊" : "🔇"}
             </button>
 
+            {/* 20 Spreads Library */}
+            <Link
+              href="/spreads"
+              className="text-xs text-[#e2d9f3] hover:text-[#f5deaa] border border-[#e5c07b]/25 hover:border-[#e5c07b]/60 px-3 py-1.5 rounded-full bg-[#100b20]/90 backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 shadow"
+            >
+              <span className="text-[#e5c07b]">✦</span>
+              <span className="hidden sm:inline font-medium">คลัง 20 ผัง</span>
+            </Link>
+
             {/* 78-Card Encyclopedia */}
-            <button
-              type="button"
-              onClick={() => {
-                soundManager.playCardSelectSound();
-                setIsEncyclopediaOpen(true);
-              }}
+            <Link
+              href="/cards"
               className="text-xs text-[#e2d9f3] hover:text-[#f5deaa] border border-[#e5c07b]/25 hover:border-[#e5c07b]/60 px-3 py-1.5 rounded-full bg-[#100b20]/90 backdrop-blur transition-all cursor-pointer flex items-center gap-1.5 shadow"
             >
               <span className="text-[#e5c07b]">✦</span>
               <span className="hidden sm:inline font-medium">คัมภีร์ 78 ใบ</span>
-            </button>
+            </Link>
 
             {/* Reading History */}
             <button
