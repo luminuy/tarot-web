@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+echo "🚀 [Pre-Push Guard] ตรวจสอบความปลอดภัยขั้นสุดท้ายก่อน Push ขึ้น GitHub..."
+npm run repo:verify
+echo "✅ [Pre-Push ผ่าน] พร้อม Push ขึ้น Cloudflare Workers!"

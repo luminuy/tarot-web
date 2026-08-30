@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+echo "🔮 [Pre-Commit Guard] กำลังตรวจสอบความปลอดภัยก่อน Commit..."
+
+# 1. Collision check
+npm run agent:check
+
+# 2. Typecheck
+npm run typecheck
+
+# 3. Cards & Spreads Integrity
+./node_modules/.bin/tsx scripts/verify-cards.ts
+./node_modules/.bin/tsx scripts/qa/test-spreads.ts
+
+echo "✅ [Pre-Commit ผ่าน] โค้ดผ่านการตรวจสอบ 100% ปลอดภัย!"
