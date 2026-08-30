@@ -427,11 +427,23 @@ export default function TarotPage() {
             >
               <div className="text-center space-y-3">
                 <div className="flex justify-center mb-1">
-                  <div className="relative group cursor-pointer" onClick={() => soundManager.playCardSelectSound()}>
-                    <div className="w-28 h-44 rounded-2xl border-2 border-[#e5c07b]/70 bg-gradient-to-b from-[#1c1236] via-[#0d071c] to-[#05030c] shadow-[0_0_40px_rgba(229,192,123,0.35)] flex items-center justify-center transform group-hover:scale-105 transition-all duration-500 overflow-hidden">
-                      <div className="absolute inset-2 border border-[#e5c07b]/30 rounded-xl card-back-pattern" />
+                  {/* เอฟเฟกต์เดียวกับการ์ดตอนสับไพ่ (ShuffleRitual idle state) —
+                      ลอยเบา ๆ, กรอบเรืองแรงขึ้น, ป้าย SACRED ORACLE, gold-foil-sheen ตอน hover */}
+                  <motion.div
+                    animate={{ y: [-4, 4, -4], rotateZ: [-1, 1, -1] }}
+                    transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => soundManager.playCardSelectSound()}
+                    className="w-28 h-44 rounded-2xl border-2 border-[#e5c07b] card-back-pattern shadow-[0_0_50px_rgba(229,192,123,0.45)] flex flex-col items-center justify-center p-3 cursor-pointer overflow-hidden group relative"
+                  >
+                    <div className="absolute top-3 w-full flex justify-center items-center opacity-75">
+                      <span className="text-[7px] font-serif-th text-[#f5deaa] tracking-[0.2em] uppercase font-bold">
+                        SACRED ORACLE
+                      </span>
                     </div>
-                  </div>
+                    <div className="gold-foil-sheen absolute inset-0 opacity-40 group-hover:opacity-75 transition-opacity" />
+                  </motion.div>
                 </div>
 
                 <div className="space-y-1">
