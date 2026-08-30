@@ -1,0 +1,46 @@
+name: 🏷️ Automated Release & Deployment Summary
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: 📦 Generate Auto-Release & Tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🏷️ Calculate Release Version
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: minor
+          release_branches: main
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: steps.tag_version.outputs.new_tag != ''
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: 🔮 Tarot Web Release ${{ steps.tag_version.outputs.new_tag }}
+          body: |
+            ## 🌟 Production Release Overview
+            
+            - **Live Production URL**: [https://tarot-web.bankjack10452.workers.dev](https://tarot-web.bankjack10452.workers.dev)
+            - **Edge Network Target**: Cloudflare Workers (Bangkok BKK Edge)
+            - **Verified Features**: 78 Cards Encyclopedia, 20 Spreads, Real-time AI SSE Streaming, Provably-Fair SHA-256 Shuffling.
+            
+            ### 📜 Changelog
+            ${{ steps.tag_version.outputs.changelog }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

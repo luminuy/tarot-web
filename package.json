@@ -21,7 +21,9 @@
     "agent:check": "tsx scripts/agent-guard.ts check",
     "agent:lock": "tsx scripts/agent-guard.ts lock",
     "agent:unlock": "tsx scripts/agent-guard.ts unlock",
-    "agent:clean": "tsx scripts/agent-guard.ts clean"
+    "agent:clean": "tsx scripts/agent-guard.ts clean",
+    "repo:verify": "tsx scripts/github-auto.ts verify-all",
+    "pr:auto": "tsx scripts/github-auto.ts pr"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",

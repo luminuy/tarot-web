@@ -174,7 +174,8 @@ export function checkCollisions(currentAgent?: string): { hasCollision: boolean;
 
   // Check 1: Conflict markers in working tree
   try {
-    const grepConflict = execSync("git grep -n '<<<<<<<' || true", { encoding: "utf-8" }).trim();
+    const marker = "<" + "<" + "<" + "<" + "<" + "<" + "<";
+    const grepConflict = execSync(`git grep -n "${marker}" -- ':!scripts/agent-guard.ts' || true`, { encoding: "utf-8" }).trim();
     if (grepConflict) {
       issues.push(`🚨 ตรวจพบ Git Conflict Markers ในไฟล์:\n${grepConflict}`);
     }
