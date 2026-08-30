@@ -25,6 +25,9 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
+      - name: 🛡️ AI Multi-Agent Collision Check
+        run: npm run agent:check
+
       - name: 🔍 TypeScript Typecheck
         run: npm run typecheck
 

@@ -29,11 +29,16 @@
 8. **Root Image Path Resolution**: ทุกจุดที่ Render ภาพไพ่ ต้องผ่าน Helper `getImageSrc()` ที่การันตี Prefix `/cards/...` เสมอ ห้ามใส่ `src={card.image}` โดดๆ
 9. **Horizontal Spread Bounds**: ผังที่มีไพ่ 7 ใบขึ้นไป (ผัง 7 วัน และ 7 จักระ) **ต้องจัดวางแบบ 2 ชั้นสมดุล (4+3 ใบ)** คุมความกว้างไม่เกิน 150px ป้องกันไพ่ล้นขอบซ้ายขวาออกนอกกรอบการ์ด
 10. **Human-First Natural Copywriting**: ใช้คำภาษาไทยที่เป็นธรรมชาติ เข้าใจง่าย ตรงไปตรงมาเหมือนมนุษย์คุยกัน ห้ามใช้ศัพท์หุ่นยนต์/AI แข็งทื่อ เช่น ใช้ 'เมนู', 'ผังการเปิดไพ่ (20 แบบ)', 'ความหมายไพ่ (78 ใบ)', 'ประวัติการดูดวง' แทนศัพท์ซับซ้อน
+11. **Multi-Agent Collision Guard**: ก่อนเริ่มงานให้ตรวจสอบ `npm run agent:status` และล็อคไฟล์ด้วย `npm run agent:lock` เสมอ หลังทำเสร็จให้ปลดล็อคด้วย `npm run agent:unlock` เพื่อไม่ให้ AI หลายตัวแก้งานชนกัน
 
 ---
 
 ## 🛠️ คำสั่งสำหรับทดสอบและรันระบบ
 
+- **ตรวจความปลอดภัยไม่ให้ชนกับ Agent อื่น**: `npm run agent:check`
+- **ดูสถานะ Agent ที่กำลังทำงาน**: `npm run agent:status`
+- **ล็อคไฟล์ก่อนเริ่มแก้**: `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>`
+- **ปลดล็อคไฟล์เมื่อทำเสร็จ**: `npm run agent:unlock -- --agent <ชื่อ>`
 - **ตรวจ Typecheck**: `npm run typecheck`
 - **ซิงก์สถานะและบันทึกงานอัตโนมัติ (Mandatory)**: `npm run log:sync`
 - **ตรวจความสมบูรณ์ของไพ่ 78 ใบ**: `./node_modules/.bin/tsx scripts/verify-cards.ts`

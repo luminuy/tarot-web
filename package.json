@@ -16,7 +16,12 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "verify:cards": "tsx scripts/verify-cards.ts"
+    "verify:cards": "tsx scripts/verify-cards.ts",
+    "agent:status": "tsx scripts/agent-guard.ts status",
+    "agent:check": "tsx scripts/agent-guard.ts check",
+    "agent:lock": "tsx scripts/agent-guard.ts lock",
+    "agent:unlock": "tsx scripts/agent-guard.ts unlock",
+    "agent:clean": "tsx scripts/agent-guard.ts clean"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",

@@ -3,6 +3,7 @@ import { execSync } from "child_process";
 import { join } from "path";
 import { DECK } from "../src/data/cards";
 import { SPREADS } from "../src/data/spreads";
+import { checkCollisions } from "./agent-guard";
 
 const ROOT_DIR = process.cwd();
 const WORK_LOG_PATH = join(ROOT_DIR, "docs", "WORK_LOG.md");
@@ -91,6 +92,7 @@ function updateWorkLog(audit: SystemAudit) {
 > ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: \`${audit.timestamp}\` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
+- **AI Agent Concurrency**: ${checkCollisions().summary}
 - **TypeScript Health**: \`npm run typecheck\` ➔ **${audit.typecheckPassed ? "✅ 0 Errors (สมบูรณ์ 100%)" : "❌ " + audit.typecheckOutput}**
 - **Database / Cards**: ไพ่ **${audit.cardCount} ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **${audit.spreadCount} ผังพยากรณ์ยอดนิยม** (${audit.positionCount} ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%

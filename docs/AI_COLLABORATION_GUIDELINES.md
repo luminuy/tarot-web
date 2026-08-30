@@ -82,21 +82,49 @@
 
 ---
 
-## 🛠️ 4. คำสั่งตรวจสอบก่อนและหลังแก้ไขโค้ด (Mandatory Verification Protocol)
+## 🛡️ 4. ระบบตรวจจับและป้องกันการชนกันของ AI (Multi-AI Agent Collision Guard Protocol)
+
+เพื่อป้องกันไม่ให้ AI หลายตัว (Gemini, Claude, Antigravity, Cursor ฯลฯ) แก้ไขไฟล์เดียวกันพร้อมกันหรือทับซ้อนกัน ให้ปฏิบัติตามกฎนี้เสมอ:
+
+1. **ก่อนเริ่มแก้งาน (Check & Lock)**:
+   - ตรวจสอบว่ามี Agent ตัวอื่นล็อคไฟล์อยู่หรือไม่: `npm run agent:status`
+   - ตรวจสอบความปลอดภัย: `npm run agent:check`
+   - ทำการล็อคไฟล์/Domain ที่จะทำ:
+     ```bash
+     npm run agent:lock -- --agent <ชื่อคุณ> --domain <หมวดงาน> --files <รายชื่อไฟล์> --task "<รายละเอียดงาน>"
+     # ตัวอย่าง:
+     npm run agent:lock -- --agent Gemini --domain UI --files "src/components/spread/SpreadBoard.tsx" --task "ปรับปรุงเอฟเฟกต์พลิกไพ่"
+     ```
+2. **หลังทำงานเสร็จ (Unlock & Auto-Sync)**:
+   - ปลดล็อคไฟล์เพื่อให้ Agent ตัวอื่นทำงานต่อได้ทันที:
+     ```bash
+     npm run agent:unlock -- --agent <ชื่อคุณ>
+     ```
+   - รันซิงก์สถานะงานอัตโนมัติ: `npm run log:sync`
+
+---
+
+## 🛠️ 5. คำสั่งตรวจสอบก่อนและหลังแก้ไขโค้ด (Mandatory Verification Protocol)
 
 ก่อนและหลังแก้ไขโค้ดทุกครั้ง AI **ต้องรันคำสั่งเหล่านี้เพื่อตรวจสอบความถูกต้อง**:
 
 ```bash
-# 1. ตรวจสอบ TypeScript Typecheck (ต้องผ่าน 0 errors เสมอ)
+# 1. ตรวจสอบว่าไม่มีไฟล์ชนกับ Agent ตัวอื่น
+npm run agent:check
+
+# 2. ตรวจสอบ TypeScript Typecheck (ต้องผ่าน 0 errors เสมอ)
 npm run typecheck
 
-# 2. ซิงก์สถานะและบันทึกงานอัตโนมัติลงใน docs/WORK_LOG.md (Mandatory Auto-Sync)
+# 3. ซิงก์สถานะและบันทึกงานอัตโนมัติลงใน docs/WORK_LOG.md (Mandatory Auto-Sync)
 npm run log:sync
 
-# 3. ตรวจสอบความถูกต้องของฐานข้อมูลไพ่ 78 ใบ
+# 4. ตรวจสอบความถูกต้องของฐานข้อมูลไพ่ 78 ใบ
 ./node_modules/.bin/tsx scripts/verify-cards.ts
 
-# 4. ตรวจสอบว่า Dev Server ตอบสนอง 200 OK
+# 5. ตรวจสอบความสมบูรณ์ของ 20 ผังพยากรณ์
+./node_modules/.bin/tsx scripts/qa/test-spreads.ts
+
+# 6. ตรวจสอบว่า Dev Server ตอบสนอง 200 OK
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000
 ```
 
