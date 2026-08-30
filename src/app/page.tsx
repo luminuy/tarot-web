@@ -324,13 +324,14 @@ export default function TarotPage() {
             onClick={handleReset}
           >
             {/* World-Class Miniature 1909 Tarot Card Brand Logo */}
-            <div className="w-8 h-12 sm:w-9 sm:h-13 rounded-lg border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.5)] relative flex-shrink-0 bg-[#07050d] group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(229,192,123,0.8)] transition-all duration-300">
+            <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-lg border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.5)] relative flex-shrink-0 bg-[#07050d] group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(229,192,123,0.8)] transition-all duration-300">
               <img
                 src="/cards/major-01.jpg"
                 alt="The Magician Tarot Seal"
-                className="w-full h-full object-cover object-top filter contrast-[1.05]"
+                className="w-full h-full object-cover object-[50%_12%] filter contrast-[1.12] saturate-[1.15] brightness-[1.05] tarot-hd-card-image"
+                loading="eager"
+                decoding="async"
               />
-              <div className="gold-foil-sheen absolute inset-0 opacity-35 group-hover:opacity-70 transition-opacity" />
             </div>
 
             <div className="flex flex-col justify-center">

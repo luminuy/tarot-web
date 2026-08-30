@@ -41,10 +41,10 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
     <img
       src={src}
       alt="Tarot Card"
-      className="w-full h-full object-cover object-center filter contrast-[1.03] brightness-[1.01]"
+      className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
       loading="lazy"
+      decoding="async"
     />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/10 pointer-events-none" />
   </div>
 );
 
@@ -56,7 +56,7 @@ export const HighPriestessIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#e5c07b] shadow-[0_0_25px_rgba(229,192,123,0.35)] ${className}`}>
-    <img src="/cards/major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover object-center" loading="lazy" />
+    <img src="/cards/major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] drop-shadow">
@@ -70,7 +70,7 @@ export const JusticeIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#a855f7] shadow-[0_0_25px_rgba(168,85,247,0.35)] ${className}`}>
-    <img src="/cards/major-11.jpg" alt="Justice" className="w-full h-full object-cover object-center" loading="lazy" />
+    <img src="/cards/major-11.jpg" alt="Justice" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#e9d5ff] drop-shadow">
@@ -84,7 +84,7 @@ export const HermitIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#38bdf8] shadow-[0_0_25px_rgba(56,189,248,0.35)] ${className}`}>
-    <img src="/cards/major-09.jpg" alt="The Hermit" className="w-full h-full object-cover object-center" loading="lazy" />
+    <img src="/cards/major-09.jpg" alt="The Hermit" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#bae6fd] drop-shadow">
@@ -98,7 +98,7 @@ export const TheStarIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#ec4899] shadow-[0_0_25px_rgba(236,72,153,0.35)] ${className}`}>
-    <img src="/cards/major-17.jpg" alt="The Star" className="w-full h-full object-cover object-center" loading="lazy" />
+    <img src="/cards/major-17.jpg" alt="The Star" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#fbcfe8] drop-shadow">
@@ -112,7 +112,7 @@ export const MagicianIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#ffd700] shadow-[0_0_25px_rgba(255,215,0,0.35)] ${className}`}>
-    <img src="/cards/major-01.jpg" alt="The Magician" className="w-full h-full object-cover object-center" loading="lazy" />
+    <img src="/cards/major-01.jpg" alt="The Magician" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] drop-shadow">
@@ -285,42 +285,42 @@ export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className 
 
 // 9. Celtic Cross (10 ใบ) — Perfect Geometry Fit
 export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
-  <div className={`flex items-center justify-center gap-3 relative ${className}`}>
+  <div className={`flex items-center justify-center gap-3.5 relative ${className}`}>
     {/* Left: Cross Formation */}
-    <div className="relative w-24 h-24 flex items-center justify-center">
-      <div className="absolute top-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
-        <img src="/cards/major-04.jpg" alt="" className="w-full h-full object-cover" />
+    <div className="relative w-28 h-28 flex items-center justify-center">
+      <div className="absolute top-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
+        <img src="/cards/major-04.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
-      <div className="absolute bottom-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
-        <img src="/cards/major-18.jpg" alt="" className="w-full h-full object-cover" />
+      <div className="absolute bottom-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
+        <img src="/cards/major-18.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
-      <div className="absolute left-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
-        <img src="/cards/major-19.jpg" alt="" className="w-full h-full object-cover" />
+      <div className="absolute left-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
+        <img src="/cards/major-19.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
-      <div className="absolute right-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
-        <img src="/cards/major-17.jpg" alt="" className="w-full h-full object-cover" />
+      <div className="absolute right-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
+        <img src="/cards/major-17.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
-      <div className="relative z-10 w-7.5 h-[52px] rounded-lg border-2 border-[#ffd700] overflow-hidden shadow-xl">
-        <img src="/cards/major-00.jpg" alt="Center" className="w-full h-full object-cover" />
+      <div className="relative z-10 w-9 h-[60px] rounded-lg border-2 border-[#ffd700] overflow-hidden shadow-xl">
+        <img src="/cards/major-00.jpg" alt="Center" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
-      <div className="absolute z-20 w-7.5 h-[52px] rounded-lg border border-[#e5c07b] overflow-hidden rotate-90 shadow-lg opacity-90">
-        <img src="/cards/major-10.jpg" alt="Cross" className="w-full h-full object-cover" />
+      <div className="absolute z-20 w-9 h-[60px] rounded-lg border border-[#e5c07b] overflow-hidden rotate-90 shadow-lg opacity-90">
+        <img src="/cards/major-10.jpg" alt="Cross" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
     </div>
 
     {/* Right: Vertical Staff of 4 Cards */}
-    <div className="flex flex-col gap-0.5">
-      <div className="w-6 h-[38px] rounded border border-[#ffd700]/70 overflow-hidden shadow">
-        <img src="/cards/major-21.jpg" alt="" className="w-full h-full object-cover" />
+    <div className="flex flex-col gap-1">
+      <div className="w-7 h-[44px] rounded-md border border-[#ffd700]/80 overflow-hidden shadow">
+        <img src="/cards/major-21.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
-      <div className="w-6 h-[38px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
-        <img src="/cards/major-14.jpg" alt="" className="w-full h-full object-cover" />
+      <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
+        <img src="/cards/major-14.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
-      <div className="w-6 h-[38px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
-        <img src="/cards/major-11.jpg" alt="" className="w-full h-full object-cover" />
+      <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
+        <img src="/cards/major-11.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
-      <div className="w-6 h-[38px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
-        <img src="/cards/major-09.jpg" alt="" className="w-full h-full object-cover" />
+      <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
+        <img src="/cards/major-09.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" loading="lazy" decoding="async" />
       </div>
     </div>
   </div>
@@ -351,8 +351,9 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
           <img
             src={`/cards/major-${cardNum}.jpg`}
             alt=""
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
             loading="lazy"
+            decoding="async"
           />
         </div>
       );
@@ -504,7 +505,13 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
               : "border border-[#e5c07b]/40 shadow opacity-90"
           }`}
         >
-          <img src={`/cards/major-${item.card}.jpg`} alt="" className="w-full h-full object-cover" loading="lazy" />
+          <img
+            src={`/cards/major-${item.card}.jpg`}
+            alt=""
+            className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       ))}
     </div>
@@ -549,7 +556,13 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
             }`}
             style={{ borderColor: chk.highlight ? "#10b981" : chk.color, boxShadow: `0 0 8px ${chk.color}35` }}
           >
-            <img src={`/cards/major-${chk.card}.jpg`} alt="" className="w-full h-full object-cover" loading="lazy" />
+            <img
+              src={`/cards/major-${chk.card}.jpg`}
+              alt=""
+              className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         ))}
       </div>
@@ -561,7 +574,13 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
             className="w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 border shadow"
             style={{ borderColor: chk.color, boxShadow: `0 0 8px ${chk.color}35` }}
           >
-            <img src={`/cards/major-${chk.card}.jpg`} alt="" className="w-full h-full object-cover" loading="lazy" />
+            <img
+              src={`/cards/major-${chk.card}.jpg`}
+              alt=""
+              className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         ))}
       </div>
