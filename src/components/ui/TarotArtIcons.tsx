@@ -3,7 +3,7 @@
 import React from "react";
 
 // ============================================================================
-// 1. REUSABLE 1909 RIDER-WAITE MINI CARD PRIMITIVE (100% PURE ARTWORK — NO TEXT OVERLAY)
+// 1. REUSABLE 1909 RIDER-WAITE MINI CARD PRIMITIVE (MATHEMATICALLY CALIBRATED)
 // ============================================================================
 
 interface MiniCardProps {
@@ -17,35 +17,33 @@ interface MiniCardProps {
 
 export const MiniRwsCard: React.FC<MiniCardProps> = ({
   src,
-  className = "w-16 h-[108px]",
+  className = "w-12 h-[82px]",
   borderColor = "rgba(229, 192, 123, 0.6)",
   glowColor = "rgba(229, 192, 123, 0.25)",
   highlight = false,
   rotate = 0,
 }) => (
   <div
-    className={`relative rounded-xl overflow-hidden border transition-all duration-300 flex-shrink-0 select-none ${className} ${
+    className={`relative rounded-lg overflow-hidden border transition-all duration-300 flex-shrink-0 select-none ${className} ${
       highlight
-        ? "ring-2 ring-[#ffd700] ring-offset-2 ring-offset-[#07040f] z-10 scale-[1.05]"
-        : "hover:border-[#ffd700]/90 hover:scale-[1.03]"
+        ? "ring-1.5 ring-[#ffd700] ring-offset-1 ring-offset-[#07040f] z-10 scale-[1.04]"
+        : "hover:border-[#ffd700]/90"
     }`}
     style={{
       borderColor: highlight ? "#ffd700" : borderColor,
       boxShadow: highlight
-        ? `0 0 25px ${glowColor}, 0 10px 24px rgba(0,0,0,0.9)`
-        : `0 6px 16px rgba(0,0,0,0.75), 0 0 12px ${glowColor}`,
+        ? `0 0 16px ${glowColor}, 0 4px 12px rgba(0,0,0,0.85)`
+        : `0 3px 8px rgba(0,0,0,0.7), 0 0 8px ${glowColor}`,
       transform: rotate ? `rotate(${rotate}deg)` : undefined,
     }}
   >
-    {/* 100% Clean, Unobstructed 1909 Rider-Waite-Smith Card Artwork */}
+    {/* 100% Pure 1909 Rider-Waite Card Art */}
     <img
       src={src}
       alt="Tarot Card"
-      className="w-full h-full object-cover object-center filter contrast-[1.04] brightness-[1.02]"
+      className="w-full h-full object-cover object-center filter contrast-[1.03] brightness-[1.01]"
       loading="lazy"
     />
-
-    {/* Subtle Depth Shadow Vignette */}
     <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/10 pointer-events-none" />
   </div>
 );
@@ -55,9 +53,9 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
 // ============================================================================
 
 export const HighPriestessIllustration: React.FC<{ className?: string }> = ({
-  className = "w-22 h-36 mx-auto",
+  className = "w-20 h-32 mx-auto",
 }) => (
-  <div className={`relative rounded-xl overflow-hidden border-2 border-[#e5c07b] shadow-[0_0_30px_rgba(229,192,123,0.4)] ${className}`}>
+  <div className={`relative rounded-xl overflow-hidden border-2 border-[#e5c07b] shadow-[0_0_25px_rgba(229,192,123,0.35)] ${className}`}>
     <img src="/cards/major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover object-center" loading="lazy" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
@@ -69,9 +67,9 @@ export const HighPriestessIllustration: React.FC<{ className?: string }> = ({
 );
 
 export const JusticeIllustration: React.FC<{ className?: string }> = ({
-  className = "w-22 h-36 mx-auto",
+  className = "w-20 h-32 mx-auto",
 }) => (
-  <div className={`relative rounded-xl overflow-hidden border-2 border-[#a855f7] shadow-[0_0_30px_rgba(168,85,247,0.4)] ${className}`}>
+  <div className={`relative rounded-xl overflow-hidden border-2 border-[#a855f7] shadow-[0_0_25px_rgba(168,85,247,0.35)] ${className}`}>
     <img src="/cards/major-11.jpg" alt="Justice" className="w-full h-full object-cover object-center" loading="lazy" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
@@ -83,9 +81,9 @@ export const JusticeIllustration: React.FC<{ className?: string }> = ({
 );
 
 export const HermitIllustration: React.FC<{ className?: string }> = ({
-  className = "w-22 h-36 mx-auto",
+  className = "w-20 h-32 mx-auto",
 }) => (
-  <div className={`relative rounded-xl overflow-hidden border-2 border-[#38bdf8] shadow-[0_0_30px_rgba(56,189,248,0.4)] ${className}`}>
+  <div className={`relative rounded-xl overflow-hidden border-2 border-[#38bdf8] shadow-[0_0_25px_rgba(56,189,248,0.35)] ${className}`}>
     <img src="/cards/major-09.jpg" alt="The Hermit" className="w-full h-full object-cover object-center" loading="lazy" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
@@ -97,9 +95,9 @@ export const HermitIllustration: React.FC<{ className?: string }> = ({
 );
 
 export const TheStarIllustration: React.FC<{ className?: string }> = ({
-  className = "w-22 h-36 mx-auto",
+  className = "w-20 h-32 mx-auto",
 }) => (
-  <div className={`relative rounded-xl overflow-hidden border-2 border-[#ec4899] shadow-[0_0_30px_rgba(236,72,153,0.4)] ${className}`}>
+  <div className={`relative rounded-xl overflow-hidden border-2 border-[#ec4899] shadow-[0_0_25px_rgba(236,72,153,0.35)] ${className}`}>
     <img src="/cards/major-17.jpg" alt="The Star" className="w-full h-full object-cover object-center" loading="lazy" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
@@ -111,9 +109,9 @@ export const TheStarIllustration: React.FC<{ className?: string }> = ({
 );
 
 export const MagicianIllustration: React.FC<{ className?: string }> = ({
-  className = "w-22 h-36 mx-auto",
+  className = "w-20 h-32 mx-auto",
 }) => (
-  <div className={`relative rounded-xl overflow-hidden border-2 border-[#ffd700] shadow-[0_0_30px_rgba(255,215,0,0.4)] ${className}`}>
+  <div className={`relative rounded-xl overflow-hidden border-2 border-[#ffd700] shadow-[0_0_25px_rgba(255,215,0,0.35)] ${className}`}>
     <img src="/cards/major-01.jpg" alt="The Magician" className="w-full h-full object-cover object-center" loading="lazy" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
@@ -125,219 +123,219 @@ export const MagicianIllustration: React.FC<{ className?: string }> = ({
 );
 
 // ============================================================================
-// 3. SACRED SPREAD PREVIEW FORMATIONS (20 MASTER SPREADS — PURE 1909 ARTWORKS)
+// 3. SACRED SPREAD PREVIEW FORMATIONS (20 SPREADS — PERFECT FIT & ZERO OVERFLOW)
 // ============================================================================
 
 // 1. ไพ่ประจำวัน (1 ใบ)
-export const DailySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
+export const DailySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`flex items-center justify-center relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-19.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.65)"
-      className="w-18 h-[122px] sm:w-20 sm:h-[136px]"
+      glowColor="rgba(255,215,0,0.6)"
+      className="w-16 h-[108px] sm:w-17 sm:h-[115px]"
       highlight
     />
   </div>
 );
 
 // 2. สรุปด่วน (2 ใบ)
-export const QuickSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex items-center justify-center gap-4 relative ${className}`}>
+export const QuickSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-3 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-00.jpg"
       borderColor="rgba(229, 192, 123, 0.7)"
-      className="w-16 h-[108px] sm:w-17 sm:h-[115px]"
+      className="w-13 h-[88px] sm:w-14 sm:h-[95px]"
     />
     <MiniRwsCard
       src="/cards/major-01.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.55)"
-      className="w-17 h-[115px] sm:w-18 sm:h-[122px]"
+      glowColor="rgba(255,215,0,0.5)"
+      className="w-14 h-[95px] sm:w-15 sm:h-[102px]"
       highlight
     />
   </div>
 );
 
 // 3. ใช่หรือไม่ (3 ใบ)
-export const YesNoSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex items-center justify-center gap-3 relative ${className}`}>
+export const YesNoSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-2 relative ${className}`}>
     <MiniRwsCard
       src="/cards/swords-03.jpg"
       borderColor="rgba(244,63,94,0.65)"
       glowColor="rgba(244,63,94,0.3)"
-      className="w-14 h-[95px] opacity-85"
+      className="w-11 h-[75px] opacity-85"
     />
     <MiniRwsCard
       src="/cards/major-10.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.65)"
-      className="w-17 h-[115px] sm:w-18 sm:h-[122px]"
+      glowColor="rgba(255,215,0,0.6)"
+      className="w-13 h-[88px] sm:w-14 sm:h-[95px]"
       highlight
     />
     <MiniRwsCard
       src="/cards/cups-02.jpg"
       borderColor="rgba(16,185,129,0.65)"
       glowColor="rgba(16,185,129,0.3)"
-      className="w-14 h-[95px] opacity-85"
+      className="w-11 h-[75px] opacity-85"
     />
   </div>
 );
 
 // 4. อดีต ปัจจุบัน อนาคต (3 ใบ)
-export const ThreeCardSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex items-center justify-center gap-3 relative ${className}`}>
-    <div className="absolute w-48 h-0.5 border-b border-dashed border-[#e5c07b]/40 top-1/2 -translate-y-1/2 z-0" />
+export const ThreeCardSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-2 relative ${className}`}>
+    <div className="absolute w-36 h-0.5 border-b border-dashed border-[#e5c07b]/40 top-1/2 -translate-y-1/2 z-0" />
     <MiniRwsCard
       src="/cards/major-09.jpg"
-      className="w-14 h-[95px] sm:w-15 sm:h-[102px] z-10 opacity-90"
+      className="w-11 h-[75px] sm:w-12 sm:h-[82px] z-10 opacity-90"
     />
     <MiniRwsCard
       src="/cards/major-17.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.65)"
-      className="w-17 h-[115px] sm:w-18 sm:h-[122px] z-10"
+      glowColor="rgba(255,215,0,0.6)"
+      className="w-13 h-[88px] sm:w-14 sm:h-[95px] z-10"
       highlight
     />
     <MiniRwsCard
       src="/cards/major-21.jpg"
-      className="w-14 h-[95px] sm:w-15 sm:h-[102px] z-10 opacity-90"
+      className="w-11 h-[75px] sm:w-12 sm:h-[82px] z-10 opacity-90"
     />
   </div>
 );
 
-// 5. ดวงความรักสองหัวใจ (5 ใบ) — Pure Relationship Formation
-export const LoveSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+// 5. ดวงความรักสองหัวใจ (5 ใบ) — Perfectly Proportionate
+export const LoveSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-06.jpg"
       borderColor="#ec4899"
-      glowColor="rgba(236,72,153,0.55)"
-      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
+      glowColor="rgba(236,72,153,0.5)"
+      className="w-10 h-[68px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2">
-      <MiniRwsCard src="/cards/cups-02.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/swords-04.jpg" borderColor="#f43f5e" className="w-10 h-[68px] sm:w-11 sm:h-[75px] opacity-85" />
-      <MiniRwsCard src="/cards/cups-03.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/cups-10.jpg" borderColor="#38bdf8" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <div className="flex items-center justify-center gap-1.5">
+      <MiniRwsCard src="/cards/cups-02.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/swords-04.jpg" borderColor="#f43f5e" className="w-8.5 h-[58px] opacity-85" />
+      <MiniRwsCard src="/cards/cups-03.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/cups-10.jpg" borderColor="#38bdf8" className="w-8.5 h-[58px]" />
     </div>
   </div>
 );
 
 // 6. เส้นทางการงาน (5 ใบ) — Career Pyramid
-export const CareerSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+export const CareerSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-04.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.55)"
-      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
+      glowColor="rgba(255,215,0,0.5)"
+      className="w-10 h-[68px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2">
-      <MiniRwsCard src="/cards/wands-03.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px] opacity-85" />
-      <MiniRwsCard src="/cards/pentacles-08.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/wands-06.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/pentacles-01.jpg" borderColor="#10b981" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <div className="flex items-center justify-center gap-1.5">
+      <MiniRwsCard src="/cards/wands-03.jpg" className="w-8.5 h-[58px] opacity-85" />
+      <MiniRwsCard src="/cards/pentacles-08.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/wands-06.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/pentacles-01.jpg" borderColor="#10b981" className="w-8.5 h-[58px]" />
     </div>
   </div>
 );
 
 // 7. การเงินและความมั่นคง (4 ใบ)
-export const MoneySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+export const MoneySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/pentacles-10.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.55)"
-      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
+      glowColor="rgba(255,215,0,0.5)"
+      className="w-10 h-[68px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2.5">
-      <MiniRwsCard src="/cards/pentacles-04.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/pentacles-05.jpg" borderColor="#f43f5e" className="w-10 h-[68px] sm:w-11 sm:h-[75px] opacity-85" />
-      <MiniRwsCard src="/cards/pentacles-09.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/pentacles-04.jpg" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/pentacles-05.jpg" borderColor="#f43f5e" className="w-9 h-[62px] opacity-85" />
+      <MiniRwsCard src="/cards/pentacles-09.jpg" className="w-9 h-[62px]" />
     </div>
   </div>
 );
 
 // 8. ทางแยกสองทาง (5 ใบ)
-export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-07.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.55)"
-      className="w-10 h-[68px] sm:w-11 sm:h-[75px]"
+      glowColor="rgba(255,215,0,0.5)"
+      className="w-9.5 h-[65px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2.5">
-      <div className="flex gap-1.5 p-1 rounded-xl border border-[#38bdf8]/30 bg-[#38bdf8]/5">
-        <MiniRwsCard src="/cards/swords-02.jpg" className="w-9 h-[62px] sm:w-10 sm:h-[68px]" />
-        <MiniRwsCard src="/cards/wands-07.jpg" className="w-9 h-[62px] sm:w-10 sm:h-[68px]" />
+    <div className="flex items-center justify-center gap-2">
+      <div className="flex gap-1 p-0.5 rounded-lg border border-[#38bdf8]/30 bg-[#38bdf8]/5">
+        <MiniRwsCard src="/cards/swords-02.jpg" className="w-8 h-[54px]" />
+        <MiniRwsCard src="/cards/wands-07.jpg" className="w-8 h-[54px]" />
       </div>
-      <div className="flex gap-1.5 p-1 rounded-xl border border-[#a855f7]/30 bg-[#a855f7]/5">
-        <MiniRwsCard src="/cards/pentacles-02.jpg" className="w-9 h-[62px] sm:w-10 sm:h-[68px]" />
-        <MiniRwsCard src="/cards/cups-09.jpg" className="w-9 h-[62px] sm:w-10 sm:h-[68px]" />
+      <div className="flex gap-1 p-0.5 rounded-lg border border-[#a855f7]/30 bg-[#a855f7]/5">
+        <MiniRwsCard src="/cards/pentacles-02.jpg" className="w-8 h-[54px]" />
+        <MiniRwsCard src="/cards/cups-09.jpg" className="w-8 h-[54px]" />
       </div>
     </div>
   </div>
 );
 
-// 9. Celtic Cross (10 ใบ) — Pure Authentic 10-Card Formation
-export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex items-center justify-center gap-4 relative ${className}`}>
+// 9. Celtic Cross (10 ใบ) — Perfect Geometry Fit
+export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-3 relative ${className}`}>
     {/* Left: Cross Formation */}
-    <div className="relative w-28 h-28 flex items-center justify-center">
-      <div className="absolute top-0 w-7 h-[48px] rounded-lg border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
+    <div className="relative w-24 h-24 flex items-center justify-center">
+      <div className="absolute top-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
         <img src="/cards/major-04.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute bottom-0 w-7 h-[48px] rounded-lg border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
+      <div className="absolute bottom-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
         <img src="/cards/major-18.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute left-0 w-7 h-[48px] rounded-lg border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
+      <div className="absolute left-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
         <img src="/cards/major-19.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute right-0 w-7 h-[48px] rounded-lg border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
+      <div className="absolute right-0 w-6 h-[40px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-80 shadow">
         <img src="/cards/major-17.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="relative z-10 w-9 h-[62px] rounded-xl border-2 border-[#ffd700] overflow-hidden shadow-2xl">
+      <div className="relative z-10 w-7.5 h-[52px] rounded-lg border-2 border-[#ffd700] overflow-hidden shadow-xl">
         <img src="/cards/major-00.jpg" alt="Center" className="w-full h-full object-cover" />
       </div>
-      <div className="absolute z-20 w-9 h-[62px] rounded-xl border border-[#e5c07b] overflow-hidden rotate-90 shadow-xl opacity-90">
+      <div className="absolute z-20 w-7.5 h-[52px] rounded-lg border border-[#e5c07b] overflow-hidden rotate-90 shadow-lg opacity-90">
         <img src="/cards/major-10.jpg" alt="Cross" className="w-full h-full object-cover" />
       </div>
     </div>
 
     {/* Right: Vertical Staff of 4 Cards */}
-    <div className="flex flex-col gap-1">
-      <div className="w-7 h-[46px] rounded-lg border border-[#ffd700]/70 overflow-hidden shadow">
+    <div className="flex flex-col gap-0.5">
+      <div className="w-6 h-[38px] rounded border border-[#ffd700]/70 overflow-hidden shadow">
         <img src="/cards/major-21.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="w-7 h-[46px] rounded-lg border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
+      <div className="w-6 h-[38px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
         <img src="/cards/major-14.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="w-7 h-[46px] rounded-lg border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
+      <div className="w-6 h-[38px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
         <img src="/cards/major-11.jpg" alt="" className="w-full h-full object-cover" />
       </div>
-      <div className="w-7 h-[46px] rounded-lg border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
+      <div className="w-6 h-[38px] rounded border border-[#e5c07b]/40 overflow-hidden opacity-85 shadow">
         <img src="/cards/major-09.jpg" alt="" className="w-full h-full object-cover" />
       </div>
     </div>
   </div>
 );
 
-// 10. ผัง 12 เดือน / วงล้อจักรราศี (12 ใบ) — Zodiac Wheel
-export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`relative w-34 h-34 mx-auto flex items-center justify-center ${className}`}>
-    <div className="w-7 h-7 rounded-full border-2 border-[#ffd700] bg-black/90 flex items-center justify-center text-[10px] text-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.7)] z-10 font-bold">
+// 10. ผัง 12 เดือน / วงล้อจักรราศี (12 ใบ)
+export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`relative w-28 h-28 mx-auto flex items-center justify-center ${className}`}>
+    <div className="w-6 h-6 rounded-full border-1.5 border-[#ffd700] bg-black/90 flex items-center justify-center text-[8.5px] text-[#ffd700] shadow-[0_0_12px_rgba(255,215,0,0.6)] z-10 font-bold">
       ✦
     </div>
     {Array.from({ length: 12 }).map((_, i) => {
       const angle = (i * 360) / 12 - 90;
       const rad = (angle * Math.PI) / 180;
-      const radius = 50;
+      const radius = 42;
       const x = Math.cos(rad) * radius;
       const y = Math.sin(rad) * radius;
       const cardNum = String(i + 1).padStart(2, "0");
@@ -345,7 +343,7 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
       return (
         <div
           key={i}
-          className="absolute w-6 h-[40px] rounded-md border border-[#e5c07b]/70 overflow-hidden shadow hover:scale-125 transition-transform"
+          className="absolute w-5 h-[34px] rounded border border-[#e5c07b]/70 overflow-hidden shadow"
           style={{
             transform: `translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
           }}
@@ -363,162 +361,172 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
 );
 
 // 11. สถานการณ์ อุปสรรค ทางออก (3 ใบ)
-export const SituationSolutionSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex items-center justify-center gap-3 relative ${className}`}>
-    <MiniRwsCard src="/cards/swords-08.jpg" className="w-14 h-[95px] opacity-90" />
-    <MiniRwsCard src="/cards/swords-10.jpg" borderColor="#f43f5e" glowColor="rgba(244,63,94,0.4)" className="w-15 h-[102px]" highlight />
-    <MiniRwsCard src="/cards/major-01.jpg" borderColor="#10b981" glowColor="rgba(16,185,129,0.55)" className="w-17 h-[115px] sm:w-18 sm:h-[122px]" highlight />
+export const SituationSolutionSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-2.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/swords-08.jpg" className="w-11 h-[75px] opacity-90" />
+    <MiniRwsCard src="/cards/swords-10.jpg" borderColor="#f43f5e" glowColor="rgba(244,63,94,0.4)" className="w-12 h-[82px]" highlight />
+    <MiniRwsCard src="/cards/major-01.jpg" borderColor="#10b981" glowColor="rgba(16,185,129,0.5)" className="w-13 h-[88px] sm:w-14 sm:h-[95px]" highlight />
   </div>
 );
 
 // 12. กาย จิต วิญญาณ (3 ใบ)
-export const MindBodySpiritSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex items-center justify-center gap-3.5 relative ${className}`}>
-    <MiniRwsCard src="/cards/pentacles-04.jpg" borderColor="#10b981" className="w-14 h-[95px] sm:w-15 sm:h-[102px]" />
-    <MiniRwsCard src="/cards/cups-14.jpg" borderColor="#38bdf8" glowColor="rgba(56,189,248,0.55)" className="w-16 h-[108px] sm:w-17 sm:h-[115px]" highlight />
-    <MiniRwsCard src="/cards/major-17.jpg" borderColor="#a855f7" glowColor="rgba(168,85,247,0.55)" className="w-16 h-[108px] sm:w-17 sm:h-[115px]" highlight />
+export const MindBodySpiritSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-2.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/pentacles-04.jpg" borderColor="#10b981" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" />
+    <MiniRwsCard src="/cards/cups-14.jpg" borderColor="#38bdf8" glowColor="rgba(56,189,248,0.5)" className="w-13 h-[88px]" highlight />
+    <MiniRwsCard src="/cards/major-17.jpg" borderColor="#a855f7" glowColor="rgba(168,85,247,0.5)" className="w-13 h-[88px]" highlight />
   </div>
 );
 
 // 13. ความในใจของเขา (4 ใบ)
-export const HowTheyFeelSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+export const HowTheyFeelSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/swords-02.jpg"
       borderColor="#ec4899"
-      glowColor="rgba(236,72,153,0.55)"
-      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
+      glowColor="rgba(236,72,153,0.5)"
+      className="w-10 h-[68px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2.5">
-      <MiniRwsCard src="/cards/cups-02.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/cups-04.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/wands-01.jpg" borderColor="#ffd700" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/cups-02.jpg" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/cups-04.jpg" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/wands-01.jpg" borderColor="#ffd700" className="w-9 h-[62px]" />
     </div>
   </div>
 );
 
 // 14. คนรักเก่าจะกลับมาไหม (4 ใบ)
-export const ExReconciliationSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+export const ExReconciliationSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-20.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.55)"
-      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
+      glowColor="rgba(255,215,0,0.5)"
+      className="w-10 h-[68px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2.5">
-      <MiniRwsCard src="/cards/cups-05.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/swords-03.jpg" borderColor="#f43f5e" className="w-10 h-[68px] sm:w-11 sm:h-[75px] opacity-85" />
-      <MiniRwsCard src="/cards/cups-06.jpg" borderColor="#10b981" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/cups-05.jpg" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/swords-03.jpg" borderColor="#f43f5e" className="w-9 h-[62px] opacity-85" />
+      <MiniRwsCard src="/cards/cups-06.jpg" borderColor="#10b981" className="w-9 h-[62px]" />
     </div>
   </div>
 );
 
 // 15. ตามหาเนื้อคู่ & ความรักแท้ (5 ใบ)
-export const SoulmateSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+export const SoulmateSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-06.jpg"
       borderColor="#ec4899"
-      glowColor="rgba(236,72,153,0.55)"
-      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
+      glowColor="rgba(236,72,153,0.5)"
+      className="w-10 h-[68px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2">
-      <MiniRwsCard src="/cards/cups-02.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/wands-04.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/major-17.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/major-21.jpg" borderColor="#ffd700" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <div className="flex items-center justify-center gap-1.5">
+      <MiniRwsCard src="/cards/cups-02.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/wands-04.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/major-17.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/major-21.jpg" borderColor="#ffd700" className="w-8.5 h-[58px]" />
     </div>
   </div>
 );
 
 // 16. ย้ายงานหรืออยู่ที่เดิม (5 ใบ)
-export const CareerSwitchSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+export const CareerSwitchSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-07.jpg"
       borderColor="#10b981"
-      glowColor="rgba(16,185,129,0.55)"
-      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
+      glowColor="rgba(16,185,129,0.5)"
+      className="w-10 h-[68px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2">
-      <MiniRwsCard src="/cards/wands-02.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/pentacles-03.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/wands-08.jpg" borderColor="#ffd700" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/major-00.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <div className="flex items-center justify-center gap-1.5">
+      <MiniRwsCard src="/cards/wands-02.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/pentacles-03.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/wands-08.jpg" borderColor="#ffd700" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/major-00.jpg" className="w-8.5 h-[58px]" />
     </div>
   </div>
 );
 
 // 17. ปลดล็อกศักยภาพในตัวคุณ (4 ใบ)
-export const InnerPotentialSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex flex-col items-center justify-center gap-2 relative ${className}`}>
+export const InnerPotentialSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-08.jpg"
       borderColor="#ffd700"
-      glowColor="rgba(255,215,0,0.55)"
-      className="w-11 h-[75px] sm:w-12 sm:h-[82px]"
+      glowColor="rgba(255,215,0,0.5)"
+      className="w-10 h-[68px]"
       highlight
     />
-    <div className="flex items-center justify-center gap-2.5">
-      <MiniRwsCard src="/cards/major-01.jpg" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
-      <MiniRwsCard src="/cards/swords-09.jpg" borderColor="#f43f5e" className="w-10 h-[68px] sm:w-11 sm:h-[75px] opacity-80" />
-      <MiniRwsCard src="/cards/major-19.jpg" borderColor="#10b981" className="w-10 h-[68px] sm:w-11 sm:h-[75px]" />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/major-01.jpg" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/swords-09.jpg" borderColor="#f43f5e" className="w-9 h-[62px] opacity-80" />
+      <MiniRwsCard src="/cards/major-19.jpg" borderColor="#10b981" className="w-9 h-[62px]" />
     </div>
   </div>
 );
 
-// 18. ดวงประจำสัปดาห์ 7 วัน (7 ใบ) — Pure 7-Day Ribbon
-export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex items-center justify-center gap-1 sm:gap-1.5 relative ${className}`}>
-    {[
-      { card: "01" },
-      { card: "04" },
-      { card: "07" },
-      { card: "10" },
-      { card: "14", highlight: true },
-      { card: "17" },
-      { card: "19" },
-    ].map((item, idx) => (
-      <div
-        key={idx}
-        className={`relative rounded-lg overflow-hidden border transition-all duration-200 flex-shrink-0 ${
-          item.highlight
-            ? "w-10 h-[68px] sm:w-11 sm:h-[75px] z-20 scale-110 -translate-y-1.5 border-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.6)]"
-            : "w-9 h-[62px] sm:w-10 sm:h-[68px] border-[#e5c07b]/40 opacity-90 hover:opacity-100"
-        }`}
-      >
-        <img
-          src={`/cards/major-${item.card}.jpg`}
-          alt=""
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      </div>
-    ))}
+// 18. ดวงประจำสัปดาห์ 7 วัน (7 ใบ) — 2-Tier Balanced Formation (No Horizontal Overflow!)
+export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+    {/* Tier 1: 4 Cards (Mon - Thu) */}
+    <div className="flex items-center justify-center gap-1.5">
+      {[
+        { card: "01" },
+        { card: "04" },
+        { card: "07" },
+        { card: "10" },
+      ].map((item, idx) => (
+        <div
+          key={idx}
+          className="w-8.5 h-[58px] rounded-lg border border-[#e5c07b]/40 overflow-hidden shadow opacity-90 hover:opacity-100 flex-shrink-0"
+        >
+          <img src={`/cards/major-${item.card}.jpg`} alt="" className="w-full h-full object-cover" loading="lazy" />
+        </div>
+      ))}
+    </div>
+    {/* Tier 2: 3 Cards (Fri - Sun, Highlight Friday) */}
+    <div className="flex items-center justify-center gap-1.5">
+      {[
+        { card: "14", highlight: true },
+        { card: "17" },
+        { card: "19" },
+      ].map((item, idx) => (
+        <div
+          key={idx}
+          className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 transition-all ${
+            item.highlight
+              ? "border-2 border-[#ffd700] shadow-[0_0_12px_rgba(255,215,0,0.5)] scale-105 z-10"
+              : "border border-[#e5c07b]/40 shadow opacity-90"
+          }`}
+        >
+          <img src={`/cards/major-${item.card}.jpg`} alt="" className="w-full h-full object-cover" loading="lazy" />
+        </div>
+      ))}
+    </div>
   </div>
 );
 
 // 19. ดวงประจำเดือน 4 สัปดาห์ (4 ใบ)
-export const MonthlySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => (
-  <div className={`flex items-center justify-center gap-2.5 sm:gap-3.5 relative ${className}`}>
+export const MonthlySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex items-center justify-center gap-1.5 sm:gap-2 relative ${className}`}>
     {Array.from({ length: 4 }).map((_, idx) => (
       <MiniRwsCard
         key={idx}
         src={`/cards/major-${String((idx * 5 + 3) % 22).padStart(2, "0")}.jpg`}
-        className="w-13 h-[88px] sm:w-14 sm:h-[95px]"
+        className="w-9.5 h-[65px] sm:w-10 sm:h-[68px]"
         highlight={idx === 2}
       />
     ))}
   </div>
 );
 
-// 20. ผังจักระทั้ง 7 (7 ใบ) — Luminous 7-Chakra Rainbow Arc
-export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-40" }) => {
+// 20. ผังจักระทั้ง 7 (7 ใบ) — 2-Tier Balanced Rainbow Arc (Zero Overflow!)
+export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => {
   const chakras = [
     { num: 1, card: "00", color: "#ef4444" },
     { num: 2, card: "03", color: "#f97316" },
@@ -530,28 +538,33 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
   ];
 
   return (
-    <div className={`flex items-center justify-center gap-1 sm:gap-1.5 relative ${className}`}>
-      {chakras.map((chk) => (
-        <div
-          key={chk.num}
-          className={`relative rounded-lg overflow-hidden border transition-all duration-200 flex-shrink-0 ${
-            chk.highlight
-              ? "w-10 h-[68px] sm:w-11 sm:h-[75px] z-20 scale-110 -translate-y-1.5 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
-              : "w-9 h-[62px] sm:w-10 sm:h-[68px] opacity-90 hover:opacity-100"
-          }`}
-          style={{
-            borderColor: chk.color,
-            boxShadow: `0 0 12px ${chk.color}45`,
-          }}
-        >
-          <img
-            src={`/cards/major-${chk.card}.jpg`}
-            alt=""
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
-      ))}
+    <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+      {/* Tier 1: 4 Chakras */}
+      <div className="flex items-center justify-center gap-1.5">
+        {chakras.slice(0, 4).map((chk) => (
+          <div
+            key={chk.num}
+            className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 border transition-all ${
+              chk.highlight ? "border-2 border-[#10b981] shadow-[0_0_12px_rgba(16,185,129,0.5)] scale-105 z-10" : ""
+            }`}
+            style={{ borderColor: chk.highlight ? "#10b981" : chk.color, boxShadow: `0 0 8px ${chk.color}35` }}
+          >
+            <img src={`/cards/major-${chk.card}.jpg`} alt="" className="w-full h-full object-cover" loading="lazy" />
+          </div>
+        ))}
+      </div>
+      {/* Tier 2: 3 Chakras */}
+      <div className="flex items-center justify-center gap-1.5">
+        {chakras.slice(4).map((chk) => (
+          <div
+            key={chk.num}
+            className="w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 border shadow"
+            style={{ borderColor: chk.color, boxShadow: `0 0 8px ${chk.color}35` }}
+          >
+            <img src={`/cards/major-${chk.card}.jpg`} alt="" className="w-full h-full object-cover" loading="lazy" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -702,56 +715,31 @@ export const EmergencyTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" })
 );
 
 // ============================================================================
-// 5. NAVBAR SACRED TAROT ICONS (Bespoke 1909 Tarot Card Icons for Top Nav)
+// 5. NAVBAR SACRED TAROT ICONS
 // ============================================================================
 
-/** คลัง 20 ผัง — ไพ่ 3 ใบเรียงผังพยากรณ์ศักดิ์สิทธิ์ */
 export const TarotSpreadNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-    {/* Left Card */}
     <rect x="3" y="6" width="6" height="13" rx="1.2" transform="rotate(-10 6 12.5)" />
-    {/* Right Card */}
     <rect x="15" y="6" width="6" height="13" rx="1.2" transform="rotate(10 18 12.5)" />
-    {/* Center Elevated Master Card */}
     <rect x="8.5" y="3.5" width="7" height="15" rx="1.4" className="fill-[#e5c07b]/15 stroke-[#ffd700]" />
     <circle cx="12" cy="9.5" r="1.5" className="fill-[#ffd700]" />
     <path d="M12 13v2.5" className="stroke-[#ffd700]" />
   </svg>
 );
 
-/** คัมภีร์ 78 ใบ — ไพ่ทาโรต์เดี่ยวทรงสูงพร้อมลายเรขาคณิตศักดิ์สิทธิ์และดวงดาว */
 export const TarotDeckNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
     <rect x="5.5" y="2.5" width="13" height="19" rx="2" className="fill-[#e5c07b]/10 stroke-[#ffd700]" />
     <rect x="7.5" y="4.5" width="9" height="15" rx="1.2" strokeWidth={1} strokeDasharray="1.5 1.5" className="stroke-[#e5c07b]/60" />
-    {/* Sacred 4-Point Star in Center */}
     <path d="M12 7.5L13 11L16.5 12L13 13L12 16.5L11 13L7.5 12L11 11Z" className="fill-[#ffd700] stroke-none" />
   </svg>
 );
 
-/** ประวัติดวง / สมุดบันทึกคำทำนาย — คัมภีร์ศักดิ์สิทธิ์พร้อมตราประทับ */
 export const JournalScrollNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
     <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" className="fill-[#e5c07b]/10 stroke-[#ffd700]" />
     <path d="M6 6h10M6 10h10M6 14h6" strokeWidth={1.3} className="stroke-[#e5c07b]/80" />
     <path d="M16 14l2 2 3-3" strokeWidth={1.5} className="stroke-[#10b981]" />
-  </svg>
-);
-
-/** สวิตช์เสียงศักดิ์สิทธิ์ — กระดิ่ง / คลื่นพลังงานเสียง */
-export const SacredSoundNavIcon: React.FC<{ isActive: boolean; className?: string }> = ({ isActive, className = "w-3.5 h-3.5" }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" className={isActive ? "fill-[#ffd700]/20 stroke-[#ffd700]" : "stroke-gray-400"} />
-    {isActive ? (
-      <>
-        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" className="stroke-[#ffd700]" />
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" className="stroke-[#e5c07b]" />
-      </>
-    ) : (
-      <>
-        <line x1="23" y1="9" x2="17" y2="15" className="stroke-gray-400" />
-        <line x1="17" y1="9" x2="23" y2="15" className="stroke-gray-400" />
-      </>
-    )}
   </svg>
 );
