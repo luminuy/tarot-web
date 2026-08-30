@@ -144,7 +144,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         แต่ตัวเลือกแรก (ยอดนิยมแนะนำ) ถูกเบียดพ้นขอบซ้ายไปแล้วและสกรอลไปดูไม่ได้อีกเลย
         (ปุ่มแรกหายไปถาวรบนมือถือ) justify-start กันปัญหานี้ทั้งชุดโดยไม่ต้องพึ่ง breakpoint
       */}
-      <div className="flex items-center justify-start gap-1.5 sm:gap-2 overflow-x-auto pb-2 px-1 no-scrollbar">
+      <div className="flex items-center justify-start gap-2 overflow-x-auto pb-2 px-1 no-scrollbar select-none">
         {categories.map((cat) => {
           const isActive = activeCategory === cat.id;
           return (
@@ -152,19 +152,19 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               key={cat.id}
               type="button"
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-serif-th font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none ${
+              className={`px-4 py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 whitespace-nowrap relative ${
                 isActive
-                  ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_20px_rgba(229,192,123,0.45)] scale-105"
-                  : "bg-[#100b20]/90 text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20 hover:border-[#e5c07b]/40 hover:bg-[#16102c]"
+                  ? "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] border border-[#fff6d6]/60 shadow-[0_0_22px_rgba(229,192,123,0.45),0_2px_8px_rgba(0,0,0,0.6)] scale-[1.03]"
+                  : "bg-[#0e091e]/85 text-[#a99fc2] hover:text-[#ffd700] border border-[#e5c07b]/20 hover:border-[#ffd700]/50 hover:bg-[#181033] hover:shadow-[0_0_15px_rgba(229,192,123,0.18)]"
               }`}
             >
-              <cat.Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <cat.Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#0a0715]" : "text-[#e5c07b]"}`} />
               <span>{cat.label}</span>
               <span
                 className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
                   isActive
-                    ? "bg-[#05040a]/20 text-[#05040a]"
-                    : "bg-white/5 text-[#9c93b8]"
+                    ? "bg-black/15 text-[#0a0715] border border-black/10"
+                    : "bg-white/5 text-[#8f85aa]"
                 }`}
               >
                 {cat.count}
