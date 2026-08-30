@@ -101,7 +101,13 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   return (
     <div className="space-y-6 w-full">
       {/* Category Filter Tabs (Linear / Apple Tier Navigation) */}
-      <div className="flex items-center justify-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 px-1 no-scrollbar">
+      {/*
+        justify-start เจตนา ไม่ใช่ justify-center: แถวนี้ overflow-x-auto และเนื้อหากว้างกว่ากรอบ
+        เสมอบนจอมือถือ — justify-center บนคอนเทนเนอร์ที่ scroll ได้ทำให้ scrollLeft เริ่มที่ 0
+        แต่ตัวเลือกแรก (ยอดนิยมแนะนำ) ถูกเบียดพ้นขอบซ้ายไปแล้วและสกรอลไปดูไม่ได้อีกเลย
+        (ปุ่มแรกหายไปถาวรบนมือถือ) justify-start กันปัญหานี้ทั้งชุดโดยไม่ต้องพึ่ง breakpoint
+      */}
+      <div className="flex items-center justify-start gap-1.5 sm:gap-2 overflow-x-auto pb-2 px-1 no-scrollbar">
         {categories.map((cat) => {
           const isActive = activeCategory === cat.id;
           return (

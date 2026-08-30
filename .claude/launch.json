@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tarot-dev",
+      "runtimeExecutable": "node_modules/.bin/next",
+      "runtimeArgs": ["dev", "--webpack"],
+      "port": 3000
+    }
+  ]
+}

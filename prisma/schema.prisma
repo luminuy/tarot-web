@@ -2,6 +2,12 @@
 // หมายเหตุเรื่อง PDPA: ตาราง Reading เก็บคำถามที่ผู้ใช้พิมพ์ ซึ่งเป็นข้อมูลอ่อนไหวมาก
 // (ความรัก การเงิน ความสัมพันธ์) จึงต้องมีเส้นทางลบข้อมูลของผู้ใช้จริง ๆ ไม่ใช่แค่ซ่อน
 // onDelete: Cascade ทุกความสัมพันธ์ที่ผูกกับ User คือส่วนหนึ่งของเรื่องนี้
+//
+// ยังไม่ได้เชื่อมต่อใช้งานจริง — แอปตอนนี้ใช้ src/server/store.ts (in-memory) แทน
+// ก่อนจะต่อ Prisma จริง ต้องแก้ให้เข้ากับ Prisma 7:
+// `datasource.url` ถูกถอดออกจาก schema แล้ว ต้องย้ายไปตั้งใน prisma.config.ts
+// พร้อมเลือก adapter (เช่น @prisma/adapter-pg สำหรับ Postgres) —ดู https://pris.ly/d/config-datasource
+// จนกว่าจะถึงตอนนั้น `pnpm build` จะไม่รัน `prisma generate` ให้ (ใช้ `pnpm db:generate` เองตอนพร้อมต่อจริง)
 
 generator client {
   provider = "prisma-client-js"
