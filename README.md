@@ -35,6 +35,7 @@
 | ผู้พัฒนา / AI Contributor | บทบาทและความรับผิดชอบ | องค์กร / โมเดล |
 | :--- | :--- | :--- |
 | 👑 **Luminut ([@luminuy](https://github.com/luminuy))** | Lead Architect, Creator & Project Owner | Project Maintainer |
+| 🏛️ **Anthropic Claude (3.5 / 3.7 Sonnet)** | Foundational Architecture, Core System Design & 1909 Tarot Engine Foundation | Anthropic |
 | 🔮 **Google DeepMind Antigravity AI** | Autonomous Multi-Agent Engineering, Collision Guard & Full-Stack Development | Google DeepMind |
 | ✨ **Google Gemini AI (2.5 Flash / Pro)** | Mystic Tarot Interpretation Engine & Real-Time SSE Streamer | Google AI |
 
