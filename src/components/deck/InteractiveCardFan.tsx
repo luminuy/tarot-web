@@ -97,8 +97,15 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
           <div className="absolute w-full h-full bg-radial from-[#e5c07b]/15 via-transparent to-transparent blur-3xl" />
         </div>
 
-        {/* 3 Organic Overlapping Spread Tiers Covering Full Screen */}
-        <div className="w-full flex flex-col items-center justify-center gap-2 sm:gap-3 py-6 relative z-10 overflow-x-auto no-scrollbar">
+        {/*
+          3 Organic Overlapping Spread Tiers Covering Full Screen
+          items-start เจตนา ไม่ใช่ items-center: แต่ละแถวกว้างกว่ากรอบเสมอ (26 ใบ
+          เกยกัน) และคอนเทนเนอร์นี้ overflow-x-auto — items-center บนแกนขวางของ
+          flex-col ที่ลูกกว้างเกินกรอบทำให้ครึ่งที่ล้นไปเบียดออกทั้งสองข้างเท่า ๆ กัน
+          แต่ scrollLeft เริ่มที่ 0 สกรอลไปทางซ้ายเพิ่มไม่ได้อีก การ์ดขวาสุดของแถว
+          จึงถูกเบียดจนขาดครึ่งถาวร (บั๊กแบบเดียวกับแถบ filter ที่เคยเจอและแก้ไปแล้ว)
+        */}
+        <div className="w-full flex flex-col items-start justify-center gap-2 sm:gap-3 py-6 relative z-10 overflow-x-auto no-scrollbar">
           {rows.map((rowCards, rowIdx) => {
             const rowOffset = rowIdx === 1 ? "sm:pl-6" : rowIdx === 2 ? "sm:pl-12" : "";
 

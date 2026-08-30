@@ -20,6 +20,7 @@ import { ReadingHistoryModal } from "@/components/history/ReadingHistoryModal";
 import { TarotEncyclopediaModal } from "@/components/encyclopedia/TarotEncyclopediaModal";
 import { CardZoomModal } from "@/components/card/CardZoomModal";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
+import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/components/ui/TarotArtIcons";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 
@@ -694,8 +695,8 @@ export default function TarotPage() {
 
           {/* Row 1: AI Disclosure Card */}
           <div className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-[#0f0a1e]/80 to-[#080510]/80 border border-[#e5c07b]/15 backdrop-blur-sm">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a1230] to-[#0d081a] border border-[#e5c07b]/25 flex items-center justify-center flex-shrink-0 shadow-lg">
-              <span className="text-base">🤖</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a1230] to-[#0d081a] border border-[#e5c07b]/25 flex items-center justify-center flex-shrink-0 shadow-lg text-[#e5c07b]">
+              <OracleEyeIcon className="w-4.5 h-4.5" />
             </div>
             <div className="space-y-1.5 min-w-0">
               <h4 className="text-[11px] font-bold text-[#e5c07b] uppercase tracking-wider font-mono">
@@ -715,8 +716,8 @@ export default function TarotPage() {
               href="/privacy"
               className="group flex items-center gap-3 p-4 rounded-xl bg-[#0a0714]/60 border border-[#e5c07b]/10 hover:border-[#e5c07b]/40 transition-all duration-300 hover:bg-[#110a22]/60"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#e5c07b]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#e5c07b]/20 transition-colors">
-                <span className="text-sm">🔒</span>
+              <div className="w-8 h-8 rounded-lg bg-[#e5c07b]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#e5c07b]/20 transition-colors text-[#e5c07b]">
+                <LockTabIcon className="w-4 h-4" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-[#e5c07b] uppercase tracking-wider font-mono block">
@@ -730,8 +731,8 @@ export default function TarotPage() {
 
             {/* Mental Health Hotline */}
             <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0a0714]/60 border border-[#e5c07b]/10">
-              <div className="w-8 h-8 rounded-lg bg-emerald-950/40 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm">💚</span>
+              <div className="w-8 h-8 rounded-lg bg-emerald-950/40 flex items-center justify-center flex-shrink-0 text-emerald-400">
+                <CareLineIcon className="w-4 h-4" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono block">
@@ -744,8 +745,8 @@ export default function TarotPage() {
 
             {/* Emergency */}
             <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0a0714]/60 border border-[#e5c07b]/10">
-              <div className="w-8 h-8 rounded-lg bg-rose-950/40 flex items-center justify-center flex-shrink-0">
-                <span className="text-sm">🚑</span>
+              <div className="w-8 h-8 rounded-lg bg-rose-950/40 flex items-center justify-center flex-shrink-0 text-rose-400">
+                <EmergencyTabIcon className="w-4 h-4" />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider font-mono block">

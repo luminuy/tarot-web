@@ -276,13 +276,29 @@ export const CareerSpreadArt: React.FC<{ className?: string }> = ({ className = 
   </div>
 );
 
-// 7. การเงินและความมั่นคง (4 ใบ) — 2x2 Wealth Grid
+// 7. การเงินและความมั่นคง (4 ใบ) — Apex + Base Row
+// เดิมใช้ grid 2x2 กับ max-w-[150px] ทำให้ขนาดโดยรวมเล็ก/แคบกว่าการ์ดข้างเคียง
+// (CareerSpreadArt, DecisionSpreadArt) อย่างเห็นได้ชัดเมื่อวางเรียงกันในกริดเดียวกัน
+// เปลี่ยนมาใช้โครง "การ์ดเด่นด้านบน + แถวฐาน" แบบเดียวกับสองผังนั้นเพื่อให้ขนาด
+// และสัดส่วนโดยรวมสม่ำเสมอกันทั้งแถว — การ์ดเด่นคือ "ความมั่งคั่ง" (เป้าหมายปลายทาง)
+// เหมือนกับที่ Career ใช้ "ศักยภาพหลัก" เป็นการ์ดยอด
 export const MoneySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-34" }) => (
-  <div className={`grid grid-cols-2 gap-2 sm:gap-2.5 items-center justify-center max-w-[150px] mx-auto relative ${className}`}>
-    <MiniRwsCard src="/cards/pentacles-04.jpg" label="1. สภาพคล่อง" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" />
-    <MiniRwsCard src="/cards/pentacles-05.jpg" label="2. จุดรั่วไหล" borderColor="#f43f5e" className="w-11 h-[75px] sm:w-12 sm:h-[82px] opacity-85" />
-    <MiniRwsCard src="/cards/pentacles-09.jpg" label="3. แหล่งเงิน" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" />
-    <MiniRwsCard src="/cards/pentacles-10.jpg" label="4. ความมั่งคั่ง" borderColor="#ffd700" glowColor="rgba(255,215,0,0.5)" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" highlight />
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+    {/* Apex — เป้าหมายปลายทาง */}
+    <MiniRwsCard
+      src="/cards/pentacles-10.jpg"
+      label="4. ความมั่งคั่ง"
+      borderColor="#ffd700"
+      glowColor="rgba(255,215,0,0.5)"
+      className="w-12 h-[82px] sm:w-13 sm:h-[88px]"
+      highlight
+    />
+    {/* Base Row */}
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/pentacles-04.jpg" label="1. สภาพคล่อง" className="w-10 h-[68px]" />
+      <MiniRwsCard src="/cards/pentacles-05.jpg" label="2. จุดรั่วไหล" borderColor="#f43f5e" className="w-10 h-[68px] opacity-85" />
+      <MiniRwsCard src="/cards/pentacles-09.jpg" label="3. แหล่งเงิน" className="w-10 h-[68px]" />
+    </div>
   </div>
 );
 
@@ -472,5 +488,83 @@ export const AllSpreadsTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }
     <rect x="4" y="6" width="7.5" height="11.5" rx="1.4" transform="rotate(-13 7.75 11.75)" />
     <rect x="8.3" y="4.5" width="7.5" height="11.5" rx="1.4" />
     <rect x="12.5" y="6" width="7.5" height="11.5" rx="1.4" transform="rotate(13 16.25 11.75)" />
+  </svg>
+);
+
+// ============================================================================
+// 12. FOOTER / SAFETY DISCLOSURE ICONS (Minimal Line-Art, สานต่อจากชุดแท็บ)
+// ============================================================================
+// หลักการเดียวกับชุด CATEGORY TAB ICONS ด้านบน — เส้นบาง currentColor สม่ำเสมอ
+// ต่างจากไอคอนแท็บตรงที่บางตัว (สายด่วน/ฉุกเฉิน) ยังต้องคงสี emerald/rose ไว้
+// เพราะเป็นตัวช่วยแยกระดับความเร่งด่วนที่มีความหมายจริงในหน้าความปลอดภัย
+// ไม่ใช่แค่ความสวยงาม — ปรับเฉพาะให้เป็นเส้นแทน emoji เท่านั้น สีเดิมคงไว้
+
+/** AI-Generated Reading — ดวงตาแห่งการหยั่งรู้ พร้อมประกายกลางตา สื่อถึง AI ที่มองเห็น/ตีความไพ่ */
+export const OracleEyeIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 9.5v-1M12 15.5v-1" strokeWidth={1.2} />
+  </svg>
+);
+
+/** Privacy & PDPA — กุญแจล็อกทรงเรียบ */
+export const LockTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <rect x="5" y="10.5" width="14" height="9.5" rx="2" />
+    <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" />
+    <path d="M12 14.3v2.4" strokeWidth={1.8} />
+  </svg>
+);
+
+/** สายด่วนสุขภาพจิต — หัวใจพร้อมเส้นชีพจร สื่อถึง "สายด่วนดูแลใจ" ชัดกว่าหัวใจเฉย ๆ */
+export const CareLineIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M12 19.5c-.2 0-.5-.1-.7-.2-3.4-2.5-6.3-5.2-6.3-8.4 0-2.2 1.7-3.9 3.9-3.9 1.2 0 2.3.6 3.1 1.6.8-1 1.9-1.6 3.1-1.6 2.2 0 3.9 1.7 3.9 3.9 0 3.2-2.9 5.9-6.3 8.4-.2.1-.5.2-.7.2Z" />
+    <path d="M7 11.3h2.1l1.1-2 1.6 3.6 1-1.6h2.2" />
+  </svg>
+);
+
+/** เหตุฉุกเฉิน — วงกลม + กากบาทการแพทย์ สัญลักษณ์สากลของบริการฉุกเฉิน */
+export const EmergencyTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.6}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="8.3" />
+    <path d="M12 8.3v7.4M8.3 12h7.4" />
   </svg>
 );
