@@ -99,36 +99,43 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
 
         {/*
           3 Organic Overlapping Spread Tiers Covering Full Screen
-          items-start เจตนา ไม่ใช่ items-center: กัน "ปุ่มแรกเข้าถึงไม่ได้เลย" แบบ
-          เดียวกับบั๊กแถบ filter ที่เคยแก้ไปแล้ว (items-center + overflow-x-auto บน
-          เนื้อหาที่กว้างกว่ากรอบ ทำให้ scrollLeft เริ่มที่ 0 ไปทางซ้ายเพิ่มไม่ได้)
 
-          แต่ items-start แก้ได้แค่ "เข้าถึงได้" ไม่ได้แก้ "หน้าตา" — แต่ละแถวมี 26 ใบ
-          เกยกัน กว้างกว่าจอแทบทุกขนาดหน้าจอแน่นอน การ์ดที่ขอบขวาของพื้นที่มองเห็น
-          (viewport ของ scroll container) จึงโดนตัดครึ่งเสมอเป็นธรรมชาติของแถวเลื่อน
-          แนวนอนที่เนื้อหายาวกว่ากรอบ — ไม่ใช่บั๊ก แต่ "หน้าตา" ดูเหมือนบั๊กเพราะมันขาด
-          หายไปแบบไม่มีสัญญาณให้รู้ว่าเลื่อนดูต่อได้ (ไม่มี fade บอกใบ้)
+          **สาเหตุของ "ไพ่แถวบนโดนตัดหัว" (วัดค่าจริงแล้ว ไม่ใช่เดา)**:
+          ไม่ได้เกิดจาก overflow แนวนอนอย่างที่เดากันตอนแรก — วัดจริงได้ว่าแถวกว้าง
+          804px อยู่ในกรอบ 1031px คือไม่ล้นด้วยซ้ำ ตัวการจริงคือกรอบ altar ชั้นนอกสุด
+          ที่มี overflow-hidden (จำเป็นสำหรับมุมโค้งและ mandala พื้นหลัง) พอ hover
+          การ์ดจะยกขึ้น -40px และขยาย 1.28 เท่า ขอบบนจึงพ้นตำแหน่งเดิมขึ้นไปราว 58px
+          ถ้าที่ว่างด้านบนไม่พอ การ์ด "แถวบนสุด" จะทะลุกรอบแล้วโดนเฉือนหัวทันที
 
-          แก้ด้วย mask-image ไล่โปร่งใสที่ขอบซ้าย-ขวา (ลวดลายมาตรฐานของแถวเลื่อน
-          แนวนอนทุกที่ เช่น carousel ของ App Store) ให้การ์ดที่โดนตัดจางหายเข้าสี
-          พื้นหลังแทนที่จะโดน "เฉือน" หยาบ ๆ ที่ขอบตรง ๆ
+          จึงแก้ด้วยการเผื่อที่ว่างด้านบนให้พอ (pt-20) แทนการลดขนาด hover ลง —
+          เพราะเอฟเฟกต์ยกไพ่ใหญ่ ๆ คือหัวใจของความรู้สึกตอนจับไพ่ ไม่ควรลดทอน
+
+          เคยลองแล้วไม่เวิร์ก อย่าวนกลับไปทำซ้ำ:
+          - mask-image ไล่จางที่ขอบ: ในเมื่อไม่มี overflow จริง มันมีแต่ทำให้การ์ด
+            ริมซ้ายจางหายโดยไม่จำเป็น
+          - ย่อ hover ลงแล้วโชว์พรีวิวใบใหญ่ตรงกลางแทน: ผู้ใช้ไม่ชอบ อยากได้
+            เอฟเฟกต์ยกไพ่ในตำแหน่งเดิมแบบเดิม
+
+          หมายเหตุ overflow-x-auto: วางไว้ที่ wrapper ของ "แต่ละแถว" แยกกัน ไม่ใช่
+          คอนเทนเนอร์รวม เพื่อให้แต่ละแถวเลื่อนอิสระเมื่อจอแคบจนไพ่ล้นจริง และห้าม
+          ใส่ overflow-x-auto กับ w-max/min-w-max ไว้ใน element เดียวกันเด็ดขาด —
+          กล่องจะขยายพอดีเนื้อหาเสมอจน scrollWidth เท่ากับ clientWidth (สกรอลไม่ได้จริง)
+          ต้องแยกสองชั้น: ชั้นนอกความกว้างจำกัด + ชั้นในกว้างได้ไม่จำกัด (w-max)
         */}
-        <div
-          className="w-full flex flex-col items-start justify-center gap-2 sm:gap-3 py-6 relative z-10 overflow-x-auto no-scrollbar"
-          style={{
-            WebkitMaskImage:
-              "linear-gradient(to right, transparent 0, black 48px, black calc(100% - 48px), transparent 100%)",
-            maskImage:
-              "linear-gradient(to right, transparent 0, black 48px, black calc(100% - 48px), transparent 100%)",
-          }}
-        >
+        {/*
+          pt เยอะกว่า pb เจตนา ไม่ใช่พลาด: การ์ดตอน hover ยกขึ้น -40px และขยาย 1.28 เท่า
+          (ขอบบนจึงพ้นตำแหน่งเดิมขึ้นไปราว 58px) ถ้าเผื่อที่ด้านบนไม่พอ การ์ดของ
+          "แถวบนสุด" จะพองทะลุ overflow-hidden ของกรอบ altar แล้วโดนเฉือนหัวทันที
+          — แถว 2-3 ไม่มีปัญหานี้เพราะมีแถวข้างบนเป็นที่ว่างรองรับอยู่แล้ว
+        */}
+        <div className="w-full flex flex-col gap-2 sm:gap-3 pt-20 pb-6 relative z-10">
           {rows.map((rowCards, rowIdx) => {
             const rowOffset = rowIdx === 1 ? "sm:pl-6" : rowIdx === 2 ? "sm:pl-12" : "";
 
             return (
+              <div key={rowIdx} className="w-full overflow-x-auto no-scrollbar">
               <div
-                key={rowIdx}
-                className={`flex items-center justify-center -space-x-4 sm:-space-x-6 md:-space-x-7 w-full min-w-max py-3 px-6 ${rowOffset}`}
+                className={`flex items-center justify-start -space-x-4 sm:-space-x-6 md:-space-x-7 w-max py-3 px-6 ${rowOffset}`}
               >
                 {rowCards.map((cardIdx) => {
                   const isPicked = pickedIndices.includes(cardIdx);
@@ -185,6 +192,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     </AnimatePresence>
                   );
                 })}
+              </div>
               </div>
             );
           })}
