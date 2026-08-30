@@ -1,0 +1,275 @@
+"use client";
+
+import React from "react";
+import { motion } from "motion/react";
+import type { Category } from "@/data/cards/types";
+import type { Persona } from "@/lib/personas";
+
+interface IntentionAltarInputProps {
+  question: string;
+  onQuestionChange: (val: string) => void;
+  nickname: string;
+  onNicknameChange: (val: string) => void;
+  situation: string;
+  onSituationChange: (val: string) => void;
+  selectedCategory: Category;
+  onCategoryChange: (val: Category) => void;
+  persona?: Persona;
+}
+
+interface MysticSeal {
+  id: string;
+  category: Category;
+  title: string;
+  subtitle: string;
+  promptSeed: string;
+  majorCard: string;
+  romanNum: string;
+  image: string;
+  accent: string;
+}
+
+const MYSTIC_SEALS: MysticSeal[] = [
+  {
+    id: "love",
+    category: "love",
+    title: "ความรัก & คนในใจ",
+    subtitle: "ความรู้สึก & ทิศทาง",
+    promptSeed: "ความสัมพันธ์กับคนที่อยู่ในใจตอนนี้มีแนวโน้มเป็นอย่างไร และควรวางตัวอย่างไร",
+    majorCard: "THE LOVERS",
+    romanNum: "VI",
+    image: "/cards/major-06.jpg",
+    accent: "#ec4899",
+  },
+  {
+    id: "career",
+    category: "work",
+    title: "การงาน & อนาคต",
+    subtitle: "โอกาส & การเติบโต",
+    promptSeed: "ทิศทางการงานและโอกาสสำคัญในช่วงนี้ ควรระวังและมุ่งเน้นสิ่งใด",
+    majorCard: "THE CHARIOT",
+    romanNum: "VII",
+    image: "/cards/major-07.jpg",
+    accent: "#f59e0b",
+  },
+  {
+    id: "finance",
+    category: "money",
+    title: "การเงิน & โชคลาภ",
+    subtitle: "ความมั่งคั่ง & จังหวะ",
+    promptSeed: "การหมุนเวียนทางการเงิน โชคลาภ และสิ่งที่จะช่วยเปิดทางความมั่งคั่ง",
+    majorCard: "WHEEL OF FORTUNE",
+    romanNum: "X",
+    image: "/cards/major-10.jpg",
+    accent: "#10b981",
+  },
+  {
+    id: "general",
+    category: "general",
+    title: "พลังงานรวม & ชีวิต",
+    subtitle: "คำแนะนำสำหรับตัวตน",
+    promptSeed: "พลังงานโดยรวมในชีวิตช่วงนี้ สิ่งที่จักรวาลกำลังเตือน และบทเรียนสำคัญ",
+    majorCard: "THE STAR",
+    romanNum: "XVII",
+    image: "/cards/major-17.jpg",
+    accent: "#a855f7",
+  },
+];
+
+export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
+  question,
+  onQuestionChange,
+  nickname,
+  onNicknameChange,
+  situation,
+  onSituationChange,
+  selectedCategory,
+  onCategoryChange,
+  persona,
+}) => {
+  const handleSelectSeal = (seal: MysticSeal) => {
+    onCategoryChange(seal.category);
+    onQuestionChange(seal.promptSeed);
+  };
+
+  const isQuestionEmpty = !question.trim();
+  const isNicknameEmpty = !nickname.trim();
+
+  return (
+    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#160e2a]/95 via-[#0b0716]/95 to-[#05040a]/95 backdrop-blur-2xl p-5 sm:p-8 shadow-[0_0_60px_rgba(0,0,0,0.9)] space-y-6 relative overflow-hidden">
+      {/* Background Sacred Geometric Aura */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-2xl" />
+
+      {/* Persona Welcoming Sanctuary Dialogue */}
+      <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-[#1c1236]/90 to-[#0e071e]/90 border border-[#e5c07b]/40 shadow-[0_0_25px_rgba(0,0,0,0.7)] relative overflow-hidden">
+        <div className="w-10 h-15 rounded-lg border-2 border-[#e5c07b] overflow-hidden flex-shrink-0 shadow-[0_0_15px_rgba(229,192,123,0.3)] bg-[#07050d]">
+          <img
+            src={`/cards/${persona?.cardImage || "major-02.jpg"}`}
+            alt={persona?.nameTh || "แม่หมอ"}
+            className="w-full h-full object-cover object-top filter contrast-[1.05]"
+          />
+        </div>
+        <div className="space-y-1 my-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm font-serif-th font-bold font-mystic-gold">
+              {persona?.nameTh || "แม่หมอประจำวิหาร"}
+            </span>
+            <span className="text-[10px] text-[#9c93b8] font-mono">
+              · ขั้นตอนซักถามบริบท (Intake)
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed font-serif-th">
+            {persona?.id === "direct"
+              ? `"สวัสดีคุณ ${nickname.trim() || "ผู้มาเยือน"} เล่าให้แม่หมอฟังตรงๆ ได้เลยว่าตอนนี้ติดขัดเรื่องไหน หรืออยากให้ชี้ทางอะไรเป็นพิเศษ จะได้เปิดไพ่ฟันธงให้ตรงจุด"`
+              : persona?.id === "mystic"
+              ? `"ขอต้อนรับสู่คลื่นพลังงานแห่งจักรวาลคุณ ${nickname.trim() || "ผู้แสวงหา"} สงบใจให้นิ่ง แล้วส่งผ่านเรื่องราวที่ต้องการคำชี้แนะมายังสำรับไพ่"`
+              : `"สวัสดีจ้าคุณ ${nickname.trim() || "คนดี"} วันนี้มีเรื่องอะไรที่ทำให้ไม่สบายใจ หรืออยากให้แม่หมอช่วยเปิดไพ่ให้กำลังใจ เล่าให้ฟังได้เลยนะ"`}
+          </p>
+        </div>
+      </div>
+
+      {/* Step 1 & 2: Name & Situation Chips */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Step 1: Nickname */}
+        <div className="space-y-1.5">
+          <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
+            <span>👤</span> 1. นามหรือชื่อเล่นของคุณ <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
+          </label>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => onNicknameChange(e.target.value)}
+            placeholder="เช่น ตะวัน, มะลิ, กานต์, ภูมิ"
+            className={`w-full bg-[#07040f] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all duration-300 ${
+              isNicknameEmpty
+                ? "border border-rose-500/50 focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
+                : "border border-[#e5c07b]/40 focus:border-[#e5c07b] focus:ring-1 focus:ring-[#e5c07b]"
+            }`}
+          />
+        </div>
+
+        {/* Step 2: Custom Situation */}
+        <div className="space-y-1.5">
+          <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
+            <span>📜</span> 2. บริบทหรือสถานการณ์เพิ่มเติม <span className="text-[10px] text-[#9c93b8] font-normal">(ช่วยให้อ่านแม่นยำขึ้น)</span>
+          </label>
+          <input
+            type="text"
+            value={situation}
+            onChange={(e) => onSituationChange(e.target.value)}
+            placeholder="เช่น กำลังคุยกับคนเก่า / กำลังจะเปลี่ยนงานใหม่"
+            className="w-full bg-[#07040f] border border-[#e5c07b]/30 focus:border-[#e5c07b] focus:ring-1 focus:ring-[#e5c07b] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Quick Situation Selector Chips */}
+      <div className="space-y-2">
+        <span className="text-[11px] text-[#9c93b8] font-serif-th">
+          ✦ หรือแตะเลือกบริบทด่วน:
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {[
+            "เพิ่งเริ่มต้น กำลังมองทิศทาง",
+            "มีปัญหา/ติดขัด อยากหาทางออก",
+            "กำลังตัดสินใจ เลือกระหว่าง 2 ทาง",
+            "อยากรู้ภาพรวม & คำเตือนสำคัญ",
+          ].map((sit) => (
+            <button
+              key={sit}
+              type="button"
+              onClick={() => onSituationChange(sit)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-serif-th transition-all cursor-pointer ${
+                situation === sit
+                  ? "bg-gradient-to-r from-[#c59b27] to-[#f5deaa] text-[#05040a] font-bold shadow-[0_0_12px_rgba(229,192,123,0.5)]"
+                  : "bg-[#07040f] text-[#cfc8e2] hover:bg-[#1b1230] border border-[#e5c07b]/30"
+              }`}
+            >
+              {sit}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Step 3: Main Mystic Question Textarea */}
+      <div className="space-y-2">
+        <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
+          <span>🕯️</span> 3. คำอธิษฐาน / สิ่งที่คุณต้องการคำตอบชัดเจนที่สุด <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
+        </label>
+        <div className="relative group">
+          <textarea
+            rows={3}
+            value={question}
+            onChange={(e) => onQuestionChange(e.target.value)}
+            placeholder="หลับตา... ตั้งสติให้นิ่ง แล้วจารึกสิ่งที่คุณปรารถนาจะล่วงรู้ (เช่น ความสัมพันธ์กับเขาจะมีทิศทางอย่างไร / งานโปรเจกต์นี้จะสำเร็จหรือไม่)..."
+            className={`w-full bg-[#07040f]/90 rounded-2xl p-4 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all duration-300 shadow-inner leading-relaxed resize-none ${
+              isQuestionEmpty
+                ? "border border-rose-500/50 focus:border-rose-400 focus:ring-2 focus:ring-rose-400/30"
+                : "border border-[#e5c07b]/35 group-hover:border-[#e5c07b]/60 focus:border-[#e5c07b] focus:ring-2 focus:ring-[#e5c07b]/30"
+            }`}
+          />
+        </div>
+      </div>
+
+      {/* 4 Authentic 1909 Rider-Waite Cards for Quick Question Selection */}
+      <div className="space-y-3 pt-2 border-t border-[#e5c07b]/15">
+        <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] uppercase tracking-wider flex items-center gap-2">
+          <span className="text-[#e5c07b]">✦</span> หรือแตะเลือกหัวข้อพร้อมคำถามแนะนำ (1909 Rider-Waite Guidance Cards)
+        </label>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
+          {MYSTIC_SEALS.map((seal) => {
+            const isActive = selectedCategory === seal.category && question.includes(seal.title);
+
+            return (
+              <motion.div
+                key={seal.id}
+                whileHover={{ y: -6, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleSelectSeal(seal)}
+                className={`rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none ${
+                  isActive
+                    ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#e5c07b] ring-2 ring-[#e5c07b]/90 shadow-[0_0_40px_rgba(229,192,123,0.5)]"
+                    : "bg-gradient-to-b from-[#130d24]/90 to-[#07040f]/90 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
+                }`}
+                style={{ minHeight: "260px" }}
+              >
+                {/* Top Card Badge: Roman Numeral & Title */}
+                <div className="flex items-center justify-between text-[10px] text-[#9c93b8] font-mono pb-1.5 border-b border-white/5">
+                  <span className="text-[#f5deaa] font-bold bg-white/5 px-1.5 py-0.5 rounded">
+                    {seal.romanNum}
+                  </span>
+                  <span className="tracking-widest uppercase text-[9px] truncate max-w-[90px]">
+                    {seal.majorCard}
+                  </span>
+                </div>
+
+                {/* Center Authentic 1909 Rider-Waite Image */}
+                <div className="my-auto py-1 flex items-center justify-center">
+                  <div className="w-18 h-28 sm:w-20 sm:h-30 rounded-lg border border-[#e5c07b]/60 overflow-hidden shadow-lg">
+                    <img
+                      src={seal.image}
+                      alt={seal.title}
+                      className="w-full h-full object-cover object-top filter contrast-[1.04]"
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom Card Title & Subtitle */}
+                <div className="text-center pt-2 border-t border-white/5">
+                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#f5deaa] group-hover:text-white transition-colors">
+                    {seal.title}
+                  </h4>
+                  <p className="text-[9.5px] text-[#9c93b8] mt-0.5">{seal.subtitle}</p>
+                </div>
+
+                {/* Holographic Sheen Layer */}
+                <div className="gold-foil-sheen absolute inset-0 opacity-20 hover:opacity-40 transition-opacity" />
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};

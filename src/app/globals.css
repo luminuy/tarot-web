@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+/*
+  ธีมวิหารพยากรณ์ลึกลับ (Mystic Sanctuary / Obsidian & Gold Leaf)
+*/
+@theme {
+  --color-void: #05040a;
+  --color-obsidian-950: #0a0714;
+  --color-obsidian-900: #100b20;
+  --color-obsidian-800: #191230;
+  --color-obsidian-700: #251c44;
+  --color-gold-200: #fff0d4;
+  --color-gold-300: #f5deaa;
+  --color-gold-400: #e5c07b;
+  --color-gold-500: #c59b27;
+  --color-gold-600: #9e791b;
+  --color-amethyst: #a855f7;
+  --color-ember: #ff9f43;
+  --color-vellum: #e2d9f3;
+  --color-ash: #9c93b8;
+
+  --font-serif-th: var(--font-noto-serif-thai), "Noto Serif Thai", serif;
+  --font-sans-th: var(--font-sarabun), "Sarabun", system-ui, sans-serif;
+}
+
+html,
+body {
+  background-color: var(--color-void);
+  color: var(--color-vellum);
+  font-family: var(--font-sans-th);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ตัวอักษรทองคำโบราณ (Ancient Gold Leaf) — ป้องกันวรรณยุกต์และสระภาษาไทยถูกตัดขอบ */
+.font-mystic-gold {
+  background: linear-gradient(135deg, #ffffff 0%, #fff0d4 20%, #e5c07b 45%, #c59b27 75%, #ffffff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  line-height: 1.45;
+  padding-top: 0.15em;
+  padding-bottom: 0.15em;
+  vertical-align: middle;
+}
+
+/* กรอบแท่นบูชา Obsidian & Gold */
+.altar-panel {
+  background: radial-gradient(circle at 50% 0%, rgba(37, 28, 68, 0.4) 0%, rgba(10, 7, 20, 0.85) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(229, 192, 123, 0.22);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 240, 212, 0.15);
+}
+
+.altar-panel-active {
+  background: radial-gradient(circle at 50% 0%, rgba(65, 45, 115, 0.55) 0%, rgba(16, 11, 32, 0.95) 100%);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(229, 192, 123, 0.6);
+  box-shadow: 0 0 35px rgba(229, 192, 123, 0.25), 0 25px 60px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(229, 192, 123, 0.15);
+}
+
+/* ลวดลายหลังไพ่ศักดิ์สิทธิ์ (Sacred Geometry Card Back) */
+.card-back-pattern {
+  background-color: #0d081a;
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(229, 192, 123, 0.3) 0%, transparent 65%),
+    repeating-linear-gradient(45deg, rgba(229, 192, 123, 0.12) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(-45deg, rgba(229, 192, 123, 0.12) 0 2px, transparent 2px 8px),
+    radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.25), transparent 70%);
+}
+
+/* การพลิกไพ่ 3D Scene */
+.card-scene {
+  perspective: 1600px;
+}
+.card-inner {
+  transform-style: preserve-3d;
+}
+.card-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.card-face--back {
+  transform: rotateY(180deg);
+}
+
+/* แสงสะท้อนประกายฟอยล์ทอง (Gold Foil Sheen) */
+.gold-foil-sheen {
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 30%,
+    rgba(229, 192, 123, 0.28) 48%,
+    rgba(168, 85, 247, 0.2) 58%,
+    rgba(255, 159, 67, 0.25) 68%,
+    transparent 85%
+  );
+  mix-blend-mode: color-dodge;
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #05040a;
+}
+::-webkit-scrollbar-thumb {
+  background: #251c44;
+  border-radius: 4px;
+  border: 1px solid rgba(229, 192, 123, 0.3);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c59b27;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Sleek Golden Scrollbar for Deck Tableau */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(10, 7, 20, 0.6);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(229, 192, 123, 0.35);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 192, 123, 0.7);
+}
+
+/* ===== Mobile-First GPU Optimizations (85%+ mobile users) ===== */
+
+/* Force GPU compositing on animated elements for buttery 60fps on mid-range phones */
+.card-scene,
+.card-inner {
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Disable expensive hover effects on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .gold-foil-sheen {
+    display: none !important;
+  }
+  /* Reduce backdrop-filter intensity on mobile for performance */
+  .altar-panel,
+  .altar-panel-active {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Tap highlight removal for native feel */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Smooth momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar on horizontal card fan (touch-scroll only) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
