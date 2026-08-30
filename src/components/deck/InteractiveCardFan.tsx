@@ -99,13 +99,29 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
 
         {/*
           3 Organic Overlapping Spread Tiers Covering Full Screen
-          items-start เจตนา ไม่ใช่ items-center: แต่ละแถวกว้างกว่ากรอบเสมอ (26 ใบ
-          เกยกัน) และคอนเทนเนอร์นี้ overflow-x-auto — items-center บนแกนขวางของ
-          flex-col ที่ลูกกว้างเกินกรอบทำให้ครึ่งที่ล้นไปเบียดออกทั้งสองข้างเท่า ๆ กัน
-          แต่ scrollLeft เริ่มที่ 0 สกรอลไปทางซ้ายเพิ่มไม่ได้อีก การ์ดขวาสุดของแถว
-          จึงถูกเบียดจนขาดครึ่งถาวร (บั๊กแบบเดียวกับแถบ filter ที่เคยเจอและแก้ไปแล้ว)
+          items-start เจตนา ไม่ใช่ items-center: กัน "ปุ่มแรกเข้าถึงไม่ได้เลย" แบบ
+          เดียวกับบั๊กแถบ filter ที่เคยแก้ไปแล้ว (items-center + overflow-x-auto บน
+          เนื้อหาที่กว้างกว่ากรอบ ทำให้ scrollLeft เริ่มที่ 0 ไปทางซ้ายเพิ่มไม่ได้)
+
+          แต่ items-start แก้ได้แค่ "เข้าถึงได้" ไม่ได้แก้ "หน้าตา" — แต่ละแถวมี 26 ใบ
+          เกยกัน กว้างกว่าจอแทบทุกขนาดหน้าจอแน่นอน การ์ดที่ขอบขวาของพื้นที่มองเห็น
+          (viewport ของ scroll container) จึงโดนตัดครึ่งเสมอเป็นธรรมชาติของแถวเลื่อน
+          แนวนอนที่เนื้อหายาวกว่ากรอบ — ไม่ใช่บั๊ก แต่ "หน้าตา" ดูเหมือนบั๊กเพราะมันขาด
+          หายไปแบบไม่มีสัญญาณให้รู้ว่าเลื่อนดูต่อได้ (ไม่มี fade บอกใบ้)
+
+          แก้ด้วย mask-image ไล่โปร่งใสที่ขอบซ้าย-ขวา (ลวดลายมาตรฐานของแถวเลื่อน
+          แนวนอนทุกที่ เช่น carousel ของ App Store) ให้การ์ดที่โดนตัดจางหายเข้าสี
+          พื้นหลังแทนที่จะโดน "เฉือน" หยาบ ๆ ที่ขอบตรง ๆ
         */}
-        <div className="w-full flex flex-col items-start justify-center gap-2 sm:gap-3 py-6 relative z-10 overflow-x-auto no-scrollbar">
+        <div
+          className="w-full flex flex-col items-start justify-center gap-2 sm:gap-3 py-6 relative z-10 overflow-x-auto no-scrollbar"
+          style={{
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent 0, black 48px, black calc(100% - 48px), transparent 100%)",
+            maskImage:
+              "linear-gradient(to right, transparent 0, black 48px, black calc(100% - 48px), transparent 100%)",
+          }}
+        >
           {rows.map((rowCards, rowIdx) => {
             const rowOffset = rowIdx === 1 ? "sm:pl-6" : rowIdx === 2 ? "sm:pl-12" : "";
 
