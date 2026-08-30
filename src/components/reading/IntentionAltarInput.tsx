@@ -114,16 +114,16 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             <span className="text-xs sm:text-sm font-serif-th font-bold font-mystic-gold">
               {persona?.nameTh || "แม่หมอประจำวิหาร"}
             </span>
-            <span className="text-[10px] text-[#9c93b8] font-mono">
-              · ขั้นตอนซักถามบริบท (Intake)
+            <span className="text-[10px] text-[#9c93b8] font-serif-th">
+              · ให้ข้อมูลเบื้องต้น
             </span>
           </div>
           <p className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed font-serif-th">
             {persona?.id === "direct"
-              ? `"สวัสดีคุณ ${nickname.trim() || "ผู้มาเยือน"} เล่าให้แม่หมอฟังตรงๆ ได้เลยว่าตอนนี้ติดขัดเรื่องไหน หรืออยากให้ชี้ทางอะไรเป็นพิเศษ จะได้เปิดไพ่ฟันธงให้ตรงจุด"`
+              ? `"สวัสดีคุณ ${nickname.trim() || "คนสำคัญ"} เล่าให้แม่หมอฟังตรงๆ ได้เลยนะว่าตอนนี้มีเรื่องอะไรในใจ หรืออยากรู้เรื่องไหนเป็นพิเศษ จะได้เปิดไพ่ตอบให้ชัดเจนตรงประเด็น"`
               : persona?.id === "mystic"
-              ? `"ขอต้อนรับสู่คลื่นพลังงานแห่งจักรวาลคุณ ${nickname.trim() || "ผู้แสวงหา"} สงบใจให้นิ่ง แล้วส่งผ่านเรื่องราวที่ต้องการคำชี้แนะมายังสำรับไพ่"`
-              : `"สวัสดีจ้าคุณ ${nickname.trim() || "คนดี"} วันนี้มีเรื่องอะไรที่ทำให้ไม่สบายใจ หรืออยากให้แม่หมอช่วยเปิดไพ่ให้กำลังใจ เล่าให้ฟังได้เลยนะ"`}
+              ? `"สวัสดีคุณ ${nickname.trim() || "คนสำคัญ"} หายใจเข้าลึกๆ ผ่อนคลาย แล้วพิมพ์เรื่องราวหรือคำถามที่ต้องการคำแนะนำมาได้เลยนะ"`
+              : `"สวัสดีจ้าคุณ ${nickname.trim() || "คนดี"} วันนี้มีเรื่องอะไรที่ทำให้คิดมาก หรืออยากให้แม่หมอช่วยดูและให้กำลังใจ เล่าให้ฟังได้เลยนะ"`}
           </p>
         </div>
       </div>
@@ -133,13 +133,13 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         {/* Step 1: Nickname */}
         <div className="space-y-1.5">
           <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
-            <span>👤</span> 1. นามหรือชื่อเล่นของคุณ <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
+            <span>👤</span> 1. ชื่อเล่นของคุณ <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
           </label>
           <input
             type="text"
             value={nickname}
             onChange={(e) => onNicknameChange(e.target.value)}
-            placeholder="เช่น ตะวัน, มะลิ, กานต์, ภูมิ"
+            placeholder="เช่น ฟ้า, บิ๊ก, พลอย, เมย์"
             className={`w-full bg-[#07040f] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all duration-300 ${
               isNicknameEmpty
                 ? "border border-rose-500/50 focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
@@ -151,13 +151,13 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         {/* Step 2: Custom Situation */}
         <div className="space-y-1.5">
           <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
-            <span>📜</span> 2. บริบทหรือสถานการณ์เพิ่มเติม <span className="text-[10px] text-[#9c93b8] font-normal">(ช่วยให้อ่านแม่นยำขึ้น)</span>
+            <span>📜</span> 2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ <span className="text-[10px] text-[#9c93b8] font-normal">(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)</span>
           </label>
           <input
             type="text"
             value={situation}
             onChange={(e) => onSituationChange(e.target.value)}
-            placeholder="เช่น กำลังคุยกับคนเก่า / กำลังจะเปลี่ยนงานใหม่"
+            placeholder="เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"
             className="w-full bg-[#07040f] border border-[#e5c07b]/30 focus:border-[#e5c07b] focus:ring-1 focus:ring-[#e5c07b] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all"
           />
         </div>
@@ -166,14 +166,14 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
       {/* Quick Situation Selector Chips */}
       <div className="space-y-2">
         <span className="text-[11px] text-[#9c93b8] font-serif-th">
-          ✦ หรือแตะเลือกบริบทด่วน:
+          ✦ หรือแตะเลือกเรื่องราวด่วน:
         </span>
         <div className="flex flex-wrap gap-2">
           {[
-            "เพิ่งเริ่มต้น กำลังมองทิศทาง",
-            "มีปัญหา/ติดขัด อยากหาทางออก",
-            "กำลังตัดสินใจ เลือกระหว่าง 2 ทาง",
-            "อยากรู้ภาพรวม & คำเตือนสำคัญ",
+            "เพิ่งเริ่มต้น กำลังดูทิศทาง",
+            "ติดปัญหา อยากหาทางออก",
+            "กำลังลังเล เลือกระหว่าง 2 ทาง",
+            "อยากรู้ภาพรวมและคำแนะนำ",
           ].map((sit) => (
             <button
               key={sit}
@@ -194,14 +194,14 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
       {/* Step 3: Main Mystic Question Textarea */}
       <div className="space-y-2">
         <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
-          <span>🕯️</span> 3. คำอธิษฐาน / สิ่งที่คุณต้องการคำตอบชัดเจนที่สุด <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
+          <span>🕯️</span> 3. คำถามที่คุณอยากรู้มากที่สุด <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
         </label>
         <div className="relative group">
           <textarea
             rows={3}
             value={question}
             onChange={(e) => onQuestionChange(e.target.value)}
-            placeholder="หลับตา... ตั้งสติให้นิ่ง แล้วจารึกสิ่งที่คุณปรารถนาจะล่วงรู้ (เช่น ความสัมพันธ์กับเขาจะมีทิศทางอย่างไร / งานโปรเจกต์นี้จะสำเร็จหรือไม่)..."
+            placeholder="พิมพ์คำถามที่คุณอยากให้ไพ่ช่วยชี้ทาง เช่น ความสัมพันธ์กับเขาจะมีทิศทางอย่างไร / งานใหม่ที่กำลังจะย้ายไปจะดีไหม..."
             className={`w-full bg-[#07040f]/90 rounded-2xl p-4 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all duration-300 shadow-inner leading-relaxed resize-none ${
               isQuestionEmpty
                 ? "border border-rose-500/50 focus:border-rose-400 focus:ring-2 focus:ring-rose-400/30"
@@ -213,8 +213,8 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
 
       {/* 4 Authentic 1909 Rider-Waite Cards for Quick Question Selection */}
       <div className="space-y-3 pt-2 border-t border-[#e5c07b]/15">
-        <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] uppercase tracking-wider flex items-center gap-2">
-          <span className="text-[#e5c07b]">✦</span> หรือแตะเลือกหัวข้อพร้อมคำถามแนะนำ (1909 Rider-Waite Guidance Cards)
+        <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] tracking-wide flex items-center gap-2">
+          <span className="text-[#e5c07b]">✦</span> หรือเลือกหัวข้อคำถามสำเร็จรูป (แตะเพื่อใช้งานทันที)
         </label>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">

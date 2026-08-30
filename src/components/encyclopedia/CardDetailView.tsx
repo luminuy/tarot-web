@@ -53,9 +53,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4 text-xs font-mono">
         <Link
           href="/cards"
-          className="inline-flex items-center gap-1.5 text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1 px-3 rounded-full bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50"
+          className="inline-flex items-center gap-1.5 text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1 px-3 rounded-full bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50 font-serif-th"
         >
-          <span>←</span> กลับสู่คัมภีร์ไพ่ 78 ใบ
+          <span>←</span> กลับหน้ารวมไพ่ 78 ใบ
         </Link>
         <span className="text-[#9c93b8]">
           ลำดับที่ <strong className="text-[#ffd700]">{currentIndex + 1}</strong> / {totalCards}
@@ -109,11 +109,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               onClick={() => setOrientation("upright")}
               className={`flex-1 py-2.5 text-xs font-serif-th font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 isUpright
-                  ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_15px_rgba(229,192,123,0.4)]"
+                  ? "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] shadow-[0_0_15px_rgba(229,192,123,0.4)]"
                   : "text-[#9c93b8] hover:text-white"
               }`}
             >
-              <span>✦</span> ไพ่หัวตั้ง (Upright)
+              <span>✦</span> ไพ่หัวตั้ง (ปกติ)
             </button>
             <button
               type="button"
@@ -124,7 +124,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   : "text-[#9c93b8] hover:text-white"
               }`}
             >
-              <span>↻</span> ไพ่หัวกลับ (Reversed)
+              <span>↻</span> ไพ่หัวกลับ
             </button>
           </div>
 
@@ -190,7 +190,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* 5 Categorized Meanings List */}
           <div className="space-y-3.5 pt-2">
             <h3 className="font-serif-th text-base font-bold text-[#ffd700] flex items-center gap-2">
-              <span>✦</span> คำทำนายและการตีความ 5 มิติชีวิต ({isUpright ? "หัวตั้ง" : "หัวกลับ"})
+              <span>✦</span> ความหมายและการทำนาย 5 ด้าน ({isUpright ? "หัวตั้ง" : "หัวกลับ"})
             </h3>
 
             <AnimatePresence mode="wait">
@@ -233,9 +233,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           <div className="pt-4 flex items-center gap-4 flex-wrap">
             <Link
               href="/"
-              className="px-7 py-3 rounded-2xl text-xs sm:text-sm font-serif-th font-bold bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_30px_rgba(229,192,123,0.45)] hover:scale-105 transition-transform flex items-center gap-2"
+              className="px-7 py-3 rounded-2xl text-xs sm:text-sm font-serif-th font-bold bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] shadow-[0_0_25px_rgba(229,192,123,0.45)] hover:scale-105 transition-transform flex items-center gap-2"
             >
-              <span>✦</span> เข้าสู่วิหารพยากรณ์หลัก
+              <span>✦</span> ไปหน้าดูดวงหลัก
             </Link>
           </div>
         </div>

@@ -300,10 +300,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           <button
             type="button"
             onClick={onProceed}
-            className="w-full sm:w-auto px-9 py-4 rounded-xl bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] font-bold font-serif-th text-base shadow-[0_0_30px_rgba(229,192,123,0.55)] hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2.5 whitespace-nowrap group"
+            className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-bold font-serif-th text-sm sm:text-base shadow-[0_0_25px_rgba(229,192,123,0.45)] hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
           >
-            <span>ถัดไป: ตั้งจิตอธิษฐาน & อัญเชิญแม่หมอ</span>
-            <span className="group-hover:translate-x-1 transition-transform">➔</span>
+            <span>ถัดไป: ตั้งคำถามและเลือกแม่หมอ</span>
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
         </motion.div>
       )}

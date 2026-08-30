@@ -67,10 +67,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
               </div>
               <div>
                 <h3 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold">
-                  บันทึกประวัติดวงชะตา (Reading Journal)
+                  ประวัติการดูดวงของคุณ
                 </h3>
-                <p className="text-[10px] text-[#9c93b8]">
-                  บันทึกผลการดูดวงในเครื่องของคุณ ({readings.length} รายการ)
+                <p className="text-[10px] text-[#9c93b8] font-serif-th">
+                  บันทึกประวัติการทำนายในเครื่องของคุณ ({readings.length} รายการ)
                 </p>
               </div>
             </div>
@@ -80,9 +80,9 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-[10px] text-rose-400 hover:text-rose-300 border border-rose-500/30 bg-rose-950/40 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+                  className="text-[10px] text-rose-400 hover:text-rose-300 border border-rose-500/30 bg-rose-950/40 px-2.5 py-1 rounded-lg transition-all cursor-pointer font-serif-th"
                 >
-                  ล้างทั้งหมด
+                  ลบทั้งหมด
                 </button>
               )}
               <button
@@ -115,7 +115,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 <span className="text-3xl">🔮</span>
                 <p className="font-serif-th text-xs text-[#cfc8e2]">
                   {readings.length === 0
-                    ? "ยังไม่มีประวัติการเปิดไพ่ เมื่อคุณเปิดไพ่เสร็จแล้วจะถูกบันทึกไว้ที่นี่โดยอัตโนมัติ"
+                    ? "ยังไม่มีประวัติการดูดวง เมื่อคุณดูดวงเสร็จจะถูกบันทึกไว้ที่นี่โดยอัตโนมัติ"
                     : "ไม่พบบันทึกที่ตรงกับคำค้นหา"}
                 </p>
               </div>
@@ -196,8 +196,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                       >
                         {item.advice && item.advice.length > 0 && (
                           <div>
-                            <span className="text-[10px] text-[#e5c07b] font-semibold block">
-                              ✦ คำแนะนำที่ลงมือทำได้จริง:
+                            <span className="text-[10px] text-[#e5c07b] font-semibold block font-serif-th">
+                              ✦ คำแนะนำและสิ่งที่ควรทำ:
                             </span>
                             <ul className="list-disc list-inside space-y-0.5 text-[#cfc8e2] text-[11px] pt-1">
                               {item.advice.map((adv, idx) => (
@@ -208,7 +208,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                         )}
                         {item.timing && (
                           <div className="text-[10px] text-[#9c93b8]">
-                            ⏳ กรอบเวลา: <span className="text-[#f5deaa]">{item.timing}</span>
+                            ⏳ ช่วงเวลา: <span className="text-[#f5deaa]">{item.timing}</span>
                           </div>
                         )}
                       </motion.div>

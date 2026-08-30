@@ -161,14 +161,14 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
       </div>
 
       {/* Sacred Ritual Subtitle & Title */}
-      <span className="text-[11px] uppercase tracking-widest text-[#e5c07b] font-bold bg-[#e5c07b]/10 px-4 py-1 rounded-full border border-[#e5c07b]/30 mb-2 inline-block shadow">
-        SACRED SHUFFLE CEREMONY
+      <span className="text-[11px] font-serif-th text-[#e5c07b] font-bold bg-[#e5c07b]/10 px-4 py-1 rounded-full border border-[#e5c07b]/30 mb-2 inline-block shadow">
+        ✦ ขั้นตอนสับไพ่ ✦
       </span>
       <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter drop-shadow py-0.5 leading-normal">
-        ตั้งจิตอธิษฐานถึงคำถามของคุณ
+        ตั้งสมาธิและนึกถึงคำถามของคุณ
       </h2>
       <p className="text-xs sm:text-sm text-[#9c93b8] mt-1 max-w-md leading-relaxed">
-        สูดหายใจเข้าลึกๆ นึกถึงเรื่องที่อยากรู้สำหรับผัง <span className="text-[#f5deaa] font-semibold">"{spreadName}"</span>
+        ทำใจให้สบาย แล้วนึกถึงเรื่องที่อยากรู้สำหรับผัง <span className="text-[#f5deaa] font-semibold">"{spreadName}"</span>
       </p>
 
       {/* Progress or Start Button */}
@@ -177,10 +177,10 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
           <button
             type="button"
             onClick={startShuffle}
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] font-bold font-serif-th shadow-[0_0_30px_rgba(229,192,123,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-bold font-serif-th shadow-[0_0_25px_rgba(229,192,123,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <span>✨</span>
-            <span>เริ่มสับไพ่ด้วยพลังจิตของคุณ</span>
+            <span>แตะเพื่อเริ่มสับไพ่</span>
             <span>✨</span>
           </button>
         ) : (
@@ -193,10 +193,10 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
             </div>
             <span className="text-xs text-[#f5deaa] font-medium flex items-center justify-center gap-1.5 animate-pulse font-serif-th">
               <span className="w-2 h-2 rounded-full bg-[#e5c07b]" />
-              {shufflePhase === "split" && "กำลังแยกสำรับและเปิดรับคลื่นพลังจิต..."}
-              {shufflePhase === "riffle" && `กำลังสับสลับไพ่ 78 ใบอย่างโปร่งใส (${progress}%)`}
-              {shufflePhase === "bridge" && "กำลังดัดสะพานรวมคลื่นพลังงาน..."}
-              {shufflePhase === "gather" && "สำรับพร้อมแล้ว กำลังแผ่ไพ่สู่โต๊ะทำนาย..."}
+              {shufflePhase === "split" && "กำลังแบ่งสำรับไพ่..."}
+              {shufflePhase === "riffle" && `กำลังสับไพ่ทั้ง 78 ใบ (${progress}%)`}
+              {shufflePhase === "bridge" && "กำลังรวมสำรับไพ่เข้าด้วยกัน..."}
+              {shufflePhase === "gather" && "สับไพ่เรียบร้อย กำลังคลี่ไพ่ให้คุณเลือก..."}
             </span>
           </div>
         )}

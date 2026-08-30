@@ -314,10 +314,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               <span className="text-xl">📸</span>
               <div>
                 <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
-                  แชร์การ์ดคำทำนายศักดิ์สิทธิ์
+                  แชร์ผลคำทำนาย
                 </h3>
-                <p className="text-[11px] text-[#9c93b8]">
-                  บันทึกรูปภาพหรือคัดลอกข้อความเพื่อส่งต่อพลังงาน
+                <p className="text-[11px] text-[#9c93b8] font-serif-th">
+                  บันทึกรูปภาพหรือคัดลอกข้อความเพื่อส่งต่อ
                 </p>
               </div>
             </div>
@@ -345,7 +345,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   🔮
                 </div>
                 <span className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold">
-                  วิหารทาโรต์ออราเคิล
+                  ดูดวงไพ่ทาโรต์
                 </span>
               </div>
 
@@ -358,7 +358,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {question && (
               <div className="p-3 rounded-xl bg-[#090514]/90 border border-[#e5c07b]/25 space-y-0.5 relative z-10 shadow-inner">
                 <span className="text-[9px] uppercase tracking-widest text-[#e5c07b] font-mono block font-semibold">
-                  ✦ คำถามอธิษฐาน:
+                  ✦ คำถามของคุณ:
                 </span>
                 <p className="font-serif-th text-xs sm:text-sm font-bold text-[#f5deaa] leading-relaxed">
                   "{question}"
@@ -432,10 +432,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             <button
               onClick={() => handleDownloadImage("post")}
               disabled={isGenerating}
-              className="py-3 px-3 rounded-xl bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] font-serif-th font-bold text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
+              className="py-3 px-3 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-bold text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
               <span>{isGenerating ? "✦" : "✦"}</span>
-              <span>{isGenerating ? "กำลังสร้าง..." : "บันทึกภาพ (4:5)"}</span>
+              <span>{isGenerating ? "กำลังสร้าง..." : "โหลดรูปภาพ (โพสต์)"}</span>
             </button>
 
             <button
@@ -444,7 +444,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               className="py-3 px-3 rounded-xl bg-[#22133c] hover:bg-[#341b5c] border border-[#e5c07b]/70 text-[#f5deaa] font-serif-th font-bold text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
               <span className="text-[#e5c07b]">✦</span>
-              <span>บันทึก IG Story (9:16)</span>
+              <span>โหลดรูปภาพ (สตอรี่)</span>
             </button>
 
             <button

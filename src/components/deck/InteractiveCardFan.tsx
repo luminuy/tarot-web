@@ -63,15 +63,15 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             <div className="inline-flex items-center gap-2 bg-[#140d28]/95 border border-[#e5c07b]/40 px-5 py-2 rounded-full shadow-[0_0_30px_rgba(229,192,123,0.35)]">
               <span className="w-2.5 h-2.5 rounded-full bg-[#e5c07b] animate-ping" />
               <span className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa]">
-                จับไพ่ใบที่ {pickedIndices.length + 1} จาก {targetCount} ใบ
+                เลือกไพ่ใบที่ {pickedIndices.length + 1} จากทั้งหมด {targetCount} ใบ
               </span>
             </div>
 
             <h3 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide filter drop-shadow leading-relaxed py-1 px-2">
-              สัมผัสพลังงานจิต เลือกไพ่สำหรับ <span className="text-[#f5deaa]">"{currentPositionName}"</span>
+              เลือกไพ่สำหรับ <span className="text-[#f5deaa]">"{currentPositionName}"</span>
             </h3>
             <p className="text-xs sm:text-sm text-[#9c93b8] max-w-xl mx-auto leading-relaxed">
-              สำรับไพ่ 78 ใบแผ่กระจายบนแท่นบูชาศักดิ์สิทธิ์ ตั้งจิตให้สงบ แล้วแตะเลือกไพ่ใบที่ดึงดูดใจคุณที่สุด
+              แตะเลือกไพ่ใบที่คุณรู้สึกถูกชะตาหรือดึงดูดสายตาคุณมากที่สุด
             </p>
           </motion.div>
         ) : (
@@ -84,7 +84,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               <span>✨</span> เลือกไพ่ครบ {targetCount} ใบเรียบร้อยแล้ว <span>✨</span>
             </h3>
             <p className="text-xs sm:text-sm text-[#9c93b8]">
-              กำลังเปิดม่านเชื่อมต่อคลื่นพลังงานเข้าสู่วิหารคำทำนาย...
+              กำลังเตรียมเปิดไพ่และคำทำนายของคุณ...
             </p>
           </motion.div>
         )}

@@ -21,23 +21,23 @@ export default function CardsPage() {
         <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1.5 px-3.5 rounded-2xl bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50"
+            className="inline-flex items-center gap-1.5 text-xs text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1.5 px-3.5 rounded-2xl bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50 font-serif-th"
           >
-            <span>←</span> กลับสู่วิหารพยากรณ์
+            <span>←</span> กลับหน้าดูดวงหลัก
           </Link>
           <SacredNavDropdown />
         </div>
 
         {/* Hero Header */}
         <div className="text-center space-y-2.5 py-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#e5c07b]/30 bg-[#130d24]/80 text-xs text-[#e5c07b] shadow-[0_0_15px_rgba(229,192,123,0.2)]">
-            <span>✦</span> 1909 Original Rider-Waite-Smith <span>✦</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#e5c07b]/30 bg-[#130d24]/80 text-xs text-[#e5c07b] shadow-[0_0_15px_rgba(229,192,123,0.2)] font-serif-th">
+            <span>✦</span> สารานุกรมความหมายไพ่ 78 ใบ <span>✦</span>
           </div>
           <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide">
-            คัมภีร์ไพ่ทาโรต์ 78 ใบ
+            ความหมายไพ่ทาโรต์ทั้ง 78 ใบ
           </h1>
-          <p className="text-xs sm:text-sm text-[#9c93b8] max-w-xl mx-auto leading-relaxed">
-            สำรวจความหมายลึกซึ้ง ธาตุ สัญลักษณ์ และข้อคิดเตือนใจของไพ่ทาโรต์ทั้ง 78 ใบ (แตะที่การ์ดเพื่อดูรายละเอียดรายใบ)
+          <p className="text-xs sm:text-sm text-[#9c93b8] max-w-xl mx-auto leading-relaxed font-serif-th">
+            ดูคำแปลและความหมายของไพ่ทาโรต์ทั้ง 78 ใบ ทั้งความรัก การงาน การเงิน (แตะที่การ์ดเพื่อดูรายละเอียด)
           </p>
         </div>
 

@@ -66,10 +66,10 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
               </div>
               <div>
                 <h3 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold">
-                  คัมภีร์สารานุกรมไพ่ 78 ใบ (Tarot Encyclopedia)
+                  ความหมายไพ่ทาโรต์ 78 ใบ
                 </h3>
-                <p className="text-[10px] text-[#9c93b8]">
-                  ศึกษาความหมายเชิงลึก 5 หมวดชีวิต สัญลักษณ์ และคีย์เวิร์ดของสำรับทาโรต์
+                <p className="text-[10px] text-[#9c93b8] font-serif-th">
+                  ดูคำแปลและความหมายของไพ่ทาโรต์ทั้ง 78 ใบ (ความรัก การงาน การเงิน)
                 </p>
               </div>
             </div>

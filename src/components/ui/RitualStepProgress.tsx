@@ -11,10 +11,10 @@ interface RitualStepProgressProps {
 }
 
 const STEPS: { id: RitualStep; title: string; num: number; icon: string }[] = [
-  { id: "SPREAD_SELECT", title: "ผังชะตา", num: 1, icon: "🎴" },
-  { id: "INTENTION_SELECT", title: "จิตอธิษฐาน", num: 2, icon: "✍️" },
+  { id: "SPREAD_SELECT", title: "เลือกผัง", num: 1, icon: "🎴" },
+  { id: "INTENTION_SELECT", title: "ตั้งคำถาม", num: 2, icon: "✍️" },
   { id: "SHUFFLE", title: "สับไพ่", num: 3, icon: "🔮" },
-  { id: "PICK_CARDS", title: "จับไพ่", num: 4, icon: "✨" },
+  { id: "PICK_CARDS", title: "เลือกไพ่", num: 4, icon: "✨" },
   { id: "READING", title: "คำทำนาย", num: 5, icon: "📜" },
 ];
 

@@ -95,11 +95,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         {/* Live Status Pill */}
         {isStreaming ? (
           <span className="text-xs font-semibold bg-[#e5c07b]/15 text-[#f5deaa] border border-[#e5c07b]/40 px-3.5 py-1.5 rounded-full flex items-center gap-2 animate-pulse shadow">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#e5c07b]" /> กำลังถ่ายทอดคำพยากรณ์...
+            <span className="w-2.5 h-2.5 rounded-full bg-[#e5c07b]" /> แม่หมอกำลังอ่านคำทำนาย...
           </span>
         ) : (
           <span className="text-xs font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" /> ถ่ายทอดคำทำนายสมบูรณ์
+            <span className="w-2 h-2 rounded-full bg-emerald-400" /> อ่านคำทำนายครบถ้วนแล้ว
           </span>
         )}
       </div>
@@ -327,7 +327,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {reading?.connections && (
             <div className="p-5 rounded-2xl bg-[#110a22] border border-[#8b5cf6]/40 space-y-1.5 shadow-lg">
               <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#e5c07b] flex items-center gap-2">
-                <span>✨</span> ความเชื่อมโยงของคลื่นพลังงานทั้งชุด
+                <span>✨</span> ความเชื่อมโยงของไพ่ทั้งชุด
               </h5>
               <p className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed">
                 {reading.connections}
@@ -340,7 +340,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <div className="p-5 rounded-2xl bg-gradient-to-br from-[#1c1338] to-[#0d071a] border-2 border-[#e5c07b]/50 space-y-2 shadow-xl">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h5 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold flex items-center gap-2">
-                  <span>✦</span> บทสรุปและแก่นแท้แห่งโชคชะตา
+                  <span>✦</span> บทสรุปคำทำนายและแนวโน้ม
                 </h5>
                 <div className="flex items-center gap-2">
                   {reading.yesNoAnswer && (
@@ -352,7 +352,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     type="button"
                     onClick={() =>
                       handleToggleVoice(
-                        `บทสรุปและแก่นแท้แห่งโชคชะตา. ${reading.summary || ""}. ${
+                        `บทสรุปคำทำนายและแนวโน้ม. ${reading.summary || ""}. ${
                           reading.advice ? "คำแนะนำคือ " + reading.advice.join(", ") : ""
                         }`
                       )
@@ -373,7 +373,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               </p>
               {reading.timing && (
                 <p className="text-xs text-[#e5c07b] pt-1 font-mono">
-                  ✦ จังหวะเวลา: {reading.timing}
+                  ✦ ช่วงเวลา: {reading.timing}
                 </p>
               )}
             </div>
@@ -383,7 +383,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {reading?.advice && reading.advice.length > 0 && (
             <div className="p-5 rounded-2xl bg-[#090614] border border-[#e5c07b]/25 space-y-2.5">
               <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#e5c07b] flex items-center gap-2">
-                <span>✦</span> คำแนะนำที่ลงมือทำได้จริง (Actionable Wisdom)
+                <span>✦</span> คำแนะนำและสิ่งที่ควรทำ
               </h5>
               <ul className="space-y-2">
                 {reading.advice.map((item, idx) => (

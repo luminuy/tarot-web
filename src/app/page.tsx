@@ -69,12 +69,12 @@ export default function TarotPage() {
     const trimmedQuestion = question.trim();
 
     if (!trimmedNickname) {
-      setErrorMsg("กรุณาระบุนามหรือชื่อเล่นของคุณก่อนเข้าสู่พิธี");
+      setErrorMsg("กรุณากรอกชื่อเล่นของคุณก่อนเริ่มดูดวง");
       return;
     }
 
     if (!trimmedQuestion) {
-      setErrorMsg("กรุณาจารึกคำอธิษฐานหรือแตะเลือกไพ่คำถามก่อนเข้าสู่พิธี");
+      setErrorMsg("กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง");
       return;
     }
 
@@ -97,7 +97,7 @@ export default function TarotPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "ไม่สามารถเริ่มพิธีได้");
+      if (!res.ok) throw new Error(data.error || "ไม่สามารถเริ่มดูดวงได้");
 
       const sessionReadingId = data.readingId || data.id;
       setReadingId(sessionReadingId);
@@ -105,7 +105,7 @@ export default function TarotPage() {
       setClientSeed(data.clientSeed || "");
       setCurrentStep("SHUFFLE");
     } catch (err: any) {
-      setErrorMsg(err.message || "เกิดข้อผิดพลาดในการเริ่มพิธี");
+      setErrorMsg(err.message || "เกิดข้อผิดพลาดในการเริ่มดูดวง");
     } finally {
       setLoading(false);
     }
@@ -337,11 +337,11 @@ export default function TarotPage() {
               <div className="flex items-center gap-1.5">
                 <span className="text-[#e5c07b] text-xs">✦</span>
                 <h1 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold tracking-wide leading-snug py-0.5">
-                  วิหารพยากรณ์ไพ่ทาโรต์
+                  ดูดวงไพ่ทาโรต์
                 </h1>
               </div>
               <span className="text-[9px] sm:text-[10px] tracking-[0.22em] text-[#c59b27] font-mono uppercase font-semibold pl-4">
-                SACRED ORACLE TAROT
+                1909 RIDER-WAITE TAROT
               </span>
             </div>
           </div>
@@ -361,9 +361,9 @@ export default function TarotPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-[#05040a] font-bold bg-gradient-to-r from-[#c59b27] via-[#e5c07b] to-[#f5deaa] hover:opacity-90 px-3.5 py-1.5 sm:py-2 rounded-2xl shadow-[0_0_15px_rgba(229,192,123,0.4)] transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1"
+                className="text-xs text-[#05040a] font-bold bg-gradient-to-r from-[#c59b27] via-[#e5c07b] to-[#f5deaa] hover:opacity-90 px-3.5 py-1.5 sm:py-2 rounded-2xl shadow-[0_0_15px_rgba(229,192,123,0.4)] transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1 font-serif-th"
               >
-                <span>✦</span> เริ่มใหม่
+                <span>✦</span> เริ่มดูดวงใหม่
               </button>
             )}
           </div>
@@ -430,7 +430,7 @@ export default function TarotPage() {
                     <div className="my-auto" />
 
                     <span className="text-xs font-serif-th font-bold font-mystic-gold tracking-wide">
-                      วิหารไพ่ทาโรต์ 1909
+                      ไพ่ทาโรต์ 1909
                     </span>
 
                     {/* Dynamic Gold Sheen */}
@@ -440,10 +440,10 @@ export default function TarotPage() {
 
                 <div className="space-y-1">
                   <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide">
-                    เลือกผังแห่งชะตา (Sacred Spreads)
+                    เลือกผังการเปิดไพ่
                   </h2>
                   <p className="text-xs sm:text-sm text-[#9c93b8] max-w-xl mx-auto">
-                    เลือกรูปแบบการวางไพ่ที่ตรงกับคำถามในใจของคุณ จากนั้นตั้งจิตอธิษฐาน
+                    เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการคำตอบ
                   </p>
                 </div>
               </div>
@@ -474,10 +474,10 @@ export default function TarotPage() {
             >
               <div className="text-center space-y-1">
                 <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold">
-                  ตั้งจิตอธิษฐาน & เลือกแม่หมอ
+                  ตั้งคำถาม & เลือกแม่หมอ
                 </h2>
                 <p className="text-xs sm:text-sm text-[#9c93b8]">
-                  ระบุคำถามที่ค้างคาใจ พร้อมเลือกบุคลิกแม่หมอที่คุณต้องการปรึกษา
+                  พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
                 </p>
               </div>
 
@@ -523,11 +523,11 @@ export default function TarotPage() {
                   className={`py-3 px-7 rounded-xl text-xs sm:text-sm font-bold font-serif-th transition-all shadow-lg flex items-center gap-2 ${
                     !nickname.trim() || !question.trim()
                       ? "bg-[#1f1635] text-[#9c93b8]/60 border border-[#e5c07b]/20 cursor-not-allowed"
-                      : "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] hover:opacity-95 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(229,192,123,0.5)]"
+                      : "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] hover:opacity-95 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(229,192,123,0.5)]"
                   }`}
                 >
                   <span>✦</span>
-                  <span>{loading ? "กำลังเชื่อมต่อ..." : "เข้าสู่พิธีสับไพ่ & เลือกไพ่ด้วยตนเอง"}</span>
+                  <span>{loading ? "กำลังโหลด..." : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}</span>
                   <span>→</span>
                 </button>
               </div>
@@ -612,9 +612,9 @@ export default function TarotPage() {
 
               {/* Bottom Quick Luxury Actions Deck */}
               <div className="p-5 sm:p-6 rounded-3xl altar-panel flex flex-wrap items-center justify-between gap-4 shadow-2xl border border-[#e5c07b]/30">
-                <div className="flex items-center gap-2 text-xs text-[#9c93b8]">
+                <div className="flex items-center gap-2 text-xs text-[#9c93b8] font-serif-th">
                   <span className="text-[#e5c07b]">✦</span>
-                  <span>บันทึกหรือแบ่งปันคำพยากรณ์นี้เพื่อเตือนสติตนเอง</span>
+                  <span>บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้</span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
@@ -626,15 +626,15 @@ export default function TarotPage() {
                     }}
                     className="py-3 px-5 rounded-xl bg-[#100b20] border border-[#e5c07b]/40 text-[#f5deaa] font-serif-th text-xs hover:bg-[#191230] transition-all cursor-pointer flex items-center gap-2 shadow"
                   >
-                    <span className="text-[#e5c07b]">✨</span> แชร์การ์ดคำทำนาย
+                    <span className="text-[#e5c07b]">✨</span> แชร์ผลคำทำนาย
                   </button>
 
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="py-3 px-6 rounded-xl bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] font-bold font-serif-th text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                    className="py-3 px-6 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-bold font-serif-th text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                   >
-                    <span>✦</span> เปิดไพ่เรื่องอื่นต่อ
+                    <span>✦</span> ดูดวงเรื่องอื่นต่อ
                   </button>
                 </div>
               </div>

@@ -161,7 +161,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       {/* Helpful Hint */}
       <div className="text-center pt-2 border-t border-[#e5c07b]/15 text-[11px] text-[#9c93b8] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
         <span className="text-[#e5c07b]">✦</span>
-        <span>แตะที่ใบไพ่บนผังเพื่อพลิกดู และสลับไปอ่านคำทำนายของใบนั้นทันที</span>
+        <span>แตะที่การ์ดเพื่อพลิกดูหน้าไพ่ หรือเลือกอ่านคำทำนายของใบนั้น</span>
       </div>
     </div>
   );

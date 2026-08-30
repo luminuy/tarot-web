@@ -11,10 +11,10 @@ interface CardsExplorerProps {
 
 const SUIT_TABS = [
   { id: "all", label: "ไพ่ทั้งหมด", icon: "✦", desc: "ครบ 78 ใบ", count: 78 },
-  { id: "major", label: "Major Arcana", icon: "👑", desc: "ไพ่ชุดใหญ่ 22 ใบ", count: 22 },
+  { id: "major", label: "ไพ่ชุดใหญ่ (Major)", icon: "👑", desc: "ไพ่หลัก 22 ใบ", count: 22 },
   { id: "wands", label: "ไม้เท้า (Wands)", icon: "🔥", desc: "ธาตุไฟ • พลังงาน & การงาน", count: 14 },
   { id: "cups", label: "ถ้วย (Cups)", icon: "🌊", desc: "ธาตุน้ำ • ความรัก & อารมณ์", count: 14 },
-  { id: "swords", label: "ดาบ (Swords)", icon: "⚔️", desc: "ธาตุลม • ปัญญา & การตัดสินใจ", count: 14 },
+  { id: "swords", label: "ดาบ (Swords)", icon: "⚔️", desc: "ธาตุลม • ความคิด & การตัดสินใจ", count: 14 },
   { id: "pentacles", label: "เหรียญ (Pentacles)", icon: "🪙", desc: "ธาตุดิน • การเงิน & ความมั่นคง", count: 14 },
 ];
 
@@ -193,7 +193,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   {/* Bottom Hover Action Overlay */}
                   <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="text-[10px] font-serif-th font-bold text-[#ffd700] flex items-center gap-1">
-                      <span>✦</span> อ่านคัมภีร์
+                      <span>✦</span> ดูความหมาย
                     </span>
                   </div>
                 </div>

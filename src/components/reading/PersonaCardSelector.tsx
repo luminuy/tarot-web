@@ -17,17 +17,17 @@ interface PersonaCardSelectorProps {
 const PERSONA_DETAILS: Record<string, { roleTitle: string; archetype: string; renderArt: () => React.ReactNode }> = {
   warm: {
     roleTitle: "THE HIGH PRIESTESS",
-    archetype: "ไพ่อัญเชิญ: จิตสัมผัสแห่งความอบอุ่น",
+    archetype: "สไตล์: อบอุ่น ให้กำลังใจ เหมือนพี่สาว",
     renderArt: () => <HighPriestessIllustration className="w-20 h-[136px] mx-auto" />,
   },
   direct: {
     roleTitle: "JUSTICE & TRUTH",
-    archetype: "ไพ่อัญเชิญ: ดาบแห่งสัจจะความจริง",
+    archetype: "สไตล์: ตรงไปตรงมา ชัดเจน ไม่อ้อมค้อม",
     renderArt: () => <JusticeIllustration className="w-20 h-[136px] mx-auto" />,
   },
   mystic: {
     roleTitle: "THE ASTRAL STAR",
-    archetype: "ไพ่อัญเชิญ: คลื่นพลังงานดวงดาว",
+    archetype: "สไตล์: ลึกซึ้ง มองภาพรวมและพลังงาน",
     renderArt: () => <TheStarIllustration className="w-20 h-[136px] mx-auto" />,
   },
 };
@@ -38,8 +38,8 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] uppercase tracking-wider flex items-center gap-2">
-        <span className="text-[#e5c07b]">✦</span> เลือกแม่หมอผู้อัญเชิญคำทำนาย (Oracle Guide)
+      <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] tracking-wide flex items-center gap-2">
+        <span className="text-[#e5c07b]">✦</span> เลือกสไตล์การทำนายของแม่หมอ
       </label>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">

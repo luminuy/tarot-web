@@ -183,7 +183,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   href={`/?spread=${spread.id}`}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-bold text-xs sm:text-sm text-center shadow-[0_0_20px_rgba(229,192,123,0.35)] hover:shadow-[0_0_28px_rgba(229,192,123,0.55)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5 z-10"
                 >
-                  <span>✦ เข้าสู่วิหารพยากรณ์ด้วยผังนี้</span>
+                  <span>✦ เริ่มดูดวงด้วยผังนี้</span>
                 </Link>
               </div>
             );
