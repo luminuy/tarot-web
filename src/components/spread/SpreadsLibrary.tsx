@@ -108,8 +108,8 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   </span>
                 </div>
 
-                {/* Interactive Spread Visual Diagram (Zero-Collision Container) */}
-                <div className="h-30 flex items-center justify-center my-1 filter drop-shadow-[0_0_15px_rgba(229,192,123,0.25)] relative select-none">
+                {/* Interactive Spread Visual Diagram (Generous High-Definition Pedestal) */}
+                <div className="h-44 flex items-center justify-center my-2 filter drop-shadow-[0_0_20px_rgba(229,192,123,0.3)] relative select-none rounded-2xl bg-gradient-to-b from-[#18112e]/40 to-transparent p-2">
                   {renderSpreadIllustration(spread.id)}
                 </div>
 
