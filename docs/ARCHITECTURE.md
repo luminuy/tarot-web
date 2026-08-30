@@ -27,8 +27,8 @@
 | **Framework** | Next.js 16 (App Router) + React 19 + TypeScript | Core Web Framework & API Routes |
 | **Styling** | Tailwind CSS v4 + PostCSS | Theme: Mystical Night Sky & Old Gold |
 | **Animation** | Motion (Framer Motion v13) | Interactive Card Fan, Flip 3D, Layout Transitions |
-| **Database & ORM** | PostgreSQL + Prisma ORM 7 | User Data, Credits Ledger, Journal, Readings |
-| **AI LLM Engine** | Claude 3.5 Sonnet / Opus / Gemini API with Structured Output | Streaming Interpretation via SSE |
+| **Database & ORM** | PostgreSQL + Prisma ORM 7 (ออกแบบ schema ไว้แล้ว ยังไม่ต่อใช้จริง — ปัจจุบันใช้ `server/store.ts` in-memory แทน) | User Data, Credits Ledger, Journal, Readings |
+| **AI LLM Engine** | **Google Gemini (`gemini-3.7-flash`, หลัก)** ผ่าน raw `fetch` streaming — Claude (`lib/ai/claude.ts`) เขียนไว้ตามสถาปัตยกรรมเดียวกันแต่ปัจจุบันไม่ได้ถูกเรียกใช้จริง (เก็บไว้เป็น reference/mock fallback) | Streaming Interpretation via SSE ด้วย Structured Output |
 | **Schema Validation** | Zod v4 | API Request/Response & Structured Output Schemas |
 
 ---
@@ -53,6 +53,63 @@
 [7. ถามคุยต่อยอด (Follow-up) หรือบันทึกดวง (Journal)]
 ```
 
+### 3.1 ผัง Engine เบื้องหลัง (Backend Pipeline)
+
+มุมมองเดียวกับข้างบน แต่มองจากฝั่งเซิร์ฟเวอร์ว่าแต่ละ "เอนจิน" คือไฟล์ไหนจริง —
+**Safety Engine ทำงาน "ก่อน" RNG Engine เสมอ** (ไม่ใช่ขนานกัน) เพราะถ้าคำถาม
+ถูก block ต้องไม่เสียเวลาสร้าง commitment เลย:
+
+```
+                    TAROT ENGINE
+                         │
+              ┌──────────┴──────────┐
+              │                     │
+        Safety Engine           RNG Engine
+     lib/safety/guardrails.ts  lib/tarot/shuffle.ts
+              │                     │
+        checkQuestion()      createCommitment()
+        (ทำงานก่อนเสมอ ─────▶  (ทำงานเมื่อคำถามผ่านแล้วเท่านั้น)
+         block ได้ที่ตรงนี้)         │
+                                     ↓
+                              Shuffled Deck
+                          (drawCards, ยังไม่จั่ว
+                           จนกว่าจะถึงขั้น shuffle)
+                                     │
+                                     ↓
+                            Interactive Fan
+                     components/deck/InteractiveCardFan.tsx
+                                     │
+                              User Pick Card
+                                     │
+                                     ↓
+                             Pick Validation
+                        drawCards({ pickedIndices })
+                     กันไพ่ซ้ำ + กันจำนวนไม่ตรง spread
+                                     │
+                                     ↓
+                              Spread Engine
+                    data/spreads.ts + SpreadBoard.tsx
+                       (แปะไพ่ที่จั่วได้ลงตำแหน่งจริง)
+                                     │
+                                     ↓
+                             Reading Engine
+                             lib/ai/prompt.ts
+                (buildSystemPrompt + buildReadingMessage
+                 ผูกไพ่ + ตำแหน่ง + บริบทคำถามเป็น prompt เดียว)
+                                     │
+                                     ↓
+                           Gemini Stream (ปัจจุบัน)
+                            lib/ai/gemini.ts
+                    (โครงเดียวกับ lib/ai/claude.ts ที่เขียน
+                     ไว้รองรับ แต่ยังไม่ได้ใช้งานจริง)
+                                     │
+                                     ↓
+                          Structured Reading
+                          lib/schema/reading.ts
+              (ตรวจ/แปลง JSON ที่ stream มาให้ตรง ReadingSchema
+               ก่อนส่งกลับ SSE ให้ frontend)
+```
+
 ---
 
 ## 4. โครงสร้างฐานข้อมูลและการเงิน (Data & Credits Model)
@@ -71,28 +128,49 @@
 src/
 ├── app/
 │   ├── api/reading/
-│   │   ├── start/route.ts          # เริ่มต้นรอบ ตรวจ safety และสร้าง commitment
-│   │   ├── [id]/shuffle/route.ts    # บันทึก seed / สับไพ่ / ยืนยันตำแหน่งไพ่ที่เลือก
-│   │   └── [id]/read/route.ts       # สตรีมคำอ่านผ่าน Server-Sent Events (SSE)
+│   │   ├── start/route.ts           # เริ่มต้นรอบ ตรวจ safety และสร้าง commitment
+│   │   ├── [id]/shuffle/route.ts    # สับไพ่ / รับ pickedIndices จากพัดไพ่ / ยืนยันตำแหน่งไพ่
+│   │   ├── [id]/read/route.ts       # สตรีมคำอ่านผ่าน Server-Sent Events (SSE)
+│   │   └── [id]/chat/route.ts       # ถามคุยต่อยอดหลังเปิดไพ่แล้ว
+│   ├── privacy/page.tsx            # นโยบายความเป็นส่วนตัว (PDPA)
+│   ├── page.tsx                    # หน้าหลัก — ประกอบ flow ทั้ง 5 ขั้นตอน
 │   ├── globals.css                 # โทนสี starry sky, 3D card perspective, CSS card-back
 │   └── layout.tsx                  # Root Layout + Thai Web Fonts
 ├── components/                     # (คอมโพเนนต์หลัก)
-│   ├── card/                       # TarotCard 3D, CardBack, CardFace
-│   ├── deck/                       # InteractiveCardFan, ShuffleGesture, CardPicker
-│   ├── spread/                     # SpreadBoard, PositionSlot, SpreadLayout
-│   ├── reading/                    # StreamReader, PersonaAvatar, AdviceList
-│   └── ui/                         # Modal, Button, Drawer, Sparkles
+│   ├── card/                       # TarotCard 3D, CardZoomModal
+│   ├── deck/                       # InteractiveCardFan, ShuffleRitual
+│   ├── spread/                     # SpreadBoard, SpreadCardSelector
+│   ├── reading/                    # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector,
+│   │                               #   IntentionAltarInput, AccuracyRatingWidget
+│   ├── history/, journal/          # ReadingHistoryModal, JournalModal, JournalHistoryDrawer
+│   ├── encyclopedia/                # TarotEncyclopediaModal (คัมภีร์ไพ่ 78 ใบ)
+│   └── ui/                         # RitualStepProgress, GalaxyCanvas, MysticAltarCanvas, TarotArtIcons
 ├── data/
 │   ├── cards/                      # ข้อมูลไพ่ 78 ใบ (Major, Cups, Swords, Wands, Pentacles)
-│   └── spreads.ts                  # ข้อมูลรูปแบบการวางไพ่ 8 แบบ
+│   ├── spreads.ts                  # ข้อมูลรูปแบบการวางไพ่ 10 แบบ
+│   └── personas.ts                 # แม่หมอ 3 บุคลิก (ใจดี, พูดตรง, สายพลัง)
 ├── lib/
-│   ├── claude.ts                   # Anthropic SDK Streaming Client
-│   ├── partial-json.ts             # Parser สำหรับ JSON แบบสตรีมมิ่ง
-│   ├── personas.ts                 # แม่หมอ 3 บุคลิก (ใจดี, พูดตรง, สายพลัง)
-│   ├── prompt.ts                   # Structured System & User Prompts
-│   ├── reading-schema.ts           # Zod Schema สำหรับคำอ่านไพ่
-│   ├── safety.ts                   # Guardrails ตรวจสอบความปลอดภัยคำถาม
-│   └── shuffle.ts                  # Provably Fair RNG & Commitment Engine
+│   ├── ai/
+│   │   ├── claude.ts               # Anthropic SDK Streaming Client (เขียนไว้ ยังไม่ใช้จริง)
+│   │   ├── gemini.ts               # Google Gemini Streaming Client (ใช้งานจริง)
+│   │   └── prompt.ts               # Structured System & User Prompts
+│   ├── schema/
+│   │   └── reading.ts              # Zod Schema สำหรับคำอ่านไพ่ (ReadingSchema, FollowUpSchema)
+│   ├── safety/
+│   │   └── guardrails.ts           # Guardrails ตรวจสอบความปลอดภัยคำถาม
+│   ├── tarot/
+│   │   └── shuffle.ts              # Provably Fair RNG & Commitment Engine
+│   └── utils/
+│       ├── partial-json.ts         # Parser สำหรับ JSON แบบสตรีมมิ่ง
+│       ├── rate-limit.ts           # จำกัดจำนวนครั้งต่อ IP
+│       ├── audio.ts                # เอฟเฟกต์เสียงด้วย Web Audio API (ใช้งานจริง)
+│       ├── sound.ts                # เอฟเฟกต์เสียงรุ่นก่อน (ปัจจุบันไม่มีที่ใดเรียกใช้)
+│       └── history.ts              # ประวัติการดูดวงฝั่ง client
 └── server/
-    └── store.ts                    # In-memory Store (พร้อมเปลี่ยนเป็น Prisma)
+    └── store.ts                    # In-memory Store + Rate Limiter (พร้อมเปลี่ยนเป็น Prisma)
 ```
+
+> **หมายเหตุ**: `prisma/schema.prisma` ออกแบบไว้ครบแล้วแต่ยังไม่ได้ต่อใช้จริง — Prisma 7
+> เปลี่ยน breaking change เรื่อง `datasource.url` (ต้องย้ายไป `prisma.config.ts` +
+> เลือก adapter ก่อน) จึงตัด `prisma generate` ออกจาก `pnpm build` ชั่วคราว
+> ใช้ `pnpm db:generate` เองเมื่อพร้อมต่อ DB จริง
