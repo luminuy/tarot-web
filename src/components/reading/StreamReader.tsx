@@ -190,7 +190,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     <img
                       src={`/cards/${cardData?.image || "major-00.jpg"}`}
                       alt={cardData?.nameTh || "Tarot"}
-                      className="w-full h-full object-cover object-center"
+                      className="w-full h-full object-cover object-center filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
+                      decoding="async"
                     />
                   </div>
 

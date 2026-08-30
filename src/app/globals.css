@@ -72,19 +72,34 @@ body {
     radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.25), transparent 70%);
 }
 
-/* การพลิกไพ่ 3D Scene */
+/* การพลิกไพ่ 3D Scene และระบบเรนเดอร์ภาพคมชัดระดับ HD */
 .card-scene {
   perspective: 1600px;
 }
 .card-inner {
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 }
 .card-face {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 .card-face--back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(0);
+}
+
+/* เรนเดอร์รูปภาพไพ่คมชัดสูงสุด ป้องกันภาพเบลอใน Safari/Chrome/iOS */
+.card-face img,
+.tarot-hd-card-image {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+  image-rendering: crisp-edges;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* แสงสะท้อนประกายฟอยล์ทอง (Gold Foil Sheen) */

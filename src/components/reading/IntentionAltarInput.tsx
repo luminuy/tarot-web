@@ -250,7 +250,8 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                     <img
                       src={seal.image}
                       alt={seal.title}
-                      className="w-full h-full object-cover object-top filter contrast-[1.04]"
+                      className="w-full h-full object-cover object-top filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
+                      decoding="async"
                     />
                   </div>
                 </div>

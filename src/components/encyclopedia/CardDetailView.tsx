@@ -85,7 +85,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   transition={{ type: "spring", stiffness: 220, damping: 22 }}
                   src={getImageSrc(card)}
                   alt={card.nameTh}
-                  className="w-full h-full object-cover filter contrast-[1.05]"
+                  className="w-full h-full object-cover filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
+                  decoding="async"
                 />
                 <div className="gold-foil-sheen absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none" />
 

@@ -175,8 +175,9 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   <img
                     src={imgUrl}
                     alt={card.nameTh}
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 filter contrast-[1.04]"
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="gold-foil-sheen absolute inset-0 opacity-10 group-hover:opacity-40 transition-opacity pointer-events-none" />
 

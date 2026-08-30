@@ -234,8 +234,9 @@ export const TarotCard: React.FC<TarotCardProps> = ({
               <img
                 src={imageSrc}
                 alt={effectiveCard?.nameTh || "Tarot"}
-                className="w-full h-full object-cover object-center filter contrast-[1.03] brightness-[1.02]"
+                className="w-full h-full object-cover object-center filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
                 loading="lazy"
+                decoding="async"
               />
             ) : (
               <div className="w-full h-full bg-[#100b20] flex items-center justify-center">
