@@ -2,7 +2,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { DECK, cardById } from "@/data/cards";
 import { CardDetailView } from "@/components/encyclopedia/CardDetailView";
-import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
+import { MysticBackground } from "@/components/ui/MysticBackground";
 import type { Metadata } from "next";
 
 interface CardPageProps {
@@ -90,7 +90,7 @@ export default async function CardDetailPage({ params }: CardPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(cardJsonLd) }}
       />
-      <MysticAltarCanvas />
+      <MysticBackground />
       <CardDetailView
         card={card}
         prevCard={prevCard}

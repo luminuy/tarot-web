@@ -32,6 +32,13 @@ interface ShootingStar {
   active: boolean;
 }
 
+/**
+ * พื้นหลังกาแลคซี่เต็มรูปแบบ — ดาวกระพริบ, เนบิวลาเคลื่อนที่, ดาวตก, พารัลแลกซ์ตามเมาส์
+ * ใช้เฉพาะเดสก์ท็อป (ผ่าน <MysticBackground />) — มือถือใช้ <MysticAltarCanvas /> ที่เบากว่า
+ *
+ * Perf guard: หยุดวาดเมื่อสลับแท็บ, เคารพ prefers-reduced-motion (วาดเฟรมเดียวแบบนิ่ง),
+ * throttle ~45fps เพื่อลดภาระ GPU
+ */
 export const GalaxyCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -41,25 +48,20 @@ export const GalaxyCanvas: React.FC = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animId: number;
+    let animId = 0;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+    let isVisible = !document.hidden;
 
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      initElements();
-    };
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let prefersReducedMotion = motionQuery.matches;
 
-    window.addEventListener("resize", handleResize);
-
-    const STAR_COUNT = Math.min(220, Math.floor((width * height) / 6000));
+    const STAR_COUNT = Math.min(200, Math.floor((width * height) / 7000));
     const STAR_COLORS = ["#ffffff", "#f0dcb4", "#e0c088", "#cfc8e2", "#9d8189", "#70d6ff"];
     let stars: Star[] = [];
     let nebulas: NebulaCloud[] = [];
     let shootingStars: ShootingStar[] = [];
-    let mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2 };
+    const mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2 };
 
     const initElements = () => {
       stars = [];
@@ -83,13 +85,7 @@ export const GalaxyCanvas: React.FC = () => {
       ];
 
       shootingStars = Array.from({ length: 3 }, () => ({
-        x: 0,
-        y: 0,
-        length: 0,
-        speed: 0,
-        angle: 0,
-        alpha: 0,
-        active: false,
+        x: 0, y: 0, length: 0, speed: 0, angle: 0, alpha: 0, active: false,
       }));
     };
 
@@ -108,29 +104,22 @@ export const GalaxyCanvas: React.FC = () => {
       }
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.targetX = e.clientX;
-      mouse.targetY = e.clientY;
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-
-    let frame = 0;
-    const render = () => {
-      frame++;
+    const drawFrame = (animate: boolean) => {
       ctx.clearRect(0, 0, width, height);
 
-      // Smooth mouse follow
-      mouse.x += (mouse.targetX - mouse.x) * 0.05;
-      mouse.y += (mouse.targetY - mouse.y) * 0.05;
+      if (animate) {
+        mouse.x += (mouse.targetX - mouse.x) * 0.05;
+        mouse.y += (mouse.targetY - mouse.y) * 0.05;
+      }
 
-      // Draw Dynamic Nebulas
+      // Nebulas
       for (const neb of nebulas) {
-        neb.x += neb.vx;
-        neb.y += neb.vy;
-        if (neb.x < 0 || neb.x > width) neb.vx *= -1;
-        if (neb.y < 0 || neb.y > height) neb.vy *= -1;
-
+        if (animate) {
+          neb.x += neb.vx;
+          neb.y += neb.vy;
+          if (neb.x < 0 || neb.x > width) neb.vx *= -1;
+          if (neb.y < 0 || neb.y > height) neb.vy *= -1;
+        }
         const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.radius);
         grad.addColorStop(0, neb.color);
         grad.addColorStop(1, "transparent");
@@ -140,26 +129,27 @@ export const GalaxyCanvas: React.FC = () => {
         ctx.fill();
       }
 
-      // Draw Interactive Mouse Glow Aureole
-      const mouseGlow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 280);
-      mouseGlow.addColorStop(0, "rgba(224, 192, 136, 0.06)");
-      mouseGlow.addColorStop(0.5, "rgba(139, 111, 158, 0.04)");
-      mouseGlow.addColorStop(1, "transparent");
-      ctx.fillStyle = mouseGlow;
-      ctx.beginPath();
-      ctx.arc(mouse.x, mouse.y, 280, 0, Math.PI * 2);
-      ctx.fill();
+      // Interactive mouse glow (desktop only — component ไม่ถูก mount บนมือถืออยู่แล้ว)
+      if (animate) {
+        const mouseGlow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 280);
+        mouseGlow.addColorStop(0, "rgba(224, 192, 136, 0.06)");
+        mouseGlow.addColorStop(0.5, "rgba(139, 111, 158, 0.04)");
+        mouseGlow.addColorStop(1, "transparent");
+        ctx.fillStyle = mouseGlow;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 280, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
-      // Draw Stars and Twinkle
+      // Stars + twinkle
       for (let i = 0; i < stars.length; i++) {
         const star = stars[i];
-        star.twinklePhase += star.twinkleSpeed;
+        if (animate) star.twinklePhase += star.twinkleSpeed;
         const currentAlpha = star.baseAlpha + Math.sin(star.twinklePhase) * 0.35;
         const alphaClamped = Math.max(0.1, Math.min(1, currentAlpha));
 
-        // Parallax slight shift based on mouse
-        const dx = (mouse.x - width / 2) * (star.size * 0.012);
-        const dy = (mouse.y - height / 2) * (star.size * 0.012);
+        const dx = animate ? (mouse.x - width / 2) * (star.size * 0.012) : 0;
+        const dy = animate ? (mouse.y - height / 2) * (star.size * 0.012) : 0;
 
         ctx.fillStyle = star.color;
         ctx.globalAlpha = alphaClamped;
@@ -167,7 +157,6 @@ export const GalaxyCanvas: React.FC = () => {
         ctx.arc(star.x + dx, star.y + dy, star.size, 0, Math.PI * 2);
         ctx.fill();
 
-        // Cross flare on brightest stars
         if (star.size > 1.8 && alphaClamped > 0.8) {
           ctx.strokeStyle = "rgba(240, 220, 180, 0.4)";
           ctx.lineWidth = 0.6;
@@ -180,44 +169,86 @@ export const GalaxyCanvas: React.FC = () => {
         }
       }
 
-      // Shooting Stars
-      spawnShootingStar();
-      for (const ss of shootingStars) {
-        if (!ss.active) continue;
-
-        ss.x += Math.cos(ss.angle) * ss.speed;
-        ss.y += Math.sin(ss.angle) * ss.speed;
-        ss.alpha -= 0.015;
-
-        if (ss.alpha <= 0 || ss.x > width || ss.y > height) {
-          ss.active = false;
-          continue;
+      // Shooting stars (animate only)
+      if (animate) {
+        spawnShootingStar();
+        for (const ss of shootingStars) {
+          if (!ss.active) continue;
+          ss.x += Math.cos(ss.angle) * ss.speed;
+          ss.y += Math.sin(ss.angle) * ss.speed;
+          ss.alpha -= 0.015;
+          if (ss.alpha <= 0 || ss.x > width || ss.y > height) {
+            ss.active = false;
+            continue;
+          }
+          const tailX = ss.x - Math.cos(ss.angle) * ss.length;
+          const tailY = ss.y - Math.sin(ss.angle) * ss.length;
+          const grad = ctx.createLinearGradient(tailX, tailY, ss.x, ss.y);
+          grad.addColorStop(0, "transparent");
+          grad.addColorStop(1, `rgba(240, 220, 180, ${ss.alpha})`);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(tailX, tailY);
+          ctx.lineTo(ss.x, ss.y);
+          ctx.stroke();
         }
-
-        const tailX = ss.x - Math.cos(ss.angle) * ss.length;
-        const tailY = ss.y - Math.sin(ss.angle) * ss.length;
-
-        const grad = ctx.createLinearGradient(tailX, tailY, ss.x, ss.y);
-        grad.addColorStop(0, "transparent");
-        grad.addColorStop(1, `rgba(240, 220, 180, ${ss.alpha})`);
-
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailY);
-        ctx.lineTo(ss.x, ss.y);
-        ctx.stroke();
       }
 
       ctx.globalAlpha = 1;
-      animId = requestAnimationFrame(render);
     };
 
-    render();
+    // ~45fps throttle
+    const FRAME_INTERVAL = 22;
+    let last = 0;
+    const render = (t: number) => {
+      if (!isVisible || prefersReducedMotion) return;
+      animId = requestAnimationFrame(render);
+      if (t - last < FRAME_INTERVAL) return;
+      last = t;
+      drawFrame(true);
+    };
+
+    const start = () => {
+      cancelAnimationFrame(animId);
+      if (prefersReducedMotion) {
+        drawFrame(false);
+      } else if (isVisible) {
+        animId = requestAnimationFrame(render);
+      }
+    };
+
+    const handleResize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      initElements();
+      start();
+    };
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
+    };
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+      start();
+    };
+    const handleMotionChange = (e: MediaQueryListEvent) => {
+      prefersReducedMotion = e.matches;
+      start();
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("visibilitychange", handleVisibility);
+    motionQuery.addEventListener("change", handleMotionChange);
+
+    start();
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      motionQuery.removeEventListener("change", handleMotionChange);
       cancelAnimationFrame(animId);
     };
   }, []);
