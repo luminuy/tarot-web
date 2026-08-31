@@ -30,23 +30,30 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: ⚡ Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
       - name: ⚙️ Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile || pnpm install
 
       # ชุดตรวจกลาง 6 ด่าน (Collision, Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Safety Guardrails, Provably-Fair Shuffle)
       # นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts — แหล่งความจริงเดียวร่วมกับ git hooks และ npm run commit
       - name: 🧪 Verification Suite (6 ด่าน)
         id: verify
-        run: npm run repo:verify
+        run: pnpm run repo:verify
 
       - name: ⚡ Test Build Worker & Next.js Bundle
         id: build_check
-        run: npm run build
+        run: pnpm run build
 
       - name: 🏷️ Auto-Label PR Based on Modified Files
         uses: actions/github-script@v7

@@ -4,6 +4,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
