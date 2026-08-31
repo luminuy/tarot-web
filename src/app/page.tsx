@@ -18,6 +18,7 @@ import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/co
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
+import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
 const ShuffleRitual = dynamic(
@@ -48,6 +49,10 @@ const TarotEncyclopediaModal = dynamic(
   () => import("@/components/encyclopedia/TarotEncyclopediaModal").then((m) => m.TarotEncyclopediaModal),
   { ssr: false }
 );
+const AuthModal = dynamic(
+  () => import("@/components/auth/AuthModal").then((m) => m.AuthModal),
+  { ssr: false }
+);
 const CardZoomModal = dynamic(
   () => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal),
   { ssr: false }
@@ -59,6 +64,7 @@ export default function TarotPage() {
   // Modals state
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isEncyclopediaOpen, setIsEncyclopediaOpen] = useState(false);
   const [zoomedCard, setZoomedCard] = useState<DrawnSlotCard | null>(null);
 
@@ -435,8 +441,10 @@ export default function TarotPage() {
             </div>
           </div>
 
-          {/* Right Toolbar Controls (Sacred Dropdown & Reset Button) */}
+          {/* Right Toolbar Controls (UserProfileBadge, Sacred Dropdown & Reset Button) */}
           <div className="flex items-center gap-2 sm:gap-2.5">
+            <UserProfileBadge onOpenAuthModal={() => setIsAuthOpen(true)} />
+
             <SacredNavDropdown
               onOpenHistory={() => {
                 soundManager.playCardSelectSound();
@@ -716,6 +724,11 @@ export default function TarotPage() {
       <ReadingHistoryModal
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
+      />
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
       />
 
       <TarotEncyclopediaModal
