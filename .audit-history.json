@@ -1,5 +1,46 @@
 [
   {
+    "id": "audit-1788166784264-fnoi6",
+    "timestampTh": "31/8/2569 15:59:43",
+    "timestampIso": "2026-08-31T08:59:43.431Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/fix-tidy-worktree",
+      "commitSha": "5602c5b"
+    },
+    "action": {
+      "category": "FIX",
+      "summary": "แก้ git:tidy --wait ที่ออกจาก branch ไม่ได้เมื่อรันใน git worktree",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "cripts/github-auto.ts",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 2
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788166450249-4upjp",
     "timestampTh": "31/8/2569 15:54:09",
     "timestampIso": "2026-08-31T08:54:09.094Z",
