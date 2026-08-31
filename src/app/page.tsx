@@ -5,8 +5,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { stepVariants, useMotionSafe } from "@/lib/motion";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { SPREADS, type Spread } from "@/data/spreads";
-import { PERSONAS, type Persona } from "@/data/personas";
+import { SPREADS, getSpread, type Spread } from "@/data/spreads";
+import { PERSONAS, getPersona, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import type { Reading } from "@/lib/schema/reading";
@@ -20,6 +20,7 @@ import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/co
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
+import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
@@ -59,6 +60,19 @@ const CardZoomModal = dynamic(
   () => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal),
   { ssr: false }
 );
+
+// P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
+function StepBackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#100b20] border border-[#e5c07b]/30 text-[11px] font-serif-th text-[#cfc8e2] hover:bg-[#191230] transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
+    >
+      <span aria-hidden="true">←</span> ย้อนกลับ
+    </button>
+  );
+}
 
 export default function TarotPage() {
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
@@ -130,6 +144,81 @@ export default function TarotPage() {
   useEffect(() => {
     scrollToSanctuaryTop();
   }, [currentStep]);
+
+  // ── P1-U4: กู้คืน flow ที่ค้างไว้ + P1-U5: รับผัง `?spread=` จากคลังผัง ──────
+  // ก่อนหน้านี้ refresh / back / สลับแท็บ = เด้งกลับขั้น 1 ทั้งที่ server session ยังอยู่ ~60 นาที
+  const resumeDoneRef = useRef(false);
+  useEffect(() => {
+    if (resumeDoneRef.current) return; // กัน StrictMode รันซ้ำ
+    resumeDoneRef.current = true;
+
+    const saved = loadFlowState();
+    // กู้คืนเฉพาะเมื่อผู้ใช้ "เริ่มดูดวงไปแล้วจริง ๆ" (พ้นขั้นเลือกผัง) — ถ้ายังอยู่ขั้น 1
+    // ให้ถือว่าไม่มีอะไรค้าง แล้วเปิดทางให้ `?spread=` ทำงานแทน
+    if (saved && saved.currentStep !== "SPREAD_SELECT") {
+      const spread = getSpread(saved.spreadId);
+      if (spread) setSelectedSpread(spread);
+      setSelectedPersona(getPersona(saved.personaId));
+      setSelectedCategory(saved.category);
+      setQuestion(saved.question);
+      setNickname(saved.nickname);
+      setSituation(saved.situation);
+      setReadingId(saved.readingId);
+      setSessionToken(saved.sessionToken);
+      setCommitment(saved.commitment);
+      setClientSeed(saved.clientSeed);
+      setProof(saved.proof || {});
+      setPickedIndices(saved.pickedIndices || []);
+      setDrawnCards(saved.drawnCards || []);
+      setRevealedOrders(saved.revealedOrders || []);
+      setActiveCardIndex(saved.activeCardIndex || 0);
+      setReadingResult(saved.readingResult);
+      setCurrentStep(saved.currentStep);
+      // สตรีม AI ตายไปแล้วหลัง refresh — ถ้าค้างที่ขั้นอ่านไพ่โดยยังไม่ได้บทสรุป
+      // ให้ขึ้นปุ่มลองใหม่แทนที่จะค้างหน้าเปล่า
+      if (saved.currentStep === "READING" && !saved.readingResult?.summary) {
+        setErrorMsg("การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กดลองใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ");
+      }
+    } else {
+      const spreadParam = new URLSearchParams(window.location.search).get("spread");
+      if (spreadParam) {
+        const match = getSpread(spreadParam);
+        if (match) setSelectedSpread(match);
+      }
+    }
+  }, []);
+
+  // เขียน flow state ลง sessionStorage ทุกครั้งที่มีการเปลี่ยนแปลง (หลัง resume จบแล้วเท่านั้น)
+  // debounce 400ms กันเขียนถี่ ๆ ตอน readingResult อัปเดตรัว ๆ ระหว่าง stream คำทำนาย
+  useEffect(() => {
+    if (!resumeDoneRef.current) return;
+    const t = setTimeout(() => {
+      saveFlowState({
+        currentStep,
+        spreadId: selectedSpread.id,
+        personaId: selectedPersona.id,
+        category: selectedCategory,
+        question,
+        nickname,
+        situation,
+        readingId,
+        sessionToken,
+        commitment,
+        clientSeed,
+        pickedIndices,
+        drawnCards,
+        revealedOrders,
+        activeCardIndex,
+        readingResult,
+        proof,
+      });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [
+    currentStep, selectedSpread, selectedPersona, selectedCategory, question, nickname,
+    situation, readingId, sessionToken, commitment, clientSeed, pickedIndices, drawnCards,
+    revealedOrders, activeCardIndex, readingResult, proof,
+  ]);
 
   // Step 1 -> Step 2: Start Reading Session
   const handleStartSession = async () => {
@@ -272,7 +361,8 @@ export default function TarotPage() {
       startAIStreaming(activeId, enrichedCards, data.sessionToken || sessionToken);
     } catch (err: any) {
       setErrorMsg(err.message || "เกิดข้อผิดพลาดในการประมวลผลไพ่");
-      setPickedIndices([]); // P2-5: allow retry picking
+      // P2-5: ถอยกลับแค่ไพ่ใบสุดท้าย ให้เลือกใหม่ได้ทันทีโดยไม่ต้องเริ่มจับใหม่ทั้งหมด
+      setPickedIndices((p) => p.slice(0, -1));
     } finally {
       setLoading(false);
     }
@@ -397,7 +487,17 @@ export default function TarotPage() {
   };
 
   // Reset to start new reading (P1-10: Complete session state purge)
+  // P1-U2: ยืนยันก่อนล้าง ถ้ากำลังดูดวงค้างอยู่และยังไม่ได้บทสรุป (กันเผลอกดทิ้งทั้งรอบ)
   const handleReset = () => {
+    const midFlow = currentStep !== "SPREAD_SELECT" && currentStep !== "SUMMARY";
+    if (
+      midFlow &&
+      typeof window !== "undefined" &&
+      !window.confirm("ต้องการเริ่มดูดวงใหม่หรือไม่? คำถาม ชื่อเล่น และไพ่ที่เลือกไว้ในรอบนี้จะถูกล้างทั้งหมด")
+    ) {
+      return;
+    }
+    clearFlowState();
     soundManager.playCardSelectSound();
     navigateStep("SPREAD_SELECT");
     setReadingId(null);
@@ -415,6 +515,20 @@ export default function TarotPage() {
     setErrorMsg(null);
   };
 
+  // P1-U1: ย้อนกลับทีละขั้นจากขั้นสับไพ่/เลือกไพ่ (เดิมทางออกเดียวคือ "เริ่มดูดวงใหม่" ที่ล้างทุกอย่าง)
+  const handleStepBack = () => {
+    soundManager.playCardSelectSound();
+    if (currentStep === "SHUFFLE") {
+      navigateStep("INTENTION_SELECT"); // เก็บคำถาม/ชื่อเล่น/ผัง/แม่หมอไว้ครบ
+    } else if (currentStep === "PICK_CARDS") {
+      setPickedIndices([]);
+      setDrawnCards([]);
+      setRevealedOrders([]);
+      setErrorMsg(null);
+      navigateStep("SHUFFLE");
+    }
+  };
+
   return (
     <main className="min-h-screen pb-24 text-[#e2d9f3] relative overflow-hidden bg-[#05040a]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
@@ -426,10 +540,11 @@ export default function TarotPage() {
       {/* Top Sacred Header */}
       <header className="w-full border-b border-[#e5c07b]/20 bg-[#07040f]/80 backdrop-blur-xl sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.9)]">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Luxury Brand Logo */}
-          <div
-            className="flex items-center gap-3.5 cursor-pointer group select-none"
-            onClick={handleReset}
+          {/* Luxury Brand Logo — P1-U2: กลับหน้าแรก ไม่ล้าง state (ปุ่ม "เริ่มดูดวงใหม่" ทำหน้าที่นั้น) */}
+          <Link
+            href="/"
+            aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
+            className="flex items-center gap-3.5 cursor-pointer group select-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
           >
             {/* World-Class Miniature 1909 Tarot Card Brand Logo */}
             <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-lg border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.5)] relative flex-shrink-0 bg-[#07050d] group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(229,192,123,0.8)] transition-all duration-300">
@@ -453,7 +568,7 @@ export default function TarotPage() {
                 1909 RIDER-WAITE TAROT
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* Right Toolbar Controls (UserProfileBadge, Sacred Dropdown & Reset Button) */}
           <div className="flex items-center gap-2 sm:gap-2.5">
@@ -656,6 +771,7 @@ export default function TarotPage() {
                 spreadName={selectedSpread.nameTh}
                 onShuffleComplete={handleShuffleComplete}
               />
+              <StepBackButton onClick={handleStepBack} />
             </motion.div>
           )}
 
@@ -679,6 +795,7 @@ export default function TarotPage() {
                 onPickCard={handlePickCard}
                 disabled={loading}
               />
+              <StepBackButton onClick={handleStepBack} />
             </motion.div>
           )}
 

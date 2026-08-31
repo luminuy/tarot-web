@@ -1,0 +1,7 @@
+# เอกสารแบบ "ต่อท้ายเรื่อย ๆ" — หลาย PR ที่ทำขนานกันมักเพิ่มรายการที่คนละจุดพร้อมกัน
+# ใช้ merge=union (built-in ของ git ไม่ต้อง config อะไรเพิ่ม) ให้เก็บบรรทัดของทั้งสองฝั่ง
+# แทนที่จะขึ้น conflict — ผู้ดูแลค่อยจัดเรียง/ตัดซ้ำทีหลังถ้าจำเป็น
+docs/WORK_LOG.md      merge=union
+docs/INCIDENT_LOG.md  merge=union
+docs/KNOWN_ISSUES.md  merge=union
+docs/BACKLOG.md       merge=union

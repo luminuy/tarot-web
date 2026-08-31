@@ -366,11 +366,8 @@ function waitForMergeThenTidy(repo: string, prNumber: string, branch: string): v
       console.log(`✅ PR #${prNumber} merged แล้ว`);
       // ต้องออกจาก branch ที่จะลบก่อน ถึงจะลบมันได้
       if (getBranch() === branch) {
-        // `.ai-locks.json` เป็นไฟล์สถานะที่ `npm run agent:check` เขียนใหม่ระหว่างการตรวจ
-        // (ตัดล็อคที่หมดอายุออก) ทำให้ working tree สกปรกค้างไว้
-        // ถ้าไฟล์นี้ถูกแก้บน main ด้วย git จะปฏิเสธการสลับ branch ทันที
-        // คืนค่าไฟล์นี้ได้อย่างปลอดภัยเพราะเป็น state ที่สร้างใหม่ได้ และตอนนี้ปลดล็อคไปแล้ว
-        shQuiet("git", ["checkout", "--", ".ai-locks.json"]);
+        // หมายเหตุ: `.ai-locks.json` / `.audit-history.json` / `docs/AUDIT_LOG.md`
+        // ไม่ track ใน git แล้ว (อยู่ใน .gitignore) จึงไม่บล็อกการสลับ branch อีกต่อไป
 
         // ⚠️ `git checkout main` ใช้ไม่ได้เมื่ออยู่ใน git worktree
         // เพราะ main ถูก checkout ค้างไว้ที่โฟลเดอร์หลักอยู่แล้ว (บทเรียน INC-0004)

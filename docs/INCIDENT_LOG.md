@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0035 · 2026-09-01 02:25 · 🟡 Medium · stop tracking auto-generated bookkeeping files that conflict on every parallel PR
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | แทบทุก PR ที่เปิดขนานกันติด merge conflict ที่ .ai-locks.json / .audit-history.json / docs/AUDIT_LOG.md / docs/WORK_LOG.md ต้อง rebase แก้มือซ้ำ ๆ ทุกครั้ง |
+| **สาเหตุราก** | ไฟล์ 4 ตัวนี้ถูก track ใน git แต่ commit tooling (recordAudit, syncWorkLog, agent-guard) เขียนทับใหม่ทั้งไฟล์ทุก commit ด้วย timestamp/collision-count/audit-entry ที่ต่างกันทุกครั้ง 2 branch ที่ทำพร้อมกันจึงแก้บรรทัดเดียวกันเสมอ = conflict รับประกัน · โดยเฉพาะ syncWorkLog ที่ regex-replace บล็อก 'Current Handoff Summary' ใน WORK_LOG.md ทุก commit |
+| **การแก้ไข** | 1) .gitignore + git rm --cached .ai-locks.json .audit-history.json docs/AUDIT_LOG.md (เป็น state เครื่อง/ผลลัพธ์ที่สร้างใหม่ได้ · audit trail ถาวรอยู่ใน git history + INCIDENT_LOG อยู่แล้ว) 2) sync-worklog.ts เขียนสถานะอัตโนมัติลง docs/WORK_LOG.status.md (gitignore) แทนแก้ WORK_LOG.md · เอาบล็อก auto-synced ออกจาก WORK_LOG.md เหลือแต่ changelog ที่คนเขียนมือ 3) .gitattributes merge=union ให้ docs/*.md ที่ append เรื่อย ๆ (WORK_LOG/INCIDENT_LOG/KNOWN_ISSUES/BACKLOG) auto-merge แทน conflict 4) แก้ isRunDirectly() ใน sync-worklog ให้ npm run log:sync ทำงานจริงใต้ tsx (เดิม guard พังเงียบ) |
+| **🛡️ กฎป้องกันถาวร** | **ห้าม track ไฟล์ที่ tooling regenerate ทั้งไฟล์ทุก commit — ถ้าต้องมี ให้ gitignore แล้วชี้ output ไปไฟล์ .status แยก · เอกสาร append-only ให้ตั้ง merge=union ใน .gitattributes เสมอ · แหล่งความจริงถาวรของ audit = git history ไม่ใช่ไฟล์ JSON ที่ commit** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run typecheck 0 errors · npm run log:sync เขียน docs/WORK_LOG.status.md สำเร็จ (เดิม no-op) · git check-ignore ยืนยันไฟล์ทั้ง 4 ถูก ignore · npm run repo:verify ผ่าน |
+| **บันทึกโดย** | Claude Sonnet 5 · branch `claude/ux-navigation-r6` · commit `b670f6d` |
+
+
 ### INC-0034 · 2026-09-01 01:25 · 🟠 High · remove invalid secrets array from wrangler.jsonc that broke Production deploy
 
 | หัวข้อ | รายละเอียด |
