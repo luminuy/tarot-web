@@ -4,3 +4,16 @@ set -e
 echo "🚀 [Pre-Push Guard] ตรวจสอบความปลอดภัยขั้นสุดท้ายก่อน Push ขึ้น GitHub..."
 npm run repo:verify
 echo "✅ [Pre-Push ผ่าน] พร้อม Push ขึ้น Cloudflare Workers!"
+
+# เตือน: push branch เฉยๆ ไม่ทำให้ automation (pr.yml merge + deploy.yml) ทำงาน
+# ต้องเปิด PR ด้วย `npm run pr:auto` เสมอ — บทเรียน INC-0015
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
+if [ -n "$BRANCH" ] && [ "$BRANCH" != "main" ] && [ "$BRANCH" != "HEAD" ]; then
+  if ! gh pr list --head "$BRANCH" --state open --json number -q '.[0].number' 2>/dev/null | grep -q '[0-9]'; then
+    echo ""
+    echo "📌 [เตือน] branch \"$BRANCH\" ยังไม่มี PR เปิดอยู่"
+    echo "   การ push เฉยๆ จะ 'ไม่' ทำให้ระบบ merge หรือ deploy ให้ (INC-0015)"
+    echo "   เมื่อพร้อมแล้วรัน:  npm run pr:auto -- \"<title>\" --body-file <path>"
+    echo ""
+  fi
+fi

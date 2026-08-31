@@ -100,12 +100,20 @@ npm run agent:unlock -- --agent <ชื่อคุณ>
 npm run log:sync
 
 # 7. เปิด PR (ระบบจะตรวจ 7 ด่านซ้ำ + merge + deploy ให้เอง)
+#    ⚠️ ขั้นนี้ "ห้ามข้าม" — ดู INC-0015 ด้านล่าง
 #    ใส่ --wait เพื่อให้รอจน merge เสร็จ แล้วสลับกลับ main + ลบ branch ให้อัตโนมัติ
 npm run pr:auto -- "<title>" --body-file <path> --wait
 
 # 8. ถ้าไม่ได้ใช้ --wait ให้เก็บกวาด branch ที่ merge แล้วเองภายหลัง
 npm run git:tidy
 ```
+
+> 🚨 **INC-0015 — ต้องเปิด PR เสมอ ไม่งั้นงานไม่ขึ้น production**
+> การ `git push` branch ขึ้น GitHub เฉยๆ **ไม่ทำให้ `pr.yml` (merge) หรือ `deploy.yml` ทำงานเลย**
+> automation ทั้งหมดเริ่มทำงาน **เมื่อมี PR เปิดอยู่เท่านั้น** (`pr.yml` trigger จาก `pull_request` event)
+> ถ้าคุณ push commit แล้วจบงานโดยไม่รัน `npm run pr:auto` → งานจะค้างอยู่บน branch เฉยๆ
+> AI ตัวถัดไปจะเจอ branch ที่ล้าหลัง main + ชน conflict (เคยเกิดจริงกับ `claude/resilience-perf-enhancements` — push 13 commit ทิ้งไว้ ไม่มี PR)
+> `npm run git:tidy` จะเตือน "⚠️ มี N commit นำหน้า main แต่ยังไม่ได้เปิด PR" ให้เอง และ pre-push hook ก็เตือนตอน push
 
 ---
 

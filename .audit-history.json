@@ -1,5 +1,58 @@
 [
   {
+    "id": "audit-1788176275227-1yb9d",
+    "timestampTh": "31/8/2569 18:37:54",
+    "timestampIso": "2026-08-31T11:37:54.340Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/enforce-pr-flow",
+      "commitSha": "b9b45aa"
+    },
+    "action": {
+      "category": "FIX",
+      "summary": "INC-0015: เพิ่มเครื่องเตือน branch ที่ push แต่ยังไม่เปิด PR",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "githooks/pre-push",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/AI_COLLABORATION_GUIDELINES.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/INCIDENT_LOG.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "cripts/github-auto.ts",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 5
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788172862924-aket9",
     "timestampTh": "31/8/2569 17:41:02",
     "timestampIso": "2026-08-31T10:41:02.121Z",

@@ -48,6 +48,19 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0015 · 2026-08-31 18:36 · 🟡 Medium · branch push ทิ้งไว้โดยไม่เปิด PR → automation ไม่ทำงาน งานไม่ขึ้น production
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | GitHub ขึ้นแบนเนอร์ 'Compare & pull request' ค้างไว้ · branch claude/resilience-perf-enhancements มี 13 commit (perf/SEO/bug fixes) push ขึ้น remote แล้วแต่ pr.yml/deploy.yml ไม่ทำงานเลย งานทั้งหมดค้างไม่ขึ้น production |
+| **ผลกระทบ** | งาน perf + แก้ ISSUE-001 (เว็บใช้ดูดวงไม่ได้) ค้าง 30+ นาที · branch ล้าหลัง main จน conflict 3 ไฟล์ ต้อง merge มือ |
+| **สาเหตุราก** | pr.yml trigger จาก pull_request event เท่านั้น การ git push เฉยๆ ไม่สร้าง event นั้น · Agent (Antigravity) ทำงานเสร็จแล้ว commit+push แต่ข้ามขั้น npm run pr:auto ใน Standard Workflow ข้อ 7 · ไม่มีเครื่องเตือนว่า 'branch นี้มีงานแต่ยังไม่เปิด PR' |
+| **การแก้ไข** | เปิด PR #21 รวม branch + reconcile conflict (เก็บ edge caching, ตัด cloudflare ID ปลอม) · เพิ่มเครื่องเตือน 3 จุด: git:tidy เตือน branch ที่มี commit นำหน้า main แต่ไม่มี PR / pre-push hook เตือนตอน push branch ที่ยังไม่มี PR / AI_COLLABORATION_GUIDELINES ข้อ 0.4 เน้นห้ามข้ามขั้น pr:auto |
+| **🛡️ กฎป้องกันถาวร** | **หลัง commit+push ทุกครั้ง ต้องรัน npm run pr:auto เสมอ — ถือว่างานยังไม่เสร็จจนกว่า PR จะเปิด · git:tidy + pre-push hook จะเตือนอัตโนมัติถ้ามี branch งานค้างไม่มี PR** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน npm run git:tidy เห็นบรรทัด '⚠️ ... มี N commit นำหน้า main แต่ยังไม่ได้เปิด PR' สำหรับ branch ที่ push แต่ไม่มี PR |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/enforce-pr-flow` · commit `b9b45aa` |
+
+
 ### INC-0014 · 2026-08-31 16:42 · 🟡 Medium · Resolve ISSUE-001 step deadlock, ISSUE-002 hydration, ISSUE-008/009 404 preloads, ISSUE-010 env vars, and ISSUE-011 packageManager
 
 | หัวข้อ | รายละเอียด |
