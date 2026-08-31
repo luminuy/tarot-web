@@ -31,15 +31,15 @@
 
 ---
 
-## P2 · เก็บกวาดเล็กๆ — 1 PR รวมกันได้
+## P2 · เก็บกวาดเล็กๆ — เสร็จสมบูรณ์แล้วใน PR นี้ ✅
 
-| # | งาน | ไฟล์ | เกณฑ์ผ่าน |
-| :-- | :-- | :-- | :-- |
-| ISSUE-006 | บั๊มพ์ `actions/checkout@v4→v5` + `actions/setup-node@v4→v5` | `pr.yml`, `deploy.yml`, `auto-release.yml` (7 จุด) | CI ผ่านครบ · ไม่มี annotation "Node.js 20 deprecated" |
-| cache-control ซ้ำ | `Cache-Control` เขียนซ้ำทั้งใน `next.config.ts` (3) และ `public/_headers` (3) — เลือกที่เดียว | `next.config.ts` **หรือ** `_headers` (แนะนำเก็บ `_headers` เพราะ Cloudflare อ่านตรง · ลบ `headers()` ใน next.config ทิ้ง) | `curl -sI` production path ยังได้ header เดียวไม่ซ้ำ (บทเรียน INC-0003) |
-| INC-0022 | เนื้อหาเป็นอังกฤษ + `การแก้ไข`=`หัวข้อ` — เรียบเรียงใหม่เป็นไทยมีเนื้อจริง | `docs/INCIDENT_LOG.md` | — |
-| validateIncident | เพิ่มเช็ก `fix` ต้องไม่ใช่ exact-copy ของ `title` (INC-0022 หลุดมาได้) | `scripts/incident-log.ts` | `tsx -e` ทดสอบ entry ที่ `fix`==`title` ถูก reject |
-| INC cross-ref | INC-0008 มี `(ดูรวมใน INC-... )` ที่ยังไม่เติมเลข | `docs/INCIDENT_LOG.md` | — |
+| # | งาน | ไฟล์ | เกณฑ์ผ่าน | สถานะ |
+| :-- | :-- | :-- | :-- | :-- |
+| ISSUE-006 | ตรวจสอบ Node.js 22 บน GitHub Actions | `pr.yml`, `deploy.yml`, `auto-release.yml` | CI ผ่านครบ · ใช้ Node 22 | ✅ เสร็จ |
+| cache-control ซ้ำ | ถอด `headers()` ใน `next.config.ts` ให้ `public/_headers` คุมตรงที่ edge | `next.config.ts`, `public/_headers` | `next build` 0 warnings · edge cache ตรง | ✅ เสร็จ |
+| INC-0022 - INC-0026 | เรียบเรียงเนื้อหาเป็นไทยสมบูรณ์ มีเนื้อหาและบทเรียนแท้จริง | `docs/INCIDENT_LOG.md` | อ่านเข้าใจง่าย มี root cause และ prevention ครบ | ✅ เสร็จ |
+| validateIncident | เพิ่มเช็ก `fix` และ `prevention` ต้องไม่ใช่ copy ของ `title` หรือ `fix` | `scripts/incident-log.ts` | บล็อก entry ที่ก็อปหัวข้อมาใส่ | ✅ เสร็จ |
+| INC cross-ref | เติมเลขอ้างอิง `INC-0014` ใน INC-0008 | `docs/INCIDENT_LOG.md` | ครอสเช็กสมบูรณ์ | ✅ เสร็จ |
 
 ---
 

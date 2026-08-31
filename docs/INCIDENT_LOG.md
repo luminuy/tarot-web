@@ -62,59 +62,58 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
-### INC-0026 · 2026-08-31 22:16 · 🟡 Medium · Fix summary tab crash by adding safe keyword extraction in mantra and resilient widget wrappers
+### INC-0026 · 2026-08-31 22:16 · 🟡 Medium · แตะแท็บ "สรุปภาพรวม & คำแนะนำ" แล้วหน้าจอขึ้น Error Boundary
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เมื่อกดเข้าแท็บ "สรุปภาพรวม & คำแนะนำ" ในหน้าผลคำทำนาย หน้าจอแสดงกล่องสีดำ Error Boundary "เกิดข้อผิดพลาดชั่วคราวในการแสดงผล" |
+| **สาเหตุราก** | `mantra.ts` ดึงคีย์เวิร์ดของไพ่ผ่าน `chosenCard.keywords.reversed[0]` โดยสันนิษฐานว่าคีย์เวิร์ดเป็น Object เสมอ แต่ในคอมโพเนนต์อ่านไพ่บนหน้าจอ คีย์เวิร์ดของไพ่ที่เปิดแล้วถูกส่งมาเป็น Array ของคำศัพท์ (`string[]`) ทำให้เกิด `TypeError: Cannot read properties of undefined (reading '0')` ในระหว่าง Render |
+| **การแก้ไข** | รองรับโครงสร้างคีย์เวิร์ดทั้งแบบ `string[]` และ `{ upright, reversed }` ใน `mantra.ts` + เพิ่ม `try/catch` ใน `useMemo` ของ `ElementalBalanceWidget` และ `OracleMantraCard` + ดึงไพ่เต็มผ่าน `cardByIndex` ใน `StreamReader.tsx` |
+| **🛡️ กฎป้องกันถาวร** | **คอมโพเนนต์ย่อยที่เรนเดอร์ในแท็บคำทำนายต้องมี safe memo / optional chaining ครอบเสมอ และต้องรองรับข้อมูลไพ่ทั้งแบบดิบและแบบผ่าน snapshot** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `09f9311` · เรียบเรียงใหม่ |
+
+
+### INC-0025 · 2026-08-31 21:50 · 🟠 High · หน้าตั้งคำถามขึ้นแถบแดง Unexpected end of JSON input เพราะ API /start คืนค่า 500
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการที่พบ** | React Error Boundary modal appeared when user clicked on Summary and Advice tab in StreamReader |
-| **สาเหตุราก** | mantra.ts assumed keywords was an object with reversed property when DrawnSlotCard stored it as string array causing TypeError reading property 0 of undefined |
-| **การแก้ไข** | Fix summary tab crash by adding safe keyword extraction in mantra and resilient widget wrappers |
-| **🛡️ กฎป้องกันถาวร** | **Handle keywords as both array and object formats safely and wrap all reading sub-widgets in defensive memo try/catch** |
-| **บันทึกโดย** | Antigravity AI · branch `main` · commit `09f9311` |
+| **อาการที่พบ** | เมื่อเลือกผังและแม่หมอเสร็จแล้วกดเริ่มดูดวง หน้าจอแสดงแถบสีแดง `Failed to execute 'json' on 'Response': Unexpected end of JSON input` |
+| **สาเหตุราก** | `src/lib/security/session-token.ts` มีการ `throw Error` เมื่อรันบน Production หากตัวแปร `TAROT_SESSION_SECRET` ยังไม่ได้ถูกตั้งค่าใน Cloudflare Worker ส่งผลให้ API `/api/reading/start` แครชด้วย HTTP 500 (Empty Body) และทำให้เบราว์เซอร์อ่าน JSON ไม่สำเร็จ |
+| **การแก้ไข** | เปลี่ยนให้ `getSessionSecret()` มีค่า Fallback Secret ที่ปลอดภัยเสมอเมื่อไม่มี env var + ครอบ `res.json().catch(() => ({}))` ฝั่งหน้าเว็บ |
+| **🛡️ กฎป้องกันถาวร** | **ฟังก์ชัน Utility ระดับระบบความปลอดภัยต้องมี Fallback ที่ปลอดภัยในตัว ไม่ throw unhandled exception จนทำให้ Serverless Edge พังทั้งระบบ** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `bc9daa2` · เรียบเรียงใหม่ |
 
 
-### INC-0025 · 2026-08-31 21:50 · 🟡 Medium · Fix HTTP 500 in start route by adding fallback secret in session-token and resilient JSON parsing
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการที่พบ** | Unexpected end of JSON input error displayed on Step 2 because session-token threw uncaught exception on Edge production when env var was unset |
-| **สาเหตุราก** | getSessionSecret threw error when TAROT_SESSION_SECRET was not set in Cloudflare Worker environment |
-| **การแก้ไข** | Fix HTTP 500 in start route by adding fallback secret in session-token and resilient JSON parsing |
-| **🛡️ กฎป้องกันถาวร** | **Ensure session-token always uses safe fallback secret and client-side res.json handles non-JSON responses gracefully** |
-| **บันทึกโดย** | Antigravity AI · branch `main` · commit `bc9daa2` |
-
-
-### INC-0024 · 2026-08-31 21:40 · 🟡 Medium · Fix missing card images caused by nonexistent avif srcset and enforce disk existence check in QA guard
+### INC-0024 · 2026-08-31 21:40 · 🟠 High · ภาพหน้าไพ่ในผังพยากรณ์ขึ้นไอคอนเครื่องหมายคำถาม (?) สีฟ้าทั้งหมด
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการที่พบ** | All spread preview cards showed blue question mark icons because browser requested missing avif files |
-| **สาเหตุราก** | CardImage.tsx included image/avif source tag in picture element but no avif files existed on disk causing 404 image load failures |
-| **การแก้ไข** | Fix missing card images caused by nonexistent avif srcset and enforce disk existence check in QA guard |
-| **🛡️ กฎป้องกันถาวร** | **Remove avif source tag from CardImage.tsx and add automated disk existence assertion for all 78 cards in test-image-paths.ts** |
-| **บันทึกโดย** | Antigravity AI · branch `main` · commit `76eab15` |
+| **อาการที่พบ** | หน้าเลือกผังพยากรณ์และหน้าดูดวง ภาพหน้าไพ่ทุกใบไม่แสดงผลและขึ้นเป็นไอคอนสี่เหลี่ยมสีฟ้าพร้อมเครื่องหมาย `?` |
+| **สาเหตุราก** | มีการเพิ่มแท็ก `<source type="image/avif">` ใน `CardImage.tsx` ทำให้เบราว์เซอร์เลือกขอไฟล์ `.avif` เป็นอันดับแรก แต่บนเซิร์ฟเวอร์มีเฉพาะไฟล์ `.webp` และ `.jpg` (ไม่มีไฟล์ `.avif` จริง) เบราว์เซอร์จึงได้ 404 และแสดงเป็นภาพพัง |
+| **การแก้ไข** | ถอดแท็ก AVIF ออกจาก `CardImage.tsx` และ `card-image.ts` ให้ใช้ WebP ที่มีอยู่จริง + เพิ่มด่านตรวจการมีอยู่จริงของไฟล์ภาพบนดิสก์ 78 ใบใน `scripts/qa/test-image-paths.ts` |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามประกาศ format ภาพใน `<picture>` หรือ `srcSet` ถ้าไม่มีไฟล์จริงบนดิสก์ครบ 78 ใบ — และ `test-image-paths.ts` จะตรวจเช็คไฟล์จริงทุกครั้งในด่านที่ 7** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `76eab15` · เรียบเรียงใหม่ |
 
 
-### INC-0023 · 2026-08-31 21:35 · 🟡 Medium · Fix WebKit scrollTo DOMException pattern error and remove persona card text overlays
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการที่พบ** | The string did not match the expected pattern error shown when transitioning steps in Safari/WebKit and persona cards had text overlapping card artwork |
-| **สาเหตุราก** | Non-standard behavior instant in window.scrollTo caused WebKit DOMException and persona illustrations had legacy text badges inside card frame |
-| **การแก้ไข** | Fix WebKit scrollTo DOMException pattern error and remove persona card text overlays |
-| **🛡️ กฎป้องกันถาวร** | **Use standard compliant ScrollBehavior auto and enforce 100% Pure 1909 card artwork without overlays per Rule 7** |
-| **บันทึกโดย** | Antigravity AI · branch `main` · commit `84b1417` |
-
-
-### INC-0022 · 2026-08-31 21:23 · 🟡 Medium · Refine pr.yml auto-merge with explicit error handling and hard-fail deploy guard
+### INC-0023 · 2026-08-31 21:35 · 🟡 Medium · หน้าจอขึ้น Error "The string did not match the expected pattern" ใน Safari
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการที่พบ** | Auto-merge workflow had permissive review approvals and logged warnings on dispatch failure |
-| **สาเหตุราก** | CI workflow needed strict sequential execution guarantees and explicit failure propagation without masking errors |
-| **การแก้ไข** | Refine pr.yml auto-merge with explicit error handling and hard-fail deploy guard |
-| **🛡️ กฎป้องกันถาวร** | **Ensure GitHub Actions workflows always propagate failures and only merge strictly verified pull requests** |
-| **บันทึกโดย** | Antigravity AI · branch `main` · commit `99e6f29` |
+| **อาการที่พบ** | เมื่อกดเปลี่ยนขั้นตอนบนเบราว์เซอร์ Safari / iOS WebKit หน้าจอแสดงแถบแจ้งเตือนสีแดง `The string did not match the expected pattern.` |
+| **สาเหตุราก** | `scrollToSanctuaryTop` ใน `src/app/page.tsx` ส่งค่า `behavior: "instant"` ซึ่งเป็นค่าผิดมาตรฐานที่ Safari ไม่รองรับและโยน `DOMException: SyntaxError` ออกมา |
+| **การแก้ไข** | ปรับไปใช้ `behavior: "auto"` และ `window.scrollTo(0, 0)` ตามมาตรฐาน CSSOM View + ครอบ `try/catch` ไม่ให้ Exception หลุดไปถึงหน้าจอ |
+| **🛡️ กฎป้องกันถาวร** | **การสั่งเลื่อนหน้าจอผ่าน Window/DOM ต้องใช้ค่ามาตรฐาน CSSOM (`auto` หรือ `smooth`) และครอบ try/catch เสมอเพื่อความปลอดภัยบนทุกเบราว์เซอร์** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `84b1417` · เรียบเรียงใหม่ |
+
+
+### INC-0022 · 2026-08-31 21:23 · 🟡 Medium · ปรับปรุงความเข้มงวดของ CI auto-merge workflow ให้ส่งต่อ Error อย่างชัดเจน
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Workflow auto-merge มีการสร้าง review approval แบบอัตโนมัติ และบันทึกเพียง warning เมื่อ trigger deploy ไม่สำเร็จ ทำให้ไม่เห็นข้อผิดพลาดแท้จริง |
+| **สาเหตุราก** | CI workflow ขาดการจัดการข้อผิดพลาดแบบ Fail-Fast (Hard-fail) ทำให้ deploy dispatch ที่ล้มเหลวไม่ทำให้สถานะ workflow เป็นสีแดง |
+| **การแก้ไข** | ปรับ `.github/workflows/pr.yml` ให้ใช้ `core.setFailed` เมื่อ trigger deploy ล้มเหลว และตัด review approval ปลอมออกเพื่อให้ audit trail โปร่งใส |
+| **🛡️ กฎป้องกันถาวร** | **Workflow การส่งมอบงานต้อง Fail-Fast เสมอเมื่อขั้นตอนสำคัญล้มเหลว ห้ามกลบ Error ด้วย Warning** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `99e6f29` · เรียบเรียงใหม่ |
 
 
 ### INC-0021 · 2026-08-31 20:55 · 🟡 Medium · บังคับคุณภาพ INCIDENT_LOG + เรียบเรียง 4 entry ที่ก็อป commit title
@@ -284,7 +283,7 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **ผลกระทบ** | ฟีเจอร์แชทถามต่อไม่ทำงานจริง เป็นแค่ข้อความตายตัว |
 | **สาเหตุราก** | chat route เรียก Gemini ด้วยชื่อ model ที่ไม่มีจริง + ส่ง `thinkingConfig` ที่ model ไม่รองรับ → API ตอบ 400 Bad Request → โค้ดมี `catch` ที่ fall back ไปคืนสตริง hardcoded โดยไม่ log ว่า error |
 | **การแก้ไข** | เปลี่ยนไปใช้ Gemini model ที่ valid + เพิ่ม Claude เป็น engine สำรอง + ส่ง conversation history เข้าไปด้วยเพื่อให้ตอบตามบริบท — `src/app/api/reading/[id]/chat/route.ts` |
-| **🛡️ กฎป้องกันถาวร** | **ห้าม `catch` แล้ว fallback เงียบไปคืนค่า hardcoded — ถ้า AI call ล้มต้อง log + คืน error ให้ผู้ใช้เห็น · ชื่อ model ต้อง validate กับ docs ก่อนใช้ (ดูรวมใน INC-... ของ Gemini model list)** |
+| **🛡️ กฎป้องกันถาวร** | **ห้าม `catch` แล้ว fallback เงียบไปคืนค่า hardcoded — ถ้า AI call ล้มต้อง log + คืน error ให้ผู้ใช้เห็น · ชื่อ model ต้อง validate กับ docs ก่อนใช้ (ดูรวมใน INC-0014 ของ Gemini model fallback)** |
 | **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 · repo:verify ผ่าน · พิมพ์คำถามต่างกันได้คำตอบต่างกันตามบริบท |
 | **บันทึกโดย** | Antigravity AI · branch `main` · commit `6ee6fc8` · เรียบเรียงใหม่โดย Claude (ของเดิมทุกช่อง = ก็อป commit title) |
 

@@ -27,3 +27,8 @@
 # ไฟล์ build ของ Next.js — มี hash อยู่ในชื่อไฟล์แล้ว จึงปลอดภัยที่จะแคชยาว
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable
+
+# ไฟล์เสียงประกอบ SFX
+/sounds/*
+  Cache-Control: public, max-age=31536000, immutable
+

@@ -90,10 +90,16 @@ export function validateIncident(inc: Incident): string[] {
     problems.push('"อาการ" ก็อปมาจาก "หัวข้อ" — ต้องอธิบายสิ่งที่ "คนเจอครั้งแรก" เห็น ไม่ใช่ชื่อเรื่อง');
   if (isDuplicate(inc.fix, inc.symptom))
     problems.push('"การแก้ไข" ก็อปมาจาก "อาการ" — เป็นคนละเรื่องกัน');
+  if (isDuplicate(inc.fix, inc.title))
+    problems.push('"การแก้ไข" ก็อปมาจาก "หัวข้อ" — ต้องอธิบายวิธีแก้จริง ไม่ใช่แค่ชื่อเรื่อง');
   if (isDuplicate(inc.rootCause, inc.symptom))
     problems.push('"สาเหตุราก" ก็อปมาจาก "อาการ" — ต้องตอบว่า "ทำไมถึงเกิดขึ้นได้ตั้งแต่แรก"');
   if (isDuplicate(inc.rootCause, inc.title))
     problems.push('"สาเหตุราก" ก็อปมาจาก "หัวข้อ" — ต้องเป็นคำอธิบายว่าทำไมบั๊กนี้ถึงหลุดมาได้');
+  if (isDuplicate(inc.prevention, inc.title))
+    problems.push('"กฎป้องกัน" ก็อปมาจาก "หัวข้อ" — ต้องเป็นกฎถาวรที่ป้องกันไม่ให้เกิดซ้ำ');
+  if (isDuplicate(inc.prevention, inc.fix))
+    problems.push('"กฎป้องกัน" ก็อปมาจาก "การแก้ไข" — การแก้ไขคือทำอะไรกับโค้ด แต่การป้องกันคือกฎหรือด่านตรวจถาวร');
 
   return problems;
 }
