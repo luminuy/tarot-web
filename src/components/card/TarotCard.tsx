@@ -71,6 +71,13 @@ const SIZE_MAP = {
   responsive: "w-full aspect-[1/1.7] max-w-[200px]",
 };
 
+const DEFAULT_IMAGE_SIZES: Record<string, string> = {
+  sm: "85px",
+  md: "(min-width: 640px) 160px, 120px",
+  lg: "(min-width: 640px) 280px, 220px",
+  responsive: "200px",
+};
+
 export const TarotCard: React.FC<TarotCardProps> = ({
   card,
   isReversed = false,
@@ -80,11 +87,13 @@ export const TarotCard: React.FC<TarotCardProps> = ({
   size = "md",
   className = "",
   onClick,
-  imageSizes = "(min-width: 640px) 128px, 112px",
+  imageSizes,
   imageFull = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
+
+  const effectiveImageSizes = imageSizes ?? DEFAULT_IMAGE_SIZES[size] ?? "120px";
 
   // Smooth Interactive 3D Parallax Spring Physics
   const mouseX = useMotionValue(0);
@@ -242,8 +251,8 @@ export const TarotCard: React.FC<TarotCardProps> = ({
                 image={effectiveCard?.image}
                 cardId={effectiveCard?.id}
                 alt={effectiveCard?.nameTh || "Tarot"}
-                className="w-full h-full object-cover object-center filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
-                sizes={imageSizes}
+                className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                sizes={effectiveImageSizes}
                 full={imageFull}
               />
             ) : (

@@ -80,15 +80,20 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               className="relative w-64 sm:w-72 aspect-[7/12] rounded-2xl overflow-hidden border-2 border-[#ffd700]/70 p-1.5 bg-gradient-to-b from-[#2d224d] via-[#150d2c] to-[#07040f] shadow-[0_0_50px_rgba(229,192,123,0.35)]"
             >
               <div className="relative w-full h-full rounded-xl overflow-hidden bg-black">
-                <motion.img
+                <motion.div
                   animate={{ rotate: isUpright ? 0 : 180 }}
                   transition={{ type: "spring", stiffness: 220, damping: 22 }}
-                  src={getImageSrc(card)}
-                  alt={card.nameTh}
-                  className="w-full h-full object-cover filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
-                  decoding="async"
-                  fetchPriority="high"
-                />
+                  className="w-full h-full"
+                >
+                  <CardImage
+                    image={card.image}
+                    cardId={card.id}
+                    alt={card.nameTh}
+                    className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                    sizes="(min-width: 640px) 320px, 280px"
+                    loading="eager"
+                  />
+                </motion.div>
                 <div className="gold-foil-sheen absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
                 {/* Top Floating Badge */}

@@ -228,7 +228,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       {/* Empty State */}
       {filteredCards.length === 0 && (
         <div className="text-center py-16 rounded-3xl border border-[#e5c07b]/20 bg-[#0d081c]/80 p-8 space-y-3">
-          <div className="text-3xl">🔮</div>
+          <div className="text-3xl text-[#ffd700]">✦</div>
           <h3 className="font-serif-th text-lg font-bold text-[#f5deaa]">
             ไม่พบไพ่ที่ตรงกับ &ldquo;{searchQuery}&rdquo;
           </h3>

@@ -7,10 +7,10 @@
 
 ## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `31/8/2569 12:18:29` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `31/8/2569 12:32:22` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
-- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (1 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
+- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (0 Locks ที่ใช้งานอยู่)
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
@@ -545,11 +545,29 @@
   3. คุมความสูงรวมของการจัดวางทุกผัง **ให้อยู่ระหว่าง 85px – 100px เสมอ** (ต่ำกว่ากล่องคอนเทนเนอร์ `h-28` = 112px อย่างน้อย 15-25px) เพื่อให้มี Padding หายใจอย่างสมบูรณ์แบบ
   4. รายละเอียดคำอธิบายของแต่ละตำแหน่ง ให้แสดงใน Accordion ด้านล่าง `"✦ ดูรายละเอียดตำแหน่งไพ่"` เท่านั้น
 
-### 10. Absolute Image Path Resolution in Sub-routes (กฎการอ้างอิง Root Path รูปภาพ)
-- **กรณีที่เคยเกิดขึ้น**: ใน `CardsExplorer.tsx` และ `CardDetailView.tsx` มีการใช้ `src={card.image}` โดยตรง (ซึ่งข้อมูลดิบเป็น `"major-00.jpg"`) ทำให้เมื่อผู้ใช้อยู่ที่ Sub-route `/cards` เบราว์เซอร์จะ Resolve เป็น `/cards/major-00.jpg` แทนที่จะเป็น `/cards/major-00.jpg` จาก root public directory ส่งผลให้ภาพไม่โหลดและแสดงไอคอนกล่องเสีย `[?]`
-- **วิธีแก้ & กฎป้องกันถาวร**:
-  - ทุกจุดที่ Render ภาพหน้าไพ่ ต้องผ่าน `<CardImage />` หรือ `getCardImageSrc(image, id)` จาก `src/lib/tarot/card-image.ts` ซึ่งการันตี prefix `/cards/` ให้เสมอ
-  - ห้ามเขียน `<img src={card.image} />` เปล่าๆ โดยไม่มี Root Prefix เด็ดขาด (ดูข้อ 3 ประกอบ — ปัจจุบันบังคับใช้ `<CardImage />` แทน `<img>` ทุกจุดแล้ว)
+### 🗓️ 2026-08-31: Phase 5 — Ultra-HD 1909 Card Image Remastering & 4-Tier WebP Pipeline
+
+#### 1. 1909 Rider-Waite Digital Image Remastering (คมชัดระดับ Masterpiece)
+- **ปัญหาเดิม**: ภาพสแกน 1909 เดิมมีเม็ดสกรีนโบราณและฝุ่นกระดาษ ย่อลงกรอบเล็กแล้วมัวและสูญเสียคอนทราสต์
+- **สิ่งที่แก้ไข**:
+  - สร้าง `scripts/remaster-cards.py` ทำการบูรณะภาพ 78 ใบด้วย Intelligent Unsharp Masking (`radius=1.1, percent=125`), ปรับความสดของสีคู่หลัก (`Color 1.10`) และคอนทราสต์เส้นหมึกดำ (`Contrast 1.06`)
+  - อัปเกรด `scripts/generate-card-variants.ts` และ `src/lib/tarot/card-image.ts` ขยายเป็น **4 ระดับความละเอียด WebP**:
+    - `w128` (128px, q86) — สำหรับพรีวิวผัง 20 แบบ, ตราโลโก้ Navbar, และพัดไพ่
+    - `w256` (256px, q88) — สำหรับการ์ดขนาดเล็กและจอมือถือ
+    - `w512` (512px, q90) — สำหรับกระดานวางไพ่และสารานุกรม
+    - `w1024` (1024px, q94) — สำหรับจอ Retina/4K, CardZoomModal และ CardDetailView
+  - อัปเกรด `TarotCard.tsx`, `CardDetailView.tsx`, `CardsExplorer.tsx`, `globals.css` (ขอบฟอยล์ทองนูนต่ำและลวดลายหลังไพ่ Obsidian Velvet & Gold Inset)
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - `scripts/remaster-cards.py`
+  - `scripts/generate-card-variants.ts`
+  - `src/lib/tarot/card-image.ts`
+  - `src/components/card/TarotCard.tsx`
+  - `src/components/encyclopedia/CardDetailView.tsx`
+  - `src/components/encyclopedia/CardsExplorer.tsx`
+  - `src/app/globals.css`
+- **ผลการทดสอบ**:
+  - `npm run cards:variants`: สร้างภาพ WebP 312 ไฟล์สำเร็จ 100%
+  - `npm run repo:verify`: ผ่านครบ 6 ด่าน 0 errors
 
 ---
 

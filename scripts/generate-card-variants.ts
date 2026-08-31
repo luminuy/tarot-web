@@ -19,11 +19,14 @@ import fs from "node:fs";
 import path from "node:path";
 
 const SOURCE_DIR = path.join(process.cwd(), "public", "cards");
+const REMASTER_CACHE_DIR = path.join(process.cwd(), "scratch", "remaster_temp");
 
 /** ขนาดที่ต้องสร้าง — ต้องตรงกับ CARD_IMAGE_VARIANTS ใน src/lib/tarot/card-image.ts */
 const VARIANTS = [
-  { dir: "w256", width: 256, quality: 82 },
-  { dir: "w512", width: 512, quality: 82 },
+  { dir: "w128", width: 128, quality: 86 },
+  { dir: "w256", width: 256, quality: 88 },
+  { dir: "w512", width: 512, quality: 90 },
+  { dir: "w1024", width: 1024, quality: 94 },
 ] as const;
 
 function ensureCwebp(): void {
@@ -36,8 +39,24 @@ function ensureCwebp(): void {
   }
 }
 
+function runRemasterPass(): boolean {
+  const remasterScript = path.join(process.cwd(), "scripts", "remaster-cards.py");
+  if (fs.existsSync(remasterScript)) {
+    try {
+      execFileSync("python3", [remasterScript, SOURCE_DIR, REMASTER_CACHE_DIR], {
+        stdio: "inherit",
+      });
+      return true;
+    } catch (e) {
+      console.warn("⚠️ Python remaster pass skipped, falling back to direct source images.");
+    }
+  }
+  return false;
+}
+
 function main(): void {
   ensureCwebp();
+  const hasRemaster = runRemasterPass();
 
   const sources = fs
     .readdirSync(SOURCE_DIR)
@@ -50,9 +69,9 @@ function main(): void {
   }
 
   console.log("\n=======================================================");
-  console.log("🖼️  RESPONSIVE CARD IMAGE VARIANT GENERATOR (WebP)");
+  console.log("🖼️  RESPONSIVE CARD IMAGE VARIANT GENERATOR (Ultra-HD WebP)");
   console.log("=======================================================");
-  console.log(`✦ ภาพต้นฉบับ: ${sources.length} ใบ`);
+  console.log(`✦ ภาพต้นฉบับ: ${sources.length} ใบ | Remaster Pass: ${hasRemaster ? "Active (Pillow Unsharp + Color)" : "Standard"}`);
 
   let created = 0;
   let skipped = 0;
@@ -63,13 +82,16 @@ function main(): void {
     fs.mkdirSync(outDir, { recursive: true });
 
     for (const file of sources) {
-      const inPath = path.join(SOURCE_DIR, file);
+      const rawInPath = path.join(SOURCE_DIR, file);
+      const remasteredInPath = path.join(REMASTER_CACHE_DIR, file);
+      const inPath = hasRemaster && fs.existsSync(remasteredInPath) ? remasteredInPath : rawInPath;
       const outPath = path.join(outDir, file.replace(/\.jpg$/i, ".webp"));
 
       // ข้ามถ้าไฟล์ย่อใหม่กว่าต้นฉบับอยู่แล้ว (idempotent — รันซ้ำได้ไม่เปลืองเวลา)
       if (
         fs.existsSync(outPath) &&
-        fs.statSync(outPath).mtimeMs >= fs.statSync(inPath).mtimeMs
+        fs.statSync(outPath).mtimeMs >= fs.statSync(rawInPath).mtimeMs &&
+        (!hasRemaster || fs.statSync(outPath).mtimeMs >= fs.statSync(remasteredInPath).mtimeMs)
       ) {
         skipped++;
         totalBytes += fs.statSync(outPath).size;
@@ -79,8 +101,8 @@ function main(): void {
       execFileSync("cwebp", [
         "-quiet",
         "-q", String(variant.quality),
-        "-m", "6",          // ใช้เวลาบีบอัดนานขึ้นเพื่อไฟล์เล็กที่สุด
-        "-sharp_yuv",       // ลดการเพี้ยนของสีตามขอบเส้น ทำให้ลายเส้นไพ่คมกว่าเดิม
+        "-m", "6",          // ใช้เวลาบีบอัดนานขึ้นเพื่อไฟล์เล็กที่สุดและคุณภาพสูงสุด
+        "-sharp_yuv",       // ลดการเพี้ยนของสีตามขอบเส้น ทำให้ลายเส้นไพ่คมกริบ
         "-resize", String(variant.width), "0",
         inPath,
         "-o", outPath,

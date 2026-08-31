@@ -17,8 +17,10 @@
 
 /** ขนาดภาพย่อ WebP ที่มีอยู่จริงใน `public/cards/<dir>/` */
 export const CARD_IMAGE_VARIANTS = [
+  { dir: "w128", width: 128 },
   { dir: "w256", width: 256 },
   { dir: "w512", width: 512 },
+  { dir: "w1024", width: 1024 },
 ] as const;
 
 const CARDS_ROOT = "/cards/";
