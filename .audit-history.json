@@ -1,5 +1,46 @@
 [
   {
+    "id": "audit-1788190424207-a58ec",
+    "timestampTh": "31/8/2569 22:33:43",
+    "timestampIso": "2026-08-31T15:33:43.255Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "docs/readme-contributors",
+      "commitSha": "563b77f"
+    },
+    "action": {
+      "category": "DOCS",
+      "summary": "อัปเดตตารางผู้มีส่วนร่วม — Claude นำวิศวกรรม+รีวิวระบบ (Sonnet 5/Opus 5), ขยายบทบาท Owner",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "EADME.md",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 2
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788189976758-m0cru",
     "timestampTh": "31/8/2569 22:26:15",
     "timestampIso": "2026-08-31T15:26:15.727Z",

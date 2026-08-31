@@ -5,7 +5,7 @@
 [![Live Production](https://img.shields.io/badge/Production-Live-success?style=for-the-badge&logo=cloudflare&logoColor=white&color=F38020)](https://tarot-web.bankjack10452.workers.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict%200%20Errors-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![AI Engine](https://img.shields.io/badge/AI%20Engine-Gemini%20%26%20Antigravity-purple?style=for-the-badge&logo=google)](https://deepmind.google/)
+[![AI Engine](https://img.shields.io/badge/AI-Claude%20%2B%20Gemini%20%2B%20Antigravity-purple?style=for-the-badge)](https://www.anthropic.com/)
 [![Edge Computing](https://img.shields.io/badge/Edge%20Network-Cloudflare%20Workers-orange?style=for-the-badge&logo=cloudflare)](https://workers.cloudflare.com/)
 
 ---
@@ -37,10 +37,10 @@
 
 | ผู้พัฒนา / AI Contributor | บทบาทและความรับผิดชอบ | องค์กร / โมเดล |
 | :--- | :--- | :--- |
-| 👑 **Luminut ([@luminuy](https://github.com/luminuy))** | Lead Architect, Creator & Project Owner | Project Maintainer |
-| 🏛️ **Anthropic Claude (3.5 / 3.7 Sonnet)** | Foundational Architecture, Core System Design & 1909 Tarot Engine Foundation | Anthropic |
-| 🔮 **Google DeepMind Antigravity AI** | Autonomous Multi-Agent Engineering, Collision Guard & Full-Stack Development | Google DeepMind |
-| ✨ **Google Gemini AI (2.5 Flash / Pro)** | Mystic Tarot Interpretation Engine & Real-Time SSE Streamer | Google AI |
+| 👑 **Luminut ([@luminuy](https://github.com/luminuy))** | **Creator & Project Owner** — กำหนดทิศทางผลิตภัณฑ์และดีไซน์, ตัดสินใจขั้นสุดท้าย, เป็นเจ้าของโครงสร้างพื้นฐาน (Cloudflare / GitHub / โดเมน / Secrets), ทดสอบบนอุปกรณ์จริง (Chrome/Safari, มือถือ) และสั่งงาน AI ทุกตัว | Project Maintainer |
+| 🏛️ **Anthropic Claude (Sonnet 5 / Opus 5)** | **Lead Engineering & System Review** — ตรวจสอบและวางสถาปัตยกรรม, หาสาเหตุรากของบั๊ก (root-cause debugging), วางระเบียบวิศวกรรม (Incident Log, ด่านตรวจอัตโนมัติ, กติกา PR), ระบบ Edge Caching (OpenNext + KV), Provably-Fair Shuffle และ Code Review ทุก PR ก่อน merge | Anthropic |
+| 🔮 **Google DeepMind Antigravity AI** | **Full-Stack Implementation** — เขียนฟีเจอร์ตามแผน, งาน UI/Motion, ปรับแต่งประสิทธิภาพ, SEO และการทำ Multi-Agent Collision Guard | Google DeepMind |
+| ✨ **Google Gemini AI (2.5 Flash / Pro)** | **Interpretation Engine** — เครื่องอ่านคำทำนายไพ่ทาโรต์และสตรีมคำอ่านแบบเรียลไทม์ (SSE) | Google AI |
 
 ---
 
