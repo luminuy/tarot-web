@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Serif_Thai, Sarabun } from "next/font/google";
 import "./globals.css";
 import { AssetWarmup } from "@/components/performance/AssetWarmup";
+import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 
 const notoSerifThai = Noto_Serif_Thai({
@@ -115,9 +116,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-dvh font-sans antialiased">
-        <AntiTheftShield />
-        <AssetWarmup />
-        {children}
+        <AppMotionProvider>
+          <AntiTheftShield />
+          <AssetWarmup />
+          {children}
+        </AppMotionProvider>
       </body>
     </html>
   );
