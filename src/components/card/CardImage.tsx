@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-import { getCardImageSrc, getCardWebpSrcSet } from "@/lib/tarot/card-image";
+import { getCardImageSrc, getCardWebpSrcSet, getCardAvifSrcSet } from "@/lib/tarot/card-image";
 
 interface CardImageProps {
   /** ชื่อไฟล์ดิบจากฐานข้อมูลไพ่ เช่น `"major-00.jpg"` หรือ path เต็ม `"/cards/major-00.jpg"` */
@@ -30,8 +30,8 @@ interface CardImageProps {
 /**
  * 🃏 ภาพหน้าไพ่ 1909 Rider-Waite แบบ Responsive
  *
- * เลือกไฟล์ WebP ย่อขนาดที่พอดีกับพื้นที่แสดงผลจริงให้อัตโนมัติ
- * และถอยไปใช้ `.jpg` ต้นฉบับเสมอถ้าเบราว์เซอร์ไม่รองรับ WebP
+ * เลือกไฟล์ AVIF/WebP ย่อขนาดที่พอดีกับพื้นที่แสดงผลจริงให้อัตโนมัติ
+ * และถอยไปใช้ `.jpg` ต้นฉบับเสมอถ้าเบราว์เซอร์ไม่รองรับ
  *
  * `<picture>` ใช้ `display: contents` จึงไม่สร้างกล่อง layout เพิ่ม —
  * `<img>` ข้างในยังจัดวางตาม parent เดิมทุกประการ (`w-full h-full`, `absolute` ฯลฯ)
@@ -69,12 +69,14 @@ export function CardImage({
 
   if (full) return img;
 
+  const avifSrcSet = getCardAvifSrcSet(image, cardId);
   const webpSrcSet = getCardWebpSrcSet(image, cardId);
-  if (!webpSrcSet) return img;
+  if (!webpSrcSet && !avifSrcSet) return img;
 
   return (
     <picture className="contents">
-      <source type="image/webp" srcSet={webpSrcSet} sizes={sizes} />
+      {avifSrcSet && <source type="image/avif" srcSet={avifSrcSet} sizes={sizes} />}
+      {webpSrcSet && <source type="image/webp" srcSet={webpSrcSet} sizes={sizes} />}
       {img}
     </picture>
   );

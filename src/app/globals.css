@@ -217,3 +217,12 @@ html {
   -webkit-backface-visibility: hidden;
 }
 
+/* ป้องกัน iOS Safari และเบราว์เซอร์มือถือไม่ให้ Auto-Zoom เมื่อผู้ใช้แตะพิมพ์ */
+@media screen and (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+

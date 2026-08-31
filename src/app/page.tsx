@@ -103,7 +103,14 @@ export default function TarotPage() {
         anchor.scrollIntoView({ behavior: "instant", block: "start" });
       }
     });
+    setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, 40);
   };
+
+  useEffect(() => {
+    scrollToSanctuaryTop();
+  }, [currentStep]);
 
   // Step 1 -> Step 2: Start Reading Session
   const handleStartSession = async () => {
@@ -364,6 +371,9 @@ export default function TarotPage() {
 
   return (
     <main className="min-h-screen pb-24 text-[#e2d9f3] relative overflow-hidden bg-[#05040a]">
+      {/* Hardware Anchor for Immediate Viewport Alignment */}
+      <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
+
       {/* Mystic Altar Floating Particles & Sacred Circles */}
       <MysticAltarCanvas />
 

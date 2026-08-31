@@ -57,3 +57,23 @@ export function getCardWebpSrcSet(
     (v) => `${CARDS_ROOT}${v.dir}/${name}.webp ${v.width}w`,
   ).join(", ");
 }
+
+/**
+ * สร้าง `srcSet` ของภาพย่อ AVIF สำหรับใช้กับ `<source type="image/avif">`
+ * มอบการบีบอัดสูงสุด (Next-Gen Image Format)
+ */
+export function getCardAvifSrcSet(
+  image?: string | null,
+  fallbackId?: string | null,
+): string | null {
+  const src = getCardImageSrc(image, fallbackId);
+  if (!src) return null;
+
+  const match = /^\/cards\/([^/]+)\.jpe?g$/i.exec(src);
+  if (!match) return null;
+
+  const name = match[1];
+  return CARD_IMAGE_VARIANTS.map(
+    (v) => `${CARDS_ROOT}${v.dir}/${name}.avif ${v.width}w`,
+  ).join(", ");
+}

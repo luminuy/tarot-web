@@ -352,7 +352,7 @@ export const WANDS: TarotCard[] = [
     astrology: "ดาวอังคารในราศีสิงห์",
     numerology:
       "เลข 7 คือบททดสอบที่มาหลังความสำเร็จของเลข 6 เป็นการวัดว่าสิ่งที่ได้มานั้นคุณรักษาไว้ได้จริงหรือเปล่า",
-    yesNo: "maybe",
+    yesNo: "no",
     image: "wands-07.jpg",
   },
   {
@@ -452,7 +452,7 @@ export const WANDS: TarotCard[] = [
     astrology: "ดวงจันทร์ในราศีธนู",
     numerology:
       "เลข 9 คือช่วงเกือบถึงที่สุดของวงจร เป็นบททดสอบความอดทนก่อนถึงบทสรุปในเลข 10",
-    yesNo: "maybe",
+    yesNo: "no",
     image: "wands-09.jpg",
   },
   {
@@ -602,7 +602,7 @@ export const WANDS: TarotCard[] = [
     astrology: "ราศีธนู ธาตุไฟ ภายใต้อิทธิพลของดาวอังคาร",
     numerology:
       "อัศวินคือวัยที่มีทั้งพลังและทักษะแล้ว แต่ยังขาดความยับยั้งชั่งใจ วุฒิภาวะระดับนี้ไปได้เร็วมากแต่ยังเลี้ยวยาก",
-    yesNo: "yes",
+    yesNo: "maybe",
     image: "wands-12.jpg",
   },
   {
