@@ -1,5 +1,78 @@
 [
   {
+    "id": "audit-1788150836461-ogkip",
+    "timestampTh": "31/8/2569 11:33:55",
+    "timestampIso": "2026-08-31T04:33:55.525Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/improve-github-automation",
+      "commitSha": "7c44ad2"
+    },
+    "action": {
+      "category": "REFACTOR",
+      "summary": "ยกเครื่อง GitHub automation ให้รันใน worktree ได้ รวมชุดตรวจเป็น 6 ด่านที่เดียว",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "githooks/pre-commit",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "github/workflows/deploy.yml",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "github/workflows/pr.yml",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "EMINI.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "EADME.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/AI_COLLABORATION_GUIDELINES.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/WORK_LOG.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "cripts/git-author-guard.ts",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "cripts/github-auto.ts",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 10
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788149984032-k6f5h",
     "timestampTh": "31/8/2569 11:19:43",
     "timestampIso": "2026-08-31T04:19:43.013Z",

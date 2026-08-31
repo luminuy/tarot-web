@@ -136,6 +136,42 @@
   - `/cards/major-00` (หน้าเว็บ HTML) ➔ `s-maxage=31536000` **ไม่โดน immutable ตามที่ตั้งใจ**
     ยืนยันว่ากฎ `/cards/*` แตะเฉพาะไฟล์ static ไม่ไปโดนหน้าที่ Worker เรนเดอร์
 
+#### 5. ยกเครื่องระบบ GitHub Automation (`scripts/github-auto.ts`)
+- **ปัญหาที่เจอจริงตอนใช้งาน**:
+  1. **`npm run pr:auto` พังทุกครั้งที่รันจาก git worktree** — `gh pr merge` พยายาม checkout `main` ในเครื่อง
+     แต่ `main` ถูก checkout ค้างที่โฟลเดอร์หลักอยู่แล้ว จึงล้มด้วย `fatal: 'main' is already checked out at ...`
+     PR ถูกสร้างสำเร็จแต่ auto-merge ไม่ติด ต้องมาสั่งเองทุกครั้ง (เจอตอนทำ PR #6 และ #7)
+     **AI Agent ทำงานใน worktree เสมอ แปลว่าคำสั่งนี้พังทุกครั้งที่ AI เรียกใช้**
+  2. **`scripts/qa/test-safety.ts` และ `scripts/qa/test-shuffle.ts` ไม่เคยถูกรันโดยอัตโนมัติเลย**
+     ทั้งสองไฟล์มีอยู่และผ่านหมด (14+14 = 28 เทสต์) แต่ไม่มี hook, npm script หรือ CI ตัวไหนเรียกใช้
+     ทั้งที่เป็นเทสต์ของ **ตัวกรองคำถามอันตราย** และ **ระบบสับไพ่ Provably Fair** ซึ่งเป็นหัวใจด้านความปลอดภัยและความโปร่งใส
+  3. ชุดตรวจถูกเขียนซ้ำ 4 ที่ (`pre-commit`, `pre-push`, `git-author-guard.ts`, workflow ทั้งสอง) แก้ที่หนึ่งลืมอีกที่
+  4. `npm run commit` รันชุดตรวจ แล้ว `pre-commit` hook รันซ้ำอีกรอบ เสียเวลาสองเท่าทุกครั้ง
+  5. หัวข้อ/คำอธิบาย PR และข้อความ commit ถูกต่อเป็นสตริงแล้วยิงผ่าน shell — ถ้ามี `"`, `` ` ``, `$` จะเพี้ยนหรือถูกแทรกคำสั่งได้
+  6. ถ้าด่านแรกล้ม จะหยุดทันที ไม่รู้ว่าด่านหลังพังด้วยไหม ต้องแก้แล้วรันใหม่ทีละรอบ
+- **สิ่งที่แก้ไข**:
+  - ทุกคำสั่ง `gh` ใส่ `-R <owner>/<repo>` (อ่านจาก git remote อัตโนมัติ) บังคับโหมด remote-only **จึงรันใน worktree ได้**
+  - รวมชุดตรวจเป็น `CHECKS` ที่เดียวใน `scripts/github-auto.ts` แล้วให้ทุกจุดเรียก `npm run repo:verify` เหมือนกันหมด
+    (`pre-commit`, `pre-push`, `npm run commit`, `pr.yml`, `deploy.yml`)
+  - **เพิ่ม `test-safety.ts` และ `test-shuffle.ts` เข้าชุดตรวจ** จาก 4 ด่านเป็น **6 ด่าน** — ตอนนี้ CI รันครบแล้ว
+  - เปลี่ยนจาก `execSync(สตริง)` เป็น `execFileSync(cmd, args[])` ทั้ง `github-auto.ts` และ `git-author-guard.ts` ไม่ผ่าน shell อีกต่อไป
+  - ส่งคำอธิบาย PR ผ่าน `--body-file` แทน argument ยาวๆ รองรับข้อความยาวและอักขระพิเศษได้ทุกแบบ
+  - `npm run commit` ส่ง `TAROT_VERIFIED=1` ให้ `pre-commit` ข้ามการตรวจซ้ำ — commit เร็วขึ้นเท่าตัว
+  - `runAllChecks()` รันจนครบทุกด่านแม้เจอที่ล้มแล้ว รายงานทีเดียวครบพร้อม error เต็ม
+  - ถ้ามี PR ของ branch นั้นเปิดค้างอยู่แล้ว จะไม่สร้างซ้ำ ใช้ตัวเดิมแล้วรายงานให้ทราบ
+  - เพิ่ม flag `--dry-run` (ดูว่าจะทำอะไรโดยไม่แตะ remote) และ `--no-merge` (สร้าง PR เฉยๆ ไม่เปิด auto-merge)
+  - `status` แสดง repo, branch ปัจจุบัน, PR ของ branch นี้, PR ที่เปิดค้าง และผล CI 3 รอบล่าสุด
+- **ไฟล์ที่แก้ไข**:
+  - `scripts/github-auto.ts` (เขียนใหม่ทั้งไฟล์), `scripts/git-author-guard.ts`
+  - `.githooks/pre-commit`, `.github/workflows/pr.yml`, `.github/workflows/deploy.yml`
+  - `docs/AI_COLLABORATION_GUIDELINES.md`, `GEMINI.md`, `README.md`
+- **ผลการทดสอบ**:
+  - `npm run repo:verify` ➔ **ผ่านครบ 6/6 ด่าน** และ exit code = 0
+  - ทดสอบเส้นทางล้มเหลว: แกล้งใส่ TypeScript error แล้วรันใหม่ ➔ รายงาน `ไม่ผ่าน 1 จาก 6 ด่าน`
+    พร้อมชี้ตำแหน่ง `card-image.ts(59,7): error TS2322` และ **exit code = 1** (CI จะ fail จริง)
+  - `npm run pr:auto -- ... --dry-run` ➔ แสดง 3 ขั้นตอนที่จะทำโดยไม่แตะ remote
+  - `npx tsx scripts/github-auto.ts status` ➔ แสดง repo/branch/PR/CI ครบถ้วน
+
 ---
 
 ### 🗓️ 2026-08-31: Phase 4 — Polish, Iconography & Multi-AI Guidelines
@@ -374,13 +410,36 @@
   - ใช้ `full` เฉพาะภาพใบใหญ่จริงๆ (หน้ารายละเอียดไพ่ 258px, หน้าซูม, Export ลง Canvas) เท่านั้น
   - ถ้าเพิ่ม/เปลี่ยนภาพไพ่ต้นฉบับ **ต้องรัน `npm run cards:variants` ใหม่ทุกครั้ง**
 
-### 4. Thai Syllable Wrapping Bug (การตัดคำภาษาไทยเสียรูป)
+### 4. คำสั่ง `gh` พังเมื่อรันจาก git worktree (Worktree + GitHub CLI Trap)
+- **กรณีที่เคยเกิดขึ้น**: `npm run pr:auto` สร้าง PR สำเร็จ แต่ขั้นเปิด auto-merge ล้มทุกครั้ง:
+  ```
+  ❌ gh pr merge --auto --squash --delete-branch
+     failed to run git: fatal: 'main' is already checked out at '/Users/bank/Desktop/เว็บไพ่'
+  ```
+  เพราะ `gh pr merge` (และ `gh pr checkout`) จะไปยุ่งกับ git ในเครื่อง แต่ `main` ถูก checkout ค้างที่โฟลเดอร์หลักอยู่แล้ว
+  ซึ่ง **AI Agent ทำงานใน git worktree เสมอ** คำสั่งนี้จึงพังทุกครั้งที่ AI เรียกใช้
+- **วิธีแก้ & กฎป้องกันถาวร**:
+  - ใส่ `-R <owner>/<repo>` ให้คำสั่ง `gh` เสมอ เพื่อบังคับให้ทำงานแบบ remote-only ไม่แตะ git ในเครื่อง
+  - `scripts/github-auto.ts` อ่าน owner/repo จาก `git remote get-url origin` แล้วเติม `-R` ให้อัตโนมัติทุกคำสั่งแล้ว
+  - ห้ามเรียก `gh pr merge` เปล่าๆ ในสคริปต์ใหม่เด็ดขาด
+
+### 5. เขียนเทสต์ไว้แต่ไม่มีใครเรียกใช้ (Orphaned Test Files)
+- **กรณีที่เคยเกิดขึ้น**: `scripts/qa/test-safety.ts` (14 เทสต์ ตัวกรองคำถามอันตราย) และ
+  `scripts/qa/test-shuffle.ts` (14 เทสต์ ระบบสับไพ่ Provably Fair) มีอยู่และผ่านหมด
+  แต่ **ไม่มี hook, npm script หรือ GitHub Actions ตัวไหนเรียกใช้เลย** ทั้งที่เป็นเทสต์ของสองระบบที่สำคัญที่สุดด้านความปลอดภัยและความโปร่งใส
+  สาเหตุคือชุดตรวจถูกเขียนซ้ำไว้ 4 ที่ พอเพิ่มเทสต์ใหม่ก็ลืมไปเพิ่มให้ครบ
+- **วิธีแก้ & กฎป้องกันถาวร**:
+  - รวมชุดตรวจไว้ที่เดียวคือตัวแปร `CHECKS` ใน `scripts/github-auto.ts`
+    ทุกจุด (`pre-commit`, `pre-push`, `npm run commit`, `pr.yml`, `deploy.yml`) เรียก `npm run repo:verify` เหมือนกันหมด
+  - **เพิ่มสคริปต์ทดสอบใหม่ใน `scripts/qa/` เมื่อไหร่ ต้องไปเพิ่มใน `CHECKS` ทันที** ไม่งั้นเทสต์นั้นจะไม่เคยถูกรันเลย
+
+### 6. Thai Syllable Wrapping Bug (การตัดคำภาษาไทยเสียรูป)
 - **กรณีที่เคยเกิดขึ้น**: ชื่อหัวข้อ `สแกนพลังงานชีวิต 7 จุด (จักระบำบัด)` ยาวเกินไปจนคำว่า `(จักระบำบัด)` ถูกตัดคำกลางคันกลายเป็น `(จักระบำ` และ `บัด)` บนอีกบรรทัด ทำให้ดูไม่เป็นมืออาชีพ
 - **วิธีแก้ & กฎป้องกัน**:
   - ตรวจสอบความยาวหัวข้อ (`nameTh`) และคำโปรยเสมอ ให้กระชับ สละสลวย เช่น ปรับเป็น `"สแกนสมดุล 7 จักระ (ไพ่ 7 ใบ)"`
   - ใช้ `leading-tight` หรือ `leading-snug` และตั้งความยาวที่พอดีกับ Grid Column
 
-### 5. Multi-Tier Spread Art Overflows & Label Bleeding (ห้ามใส่ Label ข้อความยาวใต้การ์ดในผังหลายชั้นเด็ดขาด)
+### 7. Multi-Tier Spread Art Overflows & Label Bleeding (ห้ามใส่ Label ข้อความยาวใต้การ์ดในผังหลายชั้นเด็ดขาด)
 - **กรณีที่เคยเกิดขึ้น**: ในหน้า `/spreads` และตัวเลือกผังในหน้าหลัก ผังไพ่ 4-5 ใบ (เช่น ความรักสองหัวใจ, ความในใจของเขา, แฟนเก่าจะกลับมาไหม) มีการวางการ์ดเป็น 2 ชั้น (บน-ล่าง) และใส่ข้อความ label ภาษาไทยใต้การ์ดทุกใบ ทำให้ความสูงรวมบวมขึ้นเป็น 167px เกินความสูงกล่อง (120px) จนตัวหนังสือทะลุไปทับเส้นคั่นและหัวข้อชื่อผัง
 - **วิธีแก้ & กฎป้องกันถาวร (Permanent Golden Rule)**:
   1. ในการแสดงผลพรีวิวผังไพ่ (ใน `src/components/ui/TarotArtIcons.tsx`) **ผังที่มี 4 ใบขึ้นไปหรือมีการจัดวาง 2 ชั้นขึ้นไป ห้ามใส่ข้อความ string label ใต้การ์ดทุกใบเด็ดขาด!**
@@ -388,7 +447,7 @@
   3. คุมความสูงรวมของการจัดวางทุกผัง **ให้อยู่ระหว่าง 85px – 100px เสมอ** (ต่ำกว่ากล่องคอนเทนเนอร์ `h-28` = 112px อย่างน้อย 15-25px) เพื่อให้มี Padding หายใจอย่างสมบูรณ์แบบ
   4. รายละเอียดคำอธิบายของแต่ละตำแหน่ง ให้แสดงใน Accordion ด้านล่าง `"✦ ดูรายละเอียดตำแหน่งไพ่"` เท่านั้น
 
-### 6. Absolute Image Path Resolution in Sub-routes (กฎการอ้างอิง Root Path รูปภาพ)
+### 8. Absolute Image Path Resolution in Sub-routes (กฎการอ้างอิง Root Path รูปภาพ)
 - **กรณีที่เคยเกิดขึ้น**: ใน `CardsExplorer.tsx` และ `CardDetailView.tsx` มีการใช้ `src={card.image}` โดยตรง (ซึ่งข้อมูลดิบเป็น `"major-00.jpg"`) ทำให้เมื่อผู้ใช้อยู่ที่ Sub-route `/cards` เบราว์เซอร์จะ Resolve เป็น `/cards/major-00.jpg` แทนที่จะเป็น `/cards/major-00.jpg` จาก root public directory ส่งผลให้ภาพไม่โหลดและแสดงไอคอนกล่องเสีย `[?]`
 - **วิธีแก้ & กฎป้องกันถาวร**:
   - ทุกจุดที่ Render ภาพหน้าไพ่ ต้องผ่าน `<CardImage />` หรือ `getCardImageSrc(image, id)` จาก `src/lib/tarot/card-image.ts` ซึ่งการันตี prefix `/cards/` ให้เสมอ

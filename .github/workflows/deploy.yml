@@ -26,17 +26,10 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
-      - name: 🛡️ AI Multi-Agent Collision Check
-        run: npm run agent:check
-
-      - name: 🔍 TypeScript Typecheck
-        run: npm run typecheck
-
-      - name: 🃏 Verify 78 Cards Integrity
-        run: ./node_modules/.bin/tsx scripts/verify-cards.ts
-
-      - name: 📐 Verify 20 Spreads Geometry
-        run: ./node_modules/.bin/tsx scripts/qa/test-spreads.ts
+      # ชุดตรวจกลาง 6 ด่าน — นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts
+      # เพิ่มด่านตรวจใหม่ที่นั่นที่เดียว ทั้ง hooks / PR / Deploy จะตรวจเหมือนกันหมด
+      - name: 🧪 Verification Suite (6 ด่าน)
+        run: npm run repo:verify
 
   deploy:
     name: ⚡ Deploy to Cloudflare Workers

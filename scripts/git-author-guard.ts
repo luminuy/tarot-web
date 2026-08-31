@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execFileSync, execSync } from "node:child_process";
 
 function run(cmd: string): string {
   try {
@@ -34,18 +34,13 @@ const details = args["details"] || args["desc"] || "";
 console.log("🛡️ [Git Safety & Attribution Guard] เริ่มต้นตรวจสอบความปลอดภัยก่อน Commit...");
 
 // Step 1: Run Full Verification Suite
+// ชุดตรวจกลางอยู่ที่ CHECKS ใน scripts/github-auto.ts — แหล่งความจริงเดียวของทั้งระบบ
+// (ถ้าเพิ่มด่านตรวจใหม่ ให้ไปเพิ่มที่นั่นที่เดียว hook และ CI จะได้ตรวจเหมือนกันหมด)
 try {
-  console.log("  1/4 🛡️ ตรวจสอบ Multi-Agent Collision Guard...");
-  run("npm run agent:check");
+  console.log("  1/2 🧪 รันชุดตรวจกลาง (repo:verify)...");
+  execFileSync("npm", ["run", "repo:verify"], { stdio: "inherit" });
 
-  console.log("  2/4 🔍 ตรวจสอบ TypeScript Strict Typecheck...");
-  run("npm run typecheck");
-
-  console.log("  3/4 🃏 ตรวจสอบความสมบูรณ์ของไพ่ 78 ใบ & ผัง 20 แบบ...");
-  run("./node_modules/.bin/tsx scripts/verify-cards.ts");
-  run("./node_modules/.bin/tsx scripts/qa/test-spreads.ts");
-
-  console.log("  4/4 🔒 ตรวจสอบ Secret Leak & Conflict Markers...");
+  console.log("  2/2 🔒 ตรวจสอบ Secret Leak & Conflict Markers...");
   const marker = "<" + "<" + "<" + "<" + "<" + "<" + "<";
   const conflicts = run(`git grep -n "${marker}" -- ':!scripts/agent-guard.ts' ':!scripts/git-author-guard.ts' || true`);
   if (conflicts) {
@@ -77,7 +72,12 @@ import { recordAudit } from "./audit-tracker";
 try {
   recordAudit(agent, (type.toUpperCase() || "FEAT") as any, message);
   run("git add .");
-  execSync(`git commit -m "${commitTitle}" -m "${commitBody}"`, { stdio: "inherit" });
+  // ส่ง argument เป็น array ไม่ผ่าน shell — ข้อความ commit จึงมี " ` $ ( ) ได้อย่างปลอดภัย
+  // TAROT_VERIFIED=1 บอก .githooks/pre-commit ว่าตรวจผ่านมาแล้ว ไม่ต้องรันซ้ำ
+  execFileSync("git", ["commit", "-m", commitTitle, "-m", commitBody], {
+    stdio: "inherit",
+    env: { ...process.env, TAROT_VERIFIED: "1" },
+  });
   console.log(`\n✨ [Commit สำเร็จ] บันทึก Attribution & Audit Trail ชัดเจน: "${commitTitle}"`);
 } catch (e: any) {
   console.error("❌ Commit ล้มเหลว:", e.message);
