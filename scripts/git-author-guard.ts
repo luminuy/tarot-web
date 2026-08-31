@@ -1,6 +1,7 @@
 import { execFileSync, execSync } from "node:child_process";
 import { recordAudit } from "./audit-tracker";
 import { recordIncident, type Severity } from "./incident-log";
+import { syncWorkLog } from "./sync-worklog";
 
 function run(cmd: string): string {
   try {
@@ -101,38 +102,45 @@ const commitBody = [
   `Co-authored-by: Google Gemini <gemini-ai@users.noreply.github.com>`,
 ].filter(Boolean).join("\n");
 
-try {
-  recordAudit(agent, (type.toUpperCase() || "FEAT") as any, message);
+async function executeCommit() {
+  try {
+    recordAudit(agent, (type.toUpperCase() || "FEAT") as any, message);
 
-  // บันทึกบทเรียนลง docs/INCIDENT_LOG.md "ก่อน" git add
-  // เพื่อให้ไฟล์บันทึกถูกรวมเข้าไปใน commit เดียวกันกับตัวแก้ อ่านย้อนหลังแล้วเห็นคู่กันเสมอ
-  if (isFix) {
-    const severity = (args["severity"] || "medium") as Severity;
-    const incidentId = recordIncident({
-      title: message,
-      severity: ["critical", "high", "medium", "low"].includes(severity) ? severity : "medium",
-      symptom: args["symptom"] || message,
-      impact: args["impact"],
-      rootCause: args["cause"],
-      evidence: args["evidence"],
-      fix: details || message,
-      prevention: args["prevention"],
-      verification: args["verify"] || args["verification"],
-      agent,
+    // บันทึกบทเรียนลง docs/INCIDENT_LOG.md "ก่อน" git add
+    // เพื่อให้ไฟล์บันทึกถูกรวมเข้าไปใน commit เดียวกันกับตัวแก้ อ่านย้อนหลังแล้วเห็นคู่กันเสมอ
+    if (isFix) {
+      const severity = (args["severity"] || "medium") as Severity;
+      const incidentId = recordIncident({
+        title: message,
+        severity: ["critical", "high", "medium", "low"].includes(severity) ? severity : "medium",
+        symptom: args["symptom"] || message,
+        impact: args["impact"],
+        rootCause: args["cause"],
+        evidence: args["evidence"],
+        fix: details || message,
+        prevention: args["prevention"],
+        verification: args["verify"] || args["verification"],
+        agent,
+      });
+      console.log(`📋 [Incident Log] บันทึกบทเรียน ${incidentId} ลง docs/INCIDENT_LOG.md แล้ว`);
+    }
+
+    // Auto-sync work log into docs/WORK_LOG.md automatically on EVERY commit
+    await syncWorkLog();
+
+    run("git add .");
+    // ส่ง argument เป็น array ไม่ผ่าน shell — ข้อความ commit จึงมี " ` $ ( ) ได้อย่างปลอดภัย
+    // TAROT_VERIFIED=1 บอก .githooks/pre-commit ว่าตรวจผ่านมาแล้ว ไม่ต้องรันซ้ำ
+    execFileSync("git", ["commit", "-m", commitTitle, "-m", commitBody], {
+      stdio: "inherit",
+      env: { ...process.env, TAROT_VERIFIED: "1" },
     });
-    console.log(`📋 [Incident Log] บันทึกบทเรียน ${incidentId} ลง docs/INCIDENT_LOG.md แล้ว`);
+    console.log(`\n✨ [Commit สำเร็จ] บันทึก Attribution & Audit Trail ชัดเจน: "${commitTitle}"`);
+
+  } catch (e: any) {
+    console.error("❌ Commit ล้มเหลว:", e.message);
+    process.exit(1);
   }
-
-  run("git add .");
-  // ส่ง argument เป็น array ไม่ผ่าน shell — ข้อความ commit จึงมี " ` $ ( ) ได้อย่างปลอดภัย
-  // TAROT_VERIFIED=1 บอก .githooks/pre-commit ว่าตรวจผ่านมาแล้ว ไม่ต้องรันซ้ำ
-  execFileSync("git", ["commit", "-m", commitTitle, "-m", commitBody], {
-    stdio: "inherit",
-    env: { ...process.env, TAROT_VERIFIED: "1" },
-  });
-  console.log(`\n✨ [Commit สำเร็จ] บันทึก Attribution & Audit Trail ชัดเจน: "${commitTitle}"`);
-
-} catch (e: any) {
-  console.error("❌ Commit ล้มเหลว:", e.message);
-  process.exit(1);
 }
+
+executeCommit();
