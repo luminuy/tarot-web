@@ -18,12 +18,11 @@
 /cards/*
   Cache-Control: public, max-age=31536000, immutable
 
-# ภาพย่อ WebP ที่สร้างด้วย `npm run cards:variants`
-/cards/w256/*
-  Cache-Control: public, max-age=31536000, immutable
-
-/cards/w512/*
-  Cache-Control: public, max-age=31536000, immutable
+# หมายเหตุ: ไม่ต้องเขียนกฎแยกให้ /cards/w256/* และ /cards/w512/*
+# เพราะ splat (*) ของ Cloudflare เป็นแบบ greedy คือกินข้ามเครื่องหมาย / ไปด้วย
+# กฎ /cards/* ด้านบนจึงครอบภาพย่อทั้งหมดอยู่แล้ว
+# ถ้าเขียนซ้ำ Cloudflare จะ "ต่อท้าย" ไม่ใช่ "แทนที่" ทำให้ได้ header ซ้ำสองรอบ:
+#   cache-control: public, max-age=31536000, immutable, public, max-age=31536000, immutable
 
 # ไฟล์ build ของ Next.js — มี hash อยู่ในชื่อไฟล์แล้ว จึงปลอดภัยที่จะแคชยาว
 /_next/static/*

@@ -1,5 +1,50 @@
 [
   {
+    "id": "audit-1788149984032-k6f5h",
+    "timestampTh": "31/8/2569 11:19:43",
+    "timestampIso": "2026-08-31T04:19:43.013Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/fix-duplicate-cache-header",
+      "commitSha": "f0a3582"
+    },
+    "action": {
+      "category": "FIX",
+      "summary": "ลบกฎ _headers ที่ซ้ำซ้อน แก้ปัญหา Cache-Control ถูกเขียนซ้ำสองรอบ",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/WORK_LOG.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/_headers",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 3
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788149549090-1eq2y",
     "timestampTh": "31/8/2569 11:12:28",
     "timestampIso": "2026-08-31T04:12:28.075Z",
