@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0030 · 2026-09-01 00:22 · 🟠 High · fix stream error fallback, entropy stale closure, earth element math, chat role coalescing, and purge dead code
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | UI could hang on failed stream without retry button, ShuffleRitual closed over initial empty entropy array, earth element percentage had edge case math issues, and chat sent un-coalesced consecutive roles to Gemini |
+| **สาเหตุราก** | Stream error event didn't set error message, interval in ShuffleRitual accessed state instead of ref, earth element was computed via remainder subtraction, and multi-turn chat history preserved adjacent identical roles |
+| **การแก้ไข** | Added stream termination fallback to set error state, used useRef for entropy accumulation, calculated earth percentage proportionally, merged adjacent roles in chat route, and deleted unused legacy files and prisma/next-auth dependencies |
+| **🛡️ กฎป้องกันถาวร** | **Ensure all streams have completion guards, use mutable refs for gesture entropy sampling in intervals, validate element calculation boundaries, and coalesce conversational history prior to Gemini dispatch** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify passed all 7/7 verification gates with 0 TypeScript errors and clean dead code removal |
+| **บันทึกโดย** | Antigravity AI · branch `feat/audit-milestone-3-resilience-and-cleanup` · commit `00807bd` |
+
+
 ### INC-0029 · 2026-09-01 00:14 · 🟠 High · delete dead Engine B, harden session token secret guard, and enforce chat crisis safety screening
 
 | หัวข้อ | รายละเอียด |

@@ -49,10 +49,10 @@ export function calculateElementalBalance(cards: TarotCard[], drawn?: DrawnCard[
   }
 
   const rawSum = counts.fire + counts.water + counts.air + counts.earth;
-  const fire = Math.round((counts.fire / rawSum) * 100);
-  const water = Math.round((counts.water / rawSum) * 100);
-  const air = Math.round((counts.air / rawSum) * 100);
-  const earth = Math.max(0, 100 - (fire + water + air)); // normalize to 100%
+  const fire = rawSum > 0 ? Math.round((counts.fire / rawSum) * 100) : 0;
+  const water = rawSum > 0 ? Math.round((counts.water / rawSum) * 100) : 0;
+  const air = rawSum > 0 ? Math.round((counts.air / rawSum) * 100) : 0;
+  const earth = counts.earth > 0 && rawSum > 0 ? Math.round((counts.earth / rawSum) * 100) : 0;
 
   const maxVal = Math.max(fire, water, air, earth);
   const isBalanced = maxVal <= 35 && Math.min(fire, water, air, earth) >= 15;

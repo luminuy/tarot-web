@@ -48,10 +48,16 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
     date: new Date().toISOString(),
   };
 
-  // Avoid duplicate saves for same question and cards within 1 minute
-  const isDuplicate = current.some(
-    (r) => r.question === item.question && Math.abs(new Date(r.date).getTime() - Date.now()) < 60000
-  );
+  // Avoid duplicate saves for same question and exact cards within 1 minute
+  const cardKey = (item.cards || []).map((c) => `${c.cardIndex}:${c.isReversed ? "rev" : "up"}`).join(",");
+  const isDuplicate = current.some((r) => {
+    const rCardKey = (r.cards || []).map((c) => `${c.cardIndex}:${c.isReversed ? "rev" : "up"}`).join(",");
+    return (
+      r.question === item.question &&
+      rCardKey === cardKey &&
+      Math.abs(new Date(r.date).getTime() - Date.now()) < 60000
+    );
+  });
 
   if (!isDuplicate) {
     const updated = [newItem, ...current].slice(0, 30); // Keep last 30 readings
