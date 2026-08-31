@@ -95,13 +95,15 @@
 | **ทางแก้** | อัปเกรด macOS เป็น 13.5 ขึ้นไป หรือใช้ DevContainer (Linux glibc 2.35+) |
 | **วิธีตรวจแทนระหว่างนี้** | ตรวจ header จริงบน production ด้วย<br>`curl -sI https://tarot-web.bankjack10452.workers.dev/cards/w256/major-00.webp` |
 
-### ISSUE-005 · GitHub native auto-merge ปิดอยู่ในตั้งค่า repo
+### ISSUE-005 · GitHub native auto-merge ใช้ไม่ได้ — repo เป็น private บนบัญชีฟรี
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการ** | `gh pr merge --auto` ล้มด้วย `GraphQL: Auto merge is not allowed for this repository (enablePullRequestAutoMerge)` ตรวจ API ได้ `allow_auto_merge: false` |
-| **ผลกระทบ** | ไม่กระทบการทำงานจริง เพราะ `.github/workflows/pr.yml` merge ให้เองอยู่แล้วหลัง CI ผ่าน `scripts/github-auto.ts` ตรวจค่านี้ก่อนแล้วข้ามอย่างสุภาพ |
-| **ทางแก้** | ⚠️ **AI ทำเองไม่ได้ ต้องให้เจ้าของบัญชีเปิดเอง** ที่ GitHub → repo `luminuy/tarot-web` → **Settings → General → Pull Requests → Allow auto-merge** |
+| **อาการ** | ในหน้า Settings ช่อง **"Allow auto-merge"** เป็นสีเทากดไม่ได้ (ขึ้นลิงก์ *"Why is this option disabled?"*) และ `gh pr merge --auto` ล้มด้วย `GraphQL: Auto merge is not allowed for this repository (enablePullRequestAutoMerge)` |
+| **สาเหตุที่แท้จริง** | `luminuy/tarot-web` เป็น repo **private** บน **บัญชีส่วนตัวแพลนฟรี** GitHub เปิด auto-merge ให้เฉพาะ<br>• repo ที่เป็น **public** (ทุกแพลน) หรือ<br>• repo **private** ที่อยู่บนแพลน **Pro / Team / Enterprise**<br>ยืนยันแล้วเมื่อ 2026-08-31: ยิง `PATCH repos/luminuy/tarot-web -f allow_auto_merge=true` — GitHub ตอบ 200 แต่ค่ายังเป็น `false` (ปฏิเสธเงียบ) จึงไม่ใช่แค่ toggle ที่ลืมเปิด |
+| **ผลกระทบ** | ไม่กระทบการทำงานจริง เพราะ `.github/workflows/pr.yml` merge ให้เองอยู่แล้วหลัง CI ผ่าน (`scripts/github-auto.ts` ตรวจ `allow_auto_merge` ก่อนแล้วข้ามอย่างสุภาพ) จากนั้นลบ branch ให้ (INC-0011) และฝั่งเครื่องมี `npm run git:tidy` เก็บกวาดต่อ ฟีเจอร์ native จึงซ้ำซ้อนกับของที่มีอยู่ |
+| **ทางแก้ (ถ้าจะเปิดจริง)** | ต้องเลือกอย่างใดอย่างหนึ่ง — **AI ทำเองไม่ได้ทั้งคู่ ต้องให้เจ้าของบัญชีทำ**<br>1. อัปเกรดบัญชี `luminuy` เป็น **GitHub Pro** (~$4/เดือน) แล้วช่อง Allow auto-merge จะกดได้<br>2. เปลี่ยน repo เป็น **public** (ได้ auto-merge ฟรี แต่โค้ดจะเปิดสาธารณะ) |
+| **สรุป** | **ปล่อยไว้แบบนี้ได้** automation ปัจจุบันทำงานครบวงจรแล้ว ไม่ต้องเสียเงินอัปเกรดเพื่อฟีเจอร์นี้ |
 
 ### ISSUE-006 · GitHub Actions เตือนว่า Node.js 20 กำลังจะเลิกรองรับ
 
