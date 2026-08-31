@@ -7,10 +7,10 @@
 
 ## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 01:25:58` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 02:10:32` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
-- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (5 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
+- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (20 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
@@ -31,6 +31,37 @@
 ---
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
+
+### 🗓️ 2026-09-01: แผงแอดมิน M0+M1 — Platform Access Layer + Admin Auth & Shell
+
+> ส่วนแรกของแผนใหญ่ "แผงแอดมิน (Live Content + Stats) + Marketplace แม่หมอตัวจริง"
+> (แผนเต็ม: `~/.claude/plans/breezy-percolating-llama.md` · เอกสาร: [`docs/ADMIN_PANEL.md`](ADMIN_PANEL.md))
+
+#### M0 — Platform Access Layer (เข้าถึง KV จากโค้ดแอป)
+- **ความต้องการ**: ระบบยังไม่มี datastore ที่โค้ดแอปเข้าถึงได้เลย (in-memory ล้วน) — ต้องมีชั้นกลางก่อนทำ stats/overrides
+- **สิ่งที่ทำ**:
+  - สร้าง `src/lib/platform/cf.ts` — `getAppKV()` ห่อ `getCloudflareContext().env.NEXT_INC_CACHE_KV` (reuse namespace เดิม, key prefix `app:`) + **in-memory shim** อัตโนมัติเมื่อไม่มี binding (`next dev` — ISSUE-004); `getWaitUntil()` สำหรับงาน background
+  - สร้าง `src/lib/platform/kv-store.ts` — `kvGetJSON/kvPutJSON/kvDelete/kvIncr/kvListKeys` + isolate memo cache + `KEY` builders (`app:override:*`, `app:stat:*`, `app:flag:*`, `app:audit:*`)
+  - **ไม่แตะ `wrangler.jsonc` / `open-next.config.ts`** (กัน INC-0034) · **ไม่เพิ่ม `initOpenNextCloudflareForDev`** ใน next.config.ts (มันสตาร์ท workerd ที่พังบน macOS 12.6 — ISSUE-004)
+- **ข้อจำกัดที่รับไว้**: path KV จริงตรวจได้เฉพาะหลัง deploy (curl production) — dev ใช้ shim, ข้อมูลรีเซ็ตเมื่อรีสตาร์ท
+
+#### M1 — Admin Auth + Shell
+- **ความต้องการ**: แอดมินเข้า `/admin` ด้วย "รหัสผ่านแยก" (ไม่ผูก OAuth ผู้ใช้)
+- **สิ่งที่ทำ**:
+  - สร้าง `src/lib/auth/admin-auth.ts` — HMAC-SHA256 session (`node:crypto`), cookie `tarot_admin` อายุ 8 ชม., constant-time password compare, เซ็นด้วย `TAROT_SESSION_SECRET + ADMIN_PASSWORD` (เปลี่ยนรหัส = เตะทุก session)
+  - สร้าง `src/lib/auth/require-admin.ts` — `requireAdmin()` guard (401/503) + `isAdminRequest()`
+  - สร้าง `src/lib/admin/audit.ts` — audit log append-only บน KV (`recordAudit/listAudit/auditSummary`) — ห้ามเก็บ PII
+  - สร้าง route: `POST /api/admin/login` (rate-limit 5/15นาที/IP, reuse `checkRateLimit`), `POST /api/admin/logout`, `GET /api/admin/session`
+  - สร้างหน้า: `src/app/admin/layout.tsx` (`robots: noindex`), `src/app/admin/login/page.tsx`, `src/app/admin/page.tsx` (shell + แท็บ สถิติ/เนื้อหา — เนื้อหาจริงมา M2/M3)
+  - สร้าง UI primitives: `src/components/ui/Input.tsx` (`Input`, `Textarea`), `src/components/ui/Field.tsx` (label + a11y wrapper)
+  - `src/app/robots.ts` — disallow `/admin`
+  - `.env.example` — เพิ่ม `ADMIN_PASSWORD`
+- **ผลการทดสอบ**:
+  - `npm run repo:verify` ➔ ✅ 7/7 ด่าน
+  - `next dev` + curl: session anon → `admin:false`; รหัสผิด → 401; รหัสถูก → set cookie `tarot_admin` → `admin:true`; logout → `admin:false`; 6 ครั้งผิด → `429` (rate-limit ทำงาน)
+  - เบราว์เซอร์: หน้า login altar-panel + ✦ heading render ถูก, ล็อกอินผ่าน UI → redirect เข้า shell เห็นแท็บ + ปุ่มออกจากระบบ
+- **Production setup ที่ต้องทำ**: `npx wrangler secret put ADMIN_PASSWORD` (≥ 12 ตัวอักษร)
+- **ยังไม่ทำ (milestone ถัดไป)**: M2 stats collection + dashboard · M3 live content overrides · M4–M7 marketplace (ต้อง provision D1 + sign-off PDPA)
 
 ### 🗓️ 2026-09-01: Feature 1 — Edge OAuth (Google + LINE) + Feature 3 — Smart Journal with AI Monthly Retrospective
 
