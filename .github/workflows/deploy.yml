@@ -52,11 +52,9 @@ jobs:
         run: npm install
 
       # `npm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
-      # ขั้น deploy จะ populateCache ด้วย: สร้างตาราง `revalidations` ใน D1 (--remote)
-      # และ seed หน้า ISR/SSG ลง KV ก่อน `wrangler deploy`
-      # ⚠️ CLOUDFLARE_API_TOKEN ต้องมีสิทธิ์ครบ 3 อย่าง:
-      #    Workers Scripts:Edit · Workers KV Storage:Edit · D1:Edit
-      #    ถ้าขาดตัวใด ขั้น populateCache จะ fail แบบระบุชัดว่าขาดสิทธิ์อะไร
+      # ขั้น deploy จะ populateCache: seed หน้า SSG ทั้งหมดลง KV ก่อน `wrangler deploy`
+      # ⚠️ CLOUDFLARE_API_TOKEN ต้องมี Workers Scripts:Edit + Workers KV Storage:Edit
+      #    ถ้าขาด ขั้น populateCache จะ fail แบบระบุชัดว่าขาดสิทธิ์อะไร
       - name: 🚀 Build & Deploy to Cloudflare Workers
         run: npm run deploy
         env:
