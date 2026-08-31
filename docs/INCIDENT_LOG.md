@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0033 · 2026-09-01 00:32 · 🟠 High · remove cache pnpm from setup-node and use no-frozen-lockfile in workflows
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | GitHub Actions workflows failed with error: Dependencies lock file is not found in repo. Supported file patterns: pnpm-lock.yaml |
+| **สาเหตุราก** | actions/setup-node@v4 had cache: pnpm specified without a committed pnpm-lock.yaml file in the repository |
+| **การแก้ไข** | Removed cache: pnpm from setup-node and configured pnpm install with --no-frozen-lockfile in deploy.yml and pr.yml |
+| **🛡️ กฎป้องกันถาวร** | **Do not enable pnpm caching on setup-node unless pnpm-lock.yaml is committed** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify passed all 7/7 verification gates |
+| **บันทึกโดย** | Antigravity AI · branch `fix/ci-node-setup-cache` · commit `138a8fe` |
+
+
 ### INC-0032 · 2026-09-01 00:30 · 🟠 High · fix pnpm action-setup version mismatch with package.json packageManager
 
 | หัวข้อ | รายละเอียด |

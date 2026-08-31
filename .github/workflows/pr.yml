@@ -37,10 +37,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile || pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       # ชุดตรวจกลาง 6 ด่าน (Collision, Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Safety Guardrails, Provably-Fair Shuffle)
       # นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts — แหล่งความจริงเดียวร่วมกับ git hooks และ npm run commit
