@@ -99,8 +99,12 @@ npm run commit -- --agent <ชื่อคุณ> --type <feat|fix|perf|refactor
 npm run agent:unlock -- --agent <ชื่อคุณ>
 npm run log:sync
 
-# 7. เปิด PR (ระบบจะตรวจ 6 ด่านซ้ำ + merge + deploy ให้เอง)
-npm run pr:auto -- "<title>" --body-file <path>
+# 7. เปิด PR (ระบบจะตรวจ 7 ด่านซ้ำ + merge + deploy ให้เอง)
+#    ใส่ --wait เพื่อให้รอจน merge เสร็จ แล้วสลับกลับ main + ลบ branch ให้อัตโนมัติ
+npm run pr:auto -- "<title>" --body-file <path> --wait
+
+# 8. ถ้าไม่ได้ใช้ --wait ให้เก็บกวาด branch ที่ merge แล้วเองภายหลัง
+npm run git:tidy
 ```
 
 ---

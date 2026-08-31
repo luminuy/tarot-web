@@ -7,6 +7,8 @@
  *   npm run pr:auto -- "<title>" --body-file <path>
  *   npm run pr:auto -- "<title>" "<body>" --no-merge    สร้าง PR เฉยๆ ไม่เปิด auto-merge
  *   npm run pr:auto -- "<title>" "<body>" --dry-run     แสดงสิ่งที่จะทำ โดยไม่แตะ remote
+ *   npm run pr:auto -- "<title>" "<body>" --wait       รอจน PR ถูก merge แล้วเก็บกวาด branch ให้เอง
+ *   npm run git:tidy                         ลบ branch ที่ PR merge ไปแล้วทั้งในเครื่องและบน remote
  *   tsx scripts/github-auto.ts status        ดูสถานะ repo, PR และ CI ล่าสุด
  *
  * ⚠️ หมายเหตุสำคัญสำหรับ AI Agent ทุกตัว:
@@ -230,11 +232,123 @@ function actionPr(argv: string[]): void {
       console.log(`   Settings > General > Pull Requests > Allow auto-merge`);
     }
     console.log("⚡ เมื่อ merge เข้า main แล้ว deploy.yml จะ deploy ขึ้น Cloudflare Workers อัตโนมัติ");
+
+    if (flags.has("--wait")) waitForMergeThenTidy(repo, prNumber, branch);
+    else console.log(`\n💡 เมื่อ PR merge แล้ว สั่ง \`npm run git:tidy\` เพื่อเก็บกวาด branch (หรือใช้ --wait ให้ทำให้เอง)`);
   } catch (e: any) {
     console.error(`\n❌ ผิดพลาด: ${e.message}`);
     console.error("\n💡 ถ้าติดที่ขั้นตอน merge: PR ถูกสร้างไว้แล้ว สั่ง merge เองได้จากหน้าเว็บ GitHub");
     process.exit(1);
   }
+}
+
+/**
+ * เก็บกวาด branch ที่ PR ถูก merge ไปแล้ว ทั้งในเครื่องและบน remote
+ *
+ * ⚠️ ทำไมต้องมี: repo นี้ปิด GitHub native auto-merge ไว้ การ merge จริงทำโดย
+ * step ใน `.github/workflows/pr.yml` ซึ่ง "ไม่ได้ลบ branch ให้" ผลคือ branch
+ * ค้างสะสมทั้งในเครื่องและบน GitHub และ IDE จะขึ้นปุ่ม "Create PR" ค้างไว้
+ * เพราะ branch ที่ถูก squash-merge จะยังดูเหมือนนำหน้า main อยู่ 1 commit
+ *
+ * 🔒 ความปลอดภัย: ลบเฉพาะ branch ที่ยืนยันจาก GitHub แล้วว่า PR อยู่ในสถานะ MERGED
+ * และจะไม่แตะ branch ปัจจุบัน หรือ branch ที่ถูก checkout อยู่ใน worktree อื่น
+ */
+function actionTidy(dryRun = false): void {
+  const repo = getRepoSlug();
+  const current = getBranch();
+
+  console.log(`\n🧹 [Tidy] เก็บกวาด branch ที่ merge ไปแล้ว — repo: ${repo}`);
+  if (dryRun) console.log("🧪 โหมด --dry-run: จะไม่ลบอะไรจริง");
+
+  shQuiet("git", ["fetch", "origin", "--prune"]);
+
+  // branch ที่ถูก checkout ค้างไว้ใน worktree อื่น — ห้ามลบเด็ดขาด
+  const worktreeBranches = new Set(
+    (shQuiet("git", ["worktree", "list", "--porcelain"]) ?? "")
+      .split("\n")
+      .filter((l) => l.startsWith("branch "))
+      .map((l) => l.replace("branch refs/heads/", "").trim()),
+  );
+
+  const locals = (shQuiet("git", ["branch", "--format=%(refname:short)"]) ?? "")
+    .split("\n").map((b) => b.trim()).filter((b) => b && b !== "main");
+
+  let removed = 0;
+  let skipped = 0;
+
+  for (const branch of locals) {
+    // อ่าน JSON ดิบแล้ว parse ในโค้ด แทนการใช้ jq interpolation
+    // (สตริง `\(...)` ของ jq จะถูก JS กลืน backslash ทิ้งจนคำสั่งเพี้ยน)
+    const raw = shQuiet("gh", [
+      "pr", "list", "-R", repo, "--head", branch, "--state", "all",
+      "--json", "state,number", "--limit", "1",
+    ]);
+    const pr = raw ? (JSON.parse(raw)[0] as { state?: string; number?: number } | undefined) : undefined;
+
+    if (!pr || pr.state !== "MERGED") {
+      console.log(`  ⏭️  ${branch} — ${pr ? `PR #${pr.number} ยังเป็น ${pr.state}` : "ไม่มี PR"} (ข้าม)`);
+      skipped++;
+      continue;
+    }
+
+    const prNumber = String(pr.number);
+
+    if (branch === current) {
+      console.log(`  ⚠️  ${branch} — PR #${prNumber} merged แล้ว แต่เป็น branch ที่อยู่ตอนนี้`);
+      console.log(`      สลับไปที่ main ก่อนแล้วรัน git:tidy ใหม่: git checkout main`);
+      skipped++;
+      continue;
+    }
+    if (worktreeBranches.has(branch)) {
+      console.log(`  ⚠️  ${branch} — ถูก checkout อยู่ใน worktree อื่น (ข้ามเพื่อความปลอดภัย)`);
+      skipped++;
+      continue;
+    }
+
+    if (dryRun) {
+      console.log(`  🗑️  ${branch} — PR #${prNumber} merged (จะถูกลบ)`);
+      removed++;
+      continue;
+    }
+
+    // -D จำเป็นเพราะ squash-merge ทำให้ commit hash ไม่ตรงกับบน main
+    shQuiet("git", ["branch", "-D", branch]);
+    const remoteGone = shQuiet("git", ["ls-remote", "--exit-code", "--heads", "origin", branch]) === null;
+    if (!remoteGone) shQuiet("gh", ["api", "-X", "DELETE", `repos/${repo}/git/refs/heads/${branch}`]);
+    console.log(`  ✅ ${branch} — ลบแล้ว (PR #${prNumber}${remoteGone ? "" : " + ลบบน remote ด้วย"})`);
+    removed++;
+  }
+
+  console.log(`\n✨ เก็บกวาดเสร็จ: ลบ ${removed} branch | ข้าม ${skipped} branch\n`);
+}
+
+/** รอจน PR ถูก merge (pr.yml จะ merge ให้เองหลัง CI ผ่าน) แล้วเก็บกวาด branch */
+function waitForMergeThenTidy(repo: string, prNumber: string, branch: string): void {
+  console.log(`\n⏳ รอ PR #${prNumber} ถูก merge (workflow pr.yml จะจัดการให้หลัง CI ผ่าน)...`);
+  const MAX_MINUTES = 15;
+  const deadline = Date.now() + MAX_MINUTES * 60_000;
+
+  while (Date.now() < deadline) {
+    const state = shQuiet("gh", ["pr", "view", prNumber, "-R", repo, "--json", "state", "-q", ".state"]);
+    if (state === "MERGED") {
+      console.log(`✅ PR #${prNumber} merged แล้ว`);
+      // ต้องออกจาก branch นั้นก่อนถึงจะลบได้
+      if (getBranch() === branch) {
+        shQuiet("git", ["checkout", "main"]);
+        shQuiet("git", ["pull", "--ff-only", "origin", "main"]);
+        console.log("🔄 สลับกลับมาที่ main และดึงโค้ดล่าสุดแล้ว");
+      }
+      actionTidy();
+      return;
+    }
+    if (state === "CLOSED") {
+      console.log(`ℹ️  PR #${prNumber} ถูกปิดโดยไม่ merge — ไม่เก็บกวาด branch`);
+      return;
+    }
+    execFileSync("sleep", ["20"]);
+  }
+  console.log(`⏰ รอครบ ${MAX_MINUTES} นาทีแล้วแต่ PR ยังไม่ merge — ตรวจสถานะเองที่ GitHub`);
+  console.log(`   เมื่อ merge แล้วสั่งเก็บกวาดด้วย: npm run git:tidy`);
 }
 
 function actionStatus(): void {
@@ -293,6 +407,9 @@ switch (action) {
     break;
   case "pr":
     actionPr(argv.slice(1));
+    break;
+  case "tidy":
+    actionTidy(argv.includes("--dry-run"));
     break;
   case "status":
   default:

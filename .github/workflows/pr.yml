@@ -150,3 +150,18 @@ jobs:
               console.log('❌ สั่ง deploy ไม่สำเร็จ:', err.message);
               core.setFailed(`merge สำเร็จแต่สั่ง deploy ไม่ได้: ${err.message}`);
             }
+
+            // ลบ branch ที่ merge แล้วทิ้ง — ถ้าไม่ลบ branch จะค้างสะสมบน GitHub
+            // และ IDE จะขึ้นปุ่ม "Create PR" ค้างไว้ เพราะ branch ที่ถูก squash-merge
+            // ยังดูเหมือนนำหน้า main อยู่ 1 commit (repo นี้ปิด auto-merge จึงไม่มีใครลบให้)
+            try {
+              const headRef = context.payload.pull_request.head.ref;
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${headRef}`
+              });
+              console.log(`🧹 ลบ branch ${headRef} บน remote เรียบร้อย`);
+            } catch (err) {
+              console.log('ℹ️ ลบ branch ไม่ได้ (อาจถูกลบไปแล้ว):', err.message);
+            }

@@ -54,8 +54,12 @@ npm run typecheck
 # สร้างภาพไพ่ย่อ WebP หลายขนาด (รันเมื่อเพิ่ม/เปลี่ยนภาพใน public/cards/)
 npm run cards:variants
 
-# ตรวจ + push + สร้าง PR + เปิด Auto-Merge (ใส่ --dry-run เพื่อดูก่อนโดยไม่แตะ remote)
-npm run pr:auto -- "<title>" "<body>"
+# ตรวจ + push + สร้าง PR (ใส่ --dry-run เพื่อดูก่อนโดยไม่แตะ remote)
+#   --wait     รอจน PR merge เสร็จ แล้วสลับกลับ main + เก็บกวาด branch ให้อัตโนมัติ
+npm run pr:auto -- "<title>" "<body>" --wait
+
+# เก็บกวาด branch ที่ PR merge ไปแล้ว ทั้งในเครื่องและบน remote
+npm run git:tidy
 
 # ซิงก์สถานะงานอัตโนมัติลงใน docs/WORK_LOG.md
 npm run log:sync

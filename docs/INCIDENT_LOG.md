@@ -48,6 +48,19 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0011 · 2026-08-31 15:54 · 🟡 Medium · เก็บกวาด branch อัตโนมัติหลัง merge — ปิดช่องว่างสุดท้ายของ automation
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หลัง PR merge แล้ว branch ยังค้างทั้งในเครื่องและบน GitHub สะสมไปถึง 7 อัน และ IDE ขึ้นปุ่ม Create PR ค้างไว้ทั้งที่ PR merge ไปแล้ว |
+| **ผลกระทบ** | สับสนว่างานยังไม่เสร็จ และ branch ขยะสะสมเรื่อยๆ ทุก PR |
+| **สาเหตุราก** | repo ปิด GitHub native auto-merge ไว้ การ merge จริงทำโดย step ใน pr.yml ซึ่งเรียกแค่ pulls.merge ไม่ได้ลบ branch ให้ ส่วน gh pr merge --delete-branch ก็ไม่เคยได้ทำงานเพราะถูกข้ามไปตั้งแต่แรก และเพราะ squash-merge ทำให้ commit hash ไม่ตรงกับบน main branch เดิมจึงดูเหมือนยังนำหน้า main อยู่ 1 commit |
+| **การแก้ไข** | เก็บกวาด branch อัตโนมัติหลัง merge — ปิดช่องว่างสุดท้ายของ automation |
+| **🛡️ กฎป้องกันถาวร** | **pr.yml ต้องเรียก git.deleteRef ลบ branch หลัง merge สำเร็จเสมอ และฝั่งเครื่องต้องมี npm run git:tidy ที่ลบเฉพาะ branch ที่ยืนยันจาก GitHub แล้วว่า PR เป็น MERGED โดยไม่แตะ branch ปัจจุบันและ branch ที่ถูก checkout อยู่ใน worktree อื่น** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน git:tidy --dry-run ก่อนแล้วยืนยันว่าไม่ลบอะไรจริง จากนั้นรันจริงลบ branch ที่ merge แล้ว 7 อัน เหลือแต่ branch ปัจจุบัน main และ branch ของ worktree อื่นอีก 2 อันที่ถูกข้ามอย่างถูกต้อง remote เหลือแต่ main |
+| **บันทึกโดย** | Claude · branch `claude/auto-branch-cleanup` · commit `09f6ed9` |
+
+
 ### INC-0010 · 2026-08-31 13:44 · 🔴 Critical · deploy permanent stateless HMAC-SHA256 session token architecture for zero-failover serverless edge reliability
 
 | หัวข้อ | รายละเอียด |
