@@ -64,15 +64,9 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
 
   return (
     <div className="space-y-4 w-full">
-      <div className="flex items-center justify-between px-1">
-        <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] tracking-wide flex items-center gap-2">
-          <span className="text-[#e5c07b]">✦</span> เลือกสไตล์การทำนายของแม่หมอ
-        </label>
-        {/* Mobile Swipe Guidance */}
-        <span className="text-[10px] text-[#9c93b8] font-mono bg-[#140c2a] border border-[#e5c07b]/20 px-2 py-0.5 rounded-full shadow-inner sm:hidden">
-          {activeScrollIndex + 1} / {PERSONAS.length} ท่าน
-        </span>
-      </div>
+      <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] tracking-wide flex items-center gap-2">
+        <span className="text-[#e5c07b]">✦</span> เลือกสไตล์การทำนายของแม่หมอ
+      </label>
 
       {/* Responsive Persona Carousel (Mobile Swipe / Desktop Grid) */}
       <div

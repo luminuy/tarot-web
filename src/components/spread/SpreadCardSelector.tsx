@@ -204,17 +204,6 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         })}
       </div>
 
-      {/* Mobile Swipe Guidance Header */}
-      <div className="flex sm:hidden items-center justify-between px-1 text-[11px] font-serif-th text-[#e5c07b] select-none pt-0.5">
-        <div className="flex items-center gap-1.5 font-semibold">
-          <span>✦</span>
-          <span>ปัดซ้าย-ขวาเพื่อเลือกผัง</span>
-        </div>
-        <span className="text-[10px] text-[#9c93b8] font-mono bg-[#140c2a] border border-[#e5c07b]/20 px-2 py-0.5 rounded-full shadow-inner">
-          {activeScrollIndex + 1} / {filteredSpreads.length} ผัง
-        </span>
-      </div>
-
       {/* World-Class Responsive Tarot Cards (Mobile Horizontal Swipe / Desktop Grid) */}
       <AnimatePresence mode="wait">
         <motion.div
