@@ -89,21 +89,16 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
       {/* 3D Physical Riffle & Cascade Deck Stage */}
       <div className="h-64 sm:h-72 w-full flex items-center justify-center relative my-4" style={{ perspective: 1400 }}>
         {!shuffling ? (
-          /* Idle Floating Deck with Parallax Hover */
-          <motion.div
-            animate={{
-              y: [-6, 6, -6],
-              rotateZ: [-1.2, 1.2, -1.2],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 4.5,
-              ease: "easeInOut",
-            }}
+          /* Idle Floating Deck — ลอยด้วย CSS (anim-tarot-idle) ไม่ใช่ Framer loop
+             เพราะ animate loop แบบ repeat:Infinity ทำให้ AnimatePresence mode="wait"
+             ของผังขั้นตอนค้าง เวลาผู้ใช้กด "ย้อนกลับ" ออกจากขั้นสับไพ่ */
+          <motion.button
+            type="button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.96 }}
             onClick={startShuffle}
-            className="w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#e5c07b] card-back-pattern shadow-[0_0_50px_rgba(229,192,123,0.45)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative"
+            aria-label="แตะเพื่อเริ่มสับไพ่"
+            className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#e5c07b] card-back-pattern shadow-[0_0_50px_rgba(229,192,123,0.45)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
           >
             <div className="w-full flex justify-center items-center opacity-75">
               <span className="text-[9px] font-serif-th text-[#f5deaa] tracking-[0.2em] uppercase font-bold">
@@ -120,7 +115,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
 
             {/* Dynamic Gold Sheen */}
             <div className="gold-foil-sheen absolute inset-0 opacity-40 group-hover:opacity-75 transition-opacity" />
-          </motion.div>
+          </motion.button>
         ) : (
           /* Multi-Layer Physical 3D Riffle Shuffle Animation */
           <div className="relative w-72 h-64 flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
