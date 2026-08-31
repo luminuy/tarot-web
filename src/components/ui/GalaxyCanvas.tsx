@@ -104,8 +104,6 @@ export const GalaxyCanvas: React.FC = () => {
       }
     };
 
-    let sacredAngle = 0;
-
     const drawFrame = (animate: boolean) => {
       ctx.clearRect(0, 0, width, height);
 
@@ -130,66 +128,6 @@ export const GalaxyCanvas: React.FC = () => {
         ctx.arc(neb.x, neb.y, neb.radius, 0, Math.PI * 2);
         ctx.fill();
       }
-
-      // 🔮 Sacred Rotating Altar Mandala Geometry (วงเวทย์ทองคำศักดิ์สิทธิ์หมุนวน)
-      if (animate) sacredAngle += 0.0012;
-      const centerX = width / 2;
-      const centerY = height * 0.42;
-      const radius = Math.min(width, height) * 0.35;
-
-      ctx.save();
-      ctx.translate(centerX, centerY);
-
-      // Outer gold circle
-      ctx.rotate(sacredAngle);
-      ctx.strokeStyle = "rgba(229, 192, 123, 0.14)";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(0, 0, radius, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Outer dashed circle
-      ctx.beginPath();
-      ctx.setLineDash([12, 16]);
-      ctx.arc(0, 0, radius * 0.88, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(229, 192, 123, 0.08)";
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Inner purple aurora ring (counter-clockwise)
-      ctx.rotate(-sacredAngle * 2.2);
-      ctx.beginPath();
-      ctx.setLineDash([6, 12]);
-      ctx.arc(0, 0, radius * 0.72, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(168, 85, 247, 0.15)";
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Sacred 12-ray zodiac geometry lines
-      ctx.beginPath();
-      for (let i = 0; i < 12; i++) {
-        const rad = (i * Math.PI) / 6;
-        const x1 = Math.cos(rad) * (radius * 0.72);
-        const y1 = Math.sin(rad) * (radius * 0.72);
-        const x2 = Math.cos(rad) * (radius * 0.88);
-        const y2 = Math.sin(rad) * (radius * 0.88);
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-      }
-      ctx.strokeStyle = "rgba(229, 192, 123, 0.09)";
-      ctx.stroke();
-
-      // Center glowing altar focal radial aura
-      const altarGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, radius * 0.9);
-      altarGlow.addColorStop(0, "rgba(229, 192, 123, 0.06)");
-      altarGlow.addColorStop(0.5, "rgba(139, 92, 246, 0.04)");
-      altarGlow.addColorStop(1, "transparent");
-      ctx.fillStyle = altarGlow;
-      ctx.beginPath();
-      ctx.arc(0, 0, radius * 0.9, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
 
       // Interactive mouse glow (desktop/tablet)
       if (animate) {

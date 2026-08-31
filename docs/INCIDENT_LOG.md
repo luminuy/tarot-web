@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0028 · 2026-08-31 23:47 · 🔵 Low · Clean up GalaxyCanvas by removing extra overlapping canvas rings to restore original pristine cosmic starfield
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Double concentric circles appeared over background overlapping with central card in desktop view |
+| **สาเหตุราก** | GalaxyCanvas rendered an extra layer of rotating geometry circles that conflicted with DOM altar background |
+| **การแก้ไข** | Remove duplicate canvas rotating geometry and preserve pure starfield and nebulae in GalaxyCanvas |
+| **🛡️ กฎป้องกันถาวร** | **Keep canvas background dedicated to particle starfields and let layout components handle card level decorative rings** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify 7/7 passed and visuals verified |
+| **บันทึกโดย** | Antigravity AI · branch `fix/clean-galaxy-canvas` · commit `b863ffc` |
+
+
 ### INC-0027 · 2026-08-31 23:11 · 🟠 High · Fix Step 4 to Step 5 transition crash by making cardByIndex resilient and defensive keyword extraction
 
 | หัวข้อ | รายละเอียด |
