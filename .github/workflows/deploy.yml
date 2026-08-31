@@ -29,10 +29,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile || pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       # ชุดตรวจกลาง 6 ด่าน — นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts
       # เพิ่มด่านตรวจใหม่ที่นั่นที่เดียว ทั้ง hooks / PR / Deploy จะตรวจเหมือนกันหมด
@@ -54,10 +53,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile || pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       # `pnpm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
       # ขั้น deploy จะ populateCache: seed หน้า SSG ทั้งหมดลง KV ก่อน `wrangler deploy`
