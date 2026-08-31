@@ -1,26 +1,5 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-08-31T05:18:18.680Z",
-  "locks": [
-    {
-      "id": "lock-1788152722648-kw9u",
-      "agentName": "Claude",
-      "agentRole": "AI Agent",
-      "domain": "Docs",
-      "files": [
-        "docs/INCIDENT_LOG.md",
-        "docs/KNOWN_ISSUES.md",
-        "scripts/incident-log.ts",
-        "scripts/git-author-guard.ts",
-        "docs/AI_COLLABORATION_GUIDELINES.md",
-        "GEMINI.md",
-        "CLAUDE.md",
-        "README.md",
-        "package.json"
-      ],
-      "task": "วางระบบบันทึกความผิดพลาดอัตโนมัติและมาตรฐานวิศวกรรม",
-      "acquiredAt": "2026-08-31T05:05:22.648Z",
-      "expiresAt": "2026-08-31T05:35:22.648Z"
-    }
-  ]
+  "lastUpdated": "2026-08-31T05:18:39.460Z",
+  "locks": []
 }
