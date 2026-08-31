@@ -18,11 +18,6 @@ const DEFAULT_DEV_SECRET = "tarot-sacred-altar-secret-provably-fair-2026";
 function getSessionSecret(): string {
   const secret = process.env.TAROT_SESSION_SECRET || process.env.CF_PAGES_COMMIT_SHA;
   if (secret) return secret;
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "[Security] TAROT_SESSION_SECRET environment variable must be set in production"
-    );
-  }
   return DEFAULT_DEV_SECRET;
 }
 

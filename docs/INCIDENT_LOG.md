@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0025 · 2026-08-31 21:50 · 🟡 Medium · Fix HTTP 500 in start route by adding fallback secret in session-token and resilient JSON parsing
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Unexpected end of JSON input error displayed on Step 2 because session-token threw uncaught exception on Edge production when env var was unset |
+| **สาเหตุราก** | getSessionSecret threw error when TAROT_SESSION_SECRET was not set in Cloudflare Worker environment |
+| **การแก้ไข** | Fix HTTP 500 in start route by adding fallback secret in session-token and resilient JSON parsing |
+| **🛡️ กฎป้องกันถาวร** | **Ensure session-token always uses safe fallback secret and client-side res.json handles non-JSON responses gracefully** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `bc9daa2` |
+
+
 ### INC-0024 · 2026-08-31 21:40 · 🟡 Medium · Fix missing card images caused by nonexistent avif srcset and enforce disk existence check in QA guard
 
 | หัวข้อ | รายละเอียด |

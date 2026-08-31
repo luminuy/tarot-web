@@ -145,7 +145,7 @@ export default function TarotPage() {
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "ไม่สามารถเริ่มดูดวงได้");
 
       const sessionReadingId = data.readingId || data.id;
@@ -209,7 +209,7 @@ export default function TarotPage() {
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "ไม่สามารถจัดสำรับไพ่ได้");
       if (data.sessionToken) setSessionToken(data.sessionToken);
 
