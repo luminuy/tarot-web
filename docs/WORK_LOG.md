@@ -5,28 +5,14 @@
 
 ---
 
-## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
+## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary)
 
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 02:20:32` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
-
-- **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
-- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (13 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
-- **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
-- **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
-
-### 🧭 ตารางสถานะฟีเจอร์และหน้าเว็บ (Feature Readiness & Roadmap Matrix)
-
-| หน้าเว็บ / ฟีเจอร์ | เส้นทาง (Route / File) | สถานะความพร้อม | สถานะเซิร์ฟเวอร์ | สิ่งที่ทำแล้ว | สิ่งที่สามารถต่อยอดได้ในอนาคต |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
-| **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
-| **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
-| **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
-| **บัญชีและประวัติ** | `/account` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
-| **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
-| **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
-| **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+> สถานะอัตโนมัติ (typecheck / จำนวนไพ่-ผัง / route probe / agent locks) ถูกเขียนลง
+> **`docs/WORK_LOG.status.md`** ทุกครั้งที่รัน `npm run log:sync` หรือ `npm run commit`
+> ไฟล์นั้น **ไม่ track ใน git** (`.gitignore`) — เดิมการเขียนทับบล็อกนี้ทุก commit
+> เป็นต้นเหตุ merge conflict แทบทุก PR ที่ทำขนานกัน จึงย้ายออกมา
+>
+> ประวัติงานถาวรและสิ่งที่ค้าง อยู่ในหัวข้อ **"บันทึกประวัติการพัฒนา"** ด้านล่างนี้
 
 ---
 

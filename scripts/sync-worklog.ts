@@ -1,12 +1,15 @@
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { writeFileSync, realpathSync } from "fs";
 import { execSync } from "child_process";
 import { join } from "path";
+import { fileURLToPath } from "url";
 import { DECK } from "../src/data/cards";
 import { SPREADS } from "../src/data/spreads";
 import { checkCollisions } from "./agent-guard";
 
 const ROOT_DIR = process.cwd();
-const WORK_LOG_PATH = join(ROOT_DIR, "docs", "WORK_LOG.md");
+// เขียนสถานะอัตโนมัติลงไฟล์แยกที่ .gitignore ไว้ — ไม่แตะ docs/WORK_LOG.md ที่ track ใน git
+// (การเขียนทับบล็อกสรุปทุก commit เคยเป็นต้นเหตุ merge conflict แทบทุก PR ที่ทำขนานกัน)
+const STATUS_PATH = join(ROOT_DIR, "docs", "WORK_LOG.status.md");
 
 interface SystemAudit {
   timestamp: string;
@@ -80,14 +83,11 @@ async function runAudit(): Promise<SystemAudit> {
 }
 
 function updateWorkLog(audit: SystemAudit) {
-  if (!existsSync(WORK_LOG_PATH)) {
-    console.error("❌ ไม่พบไฟล์ docs/WORK_LOG.md");
-    return;
-  }
+  const newSummaryBlock = `# 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
-  const content = readFileSync(WORK_LOG_PATH, "utf-8");
+> ไฟล์นี้ถูกสร้างใหม่อัตโนมัติทุกครั้งที่รัน \`npm run log:sync\` / \`npm run commit\`
+> **ไม่ต้อง track ใน git** (อยู่ใน .gitignore) — ประวัติงานถาวรอยู่ใน [\`WORK_LOG.md\`](WORK_LOG.md)
 
-  const newSummaryBlock = `## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
 > ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: \`${audit.timestamp}\` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
@@ -108,17 +108,11 @@ function updateWorkLog(audit: SystemAudit) {
 | **บัญชีและประวัติ** | \`/account\` | 🟡 **Scaffolded (Draft)** | ${audit.routes.find((r) => r.path === "/account")?.status || "HTTP 200"} | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
 | **นโยบายความเป็นส่วนตัว** | \`/privacy\` | 🟢 **Active / Live** | ${audit.routes.find((r) => r.path === "/privacy")?.status || "HTTP 200"} | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | \`/api/reading/[id]/*\` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
-| **Provably Fair Badge** | \`ProvablyFairBadge.tsx\` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |`;
+| **Provably Fair Badge** | \`ProvablyFairBadge.tsx\` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+`;
 
-  // Replace existing Current Handoff Summary section
-  const regex = /## 📌 สรุปสถานะงานปัจจุบัน[\s\S]*?(?=---\n\n## 📜 บันทึกประวัติการพัฒนา)/;
-  if (regex.test(content)) {
-    const updatedContent = content.replace(regex, `${newSummaryBlock}\n\n`);
-    writeFileSync(WORK_LOG_PATH, updatedContent, "utf-8");
-    console.log("✨ [Auto-Sync] อัปเดต docs/WORK_LOG.md อัตโนมัติสำเร็จ!");
-  } else {
-    console.warn("⚠️ ไม่พบตำแหน่ง Header สรุปสถานะงานปัจจุบัน");
-  }
+  writeFileSync(STATUS_PATH, newSummaryBlock, "utf-8");
+  console.log("✨ [Auto-Sync] เขียนสถานะล่าสุดลง docs/WORK_LOG.status.md (ไม่ track ใน git)");
 }
 
 export async function syncWorkLog() {
@@ -127,6 +121,19 @@ export async function syncWorkLog() {
   console.log(`✅ [Auto-Sync เสร็จสิ้น] สถานะระบบ Typecheck: 0 errors | ไพ่ ${audit.cardCount} ใบ | ผัง ${audit.spreadCount} ผัง`);
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  syncWorkLog().catch(console.error);
+// รันเป็นสคริปต์โดยตรง (npm run log:sync) — เทียบ realpath ให้ทนต่อ symlink และ loader ของ tsx
+function isRunDirectly(): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return realpathSync(entry) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+if (isRunDirectly()) {
+  syncWorkLog().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 }
