@@ -18,9 +18,14 @@
   ],
   "d1_databases": [
     {
+      "binding": "DB",
+      "database_name": "tarot-db",
+      "database_id": "tarot_db_id"
+    },
+    {
       "binding": "NEXT_TAG_CACHE_D1",
-      "database_name": "tarot-tag-cache-d1",
-      "database_id": "tarot_tag_cache_d1_id"
+      "database_name": "tarot-db",
+      "database_id": "tarot_db_id"
     }
   ],
   "services": [
