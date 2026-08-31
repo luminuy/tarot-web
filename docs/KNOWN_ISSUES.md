@@ -48,7 +48,8 @@
 | **010b** 🟡 | Session secret fallback ใน production | เพิ่ม `getSessionSecret()` บังคับ throw ใน production | ✅ Security Hard-Fail Guard |
 | **011** 🟡 | `pnpm-workspace.yaml` ขาดฟิลด์ packages | ใส่ `packages: - .` และตัด `allowBuilds` | ✅ Schema compliant pnpm 9.15 |
 
-> ยังไม่ได้ verify: flow ขั้น 3→4→5 (สับไพ่ → เลือกไพ่ → อ่านคำทำนาย) — ต้องมี `GEMINI_API_KEY` จริง · bundle หน้าแรกยัง 498KB (code-split ช่วยแค่ ~13% — page.tsx ยังใหญ่, LazyMotion ยังไม่ทำ = แผน perf ระดับ 2.3/2.4)
+> ✅ **BACKLOG P1 (ลด JS หน้าแรก)**: Code-split `@/data/cards` 780 ข้อความออกจาก Initial Chunk ของ `page.tsx` เรียบร้อย (PR #40)
+> ✅ **BACKLOG P3 (pnpm CI)**: อัปเกรด GitHub Actions Workflows สู่ pnpm 9.15 + Cache เรียบร้อย (PR #39)
 
 ---
 
