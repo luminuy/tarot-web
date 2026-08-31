@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0027 · 2026-08-31 23:11 · 🟠 High · Fix Step 4 to Step 5 transition crash by making cardByIndex resilient and defensive keyword extraction
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | React Error Boundary modal appeared when transitioning from card picking stage to divination reading chamber |
+| **สาเหตุราก** | cardByIndex threw unhandled exception when index was out of bounds or undefined and keyword extraction lacked polymorphic checks during slot mapping |
+| **การแก้ไข** | Update cardByIndex and cardById in cards/index.ts to return fallback DECK[0] instead of throwing uncaught Error, and make slot mapping handle keywords array safely |
+| **🛡️ กฎป้องกันถาวร** | **Make cardByIndex return DECK[0] fallback instead of throwing and apply polymorphic array and object checks on all card slot mappers** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify passed with 7/7 gates green and zero typecheck errors |
+| **บันทึกโดย** | Antigravity AI · branch `fix/step4-resilient-rendering` · commit `5cb8e34` |
+
+
 ### INC-0026 · 2026-08-31 22:16 · 🟡 Medium · แตะแท็บ "สรุปภาพรวม & คำแนะนำ" แล้วหน้าจอขึ้น Error Boundary
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |

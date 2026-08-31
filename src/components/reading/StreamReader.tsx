@@ -70,9 +70,13 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   const activeCardReading = reading?.cards?.find((c) => c.position === activeCardIndex);
 
   const allCards = useMemo(() => {
-    return drawnCards
-      .map((d) => (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : (d.card as unknown as TarotCard)))
-      .filter((c): c is TarotCard => !!c);
+    try {
+      return drawnCards
+        .map((d) => (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : (d.card as unknown as TarotCard)))
+        .filter((c): c is TarotCard => !!c);
+    } catch {
+      return [];
+    }
   }, [drawnCards]);
 
   const totalCards = drawnCards.length;

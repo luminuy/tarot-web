@@ -36,14 +36,18 @@ export const TOTAL_CARDS = DECK_SIZE;
 
 const BY_ID = new Map(DECK.map((card) => [card.id, card]));
 
-export function cardById(id: string): TarotCard | undefined {
+export function cardById(id?: string | null): TarotCard | undefined {
+  if (!id) return undefined;
   return BY_ID.get(id);
 }
 
-export function cardByIndex(index: number): TarotCard {
-  const card = DECK[index];
-  if (!card) throw new Error(`ไม่พบไพ่ที่ตำแหน่ง ${index} ในสำรับ`);
-  return card;
+export function cardByIndex(index?: number | null): TarotCard {
+  if (index === null || index === undefined) return DECK[0];
+  const num = typeof index === "number" ? index : Number(index);
+  if (!isNaN(num) && num >= 0 && num < DECK.length) {
+    return DECK[num];
+  }
+  return DECK[0];
 }
 
 export type { TarotCard } from "./types";
