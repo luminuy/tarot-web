@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { SPREADS, type Spread } from "@/data/spreads";
 import { PERSONAS, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
+import { CardImage } from "@/components/card/CardImage";
 import { cardByIndex } from "@/data/cards";
 import type { Reading } from "@/lib/schema/reading";
 import { ShuffleRitual } from "@/components/deck/ShuffleRitual";
@@ -325,12 +326,12 @@ export default function TarotPage() {
           >
             {/* World-Class Miniature 1909 Tarot Card Brand Logo */}
             <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-lg border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.5)] relative flex-shrink-0 bg-[#07050d] group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(229,192,123,0.8)] transition-all duration-300">
-              <img
-                src="/cards/major-01.jpg"
+              <CardImage
+                image="major-01.jpg"
                 alt="The Magician Tarot Seal"
                 className="w-full h-full object-cover object-[50%_12%] filter contrast-[1.12] saturate-[1.15] brightness-[1.05] tarot-hd-card-image"
+                sizes="40px"
                 loading="eager"
-                decoding="async"
               />
             </div>
 
@@ -753,13 +754,13 @@ export default function TarotPage() {
           <div className="flex flex-col items-center gap-2 pt-4 border-t border-[#e5c07b]/8">
             <div className="flex items-center gap-2">
               <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#e5c07b]/40 flex-shrink-0">
-                <img src="/cards/major-01.jpg" alt="The Magician" className="w-full h-full object-cover" />
+                <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="24px" />
               </div>
               <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#e5c07b]/60">
                 Sacred Oracle Tarot · 1909
               </span>
               <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#e5c07b]/40 flex-shrink-0">
-                <img src="/cards/major-17.jpg" alt="The Star" className="w-full h-full object-cover" />
+                <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="24px" />
               </div>
             </div>
             <p className="text-[9px] text-[#9c93b8]/50 font-mono">

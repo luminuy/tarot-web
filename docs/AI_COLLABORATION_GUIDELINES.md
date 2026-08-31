@@ -33,8 +33,14 @@
    - ในคอมโพเนนต์ `TarotArtIcons.tsx` ภาพพรีวิวผังไพ่ทั้ง 20 แบบ **ต้องแสดงเฉพาะรูปภาพหน้าไพ่ 1909 Rider-Waite ดั้งเดิมล้วนๆ อย่างคมชัดและสง่างาม**
    - **❌ ห้ามใส่กล่องสี่เหลี่ยมสีดำ, แถบข้อความ, หรือ Badge ปิดทับบดบังหน้าไพ่เด็ดขาด** เพื่อให้ผู้ใช้เห็นความงดงามและศิลปะของไพ่จริงอย่างเต็มตา
    - รายละเอียดความหมายและชื่อตำแหน่งทั้งหมด ให้แสดงใน Accordion ด้านล่าง `"✦ ดูรายละเอียดตำแหน่งไพ่"` เท่านั้น
-9. **🌐 กฎ Root Image Path Resolution สำหรับ Sub-routes**:
-   - การอ้างอิงภาพหน้าไพ่ทุกจุดต้องใช้ Helper `getImageSrc(card)` ที่รับประกัน Path เสมอ: `card.image?.startsWith("/") ? card.image : \`/cards/\${card.image}\`` ห้ามใช้ `src={card.image}` โดดๆ ที่ทำให้ Sub-routes ดึงภาพผิดโฟลเดอร์
+9. **🖼️ กฎการแสดงภาพหน้าไพ่ (Single Card Image Pipeline)**:
+   - ทุกจุดที่แสดงภาพหน้าไพ่ **ต้องใช้คอมโพเนนต์ `<CardImage />`** จาก `src/components/card/CardImage.tsx` เท่านั้น **ห้ามเขียน `<img src="/cards/..." />` เองเด็ดขาด**
+   - `<CardImage />` จัดการให้ครบทั้ง 2 เรื่องในที่เดียว:
+     1. **Root Path Resolution** — การันตี prefix `/cards/` เสมอ ไม่ให้ sub-route (`/cards`, `/spreads`) ดึงภาพผิดโฟลเดอร์
+     2. **Responsive Downscaling** — เลือกไฟล์ WebP ย่อขนาดที่พอดีกับพื้นที่แสดงผลจริงผ่าน `<picture>` + `srcset`
+   - **ต้องส่ง prop `sizes` เสมอ** โดยระบุความกว้างจริงที่ภาพถูกแสดง เช่น `sizes="60px"` หรือ `sizes="(min-width: 640px) 112px, 96px"` ถ้าไม่ส่ง ระบบจะเดาเป็น `120px` ซึ่งอาจโหลดไฟล์ใหญ่เกินจำเป็น
+   - ใช้ `full` เฉพาะภาพใบใหญ่จริงๆ เท่านั้น (หน้ารายละเอียดไพ่, หน้าซูม, Export ลง Canvas) เพื่อดึงไฟล์ต้นฉบับความละเอียดเต็ม
+   - ถ้าต้องการเฉพาะ path (ไม่ใช่ element) ให้ใช้ `getCardImageSrc(image, id)` จาก `src/lib/tarot/card-image.ts`
 10. **📐 กฎควบคุมสัดส่วนพรีวิวผังไม่ให้ล้นขอบ (Horizontal Spread Bounds Calibration Standard)**:
    - ในคอนเทนเนอร์การ์ดผังที่มีความกว้างคอลัมน์จำกัด (~220px บน Grid 4 คอลัมน์) **ห้ามวางเรียงไพ่ 7 ใบในแถวเดียวแนวนอนเด็ดขาด** (เพราะความกว้างรวมจะทะลุกรอบออกไป)
    - ผังที่มีไพ่ 7 ใบขึ้นไป (เช่น ผัง 7 วัน และผัง 7 จักระ) **ต้องจัดวางเป็น 2 แถวสมดุล (2-Tier Balanced Formation เช่น 4 + 3 ใบ)** โดยคุมความกว้างรวมไม่เกิน **150px** เพื่อให้พอดีกับกรอบทุกขนาดหน้าจออย่างสมบูรณ์แบบ
@@ -42,6 +48,13 @@
    - ทุกจุดใน UI เมนู ปุ่ม และคำโปรย **ต้องใช้คำภาษาไทยที่เป็นธรรมชาติ ชัดเจน ตรงไปตรงมา และเข้าใจง่ายทันที เหมือนมนุษย์คุยกับมนุษย์**
    - **❌ ห้ามใช้ศัพท์หุ่นยนต์/ศัพท์ AI แข็งทื่อ หรือศัพท์ภาษาอังกฤษเฉพาะทางที่ไม่จำเป็น** เช่น ห้ามใช้ 'SACRED SANCTUARY', 'Major & Minor Arcana' ใน UI หลักที่คนทั่วไปอ่านยาก, ห้ามใช้ 'เมนูวิหาร' ให้ใช้ **'เมนู'**
    - **✅ ใช้คำที่กระชับและเป็นมิตร**: เช่น **'เมนู'**, **'ผังการเปิดไพ่ (20 แบบ)'**, **'ความหมายไพ่ (78 ใบ)'**, **'ประวัติการดูดวง'**, **'เริ่มดูดวงใหม่'**
+12. **⚡ กฎประสิทธิภาพการโหลดภาพไพ่ (Card Image Performance Standard)**:
+   - ภาพต้นฉบับ `public/cards/*.jpg` กว้าง ~820px หนักใบละ ~280KB **ห้ามโหลดมาแสดงที่ขนาดเล็ก (34-170px) โดยตรงเด็ดขาด**
+   - ต้องใช้ไฟล์ WebP ย่อใน `public/cards/w256/` และ `public/cards/w512/` ผ่าน `<CardImage />` เสมอ
+   - ถ้าเพิ่ม/เปลี่ยนภาพไพ่ต้นฉบับ **ต้องรัน `npm run cards:variants` ใหม่ทุกครั้ง** เพื่อสร้างไฟล์ย่อให้ครบ
+   - ❌ **ห้ามใส่ `image-rendering: crisp-edges` / `pixelated` / `-webkit-optimize-contrast` กับภาพไพ่เด็ดขาด** — ค่าเหล่านี้บังคับให้เบราว์เซอร์ย่อภาพแบบ nearest-neighbour ทำให้ลายเส้นแตกเป็นเม็ดหยาบจนดูเบลอ (ต้องใช้ `image-rendering: auto` เท่านั้น)
+   - `public/_headers` ตั้ง `Cache-Control: max-age=31536000, immutable` ให้ `/cards/*` ไว้แล้ว **ถ้าจำเป็นต้องเปลี่ยนไฟล์ภาพจริงๆ ต้องเปลี่ยนชื่อไฟล์หรือชื่อโฟลเดอร์ด้วยเสมอ** ไม่งั้นคนที่เคยเข้าเว็บจะยังเห็นภาพเก่าไปอีก 1 ปี
+   - ℹ️ ภาพเก็บบน **Cloudflare Workers Static Assets** ซึ่งเป็น edge CDN อยู่แล้วและไม่คิดเงินต่อ request — **ไม่ต้องย้ายไป Cloudflare Images หรือ R2** (มีแต่จะเพิ่มค่าใช้จ่าย/latency) ส่วน Image Transformations (`/cdn-cgi/image/`) ใช้ได้เฉพาะเมื่อมี custom domain เท่านั้น
 
 ---
 
@@ -63,6 +76,7 @@
 | **Pages & Routes** | `src/app/cards/`, `spreads/`, `blog/`, `account/` | หน้าเว็บเฉพาะทาง (สารานุกรม 78 ใบ, คลังผัง, บทความ, บัญชี) | ออกแบบด้วยธีม Sacred Gold และรองรับ Mobile 100% |
 | **Audio & TTS Engine** | `src/lib/utils/audio.ts` | เสียงสังเคราะห์ Web Audio API (สับไพ่/พลิกไพ่) + Web Speech TTS | ปิด/เปิดเสียงผ่าน `soundManager` เท่านั้น |
 | **Safety & PDPA** | `src/lib/safety/`, `src/app/privacy/page.tsx` | กรองคำถามอันตราย, สายด่วน 1323, นโยบาย PDPA, AI Disclosure | ห้ามลบ Disclaimer หรือตัวกรองความปลอดภัย |
+| **Card Image Pipeline** | `src/components/card/CardImage.tsx`, `src/lib/tarot/card-image.ts`, `scripts/generate-card-variants.ts`, `public/_headers` | แสดงภาพหน้าไพ่แบบ Responsive (WebP หลายขนาด) และ Resolve path จาก root | ทุกจุดที่แสดงภาพไพ่ต้องผ่าน `<CardImage />` ห้ามใช้ `<img>` ตรงๆ |
 | **Tarot Knowledge DB** | `src/data/cards/`, `src/data/spreads/` | ข้อมูลไพ่ 78 ใบครบถ้วน และผังพยากรณ์ 20 รูปแบบ | ห้ามแก้ไข structure ของไพ่ 78 ใบโดยไม่มี script ตรวจ |
 
 ---
@@ -120,6 +134,9 @@ npm run log:sync
 
 # 4. ตรวจสอบความถูกต้องของฐานข้อมูลไพ่ 78 ใบ
 ./node_modules/.bin/tsx scripts/verify-cards.ts
+
+# 4.5 สร้างภาพไพ่ย่อ WebP ใหม่ (รันเมื่อเพิ่ม/เปลี่ยนภาพใน public/cards/ เท่านั้น)
+npm run cards:variants
 
 # 5. ตรวจสอบความสมบูรณ์ของ 20 ผังพยากรณ์
 ./node_modules/.bin/tsx scripts/qa/test-spreads.ts

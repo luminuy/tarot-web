@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
+import { CardImage } from "@/components/card/CardImage";
 
 interface InteractiveCardFanProps {
   totalCards?: number;
@@ -199,10 +200,11 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
 
               {/* Front Primary 1909 Tarot Emblem */}
               <div className="absolute inset-0 rounded-xl border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.45)] bg-[#07050d] transform -rotate-2 group-hover:rotate-0 transition-transform duration-300">
-                <img
-                  src="/cards/major-01.jpg"
+                <CardImage
+                  image="major-01.jpg"
                   alt="Sacred Tarot Altar"
-                  className="w-full h-full object-cover object-top filter contrast-[1.08] brightness-[1.02]"
+                  className="w-full h-full object-cover object-top filter contrast-[1.08] brightness-[1.02] tarot-hd-card-image"
+                  sizes="48px"
                 />
                 <div className="gold-foil-sheen absolute inset-0 opacity-40" />
               </div>

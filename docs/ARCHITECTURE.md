@@ -137,7 +137,7 @@ src/
 │   ├── globals.css                 # โทนสี starry sky, 3D card perspective, CSS card-back
 │   └── layout.tsx                  # Root Layout + Thai Web Fonts
 ├── components/                     # (คอมโพเนนต์หลัก)
-│   ├── card/                       # TarotCard 3D, CardZoomModal
+│   ├── card/                       # TarotCard 3D, CardZoomModal, CardImage (Responsive WebP)
 │   ├── deck/                       # InteractiveCardFan, ShuffleRitual
 │   ├── spread/                     # SpreadBoard, SpreadCardSelector
 │   ├── reading/                    # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector,
@@ -159,6 +159,7 @@ src/
 │   ├── safety/
 │   │   └── guardrails.ts           # Guardrails ตรวจสอบความปลอดภัยคำถาม
 │   ├── tarot/
+│   │   ├── card-image.ts           # Resolver path ภาพไพ่ + srcset ภาพย่อ WebP
 │   │   └── shuffle.ts              # Provably Fair RNG & Commitment Engine
 │   └── utils/
 │       ├── partial-json.ts         # Parser สำหรับ JSON แบบสตรีมมิ่ง
@@ -168,6 +169,12 @@ src/
 │       └── history.ts              # ประวัติการดูดวงฝั่ง client
 └── server/
     └── store.ts                    # In-memory Store + Rate Limiter (พร้อมเปลี่ยนเป็น Prisma)
+
+public/cards/
+├── *.jpg                           # ภาพต้นฉบับ 1909 Rider-Waite 78 ใบ (~820px, ~280KB/ใบ) — ห้ามแก้ไข
+├── w256/*.webp                     # ภาพย่อกว้าง 256px สำหรับพรีวิวผัง/โลโก้/พัดไพ่ (~33KB/ใบ)
+└── w512/*.webp                     # ภาพย่อกว้าง 512px สำหรับผังวางไพ่/สารานุกรม (~109KB/ใบ)
+                                    # สร้างด้วย `npm run cards:variants` (scripts/generate-card-variants.ts)
 ```
 
 > **หมายเหตุ**: `prisma/schema.prisma` ออกแบบไว้ครบแล้วแต่ยังไม่ได้ต่อใช้จริง — Prisma 7

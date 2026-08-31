@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Persona } from "@/data/personas";
+import { CardImage } from "@/components/card/CardImage";
 
 interface Message {
   id: string;
@@ -80,10 +81,11 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona }
             className="w-8 h-12 rounded-md border overflow-hidden shadow bg-[#0a0812] relative flex-shrink-0"
             style={{ borderColor: persona.accent || "#e0c088" }}
           >
-            <img
-              src={`/cards/${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
+            <CardImage
+              image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
               alt={persona.nameTh}
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-cover object-top tarot-hd-card-image"
+              sizes="32px"
             />
           </div>
           <div>

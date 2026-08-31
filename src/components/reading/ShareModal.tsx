@@ -6,6 +6,7 @@ import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import type { Reading } from "@/lib/schema/reading";
 import { soundManager } from "@/lib/utils/audio";
+import { CardImage } from "@/components/card/CardImage";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -381,10 +382,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   </div>
 
                   <div className={`w-full h-22 rounded-lg overflow-hidden relative border border-[#e5c07b]/30 ${c.isReversed ? "rotate-180" : ""}`}>
-                    <img
-                      src={"/cards/" + (c.card?.image || c.card?.id + ".jpg")}
+                    <CardImage
+                      image={c.card?.image}
+                      cardId={c.card?.id}
                       alt={c.card?.nameTh || "Tarot"}
-                      className="w-full h-full object-cover object-center"
+                      className="w-full h-full object-cover object-center tarot-hd-card-image"
+                      sizes="120px"
                     />
                   </div>
 

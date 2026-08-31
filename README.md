@@ -53,6 +53,9 @@ npm run typecheck
 # ตรวจสอบความสมบูรณ์ของไพ่ 78 ใบ
 ./node_modules/.bin/tsx scripts/verify-cards.ts
 
+# สร้างภาพไพ่ย่อ WebP หลายขนาด (รันเมื่อเพิ่ม/เปลี่ยนภาพใน public/cards/)
+npm run cards:variants
+
 # ตรวจสอบพิกัดและสัดส่วนของ 20 ผังพยากรณ์
 ./node_modules/.bin/tsx scripts/qa/test-spreads.ts
 

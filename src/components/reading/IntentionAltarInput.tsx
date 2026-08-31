@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "motion/react";
 import type { Category } from "@/data/cards/types";
 import type { Persona } from "@/data/personas";
+import { CardImage } from "@/components/card/CardImage";
 
 interface IntentionAltarInputProps {
   question: string;
@@ -103,10 +104,11 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
       {/* Persona Welcoming Sanctuary Dialogue */}
       <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-[#1c1236]/90 to-[#0e071e]/90 border border-[#e5c07b]/40 shadow-[0_0_25px_rgba(0,0,0,0.7)] relative overflow-hidden">
         <div className="w-10 h-15 rounded-lg border-2 border-[#e5c07b] overflow-hidden flex-shrink-0 shadow-[0_0_15px_rgba(229,192,123,0.3)] bg-[#07050d]">
-          <img
-            src={`/cards/${persona?.cardImage || "major-02.jpg"}`}
+          <CardImage
+            image={persona?.cardImage || "major-02.jpg"}
             alt={persona?.nameTh || "แม่หมอ"}
-            className="w-full h-full object-cover object-top filter contrast-[1.05]"
+            className="w-full h-full object-cover object-top filter contrast-[1.05] tarot-hd-card-image"
+            sizes="40px"
           />
         </div>
         <div className="space-y-1 my-auto">
@@ -247,11 +249,11 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 {/* Center Authentic 1909 Rider-Waite Image */}
                 <div className="my-auto py-1 flex items-center justify-center">
                   <div className="w-18 h-28 sm:w-20 sm:h-30 rounded-lg border border-[#e5c07b]/60 overflow-hidden shadow-lg">
-                    <img
-                      src={seal.image}
+                    <CardImage
+                      image={seal.image}
                       alt={seal.title}
                       className="w-full h-full object-cover object-top filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
-                      decoding="async"
+                      sizes="80px"
                     />
                   </div>
                 </div>

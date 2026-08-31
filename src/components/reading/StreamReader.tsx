@@ -9,6 +9,7 @@ import { cardByIndex } from "@/data/cards";
 import { soundManager } from "@/lib/utils/audio";
 import { FollowUpChat } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
+import { CardImage } from "@/components/card/CardImage";
 
 interface StreamReaderProps {
   reading?: Partial<Reading> | null;
@@ -75,10 +76,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             className="w-10 h-15 rounded-lg border-2 overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.45)] bg-[#07050d] relative flex-shrink-0"
             style={{ borderColor: persona.accent || "#e5c07b" }}
           >
-            <img
-              src={`/cards/${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
+            <CardImage
+              image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
               alt={persona.nameTh}
-              className="w-full h-full object-cover object-top filter contrast-[1.04] brightness-[1.02]"
+              className="w-full h-full object-cover object-top filter contrast-[1.04] brightness-[1.02] tarot-hd-card-image"
+              sizes="40px"
             />
             <div className="gold-foil-sheen absolute inset-0 opacity-30" />
           </div>
@@ -187,11 +189,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 <div className="flex items-center gap-3.5">
                   {/* Real 1909 Rider-Waite Thumbnail */}
                   <div className={`w-14 h-[95px] rounded-lg overflow-hidden border border-[#e5c07b]/60 flex-shrink-0 shadow-md ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}>
-                    <img
-                      src={`/cards/${cardData?.image || "major-00.jpg"}`}
+                    <CardImage
+                      image={cardData?.image || "major-00.jpg"}
                       alt={cardData?.nameTh || "Tarot"}
                       className="w-full h-full object-cover object-center filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
-                      decoding="async"
+                      sizes="56px"
                     />
                   </div>
 

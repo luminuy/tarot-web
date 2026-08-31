@@ -131,6 +131,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 
                 {drawn ? (
                   <TarotCard
+                    imageSizes="(min-width: 640px) 112px, 96px"
                     card={drawn.card || { cardIndex: drawn.cardIndex }}
                     isReversed={drawn.isReversed}
                     isRevealed={isRevealed}

@@ -60,6 +60,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
               isReversed={isReversed}
               isRevealed={flipped}
               size="lg"
+              imageFull
               className="w-full h-full shadow-2xl"
             />
           </div>

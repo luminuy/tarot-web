@@ -1,0 +1,30 @@
+# ============================================================================
+# Cloudflare Workers Static Assets — HTTP Headers
+# ============================================================================
+# ค่าเริ่มต้นของ Cloudflare คือ `Cache-Control: public, max-age=0, must-revalidate`
+# แปลว่าเบราว์เซอร์ต้องยิงถามเซิร์ฟเวอร์ใหม่ทุกครั้งที่โหลดหน้า (ได้ 304 กลับมา)
+# หน้า /spreads มีภาพไพ่ 96 ใบ = ยิง 96 รีเควสต์ทุกครั้งที่เข้าหน้า ทั้งที่ภาพไม่เคยเปลี่ยน
+#
+# ⚠️ ไฟล์นี้มีผลกับ "ไฟล์ static" เท่านั้น ไม่มีผลกับหน้าเว็บที่ Worker เรนเดอร์ (SSR/SSG)
+# ⚠️ `immutable` = เบราว์เซอร์จะไม่ถามซ้ำเลยเป็นเวลา 1 ปี
+#    ถ้าวันใดต้องเปลี่ยนไฟล์ภาพจริงๆ ต้องเปลี่ยน "ชื่อไฟล์หรือชื่อโฟลเดอร์" ด้วยเสมอ
+#    (เช่น w256 -> w256b) ไม่งั้นคนที่เคยเข้าเว็บแล้วจะยังเห็นภาพเก่า
+#
+# เอกสารอ้างอิง: https://developers.cloudflare.com/workers/static-assets/headers/
+# ============================================================================
+
+# ภาพหน้าไพ่ 1909 Rider-Waite-Smith ต้นฉบับ (public domain)
+# ตามกฎเหล็กข้อ 3 ใน docs/AI_COLLABORATION_GUIDELINES.md ภาพชุดนี้ห้ามเปลี่ยนอยู่แล้ว
+/cards/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ภาพย่อ WebP ที่สร้างด้วย `npm run cards:variants`
+/cards/w256/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/cards/w512/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ไฟล์ build ของ Next.js — มี hash อยู่ในชื่อไฟล์แล้ว จึงปลอดภัยที่จะแคชยาว
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

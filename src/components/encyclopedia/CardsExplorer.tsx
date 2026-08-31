@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
+import { CardImage } from "@/components/card/CardImage";
 
 interface CardsExplorerProps {
   cards: readonly TarotCard[];
@@ -53,11 +54,6 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       return nameTh.includes(q) || nameEn.includes(q) || keywords.includes(q) || element.includes(q) || astro.includes(q);
     });
   }, [cards, activeFilter, searchQuery]);
-
-  const getImageSrc = (card: TarotCard) => {
-    if (!card.image) return `/cards/${card.id}.jpg`;
-    return card.image.startsWith("/") ? card.image : `/cards/${card.image}`;
-  };
 
   return (
     <div className="space-y-8 relative z-10">
@@ -162,8 +158,6 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         >
           {filteredCards.map((card) => {
             const elemStyle = ELEMENT_STYLES[card.element] || ELEMENT_STYLES["ไฟ"];
-            const imgUrl = getImageSrc(card);
-
             return (
               <Link
                 key={card.id}
@@ -172,12 +166,12 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
                 <div className="relative aspect-[7/12] w-full rounded-xl overflow-hidden border border-[#e5c07b]/35 shadow-inner bg-[#040308] mb-3">
-                  <img
-                    src={imgUrl}
+                  <CardImage
+                    image={card.image}
+                    cardId={card.id}
                     alt={card.nameTh}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
-                    loading="lazy"
-                    decoding="async"
+                    sizes="(min-width: 1024px) 155px, (min-width: 768px) 145px, (min-width: 640px) 175px, 40vw"
                   />
                   <div className="gold-foil-sheen absolute inset-0 opacity-10 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
