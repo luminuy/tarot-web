@@ -14,6 +14,49 @@ interface InteractiveCardFanProps {
   disabled?: boolean;
 }
 
+interface FanCardProps {
+  cardIdx: number;
+  posInTier: number;
+  tierIdx: number;
+  isPicked: boolean;
+  disabled: boolean;
+  onClick: (idx: number) => void;
+}
+
+const FanCard = React.memo<FanCardProps>(
+  ({ cardIdx, posInTier, tierIdx, isPicked, disabled, onClick }) => {
+    if (isPicked) return null;
+    const angle = ((posInTier % 9) - 4) * 1.3;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1, rotate: angle }}
+        exit={{
+          opacity: 0,
+          y: -120,
+          scale: 0.4,
+          rotate: 180,
+          transition: { duration: 0.35, ease: "easeInOut" },
+        }}
+        whileHover={{ y: -20, scale: 1.18, rotate: 0, zIndex: 200 }}
+        whileTap={{ scale: 0.93 }}
+        onClick={() => !disabled && onClick(cardIdx)}
+        className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group"
+        style={{ zIndex: tierIdx * 40 + posInTier }}
+      >
+        <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-xl sm:rounded-2xl border-2 card-back-pattern shadow-xl flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#e5c07b]/45 group-hover:border-[#ffd700] group-hover:ring-2 group-hover:ring-[#ffd700]/70 group-hover:shadow-[0_0_25px_rgba(255,215,0,0.8)] bg-[#0d0918]">
+          <div className="w-full flex items-center justify-end text-[7px] sm:text-[8px] text-[#e5c07b]/80">
+            <span className="font-mono opacity-60">#{cardIdx + 1}</span>
+          </div>
+          <div className="gold-foil-sheen absolute inset-0 opacity-25 group-hover:opacity-60 transition-opacity pointer-events-none" />
+        </div>
+      </motion.div>
+    );
+  }
+);
+FanCard.displayName = "FanCard";
+
 const TOTAL_CARDS = 78;
 
 export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
@@ -24,9 +67,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
   onPickCard,
   disabled = false,
 }) => {
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
   const isComplete = pickedIndices.length >= targetCount;
 
   // Split 78 cards into 3 cascading tiers (26 cards each)
@@ -105,18 +146,13 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
           <div className="absolute w-full h-full bg-radial from-[#e5c07b]/15 via-transparent to-transparent blur-3xl" />
         </div>
 
-        {/*
-          SINGLE UNIFIED SCROLL CONTAINER FOR ALL 3 TIERS
-          - Perfectly proportioned for mobile & desktop
-          - Smooth touch panning with zero vertical scroll interference
-        */}
+        {/* SINGLE UNIFIED SCROLL CONTAINER FOR ALL 3 TIERS */}
         <div
           ref={scrollContainerRef}
           className="w-full overflow-x-auto custom-scrollbar pt-6 pb-6 sm:pt-10 sm:pb-8 px-4 sm:px-8 relative z-10"
         >
           <div className="min-w-max mx-auto flex flex-col items-center gap-3.5 sm:gap-6 py-1">
             {tiers.map((tierCards, tierIdx) => {
-              // Offset tiers organically for staggered fan aesthetic
               const tierOffsetClass =
                 tierIdx === 1
                   ? "pl-6 sm:pl-10"
@@ -130,61 +166,19 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                   className={`flex items-center justify-center -space-x-3.5 sm:-space-x-5 md:-space-x-6 relative ${tierOffsetClass}`}
                   style={{ zIndex: tierIdx * 30 }}
                 >
-                  {tierCards.map((cardIdx, posInTier) => {
-                    const isPicked = pickedIndices.includes(cardIdx);
-                    const isHovered = hoveredIdx === cardIdx;
-                    // Natural subtle fan angle
-                    const angle = ((posInTier % 9) - 4) * 1.3;
-
-                    return (
-                      <AnimatePresence key={cardIdx}>
-                        {!isPicked ? (
-                          <motion.div
-                            layout
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{
-                              opacity: 1,
-                              y: isHovered ? -22 : 0,
-                              scale: isHovered ? 1.18 : 1,
-                              rotate: isHovered ? 0 : angle,
-                            }}
-                            exit={{
-                              opacity: 0,
-                              y: -140,
-                              scale: 0.3,
-                              rotate: 180,
-                              transition: { duration: 0.4, ease: "easeInOut" },
-                            }}
-                            whileHover={{ y: -26, scale: 1.22 }}
-                            whileTap={{ scale: 0.93 }}
-                            onPointerEnter={() => !disabled && setHoveredIdx(cardIdx)}
-                            onPointerLeave={() => setHoveredIdx(null)}
-                            onClick={() => handleCardClick(cardIdx)}
-                            className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px]"
-                            style={{
-                              zIndex: isHovered ? 200 : tierIdx * 40 + posInTier,
-                            }}
-                          >
-                            {/* Authentic Gold Tarot Back Tablet */}
-                            <div
-                              className={`w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-xl sm:rounded-2xl border-2 card-back-pattern shadow-xl flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-300 ${
-                                isHovered
-                                  ? "border-[#ffd700] ring-3 ring-[#ffd700]/80 shadow-[0_0_35px_rgba(255,215,0,0.9),0_0_50px_rgba(168,85,247,0.6)] bg-[#251842]"
-                                  : "border-[#e5c07b]/45 shadow-[0_6px_16px_rgba(0,0,0,0.85)] bg-[#0d0918]"
-                              }`}
-                            >
-                              <div className="w-full flex items-center justify-end text-[7px] sm:text-[8px] text-[#e5c07b]/80">
-                                <span className="font-mono opacity-60">#{cardIdx + 1}</span>
-                              </div>
-
-                              {/* Dynamic Gold Sheen */}
-                              <div className="gold-foil-sheen absolute inset-0 opacity-30 hover:opacity-75 transition-opacity pointer-events-none" />
-                            </div>
-                          </motion.div>
-                        ) : null}
-                      </AnimatePresence>
-                    );
-                  })}
+                  <AnimatePresence>
+                    {tierCards.map((cardIdx, posInTier) => (
+                      <FanCard
+                        key={cardIdx}
+                        cardIdx={cardIdx}
+                        posInTier={posInTier}
+                        tierIdx={tierIdx}
+                        isPicked={pickedIndices.includes(cardIdx)}
+                        disabled={disabled}
+                        onClick={handleCardClick}
+                      />
+                    ))}
+                  </AnimatePresence>
                 </div>
               );
             })}

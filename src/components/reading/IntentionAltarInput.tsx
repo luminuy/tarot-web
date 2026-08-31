@@ -93,8 +93,11 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
     onQuestionChange(seal.promptSeed);
   };
 
-  const isQuestionEmpty = !question.trim();
-  const isNicknameEmpty = !nickname.trim();
+  const [touchedNickname, setTouchedNickname] = React.useState(false);
+  const [touchedQuestion, setTouchedQuestion] = React.useState(false);
+
+  const isNicknameEmpty = touchedNickname && !nickname.trim();
+  const isQuestionEmpty = touchedQuestion && !question.trim();
 
   return (
     <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#160e2a]/95 via-[#0b0716]/95 to-[#05040a]/95 backdrop-blur-2xl p-5 sm:p-8 shadow-[0_0_60px_rgba(0,0,0,0.9)] space-y-6 relative overflow-hidden">
@@ -134,33 +137,41 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Step 1: Nickname */}
         <div className="space-y-1.5">
-          <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
-            <span>👤</span> 1. ชื่อเล่นของคุณ <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
-          </label>
+          <div className="flex justify-between items-center">
+            <label htmlFor="altar-nickname" className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
+              <span className="text-[#e5c07b]">✦</span> 1. ชื่อเล่นของคุณ <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
+            </label>
+            <span className="text-[10px] text-[#9c93b8] font-mono">{nickname.length}/24</span>
+          </div>
           <input
+            id="altar-nickname"
             type="text"
+            maxLength={24}
             value={nickname}
+            onBlur={() => setTouchedNickname(true)}
             onChange={(e) => onNicknameChange(e.target.value)}
             placeholder="เช่น ฟ้า, บิ๊ก, พลอย, เมย์"
-            className={`w-full bg-[#07040f] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all duration-300 ${
+            className={`w-full bg-[#07040f] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/70 focus:outline-none transition-all duration-200 ${
               isNicknameEmpty
                 ? "border border-rose-500/50 focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
-                : "border border-[#e5c07b]/40 focus:border-[#e5c07b] focus:ring-1 focus:ring-[#e5c07b]"
+                : "border border-[#e5c07b]/40 focus:border-[#ffd700] focus:ring-1 focus:ring-[#ffd700]"
             }`}
           />
         </div>
 
         {/* Step 2: Custom Situation */}
         <div className="space-y-1.5">
-          <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
-            <span>📜</span> 2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ <span className="text-[10px] text-[#9c93b8] font-normal">(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)</span>
+          <label htmlFor="altar-situation" className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
+            <span className="text-[#e5c07b]">✦</span> 2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ <span className="text-[10px] text-[#9c93b8] font-normal">(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)</span>
           </label>
           <input
+            id="altar-situation"
             type="text"
+            maxLength={100}
             value={situation}
             onChange={(e) => onSituationChange(e.target.value)}
             placeholder="เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"
-            className="w-full bg-[#07040f] border border-[#e5c07b]/30 focus:border-[#e5c07b] focus:ring-1 focus:ring-[#e5c07b] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all"
+            className="w-full bg-[#07040f] border border-[#e5c07b]/30 focus:border-[#ffd700] focus:ring-1 focus:ring-[#ffd700] rounded-xl px-4 py-3 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/70 focus:outline-none transition-all"
           />
         </div>
       </div>
@@ -195,19 +206,25 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
 
       {/* Step 3: Main Mystic Question Textarea */}
       <div className="space-y-2">
-        <label className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
-          <span>🕯️</span> 3. คำถามที่คุณอยากรู้มากที่สุด <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
-        </label>
+        <div className="flex justify-between items-center">
+          <label htmlFor="altar-question" className="text-xs sm:text-sm text-[#f5deaa] flex items-center gap-1.5 font-serif-th font-bold">
+            <span className="text-[#e5c07b]">✦</span> 3. คำถามที่คุณอยากรู้มากที่สุด <span className="text-rose-400 font-mono text-xs">(จำเป็น *)</span>
+          </label>
+          <span className="text-[10px] text-[#9c93b8] font-mono">{question.length}/300</span>
+        </div>
         <div className="relative group">
           <textarea
+            id="altar-question"
             rows={3}
+            maxLength={300}
             value={question}
+            onBlur={() => setTouchedQuestion(true)}
             onChange={(e) => onQuestionChange(e.target.value)}
             placeholder="พิมพ์คำถามที่คุณอยากให้ไพ่ช่วยชี้ทาง เช่น ความสัมพันธ์กับเขาจะมีทิศทางอย่างไร / งานใหม่ที่กำลังจะย้ายไปจะดีไหม..."
-            className={`w-full bg-[#07040f]/90 rounded-2xl p-4 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/40 focus:outline-none transition-all duration-300 shadow-inner leading-relaxed resize-none ${
+            className={`w-full bg-[#07040f]/90 rounded-2xl p-4 text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/70 focus:outline-none transition-all duration-200 shadow-inner leading-relaxed resize-none ${
               isQuestionEmpty
                 ? "border border-rose-500/50 focus:border-rose-400 focus:ring-2 focus:ring-rose-400/30"
-                : "border border-[#e5c07b]/35 group-hover:border-[#e5c07b]/60 focus:border-[#e5c07b] focus:ring-2 focus:ring-[#e5c07b]/30"
+                : "border border-[#e5c07b]/35 group-hover:border-[#e5c07b]/60 focus:border-[#ffd700] focus:ring-2 focus:ring-[#ffd700]/30"
             }`}
           />
         </div>

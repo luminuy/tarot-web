@@ -8,7 +8,7 @@
 
 | # | วันที่ / เวลา (ไทย) | ผู้ดำเนินการ (Actor) | การกระทำ / รายละเอียด (Action) | กิ่ง / Commit SHA | ไฟล์ที่แก้ไข (Files) | Verification |
 | :-: | :--- | :--- | :--- | :--- | :--- | :-: |
-| 1 | `1/9/2569 00:43:30` | 🤖 `Antigravity AI` | **[FEAT]** implement FDN-4 Modal primitive and FDN-5 Button primitive with focus-visible and touch-action | `feat/ux-foundation-primitives` (28b7d7b) | `ai-locks.json`, `rc/app/globals.css`, `rc/components/reading/ShareModal.tsx` *(+2 ไฟล์)* | ✅ ผ่าน |
+| 1 | `1/9/2569 00:46:32` | 🤖 `Antigravity AI` | **[PERF]** optimize InteractiveCardFan with memoized FanCard and single AnimatePresence, remove searchQuery remount in CardsExplorer, and enhance IntentionAltarInput validation and touch feedback | `feat/ux-perf-runtime-1` (28b7d7b) | `ai-locks.json`, `rc/components/deck/InteractiveCardFan.tsx`, `rc/components/encyclopedia/CardsExplorer.tsx` *(+6 ไฟล์)* | ✅ ผ่าน |
 | 2 | `1/9/2569 00:41:45` | 🤖 `Antigravity AI` | **[FEAT]** implement FDN-1 MotionConfig reducedMotion provider, FDN-2 motion token system, and FDN-3 phantom CSS classes | `feat/ux-foundation-motion` (24a6c9d) | `ai-locks.json`, `rc/app/globals.css`, `rc/app/layout.tsx` *(+3 ไฟล์)* | ✅ ผ่าน |
 | 3 | `1/9/2569 00:32:22` | 🤖 `Antigravity AI` | **[FIX]** remove cache pnpm from setup-node and use no-frozen-lockfile in workflows | `fix/ci-node-setup-cache` (138a8fe) | `ai-locks.json`, `github/workflows/deploy.yml`, `github/workflows/pr.yml` | ✅ ผ่าน |
 | 4 | `1/9/2569 00:30:20` | 🤖 `Antigravity AI` | **[FIX]** fix pnpm action-setup version mismatch with package.json packageManager | `fix/ci-pnpm-version-conflict` (49790f2) | `ai-locks.json`, `github/workflows/deploy.yml`, `github/workflows/pr.yml` | ✅ ผ่าน |
