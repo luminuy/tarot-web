@@ -2,10 +2,11 @@
 
 ยินดีต้อนรับ! โปรเจกต์นี้คือ **เว็บดูดวงไพ่ทาโรต์ออนไลน์ระดับพรีเมียม (Interactive Provably-Fair Tarot Web)**
 
-> ⚠️ **กฎเหล็กสำคัญ**: ก่อนแก้ไขโค้ดใดๆ ต้องอ่าน 3 ไฟล์นี้เสมอ
+> ⚠️ **กฎเหล็กสำคัญ**: ก่อนแก้ไขโค้ดใดๆ ต้องอ่าน 4 ไฟล์นี้เสมอ
 > 1. **[docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md)** — ความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร **ทำผิดซ้ำเรื่องที่มีบันทึกแล้ว = ความบกพร่องร้ายแรงที่สุด**
 > 2. **[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)** — บั๊กที่ยืนยันแล้วแต่ยังไม่ได้แก้ กันแก้ซ้ำซ้อนกับ Agent อื่น
-> 3. **[docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md)** — คู่มือแม่บท (หัวข้อ 0 คือมาตรฐานการทำงานที่บังคับใช้เสมอ)
+> 3. **[docs/BACKLOG.md](docs/BACKLOG.md)** — แผนงานเดี่ยวที่ยังเหลือ + **กติกาการทำงาน** (INC-0015/0017/0020: ห้าม push ตรง main, 1 milestone = 1 PR)
+> 4. **[docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md)** — คู่มือแม่บท (หัวข้อ 0 คือมาตรฐานการทำงานที่บังคับใช้เสมอ)
 
 ---
 
