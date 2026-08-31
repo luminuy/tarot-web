@@ -1,5 +1,62 @@
 [
   {
+    "id": "audit-1788171615219-nkfmo",
+    "timestampTh": "31/8/2569 17:20:14",
+    "timestampIso": "2026-08-31T10:20:14.180Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/opennext-edge-cache",
+      "commitSha": "eb4e57f"
+    },
+    "action": {
+      "category": "FEAT",
+      "summary": "ต่อ OpenNext edge caching ครบวงจร: KV incremental + D1 tag cache + DO revalidation queue + self-ref, ใส่ ID จริง, deploy สั่ง populateCache เอง",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "github/workflows/deploy.yml",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/CLOUDFLARE_DEPLOYMENT_GUIDE.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "pen-next.config.ts",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ackage.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rangler.jsonc",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 6
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788169088453-vxd5w",
     "timestampTh": "31/8/2569 16:38:07",
     "timestampIso": "2026-08-31T09:38:07.110Z",
