@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0034 · 2026-09-01 01:25 · 🟠 High · remove invalid secrets array from wrangler.jsonc that broke Production deploy
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ทุก Production Deploy หลัง PR #55 ล้มทันทีที่ขั้น opennextjs-cloudflare build: 'The field secrets should be an object but got [GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,TAROT_SESSION_SECRET]' โค้ดใหม่ทั้ง OAuth และ motion Round 5 ค้างอยู่ที่ commit ก่อนหน้า ไม่เคยขึ้น production |
+| **สาเหตุราก** | PR #55 เพิ่มฟิลด์ top-level "secrets": [...] ลง wrangler.jsonc ตั้งใจใช้ 'ประกาศ' ชื่อ secret แต่ Wrangler config schema ไม่มีฟิลด์ชื่อ secrets เลย (ค่าที่ตั้งผ่าน 'wrangler secret put' ถูก inject เป็น env binding ตอน runtime เองอยู่แล้ว ไม่ต้องประกาศ) config validation จึง reject ทั้งไฟล์ และไม่มีขั้น build:worker/dry-run ใน pr.yml ก่อน merge จึงไม่มีใครเห็น error จนกระทั่งขั้น deploy จริง |
+| **การแก้ไข** | ลบบล็อก "secrets": [...] ออกจาก wrangler.jsonc ทั้งก้อน เหลือคอมเมนต์อธิบายว่าต้องตั้ง secret ด้วย 'wrangler secret put <NAME>' อย่างเดียวและตรวจด้วย 'wrangler secret list' จากนั้นพิสูจน์ว่า config parse ผ่านด้วย 'wrangler deploy --dry-run' และ build เต็มด้วย 'opennextjs-cloudflare build' |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามเพิ่มคีย์ลง wrangler.jsonc โดยไม่เทียบกับ node_modules/wrangler/config-schema.json ก่อน · secrets ไม่ต้องประกาศใน config · ควรเพิ่มขั้น 'npx opennextjs-cloudflare build' หรือ 'wrangler deploy --dry-run' เข้า pr.yml เพื่อดัก config error ตั้งแต่ตอนเปิด PR ไม่ใช่ตอน deploy production** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npx wrangler deploy --dry-run ผ่านขั้น config parsing (fail แค่ที่ entry-point เพราะยังไม่ build) · npx opennextjs-cloudflare build จบด้วย 'OpenNext build complete' + worker.js saved · npm run repo:verify 7/7 ผ่าน |
+| **บันทึกโดย** | Claude Sonnet 5 · branch `claude/continue-work-21bc72` · commit `a335fdd` |
+
+
 ### INC-0033 · 2026-09-01 00:32 · 🟠 High · remove cache pnpm from setup-node and use no-frozen-lockfile in workflows
 
 | หัวข้อ | รายละเอียด |

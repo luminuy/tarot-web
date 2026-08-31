@@ -24,19 +24,17 @@
 
   "vars": {
     "NODE_ENV": "production"
-  },
+  }
 
   // ── Secrets สำหรับ OAuth & Session Security ───────────────────────────────────
-  // ⚠️ IMPORTANT: ใช้ `npm run secret:sync` เพื่อเก็บ secrets ไว้ใน Cloudflare Workers
-  // ไม่ต้องใส่ค่า concrete ที่นี่ — Wrangler จะอ่านจากจริงตอน deploy
-  // เพิ่มชื่อ secrets ทั้งหมด:
-  // - GOOGLE_CLIENT_ID
-  // - GOOGLE_CLIENT_SECRET
-  // - TAROT_SESSION_SECRET
-  // - AUTH_SECRET (ถ้าใช้)
-  "secrets": [
-    "GOOGLE_CLIENT_ID",
-    "GOOGLE_CLIENT_SECRET",
-    "TAROT_SESSION_SECRET"
-  ]
+  // ⚠️ ห้ามประกาศ secrets ใน wrangler.jsonc — ไม่มีฟิลด์ "secrets" ใน schema
+  // (การใส่ทำให้ `opennextjs-cloudflare build` ล้มทันที: config validation failed)
+  // secrets ที่ตั้งผ่าน `wrangler secret put` จะพร้อมใช้เป็น env binding ตอน runtime เอง
+  // ตั้งค่าครั้งเดียวด้วย (ต้องมี CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID):
+  //   npx wrangler secret put GOOGLE_CLIENT_ID
+  //   npx wrangler secret put GOOGLE_CLIENT_SECRET
+  //   npx wrangler secret put TAROT_SESSION_SECRET
+  //   npx wrangler secret put LINE_CHANNEL_ID
+  //   npx wrangler secret put LINE_CHANNEL_SECRET
+  // ตรวจรายชื่อที่ตั้งไว้แล้ว: npx wrangler secret list
 }
