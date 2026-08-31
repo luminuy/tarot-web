@@ -22,16 +22,19 @@
 
 ## 🧊 1.5 สถาปัตยกรรม Edge Caching (OpenNext) — ตั้งครั้งเดียว
 
-เว็บใช้ **OpenNext Cloudflare edge caching** เพื่อให้หน้า static/ISR เสิร์ฟจาก edge โดยไม่ต้อง boot Next runtime ทุกคำขอ
-binding ทั้งหมดนิยามใน [`wrangler.jsonc`](../wrangler.jsonc) และ [`open-next.config.ts`](../open-next.config.ts):
+เว็บนี้เป็น **SSG ล้วน** (ทุกหน้า prerender ตอน build · ไม่มี `export const revalidate` · ไม่มี `revalidateTag()` / `revalidatePath()` ที่ไหนเลย) จึงใช้ OpenNext edge caching แบบ **มินิมอล** — แค่ KV + cache interception พอ
 
 | Binding | ประเภท | หน้าที่ |
 | :--- | :--- | :--- |
-| `NEXT_INC_CACHE_KV` | KV Namespace | เก็บ HTML/RSC ของหน้า ISR/SSG |
-| `NEXT_TAG_CACHE_D1` | D1 (`tarot-web-tag-cache`) | ตาราง `revalidations` — รองรับ `revalidateTag()` / `revalidatePath()` |
-| `NEXT_CACHE_DO_QUEUE` | Durable Object (`DOQueueHandler`) | คิว regenerate หน้า ISR แบบ async (ไม่บล็อกผู้ใช้) |
-| `WORKER_SELF_REFERENCE` | Service (self) | ให้ DO queue เรียกกลับมา render หน้าใหม่ |
+| `NEXT_INC_CACHE_KV` | KV Namespace | เก็บ HTML/RSC ของหน้า SSG ทั้งหมด (seed ตอน deploy) |
 | `ASSETS` | Static Assets | ภาพไพ่ 1909, `_next/static` |
+
+config อยู่ใน [`wrangler.jsonc`](../wrangler.jsonc) + [`open-next.config.ts`](../open-next.config.ts)
+`enableCacheInterception: true` ทำให้หน้า SSG ตอบจาก KV ที่ edge โดยไม่ boot Next runtime (ยืนยันด้วย header `x-opennext-cache: HIT`)
+
+> 💡 **ถ้าวันหน้าเพิ่ม ISR / on-demand revalidation** ต้องเติม `d1TagCache` + `doQueue` ใน `open-next.config.ts`
+> พร้อม binding `NEXT_TAG_CACHE_D1` (D1) + `NEXT_CACHE_DO_QUEUE` (Durable Object) + `WORKER_SELF_REFERENCE` ใน `wrangler.jsonc`
+> — ดูตัวอย่างเต็มใน git history PR #19
 
 ### สร้าง resource ครั้งแรก (ทำครั้งเดียวต่อบัญชี)
 
@@ -41,26 +44,18 @@ binding ทั้งหมดนิยามใน [`wrangler.jsonc`](../wrangle
 ```bash
 # KV — เอา id ที่ได้ไปใส่ wrangler.jsonc > kv_namespaces[0].id
 npx wrangler kv namespace create NEXT_INC_CACHE_KV
-
-# D1 — เอา database_id ที่ได้ไปใส่ wrangler.jsonc > d1_databases[0].database_id
-npx wrangler d1 create tarot-web-tag-cache
 ```
 
-> ✅ resource ปัจจุบันสร้างไว้แล้ว (บัญชี `bankjack10452@gmail.com`):
-> KV `3b06e256c46948949fc17ac6641cafa3` · D1 `7254712d-c255-4e80-91ad-a8fd49df0730`
-> ตาราง `revalidations` ใน D1 สร้างแล้ว และ `npm run deploy` จะ `CREATE TABLE IF NOT EXISTS` ซ้ำให้ทุกครั้ง (idempotent)
-
-ส่วน Durable Object (`DOQueueHandler`) ไม่ต้องสร้างเอง — `migrations` ใน `wrangler.jsonc` จัดการให้ตอน deploy ครั้งแรก
+> ✅ resource ปัจจุบัน (บัญชี `bankjack10452@gmail.com`): KV `3b06e256c46948949fc17ac6641cafa3`
 
 ### สิทธิ์ของ API Token (CI)
 
-`CLOUDFLARE_API_TOKEN` ใน GitHub Secrets ต้องมีครบ **3 อย่าง** (เดิมมีแค่ตัวแรก):
+`CLOUDFLARE_API_TOKEN` ใน GitHub Secrets ต้องมี **2 อย่าง** (เดิมมีแค่ตัวแรก):
 
 - **Account › Workers Scripts › Edit**
-- **Account › Workers KV Storage › Edit**  ← เพิ่มใหม่
-- **Account › D1 › Edit**  ← เพิ่มใหม่
+- **Account › Workers KV Storage › Edit**  ← เพิ่มใหม่ (จำเป็นตอน populateCache seed หน้าลง KV)
 
-ถ้าขาด ขั้น `opennextjs-cloudflare deploy` (populateCache) จะ fail แบบระบุชัดว่าขาดสิทธิ์อะไร
+ถ้าขาด ขั้น `opennextjs-cloudflare deploy` จะ fail แบบระบุชัดว่าขาดสิทธิ์อะไร
 
 ---
 
@@ -105,8 +100,8 @@ npm run deploy
 ```
 
 > `npm run deploy` = `opennextjs-cloudflare build && opennextjs-cloudflare deploy`
-> ขั้น `deploy` จะ **populateCache** ก่อน: สร้างตาราง `revalidations` ใน D1 (`--remote`)
-> + seed หน้า ISR/SSG ลง KV แล้วจึง `wrangler deploy` (ปกติทำผ่าน GitHub Actions อยู่แล้ว)
+> ขั้น `deploy` จะ **populateCache** ก่อน: seed หน้า SSG ทั้งหมดลง KV
+> แล้วจึง `wrangler deploy` (ปกติทำผ่าน GitHub Actions อยู่แล้ว)
 
 เมื่อระบบ Deploy เสร็จ จะแสดง URL ของเว็บคุณทันที เช่น:
 ```

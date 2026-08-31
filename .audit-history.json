@@ -1,5 +1,58 @@
 [
   {
+    "id": "audit-1788172862924-aket9",
+    "timestampTh": "31/8/2569 17:41:02",
+    "timestampIso": "2026-08-31T10:41:02.121Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/opennext-cache-simplify",
+      "commitSha": "89f74a7"
+    },
+    "action": {
+      "category": "REFACTOR",
+      "summary": "ลดรูป OpenNext cache เหลือ KV + interception: เว็บเป็น SSG ล้วนไม่มี ISR/revalidate จึงตัด D1 tag cache + DO queue ที่ไม่ถูกเรียกและทำ wrangler ขึ้น warning DO ไม่ export",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "github/workflows/deploy.yml",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/CLOUDFLARE_DEPLOYMENT_GUIDE.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "pen-next.config.ts",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rangler.jsonc",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 5
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788171615219-nkfmo",
     "timestampTh": "31/8/2569 17:20:14",
     "timestampIso": "2026-08-31T10:20:14.180Z",
