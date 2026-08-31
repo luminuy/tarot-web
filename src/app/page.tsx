@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
 import { SPREADS, type Spread } from "@/data/spreads";
 import { PERSONAS, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
@@ -63,7 +62,20 @@ export default function TarotPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-
+  // Instant Hardware Scroll Reset with Multi-Frame Paint Guarantee
+  const scrollToSanctuaryTop = () => {
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      const anchor = document.getElementById("sanctuary-top-anchor");
+      if (anchor) {
+        anchor.scrollIntoView({ behavior: "instant", block: "start" });
+      }
+    });
+  };
 
   // Step 1 -> Step 2: Start Reading Session
   const handleStartSession = async () => {
@@ -397,202 +409,165 @@ export default function TarotPage() {
           </div>
         )}
 
-        <AnimatePresence mode="wait">
-          {/* STEP 1: SPREAD SELECTION */}
-          {currentStep === "SPREAD_SELECT" && (
-            <motion.div
-              key="spread-select"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-8"
-            >
-              <div className="text-center space-y-3 relative">
-                {/* 3D Floating Tarot Stage with Sacred Geometric Aura (Matching Step 3 Shuffle) */}
-                <div className="h-64 sm:h-72 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1400 }}>
-                  {/* Background Sacred Geometric Aura */}
-                  <div className="absolute inset-0 flex items-center justify-center -z-10 opacity-40 pointer-events-none">
-                    <div className="w-72 h-72 sm:w-[420px] sm:h-[420px] rounded-full border border-dashed border-[#e5c07b] animate-[spin_60s_linear_infinite]" />
-                    <div className="absolute w-52 h-52 sm:w-[300px] sm:h-[300px] rounded-full border border-[#8b5cf6]/60 animate-[spin_40s_linear_infinite_reverse]" />
-                    <div className="absolute w-full h-full bg-radial from-[#e5c07b]/15 via-transparent to-transparent blur-3xl" />
+        {/* STEP 1: SPREAD SELECTION */}
+        {currentStep === "SPREAD_SELECT" && (
+          <div key="spread-select" className="anim-page-transition space-y-8">
+            <div className="text-center space-y-3 relative">
+              {/* 3D Floating Tarot Stage with Sacred Geometric Aura (Matching Step 3 Shuffle) */}
+              <div className="h-60 sm:h-72 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1200 }}>
+                {/* Background Sacred Geometric Aura */}
+                <div className="absolute inset-0 flex items-center justify-center -z-10 opacity-30 pointer-events-none">
+                  <div className="w-64 h-64 sm:w-[400px] sm:h-[400px] rounded-full border border-dashed border-[#e5c07b]/60 animate-[spin_80s_linear_infinite]" />
+                  <div className="absolute w-48 h-48 sm:w-[280px] sm:h-[280px] rounded-full border border-[#8b5cf6]/40 animate-[spin_50s_linear_infinite_reverse]" />
+                  <div className="absolute w-full h-full bg-radial from-[#e5c07b]/10 via-transparent to-transparent blur-xl sm:blur-2xl" />
+                </div>
+
+                {/* Idle Floating Deck with CSS Animation */}
+                <div
+                  onClick={() => soundManager.playCardSelectSound()}
+                  className="w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#e5c07b] card-back-pattern shadow-[0_0_35px_rgba(229,192,123,0.35)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative anim-tarot-idle gpu-layer transition-transform duration-150 active:scale-95 hover:scale-105"
+                >
+                  <div className="w-full flex justify-center items-center opacity-75">
+                    <span className="text-[9px] font-serif-th text-[#f5deaa] tracking-[0.2em] uppercase font-bold">
+                      SACRED ORACLE
+                    </span>
                   </div>
 
-                  {/* Idle Floating Deck with Parallax Hover */}
-                  <motion.div
-                    animate={{
-                      y: [-6, 6, -6],
-                      rotateZ: [-1.2, 1.2, -1.2],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 4.5,
-                      ease: "easeInOut",
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => soundManager.playCardSelectSound()}
-                    className="w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#e5c07b] card-back-pattern shadow-[0_0_50px_rgba(229,192,123,0.45)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative"
-                  >
-                    <div className="w-full flex justify-center items-center opacity-75">
-                      <span className="text-[9px] font-serif-th text-[#f5deaa] tracking-[0.2em] uppercase font-bold">
-                        SACRED ORACLE
-                      </span>
-                    </div>
+                  {/* Clean Center */}
+                  <div className="my-auto" />
 
-                    {/* Clean Center */}
-                    <div className="my-auto" />
+                  <span className="text-xs font-serif-th font-bold font-mystic-gold tracking-wide">
+                    ไพ่ทาโรต์ 1909
+                  </span>
 
-                    <span className="text-xs font-serif-th font-bold font-mystic-gold tracking-wide">
-                      ไพ่ทาโรต์ 1909
-                    </span>
-
-                    {/* Dynamic Gold Sheen */}
-                    <div className="gold-foil-sheen absolute inset-0 opacity-40 group-hover:opacity-75 transition-opacity" />
-                  </motion.div>
-                </div>
-
-                <div className="space-y-1">
-                  <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide">
-                    เลือกผังการเปิดไพ่
-                  </h2>
-                  <p className="text-xs sm:text-sm text-[#9c93b8] max-w-xl mx-auto">
-                    เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการคำตอบ
-                  </p>
+                  {/* Dynamic Gold Sheen */}
+                  <div className="gold-foil-sheen absolute inset-0 opacity-30 group-hover:opacity-65 transition-opacity" />
                 </div>
               </div>
 
-              {/* Spread Selector Grid */}
-              <SpreadCardSelector
-                selectedSpread={selectedSpread}
-                onSelectSpread={(sp) => {
-                  soundManager.playCardSelectSound();
-                  setSelectedSpread(sp);
-                }}
-                onProceed={() => {
-                  soundManager.playCardSelectSound();
-                  setCurrentStep("INTENTION_SELECT");
-                }}
-              />
-            </motion.div>
-          )}
-
-          {/* STEP 2: INTENTION & PRAYER */}
-          {currentStep === "INTENTION_SELECT" && (
-            <motion.div
-              key="intention"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-8"
-            >
-              <div className="text-center space-y-1">
-                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold">
-                  ตั้งคำถาม & เลือกแม่หมอ
+              <div className="space-y-1">
+                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide">
+                  เลือกผังการเปิดไพ่
                 </h2>
-                <p className="text-xs sm:text-sm text-[#9c93b8]">
-                  พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
+                <p className="text-xs sm:text-sm text-[#9c93b8] max-w-xl mx-auto">
+                  เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการคำตอบ
                 </p>
               </div>
+            </div>
 
-              {/* Persona Selector */}
-              <PersonaCardSelector
-                selectedPersona={selectedPersona}
-                onSelectPersona={(p) => {
+            {/* Spread Selector Grid */}
+            <SpreadCardSelector
+              selectedSpread={selectedSpread}
+              onSelectSpread={(sp) => {
+                soundManager.playCardSelectSound();
+                setSelectedSpread(sp);
+              }}
+              onProceed={() => {
+                soundManager.playCardSelectSound();
+                scrollToSanctuaryTop();
+                setCurrentStep("INTENTION_SELECT");
+              }}
+            />
+          </div>
+        )}
+
+        {/* STEP 2: INTENTION & PRAYER */}
+        {currentStep === "INTENTION_SELECT" && (
+          <div key="intention" className="anim-page-transition space-y-8">
+            <div className="text-center space-y-1">
+              <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold">
+                ตั้งคำถาม & เลือกแม่หมอ
+              </h2>
+              <p className="text-xs sm:text-sm text-[#9c93b8]">
+                พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
+              </p>
+            </div>
+
+            {/* Persona Selector */}
+            <PersonaCardSelector
+              selectedPersona={selectedPersona}
+              onSelectPersona={(p) => {
+                soundManager.playCardSelectSound();
+                setSelectedPersona(p);
+              }}
+            />
+
+            {/* Input Form */}
+            <IntentionAltarInput
+              question={question}
+              onQuestionChange={setQuestion}
+              nickname={nickname}
+              onNicknameChange={setNickname}
+              situation={situation}
+              onSituationChange={setSituation}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              persona={selectedPersona}
+            />
+
+            {/* Action Bar */}
+            <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-[#180f30] to-[#0d071a] border-2 border-[#e5c07b]/40 shadow-2xl flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => {
                   soundManager.playCardSelectSound();
-                  setSelectedPersona(p);
+                  scrollToSanctuaryTop();
+                  setCurrentStep("SPREAD_SELECT");
                 }}
-              />
+                className="py-3 px-5 rounded-xl bg-[#100b20] border border-[#e5c07b]/30 text-xs font-serif-th text-[#cfc8e2] hover:bg-[#191230] transition-colors duration-150 cursor-pointer"
+              >
+                ← เปลี่ยนผัง ({selectedSpread.nameTh})
+              </button>
 
-              {/* Input Form */}
-              <IntentionAltarInput
-                question={question}
-                onQuestionChange={setQuestion}
-                nickname={nickname}
-                onNicknameChange={setNickname}
-                situation={situation}
-                onSituationChange={setSituation}
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-                persona={selectedPersona}
-              />
+              <button
+                type="button"
+                onClick={handleStartSession}
+                disabled={loading || !nickname.trim() || !question.trim()}
+                className={`py-3 px-7 rounded-xl text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 shadow-lg flex items-center gap-2 ${
+                  !nickname.trim() || !question.trim()
+                    ? "bg-[#1f1635] text-[#9c93b8]/60 border border-[#e5c07b]/20 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] hover:opacity-95 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(229,192,123,0.5)]"
+                }`}
+              >
+                <span>✦</span>
+                <span>{loading ? "กำลังโหลด..." : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        )}
 
-              {/* Action Bar */}
-              <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-[#180f30] to-[#0d071a] border-2 border-[#e5c07b]/40 shadow-2xl flex flex-wrap items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundManager.playCardSelectSound();
-                    setCurrentStep("SPREAD_SELECT");
-                  }}
-                  className="py-3 px-5 rounded-xl bg-[#100b20] border border-[#e5c07b]/30 text-xs font-serif-th text-[#cfc8e2] hover:bg-[#191230] transition-all cursor-pointer"
-                >
-                  ← เปลี่ยนผัง ({selectedSpread.nameTh})
-                </button>
+        {/* STEP 3: SHUFFLE RITUAL */}
+        {currentStep === "SHUFFLE" && (
+          <div key="shuffle" className="anim-page-transition space-y-6">
+            <ShuffleRitual
+              commitment={commitment}
+              spreadName={selectedSpread.nameTh}
+              onShuffleComplete={handleShuffleComplete}
+            />
+          </div>
+        )}
 
-                <button
-                  type="button"
-                  onClick={handleStartSession}
-                  disabled={loading || !nickname.trim() || !question.trim()}
-                  className={`py-3 px-7 rounded-xl text-xs sm:text-sm font-bold font-serif-th transition-all shadow-lg flex items-center gap-2 ${
-                    !nickname.trim() || !question.trim()
-                      ? "bg-[#1f1635] text-[#9c93b8]/60 border border-[#e5c07b]/20 cursor-not-allowed"
-                      : "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] hover:opacity-95 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(229,192,123,0.5)]"
-                  }`}
-                >
-                  <span>✦</span>
-                  <span>{loading ? "กำลังโหลด..." : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}</span>
-                  <span>→</span>
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* STEP 3: SHUFFLE RITUAL */}
-          {currentStep === "SHUFFLE" && (
-            <motion.div
-              key="shuffle"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="space-y-6"
-            >
-              <ShuffleRitual
-                commitment={commitment}
-                spreadName={selectedSpread.nameTh}
-                onShuffleComplete={handleShuffleComplete}
-              />
-            </motion.div>
-          )}
-
-          {/* STEP 4: INTERACTIVE CARD PICKING */}
-          {currentStep === "PICK_CARDS" && (
-            <motion.div
-              key="picking"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-3.5 sm:space-y-6"
-            >
-              <InteractiveCardFan
-                pickedIndices={pickedIndices}
-                targetCount={selectedSpread.positions.length}
-                currentPositionName={
-                  selectedSpread.positions[pickedIndices.length]?.nameTh || "ตำแหน่งที่เหลือ"
-                }
-                onPickCard={handlePickCard}
-                disabled={loading}
-              />
-            </motion.div>
-          )}
+        {/* STEP 4: INTERACTIVE CARD PICKING */}
+        {currentStep === "PICK_CARDS" && (
+          <div key="picking" className="anim-page-transition space-y-3.5 sm:space-y-6">
+            <InteractiveCardFan
+              pickedIndices={pickedIndices}
+              targetCount={selectedSpread.positions.length}
+              currentPositionName={
+                selectedSpread.positions[pickedIndices.length]?.nameTh || "ตำแหน่งที่เหลือ"
+              }
+              onPickCard={handlePickCard}
+              disabled={loading}
+            />
+          </div>
+        )}
 
           {/* STEP 5 & 6: DUAL-PANE SACRED SANCTUARY */}
           {(currentStep === "READING" || currentStep === "SUMMARY") && (
-            <motion.div
+            <div
               key="reading-summary"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-8"
+              className="anim-page-transition space-y-8"
             >
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 {/* LEFT PANE: 3D Spread Board */}
@@ -620,6 +595,13 @@ export default function TarotPage() {
                     onSelectCardIndex={setActiveCardIndex}
                     drawnCards={drawnCards}
                     proof={proof}
+                    errorMsg={errorMsg}
+                    onRetry={() => {
+                      if (readingId && drawnCards.length > 0) {
+                        setErrorMsg(null);
+                        startAIStreaming(readingId, drawnCards);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -652,9 +634,8 @@ export default function TarotPage() {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
       </div>
 
       {/* Global Modals & Drawers */}

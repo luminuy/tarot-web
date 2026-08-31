@@ -249,40 +249,107 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 }
 
 export async function* streamMockGeminiReading(ctx: ReadingContext): AsyncGenerator<ReadingEvent> {
-  const opening = `สวัสดีค่ะ คุณ${ctx.nickname || "ผู้ถาม"} สัมผัสแรกที่เห็นไพ่ทั้ง ${ctx.drawn.length} ใบสำหรับคำถาม "${ctx.question}" สัมผัสได้ถึงคลื่นพลังงานแห่งการเปลี่ยนแปลงและโอกาสใหม่ที่กำลังหมุนเข้ามา`;
-  yield { type: "opening", text: opening };
+  const nickname = ctx.nickname?.trim() || "ผู้แสวงหาคำตอบ";
+  const question = ctx.question?.trim() || "ภาพรวมดวงชะตา";
+  const category = (ctx.category || "general") as "general" | "work" | "money" | "love" | "self";
 
+  // 1. Opening Greeting tailored by Persona
+  let opening = "";
+  if (ctx.personaId === "direct") {
+    opening = `สวัสดีคุณ${nickname} ไพ่ทั้ง ${ctx.drawn.length} ใบสำหรับเรื่อง "${question}" วางเรียงออกมาตรงไปตรงมา ชัดเจนในทิศทางที่ต้องเลือก`;
+  } else if (ctx.personaId === "mystic") {
+    opening = `ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์ คุณ${nickname} สัมผัสแรกจากไพ่ทั้ง ${ctx.drawn.length} ใบปรากฏคลื่นพลังงานลี้ลับที่กำลังหมุนวนรอบคำถาม "${question}"`;
+  } else {
+    opening = `สวัสดีค่ะคุณ${nickname} แม่หมอเปิดไพ่ทั้ง ${ctx.drawn.length} ใบให้แล้วนะคะ สำหรับคำถาม "${question}" ไพ่ส่งมอบความกระจ่างและพลังบวกมาให้อย่างอบอุ่นค่ะ`;
+  }
+  yield { type: "opening", text: opening };
+  await new Promise((r) => setTimeout(r, 40));
+
+  // 2. Per-card Deep Interpretation from 78 Cards Encyclopedia
   const cardsResult = [];
+  let majorCount = 0;
+  const elementCounts: Record<string, number> = { ไฟ: 0, น้ำ: 0, ลม: 0, ดิน: 0 };
+
   for (let i = 0; i < ctx.drawn.length; i++) {
     const d = ctx.drawn[i];
     const card = ctx.cards[i];
-    const pos = ctx.spread.positions[d.order] || { nameTh: `ตำแหน่งที่ ${i + 1}` };
+    if (!card) continue;
 
-    const headline = `${card.nameTh} (${d.isReversed ? "กลับหัว" : "หัวตั้ง"}) ในตำแหน่ง ${pos.nameTh}`;
-    const reading = `${card.nameTh} ในตำแหน่ง ${pos.nameTh} สะท้อนถึงพลังงานของชีวิต ${
-      d.isReversed
-        ? "มีอุปสรรคหรือความสับสนที่ต้องค่อยๆ คลายปมด้วยสติ"
-        : "เป็นจังหวะที่เกื้อหนุนและให้ความกระจ่างแจ้งในการตัดสินใจ"
-    }`;
+    if (card.arcana === "major") majorCount++;
+    if (card.element && elementCounts[card.element] !== undefined) {
+      elementCounts[card.element]++;
+    }
+
+    const pos = ctx.spread.positions[d.order] || {
+      nameTh: `ตำแหน่งที่ ${i + 1}`,
+      meaning: "พลังงานในตำแหน่งนี้",
+    };
+
+    const orientation = d.isReversed ? "reversed" : "upright";
+    const catMeaning = card.meanings?.[category]?.[orientation] || card.meanings?.general?.[orientation] || "";
+    const keywords = card.keywords?.[orientation]?.slice(0, 3).join(", ") || "";
+
+    const headline = `${card.nameTh}${d.isReversed ? " (กลับหัว)" : ""} ในตำแหน่ง${pos.nameTh}`;
+    
+    let reading = "";
+    if (d.isReversed) {
+      reading = `${card.nameTh} ในตำแหน่ง ${pos.nameTh} (${pos.meaning}) บ่งบอกถึงภาวะที่พลังงานอาจสะดุดหรือมีความลังเลภายใน คีย์สำคัญคือ "${keywords}" คำแนะนำคือ ${catMeaning}`;
+    } else {
+      reading = `${card.nameTh} ในตำแหน่ง ${pos.nameTh} (${pos.meaning}) เป็นสัญญาณเกื้อหนุนอย่างเด่นชัด คีย์สำคัญคือ "${keywords}" พลังงานบอกว่า ${catMeaning}`;
+    }
 
     cardsResult.push({ position: d.order, headline, reading });
     yield { type: "card", position: d.order, headline, reading };
+    await new Promise((r) => setTimeout(r, 35));
   }
 
-  const connections = "ไพ่ทั้งหมดในชุดนี้ส่งพลังเกื้อกูลกัน ชี้ให้เห็นว่าสิ่งที่อยู่ในใจคุณกำลังจะพบทางออกที่ลงตัว";
+  // 3. Card Connections Synthesis
+  const dominantElement = Object.entries(elementCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "ดิน";
+  let connections = "";
+  if (majorCount >= Math.ceil(ctx.drawn.length / 2)) {
+    connections = `ไพ่ชุดนี้มีไพ่ชุดใหญ่ (Major Arcana) ปรากฏขึ้นถึง ${majorCount} ใบ ชี้ว่าเรื่องนี้เป็นจุดเปลี่ยนสำคัญของชีวิตที่จักรวาลกำลังจัดสรร ไม่ใช่เรื่องบังเอิญเล็กๆ น้อยๆ`;
+  } else {
+    connections = `พลังงานธาตุ${dominantElement}ปรากฏเด่นชัดในผังนี้ ส่งพลังเชื่อมโยงให้เห็นว่า ความพยายามและการลงมือทำทีละก้าวของคุณจะนำพาผลลัพธ์ที่จับต้องได้มาให้`;
+  }
   yield { type: "connections", text: connections };
+  await new Promise((r) => setTimeout(r, 30));
 
-  const summary = `สำหรับคำถาม "${ctx.question}" บทสรุปคือจงมั่นใจในก้าวต่อไปและตัดสินใจด้วยความรอบคอบ`;
+  // 4. Core Summary
+  let summary = "";
+  if (ctx.personaId === "direct") {
+    summary = `สรุปสำหรับคำถาม "${question}": ความจริงปรากฏชัดเจนแล้ว อย่าปล่อยให้ความลังเลดึงเวลาไว้ จงตัดสินใจบนพื้นฐานของเหตุผลและความจริง`;
+  } else if (ctx.personaId === "mystic") {
+    summary = `สารจากดวงดาวและไพ่สำหรับ "${question}": ม่านหมอกกำลังสลายตัว จงเชื่อมั่นในญาณหยั่งรู้ของคุณ แล้วทางข้างหน้าจะปรากฏอย่างแจ่มชัด`;
+  } else {
+    summary = `แม่หมอขอสรุปให้คุณ${nickname}ว่า สำหรับ "${question}" ทุกอย่างมีทางออกที่ดีเสมอ ขอให้มั่นใจในคุณค่าของตัวเองและก้าวไปข้างหน้าอย่างอบอุ่นใจนะคะ`;
+  }
   yield { type: "summary", text: summary };
+  await new Promise((r) => setTimeout(r, 30));
+
+  // 5. Actionable Advice
+  const adviceList: string[] = [];
+  if (dominantElement === "ไฟ") {
+    adviceList.push("กล้าที่จะริเริ่มและลงมือทำทันทีที่มีโอกาส");
+    adviceList.push("ระวังอารมณ์ใจร้อน ให้คิดอย่างรอบคอบก่อนเจรจา");
+  } else if (dominantElement === "น้ำ") {
+    adviceList.push("รับฟังความรู้สึกและสัญชาตญาณภายในของตนเอง");
+    adviceList.push("ให้เวลาตัวเองได้ผ่อนคลายและเคลียร์จิตใจให้แจ่มใส");
+  } else if (dominantElement === "ลม") {
+    adviceList.push("รวบรวมข้อมูลและวิเคราะห์เหตุผลให้รอบด้าน");
+    adviceList.push("สื่อสารอย่างตรงไปตรงมาและชัดเจนกับผู้เกี่ยวข้อง");
+  } else {
+    adviceList.push("จัดระเบียบแผนงานและการเงินให้มั่นคงเป็นขั้นตอน");
+    adviceList.push("อดทนและสร้างรากฐานที่แข็งแรงทีละก้าว");
+  }
 
   const finalReading: Reading = {
     opening,
     cards: cardsResult,
     connections,
     summary,
-    advice: ["ตั้งสติและลงมือทำสิ่งที่วางแผนไว้", "เปิดใจรับฟังความคิดเห็นรอบข้าง"],
-    timing: "ภายใน 1-2 สัปดาห์ข้างหน้านี้",
-    mood: "อบอุ่น",
+    advice: adviceList,
+    timing: dominantElement === "ไฟ" ? "ภายใน 1-2 สัปดาห์นี้" : dominantElement === "น้ำ" ? "ภายใน 1 เดือนนี้" : dominantElement === "ลม" ? "เร็วๆ นี้ภายในไม่กี่วัน" : "ภายใน 1-3 เดือนนี้",
+    mood: majorCount > 1 ? "ท้าทาย" : "อบอุ่น",
     yesNoAnswer: null,
   };
 
