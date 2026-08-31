@@ -162,7 +162,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               <Link
                 key={card.id}
                 href={`/cards/${card.id}`}
-                className="rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#160e2c]/95 via-[#0d081c]/95 to-[#06040d]/95 p-3 flex flex-col justify-between hover:border-[#ffd700] hover:shadow-[0_12px_35px_rgba(229,192,123,0.3)] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5"
+                className="content-visibility-auto rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#160e2c]/95 via-[#0d081c]/95 to-[#06040d]/95 p-3 flex flex-col justify-between hover:border-[#ffd700] hover:shadow-[0_12px_35px_rgba(229,192,123,0.3)] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5"
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
                 <div className="relative aspect-[7/12] w-full rounded-xl overflow-hidden border border-[#e5c07b]/35 shadow-inner bg-[#040308] mb-3">

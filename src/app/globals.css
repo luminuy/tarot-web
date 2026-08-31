@@ -208,3 +208,17 @@ html {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Peak Performance: Content Visibility & Containment for 60fps Grid / List Rendering */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 350px;
+}
+
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+

@@ -18,6 +18,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+import { AssetWarmup } from "@/components/performance/AssetWarmup";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th">
@@ -29,7 +31,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="starfield min-h-dvh">{children}</body>
+      <body className="starfield min-h-dvh">
+        <AssetWarmup />
+        {children}
+      </body>
     </html>
   );
 }
