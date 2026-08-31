@@ -119,6 +119,23 @@
   - Image Transformations (`/cdn-cgi/image/`) ฟรี 5,000 unique transformations/เดือน แล้ว $0.50/1,000 **แต่ต้องมี custom domain (zone) ใช้บน `*.workers.dev` ไม่ได้** และเราย่อภาพล่วงหน้าไปแล้วจึงไม่ต้องใช้
   - R2 จะเพิ่ม latency (Worker ต้องวิ่งไปหยิบจาก R2) โดยไม่ได้ประโยชน์
 
+#### 4. แก้ Cache-Control ซ้ำสองรอบใน `public/_headers` (Duplicate Header Bug)
+- **ปัญหาเดิม**: หลัง deploy PR #6 ขึ้น production แล้วตรวจ header จริงพบว่าภาพย่อ WebP ได้ค่าซ้ำ:
+  ```
+  $ curl -sI https://tarot-web.bankjack10452.workers.dev/cards/w256/major-00.webp
+  cache-control: public, max-age=31536000, immutable, public, max-age=31536000, immutable
+  ```
+- **สาเหตุ**: เขียนกฎแยกไว้ทั้ง `/cards/*`, `/cards/w256/*` และ `/cards/w512/*`
+  แต่ splat (`*`) ของ Cloudflare เป็นแบบ **greedy** คือกินข้ามเครื่องหมาย `/` ไปด้วย
+  กฎ `/cards/*` จึง match ภาพย่อทั้งหมดอยู่แล้ว และเมื่อมีกฎซ้อนกันหลายข้อ
+  Cloudflare จะ **ต่อท้าย (append)** ค่า ไม่ใช่ **แทนที่ (replace)** ค่าจึงถูกเขียนซ้ำสองรอบ
+- **สิ่งที่แก้ไข**: ลบกฎ `/cards/w256/*` และ `/cards/w512/*` ที่ซ้ำซ้อนออก เหลือ `/cards/*` ข้อเดียว พร้อมคอมเมนต์อธิบายกันพลาดซ้ำ
+- **ไฟล์ที่แก้ไข**: `public/_headers`
+- **ผลการทดสอบ (จาก deploy รอบก่อนหน้า ยืนยันว่ากฎ scope ถูกต้อง)**:
+  - `/cards/major-00.jpg` ➔ `max-age=31536000, immutable` **ถูกต้อง**
+  - `/cards/major-00` (หน้าเว็บ HTML) ➔ `s-maxage=31536000` **ไม่โดน immutable ตามที่ตั้งใจ**
+    ยืนยันว่ากฎ `/cards/*` แตะเฉพาะไฟล์ static ไม่ไปโดนหน้าที่ Worker เรนเดอร์
+
 ---
 
 ### 🗓️ 2026-08-31: Phase 4 — Polish, Iconography & Multi-AI Guidelines
