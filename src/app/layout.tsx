@@ -1,24 +1,91 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { AssetWarmup } from "@/components/performance/AssetWarmup";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tarot.luminuy.com"),
   title: {
-    default: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI",
+    default: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI | ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite",
     template: "%s · วิหารพยากรณ์ไพ่ทาโรต์",
   },
   description:
-    "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง แล้วให้แม่หมอ AI อ่านให้ฟังทีละใบ พร้อมหลักฐานความสุ่มโปร่งใสที่ตรวจสอบได้",
-  keywords: ["ไพ่ทาโรต์", "ดูดวงออนไลน์", "เปิดไพ่", "ทาโรต์ฟรี", "แม่หมอ AI", "ดูดวงความรัก"],
-  openGraph: { type: "website", locale: "th_TH", siteName: "วิหารพยากรณ์ไพ่ทาโรต์" },
+    "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง 78 ใบ แล้วให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair SHA-256",
+  keywords: [
+    "ไพ่ทาโรต์",
+    "ดูดวงออนไลน์",
+    "เปิดไพ่",
+    "ทาโรต์ฟรี",
+    "แม่หมอ AI",
+    "ดูดวงความรัก",
+    "ดูดวงการงาน",
+    "ไพ่ยิปซี",
+    "1909 Rider-Waite",
+    "Provably Fair Tarot",
+  ],
+  authors: [{ name: "วิหารพยากรณ์ไพ่ทาโรต์" }],
+  creator: "Luminuy Sanctuary",
+  publisher: "Luminuy Sanctuary",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "th_TH",
+    siteName: "วิหารพยากรณ์ไพ่ทาโรต์ (Sacred Oracle Tarot)",
+    title: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI ✦ ดูดวงไพ่ทาโรต์ออนไลน์",
+    description:
+      "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair",
+    url: "https://tarot.luminuy.com",
+    images: [
+      {
+        url: "/cards/major-01.webp",
+        width: 300,
+        height: 520,
+        alt: "วิหารพยากรณ์ไพ่ทาโรต์ 1909 Rider-Waite",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI",
+    description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมระบบ Provably-Fair",
+    images: ["/cards/major-01.webp"],
+  },
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0812",
+  themeColor: "#05040a",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
 };
 
-import { AssetWarmup } from "@/components/performance/AssetWarmup";
+const webAppJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "วิหารพยากรณ์ไพ่ทาโรต์ (Sacred Oracle Tarot)",
+  url: "https://tarot.luminuy.com",
+  description: "เว็บดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกจับไพ่ด้วยตนเอง พร้อมแม่หมอ AI และระบบความสุ่มโปร่งใส Provably-Fair SHA-256",
+  applicationCategory: "LifestyleApplication",
+  operatingSystem: "All",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "THB",
+  },
+  inLanguage: "th",
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -29,6 +96,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link
           href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@400;600;700&family=Sarabun:wght@300;400;600&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
         />
       </head>
       <body className="starfield min-h-dvh">
