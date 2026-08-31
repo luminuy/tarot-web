@@ -11,7 +11,15 @@ interface ElementalBalanceWidgetProps {
 }
 
 export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ cards, drawn }) => {
-  const breakdown = useMemo(() => calculateElementalBalance(cards, drawn), [cards, drawn]);
+  const breakdown = useMemo(() => {
+    try {
+      return calculateElementalBalance(cards, drawn);
+    } catch {
+      return null;
+    }
+  }, [cards, drawn]);
+
+  if (!breakdown) return null;
 
   return (
     <div className="my-6 rounded-2xl border border-amber-500/20 bg-gradient-to-b from-[#161224]/90 to-[#0c0a14]/95 p-5 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-amber-500/35">

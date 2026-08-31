@@ -17,7 +17,15 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({
   personaNameTh = "แม่หมอทาโรต์",
 }) => {
   const [copied, setCopied] = useState(false);
-  const mantra = useMemo(() => generateSacredMantra(cards, drawn), [cards, drawn]);
+  const mantra = useMemo(() => {
+    try {
+      return generateSacredMantra(cards, drawn);
+    } catch {
+      return null;
+    }
+  }, [cards, drawn]);
+
+  if (!mantra) return null;
 
   const handleCopy = async () => {
     const textToCopy = `🔮 คำคมพลังใจศักดิ์สิทธิ์จาก ${personaNameTh}\n${mantra.quoteTh}\n✦ ข้อคิดนำทาง: "${mantra.affirmationTh}"\n(ไพ่สะท้อนพลัง: ${mantra.sourceCard.nameTh} - ${mantra.powerWord})\nดูดวงออนไลน์พรีเมียม: https://tarot-web.bankjack10452.workers.dev`;

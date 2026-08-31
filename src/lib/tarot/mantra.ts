@@ -59,8 +59,19 @@ export function generateSacredMantra(cards: TarotCard[], drawn?: DrawnCard[]): S
 
   const chosenCard = cards[chosenIndex];
   const isReversed = drawn && drawn[chosenIndex] ? drawn[chosenIndex].isReversed : false;
-  const keywords = isReversed ? chosenCard.keywords.reversed : chosenCard.keywords.upright;
-  const powerWord = keywords[0] || "ปัญญาญาณ";
+  
+  let powerWord = "ปัญญาญาณ";
+  if (chosenCard && (chosenCard as any).keywords) {
+    const kw = (chosenCard as any).keywords;
+    if (Array.isArray(kw) && kw.length > 0) {
+      powerWord = kw[0];
+    } else if (typeof kw === "object") {
+      const list = isReversed ? kw.reversed : kw.upright;
+      if (Array.isArray(list) && list.length > 0) {
+        powerWord = list[0];
+      }
+    }
+  }
 
   // คัดสรร Mantra ตามธาตุและพลังของไพ่
   const element = chosenCard.element || "ลม";

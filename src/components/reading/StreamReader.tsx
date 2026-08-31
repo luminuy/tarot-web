@@ -71,7 +71,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
   const allCards = useMemo(() => {
     return drawnCards
-      .map((d) => d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined))
+      .map((d) => (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : (d.card as unknown as TarotCard)))
       .filter((c): c is TarotCard => !!c);
   }, [drawnCards]);
 

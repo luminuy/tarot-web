@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0026 · 2026-08-31 22:16 · 🟡 Medium · Fix summary tab crash by adding safe keyword extraction in mantra and resilient widget wrappers
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | React Error Boundary modal appeared when user clicked on Summary and Advice tab in StreamReader |
+| **สาเหตุราก** | mantra.ts assumed keywords was an object with reversed property when DrawnSlotCard stored it as string array causing TypeError reading property 0 of undefined |
+| **การแก้ไข** | Fix summary tab crash by adding safe keyword extraction in mantra and resilient widget wrappers |
+| **🛡️ กฎป้องกันถาวร** | **Handle keywords as both array and object formats safely and wrap all reading sub-widgets in defensive memo try/catch** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `09f9311` |
+
+
 ### INC-0025 · 2026-08-31 21:50 · 🟡 Medium · Fix HTTP 500 in start route by adding fallback secret in session-token and resilient JSON parsing
 
 | หัวข้อ | รายละเอียด |
