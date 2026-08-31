@@ -1,5 +1,1315 @@
 [
   {
+    "id": "audit-1788170062975-lvexy",
+    "timestampTh": "31/8/2569 16:54:21",
+    "timestampIso": "2026-08-31T09:54:21.828Z",
+    "actor": {
+      "name": "Antigravity AI",
+      "email": "bankjack10452@gmail.com",
+      "type": "AI_AGENT",
+      "agentModel": "Google DeepMind Antigravity",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/resilience-perf-enhancements",
+      "commitSha": "defb95c"
+    },
+    "action": {
+      "category": "PERF",
+      "summary": "Implement Level A and B card image sharpness overhaul with Retina layer uncoupling, w1024 removal, intrinsic dimensions, and tuned unsharp mask",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/WORK_LOG.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-01.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-02.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-03.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-04.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-05.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-06.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-07.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-08.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-09.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-10.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-11.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-12.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-13.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/cups-14.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-00.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-01.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-02.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-03.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-04.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-05.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-06.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-07.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-08.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-09.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-10.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-11.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-12.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-13.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-14.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-15.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-16.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-17.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-18.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-19.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-20.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/major-21.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-01.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-02.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-03.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-04.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-05.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-06.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-07.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-08.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-09.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-10.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-11.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-12.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-13.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/pentacles-14.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-01.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-02.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-03.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-04.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-05.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-06.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-07.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-08.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-09.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-10.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-11.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-12.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-13.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/swords-14.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-01.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-02.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-03.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-04.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-05.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-06.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-07.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-08.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-09.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-10.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-11.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-12.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-13.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w1024/wands-14.webp",
+          "status": "DELETED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/cups-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-00.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-15.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-16.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-17.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-18.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-19.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-20.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/major-21.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/pentacles-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/swords-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w128/wands-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/cups-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-00.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-15.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-16.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-17.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-18.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-19.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-20.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/major-21.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/pentacles-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/swords-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w256/wands-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/cups-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-00.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-15.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-16.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-17.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-18.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-19.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-20.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/major-21.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/pentacles-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/swords-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-01.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-02.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-03.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-04.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-05.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-06.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-07.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-08.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-09.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-10.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-11.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-12.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-13.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ublic/cards/w512/wands-14.webp",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "cripts/generate-card-variants.ts",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "cripts/remaster-cards.py",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/app/globals.css",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/card/CardImage.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/lib/tarot/card-image.ts",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 319
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788169858751-txajg",
     "timestampTh": "31/8/2569 16:50:57",
     "timestampIso": "2026-08-31T09:50:57.798Z",

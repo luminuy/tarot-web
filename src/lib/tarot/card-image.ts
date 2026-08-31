@@ -15,12 +15,11 @@
  *    ถ้าเพิ่ม/แก้ขนาดที่นี่ ต้องรัน `npm run cards:variants` ใหม่เสมอ
  */
 
-/** ขนาดภาพย่อ WebP ที่มีอยู่จริงใน `public/cards/<dir>/` */
+/** ขนาดภาพย่อ WebP ที่มีอยู่จริงใน `public/cards/<dir>/` (ย่อจากต้นฉบับจริง ~829px) */
 export const CARD_IMAGE_VARIANTS = [
   { dir: "w128", width: 128 },
   { dir: "w256", width: 256 },
   { dir: "w512", width: 512 },
-  { dir: "w1024", width: 1024 },
 ] as const;
 
 const CARDS_ROOT = "/cards/";

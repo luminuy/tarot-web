@@ -93,17 +93,12 @@ body {
 }
 
 /*
-  เรนเดอร์รูปภาพไพ่คมชัดสูงสุด ป้องกันภาพหยัก/แตกเป็นเม็ดใน Safari/Chrome/iOS
-  ใช้ WebP Multi-Resolution ควบคู่กับ hardware acceleration
+  เรนเดอร์รูปภาพไพ่คมชัดสูงสุดบนจอ Retina ป้องกันภาพเบลอจากการ rasterize ผิด layer
+  ให้ 3D transform อยู่ที่กล่อง wrapper (.card-inner) เท่านั้น ไม่ใส่ translateZ บนตัว <img>
 */
 .card-face img,
 .tarot-hd-card-image {
   image-rendering: auto;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  transform: translateZ(0);
 }
 
 /* แสงสะท้อนประกายฟอยล์ทอง (Gold Foil Sheen) */
