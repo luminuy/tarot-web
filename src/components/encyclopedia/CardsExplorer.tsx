@@ -149,11 +149,11 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       {/* 78 Cards Luxury Masterpiece Grid */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={activeFilter + searchQuery}
+          key={activeFilter}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -15 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.2 }}
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5"
         >
           {filteredCards.map((card) => {

@@ -1,8 +1,8 @@
 [
   {
-    "id": "audit-1788198211439-4opkc",
-    "timestampTh": "1/9/2569 00:43:30",
-    "timestampIso": "2026-08-31T17:43:30.263Z",
+    "id": "audit-1788198393389-0r8x3",
+    "timestampTh": "1/9/2569 00:46:32",
+    "timestampIso": "2026-08-31T17:46:32.421Z",
     "actor": {
       "name": "Antigravity AI",
       "email": "bankjack10452@gmail.com",
@@ -16,35 +16,51 @@
     "environment": {
       "host": "Banks-MacBook-Pro.local",
       "platform": "darwin (x64)",
-      "branch": "feat/ux-foundation-primitives",
+      "branch": "feat/ux-perf-runtime-1",
       "commitSha": "28b7d7b"
     },
     "action": {
-      "category": "FEAT",
-      "summary": "implement FDN-4 Modal primitive and FDN-5 Button primitive with focus-visible and touch-action",
+      "category": "PERF",
+      "summary": "optimize InteractiveCardFan with memoized FanCard and single AnimatePresence, remove searchQuery remount in CardsExplorer, and enhance IntentionAltarInput validation and touch feedback",
       "filesChanged": [
         {
           "file": "ai-locks.json",
           "status": "MODIFIED"
         },
         {
-          "file": "rc/app/globals.css",
+          "file": "rc/components/deck/InteractiveCardFan.tsx",
           "status": "MODIFIED"
         },
         {
-          "file": "rc/components/reading/ShareModal.tsx",
+          "file": "rc/components/encyclopedia/CardsExplorer.tsx",
           "status": "MODIFIED"
         },
         {
-          "file": "src/components/ui/Button.tsx",
+          "file": "rc/components/history/ReadingHistoryModal.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/reading/IntentionAltarInput.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/lib/utils/history.ts",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "src/app/api/auth/",
           "status": "ADDED"
         },
         {
-          "file": "src/components/ui/Modal.tsx",
+          "file": "src/app/api/journal/",
+          "status": "ADDED"
+        },
+        {
+          "file": "src/lib/auth/",
           "status": "ADDED"
         }
       ],
-      "totalFiles": 5
+      "totalFiles": 9
     },
     "verification": {
       "typecheckPassed": true,
