@@ -13,10 +13,50 @@
 > เป็นต้นเหตุ merge conflict แทบทุก PR ที่ทำขนานกัน จึงย้ายออกมา
 >
 > ประวัติงานถาวรและสิ่งที่ค้าง อยู่ในหัวข้อ **"บันทึกประวัติการพัฒนา"** ด้านล่างนี้
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 02:34:14` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+
+- **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
+- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (16 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
+- **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
+- **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
+- **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
+
+### 🧭 ตารางสถานะฟีเจอร์และหน้าเว็บ (Feature Readiness & Roadmap Matrix)
+
+| หน้าเว็บ / ฟีเจอร์ | เส้นทาง (Route / File) | สถานะความพร้อม | สถานะเซิร์ฟเวอร์ | สิ่งที่ทำแล้ว | สิ่งที่สามารถต่อยอดได้ในอนาคต |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
+| **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
+| **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
+| **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
+| **บัญชีและประวัติ** | `/account` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
+| **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
+| **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
+| **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
 ---
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
+
+### 🗓️ 2026-09-01: แผงแอดมิน M3 — Live Content Overrides (แก้ prompt / ไพ่ / แม่หมอ ไม่ต้อง deploy)
+
+> ต่อจาก M2 (PR #59) · แผน: `~/.claude/plans/breezy-percolating-llama.md`
+
+- **ความต้องการ**: แอดมินแก้ prompt กลาง / น้ำเสียงแม่หมอ / ความหมายไพ่ แล้วมีผลกับ production ทันที ไม่ต้อง deploy
+- **สิ่งที่ทำ**:
+  - สร้าง `src/lib/content/overrides.ts` — เก็บ override เป็น JSON ก้อนเดียวใน KV `app:override:content` (memo cache 60 วิ) + resolver: `resolveSystemCore()`, `resolvePersona()`, `resolveCardByIndex/ById()` + `applyCardOverride()`
+  - `src/lib/ai/prompt.ts` — export `SYSTEM_CORE_KNOWLEDGE` · `buildSystemPrompt(personaId, opts?)` รับ `{systemCore, persona}` ที่ resolve แล้ว (ไม่ส่ง = พฤติกรรมเดิม 100%)
+  - เดินสายผ่าน consumer: `gemini.ts` + `claude.ts` (`buildSystemPrompt` ใช้ resolved) · `read/route.ts` + `chat/route.ts` (`cardByIndex` → `resolveCardByIndex`)
+  - **🔒 override แก้ได้แค่ข้อความ** — `applyCardOverride` คงทุก field ยกเว้น meanings/keywords/yesNo; ค่าว่าง → fallback default; `id/number/element/image/order` แตะไม่ได้
+  - `GET/PUT /api/admin/content` — Zod strict validation (reject card id ปลอม / ฟิลด์โครงสร้าง / >200KB / string เกิน limit) + audit log
+  - `src/components/admin/ContentEditor.tsx` — 3 sub-tab: prompt กลาง / บุคลิกแม่หมอ (5) / ความหมายไพ่ (78 ค้นหาได้, meaning 5 หมวด × 2 + keywords + yesNo) · ปุ่มคืนค่าเริ่มต้นต่อ field · badge ✦ ไพ่ที่แก้แล้ว
+  - **gate ที่ 8 ใหม่**: `scripts/qa/test-overrides-safety.ts` (22 เคส) เพิ่มใน `CHECKS`
+- **ผลการทดสอบ**:
+  - `npm run repo:verify` ➔ ✅ 8/8 · `build:worker` ➔ verify · gate ใหม่ 22/22
+  - curl: PUT override (systemPrompt + persona.warm.voice + card major-00) → GET สะท้อนถูก · card id ปลอม → 400 · ฟิลด์ `element/id` → 400 (strict) · `updatedAt` จาก client → server เขียนทับเอง
+  - เบราว์เซอร์: ContentEditor render 3 tab, card editor major-00 แสดง 5 หมวด + yesNo + default placeholder, แก้แล้วขึ้น ✦, save ผ่าน
+- **หมายเหตุ**: end-to-end (override → โทน Gemini เปลี่ยนจริง) ต้อง verify บน production ที่มี `GEMINI_API_KEY` — dev ไม่มี key จึงวิ่ง mock path
+- **ยังไม่ทำ**: M4–M7 marketplace (ต้อง provision D1 + sign-off PDPA)
 
 ### 🗓️ 2026-09-01: แผงแอดมิน M2 — Stats Collection + Dashboard
 

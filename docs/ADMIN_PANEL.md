@@ -1,6 +1,6 @@
 # 🔧 แผงแอดมิน (Admin Panel) — คู่มือระบบ
 
-> สถานะ: **M0 + M1 + M2 เสร็จ** (platform · auth · shell · สถิติ) · M3 ระหว่างทำ · M4–M7 (marketplace) ยังไม่เริ่ม
+> สถานะ: **M0–M3 เสร็จ** (platform · auth · shell · สถิติ · แก้เนื้อหา live) · M4–M7 (marketplace) ยังไม่เริ่ม
 > แผนเต็ม: `~/.claude/plans/breezy-percolating-llama.md`
 
 ---
@@ -66,6 +66,21 @@ Local dev: ใส่ `ADMIN_PASSWORD=...` ใน `.env.local`
 - เขียน KV แบบ debounce เพราะ free plan จำกัด ~1,000 writes/วัน — ยอมสูญเสีย < 20 วิ/isolate ถ้า worker recycle
 - metric ที่นับ: `reading_started/completed/failed/blocked`, `spread:*`, `persona:*`, `category:*`, `safety_flag:*`, `ai_call:gemini`, `ai_error:gemini`, `ai_latency_ms`, `ai_tokens_in/out`, `chat_message`, `chat_blocked`
 - **ทุก metric เป็น enum/count ล้วน — ไม่มี PII**
+
+## แก้เนื้อหา live (M3)
+
+| ไฟล์ | หน้าที่ |
+| :-- | :-- |
+| `src/lib/content/overrides.ts` | เก็บ override JSON ก้อนเดียวใน KV `app:override:content` + `resolveSystemCore/Persona/CardByIndex` + `applyCardOverride` |
+| `src/components/admin/ContentEditor.tsx` | UI 3 tab: prompt กลาง / บุคลิกแม่หมอ / ความหมายไพ่ 78 ใบ |
+| `GET/PUT /api/admin/content` | อ่าน/เขียน doc (Zod strict, audit) |
+| `scripts/qa/test-overrides-safety.ts` | gate ที่ 8 — override ห้ามแตะโครงไพ่ |
+
+- override แก้ได้เฉพาะ **ข้อความ**: `systemPrompt`, persona `voice/tagline/nameTh`, card `meanings/keywords/yesNo`
+- **ห้ามแตะ**: card `id/number/arcana/suit/element/image/astrology/numerology`, ลำดับ DECK (cardIndex load-bearing)
+- ค่าว่าง/ช่องว่าง → fallback ไป default อัตโนมัติ
+- มีผลกับคำอ่านใหม่ภายใน ~60 วินาที (memo cache TTL)
+- consumer ที่เดินสายผ่าน: `gemini.ts`, `claude.ts`, `api/reading/[id]/read`, `api/reading/[id]/chat`
 
 ## ความปลอดภัย / PDPA
 

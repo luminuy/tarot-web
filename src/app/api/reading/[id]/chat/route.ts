@@ -4,6 +4,7 @@ import { getReading, type ReadingRecord } from "@/server/store";
 import { cardByIndex } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
 import { buildSystemPrompt } from "@/lib/ai/prompt";
+import { getContentOverrides, resolveCardByIndex, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
@@ -266,13 +267,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const personaId = record.personaId || "warm";
     const spread = getSpread(record.spreadId || "single");
+    const overrideDoc = await getContentOverrides();
     const cards = (record.drawn || []).map((d) => {
-      const card = cardByIndex(d.cardIndex);
+      const card = resolveCardByIndex(overrideDoc, d.cardIndex);
       const pos = spread?.positions[d.order];
       return `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"}`;
     });
 
-    const systemInstruction = `${buildSystemPrompt(personaId)}
+    const systemInstruction = `${buildSystemPrompt(personaId, {
+      systemCore: resolveSystemCore(overrideDoc),
+      persona: resolvePersona(overrideDoc, personaId),
+    })}
 
 ## บริบทการสนทนาส่วนตัวแบบ 1-on-1 (Master Tarot Consultation Dialogue)
 ผู้ถามเพิ่งเปิดไพ่ชุดนี้กับคุณ:

@@ -3,6 +3,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
 import { parsePartialReading } from "@/lib/utils/partial-json";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
+import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { type Reading, ReadingSchema } from "@/lib/schema/reading";
 
 /**
@@ -69,13 +70,17 @@ export async function* streamReading(ctx: ReadingContext): AsyncGenerator<Readin
   }
   const client = getClient();
 
+  const overrideDoc = await getContentOverrides();
   const stream = client.messages.stream({
     model: MODEL,
     max_tokens: 16000,
     system: [
       {
         type: "text",
-        text: buildSystemPrompt(ctx.personaId),
+        text: buildSystemPrompt(ctx.personaId, {
+          systemCore: resolveSystemCore(overrideDoc),
+          persona: resolvePersona(overrideDoc, ctx.personaId),
+        }),
         cache_control: { type: "ephemeral" },
       },
     ],

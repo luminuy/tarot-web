@@ -91,6 +91,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🚨 ตัวกรองคำถามอันตราย (Safety Guardrails)", cmd: TSX, args: ["scripts/qa/test-safety.ts"] },
   { label: "🎲 ระบบสับไพ่ Provably Fair", cmd: TSX, args: ["scripts/qa/test-shuffle.ts"] },
   { label: "🖼️  การอ้างอิง path ภาพไพ่ถูกต้อง", cmd: TSX, args: ["scripts/qa/test-image-paths.ts"] },
+  { label: "✍️  Live content override ปลอดภัย (ไม่แตะโครงไพ่)", cmd: TSX, args: ["scripts/qa/test-overrides-safety.ts"] },
 ];
 
 /**

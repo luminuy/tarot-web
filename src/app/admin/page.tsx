@@ -10,6 +10,10 @@ const StatsDashboard = dynamic(() => import("@/components/admin/StatsDashboard")
   ssr: false,
   loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดแดชบอร์ด…</p>,
 });
+const ContentEditor = dynamic(() => import("@/components/admin/ContentEditor"), {
+  ssr: false,
+  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดตัวแก้เนื้อหา…</p>,
+});
 
 type Tab = "stats" | "content";
 
@@ -78,13 +82,7 @@ export default function AdminHome() {
       </nav>
 
       <section className="mt-6">
-        {tab === "stats" ? (
-          <StatsDashboard />
-        ) : (
-          <div className="altar-panel rounded-2xl p-6 text-sm text-[#9c93b8]">
-            ตัวแก้ prompt / ความหมายไพ่ / บุคลิกแม่หมอ จะมาใน milestone ถัดไป (M3)
-          </div>
-        )}
+        {tab === "stats" ? <StatsDashboard /> : <ContentEditor />}
       </section>
     </div>
   );
