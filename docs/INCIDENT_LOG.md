@@ -48,15 +48,27 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
-### INC-0018 · 2026-08-31 20:42 · 🟡 Medium · Fix CI lockfile dependency and restore standard npm workflow in GitHub Actions
+### INC-0019 · 2026-08-31 20:45 · 🟡 Medium · Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการที่พบ** | Fix CI lockfile dependency and restore standard npm workflow in GitHub Actions |
-| **สาเหตุราก** | pnpm-lock.yaml had empty packages in CI causing frozen lockfile failure |
-| **การแก้ไข** | Fix CI lockfile dependency and restore standard npm workflow in GitHub Actions |
-| **🛡️ กฎป้องกันถาวร** | **Maintain single package-lock.json source of truth for npm in CI** |
-| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` · commit `c2471bb` |
+| **อาการที่พบ** | Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds |
+| **สาเหตุราก** | pnpm-workspace.yaml lacked packages field and had invalid allowBuilds key |
+| **การแก้ไข** | Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds |
+| **🛡️ กฎป้องกันถาวร** | **Ensure pnpm-workspace.yaml strictly complies with pnpm 9.15 schema with packages field** |
+| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` · commit `3c7b9a9` |
+
+
+### INC-0018 · 2026-08-31 20:45 · 🟠 High · CI Fail จาก pnpm-workspace.yaml ผิด Schema ขาด packages field (ISSUE-011)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | GitHub Actions CI ล้มเหลวทันทีที่ขั้นตอน Setup/Install Dependencies ด้วย error `ERROR packages field missing or empty` |
+| **สาเหตุราก** | `pnpm-workspace.yaml` มีคีย์ `allowBuilds:` ซึ่งไม่ใช่ spec จริงของ pnpm 9.15 และขาดคีย์ `packages: - .` ทำให้ pnpm 9.15 หา workspace packages ไม่เจอและบล็อกการติดตั้ง |
+| **การแก้ไข** | 1) แก้ไข `pnpm-workspace.yaml` ให้ถูกต้อง: เพิ่ม `packages: - .` และตัด `allowBuilds` ทิ้ง คงไว้เฉพาะ `onlyBuiltDependencies` 2) ปรับ CI ให้สอดคล้องสมบูรณ์ 3) รัน `npm run repo:verify` ผ่าน 7/7 ด่าน |
+| **🛡️ กฎป้องกันถาวร** | **1) Workspace Config ต้องมี `packages: - .` เสมอ และห้ามใส่คีย์ที่ไม่อยู่ใน official spec 2) ทุกการเปลี่ยนแปลงคอนฟิก CI/Package ต้องตรวจสอบความถูกต้องของ Schema และทดสอบ Store/Install ก่อน 3) ทำงานให้เรียบร้อย รอบคอบ มีความคิดเป็นระบบ ไม่แก้เพียงผิวเผิน** |
+| **การพิสูจน์ว่าแก้ได้จริง** | แก้ไข `pnpm-workspace.yaml` ถูกต้องตาม spec, ผ่านการตรวจสอบ 7/7 ด่าน, build 91 static/dynamic pages ผ่าน 100% |
+| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` |
 
 
 ### INC-0017 · 2026-08-31 20:40 · 🟠 High · แตกกิ่งย่อยกระจัดกระจายโดยไม่ Rebase และไม่รวม PR (Concurrent Branch Drift & Incomplete Handoff)

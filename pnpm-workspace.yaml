@@ -1,7 +1,5 @@
-allowBuilds:
-  '@prisma/engines': true
-  esbuild: true
-  prisma: true
+packages:
+  - .
 onlyBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'
@@ -9,3 +7,4 @@ onlyBuiltDependencies:
   - esbuild
   - '@tailwindcss/oxide'
   - sharp
+
