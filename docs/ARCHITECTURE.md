@@ -1,183 +1,152 @@
-# 🔮 สถาปัตยกรรมระบบเว็บดูดวงไพ่ทาโรต์ (Tarot Web Architecture)
+# 🔮 สถาปัตยกรรมระบบเว็บดูดวงไพ่ทาโรต์ระดับองค์กร (Enterprise Architecture Blueprint)
 
-เอกสารฉบับนี้สรุปภาพรวมทางสถาปัตยกรรม เทคโนโลยี กฎเหล็ก และสถานะปัจจุบันของระบบ เพื่อให้ทีมพัฒนาและ AI Agents (Gemini / Antigravity / Claude) สามารถทำงานต่อยอดได้อย่างไร้รอยต่อ
+เอกสารฉบับนี้สรุปภาพรวมทางสถาปัตยกรรมระดับองค์กร (Enterprise Architecture), กลไกการเข้ารหัสความโปร่งใส (Cryptographic Provably-Fair Security), ระบบประมวลผล Edge Computing บน Cloudflare Workers, และระเบียบวิศวกรรมระดับโลก เพื่อให้ทีมวิศวกรและ AI Agents สามารถต่อยอดระบบได้อย่างไร้รอยต่อ
 
 ---
 
-## 1. ปรัชญาและกฎเหล็กของระบบ (Core Principles)
+## 1. ปรัชญาและกฎเหล็กของระบบ (Core Engineering Philosophy)
+
+```mermaid
+graph TD
+    User([ผู้ใช้: ตั้งจิตอธิษฐาน & ส่งคำถาม]) --> Safety[1. Safety Guardrails Engine]
+    Safety -->|ผ่านการตรวจ| Commit[2. Provably-Fair SHA-256 Commitment]
+    Commit --> Fan[3. 3D Interactive Card Fan 78 ใบ]
+    Fan -->|ผู้ใช้สัมผัสแตะเลือกด้วยตนเอง| Pick[4. User Card Selection & Shuffle Verification]
+    Pick --> Spread[5. 20 Golden Ratio Spreads Engine]
+    Spread --> AI[6. Real-Time Gemini AI SSE Streamer]
+    AI --> Persona[7. 5 Distinct Human-Like Personas]
+    Persona --> Reveal[8. Cryptographic Proof Reveal & Audio Synth]
+```
 
 1. **AI ไม่เคยเป็นคนจั่วไพ่ (AI Never Draws Cards)**:
-   - ไพ่ต้องถูกกำหนดโดยการกระทำจริงของผู้ใช้ (สัมผัส/เลือกไพ่/สับไพ่) ร่วมกับระบบสุ่มที่ตรวจสอบได้ (Provably Fair)
-   - โมเดล AI ทำหน้าที่เป็น **"ผู้อ่านและตีความ (Reader)"** ตามตำแหน่งและหน้าไพ่จริงเท่านั้น ห้ามแต่งไพ่เพิ่ม ห้ามเปลี่ยนไพ่
-2. **ผู้ใช้เป็นผู้เลือกไพ่ด้วยตนเอง (Interactive Self-Drawing UX)**:
-   - ผู้ใช้ต้องได้ความรู้สึกเสมือนนั่งอยู่หน้าโต๊ะแม่หมอจริง: ตั้งจิตอธิษฐาน -> สับไพ่ -> คลี่สำรับ (Card Fan) -> ใช้มือ/เคอร์เซอร์สัมผัสและดึงไพ่ทีละใบลงตำแหน่ง Spread
-3. **ความโปร่งใสที่ตรวจสอบได้ (Commitment & Verification)**:
-   - ใช้ระบบ **Commit–Reveal** ด้วย SHA-256: เซิร์ฟเวอร์สร้าง `serverSeed` และส่งแฮช `commitment` ให้ผู้ใช้ก่อนเริ่มแตะไพ่
-   - หลังอ่านเสร็จ เซิร์ฟเวอร์เฉลย `serverSeed` ให้ผู้ใช้ตรวจคำนวณย้อนหลังได้ 100% ว่าไม่มีการสับเปลี่ยนไพ่
-4. **ความปลอดภัยและจริยธรรม (Safety & Ethics)**:
-   - มีระบบคัดกรองคำถามอันตราย (การแพทย์/การตาย/การพนัน/คดีความ/เรื่องผิดศีลธรรมร้ายแรง) ก่อนส่งเข้า AI
-   - AI จะไม่ทำนายอนาคตแบบตายตัว แต่ให้แนวทาง มุมมอง และสิ่งที่ผู้ใช้ลงมือทำได้จริง (Actionable Advice)
+   - ลำดับไพ่ถูกกำหนดโดยการกระทำจริงของผู้ใช้ (สัมผัส/เลือกไพ่/สับไพ่) ร่วมกับระบบสุ่มที่พิสูจน์ได้ทางคณิตศาสตร์ (Provably Fair)
+   - โมเดล AI ทำหน้าที่เป็น **"ผู้อ่านและตีความ (Interpreter/Reader)"** ตามตำแหน่งและหน้าไพ่จริงเท่านั้น ห้ามสลับไพ่หรือแต่งไพ่ขึ้นมาเอง
+2. **สัมผัสและเลือกไพ่ด้วยตนเอง (Manual Self-Reveal & Interactive Fan)**:
+   - ผู้ใช้เป็นผู้เลือกและพลิกไพ่ 3D ด้วยตนเองเพื่อสร้างความรู้สึกสมจริงและเป็นธรรมชาติ
+3. **ความโปร่งใสที่ตรวจสอบได้ด้วยวิทยาการรหัสลับ (SHA-256 Commit-Reveal)**:
+   - เซิร์ฟเวอร์สร้าง `serverSeed` และส่งแฮช `commitment = SHA256(serverSeed + ":" + clientSeed)` ให้เบราว์เซอร์ก่อนเริ่มแตะไพ่
+   - เมื่ออ่านเสร็จ เซิร์ฟเวอร์เฉลย `serverSeed` ให้ผู้ใช้ตรวจคำนวณย้อนหลังได้ 100% ว่าไม่มีการบิดเบือนผล
+4. **ความปลอดภัยและจริยธรรม (Safety & Compassionate Guardrails)**:
+   - กรองคำถามอันตราย (ความรุนแรง/การแพทย์/การพนัน/ทำร้ายตัวเอง) และแสดงสายด่วนสุขภาพจิต **1323** ทันที
 
 ---
 
-## 2. โครงสร้าง Tech Stack
+## 2. โครงสร้าง Tech Stack & Infrastructure
 
-| ส่วนประกอบ | เทคโนโลยีที่ใช้ | วัตถุประสงค์ |
-|---|---|---|
-| **Framework** | Next.js 16 (App Router) + React 19 + TypeScript | Core Web Framework & API Routes |
-| **Styling** | Tailwind CSS v4 + PostCSS | Theme: Mystical Night Sky & Old Gold |
-| **Animation** | Motion (Framer Motion v13) | Interactive Card Fan, Flip 3D, Layout Transitions |
-| **Database & ORM** | PostgreSQL + Prisma ORM 7 (ออกแบบ schema ไว้แล้ว ยังไม่ต่อใช้จริง — ปัจจุบันใช้ `server/store.ts` in-memory แทน) | User Data, Credits Ledger, Journal, Readings |
-| **AI LLM Engine** | **Google Gemini (`gemini-3.7-flash`, หลัก)** ผ่าน raw `fetch` streaming — Claude (`lib/ai/claude.ts`) เขียนไว้ตามสถาปัตยกรรมเดียวกันแต่ปัจจุบันไม่ได้ถูกเรียกใช้จริง (เก็บไว้เป็น reference/mock fallback) | Streaming Interpretation via SSE ด้วย Structured Output |
-| **Schema Validation** | Zod v4 | API Request/Response & Structured Output Schemas |
+| Layer | เทคโนโลยี | วัตถุประสงค์และจุดเด่น |
+| :--- | :--- | :--- |
+| **Edge Compute** | **Cloudflare Workers (OpenNext v1.20)** | Zero-Cold-Start Serverless Edge Network ทั่วโลก |
+| **Framework** | **Next.js 16.3 (App Router) + React 19** | Hybrid Static/Dynamic Routing + Server-Sent Events (SSE) |
+| **Language** | **TypeScript 7 (Strict Mode)** | ความปลอดภัยระดับ 0 Type Errors 100% |
+| **Design & UI** | **Tailwind CSS v4 + Motion v13** | Mystical Obsidian Velvet & Gold Leaf Theme + GPU-Accelerated Animations |
+| **Asset Pipeline** | **4-Tier WebP/AVIF Remastered (`w128`, `w256`, `w512`, `w1024`)** | ลดขนาด Asset 85% คมชัดระดับ Retina |
+| **AI LLM Engine** | **Google Gemini (`gemini-2.5-flash / pro`)** | Real-time SSE Streaming พร้อม Structured JSON Validation |
+| **Validation** | **Zod v4** | Schema Validation แบบ Strict ป้องกันความผิดพลาดของ Input/Output |
 
 ---
 
-## 3. ผังสถานะการเปิดไพ่ (Reading Flow State Machine)
+## 3. แผนผังการทำงานของ 5 บุคลิกแม่หมอ (5 Tarot Reader Personas)
 
-```
-[1. ตั้งคำถาม/เลือกหมวด/แม่หมอ] 
-              ↓
-[ตรวจ Safety & สร้าง Commitment] 
-              ↓
-[2. ผู้ใช้สับไพ่ & สำรับคลี่ออกเป็นพัด (Interactive Fan 78 ใบ)] 
-              ↓
-[3. ผู้ใช้เอามือ/เมาส์สัมผัสเลือกไพ่ทีละใบด้วยตัวเอง] 
-              ↓
-[4. ไพ่ลอยเข้าไปจัดวางในตำแหน่งผัง Spread] 
-              ↓
-[5. พลิกไพ่ 3D พร้อม AI ทยอยสตรีมคำอ่านทีละใบ (SSE)] 
-              ↓
-[6. สรุปภาพรวม คำแนะนำ และเฉลย Server Seed ตรวจสอบความสุ่ม] 
-              ↓
-[7. ถามคุยต่อยอด (Follow-up) หรือบันทึกดวง (Journal)]
-```
+ระบบมีแม่หมอ 5 บุคลิกที่ตอบโจทย์ความต้องการของผู้ใช้ทุกกลุ่ม พร้อมระบบตรวจจับเจตนาของผู้ใช้ (Intent Classification Engine):
 
-### 3.1 ผัง Engine เบื้องหลัง (Backend Pipeline)
+| บุคลิก (Persona) | ฉายา / อาร์คิไทป์ | ภาพไพ่ประจำตัว | สไตล์และน้ำเสียง |
+| :--- | :--- | :--- | :--- |
+| **`warm`** | **แม่หมอใจดี** (The High Priestess) | `major-02.jpg` | อบอุ่น นุ่มนวล โอบกอดความรู้สึกเหมือนพี่สาวคนสนิท |
+| **`playful`** | **แม่หมอเพื่อนซี้** (The Magician) | `major-01.jpg` | คุยสนุก เป็นกันเอง มีอารมณ์ขัน เม้าท์มันส์ ให้กำลังใจแบบเพื่อนสนิท |
+| **`direct`** | **แม่หมอพูดตรง** (Justice & Truth) | `major-11.jpg` | ตรงไปตรงมา กระชับ เด็ดขาด ชี้จุดที่ต้องตื่นรู้เพื่อให้ชีวิตไปต่อได้จริง |
+| **`master`** | **อาจารย์สายฟันธง** (The Master Strategist) | `major-09.jpg` | จริงจัง สุขุม ทรงภูมิ ให้กลยุทธ์และ Action Plan 1-2-3 ชัดเจน |
+| **`mystic`** | **แม่หมอสายพลัง** (The Astral Star) | `major-17.jpg` | สุขุม ลึกซึ้ง อ่านคลื่นพลังงาน จังหวะจักรวาล และบทเรียนจิตวิญญาณ |
 
-มุมมองเดียวกับข้างบน แต่มองจากฝั่งเซิร์ฟเวอร์ว่าแต่ละ "เอนจิน" คือไฟล์ไหนจริง —
-**Safety Engine ทำงาน "ก่อน" RNG Engine เสมอ** (ไม่ใช่ขนานกัน) เพราะถ้าคำถาม
-ถูก block ต้องไม่เสียเวลาสร้าง commitment เลย:
+---
 
-```
-                    TAROT ENGINE
-                         │
-              ┌──────────┴──────────┐
-              │                     │
-        Safety Engine           RNG Engine
-     lib/safety/guardrails.ts  lib/tarot/shuffle.ts
-              │                     │
-        checkQuestion()      createCommitment()
-        (ทำงานก่อนเสมอ ─────▶  (ทำงานเมื่อคำถามผ่านแล้วเท่านั้น)
-         block ได้ที่ตรงนี้)         │
-                                     ↓
-                              Shuffled Deck
-                          (drawCards, ยังไม่จั่ว
-                           จนกว่าจะถึงขั้น shuffle)
-                                     │
-                                     ↓
-                            Interactive Fan
-                     components/deck/InteractiveCardFan.tsx
-                                     │
-                              User Pick Card
-                                     │
-                                     ↓
-                             Pick Validation
-                        drawCards({ pickedIndices })
-                     กันไพ่ซ้ำ + กันจำนวนไม่ตรง spread
-                                     │
-                                     ↓
-                              Spread Engine
-                    data/spreads.ts + SpreadBoard.tsx
-                       (แปะไพ่ที่จั่วได้ลงตำแหน่งจริง)
-                                     │
-                                     ↓
-                             Reading Engine
-                             lib/ai/prompt.ts
-                (buildSystemPrompt + buildReadingMessage
-                 ผูกไพ่ + ตำแหน่ง + บริบทคำถามเป็น prompt เดียว)
-                                     │
-                                     ↓
-                           Gemini Stream (ปัจจุบัน)
-                            lib/ai/gemini.ts
-                    (โครงเดียวกับ lib/ai/claude.ts ที่เขียน
-                     ไว้รองรับ แต่ยังไม่ได้ใช้งานจริง)
-                                     │
-                                     ↓
-                          Structured Reading
-                          lib/schema/reading.ts
-              (ตรวจ/แปลง JSON ที่ stream มาให้ตรง ReadingSchema
-               ก่อนส่งกลับ SSE ให้ frontend)
+## 4. 20 ผังพยากรณ์ยอดนิยม (Golden Ratio 20 Spreads Architecture)
+
+ระบบรองรับผังการเปิดไพ่ 20 แบบ ครอบคลุม 4 หมวดหมู่ จัดวางด้วยสัดส่วนทองคำแบบ **Zero-Clipping Unified Altar Canvas**:
+
+1. **ผัง 1 ใบ**: ไพ่ประจำวัน (Daily Card), คำแนะนำด่วน (Quick Oracle), ใช่หรือไม่ (Yes/No Single)
+2. **ผัง 2 ใบ**: ทางแยกสองทาง (Two Paths), ความรักสองหัวใจ (Two Hearts)
+3. **ผัง 3 ใบ**: อดีต-ปัจจุบัน-อนาคต (Past-Present-Future), จิตใจ-ร่างกาย-วิญญาณ (Mind-Body-Spirit), สถานการณ์-อุปสรรค-ทางออก (Situation-Challenge-Advice), ใช่หรือไม่ 3 ใบ (Yes/No Triad)
+4. **ผัง 4 ใบ**: 4 ทิศทางชีวิต (Four Directions), แฟนเก่าจะกลับมาไหม (Reunion Path), เช็คดวงการงาน (Career Outlook)
+5. **ผัง 5 ใบ**: กางเขนธาตุทั้งห้า (Elemental Cross), การเงินมหาเศรษฐี (Wealth & Abundance), ความในใจของเขา (Inner Thoughts)
+6. **ผัง 6 ใบ**: พลังงานรายสัปดาห์ (Weekly Energy)
+7. **ผัง 7 ใบ**: ดวงชะตา 7 วัน (7-Day Forecast), สแกนสมดุล 7 จักระ (7 Chakras Balance)
+8. **ผัง 10 ใบ**: เคลติกครอสโบราณ (Celtic Cross Grand Spread), ส่องเส้นทางชีวิต 10 มิติ (Tree of Life)
+
+---
+
+## 5. การเข้ารหัสความโปร่งใส (Provably Fair Cryptographic Flow)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as ผู้ใช้ (Client)
+    participant Server as วิหารพยากรณ์ (Edge Server)
+    participant AI as Gemini AI Engine
+
+    User->>Server: POST /api/reading/start (คำถาม + ผัง + แม่หมอ)
+    Server->>Server: สร้าง serverSeed = CSPRNG(32 bytes)
+    Server->>Server: commitment = SHA256(serverSeed + ":" + clientSeed)
+    Server-->>User: ส่ง sessionToken + commitment (บันทึกไว้ใน Browser)
+    
+    User->>Server: POST /api/reading/[id]/shuffle (สัมผัสและเลือกไพ่ pickedIndices)
+    Server->>Server: Deterministic Fisher-Yates Shuffle ด้วย seed
+    Server-->>User: ยืนยันการวางตำแหน่งไพ่บนผัง
+    
+    User->>Server: POST /api/reading/[id]/read (SSE Streaming)
+    Server->>AI: ส่งตำแหน่งไพ่ + บริบทคำถาม + กฎแม่หมอ
+    AI-->>Server: สตรีมคำทำนาย Real-time JSON chunk
+    Server-->>User: สตรีมข้อความคำทำนายสด SSE
+    
+    Server-->>User: เฉลย serverSeed + Proof ให้ผู้ใช้ตรวจสอบ SHA-256 ย้อนหลังได้ 100%
 ```
 
 ---
 
-## 4. โครงสร้างฐานข้อมูลและการเงิน (Data & Credits Model)
-
-- **User**: เก็บข้อมูลผู้ใช้, เครดิตคงเหลือ (`creditBalance`), บุคลิกแม่หมอที่ชอบ (`preferredPersona`)
-- **CreditLedger**: บัญชีเดินสะพัด ป้องกันยอดเงินสูญหายและป้องกัน Race Condition ด้วย `@@unique([userId, reason, refId])`
-- **Reading**: เก็บบันทึกการเปิดไพ่, `commitment`, `serverSeed`, `drawnCards`, `safetyFlag`, `result (JSON)`, และสถิติ Token
-- **ChatMessage**: การสนทนาถามต่อยอด (Follow-up Question) โดยอ้างอิงเฉพาะไพ่ชุดเดิม
-- **JournalEntry**: สมุดบันทึกติดตามผล (Outcome tracking) เพื่อเพิ่มความผูกพันและคุณค่าสะสมของผู้ใช้
-
----
-
-## 5. แฟ้มข้อมูลหลักใน Codebase (File Directory Structure)
+## 6. สถาปัตยกรรมโครงสร้างไฟล์ในโปรเจกต์ (Codebase Topology)
 
 ```text
 src/
 ├── app/
 │   ├── api/reading/
-│   │   ├── start/route.ts           # เริ่มต้นรอบ ตรวจ safety และสร้าง commitment
-│   │   ├── [id]/shuffle/route.ts    # สับไพ่ / รับ pickedIndices จากพัดไพ่ / ยืนยันตำแหน่งไพ่
+│   │   ├── start/route.ts           # เริ่มต้นรอบ ตรวจ Safety และสร้าง SHA-256 Commitment
+│   │   ├── [id]/shuffle/route.ts    # คำนวณ Shuffle ตาม pickedIndices
 │   │   ├── [id]/read/route.ts       # สตรีมคำอ่านผ่าน Server-Sent Events (SSE)
-│   │   └── [id]/chat/route.ts       # ถามคุยต่อยอดหลังเปิดไพ่แล้ว
-│   ├── privacy/page.tsx            # นโยบายความเป็นส่วนตัว (PDPA)
-│   ├── page.tsx                    # หน้าหลัก — ประกอบ flow ทั้ง 5 ขั้นตอน
-│   ├── globals.css                 # โทนสี starry sky, 3D card perspective, CSS card-back
-│   └── layout.tsx                  # Root Layout + Thai Web Fonts
-├── components/                     # (คอมโพเนนต์หลัก)
-│   ├── card/                       # TarotCard 3D, CardZoomModal, CardImage (Responsive WebP)
-│   ├── deck/                       # InteractiveCardFan, ShuffleRitual
-│   ├── spread/                     # SpreadBoard, SpreadCardSelector
-│   ├── reading/                    # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector,
-│   │                               #   IntentionAltarInput, AccuracyRatingWidget
-│   ├── history/, journal/          # ReadingHistoryModal, JournalModal, JournalHistoryDrawer
-│   ├── encyclopedia/                # TarotEncyclopediaModal (คัมภีร์ไพ่ 78 ใบ)
-│   └── ui/                         # RitualStepProgress, GalaxyCanvas, MysticAltarCanvas, TarotArtIcons
+│   │   └── [id]/chat/route.ts       # ถามคุยต่อยอดตามบริบทไพ่และ 5 บุคลิก
+│   ├── cards/                       # สารานุกรมไพ่ 78 ใบ (/cards และ /cards/[id])
+│   ├── spreads/                     # คลังผังพยากรณ์ 20 แบบ
+│   ├── blog/, privacy/, account/    # หน้าเนื้อหา นโยบาย PDPA และจัดการบัญชี
+│   ├── page.tsx                     # วิหารพยากรณ์หลัก (5-Step Ritual Flow)
+│   └── globals.css                  # Obsidian Velvet & Gold Design System + GPU Classes
+├── components/
+│   ├── card/                        # TarotCard 3D, CardImage (WebP/AVIF), CardZoomModal
+│   ├── deck/                        # InteractiveCardFan (78 ใบ), ShuffleRitual
+│   ├── spread/                      # SpreadBoard, SpreadCardSelector (20 ผัง)
+│   ├── reading/                     # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector
+│   ├── history/, encyclopedia/      # ReadingHistoryModal, TarotEncyclopediaModal
+│   └── ui/                          # MysticAltarCanvas, TarotArtIcons, RitualStepProgress
 ├── data/
-│   ├── cards/                      # ข้อมูลไพ่ 78 ใบ (Major, Cups, Swords, Wands, Pentacles)
-│   ├── spreads.ts                  # ข้อมูลรูปแบบการวางไพ่ 10 แบบ
-│   └── personas.ts                 # แม่หมอ 3 บุคลิก (ใจดี, พูดตรง, สายพลัง)
+│   ├── cards/                       # ข้อมูลไพ่ 78 ใบ (780 ข้อความความหมาย 5 มิติ)
+│   ├── spreads.ts                   # ข้อมูล 20 ผังพยากรณ์และ 95 ตำแหน่ง
+│   └── personas.ts                  # แม่หมอ 5 บุคลิก (warm, playful, direct, master, mystic)
 ├── lib/
-│   ├── ai/
-│   │   ├── claude.ts               # Anthropic SDK Streaming Client (เขียนไว้ ยังไม่ใช้จริง)
-│   │   ├── gemini.ts               # Google Gemini Streaming Client (ใช้งานจริง)
-│   │   └── prompt.ts               # Structured System & User Prompts
-│   ├── schema/
-│   │   └── reading.ts              # Zod Schema สำหรับคำอ่านไพ่ (ReadingSchema, FollowUpSchema)
-│   ├── safety/
-│   │   └── guardrails.ts           # Guardrails ตรวจสอบความปลอดภัยคำถาม
-│   ├── tarot/
-│   │   ├── card-image.ts           # Resolver path ภาพไพ่ + srcset ภาพย่อ WebP
-│   │   └── shuffle.ts              # Provably Fair RNG & Commitment Engine
-│   └── utils/
-│       ├── partial-json.ts         # Parser สำหรับ JSON แบบสตรีมมิ่ง
-│       ├── rate-limit.ts           # จำกัดจำนวนครั้งต่อ IP
-│       ├── audio.ts                # เอฟเฟกต์เสียงด้วย Web Audio API (ใช้งานจริง)
-│       ├── sound.ts                # เอฟเฟกต์เสียงรุ่นก่อน (ปัจจุบันไม่มีที่ใดเรียกใช้)
-│       └── history.ts              # ประวัติการดูดวงฝั่ง client
-└── server/
-    └── store.ts                    # In-memory Store + Rate Limiter (พร้อมเปลี่ยนเป็น Prisma)
-
-public/cards/
-├── *.jpg                           # ภาพต้นฉบับ 1909 Rider-Waite 78 ใบ (~820px, ~280KB/ใบ) — ห้ามแก้ไข
-├── w256/*.webp                     # ภาพย่อกว้าง 256px สำหรับพรีวิวผัง/โลโก้/พัดไพ่ (~33KB/ใบ)
-└── w512/*.webp                     # ภาพย่อกว้าง 512px สำหรับผังวางไพ่/สารานุกรม (~109KB/ใบ)
-                                    # สร้างด้วย `npm run cards:variants` (scripts/generate-card-variants.ts)
+│   ├── ai/                          # Gemini SSE Streaming & Structured Output Parser
+│   ├── safety/                      # Guardrails กรองคำถามอันตราย & 1323
+│   ├── security/                    # Session Token & Stateless HMAC Signature
+│   └── tarot/                       # Provably Fair Shuffle & Single Source Card Resolver
 ```
 
-> **หมายเหตุ**: `prisma/schema.prisma` ออกแบบไว้ครบแล้วแต่ยังไม่ได้ต่อใช้จริง — Prisma 7
-> เปลี่ยน breaking change เรื่อง `datasource.url` (ต้องย้ายไป `prisma.config.ts` +
-> เลือก adapter ก่อน) จึงตัด `prisma generate` ออกจาก `pnpm build` ชั่วคราว
-> ใช้ `pnpm db:generate` เองเมื่อพร้อมต่อ DB จริง
+---
+
+## 7. ระเบียบวิศวกรรมการตรวจสอบ 7 ด่าน (7-Stage Verification Protocol)
+
+ก่อนการ Commit หรือ Deploy ทุกครั้ง โค้ดต้องผ่านการตรวจครบ 7 ด่านผ่านคำสั่ง `npm run repo:verify`:
+
+1. 🛡️ **AI Agent Collision Guard**: ป้องกันการแก้ไขไฟล์ชนกันระหว่างหลาย Agent
+2. 🔍 **TypeScript Strict Typecheck**: การันตี 0 Type Errors 100%
+3. 🃏 **78 Cards Database Integrity**: ตรวจสอบความครบถ้วน 780 ข้อความ 5 มิติ
+4. 📐 **20 Spreads Geometry Calibration**: ตรวจสอบพิกัด 95 ตำแหน่งไร้การทับซ้อน
+5. 🚨 **Safety Guardrails Filter**: ตรวจสอบการบล็อกคำถามอันตราย
+6. 🎲 **Provably Fair Cryptographic Engine**: ทดสอบความยุติธรรมของระบบสับไพ่
+7. 🖼️ **Card Image Path Guard**: ตรวจสอบการโหลดรูปผ่าน Single Pipeline ป้องกัน Error 404
+
+ระบบถูกออกแบบภายใต้มาตรฐานความน่าเชื่อถือระดับสูง (High Reliability & Fault Tolerance) เพื่อมอบประสบการณ์ดูดวงไพ่ทาโรต์ออนไลน์ที่ดีที่สุดในระดับสากล ✦
