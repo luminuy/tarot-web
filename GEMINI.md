@@ -45,7 +45,7 @@
 - **ดูสถานะ Agent ที่กำลังทำงาน**: `npm run agent:status`
 - **ล็อคไฟล์ก่อนเริ่มแก้**: `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>`
 - **ปลดล็อคไฟล์เมื่อทำเสร็จ**: `npm run agent:unlock -- --agent <ชื่อ>`
-- **ตรวจครบ 6 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)**: `npm run repo:verify`
+- **ตรวจครบ 7 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)**: `npm run repo:verify`
 - **ตรวจ Typecheck อย่างเดียว**: `npm run typecheck`
 - **ซิงก์สถานะและบันทึกงานอัตโนมัติ (Mandatory)**: `npm run log:sync`
 - **สร้างภาพไพ่ย่อ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)**: `npm run cards:variants`

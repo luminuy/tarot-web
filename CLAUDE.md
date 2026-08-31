@@ -21,7 +21,7 @@
 ```bash
 npm run agent:status                      # 1. เช็กว่าไม่ชนกับ Agent อื่น
 npm run agent:lock -- --agent Claude ...  # 2. ล็อคไฟล์ที่จะแก้
-npm run repo:verify                       # 3. ตรวจครบ 6 ด่าน
+npm run repo:verify                       # 3. ตรวจครบ 7 ด่าน
 npm run commit -- --agent Claude ...      # 4. commit (type fix ต้องมี --cause และ --prevention)
 npm run agent:unlock -- --agent Claude    # 5. ปลดล็อค
 npm run log:sync                          # 6. ซิงก์ docs/WORK_LOG.md อัตโนมัติ
