@@ -124,21 +124,7 @@ jobs:
               return;
             }
 
-            // 1. Submit automated passing review approval
-            try {
-              await github.rest.pulls.createReview({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number,
-                event: 'APPROVE',
-                body: '✅ Verified by Automated Quality Suite (7/7 Gates Passed, Production Bundle Compiled Successfully)'
-              });
-              console.log('✅ Approved PR with Automated Review');
-            } catch (reviewErr) {
-              console.log('ℹ️ Review approval note (may already be approved or PR created by token):', reviewErr.message);
-            }
-
-            // 2. Perform automated squash merge
+            // Perform automated squash merge
             let merged = false;
             try {
               const mergeRes = await github.rest.pulls.merge({
@@ -151,8 +137,7 @@ jobs:
               merged = mergeRes.data.merged;
               console.log('✨ Auto-Merge Successful:', mergeRes.data.message);
             } catch (err) {
-              console.log('ℹ️ Auto-merge response:', err.message);
-              // If already merged by native auto-merge or user
+              console.log('ℹ️ Checking PR status:', err.message);
               const prCheck = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -160,15 +145,16 @@ jobs:
               });
               if (prCheck.data.merged) {
                 merged = true;
-                console.log('✨ PR is confirmed MERGED!');
+                console.log('✨ PR is already MERGED!');
               } else {
                 core.setFailed(`Auto-merge failed: ${err.message}`);
+                return;
               }
             }
 
             if (!merged) return;
 
-            // 3. Dispatch production deploy to Cloudflare Workers
+            // Dispatch production deploy to Cloudflare Workers (Hard-fail if dispatch fails)
             try {
               await github.rest.actions.createWorkflowDispatch({
                 owner: context.repo.owner,
@@ -178,12 +164,11 @@ jobs:
               });
               console.log('🚀 สั่ง deploy.yml ให้ deploy main ขึ้น Cloudflare Workers แล้ว');
             } catch (err) {
-              console.log('⚠️ Dispatch deploy note:', err.message);
+              console.log('❌ สั่ง deploy ไม่สำเร็จ:', err.message);
+              core.setFailed(`Merge สำเร็จแต่สั่ง deploy.yml ไม่ได้: ${err.message}`);
             }
 
-            // ลบ branch ที่ merge แล้วทิ้ง — ถ้าไม่ลบ branch จะค้างสะสมบน GitHub
-            // และ IDE จะขึ้นปุ่ม "Create PR" ค้างไว้ เพราะ branch ที่ถูก squash-merge
-            // ยังดูเหมือนนำหน้า main อยู่ 1 commit (repo นี้ปิด auto-merge จึงไม่มีใครลบให้)
+            // ลบ branch ที่ merge แล้วทิ้ง
             try {
               const headRef = context.payload.pull_request.head.ref;
               await github.rest.git.deleteRef({

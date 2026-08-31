@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0022 · 2026-08-31 21:23 · 🟡 Medium · Refine pr.yml auto-merge with explicit error handling and hard-fail deploy guard
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Auto-merge workflow had permissive review approvals and logged warnings on dispatch failure |
+| **สาเหตุราก** | CI workflow needed strict sequential execution guarantees and explicit failure propagation without masking errors |
+| **การแก้ไข** | Refine pr.yml auto-merge with explicit error handling and hard-fail deploy guard |
+| **🛡️ กฎป้องกันถาวร** | **Ensure GitHub Actions workflows always propagate failures and only merge strictly verified pull requests** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `99e6f29` |
+
+
 ### INC-0021 · 2026-08-31 20:55 · 🟡 Medium · บังคับคุณภาพ INCIDENT_LOG + เรียบเรียง 4 entry ที่ก็อป commit title
 
 | หัวข้อ | รายละเอียด |
