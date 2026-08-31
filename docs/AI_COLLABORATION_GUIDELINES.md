@@ -115,6 +115,12 @@
      npm run agent:unlock -- --agent <ชื่อคุณ>
      ```
    - รันซิงก์สถานะงานอัตโนมัติ: `npm run log:sync`
+3. **⚠️ เรื่องต้องรู้เมื่อรันคำสั่ง `gh` จาก git worktree**:
+   - AI Agent ทำงานใน git worktree เสมอ ซึ่ง `main` ถูก checkout ค้างไว้ที่โฟลเดอร์หลักอยู่แล้ว
+   - คำสั่ง `gh pr merge` / `gh pr checkout` ที่ไม่ระบุ repo จะพยายามยุ่งกับ git ในเครื่องแล้วพังด้วย
+     `fatal: 'main' is already checked out at '<path>'`
+   - **แก้ด้วยการใส่ `-R <owner>/<repo>` เสมอ** เพื่อบังคับให้ `gh` ทำงานแบบ remote-only
+     (`npm run pr:auto` จัดการให้อัตโนมัติแล้ว)
 
 ---
 
@@ -123,27 +129,24 @@
 ก่อนและหลังแก้ไขโค้ดทุกครั้ง AI **ต้องรันคำสั่งเหล่านี้เพื่อตรวจสอบความถูกต้อง**:
 
 ```bash
-# 1. ตรวจสอบว่าไม่มีไฟล์ชนกับ Agent ตัวอื่น
-npm run agent:check
+# ✅ คำสั่งเดียวจบ — ตรวจครบทั้ง 6 ด่านในรอบเดียว
+#    (Collision Guard, Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Safety Guardrails, Provably-Fair Shuffle)
+#    ถ้าไม่ผ่าน จะบอกครบทุกด่านที่พังพร้อมข้อความ error เต็ม ไม่ต้องแก้ทีละรอบ
+npm run repo:verify
 
-# 2. ตรวจสอบ TypeScript Typecheck (ต้องผ่าน 0 errors เสมอ)
-npm run typecheck
-
-# 3. ซิงก์สถานะและบันทึกงานอัตโนมัติลงใน docs/WORK_LOG.md (Mandatory Auto-Sync)
+# ซิงก์สถานะและบันทึกงานอัตโนมัติลงใน docs/WORK_LOG.md (Mandatory Auto-Sync)
 npm run log:sync
 
-# 4. ตรวจสอบความถูกต้องของฐานข้อมูลไพ่ 78 ใบ
-./node_modules/.bin/tsx scripts/verify-cards.ts
-
-# 4.5 สร้างภาพไพ่ย่อ WebP ใหม่ (รันเมื่อเพิ่ม/เปลี่ยนภาพใน public/cards/ เท่านั้น)
+# สร้างภาพไพ่ย่อ WebP ใหม่ (รันเมื่อเพิ่ม/เปลี่ยนภาพใน public/cards/ เท่านั้น)
 npm run cards:variants
 
-# 5. ตรวจสอบความสมบูรณ์ของ 20 ผังพยากรณ์
-./node_modules/.bin/tsx scripts/qa/test-spreads.ts
-
-# 6. ตรวจสอบว่า Dev Server ตอบสนอง 200 OK
+# ตรวจสอบว่า Dev Server ตอบสนอง 200 OK
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000
 ```
+
+> 🧭 **ชุดตรวจทั้งหมดนิยามไว้ที่เดียว** คือตัวแปร `CHECKS` ใน [`scripts/github-auto.ts`](file:///Users/bank/Desktop/เว็บไพ่/scripts/github-auto.ts)
+> ซึ่งถูกใช้ร่วมกันโดย `.githooks/pre-commit`, `.githooks/pre-push`, `npm run commit`, GitHub Actions ทั้ง `pr.yml` และ `deploy.yml`
+> **ถ้าเพิ่มสคริปต์ทดสอบใหม่ใน `scripts/qa/` ต้องไปเพิ่มใน `CHECKS` ด้วยเสมอ** ไม่งั้นเทสต์นั้นจะไม่เคยถูกรันอัตโนมัติเลย
 
 ---
 

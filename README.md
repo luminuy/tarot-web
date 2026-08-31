@@ -44,23 +44,18 @@
 ## 🛠️ คำสั่งสำหรับพัฒนาและตรวจสอบระบบ (Development Protocol)
 
 ```bash
-# ตรวจสอบความปลอดภัยไม่ให้ชนกับ Agent ตัวอื่น
-npm run agent:check
+# ✅ รัน Verification Suite ทั้ง 6 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)
+#    Collision Guard · Typecheck · ไพ่ 78 ใบ · ผัง 20 แบบ · Safety Guardrails · Provably-Fair Shuffle
+npm run repo:verify
 
-# ตรวจสอบ Typecheck ทั้งระบบ (ต้องผ่าน 0 errors เสมอ)
+# ตรวจสอบ Typecheck อย่างเดียว
 npm run typecheck
-
-# ตรวจสอบความสมบูรณ์ของไพ่ 78 ใบ
-./node_modules/.bin/tsx scripts/verify-cards.ts
 
 # สร้างภาพไพ่ย่อ WebP หลายขนาด (รันเมื่อเพิ่ม/เปลี่ยนภาพใน public/cards/)
 npm run cards:variants
 
-# ตรวจสอบพิกัดและสัดส่วนของ 20 ผังพยากรณ์
-./node_modules/.bin/tsx scripts/qa/test-spreads.ts
-
-# รัน Verification Suite ทั้งระบบในคำสั่งเดียว
-npm run repo:verify
+# ตรวจ + push + สร้าง PR + เปิด Auto-Merge (ใส่ --dry-run เพื่อดูก่อนโดยไม่แตะ remote)
+npm run pr:auto -- "<title>" "<body>"
 
 # ซิงก์สถานะงานอัตโนมัติลงใน docs/WORK_LOG.md
 npm run log:sync

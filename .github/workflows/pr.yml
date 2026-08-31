@@ -37,21 +37,11 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
-      - name: 🛡️ Multi-AI Agent Collision Guard Check
-        id: agent_check
-        run: npm run agent:check
-
-      - name: 🔍 TypeScript Strict Typecheck
-        id: typecheck
-        run: npm run typecheck
-
-      - name: 🃏 78 Rider-Waite Cards Integrity
-        id: cards_check
-        run: ./node_modules/.bin/tsx scripts/verify-cards.ts
-
-      - name: 📐 20 Spreads Geometry Calibration Check
-        id: spreads_check
-        run: ./node_modules/.bin/tsx scripts/qa/test-spreads.ts
+      # ชุดตรวจกลาง 6 ด่าน (Collision, Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Safety Guardrails, Provably-Fair Shuffle)
+      # นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts — แหล่งความจริงเดียวร่วมกับ git hooks และ npm run commit
+      - name: 🧪 Verification Suite (6 ด่าน)
+        id: verify
+        run: npm run repo:verify
 
       - name: ⚡ Test Build Worker & Next.js Bundle
         id: build_check

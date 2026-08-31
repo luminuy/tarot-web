@@ -1,16 +1,17 @@
 #!/bin/bash
 set -e
 
+# `npm run commit` (scripts/git-author-guard.ts) รันชุดตรวจครบแล้วก่อนเรียก git commit
+# จึงตั้ง TAROT_VERIFIED=1 ส่งต่อมา เพื่อไม่ต้องรันซ้ำให้เสียเวลาสองรอบ
+if [ "$TAROT_VERIFIED" = "1" ]; then
+  echo "🔮 [Pre-Commit Guard] ตรวจผ่านมาแล้วจาก npm run commit — ข้ามการตรวจซ้ำ"
+  exit 0
+fi
+
 echo "🔮 [Pre-Commit Guard] กำลังตรวจสอบความปลอดภัยก่อน Commit..."
 
-# 1. Collision check
-npm run agent:check
-
-# 2. Typecheck
-npm run typecheck
-
-# 3. Cards & Spreads Integrity
-./node_modules/.bin/tsx scripts/verify-cards.ts
-./node_modules/.bin/tsx scripts/qa/test-spreads.ts
+# แหล่งความจริงเดียวของชุดตรวจอยู่ใน scripts/github-auto.ts (CHECKS)
+# ถ้าจะเพิ่มด่านตรวจใหม่ ให้ไปเพิ่มที่นั่นที่เดียว ทุกจุดจะได้ตรวจเหมือนกันหมด
+npm run repo:verify
 
 echo "✅ [Pre-Commit ผ่าน] โค้ดผ่านการตรวจสอบ 100% ปลอดภัย!"
