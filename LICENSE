@@ -1,0 +1,45 @@
+# 🛡️ PROTECTIVE NON-COMMERCIAL SOURCE LICENSE
+## สัญญาอนุญาตการใช้งานซอร์สโค้ดแบบไม่แสวงหาผลกำไร (คุ้มครองลิขสิทธิ์)
+
+**Copyright (c) 2026 Luminuy (Jack Bank) & Core Contributors. All rights reserved.**
+
+---
+
+### 🇹🇭 [ฉบับภาษาไทย] สรุปเงื่อนไขการคุ้มครองลิขสิทธิ์และสิทธิ์การใช้งาน
+
+ซอร์สโค้ด งานออกแบบ ระบบปัญญาประดิษฐ์แม่หมอ 5 บุคลิก ผังพยากรณ์ 20 แบบ และทรัพย์สินทางปัญญาทั้งหมดในคลังข้อมูลนี้ (Repository) ได้รับความคุ้มครองตามกฎหมายลิขสิทธิ์และทรัพย์สินทางปัญญา
+
+#### 1. สิทธิ์ที่ได้รับอนุญาต (Permitted Uses):
+- **การศึกษาและวิจัยส่วนบุคคล (Personal Study & Research)**: อนุญาตให้ดู ศึกษา และทดสอบระบบเพื่อการเรียนรู้ส่วนบุคคลโดยไม่มีการแสวงหาผลประโยชน์ทางการเงิน
+- **การให้เครดิต (Attribution Required)**: ในกรณีที่มีการอ้างอิงหรือกล่าวถึงส่วนหนึ่งส่วนใดของโค้ด ต้องระบุแหล่งที่มาและชื่อผู้สร้างสรรค์ต้นฉบับ (`Luminuy / Jack Bank`) อย่างชัดเจนเสมอ
+
+#### 2. ข้อห้ามโดยเด็ดขาด (Strict Prohibitions - Non-Commercial Only):
+- ❌ **ห้ามใช้ในเชิงพาณิชย์ (No Commercial Use)**: ห้ามนำซอร์สโค้ด, ฐานข้อมูลไพ่, ระบบแม่หมอ AI, หรือส่วนใดส่วนหนึ่งไปใช้ในการหารายได้ โฆษณา ขายต่อ ให้บริการแบบเสียค่าบริการ หรือใช้ในธุรกิจใดๆ ทั้งทางตรงและทางอ้อม โดยไม่ได้รับความยินยอมเป็นลายลักษณ์อักษรจากเจ้าของลิขสิทธิ์
+- ❌ **ห้ามคัดลอกเพื่อสวมสิทธิ์ (No Re-branding & Impersonation)**: ห้ามนำซอร์สโค้ดไปเปลี่ยนชื่อ ปรับแต่งหน้าตาเพียงเล็กน้อย แล้วนำไปเผยแพร่เสมือนเป็นผลงานของตนเอง
+- ❌ **ห้ามแจกจ่ายซ้ำในเชิงแสวงหาผลประโยชน์ (No Commercial Redistribution)**: ห้ามนำไปบรรจุลงในคอร์สเรียนแบบชำระเงิน หรือจำหน่ายเป็นเทมเพลตซอฟต์แวร์
+
+---
+
+### 🇬🇧 [English Version] PolyForm Noncommercial License 1.0.0 & Attribution
+
+By accessing, copying, modifying, or distributing this source code, you agree to be bound by the terms of this license:
+
+#### 1. Noncommercial License Grant
+The Licensor grants you a copyright license to make, use, copy, modify, and distribute the Software solely for **Noncommercial Purposes**. 
+
+#### 2. Noncommercial Purpose Definition
+**"Noncommercial Purpose"** means a purpose that is not intended for or directed toward commercial advantage or monetary compensation. Personal research, academic study, and individual educational experimentation qualify as noncommercial purposes.
+
+#### 3. Prohibited Uses
+You may NOT:
+- Use the software, cognitive tarot personas, spreads, or proprietary prompt architectures for any revenue-generating activity, paid API service, hosted commercial SaaS, or business operations.
+- Re-brand, remove original copyright notices, or disguise provenance.
+- Sell, sublicense, or distribute copies of this software or modified versions thereof as part of a paid commercial package or digital asset.
+
+#### 4. Disclaimer of Warranty
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
+
+---
+
+**Official Inquiries & Commercial Licensing:**  
+For commercial partnership or licensing inquiries, please contact: `luminuy` via GitHub.
