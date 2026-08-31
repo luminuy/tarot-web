@@ -30,6 +30,7 @@ import {
   CrystalBallTabIcon,
   AllSpreadsTabIcon,
 } from "@/components/ui/TarotArtIcons";
+import { CardImage } from "@/components/card/CardImage";
 
 interface SpreadCardSelectorProps {
   selectedSpread: Spread;
@@ -256,8 +257,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}
             <div className="w-9 h-14 sm:w-10 sm:h-15 rounded-lg border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.5)] bg-[#07050d] relative flex-shrink-0">
-              <img
-                src={`/cards/${
+              <CardImage
+                image={`${
                   selectedSpread.id === "daily"
                     ? "major-19.jpg"
                     : selectedSpread.id === "quick"
@@ -278,6 +279,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 }`}
                 alt={selectedSpread.nameTh}
                 className="w-full h-full object-cover object-top filter contrast-[1.04]"
+                sizes="40px"
               />
               <div className="gold-foil-sheen absolute inset-0 opacity-30" />
             </div>

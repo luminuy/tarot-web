@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
+import { CardImage } from "@/components/card/CardImage";
+import { getCardImageSrc } from "@/lib/tarot/card-image";
 
 interface CardDetailViewProps {
   card: TarotCard;
@@ -33,11 +35,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   const currentKeywords = isUpright ? card.keywords.upright : card.keywords.reversed;
   const elem = ELEMENT_CONFIG[card.element] || ELEMENT_CONFIG["ไฟ"];
 
-  const getImageSrc = (targetCard?: TarotCard) => {
-    if (!targetCard) return "";
-    if (!targetCard.image) return `/cards/${targetCard.id}.jpg`;
-    return targetCard.image.startsWith("/") ? targetCard.image : `/cards/${targetCard.image}`;
-  };
+  // ภาพหน้าไพ่ใบหลักใช้ไฟล์ต้นฉบับความละเอียดเต็ม (แสดงใหญ่ 256-288px)
+  const getImageSrc = (targetCard?: TarotCard) =>
+    getCardImageSrc(targetCard?.image, targetCard?.id) ?? "";
 
   const categories = [
     { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", icon: "✦", color: "#ffd700" },
@@ -87,6 +87,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   alt={card.nameTh}
                   className="w-full h-full object-cover filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
                   decoding="async"
+                  fetchPriority="high"
                 />
                 <div className="gold-foil-sheen absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
@@ -250,7 +251,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             className="flex items-center gap-3 p-3.5 rounded-2xl border border-[#e5c07b]/25 hover:border-[#ffd700] bg-[#130d24]/80 hover:bg-[#181030] transition-all group max-w-[48%]"
           >
             <div className="w-9 h-14 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-black">
-              <img src={getImageSrc(prevCard)} alt="" className="w-full h-full object-cover" />
+              <CardImage image={prevCard.image} cardId={prevCard.id} alt="" className="w-full h-full object-cover tarot-hd-card-image" sizes="36px" />
             </div>
             <div className="text-left overflow-hidden">
               <span className="text-[10px] font-mono text-[#9c93b8] block">← ใบก่อนหน้า</span>
@@ -275,7 +276,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               </span>
             </div>
             <div className="w-9 h-14 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-black">
-              <img src={getImageSrc(nextCard)} alt="" className="w-full h-full object-cover" />
+              <CardImage image={nextCard.image} cardId={nextCard.id} alt="" className="w-full h-full object-cover tarot-hd-card-image" sizes="36px" />
             </div>
           </Link>
         ) : (

@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { cardById, cardByIndex } from "@/data/cards";
+import { CardImage } from "@/components/card/CardImage";
+import { getCardImageSrc } from "@/lib/tarot/card-image";
 
 export interface TarotCardProps {
   card?: {
@@ -22,6 +24,13 @@ export interface TarotCardProps {
   size?: "sm" | "md" | "lg" | "responsive";
   className?: string;
   onClick?: () => void;
+  /**
+   * ความกว้างจริงที่การ์ดถูกแสดงบนหน้าจอ ใช้เลือกไฟล์ภาพย่อให้พอดี
+   * (ต้องส่งมาเองเมื่อ override ขนาดด้วย `className` เช่น `w-full h-full`)
+   */
+  imageSizes?: string;
+  /** `true` = ใช้ภาพต้นฉบับความละเอียดเต็ม สำหรับการ์ดใบใหญ่ เช่น หน้าซูมไพ่ */
+  imageFull?: boolean;
 }
 
 const ELEMENT_CONFIG: Record<string, { border: string; glow: string; icon: string; name: string; bgGradient: string }> = {
@@ -71,6 +80,8 @@ export const TarotCard: React.FC<TarotCardProps> = ({
   size = "md",
   className = "",
   onClick,
+  imageSizes = "(min-width: 640px) 128px, 112px",
+  imageFull = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
@@ -112,11 +123,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
     setIsHovered(false);
   };
 
-  const imageSrc = effectiveCard?.image
-    ? `/cards/${effectiveCard.image}`
-    : effectiveCard?.id
-    ? `/cards/${effectiveCard.id}.jpg`
-    : null;
+  const imageSrc = getCardImageSrc(effectiveCard?.image, effectiveCard?.id);
 
   useEffect(() => {
     setImgFailed(false);
@@ -231,12 +238,13 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Full Authentic 1909 Rider-Waite Card Face */}
           <div className={`w-full h-full relative overflow-hidden ${isReversed ? "rotate-180" : ""}`}>
             {imageSrc ? (
-              <img
-                src={imageSrc}
+              <CardImage
+                image={effectiveCard?.image}
+                cardId={effectiveCard?.id}
                 alt={effectiveCard?.nameTh || "Tarot"}
                 className="w-full h-full object-cover object-center filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
-                loading="lazy"
-                decoding="async"
+                sizes={imageSizes}
+                full={imageFull}
               />
             ) : (
               <div className="w-full h-full bg-[#100b20] flex items-center justify-center">

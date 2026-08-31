@@ -90,14 +90,18 @@ body {
   transform: rotateY(180deg) translateZ(0);
 }
 
-/* เรนเดอร์รูปภาพไพ่คมชัดสูงสุด ป้องกันภาพเบลอใน Safari/Chrome/iOS */
+/*
+  เรนเดอร์รูปภาพไพ่คมชัดสูงสุด ป้องกันภาพหยัก/แตกเป็นเม็ดใน Safari/Chrome/iOS
+
+  ⚠️ ห้ามใส่ image-rendering: crisp-edges / pixelated / -webkit-optimize-contrast ที่นี่เด็ดขาด
+  ภาพต้นฉบับ 1909 Rider-Waite มีขนาด ~820x1430px แต่ถูกย่อลงเหลือ 34-70px
+  (ย่อลง 12-25 เท่า) ค่าเหล่านั้นจะบังคับให้เบราว์เซอร์ย่อภาพแบบ nearest-neighbour
+  ทำให้เส้นและตัวอักษรบนหน้าไพ่แตกเป็นเม็ดหยาบจนดูเบลอ
+  ต้องใช้ auto เท่านั้น เพื่อให้เบราว์เซอร์ย่อภาพด้วย bilinear/mipmap ที่คมและเนียนกว่า
+*/
 .card-face img,
 .tarot-hd-card-image {
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: high-quality;
-  image-rendering: crisp-edges;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  image-rendering: auto;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }

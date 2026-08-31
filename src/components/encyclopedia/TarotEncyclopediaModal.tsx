@@ -127,7 +127,13 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
                   className="p-2 rounded-2xl bg-gradient-to-b from-[#180f30] to-[#0d071a] border border-[#e5c07b]/25 hover:border-[#e5c07b]/80 transition-all cursor-pointer flex flex-col items-center text-center space-y-1.5 shadow-md hover:scale-105 group"
                 >
                   <div className="w-16 h-[108px] sm:w-18 sm:h-[122px] rounded-xl shadow overflow-hidden flex-shrink-0">
-                    <TarotCardComponent card={c} isRevealed={true} size="sm" className="w-full h-full" />
+                    <TarotCardComponent
+                      card={c}
+                      isRevealed={true}
+                      size="sm"
+                      imageSizes="(min-width: 640px) 72px, 64px"
+                      className="w-full h-full"
+                    />
                   </div>
                   <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] truncate max-w-full block leading-tight">
                     {c.nameTh}
@@ -165,6 +171,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
                       isRevealed={true}
                       isReversed={viewOrientation === "reversed"}
                       size="sm"
+                      imageSizes="96px"
                       className="w-full h-full"
                     />
                   </div>

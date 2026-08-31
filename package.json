@@ -17,6 +17,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "verify:cards": "tsx scripts/verify-cards.ts",
+    "cards:variants": "tsx scripts/generate-card-variants.ts",
     "agent:status": "tsx scripts/agent-guard.ts status",
     "agent:check": "tsx scripts/agent-guard.ts check",
     "agent:lock": "tsx scripts/agent-guard.ts lock",

@@ -7,10 +7,10 @@
 
 ## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `31/8/2569 05:45:58` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `31/8/2569 11:09:30` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
-- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (1 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
+- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (28 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
@@ -19,18 +19,107 @@
 
 | หน้าเว็บ / ฟีเจอร์ | เส้นทาง (Route / File) | สถานะความพร้อม | สถานะเซิร์ฟเวอร์ | สิ่งที่ทำแล้ว | สิ่งที่สามารถต่อยอดได้ในอนาคต |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
-| **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
-| **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
-| **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
-| **บัญชีและประวัติ** | `/account` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
-| **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
+| **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | HTTP 200 | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
+| **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | HTTP 200 | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
+| **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | HTTP 200 | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
+| **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | HTTP 200 | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
+| **บัญชีและประวัติ** | `/account` | 🟡 **Scaffolded (Draft)** | HTTP 200 | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
+| **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | HTTP 200 | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
 ---
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
+
+### 🗓️ 2026-08-31: แก้ภาพไพ่เบลอ/หยัก (Card Image Sharpness Fix)
+
+#### 1. ลบ `image-rendering: crisp-edges` ที่ทำให้ภาพไพ่แตกเป็นเม็ด
+- **ปัญหาเดิม**: ภาพหน้าไพ่ทุกจุดดูไม่คมชัด ตัวอักษรบนหน้าไพ่ (THE SUN / THE FOOL) อ่านไม่ออก โดยเฉพาะการ์ดพรีวิวผังและโลโก้ Navbar
+- **สาเหตุที่แท้จริง**: `.card-face img, .tarot-hd-card-image` ใน `src/app/globals.css` กำหนด `image-rendering` ซ้อนกัน 3 บรรทัด โดยบรรทัดสุดท้าย (`crisp-edges`) ชนะ → เบราว์เซอร์ย่อภาพแบบ nearest-neighbour
+  - ภาพต้นฉบับ ~820x1430px ถูกย่อเหลือ 34-70px (ย่อ 12-25 เท่า) → เส้นและตัวอักษรแตกเป็นเม็ดหยาบ
+  - `filter: contrast/saturate` ที่ใส่ไว้เพื่อเพิ่มความคม กลับขับเม็ดหยาบให้เด่นขึ้นอีก
+- **สิ่งที่แก้ไข**:
+  - เปลี่ยนเป็น `image-rendering: auto` (bilinear/mipmap) บรรทัดเดียว
+  - ลบ `transform: translateZ(0)` ออกจาก `<img>` (บังคับสร้าง composited layer โดยไม่จำเป็น และทำให้ iOS Safari rasterize ที่ 1x)
+  - คง `backface-visibility: hidden` ไว้สำหรับการพลิกไพ่ 3D
+  - ใส่คอมเมนต์เตือนห้ามใส่กลับไว้ในไฟล์
+- **ไฟล์ที่แก้ไข**:
+  - `src/app/globals.css`
+- **ผลการทดสอบ**: `npm run typecheck` ➔ ผ่าน 0 errors | ตรวจสอบบน dev server จริง (computed `image-rendering: auto`, `transform: none`) และเทียบภาพ before/after → ตัวอักษรบนหน้าไพ่ขนาด 60px อ่านออกชัดเจน
+- **สิ่งที่ค้างอยู่ / ต้องทำต่อ**: ยังโหลดภาพเต็ม ~279KB/ใบ มาแสดงที่ 34-70px (หน้าเลือกผังโหลด ~4.6MB) → ควรทำภาพย่อหลายขนาด + `srcset`/`sizes` ในเฟสถัดไป
+
+
+#### 2. ระบบภาพไพ่ย่อหลายขนาด WebP + `<CardImage />` (Responsive Card Image Pipeline)
+- **ปัญหาเดิม**: ทุกจุดในเว็บโหลดภาพต้นฉบับ ~820px หนัก ~280KB/ใบ มาแสดงที่ขนาด 34-170px
+  - หน้าเลือกผังโหลดภาพไพ่รวม **4.63MB**, หน้า `/spreads` มีภาพไพ่ 96 ใบ, หน้าแผ่ไพ่ 78 ใบคิดเป็น ~21MB
+  - นอกจากเปลืองแบนด์วิดท์แล้ว การให้เบราว์เซอร์ย่อภาพ 12-25 เท่าเองยังได้ผลลัพธ์ที่คมน้อยกว่าภาพที่ย่อมาล่วงหน้า
+  - `<img src="/cards/..." />` ยังกระจายอยู่ ~90 จุด เสี่ยงผิดกฎ Root Image Path Resolution ซ้ำอีก
+- **สิ่งที่แก้ไข**:
+  - เพิ่ม `scripts/generate-card-variants.ts` (`npm run cards:variants`) สร้างภาพย่อ WebP ด้วย `cwebp` แบบ idempotent
+    - `public/cards/w256/*.webp` — กว้าง 256px (~33KB/ใบ) สำหรับพรีวิวผัง โลโก้ พัดไพ่
+    - `public/cards/w512/*.webp` — กว้าง 512px (~109KB/ใบ) สำหรับผังวางไพ่ และสารานุกรมไพ่ 78 ใบ
+    - ภาพต้นฉบับ `.jpg` ยังอยู่ครบไม่ถูกแตะต้อง ใช้เป็นทั้ง fallback และภาพความละเอียดเต็ม
+  - เพิ่ม `src/lib/tarot/card-image.ts` เป็นแหล่งความจริงเดียวของ path ภาพไพ่ (`getCardImageSrc`, `getCardWebpSrcSet`)
+  - เพิ่มคอมโพเนนต์ `src/components/card/CardImage.tsx` ห่อด้วย `<picture>` + `<source type="image/webp">` + `srcset`/`sizes`
+    - `<picture>` ใช้ `display: contents` จึงไม่สร้างกล่อง layout เพิ่ม — การจัดวางเดิมไม่เปลี่ยนแม้แต่พิกเซลเดียว
+    - มี prop `full` สำหรับภาพใบใหญ่ (หน้ารายละเอียดไพ่ 258px, หน้าซูม, Export ลง Canvas) ให้ใช้ไฟล์ต้นฉบับ
+  - แทนที่ `<img>` ภาพไพ่ **ทุกจุดในระบบ (~90 จุด / 13 ไฟล์)** ด้วย `<CardImage />` พร้อม `sizes` ที่คำนวณจากความกว้างจริงของแต่ละจุด
+  - เพิ่ม prop `imageSizes` / `imageFull` ให้ `TarotCard` เพื่อให้จุดที่ override ขนาดด้วย `className` ระบุขนาดจริงได้
+  - ลบ `getImageSrc` ที่เขียนซ้ำใน `CardsExplorer.tsx` และ `CardDetailView.tsx` ให้เรียกจาก helper กลางแทน
+- **ไฟล์ที่แก้ไข**:
+  - เพิ่มใหม่: `src/lib/tarot/card-image.ts`, `src/components/card/CardImage.tsx`, `scripts/generate-card-variants.ts`
+  - เพิ่มใหม่: `public/cards/w256/` และ `public/cards/w512/` (156 ไฟล์ WebP)
+  - แก้ไข: `src/app/page.tsx`, `src/components/ui/TarotArtIcons.tsx`, `src/components/card/TarotCard.tsx`,
+    `src/components/card/CardZoomModal.tsx`, `src/components/spread/SpreadBoard.tsx`,
+    `src/components/spread/SpreadCardSelector.tsx`, `src/components/deck/InteractiveCardFan.tsx`,
+    `src/components/encyclopedia/CardsExplorer.tsx`, `src/components/encyclopedia/CardDetailView.tsx`,
+    `src/components/encyclopedia/TarotEncyclopediaModal.tsx`, `src/components/reading/StreamReader.tsx`,
+    `src/components/reading/FollowUpChat.tsx`, `src/components/reading/IntentionAltarInput.tsx`,
+    `src/components/reading/ShareModal.tsx`, `package.json`
+- **ผลการทดสอบ**:
+  - `npm run typecheck` ➔ **ผ่าน 0 errors**
+  - `scripts/verify-cards.ts` ➔ **ไพ่ 78 ใบผ่านครบ**
+  - `scripts/qa/test-spreads.ts` ➔ **541/541 ผ่าน (20 ผัง 95 ตำแหน่ง)**
+  - ตรวจบนเบราว์เซอร์จริง: หน้าแรก 26 ภาพ, `/cards` 15 ภาพ, `/spreads` 96 ภาพ — **โหลดครบ เสียหาย 0 ภาพ**
+    เลือกไฟล์ `w256/*.webp` ถูกต้องทุกจุด และหน้ารายละเอียดไพ่ยังดึง `.jpg` ต้นฉบับ (825px) ตามที่ตั้งใจ
+  - เทียบขนาด: พรีวิวผัง 1 ใบ **280KB ➔ 33KB (ลดลง 88%)** — หน้า `/spreads` ลดจาก ~26MB เหลือ ~3.2MB
+- **สิ่งที่ค้างอยู่ / ต้องทำต่อ**:
+  - ยังไม่ได้ตรวจด้วยตาบนหน้าจอจริงในขั้นที่ 3-5 ของพิธีกรรม (`ShuffleRitual`, `InteractiveCardFan`, `SpreadBoard`, `StreamReader`)
+    เพราะปุ่ม `ถัดไป: ตั้งคำถามและเลือกแม่หมอ` ไม่พาไปขั้นที่ 2 — **ยืนยันแล้วว่าเป็นอาการเดิมที่มีอยู่ก่อนแก้ไข**
+    (ทดสอบซ้ำบน dev server ของ repo หลักที่ยังไม่มีการแก้ไขใดๆ ก็ติดจุดเดียวกัน) เป็นบั๊กคนละเรื่องที่ควรตามแก้ต่อ
+  - พบ Hydration Mismatch เดิมใน `TwelveMonthsSpreadArt` (`translate(-21.000000000000018px, ...)` ฝั่ง client ไม่ตรง server)
+    เกิดจากการคำนวณ `Math.cos/sin` แล้วใส่ลง inline style โดยไม่ปัดทศนิยม — ควรใช้ `.toFixed(2)` (ยังไม่แก้ อยู่นอกขอบเขตงานนี้)
+
+#### 3. ตั้งค่า Cache-Control ระยะยาวให้ภาพไพ่บน Cloudflare (`public/_headers`)
+- **ปัญหาเดิม**: ตรวจ header ของ production จริงพบว่า
+  ```
+  $ curl -sI https://tarot-web.bankjack10452.workers.dev/cards/major-00.jpg
+  cache-control: public, max-age=0, must-revalidate
+  cf-cache-status: HIT
+  ```
+  - `max-age=0, must-revalidate` คือค่าเริ่มต้นของ Cloudflare Workers Static Assets
+  - แปลว่าเบราว์เซอร์ **ยิงถามเซิร์ฟเวอร์ใหม่ทุกครั้งที่โหลดหน้า** แม้ภาพจะไม่เคยเปลี่ยนเลย
+  - หน้า `/spreads` มีภาพไพ่ 96 ใบ = ยิง 96 conditional requests ทุกครั้งที่เข้าหน้า (ได้ 304 กลับมา แต่ก็ยังเสีย round-trip)
+  - `cf-cache-status: HIT` ยืนยันว่าภาพถูกแคชที่ Cloudflare edge อยู่แล้ว — คอขวดอยู่ที่ฝั่งเบราว์เซอร์ ไม่ใช่ที่ต้นทาง
+- **สิ่งที่แก้ไข**: เพิ่มไฟล์ `public/_headers` (วิธีที่ OpenNext แนะนำอย่างเป็นทางการ) ตั้ง `Cache-Control: public, max-age=31536000, immutable` ให้ `/cards/*`, `/cards/w256/*`, `/cards/w512/*` และ `/_next/static/*`
+- **ไฟล์ที่แก้ไข**: `public/_headers` (ไฟล์ใหม่)
+- **ผลการทดสอบ**:
+  - `npm run build:worker` ➔ **build ผ่าน** และยืนยันว่า `_headers` ถูก copy ไปที่ `.open-next/assets/_headers` จริง
+  - ตรวจ `.open-next/assets/cards/` แล้วพบเฉพาะไฟล์ภาพ (jpg 78 + w256 78 + w512 78) **ไม่มีไฟล์ .html ปนเลย**
+    จึงยืนยันได้ว่ากฎ `/cards/*` แตะเฉพาะไฟล์ภาพ ไม่ไปโดนหน้าเว็บ `/cards` และ `/cards/[id]` ที่ Worker เป็นคนเรนเดอร์
+- **สิ่งที่ค้างอยู่ / ต้องทำต่อ**:
+  - **ยังไม่ได้ยืนยัน header ตอนรันจริง** เพราะ `npm run preview:worker` / `wrangler dev` รันบนเครื่องนี้ไม่ได้
+    (`Unsupported macOS version: ... current version of macOS (12.6.0). The minimum requirement is macOS 13.5.0+`)
+    ต้องตรวจซ้ำหลัง deploy ด้วย `curl -sI https://tarot-web.bankjack10452.workers.dev/cards/major-00.jpg`
+  - ⚠️ `immutable` แคช 1 ปี ถ้าวันใดต้องเปลี่ยนไฟล์ภาพ **ต้องเปลี่ยนชื่อไฟล์หรือชื่อโฟลเดอร์ด้วยเสมอ** (เช่น `w256` ➔ `w256b`)
+- **สรุปเรื่องย้ายรูปไปเก็บที่อื่น (Cloudflare Images / R2)**: **ไม่จำเป็นและไม่คุ้ม**
+  - ภาพอยู่บน Cloudflare Workers Static Assets = edge CDN 300+ เมืองอยู่แล้ว และ asset request ไม่นับเป็น Worker request (ฟรี)
+  - Cloudflare Images คิด $5/100,000 ภาพที่เก็บ/เดือน + $1/100,000 ภาพที่ส่ง/เดือน — จ่ายเพิ่มโดยไม่ได้อะไรกลับมา
+  - Image Transformations (`/cdn-cgi/image/`) ฟรี 5,000 unique transformations/เดือน แล้ว $0.50/1,000 **แต่ต้องมี custom domain (zone) ใช้บน `*.workers.dev` ไม่ได้** และเราย่อภาพล่วงหน้าไปแล้วจึงไม่ต้องใช้
+  - R2 จะเพิ่ม latency (Worker ต้องวิ่งไปหยิบจาก R2) โดยไม่ได้ประโยชน์
+
+---
 
 ### 🗓️ 2026-08-31: Phase 4 — Polish, Iconography & Multi-AI Guidelines
 
@@ -253,13 +342,28 @@
   - ใส่หมายเลขย่อย (เช่น `1`–`7`) ที่มุมของการ์ดโดยตรง แทนการใส่กล่องข้อความยาวใต้การ์ดทุกใบ
   - คำนวณความสูงรวมเสมอ: ความสูงกล่องพรีวิว (`h-34` / `h-36` = 136-144px) องค์ประกอบภายในต้องไม่เกิน 90-100px เพื่อเหลือพื้นที่ Margin ให้กับหัวข้อด้านล่าง
 
-### 2. Thai Syllable Wrapping Bug (การตัดคำภาษาไทยเสียรูป)
+### 2. `image-rendering: crisp-edges` ทำให้ภาพไพ่แตกเป็นเม็ด (Nearest-Neighbour Downscaling Trap)
+- **กรณีที่เคยเกิดขึ้น**: มีการใส่ `image-rendering: -webkit-optimize-contrast; high-quality; crisp-edges;` ซ้อนกันใน `globals.css` โดยตั้งใจจะทำให้ภาพ "คม HD" แต่ CSS เอาบรรทัดสุดท้าย (`crisp-edges`) → เบราว์เซอร์ย่อภาพแบบ nearest-neighbour ภาพไพ่ ~820x1430px ที่ถูกย่อเหลือ 34-70px จึงแตกเป็นเม็ดหยาบจนดูเบลอ
+- **วิธีแก้ & กฎป้องกัน**:
+  - ภาพถ่าย/ภาพวาดที่ถูก **ย่อ** ต้องใช้ `image-rendering: auto` เท่านั้น
+  - `crisp-edges` / `pixelated` มีไว้สำหรับ Pixel Art ที่ถูก **ขยาย** เท่านั้น ห้ามใช้กับภาพถ่ายเด็ดขาด
+  - อย่าใส่ `transform: translateZ(0)` บน `<img>` โดยไม่จำเป็น — มันสร้าง composited layer และทำให้ iOS Safari rasterize ที่ 1x
+
+### 3. โหลดภาพไพ่ต้นฉบับ 280KB มาแสดงที่ 34px (Full-Size Image For Thumbnail Trap)
+- **กรณีที่เคยเกิดขึ้น**: ทุกจุดในเว็บเขียน `<img src="/cards/major-00.jpg" />` ตรงๆ ทำให้เบราว์เซอร์ดาวน์โหลดภาพต้นฉบับกว้าง ~820px (~280KB) มาแสดงในกรอบ 34-70px หน้าเลือกผังจึงกินแบนด์วิดท์ **4.63MB** และหน้า `/spreads` ที่มีภาพไพ่ 96 ใบยิ่งหนักกว่านั้นหลายเท่า
+- **วิธีแก้ & กฎป้องกันถาวร**:
+  - ทุกจุดที่แสดงภาพหน้าไพ่ **ต้องใช้ `<CardImage />`** (`src/components/card/CardImage.tsx`) พร้อมส่ง prop `sizes` ตามความกว้างจริงที่แสดง เช่น `sizes="60px"`
+  - `<CardImage />` จะเลือกไฟล์ WebP ย่อจาก `public/cards/w256/` หรือ `w512/` ให้อัตโนมัติผ่าน `<picture>` + `srcset`
+  - ใช้ `full` เฉพาะภาพใบใหญ่จริงๆ (หน้ารายละเอียดไพ่ 258px, หน้าซูม, Export ลง Canvas) เท่านั้น
+  - ถ้าเพิ่ม/เปลี่ยนภาพไพ่ต้นฉบับ **ต้องรัน `npm run cards:variants` ใหม่ทุกครั้ง**
+
+### 4. Thai Syllable Wrapping Bug (การตัดคำภาษาไทยเสียรูป)
 - **กรณีที่เคยเกิดขึ้น**: ชื่อหัวข้อ `สแกนพลังงานชีวิต 7 จุด (จักระบำบัด)` ยาวเกินไปจนคำว่า `(จักระบำบัด)` ถูกตัดคำกลางคันกลายเป็น `(จักระบำ` และ `บัด)` บนอีกบรรทัด ทำให้ดูไม่เป็นมืออาชีพ
 - **วิธีแก้ & กฎป้องกัน**:
   - ตรวจสอบความยาวหัวข้อ (`nameTh`) และคำโปรยเสมอ ให้กระชับ สละสลวย เช่น ปรับเป็น `"สแกนสมดุล 7 จักระ (ไพ่ 7 ใบ)"`
   - ใช้ `leading-tight` หรือ `leading-snug` และตั้งความยาวที่พอดีกับ Grid Column
 
-### 3. Multi-Tier Spread Art Overflows & Label Bleeding (ห้ามใส่ Label ข้อความยาวใต้การ์ดในผังหลายชั้นเด็ดขาด)
+### 5. Multi-Tier Spread Art Overflows & Label Bleeding (ห้ามใส่ Label ข้อความยาวใต้การ์ดในผังหลายชั้นเด็ดขาด)
 - **กรณีที่เคยเกิดขึ้น**: ในหน้า `/spreads` และตัวเลือกผังในหน้าหลัก ผังไพ่ 4-5 ใบ (เช่น ความรักสองหัวใจ, ความในใจของเขา, แฟนเก่าจะกลับมาไหม) มีการวางการ์ดเป็น 2 ชั้น (บน-ล่าง) และใส่ข้อความ label ภาษาไทยใต้การ์ดทุกใบ ทำให้ความสูงรวมบวมขึ้นเป็น 167px เกินความสูงกล่อง (120px) จนตัวหนังสือทะลุไปทับเส้นคั่นและหัวข้อชื่อผัง
 - **วิธีแก้ & กฎป้องกันถาวร (Permanent Golden Rule)**:
   1. ในการแสดงผลพรีวิวผังไพ่ (ใน `src/components/ui/TarotArtIcons.tsx`) **ผังที่มี 4 ใบขึ้นไปหรือมีการจัดวาง 2 ชั้นขึ้นไป ห้ามใส่ข้อความ string label ใต้การ์ดทุกใบเด็ดขาด!**
@@ -267,11 +371,11 @@
   3. คุมความสูงรวมของการจัดวางทุกผัง **ให้อยู่ระหว่าง 85px – 100px เสมอ** (ต่ำกว่ากล่องคอนเทนเนอร์ `h-28` = 112px อย่างน้อย 15-25px) เพื่อให้มี Padding หายใจอย่างสมบูรณ์แบบ
   4. รายละเอียดคำอธิบายของแต่ละตำแหน่ง ให้แสดงใน Accordion ด้านล่าง `"✦ ดูรายละเอียดตำแหน่งไพ่"` เท่านั้น
 
-### 4. Absolute Image Path Resolution in Sub-routes (กฎการอ้างอิง Root Path รูปภาพ)
+### 6. Absolute Image Path Resolution in Sub-routes (กฎการอ้างอิง Root Path รูปภาพ)
 - **กรณีที่เคยเกิดขึ้น**: ใน `CardsExplorer.tsx` และ `CardDetailView.tsx` มีการใช้ `src={card.image}` โดยตรง (ซึ่งข้อมูลดิบเป็น `"major-00.jpg"`) ทำให้เมื่อผู้ใช้อยู่ที่ Sub-route `/cards` เบราว์เซอร์จะ Resolve เป็น `/cards/major-00.jpg` แทนที่จะเป็น `/cards/major-00.jpg` จาก root public directory ส่งผลให้ภาพไม่โหลดและแสดงไอคอนกล่องเสีย `[?]`
 - **วิธีแก้ & กฎป้องกันถาวร**:
-  - ทุกจุดที่ Render ภาพหน้าไพ่ ต้องใช้ Helper Function `getImageSrc(card)` ที่มีตรรกะ: `card.image?.startsWith("/") ? card.image : \`/cards/\${card.image}\``
-  - ห้ามเขียน `<img src={card.image} />` เปล่าๆ โดยไม่มี Root Prefix เด็ดขาด
+  - ทุกจุดที่ Render ภาพหน้าไพ่ ต้องผ่าน `<CardImage />` หรือ `getCardImageSrc(image, id)` จาก `src/lib/tarot/card-image.ts` ซึ่งการันตี prefix `/cards/` ให้เสมอ
+  - ห้ามเขียน `<img src={card.image} />` เปล่าๆ โดยไม่มี Root Prefix เด็ดขาด (ดูข้อ 3 ประกอบ — ปัจจุบันบังคับใช้ `<CardImage />` แทน `<img>` ทุกจุดแล้ว)
 
 ---
 
