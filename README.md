@@ -37,7 +37,7 @@
 
 | ผู้พัฒนา / AI Contributor | บทบาทและความรับผิดชอบ | องค์กร / โมเดล |
 | :--- | :--- | :--- |
-| 👑 **Luminut ([@luminuy](https://github.com/luminuy))** | **Creator & Project Owner** — กำหนดทิศทางผลิตภัณฑ์และดีไซน์, ตัดสินใจขั้นสุดท้าย, เป็นเจ้าของโครงสร้างพื้นฐาน (Cloudflare / GitHub / โดเมน / Secrets), ทดสอบบนอุปกรณ์จริง (Chrome/Safari, มือถือ) และสั่งงาน AI ทุกตัว | Project Maintainer |
+| 👑 **Luminut ([@luminuy](https://github.com/luminuy))** | **Creator, Project Owner & Senior Developer** — เขียนโค้ดเองทั้ง feature / fix / refactor, รีวิวและตัดสินใจสถาปัตยกรรมขั้นสุดท้าย, กำหนดทิศทางผลิตภัณฑ์และดีไซน์, เป็นเจ้าของโครงสร้างพื้นฐาน (Cloudflare / GitHub / โดเมน / Secrets), ทดสอบบนอุปกรณ์จริง (Chrome/Safari, มือถือ) และกำกับงาน AI ทุกตัว | Project Maintainer |
 | 🏛️ **Anthropic Claude (Sonnet 5 / Opus 5)** | **Lead Engineering & System Review** — ตรวจสอบและวางสถาปัตยกรรม, หาสาเหตุรากของบั๊ก (root-cause debugging), วางระเบียบวิศวกรรม (Incident Log, ด่านตรวจอัตโนมัติ, กติกา PR), ระบบ Edge Caching (OpenNext + KV), Provably-Fair Shuffle และ Code Review ทุก PR ก่อน merge | Anthropic |
 | 🔮 **Google DeepMind Antigravity AI** | **Full-Stack Implementation** — เขียนฟีเจอร์ตามแผน, งาน UI/Motion, ปรับแต่งประสิทธิภาพ, SEO และการทำ Multi-Agent Collision Guard | Google DeepMind |
 | ✨ **Google Gemini AI (3.7 Flash)** | **Interpretation Engine** — เครื่องอ่านคำทำนายไพ่ทาโรต์และสตรีมคำอ่านแบบเรียลไทม์ (SSE) | Google AI |
