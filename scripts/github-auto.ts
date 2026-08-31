@@ -276,6 +276,13 @@ function actionStatus(): void {
 // Entry point
 // ============================================================================
 
+for (let i = 0; i < process.argv.length; i++) {
+  if (process.argv[i] === "--agent" && process.argv[i + 1]) {
+    process.env.AGENT_NAME = process.argv[i + 1];
+    process.env.TAROT_AGENT = process.argv[i + 1];
+  }
+}
+
 const argv = process.argv.slice(2);
 const action = argv[0] && !argv[0].startsWith("--") ? argv[0] : "status";
 

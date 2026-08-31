@@ -87,6 +87,30 @@ function parseArgs(args: string[]): Record<string, string> {
   return parsed;
 }
 
+export function isSameAgent(a?: string, b?: string): boolean {
+  if (!a || !b) return false;
+  const sa = a.trim().toLowerCase();
+  const sb = b.trim().toLowerCase();
+  return sa === sb || sa.includes(sb) || sb.includes(sa);
+}
+
+export function inferCurrentAgent(): string | undefined {
+  if (process.env.AGENT_NAME) return process.env.AGENT_NAME;
+  if (process.env.TAROT_AGENT) return process.env.TAROT_AGENT;
+
+  try {
+    const branch = execSync("git branch --show-current", { encoding: "utf-8" }).trim();
+    if (branch.includes("/")) {
+      const prefix = branch.split("/")[0].toLowerCase();
+      if (prefix === "claude") return "Claude";
+      if (prefix === "gemini") return "Gemini";
+      if (prefix === "antigravity") return "Antigravity AI";
+    }
+  } catch {}
+
+  return undefined;
+}
+
 // 1. ACQUIRE LOCK
 export function acquireLock(
   agentName: string,
@@ -100,7 +124,7 @@ export function acquireLock(
 
   // Check for file overlaps with other agents
   const conflicts = data.locks.filter((lock) => {
-    if (lock.agentName === agentName) return false; // same agent can extend/update
+    if (isSameAgent(lock.agentName, agentName)) return false; // same agent can extend/update
     const overlapFiles = lock.files.some((f) => files.includes(f) || f === "*" || files.includes("*"));
     const sameDomain = lock.domain.toLowerCase() === domain.toLowerCase() && domain !== "general";
     return overlapFiles || sameDomain;
@@ -118,7 +142,7 @@ export function acquireLock(
   }
 
   // Remove old lock from same agent if any
-  data.locks = data.locks.filter((l) => l.agentName !== agentName);
+  data.locks = data.locks.filter((l) => !isSameAgent(l.agentName, agentName));
 
   const now = new Date();
   const expires = new Date(now.getTime() + ttlMinutes * 60 * 1000);
@@ -154,7 +178,7 @@ export function releaseLock(agentName: string, force = false): { success: boolea
     return { success: true, message: `🧹 ปลดล็อคทั้งหมด (Force Clean) สำเร็จ!` };
   }
 
-  data.locks = data.locks.filter((l) => l.agentName !== agentName);
+  data.locks = data.locks.filter((l) => !isSameAgent(l.agentName, agentName));
   saveLocks(data);
 
   if (data.locks.length === countBefore) {
@@ -166,6 +190,7 @@ export function releaseLock(agentName: string, force = false): { success: boolea
 
 // 3. CHECK COLLISIONS
 export function checkCollisions(currentAgent?: string): { hasCollision: boolean; summary: string } {
+  const agent = currentAgent || inferCurrentAgent();
   const data = cleanExpired(readLocks());
   saveLocks(data);
 
@@ -175,7 +200,7 @@ export function checkCollisions(currentAgent?: string): { hasCollision: boolean;
   // Check 1: Conflict markers in working tree
   try {
     const marker = "<" + "<" + "<" + "<" + "<" + "<" + "<";
-    const grepConflict = execSync(`git grep -n "${marker}" -- ':!scripts/agent-guard.ts' || true`, { encoding: "utf-8" }).trim();
+    const grepConflict = execSync(`git grep -n "${marker}" -- ':!scripts/agent-guard.ts' ':!scripts/git-author-guard.ts' || true`, { encoding: "utf-8" }).trim();
     if (grepConflict) {
       issues.push(`🚨 ตรวจพบ Git Conflict Markers ในไฟล์:\n${grepConflict}`);
     }
@@ -184,7 +209,7 @@ export function checkCollisions(currentAgent?: string): { hasCollision: boolean;
   // Check 2: Active locks from OTHER agents overlapping with modified git files
   if (gitFiles.length > 0) {
     for (const lock of data.locks) {
-      if (currentAgent && lock.agentName === currentAgent) continue;
+      if (isSameAgent(lock.agentName, agent)) continue;
 
       const overlapping = gitFiles.filter((f) => lock.files.includes(f) || lock.files.includes("*"));
       if (overlapping.length > 0) {
@@ -256,7 +281,7 @@ switch (action) {
   }
 
   case "unlock": {
-    const agent = args["agent"] || args["name"] || "Current-AI";
+    const agent = args["agent"] || args["name"] || inferCurrentAgent() || "Current-AI";
     const force = args["force"] === "true" || args["all"] === "true";
     const res = releaseLock(agent, force);
     console.log(res.message);
@@ -264,7 +289,7 @@ switch (action) {
   }
 
   case "check": {
-    const agent = args["agent"] || args["name"];
+    const agent = args["agent"] || args["name"] || inferCurrentAgent();
     const res = checkCollisions(agent);
     console.log(res.summary);
     if (res.hasCollision) process.exit(1);

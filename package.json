@@ -25,6 +25,7 @@
     "repo:verify": "tsx scripts/github-auto.ts verify-all",
     "pr:auto": "tsx scripts/github-auto.ts pr",
     "commit": "tsx scripts/git-author-guard.ts",
+    "incident": "tsx scripts/incident-log.ts",
     "hooks:setup": "git config core.hooksPath .githooks",
     "audit:show": "tsx scripts/audit-tracker.ts show",
     "audit:track": "tsx scripts/audit-tracker.ts track"

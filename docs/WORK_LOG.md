@@ -7,10 +7,10 @@
 
 ## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `31/8/2569 11:09:30` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `31/8/2569 12:17:36` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
-- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (28 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
+- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (13 ไฟล์ที่กำลังแก้, 1 Locks ที่ใช้งานอยู่)
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
@@ -19,18 +19,38 @@
 
 | หน้าเว็บ / ฟีเจอร์ | เส้นทาง (Route / File) | สถานะความพร้อม | สถานะเซิร์ฟเวอร์ | สิ่งที่ทำแล้ว | สิ่งที่สามารถต่อยอดได้ในอนาคต |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | HTTP 200 | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
-| **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | HTTP 200 | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
-| **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | HTTP 200 | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
-| **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | HTTP 200 | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
-| **บัญชีและประวัติ** | `/account` | 🟡 **Scaffolded (Draft)** | HTTP 200 | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
-| **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | HTTP 200 | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
+| **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
+| **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
+| **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
+| **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
+| **บัญชีและประวัติ** | `/account` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
+| **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
 ---
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
+
+### 🗓️ 2026-08-31: ระบบบันทึกบทเรียนความผิดพลาดอัตโนมัติและมาตรฐานวิศวกรรม (Incident Log & Engineering Discipline Protocol)
+
+#### 1. วางระบบบันทึกความผิดพลาดอัตโนมัติและกฎ 7 ข้อ (Incident Log Engine & Blameless Post-Mortem)
+- **ปัญหาเดิม**: AI แต่ละตัวที่เข้ามาทำงานต่ออาจทำผิดซ้ำเรื่องเดิม (เช่น ปัญหา image-rendering, header ทับซ้อน, คำสั่ง gh ใน worktree, flaky random test) เพราะไม่มีแหล่งบันทึกบทเรียนกลางที่บังคับให้อ่านและบันทึก
+- **สิ่งที่แก้ไข**:
+  - สร้าง `docs/INCIDENT_LOG.md` บันทึกบทเรียนจากเหตุการณ์จริง INC-0001 ถึง INC-0007 พร้อมกฎป้องกันถาวร
+  - สร้าง `docs/KNOWN_ISSUES.md` บันทึกบั๊กที่ยืนยันแล้วแต่ยังไม่ได้แก้ (ISSUE-001 ถึง ISSUE-007) ป้องกันการแก้ซ้ำซ้อน
+  - สร้าง `scripts/incident-log.ts` (`npm run incident`) สำหรับบันทึกบทเรียนทั้งแบบ CLI และโปรแกรม
+  - อัปเกรด `scripts/git-author-guard.ts` เพิ่มเกณฑ์วิศวกรรม: บล็อก commit ประเภท `fix` ทุกตัวที่ไม่ระบุ `--cause` และ `--prevention` พร้อมบันทึกลง `docs/INCIDENT_LOG.md` ให้อัตโนมัติก่อน commit
+  - แก้ไข `scripts/agent-guard.ts` และ `scripts/github-auto.ts`: เพิ่ม `inferCurrentAgent()` จาก environment variable และ branch name เพื่อไม่ให้ระบบตรวจจับ lock ของตนเองเป็น collision
+  - อัปเดต `docs/AI_COLLABORATION_GUIDELINES.md`, `CLAUDE.md`, `GEMINI.md`, `README.md` และ `package.json`
+- **ไฟล์ที่แก้ไข**:
+  - เพิ่มใหม่: `docs/INCIDENT_LOG.md`, `docs/KNOWN_ISSUES.md`, `scripts/incident-log.ts`
+  - แก้ไข: `scripts/agent-guard.ts`, `scripts/git-author-guard.ts`, `scripts/github-auto.ts`, `docs/AI_COLLABORATION_GUIDELINES.md`, `CLAUDE.md`, `GEMINI.md`, `README.md`, `package.json`, `docs/WORK_LOG.md`
+- **ผลการทดสอบ**:
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 6 ด่าน 100% Green**
+  - ทดสอบ `npm run incident` โดยไม่ใส่ argument ➔ แจ้งเตือนและบล็อกด้วย exit code 1
+  - ทดสอบ `npm run commit` แบบ `type: fix` โดยไม่ใส่ `--cause`/`--prevention` ➔ แจ้งเตือนและบล็อกด้วย exit code 1
+  - ทดสอบ Multi-Agent Collision Guard ➔ ตรวจจับและแยกแยะ Agent แต่ละตัวได้ถูกต้อง
 
 ### 🗓️ 2026-08-31: แก้ภาพไพ่เบลอ/หยัก (Card Image Sharpness Fix)
 
