@@ -215,13 +215,20 @@ export default function TarotPage() {
 
       const enrichedCards: DrawnSlotCard[] = (data.drawn || []).map((d: any) => {
         const fullCard = cardByIndex(d.cardIndex);
+        const kw = fullCard?.keywords;
+        const extractedKeywords = Array.isArray(kw)
+          ? kw
+          : d.isReversed
+          ? kw?.reversed ?? []
+          : kw?.upright ?? [];
+
         return {
-          order: d.order,
-          cardIndex: d.cardIndex,
-          isReversed: d.isReversed,
-          position: selectedSpread.positions[d.order] || {
-            index: d.order,
-            nameTh: `ตำแหน่งที่ ${d.order + 1}`,
+          order: d.order ?? 0,
+          cardIndex: d.cardIndex ?? 0,
+          isReversed: !!d.isReversed,
+          position: selectedSpread?.positions?.[d.order] || {
+            index: d.order ?? 0,
+            nameTh: `ตำแหน่งที่ ${(d.order ?? 0) + 1}`,
             meaning: "",
           },
           card: {
@@ -230,7 +237,7 @@ export default function TarotPage() {
             nameEn: fullCard.nameEn,
             image: fullCard.image,
             element: fullCard.element,
-            keywords: d.isReversed ? fullCard.keywords.reversed : fullCard.keywords.upright,
+            keywords: extractedKeywords,
           },
         };
       });
