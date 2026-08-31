@@ -211,9 +211,23 @@ function actionPr(argv: string[]): void {
       return;
     }
 
-    // -R บังคับให้ gh ทำงานแบบ remote-only จึงใช้ใน git worktree ได้
-    sh("gh", ["pr", "merge", prNumber, "--auto", "--squash", "--delete-branch", "-R", repo]);
-    console.log(`🔀 เปิด Auto-Merge ให้ PR #${prNumber} แล้ว — จะ merge เข้า main ทันทีที่ CI ผ่าน`);
+    // GitHub native auto-merge ใช้ได้เฉพาะเมื่อเปิดสวิตช์ไว้ในตั้งค่า repo เท่านั้น
+    // ถ้ายังปิดอยู่แล้วเรียก --auto จะได้ error: "Auto merge is not allowed for this repository"
+    // เช็กก่อนจะได้ไม่ต้องล้มทั้งคำสั่งทั้งที่ PR สร้างสำเร็จไปแล้ว
+    const autoMergeAllowed =
+      shQuiet("gh", ["api", `repos/${repo}`, "--jq", ".allow_auto_merge"]) === "true";
+
+    if (autoMergeAllowed) {
+      // -R บังคับให้ gh ทำงานแบบ remote-only จึงใช้ใน git worktree ได้
+      sh("gh", ["pr", "merge", prNumber, "--auto", "--squash", "--delete-branch", "-R", repo]);
+      console.log(`🔀 เปิด Auto-Merge ให้ PR #${prNumber} แล้ว — จะ merge เข้า main ทันทีที่ CI ผ่าน`);
+    } else {
+      console.log(`ℹ️  repo นี้ปิด GitHub native auto-merge ไว้ (allow_auto_merge = false) จึงข้ามขั้นตอนนั้น`);
+      console.log(`   ไม่ต้องกังวล — workflow .github/workflows/pr.yml จะ squash merge PR #${prNumber}`);
+      console.log(`   ให้เองอัตโนมัติเมื่อการตรวจใน CI ผ่านครบ`);
+      console.log(`   ถ้าอยากใช้ auto-merge ของ GitHub จริง ๆ ให้เปิดที่:`);
+      console.log(`   Settings > General > Pull Requests > Allow auto-merge`);
+    }
     console.log("⚡ เมื่อ merge เข้า main แล้ว deploy.yml จะ deploy ขึ้น Cloudflare Workers อัตโนมัติ");
   } catch (e: any) {
     console.error(`\n❌ ผิดพลาด: ${e.message}`);

@@ -1,5 +1,50 @@
 [
   {
+    "id": "audit-1788150986372-em2q5",
+    "timestampTh": "31/8/2569 11:36:25",
+    "timestampIso": "2026-08-31T04:36:25.402Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/improve-github-automation",
+      "commitSha": "0e0c131"
+    },
+    "action": {
+      "category": "FIX",
+      "summary": "ตรวจ allow_auto_merge ก่อนเรียก gh pr merge --auto ไม่ให้ทั้งคำสั่งล้มทั้งที่ PR สร้างสำเร็จแล้ว",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/WORK_LOG.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "cripts/github-auto.ts",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 3
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788150836461-ogkip",
     "timestampTh": "31/8/2569 11:33:55",
     "timestampIso": "2026-08-31T04:33:55.525Z",

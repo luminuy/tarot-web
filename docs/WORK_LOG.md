@@ -171,6 +171,17 @@
     พร้อมชี้ตำแหน่ง `card-image.ts(59,7): error TS2322` และ **exit code = 1** (CI จะ fail จริง)
   - `npm run pr:auto -- ... --dry-run` ➔ แสดง 3 ขั้นตอนที่จะทำโดยไม่แตะ remote
   - `npx tsx scripts/github-auto.ts status` ➔ แสดง repo/branch/PR/CI ครบถ้วน
+- **สิ่งที่ค้นพบเพิ่มหลังแก้ปัญหา worktree แล้ว**: พอ error ของ worktree หายไป error ตัวจริงก็โผล่ขึ้นมา
+  ```
+  GraphQL: Auto merge is not allowed for this repository (enablePullRequestAutoMerge)
+  ```
+  - ตรวจ `gh api repos/luminuy/tarot-web --jq .allow_auto_merge` ➔ **`false`**
+  - แปลว่าบรรทัด `gh pr merge --auto` **ไม่เคยทำงานได้เลยตั้งแต่แรก** แค่ก่อนหน้านี้ถูก error ของ worktree บังไว้
+  - ที่ PR ถูก merge จริงมาจาก step `🔀 Auto-Merge Verified PR into main` ใน `.github/workflows/pr.yml`
+    ซึ่งเรียก `github.rest.pulls.merge({ merge_method: 'squash' })` เองหลังการตรวจผ่าน
+  - **แก้เพิ่ม**: สคริปต์เช็ก `allow_auto_merge` ก่อน ถ้าปิดอยู่จะข้ามขั้นตอนนั้นอย่างสุภาพ
+    พร้อมบอกว่า `pr.yml` จะ merge ให้เองอยู่แล้ว และบอกวิธีเปิดสวิตช์ที่ Settings > General > Pull Requests > Allow auto-merge
+    ไม่ทำให้ทั้งคำสั่งล้มทั้งที่ PR สร้างสำเร็จไปแล้ว
 
 ---
 
@@ -422,6 +433,10 @@
   - ใส่ `-R <owner>/<repo>` ให้คำสั่ง `gh` เสมอ เพื่อบังคับให้ทำงานแบบ remote-only ไม่แตะ git ในเครื่อง
   - `scripts/github-auto.ts` อ่าน owner/repo จาก `git remote get-url origin` แล้วเติม `-R` ให้อัตโนมัติทุกคำสั่งแล้ว
   - ห้ามเรียก `gh pr merge` เปล่าๆ ในสคริปต์ใหม่เด็ดขาด
+  - **บทเรียนแถม**: error หนึ่งอาจบัง error อีกตัวไว้ พอแก้ปัญหา worktree เสร็จ error ตัวจริงถึงโผล่ว่า
+    `Auto merge is not allowed for this repository` — repo นี้ตั้ง `allow_auto_merge = false` ไว้
+    แปลว่า `gh pr merge --auto` ไม่เคยทำงานเลย ตัวที่ merge จริงคือ step ใน `.github/workflows/pr.yml`
+    **แก้อาการแรกแล้วต้องรันซ้ำดูผลจริงเสมอ อย่าเพิ่งสรุปว่าจบ**
 
 ### 5. เขียนเทสต์ไว้แต่ไม่มีใครเรียกใช้ (Orphaned Test Files)
 - **กรณีที่เคยเกิดขึ้น**: `scripts/qa/test-safety.ts` (14 เทสต์ ตัวกรองคำถามอันตราย) และ
