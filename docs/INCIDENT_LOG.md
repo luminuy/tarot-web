@@ -48,6 +48,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0020 · 2026-08-31 20:59 · 🔴 Critical · ถอด cache:"npm" ที่ทำ CI และ deploy พังทั้งหมด
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ทุก workflow run (pr.yml + deploy.yml) ล้มทันทีที่ step Setup Node.js: '##[error]Dependencies lock file is not found ... Supported: package-lock.json, npm-shrinkwrap.json, yarn.lock' · deploy ขึ้น production ไม่ได้เลย 2 รอบติด |
+| **สาเหตุราก** | commit 451b057 (Antigravity, push ตรงเข้า main ไม่ผ่าน PR) พยายามย้าย CI ไป pnpm แล้วถูก revert บางส่วน เหลือ 'cache: npm' ค้างไว้ แต่ repo ไม่เคย commit package-lock.json (ใช้ pnpm-lock.yaml) → setup-node หา lockfile ไม่เจอ hard error |
+| **การแก้ไข** | ถอด cache:"npm" ที่ทำ CI และ deploy พังทั้งหมด |
+| **🛡️ กฎป้องกันถาวร** | **ห้าม push .github/workflows/ ตรงเข้า main — workflow ทุกไฟล์ต้องผ่าน PR ที่ CI รันจริงก่อน · 'cache:' ใน setup-node ต้องมี lockfile ชนิดที่ตรงกัน commit อยู่จริงเสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | PR นี้เอง: CI ต้องรันได้ (ก่อนหน้านี้ error ที่ step แรก) และ deploy รอบถัดไปต้องสำเร็จ |
+| **บันทึกโดย** | Claude · branch `fix/ci-npm-cache-broken` · commit `451b057` |
+
+
 ### INC-0019 · 2026-08-31 20:45 · 🟡 Medium · Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds
 
 | หัวข้อ | รายละเอียด |

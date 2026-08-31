@@ -1,5 +1,50 @@
 [
   {
+    "id": "audit-1788184760484-2mm3r",
+    "timestampTh": "31/8/2569 20:59:19",
+    "timestampIso": "2026-08-31T13:59:19.053Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "fix/ci-npm-cache-broken",
+      "commitSha": "451b057"
+    },
+    "action": {
+      "category": "FIX",
+      "summary": "ถอด cache:\"npm\" ที่ทำ CI และ deploy พังทั้งหมด",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "github/workflows/deploy.yml",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "github/workflows/pr.yml",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 3
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788184218751-mkych",
     "timestampTh": "31/8/2569 20:50:17",
     "timestampIso": "2026-08-31T13:50:17.053Z",
