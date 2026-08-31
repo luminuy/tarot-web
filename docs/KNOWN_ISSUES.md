@@ -36,24 +36,21 @@
 
 ---
 
-## ✅ แก้เสร็จแล้ว (branch `claude/resilience-perf-enhancements`)
+## ✅ แก้เสร็จแล้ว + verify แล้ว (branch `claude/resilience-perf-enhancements` + merge นี้)
 
-| # | เดิม | แก้อย่างไร |
-| :-- | :--- | :--- |
-| **001** 🔴 | flow ดูดวงติดตายขั้น 1 — `<AnimatePresence mode="wait">` deadlock (motion@13 + React 19.2) | ถอด `<AnimatePresence>` + `<motion.div>` ทั้งหมดใน `src/app/page.tsx` ออก เปลี่ยนเป็น CSS transition (`.anim-page-transition`) + scroll reset |
-| **002** 🟠 | Hydration mismatch — `Math.cos/sin` ทศนิยมดิบใน inline style | `Number((Math.cos(rad) * radius).toFixed(2))` ทุกจุดใน `TarotArtIcons.tsx` |
-| **008** 🟠 | `cache.ts` พรีโหลดจาก `/cards/variants/w320/` (404 × 9) | ใช้ `getCardImageSrc()` จาก `@/lib/tarot/card-image` + ลบ `ALLOWLIST` ใน `scripts/qa/test-image-paths.ts` |
-| **009** 🟠 | `cache.ts` พรีโหลด `/sounds/*.mp3` (404 × 3) | ตัด `PRELOAD_SOUNDS` ทิ้ง (ระบบเสียงใช้ Web Audio synth ใน `audio.ts` อยู่แล้ว) |
+| # | เดิม | แก้อย่างไร | verify (2026-08-31, dev :3200) |
+| :-- | :--- | :--- | :--- |
+| **001** 🔴 | flow ดูดวงติดตายขั้น 1 — `<AnimatePresence mode="wait">` deadlock (motion@13 + React 19.2) | ถอด `<AnimatePresence>` + `<motion.div>` ทั้งหมดใน `src/app/page.tsx` ออก ใช้ conditional render ธรรมดา + scroll reset | ✅ คลิกจริง: ขั้น 1→2→3 เดินได้ (`currentStep` เปลี่ยน, `<textarea>` โผล่, `/api/reading/start` 200, ถึงหน้าสับไพ่) |
+| **002** 🟠 | Hydration mismatch — `Math.cos/sin` ทศนิยมดิบใน inline style | `Number((Math.cos(rad) * radius).toFixed(2))` ทุกจุดใน `TarotArtIcons.tsx` | ✅ `curl /spreads` → `translate()` ปัด 2 ตำแหน่ง, ทศนิยมดิบ 0 จุด |
+| **008** 🟠 | `cache.ts` พรีโหลดจาก `/cards/variants/w320/` (404 × 9) | ใช้ `getCardImageSrc()` จาก `@/lib/tarot/card-image` + ลบ `ALLOWLIST` ใน `scripts/qa/test-image-paths.ts` | ✅ network log หน้าแรก: ไม่มี request ไป `/cards/variants/` แล้ว · console error 0 |
+| **009** 🟠 | `cache.ts` พรีโหลด `/sounds/*.mp3` (404 × 3) | ตัด `PRELOAD_SOUNDS` ทิ้ง (ระบบเสียงใช้ Web Audio synth ใน `audio.ts` อยู่แล้ว) | ✅ network log: ไม่มี request `/sounds/` แล้ว |
 
 **ISSUE-010** แก้ครึ่งเดียว: `.env.example` เพิ่ม `TAROT_SESSION_SECRET` + Turnstile keys แล้ว
 แต่ **ครึ่งหลังยังค้าง** → ดู ISSUE-010b ในดัชนีข้างบน
 
 **ISSUE-011** ยังค้าง: merge นี้เอา `browserslist` เข้ามา แต่ **ไม่ใส่ `packageManager`** เพราะ CI (`pr.yml`/`deploy.yml`) ยังใช้ `npm install` การใส่ field `pnpm@x` อาจทำ corepack เด้ง — ต้องแยก PR ทำพร้อมกันทั้งชุด
 
-> ⚠️ **เกณฑ์ปิดที่ต้อง verify ก่อน move เข้า INCIDENT_LOG จริง**:
-> - ISSUE-001: คลิกจริงผ่านเบราว์เซอร์ให้เดินครบ 5 ขั้น (สับไพ่ → เลือกไพ่ → อ่านคำทำนาย)
-> - ISSUE-002: `curl /spreads` ยืนยัน HTML ไม่มี `translate()` ทศนิยมเกิน 2 ตำแหน่ง + console ไม่มี hydration error
-> - ISSUE-008/009: เปิดหน้าใดก็ได้ console ไม่เหลือ 404 ของ `/cards/` กับ `/sounds/`
+> ยังไม่ได้ verify: flow ขั้น 3→4→5 (สับไพ่ → เลือกไพ่ → อ่านคำทำนาย) — ต้องมี `GEMINI_API_KEY` จริง · bundle หน้าแรกยัง 498KB (code-split ช่วยแค่ ~13% — page.tsx ยังใหญ่, LazyMotion ยังไม่ทำ = แผน perf ระดับ 2.3/2.4)
 
 ---
 
