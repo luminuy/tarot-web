@@ -36,6 +36,8 @@
 9. **Horizontal Spread Bounds**: ผังที่มีไพ่ 7 ใบขึ้นไป (ผัง 7 วัน และ 7 จักระ) **ต้องจัดวางแบบ 2 ชั้นสมดุล (4+3 ใบ)** คุมความกว้างไม่เกิน 150px ป้องกันไพ่ล้นขอบซ้ายขวาออกนอกกรอบการ์ด
 10. **Human-First Natural Copywriting**: ใช้คำภาษาไทยที่เป็นธรรมชาติ เข้าใจง่าย ตรงไปตรงมาเหมือนมนุษย์คุยกัน ห้ามใช้ศัพท์หุ่นยนต์/AI แข็งทื่อ เช่น ใช้ 'เมนู', 'ผังการเปิดไพ่ (20 แบบ)', 'ความหมายไพ่ (78 ใบ)', 'ประวัติการดูดวง' แทนศัพท์ซับซ้อน
 11. **Multi-Agent Collision Guard**: ก่อนเริ่มงานให้ตรวจสอบ `npm run agent:status` และล็อคไฟล์ด้วย `npm run agent:lock` เสมอ หลังทำเสร็จให้ปลดล็อคด้วย `npm run agent:unlock` เพื่อไม่ให้ AI หลายตัวแก้งานชนกัน
+12. **One Unified Branch per Milestone & Zero Leftovers**: ห้ามแตกกิ่งย่อยกระจัดกระจายโดยไม่เปิด PR ทันที ต้อง Rebase บน `origin/main` ล่าสุดเสมอ และเมื่อทำงานเสร็จต้องรัน `npm run pr:auto` ➔ `npm run git:tidy` ให้จบสมบูรณ์ 100% ห้ามทิ้งกิ่งค้างหรือปล่อยภาระให้ผู้อื่นตามแก้
+13. **Auto-Merge Workflow Enforcement**: เมื่อเปิด PR ให้ใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 7 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers จบในคำสั่งเดียว
 
 ---
 

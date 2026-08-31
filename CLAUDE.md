@@ -25,7 +25,12 @@ npm run repo:verify                       # 3. ตรวจครบ 7 ด่า
 npm run commit -- --agent Claude ...      # 4. commit (type fix ต้องมี --cause และ --prevention)
 npm run agent:unlock -- --agent Claude    # 5. ปลดล็อค
 npm run log:sync                          # 6. ซิงก์ docs/WORK_LOG.md อัตโนมัติ
+npm run pr:auto -- "<title>"              # 7. สร้าง PR + Auto-Merge CI + Deploy Cloudflare
+npm run git:tidy                          # 8. เก็บกวาด branch ที่ merge แล้วทั้งในเครื่องและ remote
 ```
 
-**commit ประเภท `fix` จะถูกบล็อกถ้าไม่ระบุ `--cause` และ `--prevention`**
+**กฎเหล็กเพิ่มเติม**:
+- **One Unified Branch**: ห้ามแตกกิ่งย่อยกระจัดกระจายโดยไม่เปิด PR ทันที
+- **Zero Leftovers**: ทำงานต้องทำให้จบ 100% (ตรวจ 7 ด่าน -> commit -> push -> pr:auto -> git:tidy) ห้ามปล่อย branch ค้างหรือให้ผู้อื่นมาตามเก็บกวาดเด็ดขาด
+- **commit ประเภท `fix` จะถูกบล็อกถ้าไม่ระบุ `--cause` และ `--prevention`**
 เพราะทุกความผิดพลาดต้องถูกบันทึกลง `docs/INCIDENT_LOG.md` เพื่อไม่ให้ AI ตัวไหนทำผิดซ้ำอีก

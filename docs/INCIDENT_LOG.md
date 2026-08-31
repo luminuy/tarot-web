@@ -48,6 +48,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0017 · 2026-08-31 20:40 · 🟠 High · แตกกิ่งย่อยกระจัดกระจายโดยไม่ Rebase และไม่รวม PR (Concurrent Branch Drift & Incomplete Handoff)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | มีการสร้างและ push 6-7 branch ย่อยขึ้น GitHub โดยไม่มีการเปิด PR, ไม่ได้ Rebase เข้ากับ `main` ล่าสุด และแต่ละ branch มีการแก้ไขไฟล์ซ้อนทับกัน จนเกิดความขัดแย้ง (Merge Conflict) และทิ้งภาระให้ผู้อื่นต้องมาตามเก็บกวาด |
+| **สาเหตุราก** | ขาดวินัยในการรวบรวมงาน (Consolidation) ไม่ได้ดึง `origin/main` ล่าสุดก่อนเริ่มงานใหม่ และปล่อยกิ่งค้างไว้บน remote โดยไม่สั่ง `npm run pr:auto` และ `npm run git:tidy` ให้จบสมบูรณ์ในรอบเดียว |
+| **การแก้ไข** | 1) รวมทุกฟีเจอร์และบั๊กฟิกซ์เข้าสู่กิ่งเดี่ยว `feat/consolidated-platform-upgrades` บน `origin/main` ล่าสุด 2) ลบ 7 กิ่งเก่าบน GitHub ทิ้งทั้งหมด 3) ตรวจสอบผ่าน 7 ด่าน (`npm run repo:verify`) 4) สร้าง PR #24 และวางระบบ Auto-merge 100% |
+| **🛡️ กฎป้องกันถาวร** | **1) ทำงานแบบ 1 Unified Branch per Milestone เท่านั้น ห้ามแตกกิ่งย่อยค้างไว้ 2) ต้องดึง `origin/main` ล่าสุดก่อนเริ่มงานเสมอ 3) ทำงานต้องจบ 100% ห้ามทิ้งภาระให้คนอื่นตามแก้: ต้องตรวจ 7 ด่าน -> commit -> push -> pr:auto -> git:tidy ให้สะอาดหมดจด** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รวม 7 งานผ่าน 7/7 gates (0 type errors, 0 collision, 78 cards, 20 spreads) และเปิด PR #24 พร้อมลบกิ่งเก่า 7 กิ่งบน remote สะอาด 100% |
+| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` |
+
 ### INC-0016 · 2026-08-31 20:13 · 🟡 Medium · แก้ Chrome รูปไพ่เบลอ + chat auto-scroll เด้งทั้งหน้า
 
 | หัวข้อ | รายละเอียด |
