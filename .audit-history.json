@@ -1,5 +1,103 @@
 [
   {
+    "id": "audit-1788167903029-0wfd0",
+    "timestampTh": "31/8/2569 16:18:22",
+    "timestampIso": "2026-08-31T09:18:22.207Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/new-session-68eb5a",
+      "commitSha": "22fdae4"
+    },
+    "action": {
+      "category": "DOCS",
+      "summary": "แก้ ISSUE-005 ให้ตรงความจริง: auto-merge ใช้ไม่ได้เพราะ repo private บนแพลนฟรี ไม่ใช่แค่ toggle ที่ลืมเปิด",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": ".audit-history.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "docs/AUDIT_LOG.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "docs/KNOWN_ISSUES.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "package-lock.json",
+          "status": "ADDED"
+        }
+      ],
+      "totalFiles": 5
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
+    "id": "audit-1788167870913-22i7e",
+    "timestampTh": "31/8/2569 16:17:49",
+    "timestampIso": "2026-08-31T09:17:49.910Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/new-session-68eb5a",
+      "commitSha": "22fdae4"
+    },
+    "action": {
+      "category": "DOCS",
+      "summary": "แก้ ISSUE-005 ให้ตรงความจริง: auto-merge ใช้ไม่ได้เพราะ repo private บนแพลนฟรี ไม่ใช่แค่ toggle ที่ลืมเปิด",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "ocs/KNOWN_ISSUES.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "package-lock.json",
+          "status": "ADDED"
+        }
+      ],
+      "totalFiles": 3
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788167266483-1zbc7",
     "timestampTh": "31/8/2569 16:07:45",
     "timestampIso": "2026-08-31T09:07:45.697Z",
