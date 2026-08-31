@@ -48,6 +48,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0008 · 2026-08-31 13:20 · 🟠 High · upgrade Follow-up Chat with Claude and Gemini dual-engine integration, conversation history awareness, and dynamic contextual response engine
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | upgrade Follow-up Chat with Claude and Gemini dual-engine integration, conversation history awareness, and dynamic contextual response engine |
+| **สาเหตุราก** | chat route called invalid gemini models with thinkingConfig causing 400 Bad Request and fell back to static hardcoded string ignoring user questions |
+| **การแก้ไข** | upgrade Follow-up Chat with Claude and Gemini dual-engine integration, conversation history awareness, and dynamic contextual response engine |
+| **🛡️ กฎป้องกันถาวร** | **support Claude 3.5 Sonnet and validated Gemini models with conversation history and dynamic contextual multi-intent response engine** |
+| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 errors, 6/6 repo verify checks passed, context-aware responses per question |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `6ee6fc8` |
+
+
 ### INC-0007 · 2026-08-31 12:09 · 🟠 High · เทสต์สถิติที่ตัวอย่างน้อยเกินไป ทำ deploy ขึ้น production ล้มแบบสุ่ม
 
 | หัวข้อ | รายละเอียด |

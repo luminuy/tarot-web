@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getReading } from "@/server/store";
+import Anthropic from "@anthropic-ai/sdk";
+import { getReading, type ReadingRecord } from "@/server/store";
 import { cardByIndex } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
 import { buildSystemPrompt } from "@/lib/ai/prompt";
@@ -10,7 +11,79 @@ export const runtime = "nodejs";
 
 const BodySchema = z.object({
   message: z.string().min(1).max(500),
+  history: z
+    .array(
+      z.object({
+        sender: z.enum(["user", "bot"]),
+        text: z.string(),
+      })
+    )
+    .optional(),
 });
+
+function generateContextualTarotChatReply(params: {
+  userQuestion: string;
+  history?: Array<{ sender: "user" | "bot"; text: string }>;
+  personaId: string;
+  record: ReadingRecord;
+}): string {
+  const { userQuestion, history = [], personaId, record } = params;
+  const cards = record.drawn?.map((d) => cardByIndex(d.cardIndex)) || [];
+  const primaryCard = cards[0];
+  const q = userQuestion.toLowerCase();
+  const isDirect = personaId === "direct";
+  const isMystic = personaId === "mystic";
+
+  // 1. Solution / Action questions ("แก้ยังไง", "ทำไงดี", "ทางออก", "ควรทำยังไง")
+  if (q.includes("แก้") || q.includes("ทำไง") || q.includes("ทางออก") || q.includes("ควรทำ") || q.includes("เริ่มยังไง")) {
+    if (history.length >= 2) {
+      return isDirect
+        ? `จุดสำคัญตอนนี้คือ "ลงมือทำทีละสเต็ป" อย่าเพิ่งคิดวนไปไกล จากไพ่ ${primaryCard?.nameTh || "หลัก"} คุณต้องเด็ดขาดกับสิ่งที่ค้างคา ตัดสิ่งที่ฉุดรั้งแล้วโฟกัสเฉพาะสิ่งที่คุณควบคุมได้จริงๆ เท่านั้น`
+        : isMystic
+        ? `พลังงานแห่งการคลี่คลายระบุว่า ให้คุณหยุดความคิดที่สับสน แล้วเริ่มจากจุดที่เล็กที่สุดก่อน ไพ่ ${primaryCard?.nameTh || "หลัก"} บ่งบอกว่าเมื่อคุณปลดปล่อยความกังวล ทางออกจะค่อยๆ ปรากฏขึ้นมาเองอย่างชัดเจน`
+        : `สำหรับทางออกที่แม่หมออยากแนะนำเพิ่มเติมนะคะ ให้คุณเริ่มจากการจัดลำดับความสำคัญก่อน สิ่งไหนเร่งด่วนให้จัดการทีละเรื่อง และอย่าลืมใจดีกับตัวเองด้วยนะ ทุกอย่างกำลังค่อยๆ ดีขึ้นค่ะ`;
+    }
+    return isDirect
+      ? `วิธีแก้ตรงนี้คือ: จากไพ่ ${primaryCard?.nameTh || "หลัก"} (${record.drawn?.[0]?.isReversed ? "กลับหัว" : "หัวตั้ง"}) คุณต้องเผชิญหน้ากับความจริง ไม่หนีปัญหา สื่อสารให้ชัดเจนและตั้งขอบเขตให้ตัวเองให้ได้`
+      : isMystic
+      ? `คลื่นพลังงานของไพ่ ${primaryCard?.nameTh || "หลัก"} ชี้ทางสว่างว่า ความชัดเจนจะเกิดขึ้นเมื่อจิตใจคุณสงบ ให้ถอยออกมามองภาพกว้างสักนิด แล้วคุณจะเห็นว่าจุดที่ต้องปรับคือทัศนคติและการปล่อยวาง`
+      : `แม่หมอแนะนำว่า จากพลังของไพ่ ${primaryCard?.nameTh || "หลัก"} สิ่งที่คุณทำได้ทันทีคือการตั้งสติ ไม่รีบร้อนจนกดดันตัวเอง ลองปรึกษาคนสนิทหรือค่อยๆ ก้าวทีละขั้น ผลลัพธ์จะออกมาดีแน่นอนค่ะ`;
+  }
+
+  // 2. Love & Relationship ("รัก", "แฟน", "คนคุย", "เขาคิดยังไง", "ความสัมพันธ์")
+  if (q.includes("รัก") || q.includes("แฟน") || q.includes("คนคุย") || q.includes("เขา") || q.includes("ใจ")) {
+    return isDirect
+      ? `เรื่องความสัมพันธ์จากไพ่ ${primaryCard?.nameTh || "ชุดนี้"} ถ้าเขายังไม่ชัดเจน คุณต้องรักตัวเองให้มากพอ อย่าเสียเวลากับความคลุมเครือ คุยกันตรงๆ จะได้คำตอบที่แท้จริง`
+      : isMystic
+      ? `ในมิติของความรู้สึก ไพ่ ${primaryCard?.nameTh || "ชุดนี้"} แสดงถึงสายสัมพันธ์ที่กำลังอยู่ในช่วงทดสอบจิตใจ จงฟังเสียงหัวใจตนเองมากกว่าคำพูดคนรอบข้าง`
+      : `ในเรื่องความรักนะคะ ไพ่ ${primaryCard?.nameTh || "ชุดนี้"} บอกว่าความเข้าใจและการเปิดใจคุยกันด้วยความนุ่มนวลคือหัวใจสำคัญที่สุด ค่อยๆ ให้เวลาซึ่งกันและกันนะคะ`;
+  }
+
+  // 3. Timing ("เมื่อไหร่", "ตอนไหน", "ช่วงไหน", "กี่วัน", "กี่เดือน")
+  if (q.includes("เมื่อไหร่") || q.includes("ตอนไหน") || q.includes("ช่วง") || q.includes("นานไหม")) {
+    return isDirect
+      ? `จังหวะเวลาจากไพ่ชุดนี้จะเริ่มเห็นการเปลี่ยนแปลงชัดเจนภายใน 1-3 สัปดาห์ข้างหน้านี้ อยู่ที่คุณจะกล้าตัดสินใจลงมือเริ่มเมื่อไหร่`
+      : isMystic
+      ? `กระแสพลังงานจะเริ่มหมุนเวียนและปลดล็อคในช่วง 2-4 สัปดาห์นี้ ขอให้รักษาพลังงานบวกและเตรียมตัวให้พร้อม`
+      : `ช่วงเวลาที่พลังงานไพ่ส่งผลเด่นชัดที่สุดคือช่วง 1-2 สัปดาห์นี้เลยค่ะ เป็นจังหวะที่ดีในการเริ่มต้นอะไรใหม่ๆ นะคะ`;
+  }
+
+  // 4. Caution / Warnings ("ระวัง", "อันตราย", "กลัว", "กังวล")
+  if (q.includes("ระวัง") || q.includes("กังวล") || q.includes("กลัว") || q.includes("ข้อเสีย")) {
+    return isDirect
+      ? `สิ่งที่ต้องระวังที่สุดตามไพ่ ${primaryCard?.nameTh || "หลัก"} คือ "ความลังเลและการผัดวันประกันพรุ่ง" อย่าปล่อยให้ความกลัวมาชี้นำการตัดสินใจ`
+      : isMystic
+      ? `ไพ่ ${primaryCard?.nameTh || "หลัก"} เตือนให้ระวังพลังงานลบรอบข้างและความคิดฟุ้งซ่าน อย่าให้คำวิจารณ์ภายนอกมาบดบังญาณหยั่งรู้ของคุณ`
+      : `สิ่งที่แม่หมออยากให้ระวังเป็นพิเศษคือเรื่องสุขภาพและอารมณ์ชั่ววูบค่ะ อย่าเก็บทุกอย่างมาคิดคนเดียว มีอะไรระบายออกมาได้เสมอนะคะ`;
+  }
+
+  // 5. Default contextual response
+  return isDirect
+    ? `สำหรับคำถาม "${userQuestion}" เมื่อมองควบคู่กับไพ่ ${primaryCard?.nameTh || "ชุดนี้"} สรุปคือจงเชื่อมั่นในตัวเอง วางแผนให้รอบคอบแล้วลุยต่อได้เลย`
+    : isMystic
+    ? `สำหรับเรื่อง "${userQuestion}" ม่านพลังงานของไพ่ ${primaryCard?.nameTh || "ชุดนี้"} สะท้อนว่าคุณกำลังเข้าสู่ช่วงแห่งความเข้าใจที่ลึกซึ้งขึ้น จงวางใจในเส้นทางของตนเอง`
+    : `สำหรับคำถามนี้ แม่หมอมองว่าพลังของไพ่ ${primaryCard?.nameTh || "ชุดนี้"} กำลังช่วยหนุนนำให้คุณพบทางออกที่สบายใจขึ้นเรื่อยๆ ขอให้มีความมั่นใจและก้าวไปข้างหน้านะคะ`;
+}
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -23,7 +96,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Rate Limiting & Concurrency Guard per IP
   const clientIp = getClientIdentifier(request);
   const limit = checkRateLimit(`chat:${clientIp}`, {
-    maxRequests: 25,
+    maxRequests: 30,
     windowSeconds: 60,
     maxConcurrent: 2,
   });
@@ -39,6 +112,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     const userQuestion = parsed.data.message;
+    const history = parsed.data.history || [];
     const spread = getSpread(record.spreadId);
     const cards = record.drawn.map((d) => {
       const card = cardByIndex(d.cardIndex);
@@ -61,51 +135,98 @@ ${cards.join("\n")}
 2. ห้ามใช้คำว่า "ตามหลักการของไพ่" หรือตอบแบบบอท ให้พูดจาเหมือนกำลังคุยกันในแชทส่วนตัว เช่น "ถ้าถามเรื่องนี้จากไพ่ชุดเดิม แม่หมอมองว่า...", "จุดที่น่าสนใจคือ..."
 3. ตอบกระชับ 2-4 ประโยค ชัดเจน อบอุ่น ฟันธง และให้ข้อคิดที่นำไปใช้ได้จริงทันที`;
 
-  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-
-  if (geminiKey) {
-    const models = ["gemini-3.7-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
-    for (const model of models) {
-      console.log(`💬 [Gemini Chat] Sending follow-up to model: ${model}`);
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    // 1. Try Anthropic Claude First (if key available)
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    if (anthropicKey) {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const client = new Anthropic({ apiKey: anthropicKey });
+        const messagesPayload: Array<{ role: "user" | "assistant"; content: string }> = [];
 
-        const response = await fetch(endpoint, {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            "Content-Type": "application/json",
-            "X-goog-api-key": geminiKey,
-          },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: userQuestion }] }],
-            system_instruction: { parts: [{ text: systemInstruction }] },
-            generationConfig: {
-              temperature: 0.7,
-              thinkingConfig: { thinkingBudget: 0 },
-            },
-          }),
+        for (const h of history.slice(-4)) {
+          messagesPayload.push({
+            role: h.sender === "user" ? "user" : "assistant",
+            content: h.text,
+          });
+        }
+        messagesPayload.push({ role: "user", content: userQuestion });
+
+        const claudeRes = await client.messages.create({
+          model: "claude-3-5-sonnet-20241022",
+          system: systemInstruction,
+          max_tokens: 350,
+          temperature: 0.7,
+          messages: messagesPayload,
         });
 
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const data = await response.json();
-          const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (replyText) return NextResponse.json({ reply: replyText.trim() });
+        const replyBlock = claudeRes.content.find((c) => c.type === "text");
+        if (replyBlock && "text" in replyBlock && replyBlock.text.trim()) {
+          return NextResponse.json({ reply: replyBlock.text.trim() });
         }
-      } catch (err) {
-        console.warn(`Chat model ${model} error/timeout:`, err);
+      } catch (claudeErr) {
+        console.warn("⚠️ Claude follow-up chat failed, trying Gemini fallback...", claudeErr);
       }
     }
-  }
 
-    // Instant Fallback / Local Mock
-    return NextResponse.json({
-      reply: `จากไพ่ที่คุณเปิดไป (${record.drawn.map((d) => cardByIndex(d.cardIndex).nameTh).join(", ")}) สิ่งที่ต้องระวังและโฟกัสมากที่สุดคือการมีสติอยู่กับปัจจุบัน อย่าเพิ่งด่วนตัดสินใจจากอารมณ์ชั่ววูบ และก้าวต่อไปอย่างมั่นคงนะคะ`,
+    // 2. Try Google Gemini API
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (geminiKey) {
+      const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+      for (const model of models) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+          const contentsPayload = [];
+          for (const h of history.slice(-4)) {
+            contentsPayload.push({
+              role: h.sender === "user" ? "user" : "model",
+              parts: [{ text: h.text }],
+            });
+          }
+          contentsPayload.push({
+            role: "user",
+            parts: [{ text: userQuestion }],
+          });
+
+          const response = await fetch(endpoint, {
+            method: "POST",
+            signal: controller.signal,
+            headers: {
+              "Content-Type": "application/json",
+              "X-goog-api-key": geminiKey,
+            },
+            body: JSON.stringify({
+              contents: contentsPayload,
+              system_instruction: { parts: [{ text: systemInstruction }] },
+              generationConfig: {
+                temperature: 0.7,
+              },
+            }),
+          });
+
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            const data = await response.json();
+            const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (replyText) return NextResponse.json({ reply: replyText.trim() });
+          }
+        } catch (err) {
+          console.warn(`Chat model ${model} error:`, err);
+        }
+      }
+    }
+
+    // 3. Dynamic Context-Aware Intelligent Local Engine
+    const dynamicReply = generateContextualTarotChatReply({
+      userQuestion,
+      history,
+      personaId: record.personaId,
+      record,
     });
+
+    return NextResponse.json({ reply: dynamicReply });
   } finally {
     limit.releaseConcurrency();
   }

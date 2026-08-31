@@ -40,7 +40,10 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona }
       const res = await fetch(`/api/reading/${readingId}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: query }),
+        body: JSON.stringify({
+          message: query,
+          history: messages.map((m) => ({ sender: m.sender, text: m.text })),
+        }),
       });
 
       const data = await res.json();
