@@ -24,5 +24,19 @@
 
   "vars": {
     "NODE_ENV": "production"
-  }
+  },
+
+  // ── Secrets สำหรับ OAuth & Session Security ───────────────────────────────────
+  // ⚠️ IMPORTANT: ใช้ `npm run secret:sync` เพื่อเก็บ secrets ไว้ใน Cloudflare Workers
+  // ไม่ต้องใส่ค่า concrete ที่นี่ — Wrangler จะอ่านจากจริงตอน deploy
+  // เพิ่มชื่อ secrets ทั้งหมด:
+  // - GOOGLE_CLIENT_ID
+  // - GOOGLE_CLIENT_SECRET
+  // - TAROT_SESSION_SECRET
+  // - AUTH_SECRET (ถ้าใช้)
+  "secrets": [
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "TAROT_SESSION_SECRET"
+  ]
 }
