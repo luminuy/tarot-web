@@ -334,6 +334,12 @@ function waitForMergeThenTidy(repo: string, prNumber: string, branch: string): v
       console.log(`✅ PR #${prNumber} merged แล้ว`);
       // ต้องออกจาก branch ที่จะลบก่อน ถึงจะลบมันได้
       if (getBranch() === branch) {
+        // `.ai-locks.json` เป็นไฟล์สถานะที่ `npm run agent:check` เขียนใหม่ระหว่างการตรวจ
+        // (ตัดล็อคที่หมดอายุออก) ทำให้ working tree สกปรกค้างไว้
+        // ถ้าไฟล์นี้ถูกแก้บน main ด้วย git จะปฏิเสธการสลับ branch ทันที
+        // คืนค่าไฟล์นี้ได้อย่างปลอดภัยเพราะเป็น state ที่สร้างใหม่ได้ และตอนนี้ปลดล็อคไปแล้ว
+        shQuiet("git", ["checkout", "--", ".ai-locks.json"]);
+
         // ⚠️ `git checkout main` ใช้ไม่ได้เมื่ออยู่ใน git worktree
         // เพราะ main ถูก checkout ค้างไว้ที่โฟลเดอร์หลักอยู่แล้ว (บทเรียน INC-0004)
         // จึงต้องลองแบบปกติก่อน แล้วถอยไป detach ที่ origin/main ซึ่งทำงานได้ทุก worktree
@@ -349,10 +355,15 @@ function waitForMergeThenTidy(repo: string, prNumber: string, branch: string): v
           }
         }
 
-        // อย่ารายงานว่าสำเร็จถ้ายังออกจาก branch ไม่ได้จริง
+        // อย่ารายงานว่าสำเร็จถ้ายังออกจาก branch ไม่ได้จริง — และต้องบอกด้วยว่าติดเพราะอะไร
         if (!moved) {
           console.log(`⚠️ ออกจาก branch '${branch}' ไม่ได้ จึงลบ branch นี้ไม่ได้`);
-          console.log(`   ย้ายไป branch อื่นเองแล้วสั่ง: npm run git:tidy`);
+          const dirty = shQuiet("git", ["status", "--porcelain"]);
+          if (dirty) {
+            console.log(`   สาเหตุที่เป็นไปได้: มีไฟล์ค้างใน working tree`);
+            console.log(indent(dirty, ""));
+          }
+          console.log(`   จัดการไฟล์ค้างแล้วสั่ง: npm run git:tidy`);
           return;
         }
       }
