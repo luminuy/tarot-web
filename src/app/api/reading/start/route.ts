@@ -55,8 +55,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
   }
 
-  // ตรวจความปลอดภัยของคำถามก่อนทำอย่างอื่นทั้งหมด
-  const verdict = checkQuestion(`${question} ${intake.situation ?? ""} ${intake.feeling ?? ""}`);
+  // ตรวจความปลอดภัยของคำถามก่อนทำอย่างอื่นทั้งหมด (รวมทุกฟิลด์ที่ผู้ใช้กรอก: P0-5 fix)
+  const textToScan = [
+    question,
+    intake.situation,
+    intake.feeling,
+    intake.hoped,
+    nickname,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const verdict = checkQuestion(textToScan);
   if (verdict.block) {
     return NextResponse.json({ blocked: true, message: verdict.message }, { status: 200 });
   }

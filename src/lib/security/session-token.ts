@@ -13,16 +13,43 @@ import type { ReadingRecord } from "@/server/store";
  * 3. รับประกันความปลอดภัย 100% ไม่สามารถปลอมแปลงไพ่หรือ Seed ได้
  */
 
-const DEFAULT_DEV_SECRET = "tarot-sacred-altar-secret-provably-fair-2026";
+const KNOWN_INSECURE_SECRETS = new Set([
+  "tarot-sacred-altar-secret-provably-fair-2026",
+  "secret",
+  "default",
+]);
 
-function getSessionSecret(): string {
-  const secret = process.env.TAROT_SESSION_SECRET || process.env.CF_PAGES_COMMIT_SHA;
-  if (secret) return secret;
-  return DEFAULT_DEV_SECRET;
+export function getSessionSecret(): string {
+  const secret = process.env.TAROT_SESSION_SECRET;
+  const isProd = process.env.NODE_ENV === "production";
+
+  if (isProd) {
+    if (!secret || secret.trim().length < 32 || KNOWN_INSECURE_SECRETS.has(secret)) {
+      throw new Error(
+        "[Security Guard] TAROT_SESSION_SECRET must be set to a secure string (≥ 32 characters) in production!"
+      );
+    }
+    return secret;
+  }
+
+  // Development fallback with explicit dev-only prefix
+  return (
+    secret ||
+    process.env.TAROT_SESSION_SECRET_DEV ||
+    "dev-only-local-secret-32-chars-minimum-token-protection"
+  );
+}
+
+export interface SessionTokenPayload extends Partial<ReadingRecord> {
+  iat?: number;
+  exp?: number;
 }
 
 export function signReadingSessionToken(record: Partial<ReadingRecord>): string {
-  const compactPayload: Partial<ReadingRecord> = {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const isDrawnComplete = Array.isArray(record.drawn) && record.drawn.length > 0;
+
+  const compactPayload: SessionTokenPayload = {
     id: record.id,
     status: record.status,
     spreadId: record.spreadId,
@@ -34,11 +61,14 @@ export function signReadingSessionToken(record: Partial<ReadingRecord>): string 
     safetyFlag: record.safetyFlag,
     safetyGuard: record.safetyGuard,
     commitment: record.commitment,
-    serverSeed: record.serverSeed,
+    // P0-1 Guard: Do NOT reveal serverSeed before cards are drawn (Prevent seed pre-computation)
+    serverSeed: isDrawnComplete ? record.serverSeed : undefined,
     clientSeed: record.clientSeed,
     drawn: record.drawn,
     result: record.result,
-    createdAt: record.createdAt,
+    createdAt: record.createdAt || Date.now(),
+    iat: nowSec,
+    exp: nowSec + 7200, // 2-hour TTL expiration
   };
 
   const payloadStr = JSON.stringify(compactPayload);
@@ -67,7 +97,20 @@ export function verifyReadingSessionToken(token: string): Partial<ReadingRecord>
     }
 
     const payloadStr = Buffer.from(data, "base64url").toString("utf8");
-    return JSON.parse(payloadStr) as Partial<ReadingRecord>;
+    const payload = JSON.parse(payloadStr) as SessionTokenPayload;
+
+    // P0-3 Guard: Check Token Expiration
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (payload.exp && nowSec > payload.exp) {
+      return null; // Expired token
+    }
+
+    // Guard against stale records older than 2 hours
+    if (payload.createdAt && Date.now() - payload.createdAt > 7200 * 1000) {
+      return null;
+    }
+
+    return payload as Partial<ReadingRecord>;
   } catch {
     return null;
   }

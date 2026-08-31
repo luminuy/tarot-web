@@ -7,6 +7,8 @@ import { buildSystemPrompt } from "@/lib/ai/prompt";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
+import { checkQuestion } from "@/lib/safety/guardrails";
+
 export const runtime = "nodejs";
 
 const BodySchema = z.object({
@@ -45,6 +47,13 @@ function generateContextualTarotChatReply(params: {
   record: Partial<ReadingRecord>;
 }): string {
   const { userQuestion, history = [], personaId, record } = params;
+
+  // P0-4 Guard: Crisis filter in local fallback
+  const verdict = checkQuestion(userQuestion);
+  if (verdict.block) {
+    return verdict.message || "กรุณาปรึกษาสายด่วนสุขภาพจิต 1323 โทรฟรีตลอด 24 ชั่วโมง หรือติดต่อผู้เชี่ยวชาญทันทีนะคะ ✨";
+  }
+
   const cards = record.drawn?.map((d) => cardByIndex(d.cardIndex)) || [];
   const primaryCard = cards[0];
   const q = userQuestion.toLowerCase();
@@ -168,6 +177,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const userQuestion = parsed.data.message;
     const history = parsed.data.history || [];
     const clientSnapshot = parsed.data.readingSnapshot;
+
+    // P0-4 Guard: Screen userQuestion for crisis / self-harm signals (Golden Rule 6 & Hotline 1323)
+    const safetyVerdict = checkQuestion(userQuestion);
+    if (safetyVerdict.block) {
+      return NextResponse.json({
+        reply: safetyVerdict.message,
+        blocked: true,
+        crisisCard: true,
+      });
+    }
 
     // Resilient server store resolution with session token and client snapshot fallback (Edge Failover Safe)
     let record: Partial<ReadingRecord> | undefined = getReading(id);

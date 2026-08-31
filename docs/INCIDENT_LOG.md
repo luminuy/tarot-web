@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0029 · 2026-09-01 00:14 · 🟠 High · delete dead Engine B, harden session token secret guard, and enforce chat crisis safety screening
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Dead Engine B routes open to unauthenticated access, session token could silently fallback to default string in prod, and chat messages bypassed crisis hotline 1323 screening |
+| **สาเหตุราก** | Unused legacy services were left intact after migration, session token helper did not hard throw on missing production secrets, and chat POST handler lacked checkQuestion guard |
+| **การแก้ไข** | Deleted all dead Engine B endpoints and services, upgraded getSessionSecret to throw in production for secrets under 32 chars or default values, added 2-hour token expiration, and integrated checkQuestion in chat POST handler |
+| **🛡️ กฎป้องกันถาวร** | **Pruned all unused legacy services and routes, enforced hard fail loud on missing or short production session secrets with 2h expiration, and added mandatory checkQuestion at start of chat endpoint and local fallback** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify passes 7/7 gates, typecheck 0 errors, and unit checks verify deleted dead routes and active safety screening |
+| **บันทึกโดย** | Antigravity AI · branch `feat/audit-milestone-1-engine-b-and-p0-security` · commit `b7446f1` |
+
+
 ### INC-0028 · 2026-08-31 23:47 · 🔵 Low · Clean up GalaxyCanvas by removing extra overlapping canvas rings to restore original pristine cosmic starfield
 
 | หัวข้อ | รายละเอียด |
