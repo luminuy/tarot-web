@@ -21,6 +21,33 @@
 
   --font-serif-th: var(--font-noto-serif-thai), "Noto Serif Thai", serif;
   --font-sans-th: var(--font-sarabun), "Sarabun", system-ui, sans-serif;
+
+  /* FDN-2: Motion Tokens */
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+  --dur-slow: 420ms;
+  --dur-page: 360ms;
+  --dur-ritual: 520ms;
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-emphasis: cubic-bezier(0.2, 0, 0, 1);
+}
+
+:root {
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+  --dur-slow: 420ms;
+  --dur-page: 360ms;
+  --dur-ritual: 520ms;
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-emphasis: cubic-bezier(0.2, 0, 0, 1);
 }
 
 html,
@@ -225,4 +252,39 @@ html {
     font-size: 16px !important;
   }
 }
+
+/* FDN-3: Animation and Transition Classes */
+.anim-page-transition {
+  animation: pageFadeIn var(--dur-page) var(--ease-out) both;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-tarot-idle {
+  animation: tarotIdleFloat 4s ease-in-out infinite;
+}
+
+@keyframes tarotIdleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 
