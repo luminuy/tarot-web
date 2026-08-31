@@ -1,5 +1,46 @@
 [
   {
+    "id": "audit-1788167266483-1zbc7",
+    "timestampTh": "31/8/2569 16:07:45",
+    "timestampIso": "2026-08-31T09:07:45.697Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/polish-tidy-output",
+      "commitSha": "47b7017"
+    },
+    "action": {
+      "category": "REFACTOR",
+      "summary": "กรอง (HEAD detached) ออกจากรายการ branch ใน git:tidy",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "cripts/github-auto.ts",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 2
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788167064154-4mqz9",
     "timestampTh": "31/8/2569 16:04:23",
     "timestampIso": "2026-08-31T09:04:23.159Z",
