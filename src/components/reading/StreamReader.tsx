@@ -406,7 +406,19 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {/* TAB 3: FOLLOW-UP CHAT */}
       {activeTab === "chat" && readingId && (
         <div className="pt-2">
-          <FollowUpChat readingId={readingId} persona={persona} />
+          <FollowUpChat
+            readingId={readingId}
+            persona={persona}
+            readingSnapshot={{
+              summary: reading?.summary,
+              personaId: persona.id,
+              drawn: drawnCards.map((d) => ({
+                order: d.order,
+                cardIndex: d.cardIndex !== undefined ? d.cardIndex : 0,
+                isReversed: !!d.isReversed,
+              })),
+            }}
+          />
         </div>
       )}
 

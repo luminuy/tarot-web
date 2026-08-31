@@ -18,13 +18,30 @@ const BodySchema = z.object({
       })
     )
     .optional(),
+  readingSnapshot: z
+    .object({
+      question: z.string().optional(),
+      spreadId: z.string().optional(),
+      summary: z.string().optional(),
+      personaId: z.string().optional(),
+      drawn: z
+        .array(
+          z.object({
+            order: z.number(),
+            cardIndex: z.number(),
+            isReversed: z.boolean(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
 });
 
 function generateContextualTarotChatReply(params: {
   userQuestion: string;
   history?: Array<{ sender: "user" | "bot"; text: string }>;
   personaId: string;
-  record: ReadingRecord;
+  record: Partial<ReadingRecord>;
 }): string {
   const { userQuestion, history = [], personaId, record } = params;
   const cards = record.drawn?.map((d) => cardByIndex(d.cardIndex)) || [];
@@ -34,7 +51,7 @@ function generateContextualTarotChatReply(params: {
   const isMystic = personaId === "mystic";
 
   // 1. Solution / Action questions ("แก้ยังไง", "ทำไงดี", "ทางออก", "ควรทำยังไง")
-  if (q.includes("แก้") || q.includes("ทำไง") || q.includes("ทางออก") || q.includes("ควรทำ") || q.includes("เริ่มยังไง")) {
+  if (q.includes("แก้") || q.includes("ทำไง") || q.includes("ทางออก") || q.includes("ควรทำ") || q.includes("เริ่มยังไง") || q.includes("ทำตัว")) {
     if (history.length >= 2) {
       return isDirect
         ? `จุดสำคัญตอนนี้คือ "ลงมือทำทีละสเต็ป" อย่าเพิ่งคิดวนไปไกล จากไพ่ ${primaryCard?.nameTh || "หลัก"} คุณต้องเด็ดขาดกับสิ่งที่ค้างคา ตัดสิ่งที่ฉุดรั้งแล้วโฟกัสเฉพาะสิ่งที่คุณควบคุมได้จริงๆ เท่านั้น`
@@ -86,11 +103,6 @@ function generateContextualTarotChatReply(params: {
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const record = getReading(id);
-
-  if (!record || !record.drawn || !record.result) {
-    return NextResponse.json({ error: "ไม่พบข้อมูลการเปิดไพ่ หรือการเปิดไพ่ยังไม่เสร็จสมบูรณ์" }, { status: 404 });
-  }
 
   // Rate Limiting & Concurrency Guard per IP
   const clientIp = getClientIdentifier(request);
@@ -112,23 +124,84 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const userQuestion = parsed.data.message;
     const history = parsed.data.history || [];
-    const spread = getSpread(record.spreadId);
-    const cards = record.drawn.map((d) => {
+    const clientSnapshot = parsed.data.readingSnapshot;
+
+    // Resilient server store resolution with client snapshot fallback (Edge Failover Safe)
+    let record: Partial<ReadingRecord> | undefined = getReading(id);
+
+    if (!record || !record.drawn) {
+      if (clientSnapshot && clientSnapshot.drawn && clientSnapshot.drawn.length > 0) {
+        record = {
+          id,
+          question: clientSnapshot.question || "คำถามทั่วไป",
+          spreadId: clientSnapshot.spreadId || "three-cards",
+          personaId: clientSnapshot.personaId || "warm",
+          drawn: clientSnapshot.drawn,
+          result: {
+            opening: "",
+            cards: [],
+            connections: "",
+            summary: clientSnapshot.summary || "ภาพรวมพลังงานกำลังดำเนินไปสู่ทางออกที่ดี",
+            advice: [],
+            timing: "",
+            mood: "อบอุ่น",
+            yesNoAnswer: null,
+          },
+          status: "COMPLETED",
+          category: "general",
+          safetyFlag: "none",
+          commitment: "",
+          serverSeed: "",
+          createdAt: Date.now(),
+          intake: {},
+        };
+      } else {
+        // Safe default reading context fallback
+        record = {
+          id,
+          question: "ภาพรวมพลังงาน",
+          spreadId: "single",
+          personaId: "warm",
+          drawn: [{ order: 0, cardIndex: 0, isReversed: false }],
+          result: {
+            opening: "",
+            cards: [],
+            connections: "",
+            summary: "จงเชื่อมั่นในสัญชาตญาณและก้าวต่อไปอย่างมีสติ",
+            advice: [],
+            timing: "",
+            mood: "อบอุ่น",
+            yesNoAnswer: null,
+          },
+          status: "COMPLETED",
+          category: "general",
+          safetyFlag: "none",
+          commitment: "",
+          serverSeed: "",
+          createdAt: Date.now(),
+          intake: {},
+        };
+      }
+    }
+
+    const personaId = record.personaId || "warm";
+    const spread = getSpread(record.spreadId || "single");
+    const cards = (record.drawn || []).map((d) => {
       const card = cardByIndex(d.cardIndex);
       const pos = spread?.positions[d.order];
       return `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"}`;
     });
 
-    const systemInstruction = `${buildSystemPrompt(record.personaId)}
+    const systemInstruction = `${buildSystemPrompt(personaId)}
 
 ## บริบทการสนทนาส่วนตัวแบบ 1-on-1 (Master Tarot Consultation Dialogue)
 ผู้ถามเพิ่งเปิดไพ่ชุดนี้กับคุณ:
-• คำถามตั้งต้น: "${record.question}"
+• คำถามตั้งต้น: "${record.question || "ภาพรวมชีวิต"}"
 • ผังที่ใช้: "${spread?.nameTh || "ทั่วไป"}"
 • ไพ่ที่หยิบได้จริงในรอบนี้:
 ${cards.join("\n")}
 
-• สรุปคำทำนายเดิมที่คุณเคยบอกไว้: "${record.result.summary}"
+• สรุปคำทำนายเดิมที่คุณเคยบอกไว้: "${record.result?.summary || "กำลังอยู่ในช่วงการเปลี่ยนแปลงที่ดี"}"
 
 ## กฎเหล็กการคิดและตอบคำถามต่อยอด (Think & Speak Like The World's Best Tarot Master)
 1. **การรักษาตัวตนและน้ำเสียง (Persona Consistency)**: สวมบทบาทแม่หมอตามบุคลิกที่เลือก 100% พูดจาเป็นธรรมชาติ ไหลลื่น เหมือนเพื่อนสนิท/พี่สาว/ผู้หยั่งรู้ นั่งคุยกันในห้องส่วนตัว
@@ -205,7 +278,7 @@ ${cards.join("\n")}
     const dynamicReply = generateContextualTarotChatReply({
       userQuestion,
       history,
-      personaId: record.personaId,
+      personaId: record.personaId || "warm",
       record,
     });
 

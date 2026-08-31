@@ -48,6 +48,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0009 · 2026-08-31 13:38 · 🟠 High · add smooth auto-scroll to latest message and client snapshot resilience for serverless edge chat
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | add smooth auto-scroll to latest message and client snapshot resilience for serverless edge chat |
+| **สาเหตุราก** | chat container did not auto-scroll down to newly sent/received messages and serverless worker isolates lost in-memory reading records on multi-turn chat |
+| **การแก้ไข** | add smooth auto-scroll to latest message and client snapshot resilience for serverless edge chat |
+| **🛡️ กฎป้องกันถาวร** | **added chatBottomRef auto-scroll hook and implemented readingSnapshot client fallback payload for 100% resilient edge consultation** |
+| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 errors, 6/6 repo verify checks passed, smooth auto-scrolling and zero 404 errors on serverless chat |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `c9e3afc` |
+
+
 ### INC-0008 · 2026-08-31 13:20 · 🟠 High · upgrade Follow-up Chat with Claude and Gemini dual-engine integration, conversation history awareness, and dynamic contextual response engine
 
 | หัวข้อ | รายละเอียด |

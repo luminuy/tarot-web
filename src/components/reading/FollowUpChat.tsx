@@ -14,6 +14,13 @@ interface Message {
 interface FollowUpChatProps {
   readingId: string;
   persona: Persona;
+  readingSnapshot?: {
+    question?: string;
+    spreadId?: string;
+    summary?: string;
+    personaId?: string;
+    drawn?: Array<{ order: number; cardIndex: number; isReversed: boolean }>;
+  };
 }
 
 const SUGGESTED_QUESTIONS = [
@@ -22,10 +29,19 @@ const SUGGESTED_QUESTIONS = [
   "จังหวะเวลานี้เหมาะกับการตัดสินใจเรื่องนี้หรือยัง?",
 ];
 
-export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona }) => {
+export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, readingSnapshot }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const chatBottomRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  React.useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   const sendMessage = async (textToSend?: string) => {
     const query = (textToSend || input).trim();
@@ -43,6 +59,9 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona }
         body: JSON.stringify({
           message: query,
           history: messages.map((m) => ({ sender: m.sender, text: m.text })),
+          readingSnapshot: readingSnapshot || {
+            personaId: persona.id,
+          },
         }),
       });
 
@@ -155,6 +174,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona }
             {persona.nameTh} กำลังมองไพ่และพิมพ์ตอบคุณ...
           </motion.div>
         )}
+        <div ref={chatBottomRef} />
       </div>
 
       {/* Input Bar */}
