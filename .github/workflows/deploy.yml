@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - main
+  # จำเป็นต้องมี! GitHub จะไม่ trigger workflow จาก event ที่เกิดจาก GITHUB_TOKEN
+  # (กันการวนซ้ำไม่รู้จบ) ดังนั้น PR ที่ถูก merge โดย pr.yml จะไม่ทำให้ deploy ทำงาน
+  # pr.yml จึงต้องสั่ง dispatch มาที่นี่เองหลัง merge สำเร็จ
+  workflow_dispatch:
 
 concurrency:
   group: production-deploy
