@@ -1,22 +1,5 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-08-31T09:34:44.094Z",
-  "locks": [
-    {
-      "id": "lock-1788168833907-6csu",
-      "agentName": "Antigravity AI",
-      "agentRole": "AI Agent",
-      "domain": "SEODiscoverability",
-      "files": [
-        "src/app/sitemap.ts",
-        "src/app/robots.ts",
-        "src/app/manifest.ts",
-        "src/app/cards/[id]/page.tsx",
-        "src/app/layout.tsx"
-      ],
-      "task": "Modifying codebase",
-      "acquiredAt": "2026-08-31T09:33:53.907Z",
-      "expiresAt": "2026-08-31T10:03:53.907Z"
-    }
-  ]
+  "lastUpdated": "2026-08-31T09:35:07.666Z",
+  "locks": []
 }
