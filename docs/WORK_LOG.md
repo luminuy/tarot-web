@@ -23,7 +23,9 @@
 | **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
 | **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
 | **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
-| **บัญชีและประวัติ** | `/account` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
+| **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA, Edge OAuth Google + LINE, บันทึกผลทำนาย 50 รายการ, ติดตาม Outcome | ตั้งค่า OAuth Credentials บน Cloudflare Workers |
+| **ล็อกอิน Google / LINE** | `src/components/auth/AuthModal.tsx` | 🟢 **Active / Live** (ต้องตั้ง Secrets) | Ready | Edge OAuth HMAC-SHA256, Session Cookie 30 วัน, CSRF Protection, UserProfileBadge header | ตั้งค่า GOOGLE_CLIENT_ID / LINE_CHANNEL_ID บน Cloudflare |
+| **สมุดบันทึก AI Retrospective** | `src/components/history/ReadingHistoryModal.tsx` | 🟢 **Active / Live** | Ready | ติดตามผล ACCURATE/PARTIAL/PENDING/NOT_HAPPENED, บันทึกความคิด, AI Monthly Retrospective Gemini | ซิงก์ประวัติข้ามอุปกรณ์ผ่าน Cloud |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
@@ -32,7 +34,50 @@
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
 
+### 🗓️ 2026-09-01: Feature 1 — Edge OAuth (Google + LINE) + Feature 3 — Smart Journal with AI Monthly Retrospective
+
+#### 1. ระบบล็อกอิน Google และ LINE (Edge OAuth HMAC-SHA256)
+- **ความต้องการ**: ให้ผู้ใช้สามารถล็อกอินด้วย Google หรือ LINE เพื่อบันทึกและซิงก์ประวัติการดูดวง
+- **สิ่งที่แก้ไข**:
+  - สร้าง `src/lib/auth/edge-auth.ts` — Edge OAuth engine ด้วย Web Crypto API + HMAC-SHA256 session ไม่ต้องพึ่ง JWT library ภายนอก รองรับ Cloudflare Workers Edge Runtime 100%
+  - สร้าง `src/app/api/auth/[provider]/route.ts` — Redirect ไป Google หรือ LINE OAuth พร้อม CSRF state cookie
+  - สร้าง `src/app/api/auth/[provider]/callback/route.ts` — แลก code กับ token, ออก session cookie `tarot_auth_session` (HttpOnly, Secure, 30 วัน)
+  - สร้าง `src/app/api/auth/me/route.ts` — ตรวจสอบ session และคืน user profile
+  - สร้าง `src/app/api/auth/logout/route.ts` — ล้าง session cookie
+  - สร้าง `src/components/auth/AuthModal.tsx` — Modal ล็อกอินสไตล์หรูหรา ปุ่ม Google + LINE
+  - สร้าง `src/components/auth/UserProfileBadge.tsx` — Badge แสดงชื่อ/avatar ผู้ใช้บน header พร้อมปุ่ม logout
+  - แก้ไข `src/app/page.tsx` — เพิ่ม dynamic import AuthModal, state `isAuthOpen`, UserProfileBadge ใน header toolbar
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - ใหม่: `src/lib/auth/edge-auth.ts`, `src/components/auth/AuthModal.tsx`, `src/components/auth/UserProfileBadge.tsx`
+  - ใหม่: `src/app/api/auth/[provider]/route.ts`, `src/app/api/auth/[provider]/callback/route.ts`
+  - ใหม่: `src/app/api/auth/me/route.ts`, `src/app/api/auth/logout/route.ts`
+  - แก้ไข: `src/app/page.tsx`
+- **ผลการทดสอบ**: `npm run typecheck` ➔ ✅ 0 errors | `npm run repo:verify` ➔ ✅ 7/7 ด่าน
+
+#### 2. Smart Journal พร้อม Outcome Tracking และ AI Monthly Retrospective
+- **ความต้องการ**: ให้ผู้ใช้ติดตามว่าคำทำนายไพ่แม่นแค่ไหน และสรุปรายเดือนด้วย AI
+- **สิ่งที่แก้ไข**:
+  - แก้ไข `src/lib/utils/history.ts` — เพิ่มประเภท `ReadingOutcome` (ACCURATE/PARTIAL/PENDING/NOT_HAPPENED), ฟิลด์ `outcome`, `userNote`, `outcomeUpdatedAt` ใน `SavedReadingItem`; เพิ่ม `updateReadingOutcome()`, `importReadings()`; เพิ่ม cap จาก 30 เป็น 50
+  - สร้าง `src/app/api/journal/monthly-summary/route.ts` — Edge API วิเคราะห์ผลทำนาย 15 รายการล่าสุด: ไพ่ที่โผล่บ่อย, ธาตุครอบงำ, Gemini AI สรุปบทเรียนชีวิต+คำเสริมพลัง+ย่อหน้า synthesis (fallback ถ้าไม่มี API key)
+  - เขียน `src/components/history/ReadingHistoryModal.tsx` ใหม่ทั้งหมด — ปุ่ม AI Monthly Synthesis, แสดง card ผลสรุป AI, ปุ่มติดตาม Outcome รายการ, textarea บันทึกความคิด, แท็บกรองตาม Outcome, ค้นหาครอบคลุม userNote
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - แก้ไข: `src/lib/utils/history.ts`, `src/components/history/ReadingHistoryModal.tsx`
+  - ใหม่: `src/app/api/journal/monthly-summary/route.ts`
+- **ผลการทดสอบ**: `npm run typecheck` ➔ ✅ 0 errors | Deploy บน `origin/main` สำเร็จ (รวมใน PR #51 Squash Merge)
+
+#### ⚠️ สิ่งที่ต้องทำเพิ่ม (ยังไม่ได้ตั้งค่า)
+- ตั้งค่า Cloudflare Worker Secrets เพื่อให้ OAuth ทำงานจริงบน Production:
+  ```bash
+  npx wrangler secret put GOOGLE_CLIENT_ID --name tarot-web
+  npx wrangler secret put GOOGLE_CLIENT_SECRET --name tarot-web
+  npx wrangler secret put LINE_CHANNEL_ID --name tarot-web
+  npx wrangler secret put LINE_CHANNEL_SECRET --name tarot-web
+  ```
+- สร้าง Google OAuth App บน [console.cloud.google.com](https://console.cloud.google.com)
+- สร้าง LINE Login Channel บน [developers.line.biz](https://developers.line.biz)
+
 ### 🗓️ 2026-08-31: ระบบบันทึกบทเรียนความผิดพลาดอัตโนมัติและมาตรฐานวิศวกรรม (Incident Log & Engineering Discipline Protocol)
+
 
 #### 1. วางระบบบันทึกความผิดพลาดอัตโนมัติและกฎ 7 ข้อ (Incident Log Engine & Blameless Post-Mortem)
 - **ปัญหาเดิม**: AI แต่ละตัวที่เข้ามาทำงานต่ออาจทำผิดซ้ำเรื่องเดิม (เช่น ปัญหา image-rendering, header ทับซ้อน, คำสั่ง gh ใน worktree, flaky random test) เพราะไม่มีแหล่งบันทึกบทเรียนกลางที่บังคับให้อ่านและบันทึก
