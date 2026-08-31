@@ -46,7 +46,7 @@ export function CardImage({
   full = false,
   loading = "lazy",
   decoding = "async",
-  draggable,
+  draggable = false,
   onError,
 }: CardImageProps) {
   const src = getCardImageSrc(image, cardId);
@@ -58,7 +58,7 @@ export function CardImage({
       alt={alt}
       width={300}
       height={520}
-      className={className}
+      className={`select-none ${className || ""}`}
       style={style}
       loading={loading}
       decoding={decoding}
