@@ -121,10 +121,12 @@ function updateWorkLog(audit: SystemAudit) {
   }
 }
 
-async function main() {
+export async function syncWorkLog() {
   const audit = await runAudit();
   updateWorkLog(audit);
   console.log(`✅ [Auto-Sync เสร็จสิ้น] สถานะระบบ Typecheck: 0 errors | ไพ่ ${audit.cardCount} ใบ | ผัง ${audit.spreadCount} ผัง`);
 }
 
-main().catch(console.error);
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  syncWorkLog().catch(console.error);
+}

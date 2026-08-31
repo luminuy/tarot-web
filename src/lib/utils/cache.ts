@@ -1,27 +1,22 @@
+import { getCardImageSrc } from "@/lib/tarot/card-image";
+
 /**
  * Tarot Master Web Performance & Cache Engine
  * -------------------------------------------------------------
  * 1. Asset Pre-Decoding: โหลดและ decode ภาพไพ่ WebP ล่วงหน้าบน idle frame (0ms stutter)
- * 2. Audio SFX Warmup: เตรียม Web Audio Context เพื่อเล่นเสียงได้ทันทีแบบ Low-Latency
- * 3. In-Memory LRU Cache: พักข้อมูลการทำนายและการ์ดในเครื่องเพื่อการสลับแท็บความเร็วสูง
+ * 2. In-Memory LRU Cache: พักข้อมูลการทำนายและการ์ดในเครื่องเพื่อการสลับแท็บความเร็วสูง
  */
 
 const PRELOAD_MAJOR_CARDS = [
-  "major-00.webp",
-  "major-01.webp",
-  "major-02.webp",
-  "major-03.webp",
-  "major-04.webp",
-  "major-10.webp",
-  "major-17.webp",
-  "major-19.webp",
-  "major-21.webp",
-];
-
-const PRELOAD_SOUNDS = [
-  "/sounds/shuffle.mp3",
-  "/sounds/card-pick.mp3",
-  "/sounds/reveal.mp3",
+  "major-00.jpg",
+  "major-01.jpg",
+  "major-02.jpg",
+  "major-03.jpg",
+  "major-04.jpg",
+  "major-10.jpg",
+  "major-17.jpg",
+  "major-19.jpg",
+  "major-21.jpg",
 ];
 
 let isPreloaded = false;
@@ -36,23 +31,16 @@ export function warmupTarotAssets(): void {
   const scheduleTask = (window as any).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1000));
 
   scheduleTask(() => {
-    // 1. Pre-decode Priority Major Arcana Cards
+    // 1. Pre-decode Priority Major Arcana Cards using Canonical Path Resolver
     for (const cardFile of PRELOAD_MAJOR_CARDS) {
       try {
+        const src = getCardImageSrc(cardFile);
+        if (!src) continue;
         const img = new Image();
-        img.src = `/cards/variants/w320/${cardFile}`;
+        img.src = src;
         if (typeof img.decode === "function") {
           img.decode().catch(() => {});
         }
-      } catch {}
-    }
-
-    // 2. Pre-fetch Essential Audio SFX
-    for (const sfx of PRELOAD_SOUNDS) {
-      try {
-        const audio = new Audio();
-        audio.preload = "auto";
-        audio.src = sfx;
       } catch {}
     }
   });

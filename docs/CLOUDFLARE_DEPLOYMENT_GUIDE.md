@@ -70,17 +70,14 @@ npx wrangler login
 
 ---
 
-### ขั้นที่ 2: ตั้งค่า API Key และ Secrets (สำคัญมาก ⚠️)
-ตั้งค่า Key สำหรับให้ AI แม่หมอทำงานบน Cloudflare อย่างปลอดภัย (ไม่ต้องเขียนลงโค้ด):
+### ขั้นที่ 2: ตั้งค่า Secrets (สำคัญมาก ⚠️)
 
 ```bash
-# 1. ใส่ Gemini API Key
 npx wrangler secret put GEMINI_API_KEY
-# (ระบบจะให้พิมพ์หรือ Paste API Key ลงไป แล้วกด Enter)
-
-# 2. (ตัวเลือกเสริม) ใส่ Google AI API Key สำรอง
-npx wrangler secret put GOOGLE_API_KEY
+npx wrangler secret put TAROT_SESSION_SECRET   # openssl rand -hex 32 — จำเป็น! ไม่งั้น Provably-Fair ใช้ค่า default ที่ทุกคนรู้
 ```
+
+> ส่วน KV namespace สำหรับ edge cache สร้างครั้งเดียวแล้ว (ดูหัวข้อ **1.5** ด้านบน) — ไม่ต้องสร้างใหม่ทุกครั้ง
 
 ---
 

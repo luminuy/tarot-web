@@ -25,8 +25,7 @@ const REMASTER_CACHE_DIR = path.join(process.cwd(), "scratch", "remaster_temp");
 const VARIANTS = [
   { dir: "w128", width: 128, quality: 86 },
   { dir: "w256", width: 256, quality: 88 },
-  { dir: "w512", width: 512, quality: 90 },
-  { dir: "w1024", width: 1024, quality: 94 },
+  { dir: "w512", width: 512, quality: 92 },
 ] as const;
 
 function ensureCwebp(): void {

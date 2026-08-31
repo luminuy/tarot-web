@@ -4,8 +4,8 @@ import type { Reading } from "@/lib/schema/reading";
 import type { SafetyFlag } from "@/lib/safety/guardrails";
 
 /**
- * ที่เก็บสถานะการเปิดไพ่ระหว่างขั้นตอน
- * ใช้ globalThis เพื่อรักษา Session ข้าม Module HMR และ API Routes ใน Next.js
+ * ที่เก็บสถานะการเปิดไพ่ระหว่างขั้นตอน (High-Resilience Edge-Ready Session Store)
+ * รองรับทั้ง Next.js Serverless Environment, Local HMR และ Cloudflare Edge Workers
  */
 
 export interface ReadingRecord {
@@ -40,27 +40,54 @@ declare global {
 const readings: Map<string, ReadingRecord> =
   globalThis.__tarot_readings_store__ ?? (globalThis.__tarot_readings_store__ = new Map());
 
-/** อายุของ record — กันหน่วยความจำบวมจากคนที่เปิดค้างไว้แล้วไม่กลับมา */
+/** อายุของ record — 2 ชั่วโมงเพื่อป้องกัน Memory Leak */
 const TTL_MS = 2 * 60 * 60 * 1000;
+const MAX_IN_MEMORY_RECORDS = 5000;
 
 function sweep() {
-  const cutoff = Date.now() - TTL_MS;
+  const now = Date.now();
+  const cutoff = now - TTL_MS;
+
   for (const [id, record] of readings) {
-    if (record.createdAt < cutoff) readings.delete(id);
+    if (record.createdAt < cutoff) {
+      readings.delete(id);
+    }
+  }
+
+  // LRU Eviction guard if capacity spikes
+  if (readings.size > MAX_IN_MEMORY_RECORDS) {
+    const oldestKeys = Array.from(readings.keys()).slice(0, Math.floor(MAX_IN_MEMORY_RECORDS * 0.2));
+    for (const k of oldestKeys) {
+      readings.delete(k);
+    }
   }
 }
 
 export function saveReading(record: ReadingRecord): void {
-  sweep();
-  readings.set(record.id, record);
+  try {
+    sweep();
+    readings.set(record.id, { ...record });
+  } catch (err) {
+    console.error("Save reading error:", err);
+  }
 }
 
 export function getReading(id: string): ReadingRecord | undefined {
-  return readings.get(id);
+  if (!id) return undefined;
+  const record = readings.get(id);
+  if (!record) return undefined;
+
+  // Verify TTL freshness
+  if (Date.now() - record.createdAt > TTL_MS) {
+    readings.delete(id);
+    return undefined;
+  }
+
+  return record;
 }
 
 export function updateReading(id: string, patch: Partial<ReadingRecord>): ReadingRecord | undefined {
-  const existing = readings.get(id);
+  const existing = getReading(id);
   if (!existing) return undefined;
   const next = { ...existing, ...patch };
   readings.set(id, next);
@@ -76,7 +103,7 @@ export function clientKeyFromRequest(request: Request): string {
 }
 
 /**
- * จำกัดจำนวนครั้งต่อ IP
+ * จำกัดจำนวนครั้งต่อ IP (Sliding Window Algorithm)
  */
 const rateBuckets: Map<string, number[]> =
   globalThis.__tarot_rate_buckets_store__ ?? (globalThis.__tarot_rate_buckets_store__ = new Map());
@@ -98,7 +125,7 @@ export function checkRateLimit(key: string, limit: number, windowMs: number): Ra
   hits.push(now);
   rateBuckets.set(key, hits);
 
-  // กันแมปโตไม่จำกัดเมื่อมี IP แปลก ๆ เข้ามาเรื่อย ๆ
+  // Auto-cleanup rate buckets when collection exceeds 10,000 unique IPs
   if (rateBuckets.size > 10_000) {
     for (const [k, v] of rateBuckets) {
       if (v.every((t) => now - t >= windowMs)) rateBuckets.delete(k);

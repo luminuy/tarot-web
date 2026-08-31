@@ -56,6 +56,8 @@ export function CardImage({
     <img
       src={src}
       alt={alt}
+      width={300}
+      height={520}
       className={className}
       style={style}
       loading={loading}
