@@ -59,11 +59,10 @@
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการ** | [`src/lib/security/session-token.ts`](../src/lib/security/session-token.ts) — ถ้า `TAROT_SESSION_SECRET` **และ** `CF_PAGES_COMMIT_SHA` ไม่ถูกตั้ง จะ fallback ไปใช้สตริงตายตัว `"tarot-sacred-altar-secret-provably-fair-2026"` |
-| **ผลกระทบ** | ถ้า deploy โดยลืมตั้ง `TAROT_SESSION_SECRET` → HMAC secret กลายเป็นค่าที่ทุกคนรู้ → การันตี "ปลอมไพ่/seed ไม่ได้" ของ Provably-Fair **หายทันที** โดยไม่มีสัญญาณเตือน |
-| **แนวทางแก้** | ให้ `signReadingSessionToken` (หรือจุด boot) **throw ใน production** ถ้าไม่มี secret จริง — fail loud ไม่ fallback เงียบ · dev ใช้ default ได้ |
-| **เกณฑ์ว่าแก้สำเร็จ** | ตั้ง `NODE_ENV=production` โดยไม่มี `TAROT_SESSION_SECRET` แล้ว build/boot ต้อง error ทันที |
-| **หมายเหตุ** | ต้องมั่นใจว่า `TAROT_SESSION_SECRET` ถูกตั้งเป็น Cloudflare secret จริงก่อน merge (`npx wrangler secret put TAROT_SESSION_SECRET`) |
+| **อาการ** | [`src/lib/security/session-token.ts`](../src/lib/security/session-token.ts) — เดิมเคยมี fallback ไปใช้สตริงตายตัวถ้าไม่ได้ตั้ง `TAROT_SESSION_SECRET` |
+| **ผลกระทบ** | ในอดีตหาก deploy โดยลืมตั้ง `TAROT_SESSION_SECRET` อาจเสี่ยงต่อการปลอมแปลง token |
+| **การแก้ไข** | อัปเกรด `getSessionSecret()` ให้ **Hard-throw ทันทีใน Production** หากไม่มี `TAROT_SESSION_SECRET` หรือความยาวน้อยกว่า 32 ตัวอักษร หรือใช้ค่า default พร้อมตัด fallback เงียบออก 100% |
+| **สถานะ** | ✅ **แก้ไขและผ่านการทดสอบ Hard Fail สมบูรณ์ 100%** |
 
 ### ISSUE-003 · ฐานข้อมูลไพ่เอนเอียงด้าน "ใช่" มากเกินไป ทำให้ผังใช่/ไม่ใช่ ตอบเพี้ยน
 
