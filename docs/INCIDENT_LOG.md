@@ -48,6 +48,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0016 · 2026-08-31 20:13 · 🟡 Medium · แก้ Chrome รูปไพ่เบลอ + chat auto-scroll เด้งทั้งหน้า
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | 1) รูปหน้าไพ่ (พรีวิวผัง, โลโก้ Navbar, การ์ดเล็ก) เบลอบน Chrome แต่คมบน Safari 2) หน้าแชทถามต่อ: พิมพ์แล้วกดส่ง หน้าจอทั้งหน้าเด้งเลื่อนลงมาเอง |
+| **สาเหตุราก** | 1) `sizes` prop ตั้งไว้ 180–256px แต่การ์ดแสดงจริงแค่ 30–80px → บน Retina เบราว์เซอร์เลือก `w512` มาย่อ 8–17 เท่า · Chrome ย่อภาพอัตราส่วนสูงด้วยฟิลเตอร์คุณภาพต่ำกว่า Safari (CoreGraphics) 2) `FollowUpChat` ใช้ `chatBottomRef.scrollIntoView()` ซึ่ง spec บอกให้เลื่อน scroll container **ทุกชั้นรวมถึง window** จนเห็น element → ทั้งหน้าถูกดึงลง ทุกครั้งที่ `messages`/`loading` เปลี่ยน |
+| **การแก้ไข** | 1) ปรับ `sizes` ทุกจุดให้ใกล้ความกว้างจริง: TarotArtIcons 220/256→96/112px · SpreadCardSelector/InteractiveCardFan 180-200→72px · FollowUpChat 180→64px · Navbar logo 200→64px · StreamReader 200→88px · IntentionAltar 240→112px · ShareModal 240→128px 2) FollowUpChat: ใส่ ref ที่กล่อง `max-h-80 overflow-y-auto` โดยตรง แล้ว `el.scrollTo({top: el.scrollHeight})` เฉพาะกล่องนั้น + เช็ค `nearBottom` (< 120px) ก่อน + ไม่เลื่อนถ้า `messages.length === 0` |
+| **🛡️ กฎป้องกันถาวร** | **prop sizes ของ <CardImage /> ต้องใกล้เคียงความกว้างจริงที่แสดง (สูงสุด ~display×3 สำหรับ DPR3) ห้ามใส่ค่าเผื่อเยอะ · ห้ามใช้ scrollIntoView ในกล่องที่ nested ลึก ให้ scroll element นั้นตรงๆ (el.scrollTo) และเช็ค nearBottom ก่อน** |
+| **การพิสูจน์ว่าแก้ได้จริง** | dev server: การ์ด 34-69px เลือก w128 (เดิม w256/w512) downscale เหลือ 1.9-3.8x · chat scroll เลื่อนเฉพาะกล่อง max-h-80 ไม่ดึง window |
+| **บันทึกโดย** | Claude · branch `claude/chrome-sharp-chatscroll` · commit `55f427d` |
+
+
 ### INC-0015 · 2026-08-31 18:36 · 🟡 Medium · branch push ทิ้งไว้โดยไม่เปิด PR → automation ไม่ทำงาน งานไม่ขึ้น production
 
 | หัวข้อ | รายละเอียด |

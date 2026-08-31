@@ -34,14 +34,19 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const chatBottomRef = React.useRef<HTMLDivElement>(null);
+  const chatLogRef = React.useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
+  // เลื่อนเฉพาะ "กล่องแชท" ให้เห็นข้อความล่าสุด — ห้ามใช้ scrollIntoView เพราะมันจะ
+  // เลื่อนทั้งหน้าจอ (window) ตามไปด้วย ทำให้ผู้ใช้โดนดึงหน้าเด้งลงมาทุกครั้งที่กดส่ง
+  // และเลื่อนก็ต่อเมื่อผู้ใช้อยู่ใกล้ก้นแชทอยู่แล้ว (ถ้าเลื่อนขึ้นไปอ่านเก่าจะไม่ยุ่ง)
   React.useEffect(() => {
-    scrollToBottom();
+    if (messages.length === 0) return;
+    const el = chatLogRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    if (nearBottom) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
   }, [messages, loading]);
 
   const sendMessage = async (textToSend?: string) => {
@@ -112,7 +117,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
               alt={persona.nameTh}
               className="w-full h-full object-cover object-top filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-              sizes="180px"
+              sizes="64px"
             />
           </div>
           <div>
@@ -147,7 +152,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       )}
 
       {/* Chat Messages Log */}
-      <div className="space-y-3 max-h-80 overflow-y-auto pr-1 no-scrollbar">
+      <div ref={chatLogRef} className="space-y-3 max-h-80 overflow-y-auto pr-1 no-scrollbar">
         <AnimatePresence>
           {messages.map((msg) => (
             <motion.div
@@ -179,7 +184,6 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             {persona.nameTh} กำลังมองไพ่และพิมพ์ตอบคุณ...
           </motion.div>
         )}
-        <div ref={chatBottomRef} />
       </div>
 
       {/* Input Bar */}
