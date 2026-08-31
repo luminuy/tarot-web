@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { DECK } from "@/data/cards";
 import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
-import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
+import { MysticBackground } from "@/components/ui/MysticBackground";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 
 export const metadata = {
@@ -14,7 +14,7 @@ export default function CardsPage() {
   return (
     <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700] relative overflow-hidden">
       {/* Floating Celestial Mystic Particles Background */}
-      <MysticAltarCanvas />
+      <MysticBackground />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Top Breadcrumbs & Dropdown */}

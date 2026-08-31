@@ -14,7 +14,7 @@ import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { PersonaCardSelector } from "@/components/reading/PersonaCardSelector";
 import { IntentionAltarInput } from "@/components/reading/IntentionAltarInput";
 import { RitualStepProgress, type RitualStep } from "@/components/ui/RitualStepProgress";
-import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
+import { MysticBackground } from "@/components/ui/MysticBackground";
 import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/components/ui/TarotArtIcons";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
@@ -382,7 +382,7 @@ export default function TarotPage() {
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
       {/* Mystic Altar Floating Particles & Sacred Circles */}
-      <MysticAltarCanvas />
+      <MysticBackground />
 
       {/* Top Sacred Header */}
       <header className="w-full border-b border-[#e5c07b]/20 bg-[#07040f]/80 backdrop-blur-xl sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.9)]">
