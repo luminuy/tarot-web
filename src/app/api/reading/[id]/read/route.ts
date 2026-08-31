@@ -1,5 +1,5 @@
-import { cardByIndex } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
+import { getContentOverrides, resolveCardByIndex } from "@/lib/content/overrides";
 import { streamGeminiReading } from "@/lib/ai/gemini";
 import { AI_DISCLOSURE } from "@/lib/safety/guardrails";
 import { getReading, updateReading } from "@/server/store";
@@ -76,6 +76,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        const overrideDoc = await getContentOverrides();
         const readingCtx = {
           personaId: record.personaId,
           spread,
@@ -84,7 +85,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           intake: record.intake,
           nickname: record.nickname,
           drawn: record.drawn!,
-          cards: record.drawn!.map((d) => cardByIndex(d.cardIndex)),
+          cards: record.drawn!.map((d) => resolveCardByIndex(overrideDoc, d.cardIndex)),
           safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
         };
 

@@ -1,6 +1,6 @@
 import type { Category, TarotCard } from "@/data/cards/types";
 import type { Spread } from "@/data/spreads";
-import { getPersona } from "@/data/personas";
+import { getPersona, type Persona } from "@/data/personas";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { SafetyVerdict } from "@/lib/safety/guardrails";
 
@@ -13,7 +13,7 @@ import type { SafetyVerdict } from "@/lib/safety/guardrails";
  *    -> ส่งเฉพาะตัวแปรที่เปลี่ยนไป ไม่ยัดข้อมูลซ้ำซ้อน
  */
 
-const SYSTEM_CORE_KNOWLEDGE = `คุณคือนักพยากรณ์ไพ่ทาโรต์ระดับปรมาจารย์ (World-Class Grandmaster & Psychological Tarot Reader) ผู้ผสานสัญลักษณ์วิทยาโบราณ 1909 Rider-Waite เข้ากับจิตวิทยาเชิงลึกของ Carl Jung, Mary K. Greer และ Rachel Pollack กำลังนั่งอ่านไพ่แบบตัวต่อตัวกับผู้ถามในวิหารศักดิ์สิทธิ์
+export const SYSTEM_CORE_KNOWLEDGE = `คุณคือนักพยากรณ์ไพ่ทาโรต์ระดับปรมาจารย์ (World-Class Grandmaster & Psychological Tarot Reader) ผู้ผสานสัญลักษณ์วิทยาโบราณ 1909 Rider-Waite เข้ากับจิตวิทยาเชิงลึกของ Carl Jung, Mary K. Greer และ Rachel Pollack กำลังนั่งอ่านไพ่แบบตัวต่อตัวกับผู้ถามในวิหารศักดิ์สิทธิ์
 
 ไพ่ทุกใบตรงหน้าคือไพ่ที่ผู้ถามตั้งจิตอธิษฐาน สับไพ่ และเลือกหยิบขึ้นมาด้วยมือของเขาเอง
 
@@ -71,10 +71,17 @@ const SYSTEM_CORE_KNOWLEDGE = `คุณคือนักพยากรณ์�
 
 /**
  * ส่วน Prefix คงที่สำหรับ Prompt Caching
+ *
+ * `opts` ใช้เมื่อแอดมินแก้เนื้อหาแบบ live (M3) — ส่ง systemCore / persona ที่ resolve override แล้วเข้ามา
+ * ถ้าไม่ส่ง จะใช้ค่า default จากไฟล์ (พฤติกรรมเดิม 100%)
  */
-export function buildSystemPrompt(personaId: string | null | undefined): string {
-  const persona = getPersona(personaId);
-  return `${SYSTEM_CORE_KNOWLEDGE}
+export function buildSystemPrompt(
+  personaId: string | null | undefined,
+  opts?: { systemCore?: string; persona?: Pick<Persona, "nameTh" | "tagline" | "voice"> },
+): string {
+  const persona = opts?.persona ?? getPersona(personaId);
+  const core = opts?.systemCore ?? SYSTEM_CORE_KNOWLEDGE;
+  return `${core}
 
 ## น้ำเสียงและบุคลิกเฉพาะของคุณในครั้งนี้
 คุณคือ "${persona.nameTh}" (${persona.tagline})

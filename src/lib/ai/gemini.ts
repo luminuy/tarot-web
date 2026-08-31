@@ -1,6 +1,7 @@
 import "server-only";
 import { parsePartialReading } from "@/lib/utils/partial-json";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
+import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { type Reading, ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
 
@@ -93,7 +94,11 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
     return;
   }
 
-  const systemInstruction = buildSystemPrompt(ctx.personaId);
+  const overrideDoc = await getContentOverrides();
+  const systemInstruction = buildSystemPrompt(ctx.personaId, {
+    systemCore: resolveSystemCore(overrideDoc),
+    persona: resolvePersona(overrideDoc, ctx.personaId),
+  });
   const userPrompt = buildReadingMessage(ctx);
 
   let response: Response | null = null;
