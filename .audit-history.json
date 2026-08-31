@@ -1,5 +1,50 @@
 [
   {
+    "id": "audit-1788169088453-vxd5w",
+    "timestampTh": "31/8/2569 16:38:07",
+    "timestampIso": "2026-08-31T09:38:07.110Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/docs-refresh",
+      "commitSha": "46fe3e9"
+    },
+    "action": {
+      "category": "DOCS",
+      "summary": "re-audit 2026-08-31 บน 46fe3e9: ยืนยัน root cause ISSUE-001 (AnimatePresence mode=wait deadlock), refresh สถานะทุกข้อ, เพิ่ม ISSUE-010 (.env drift+session secret), ISSUE-011 (npm/pnpm), section ช่องว่างเอกสาร",
+      "filesChanged": [
+        {
+          "file": ".ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "docs/KNOWN_ISSUES.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "docs/WORK_LOG.md",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 3
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788167903029-0wfd0",
     "timestampTh": "31/8/2569 16:18:22",
     "timestampIso": "2026-08-31T09:18:22.207Z",
