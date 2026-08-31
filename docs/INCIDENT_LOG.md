@@ -48,6 +48,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0014 · 2026-08-31 16:42 · 🟡 Medium · Resolve ISSUE-001 step deadlock, ISSUE-002 hydration, ISSUE-008/009 404 preloads, ISSUE-010 env vars, and ISSUE-011 packageManager
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Resolve ISSUE-001 step deadlock, ISSUE-002 hydration, ISSUE-008/009 404 preloads, ISSUE-010 env vars, and ISSUE-011 packageManager |
+| **สาเหตุราก** | Framer Motion mode wait deadlock, unrounded float styles, invalid static preload paths and sound files, missing env docs |
+| **การแก้ไข** | Resolve ISSUE-001 step deadlock, ISSUE-002 hydration, ISSUE-008/009 404 preloads, ISSUE-010 env vars, and ISSUE-011 packageManager |
+| **🛡️ กฎป้องกันถาวร** | **Zero framer-motion DOM orchestration, toFixed coordinate rounding, test-image-paths guard, synchronized env.example** |
+| **บันทึกโดย** | Antigravity AI · branch `claude/resilience-perf-enhancements` · commit `93335bc` |
+
+
 ### INC-0013 · 2026-08-31 16:04 · 🔵 Low · แก้ tidy สลับ branch ไม่ได้เพราะไฟล์สถานะ .ai-locks.json ค้างใน working tree
 
 | หัวข้อ | รายละเอียด |

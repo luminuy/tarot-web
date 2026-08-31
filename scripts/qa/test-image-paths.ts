@@ -42,12 +42,7 @@ const INFRASTRUCTURE = ["src/lib/tarot/card-image.ts"];
  * 🚧 หนี้ที่ค้างอยู่ก่อนมีด่านตรวจนี้ — ต้องแก้แล้วลบออกจากรายการ
  * ⚠️ ห้ามเพิ่มรายการใหม่เข้ามาเด็ดขาด
  */
-const ALLOWLIST: { file: string; reason: string }[] = [
-  {
-    file: "src/lib/utils/cache.ts",
-    reason: "ISSUE-008 — พรีโหลดจาก /cards/variants/w320/ ที่ไม่มีอยู่จริง (ยิง 404 ทุกครั้งที่เปิดหน้า) ยังไม่ได้แก้",
-  },
-];
+const ALLOWLIST: { file: string; reason: string }[] = [];
 
 /** กฎ A: path ที่ชี้เข้าโฟลเดอร์ย่อยของ /cards/ */
 const SUBFOLDER_PATH = /["'`]\/cards\/[A-Za-z0-9_-]+\//;

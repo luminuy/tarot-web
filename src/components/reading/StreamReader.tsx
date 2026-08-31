@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import type { Reading } from "@/lib/schema/reading";
 import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
@@ -25,6 +24,8 @@ interface StreamReaderProps {
     clientSeed?: string;
     commitment?: string;
   };
+  errorMsg?: string | null;
+  onRetry?: () => void;
 }
 
 export const StreamReader: React.FC<StreamReaderProps> = ({
@@ -37,6 +38,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   readingId,
   sessionToken,
   proof,
+  errorMsg,
+  onRetry,
 }) => {
   const [activeTab, setActiveTab] = useState<"card" | "summary" | "chat">("card");
   const [isSpeakingVoice, setIsSpeakingVoice] = useState(false);
@@ -152,23 +155,42 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         )}
       </div>
 
+      {/* Error / Recovery Banner */}
+      {errorMsg && (
+        <div className="anim-page-transition p-4 rounded-2xl bg-rose-950/90 border border-rose-600/50 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+          <div className="text-xs sm:text-sm text-rose-200 font-serif-th text-center sm:text-left">
+            <span>✦ </span>
+            <span>{errorMsg}</span>
+          </div>
+          {onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] text-xs font-bold font-serif-th shadow hover:opacity-95 cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+            >
+              <span>✦</span> ลองอ่านใหม่อีกครั้ง (Retry)
+            </button>
+          )}
+        </div>
+      )}
+
       {/* TAB 1: CARD-BY-CARD INSPECTION VIEW */}
       {activeTab === "card" && (
         <div className="space-y-5">
           {/* Card Selector Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            {drawnCards.map((d) => (
+            {drawnCards.map((d, i) => (
               <button
                 key={d.order}
                 type="button"
                 onClick={() => onSelectCardIndex(d.order)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-serif-th font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 select-none ${
                   activeCardIndex === d.order
-                    ? "bg-[#e5c07b] text-[#05040a] shadow-[0_0_12px_rgba(229,192,123,0.5)] font-bold"
-                    : "bg-[#100b20] text-[#cfc8e2] hover:bg-[#191230] border border-[#e5c07b]/20"
+                    ? "bg-[#e5c07b] text-[#05040a] font-bold shadow-md"
+                    : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
                 }`}
               >
-                <span>ใบที่ {d.order + 1}</span>
+                <span>ใบที่ {i + 1}</span>
                 {(() => {
                   const card = d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined);
                   return card ? <span className="text-[10px] opacity-80 font-normal">({card.nameTh})</span> : null;
@@ -178,143 +200,138 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           </div>
 
           {/* Active Card Interpretation Showcase */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeCardIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="p-5 sm:p-6 rounded-2xl bg-[#090614] border border-[#e5c07b]/30 shadow-inner space-y-4"
-            >
-              {/* Position & Card Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#e5c07b]/15">
-                <div className="flex items-center gap-3.5">
-                  {/* Real 1909 Rider-Waite Thumbnail */}
-                  <div className={`w-14 h-[95px] rounded-lg overflow-hidden border border-[#e5c07b]/60 flex-shrink-0 shadow-md ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}>
-                    <CardImage
-                      image={cardData?.image || "major-00.jpg"}
-                      alt={cardData?.nameTh || "Tarot"}
-                      className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-                      sizes="200px"
-                    />
-                  </div>
-
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-[#e5c07b] font-mono font-semibold">
-                      ✦ ตำแหน่งที่ {activeCardIndex + 1}: {activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}
-                    </span>
-                    <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#f5deaa] mt-0.5">
-                      {cardData?.nameTh || `ไพ่ใบที่ ${activeCardIndex + 1}`}{" "}
-                      {cardData?.nameEn && (
-                        <span className="text-xs font-mono font-normal text-[#9c93b8]">
-                          ({cardData.nameEn})
-                        </span>
-                      )}{" "}
-                      <span className="text-xs font-serif-th font-semibold text-[#e5c07b]">
-                        {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว (Reversed)" : "· ไพ่ตรง (Upright)"}
-                      </span>
-                    </h4>
-                  </div>
+          <div
+            key={activeCardIndex}
+            className="anim-page-transition p-5 sm:p-6 rounded-2xl bg-[#090614] border border-[#e5c07b]/30 shadow-inner space-y-4"
+          >
+            {/* Position & Card Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#e5c07b]/15">
+              <div className="flex items-center gap-3.5">
+                {/* Real 1909 Rider-Waite Thumbnail */}
+                <div className={`w-14 h-[95px] rounded-lg overflow-hidden border border-[#e5c07b]/60 flex-shrink-0 shadow-md ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}>
+                  <CardImage
+                    image={cardData?.image || "major-00.jpg"}
+                    alt={cardData?.nameTh || "Tarot"}
+                    className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                    sizes="200px"
+                  />
                 </div>
 
-                {/* Elemental & Meaning Tag */}
-                {activeDrawnCard?.position.meaning && (
-                  <span className="text-[10px] text-[#e5c07b] bg-[#e5c07b]/10 border border-[#e5c07b]/25 px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
-                    {activeDrawnCard.position.meaning}
+                <div>
+                  <span className="text-[10px] uppercase tracking-widest text-[#e5c07b] font-mono font-semibold">
+                    ✦ ตำแหน่งที่ {activeCardIndex + 1}: {activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}
                   </span>
+                  <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#f5deaa] mt-0.5">
+                    {cardData?.nameTh || `ไพ่ใบที่ ${activeCardIndex + 1}`}{" "}
+                    {cardData?.nameEn && (
+                      <span className="text-xs font-mono font-normal text-[#9c93b8]">
+                        ({cardData.nameEn})
+                      </span>
+                    )}{" "}
+                    <span className="text-xs font-serif-th font-semibold text-[#e5c07b]">
+                      {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว (Reversed)" : "· ไพ่ตรง (Upright)"}
+                    </span>
+                  </h4>
+                </div>
+              </div>
+
+              {/* Elemental & Meaning Tag */}
+              {activeDrawnCard?.position.meaning && (
+                <span className="text-[10px] text-[#e5c07b] bg-[#e5c07b]/10 border border-[#e5c07b]/25 px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
+                  {activeDrawnCard.position.meaning}
+                </span>
+              )}
+            </div>
+
+            {/* Keywords */}
+            {(() => {
+              const keywords =
+                cardData?.keywords && Array.isArray(cardData.keywords)
+                  ? cardData.keywords
+                  : cardData?.keywords && typeof cardData.keywords === "object"
+                  ? (activeDrawnCard?.isReversed ? (cardData.keywords as any).reversed : (cardData.keywords as any).upright)
+                  : [];
+
+              return keywords && keywords.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[10px] text-[#9c93b8] font-mono">คีย์เวิร์ด:</span>
+                  {keywords.map((kw: string, idx: number) => (
+                    <span
+                      key={idx}
+                      className="text-[10px] text-[#f5deaa] bg-white/5 border border-white/10 px-2 py-0.5 rounded-md"
+                    >
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              ) : null;
+            })()}
+
+            {/* Interpretation Body */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between gap-2">
+                {activeCardReading?.headline && (
+                  <h5 className="font-serif-th text-sm font-bold text-[#e5c07b]">
+                    ✦ {activeCardReading.headline}
+                  </h5>
+                )}
+                {activeCardReading?.reading && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleToggleVoice(
+                        `${activeCardReading.headline ? activeCardReading.headline + ". " : ""}${activeCardReading.reading}`
+                      )
+                    }
+                    className={`px-3 py-1 rounded-full text-xs font-serif-th transition-all cursor-pointer flex items-center gap-1.5 shadow ml-auto ${
+                      isSpeakingVoice
+                        ? "bg-rose-950/90 text-rose-200 border border-rose-500/60 animate-pulse"
+                        : "bg-[#18102c] text-[#f5deaa] border border-[#e5c07b]/40 hover:bg-[#251842]"
+                    }`}
+                    title="ฟังเสียงแม่หมออ่านคำทำนาย"
+                  >
+                    <span>{isSpeakingVoice ? "⏹️" : "🔊"}</span>
+                    <span>{isSpeakingVoice ? "หยุดเสียง" : "ฟังเสียงแม่หมอ"}</span>
+                  </button>
                 )}
               </div>
+              <p className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed font-serif-th font-normal">
+                {activeCardReading?.reading ||
+                  (isStreaming
+                    ? "แม่หมอกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำทำนายของไพ่ใบนี้..."
+                    : "รอการเปิดม่านพยากรณ์")}
+              </p>
+            </div>
 
-              {/* Keywords */}
-              {(() => {
-                const keywords =
-                  cardData?.keywords && Array.isArray(cardData.keywords)
-                    ? cardData.keywords
-                    : cardData?.keywords && typeof cardData.keywords === "object"
-                    ? (activeDrawnCard?.isReversed ? (cardData.keywords as any).reversed : (cardData.keywords as any).upright)
-                    : [];
+            {/* Next / Prev Card Navigation Arrows */}
+            <div className="flex items-center justify-between pt-3 border-t border-[#e5c07b]/15 text-xs">
+              <button
+                type="button"
+                onClick={() => onSelectCardIndex(Math.max(0, activeCardIndex - 1))}
+                disabled={activeCardIndex === 0}
+                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
+                  activeCardIndex > 0
+                    ? "border-[#e5c07b]/40 text-[#f5deaa] hover:bg-[#140b24] cursor-pointer"
+                    : "border-transparent text-[#9c93b8]/30 cursor-not-allowed"
+                }`}
+              >
+                <span>← ใบก่อนหน้า</span>
+              </button>
 
-                return keywords && keywords.length > 0 ? (
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[10px] text-[#9c93b8] font-mono">คีย์เวิร์ด:</span>
-                    {keywords.map((kw: string, idx: number) => (
-                      <span
-                        key={idx}
-                        className="text-[10px] text-[#f5deaa] bg-white/5 border border-white/10 px-2 py-0.5 rounded-md"
-                      >
-                        {kw}
-                      </span>
-                    ))}
-                  </div>
-                ) : null;
-              })()}
-
-              {/* Interpretation Body */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center justify-between gap-2">
-                  {activeCardReading?.headline && (
-                    <h5 className="font-serif-th text-sm font-bold text-[#e5c07b]">
-                      ✦ {activeCardReading.headline}
-                    </h5>
-                  )}
-                  {activeCardReading?.reading && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleToggleVoice(
-                          `${activeCardReading.headline ? activeCardReading.headline + ". " : ""}${activeCardReading.reading}`
-                        )
-                      }
-                      className={`px-3 py-1 rounded-full text-xs font-serif-th transition-all cursor-pointer flex items-center gap-1.5 shadow ml-auto ${
-                        isSpeakingVoice
-                          ? "bg-rose-950/90 text-rose-200 border border-rose-500/60 animate-pulse"
-                          : "bg-[#18102c] text-[#f5deaa] border border-[#e5c07b]/40 hover:bg-[#251842]"
-                      }`}
-                      title="ฟังเสียงแม่หมออ่านคำทำนาย"
-                    >
-                      <span>{isSpeakingVoice ? "⏹️" : "🔊"}</span>
-                      <span>{isSpeakingVoice ? "หยุดเสียง" : "ฟังเสียงแม่หมอ"}</span>
-                    </button>
-                  )}
-                </div>
-                <p className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed font-serif-th font-normal">
-                  {activeCardReading?.reading ||
-                    (isStreaming
-                      ? "แม่หมอกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำทำนายของไพ่ใบนี้..."
-                      : "รอการเปิดม่านพยากรณ์")}
-                </p>
-              </div>
-
-              {/* Next / Prev Card Navigation Arrows */}
-              <div className="flex items-center justify-between pt-3 border-t border-[#e5c07b]/15 text-xs">
-                <button
-                  type="button"
-                  onClick={() => onSelectCardIndex(Math.max(0, activeCardIndex - 1))}
-                  disabled={activeCardIndex === 0}
-                  className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
-                    activeCardIndex > 0
-                      ? "border-[#e5c07b]/40 text-[#f5deaa] hover:bg-[#140b24] cursor-pointer"
-                      : "border-transparent text-[#9c93b8]/30 cursor-not-allowed"
-                  }`}
-                >
-                  <span>← ใบก่อนหน้า</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => onSelectCardIndex(Math.min(totalCards - 1, activeCardIndex + 1))}
-                  disabled={activeCardIndex === totalCards - 1}
-                  className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
-                    activeCardIndex < totalCards - 1
-                      ? "border-[#e5c07b]/40 text-[#f5deaa] hover:bg-[#140b24] cursor-pointer"
-                      : "border-transparent text-[#9c93b8]/30 cursor-not-allowed"
-                  }`}
-                >
-                  <span>ใบถัดไป →</span>
-                </button>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              <button
+                type="button"
+                onClick={() => onSelectCardIndex(Math.min(totalCards - 1, activeCardIndex + 1))}
+                disabled={activeCardIndex === totalCards - 1}
+                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
+                  activeCardIndex < totalCards - 1
+                    ? "border-[#e5c07b]/40 text-[#f5deaa] hover:bg-[#140b24] cursor-pointer"
+                    : "border-transparent text-[#9c93b8]/30 cursor-not-allowed"
+                }`}
+              >
+                <span>ใบถัดไป →</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

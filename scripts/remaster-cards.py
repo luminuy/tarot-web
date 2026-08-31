@@ -33,18 +33,18 @@ def remaster_cards(source_dir: str, output_dir: str):
             
             # 1. Line-Art Sharpness Enhancement
             enh_sharp = ImageEnhance.Sharpness(rgb_img)
-            sharp = enh_sharp.enhance(1.22)
+            sharp = enh_sharp.enhance(1.15)
             
             # 2. Rich Primary Color Tuning (Sapphire, Ruby, Emerald, Gold)
             enh_col = ImageEnhance.Color(sharp)
-            vibrant = enh_col.enhance(1.10)
+            vibrant = enh_col.enhance(1.08)
             
             # 3. Ink Depth & Highlight Contrast
             enh_con = ImageEnhance.Contrast(vibrant)
             contrast = enh_con.enhance(1.06)
             
-            # 4. Intelligent Unsharp Masking (enhances black lines without accentuating paper grain)
-            unsharp = contrast.filter(ImageFilter.UnsharpMask(radius=1.1, percent=125, threshold=2))
+            # 4. Intelligent Unsharp Masking (Tuned: radius 0.8, percent 90 to prevent white halos)
+            unsharp = contrast.filter(ImageFilter.UnsharpMask(radius=0.8, percent=90, threshold=2))
             
             unsharp.save(out_path, format="JPEG", quality=96, subsampling=0)
             
