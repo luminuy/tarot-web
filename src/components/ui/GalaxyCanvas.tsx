@@ -56,7 +56,7 @@ export const GalaxyCanvas: React.FC = () => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let prefersReducedMotion = motionQuery.matches;
 
-    const STAR_COUNT = Math.min(200, Math.floor((width * height) / 7000));
+    const STAR_COUNT = Math.min(120, Math.floor((width * height) / 9000));
     const STAR_COLORS = ["#ffffff", "#f0dcb4", "#e0c088", "#cfc8e2", "#9d8189", "#70d6ff"];
     let stars: Star[] = [];
     let nebulas: NebulaCloud[] = [];

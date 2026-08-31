@@ -13,7 +13,7 @@ const BodySchema = z.object({
   /** เก็บจากการขยับจริงของผู้ใช้ตอนสับไพ่ เพื่อให้ผู้ใช้มีส่วนกำหนดผล */
   clientSeed: z.string().max(4096).optional(),
   /** ตำแหน่งไพ่ในพัดสำรับที่ผู้ใช้แตะเลือกด้วยตนเอง */
-  pickedIndices: z.array(z.number().int().min(0).max(DECK_SIZE - 1)).optional(),
+  pickedIndices: z.array(z.number().int().min(0).max(DECK_SIZE - 1)).max(DECK_SIZE).optional(),
   sessionToken: z.string().optional(),
 });
 
