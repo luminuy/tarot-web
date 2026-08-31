@@ -7,7 +7,6 @@ import { SPREADS, type Spread } from "@/data/spreads";
 import { PERSONAS, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
-import { cardByIndex } from "@/data/cards";
 import type { Reading } from "@/lib/schema/reading";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
@@ -212,6 +211,8 @@ export default function TarotPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "ไม่สามารถจัดสำรับไพ่ได้");
       if (data.sessionToken) setSessionToken(data.sessionToken);
+
+      const { cardByIndex } = await import("@/data/cards");
 
       const enrichedCards: DrawnSlotCard[] = (data.drawn || []).map((d: any) => {
         const fullCard = cardByIndex(d.cardIndex);
@@ -705,7 +706,7 @@ export default function TarotPage() {
       />
 
       <CardZoomModal
-        card={zoomedCard ? (cardByIndex(zoomedCard.cardIndex) || (zoomedCard.card as any)) : null}
+        card={zoomedCard ? (zoomedCard.card as any) : null}
         positionName={zoomedCard?.position.nameTh}
         isReversed={zoomedCard?.isReversed}
         isOpen={!!zoomedCard}
