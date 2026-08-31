@@ -337,8 +337,8 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
       const angle = (i * 360) / 12 - 90;
       const rad = (angle * Math.PI) / 180;
       const radius = 42;
-      const x = Math.cos(rad) * radius;
-      const y = Math.sin(rad) * radius;
+      const x = Number((Math.cos(rad) * radius).toFixed(2));
+      const y = Number((Math.sin(rad) * radius).toFixed(2));
       const cardNum = String(i + 1).padStart(2, "0");
 
       return (
