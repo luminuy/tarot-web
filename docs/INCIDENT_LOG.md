@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0032 · 2026-09-01 00:30 · 🟠 High · fix pnpm action-setup version mismatch with package.json packageManager
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | GitHub Actions workflows (deploy.yml and pr.yml) failed at Setup pnpm step with Error: Multiple versions of pnpm specified |
+| **สาเหตุราก** | pnpm/action-setup@v4 had with.version: 9 explicitly configured while package.json specified packageManager: pnpm@9.15.4, causing action-setup to throw a duplicate version specification error |
+| **การแก้ไข** | Removed with.version from action-setup@v4 in deploy.yml and pr.yml so it automatically and cleanly resolves the exact pnpm version from package.json |
+| **🛡️ กฎป้องกันถาวร** | **Do not duplicate version key in action-setup@v4 when packageManager is specified in package.json** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify passed all 7/7 verification gates and workflow YAML syntax is valid |
+| **บันทึกโดย** | Antigravity AI · branch `fix/ci-pnpm-version-conflict` · commit `49790f2` |
+
+
 ### INC-0031 · 2026-09-01 00:25 · 🟠 High · add prompt XML boundaries, Gemini safe JSON parsing, Zod bounded arrays, and copy attribution scope
 
 | หัวข้อ | รายละเอียด |
