@@ -202,7 +202,7 @@ export const PENTACLES: TarotCard[] = [
     astrology: "ดวงอาทิตย์ในราศีมังกร",
     numerology:
       "เลข 4 คือโครงสร้างและกำแพงสี่ด้าน มันให้ความปลอดภัย แต่ก็เตือนว่าห้องที่ไม่มีประตูก็คือกรงเหมือนกัน",
-    yesNo: "maybe",
+    yesNo: "no",
     image: "pentacles-04.jpg",
   },
   {

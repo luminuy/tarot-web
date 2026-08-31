@@ -7,6 +7,8 @@ import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import type { Reading } from "@/lib/schema/reading";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
+import { getCardImageSrc } from "@/lib/tarot/card-image";
+import { cardByIndex } from "@/data/cards";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -36,7 +38,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const shareText = `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จากวิหารออราเคิล
 ✦ ผังการวางไพ่: ${spreadName}
 ✦ คำถามอธิษฐาน: "${question || "ภาพรวมดวงชะตา"}"
-✦ ไพ่ที่เปิดได้: ${cards.map((c) => `${c.position.nameTh}: ${c.card?.nameTh || "ไพ่"}${c.isReversed ? " (กลับหัว)" : ""}`).join(", ")}
+✦ ไพ่ที่เปิดได้: ${cards.map((c) => {
+    const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
+    return `${c.position.nameTh}: ${card?.nameTh || "ไพ่"}${c.isReversed ? " (กลับหัว)" : ""}`;
+  }).join(", ")}
 ✦ คำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary || "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ"}"
 ✦ สัมผัสวิหารไพ่ทาโรต์ออนไลน์: ${typeof window !== "undefined" ? window.location.origin : ""}`;
 
@@ -166,11 +171,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       const loadedImages = await Promise.all(
         displayCards.map((c) => {
           return new Promise<HTMLImageElement | null>((resolve) => {
+            const cardObj = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
+            const imgSrc = getCardImageSrc(cardObj?.image, cardObj?.id);
+            if (!imgSrc) {
+              resolve(null);
+              return;
+            }
             const img = new Image();
             img.crossOrigin = "anonymous";
             img.onload = () => resolve(img);
             img.onerror = () => resolve(null);
-            img.src = `/cards/${c.card?.image || c.card?.id + ".jpg"}`;
+            img.src = imgSrc;
           });
         })
       );
@@ -178,6 +189,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       displayCards.forEach((c, idx) => {
         const cx = startX + idx * (cardW + gap);
         const cardImg = loadedImages[idx];
+        const cardObj = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
 
         // Card Background
         ctx.fillStyle = "#090614";
@@ -227,7 +239,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         // Card Name
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 20px 'Noto Serif Thai', serif, sans-serif";
-        ctx.fillText(c.card?.nameTh || "ไพ่ทาโรต์", cx + cardW / 2, cardY + cardH - 35);
+        ctx.fillText(cardObj?.nameTh || "ไพ่ทาโรต์", cx + cardW / 2, cardY + cardH - 35);
 
         // Orientation Status
         ctx.fillStyle = c.isReversed ? "#fda4af" : "#86efac";

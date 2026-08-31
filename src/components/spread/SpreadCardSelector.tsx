@@ -221,15 +221,13 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             const isRecommended = spread.id === "three-card";
 
             return (
-              <motion.div
+              <div
                 key={spread.id}
-                whileHover={{ y: -5, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   onSelectSpread(spread);
                   scrollToCard(idx);
                 }}
-                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none ${
+                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 transform-gpu hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none ${
                   isSelected
                     ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_35px_rgba(229,192,123,0.45)]"
                     : "bg-gradient-to-b from-[#130d24]/95 to-[#07040f]/95 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
@@ -278,7 +276,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
                 {/* Holographic Sheen Layer */}
                 <div className="gold-foil-sheen absolute inset-0 opacity-20 hover:opacity-40 transition-opacity pointer-events-none" />
-              </motion.div>
+              </div>
             );
           })}
         </motion.div>

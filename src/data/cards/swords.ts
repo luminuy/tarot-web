@@ -302,7 +302,7 @@ export const SWORDS: TarotCard[] = [
     astrology: "ดาวพุธในราศีกุมภ์",
     numerology:
       "เลข 6 คือการกลับสู่สมดุลหลังผ่านความวุ่นวาย ในชุดดาบมันคือการเคลื่อนออกจากปัญหาอย่างเงียบ ๆ",
-    yesNo: "yes",
+    yesNo: "maybe",
     image: "swords-06.jpg",
   },
   {
@@ -602,7 +602,7 @@ export const SWORDS: TarotCard[] = [
     astrology: "ราศีเมถุน ผสมแรงผลักดันของดาวอังคาร",
     numerology:
       "ไพ่อัศวินคือวุฒิภาวะขั้นลงมือของธาตุลม กล้าและเร็ว แต่ยังต้องเรียนรู้เรื่องจังหวะและความยั้งคิด",
-    yesNo: "yes",
+    yesNo: "no",
     image: "swords-12.jpg",
   },
   {
@@ -652,7 +652,7 @@ export const SWORDS: TarotCard[] = [
     astrology: "ราศีตุลย์",
     numerology:
       "ไพ่ราชินีคือวุฒิภาวะขั้นเข้าใจของธาตุลม รู้จักใช้ความคิดอย่างมีเมตตา และรู้ว่าเมื่อไหร่ควรพูด เมื่อไหร่ควรเงียบ",
-    yesNo: "yes",
+    yesNo: "maybe",
     image: "swords-13.jpg",
   },
   {
@@ -702,7 +702,7 @@ export const SWORDS: TarotCard[] = [
     astrology: "ราศีกุมภ์",
     numerology:
       "ไพ่ราชาคือวุฒิภาวะขั้นสูงสุดของธาตุลม ความคิดที่ผ่านการใช้งานมาจนตกผลึกเป็นหลักการที่พึ่งพาได้",
-    yesNo: "yes",
+    yesNo: "maybe",
     image: "swords-14.jpg",
   },
 ];

@@ -13,10 +13,18 @@ import type { ReadingRecord } from "@/server/store";
  * 3. รับประกันความปลอดภัย 100% ไม่สามารถปลอมแปลงไพ่หรือ Seed ได้
  */
 
-const SESSION_SECRET =
-  process.env.TAROT_SESSION_SECRET ||
-  process.env.CF_PAGES_COMMIT_SHA ||
-  "tarot-sacred-altar-secret-provably-fair-2026";
+const DEFAULT_DEV_SECRET = "tarot-sacred-altar-secret-provably-fair-2026";
+
+function getSessionSecret(): string {
+  const secret = process.env.TAROT_SESSION_SECRET || process.env.CF_PAGES_COMMIT_SHA;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "[Security] TAROT_SESSION_SECRET environment variable must be set in production"
+    );
+  }
+  return DEFAULT_DEV_SECRET;
+}
 
 export function signReadingSessionToken(record: Partial<ReadingRecord>): string {
   const compactPayload: Partial<ReadingRecord> = {
@@ -40,7 +48,7 @@ export function signReadingSessionToken(record: Partial<ReadingRecord>): string 
 
   const payloadStr = JSON.stringify(compactPayload);
   const data = Buffer.from(payloadStr, "utf8").toString("base64url");
-  const signature = createHmac("sha256", SESSION_SECRET).update(data).digest("base64url");
+  const signature = createHmac("sha256", getSessionSecret()).update(data).digest("base64url");
   return `${data}.${signature}`;
 }
 
@@ -54,7 +62,7 @@ export function verifyReadingSessionToken(token: string): Partial<ReadingRecord>
     const data = token.substring(0, dotIdx);
     const signature = token.substring(dotIdx + 1);
 
-    const expectedSig = createHmac("sha256", SESSION_SECRET).update(data).digest("base64url");
+    const expectedSig = createHmac("sha256", getSessionSecret()).update(data).digest("base64url");
 
     const sigBuf = Buffer.from(signature, "utf8");
     const expBuf = Buffer.from(expectedSig, "utf8");

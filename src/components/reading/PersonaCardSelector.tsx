@@ -7,6 +7,8 @@ import {
   HighPriestessIllustration,
   JusticeIllustration,
   TheStarIllustration,
+  MagicianIllustration,
+  HermitIllustration,
 } from "@/components/ui/TarotArtIcons";
 
 interface PersonaCardSelectorProps {
@@ -20,10 +22,20 @@ const PERSONA_DETAILS: Record<string, { roleTitle: string; archetype: string; re
     archetype: "สไตล์: อบอุ่น ให้กำลังใจ เหมือนพี่สาว",
     renderArt: () => <HighPriestessIllustration className="w-20 h-[136px] mx-auto" />,
   },
+  playful: {
+    roleTitle: "THE MAGICIAN & BESTIE",
+    archetype: "สไตล์: คุยสนุก เป็นกันเอง เม้าท์มันส์",
+    renderArt: () => <MagicianIllustration className="w-20 h-[136px] mx-auto" />,
+  },
   direct: {
     roleTitle: "JUSTICE & TRUTH",
     archetype: "สไตล์: ตรงไปตรงมา ชัดเจน ไม่อ้อมค้อม",
     renderArt: () => <JusticeIllustration className="w-20 h-[136px] mx-auto" />,
+  },
+  master: {
+    roleTitle: "THE MASTER STRATEGIST",
+    archetype: "สไตล์: จริงจัง สุขุม ให้กลยุทธ์ฟันธง",
+    renderArt: () => <HermitIllustration className="w-20 h-[136px] mx-auto" />,
   },
   mystic: {
     roleTitle: "THE ASTRAL STAR",
@@ -65,14 +77,14 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   return (
     <div className="space-y-4 w-full">
       <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] tracking-wide flex items-center gap-2">
-        <span className="text-[#e5c07b]">✦</span> เลือกสไตล์การทำนายของแม่หมอ
+        <span className="text-[#e5c07b]">✦</span> เลือกสไตล์การทำนายของแม่หมอ ({PERSONAS.length} สไตล์)
       </label>
 
       {/* Responsive Persona Carousel (Mobile Swipe / Desktop Grid) */}
       <div
         ref={carouselRef}
         onScroll={handleCarouselScroll}
-        className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-3 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
+        className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-4 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
       >
         {PERSONAS.map((p, idx) => {
           const isSelected = selectedPersona.id === p.id;

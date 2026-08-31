@@ -48,6 +48,40 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0019 · 2026-08-31 20:45 · 🟡 Medium · Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds |
+| **สาเหตุราก** | pnpm-workspace.yaml lacked packages field and had invalid allowBuilds key |
+| **การแก้ไข** | Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds |
+| **🛡️ กฎป้องกันถาวร** | **Ensure pnpm-workspace.yaml strictly complies with pnpm 9.15 schema with packages field** |
+| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` · commit `3c7b9a9` |
+
+
+### INC-0018 · 2026-08-31 20:45 · 🟠 High · CI Fail จาก pnpm-workspace.yaml ผิด Schema ขาด packages field (ISSUE-011)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | GitHub Actions CI ล้มเหลวทันทีที่ขั้นตอน Setup/Install Dependencies ด้วย error `ERROR packages field missing or empty` |
+| **สาเหตุราก** | `pnpm-workspace.yaml` มีคีย์ `allowBuilds:` ซึ่งไม่ใช่ spec จริงของ pnpm 9.15 และขาดคีย์ `packages: - .` ทำให้ pnpm 9.15 หา workspace packages ไม่เจอและบล็อกการติดตั้ง |
+| **การแก้ไข** | 1) แก้ไข `pnpm-workspace.yaml` ให้ถูกต้อง: เพิ่ม `packages: - .` และตัด `allowBuilds` ทิ้ง คงไว้เฉพาะ `onlyBuiltDependencies` 2) ปรับ CI ให้สอดคล้องสมบูรณ์ 3) รัน `npm run repo:verify` ผ่าน 7/7 ด่าน |
+| **🛡️ กฎป้องกันถาวร** | **1) Workspace Config ต้องมี `packages: - .` เสมอ และห้ามใส่คีย์ที่ไม่อยู่ใน official spec 2) ทุกการเปลี่ยนแปลงคอนฟิก CI/Package ต้องตรวจสอบความถูกต้องของ Schema และทดสอบ Store/Install ก่อน 3) ทำงานให้เรียบร้อย รอบคอบ มีความคิดเป็นระบบ ไม่แก้เพียงผิวเผิน** |
+| **การพิสูจน์ว่าแก้ได้จริง** | แก้ไข `pnpm-workspace.yaml` ถูกต้องตาม spec, ผ่านการตรวจสอบ 7/7 ด่าน, build 91 static/dynamic pages ผ่าน 100% |
+| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` |
+
+
+### INC-0017 · 2026-08-31 20:40 · 🟠 High · แตกกิ่งย่อยกระจัดกระจายโดยไม่ Rebase และไม่รวม PR (Concurrent Branch Drift & Incomplete Handoff)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | มีการสร้างและ push 6-7 branch ย่อยขึ้น GitHub โดยไม่มีการเปิด PR, ไม่ได้ Rebase เข้ากับ `main` ล่าสุด และแต่ละ branch มีการแก้ไขไฟล์ซ้อนทับกัน จนเกิดความขัดแย้ง (Merge Conflict) และทิ้งภาระให้ผู้อื่นต้องมาตามเก็บกวาด |
+| **สาเหตุราก** | ขาดวินัยในการรวบรวมงาน (Consolidation) ไม่ได้ดึง `origin/main` ล่าสุดก่อนเริ่มงานใหม่ และปล่อยกิ่งค้างไว้บน remote โดยไม่สั่ง `npm run pr:auto` และ `npm run git:tidy` ให้จบสมบูรณ์ในรอบเดียว |
+| **การแก้ไข** | 1) รวมทุกฟีเจอร์และบั๊กฟิกซ์เข้าสู่กิ่งเดี่ยว `feat/consolidated-platform-upgrades` บน `origin/main` ล่าสุด 2) ลบ 7 กิ่งเก่าบน GitHub ทิ้งทั้งหมด 3) ตรวจสอบผ่าน 7 ด่าน (`npm run repo:verify`) 4) สร้าง PR #24 และวางระบบ Auto-merge 100% |
+| **🛡️ กฎป้องกันถาวร** | **1) ทำงานแบบ 1 Unified Branch per Milestone เท่านั้น ห้ามแตกกิ่งย่อยค้างไว้ 2) ต้องดึง `origin/main` ล่าสุดก่อนเริ่มงานเสมอ 3) ทำงานต้องจบ 100% ห้ามทิ้งภาระให้คนอื่นตามแก้: ต้องตรวจ 7 ด่าน -> commit -> push -> pr:auto -> git:tidy ให้สะอาดหมดจด** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รวม 7 งานผ่าน 7/7 gates (0 type errors, 0 collision, 78 cards, 20 spreads) และเปิด PR #24 พร้อมลบกิ่งเก่า 7 กิ่งบน remote สะอาด 100% |
+| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` |
+
 ### INC-0016 · 2026-08-31 20:13 · 🟡 Medium · แก้ Chrome รูปไพ่เบลอ + chat auto-scroll เด้งทั้งหน้า
 
 | หัวข้อ | รายละเอียด |
