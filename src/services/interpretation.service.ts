@@ -1,14 +1,13 @@
 import { streamGeminiReading, streamMockGeminiReading } from "@/lib/ai/gemini";
-import { streamReading as streamClaudeReading, type ReadingEvent } from "@/lib/ai/claude";
+import type { ReadingEvent } from "@/lib/ai/claude";
 import { getSpread } from "@/data/spreads";
 import type { TarotCard } from "@/data/cards/types";
 
 export class InterpretationService {
   /**
-   * Dual-Engine AI Streamer with Auto-Failover
-   * Primary: Anthropic Claude 3.5/3.7 Sonnet (if ANTHROPIC_API_KEY is present)
-   * Secondary: Google Gemini (if GEMINI_API_KEY is present)
-   * Fallback: Local Mock Engine
+   * Google Gemini 3.7 Flash Tarot Engine
+   * Primary: Google Gemini 3.7 Flash (High-Speed Reasoning)
+   * Fallback: Local Contextual Tarot Engine
    */
   static async *streamReading(params: {
     spreadId: string;
@@ -35,17 +34,7 @@ export class InterpretationService {
       safety: { flag: "none" as const, block: false },
     };
 
-    // 1. Try Anthropic Claude first if Key exists
-    if (process.env.ANTHROPIC_API_KEY) {
-      try {
-        yield* streamClaudeReading(readingCtx);
-        return;
-      } catch (claudeError) {
-        console.warn("⚠️ Anthropic Claude stream failed, auto-failing over to Gemini...", claudeError);
-      }
-    }
-
-    // 2. Try Google Gemini if Key exists or as primary
+    // 1. Primary: Google Gemini 3.7 Flash
     if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
       try {
         yield* streamGeminiReading(readingCtx);
@@ -55,7 +44,7 @@ export class InterpretationService {
       }
     }
 
-    // 3. Fallback Local Simulator
+    // 2. Fallback Local Simulator
     yield* streamMockGeminiReading(readingCtx);
   }
 }

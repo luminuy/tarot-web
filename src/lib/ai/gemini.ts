@@ -71,10 +71,8 @@ const GEMINI_RESPONSE_SCHEMA = {
 };
 
 export const CANDIDATE_GEMINI_MODELS = [
-  "gemini-3.6-flash",
   "gemini-3.7-flash",
-  "gemini-3.5-flash",
-  "gemini-flash-latest",
+  "gemini-2.0-flash",
 ];
 
 // ค่าเริ่มต้นก่อนได้ usageMetadata จริงจาก Gemini — ตั้งเป็นศูนย์แทนการเดาตัวเลข

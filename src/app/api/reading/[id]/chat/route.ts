@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import Anthropic from "@anthropic-ai/sdk";
 import { getReading, type ReadingRecord } from "@/server/store";
 import { cardByIndex } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
@@ -135,47 +134,18 @@ ${cards.join("\n")}
 2. ห้ามใช้คำว่า "ตามหลักการของไพ่" หรือตอบแบบบอท ให้พูดจาเหมือนกำลังคุยกันในแชทส่วนตัว เช่น "ถ้าถามเรื่องนี้จากไพ่ชุดเดิม แม่หมอมองว่า...", "จุดที่น่าสนใจคือ..."
 3. ตอบกระชับ 2-4 ประโยค ชัดเจน อบอุ่น ฟันธง และให้ข้อคิดที่นำไปใช้ได้จริงทันที`;
 
-    // 1. Try Anthropic Claude First (if key available)
-    const anthropicKey = process.env.ANTHROPIC_API_KEY;
-    if (anthropicKey) {
-      try {
-        const client = new Anthropic({ apiKey: anthropicKey });
-        const messagesPayload: Array<{ role: "user" | "assistant"; content: string }> = [];
-
-        for (const h of history.slice(-4)) {
-          messagesPayload.push({
-            role: h.sender === "user" ? "user" : "assistant",
-            content: h.text,
-          });
-        }
-        messagesPayload.push({ role: "user", content: userQuestion });
-
-        const claudeRes = await client.messages.create({
-          model: "claude-3-5-sonnet-20241022",
-          system: systemInstruction,
-          max_tokens: 350,
-          temperature: 0.7,
-          messages: messagesPayload,
-        });
-
-        const replyBlock = claudeRes.content.find((c) => c.type === "text");
-        if (replyBlock && "text" in replyBlock && replyBlock.text.trim()) {
-          return NextResponse.json({ reply: replyBlock.text.trim() });
-        }
-      } catch (claudeErr) {
-        console.warn("⚠️ Claude follow-up chat failed, trying Gemini fallback...", claudeErr);
-      }
-    }
-
-    // 2. Try Google Gemini API
+    // Pure Google Gemini 3.7 Flash AI Engine
     const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     if (geminiKey) {
-      const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
-      for (const model of models) {
+      const primaryModel = "gemini-3.7-flash";
+      const fallbackModel = "gemini-2.0-flash";
+      const modelsToTry = [primaryModel, fallbackModel];
+
+      for (const model of modelsToTry) {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 6000);
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
 
           const contentsPayload = [];
           for (const h of history.slice(-4)) {
@@ -211,14 +181,17 @@ ${cards.join("\n")}
             const data = await response.json();
             const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (replyText) return NextResponse.json({ reply: replyText.trim() });
+          } else {
+            const errText = await response.text().catch(() => "");
+            console.warn(`[Gemini Flash Chat ${model}] response status: ${response.status}`, errText);
           }
         } catch (err) {
-          console.warn(`Chat model ${model} error:`, err);
+          console.warn(`[Gemini Flash Chat ${model}] error:`, err);
         }
       }
     }
 
-    // 3. Dynamic Context-Aware Intelligent Local Engine
+    // Dynamic Context-Aware Intelligent Local Engine (when API Key is offline/local testing)
     const dynamicReply = generateContextualTarotChatReply({
       userQuestion,
       history,
