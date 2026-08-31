@@ -31,16 +31,21 @@ npx wrangler login
 
 ---
 
-### ขั้นที่ 2: ตั้งค่า API Key และ Secrets (สำคัญมาก ⚠️)
-ตั้งค่า Key สำหรับให้ AI แม่หมอทำงานบน Cloudflare อย่างปลอดภัย (ไม่ต้องเขียนลงโค้ด):
+### ขั้นที่ 2: ตั้งค่า API Key, Secrets และ Cloudflare Edge Resources (สำคัญมาก ⚠️)
+ตั้งค่า Key สำหรับให้ AI แม่หมอ และเตรียม Cloudflare Bindings ให้ระบบแคชระดับ Global:
 
 ```bash
-# 1. ใส่ Gemini API Key
+# 1. ใส่ Gemini API Key & Stateless Session Secret
 npx wrangler secret put GEMINI_API_KEY
-# (ระบบจะให้พิมพ์หรือ Paste API Key ลงไป แล้วกด Enter)
+npx wrangler secret put TAROT_SESSION_SECRET
 
-# 2. (ตัวเลือกเสริม) ใส่ Google AI API Key สำรอง
-npx wrangler secret put GOOGLE_API_KEY
+# 2. สร้าง KV Namespace สำหรับ Global Incremental Static Regeneration (ISR)
+npx wrangler kv namespace create tarot-inc-cache-kv
+# (นำ id ที่ได้ไปใส่ใน wrangler.jsonc ที่ช่อง id ของ NEXT_INC_CACHE_KV)
+
+# 3. สร้าง D1 Database สำหรับ Next.js On-Demand Tag Revalidation & Provably-Fair Audit
+npx wrangler d1 create tarot-tag-cache-d1
+# (นำ database_id ที่ได้ไปใส่ใน wrangler.jsonc ที่ช่อง database_id ของ NEXT_TAG_CACHE_D1)
 ```
 
 ---

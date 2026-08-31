@@ -10,6 +10,25 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "kv_namespaces": [
+    {
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "tarot_inc_cache_kv_id"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "tarot-tag-cache-d1",
+      "database_id": "tarot_tag_cache_d1_id"
+    }
+  ],
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "tarot-web"
+    }
+  ],
   "vars": {
     "NODE_ENV": "production"
   }
