@@ -14,6 +14,7 @@ interface Message {
 interface FollowUpChatProps {
   readingId: string;
   persona: Persona;
+  sessionToken?: string | null;
   readingSnapshot?: {
     question?: string;
     spreadId?: string;
@@ -29,7 +30,7 @@ const SUGGESTED_QUESTIONS = [
   "จังหวะเวลานี้เหมาะกับการตัดสินใจเรื่องนี้หรือยัง?",
 ];
 
-export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, readingSnapshot }) => {
+export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, sessionToken, readingSnapshot }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,9 +56,13 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
     try {
       const res = await fetch(`/api/reading/${readingId}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-reading-token": sessionToken || "",
+        },
         body: JSON.stringify({
           message: query,
+          sessionToken: sessionToken || undefined,
           history: messages.map((m) => ({ sender: m.sender, text: m.text })),
           readingSnapshot: readingSnapshot || {
             personaId: persona.id,

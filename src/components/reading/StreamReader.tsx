@@ -19,6 +19,7 @@ interface StreamReaderProps {
   onSelectCardIndex: (index: number) => void;
   drawnCards: DrawnSlotCard[];
   readingId?: string | null;
+  sessionToken?: string | null;
   proof?: {
     serverSeed?: string;
     clientSeed?: string;
@@ -34,6 +35,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   onSelectCardIndex,
   drawnCards,
   readingId,
+  sessionToken,
   proof,
 }) => {
   const [activeTab, setActiveTab] = useState<"card" | "summary" | "chat">("card");
@@ -409,6 +411,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           <FollowUpChat
             readingId={readingId}
             persona={persona}
+            sessionToken={sessionToken}
             readingSnapshot={{
               summary: reading?.summary,
               personaId: persona.id,

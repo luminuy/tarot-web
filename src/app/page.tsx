@@ -46,6 +46,7 @@ export default function TarotPage() {
 
   // Reading session state
   const [readingId, setReadingId] = useState<string | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [commitment, setCommitment] = useState<string>("");
   const [clientSeed, setClientSeed] = useState<string>("");
   const [proof, setProof] = useState<{ serverSeed?: string; clientSeed?: string; commitment?: string }>({});
@@ -102,6 +103,7 @@ export default function TarotPage() {
 
       const sessionReadingId = data.readingId || data.id;
       setReadingId(sessionReadingId);
+      if (data.sessionToken) setSessionToken(data.sessionToken);
       setCommitment(data.commitment || "");
       setClientSeed(data.clientSeed || "");
       setCurrentStep("SHUFFLE");
@@ -149,15 +151,20 @@ export default function TarotPage() {
 
       const res = await fetch(`/api/reading/${activeId}/shuffle`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-reading-token": sessionToken || "",
+        },
         body: JSON.stringify({
           clientSeed,
           pickedIndices: finalIndices,
+          sessionToken: sessionToken || undefined,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "ไม่สามารถจัดสำรับไพ่ได้");
+      if (data.sessionToken) setSessionToken(data.sessionToken);
 
       const enrichedCards: DrawnSlotCard[] = (data.drawn || []).map((d: any) => {
         const fullCard = cardByIndex(d.cardIndex);
@@ -187,7 +194,7 @@ export default function TarotPage() {
       setCurrentStep("READING");
 
       // Auto start streaming AI interpretation in background
-      startAIStreaming(activeId, enrichedCards);
+      startAIStreaming(activeId, enrichedCards, data.sessionToken || sessionToken);
     } catch (err: any) {
       setErrorMsg(err.message || "เกิดข้อผิดพลาดในการประมวลผลไพ่");
     } finally {
@@ -196,7 +203,7 @@ export default function TarotPage() {
   };
 
   // Step 4: Stream AI interpretation
-  const startAIStreaming = async (id: string, cards: DrawnSlotCard[]) => {
+  const startAIStreaming = async (id: string, cards: DrawnSlotCard[], currentToken?: string | null) => {
     setIsStreaming(true);
     setReadingResult({});
     setErrorMsg(null);
@@ -204,6 +211,10 @@ export default function TarotPage() {
     try {
       const res = await fetch(`/api/reading/${id}/read`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-reading-token": currentToken || sessionToken || "",
+        },
       });
 
       if (!res.ok || !res.body) {
@@ -601,6 +612,7 @@ export default function TarotPage() {
                 <div className="lg:col-span-7 space-y-6">
                   <StreamReader
                     readingId={readingId}
+                    sessionToken={sessionToken}
                     persona={selectedPersona}
                     isStreaming={isStreaming}
                     reading={readingResult}

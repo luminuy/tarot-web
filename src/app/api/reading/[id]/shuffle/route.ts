@@ -13,6 +13,7 @@ const BodySchema = z.object({
   clientSeed: z.string().max(4096).optional(),
   /** ตำแหน่งไพ่ในพัดสำรับที่ผู้ใช้แตะเลือกด้วยตนเอง */
   pickedIndices: z.array(z.number().int().min(0).max(DECK_SIZE - 1)).optional(),
+  sessionToken: z.string().optional(),
 });
 
 /**
@@ -24,7 +25,23 @@ const BodySchema = z.object({
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const record = getReading(id);
+  const parsed = BodySchema.safeParse(await request.json().catch(() => ({})));
+
+  let record = getReading(id);
+
+  // Stateless failover recovery: if memory was lost on edge worker isolate
+  if (!record) {
+    const token = request.headers.get("x-reading-token") || (parsed.success ? parsed.data.sessionToken : undefined);
+    if (token) {
+      const { verifyReadingSessionToken } = await import("@/lib/security/session-token");
+      const recovered = verifyReadingSessionToken(token);
+      if (recovered && recovered.id === id) {
+        record = recovered as import("@/server/store").ReadingRecord;
+        const { saveReading } = await import("@/server/store");
+        saveReading(record);
+      }
+    }
+  }
 
   if (!record) {
     return NextResponse.json({ error: "การเปิดไพ่นี้หมดอายุแล้ว เริ่มใหม่อีกครั้งนะ" }, { status: 404 });
@@ -35,7 +52,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
   }
 
-  const parsed = BodySchema.safeParse(await request.json().catch(() => ({})));
   const clientSeed = record.clientSeed ?? normalizeClientSeed(parsed.success ? parsed.data.clientSeed : undefined);
   const pickedIndices = parsed.success ? parsed.data.pickedIndices : undefined;
 
@@ -63,11 +79,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: errorMsg }, { status: 400 });
   }
 
-  updateReading(id, { drawn, clientSeed });
+  const updated = updateReading(id, { drawn, clientSeed });
+  const { signReadingSessionToken } = await import("@/lib/security/session-token");
+  const sessionToken = signReadingSessionToken(updated || { ...record, drawn, clientSeed });
 
   return NextResponse.json({
     clientSeed,
     drawn,
+    sessionToken,
     cards: drawn.map((d) => {
       const card = cardByIndex(d.cardIndex);
       return {

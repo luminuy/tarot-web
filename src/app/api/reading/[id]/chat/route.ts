@@ -126,8 +126,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const history = parsed.data.history || [];
     const clientSnapshot = parsed.data.readingSnapshot;
 
-    // Resilient server store resolution with client snapshot fallback (Edge Failover Safe)
+    // Resilient server store resolution with session token and client snapshot fallback (Edge Failover Safe)
     let record: Partial<ReadingRecord> | undefined = getReading(id);
+
+    if (!record || !record.drawn) {
+      const token = request.headers.get("x-reading-token");
+      if (token) {
+        const { verifyReadingSessionToken } = await import("@/lib/security/session-token");
+        const recovered = verifyReadingSessionToken(token);
+        if (recovered && recovered.id === id) {
+          record = recovered;
+        }
+      }
+    }
 
     if (!record || !record.drawn) {
       if (clientSnapshot && clientSnapshot.drawn && clientSnapshot.drawn.length > 0) {

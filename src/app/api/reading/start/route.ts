@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   const { serverSeed, commitment } = createCommitment();
   const id = randomUUID();
 
-  saveReading({
+  const record: import("@/server/store").ReadingRecord = {
     id,
     status: "DRAWING",
     spreadId,
@@ -73,12 +73,18 @@ export async function POST(request: Request) {
     commitment,
     serverSeed,
     createdAt: Date.now(),
-  });
+  };
+
+  saveReading(record);
+
+  const { signReadingSessionToken } = await import("@/lib/security/session-token");
+  const sessionToken = signReadingSessionToken(record);
 
   return NextResponse.json({
     id,
     readingId: id,
     commitment,
+    sessionToken,
     spread: {
       id: spread.id,
       nameTh: spread.nameTh,

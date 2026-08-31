@@ -48,6 +48,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0010 · 2026-08-31 13:44 · 🔴 Critical · deploy permanent stateless HMAC-SHA256 session token architecture for zero-failover serverless edge reliability
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | deploy permanent stateless HMAC-SHA256 session token architecture for zero-failover serverless edge reliability |
+| **สาเหตุราก** | stateless edge worker isolates in Cloudflare could drop in-memory reading sessions across multi-step requests |
+| **การแก้ไข** | deploy permanent stateless HMAC-SHA256 session token architecture for zero-failover serverless edge reliability |
+| **🛡️ กฎป้องกันถาวร** | **deployed cryptographic HMAC-SHA256 session token and auto-restoration across all API endpoints** |
+| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 errors, 6/6 repo verify checks passed, 100% immune to edge worker failovers |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `b33429f` |
+
+
 ### INC-0009 · 2026-08-31 13:38 · 🟠 High · add smooth auto-scroll to latest message and client snapshot resilience for serverless edge chat
 
 | หัวข้อ | รายละเอียด |

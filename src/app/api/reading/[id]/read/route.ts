@@ -14,7 +14,21 @@ export const maxDuration = 120;
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const record = getReading(id);
+  let record = getReading(id);
+
+  // Stateless failover recovery: if memory was lost on edge worker isolate
+  if (!record || !record.drawn) {
+    const token = request.headers.get("x-reading-token");
+    if (token) {
+      const { verifyReadingSessionToken } = await import("@/lib/security/session-token");
+      const recovered = verifyReadingSessionToken(token);
+      if (recovered && recovered.id === id && recovered.drawn) {
+        record = recovered as import("@/server/store").ReadingRecord;
+        const { saveReading } = await import("@/server/store");
+        saveReading(record);
+      }
+    }
+  }
 
   if (!record || !record.drawn) {
     return Response.json({ error: "ยังไม่ได้สับไพ่ หรือการเปิดไพ่นี้หมดอายุแล้ว" }, { status: 404 });
