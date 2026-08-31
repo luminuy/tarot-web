@@ -279,6 +279,7 @@ function actionTidy(dryRun = false): void {
 
   let removed = 0;
   let skipped = 0;
+  const orphanWork: string[] = []; // branch ที่มีงานค้างแต่ยังไม่ได้เปิด PR
 
   for (const branch of locals) {
     // อ่าน JSON ดิบแล้ว parse ในโค้ด แทนการใช้ jq interpolation
@@ -290,7 +291,22 @@ function actionTidy(dryRun = false): void {
     const pr = raw ? (JSON.parse(raw)[0] as { state?: string; number?: number } | undefined) : undefined;
 
     if (!pr || pr.state !== "MERGED") {
-      console.log(`  ⏭️  ${branch} — ${pr ? `PR #${pr.number} ยังเป็น ${pr.state}` : "ไม่มี PR"} (ข้าม)`);
+      // ถ้าไม่มี PR แต่ branch มี commit นำหน้า origin/main = งานค้างที่ลืมเปิด PR
+      // (INC-0015: push commit เฉยๆ ไม่ทำให้ automation ทำงาน ต้อง `npm run pr:auto` ด้วย)
+      if (!pr) {
+        const ahead = Number(
+          shQuiet("git", ["rev-list", "--count", `origin/main..${branch}`]) ?? "0",
+        );
+        if (ahead > 0) {
+          console.log(
+            `  ⚠️  ${branch} — มี ${ahead} commit นำหน้า main แต่ยังไม่ได้เปิด PR! → \`npm run pr:auto -- "<title>"\``,
+          );
+          orphanWork.push(branch);
+          skipped++;
+          continue;
+        }
+      }
+      console.log(`  ⏭️  ${branch} — ${pr ? `PR #${pr.number} ยังเป็น ${pr.state}` : "ไม่มี PR (ไม่มี commit ค้าง)"} (ข้าม)`);
       skipped++;
       continue;
     }
@@ -323,7 +339,19 @@ function actionTidy(dryRun = false): void {
     removed++;
   }
 
-  console.log(`\n✨ เก็บกวาดเสร็จ: ลบ ${removed} branch | ข้าม ${skipped} branch\n`);
+  console.log(`\n✨ เก็บกวาดเสร็จ: ลบ ${removed} branch | ข้าม ${skipped} branch`);
+
+  if (orphanWork.length > 0) {
+    console.log(
+      `\n🚨 มี ${orphanWork.length} branch ที่มีงานค้าง "ยังไม่ได้เปิด PR" — automation จะไม่ merge/deploy ให้จนกว่าจะเปิด PR:`,
+    );
+    for (const b of orphanWork) console.log(`   • ${b}`);
+    console.log(
+      `   บทเรียน INC-0015: การ push branch ไม่ทำให้ automation ทำงาน ต้องรัน \`npm run pr:auto\` เสมอ (ดู docs/INCIDENT_LOG.md)\n`,
+    );
+  } else {
+    console.log("");
+  }
 }
 
 /** รอจน PR ถูก merge (pr.yml จะ merge ให้เองหลัง CI ผ่าน) แล้วเก็บกวาด branch */
