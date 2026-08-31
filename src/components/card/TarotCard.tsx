@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { SPRING } from "@/lib/motion";
 import { cardById, cardByIndex } from "@/data/cards";
 import { CardImage } from "@/components/card/CardImage";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
@@ -154,7 +155,8 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         animate={{
           rotateY: isRevealed ? 180 : 0,
           scale: isHighlighted ? 1.08 : isHovered ? 1.05 : 1,
-          y: isHighlighted ? -8 : isHovered ? -5 : 0,
+          y: isHighlighted ? -10 : isHovered ? -5 : 0,
+          z: isRevealed && isHighlighted ? 20 : 0,
         }}
         style={{
           rotateX: smoothRotateX,
@@ -162,9 +164,10 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           transformStyle: "preserve-3d",
         }}
         transition={{
-          rotateY: { type: "spring", stiffness: 220, damping: 24 },
-          scale: { type: "spring", stiffness: 350, damping: 25 },
-          y: { type: "spring", stiffness: 300, damping: 22 },
+          rotateY: SPRING.card,
+          scale: SPRING.snappy,
+          y: SPRING.follow,
+          z: SPRING.card,
         }}
       >
         {/* ========================================================= */}

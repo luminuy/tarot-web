@@ -7,10 +7,10 @@
 
 ## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 00:52:18` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 01:04:30` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
-- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (7 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
+- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (8 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
@@ -23,9 +23,7 @@
 | **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
 | **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
 | **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
-| **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA, Edge OAuth Google + LINE, บันทึกผลทำนาย 50 รายการ, ติดตาม Outcome | ตั้งค่า OAuth Credentials บน Cloudflare Workers |
-| **ล็อกอิน Google / LINE** | `src/components/auth/AuthModal.tsx` | 🟢 **Active / Live** (ต้องตั้ง Secrets) | Ready | Edge OAuth HMAC-SHA256, Session Cookie 30 วัน, CSRF Protection, UserProfileBadge header | ตั้งค่า GOOGLE_CLIENT_ID / LINE_CHANNEL_ID บน Cloudflare |
-| **สมุดบันทึก AI Retrospective** | `src/components/history/ReadingHistoryModal.tsx` | 🟢 **Active / Live** | Ready | ติดตามผล ACCURATE/PARTIAL/PENDING/NOT_HAPPENED, บันทึกความคิด, AI Monthly Retrospective Gemini | ซิงก์ประวัติข้ามอุปกรณ์ผ่าน Cloud |
+| **บัญชีและประวัติ** | `/account` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ระบบ NextAuth Login และซิงก์ประวัติคลาวด์ |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
