@@ -57,3 +57,20 @@ export function getCardWebpSrcSet(
     (v) => `${CARDS_ROOT}${v.dir}/${name}.webp ${v.width}w`,
   ).join(", ");
 }
+
+/**
+ * ดึง URL ของภาพ WebP ขนาดย่อที่ระบุ (เช่น "w128") ผ่าน Single Source of Truth
+ */
+export function getCardWebpVariantSrc(
+  image?: string | null,
+  variant: "w128" | "w256" | "w512" = "w128",
+  fallbackId?: string | null,
+): string | null {
+  const src = getCardImageSrc(image, fallbackId);
+  if (!src) return null;
+
+  const match = /^\/cards\/([^/]+)\.jpe?g$/i.exec(src);
+  if (!match) return src;
+
+  return `${CARDS_ROOT}${variant}/${match[1]}.webp`;
+}
