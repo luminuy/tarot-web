@@ -52,7 +52,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      alert("คัดลอกข้อความสำเร็จ!");
+      setCopied(false);
     }
   };
 
