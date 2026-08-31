@@ -2,12 +2,17 @@
 
 ยินดีต้อนรับ! โปรเจกต์นี้คือ **เว็บดูดวงไพ่ทาโรต์ออนไลน์ระดับพรีเมียม (Interactive Provably-Fair Tarot Web)**
 
-> ⚠️ **กฎเหล็กสำคัญ**: ก่อนแก้ไขโค้ดใดๆ ต้องอ่าน **[docs/AI_COLLABORATION_GUIDELINES.md](file:///Users/bank/Desktop/เว็บไพ่/docs/AI_COLLABORATION_GUIDELINES.md)** เพื่อป้องกันการชนกันของงานและรักษามาตรฐานดีไซน์ระดับ Masterpiece
+> ⚠️ **กฎเหล็กสำคัญ**: ก่อนแก้ไขโค้ดใดๆ ต้องอ่าน 3 ไฟล์นี้เสมอ
+> 1. **[docs/INCIDENT_LOG.md](file:///Users/bank/Desktop/เว็บไพ่/docs/INCIDENT_LOG.md)** — ความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร **ทำผิดซ้ำเรื่องที่มีบันทึกแล้ว = ความบกพร่องร้ายแรงที่สุด**
+> 2. **[docs/KNOWN_ISSUES.md](file:///Users/bank/Desktop/เว็บไพ่/docs/KNOWN_ISSUES.md)** — บั๊กที่ยืนยันแล้วแต่ยังไม่ได้แก้ กันแก้ซ้ำซ้อนกับ Agent อื่น
+> 3. **[docs/AI_COLLABORATION_GUIDELINES.md](file:///Users/bank/Desktop/เว็บไพ่/docs/AI_COLLABORATION_GUIDELINES.md)** — คู่มือแม่บท (หัวข้อ 0 คือมาตรฐานการทำงานที่บังคับใช้เสมอ)
 
 ---
 
 ## 🧭 เอกสารสำคัญในโปรเจกต์ (Documentation Index)
 
+0. **[docs/INCIDENT_LOG.md](file:///Users/bank/Desktop/เว็บไพ่/docs/INCIDENT_LOG.md)**: **(บทเรียนจากความผิดพลาด — อ่านก่อนเสมอ)** ทุกความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร ระบบบันทึกให้อัตโนมัติทุกครั้งที่ commit ด้วย `--type fix`
+0.5 **[docs/KNOWN_ISSUES.md](file:///Users/bank/Desktop/เว็บไพ่/docs/KNOWN_ISSUES.md)**: **(บั๊กค้างที่ยืนยันแล้ว)** ดูก่อนเริ่มงานใหม่เพื่อไม่แก้ซ้ำซ้อนกับ Agent ตัวอื่น
 1. **[docs/WORK_LOG.md](file:///Users/bank/Desktop/เว็บไพ่/docs/WORK_LOG.md)**: **(MANDATORY WORK LOG)** บันทึกประวัติสิ่งที่ทำเสร็จแล้ว อะไรแก้ไปแล้ว และอะไรค้างอยู่ (ต้องอัปเดตทุกครั้งหลังทำงานเสร็จ)
 2. **[docs/AI_COLLABORATION_GUIDELINES.md](file:///Users/bank/Desktop/เว็บไพ่/docs/AI_COLLABORATION_GUIDELINES.md)**: **(MASTER RULEBOOK)** กฎเหล็กการทำงานร่วมกันของ AI, การแบ่ง Domain, กฎดีไซน์ทองคำ
 3. **[docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md](file:///Users/bank/Desktop/เว็บไพ่/docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md)**: **(DEPLOY GUIDE)** ขั้นตอนการนำเว็บขึ้น Cloudflare Workers พร้อมระบบ Secret & Custom Domain
@@ -19,6 +24,7 @@
 
 ## 🏛️ สรุปกฎเหล็กหลักสำหรับ AI ทุกตัว
 
+0. **บันทึกบทเรียนทุกครั้งที่แก้บั๊ก (สำคัญที่สุด)**: commit ประเภท `fix` **ต้องมี `--cause` และ `--prevention`** ไม่งั้นระบบจะบล็อกให้อัตโนมัติ ระบบจะเขียนบันทึกลง `docs/INCIDENT_LOG.md` ให้เอง เพื่อไม่ให้ AI ตัวไหนทำผิดซ้ำเรื่องเดิม
 1. **บันทึกงานทุกครั้ง**: ทำอะไรเสร็จ แก้บั๊ก หรือเพิ่มฟีเจอร์ ต้องอัปเดต [`docs/WORK_LOG.md`](file:///Users/bank/Desktop/เว็บไพ่/docs/WORK_LOG.md) ทันที
 2. **ห้ามใช้อิโมจิการ์ตูนทั่วไป**: ให้ใช้สัญลักษณ์ทองคำเปลว `✦` และ `✨` เท่านั้น
 3. **Zero-Clipping Architecture**: ห้ามใส่ `overflow-hidden` หรือ `overflow-x-auto` ย่อยในแต่ละแถวของการ์ด ต้องใช้ Unified Altar Canvas
@@ -43,6 +49,7 @@
 - **ตรวจ Typecheck อย่างเดียว**: `npm run typecheck`
 - **ซิงก์สถานะและบันทึกงานอัตโนมัติ (Mandatory)**: `npm run log:sync`
 - **สร้างภาพไพ่ย่อ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)**: `npm run cards:variants`
+- **บันทึกความผิดพลาดด้วยมือ**: `npm run incident -- --title "..." --severity high --symptom "..." --cause "..." --fix "..." --prevention "..."`
 - **ดูสถานะ repo, PR และ CI ล่าสุด**: `npx tsx scripts/github-auto.ts status`
 - **ตรวจ + push + สร้าง PR + เปิด auto-merge**: `npm run pr:auto -- "<title>" "<body>"`
   (เพิ่ม `--dry-run` เพื่อดูว่าจะทำอะไรบ้างโดยไม่แตะ remote, `--no-merge` เพื่อสร้าง PR เฉยๆ)
