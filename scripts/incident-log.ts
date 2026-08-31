@@ -51,6 +51,53 @@ export interface Incident {
   agent?: string;
 }
 
+/** ตัดช่องว่าง/อีโมจิ/เครื่องหมายออก เหลือแต่ตัวอักษร เพื่อเทียบว่าสองข้อความ "เนื้อเดียวกัน" ไหม */
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+/** สองข้อความถือว่า "ก็อปกันมา" ถ้าอันหนึ่งเป็น substring ของอีกอัน (หลัง normalize) และยาวพอ ๆ กัน */
+function isDuplicate(a: string, b: string): boolean {
+  const na = normalize(a);
+  const nb = normalize(b);
+  if (na.length < 8 || nb.length < 8) return na === nb;
+  const short = na.length <= nb.length ? na : nb;
+  const long = na.length <= nb.length ? nb : na;
+  return long.includes(short) && short.length / long.length > 0.7;
+}
+
+/**
+ * ตรวจว่าบันทึกเหตุการณ์ "มีเนื้อจริง" ก่อนเขียนลงไฟล์
+ * เพราะบันทึกที่ช่อง "อาการ" = "การแก้ไข" = หัวข้อ (ก็อปกันมา) ไม่มีค่าอะไรเลย
+ * ทำให้ AI ตัวถัดไปอ่านแล้วไม่ได้บทเรียน — บทเรียน INC-0008/0009/0010/0014
+ */
+export function validateIncident(inc: Incident): string[] {
+  const problems: string[] = [];
+  const minLen = (label: string, value: string | undefined, min: number) => {
+    if (!value || normalize(value).length < min) {
+      problems.push(`"${label}" สั้นเกินไป (ต้องมีเนื้อจริงอย่างน้อย ~${min} ตัวอักษร) — ได้: ${value ?? "(ว่าง)"}`);
+    }
+  };
+  minLen("อาการ (symptom)", inc.symptom, 20);
+  minLen("สาเหตุราก (rootCause)", inc.rootCause, 25);
+  minLen("การแก้ไข (fix)", inc.fix, 15);
+  minLen("กฎป้องกัน (prevention)", inc.prevention, 20);
+
+  if (isDuplicate(inc.symptom, inc.title))
+    problems.push('"อาการ" ก็อปมาจาก "หัวข้อ" — ต้องอธิบายสิ่งที่ "คนเจอครั้งแรก" เห็น ไม่ใช่ชื่อเรื่อง');
+  if (isDuplicate(inc.fix, inc.symptom))
+    problems.push('"การแก้ไข" ก็อปมาจาก "อาการ" — เป็นคนละเรื่องกัน');
+  if (isDuplicate(inc.rootCause, inc.symptom))
+    problems.push('"สาเหตุราก" ก็อปมาจาก "อาการ" — ต้องตอบว่า "ทำไมถึงเกิดขึ้นได้ตั้งแต่แรก"');
+  if (isDuplicate(inc.rootCause, inc.title))
+    problems.push('"สาเหตุราก" ก็อปมาจาก "หัวข้อ" — ต้องเป็นคำอธิบายว่าทำไมบั๊กนี้ถึงหลุดมาได้');
+
+  return problems;
+}
+
 function gitOrNull(args: string[]): string | null {
   try {
     return execFileSync("git", args, { encoding: "utf-8", stdio: "pipe" }).trim();
@@ -137,6 +184,15 @@ ${ENTRIES_MARKER}
 
 /** เขียนบันทึกเหตุการณ์ลง docs/INCIDENT_LOG.md แล้วคืนรหัสเหตุการณ์ */
 export function recordIncident(incident: Incident): string {
+  const problems = validateIncident(incident);
+  if (problems.length > 0) {
+    throw new Error(
+      `บันทึกเหตุการณ์ไม่ผ่านมาตรฐานคุณภาพ (${problems.length} จุด):\n` +
+        problems.map((p) => `  • ${p}`).join("\n") +
+        `\n\nบันทึกที่ไม่มีเนื้อจริง = AI ตัวถัดไปอ่านแล้วไม่ได้บทเรียน` +
+        `\nระบุ --symptom / --cause / --fix / --prevention ให้มีเนื้อหาจริง แล้ว commit ใหม่`,
+    );
+  }
   const content = ensureLogFile();
   const id = nextIncidentId(content);
   const branch = gitOrNull(["branch", "--show-current"]) ?? "(ไม่ทราบ)";
@@ -196,18 +252,24 @@ if (isDirectRun) {
     process.exit(1);
   }
 
-  const id = recordIncident({
-    title: a.title,
-    severity,
-    symptom: a.symptom,
-    impact: a.impact,
-    rootCause: a.cause,
-    evidence: a.evidence,
-    fix: a.fix,
-    prevention: a.prevention,
-    verification: a.verify,
-    agent: a.agent,
-  });
+  let id: string;
+  try {
+    id = recordIncident({
+      title: a.title,
+      severity,
+      symptom: a.symptom,
+      impact: a.impact,
+      rootCause: a.cause,
+      evidence: a.evidence,
+      fix: a.fix,
+      prevention: a.prevention,
+      verification: a.verify,
+      agent: a.agent,
+    });
+  } catch (e: any) {
+    console.error(`\n❌ ${e.message}\n`);
+    process.exit(1);
+  }
 
   console.log(`\n📋 บันทึกเหตุการณ์ ${id} ลง docs/INCIDENT_LOG.md เรียบร้อย`);
   console.log(`   กฎป้องกันถาวร: ${a.prevention}\n`);

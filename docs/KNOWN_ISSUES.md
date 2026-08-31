@@ -131,5 +131,5 @@
 | **คู่มือตั้งเครื่อง dev (Local Setup)** | ต้องเดาเอง: pnpm/npm, env อะไรบ้าง, พอร์ตอะไร, dev server บน macOS 12 ต้องเลี่ยงอะไร | `README.md` หรือ `docs/LOCAL_SETUP.md` ใหม่ |
 | **แผนที่ env var จริง** | ควรมีตารางว่าคีย์ไหนใช้ที่ไฟล์ไหน จำเป็น/ไม่จำเป็น | `docs/ARCHITECTURE.md` |
 | **บันทึกเหตุผลที่ใช้ stack ล้ำเวอร์ชัน** | `react@19.2`, `next@16.3`, `motion@13` เป็นต้นเหตุ ISSUE-001 ควรมี ADR ว่าตั้งใจและรับความเสี่ยงอะไร | `docs/ARCHITECTURE.md` หรือ ADR |
-| **มาตรฐานคุณภาพ INCIDENT_LOG** | INC-0008/0009/0010/0014 ช่อง "อาการ" ก็อป "การแก้ไข" มา, "สาเหตุราก" กว้างลอย — ไม่ตรงมาตรฐานคู่มือข้อ 0.2 | เพิ่มการตรวจใน `scripts/incident-log.ts` |
+| ~~มาตรฐานคุณภาพ INCIDENT_LOG~~ ✅ | ~~INC-0008/0009/0010/0014 ช่อง "อาการ" ก็อป "การแก้ไข"~~ — แก้แล้ว: `validateIncident()` ใน `scripts/incident-log.ts` บล็อก entry ที่ก็อปกันมา + เรียบเรียง INC-0008/9/10/14 ใหม่ | — |
 | **cross-link `AGENTS_TASK_PLAN.md` ↔ KNOWN_ISSUES** | มี roadmap แยกแต่ไม่อ้างถึงกัน | หัวไฟล์ทั้งสอง |

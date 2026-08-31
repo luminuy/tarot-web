@@ -16,23 +16,37 @@
 ## 📐 มาตรฐานการบันทึก
 
 ทุกครั้งที่ commit ด้วย `--type fix` / `hotfix` / `revert`
-`scripts/git-author-guard.ts` จะบันทึกลงไฟล์นี้ให้อัตโนมัติ และ **จะบล็อกการ commit ถ้าไม่ระบุ `--cause` กับ `--prevention`**
+`scripts/git-author-guard.ts` จะบันทึกลงไฟล์นี้ให้อัตโนมัติ และ **บล็อกการ commit** ถ้า:
+
+1. ไม่ระบุ `--symptom`, `--cause`, `--prevention` (บังคับครบ 3 ตัว)
+2. เนื้อหาช่องไหน "ก็อป `--msg` มา" — `scripts/incident-log.ts` มี `validateIncident()` ตรวจว่า
+   `อาการ` ต้องไม่ใช่หัวข้อ · `สาเหตุราก` ต้องไม่ใช่อาการ · แต่ละช่องต้องยาวพอมีเนื้อจริง
+   (บทเรียน INC-0008/0009/0010/0014 ที่ทุกช่อง = commit title ภาษาอังกฤษ อ่านแล้วไม่ได้บทเรียน)
 
 ```bash
 npm run commit -- --agent <ชื่อคุณ> --type fix --scope <หมวด> \
-  --msg "<แก้อะไร>" \
-  --cause "<ทำไมถึงเกิดขึ้นได้ตั้งแต่แรก>" \
-  --prevention "<กฎถาวรที่ทำให้ไม่เกิดซ้ำ>" \
+  --msg "<หัวข้อสั้น: แก้อะไร>" \
+  --symptom "<สิ่งที่คนเจอครั้งแรกเห็น — ไม่ใช่ชื่อเรื่อง>" \
+  --cause "<ทำไมบั๊กนี้ถึงหลุดมาได้ตั้งแต่แรก — สาเหตุราก ไม่ใช่อาการ>" \
+  --prevention "<กฎถาวร/ด่านตรวจที่ทำให้ไม่เกิดซ้ำ>" \
   --severity high \
-  --verify "<พิสูจน์อย่างไรว่าแก้ได้จริง>"
+  --verify "<คำสั่งที่รัน + ผลลัพธ์ที่ยืนยันว่าหายจริง>"
 ```
 
-บันทึกด้วยมือ (กรณีเจอปัญหาแต่ยังไม่ได้ commit):
+> ช่อง `การแก้ไข` มาจาก `--fix` (ถ้าไม่ระบุจะใช้ `--msg`) · `ผลกระทบ` จาก `--impact` · `หลักฐาน` จาก `--evidence`
+
+บันทึกด้วยมือ (เจอปัญหาแต่ยังไม่ได้ commit — หรือปัญหาที่ไม่ได้เกิดจากโค้ด เช่น process/automation):
 
 ```bash
 npm run incident -- --title "..." --severity high --symptom "..." \
-  --cause "..." --fix "..." --prevention "..."
+  --cause "..." --fix "..." --prevention "..." --verify "..."
 ```
+
+**เขียนบันทึกให้ AI ตัวถัดไปได้ประโยชน์:**
+- `อาการ` = เขียนแบบคนยังไม่รู้คำตอบ ("กดปุ่มแล้วค้าง" ไม่ใช่ "AnimatePresence deadlock")
+- `สาเหตุราก` = ตอบ "ทำไมถึงหลุดมาได้" ("ไม่มีด่านตรวจ X" / "กฎ Y เขียนไว้แต่ไม่มีเครื่องบังคับ")
+- `กฎป้องกัน` = ถ้าเป็นไปได้ให้เป็น **ด่านตรวจอัตโนมัติ** ไม่ใช่แค่ "ให้ระวัง" (หลักการข้อ 0.8)
+- ถ้า incident นี้เกี่ยวกับ incident เก่า ให้ใส่แถว `เชื่อมโยง` / `เกิดซ้ำแล้ว` / `ผลข้างเคียงที่พบภายหลัง`
 
 ## 🚦 ระดับความรุนแรง
 
@@ -48,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0021 · 2026-08-31 20:55 · 🟡 Medium · บังคับคุณภาพ INCIDENT_LOG + เรียบเรียง 4 entry ที่ก็อป commit title
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | INC-0008/0009/0010/0014 ทุกช่อง (อาการ/การแก้ไข) = ก็อป commit title ภาษาอังกฤษมา อ่านแล้วไม่รู้ว่าเกิดอะไร ไม่ได้บทเรียน |
+| **สาเหตุราก** | git-author-guard fallback symptom/fix เป็น --msg ถ้าไม่ระบุ + ไม่มี validateIncident ตรวจว่าช่องต่างๆ เป็นเนื้อเดียวกันไหม + ไม่บังคับ --symptom |
+| **การแก้ไข** | เพิ่ม validateIncident() ใน incident-log.ts บล็อก entry ที่ช่องก็อปกันมา/สั้นเกิน · git-author-guard บังคับ --symptom + เลิก fallback เป็น --msg · เรียบเรียง INC-0008/9/10/14 ใหม่เป็นภาษาไทยมีเนื้อจริง + ใส่ cross-ref |
+| **🛡️ กฎป้องกันถาวร** | **recordIncident() throw ถ้า validateIncident เจอปัญหา — commit ประเภท fix จะถูกบล็อกทันทีถ้า incident entry ไม่มีเนื้อจริง** |
+| **การพิสูจน์ว่าแก้ได้จริง** | tsx -e ทดสอบ: entry ที่ก็อปกันมาถูก reject 4 จุด, entry ที่มีเนื้อจริงผ่าน · repo:verify 7/7 · commit นี้เองต้องผ่าน gate ใหม่ |
+| **บันทึกโดย** | Claude · branch `docs/incident-log-quality` · PR #25 |
+
+
 ### INC-0020 · 2026-08-31 20:59 · 🔴 Critical · ถอด cache:"npm" ที่ทำ CI และ deploy พังทั้งหมด
 
 | หัวข้อ | รายละเอียด |
@@ -56,19 +82,14 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **สาเหตุราก** | commit 451b057 (Antigravity, push ตรงเข้า main ไม่ผ่าน PR) พยายามย้าย CI ไป pnpm แล้วถูก revert บางส่วน เหลือ 'cache: npm' ค้างไว้ แต่ repo ไม่เคย commit package-lock.json (ใช้ pnpm-lock.yaml) → setup-node หา lockfile ไม่เจอ hard error |
 | **การแก้ไข** | ถอด cache:"npm" ที่ทำ CI และ deploy พังทั้งหมด |
 | **🛡️ กฎป้องกันถาวร** | **ห้าม push .github/workflows/ ตรงเข้า main — workflow ทุกไฟล์ต้องผ่าน PR ที่ CI รันจริงก่อน · 'cache:' ใน setup-node ต้องมี lockfile ชนิดที่ตรงกัน commit อยู่จริงเสมอ** |
-| **การพิสูจน์ว่าแก้ได้จริง** | PR นี้เอง: CI ต้องรันได้ (ก่อนหน้านี้ error ที่ step แรก) และ deploy รอบถัดไปต้องสำเร็จ |
-| **บันทึกโดย** | Claude · branch `fix/ci-npm-cache-broken` · commit `451b057` |
+| **การพิสูจน์ว่าแก้ได้จริง** | PR #26: CI รันผ่าน (ก่อนหน้านี้ error ที่ step แรก) · deploy รอบถัดไป success · prod 200 |
+| **บันทึกโดย** | Claude · branch `fix/ci-npm-cache-broken` · PR #26 |
 
 
-### INC-0019 · 2026-08-31 20:45 · 🟡 Medium · Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds
+### INC-0019 · ~~ยกเลิก — ซ้ำกับ INC-0018~~
 
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการที่พบ** | Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds |
-| **สาเหตุราก** | pnpm-workspace.yaml lacked packages field and had invalid allowBuilds key |
-| **การแก้ไข** | Fix pnpm-workspace.yaml schema by adding packages field and removing allowBuilds |
-| **🛡️ กฎป้องกันถาวร** | **Ensure pnpm-workspace.yaml strictly complies with pnpm 9.15 schema with packages field** |
-| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` · commit `3c7b9a9` |
+> รายการนี้เป็น auto-entry ที่ทุกช่อง = ก็อป commit title มา (ซ้ำเรื่องเดียวกับ INC-0018) — ถูกลบเนื้อหาออก
+> `validateIncident()` ที่เพิ่มใน **INC-0021** จะบล็อก entry แบบนี้ตั้งแต่ตอน commit
 
 
 ### INC-0018 · 2026-08-31 20:45 · 🟠 High · CI Fail จาก pnpm-workspace.yaml ผิด Schema ขาด packages field (ISSUE-011)
@@ -102,8 +123,9 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **สาเหตุราก** | 1) `sizes` prop ตั้งไว้ 180–256px แต่การ์ดแสดงจริงแค่ 30–80px → บน Retina เบราว์เซอร์เลือก `w512` มาย่อ 8–17 เท่า · Chrome ย่อภาพอัตราส่วนสูงด้วยฟิลเตอร์คุณภาพต่ำกว่า Safari (CoreGraphics) 2) `FollowUpChat` ใช้ `chatBottomRef.scrollIntoView()` ซึ่ง spec บอกให้เลื่อน scroll container **ทุกชั้นรวมถึง window** จนเห็น element → ทั้งหน้าถูกดึงลง ทุกครั้งที่ `messages`/`loading` เปลี่ยน |
 | **การแก้ไข** | 1) ปรับ `sizes` ทุกจุดให้ใกล้ความกว้างจริง: TarotArtIcons 220/256→96/112px · SpreadCardSelector/InteractiveCardFan 180-200→72px · FollowUpChat 180→64px · Navbar logo 200→64px · StreamReader 200→88px · IntentionAltar 240→112px · ShareModal 240→128px 2) FollowUpChat: ใส่ ref ที่กล่อง `max-h-80 overflow-y-auto` โดยตรง แล้ว `el.scrollTo({top: el.scrollHeight})` เฉพาะกล่องนั้น + เช็ค `nearBottom` (< 120px) ก่อน + ไม่เลื่อนถ้า `messages.length === 0` |
 | **🛡️ กฎป้องกันถาวร** | **prop sizes ของ <CardImage /> ต้องใกล้เคียงความกว้างจริงที่แสดง (สูงสุด ~display×3 สำหรับ DPR3) ห้ามใส่ค่าเผื่อเยอะ · ห้ามใช้ scrollIntoView ในกล่องที่ nested ลึก ให้ scroll element นั้นตรงๆ (el.scrollTo) และเช็ค nearBottom ก่อน** |
-| **การพิสูจน์ว่าแก้ได้จริง** | dev server: การ์ด 34-69px เลือก w128 (เดิม w256/w512) downscale เหลือ 1.9-3.8x · chat scroll เลื่อนเฉพาะกล่อง max-h-80 ไม่ดึง window |
-| **บันทึกโดย** | Claude · branch `claude/chrome-sharp-chatscroll` · commit `55f427d` |
+| **การพิสูจน์ว่าแก้ได้จริง** | dev server: การ์ด 34–69px เลือก `w128` (เดิม `w256`/`w512`) downscale เหลือ 1.9–3.8× · production HTML หลัง deploy มี `sizes="96px"` แล้ว · chat scroll เลื่อนเฉพาะกล่อง `max-h-80` ไม่ดึง window (ต้องเทียบ Chrome Retina จริงอีกที) |
+| **เชื่อมโยง** | ผลข้างเคียงของ INC-0009 (auto-scroll ที่เพิ่มตอนนั้นใช้ `scrollIntoView` เลื่อน window) · sizes ที่ใหญ่เกินเป็นหนี้เก่าจาก INC-0002 (ตอนนั้นแก้เรื่องขนาดไฟล์ แต่ไม่ได้จูน `sizes` ต่อจุด) |
+| **บันทึกโดย** | Claude · branch `claude/chrome-sharp-chatscroll` · PR #23 |
 
 
 ### INC-0015 · 2026-08-31 18:36 · 🟡 Medium · branch push ทิ้งไว้โดยไม่เปิด PR → automation ไม่ทำงาน งานไม่ขึ้น production
@@ -115,19 +137,22 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **สาเหตุราก** | pr.yml trigger จาก pull_request event เท่านั้น การ git push เฉยๆ ไม่สร้าง event นั้น · Agent (Antigravity) ทำงานเสร็จแล้ว commit+push แต่ข้ามขั้น npm run pr:auto ใน Standard Workflow ข้อ 7 · ไม่มีเครื่องเตือนว่า 'branch นี้มีงานแต่ยังไม่เปิด PR' |
 | **การแก้ไข** | เปิด PR #21 รวม branch + reconcile conflict (เก็บ edge caching, ตัด cloudflare ID ปลอม) · เพิ่มเครื่องเตือน 3 จุด: git:tidy เตือน branch ที่มี commit นำหน้า main แต่ไม่มี PR / pre-push hook เตือนตอน push branch ที่ยังไม่มี PR / AI_COLLABORATION_GUIDELINES ข้อ 0.4 เน้นห้ามข้ามขั้น pr:auto |
 | **🛡️ กฎป้องกันถาวร** | **หลัง commit+push ทุกครั้ง ต้องรัน npm run pr:auto เสมอ — ถือว่างานยังไม่เสร็จจนกว่า PR จะเปิด · git:tidy + pre-push hook จะเตือนอัตโนมัติถ้ามี branch งานค้างไม่มี PR** |
-| **การพิสูจน์ว่าแก้ได้จริง** | รัน npm run git:tidy เห็นบรรทัด '⚠️ ... มี N commit นำหน้า main แต่ยังไม่ได้เปิด PR' สำหรับ branch ที่ push แต่ไม่มี PR |
-| **บันทึกโดย** | ไม่ระบุ · branch `claude/enforce-pr-flow` · commit `b9b45aa` |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน `npm run git:tidy` เห็นบรรทัด `⚠️ claude/enforce-pr-flow — มี 1 commit นำหน้า main แต่ยังไม่ได้เปิด PR!` + สรุป `🚨 มี N branch งานค้าง` ท้ายสุด |
+| **เกิดซ้ำแล้ว** | 2026-08-31 หลัง INC-0015 ไม่นาน Antigravity push 6 branch (`perf/page-bundle-and-lazy-motion` ฯลฯ) โดยไม่เปิด PR อีก — `git:tidy` จับได้ทั้ง 6 · ครั้งนี้ผู้ใช้สั่งให้ Antigravity consolidate เป็น PR #24 เอง (ยังไม่มี pre-push hook เพราะ hook เพิ่งเข้า main รอบนี้) |
+| **บันทึกโดย** | Claude · branch `claude/enforce-pr-flow` · PR #22 |
 
 
-### INC-0014 · 2026-08-31 16:42 · 🟡 Medium · Resolve ISSUE-001 step deadlock, ISSUE-002 hydration, ISSUE-008/009 404 preloads, ISSUE-010 env vars, and ISSUE-011 packageManager
+### INC-0014 · 2026-08-31 16:42 · 🟡 Medium · แก้ ISSUE-001/002/008/009/011 พร้อมกันในชุดเดียว (flow ติดตาย, hydration, 404 preload)
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการที่พบ** | Resolve ISSUE-001 step deadlock, ISSUE-002 hydration, ISSUE-008/009 404 preloads, ISSUE-010 env vars, and ISSUE-011 packageManager |
-| **สาเหตุราก** | Framer Motion mode wait deadlock, unrounded float styles, invalid static preload paths and sound files, missing env docs |
-| **การแก้ไข** | Resolve ISSUE-001 step deadlock, ISSUE-002 hydration, ISSUE-008/009 404 preloads, ISSUE-010 env vars, and ISSUE-011 packageManager |
-| **🛡️ กฎป้องกันถาวร** | **Zero framer-motion DOM orchestration, toFixed coordinate rounding, test-image-paths guard, synchronized env.example** |
-| **บันทึกโดย** | Antigravity AI · branch `claude/resilience-perf-enhancements` · commit `93335bc` |
+| **อาการที่พบ** | ISSUE-001: กดปุ่มไปขั้น 2 ของ flow ดูดวงแล้วค้าง (เว็บใช้ดูดวงไม่ได้) · ISSUE-002: React hydration error หน้า `/spreads` · ISSUE-008/009: เปิดหน้าใดก็ยิง 404 12 ครั้ง (`/cards/variants/w320/`, `/sounds/*.mp3`) · ISSUE-011: `npm install` สร้าง `package-lock.json` เกิน |
+| **ผลกระทบ** | ISSUE-001 บล็อกฟีเจอร์หลักทั้งเว็บ · ที่เหลือเปลือง request + console รก |
+| **สาเหตุราก** | `<AnimatePresence mode="wait">` (motion@13 + React 19.2) exit-transition deadlock · `Math.cos/sin` ทศนิยมดิบใน inline style · `cache.ts` เขียน path ภาพ/เสียงเองไม่ผ่าน `getCardImageSrc()` (ละเมิดกฎ INC-0002) · ไม่มี `packageManager` field |
+| **การแก้ไข** | ถอด `<AnimatePresence>` ออกจาก `page.tsx` ใช้ conditional render ธรรมดา · `Number((...).toFixed(2))` ใน `TarotArtIcons.tsx` · `cache.ts` ใช้ `getCardImageSrc()` + ตัด `PRELOAD_SOUNDS` · เพิ่ม `packageManager` |
+| **🛡️ กฎป้องกันถาวร** | **หน้า multi-step ห้ามครอบด้วย `AnimatePresence mode="wait"` · trig coord ต้อง `.toFixed()` ก่อนลง style · path ภาพไพ่ทุกจุดผ่าน `getCardImageSrc()` เท่านั้น (มีด่านตรวจ test-image-paths แล้ว)** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ⚠️ commit นี้อ้าง "7 ด่านผ่าน" แต่ 7 ด่านไม่ได้เทสต์ flow จริง — ต่อมา **PR #21 (INC ไม่มี)** Claude verify ด้วยการคลิกจริงผ่านเบราว์เซอร์ว่า ISSUE-001 เดินขั้น 1→2→3 ได้จริง + `curl /spreads` ไม่มีทศนิยมดิบ + network log ไม่มี 404 |
+| **บันทึกโดย** | Antigravity AI · branch `claude/resilience-perf-enhancements` · เนื้อหาข้างบนเรียบเรียงใหม่โดย Claude (ของเดิมช่อง "อาการ" = ก็อป commit title) |
 
 
 ### INC-0013 · 2026-08-31 16:04 · 🔵 Low · แก้ tidy สลับ branch ไม่ได้เพราะไฟล์สถานะ .ai-locks.json ค้างใน working tree
@@ -169,40 +194,44 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **บันทึกโดย** | Claude · branch `claude/auto-branch-cleanup` · commit `09f6ed9` |
 
 
-### INC-0010 · 2026-08-31 13:44 · 🔴 Critical · deploy permanent stateless HMAC-SHA256 session token architecture for zero-failover serverless edge reliability
+### INC-0010 · 2026-08-31 13:44 · 🔴 Critical · ดูดวงหลายขั้นแล้ว session หายกลางคัน เพราะ Cloudflare edge worker isolate ไม่ share memory
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการที่พบ** | deploy permanent stateless HMAC-SHA256 session token architecture for zero-failover serverless edge reliability |
-| **สาเหตุราก** | stateless edge worker isolates in Cloudflare could drop in-memory reading sessions across multi-step requests |
-| **การแก้ไข** | deploy permanent stateless HMAC-SHA256 session token architecture for zero-failover serverless edge reliability |
-| **🛡️ กฎป้องกันถาวร** | **deployed cryptographic HMAC-SHA256 session token and auto-restoration across all API endpoints** |
-| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 errors, 6/6 repo verify checks passed, 100% immune to edge worker failovers |
-| **บันทึกโดย** | Antigravity AI · branch `main` · commit `b33429f` |
+| **อาการที่พบ** | ผู้ใช้เริ่มดูดวง → สับไพ่ → เลือกไพ่ แต่พอถึงขั้นอ่านคำทำนาย ระบบขึ้นว่าไม่พบ reading (404) flow พังกลางคันแบบสุ่ม |
+| **ผลกระทบ** | ผู้ใช้ดูดวงไม่จบเป็นบางครั้งบน production |
+| **สาเหตุราก** | `src/server/store.ts` เก็บ reading ไว้ใน memory ของ worker แต่ Cloudflare Workers รันแบบ stateless isolate — request ถัดไปอาจตกไป isolate คนละตัวที่ไม่มีข้อมูลนั้น (ISSUE-007: Prisma ยังไม่ต่อ จึงยังไม่มี persistent store) |
+| **การแก้ไข** | ออกแบบ stateless session token: เซ็น reading state ด้วย HMAC-SHA256 ส่งให้ client ถือ ทุก API route ถอดรหัส token กู้ state กลับมาเองได้โดยไม่ต้องพึ่ง memory — `src/lib/security/session-token.ts` |
+| **🛡️ กฎป้องกันถาวร** | **บน Cloudflare Workers ห้ามพึ่ง in-memory state ข้าม request — ต้องมาจาก token/KV/D1 เสมอ · secret ที่เซ็น token ต้องมาจาก env จริง (ตามมา ISSUE-010b: fallback เป็นสตริงตายตัวทำ Provably-Fair พังเงียบ)** |
+| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 · repo:verify ผ่าน · ทดสอบ flow หลายขั้นบน production ไม่เจอ 404 กลางคันอีก |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `b33429f` · เรียบเรียงใหม่โดย Claude (ของเดิมทุกช่อง = ก็อป commit title ภาษาอังกฤษ) |
 
 
-### INC-0009 · 2026-08-31 13:38 · 🟠 High · add smooth auto-scroll to latest message and client snapshot resilience for serverless edge chat
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการที่พบ** | add smooth auto-scroll to latest message and client snapshot resilience for serverless edge chat |
-| **สาเหตุราก** | chat container did not auto-scroll down to newly sent/received messages and serverless worker isolates lost in-memory reading records on multi-turn chat |
-| **การแก้ไข** | add smooth auto-scroll to latest message and client snapshot resilience for serverless edge chat |
-| **🛡️ กฎป้องกันถาวร** | **added chatBottomRef auto-scroll hook and implemented readingSnapshot client fallback payload for 100% resilient edge consultation** |
-| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 errors, 6/6 repo verify checks passed, smooth auto-scrolling and zero 404 errors on serverless chat |
-| **บันทึกโดย** | Antigravity AI · branch `main` · commit `c9e3afc` |
-
-
-### INC-0008 · 2026-08-31 13:20 · 🟠 High · upgrade Follow-up Chat with Claude and Gemini dual-engine integration, conversation history awareness, and dynamic contextual response engine
+### INC-0009 · 2026-08-31 13:38 · 🟠 High · แชทถามต่อไม่เลื่อนหาข้อความใหม่ + session หายเมื่อคุยหลายรอบ
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการที่พบ** | upgrade Follow-up Chat with Claude and Gemini dual-engine integration, conversation history awareness, and dynamic contextual response engine |
-| **สาเหตุราก** | chat route called invalid gemini models with thinkingConfig causing 400 Bad Request and fell back to static hardcoded string ignoring user questions |
-| **การแก้ไข** | upgrade Follow-up Chat with Claude and Gemini dual-engine integration, conversation history awareness, and dynamic contextual response engine |
-| **🛡️ กฎป้องกันถาวร** | **support Claude 3.5 Sonnet and validated Gemini models with conversation history and dynamic contextual multi-intent response engine** |
-| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 errors, 6/6 repo verify checks passed, context-aware responses per question |
-| **บันทึกโดย** | Antigravity AI · branch `main` · commit `6ee6fc8` |
+| **อาการที่พบ** | 1) พิมพ์ถามในแชทถามต่อ ข้อความใหม่โผล่ใต้จอ ต้องเลื่อนเองถึงจะเห็น 2) คุยไปหลายรอบแล้วแชทขึ้น error ว่าไม่พบ reading |
+| **ผลกระทบ** | แชทถามต่อใช้ยาก + ใช้ไม่ได้เลยเมื่อ worker isolate เปลี่ยนตัว |
+| **สาเหตุราก** | 1) ไม่มี logic เลื่อน scroll หาข้อความล่าสุด 2) เหมือน INC-0010 — `chat` route พึ่ง in-memory reading ที่ edge worker isolate ไม่ share |
+| **การแก้ไข** | เพิ่ม `chatBottomRef` + `scrollIntoView` auto-scroll · ส่ง `readingSnapshot` เป็น fallback payload จาก client ให้ chat route ใช้ตอน memory ไม่มี |
+| **🛡️ กฎป้องกันถาวร** | **edge route ที่ต้องใช้ reading state ต้องรับ snapshot/token จาก client ได้เสมอ ไม่พึ่ง memory ฝั่ง server** |
+| **⚠️ ผลข้างเคียงที่พบภายหลัง** | `chatBottomRef.scrollIntoView()` ที่เพิ่มใน incident นี้ เลื่อน **window ทั้งหน้า** ตามไปด้วย → ผู้ใช้โดนหน้าเด้งลงทุกครั้งที่กดส่ง · แก้ใน **INC-0016** (เลื่อนเฉพาะกล่องแชท + เช็ค nearBottom) |
+| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 · repo:verify ผ่าน · แชทหลายรอบไม่ 404 |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `c9e3afc` · เรียบเรียงใหม่โดย Claude (ของเดิมทุกช่อง = ก็อป commit title) |
+
+
+### INC-0008 · 2026-08-31 13:20 · 🟠 High · แชทถามต่อตอบข้อความ hardcoded เดิมๆ ไม่ตอบตรงคำถาม เพราะเรียก Gemini model ผิด
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ผู้ใช้พิมพ์ถามอะไรในแชทถามต่อ ก็ได้คำตอบเป็นข้อความสำเร็จรูปเดิมทุกครั้ง ไม่เกี่ยวกับคำถาม |
+| **ผลกระทบ** | ฟีเจอร์แชทถามต่อไม่ทำงานจริง เป็นแค่ข้อความตายตัว |
+| **สาเหตุราก** | chat route เรียก Gemini ด้วยชื่อ model ที่ไม่มีจริง + ส่ง `thinkingConfig` ที่ model ไม่รองรับ → API ตอบ 400 Bad Request → โค้ดมี `catch` ที่ fall back ไปคืนสตริง hardcoded โดยไม่ log ว่า error |
+| **การแก้ไข** | เปลี่ยนไปใช้ Gemini model ที่ valid + เพิ่ม Claude เป็น engine สำรอง + ส่ง conversation history เข้าไปด้วยเพื่อให้ตอบตามบริบท — `src/app/api/reading/[id]/chat/route.ts` |
+| **🛡️ กฎป้องกันถาวร** | **ห้าม `catch` แล้ว fallback เงียบไปคืนค่า hardcoded — ถ้า AI call ล้มต้อง log + คืน error ให้ผู้ใช้เห็น · ชื่อ model ต้อง validate กับ docs ก่อนใช้ (ดูรวมใน INC-... ของ Gemini model list)** |
+| **การพิสูจน์ว่าแก้ได้จริง** | typecheck 0 · repo:verify ผ่าน · พิมพ์คำถามต่างกันได้คำตอบต่างกันตามบริบท |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `6ee6fc8` · เรียบเรียงใหม่โดย Claude (ของเดิมทุกช่อง = ก็อป commit title) |
 
 
 ### INC-0007 · 2026-08-31 12:09 · 🟠 High · เทสต์สถิติที่ตัวอย่างน้อยเกินไป ทำ deploy ขึ้น production ล้มแบบสุ่ม

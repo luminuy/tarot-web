@@ -45,6 +45,7 @@ const isFix = FIX_TYPES.includes(type.toLowerCase());
 
 if (isFix) {
   const missing: string[] = [];
+  if (!args["symptom"]) missing.push("--symptom");
   if (!args["cause"]) missing.push("--cause");
   if (!args["prevention"]) missing.push("--prevention");
 
@@ -52,10 +53,12 @@ if (isFix) {
     console.error("\n❌ [Commit ถูกบล็อก] commit ประเภทแก้บั๊กต้องบันทึกบทเรียนเสมอ");
     console.error(`   ขาด: ${missing.join(", ")}\n`);
     console.error("   เหตุผล: ทุกความผิดพลาดต้องถูกบันทึกลง docs/INCIDENT_LOG.md");
-    console.error("   เพื่อไม่ให้ AI ตัวไหนทำผิดซ้ำเรื่องเดิมอีก\n");
+    console.error("   เพื่อไม่ให้ AI ตัวไหนทำผิดซ้ำเรื่องเดิมอีก");
+    console.error("   (--symptom / --cause ห้ามก็อป --msg มา ต้องเป็นคนละเนื้อ ไม่งั้น incident-log จะบล็อกซ้ำ)\n");
     console.error("   ตัวอย่าง:");
     console.error(`   npm run commit -- --agent ${agent} --type ${type} --scope ${scope} \\`);
     console.error(`     --msg "${message}" \\`);
+    console.error(`     --symptom "อาการที่คนเจอครั้งแรกเห็น (ไม่ใช่ชื่อเรื่อง)" \\`);
     console.error(`     --cause "ทำไมถึงเกิดขึ้นได้ตั้งแต่แรก (สาเหตุราก ไม่ใช่อาการ)" \\`);
     console.error(`     --prevention "กฎถาวรที่ทำให้เกิดซ้ำไม่ได้อีก" \\`);
     console.error(`     --severity high --verify "พิสูจน์ยังไงว่าแก้ได้จริง"\n`);
@@ -113,11 +116,11 @@ async function executeCommit() {
       const incidentId = recordIncident({
         title: message,
         severity: ["critical", "high", "medium", "low"].includes(severity) ? severity : "medium",
-        symptom: args["symptom"] || message,
+        symptom: args["symptom"] ?? "",   // บังคับมาแล้วจาก gate ด้านบน — ห้าม fallback เป็น message
         impact: args["impact"],
         rootCause: args["cause"],
         evidence: args["evidence"],
-        fix: details || message,
+        fix: args["fix"] || details || message,
         prevention: args["prevention"],
         verification: args["verify"] || args["verification"],
         agent,
