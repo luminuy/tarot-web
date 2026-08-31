@@ -100,12 +100,27 @@ check(
   })(),
 );
 
-// 6. อัตราไพ่หัวกลับต้องสมเหตุสมผล (ไม่ใช่ 0% หรือ 100%) — สุ่มจริง
-const largeSample = drawCards({ serverSeed, clientSeed: normalizeClientSeed("sample-run"), count: 78 });
-const reversedCount = largeSample.filter((d) => d.isReversed).length;
+// 6. อัตราไพ่หัวกลับต้องใกล้เคียงค่าที่ตั้งไว้ (REVERSAL_RATE = 0.4)
+//
+// ⚠️ ห้ามวัดจากสำรับเดียว (78 ใบ) เด็ดขาด
+// serverSeed สุ่มใหม่ทุกครั้งที่รัน ถ้าวัดจาก 78 ใบ ค่าเบี่ยงเบนมาตรฐานจะสูงถึง ±5.5 จุด
+// เทสต์จะ fail แบบสุ่มทั้งที่ไม่มีอะไรพัง (flaky) และเมื่อเทสต์นี้อยู่ใน CI
+// การ fail แบบสุ่มจะทำให้ deploy ขึ้น production ล้มไปด้วย (เคยเกิดขึ้นจริงมาแล้ว)
+//
+// จึงต้องรวมหลายสำรับให้ตัวอย่างใหญ่พอ: 40 สำรับ = 3,120 ใบ
+// σ ≈ sqrt(0.4 × 0.6 / 3120) ≈ 0.88 จุด ดังนั้นกรอบ 35-45% ห่างจากค่ากลางราว 5.7σ
+// โอกาส fail แบบสุ่มน้อยกว่า 1 ในร้อยล้าน แต่ยังจับได้ทันทีถ้าอัตราจริงเพี้ยนไปจริง ๆ
+const SAMPLE_DECKS = 40;
+const SAMPLE_SIZE = SAMPLE_DECKS * 78;
+let reversedCount = 0;
+for (let i = 0; i < SAMPLE_DECKS; i++) {
+  const deck = drawCards({ serverSeed, clientSeed: normalizeClientSeed(`sample-run-${i}`), count: 78 });
+  reversedCount += deck.filter((d) => d.isReversed).length;
+}
+const reversedRate = reversedCount / SAMPLE_SIZE;
 check(
-  `อัตราไพ่หัวกลับอยู่ในช่วงสมเหตุสมผล (ได้ ${reversedCount}/78 ≈ ${Math.round((reversedCount / 78) * 100)}%, คาดหวัง 40% ±15)`,
-  reversedCount > 78 * 0.25 && reversedCount < 78 * 0.55,
+  `อัตราไพ่หัวกลับใกล้เคียง 40% (ได้ ${(reversedRate * 100).toFixed(1)}% จาก ${SAMPLE_SIZE} ใบ, ยอมรับ 35-45%)`,
+  reversedRate > 0.35 && reversedRate < 0.45,
 );
 
 // 7. ความกระจายของการสุ่ม — รันหลายซีดแล้วดูว่าไพ่ใบแรกกระจายทั่วสำรับ ไม่เอนไปใบต้น ๆ (มาตรฐาน rejection sampling)
