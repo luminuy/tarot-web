@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
+import { SPRING, DUR } from "@/lib/motion";
 
 interface ShuffleRitualProps {
   commitment: string;
@@ -18,12 +19,47 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
   const [shuffling, setShuffling] = useState(false);
   const [shufflePhase, setShufflePhase] = useState<"idle" | "split" | "riffle" | "bridge" | "gather">("idle");
   const [progress, setProgress] = useState(0);
-  const entropyRef = React.useRef<number[]>([]);
+  const entropyRef = useRef<number[]>([]);
+  const rafRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
+
+  // Cleanup rAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   // Collect entropy from user's micro-gestures
   const handlePointerMove = (e: React.PointerEvent) => {
     if (shuffling && entropyRef.current.length < 50) {
       entropyRef.current.push(e.clientX + e.clientY + Date.now());
+    }
+  };
+
+  // P1-M5: rAF-based shuffle progress (frame-accurate, GPU-synchronized)
+  const SHUFFLE_DURATION_MS = 2200; // total shuffle duration
+
+  const shuffleTick = (timestamp: number) => {
+    if (startTimeRef.current === 0) startTimeRef.current = timestamp;
+    const elapsed = timestamp - startTimeRef.current;
+    const cur = Math.min(100, (elapsed / SHUFFLE_DURATION_MS) * 100);
+    setProgress(Math.round(cur));
+
+    // Phase transitions
+    if (cur >= 10 && cur < 20) setShufflePhase("split");
+    else if (cur >= 20 && cur < 65) setShufflePhase("riffle");
+    else if (cur >= 65 && cur < 85) setShufflePhase("bridge");
+    else if (cur >= 85) setShufflePhase("gather");
+
+    if (cur < 100) {
+      rafRef.current = requestAnimationFrame(shuffleTick);
+    } else {
+      rafRef.current = null;
+      setTimeout(() => {
+        const rawSeed = entropyRef.current.join(":") + ":" + Date.now();
+        onShuffleComplete(rawSeed);
+      }, 420);
     }
   };
 
@@ -34,24 +70,8 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
     }
     setShuffling(true);
     setShufflePhase("split");
-
-    let cur = 0;
-    const interval = setInterval(() => {
-      cur += 2;
-      setProgress(cur);
-
-      if (cur === 20) setShufflePhase("riffle");
-      if (cur === 65) setShufflePhase("bridge");
-      if (cur === 85) setShufflePhase("gather");
-
-      if (cur >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          const rawSeed = entropyRef.current.join(":") + ":" + Date.now();
-          onShuffleComplete(rawSeed);
-        }, 500);
-      }
-    }, 45);
+    startTimeRef.current = 0;
+    rafRef.current = requestAnimationFrame(shuffleTick);
   };
 
   return (
@@ -132,17 +152,19 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
               <div className="w-8 h-8 rounded-full border border-[#e5c07b] flex items-center justify-center text-xs">✨</div>
             </motion.div>
 
-            {/* Center Weaving Cascade Cards */}
+            {/* Center Weaving Cascade Cards — non-looping finite riffle */}
             {shufflePhase === "riffle" && (
               <>
                 <motion.div
-                  animate={{ y: [-15, 10, -15], rotateZ: [-6, 6, -6], scale: [0.95, 1.05, 0.95] }}
-                  transition={{ repeat: Infinity, duration: 0.25 }}
+                  initial={{ y: 0, rotateZ: 0, scale: 1, opacity: 0 }}
+                  animate={{ y: [-14, 10, -8, 6, -4, 2, 0], rotateZ: [-5, 5, -3, 3, -1, 1, 0], scale: [0.95, 1.04, 0.97, 1.02, 0.99, 1.01, 1], opacity: 1 }}
+                  transition={{ duration: 1.4, ease: "easeInOut" }}
                   className="w-30 h-44 rounded-2xl border border-[#f5deaa] card-back-pattern absolute z-20 shadow-2xl opacity-90"
                 />
                 <motion.div
-                  animate={{ y: [10, -15, 10], rotateZ: [6, -6, 6], scale: [1.02, 0.96, 1.02] }}
-                  transition={{ repeat: Infinity, duration: 0.28 }}
+                  initial={{ y: 0, rotateZ: 0, scale: 1, opacity: 0 }}
+                  animate={{ y: [10, -14, 6, -8, 2, -4, 0], rotateZ: [5, -5, 3, -3, 1, -1, 0], scale: [1.02, 0.96, 1.01, 0.98, 1, 0.99, 1], opacity: 1 }}
+                  transition={{ duration: 1.4, ease: "easeInOut", delay: 0.05 }}
                   className="w-30 h-44 rounded-2xl border border-[#c59b27] card-back-pattern absolute z-20 shadow-2xl opacity-80"
                 />
               </>

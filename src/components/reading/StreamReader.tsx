@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { STAGGER, DUR, EASE } from "@/lib/motion";
 import type { Reading } from "@/lib/schema/reading";
 import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
@@ -308,12 +310,40 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   </button>
                 )}
               </div>
-              <p className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed font-serif-th font-normal">
-                {activeCardReading?.reading ||
-                  (isStreaming
+
+              {/* P1-M3: Word-by-word oracle streaming animation */}
+              {activeCardReading?.reading ? (
+                <p
+                  key={`oracle-${activeCardIndex}`}
+                  className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed font-serif-th font-normal"
+                  aria-live="polite"
+                  aria-label="คำทำนายจากแม่หมอ"
+                >
+                  {isStreaming
+                    ? activeCardReading.reading.split(" ").map((word, i) => (
+                        <motion.span
+                          key={i}
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            duration: DUR.fast,
+                            ease: EASE.out,
+                            delay: i * STAGGER.tight,
+                          }}
+                          className="inline-block mr-[0.25em]"
+                        >
+                          {word}
+                        </motion.span>
+                      ))
+                    : activeCardReading.reading}
+                </p>
+              ) : (
+                <p className="text-xs sm:text-sm text-[#cfc8e2]/60 leading-relaxed font-serif-th font-normal italic">
+                  {isStreaming
                     ? "แม่หมอกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำทำนายของไพ่ใบนี้..."
-                    : "รอการเปิดม่านพยากรณ์")}
-              </p>
+                    : "รอการเปิดม่านพยากรณ์"}
+                </p>
+              )}
             </div>
 
             {/* Next / Prev Card Navigation Arrows */}

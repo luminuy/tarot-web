@@ -26,24 +26,36 @@ interface FanCardProps {
 const FanCard = React.memo<FanCardProps>(
   ({ cardIdx, posInTier, tierIdx, isPicked, disabled, onClick }) => {
     if (isPicked) return null;
-    const angle = ((posInTier % 9) - 4) * 1.3;
+
+    // P1-M4: True mathematical arc geometry
+    // Each tier has 26 cards; use position within tier for arc spread
+    const TIER_SPREAD_DEG = 22; // total arc spread per tier in degrees
+    const CARDS_PER_TIER = 26;
+    const normalized = (posInTier % CARDS_PER_TIER) / (CARDS_PER_TIER - 1) - 0.5; // -0.5 to 0.5
+    const angle = normalized * TIER_SPREAD_DEG;
+
+    // Arc Y: cards at edges of fan dip down following the circumference
+    // Using approximation: y = R * (1 - cos(θ)) where R is the virtual arc radius
+    const ARC_RADIUS = 320; // virtual radius in px
+    const angleRad = (angle * Math.PI) / 180;
+    const arcY = ARC_RADIUS * (1 - Math.cos(angleRad));
 
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1, rotate: angle }}
+        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+        animate={{ opacity: 1, scale: 1, rotate: angle, y: arcY }}
         exit={{
           opacity: 0,
-          y: -120,
-          scale: 0.4,
-          rotate: 180,
-          transition: { duration: 0.35, ease: "easeInOut" },
+          y: -130,
+          scale: 0.35,
+          rotate: angle * 3,
+          transition: { duration: 0.3, ease: [0.4, 0, 1, 1] },
         }}
-        whileHover={{ y: -20, scale: 1.18, rotate: 0, zIndex: 200 }}
+        whileHover={{ y: arcY - 22, scale: 1.18, rotate: 0, zIndex: 200 }}
         whileTap={{ scale: 0.93 }}
         onClick={() => !disabled && onClick(cardIdx)}
         className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group"
-        style={{ zIndex: tierIdx * 40 + posInTier }}
+        style={{ zIndex: tierIdx * 40 + posInTier, originY: 1 }}
       >
         <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-xl sm:rounded-2xl border-2 card-back-pattern shadow-xl flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#e5c07b]/45 group-hover:border-[#ffd700] group-hover:ring-2 group-hover:ring-[#ffd700]/70 group-hover:shadow-[0_0_25px_rgba(255,215,0,0.8)] bg-[#0d0918]">
           <div className="w-full flex items-center justify-end text-[7px] sm:text-[8px] text-[#e5c07b]/80">
