@@ -330,7 +330,7 @@ export default function TarotPage() {
                 image="major-01.jpg"
                 alt="The Magician Tarot Seal"
                 className="w-full h-full object-cover object-[50%_12%] filter contrast-[1.12] saturate-[1.15] brightness-[1.05] tarot-hd-card-image"
-                sizes="40px"
+                sizes="200px"
                 loading="eager"
               />
             </div>

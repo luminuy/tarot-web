@@ -84,8 +84,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona }
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
               alt={persona.nameTh}
-              className="w-full h-full object-cover object-top tarot-hd-card-image"
-              sizes="32px"
+              className="w-full h-full object-cover object-top filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+              sizes="180px"
             />
           </div>
           <div>

@@ -192,8 +192,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     <CardImage
                       image={cardData?.image || "major-00.jpg"}
                       alt={cardData?.nameTh || "Tarot"}
-                      className="w-full h-full object-cover object-center filter contrast-[1.06] saturate-[1.06] brightness-[1.02] tarot-hd-card-image"
-                      sizes="56px"
+                      className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                      sizes="200px"
                     />
                   </div>
 

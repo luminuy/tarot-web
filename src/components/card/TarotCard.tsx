@@ -72,10 +72,10 @@ const SIZE_MAP = {
 };
 
 const DEFAULT_IMAGE_SIZES: Record<string, string> = {
-  sm: "85px",
-  md: "(min-width: 640px) 160px, 120px",
-  lg: "(min-width: 640px) 280px, 220px",
-  responsive: "200px",
+  sm: "160px",
+  md: "(min-width: 640px) 280px, 200px",
+  lg: "(min-width: 640px) 512px, 320px",
+  responsive: "320px",
 };
 
 export const TarotCard: React.FC<TarotCardProps> = ({

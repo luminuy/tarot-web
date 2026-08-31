@@ -343,7 +343,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             <div className="flex items-center justify-between pb-3 border-b border-[#e5c07b]/20 relative z-10">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full border border-[#e5c07b] flex items-center justify-center bg-[#07050d] text-xs text-[#e5c07b]">
-                  🔮
+                  ✦
                 </div>
                 <span className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold">
                   ดูดวงไพ่ทาโรต์
@@ -386,8 +386,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                       image={c.card?.image}
                       cardId={c.card?.id}
                       alt={c.card?.nameTh || "Tarot"}
-                      className="w-full h-full object-cover object-center tarot-hd-card-image"
-                      sizes="120px"
+                      className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                      sizes="240px"
                     />
                   </div>
 

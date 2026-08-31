@@ -44,7 +44,7 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
       image={src}
       alt="Tarot Card"
       className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-      sizes="60px"
+      sizes="220px"
     />
   </div>
 );
@@ -57,7 +57,7 @@ export const HighPriestessIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#e5c07b] shadow-[0_0_25px_rgba(229,192,123,0.35)] ${className}`}>
-    <CardImage image="major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+    <CardImage image="major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="256px" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] drop-shadow">
@@ -71,7 +71,7 @@ export const JusticeIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#a855f7] shadow-[0_0_25px_rgba(168,85,247,0.35)] ${className}`}>
-    <CardImage image="major-11.jpg" alt="Justice" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+    <CardImage image="major-11.jpg" alt="Justice" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="256px" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#e9d5ff] drop-shadow">
@@ -85,7 +85,7 @@ export const HermitIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#38bdf8] shadow-[0_0_25px_rgba(56,189,248,0.35)] ${className}`}>
-    <CardImage image="major-09.jpg" alt="The Hermit" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+    <CardImage image="major-09.jpg" alt="The Hermit" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="256px" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#bae6fd] drop-shadow">
@@ -99,7 +99,7 @@ export const TheStarIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#ec4899] shadow-[0_0_25px_rgba(236,72,153,0.35)] ${className}`}>
-    <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+    <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="256px" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#fbcfe8] drop-shadow">
@@ -113,7 +113,7 @@ export const MagicianIllustration: React.FC<{ className?: string }> = ({
   className = "w-20 h-32 mx-auto",
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#ffd700] shadow-[0_0_25px_rgba(255,215,0,0.35)] ${className}`}>
-    <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+    <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="256px" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
     <div className="absolute bottom-1.5 inset-x-0 text-center">
       <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] drop-shadow">
@@ -290,38 +290,38 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
     {/* Left: Cross Formation */}
     <div className="relative w-28 h-28 flex items-center justify-center">
       <div className="absolute top-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-04.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-04.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
       <div className="absolute bottom-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-18.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-18.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
       <div className="absolute left-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-19.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-19.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
       <div className="absolute right-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-17.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-17.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
       <div className="relative z-10 w-9 h-[60px] rounded-lg border-2 border-[#ffd700] overflow-hidden shadow-xl">
-        <CardImage image="major-00.jpg" alt="Center" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-00.jpg" alt="Center" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
       <div className="absolute z-20 w-9 h-[60px] rounded-lg border border-[#e5c07b] overflow-hidden rotate-90 shadow-lg opacity-90">
-        <CardImage image="major-10.jpg" alt="Cross" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-10.jpg" alt="Cross" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
     </div>
 
     {/* Right: Vertical Staff of 4 Cards */}
     <div className="flex flex-col gap-1">
       <div className="w-7 h-[44px] rounded-md border border-[#ffd700]/80 overflow-hidden shadow">
-        <CardImage image="major-21.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-21.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
       <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-14.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-14.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
       <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-11.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-11.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
       <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-09.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+        <CardImage image="major-09.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
       </div>
     </div>
   </div>
@@ -352,7 +352,9 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
           <CardImage
             image={`major-${cardNum}.jpg`}
             alt=""
-            className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+            className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+            sizes="220px"
+          />
         </div>
       );
     })}
@@ -484,7 +486,7 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
           key={idx}
           className="w-8.5 h-[58px] rounded-lg border border-[#e5c07b]/40 overflow-hidden shadow opacity-90 hover:opacity-100 flex-shrink-0"
         >
-          <CardImage image={`major-${item.card}.jpg`} alt="" className="w-full h-full object-cover" sizes="60px" />
+          <CardImage image={`major-${item.card}.jpg`} alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="220px" />
         </div>
       ))}
     </div>
@@ -506,7 +508,9 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
           <CardImage
             image={`major-${item.card}.jpg`}
             alt=""
-            className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+            className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+            sizes="220px"
+          />
         </div>
       ))}
     </div>
@@ -554,7 +558,9 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
             <CardImage
               image={`major-${chk.card}.jpg`}
               alt=""
-              className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+              className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+              sizes="220px"
+            />
           </div>
         ))}
       </div>
@@ -569,7 +575,9 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
             <CardImage
               image={`major-${chk.card}.jpg`}
               alt=""
-              className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="60px" />
+              className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+              sizes="220px"
+            />
           </div>
         ))}
       </div>

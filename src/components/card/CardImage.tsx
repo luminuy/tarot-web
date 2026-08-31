@@ -42,7 +42,7 @@ export function CardImage({
   alt,
   className,
   style,
-  sizes = "120px",
+  sizes = "220px",
   full = false,
   loading = "lazy",
   decoding = "async",

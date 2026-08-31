@@ -278,8 +278,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     : "major-17.jpg"
                 }`}
                 alt={selectedSpread.nameTh}
-                className="w-full h-full object-cover object-top filter contrast-[1.04]"
-                sizes="40px"
+                className="w-full h-full object-cover object-top filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                sizes="200px"
               />
               <div className="gold-foil-sheen absolute inset-0 opacity-30" />
             </div>

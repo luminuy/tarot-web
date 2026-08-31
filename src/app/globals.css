@@ -99,6 +99,8 @@ body {
 .card-face img,
 .tarot-hd-card-image {
   image-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   transform: translateZ(0);

@@ -90,7 +90,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     cardId={card.id}
                     alt={card.nameTh}
                     className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-                    sizes="(min-width: 640px) 320px, 280px"
+                    sizes="(min-width: 640px) 600px, 400px"
                     loading="eager"
                   />
                 </motion.div>
