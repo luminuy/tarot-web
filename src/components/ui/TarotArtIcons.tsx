@@ -58,12 +58,7 @@ export const HighPriestessIllustration: React.FC<{ className?: string }> = ({
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#e5c07b] shadow-[0_0_25px_rgba(229,192,123,0.35)] ${className}`}>
     <CardImage image="major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="112px" />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-    <div className="absolute bottom-1.5 inset-x-0 text-center">
-      <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] drop-shadow">
-        จิตสัมผัสอันอ่อนโยน
-      </span>
-    </div>
+    
   </div>
 );
 
@@ -72,12 +67,7 @@ export const JusticeIllustration: React.FC<{ className?: string }> = ({
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#a855f7] shadow-[0_0_25px_rgba(168,85,247,0.35)] ${className}`}>
     <CardImage image="major-11.jpg" alt="Justice" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="112px" />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-    <div className="absolute bottom-1.5 inset-x-0 text-center">
-      <span className="text-[10px] font-serif-th font-bold text-[#e9d5ff] drop-shadow">
-        หลักการและสัจจะ
-      </span>
-    </div>
+    
   </div>
 );
 
@@ -86,12 +76,7 @@ export const HermitIllustration: React.FC<{ className?: string }> = ({
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#38bdf8] shadow-[0_0_25px_rgba(56,189,248,0.35)] ${className}`}>
     <CardImage image="major-09.jpg" alt="The Hermit" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="112px" />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-    <div className="absolute bottom-1.5 inset-x-0 text-center">
-      <span className="text-[10px] font-serif-th font-bold text-[#bae6fd] drop-shadow">
-        ปัญญาและสติ
-      </span>
-    </div>
+    
   </div>
 );
 
@@ -100,12 +85,7 @@ export const TheStarIllustration: React.FC<{ className?: string }> = ({
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#ec4899] shadow-[0_0_25px_rgba(236,72,153,0.35)] ${className}`}>
     <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="112px" />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-    <div className="absolute bottom-1.5 inset-x-0 text-center">
-      <span className="text-[10px] font-serif-th font-bold text-[#fbcfe8] drop-shadow">
-        คลื่นพลังงานดวงดาว
-      </span>
-    </div>
+    
   </div>
 );
 
@@ -114,12 +94,7 @@ export const MagicianIllustration: React.FC<{ className?: string }> = ({
 }) => (
   <div className={`relative rounded-xl overflow-hidden border-2 border-[#ffd700] shadow-[0_0_25px_rgba(255,215,0,0.35)] ${className}`}>
     <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="112px" />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
-    <div className="absolute bottom-1.5 inset-x-0 text-center">
-      <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] drop-shadow">
-        ผู้เนรมิตพลัง
-      </span>
-    </div>
+    
   </div>
 );
 

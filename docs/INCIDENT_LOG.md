@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0023 · 2026-08-31 21:35 · 🟡 Medium · Fix WebKit scrollTo DOMException pattern error and remove persona card text overlays
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | The string did not match the expected pattern error shown when transitioning steps in Safari/WebKit and persona cards had text overlapping card artwork |
+| **สาเหตุราก** | Non-standard behavior instant in window.scrollTo caused WebKit DOMException and persona illustrations had legacy text badges inside card frame |
+| **การแก้ไข** | Fix WebKit scrollTo DOMException pattern error and remove persona card text overlays |
+| **🛡️ กฎป้องกันถาวร** | **Use standard compliant ScrollBehavior auto and enforce 100% Pure 1909 card artwork without overlays per Rule 7** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `84b1417` |
+
+
 ### INC-0022 · 2026-08-31 21:23 · 🟡 Medium · Refine pr.yml auto-merge with explicit error handling and hard-fail deploy guard
 
 | หัวข้อ | รายละเอียด |

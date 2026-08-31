@@ -93,18 +93,18 @@ export default function TarotPage() {
   // Instant Hardware Scroll Reset with Multi-Frame Paint Guarantee
   const scrollToSanctuaryTop = () => {
     if (typeof window === "undefined") return;
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     if (document.documentElement) document.documentElement.scrollTop = 0;
     if (document.body) document.body.scrollTop = 0;
     requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       const anchor = document.getElementById("sanctuary-top-anchor");
       if (anchor) {
-        anchor.scrollIntoView({ behavior: "instant", block: "start" });
+        anchor.scrollIntoView({ behavior: "auto", block: "start" });
       }
     });
     setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }, 40);
   };
 
