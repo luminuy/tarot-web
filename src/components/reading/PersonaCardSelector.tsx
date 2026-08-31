@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { PERSONAS, type Persona } from "@/data/personas";
 import {
@@ -36,34 +36,67 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   selectedPersona,
   onSelectPersona,
 }) => {
+  const carouselRef = React.useRef<HTMLDivElement>(null);
+  const [activeScrollIndex, setActiveScrollIndex] = useState(0);
+
+  const handleCarouselScroll = () => {
+    if (!carouselRef.current) return;
+    const { scrollLeft, clientWidth } = carouselRef.current;
+    const cardWidth = Math.min(clientWidth * 0.82, 310) + 16;
+    const newIdx = Math.round(scrollLeft / cardWidth);
+    if (newIdx >= 0 && newIdx < PERSONAS.length && newIdx !== activeScrollIndex) {
+      setActiveScrollIndex(newIdx);
+    }
+  };
+
+  const scrollToCard = (index: number) => {
+    if (!carouselRef.current) return;
+    const children = carouselRef.current.children;
+    if (children && children[index]) {
+      (children[index] as HTMLElement).scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
+      setActiveScrollIndex(index);
+    }
+  };
+
   return (
     <div className="space-y-4 w-full">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-1">
         <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] tracking-wide flex items-center gap-2">
           <span className="text-[#e5c07b]">✦</span> เลือกสไตล์การทำนายของแม่หมอ
         </label>
-        {/* Mobile Swipe Hint */}
-        <span className="text-[10px] text-[#9c93b8] font-mono tracking-wider sm:hidden">
-          ← เลื่อน →
+        {/* Mobile Swipe Guidance */}
+        <span className="text-[10px] text-[#9c93b8] font-mono bg-[#140c2a] border border-[#e5c07b]/20 px-2 py-0.5 rounded-full shadow-inner sm:hidden">
+          {activeScrollIndex + 1} / {PERSONAS.length} ท่าน
         </span>
       </div>
 
       {/* Responsive Persona Carousel (Mobile Swipe / Desktop Grid) */}
-      <div className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-4 pt-1 px-4 -mx-4 no-scrollbar sm:grid sm:grid-cols-3 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible">
-        {PERSONAS.map((p) => {
+      <div
+        ref={carouselRef}
+        onScroll={handleCarouselScroll}
+        className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-3 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
+      >
+        {PERSONAS.map((p, idx) => {
           const isSelected = selectedPersona.id === p.id;
           const meta = PERSONA_DETAILS[p.id] || PERSONA_DETAILS.warm;
 
           return (
             <motion.div
               key={p.id}
-              whileHover={{ y: -6, scale: 1.02 }}
+              whileHover={{ y: -5, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => onSelectPersona(p)}
+              onClick={() => {
+                onSelectPersona(p);
+                scrollToCard(idx);
+              }}
               className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none ${
                 isSelected
-                  ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#e5c07b] ring-2 ring-[#e5c07b]/90 shadow-[0_0_40px_rgba(229,192,123,0.5)]"
-                  : "bg-gradient-to-b from-[#130d24]/90 to-[#07040f]/90 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
+                  ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_35px_rgba(229,192,123,0.45)]"
+                  : "bg-gradient-to-b from-[#130d24]/95 to-[#07040f]/95 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
               }`}
               style={{ minHeight: "315px" }}
             >
@@ -77,9 +110,12 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                 </span>
               </div>
 
-              {/* Authentic Tarot Persona Character Artwork */}
-              <div className="my-auto py-2 flex items-center justify-center filter drop-shadow-[0_0_12px_rgba(229,192,123,0.25)]">
-                {meta.renderArt()}
+              {/* Authentic Tarot Persona Character Artwork with Altar Aura */}
+              <div className="my-auto py-2 flex items-center justify-center relative">
+                <div className="absolute inset-0 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-xl" />
+                <div className="relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.3)]">
+                  {meta.renderArt()}
+                </div>
               </div>
 
               {/* Card Footer Titles */}
@@ -95,10 +131,10 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               {/* Selected Golden Corner Seals */}
               {isSelected && (
                 <>
-                  <div className="absolute top-1.5 left-1.5 text-[8px] text-[#e5c07b]">✦</div>
-                  <div className="absolute top-1.5 right-1.5 text-[8px] text-[#e5c07b]">✦</div>
-                  <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#e5c07b]">✦</div>
-                  <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#e5c07b]">✦</div>
+                  <div className="absolute top-1.5 left-1.5 text-[8px] text-[#ffd700]">✦</div>
+                  <div className="absolute top-1.5 right-1.5 text-[8px] text-[#ffd700]">✦</div>
+                  <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#ffd700]">✦</div>
+                  <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#ffd700]">✦</div>
                 </>
               )}
 
@@ -109,19 +145,26 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
         })}
       </div>
 
-      {/* Mobile Persona Indicator Dots */}
-      <div className="flex sm:hidden items-center justify-center gap-1.5 -mt-2 pb-1">
-        {PERSONAS.map((p) => {
+      {/* Interactive Mobile Persona Indicator Dots */}
+      <div className="flex sm:hidden items-center justify-center gap-1.5 pt-0.5 pb-1">
+        {PERSONAS.map((p, idx) => {
+          const isCurrentActive = activeScrollIndex === idx;
           const isSelected = selectedPersona.id === p.id;
+
           return (
             <button
               key={p.id}
               type="button"
-              onClick={() => onSelectPersona(p)}
+              onClick={() => {
+                onSelectPersona(p);
+                scrollToCard(idx);
+              }}
               className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                isSelected
-                  ? "w-6 bg-gradient-to-r from-[#d4af37] to-[#f7e7b4] shadow-[0_0_8px_rgba(229,192,123,0.8)]"
-                  : "w-1.5 bg-[#e5c07b]/25 hover:bg-[#e5c07b]/50"
+                isCurrentActive
+                  ? "w-7 bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] shadow-[0_0_10px_rgba(229,192,123,0.9)]"
+                  : isSelected
+                  ? "w-3 bg-[#e5c07b]/60"
+                  : "w-1.5 bg-[#e5c07b]/20 hover:bg-[#e5c07b]/45"
               }`}
               aria-label={`เลือก ${p.nameTh}`}
             />
