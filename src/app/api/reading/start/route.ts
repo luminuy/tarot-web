@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { getSpread } from "@/data/spreads";
 import { checkQuestion } from "@/lib/safety/guardrails";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { createCommitment } from "@/lib/tarot/shuffle";
 import { checkRateLimit, clientKeyFromRequest, saveReading } from "@/server/store";
 
@@ -31,6 +32,10 @@ const BodySchema = z.object({
  * นั่นคือสิ่งที่ทำให้พิสูจน์ได้ว่าเราไม่ได้เลือกไพ่หลังจากเห็นคำถามแล้ว
  */
 export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึง API จากภายนอก (Unauthorized Origin)" }, { status: 403 });
+  }
+
   const limit = checkRateLimit(`start:${clientKeyFromRequest(request)}`, 20, 60 * 60 * 1000);
   if (!limit.allowed) {
     return NextResponse.json(

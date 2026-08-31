@@ -4,6 +4,7 @@ import { getReading, type ReadingRecord } from "@/server/store";
 import { cardByIndex } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
 import { buildSystemPrompt } from "@/lib/ai/prompt";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
@@ -140,6 +141,10 @@ function generateContextualTarotChatReply(params: {
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึง API จากภายนอก (Unauthorized Origin)" }, { status: 403 });
+  }
+
   const { id } = await params;
 
   // Rate Limiting & Concurrency Guard per IP
