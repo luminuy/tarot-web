@@ -88,35 +88,72 @@ class MysticAudioEngine {
     }
   }
 
-  /** เสียงหยิบไพ่ / แตะเลือกการ์ด (Card Tap & Select Chime) */
-  public playCardSelectSound() {
+  /**
+   * 🎴 เสียงหยิบไพ่ / แตะเลือกการ์ด (Luxury Tactile Snap & Celestial Pentatonic Chime)
+   * ผสมผสานเสียงสัมผัสเนื้อกระดาษไพ่ 350gsm + กระดิ่งคริสตัลศักดิ์สิทธิ์ Solfeggio Scale
+   */
+  public playCardSelectSound(stepIndex?: number) {
     if (!this.soundEnabled) return;
     const ctx = this.getContext();
     if (!ctx) return;
 
     try {
       const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
 
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, now); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, now + 0.08); // A5
+      // 1. Layer สัมผัสเนื้อกระดาษไพ่ (Organic 350gsm Linen Card Snap Transient)
+      const noiseBuffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.04), ctx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (data.length * 0.25));
+      }
+      const noiseSrc = ctx.createBufferSource();
+      noiseSrc.buffer = noiseBuffer;
+      const noiseFilter = ctx.createBiquadFilter();
+      noiseFilter.type = "lowpass";
+      noiseFilter.frequency.setValueAtTime(520, now);
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.20, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      noiseSrc.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noiseSrc.start(now);
+      noiseSrc.stop(now + 0.045);
 
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      // 2. Layer กระดิ่งคริสตัลทองคำ (Celestial Golden Pentatonic Harmonic Cascade)
+      // บันไดเสียงศักดิ์สิทธิ์: F#5 (740Hz), G#5 (830Hz), A#5 (932Hz), C#6 (1108Hz), D#6 (1244Hz), F#6 (1480Hz)
+      const PENTATONIC_SCALE = [739.99, 830.61, 932.33, 1108.73, 1244.51, 1479.98];
+      const noteFreq = PENTATONIC_SCALE[(stepIndex !== undefined ? stepIndex : 0) % PENTATONIC_SCALE.length];
 
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+      // Fundamental warm sine tone
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(noteFreq, now);
+      gain1.gain.setValueAtTime(0.12, now);
+      gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.36);
 
-      osc.start(now);
-      osc.stop(now + 0.25);
+      // Crystal shimmer overtone (Triangle wave 2nd harmonic)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(noteFreq * 2.004, now); // Slight chorus detune
+      gain2.gain.setValueAtTime(0.05, now);
+      gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now);
+      osc2.stop(now + 0.24);
     } catch {
       // Audio fallback
     }
   }
 
-  /** เสียงพลิกไพ่ 3D (3D Flip Swoosh) */
+  /** 🪄 เสียงพลิกไพ่ 3D (Tactile Linen Flip & Celestial Air Swoosh) */
   public playCardFlipSound() {
     if (!this.soundEnabled) return;
     const ctx = this.getContext();
@@ -124,11 +161,11 @@ class MysticAudioEngine {
 
     try {
       const now = ctx.currentTime;
-      const bufferSize = ctx.sampleRate * 0.12;
+      const bufferSize = Math.floor(ctx.sampleRate * 0.14);
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
+        data[i] = (Math.random() * 2 - 1) * Math.sin((Math.PI * i) / bufferSize);
       }
 
       const noise = ctx.createBufferSource();
@@ -136,27 +173,28 @@ class MysticAudioEngine {
 
       const filter = ctx.createBiquadFilter();
       filter.type = "bandpass";
-      filter.frequency.setValueAtTime(400, now);
-      filter.frequency.exponentialRampToValueAtTime(2400, now + 0.06);
-      filter.frequency.exponentialRampToValueAtTime(600, now + 0.12);
+      filter.frequency.setValueAtTime(600, now);
+      filter.frequency.exponentialRampToValueAtTime(3200, now + 0.05);
+      filter.frequency.exponentialRampToValueAtTime(700, now + 0.13);
+      filter.Q.setValueAtTime(1.8, now);
 
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(0.01, now);
-      gain.gain.linearRampToValueAtTime(0.15, now + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
 
       noise.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
 
       noise.start(now);
-      noise.stop(now + 0.12);
+      noise.stop(now + 0.14);
     } catch {
       // Audio fallback
     }
   }
 
-  /** เสียงระฆังธิเบต/ขันคริสตัลศักดิ์สิทธิ์ (Tibetan Singing Bowl Chime 432Hz Harmonic) */
+  /** 🔔 เสียงระฆังธิเบต/ขันคริสตัลศักดิ์สิทธิ์ (Tibetan Singing Bowl Chime 432Hz & 528Hz Harmonic) */
   public playOracleRevealSound() {
     if (!this.soundEnabled) return;
     const ctx = this.getContext();
@@ -164,8 +202,8 @@ class MysticAudioEngine {
 
     try {
       const now = ctx.currentTime;
-      const freqs = [216, 432, 864, 1296];
-      const gains = [0.15, 0.22, 0.08, 0.03];
+      const freqs = [216, 432, 528, 864, 1056];
+      const gains = [0.14, 0.18, 0.12, 0.06, 0.03];
 
       freqs.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
@@ -175,13 +213,13 @@ class MysticAudioEngine {
         osc.frequency.setValueAtTime(freq, now);
 
         gain.gain.setValueAtTime(gains[idx], now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 3.0);
 
         osc.connect(gain);
         gain.connect(ctx.destination);
 
         osc.start(now);
-        osc.stop(now + 2.5);
+        osc.stop(now + 3.0);
       });
     } catch {
       // Audio fallback

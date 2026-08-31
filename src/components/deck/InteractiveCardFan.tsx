@@ -44,7 +44,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
 
   const handleCardClick = (idx: number) => {
     if (disabled || isComplete || pickedIndices.includes(idx)) return;
-    soundManager.playCardSelectSound();
+    soundManager.playCardSelectSound(pickedIndices.length);
     if (typeof navigator !== "undefined" && navigator.vibrate) {
       navigator.vibrate(30);
     }
