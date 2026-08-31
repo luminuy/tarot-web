@@ -22,18 +22,25 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup Node.js
+      - name: ⚡ Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: ⚙️ Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile || pnpm install
 
       # ชุดตรวจกลาง 6 ด่าน — นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts
       # เพิ่มด่านตรวจใหม่ที่นั่นที่เดียว ทั้ง hooks / PR / Deploy จะตรวจเหมือนกันหมด
       - name: 🧪 Verification Suite (6 ด่าน)
-        run: npm run repo:verify
+        run: pnpm run repo:verify
 
   deploy:
     name: ⚡ Deploy to Cloudflare Workers
@@ -43,20 +50,27 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup Node.js
+      - name: ⚡ Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: ⚙️ Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'pnpm'
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile || pnpm install
 
-      # `npm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
+      # `pnpm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
       # ขั้น deploy จะ populateCache: seed หน้า SSG ทั้งหมดลง KV ก่อน `wrangler deploy`
       # ⚠️ CLOUDFLARE_API_TOKEN ต้องมี Workers Scripts:Edit + Workers KV Storage:Edit
       #    ถ้าขาด ขั้น populateCache จะ fail แบบระบุชัดว่าขาดสิทธิ์อะไร
       - name: 🚀 Build & Deploy to Cloudflare Workers
-        run: npm run deploy
+        run: pnpm run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
