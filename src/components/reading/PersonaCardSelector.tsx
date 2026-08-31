@@ -37,12 +37,19 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   onSelectPersona,
 }) => {
   return (
-    <div className="space-y-4">
-      <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] tracking-wide flex items-center gap-2">
-        <span className="text-[#e5c07b]">✦</span> เลือกสไตล์การทำนายของแม่หมอ
-      </label>
+    <div className="space-y-4 w-full">
+      <div className="flex items-center justify-between">
+        <label className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa] tracking-wide flex items-center gap-2">
+          <span className="text-[#e5c07b]">✦</span> เลือกสไตล์การทำนายของแม่หมอ
+        </label>
+        {/* Mobile Swipe Hint */}
+        <span className="text-[10px] text-[#9c93b8] font-mono tracking-wider sm:hidden">
+          ← เลื่อน →
+        </span>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+      {/* Responsive Persona Carousel (Mobile Swipe / Desktop Grid) */}
+      <div className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-4 pt-1 px-4 -mx-4 no-scrollbar sm:grid sm:grid-cols-3 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible">
         {PERSONAS.map((p) => {
           const isSelected = selectedPersona.id === p.id;
           const meta = PERSONA_DETAILS[p.id] || PERSONA_DETAILS.warm;
@@ -53,7 +60,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               whileHover={{ y: -6, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelectPersona(p)}
-              className={`rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none ${
+              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none ${
                 isSelected
                   ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#e5c07b] ring-2 ring-[#e5c07b]/90 shadow-[0_0_40px_rgba(229,192,123,0.5)]"
                   : "bg-gradient-to-b from-[#130d24]/90 to-[#07040f]/90 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
@@ -96,8 +103,28 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               )}
 
               {/* Holographic Sheen Layer */}
-              <div className="gold-foil-sheen absolute inset-0 opacity-20 hover:opacity-40 transition-opacity" />
+              <div className="gold-foil-sheen absolute inset-0 opacity-20 hover:opacity-40 transition-opacity pointer-events-none" />
             </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Mobile Persona Indicator Dots */}
+      <div className="flex sm:hidden items-center justify-center gap-1.5 -mt-2 pb-1">
+        {PERSONAS.map((p) => {
+          const isSelected = selectedPersona.id === p.id;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => onSelectPersona(p)}
+              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                isSelected
+                  ? "w-6 bg-gradient-to-r from-[#d4af37] to-[#f7e7b4] shadow-[0_0_8px_rgba(229,192,123,0.8)]"
+                  : "w-1.5 bg-[#e5c07b]/25 hover:bg-[#e5c07b]/50"
+              }`}
+              aria-label={`เลือก ${p.nameTh}`}
+            />
           );
         })}
       </div>
