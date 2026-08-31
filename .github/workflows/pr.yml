@@ -17,6 +17,7 @@ permissions:
   issues: write
   statuses: write
   checks: write
+  actions: write   # ต้องมีเพื่อสั่ง dispatch deploy.yml หลัง merge สำเร็จ
 
 jobs:
   pr-verification:
@@ -117,6 +118,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            let merged = false;
             try {
               await github.rest.pulls.merge({
                 owner: context.repo.owner,
@@ -124,7 +126,27 @@ jobs:
                 pull_number: context.issue.number,
                 merge_method: 'squash'
               });
+              merged = true;
               console.log('✨ Auto-Merge Successful!');
             } catch (err) {
               console.log('ℹ️ Auto-merge info:', err.message);
+            }
+
+            if (!merged) return;
+
+            // ⚠️ สำคัญมาก: GitHub จะ "ไม่" trigger workflow ใด ๆ จาก event ที่เกิดจาก GITHUB_TOKEN
+            // (เป็นกลไกกันการวนซ้ำไม่รู้จบ) ดังนั้นการ merge ตรงนี้จะไม่ทำให้ deploy.yml ทำงานเอง
+            // ผลคือทุก PR ที่ถูก merge โดย workflow นี้จะ "ไม่เคยถูก deploy" เลย
+            // จึงต้องสั่ง workflow_dispatch ไปที่ deploy.yml ด้วยตัวเอง (วิธีนี้ทำงานได้กับ GITHUB_TOKEN)
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'deploy.yml',
+                ref: 'main'
+              });
+              console.log('🚀 สั่ง deploy.yml ให้ deploy main ขึ้น Cloudflare Workers แล้ว');
+            } catch (err) {
+              console.log('❌ สั่ง deploy ไม่สำเร็จ:', err.message);
+              core.setFailed(`merge สำเร็จแต่สั่ง deploy ไม่ได้: ${err.message}`);
             }

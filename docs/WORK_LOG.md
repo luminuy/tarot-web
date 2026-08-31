@@ -183,6 +183,30 @@
     พร้อมบอกว่า `pr.yml` จะ merge ให้เองอยู่แล้ว และบอกวิธีเปิดสวิตช์ที่ Settings > General > Pull Requests > Allow auto-merge
     ไม่ทำให้ทั้งคำสั่งล้มทั้งที่ PR สร้างสำเร็จไปแล้ว
 
+#### 6. 🚨 แก้บั๊กเงียบ: PR ที่ merge โดย workflow ไม่เคย deploy ขึ้น production เลย
+- **วิธีที่เจอ**: หลัง PR #8 ถูก merge เข้า `main` (commit `6b2e4f9`) แล้วรอ deploy แต่**ไม่มี workflow ตัวไหนทำงานเลย**
+  ทั้งที่ PR #6 และ #7 ก่อนหน้านี้ deploy ปกติ จึงไล่ดูว่าใครเป็นคน merge:
+  ```
+  PR #6 merged by: luminuy            → deploy ทำงาน ✓
+  PR #7 merged by: luminuy            → deploy ทำงาน ✓
+  PR #8 merged by: app/github-actions → ไม่มี deploy ✗
+  ```
+- **สาเหตุ**: **GitHub จงใจไม่ trigger workflow จาก event ที่เกิดจาก `GITHUB_TOKEN`** (กลไกกันการวนซ้ำไม่รู้จบ)
+  - step `🔀 Auto-Merge Verified PR into main` ใน `pr.yml` merge ด้วย `GITHUB_TOKEN`
+  - push ที่เกิดจากการ merge นั้นจึง **ไม่ trigger `deploy.yml`**
+  - แปลว่า **ทุก PR ที่ระบบ merge ให้เอง จะไม่เคยถูก deploy ขึ้นเว็บจริงเลย**
+  - ที่ผ่านมาไม่มีใครสังเกต เพราะ PR #6 และ #7 บังเอิญถูก merge ด้วย token ของผู้ใช้ (สั่ง `gh pr merge` เอง) จึง deploy ปกติ
+- **สิ่งที่แก้ไข**:
+  - `deploy.yml`: เพิ่ม trigger `workflow_dispatch:` เพื่อให้สั่งรันจากภายนอกได้
+  - `pr.yml`: เพิ่มสิทธิ์ `actions: write` และหลัง merge สำเร็จให้เรียก
+    `github.rest.actions.createWorkflowDispatch({ workflow_id: 'deploy.yml', ref: 'main' })`
+    (การ dispatch แบบนี้ **ทำงานได้กับ `GITHUB_TOKEN`** ต่างจาก push event)
+  - ถ้า merge สำเร็จแต่สั่ง deploy ไม่ได้ จะ `core.setFailed()` ให้เห็นชัด ไม่เงียบอีกต่อไป
+- **ไฟล์ที่แก้ไข**: `.github/workflows/pr.yml`, `.github/workflows/deploy.yml`
+- **ผลการทดสอบ**: PR ที่มีการแก้ไขนี้เองคือการทดสอบ — ถ้า merge แล้ว `deploy.yml` ทำงานต่อเองโดยไม่ต้องสั่งมือ แปลว่าแก้ถูกจุด
+- **หมายเหตุ**: ระหว่างที่ยังไม่แก้ commit `6b2e4f9` บน `main` ค้างอยู่โดยไม่ได้ deploy
+  (ไม่กระทบหน้าเว็บ เพราะ PR #8 แก้แต่สคริปต์ automation กับเอกสาร ไม่ได้แตะโค้ดเว็บ)
+
 ---
 
 ### 🗓️ 2026-08-31: Phase 4 — Polish, Iconography & Multi-AI Guidelines
@@ -448,13 +472,24 @@
     ทุกจุด (`pre-commit`, `pre-push`, `npm run commit`, `pr.yml`, `deploy.yml`) เรียก `npm run repo:verify` เหมือนกันหมด
   - **เพิ่มสคริปต์ทดสอบใหม่ใน `scripts/qa/` เมื่อไหร่ ต้องไปเพิ่มใน `CHECKS` ทันที** ไม่งั้นเทสต์นั้นจะไม่เคยถูกรันเลย
 
-### 6. Thai Syllable Wrapping Bug (การตัดคำภาษาไทยเสียรูป)
+### 6. workflow ที่ merge ด้วย `GITHUB_TOKEN` จะไม่ trigger workflow ตัวอื่น (GITHUB_TOKEN Event Suppression)
+- **กรณีที่เคยเกิดขึ้น**: `pr.yml` merge PR ให้อัตโนมัติด้วย `GITHUB_TOKEN` แต่ `deploy.yml` (ที่ trigger ด้วย `push: main`)
+  **ไม่เคยทำงานเลย** ทำให้ทุก PR ที่ระบบ merge ให้ ไม่ถูก deploy ขึ้น production
+  บั๊กนี้เงียบสนิทอยู่นาน เพราะ PR ที่คนสั่ง merge เองด้วย token ผู้ใช้ยัง deploy ได้ปกติ
+- **วิธีแก้ & กฎป้องกันถาวร**:
+  - GitHub **จงใจ** ไม่ trigger workflow จาก event ที่เกิดจาก `GITHUB_TOKEN` เพื่อกันการวนซ้ำไม่รู้จบ
+  - ถ้า workflow หนึ่งต้องปลุก workflow อีกตัว ให้ใช้ `workflow_dispatch` แทนการหวังพึ่ง push event
+    (เพิ่ม `workflow_dispatch:` ที่ปลายทาง + `actions: write` ที่ต้นทาง + เรียก `createWorkflowDispatch`)
+  - ทางเลือกอื่นคือใช้ Personal Access Token แทน `GITHUB_TOKEN` แต่ต้องเพิ่ม secret และดูแลวันหมดอายุเอง
+  - **เวลาตรวจว่า deploy ทำงานไหม อย่าดูแค่ว่า PR merged แล้ว ให้ดูว่ามี run ของ deploy.yml สำหรับ commit นั้นจริง**
+
+### 7. Thai Syllable Wrapping Bug (การตัดคำภาษาไทยเสียรูป)
 - **กรณีที่เคยเกิดขึ้น**: ชื่อหัวข้อ `สแกนพลังงานชีวิต 7 จุด (จักระบำบัด)` ยาวเกินไปจนคำว่า `(จักระบำบัด)` ถูกตัดคำกลางคันกลายเป็น `(จักระบำ` และ `บัด)` บนอีกบรรทัด ทำให้ดูไม่เป็นมืออาชีพ
 - **วิธีแก้ & กฎป้องกัน**:
   - ตรวจสอบความยาวหัวข้อ (`nameTh`) และคำโปรยเสมอ ให้กระชับ สละสลวย เช่น ปรับเป็น `"สแกนสมดุล 7 จักระ (ไพ่ 7 ใบ)"`
   - ใช้ `leading-tight` หรือ `leading-snug` และตั้งความยาวที่พอดีกับ Grid Column
 
-### 7. Multi-Tier Spread Art Overflows & Label Bleeding (ห้ามใส่ Label ข้อความยาวใต้การ์ดในผังหลายชั้นเด็ดขาด)
+### 8. Multi-Tier Spread Art Overflows & Label Bleeding (ห้ามใส่ Label ข้อความยาวใต้การ์ดในผังหลายชั้นเด็ดขาด)
 - **กรณีที่เคยเกิดขึ้น**: ในหน้า `/spreads` และตัวเลือกผังในหน้าหลัก ผังไพ่ 4-5 ใบ (เช่น ความรักสองหัวใจ, ความในใจของเขา, แฟนเก่าจะกลับมาไหม) มีการวางการ์ดเป็น 2 ชั้น (บน-ล่าง) และใส่ข้อความ label ภาษาไทยใต้การ์ดทุกใบ ทำให้ความสูงรวมบวมขึ้นเป็น 167px เกินความสูงกล่อง (120px) จนตัวหนังสือทะลุไปทับเส้นคั่นและหัวข้อชื่อผัง
 - **วิธีแก้ & กฎป้องกันถาวร (Permanent Golden Rule)**:
   1. ในการแสดงผลพรีวิวผังไพ่ (ใน `src/components/ui/TarotArtIcons.tsx`) **ผังที่มี 4 ใบขึ้นไปหรือมีการจัดวาง 2 ชั้นขึ้นไป ห้ามใส่ข้อความ string label ใต้การ์ดทุกใบเด็ดขาด!**
@@ -462,7 +497,7 @@
   3. คุมความสูงรวมของการจัดวางทุกผัง **ให้อยู่ระหว่าง 85px – 100px เสมอ** (ต่ำกว่ากล่องคอนเทนเนอร์ `h-28` = 112px อย่างน้อย 15-25px) เพื่อให้มี Padding หายใจอย่างสมบูรณ์แบบ
   4. รายละเอียดคำอธิบายของแต่ละตำแหน่ง ให้แสดงใน Accordion ด้านล่าง `"✦ ดูรายละเอียดตำแหน่งไพ่"` เท่านั้น
 
-### 8. Absolute Image Path Resolution in Sub-routes (กฎการอ้างอิง Root Path รูปภาพ)
+### 9. Absolute Image Path Resolution in Sub-routes (กฎการอ้างอิง Root Path รูปภาพ)
 - **กรณีที่เคยเกิดขึ้น**: ใน `CardsExplorer.tsx` และ `CardDetailView.tsx` มีการใช้ `src={card.image}` โดยตรง (ซึ่งข้อมูลดิบเป็น `"major-00.jpg"`) ทำให้เมื่อผู้ใช้อยู่ที่ Sub-route `/cards` เบราว์เซอร์จะ Resolve เป็น `/cards/major-00.jpg` แทนที่จะเป็น `/cards/major-00.jpg` จาก root public directory ส่งผลให้ภาพไม่โหลดและแสดงไอคอนกล่องเสีย `[?]`
 - **วิธีแก้ & กฎป้องกันถาวร**:
   - ทุกจุดที่ Render ภาพหน้าไพ่ ต้องผ่าน `<CardImage />` หรือ `getCardImageSrc(image, id)` จาก `src/lib/tarot/card-image.ts` ซึ่งการันตี prefix `/cards/` ให้เสมอ
