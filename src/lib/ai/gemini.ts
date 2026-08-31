@@ -1,3 +1,4 @@
+import "server-only";
 import { parsePartialReading } from "@/lib/utils/partial-json";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
 import { type Reading, ReadingSchema } from "@/lib/schema/reading";
@@ -98,7 +99,6 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   let response: Response | null = null;
 
   for (const model of CANDIDATE_GEMINI_MODELS) {
-    console.log(`🔮 [Gemini Stream] Requesting tarot reading with model: ${model}`);
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
     const requestBody = {
       contents: [{ role: "user", parts: [{ text: userPrompt }] }],
@@ -124,12 +124,10 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
       });
 
       if (res.ok) {
-        console.log(`✨ [Gemini Stream] Connected and streaming successfully with: ${model}`);
         response = res;
         break;
       } else {
-        const errText = await res.text().catch(() => "");
-        console.warn(`Gemini Model ${model} returned ${res.status}:`, errText);
+        console.warn(`Gemini Model ${model} returned status:`, res.status);
       }
     } catch (e) {
       console.warn(`Gemini Model ${model} fetch failed:`, e);
@@ -221,8 +219,15 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
       }
     }
 
-    const parsed = ReadingSchema.safeParse(JSON.parse(jsonAccumulator));
-    if (!parsed.success) {
+    let parsedJson: any = null;
+    try {
+      parsedJson = JSON.parse(jsonAccumulator);
+    } catch {
+      // Stream JSON was partial/truncated, handled through graceful fallback below
+    }
+
+    const parsed = parsedJson ? ReadingSchema.safeParse(parsedJson) : null;
+    if (!parsed || !parsed.success) {
       const loose = parsePartialReading(jsonAccumulator);
       const fallbackReading: Reading = {
         opening: loose.opening || "สวัสดีค่ะ ไพ่ชุดนี้มีพลังงานที่น่าจับตามองมาก",
@@ -236,11 +241,15 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         advice: ["ตั้งสติและลงมือทำสิ่งที่ทำได้จริง", "เปิดรับโอกาสใหม่ๆ"],
         timing: "ภายใน 1-3 เดือนนี้",
         mood: "ครุ่นคิด",
-        yesNoAnswer: null,
+        yesNoAnswer: ctx.spread.yesNoMode ? "ยังไม่แน่" : null,
       };
       yield { type: "done", reading: fallbackReading, usage };
     } else {
-      yield { type: "done", reading: parsed.data, usage };
+      const readingData = parsed.data;
+      if (!ctx.spread.yesNoMode) {
+        readingData.yesNoAnswer = null;
+      }
+      yield { type: "done", reading: readingData, usage };
     }
   } catch (error) {
     console.error("Gemini stream failed:", error);

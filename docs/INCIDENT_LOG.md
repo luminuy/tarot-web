@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0031 · 2026-09-01 00:25 · 🟠 High · add prompt XML boundaries, Gemini safe JSON parsing, Zod bounded arrays, and copy attribution scope
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | User question could blend with system prompt without delimiters, truncated Gemini stream could throw JSON parse error, unbounded chat arrays could accept large payloads, and copying normal page text attached prophecy watermark |
+| **สาเหตุราก** | Prompt lacked data tag isolation, JSON.parse was unguarded in stream end handler, Zod schemas lacked max length constraints, and global copy listener intercepted all document copy events |
+| **การแก้ไข** | Wrapped user input in XML tags with control character sanitization, added try/catch around JSON.parse with partial loose parsing fallback, added max constraints on history/picked arrays, and scoped copy attribution to reading container |
+| **🛡️ กฎป้องกันถาวร** | **Always encapsulate user-provided data within XML delimiters in prompts, provide parse exception guards for LLM streams, enforce array bounds in public API schemas, and scope clipboard mutations to user-facing output containers** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify passed all 7/7 verification gates with 0 errors |
+| **บันทึกโดย** | Antigravity AI · branch `feat/audit-milestone-4-hardening-and-optimizations` · commit `c9910b0` |
+
+
 ### INC-0030 · 2026-09-01 00:22 · 🟠 High · fix stream error fallback, entropy stale closure, earth element math, chat role coalescing, and purge dead code
 
 | หัวข้อ | รายละเอียด |

@@ -25,17 +25,21 @@ export function AntiTheftShield() {
       );
     }
 
-    // 2. 📋 Smart Copy Attribution Watermark
+    // 2. 📋 Smart Copy Attribution Watermark (Scoped to prophecy text only)
     const handleCopy = (e: ClipboardEvent) => {
-      const selection = window.getSelection()?.toString();
-      if (!selection || selection.trim().length < 40) return;
+      const selection = window.getSelection();
+      if (!selection) return;
+      const text = selection.toString();
+      if (!text || text.trim().length < 60) return;
 
-      // ถ้าผู้ใช้คัดลอกข้อความคำทำนายยาวๆ ให้แนบเครดิตวิหาร
-      const watermark = "\n\n✦ คำทำนายพยากรณ์โดย: วิหารทาโรต์ออราเคิล (Luminuy Tarot)\n✦ เว็บไซต์: https://tarot-web.bankjack10452.workers.dev\n✦ ลิขสิทธิ์เฉพาะ (c) 2026 Luminuy — ห้ามคัดลอกเพื่อการค้า";
-      
+      const anchor = selection.anchorNode?.parentElement;
+      const isReadingContainer = anchor?.closest("[data-reading-result]") || anchor?.closest(".prose-oracle");
+      if (!isReadingContainer) return;
+
+      const watermark = "\n\n✦ คำทำนายพยากรณ์โดย: วิหารทาโรต์ออราเคิล (Luminuy Tarot)\n✦ เว็บไซต์: https://luminuy.com";
       if (e.clipboardData) {
         e.preventDefault();
-        e.clipboardData.setData("text/plain", selection + watermark);
+        e.clipboardData.setData("text/plain", text + watermark);
       }
     };
 

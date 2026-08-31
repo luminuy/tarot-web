@@ -17,24 +17,26 @@ const BodySchema = z.object({
     .array(
       z.object({
         sender: z.enum(["user", "bot"]),
-        text: z.string(),
+        text: z.string().max(2000),
       })
     )
+    .max(20)
     .optional(),
   readingSnapshot: z
     .object({
-      question: z.string().optional(),
-      spreadId: z.string().optional(),
-      summary: z.string().optional(),
-      personaId: z.string().optional(),
+      question: z.string().max(500).optional(),
+      spreadId: z.string().max(100).optional(),
+      summary: z.string().max(2000).optional(),
+      personaId: z.string().max(100).optional(),
       drawn: z
         .array(
           z.object({
-            order: z.number(),
-            cardIndex: z.number(),
+            order: z.number().int().min(0).max(77),
+            cardIndex: z.number().int().min(0).max(77),
             isReversed: z.boolean(),
           })
         )
+        .max(78)
         .optional(),
     })
     .optional(),
@@ -48,14 +50,15 @@ function generateContextualTarotChatReply(params: {
 }): string {
   const { userQuestion, history = [], personaId, record } = params;
 
-  // P0-4 Guard: Crisis filter in local fallback
-  const verdict = checkQuestion(userQuestion);
-  if (verdict.block) {
-    return verdict.message || "กรุณาปรึกษาสายด่วนสุขภาพจิต 1323 โทรฟรีตลอด 24 ชั่วโมง หรือติดต่อผู้เชี่ยวชาญทันทีนะคะ ✨";
+  // Crisis / self-harm safety check for offline fallback
+  const safety = checkQuestion(userQuestion);
+  if (safety.block) {
+    return safety.message || "หากคุณกำลังเผชิญช่วงเวลาที่ยากลำบาก สายด่วนสุขภาพจิต 1323 พร้อมรับฟังเสมอค่ะ";
   }
 
   const cards = record.drawn?.map((d) => cardByIndex(d.cardIndex)) || [];
   const primaryCard = cards[0];
+
   const q = userQuestion.toLowerCase();
   const isDirect = personaId === "direct";
   const isMystic = personaId === "mystic";
