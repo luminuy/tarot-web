@@ -15,30 +15,43 @@ interface ClientRecord {
 }
 
 const clientStore = new Map<string, ClientRecord>();
+let lastCleanupTime = Date.now();
 
-// Cleanup stale entries every 5 minutes
-if (typeof setInterval !== "undefined") {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, record] of clientStore.entries()) {
-      record.timestamps = record.timestamps.filter((t) => now - t < 15 * 60 * 1000);
-      if (record.timestamps.length === 0 && record.concurrent <= 0) {
-        clientStore.delete(key);
-      }
+/**
+ * Lazy cleanup of stale entries (Avoids timer setInterval on serverless isolate)
+ */
+function performLazyCleanup() {
+  const now = Date.now();
+  if (now - lastCleanupTime < 60 * 1000) return; // run at most once per minute
+  lastCleanupTime = now;
+
+  for (const [key, record] of clientStore.entries()) {
+    record.timestamps = record.timestamps.filter((t) => now - t < 15 * 60 * 1000);
+    if (record.timestamps.length === 0 && record.concurrent <= 0) {
+      clientStore.delete(key);
     }
-  }, 5 * 60 * 1000);
+  }
 }
 
 /**
- * Extract client IP from Next.js request headers
+ * Extract client IP securely from Cloudflare / Edge request headers
  */
 export function getClientIdentifier(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
+  // 1. Cloudflare edge verified IP (Cannot be forged by client)
+  const cfIp = request.headers.get("cf-connecting-ip");
+  if (cfIp) return cfIp.trim();
+
+  // 2. Real IP from proxy
   const realIp = request.headers.get("x-real-ip");
   if (realIp) return realIp.trim();
+
+  // 3. Forwarded IP (Take the rightmost untampered hop if multiple exist)
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const parts = forwarded.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length > 0) return parts[parts.length - 1];
+  }
+
   return "127.0.0.1";
 }
 
@@ -54,6 +67,7 @@ export function checkRateLimit(
   retryAfterSeconds: number;
   releaseConcurrency: () => void;
 } {
+  performLazyCleanup();
   const now = Date.now();
   const windowMs = config.windowSeconds * 1000;
 

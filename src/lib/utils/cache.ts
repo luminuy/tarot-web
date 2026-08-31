@@ -1,4 +1,4 @@
-import { getCardImageSrc } from "@/lib/tarot/card-image";
+import { getCardWebpVariantSrc } from "@/lib/tarot/card-image";
 
 /**
  * Tarot Master Web Performance & Cache Engine
@@ -23,18 +23,24 @@ let isPreloaded = false;
 
 /**
  * ทำการ Warmup โหลด Asset ล่วงหน้าแบบ Non-blocking ในช่วงที่เบราว์เซอร์ว่าง (requestIdleCallback)
+ * P1-9: ใช้ภาพย่อ WebP w128 (~5KB) แทนภาพต้นฉบับ JPEG 250KB และเคารพโหมด Save-Data ของผู้ใช้
  */
 export function warmupTarotAssets(): void {
   if (typeof window === "undefined" || isPreloaded) return;
+
+  // Respect user's data-saver preference
+  const nav = navigator as any;
+  if (nav?.connection?.saveData === true) return;
+
   isPreloaded = true;
 
-  const scheduleTask = (window as any).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1000));
+  const scheduleTask = (window as any).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1200));
 
   scheduleTask(() => {
-    // 1. Pre-decode Priority Major Arcana Cards using Canonical Path Resolver
+    // Pre-decode lightweight w128 WebP thumbnails
     for (const cardFile of PRELOAD_MAJOR_CARDS) {
       try {
-        const src = getCardImageSrc(cardFile);
+        const src = getCardWebpVariantSrc(cardFile, "w128");
         if (!src) continue;
         const img = new Image();
         img.src = src;

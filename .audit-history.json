@@ -1,8 +1,8 @@
 [
   {
-    "id": "audit-1788196456929-etsl2",
-    "timestampTh": "1/9/2569 00:14:15",
-    "timestampIso": "2026-08-31T17:14:15.731Z",
+    "id": "audit-1788196600433-avt03",
+    "timestampTh": "1/9/2569 00:16:39",
+    "timestampIso": "2026-08-31T17:16:39.427Z",
     "actor": {
       "name": "Antigravity AI",
       "email": "bankjack10452@gmail.com",
@@ -16,257 +16,39 @@
     "environment": {
       "host": "Banks-MacBook-Pro.local",
       "platform": "darwin (x64)",
-      "branch": "feat/audit-milestone-1-engine-b-and-p0-security",
+      "branch": "feat/audit-milestone-2-headers-and-edge-perf",
       "commitSha": "b7446f1"
     },
     "action": {
-      "category": "FIX",
-      "summary": "delete dead Engine B, harden session token secret guard, and enforce chat crisis safety screening",
+      "category": "FEAT",
+      "summary": "add full CSP security headers, strict origin matching, CF-Connecting-IP rate limit, and WebP thumbnail warmup",
       "filesChanged": [
         {
           "file": "ai-locks.json",
           "status": "MODIFIED"
         },
         {
-          "file": "audit-history.json",
+          "file": "ext.config.ts",
           "status": "MODIFIED"
         },
         {
-          "file": "ocs/AUDIT_LOG.md",
+          "file": "rc/lib/security/anti-theft.ts",
           "status": "MODIFIED"
         },
         {
-          "file": "ocs/KNOWN_ISSUES.md",
+          "file": "rc/lib/tarot/card-image.ts",
           "status": "MODIFIED"
         },
         {
-          "file": "rc/app/api/reading/[id]/chat/route.ts",
+          "file": "rc/lib/utils/cache.ts",
           "status": "MODIFIED"
         },
         {
-          "file": "rc/app/api/reading/[id]/pick/route.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/app/api/reading/[id]/reveal/route.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/app/api/reading/[id]/shuffle/route.ts",
+          "file": "rc/lib/utils/rate-limit.ts",
           "status": "MODIFIED"
-        },
-        {
-          "file": "rc/app/api/reading/[id]/verify/route.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/app/api/reading/start/route.ts",
-          "status": "MODIFIED"
-        },
-        {
-          "file": "rc/lib/crypto/provably-fair.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/lib/security/session-token.ts",
-          "status": "MODIFIED"
-        },
-        {
-          "file": "rc/server/repositories/reading.repository.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/cache.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/index.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/interpretation.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/pick.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/reading.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/safety.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/shuffle.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/storage.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/turnstile.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/types/index.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/types/reading.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/types/safety.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/types/tarot.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "docs/AUDIT_2026-09-01.md",
-          "status": "ADDED"
         }
       ],
-      "totalFiles": 27
-    },
-    "verification": {
-      "typecheckPassed": true,
-      "collisionGuardPassed": true,
-      "cardsIntegrityPassed": true,
-      "spreadsGeometryPassed": true
-    }
-  },
-  {
-    "id": "audit-1788196446004-sj8vz",
-    "timestampTh": "1/9/2569 00:14:04",
-    "timestampIso": "2026-08-31T17:14:04.941Z",
-    "actor": {
-      "name": "Antigravity AI",
-      "email": "bankjack10452@gmail.com",
-      "type": "AI_AGENT",
-      "agentModel": "Google DeepMind Antigravity",
-      "coAuthors": [
-        "Google DeepMind Antigravity <antigravity@google.com>",
-        "Google Gemini <gemini@google.com>"
-      ]
-    },
-    "environment": {
-      "host": "Banks-MacBook-Pro.local",
-      "platform": "darwin (x64)",
-      "branch": "feat/audit-milestone-1-engine-b-and-p0-security",
-      "commitSha": "b7446f1"
-    },
-    "action": {
-      "category": "FIX",
-      "summary": "delete dead Engine B, harden session token secret guard, and enforce chat crisis safety screening",
-      "filesChanged": [
-        {
-          "file": "ai-locks.json",
-          "status": "MODIFIED"
-        },
-        {
-          "file": "ocs/KNOWN_ISSUES.md",
-          "status": "MODIFIED"
-        },
-        {
-          "file": "rc/app/api/reading/[id]/chat/route.ts",
-          "status": "MODIFIED"
-        },
-        {
-          "file": "rc/app/api/reading/[id]/pick/route.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/app/api/reading/[id]/reveal/route.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/app/api/reading/[id]/shuffle/route.ts",
-          "status": "MODIFIED"
-        },
-        {
-          "file": "rc/app/api/reading/[id]/verify/route.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/app/api/reading/start/route.ts",
-          "status": "MODIFIED"
-        },
-        {
-          "file": "rc/lib/crypto/provably-fair.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/lib/security/session-token.ts",
-          "status": "MODIFIED"
-        },
-        {
-          "file": "rc/server/repositories/reading.repository.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/cache.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/index.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/interpretation.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/pick.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/reading.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/safety.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/shuffle.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/storage.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/services/turnstile.service.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/types/index.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/types/reading.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/types/safety.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "rc/types/tarot.ts",
-          "status": "DELETED"
-        },
-        {
-          "file": "docs/AUDIT_2026-09-01.md",
-          "status": "ADDED"
-        }
-      ],
-      "totalFiles": 25
+      "totalFiles": 6
     },
     "verification": {
       "typecheckPassed": true,
