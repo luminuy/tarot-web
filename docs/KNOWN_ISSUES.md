@@ -20,7 +20,7 @@
 | **วันที่** | 2026-08-31 |
 | **commit ฐาน** | main + branch `claude/resilience-perf-enhancements` (perf/รูป/SEO/bug fixes) + PR #19/#20 (edge caching) |
 | **วิธีตรวจ** | dev server + คลิกผ่านเบราว์เซอร์ + `curl` + `npm run repo:verify` + `opennextjs-cloudflare build` + ตรวจ production จริง |
-| **ผลสรุป** | ✅ ISSUE-001/002/008/009/011 **แก้แล้ว** (ดู INC-0014 + ด้านล่าง) · 🟡 ISSUE-003 + ISSUE-010(ครึ่งหลัง) ยังค้าง · 🔵 ISSUE-004/005/006/007 ยังเป็นข้อจำกัดเดิม |
+| **ผลสรุป** | ✅ ISSUE-001/002/008/009 **แก้แล้ว** (ดู INC-0014 + ด้านล่าง) · 🟡 ISSUE-003 + ISSUE-010(ครึ่งหลัง) + ISSUE-011 ยังค้าง · 🔵 ISSUE-004/005/006/007 ยังเป็นข้อจำกัดเดิม |
 
 ### 🗂️ ดัชนีบั๊กที่ยังค้าง
 
@@ -28,6 +28,7 @@
 | :-- | :-- | :--- | :--- | :-- |
 | **010b** | 🟡 Medium | session-token fallback เป็นสตริงตายตัวถ้าลืมตั้ง env | `src/lib/security/session-token.ts` | 🟡 ยังค้าง (เพิ่มคีย์ใน `.env.example` แล้ว แต่ยังไม่ hard-fail) |
 | **003** | 🟡 Medium | ฐานข้อมูลไพ่เอียง "ใช่" (43/18/17) | `src/data/cards/*.ts` | 🟡 ยังค้าง (เท่าเดิม) |
+| **011** | 🔵 Low | repo ใช้ pnpm แต่ CI/เอกสารเป็น npm | `package.json`, `.github/workflows/*` | 🔵 ยังค้าง — เพิ่ม `browserslist` แล้ว แต่ `packageManager` field ยังไม่ใส่ (เสี่ยง CI ที่ใช้ `npm install`) ต้องแยก PR: ใส่ field + ย้าย CI ไป `pnpm` + gitignore `package-lock.json` พร้อมกัน |
 | **004** | 🔵 Low | รัน `wrangler dev` บน macOS 12.6 ไม่ได้ | (สภาพแวดล้อม) | 🔵 ข้อจำกัดเครื่อง |
 | **005** | 🔵 Low | GitHub auto-merge ใช้ไม่ได้ (private repo + แพลนฟรี) | (ตั้งค่า GitHub) | 🔵 ปล่อยไว้ได้ |
 | **006** | 🔵 Low | GitHub Actions เตือน Node 20 deprecated | `.github/workflows/*.yml` | 🔵 ยังเป็น `@v4` ทั้ง 3 ไฟล์ |
@@ -43,10 +44,11 @@
 | **002** 🟠 | Hydration mismatch — `Math.cos/sin` ทศนิยมดิบใน inline style | `Number((Math.cos(rad) * radius).toFixed(2))` ทุกจุดใน `TarotArtIcons.tsx` |
 | **008** 🟠 | `cache.ts` พรีโหลดจาก `/cards/variants/w320/` (404 × 9) | ใช้ `getCardImageSrc()` จาก `@/lib/tarot/card-image` + ลบ `ALLOWLIST` ใน `scripts/qa/test-image-paths.ts` |
 | **009** 🟠 | `cache.ts` พรีโหลด `/sounds/*.mp3` (404 × 3) | ตัด `PRELOAD_SOUNDS` ทิ้ง (ระบบเสียงใช้ Web Audio synth ใน `audio.ts` อยู่แล้ว) |
-| **011** 🔵 | ไม่มี `packageManager` field | `"packageManager": "pnpm@9.15.4"` + `browserslist` |
 
 **ISSUE-010** แก้ครึ่งเดียว: `.env.example` เพิ่ม `TAROT_SESSION_SECRET` + Turnstile keys แล้ว
 แต่ **ครึ่งหลังยังค้าง** → ดู ISSUE-010b ในดัชนีข้างบน
+
+**ISSUE-011** ยังค้าง: merge นี้เอา `browserslist` เข้ามา แต่ **ไม่ใส่ `packageManager`** เพราะ CI (`pr.yml`/`deploy.yml`) ยังใช้ `npm install` การใส่ field `pnpm@x` อาจทำ corepack เด้ง — ต้องแยก PR ทำพร้อมกันทั้งชุด
 
 > ⚠️ **เกณฑ์ปิดที่ต้อง verify ก่อน move เข้า INCIDENT_LOG จริง**:
 > - ISSUE-001: คลิกจริงผ่านเบราว์เซอร์ให้เดินครบ 5 ขั้น (สับไพ่ → เลือกไพ่ → อ่านคำทำนาย)
