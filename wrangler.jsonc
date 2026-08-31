@@ -2,14 +2,62 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "tarot-web",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2025-01-01",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // ── Static assets (ภาพไพ่ 1909, _next/static ฯลฯ) ─────────────────────────────
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+
+  // ── OpenNext Edge Caching ────────────────────────────────────────────────────
+  // ISR / SSG incremental cache เก็บใน KV (อ่านจาก edge ไม่ต้อง boot Next ทุกครั้ง)
+  // ⚠️ id ต้องเป็นของจริงจาก `npx wrangler kv namespace list`
+  "kv_namespaces": [
+    {
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "3b06e256c46948949fc17ac6641cafa3"
+    }
+  ],
+
+  // ตารางบอกว่า cache tag ไหนถูก revalidate เมื่อไหร่ (รองรับ revalidateTag/revalidatePath)
+  // ตาราง `revalidations` ถูกสร้างอัตโนมัติโดย `opennextjs-cloudflare deploy` (populateCache)
+  // ⚠️ database_id ต้องเป็นของจริงจาก `npx wrangler d1 list`
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "tarot-web-tag-cache",
+      "database_id": "7254712d-c255-4e80-91ad-a8fd49df0730"
+    }
+  ],
+
+  // DO queue (open-next.config.ts → queue: doQueue) ใช้ binding นี้เรียกกลับมาที่ worker
+  // เพื่อ regenerate หน้า ISR ใน background
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "tarot-web"
+    }
+  ],
+
+  // Durable Object สำหรับคิว revalidation แบบ async — class DOQueueHandler
+  // OpenNext worker export class นี้ให้เองตอน build (queue: doQueue)
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "NEXT_CACHE_DO_QUEUE",
+        "class_name": "DOQueueHandler"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["DOQueueHandler"]
+    }
+  ],
+
   "vars": {
     "NODE_ENV": "production"
   }
