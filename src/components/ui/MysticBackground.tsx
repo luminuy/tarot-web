@@ -6,22 +6,19 @@ import { GalaxyCanvas } from "@/components/ui/GalaxyCanvas";
 
 /**
  * พื้นหลังปรับตามอุปกรณ์:
- *  - เดสก์ท็อป (จอ ≥ 1024px + มีเมาส์)  → <GalaxyCanvas />  เต็มรูปแบบ (ดาว/เนบิวลา/ดาวตก/พารัลแลกซ์)
- *  - มือถือ / แท็บเล็ต / จอเล็ก           → <MysticAltarCanvas />  เบา (อนุภาคทอง 12–30)
- *
- * เริ่มด้วย MysticAltarCanvas เสมอ (SSR-safe + ปลอดภัยสำหรับ 85% ที่เป็นมือถือ)
- * แล้ว upgrade เป็น GalaxyCanvas บน client ถ้าเข้าเงื่อนไขเดสก์ท็อป
+ *  - เดสก์ท็อป & แท็บเล็ต (จอ ≥ 768px เช่น iPad, Android Tablet, Mac/PC) → <GalaxyCanvas /> เต็มรูปแบบ (ดาวขยับ/เนบิวลา/ดาวตก/วงเวทย์หมุนวน)
+ *  - มือถือ (จอ < 768px เช่น สมาร์ตโฟน)                                    → <MysticAltarCanvas /> เบา ประหยัดแบตเตอรี่ ลื่นไหล 60fps
  */
 export const MysticBackground: React.FC = () => {
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px) and (pointer: fine)");
-    const update = () => setIsDesktop(mq.matches);
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsLargeScreen(mq.matches);
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  return isDesktop ? <GalaxyCanvas /> : <MysticAltarCanvas />;
+  return isLargeScreen ? <GalaxyCanvas /> : <MysticAltarCanvas />;
 };
