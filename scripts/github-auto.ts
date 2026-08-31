@@ -332,11 +332,29 @@ function waitForMergeThenTidy(repo: string, prNumber: string, branch: string): v
     const state = shQuiet("gh", ["pr", "view", prNumber, "-R", repo, "--json", "state", "-q", ".state"]);
     if (state === "MERGED") {
       console.log(`✅ PR #${prNumber} merged แล้ว`);
-      // ต้องออกจาก branch นั้นก่อนถึงจะลบได้
+      // ต้องออกจาก branch ที่จะลบก่อน ถึงจะลบมันได้
       if (getBranch() === branch) {
-        shQuiet("git", ["checkout", "main"]);
-        shQuiet("git", ["pull", "--ff-only", "origin", "main"]);
-        console.log("🔄 สลับกลับมาที่ main และดึงโค้ดล่าสุดแล้ว");
+        // ⚠️ `git checkout main` ใช้ไม่ได้เมื่ออยู่ใน git worktree
+        // เพราะ main ถูก checkout ค้างไว้ที่โฟลเดอร์หลักอยู่แล้ว (บทเรียน INC-0004)
+        // จึงต้องลองแบบปกติก่อน แล้วถอยไป detach ที่ origin/main ซึ่งทำงานได้ทุก worktree
+        let moved = shQuiet("git", ["checkout", "main"]) !== null;
+        if (moved) {
+          shQuiet("git", ["pull", "--ff-only", "origin", "main"]);
+          console.log("🔄 สลับกลับมาที่ main และดึงโค้ดล่าสุดแล้ว");
+        } else {
+          moved = shQuiet("git", ["checkout", "--detach", "origin/main"]) !== null;
+          if (moved) {
+            console.log("🔄 อยู่ใน git worktree (main ถูก checkout ที่โฟลเดอร์หลัก)");
+            console.log("   จึง detach ไปที่ origin/main แทน — โค้ดล่าสุดพร้อมใช้งานแล้ว");
+          }
+        }
+
+        // อย่ารายงานว่าสำเร็จถ้ายังออกจาก branch ไม่ได้จริง
+        if (!moved) {
+          console.log(`⚠️ ออกจาก branch '${branch}' ไม่ได้ จึงลบ branch นี้ไม่ได้`);
+          console.log(`   ย้ายไป branch อื่นเองแล้วสั่ง: npm run git:tidy`);
+          return;
+        }
       }
       actionTidy();
       return;
