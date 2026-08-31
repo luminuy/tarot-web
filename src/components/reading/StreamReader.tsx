@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import type { Reading } from "@/lib/schema/reading";
 import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
-import { cardByIndex } from "@/data/cards";
+import { cardByIndex, type TarotCard } from "@/data/cards";
+import { ElementalBalanceWidget } from "@/components/reading/ElementalBalanceWidget";
+import { OracleMantraCard } from "@/components/reading/OracleMantraCard";
 import { soundManager } from "@/lib/utils/audio";
 import { FollowUpChat } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
@@ -51,6 +53,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
     } else {
       const ok = soundManager.speakProphecy(
         textToSpeak,
+        persona.id,
         () => setIsSpeakingVoice(false),
         () => setIsSpeakingVoice(false)
       );
@@ -65,6 +68,12 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       ? cardByIndex(activeDrawnCard.cardIndex)
       : undefined);
   const activeCardReading = reading?.cards?.find((c) => c.position === activeCardIndex);
+
+  const allCards = useMemo(() => {
+    return drawnCards
+      .map((d) => d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined))
+      .filter((c): c is TarotCard => !!c);
+  }, [drawnCards]);
 
   const totalCards = drawnCards.length;
 
@@ -418,6 +427,16 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 ))}
               </ul>
             </div>
+          )}
+
+          {/* Sacred Oracle Mantra Card */}
+          {allCards.length > 0 && (
+            <OracleMantraCard cards={allCards} drawn={drawnCards} personaNameTh={persona.nameTh} />
+          )}
+
+          {/* Elemental Balance 4-Elements Analysis */}
+          {allCards.length > 0 && (
+            <ElementalBalanceWidget cards={allCards} drawn={drawnCards} />
           )}
         </div>
       )}

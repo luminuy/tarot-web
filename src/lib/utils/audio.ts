@@ -188,8 +188,8 @@ class MysticAudioEngine {
     }
   }
 
-  /** Voice Speech Synthesis (TTS) สำหรับให้แม่หมออ่านคำทำนายให้ฟัง */
-  public speakProphecy(text: string, onEnd?: () => void, onError?: () => void): boolean {
+  /** Voice Speech Synthesis (TTS) ปรับจูนเสียงเฉพาะตัวตามบุคลิกแม่หมอ 5 บุคลิก */
+  public speakProphecy(text: string, personaId?: string | null, onEnd?: () => void, onError?: () => void): boolean {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
     window.speechSynthesis.cancel();
     const cleanText = text.replace(/[*#_`]/g, "").trim();
@@ -197,8 +197,40 @@ class MysticAudioEngine {
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = "th-TH";
-    utterance.rate = 0.95;
-    utterance.pitch = 1.05;
+
+    // ปรับจูน Pitch & Rate ตาม Persona
+    let rate = 0.95;
+    let pitch = 1.0;
+
+    switch (personaId) {
+      case "warm":
+        rate = 0.90;
+        pitch = 1.02; // อบอุ่น นุ่มนวล
+        break;
+      case "playful":
+        rate = 1.04;
+        pitch = 1.15; // สดใส คุยสนุก มีพลัง
+        break;
+      case "direct":
+        rate = 0.98;
+        pitch = 0.95; // ตรงไปตรงมา กระชับ มั่นใจ
+        break;
+      case "master":
+        rate = 0.88;
+        pitch = 0.82; // ทุ้ม สุขุม ทรงภูมิ
+        break;
+      case "mystic":
+        rate = 0.86;
+        pitch = 1.06; // ก้องกังวาน ลึกซึ้ง
+        break;
+      default:
+        rate = 0.92;
+        pitch = 1.0;
+        break;
+    }
+
+    utterance.rate = rate;
+    utterance.pitch = pitch;
 
     const voices = window.speechSynthesis.getVoices();
     const thaiVoice = voices.find((v) => v.lang === "th-TH" || v.lang.startsWith("th"));

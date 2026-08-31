@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { PERSONAS, type Persona } from "@/data/personas";
+import { soundManager } from "@/lib/utils/audio";
 import {
   HighPriestessIllustration,
   JusticeIllustration,
@@ -15,6 +16,15 @@ interface PersonaCardSelectorProps {
   selectedPersona: Persona;
   onSelectPersona: (persona: Persona) => void;
 }
+
+
+const PERSONA_GREETINGS: Record<string, string> = {
+  warm: "ยินดีต้อนรับนะคะ มีเรื่องอะไรในใจ เล่าให้แม่หมอฟังได้เลยนะ",
+  playful: "ว่าไงจ๊ะคนเก่ง! วันนี้มีเรื่องอะไรมาอัปเดต มาดูกันให้ไวเลย!",
+  direct: "สวัสดีค่ะ ไพ่พร้อมเปิดเผยความจริง คุณพร้อมรับฟังทางออกหรือยังคะ",
+  master: "สวัสดีครับ ทุกปัญหามีทางออก มาดูภาพรวมและวางกลยุทธ์ก้าวต่อไปกันครับ",
+  mystic: "ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์ ดวงดาวและจักรวาลกำลังส่งสัญญาณถึงคุณ",
+};
 
 const PERSONA_DETAILS: Record<string, { roleTitle: string; archetype: string; renderArt: () => React.ReactNode }> = {
   warm: {
@@ -126,9 +136,25 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
 
               {/* Card Footer Titles */}
               <div className="pt-2 border-t border-[#e5c07b]/15 text-center">
-                <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight">
-                  {p.nameTh}
-                </h4>
+                <div className="flex items-center justify-center gap-1.5">
+                  <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight">
+                    {p.nameTh}
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectPersona(p);
+                      const greeting = PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
+                      soundManager.speakProphecy(greeting, p.id);
+                    }}
+                    className="p-1 rounded-full text-[10px] text-amber-300/70 hover:text-amber-200 hover:bg-amber-500/20 transition-all cursor-pointer"
+                    title="ฟังเสียงทักทาย"
+                    aria-label="ฟังเสียงทักทาย"
+                  >
+                    🔊
+                  </button>
+                </div>
                 <p className="text-[10px] text-[#cfc8e2]/80 mt-1 leading-snug">
                   {p.tagline}
                 </p>
