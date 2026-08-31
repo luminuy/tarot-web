@@ -44,8 +44,8 @@
 ## 🛠️ คำสั่งสำหรับพัฒนาและตรวจสอบระบบ (Development Protocol)
 
 ```bash
-# ✅ รัน Verification Suite ทั้ง 6 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)
-#    Collision Guard · Typecheck · ไพ่ 78 ใบ · ผัง 20 แบบ · Safety Guardrails · Provably-Fair Shuffle
+# ✅ รัน Verification Suite ทั้ง 7 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)
+#    Collision Guard · Typecheck · ไพ่ 78 ใบ · ผัง 20 แบบ · Safety Guardrails · Provably-Fair Shuffle · Card Image Path Guard
 npm run repo:verify
 
 # ตรวจสอบ Typecheck อย่างเดียว

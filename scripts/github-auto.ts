@@ -2,7 +2,7 @@
  * 🤖 GitHub Automation Engine
  *
  * คำสั่งที่ใช้:
- *   npm run repo:verify                      ตรวจความสมบูรณ์ของระบบทั้ง 6 ด่าน
+ *   npm run repo:verify                      ตรวจความสมบูรณ์ของระบบทั้ง 7 ด่าน
  *   npm run pr:auto -- "<title>" "<body>"    ตรวจ + push + สร้าง PR + เปิด auto-merge
  *   npm run pr:auto -- "<title>" --body-file <path>
  *   npm run pr:auto -- "<title>" "<body>" --no-merge    สร้าง PR เฉยๆ ไม่เปิด auto-merge
@@ -88,6 +88,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "📐 ผังพยากรณ์ 20 แบบพิกัดถูกต้อง", cmd: TSX, args: ["scripts/qa/test-spreads.ts"] },
   { label: "🚨 ตัวกรองคำถามอันตราย (Safety Guardrails)", cmd: TSX, args: ["scripts/qa/test-safety.ts"] },
   { label: "🎲 ระบบสับไพ่ Provably Fair", cmd: TSX, args: ["scripts/qa/test-shuffle.ts"] },
+  { label: "🖼️  การอ้างอิง path ภาพไพ่ถูกต้อง", cmd: TSX, args: ["scripts/qa/test-image-paths.ts"] },
 ];
 
 /**
@@ -95,7 +96,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
  * เพื่อให้เห็นปัญหาทั้งหมดในรอบเดียว ไม่ต้องแก้ทีละอันแล้วรันใหม่
  */
 function runAllChecks(): boolean {
-  console.log("\n🔍 [Verification Suite] ตรวจความสมบูรณ์ของระบบ 6 ด่าน\n");
+  console.log("\n🔍 [Verification Suite] ตรวจความสมบูรณ์ของระบบ 7 ด่าน\n");
   const failures: { label: string; detail: string }[] = [];
 
   for (const check of CHECKS) {
@@ -109,7 +110,7 @@ function runAllChecks(): boolean {
   }
 
   if (failures.length === 0) {
-    console.log("\n✨ ผ่านครบทั้ง 6 ด่าน พร้อมสร้าง/Merge PR ได้ทันที!\n");
+    console.log("\n✨ ผ่านครบทั้ง 7 ด่าน พร้อมสร้าง/Merge PR ได้ทันที!\n");
     return true;
   }
 
