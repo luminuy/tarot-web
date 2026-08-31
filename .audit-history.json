@@ -1,5 +1,82 @@
 [
   {
+    "id": "audit-1788204032879-8o6ps",
+    "timestampTh": "1/9/2569 02:20:31",
+    "timestampIso": "2026-08-31T19:20:31.818Z",
+    "actor": {
+      "name": "Claude Sonnet 5",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/admin-m2-stats",
+      "commitSha": "5b8094f"
+    },
+    "action": {
+      "category": "FEAT",
+      "summary": "stats collection + admin dashboard (M2) — KV-buffered event counters, no PII",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "docs/ADMIN_PANEL.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "docs/WORK_LOG.md",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "src/app/admin/page.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "src/app/api/admin/stats/route.ts",
+          "status": "ADDED"
+        },
+        {
+          "file": "src/app/api/reading/[id]/chat/route.ts",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "src/app/api/reading/[id]/read/route.ts",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "src/app/api/reading/start/route.ts",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "src/components/admin/StatsDashboard.tsx",
+          "status": "ADDED"
+        },
+        {
+          "file": "src/lib/stats/read.ts",
+          "status": "ADDED"
+        },
+        {
+          "file": "src/lib/stats/record.ts",
+          "status": "ADDED"
+        }
+      ],
+      "totalFiles": 11
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788203432824-2rz0f",
     "timestampTh": "1/9/2569 02:10:31",
     "timestampIso": "2026-08-31T19:10:31.674Z",

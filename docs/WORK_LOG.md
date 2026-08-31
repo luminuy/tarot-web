@@ -7,10 +7,10 @@
 
 ## 📌 สรุปสถานะงานปัจจุบัน (Current Handoff Summary — Auto-Synced)
 
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 02:10:32` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 02:20:32` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
-- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (20 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
+- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (13 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
@@ -31,6 +31,27 @@
 ---
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
+
+### 🗓️ 2026-09-01: แผงแอดมิน M2 — Stats Collection + Dashboard
+
+> ต่อจาก M0+M1 (PR #57) · แผน: `~/.claude/plans/breezy-percolating-llama.md` · [`docs/ADMIN_PANEL.md`](ADMIN_PANEL.md)
+
+- **ความต้องการ**: แอดมินต้องเห็นสถิติการใช้งานครบทุกมิติ (ปัจจุบันระบบไม่เก็บอะไรเลย)
+- **สิ่งที่ทำ**:
+  - สร้าง `src/lib/stats/record.ts` — `recordEvent()/recordEvents()` fire-and-forget · **buffer ระดับ isolate + flush รวมผ่าน `waitUntil` แบบ debounce 20 วิ** (KV free plan เขียนได้ ~1,000/วัน — ห้ามเขียนต่อ event) · เก็บ `app:stat:day:<YYYY-MM-DD>` + `app:stat:all`
+  - สร้าง `src/lib/stats/read.ts` — `getStats(rangeDays)` (force-flush ก่อนอ่าน) + `breakdown()` helper
+  - **Instrument** (แตะแค่ 3 route — ไม่ยุ่งใน gemini.ts):
+    - `api/reading/start` — `reading_started`, `spread:*`, `persona:*`, `category:*`, `safety_flag:*`, `reading_blocked`
+    - `api/reading/[id]/read` — `reading_completed`, `reading_failed`, `ai_call:gemini`, `ai_error:gemini`, `ai_latency_ms`, `ai_tokens_in/out`
+    - `api/reading/[id]/chat` — `chat_message`, `chat_blocked`, `safety_flag:*`
+  - สร้าง `GET /api/admin/stats?days=` (guard `requireAdmin`) → `{ stats, audit }`
+  - สร้าง `src/components/admin/StatsDashboard.tsx` — การ์ดตัวเลข + bar list แบบ CSS (ไม่มี chart lib) · แปลง id→ชื่อไทยจาก `PERSONAS`/`SPREADS` · toggle 7/30/90 วัน · dynamic import ใน `/admin` shell
+  - **ห้าม PII**: metric เป็น enum/dimension ล้วน ไม่มีข้อความคำถาม/ชื่อเล่น/IP
+- **ผลการทดสอบ**:
+  - `npm run repo:verify` ➔ ✅ 7/7 · `next build:worker` (OpenNext) ➔ verify ต่อ
+  - `next dev` + curl: ยิง `/api/reading/start` 4 ครั้ง (3 ผัง 2 persona) + 1 crisis → รอ 21 วิ → `GET /api/admin/stats` เห็น `reading_started:4, spread:daily:2, persona:playful:3, category:work:3, reading_blocked:1, safety_flag:crisis:1` ครบถูกต้อง
+  - เบราว์เซอร์: dashboard render การ์ด 8 ใบ + bar list 4 กล่อง (ชื่อไทยถูก) + audit log + toggle ช่วงวัน — ไม่มี error
+- **ยังไม่ทำ**: M3 live content overrides · M4–M7 marketplace
 
 ### 🗓️ 2026-09-01: แผงแอดมิน M0+M1 — Platform Access Layer + Admin Auth & Shell
 
