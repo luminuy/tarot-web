@@ -1,5 +1,74 @@
 [
   {
+    "id": "audit-1788182033515-ndseb",
+    "timestampTh": "31/8/2569 20:13:52",
+    "timestampIso": "2026-08-31T13:13:52.503Z",
+    "actor": {
+      "name": "Claude",
+      "email": "bankjack10452@gmail.com",
+      "type": "HUMAN_DEVELOPER",
+      "coAuthors": [
+        "Google DeepMind Antigravity <antigravity@google.com>",
+        "Google Gemini <gemini@google.com>"
+      ]
+    },
+    "environment": {
+      "host": "Banks-MacBook-Pro.local",
+      "platform": "darwin (x64)",
+      "branch": "claude/chrome-sharp-chatscroll",
+      "commitSha": "55f427d"
+    },
+    "action": {
+      "category": "FIX",
+      "summary": "แก้ Chrome รูปไพ่เบลอ + chat auto-scroll เด้งทั้งหน้า",
+      "filesChanged": [
+        {
+          "file": "ai-locks.json",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/app/page.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/deck/InteractiveCardFan.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/reading/FollowUpChat.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/reading/IntentionAltarInput.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/reading/ShareModal.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/reading/StreamReader.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/spread/SpreadCardSelector.tsx",
+          "status": "MODIFIED"
+        },
+        {
+          "file": "rc/components/ui/TarotArtIcons.tsx",
+          "status": "MODIFIED"
+        }
+      ],
+      "totalFiles": 9
+    },
+    "verification": {
+      "typecheckPassed": true,
+      "collisionGuardPassed": true,
+      "cardsIntegrityPassed": true,
+      "spreadsGeometryPassed": true
+    }
+  },
+  {
     "id": "audit-1788176275227-1yb9d",
     "timestampTh": "31/8/2569 18:37:54",
     "timestampIso": "2026-08-31T11:37:54.340Z",

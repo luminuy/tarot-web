@@ -387,7 +387,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                       cardId={c.card?.id}
                       alt={c.card?.nameTh || "Tarot"}
                       className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-                      sizes="240px"
+                      sizes="128px"
                     />
                   </div>
 

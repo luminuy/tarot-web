@@ -203,7 +203,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                   image="major-01.jpg"
                   alt="Sacred Tarot Altar"
                   className="w-full h-full object-cover object-top filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-                  sizes="180px"
+                  sizes="72px"
                 />
                 <div className="gold-foil-sheen absolute inset-0 opacity-40 pointer-events-none" />
               </div>
