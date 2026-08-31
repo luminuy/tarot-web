@@ -54,7 +54,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // อ่านซ้ำให้คืนผลเดิม ไม่เรียกโมเดลใหม่
   if (record.result) {
     limit.releaseConcurrency();
-    return streamCached(record.result, record.serverSeed);
+    return streamCached(record.result, record);
   }
 
   updateReading(id, { status: "READING" });
@@ -134,7 +134,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 }
 
 /** ส่งผลที่เคยอ่านไว้แล้วกลับไปในรูปแบบเดียวกัน เพื่อให้ฝั่งหน้าเว็บใช้โค้ดชุดเดิม */
-function streamCached(reading: import("@/lib/schema/reading").Reading, serverSeed: string) {
+function streamCached(
+  reading: import("@/lib/schema/reading").Reading,
+  record: import("@/server/store").ReadingRecord
+) {
   const encoder = new TextEncoder();
   const body = new ReadableStream({
     start(controller) {
@@ -145,7 +148,12 @@ function streamCached(reading: import("@/lib/schema/reading").Reading, serverSee
       for (const card of reading.cards) push("card", card);
       push("connections", { text: reading.connections });
       push("summary", { text: reading.summary });
-      push("done", { reading, disclosure: AI_DISCLOSURE, proof: { serverSeed }, cached: true });
+      push("done", {
+        reading,
+        disclosure: AI_DISCLOSURE,
+        proof: { serverSeed: record.serverSeed, clientSeed: record.clientSeed, commitment: record.commitment },
+        cached: true,
+      });
       controller.close();
     },
   });

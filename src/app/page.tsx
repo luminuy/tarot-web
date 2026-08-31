@@ -252,6 +252,7 @@ export default function TarotPage() {
       startAIStreaming(activeId, enrichedCards, data.sessionToken || sessionToken);
     } catch (err: any) {
       setErrorMsg(err.message || "เกิดข้อผิดพลาดในการประมวลผลไพ่");
+      setPickedIndices([]); // P2-5: allow retry picking
     } finally {
       setLoading(false);
     }
@@ -262,6 +263,7 @@ export default function TarotPage() {
     setIsStreaming(true);
     setReadingResult({});
     setErrorMsg(null);
+    let streamCompleted = false;
 
     try {
       const res = await fetch(`/api/reading/${id}/read`, {
@@ -273,7 +275,7 @@ export default function TarotPage() {
       });
 
       if (!res.ok || !res.body) {
-        throw new Error("ไม่สามารถเริ่มการอ่านไพ่ได้");
+        throw new Error("ไม่สามารถเริ่มการอ่านไพ่ได้ กรุณาลองใหม่อีกครั้ง");
       }
 
       const reader = res.body.getReader();
@@ -311,6 +313,7 @@ export default function TarotPage() {
               } else if (eventType === "summary") {
                 setReadingResult((prev) => ({ ...prev, summary: data.text }));
               } else if (eventType === "done") {
+                streamCompleted = true;
                 setReadingResult(data.reading);
                 setProof(data.proof || {});
                 setIsStreaming(false);
@@ -342,6 +345,7 @@ export default function TarotPage() {
                   });
                 }
               } else if (eventType === "error") {
+                streamCompleted = true;
                 setIsStreaming(false);
                 setErrorMsg(data.message || "เกิดข้อผิดพลาดในการอ่านไพ่");
               }
@@ -351,9 +355,16 @@ export default function TarotPage() {
           }
         }
       }
-    } catch (err) {
+
+      // P1-4 Guard: If stream ended without 'done' event
+      if (!streamCompleted) {
+        setIsStreaming(false);
+        setErrorMsg("สัญญาณการอ่านไพ่ขาดหายไปชั่วคราว กรุณากดลองใหม่อีกครั้ง");
+      }
+    } catch (err: any) {
       console.error("Stream reading failed", err);
       setIsStreaming(false);
+      setErrorMsg(err.message || "การเชื่อมต่อเพื่ออ่านคำทำนายขัดข้อง กรุณากดลองใหม่อีกครั้ง");
     }
   };
 
@@ -365,11 +376,18 @@ export default function TarotPage() {
     setActiveCardIndex(order);
   };
 
-  // Reset to start new reading
+  // Reset to start new reading (P1-10: Complete session state purge)
   const handleReset = () => {
     soundManager.playCardSelectSound();
     setCurrentStep("SPREAD_SELECT");
     setReadingId(null);
+    setSessionToken(null);
+    setCommitment("");
+    setClientSeed("");
+    setProof({});
+    setActiveCardIndex(0);
+    setIsStreaming(false);
+    setZoomedCard(null);
     setPickedIndices([]);
     setDrawnCards([]);
     setRevealedOrders([]);

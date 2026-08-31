@@ -207,7 +207,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         record = {
           id,
           question: clientSnapshot.question || "คำถามทั่วไป",
-          spreadId: clientSnapshot.spreadId || "three-cards",
+          spreadId: clientSnapshot.spreadId || "three-card",
           personaId: clientSnapshot.personaId || "warm",
           drawn: clientSnapshot.drawn,
           result: {
@@ -233,7 +233,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         record = {
           id,
           question: "ภาพรวมพลังงาน",
-          spreadId: "single",
+          spreadId: "daily",
           personaId: "warm",
           drawn: [{ order: 0, cardIndex: 0, isReversed: false }],
           result: {
@@ -303,17 +303,28 @@ ${cards.join("\n")}
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-          const contentsPayload = [];
-          for (const h of history.slice(-4)) {
-            contentsPayload.push({
-              role: h.sender === "user" ? "user" : "model",
-              parts: [{ text: h.text }],
-            });
-          }
-          contentsPayload.push({
+          const rawHistory = history.slice(-4).map((h) => ({
+            role: h.sender === "user" ? "user" : "model",
+            parts: [{ text: h.text }],
+          }));
+          rawHistory.push({
             role: "user",
             parts: [{ text: userQuestion }],
           });
+
+          // P2-14: Coalesce adjacent roles and discard leading model turns
+          const contentsPayload: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+          for (const item of rawHistory) {
+            if (contentsPayload.length === 0 && item.role === "model") {
+              continue;
+            }
+            const last = contentsPayload[contentsPayload.length - 1];
+            if (last && last.role === item.role) {
+              last.parts[0].text += `\n${item.parts[0].text}`;
+            } else {
+              contentsPayload.push({ ...item });
+            }
+          }
 
           const response = await fetch(endpoint, {
             method: "POST",

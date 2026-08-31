@@ -18,12 +18,12 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
   const [shuffling, setShuffling] = useState(false);
   const [shufflePhase, setShufflePhase] = useState<"idle" | "split" | "riffle" | "bridge" | "gather">("idle");
   const [progress, setProgress] = useState(0);
-  const [entropyList, setEntropyList] = useState<number[]>([]);
+  const entropyRef = React.useRef<number[]>([]);
 
   // Collect entropy from user's micro-gestures
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (shuffling && entropyList.length < 50) {
-      setEntropyList((prev) => [...prev, e.clientX + e.clientY + Date.now()]);
+    if (shuffling && entropyRef.current.length < 50) {
+      entropyRef.current.push(e.clientX + e.clientY + Date.now());
     }
   };
 
@@ -47,7 +47,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
       if (cur >= 100) {
         clearInterval(interval);
         setTimeout(() => {
-          const rawSeed = entropyList.join(":") + ":" + Date.now();
+          const rawSeed = entropyRef.current.join(":") + ":" + Date.now();
           onShuffleComplete(rawSeed);
         }, 500);
       }
