@@ -98,6 +98,28 @@ for (const entry of ALLOWLIST) {
   }
 }
 
+
+// C) ตรวจว่าไฟล์ภาพย่อทั้งหมดตาม CARD_IMAGE_VARIANTS มีอยู่จริงบนดิสก์สำหรับไพ่ทั้ง 78 ใบ
+import { ALL_CARDS } from "../../src/data/cards";
+import { CARD_IMAGE_VARIANTS } from "../../src/lib/tarot/card-image";
+
+for (const card of ALL_CARDS) {
+  const match = /([^/]+)\.jpe?g$/i.exec(card.image);
+  if (!match) continue;
+  const name = match[1];
+  for (const variant of CARD_IMAGE_VARIANTS) {
+    const filePath = path.join(process.cwd(), "public", "cards", variant.dir, `${name}.webp`);
+    if (!fs.existsSync(filePath)) {
+      violations.push({
+        file: `public/cards/${variant.dir}/${name}.webp`,
+        line: 0,
+        rule: "C: ไฟล์ภาพย่อ WebP ไม่มีอยู่จริงบนดิสก์",
+        text: `ขาดไฟล์ ${filePath}`,
+      });
+    }
+  }
+}
+
 if (violations.length === 0) {
   console.log(`\n✅ ไม่พบการละเมิดจุดใหม่ (ยกเว้นชั่วคราว ${allowlistHits.size} ไฟล์)\n`);
   process.exit(0);

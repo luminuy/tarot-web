@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0024 · 2026-08-31 21:40 · 🟡 Medium · Fix missing card images caused by nonexistent avif srcset and enforce disk existence check in QA guard
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | All spread preview cards showed blue question mark icons because browser requested missing avif files |
+| **สาเหตุราก** | CardImage.tsx included image/avif source tag in picture element but no avif files existed on disk causing 404 image load failures |
+| **การแก้ไข** | Fix missing card images caused by nonexistent avif srcset and enforce disk existence check in QA guard |
+| **🛡️ กฎป้องกันถาวร** | **Remove avif source tag from CardImage.tsx and add automated disk existence assertion for all 78 cards in test-image-paths.ts** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `76eab15` |
+
+
 ### INC-0023 · 2026-08-31 21:35 · 🟡 Medium · Fix WebKit scrollTo DOMException pattern error and remove persona card text overlays
 
 | หัวข้อ | รายละเอียด |
