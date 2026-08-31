@@ -51,6 +51,8 @@
 - **สร้างภาพไพ่ย่อ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)**: `npm run cards:variants`
 - **บันทึกความผิดพลาดด้วยมือ**: `npm run incident -- --title "..." --severity high --symptom "..." --cause "..." --fix "..." --prevention "..."`
 - **ดูสถานะ repo, PR และ CI ล่าสุด**: `npx tsx scripts/github-auto.ts status`
-- **ตรวจ + push + สร้าง PR + เปิด auto-merge**: `npm run pr:auto -- "<title>" "<body>"`
+- **ตรวจ + push + สร้าง PR**: `npm run pr:auto -- "<title>" "<body>"`
+  เติม `--wait` เพื่อให้รอจน PR merge เสร็จแล้วเก็บกวาด branch ให้อัตโนมัติ
+- **เก็บกวาด branch ที่ merge ไปแล้ว (ในเครื่อง + บน remote)**: `npm run git:tidy` (ใส่ `--dry-run` เพื่อดูก่อน)
   (เพิ่ม `--dry-run` เพื่อดูว่าจะทำอะไรบ้างโดยไม่แตะ remote, `--no-merge` เพื่อสร้าง PR เฉยๆ)
 - **รันเซิร์ฟเวอร์สำหรับพัฒนา**: `npm run dev`

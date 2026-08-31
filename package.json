@@ -24,6 +24,7 @@
     "agent:unlock": "tsx scripts/agent-guard.ts unlock",
     "repo:verify": "tsx scripts/github-auto.ts verify-all",
     "pr:auto": "tsx scripts/github-auto.ts pr",
+    "git:tidy": "tsx scripts/github-auto.ts tidy",
     "commit": "tsx scripts/git-author-guard.ts",
     "incident": "tsx scripts/incident-log.ts",
     "hooks:setup": "git config core.hooksPath .githooks",
