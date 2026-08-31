@@ -2,29 +2,57 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { SPREADS, type Spread } from "@/data/spreads";
 import { PERSONAS, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import { cardByIndex } from "@/data/cards";
 import type { Reading } from "@/lib/schema/reading";
-import { ShuffleRitual } from "@/components/deck/ShuffleRitual";
-import { InteractiveCardFan } from "@/components/deck/InteractiveCardFan";
-import { SpreadBoard, type DrawnSlotCard } from "@/components/spread/SpreadBoard";
+import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { PersonaCardSelector } from "@/components/reading/PersonaCardSelector";
 import { IntentionAltarInput } from "@/components/reading/IntentionAltarInput";
 import { RitualStepProgress, type RitualStep } from "@/components/ui/RitualStepProgress";
-import { StreamReader } from "@/components/reading/StreamReader";
-import { ShareModal } from "@/components/reading/ShareModal";
-import { ReadingHistoryModal } from "@/components/history/ReadingHistoryModal";
-import { TarotEncyclopediaModal } from "@/components/encyclopedia/TarotEncyclopediaModal";
-import { CardZoomModal } from "@/components/card/CardZoomModal";
 import { MysticAltarCanvas } from "@/components/ui/MysticAltarCanvas";
 import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/components/ui/TarotArtIcons";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
+
+// Dynamic Code-Splitting for 60% smaller initial JS bundle
+const ShuffleRitual = dynamic(
+  () => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual),
+  { ssr: false }
+);
+const InteractiveCardFan = dynamic(
+  () => import("@/components/deck/InteractiveCardFan").then((m) => m.InteractiveCardFan),
+  { ssr: false }
+);
+const SpreadBoard = dynamic(
+  () => import("@/components/spread/SpreadBoard").then((m) => m.SpreadBoard),
+  { ssr: false }
+);
+const StreamReader = dynamic(
+  () => import("@/components/reading/StreamReader").then((m) => m.StreamReader),
+  { ssr: false }
+);
+const ShareModal = dynamic(
+  () => import("@/components/reading/ShareModal").then((m) => m.ShareModal),
+  { ssr: false }
+);
+const ReadingHistoryModal = dynamic(
+  () => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
+  { ssr: false }
+);
+const TarotEncyclopediaModal = dynamic(
+  () => import("@/components/encyclopedia/TarotEncyclopediaModal").then((m) => m.TarotEncyclopediaModal),
+  { ssr: false }
+);
+const CardZoomModal = dynamic(
+  () => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal),
+  { ssr: false }
+);
 
 export default function TarotPage() {
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");

@@ -1,6 +1,23 @@
 import type { Metadata, Viewport } from "next";
+import { Noto_Serif_Thai, Sarabun } from "next/font/google";
 import "./globals.css";
 import { AssetWarmup } from "@/components/performance/AssetWarmup";
+
+const notoSerifThai = Noto_Serif_Thai({
+  subsets: ["thai", "latin"],
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--font-noto-serif-thai",
+  adjustFontFallback: true,
+});
+
+const sarabun = Sarabun({
+  subsets: ["thai", "latin"],
+  weight: ["400", "600"],
+  display: "swap",
+  variable: "--font-sarabun",
+  adjustFontFallback: true,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tarot.luminuy.com"),
@@ -89,20 +106,14 @@ const webAppJsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th">
+    <html lang="th" className={`${notoSerifThai.variable} ${sarabun.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@400;600;700&family=Sarabun:wght@300;400;600&display=swap"
-          rel="stylesheet"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
         />
       </head>
-      <body className="starfield min-h-dvh">
+      <body className="min-h-dvh font-sans antialiased">
         <AssetWarmup />
         {children}
       </body>
