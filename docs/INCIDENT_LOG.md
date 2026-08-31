@@ -48,6 +48,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0018 · 2026-08-31 20:42 · 🟡 Medium · Fix CI lockfile dependency and restore standard npm workflow in GitHub Actions
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Fix CI lockfile dependency and restore standard npm workflow in GitHub Actions |
+| **สาเหตุราก** | pnpm-lock.yaml had empty packages in CI causing frozen lockfile failure |
+| **การแก้ไข** | Fix CI lockfile dependency and restore standard npm workflow in GitHub Actions |
+| **🛡️ กฎป้องกันถาวร** | **Maintain single package-lock.json source of truth for npm in CI** |
+| **บันทึกโดย** | Antigravity AI · branch `feat/consolidated-platform-upgrades` · commit `c2471bb` |
+
+
 ### INC-0017 · 2026-08-31 20:40 · 🟠 High · แตกกิ่งย่อยกระจัดกระจายโดยไม่ Rebase และไม่รวม PR (Concurrent Branch Drift & Incomplete Handoff)
 
 | หัวข้อ | รายละเอียด |

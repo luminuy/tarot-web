@@ -22,24 +22,19 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9.15.4
-
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "pnpm"
+          cache: "npm"
 
       - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
       # ชุดตรวจกลาง 6 ด่าน — นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts
       # เพิ่มด่านตรวจใหม่ที่นั่นที่เดียว ทั้ง hooks / PR / Deploy จะตรวจเหมือนกันหมด
       - name: 🧪 Verification Suite (6 ด่าน)
-        run: pnpm run repo:verify
+        run: npm run repo:verify
 
   deploy:
     name: ⚡ Deploy to Cloudflare Workers
@@ -49,19 +44,14 @@ jobs:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9.15.4
-
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "pnpm"
+          cache: "npm"
 
       - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
       # `npm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
       # ขั้น deploy จะ populateCache: seed หน้า SSG ทั้งหมดลง KV ก่อน `wrangler deploy`
