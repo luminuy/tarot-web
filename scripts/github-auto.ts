@@ -270,8 +270,12 @@ function actionTidy(dryRun = false): void {
       .map((l) => l.replace("branch refs/heads/", "").trim()),
   );
 
+  // กรอง "(HEAD detached at ...)" ที่ git แสดงเป็นบรรทัดหนึ่งในรายการ branch ออกด้วย
+  // เพราะไม่ใช่ branch จริง (เกิดขึ้นเสมอหลัง --wait detach ไปที่ origin/main ใน worktree)
   const locals = (shQuiet("git", ["branch", "--format=%(refname:short)"]) ?? "")
-    .split("\n").map((b) => b.trim()).filter((b) => b && b !== "main");
+    .split("\n")
+    .map((b) => b.trim())
+    .filter((b) => b && b !== "main" && !b.startsWith("("));
 
   let removed = 0;
   let skipped = 0;
