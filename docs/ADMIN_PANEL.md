@@ -1,6 +1,6 @@
 # 🔧 แผงแอดมิน (Admin Panel) — คู่มือระบบ
 
-> สถานะ: **M0 + M1 เสร็จ** (platform layer + auth + shell) · M2–M3 ระหว่างทำ · M4–M7 (marketplace) ยังไม่เริ่ม
+> สถานะ: **M0 + M1 + M2 เสร็จ** (platform · auth · shell · สถิติ) · M3 ระหว่างทำ · M4–M7 (marketplace) ยังไม่เริ่ม
 > แผนเต็ม: `~/.claude/plans/breezy-percolating-llama.md`
 
 ---
@@ -52,6 +52,20 @@ npx wrangler secret put ADMIN_PASSWORD   # ต้อง ≥ 12 ตัวอั�
 Local dev: ใส่ `ADMIN_PASSWORD=...` ใน `.env.local`
 
 ---
+
+## สถิติ (M2)
+
+| ไฟล์ | หน้าที่ |
+| :-- | :-- |
+| `src/lib/stats/record.ts` | `recordEvent()` — buffer ระดับ isolate + flush debounce 20 วิ ผ่าน `waitUntil` |
+| `src/lib/stats/read.ts` | `getStats(days)` — force-flush ก่อนอ่าน + รวม daily/all-time |
+| `src/components/admin/StatsDashboard.tsx` | UI การ์ด + bar list (ไม่มี chart lib) |
+| `GET /api/admin/stats?days=` | คืน `{ stats, audit }` (guard requireAdmin) |
+
+- KV keys: `app:stat:day:<YYYY-MM-DD>` (TTL 400 วัน) + `app:stat:all`
+- เขียน KV แบบ debounce เพราะ free plan จำกัด ~1,000 writes/วัน — ยอมสูญเสีย < 20 วิ/isolate ถ้า worker recycle
+- metric ที่นับ: `reading_started/completed/failed/blocked`, `spread:*`, `persona:*`, `category:*`, `safety_flag:*`, `ai_call:gemini`, `ai_error:gemini`, `ai_latency_ms`, `ai_tokens_in/out`, `chat_message`, `chat_blocked`
+- **ทุก metric เป็น enum/count ล้วน — ไม่มี PII**
 
 ## ความปลอดภัย / PDPA
 

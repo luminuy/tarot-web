@@ -7,6 +7,7 @@ import { checkQuestion } from "@/lib/safety/guardrails";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { createCommitment } from "@/lib/tarot/shuffle";
 import { checkRateLimit, clientKeyFromRequest, saveReading } from "@/server/store";
+import { recordEvents } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
 
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
 
   const verdict = checkQuestion(textToScan);
   if (verdict.block) {
+    recordEvents(["reading_blocked", `safety_flag:${verdict.flag}`]);
     return NextResponse.json({ blocked: true, message: verdict.message }, { status: 200 });
   }
 
@@ -91,6 +93,14 @@ export async function POST(request: Request) {
   };
 
   saveReading(record);
+
+  recordEvents([
+    "reading_started",
+    `spread:${spreadId}`,
+    `persona:${personaId}`,
+    `category:${record.category}`,
+    ...(verdict.flag !== "none" ? [`safety_flag:${verdict.flag}`] : []),
+  ]);
 
   const { signReadingSessionToken } = await import("@/lib/security/session-token");
   const sessionToken = signReadingSessionToken(record);

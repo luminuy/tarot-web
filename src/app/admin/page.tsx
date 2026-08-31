@@ -1,9 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+
+const StatsDashboard = dynamic(() => import("@/components/admin/StatsDashboard"), {
+  ssr: false,
+  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดแดชบอร์ด…</p>,
+});
 
 type Tab = "stats" | "content";
 
@@ -72,11 +78,13 @@ export default function AdminHome() {
       </nav>
 
       <section className="mt-6">
-        <div className="altar-panel rounded-2xl p-6 text-sm text-[#9c93b8]">
-          {tab === "stats"
-            ? "แดชบอร์ดสถิติจะมาใน milestone ถัดไป (M2)"
-            : "ตัวแก้ prompt / ความหมายไพ่ / บุคลิกแม่หมอ จะมาใน milestone ถัดไป (M3)"}
-        </div>
+        {tab === "stats" ? (
+          <StatsDashboard />
+        ) : (
+          <div className="altar-panel rounded-2xl p-6 text-sm text-[#9c93b8]">
+            ตัวแก้ prompt / ความหมายไพ่ / บุคลิกแม่หมอ จะมาใน milestone ถัดไป (M3)
+          </div>
+        )}
       </section>
     </div>
   );

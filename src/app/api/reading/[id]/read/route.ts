@@ -4,6 +4,7 @@ import { streamGeminiReading } from "@/lib/ai/gemini";
 import { AI_DISCLOSURE } from "@/lib/safety/guardrails";
 import { getReading, updateReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { recordEvents, recordEvent } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
@@ -70,6 +71,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   };
 
+  const startedAt = Date.now();
+
   const stream = new ReadableStream({
     async start(controller) {
       try {
@@ -92,6 +95,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
           if (event.type === "done") {
             updateReading(id, { status: "COMPLETED", result: event.reading });
+            recordEvents([
+              "reading_completed",
+              "ai_call:gemini",
+              ["ai_latency_ms", Date.now() - startedAt],
+              ["ai_tokens_in", event.usage?.inputTokens ?? 0],
+              ["ai_tokens_out", event.usage?.outputTokens ?? 0],
+            ]);
             // เฉลย serverSeed ตอนนี้ — ผู้ใช้ตรวจย้อนหลังได้ว่าไพ่ไม่ได้ถูกเลือกทีหลัง
             send(controller, "done", {
               reading: event.reading,
@@ -101,6 +111,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             });
           } else if (event.type === "error") {
             updateReading(id, { status: "FAILED" });
+            recordEvents(["reading_failed", "ai_error:gemini"]);
             send(controller, "error", { message: event.message });
           } else {
             send(controller, event.type, event);
@@ -109,6 +120,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       } catch (error) {
         console.error("stream การอ่านล้มเหลว", error);
         updateReading(id, { status: "FAILED" });
+        recordEvent("reading_failed");
         send(controller, "error", { message: "คำอ่านขัดข้อง ลองใหม่อีกครั้งนะ" });
       } finally {
         limit.releaseConcurrency();

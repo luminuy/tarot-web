@@ -8,6 +8,7 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 import { checkQuestion } from "@/lib/safety/guardrails";
+import { recordEvent, recordEvents } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
 
@@ -181,9 +182,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const history = parsed.data.history || [];
     const clientSnapshot = parsed.data.readingSnapshot;
 
+    recordEvent("chat_message");
+
     // P0-4 Guard: Screen userQuestion for crisis / self-harm signals (Golden Rule 6 & Hotline 1323)
     const safetyVerdict = checkQuestion(userQuestion);
     if (safetyVerdict.block) {
+      recordEvents(["chat_blocked", `safety_flag:${safetyVerdict.flag}`]);
       return NextResponse.json({
         reply: safetyVerdict.message,
         blocked: true,
