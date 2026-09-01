@@ -344,16 +344,23 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
 > **หมายเหตุปรับจากแผน:** `user_bonus` ใช้หลายแถว + `UNIQUE(user_id, reason)` แทน 1 แถว/user
 > เพื่อให้ `grantBonus` idempotent ต่อเหตุผล (signup/grandfather/support) และ audit ได้
 
-### PR B · บังคับสิทธิ์ที่ API
+### PR B · บังคับสิทธิ์ที่ API ✅ เสร็จ (2026-09-01)
 **ต้องมี A**
 
-- [ ] `src/lib/entitlement/viewer.ts` — `getViewer(request)` อ่านเซสชันจาก `verifyUserSession()`
-- [ ] `app/api/entitlement/route.ts` ใหม่
-- [ ] แทรกการตรวจใน `start` · แทรกการหัก/คืนใน `read` · กั้นสมาชิกใน `chat`
-- [ ] เพดาน AI สองชั้นใน `ai-budget.ts`
-- [ ] ทดสอบด้วย `curl` ยิงตรงข้าม UI ต้องโดนบล็อก
+- [x] `src/lib/entitlement/viewer.ts` — `getViewer(request)` อ่านเซสชันจาก `verifyUserSession()` (guest ยัง used=0 จนถึง PR C)
+- [x] `app/api/entitlement/route.ts` ใหม่ — flag off → คืนสิทธิ์ "ไม่จำกัด" ให้ UI ไม่แสดง gate
+- [x] `start` — เช็คสิทธิ์หลัง safety ก่อน commitment → 403 + reason (ยังไม่หัก)
+- [x] `read` — หักสิทธิ์หลังบล็อกอ่านซ้ำ ก่อนเช็คเพดาน · คืนสิทธิ์ทุก failure path (error event / catch / stream cut / done ที่ token=0)
+- [x] `chat` — guest + flag on → 403 `members_only`
+- [x] เพดาน AI สองชั้นใน `ai-budget.ts` — `isAiCapReached(tier)` guest 70% / member 100% (default guest · call site ระบุ tier เอง · flag off = member = พฤติกรรมเดิม)
+- [x] `app/api/admin/entitlement/route.ts` — GET/PUT ธง (จำเป็นสำหรับ PR F) + audit
+- [x] curl: flag off = ปกติ · flag on + guest → chat 403 members_only · start 200 · GET /api/entitlement สะท้อนธง
+- [x] gate 14: +2 เคส (เพดาน AI สองชั้น) → 32/32 · repo:verify 14/14 · build:worker ✓
 
-> ธงยังปิดอยู่ตลอด PR นี้ พฤติกรรมจริงยังไม่เปลี่ยน
+> ธงยังปิดอยู่ตลอด PR นี้ พฤติกรรมจริงยังไม่เปลี่ยน (verify: flag off = readings/chat ปกติ)
+>
+> **ยังไม่ครบ e2e**: member-path (หัก/คืนจริง, สิทธิ์รายสัปดาห์หมด) พิสูจน์ด้วย unit test 32/32 —
+> ต้องทดสอบ member จริงด้วย OAuth session ตอน PR D หรือบน production
 
 ### PR C · สิทธิ์ฟรีของผู้เยี่ยมชม
 **ต้องมี A, B**

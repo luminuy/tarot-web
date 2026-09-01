@@ -5,6 +5,8 @@ import { utcDay } from "@/lib/stats/record";
 
 const DEFAULT_DAILY_CAP = 2000;
 const MEMO_MS = 30_000;
+/** ผู้เยี่ยมชมถูกตัดที่สัดส่วนนี้ของเพดาน สมาชิกใช้ได้ถึง 100% (ENTITLEMENT_PLAN ข้อ 6) */
+const GUEST_CAP_RATIO = 0.7;
 let memo: { day: string; count: number; at: number } | null = null;
 
 export function getAiDailyCap(): number {
@@ -14,14 +16,18 @@ export function getAiDailyCap(): number {
 
 /**
  * true ถ้าวันนี้เรียก AI เกินเพดานแล้ว — ตรวจสอบก่อนเริ่ม stream Gemini
+ * เพดานสองชั้น: ผู้เยี่ยมชมตัดที่ 70% · สมาชิกใช้ได้ถึง 100%
+ * (default = "guest" เพื่อความปลอดภัย — call site ต้องระบุ "member" เอง)
  */
-export async function isAiCapReached(): Promise<boolean> {
+export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promise<boolean> {
   const day = utcDay();
   if (!memo || memo.day !== day || Date.now() - memo.at > MEMO_MS) {
     const raw = await kvGetJSON<{ count: number }>(KEY.aiCap(day)).catch(() => null);
     memo = { day, count: raw?.count ?? 0, at: Date.now() };
   }
-  return memo.count >= getAiDailyCap();
+  const cap = getAiDailyCap();
+  const effective = tier === "member" ? cap : Math.floor(cap * GUEST_CAP_RATIO);
+  return memo.count >= effective;
 }
 
 /**

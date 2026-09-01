@@ -132,6 +132,15 @@ async function main() {
   await purgeEntitlementData(uid);
   check("purgeEntitlementData ซ้ำ → ไม่ throw", true);
 
+  // ── 9. เพดาน AI สองชั้น (ENTITLEMENT_PLAN ข้อ 6.2) ──
+  const { isAiCapReached } = await import("../../src/lib/security/ai-budget");
+  const { kvPutJSON, KEY } = await import("../../src/lib/platform/kv-store");
+  const { utcDay } = await import("../../src/lib/stats/record");
+  // cap เริ่มต้น 2000 → guest ตัดที่ 1400 · ตั้งตัวนับวันนี้ = 1500
+  await kvPutJSON(KEY.aiCap(utcDay()), { count: 1500 });
+  check("เพดาน AI: guest ที่ 1500/2000 → ถึงเพดานแล้ว (ตัด 70%)", (await isAiCapReached("guest")) === true);
+  check("เพดาน AI: member ที่ 1500/2000 → ยังไม่ถึงเพดาน (100%)", (await isAiCapReached("member")) === false);
+
   console.log(`\n${pass}/${pass + fail} ผ่าน`);
   if (fail > 0) process.exit(1);
 }
