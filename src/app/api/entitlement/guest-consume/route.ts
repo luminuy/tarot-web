@@ -5,6 +5,7 @@ import {
   GUEST_COOKIE_NAME,
   GUEST_COOKIE_OPTIONS,
   guestCookieValue,
+  markGuestUsedOnServer,
   readGuestCookie,
   verifyGuestConsumeTicket,
 } from "@/lib/entitlement/guest";
@@ -54,6 +55,9 @@ export async function POST(request: Request) {
   if (token) {
     res.cookies.set(GUEST_COOKIE_NAME, token, GUEST_COOKIE_OPTIONS);
   }
+
+  // defense-in-depth: read route mark ให้แล้ว แต่กันกรณี client ยิงตรงนี้โดยไม่ผ่าน read done
+  void markGuestUsedOnServer(gid);
 
   if (!current || current.used < GUEST_LIMIT) {
     recordEvent("entitlement_guest_consumed");

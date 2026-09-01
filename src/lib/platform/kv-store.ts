@@ -26,6 +26,12 @@ export const KEY = {
   reading: (id: string) => `app:reading:${id}`,
   /** ตัวนับโควตาเรียก AI ต่อวัน: app:aicap:YYYY-MM-DD */
   aiCap: (day: string) => `app:aicap:${day}`,
+  /** ผู้เยี่ยมชมใช้สิทธิ์ฟรีแล้ว (server-authoritative · กัน client บล็อก guest-consume) */
+  guestUsed: (gid: string) => `app:guest:used:${gid}`,
+  /** โควตาการเปิดไพ่ของผู้เยี่ยมชมต่อ IP ต่อวัน */
+  guestIpQuota: (day: string, ipHash: string) => `app:guest:ipq:${day}:${ipHash}`,
+  /** โควตาการเปิดไพ่ของผู้เยี่ยมชมต่อซับเน็ต (/24 หรือ /64) ต่อวัน */
+  guestSubnetQuota: (day: string, subnetHash: string) => `app:guest:subq:${day}:${subnetHash}`,
 } as const;
 
 /** memo cache ระดับ isolate — กัน round-trip ซ้ำภายในคำขอเดียว / ข้ามคำขอในช่วงสั้น */

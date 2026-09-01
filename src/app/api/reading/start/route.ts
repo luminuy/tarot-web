@@ -84,12 +84,14 @@ export async function POST(request: Request) {
   }
 
   // ── สิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 1: ล็อกขั้น 1 · ยังไม่หัก) ──
+  let guestGidToPin: string | null = null;
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     if (await isEntitlementEnabled()) {
       const { getViewer } = await import("@/lib/entitlement/viewer");
       const { getEntitlement } = await import("@/lib/entitlement/entitlement");
-      const ent = await getEntitlement(await getViewer(request));
+      const viewer = await getViewer(request);
+      const ent = await getEntitlement(viewer);
       if (!ent.canStartReading) {
         recordEvent("entitlement_blocked_start");
         return NextResponse.json(
@@ -103,6 +105,26 @@ export async function POST(request: Request) {
           },
           { status: 403 },
         );
+      }
+      if (viewer.kind === "guest") {
+        // เพดานเฉพาะผู้เยี่ยมชมต่อ IP/ซับเน็ต — เช็คที่นี่ (ก่อนพิธีจับไพ่) เพื่อ UX ที่ดี
+        const { isGuestReadQuotaReached } = await import("@/lib/security/ai-budget");
+        if (await isGuestReadQuotaReached(getClientIdentifier(request))) {
+          recordEvent("entitlement_guest_ip_capped");
+          return NextResponse.json(
+            {
+              error: "วันนี้เปิดไพ่แบบทดลองจากเครือข่ายนี้ครบแล้ว สมัครสมาชิกเพื่อเปิดต่อได้เลย",
+              reason: "guest_used",
+            },
+            { status: 403 },
+          );
+        }
+        // ผู้เยี่ยมชมที่ยังไม่มี gid คงที่ → ปักหมุด gid ตั้งแต่ขั้น start (used=0)
+        // เพื่อให้ read / guest-consume / เครื่องหมายฝั่ง server ใช้ค่าเดียวกันตลอดวงจร
+        if (viewer.gid === "anon") {
+          const { newGid } = await import("@/lib/entitlement/guest");
+          guestGidToPin = newGid();
+        }
       }
     }
   }
@@ -140,7 +162,7 @@ export async function POST(request: Request) {
   const { signReadingSessionToken } = await import("@/lib/security/session-token");
   const sessionToken = signReadingSessionToken(record);
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     id,
     readingId: id,
     commitment,
@@ -151,4 +173,14 @@ export async function POST(request: Request) {
       positions: spread.positions,
     },
   });
+
+  if (guestGidToPin) {
+    const { GUEST_COOKIE_NAME, GUEST_COOKIE_OPTIONS, guestCookieValue } = await import(
+      "@/lib/entitlement/guest"
+    );
+    const token = await guestCookieValue({ gid: guestGidToPin, used: 0 }).catch(() => null);
+    if (token) res.cookies.set(GUEST_COOKIE_NAME, token, GUEST_COOKIE_OPTIONS);
+  }
+
+  return res;
 }

@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 
 import { AUTH_COOKIE_NAME, verifyUserSession } from "@/lib/auth/edge-auth";
-import type { Viewer } from "@/lib/entitlement/entitlement";
-import { readGuestCookie } from "@/lib/entitlement/guest";
+import { GUEST_LIMIT, type Viewer } from "@/lib/entitlement/entitlement";
+import { isGuestUsedOnServer, readGuestCookie } from "@/lib/entitlement/guest";
 
 /**
  * แปลง request → Viewer (สมาชิก หรือ ผู้เยี่ยมชม)
@@ -21,5 +21,13 @@ export async function getViewer(_request?: Request): Promise<Viewer> {
   }
 
   const guest = await readGuestCookie();
-  return { kind: "guest", gid: guest?.gid ?? "anon", guestUsed: guest?.used ?? 0 };
+  const gid = guest?.gid ?? "anon";
+  let guestUsed = guest?.used ?? 0;
+
+  // เครื่องหมายฝั่ง server ทับค่าคุกกี้ได้เสมอ — client ที่บล็อก guest-consume ยังโดนกั้น
+  if (guestUsed < GUEST_LIMIT && (await isGuestUsedOnServer(gid).catch(() => false))) {
+    guestUsed = GUEST_LIMIT;
+  }
+
+  return { kind: "guest", gid, guestUsed };
 }

@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0039 · 2026-09-01 15:33 · 🟠 High · กันโกงสิทธิ์ฟรีผู้เยี่ยมชม P0+P1 — server-authoritative gid marker + guest IP/subnet quota
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หลัง PR #96 ผู้เยี่ยมชมที่บล็อก POST /api/entitlement/guest-consume ทำให้คุกกี้ค้าง used=0 → เปิดไพ่ได้ไม่จำกัด (เพดานแค่ per-IP 40/วัน) · และล้างคุกกี้ 40 รอบ/IP/วัน = 40 AI call ฟรี |
+| **สาเหตุราก** | การหักสิทธิ์ guest พึ่งคุกกี้ที่ client เป็นคนอัปเดตผ่าน endpoint แยก — ไม่มี state ฝั่ง server ที่ start จะเช็คได้เอง · เพดาน per-IP เดิม (40/วัน) ตั้งไว้สำหรับ member ไม่เคยแยกสำหรับ guest |
+| **การแก้ไข** | P0: markGuestUsedOnServer/isGuestUsedOnServer เขียน KV app:guest:used:<gid> (TTL 400 วัน) ตอน read เสร็จจริง · start ปักหมุด gid ลงคุกกี้ตั้งแต่ขั้นแรก · getViewer อ่าน marker ทับค่าคุกกี้ · guest-consume mark ซ้ำ. P1: isGuestReadQuotaReached/recordGuestRead/subnetPrefix — เพดาน guest ต่อ IP 5/วัน + /24|/64 subnet 20/วัน (env override) เช็คที่ start ก่อนพิธีจับไพ่ + ตาข่ายที่ read · IP hash SHA-256 |
+| **🛡️ กฎป้องกันถาวร** | **สิทธิ์ที่หักแล้วกลับคืนไม่ได้ต้องมี state ฝั่ง server ที่ gate เช็คเองได้ ห้ามพึ่ง client call เพียงอย่างเดียว · เพดานทรัพยากรของ guest ต้องแยกจาก member และตั้งต่ำ (household NAT ที่ชน = ชวนสมัคร ไม่ใช่ error) · ห้าม fingerprint/CAPTCHA (PDPA)** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify 14/14 · typecheck 0 · unit test-entitlement 50/50 (+7 เคส marker/subnet/quota) · build:worker exit 0 |
+| **บันทึกโดย** | Claude Sonnet 5 · branch `claude/harden-guest-entitlement` · commit `809ae59` |
+
+
 ### INC-0038 · 2026-09-01 15:09 · 🟠 High · guest ไม่เสียสิทธิ์ฟรีเมื่อ AI ล้ม — ย้ายการหักไปหลัง done ผ่าน signed ticket
 
 | หัวข้อ | รายละเอียด |
