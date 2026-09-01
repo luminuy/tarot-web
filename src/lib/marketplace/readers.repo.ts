@@ -239,10 +239,18 @@ export async function setReaderStatus(id: string, status: ReaderStatus): Promise
 }
 
 /**
- * ลบแม่หมอออกจากระบบ
+ * ลบแม่หมอออกจากระบบ พร้อมเก็บกวาดข้อมูลคิวที่เกี่ยวข้อง
  */
 export async function deleteReader(id: string): Promise<boolean> {
   const db = await getAppDB();
+  try {
+    await db.prepare("DELETE FROM bookings WHERE reader_id = ?").bind(id).run();
+    await db.prepare("DELETE FROM queue_tickets WHERE reader_id = ?").bind(id).run();
+    await db.prepare("DELETE FROM reader_availability WHERE reader_id = ?").bind(id).run();
+  } catch {
+    // ignore if tables not yet created in older migrations
+  }
+
   const res = await db.prepare("DELETE FROM readers WHERE id = ?").bind(id).run();
   return (res.meta?.changes ?? 0) > 0;
 }

@@ -2,6 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
+import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
+import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
 import { MysticBackground } from "@/components/ui/MysticBackground";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 
@@ -30,6 +32,8 @@ export default async function ReaderDetailPage({
   if (!reader) {
     notFound();
   }
+
+  const isLiveOpen = await getReaderLiveAvailability(id);
 
   return (
     <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700] relative overflow-hidden">
@@ -127,26 +131,9 @@ export default async function ReaderDetailPage({
 
           {/* Booking / Consultation Action */}
           <div className="border-t border-white/10 pt-6 space-y-3 text-center sm:text-left">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-[#2a1a45]/80 to-[#1b122e]/80 border border-[#e5c07b]/30 p-6 rounded-2xl">
-              <div>
-                <h3 className="font-serif-th font-bold text-base text-[#f5deaa]">
-                  พร้อมรับคำทำนายจาก {reader.displayName} แล้วหรือยัง?
-                </h3>
-                <p className="text-xs text-[#9c93b8] mt-1">
-                  ระบบจะพาคุณไปสู่ขั้นตอนการเตรียมคำถามและผังไพ่
-                </p>
-              </div>
+            <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} />
 
-              <Link
-                href={`/?readerId=${reader.id}`}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#e5c07b] to-[#ffd700] text-[#120f1d] font-serif-th font-bold text-xs sm:text-sm hover:shadow-[0_0_20px_rgba(229,192,123,0.4)] transition-all shrink-0"
-              >
-                <span>✦ เริ่มต้นขอคำปรึกษา</span>
-                <span>→</span>
-              </Link>
-            </div>
-
-            <p className="text-[11px] text-[#9c93b8] text-center pt-2">
+            <p className="text-[11px] text-[#9c93b8] text-center pt-2 font-serif-th">
               🔒 ข้อมูลคำถามจะถูกส่งต่อไปยังแม่หมอโดยตรง และจะถูกลบออกจากระบบภายใน 30 วันตามมาตรฐาน PDPA
             </p>
           </div>
