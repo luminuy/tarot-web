@@ -99,6 +99,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let consumed = false;
   let capTier: "guest" | "member" = "member"; // ธงปิด → เพดานเต็ม (พฤติกรรมเดิม)
   let guestNeedsConsume = false; // ผู้เยี่ยมชมผ่าน gate → ต้องออก ticket หลังอ่านสำเร็จจริง
+  let guestGid: string | null = null; // gid ของผู้เยี่ยมชม — ใช้ mark ฝั่ง server ตอนอ่านจบ
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     if (await isEntitlementEnabled()) {
@@ -121,8 +122,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       // ยิงไป `POST /api/entitlement/guest-consume` เพื่อ Set-Cookie used=1 (ENTITLEMENT_PLAN ข้อ 4)
       if (viewer.kind === "guest") {
         guestNeedsConsume = true;
+        guestGid = viewer.gid !== "anon" ? viewer.gid : null;
         // guest ไม่มีแถว DB ให้ refund — กันไม่ให้ finally เรียก refundReading เปล่า ๆ
         consumed = false;
+
+        // เพดานเฉพาะผู้เยี่ยมชมต่อ IP/ซับเน็ต — เช็คหลัก ๆ ที่ start (UX) · ที่นี่เป็นตาข่ายกันเรียก read ตรง
+        const { isGuestReadQuotaReached } = await import("@/lib/security/ai-budget");
+        if (await isGuestReadQuotaReached(clientIp)) {
+          limit.releaseConcurrency();
+          recordEvent("entitlement_guest_ip_capped");
+          return Response.json(
+            {
+              error: "วันนี้เปิดไพ่แบบทดลองจากเครือข่ายนี้ครบแล้ว สมัครสมาชิกเพื่อเปิดต่อได้เลย",
+              reason: "guest_used",
+            },
+            { status: 403 },
+          );
+        }
       }
     }
   }
@@ -195,8 +211,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               // ผู้เยี่ยมชม: ออก ticket ให้ client ยิง /api/entitlement/guest-consume
               // เฉพาะตรงนี้ (คำอ่านจริง) — ทุก failure path ไม่มีทางมาถึง → ไม่มีทางเสียสิทธิ์
               if (guestNeedsConsume) {
-                const { signGuestConsumeTicket } = await import("@/lib/entitlement/guest");
+                const { signGuestConsumeTicket, markGuestUsedOnServer } = await import(
+                  "@/lib/entitlement/guest"
+                );
                 guestConsumeTicket = await signGuestConsumeTicket(id).catch(() => null);
+                // เครื่องหมายฝั่ง server — ไม่พึ่ง client · client ที่บล็อก guest-consume ยังโดนกั้นที่ start
+                if (guestGid) void markGuestUsedOnServer(guestGid);
+                const { recordGuestRead } = await import("@/lib/security/ai-budget");
+                void recordGuestRead(clientIp);
               }
             } else {
               await refundIfConsumed();

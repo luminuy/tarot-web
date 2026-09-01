@@ -64,6 +64,19 @@
 - **สถานะปัจจุบัน**: Google login + แผงแอดมิน + ดูดวง ใช้งานได้ · email signup พัง 500 บน prod (ไม่มี `PASSWORD_PEPPER`) — Google login ไม่กระทบ
 - **แนะนำลำดับ**: LINE login (ฟรี) → ซื้อโดเมน ~฿370 → Resend → เปิด entitlement
 
+### 🗓️ 2026-09-01: Harden — ระบบกันโกงสิทธิ์ฟรีผู้เยี่ยมชม P0+P1 (server-authoritative marker + IP/subnet quota)
+
+- **ความต้องการ**: หลัง PR #96 การหักสิทธิ์ guest พึ่งคุกกี้ที่ client อัปเดต → บล็อก `POST /guest-consume` = เปิดไพ่ไม่จำกัด (เพดานแค่ per-IP 40/วัน) · ต้องวางระบบกันโกงให้ดีกว่าเดิมโดยไม่ละเมิด PDPA และไม่ทำร้าย conversion funnel
+- **สิ่งที่ทำ**:
+  - **P0 — server-authoritative gid marker**: `src/lib/entitlement/guest.ts` + `markGuestUsedOnServer()` / `isGuestUsedOnServer()` (KV `app:guest:used:<gid>` TTL 400 วัน) · `start` route ปักหมุด gid ลงคุกกี้ตั้งแต่ขั้นแรก (`used=0`) · `read` route mark ฝั่ง server ตอน `realReading` · `getViewer()` อ่าน marker ทับค่าคุกกี้ · `guest-consume` mark ซ้ำ (defense-in-depth) → บล็อก client call ไม่ช่วยแล้ว, `start` เห็น marker → 403
+  - **P1 — guest IP/subnet quota**: `src/lib/security/ai-budget.ts` + `isGuestReadQuotaReached()` / `recordGuestRead()` / `subnetPrefix()` · IP 5/วัน (`GUEST_IP_DAILY_READS`) + /24|/64 subnet 20/วัน (`GUEST_SUBNET_DAILY_READS`) · KV · IP hash SHA-256 · เช็คใน `read` ก่อนเรียก AI · เกิน → 403 ข้อความชวนสมัคร · stat `entitlement_guest_ip_capped`
+  - `src/lib/platform/kv-store.ts` — +3 KEY builders (`guestUsed` / `guestIpQuota` / `guestSubnetQuota`)
+  - `docs/ENTITLEMENT_ABUSE_MODEL.md` 🆕 — threat model, ชั้นป้องกัน, จุดอ่อนที่ยอมรับ, P2 (PoW) / P3 (velocity alert) ที่เลื่อนไว้แบบ metric-driven, สิ่งที่ไม่ทำ + เหตุผล PDPA
+  - `scripts/qa/test-entitlement.ts` — +7 เคส (marker round-trip, subnetPrefix v4/v6, IP quota) → 50/50
+- **การพิสูจน์**: `npm run repo:verify` 14/14 · `typecheck` 0 · unit 50/50 · `build:worker`
+- **PDPA/funnel**: gid เป็น pseudonym TTL auto-purge (ไม่ต้อง cleanup job) · household NAT ที่ชน quota = ข้อความชวนสมัคร ไม่ใช่ error · ไม่แตะ fingerprint/CAPTCHA
+- **ธงยังปิด** — พฤติกรรมเว็บไม่เปลี่ยนเมื่อ `entitlement.enabled` OFF
+
 ### 🗓️ 2026-09-01: Fix — ผู้เยี่ยมชมเสียสิทธิ์ฟรีเมื่อ AI ล้ม (eager guest cookie ใน read route)
 
 - **อาการ**: ธง entitlement เปิด → ผู้เยี่ยมชมครั้งแรกเจอ AI ล้มระหว่างสตรีม → สิทธิ์ฟรี 1 ครั้งหมดทันที (คุกกี้ `tarot_guest used=1`) ทั้งที่ยังไม่ได้อ่านอะไร · ติดกำแพงหน้าเลือกผัง · ไม่รู้ว่าต้องล้างคุกกี้ · สมาชิกไม่โดนเพราะ `refundReading()` ลบแถว DB ได้

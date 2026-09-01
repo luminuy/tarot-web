@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import { signPayload, verifyPayload } from "@/lib/auth/edge-auth";
 import { GUEST_LIMIT } from "@/lib/entitlement/entitlement";
+import { KEY, kvGetJSON, kvPutJSON } from "@/lib/platform/kv-store";
 
 /**
  * คุกกี้นับสิทธิ์ผู้เยี่ยมชม (ENTITLEMENT_PLAN PR C)
@@ -28,8 +29,37 @@ interface GuestPayload extends Record<string, unknown> {
   iat: number;
 }
 
-function newGid(): string {
+export function newGid(): string {
   return `g_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
+}
+
+/**
+ * เครื่องหมาย "ผู้เยี่ยมชม gid นี้ใช้สิทธิ์ฟรีแล้ว" ฝั่ง server (KV · TTL ~400 วัน)
+ * ------------------------------------------------------------------------
+ * ทำไมต้องมี: หลัง PR #96 การหักสิทธิ์ guest เกิดที่ `POST /api/entitlement/guest-consume`
+ * ซึ่ง client เป็นคนยิง → ถ้า client บล็อก call นั้น คุกกี้จะค้าง `used=0` ตลอด = ไม่จำกัด
+ * เครื่องหมายนี้เขียนฝั่ง server ตอน read เสร็จจริง (`realReading`) → `start` เช็คได้เอง
+ * ไม่ต้องพึ่ง client · ช่องที่เหลือคือ "ล้างคุกกี้ = gid ใหม่" ตาม ENTITLEMENT_PLAN ข้อ 3
+ *
+ * gid เป็น pseudonym (ไม่มี PII) · TTL หมดอายุเอง ไม่ต้องมี cleanup job (PDPA)
+ */
+const GUEST_USED_TTL_SEC = 400 * 24 * 60 * 60;
+
+export async function isGuestUsedOnServer(gid: string): Promise<boolean> {
+  if (!gid || gid === "anon") return false;
+  // memo 15s ต่อ isolate — การ mark เรียก kvPutJSON ซึ่งล้าง memo ให้เอง จึงไม่ค้าง stale ใน isolate เดียวกัน
+  const row = await kvGetJSON<{ at: number }>(KEY.guestUsed(gid), 15_000).catch(() => null);
+  return !!row;
+}
+
+/** best-effort — caller ควรห่อ `void` เอง (fire-and-forget) หรือ `await` ใน test */
+export async function markGuestUsedOnServer(gid: string): Promise<void> {
+  if (!gid || gid === "anon") return;
+  await kvPutJSON(
+    KEY.guestUsed(gid),
+    { at: Date.now() },
+    { expirationTtl: GUEST_USED_TTL_SEC },
+  ).catch(() => {});
 }
 
 /** อ่านสถานะผู้เยี่ยมชมจากคุกกี้ (null ถ้าไม่มี/เสียหาย) */

@@ -167,6 +167,27 @@ async function main() {
   });
   check("ticket iat อนาคตเกิน skew → null", (await verifyGuestConsumeTicket(future)) === null);
 
+  // ── 9d. server-authoritative guest marker (ปิดช่อง client บล็อก guest-consume) ──
+  const { isGuestUsedOnServer, markGuestUsedOnServer, newGid } = await import(
+    "../../src/lib/entitlement/guest"
+  );
+  const testGid = newGid();
+  check("guest marker: gid ใหม่ → ยังไม่ใช้", (await isGuestUsedOnServer(testGid)) === false);
+  await markGuestUsedOnServer(testGid);
+  check("guest marker: หลัง mark → used", (await isGuestUsedOnServer(testGid)) === true);
+  check("guest marker: gid ว่าง/anon → false เสมอ", (await isGuestUsedOnServer("anon")) === false);
+
+  // ── 9e. เพดานผู้เยี่ยมชมต่อ IP/ซับเน็ต (P1: กันล้างคุกกี้ซ้ำเผางบ AI) ──
+  const { isGuestReadQuotaReached, recordGuestRead, subnetPrefix } = await import(
+    "../../src/lib/security/ai-budget"
+  );
+  check("subnetPrefix: IPv4 → /24", subnetPrefix("203.0.113.44") === "203.0.113.0/24");
+  check("subnetPrefix: IPv6 → /64", subnetPrefix("2001:db8:1:2:3:4:5:6") === "2001:db8:1:2::/64");
+  const qip = `198.51.100.${Math.floor(Date.now() % 200) + 1}`;
+  check("guest IP quota: เริ่มต้นยังไม่ถึงเพดาน", (await isGuestReadQuotaReached(qip)) === false);
+  for (let i = 0; i < 5; i++) await recordGuestRead(qip);
+  check("guest IP quota: หลังเปิด 5 ครั้ง → ถึงเพดาน (default GUEST_IP_DAILY=5)", (await isGuestReadQuotaReached(qip)) === true);
+
   // ── 9b. โบนัสเปลี่ยนผ่าน (grandfather) — เพิ่มบน signup, idempotent ต่อ reason ──
   const gfUid = `test_gf_${Date.now()}`;
   await upsertUserOnLogin({ id: gfUid, provider: "google", email: `${gfUid}@e.com`, name: "ผู้ใช้เก่า" });
