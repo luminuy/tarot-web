@@ -22,6 +22,8 @@ export const KEY = {
   /** audit log entry (append-only, key เรียงตามเวลา) */
   audit: (ts: number, rand: string) => `app:audit:${ts}:${rand}`,
   auditPrefix: () => "app:audit:",
+  /** reading session state (cross-isolate durable backstop) */
+  reading: (id: string) => `app:reading:${id}`,
 } as const;
 
 /** memo cache ระดับ isolate — กัน round-trip ซ้ำภายในคำขอเดียว / ข้ามคำขอในช่วงสั้น */
