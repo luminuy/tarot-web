@@ -36,6 +36,16 @@
 
 ---
 
+### 🗓️ 2026-09-01: Master Admin & Unlimited Access Mode (รหัสมาสเตอร์และโหมดไม่จำกัดสิทธิ์)
+
+- **ความต้องการ**: สร้างรหัสผ่านสำหรับเข้าใช้งานระบบในฐานะ Master / Admin แบบไม่จำกัดสิทธิ์การเปิดไพ่และการสนทนา (Unlimited Access)
+- **สิ่งที่ทำ**:
+  - `src/app/api/entitlement/route.ts`: เพิ่มการตรวจสอบ `isPrivilegedTestRequest(request)` หากมีคุกกี้แอดมินหรือ Token พิเศษ จะคืนสถานะไม่จำกัดสิทธิ์ (`remaining: 9999`, `dailyRemaining: 9999`, `role: "admin"`)
+  - `src/components/entitlement/QuotaBadge.tsx`: เพิ่มการแสดงผลป้าย `✦ มาสเตอร์ (ไม่จำกัดสิทธิ์)` พร้อมปุ่ม ADMIN สีทองเรืองแสง และลิงก์ตรงไปยังแผง `/admin`
+  - `src/lib/entitlement/use-entitlement.ts`: อัปเดต `ClientEntitlement` รองรับ `role?: string`
+  - `.env`: กำหนด `ADMIN_PASSWORD="MasterTarot2026!Supreme"` และ `RATE_LIMIT_BYPASS_TOKEN`
+- **ผลการทดสอบ**: `npm run repo:verify` 14/14 ด่านผ่าน 100%, `typecheck` 0 errors
+
 ### 🗓️ 2026-09-01: แก้จบ — คำอ่าน AI (Gemini 3.x) + paywall ทำงานครบบน production (ISSUE-016 ปิด)
 
 ต่อเนื่องจากวินิจฉัยด้านล่าง · เจ้าของตั้ง `GEMINI_API_KEY` แล้ว จากนั้นไล่แก้โค้ดฝั่ง Gemini ทีละชั้นจาก Worker log จริง:
