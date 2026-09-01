@@ -1,6 +1,7 @@
 import { getAppDB } from "@/lib/platform/db";
 import { dayKey, nextResetAt, weekKey } from "@/lib/entitlement/week";
 import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading, todayDateKey } from "@/lib/entitlement/daily";
+import { DAILY_LIMIT, GUEST_LIMIT, SIGNUP_BONUS } from "@/lib/entitlement/limits";
 
 /**
  * แกนสิทธิ์การเปิดไพ่ — แหล่งความจริงเดียว (ENTITLEMENT_PLAN ข้อ 5)
@@ -10,11 +11,13 @@ import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading, todayDateKe
  * สมาชิก (สมัครแล้ว):       3 ครั้ง/วัน (ไม่ว่าจะเปิดผังใด รีเซ็ตเที่ยงคืนเวลาไทย) + โบนัสก้อน (ไม่หมดอายุ)
  */
 
-export const DAILY_LIMIT = 3;
-export const WEEKLY_LIMIT = 3; // compatibility alias
-export const GUEST_LIMIT = 1;
-export const SIGNUP_BONUS = 3;
-export const GRANDFATHER_BONUS = 10;
+export {
+  DAILY_LIMIT,
+  WEEKLY_LIMIT,
+  GUEST_LIMIT,
+  SIGNUP_BONUS,
+  GRANDFATHER_BONUS,
+} from "@/lib/entitlement/limits";
 
 export type Viewer =
   | { kind: "guest"; gid: string; guestUsed: number }

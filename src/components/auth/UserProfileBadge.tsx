@@ -89,7 +89,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           soundManager.playCardSelectSound();
           onOpenAuthModal();
         }}
-        className="px-3.5 py-1.5 rounded-xl bg-[#140b24] border border-[#e5c07b]/40 text-[#f5deaa] hover:bg-[#201338] hover:border-[#ffd700] text-xs font-serif-th font-semibold shadow transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
+        className="min-h-[36px] px-3 sm:px-3.5 py-1.5 rounded-xl bg-[#140b24] border border-[#e5c07b]/40 text-[#f5deaa] hover:bg-[#201338] hover:border-[#ffd700] text-xs font-serif-th font-semibold shadow transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
       >
         <span className="text-[#e5c07b]">✦</span>
         <span>เข้าสู่ระบบ</span>
