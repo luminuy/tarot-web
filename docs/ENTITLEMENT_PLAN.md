@@ -403,11 +403,16 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
 - [x] `GET/PUT /api/admin/entitlement` ขยาย: `announce` + `announceResetDate` + `metrics` · `GET /api/entitlement` เผย `announce`/`announceResetDate` (public)
 - [x] repo:verify 14/14 (test-entitlement 36/36 +grandfather) · build:worker ✓ · browser: แบนเนอร์ + แท็บแอดมิน render ถูก
 
-**ขั้นตอนเปิดจริง (เจ้าของทำ) — runbook:**
-1. `npm run entitlement:grandfather -- --before <วันเปิด> --remote` (ให้โบนัสผู้ใช้เดิม)
-2. แผงแอดมิน → แท็บ "สิทธิ์เปิดไพ่" → ตั้งวันเปิด + เปิด "ประกาศ" → รออย่างน้อย **7 วัน**
-3. ครบ 7 วัน → กด "เปิดระบบสิทธิ์" (confirm)
-4. เฝ้าดู metric `blockedRead` / `aiCapHit` / `signupClicked` ใน 48 ชม.แรก · ถ้า aiCapHit สูง → เพิ่ม env `AI_DAILY_CALL_CAP` (คำนวณ: สมาชิก × 3 ÷ 7 + headroom)
+**ขั้นตอนเปิดจริง — ทำได้ครบจาก `/admin` → แท็บ "สิทธิ์เปิดไพ่" (ไม่ต้องใช้ terminal):**
+1. **เตรียมฐานข้อมูล** → กดปุ่ม (สร้างตารางบน D1 · idempotent · แสดง ✓ พร้อม)
+2. **โบนัสเปลี่ยนผ่าน** → กรอกวันตัด → "ตรวจจำนวน" (preview) → "ให้โบนัส" (idempotent กดซ้ำได้)
+3. **แบนเนอร์ประกาศ** → กรอกวันเริ่มใช้ → เปิด "ประกาศ" → **รออย่างน้อย 7 วัน**
+4. ครบ 7 วัน → **เปิดระบบสิทธิ์จริง** → กด (confirm · ปุ่มล็อกจนกว่าข้อ 1 ✓)
+5. เฝ้าดู metric ในการ์ด "สถิติระบบสิทธิ์" — `blockedRead` / `aiCapHit` / `signupClicked` 48 ชม.แรก
+   · ถ้า `aiCapHit` สูง → เพิ่ม env `AI_DAILY_CALL_CAP` (สมาชิก × 3 ÷ 7 + headroom) แล้ว redeploy
+
+> CLI ทางเลือก (ผู้เชี่ยวชาญ): `npm run entitlement:grandfather -- --before YYYY-MM-DD --remote` · migration: `npm run db:migrate`
+> (`deploy.yml` ยังไม่รัน d1 migrations อัตโนมัติ — ปุ่ม "เตรียมฐานข้อมูล" ในแอดมินทดแทนสำหรับตารางของระบบนี้)
 
 ---
 
