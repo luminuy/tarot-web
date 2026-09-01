@@ -253,6 +253,16 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       );
       CREATE UNIQUE INDEX IF NOT EXISTS idx_ub_user_reason ON user_bonus(user_id, reason);
       CREATE INDEX IF NOT EXISTS idx_ub_user ON user_bonus(user_id);
+
+      CREATE TABLE IF NOT EXISTS daily_readings (
+        id          TEXT PRIMARY KEY,
+        user_key    TEXT NOT NULL,
+        date_key    TEXT NOT NULL,
+        reading_id  TEXT NOT NULL,
+        created_at  INTEGER NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_user_date ON daily_readings(user_key, date_key);
+      CREATE INDEX IF NOT EXISTS idx_daily_user ON daily_readings(user_key, created_at);
     `);
 
     // Safe Alter & Index for local SQLite migration

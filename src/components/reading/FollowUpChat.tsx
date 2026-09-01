@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import type { Persona } from "@/data/personas";
 import { CardImage } from "@/components/card/CardImage";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { TTSReaderButton } from "./TTSReaderButton";
 
 interface Message {
   id: string;
@@ -164,14 +165,23 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
               animate={{ opacity: 1, y: 0 }}
               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
-                  msg.sender === "user"
-                    ? "bg-gradient-to-r from-[#c9a25e] to-[#e0c088] text-[#0a0812] font-medium rounded-tr-none shadow-md"
-                    : "bg-[#1b1530] border border-[#e0c088]/30 text-[#f0dcb4] font-serif-th rounded-tl-none shadow-lg"
-                }`}
-              >
-                {msg.text}
+              <div className="flex flex-col items-start gap-1 max-w-[85%]">
+                <div
+                  className={`w-full rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
+                    msg.sender === "user"
+                      ? "bg-gradient-to-r from-[#c9a25e] to-[#e0c088] text-[#0a0812] font-medium rounded-tr-none shadow-md"
+                      : "bg-[#1b1530] border border-[#e0c088]/30 text-[#f0dcb4] font-serif-th rounded-tl-none shadow-lg"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+                {msg.sender === "bot" && (
+                  <TTSReaderButton
+                    textToRead={msg.text}
+                    personaId={persona.id}
+                    className="text-[10px] py-1 px-2.5"
+                  />
+                )}
               </div>
             </motion.div>
           ))}

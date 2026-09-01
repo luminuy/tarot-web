@@ -65,6 +65,10 @@ const CardZoomModal = dynamic(
   () => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal),
   { ssr: false }
 );
+const BuyCreditsModal = dynamic(
+  () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
+  { ssr: false }
+);
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick }: { onClick: () => void }) {
@@ -98,8 +102,19 @@ export default function TarotPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isBuyCreditsOpen, setIsBuyCreditsOpen] = useState(false);
   const [isEncyclopediaOpen, setIsEncyclopediaOpen] = useState(false);
   const [zoomedCard, setZoomedCard] = useState<DrawnSlotCard | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user) setCurrentUser(data.user);
+      })
+      .catch(() => {});
+  }, [isAuthOpen]);
 
   // Selection state
   const [selectedSpread, setSelectedSpread] = useState<Spread>(SPREADS[3]); // Default: 3-card
@@ -648,7 +663,7 @@ export default function TarotPage() {
 
           {/* Right Toolbar Controls (UserProfileBadge, Sacred Dropdown & Reset Button) */}
           <div className="flex items-center gap-2 sm:gap-2.5">
-            <QuotaBadge />
+            <QuotaBadge onOpenBuyCredits={() => setIsBuyCreditsOpen(true)} />
             <UserProfileBadge onOpenAuthModal={() => setIsAuthOpen(true)} />
 
             <SacredNavDropdown
@@ -721,7 +736,11 @@ export default function TarotPage() {
               exit="exit"
               className="space-y-8"
             >
-              <EntitlementGate active={currentStep === "SPREAD_SELECT"} onOpenAuth={() => setIsAuthOpen(true)}>
+              <EntitlementGate
+                active={currentStep === "SPREAD_SELECT"}
+                onOpenAuth={() => setIsAuthOpen(true)}
+                onOpenBuyCredits={() => setIsBuyCreditsOpen(true)}
+              >
               <div className="text-center space-y-3 relative">
                 {/* 3D Floating Tarot Stage with Sacred Geometric Aura (Matching Step 3 Shuffle) */}
                 <div className="h-60 sm:h-72 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1200 }}>
@@ -1003,6 +1022,13 @@ export default function TarotPage() {
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
+      />
+
+      <BuyCreditsModal
+        isOpen={isBuyCreditsOpen}
+        onClose={() => setIsBuyCreditsOpen(false)}
+        user={currentUser}
+        onRequireAuth={() => setIsAuthOpen(true)}
       />
 
       <TarotEncyclopediaModal

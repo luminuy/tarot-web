@@ -106,7 +106,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const { consumeReading } = await import("@/lib/entitlement/entitlement");
       const viewer = await getViewer(request);
       capTier = viewer.kind;
-      consumed = await consumeReading(viewer, id);
+      consumed = await consumeReading(viewer, id, record.spreadId);
       if (!consumed) {
         limit.releaseConcurrency();
         recordEvent("entitlement_blocked_read");
