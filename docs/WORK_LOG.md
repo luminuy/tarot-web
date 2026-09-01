@@ -46,6 +46,19 @@
 - **สถานะปัจจุบัน**: Google login + แผงแอดมิน + ดูดวง ใช้งานได้ · email signup พัง 500 บน prod (ไม่มี `PASSWORD_PEPPER`) — Google login ไม่กระทบ
 - **แนะนำลำดับ**: LINE login (ฟรี) → ซื้อโดเมน ~฿370 → Resend → เปิด entitlement
 
+### 🗓️ 2026-09-01: Fix — ผู้เยี่ยมชมเสียสิทธิ์ฟรีเมื่อ AI ล้ม (eager guest cookie ใน read route)
+
+- **อาการ**: ธง entitlement เปิด → ผู้เยี่ยมชมครั้งแรกเจอ AI ล้มระหว่างสตรีม → สิทธิ์ฟรี 1 ครั้งหมดทันที (คุกกี้ `tarot_guest used=1`) ทั้งที่ยังไม่ได้อ่านอะไร · ติดกำแพงหน้าเลือกผัง · ไม่รู้ว่าต้องล้างคุกกี้ · สมาชิกไม่โดนเพราะ `refundReading()` ลบแถว DB ได้
+- **สาเหตุราก**: `read/route.ts` แปะ `Set-Cookie used=1` บน header ของ SSE response ซึ่งถูกส่งออกไป "ก่อน" body ของสตรีมจะรัน — refund path ทุกทางเป็น no-op สำหรับ guest (ดึงคุกกี้ที่ส่งไปแล้วกลับไม่ได้) ขัด ENTITLEMENT_PLAN ข้อ 4 ("ผู้ใช้ต้องไม่เสียสิทธิ์เพราะระบบเราพัง")
+- **สิ่งที่ทำ**:
+  - `src/lib/entitlement/guest.ts` — เพิ่ม `signGuestConsumeTicket()` / `verifyGuestConsumeTicket()` (เซ็น HMAC ด้วยกลไก edge-auth เดิม · purpose + rid + iat, อายุ 10 นาที)
+  - `src/app/api/entitlement/guest-consume/route.ts` 🆕 — `POST` · origin guard · verify ticket → `Set-Cookie tarot_guest used=1` · idempotent · stat `entitlement_guest_consumed`
+  - `src/app/api/reading/[id]/read/route.ts` — **ลบ** `Set-Cookie` eager ทั้งบล็อก · แทนด้วยการออก `guestConsumeTicket` ใน payload ของ event `done` เฉพาะตอน `realReading` (failure path ทุกทางไม่มีทางได้ ticket)
+  - `src/app/page.tsx` — handler `done`: ถ้ามี `data.guestConsumeTicket` → `POST /api/entitlement/guest-consume` แล้วค่อย `refreshEntitlement()`
+  - `scripts/qa/test-entitlement.ts` — +8 เคส (ticket sign/verify/หมดอายุ/purpose ผิด/tamper) → 43/43
+- **การพิสูจน์**: `npm run repo:verify` 14/14 · `npm run typecheck` 0 errors · unit 43/43 (AI ล้ม 4 แบบ = ไม่มี ticket = guest ยัง `remaining=1`)
+- **ผลต่อการกันโกง**: ไม่เปลี่ยนระดับ — guest ต้องบล็อก background request 1 ตัวเพื่อได้สิทธิ์ใหม่ = แรงเท่าล้างคุกกี้ (ENTITLEMENT_PLAN ข้อ 3 ยอมรับไว้แล้ว)
+
 ### 🗓️ 2026-09-01: UI/UX Fix: Consistent Dark Obsidian Background Sanctuary (ปรับพื้นหลังหน้าแรกให้เข้มสนิท สม่ำเสมอ ไม่ซีดจาง)
 
 - **ความต้องการ**: แก้ไขปัญหาพื้นหลังหน้าแรกที่ตอนแรกสีเข้ม แต่เมื่อเลื่อนหน้าจอลงมาสีพื้นหลังจางและสว่างขึ้น โดยปรับให้พื้นหลังเป็นสีดำสนิท (Obsidian Void `#05040a`) สม่ำเสมอทั้งหน้า ไม่เปลี่ยนสีหรือสว่างขึ้นเมื่อเลื่อนหน้าจอ

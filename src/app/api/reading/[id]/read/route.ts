@@ -98,7 +98,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // ── หักสิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 6.1) — วางหลังบล็อกอ่านซ้ำ ก่อนเช็คเพดาน AI ──
   let consumed = false;
   let capTier: "guest" | "member" = "member"; // ธงปิด → เพดานเต็ม (พฤติกรรมเดิม)
-  let guestConsumeCookie: string | null = null; // Set-Cookie สำหรับผู้เยี่ยมชมที่ใช้สิทธิ์
+  let guestNeedsConsume = false; // ผู้เยี่ยมชมผ่าน gate → ต้องออก ticket หลังอ่านสำเร็จจริง
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     if (await isEntitlementEnabled()) {
@@ -115,22 +115,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           { status: 403 },
         );
       }
-      // ผู้เยี่ยมชม: หักด้วยคุกกี้ (DB ไม่มีแถว) — set used=1 ใน response headers
-      // ไม่มี refund สำหรับ guest (เจตนา: สิทธิ์ฟรีเป็น best-effort · ล้างคุกกี้ = สิทธิ์ใหม่ · ENTITLEMENT_PLAN ข้อ 3)
+      // ผู้เยี่ยมชม: DB ไม่มีแถว → คุกกี้เป็นตัวนับ
+      // ห้าม Set-Cookie ตอนนี้ (header ส่งไปก่อน AI ทำงาน → AI ล้ม = เสียสิทธิ์ฟรีทั้งที่ยังไม่ได้อ่าน)
+      // แทนด้วย: ออก signed ticket เฉพาะตอน event `done` ที่เป็นคำอ่านจริง แล้วให้ client
+      // ยิงไป `POST /api/entitlement/guest-consume` เพื่อ Set-Cookie used=1 (ENTITLEMENT_PLAN ข้อ 4)
       if (viewer.kind === "guest") {
-        const { guestCookieValue, GUEST_COOKIE_NAME, GUEST_COOKIE_OPTIONS } = await import(
-          "@/lib/entitlement/guest"
-        );
-        const gid =
-          viewer.gid !== "anon"
-            ? viewer.gid
-            : `g_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
-        const token = await guestCookieValue({ gid, used: 1 }).catch(() => null);
-        if (token) {
-          const o = GUEST_COOKIE_OPTIONS;
-          guestConsumeCookie = `${GUEST_COOKIE_NAME}=${token}; Path=${o.path}; HttpOnly; SameSite=Lax; Max-Age=${o.maxAge}${o.secure ? "; Secure" : ""}`;
-        }
-        recordEvent("entitlement_guest_consumed");
+        guestNeedsConsume = true;
+        // guest ไม่มีแถว DB ให้ refund — กันไม่ให้ finally เรียก refundReading เปล่า ๆ
+        consumed = false;
       }
     }
   }
@@ -197,8 +189,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             // คำอ่านสำรอง/ออฟไลน์ (token = 0) ไม่ควรหักสิทธิ์ผู้ใช้ — คืนให้
             const realReading =
               (event.usage?.inputTokens ?? 0) > 0 || (event.usage?.outputTokens ?? 0) > 0;
+            let guestConsumeTicket: string | null = null;
             if (realReading) {
               completedOk = true;
+              // ผู้เยี่ยมชม: ออก ticket ให้ client ยิง /api/entitlement/guest-consume
+              // เฉพาะตรงนี้ (คำอ่านจริง) — ทุก failure path ไม่มีทางมาถึง → ไม่มีทางเสียสิทธิ์
+              if (guestNeedsConsume) {
+                const { signGuestConsumeTicket } = await import("@/lib/entitlement/guest");
+                guestConsumeTicket = await signGuestConsumeTicket(id).catch(() => null);
+              }
             } else {
               await refundIfConsumed();
             }
@@ -229,6 +228,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
                 deckSize: 78,
               },
               usage: event.usage,
+              ...(guestConsumeTicket ? { guestConsumeTicket } : {}),
             });
           } else if (event.type === "error") {
             updateReading(id, { status: "FAILED" });
@@ -266,7 +266,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // กัน proxy บางตัวหน่วง buffer จนสตรีมไม่ไหล
     "X-Accel-Buffering": "no",
   });
-  if (guestConsumeCookie) streamHeaders.append("Set-Cookie", guestConsumeCookie);
 
   return new Response(stream, { headers: streamHeaders });
 }

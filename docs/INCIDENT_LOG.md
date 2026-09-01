@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0038 · 2026-09-01 15:09 · 🟠 High · guest ไม่เสียสิทธิ์ฟรีเมื่อ AI ล้ม — ย้ายการหักไปหลัง done ผ่าน signed ticket
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ธง entitlement เปิด · ผู้เยี่ยมชมครั้งแรกเจอ AI ล้มระหว่างสตรีม → สิทธิ์ฟรี 1 ครั้งหมดทันที ติดกำแพงหน้าเลือกผัง ทั้งที่ยังไม่ได้อ่านคำทำนายเลย |
+| **สาเหตุราก** | read/route.ts แปะ Set-Cookie tarot_guest used=1 บน header ของ SSE response ซึ่งถูก flush ออกไปก่อน body ของสตรีมจะรัน · refund path ทุกทางเป็น no-op สำหรับ guest เพราะดึงคุกกี้ที่ส่งไปแล้วกลับไม่ได้ (ต่างจากสมาชิกที่ refundReading ลบแถว DB ได้) |
+| **การแก้ไข** | เพิ่ม signGuestConsumeTicket/verifyGuestConsumeTicket ใน guest.ts (HMAC edge-auth · purpose+rid+iat อายุ 10 นาที) · ลบบล็อก Set-Cookie eager ออกจาก read route ทั้งหมด แล้วให้ route ออก guestConsumeTicket ใน payload ของ event done เฉพาะเมื่อ realReading · เพิ่ม POST /api/entitlement/guest-consume ที่ verify ticket แล้วจึง Set-Cookie used=1 · page.tsx เรียก endpoint นี้ใน handler done ก่อน refreshEntitlement |
+| **🛡️ กฎป้องกันถาวร** | **ห้าม Set-Cookie หักสิทธิ์บน header ของ streaming response · การหักสิทธิ์ที่กลับคืนไม่ได้ต้องเกิดหลังงานสำเร็จจริงเท่านั้น — ออก token/ticket จากจุดสำเร็จเดียว ไม่ใช่แปะสถานะไว้ตั้งแต่เริ่ม** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify 14/14 · typecheck 0 · unit test-entitlement 43/43 (+8 เคส ticket) · build:worker exit 0 |
+| **บันทึกโดย** | Claude Sonnet 5 · branch `claude/fix-guest-entitlement-eager-consume` · commit `451871d` |
+
+
 ### INC-0037 · 2026-09-01 10:57 · 🟡 Medium · fix(ui): enforce consistent deep dark obsidian background without nebula/gradient washouts on scroll
 
 | หัวข้อ | รายละเอียด |

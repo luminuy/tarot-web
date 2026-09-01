@@ -368,7 +368,8 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
 - [x] `src/lib/auth/edge-auth.ts` — เพิ่ม `signPayload()` / `verifyPayload()` (กลไก HMAC-SHA256 + secret เดิม · ไม่ได้เขียนใหม่)
 - [x] `src/lib/entitlement/guest.ts` — คุกกี้ `tarot_guest` (`{ gid, used }`) · httpOnly · SameSite=Lax · Secure prod · 1 ปี
 - [x] `getViewer()` อ่านคุกกี้ → `kind: "guest"` + `guestUsed`
-- [x] `read` route: guest ผ่าน gate → set คุกกี้ `used=1` ใน SSE response headers (**ไม่มี refund สำหรับ guest** — best-effort ตามข้อ 3)
+- [x] `read` route: guest ผ่าน gate → **ออก signed ticket ใน event `done` เท่านั้น** → client ยิง `POST /api/entitlement/guest-consume` → คุกกี้ `used=1`
+      *(แก้ 2026-09-01: เดิม set คุกกี้ eager บน SSE headers → AI ล้ม = guest เสียสิทธิ์ฟรีทั้งที่ยังไม่ได้อ่าน ขัดข้อ 4 · ตอนนี้ failure path ทุกทางไม่มี ticket = ไม่เสียสิทธิ์ · การกันโกงเท่าเดิมตามข้อ 3)*
 - [x] `app/privacy/page.tsx` — เพิ่มบรรทัดประกาศคุกกี้ `tarot_guest` (first-party, ไม่มี PII, ไม่ติดตามข้ามเว็บ)
 - [x] curl e2e (flag on): fresh guest remaining=1 → reading flow → คุกกี้ set → remaining=0 reason=guest_used → start ครั้งที่ 2 = 403
 - [x] gate 14 → 35/35 (+ sign/verify คุกกี้) · repo:verify 14/14 · build:worker ✓
