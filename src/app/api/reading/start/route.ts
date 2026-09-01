@@ -8,7 +8,7 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { createCommitment } from "@/lib/tarot/shuffle";
 import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
-import { recordEvents } from "@/lib/stats/record";
+import { recordEvent, recordEvents } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
 
@@ -81,6 +81,30 @@ export async function POST(request: Request) {
   if (verdict.block) {
     recordEvents(["reading_blocked", `safety_flag:${verdict.flag}`]);
     return NextResponse.json({ blocked: true, message: verdict.message }, { status: 200 });
+  }
+
+  // ── สิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 1: ล็อกขั้น 1 · ยังไม่หัก) ──
+  if (!privileged) {
+    const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
+    if (await isEntitlementEnabled()) {
+      const { getViewer } = await import("@/lib/entitlement/viewer");
+      const { getEntitlement } = await import("@/lib/entitlement/entitlement");
+      const ent = await getEntitlement(await getViewer(request));
+      if (!ent.canStartReading) {
+        recordEvent("entitlement_blocked_start");
+        return NextResponse.json(
+          {
+            error:
+              ent.kind === "guest"
+                ? "ครั้งแรกจบแล้ว สมัครสมาชิกเพื่อเปิดไพ่ต่อสัปดาห์ละ 3 ครั้ง"
+                : "ไพ่สำหรับสัปดาห์นี้ปิดวงแล้ว กลับมาเปิดใหม่ได้วันจันทร์",
+            reason: ent.reason ?? "weekly_exhausted",
+            resetAt: ent.resetAt,
+          },
+          { status: 403 },
+        );
+      }
+    }
   }
 
   const { serverSeed, commitment } = createCommitment();

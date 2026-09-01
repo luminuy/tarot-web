@@ -36,6 +36,25 @@
 
 ---
 
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR B — บังคับสิทธิ์ที่ API
+
+> ต่อจาก PR A (#87) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ยังปิด · flag off = readings/chat ปกติทุกอย่าง)
+
+- **สิ่งที่ทำ**:
+  - `src/lib/entitlement/viewer.ts` — `getViewer(request)` → `member` (จากคุกกี้ `tarot_auth_session`) หรือ `guest` (used=0 จนถึง PR C)
+  - `src/app/api/entitlement/route.ts` — `GET` คืน `Entitlement` ให้ UI · flag off → สิทธิ์ "ไม่จำกัด"
+  - `src/app/api/reading/start/route.ts` — เช็คสิทธิ์หลัง safety ก่อน commitment → `403` + `reason`/`resetAt` (**ยังไม่หัก** — ENTITLEMENT_PLAN ข้อ 1)
+  - `src/app/api/reading/[id]/read/route.ts` — หักสิทธิ์หลังบล็อกอ่านซ้ำ · **คืนสิทธิ์ครบทุก failure path**: error event, catch, stream ถูกตัด (`completedOk` guard ใน finally), และ `done` ที่ token=0 (คำอ่านสำรอง/ออฟไลน์)
+  - `src/app/api/reading/[id]/chat/route.ts` — guest + flag on → `403 members_only` (แชท = สมาชิกเท่านั้น ไม่กินโควตา)
+  - `src/lib/security/ai-budget.ts` — `isAiCapReached(tier)` เพดานสองชั้น guest 70% / member 100% (default `guest` · flag off ส่ง `member` = พฤติกรรมเดิม)
+  - `src/app/api/admin/entitlement/route.ts` — GET/PUT ธง (สำหรับ PR F) + audit log
+  - **stats ใหม่**: `entitlement_blocked_start/read/chat`
+- **ผลการทดสอบ**:
+  - gate 14 `test-entitlement.ts` → **32/32** (+ เพดาน AI สองชั้น) · `repo:verify` **14/14** · `build:worker` ✓
+  - `next dev` + curl: flag off = readings/chat ปกติ · flag on + guest → `GET /api/entitlement` = `{kind:guest,canChat:false,remaining:1}` · chat → `403 members_only` · start → `200`
+  - PUT `/api/admin/entitlement {enabled}` toggle ธงได้ (audited)
+- **ยังไม่ครบ**: member-path e2e (หัก/คืนจริงผ่าน OAuth session) — พิสูจน์ด้วย unit test · PR C สิทธิ์ผู้เยี่ยมชม · PR D–F
+
 ### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR A — แกนสิทธิ์ + ตารางฐานข้อมูล
 
 > อ้างอิงแผน [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) · **ไม่เปลี่ยนพฤติกรรมเว็บ** (ยังไม่ต่อกับเส้นทางใด · ธง `entitlement.enabled` ยังปิด)
