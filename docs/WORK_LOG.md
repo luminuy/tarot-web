@@ -36,6 +36,27 @@
 
 ---
 
+### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 1: Schema & PBKDF2 Password Hashing (ระบบเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน)
+
+- **ความต้องการ**: พัฒนาระบบยืนยันตัวตนด้วยอีเมลและรหัสผ่าน (Email/Password Authentication) เสริมจาก Google และ LINE OAuth โดยรหัสผ่านต้องได้รับการแฮชด้วย PBKDF2-HMAC-SHA256 ร่วมกับ Server-side Pepper บน Cloudflare Web Crypto ปลอดภัย 100%
+- **สิ่งที่ทำ**:
+  - **D1 Migration `migrations/0006_email_auth.sql`**:
+    - เพิ่มคอลัมน์ `email_lower`, `password_hash`, `email_verified`, และ `token_version` ในตาราง `users`
+    - สร้างตาราง `auth_tokens` (สำหรับ Verification Links และ Password Reset Links แบบ Single-Use พร้อม TTL)
+    - สร้างตาราง `oauth_identities` (สำหรับเชื่อมต่อหลาย Identity เข้ากับ User Account เดียว)
+    - นำขึ้น Remote Cloudflare D1 เรียบร้อย 100%
+  - **Web Crypto Password Hashing (`src/lib/auth/password.ts`)**:
+    - ใช้ PBKDF2-HMAC-SHA256 (150,000 iterations + 16 bytes random salt) ร่วมกับ Server-side Pepper (`PASSWORD_PEPPER`)
+    - ฟังก์ชัน `hashPassword()`, `verifyPassword()`, `timingSafeEqualBytes()` แบบ zero external dependencies
+  - **User Repository Layer (`src/lib/users/users.repo.ts`)**:
+    - เพิ่มฟังก์ชัน `normalizeEmail`, `getUserByEmail`, `createEmailUser`, `setPasswordHash`, `markEmailVerified`, `getTokenVersion`, `linkOAuthIdentity`, `findUserIdByOAuth`
+  - **Verification Suite**:
+    - สร้าง QA test `scripts/qa/test-password.ts` ตรวจสอบความถูกต้องของ Hash, Verification, Random Salting, DB CRUD ครบ 11 ด่านย่อย
+    - `npm run repo:verify` ผ่านครบ **12/12 ด่าน 100% Green**
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - เพิ่มใหม่: `migrations/0006_email_auth.sql`, `src/lib/auth/password.ts`, `scripts/qa/test-password.ts`
+  - แก้ไข: `src/lib/platform/db.ts`, `src/lib/users/users.repo.ts`, `scripts/qa/test-journal-sync.ts`, `scripts/github-auto.ts`, `docs/WORK_LOG.md`
+
 ### 🗓️ 2026-09-01: AI Cost Control & Rate Limiting Infrastructure (PR 1 - PR 5: 7-Layer Defense-in-Depth)
 
 - **ความต้องการ**: พัฒนาระบบควบคุมต้นทุน AI (Gemini 3.7 Flash) และป้องกันการยิง API ซ้ำซ้อนโดยไม่ต้องใช้ Captcha/Turnstile ที่ทำลาย UX (ADR-002)

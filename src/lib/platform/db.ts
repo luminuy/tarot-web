@@ -172,6 +172,10 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
         id                TEXT PRIMARY KEY,
         provider          TEXT NOT NULL,
         email             TEXT,
+        email_lower       TEXT,
+        password_hash     TEXT,
+        email_verified    INTEGER NOT NULL DEFAULT 0,
+        token_version     INTEGER NOT NULL DEFAULT 0,
         name              TEXT NOT NULL,
         avatar_url        TEXT,
         locale            TEXT NOT NULL DEFAULT 'th',
@@ -183,6 +187,27 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       );
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_users_consent ON users(marketing_consent, deleted_at);
+
+      CREATE TABLE IF NOT EXISTS auth_tokens (
+        id          TEXT PRIMARY KEY,
+        user_id     TEXT NOT NULL REFERENCES users(id),
+        kind        TEXT NOT NULL,
+        token_hash  TEXT NOT NULL,
+        expires_at  INTEGER NOT NULL,
+        used_at     INTEGER,
+        created_at  INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_authtok_hash ON auth_tokens(token_hash);
+      CREATE INDEX IF NOT EXISTS idx_authtok_user ON auth_tokens(user_id, kind);
+
+      CREATE TABLE IF NOT EXISTS oauth_identities (
+        provider         TEXT NOT NULL,
+        provider_user_id TEXT NOT NULL,
+        user_id          TEXT NOT NULL REFERENCES users(id),
+        created_at       INTEGER NOT NULL,
+        PRIMARY KEY (provider, provider_user_id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_oauthid_user ON oauth_identities(user_id);
 
       CREATE TABLE IF NOT EXISTS reading_journal (
         id                 TEXT PRIMARY KEY,
@@ -208,6 +233,21 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       CREATE INDEX IF NOT EXISTS idx_rj_user_created ON reading_journal(user_id, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_rj_pending ON reading_journal(user_id, outcome, created_at);
     `);
+
+    // Safe Alter & Index for local SQLite migration
+    const safeExec = (sql: string) => {
+      try {
+        db.exec(sql);
+      } catch {
+        // Ignore errors if already present or column exists
+      }
+    };
+    safeExec("ALTER TABLE users ADD COLUMN email_lower TEXT");
+    safeExec("ALTER TABLE users ADD COLUMN password_hash TEXT");
+    safeExec("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0");
+    safeExec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users(email_lower) WHERE email_lower IS NOT NULL");
+
 
     const adapter: AppDB = {
       prepare(query: string) {

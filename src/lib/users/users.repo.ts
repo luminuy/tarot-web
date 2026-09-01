@@ -2,13 +2,17 @@ import { getAppDB } from "@/lib/platform/db";
 
 export interface AppUser {
   id: string;
-  provider: "google" | "line";
+  provider: "google" | "line" | "email";
   email?: string | null;
+  emailLower?: string | null;
   name: string;
   avatarUrl?: string | null;
   locale: string;
   marketingConsent: boolean;
   consentAt?: number | null;
+  emailVerified: boolean;
+  hasPassword: boolean;
+  tokenVersion: number;
   createdAt: number;
   lastSeenAt: number;
   deletedAt?: number | null;
@@ -18,6 +22,10 @@ interface RawUserRow {
   id: string;
   provider: string;
   email: string | null;
+  email_lower?: string | null;
+  password_hash?: string | null;
+  email_verified?: number | null;
+  token_version?: number | null;
   name: string;
   avatar_url: string | null;
   locale: string;
@@ -28,16 +36,27 @@ interface RawUserRow {
   deleted_at: number | null;
 }
 
+/**
+ * ปรับรูปแบบอีเมลให้อยู่ในรูปแบบ lowercase และตัดช่องว่างหน้าหลัง
+ */
+export function normalizeEmail(email: string): string {
+  return (email || "").trim().toLowerCase();
+}
+
 function mapRowToUser(row: RawUserRow): AppUser {
   return {
     id: row.id,
-    provider: row.provider as "google" | "line",
+    provider: (row.provider as "google" | "line" | "email") || "google",
     email: row.email,
+    emailLower: row.email_lower ?? (row.email ? normalizeEmail(row.email) : null),
     name: row.name,
     avatarUrl: row.avatar_url,
     locale: row.locale || "th",
     marketingConsent: Number(row.marketing_consent) === 1,
     consentAt: row.consent_at,
+    emailVerified: Number(row.email_verified) === 1,
+    hasPassword: Boolean(row.password_hash && row.password_hash.length > 0),
+    tokenVersion: Number(row.token_version || 0),
     createdAt: row.created_at,
     lastSeenAt: row.last_seen_at,
     deletedAt: row.deleted_at,
@@ -56,24 +75,55 @@ export async function upsertUserOnLogin(p: {
 }): Promise<AppUser> {
   const db = await getAppDB();
   const now = Date.now();
+  const emailLower = p.email ? normalizeEmail(p.email) : null;
 
   await db
     .prepare(
-      `INSERT INTO users (id, provider, email, name, avatar_url, locale, marketing_consent, created_at, last_seen_at)
-       VALUES (?, ?, ?, ?, ?, 'th', 0, ?, ?)
+      `INSERT INTO users (id, provider, email, email_lower, name, avatar_url, locale, marketing_consent, email_verified, token_version, created_at, last_seen_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'th', 0, 1, 0, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          name = excluded.name,
          avatar_url = COALESCE(excluded.avatar_url, users.avatar_url),
          email = COALESCE(excluded.email, users.email),
+         email_lower = COALESCE(excluded.email_lower, users.email_lower),
+         email_verified = 1,
          last_seen_at = excluded.last_seen_at,
          deleted_at = NULL`
     )
-    .bind(p.id, p.provider, p.email || null, p.name, p.avatarUrl || null, now, now)
+    .bind(p.id, p.provider, p.email || null, emailLower, p.name, p.avatarUrl || null, now, now)
     .run();
 
   const user = await getUserById(p.id);
   if (!user) {
     throw new Error("ไม่สามารถดึงข้อมูลผู้ใช้หลังบันทึกได้");
+  }
+  return user;
+}
+
+/**
+ * สร้างผู้ใช้ใหม่สำหรับการสมัครผ่านอีเมลและรหัสผ่าน (Email Provider)
+ */
+export async function createEmailUser(p: {
+  email: string;
+  name: string;
+  passwordHash: string;
+}): Promise<AppUser> {
+  const db = await getAppDB();
+  const now = Date.now();
+  const emailLower = normalizeEmail(p.email);
+  const id = `email_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
+
+  await db
+    .prepare(
+      `INSERT INTO users (id, provider, email, email_lower, password_hash, name, avatar_url, locale, marketing_consent, email_verified, token_version, created_at, last_seen_at)
+       VALUES (?, 'email', ?, ?, ?, ?, NULL, 'th', 0, 0, 0, ?, ?)`
+    )
+    .bind(id, p.email.trim(), emailLower, p.passwordHash, p.name.trim(), now, now)
+    .run();
+
+  const user = await getUserById(id);
+  if (!user) {
+    throw new Error("ไม่สามารถสร้างบัญชีผู้ใช้ใหม่ด้วยอีเมลได้");
   }
   return user;
 }
@@ -89,6 +139,128 @@ export async function getUserById(id: string): Promise<AppUser | null> {
     .first<RawUserRow>();
 
   return row ? mapRowToUser(row) : null;
+}
+
+/**
+ * ดึงข้อมูลผู้ใช้ตามอีเมล (case-insensitive lookup, เฉพาะบัญชีที่ยังไม่ถูกลบ)
+ */
+export async function getUserByEmail(email: string): Promise<AppUser | null> {
+  const db = await getAppDB();
+  const emailLower = normalizeEmail(email);
+  const row = await db
+    .prepare(
+      `SELECT * FROM users
+       WHERE (email_lower = ? OR lower(email) = ?) AND deleted_at IS NULL
+       LIMIT 1`
+    )
+    .bind(emailLower, emailLower)
+    .first<RawUserRow>();
+
+  return row ? mapRowToUser(row) : null;
+}
+
+/**
+ * ดึงรหัสผ่านแฮชของผู้ใช้สำหรับการตรวจสอบความถูกต้อง (Internal Auth Only)
+ */
+export async function getUserPasswordHash(id: string): Promise<string | null> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare(`SELECT password_hash FROM users WHERE id = ? AND deleted_at IS NULL LIMIT 1`)
+    .bind(id)
+    .first<{ password_hash: string | null }>();
+
+  return row?.password_hash ?? null;
+}
+
+/**
+ * อัปเดตรหัสผ่านแฮชและเพิ่ม token_version เพื่อให้ Session เก่าหมดอายุ
+ */
+export async function setPasswordHash(userId: string, hash: string): Promise<void> {
+  const db = await getAppDB();
+  const now = Date.now();
+  await db
+    .prepare(
+      `UPDATE users
+       SET password_hash = ?, token_version = token_version + 1, last_seen_at = ?
+       WHERE id = ? AND deleted_at IS NULL`
+    )
+    .bind(hash, now, userId)
+    .run();
+}
+
+/**
+ * ทำเครื่องหมายว่าอีเมลได้รับการยืนยันแล้ว
+ */
+export async function markEmailVerified(userId: string): Promise<void> {
+  const db = await getAppDB();
+  await db
+    .prepare(`UPDATE users SET email_verified = 1 WHERE id = ? AND deleted_at IS NULL`)
+    .bind(userId)
+    .run();
+}
+
+/**
+ * ดึง token_version ของผู้ใช้
+ */
+export async function getTokenVersion(userId: string): Promise<number> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare(`SELECT token_version FROM users WHERE id = ? LIMIT 1`)
+    .bind(userId)
+    .first<{ token_version: number }>();
+
+  return row?.token_version ?? 0;
+}
+
+/**
+ * อัปเดตเวลาเข้าใช้งานล่าสุด
+ */
+export async function touchLastSeen(id: string): Promise<void> {
+  const db = await getAppDB();
+  await db
+    .prepare(`UPDATE users SET last_seen_at = ? WHERE id = ?`)
+    .bind(Date.now(), id)
+    .run();
+}
+
+/**
+ * ค้นหา User ID ที่ผูกไว้กับ OAuth Identity
+ */
+export async function findUserIdByOAuth(
+  provider: "google" | "line",
+  providerUserId: string
+): Promise<string | null> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare(
+      `SELECT user_id FROM oauth_identities
+       WHERE provider = ? AND provider_user_id = ?
+       LIMIT 1`
+    )
+    .bind(provider, providerUserId)
+    .first<{ user_id: string }>();
+
+  return row?.user_id ?? null;
+}
+
+/**
+ * ผูก OAuth Identity เข้ากับ User ID
+ */
+export async function linkOAuthIdentity(
+  provider: "google" | "line",
+  providerUserId: string,
+  userId: string
+): Promise<void> {
+  const db = await getAppDB();
+  const now = Date.now();
+  await db
+    .prepare(
+      `INSERT INTO oauth_identities (provider, provider_user_id, user_id, created_at)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(provider, provider_user_id) DO UPDATE SET user_id = excluded.user_id`
+    )
+    .bind(provider, providerUserId, userId, now)
+    .run();
 }
 
 /**

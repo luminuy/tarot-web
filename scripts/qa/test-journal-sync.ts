@@ -19,17 +19,18 @@ async function runJournalSyncQATests() {
   console.log("🧪 [QA Test] เริ่มต้นตรวจสอบระบบ Users & Server Journal Sync...");
 
   const testUserId = `test_user_${Date.now()}`;
+  const testEmail = `test_${Date.now()}@example.com`;
 
   // 1. Test User Upsert & Retrieval
   const user = await upsertUserOnLogin({
     id: testUserId,
     provider: "google",
-    email: "test@example.com",
+    email: testEmail,
     name: "นักอ่านไพ่ทดสอบ",
     avatarUrl: "https://example.com/avatar.png",
   });
 
-  if (!user || user.id !== testUserId || user.email !== "test@example.com") {
+  if (!user || user.id !== testUserId || user.email !== testEmail) {
     throw new Error("❌ User upsert failed to return expected user object");
   }
 
