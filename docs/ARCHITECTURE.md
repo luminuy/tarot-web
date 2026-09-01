@@ -80,17 +80,21 @@ graph TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as ผู้ใช้ (Client)
+    actor User as ผู้ใช้ (Client Browser)
     participant Server as วิหารพยากรณ์ (Edge Server)
+    participant KV as Cloudflare KV (2h Session Store)
     participant AI as Gemini AI Engine
 
     User->>Server: POST /api/reading/start (คำถาม + ผัง + แม่หมอ)
     Server->>Server: สร้าง serverSeed = CSPRNG(32 bytes)
-    Server->>Server: commitment = SHA256(serverSeed + ":" + clientSeed)
-    Server-->>User: ส่ง sessionToken + commitment (บันทึกไว้ใน Browser)
+    Server->>Server: commitment = SHA256(serverSeed)
+    Server->>KV: Persist reading session (KEY.reading, 2h TTL)
+    Server-->>User: ส่ง sessionToken + commitment (แสดง SHA-256 ให้ผู้ใช้เห็นก่อนสับ)
     
-    User->>Server: POST /api/reading/[id]/shuffle (สัมผัสและเลือกไพ่ pickedIndices)
-    Server->>Server: Deterministic Fisher-Yates Shuffle ด้วย seed
+    User->>Server: POST /api/reading/[id]/shuffle (clientSeed + pickedIndices)
+    Server->>KV: Load / Verify serverSeed & verifyCommitment()
+    Server->>Server: Deterministic Fisher-Yates Shuffle ด้วย seed (serverSeed | clientSeed)
+    Server->>KV: Persist drawn cards & clientSeed
     Server-->>User: ยืนยันการวางตำแหน่งไพ่บนผัง
     
     User->>Server: POST /api/reading/[id]/read (SSE Streaming)
@@ -98,7 +102,8 @@ sequenceDiagram
     AI-->>Server: สตรีมคำทำนาย Real-time JSON chunk
     Server-->>User: สตรีมข้อความคำทำนายสด SSE
     
-    Server-->>User: เฉลย serverSeed + Proof ให้ผู้ใช้ตรวจสอบ SHA-256 ย้อนหลังได้ 100%
+    Server-->>User: เฉลย serverSeed + Proof (pickedIndices, deckSize) ใน done event
+    User->>User: Client Web Crypto (crypto.subtle) verifyReading() คำนวณซ้ำในเบราว์เซอร์ 100%
 ```
 
 ---
