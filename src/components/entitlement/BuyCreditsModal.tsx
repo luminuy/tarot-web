@@ -33,9 +33,15 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleStartCheckout = async () => {
+    // เติมรอบต้องผูกกับบัญชี — ถ้ายังไม่ได้เข้าสู่ระบบ ให้บอกตรง ๆ ตรงนี้
+    // (ของเดิมปิดหน้าต่างทิ้งเงียบ ๆ เมื่อไม่มี onRequireAuth ผู้ใช้กดแล้วไม่มีอะไรเกิดขึ้น)
     if (!user) {
-      onClose();
-      onRequireAuth?.();
+      if (onRequireAuth) {
+        onClose();
+        onRequireAuth();
+      } else {
+        setErrorMsg("ต้องเข้าสู่ระบบก่อนจึงจะเติมรอบเปิดไพ่ได้ — รอบที่เติมจะผูกกับบัญชีของคุณ");
+      }
       return;
     }
 
@@ -123,7 +129,8 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
           <>
             <div className="text-center space-y-1">
               <p className="text-xs text-[#9c93b8] font-serif-th">
-                เลือกแพ็กเกจที่ต้องการเพื่อเปิดไพ่และสนทนาถามลึกกับแม่หมอได้ทันที ไม่มีวันหมดอายุ
+                จ่ายครั้งเดียว ไม่ใช่รายเดือน และไม่มีการตัดเงินอัตโนมัติ ·
+                รอบที่เติมใช้ต่อจากโควตาฟรีได้ทันที และไม่มีวันหมดอายุ
               </p>
             </div>
 
@@ -132,10 +139,12 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
               {CREDIT_PACKAGES.map((pkg) => {
                 const isSelected = selectedPkg.id === pkg.id;
                 return (
-                  <div
+                  <button
                     key={pkg.id}
+                    type="button"
+                    aria-pressed={isSelected}
                     onClick={() => setSelectedPkg(pkg)}
-                    className={`rounded-2xl p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between relative select-none ${
+                    className={`rounded-2xl p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                       isSelected
                         ? "bg-[#140b28] border-[#ffd700] ring-2 ring-[#ffd700]/70 shadow-[0_0_25px_rgba(229,192,123,0.3)] scale-[1.02]"
                         : "bg-[#0a0714] border-[#e5c07b]/20 hover:border-[#e5c07b]/50 hover:bg-[#100a20]"
@@ -164,7 +173,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
                         {pkg.credits} ครั้ง
                       </span>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>

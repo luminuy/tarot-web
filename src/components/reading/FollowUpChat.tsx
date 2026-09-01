@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "motion/react";
 import type { Persona } from "@/data/personas";
 import { CardImage } from "@/components/card/CardImage";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { requestUpgrade } from "@/lib/entitlement/upgrade-bus";
+import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { TTSReaderButton } from "./TTSReaderButton";
 
 interface Message {
@@ -201,13 +203,29 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
 
       {/* Input Bar */}
       {chatLocked ? (
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new Event("tarot:open-auth"))}
-          className="mt-2 w-full rounded-xl border border-[#e0c088]/40 bg-[#1b1530] px-4 py-3 text-xs font-serif-th text-[#f0dcb4] hover:border-[#ffd700] transition-all cursor-pointer"
-        >
-          <span className="text-[#e5c07b]">✦</span> สมัครสมาชิกเพื่อถามแม่หมอต่อ และเก็บดวงไว้ดูย้อนหลังได้ทุกเครื่อง
-        </button>
+        /* กั้นเฉพาะช่องพิมพ์ — คำทำนายที่อ่านไปแล้วยังอยู่ครบ ไม่ถูกซ่อน */
+        <div className="mt-2 space-y-3 rounded-2xl border border-[#e0c088]/35 bg-[#150f26] p-4">
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#e0c088]/35 bg-[#1f1836] text-[#ffd700]">
+              <SealedLockIcon className="h-4 w-4" />
+            </span>
+            <div className="min-w-0 space-y-1">
+              <p className="font-serif-th text-xs font-bold text-[#f0dcb4] sm:text-sm">
+                ถามต่อจากไพ่ชุดนี้ได้เมื่อเป็นสมาชิก
+              </p>
+              <p className="font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+                สมัครฟรีเพื่อคุยถามเจาะลึกต่อ เก็บบทสนทนาไว้กับดวงชุดนี้ และดูย้อนหลังได้ทุกเครื่อง
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => requestUpgrade("members_only")}
+            className="w-full rounded-xl bg-gradient-to-r from-[#c9a25e] to-[#e0c088] px-4 py-3 font-serif-th text-xs font-bold text-[#0a0812] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#120e1f]"
+          >
+            <span className="mr-1.5">✦</span> สมัครสมาชิกฟรีเพื่อถามต่อ
+          </button>
+        </div>
       ) : (
       <form
         onSubmit={(e) => {

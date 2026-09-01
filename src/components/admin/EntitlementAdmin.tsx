@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
+import { DAILY_LIMIT, GUEST_LIMIT } from "@/lib/entitlement/limits";
 
 interface State {
   enabled: boolean;
@@ -245,7 +246,7 @@ export default function EntitlementAdmin() {
         <p className="mt-3 rounded-lg border border-[#e5c07b]/20 bg-[#0c0818]/60 p-3 text-xs text-[#9c93b8]">
           ตัวอย่างแบนเนอร์:{" "}
           <span className="text-[#f5deaa]">
-            เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น ผู้เยี่ยมชม 1 ครั้ง · สมาชิกฟรีสัปดาห์ละ 3 ครั้ง
+            เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น ผู้เยี่ยมชม {GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ {DAILY_LIMIT} ครั้ง
             {s.announceResetDate?.trim() ? ` เริ่ม ${s.announceResetDate.trim()}` : ""}
           </span>
         </p>
@@ -257,7 +258,7 @@ export default function EntitlementAdmin() {
           <div>
             <h3 className="text-sm font-semibold text-[#e5c07b]">4 · เปิดระบบสิทธิ์จริง</h3>
             <p className="mt-1 text-xs text-[#9c93b8]">
-              เปิด = ผู้เยี่ยมชม 1 ครั้ง · สมาชิกสัปดาห์ละ 3 ครั้ง · แชทเฉพาะสมาชิก
+              เปิด = ผู้เยี่ยมชม {GUEST_LIMIT} ครั้ง · สมาชิกวันละ {DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก
               <br />
               <strong className="text-[#f0a0a0]">
                 ⚠️ ทำข้อ 1–3 ให้ครบและรอประกาศ ≥ 7 วันก่อน — จะลดสิทธิ์ผู้ใช้เดิมทันที

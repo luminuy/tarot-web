@@ -22,10 +22,13 @@ import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
-import { QuotaBadge } from "@/components/entitlement/QuotaBadge";
+import { QuotaMeter } from "@/components/entitlement/QuotaMeter";
 import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
+import { FreeTrialNotice } from "@/components/entitlement/FreeTrialNotice";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
+import { DAILY_LIMIT, SIGNUP_BONUS, describeEntitlement, type UpgradeReason } from "@/lib/entitlement/copy";
+import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
@@ -69,6 +72,10 @@ const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
   { ssr: false }
 );
+const AccessDialog = dynamic(
+  () => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog),
+  { ssr: false }
+);
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick }: { onClick: () => void }) {
@@ -81,6 +88,17 @@ function StepBackButton({ onClick }: { onClick: () => void }) {
       <span aria-hidden="true">←</span> ย้อนกลับ
     </button>
   );
+}
+
+/**
+ * แปลง `reason` ที่ API ส่งกลับมาเป็นเหตุผลของกำแพงสิทธิ์ฝั่ง UI
+ * คืน null ถ้าไม่ใช่เรื่องสิทธิ์ (เช่น AI ล่ม) — กรณีนั้นให้แสดง error ตามปกติ
+ */
+function mapBlockedReason(reason?: string): UpgradeReason | null {
+  if (reason === "guest_used") return "guest_used";
+  if (reason === "daily_exhausted" || reason === "weekly_exhausted") return "daily_exhausted";
+  if (reason === "members_only") return "members_only";
+  return null;
 }
 
 export default function TarotPage() {
@@ -102,11 +120,29 @@ export default function TarotPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [authFromWall, setAuthFromWall] = useState(false);
   const [isBuyCreditsOpen, setIsBuyCreditsOpen] = useState(false);
+  // เหตุผลที่เปิดหน้าต่างสิทธิ์ — null = ปิดอยู่ (จุดเดียวที่คุมกำแพงสิทธิ์ทั้งเว็บ)
+  const [accessReason, setAccessReason] = useState<UpgradeReason | null>(null);
   const [isEncyclopediaOpen, setIsEncyclopediaOpen] = useState(false);
   const [zoomedCard, setZoomedCard] = useState<DrawnSlotCard | null>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const entitlement = useEntitlement();
+  const entitlementView = describeEntitlement(entitlement);
+
+  /**
+   * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้
+   * ห้ามเปิด AuthModal หรือ BuyCreditsModal ตรง ๆ พร้อมกับขึ้นแถบ error อีก
+   * (ของเดิมทำสองอย่างพร้อมกัน ผู้ใช้เลยเจอข้อความซ้อนกันสองชั้น)
+   */
+  const openAccessDialog = (reason: UpgradeReason) => setAccessReason(reason);
+
+  const openAuth = (mode: "signin" | "signup" = "signin", fromWall = false) => {
+    setAuthMode(mode);
+    setAuthFromWall(fromWall);
+    setIsAuthOpen(true);
+  };
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -226,7 +262,15 @@ export default function TarotPage() {
       const authError = searchParams.get("auth_error");
 
       if (isVerified) {
-        setAuthBanner({ type: "success", text: "ยินดีด้วย! คุณได้ยืนยันที่อยู่อีเมลเรียบร้อยแล้ว ✦" });
+        setAuthBanner({
+          type: "success",
+          text: `ยืนยันอีเมลเรียบร้อยแล้ว ✦ รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมโบนัสต้อนรับอีก ${SIGNUP_BONUS} ครั้ง`,
+        });
+      } else if (isAuthSuccess) {
+        setAuthBanner({
+          type: "success",
+          text: `เข้าสู่ระบบเรียบร้อยแล้ว ✦ ตอนนี้คุณเปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง และคุยถามแม่หมอต่อได้`,
+        });
       } else if (isPwReset) {
         setAuthBanner({ type: "success", text: "ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว เข้าสู่วิหารศักดิ์สิทธิ์ได้ทันที ✦" });
       } else if (verifyError === "expired") {
@@ -256,12 +300,9 @@ export default function TarotPage() {
     }
   }, []);
 
-  // เปิด AuthModal จากคอมโพเนนต์ลึก (เช่นช่องแชทที่ล็อกใน FollowUpChat) ผ่าน event bus
-  useEffect(() => {
-    const openAuth = () => setIsAuthOpen(true);
-    window.addEventListener("tarot:open-auth", openAuth);
-    return () => window.removeEventListener("tarot:open-auth", openAuth);
-  }, []);
+  // คอมโพเนนต์ลึก (เช่นช่องแชทที่ล็อกใน FollowUpChat) ขอเปิดหน้าต่างสิทธิ์พร้อม "เหตุผล"
+  // จึงเลือกถ้อยคำและปุ่มให้ตรงสถานการณ์ได้ ไม่ใช่เด้งหน้าเข้าสู่ระบบเหมือนกันหมด
+  useEffect(() => onUpgradeRequest((reason) => setAccessReason(reason)), []);
 
   // เขียน flow state ลง sessionStorage ทุกครั้งที่มีการเปลี่ยนแปลง (หลัง resume จบแล้วเท่านั้น)
   // debounce 400ms กันเขียนถี่ ๆ ตอน readingResult อัปเดตรัว ๆ ระหว่าง stream คำทำนาย
@@ -297,14 +338,9 @@ export default function TarotPage() {
 
   // Step 1 -> Step 2: Start Reading Session
   const handleStartSession = async () => {
-    if (entitlement && entitlement.enabled && !entitlement.canStartReading) {
-      if (entitlement.kind === "guest") {
-        setIsAuthOpen(true);
-        setErrorMsg("คุณใช้สิทธิ์ดูดวงฟรี 1 ครั้งแล้ว กรุณาสมัครสมาชิกเพื่อรับสิทธิ์เปิดไพ่วันละ 3 ครั้งฟรี");
-      } else {
-        setIsBuyCreditsOpen(true);
-        setErrorMsg("คุณใช้โควตาดูดวงประจำวันครบแล้ว (3 ครั้ง/วัน) หรือเติมรอบเพื่อดูต่อทันที");
-      }
+    // สิทธิ์หมดตั้งแต่ยังไม่ยิง API — อธิบายด้วยหน้าต่างเดียว ไม่ต้องมีแถบแดงซ้อน
+    if (entitlementView?.blocked) {
+      openAccessDialog(entitlementView.blockedReason ?? "guest_used");
       return;
     }
 
@@ -341,10 +377,12 @@ export default function TarotPage() {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        if (data.reason === "guest_used") {
-          setIsAuthOpen(true);
-        } else if (data.reason === "daily_exhausted" || data.reason === "weekly_exhausted") {
-          setIsBuyCreditsOpen(true);
+        // server เป็นผู้ตัดสินสิทธิ์เสมอ — ถ้าโดนกั้นที่นี่ ให้หน้าต่างสิทธิ์อธิบายแทนแถบ error
+        const blockedReason = mapBlockedReason(data.reason);
+        if (blockedReason) {
+          refreshEntitlement();
+          openAccessDialog(blockedReason);
+          return;
         }
         throw new Error(data.error || "ไม่สามารถเริ่มดูดวงได้");
       }
@@ -484,17 +522,12 @@ export default function TarotPage() {
 
       if (!res.ok || !res.body) {
         const errData = await res.json().catch(() => ({} as { reason?: string; error?: string }));
-        if (errData.reason === "guest_used") {
-          setIsAuthOpen(true);
-          throw new Error(
-            "แม่หมอเปิดไพ่ฟรีให้คุณไปแล้ว 1 ครั้งนะคะ ✦ สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อได้สัปดาห์ละ 3 ครั้ง",
-          );
-        }
-        if (errData.reason === "daily_exhausted" || errData.reason === "weekly_exhausted") {
-          setIsBuyCreditsOpen(true);
-          throw new Error(
-            "โควตาเปิดไพ่ของวันนี้ครบแล้วค่ะ ✦ เติมรอบเพื่อดูต่อได้ทันที หรือกลับมาใหม่พรุ่งนี้เวลา 00:00 น.",
-          );
+        const blockedReason = mapBlockedReason(errData.reason);
+        if (blockedReason) {
+          setIsStreaming(false);
+          refreshEntitlement();
+          openAccessDialog(blockedReason);
+          return;
         }
         throw new Error(
           errData.error || "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กดปุ่มลองอ่านใหม่ได้เลยค่ะ",
@@ -669,7 +702,7 @@ export default function TarotPage() {
           <Link
             href="/"
             aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
-            className="flex items-center gap-3.5 cursor-pointer group select-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
+            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
           >
             {/* World-Class Miniature 1909 Tarot Card Brand Logo */}
             <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-lg border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.5)] relative flex-shrink-0 bg-[#07050d] group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(229,192,123,0.8)] transition-all duration-300">
@@ -682,23 +715,25 @@ export default function TarotPage() {
               />
             </div>
 
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-1.5">
+            {/* แถบหัวมี 3 ปุ่มตั้งแต่มี QuotaMeter โผล่บนมือถือ — จอเล็กเหลือแค่ตราไพ่
+                (ชื่อแบรนด์ที่ตัดคำหรือล้นทับปุ่มแย่กว่าการซ่อนชื่อไว้ก่อน) */}
+            <div className="hidden min-w-0 flex-col justify-center sm:flex">
+              <div className="flex min-w-0 items-center gap-1.5">
                 <span className="text-[#e5c07b] text-xs">✦</span>
-                <h1 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold tracking-wide leading-snug py-0.5">
+                <h1 className="font-serif-th text-sm sm:text-lg font-bold font-mystic-gold tracking-wide leading-snug py-0.5 whitespace-nowrap">
                   ดูดวงไพ่ทาโรต์
                 </h1>
               </div>
-              <span className="text-[9px] sm:text-[10px] tracking-[0.22em] text-[#c59b27] font-mono uppercase font-semibold pl-4">
+              <span className="hidden sm:block text-[10px] tracking-[0.22em] text-[#c59b27] font-mono uppercase font-semibold pl-4">
                 1909 RIDER-WAITE TAROT
               </span>
             </div>
           </Link>
 
           {/* Right Toolbar Controls (UserProfileBadge, Sacred Dropdown & Reset Button) */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            <QuotaBadge onOpenBuyCredits={() => setIsBuyCreditsOpen(true)} />
-            <UserProfileBadge onOpenAuthModal={() => setIsAuthOpen(true)} />
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+            <QuotaMeter onOpenDetails={() => openAccessDialog("explore")} />
+            <UserProfileBadge onOpenAuthModal={() => openAuth("signin")} />
 
             <SacredNavDropdown
               onOpenHistory={() => {
@@ -771,11 +806,8 @@ export default function TarotPage() {
               exit="exit"
               className="space-y-8"
             >
-              <EntitlementGate
-                active={currentStep === "SPREAD_SELECT"}
-                onOpenAuth={() => setIsAuthOpen(true)}
-                onOpenBuyCredits={() => setIsBuyCreditsOpen(true)}
-              >
+              <EntitlementGate active={currentStep === "SPREAD_SELECT"} onRequestUpgrade={openAccessDialog}>
+                <FreeTrialNotice onOpenAccess={() => openAccessDialog("explore")} />
               <div className="text-center space-y-3 relative">
                 {/* 3D Floating Tarot Stage with Sacred Geometric Aura (Matching Step 3 Shuffle) */}
                 <div className="h-60 sm:h-72 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1200 }}>
@@ -826,12 +858,8 @@ export default function TarotPage() {
                   setSelectedSpread(sp);
                 }}
                 onProceed={() => {
-                  if (entitlement && entitlement.enabled && !entitlement.canStartReading) {
-                    if (entitlement.kind === "guest") {
-                      setIsAuthOpen(true);
-                    } else {
-                      setIsBuyCreditsOpen(true);
-                    }
+                  if (entitlementView?.blocked) {
+                    openAccessDialog(entitlementView.blockedReason ?? "guest_used");
                     return;
                   }
                   soundManager.playCardSelectSound();
@@ -1039,7 +1067,7 @@ export default function TarotPage() {
               </div>
 
               {currentStep === "SUMMARY" && !isStreaming && (
-                <PostReadingSignup onOpenAuth={() => setIsAuthOpen(true)} />
+                <PostReadingSignup onOpenAuth={() => openAuth("signup", true)} />
               )}
             </motion.div>
           )}
@@ -1064,14 +1092,28 @@ export default function TarotPage() {
 
       <AuthModal
         isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
+        onClose={() => {
+          setIsAuthOpen(false);
+          refreshEntitlement(); // ปิดหน้าต่างแล้วสิทธิ์อาจเปลี่ยน (เพิ่งสมัคร/เข้าสู่ระบบ)
+        }}
+        initialMode={authMode}
+        fromEntitlementWall={authFromWall}
       />
 
       <BuyCreditsModal
         isOpen={isBuyCreditsOpen}
         onClose={() => setIsBuyCreditsOpen(false)}
         user={currentUser}
-        onRequireAuth={() => setIsAuthOpen(true)}
+        onRequireAuth={() => openAuth("signup", true)}
+      />
+
+      {/* หน้าต่างสิทธิ์การใช้งาน — จุดเดียวที่อธิบายเรื่องสิทธิ์ทั้งหมด */}
+      <AccessDialog
+        reason={accessReason}
+        onClose={() => setAccessReason(null)}
+        onSignup={() => openAuth("signup", true)}
+        onSignin={() => openAuth("signin", true)}
+        onBuyCredits={() => setIsBuyCreditsOpen(true)}
       />
 
       <TarotEncyclopediaModal

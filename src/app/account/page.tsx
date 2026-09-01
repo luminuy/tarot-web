@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ChangePasswordCard } from "@/components/account/ChangePasswordCard";
+import { EntitlementStatusCard } from "@/components/entitlement/EntitlementStatusCard";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
 
 export const metadata = {
@@ -23,8 +24,12 @@ export default function AccountPage() {
         </div>
 
         <div className="text-center space-y-2 py-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#e5c07b]/30 bg-[#130d24] text-[11px] text-[#e5c07b]">
-            <span>✦</span> Sacred Sanctuary Profile <span>✦</span>
+          {/* ต้องมี wrapper ระดับ block คั่น — `.font-mystic-gold` เป็น display:inline-block
+              ถ้าวางชิดกับ inline-flex หัวข้อจะไหลไปอยู่บรรทัดเดียวกับป้าย */}
+          <div>
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#e5c07b]/30 bg-[#130d24] text-[11px] text-[#e5c07b]">
+              <span>✦</span> Sacred Sanctuary Profile <span>✦</span>
+            </span>
           </div>
           <h1 className="font-serif-th text-2xl sm:text-4xl font-bold font-mystic-gold">
             บัญชีและประวัติของคุณ
@@ -33,6 +38,9 @@ export default function AccountPage() {
             ควบคุมข้อมูลความเป็นส่วนตัว ประวัติคำทำนาย และการตั้งค่าตามสิทธิ์ PDPA
           </p>
         </div>
+
+        {/* สิทธิ์การเปิดไพ่คงเหลือ · โควตารายวัน · โบนัสสะสม */}
+        <EntitlementStatusCard />
 
         {/* Change Password & Security Card */}
         <ChangePasswordCard />

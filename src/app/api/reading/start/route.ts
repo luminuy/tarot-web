@@ -9,6 +9,7 @@ import { createCommitment } from "@/lib/tarot/shuffle";
 import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
+import { DAILY_LIMIT, GUEST_LIMIT } from "@/lib/entitlement/limits";
 
 export const runtime = "nodejs";
 
@@ -98,8 +99,8 @@ export async function POST(request: Request) {
           {
             error:
               ent.kind === "guest"
-                ? "คุณใช้สิทธิ์ดูดวงฟรี 1 ครั้งแล้ว สมัครสมาชิกเพื่อรับสิทธิ์เปิดไพ่วันละ 3 ครั้งฟรี"
-                : "คุณใช้โควตาดูดวงครบ 3 ครั้งของวันนี้แล้ว กลับมาเปิดใหม่ได้ในวันพรุ่งนี้เวลา 00:00 น. หรือเติมรอบเพื่อดูต่อทันที",
+                ? `คุณใช้สิทธิ์ดูดวงฟรี ${GUEST_LIMIT} ครั้งแล้ว สมัครสมาชิกเพื่อรับสิทธิ์เปิดไพ่วันละ ${DAILY_LIMIT} ครั้งฟรี`
+                : `คุณใช้โควตาดูดวงครบ ${DAILY_LIMIT} ครั้งของวันนี้แล้ว กลับมาเปิดใหม่ได้ในวันพรุ่งนี้เวลา 00:00 น. หรือเติมรอบเพื่อดูต่อทันที`,
             reason: ent.reason ?? (ent.kind === "guest" ? "guest_used" : "daily_exhausted"),
             resetAt: ent.resetAt,
           },

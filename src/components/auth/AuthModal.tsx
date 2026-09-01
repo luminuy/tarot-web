@@ -1,21 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
+import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
+import { DAILY_LIMIT, MEMBER_BENEFITS, SIGNUP_BONUS } from "@/lib/entitlement/copy";
 
 export interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: "signin" | "signup" | "forgot";
+  /** true เมื่อผู้ใช้ถูกพามาที่นี่จากกำแพงสิทธิ์ — แสดงสิ่งที่จะได้รับกำกับไว้ด้วย */
+  fromEntitlementWall?: boolean;
 }
+
+/** ไอคอนเส้นในช่องกรอก — กฎทองข้อ 2 ห้ามใช้อิโมจิการ์ตูน */
+const FieldIcon: React.FC<{ variant: "person" | "mail" | "key"; className?: string }> = ({
+  variant,
+  className = "w-3.5 h-3.5",
+}) => (
+  <svg viewBox="0 0 24 24" className={`stroke-current fill-none ${className}`} strokeWidth={1.6} aria-hidden="true">
+    {variant === "person" && (
+      <>
+        <circle cx="12" cy="8.5" r="3.5" />
+        <path d="M5.5 19.5a6.5 6.5 0 0113 0" strokeLinecap="round" />
+      </>
+    )}
+    {variant === "mail" && (
+      <>
+        <rect x="3.2" y="5.5" width="17.6" height="13" rx="2.5" />
+        <path d="M4 7l8 6 8-6" strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    )}
+    {variant === "key" && (
+      <>
+        <circle cx="8.5" cy="12" r="3.5" />
+        <path d="M12 12h8M17.5 12v3M20 12v2.4" strokeLinecap="round" />
+      </>
+    )}
+  </svg>
+);
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   initialMode = "signin",
+  fromEntitlementWall = false,
 }) => {
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">(initialMode);
   const [email, setEmail] = useState("");
@@ -25,6 +57,56 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  // เปิดหน้าต่างครั้งใหม่ต้องเคารพโหมดที่ผู้เรียกส่งมา
+  // (มาจากกำแพงสิทธิ์ = ควรเปิดแท็บ "สมัครสมาชิก" ให้เลย ไม่ใช่ให้ผู้ใช้หาเอง)
+  useEffect(() => {
+    if (isOpen) setMode(initialMode);
+  }, [isOpen, initialMode]);
+
+  // Esc ปิด · ล็อกการเลื่อนพื้นหลัง · ขังโฟกัสไว้ในหน้าต่าง (a11y — ของเดิมไม่มีเลย)
+  useEffect(() => {
+    if (!isOpen) return;
+    restoreFocusRef.current = document.activeElement as HTMLElement | null;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    const focusTimer = requestAnimationFrame(() => {
+      dialogRef.current?.querySelector<HTMLElement>("input, button")?.focus();
+    });
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+      cancelAnimationFrame(focusTimer);
+      restoreFocusRef.current?.focus?.();
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -121,8 +203,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 16 }}
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          ref={dialogRef}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md rounded-3xl bg-gradient-to-b from-[#130b24] via-[#090514] to-[#05030a] border border-[#e5c07b]/40 p-6 sm:p-8 shadow-[0_0_60px_rgba(0,0,0,0.95)] flex flex-col items-center relative overflow-hidden z-10 select-none"
+          className="w-full max-w-md rounded-3xl bg-gradient-to-b from-[#130b24] via-[#090514] to-[#05030a] border border-[#e5c07b]/40 p-6 sm:p-8 shadow-[0_0_60px_rgba(0,0,0,0.95)] flex flex-col items-center relative max-h-[92vh] overflow-y-auto z-10 select-none"
         >
           {/* Subtle Ambient Gold Aura */}
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-radial from-[#e5c07b]/15 via-transparent to-transparent pointer-events-none blur-2xl" />
@@ -169,11 +252,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {mode === "forgot" && "ฟื้นฟูดวงชะตา (ลืมรหัสผ่าน)"}
             </h3>
             <p className="text-xs text-[#a79cc2] font-serif-th max-w-xs mx-auto leading-relaxed">
-              {mode === "signin" && "บันทึกประวัติการเปิดไพ่ ซิงก์ดวงข้ามอุปกรณ์ และรับสิทธิ์รายสัปดาห์"}
-              {mode === "signup" && "สร้างบัญชีใหม่เพื่อรับโบนัสเปิดไพ่ฟรี และบันทึกคำทำนายถาวร"}
+              {mode === "signin" && `เข้าสู่ระบบเพื่อใช้สิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง และดูประวัติดวงย้อนหลัง`}
+              {mode === "signup" &&
+                `สมัครฟรี รับโบนัสเปิดไพ่ทันที ${SIGNUP_BONUS} ครั้ง แล้วเปิดต่อได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
               {mode === "forgot" && "ระบุอีเมลเพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย"}
             </p>
           </div>
+
+          {/* สิ่งที่จะได้รับ — แสดงเมื่อผู้ใช้ถูกพามาจากกำแพงสิทธิ์ จะได้รู้ว่าสมัครไปเพื่ออะไร */}
+          {fromEntitlementWall && mode !== "forgot" && (
+            <ul className="w-full mb-4 grid gap-1.5 rounded-2xl border border-[#e5c07b]/20 bg-[#0b0617]/80 p-3">
+              {MEMBER_BENEFITS.map((b) => (
+                <li key={b.title} className="flex items-start gap-2 text-[11px] font-serif-th text-[#cfc8e2]">
+                  <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#ffd700]" />
+                  {b.title}
+                </li>
+              ))}
+            </ul>
+          )}
 
           {/* Segmented Mode Switcher (Tab System) */}
           {mode !== "forgot" && (
@@ -228,7 +324,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   ชื่อหรือนามแฝง
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#9c93b8] text-xs pointer-events-none">👤</span>
+                  <span className="absolute left-3.5 text-[#9c93b8] pointer-events-none"><FieldIcon variant="person" /></span>
                   <input
                     id="auth-name"
                     type="text"
@@ -248,7 +344,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 ที่อยู่อีเมล
               </label>
               <div className="relative flex items-center">
-                <span className="absolute left-3.5 text-[#9c93b8] text-xs pointer-events-none">✉️</span>
+                <span className="absolute left-3.5 text-[#9c93b8] pointer-events-none"><FieldIcon variant="mail" /></span>
                 <input
                   id="auth-email"
                   type="email"
@@ -280,7 +376,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
                 </div>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#9c93b8] text-xs pointer-events-none">🗝️</span>
+                  <span className="absolute left-3.5 text-[#9c93b8] pointer-events-none"><FieldIcon variant="key" /></span>
                   <input
                     id="auth-password"
                     type={showPassword ? "text" : "password"}
@@ -425,8 +521,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Cryptographic Assurance & PDPA Footnote */}
           <div className="mt-5 text-[10px] text-[#7d7398] font-serif-th text-center flex items-center justify-center gap-1 opacity-80">
-            <span>🔒</span>
-            <span>เข้ารหัสลับความปลอดภัยระดับสูงตามมาตรฐานสากล</span>
+            <span className="text-[#e5c07b]">✦</span>
+            <span>เข้ารหัสความปลอดภัยระดับสากล · ลบบัญชีและข้อมูลทั้งหมดได้ทุกเมื่อ</span>
           </div>
         </motion.div>
       </div>
