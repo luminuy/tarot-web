@@ -36,6 +36,24 @@
 
 ---
 
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR G — คุมทุกขั้นตอนเปิดใช้งานจาก /admin (ไม่ต้องใช้ terminal)
+
+> เหตุผล: หุ้นส่วนที่คุมระบบไม่ถนัดโปรแกรมมิ่ง — ทุก action ต้องกดจาก `/admin`
+
+- **สิ่งที่ทำ**:
+  - `src/app/api/admin/entitlement/ops/route.ts` — endpoint เดียว 4 action (guard requireAdmin, audit):
+    - `check_db` / `init_db` — ตรวจ/สร้างตาราง `reading_usage` + `user_bonus` บน D1 (`CREATE TABLE IF NOT EXISTS` รันทีละ statement — idempotent) · ทดแทนการรัน `npm run db:migrate` สำหรับตารางของระบบนี้ (deploy.yml ไม่รัน d1 migrations)
+    - `grandfather_preview` — นับผู้ใช้ที่สมัครก่อนวันตัด
+    - `grandfather_run` — ให้โบนัส 10 ครั้ง (batch ≤ 4000/ครั้ง กัน timeout · idempotent · คืน `remaining` ถ้ามีเกิน)
+  - `src/components/admin/EntitlementAdmin.tsx` — เขียนใหม่เป็น 4 ขั้นเรียงลำดับ 1→4:
+    - 1 เตรียมฐานข้อมูล (แสดง ✓ พร้อม / ✗) · 2 โบนัสเปลี่ยนผ่าน (input + ตรวจจำนวน + ให้โบนัส) · 3 แบนเนอร์ประกาศ · 4 เปิดระบบจริง (ปุ่ม disabled จนกว่าฐานข้อมูล ✓ · confirm ก่อนเปิด)
+    - + การ์ดสถิติ 8 metric
+- **ผลการทดสอบ**:
+  - `repo:verify` **14/14** · `build:worker` ✓ · `tsc` 0 errors
+  - `next dev` + curl: check_db → `ready:true` · init_db idempotent · seed 3 users (2 เก่า 1 ใหม่) → preview `count:2` → run `granted:2` → run ซ้ำ `granted:2` แต่ `SUM(granted)` ยัง 10 (idempotent) · bad action → 400
+  - browser: แท็บ "สิทธิ์เปิดไพ่" render 4 ขั้น + ปุ่ม "ตรวจจำนวน" คืน "พบผู้ใช้ 2 คน" จาก UI
+- **runbook เปิดจริง (100% จาก /admin)**: ดู [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) PR F/G
+
 ### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR F — เครื่องมือเปิดใช้งานจริง (โค้ดครบ · ยังไม่เปิดธง)
 
 > ต่อจาก PR E (#92) · **พฤติกรรมเว็บไม่เปลี่ยน** — ธง `entitlement.enabled` ยังปิด · เปิดจริงตาม runbook ใน [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) (เจ้าของตัดสินใจ + ประกาศ ≥ 7 วัน + โบนัสเปลี่ยนผ่าน)
