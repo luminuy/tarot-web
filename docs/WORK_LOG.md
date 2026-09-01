@@ -36,6 +36,23 @@
 
 ---
 
+### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 5: Hardening, Session Token Version Revocation & Architecture Docs (เสริมความแกร่งและความปลอดภัยสูงสุด)
+
+- **ความต้องการ**: ปรับปรุงระบบตรวจสอบและเพิกถอนเซสชันอัตโนมัติเมื่อมีการเปลี่ยนรหัสผ่านหรือลบบัญชีผู้ใช้ (`token_version` validation), เพิกถอน Token คงค้างในระบบทั้งหมดเมื่อผู้ใช้ขอลบบัญชีตามสิทธิ์ PDPA และอัปเดตคู่มือสถาปัตยกรรมระบบรวมถึงขั้นตอนการตั้งค่า Secrets บน Cloudflare Workers
+- **สิ่งที่ทำ**:
+  - **Session Invalidation via `token_version` (`src/app/api/auth/me/route.ts`)**:
+    - ตรวจสอบ `token_version` ใน JWT Payload เทียบกับ `token_version` ปัจจุบันใน D1 database
+    - หากพบว่า `token_version` ในฐานข้อมูลมากกว่า (เกิดจากการเปลี่ยนรหัสผ่านบนอุปกรณ์อื่น) หรือบัญชีถูกลบ ระบบจะลบ Cookie `tarot_auth_session` และตัดเซสชันทันที
+  - **PDPA Account Deletion Token Cascade (`src/app/api/account/route.ts`)**:
+    - เพิกถอน verification tokens และ password reset tokens ทั้งหมดของผู้ใช้ทันทีเมื่อมีการขอลบบัญชี
+  - **Architecture & Deployment Documentation**:
+    - อัปเดต `docs/ARCHITECTURE.md` เพิ่มหมวดที่ 9: ระบบยืนยันตัวตนด้วยอีเมลและรหัสผ่าน (Web Crypto PBKDF2, Single-Use Token, Anti-Enumeration, Account Linking)
+    - อัปเดต `docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md` ระบุคำสั่งตั้งค่า Secrets สำหรับ `AUTH_SECRET`, `PASSWORD_PEPPER`, `RESEND_API_KEY`, และ `EMAIL_FROM`
+  - **Verification Suite**:
+    - `npm run repo:verify` ผ่านครบ **13/13 ด่าน 100% Green**
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - แก้ไข: `src/app/api/auth/me/route.ts`, `src/app/api/account/route.ts`, `docs/ARCHITECTURE.md`, `docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md`, `docs/WORK_LOG.md`
+
 ### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 4: OAuth Account Linking & Change Password Sanctuary (การเชื่อมต่อบัญชี & จัดการรหัสผ่าน)
 
 - **ความต้องการ**: พัฒนาระบบเชื่อมโยงบัญชีอัตโนมัติ (OAuth Account Linking) เพื่อป้องกันปัญหาบัญชีซ้ำซ้อนเมื่อผู้ใช้เข้าสู่ระบบด้วย Google หรือ LINE ที่มีอีเมลตรงกับบัญชีที่เคยสมัครด้วยรหัสผ่าน และเพิ่ม API พร้อมหน้า UI สำหรับการเปลี่ยนรหัสผ่าน / ตั้งรหัสผ่านเริ่มต้นสำหรับบัญชี

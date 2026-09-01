@@ -155,5 +155,28 @@ src/
 6. **AI Daily Spend Cap & Circuit Breaker (`ai-budget.ts`)**: เพดานงบประมาณ Gemini ประจำวัน (`AI_DAILY_CALL_CAP`) พร้อมตัดวงจรคืนค่า HTTP 503 บน `/read` และ fallback สู่ Local Synthesis อัตโนมัติบน `/chat`
 7. **Cloudflare Native WAF Rate Limiting**: บล็อกสแปมและทราฟฟิกผิดปกติตั้งแต่ระดับ DNS Edge ก่อนเข้าถึง Cloudflare Worker
 
+---
+
+## 9. ระบบยืนยันตัวตนด้วยอีเมลและรหัสผ่าน (Email & Password Authentication Architecture)
+
+เพื่อมอบทางเลือกให้กับผู้ใช้ที่ไม่ได้ใช้งาน Google หรือ LINE OAuth ระบบรองรับ Email/Password Authentication ภายใต้มาตรฐานความปลอดภัยระดับสูง:
+
+1. **PBKDF2-HMAC-SHA256 Password Hashing (`password.ts`)**:
+   - 150,000 iterations, 32-byte derived key, 16-byte random salt ต่อผู้ใช้
+   - ผสม Server-side Pepper (`PASSWORD_PEPPER`) บน Web Crypto API ทำงานได้รวดเร็วบน Cloudflare Workers
+   - Constant-time verification (`timingSafeEqualBytes`) ป้องกัน Timing Attack
+2. **NIST 2024 Password Policy (`password-policy.ts`)**:
+   - ความยาว 10–200 ตัวอักษร, ปฏิเสธรหัสผ่านยอดนิยม (Common Passwords) และรหัสผ่านที่ซ้ำกับชื่ออีเมล
+3. **Single-Use Token Lifecycle (`auth-tokens.repo.ts`)**:
+   - จัดเก็บเฉพาะ SHA-256 Hash ของ Token ในฐานข้อมูล D1 (`auth_tokens`)
+   - Verification Token (TTL 24 ชม.), Reset Token (TTL 15 นาที)
+   - ป้องกัน Replay Attack โดยทำเครื่องหมาย `used_at` ทันทีเมื่อถูกใช้งาน
+4. **Anti-Enumeration Protection**:
+   - API endpoints ตอบข้อความมาตรฐานแบบ generic แม้อีเมลจะไม่มีอยู่ในระบบ เพื่อป้องกันการกวาดรายชื่อผู้ใช้
+5. **OAuth Account Linking (`oauth_identities`)**:
+   - เมื่อผู้ใช้เข้าสู่ระบบด้วย Google หรือ LINE ที่มีอีเมลตรงกับบัญชีเดิม ระบบจะเชื่อมโยง Provider Identity เข้ากับบัญชีเดิมให้อัตโนมัติโดยไม่สร้างบัญชีซ้ำซ้อน
+6. **Session Invalidation via `token_version`**:
+   - ทุกครั้งที่มีการเปลี่ยนหรือรีเซ็ตรหัสผ่าน ค่า `token_version` ในฐานข้อมูลจะถูกเพิ่มขึ้น 1 ทำให้เซสชันเดิมบนอุปกรณ์อื่นทั้งหมดถูกเพิกถอนทันที
+
 ระบบถูกออกแบบภายใต้มาตรฐานความน่าเชื่อถือระดับสูง (High Reliability & Fault Tolerance) เพื่อมอบประสบการณ์ดูดวงไพ่ทาโรต์ออนไลน์ที่ดีที่สุดในระดับสากล ✦
 
