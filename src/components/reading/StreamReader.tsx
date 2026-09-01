@@ -12,6 +12,7 @@ import { OracleMantraCard } from "@/components/reading/OracleMantraCard";
 import { soundManager } from "@/lib/utils/audio";
 import { FollowUpChat } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
+import { ProvablyFairPanel } from "./ProvablyFairPanel";
 import { CardImage } from "@/components/card/CardImage";
 
 interface StreamReaderProps {
@@ -27,6 +28,8 @@ interface StreamReaderProps {
     serverSeed?: string;
     clientSeed?: string;
     commitment?: string;
+    pickedIndices?: number[];
+    deckSize?: number;
   };
   errorMsg?: string | null;
   onRetry?: () => void;
@@ -492,6 +495,17 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {allCards.length > 0 && (
             <ElementalBalanceWidget cards={allCards} drawn={drawnCards} />
           )}
+
+          {/* Provably-Fair Independent Mathematical Verification */}
+          <ProvablyFairPanel
+            commitment={proof?.commitment ?? ""}
+            proof={proof}
+            drawn={drawnCards.map((c) => ({
+              order: c.order,
+              cardIndex: c.cardIndex !== undefined ? c.cardIndex : 0,
+              isReversed: !!c.isReversed,
+            }))}
+          />
         </div>
       )}
 

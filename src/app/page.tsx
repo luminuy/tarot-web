@@ -109,7 +109,13 @@ export default function TarotPage() {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [commitment, setCommitment] = useState<string>("");
   const [clientSeed, setClientSeed] = useState<string>("");
-  const [proof, setProof] = useState<{ serverSeed?: string; clientSeed?: string; commitment?: string }>({});
+  const [proof, setProof] = useState<{
+    serverSeed?: string;
+    clientSeed?: string;
+    commitment?: string;
+    pickedIndices?: number[];
+    deckSize?: number;
+  }>({});
 
   // Interactive Card Picking state
   const [pickedIndices, setPickedIndices] = useState<number[]>([]);
