@@ -72,9 +72,24 @@ const GEMINI_RESPONSE_SCHEMA = {
   required: ["opening", "cards", "connections", "summary", "advice", "timing", "mood"],
 };
 
+/**
+ * โมเดลที่ลองเรียงกันจนกว่าจะเจอตัวที่ API key นี้เรียกได้ (loop ใน streamGeminiReading)
+ * -------------------------------------------------------------------------------
+ * เรียงจาก "ใหม่/เก่งสุด" → "เข้ากันได้กว้างสุด"
+ * - `*-latest` เป็น alias ที่ Google ชี้ไปยังรุ่นล่าสุดเสมอ → ไม่พังเวลา Google ปลดรุ่นเก่า
+ * - ใส่ทั้งชื่อสั้น (`gemini-2.0-flash`) และชื่อพินรุ่น (`-001`) เพราะบาง API version/โปรเจกต์
+ *   รับได้แค่แบบใดแบบหนึ่ง (เคยเจอ 404 กับชื่อสั้นบน prod — INC/ISSUE-016)
+ * ถ้าเพิ่ม/แก้ ให้ยึดผลจาก `GET https://generativelanguage.googleapis.com/v1beta/models?key=…`
+ */
 export const CANDIDATE_GEMINI_MODELS = [
+  "gemini-flash-latest",
   "gemini-3.7-flash",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
   "gemini-2.0-flash",
+  "gemini-2.0-flash-001",
+  "gemini-1.5-flash",
+  "gemini-1.5-flash-8b",
 ];
 
 // ค่าเริ่มต้นก่อนได้ usageMetadata จริงจาก Gemini — ตั้งเป็นศูนย์แทนการเดาตัวเลข
@@ -138,7 +153,11 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         response = res;
         break;
       } else {
-        console.warn(`Gemini Model ${model} returned status:`, res.status);
+        // log body ด้วย (ไม่ใช่แค่ status) — ช่วยแยก "คีย์ผิด" / "โมเดลไม่มี" / "โควตาหมด" ได้ทันทีจาก Worker log
+        const errBody = await res.text().catch(() => "");
+        console.warn(
+          `Gemini Model ${model} returned status: ${res.status} · ${errBody.slice(0, 300)}`,
+        );
       }
     } catch (e) {
       console.warn(`Gemini Model ${model} fetch failed:`, e);
