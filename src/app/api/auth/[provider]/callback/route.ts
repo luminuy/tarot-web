@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { signUserSession, type UserProfile } from "@/lib/auth/edge-auth";
 
 export const runtime = "nodejs";
@@ -13,9 +14,20 @@ export async function GET(
   const state = url.searchParams.get("state");
   const error = url.searchParams.get("error");
 
-  const host = request.headers.get("x-forwarded-host") || url.host;
+  const ALLOWED_HOSTS = new Set(["tarot.luminuy.com", "localhost:3000"]);
+  const rawHost = request.headers.get("x-forwarded-host") || url.host;
+  const host = ALLOWED_HOSTS.has(rawHost) || rawHost.endsWith(".workers.dev") ? rawHost : "tarot.luminuy.com";
   const protocol = request.headers.get("x-forwarded-proto") || (url.protocol.replace(":", ""));
-  const origin = `${protocol}://${host}`;
+  const origin = process.env.APP_ORIGIN || `${protocol}://${host}`;
+
+  const cookieStore = await cookies();
+  const expectedState = cookieStore.get("tarot_oauth_state")?.value;
+
+  if (!state || !expectedState || state !== expectedState) {
+    return NextResponse.redirect(
+      `${origin}/?auth_error=${encodeURIComponent("คำขอล็อกอินไม่ถูกต้อง (state mismatch)")}`
+    );
+  }
 
   if (error || !code) {
     return NextResponse.redirect(`${origin}/?auth_error=${encodeURIComponent(error || "ไม่ได้รับสิทธิ์การล็อกอิน")}`);
@@ -113,6 +125,7 @@ export async function GET(
       maxAge: 30 * 24 * 60 * 60, // 30 days
       path: "/",
     });
+    response.cookies.delete("tarot_oauth_state");
 
     return response;
   } catch (err: any) {

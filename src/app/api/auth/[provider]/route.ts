@@ -9,11 +9,13 @@ export async function GET(
 ) {
   const { provider } = await params;
   const url = new URL(request.url);
-  const host = request.headers.get("x-forwarded-host") || url.host;
+  const ALLOWED_HOSTS = new Set(["tarot.luminuy.com", "localhost:3000"]);
+  const rawHost = request.headers.get("x-forwarded-host") || url.host;
+  const host = ALLOWED_HOSTS.has(rawHost) || rawHost.endsWith(".workers.dev") ? rawHost : "tarot.luminuy.com";
   const protocol = request.headers.get("x-forwarded-proto") || (url.protocol.replace(":", ""));
-  const origin = `${protocol}://${host}`;
+  const origin = process.env.APP_ORIGIN || `${protocol}://${host}`;
 
-  const state = Math.random().toString(36).slice(2, 12);
+  const state = crypto.randomUUID();
   const redirectUri = `${origin}/api/auth/${provider}/callback`;
 
   if (provider === "google") {
