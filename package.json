@@ -16,6 +16,7 @@
     "preview:worker": "opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "verify:cards": "tsx scripts/verify-cards.ts",
+    "verify:parity": "tsx scripts/verify-shuffle-parity.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "cards:variants": "tsx scripts/generate-card-variants.ts",
     "agent:status": "tsx scripts/agent-guard.ts status",
