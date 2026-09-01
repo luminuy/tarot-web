@@ -92,6 +92,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🎲 ระบบสับไพ่ Provably Fair", cmd: TSX, args: ["scripts/qa/test-shuffle.ts"] },
   { label: "🖼️  การอ้างอิง path ภาพไพ่ถูกต้อง", cmd: TSX, args: ["scripts/qa/test-image-paths.ts"] },
   { label: "✍️  Live content override ปลอดภัย (ไม่แตะโครงไพ่)", cmd: TSX, args: ["scripts/qa/test-overrides-safety.ts"] },
+  { label: "🔮 Marketplace แม่หมอและการปกป้องข้อมูล (D1 / PDPA)", cmd: TSX, args: ["scripts/qa/test-marketplace-readers.ts"] },
 ];
 
 /**
@@ -99,7 +100,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
  * เพื่อให้เห็นปัญหาทั้งหมดในรอบเดียว ไม่ต้องแก้ทีละอันแล้วรันใหม่
  */
 function runAllChecks(): boolean {
-  console.log("\n🔍 [Verification Suite] ตรวจความสมบูรณ์ของระบบ 7 ด่าน\n");
+  console.log(`\n🔍 [Verification Suite] ตรวจความสมบูรณ์ของระบบ ${CHECKS.length} ด่าน\n`);
   const failures: { label: string; detail: string }[] = [];
 
   for (const check of CHECKS) {
@@ -113,7 +114,7 @@ function runAllChecks(): boolean {
   }
 
   if (failures.length === 0) {
-    console.log("\n✨ ผ่านครบทั้ง 7 ด่าน พร้อมสร้าง/Merge PR ได้ทันที!\n");
+    console.log(`\n✨ ผ่านครบทั้ง ${CHECKS.length} ด่าน พร้อมสร้าง/Merge PR ได้ทันที!\n`);
     return true;
   }
 

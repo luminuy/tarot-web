@@ -38,6 +38,35 @@
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
 
+### 🗓️ 2026-09-01: Phase 2 · M4 — Cloudflare D1 Foundation + Human Reader Profiles & Admin System (Marketplace แม่หมอ)
+
+- **ความต้องการ**: สร้างฐานข้อมูล Cloudflare D1 สำหรับระบบ Marketplace รวมโปรไฟล์แม่หมอตัวจริง จัดการผ่านแผงแอดมิน และเปิดหน้ารวมแม่หมอสาธารณะ (`/readers`) ภายใต้ระเบียบ PDPA
+- **สิ่งที่ทำ**:
+  - **D1 Database & Migrations**:
+    - สร้าง D1 Database `tarot-app-db` (`560fdbe7-e1f5-46e1-bad6-c8c387dcfcb5`) พร้อมเพิ่ม binding `APP_DB` ใน `wrangler.jsonc`
+    - สร้าง migration `migrations/0001_marketplace_init.sql` (ตาราง `readers` และ `admin_audit`) พร้อมรัน migration ขึ้น Cloudflare D1 สำเร็จ 100%
+    - สร้างสคริปต์ `scripts/db-migrate.ts` (`npm run db:migrate`)
+  - **Platform & Repository Layer**:
+    - สร้าง `src/lib/platform/db.ts` รองรับ Cloudflare D1 บน Worker พร้อม auto-fallback ไปยัง `node:sqlite` สำหรับ local dev และ standalone tests
+    - สร้าง `src/lib/marketplace/readers.repo.ts` (list, get, create, update, setStatus, delete, audit) พร้อม projection ปลอดภัย (`PublicReaderProfile` ไม่รั่วไหล lineUrl/secret)
+  - **Admin System & UI**:
+    - สร้าง API `/api/admin/readers` และ `/api/admin/readers/[id]` (Zod schema validation, `requireAdmin()` guard, `recordAudit` logging)
+    - สร้าง `src/components/admin/ReadersManager.tsx` พร้อมเชื่อมต่อแท็บ "แม่หมอ (Marketplace)" ใน `src/app/admin/page.tsx`
+  - **Public Pages & Privacy Compliance**:
+    - สร้าง `docs/ADR-001-marketplace-pdpa.md` กำหนดมาตรการคุ้มครองข้อมูลส่วนบุคคล (Data Minimization, 30-day retention, off-platform handoff, no AI training)
+    - สร้าง `src/components/readers/ReadersDirectory.tsx` หน้ารวมแม่หมอพร้อมค้นหาและฟิลเตอร์หมวดหมู่
+    - สร้าง `src/app/readers/page.tsx` และ `src/app/readers/[id]/page.tsx` (Dynamic SSR 100% SEO-friendly)
+    - อัปเดต `src/app/robots.ts` disallow `/readers/console`
+    - เพิ่มลิงก์แม่หมอตัวจริงลงใน `SacredNavDropdown.tsx`
+  - **QA & Verification**:
+    - สร้าง `scripts/qa/test-marketplace-readers.ts` ทดสอบ CRUD, security projection, audit trail และผูกเข้าสู่ `scripts/github-auto.ts` (`repo:verify` ครบ 9 ด่าน 100% Green)
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - เพิ่มใหม่: `migrations/0001_marketplace_init.sql`, `scripts/db-migrate.ts`, `docs/ADR-001-marketplace-pdpa.md`, `src/lib/platform/db.ts`, `src/lib/marketplace/readers.repo.ts`, `src/app/api/admin/readers/route.ts`, `src/app/api/admin/readers/[id]/route.ts`, `src/app/api/readers/route.ts`, `src/components/admin/ReadersManager.tsx`, `src/components/readers/ReadersDirectory.tsx`, `src/app/readers/page.tsx`, `src/app/readers/[id]/page.tsx`, `scripts/qa/test-marketplace-readers.ts`
+  - แก้ไข: `wrangler.jsonc`, `package.json`, `.gitignore`, `src/app/admin/page.tsx`, `src/components/ui/SacredNavDropdown.tsx`, `src/components/ui/TarotArtIcons.tsx`, `src/app/robots.ts`, `scripts/github-auto.ts`, `docs/MARKETPLACE.md`, `docs/ARCHITECTURE.md`, `docs/WORK_LOG.md`
+- **ผลการทดสอบ**:
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 9 ด่าน 100% Green**
+  - `npm run build` ➔ **ผ่านฉลุย 103 static/dynamic routes**
+
 ### 🗓️ 2026-09-01: เอกสารส่งต่องาน Phase 2 — Marketplace แม่หมอตัวจริง
 
 - สร้าง [`docs/MARKETPLACE.md`](MARKETPLACE.md) — handoff แบบละเอียดสำหรับ AI/นักพัฒนาคนต่อไปทำ M4–M7

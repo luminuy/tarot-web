@@ -36,6 +36,7 @@ graph TD
 | Layer | เทคโนโลยี | วัตถุประสงค์และจุดเด่น |
 | :--- | :--- | :--- |
 | **Edge Compute** | **Cloudflare Workers (OpenNext v1.20)** | Zero-Cold-Start Serverless Edge Network ทั่วโลก |
+| **Database** | **Cloudflare D1 (`APP_DB`) + Cloudflare KV** | Relational Database สำหรับระบบแม่หมอ Marketplace และ KV สำหรับ Caching/Audit |
 | **Framework** | **Next.js 16.3 (App Router) + React 19** | Hybrid Static/Dynamic Routing + Server-Sent Events (SSE) |
 | **Language** | **TypeScript 7 (Strict Mode)** | ความปลอดภัยระดับ 0 Type Errors 100% |
 | **Design & UI** | **Tailwind CSS v4 + Motion v13** | Mystical Obsidian Velvet & Gold Leaf Theme + GPU-Accelerated Animations |

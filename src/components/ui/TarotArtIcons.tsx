@@ -734,3 +734,12 @@ export const JournalScrollNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h
     <path d="M16 14l2 2 3-3" strokeWidth={1.5} className="stroke-[#10b981]" />
   </svg>
 );
+
+export const MarketplaceReaderNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+    <circle cx="12" cy="7" r="4" className="fill-[#e5c07b]/15 stroke-[#ffd700]" />
+    <path d="M5.5 21a6.5 6.5 0 0 1 13 0" className="stroke-[#ffd700]" />
+    <path d="M19 8l1.5 1.5L23 7" strokeWidth={1.4} className="stroke-[#e5c07b]" />
+  </svg>
+);
+

@@ -1,0 +1,185 @@
+/**
+ * ตัวกลางเข้าถึง Cloudflare D1 Database (Platform Access Layer for D1)
+ * ----------------------------------------------------------------------
+ * - บน Cloudflare Worker (production / opennextjs-cloudflare): คืน binding จริง (APP_DB)
+ * - บน local dev / test: ใช้ node:sqlite (Node 22+) เก็บใน `.dev-marketplace.db`
+ *   พร้อม auto-migrate ตาราง readers และ admin_audit
+ */
+
+export interface D1ExecResult {
+  success: boolean;
+  meta?: {
+    changes: number;
+    last_row_id?: number;
+    duration?: number;
+  };
+}
+
+export interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  first<T = unknown>(colName?: string): Promise<T | null>;
+  all<T = unknown>(): Promise<{ results: T[]; success: boolean }>;
+  run(): Promise<D1ExecResult>;
+}
+
+export interface AppDB {
+  prepare(query: string): D1PreparedStatement;
+  batch?(statements: D1PreparedStatement[]): Promise<unknown[]>;
+  exec?(query: string): Promise<D1ExecResult>;
+}
+
+let cachedDB: AppDB | null = null;
+
+async function safelyGetCloudflareContext() {
+  try {
+    const mod = await import("@opennextjs/cloudflare");
+    if (typeof mod?.getCloudflareContext === "function") {
+      return await mod.getCloudflareContext({ async: true });
+    }
+  } catch {
+    // Dynamic import fails gracefully in local dev or standalone test runner
+  }
+  return null;
+}
+
+/**
+ * สร้าง Local SQLite Adapter ด้วย node:sqlite สำหรับ Local Dev และ Automated Tests
+ */
+async function createLocalSQLiteDB(): Promise<AppDB> {
+  const g = globalThis as { __tarot_d1_shim__?: AppDB };
+  if (g.__tarot_d1_shim__) return g.__tarot_d1_shim__;
+
+  try {
+    const sqlite = await import("node:sqlite");
+    const path = await import("node:path");
+    const dbPath = path.resolve(process.cwd(), ".dev-marketplace.db");
+    const db = new sqlite.DatabaseSync(dbPath);
+
+    // Auto-migrate local sqlite schema
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS readers (
+        id             TEXT PRIMARY KEY,
+        display_name   TEXT NOT NULL,
+        bio            TEXT NOT NULL DEFAULT '',
+        avatar_url     TEXT,
+        specialties    TEXT NOT NULL DEFAULT '[]',
+        line_url       TEXT NOT NULL,
+        status         TEXT NOT NULL DEFAULT 'pending',
+        commission_pct INTEGER NOT NULL DEFAULT 20,
+        session_secret TEXT NOT NULL,
+        created_at     INTEGER NOT NULL,
+        updated_at     INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_readers_status ON readers(status);
+      CREATE INDEX IF NOT EXISTS idx_readers_created ON readers(created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS admin_audit (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        ts         INTEGER NOT NULL,
+        actor      TEXT NOT NULL,
+        action     TEXT NOT NULL,
+        detail     TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_audit_ts ON admin_audit(ts DESC);
+    `);
+
+    const adapter: AppDB = {
+      prepare(query: string) {
+        let boundParams: unknown[] = [];
+        return {
+          bind(...values: unknown[]) {
+            boundParams = values;
+            return this;
+          },
+          async first<T = unknown>(colName?: string): Promise<T | null> {
+            try {
+              const stmt = db.prepare(query);
+              const row = (stmt.get as (...args: unknown[]) => Record<string, unknown> | undefined)(...boundParams);
+              if (!row) return null;
+              if (colName) return (row[colName] as T) ?? null;
+              return row as unknown as T;
+            } catch (err) {
+              console.error("[LocalSQLite Error in first()]", err, "Query:", query, "Params:", boundParams);
+              throw err;
+            }
+          },
+          async all<T = unknown>(): Promise<{ results: T[]; success: boolean }> {
+            try {
+              const stmt = db.prepare(query);
+              const rows = (stmt.all as (...args: unknown[]) => unknown[])(...boundParams) as T[];
+              return { results: rows, success: true };
+            } catch (err) {
+              console.error("[LocalSQLite Error in all()]", err, "Query:", query, "Params:", boundParams);
+              throw err;
+            }
+          },
+          async run(): Promise<D1ExecResult> {
+            try {
+              const stmt = db.prepare(query);
+              const res = (stmt.run as (...args: unknown[]) => { changes?: number; lastInsertRowid?: number })(...boundParams);
+              return {
+                success: true,
+                meta: {
+                  changes: typeof res.changes === "number" ? res.changes : 0,
+                  last_row_id: typeof res.lastInsertRowid === "number" ? Number(res.lastInsertRowid) : undefined,
+                },
+              };
+            } catch (err) {
+              console.error("[LocalSQLite Error in run()]", err, "Query:", query, "Params:", boundParams);
+              throw err;
+            }
+          },
+        };
+      },
+      async exec(query: string): Promise<D1ExecResult> {
+        db.exec(query);
+        return { success: true };
+      },
+    };
+
+    g.__tarot_d1_shim__ = adapter;
+    return adapter;
+  } catch (err) {
+    console.warn("[Platform DB] Failed to init node:sqlite, using memory mock fallback:", err);
+    // In-memory fallback if node:sqlite fails
+    return createMemoryDBFallback();
+  }
+}
+
+/** Fallback memory DB in case sqlite fails to load */
+function createMemoryDBFallback(): AppDB {
+  return {
+    prepare(_query: string) {
+      return {
+        bind(..._values: unknown[]) { return this; },
+        async first<T = unknown>(): Promise<T | null> { return null; },
+        async all<T = unknown>(): Promise<{ results: T[]; success: boolean }> { return { results: [], success: true }; },
+        async run(): Promise<D1ExecResult> { return { success: true, meta: { changes: 0 } }; },
+      };
+    },
+  };
+}
+
+/**
+ * ดึง AppDB (Cloudflare D1 binding หรือ Local SQLite adapter)
+ */
+export async function getAppDB(): Promise<AppDB> {
+  if (cachedDB) return cachedDB;
+
+  try {
+    const ctx = await safelyGetCloudflareContext();
+    if (ctx) {
+      const env = ctx.env as Record<string, unknown>;
+      const binding = env.APP_DB;
+      if (binding && typeof (binding as AppDB).prepare === "function") {
+        cachedDB = binding as AppDB;
+        return cachedDB;
+      }
+    }
+  } catch {
+    // No Cloudflare context (dev/test)
+  }
+
+  cachedDB = await createLocalSQLiteDB();
+  return cachedDB;
+}

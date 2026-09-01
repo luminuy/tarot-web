@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/admin", "/admin/"],
+      disallow: ["/api/", "/admin", "/admin/", "/readers/console", "/readers/console/"],
     },
     sitemap: "https://tarot.luminuy.com/sitemap.xml",
   };
