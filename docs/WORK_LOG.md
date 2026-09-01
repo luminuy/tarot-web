@@ -36,6 +36,19 @@
 
 ---
 
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR E — การ์ดชวนสมัครหลังอ่านจบ
+
+> ต่อจาก PR D (#91) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธงปิด → การ์ดไม่แสดง)
+
+- **สิ่งที่ทำ**:
+  - `src/components/entitlement/PostReadingSignup.tsx` — การ์ดท้ายขั้น SUMMARY (`!isStreaming`) เฉพาะ guest + ธงเปิด · ปิดได้ (localStorage 7 วัน — ไม่ตื๊อ) · ไม่ใช่ป๊อปอัปทับ
+  - `src/app/api/stats/event/route.ts` — `POST` endpoint ให้ UI ยิง event ผ่าน **allowlist** (`signup_card_shown`/`clicked`/`dismissed`) → `recordEvent()` (กัน metric อิสระทำ KV บวม)
+  - `src/app/page.tsx` — `<PostReadingSignup/>` ท้าย SUMMARY step
+  - ผูกดวง guest → บัญชีหลังสมัคร: ใช้ `syncAnonymousHistoryToServer()` ที่ page.tsx เรียกหลัง `auth_success` อยู่แล้ว (ไม่ต้องทำใหม่)
+- **ผลการทดสอบ**: `repo:verify` **14/14** · `build:worker` ✓ · curl: `signup_card_shown` → 200 · `evil_metric` → 400 (allowlist ทำงาน)
+- **หมายเหตุ**: การ์ด visual ที่ SUMMARY ยังไม่ได้เห็นในเบราว์เซอร์ (test cookie เป็น guest ที่สิทธิ์หมด เริ่ม reading ใหม่ไม่ได้) — ตรวจซ้ำตอน production
+- **ยังไม่ทำ**: PR F (rollout — โบนัสเปลี่ยนผ่าน + ประกาศ + เปิดธง — **ต้องเจ้าของตัดสินใจ**)
+
 ### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR D — สถานะบนหน้าเว็บ (QuotaBadge / EntitlementGate / locked chat)
 
 > ต่อจาก PR C (#90) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ปิด → badge/gate ไม่แสดง, หน้าเลือกผังปกติ)

@@ -384,12 +384,14 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
 - [x] curl + browser (flag on): guest ใหม่ badge "ทดลองฟรี 1 ครั้ง" → ทำ reading → reload → badge "ทดลองฟรีครบแล้ว" + gate "ครั้งแรกจบแล้ว" แทนหน้าเลือกผัง · flag off → badge/gate หาย, หน้าเลือกผังปกติ (เหมือนก่อน PR D 100%)
 - [x] repo:verify 14/14 · build:worker ✓ · hydration warning เดิม (motion SSR) — **มีอยู่ก่อน PR D** (ยืนยันโดย stash)
 
-### PR E · การ์ดชวนสมัครหลังอ่านจบ
+### PR E · การ์ดชวนสมัครหลังอ่านจบ ✅ เสร็จ (2026-09-01)
 **ต้องมี D**
 
-- [ ] `components/auth/PostReadingSignup.tsx` — โผล่ท้ายขั้น 5 หลังสตรีมจบ ปิดได้
-- [ ] วัดผลด้วย `recordEvent()` ที่มีอยู่: `signup_card_shown` · `signup_card_clicked` · `signup_card_dismissed`
-- [ ] ผูกดวงที่ผู้เยี่ยมชมเปิดไว้เข้าบัญชีหลังสมัคร (กลไก merge มีอยู่แล้วจาก PR #74)
+- [x] `src/components/entitlement/PostReadingSignup.tsx` — โผล่ท้ายขั้น SUMMARY (`!isStreaming`) เฉพาะ guest + ธงเปิด · ปิดได้ (localStorage 7 วัน ไม่ตื๊อ)
+- [x] `POST /api/stats/event` — endpoint ให้ UI ยิง event ผ่าน **allowlist** (`signup_card_shown/clicked/dismissed`) → `recordEvent()`
+- [x] ผูกดวงหลังสมัคร — ใช้กลไกเดิม `syncAnonymousHistoryToServer()` ที่ page.tsx เรียกอยู่แล้วหลัง `auth_success` (ไม่ต้องทำใหม่)
+- [x] repo:verify 14/14 · build:worker ✓ · curl: allowlist metric → 200 · metric อื่น → 400
+- [~] การ์ดที่ SUMMARY (visual): verify ด้วย logic + track endpoint — ไม่ได้เห็นในเบราว์เซอร์เพราะ test cookie เป็น guest ที่ใช้สิทธิ์หมดแล้ว (เริ่ม reading ใหม่ไม่ได้) · ตรวจซ้ำตอน production หรือด้วยเบราว์เซอร์คุกกี้สะอาด
 
 ### PR F · เปิดใช้งานจริง
 **ต้องมี A–E · ทำหลังทดสอบบน production แล้ว**

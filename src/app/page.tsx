@@ -24,6 +24,7 @@ import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-p
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { QuotaBadge } from "@/components/entitlement/QuotaBadge";
 import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
+import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { refreshEntitlement } from "@/lib/entitlement/use-entitlement";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
@@ -961,6 +962,10 @@ export default function TarotPage() {
                   </button>
                 </div>
               </div>
+
+              {currentStep === "SUMMARY" && !isStreaming && (
+                <PostReadingSignup onOpenAuth={() => setIsAuthOpen(true)} />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
