@@ -36,6 +36,19 @@
 
 ---
 
+### 🗓️ 2026-09-01: UI/UX Redesign — World-Class Luxury Mystic Auth Modal (ปรับโฉมหน้าต่างเข้าสู่ระบบระดับวิหารศักดิ์สิทธิ์)
+
+- **ความต้องการ**: ออกแบบหน้าต่างเข้าสู่ระบบ (`AuthModal.tsx`) ใหม่ทั้งหมดให้เข้ากับธีมศิลานิลกาลและทองคำแท้ (Obsidian & Sacred Gold) ในระดับพรีเมียมระดับโลก
+- **สิ่งที่ทำ**:
+  - `src/components/auth/AuthModal.tsx`:
+    1. **Sacred Oracle Emblem**: ตราประทับวิหารศักดิ์สิทธิ์พร้อมวงแหวน Sacred Geometry หมุนรอบดวงดาวทองคำเปลว `✦`
+    2. **Segmented Mode Switcher**: แถบแท็บสลับโหมด "✦ เข้าสู่ระบบ" และ "✨ สมัครสมาชิก" หรูหรา ไร้รอยต่อ
+    3. **Luxury Form Fields**: ช่องกรอกข้อมูลศิลานิลกาลพร้อมไอคอนกำกับ (👤 นามแฝง, ✉️ อีเมล, 🗝️ รหัสผ่าน) และปุ่มสลับการมองเห็น
+    4. **Gemstone Password Strength Meter**: มาตรวัดระดับความแข็งแกร่งของรหัสผ่านแบบ 4 อัญมณีเรืองแสง
+    5. **Harmonious Social Login**: ปรับปุ่ม Google และ LINE ให้เป็น Dark Sanctuary Glass Cards สวยงาม ไม่ขัดตา และคงอัตลักษณ์แบรนด์ชัดเจน
+    6. **Footnote Assurance**: ป้ายความปลอดภัยการเข้ารหัส Web Crypto
+- **ผลการทดสอบ**: `npm run repo:verify` 14/14 ด่านผ่าน 100%, `typecheck` 0 errors
+
 ### 🗓️ 2026-09-01: AI Reading Credits Store, Free Daily Tarot Habit & Web Speech TTS
 
 - **ความต้องการ**: พัฒนายกระดับ 3 ด้านตามคำขอของผู้ใช้:
