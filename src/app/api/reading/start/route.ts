@@ -6,7 +6,8 @@ import { getSpread } from "@/data/spreads";
 import { checkQuestion } from "@/lib/safety/guardrails";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { createCommitment } from "@/lib/tarot/shuffle";
-import { checkRateLimit, clientKeyFromRequest, saveReading, persistReading } from "@/server/store";
+import { saveReading, persistReading } from "@/server/store";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvents } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
@@ -41,11 +42,15 @@ export async function POST(request: Request) {
   const privileged = await isPrivilegedTestRequest(request);
 
   if (!privileged) {
-    const limit = checkRateLimit(`start:${clientKeyFromRequest(request)}`, 20, 60 * 60 * 1000);
+    const clientIp = getClientIdentifier(request);
+    const limit = checkRateLimit(`start:${clientIp}`, {
+      maxRequests: 20,
+      windowSeconds: 3600,
+    });
     if (!limit.allowed) {
-      return NextResponse.json(
-        { error: "วันนี้เปิดไพ่ถี่ไปหน่อยแล้วนะ พักสักครู่แล้วค่อยกลับมา", retryAfter: limit.retryAfterSeconds },
-        { status: 429 },
+      return createRateLimitResponse(
+        limit.retryAfterSeconds,
+        "วันนี้เปิดไพ่ถี่ไปหน่อยแล้วนะ พักสักครู่แล้วค่อยกลับมา",
       );
     }
   }

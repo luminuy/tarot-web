@@ -5,7 +5,8 @@ import { cardByIndex, DECK_SIZE } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
 import { drawCards, normalizeClientSeed, verifyCommitment } from "@/lib/tarot/shuffle";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { checkRateLimit, clientKeyFromRequest, getReading, updateReading, persistReading } from "@/server/store";
+import { getReading, updateReading, persistReading } from "@/server/store";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -33,11 +34,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const privileged = await isPrivilegedTestRequest(request);
 
   if (!privileged) {
-    const limit = checkRateLimit(`shuffle:${clientKeyFromRequest(request)}`, 30, 60 * 1000);
+    const clientIp = getClientIdentifier(request);
+    const limit = checkRateLimit(`shuffle:${clientIp}`, {
+      maxRequests: 30,
+      windowSeconds: 60,
+    });
     if (!limit.allowed) {
-      return NextResponse.json(
-        { error: "ส่งคำขอเร็วเกินไป กรุณารอสักครู่", retryAfter: limit.retryAfterSeconds },
-        { status: 429 },
+      return createRateLimitResponse(
+        limit.retryAfterSeconds,
+        "ส่งคำขอเร็วเกินไป กรุณารอสักครู่",
       );
     }
   }

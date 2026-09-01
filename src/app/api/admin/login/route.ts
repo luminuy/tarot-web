@@ -10,7 +10,7 @@ import {
   verifyAdminPassword,
 } from "@/lib/auth/admin-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { checkRateLimit, clientKeyFromRequest } from "@/server/store";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
@@ -29,11 +29,15 @@ export async function POST(request: Request) {
   }
 
   // กัน brute-force: 5 ครั้ง / 15 นาที ต่อ IP
-  const limit = checkRateLimit(`admin_login:${clientKeyFromRequest(request)}`, 5, 15 * 60 * 1000);
+  const clientIp = getClientIdentifier(request);
+  const limit = checkRateLimit(`admin_login:${clientIp}`, {
+    maxRequests: 5,
+    windowSeconds: 15 * 60,
+  });
   if (!limit.allowed) {
-    return NextResponse.json(
-      { error: "ลองเข้าระบบถี่เกินไป รอสักครู่แล้วลองใหม่", retryAfter: limit.retryAfterSeconds },
-      { status: 429 },
+    return createRateLimitResponse(
+      limit.retryAfterSeconds,
+      "ลองเข้าระบบถี่เกินไป รอสักครู่แล้วลองใหม่",
     );
   }
 
