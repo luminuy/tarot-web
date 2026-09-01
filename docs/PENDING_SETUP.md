@@ -7,21 +7,29 @@
 
 ## ✅ ตั้งค่าแล้ว (Cloudflare Worker Secrets)
 
-`npx wrangler secret list` → มี 4 ตัว:
+`npx wrangler secret list` → มี 5 ตัว:
 
 | Secret | ใช้ทำอะไร |
 | :-- | :-- |
 | `TAROT_SESSION_SECRET` | เซ็น session token (Provably-Fair, OAuth, guest cookie, admin) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | ล็อกอิน Google |
 | `ADMIN_PASSWORD` | เข้าแผงแอดมิน `/admin` |
+| `GEMINI_API_KEY` | คำอ่านไพ่ AI + แชทถามต่อ + สรุปดวงรายเดือน (ตั้ง 2026-09-01) |
 
-**ใช้งานได้ตอนนี้:** ดูดวง 5 ขั้น *(แต่คำอ่านเป็น mock ออฟไลน์ — ยังไม่ได้ตั้งคีย์ Gemini · ดูข้อ 0)* · Google login · แผงแอดมิน (`/admin` — สถิติ, แก้ prompt/ไพ่, marketplace, สิทธิ์เปิดไพ่)
+**ใช้งานได้ตอนนี้:** ดูดวง 5 ขั้น (คำอ่าน AI จริงผ่าน Gemini + ระบบสิทธิ์/โควตา) · Google login · แผงแอดมิน (`/admin` — สถิติ, แก้ prompt/ไพ่, marketplace, สิทธิ์เปิดไพ่)
 
 ---
 
 ## ⏳ ยังค้าง
 
-### 0. 🔴 **คีย์ AI (Gemini) — ยังไม่ได้ตั้ง · คำอ่านทุกอันเป็น mock ออฟไลน์ + ระบบสิทธิ์ (paywall) ไม่ทำงาน**
+### 0. ✅ **คีย์ AI (Gemini) — ตั้งแล้ว 2026-09-01 · คำอ่าน AI + paywall ทำงานครบ**
+
+> ตั้ง `GEMINI_API_KEY` แล้ว + แก้โค้ดฝั่ง Gemini (PR #104–110): ชื่อโมเดล `gemini-3.6/3.7-flash`
+> (1.5/2.0/2.5 ถูก Google ปลด), request body แบบ 3.x, จับ thought-parts, `responseJsonSchema`
+> · verify: curl guest flow บน prod ได้คำอ่าน AI จริง 3 องก์ + โควตา `remaining` 1→0 + reading ที่ 2 = 403
+> · ถ้าจะเปลี่ยนโมเดลในอนาคต ยึด `GET https://generativelanguage.googleapis.com/v1beta/models?key=…`
+
+<details><summary>บันทึกปัญหาเดิม (ก่อนแก้)</summary>
 
 **สถานะ (ยืนยัน 2026-09-01):** `wrangler secret list` ไม่มี `GEMINI_API_KEY` / `GOOGLE_API_KEY`
 → `src/lib/ai/gemini.ts:92` เข้า branch `!apiKey` → เสิร์ฟ `streamMockGeminiReading` (คำอ่านสำเร็จรูปในโค้ด) ทุกครั้ง
@@ -40,6 +48,8 @@ npx wrangler secret put GEMINI_API_KEY      # วางค่า AIza... (จำ
 ```
 โมเดลที่โค้ดลองเรียงกัน: `CANDIDATE_GEMINI_MODELS` ใน `src/lib/ai/gemini.ts` (ปัจจุบัน `gemini-3.7-flash` → `gemini-2.0-flash`)
 หลังตั้งคีย์: ทำ reading 1 ครั้ง แล้ว curl `GET /api/entitlement` ด้วยคุกกี้เดิม — `canStartReading` ต้องกลายเป็น `false` · Worker log ต้องไม่มีบรรทัด `[gemini] ไม่พบ GEMINI_API_KEY`
+
+</details>
 
 ---
 
