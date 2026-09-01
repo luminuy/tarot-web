@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0036 · 2026-09-01 09:51 · 🟠 High · PR 0 auth-hardening: enforce prod AUTH_SECRET throw, OAuth state CSRF verification, and host header injection protection
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Edge auth had insecure fallback secret in production, unchecked OAuth state (login CSRF), and trusted x-forwarded-host |
+| **สาเหตุราก** | edge-auth.ts lacked production secret guard and callback route did not verify tarot_oauth_state cookie or sanitize host header |
+| **การแก้ไข** | Updated getAuthSecret with production throw on missing or weak secrets, added OAuth state CSRF verification with cookie comparison, and restricted host resolution to allowlist and APP_ORIGIN |
+| **🛡️ กฎป้องกันถาวร** | **All auth secrets must throw in production if < 32 characters; all OAuth flows must verify state cookie before token exchange** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify passed 10/10 gates |
+| **บันทึกโดย** | Antigravity AI · branch `auth-hardening` · commit `a9a4bb4` |
+
+
 ### INC-0035 · 2026-09-01 02:25 · 🟡 Medium · stop tracking auto-generated bookkeeping files that conflict on every parallel PR
 
 | หัวข้อ | รายละเอียด |

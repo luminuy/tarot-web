@@ -8,10 +8,30 @@ export interface UserProfile {
 }
 
 const AUTH_COOKIE_NAME = "tarot_auth_session";
-const FALLBACK_SECRET = "tarot-sacred-auth-sanctuary-secret-2026";
+const KNOWN_INSECURE_SECRETS = new Set([
+  "tarot-sacred-auth-sanctuary-secret-2026",
+  "secret",
+  "default",
+]);
 
-function getAuthSecret(): string {
-  return process.env.TAROT_SESSION_SECRET || process.env.AUTH_SECRET || FALLBACK_SECRET;
+export function getAuthSecret(): string {
+  const secret = process.env.AUTH_SECRET || process.env.TAROT_SESSION_SECRET;
+  const isProd = process.env.NODE_ENV === "production";
+
+  if (isProd) {
+    if (!secret || secret.trim().length < 32 || KNOWN_INSECURE_SECRETS.has(secret)) {
+      throw new Error(
+        "[Security Guard] AUTH_SECRET must be set to a secure string (≥ 32 characters) in production!"
+      );
+    }
+    return secret;
+  }
+
+  return (
+    secret ||
+    process.env.AUTH_SECRET_DEV ||
+    "dev-only-auth-secret-32-chars-minimum-protection"
+  );
 }
 
 function base64UrlEncode(str: string): string {
