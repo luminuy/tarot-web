@@ -151,16 +151,105 @@ async function runTest() {
   }
   console.log("  ✓ 8. Reader Queue Lifecycle: รอคิว ➔ เรียกคิว ➔ ส่งต่อ LINE สำเร็จครบวงจร");
 
+  // ── M7: Payments & Webhook Verification ───────────────────────────────────
+  const { createGatewayCharge, verifyWebhookSignature } = await import(
+    "../../src/lib/marketplace/payment-gateway"
+  );
+  const {
+    calculateReaderEarnings,
+    createPaymentRecord,
+    getPaymentById,
+    recordReaderPayout,
+    updatePaymentStatus,
+  } = await import("../../src/lib/marketplace/payments.repo");
+
+  // 1. Create simulated charge
+  const charge = await createGatewayCharge({
+    amountSatang: 29900,
+    description: "ทดสอบการชำระเงิน 299 บาท",
+    returnUri: "http://localhost:3000/readers/queue/ticket_test",
+  });
+  if (!charge.chargeId || charge.amountSatang !== 29900) {
+    throw new Error("❌ createGatewayCharge failed to generate charge");
+  }
+
+  // 2. Create Booking First to satisfy Foreign Key
+  const { getAppDB } = await import("../../src/lib/platform/db");
+  const db = await getAppDB();
+  const testBookingId = `book_test_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
+  const now = Date.now();
+  await db
+    .prepare(
+      `INSERT INTO bookings (id, ticket_id, reader_id, slot_start, slot_end, status, created_at)
+       VALUES (?, ?, ?, ?, ?, 'reserved', ?)`
+    )
+    .bind(testBookingId, ticket1.id, created.id, now, now + 1800000, now)
+    .run();
+
+  // 3. Create Payment Record
+  const payment = await createPaymentRecord({
+    bookingId: testBookingId,
+    ticketId: ticket1.id,
+    provider: "omise",
+    providerRef: charge.chargeId,
+    amountSatang: 29900,
+  });
+  if (payment.status !== "pending" || payment.amountSatang !== 29900) {
+    throw new Error("❌ createPaymentRecord failed");
+  }
+
+  // 3. Test Webhook Signature Verification
+  const testPayload = JSON.stringify({
+    data: { id: charge.chargeId, status: "successful", amount: 29900 },
+  });
+  const secretKey = "test_webhook_secret_key_123";
+  const { createHmac } = await import("node:crypto");
+  const validSignature = createHmac("sha256", secretKey).update(testPayload).digest("hex");
+
+  const sigPass = verifyWebhookSignature(testPayload, validSignature, secretKey);
+  const sigFail = verifyWebhookSignature(testPayload, "tampered_signature_hex", secretKey);
+  if (!sigPass || sigFail) {
+    throw new Error("❌ verifyWebhookSignature failed to validate signature integrity");
+  }
+
+  // 4. Update Payment status to 'paid'
+  const paidPayment = await updatePaymentStatus(payment.id, "paid", {
+    providerRef: charge.chargeId,
+    webhookLog: testPayload,
+  });
+  if (!paidPayment || paidPayment.status !== "paid") {
+    throw new Error("❌ updatePaymentStatus failed to transition to 'paid'");
+  }
+  console.log("  ✓ 10. Payments & Webhook: ตรวจสอบลายเซ็นและบันทึกสถานะ 'paid' สำเร็จ");
+
+  // 5. Test Reader Earnings Calculation & Payout Ledger
+  const earnings = await calculateReaderEarnings(created.id);
+  if (typeof earnings.grossSatang !== "number" || typeof earnings.commissionSatang !== "number") {
+    throw new Error("❌ calculateReaderEarnings failed");
+  }
+
+  const payout = await recordReaderPayout({
+    readerId: created.id,
+    period: "2026-09",
+    grossSatang: 29900,
+    commissionSatang: 7475, // 25%
+    netSatang: 22425,
+  });
+  if (payout.status !== "pending" || payout.netSatang !== 22425) {
+    throw new Error("❌ recordReaderPayout failed");
+  }
+  console.log("  ✓ 11. Revenue & Commission: คำนวณส่วนแบ่งรายได้และบันทึก Payout Ledger สำเร็จ");
+
   // ── PDPA Cleanup ─────────────────────────────────────────────────────────
   await cancelQueueTicket(ticket2.id);
   const purgedCount = await cleanupExpiredTickets();
-  console.log(`  ✓ 9. PDPA Data Retention: Auto-cleanup expired tickets (${purgedCount} purged)`);
+  console.log(`  ✓ 12. PDPA Data Retention: Auto-cleanup expired tickets (${purgedCount} purged)`);
 
   // Cleanup test reader
   await deleteReader(created.id);
-  console.log("  ✓ 10. ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
+  console.log("  ✓ 13. ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
 
-  console.log("\n✨ [QA] Marketplace M4-M6 Test ผ่านครบทุกด่าน 100%!");
+  console.log("\n✨ [QA] Marketplace M4-M7 Test ผ่านครบทุกด่าน 100%!");
 }
 
 runTest().catch((err) => {

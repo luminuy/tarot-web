@@ -139,6 +139,34 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
         created_at  INTEGER NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_bookings_reader ON bookings(reader_id, slot_start);
+
+      CREATE TABLE IF NOT EXISTS payments (
+        id            TEXT PRIMARY KEY,
+        booking_id    TEXT NOT NULL REFERENCES bookings(id),
+        ticket_id     TEXT REFERENCES queue_tickets(id),
+        provider      TEXT NOT NULL DEFAULT 'omise',
+        provider_ref  TEXT,
+        amount_satang INTEGER NOT NULL,
+        currency      TEXT NOT NULL DEFAULT 'THB',
+        status        TEXT NOT NULL DEFAULT 'pending',
+        webhook_log   TEXT,
+        created_at    INTEGER NOT NULL,
+        updated_at    INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
+      CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+
+      CREATE TABLE IF NOT EXISTS payouts (
+        id                TEXT PRIMARY KEY,
+        reader_id         TEXT NOT NULL REFERENCES readers(id),
+        period            TEXT NOT NULL,
+        gross_satang      INTEGER NOT NULL,
+        commission_satang INTEGER NOT NULL,
+        net_satang        INTEGER NOT NULL,
+        status            TEXT NOT NULL DEFAULT 'pending',
+        created_at        INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_payouts_reader ON payouts(reader_id, period);
     `);
 
     const adapter: AppDB = {

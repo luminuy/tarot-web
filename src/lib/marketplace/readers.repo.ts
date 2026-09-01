@@ -239,11 +239,13 @@ export async function setReaderStatus(id: string, status: ReaderStatus): Promise
 }
 
 /**
- * ลบแม่หมอออกจากระบบ พร้อมเก็บกวาดข้อมูลคิวที่เกี่ยวข้อง
+ * ลบแม่หมอออกจากระบบ พร้อมเก็บกวาดข้อมูลคิวและการเงินที่เกี่ยวข้อง
  */
 export async function deleteReader(id: string): Promise<boolean> {
   const db = await getAppDB();
   try {
+    await db.prepare("DELETE FROM payments WHERE booking_id IN (SELECT id FROM bookings WHERE reader_id = ?)").bind(id).run();
+    await db.prepare("DELETE FROM payouts WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM bookings WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM queue_tickets WHERE reader_id = ?").bind(id).run();
     await db.prepare("DELETE FROM reader_availability WHERE reader_id = ?").bind(id).run();

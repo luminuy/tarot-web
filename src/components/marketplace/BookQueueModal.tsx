@@ -137,6 +137,15 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
           </div>
         )}
 
+        {/* Service Fee Display */}
+        <div className="flex items-center justify-between rounded-xl bg-[#1c1333] border border-[#ffd700]/30 p-3 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-[#ffd700] font-bold text-sm">✦ ค่าบริการ / บูชาครู</span>
+            <span className="text-[10px] text-[#9c93b8]">(30 นาที)</span>
+          </div>
+          <span className="font-bold text-[#ffd700] text-sm">299 บาท</span>
+        </div>
+
         <Field label="ชื่อเล่นของคุณ (Nickname) *">
           {(id) => (
             <Input
