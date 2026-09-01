@@ -20,6 +20,8 @@
 4. **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**: สถาปัตยกรรมระดับองค์กร (Enterprise Architecture), กลไกการเข้ารหัสความโปร่งใส (Provably Fair Flow)
 5. **[docs/INTERACTIVE_CARD_PICKING.md](docs/INTERACTIVE_CARD_PICKING.md)**: รายละเอียดระบบและ Component สำหรับการให้คนจับไพ่ด้วยตนเอง
 6. **[docs/AGENTS_TASK_PLAN.md](docs/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
+7. **[docs/ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: แผงแอดมิน `/admin` — auth, สถิติ, แก้ prompt/ความหมายไพ่แบบ live (Phase 1 เสร็จ M0–M3)
+8. **[docs/MARKETPLACE.md](docs/MARKETPLACE.md)**: **(HANDOFF Phase 2)** เอกสารส่งต่องาน Marketplace แม่หมอตัวจริง M4–M7 — SQL schema, code pattern, verification playbook, checklist ครบ
 
 ---
 
