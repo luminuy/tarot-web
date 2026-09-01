@@ -68,7 +68,7 @@ function mapRowToUser(row: RawUserRow): AppUser {
  */
 export async function upsertUserOnLogin(p: {
   id: string;
-  provider: "google" | "line";
+  provider: "google" | "line" | "email";
   email?: string | null;
   name: string;
   avatarUrl?: string | null;

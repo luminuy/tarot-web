@@ -1,13 +1,14 @@
 export interface UserProfile {
   id: string;
-  provider: "google" | "line";
+  provider: "google" | "line" | "email";
   email?: string;
   name: string;
   avatar?: string;
   createdAt: string;
+  tokenVersion?: number;
 }
 
-const AUTH_COOKIE_NAME = "tarot_auth_session";
+export const AUTH_COOKIE_NAME = "tarot_auth_session";
 const KNOWN_INSECURE_SECRETS = new Set([
   "tarot-sacred-auth-sanctuary-secret-2026",
   "secret",
