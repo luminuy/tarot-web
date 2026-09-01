@@ -1,9 +1,9 @@
 # 🎟 ระบบสมาชิกและโควตาเปิดไพ่ — แผนลงมือสำหรับทีม Antigravity
 
-> **สถานะ:** ตัดสินใจครบทุกข้อแล้ว พร้อมเริ่ม ไม่ต้องถามกลับ
-> **ฐานอ้างอิง:** commit `2de3e8d`
+> **สถานะ:** PR A–F โค้ดเสร็จครบ (Claude Sonnet 5 · 2026-09-01) · **ธง `entitlement.enabled` ยังปิด** — เปิดจริงตาม runbook ท้ายไฟล์ (เจ้าของตัดสินใจ)
+> **ฐานอ้างอิง:** commit `2de3e8d` (PR A rebase บน main หลัง #86)
 > **ขนาดงาน:** 6 PR
-> **ธงเปิดใช้:** `entitlement.enabled` (KV)
+> **ธงเปิดใช้:** `entitlement.enabled` (KV) — ยังปิด
 
 เอกสารนี้คือแผนลงมือแบบละเอียด — มี SQL, โค้ดจริงที่เข้ากับ API ของโปรเจกต์,
 จุดแทรกในแต่ละ route และเช็กลิสต์ราย PR
@@ -326,61 +326,93 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
 เรียงตามลำดับพึ่งพาจริง ข้ามลำดับจะติดเพราะของยังไม่มี
 หนึ่ง PR หนึ่ง branch และ `git fetch origin && git checkout -B <branch> origin/main` ก่อนเริ่มทุกครั้ง
 
-### PR A · แกนสิทธิ์ + ตารางฐานข้อมูล
+### PR A · แกนสิทธิ์ + ตารางฐานข้อมูล ✅ เสร็จ (2026-09-01)
 **ไม่ขึ้นกับใคร**
 
-- [ ] `migrations/0006_reading_entitlement.sql` ตามข้อ 4
-- [ ] `src/lib/entitlement/week.ts` — `weekKey()`, `nextResetAt()`
-- [ ] `src/lib/entitlement/entitlement.ts` — สี่ฟังก์ชันตามข้อ 5.2
-- [ ] `src/lib/entitlement/flag.ts` — `isEntitlementEnabled()` อ่านจาก `KEY.flag("entitlement.enabled")`
-- [ ] เพิ่มการลบ `reading_usage` + `user_bonus` ใน `softDeleteUser()`
-- [ ] ให้โบนัสสมัครใหม่ใน `upsertUserOnLogin()` **เฉพาะตอนสร้างผู้ใช้ครั้งแรก**
-- [ ] ยูนิตเทสต์: `weekKey` คร่อมวันอาทิตย์/จันทร์ · หักซ้ำ · ลำดับ weekly ก่อน bonus
+- [x] `migrations/0007_reading_entitlement.sql` ตามข้อ 4 *(เลื่อนจาก 0006 เพราะชนกับ email_auth)*
+- [x] เพิ่มสองตารางเข้า local SQLite shim ใน `src/lib/platform/db.ts` *(gotcha เฉพาะ repo นี้ — dev ใช้ node:sqlite)*
+- [x] `src/lib/entitlement/week.ts` — `weekKey()`, `nextResetAt()`
+- [x] `src/lib/entitlement/entitlement.ts` — `getEntitlement/consumeReading/refundReading/grantBonus` + `grantSignupBonus/purgeEntitlementData`
+- [x] `src/lib/entitlement/flag.ts` — `isEntitlementEnabled()` อ่านจาก `KEY.flag("entitlement.enabled")`
+- [x] เพิ่มการลบ `reading_usage` + `user_bonus` ใน `softDeleteUser()`
+- [x] ให้โบนัสสมัครใหม่ — แทรกใน OAuth callback (branch new-user 3,4) + email signup route *(ไม่ใช่ใน `upsertUserOnLogin` เพราะ upsert แยก insert/update ไม่ได้)*
+- [x] `scripts/qa/test-entitlement.ts` (30 เคส) + register ใน CHECKS → gate ที่ 14
+- [x] `npm run repo:verify` 14/14 ผ่าน
 
-> ยังไม่ต่อกับเส้นทางใด **พฤติกรรมเว็บไม่เปลี่ยนเลยหลัง merge**
+> ยังไม่ต่อกับเส้นทางใด **พฤติกรรมเว็บไม่เปลี่ยนเลยหลัง merge** *(ยกเว้น: signup เริ่มบันทึกแถวโบนัสไว้ล่วงหน้า — ไม่มีผลจนธงเปิด)*
+>
+> **หมายเหตุปรับจากแผน:** `user_bonus` ใช้หลายแถว + `UNIQUE(user_id, reason)` แทน 1 แถว/user
+> เพื่อให้ `grantBonus` idempotent ต่อเหตุผล (signup/grandfather/support) และ audit ได้
 
-### PR B · บังคับสิทธิ์ที่ API
+### PR B · บังคับสิทธิ์ที่ API ✅ เสร็จ (2026-09-01)
 **ต้องมี A**
 
-- [ ] `src/lib/entitlement/viewer.ts` — `getViewer(request)` อ่านเซสชันจาก `verifyUserSession()`
-- [ ] `app/api/entitlement/route.ts` ใหม่
-- [ ] แทรกการตรวจใน `start` · แทรกการหัก/คืนใน `read` · กั้นสมาชิกใน `chat`
-- [ ] เพดาน AI สองชั้นใน `ai-budget.ts`
-- [ ] ทดสอบด้วย `curl` ยิงตรงข้าม UI ต้องโดนบล็อก
+- [x] `src/lib/entitlement/viewer.ts` — `getViewer(request)` อ่านเซสชันจาก `verifyUserSession()` (guest ยัง used=0 จนถึง PR C)
+- [x] `app/api/entitlement/route.ts` ใหม่ — flag off → คืนสิทธิ์ "ไม่จำกัด" ให้ UI ไม่แสดง gate
+- [x] `start` — เช็คสิทธิ์หลัง safety ก่อน commitment → 403 + reason (ยังไม่หัก)
+- [x] `read` — หักสิทธิ์หลังบล็อกอ่านซ้ำ ก่อนเช็คเพดาน · คืนสิทธิ์ทุก failure path (error event / catch / stream cut / done ที่ token=0)
+- [x] `chat` — guest + flag on → 403 `members_only`
+- [x] เพดาน AI สองชั้นใน `ai-budget.ts` — `isAiCapReached(tier)` guest 70% / member 100% (default guest · call site ระบุ tier เอง · flag off = member = พฤติกรรมเดิม)
+- [x] `app/api/admin/entitlement/route.ts` — GET/PUT ธง (จำเป็นสำหรับ PR F) + audit
+- [x] curl: flag off = ปกติ · flag on + guest → chat 403 members_only · start 200 · GET /api/entitlement สะท้อนธง
+- [x] gate 14: +2 เคส (เพดาน AI สองชั้น) → 32/32 · repo:verify 14/14 · build:worker ✓
 
-> ธงยังปิดอยู่ตลอด PR นี้ พฤติกรรมจริงยังไม่เปลี่ยน
+> ธงยังปิดอยู่ตลอด PR นี้ พฤติกรรมจริงยังไม่เปลี่ยน (verify: flag off = readings/chat ปกติ)
+>
+> **ยังไม่ครบ e2e**: member-path (หัก/คืนจริง, สิทธิ์รายสัปดาห์หมด) พิสูจน์ด้วย unit test 32/32 —
+> ต้องทดสอบ member จริงด้วย OAuth session ตอน PR D หรือบน production
 
-### PR C · สิทธิ์ฟรีของผู้เยี่ยมชม
+### PR C · สิทธิ์ฟรีของผู้เยี่ยมชม ✅ เสร็จ (2026-09-01)
 **ต้องมี A, B**
 
-- [ ] `src/lib/entitlement/guest.ts` — คุกกี้ `tarot_guest` เซ็นด้วยรูปแบบเดิมของ `edge-auth.ts`
-      **ห้ามเขียนกลไกเซ็นใหม่**
-- [ ] คุกกี้ httpOnly · SameSite=Lax · Secure บน production · อายุ 1 ปี · เก็บแค่ `{ gid, usedAt }`
-- [ ] ผูกเข้ากับ `getViewer()` ให้คืน `kind: "guest"` พร้อม `guestUsed`
-- [ ] อัปเดต `app/privacy/page.tsx` ให้ครอบคุกกี้ตัวนี้ — **ทำใน PR เดียวกัน ห้ามเลื่อน**
+- [x] `src/lib/auth/edge-auth.ts` — เพิ่ม `signPayload()` / `verifyPayload()` (กลไก HMAC-SHA256 + secret เดิม · ไม่ได้เขียนใหม่)
+- [x] `src/lib/entitlement/guest.ts` — คุกกี้ `tarot_guest` (`{ gid, used }`) · httpOnly · SameSite=Lax · Secure prod · 1 ปี
+- [x] `getViewer()` อ่านคุกกี้ → `kind: "guest"` + `guestUsed`
+- [x] `read` route: guest ผ่าน gate → set คุกกี้ `used=1` ใน SSE response headers (**ไม่มี refund สำหรับ guest** — best-effort ตามข้อ 3)
+- [x] `app/privacy/page.tsx` — เพิ่มบรรทัดประกาศคุกกี้ `tarot_guest` (first-party, ไม่มี PII, ไม่ติดตามข้ามเว็บ)
+- [x] curl e2e (flag on): fresh guest remaining=1 → reading flow → คุกกี้ set → remaining=0 reason=guest_used → start ครั้งที่ 2 = 403
+- [x] gate 14 → 35/35 (+ sign/verify คุกกี้) · repo:verify 14/14 · build:worker ✓
 
-### PR D · สถานะบนหน้าเว็บ
+### PR D · สถานะบนหน้าเว็บ ✅ เสร็จ (2026-09-01)
 **ต้องมี B, C**
 
-- [ ] `QuotaBadge`, `EntitlementGate` และช่องคุยแบบล็อกใน `FollowUpChat`
-- [ ] ดึงสิทธิ์ครั้งเดียวใน `page.tsx` แล้วส่งลงเป็น prop ไม่ให้แต่ละคอมโพเนนต์ยิงเอง
-- [ ] รีเฟรชสิทธิ์หลังอ่านจบ และหลังล็อกอินสำเร็จ
-- [ ] ตรวจ responsive มือถือ/แท็บเล็ต/เดสก์ท็อป ตามมาตรฐานเดิมของโปรเจกต์
+- [x] `src/components/entitlement/QuotaBadge.tsx` — ป้ายข้าง UserProfileBadge (ธงปิด → ไม่แสดง)
+- [x] `src/components/entitlement/EntitlementGate.tsx` — wrap เนื้อหาขั้น SPREAD_SELECT (ธงปิด/มีสิทธิ์ → render children ปกติ)
+- [x] `FollowUpChat` — ช่องแชทแบบล็อกเมื่อ `!canChat` (guest) → ปุ่มเปิด AuthModal ผ่าน event `tarot:open-auth`
+- [x] `src/lib/entitlement/use-entitlement.ts` — hook + module cache (ดึง `/api/entitlement` ครั้งเดียว, `refreshEntitlement()` bust cache) *(แทน "ส่ง prop จาก page.tsx" เพื่อลดการแก้ไฟล์ page.tsx ที่เปราะ — spirit เดียวกัน: ยิงครั้งเดียว)*
+- [x] `page.tsx` — `refreshEntitlement()` หลังอ่านจบ (`done`) + หลังล็อกอิน (`auth_success`) · listener `tarot:open-auth`
+- [x] curl + browser (flag on): guest ใหม่ badge "ทดลองฟรี 1 ครั้ง" → ทำ reading → reload → badge "ทดลองฟรีครบแล้ว" + gate "ครั้งแรกจบแล้ว" แทนหน้าเลือกผัง · flag off → badge/gate หาย, หน้าเลือกผังปกติ (เหมือนก่อน PR D 100%)
+- [x] repo:verify 14/14 · build:worker ✓ · hydration warning เดิม (motion SSR) — **มีอยู่ก่อน PR D** (ยืนยันโดย stash)
 
-### PR E · การ์ดชวนสมัครหลังอ่านจบ
+### PR E · การ์ดชวนสมัครหลังอ่านจบ ✅ เสร็จ (2026-09-01)
 **ต้องมี D**
 
-- [ ] `components/auth/PostReadingSignup.tsx` — โผล่ท้ายขั้น 5 หลังสตรีมจบ ปิดได้
-- [ ] วัดผลด้วย `recordEvent()` ที่มีอยู่: `signup_card_shown` · `signup_card_clicked` · `signup_card_dismissed`
-- [ ] ผูกดวงที่ผู้เยี่ยมชมเปิดไว้เข้าบัญชีหลังสมัคร (กลไก merge มีอยู่แล้วจาก PR #74)
+- [x] `src/components/entitlement/PostReadingSignup.tsx` — โผล่ท้ายขั้น SUMMARY (`!isStreaming`) เฉพาะ guest + ธงเปิด · ปิดได้ (localStorage 7 วัน ไม่ตื๊อ)
+- [x] `POST /api/stats/event` — endpoint ให้ UI ยิง event ผ่าน **allowlist** (`signup_card_shown/clicked/dismissed`) → `recordEvent()`
+- [x] ผูกดวงหลังสมัคร — ใช้กลไกเดิม `syncAnonymousHistoryToServer()` ที่ page.tsx เรียกอยู่แล้วหลัง `auth_success` (ไม่ต้องทำใหม่)
+- [x] repo:verify 14/14 · build:worker ✓ · curl: allowlist metric → 200 · metric อื่น → 400
+- [~] การ์ดที่ SUMMARY (visual): verify ด้วย logic + track endpoint — ไม่ได้เห็นในเบราว์เซอร์เพราะ test cookie เป็น guest ที่ใช้สิทธิ์หมดแล้ว (เริ่ม reading ใหม่ไม่ได้) · ตรวจซ้ำตอน production หรือด้วยเบราว์เซอร์คุกกี้สะอาด
 
-### PR F · เปิดใช้งานจริง
+### PR F · เปิดใช้งานจริง — **โค้ดพร้อมแล้ว (2026-09-01) · ยังไม่เปิดธง (เจ้าของตัดสินใจ)**
 **ต้องมี A–E · ทำหลังทดสอบบน production แล้ว**
 
-- [ ] สคริปต์ให้โบนัสเปลี่ยนผ่าน 10 ครั้ง แก่ผู้ใช้ที่ `created_at` ก่อนวันเปิดใช้
-- [ ] ประกาศบนเว็บล่วงหน้าอย่างน้อย 7 วันก่อนเปิดธง
-- [ ] เปิด `entitlement.enabled` ผ่านแผงแอดมิน
-- [ ] เฝ้าดู `entitlement_blocked_read` และ `ai_cap_hit` ใน 48 ชั่วโมงแรก
+โค้ด PR F เสร็จ:
+- [x] `scripts/entitlement-grandfather.ts` + `npm run entitlement:grandfather -- --before YYYY-MM-DD [--remote] [--dry-run]` — ให้โบนัส 10 ครั้ง (idempotent · unique(user_id,"grandfather"))
+- [x] `src/components/entitlement/AnnouncementBanner.tsx` — แบนเนอร์หน้าแรก แสดงเมื่อ `entitlement.announce` เปิด + ธงจริงยังปิด · ปิดได้
+- [x] แท็บแอดมิน "สิทธิ์เปิดไพ่" (`src/components/admin/EntitlementAdmin.tsx`) — toggle ธง (confirm ก่อนเปิด) · toggle + วันที่ประกาศ · คำสั่ง grandfather · metric 8 ตัว (7 วัน)
+- [x] `GET/PUT /api/admin/entitlement` ขยาย: `announce` + `announceResetDate` + `metrics` · `GET /api/entitlement` เผย `announce`/`announceResetDate` (public)
+- [x] repo:verify 14/14 (test-entitlement 36/36 +grandfather) · build:worker ✓ · browser: แบนเนอร์ + แท็บแอดมิน render ถูก
+
+**ขั้นตอนเปิดจริง — ทำได้ครบจาก `/admin` → แท็บ "สิทธิ์เปิดไพ่" (ไม่ต้องใช้ terminal):**
+1. **เตรียมฐานข้อมูล** → กดปุ่ม (สร้างตารางบน D1 · idempotent · แสดง ✓ พร้อม)
+2. **โบนัสเปลี่ยนผ่าน** → กรอกวันตัด → "ตรวจจำนวน" (preview) → "ให้โบนัส" (idempotent กดซ้ำได้)
+3. **แบนเนอร์ประกาศ** → กรอกวันเริ่มใช้ → เปิด "ประกาศ" → **รออย่างน้อย 7 วัน**
+4. ครบ 7 วัน → **เปิดระบบสิทธิ์จริง** → กด (confirm · ปุ่มล็อกจนกว่าข้อ 1 ✓)
+5. เฝ้าดู metric ในการ์ด "สถิติระบบสิทธิ์" — `blockedRead` / `aiCapHit` / `signupClicked` 48 ชม.แรก
+   · ถ้า `aiCapHit` สูง → เพิ่ม env `AI_DAILY_CALL_CAP` (สมาชิก × 3 ÷ 7 + headroom) แล้ว redeploy
+
+> CLI ทางเลือก (ผู้เชี่ยวชาญ): `npm run entitlement:grandfather -- --before YYYY-MM-DD --remote` · migration: `npm run db:migrate`
+> (`deploy.yml` ยังไม่รัน d1 migrations อัตโนมัติ — ปุ่ม "เตรียมฐานข้อมูล" ในแอดมินทดแทนสำหรับตารางของระบบนี้)
 
 ---
 

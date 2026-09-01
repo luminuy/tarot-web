@@ -282,6 +282,7 @@ export async function setMarketingConsent(id: string, consent: boolean): Promise
 
 /**
  * ทำเครื่องหมายลบบัญชีผู้ใช้ (Soft Delete)
+ * + ลบข้อมูลสิทธิ์การเปิดไพ่ทั้งหมด (reading_usage / user_bonus) ตาม PDPA
  */
 export async function softDeleteUser(id: string): Promise<void> {
   const db = await getAppDB();
@@ -291,6 +292,13 @@ export async function softDeleteUser(id: string): Promise<void> {
     .prepare(`UPDATE users SET deleted_at = ? WHERE id = ?`)
     .bind(now, id)
     .run();
+
+  try {
+    const { purgeEntitlementData } = await import("@/lib/entitlement/entitlement");
+    await purgeEntitlementData(id);
+  } catch (err) {
+    console.error("[users.repo] purgeEntitlementData failed on softDelete:", err);
+  }
 }
 
 /**

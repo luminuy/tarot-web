@@ -89,16 +89,68 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   }
 
-  // อ่านซ้ำให้คืนผลเดิม ไม่เรียกโมเดลใหม่
+  // อ่านซ้ำให้คืนผลเดิม ไม่เรียกโมเดลใหม่ (ไม่หักสิทธิ์)
   if (record.result) {
     limit.releaseConcurrency();
     return streamCached(record.result, record);
   }
 
-  // World-Class AI Spend Cap & Financial Circuit Breaker
+  // ── หักสิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 6.1) — วางหลังบล็อกอ่านซ้ำ ก่อนเช็คเพดาน AI ──
+  let consumed = false;
+  let capTier: "guest" | "member" = "member"; // ธงปิด → เพดานเต็ม (พฤติกรรมเดิม)
+  let guestConsumeCookie: string | null = null; // Set-Cookie สำหรับผู้เยี่ยมชมที่ใช้สิทธิ์
+  if (!privileged) {
+    const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
+    if (await isEntitlementEnabled()) {
+      const { getViewer } = await import("@/lib/entitlement/viewer");
+      const { consumeReading } = await import("@/lib/entitlement/entitlement");
+      const viewer = await getViewer(request);
+      capTier = viewer.kind;
+      consumed = await consumeReading(viewer, id);
+      if (!consumed) {
+        limit.releaseConcurrency();
+        recordEvent("entitlement_blocked_read");
+        return Response.json(
+          { error: "สิทธิ์เปิดไพ่ของคุณหมดแล้ว", reason: "weekly_exhausted" },
+          { status: 403 },
+        );
+      }
+      // ผู้เยี่ยมชม: หักด้วยคุกกี้ (DB ไม่มีแถว) — set used=1 ใน response headers
+      // ไม่มี refund สำหรับ guest (เจตนา: สิทธิ์ฟรีเป็น best-effort · ล้างคุกกี้ = สิทธิ์ใหม่ · ENTITLEMENT_PLAN ข้อ 3)
+      if (viewer.kind === "guest") {
+        const { guestCookieValue, GUEST_COOKIE_NAME, GUEST_COOKIE_OPTIONS } = await import(
+          "@/lib/entitlement/guest"
+        );
+        const gid =
+          viewer.gid !== "anon"
+            ? viewer.gid
+            : `g_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
+        const token = await guestCookieValue({ gid, used: 1 }).catch(() => null);
+        if (token) {
+          const o = GUEST_COOKIE_OPTIONS;
+          guestConsumeCookie = `${GUEST_COOKIE_NAME}=${token}; Path=${o.path}; HttpOnly; SameSite=Lax; Max-Age=${o.maxAge}${o.secure ? "; Secure" : ""}`;
+        }
+        recordEvent("entitlement_guest_consumed");
+      }
+    }
+  }
+
+  const refundIfConsumed = async () => {
+    if (!consumed) return;
+    consumed = false;
+    try {
+      const { refundReading } = await import("@/lib/entitlement/entitlement");
+      await refundReading(id);
+    } catch {
+      /* best-effort */
+    }
+  };
+
+  // World-Class AI Spend Cap & Financial Circuit Breaker (เพดานสองชั้น: guest 70% / member 100%)
   const { isAiCapReached, recordAiCall, recordPerIpReadQuota } = await import("@/lib/security/ai-budget");
-  if (!privileged && (await isAiCapReached())) {
+  if (!privileged && (await isAiCapReached(capTier))) {
     limit.releaseConcurrency();
+    await refundIfConsumed();
     recordEvent("ai_cap_hit");
     return Response.json(
       { error: "ระบบดูดวงมีผู้ใช้จำนวนมากในวันนี้ กรุณากลับมาใหม่พรุ่งนี้ หรือลองอีกครั้งในภายหลัง" },
@@ -120,6 +172,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   };
 
   const startedAt = Date.now();
+  let completedOk = false;
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -141,6 +194,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           if (isClosed) break;
 
           if (event.type === "done") {
+            // คำอ่านสำรอง/ออฟไลน์ (token = 0) ไม่ควรหักสิทธิ์ผู้ใช้ — คืนให้
+            const realReading =
+              (event.usage?.inputTokens ?? 0) > 0 || (event.usage?.outputTokens ?? 0) > 0;
+            if (realReading) {
+              completedOk = true;
+            } else {
+              await refundIfConsumed();
+            }
+
             const updated = updateReading(id, { status: "COMPLETED", result: event.reading });
             if (updated) {
               const { persistReading } = await import("@/server/store");
@@ -170,6 +232,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             });
           } else if (event.type === "error") {
             updateReading(id, { status: "FAILED" });
+            await refundIfConsumed();
             recordEvents(["reading_failed", "ai_error:gemini"]);
             send(controller, "error", { message: event.message });
           } else {
@@ -179,9 +242,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       } catch (error) {
         console.error("stream การอ่านล้มเหลว", error);
         updateReading(id, { status: "FAILED" });
+        await refundIfConsumed();
         recordEvent("reading_failed");
         send(controller, "error", { message: "คำอ่านขัดข้อง ลองใหม่อีกครั้งนะ" });
       } finally {
+        // สตรีมถูกตัดกลางคัน / ไม่มี done ที่สำเร็จ → คืนสิทธิ์
+        if (!completedOk) await refundIfConsumed();
         limit.releaseConcurrency();
         if (!isClosed) {
           try {
@@ -193,15 +259,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     },
   });
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream; charset=utf-8",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-      // กัน proxy บางตัวหน่วง buffer จนสตรีมไม่ไหล
-      "X-Accel-Buffering": "no",
-    },
+  const streamHeaders = new Headers({
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive",
+    // กัน proxy บางตัวหน่วง buffer จนสตรีมไม่ไหล
+    "X-Accel-Buffering": "no",
   });
+  if (guestConsumeCookie) streamHeaders.append("Set-Cookie", guestConsumeCookie);
+
+  return new Response(stream, { headers: streamHeaders });
 }
 
 /** ส่งผลที่เคยอ่านไว้แล้วกลับไปในรูปแบบเดียวกัน เพื่อให้ฝั่งหน้าเว็บใช้โค้ดชุดเดิม */

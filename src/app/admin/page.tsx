@@ -18,13 +18,18 @@ const ReadersManager = dynamic(() => import("@/components/admin/ReadersManager")
   ssr: false,
   loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดรายการแม่หมอ…</p>,
 });
+const EntitlementAdmin = dynamic(() => import("@/components/admin/EntitlementAdmin"), {
+  ssr: false,
+  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>,
+});
 
-type Tab = "stats" | "content" | "readers";
+type Tab = "stats" | "content" | "readers" | "entitlement";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "stats", label: "สถิติ" },
   { id: "content", label: "เนื้อหา (prompt / ไพ่ / AI)" },
   { id: "readers", label: "แม่หมอ (Marketplace)" },
+  { id: "entitlement", label: "สิทธิ์เปิดไพ่" },
 ];
 
 export default function AdminHome() {
@@ -91,8 +96,10 @@ export default function AdminHome() {
           <StatsDashboard />
         ) : tab === "content" ? (
           <ContentEditor />
-        ) : (
+        ) : tab === "readers" ? (
           <ReadersManager />
+        ) : (
+          <EntitlementAdmin />
         )}
       </section>
     </div>

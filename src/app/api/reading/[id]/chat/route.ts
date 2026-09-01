@@ -165,6 +165,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { isPrivilegedTestRequest } = await import("@/lib/security/privileged");
   const privileged = await isPrivilegedTestRequest(request);
 
+  // ── การคุยต่อกับแม่หมอ = สมาชิกเท่านั้น (ENTITLEMENT_PLAN ข้อ 4) · ไม่กินโควตาเปิดไพ่ ──
+  if (!privileged) {
+    const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
+    if (await isEntitlementEnabled()) {
+      const { getViewer } = await import("@/lib/entitlement/viewer");
+      const viewer = await getViewer(request);
+      if (viewer.kind !== "member") {
+        recordEvent("entitlement_blocked_chat");
+        return NextResponse.json(
+          {
+            error: "สมัครสมาชิกเพื่อถามแม่หมอต่อ และเก็บดวงไว้ดูย้อนหลังได้ทุกเครื่อง",
+            reason: "members_only",
+          },
+          { status: 403 },
+        );
+      }
+    }
+  }
+
   let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
   if (!privileged) {
     const clientIp = getClientIdentifier(request);
@@ -309,8 +328,9 @@ ${cards.join("\n")}
    - คืนพลังให้ผู้ถามเสมอว่าเขาสามารถเปลี่ยนแปลงผลลัพธ์ได้ด้วยการลงมือทำในปัจจุบัน`;
 
     // Pure Google Gemini 3.7 Flash AI Engine
+    // แชท = สมาชิกเท่านั้น (หรือธงปิด = พฤติกรรมเดิม) → ใช้เพดานชั้นสมาชิก (100%) เสมอ
     const { isAiCapReached } = await import("@/lib/security/ai-budget");
-    const aiCapHit = !privileged && (await isAiCapReached());
+    const aiCapHit = !privileged && (await isAiCapReached("member"));
 
     const geminiKey = !aiCapHit ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY : undefined;
     if (geminiKey) {

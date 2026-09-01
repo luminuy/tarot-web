@@ -75,6 +75,10 @@ npx wrangler login
 ```bash
 npx wrangler secret put GEMINI_API_KEY
 npx wrangler secret put TAROT_SESSION_SECRET   # openssl rand -hex 32 — จำเป็น! ไม่งั้น Provably-Fair ใช้ค่า default ที่ทุกคนรู้
+npx wrangler secret put AUTH_SECRET            # openssl rand -hex 32 — สำหรับเข้ารหัส JWT Session ของผู้ใช้
+npx wrangler secret put PASSWORD_PEPPER        # openssl rand -hex 32 — สำหรับ Server-side Pepper แฮชรหัสผ่าน
+npx wrangler secret put RESEND_API_KEY         # API Key จาก Resend.com สำหรับส่งอีเมลยืนยันตัวตนและรีเซ็ตรหัสผ่าน
+npx wrangler secret put EMAIL_FROM             # แม่หมอลูมินัย <noreply@tarot.luminuy.com>
 ```
 
 > ส่วน KV namespace สำหรับ edge cache สร้างครั้งเดียวแล้ว (ดูหัวข้อ **1.5** ด้านบน) — ไม่ต้องสร้างใหม่ทุกครั้ง

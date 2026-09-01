@@ -22,6 +22,11 @@ import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
+import { QuotaBadge } from "@/components/entitlement/QuotaBadge";
+import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
+import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
+import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
+import { refreshEntitlement } from "@/lib/entitlement/use-entitlement";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
 const ShuffleRitual = dynamic(
@@ -216,6 +221,11 @@ export default function TarotPage() {
         setAuthBanner({ type: "error", text: authError });
       }
 
+      if (isAuthSuccess || isVerified || isPwReset) {
+        // เพิ่งล็อกอิน/ยืนยัน → รีเฟรชสิทธิ์ (guest → member)
+        refreshEntitlement();
+      }
+
       import("@/lib/utils/history").then((m) => {
         if (isAuthSuccess || isVerified || isPwReset) {
           m.syncAnonymousHistoryToServer().then(({ merged }) => {
@@ -228,6 +238,13 @@ export default function TarotPage() {
         }
       });
     }
+  }, []);
+
+  // เปิด AuthModal จากคอมโพเนนต์ลึก (เช่นช่องแชทที่ล็อกใน FollowUpChat) ผ่าน event bus
+  useEffect(() => {
+    const openAuth = () => setIsAuthOpen(true);
+    window.addEventListener("tarot:open-auth", openAuth);
+    return () => window.removeEventListener("tarot:open-auth", openAuth);
   }, []);
 
   // เขียน flow state ลง sessionStorage ทุกครั้งที่มีการเปลี่ยนแปลง (หลัง resume จบแล้วเท่านั้น)
@@ -476,6 +493,7 @@ export default function TarotPage() {
                 setIsStreaming(false);
                 navigateStep("SUMMARY");
                 soundManager.playOracleRevealSound();
+                refreshEntitlement(); // อ่านจบ → สิทธิ์อาจลดลง อัปเดต badge
 
                 // Auto-save to Reading Journal
                 if (data.reading) {
@@ -619,6 +637,7 @@ export default function TarotPage() {
 
           {/* Right Toolbar Controls (UserProfileBadge, Sacred Dropdown & Reset Button) */}
           <div className="flex items-center gap-2 sm:gap-2.5">
+            <QuotaBadge />
             <UserProfileBadge onOpenAuthModal={() => setIsAuthOpen(true)} />
 
             <SacredNavDropdown
@@ -645,6 +664,8 @@ export default function TarotPage() {
 
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
+        <AnnouncementBanner />
+
         {/* Auth Toast Notification Banner */}
         {authBanner && (
           <div
@@ -689,6 +710,7 @@ export default function TarotPage() {
               exit="exit"
               className="space-y-8"
             >
+              <EntitlementGate active={currentStep === "SPREAD_SELECT"} onOpenAuth={() => setIsAuthOpen(true)}>
               <div className="text-center space-y-3 relative">
                 {/* 3D Floating Tarot Stage with Sacred Geometric Aura (Matching Step 3 Shuffle) */}
                 <div className="h-60 sm:h-72 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1200 }}>
@@ -744,6 +766,7 @@ export default function TarotPage() {
                   navigateStep("INTENTION_SELECT");
                 }}
               />
+              </EntitlementGate>
             </motion.div>
           )}
 
@@ -941,6 +964,10 @@ export default function TarotPage() {
                   </button>
                 </div>
               </div>
+
+              {currentStep === "SUMMARY" && !isStreaming && (
+                <PostReadingSignup onOpenAuth={() => setIsAuthOpen(true)} />
+              )}
             </motion.div>
           )}
         </AnimatePresence>

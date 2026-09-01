@@ -54,6 +54,140 @@
     - `npm run repo:verify` ผ่านครบ **13/13 ด่าน 100% Green**
 - **ไฟล์ที่แก้ไข**:
   - `src/components/ui/GalaxyCanvas.tsx`, `src/components/ui/MysticAltarCanvas.tsx`, `src/components/spread/SpreadCardSelector.tsx`, `src/app/page.tsx`, `docs/WORK_LOG.md`
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR G — คุมทุกขั้นตอนเปิดใช้งานจาก /admin (ไม่ต้องใช้ terminal)
+
+> เหตุผล: หุ้นส่วนที่คุมระบบไม่ถนัดโปรแกรมมิ่ง — ทุก action ต้องกดจาก `/admin`
+
+- **สิ่งที่ทำ**:
+  - `src/app/api/admin/entitlement/ops/route.ts` — endpoint เดียว 4 action (guard requireAdmin, audit):
+    - `check_db` / `init_db` — ตรวจ/สร้างตาราง `reading_usage` + `user_bonus` บน D1 (`CREATE TABLE IF NOT EXISTS` รันทีละ statement — idempotent) · ทดแทนการรัน `npm run db:migrate` สำหรับตารางของระบบนี้ (deploy.yml ไม่รัน d1 migrations)
+    - `grandfather_preview` — นับผู้ใช้ที่สมัครก่อนวันตัด
+    - `grandfather_run` — ให้โบนัส 10 ครั้ง (batch ≤ 4000/ครั้ง กัน timeout · idempotent · คืน `remaining` ถ้ามีเกิน)
+  - `src/components/admin/EntitlementAdmin.tsx` — เขียนใหม่เป็น 4 ขั้นเรียงลำดับ 1→4:
+    - 1 เตรียมฐานข้อมูล (แสดง ✓ พร้อม / ✗) · 2 โบนัสเปลี่ยนผ่าน (input + ตรวจจำนวน + ให้โบนัส) · 3 แบนเนอร์ประกาศ · 4 เปิดระบบจริง (ปุ่ม disabled จนกว่าฐานข้อมูล ✓ · confirm ก่อนเปิด)
+    - + การ์ดสถิติ 8 metric
+- **ผลการทดสอบ**:
+  - `repo:verify` **14/14** · `build:worker` ✓ · `tsc` 0 errors
+  - `next dev` + curl: check_db → `ready:true` · init_db idempotent · seed 3 users (2 เก่า 1 ใหม่) → preview `count:2` → run `granted:2` → run ซ้ำ `granted:2` แต่ `SUM(granted)` ยัง 10 (idempotent) · bad action → 400
+  - browser: แท็บ "สิทธิ์เปิดไพ่" render 4 ขั้น + ปุ่ม "ตรวจจำนวน" คืน "พบผู้ใช้ 2 คน" จาก UI
+- **runbook เปิดจริง (100% จาก /admin)**: ดู [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) PR F/G
+
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR F — เครื่องมือเปิดใช้งานจริง (โค้ดครบ · ยังไม่เปิดธง)
+
+> ต่อจาก PR E (#92) · **พฤติกรรมเว็บไม่เปลี่ยน** — ธง `entitlement.enabled` ยังปิด · เปิดจริงตาม runbook ใน [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) (เจ้าของตัดสินใจ + ประกาศ ≥ 7 วัน + โบนัสเปลี่ยนผ่าน)
+
+- **สิ่งที่ทำ**:
+  - `scripts/entitlement-grandfather.ts` + `npm run entitlement:grandfather -- --before YYYY-MM-DD [--remote] [--dry-run]` — ให้โบนัส 10 ครั้งแก่ผู้ใช้ที่สมัครก่อนวันตัด (idempotent ด้วย `UNIQUE(user_id, "grandfather")`)
+  - `src/components/entitlement/AnnouncementBanner.tsx` — แบนเนอร์หน้าแรกประกาศล่วงหน้า (แสดงเมื่อ `entitlement.announce` เปิด + ธงจริงยังปิด) · ปิดได้ (localStorage)
+  - `src/components/admin/EntitlementAdmin.tsx` + แท็บแอดมิน "สิทธิ์เปิดไพ่" — toggle ธง (มี confirm), toggle ประกาศ + วันที่, คำสั่ง grandfather, metric 8 ตัว (blockedStart/Read/Chat, guestConsumed, aiCapHit, signup shown/clicked/dismissed) 7 วันล่าสุด
+  - `GET/PUT /api/admin/entitlement` ขยาย — `announce` / `announceResetDate` / `metrics` · `GET /api/entitlement` เผย `announce` ให้ public
+  - `use-entitlement.ts` — เพิ่ม `announce` / `announceResetDate` ใน type
+- **ผลการทดสอบ**:
+  - `repo:verify` **14/14** · gate 14 `test-entitlement` → **36/36** (+grandfather idempotent) · `build:worker` ✓
+  - `next dev` + curl: admin GET/PUT entitlement (flag/announce/metrics) · public `/api/entitlement` เผย `announce:true, announceResetDate:"15 ก.ย. 2569"` เมื่อธงปิด+ประกาศเปิด
+  - browser: แบนเนอร์ประกาศแสดงบนหน้าแรก (ธงปิด) · แท็บแอดมิน "สิทธิ์เปิดไพ่" render ครบ 4 panel
+  - grandfather script: seed user → grant 10 + signup 3 → `bonusRemaining = 13` · รันซ้ำ → ยัง 13
+- **✅ ครบทั้ง 6 PR (A–F) ของ ENTITLEMENT_PLAN** — ระบบพร้อมเปิด รอเจ้าของทำ runbook
+
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR E — การ์ดชวนสมัครหลังอ่านจบ
+
+> ต่อจาก PR D (#91) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธงปิด → การ์ดไม่แสดง)
+
+- **สิ่งที่ทำ**:
+  - `src/components/entitlement/PostReadingSignup.tsx` — การ์ดท้ายขั้น SUMMARY (`!isStreaming`) เฉพาะ guest + ธงเปิด · ปิดได้ (localStorage 7 วัน — ไม่ตื๊อ) · ไม่ใช่ป๊อปอัปทับ
+  - `src/app/api/stats/event/route.ts` — `POST` endpoint ให้ UI ยิง event ผ่าน **allowlist** (`signup_card_shown`/`clicked`/`dismissed`) → `recordEvent()` (กัน metric อิสระทำ KV บวม)
+  - `src/app/page.tsx` — `<PostReadingSignup/>` ท้าย SUMMARY step
+  - ผูกดวง guest → บัญชีหลังสมัคร: ใช้ `syncAnonymousHistoryToServer()` ที่ page.tsx เรียกหลัง `auth_success` อยู่แล้ว (ไม่ต้องทำใหม่)
+- **ผลการทดสอบ**: `repo:verify` **14/14** · `build:worker` ✓ · curl: `signup_card_shown` → 200 · `evil_metric` → 400 (allowlist ทำงาน)
+- **หมายเหตุ**: การ์ด visual ที่ SUMMARY ยังไม่ได้เห็นในเบราว์เซอร์ (test cookie เป็น guest ที่สิทธิ์หมด เริ่ม reading ใหม่ไม่ได้) — ตรวจซ้ำตอน production
+- **ยังไม่ทำ**: PR F (rollout — โบนัสเปลี่ยนผ่าน + ประกาศ + เปิดธง — **ต้องเจ้าของตัดสินใจ**)
+
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR D — สถานะบนหน้าเว็บ (QuotaBadge / EntitlementGate / locked chat)
+
+> ต่อจาก PR C (#90) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ปิด → badge/gate ไม่แสดง, หน้าเลือกผังปกติ)
+
+- **สิ่งที่ทำ**:
+  - `src/lib/entitlement/use-entitlement.ts` — hook `useEntitlement()` + module-level cache (ยิง `/api/entitlement` ครั้งเดียวทั้งหน้า) + `refreshEntitlement()` bust cache
+  - `src/components/entitlement/QuotaBadge.tsx` — ป้ายสิทธิ์ข้าง `UserProfileBadge` (guest: "ทดลองฟรี 1 ครั้ง" · member: "เปิดได้อีก N ครั้ง · รีเซ็ตวัน…")
+  - `src/components/entitlement/EntitlementGate.tsx` — wrap เนื้อหาขั้น SPREAD_SELECT · สิทธิ์หมด → การ์ด "ครั้งแรกจบแล้ว" (guest + ปุ่มสมัคร) / "ปิดวงสัปดาห์นี้" (member + วันรีเซ็ต)
+  - `src/components/reading/FollowUpChat.tsx` — `!canChat` → ช่องพิมพ์กลายเป็นปุ่ม "สมัครสมาชิกเพื่อถามแม่หมอต่อ" (เปิด AuthModal ผ่าน event `tarot:open-auth`) + ซ่อนคำถามแนะนำ
+  - `src/app/page.tsx` — `<QuotaBadge/>` ใน header · wrap SPREAD_SELECT ด้วย `<EntitlementGate>` · `refreshEntitlement()` หลัง `done` + หลัง `auth_success` · listener `tarot:open-auth` → เปิด AuthModal
+  - **ปรับจากแผน**: ใช้ hook + module cache แทน "prop จาก page.tsx" เพื่อลดการแก้ page.tsx (1081 บรรทัด state machine เปราะ) — spirit เดียวกัน (ยิง `/api/entitlement` ครั้งเดียว)
+- **ผลการทดสอบ**:
+  - `repo:verify` **14/14** · `build:worker` ✓
+  - browser (flag on): guest ใหม่ → badge "ทดลองฟรี 1 ครั้ง" → ทำ reading → reload → badge "ทดลองฟรีครบแล้ว" + gate "ครั้งแรกจบแล้ว" แทนหน้าเลือกผัง (spread selector `hasSpreadSelector:false`)
+  - browser (flag off): `enabled:false` → badge/gate หายหมด, หน้าเลือกผังปกติ — **เหมือนก่อน PR D 100%**
+  - hydration warning (motion SSR `translateX ±40px`) — **มีอยู่ก่อน PR D** (ยืนยันด้วย `git stash` แล้ว reload)
+- **ยังไม่ทำ**: PR E (การ์ดชวนสมัคร) · PR F (rollout — ต้องเจ้าของ)
+
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR C — สิทธิ์ฟรีของผู้เยี่ยมชม (คุกกี้ tarot_guest)
+
+> ต่อจาก PR B (#89) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ยังปิด)
+
+- **สิ่งที่ทำ**:
+  - `src/lib/auth/edge-auth.ts` — เพิ่ม `signPayload()` / `verifyPayload<T>()` — HMAC-SHA256 + `AUTH_SECRET` เดิม (reuse กลไก ไม่เขียนใหม่)
+  - `src/lib/entitlement/guest.ts` — คุกกี้ `tarot_guest` เก็บ `{ gid, used }` · httpOnly · SameSite=Lax · Secure (prod) · Max-Age 1 ปี · `readGuestCookie()` clamp used ที่ `GUEST_LIMIT`
+  - `src/lib/entitlement/viewer.ts` — `getViewer()` อ่านคุกกี้ guest → `guestUsed`
+  - `src/app/api/reading/[id]/read/route.ts` — guest ที่ผ่าน gate → เขียนคุกกี้ `used=1` ลง SSE response headers (**ไม่มี refund สำหรับ guest** — สิทธิ์ฟรีเป็น best-effort, ล้างคุกกี้ = สิทธิ์ใหม่, ตาม ENTITLEMENT_PLAN ข้อ 3) · stat `entitlement_guest_consumed`
+  - `src/app/privacy/page.tsx` — เพิ่มบรรทัดประกาศคุกกี้ `tarot_guest` (first-party, เก็บแค่รหัสสุ่ม+จำนวนครั้ง, ไม่มี PII, ไม่ติดตามข้ามเว็บ) — **ทำใน PR เดียวกันตามแผน**
+- **ผลการทดสอบ**:
+  - gate 14 `test-entitlement.ts` → **35/35** (+ sign/verify + tamper คุกกี้) · `repo:verify` **14/14** · `build:worker` ✓
+  - `next dev` + curl (flag on): fresh guest `remaining:1` → reading flow เต็ม (start→shuffle→read) → คุกกี้ `tarot_guest` set → `GET /api/entitlement` `remaining:0 reason:guest_used` → start ครั้งที่ 2 = **403** พร้อม CTA สมัคร
+- **ยังไม่ทำ**: PR D (UI) · PR E (การ์ดชวนสมัคร) · PR F (rollout — ต้องเจ้าของ)
+
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR B — บังคับสิทธิ์ที่ API
+
+> ต่อจาก PR A (#87) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ยังปิด · flag off = readings/chat ปกติทุกอย่าง)
+
+- **สิ่งที่ทำ**:
+  - `src/lib/entitlement/viewer.ts` — `getViewer(request)` → `member` (จากคุกกี้ `tarot_auth_session`) หรือ `guest` (used=0 จนถึง PR C)
+  - `src/app/api/entitlement/route.ts` — `GET` คืน `Entitlement` ให้ UI · flag off → สิทธิ์ "ไม่จำกัด"
+  - `src/app/api/reading/start/route.ts` — เช็คสิทธิ์หลัง safety ก่อน commitment → `403` + `reason`/`resetAt` (**ยังไม่หัก** — ENTITLEMENT_PLAN ข้อ 1)
+  - `src/app/api/reading/[id]/read/route.ts` — หักสิทธิ์หลังบล็อกอ่านซ้ำ · **คืนสิทธิ์ครบทุก failure path**: error event, catch, stream ถูกตัด (`completedOk` guard ใน finally), และ `done` ที่ token=0 (คำอ่านสำรอง/ออฟไลน์)
+  - `src/app/api/reading/[id]/chat/route.ts` — guest + flag on → `403 members_only` (แชท = สมาชิกเท่านั้น ไม่กินโควตา)
+  - `src/lib/security/ai-budget.ts` — `isAiCapReached(tier)` เพดานสองชั้น guest 70% / member 100% (default `guest` · flag off ส่ง `member` = พฤติกรรมเดิม)
+  - `src/app/api/admin/entitlement/route.ts` — GET/PUT ธง (สำหรับ PR F) + audit log
+  - **stats ใหม่**: `entitlement_blocked_start/read/chat`
+- **ผลการทดสอบ**:
+  - gate 14 `test-entitlement.ts` → **32/32** (+ เพดาน AI สองชั้น) · `repo:verify` **14/14** · `build:worker` ✓
+  - `next dev` + curl: flag off = readings/chat ปกติ · flag on + guest → `GET /api/entitlement` = `{kind:guest,canChat:false,remaining:1}` · chat → `403 members_only` · start → `200`
+  - PUT `/api/admin/entitlement {enabled}` toggle ธงได้ (audited)
+- **ยังไม่ครบ**: member-path e2e (หัก/คืนจริงผ่าน OAuth session) — พิสูจน์ด้วย unit test · PR C สิทธิ์ผู้เยี่ยมชม · PR D–F
+
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR A — แกนสิทธิ์ + ตารางฐานข้อมูล
+
+> อ้างอิงแผน [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) · **ไม่เปลี่ยนพฤติกรรมเว็บ** (ยังไม่ต่อกับเส้นทางใด · ธง `entitlement.enabled` ยังปิด)
+
+- **ความต้องการ**: สร้างแกนสิทธิ์การเปิดไพ่ (แหล่งความจริงเดียว) + ตาราง D1 ก่อนบังคับใช้ที่ API ใน PR B
+- **สิ่งที่ทำ**:
+  - `migrations/0007_reading_entitlement.sql` — ตาราง `reading_usage` (แถวต่อการเปิดไพ่ · `UNIQUE(reading_id)` กันหักซ้ำ) + `user_bonus`
+    - **ปรับจากแผน**: แผนเดิมเขียน migration 0006 (ชนกับ email_auth) → เลื่อนเป็น 0007 · `user_bonus` เปลี่ยนจาก 1 แถว/user เป็นหลายแถว + `UNIQUE(user_id, reason)` เพื่อให้ `grantBonus` idempotent ต่อเหตุผล และตรวจย้อนหลังได้ (ตรงหลักการเดียวกับ `reading_usage`)
+  - เพิ่มสองตารางเข้า local SQLite shim (`src/lib/platform/db.ts`) — dev/test มีตารางครบ
+  - `src/lib/entitlement/week.ts` — `weekKey()` (จันทร์ 00:00 เวลาไทย UTC+7), `nextResetAt()`
+  - `src/lib/entitlement/entitlement.ts` — `getEntitlement()`, `consumeReading()` (fast-path check + พึ่ง `UNIQUE` + catch สำหรับ race), `refundReading()`, `grantBonus()`/`grantSignupBonus()`, `purgeEntitlementData()` · ค่าคงที่ `WEEKLY_LIMIT=3` `GUEST_LIMIT=1` `SIGNUP_BONUS=3` `GRANDFATHER_BONUS=10`
+  - `src/lib/entitlement/flag.ts` — `isEntitlementEnabled()` อ่าน KV `app:flag:entitlement.enabled` (default ปิด)
+  - โบนัสสมัครใหม่: `grantSignupBonus()` แทรกใน OAuth callback (branch new-user 3,4) + email signup route
+  - PDPA: `softDeleteUser()` เรียก `purgeEntitlementData()` ลบ `reading_usage` + `user_bonus` ของ user
+  - **gate ที่ 14 ใหม่**: `scripts/qa/test-entitlement.ts` (30 เคส) — weekKey คร่อมวัน, ลำดับ weekly ก่อน bonus, กันหักซ้ำ concurrent, refund, สิทธิ์หมด, PDPA cascade
+- **ผลการทดสอบ**: `npm run repo:verify` ➔ ✅ **14/14 ด่าน** · gate ใหม่ 30/30
+- **ยังไม่ทำ**: PR B (บังคับสิทธิ์ที่ API) · PR C (สิทธิ์ผู้เยี่ยมชม) · PR D–F
+
+### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 5: Hardening, Session Token Version Revocation & Architecture Docs (เสริมความแกร่งและความปลอดภัยสูงสุด)
+
+- **ความต้องการ**: ปรับปรุงระบบตรวจสอบและเพิกถอนเซสชันอัตโนมัติเมื่อมีการเปลี่ยนรหัสผ่านหรือลบบัญชีผู้ใช้ (`token_version` validation), เพิกถอน Token คงค้างในระบบทั้งหมดเมื่อผู้ใช้ขอลบบัญชีตามสิทธิ์ PDPA และอัปเดตคู่มือสถาปัตยกรรมระบบรวมถึงขั้นตอนการตั้งค่า Secrets บน Cloudflare Workers
+- **สิ่งที่ทำ**:
+  - **Session Invalidation via `token_version` (`src/app/api/auth/me/route.ts`)**:
+    - ตรวจสอบ `token_version` ใน JWT Payload เทียบกับ `token_version` ปัจจุบันใน D1 database
+    - หากพบว่า `token_version` ในฐานข้อมูลมากกว่า (เกิดจากการเปลี่ยนรหัสผ่านบนอุปกรณ์อื่น) หรือบัญชีถูกลบ ระบบจะลบ Cookie `tarot_auth_session` และตัดเซสชันทันที
+  - **PDPA Account Deletion Token Cascade (`src/app/api/account/route.ts`)**:
+    - เพิกถอน verification tokens และ password reset tokens ทั้งหมดของผู้ใช้ทันทีเมื่อมีการขอลบบัญชี
+  - **Architecture & Deployment Documentation**:
+    - อัปเดต `docs/ARCHITECTURE.md` เพิ่มหมวดที่ 9: ระบบยืนยันตัวตนด้วยอีเมลและรหัสผ่าน (Web Crypto PBKDF2, Single-Use Token, Anti-Enumeration, Account Linking)
+    - อัปเดต `docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md` ระบุคำสั่งตั้งค่า Secrets สำหรับ `AUTH_SECRET`, `PASSWORD_PEPPER`, `RESEND_API_KEY`, และ `EMAIL_FROM`
+  - **Verification Suite**:
+    - `npm run repo:verify` ผ่านครบ **13/13 ด่าน 100% Green**
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - แก้ไข: `src/app/api/auth/me/route.ts`, `src/app/api/account/route.ts`, `docs/ARCHITECTURE.md`, `docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md`, `docs/WORK_LOG.md`
 
 ### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 4: OAuth Account Linking & Change Password Sanctuary (การเชื่อมต่อบัญชี & จัดการรหัสผ่าน)
 

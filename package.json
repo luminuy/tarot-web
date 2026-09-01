@@ -31,7 +31,8 @@
     "incident": "tsx scripts/incident-log.ts",
     "hooks:setup": "git config core.hooksPath .githooks",
     "audit:show": "tsx scripts/audit-tracker.ts show",
-    "audit:track": "tsx scripts/audit-tracker.ts track"
+    "audit:track": "tsx scripts/audit-tracker.ts track",
+    "entitlement:grandfather": "tsx scripts/entitlement-grandfather.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
