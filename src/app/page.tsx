@@ -128,6 +128,7 @@ export default function TarotPage() {
   const [readingResult, setReadingResult] = useState<Partial<Reading> | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [authBanner, setAuthBanner] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Instant Hardware Scroll Reset with Multi-Frame Paint Guarantee
   const scrollToSanctuaryTop = () => {
@@ -194,11 +195,29 @@ export default function TarotPage() {
       }
     }
 
-    // Auto-sync anonymous history to server upon login or app mount
+    // Auto-sync anonymous history to server upon login or app mount & handle Auth query toasts
     if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const isAuthSuccess = searchParams.get("auth_success") === "1";
+      const isVerified = searchParams.get("verified") === "1";
+      const isPwReset = searchParams.get("pw_reset") === "1";
+      const verifyError = searchParams.get("verify_error");
+      const authError = searchParams.get("auth_error");
+
+      if (isVerified) {
+        setAuthBanner({ type: "success", text: "ยินดีด้วย! คุณได้ยืนยันที่อยู่อีเมลเรียบร้อยแล้ว ✦" });
+      } else if (isPwReset) {
+        setAuthBanner({ type: "success", text: "ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว เข้าสู่วิหารศักดิ์สิทธิ์ได้ทันที ✦" });
+      } else if (verifyError === "expired") {
+        setAuthBanner({ type: "error", text: "ลิงก์ยืนยันอีเมลหมดอายุ กรุณาขอลิงก์ใหม่จากเมนูโปรไฟล์" });
+      } else if (verifyError) {
+        setAuthBanner({ type: "error", text: "ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือถูกใช้งานไปแล้ว" });
+      } else if (authError) {
+        setAuthBanner({ type: "error", text: authError });
+      }
+
       import("@/lib/utils/history").then((m) => {
-        const isAuthSuccess = new URLSearchParams(window.location.search).get("auth_success") === "1";
-        if (isAuthSuccess) {
+        if (isAuthSuccess || isVerified || isPwReset) {
           m.syncAnonymousHistoryToServer().then(({ merged }) => {
             if (merged > 0) {
               console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ ✦`);
@@ -626,6 +645,26 @@ export default function TarotPage() {
 
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
+        {/* Auth Toast Notification Banner */}
+        {authBanner && (
+          <div
+            className={`mb-6 p-4 rounded-2xl border text-xs sm:text-sm text-center shadow-2xl backdrop-blur flex items-center justify-between gap-3 ${
+              authBanner.type === "success"
+                ? "bg-emerald-950/90 border-emerald-500/50 text-emerald-200"
+                : "bg-rose-950/90 border-rose-600/50 text-rose-200"
+            }`}
+          >
+            <span className="flex-1 font-serif-th">{authBanner.text}</span>
+            <button
+              type="button"
+              onClick={() => setAuthBanner(null)}
+              className="text-xs opacity-75 hover:opacity-100 px-2 py-1 cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Step Tracker Progress Bar */}
         <RitualStepProgress
           currentStep={currentStep}

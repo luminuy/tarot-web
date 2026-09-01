@@ -36,6 +36,31 @@
 
 ---
 
+### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 3: AuthModal, Password Reset Page & Client UI (หน้าต่างเข้าสู่ระบบและรีเซ็ตรหัสผ่าน)
+
+- **ความต้องการ**: ปรับปรุงหน้าต่างเข้าสู่ระบบ (`AuthModal.tsx`) ให้รองรับการเข้าสู่ระบบ/สมัครสมาชิก/ลืมรหัสผ่านด้วยอีเมลและรหัสผ่าน พร้อมตัววัดความแข็งแรงของรหัสผ่าน (Password Strength Meter), สร้างหน้าตั้งรหัสผ่านใหม่ (`/reset-password`), แบนเนอร์เตือนยืนยันอีเมลใน `UserProfileBadge` และ Toast แจ้งเตือนสถานะในหน้าหลัก
+- **สิ่งที่ทำ**:
+  - **AuthModal UI (`src/components/auth/AuthModal.tsx`)**:
+    - รองรับ 3 โหมด: `signin`, `signup`, `forgot`
+    - เพิ่มช่องกรอกชื่อ, อีเมล, รหัสผ่าน พร้อมปุ่มเปิด/ปิดการมองเห็นรหัสผ่าน (Show/Hide Toggle)
+    - Client-side Password Strength Meter 4 ระดับ (สีแดง/เหลือง/เขียว/ทองคำ ✦)
+    - Accessible Form Inputs (touch targets >= 44px, font size >= 16px ป้องกัน iOS auto-zoom, `aria-live="polite"` สำหรับ error/success messages)
+    - ตัวเลือกเข้าสู่ระบบด้วย Google และ LINE OAuth ด้านล่าง
+  - **Reset Password Page (`src/app/reset-password/page.tsx`)**:
+    - หน้าตั้งรหัสผ่านใหม่แบบ Dynamic Route + Suspense Guard
+    - ช่องกรอกรหัสผ่านใหม่ + ยืนยันรหัสผ่าน + Strength Meter
+    - จัดการกรณี Token ไม่ถูกต้องหรือหมดอายุอย่างชัดเจน
+  - **UserProfileBadge Updates (`src/components/auth/UserProfileBadge.tsx`)**:
+    - แสดงสถานะ provider "บัญชีอีเมล"
+    - แถบเตือนสีทอง/ส้ม "⚠️ ยังไม่ยืนยันอีเมล" พร้อมปุ่มกด "ส่งลิงก์ใหม่" เรียก `/api/auth/email/resend`
+  - **Main Page Auth Toasts (`src/app/page.tsx`)**:
+    - ตรวจจับ Query params: `?verified=1`, `?pw_reset=1`, `?verify_error=...` และแสดงแบนเนอร์แจ้งเตือนอัตโนมัติ
+  - **Verification Suite**:
+    - `npm run repo:verify` ผ่านครบ **13/13 ด่าน 100% Green**
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - เพิ่มใหม่: `src/lib/auth/strength.ts`, `src/app/reset-password/page.tsx`
+  - แก้ไข: `src/components/auth/AuthModal.tsx`, `src/components/auth/UserProfileBadge.tsx`, `src/app/api/auth/me/route.ts`, `src/app/page.tsx`, `docs/WORK_LOG.md`
+
 ### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 2: API Endpoints, Token Lifecycle, Rate Limiting & Email Delivery (ระบบส่งอีเมล & API เส้นทาง)
 
 - **ความต้องการ**: พัฒนา API endpoints สำหรับการสมัครสมาชิก, เข้าสู่ระบบ, ยืนยันอีเมล, ส่งอีเมลซ้ำ, ขอลืมรหัสผ่าน และตั้งรหัสผ่านใหม่ พร้อมระบบป้องกัน Anti-Enumeration, Token Lifecycle Management, Email Sending ด้วย Resend API และ KV Rate Limiting
