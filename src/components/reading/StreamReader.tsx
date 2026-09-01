@@ -13,6 +13,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { FollowUpChat } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
 import { ProvablyFairPanel } from "./ProvablyFairPanel";
+import { CollapsibleCard } from "./CollapsibleCard";
 import { CardImage } from "@/components/card/CardImage";
 import { TTSReaderButton } from "./TTSReaderButton";
 
@@ -463,17 +464,30 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             </div>
           )}
 
+          {/* ── ส่วนรอง: ยุบไว้เพื่อไม่ให้หน้ายาวเกินไป ผู้ใช้แตะเปิดเอง ── */}
+
           {/* Sacred Oracle Mantra Card */}
           {allCards.length > 0 && (
-            <OracleMantraCard cards={allCards} drawn={drawnCards} personaNameTh={persona.nameTh} />
+            <CollapsibleCard
+              title="คำคมพลังใจศักดิ์สิทธิ์"
+              hint="ข้อคิดนำทางที่กลั่นจากไพ่ทั้งชุด"
+              icon="✨"
+            >
+              <OracleMantraCard cards={allCards} drawn={drawnCards} personaNameTh={persona.nameTh} />
+            </CollapsibleCard>
           )}
 
           {/* Elemental Balance 4-Elements Analysis */}
           {allCards.length > 0 && (
-            <ElementalBalanceWidget cards={allCards} drawn={drawnCards} />
+            <CollapsibleCard
+              title="สมดุลพลังงาน 4 ธาตุในผัง"
+              hint="วิเคราะห์คลื่นพลังงาน ไฟ · น้ำ · ลม · ดิน"
+            >
+              <ElementalBalanceWidget cards={allCards} drawn={drawnCards} />
+            </CollapsibleCard>
           )}
 
-          {/* Provably-Fair Independent Mathematical Verification */}
+          {/* Provably-Fair Independent Mathematical Verification (ยุบในตัวเอง) */}
           <ProvablyFairPanel
             commitment={proof?.commitment ?? ""}
             proof={proof}
