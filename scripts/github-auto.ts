@@ -98,6 +98,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔑 การแฮชรหัสผ่าน & Email Auth Schema (PBKDF2/D1)", cmd: TSX, args: ["scripts/qa/test-password.ts"] },
   { label: "📧 ระบบตรวจสอบเส้นทาง Email & Password Auth (Endpoints/Tokens)", cmd: TSX, args: ["scripts/qa/test-email-auth.ts"] },
   { label: "🎟 แกนสิทธิ์การเปิดไพ่ (โควตารายสัปดาห์ / โบนัส / กันหักซ้ำ)", cmd: TSX, args: ["scripts/qa/test-entitlement.ts"] },
+  { label: "🎫 บัญชีผู้ทดสอบ (tarot_tester ปลดล็อกไม่จำกัด · ไม่ให้สิทธิ์แอดมิน)", cmd: TSX, args: ["scripts/qa/test-tester.ts"] },
 ];
 
 /**

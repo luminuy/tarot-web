@@ -14,6 +14,7 @@
 | `TAROT_SESSION_SECRET` | เซ็น session token (Provably-Fair, OAuth, guest cookie, admin) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | ล็อกอิน Google |
 | `ADMIN_PASSWORD` | เข้าแผงแอดมิน `/admin` |
+| `TESTER_PASSWORD` | *(ยังไม่ตั้ง — ดูข้อ 4.5)* เข้า `/tester` ใช้เว็บไม่จำกัด โดยไม่เห็นแผงแอดมิน |
 | `GEMINI_API_KEY` | คำอ่านไพ่ AI + แชทถามต่อ + สรุปดวงรายเดือน (ตั้ง 2026-09-01) |
 
 **ใช้งานได้ตอนนี้:** ดูดวง 5 ขั้น (คำอ่าน AI จริงผ่าน Gemini + ระบบสิทธิ์/โควตา) · Google login · แผงแอดมิน (`/admin` — สถิติ, แก้ prompt/ไพ่, marketplace, สิทธิ์เปิดไพ่)
@@ -97,6 +98,26 @@ npx wrangler secret put LINE_CHANNEL_SECRET
 
 เปิดใช้งานได้ 100% จาก `/admin` → แท็บ **"สิทธิ์เปิดไพ่"** (4 ปุ่ม: เตรียม DB → โบนัส → ประกาศ → เปิด)
 runbook เต็ม: [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) ท้ายไฟล์
+
+### 4.5 บัญชีผู้ทดสอบ (Tester) — ให้หุ้นส่วน/ทีมงานใช้เว็บไม่จำกัด · โค้ดครบ · รอตั้ง secret
+
+**ปลดล็อกทุกลิมิต** (rate limit / โควตาเปิดไพ่ / เพดาน AI / origin guard / entitlement)
+**ไม่เปิดแผงแอดมิน** — แก้ prompt / เห็นสถิติ / ยอดจ่าย ไม่ได้ (คนละกลไกกับ `/admin`)
+
+```bash
+npx wrangler secret put TESTER_PASSWORD    # ตั้งรหัสยาว ≥ 12 ตัว เช่น: openssl rand -base64 18
+```
+
+วิธีใช้ (ส่งให้หุ้นส่วน):
+1. เปิด `https://<โดเมน>/tester`
+2. ใส่รหัสผ่านผู้ทดสอบ → กด "ปลดล็อก"
+3. กด "เข้าใช้งานเว็บ" → ใช้ได้ไม่จำกัด 30 วัน (ต่ออายุ = เข้า `/tester` ใส่รหัสใหม่)
+4. เลิก = เข้า `/tester` → "ออกจากโหมดผู้ทดสอบ"
+
+- cookie `tarot_tester` (httpOnly · 30 วัน) · เปลี่ยน `TESTER_PASSWORD` = เตะทุกเครื่องที่ปลดล็อกไว้ทิ้งทันที
+- การใช้งานถูกนับใน stat `ratelimit_bypass:tester` (เห็นใน `/admin`)
+- **ยังบังคับ:** safety guard (สายด่วน 1323), provably-fair integrity — เหมือน bypass ทุกแบบ
+- dev: ใส่ `TESTER_PASSWORD=...` ใน `.env.local`
 
 ### 5. D1 Migrations ไม่รันอัตโนมัติตอน deploy
 
