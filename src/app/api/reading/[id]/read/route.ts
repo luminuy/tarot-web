@@ -2,6 +2,7 @@ import { getSpread } from "@/data/spreads";
 import { getContentOverrides, resolveCardByIndex } from "@/lib/content/overrides";
 import { streamGeminiReading } from "@/lib/ai/gemini";
 import { AI_DISCLOSURE } from "@/lib/safety/guardrails";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getReading, updateReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvents, recordEvent } from "@/lib/stats/record";
@@ -14,6 +15,13 @@ export const maxDuration = 120;
  * ขั้นที่ 3 — ให้แม่หมอ Gemini AI อ่าน แล้วส่งกลับเป็น Server-Sent Events แบบ Structured Streaming
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { isPrivilegedTestRequest } = await import("@/lib/security/privileged");
+  const privileged = await isPrivilegedTestRequest(request);
+
+  if (!privileged && !isRequestAuthorizedOrigin(request)) {
+    return Response.json({ error: "ไม่อนุญาตให้เข้าถึง API จากภายนอก (Unauthorized Origin)" }, { status: 403 });
+  }
+
   const { id } = await params;
   let record = getReading(id);
 
@@ -60,9 +68,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   // World-Class Rate Limiter & Single-Flight Concurrency Protection per IP
-  const { isPrivilegedTestRequest } = await import("@/lib/security/privileged");
-  const privileged = await isPrivilegedTestRequest(request);
-
   let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
   if (!privileged) {
     const clientIp = getClientIdentifier(request);

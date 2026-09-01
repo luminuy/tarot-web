@@ -114,45 +114,5 @@ export async function loadReadingFromKV(id: string): Promise<ReadingRecord | nul
   }
 }
 
-export function clientKeyFromRequest(request: Request): string {
-  const cfIp = request.headers.get("cf-connecting-ip");
-  if (cfIp) return cfIp.trim();
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) return realIp.trim();
-  return "127.0.0.1";
-}
+export { getClientIdentifier as clientKeyFromRequest } from "@/lib/utils/rate-limit";
 
-/**
- * จำกัดจำนวนครั้งต่อ IP (Sliding Window Algorithm)
- */
-const rateBuckets: Map<string, number[]> =
-  globalThis.__tarot_rate_buckets_store__ ?? (globalThis.__tarot_rate_buckets_store__ = new Map());
-
-export interface RateLimitResult {
-  allowed: boolean;
-  retryAfterSeconds: number;
-}
-
-export function checkRateLimit(key: string, limit: number, windowMs: number): RateLimitResult {
-  const now = Date.now();
-  const hits = (rateBuckets.get(key) ?? []).filter((t) => now - t < windowMs);
-
-  if (hits.length >= limit) {
-    const oldest = hits[0];
-    return { allowed: false, retryAfterSeconds: Math.ceil((windowMs - (now - oldest)) / 1000) };
-  }
-
-  hits.push(now);
-  rateBuckets.set(key, hits);
-
-  // Auto-cleanup rate buckets when collection exceeds 10,000 unique IPs
-  if (rateBuckets.size > 10_000) {
-    for (const [k, v] of rateBuckets) {
-      if (v.every((t) => now - t >= windowMs)) rateBuckets.delete(k);
-    }
-  }
-
-  return { allowed: true, retryAfterSeconds: 0 };
-}
