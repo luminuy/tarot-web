@@ -36,6 +36,26 @@
 
 ---
 
+### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 4: OAuth Account Linking & Change Password Sanctuary (การเชื่อมต่อบัญชี & จัดการรหัสผ่าน)
+
+- **ความต้องการ**: พัฒนาระบบเชื่อมโยงบัญชีอัตโนมัติ (OAuth Account Linking) เพื่อป้องกันปัญหาบัญชีซ้ำซ้อนเมื่อผู้ใช้เข้าสู่ระบบด้วย Google หรือ LINE ที่มีอีเมลตรงกับบัญชีที่เคยสมัครด้วยรหัสผ่าน และเพิ่ม API พร้อมหน้า UI สำหรับการเปลี่ยนรหัสผ่าน / ตั้งรหัสผ่านเริ่มต้นสำหรับบัญชี
+- **สิ่งที่ทำ**:
+  - **OAuth Account Linking (`src/app/api/auth/[provider]/callback/route.ts`)**:
+    - ตรวจสอบ `findUserIdByOAuth` และ `getUserByEmail` เมื่อผู้ใช้ผ่านการตรวจสอบสิทธิ์จาก Google หรือ LINE
+    - เชื่อมโยง provider_user_id เข้ากับ user_id เดิมในตาราง `oauth_identities` แบบอัตโนมัติโดยไม่สูญเสียประวัติเดิม
+  - **Change Password API Route (`src/app/api/account/change-password/route.ts`)**:
+    - รองรับทั้งการเปลี่ยนรหัสผ่านเดิม (ต้องตรวจยืนยัน old password) และการตั้งรหัสผ่านเริ่มต้นสำหรับผู้ใช้ที่เคยล็อกอินผ่าน OAuth เท่านั้น
+    - ตรวจสอบความปลอดภัยตามเกณฑ์ NIST 2024
+    - เพิ่มค่า `token_version` อัตโนมัติ เพื่อเพิกถอนเซสชันเก่าบนอุปกรณ์อื่น
+  - **Account UI Integration (`src/components/account/ChangePasswordCard.tsx` & `src/app/account/page.tsx`)**:
+    - การ์ดจัดการรหัสผ่านในหน้า `/account` ปรับเปลี่ยนข้อความและฟอร์มตามสถานะของผู้ใช้ (เคยตั้งรหัสผ่านแล้ว หรือเป็นบัญชี OAuth)
+  - **Verification Suite**:
+    - เพิ่มชุดทดสอบ Account Linking ใน `scripts/qa/test-email-auth.ts`
+    - `npm run repo:verify` ผ่านครบ **13/13 ด่าน 100% Green**
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - เพิ่มใหม่: `src/app/api/account/change-password/route.ts`, `src/components/account/ChangePasswordCard.tsx`
+  - แก้ไข: `src/app/api/auth/[provider]/callback/route.ts`, `src/app/account/page.tsx`, `scripts/qa/test-email-auth.ts`, `docs/WORK_LOG.md`
+
 ### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 3: AuthModal, Password Reset Page & Client UI (หน้าต่างเข้าสู่ระบบและรีเซ็ตรหัสผ่าน)
 
 - **ความต้องการ**: ปรับปรุงหน้าต่างเข้าสู่ระบบ (`AuthModal.tsx`) ให้รองรับการเข้าสู่ระบบ/สมัครสมาชิก/ลืมรหัสผ่านด้วยอีเมลและรหัสผ่าน พร้อมตัววัดความแข็งแรงของรหัสผ่าน (Password Strength Meter), สร้างหน้าตั้งรหัสผ่านใหม่ (`/reset-password`), แบนเนอร์เตือนยืนยันอีเมลใน `UserProfileBadge` และ Toast แจ้งเตือนสถานะในหน้าหลัก

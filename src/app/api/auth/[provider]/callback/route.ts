@@ -37,6 +37,8 @@ export async function GET(
 
   try {
     let profile: UserProfile | null = null;
+    let providerUserId = "";
+    const oauthProvider: "google" | "line" = provider === "line" ? "line" : "google";
 
     if (provider === "google") {
       const clientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -65,6 +67,7 @@ export async function GET(
         headers: { Authorization: `Bearer ${tokens.access_token}` },
       });
       const userData = await userRes.json();
+      providerUserId = String(userData.id);
 
       profile = {
         id: `google_${userData.id}`,
@@ -101,6 +104,7 @@ export async function GET(
         headers: { Authorization: `Bearer ${tokens.access_token}` },
       });
       const userData = await userRes.json();
+      providerUserId = String(userData.userId);
 
       profile = {
         id: `line_${userData.userId}`,
@@ -115,16 +119,59 @@ export async function GET(
       throw new Error("ไม่สามารถสร้างข้อมูลผู้ใช้ได้");
     }
 
-    // Persist user identity to D1 database
+    // Persist user identity & Account Linking to D1 database
     try {
-      const { upsertUserOnLogin } = await import("@/lib/users/users.repo");
-      await upsertUserOnLogin({
-        id: profile.id,
-        provider: profile.provider,
-        email: profile.email,
-        name: profile.name,
-        avatarUrl: profile.avatar,
-      });
+      const {
+        findUserIdByOAuth,
+        getUserByEmail,
+        getUserById,
+        linkOAuthIdentity,
+        upsertUserOnLogin,
+      } = await import("@/lib/users/users.repo");
+
+      // 1. Check if this OAuth provider ID is already linked
+      const existingLinkedUserId = await findUserIdByOAuth(oauthProvider, providerUserId);
+
+      if (existingLinkedUserId) {
+        const linkedUser = await getUserById(existingLinkedUserId);
+        if (linkedUser) {
+          profile.id = linkedUser.id;
+          profile.tokenVersion = linkedUser.tokenVersion;
+          if (linkedUser.name) profile.name = linkedUser.name;
+          if (linkedUser.email) profile.email = linkedUser.email;
+          if (linkedUser.avatarUrl) profile.avatar = linkedUser.avatarUrl;
+        }
+      } else if (profile.email) {
+        // 2. Check if a user with this email already exists
+        const existingEmailUser = await getUserByEmail(profile.email);
+        if (existingEmailUser) {
+          await linkOAuthIdentity(oauthProvider, providerUserId, existingEmailUser.id);
+          profile.id = existingEmailUser.id;
+          profile.tokenVersion = existingEmailUser.tokenVersion;
+          if (existingEmailUser.name) profile.name = existingEmailUser.name;
+          if (existingEmailUser.avatarUrl) profile.avatar = existingEmailUser.avatarUrl;
+        } else {
+          // 3. New User with Email
+          await upsertUserOnLogin({
+            id: profile.id,
+            provider: profile.provider,
+            email: profile.email,
+            name: profile.name,
+            avatarUrl: profile.avatar,
+          });
+          await linkOAuthIdentity(oauthProvider, providerUserId, profile.id);
+        }
+      } else {
+        // 4. OAuth without email
+        await upsertUserOnLogin({
+          id: profile.id,
+          provider: profile.provider,
+          email: profile.email,
+          name: profile.name,
+          avatarUrl: profile.avatar,
+        });
+        await linkOAuthIdentity(oauthProvider, providerUserId, profile.id);
+      }
     } catch (dbErr) {
       console.error("[OAuth D1 User Upsert Warning]:", dbErr);
       // Non-blocking fallback: allow login even if D1 transiently fails
@@ -144,7 +191,7 @@ export async function GET(
 
     return response;
   } catch (err: any) {
-    console.error("[OAuth Callback Error]:", err);
-    return NextResponse.redirect(`${origin}/?auth_error=${encodeURIComponent(err.message || "เกิดข้อผิดพลาดในการล็อกอิน")}`);
+    console.error(`[OAuth Callback Error - ${provider}]:`, err);
+    return NextResponse.redirect(`${origin}/?auth_error=${encodeURIComponent(err.message || "การยืนยันตัวตนล้มเหลว")}`);
   }
 }
