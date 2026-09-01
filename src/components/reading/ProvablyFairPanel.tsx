@@ -30,6 +30,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [showIndependentGuide, setShowIndependentGuide] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const effectiveCommitment = proof?.commitment || commitment;
   const serverSeed = proof?.serverSeed;
@@ -94,28 +95,59 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({
   return (
     <section
       aria-label="ตรวจสอบความโปร่งใส Provably-Fair"
-      className="my-6 rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#140d28]/95 via-[#0c071a]/98 to-[#06040e]/95 p-5 sm:p-6 shadow-2xl backdrop-blur-md transition-all space-y-4"
+      className="my-4 rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#140d28]/95 via-[#0c071a]/98 to-[#06040e]/95 shadow-2xl backdrop-blur-md transition-all overflow-hidden"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-3 flex-wrap gap-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full border border-[#e5c07b] flex items-center justify-center text-xs text-[#ffd700] bg-[#07050f] shadow">
+      {/* Header — แตะเพื่อยุบ/ขยาย (เริ่มต้นยุบไว้ ไม่ให้หน้ายาว) */}
+      <button
+        type="button"
+        aria-expanded={isPanelOpen}
+        aria-controls="provably-fair-body"
+        onClick={() => setIsPanelOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-2 p-4 sm:p-5 text-left transition-colors hover:bg-[#e5c07b]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 flex-shrink-0 rounded-full border border-[#e5c07b] flex items-center justify-center text-xs text-[#ffd700] bg-[#07050f] shadow">
             ✦
           </div>
-          <div>
+          <div className="min-w-0">
             <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold">
               ความโปร่งใสทางคณิตศาสตร์ (Provably-Fair Verification)
             </h4>
             <p className="text-[10.5px] text-[#9c93b8] font-serif-th">
-              พิสูจน์ได้ว่าผลไพ่ถูกกำหนดจาก Seed ล่วงหน้า ไม่มีการเลือกไพ่ทีหลัง
+              {isPanelOpen
+                ? "พิสูจน์ได้ว่าผลไพ่ถูกกำหนดจาก Seed ล่วงหน้า ไม่มีการเลือกไพ่ทีหลัง"
+                : "แตะเพื่อดูวิธีตรวจสอบว่าผลไพ่ยุติธรรม 100%"}
             </p>
           </div>
         </div>
 
-        <span className="rounded-full border border-[#ffd700]/30 bg-[#ffd700]/10 px-2.5 py-0.5 text-[10px] font-mono font-bold text-[#ffd700]">
-          SHA-256 Commit-Reveal
-        </span>
-      </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="hidden sm:inline-block rounded-full border border-[#ffd700]/30 bg-[#ffd700]/10 px-2.5 py-0.5 text-[10px] font-mono font-bold text-[#ffd700]">
+            SHA-256 Commit-Reveal
+          </span>
+          <span
+            className={`font-mono text-xs text-[#e5c07b] transition-transform duration-200 ${
+              isPanelOpen ? "rotate-180" : ""
+            }`}
+            aria-hidden
+          >
+            ▼
+          </span>
+        </div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {isPanelOpen && (
+          <motion.div
+            key="pf-body"
+            id="provably-fair-body"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={SPRING.snappy}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-[#e5c07b]/20 p-5 sm:p-6 space-y-4">
 
       {/* State 1: Before Reveal (No serverSeed yet) */}
       {!isRevealed && (
@@ -318,6 +350,10 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({
           </div>
         </div>
       )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

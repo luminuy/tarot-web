@@ -52,6 +52,18 @@
   - `src/app/api/reading/start/route.ts` & `src/app/api/reading/[id]/read/route.ts`: ปรับข้อความ 403 และ `reason: "guest_used" | "daily_exhausted"`
   - `scripts/qa/test-entitlement.ts`: อัปเดตชุดทดสอบให้ครอบคลุม 55/55 เคสผ่าน 100%
 - **ผลการทดสอบ**: `npm run repo:verify` 14/14 ผ่านครบสมบูรณ์, `typecheck` 0 errors
+### 🗓️ 2026-09-01: UX — ย่อหน้าผลคำทำนายให้สั้นลง + ยุบ Provably-Fair เป็น dropdown
+
+- **ความต้องการ (จากผู้ใช้ 2 ข้อ)**:
+  1. แผง "ความโปร่งใสทางคณิตศาสตร์ (Provably-Fair)" ไม่ต้องกางค้างไว้ ให้ลูกค้ากดแล้วค่อยดรอปดาวน์ลงมา
+  2. หน้าผลคำทำนาย (แท็บ "สรุปภาพรวม & คำแนะนำ") ยาวเกินไป — ยุบส่วนรองเป็น accordion
+- **สิ่งที่ทำ**:
+  - `src/components/reading/CollapsibleCard.tsx` 🆕: แถบยุบ/ขยายสไตล์วิหารทองคำ (หัวข้อ + hint + badge + chevron ▼) เริ่มต้นปิด แตะเปิดเอง มี ARIA `aria-expanded`/`aria-controls`
+  - `src/components/reading/ProvablyFairPanel.tsx`: หัวแผงกลายเป็นปุ่มยุบ/ขยาย เริ่มต้น **ปิด** — โชว์แค่หัวข้อ + hint "แตะเพื่อดูวิธีตรวจสอบว่าผลไพ่ยุติธรรม 100%" เนื้อหา seeds/ปุ่มตรวจสอบ/Independent Verification อยู่ใต้ AnimatePresence
+  - `src/components/reading/StreamReader.tsx`: ห่อ `OracleMantraCard` (คำคมพลังใจ) และ `ElementalBalanceWidget` (สมดุล 4 ธาตุ) ด้วย `CollapsibleCard` ยุบไว้ · ส่วนหลัก (opening / connections / summary / advice) ยังโชว์เต็มเหมือนเดิม
+- **ผลการทดสอบ**: `npm run typecheck` ➔ 0 errors · ตรวจด้วย dev server + Browser: แท็บสรุปสั้นลงเหลือ 3 แถบยุบ, กด Provably-Fair แล้วกาง seeds ครบ, hint สลับข้อความถูกต้อง
+
+---
 
 ### 🗓️ 2026-09-01: UI/UX Redesign — World-Class Luxury Mystic Auth Modal (ปรับโฉมหน้าต่างเข้าสู่ระบบระดับวิหารศักดิ์สิทธิ์)
 
