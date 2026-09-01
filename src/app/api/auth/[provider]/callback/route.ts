@@ -128,6 +128,7 @@ export async function GET(
         linkOAuthIdentity,
         upsertUserOnLogin,
       } = await import("@/lib/users/users.repo");
+      const { grantSignupBonus } = await import("@/lib/entitlement/entitlement");
 
       // 1. Check if this OAuth provider ID is already linked
       const existingLinkedUserId = await findUserIdByOAuth(oauthProvider, providerUserId);
@@ -160,6 +161,7 @@ export async function GET(
             avatarUrl: profile.avatar,
           });
           await linkOAuthIdentity(oauthProvider, providerUserId, profile.id);
+          await grantSignupBonus(profile.id);
         }
       } else {
         // 4. OAuth without email
@@ -171,6 +173,7 @@ export async function GET(
           avatarUrl: profile.avatar,
         });
         await linkOAuthIdentity(oauthProvider, providerUserId, profile.id);
+        await grantSignupBonus(profile.id);
       }
     } catch (dbErr) {
       console.error("[OAuth D1 User Upsert Warning]:", dbErr);

@@ -36,6 +36,24 @@
 
 ---
 
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR A — แกนสิทธิ์ + ตารางฐานข้อมูล
+
+> อ้างอิงแผน [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) · **ไม่เปลี่ยนพฤติกรรมเว็บ** (ยังไม่ต่อกับเส้นทางใด · ธง `entitlement.enabled` ยังปิด)
+
+- **ความต้องการ**: สร้างแกนสิทธิ์การเปิดไพ่ (แหล่งความจริงเดียว) + ตาราง D1 ก่อนบังคับใช้ที่ API ใน PR B
+- **สิ่งที่ทำ**:
+  - `migrations/0007_reading_entitlement.sql` — ตาราง `reading_usage` (แถวต่อการเปิดไพ่ · `UNIQUE(reading_id)` กันหักซ้ำ) + `user_bonus`
+    - **ปรับจากแผน**: แผนเดิมเขียน migration 0006 (ชนกับ email_auth) → เลื่อนเป็น 0007 · `user_bonus` เปลี่ยนจาก 1 แถว/user เป็นหลายแถว + `UNIQUE(user_id, reason)` เพื่อให้ `grantBonus` idempotent ต่อเหตุผล และตรวจย้อนหลังได้ (ตรงหลักการเดียวกับ `reading_usage`)
+  - เพิ่มสองตารางเข้า local SQLite shim (`src/lib/platform/db.ts`) — dev/test มีตารางครบ
+  - `src/lib/entitlement/week.ts` — `weekKey()` (จันทร์ 00:00 เวลาไทย UTC+7), `nextResetAt()`
+  - `src/lib/entitlement/entitlement.ts` — `getEntitlement()`, `consumeReading()` (fast-path check + พึ่ง `UNIQUE` + catch สำหรับ race), `refundReading()`, `grantBonus()`/`grantSignupBonus()`, `purgeEntitlementData()` · ค่าคงที่ `WEEKLY_LIMIT=3` `GUEST_LIMIT=1` `SIGNUP_BONUS=3` `GRANDFATHER_BONUS=10`
+  - `src/lib/entitlement/flag.ts` — `isEntitlementEnabled()` อ่าน KV `app:flag:entitlement.enabled` (default ปิด)
+  - โบนัสสมัครใหม่: `grantSignupBonus()` แทรกใน OAuth callback (branch new-user 3,4) + email signup route
+  - PDPA: `softDeleteUser()` เรียก `purgeEntitlementData()` ลบ `reading_usage` + `user_bonus` ของ user
+  - **gate ที่ 14 ใหม่**: `scripts/qa/test-entitlement.ts` (30 เคส) — weekKey คร่อมวัน, ลำดับ weekly ก่อน bonus, กันหักซ้ำ concurrent, refund, สิทธิ์หมด, PDPA cascade
+- **ผลการทดสอบ**: `npm run repo:verify` ➔ ✅ **14/14 ด่าน** · gate ใหม่ 30/30
+- **ยังไม่ทำ**: PR B (บังคับสิทธิ์ที่ API) · PR C (สิทธิ์ผู้เยี่ยมชม) · PR D–F
+
 ### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 5: Hardening, Session Token Version Revocation & Architecture Docs (เสริมความแกร่งและความปลอดภัยสูงสุด)
 
 - **ความต้องการ**: ปรับปรุงระบบตรวจสอบและเพิกถอนเซสชันอัตโนมัติเมื่อมีการเปลี่ยนรหัสผ่านหรือลบบัญชีผู้ใช้ (`token_version` validation), เพิกถอน Token คงค้างในระบบทั้งหมดเมื่อผู้ใช้ขอลบบัญชีตามสิทธิ์ PDPA และอัปเดตคู่มือสถาปัตยกรรมระบบรวมถึงขั้นตอนการตั้งค่า Secrets บน Cloudflare Workers
