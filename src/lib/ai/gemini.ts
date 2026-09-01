@@ -124,6 +124,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   const decoder = new TextDecoder();
   let buffer = "";
   let jsonAccumulator = "";
+  let debugLoggedChunk = false; // TEMP diag (ISSUE-016) — ลบออกเมื่อ parse ทำงานแล้ว
   let sentOpening = false;
   let sentConnections = false;
   let sentSummary = false;
@@ -148,6 +149,13 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
           try {
             const chunk = JSON.parse(jsonStr);
+
+            if (!debugLoggedChunk) {
+              debugLoggedChunk = true;
+              console.warn(
+                `[gemini diag] first chunk candidates[0]=${JSON.stringify(chunk.candidates?.[0]).slice(0, 400)}`,
+              );
+            }
 
             // usageMetadata มักมากับ chunk สุดท้ายของสตรีม เก็บล่าสุดที่เจอไว้เสมอ
             const meta = chunk.usageMetadata;
@@ -217,6 +225,9 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
     const parsed = parsedJson ? ReadingSchema.safeParse(parsedJson) : null;
     if (!parsed || !parsed.success) {
+      console.warn(
+        `[gemini diag] parse fail · accLen=${jsonAccumulator.length} · head=${jsonAccumulator.slice(0, 300)} · zodErr=${parsed ? JSON.stringify(parsed.error.issues?.slice(0, 3)) : "no-json"}`,
+      );
       const loose = parsePartialReading(jsonAccumulator);
       const fallbackReading: Reading = {
         opening: loose.opening || "สวัสดีค่ะ ไพ่ชุดนี้มีพลังงานที่น่าจับตามองมาก",
