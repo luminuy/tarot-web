@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { ChangePasswordCard } from "@/components/account/ChangePasswordCard";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
 
 export const metadata = {
@@ -32,6 +33,9 @@ export default function AccountPage() {
             ควบคุมข้อมูลความเป็นส่วนตัว ประวัติคำทำนาย และการตั้งค่าตามสิทธิ์ PDPA
           </p>
         </div>
+
+        {/* Change Password & Security Card */}
+        <ChangePasswordCard />
 
         {/* Privacy & PDPA Control Card */}
         <div className="rounded-2xl border border-[#e5c07b]/25 bg-gradient-to-b from-[#130d24]/90 to-[#07040f]/90 p-5 sm:p-6 space-y-4 shadow-xl">

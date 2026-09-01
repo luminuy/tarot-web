@@ -1,0 +1,108 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { z } from "zod";
+import { AUTH_COOKIE_NAME, signUserSession, verifyUserSession } from "@/lib/auth/edge-auth";
+import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { validatePasswordPolicy } from "@/lib/auth/password-policy";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
+import { getUserById, getUserPasswordHash, setPasswordHash } from "@/lib/users/users.repo";
+
+export const runtime = "nodejs";
+
+const ChangePasswordSchema = z.object({
+  oldPassword: z.string().optional(),
+  newPassword: z.string().min(10, "รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 10 ตัวอักษร").max(200, "รหัสผ่านยาวเกินไป"),
+});
+
+export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: "กรุณาเข้าสู่ระบบก่อนทำรายการ" }, { status: 401 });
+    }
+
+    const session = await verifyUserSession(sessionToken);
+    if (!session?.id) {
+      return NextResponse.json({ error: "เซสชันไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
+    }
+
+    // Rate Limit Check
+    const limit = await checkAuthRateLimit(request, "login", session.id);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json();
+    const parsed = ChangePasswordSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    const { oldPassword, newPassword } = parsed.data;
+    const user = await getUserById(session.id);
+    if (!user) {
+      return NextResponse.json({ error: "ไม่พบข้อมูลบัญชีผู้ใช้" }, { status: 404 });
+    }
+
+    // ถ้าผู้ใช้เคยตั้งรหัสผ่านไว้แล้ว ต้องตรวจรหัสผ่านเดิมก่อน
+    if (user.hasPassword) {
+      if (!oldPassword) {
+        return NextResponse.json({ error: "กรุณาระบุรหัสผ่านเดิม" }, { status: 400 });
+      }
+
+      const currentHash = await getUserPasswordHash(user.id);
+      if (!currentHash || !(await verifyPassword(oldPassword, currentHash))) {
+        return NextResponse.json({ error: "รหัสผ่านเดิมไม่ถูกต้อง" }, { status: 400 });
+      }
+    }
+
+    // ตรวจสอบความปลอดภัยของรหัสผ่านใหม่
+    const policy = validatePasswordPolicy(newPassword, user.email || undefined);
+    if (!policy.ok) {
+      return NextResponse.json({ error: policy.reason || "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย" }, { status: 400 });
+    }
+
+    // แฮชและบันทึกรหัสผ่านใหม่ (เพิ่ม token_version อัตโนมัติเพื่อเตะ session เก่าบนเครื่องอื่นออก)
+    const newHash = await hashPassword(newPassword);
+    await setPasswordHash(user.id, newHash);
+
+    const updatedUser = await getUserById(user.id);
+
+    // ออก Session Cookie ใหม่
+    const newSessionToken = await signUserSession({
+      id: user.id,
+      provider: user.provider,
+      email: user.email || undefined,
+      name: user.name,
+      createdAt: new Date(user.createdAt).toISOString(),
+      tokenVersion: updatedUser?.tokenVersion ?? user.tokenVersion + 1,
+    });
+
+    const response = NextResponse.json({
+      ok: true,
+      message: "เปลี่ยนรหัสผ่านสำเร็จเรียบร้อยแล้ว",
+    });
+
+    response.cookies.set(AUTH_COOKIE_NAME, newSessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60,
+      path: "/",
+    });
+
+    return response;
+  } catch (err) {
+    console.error("[Change Password Error]", err);
+    return NextResponse.json({ error: "ไม่สามารถเปลี่ยนรหัสผ่านได้ในขณะนี้" }, { status: 500 });
+  }
+}

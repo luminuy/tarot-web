@@ -8,9 +8,11 @@ import { hashPassword, verifyPassword } from "../../src/lib/auth/password";
 import { validatePasswordPolicy } from "../../src/lib/auth/password-policy";
 import {
   createEmailUser,
+  findUserIdByOAuth,
   getUserByEmail,
   getUserById,
   getUserPasswordHash,
+  linkOAuthIdentity,
   markEmailVerified,
   normalizeEmail,
   setPasswordHash,
@@ -118,9 +120,19 @@ async function runEmailAuthQATests() {
   if (oldPwMatch) throw new Error("❌ รหัสผ่านเก่าไม่ควรใช้งานได้หลังรีเซ็ต");
   console.log("  ✓ 6. Reset Password Flow: เปลี่ยนรหัสและเพิ่ม token_version สำเร็จ");
 
+  // 7. OAuth Account Linking Flow
+  const oauthGoogleSub = `g_sub_${Date.now()}`;
+  await linkOAuthIdentity("google", oauthGoogleSub, newUser.id);
+
+  const foundUserId = await findUserIdByOAuth("google", oauthGoogleSub);
+  if (foundUserId !== newUser.id) {
+    throw new Error("❌ findUserIdByOAuth คืนค่าไม่ตรงกับบัญชีที่ผูกไว้");
+  }
+  console.log("  ✓ 7. OAuth Account Linking: ผูกและค้นหาบัญชีข้าม Identity สำเร็จ");
+
   // Cleanup
   await softDeleteUser(newUser.id);
-  console.log("  ✓ 7. Cleanup: ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
+  console.log("  ✓ 8. Cleanup: ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
 
   console.log("\n✨ [QA] Email Auth Routes & Security ผ่านครบทุกด่าน 100%!");
 }
