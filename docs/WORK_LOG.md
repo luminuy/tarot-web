@@ -36,6 +36,24 @@
 
 ---
 
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR D — สถานะบนหน้าเว็บ (QuotaBadge / EntitlementGate / locked chat)
+
+> ต่อจาก PR C (#90) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ปิด → badge/gate ไม่แสดง, หน้าเลือกผังปกติ)
+
+- **สิ่งที่ทำ**:
+  - `src/lib/entitlement/use-entitlement.ts` — hook `useEntitlement()` + module-level cache (ยิง `/api/entitlement` ครั้งเดียวทั้งหน้า) + `refreshEntitlement()` bust cache
+  - `src/components/entitlement/QuotaBadge.tsx` — ป้ายสิทธิ์ข้าง `UserProfileBadge` (guest: "ทดลองฟรี 1 ครั้ง" · member: "เปิดได้อีก N ครั้ง · รีเซ็ตวัน…")
+  - `src/components/entitlement/EntitlementGate.tsx` — wrap เนื้อหาขั้น SPREAD_SELECT · สิทธิ์หมด → การ์ด "ครั้งแรกจบแล้ว" (guest + ปุ่มสมัคร) / "ปิดวงสัปดาห์นี้" (member + วันรีเซ็ต)
+  - `src/components/reading/FollowUpChat.tsx` — `!canChat` → ช่องพิมพ์กลายเป็นปุ่ม "สมัครสมาชิกเพื่อถามแม่หมอต่อ" (เปิด AuthModal ผ่าน event `tarot:open-auth`) + ซ่อนคำถามแนะนำ
+  - `src/app/page.tsx` — `<QuotaBadge/>` ใน header · wrap SPREAD_SELECT ด้วย `<EntitlementGate>` · `refreshEntitlement()` หลัง `done` + หลัง `auth_success` · listener `tarot:open-auth` → เปิด AuthModal
+  - **ปรับจากแผน**: ใช้ hook + module cache แทน "prop จาก page.tsx" เพื่อลดการแก้ page.tsx (1081 บรรทัด state machine เปราะ) — spirit เดียวกัน (ยิง `/api/entitlement` ครั้งเดียว)
+- **ผลการทดสอบ**:
+  - `repo:verify` **14/14** · `build:worker` ✓
+  - browser (flag on): guest ใหม่ → badge "ทดลองฟรี 1 ครั้ง" → ทำ reading → reload → badge "ทดลองฟรีครบแล้ว" + gate "ครั้งแรกจบแล้ว" แทนหน้าเลือกผัง (spread selector `hasSpreadSelector:false`)
+  - browser (flag off): `enabled:false` → badge/gate หายหมด, หน้าเลือกผังปกติ — **เหมือนก่อน PR D 100%**
+  - hydration warning (motion SSR `translateX ±40px`) — **มีอยู่ก่อน PR D** (ยืนยันด้วย `git stash` แล้ว reload)
+- **ยังไม่ทำ**: PR E (การ์ดชวนสมัคร) · PR F (rollout — ต้องเจ้าของ)
+
 ### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR C — สิทธิ์ฟรีของผู้เยี่ยมชม (คุกกี้ tarot_guest)
 
 > ต่อจาก PR B (#89) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ยังปิด)
