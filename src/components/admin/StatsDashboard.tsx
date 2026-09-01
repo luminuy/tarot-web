@@ -100,7 +100,12 @@ function BarList({
 
 export default function StatsDashboard() {
   const [days, setDays] = useState(30);
-  const [data, setData] = useState<{ stats: StatsSnapshot; audit: AuditEntry[] } | null>(null);
+  const [data, setData] = useState<{
+    stats: StatsSnapshot;
+    audit: AuditEntry[];
+    aiCapToday?: number;
+    aiDailyCap?: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
@@ -133,6 +138,7 @@ export default function StatsDashboard() {
     const tokOut = r.ai_tokens_out ?? 0;
     const latSum = r.ai_latency_ms ?? 0;
     const aiCalls = r["ai_call:gemini"] ?? 0;
+    const aiCapHit = r.ai_cap_hit ?? 0;
     return {
       started,
       completed,
@@ -143,6 +149,7 @@ export default function StatsDashboard() {
       tokens: tokIn + tokOut,
       aiCalls,
       aiErrors: r["ai_error:gemini"] ?? 0,
+      aiCapHit,
       chat: r.chat_message ?? 0,
       spreads: breakdown(r, "spread:"),
       personas: breakdown(r, "persona:"),
@@ -187,10 +194,14 @@ export default function StatsDashboard() {
             <StatCard label="อ่านจบสมบูรณ์" value={n(view.completed)} sub={`${view.completionRate} ของที่เริ่ม`} />
             <StatCard label="ล้มเหลว / ถูกบล็อก" value={`${n(view.failed)} / ${n(view.blocked)}`} />
             <StatCard label="แชทถามต่อ" value={n(view.chat)} />
+            <StatCard
+              label="โควตา AI วันนี้ (Cap)"
+              value={`${n(data?.aiCapToday ?? 0)} / ${n(data?.aiDailyCap ?? 2000)}`}
+              sub={view.aiCapHit > 0 ? `เต็มโควตา ${n(view.aiCapHit)} ครั้ง` : "ใช้งานปกติ"}
+            />
             <StatCard label="เรียก AI (Gemini)" value={n(view.aiCalls)} sub={`ผิดพลาด ${n(view.aiErrors)} ครั้ง`} />
             <StatCard label="เวลาเฉลี่ย/คำอ่าน" value={view.avgLatency} />
             <StatCard label="Token รวม" value={n(view.tokens)} sub="in + out" />
-            <StatCard label="ทั้งหมดตั้งแต่เปิดระบบ" value={n(data!.stats.allTime.reading_started ?? 0)} sub="เริ่มดูดวง" />
           </div>
 
           <div className="grid gap-3 lg:grid-cols-2">

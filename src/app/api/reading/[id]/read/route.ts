@@ -83,6 +83,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return streamCached(record.result, record);
   }
 
+  // World-Class AI Spend Cap & Financial Circuit Breaker
+  const { isAiCapReached, recordAiCall } = await import("@/lib/security/ai-budget");
+  if (!privileged && (await isAiCapReached())) {
+    limit.releaseConcurrency();
+    recordEvent("ai_cap_hit");
+    return Response.json(
+      { error: "ระบบดูดวงมีผู้ใช้จำนวนมากในวันนี้ กรุณากลับมาใหม่พรุ่งนี้ หรือลองอีกครั้งในภายหลัง" },
+      { status: 503 },
+    );
+  }
+
   updateReading(id, { status: "READING" });
 
   const encoder = new TextEncoder();
@@ -114,9 +125,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
         };
 
-        const generator = streamGeminiReading(readingCtx);
-
-        for await (const event of generator) {
+        for await (const event of streamGeminiReading(readingCtx)) {
           if (isClosed) break;
 
           if (event.type === "done") {
@@ -132,6 +141,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               ["ai_tokens_in", event.usage?.inputTokens ?? 0],
               ["ai_tokens_out", event.usage?.outputTokens ?? 0],
             ]);
+            void recordAiCall(1);
             // เฉลย serverSeed ตอนนี้ — ผู้ใช้ตรวจย้อนหลังได้ว่าไพ่ไม่ได้ถูกเลือกทีหลัง
             send(controller, "done", {
               reading: event.reading,

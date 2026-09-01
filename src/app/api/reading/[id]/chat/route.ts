@@ -309,7 +309,10 @@ ${cards.join("\n")}
    - คืนพลังให้ผู้ถามเสมอว่าเขาสามารถเปลี่ยนแปลงผลลัพธ์ได้ด้วยการลงมือทำในปัจจุบัน`;
 
     // Pure Google Gemini 3.7 Flash AI Engine
-    const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const { isAiCapReached } = await import("@/lib/security/ai-budget");
+    const aiCapHit = !privileged && (await isAiCapReached());
+
+    const geminiKey = !aiCapHit ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY : undefined;
     if (geminiKey) {
       const primaryModel = "gemini-3.7-flash";
       const fallbackModel = "gemini-2.0-flash";

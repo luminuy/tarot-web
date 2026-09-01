@@ -24,6 +24,8 @@ export const KEY = {
   auditPrefix: () => "app:audit:",
   /** reading session state (cross-isolate durable backstop) */
   reading: (id: string) => `app:reading:${id}`,
+  /** ตัวนับโควตาเรียก AI ต่อวัน: app:aicap:YYYY-MM-DD */
+  aiCap: (day: string) => `app:aicap:${day}`,
 } as const;
 
 /** memo cache ระดับ isolate — กัน round-trip ซ้ำภายในคำขอเดียว / ข้ามคำขอในช่วงสั้น */
