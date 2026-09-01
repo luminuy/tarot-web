@@ -362,14 +362,16 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
 > **ยังไม่ครบ e2e**: member-path (หัก/คืนจริง, สิทธิ์รายสัปดาห์หมด) พิสูจน์ด้วย unit test 32/32 —
 > ต้องทดสอบ member จริงด้วย OAuth session ตอน PR D หรือบน production
 
-### PR C · สิทธิ์ฟรีของผู้เยี่ยมชม
+### PR C · สิทธิ์ฟรีของผู้เยี่ยมชม ✅ เสร็จ (2026-09-01)
 **ต้องมี A, B**
 
-- [ ] `src/lib/entitlement/guest.ts` — คุกกี้ `tarot_guest` เซ็นด้วยรูปแบบเดิมของ `edge-auth.ts`
-      **ห้ามเขียนกลไกเซ็นใหม่**
-- [ ] คุกกี้ httpOnly · SameSite=Lax · Secure บน production · อายุ 1 ปี · เก็บแค่ `{ gid, usedAt }`
-- [ ] ผูกเข้ากับ `getViewer()` ให้คืน `kind: "guest"` พร้อม `guestUsed`
-- [ ] อัปเดต `app/privacy/page.tsx` ให้ครอบคุกกี้ตัวนี้ — **ทำใน PR เดียวกัน ห้ามเลื่อน**
+- [x] `src/lib/auth/edge-auth.ts` — เพิ่ม `signPayload()` / `verifyPayload()` (กลไก HMAC-SHA256 + secret เดิม · ไม่ได้เขียนใหม่)
+- [x] `src/lib/entitlement/guest.ts` — คุกกี้ `tarot_guest` (`{ gid, used }`) · httpOnly · SameSite=Lax · Secure prod · 1 ปี
+- [x] `getViewer()` อ่านคุกกี้ → `kind: "guest"` + `guestUsed`
+- [x] `read` route: guest ผ่าน gate → set คุกกี้ `used=1` ใน SSE response headers (**ไม่มี refund สำหรับ guest** — best-effort ตามข้อ 3)
+- [x] `app/privacy/page.tsx` — เพิ่มบรรทัดประกาศคุกกี้ `tarot_guest` (first-party, ไม่มี PII, ไม่ติดตามข้ามเว็บ)
+- [x] curl e2e (flag on): fresh guest remaining=1 → reading flow → คุกกี้ set → remaining=0 reason=guest_used → start ครั้งที่ 2 = 403
+- [x] gate 14 → 35/35 (+ sign/verify คุกกี้) · repo:verify 14/14 · build:worker ✓
 
 ### PR D · สถานะบนหน้าเว็บ
 **ต้องมี B, C**

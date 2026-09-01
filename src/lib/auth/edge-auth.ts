@@ -55,6 +55,58 @@ function base64UrlDecode(str: string): string {
   return new TextDecoder().decode(bytes);
 }
 
+/**
+ * ตัวเซ็น/ตรวจ payload ทั่วไป — HMAC-SHA256 + base64url เหมือน signUserSession
+ * ใช้ secret ตัวเดียวกัน (`AUTH_SECRET`) · ห้ามเขียนกลไกเซ็นใหม่ที่อื่น
+ * (ใช้กับคุกกี้ผู้เยี่ยมชม `tarot_guest` — ENTITLEMENT_PLAN PR C)
+ */
+export async function signPayload(payload: Record<string, unknown>): Promise<string> {
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(getAuthSecret()),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sigBuf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(encodedPayload));
+  let binary = "";
+  const bytes = new Uint8Array(sigBuf);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  const signature = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return `${encodedPayload}.${signature}`;
+}
+
+export async function verifyPayload<T = Record<string, unknown>>(token: string): Promise<T | null> {
+  if (!token || !token.includes(".")) return null;
+  const [encodedPayload, signature] = token.split(".");
+  if (!encodedPayload || !signature) return null;
+  try {
+    const key = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(getAuthSecret()),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"],
+    );
+    let base64 = signature.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) base64 += "=";
+    const binary = atob(base64);
+    const sigBytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) sigBytes[i] = binary.charCodeAt(i);
+    const ok = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      sigBytes,
+      new TextEncoder().encode(encodedPayload),
+    );
+    if (!ok) return null;
+    return JSON.parse(base64UrlDecode(encodedPayload)) as T;
+  } catch {
+    return null;
+  }
+}
+
 export async function signUserSession(profile: UserProfile): Promise<string> {
   const payload = JSON.stringify({
     ...profile,
