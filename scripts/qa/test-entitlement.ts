@@ -140,6 +140,16 @@ async function main() {
   check("guest cookie: token ที่ถูกแก้ → verify = null", (await verifyPayload(gtoken.slice(0, -3) + "xxx")) === null);
   check("guest cookie: token ขยะ → verify = null", (await verifyPayload("not.a.token")) === null);
 
+  // ── 9b. โบนัสเปลี่ยนผ่าน (grandfather) — เพิ่มบน signup, idempotent ต่อ reason ──
+  const gfUid = `test_gf_${Date.now()}`;
+  await upsertUserOnLogin({ id: gfUid, provider: "google", email: `${gfUid}@e.com`, name: "ผู้ใช้เก่า" });
+  await grantSignupBonus(gfUid);
+  await grantBonus(gfUid, 10, "grandfather");
+  await grantBonus(gfUid, 10, "grandfather"); // ซ้ำ — ต้องไม่เพิ่ม
+  const gfEnt = await getEntitlement({ kind: "member", userId: gfUid });
+  check("grandfather + signup: bonusRemaining = 13 (3+10, ไม่ใช่ 23)", gfEnt.bonusRemaining === 13);
+  await softDeleteUser(gfUid);
+
   // ── 10. เพดาน AI สองชั้น (ENTITLEMENT_PLAN ข้อ 6.2) ──
   const { isAiCapReached } = await import("../../src/lib/security/ai-budget");
   const { kvPutJSON, KEY } = await import("../../src/lib/platform/kv-store");
