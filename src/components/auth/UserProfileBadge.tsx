@@ -9,10 +9,13 @@ export interface UserProfileBadgeProps {
 }
 
 export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthModal }) => {
-  const [user, setUser] = useState<(UserProfile & { marketingConsent?: boolean }) | null>(null);
+  const [user, setUser] = useState<
+    (UserProfile & { marketingConsent?: boolean; emailVerified?: boolean }) | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [resendStatus, setResendStatus] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -57,6 +60,23 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
     }
   };
 
+  const handleResendVerify = async () => {
+    soundManager.playCardSelectSound();
+    setResendStatus("กำลังส่ง…");
+    try {
+      const res = await fetch("/api/auth/email/resend", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setResendStatus("✓ ส่งแล้ว");
+        setTimeout(() => setResendStatus(null), 3000);
+      } else {
+        setResendStatus(data.error || "ส่งไม่สำเร็จ");
+      }
+    } catch {
+      setResendStatus("เกิดข้อผิดพลาด");
+    }
+  };
+
   if (loading) {
     return <div className="w-20 h-8 rounded-xl bg-white/5 animate-pulse" />;
   }
@@ -76,6 +96,12 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
       </button>
     );
   }
+
+  const getProviderLabel = () => {
+    if (user.provider === "google") return "Google Account";
+    if (user.provider === "line") return "LINE Account";
+    return "บัญชีอีเมล";
+  };
 
   return (
     <div className="relative">
@@ -107,11 +133,27 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
       </button>
 
       {menuOpen && (
-        <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#0e081e] border border-[#e5c07b]/50 p-2 shadow-2xl z-50 space-y-1 font-serif-th text-xs">
+        <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-[#0e081e] border border-[#e5c07b]/50 p-2 shadow-2xl z-50 space-y-1 font-serif-th text-xs">
           <div className="p-2 border-b border-[#e5c07b]/15 text-[11px] text-[#9c93b8]">
             <span className="block text-[#f5deaa] font-semibold truncate">{user.name}</span>
-            <span className="text-[10px] opacity-75">{user.provider === "google" ? "Google Account" : "LINE Account"}</span>
+            <span className="text-[10px] opacity-75">{getProviderLabel()}</span>
           </div>
+
+          {/* Unverified Email Warning Badge */}
+          {user.provider === "email" && user.emailVerified === false && (
+            <div className="p-2 rounded-xl bg-amber-950/60 border border-amber-500/40 text-amber-200 text-[11px] space-y-1">
+              <div className="flex items-center justify-between">
+                <span>⚠️ ยังไม่ยืนยันอีเมล</span>
+                <button
+                  type="button"
+                  onClick={handleResendVerify}
+                  className="text-[10px] text-[#ffd700] hover:underline font-semibold cursor-pointer"
+                >
+                  {resendStatus || "ส่งลิงก์ใหม่"}
+                </button>
+              </div>
+            </div>
+          )}
 
           {pendingCount > 0 && (
             <div className="p-2 rounded-xl bg-[#ffd700]/10 border border-[#ffd700]/30 text-[#ffd700] text-[11px] flex items-center justify-between">

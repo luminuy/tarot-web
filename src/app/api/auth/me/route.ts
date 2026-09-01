@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyUserSession } from "@/lib/auth/edge-auth";
+import { AUTH_COOKIE_NAME, verifyUserSession } from "@/lib/auth/edge-auth";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("tarot_auth_session")?.value;
+    const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
     if (!token) {
       return NextResponse.json({ user: null });
     }
@@ -20,6 +20,7 @@ export async function GET() {
         return NextResponse.json({
           user: {
             ...user,
+            emailVerified: dbUser?.emailVerified ?? (user.provider !== "email"),
             marketingConsent: dbUser?.marketingConsent ?? false,
           },
         });
