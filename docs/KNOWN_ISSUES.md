@@ -33,6 +33,7 @@
 | **004** | 🔵 Note | รัน `wrangler dev` บน macOS 12.6 ไม่ได้ | (สภาพแวดล้อมเครื่อง) | 🔵 ข้อจำกัด OS เครื่อง (ใช้ dev server แทน) |
 | **006** | 🔵 Note | GitHub Actions runner configuration | `.github/workflows/*.yml` | 🟢 อัปเกรด Node 22 รองรับครบ |
 | **007** | 🔵 Roadmap | Prisma schema พร้อมต่อ PostgreSQL ถาวร | `src/server/store.ts`, `prisma/` | 🟡 Roadmap (ปัจจุบันใช้ in-memory store) |
+| **012** | 🟡 Config | อีเมล/โดเมน/LINE ยังไม่ตั้ง (email signup พัง 500 บน prod · Google login ปกติ) | secrets, `src/lib/email/send.ts` | 📋 เจ้าของทำทีหลัง — ดู [`docs/PENDING_SETUP.md`](PENDING_SETUP.md) · **ไม่ปิดฟีเจอร์ (ตัดสินใจ 2026-09-01)** |
 
 ---
 

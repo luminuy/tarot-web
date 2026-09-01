@@ -36,6 +36,16 @@
 
 ---
 
+### 🗓️ 2026-09-01: เอกสารงานตั้งค่า production ที่ยังค้าง (docs/PENDING_SETUP.md)
+
+- **ความต้องการ**: เจ้าของยังไม่ได้ซื้อโดเมน (ใช้ `tarot-web.bankjack10452.workers.dev`) · ต้องจดไว้ว่าต้องตั้งอะไรบ้าง — **ตัดสินใจ: ยังไม่ปิดฟีเจอร์อีเมล ใส่ secret ทีหลัง**
+- **สิ่งที่ทำ**:
+  - สร้าง `docs/PENDING_SETUP.md` — เช็กลิสต์เจ้าของ: (1) email auth + 4 secrets (RESEND/EMAIL_FROM/PASSWORD_PEPPER/AUTH_SECRET) · (2) custom domain (`luminuy.com` ฮาร์ดโค้ดไว้แต่ยังไม่จด — ระบุไฟล์ที่ต้องแก้ถ้าใช้โดเมนอื่น) · (3) LINE login secrets · (4) เปิด entitlement จาก /admin · (5) d1 migrations ไม่ auto
+  - `CLAUDE.md` doc index → เพิ่มข้อ 10
+  - `docs/KNOWN_ISSUES.md` → เพิ่ม ISSUE-012 (Config) ชี้ไป PENDING_SETUP
+- **สถานะปัจจุบัน**: Google login + แผงแอดมิน + ดูดวง ใช้งานได้ · email signup พัง 500 บน prod (ไม่มี `PASSWORD_PEPPER`) — Google login ไม่กระทบ
+- **แนะนำลำดับ**: LINE login (ฟรี) → ซื้อโดเมน ~฿370 → Resend → เปิด entitlement
+
 ### 🗓️ 2026-09-01: UI/UX Fix: Consistent Dark Obsidian Background Sanctuary (ปรับพื้นหลังหน้าแรกให้เข้มสนิท สม่ำเสมอ ไม่ซีดจาง)
 
 - **ความต้องการ**: แก้ไขปัญหาพื้นหลังหน้าแรกที่ตอนแรกสีเข้ม แต่เมื่อเลื่อนหน้าจอลงมาสีพื้นหลังจางและสว่างขึ้น โดยปรับให้พื้นหลังเป็นสีดำสนิท (Obsidian Void `#05040a`) สม่ำเสมอทั้งหน้า ไม่เปลี่ยนสีหรือสว่างขึ้นเมื่อเลื่อนหน้าจอ
