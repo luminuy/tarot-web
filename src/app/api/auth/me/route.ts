@@ -13,7 +13,21 @@ export async function GET() {
     }
 
     const user = await verifyUserSession(token);
-    return NextResponse.json({ user });
+    if (user) {
+      try {
+        const { getUserById } = await import("@/lib/users/users.repo");
+        const dbUser = await getUserById(user.id);
+        return NextResponse.json({
+          user: {
+            ...user,
+            marketingConsent: dbUser?.marketingConsent ?? false,
+          },
+        });
+      } catch {
+        return NextResponse.json({ user });
+      }
+    }
+    return NextResponse.json({ user: null });
   } catch {
     return NextResponse.json({ user: null });
   }

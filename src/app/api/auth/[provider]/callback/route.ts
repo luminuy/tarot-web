@@ -115,6 +115,21 @@ export async function GET(
       throw new Error("ไม่สามารถสร้างข้อมูลผู้ใช้ได้");
     }
 
+    // Persist user identity to D1 database
+    try {
+      const { upsertUserOnLogin } = await import("@/lib/users/users.repo");
+      await upsertUserOnLogin({
+        id: profile.id,
+        provider: profile.provider,
+        email: profile.email,
+        name: profile.name,
+        avatarUrl: profile.avatar,
+      });
+    } catch (dbErr) {
+      console.error("[OAuth D1 User Upsert Warning]:", dbErr);
+      // Non-blocking fallback: allow login even if D1 transiently fails
+    }
+
     const sessionToken = await signUserSession(profile);
     const response = NextResponse.redirect(`${origin}/?auth_success=1`);
 
