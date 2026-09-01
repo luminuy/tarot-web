@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { stepVariants, useMotionSafe } from "@/lib/motion";
 import Link from "next/link";
@@ -82,6 +82,9 @@ export default function TarotPage() {
   const [isEncyclopediaOpen, setIsEncyclopediaOpen] = useState(false);
   const [zoomedCard, setZoomedCard] = useState<DrawnSlotCard | null>(null);
 
+  // P1-U2: Confirm-before-reset — only shown when reading is in progress
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
   // Selection state
   const [selectedSpread, setSelectedSpread] = useState<Spread>(SPREADS[3]); // Default: 3-card
   const [selectedPersona, setSelectedPersona] = useState<Persona>(PERSONAS[0]); // Default: warm
@@ -108,6 +111,25 @@ export default function TarotPage() {
   const [readingResult, setReadingResult] = useState<Partial<Reading> | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  // P1-U4 & P1-U5: Hydrate spread from ?spread= URL param or sessionStorage on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const spreadParam = params.get("spread");
+    if (spreadParam) {
+      const found = SPREADS.find((s) => s.id === spreadParam || s.nameTh === spreadParam);
+      if (found) setSelectedSpread(found);
+    } else {
+      const saved = sessionStorage.getItem("tarot_last_spread");
+      if (saved) {
+        const found = SPREADS.find((s) => s.id === saved);
+        if (found) setSelectedSpread(found);
+      }
+    }
+    const savedNickname = sessionStorage.getItem("tarot_nickname");
+    if (savedNickname) setNickname(savedNickname);
+  }, []);
 
   // Instant Hardware Scroll Reset with Multi-Frame Paint Guarantee
   const scrollToSanctuaryTop = () => {
@@ -388,16 +410,25 @@ export default function TarotPage() {
     }
   };
 
-  // Flip card manually
+  // Flip card manually + haptic feedback
   const handleFlipCard = (order: number) => {
     setRevealedOrders((prev) =>
       prev.includes(order) ? prev.filter((o) => o !== order) : [...prev, order]
     );
     setActiveCardIndex(order);
+    // P1-U haptic on flip (15ms pulse like physical card snap)
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(15);
   };
 
-  // Reset to start new reading (P1-10: Complete session state purge)
-  const handleReset = () => {
+  // P1-U2: Guarded reset — shows confirm when a reading is active
+  const handleReset = useCallback(() => {
+    const inProgress = currentStep !== "SPREAD_SELECT" && currentStep !== "INTENTION_SELECT";
+    if (inProgress && !showResetConfirm) {
+      setShowResetConfirm(true);
+      return;
+    }
+    // Confirmed (or already on early steps)
+    setShowResetConfirm(false);
     soundManager.playCardSelectSound();
     navigateStep("SPREAD_SELECT");
     setReadingId(null);
@@ -413,12 +444,29 @@ export default function TarotPage() {
     setRevealedOrders([]);
     setReadingResult(null);
     setErrorMsg(null);
-  };
+  }, [currentStep, showResetConfirm]);
+
+  // P1-U4: Save spread preference to sessionStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("tarot_last_spread", selectedSpread.id);
+    }
+  }, [selectedSpread.id]);
+
+  // P1-U4: Save nickname to sessionStorage for next visit
+  useEffect(() => {
+    if (typeof window !== "undefined" && nickname.trim()) {
+      sessionStorage.setItem("tarot_nickname", nickname.trim());
+    }
+  }, [nickname]);
 
   return (
-    <main className="min-h-screen pb-24 text-[#e2d9f3] relative overflow-hidden bg-[#05040a]">
-      {/* Hardware Anchor for Immediate Viewport Alignment */}
-      <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
+    <>
+      {/* Skip-to-content link for keyboard navigation (a11y) */}
+      <a href="#main" className="skip-link">ข้ามไปเนื้อหาหลัก</a>
+      <main id="main" className="min-h-screen pb-24 text-[#e2d9f3] relative overflow-hidden bg-[#05040a]">
+        {/* Hardware Anchor for Immediate Viewport Alignment */}
+        <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
       {/* Mystic Altar Floating Particles & Sacred Circles */}
       <MysticBackground />
@@ -629,12 +677,27 @@ export default function TarotPage() {
                   className={`py-3 px-7 rounded-xl text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 shadow-lg flex items-center gap-2 ${
                     !nickname.trim() || !question.trim()
                       ? "bg-[#1f1635] text-[#9c93b8]/60 border border-[#e5c07b]/20 cursor-not-allowed"
+                      : loading
+                      ? "bg-[#1f1635] text-[#f5deaa]/70 border border-[#e5c07b]/30 cursor-wait"
                       : "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] hover:opacity-95 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(229,192,123,0.5)]"
                   }`}
+                  aria-busy={loading}
                 >
-                  <span>✦</span>
-                  <span>{loading ? "กำลังโหลด..." : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}</span>
-                  <span>→</span>
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin w-3.5 h-3.5 text-[#e5c07b]" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      <span>กำลังเตรียมคำถาม…</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>✦</span>
+                      <span>ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง</span>
+                      <span>→</span>
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>
@@ -651,6 +714,20 @@ export default function TarotPage() {
               exit="exit"
               className="space-y-6"
             >
+              {/* P1-U1: Back button to INTENTION_SELECT */}
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.playCardSelectSound();
+                    navigateStep("INTENTION_SELECT");
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-[#9c93b8] hover:text-[#f5deaa] transition-colors cursor-pointer py-1 px-3 rounded-lg hover:bg-[#180f30]/60"
+                  aria-label="กลับไปแก้ไขคำถาม"
+                >
+                  ← ย้อนกลับแก้คำถาม
+                </button>
+              </div>
               <ShuffleRitual
                 commitment={commitment}
                 spreadName={selectedSpread.nameTh}
@@ -670,6 +747,21 @@ export default function TarotPage() {
               exit="exit"
               className="space-y-3.5 sm:space-y-6"
             >
+              {/* P1-U1: Back button to SHUFFLE */}
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.playCardSelectSound();
+                    setPickedIndices([]);
+                    navigateStep("SHUFFLE");
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-[#9c93b8] hover:text-[#f5deaa] transition-colors cursor-pointer py-1 px-3 rounded-lg hover:bg-[#180f30]/60"
+                  aria-label="กลับไปสับไพ่ใหม่"
+                >
+                  ← สับไพ่ใหม่
+                </button>
+              </div>
               <InteractiveCardFan
                 pickedIndices={pickedIndices}
                 targetCount={selectedSpread.positions.length}
@@ -763,7 +855,53 @@ export default function TarotPage() {
         </AnimatePresence>
       </div>
 
-      {/* Global Modals & Drawers */}
+      {/* P1-U2: Reset Confirmation Dialog */}
+      <AnimatePresence>
+        {showResetConfirm && (
+          <motion.div
+            key="reset-confirm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowResetConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm p-6 rounded-3xl bg-gradient-to-b from-[#180f30] to-[#0d071a] border-2 border-[#e5c07b]/40 shadow-2xl space-y-5"
+            >
+              <div className="text-center space-y-2">
+                <p className="text-2xl">✦</p>
+                <h3 className="font-serif-th font-bold text-lg text-[#f5deaa]">เริ่มดูดวงใหม่?</h3>
+                <p className="text-xs text-[#9c93b8] leading-relaxed font-serif-th">
+                  คำทำนายและไพ่ที่เลือกไว้จะถูกล้าง<br />คุณแน่ใจว่าต้องการเริ่มใหม่?
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-[#100b20] border border-[#e5c07b]/25 text-xs font-serif-th text-[#cfc8e2] hover:bg-[#191230] transition-colors cursor-pointer"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-bold font-serif-th text-xs shadow-lg cursor-pointer"
+                >
+                  ✦ เริ่มใหม่
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Global Modals &amp; Drawers */}
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
@@ -893,5 +1031,6 @@ export default function TarotPage() {
         </div>
       </footer>
     </main>
+    </>
   );
 }

@@ -52,11 +52,32 @@
 
 html,
 body {
+  color-scheme: dark;                  /* native controls (scrollbar, autofill) render dark */
   background-color: var(--color-void);
   color: var(--color-vellum);
   font-family: var(--font-sans-th);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  /* Safe area insets for notch/home indicator on mobile */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Skip-to-content link for keyboard/screen-reader navigation */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-gold-400);
+  color: #07040f;
+  font-weight: bold;
+  border-radius: 0 0 0.75rem 0;
+  transition: top 150ms ease;
+}
+.skip-link:focus {
+  top: 0;
 }
 
 /* ตัวอักษรทองคำโบราณ (Ancient Gold Leaf) — ป้องกันวรรณยุกต์และสระภาษาไทยถูกตัดขอบ */

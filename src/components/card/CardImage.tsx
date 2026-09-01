@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { useState } from "react";
 
 import { getCardImageSrc, getCardWebpSrcSet } from "@/lib/tarot/card-image";
 
@@ -35,6 +36,9 @@ interface CardImageProps {
  *
  * `<picture>` ใช้ `display: contents` จึงไม่สร้างกล่อง layout เพิ่ม —
  * `<img>` ข้างในยังจัดวางตาม parent เดิมทุกประการ (`w-full h-full`, `absolute` ฯลฯ)
+ *
+ * UX improvement: blur-up shimmer placeholder ระหว่างรอโหลด,
+ * onError fallback ป้องกันกล่องว่างเมื่อภาพโหลดไม่ได้
  */
 export function CardImage({
   image,
@@ -52,30 +56,75 @@ export function CardImage({
   const src = getCardImageSrc(image, cardId);
   if (!src) return null;
 
-  const img = (
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [loaded, setLoaded] = useState(loading === "eager");
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [errored, setErrored] = useState(false);
+
+  if (errored) {
+    // Graceful fallback — gold shimmer placeholder instead of blank box
+    return (
+      <div
+        className={`bg-gradient-to-br from-[#1a1230] to-[#0d081a] border border-[#e5c07b]/20 flex items-center justify-center select-none ${className || ""}`}
+        style={style}
+        aria-label={alt}
+        role="img"
+      >
+        <span className="text-[#e5c07b]/30 text-xs font-mono">✦</span>
+      </div>
+    );
+  }
+
+  const imgElement = (
     <img
       src={src}
       alt={alt}
       width={300}
       height={520}
-      className={`select-none ${className || ""}`}
+      className={`select-none transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"} ${className || ""}`}
       style={style}
       loading={loading}
       decoding={decoding}
       draggable={draggable}
-      onError={onError}
+      onLoad={() => setLoaded(true)}
+      onError={() => {
+        setErrored(true);
+        onError?.();
+      }}
     />
   );
 
-  if (full) return img;
+  const shimmer = !loaded && (
+    <div
+      className="absolute inset-0 bg-gradient-to-br from-[#1a1230] to-[#0d081a] animate-pulse rounded-[inherit]"
+      aria-hidden
+    />
+  );
+
+  if (full) {
+    return (
+      <div className="relative contents">
+        {shimmer}
+        {imgElement}
+      </div>
+    );
+  }
 
   const webpSrcSet = getCardWebpSrcSet(image, cardId);
-  if (!webpSrcSet) return img;
+  if (!webpSrcSet) {
+    return (
+      <div className="relative contents">
+        {shimmer}
+        {imgElement}
+      </div>
+    );
+  }
 
   return (
     <picture className="contents">
       <source type="image/webp" srcSet={webpSrcSet} sizes={sizes} />
-      {img}
+      {shimmer}
+      {imgElement}
     </picture>
   );
 }

@@ -13,3 +13,8 @@ next-env.d.ts
 /prisma/dev.db*
 *.tsbuildinfo
 scratch/
+
+# Tooling auto-generated files (written on every commit — do not track)
+.ai-locks.json
+.audit-history.json
+.status.md
