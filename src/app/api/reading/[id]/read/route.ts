@@ -112,7 +112,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         limit.releaseConcurrency();
         recordEvent("entitlement_blocked_read");
         return Response.json(
-          { error: "สิทธิ์เปิดไพ่ของคุณหมดแล้ว", reason: "weekly_exhausted" },
+          { error: "สิทธิ์เปิดไพ่ของคุณหมดแล้ว", reason: viewer.kind === "guest" ? "guest_used" : "daily_exhausted" },
           { status: 403 },
         );
       }

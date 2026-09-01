@@ -26,7 +26,7 @@ import { QuotaBadge } from "@/components/entitlement/QuotaBadge";
 import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
-import { refreshEntitlement } from "@/lib/entitlement/use-entitlement";
+import { refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
 const ShuffleRitual = dynamic(
@@ -106,6 +106,7 @@ export default function TarotPage() {
   const [isEncyclopediaOpen, setIsEncyclopediaOpen] = useState(false);
   const [zoomedCard, setZoomedCard] = useState<DrawnSlotCard | null>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
+  const entitlement = useEntitlement();
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -296,6 +297,17 @@ export default function TarotPage() {
 
   // Step 1 -> Step 2: Start Reading Session
   const handleStartSession = async () => {
+    if (entitlement && entitlement.enabled && !entitlement.canStartReading) {
+      if (entitlement.kind === "guest") {
+        setIsAuthOpen(true);
+        setErrorMsg("คุณใช้สิทธิ์ดูดวงฟรี 1 ครั้งแล้ว กรุณาสมัครสมาชิกเพื่อรับสิทธิ์เปิดไพ่วันละ 3 ครั้งฟรี");
+      } else {
+        setIsBuyCreditsOpen(true);
+        setErrorMsg("คุณใช้โควตาดูดวงประจำวันครบแล้ว (3 ครั้ง/วัน) หรือเติมรอบเพื่อดูต่อทันที");
+      }
+      return;
+    }
+
     const trimmedNickname = nickname.trim();
     const trimmedQuestion = question.trim();
 
@@ -328,7 +340,14 @@ export default function TarotPage() {
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "ไม่สามารถเริ่มดูดวงได้");
+      if (!res.ok) {
+        if (data.reason === "guest_used") {
+          setIsAuthOpen(true);
+        } else if (data.reason === "daily_exhausted" || data.reason === "weekly_exhausted") {
+          setIsBuyCreditsOpen(true);
+        }
+        throw new Error(data.error || "ไม่สามารถเริ่มดูดวงได้");
+      }
 
       const sessionReadingId = data.readingId || data.id;
       setReadingId(sessionReadingId);
@@ -791,6 +810,14 @@ export default function TarotPage() {
                   setSelectedSpread(sp);
                 }}
                 onProceed={() => {
+                  if (entitlement && entitlement.enabled && !entitlement.canStartReading) {
+                    if (entitlement.kind === "guest") {
+                      setIsAuthOpen(true);
+                    } else {
+                      setIsBuyCreditsOpen(true);
+                    }
+                    return;
+                  }
                   soundManager.playCardSelectSound();
                   scrollToSanctuaryTop();
                   navigateStep("INTENTION_SELECT");

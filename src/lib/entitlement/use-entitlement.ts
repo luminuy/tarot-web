@@ -14,6 +14,7 @@ export interface ClientEntitlement {
   canChat: boolean;
   remaining: number | null;
   limit: number | null;
+  dailyRemaining?: number | null;
   weeklyRemaining: number | null;
   bonusRemaining: number | null;
   resetAt: string | null;

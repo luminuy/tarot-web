@@ -25,8 +25,8 @@ export function QuotaBadge({ onOpenBuyCredits }: { onOpenBuyCredits?: () => void
       ? "ทดลองฟรี 1 ครั้ง"
       : "ทดลองฟรีครบแล้ว"
     : remaining > 0
-      ? `เปิดได้อีก ${remaining} ครั้ง`
-      : `ปิดวงสัปดาห์นี้ · ${resetLabel(ent.resetAt)}`;
+      ? `เหลือ ${remaining} ครั้งวันนี้`
+      : "ครบโควตาวันนี้ · รีเซ็ตเที่ยงคืน";
 
   const dim = remaining === 0;
 
@@ -36,7 +36,7 @@ export function QuotaBadge({ onOpenBuyCredits }: { onOpenBuyCredits?: () => void
       onClick={!isGuest ? onOpenBuyCredits : undefined}
       title={
         !isGuest
-          ? `รายสัปดาห์ ${ent.weeklyRemaining} + โบนัส ${ent.bonusRemaining} (คลิกเพื่อเติมโควตาเพิ่ม)`
+          ? `โควตาวันนี้ ${ent.dailyRemaining ?? ent.weeklyRemaining} + โบนัส ${ent.bonusRemaining} (คลิกเพื่อเติมโควตาเพิ่ม)`
           : undefined
       }
       className={`hidden sm:inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1 text-[10px] font-serif-th font-semibold whitespace-nowrap transition-all select-none ${

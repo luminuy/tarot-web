@@ -1,17 +1,17 @@
 import { getAppDB } from "@/lib/platform/db";
-import { nextResetAt, weekKey } from "@/lib/entitlement/week";
-import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading } from "@/lib/entitlement/daily";
+import { dayKey, nextResetAt, weekKey } from "@/lib/entitlement/week";
+import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading, todayDateKey } from "@/lib/entitlement/daily";
 
 /**
  * แกนสิทธิ์การเปิดไพ่ — แหล่งความจริงเดียว (ENTITLEMENT_PLAN ข้อ 5)
  * ห้ามคำนวณสิทธิ์ที่อื่น · ห้ามคำนวณฝั่งเบราว์เซอร์
  *
- * ผู้เยี่ยมชม: 1 ครั้ง (คุกกี้จัดการนับจริง — PR C)
- * สมาชิก:     3 ครั้ง/สัปดาห์ + โบนัสก้อน (ไม่หมดอายุ) · ใช้โควตารายสัปดาห์ก่อน เก็บโบนัสไว้
- * ไพ่ประจำวัน (daily): เปิดฟรี 1 ครั้ง/วัน ไม่กินโควตารายสัปดาห์
+ * ผู้เยี่ยมชม (ยังไม่สมัคร): 1 ครั้ง เท่านั้น (ไม่ว่าจะเปิดผังใด)
+ * สมาชิก (สมัครแล้ว):       3 ครั้ง/วัน (ไม่ว่าจะเปิดผังใด รีเซ็ตเที่ยงคืนเวลาไทย) + โบนัสก้อน (ไม่หมดอายุ)
  */
 
-export const WEEKLY_LIMIT = 3;
+export const DAILY_LIMIT = 3;
+export const WEEKLY_LIMIT = 3; // compatibility alias
 export const GUEST_LIMIT = 1;
 export const SIGNUP_BONUS = 3;
 export const GRANDFATHER_BONUS = 10;
@@ -23,34 +23,37 @@ export type Viewer =
 export interface Entitlement {
   canStartReading: boolean;
   canChat: boolean;
-  /** สิทธิ์เปิดไพ่ที่เหลือทั้งหมด (รายสัปดาห์ + โบนัส สำหรับสมาชิก / GUEST_LIMIT - used สำหรับผู้เยี่ยมชม) */
+  /** สิทธิ์เปิดไพ่ที่เหลือทั้งหมด (รายวัน + โบนัส สำหรับสมาชิก / GUEST_LIMIT - used สำหรับผู้เยี่ยมชม) */
   remaining: number;
   /** เพดานต่อรอบ — ใช้แสดง "เหลือ x/limit" */
   limit: number;
-  /** สมาชิกเท่านั้น */
+  /** สมาชิกเท่านั้น (โควตารายวันคงเหลือ) */
+  dailyRemaining: number;
+  /** สมาชิกเท่านั้น (backward compat) */
   weeklyRemaining: number;
   /** สมาชิกเท่านั้น */
   bonusRemaining: number;
-  /** ISO string เวลาโควตารายสัปดาห์รีเซ็ต (null สำหรับผู้เยี่ยมชม) */
+  /** ISO string เวลาโควตารายวันรีเซ็ต (null สำหรับผู้เยี่ยมชม) */
   resetAt: string | null;
   /** ไพ่ประจำวันฟรีของวันนี้ยังใช้ได้หรือไม่ */
   dailyFreeAvailable: boolean;
   /** จำนวนวันที่เปิดไพ่ประจำวันต่อเนื่อง */
   dailyStreak: number;
-  reason?: "guest_used" | "weekly_exhausted" | "members_only";
+  reason?: "guest_used" | "daily_exhausted" | "weekly_exhausted" | "members_only";
   kind: "guest" | "member";
 }
 
-async function memberUsage(userId: string): Promise<{ weeklyUsed: number; bonusGranted: number; bonusUsed: number }> {
+async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGranted: number; bonusUsed: number }> {
   const db = await getAppDB();
+  const dk = todayDateKey();
   const wk = weekKey();
 
-  const [weeklyRow, bonusGrantRow, bonusUsedRow] = await Promise.all([
+  const [dailyRow, bonusGrantRow, bonusUsedRow] = await Promise.all([
     db
       .prepare(
-        `SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND week_key = ? AND source = 'weekly'`,
+        `SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND (week_key = ? OR (week_key = ? AND source = 'daily')) AND source != 'bonus'`,
       )
-      .bind(userId, wk)
+      .bind(userId, dk, wk)
       .first<{ n: number }>(),
     db
       .prepare(`SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ?`)
@@ -63,7 +66,7 @@ async function memberUsage(userId: string): Promise<{ weeklyUsed: number; bonusG
   ]);
 
   return {
-    weeklyUsed: Number(weeklyRow?.n ?? 0),
+    dailyUsed: Number(dailyRow?.n ?? 0),
     bonusGranted: Number(bonusGrantRow?.n ?? 0),
     bonusUsed: Number(bonusUsedRow?.n ?? 0),
   };
@@ -86,6 +89,7 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
       canChat: false,
       remaining,
       limit: GUEST_LIMIT,
+      dailyRemaining: 0,
       weeklyRemaining: 0,
       bonusRemaining: 0,
       resetAt: null,
@@ -95,29 +99,31 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
     };
   }
 
-  const { weeklyUsed, bonusGranted, bonusUsed } = await memberUsage(v.userId);
-  const weeklyRemaining = Math.max(0, WEEKLY_LIMIT - weeklyUsed);
+  const { dailyUsed: usedToday, bonusGranted, bonusUsed } = await memberUsage(v.userId);
+  const dailyRemaining = Math.max(0, DAILY_LIMIT - usedToday);
   const bonusRemaining = Math.max(0, bonusGranted - bonusUsed);
-  const remaining = weeklyRemaining + bonusRemaining;
+  const remaining = dailyRemaining + bonusRemaining;
 
   return {
     kind: "member",
     canStartReading: remaining > 0,
     canChat: true,
     remaining,
-    limit: WEEKLY_LIMIT,
-    weeklyRemaining,
+    limit: DAILY_LIMIT,
+    dailyRemaining,
+    weeklyRemaining: dailyRemaining,
     bonusRemaining,
     resetAt: nextResetAt(),
     dailyFreeAvailable,
     dailyStreak,
-    reason: remaining > 0 ? undefined : "weekly_exhausted",
+    reason: remaining > 0 ? undefined : "daily_exhausted",
   };
 }
 
 /**
  * หักสิทธิ์การเปิดไพ่ 1 ครั้ง — คืน false ถ้าหักไม่ได้ (สิทธิ์หมด)
- * - หากเป็นผัง 'daily' และยังไม่เคยเปิดฟรีในวันนี้ → บันทึก streak และไม่หักโควตารายสัปดาห์
+ * - ผู้เยี่ยมชม: ได้ 1 ครั้งตลอดชีพ (นับผ่าน signed guest ticket & cookie)
+ * - สมาชิก: ได้ 3 ครั้งต่อวัน (ตัดตามวันไทย) + ใช้โควตาโบนัสเมื่อโควตารายวันหมด
  * - กันหักซ้ำด้วย UNIQUE(reading_id): กดรัว/รีทราย/สองแท็บ ก็หักครั้งเดียว
  */
 export async function consumeReading(
@@ -127,13 +133,9 @@ export async function consumeReading(
 ): Promise<boolean> {
   const userKey = v.kind === "member" ? v.userId : `guest_${v.gid}`;
 
-  // กรณีเป็นผังไพ่ประจำวัน (daily) และยังไม่ได้ใช้สิทธิ์ฟรีของวันนี้
+  // บันทึก streak สำหรับผัง daily
   if (spreadId === "daily") {
-    const dailyUsed = await isDailyFreeReadingUsed(userKey);
-    if (!dailyUsed) {
-      await recordDailyReading(userKey, readingId);
-      return true; // ฟรี 1 ครั้งต่อวัน ไม่หักโควตา
-    }
+    await recordDailyReading(userKey, readingId).catch(() => {});
   }
 
   if (v.kind === "guest") {
@@ -154,8 +156,9 @@ export async function consumeReading(
   const ent = await getEntitlement(v);
   if (!ent.canStartReading && ent.remaining <= 0) return false;
 
-  // ใช้โควตารายสัปดาห์ก่อน เก็บโบนัสไว้ให้นานที่สุด
-  const source = ent.weeklyRemaining > 0 ? "weekly" : "bonus";
+  // ใช้โควตารายวันก่อน เก็บโบนัสไว้ให้นานที่สุด
+  const source = ent.dailyRemaining > 0 ? "daily" : "bonus";
+  const dk = todayDateKey();
 
   try {
     await db
@@ -163,7 +166,7 @@ export async function consumeReading(
         `INSERT INTO reading_usage (id, user_id, reading_id, week_key, source, consumed_at)
          VALUES (?, ?, ?, ?, ?, ?)`,
       )
-      .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, weekKey(), source, Date.now())
+      .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, source, Date.now())
       .run();
     return true;
   } catch {

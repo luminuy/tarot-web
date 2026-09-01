@@ -15,7 +15,10 @@ export async function isEntitlementEnabled(): Promise<boolean> {
     MEMO_MS,
   ).catch(() => null);
 
-  if (raw === true) return true;
-  if (raw && typeof raw === "object") return raw.value === true || raw.enabled === true;
-  return false;
+  // If explicitly disabled in KV by admin
+  if (raw === false || (raw && typeof raw === "object" && (raw.value === false || raw.enabled === false))) {
+    return false;
+  }
+  // Default is TRUE (Entitlement enforcement active for guest 1 reading & member 3 readings/day)
+  return true;
 }
