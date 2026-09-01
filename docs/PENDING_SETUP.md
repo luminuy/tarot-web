@@ -15,6 +15,7 @@
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | ล็อกอิน Google |
 | `ADMIN_PASSWORD` | เข้าแผงแอดมิน `/admin` |
 | `TESTER_PASSWORD` | *(ยังไม่ตั้ง — ดูข้อ 4.5)* เข้า `/tester` ใช้เว็บไม่จำกัด โดยไม่เห็นแผงแอดมิน |
+| `UNLIMITED_EMAILS` | *(ยังไม่ตั้ง — ดูข้อ 4.6)* บัญชีจริงที่อีเมลอยู่ในลิสต์ → ใช้เว็บไม่จำกัด (ล็อกอิน Google ได้เลย) |
 | `GEMINI_API_KEY` | คำอ่านไพ่ AI + แชทถามต่อ + สรุปดวงรายเดือน (ตั้ง 2026-09-01) |
 
 **ใช้งานได้ตอนนี้:** ดูดวง 5 ขั้น (คำอ่าน AI จริงผ่าน Gemini + ระบบสิทธิ์/โควตา) · Google login · แผงแอดมิน (`/admin` — สถิติ, แก้ prompt/ไพ่, marketplace, สิทธิ์เปิดไพ่)
@@ -118,6 +119,27 @@ npx wrangler secret put TESTER_PASSWORD    # ตั้งรหัสยาว �
 - การใช้งานถูกนับใน stat `ratelimit_bypass:tester` (เห็นใน `/admin`)
 - **ยังบังคับ:** safety guard (สายด่วน 1323), provably-fair integrity — เหมือน bypass ทุกแบบ
 - dev: ใส่ `TESTER_PASSWORD=...` ใน `.env.local`
+
+### 4.6 บัญชีจริงแบบ "ไม่จำกัด" — ล็อกอินผ่านหน้าต่างเข้าสู่ระบบปกติ (`UNLIMITED_EMAILS`)
+
+ต่างจาก 4.5: อันนี้ผูกกับ **บัญชีจริง** → มีประวัติดูดวง ซิงก์ข้ามเครื่อง คุยกับแม่หมอได้เต็ม
+ทุกลิมิตถูกปลดเหมือน tester · **ไม่เปิดแผงแอดมิน**
+
+```bash
+npx wrangler secret put UNLIMITED_EMAILS    # คั่นด้วย comma เช่น: partner@gmail.com, boss@gmail.com
+```
+
+**ทางที่ง่ายที่สุด (ไม่ต้องตั้ง secret อื่นเลย):**
+1. หุ้นส่วนกด **"Google"** ในหน้าต่างเข้าสู่ระบบ → ล็อกอินด้วย Gmail ของตัวเอง (Google login ใช้ได้อยู่แล้วบน prod)
+2. เอาอีเมล Gmail นั้นใส่ใน `UNLIMITED_EMAILS` → deploy รอบเดียว → ใช้ไม่จำกัดทันที
+3. เอาออก = ลบอีเมลออกจาก secret แล้ว deploy
+
+**ถ้าอยากได้ "อีเมล + รหัสผ่าน" แยก (ปุ่มล่างในรูป — เข้าสู่ระบบด้วยอีเมล):**
+- ต้องตั้ง `PASSWORD_PEPPER` ก่อน (ข้อ 1 · `openssl rand -hex 32` · **ไม่ต้องมีโดเมน**) — ตอนนี้ยังไม่ได้ตั้ง form อีเมลจึง error 500
+- ตั้งเสร็จแล้ว: หุ้นส่วนกดแท็บ **"สมัครสมาชิก"** ในหน้าต่าง กรอกอีเมล+รหัส+ชื่อ → ได้บัญชีทันที (อีเมลยืนยันส่งไม่ได้จนกว่าจะตั้ง Resend แต่ไม่บล็อกการล็อกอิน)
+- เอาอีเมลนั้นใส่ `UNLIMITED_EMAILS`
+
+- นับใน stat `ratelimit_bypass:unlimited_user` · dev: `UNLIMITED_EMAILS=...` ใน `.env.local`
 
 ### 5. D1 Migrations ไม่รันอัตโนมัติตอน deploy
 
