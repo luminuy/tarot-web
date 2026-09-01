@@ -191,28 +191,33 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         )}
       </div>
 
-      {/* Error / Recovery Banner */}
-      {errorMsg && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          className="anim-page-transition p-4 rounded-2xl bg-rose-950/90 border border-rose-600/50 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg"
-        >
-          <div className="text-xs sm:text-sm text-rose-200 font-serif-th text-center sm:text-left">
-            <span>✦ </span>
-            <span>{errorMsg}</span>
+      {/* Error / Recovery Banner — โทนทองอุ่น ไม่ใช่แดงตกใจ · ซ่อนปุ่มลองใหม่เมื่อเป็นเรื่องโควตา */}
+      {errorMsg && (() => {
+        const isQuota = /สมัครสมาชิก|เติมรอบ|โควตา|สิทธิ์/.test(errorMsg);
+        return (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="anim-page-transition p-4 rounded-2xl bg-[#1c1330]/90 border border-[#e5c07b]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg backdrop-blur"
+          >
+            <div className="flex items-start gap-2.5 text-xs sm:text-sm text-[#f5deaa] font-serif-th">
+              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[#e5c07b]/60 text-[10px] text-[#ffd700]">
+                ✦
+              </span>
+              <span className="leading-relaxed">{errorMsg}</span>
+            </div>
+            {onRetry && !isQuota && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="self-end sm:self-auto px-5 py-2 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] text-xs font-bold font-serif-th shadow hover:opacity-95 cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+              >
+                <span>✦</span> ลองอ่านใหม่
+              </button>
+            )}
           </div>
-          {onRetry && (
-            <button
-              type="button"
-              onClick={onRetry}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] text-xs font-bold font-serif-th shadow hover:opacity-95 cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
-            >
-              <span>✦</span> ลองอ่านใหม่อีกครั้ง (Retry)
-            </button>
-          )}
-        </div>
-      )}
+        );
+      })()}
 
       {/* TAB 1: CARD-BY-CARD INSPECTION VIEW */}
       {activeTab === "card" && (
