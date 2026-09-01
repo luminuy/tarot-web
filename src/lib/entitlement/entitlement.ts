@@ -1,5 +1,6 @@
 import { getAppDB } from "@/lib/platform/db";
 import { nextResetAt, weekKey } from "@/lib/entitlement/week";
+import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading } from "@/lib/entitlement/daily";
 
 /**
  * แกนสิทธิ์การเปิดไพ่ — แหล่งความจริงเดียว (ENTITLEMENT_PLAN ข้อ 5)
@@ -7,6 +8,7 @@ import { nextResetAt, weekKey } from "@/lib/entitlement/week";
  *
  * ผู้เยี่ยมชม: 1 ครั้ง (คุกกี้จัดการนับจริง — PR C)
  * สมาชิก:     3 ครั้ง/สัปดาห์ + โบนัสก้อน (ไม่หมดอายุ) · ใช้โควตารายสัปดาห์ก่อน เก็บโบนัสไว้
+ * ไพ่ประจำวัน (daily): เปิดฟรี 1 ครั้ง/วัน ไม่กินโควตารายสัปดาห์
  */
 
 export const WEEKLY_LIMIT = 3;
@@ -31,6 +33,10 @@ export interface Entitlement {
   bonusRemaining: number;
   /** ISO string เวลาโควตารายสัปดาห์รีเซ็ต (null สำหรับผู้เยี่ยมชม) */
   resetAt: string | null;
+  /** ไพ่ประจำวันฟรีของวันนี้ยังใช้ได้หรือไม่ */
+  dailyFreeAvailable: boolean;
+  /** จำนวนวันที่เปิดไพ่ประจำวันต่อเนื่อง */
+  dailyStreak: number;
   reason?: "guest_used" | "weekly_exhausted" | "members_only";
   kind: "guest" | "member";
 }
@@ -64,6 +70,13 @@ async function memberUsage(userId: string): Promise<{ weeklyUsed: number; bonusG
 }
 
 export async function getEntitlement(v: Viewer): Promise<Entitlement> {
+  const userKey = v.kind === "member" ? v.userId : `guest_${v.gid}`;
+  const [dailyUsed, dailyStreak] = await Promise.all([
+    isDailyFreeReadingUsed(userKey),
+    getDailyStreak(userKey),
+  ]);
+  const dailyFreeAvailable = !dailyUsed;
+
   if (v.kind === "guest") {
     const used = Math.max(0, v.guestUsed);
     const remaining = Math.max(0, GUEST_LIMIT - used);
@@ -76,6 +89,8 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
       weeklyRemaining: 0,
       bonusRemaining: 0,
       resetAt: null,
+      dailyFreeAvailable,
+      dailyStreak,
       reason: remaining > 0 ? undefined : "guest_used",
     };
   }
@@ -94,15 +109,33 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
     weeklyRemaining,
     bonusRemaining,
     resetAt: nextResetAt(),
+    dailyFreeAvailable,
+    dailyStreak,
     reason: remaining > 0 ? undefined : "weekly_exhausted",
   };
 }
 
 /**
  * หักสิทธิ์การเปิดไพ่ 1 ครั้ง — คืน false ถ้าหักไม่ได้ (สิทธิ์หมด)
- * กันหักซ้ำด้วย UNIQUE(reading_id): กดรัว/รีทราย/สองแท็บ ก็หักครั้งเดียว
+ * - หากเป็นผัง 'daily' และยังไม่เคยเปิดฟรีในวันนี้ → บันทึก streak และไม่หักโควตารายสัปดาห์
+ * - กันหักซ้ำด้วย UNIQUE(reading_id): กดรัว/รีทราย/สองแท็บ ก็หักครั้งเดียว
  */
-export async function consumeReading(v: Viewer, readingId: string): Promise<boolean> {
+export async function consumeReading(
+  v: Viewer,
+  readingId: string,
+  spreadId?: string
+): Promise<boolean> {
+  const userKey = v.kind === "member" ? v.userId : `guest_${v.gid}`;
+
+  // กรณีเป็นผังไพ่ประจำวัน (daily) และยังไม่ได้ใช้สิทธิ์ฟรีของวันนี้
+  if (spreadId === "daily") {
+    const dailyUsed = await isDailyFreeReadingUsed(userKey);
+    if (!dailyUsed) {
+      await recordDailyReading(userKey, readingId);
+      return true; // ฟรี 1 ครั้งต่อวัน ไม่หักโควตา
+    }
+  }
+
   if (v.kind === "guest") {
     // การนับจริงของผู้เยี่ยมชมอยู่ที่คุกกี้ (PR C) — ที่นี่แค่ตรวจว่ายังมีสิทธิ์
     return v.guestUsed < GUEST_LIMIT;
@@ -110,8 +143,7 @@ export async function consumeReading(v: Viewer, readingId: string): Promise<bool
 
   const db = await getAppDB();
 
-  // fast path: เคยหัก reading นี้แล้ว → ผ่าน ไม่ทำอะไรต่อ (ลด noise จากการกดรัว/รีทราย)
-  // UNIQUE(reading_id) ยังเป็นตัวกันจริงสำหรับ race ที่สอดแทรกระหว่าง check นี้กับ insert
+  // fast path: เคยหัก reading นี้แล้ว → ผ่าน ไม่ทำอะไรต่อ
   const already = await db
     .prepare(`SELECT 1 AS x FROM reading_usage WHERE reading_id = ? LIMIT 1`)
     .bind(readingId)
@@ -120,7 +152,7 @@ export async function consumeReading(v: Viewer, readingId: string): Promise<bool
   if (already) return true;
 
   const ent = await getEntitlement(v);
-  if (!ent.canStartReading) return false;
+  if (!ent.canStartReading && ent.remaining <= 0) return false;
 
   // ใช้โควตารายสัปดาห์ก่อน เก็บโบนัสไว้ให้นานที่สุด
   const source = ent.weeklyRemaining > 0 ? "weekly" : "bonus";

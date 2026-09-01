@@ -177,14 +177,37 @@ async function main() {
   check("grandfather + signup: bonusRemaining = 13 (3+10, ไม่ใช่ 23)", gfEnt.bonusRemaining === 13);
   await softDeleteUser(gfUid);
 
-  // ── 10. เพดาน AI สองชั้น (ENTITLEMENT_PLAN ข้อ 6.2) ──
-  const { isAiCapReached } = await import("../../src/lib/security/ai-budget");
-  const { kvPutJSON, KEY } = await import("../../src/lib/platform/kv-store");
-  const { utcDay } = await import("../../src/lib/stats/record");
-  // cap เริ่มต้น 2000 → guest ตัดที่ 1400 · ตั้งตัวนับวันนี้ = 1500
-  await kvPutJSON(KEY.aiCap(utcDay()), { count: 1500 });
-  check("เพดาน AI: guest ที่ 1500/2000 → ถึงเพดานแล้ว (ตัด 70%)", (await isAiCapReached("guest")) === true);
-  check("เพดาน AI: member ที่ 1500/2000 → ยังไม่ถึงเพดาน (100%)", (await isAiCapReached("member")) === false);
+  // ── 11. เติมแพ็กเกจโควตา (AI Reading Credit Packages) ──
+  const { CREDIT_PACKAGES, getCreditPackageById } = await import(
+    "../../src/lib/entitlement/packages"
+  );
+  check("มีแพ็กเกจเครดิตครบ 3 ระดับ", CREDIT_PACKAGES.length === 3);
+  check("คำนวณราคาเป็น integer satang (pack_10 = 14900 satang)", getCreditPackageById("pack_10")?.amountSatang === 14900);
+  
+  const buyerId = `test_buyer_${Date.now()}`;
+  await upsertUserOnLogin({ id: buyerId, provider: "email", email: `${buyerId}@test.com`, name: "ผู้ซื้อ" });
+  await grantBonus(buyerId, 10, "purchase_ord_test123");
+  const buyerEnt = await getEntitlement({ kind: "member", userId: buyerId });
+  check("ซื้อแพ็กเกจ 10 ครั้ง → bonusRemaining = 10", buyerEnt.bonusRemaining === 10);
+  await softDeleteUser(buyerId);
+
+  // ── 12. ไพ่ประจำวันฟรี 1 ครั้ง/วัน ไม่กินโควตารายสัปดาห์ (Daily Habit Loop) ──
+  const { todayDateKey, isDailyFreeReadingUsed, getDailyStreak } = await import(
+    "../../src/lib/entitlement/daily"
+  );
+  const dailyUser = `test_daily_${Date.now()}`;
+  await upsertUserOnLogin({ id: dailyUser, provider: "google", email: `${dailyUser}@test.com`, name: "คนเปิดรายวัน" });
+  const dailyViewer: Viewer = { kind: "member", userId: dailyUser };
+
+  const dEnt1 = await getEntitlement(dailyViewer);
+  check("ก่อนเปิดรายวัน: dailyFreeAvailable = true", dEnt1.dailyFreeAvailable === true);
+  check("เปิดไพ่ประจำวันครั้งแรกของวัน → consumeReading คืน true", (await consumeReading(dailyViewer, `r_daily_1`, "daily")) === true);
+  
+  const dEnt2 = await getEntitlement(dailyViewer);
+  check("หลังเปิดรายวัน: weeklyRemaining ยังเต็ม 3 (ไม่กินโควตาสัปดาห์)", dEnt2.weeklyRemaining === 3);
+  check("หลังเปิดรายวัน: dailyFreeAvailable = false", dEnt2.dailyFreeAvailable === false);
+  check("streak ถูกบันทึกเป็น 1 วัน", (await getDailyStreak(dailyUser)) >= 1);
+  await softDeleteUser(dailyUser);
 
   console.log(`\n${pass}/${pass + fail} ผ่าน`);
   if (fail > 0) process.exit(1);

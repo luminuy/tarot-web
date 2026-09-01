@@ -36,6 +36,24 @@
 
 ---
 
+### 🗓️ 2026-09-01: AI Reading Credits Store, Free Daily Tarot Habit & Web Speech TTS
+
+- **ความต้องการ**: พัฒนายกระดับ 3 ด้านตามคำขอของผู้ใช้:
+  1. 🔴 **ระบบซื้อรอบดูดวงเพิ่ม (AI Reading Credit Packages & Checkout)**: เติมโควตาดูดวง 3 ระดับ (3/10/30 ครั้ง) ผ่าน PromptPay QR & บัตรเครดิต (Omise / Simulator) พร้อมปุ่มซื้อใน `EntitlementGate` และ `QuotaBadge`
+  2. 🟡 **ระบบไพ่ประจำวันฟรี 1 ครั้ง/วัน (Daily Tarot Habit Loop & Streak Tracking)**: เปิดไพ่ประจำวันฟรีวันละ 1 ครั้งโดยไม่กินโควตารายสัปดาห์ (3 ครั้ง/สัปดาห์) พร้อมระบบนับ Streak การเปิดต่อเนื่อง
+  3. 🔵 **ระบบเสียงอ่านคำทำนาย (Web Speech TTS)**: ปุ่มลำโพงฟังเสียงอ่านคำทำนายภาษาไทยสไตล์แม่หมอบนการ์ดผลทำนายและบทสนทนาต่อเนื่อง
+- **สิ่งที่ทำ**:
+  - `src/lib/entitlement/packages.ts` 🆕: นิยาม 3 แพ็กเกจเครดิต (`pack_3`: ฿59, `pack_10`: ฿149, `pack_30`: ฿299) คำนวณในหน่วย Integer Satang
+  - `src/app/api/entitlement/checkout/route.ts` 🆕: Endpoint สั่งซื้อเครดิตและสร้าง Charge พร้อมบันทึกในตาราง payments
+  - `src/app/api/entitlement/checkout/confirm/route.ts` 🆕: Endpoint ยืนยันการชำระเงินและเรียก `grantBonus(userId, credits, "purchase_" + orderId)`
+  - `src/components/entitlement/BuyCreditsModal.tsx` 🆕: Modal เลือกแพ็กเกจ แสดง QR PromptPay และยืนยันการเติมโควตา
+  - `migrations/0008_daily_readings.sql` & `src/lib/entitlement/daily.ts` 🆕: ตารางและฟังก์ชันจัดการไพ่ประจำวันฟรีและคำนวณ Streak
+  - `src/lib/entitlement/entitlement.ts` & `src/app/api/reading/[id]/read/route.ts`: ปรับปรุงให้ผัง `daily` ฟรี 1 ครั้ง/วัน ไม่กินโควตารายสัปดาห์
+  - `src/lib/audio/tts.ts` & `src/components/reading/TTSReaderButton.tsx` 🆕: โมดูลและปุ่มลำโพง Web Speech TTS ปรับ Pitch/Rate ตาม Persona
+  - `src/components/reading/StreamReader.tsx` & `src/components/reading/FollowUpChat.tsx`: ติดตั้งปุ่ม `TTSReaderButton` ในการ์ดอ่านรายใบ, สรุป และกล่องแชท
+  - `scripts/qa/test-entitlement.ts`: เพิ่มชุดทดสอบครบ 49/49 เคส
+- **ผลการทดสอบ**: `npm run repo:verify` 14/14 ผ่านครบสมบูรณ์, `typecheck` 0 errors, QA 49/49 ผ่าน 100%
+
 ### 🗓️ 2026-09-01: เอกสารงานตั้งค่า production ที่ยังค้าง (docs/PENDING_SETUP.md)
 
 - **ความต้องการ**: เจ้าของยังไม่ได้ซื้อโดเมน (ใช้ `tarot-web.bankjack10452.workers.dev`) · ต้องจดไว้ว่าต้องตั้งอะไรบ้าง — **ตัดสินใจ: ยังไม่ปิดฟีเจอร์อีเมล ใส่ secret ทีหลัง**

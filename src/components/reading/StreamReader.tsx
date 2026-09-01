@@ -14,6 +14,7 @@ import { FollowUpChat } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
 import { ProvablyFairPanel } from "./ProvablyFairPanel";
 import { CardImage } from "@/components/card/CardImage";
+import { TTSReaderButton } from "./TTSReaderButton";
 
 interface StreamReaderProps {
   reading?: Partial<Reading> | null;
@@ -314,23 +315,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   </h5>
                 )}
                 {activeCardReading?.reading && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleToggleVoice(
-                        `${activeCardReading.headline ? activeCardReading.headline + ". " : ""}${activeCardReading.reading}`
-                      )
-                    }
-                    className={`px-3 py-1 rounded-full text-xs font-serif-th transition-all cursor-pointer flex items-center gap-1.5 shadow ml-auto ${
-                      isSpeakingVoice
-                        ? "bg-rose-950/90 text-rose-200 border border-rose-500/60 animate-pulse"
-                        : "bg-[#18102c] text-[#f5deaa] border border-[#e5c07b]/40 hover:bg-[#251842]"
-                    }`}
-                    title="ฟังเสียงแม่หมออ่านคำทำนาย"
-                  >
-                    <span>{isSpeakingVoice ? "⏹️" : "🔊"}</span>
-                    <span>{isSpeakingVoice ? "หยุดเสียง" : "ฟังเสียงแม่หมอ"}</span>
-                  </button>
+                  <TTSReaderButton
+                    textToRead={`${activeCardReading.headline ? activeCardReading.headline + ". " : ""}${activeCardReading.reading}`}
+                    personaId={persona.id}
+                    className="ml-auto"
+                  />
                 )}
               </div>
 
@@ -436,24 +425,12 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                       คำตอบ: {reading.yesNoAnswer}
                     </span>
                   )}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleToggleVoice(
-                        `บทสรุปคำทำนายและแนวโน้ม. ${reading.summary || ""}. ${
-                          reading.advice ? "คำแนะนำคือ " + reading.advice.join(", ") : ""
-                        }`
-                      )
-                    }
-                    className={`px-3 py-1 rounded-full text-xs font-serif-th transition-all cursor-pointer flex items-center gap-1.5 shadow ${
-                      isSpeakingVoice
-                        ? "bg-rose-950/90 text-rose-200 border border-rose-500/60 animate-pulse"
-                        : "bg-[#18102c] text-[#f5deaa] border border-[#e5c07b]/40 hover:bg-[#251842]"
+                  <TTSReaderButton
+                    textToRead={`บทสรุปคำทำนายและแนวโน้ม. ${reading.summary || ""}. ${
+                      reading.advice ? "คำแนะนำคือ " + reading.advice.join(", ") : ""
                     }`}
-                  >
-                    <span>{isSpeakingVoice ? "⏹️" : "🔊"}</span>
-                    <span>{isSpeakingVoice ? "หยุดเสียง" : "ฟังบทสรุปทั้งหมด"}</span>
-                  </button>
+                    personaId={persona.id}
+                  />
                 </div>
               </div>
               <p className="text-xs sm:text-sm text-[#f5deaa] font-serif-th leading-relaxed">

@@ -17,6 +17,8 @@ export interface ClientEntitlement {
   weeklyRemaining: number | null;
   bonusRemaining: number | null;
   resetAt: string | null;
+  dailyFreeAvailable?: boolean;
+  dailyStreak?: number;
   kind?: "guest" | "member";
   reason?: string;
   announce?: boolean;
@@ -41,6 +43,8 @@ export async function refreshEntitlement(): Promise<void> {
   cache = await fetchEntitlement();
   listeners.forEach((fn) => fn(cache));
 }
+
+export const mutateEntitlement = refreshEntitlement;
 
 export function useEntitlement(): ClientEntitlement | null {
   const [state, setState] = useState<ClientEntitlement | null>(cache);
