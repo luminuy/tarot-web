@@ -161,9 +161,18 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
               };
             }
 
-            const textPart = chunk.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textPart) {
-              jsonAccumulator += textPart;
+            // Gemini 3.x เปิด "thinking" เป็นค่าเริ่มต้น → content.parts มีทั้ง part ความคิด
+            // (`thought: true`) และ part คำตอบจริง · ต้องวน parts ทั้งหมด + ข้าม thought
+            // ไม่งั้นข้อความความคิดจะปนเข้า jsonAccumulator ทำให้ JSON.parse พัง (ทุกคำอ่านตกไป fallback)
+            const parts = chunk.candidates?.[0]?.content?.parts;
+            const answerText = Array.isArray(parts)
+              ? parts
+                  .filter((p: any) => p && p.thought !== true && typeof p.text === "string")
+                  .map((p: any) => p.text)
+                  .join("")
+              : undefined;
+            if (answerText) {
+              jsonAccumulator += answerText;
               const partial = parsePartialReading(jsonAccumulator);
 
               if (!sentOpening && partial.opening) {
