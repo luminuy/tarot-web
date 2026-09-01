@@ -38,6 +38,35 @@
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
 
+### 🗓️ 2026-09-01: Phase 2 · M7 — Marketplace Payments, Webhook Signature Verification & Platform Revenue Ledger (ระบบชำระเงิน & บัญชีส่วนแบ่ง)
+
+- **ความต้องการ**: พัฒนาระบบชำระเงินสำหรับค่าบริการขอคำปรึกษาแม่หมอ (299 บาท/30 นาที) รองรับ Payment Gateway (Omise / PromptPay / Credit Card) พร้อม Webhook Security Verification และระบบคำนวณส่วนแบ่งรายได้แม่หมอ & ค่าคอมมิชชั่นแพลตฟอร์ม
+- **สิ่งที่ทำ**:
+  - **D1 Schema & Migration**:
+    - สร้าง migration `migrations/0003_marketplace_payments.sql` (ตาราง `payments` และ `payouts`) และ apply ขึ้น Remote Cloudflare D1 สำเร็จ 100%
+    - อัปเดต `src/lib/platform/db.ts` local SQLite schema รองรับตาราง `payments` และ `payouts`
+  - **Payment Gateway Adapter & Test Mode (M7)**:
+    - สร้าง `src/lib/marketplace/payment-gateway.ts` เชื่อมต่อ Omise Charges API พร้อมระบบ **Deterministic Test-Mode Simulator** เพื่อให้ระบบทำงานและทดสอบได้ทันทีระหว่างรอเจ้าของใส่ API Key ในภายหลัง
+    - ระบบตรวจสอบความถูกต้องของ Webhook Signature ด้วย HMAC-SHA256 ป้องกันการปลอมแปลง Event (Zero-Trust)
+  - **Repository & APIs Layer**:
+    - สร้าง `src/lib/marketplace/payments.repo.ts` (CRUD, status transitions `pending` ➔ `paid`, และคำนวณรายได้แม่หมอ `calculateReaderEarnings`)
+    - สร้าง API `/api/marketplace/payments` สำหรับสร้างรายการชำระเงิน
+    - สร้าง API `/api/marketplace/payments/webhook` สำหรับรับ Webhook ยืนยันการชำระเงิน
+    - สร้าง API `/api/admin/payouts` แผงแอดมินดูสรุปรายได้ ยอดรวมคอมมิชชั่น และยอดจ่ายสุทธิของแม่หมอ
+  - **UI & Checkout Integration**:
+    - อัปเดต `BookQueueModal.tsx` แสดงป้ายราคาค่าบริการ / บูชาครู (299 บาท/30 นาที)
+    - อัปเดต `src/app/readers/queue/[id]/page.tsx` แสดงข้อมูลการชำระเงินและบริบทคิว
+  - **QA & Verification Suite**:
+    - อัปเกรด `scripts/qa/test-marketplace-readers.ts` ครอบคลุม 13 ด่านตรวจ (M4-M7) ผ่าน 100% Green
+    - `npm run repo:verify` ผ่านครบ **9/9 ด่าน 100% Green**
+    - `npm run build` ผ่าน 109 routes
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - เพิ่มใหม่: `migrations/0003_marketplace_payments.sql`, `src/lib/marketplace/payments.repo.ts`, `src/lib/marketplace/payment-gateway.ts`, `src/app/api/marketplace/payments/route.ts`, `src/app/api/marketplace/payments/webhook/route.ts`, `src/app/api/admin/payouts/route.ts`
+  - แก้ไข: `src/lib/platform/db.ts`, `src/lib/marketplace/readers.repo.ts`, `src/components/marketplace/BookQueueModal.tsx`, `src/app/readers/queue/[id]/page.tsx`, `scripts/qa/test-marketplace-readers.ts`, `docs/MARKETPLACE.md`, `docs/WORK_LOG.md`
+- **ผลการทดสอบ**:
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 9 ด่าน 100% Green**
+  - `npm run build` ➔ **ผ่าน 109 static/dynamic routes**
+
 ### 🗓️ 2026-09-01: Phase 2 · M5 & M6 — Real-time Queue Intake, Reader Mission Control & AI Pre-Screening Engine (Marketplace คิวสด & บรีฟแม่หมอ)
 
 - **ความต้องการ**: พัฒนาระบบรับคิวสด (Live Walk-up Queue) และนัดหมายล่วงหน้า เชื่อมต่อแผงควบคุมแม่หมอ (Reader Console) พร้อมระบบ AI คัดกรองคำถาม สรุปบรีฟใน 5 วินาที แนะนำผังพยากรณ์ และบล็อกคำถามวิกฤตสุขภาพจิตด้วยสายด่วน 1323

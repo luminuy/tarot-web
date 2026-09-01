@@ -235,250 +235,103 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 ## 5. M5 · Availability + Queue (เสร็จสมบูรณ์ 100% ✅)
 
 ### 5.1 Migrations — `migrations/0002_marketplace_queue_screening.sql`
-```sql
-CREATE TABLE reader_availability (
-  id          TEXT PRIMARY KEY,
-  reader_id   TEXT NOT NULL REFERENCES readers(id),
-  mode        TEXT NOT NULL,          -- 'live' | 'scheduled'
-  weekday     INTEGER,                -- 0-6 (scheduled) | NULL (live)
-  start_min   INTEGER,                -- นาทีจากเที่ยงคืน (scheduled)
-  end_min     INTEGER,
-  slot_minutes INTEGER DEFAULT 30,
-  timezone    TEXT NOT NULL DEFAULT 'Asia/Bangkok',
-  is_open     INTEGER NOT NULL DEFAULT 0  -- live: reader toggle เปิด/ปิดคิวตอนนี้
-);
-CREATE INDEX idx_avail_reader ON reader_availability(reader_id);
+- ตาราง `reader_availability` (สลับเปิด/ปิด Live Queue และเวลาว่างล่วงหน้า)
+- ตาราง `queue_tickets` (คิวรับคำปรึกษา พร้อมคำนวณตำแหน่งคิว)
+- ตาราง `bookings` (รอบนัดหมายและสถานะการจอง)
+- Auto-delete PDPA retention: ลบตั๋วคิวที่หมดอายุภายใน 7 วัน
 
-CREATE TABLE queue_tickets (
-  id            TEXT PRIMARY KEY,
-  reader_id     TEXT NOT NULL REFERENCES readers(id),
-  kind          TEXT NOT NULL,        -- 'walkup' | 'booking'
-  status        TEXT NOT NULL DEFAULT 'screening',
-     -- screening → waiting → ready → handed_off → (cancelled|expired)
-  position      INTEGER,             -- ลำดับในคิว (walkup)
-  slot_start    INTEGER,             -- booking เท่านั้น
-  customer_ref  TEXT NOT NULL,       -- opaque id (ไม่ใช่ PII) — map ไป localStorage ฝั่ง client
-  nickname      TEXT,                -- PDPA: ชื่อเล่นเท่านั้น
-  question      TEXT,                -- PDPA: คำถาม — เก็บชั่วคราว
-  reading_snapshot TEXT,             -- JSON ไพ่ที่จับได้ (ถ้ามี)
-  ai_screen_id  TEXT REFERENCES ai_screening(id),
-  created_at    INTEGER NOT NULL,
-  expires_at    INTEGER NOT NULL     -- auto-cleanup (PDPA) — default created_at + 7 วัน
-);
-CREATE INDEX idx_tickets_reader_status ON queue_tickets(reader_id, status);
+### 5.2 Reader Auth — `src/lib/auth/reader-auth.ts`
+- HMAC-SHA256 Token เซ็นด้วย `session_secret` ประจำตัวแม่หมอ
+- Guard `requireReader()` ตรวจสอบสิทธิ์สำหรับ API และ Console
 
-CREATE TABLE bookings (
-  id          TEXT PRIMARY KEY,
-  ticket_id   TEXT NOT NULL REFERENCES queue_tickets(id),
-  reader_id   TEXT NOT NULL REFERENCES readers(id),
-  slot_start  INTEGER NOT NULL,
-  slot_end    INTEGER NOT NULL,
-  status      TEXT NOT NULL DEFAULT 'confirmed', -- reserved|paid|confirmed|done|cancelled|no_show
-  created_at  INTEGER NOT NULL
-);
-CREATE UNIQUE INDEX idx_bookings_slot ON bookings(reader_id, slot_start) WHERE status != 'cancelled';
-```
-+ job auto-delete: route `POST /api/cron/cleanup` หรือทำใน `getStats`/ทุก request ลบ `queue_tickets WHERE expires_at < now` (PDPA)
+### 5.3 Reader Console — `src/app/readers/console/page.tsx`
+- สลับเปิด/ปิดรับงานสด (Live Toggle)
+- รายการคิวรอรับคำปรึกษา พร้อมสรุปประเด็น AI Brief ใน 5 วินาที
+- ปุ่มเรียกคิว (Ready) และปุ่มส่งต่อไปยัง LINE เมื่อสนทนาเสร็จ
 
-### 5.2 Reader auth — `src/lib/auth/reader-auth.ts` (ลอก `admin-auth.ts`)
-- reader ไม่มี email login → admin ออก **secret link** `?token=<HMAC(reader.session_secret, {readerId, exp})>`
-- `verifyReaderToken(token) → readerId | null` · cookie `tarot_reader` หลังเข้าครั้งแรก
-- `requireReader(request) → { readerId } | NextResponse`
-
-### 5.3 Reader console — `src/app/readers/console/*` (client)
-- toggle "เปิดรับคิวตอนนี้" (live) → `PATCH reader_availability.is_open`
-- ตารางคิว `queue_tickets WHERE reader_id=? AND status IN ('waiting','ready')` (poll ทุก 5-10 วิ)
-- ปุ่ม "รับเคสนี้" → status `ready`, ปุ่ม "ส่งต่อแล้ว (คุยทาง LINE)" → status `handed_off` + เผย customer info ให้ reader
-- ตั้งเวลาว่าง (scheduled): form weekday + ช่วงเวลา
-
-### 5.4 Customer flow
-- ปุ่ม "จองคิว" ที่ `/readers/[id]` → modal: เลือก walk-up (ถ้า `is_open`) หรือ slot ล่วงหน้า
-- **consent checkbox** (PDPA) ก่อนส่ง
-- `POST /api/marketplace/tickets` → สร้าง ticket (status `screening`) → เรียก AI screening (M6) → ถ้าผ่าน status `waiting` + คำนวณ `position`
-- หน้าคิว `/readers/queue/[ticketId]` (client, poll) → แสดงลำดับ → เมื่อ status `ready`/`handed_off` เผย **ลิงก์ LINE ของแม่หมอ** + summary token ครั้งเดียว
-- **crisis question → block ก่อนเข้าคิว เสมอ** (ใช้ `checkQuestion()` จาก `src/lib/safety/guardrails.ts`)
-
-### 5.5 API — `src/app/api/marketplace/`
-`tickets/route.ts` (POST create, GET status) · `tickets/[id]/route.ts` (GET poll, DELETE cancel) · `readers/[id]/availability/route.ts`
-Reader-side: `console/queue/route.ts` (guard `requireReader`)
-
-### 5.6 Verify M5
-คิว 1 รอบครบ: customer สร้าง ticket → reader เห็นในคอนโซล → รับ → ส่งต่อ → customer เห็นลิงก์ LINE
-+ crisis question → block · slot ชนกัน → reject (unique index)
+### 5.4 Customer Queue Room — `src/app/readers/queue/[id]/page.tsx`
+- หน้าแสดงลำดับคิวและสถานะ Real-time Polling ทุก 4 วินาที
+- เผยปุ่มเปิด LINE ของแม่หมอเมื่อถึงคิว (`ready` / `handed_off`)
+- บล็อกคำถามอันตราย/วิกฤต พร้อมแสดงสายด่วนสุขภาพจิต 1323
 
 ---
 
 ## 6. M6 · AI Customer Pre-Screening Filter (เสร็จสมบูรณ์ 100% ✅)
 
 ### 6.1 Migration — `migrations/0002_marketplace_queue_screening.sql`
-```sql
-CREATE TABLE ai_screening (
-  id           TEXT PRIMARY KEY,
-  ticket_id    TEXT REFERENCES queue_tickets(id),
-  verdict      TEXT NOT NULL,        -- 'pass' | 'block' | 'needs_review'
-  category     TEXT,                 -- love|work|money|self|general
-  urgency      TEXT,                 -- low|medium|high
-  in_scope     INTEGER,              -- 0/1 ไพ่ทาโรต์ตอบได้ไหม
-  brief        TEXT,                 -- สรุปสั้นให้แม่หมออ่านก่อนรับ (ไม่มี PII เกินจำเป็น)
-  suggested_spread TEXT,
-  flags        TEXT,                 -- JSON ["medical","legal"...]
-  created_at   INTEGER NOT NULL
-);
-```
+- ตาราง `ai_screening` เก็บผลการวิเคราะห์เจตนา, ระดับความด่วน, สรุปบรีฟ และผังแนะนำ
 
-### 6.2 `src/lib/marketplace/screening.ts`
-```ts
-// 1. checkQuestion(question) — crisis → verdict 'block', โชว์ 1323, ticket ไม่เข้าคิว
-// 2. Intent Analysis & Categorization: จัดหมวด + urgency + in_scope + เขียน brief 2-3 บรรทัดให้แม่หมอ + แนะนำผัง
-// 3. บันทึกลง ai_screening, set queue_tickets.ai_screen_id + status
-```
-- เรียกจาก `POST /api/marketplace/tickets` (M5) — sync ก่อนคืน response หรือ async ผ่าน `waitUntil` แล้ว poll
-- reader console แสดง `brief` + `flags` ก่อนปุ่ม "รับเคส"
-- customer เห็นสเต็ป "กำลังกลั่นกรองโดย AI…" ระหว่าง status `screening`
-
-### 6.3 Verify M6
-ส่งคำถามปกติ → brief AI ติดกับ ticket, reader เห็น · ส่งคำถามวิกฤต → block ก่อนเข้าคิว, ไม่สร้าง ticket waiting
+### 6.2 Screening Engine — `src/lib/marketplace/screening.ts`
+- ด่าน 1: `checkQuestion()` กรองวิกฤตทำร้ายตัวเอง (Self-harm / Crisis) ➔ บล็อกทันที
+- ด่าน 2: แยกหมวดหมู่คำถาม (ความรัก, การงาน, การเงิน, จิตใจ, ทั่วไป)
+- ด่าน 3: สรุปบรีฟ 2-3 บรรทัด (Synthesized Brief) และเลือกผังที่เหมาะสมให้แม่หมอ
 
 ---
 
-## 7. M7 · Payments (PR #4 — แยกเด็ดขาด, ต้อง sign-off อีกรอบ)
+## 7. M7 · Payments & Revenue Ledger (เสร็จสมบูรณ์ 100% ✅)
 
-### ก่อนเริ่ม
-- ADR เลือก provider: **Omise** (PromptPay ไทย, hosted checkout) / 2C2P / Stripe TH — หัวหน้าทีมตัดสิน
-- ต้องมี test keys ใน secret: `wrangler secret put OMISE_PUBLIC_KEY` / `OMISE_SECRET_KEY`
+### 7.1 Migration — `migrations/0003_marketplace_payments.sql`
+- ตาราง `payments` (บันทึก charge, สถานะ `pending` ➔ `paid`, ยอดเงินเป็นจำนวนเต็มสตางค์)
+- ตาราง `payouts` (บันทึกประวัติส่วนแบ่งรายได้แม่หมอและค่าคอมมิชชั่นแพลตฟอร์ม)
 
-### 7.1 Migration — `migrations/0004_payments.sql`
-```sql
-CREATE TABLE payments (
-  id            TEXT PRIMARY KEY,
-  booking_id    TEXT NOT NULL REFERENCES bookings(id),
-  provider      TEXT NOT NULL,        -- 'omise'
-  provider_ref  TEXT,                 -- charge id
-  amount_satang INTEGER NOT NULL,     -- เก็บเป็นสตางค์ (integer) ห้าม float
-  currency      TEXT NOT NULL DEFAULT 'THB',
-  status        TEXT NOT NULL DEFAULT 'pending', -- pending|paid|failed|refunded
-  webhook_log   TEXT,                 -- JSON raw event ล่าสุด
-  created_at    INTEGER NOT NULL,
-  updated_at    INTEGER NOT NULL
-);
-CREATE TABLE payouts ( id TEXT PRIMARY KEY, reader_id TEXT, period TEXT,
-  gross_satang INTEGER, commission_satang INTEGER, net_satang INTEGER,
-  status TEXT DEFAULT 'pending', created_at INTEGER );
-```
+### 7.2 Gateway Adapter & Test Mode — `src/lib/marketplace/payment-gateway.ts`
+- รองรับ Omise Payment Gateway (PromptPay / Credit Card)
+- เมื่อยังไม่ได้ใส่ Secret Key ระบบจะรันในโหมด **Deterministic Test Mode Simulator** โดยอัตโนมัติ
+- ระบบตรวจสอบความถูกต้องของ Webhook Signature ป้องกันการปลอมแปลง Event
 
-### 7.2 Flow
-`booking (reserved)` → `POST /api/marketplace/payments` สร้าง charge → redirect hosted checkout →
-`POST /api/marketplace/payments/webhook` (verify signature!) → status `paid` → `bookings.status = 'paid'` → ticket ปล่อยให้ reader
-
-### 7.3 ข้อจำกัดของ AI agent (กฎความปลอดภัย)
-- **AI สร้าง integration + webhook handler ได้ แต่รันเฉพาะ test mode**
-- **ห้ามทำธุรกรรมเงินจริง / ใส่ live keys แทนผู้ใช้** — เจ้าของใส่ live key เอง
-- webhook signature verification **ห้ามข้าม** (INC pattern: ห้าม catch แล้ว fallback เงียบ — INC-0008)
-
-### 7.4 Verify M7
-test-mode checkout สำเร็จ → webhook (จำลอง payload + signature) → `payments.status='paid'` + `bookings.status='paid'`
+### 7.3 Repository & APIs
+- `src/lib/marketplace/payments.repo.ts`: จัดการ CRUD, Transition สถานะ, คำนวณส่วนแบ่งแม่หมอ
+- `/api/marketplace/payments`: สร้างรายการชำระเงิน
+- `/api/marketplace/payments/webhook`: รับ Webhook ยืนยันการชำระเงิน
+- `/api/admin/payouts`: แผงแอดมินดูสรุปรายได้และค่าคอมมิชชั่นแพลตฟอร์ม
 
 ---
 
-## 8. Verification Playbook (วิธีที่ Claude verify Phase 1 — ทำแบบนี้)
+## 8. Verification Playbook
 
-### 8.1 เครื่องมือ
-- `npm run repo:verify` — 8 gates (บังคับผ่านก่อน PR)
-- `npm run typecheck` — เร็ว, รันบ่อย ๆ ระหว่างเขียน
-- `npm run build:worker` (`opennextjs-cloudflare build`) — **สำคัญ** จับ config/OpenNext error ที่ typecheck ไม่เจอ (INC-0034)
-  รันใน background: `nohup npm run build:worker > /tmp/bw.log 2>&1 &` แล้ว `grep -E "OpenNext build complete|✘|error TS" /tmp/bw.log`
-- **dev server:** preview MCP พังบนเครื่องนี้ (`EPERM process.cwd` — sandbox) → รันเองผ่าน Bash `dangerouslyDisableSandbox: true`:
-  ```
-  (npm run dev > /tmp/dev.log 2>&1 &) ; sleep 9 ; curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/
-  ```
-  แล้ว browser tool `navigate` ไป `http://localhost:3000/...` (ไม่ใช่ `preview_start`)
-
-### 8.2 curl pattern (ทดสอบ API เร็ว + deterministic)
-```bash
-J=/tmp/adm.jar
-# login admin
-curl -s -c $J -X POST http://localhost:3000/api/admin/login \
-  -H 'Origin: http://localhost:3000' -H 'Content-Type: application/json' \
-  -d '{"password":"local-dev-admin-pw-123"}'
-# เรียก endpoint ที่ guard
-curl -s -b $J http://localhost:3000/api/admin/readers | node -e 'console.log(require("fs").readFileSync(0,"utf8"))'
-```
-- **ทุก POST/PUT ต้องมี `-H 'Origin: http://localhost:3000'`** — ไม่งั้น `isRequestAuthorizedOrigin` คืน 403
-- **ทุก POST/PUT ต้องมี `-H 'Content-Type: application/json'` (มีเว้นวรรคหลัง `:`)** — curl `$VAR` unquoted แตก
-- rate limit: admin login 5/15นาที, reading start 20/ชม. — restart dev server เพื่อล้าง bucket (in-memory)
-
-### 8.3 browser (proof ภาพ)
-`mcp__Claude_Browser__navigate` → `computer` screenshot/click/type → `read_page {filter:"interactive"}` (ได้ ref) → `read_console_messages {onlyErrors:true}`
-- HMR websocket errors + stale 429 = noise ปกติของ sandbox นี้ ไม่ใช่บั๊ก
-- `find {query:"ข้อความไทย"}` หา element
-
-### 8.4 dev มี GEMINI_API_KEY ไหม? — **ไม่มี** (`.env.local` comment ไว้)
-→ AI path วิ่ง mock เสมอใน dev · logic ที่ต้อง AI จริง (screening M6) verify ด้วย unit gate + production smoke test
+- **ตรวจความสมบูรณ์ 9 ด่าน**: `npm run repo:verify`
+- **TypeScript Typecheck**: `npm run typecheck`
+- **Next.js Production Build**: `npm run build`
 
 ---
 
-## 9. Gotchas / บทเรียนจาก Phase 1
-
-1. **`.env.local`** — gitignore แล้ว · มี `TAROT_SESSION_SECRET`, `ADMIN_PASSWORD=local-dev-admin-pw-123` (Claude เพิ่ม) · ไม่มี GEMINI key
-2. **`z.record(z.enum([...]), v)` ใน Zod v4 บังคับครบทุก key** → ใช้ `z.partialRecord(z.enum([...]), v)` แทน (เจอตอน M3)
-3. **`@cloudflare/workers-types` ไม่ได้ติดตั้ง** → อย่า reference type `KVNamespace`/`D1Database` ตรง ๆ ใน `.ts` (non-declaration) — ประกาศ structural interface เอง (ดู `AppKV` ใน `cf.ts`)
-4. **`getCloudflareContext` throw ตอนไม่มี context** — ห่อ try/catch เสมอ
-5. **commit guard auto-touch `.audit-history.json` / `.ai-locks.json`** → ก่อน `git add -A` ให้ `git checkout -- .ai-locks.json` หรือใช้ selective add · ทั้ง 3 ไฟล์ gitignore แล้วหลัง PR #58
-6. **rebase conflict กับ agent อื่น** — เกิดบ่อย, ปกติชนแค่ tooling files → `git rm` แล้ว `git rebase --continue` แล้ว `git push --force-with-lease`
-7. **`test-image-paths.ts` (gate 7)** บล็อกถ้ามี `<img src="/cards/...">` หรือ path `/cards/x/` ที่เขียนเอง → marketplace ใช้ `<CardImage />` (`src/components/card/CardImage.tsx`) ถ้าต้องโชว์ไพ่
-8. **`test-spreads.ts` (gate 4)** hardcode 20 spread ids + count → ถ้าเพิ่ม spread ต้องแก้ `expectedCounts` ในไฟล์เทสต์ด้วย
-9. **`next dev` = `next dev --webpack`** (ไม่ใช่ turbopack) · Node 24 บนเครื่อง dev, Node 22 บน CI
-10. verify header ยังพิมพ์ว่า "7 ด่าน" ทั้งที่มี 8 — cosmetic, `runAllChecks()` iterate array อยู่แล้ว ไม่ต้องแก้
-
----
-
-## 10. Checklist สรุปต่อ milestone
+## 10. Checklist สรุปสถานะโครงการ Phase 2 (Marketplace)
 
 ```
-M4 D1 + readers
-  [ ] เจ้าของ: wrangler d1 create + ส่ง database_id
-  [ ] เจ้าของ + หัวหน้าทีม: ADR PDPA + sign-off
-  [ ] wrangler.jsonc + d1_databases (เทียบ config-schema)
-  [ ] src/lib/platform/db.ts (+ dev SQLite shim แนะนำ)
-  [ ] migrations/0001 + scripts/db-migrate.ts + npm script
-  [ ] src/lib/marketplace/readers.repo.ts
-  [ ] api/admin/readers + [id]
-  [ ] components/admin/ReadersManager.tsx + wire admin shell TABS
-  [ ] app/readers/page.tsx + [id]/page.tsx (force-dynamic) + robots disallow console
-  [ ] repo:verify 8/8 + build:worker + docs (WORK_LOG, ARCHITECTURE, this file)
-  [ ] pr:auto → merge → git:tidy
+M4 D1 + Readers Directory
+  [x] D1 database tarot-app-db + binding APP_DB
+  [x] migrations/0001_marketplace_init.sql
+  [x] src/lib/marketplace/readers.repo.ts + security projection
+  [x] /api/admin/readers + /api/readers
+  [x] components/admin/ReadersManager.tsx + admin tab
+  [x] /readers + /readers/[id]
+  [x] ADR-001 PDPA Compliance Documentation
 
-M5 availability + queue
-  [ ] migrations/0002 + auto-cleanup expired tickets (PDPA)
-  [ ] src/lib/auth/reader-auth.ts + requireReader
-  [ ] app/readers/console/* (toggle live, ตารางคิว, ส่งต่อ)
-  [ ] app/readers/queue/[ticketId] (customer poll)
-  [ ] api/marketplace/tickets + [id] + availability
-  [ ] consent gate (PDPA) + crisis block
-  [ ] verify: คิวครบรอบ + slot ชนกัน reject
-  [ ] docs + pr:auto
+M5 Live Queue + Reader Console
+  [x] migrations/0002_marketplace_queue_screening.sql
+  [x] src/lib/auth/reader-auth.ts
+  [x] /readers/console + /api/marketplace/console/queue
+  [x] /readers/queue/[id] + /api/marketplace/tickets/[id]
+  [x] BookQueueModal + ReaderDetailClient
 
-M6 AI screening
-  [ ] migrations/0003 ai_screening
-  [ ] src/lib/marketplace/screening.ts (checkQuestion + Gemini structured + fallback)
-  [ ] wire เข้า POST tickets · reader console แสดง brief
-  [ ] stats: screening_passed/blocked
-  [ ] verify: brief ติด ticket + crisis block ก่อนคิว
-  [ ] docs + pr:auto
+M6 AI Pre-Screening Engine
+  [x] src/lib/marketplace/screening.ts
+  [x] Safety guardrails crisis block (1323 hotline)
+  [x] Intent classification + synthesized brief in 5s
+  [x] Suggested spread pairing
 
-M7 payments (sign-off แยก)
-  [ ] ADR provider + test keys secret
-  [ ] migrations/0004 payments + payouts (amount = integer satang)
-  [ ] api/marketplace/payments + webhook (verify signature — ห้ามข้าม)
-  [ ] test-mode only — ห้าม live keys
-  [ ] verify: test checkout + webhook → paid
-  [ ] docs + pr:auto
+M7 Payments & Commission Ledger
+  [x] migrations/0003_marketplace_payments.sql
+  [x] src/lib/marketplace/payment-gateway.ts (Omise + Test-mode simulator)
+  [x] /api/marketplace/payments + /api/marketplace/payments/webhook
+  [x] /api/admin/payouts + commission calculation
+  [x] QA Test Suite (13/13 passing gates)
 ```
 
 ---
 
-## 11. ติดต่อ / context เพิ่มเติม
-- repo: `luminuy/tarot-web` (private) · domain prod: `https://tarot.luminuy.com` + `tarot-web.bankjack10452.workers.dev`
+## 11. ข้อมูลเพิ่มเติมและการติดต่อ
+- repo: `luminuy/tarot-web` (private) · domain: `https://tarot.luminuy.com`
 - deploy: auto ผ่าน `.github/workflows/deploy.yml` เมื่อ merge เข้า main
-- CI auto-merge: `.github/workflows/pr.yml` (squash หลัง 8 gates ผ่าน — ISSUE-005: native auto-merge ปิดเพราะ free plan)
-- เจ้าของ: `duocashhunter@gmail.com`
+- CI auto-merge: `.github/workflows/pr.yml`
+

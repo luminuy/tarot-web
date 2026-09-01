@@ -242,6 +242,10 @@ export default function CustomerQueuePage() {
                 <span className="text-[#ffd700] font-medium">✦ {ticket.screening.category}</span>
               </div>
             )}
+            <div className="flex justify-between text-[#9c93b8]">
+              <span>ค่าบริการ / บูชาครู:</span>
+              <span className="text-emerald-300 font-semibold font-serif-th">✦ 299 บาท (30 นาที)</span>
+            </div>
           </div>
 
           {/* Cancel Button */}
