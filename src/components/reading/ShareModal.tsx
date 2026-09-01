@@ -311,6 +311,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   return (
     <AnimatePresence>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="แชร์ผลคำทำนาย"
         onClick={onClose}
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl"
       >
@@ -324,7 +327,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           {/* Header Title */}
           <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-xl">📸</span>
+              <span className="text-base text-[#ffd700]">✦</span>
               <div>
                 <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
                   แชร์ผลคำทำนาย
@@ -335,8 +338,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               </div>
             </div>
             <button
+              type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer"
+              aria-label="ปิดหน้าต่างแชร์ผลคำทำนาย"
+              className="w-11 h-11 rounded-2xl bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
             >
               ✕
             </button>

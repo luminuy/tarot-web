@@ -238,15 +238,27 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
           {MYSTIC_SEALS.map((seal) => {
-            const isActive = selectedCategory === seal.category && question.includes(seal.title);
+            const isActive =
+              selectedCategory === seal.category &&
+              (question === seal.promptSeed || question.includes(seal.title));
 
             return (
               <motion.div
                 key={seal.id}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isActive}
+                aria-label={`เลือกหัวข้อสำเร็จรูป: ${seal.title}`}
                 whileHover={{ y: -6, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleSelectSeal(seal)}
-                className={`rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none ${
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleSelectSeal(seal);
+                  }
+                }}
+                className={`rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                   isActive
                     ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#e5c07b] ring-2 ring-[#e5c07b]/90 shadow-[0_0_40px_rgba(229,192,123,0.5)]"
                     : "bg-gradient-to-b from-[#130d24]/90 to-[#07040f]/90 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"

@@ -318,5 +318,14 @@ a,
   box-shadow: 0 0 0 2px #05040a, 0 0 0 4px #ffd700 !important;
 }
 
+/* Mobile Safe Area Padding Helpers */
+.safe-pb {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.safe-pt {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
 
 

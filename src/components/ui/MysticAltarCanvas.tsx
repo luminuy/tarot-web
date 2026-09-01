@@ -86,7 +86,8 @@ export const MysticAltarCanvas: React.FC = () => {
       size: number;
       speedY: number;
       speedX: number;
-      opacity: number;
+      baseOpacity: number;
+      phase: number;
       fadeSpeed: number;
       color: string;
     }> = [];
@@ -98,8 +99,9 @@ export const MysticAltarCanvas: React.FC = () => {
         size: Math.random() * 1.8 + 0.5,
         speedY: -(Math.random() * 0.35 + 0.08),
         speedX: (Math.random() - 0.5) * 0.25,
-        opacity: Math.random() * 0.7 + 0.2,
-        fadeSpeed: Math.random() * 0.008 + 0.002,
+        baseOpacity: Math.random() * 0.4 + 0.3,
+        phase: Math.random() * Math.PI * 2,
+        fadeSpeed: Math.random() * 0.003 + 0.001,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
       });
     }
@@ -170,18 +172,19 @@ export const MysticAltarCanvas: React.FC = () => {
       ctx.restore();
 
       // Floating Mystic Embers
+      const now = Date.now();
       for (const p of particles) {
         p.y += p.speedY;
         p.x += p.speedX;
-        p.opacity += Math.sin(Date.now() * p.fadeSpeed) * 0.01;
 
         if (p.y < -10) {
           p.y = height + 10;
           p.x = Math.random() * width;
         }
 
+        const alpha = Math.max(0.1, Math.min(0.8, p.baseOpacity + Math.sin(now * p.fadeSpeed + p.phase) * 0.25));
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0.1, Math.min(0.8, p.opacity));
+        ctx.globalAlpha = alpha;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
