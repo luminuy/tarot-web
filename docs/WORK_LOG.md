@@ -36,6 +36,29 @@
 
 ---
 
+### 🗓️ 2026-09-01: แก้จบ — คำอ่าน AI (Gemini 3.x) + paywall ทำงานครบบน production (ISSUE-016 ปิด)
+
+ต่อเนื่องจากวินิจฉัยด้านล่าง · เจ้าของตั้ง `GEMINI_API_KEY` แล้ว จากนั้นไล่แก้โค้ดฝั่ง Gemini ทีละชั้นจาก Worker log จริง:
+
+| PR | เจอ (จาก `wrangler tail`) | แก้ |
+| :-- | :-- | :-- |
+| #104 | ไม่มีคีย์ → mock เงียบ ๆ | `console.error` ดัง + PENDING_SETUP ข้อ 0 + ISSUE-016 |
+| #105 | 2 โมเดลใน list ล้ม | ขยาย list + log error **body** ของ Gemini |
+| #106 | `gemini-2.0/2.5/1.5-flash` → 404 "no longer available · use gemini-3.6-flash" | list = `[3.6-flash, 3.7-flash, flash-latest, 3.5-flash-lite]` · chat/monthly-summary ใช้ list เดียวกัน |
+| #107 | `gemini-3.6-flash` → 400 "invalid argument" | ตัด `thinkingConfig.thinkingBudget:0` + `response_schema` (OpenAPI เก่า) · body เป็น camelCase |
+| #108 | คำอ่านตก fallback (cards:[]) แม้ `usage!=0` | Gemini 3.x เปิด thinking → วน `parts` ทั้ง array + ข้าม `thought:true` |
+| #109 | (diag) | log ชั่วคราวดูโครงสร้าง chunk |
+| #110 | Gemini แต่งคีย์เอง (`reading_title`/`overall_energy`) เพราะ #107 ตัด schema | `generationConfig.responseJsonSchema` (JSON Schema มาตรฐาน) + prompt ระบุคีย์บังคับ |
+
+**verify (curl guest flow บน prod หลัง #110):**
+- SSE ครบ: `opening` + `card`×3 + `connections` + `summary` + `done`
+- คำอ่าน AI จริง 3 องก์ ตามน้ำเสียง persona (ไม่ใช่ template) · `usage: {in 3071, out 620}`
+- `/api/entitlement`: `remaining` 1→0 · reading ที่ 2 = **403** `guest_used`
+
+**บทเรียน:** Gemini 3.x (2026) — ต้อง `responseJsonSchema` ไม่ใช่ `responseSchema` เดิม · thinking เปิดโดยดีฟอลต์ (ต้องกรอง thought parts) · รุ่น < 3.5 ถูกปลดหมด · ยึด `GET /v1beta/models?key=…` เป็นแหล่งจริงเสมอ
+
+---
+
 ### 🗓️ 2026-09-01: วินิจฉัย — "paywall ไม่ทำงาน เปิดไพ่ได้ไม่จำกัด" = ไม่ได้ตั้งคีย์ Gemini บน prod
 
 - **อาการ (เจ้าของแจ้ง)**: ธง `entitlement.enabled` เปิดแล้ว แต่ guest ใน incognito เปิดไพ่ได้เรื่อย ๆ ไม่โดนกั้น
