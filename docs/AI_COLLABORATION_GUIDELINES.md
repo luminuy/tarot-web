@@ -274,3 +274,5 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000
 | **2026-08-31** | **TTS Thai Voice Engine** | ระบบอ่านออกเสียงคำทำนายภาษาไทยใน StreamReader | Antigravity AI |
 | **2026-08-31** | **IG Story 9:16 & Post 4:5 Export** | ระบบสร้างการ์ดรูปภาพพร้อมแชร์ความละเอียดสูง | Antigravity AI |
 | **2026-08-31** | **Provably-Fair Shuffle Engine** | Fisher-Yates + SHA-256 Commit-Reveal Cryptographic Verification | Antigravity AI |
+| **2026-09-01** | **7-Layer AI Cost Control & Defense** | Rate Limit Bypass, AI Daily Cap Circuit Breaker, Origin Guard, KV IP Quota, ADR-002 | Antigravity AI |
+

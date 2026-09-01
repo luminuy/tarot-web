@@ -50,11 +50,13 @@
 | **012** 🟢 | ขาด Client-side Provably-Fair Verifier & KV Persistence | พอร์ต Web Crypto, สร้าง ProvablyFairPanel, 1000-case parity test, KV session backstop | ✅ ตรวจสอบได้อิสระในเบราว์เซอร์ 100% |
 | **013** 🟢 | ขาด Consumer Retention & Reading Journal D1 Persistence | ตาราง `users`, `reading_journal`, dual-mode history sync, auto-merge on login | ✅ ซิงก์ประวัติข้ามอุปกรณ์และสำรอง D1 สมบูรณ์ |
 | **014** 🟢 | Edge OAuth Hardening & State CSRF Guard | บังคับ throw ใน production สำหรับ AUTH_SECRET, ตรวจสอบ state cookie ป้องกัน CSRF, sanitize host header | ✅ ป้องกัน Login CSRF และ Host Injection 100% |
+| **015** 🟢 | ขาดระบบป้องกันต้นทุน AI และการถูกยิง API ซ้ำซ้อน | กลยุทธ์ 7 ชั้น: Rate Limit Bypass, AI Daily Budget Cap, Origin Guard, KV per-IP Quota, WAF Rules (ADR-002) | ✅ ควบคุมต้นทุนและตัดวงจรอัตโนมัติสมบูรณ์ 100% |
 
 > ✅ **BACKLOG P1 (ลด JS หน้าแรก)**: Code-split `@/data/cards` 780 ข้อความออกจาก Initial Chunk ของ `page.tsx` เรียบร้อย (PR #40)
 > ✅ **BACKLOG P3 (pnpm CI)**: อัปเกรด GitHub Actions Workflows สู่ pnpm 9.15 + Cache เรียบร้อย (PR #39)
 > ✅ **PROVABLY-FAIR (PR 1-4)**: Web Crypto client verifier, interactive ProvablyFairPanel, pre-shuffle commitment, 410 seed guard, and KV resilience (PR #68, #69, #70, #71)
 > ✅ **RETENTION INFRA (PR 0-4)**: Edge auth hardening, D1 users table, server journal, retention loop & consent, and PDPA account export/deletion (PR #72, #73, #74, #75)
+> ✅ **AI COST CONTROL & BOT DEFENSE (PR 1-5)**: Rate limit bypass token, daily AI spend cap circuit breaker, read origin guard, edge per-IP soft quota, ADR-002 bot challenge decision (PR #77, #78, #79, #80)
 
 ---
 
