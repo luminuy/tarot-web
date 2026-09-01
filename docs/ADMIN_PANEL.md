@@ -87,3 +87,10 @@ Local dev: ใส่ `ADMIN_PASSWORD=...` ใน `.env.local`
 - `/admin` + `/api/admin` — `robots` disallow + `noindex`
 - audit log และ stat events **ห้ามมี PII** (ไม่มีข้อความคำถาม / ชื่อเล่น / IP — เก็บแค่ enum + count)
 - Marketplace (M4+) จะเก็บ PII ลูกค้า → ต้องมี consent gate + ADR + แก้ `src/app/privacy/page.tsx` ก่อนเริ่ม
+
+---
+
+## ต่อไป: Phase 2 Marketplace
+
+งาน M4–M7 (D1 + reader profiles → คิว walk-up/จองล่วงหน้า → AI screening → payments) มีเอกสารส่งต่อละเอียดแยกที่
+**[`docs/MARKETPLACE.md`](MARKETPLACE.md)** — บล็อกอยู่ที่เจ้าของต้อง provision D1 + PDPA sign-off ก่อน

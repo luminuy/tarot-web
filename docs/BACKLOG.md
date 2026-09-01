@@ -17,6 +17,20 @@
 
 ---
 
+## 🔮 P0 · Marketplace แม่หมอตัวจริง (Phase 2) — ดูเอกสารแยก
+
+งาน M4–M7 (D1 + reader profiles → คิว → AI screening → payments) มีเอกสารส่งต่อละเอียดที่
+**[`docs/MARKETPLACE.md`](MARKETPLACE.md)** — SQL schema, code pattern, verification playbook, checklist ครบ
+
+**ติดอยู่ 2 จุด (ต้องให้เจ้าของทำก่อน):**
+1. `npx wrangler d1 create tarot-app-db` → ส่ง `database_id` กลับมา
+2. ADR + PDPA sign-off (marketplace เก็บ PII ลูกค้า + ส่ง LINE — ขัดกฎเดิม)
+
+Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #57 (auth+platform), #59 (stats), #60 (live content overrides)
+→ ดู [`docs/ADMIN_PANEL.md`](ADMIN_PANEL.md) · เจ้าของต้อง `wrangler secret put ADMIN_PASSWORD` ให้ `/admin` ใช้งานได้บน prod
+
+---
+
 ## P1 · ลด JS หน้าแรก (perf — งานใหญ่สุดที่เหลือ) — 1 PR
 
 **ปัญหา:** `app/page.js` ยังใหญ่ ~498KB (ลดจาก 572KB ตอน PR #21 แค่ ~13%)

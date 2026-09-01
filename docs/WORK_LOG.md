@@ -38,6 +38,16 @@
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
 
+### 🗓️ 2026-09-01: เอกสารส่งต่องาน Phase 2 — Marketplace แม่หมอตัวจริง
+
+- สร้าง [`docs/MARKETPLACE.md`](MARKETPLACE.md) — handoff แบบละเอียดสำหรับ AI/นักพัฒนาคนต่อไปทำ M4–M7
+  (D1 foundation + readers → คิว walk-up/จอง → AI screening → payments)
+- ครอบคลุม: สถานะ Phase 1, สถาปัตยกรรม storage (D1 + KV), SQL schema ร่างครบ 4 migration,
+  code pattern ที่ reuse ได้ (file refs), verification playbook (curl/browser/build:worker แบบที่ Claude ใช้),
+  gotchas 10 ข้อจาก Phase 1, checklist ต่อ milestone
+- **บล็อก 2 จุดก่อนเริ่ม M4**: (1) เจ้าของต้อง `wrangler d1 create tarot-app-db` (2) ADR + PDPA sign-off
+- Phase 1 (M0–M3) เสร็จครบแล้ว: PR #57, #59, #60 merged
+
 ### 🗓️ 2026-09-01: แผงแอดมิน M3 — Live Content Overrides (แก้ prompt / ไพ่ / แม่หมอ ไม่ต้อง deploy)
 
 > ต่อจาก M2 (PR #59) · แผน: `~/.claude/plans/breezy-percolating-llama.md`
