@@ -21,7 +21,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
   const view = describeEntitlement(ent);
   const [countdown, setCountdown] = useState("");
 
-  const visible = !!view && !view.isAdmin && !view.blocked;
+  const visible = !!view && !view.isUnlimited && !view.blocked;
 
   useEffect(() => {
     if (visible) trackEntitlementEvent("free_trial_notice_shown");

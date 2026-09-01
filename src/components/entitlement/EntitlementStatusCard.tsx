@@ -61,14 +61,20 @@ export function EntitlementStatusCard() {
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e5c07b]/15 bg-[#0a0714]/70 px-4 py-3">
         <div className="space-y-1">
           <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#9c93b8]">
-            {view.isAdmin ? "ผู้ดูแลระบบ" : view.isGuest ? "ผู้เยี่ยมชม" : "สมาชิก"}
+            {view.isAdmin
+              ? "ผู้ดูแลระบบ"
+              : view.isUnlimited
+              ? "บัญชีไม่จำกัดสิทธิ์"
+              : view.isGuest
+              ? "ผู้เยี่ยมชม"
+              : "สมาชิก"}
           </span>
           <span className="block font-serif-th text-sm font-semibold text-[#f5deaa]">{view.statusLine}</span>
         </div>
         <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />
       </div>
 
-      {view.isMember && !view.isAdmin && (
+      {view.isMember && !view.isUnlimited && (
         <div className="grid gap-2 sm:grid-cols-2">
           <div className="flex items-center gap-2 rounded-xl border border-[#e5c07b]/12 bg-[#100b20]/60 px-3 py-2.5 font-serif-th text-[11px] text-[#cfc8e2]">
             <HourglassIcon className="h-4 w-4 shrink-0 text-[#e5c07b]" />
@@ -100,7 +106,7 @@ export function EntitlementStatusCard() {
         <Link href="/" className="text-xs text-[#e5c07b] underline transition-colors hover:text-[#ffd700]">
           {view.isGuest ? "กลับไปเปิดไพ่และสมัครสมาชิก" : "กลับไปเปิดไพ่"}
         </Link>
-        {view.isMember && !view.isAdmin && (
+        {view.isMember && !view.isUnlimited && (
           <button
             type="button"
             onClick={() => setBuyOpen(true)}

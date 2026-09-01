@@ -30,7 +30,10 @@ export type QuotaTone = "unlimited" | "ample" | "low" | "empty";
 export interface EntitlementView {
   /** ระบบสิทธิ์เปิดใช้อยู่หรือไม่ (ธงปิด = ไม่ต้องแสดง UI สิทธิ์เลย) */
   enabled: boolean;
+  /** แอดมินตัวจริงเท่านั้น (มีสิทธิ์เข้าแผง /admin) */
   isAdmin: boolean;
+  /** ใช้ได้ไม่จำกัด — แอดมิน หรือผู้ทดสอบ/อีเมล allowlist ที่ไม่มีสิทธิ์แผงแอดมิน */
+  isUnlimited: boolean;
   isGuest: boolean;
   isMember: boolean;
   remaining: number;
@@ -83,6 +86,7 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
   if (!ent || !ent.enabled) return null;
 
   const isAdmin = ent.role === "admin";
+  const isUnlimited = isAdmin || ent.role === "unlimited";
   const isGuest = ent.kind === "guest";
   const remaining = Math.max(0, ent.remaining ?? 0);
   const limit = Math.max(1, ent.limit ?? (isGuest ? GUEST_LIMIT : DAILY_LIMIT));
@@ -90,21 +94,24 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
   const used = Math.max(0, Math.min(limit, limit - Math.min(remaining, limit)));
   const countdown = formatResetCountdown(ent.resetAt);
 
-  if (isAdmin) {
+  if (isUnlimited) {
     return {
       enabled: true,
-      isAdmin: true,
+      isAdmin,
+      isUnlimited: true,
       isGuest: false,
       isMember: true,
       remaining,
       limit,
       used: 0,
       tone: "unlimited",
-      badgeLabel: "มาสเตอร์ · ไม่จำกัด",
-      statusLine: "โหมดผู้ดูแลระบบ — เปิดไพ่และคุยต่อได้ไม่จำกัด",
+      badgeLabel: isAdmin ? "มาสเตอร์ · ไม่จำกัด" : "ไม่จำกัดสิทธิ์",
+      statusLine: isAdmin
+        ? "โหมดผู้ดูแลระบบ — เปิดไพ่และคุยต่อได้ไม่จำกัด"
+        : "บัญชีไม่จำกัดสิทธิ์ — เปิดไพ่และคุยต่อได้ไม่จำกัด",
       resetLine: "",
-      action: "admin",
-      actionLabel: "ไปแผงผู้ดูแลระบบ",
+      action: isAdmin ? "admin" : "none",
+      actionLabel: isAdmin ? "ไปแผงผู้ดูแลระบบ" : "",
       blocked: false,
       blockedReason: null,
     };
@@ -115,6 +122,7 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
     return {
       enabled: true,
       isAdmin: false,
+      isUnlimited: false,
       isGuest: true,
       isMember: false,
       remaining,
@@ -142,6 +150,7 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
   return {
     enabled: true,
     isAdmin: false,
+    isUnlimited: false,
     isGuest: false,
     isMember: true,
     remaining,
