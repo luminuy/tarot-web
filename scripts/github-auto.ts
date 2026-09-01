@@ -94,6 +94,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "✍️  Live content override ปลอดภัย (ไม่แตะโครงไพ่)", cmd: TSX, args: ["scripts/qa/test-overrides-safety.ts"] },
   { label: "🔐 Client-Server Shuffle Parity (Web Crypto 1,000 เคส)", cmd: TSX, args: ["scripts/verify-shuffle-parity.ts"] },
   { label: "🔮 Marketplace แม่หมอและการปกป้องข้อมูล (D1 / PDPA)", cmd: TSX, args: ["scripts/qa/test-marketplace-readers.ts"] },
+  { label: "📖 สมุดบันทึกดวงชะตา & User Retention Sync (D1 / SQLite)", cmd: TSX, args: ["scripts/qa/test-journal-sync.ts"] },
 ];
 
 /**
