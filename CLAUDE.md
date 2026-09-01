@@ -23,6 +23,7 @@
 7. **[docs/ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: แผงแอดมิน `/admin` — auth, สถิติ, แก้ prompt/ความหมายไพ่แบบ live (Phase 1 เสร็จ M0–M3)
 8. **[docs/MARKETPLACE.md](docs/MARKETPLACE.md)**: **(HANDOFF Phase 2)** เอกสารส่งต่องาน Marketplace แม่หมอตัวจริง M4–M7 — SQL schema, code pattern, verification playbook, checklist ครบ
 9. **[docs/ENTITLEMENT_PLAN.md](docs/ENTITLEMENT_PLAN.md)**: **(HANDOFF)** แผนลงมือระบบสมาชิกและโควตาเปิดไพ่ — ผู้เยี่ยมชมฟรี 1 ครั้ง, สมาชิก 3 ครั้ง/สัปดาห์, กั้นแชทเฉพาะสมาชิก · SQL, โค้ดจริง, จุดแทรกราย route, 6 PR
+10. **[docs/PENDING_SETUP.md](docs/PENDING_SETUP.md)**: **(สำหรับเจ้าของ)** งานตั้งค่า production ที่ยังค้าง — โดเมน, อีเมล (Resend), LINE login, secrets · โค้ดพร้อมหมดแล้วรอแค่ config
 
 ---
 
