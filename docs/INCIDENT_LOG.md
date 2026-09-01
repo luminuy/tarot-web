@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0037 · 2026-09-01 10:57 · 🟡 Medium · fix(ui): enforce consistent deep dark obsidian background without nebula/gradient washouts on scroll
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ผู้ใช้พบว่าพื้นหลังหน้าแรกด้านบนเป็นสีเข้ม แต่เมื่อเลื่อนหน้าจอลงมาด้านล่างกลับมีรอยด่างสีม่วงฟ้าทองและสว่างขึ้น |
+| **สาเหตุราก** | GalaxyCanvas มี fixed colored nebula clouds และ mouse glow ส่องสว่างบริเวณครึ่งล่างของ viewport และมี bg-radial fog ในหน้าแรก |
+| **การแก้ไข** | ลบ nebula clouds และ mouse glow ใน GalaxyCanvas ปรับ radial gradient ใน MysticAltarCanvas ให้มืดสนิท และลบ ambient fog ออกจาก page.tsx และ SpreadCardSelector |
+| **🛡️ กฎป้องกันถาวร** | **รักษาโทนสีพื้นหลังเป็น Deep Dark Obsidian Void (#05040a) ให้สม่ำเสมอทั่วทุกความลึกของการ scroll และไม่ใส่ ambient fog ขนาดใหญ่ที่สว่างเกินไป** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ตรวจ repo:verify 13 ด่าน และตรวจสอบภาพพื้นหลังมืดสนิทสม่ำเสมอ |
+| **บันทึกโดย** | Antigravity AI · branch `fix/home-consistent-dark-background` · commit `067195e` |
+
+
 ### INC-0036 · 2026-09-01 09:51 · 🟠 High · PR 0 auth-hardening: enforce prod AUTH_SECRET throw, OAuth state CSRF verification, and host header injection protection
 
 | หัวข้อ | รายละเอียด |

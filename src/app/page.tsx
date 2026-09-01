@@ -718,7 +718,6 @@ export default function TarotPage() {
                   <div className="absolute inset-0 flex items-center justify-center -z-10 opacity-30 pointer-events-none">
                     <div className="w-64 h-64 sm:w-[400px] sm:h-[400px] rounded-full border border-dashed border-[#e5c07b]/60 animate-[spin_80s_linear_infinite]" />
                     <div className="absolute w-48 h-48 sm:w-[280px] sm:h-[280px] rounded-full border border-[#8b5cf6]/40 animate-[spin_50s_linear_infinite_reverse]" />
-                    <div className="absolute w-full h-full bg-radial from-[#e5c07b]/10 via-transparent to-transparent blur-xl sm:blur-2xl" />
                   </div>
 
                   {/* Idle Floating Deck with CSS Animation */}
@@ -1012,10 +1011,9 @@ export default function TarotPage() {
           Site-Wide Sanctuary Footer — World-Class Luxury Design
           ═══════════════════════════════════════════════════════════════ */}
       <footer className="w-full mt-16 relative overflow-hidden">
-        {/* Ambient glow behind footer */}
+        {/* Ambient gold line above footer */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#e5c07b]/50 to-transparent" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[80px] bg-gradient-to-b from-[#e5c07b]/5 to-transparent blur-2xl" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#e5c07b]/30 to-transparent" />
         </div>
 
         <div className="max-w-4xl mx-auto px-5 pt-10 pb-8 space-y-8 relative z-10">

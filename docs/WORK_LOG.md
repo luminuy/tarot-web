@@ -36,6 +36,24 @@
 
 ---
 
+### 🗓️ 2026-09-01: UI/UX Fix: Consistent Dark Obsidian Background Sanctuary (ปรับพื้นหลังหน้าแรกให้เข้มสนิท สม่ำเสมอ ไม่ซีดจาง)
+
+- **ความต้องการ**: แก้ไขปัญหาพื้นหลังหน้าแรกที่ตอนแรกสีเข้ม แต่เมื่อเลื่อนหน้าจอลงมาสีพื้นหลังจางและสว่างขึ้น โดยปรับให้พื้นหลังเป็นสีดำสนิท (Obsidian Void `#05040a`) สม่ำเสมอทั้งหน้า ไม่เปลี่ยนสีหรือสว่างขึ้นเมื่อเลื่อนหน้าจอ
+- **สิ่งที่ทำ**:
+  - **GalaxyCanvas Refinement (`src/components/ui/GalaxyCanvas.tsx`)**:
+    - นำ nebula clouds ขนาดใหญ่และ mouse radial glow ที่เคยทำให้พื้นหลังมีรอยด่างสีม่วง/ฟ้า/ทองสว่างออก
+    - คงความงามของดวงดาวระยิบระยับ (Twinkling Stars) พร้อมระบบ Parallax ตามเมาส์ และดาวตก (Shooting Stars) ที่คมชัดบนผืนฟ้าราตรีสีดำสนิท
+  - **MysticAltarCanvas Optimization (`src/components/ui/MysticAltarCanvas.tsx`)**:
+    - ปรับ Radial Gradient ให้เป็นโทน Obsidian มืดสนิทสม่ำเสมอ ไม่เกิดวงสว่างตรงกลาง
+  - **SpreadCardSelector (`src/components/spread/SpreadCardSelector.tsx`)**:
+    - เปลี่ยนสีพื้นหลังของการ์ดผังพยากรณ์เป็นโทน Obsidian `#0b0817` / `#140c26` ที่เรียบหรูและมืดสนิทเข้ากับธีม
+    - นำแสงฟุ้ง `bg-radial` และหมอกเบลอที่กระจายแสงด้านล่างออก
+  - **Page Layout & Footer (`src/app/page.tsx`)**:
+    - นำ `bg-radial` ขนาดใหญ่บริเวณแท่นไพ่ 3D และแสงฟุ้งสีทองด้านล่างของ Footer ออก เหลือเฉพาะเส้นทองคำเปลวเรียบหรู
+  - **Verification Suite**:
+    - `npm run repo:verify` ผ่านครบ **13/13 ด่าน 100% Green**
+- **ไฟล์ที่แก้ไข**:
+  - `src/components/ui/GalaxyCanvas.tsx`, `src/components/ui/MysticAltarCanvas.tsx`, `src/components/spread/SpreadCardSelector.tsx`, `src/app/page.tsx`, `docs/WORK_LOG.md`
 ### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR G — คุมทุกขั้นตอนเปิดใช้งานจาก /admin (ไม่ต้องใช้ terminal)
 
 > เหตุผล: หุ้นส่วนที่คุมระบบไม่ถนัดโปรแกรมมิ่ง — ทุก action ต้องกดจาก `/admin`
