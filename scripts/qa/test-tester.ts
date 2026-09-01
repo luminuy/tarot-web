@@ -54,6 +54,23 @@ async function main() {
   check("รหัสสั้นกว่า 12 → isTesterConfigured = false", isTesterConfigured() === false);
   check("รหัสสั้น → verifyTesterSession = false", verifyTesterSession(signTesterSession()) === false);
 
+  // ── allowlist อีเมล UNLIMITED_EMAILS (บัญชีจริงใช้ไม่จำกัด ผ่านหน้าต่างเข้าสู่ระบบ) ──
+  const { isUnlimitedEmail, unlimitedEmailCount } = await import("../../src/lib/auth/unlimited-users");
+
+  process.env.UNLIMITED_EMAILS = "";
+  check("UNLIMITED_EMAILS ว่าง → ไม่มีใครไม่จำกัด", isUnlimitedEmail("boss@example.com") === false);
+  check("UNLIMITED_EMAILS ว่าง → count 0", unlimitedEmailCount() === 0);
+
+  process.env.UNLIMITED_EMAILS = "Partner@Example.com,  boss@example.com ";
+  check("อีเมลในลิสต์ (ต่าง case) → true", isUnlimitedEmail("partner@example.com") === true);
+  check("อีเมลในลิสต์ (มีช่องว่าง/หลาย sep) → true", isUnlimitedEmail("BOSS@EXAMPLE.COM") === true);
+  check("อีเมลนอกลิสต์ → false", isUnlimitedEmail("random@example.com") === false);
+  check("อีเมล null/ว่าง → false", isUnlimitedEmail(null) === false && isUnlimitedEmail("") === false);
+  check("count = 2", unlimitedEmailCount() === 2);
+
+  process.env.UNLIMITED_EMAILS = "not-an-email, x@y.co";
+  check("รายการที่ไม่ใช่อีเมลถูกกรองทิ้ง → count 1", unlimitedEmailCount() === 1);
+
   console.log(`\n${pass}/${pass + fail} ผ่าน`);
   if (fail > 0) process.exit(1);
 }

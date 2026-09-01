@@ -168,6 +168,18 @@
 - **สถานะปัจจุบัน**: Google login + แผงแอดมิน + ดูดวง ใช้งานได้ · email signup พัง 500 บน prod (ไม่มี `PASSWORD_PEPPER`) — Google login ไม่กระทบ
 - **แนะนำลำดับ**: LINE login (ฟรี) → ซื้อโดเมน ~฿370 → Resend → เปิด entitlement
 
+### 🗓️ 2026-09-01: Feature — บัญชีจริงแบบ "ไม่จำกัด" ผ่าน allowlist อีเมล (UNLIMITED_EMAILS)
+
+- **ความต้องการ**: เจ้าของอยากให้หุ้นส่วนล็อกอิน "ผ่านหน้าต่างเข้าสู่ระบบปกติ" (Google/LINE/อีเมล) แล้วใช้เว็บไม่จำกัด — ไม่เอาโหมด `/tester` แยก
+- **สิ่งที่ทำ**:
+  - `src/lib/auth/unlimited-users.ts` 🆕 — `isUnlimitedEmail()` / `unlimitedEmailCount()` อ่าน env `UNLIMITED_EMAILS` (คั่น comma/เว้นวรรค · normalize lowercase · cache ตาม raw string)
+  - `src/lib/security/privileged.ts` — `isPrivilegedTestRequest()` +ทางเข้าที่ 3: อ่าน `tarot_auth_session` → `verifyUserSession()` → ถ้า `user.email` อยู่ใน allowlist → bypass ทุกลิมิต · stat `ratelimit_bypass:unlimited_user`
+  - `scripts/qa/test-tester.ts` — +9 เคส allowlist (case-insensitive, หลาย separator, กรอง non-email, ว่าง=ปิด) → 20/20 · gate 15 label ปรับเป็น "บัญชีปลดล็อกไม่จำกัด (tarot_tester + allowlist อีเมล)"
+  - `docs/PENDING_SETUP.md` — ข้อ 4.6 (ทางง่ายสุด: Google login + ใส่อีเมลใน secret · ทาง email/password ต้องตั้ง `PASSWORD_PEPPER` ก่อน — ไม่ต้องมีโดเมน)
+- **หมายเหตุ**: form "เข้าสู่ระบบด้วยอีเมล" ยัง error 500 บน prod จนกว่าจะตั้ง `PASSWORD_PEPPER` (ข้อ 1) — Google login ใช้ได้เลย
+- **การพิสูจน์**: `repo:verify` 15/15 · `typecheck` 0 · `test-tester` 20/20 · `build:worker`
+- **รอเจ้าของ**: `npx wrangler secret put UNLIMITED_EMAILS`
+
 ### 🗓️ 2026-09-01: Feature — บัญชีผู้ทดสอบ (tarot_tester) ปลดล็อกการใช้งานไม่จำกัด โดยไม่ให้สิทธิ์แอดมิน
 
 - **ความต้องการ**: เจ้าของอยากได้ user+password ส่งให้หุ้นส่วนอีกคนลองเล่นเว็บแบบไม่ติดลิมิตอะไรเลย — แต่ไม่อยากให้เห็น/แก้แผงแอดมิน

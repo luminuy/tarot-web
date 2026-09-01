@@ -1,7 +1,9 @@
 import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE_NAME, verifyAdminSession } from "@/lib/auth/admin-auth";
+import { AUTH_COOKIE_NAME, verifyUserSession } from "@/lib/auth/edge-auth";
 import { TESTER_COOKIE_NAME, verifyTesterSession } from "@/lib/auth/tester-auth";
+import { isUnlimitedEmail } from "@/lib/auth/unlimited-users";
 import { recordEvent } from "@/lib/stats/record";
 
 const MIN_BYPASS_LEN = 24;
@@ -24,10 +26,11 @@ export function isBypassConfigured(): boolean {
 /**
  * true = "ผู้ทดสอบที่ได้รับอนุญาต" — ข้าม: rate limit ต่อ IP, concurrency, global spend cap, origin guard
  * ไม่ข้าม: safety checkQuestion, provably-fair integrity, body-size cap, auth ของ feature อื่น
- * 3 ทางเข้า:
+ * 4 ทางเข้า:
  *   1) cookie แอดมิน `tarot_admin` (ล็อกอินที่ /admin) — ทดสอบผ่านเบราว์เซอร์
  *   2) cookie ผู้ทดสอบ `tarot_tester` (ล็อกอินที่ /tester) — หุ้นส่วน/ทีมงานใช้เว็บไม่จำกัด โดยไม่เห็นแผงแอดมิน
- *   3) header `X-Tarot-Bypass: <RATE_LIMIT_BYPASS_TOKEN>` — curl / โหลดเทสต์ / CI
+ *   3) บัญชีจริงที่อีเมลอยู่ใน `UNLIMITED_EMAILS` — ล็อกอินปกติผ่านหน้าต่างเข้าสู่ระบบ (Google/LINE/อีเมล) แล้วใช้ไม่จำกัด
+ *   4) header `X-Tarot-Bypass: <RATE_LIMIT_BYPASS_TOKEN>` — curl / โหลดเทสต์ / CI
  * ทุกครั้งที่ใช้ → บันทึกลง stats (เห็นใน /admin)
  */
 export async function isPrivilegedTestRequest(request: Request): Promise<boolean> {
@@ -42,6 +45,14 @@ export async function isPrivilegedTestRequest(request: Request): Promise<boolean
     if (testerCookie && verifyTesterSession(testerCookie)) {
       recordEvent("ratelimit_bypass:tester");
       return true;
+    }
+    const authCookie = cookieStore.get(AUTH_COOKIE_NAME)?.value;
+    if (authCookie) {
+      const user = await verifyUserSession(authCookie);
+      if (user?.email && isUnlimitedEmail(user.email)) {
+        recordEvent("ratelimit_bypass:unlimited_user");
+        return true;
+      }
     }
   } catch {
     // cookies() may fail in certain environments/contexts
