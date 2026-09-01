@@ -13,15 +13,6 @@ interface Star {
   color: string;
 }
 
-interface NebulaCloud {
-  x: number;
-  y: number;
-  radius: number;
-  color: string;
-  vx: number;
-  vy: number;
-}
-
 interface ShootingStar {
   x: number;
   y: number;
@@ -33,11 +24,10 @@ interface ShootingStar {
 }
 
 /**
- * พื้นหลังกาแลคซี่เต็มรูปแบบ — ดาวกระพริบ, เนบิวลาเคลื่อนที่, ดาวตก, พารัลแลกซ์ตามเมาส์
+ * พื้นหลังกาแลคซี่โทนดำสนิท (Obsidian Night Sky) — ดาวระยิบระยับ, ดาวตก, พารัลแลกซ์ตามเมาส์
  * ใช้เฉพาะเดสก์ท็อป (ผ่าน <MysticBackground />) — มือถือใช้ <MysticAltarCanvas /> ที่เบากว่า
  *
- * Perf guard: หยุดวาดเมื่อสลับแท็บ, เคารพ prefers-reduced-motion (วาดเฟรมเดียวแบบนิ่ง),
- * throttle ~45fps เพื่อลดภาระ GPU
+ * สีพื้นหลังสม่ำเสมอเข้มสนิททั่วทั้งหน้าจอ ไม่ซีดจางหรือสว่างขึ้นเมื่อเลื่อนหน้าจอลงมา
  */
 export const GalaxyCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,10 +46,9 @@ export const GalaxyCanvas: React.FC = () => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let prefersReducedMotion = motionQuery.matches;
 
-    const STAR_COUNT = Math.min(120, Math.floor((width * height) / 9000));
-    const STAR_COLORS = ["#ffffff", "#f0dcb4", "#e0c088", "#cfc8e2", "#9d8189", "#70d6ff"];
+    const STAR_COUNT = Math.min(130, Math.floor((width * height) / 8500));
+    const STAR_COLORS = ["#ffffff", "#f0dcb4", "#e0c088", "#cfc8e2", "#dfd8f5"];
     let stars: Star[] = [];
-    let nebulas: NebulaCloud[] = [];
     let shootingStars: ShootingStar[] = [];
     const mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2 };
 
@@ -69,23 +58,23 @@ export const GalaxyCanvas: React.FC = () => {
         stars.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          size: Math.random() * 1.8 + 0.4,
-          baseAlpha: Math.random() * 0.7 + 0.2,
+          size: Math.random() * 1.6 + 0.35,
+          baseAlpha: Math.random() * 0.65 + 0.15,
           alpha: Math.random(),
-          twinkleSpeed: Math.random() * 0.03 + 0.008,
+          twinkleSpeed: Math.random() * 0.025 + 0.008,
           twinklePhase: Math.random() * Math.PI * 2,
           color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
         });
       }
 
-      nebulas = [
-        { x: width * 0.2, y: height * 0.25, radius: Math.min(width, height) * 0.45, color: "rgba(90, 40, 130, 0.12)", vx: 0.06, vy: 0.04 },
-        { x: width * 0.8, y: height * 0.4, radius: Math.min(width, height) * 0.4, color: "rgba(30, 60, 120, 0.14)", vx: -0.05, vy: 0.05 },
-        { x: width * 0.5, y: height * 0.8, radius: Math.min(width, height) * 0.5, color: "rgba(180, 120, 40, 0.08)", vx: 0.03, vy: -0.04 },
-      ];
-
       shootingStars = Array.from({ length: 3 }, () => ({
-        x: 0, y: 0, length: 0, speed: 0, angle: 0, alpha: 0, active: false,
+        x: 0,
+        y: 0,
+        length: 0,
+        speed: 0,
+        angle: 0,
+        alpha: 0,
+        active: false,
       }));
     };
 
@@ -93,13 +82,13 @@ export const GalaxyCanvas: React.FC = () => {
 
     const spawnShootingStar = () => {
       const inactive = shootingStars.find((s) => !s.active);
-      if (inactive && Math.random() < 0.02) {
+      if (inactive && Math.random() < 0.018) {
         inactive.x = Math.random() * width * 0.9;
-        inactive.y = Math.random() * (height * 0.4);
+        inactive.y = Math.random() * (height * 0.45);
         inactive.length = Math.random() * 80 + 60;
         inactive.speed = Math.random() * 12 + 15;
         inactive.angle = Math.PI / 4 + (Math.random() - 0.5) * 0.2;
-        inactive.alpha = 1;
+        inactive.alpha = 0.9;
         inactive.active = true;
       }
     };
@@ -108,48 +97,19 @@ export const GalaxyCanvas: React.FC = () => {
       ctx.clearRect(0, 0, width, height);
 
       if (animate) {
-        mouse.x += (mouse.targetX - mouse.x) * 0.05;
-        mouse.y += (mouse.targetY - mouse.y) * 0.05;
+        mouse.x += (mouse.targetX - mouse.x) * 0.04;
+        mouse.y += (mouse.targetY - mouse.y) * 0.04;
       }
 
-      // Nebulas
-      for (const neb of nebulas) {
-        if (animate) {
-          neb.x += neb.vx;
-          neb.y += neb.vy;
-          if (neb.x < 0 || neb.x > width) neb.vx *= -1;
-          if (neb.y < 0 || neb.y > height) neb.vy *= -1;
-        }
-        const grad = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.radius);
-        grad.addColorStop(0, neb.color);
-        grad.addColorStop(1, "transparent");
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(neb.x, neb.y, neb.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Interactive mouse glow (desktop/tablet)
-      if (animate) {
-        const mouseGlow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 280);
-        mouseGlow.addColorStop(0, "rgba(224, 192, 136, 0.06)");
-        mouseGlow.addColorStop(0.5, "rgba(139, 111, 158, 0.04)");
-        mouseGlow.addColorStop(1, "transparent");
-        ctx.fillStyle = mouseGlow;
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 280, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Stars + twinkle
+      // Stars + twinkle (Crisp Obsidian Sky)
       for (let i = 0; i < stars.length; i++) {
         const star = stars[i];
         if (animate) star.twinklePhase += star.twinkleSpeed;
-        const currentAlpha = star.baseAlpha + Math.sin(star.twinklePhase) * 0.35;
-        const alphaClamped = Math.max(0.1, Math.min(1, currentAlpha));
+        const currentAlpha = star.baseAlpha + Math.sin(star.twinklePhase) * 0.3;
+        const alphaClamped = Math.max(0.1, Math.min(0.95, currentAlpha));
 
-        const dx = animate ? (mouse.x - width / 2) * (star.size * 0.012) : 0;
-        const dy = animate ? (mouse.y - height / 2) * (star.size * 0.012) : 0;
+        const dx = animate ? (mouse.x - width / 2) * (star.size * 0.01) : 0;
+        const dy = animate ? (mouse.y - height / 2) * (star.size * 0.01) : 0;
 
         ctx.fillStyle = star.color;
         ctx.globalAlpha = alphaClamped;
@@ -157,14 +117,14 @@ export const GalaxyCanvas: React.FC = () => {
         ctx.arc(star.x + dx, star.y + dy, star.size, 0, Math.PI * 2);
         ctx.fill();
 
-        if (star.size > 1.8 && alphaClamped > 0.8) {
-          ctx.strokeStyle = "rgba(240, 220, 180, 0.4)";
-          ctx.lineWidth = 0.6;
+        if (star.size > 1.6 && alphaClamped > 0.75) {
+          ctx.strokeStyle = "rgba(240, 220, 180, 0.35)";
+          ctx.lineWidth = 0.5;
           ctx.beginPath();
-          ctx.moveTo(star.x + dx - 4, star.y + dy);
-          ctx.lineTo(star.x + dx + 4, star.y + dy);
-          ctx.moveTo(star.x + dx, star.y + dy - 4);
-          ctx.lineTo(star.x + dx, star.y + dy + 4);
+          ctx.moveTo(star.x + dx - 3.5, star.y + dy);
+          ctx.lineTo(star.x + dx + 3.5, star.y + dy);
+          ctx.moveTo(star.x + dx, star.y + dy - 3.5);
+          ctx.lineTo(star.x + dx, star.y + dy + 3.5);
           ctx.stroke();
         }
       }
@@ -187,7 +147,7 @@ export const GalaxyCanvas: React.FC = () => {
           grad.addColorStop(0, "transparent");
           grad.addColorStop(1, `rgba(240, 220, 180, ${ss.alpha})`);
           ctx.strokeStyle = grad;
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 1.2;
           ctx.beginPath();
           ctx.moveTo(tailX, tailY);
           ctx.lineTo(ss.x, ss.y);

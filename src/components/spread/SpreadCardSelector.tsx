@@ -262,8 +262,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 }}
                 className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 transform-gpu hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                   isSelected
-                    ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_35px_rgba(229,192,123,0.45)]"
-                    : "bg-gradient-to-b from-[#130d24]/95 to-[#07040f]/95 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
+                    ? "bg-[#140c26] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_30px_rgba(229,192,123,0.35)]"
+                    : "bg-[#0b0817] border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#110c22] shadow-xl"
                 }`}
                 style={{ minHeight: "320px" }}
               >
@@ -279,10 +279,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   )}
                 </div>
 
-                {/* 1909 Tarot Spread Centerpiece with Soft Altar Glow */}
+                {/* 1909 Tarot Spread Centerpiece */}
                 <div className="my-auto py-2.5 flex items-center justify-center relative">
-                  <div className="absolute inset-0 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-xl" />
-                  <div className="relative z-10 filter drop-shadow-[0_0_14px_rgba(229,192,123,0.3)]">
+                  <div className="relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.25)]">
                     {renderSpreadIllustration(spread.id)}
                   </div>
                 </div>
@@ -347,7 +346,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#170d30]/95 via-[#100922]/95 to-[#080512]/95 border-2 border-[#e5c07b]/60 backdrop-blur-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)]"
+          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#0d091a]/95 border-2 border-[#e5c07b]/60 backdrop-blur-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)]"
         >
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}
