@@ -12,6 +12,7 @@ import {
   grantBonus,
   grantSignupBonus,
   purgeEntitlementData,
+  DAILY_LIMIT,
   WEEKLY_LIMIT,
   GUEST_LIMIT,
   SIGNUP_BONUS,
@@ -19,6 +20,7 @@ import {
 } from "../../src/lib/entitlement/entitlement";
 import { upsertUserOnLogin, softDeleteUser } from "../../src/lib/users/users.repo";
 import { getAppDB } from "../../src/lib/platform/db";
+import { todayDateKey, getDailyStreak } from "../../src/lib/entitlement/daily";
 
 let pass = 0;
 let fail = 0;
@@ -59,8 +61,8 @@ async function main() {
   const member: Viewer = { kind: "member", userId: uid };
 
   const em0 = await getEntitlement(member);
-  check("สมาชิกใหม่ (ยังไม่โบนัส): weeklyRemaining = 3", em0.weeklyRemaining === WEEKLY_LIMIT);
-  check("สมาชิกใหม่: remaining = 3, canStart = true", em0.remaining === WEEKLY_LIMIT && em0.canStartReading);
+  check("สมาชิกใหม่ (ยังไม่โบนัส): dailyRemaining = 3", em0.dailyRemaining === DAILY_LIMIT);
+  check("สมาชิกใหม่: remaining = 3, canStart = true", em0.remaining === DAILY_LIMIT && em0.canStartReading);
   check("สมาชิก: canChat = true", em0.canChat === true);
   check("สมาชิก: resetAt ไม่ใช่ null", em0.resetAt !== null);
 
@@ -70,29 +72,29 @@ async function main() {
   await grantBonus(uid, 99, "signup"); // reason เดิม — ต้องไม่เพิ่ม
   const em1 = await getEntitlement(member);
   check("grantSignupBonus idempotent: bonusRemaining = 3 (ไม่ใช่ 6 หรือ 105)", em1.bonusRemaining === SIGNUP_BONUS);
-  check("สมาชิกหลังโบนัส: remaining = 6", em1.remaining === WEEKLY_LIMIT + SIGNUP_BONUS);
+  check("สมาชิกหลังโบนัส: remaining = 6", em1.remaining === DAILY_LIMIT + SIGNUP_BONUS);
 
-  // ── 4. ลำดับการหัก: weekly ก่อน bonus (เกณฑ์ข้อ 5) ──
+  // ── 4. ลำดับการหัก: daily ก่อน bonus (เกณฑ์ข้อ 5) ──
   check("หัก #1", (await consumeReading(member, `r_${uid}_1`)) === true);
   check("หัก #2", (await consumeReading(member, `r_${uid}_2`)) === true);
   check("หัก #3", (await consumeReading(member, `r_${uid}_3`)) === true);
   check("หัก #4 (ควรเป็น bonus)", (await consumeReading(member, `r_${uid}_4`)) === true);
 
   const db = await getAppDB();
-  const wk = weekKey();
-  const weeklyRows = await db
-    .prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND week_key = ? AND source = 'weekly'`)
-    .bind(uid, wk)
+  const dk = todayDateKey();
+  const dailyRows = await db
+    .prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND (week_key = ? OR source = 'daily') AND source != 'bonus'`)
+    .bind(uid, dk)
     .first<{ n: number }>();
   const bonusRows = await db
     .prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND source = 'bonus'`)
     .bind(uid)
     .first<{ n: number }>();
-  check("มี weekly 3 แถว", Number(weeklyRows?.n) === 3);
+  check("มี daily 3 แถว", Number(dailyRows?.n) === 3);
   check("มี bonus 1 แถว", Number(bonusRows?.n) === 1);
 
   const em2 = await getEntitlement(member);
-  check("หลังหัก 4: weeklyRemaining = 0, bonusRemaining = 2", em2.weeklyRemaining === 0 && em2.bonusRemaining === 2);
+  check("หลังหัก 4: dailyRemaining = 0, bonusRemaining = 2", em2.dailyRemaining === 0 && em2.bonusRemaining === 2);
 
   // ── 5. หักซ้ำ readingId เดิมไม่ได้ (เกณฑ์ข้อ 2) ──
   const before = (await db.prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ?`).bind(uid).first<{ n: number }>())?.n;
@@ -116,9 +118,9 @@ async function main() {
   // ── 7. สิทธิ์หมด → consumeReading = false ──
   await consumeReading(member, `r_${uid}_5`);
   await consumeReading(member, `r_${uid}_6`);
-  await consumeReading(member, `r_${uid}_7`); // ตอนนี้ใช้ครบ 3 weekly + 3 bonus = 6
+  await consumeReading(member, `r_${uid}_7`); // ตอนนี้ใช้ครบ 3 daily + 3 bonus = 6
   const em4 = await getEntitlement(member);
-  check("ใช้ครบ 6: canStartReading = false, reason = weekly_exhausted", !em4.canStartReading && em4.reason === "weekly_exhausted");
+  check("ใช้ครบ 6: canStartReading = false", !em4.canStartReading && (em4.reason === "daily_exhausted" || em4.reason === "weekly_exhausted"));
   check("consumeReading เมื่อสิทธิ์หมด = false", (await consumeReading(member, `r_${uid}_8`)) === false);
 
   // ── 8. PDPA: ลบบัญชี → ข้อมูลสิทธิ์หายตาม (เกณฑ์ข้อ 8) ──
@@ -212,21 +214,17 @@ async function main() {
   check("ซื้อแพ็กเกจ 10 ครั้ง → bonusRemaining = 10", buyerEnt.bonusRemaining === 10);
   await softDeleteUser(buyerId);
 
-  // ── 12. ไพ่ประจำวันฟรี 1 ครั้ง/วัน ไม่กินโควตารายสัปดาห์ (Daily Habit Loop) ──
-  const { todayDateKey, isDailyFreeReadingUsed, getDailyStreak } = await import(
-    "../../src/lib/entitlement/daily"
-  );
+  // ── 12. โควตาสมาชิก 3 ครั้ง/วัน — ผัง daily นับเข้าโควตารายวันและบันทึก streak ──
   const dailyUser = `test_daily_${Date.now()}`;
   await upsertUserOnLogin({ id: dailyUser, provider: "google", email: `${dailyUser}@test.com`, name: "คนเปิดรายวัน" });
   const dailyViewer: Viewer = { kind: "member", userId: dailyUser };
 
   const dEnt1 = await getEntitlement(dailyViewer);
-  check("ก่อนเปิดรายวัน: dailyFreeAvailable = true", dEnt1.dailyFreeAvailable === true);
-  check("เปิดไพ่ประจำวันครั้งแรกของวัน → consumeReading คืน true", (await consumeReading(dailyViewer, `r_daily_1`, "daily")) === true);
+  check("สมาชิกก่อนเปิด: dailyRemaining = 3", dEnt1.dailyRemaining === 3);
+  check("เปิดไพ่ครั้งที่ 1 (ผัง daily) → consumeReading คืน true", (await consumeReading(dailyViewer, `r_daily_1`, "daily")) === true);
   
   const dEnt2 = await getEntitlement(dailyViewer);
-  check("หลังเปิดรายวัน: weeklyRemaining ยังเต็ม 3 (ไม่กินโควตาสัปดาห์)", dEnt2.weeklyRemaining === 3);
-  check("หลังเปิดรายวัน: dailyFreeAvailable = false", dEnt2.dailyFreeAvailable === false);
+  check("หลังเปิด 1 ครั้ง: dailyRemaining = 2 (หักจากโควตารายวัน 3 ครั้ง)", dEnt2.dailyRemaining === 2);
   check("streak ถูกบันทึกเป็น 1 วัน", (await getDailyStreak(dailyUser)) >= 1);
   await softDeleteUser(dailyUser);
 

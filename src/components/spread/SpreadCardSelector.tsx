@@ -272,13 +272,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   <span className="text-[10px] text-[#e5c07b] bg-[#e5c07b]/15 px-2.5 py-0.5 rounded-full border border-[#e5c07b]/30 font-semibold font-mono">
                     {spread.positions.length} ใบ
                   </span>
-                  {spread.id === "daily" ? (
-                    <div className="flex items-center gap-1">
-                      <span className="text-[9px] text-[#05040a] bg-gradient-to-r from-[#10b981] via-[#6ee7b7] to-[#059669] px-2 py-0.5 rounded-full font-bold shadow flex items-center gap-0.5">
-                        <span>✦</span> ฟรี 1 ครั้ง/วัน
-                      </span>
-                    </div>
-                  ) : isRecommended ? (
+                  {isRecommended ? (
                     <span className="text-[9px] text-[#05040a] bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] px-2.5 py-0.5 rounded-full font-bold shadow flex items-center gap-1">
                       <span>✦</span> ยอดนิยม
                     </span>

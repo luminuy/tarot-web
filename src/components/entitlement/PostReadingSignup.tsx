@@ -60,7 +60,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
             ✦ เก็บดวงนี้ไว้ และเปิดไพ่ต่อได้อีก
           </h3>
           <p className="font-serif-th text-sm leading-relaxed text-[#cfc8e2]">
-            สมัครสมาชิกฟรี — เปิดไพ่สัปดาห์ละ 3 ครั้ง ถามแม่หมอต่อได้ไม่จำกัด
+            สมัครสมาชิกฟรี — เปิดไพ่วันละ 3 ครั้ง คุยถามแม่หมอต่อได้
             และเก็บประวัติดูดวงไว้ดูย้อนหลังทุกเครื่อง
           </p>
         </div>

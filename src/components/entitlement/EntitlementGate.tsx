@@ -4,19 +4,9 @@ import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 
 /**
  * แสดงแทนหน้าเลือกผังเมื่อสิทธิ์เปิดไพ่หมด
- * - ผู้เยี่ยมชม: ปุ่มสมัคร
- * - สมาชิก: ปุ่มซื้อโควตาเพิ่มทันที + วันรีเซ็ต
- * ธงปิด หรือยังมีสิทธิ์ → ไม่แสดง (render children ต่อ)
- *
- * ใช้แบบ: <EntitlementGate active={currentStep === "SPREAD_SELECT"} onOpenAuth={...} onOpenBuyCredits={...}>{หน้าเลือกผัง}</EntitlementGate>
+ * - ผู้เยี่ยมชม: บล็อกเมื่อใช้สิทธิ์ฟรี 1 ครั้งแล้ว พร้อมปุ่มเข้าสู่ระบบ/สมัครสมาชิก
+ * - สมาชิก: บล็อกเมื่อใช้โควตารายวัน (3 ครั้ง/วัน) ครบแล้ว พร้อมปุ่มเติมรอบเพิ่ม
  */
-function fullResetLabel(iso: string | null): string {
-  if (!iso) return "เร็ว ๆ นี้";
-  const d = new Date(iso);
-  const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-  return `วัน${days[d.getDay()]}`;
-}
-
 export function EntitlementGate({
   active,
   onOpenAuth,
@@ -36,30 +26,33 @@ export function EntitlementGate({
   const isGuest = ent!.kind === "guest";
 
   return (
-    <div className="altar-panel mx-auto max-w-md rounded-3xl p-8 text-center space-y-5">
-      <div className="text-3xl text-[#e5c07b]">✦</div>
+    <div className="altar-panel mx-auto max-w-md rounded-3xl p-8 text-center space-y-5 border border-[#e5c07b]/40 shadow-[0_0_50px_rgba(0,0,0,0.85)]">
+      <div className="text-3xl text-[#ffd700] filter drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]">✦</div>
       {isGuest ? (
         <>
-          <h2 className="font-serif-th text-lg font-bold font-mystic-gold">ครั้งแรกจบแล้ว</h2>
+          <h2 className="font-serif-th text-xl font-bold bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] bg-clip-text text-transparent">
+            สิทธิ์ดูดวงฟรี 1 ครั้งถูกใช้แล้ว
+          </h2>
           <p className="font-serif-th text-sm leading-relaxed text-[#cfc8e2]">
-            สมัครสมาชิกเพื่อเปิดไพ่ต่อสัปดาห์ละ 3 ครั้ง คุยถามแม่หมอต่อได้ และเก็บดวงไว้ดูย้อนหลังทุกเครื่อง
+            สมัครสมาชิกร่วมผูกดวงฟรี เพื่อรับสิทธิ์เปิดไพ่วันละ 3 ครั้ง คุยถามเจาะลึกกับแม่หมอต่อได้ และบันทึกประวัติดวงชะตาข้ามอุปกรณ์
           </p>
           <button
             type="button"
             onClick={onOpenAuth}
-            className="w-full rounded-2xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-6 py-3.5 font-serif-th text-sm font-bold text-[#05040a] shadow-[0_0_25px_rgba(212,175,55,0.35)] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer"
+            className="w-full rounded-2xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-6 py-3.5 font-serif-th text-sm font-bold text-[#05040a] shadow-[0_0_25px_rgba(212,175,55,0.4)] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer"
           >
-            สมัคร / เข้าสู่ระบบ
+            ✦ สมัครสมาชิก / เข้าสู่ระบบ
           </button>
         </>
       ) : (
         <>
-          <h2 className="font-serif-th text-lg font-bold font-mystic-gold">ไพ่สำหรับสัปดาห์นี้ครบโควตาแล้ว</h2>
+          <h2 className="font-serif-th text-xl font-bold bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] bg-clip-text text-transparent">
+            โควตาดูดวงวันนี้ครบ 3 ครั้งแล้ว
+          </h2>
           <p className="font-serif-th text-sm leading-relaxed text-[#cfc8e2]">
-            โควตาฟรีประจำสัปดาห์จะรีเซ็ตใหม่ใน{" "}
-            <strong className="text-[#f5deaa]">{fullResetLabel(ent!.resetAt)} 00:00 น.</strong>
+            โควตาฟรีประจำวัน (3 ครั้ง/วัน) จะรีเซ็ตใหม่ในวันพรุ่งนี้เวลา <strong className="text-[#ffd700]">00:00 น.</strong>
             <br />
-            หากต้องการเปิดไพ่ถามดวงเจาะลึกเพิ่มทันที สามารถเลือกเติมแพ็กเกจโควตาได้
+            หากต้องการเปิดไพ่ถามดวงต่อทันที สามารถเลือกเติมรอบการเปิดไพ่ได้
           </p>
 
           <div className="pt-2 space-y-3">
