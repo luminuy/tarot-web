@@ -36,6 +36,33 @@
 
 ---
 
+### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 2: API Endpoints, Token Lifecycle, Rate Limiting & Email Delivery (ระบบส่งอีเมล & API เส้นทาง)
+
+- **ความต้องการ**: พัฒนา API endpoints สำหรับการสมัครสมาชิก, เข้าสู่ระบบ, ยืนยันอีเมล, ส่งอีเมลซ้ำ, ขอลืมรหัสผ่าน และตั้งรหัสผ่านใหม่ พร้อมระบบป้องกัน Anti-Enumeration, Token Lifecycle Management, Email Sending ด้วย Resend API และ KV Rate Limiting
+- **สิ่งที่ทำ**:
+  - **Password Policy (`src/lib/auth/password-policy.ts`)**:
+    - ตรวจสอบความปลอดภัยตาม NIST 2024 (ยาว 10-200 ตัวอักษร, ไม่ตรงกับอีเมล, ไม่เป็นรหัสผ่านยอดฮิต)
+  - **Token Repository (`src/lib/auth/auth-tokens.repo.ts`)**:
+    - `issueToken`, `consumeToken` (Single-use with TTL, เก็บเฉพาะ SHA-256 hash ป้องกัน token leak), `invalidateUserTokens`
+  - **Email Templates & Sender (`src/lib/email/templates.ts` & `src/lib/email/send.ts`)**:
+    - เทมเพลตอีเมลภาษาไทยมูเตลูสีทองพรีเมียม (Verify Email, Reset Password, Account Alert)
+    - ส่งผ่าน Resend API พร้อมโหมดจำลองในคอนโซลสำหรับ Local & CI Testing
+  - **Rate Limiting Layer (`src/lib/security/auth-ratelimit.ts`)**:
+    - ควบคุมความถี่ (Signup 3/ชม., Login 8/15นาที, Forgot 3/ชม., Resend 3/ชม.) พร้อมระบบ Privileged Test Request Bypass
+  - **6 API Endpoints (`src/app/api/auth/email/`)**:
+    - `POST /api/auth/email/signup`: สมัครสมาชิกและส่งอีเมลยืนยันตัวตน พร้อมออก session ทันที
+    - `POST /api/auth/email/login`: เข้าสู่ระบบแบบ Anti-Enumeration 401 ปลอดภัย
+    - `GET /api/auth/email/verify`: ยืนยันอีเมลผ่านลิงก์และอัปเดตสถานะในระบบ
+    - `POST /api/auth/email/resend`: ขอส่งลิงก์ยืนยันอีเมลซ้ำ
+    - `POST /api/auth/email/forgot`: ขอลืมรหัสผ่าน (Anti-Enumeration 200 generic)
+    - `POST /api/auth/email/reset`: ตั้งรหัสผ่านใหม่และเพิกถอน Token เก่า
+  - **Verification Suite**:
+    - สร้าง QA test `scripts/qa/test-email-auth.ts` ครอบคลุม 7 flow ย่อย
+    - `npm run repo:verify` ผ่านครบ **13/13 ด่าน 100% Green**
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - เพิ่มใหม่: `src/lib/auth/password-policy.ts`, `src/lib/auth/auth-tokens.repo.ts`, `src/lib/email/templates.ts`, `src/lib/email/send.ts`, `src/lib/security/auth-ratelimit.ts`, `src/app/api/auth/email/signup/route.ts`, `src/app/api/auth/email/login/route.ts`, `src/app/api/auth/email/verify/route.ts`, `src/app/api/auth/email/resend/route.ts`, `src/app/api/auth/email/forgot/route.ts`, `src/app/api/auth/email/reset/route.ts`, `scripts/qa/test-email-auth.ts`
+  - แก้ไข: `src/lib/auth/edge-auth.ts`, `src/lib/users/users.repo.ts`, `scripts/github-auto.ts`, `docs/WORK_LOG.md`
+
 ### 🗓️ 2026-09-01: Email & Password Authentication Suite · PR 1: Schema & PBKDF2 Password Hashing (ระบบเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน)
 
 - **ความต้องการ**: พัฒนาระบบยืนยันตัวตนด้วยอีเมลและรหัสผ่าน (Email/Password Authentication) เสริมจาก Google และ LINE OAuth โดยรหัสผ่านต้องได้รับการแฮชด้วย PBKDF2-HMAC-SHA256 ร่วมกับ Server-side Pepper บน Cloudflare Web Crypto ปลอดภัย 100%

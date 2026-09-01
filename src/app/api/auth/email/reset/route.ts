@@ -1,0 +1,93 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { AUTH_COOKIE_NAME, signUserSession } from "@/lib/auth/edge-auth";
+import { consumeToken, invalidateUserTokens } from "@/lib/auth/auth-tokens.repo";
+import { hashPassword } from "@/lib/auth/password";
+import { validatePasswordPolicy } from "@/lib/auth/password-policy";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { getUserById, setPasswordHash } from "@/lib/users/users.repo";
+
+export const runtime = "nodejs";
+
+const ResetSchema = z.object({
+  token: z.string().trim().min(1, "กรุณาระบุ Token"),
+  password: z.string().min(10, "รหัสผ่านต้องมีความยาวอย่างน้อย 10 ตัวอักษร").max(200, "รหัสผ่านยาวเกินไป"),
+});
+
+export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
+  try {
+    const body = await request.json();
+    const parsed = ResetSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    const { token, password } = parsed.data;
+
+    // Consume single-use reset token
+    const tokenResult = await consumeToken(token, "reset");
+    if (!tokenResult) {
+      return NextResponse.json(
+        { error: "ลิงก์ตั้งรหัสผ่านนี้หมดอายุหรือถูกใช้งานไปแล้ว กรุณากดขอลิงก์ใหม่อีกครั้ง" },
+        { status: 400 }
+      );
+    }
+
+    const user = await getUserById(tokenResult.userId);
+    if (!user) {
+      return NextResponse.json({ error: "ไม่พบข้อมูลบัญชีผู้ใช้" }, { status: 404 });
+    }
+
+    // Password Policy Check
+    const policy = validatePasswordPolicy(password, user.email || undefined);
+    if (!policy.ok) {
+      return NextResponse.json({ error: policy.reason || "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย" }, { status: 400 });
+    }
+
+    // Hash & Save (bumps token_version automatically)
+    const newHash = await hashPassword(password);
+    await setPasswordHash(user.id, newHash);
+    await invalidateUserTokens(user.id, "reset");
+
+    // ดึงข้อมูลผู้ใช้ล่าสุดหลังอัปเดต token_version
+    const updatedUser = await getUserById(user.id);
+
+    // ออก Session Cookie ใหม่
+    const sessionToken = await signUserSession({
+      id: user.id,
+      provider: user.provider,
+      email: user.email || undefined,
+      name: user.name,
+      createdAt: new Date(user.createdAt).toISOString(),
+      tokenVersion: updatedUser?.tokenVersion ?? user.tokenVersion + 1,
+    });
+
+    const response = NextResponse.json({
+      ok: true,
+      message: "ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        emailVerified: user.emailVerified,
+      },
+    });
+
+    response.cookies.set(AUTH_COOKIE_NAME, sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60,
+      path: "/",
+    });
+
+    return response;
+  } catch (err) {
+    console.error("[Reset Password Error]", err);
+    return NextResponse.json({ error: "ไม่สามารถตั้งรหัสผ่านใหม่ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
+  }
+}
