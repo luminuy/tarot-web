@@ -61,8 +61,8 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full border border-[#e5c07b] flex items-center justify-center text-sm bg-[#0a0812]">
-                📖
+              <div className="w-8 h-8 rounded-full border border-[#e5c07b] flex items-center justify-center text-xs text-[#ffd700] bg-[#0a0812]">
+                ✦
               </div>
               <div>
                 <h3 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold">
@@ -77,7 +77,8 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer"
+              aria-label="ปิดความหมายไพ่ทาโรต์"
+              className="w-11 h-11 rounded-2xl bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
             >
               ✕
             </button>
@@ -85,19 +86,26 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
 
           {/* Filter Bar & Search */}
           <div className="space-y-2">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            <div
+              role="tablist"
+              aria-label="ชุดไพ่ทาโรต์"
+              className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar"
+            >
               {[
                 { id: "all", label: "ทั้งหมด (78)" },
                 { id: "major", label: "ชุดหลัก Major (22)" },
-                { id: "wands", label: "🔥 ไม้เท้า Wands" },
-                { id: "cups", label: "🌊 ถ้วย Cups" },
-                { id: "swords", label: "🌪️ ดาบ Swords" },
-                { id: "pentacles", label: "🌿 เหรียญ Pentacles" },
+                { id: "wands", label: "✦ ไม้เท้า Wands" },
+                { id: "cups", label: "✦ ถ้วย Cups" },
+                { id: "swords", label: "✦ ดาบ Swords" },
+                { id: "pentacles", label: "✦ เหรียญ Pentacles" },
               ].map((tab) => (
                 <button
                   key={tab.id}
+                  role="tab"
+                  aria-selected={filter === tab.id}
+                  type="button"
                   onClick={() => setFilter(tab.id as SuitFilter)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-serif-th font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-serif-th font-semibold whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                     filter === tab.id
                       ? "bg-gradient-to-r from-[#c59b27] to-[#e5c07b] text-[#05040a] font-bold shadow"
                       : "bg-[#140b24] text-[#cfc8e2] hover:bg-[#1f1238] border border-[#e5c07b]/20"
@@ -110,45 +118,78 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
 
             <input
               type="text"
-              placeholder="🔍 ค้นหาตามชื่อไพ่ (เช่น The Fool, ราชินีถ้วย, ความรัก, การเงิน)..."
+              placeholder="✦ ค้นหาตามชื่อไพ่ (เช่น The Fool, ราชินีถ้วย, ความรัก, การเงิน)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#140b24] border border-[#e5c07b]/30 rounded-xl px-3.5 py-2 text-xs text-[#f5deaa] placeholder:text-[#9c93b8]/60 focus:outline-none focus:border-[#e5c07b]"
+              className="w-full bg-[#140b24] border border-[#e5c07b]/30 rounded-xl px-3.5 py-2 text-xs text-[#f5deaa] placeholder:text-[#9c93b8]/70 focus:outline-none focus:border-[#e5c07b]"
             />
           </div>
 
           {/* Content Area: Grid of Cards */}
           <div className="flex-1 overflow-y-auto space-y-4 pr-1 no-scrollbar min-h-[300px]">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-              {filteredCards.map((c) => (
-                <div
-                  key={c.id}
-                  onClick={() => handleSelectCard(c)}
-                  className="p-2 rounded-2xl bg-gradient-to-b from-[#180f30] to-[#0d071a] border border-[#e5c07b]/25 hover:border-[#e5c07b]/80 transition-all cursor-pointer flex flex-col items-center text-center space-y-1.5 shadow-md hover:scale-105 group"
-                >
-                  <div className="w-16 h-[108px] sm:w-18 sm:h-[122px] rounded-xl shadow overflow-hidden flex-shrink-0">
-                    <TarotCardComponent
-                      card={c}
-                      isRevealed={true}
-                      size="sm"
-                      imageSizes="(min-width: 640px) 72px, 64px"
-                      className="w-full h-full"
-                    />
+            {filteredCards.length > 0 ? (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                {filteredCards.map((c) => (
+                  <div
+                    key={c.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`ดูความหมาย ${c.nameTh} (${c.nameEn})`}
+                    onClick={() => handleSelectCard(c)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleSelectCard(c);
+                      }
+                    }}
+                    className="p-2 rounded-2xl bg-gradient-to-b from-[#180f30] to-[#0d071a] border border-[#e5c07b]/25 hover:border-[#e5c07b]/80 transition-all cursor-pointer flex flex-col items-center text-center space-y-1.5 shadow-md hover:scale-105 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+                  >
+                    <div className="w-16 h-[108px] sm:w-18 sm:h-[122px] rounded-xl shadow overflow-hidden flex-shrink-0">
+                      <TarotCardComponent
+                        card={c}
+                        isRevealed={true}
+                        size="sm"
+                        imageSizes="(min-width: 640px) 72px, 64px"
+                        className="w-full h-full"
+                      />
+                    </div>
+                    <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] truncate max-w-full block leading-tight">
+                      {c.nameTh}
+                    </span>
+                    <span className="text-[8px] text-[#9c93b8] font-mono truncate max-w-full block">
+                      {c.nameEn}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-serif-th font-bold text-[#f5deaa] truncate max-w-full block leading-tight">
-                    {c.nameTh}
-                  </span>
-                  <span className="text-[8px] text-[#9c93b8] font-mono truncate max-w-full block">
-                    {c.nameEn}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 space-y-3">
+                <div className="text-2xl text-[#ffd700]">✦</div>
+                <h4 className="font-serif-th text-sm font-bold text-[#f5deaa]">
+                  ไม่พบไพ่ที่ตรงกับ &ldquo;{search}&rdquo;
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setFilter("all");
+                  }}
+                  className="px-4 py-1.5 rounded-xl text-xs font-serif-th font-bold bg-[#1d1438] border border-[#e5c07b]/40 text-[#ffd700] hover:bg-[#2a1d4f] transition-all cursor-pointer"
+                >
+                  ล้างการค้นหา
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Selected Card Deep Wisdom Detail Modal Layer */}
           {selectedCard && (
-            <div className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/90 backdrop-blur-2xl">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={`ความหมายไพ่ ${selectedCard.nameTh}`}
+              className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-black/90 backdrop-blur-2xl"
+            >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -158,7 +199,8 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setSelectedCard(null)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer z-10"
+                  aria-label="ปิดหน้ารายละเอียดไพ่"
+                  className="absolute top-4 right-4 w-11 h-11 rounded-2xl bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
                 >
                   ✕
                 </button>

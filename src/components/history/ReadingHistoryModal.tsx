@@ -27,6 +27,17 @@ interface MonthlySummaryResult {
   empowermentQuote: string;
 }
 
+const CATEGORY_MAP_TH: Record<string, string> = {
+  general: "ทั่วไป",
+  love: "ความรัก",
+  career: "การงาน",
+  work: "การงาน",
+  money: "การเงิน",
+  finance: "การเงิน",
+  spiritual: "จิตวิญญาณ",
+  decision: "การตัดสินใจ",
+};
+
 export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
   isOpen,
   onClose,
@@ -124,7 +135,12 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="สมุดบันทึกดวงชะตา"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl"
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -134,8 +150,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full border border-[#e5c07b] flex items-center justify-center text-sm bg-[#0a0812]">
-                📜
+              <div className="w-8 h-8 rounded-full border border-[#e5c07b] flex items-center justify-center text-xs text-[#ffd700] bg-[#0a0812]">
+                ✦
               </div>
               <div>
                 <h3 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold">
@@ -152,7 +168,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-[10px] text-rose-400 hover:text-rose-300 border border-rose-500/30 bg-rose-950/40 px-2.5 py-1 rounded-lg transition-all cursor-pointer font-serif-th"
+                  className="text-[10px] text-rose-400 hover:text-rose-300 border border-rose-500/30 bg-rose-950/40 px-2.5 py-1 rounded-lg transition-all cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-400"
                 >
                   ลบทั้งหมด
                 </button>
@@ -160,7 +176,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer"
+                aria-label="ปิดสมุดบันทึกดวงชะตา"
+                className="w-11 h-11 rounded-2xl bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
               >
                 ✕
               </button>
@@ -171,7 +188,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
           {readings.length >= 1 && (
             <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#1c1236] via-[#241344] to-[#120a24] border border-[#e5c07b]/35 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
               <div className="flex items-center gap-2.5 text-left">
-                <span className="text-xl">🔮</span>
+                <span className="text-sm text-[#ffd700]">✨</span>
                 <div>
                   <h4 className="text-xs sm:text-sm font-serif-th font-bold text-[#f5deaa]">
                     กระจกสะท้อนดวงรอบเดือน (AI Monthly Destiny Retrospective)
@@ -360,7 +377,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                         <span className="bg-[#e5c07b]/15 text-[#f5deaa] border border-[#e5c07b]/30 px-2 py-0.5 rounded-full font-serif-th font-semibold">
                           ผัง: {item.spreadName}
                         </span>
-                        <span className="text-[#9c93b8]">หมวด{item.category}</span>
+                        <span className="text-[#9c93b8]">หมวด: {CATEGORY_MAP_TH[item.category] || item.category}</span>
                         <span className="text-[#e5c07b]/80">· แม่หมอ {item.personaName}</span>
                       </div>
 
@@ -369,10 +386,11 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                         <button
                           type="button"
                           onClick={(e) => handleDelete(e, item.id)}
-                          className="text-rose-400 hover:text-rose-300 p-1 text-xs"
+                          className="text-rose-400 hover:text-rose-300 p-1 text-xs transition-colors cursor-pointer"
                           title="ลบบันทึกนี้"
+                          aria-label="ลบบันทึกนี้"
                         >
-                          🗑️
+                          ✕
                         </button>
                       </div>
                     </div>

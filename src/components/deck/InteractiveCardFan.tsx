@@ -35,13 +35,16 @@ const FanCard = React.memo<FanCardProps>(
     const angle = normalized * TIER_SPREAD_DEG;
 
     // Arc Y: cards at edges of fan dip down following the circumference
-    // Using approximation: y = R * (1 - cos(θ)) where R is the virtual arc radius
     const ARC_RADIUS = 320; // virtual radius in px
     const angleRad = (angle * Math.PI) / 180;
     const arcY = ARC_RADIUS * (1 - Math.cos(angleRad));
 
     return (
       <motion.div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-label={`เลือกไพ่ใบที่ ${cardIdx + 1}`}
+        aria-disabled={disabled}
         initial={{ opacity: 0, scale: 0.8, y: 10 }}
         animate={{ opacity: 1, scale: 1, rotate: angle, y: arcY }}
         exit={{
@@ -54,10 +57,16 @@ const FanCard = React.memo<FanCardProps>(
         whileHover={{ y: arcY - 22, scale: 1.18, rotate: 0, zIndex: 200 }}
         whileTap={{ scale: 0.93 }}
         onClick={() => !disabled && onClick(cardIdx)}
-        className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if (!disabled) onClick(cardIdx);
+          }
+        }}
+        className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group focus-visible:outline-none"
         style={{ zIndex: tierIdx * 40 + posInTier, originY: 1 }}
       >
-        <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-xl sm:rounded-2xl border-2 card-back-pattern shadow-xl flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#e5c07b]/45 group-hover:border-[#ffd700] group-hover:ring-2 group-hover:ring-[#ffd700]/70 group-hover:shadow-[0_0_25px_rgba(255,215,0,0.8)] bg-[#0d0918]">
+        <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-xl sm:rounded-2xl border-2 card-back-pattern shadow-xl flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#e5c07b]/45 group-hover:border-[#ffd700] group-hover:ring-2 group-hover:ring-[#ffd700]/70 group-hover:shadow-[0_0_25px_rgba(255,215,0,0.8)] group-focus-visible:border-[#ffd700] group-focus-visible:ring-2 group-focus-visible:ring-[#ffd700] bg-[#0d0918]">
           <div className="w-full flex items-center justify-end text-[7px] sm:text-[8px] text-[#e5c07b]/80">
             <span className="font-mono opacity-60">#{cardIdx + 1}</span>
           </div>
@@ -104,6 +113,17 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
     onPickCard(idx);
   };
 
+  // P1-U6: Accessible Auto-Pick Fallback (Randomly select next card)
+  const handleAutoPick = () => {
+    if (disabled || isComplete) return;
+    const available = Array.from({ length: totalCards }, (_, i) => i).filter(
+      (idx) => !pickedIndices.includes(idx)
+    );
+    if (available.length === 0) return;
+    const randomIdx = available[Math.floor(Math.random() * available.length)];
+    handleCardClick(randomIdx);
+  };
+
   return (
     <div className="w-full flex flex-col items-center select-none space-y-3.5 sm:space-y-6">
       {/* Top Sacred Guidance & Target Slot Focus */}
@@ -130,7 +150,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               </span>
             </h3>
             <p className="text-[11px] sm:text-xs text-[#9c93b8] max-w-xl mx-auto leading-normal">
-              แตะเลือกไพ่ใบที่คุณรู้สึกถูกชะตาหรือดึงดูดสายตาคุณมากที่สุด
+              แตะเลือกไพ่ใบที่คุณรู้สึกถูกชะตา หรือกดปุ่ม &ldquo;สุ่มเลือกให้ฉัน&rdquo; ด้านล่าง
             </p>
           </motion.div>
         ) : (
@@ -158,10 +178,14 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
           <div className="absolute w-full h-full bg-radial from-[#e5c07b]/15 via-transparent to-transparent blur-3xl" />
         </div>
 
-        {/* SINGLE UNIFIED SCROLL CONTAINER FOR ALL 3 TIERS */}
+        {/* Mobile Edge Fade Masks */}
+        <div className="absolute top-0 bottom-0 left-0 w-6 bg-gradient-to-r from-[#140d28] to-transparent pointer-events-none z-20 sm:hidden" />
+        <div className="absolute top-0 bottom-0 right-0 w-6 bg-gradient-to-l from-[#140d28] to-transparent pointer-events-none z-20 sm:hidden" />
+
+        {/* SINGLE UNIFIED SCROLL CONTAINER FOR ALL 3 TIERS (P1-U10 overscroll-contain) */}
         <div
           ref={scrollContainerRef}
-          className="w-full overflow-x-auto custom-scrollbar pt-6 pb-6 sm:pt-10 sm:pb-8 px-4 sm:px-8 relative z-10"
+          className="w-full overflow-x-auto custom-scrollbar pt-6 pb-6 sm:pt-10 sm:pb-8 px-4 sm:px-8 relative z-10 overscroll-x-contain"
         >
           <div className="min-w-max mx-auto flex flex-col items-center gap-3.5 sm:gap-6 py-1">
             {tiers.map((tierCards, tierIdx) => {
@@ -233,24 +257,40 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               {/* Luminous Animated Progress Bar */}
               <div className="w-full h-1.5 sm:h-2 rounded-full bg-[#0d081a] border border-[#e5c07b]/25 overflow-hidden p-0.5 relative">
                 <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(pickedIndices.length / targetCount) * 100}%` }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: pickedIndices.length / targetCount }}
+                  style={{ transformOrigin: "left" }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="h-full rounded-full bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#ffd700] shadow-[0_0_10px_rgba(255,215,0,0.8)] relative"
+                  className="h-full w-full rounded-full bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#ffd700] shadow-[0_0_10px_rgba(255,215,0,0.8)] relative"
                 >
                   <div className="absolute inset-0 bg-white/25 animate-[pulse_2s_infinite]" />
                 </motion.div>
               </div>
 
-              <p className="text-[10px] sm:text-[11px] text-[#9c93b8] font-serif-th leading-tight truncate">
-                {isComplete ? (
-                  <span className="text-emerald-400 font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
-                ) : (
-                  <span>
-                    กำลังเลือกใบสำหรับ <strong className="text-[#f5deaa]">&ldquo;{currentPositionName}&rdquo;</strong>
-                  </span>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] sm:text-[11px] text-[#9c93b8] font-serif-th leading-tight truncate">
+                  {isComplete ? (
+                    <span className="text-emerald-400 font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
+                  ) : (
+                    <span>
+                      กำลังเลือกใบสำหรับ <strong className="text-[#f5deaa]">&ldquo;{currentPositionName}&rdquo;</strong>
+                    </span>
+                  )}
+                </p>
+
+                {/* P1-U6: Auto-Pick fallback button for keyboard / assistive users */}
+                {!isComplete && (
+                  <button
+                    type="button"
+                    onClick={handleAutoPick}
+                    disabled={disabled}
+                    className="flex-shrink-0 text-[10px] sm:text-[11px] text-[#e5c07b] hover:text-[#ffd700] bg-[#1a1130] hover:bg-[#251842] border border-[#e5c07b]/30 hover:border-[#ffd700]/60 px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffd700]"
+                    aria-label="สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"
+                  >
+                    ✦ สุ่มเลือกให้ฉัน
+                  </button>
                 )}
-              </p>
+              </div>
             </div>
           </div>
 

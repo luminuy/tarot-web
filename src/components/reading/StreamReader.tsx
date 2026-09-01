@@ -127,11 +127,19 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       </div>
 
       {/* World-Class Chamber Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#e5c07b]/15 pb-2 overflow-x-auto no-scrollbar">
+      <div
+        role="tablist"
+        aria-label="ส่วนแสดงผลคำทำนาย"
+        className="flex items-center gap-2 border-b border-[#e5c07b]/15 pb-2 overflow-x-auto no-scrollbar"
+      >
         <button
           type="button"
+          role="tab"
+          id="chamber-tab-card"
+          aria-selected={activeTab === "card"}
+          aria-controls="chamber-panel-card"
           onClick={() => setActiveTab("card")}
-          className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none ${
+          className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
             activeTab === "card"
               ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_15px_rgba(229,192,123,0.4)]"
               : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
@@ -143,8 +151,12 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
         <button
           type="button"
+          role="tab"
+          id="chamber-tab-summary"
+          aria-selected={activeTab === "summary"}
+          aria-controls="chamber-panel-summary"
           onClick={() => setActiveTab("summary")}
-          className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none ${
+          className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
             activeTab === "summary"
               ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_15px_rgba(229,192,123,0.4)]"
               : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
@@ -157,8 +169,12 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         {readingId && (
           <button
             type="button"
+            role="tab"
+            id="chamber-tab-chat"
+            aria-selected={activeTab === "chat"}
+            aria-controls="chamber-panel-chat"
             onClick={() => setActiveTab("chat")}
-            className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none ${
+            className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
               activeTab === "chat"
                 ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_15px_rgba(229,192,123,0.4)]"
                 : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
@@ -172,7 +188,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
       {/* Error / Recovery Banner */}
       {errorMsg && (
-        <div className="anim-page-transition p-4 rounded-2xl bg-rose-950/90 border border-rose-600/50 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="anim-page-transition p-4 rounded-2xl bg-rose-950/90 border border-rose-600/50 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg"
+        >
           <div className="text-xs sm:text-sm text-rose-200 font-serif-th text-center sm:text-left">
             <span>✦ </span>
             <span>{errorMsg}</span>
