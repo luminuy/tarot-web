@@ -22,9 +22,10 @@
 งาน M4–M7 (D1 + reader profiles → คิว → AI screening → payments) มีเอกสารส่งต่อละเอียดที่
 **[`docs/MARKETPLACE.md`](MARKETPLACE.md)** — SQL schema, code pattern, verification playbook, checklist ครบ
 
-**ติดอยู่ 2 จุด (ต้องให้เจ้าของทำก่อน):**
-1. `npx wrangler d1 create tarot-app-db` → ส่ง `database_id` กลับมา
-2. ADR + PDPA sign-off (marketplace เก็บ PII ลูกค้า + ส่ง LINE — ขัดกฎเดิม)
+**ติดอยู่ 1 จุด (ต้องให้เจ้าของทำก่อน):**
+1. ~~`npx wrangler d1 create tarot-app-db` → ส่ง `database_id` กลับมา~~
+   ✅ **ทำแล้ว** — `database_id: 560fdbe7-e1f5-46e1-bad6-c8c387dcfcb5` อยู่ใน `wrangler.jsonc` (binding `APP_DB`)
+2. ⬜ ADR + PDPA sign-off (marketplace เก็บ PII ลูกค้า + ส่ง LINE — ขัดกฎเดิม)
 
 Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #57 (auth+platform), #59 (stats), #60 (live content overrides)
 → ดู [`docs/ADMIN_PANEL.md`](ADMIN_PANEL.md) · เจ้าของต้อง `wrangler secret put ADMIN_PASSWORD` ให้ `/admin` ใช้งานได้บน prod
@@ -45,17 +46,25 @@ Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #5
 
 ---
 
-## P1 · ลด JS หน้าแรก (perf — งานใหญ่สุดที่เหลือ) — 1 PR
+## ~~P1 · ลด JS หน้าแรก (perf)~~ — ✅ **บรรลุเป้าแล้ว (วัดซ้ำ 2026-09-01)**
 
-**ปัญหา:** `app/page.js` ยังใหญ่ ~498KB (ลดจาก 572KB ตอน PR #21 แค่ ~13%)
+**เดิม** `app/page.js` ~498KB · **เกณฑ์ผ่าน** ≤ ~300KB · **ตอนนี้ 81KB** — ผ่านเป้าไปมาก
+(ผลจาก dynamic import คอมโพเนนต์หนัก 10 ตัวใน `page.tsx` ที่ทำระหว่าง PR ชุด auth/entitlement)
+
+วัดซ้ำ: `npm run build` แล้ว
+`ls -la .next/static/chunks/app/page*.js | awk '{printf "%.0f KB\n", $5/1024}'`
+
+**เหลือแค่ optional ไม่เร่ง:**
 
 | งาน | รายละเอียด |
 | :-- | :-- |
-| แตก `src/app/page.tsx` | ตอนนี้ ~790 บรรทัด client เดียว คุม state 30+ ตัว · แยกแต่ละ step เป็น component + ดันส่วน static ขึ้น Server Component |
 | `LazyMotion` + `m` API | เปลี่ยน `import { motion } from "motion/react"` เป็น `LazyMotion` + `domAnimation` + `m.*` ในทุก component (22 ไฟล์) — โหลด motion feature เท่าที่ใช้ (~-60% vendor chunk) |
 | ตรวจ `@anthropic-ai/sdk` | ยืนยันว่าไม่ถูก bundle ฝั่ง client (ต้องอยู่แค่ `src/lib/ai/claude.ts` server) |
 
-**เกณฑ์ผ่าน:** `next build` → `app/page.js` ≤ ~300KB · flow 5 ขั้นยังเดินได้ครบ (คลิกจริงผ่านเบราว์เซอร์) · ไพ่ยังคว่ำหน้าเริ่มต้น (Golden Rule 5)
+**เกณฑ์ผ่าน:**
+- ✅ `next build` → `app/page.js` ≤ ~300KB — **ผ่าน (81KB)**
+- ⬜ flow 5 ขั้นเดินได้ครบ (คลิกจริงผ่านเบราว์เซอร์) — **ยังไม่ผ่าน** ดู "หนี้การตรวจสอบ" ด้านล่าง
+- ✅ ไพ่ยังคว่ำหน้าเริ่มต้น (Golden Rule 5)
 
 ---
 
