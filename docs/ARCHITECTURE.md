@@ -143,16 +143,17 @@ src/
 
 ---
 
-## 7. ระเบียบวิศวกรรมการตรวจสอบ 7 ด่าน (7-Stage Verification Protocol)
+## 8. ระบบความปลอดภัยและการควบคุมต้นทุน AI 7 ชั้น (7-Layer Defense-in-Depth & Cost Control)
 
-ก่อนการ Commit หรือ Deploy ทุกครั้ง โค้ดต้องผ่านการตรวจครบ 7 ด่านผ่านคำสั่ง `npm run repo:verify`:
+เพื่อป้องกันการยิง API ซ้ำซ้อน, การถูก Bot Scraping และการสูญเสียงบประมาณโมเดล AI (Gemini 3.7 Flash) โดยไม่ทำลายบรรยากาศการเปิดไพ่ด้วย Captcha (ADR-002):
 
-1. 🛡️ **AI Agent Collision Guard**: ป้องกันการแก้ไขไฟล์ชนกันระหว่างหลาย Agent
-2. 🔍 **TypeScript Strict Typecheck**: การันตี 0 Type Errors 100%
-3. 🃏 **78 Cards Database Integrity**: ตรวจสอบความครบถ้วน 780 ข้อความ 5 มิติ
-4. 📐 **20 Spreads Geometry Calibration**: ตรวจสอบพิกัด 95 ตำแหน่งไร้การทับซ้อน
-5. 🚨 **Safety Guardrails Filter**: ตรวจสอบการบล็อกคำถามอันตราย
-6. 🎲 **Provably Fair Cryptographic Engine**: ทดสอบความยุติธรรมของระบบสับไพ่
-7. 🖼️ **Card Image Path Guard**: ตรวจสอบการโหลดรูปผ่าน Single Pipeline ป้องกัน Error 404
+1. **Provably Fair Entropy Binding**: การสับไพ่ผูกกับ `clientSeed` และ `pickedIndices` ของผู้ใช้จริง บอทไม่สามารถยิงลัดขั้นตอนได้
+2. **Strict Origin & Anti-Theft Guard (`anti-theft.ts`)**: ตรวจสอบ `Sec-Fetch-Site` และ `Origin` ป้องกันการขโมย API ไปใช้ในเว็บภายนอก
+3. **Privileged Testing Bypass (`privileged.ts`)**: รองรับการทดสอบอัตโนมัติของทีมและ CI ผ่าน Admin Cookie และ Header `X-Tarot-Bypass: RATE_LIMIT_BYPASS_TOKEN`
+4. **Sliding Window Rate Limiter (`rate-limit.ts`)**: จำกัดความถี่คำขอต่อ IP แบบ Sliding Window พร้อม Single-Flight Concurrency Lock
+5. **Edge KV Cross-Fleet Soft Quota (`ai-budget.ts`)**: จำกัดโควตารายวันต่อ IP (40 ครั้ง/วัน) ซิงก์ข้าม Edge isolate ด้วย SHA-256 IP Hash
+6. **AI Daily Spend Cap & Circuit Breaker (`ai-budget.ts`)**: เพดานงบประมาณ Gemini ประจำวัน (`AI_DAILY_CALL_CAP`) พร้อมตัดวงจรคืนค่า HTTP 503 บน `/read` และ fallback สู่ Local Synthesis อัตโนมัติบน `/chat`
+7. **Cloudflare Native WAF Rate Limiting**: บล็อกสแปมและทราฟฟิกผิดปกติตั้งแต่ระดับ DNS Edge ก่อนเข้าถึง Cloudflare Worker
 
 ระบบถูกออกแบบภายใต้มาตรฐานความน่าเชื่อถือระดับสูง (High Reliability & Fault Tolerance) เพื่อมอบประสบการณ์ดูดวงไพ่ทาโรต์ออนไลน์ที่ดีที่สุดในระดับสากล ✦
+

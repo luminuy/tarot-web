@@ -36,7 +36,26 @@
 
 ---
 
-## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
+### 🗓️ 2026-09-01: AI Cost Control & Rate Limiting Infrastructure (PR 1 - PR 5: 7-Layer Defense-in-Depth)
+
+- **ความต้องการ**: พัฒนาระบบควบคุมต้นทุน AI (Gemini 3.7 Flash) และป้องกันการยิง API ซ้ำซ้อนโดยไม่ต้องใช้ Captcha/Turnstile ที่ทำลาย UX (ADR-002)
+- **สิ่งที่ทำ**:
+  - **PR 1: `ratelimit-bypass` (PR #77 MERGED)**:
+    - สร้าง `src/lib/security/privileged.ts` รองรับการ bypass การจำกัดความถี่สำหรับแอดมิน (Cookie `tarot_admin`) และระบบเทสต์/CI (Header `X-Tarot-Bypass: RATE_LIMIT_BYPASS_TOKEN` ด้วย `timingSafeEqual`)
+    - ผูกเข้ากับ API routes สำคัญ (`/start`, `/shuffle`, `/read`, `/chat`)
+  - **PR 2: `ai-spend-cap` (PR #78 MERGED)**:
+    - สร้าง `src/lib/security/ai-budget.ts` ควบคุมเพดานงบประมาณ AI รวมต่อวัน (`AI_DAILY_CALL_CAP`, ค่าเริ่มต้น 2,000 ครั้ง)
+    - เพิ่ม Circuit Breaker คืนค่า 503 ทันทีบน `/read` เมื่อเต็มเพดาน และตัด fallback อัตโนมัติไปใช้ local contextual synthesis บน `/chat`
+    - แสดงสถิติโควตา AI ประจำวันบนแผงแดชบอร์ดแอดมิน (`/admin`)
+  - **PR 3: `read-origin-guard` (PR #79 MERGED)**:
+    - เพิ่ม Origin Guard (`isRequestAuthorizedOrigin`) บนเส้นทาง `/read` ป้องกันการขโมย API
+    - รวม Rate limiter ทั้งระบบให้เป็น Single Source of Truth ผ่าน `@/lib/utils/rate-limit` ตัด duplicate `rateBuckets` ออกจาก `store.ts`
+  - **PR 4: `edge-ratelimit` (PR #80 MERGED)**:
+    - เพิ่ม Cloudflare KV soft quota per IP (`checkPerIpReadQuota`, 40 ครั้ง/วัน) ซิงก์ข้าม Edge isolate fleet ด้วย SHA-256 IP Hash (PDPA Compliant)
+    - จัดทำคู่มือตั้งค่า Cloudflare Native WAF Rate Limiting rules ใน `docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md`
+  - **PR 5: `bot-challenge-decision` (PR #81)**:
+    - จัดทำบันทึกการตัดสินใจทางสถาปัตยกรรม `docs/ADR-002-bot-challenge.md`
+    - อัปเดต `docs/KNOWN_ISSUES.md`, `docs/ARCHITECTURE.md`, `docs/AI_COLLABORATION_GUIDELINES.md`, และ `docs/WORK_LOG.md`
 
 ### 🗓️ 2026-09-01: Phase 2 · M7 — Marketplace Payments, Webhook Signature Verification & Platform Revenue Ledger (ระบบชำระเงิน & บัญชีส่วนแบ่ง)
 
