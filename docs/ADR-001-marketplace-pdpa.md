@@ -68,3 +68,18 @@
 | **M5** | ตาราง `reader_availability`, คิวรับดูดวง, ระบบจอง | Consent Gate + Auto-expiry 30 วัน |
 | **M6** | AI Pre-Screening & Handoff Brief | กรองคำถามอันตราย + เข้ารหัส Brief ส่งผ่าน LINE |
 | **M7** | Payment & Escrow | ปฏิบัติตามมาตรฐาน Payment Gateway ไม่เก็บเลขบัตร |
+
+---
+
+## 5. บัญชีผู้ใช้ทั่วไปและสมุดบันทึกดวงชะตา (Consumer Account & Reading Journal)
+
+### 5.1 ฐานทางกฎหมายและข้อมูลที่จัดเก็บ (Legal Basis & Data Categories)
+1. **ข้อมูลระบุตัวตน (User Identity)**: จัดเก็บใน `users` table (`id`, `provider`, `email`, `name`, `avatar_url`, `marketing_consent`, `created_at`) เพื่อให้สิทธิ์ในการเข้าถึงและซิงก์ข้อมูล
+2. **สมุดบันทึกดวงชะตา (Reading Journal)**: จัดเก็บใน `reading_journal` table (`question`, `cards_json`, `summary`, `advice_json`, `outcome`, `user_note`) ภายใต้ฐานสัญญาและประโยชน์อันชอบธรรม (ผู้ใช้ร้องขอให้จัดเก็บบนคลาวด์เพื่อซิงก์ข้ามอุปกรณ์)
+3. **การแจ้งเตือนและการตลาด (Marketing & Follow-up Digest)**: ดำเนินการเฉพาะเมื่อผู้ใช้ให้ **ความยินยอมโดยชัดแจ้ง (Explicit Consent)** ผ่าน `POST /api/account/consent` เท่านั้น และสามารถถอนความยินยอมได้ตลอดเวลา
+
+### 5.2 การใช้สิทธิของเจ้าของข้อมูล (Data Subject Rights)
+- **Right to Erasure (สิทธิในการลบข้อมูล)**: เรียก `DELETE /api/account` เพื่อล้างประวัติ `reading_journal` และทำ Soft Delete / Purge บัญชี `users` ทันที พร้อมลบเซสชันคุกกี้
+- **Data Portability (สิทธิในการโอนย้ายข้อมูล)**: เรียก `GET /api/account/export` เพื่อดาวน์โหลดข้อมูลบัญชีและประวัติดูดวงทั้งหมดในรูปแบบ JSON
+- **Right of Access & Rectification (สิทธิในการเข้าถึงและแก้ไข)**: ผู้ใช้สามารถตรวจสอบประวัติและอัปเดตบันทึกผลลัพธ์ความเป็นจริง (Outcome & Note) ได้ผ่านสมุดบันทึกดวงชะตาตลอดเวลา
+
