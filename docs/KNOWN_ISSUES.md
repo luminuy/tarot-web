@@ -32,7 +32,7 @@
 | **005** | 🟢 Resolved | ระบบ CI Auto-Merge อัตโนมัติ 100% | `.github/workflows/pr.yml` | ✅ **แก้แล้ว** (Autonomous review & squash) |
 | **004** | 🔵 Note | รัน `wrangler dev` บน macOS 12.6 ไม่ได้ | (สภาพแวดล้อมเครื่อง) | 🔵 ข้อจำกัด OS เครื่อง (ใช้ dev server แทน) |
 | **006** | 🔵 Note | GitHub Actions runner configuration | `.github/workflows/*.yml` | 🟢 อัปเกรด Node 22 รองรับครบ |
-| **007** | 🔵 Roadmap | Prisma schema พร้อมต่อ PostgreSQL ถาวร | `src/server/store.ts`, `prisma/` | 🟡 Roadmap (ปัจจุบันใช้ in-memory store) |
+| **007** | 🟢 Resolved | ~~Prisma schema พร้อมต่อ PostgreSQL~~ → ย้ายไป Cloudflare D1 แล้ว | `wrangler.jsonc`, `migrations/`, `src/lib/platform/db.ts` | ✅ **ปิดแล้ว** — ไม่ใช้ Prisma · D1 ใช้งานจริง |
 | **012** | 🟡 Config | อีเมล/โดเมน/LINE ยังไม่ตั้ง (email signup พัง 500 บน prod · Google login ปกติ) | secrets, `src/lib/email/send.ts` | 📋 เจ้าของทำทีหลัง — ดู [`docs/PENDING_SETUP.md`](PENDING_SETUP.md) · **ไม่ปิดฟีเจอร์ (ตัดสินใจ 2026-09-01)** |
 | **016** | 🟢 Resolved | คำอ่าน AI ตกไป mock/fallback → `usage=0` → ระบบสิทธิ์ไม่หักโควตา ทุกคนเปิดไพ่ไม่จำกัด | `src/lib/ai/gemini.ts`, secrets | ✅ **แก้แล้ว** (PR #104–110) — ตั้ง `GEMINI_API_KEY` + แก้ชื่อโมเดล 3.6/3.7 + request body + thought-parts + responseJsonSchema · verify curl guest flow: คำอ่านจริง 3 องก์ + `remaining` 1→0 + start#2 403 |
 
@@ -53,6 +53,7 @@
 | **013** 🟢 | ขาด Consumer Retention & Reading Journal D1 Persistence | ตาราง `users`, `reading_journal`, dual-mode history sync, auto-merge on login | ✅ ซิงก์ประวัติข้ามอุปกรณ์และสำรอง D1 สมบูรณ์ |
 | **014** 🟢 | Edge OAuth Hardening & State CSRF Guard | บังคับ throw ใน production สำหรับ AUTH_SECRET, ตรวจสอบ state cookie ป้องกัน CSRF, sanitize host header | ✅ ป้องกัน Login CSRF และ Host Injection 100% |
 | **015** 🟢 | ขาดระบบป้องกันต้นทุน AI และการถูกยิง API ซ้ำซ้อน | กลยุทธ์ 7 ชั้น: Rate Limit Bypass, AI Daily Budget Cap, Origin Guard, KV per-IP Quota, WAF Rules (ADR-002) | ✅ ควบคุมต้นทุนและตัดวงจรอัตโนมัติสมบูรณ์ 100% |
+| **016** 🟢 | **ผู้เยี่ยมชมเสียสิทธิ์ทดลองฟรีถาวรถ้า AI ล้มกลางคัน** — คุกกี้ `used=1` ถูกแนบไปกับ response header ซึ่งส่งออก **ก่อน** สตรีมเริ่มทำงาน · `refundReading()` ลบได้แค่แถวใน `reading_usage` (ตารางสมาชิก) เรียกคืนคุกกี้ไม่ได้ → คนเข้าเว็บครั้งแรกเจอ AI ล้มแล้วลองใหม่ไม่ได้อีกเลย | ย้ายการปั๊มคุกกี้ออกจาก response header ไปเป็น `POST /api/entitlement/guest-consume` ที่ client ยิงหลังได้ event `done` เท่านั้น (PR #98) | ✅ คืนสิทธิ์ครบทั้งสมาชิกและผู้เยี่ยมชม — ตรงเกณฑ์ผ่านข้อ 3 ของ `ENTITLEMENT_PLAN` |
 
 > ✅ **BACKLOG P1 (ลด JS หน้าแรก)**: Code-split `@/data/cards` 780 ข้อความออกจาก Initial Chunk ของ `page.tsx` เรียบร้อย (PR #40)
 > ✅ **BACKLOG P3 (pnpm CI)**: อัปเกรด GitHub Actions Workflows สู่ pnpm 9.15 + Cache เรียบร้อย (PR #39)
@@ -119,15 +120,15 @@
 | **ผลกระทบ** | ตอนนี้ยังทำงานได้ แต่จะพังเมื่อ GitHub เลิกรองรับจริง |
 | **ทางแก้** | อัปเป็น `actions/checkout@v5` + `actions/setup-node@v5` ให้ครบ **ทั้ง 3 ไฟล์** แล้วดู CI ผ่านครบ 7 ด่าน |
 
-### ISSUE-007 · Prisma ออกแบบ schema ไว้แล้วแต่ยังไม่ได้ต่อใช้จริง
+### ~~ISSUE-007 · Prisma ออกแบบ schema ไว้แล้วแต่ยังไม่ได้ต่อใช้จริง~~ — 🟢 **ปิดแล้ว (ตรวจ 2026-09-01)**
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการ** | `prisma/schema.prisma` ครบแล้ว แต่ระบบยังใช้ `src/server/store.ts` (in-memory) — ข้อมูลหายทุกครั้งที่ Worker restart |
-| **สาเหตุ** | Prisma 7 มี breaking change เรื่อง `datasource.url` (ต้องย้ายไป `prisma.config.ts` + เลือก adapter ก่อน) จึงตัด `prisma generate` ออกจาก build ชั่วคราว |
-| **ผลกระทบ** | ประวัติดูดวงเก็บใน `localStorage` ผู้ใช้เท่านั้นตามนโยบาย PDPA — ยังไม่กระทบการใช้งาน แต่ขยายฟีเจอร์ที่ต้องใช้ DB ไม่ได้ |
-| **เริ่มดูตรงไหน** | `prisma/schema.prisma`, `src/server/repositories/reading.repository.ts`, `src/server/store.ts` |
-| **ข้อควรระวัง** | ⚠️ ต้องไม่ขัดกฎ PDPA — ข้อมูลผู้ใช้ห้ามเก็บถาวรบนเซิร์ฟเวอร์และห้ามนำไปเทรนโมเดล |
+| **สรุป** | ระบบ **ย้ายไป Cloudflare D1 เรียบร้อยแล้ว** ไม่ได้ใช้ Prisma และ **ไม่มีโฟลเดอร์ `prisma/` ในโปรเจกต์แล้ว** — ประเด็น Prisma 7 `datasource.url` จึงหมดความหมาย |
+| **ของจริงตอนนี้** | binding `APP_DB` ใน `wrangler.jsonc` (`database_id: 560fdbe7…`) · migrations `0001`–`0006` · ตัวช่วย `getAppDB()` ที่ `src/lib/platform/db.ts` |
+| **ตารางที่ใช้จริง** | `users` (0004) · `reading_journal` (0005) · `reading_usage` + `user_bonus` (0006) · marketplace (0001–0003) |
+| **`src/server/store.ts` ยังอยู่ไหม** | ยังอยู่ แต่เปลี่ยนบทบาทเป็น **session ระหว่างเปิดไพ่** (อายุสั้น มี KV เป็น durable backstop) ไม่ใช่ที่เก็บข้อมูลถาวรอีกแล้ว — ตั้งใจให้เป็นแบบนี้ ไม่ใช่หนี้ทางเทคนิค |
+| **ข้อควรระวังที่ยังใช้อยู่** | ⚠️ กฎ PDPA เดิมยังบังคับ — `softDeleteUser()` ต้องลบ `reading_usage`/`user_bonus` ตามไปด้วย และห้ามนำข้อมูลผู้ใช้ไปเทรนโมเดล |
 
 ---
 
