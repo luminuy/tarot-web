@@ -11,7 +11,7 @@ import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
  * ไฟล์นี้ทำงานฝั่งเซิร์ฟเวอร์เท่านั้น
  */
 
-export const GEMINI_MODEL = "gemini-3.7-flash";
+export const GEMINI_MODEL = "gemini-3.6-flash";
 
 export function getGeminiApiKey(): string {
   const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -73,23 +73,20 @@ const GEMINI_RESPONSE_SCHEMA = {
 };
 
 /**
- * โมเดลที่ลองเรียงกันจนกว่าจะเจอตัวที่ API key นี้เรียกได้ (loop ใน streamGeminiReading)
- * -------------------------------------------------------------------------------
- * เรียงจาก "ใหม่/เก่งสุด" → "เข้ากันได้กว้างสุด"
- * - `*-latest` เป็น alias ที่ Google ชี้ไปยังรุ่นล่าสุดเสมอ → ไม่พังเวลา Google ปลดรุ่นเก่า
- * - ใส่ทั้งชื่อสั้น (`gemini-2.0-flash`) และชื่อพินรุ่น (`-001`) เพราะบาง API version/โปรเจกต์
- *   รับได้แค่แบบใดแบบหนึ่ง (เคยเจอ 404 กับชื่อสั้นบน prod — INC/ISSUE-016)
- * ถ้าเพิ่ม/แก้ ให้ยึดผลจาก `GET https://generativelanguage.googleapis.com/v1beta/models?key=…`
+ * โมเดลที่ลองเรียงกันจนกว่าจะเจอตัวที่เรียกได้ (loop ใน streamGeminiReading + chat + monthly-summary)
+ * -------------------------------------------------------------------------------------------
+ * ยืนยันจาก Worker log 2026-09-01 (ISSUE-016): รุ่น 1.5 / 2.0 / 2.5 ถูก Google ปลดหมดแล้ว
+ * (404 "no longer available · use models/gemini-3.6-flash") · รุ่นที่ยังเรียกได้คือ 3.5-lite / 3.6 / 3.7
+ * - นำด้วย `gemini-3.6-flash` = รุ่นที่ Google แนะนำใน error message ปัจจุบัน (capacity เยอะสุด)
+ * - `gemini-3.7-flash` / `gemini-flash-latest` บางจังหวะ 503 "high demand" → ให้ loop ตกไปตัวถัดไป
+ * - `gemini-3.5-flash-lite` = เบาสุด เหลือเป็นตาข่ายสุดท้ายก่อน mock
+ * ถ้าจะแก้ ยึดผลจริงจาก `GET https://generativelanguage.googleapis.com/v1beta/models?key=…`
  */
 export const CANDIDATE_GEMINI_MODELS = [
-  "gemini-flash-latest",
+  "gemini-3.6-flash",
   "gemini-3.7-flash",
-  "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-001",
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
+  "gemini-flash-latest",
+  "gemini-3.5-flash-lite",
 ];
 
 // ค่าเริ่มต้นก่อนได้ usageMetadata จริงจาก Gemini — ตั้งเป็นศูนย์แทนการเดาตัวเลข
