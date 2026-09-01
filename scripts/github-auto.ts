@@ -92,6 +92,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🎲 ระบบสับไพ่ Provably Fair", cmd: TSX, args: ["scripts/qa/test-shuffle.ts"] },
   { label: "🖼️  การอ้างอิง path ภาพไพ่ถูกต้อง", cmd: TSX, args: ["scripts/qa/test-image-paths.ts"] },
   { label: "✍️  Live content override ปลอดภัย (ไม่แตะโครงไพ่)", cmd: TSX, args: ["scripts/qa/test-overrides-safety.ts"] },
+  { label: "🔐 Client-Server Shuffle Parity (Web Crypto 1,000 เคส)", cmd: TSX, args: ["scripts/verify-shuffle-parity.ts"] },
   { label: "🔮 Marketplace แม่หมอและการปกป้องข้อมูล (D1 / PDPA)", cmd: TSX, args: ["scripts/qa/test-marketplace-readers.ts"] },
 ];
 
