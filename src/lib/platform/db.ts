@@ -183,6 +183,30 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       );
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
       CREATE INDEX IF NOT EXISTS idx_users_consent ON users(marketing_consent, deleted_at);
+
+      CREATE TABLE IF NOT EXISTS reading_journal (
+        id                 TEXT PRIMARY KEY,
+        user_id            TEXT NOT NULL REFERENCES users(id),
+        content_hash       TEXT NOT NULL,
+        question           TEXT NOT NULL,
+        nickname           TEXT,
+        spread_id          TEXT NOT NULL,
+        spread_name        TEXT NOT NULL,
+        category           TEXT NOT NULL,
+        persona_id         TEXT NOT NULL,
+        persona_name       TEXT NOT NULL,
+        cards_json         TEXT NOT NULL,
+        summary            TEXT NOT NULL DEFAULT '',
+        advice_json        TEXT NOT NULL DEFAULT '[]',
+        timing             TEXT,
+        outcome            TEXT NOT NULL DEFAULT 'PENDING',
+        user_note          TEXT,
+        outcome_updated_at INTEGER,
+        created_at         INTEGER NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_rj_user_hash ON reading_journal(user_id, content_hash);
+      CREATE INDEX IF NOT EXISTS idx_rj_user_created ON reading_journal(user_id, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_rj_pending ON reading_journal(user_id, outcome, created_at);
     `);
 
     const adapter: AppDB = {

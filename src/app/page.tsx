@@ -186,11 +186,28 @@ export default function TarotPage() {
         setErrorMsg("การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กดลองใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ");
       }
     } else {
-      const spreadParam = new URLSearchParams(window.location.search).get("spread");
+      const searchParams = new URLSearchParams(window.location.search);
+      const spreadParam = searchParams.get("spread");
       if (spreadParam) {
         const match = getSpread(spreadParam);
         if (match) setSelectedSpread(match);
       }
+    }
+
+    // Auto-sync anonymous history to server upon login or app mount
+    if (typeof window !== "undefined") {
+      import("@/lib/utils/history").then((m) => {
+        const isAuthSuccess = new URLSearchParams(window.location.search).get("auth_success") === "1";
+        if (isAuthSuccess) {
+          m.syncAnonymousHistoryToServer().then(({ merged }) => {
+            if (merged > 0) {
+              console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ ✦`);
+            }
+          });
+        } else {
+          m.fetchServerReadings();
+        }
+      });
     }
   }, []);
 

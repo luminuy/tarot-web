@@ -59,6 +59,14 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
       setReadings(getReadings());
       setMonthlySummary(null);
       setSummaryError(null);
+      // Dual-mode server sync refresh
+      import("@/lib/utils/history").then((m) => {
+        m.fetchServerReadings().then((serverItems) => {
+          if (serverItems && serverItems.length > 0) {
+            setReadings(serverItems);
+          }
+        });
+      });
     }
   }, [isOpen]);
 
