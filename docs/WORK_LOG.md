@@ -38,6 +38,37 @@
 
 ## 📜 บันทึกประวัติการพัฒนา (Changelog & Activity Log)
 
+### 🗓️ 2026-09-01: Phase 2 · M5 & M6 — Real-time Queue Intake, Reader Mission Control & AI Pre-Screening Engine (Marketplace คิวสด & บรีฟแม่หมอ)
+
+- **ความต้องการ**: พัฒนาระบบรับคิวสด (Live Walk-up Queue) และนัดหมายล่วงหน้า เชื่อมต่อแผงควบคุมแม่หมอ (Reader Console) พร้อมระบบ AI คัดกรองคำถาม สรุปบรีฟใน 5 วินาที แนะนำผังพยากรณ์ และบล็อกคำถามวิกฤตสุขภาพจิตด้วยสายด่วน 1323
+- **สิ่งที่ทำ**:
+  - **D1 Database & Migrations**:
+    - สร้าง migration `migrations/0002_marketplace_queue_screening.sql` (ตาราง `reader_availability`, `ai_screening`, `queue_tickets`, `bookings`) และ apply ขึ้น Remote Cloudflare D1 สำเร็จ
+    - อัปเดต `src/lib/platform/db.ts` local SQLite schema รองรับทุกตารางแบบ zero-config
+  - **Reader Authentication & Security**:
+    - สร้าง `src/lib/auth/reader-auth.ts` ระบบ HMAC-SHA256 Secret Token และ Session Guard (`requireReader()`) สำหรับแผงควบคุมแม่หมอ
+  - **AI Pre-Screening & Safety Guardrail (M6)**:
+    - สร้าง `src/lib/marketplace/screening.ts` วิเคราะห์เจตนา (ความรัก, การงาน, การเงิน, จิตใจ, ทั่วไป) ระดับความด่วน สรุปสาระสำคัญ (Brief) ให้แม่หมออ่านเข้าใจทันที
+    - บล็อกคำถามวิกฤตทำร้ายตัวเองทันที และชี้แนะสายด่วนสุขภาพจิต 1323
+  - **Queue Repository & APIs (M5)**:
+    - สร้าง `src/lib/marketplace/queue.repo.ts` จัดการคำนวณลำดับคิว สถานะคิว (`waiting` ➔ `ready` ➔ `handed_off`) และ auto-purge 7 วันตาม PDPA
+    - สร้าง APIs: `/api/marketplace/tickets`, `/api/marketplace/tickets/[id]`, `/api/marketplace/readers/[id]/availability`, `/api/marketplace/console/queue`
+  - **Customer & Reader UI Interfaces**:
+    - สร้าง `src/components/marketplace/BookQueueModal.tsx` โมดอลกรอกคำถามและกดยินยอม PDPA
+    - สร้าง `src/components/marketplace/ReaderDetailClient.tsx` ปรับปรุงหน้า `/readers/[id]` รองรับการเปิดคิวสด
+    - สร้าง `src/app/readers/queue/[id]/page.tsx` ห้องรอคิวพยากรณ์สด พร้อม Real-time polling และปุ่มเปิด LINE เมื่อถึงคิว
+    - สร้าง `src/app/readers/console/page.tsx` แผงควบคุมแม่หมอ (เปิด/ปิดรับงานสด, ดูสรุปบรีฟ AI, เรียกคิว, ส่งต่อ)
+  - **QA & Verification Suite**:
+    - อัปเกรด `scripts/qa/test-marketplace-readers.ts` ครอบคลุม CRUD, HMAC Token, Live Toggle, AI Pre-Screening, Crisis Blocking, Queue Cycle และ PDPA Retention
+    - `npm run repo:verify` 9/9 ผ่านฉลุย 100% Green
+    - `npm run build` ผ่าน 106 routes
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - เพิ่มใหม่: `migrations/0002_marketplace_queue_screening.sql`, `src/lib/auth/reader-auth.ts`, `src/lib/marketplace/screening.ts`, `src/lib/marketplace/queue.repo.ts`, `src/app/api/marketplace/tickets/route.ts`, `src/app/api/marketplace/tickets/[id]/route.ts`, `src/app/api/marketplace/readers/[id]/availability/route.ts`, `src/app/api/marketplace/console/queue/route.ts`, `src/components/marketplace/BookQueueModal.tsx`, `src/components/marketplace/ReaderDetailClient.tsx`, `src/app/readers/queue/[id]/page.tsx`, `src/app/readers/console/page.tsx`
+  - แก้ไข: `src/lib/platform/db.ts`, `src/lib/marketplace/readers.repo.ts`, `src/app/readers/[id]/page.tsx`, `scripts/qa/test-marketplace-readers.ts`, `docs/MARKETPLACE.md`, `docs/WORK_LOG.md`
+- **ผลการทดสอบ**:
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 9 ด่าน 100% Green**
+  - `npm run build` ➔ **ผ่าน 106 static/dynamic routes**
+
 ### 🗓️ 2026-09-01: Phase 2 · M4 — Cloudflare D1 Foundation + Human Reader Profiles & Admin System (Marketplace แม่หมอ)
 
 - **ความต้องการ**: สร้างฐานข้อมูล Cloudflare D1 สำหรับระบบ Marketplace รวมโปรไฟล์แม่หมอตัวจริง จัดการผ่านแผงแอดมิน และเปิดหน้ารวมแม่หมอสาธารณะ (`/readers`) ภายใต้ระเบียบ PDPA

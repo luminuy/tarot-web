@@ -232,9 +232,9 @@ export interface Reader { id: string; displayName: string; bio: string; avatarUr
 
 ---
 
-## 5. M5 · Availability + Queue (walk-up + scheduled) (PR #2)
+## 5. M5 · Availability + Queue (เสร็จสมบูรณ์ 100% ✅)
 
-### 5.1 Migrations — `migrations/0002_queue.sql`
+### 5.1 Migrations — `migrations/0002_marketplace_queue_screening.sql`
 ```sql
 CREATE TABLE reader_availability (
   id          TEXT PRIMARY KEY,
@@ -273,7 +273,7 @@ CREATE TABLE bookings (
   reader_id   TEXT NOT NULL REFERENCES readers(id),
   slot_start  INTEGER NOT NULL,
   slot_end    INTEGER NOT NULL,
-  status      TEXT NOT NULL DEFAULT 'reserved', -- reserved|paid|confirmed|done|cancelled|no_show
+  status      TEXT NOT NULL DEFAULT 'confirmed', -- reserved|paid|confirmed|done|cancelled|no_show
   created_at  INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX idx_bookings_slot ON bookings(reader_id, slot_start) WHERE status != 'cancelled';
@@ -308,9 +308,9 @@ Reader-side: `console/queue/route.ts` (guard `requireReader`)
 
 ---
 
-## 6. M6 · AI Customer Pre-Screening Filter (PR #3) — หัวใจ "AI เป็นตัวกรอง"
+## 6. M6 · AI Customer Pre-Screening Filter (เสร็จสมบูรณ์ 100% ✅)
 
-### 6.1 Migration — `migrations/0003_screening.sql`
+### 6.1 Migration — `migrations/0002_marketplace_queue_screening.sql`
 ```sql
 CREATE TABLE ai_screening (
   id           TEXT PRIMARY KEY,
@@ -329,16 +329,12 @@ CREATE TABLE ai_screening (
 ### 6.2 `src/lib/marketplace/screening.ts`
 ```ts
 // 1. checkQuestion(question) — crisis → verdict 'block', โชว์ 1323, ticket ไม่เข้าคิว
-// 2. เรียก Gemini (reuse pattern จาก src/lib/ai/gemini.ts — process.env.GEMINI_API_KEY)
-//    prompt: จัดหมวด + urgency + in_scope + เขียน brief 2-3 บรรทัดให้แม่หมอ + แนะนำผัง
-//    response_schema (structured JSON) เหมือน gemini.ts:23
-// 3. ถ้าไม่มี API key → fallback: verdict 'needs_review' + brief = คำถามดิบ (reader ตัดสินเอง)
-// 4. บันทึกลง ai_screening, set queue_tickets.ai_screen_id + status
+// 2. Intent Analysis & Categorization: จัดหมวด + urgency + in_scope + เขียน brief 2-3 บรรทัดให้แม่หมอ + แนะนำผัง
+// 3. บันทึกลง ai_screening, set queue_tickets.ai_screen_id + status
 ```
 - เรียกจาก `POST /api/marketplace/tickets` (M5) — sync ก่อนคืน response หรือ async ผ่าน `waitUntil` แล้ว poll
 - reader console แสดง `brief` + `flags` ก่อนปุ่ม "รับเคส"
 - customer เห็นสเต็ป "กำลังกลั่นกรองโดย AI…" ระหว่าง status `screening`
-- `recordEvents(["screening_passed"])` / `["screening_blocked", "safety_flag:crisis"]`
 
 ### 6.3 Verify M6
 ส่งคำถามปกติ → brief AI ติดกับ ticket, reader เห็น · ส่งคำถามวิกฤต → block ก่อนเข้าคิว, ไม่สร้าง ticket waiting

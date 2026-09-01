@@ -81,6 +81,64 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
         detail     TEXT
       );
       CREATE INDEX IF NOT EXISTS idx_audit_ts ON admin_audit(ts DESC);
+
+      CREATE TABLE IF NOT EXISTS reader_availability (
+        id           TEXT PRIMARY KEY,
+        reader_id    TEXT NOT NULL REFERENCES readers(id),
+        mode         TEXT NOT NULL,
+        weekday      INTEGER,
+        start_min    INTEGER,
+        end_min      INTEGER,
+        slot_minutes INTEGER DEFAULT 30,
+        timezone     TEXT NOT NULL DEFAULT 'Asia/Bangkok',
+        is_open      INTEGER NOT NULL DEFAULT 0,
+        created_at   INTEGER NOT NULL,
+        updated_at   INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_avail_reader ON reader_availability(reader_id);
+
+      CREATE TABLE IF NOT EXISTS ai_screening (
+        id               TEXT PRIMARY KEY,
+        ticket_id        TEXT,
+        verdict          TEXT NOT NULL,
+        category         TEXT,
+        urgency          TEXT,
+        in_scope         INTEGER DEFAULT 1,
+        brief            TEXT,
+        suggested_spread TEXT,
+        flags            TEXT DEFAULT '[]',
+        created_at       INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_screening_ticket ON ai_screening(ticket_id);
+
+      CREATE TABLE IF NOT EXISTS queue_tickets (
+        id               TEXT PRIMARY KEY,
+        reader_id        TEXT NOT NULL REFERENCES readers(id),
+        kind             TEXT NOT NULL,
+        status           TEXT NOT NULL DEFAULT 'screening',
+        position         INTEGER,
+        slot_start       INTEGER,
+        customer_ref     TEXT NOT NULL,
+        nickname         TEXT,
+        question         TEXT,
+        reading_snapshot TEXT,
+        ai_screen_id     TEXT REFERENCES ai_screening(id),
+        created_at       INTEGER NOT NULL,
+        expires_at       INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_tickets_reader_status ON queue_tickets(reader_id, status);
+      CREATE INDEX IF NOT EXISTS idx_tickets_cust ON queue_tickets(customer_ref);
+
+      CREATE TABLE IF NOT EXISTS bookings (
+        id          TEXT PRIMARY KEY,
+        ticket_id   TEXT NOT NULL REFERENCES queue_tickets(id),
+        reader_id   TEXT NOT NULL REFERENCES readers(id),
+        slot_start  INTEGER NOT NULL,
+        slot_end    INTEGER NOT NULL,
+        status      TEXT NOT NULL DEFAULT 'confirmed',
+        created_at  INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_bookings_reader ON bookings(reader_id, slot_start);
     `);
 
     const adapter: AppDB = {
