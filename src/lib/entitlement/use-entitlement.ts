@@ -21,6 +21,7 @@ export interface ClientEntitlement {
   dailyFreeAvailable?: boolean;
   dailyStreak?: number;
   kind?: "guest" | "member";
+  role?: string;
   reason?: string;
   announce?: boolean;
   announceResetDate?: string;

@@ -4,6 +4,7 @@ import { getEntitlement } from "@/lib/entitlement/entitlement";
 import { isEntitlementEnabled } from "@/lib/entitlement/flag";
 import { getViewer } from "@/lib/entitlement/viewer";
 import { KEY, kvGetJSON } from "@/lib/platform/kv-store";
+import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 
 export const runtime = "nodejs";
 
@@ -11,12 +12,13 @@ export const runtime = "nodejs";
  * GET /api/entitlement — คืนสถานะสิทธิ์ปัจจุบันให้ UI ใช้แสดงผล
  * (ห้าม UI คำนวณสิทธิ์เอง — การซ่อนปุ่มไม่ใช่การบังคับสิทธิ์)
  *
- * เมื่อธงปิด: คืน enabled=false + สิทธิ์แบบ "ไม่จำกัด" เพื่อให้ UI ไม่แสดง gate ใด ๆ
+ * เมื่อผู้ใช้เป็น Admin / Master หรือธงปิด: คืนสิทธิ์แบบ "ไม่จำกัด"
  * `announce` = ประกาศล่วงหน้าว่าระบบสิทธิ์กำลังจะมา (แสดงแบนเนอร์)
  */
 export async function GET(request: Request) {
-  const [enabled, announceDoc] = await Promise.all([
+  const [enabled, privileged, announceDoc] = await Promise.all([
     isEntitlementEnabled(),
+    isPrivilegedTestRequest(request),
     kvGetJSON<{ value?: boolean; resetDate?: string }>(KEY.flag("entitlement.announce"), 30_000).catch(
       () => null,
     ),
@@ -25,6 +27,25 @@ export async function GET(request: Request) {
     !enabled && !!announceDoc && announceDoc.value === true
       ? { announce: true, announceResetDate: announceDoc.resetDate ?? "" }
       : { announce: false, announceResetDate: "" };
+
+  if (privileged) {
+    return NextResponse.json({
+      enabled: true,
+      canStartReading: true,
+      canChat: true,
+      remaining: 9999,
+      limit: 9999,
+      dailyRemaining: 9999,
+      weeklyRemaining: 9999,
+      bonusRemaining: 9999,
+      resetAt: null,
+      kind: "member",
+      dailyFreeAvailable: true,
+      dailyStreak: 99,
+      role: "admin",
+      ...announce,
+    });
+  }
 
   if (!enabled) {
     return NextResponse.json({
