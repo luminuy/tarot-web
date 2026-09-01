@@ -34,6 +34,7 @@
 | **006** | 🔵 Note | GitHub Actions runner configuration | `.github/workflows/*.yml` | 🟢 อัปเกรด Node 22 รองรับครบ |
 | **007** | 🔵 Roadmap | Prisma schema พร้อมต่อ PostgreSQL ถาวร | `src/server/store.ts`, `prisma/` | 🟡 Roadmap (ปัจจุบันใช้ in-memory store) |
 | **012** | 🟡 Config | อีเมล/โดเมน/LINE ยังไม่ตั้ง (email signup พัง 500 บน prod · Google login ปกติ) | secrets, `src/lib/email/send.ts` | 📋 เจ้าของทำทีหลัง — ดู [`docs/PENDING_SETUP.md`](PENDING_SETUP.md) · **ไม่ปิดฟีเจอร์ (ตัดสินใจ 2026-09-01)** |
+| **016** | 🔴 Config | ไม่ได้ตั้ง `GEMINI_API_KEY` บน prod → คำอ่านทุกอันเป็น mock (`usage=0`) → `realReading=false` → **ระบบสิทธิ์ไม่หักโควตา ทุกคนเปิดไพ่ไม่จำกัด** แม้ธงเปิด | secrets, `src/lib/ai/gemini.ts:92` | 📋 เจ้าของตั้งคีย์ — `npx wrangler secret put GEMINI_API_KEY` · ดู [`docs/PENDING_SETUP.md`](PENDING_SETUP.md) ข้อ 0 · **logic ระบบสิทธิ์ถูกต้อง (QA 55/55) — บั๊กที่ config** |
 
 ---
 

@@ -36,6 +36,24 @@
 
 ---
 
+### 🗓️ 2026-09-01: วินิจฉัย — "paywall ไม่ทำงาน เปิดไพ่ได้ไม่จำกัด" = ไม่ได้ตั้งคีย์ Gemini บน prod
+
+- **อาการ (เจ้าของแจ้ง)**: ธง `entitlement.enabled` เปิดแล้ว แต่ guest ใน incognito เปิดไพ่ได้เรื่อย ๆ ไม่โดนกั้น
+- **วิธีวินิจฉัย**: curl guest flow เต็ม (start→shuffle→read) บน `tarot-web.bankjack10452.workers.dev`
+  - `/api/entitlement` → `enabled:true, canStartReading:true, remaining:1` (ก่อนและหลัง reading — ไม่ลด)
+  - `read` done event → `usage:{inputTokens:0, outputTokens:0}`
+  - คำอ่านที่ได้ = ตรงกับ template ใน `streamMockGeminiReading` (`gemini.ts:338`) เป๊ะ ("แม่หมอขอสรุปให้คุณ…")
+  - `wrangler secret list` (per PENDING_SETUP) มีแค่ 4 ตัว — **ไม่มี `GEMINI_API_KEY`**
+- **สาเหตุราก**: `src/lib/ai/gemini.ts:92` `if (!apiKey)` → `streamMockGeminiReading` ทุกครั้ง → `usage=0`
+  → `read` route: `realReading=false` → ไม่เรียก `markGuestUsedOnServer` / `recordGuestRead` + refund
+  → ระบบสิทธิ์ไม่หักโควตาใคร (พฤติกรรมตั้งใจตาม INC-0096 "AI พัง = ไม่คิดเงิน" แต่ที่นี่คือ "ไม่เคยตั้งคีย์")
+- **สิ่งที่ทำ (โค้ด)**: `gemini.ts` — เพิ่ม `console.error` ดัง ๆ ตอน `!apiKey` (เดิมเงียบสนิท) ให้เห็นใน Worker log
+- **สิ่งที่ทำ (เอกสาร)**: `PENDING_SETUP.md` ข้อ 0 (คำสั่งตั้งคีย์ + วิธี verify) · `KNOWN_ISSUES.md` ISSUE-016
+- **ต้องทำต่อ (เจ้าของ)**: `npx wrangler secret put GEMINI_API_KEY` (คีย์ฟรีจาก aistudio.google.com/apikey) → paywall ทำงานทันที (logic ผ่าน QA 55/55 แล้ว)
+- **ผลการทดสอบ**: `npm run typecheck` 0 errors
+
+---
+
 ### 🗓️ 2026-09-01: Admin UX — ปฏิทินเลือกวันในแท็บ "สิทธิ์เปิดไพ่" (แทนช่องพิมพ์วันที่เปล่า)
 
 - **ความต้องการ (จากเจ้าของ)**: แท็บ `/admin` → "สิทธิ์เปิดไพ่" ช่อง "วันตัด" และ "วันเริ่มใช้" เป็น text เปล่า **ไม่มีปุ่มให้เลือกวัน** ต้องพิมพ์เอง

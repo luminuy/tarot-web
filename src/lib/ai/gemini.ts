@@ -90,6 +90,12 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
   if (!apiKey) {
+    // ⚠️ ไม่มีคีย์ = ทุกคำอ่านเป็น mock ออฟไลน์ · usage = 0 → ระบบถือว่า "ไม่ใช่คำอ่านจริง"
+    // → ไม่หักสิทธิ์ guest/สมาชิก (ตั้งใจกันโกงตาม INC-0096) → paywall ไม่ทำงานเลย
+    // ตั้งคีย์ด้วย `npx wrangler secret put GEMINI_API_KEY` (ดู docs/PENDING_SETUP.md)
+    console.error(
+      "[gemini] ไม่พบ GEMINI_API_KEY / GOOGLE_API_KEY — เสิร์ฟคำอ่าน mock ออฟไลน์ทั้งหมด และระบบสิทธิ์ (โควตา) จะไม่ทำงาน",
+    );
     yield* streamMockGeminiReading(ctx);
     return;
   }
