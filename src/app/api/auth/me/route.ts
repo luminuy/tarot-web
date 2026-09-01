@@ -17,11 +17,19 @@ export async function GET() {
       try {
         const { getUserById } = await import("@/lib/users/users.repo");
         const dbUser = await getUserById(user.id);
+
+        // ตรวจสอบว่าบัญชีถูกลบ หรือ token_version เปลี่ยนแปลง (เช่น มีการเปลี่ยนรหัสผ่านบนอุปกรณ์อื่น)
+        if (!dbUser || (dbUser.tokenVersion > (user.tokenVersion || 0))) {
+          const response = NextResponse.json({ user: null });
+          response.cookies.delete(AUTH_COOKIE_NAME);
+          return response;
+        }
+
         return NextResponse.json({
           user: {
             ...user,
-            emailVerified: dbUser?.emailVerified ?? (user.provider !== "email"),
-            marketingConsent: dbUser?.marketingConsent ?? false,
+            emailVerified: dbUser.emailVerified,
+            marketingConsent: dbUser.marketingConsent,
           },
         });
       } catch {
