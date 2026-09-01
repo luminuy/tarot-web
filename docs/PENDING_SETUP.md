@@ -15,11 +15,33 @@
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | ล็อกอิน Google |
 | `ADMIN_PASSWORD` | เข้าแผงแอดมิน `/admin` |
 
-**ใช้งานได้ตอนนี้:** ดูดวง 5 ขั้น · Google login · แผงแอดมิน (`/admin` — สถิติ, แก้ prompt/ไพ่, marketplace, สิทธิ์เปิดไพ่)
+**ใช้งานได้ตอนนี้:** ดูดวง 5 ขั้น *(แต่คำอ่านเป็น mock ออฟไลน์ — ยังไม่ได้ตั้งคีย์ Gemini · ดูข้อ 0)* · Google login · แผงแอดมิน (`/admin` — สถิติ, แก้ prompt/ไพ่, marketplace, สิทธิ์เปิดไพ่)
 
 ---
 
 ## ⏳ ยังค้าง
+
+### 0. 🔴 **คีย์ AI (Gemini) — ยังไม่ได้ตั้ง · คำอ่านทุกอันเป็น mock ออฟไลน์ + ระบบสิทธิ์ (paywall) ไม่ทำงาน**
+
+**สถานะ (ยืนยัน 2026-09-01):** `wrangler secret list` ไม่มี `GEMINI_API_KEY` / `GOOGLE_API_KEY`
+→ `src/lib/ai/gemini.ts:92` เข้า branch `!apiKey` → เสิร์ฟ `streamMockGeminiReading` (คำอ่านสำเร็จรูปในโค้ด) ทุกครั้ง
+
+**ผลกระทบลูกโซ่:**
+- คำอ่านที่ผู้ใช้เห็นเป็นข้อความ template เดิมซ้ำ ๆ (เช่น "แม่หมอขอสรุปให้คุณ…ทุกอย่างมีทางออกที่ดีเสมอ…") ไม่ได้วิเคราะห์จริง
+- mock ส่ง `usage = {inputTokens:0, outputTokens:0}` → `read` route ตัดสิน `realReading = false`
+  → **ไม่หักสิทธิ์ผู้เยี่ยมชม/สมาชิก** (ตั้งใจกันโกงตาม INC-0096 "ห้ามคิดเงินถ้า AI เราพัง")
+  → **ทุกคนเปิดไพ่ได้ไม่จำกัด แม้ธง `entitlement.enabled` เปิดอยู่** — ดู ISSUE-016 ใน KNOWN_ISSUES
+- โค้ด logic ระบบสิทธิ์ถูกทดสอบครบ (`scripts/qa/test-entitlement.ts` 55/55) — บั๊กอยู่ที่ config ไม่ใช่โค้ด
+
+**วิธีแก้ (ทำครั้งเดียว — ไม่ต้องมีโดเมน):**
+```bash
+# 1. ขอ API key ฟรีจาก https://aistudio.google.com/apikey
+npx wrangler secret put GEMINI_API_KEY      # วางค่า AIza... (จำเป็น)
+```
+โมเดลที่โค้ดลองเรียงกัน: `CANDIDATE_GEMINI_MODELS` ใน `src/lib/ai/gemini.ts` (ปัจจุบัน `gemini-3.7-flash` → `gemini-2.0-flash`)
+หลังตั้งคีย์: ทำ reading 1 ครั้ง แล้ว curl `GET /api/entitlement` ด้วยคุกกี้เดิม — `canStartReading` ต้องกลายเป็น `false` · Worker log ต้องไม่มีบรรทัด `[gemini] ไม่พบ GEMINI_API_KEY`
+
+---
 
 ### 1. อีเมล (Email Auth) — ✋ **ตัดสินใจ 2026-09-01: ใส่ทีหลัง ไม่ปิดฟีเจอร์**
 
