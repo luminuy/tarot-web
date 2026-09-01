@@ -493,7 +493,18 @@ export default function TarotPage() {
                 setIsStreaming(false);
                 navigateStep("SUMMARY");
                 soundManager.playOracleRevealSound();
-                refreshEntitlement(); // อ่านจบ → สิทธิ์อาจลดลง อัปเดต badge
+                // ผู้เยี่ยมชม: หักสิทธิ์ฟรี "หลัง" อ่านจบจริงเท่านั้น (server ออก ticket เฉพาะตอนนี้)
+                // AI ล้ม = ไม่มี ticket = ไม่เสียสิทธิ์ · ยิงเสร็จค่อย refresh badge ให้ค่าตรง
+                void (async () => {
+                  if (data.guestConsumeTicket) {
+                    await fetch("/api/entitlement/guest-consume", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ ticket: data.guestConsumeTicket }),
+                    }).catch(() => {});
+                  }
+                  refreshEntitlement(); // อ่านจบ → สิทธิ์อาจลดลง อัปเดต badge
+                })();
 
                 // Auto-save to Reading Journal
                 if (data.reading) {

@@ -76,3 +76,38 @@ export const GUEST_COOKIE_OPTIONS = {
   path: "/",
   maxAge: MAX_AGE_SEC,
 };
+
+/**
+ * Ticket หักสิทธิ์ผู้เยี่ยมชม (เซ็น HMAC ด้วยกลไก edge-auth เดิม)
+ * ------------------------------------------------------------
+ * `read` route ออก ticket นี้ "เฉพาะตอน" event `done` ที่เป็นคำอ่านจริง
+ * failure path ทุกทาง (AI error / refusal / stream cut / token=0) ไม่มีทางได้ ticket
+ * → ผู้เยี่ยมชมไม่มีทางเสียสิทธิ์ฟรีเพราะระบบเราพัง (ENTITLEMENT_PLAN ข้อ 4)
+ *
+ * client ส่ง ticket กลับมาที่ `POST /api/entitlement/guest-consume` แล้วเราจึง Set-Cookie used=1
+ */
+const TICKET_PURPOSE = "guest-consume";
+const TICKET_MAX_AGE_MS = 10 * 60 * 1000;
+const TICKET_CLOCK_SKEW_MS = 60 * 1000;
+
+interface ConsumeTicket extends Record<string, unknown> {
+  rid: string;
+  purpose: string;
+  iat: number;
+}
+
+export async function signGuestConsumeTicket(readingId: string): Promise<string> {
+  return signPayload({ rid: readingId, purpose: TICKET_PURPOSE, iat: Date.now() } satisfies ConsumeTicket);
+}
+
+/** คืน readingId ถ้า ticket ถูกต้องและยังไม่หมดอายุ · null ถ้าไม่ผ่าน */
+export async function verifyGuestConsumeTicket(token: string): Promise<string | null> {
+  if (!token) return null;
+  const t = await verifyPayload<ConsumeTicket>(token);
+  if (!t || t.purpose !== TICKET_PURPOSE) return null;
+  if (typeof t.rid !== "string" || !t.rid) return null;
+  if (typeof t.iat !== "number") return null;
+  const age = Date.now() - t.iat;
+  if (age > TICKET_MAX_AGE_MS || age < -TICKET_CLOCK_SKEW_MS) return null;
+  return t.rid;
+}

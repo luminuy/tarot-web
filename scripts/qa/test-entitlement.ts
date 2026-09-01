@@ -140,6 +140,33 @@ async function main() {
   check("guest cookie: token ที่ถูกแก้ → verify = null", (await verifyPayload(gtoken.slice(0, -3) + "xxx")) === null);
   check("guest cookie: token ขยะ → verify = null", (await verifyPayload("not.a.token")) === null);
 
+  // ── 9c. guest-consume ticket: ออกเฉพาะตอนอ่านจบจริง → AI ล้ม = ไม่เสียสิทธิ์ (ENTITLEMENT_PLAN ข้อ 4) ──
+  const { signGuestConsumeTicket, verifyGuestConsumeTicket } = await import(
+    "../../src/lib/entitlement/guest"
+  );
+  const goodTicket = await signGuestConsumeTicket("reading_xyz");
+  check("ticket ถูกต้อง → verify คืน readingId เดิม", (await verifyGuestConsumeTicket(goodTicket)) === "reading_xyz");
+  check("ticket ว่าง → null", (await verifyGuestConsumeTicket("")) === null);
+  check("ticket ขยะ → null", (await verifyGuestConsumeTicket("not.a.ticket")) === null);
+  check(
+    "ticket ถูกแก้ → null",
+    (await verifyGuestConsumeTicket(goodTicket.slice(0, -3) + "zzz")) === null,
+  );
+  const wrongPurpose = await signPayload({ rid: "r1", purpose: "something-else", iat: Date.now() });
+  check("ticket purpose ผิด → null", (await verifyGuestConsumeTicket(wrongPurpose)) === null);
+  const stale = await signPayload({
+    rid: "r1",
+    purpose: "guest-consume",
+    iat: Date.now() - 11 * 60 * 1000,
+  });
+  check("ticket เก่าเกิน 10 นาที → null", (await verifyGuestConsumeTicket(stale)) === null);
+  const future = await signPayload({
+    rid: "r1",
+    purpose: "guest-consume",
+    iat: Date.now() + 5 * 60 * 1000,
+  });
+  check("ticket iat อนาคตเกิน skew → null", (await verifyGuestConsumeTicket(future)) === null);
+
   // ── 9b. โบนัสเปลี่ยนผ่าน (grandfather) — เพิ่มบน signup, idempotent ต่อ reason ──
   const gfUid = `test_gf_${Date.now()}`;
   await upsertUserOnLogin({ id: gfUid, provider: "google", email: `${gfUid}@e.com`, name: "ผู้ใช้เก่า" });
