@@ -92,6 +92,14 @@ export async function POST(request: Request) {
       passwordHash,
     });
 
+    // โบนัสสมัครใหม่ (ENTITLEMENT_PLAN ข้อ 5) — idempotent
+    try {
+      const { grantSignupBonus } = await import("@/lib/entitlement/entitlement");
+      await grantSignupBonus(newUser.id);
+    } catch (bonusErr) {
+      console.error("[Signup bonus failed]", bonusErr);
+    }
+
     // ออก Token ยืนยันอีเมล (อายุ 24 ชม.)
     try {
       const verifyToken = await issueToken(newUser.id, "verify", 24 * 60 * 60 * 1000);
