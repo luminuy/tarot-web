@@ -932,7 +932,7 @@ export default function TarotPage() {
               <OracleEyeIcon className="w-4.5 h-4.5" />
             </div>
             <div className="space-y-1.5 min-w-0">
-              <h4 className="text-[11px] font-bold text-[#e5c07b] uppercase tracking-wider font-mono">
+              <h4 translate="no" className="text-[11px] font-bold text-[#e5c07b] uppercase tracking-wider font-mono">
                 AI-Generated Reading
               </h4>
               <p className="text-[11px] text-[#9c93b8] leading-[1.7] font-serif-th">
@@ -947,16 +947,16 @@ export default function TarotPage() {
             {/* Privacy */}
             <a
               href="/privacy"
-              className="group flex items-center gap-3 p-4 rounded-xl bg-[#0a0714]/60 border border-[#e5c07b]/10 hover:border-[#e5c07b]/40 transition-all duration-300 hover:bg-[#110a22]/60"
+              className="group flex items-center gap-3 p-4 rounded-xl bg-[#0a0714]/60 border border-[#e5c07b]/10 hover:border-[#e5c07b]/40 transition-all duration-300 hover:bg-[#110a22]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
             >
               <div className="w-8 h-8 rounded-lg bg-[#e5c07b]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#e5c07b]/20 transition-colors text-[#e5c07b]">
                 <LockTabIcon className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#e5c07b] uppercase tracking-wider font-mono block">
+                <span translate="no" className="text-[10px] font-bold text-[#e5c07b] uppercase tracking-wider font-mono block">
                   Privacy & PDPA
                 </span>
-                <span className="text-[10px] text-[#9c93b8] group-hover:text-[#cfc8e2] transition-colors">
+                <span className="text-[10px] text-[#9c93b8] group-hover:text-[#cfc8e2] transition-colors font-serif-th">
                   นโยบายความเป็นส่วนตัว
                 </span>
               </div>
@@ -968,11 +968,11 @@ export default function TarotPage() {
                 <CareLineIcon className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono block">
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono block font-serif-th">
                   สายด่วนสุขภาพจิต
                 </span>
                 <span className="text-sm font-bold text-[#f5deaa] font-mono tracking-widest">1323</span>
-                <span className="text-[9px] text-[#9c93b8] ml-1.5">24 ชม.</span>
+                <span className="text-[9px] text-[#9c93b8] ml-1.5 font-serif-th">24 ชม.</span>
               </div>
             </div>
 
@@ -982,7 +982,7 @@ export default function TarotPage() {
                 <EmergencyTabIcon className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider font-mono block">
+                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider font-mono block font-serif-th">
                   เหตุฉุกเฉิน
                 </span>
                 <span className="text-sm font-bold text-[#f5deaa] font-mono tracking-widest">1669</span>
@@ -996,14 +996,14 @@ export default function TarotPage() {
               <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#e5c07b]/40 flex-shrink-0">
                 <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="24px" />
               </div>
-              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#e5c07b]/60">
+              <span translate="no" className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#e5c07b]/60">
                 Sacred Oracle Tarot · 1909
               </span>
               <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#e5c07b]/40 flex-shrink-0">
                 <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="24px" />
               </div>
             </div>
-            <p className="text-[9px] text-[#9c93b8]/50 font-mono">
+            <p translate="no" className="text-[9px] text-[#9c93b8]/50 font-mono text-center">
               Provably-Fair Cryptographic Shuffle · Rider-Waite-Smith 1909 · All readings AI-generated
             </p>
           </div>
