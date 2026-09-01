@@ -6,7 +6,7 @@ import { getSpread } from "@/data/spreads";
 import { checkQuestion } from "@/lib/safety/guardrails";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { createCommitment } from "@/lib/tarot/shuffle";
-import { checkRateLimit, clientKeyFromRequest, saveReading } from "@/server/store";
+import { checkRateLimit, clientKeyFromRequest, saveReading, persistReading } from "@/server/store";
 import { recordEvents } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
@@ -93,6 +93,7 @@ export async function POST(request: Request) {
   };
 
   saveReading(record);
+  await persistReading(record);
 
   recordEvents([
     "reading_started",

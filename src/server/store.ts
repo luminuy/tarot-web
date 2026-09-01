@@ -2,6 +2,7 @@ import type { Category } from "@/data/cards/types";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { Reading } from "@/lib/schema/reading";
 import type { SafetyFlag } from "@/lib/safety/guardrails";
+import { kvGetJSON, kvPutJSON, KEY } from "@/lib/platform/kv-store";
 
 /**
  * ที่เก็บสถานะการเปิดไพ่ระหว่างขั้นตอน (High-Resilience Edge-Ready Session Store)
@@ -95,7 +96,27 @@ export function updateReading(id: string, patch: Partial<ReadingRecord>): Readin
   return next;
 }
 
+const READING_KV_TTL_SEC = 7200; // 2 hours (ตรงกับ Session Token & Memory TTL)
+
+export async function persistReading(record: ReadingRecord): Promise<void> {
+  try {
+    await kvPutJSON(KEY.reading(record.id), record, { expirationTtl: READING_KV_TTL_SEC });
+  } catch {
+    // Non-blocking graceful fallback if KV binding is absent in unit tests
+  }
+}
+
+export async function loadReadingFromKV(id: string): Promise<ReadingRecord | null> {
+  try {
+    return await kvGetJSON<ReadingRecord>(KEY.reading(id));
+  } catch {
+    return null;
+  }
+}
+
 export function clientKeyFromRequest(request: Request): string {
+  const cfIp = request.headers.get("cf-connecting-ip");
+  if (cfIp) return cfIp.trim();
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
   const realIp = request.headers.get("x-real-ip");

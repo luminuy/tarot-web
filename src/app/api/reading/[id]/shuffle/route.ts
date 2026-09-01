@@ -3,9 +3,9 @@ import { z } from "zod";
 
 import { cardByIndex, DECK_SIZE } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
-import { drawCards, normalizeClientSeed } from "@/lib/tarot/shuffle";
+import { drawCards, normalizeClientSeed, verifyCommitment } from "@/lib/tarot/shuffle";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { checkRateLimit, clientKeyFromRequest, getReading, updateReading } from "@/server/store";
+import { checkRateLimit, clientKeyFromRequest, getReading, updateReading, persistReading } from "@/server/store";
 
 export const runtime = "nodejs";
 
@@ -45,7 +45,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   let record = getReading(id);
 
-  // Stateless failover recovery: if memory was lost on edge worker isolate
+  // Durable KV failover recovery: if memory was lost on edge worker isolate
+  if (!record) {
+    const { loadReadingFromKV, saveReading } = await import("@/server/store");
+    const fromKv = await loadReadingFromKV(id);
+    if (fromKv) {
+      record = fromKv;
+      saveReading(record);
+    }
+  }
+
+  // Stateless session-token fallback: last resort
   if (!record) {
     const token = request.headers.get("x-reading-token") || parsed.data.sessionToken;
     if (token) {
@@ -61,6 +71,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (!record) {
     return NextResponse.json({ error: "การเปิดไพ่นี้หมดอายุแล้ว เริ่มใหม่อีกครั้งนะ" }, { status: 404 });
+  }
+
+  // Cryptographic seed integrity guard (GAP-2 Prevention)
+  if (!record.serverSeed || record.serverSeed.length < 64) {
+    return NextResponse.json(
+      { error: "เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่", code: "SESSION_SEED_LOST" },
+      { status: 410 },
+    );
   }
 
   const spread = getSpread(record.spreadId);
@@ -117,7 +135,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: errorMsg }, { status: 400 });
   }
 
+  if (!verifyCommitment(record.serverSeed, record.commitment)) {
+    console.error("[PF] commitment mismatch on shuffle", { id });
+    return NextResponse.json({ error: "เกิดข้อผิดพลาดด้านความสมบูรณ์ของข้อมูล กรุณาเริ่มใหม่" }, { status: 500 });
+  }
+
   const updated = updateReading(id, { drawn, clientSeed, pickedIndices: pickedIndices ?? undefined });
+  if (updated) {
+    await persistReading(updated);
+  }
   const { signReadingSessionToken } = await import("@/lib/security/session-token");
   const sessionToken = signReadingSessionToken(updated || { ...record, drawn, clientSeed, pickedIndices: pickedIndices ?? undefined });
 

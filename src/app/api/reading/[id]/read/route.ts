@@ -17,7 +17,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   let record = getReading(id);
 
-  // Stateless failover recovery: if memory was lost on edge worker isolate
+  // Durable KV failover recovery: if memory was lost on edge worker isolate
+  if (!record || !record.drawn) {
+    const { loadReadingFromKV, saveReading } = await import("@/server/store");
+    const fromKv = await loadReadingFromKV(id);
+    if (fromKv && fromKv.drawn) {
+      record = fromKv;
+      saveReading(record);
+    }
+  }
+
+  // Stateless session-token fallback: last resort
   if (!record || !record.drawn) {
     const token = request.headers.get("x-reading-token");
     if (token) {
@@ -33,6 +43,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (!record || !record.drawn) {
     return Response.json({ error: "ยังไม่ได้สับไพ่ หรือการเปิดไพ่นี้หมดอายุแล้ว" }, { status: 404 });
+  }
+
+  // Cryptographic seed & commitment integrity verification gate
+  if (record.serverSeed && record.commitment) {
+    const { verifyCommitment } = await import("@/lib/tarot/shuffle");
+    if (!verifyCommitment(record.serverSeed, record.commitment)) {
+      console.error("[PF] commitment mismatch on read route", { id });
+      return Response.json({ error: "ข้อมูลความถูกต้องของไพ่ไม่ตรงกับคำมั่นเดิม" }, { status: 500 });
+    }
   }
 
   const spread = getSpread(record.spreadId);
@@ -95,7 +114,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           if (isClosed) break;
 
           if (event.type === "done") {
-            updateReading(id, { status: "COMPLETED", result: event.reading });
+            const updated = updateReading(id, { status: "COMPLETED", result: event.reading });
+            if (updated) {
+              const { persistReading } = await import("@/server/store");
+              await persistReading(updated);
+            }
             recordEvents([
               "reading_completed",
               "ai_call:gemini",

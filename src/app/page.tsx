@@ -324,7 +324,12 @@ export default function TarotPage() {
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "ไม่สามารถจัดสำรับไพ่ได้");
+      if (!res.ok) {
+        if (res.status === 410 || data.code === "SESSION_SEED_LOST") {
+          throw new Error("เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
+        }
+        throw new Error(data.error || "ไม่สามารถจัดสำรับไพ่ได้");
+      }
       if (data.sessionToken) setSessionToken(data.sessionToken);
 
       const { cardByIndex } = await import("@/data/cards");
