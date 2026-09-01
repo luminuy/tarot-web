@@ -21,10 +21,40 @@ export function getGeminiApiKey(): string {
   return key;
 }
 
-// หมายเหตุ: เดิมส่ง responseSchema (OpenAPI subset) เข้า generationConfig เพื่อบังคับโครงสร้าง JSON
-// แต่ Gemini 3.x คืน 400 "invalid argument" กับ schema รูปแบบนั้น → เลิกใช้ · โครงสร้างบังคับผ่าน
-// system prompt + response_mime_type=application/json แทน · ฝั่ง parse มี parsePartialReading +
-// ReadingSchema.safeParse + fallbackReading รองรับกรณีโมเดลตอบไม่ตรงโครงอยู่แล้ว
+/**
+ * Schema บังคับโครงสร้าง JSON ของคำอ่าน (responseJsonSchema — มาตรฐาน JSON Schema)
+ * -------------------------------------------------------------------------------
+ * ต้องมี: ถ้าไม่ส่ง schema เลย Gemini 3.x จะแต่งคีย์เอง (`reading_title`, `overall_energy`, …)
+ * → ReadingSchema.safeParse fail → ทุกคำอ่านตกไป fallbackReading filler (ISSUE-016)
+ * ใช้ responseJsonSchema (ไม่ใช่ responseSchema แบบ OpenAPI `type:"OBJECT"` เดิมที่ 3.x คืน 400)
+ */
+const READING_JSON_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    opening: { type: "string" },
+    cards: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          position: { type: "integer" },
+          headline: { type: "string" },
+          reading: { type: "string" },
+        },
+        required: ["position", "headline", "reading"],
+      },
+    },
+    connections: { type: "string" },
+    summary: { type: "string" },
+    advice: { type: "array", items: { type: "string" } },
+    timing: { type: "string" },
+    yesNoAnswer: { type: "string", enum: ["ใช่", "ไม่ใช่", "ยังไม่แน่"] },
+    mood: { type: "string", enum: ["สดใส", "อบอุ่น", "สงบ", "ครุ่นคิด", "ท้าทาย"] },
+  },
+  required: ["opening", "cards", "connections", "summary", "advice", "timing", "mood"],
+};
 
 /**
  * โมเดลที่ลองเรียงกันจนกว่าจะเจอตัวที่เรียกได้ (loop ใน streamGeminiReading + chat + monthly-summary)
@@ -85,6 +115,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
       systemInstruction: { parts: [{ text: systemInstruction }] },
       generationConfig: {
         responseMimeType: "application/json",
+        responseJsonSchema: READING_JSON_SCHEMA,
         temperature: 0.7,
       },
     };
@@ -124,7 +155,6 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   const decoder = new TextDecoder();
   let buffer = "";
   let jsonAccumulator = "";
-  let debugLoggedChunk = false; // TEMP diag (ISSUE-016) — ลบออกเมื่อ parse ทำงานแล้ว
   let sentOpening = false;
   let sentConnections = false;
   let sentSummary = false;
@@ -149,13 +179,6 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
           try {
             const chunk = JSON.parse(jsonStr);
-
-            if (!debugLoggedChunk) {
-              debugLoggedChunk = true;
-              console.warn(
-                `[gemini diag] first chunk candidates[0]=${JSON.stringify(chunk.candidates?.[0]).slice(0, 400)}`,
-              );
-            }
 
             // usageMetadata มักมากับ chunk สุดท้ายของสตรีม เก็บล่าสุดที่เจอไว้เสมอ
             const meta = chunk.usageMetadata;
@@ -225,8 +248,9 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
     const parsed = parsedJson ? ReadingSchema.safeParse(parsedJson) : null;
     if (!parsed || !parsed.success) {
+      // คำอ่านตกไป fallback filler — log ให้เห็นสาเหตุ (คีย์ผิด / JSON พัง / stream ตัด)
       console.warn(
-        `[gemini diag] parse fail · accLen=${jsonAccumulator.length} · head=${jsonAccumulator.slice(0, 300)} · zodErr=${parsed ? JSON.stringify(parsed.error.issues?.slice(0, 3)) : "no-json"}`,
+        `[gemini] คำอ่านไม่ผ่าน schema → ใช้ fallback · accLen=${jsonAccumulator.length} · head=${jsonAccumulator.slice(0, 200)} · zodErr=${parsed ? JSON.stringify(parsed.error.issues?.slice(0, 3)) : "JSON.parse failed"}`,
       );
       const loose = parsePartialReading(jsonAccumulator);
       const fallbackReading: Reading = {
