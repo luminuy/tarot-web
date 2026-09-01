@@ -60,15 +60,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   // World-Class Rate Limiter & Single-Flight Concurrency Protection per IP
-  const clientIp = getClientIdentifier(request);
-  const limit = checkRateLimit(`read:${clientIp}`, {
-    maxRequests: 15,
-    windowSeconds: 600,
-    maxConcurrent: 1,
-  });
+  const { isPrivilegedTestRequest } = await import("@/lib/security/privileged");
+  const privileged = await isPrivilegedTestRequest(request);
 
-  if (!limit.allowed) {
-    return createRateLimitResponse(limit.retryAfterSeconds, "คุณกำลังเปิดไพ่อยู่แล้ว หรือเปิดไพ่ถี่เกินไป กรุณารอสักครู่");
+  let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
+  if (!privileged) {
+    const clientIp = getClientIdentifier(request);
+    limit = checkRateLimit(`read:${clientIp}`, {
+      maxRequests: 15,
+      windowSeconds: 600,
+      maxConcurrent: 1,
+    });
+
+    if (!limit.allowed) {
+      return createRateLimitResponse(limit.retryAfterSeconds, "คุณกำลังเปิดไพ่อยู่แล้ว หรือเปิดไพ่ถี่เกินไป กรุณารอสักครู่");
+    }
   }
 
   // อ่านซ้ำให้คืนผลเดิม ไม่เรียกโมเดลใหม่

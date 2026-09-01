@@ -37,12 +37,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึง API จากภายนอก (Unauthorized Origin)" }, { status: 403 });
   }
 
-  const limit = checkRateLimit(`start:${clientKeyFromRequest(request)}`, 20, 60 * 60 * 1000);
-  if (!limit.allowed) {
-    return NextResponse.json(
-      { error: "วันนี้เปิดไพ่ถี่ไปหน่อยแล้วนะ พักสักครู่แล้วค่อยกลับมา", retryAfter: limit.retryAfterSeconds },
-      { status: 429 },
-    );
+  const { isPrivilegedTestRequest } = await import("@/lib/security/privileged");
+  const privileged = await isPrivilegedTestRequest(request);
+
+  if (!privileged) {
+    const limit = checkRateLimit(`start:${clientKeyFromRequest(request)}`, 20, 60 * 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "วันนี้เปิดไพ่ถี่ไปหน่อยแล้วนะ พักสักครู่แล้วค่อยกลับมา", retryAfter: limit.retryAfterSeconds },
+        { status: 429 },
+      );
+    }
   }
 
   const parsed = BodySchema.safeParse(await request.json().catch(() => null));

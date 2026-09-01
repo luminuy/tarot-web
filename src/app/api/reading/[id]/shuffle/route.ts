@@ -29,12 +29,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึง API จากภายนอก (Unauthorized Origin)" }, { status: 403 });
   }
 
-  const limit = checkRateLimit(`shuffle:${clientKeyFromRequest(request)}`, 30, 60 * 1000);
-  if (!limit.allowed) {
-    return NextResponse.json(
-      { error: "ส่งคำขอเร็วเกินไป กรุณารอสักครู่", retryAfter: limit.retryAfterSeconds },
-      { status: 429 },
-    );
+  const { isPrivilegedTestRequest } = await import("@/lib/security/privileged");
+  const privileged = await isPrivilegedTestRequest(request);
+
+  if (!privileged) {
+    const limit = checkRateLimit(`shuffle:${clientKeyFromRequest(request)}`, 30, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "ส่งคำขอเร็วเกินไป กรุณารอสักครู่", retryAfter: limit.retryAfterSeconds },
+        { status: 429 },
+      );
+    }
   }
 
   const { id } = await params;
