@@ -10,7 +10,7 @@ import type { ReadingRecord } from "@/server/store";
  * ทางแก้ระดับโปรดักชัน:
  * 1. สร้าง Cryptographic HMAC-SHA256 Token ส่งให้ Client ถือไว้เสมอ
  * 2. ทุก API Route สามารถถอดรหัสและกู้คืน Reading State ได้ทันที 0ms โดยไม่ต้องพึ่งพาเซิร์ฟเวอร์เดิม
- * 3. รับประกันความปลอดภัย 100% ไม่สามารถปลอมแปลงไพ่หรือ Seed ได้
+ * 3. ป้องกันการปลอมแปลง drawn/seed ด้วย HMAC-SHA256 + commit-reveal (serverSeed ไม่เปิดเผยจนกว่าจะจั่วเสร็จ)
  */
 
 const KNOWN_INSECURE_SECRETS = new Set([
