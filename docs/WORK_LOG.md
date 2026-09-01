@@ -168,6 +168,21 @@
 - **สถานะปัจจุบัน**: Google login + แผงแอดมิน + ดูดวง ใช้งานได้ · email signup พัง 500 บน prod (ไม่มี `PASSWORD_PEPPER`) — Google login ไม่กระทบ
 - **แนะนำลำดับ**: LINE login (ฟรี) → ซื้อโดเมน ~฿370 → Resend → เปิด entitlement
 
+### 🗓️ 2026-09-01: Feature — บัญชีผู้ทดสอบ (tarot_tester) ปลดล็อกการใช้งานไม่จำกัด โดยไม่ให้สิทธิ์แอดมิน
+
+- **ความต้องการ**: เจ้าของอยากได้ user+password ส่งให้หุ้นส่วนอีกคนลองเล่นเว็บแบบไม่ติดลิมิตอะไรเลย — แต่ไม่อยากให้เห็น/แก้แผงแอดมิน
+- **สิ่งที่ทำ**:
+  - `src/lib/auth/tester-auth.ts` 🆕 — mirror `admin-auth.ts` · secret `TESTER_PASSWORD` (≥12) · cookie `tarot_tester` HMAC-signed 30 วัน · เปลี่ยนรหัส = เตะ session ทิ้ง
+  - `src/lib/security/privileged.ts` — `isPrivilegedTestRequest()` +ทางเข้าที่ 2: cookie `tarot_tester` → bypass rate limit / concurrency / AI cap / origin guard / entitlement (เหมือน admin) · **ไม่** ผ่าน `verifyAdminSession` → เข้า `/admin` ไม่ได้ · stat `ratelimit_bypass:tester`
+  - `src/app/api/tester/{login,logout,session}/route.ts` 🆕 — login มี brute-force guard 5/15นาที/IP (mirror admin)
+  - `src/app/tester/{page,layout}.tsx` 🆕 — หน้า `/tester` (noindex): ใส่รหัส → ปลดล็อก → ปุ่ม "เข้าใช้งานเว็บ" / "ออกจากโหมดผู้ทดสอบ"
+  - `/api/entitlement` คืน "ไม่จำกัด" ให้ privileged อยู่แล้ว (PR #97) → tester ได้ผลนี้ฟรี · UI ไม่แสดง gate/badge
+  - `scripts/qa/test-tester.ts` 🆕 (12 เคส) + register ใน CHECKS → gate 15
+  - `docs/PENDING_SETUP.md` — ข้อ 4.5 (วิธีตั้ง secret + ส่งให้หุ้นส่วน) + แถวในตาราง secret
+- **ยังบังคับกับ tester**: safety `checkQuestion` (สายด่วน 1323), provably-fair integrity, body-size cap
+- **การพิสูจน์**: `repo:verify` 15/15 · `typecheck` 0 · `test-tester` 12/12 · `build:worker`
+- **รอเจ้าของ**: `npx wrangler secret put TESTER_PASSWORD` (ดู PENDING_SETUP ข้อ 4.5) — ก่อนตั้ง = `/tester` ตอบ 503
+
 ### 🗓️ 2026-09-01: Harden — ระบบกันโกงสิทธิ์ฟรีผู้เยี่ยมชม P0+P1 (server-authoritative marker + IP/subnet quota)
 
 - **ความต้องการ**: หลัง PR #96 การหักสิทธิ์ guest พึ่งคุกกี้ที่ client อัปเดต → บล็อก `POST /guest-consume` = เปิดไพ่ไม่จำกัด (เพดานแค่ per-IP 40/วัน) · ต้องวางระบบกันโกงให้ดีกว่าเดิมโดยไม่ละเมิด PDPA และไม่ทำร้าย conversion funnel
