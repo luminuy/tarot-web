@@ -67,10 +67,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return Response.json({ error: "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
   }
 
+  const clientIp = getClientIdentifier(request);
+
   // World-Class Rate Limiter & Single-Flight Concurrency Protection per IP
   let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
   if (!privileged) {
-    const clientIp = getClientIdentifier(request);
     limit = checkRateLimit(`read:${clientIp}`, {
       maxRequests: 15,
       windowSeconds: 600,
@@ -79,6 +80,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     if (!limit.allowed) {
       return createRateLimitResponse(limit.retryAfterSeconds, "คุณกำลังเปิดไพ่อยู่แล้ว หรือเปิดไพ่ถี่เกินไป กรุณารอสักครู่");
+    }
+
+    const { checkPerIpReadQuota } = await import("@/lib/security/ai-budget");
+    const quota = await checkPerIpReadQuota(clientIp);
+    if (!quota.allowed) {
+      return createRateLimitResponse(3600, "คุณเปิดไพ่ครบโควตาสูงสุดของวันนี้แล้ว พักผ่อนแล้วกลับมาใหม่พรุ่งนี้นะ");
     }
   }
 
@@ -89,7 +96,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   // World-Class AI Spend Cap & Financial Circuit Breaker
-  const { isAiCapReached, recordAiCall } = await import("@/lib/security/ai-budget");
+  const { isAiCapReached, recordAiCall, recordPerIpReadQuota } = await import("@/lib/security/ai-budget");
   if (!privileged && (await isAiCapReached())) {
     limit.releaseConcurrency();
     recordEvent("ai_cap_hit");
@@ -147,6 +154,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               ["ai_tokens_out", event.usage?.outputTokens ?? 0],
             ]);
             void recordAiCall(1);
+            void recordPerIpReadQuota(clientIp);
             // เฉลย serverSeed ตอนนี้ — ผู้ใช้ตรวจย้อนหลังได้ว่าไพ่ไม่ได้ถูกเลือกทีหลัง
             send(controller, "done", {
               reading: event.reading,
