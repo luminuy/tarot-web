@@ -36,6 +36,21 @@
 
 ---
 
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR C — สิทธิ์ฟรีของผู้เยี่ยมชม (คุกกี้ tarot_guest)
+
+> ต่อจาก PR B (#89) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ยังปิด)
+
+- **สิ่งที่ทำ**:
+  - `src/lib/auth/edge-auth.ts` — เพิ่ม `signPayload()` / `verifyPayload<T>()` — HMAC-SHA256 + `AUTH_SECRET` เดิม (reuse กลไก ไม่เขียนใหม่)
+  - `src/lib/entitlement/guest.ts` — คุกกี้ `tarot_guest` เก็บ `{ gid, used }` · httpOnly · SameSite=Lax · Secure (prod) · Max-Age 1 ปี · `readGuestCookie()` clamp used ที่ `GUEST_LIMIT`
+  - `src/lib/entitlement/viewer.ts` — `getViewer()` อ่านคุกกี้ guest → `guestUsed`
+  - `src/app/api/reading/[id]/read/route.ts` — guest ที่ผ่าน gate → เขียนคุกกี้ `used=1` ลง SSE response headers (**ไม่มี refund สำหรับ guest** — สิทธิ์ฟรีเป็น best-effort, ล้างคุกกี้ = สิทธิ์ใหม่, ตาม ENTITLEMENT_PLAN ข้อ 3) · stat `entitlement_guest_consumed`
+  - `src/app/privacy/page.tsx` — เพิ่มบรรทัดประกาศคุกกี้ `tarot_guest` (first-party, เก็บแค่รหัสสุ่ม+จำนวนครั้ง, ไม่มี PII, ไม่ติดตามข้ามเว็บ) — **ทำใน PR เดียวกันตามแผน**
+- **ผลการทดสอบ**:
+  - gate 14 `test-entitlement.ts` → **35/35** (+ sign/verify + tamper คุกกี้) · `repo:verify` **14/14** · `build:worker` ✓
+  - `next dev` + curl (flag on): fresh guest `remaining:1` → reading flow เต็ม (start→shuffle→read) → คุกกี้ `tarot_guest` set → `GET /api/entitlement` `remaining:0 reason:guest_used` → start ครั้งที่ 2 = **403** พร้อม CTA สมัคร
+- **ยังไม่ทำ**: PR D (UI) · PR E (การ์ดชวนสมัคร) · PR F (rollout — ต้องเจ้าของ)
+
 ### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR B — บังคับสิทธิ์ที่ API
 
 > ต่อจาก PR A (#87) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธง `entitlement.enabled` ยังปิด · flag off = readings/chat ปกติทุกอย่าง)

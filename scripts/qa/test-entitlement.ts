@@ -132,7 +132,15 @@ async function main() {
   await purgeEntitlementData(uid);
   check("purgeEntitlementData ซ้ำ → ไม่ throw", true);
 
-  // ── 9. เพดาน AI สองชั้น (ENTITLEMENT_PLAN ข้อ 6.2) ──
+  // ── 9. คุกกี้ผู้เยี่ยมชม: เซ็น/ตรวจด้วยกลไก edge-auth (PR C) ──
+  const { signPayload, verifyPayload } = await import("../../src/lib/auth/edge-auth");
+  const gtoken = await signPayload({ gid: "g_abc123", used: 1, iat: 111 });
+  const gback = await verifyPayload<{ gid: string; used: number }>(gtoken);
+  check("guest cookie: sign→verify คืนค่าเดิม", gback?.gid === "g_abc123" && gback?.used === 1);
+  check("guest cookie: token ที่ถูกแก้ → verify = null", (await verifyPayload(gtoken.slice(0, -3) + "xxx")) === null);
+  check("guest cookie: token ขยะ → verify = null", (await verifyPayload("not.a.token")) === null);
+
+  // ── 10. เพดาน AI สองชั้น (ENTITLEMENT_PLAN ข้อ 6.2) ──
   const { isAiCapReached } = await import("../../src/lib/security/ai-budget");
   const { kvPutJSON, KEY } = await import("../../src/lib/platform/kv-store");
   const { utcDay } = await import("../../src/lib/stats/record");

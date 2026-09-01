@@ -2,12 +2,12 @@ import { cookies } from "next/headers";
 
 import { AUTH_COOKIE_NAME, verifyUserSession } from "@/lib/auth/edge-auth";
 import type { Viewer } from "@/lib/entitlement/entitlement";
+import { readGuestCookie } from "@/lib/entitlement/guest";
 
 /**
  * แปลง request → Viewer (สมาชิก หรือ ผู้เยี่ยมชม)
  * - สมาชิก: อ่านจากคุกกี้เซสชัน `tarot_auth_session`
- * - ผู้เยี่ยมชม: PR C จะเพิ่มคุกกี้ `tarot_guest` เพื่อนับสิทธิ์ข้ามครั้งจริง
- *   ตอนนี้ (PR B) คืน guestUsed = 0 เสมอ — ยังไม่บังคับใช้ (ธง entitlement.enabled ปิด)
+ * - ผู้เยี่ยมชม: อ่านจากคุกกี้ `tarot_guest` (นับสิทธิ์ข้ามครั้ง) · ไม่มีคุกกี้ = ยังไม่เคยใช้
  */
 export async function getViewer(_request?: Request): Promise<Viewer> {
   try {
@@ -20,5 +20,6 @@ export async function getViewer(_request?: Request): Promise<Viewer> {
     // cookies() อาจ throw ในบางบริบท — ถือว่าเป็นผู้เยี่ยมชม
   }
 
-  return { kind: "guest", gid: "anon", guestUsed: 0 };
+  const guest = await readGuestCookie();
+  return { kind: "guest", gid: guest?.gid ?? "anon", guestUsed: guest?.used ?? 0 };
 }

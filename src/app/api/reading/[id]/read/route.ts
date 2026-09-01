@@ -98,6 +98,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // ── หักสิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 6.1) — วางหลังบล็อกอ่านซ้ำ ก่อนเช็คเพดาน AI ──
   let consumed = false;
   let capTier: "guest" | "member" = "member"; // ธงปิด → เพดานเต็ม (พฤติกรรมเดิม)
+  let guestConsumeCookie: string | null = null; // Set-Cookie สำหรับผู้เยี่ยมชมที่ใช้สิทธิ์
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     if (await isEntitlementEnabled()) {
@@ -113,6 +114,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           { error: "สิทธิ์เปิดไพ่ของคุณหมดแล้ว", reason: "weekly_exhausted" },
           { status: 403 },
         );
+      }
+      // ผู้เยี่ยมชม: หักด้วยคุกกี้ (DB ไม่มีแถว) — set used=1 ใน response headers
+      // ไม่มี refund สำหรับ guest (เจตนา: สิทธิ์ฟรีเป็น best-effort · ล้างคุกกี้ = สิทธิ์ใหม่ · ENTITLEMENT_PLAN ข้อ 3)
+      if (viewer.kind === "guest") {
+        const { guestCookieValue, GUEST_COOKIE_NAME, GUEST_COOKIE_OPTIONS } = await import(
+          "@/lib/entitlement/guest"
+        );
+        const gid =
+          viewer.gid !== "anon"
+            ? viewer.gid
+            : `g_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`;
+        const token = await guestCookieValue({ gid, used: 1 }).catch(() => null);
+        if (token) {
+          const o = GUEST_COOKIE_OPTIONS;
+          guestConsumeCookie = `${GUEST_COOKIE_NAME}=${token}; Path=${o.path}; HttpOnly; SameSite=Lax; Max-Age=${o.maxAge}${o.secure ? "; Secure" : ""}`;
+        }
+        recordEvent("entitlement_guest_consumed");
       }
     }
   }
@@ -241,15 +259,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     },
   });
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream; charset=utf-8",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-      // กัน proxy บางตัวหน่วง buffer จนสตรีมไม่ไหล
-      "X-Accel-Buffering": "no",
-    },
+  const streamHeaders = new Headers({
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive",
+    // กัน proxy บางตัวหน่วง buffer จนสตรีมไม่ไหล
+    "X-Accel-Buffering": "no",
   });
+  if (guestConsumeCookie) streamHeaders.append("Set-Cookie", guestConsumeCookie);
+
+  return new Response(stream, { headers: streamHeaders });
 }
 
 /** ส่งผลที่เคยอ่านไว้แล้วกลับไปในรูปแบบเดียวกัน เพื่อให้ฝั่งหน้าเว็บใช้โค้ดชุดเดิม */
