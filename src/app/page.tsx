@@ -483,7 +483,22 @@ export default function TarotPage() {
       });
 
       if (!res.ok || !res.body) {
-        throw new Error("ไม่สามารถเริ่มการอ่านไพ่ได้ กรุณาลองใหม่อีกครั้ง");
+        const errData = await res.json().catch(() => ({} as { reason?: string; error?: string }));
+        if (errData.reason === "guest_used") {
+          setIsAuthOpen(true);
+          throw new Error(
+            "แม่หมอเปิดไพ่ฟรีให้คุณไปแล้ว 1 ครั้งนะคะ ✦ สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อได้สัปดาห์ละ 3 ครั้ง",
+          );
+        }
+        if (errData.reason === "daily_exhausted" || errData.reason === "weekly_exhausted") {
+          setIsBuyCreditsOpen(true);
+          throw new Error(
+            "โควตาเปิดไพ่ของวันนี้ครบแล้วค่ะ ✦ เติมรอบเพื่อดูต่อได้ทันที หรือกลับมาใหม่พรุ่งนี้เวลา 00:00 น.",
+          );
+        }
+        throw new Error(
+          errData.error || "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กดปุ่มลองอ่านใหม่ได้เลยค่ะ",
+        );
       }
 
       const reader = res.body.getReader();
@@ -579,12 +594,12 @@ export default function TarotPage() {
       // P1-4 Guard: If stream ended without 'done' event
       if (!streamCompleted) {
         setIsStreaming(false);
-        setErrorMsg("สัญญาณการอ่านไพ่ขาดหายไปชั่วคราว กรุณากดลองใหม่อีกครั้ง");
+        setErrorMsg("คำทำนายส่งมาไม่ครบสักนิดค่ะ กดปุ่มลองอ่านใหม่ แม่หมอพร้อมเปิดไพ่ให้ทันที");
       }
     } catch (err: any) {
       console.error("Stream reading failed", err);
       setIsStreaming(false);
-      setErrorMsg(err.message || "การเชื่อมต่อเพื่ออ่านคำทำนายขัดข้อง กรุณากดลองใหม่อีกครั้ง");
+      setErrorMsg(err.message || "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กดปุ่มลองอ่านใหม่ได้เลย");
     }
   };
 
@@ -737,7 +752,8 @@ export default function TarotPage() {
           onStepClick={(step) => navigateStep(step)}
         />
 
-        {errorMsg && (
+        {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
+        {errorMsg && currentStep !== "SUMMARY" && (
           <div className="mb-6 p-4 rounded-2xl bg-rose-950/90 border border-rose-700 text-rose-200 text-xs sm:text-sm text-center shadow-2xl backdrop-blur">
             {errorMsg}
           </div>
