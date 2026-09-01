@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { soundManager } from "@/lib/utils/audio";
+import { CardImage } from "@/components/card/CardImage";
 
 export interface AuthModalProps {
   isOpen: boolean;
@@ -136,12 +137,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ✕
           </button>
 
-          {/* Sacred Oracle Emblem */}
-          <div className="relative mb-3">
-            <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-[#241344] via-[#140a28] to-[#0a0515] border border-[#e5c07b]/60 flex items-center justify-center text-2xl shadow-[0_0_25px_rgba(229,192,123,0.35)] relative group">
-              <span className="text-[#ffd700] filter drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]">✦</span>
-              {/* Rotating Sacred Dashed Ring */}
-              <div className="absolute -inset-1.5 rounded-full border border-dashed border-[#e5c07b]/30 animate-[spin_60s_linear_infinite] pointer-events-none" />
+          {/* Authentic 1909 Rider-Waite Tarot Card Seal (Matching Brand Logo) */}
+          <div className="relative mb-3.5 group select-none">
+            {/* Ambient Gold Halo Aura */}
+            <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-[#d4af37]/35 via-[#ffd700]/45 to-[#c59b27]/35 blur-md opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+            {/* Sacred Rotating Dashed Ring */}
+            <div className="absolute -inset-3 rounded-full border border-dashed border-[#e5c07b]/35 animate-[spin_50s_linear_infinite] pointer-events-none" />
+
+            {/* Miniature 1909 Tarot Card Frame */}
+            <div className="w-12 h-[72px] sm:w-13 sm:h-[78px] rounded-xl border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_25px_rgba(229,192,123,0.6)] relative flex-shrink-0 bg-[#07050d] group-hover:scale-105 group-hover:shadow-[0_0_35px_rgba(229,192,123,0.85)] transition-all duration-300">
+              <CardImage
+                image="major-01.jpg"
+                alt="The Magician Tarot Brand Seal"
+                className="w-full h-full object-cover object-[50%_12%] filter contrast-[1.12] saturate-[1.15] brightness-[1.05] tarot-hd-card-image"
+                sizes="80px"
+                loading="eager"
+              />
+              <div className="gold-foil-sheen absolute inset-0 opacity-25 pointer-events-none" />
             </div>
           </div>
 
