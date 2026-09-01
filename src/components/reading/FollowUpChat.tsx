@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Persona } from "@/data/personas";
 import { CardImage } from "@/components/card/CardImage";
+import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 
 interface Message {
   id: string;
@@ -34,6 +35,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const ent = useEntitlement();
+  const chatLocked = !!ent && ent.enabled && !ent.canChat;
   const chatLogRef = React.useRef<HTMLDivElement>(null);
 
   // เลื่อนเฉพาะ "กล่องแชท" ให้เห็นข้อความล่าสุด — ห้ามใช้ scrollIntoView เพราะมันจะ
@@ -132,7 +135,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       </div>
 
       {/* Suggested Quick Questions */}
-      {messages.length === 0 && (
+      {messages.length === 0 && !chatLocked && (
         <div className="space-y-1.5">
           <span className="text-[11px] text-[#e0c088] font-medium block">
             ✦ คำถามที่คนนิยมถามต่อ:
@@ -187,6 +190,15 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       </div>
 
       {/* Input Bar */}
+      {chatLocked ? (
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("tarot:open-auth"))}
+          className="mt-2 w-full rounded-xl border border-[#e0c088]/40 bg-[#1b1530] px-4 py-3 text-xs font-serif-th text-[#f0dcb4] hover:border-[#ffd700] transition-all cursor-pointer"
+        >
+          <span className="text-[#e5c07b]">✦</span> สมัครสมาชิกเพื่อถามแม่หมอต่อ และเก็บดวงไว้ดูย้อนหลังได้ทุกเครื่อง
+        </button>
+      ) : (
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -210,6 +222,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
           ส่งคำถาม
         </button>
       </form>
+      )}
     </div>
   );
 };

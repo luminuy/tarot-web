@@ -373,13 +373,16 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
 - [x] curl e2e (flag on): fresh guest remaining=1 → reading flow → คุกกี้ set → remaining=0 reason=guest_used → start ครั้งที่ 2 = 403
 - [x] gate 14 → 35/35 (+ sign/verify คุกกี้) · repo:verify 14/14 · build:worker ✓
 
-### PR D · สถานะบนหน้าเว็บ
+### PR D · สถานะบนหน้าเว็บ ✅ เสร็จ (2026-09-01)
 **ต้องมี B, C**
 
-- [ ] `QuotaBadge`, `EntitlementGate` และช่องคุยแบบล็อกใน `FollowUpChat`
-- [ ] ดึงสิทธิ์ครั้งเดียวใน `page.tsx` แล้วส่งลงเป็น prop ไม่ให้แต่ละคอมโพเนนต์ยิงเอง
-- [ ] รีเฟรชสิทธิ์หลังอ่านจบ และหลังล็อกอินสำเร็จ
-- [ ] ตรวจ responsive มือถือ/แท็บเล็ต/เดสก์ท็อป ตามมาตรฐานเดิมของโปรเจกต์
+- [x] `src/components/entitlement/QuotaBadge.tsx` — ป้ายข้าง UserProfileBadge (ธงปิด → ไม่แสดง)
+- [x] `src/components/entitlement/EntitlementGate.tsx` — wrap เนื้อหาขั้น SPREAD_SELECT (ธงปิด/มีสิทธิ์ → render children ปกติ)
+- [x] `FollowUpChat` — ช่องแชทแบบล็อกเมื่อ `!canChat` (guest) → ปุ่มเปิด AuthModal ผ่าน event `tarot:open-auth`
+- [x] `src/lib/entitlement/use-entitlement.ts` — hook + module cache (ดึง `/api/entitlement` ครั้งเดียว, `refreshEntitlement()` bust cache) *(แทน "ส่ง prop จาก page.tsx" เพื่อลดการแก้ไฟล์ page.tsx ที่เปราะ — spirit เดียวกัน: ยิงครั้งเดียว)*
+- [x] `page.tsx` — `refreshEntitlement()` หลังอ่านจบ (`done`) + หลังล็อกอิน (`auth_success`) · listener `tarot:open-auth`
+- [x] curl + browser (flag on): guest ใหม่ badge "ทดลองฟรี 1 ครั้ง" → ทำ reading → reload → badge "ทดลองฟรีครบแล้ว" + gate "ครั้งแรกจบแล้ว" แทนหน้าเลือกผัง · flag off → badge/gate หาย, หน้าเลือกผังปกติ (เหมือนก่อน PR D 100%)
+- [x] repo:verify 14/14 · build:worker ✓ · hydration warning เดิม (motion SSR) — **มีอยู่ก่อน PR D** (ยืนยันโดย stash)
 
 ### PR E · การ์ดชวนสมัครหลังอ่านจบ
 **ต้องมี D**
