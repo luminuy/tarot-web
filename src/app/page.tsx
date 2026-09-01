@@ -25,6 +25,7 @@ import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { QuotaBadge } from "@/components/entitlement/QuotaBadge";
 import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
+import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
 import { refreshEntitlement } from "@/lib/entitlement/use-entitlement";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
@@ -663,6 +664,8 @@ export default function TarotPage() {
 
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
+        <AnnouncementBanner />
+
         {/* Auth Toast Notification Banner */}
         {authBanner && (
           <div

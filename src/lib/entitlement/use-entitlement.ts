@@ -19,6 +19,8 @@ export interface ClientEntitlement {
   resetAt: string | null;
   kind?: "guest" | "member";
   reason?: string;
+  announce?: boolean;
+  announceResetDate?: string;
 }
 
 let cache: ClientEntitlement | null = null;

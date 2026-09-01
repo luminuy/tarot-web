@@ -36,6 +36,23 @@
 
 ---
 
+### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR F — เครื่องมือเปิดใช้งานจริง (โค้ดครบ · ยังไม่เปิดธง)
+
+> ต่อจาก PR E (#92) · **พฤติกรรมเว็บไม่เปลี่ยน** — ธง `entitlement.enabled` ยังปิด · เปิดจริงตาม runbook ใน [`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md) (เจ้าของตัดสินใจ + ประกาศ ≥ 7 วัน + โบนัสเปลี่ยนผ่าน)
+
+- **สิ่งที่ทำ**:
+  - `scripts/entitlement-grandfather.ts` + `npm run entitlement:grandfather -- --before YYYY-MM-DD [--remote] [--dry-run]` — ให้โบนัส 10 ครั้งแก่ผู้ใช้ที่สมัครก่อนวันตัด (idempotent ด้วย `UNIQUE(user_id, "grandfather")`)
+  - `src/components/entitlement/AnnouncementBanner.tsx` — แบนเนอร์หน้าแรกประกาศล่วงหน้า (แสดงเมื่อ `entitlement.announce` เปิด + ธงจริงยังปิด) · ปิดได้ (localStorage)
+  - `src/components/admin/EntitlementAdmin.tsx` + แท็บแอดมิน "สิทธิ์เปิดไพ่" — toggle ธง (มี confirm), toggle ประกาศ + วันที่, คำสั่ง grandfather, metric 8 ตัว (blockedStart/Read/Chat, guestConsumed, aiCapHit, signup shown/clicked/dismissed) 7 วันล่าสุด
+  - `GET/PUT /api/admin/entitlement` ขยาย — `announce` / `announceResetDate` / `metrics` · `GET /api/entitlement` เผย `announce` ให้ public
+  - `use-entitlement.ts` — เพิ่ม `announce` / `announceResetDate` ใน type
+- **ผลการทดสอบ**:
+  - `repo:verify` **14/14** · gate 14 `test-entitlement` → **36/36** (+grandfather idempotent) · `build:worker` ✓
+  - `next dev` + curl: admin GET/PUT entitlement (flag/announce/metrics) · public `/api/entitlement` เผย `announce:true, announceResetDate:"15 ก.ย. 2569"` เมื่อธงปิด+ประกาศเปิด
+  - browser: แบนเนอร์ประกาศแสดงบนหน้าแรก (ธงปิด) · แท็บแอดมิน "สิทธิ์เปิดไพ่" render ครบ 4 panel
+  - grandfather script: seed user → grant 10 + signup 3 → `bonusRemaining = 13` · รันซ้ำ → ยัง 13
+- **✅ ครบทั้ง 6 PR (A–F) ของ ENTITLEMENT_PLAN** — ระบบพร้อมเปิด รอเจ้าของทำ runbook
+
 ### 🗓️ 2026-09-01: ระบบสมาชิกและโควตาเปิดไพ่ · PR E — การ์ดชวนสมัครหลังอ่านจบ
 
 > ต่อจาก PR D (#91) · **พฤติกรรมเว็บไม่เปลี่ยน** (ธงปิด → การ์ดไม่แสดง)

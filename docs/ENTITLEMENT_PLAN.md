@@ -1,6 +1,6 @@
 # 🎟 ระบบสมาชิกและโควตาเปิดไพ่ — แผนลงมือสำหรับทีม Antigravity
 
-> **สถานะ:** PR A เสร็จ (Claude Sonnet 5 · 2026-09-01) · PR B–F ยังไม่เริ่ม
+> **สถานะ:** PR A–F โค้ดเสร็จครบ (Claude Sonnet 5 · 2026-09-01) · **ธง `entitlement.enabled` ยังปิด** — เปิดจริงตาม runbook ท้ายไฟล์ (เจ้าของตัดสินใจ)
 > **ฐานอ้างอิง:** commit `2de3e8d` (PR A rebase บน main หลัง #86)
 > **ขนาดงาน:** 6 PR
 > **ธงเปิดใช้:** `entitlement.enabled` (KV) — ยังปิด
@@ -393,13 +393,21 @@ export async function isAiCapReached(tier: "guest" | "member" = "guest"): Promis
 - [x] repo:verify 14/14 · build:worker ✓ · curl: allowlist metric → 200 · metric อื่น → 400
 - [~] การ์ดที่ SUMMARY (visual): verify ด้วย logic + track endpoint — ไม่ได้เห็นในเบราว์เซอร์เพราะ test cookie เป็น guest ที่ใช้สิทธิ์หมดแล้ว (เริ่ม reading ใหม่ไม่ได้) · ตรวจซ้ำตอน production หรือด้วยเบราว์เซอร์คุกกี้สะอาด
 
-### PR F · เปิดใช้งานจริง
+### PR F · เปิดใช้งานจริง — **โค้ดพร้อมแล้ว (2026-09-01) · ยังไม่เปิดธง (เจ้าของตัดสินใจ)**
 **ต้องมี A–E · ทำหลังทดสอบบน production แล้ว**
 
-- [ ] สคริปต์ให้โบนัสเปลี่ยนผ่าน 10 ครั้ง แก่ผู้ใช้ที่ `created_at` ก่อนวันเปิดใช้
-- [ ] ประกาศบนเว็บล่วงหน้าอย่างน้อย 7 วันก่อนเปิดธง
-- [ ] เปิด `entitlement.enabled` ผ่านแผงแอดมิน
-- [ ] เฝ้าดู `entitlement_blocked_read` และ `ai_cap_hit` ใน 48 ชั่วโมงแรก
+โค้ด PR F เสร็จ:
+- [x] `scripts/entitlement-grandfather.ts` + `npm run entitlement:grandfather -- --before YYYY-MM-DD [--remote] [--dry-run]` — ให้โบนัส 10 ครั้ง (idempotent · unique(user_id,"grandfather"))
+- [x] `src/components/entitlement/AnnouncementBanner.tsx` — แบนเนอร์หน้าแรก แสดงเมื่อ `entitlement.announce` เปิด + ธงจริงยังปิด · ปิดได้
+- [x] แท็บแอดมิน "สิทธิ์เปิดไพ่" (`src/components/admin/EntitlementAdmin.tsx`) — toggle ธง (confirm ก่อนเปิด) · toggle + วันที่ประกาศ · คำสั่ง grandfather · metric 8 ตัว (7 วัน)
+- [x] `GET/PUT /api/admin/entitlement` ขยาย: `announce` + `announceResetDate` + `metrics` · `GET /api/entitlement` เผย `announce`/`announceResetDate` (public)
+- [x] repo:verify 14/14 (test-entitlement 36/36 +grandfather) · build:worker ✓ · browser: แบนเนอร์ + แท็บแอดมิน render ถูก
+
+**ขั้นตอนเปิดจริง (เจ้าของทำ) — runbook:**
+1. `npm run entitlement:grandfather -- --before <วันเปิด> --remote` (ให้โบนัสผู้ใช้เดิม)
+2. แผงแอดมิน → แท็บ "สิทธิ์เปิดไพ่" → ตั้งวันเปิด + เปิด "ประกาศ" → รออย่างน้อย **7 วัน**
+3. ครบ 7 วัน → กด "เปิดระบบสิทธิ์" (confirm)
+4. เฝ้าดู metric `blockedRead` / `aiCapHit` / `signupClicked` ใน 48 ชม.แรก · ถ้า aiCapHit สูง → เพิ่ม env `AI_DAILY_CALL_CAP` (คำนวณ: สมาชิก × 3 ÷ 7 + headroom)
 
 ---
 
