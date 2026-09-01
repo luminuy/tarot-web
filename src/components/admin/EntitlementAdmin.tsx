@@ -13,6 +13,23 @@ interface State {
   metrics: Record<string, number>;
 }
 
+/** วันนี้ในรูปแบบ YYYY-MM-DD ตามเวลาไทย (ใช้เป็นค่าเริ่มต้น/เพดานของ date picker) */
+function todayISO(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date());
+}
+
+/** แปลง YYYY-MM-DD → ข้อความไทยสำหรับแบนเนอร์ เช่น "15 กันยายน 2569" */
+function isoToThai(iso: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Intl.DateTimeFormat("th-TH", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Bangkok",
+  }).format(new Date(Date.UTC(y, m - 1, d)));
+}
+
 const METRIC_LABEL: Record<string, string> = {
   blockedStart: "บล็อกที่ขั้นเลือกผัง",
   blockedRead: "บล็อกที่ขั้นอ่านไพ่",
@@ -44,6 +61,9 @@ export default function EntitlementAdmin() {
   const [gfDate, setGfDate] = useState("");
   const [gfBusy, setGfBusy] = useState(false);
   const [gfResult, setGfResult] = useState("");
+
+  // ตัวช่วยเลือกวันสำหรับแบนเนอร์ประกาศ — เก็บ ISO ไว้ในเครื่องเท่านั้น (ฝั่ง server เก็บเป็นข้อความไทย)
+  const [announceISO, setAnnounceISO] = useState("");
 
   const load = useCallback(() => {
     fetch("/api/admin/entitlement")
@@ -153,16 +173,21 @@ export default function EntitlementAdmin() {
           ทำครั้งเดียวก่อนเปิดระบบ — ผู้ใช้ที่สมัคร <strong>ก่อน</strong> วันตัด จะได้โบนัส 10 ครั้ง (ไม่หมดอายุ) · กดซ้ำได้
         </p>
         <div className="flex flex-wrap items-end gap-3">
-          <Field label="วันตัด (YYYY-MM-DD)">
+          <Field label="วันตัด">
             {(id) => (
               <Input
                 id={id}
-                placeholder="2026-09-15"
+                type="date"
+                className="[color-scheme:dark]"
+                max={todayISO()}
                 value={gfDate}
-                onChange={(e) => setGfDate(e.target.value.trim())}
+                onChange={(e) => setGfDate(e.target.value)}
               />
             )}
           </Field>
+          <Button size="sm" variant="outline" isLoading={gfBusy} onClick={() => setGfDate(todayISO())}>
+            ใช้วันนี้
+          </Button>
           <Button size="sm" variant="outline" isLoading={gfBusy} onClick={() => grandfather(false)}>
             ตรวจจำนวน
           </Button>
@@ -180,11 +205,27 @@ export default function EntitlementAdmin() {
           แสดงบนหน้าแรกเมื่อระบบยังปิด — เปิดล่วงหน้าอย่างน้อย <strong>7 วัน</strong> ก่อนเปิดระบบจริง
         </p>
         <div className="flex flex-wrap items-end gap-3">
-          <Field label="วันเริ่มใช้ (ข้อความในแบนเนอร์ เช่น 15 ก.ย. 2569)">
+          <Field label="เลือกวันเริ่มใช้">
             {(id) => (
               <Input
                 id={id}
-                placeholder="15 ก.ย. 2569"
+                type="date"
+                className="[color-scheme:dark]"
+                min={todayISO()}
+                value={announceISO}
+                onChange={(e) => {
+                  setAnnounceISO(e.target.value);
+                  save({ announceResetDate: isoToThai(e.target.value) });
+                }}
+              />
+            )}
+          </Field>
+          <Field label="ข้อความที่จะขึ้นในแบนเนอร์ (แก้เองได้)">
+            {(id) => (
+              <Input
+                id={id}
+                key={s.announceResetDate}
+                placeholder="15 กันยายน 2569"
                 defaultValue={s.announceResetDate}
                 onBlur={(e) => {
                   if (e.target.value !== s.announceResetDate)
@@ -201,6 +242,13 @@ export default function EntitlementAdmin() {
             {s.announce ? "ประกาศเปิดอยู่ — กดเพื่อปิด" : "ประกาศปิดอยู่ — กดเพื่อเปิด"}
           </Button>
         </div>
+        <p className="mt-3 rounded-lg border border-[#e5c07b]/20 bg-[#0c0818]/60 p-3 text-xs text-[#9c93b8]">
+          ตัวอย่างแบนเนอร์:{" "}
+          <span className="text-[#f5deaa]">
+            เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น ผู้เยี่ยมชม 1 ครั้ง · สมาชิกฟรีสัปดาห์ละ 3 ครั้ง
+            {s.announceResetDate?.trim() ? ` เริ่ม ${s.announceResetDate.trim()}` : ""}
+          </span>
+        </p>
       </div>
 
       {/* ── ธงเปิดระบบจริง ── */}
