@@ -117,9 +117,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: errorMsg }, { status: 400 });
   }
 
-  const updated = updateReading(id, { drawn, clientSeed });
+  const updated = updateReading(id, { drawn, clientSeed, pickedIndices: pickedIndices ?? undefined });
   const { signReadingSessionToken } = await import("@/lib/security/session-token");
-  const sessionToken = signReadingSessionToken(updated || { ...record, drawn, clientSeed });
+  const sessionToken = signReadingSessionToken(updated || { ...record, drawn, clientSeed, pickedIndices: pickedIndices ?? undefined });
 
   return NextResponse.json({
     clientSeed,

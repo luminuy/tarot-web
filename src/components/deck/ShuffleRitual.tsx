@@ -188,6 +188,22 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
         ทำใจให้สบาย แล้วนึกถึงเรื่องที่อยากรู้สำหรับผัง <span className="text-[#f5deaa] font-semibold">"{spreadName}"</span>
       </p>
 
+      {/* Commitment Preview for Commit-Reveal Transparency */}
+      {commitment && (
+        <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080512]/90 border border-[#e5c07b]/25 text-[10px] font-mono text-[#e5c07b]/80">
+          <span>คำมั่นความสุ่ม (SHA-256): {commitment.slice(0, 16)}…{commitment.slice(-8)}</span>
+          <button
+            type="button"
+            onClick={() => navigator.clipboard.writeText(commitment)}
+            title="คัดลอกคำมั่นความสุ่มเต็ม"
+            aria-label="คัดลอกคำมั่นความสุ่ม"
+            className="text-[#ffd700] hover:text-white cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffd700]"
+          >
+            ⧉
+          </button>
+        </div>
+      )}
+
       {/* Progress or Start Button */}
       <div className="w-full max-w-xs mt-6">
         {!shuffling ? (

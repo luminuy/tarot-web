@@ -107,7 +107,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             send(controller, "done", {
               reading: event.reading,
               disclosure: AI_DISCLOSURE,
-              proof: { serverSeed: record.serverSeed, clientSeed: record.clientSeed, commitment: record.commitment },
+              proof: {
+                serverSeed: record.serverSeed,
+                clientSeed: record.clientSeed,
+                commitment: record.commitment,
+                pickedIndices: record.pickedIndices,
+                deckSize: 78,
+              },
               usage: event.usage,
             });
           } else if (event.type === "error") {
@@ -164,7 +170,13 @@ function streamCached(
       push("done", {
         reading,
         disclosure: AI_DISCLOSURE,
-        proof: { serverSeed: record.serverSeed, clientSeed: record.clientSeed, commitment: record.commitment },
+        proof: {
+          serverSeed: record.serverSeed,
+          clientSeed: record.clientSeed,
+          commitment: record.commitment,
+          pickedIndices: record.pickedIndices,
+          deckSize: 78,
+        },
         cached: true,
       });
       controller.close();

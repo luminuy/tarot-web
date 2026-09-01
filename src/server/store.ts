@@ -25,6 +25,7 @@ export interface ReadingRecord {
   serverSeed: string;
   clientSeed?: string;
   drawn?: DrawnCard[];
+  pickedIndices?: number[];
 
   result?: Reading;
   createdAt: number;

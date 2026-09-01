@@ -65,6 +65,7 @@ export function signReadingSessionToken(record: Partial<ReadingRecord>): string 
     serverSeed: isDrawnComplete ? record.serverSeed : undefined,
     clientSeed: record.clientSeed,
     drawn: record.drawn,
+    pickedIndices: record.pickedIndices,
     result: record.result,
     createdAt: record.createdAt || Date.now(),
     iat: nowSec,
