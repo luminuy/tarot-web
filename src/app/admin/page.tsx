@@ -14,12 +14,17 @@ const ContentEditor = dynamic(() => import("@/components/admin/ContentEditor"), 
   ssr: false,
   loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดตัวแก้เนื้อหา…</p>,
 });
+const ReadersManager = dynamic(() => import("@/components/admin/ReadersManager"), {
+  ssr: false,
+  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดรายการแม่หมอ…</p>,
+});
 
-type Tab = "stats" | "content";
+type Tab = "stats" | "content" | "readers";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "stats", label: "สถิติ" },
-  { id: "content", label: "เนื้อหา (prompt / ไพ่ / แม่หมอ)" },
+  { id: "content", label: "เนื้อหา (prompt / ไพ่ / AI)" },
+  { id: "readers", label: "แม่หมอ (Marketplace)" },
 ];
 
 export default function AdminHome() {
@@ -82,7 +87,13 @@ export default function AdminHome() {
       </nav>
 
       <section className="mt-6">
-        {tab === "stats" ? <StatsDashboard /> : <ContentEditor />}
+        {tab === "stats" ? (
+          <StatsDashboard />
+        ) : tab === "content" ? (
+          <ContentEditor />
+        ) : (
+          <ReadersManager />
+        )}
       </section>
     </div>
   );

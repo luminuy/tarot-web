@@ -151,7 +151,7 @@ export async function getAppDB(): Promise<AppDB | null> {
 
 ---
 
-## 4. M4 · D1 Foundation + Reader Profiles (PR #1 ของ Phase 2)
+## 4. M4 · D1 Foundation + Reader Profiles (เสร็จสมบูรณ์ 100% ✅)
 
 ### 4.1 Provision + binding (เจ้าของทำ / AI เขียน config)
 1. `npx wrangler d1 create tarot-app-db` → ได้ `database_id`

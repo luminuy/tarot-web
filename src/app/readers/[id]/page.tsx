@@ -1,0 +1,157 @@
+import React from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
+import { MysticBackground } from "@/components/ui/MysticBackground";
+import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const reader = await getPublicReaderById(id);
+  if (!reader) {
+    return { title: "ไม่พบแม่หมอ | Tarot Marketplace" };
+  }
+  return {
+    title: `${reader.displayName} | ปรึกษาแม่หมอตัวจริง`,
+    description: reader.bio || `ปรึกษาดวงชะตากับ ${reader.displayName} ผ่านศาสตร์ไพ่ทาโรต์`,
+  };
+}
+
+export default async function ReaderDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const reader = await getPublicReaderById(id);
+
+  if (!reader) {
+    notFound();
+  }
+
+  return (
+    <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700] relative overflow-hidden">
+      <MysticBackground />
+
+      <div className="max-w-4xl mx-auto space-y-6 relative z-10">
+        {/* Top Breadcrumbs */}
+        <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4">
+          <Link
+            href="/readers"
+            className="inline-flex items-center gap-1.5 text-xs text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1.5 px-3.5 rounded-2xl bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50 font-serif-th"
+          >
+            <span>←</span> หน้ารวมแม่หมอทั้งหมด
+          </Link>
+          <SacredNavDropdown />
+        </div>
+
+        {/* Reader Profile Container */}
+        <div className="altar-panel rounded-3xl p-6 sm:p-10 space-y-8 shadow-2xl border border-[#e5c07b]/30">
+          {/* Header info */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+            <div className="h-24 w-24 sm:h-28 sm:w-28 shrink-0 rounded-full border-2 border-[#ffd700]/60 bg-[#21163b] overflow-hidden flex items-center justify-center text-3xl font-bold text-[#ffd700] shadow-[0_0_25px_rgba(255,215,0,0.2)]">
+              {reader.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={reader.avatarUrl}
+                  alt={reader.displayName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                reader.displayName.charAt(0)
+              )}
+            </div>
+
+            <div className="space-y-3 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <h1 className="font-serif-th text-2xl sm:text-3xl font-bold font-mystic-gold">
+                  {reader.displayName}
+                </h1>
+                <span className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-[#10b981]/20 border border-[#10b981]/40 text-xs text-emerald-300 font-semibold w-fit mx-auto sm:mx-0">
+                  <span>✦</span> แม่หมอตัวจริง (ยืนยันตัวตนแล้ว)
+                </span>
+              </div>
+
+              {/* Specialties */}
+              <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                {reader.specialties.map((s, idx) => (
+                  <span
+                    key={idx}
+                    className="px-3 py-1 rounded-full bg-[#2d1f4d]/90 border border-[#e5c07b]/30 text-xs text-[#e5c07b] font-medium"
+                  >
+                    ✦ {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bio Section */}
+          <div className="space-y-3 border-t border-white/10 pt-6">
+            <h2 className="text-sm font-bold text-[#f5deaa] font-serif-th flex items-center gap-2">
+              <span>✦</span> ประวัติและสไตล์การทำนาย
+            </h2>
+            <div className="bg-[#140e26]/80 rounded-2xl p-5 border border-[#e5c07b]/15 text-xs sm:text-sm text-[#c3bdd8] leading-relaxed font-serif-th whitespace-pre-line">
+              {reader.bio || "พร้อมให้คำปรึกษาและชี้แนะแนวทางชีวิตอย่างลึกซึ้งผ่านศาสตร์ไพ่ทาโรต์"}
+            </div>
+          </div>
+
+          {/* Consultation Process Steps */}
+          <div className="space-y-4 border-t border-white/10 pt-6">
+            <h2 className="text-sm font-bold text-[#f5deaa] font-serif-th flex items-center gap-2">
+              <span>✨</span> ขั้นตอนการรับคำปรึกษา
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-3 text-xs">
+              <div className="rounded-2xl bg-[#1c1433]/70 border border-[#e5c07b]/20 p-4 space-y-1.5">
+                <span className="text-[#ffd700] font-bold text-base">1. สับไพ่และตั้งจิต</span>
+                <p className="text-[#9c93b8] leading-relaxed">
+                  เลือกผังและเปิดไพ่ด้วยตนเองผ่านระบบ หรือระบุหัวข้อคำถามที่ต้องการคำตอบ
+                </p>
+              </div>
+              <div className="rounded-2xl bg-[#1c1433]/70 border border-[#e5c07b]/20 p-4 space-y-1.5">
+                <span className="text-[#ffd700] font-bold text-base">2. AI สรุปสาระสำคัญ</span>
+                <p className="text-[#9c93b8] leading-relaxed">
+                  ระบบช่วยประมวลผลตำแหน่งไพ่และบริบทคำถาม เพื่อเตรียมข้อมูลส่งต่อให้แม่หมอ
+                </p>
+              </div>
+              <div className="rounded-2xl bg-[#1c1433]/70 border border-[#e5c07b]/20 p-4 space-y-1.5">
+                <span className="text-[#ffd700] font-bold text-base">3. สนทนากับแม่หมอ</span>
+                <p className="text-[#9c93b8] leading-relaxed">
+                  เชื่อมต่อไปยัง LINE ส่วนตัวของแม่หมอเพื่อสนทนาเจาะลึกและไขข้อข้องใจ
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Booking / Consultation Action */}
+          <div className="border-t border-white/10 pt-6 space-y-3 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-[#2a1a45]/80 to-[#1b122e]/80 border border-[#e5c07b]/30 p-6 rounded-2xl">
+              <div>
+                <h3 className="font-serif-th font-bold text-base text-[#f5deaa]">
+                  พร้อมรับคำทำนายจาก {reader.displayName} แล้วหรือยัง?
+                </h3>
+                <p className="text-xs text-[#9c93b8] mt-1">
+                  ระบบจะพาคุณไปสู่ขั้นตอนการเตรียมคำถามและผังไพ่
+                </p>
+              </div>
+
+              <Link
+                href={`/?readerId=${reader.id}`}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#e5c07b] to-[#ffd700] text-[#120f1d] font-serif-th font-bold text-xs sm:text-sm hover:shadow-[0_0_20px_rgba(229,192,123,0.4)] transition-all shrink-0"
+              >
+                <span>✦ เริ่มต้นขอคำปรึกษา</span>
+                <span>→</span>
+              </Link>
+            </div>
+
+            <p className="text-[11px] text-[#9c93b8] text-center pt-2">
+              🔒 ข้อมูลคำถามจะถูกส่งต่อไปยังแม่หมอโดยตรง และจะถูกลบออกจากระบบภายใน 30 วันตามมาตรฐาน PDPA
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

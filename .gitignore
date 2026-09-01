@@ -11,6 +11,7 @@ dist/
 .DS_Store
 next-env.d.ts
 /prisma/dev.db*
+.dev-marketplace.db*
 *.tsbuildinfo
 scratch/
 

@@ -22,6 +22,15 @@
     }
   ],
 
+  // ── Cloudflare D1 Database (Marketplace & Readers) ───────────────────────────
+  "d1_databases": [
+    {
+      "binding": "APP_DB",
+      "database_name": "tarot-app-db",
+      "database_id": "560fdbe7-e1f5-46e1-bad6-c8c387dcfcb5"
+    }
+  ],
+
   "vars": {
     "NODE_ENV": "production"
   }

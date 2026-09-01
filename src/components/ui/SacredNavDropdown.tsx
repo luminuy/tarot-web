@@ -7,6 +7,7 @@ import {
   TarotSpreadNavIcon,
   TarotDeckNavIcon,
   JournalScrollNavIcon,
+  MarketplaceReaderNavIcon,
 } from "@/components/ui/TarotArtIcons";
 
 interface SacredNavDropdownProps {
@@ -48,6 +49,13 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       href: "/cards",
       Icon: TarotDeckNavIcon,
       badge: "78 ใบ",
+    },
+    {
+      label: "ปรึกษาแม่หมอตัวจริง",
+      sublabel: "เลือกดูโปรไฟล์และจองคิวกับนักพยากรณ์",
+      href: "/readers",
+      Icon: MarketplaceReaderNavIcon,
+      badge: "Marketplace",
     },
   ];
 
