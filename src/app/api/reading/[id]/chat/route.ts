@@ -334,9 +334,8 @@ ${cards.join("\n")}
 
     const geminiKey = !aiCapHit ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY : undefined;
     if (geminiKey) {
-      const primaryModel = "gemini-3.7-flash";
-      const fallbackModel = "gemini-2.0-flash";
-      const modelsToTry = [primaryModel, fallbackModel];
+      const { CANDIDATE_GEMINI_MODELS } = await import("@/lib/ai/gemini");
+      const modelsToTry = CANDIDATE_GEMINI_MODELS.slice(0, 3); // จำกัด 3 ตัว — chat มี timeout 8s/ตัว
 
       for (const model of modelsToTry) {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;

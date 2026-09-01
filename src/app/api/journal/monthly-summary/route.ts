@@ -128,23 +128,34 @@ ${historyText}
   "empowermentQuote": "คำคมพลังใจศักดิ์สิทธิ์ประจำเดือนที่ประทับใจ"
 }`;
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.7,
-          },
-        }),
+    const { CANDIDATE_GEMINI_MODELS } = await import("@/lib/ai/gemini");
+    let res: Response | null = null;
+    for (const model of CANDIDATE_GEMINI_MODELS.slice(0, 3)) {
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: "application/json",
+              temperature: 0.7,
+            },
+          }),
+        }
+      );
+      if (r.ok) {
+        res = r;
+        break;
       }
-    );
+      console.warn(
+        `[Monthly Summary] model ${model} → ${r.status} · ${(await r.text().catch(() => "")).slice(0, 200)}`,
+      );
+    }
 
-    if (!res.ok) {
-      throw new Error(`Gemini API returned status ${res.status}`);
+    if (!res) {
+      throw new Error("ทุกโมเดล Gemini เรียกไม่สำเร็จ");
     }
 
     const resJson = await res.json() as any;
