@@ -171,10 +171,33 @@ jobs:
 
 ---
 
-## 🧪 6. Checklist ตรวจสอบความพร้อมหลัง Deploy
+---
+
+## 🛡️ 6. การตั้งค่า Cloudflare Native WAF Rate Limiting (AI Abuse & Cost Protection)
+
+เพื่อป้องกันการยิงเรียก AI ซ้ำซ้อนจากระดับเครือข่ายก่อนถึง Worker:
+
+1. ไปที่ **Cloudflare Dashboard** › เลือกโดเมนของคุณ › **Security** › **WAF** › **Rate limiting rules**
+2. กด **Create rule**:
+   - **Rule Name**: `Tarot Reading Rate Limit`
+   - **When incoming requests match**:
+     - `URI Path` contains `/api/reading/`
+   - **Rate limit criteria**:
+     - **Requests**: `60` requests
+     - **Period**: `1 minute`
+     - **Characteristics**: `IP`
+   - **Action**: `Block` (Duration: `10 minutes`)
+3. สำหรับเส้นทางประมวลผลโมเดล AI (`/api/reading/*/read`):
+   - **Requests**: `20` requests ต่อ `10 minutes` ต่อ IP
+
+---
+
+## 🧪 7. Checklist ตรวจสอบความพร้อมหลัง Deploy
 
 - [ ] หน้าแรก `/` โหลดเร็ว ไพ่ 78 ใบแสดงครบถ้วน
 - [ ] หน้า `/cards` และหน้ารายใบ `/cards/major-00` แสดงผลสมบูรณ์
 - [ ] หน้า `/spreads` แสดงผังทั้ง 20 รูปแบบครบถ้วน
 - [ ] ทดลองเปิดไพ่และสตรีมคำทำนายจากแม่หมอ AI ไหลลื่นไม่มีสะดุด
-- [ ] หน้า `/privacy` สามารถกดลบข้อมูล LocalStorage ได้ตามมาตรฐาน PDPA
+- [ ] หน้า `/privacy` สามารถดาวน์โหลดสำเนา JSON และสั่งลบข้อมูลได้ตามมาตรฐาน PDPA
+- [ ] แผงแอดมิน `/admin` แสดงตัวเลขโควตา AI ประจำวันและสถานะ Rate Limit Bypass
+
