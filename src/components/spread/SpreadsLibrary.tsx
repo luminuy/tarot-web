@@ -17,17 +17,31 @@ interface SpreadsLibraryProps {
   spreads: Spread[];
 }
 
+const CATEGORY_MAP_TH: Record<string, string> = {
+  general: "ทั่วไป",
+  love: "ความรัก",
+  career: "การงาน",
+  work: "การงาน",
+  money: "การเงิน",
+  finance: "การเงิน",
+  spiritual: "จิตวิญญาณ",
+  decision: "การตัดสินใจ",
+  all: "ทั้งหมด",
+  recommended: "แนะนำ",
+  master: "ผังใหญ่",
+};
+
 export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string>("recommended");
   const [expandedSpreadId, setExpandedSpreadId] = useState<string | null>(null);
 
-  const categories = [
-    { id: "all", label: "ผังทั้งหมด", count: spreads.length, Icon: AllSpreadsTabIcon },
+  const categories = useMemo(() => [
     { id: "recommended", label: "ยอดนิยมแนะนำ", count: 6, Icon: SparkleTabIcon },
-    { id: "love", label: "ความรัก & ความสัมพันธ์", count: 5, Icon: HeartTabIcon },
+    { id: "love", label: "ความรัก & คนในใจ", count: 5, Icon: HeartTabIcon },
     { id: "career", label: "การงาน & การเงิน", count: 5, Icon: PentacleTabIcon },
     { id: "master", label: "ผังใหญ่เจาะลึก", count: 5, Icon: CrystalBallTabIcon },
-  ];
+    { id: "all", label: "ผังทั้งหมด", count: spreads.length, Icon: AllSpreadsTabIcon },
+  ], [spreads.length]);
 
   const filteredSpreads = useMemo(() => {
     switch (activeCategory) {
@@ -60,17 +74,36 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
   return (
     <div className="space-y-6">
       {/* Category Tabs with Refined Golden Halo */}
-      <div className="flex items-center justify-start gap-2 overflow-x-auto pb-2 px-1 no-scrollbar select-none">
-        {categories.map((cat) => {
+      <div 
+        role="tablist" 
+        aria-label="หมวดหมู่คลังผังพยากรณ์" 
+        className="flex items-center justify-start gap-2 overflow-x-auto pb-2 px-1 no-scrollbar select-none"
+      >
+        {categories.map((cat, catIdx) => {
           const isActive = activeCategory === cat.id;
           const Icon = cat.Icon;
 
           return (
             <button
               key={cat.id}
+              role="tab"
+              id={`library-tab-${cat.id}`}
+              aria-selected={isActive}
+              tabIndex={isActive ? 0 : -1}
               type="button"
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 whitespace-nowrap relative ${
+              onKeyDown={(e) => {
+                let nextIdx = -1;
+                if (e.key === "ArrowRight") nextIdx = (catIdx + 1) % categories.length;
+                else if (e.key === "ArrowLeft") nextIdx = (catIdx - 1 + categories.length) % categories.length;
+                if (nextIdx !== -1) {
+                  e.preventDefault();
+                  setActiveCategory(categories[nextIdx].id);
+                  const nextTab = document.getElementById(`library-tab-${categories[nextIdx].id}`);
+                  nextTab?.focus();
+                }
+              }}
+              className={`px-4 py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                 isActive
                   ? "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] border border-[#fff6d6]/60 shadow-[0_0_22px_rgba(229,192,123,0.45),0_2px_8px_rgba(0,0,0,0.6)] scale-[1.03]"
                   : "bg-[#0e091e]/85 text-[#a99fc2] hover:text-[#ffd700] border border-[#e5c07b]/20 hover:border-[#ffd700]/50 hover:bg-[#181033] hover:shadow-[0_0_15px_rgba(229,192,123,0.18)]"
@@ -96,6 +129,9 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       <AnimatePresence mode="wait">
         <motion.div
           key={activeCategory}
+          role="tabpanel"
+          id={`library-panel-${activeCategory}`}
+          aria-labelledby={`library-tab-${activeCategory}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
@@ -116,7 +152,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                     {spread.positions.length} ใบ
                   </span>
                   <span className="text-[10px] text-[#a99fc2] font-serif-th">
-                    หมวด: {spread.defaultCategory}
+                    หมวด: {CATEGORY_MAP_TH[spread.defaultCategory] || spread.defaultCategory}
                   </span>
                 </div>
 

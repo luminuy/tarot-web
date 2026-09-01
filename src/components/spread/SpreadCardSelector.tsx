@@ -174,15 +174,34 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   return (
     <div className="space-y-5 w-full">
       {/* Category Filter Tabs (Linear / Apple Tier Navigation) */}
-      <div className="flex items-center justify-start gap-2 overflow-x-auto pb-1.5 px-1 no-scrollbar select-none">
-        {categories.map((cat) => {
+      <div
+        role="tablist"
+        aria-label="หมวดหมู่ผังพยากรณ์"
+        className="flex items-center justify-start gap-2 overflow-x-auto pb-1.5 px-1 no-scrollbar select-none"
+      >
+        {categories.map((cat, catIdx) => {
           const isActive = activeCategory === cat.id;
           return (
             <button
               key={cat.id}
+              role="tab"
+              id={`spread-tab-${cat.id}`}
+              aria-selected={isActive}
+              tabIndex={isActive ? 0 : -1}
               type="button"
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 whitespace-nowrap relative ${
+              onKeyDown={(e) => {
+                let nextIdx = -1;
+                if (e.key === "ArrowRight") nextIdx = (catIdx + 1) % categories.length;
+                else if (e.key === "ArrowLeft") nextIdx = (catIdx - 1 + categories.length) % categories.length;
+                if (nextIdx !== -1) {
+                  e.preventDefault();
+                  setActiveCategory(categories[nextIdx].id);
+                  const nextTab = document.getElementById(`spread-tab-${categories[nextIdx].id}`);
+                  nextTab?.focus();
+                }
+              }}
+              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                 isActive
                   ? "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] border border-[#fff6d6]/60 shadow-[0_0_22px_rgba(229,192,123,0.45),0_2px_8px_rgba(0,0,0,0.6)] scale-[1.03]"
                   : "bg-[#0e091e]/85 text-[#a99fc2] hover:text-[#ffd700] border border-[#e5c07b]/20 hover:border-[#ffd700]/50 hover:bg-[#181033] hover:shadow-[0_0_15px_rgba(229,192,123,0.18)]"
@@ -208,6 +227,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
       <AnimatePresence mode="wait">
         <motion.div
           key={activeCategory}
+          role="tabpanel"
+          id={`spread-panel-${activeCategory}`}
+          aria-labelledby={`spread-tab-${activeCategory}`}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
@@ -223,11 +245,22 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             return (
               <div
                 key={spread.id}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isSelected}
+                aria-label={`ผัง ${spread.nameTh} (${spread.positions.length} ใบ) - ${spread.description}`}
                 onClick={() => {
                   onSelectSpread(spread);
                   scrollToCard(idx);
                 }}
-                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 transform-gpu hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none ${
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelectSpread(spread);
+                    scrollToCard(idx);
+                  }
+                }}
+                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 transform-gpu hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                   isSelected
                     ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_35px_rgba(229,192,123,0.45)]"
                     : "bg-gradient-to-b from-[#130d24]/95 to-[#07040f]/95 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"

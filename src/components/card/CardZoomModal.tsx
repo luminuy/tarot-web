@@ -27,6 +27,9 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
   return (
     <AnimatePresence>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`ซูมดูไพ่ ${card.nameTh} (${card.nameEn})`}
         onClick={onClose}
         className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl cursor-zoom-out"
       >
@@ -41,7 +44,8 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer z-10"
+            aria-label="ปิดหน้าต่างซูมไพ่"
+            className="absolute top-4 right-4 w-11 h-11 rounded-2xl bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
           >
             ✕
           </button>

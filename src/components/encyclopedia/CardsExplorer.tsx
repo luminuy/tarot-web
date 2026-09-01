@@ -103,15 +103,34 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         </div>
 
         {/* Suit & Arcana Filter Tabs (World-Class Interactive Badges) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
-          {SUIT_TABS.map((tab) => {
+        <div
+          role="tablist"
+          aria-label="หมวดหมู่ชุดไพ่และสำรับ"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5"
+        >
+          {SUIT_TABS.map((tab, tabIdx) => {
             const isActive = activeFilter === tab.id;
             return (
               <button
                 key={tab.id}
+                role="tab"
+                id={`card-tab-${tab.id}`}
+                aria-selected={isActive}
+                tabIndex={isActive ? 0 : -1}
                 type="button"
                 onClick={() => setActiveFilter(tab.id)}
-                className={`p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none ${
+                onKeyDown={(e) => {
+                  let nextIdx = -1;
+                  if (e.key === "ArrowRight") nextIdx = (tabIdx + 1) % SUIT_TABS.length;
+                  else if (e.key === "ArrowLeft") nextIdx = (tabIdx - 1 + SUIT_TABS.length) % SUIT_TABS.length;
+                  if (nextIdx !== -1) {
+                    e.preventDefault();
+                    setActiveFilter(SUIT_TABS[nextIdx].id);
+                    const nextTab = document.getElementById(`card-tab-${SUIT_TABS[nextIdx].id}`);
+                    nextTab?.focus();
+                  }
+                }}
+                className={`p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                   isActive
                     ? "border-[#ffd700] bg-gradient-to-b from-[#2d224d] via-[#1d1438] to-[#100b24] shadow-[0_0_25px_rgba(229,192,123,0.35)] scale-[1.02]"
                     : "border-[#e5c07b]/20 bg-[#0c081a]/80 hover:border-[#e5c07b]/50 hover:bg-[#150e2e]"

@@ -1,10 +1,8 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-
 /**
  * ตัวกลางเข้าถึง Cloudflare bindings จากโค้ดแอป (Platform Access Layer)
  * ----------------------------------------------------------------------
  * - บน Cloudflare Worker (production / `opennextjs-cloudflare build`): คืน binding จริง
- * - บน `next dev` เครื่อง local: ไม่มี workerd (ISSUE-004 — macOS 12.6 รัน wrangler dev ไม่ได้)
+ * - บน `next dev` เครื่อง local / test: ไม่มี workerd (ISSUE-004 — macOS 12.6 รัน wrangler dev ไม่ได้)
  *   จึง fallback เป็น in-memory shim — ข้อมูลรีเซ็ตเมื่อรีสตาร์ท dev server ซึ่งรับได้สำหรับงานพัฒนา
  *
  * ⚠️ ห้ามเรียก `initOpenNextCloudflareForDev()` ใน next.config.ts —
@@ -74,6 +72,18 @@ function createMemoryKV(): AppKV {
   };
 }
 
+async function safelyGetCloudflareContext() {
+  try {
+    const mod = await import("@opennextjs/cloudflare");
+    if (typeof mod?.getCloudflareContext === "function") {
+      return await mod.getCloudflareContext({ async: true });
+    }
+  } catch {
+    // Dynamic import fails gracefully in local dev or standalone test runner
+  }
+  return null;
+}
+
 let cachedKV: AppKV | null = null;
 
 /**
@@ -84,12 +94,14 @@ export async function getAppKV(): Promise<AppKV> {
   if (cachedKV) return cachedKV;
 
   try {
-    const ctx = await getCloudflareContext({ async: true });
-    const env = ctx.env as Record<string, unknown>;
-    const binding = env.NEXT_INC_CACHE_KV;
-    if (binding && typeof (binding as AppKV).get === "function") {
-      cachedKV = binding as AppKV;
-      return cachedKV;
+    const ctx = await safelyGetCloudflareContext();
+    if (ctx) {
+      const env = ctx.env as Record<string, unknown>;
+      const binding = env.NEXT_INC_CACHE_KV;
+      if (binding && typeof (binding as AppKV).get === "function") {
+        cachedKV = binding as AppKV;
+        return cachedKV;
+      }
     }
   } catch {
     // ไม่มี Cloudflare context (เช่น `next dev`) — ตกไปใช้ shim
@@ -105,9 +117,11 @@ export async function getAppKV(): Promise<AppKV> {
  */
 export async function getWaitUntil(): Promise<(promise: Promise<unknown>) => void> {
   try {
-    const ctx = await getCloudflareContext({ async: true });
-    const exec = ctx.ctx as { waitUntil?: (p: Promise<unknown>) => void } | undefined;
-    if (exec?.waitUntil) return exec.waitUntil.bind(exec);
+    const ctx = await safelyGetCloudflareContext();
+    if (ctx) {
+      const exec = ctx.ctx as { waitUntil?: (p: Promise<unknown>) => void } | undefined;
+      if (exec?.waitUntil) return exec.waitUntil.bind(exec);
+    }
   } catch {
     // ignore
   }

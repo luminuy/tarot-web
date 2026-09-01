@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { motion } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import { calculateElementalBalance } from "@/lib/tarot/elements";
@@ -26,7 +27,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
       {/* Header */}
       <div className="mb-4 flex items-center justify-between border-b border-amber-500/10 pb-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">⚖️</span>
+          <span className="text-sm text-[#ffd700]">✦</span>
           <div>
             <h4 className="font-serif text-sm font-semibold text-amber-200/90 sm:text-base">
               สมดุลพลังงาน 4 ธาตุในผัง (Elemental Dignities)
@@ -39,20 +40,23 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         </span>
       </div>
 
-      {/* Progress Bars */}
+      {/* Progress Bars with scaleX animation for compositor perf */}
       <div className="space-y-2.5">
         {/* Fire */}
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-medium text-orange-300">
-              <span>🔥</span> ธาตุไฟ (แพชชัน / งาน / แรงผลักดัน)
+              <span className="text-xs text-orange-400">✦</span> ธาตุไฟ (แพชชัน / งาน / แรงผลักดัน)
             </span>
             <span className="font-mono text-orange-200/80">{breakdown.fire}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-900/80">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-400 transition-all duration-700 ease-out"
-              style={{ width: `${breakdown.fire}%` }}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: breakdown.fire / 100 }}
+              style={{ transformOrigin: "left" }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="h-full w-full rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-400"
             />
           </div>
         </div>
@@ -61,14 +65,17 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-medium text-cyan-300">
-              <span>💧</span> ธาตุน้ำ (อารมณ์ / ความรู้สึก / สัญชาตญาณ)
+              <span className="text-xs text-cyan-400">✦</span> ธาตุน้ำ (อารมณ์ / ความรู้สึก / สัญชาตญาณ)
             </span>
             <span className="font-mono text-cyan-200/80">{breakdown.water}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-900/80">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-300 transition-all duration-700 ease-out"
-              style={{ width: `${breakdown.water}%` }}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: breakdown.water / 100 }}
+              style={{ transformOrigin: "left" }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
+              className="h-full w-full rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-300"
             />
           </div>
         </div>
@@ -77,14 +84,17 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-medium text-indigo-300">
-              <span>🌪️</span> ธาตุลม (ตรรกะ / ความคิด / การตัดสินใจ)
+              <span className="text-xs text-indigo-400">✦</span> ธาตุลม (ตรรกะ / ความคิด / การตัดสินใจ)
             </span>
             <span className="font-mono text-indigo-200/80">{breakdown.air}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-900/80">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-600 via-purple-500 to-sky-300 transition-all duration-700 ease-out"
-              style={{ width: `${breakdown.air}%` }}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: breakdown.air / 100 }}
+              style={{ transformOrigin: "left" }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.16 }}
+              className="h-full w-full rounded-full bg-gradient-to-r from-indigo-600 via-purple-500 to-sky-300"
             />
           </div>
         </div>
@@ -93,14 +103,17 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-medium text-emerald-300">
-              <span>🌍</span> ธาตุดิน (การเงิน / ทรัพย์สิน / ความมั่นคง)
+              <span className="text-xs text-emerald-400">✦</span> ธาตุดิน (การเงิน / ทรัพย์สิน / ความมั่นคง)
             </span>
             <span className="font-mono text-emerald-200/80">{breakdown.earth}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-900/80">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-700 via-teal-600 to-green-400 transition-all duration-700 ease-out"
-              style={{ width: `${breakdown.earth}%` }}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: breakdown.earth / 100 }}
+              style={{ transformOrigin: "left" }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.24 }}
+              className="h-full w-full rounded-full bg-gradient-to-r from-emerald-700 via-teal-600 to-green-400"
             />
           </div>
         </div>
@@ -113,7 +126,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         </p>
         <p className="mt-1 text-amber-200/70">{breakdown.dominantInsightTh}</p>
         <p className="mt-2 text-amber-300/90">
-          💡 <span className="font-medium">วิธีปรับสมดุล:</span> {breakdown.balancingAdviceTh}
+          <span>✨</span> <span className="font-medium">วิธีปรับสมดุล:</span> {breakdown.balancingAdviceTh}
         </p>
       </div>
     </div>

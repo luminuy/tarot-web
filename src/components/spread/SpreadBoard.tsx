@@ -45,6 +45,9 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 }) => {
   const handleCardClick = (order: number) => {
     soundManager.playCardFlipSound();
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(15);
+    }
     if (onFlipCard) onFlipCard(order);
   };
 
@@ -78,7 +81,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
           <button
             type="button"
             onClick={onRevealAll}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-serif-th font-semibold border transition-all cursor-pointer flex items-center gap-1.5 shadow ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-serif-th font-semibold border transition-all cursor-pointer flex items-center gap-1.5 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
               isAllRevealed
                 ? "bg-[#100b20] border-[#e5c07b]/30 text-[#9c93b8]"
                 : "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] font-bold border-transparent shadow-[0_0_15px_rgba(229,192,123,0.4)] hover:opacity-90"
@@ -100,15 +103,24 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
           return (
             <motion.div
               key={pos.index}
+              role="button"
+              tabIndex={0}
+              aria-label={`ตำแหน่งที่ ${pos.index + 1}: ${pos.nameTh} - ${isRevealed ? (drawn?.card?.nameTh || "เปิดไพ่แล้ว") : "แตะหรือกดเพื่อเปิดไพ่"}`}
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: pos.index * 0.06 }}
-              className="flex flex-col items-center cursor-pointer"
+              className="flex flex-col items-center cursor-pointer focus-visible:outline-none group rounded-2xl"
               onClick={() => handleCardClick(pos.index)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleCardClick(pos.index);
+                }
+              }}
             >
               {/* Card Container with Active Glow */}
               <div
-                className={`relative transition-all duration-300 rounded-2xl ${
+                className={`relative transition-all duration-300 rounded-2xl group-focus-visible:ring-2 group-focus-visible:ring-[#ffd700] ${
                   isCurrentReading
                     ? "ring-4 ring-[#e5c07b] ring-offset-2 ring-offset-[#07040f] shadow-[0_0_30px_rgba(229,192,123,0.7)] scale-105"
                     : "hover:scale-105"

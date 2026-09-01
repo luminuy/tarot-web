@@ -93,6 +93,8 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
       {/* Responsive Persona Carousel (Mobile Swipe / Desktop Grid) */}
       <div
         ref={carouselRef}
+        role="radiogroup"
+        aria-label="เลือกสไตล์การทำนายของแม่หมอ"
         onScroll={handleCarouselScroll}
         className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-4 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
       >
@@ -103,13 +105,24 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
           return (
             <motion.div
               key={p.id}
+              role="radio"
+              tabIndex={0}
+              aria-checked={isSelected}
+              aria-label={`แม่หมอ ${p.nameTh} (${meta.roleTitle}) - ${p.tagline}`}
               whileHover={{ y: -5, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 onSelectPersona(p);
                 scrollToCard(idx);
               }}
-              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none ${
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelectPersona(p);
+                  scrollToCard(idx);
+                }
+              }}
+              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                 isSelected
                   ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_35px_rgba(229,192,123,0.45)]"
                   : "bg-gradient-to-b from-[#130d24]/95 to-[#07040f]/95 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
@@ -148,9 +161,9 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                       const greeting = PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
                       soundManager.speakProphecy(greeting, p.id);
                     }}
-                    className="p-1 rounded-full text-[10px] text-amber-300/70 hover:text-amber-200 hover:bg-amber-500/20 transition-all cursor-pointer"
-                    title="ฟังเสียงทักทาย"
-                    aria-label="ฟังเสียงทักทาย"
+                    className="p-1.5 rounded-full text-xs text-amber-300/80 hover:text-amber-200 hover:bg-amber-500/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+                    title={`ฟังเสียงทักทายของ ${p.nameTh}`}
+                    aria-label={`ฟังเสียงทักทายของ ${p.nameTh}`}
                   >
                     🔊
                   </button>
