@@ -375,7 +375,7 @@ ${cards.join("\n")}
             },
             body: JSON.stringify({
               contents: contentsPayload,
-              system_instruction: { parts: [{ text: systemInstruction }] },
+              systemInstruction: { parts: [{ text: systemInstruction }] },
               generationConfig: {
                 temperature: 0.7,
               },

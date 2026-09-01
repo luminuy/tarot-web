@@ -21,56 +21,10 @@ export function getGeminiApiKey(): string {
   return key;
 }
 
-const GEMINI_RESPONSE_SCHEMA = {
-  type: "OBJECT",
-  properties: {
-    opening: {
-      type: "STRING",
-      description: "คำทักทายและความรู้สึกแรกเมื่อเห็นไพ่ทั้งชุด 1-2 ประโยค ห้ามเฉลยรายละเอียดรายใบตรงนี้",
-    },
-    cards: {
-      type: "ARRAY",
-      description: "คำอ่านรายใบ ต้องมีครบทุกตำแหน่งที่ให้มา เรียงตาม position จากน้อยไปมาก",
-      items: {
-        type: "OBJECT",
-        properties: {
-          position: { type: "INTEGER", description: "index ตำแหน่งตามที่ระบุในข้อมูลไพ่" },
-          headline: { type: "STRING", description: "พาดหัวสั้นกระชับสรุปใจความของไพ่ใบนี้" },
-          reading: { type: "STRING", description: "คำอ่าน 2-3 ประโยคกระชับทรงพลัง เชื่อมโยงความหมายไพ่และตำแหน่งเข้ากับคำถาม" },
-        },
-        required: ["position", "headline", "reading"],
-      },
-    },
-    connections: {
-      type: "STRING",
-      description: "ไพ่ทั้งชุดคุยกันอย่างไร ชี้ความสัมพันธ์ที่มีอยู่จริง 2-3 ประโยค",
-    },
-    summary: {
-      type: "STRING",
-      description: "สรุปคำตอบต่อคำถามของผู้ถามโดยตรง 2-3 ประโยค",
-    },
-    advice: {
-      type: "ARRAY",
-      description: "สิ่งที่ผู้ถามลงมือทำได้จริงภายในสัปดาห์นี้ ข้อละหนึ่งประโยค 2-3 ข้อ",
-      items: { type: "STRING" },
-    },
-    timing: {
-      type: "STRING",
-      description: "กรอบเวลาโดยประมาณที่เรื่องน่าจะขยับ",
-    },
-    yesNoAnswer: {
-      type: "STRING",
-      enum: ["ใช่", "ไม่ใช่", "ยังไม่แน่"],
-      description: "ใส่ค่าเฉพาะเมื่อโหมดใช่/ไม่ใช่ถูกเปิด นอกนั้นให้เป็น null หรือเว้นว่าง",
-    },
-    mood: {
-      type: "STRING",
-      enum: ["สดใส", "อบอุ่น", "สงบ", "ครุ่นคิด", "ท้าทาย"],
-      description: "อารมณ์รวมของคำอ่านชุดนี้",
-    },
-  },
-  required: ["opening", "cards", "connections", "summary", "advice", "timing", "mood"],
-};
+// หมายเหตุ: เดิมส่ง responseSchema (OpenAPI subset) เข้า generationConfig เพื่อบังคับโครงสร้าง JSON
+// แต่ Gemini 3.x คืน 400 "invalid argument" กับ schema รูปแบบนั้น → เลิกใช้ · โครงสร้างบังคับผ่าน
+// system prompt + response_mime_type=application/json แทน · ฝั่ง parse มี parsePartialReading +
+// ReadingSchema.safeParse + fallbackReading รองรับกรณีโมเดลตอบไม่ตรงโครงอยู่แล้ว
 
 /**
  * โมเดลที่ลองเรียงกันจนกว่าจะเจอตัวที่เรียกได้ (loop ใน streamGeminiReading + chat + monthly-summary)
@@ -123,16 +77,15 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
   for (const model of CANDIDATE_GEMINI_MODELS) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
+    // camelCase ล้วน + ตัด thinkingConfig/responseSchema ออก —
+    // Gemini 3.x (3.6/3.5-lite) คืน 400 "invalid argument" ถ้ามี thinkingBudget:0 หรือ responseSchema แบบ OpenAPI เก่า
+    // JSON ที่ได้ยัง parse ได้ปกติผ่าน parsePartialReading + ReadingSchema.safeParse + fallback ด้านล่าง
     const requestBody = {
       contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-      system_instruction: { parts: [{ text: systemInstruction }] },
+      systemInstruction: { parts: [{ text: systemInstruction }] },
       generationConfig: {
-        response_mime_type: "application/json",
-        response_schema: GEMINI_RESPONSE_SCHEMA,
+        responseMimeType: "application/json",
         temperature: 0.7,
-        thinkingConfig: {
-          thinkingBudget: 0, // Disable chain-of-thought latency for high speed
-        },
       },
     };
 
