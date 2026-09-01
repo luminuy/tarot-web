@@ -162,15 +162,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
 
   // Rate Limiting & Concurrency Guard per IP
-  const clientIp = getClientIdentifier(request);
-  const limit = checkRateLimit(`chat:${clientIp}`, {
-    maxRequests: 30,
-    windowSeconds: 60,
-    maxConcurrent: 2,
-  });
+  const { isPrivilegedTestRequest } = await import("@/lib/security/privileged");
+  const privileged = await isPrivilegedTestRequest(request);
 
-  if (!limit.allowed) {
-    return createRateLimitResponse(limit.retryAfterSeconds, "คุณส่งข้อความเร็วเกินไป พักหายใจสักครู่แล้วค่อยพิมพ์ใหม่นะ");
+  let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
+  if (!privileged) {
+    const clientIp = getClientIdentifier(request);
+    limit = checkRateLimit(`chat:${clientIp}`, {
+      maxRequests: 30,
+      windowSeconds: 60,
+      maxConcurrent: 2,
+    });
+
+    if (!limit.allowed) {
+      return createRateLimitResponse(limit.retryAfterSeconds, "คุณส่งข้อความเร็วเกินไป พักหายใจสักครู่แล้วค่อยพิมพ์ใหม่นะ");
+    }
   }
 
   try {
