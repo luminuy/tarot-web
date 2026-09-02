@@ -271,18 +271,51 @@ export default function TarotPage() {
       const verifyError = searchParams.get("verify_error");
       const authError = searchParams.get("auth_error");
 
+      // 🧹 ล้าง auth query parameters ออกจาก URL ทันที
+      // ป้องกันไม่ให้ query string ค้างใน address bar ของเบราว์เซอร์ ซึ่งทำให้ผู้ใช้เห็นแบนเนอร์ซ้ำตอนรีเฟรช
+      if (isAuthSuccess || isVerified || isPwReset || verifyError || authError) {
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("auth_success");
+        cleanUrl.searchParams.delete("verified");
+        cleanUrl.searchParams.delete("pw_reset");
+        cleanUrl.searchParams.delete("verify_error");
+        cleanUrl.searchParams.delete("auth_error");
+        window.history.replaceState(
+          {},
+          "",
+          cleanUrl.pathname + (cleanUrl.search ? cleanUrl.search : "") + cleanUrl.hash
+        );
+      }
+
       if (isVerified) {
         setAuthBanner({
           type: "success",
           text: `ยืนยันอีเมลเรียบร้อยแล้ว ✦ รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมโบนัสต้อนรับอีก ${SIGNUP_BONUS} ครั้ง`,
         });
+        refreshEntitlement();
       } else if (isAuthSuccess) {
-        setAuthBanner({
-          type: "success",
-          text: `เข้าสู่ระบบเรียบร้อยแล้ว ✦ ตอนนี้คุณเปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง และคุยถามแม่หมอต่อได้`,
+        // ตรวจสอบเซสชันจริงก่อนแสดงแบนเนอร์ — ถ้าผู้ใช้ไม่ได้ล็อกอินจริง จะไม่แสดงแบนเนอร์เด็ดขาด
+        import("@/lib/auth/use-session").then(({ fetchSessionUser }) => {
+          fetchSessionUser({ force: true }).then((currentUser) => {
+            if (currentUser) {
+              setAuthBanner({
+                type: "success",
+                text: `เข้าสู่ระบบเรียบร้อยแล้ว ✦ ตอนนี้คุณเปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง และคุยถามแม่หมอต่อได้`,
+              });
+              refreshEntitlement();
+              import("@/lib/utils/history").then((m) => {
+                m.syncAnonymousHistoryToServer().then(({ merged }) => {
+                  if (merged > 0) {
+                    console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ ✦`);
+                  }
+                });
+              });
+            }
+          });
         });
       } else if (isPwReset) {
         setAuthBanner({ type: "success", text: "ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว เข้าสู่วิหารศักดิ์สิทธิ์ได้ทันที ✦" });
+        refreshEntitlement();
       } else if (verifyError === "expired") {
         setAuthBanner({ type: "error", text: "ลิงก์ยืนยันอีเมลหมดอายุ กรุณาขอลิงก์ใหม่จากเมนูโปรไฟล์" });
       } else if (verifyError) {
@@ -291,22 +324,19 @@ export default function TarotPage() {
         setAuthBanner({ type: "error", text: describeAuthError(authError) });
       }
 
-      if (isAuthSuccess || isVerified || isPwReset) {
-        // เพิ่งล็อกอิน/ยืนยัน → รีเฟรชสิทธิ์ (guest → member)
-        refreshEntitlement();
+      if (!isAuthSuccess) {
+        import("@/lib/utils/history").then((m) => {
+          if (isVerified || isPwReset) {
+            m.syncAnonymousHistoryToServer().then(({ merged }) => {
+              if (merged > 0) {
+                console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ ✦`);
+              }
+            });
+          } else {
+            m.fetchServerReadings();
+          }
+        });
       }
-
-      import("@/lib/utils/history").then((m) => {
-        if (isAuthSuccess || isVerified || isPwReset) {
-          m.syncAnonymousHistoryToServer().then(({ merged }) => {
-            if (merged > 0) {
-              console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ ✦`);
-            }
-          });
-        } else {
-          m.fetchServerReadings();
-        }
-      });
     }
   }, []);
 
