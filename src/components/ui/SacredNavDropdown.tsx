@@ -9,6 +9,7 @@ import {
   JournalScrollNavIcon,
   MarketplaceReaderNavIcon,
 } from "@/components/ui/TarotArtIcons";
+import { CoinSealIcon } from "@/components/entitlement/EntitlementIcons";
 import { soundManager } from "@/lib/utils/audio";
 
 const EASE = {
@@ -18,12 +19,14 @@ const EASE = {
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
+  onOpenPlans?: () => void;
   onReset?: () => void;
   canReset?: boolean;
 }
 
 export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   onOpenHistory,
+  onOpenPlans,
   onReset,
   canReset = false,
 }) => {
@@ -96,6 +99,17 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       Icon: TarotDeckNavIcon,
       badge: "78 ใบ",
     },
+    ...(onOpenPlans
+      ? [
+          {
+            label: "แพ็กเกจญาณพยากรณ์พิเศษ",
+            sublabel: "เปรียบเทียบสิทธิ์ ปลดล็อกผังใหญ่ 12 ภพ และเติมรอบ",
+            onClick: onOpenPlans,
+            Icon: CoinSealIcon,
+            badge: "✦ สิทธิ์/แพลน",
+          },
+        ]
+      : []),
     {
       label: "ปรึกษาแม่หมอตัวจริง",
       sublabel: "จองคิววิเคราะห์ดวงเชิงลึกกับนักพยากรณ์",
@@ -190,35 +204,57 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
             {/* Navigation Portals */}
             <div className="space-y-1 pt-0.5">
-              {navItems.map((item) => {
+              {navItems.map((item, idx) => {
                 const Icon = item.Icon;
+                const isAction = "onClick" in item && typeof item.onClick === "function";
+
+                const content = (
+                  <>
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1c1033] to-[#120a22] border border-[#e5c07b]/30 flex items-center justify-center text-[#e5c07b] group-hover:text-[#ffd700] group-hover:border-[#ffd700]/80 group-hover:shadow-[0_0_14px_rgba(229,192,123,0.35)] transition-all flex-shrink-0 mt-0.5">
+                      <Icon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-serif-th font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors">
+                          {item.label}
+                        </span>
+                        <span className="text-[9px] font-serif-th text-[#d4af37] bg-[#ffd700]/10 px-2 py-0.5 rounded-full border border-[#ffd700]/25">
+                          {item.badge}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
+                        {item.sublabel}
+                      </p>
+                    </div>
+                  </>
+                );
+
                 return (
-                  <div key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={() => {
-                        soundManager.playMenuTapSound();
-                        setIsOpen(false);
-                      }}
-                      className="w-full flex items-start gap-3 p-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-[#201238] hover:to-[#140b26] border border-transparent hover:border-[#ffd700]/30 hover:shadow-[0_0_15px_rgba(229,192,123,0.12)] transition-all duration-150 group cursor-pointer"
-                    >
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1c1033] to-[#120a22] border border-[#e5c07b]/30 flex items-center justify-center text-[#e5c07b] group-hover:text-[#ffd700] group-hover:border-[#ffd700]/80 group-hover:shadow-[0_0_14px_rgba(229,192,123,0.35)] transition-all flex-shrink-0 mt-0.5">
-                        <Icon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-serif-th font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors">
-                            {item.label}
-                          </span>
-                          <span className="text-[9px] font-serif-th text-[#d4af37] bg-[#ffd700]/10 px-2 py-0.5 rounded-full border border-[#ffd700]/25">
-                            {item.badge}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
-                          {item.sublabel}
-                        </p>
-                      </div>
-                    </Link>
+                  <div key={"href" in item && item.href ? item.href : `action-${idx}`}>
+                    {isAction ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          soundManager.playMenuTapSound();
+                          setIsOpen(false);
+                          item.onClick();
+                        }}
+                        className="w-full flex items-start gap-3 p-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-[#201238] hover:to-[#140b26] border border-transparent hover:border-[#ffd700]/30 hover:shadow-[0_0_15px_rgba(229,192,123,0.12)] transition-all duration-150 group cursor-pointer text-left"
+                      >
+                        {content}
+                      </button>
+                    ) : (
+                      <Link
+                        href={"href" in item ? (item.href as string) : "#"}
+                        onClick={() => {
+                          soundManager.playMenuTapSound();
+                          setIsOpen(false);
+                        }}
+                        className="w-full flex items-start gap-3 p-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-[#201238] hover:to-[#140b26] border border-transparent hover:border-[#ffd700]/30 hover:shadow-[0_0_15px_rgba(229,192,123,0.12)] transition-all duration-150 group cursor-pointer"
+                      >
+                        {content}
+                      </Link>
+                    )}
                   </div>
                 );
               })}
