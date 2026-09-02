@@ -165,7 +165,12 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
   };
 
   if (loading) {
-    return <div className="w-20 h-9 rounded-2xl bg-white/5 animate-pulse" />;
+    return (
+      <div className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-[#140b24]/90 border border-[#e5c07b]/35 text-[#f5deaa] text-xs font-serif-th font-bold flex items-center gap-1.5 whitespace-nowrap select-none opacity-80 pointer-events-none">
+        <span className="text-[#ffd700] text-xs">✦</span>
+        <span>เข้าสู่ระบบ</span>
+      </div>
+    );
   }
 
   if (!user) {

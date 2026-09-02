@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0051 · 2026-09-02 11:04 · 🟡 Medium · eliminate ghost slot skeleton flicker during auth state transitions and login/logout
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ขณะเข้าหรือออกจากระบบ มีกล่องสี่เหลี่ยมคล้ายช่องปุ่มสีเทากระพริบโผล่ขึ้นมาแวบหนึ่งแล้วหายไปข้างปุ่มเข้าสู่ระบบ |
+| **สาเหตุราก** | QuotaMeter เรนเดอร์ skeleton box ตอน ent===null แล้วยุบตัวเป็น null เมื่อสิทธิ์ปิดอยู่ และ UserProfileBadge เรนเดอร์ pulsing box ว่างเปล่าตอนรอเซสชัน |
+| **การแก้ไข** | ลบ skeleton box ใน QuotaMeter ออกโดยคืน null ทันทีหาก view เป็น null และใน UserProfileBadge ใช้ solid placeholder ที่มีขนาดเดียวกับปุ่มเข้าสู่ระบบจริงเพื่อป้องกัน layout shift |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามเรนเดอร์ skeleton ในคอมโพเนนต์ที่อาจยุบเป็น null และใน UserProfileBadge ให้ใช้ solid placeholder มิติเดียวกับปุ่มจริงแทนกล่องกระพริบ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify 16 gates passed, typecheck 0 errors, no ghost box flicker on load |
+| **บันทึกโดย** | Antigravity AI · branch `fix/eliminate-ghost-slot-skeleton` · commit `87d0314` |
+
+
 ### INC-0050 · 2026-09-02 10:19 · 🟡 Medium · strip auth query params from URL via replaceState and verify user session before displaying login banner
 
 | หัวข้อ | รายละเอียด |

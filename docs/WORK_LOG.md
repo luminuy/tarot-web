@@ -34,6 +34,21 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: ขจัดอาการช่องปุ่มกระพริบโผล่มาแล้วหายไป (Ghost Slot Skeleton Flicker) ตอนเข้า/ออกจากระบบ
+
+**อาการที่ผู้ใช้เจอ**:
+- บริเวณปุ่มเข้าสู่ระบบด้านขวาบน *"เวลาเข้าออกระบบ เหมือนมีอะไรเหมือนช่องปุ่ม โผล่มาแป๊บนึงแล้วหายไป"*
+
+**สาเหตุจริง**:
+1. **Ghost Skeleton ใน `QuotaMeter.tsx`**: เมื่อโหลดหน้าเว็บหรือเข้า/ออกจากระบบ `ent` จะมีสถานะเป็น `null` ชั่วคราว ซึ่งโค้ดเดิมเขียนดัก `if (ent === null) return <div className="h-9 w-[68px] animate-pulse rounded-xl bg-white/5 sm:w-28" />` ทำให้มีกล่อง Skeleton สี่เหลี่ยมสีเทากระพริบขึ้นมา พอ API ตรวจพบว่าระบบสิทธิ์ปิดอยู่หรือ `view === null` ตัวคอมโพเนนต์จะกลายเป็น `null` ส่งผลให้กล่องปุ่มนั้นยุบตัวหายไปทันที (Ghost Slot Pop & Collapse)
+2. **Pulse Skeleton ใน `UserProfileBadge.tsx`**: ระหว่างรอตรวจเซสชัน (`loading === true`) ตัวคอมโพเนนต์เคยเรนเดอร์ `<div className="w-20 h-9 rounded-2xl bg-white/5 animate-pulse" />` ทำให้เกิดกล่องกระพริบช่องที่สองก่อนจะเปลี่ยนร่างเป็นปุ่มเข้าสู่ระบบ
+
+**สิ่งที่แก้ไข**:
+1. **ตัด Skeleton หลอกใน `QuotaMeter.tsx` ออก**: ถ้า `view === null` ให้คืนค่า `null` ทันทีตั้งแต่แรก ไม่ต้องเรนเดอร์กล่องผี (Ghost box) ที่จะยุบตัวทิ้งในภายหลัง
+2. **ใช้ Stable Seamless Placeholder ใน `UserProfileBadge.tsx`**: ระหว่างที่รอโหลดเซสชัน ให้เรนเดอร์ปุ่มโครงสร้างแบบเดียวกับ `✦ เข้าสู่ระบบ` ด้วยมิติขนาดเดิมเป๊ะ ทำให้ปุ่มอยู่นิ่งสนิท ไม่มีช่องว่างโผล่มาแวบหนึ่งแล้วเปลี่ยนรูปทรงอีกต่อไป Zero Layout Shift & Zero Flicker 100%
+
+---
+
 ### 🗓️ 2026-09-02: ยกระดับความแตกต่างของแพ็กเกจ (Value Differentiators) & เปลี่ยนชื่อแพ็กเกจเป็น "ญาณพยากรณ์พิเศษ"
 
 **สิ่งที่ผู้ใช้ต้องการ**:
