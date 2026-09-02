@@ -14,21 +14,21 @@ import { recordEvent, recordEvents } from "@/lib/stats/record";
 export const runtime = "nodejs";
 
 const BodySchema = z.object({
-  message: z.string().min(1).max(500),
+  message: z.string().min(1, "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม").max(2000, "คำถามยาวเกิน 2,000 ตัวอักษร"),
   history: z
     .array(
       z.object({
         sender: z.enum(["user", "bot"]),
-        text: z.string().max(2000),
+        text: z.string().max(50000),
       })
     )
-    .max(20)
+    .max(50)
     .optional(),
   readingSnapshot: z
     .object({
-      question: z.string().max(500).optional(),
+      question: z.string().max(1000).optional(),
       spreadId: z.string().max(100).optional(),
-      summary: z.string().max(2000).optional(),
+      summary: z.string().max(10000).optional(),
       personaId: z.string().max(100).optional(),
       drawn: z
         .array(
@@ -199,9 +199,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   try {
-    const parsed = BodySchema.safeParse(await request.json().catch(() => null));
+    const rawBody = await request.json().catch(() => null);
+    const parsed = BodySchema.safeParse(rawBody);
     if (!parsed.success) {
-      return NextResponse.json({ error: "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม" }, { status: 400 });
+      const firstIssue = parsed.error.issues[0];
+      console.warn("[Chat API] Schema validation failed:", JSON.stringify(firstIssue));
+      const errorMessage =
+        firstIssue?.path[0] === "message"
+          ? (firstIssue.message || "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม")
+          : "ข้อมูลการสนทนาไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง";
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
     const userQuestion = parsed.data.message;
@@ -358,7 +365,7 @@ ${cards.join("\n")}
           // จนคำตอบวนซ้ำและไม่ต่อเนื่องเหมือนแชท AI จริง — ขยายเป็น 10
           const rawHistory = history.slice(-10).map((h) => ({
             role: h.sender === "user" ? "user" : "model",
-            parts: [{ text: h.text }],
+            parts: [{ text: h.text.slice(0, 4000) }],
           }));
           rawHistory.push({
             role: "user",
