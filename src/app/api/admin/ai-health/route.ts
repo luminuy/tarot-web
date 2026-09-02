@@ -4,7 +4,9 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { kvGetJSON, KEY } from "@/lib/platform/kv-store";
 import { utcDay } from "@/lib/stats/record";
 import { getAiDailyCap } from "@/lib/security/ai-budget";
-import { CANDIDATE_GEMINI_MODELS, extractGeminiAnswer } from "@/lib/ai/gemini";
+import { CANDIDATE_GEMINI_MODELS, CHAT_GEMINI_MODELS, extractGeminiAnswer } from "@/lib/ai/gemini";
+import { buildSystemPrompt } from "@/lib/ai/prompt";
+import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 
 export const runtime = "nodejs";
 
@@ -50,7 +52,9 @@ export async function GET() {
     configured: !!apiKey,
     envVar: keyFromEnv,
     length: apiKey?.length ?? 0,
-    looksLikeGoogleKey: !!apiKey && apiKey.startsWith("AIza"),
+    // เป็นแค่ข้อสังเกต ไม่ใช่คำตัดสิน — Google ออกคีย์หลายรูปแบบและมีคีย์ที่ไม่ขึ้นต้น AIza
+    // แต่เรียกงานได้จริง · ตัวชี้ขาดคือผลยิงจริงในตาราง models ด้านล่างเท่านั้น
+    startsWithAIza: !!apiKey && apiKey.startsWith("AIza"),
   };
 
   if (!apiKey) {
@@ -158,6 +162,94 @@ export async function GET() {
     key,
     budget,
     models,
+    chatProbe: await probeRealChatPayload(apiKey, scrub),
     checkedAt: new Date().toISOString(),
   });
+}
+
+/**
+ * ยิงด้วย "payload แบบเดียวกับห้องคุยจริง" — system prompt เต็ม + ไพ่ + ประวัติสนทนา
+ * ------------------------------------------------------------------------------
+ * ping สั้น ๆ ด้านบนผ่านไม่ได้แปลว่าห้องคุยจะผ่าน เพราะ prompt จริงหนักกว่ามาก
+ * และโมเดลต้องใช้เวลาคิดนานกว่า · ช่องนี้จึงเป็นตัวชี้ขาดว่าแชทใช้งานได้จริงไหม
+ */
+async function probeRealChatPayload(
+  apiKey: string,
+  scrub: (t: string) => string,
+): Promise<Array<Record<string, unknown>>> {
+  const personaId = "warm";
+  let systemInstruction: string;
+  try {
+    const overrideDoc = await getContentOverrides();
+    systemInstruction = `${buildSystemPrompt(personaId, {
+      systemCore: resolveSystemCore(overrideDoc),
+      persona: resolvePersona(overrideDoc, personaId),
+    })}
+
+## บริบทการสนทนาส่วนตัว (ทดสอบระบบจากแผงแอดมิน)
+• คำถามตั้งต้น: "ภาพรวมชีวิต"
+• ไพ่ที่หยิบได้จริงในรอบนี้: ใบที่ 1 ความตาย (Death) · ไพ่ตรง
+• สรุปคำทำนายเดิม: "กำลังอยู่ในช่วงเปลี่ยนผ่านครั้งสำคัญ"
+
+ตอบกระชับ 2-4 ประโยคตามบุคลิกแม่หมอ`;
+  } catch (e) {
+    return [{ model: "-", ok: false, error: `สร้าง system prompt ไม่สำเร็จ: ${String(e).slice(0, 200)}` }];
+  }
+
+  const out: Array<Record<string, unknown>> = [];
+  for (const [idx, model] of CHAT_GEMINI_MODELS.entries()) {
+    const startedAt = Date.now();
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), idx === 0 ? 30000 : 15000);
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          signal: controller.signal,
+          headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: "ขยายความไพ่ใบนี้ให้หน่อย" }] }],
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            generationConfig: { temperature: 0.7 },
+          }),
+        },
+      );
+      clearTimeout(timeoutId);
+      const elapsedMs = Date.now() - startedAt;
+
+      if (!res.ok) {
+        out.push({
+          model,
+          ok: false,
+          status: res.status,
+          elapsedMs,
+          error: scrub(await res.text().catch(() => "")),
+        });
+        continue;
+      }
+      const data = (await res.json()) as any;
+      const answer = extractGeminiAnswer(data);
+      out.push({
+        model,
+        ok: !!answer,
+        status: 200,
+        elapsedMs,
+        promptChars: systemInstruction.length,
+        finishReason: data?.candidates?.[0]?.finishReason ?? null,
+        answerPreview: answer.slice(0, 160),
+        error: answer ? null : "ตอบ 200 แต่แยกข้อความคำตอบไม่ได้",
+      });
+      if (answer) break; // เจอตัวที่ตอบได้แล้ว เหมือนห้องคุยจริงที่จะหยุดที่ตัวแรกที่สำเร็จ
+    } catch (e) {
+      out.push({
+        model,
+        ok: false,
+        status: null,
+        elapsedMs: Date.now() - startedAt,
+        error: scrub(e instanceof Error ? `${e.name}: ${e.message}` : String(e)),
+      });
+    }
+  }
+  return out;
 }

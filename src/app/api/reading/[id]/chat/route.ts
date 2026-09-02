@@ -334,17 +334,17 @@ ${cards.join("\n")}
 
     const geminiKey = !aiCapHit ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY : undefined;
     if (geminiKey) {
-      const { CANDIDATE_GEMINI_MODELS, extractGeminiAnswer } = await import("@/lib/ai/gemini");
-      const modelsToTry = CANDIDATE_GEMINI_MODELS.slice(0, 3);
+      const { CHAT_GEMINI_MODELS, extractGeminiAnswer } = await import("@/lib/ai/gemini");
+      const modelsToTry = CHAT_GEMINI_MODELS;
 
       for (const [modelIdx, model] of modelsToTry.entries()) {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         try {
-          // Gemini 3.x เปิด "thinking" เป็นค่าเริ่มต้น รอบคิดกินเวลาเกิน 8 วินาทีได้บ่อย
-          // ของเดิมตั้ง 8s ทุกตัว → abort ครบทั้ง 3 โมเดล แล้วตกไปคำตอบสำเร็จรูปเงียบ ๆ
-          // ให้ตัวแรก (ตัวที่เก่งสุด) มีเวลาคิดจริง 20s ตัวสำรองค่อยรีบ 12s
+          // Gemini 3.x เปิด "thinking" เป็นค่าเริ่มต้น และ prompt ของแชทหนักกว่า ping ทดสอบมาก
+          // (system prompt เต็ม + ไพ่ทั้งชุด + ประวัติสนทนา) จึงต้องเผื่อเวลาคิดให้พอจริง
+          // ตัวหลัก 30s · ตัวสำรอง (flash-lite ซึ่งวัดได้ 768ms) 15s ก็เหลือเฟือ
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), modelIdx === 0 ? 20000 : 12000);
+          const timeoutId = setTimeout(() => controller.abort(), modelIdx === 0 ? 30000 : 15000);
 
           // เดิมส่งแค่ 4 ข้อความ (= คุยกันแค่ 2 รอบ) แม่หมอจึงลืมบริบทเร็วมาก
           // จนคำตอบวนซ้ำและไม่ต่อเนื่องเหมือนแชท AI จริง — ขยายเป็น 10

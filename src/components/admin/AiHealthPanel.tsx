@@ -21,7 +21,8 @@ interface Health {
   verdict: "healthy" | "no_api_key" | "ai_daily_cap" | "gemini_unavailable";
   summary: string;
   nextStep: string;
-  key: { configured: boolean; envVar: string | null; length: number; looksLikeGoogleKey: boolean };
+  key: { configured: boolean; envVar: string | null; length: number; startsWithAIza: boolean };
+  chatProbe?: Array<ModelResult & { promptChars?: number }>;
   budget: { usedToday: number; dailyCap: number; memberCapReached: boolean; guestCapReached: boolean };
   models: ModelResult[];
   checkedAt: string;
@@ -107,8 +108,8 @@ export default function AiHealthPanel() {
               <p className="text-[11px] uppercase tracking-widest text-[#e5c07b]">คีย์ AI</p>
               <p className="mt-1 text-xs text-[#cfc8e2]">
                 {data.key.configured
-                  ? `ตั้งไว้แล้วที่ ${data.key.envVar} · ยาว ${data.key.length} ตัว · รูปแบบ ${
-                      data.key.looksLikeGoogleKey ? "ถูกต้อง (ขึ้นต้น AIza)" : "น่าสงสัย (ไม่ได้ขึ้นต้นด้วย AIza)"
+                  ? `ตั้งไว้แล้วที่ ${data.key.envVar} · ยาว ${data.key.length} ตัว${
+                      data.key.startsWithAIza ? " · ขึ้นต้น AIza" : ""
                     }`
                   : "ยังไม่ได้ตั้ง GEMINI_API_KEY / GOOGLE_API_KEY"}
               </p>
@@ -162,6 +163,40 @@ export default function AiHealthPanel() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {data.chatProbe && data.chatProbe.length > 0 && (
+            <div className="space-y-2">
+              <div>
+                <h3 className="text-sm font-bold text-[#f5deaa]">ทดสอบแบบห้องคุยจริง</h3>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-[#9c93b8]">
+                  ยิงด้วย prompt ชุดเดียวกับที่ห้องคุยใช้จริง (บุคลิกแม่หมอเต็ม + ไพ่ + ประวัติสนทนา)
+                  — ผ่าน ping สั้น ๆ ไม่ได้แปลว่าห้องคุยจะผ่าน ช่องนี้คือตัวชี้ขาด
+                </p>
+              </div>
+              {data.chatProbe.map((m) => (
+                <div
+                  key={m.model}
+                  className={`rounded-xl border px-4 py-3 text-xs ${
+                    m.ok ? "border-emerald-500/35 bg-emerald-950/20" : "border-red-500/35 bg-red-950/15"
+                  }`}
+                >
+                  <p className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-[11px] text-[#cfc8e2]">{m.model}</span>
+                    <span className={m.ok ? "font-semibold text-emerald-300" : "font-semibold text-red-300"}>
+                      {m.ok ? "ตอบได้จริง" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
+                    </span>
+                    <span className="font-mono text-[11px] text-[#9c93b8]">{m.elapsedMs}ms</span>
+                    {m.promptChars ? (
+                      <span className="text-[10px] text-[#9c93b8]">prompt {m.promptChars} ตัวอักษร</span>
+                    ) : null}
+                  </p>
+                  <p className={`mt-1.5 leading-relaxed ${m.ok ? "text-[#cfc8e2]" : "break-all text-red-300/90"}`}>
+                    {m.ok ? `“${m.answerPreview}”` : m.error}
+                  </p>
+                </div>
+              ))}
             </div>
           )}
 
