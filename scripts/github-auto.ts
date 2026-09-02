@@ -262,6 +262,34 @@ function actionPr(argv: string[]): void {
  * 🔒 ความปลอดภัย: ลบเฉพาะ branch ที่ยืนยันจาก GitHub แล้วว่า PR อยู่ในสถานะ MERGED
  * และจะไม่แตะ branch ปัจจุบัน หรือ branch ที่ถูก checkout อยู่ใน worktree อื่น
  */
+/** true ถ้าเครื่องนี้มีคำสั่ง `gh` ให้เรียกได้จริง */
+function hasGhCli(): boolean {
+  return shQuiet("gh", ["--version"]) !== null;
+}
+
+/**
+ * ตรวจว่า branch ถูก merge เข้า main ไปแล้วหรือยัง **โดยไม่พึ่ง `gh`**
+ *
+ * ใช้ตอน environment ไม่มี GitHub CLI (เช่น Claude Code บนเว็บ) — ของเดิมพอเรียก `gh`
+ * ไม่ได้จะได้ค่าว่างแล้วสรุปว่า "ยังไม่ได้เปิด PR" ทั้งที่ PR อาจ merge ไปแล้ว
+ * รายงานผิดแบบนี้อันตรายกว่าไม่รายงาน เพราะไปกล่าวหาคนที่ทำถูกแล้ว (INC-0043)
+ */
+function isBranchContentInMain(branch: string): boolean {
+  // ต้องเคยถูก push ขึ้นไปเป็น branch ของตัวเองมาก่อน — กันไม่ให้ลบ branch ใหม่ที่เพิ่งแตกไว้
+  // แล้วยังไม่ได้ commit อะไร (branch แบบนั้นก็ "ไม่ต่างจาก main" เหมือนกัน)
+  const upstream = shQuiet("git", ["config", "--get", `branch.${branch}.merge`]);
+  if (upstream !== `refs/heads/${branch}`) return false;
+
+  // GitHub ลบ branch ให้อัตโนมัติหลัง squash merge — ถ้ายังอยู่บน remote แปลว่ายังไม่จบ
+  const remoteStillThere = shQuiet("git", ["ls-remote", "--exit-code", "--heads", "origin", branch]) !== null;
+  if (remoteStillThere) return false;
+
+  // squash merge ทำให้ commit hash ไม่ตรงกับบน main เทียบ hash อย่างเดียวจึงใช้ไม่ได้
+  // ต้องเทียบ "เนื้อหา" ว่าไม่เหลืออะไรที่ main ยังไม่มี
+  const diff = shQuiet("git", ["diff", "--stat", `origin/main..${branch}`]);
+  return diff === "";
+}
+
 function actionTidy(dryRun = false): void {
   const repo = getRepoSlug();
   const current = getBranch();
@@ -290,7 +318,49 @@ function actionTidy(dryRun = false): void {
   let skipped = 0;
   const orphanWork: string[] = []; // branch ที่มีงานค้างแต่ยังไม่ได้เปิด PR
 
+  const ghAvailable = hasGhCli();
+  if (!ghAvailable) {
+    console.log("  ℹ️  เครื่องนี้ไม่มีคำสั่ง `gh` — จะตรวจสถานะ merge จาก git โดยตรงแทน");
+  }
+
   for (const branch of locals) {
+    // ไม่มี gh = ถามสถานะ PR ไม่ได้ ต้องตัดสินจาก git เอง ห้ามเดาว่า "ยังไม่ได้เปิด PR"
+    if (!ghAvailable) {
+      if (isBranchContentInMain(branch)) {
+        if (branch === current) {
+          console.log(`  ⚠️  ${branch} — เนื้อหาเข้า main แล้ว แต่เป็น branch ที่อยู่ตอนนี้ (git checkout main ก่อน)`);
+          skipped++;
+          continue;
+        }
+        if (worktreeBranches.has(branch)) {
+          console.log(`  ⚠️  ${branch} — ถูก checkout อยู่ใน worktree อื่น (ข้ามเพื่อความปลอดภัย)`);
+          skipped++;
+          continue;
+        }
+        if (dryRun) {
+          console.log(`  🗑️  ${branch} — เนื้อหาเข้า main แล้วและ branch หายจาก remote (จะถูกลบ)`);
+          removed++;
+          continue;
+        }
+        shQuiet("git", ["branch", "-D", branch]);
+        console.log(`  ✅ ${branch} — เนื้อหาเข้า main แล้วและ branch หายจาก remote → ลบทิ้ง`);
+        removed++;
+        continue;
+      }
+
+      const aheadNoGh = Number(shQuiet("git", ["rev-list", "--count", `origin/main..${branch}`]) ?? "0");
+      if (aheadNoGh > 0) {
+        console.log(
+          `  ❓ ${branch} — มี ${aheadNoGh} commit นำหน้า main · ตรวจไม่ได้ว่ามี PR หรือยัง (ไม่มี gh)`,
+        );
+        console.log(`      ถ้ายังไม่ได้เปิด PR ให้เปิดผ่าน GitHub API/MCP — ห้ามหยุดแค่ push (INC-0043)`);
+      } else {
+        console.log(`  ⏭️  ${branch} — ไม่มี commit ค้าง (ข้าม)`);
+      }
+      skipped++;
+      continue;
+    }
+
     // อ่าน JSON ดิบแล้ว parse ในโค้ด แทนการใช้ jq interpolation
     // (สตริง `\(...)` ของ jq จะถูก JS กลืน backslash ทิ้งจนคำสั่งเพี้ยน)
     const raw = shQuiet("gh", [
