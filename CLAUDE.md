@@ -5,30 +5,31 @@
 > 💬 **สไตล์การตอบแชท**: ตอบสั้น กระชับ ได้ใจความ ไม่ต้องอธิบายยืดยาว (คำสั่งจากเจ้าของโปรเจกต์)
 
 > ⚠️ **ก่อนแก้โค้ด ต้องอ่าน 4 ไฟล์นี้เสมอ**
-> 1. [docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md) — บทเรียนความผิดพลาด + กฎป้องกันถาวร **ทำผิดซ้ำ = บกพร่องร้ายแรงสุด**
-> 2. [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) — บั๊กค้าง กันแก้ซ้ำกับ Agent อื่น
-> 3. [docs/BACKLOG.md](docs/BACKLOG.md) — งานที่เหลือ + กติกา (ห้าม push ตรง main, 1 milestone = 1 PR)
+> 1. [docs/INDEX.md](docs/INDEX.md) — ศูนย์รวมสารบรรณและแผนที่เอกสารทั้งหมด
+> 2. [docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md) — บทเรียนความผิดพลาด + กฎป้องกันถาวร **ทำผิดซ้ำ = บกพร่องร้ายแรงสุด**
+> 3. [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) — บั๊กค้าง กันแก้ซ้ำกับ Agent อื่น
 > 4. [docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md) — คู่มือแม่บท (หัวข้อ 0 = มาตรฐานบังคับ)
 
 ---
 
-## 🧭 ดัชนีเอกสาร
+## 🧭 ดัชนีเอกสาร (Documentation Index & Sitemap)
 
 | ไฟล์ | เนื้อหา |
 |---|---|
-| [INCIDENT_LOG.md](docs/INCIDENT_LOG.md) | บทเรียนความผิดพลาด (INC-0001–0019) — อ่านก่อนเสมอ |
-| [KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | บั๊กค้าง/สถานะระบบ |
-| [WORK_LOG.md](docs/WORK_LOG.md) | ประวัติงานที่ทำ — **ต้องอัปเดตทุกครั้ง** |
-| [AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md) | กฎการทำงานร่วมกัน, แบ่ง Domain, ดีไซน์ |
-| [CLOUDFLARE_DEPLOYMENT_GUIDE.md](docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md) | ขั้นตอน deploy ขึ้น Cloudflare Workers |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | สถาปัตยกรรม + Provably Fair Flow |
-| [INTERACTIVE_CARD_PICKING.md](docs/INTERACTIVE_CARD_PICKING.md) | ระบบจับไพ่ด้วยตนเอง |
-| [AGENTS_TASK_PLAN.md](docs/AGENTS_TASK_PLAN.md) | แผนกระจายงาน 5 เอเจนท์ + Milestone |
-| [ADMIN_PANEL.md](docs/ADMIN_PANEL.md) | แผงแอดมิน `/admin` (Phase 1: M0–M3 เสร็จ) |
-| [MARKETPLACE.md](docs/MARKETPLACE.md) | HANDOFF Phase 2 — Marketplace แม่หมอ M4–M7 |
-| [ENTITLEMENT_PLAN.md](docs/ENTITLEMENT_PLAN.md) | HANDOFF — ระบบสมาชิก/โควตาเปิดไพ่ |
-| [PENDING_SETUP.md](docs/PENDING_SETUP.md) | งานตั้งค่า production ที่ค้าง (สำหรับเจ้าของ) |
-| [ENTITLEMENT_ABUSE_MODEL.md](docs/ENTITLEMENT_ABUSE_MODEL.md) | ระบบกันโกงสิทธิ์ฟรี — threat model |
+| [docs/INDEX.md](docs/INDEX.md) | 🌟 แผนที่นำทางเอกสารทั้งหมดและคำแนะนำการอ่านตามบทบาท |
+| [docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md) | บทเรียนความผิดพลาด (INC-0001 เป็นต้นไป) — อ่านก่อนเสมอ |
+| [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | บั๊กค้าง/สถานะระบบ (อัปเดตล่าสุด 2026-09-02) |
+| [docs/WORK_LOG.md](docs/WORK_LOG.md) | ประวัติงานที่ทำ — **ต้องอัปเดตทุกครั้ง** |
+| [docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md) | กฎการทำงานร่วมกัน, แบ่ง Domain, ดีไซน์ |
+| [docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md](docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md) | ขั้นตอน deploy ขึ้น Cloudflare Workers & Custom Domain |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | สถาปัตยกรรมระดับองค์กร + Provably Fair Flow |
+| [docs/ADMIN_PANEL.md](docs/ADMIN_PANEL.md) | แผงแอดมิน `/admin` พร้อมตรวจสุขภาพระบบ Cloud Health |
+| [docs/PENDING_SETUP.md](docs/PENDING_SETUP.md) | ทะเบียนการตั้งค่าและ Secrets บน Production (ครบ 100%) |
+| [docs/specs/INTERACTIVE_CARD_PICKING.md](docs/specs/INTERACTIVE_CARD_PICKING.md) | ระบบจับไพ่ด้วยตนเอง 3D |
+| [docs/specs/MARKETPLACE.md](docs/specs/MARKETPLACE.md) | สเปกระบบ Marketplace แม่หมอตัวจริง |
+| [docs/specs/ENTITLEMENT_ABUSE_MODEL.md](docs/specs/ENTITLEMENT_ABUSE_MODEL.md) | ระบบกันโกงสิทธิ์ฟรี — threat model |
+| [docs/plans/ENTITLEMENT_PLAN.md](docs/plans/ENTITLEMENT_PLAN.md) | แผนพัฒนาระบบสมาชิกและโควตาเปิดไพ่ |
+| [docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md) | แผนกระจายงาน 5 เอเจนท์เฉพาะทาง |
 
 ---
 

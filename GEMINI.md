@@ -9,16 +9,18 @@
 
 ---
 
-## 🧭 เอกสารสำคัญในโปรเจกต์ (Documentation Index)
+## 🧭 เอกสารสำคัญในโปรเจกต์ (Documentation Index & Sitemap)
 
-0. **[docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md)**: **(บทเรียนจากความผิดพลาด — อ่านก่อนเสมอ)** ทุกความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร (INC-0001 ถึง INC-0019)
+- 🌟 **[docs/INDEX.md](docs/INDEX.md)**: **(ศูนย์รวมแผนที่นำทางเอกสารทั้งหมด)** แผนผังภาพรวมและคำแนะนำการอ่านตามบทบาท
+0. **[docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md)**: **(บทเรียนจากความผิดพลาด — อ่านก่อนเสมอ)** ทุกความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร (INC-0001 เป็นต้นไป)
 0.5 **[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)**: **(บั๊กค้างและสถานะระบบ)** ดูก่อนเริ่มงานใหม่เพื่อไม่แก้ซ้ำซ้อนกับ Agent ตัวอื่น
 1. **[docs/WORK_LOG.md](docs/WORK_LOG.md)**: **(MANDATORY WORK LOG)** บันทึกประวัติสิ่งที่ทำเสร็จแล้ว อะไรแก้ไปแล้ว และอะไรค้างอยู่ (ต้องอัปเดตทุกครั้งหลังทำงานเสร็จ)
 2. **[docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md)**: **(MASTER RULEBOOK)** กฎเหล็กการทำงานร่วมกันของ AI, การแบ่ง Domain, กฎดีไซน์ทองคำ
 3. **[docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md](docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md)**: **(DEPLOY GUIDE)** ขั้นตอนการนำเว็บขึ้น Cloudflare Workers พร้อมระบบ Secret & Custom Domain
 4. **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**: สถาปัตยกรรมระดับองค์กร (Enterprise Architecture), กลไกการเข้ารหัสความโปร่งใส (Provably Fair Flow)
-5. **[docs/INTERACTIVE_CARD_PICKING.md](docs/INTERACTIVE_CARD_PICKING.md)**: รายละเอียดระบบและ Component สำหรับการให้คนจับไพ่ด้วยตนเอง
-6. **[docs/AGENTS_TASK_PLAN.md](docs/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
+5. **[docs/ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: คู่มือและสถาปัตยกรรมแผงควบคุมผู้ดูแลระบบ (Admin Panel & Cloud Health)
+6. **[docs/specs/INTERACTIVE_CARD_PICKING.md](docs/specs/INTERACTIVE_CARD_PICKING.md)**: รายละเอียดระบบและ Component สำหรับการให้คนจับไพ่ด้วยตนเอง
+7. **[docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
 
 ---
 

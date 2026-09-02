@@ -34,6 +34,22 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: ปรับปรุงโครงสร้างเอกสารแม่บทสู่ระดับโลก (World-Class Documentation Overhaul)
+
+**คำขอของผู้ใช้**: *"เคลียร์ปรับปรุง md ให้โอเค รวมไฟล์จัดหมวด หมู่อย่างดี เขียนอย่างดี รัดกลุ่ม มีระเบียบ หลักการคิดแบบ วิศวกรระดับโลก"*
+
+**สิ่งที่ทำเสร็จแล้ว**:
+1. **เคลียร์ Root Directory 100%**: ย้ายไฟล์แผนงาน 5 ไฟล์ที่กระจัดกระจายอยู่ใน Root (`AI_COST_CONTROL_PLAN.md`, `EMAIL_AUTH_PLAN.md`, `PROVABLY_FAIR_PLAN.md`, `RETENTION_PLAN.md`, `UX_PERF_PLAN.md`) เข้าสู่ `docs/plans/`
+2. **จัดหมวดหมู่เอกสารใน `docs/` เป็น 4 ชั้นชัดเจน**:
+   - `docs/adr/`: รวมสถาปัตยกรรม ADR-001 (PDPA) และ ADR-002 (Bot Challenge)
+   - `docs/specs/`: รวมข้อกำหนดฟังก์ชันระบบ (`INTERACTIVE_CARD_PICKING.md`, `MARKETPLACE.md`, `ENTITLEMENT_ABUSE_MODEL.md`)
+   - `docs/plans/`: รวมแผนงานและบันทึกประวัติการพัฒนา (`ENTITLEMENT_PLAN.md`, `AGENTS_TASK_PLAN.md`, `AUDIT_2026-09-01.md`, `BACKLOG.md`)
+3. **สร้างดัชนีแม่บท `docs/INDEX.md`**: จัดทำแผนผังสารบรรณเอกสารทั้งระบบ พร้อมตารางบทบาท (AI Agent, Product Owner, DevOps) และสรุปคำสั่งสำคัญ
+4. **อัปเดตสถานะเอกสารเป็นปัจจุบัน 100%**:
+   - `docs/PENDING_SETUP.md`: ปรับสถานะโดเมน `seertarot.net`, LINE Login, Google OAuth, Resend Email และ D1 Migration เป็นเสร็จสมบูรณ์
+   - `docs/KNOWN_ISSUES.md`: ปิดบั๊ก `ISSUE-012` เป็น Resolved
+   - `README.md`, `GEMINI.md`, `CLAUDE.md`: ปรับตารางสารบรรณและลิงก์เอกสารให้ตรงตามสารบบใหม่ทั้งหมด
+
 ### 🗓️ 2026-09-02: ยกระดับแผงแอดมินสู่ระดับโลก (World-Class Admin Panel & Cloud Health Suite)
 
 **คำขอของผู้ใช้**: *"ปรับทั้งหมดเลยสิ่งที่ขาดด้วย ต้องการ แผงแอดมิน ระดับโลก"*
