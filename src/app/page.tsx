@@ -1142,22 +1142,23 @@ export default function TarotPage() {
               exit="exit"
               className="space-y-8"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                {/* LEFT PANE: 3D Spread Board */}
-                <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4">
-                  <SpreadBoard
-                    spread={selectedSpread}
-                    drawnCards={drawnCards}
-                    revealedOrders={revealedOrders}
-                    currentReadingPosition={activeCardIndex}
-                    onFlipCard={handleFlipCard}
-                    onRevealAll={() => setRevealedOrders(drawnCards.map((c) => c.order))}
-                    onZoomCard={(c) => setZoomedCard(c)}
-                  />
-                </div>
+              {/* HERO ROW: Centered 3D Sacred Spread Altar (รูปที่ 2: ผังไพ่อันเดียวตรงกลางสง่างาม) */}
+              <section aria-label="แท่นผังไพ่พยากรณ์" className="w-full max-w-5xl mx-auto">
+                <SpreadBoard
+                  spread={selectedSpread}
+                  drawnCards={drawnCards}
+                  revealedOrders={revealedOrders}
+                  currentReadingPosition={activeCardIndex}
+                  onFlipCard={handleFlipCard}
+                  onRevealAll={() => setRevealedOrders(drawnCards.map((c) => c.order))}
+                  onZoomCard={(c) => setZoomedCard(c)}
+                />
+              </section>
 
-                {/* RIGHT PANE: Oracle Chamber */}
-                <div className="lg:col-span-7 space-y-6">
+              {/* DUAL PANE ROW: Reading & Follow-up Chat Side-by-Side (รูปที่ 3 & 4: อยู่คู่กันด้านล่าง) */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+                {/* LEFT PANE: Card Interpretation & Summary (รูปที่ 3) */}
+                <section aria-label="คำทำนายไพ่ทาโรต์" className="w-full">
                   <StreamReader
                     readingId={readingId}
                     persona={selectedPersona}
@@ -1175,29 +1176,30 @@ export default function TarotPage() {
                       }
                     }}
                   />
-                </div>
-              </div>
+                </section>
 
-              {/* ห้องคุยกับแม่หมอ — แยกออกจากแท็บคำทำนายมาเป็นส่วนของตัวเองเต็มความกว้าง
-                  เพราะคนอ่านจบแล้วส่วนใหญ่อยากถามต่อ ต้องเห็นชัดและกดใช้ได้ทันที */}
-              {readingId && (
-                <FollowUpChat
-                  readingId={readingId}
-                  persona={selectedPersona}
-                  sessionToken={sessionToken}
-                  readingSnapshot={{
-                    question: question || undefined,
-                    spreadId: selectedSpread.id,
-                    summary: readingResult?.summary,
-                    personaId: selectedPersona.id,
-                    drawn: drawnCards.map((d) => ({
-                      order: d.order,
-                      cardIndex: d.cardIndex !== undefined ? d.cardIndex : 0,
-                      isReversed: !!d.isReversed,
-                    })),
-                  }}
-                />
-              )}
+                {/* RIGHT PANE: Human-like Live Consultation Chat (รูปที่ 4 & 5) */}
+                {readingId && (
+                  <section aria-label="ห้องสนทนากับแม่หมอ" className="w-full lg:sticky lg:top-20">
+                    <FollowUpChat
+                      readingId={readingId}
+                      persona={selectedPersona}
+                      sessionToken={sessionToken}
+                      readingSnapshot={{
+                        question: question || undefined,
+                        spreadId: selectedSpread.id,
+                        summary: readingResult?.summary,
+                        personaId: selectedPersona.id,
+                        drawn: drawnCards.map((d) => ({
+                          order: d.order,
+                          cardIndex: d.cardIndex,
+                          isReversed: !!d.isReversed,
+                        })),
+                      }}
+                    />
+                  </section>
+                )}
+              </div>
 
               {/* Bottom Quick Luxury Actions Deck */}
               <div className="p-5 sm:p-6 rounded-3xl altar-panel flex flex-wrap items-center justify-between gap-4 shadow-2xl border border-[#e5c07b]/30">

@@ -194,7 +194,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               <span className="mr-1.5 text-[#e5c07b]">✦</span> มีอะไรอยากถามแม่หมอต่อไหม
             </span>
             <span className="mt-0.5 block font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
-              ห้องคุยอยู่ด้านล่างสุด แตะเพื่อเลื่อนลงไปพิมพ์คุยได้เลย
+              พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที แตะเพื่อเริ่มพิมพ์คุยได้เลย
             </span>
           </span>
           <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#e5c07b]/40 text-[#e5c07b] transition-transform group-hover:translate-y-0.5">
