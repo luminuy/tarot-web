@@ -103,8 +103,7 @@ export function resetClockLabel(): string {
 export function describeEntitlement(ent: ClientEntitlement | null): EntitlementView | null {
   if (!ent || !ent.enabled) return null;
 
-  const isAdmin = ent.role === "admin";
-  const isUnlimited = isAdmin || ent.role === "unlimited";
+  const isUnlimited = ent.role === "unlimited";
   const isGuest = ent.kind === "guest";
   const remaining = Math.max(0, ent.remaining ?? 0);
   const limit = Math.max(1, ent.limit ?? (isGuest ? GUEST_LIMIT : DAILY_LIMIT));
@@ -115,7 +114,7 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
   if (isUnlimited) {
     return {
       enabled: true,
-      isAdmin,
+      isAdmin: false,
       isUnlimited: true,
       isGuest: false,
       isMember: true,
@@ -123,13 +122,11 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
       limit,
       used: 0,
       tone: "unlimited",
-      badgeLabel: isAdmin ? "มาสเตอร์ · ไม่จำกัด" : "ไม่จำกัดสิทธิ์",
-      statusLine: isAdmin
-        ? "โหมดผู้ดูแลระบบ — เปิดไพ่และคุยต่อได้ไม่จำกัด"
-        : "บัญชีไม่จำกัดสิทธิ์ — เปิดไพ่และคุยต่อได้ไม่จำกัด",
+      badgeLabel: "ไม่จำกัดสิทธิ์",
+      statusLine: "บัญชีไม่จำกัดสิทธิ์ — เปิดไพ่และคุยต่อได้ไม่จำกัด",
       resetLine: "",
-      action: isAdmin ? "admin" : "none",
-      actionLabel: isAdmin ? "ไปแผงผู้ดูแลระบบ" : "",
+      action: "none",
+      actionLabel: "",
       blocked: false,
       blockedReason: null,
     };

@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-
-import { ADMIN_COOKIE_NAME, verifyAdminSession } from "@/lib/auth/admin-auth";
 
 import { getEntitlement } from "@/lib/entitlement/entitlement";
 import { isEntitlementEnabled } from "@/lib/entitlement/flag";
@@ -32,13 +29,6 @@ export async function GET(request: Request) {
       : { announce: false, announceResetDate: "" };
 
   if (privileged) {
-    // `isPrivilegedTestRequest` เป็นจริงได้ 4 ทาง (แอดมิน / ผู้ทดสอบ / อีเมล unlimited / bypass token)
-    // แต่มีแค่ "แอดมินจริง" เท่านั้นที่ควรเห็นทางเข้าแผง /admin บน UI
-    // ถ้าเหมารวมเป็น role=admin ทั้งหมด ผู้ทดสอบจะถูกพาไปหน้าที่ตัวเองไม่มีสิทธิ์ (เจตนาของ /tester คือไม่ให้เห็นแผงแอดมิน)
-    const isRealAdmin = await cookies()
-      .then((c) => verifyAdminSession(c.get(ADMIN_COOKIE_NAME)?.value))
-      .catch(() => false);
-
     return NextResponse.json({
       enabled: true,
       canStartReading: true,
@@ -52,7 +42,7 @@ export async function GET(request: Request) {
       kind: "member",
       dailyFreeAvailable: true,
       dailyStreak: 99,
-      role: isRealAdmin ? "admin" : "unlimited",
+      role: "unlimited",
       ...announce,
     });
   }
