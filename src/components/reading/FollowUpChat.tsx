@@ -15,6 +15,8 @@ interface Message {
   text: string;
   /** `true` = คำตอบสำเร็จรูปออฟไลน์ ไม่ได้มาจาก AI จริง (เซิร์ฟเวอร์ติดธง `fallback` มา) */
   isFallback?: boolean;
+  /** `true` = ข้อความแจ้งเตือนข้อผิดพลาดระบบ (จะไม่ถูกส่งต่อเป็นประวัติการคุย) */
+  isError?: boolean;
 }
 
 interface FollowUpChatProps {
@@ -78,6 +80,16 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
     setLoading(true);
 
     try {
+      const validHistory = messages
+        .filter(
+          (m) =>
+            !m.isError &&
+            m.text !== "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม" &&
+            !m.text.includes("การเชื่อมต่อขัดข้อง") &&
+            !m.text.includes("ขออภัยนะ แม่หมอไม่สามารถตอบคำถามนี้ได้ในขณะนี้")
+        )
+        .map((m) => ({ sender: m.sender, text: m.text.slice(0, 4000) }));
+
       const res = await fetch(`/api/reading/${readingId}/chat`, {
         method: "POST",
         headers: {
@@ -87,7 +99,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
         body: JSON.stringify({
           message: query,
           sessionToken: sessionToken || undefined,
-          history: messages.map((m) => ({ sender: m.sender, text: m.text })),
+          history: validHistory,
           readingSnapshot: readingSnapshot || {
             personaId: persona.id,
           },
@@ -108,6 +120,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
           id: (Date.now() + 1).toString(),
           sender: "bot",
           text: data.error || "ขออภัยนะ แม่หมอไม่สามารถตอบคำถามนี้ได้ในขณะนี้",
+          isError: true,
         };
         setMessages((prev) => [...prev, errMsg]);
       }
@@ -117,6 +130,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
         id: (Date.now() + 1).toString(),
         sender: "bot",
         text: "การเชื่อมต่อขัดข้อง ลองใหม่อีกครั้งนะ",
+        isError: true,
       };
       setMessages((prev) => [...prev, errMsg]);
     } finally {
@@ -199,12 +213,14 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                   className={`w-full rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed ${
                     msg.sender === "user"
                       ? "bg-gradient-to-r from-[#c9a25e] to-[#e0c088] text-[#0a0812] font-medium rounded-tr-none shadow-md"
+                      : msg.isError
+                      ? "bg-[#25131a] border border-rose-500/40 text-rose-200 font-serif-th rounded-tl-none shadow-md"
                       : "bg-[#1b1530] border border-[#e0c088]/30 text-[#f0dcb4] font-serif-th rounded-tl-none shadow-lg"
                   }`}
                 >
                   {msg.text}
                 </div>
-                {msg.sender === "bot" && (
+                {msg.sender === "bot" && !msg.isError && (
                   <TTSReaderButton
                     textToRead={msg.text}
                     personaId={persona.id}

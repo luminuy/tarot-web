@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0055 · 2026-09-02 15:04 · 🟠 High · expand chat history schema limits and prevent error message cascading in follow-up chat
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | คำถามแรกตอบได้ยาวละเอียด แต่พอถามคำถามถัดไปกลับได้ข้อความซ้ำๆ ว่า กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม ตลอดการสนทนา |
+| **สาเหตุราก** | BodySchema จำกัด history.text ไว้เพียง 2000 ตัวอักษร เมื่อคำตอบแรกของ AI มีความยาวละเอียด 2500 ถึง 4000 ตัวอักษร การส่งประวัติในรอบถัดไปจึง fail safeParse ทันที และ route คืน error กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม แบบเหมารวมทุกกรณี |
+| **การแก้ไข** | ขยาย BodySchema ให้รองรับ history.text สูงสุด 50000 ตัวอักษร และ summary 10000 ตัวอักษร แยก error ข้อความว่างออกจาก validation อื่น ใน FollowUpChat ทำการ filter ข้อความผิดพลาดออกจากประวัติก่อนส่ง และตัดคำ history ฝั่ง Gemini ไม่เกิน 4000 ตัวอักษรต่อข้อความ |
+| **🛡️ กฎป้องกันถาวร** | **ขยายขีดจำกัดประวัติแชทเป็น 50000 ตัวอักษร แยก error ข้อความว่างออกจาก validation อื่น และเพิ่มด่านตรวจ scripts/qa/test-chat-history-schema.ts เข้าใน repo:verify** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npx tsx scripts/qa/test-chat-history-schema.ts ผ่านทั้ง 3 เคส และ npm run repo:verify ผ่านครบ 19 ด่าน |
+| **บันทึกโดย** | Antigravity AI · branch `fix/chat-history-zod-limit-and-empty-question-error` · commit `806d146` |
+
+
 ### INC-0054 · 2026-09-02 14:35 · 🟠 High · hedge เลือกโมเดล 8 วินาที และใส่เพดานเวลาให้ทุกเส้นทางที่เรียก Gemini
 
 | หัวข้อ | รายละเอียด |
