@@ -97,7 +97,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   const totalCards = drawnCards.length;
 
   return (
-    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 backdrop-blur-2xl p-5 sm:p-7 shadow-[0_0_50px_rgba(0,0,0,0.85)] flex flex-col justify-between space-y-6 relative overflow-hidden">
+    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 p-5 sm:p-7 shadow-[0_0_50px_rgba(0,0,0,0.85)] flex flex-col justify-between space-y-6 relative overflow-hidden">
       {/* Background Sacred Geometric Aura */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-2xl" />
 
@@ -112,7 +112,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
               alt={persona.nameTh}
-              className="w-full h-full object-cover object-top filter contrast-[1.04] brightness-[1.02] tarot-hd-card-image"
+              className="w-full h-full object-cover object-top tarot-card-enhance contrast-[1.04] brightness-[1.02] tarot-hd-card-image"
               sizes="40px"
             />
             <div className="gold-foil-sheen absolute inset-0 opacity-30" />
@@ -210,7 +210,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           <div
             role="alert"
             aria-live="assertive"
-            className="anim-page-transition p-4 rounded-2xl bg-[#1c1330]/90 border border-[#e5c07b]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg backdrop-blur"
+            className="anim-page-transition p-4 rounded-2xl bg-[#1c1330]/96 border border-[#e5c07b]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg"
           >
             <div className="flex items-start gap-2.5 text-xs sm:text-sm text-[#f5deaa] font-serif-th">
               <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[#e5c07b]/60 text-[10px] text-[#ffd700]">
@@ -276,7 +276,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     <CardImage
                       image={cardData.image}
                       alt={cardData?.nameTh || "Tarot"}
-                      className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                      className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
                       sizes="88px"
                     />
                   ) : (

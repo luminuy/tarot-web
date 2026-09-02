@@ -89,7 +89,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     image={card.image}
                     cardId={card.id}
                     alt={card.nameTh}
-                    className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                    className="w-full h-full object-cover tarot-card-enhance tarot-hd-card-image"
                     sizes="(min-width: 640px) 600px, 400px"
                     loading="eager"
                   />
@@ -98,10 +98,10 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
                 {/* Top Floating Badge */}
                 <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-black/85 text-[#ffd700] border border-[#ffd700]/40 backdrop-blur shadow">
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-black/90 text-[#ffd700] border border-[#ffd700]/40 shadow">
                     {card.arcana === "major" ? `Major #${card.number}` : card.suit?.toUpperCase()}
                   </span>
-                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md backdrop-blur border ${elem.border} ${elem.bg} ${elem.text} font-bold shadow`}>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md border ${elem.border} ${elem.bg} ${elem.text} font-bold shadow`}>
                     {elem.icon} {card.element}
                   </span>
                 </div>

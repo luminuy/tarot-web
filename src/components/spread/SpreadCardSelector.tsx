@@ -310,7 +310,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 {/* 1909 Tarot Spread Centerpiece */}
                 <div className="my-auto py-2.5 flex flex-col items-center justify-center gap-2 relative">
                   <div
-                    className={`relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.25)] transition-all duration-300 ${
+                    className={`relative z-10 drop-shadow-[0_0_12px_rgba(229,192,123,0.25)] transition-all duration-300 ${
                       isLocked ? "opacity-65 saturate-[0.9] group-hover/card:opacity-90" : ""
                     }`}
                   >
@@ -416,7 +416,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     : "major-17.jpg"
                 }`}
                 alt={selectedSpread.nameTh}
-                className="w-full h-full object-cover object-top filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                className="w-full h-full object-cover object-top tarot-hd-card-image"
                 sizes="72px"
               />
               <div className="gold-foil-sheen absolute inset-0 opacity-30" />

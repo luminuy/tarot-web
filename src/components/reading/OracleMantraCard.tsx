@@ -45,7 +45,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.32 }}
-      className="relative my-6 overflow-hidden rounded-2xl border-2 border-amber-400/40 bg-gradient-to-b from-[#1c162e]/95 via-[#120e1e]/98 to-[#090710]/95 p-6 text-center shadow-[0_0_35px_rgba(245,158,11,0.15)] backdrop-blur-md"
+      className="relative my-6 overflow-hidden rounded-2xl border-2 border-amber-400/40 bg-gradient-to-b from-[#1c162e]/95 via-[#120e1e]/98 to-[#090710]/95 p-6 text-center shadow-[0_0_35px_rgba(245,158,11,0.15)]"
     >
       {/* Decorative Ornaments */}
       <div className="pointer-events-none absolute -left-6 -top-6 h-24 w-24 rounded-full bg-amber-500/10 blur-2xl" />

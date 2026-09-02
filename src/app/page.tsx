@@ -906,7 +906,7 @@ export default function TarotPage() {
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-950/90 border border-rose-700 text-rose-200 text-xs sm:text-sm text-center shadow-2xl backdrop-blur flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mb-6 p-4 rounded-2xl bg-rose-950/90 border border-rose-700 text-rose-200 text-xs sm:text-sm text-center shadow-2xl flex flex-col sm:flex-row items-center justify-center gap-3">
             <span>{errorMsg}</span>
             {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ/.test(errorMsg) && (
               <button
@@ -1064,7 +1064,13 @@ export default function TarotPage() {
               />
 
               {/* Action Bar */}
-              <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-[#180f30] to-[#0d071a] border-2 border-[#e5c07b]/40 shadow-2xl flex flex-wrap items-center justify-between gap-3">
+              {/*
+                แถบปุ่มต้องอยู่ "บรรทัดเดียวกัน" เสมอ — ของเดิมใช้ flex-wrap แล้วใส่ชื่อผังเต็ม ๆ
+                ไว้ในปุ่มย้อนกลับ (เช่น "ส่องชะตาเจาะลึก 10 มิติ (เซลติกครอส)") ความกว้างรวมจึงเกินกรอบ
+                แล้วปุ่มตกไปคนละบรรทัด · ตอนนี้ล็อกเป็น flex-nowrap: ปุ่มย้อนกลับกว้างเท่าที่จำเป็น
+                (ชื่อผังโชว์เฉพาะจอกว้าง) ส่วนปุ่มหลักยืดเต็มพื้นที่ที่เหลือ
+              */}
+              <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-3xl bg-gradient-to-b from-[#180f30] to-[#0d071a] border-2 border-[#e5c07b]/40 shadow-2xl flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -1072,24 +1078,35 @@ export default function TarotPage() {
                     scrollToSanctuaryTop();
                     navigateStep("SPREAD_SELECT");
                   }}
-                  className="py-3 px-5 rounded-xl bg-[#100b20] border border-[#e5c07b]/30 text-xs font-serif-th text-[#cfc8e2] hover:bg-[#191230] transition-colors duration-150 cursor-pointer"
+                  aria-label={`เปลี่ยนผัง (ตอนนี้เลือก ${selectedSpread.nameTh})`}
+                  className="shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 rounded-xl bg-[#100b20] border border-[#e5c07b]/30 text-xs font-serif-th text-[#cfc8e2] hover:bg-[#191230] transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
                 >
-                  ← เปลี่ยนผัง ({selectedSpread.nameTh})
+                  <span aria-hidden="true">←</span>
+                  <span>เปลี่ยนผัง</span>
+                  <span className="hidden lg:inline truncate text-[#9c93b8]">({selectedSpread.nameTh})</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleStartSession}
                   disabled={loading || !nickname.trim() || !question.trim()}
-                  className={`py-3 px-7 rounded-xl text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 shadow-lg flex items-center gap-2 ${
+                  aria-label="ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"
+                  className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-xl text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 shadow-lg flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                     !nickname.trim() || !question.trim()
                       ? "bg-[#1f1635] text-[#9c93b8]/60 border border-[#e5c07b]/20 cursor-not-allowed"
                       : "bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] hover:opacity-95 active:scale-95 cursor-pointer shadow-[0_0_20px_rgba(229,192,123,0.5)]"
                   }`}
                 >
-                  <span>✦</span>
-                  <span>{loading ? "กำลังโหลด..." : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}</span>
-                  <span>→</span>
+                  <span aria-hidden="true">✦</span>
+                  {loading ? (
+                    <span className="truncate">กำลังโหลด...</span>
+                  ) : (
+                    <>
+                      <span className="truncate sm:hidden">ต่อไป: สับไพ่</span>
+                      <span className="truncate hidden sm:inline">ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง</span>
+                    </>
+                  )}
+                  <span aria-hidden="true">→</span>
                 </button>
               </div>
             </motion.div>

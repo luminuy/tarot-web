@@ -23,7 +23,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
   if (!breakdown) return null;
 
   return (
-    <div className="my-6 rounded-2xl border border-amber-500/20 bg-gradient-to-b from-[#161224]/90 to-[#0c0a14]/95 p-5 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-amber-500/35">
+    <div className="my-6 rounded-2xl border border-amber-500/20 bg-gradient-to-b from-[#161224]/96 to-[#0c0a14]/95 p-5 shadow-2xl transition-all duration-300 hover:border-amber-500/35">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between border-b border-amber-500/10 pb-3">
         <div className="flex items-center gap-2">

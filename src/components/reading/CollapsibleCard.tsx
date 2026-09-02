@@ -34,7 +34,7 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
   const panelId = useId();
 
   return (
-    <section className="my-4 overflow-hidden rounded-2xl border border-[#e5c07b]/25 bg-[#090614]/80 shadow-lg backdrop-blur-md">
+    <section className="my-4 overflow-hidden rounded-2xl border border-[#e5c07b]/25 bg-[#090614]/95 shadow-lg">
       <button
         type="button"
         aria-expanded={open}
