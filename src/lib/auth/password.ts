@@ -51,13 +51,36 @@ export function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
 }
 
 /**
+ * ข้อผิดพลาดที่เกิดจาก "ระบบตั้งค่าไม่ครบ" ไม่ใช่ "ผู้ใช้กรอกรหัสผ่านผิด"
+ *
+ * ⚠️ ต้องแยกสองอย่างนี้ออกจากกันให้ขาด — ของเดิม `verifyPassword()` จับ error ทุกชนิด
+ * แล้วคืน `false` เหมือนกันหมด ทำให้ตอนลืมตั้ง `PASSWORD_PEPPER` บน production
+ * ผู้ใช้เห็นข้อความ "อีเมลหรือรหัสผ่านไม่ถูกต้อง" ทั้งที่รหัสผ่านถูกทุกตัวอักษร
+ * เจ้าของระบบไล่หาสาเหตุไม่เจอเพราะหน้าเว็บโทษรหัสผ่านของผู้ใช้แทนที่จะบอกว่าตัวเองตั้งค่าไม่ครบ
+ */
+export class PasswordConfigError extends Error {
+  readonly isConfigError = true;
+  constructor(message: string) {
+    super(message);
+    this.name = "PasswordConfigError";
+  }
+}
+
+/** true ถ้า error ที่จับได้เกิดจากการตั้งค่าระบบ ไม่ใช่รหัสผ่านผิด */
+export function isPasswordConfigError(err: unknown): err is PasswordConfigError {
+  return err instanceof PasswordConfigError;
+}
+
+/**
  * นำรหัสผ่านไปทำ HMAC-SHA256 กับ Server-side Pepper ก่อนส่งเข้า PBKDF2
  */
 async function pepper(pw: string): Promise<ArrayBuffer> {
   const secret = process.env.PASSWORD_PEPPER;
   if (!secret || secret.length < 24) {
     if (process.env.NODE_ENV === "production") {
-      throw new Error("[Security] PASSWORD_PEPPER (≥24 ตัวอักษร) ต้องถูกกำหนดใน Environment ของ Production");
+      throw new PasswordConfigError(
+        "[Security] PASSWORD_PEPPER (≥24 ตัวอักษร) ต้องถูกกำหนดใน Environment ของ Production",
+      );
     }
   }
   const pepperKey = secret || "dev-pepper-default-secret-string-at-least-24-chars";
@@ -122,6 +145,9 @@ export async function verifyPassword(pw: string, stored: string): Promise<boolea
 
     return timingSafeEqualBytes(derivedBits, expectedHash);
   } catch (err) {
+    // ระบบตั้งค่าไม่ครบ = ไม่ใช่ความผิดของผู้ใช้ ต้องโยนต่อให้ route ตอบ 503
+    // ห้ามกลืนเป็น false เพราะจะกลายเป็น "รหัสผ่านไม่ถูกต้อง" ทั้งที่ถูก
+    if (isPasswordConfigError(err)) throw err;
     console.error("[verifyPassword Error]", err);
     return false;
   }

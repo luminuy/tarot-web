@@ -3,7 +3,7 @@ import { z } from "zod";
 import { signUserSession } from "@/lib/auth/edge-auth";
 import { setAuthCookie } from "@/lib/auth/session";
 import { issueToken } from "@/lib/auth/auth-tokens.repo";
-import { hashPassword } from "@/lib/auth/password";
+import { hashPassword, isPasswordConfigError } from "@/lib/auth/password";
 import { validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { sendEmail } from "@/lib/email/send";
 import { accountExistsHtml, resetPasswordHtml, verifyEmailHtml } from "@/lib/email/templates";
@@ -129,6 +129,10 @@ export async function POST(request: Request) {
 
     return response;
   } catch (err) {
+    if (isPasswordConfigError(err)) {
+      console.error("[Email Signup] ตั้งค่าไม่ครบ:", err.message);
+      return NextResponse.json({ error: "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
+    }
     console.error("[Email Signup Error]", err);
     return NextResponse.json({ error: "ไม่สามารถสร้างบัญชีได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
   }
