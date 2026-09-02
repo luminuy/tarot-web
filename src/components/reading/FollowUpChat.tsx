@@ -28,6 +28,9 @@ interface FollowUpChatProps {
   };
 }
 
+/** id ของส่วน "คุยต่อกับแม่หมอ" — ใช้เป็นจุดหมายของปุ่มเลื่อนลงมาจากแผงคำทำนาย */
+export const ASK_ORACLE_SECTION_ID = "ask-oracle";
+
 const SUGGESTED_QUESTIONS = [
   "ไพ่แนะนำให้ฉันระวังเรื่องอะไรมากที่สุด?",
   "มีอะไรที่ฉันสามารถเริ่มลงมือทำได้เลยในวันพรุ่งนี้?",
@@ -119,46 +122,59 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto rounded-2xl bg-[#120e1f]/80 border border-[#e0c088]/30 backdrop-blur-xl p-5 shadow-2xl space-y-4">
+    /* ห้องคุยกับแม่หมอ — แยกออกมาเป็นส่วนของตัวเองเต็มความกว้าง ไม่ซ่อนอยู่ใต้แท็บอีกต่อไป
+       เพราะคนส่วนใหญ่อยากคุยต่อหลังอ่านคำทำนายจบ (คำสั่งเจ้าของโปรเจกต์) */
+    <section
+      id={ASK_ORACLE_SECTION_ID}
+      aria-labelledby="ask-oracle-title"
+      className="w-full scroll-mt-24 rounded-3xl border-2 border-[#e5c07b]/45 bg-gradient-to-b from-[#181029]/95 via-[#0d0918]/95 to-[#07050d]/95 backdrop-blur-2xl p-5 sm:p-7 shadow-[0_0_45px_rgba(229,192,123,0.2)] space-y-5"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#e0c088]/20 pb-3">
-        <div className="flex items-center gap-2.5">
+      <div className="flex flex-col gap-3 border-b border-[#e5c07b]/25 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3.5">
           <div
-            className="w-8 h-12 rounded-md border overflow-hidden shadow bg-[#0a0812] relative flex-shrink-0"
+            className="w-12 h-[72px] rounded-lg border-2 overflow-hidden shadow-[0_0_18px_rgba(229,192,123,0.35)] bg-[#0a0812] relative flex-shrink-0"
             style={{ borderColor: persona.accent || "#e0c088" }}
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
               alt={persona.nameTh}
               className="w-full h-full object-cover object-top filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-              sizes="64px"
+              sizes="96px"
             />
           </div>
-          <div>
-            <h4 className="font-serif-th text-xs sm:text-sm font-semibold text-[#f0dcb4]">
-              ถามคำถามต่อยอดกับ {persona.nameTh}
-            </h4>
-            <p className="text-[10px] text-[#9c93b8]">
-              สงสัยจุดไหนเกี่ยวกับไพ่ที่เพิ่งเปิด สามารถพิมพ์ถามเพิ่มได้เลย
+          <div className="min-w-0">
+            <h3
+              id="ask-oracle-title"
+              className="font-serif-th text-lg sm:text-xl font-bold font-mystic-gold"
+            >
+              คุยต่อกับ {persona.nameTh}
+            </h3>
+            <p className="mt-0.5 font-serif-th text-xs sm:text-sm leading-relaxed text-[#cfc8e2]/85">
+              ยังสงสัยตรงไหน อยากเล่าเพิ่ม หรืออยากให้ขยายความ พิมพ์คุยกับแม่หมอได้เลย
             </p>
           </div>
         </div>
+        <span className="self-start whitespace-nowrap rounded-full border border-[#e5c07b]/40 bg-[#e5c07b]/10 px-3.5 py-1.5 font-serif-th text-[11px] text-[#f5deaa] sm:self-auto">
+          ✦ แม่หมอยังถือไพ่ชุดนี้ของคุณอยู่
+        </span>
       </div>
 
       {/* Suggested Quick Questions */}
       {messages.length === 0 && !chatLocked && (
-        <div className="space-y-1.5">
-          <span className="text-[11px] text-[#e0c088] font-medium block">
-            ✦ คำถามที่คนนิยมถามต่อ:
+        <div className="space-y-2">
+          <span className="block font-serif-th text-xs text-[#e5c07b] font-semibold">
+            ✦ แตะเลือกคำถามที่คนถามกันบ่อย หรือพิมพ์เองก็ได้
           </span>
           <div className="flex flex-wrap gap-2">
             {SUGGESTED_QUESTIONS.map((q, idx) => (
               <button
                 key={idx}
+                type="button"
                 onClick={() => sendMessage(q)}
-                className="text-[11px] text-[#cfc8e2] bg-[#1b1530] hover:bg-[#262040] hover:text-[#f0dcb4] border border-[#e0c088]/25 rounded-full px-3 py-1 transition-all cursor-pointer text-left"
+                className="cursor-pointer rounded-full border border-[#e5c07b]/30 bg-[#1b1530] px-4 py-2 text-left font-serif-th text-xs text-[#cfc8e2] transition-all hover:border-[#e5c07b]/60 hover:bg-[#262040] hover:text-[#f5deaa] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
               >
-                "{q}"
+                “{q}”
               </button>
             ))}
           </div>
@@ -166,7 +182,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       )}
 
       {/* Chat Messages Log */}
-      <div ref={chatLogRef} className="space-y-3 max-h-80 overflow-y-auto pr-1 no-scrollbar">
+      <div ref={chatLogRef} className="space-y-3 max-h-[26rem] overflow-y-auto pr-1 no-scrollbar">
         <AnimatePresence>
           {messages.map((msg) => (
             <motion.div
@@ -266,19 +282,20 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
           }}
           className="space-y-1.5 pt-2"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <input
               type="text"
-              placeholder="พิมพ์คำถามเพิ่มเติมเกี่ยวกับไพ่ชุดนี้..."
+              placeholder="พิมพ์คำถามของคุณที่นี่ เช่น ควรเริ่มลงมือตอนไหนดี..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}
-              className="flex-1 bg-[#1b1530] border border-[#e0c088]/30 rounded-xl px-3.5 py-2.5 text-xs text-[#f0dcb4] placeholder-[#9c93b8]/50 focus:outline-none focus:border-[#e0c088]"
+              aria-label="พิมพ์คำถามถึงแม่หมอ"
+              className="min-w-0 flex-1 rounded-xl border border-[#e5c07b]/35 bg-[#1b1530] px-4 py-3.5 font-serif-th text-sm text-[#f5deaa] placeholder-[#9c93b8]/60 transition-colors focus:border-[#e5c07b] focus:outline-none"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a25e] to-[#e0c088] text-[#0a0812] text-xs font-semibold font-serif-th hover:opacity-90 active:scale-95 disabled:opacity-40 transition-all cursor-pointer flex-shrink-0"
+              className="flex-shrink-0 cursor-pointer rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] px-6 py-3.5 font-serif-th text-sm font-bold text-[#0a0812] shadow-[0_0_18px_rgba(212,175,55,0.28)] transition-all hover:opacity-95 active:scale-95 disabled:opacity-40 disabled:shadow-none"
             >
               ส่งคำถาม
             </button>
@@ -297,6 +314,6 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
           )}
         </form>
       )}
-    </div>
+    </section>
   );
 };

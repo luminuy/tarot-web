@@ -57,6 +57,10 @@ const StreamReader = dynamic(
   () => import("@/components/reading/StreamReader").then((m) => m.StreamReader),
   { ssr: false }
 );
+const FollowUpChat = dynamic(
+  () => import("@/components/reading/FollowUpChat").then((m) => m.FollowUpChat),
+  { ssr: false }
+);
 const ShareModal = dynamic(
   () => import("@/components/reading/ShareModal").then((m) => m.ShareModal),
   { ssr: false }
@@ -1130,7 +1134,6 @@ export default function TarotPage() {
                 <div className="lg:col-span-7 space-y-6">
                   <StreamReader
                     readingId={readingId}
-                    sessionToken={sessionToken}
                     persona={selectedPersona}
                     isStreaming={isStreaming}
                     reading={readingResult}
@@ -1148,6 +1151,27 @@ export default function TarotPage() {
                   />
                 </div>
               </div>
+
+              {/* ห้องคุยกับแม่หมอ — แยกออกจากแท็บคำทำนายมาเป็นส่วนของตัวเองเต็มความกว้าง
+                  เพราะคนอ่านจบแล้วส่วนใหญ่อยากถามต่อ ต้องเห็นชัดและกดใช้ได้ทันที */}
+              {readingId && (
+                <FollowUpChat
+                  readingId={readingId}
+                  persona={selectedPersona}
+                  sessionToken={sessionToken}
+                  readingSnapshot={{
+                    question: question || undefined,
+                    spreadId: selectedSpread.id,
+                    summary: readingResult?.summary,
+                    personaId: selectedPersona.id,
+                    drawn: drawnCards.map((d) => ({
+                      order: d.order,
+                      cardIndex: d.cardIndex !== undefined ? d.cardIndex : 0,
+                      isReversed: !!d.isReversed,
+                    })),
+                  }}
+                />
+              )}
 
               {/* Bottom Quick Luxury Actions Deck */}
               <div className="p-5 sm:p-6 rounded-3xl altar-panel flex flex-wrap items-center justify-between gap-4 shadow-2xl border border-[#e5c07b]/30">

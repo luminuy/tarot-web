@@ -10,7 +10,7 @@ import { cardByIndex, type TarotCard } from "@/data/cards";
 import { ElementalBalanceWidget } from "@/components/reading/ElementalBalanceWidget";
 import { OracleMantraCard } from "@/components/reading/OracleMantraCard";
 import { soundManager } from "@/lib/utils/audio";
-import { FollowUpChat } from "./FollowUpChat";
+import { ASK_ORACLE_SECTION_ID } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
 import { ProvablyFairPanel } from "./ProvablyFairPanel";
 import { CollapsibleCard } from "./CollapsibleCard";
@@ -25,7 +25,6 @@ interface StreamReaderProps {
   onSelectCardIndex: (index: number) => void;
   drawnCards: DrawnSlotCard[];
   readingId?: string | null;
-  sessionToken?: string | null;
   proof?: {
     serverSeed?: string;
     clientSeed?: string;
@@ -45,12 +44,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   onSelectCardIndex,
   drawnCards,
   readingId,
-  sessionToken,
   proof,
   errorMsg,
   onRetry,
 }) => {
-  const [activeTab, setActiveTab] = useState<"card" | "summary" | "chat">("card");
+  const [activeTab, setActiveTab] = useState<"card" | "summary">("card");
   const [isSpeakingVoice, setIsSpeakingVoice] = useState(false);
 
   const handleToggleVoice = (textToSpeak: string) => {
@@ -66,6 +64,16 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       );
       if (ok) setIsSpeakingVoice(true);
     }
+  };
+
+  // เลื่อนลงไปห้องคุยกับแม่หมอ (ส่วนแยกด้านล่าง) — เคารพ prefers-reduced-motion
+  const scrollToAskOracle = () => {
+    const el = typeof document !== "undefined" ? document.getElementById(ASK_ORACLE_SECTION_ID) : null;
+    if (!el) return;
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
   };
 
   const activeDrawnCard = drawnCards.find((d) => d.order === activeCardIndex);
@@ -171,25 +179,29 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           <span>สรุปภาพรวม & คำแนะนำ</span>
         </button>
 
-        {readingId && (
-          <button
-            type="button"
-            role="tab"
-            id="chamber-tab-chat"
-            aria-selected={activeTab === "chat"}
-            aria-controls="chamber-panel-chat"
-            onClick={() => setActiveTab("chat")}
-            className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
-              activeTab === "chat"
-                ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_15px_rgba(229,192,123,0.4)]"
-                : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
-            }`}
-          >
-            <span className="text-[#e5c07b]">✦</span>
-            <span>ถามแม่หมอต่อ</span>
-          </button>
-        )}
       </div>
+
+      {/* ทางลัดลงไปห้องคุยกับแม่หมอ — ตัวห้องคุยย้ายออกไปเป็นส่วนของตัวเองด้านล่างแล้ว
+          ปุ่มนี้ไม่ใช่แท็บ จึงอยู่นอก role="tablist" เพื่อไม่ให้ screen reader สับสน */}
+      {readingId && (
+        <button
+          type="button"
+          onClick={scrollToAskOracle}
+          className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-[#e5c07b]/35 bg-[#100b20]/80 px-4 py-3 text-left transition-all hover:border-[#e5c07b]/60 hover:bg-[#171029] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+        >
+          <span className="min-w-0">
+            <span className="block font-serif-th text-xs font-bold text-[#f5deaa] sm:text-sm">
+              <span className="mr-1.5 text-[#e5c07b]">✦</span> มีอะไรอยากถามแม่หมอต่อไหม
+            </span>
+            <span className="mt-0.5 block font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+              ห้องคุยอยู่ด้านล่างสุด แตะเพื่อเลื่อนลงไปพิมพ์คุยได้เลย
+            </span>
+          </span>
+          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#e5c07b]/40 text-[#e5c07b] transition-transform group-hover:translate-y-0.5">
+            ↓
+          </span>
+        </button>
+      )}
 
       {/* Error / Recovery Banner — โทนทองอุ่น ไม่ใช่แดงตกใจ · ซ่อนปุ่มลองใหม่เมื่อเป็นเรื่องโควตา */}
       {errorMsg && (() => {
@@ -501,26 +513,6 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               cardIndex: c.cardIndex !== undefined ? c.cardIndex : 0,
               isReversed: !!c.isReversed,
             }))}
-          />
-        </div>
-      )}
-
-      {/* TAB 3: FOLLOW-UP CHAT */}
-      {activeTab === "chat" && readingId && (
-        <div className="pt-2">
-          <FollowUpChat
-            readingId={readingId}
-            persona={persona}
-            sessionToken={sessionToken}
-            readingSnapshot={{
-              summary: reading?.summary,
-              personaId: persona.id,
-              drawn: drawnCards.map((d) => ({
-                order: d.order,
-                cardIndex: d.cardIndex !== undefined ? d.cardIndex : 0,
-                isReversed: !!d.isReversed,
-              })),
-            }}
           />
         </div>
       )}
