@@ -4,6 +4,7 @@ import "./globals.css";
 import { AssetWarmup } from "@/components/performance/AssetWarmup";
 import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { SITE_ORIGIN } from "@/lib/config/site";
 
 const notoSerifThai = Noto_Serif_Thai({
@@ -152,6 +153,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppMotionProvider>
           <AntiTheftShield />
           <AssetWarmup />
+          <AnalyticsTracker />
           {children}
         </AppMotionProvider>
       </body>

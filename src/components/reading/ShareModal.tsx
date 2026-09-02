@@ -9,6 +9,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
 import { cardByIndex } from "@/data/cards";
+import { trackEvent } from "@/lib/analytics";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   const handleCopyText = async () => {
     soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: "copy", spread_id: spreadName });
     try {
       await navigator.clipboard.writeText(shareText);
       setCopied(true);
@@ -58,6 +60,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   const handleNativeShare = async () => {
     soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: "native", spread_id: spreadName });
     if (navigator.share) {
       try {
         await navigator.share({
@@ -69,6 +72,40 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     } else {
       handleCopyText();
     }
+  };
+
+  const handleShareFacebook = () => {
+    soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: "facebook", spread_id: spreadName });
+    const url = typeof window !== "undefined" ? window.location.origin : "https://seertarot.net";
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(shareText)}`;
+    window.open(fbUrl, "_blank", "noopener,noreferrer,width=600,height=550");
+  };
+
+  const handleShareTwitter = () => {
+    soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: "twitter", spread_id: spreadName });
+    const url = typeof window !== "undefined" ? window.location.origin : "https://seertarot.net";
+    const text = `✨ ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จากวิหารออราเคิล\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary ? reading.summary.slice(0, 100) + '...' : ''}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
+    const twUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twUrl, "_blank", "noopener,noreferrer,width=600,height=550");
+  };
+
+  const handleShareThreads = () => {
+    soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: "threads", spread_id: spreadName });
+    const url = typeof window !== "undefined" ? window.location.origin : "https://seertarot.net";
+    const text = `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จากวิหารออราเคิล\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนาย: "${reading?.summary || ""}"\n${url}`;
+    const threadsUrl = `https://www.threads.net/intent/post?text=${encodeURIComponent(text)}`;
+    window.open(threadsUrl, "_blank", "noopener,noreferrer,width=600,height=550");
+  };
+
+  const handleShareTikTok = async () => {
+    soundManager.playCardSelectSound();
+    trackEvent("share_click", { platform: "tiktok", spread_id: spreadName });
+    await handleDownloadImage("story");
+    await handleCopyText();
+    alert("✨ บันทึกการ์ดรูปภาพสตอรี่ (9:16) และคัดลอกแคปชันเรียบร้อยแล้ว!\nเปิดแอป TikTok แล้วเลือกรูปภาพนี้โพสต์ลง Story หรือวิดีโอได้ทันที ✦");
   };
 
   // Direct HD PNG Image Generation using HTML5 Canvas
@@ -482,6 +519,55 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               <span className="text-[#e5c07b]">✨</span>
               <span>แชร์ให้เพื่อน</span>
             </button>
+          </div>
+
+          {/* Direct 1-Click Social Media Platforms */}
+          <div className="pt-3 border-t border-[#e5c07b]/20 space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-serif-th text-[#e5c07b]/90 px-1">
+              <span className="flex items-center gap-1.5 font-bold">
+                <span>✨</span>
+                <span>แชร์ตรงสู่โซเชียลมีเดีย:</span>
+              </span>
+              <span className="text-[10px] text-[#9c93b8]">1-Click Share</span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* Facebook */}
+              <button
+                onClick={handleShareFacebook}
+                className="py-2.5 px-3 rounded-xl bg-[#1877f2]/20 hover:bg-[#1877f2]/30 border border-[#1877f2]/50 text-sky-200 font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow hover:scale-[1.02] active:scale-95"
+              >
+                <span className="font-bold text-sm text-[#1877f2]">f</span>
+                <span>Facebook</span>
+              </button>
+
+              {/* TikTok */}
+              <button
+                onClick={handleShareTikTok}
+                className="py-2.5 px-3 rounded-xl bg-[#fe2c55]/15 hover:bg-[#fe2c55]/25 border border-[#fe2c55]/50 text-rose-200 font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow hover:scale-[1.02] active:scale-95"
+              >
+                <span className="font-bold text-sm text-[#fe2c55]">♪</span>
+                <span>TikTok</span>
+              </button>
+
+              {/* X (Twitter) */}
+              <button
+                onClick={handleShareTwitter}
+                className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/30 text-slate-100 font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow hover:scale-[1.02] active:scale-95"
+              >
+                <span className="font-bold text-xs text-white">𝕏</span>
+                <span>X / Twitter</span>
+              </button>
+
+              {/* Threads */}
+              <button
+                onClick={handleShareThreads}
+                className="py-2.5 px-3 rounded-xl bg-[#8b5cf6]/20 hover:bg-[#8b5cf6]/30 border border-[#8b5cf6]/50 text-purple-200 font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow hover:scale-[1.02] active:scale-95"
+              >
+                <span className="font-bold text-sm text-[#a78bfa]">@</span>
+                <span>Threads</span>
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

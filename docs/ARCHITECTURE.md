@@ -195,6 +195,8 @@ src/
 | **`AI_DAILY_CALL_CAP`** | ตัวเลขจำกัดเพดานการเรียก AI รายวันเพื่อควบคุมค่าใช้จ่าย (ค่าเริ่มต้น: 500) | 🟢 **ตัวเลือกปรับแต่ง** | Cloudflare Environment Variable | `src/lib/security/ai-budget.ts` |
 | **`APP_DB`** *(Binding)* | Cloudflare D1 Database Binding สำหรับเก็บข้อมูลสมาชิก, ประวัติดูดวง, และบันทึกสิทธิ์ | 🔴 **จำเป็นบน Production** *(Local ใช้ SQLite Mock)* | `wrangler.jsonc` (`d1_databases`) | `src/lib/platform/db.ts`<br>`src/server/db/*` |
 | **`APP_KV`** *(Binding)* | Cloudflare KV Namespace Binding สำหรับเก็บแคชชั่วคราว, Rate Limit, และ AI Budget | 🔴 **จำเป็นบน Production** *(Local ใช้ In-Memory Mock)* | `wrangler.jsonc` (`kv_namespaces`) | `src/lib/platform/kv.ts`<br>`src/lib/security/ai-budget.ts` |
+| **`NEXT_PUBLIC_GA_ID`** | รหัส Measurement ID ของ Google Analytics 4 (เช่น `G-XXXXXXXXXX`) เพื่อวัดผลทราฟฟิก | 🟢 **ตัวเลือกเสริมการตลาด** | Cloudflare Env / `.env.local` | `src/components/analytics/AnalyticsTracker.tsx`<br>`src/lib/analytics.ts` |
+| **`NEXT_PUBLIC_META_PIXEL_ID`** | รหัส Pixel ID ของ Meta/Facebook เพื่อวัดผลแคมเปญโฆษณาและการแปลงผล (Conversions) | 🟢 **ตัวเลือกเสริมการตลาด** | Cloudflare Env / `.env.local` | `src/components/analytics/AnalyticsTracker.tsx`<br>`src/lib/analytics.ts` |
 
 ---
 
