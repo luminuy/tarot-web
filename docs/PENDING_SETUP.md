@@ -91,25 +91,38 @@ npx wrangler secret put EMAIL_FROM          # แม่หมอลูมิน�
 **บริการอีเมลแนะนำ:** [Resend](https://resend.com) — ฟรี 3,000 อีเมล/เดือน (100/วัน) · โค้ด `src/lib/email/send.ts` เขียนเรียก Resend API ไว้แล้ว · **ต้อง verify โดเมน** (เพิ่ม DNS 3 records)
 ทางเลือกถ้าไม่อยากผูกโดเมน: Brevo (ฟรี 300/วัน, verify sender ด้วย Gmail ได้) — ต้องแก้ `send.ts` เปลี่ยน API (~15 บรรทัด)
 
-### 2. โดเมน (Custom Domain) — ยังใช้ `tarot-web.bankjack10452.workers.dev`
+### 2. โดเมน (Custom Domain) — 🟡 **จดแล้ว: `seertarot.net` (GoDaddy) · รอผูกกับ Cloudflare**
 
-**ปัญหา:** โค้ดฮาร์ดโค้ด `luminuy.com` / `tarot.luminuy.com` ไว้ **แต่โดเมนนี้ยังไม่ได้จด** (curl → ไม่ตอบ)
+**โค้ดพร้อมแล้ว** — โดเมนถูกย้ายมาไว้ที่เดียวใน `src/lib/config/site.ts` (`SITE_DOMAIN = "seertarot.net"`)
+metadata / sitemap / robots / allowlist ความปลอดภัย / อีเมล / ลายน้ำ ดึงจากไฟล์นี้ทั้งหมด
+เปลี่ยนโดเมนครั้งหน้าแก้บรรทัดเดียว ไม่ต้องไล่ 9 ไฟล์เหมือนเดิม
 
-**ทางเลือก:**
-- จด `luminuy.com` (ถ้ายังว่าง) → โค้ดใช้ได้เลยไม่ต้องแก้ · Cloudflare Registrar ราคาทุน `.com` ~$10.44/ปี
-- จดโดเมนอื่น → ต้องแก้ `luminuy.com` ในไฟล์เหล่านี้:
-  - `src/app/layout.tsx` (`metadataBase`), `src/app/sitemap.ts`, `src/app/robots.ts`
-  - `src/lib/security/anti-theft.ts` (allowlist host), `src/lib/email/send.ts` (EMAIL_FROM default)
-  - **`src/lib/security/app-origin.ts` (allowlist โดเมนสำหรับประกอบลิงก์ในอีเมลและ OAuth redirect_uri)**
-  - `next.config.ts`? · docs ต่าง ๆ
+**เหลือขั้นตอนฝั่งเจ้าของ:**
 
-> 🔐 **แนะนำให้ตั้ง `APP_ORIGIN` ด้วย** (เช่น `npx wrangler secret put APP_ORIGIN` → `https://tarot.luminuy.com`)
-> ตอนนี้ยังไม่ได้ตั้ง ระบบจึงตกไปใช้ allowlist ใน `app-origin.ts` แทน ซึ่งปลอดภัยแล้ว
-> (ก่อนหน้านี้ไม่มี allowlist — ใครส่ง `X-Forwarded-Host` เข้ามาก็สั่งให้ระบบส่งลิงก์ตั้งรหัสผ่านใหม่
-> พร้อม token จริงไปโดเมนตัวเองได้) แต่การตั้ง `APP_ORIGIN` ตรง ๆ ชัดเจนกว่าและไม่ต้องพึ่ง allowlist
-- ผูก Custom Domain ใน Cloudflare Workers dashboard → Settings → Domains & Routes
+1. **ย้าย nameserver จาก GoDaddy มา Cloudflare** (บังคับ — Workers custom domain ต้องให้ Cloudflare ถือ zone
+   ใช้ DNS ของ GoDaddy แล้ว CNAME มาที่ `workers.dev` ไม่ได้)
+   - Cloudflare Dashboard → **Add a site** → `seertarot.net` → แผน **Free**
+   - Cloudflare ให้ nameserver 2 ตัว → GoDaddy → My Products → โดเมน → **DNS → Nameservers → Change**
+     → *"I'll use my own nameservers"* → วาง 2 ตัว → Save → รอสถานะ **Active** (ปกติ 5 นาที–2 ชม.)
+2. **ผูกโดเมนกับ Worker**: Workers & Pages → `tarot-web` → **Settings → Domains & Routes → Add Custom Domain**
+   → `seertarot.net` (Cloudflare ออก SSL ให้เอง) · แนะนำเพิ่ม `www.seertarot.net` แล้ว redirect มาที่ root
+3. **ตั้ง secret ให้ลิงก์ตอน runtime ชัดเจน** (ไม่ต้องพึ่ง allowlist):
+   ```bash
+   npx wrangler secret put APP_ORIGIN     # https://seertarot.net
+   ```
+4. **อัปเดต Google OAuth**: Google Cloud Console → Credentials → OAuth client →
+   Authorized redirect URIs เพิ่ม `https://seertarot.net/api/auth/google/callback`
+   (คงของ `*.workers.dev` ไว้ด้วยก็ได้ เผื่อทดสอบ)
+5. (ถ้าจะเปิดอีเมล) verify `seertarot.net` กับ Resend แล้วเพิ่ม DNS 3 เรคคอร์ดใน Cloudflare → ดูข้อ 1
 
-**ได้อะไร:** URL สวย + ปลดล็อกอีเมล (ข้อ 1)
+**ตัวเลือกบนหน้าจอ "Connect your domain" ของ Cloudflare:**
+| หัวข้อ | ควรเลือก | เหตุผล |
+| :-- | :-- | :-- |
+| Search | **Allow** | ต้องให้ Google เก็บหน้าเว็บ ไม่งั้นไม่มีคนเจอ |
+| Agent | **Allow** | ให้ผู้ช่วย AI แนะนำเว็บเราได้ = ทราฟฟิกเพิ่ม |
+| Training | **Block** (ไม่ใช่ "Block on pages with ads") | เว็บไม่มีโฆษณา ตัวเลือก ads จึงเท่ากับไม่บล็อกอะไรเลย · คำทำนาย/คำอธิบายไพ่ 78 ใบคือตัวสินค้า |
+| Block training in robots.txt | เปิดไว้ได้ | Cloudflare จะเติมกฎให้ที่ edge ทับ `/robots.txt` ของแอป (แอปยังส่ง sitemap ตามเดิม) |
+| Import DNS records | **Automatic** | ดึงเรคคอร์ดเดิมจาก GoDaddy มาให้ครบก่อนสลับ nameserver |
 
 ### 3. LINE Login — ยังไม่ได้ตั้ง (ฟรี ไม่ต้องโดเมน)
 

@@ -4,6 +4,7 @@ import { DECK, cardById } from "@/data/cards";
 import { CardDetailView } from "@/components/encyclopedia/CardDetailView";
 import { MysticBackground } from "@/components/ui/MysticBackground";
 import type { Metadata } from "next";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
 interface CardPageProps {
   params: Promise<{ id: string }>;
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: CardPageProps): Promise<Metad
       title,
       description,
       type: "article",
-      url: `https://tarot.luminuy.com/cards/${card.id}`,
+      url: `${SITE_ORIGIN}/cards/${card.id}`,
       images: [
         {
           url: `/cards/${card.image}`,
@@ -55,7 +56,7 @@ export async function generateMetadata({ params }: CardPageProps): Promise<Metad
       ],
     },
     alternates: {
-      canonical: `https://tarot.luminuy.com/cards/${card.id}`,
+      canonical: `${SITE_ORIGIN}/cards/${card.id}`,
     },
   };
 }
@@ -78,9 +79,9 @@ export default async function CardDetailPage({ params }: CardPageProps) {
     name: `${card.nameTh} (${card.nameEn})`,
     alternateName: card.nameEn,
     description: `ความหมายไพ่ทาโรต์ ${card.nameTh} ทั้งหัวตั้งและกลับหัว ธาตุ${card.element} โหราศาสตร์ ${card.astrology}`,
-    inDefinedTermSet: "https://tarot.luminuy.com/cards",
-    url: `https://tarot.luminuy.com/cards/${card.id}`,
-    image: `https://tarot.luminuy.com/cards/${card.image}`,
+    inDefinedTermSet: `${SITE_ORIGIN}/cards`,
+    url: `${SITE_ORIGIN}/cards/${card.id}`,
+    image: `${SITE_ORIGIN}/cards/${card.image}`,
     inLanguage: "th",
   };
 

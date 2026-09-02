@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/admin", "/admin/", "/readers/console", "/readers/console/"],
     },
-    sitemap: "https://tarot.luminuy.com/sitemap.xml",
+    sitemap: `${SITE_ORIGIN}/sitemap.xml`,
   };
 }

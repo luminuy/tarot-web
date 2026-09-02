@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { getUserById } from "@/lib/users/users.repo";
 import { listJournal } from "@/lib/journal/journal.repo";
+import { SITE_DOMAIN, SITE_NAME_TH } from "@/lib/config/site";
 
 export const runtime = "nodejs";
 
@@ -17,7 +18,7 @@ export async function GET() {
 
     const exportData = {
       exportedAt: new Date().toISOString(),
-      platform: "Tarot Sanctuary (luminuy.com)",
+      platform: `${SITE_NAME_TH} (${SITE_DOMAIN})`,
       user: {
         id: user.id,
         provider: user.provider,
