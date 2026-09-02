@@ -1,18 +1,87 @@
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { SPREADS } from "@/data/spreads";
 import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
 import { MysticBackground } from "@/components/ui/MysticBackground";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม | Spreads Library",
   description: "รวบรวม 20 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล ความรัก การงาน การเงิน และผังใหญ่เจาะลึก 10 มิติ พร้อมภาพไดอะแกรมการจัดวางจริง",
+  alternates: {
+    canonical: `${SITE_ORIGIN}/spreads`,
+  },
+  openGraph: {
+    title: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม | SeerTarot",
+    description: "รวบรวม 20 ผังพยากรณ์มาตรฐานสากล ความรัก การงาน การเงิน พร้อมภาพจัดวางจริง",
+    url: `${SITE_ORIGIN}/spreads`,
+    siteName: "SeerTarot",
+    type: "website",
+    images: [
+      {
+        url: "/cards/major-01.webp",
+        width: 300,
+        height: 520,
+        alt: "20 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล",
+      },
+    ],
+  },
 };
 
 export default function SpreadsPage() {
+  const spreadsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม (Spreads Library)",
+    description: "รวบรวม 20 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล ความรัก การงาน การเงิน และผังใหญ่เจาะลึก 10 มิติ",
+    url: `${SITE_ORIGIN}/spreads`,
+    inLanguage: "th",
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: SPREADS.length,
+      itemListElement: SPREADS.map((spread, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: spread.nameTh,
+        description: spread.description,
+        url: `${SITE_ORIGIN}/spreads`,
+      })),
+    },
+  };
+
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "หน้าแรก",
+        item: SITE_ORIGIN,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "ผังพยากรณ์ 20 แบบ",
+        item: `${SITE_ORIGIN}/spreads`,
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700] relative overflow-hidden">
+      {/* Schema.org Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(spreadsJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
+      />
+
       {/* Floating Mystic Background Particles */}
       <MysticBackground />
 
