@@ -51,10 +51,10 @@ interface AuthRateLimitConfig {
  */
 const ACTION_CONFIGS: Record<AuthRateLimitAction, AuthRateLimitConfig> = {
   login: { ipMax: 40, pairMax: 10, idMax: 60, windowSec: 15 * 60 },
-  signup: { ipMax: 12, pairMax: 3, idMax: 6, windowSec: 60 * 60 },
-  forgot: { ipMax: 12, pairMax: 3, idMax: 6, windowSec: 60 * 60 },
-  resend: { ipMax: 12, pairMax: 3, idMax: 6, windowSec: 60 * 60 },
-  reset: { ipMax: 20, pairMax: 5, idMax: 20, windowSec: 60 * 60 },
+  signup: { ipMax: 30, pairMax: 8, idMax: 15, windowSec: 15 * 60 },
+  forgot: { ipMax: 15, pairMax: 5, idMax: 10, windowSec: 30 * 60 },
+  resend: { ipMax: 15, pairMax: 5, idMax: 10, windowSec: 30 * 60 },
+  reset: { ipMax: 20, pairMax: 5, idMax: 20, windowSec: 30 * 60 },
 };
 
 interface ScopedKey {

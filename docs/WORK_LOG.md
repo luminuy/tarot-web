@@ -36,6 +36,27 @@
 
 ---
 
+### 🗓️ 2026-09-02: สมัครสมาชิกด้วยอีเมลล้มเหลว 500 — Cloudflare Workers จำกัด PBKDF2 ไม่เกิน 100,000 รอบ
+
+**อาการที่ผู้ใช้เจอ**:
+- สมัครสมาชิกแล้วขึ้น *"ไม่สามารถสร้างบัญชีได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง"* (HTTP 500)
+- พอกดซ้ำหลายครั้งติด Rate Limit *"คุณทำรายการบ่อยเกินไป กรุณารออีก 1577 วินาที"*
+
+**สาเหตุจริง**:
+1. Cloudflare Workers Web Crypto API มี hard ceiling ของ PBKDF2 iteration count อยู่ที่ **100,000** รอบ แต่โค้ดตั้งไว้ `150_000` ทำให้ `crypto.subtle.deriveBits()` โยน `NotSupportedError: Pbkdf2 failed: iteration counts above 100000 are not supported (requested 150000).` ส่งผลให้ route `POST /api/auth/email/signup` ตอบ 500 ทุกครั้ง
+2. `DUMMY_PASSWORD_HASH` ใน `src/app/api/auth/email/login/route.ts` ใช้ `150000` ซึ่งทำให้การ verify timing-safe ของบัญชีที่ไม่มีอยู่จริงพังเช่นกัน
+3. Rate limit เพดาน `signup` เดิมตั้งไว้เข้มเกินไป (`pairMax: 3`, หน้าต่าง 60 นาที) เมื่อระบบเออเร่อทำให้ผู้ใช้กดลองซ้ำและถูกขัง 1 ชั่วโมงเต็ม
+
+**สิ่งที่แก้ไข**:
+1. `src/lib/auth/password.ts`: ปรับ `ITERATIONS = 100_000` ตามข้อกำหนดของ Cloudflare Workers Web Crypto
+2. `src/app/api/auth/email/login/route.ts`: ปรับ `DUMMY_PASSWORD_HASH` เป็น 100,000 รอบ
+3. `src/lib/security/auth-ratelimit.ts`: ขยายเพดาน `signup` เป็น `pairMax: 8`, `ipMax: 30`, หน้าต่าง 15 นาที
+4. `src/app/api/auth/email/signup/route.ts`: ล้างถัง rate limit อัตโนมัติ (`clearAuthRateLimit`) เมื่อสร้างบัญชีสำเร็จ
+5. **ล้างคีย์ rate limit ที่ค้างใน Cloudflare KV ทั้งหมด** ปลดบล็อกให้ผู้ใช้ที่ติดค้างอยู่สามารถใช้งานได้ทันที
+6. อัปเดต `scripts/qa/test-password.ts` และ `scripts/auth-hash.ts` — `repo:verify` ผ่านครบ 16 ด่าน
+
+---
+
 ### 🗓️ 2026-09-02: ล็อกอินด้วยอีเมลใช้ไม่ได้ทั้งระบบ — `PASSWORD_PEPPER` ไม่ได้ตั้ง + ระบบโทษผิดที่
 
 **อาการที่เจ้าของเจอ**: ใส่แฮชรหัสผ่านลงตาราง `users` บน D1 remote ด้วยมือครบถ้วน (`email_verified=1`, `deleted_at=null`, PHC ถูกฟอร์แมต) แต่ล็อกอินขึ้น "อีเมลหรือรหัสผ่านไม่ถูกต้อง" ทุกครั้ง จนหลงคิดว่าแฮชผิด

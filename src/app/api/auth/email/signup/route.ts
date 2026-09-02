@@ -8,7 +8,7 @@ import { validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { sendEmail } from "@/lib/email/send";
 import { accountExistsHtml, resetPasswordHtml, verifyEmailHtml } from "@/lib/email/templates";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
+import { checkAuthRateLimit, clearAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import {
   createEmailUser,
   getUserByEmail,
@@ -137,6 +137,7 @@ export async function POST(request: Request) {
     });
 
     setAuthCookie(response, sessionToken);
+    await clearAuthRateLimit(request, "signup", emailLower);
 
     return response;
   } catch (err) {
