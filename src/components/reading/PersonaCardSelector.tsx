@@ -11,10 +11,13 @@ import {
   MagicianIllustration,
   HermitIllustration,
 } from "@/components/ui/TarotArtIcons";
+import { isMasterPersona } from "@/lib/entitlement/limits";
 
 interface PersonaCardSelectorProps {
   selectedPersona: Persona;
   onSelectPersona: (persona: Persona) => void;
+  isPassHolder?: boolean;
+  onRequireUpgrade?: (reason: "master_persona", persona: Persona) => void;
 }
 
 
@@ -57,6 +60,8 @@ const PERSONA_DETAILS: Record<string, { roleTitle: string; archetype: string; re
 export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   selectedPersona,
   onSelectPersona,
+  isPassHolder = false,
+  onRequireUpgrade,
 }) => {
   const carouselRef = React.useRef<HTMLDivElement>(null);
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
@@ -101,6 +106,18 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
         {PERSONAS.map((p, idx) => {
           const isSelected = selectedPersona.id === p.id;
           const meta = PERSONA_DETAILS[p.id] || PERSONA_DETAILS.warm;
+          const isMaster = isMasterPersona(p.id);
+          const isLocked = isMaster && !isPassHolder;
+
+          const handlePersonaClick = () => {
+            if (isLocked) {
+              soundManager.playMenuTapSound();
+              onRequireUpgrade?.("master_persona", p);
+              return;
+            }
+            onSelectPersona(p);
+            scrollToCard(idx);
+          };
 
           return (
             <motion.div
@@ -108,32 +125,38 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               role="radio"
               tabIndex={0}
               aria-checked={isSelected}
-              aria-label={`แม่หมอ ${p.nameTh} (${meta.roleTitle}) - ${p.tagline}`}
+              aria-label={`แม่หมอ ${p.nameTh} (${meta.roleTitle})${isLocked ? " - ปลดล็อกด้วยญาณพยากรณ์พิเศษ" : ""} - ${p.tagline}`}
               whileHover={{ y: -5, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                onSelectPersona(p);
-                scrollToCard(idx);
-              }}
+              onClick={handlePersonaClick}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  onSelectPersona(p);
-                  scrollToCard(idx);
+                  handlePersonaClick();
                 }
               }}
-              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] group/persona ${
                 isSelected
                   ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_35px_rgba(229,192,123,0.45)]"
+                  : isLocked
+                  ? "bg-gradient-to-b from-[#0f091c]/90 via-[#0a0515]/90 to-[#05020c]/90 border-[#e5c07b]/20 hover:border-[#ffd700]/60 hover:bg-[#160d29] opacity-85 hover:opacity-100 shadow-lg"
                   : "bg-gradient-to-b from-[#130d24]/95 to-[#07040f]/95 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
               }`}
               style={{ minHeight: "315px" }}
             >
               {/* Top Card Archetype Tag */}
               <div className="text-center pb-1.5 border-b border-[#e5c07b]/15">
-                <span className="text-[9px] uppercase tracking-widest text-[#e5c07b] font-mono font-semibold block">
-                  {meta.roleTitle}
-                </span>
+                <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                  <span className="text-[9px] uppercase tracking-widest text-[#e5c07b] font-mono font-semibold block">
+                    {meta.roleTitle}
+                  </span>
+                  {isLocked && (
+                    <span className="text-[8px] text-[#ffd700] bg-gradient-to-r from-[#2a1340] to-[#150a24] border border-[#ffd700]/40 px-1.5 py-0.2 rounded-full font-serif-th font-bold flex items-center gap-0.5 shadow-[0_0_8px_rgba(255,215,0,0.2)]">
+                      <span>🔒</span>
+                      <span>✦ ปรมาจารย์ลับ</span>
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] text-[#9c93b8] font-serif-th block mt-0.5">
                   {meta.archetype}
                 </span>
@@ -142,7 +165,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               {/* Authentic Tarot Persona Character Artwork with Altar Aura */}
               <div className="my-auto py-2 flex items-center justify-center relative">
                 <div className="absolute inset-0 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-xl" />
-                <div className="relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.3)]">
+                <div className={`relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.3)] ${isLocked ? "opacity-90" : ""}`}>
                   {meta.renderArt()}
                 </div>
               </div>
@@ -157,13 +180,18 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (isLocked) {
+                        soundManager.playMenuTapSound();
+                        onRequireUpgrade?.("master_persona", p);
+                        return;
+                      }
                       onSelectPersona(p);
                       const greeting = PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
                       soundManager.speakProphecy(greeting, p.id);
                     }}
                     className="p-1.5 rounded-full text-xs text-amber-300/80 hover:text-amber-200 hover:bg-amber-500/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
-                    title={`ฟังเสียงทักทายของ ${p.nameTh}`}
-                    aria-label={`ฟังเสียงทักทายของ ${p.nameTh}`}
+                    title={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
+                    aria-label={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                   >
                     🔊
                   </button>
@@ -181,6 +209,16 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#ffd700]">✦</div>
                   <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#ffd700]">✦</div>
                 </>
+              )}
+
+              {/* Locked Hover Teaser Overlay */}
+              {isLocked && (
+                <div className="absolute inset-0 bg-black/20 pointer-events-none rounded-2xl flex items-center justify-center opacity-0 group-hover/persona:opacity-100 transition-opacity duration-200">
+                  <div className="bg-[#0b0716]/95 border border-[#ffd700]/70 px-3 py-1.5 rounded-xl text-[10.5px] font-serif-th font-bold text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.4)] flex items-center gap-1.5">
+                    <span>✦</span>
+                    <span>แตะเพื่อปลดล็อกปรมาจารย์</span>
+                  </div>
+                </div>
               )}
 
               {/* Holographic Sheen Layer */}

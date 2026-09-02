@@ -12,6 +12,7 @@ import {
   CrystalBallTabIcon,
   AllSpreadsTabIcon,
 } from "@/components/ui/TarotArtIcons";
+import { isStandardSpread } from "@/lib/entitlement/limits";
 
 interface SpreadsLibraryProps {
   spreads: Spread[];
@@ -148,9 +149,17 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               >
                 {/* Header Tag */}
                 <div className="flex items-center justify-between z-10">
-                  <span className="text-[10px] font-mono font-bold text-[#ffd700] bg-[#e5c07b]/15 px-2.5 py-0.5 rounded-full border border-[#e5c07b]/35 shadow-sm">
-                    {spread.positions.length} ใบ
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-mono font-bold text-[#ffd700] bg-[#e5c07b]/15 px-2.5 py-0.5 rounded-full border border-[#e5c07b]/35 shadow-sm">
+                      {spread.positions.length} ใบ
+                    </span>
+                    {!isStandardSpread(spread.id) && (
+                      <span className="text-[9px] text-[#ffd700] bg-gradient-to-r from-[#2a1340] to-[#150a24] border border-[#ffd700]/40 px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 shadow-[0_0_8px_rgba(255,215,0,0.2)]">
+                        <span>🔒</span>
+                        <span>✦ ญาณพิเศษ</span>
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] text-[#a99fc2] font-serif-th">
                     หมวด: {CATEGORY_MAP_TH[spread.defaultCategory] || spread.defaultCategory}
                   </span>
@@ -219,7 +228,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   href={`/?spread=${spread.id}`}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-bold text-xs sm:text-sm text-center shadow-[0_0_20px_rgba(229,192,123,0.35)] hover:shadow-[0_0_28px_rgba(229,192,123,0.55)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5 z-10"
                 >
-                  <span>✦ เริ่มดูดวงด้วยผังนี้</span>
+                  <span>✦ {isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้"}</span>
                 </Link>
               </div>
             );
