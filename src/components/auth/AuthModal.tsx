@@ -183,7 +183,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         );
         soundManager.playCardSelectSound();
         invalidateSessionCache();
-        window.location.reload();
+        window.location.href = "/?auth_success=1";
       } else if (mode === "signup") {
         const data = await postJson(
           "/api/auth/email/signup",
@@ -193,7 +193,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         soundManager.playCardSelectSound();
         if (data.user) {
           invalidateSessionCache();
-          window.location.reload();
+          window.location.href = "/?auth_success=1&new_user=1";
         } else {
           setSuccessMsg(data.message || "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว");
         }

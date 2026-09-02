@@ -28,6 +28,7 @@ import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
 import { FreeTrialNotice } from "@/components/entitlement/FreeTrialNotice";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
+import { ToastNotification, type ToastData } from "@/components/ui/ToastNotification";
 import { DAILY_LIMIT, SIGNUP_BONUS, describeEntitlement, type UpgradeReason } from "@/lib/entitlement/copy";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
@@ -195,7 +196,7 @@ export default function TarotPage() {
   const [readingResult, setReadingResult] = useState<Partial<Reading> | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [authBanner, setAuthBanner] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [toast, setToast] = useState<ToastData | null>(null);
 
   // Instant Hardware Scroll Reset with Multi-Frame Paint Guarantee
   const scrollToSanctuaryTop = () => {
@@ -266,6 +267,7 @@ export default function TarotPage() {
     if (typeof window !== "undefined") {
       const searchParams = new URLSearchParams(window.location.search);
       const isAuthSuccess = searchParams.get("auth_success") === "1";
+      const isNewUser = searchParams.get("new_user") === "1";
       const isVerified = searchParams.get("verified") === "1";
       const isPwReset = searchParams.get("pw_reset") === "1";
       const verifyError = searchParams.get("verify_error");
@@ -276,6 +278,7 @@ export default function TarotPage() {
       if (isAuthSuccess || isVerified || isPwReset || verifyError || authError) {
         const cleanUrl = new URL(window.location.href);
         cleanUrl.searchParams.delete("auth_success");
+        cleanUrl.searchParams.delete("new_user");
         cleanUrl.searchParams.delete("verified");
         cleanUrl.searchParams.delete("pw_reset");
         cleanUrl.searchParams.delete("verify_error");
@@ -288,21 +291,47 @@ export default function TarotPage() {
       }
 
       if (isVerified) {
-        setAuthBanner({
+        setToast({
           type: "success",
-          text: `ยืนยันอีเมลเรียบร้อยแล้ว ✦ รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมโบนัสต้อนรับอีก ${SIGNUP_BONUS} ครั้ง`,
+          title: "ยืนยันอีเมลสำเร็จ ✦",
+          subtitle: `รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมโบนัสต้อนรับอีก ${SIGNUP_BONUS} ครั้งเรียบร้อยแล้ว`,
+          duration: 4500,
         });
         refreshEntitlement();
       } else if (isAuthSuccess) {
-        // ตรวจสอบเซสชันจริงก่อนแสดงแบนเนอร์ — ถ้าผู้ใช้ไม่ได้ล็อกอินจริง จะไม่แสดงแบนเนอร์เด็ดขาด
+        // ตรวจสอบเซสชันจริงก่อนแสดงการแจ้งเตือน
         import("@/lib/auth/use-session").then(({ fetchSessionUser }) => {
           fetchSessionUser({ force: true }).then((currentUser) => {
             if (currentUser) {
-              setAuthBanner({
-                type: "success",
-                text: `เข้าสู่ระบบเรียบร้อยแล้ว ✦ ตอนนี้คุณเปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง และคุยถามแม่หมอต่อได้`,
-              });
               refreshEntitlement();
+              const welcomeKey = `tarot_welcomed_${currentUser.id}`;
+              const hasBeenWelcomed = typeof window !== "undefined" && localStorage.getItem(welcomeKey) === "1";
+              const isRecentAccount =
+                currentUser.createdAt && Date.now() - new Date(currentUser.createdAt).getTime() < 10 * 60 * 1000;
+              const isFirstTimeUser = isNewUser || (isRecentAccount && !hasBeenWelcomed);
+
+              if (isFirstTimeUser && !hasBeenWelcomed) {
+                // สมัครครั้งแรก (First-Time Signup Onboarding): แสดงสิทธิ์โควตาต้อนรับเพียงครั้งเดียว
+                try {
+                  localStorage.setItem(welcomeKey, "1");
+                } catch {}
+
+                setToast({
+                  type: "welcome",
+                  title: "ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์ ✦",
+                  subtitle: `คุณได้รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมโบนัสต้อนรับเรียบร้อยแล้ว`,
+                  duration: 4800,
+                });
+              } else {
+                // ผู้ใช้เดิมเข้าสู่ระบบ (Returning User Login): ไม่แสดงข้อความสิทธิ์ซ้ำซาก ทักทายกระชับ 2.8 วินาทีแล้วจางหาย
+                setToast({
+                  type: "success",
+                  title: "เข้าสู่วิหารเรียบร้อย ✦",
+                  subtitle: `ยินดีต้อนรับกลับสู่ห้วงชะตา คุณ ${currentUser.name || "ผู้แสวงหาคำตอบ"}`,
+                  duration: 2800,
+                });
+              }
+
               import("@/lib/utils/history").then((m) => {
                 m.syncAnonymousHistoryToServer().then(({ merged }) => {
                   if (merged > 0) {
@@ -314,14 +343,34 @@ export default function TarotPage() {
           });
         });
       } else if (isPwReset) {
-        setAuthBanner({ type: "success", text: "ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว เข้าสู่วิหารศักดิ์สิทธิ์ได้ทันที ✦" });
+        setToast({
+          type: "success",
+          title: "ตั้งรหัสผ่านใหม่เรียบร้อย ✦",
+          subtitle: "เข้าสู่วิหารศักดิ์สิทธิ์ได้ทันที",
+          duration: 3500,
+        });
         refreshEntitlement();
       } else if (verifyError === "expired") {
-        setAuthBanner({ type: "error", text: "ลิงก์ยืนยันอีเมลหมดอายุ กรุณาขอลิงก์ใหม่จากเมนูโปรไฟล์" });
+        setToast({
+          type: "error",
+          title: "ลิงก์ยืนยันอีเมลหมดอายุ",
+          subtitle: "กรุณาขอลิงก์ใหม่จากเมนูโปรไฟล์ของคุณ",
+          duration: 5000,
+        });
       } else if (verifyError) {
-        setAuthBanner({ type: "error", text: "ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือถูกใช้งานไปแล้ว" });
+        setToast({
+          type: "error",
+          title: "การยืนยันอีเมลไม่สำเร็จ",
+          subtitle: "ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือถูกใช้งานไปแล้ว",
+          duration: 5000,
+        });
       } else if (authError) {
-        setAuthBanner({ type: "error", text: describeAuthError(authError) });
+        setToast({
+          type: "error",
+          title: "เข้าสู่ระบบไม่สำเร็จ",
+          subtitle: describeAuthError(authError),
+          duration: 5000,
+        });
       }
 
       if (!isAuthSuccess) {
@@ -797,29 +846,14 @@ export default function TarotPage() {
         </div>
       </header>
 
+      {/* World-Class Sacred Floating Toast Notification HUD */}
+      <AnimatePresence>
+        {toast && <ToastNotification toast={toast} onClose={() => setToast(null)} />}
+      </AnimatePresence>
+
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
         <AnnouncementBanner />
-
-        {/* Auth Toast Notification Banner */}
-        {authBanner && (
-          <div
-            className={`mb-6 p-4 rounded-2xl border text-xs sm:text-sm text-center shadow-2xl backdrop-blur flex items-center justify-between gap-3 ${
-              authBanner.type === "success"
-                ? "bg-emerald-950/90 border-emerald-500/50 text-emerald-200"
-                : "bg-rose-950/90 border-rose-600/50 text-rose-200"
-            }`}
-          >
-            <span className="flex-1 font-serif-th">{authBanner.text}</span>
-            <button
-              type="button"
-              onClick={() => setAuthBanner(null)}
-              className="text-xs opacity-75 hover:opacity-100 px-2 py-1 cursor-pointer"
-            >
-              ✕
-            </button>
-          </div>
-        )}
 
         {/* Step Tracker Progress Bar */}
         <RitualStepProgress
