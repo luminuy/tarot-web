@@ -34,6 +34,28 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: ตั้งโดเมนจริง `seertarot.net` + รวมโดเมนไว้ที่ไฟล์เดียว
+
+**คำขอของผู้ใช้**: *"มีโดเมน ซื้อกับ godaddy"* → โดเมนจริงคือ **`seertarot.net`** (กำลัง Add site เข้า Cloudflare)
+
+**ปัญหาเดิม**: โดเมน `tarot.luminuy.com` (ที่ยังไม่เคยจด) ถูกฮาร์ดโค้ดกระจายอยู่ **10 จุดใน 9 ไฟล์** —
+metadata, sitemap, robots, allowlist กัน host injection, allowlist กันดูดเนื้อหา, อีเมลผู้ส่ง, ลายน้ำคัดลอก,
+ลิงก์แชร์, ไฟล์ส่งออกข้อมูล PDPA และในชุดทดสอบ QA อีก 5 จุด → เปลี่ยนโดเมนทีต้องไล่แก้ทีละไฟล์และมีโอกาสตกหล่น
+จนลิงก์ในอีเมล/OAuth ชี้ผิดโดเมน
+
+**สิ่งที่ทำ**:
+1. สร้าง `src/lib/config/site.ts` เป็นแหล่งความจริงเดียว — `SITE_DOMAIN` / `SITE_ORIGIN` / `SITE_HOSTS` /
+   `isOwnHostname()` / `DEFAULT_EMAIL_FROM` / `SITE_NAME_TH` · เปลี่ยนโดเมนครั้งหน้าแก้บรรทัดเดียว
+2. เปลี่ยนทุกจุดให้ดึงจากไฟล์นี้: `layout.tsx` (metadataBase/og), `sitemap.ts`, `robots.ts`,
+   `cards/[id]/page.tsx`, `security/app-origin.ts`, `security/anti-theft.ts`, `email/send.ts`,
+   `api/account/export/route.ts`, `AntiTheftShield.tsx`, `OracleMantraCard.tsx`
+3. `allowlist` รับ `seertarot.net`, `www.seertarot.net`, `*.seertarot.net`, `*.workers.dev`, localhost
+4. ชุดทดสอบ `scripts/qa/test-session-guard.ts` เลิกฮาร์ดโค้ดโดเมน → อ้าง `SITE_ORIGIN` แทน (กันเทสต์ค้างตอนเปลี่ยนโดเมน)
+5. `docs/PENDING_SETUP.md` ข้อ 2 เขียนใหม่: ขั้นตอนย้าย nameserver GoDaddy → Cloudflare, ผูก custom domain,
+   ตั้ง secret `APP_ORIGIN`, อัปเดต Google OAuth redirect URI และตารางแนะนำค่าบนหน้าจอ "Connect your domain"
+
+**การตรวจสอบ**: `npm run repo:verify` ผ่าน 21/21 (ด่านเซสชัน/host injection ทดสอบกับโดเมนใหม่จริง) · `grep luminuy` เหลือ 0 จุดใน `src/` และ `scripts/`
+
 ### 🗓️ 2026-09-02: แก้ข้อความแถบสิทธิ์ที่อ่านแล้วเข้าใจผิดเรื่องจำนวนครั้ง
 
 **คำขอของผู้ใช้**:

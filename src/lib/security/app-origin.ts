@@ -11,17 +11,17 @@
  */
 
 /** โดเมนที่ยอมรับได้ — นอกเหนือจากนี้จะถูกตีกลับไปใช้ค่าปลอดภัยเสมอ */
-const ALLOWED_HOSTS = new Set(["tarot.luminuy.com", "luminuy.com", "localhost:3000", "127.0.0.1:3000"]);
+const ALLOWED_HOSTS = new Set(SITE_HOSTS);
 
 /** โดเมนหลักที่ใช้เมื่อ host ที่ส่งมาไม่น่าเชื่อถือ */
-const CANONICAL_ORIGIN = "https://tarot.luminuy.com";
+const CANONICAL_ORIGIN = SITE_ORIGIN;
 
 function isAllowedHost(host: string): boolean {
   if (!host) return false;
   if (ALLOWED_HOSTS.has(host)) return true;
   // preview deployment ของโปรเจกต์เอง
   if (host.endsWith(".workers.dev")) return true;
-  if (host.endsWith(".luminuy.com")) return true;
+  if (host.endsWith(`.${SITE_DOMAIN}`)) return true;
   return false;
 }
 
@@ -29,6 +29,8 @@ function isAllowedHost(host: string): boolean {
  * คืน origin ที่ใช้ประกอบลิงก์ได้อย่างปลอดภัย
  * ลำดับความน่าเชื่อถือ: `APP_ORIGIN` (ตั้งไว้เอง) → host ของ request ที่อยู่ใน allowlist → โดเมนหลัก
  */
+
+import { SITE_DOMAIN, SITE_HOSTS, SITE_ORIGIN } from "@/lib/config/site";
 export function resolveAppOrigin(request: Request): string {
   const configured = (process.env.APP_ORIGIN ?? "").trim();
   if (configured) {

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import { generateSacredMantra } from "@/lib/tarot/mantra";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
 interface OracleMantraCardProps {
   cards: TarotCard[];
@@ -29,7 +30,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({
   if (!mantra) return null;
 
   const handleCopy = async () => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://luminuy.com";
+    const origin = typeof window !== "undefined" ? window.location.origin : SITE_ORIGIN;
     const textToCopy = `✨ คำคมพลังใจศักดิ์สิทธิ์จาก ${personaNameTh}\n${mantra.quoteTh}\n✦ ข้อคิดนำทาง: "${mantra.affirmationTh}"\n(ไพ่สะท้อนพลัง: ${mantra.sourceCard.nameTh} - ${mantra.powerWord})\nดูดวงออนไลน์พรีเมียม: ${origin}`;
     try {
       await navigator.clipboard.writeText(textToCopy);

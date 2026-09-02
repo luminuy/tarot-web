@@ -13,6 +13,7 @@
 
 import { signUserSession, verifyUserSession, type UserProfile } from "../../src/lib/auth/edge-auth";
 import { resolveAppOrigin } from "../../src/lib/security/app-origin";
+import { SITE_DOMAIN, SITE_ORIGIN } from "../../src/lib/config/site";
 import { describeAuthError } from "../../src/lib/auth/use-session";
 import {
   clearAuthRateLimit,
@@ -101,7 +102,7 @@ async function run() {
   const savedOrigin = process.env.APP_ORIGIN;
   delete process.env.APP_ORIGIN;
   try {
-    const spoofed = new Request("https://tarot.luminuy.com/api/auth/email/forgot", {
+    const spoofed = new Request(`${SITE_ORIGIN}/api/auth/email/forgot`, {
       headers: { "x-forwarded-host": "evil.example" },
     });
     const origin = resolveAppOrigin(spoofed);
@@ -113,17 +114,17 @@ async function run() {
     }
 
     const legit = resolveAppOrigin(
-      new Request("https://tarot.luminuy.com/api/auth/email/forgot", {
-        headers: { "x-forwarded-host": "tarot.luminuy.com" },
+      new Request(`${SITE_ORIGIN}/api/auth/email/forgot`, {
+        headers: { "x-forwarded-host": SITE_DOMAIN },
       }),
     );
-    if (legit !== "https://tarot.luminuy.com") {
+    if (legit !== SITE_ORIGIN) {
       throw new Error(`❌ resolveAppOrigin ปฏิเสธโดเมนของเราเอง: ${legit}`);
     }
 
     // ห้าม downgrade เป็น http ผ่าน header บนโดเมน production
     const downgraded = resolveAppOrigin(
-      new Request("https://tarot.luminuy.com/x", { headers: { "x-forwarded-proto": "http" } }),
+      new Request(`${SITE_ORIGIN}/x`, { headers: { "x-forwarded-proto": "http" } }),
     );
     if (downgraded.startsWith("http://")) {
       throw new Error("❌ resolveAppOrigin ยอม downgrade เป็น http ตาม header");
@@ -146,7 +147,7 @@ async function run() {
 
   // ── 6. Rate limit ของการเข้าสู่ระบบ ──────────────────────────────────────
   const loginReq = (ip: string) =>
-    new Request("https://tarot.luminuy.com/api/auth/email/login", {
+    new Request(`${SITE_ORIGIN}/api/auth/email/login`, {
       method: "POST",
       headers: { "cf-connecting-ip": ip },
     });

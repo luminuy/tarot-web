@@ -2,13 +2,15 @@
  * ระบบส่งอีเมลธุรกรรมผ่าน Resend API พร้อม fallback แสดงผลในคอนโซลสำหรับ Local Development & Test
  */
 
+import { DEFAULT_EMAIL_FROM } from "@/lib/config/site";
+
 export async function sendEmail(
   to: string,
   subject: string,
   html: string
 ): Promise<{ success: boolean; messageId?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM || "แม่หมอลูมินัย <noreply@tarot.luminuy.com>";
+  const from = process.env.EMAIL_FROM || DEFAULT_EMAIL_FROM;
 
   if (!apiKey) {
     console.log(`\n📧 [Email Dev Log]\n  To: ${to}\n  From: ${from}\n  Subject: ${subject}\n  Length: ${html.length} chars\n`);

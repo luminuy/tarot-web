@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
 import { DECK } from "@/data/cards";
 import { SPREADS } from "@/data/spreads";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://tarot.luminuy.com";
+  const baseUrl = SITE_ORIGIN;
   const now = new Date();
 
   // Core Static Pages

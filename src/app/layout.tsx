@@ -4,6 +4,7 @@ import "./globals.css";
 import { AssetWarmup } from "@/components/performance/AssetWarmup";
 import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
 const notoSerifThai = Noto_Serif_Thai({
   subsets: ["thai", "latin"],
@@ -22,7 +23,7 @@ const sarabun = Sarabun({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tarot.luminuy.com"),
+  metadataBase: new URL(SITE_ORIGIN),
   title: {
     default: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI | ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite",
     template: "%s · วิหารพยากรณ์ไพ่ทาโรต์",
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
     title: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI ✦ ดูดวงไพ่ทาโรต์ออนไลน์",
     description:
       "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair",
-    url: "https://tarot.luminuy.com",
+    url: SITE_ORIGIN,
     images: [
       {
         url: "/cards/major-01.webp",
@@ -95,7 +96,7 @@ const webAppJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: "วิหารพยากรณ์ไพ่ทาโรต์ (Sacred Oracle Tarot)",
-  url: "https://tarot.luminuy.com",
+  url: SITE_ORIGIN,
   description: "เว็บดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกจับไพ่ด้วยตนเอง พร้อมแม่หมอ AI และระบบความสุ่มโปร่งใส Provably-Fair SHA-256",
   applicationCategory: "LifestyleApplication",
   operatingSystem: "All",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { SITE_NAME_TH, SITE_ORIGIN } from "@/lib/config/site";
 
 /**
  * 🛡️ AntiTheftShield — ระบบคุ้มครองลิขสิทธิ์และป้องกันการคัดลอก/ดูดข้อมูล
@@ -36,7 +37,7 @@ export function AntiTheftShield() {
       const isReadingContainer = anchor?.closest("[data-reading-result]") || anchor?.closest(".prose-oracle");
       if (!isReadingContainer) return;
 
-      const watermark = "\n\n✦ คำทำนายพยากรณ์โดย: วิหารทาโรต์ออราเคิล (Luminuy Tarot)\n✦ เว็บไซต์: https://luminuy.com";
+      const watermark = `\n\n✦ คำทำนายพยากรณ์โดย: ${SITE_NAME_TH}\n✦ เว็บไซต์: ${SITE_ORIGIN}`;
       if (e.clipboardData) {
         e.preventDefault();
         e.clipboardData.setData("text/plain", text + watermark);

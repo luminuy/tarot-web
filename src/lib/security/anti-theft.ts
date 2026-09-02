@@ -4,6 +4,8 @@
  * ตรวจสอบ Origin / Fetch Metadata ป้องกันไม่ให้เว็บไซต์อื่นหรือบอทภายนอก
  * ยิงเรียกใช้งาน AI Engine API หรือดูดข้อมูลคำทำนายไปใช้โดยไม่ได้รับอนุญาต
  */
+
+import { isOwnHostname } from "@/lib/config/site";
 export function isRequestAuthorizedOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
@@ -14,15 +16,7 @@ export function isRequestAuthorizedOrigin(request: Request): boolean {
     return true;
   }
 
-  const isAllowedHost = (hostname: string) => {
-    return (
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname.endsWith(".workers.dev") ||
-      hostname === "luminuy.com" ||
-      hostname.endsWith(".luminuy.com")
-    );
-  };
+  const isAllowedHost = (hostname: string) => isOwnHostname(hostname);
 
   if (origin) {
     try {
