@@ -145,7 +145,7 @@ export default function TarotPage() {
   const entitlementView = describeEntitlement(entitlement);
   const isPassHolder = Boolean(
     entitlementView?.isUnlimited ||
-    (entitlement?.bonusRemaining ?? 0) > 0
+    entitlement?.hasPaidCredits
   );
 
   /**

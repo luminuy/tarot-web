@@ -17,6 +17,8 @@ export interface ClientEntitlement {
   dailyRemaining?: number | null;
   weeklyRemaining: number | null;
   bonusRemaining: number | null;
+  /** true เฉพาะเมื่อผู้ใช้เคยซื้อ credits (purchase_*) และยังเหลือรอบอยู่ */
+  hasPaidCredits?: boolean;
   resetAt: string | null;
   dailyFreeAvailable?: boolean;
   dailyStreak?: number;
