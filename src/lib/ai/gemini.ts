@@ -96,7 +96,7 @@ export const CANDIDATE_GEMINI_MODELS = [
  *
  * ⚠️ ถ้าจะแก้รายการนี้ ให้ยึดผลจาก /admin → แท็บ "สุขภาพ AI" เท่านั้น **ห้ามเดา** (บทเรียน INC-0053)
  */
-export const WORKING_GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"];
+export const WORKING_GEMINI_MODELS = ["gemini-3.5-flash-lite", "gemini-3.6-flash"];
 
 /**
  * เพดานเวลารอ "การตอบกลับครั้งแรก" ต่อโมเดล (มิลลิวินาที)
