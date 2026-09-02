@@ -334,16 +334,21 @@ ${cards.join("\n")}
 
     const geminiKey = !aiCapHit ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY : undefined;
     if (geminiKey) {
-      const { CANDIDATE_GEMINI_MODELS } = await import("@/lib/ai/gemini");
-      const modelsToTry = CANDIDATE_GEMINI_MODELS.slice(0, 3); // จำกัด 3 ตัว — chat มี timeout 8s/ตัว
+      const { CANDIDATE_GEMINI_MODELS, extractGeminiAnswer } = await import("@/lib/ai/gemini");
+      const modelsToTry = CANDIDATE_GEMINI_MODELS.slice(0, 3);
 
-      for (const model of modelsToTry) {
+      for (const [modelIdx, model] of modelsToTry.entries()) {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         try {
+          // Gemini 3.x เปิด "thinking" เป็นค่าเริ่มต้น รอบคิดกินเวลาเกิน 8 วินาทีได้บ่อย
+          // ของเดิมตั้ง 8s ทุกตัว → abort ครบทั้ง 3 โมเดล แล้วตกไปคำตอบสำเร็จรูปเงียบ ๆ
+          // ให้ตัวแรก (ตัวที่เก่งสุด) มีเวลาคิดจริง 20s ตัวสำรองค่อยรีบ 12s
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          const timeoutId = setTimeout(() => controller.abort(), modelIdx === 0 ? 20000 : 12000);
 
-          const rawHistory = history.slice(-4).map((h) => ({
+          // เดิมส่งแค่ 4 ข้อความ (= คุยกันแค่ 2 รอบ) แม่หมอจึงลืมบริบทเร็วมาก
+          // จนคำตอบวนซ้ำและไม่ต่อเนื่องเหมือนแชท AI จริง — ขยายเป็น 10
+          const rawHistory = history.slice(-10).map((h) => ({
             role: h.sender === "user" ? "user" : "model",
             parts: [{ text: h.text }],
           }));
@@ -386,8 +391,13 @@ ${cards.join("\n")}
 
           if (response.ok) {
             const data = await response.json();
-            const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (replyText) return NextResponse.json({ reply: replyText.trim() });
+            const replyText = extractGeminiAnswer(data);
+            if (replyText) return NextResponse.json({ reply: replyText });
+            console.warn(
+              `[Gemini Flash Chat ${model}] 200 แต่ไม่มีข้อความคำตอบ · finishReason=${
+                data.candidates?.[0]?.finishReason
+              } · parts=${JSON.stringify(data.candidates?.[0]?.content?.parts)?.slice(0, 300)}`,
+            );
           } else {
             const errText = await response.text().catch(() => "");
             console.warn(`[Gemini Flash Chat ${model}] response status: ${response.status}`, errText);
@@ -398,7 +408,17 @@ ${cards.join("\n")}
       }
     }
 
-    // Dynamic Context-Aware Intelligent Local Engine (when API Key is offline/local testing)
+    // ── มาถึงตรงนี้ = ไม่ได้คำตอบจาก AI จริง ต้องใช้คลังคำตอบสำรองออฟไลน์ ──
+    // เดิมส่งคืนเหมือนคำตอบ AI ทุกประการ ผู้ใช้จึงแยกไม่ออกว่ากำลังคุยกับข้อความสำเร็จรูป
+    // (เจ้าของโปรเจกต์เจอเองว่า 2 คำถามคนละเรื่องได้คำตอบเดียวกันเป๊ะ)
+    // ต่อไปนี้ต้องติดธง `fallback` กลับไปเสมอ ให้หน้าเว็บบอกผู้ใช้ตรง ๆ
+    console.warn(
+      `[chat] ตกไปใช้คำตอบสำรองออฟไลน์ · reason=${
+        aiCapHit ? "ai_daily_cap" : geminiKey ? "gemini_unavailable" : "no_api_key"
+      } · readingId=${id}`,
+    );
+    recordEvent("chat_offline_fallback");
+
     const dynamicReply = generateContextualTarotChatReply({
       userQuestion,
       history,
@@ -406,7 +426,11 @@ ${cards.join("\n")}
       record,
     });
 
-    return NextResponse.json({ reply: dynamicReply });
+    return NextResponse.json({
+      reply: dynamicReply,
+      fallback: true,
+      fallbackReason: aiCapHit ? "ai_daily_cap" : geminiKey ? "gemini_unavailable" : "no_api_key",
+    });
   } finally {
     limit.releaseConcurrency();
   }
