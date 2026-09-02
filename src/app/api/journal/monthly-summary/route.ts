@@ -128,23 +128,43 @@ ${historyText}
   "empowermentQuote": "คำคมพลังใจศักดิ์สิทธิ์ประจำเดือนที่ประทับใจ"
 }`;
 
-    const { CANDIDATE_GEMINI_MODELS, extractGeminiAnswer } = await import("@/lib/ai/gemini");
+    const {
+      WORKING_GEMINI_MODELS,
+      GEMINI_FIRST_MODEL_TIMEOUT_MS,
+      GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
+      extractGeminiAnswer,
+    } = await import("@/lib/ai/gemini");
     let res: Response | null = null;
-    for (const model of CANDIDATE_GEMINI_MODELS.slice(0, 3)) {
-      const r = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              temperature: 0.7,
-            },
-          }),
-        }
+    for (const [modelIdx, model] of WORKING_GEMINI_MODELS.entries()) {
+      // เพดานเวลาเหมือนเส้นทางอื่น — ไม่มี timeout = ถ้าโมเดลค้าง คำขอค้างยาว (บทเรียน INC-0053)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
       );
+      let r: Response;
+      try {
+        r = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          {
+            method: "POST",
+            signal: controller.signal,
+            headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                temperature: 0.7,
+              },
+            }),
+          }
+        );
+      } catch (e) {
+        console.warn(`[Monthly Summary] model ${model} → ${e instanceof Error ? e.name : String(e)}`);
+        continue;
+      } finally {
+        clearTimeout(timeoutId);
+      }
       if (r.ok) {
         res = r;
         break;
