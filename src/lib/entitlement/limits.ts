@@ -22,3 +22,26 @@ export const SIGNUP_BONUS = 3;
 
 /** โบนัสชดเชยผู้ใช้เดิมก่อนเปิดระบบสิทธิ์ */
 export const GRANDFATHER_BONUS = 10;
+
+/** ผังมาตรฐาน 1–4 ใบ (7 ผัง) ที่เปิดให้สมาชิกทั่วไปใช้ฟรี */
+export const STANDARD_SPREAD_IDS = new Set([
+  "daily",
+  "quick",
+  "yes-no",
+  "three-card",
+  "situation-solution",
+  "mind-body-spirit",
+  "how-they-feel",
+]);
+
+export function isStandardSpread(spreadId: string): boolean {
+  return STANDARD_SPREAD_IDS.has(spreadId);
+}
+
+/** 2 ปรมาจารย์ลับที่สงวนไว้สำหรับผู้ถือสิทธิ์ญาณพยากรณ์พิเศษ (Paid / Credits / Unlimited) */
+export const MASTER_PERSONA_IDS = new Set(["master", "mystic"]);
+
+export function isMasterPersona(personaId: string): boolean {
+  return MASTER_PERSONA_IDS.has(personaId);
+}
+

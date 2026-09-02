@@ -100,6 +100,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🎟 แกนสิทธิ์การเปิดไพ่ (โควตารายสัปดาห์ / โบนัส / กันหักซ้ำ)", cmd: TSX, args: ["scripts/qa/test-entitlement.ts"] },
   { label: "🎫 บัญชีปลดล็อกไม่จำกัด (tarot_tester + allowlist อีเมล · ไม่ให้สิทธิ์แอดมิน)", cmd: TSX, args: ["scripts/qa/test-tester.ts"] },
   { label: "🔐 เซสชันล็อกอิน (tokenVersion · host injection · rate limit ไม่ล็อกเจ้าของบัญชี)", cmd: TSX, args: ["scripts/qa/test-session-guard.ts"] },
+  { label: "💎 ระบบล็อกฟีเจอร์พรีเมียม (ผังใหญ่ 13 แบบ & ปรมาจารย์ลับ 2 ท่าน)", cmd: TSX, args: ["scripts/qa/test-feature-gating.ts"] },
 ];
 
 /**

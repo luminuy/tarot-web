@@ -10,19 +10,37 @@
  */
 
 import type { ClientEntitlement } from "@/lib/entitlement/use-entitlement";
-import { DAILY_LIMIT, GUEST_LIMIT, SIGNUP_BONUS } from "@/lib/entitlement/limits";
+import {
+  DAILY_LIMIT,
+  GUEST_LIMIT,
+  SIGNUP_BONUS,
+  STANDARD_SPREAD_IDS,
+  isStandardSpread,
+  MASTER_PERSONA_IDS,
+  isMasterPersona,
+} from "@/lib/entitlement/limits";
 import { CREDIT_PACKAGES } from "@/lib/entitlement/packages";
 
 /** ราคาแพ็กเกจถูกที่สุด — ใช้เป็นราคา "เริ่มต้น" ทุกที่ ห้ามพิมพ์ตัวเลขเอง */
 export const CHEAPEST_PACKAGE_THB = Math.min(...CREDIT_PACKAGES.map((p) => p.priceThb));
 
-export { DAILY_LIMIT, GUEST_LIMIT, SIGNUP_BONUS };
+export {
+  DAILY_LIMIT,
+  GUEST_LIMIT,
+  SIGNUP_BONUS,
+  STANDARD_SPREAD_IDS,
+  isStandardSpread,
+  MASTER_PERSONA_IDS,
+  isMasterPersona,
+};
 
 /** เหตุผลที่ทำให้ผู้ใช้เจอกำแพงสิทธิ์ — ใช้เลือกถ้อยคำและปุ่มให้ตรงสถานการณ์ */
 export type UpgradeReason =
   | "guest_used" // ผู้เยี่ยมชมใช้สิทธิ์ทดลองฟรีครบแล้ว
   | "daily_exhausted" // สมาชิกใช้โควตารายวันครบแล้ว
   | "members_only" // ฟีเจอร์เฉพาะสมาชิก (แชทถามต่อ)
+  | "grand_spread" // ผังใหญ่ 5–12 ใบสำหรับผู้ถือญาณพยากรณ์พิเศษ
+  | "master_persona" // 2 ปรมาจารย์ลับสำหรับผู้ถือญาณพยากรณ์พิเศษ
   | "explore"; // ผู้ใช้กดดูรายละเอียดสิทธิ์เอง (ไม่ได้ถูกบล็อก)
 
 export type QuotaTone = "unlimited" | "ample" | "low" | "empty";
@@ -241,6 +259,24 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     primaryAction: "signup",
     secondaryLabel: "ปิดหน้าต่างนี้",
     reassurance: "ไม่มีการเก็บเงินอัตโนมัติ · ยกเลิกหรือลบบัญชีได้ตลอดเวลา",
+  },
+  grand_spread: {
+    eyebrow: "✦ ญาณพยากรณ์พิเศษ",
+    title: "ผังพยากรณ์เจาะลึกชั้นสูง (5–12 ใบ)",
+    body: "ผังนี้เป็นผังพยากรณ์ระดับลึกซึ้ง (เช่น Celtic Cross 10 ใบ, จักรราศี 12 ภพ, 7 จักระ) สำหรับผู้ถือสิทธิ์ญาณพยากรณ์พิเศษ เพื่อผ่าดวงชะตาทุกมิติ",
+    primaryLabel: `ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
+    primaryAction: "credits",
+    secondaryLabel: "เลือกผังมาตรฐาน 1–4 ใบไปก่อน",
+    reassurance: "รอบสะสมไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ 20 ผัง + คุยเจาะลึกไม่จำกัด",
+  },
+  master_persona: {
+    eyebrow: "✦ ปรมาจารย์ลับ",
+    title: "ปรมาจารย์วิเคราะห์ดวงชะตาเชิงลึก",
+    body: "อาจารย์สายฟันธง และ แม่หมอสายพลัง เป็น 2 ปรมาจารย์ลับผู้ให้กลยุทธ์ฟันธงและจิตวิทยาเชิงลึก เฉพาะผู้ถือญาณพยากรณ์พิเศษ",
+    primaryLabel: `ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
+    primaryAction: "credits",
+    secondaryLabel: "เลือกแม่หมอพื้นฐาน 3 ท่านไปก่อน",
+    reassurance: "รอบสะสมไม่มีวันหมดอายุ · ปลดล็อกปรมาจารย์ + ถามเจาะลึกไม่จำกัด",
   },
 };
 

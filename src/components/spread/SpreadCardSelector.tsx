@@ -31,11 +31,15 @@ import {
   AllSpreadsTabIcon,
 } from "@/components/ui/TarotArtIcons";
 import { CardImage } from "@/components/card/CardImage";
+import { isStandardSpread } from "@/lib/entitlement/limits";
+import { soundManager } from "@/lib/utils/audio";
 
 interface SpreadCardSelectorProps {
   selectedSpread: Spread;
   onSelectSpread: (spread: Spread) => void;
   onProceed?: () => void;
+  isPassHolder?: boolean;
+  onRequireUpgrade?: (reason: "grand_spread", spread: Spread) => void;
 }
 
 type SpreadCategory = "all" | "recommended" | "love" | "career" | "master";
@@ -98,6 +102,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   selectedSpread,
   onSelectSpread,
   onProceed,
+  isPassHolder = false,
+  onRequireUpgrade,
 }) => {
   const [activeCategory, setActiveCategory] = useState<SpreadCategory>("recommended");
 
@@ -241,6 +247,18 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           {filteredSpreads.map((spread, idx) => {
             const isSelected = selectedSpread.id === spread.id;
             const isRecommended = spread.id === "three-card";
+            const isGrand = !isStandardSpread(spread.id);
+            const isLocked = isGrand && !isPassHolder;
+
+            const handleCardClick = () => {
+              if (isLocked) {
+                soundManager.playMenuTapSound();
+                onRequireUpgrade?.("grand_spread", spread);
+                return;
+              }
+              onSelectSpread(spread);
+              scrollToCard(idx);
+            };
 
             return (
               <div
@@ -248,21 +266,19 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
-                aria-label={`ผัง ${spread.nameTh} (${spread.positions.length} ใบ) - ${spread.description}`}
-                onClick={() => {
-                  onSelectSpread(spread);
-                  scrollToCard(idx);
-                }}
+                aria-label={`ผัง ${spread.nameTh} (${spread.positions.length} ใบ)${isLocked ? " - ปลดล็อกด้วยญาณพยากรณ์พิเศษ" : ""} - ${spread.description}`}
+                onClick={handleCardClick}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    onSelectSpread(spread);
-                    scrollToCard(idx);
+                    handleCardClick();
                   }
                 }}
-                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 transform-gpu hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 transform-gpu hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] group/card ${
                   isSelected
                     ? "bg-[#140c26] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_30px_rgba(229,192,123,0.35)]"
+                    : isLocked
+                    ? "bg-[#0a0714]/90 border-[#e5c07b]/20 hover:border-[#ffd700]/60 hover:bg-[#120a22] shadow-lg opacity-85 hover:opacity-100"
                     : "bg-[#0b0817] border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#110c22] shadow-xl"
                 }`}
                 style={{ minHeight: "320px" }}
@@ -272,7 +288,12 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   <span className="text-[10px] text-[#e5c07b] bg-[#e5c07b]/15 px-2.5 py-0.5 rounded-full border border-[#e5c07b]/30 font-semibold font-mono">
                     {spread.positions.length} ใบ
                   </span>
-                  {isRecommended ? (
+                  {isLocked ? (
+                    <span className="text-[9px] text-[#ffd700] bg-gradient-to-r from-[#2a1340] to-[#150a24] border border-[#ffd700]/40 px-2.5 py-0.5 rounded-full font-serif-th font-bold shadow-[0_0_12px_rgba(255,215,0,0.2)] flex items-center gap-1">
+                      <span>🔒</span>
+                      <span>✦ ญาณพิเศษ</span>
+                    </span>
+                  ) : isRecommended ? (
                     <span className="text-[9px] text-[#05040a] bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] px-2.5 py-0.5 rounded-full font-bold shadow flex items-center gap-1">
                       <span>✦</span> ยอดนิยม
                     </span>
@@ -281,7 +302,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
                 {/* 1909 Tarot Spread Centerpiece */}
                 <div className="my-auto py-2.5 flex items-center justify-center relative">
-                  <div className="relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.25)]">
+                  <div className={`relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.25)] ${isLocked ? "opacity-90" : ""}`}>
                     {renderSpreadIllustration(spread.id)}
                   </div>
                 </div>
@@ -304,6 +325,16 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#ffd700]">✦</div>
                     <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#ffd700]">✦</div>
                   </>
+                )}
+
+                {/* Locked Hover Teaser Overlay */}
+                {isLocked && (
+                  <div className="absolute inset-0 bg-black/20 pointer-events-none rounded-2xl flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200">
+                    <div className="bg-[#0b0716]/95 border border-[#ffd700]/70 px-3 py-1.5 rounded-xl text-[10.5px] font-serif-th font-bold text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.4)] flex items-center gap-1.5">
+                      <span>✦</span>
+                      <span>แตะเพื่อปลดล็อกผังนี้</span>
+                    </div>
+                  </div>
                 )}
 
                 {/* Holographic Sheen Layer */}

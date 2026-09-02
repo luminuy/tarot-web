@@ -29,7 +29,14 @@ import { FreeTrialNotice } from "@/components/entitlement/FreeTrialNotice";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
 import { ToastNotification, type ToastData } from "@/components/ui/ToastNotification";
-import { DAILY_LIMIT, SIGNUP_BONUS, describeEntitlement, type UpgradeReason } from "@/lib/entitlement/copy";
+import {
+  DAILY_LIMIT,
+  SIGNUP_BONUS,
+  describeEntitlement,
+  type UpgradeReason,
+  isStandardSpread,
+  isMasterPersona,
+} from "@/lib/entitlement/copy";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 
@@ -132,6 +139,10 @@ export default function TarotPage() {
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const entitlement = useEntitlement();
   const entitlementView = describeEntitlement(entitlement);
+  const isPassHolder = Boolean(
+    entitlementView?.isUnlimited ||
+    (entitlement?.bonusRemaining ?? 0) > 0
+  );
 
   /**
    * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้
@@ -430,6 +441,16 @@ export default function TarotPage() {
     // สิทธิ์หมดตั้งแต่ยังไม่ยิง API — อธิบายด้วยหน้าต่างเดียว ไม่ต้องมีแถบแดงซ้อน
     if (entitlementView?.blocked) {
       openAccessDialog(entitlementView.blockedReason ?? "guest_used");
+      return;
+    }
+
+    if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
+      openAccessDialog("grand_spread");
+      return;
+    }
+
+    if (!isPassHolder && isMasterPersona(selectedPersona.id)) {
+      openAccessDialog("master_persona");
       return;
     }
 
@@ -931,9 +952,17 @@ export default function TarotPage() {
                   soundManager.playCardSelectSound();
                   setSelectedSpread(sp);
                 }}
+                isPassHolder={isPassHolder}
+                onRequireUpgrade={() => {
+                  openAccessDialog("grand_spread");
+                }}
                 onProceed={() => {
                   if (entitlementView?.blocked) {
                     openAccessDialog(entitlementView.blockedReason ?? "guest_used");
+                    return;
+                  }
+                  if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
+                    openAccessDialog("grand_spread");
                     return;
                   }
                   soundManager.playCardSelectSound();
@@ -971,6 +1000,10 @@ export default function TarotPage() {
                 onSelectPersona={(p) => {
                   soundManager.playCardSelectSound();
                   setSelectedPersona(p);
+                }}
+                isPassHolder={isPassHolder}
+                onRequireUpgrade={() => {
+                  openAccessDialog("master_persona");
                 }}
               />
 
