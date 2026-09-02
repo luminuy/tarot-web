@@ -28,11 +28,37 @@
 | **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
 | **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
 | **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
-| **คัมภีร์บทความความรู้** | `/blog` | 🟡 **Scaffolded (Draft)** | Dev Server Ready | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader `/blog/[slug]` Markdown |
+| **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | หน้าประวัติดูดวงเต็มรูปแบบในบัญชี |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-02: เปิดตัวระบบ 20 บทความ SEO ไฮทราฟฟิก (High-Traffic SEO Content Engine)
+
+**คำขอของผู้ใช้**: *"วางแผนเขียน บทความ seo กันเถอะ" ➔ "เขียน ทำมาให้หมดทีเดียว เรียกใช้ เอเจนมาช่วยได้"*
+
+**สิ่งที่สร้างและพัฒนาเสร็จสมบูรณ์**:
+1. **คลัง 20 บทความ SEO คุณภาพสูง (`src/data/articles.ts`)**:
+   - บรรจุบทความครอบคลุม 5 หมวดหมู่หลัก (ความรัก, การงาน/การเงิน, ผังพยากรณ์, ความหมายไพ่, จิตวิทยา/AI)
+   - ปรับแต่ง SEO Title, Meta Description, Keywords, Table of Contents, FAQs และโครงสร้างเนื้อหาแบบลึกซึ้ง
+   - ออกแบบเชื่อมโยงคู่คีย์เวิร์ดทั้ง "ไพ่ยิปซี" และ "ไพ่ทาโรต์ 1909"
+2. **หน้ารวมบทความคัมภีร์ (`src/app/blog/page.tsx`, `BlogIndexClient.tsx`)**:
+   - ระบบค้นหาแบบ Real-time Search
+   - แถบกรอง 5 หมวดหมู่ย่อยแบบ Smooth Animation
+   - การ์ดแนะนำ Featured Hero Card ประจำสัปดาห์
+3. **หน้าอ่านบทความ Dynamic Reader (`src/app/blog/[slug]/page.tsx`, `ArticleReadingClient.tsx`)**:
+   - Render Markdown พร้อม Typography สไตล์วิหารทองคำ
+   - ฝัง **Schema.org Structured Data** ครบ 3 รูปแบบ (`Article`, `BreadcrumbList`, `FAQPage`) ช่วยติด Google Rich Snippets
+   - กล่อง Highlight เชื่อมต่อไปยังสารานุกรมไพ่ 78 ใบ (`/cards/[id]`)
+   - Interactive High-Conversion CTA กล่องทองคำชวนเปิดไพ่จริงบนหน้าแรก
+   - ระบบ FAQ Accordion ขยายดูคำตอบได้ทันที
+   - ปุ่มแชร์/คัดลอกลิงก์พร้อมเสียงและ Toast feedback
+   - แนะนำ 3 บทความที่เกี่ยวข้อง (Related Articles)
+4. **ลงทะเบียน Sitemap อัตโนมัติ (`src/app/sitemap.ts`)**:
+   - บรรจุ URL ทั้ง 20 บทความขึ้น Sitemap เพื่อให้ Google Bot มา Index ทันที
+5. **เพิ่มเมนูเข้าถึงใน Navbar (`SacredNavDropdown.tsx`)**:
+   - เพิ่มปุ่ม "คัมภีร์บทความ (20 เรื่อง)" ในแถบเมนูหลัก
 
 ### 🗓️ 2026-09-02: ปรับปรุงโครงสร้างเอกสารแม่บทสู่ระดับโลก (World-Class Documentation Overhaul)
 
