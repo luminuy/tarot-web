@@ -31,12 +31,8 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
     return () => clearInterval(timer);
   }, [ent?.resetAt]);
 
-  // ยังไม่รู้สิทธิ์ (กำลังเรียก /api/entitlement) → กันที่ไว้ก่อน
-  // ถ้าปล่อยว่างแล้วค่อยแทรกทีหลัง ปุ่มบนแถบหัวจะกระโดดใส่หน้าผู้ใช้ (layout shift)
-  if (ent === null) {
-    return <div aria-hidden="true" className="h-9 w-[68px] animate-pulse rounded-xl bg-white/5 sm:w-28" />;
-  }
-
+  // ถ้ายังไม่รู้สิทธิ์ หรือระบบสิทธิ์ปิดอยู่ (view === null) ให้คืน null ทันที
+  // ป้องกันอาการ Ghost Slot: ช่องปุ่มโครงกระดูกโผล่มาแวบหนึ่งแล้วหายไป
   if (!view) return null;
 
   const isAdmin = view.isAdmin;
