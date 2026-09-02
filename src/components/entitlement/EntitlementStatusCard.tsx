@@ -79,7 +79,7 @@ export function EntitlementStatusCard() {
           <div className="flex items-center gap-2 rounded-xl border border-[#e5c07b]/12 bg-[#100b20]/60 px-3 py-2.5 font-serif-th text-[11px] text-[#cfc8e2]">
             <SparkSealIcon className="h-4 w-4 shrink-0 text-[#e5c07b]" />
             <span>
-              โบนัสสะสม <strong className="text-[#ffd700]">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ
+              รอบที่เติมไว้ <strong className="text-[#ffd700]">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ
             </span>
           </div>
         </div>

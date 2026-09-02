@@ -211,8 +211,13 @@ export async function grantBonus(userId: string, n: number, reason: string): Pro
   }
 }
 
-/** ให้โบนัสสมัครใหม่ — เรียกครั้งเดียวตอนสร้างผู้ใช้ (idempotent ปลอดภัยถ้าเรียกซ้ำ) */
+/**
+ * ให้โบนัสสมัครใหม่ — เรียกครั้งเดียวตอนสร้างผู้ใช้ (idempotent ปลอดภัยถ้าเรียกซ้ำ)
+ * ปัจจุบัน `SIGNUP_BONUS = 0` (ไม่ทำระบบโบนัสแจกฟรี) ฟังก์ชันนี้จึงไม่ทำอะไร
+ * แต่คงไว้เพื่อไม่ให้จุดเรียกใช้ทั่วระบบพัง และเปิดกลับได้ทันทีถ้าเจ้าของเปลี่ยนใจ
+ */
 export async function grantSignupBonus(userId: string): Promise<void> {
+  if (SIGNUP_BONUS <= 0) return;
   await grantBonus(userId, SIGNUP_BONUS, "signup");
 }
 

@@ -115,7 +115,7 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0 }}
             transition={TWEEN.fast}
             onClick={onClose}
-            className="fixed inset-0 bg-[#05040a]/85 backdrop-blur-md"
+            className="fixed inset-0 bg-[#05040a]/93"
           />
 
           {/* Modal Dialog Card */}
@@ -123,11 +123,16 @@ export const Modal: React.FC<ModalProps> = ({
             key="modal-content"
             ref={modalContainerRef}
             tabIndex={-1}
-            initial={isMotionSafe ? { opacity: 0, scale: 0.95, y: 16 } : { opacity: 0 }}
-            animate={isMotionSafe ? { opacity: 1, scale: 1, y: 0 } : { opacity: 1 }}
-            exit={isMotionSafe ? { opacity: 0, scale: 0.96, y: 12 } : { opacity: 0 }}
+            /*
+             * ไม่ใช้ scale กับการ์ดโมดัลใบใหญ่ — การย่อ/ขยายบังคับให้เบราว์เซอร์
+             * วาดตัวอักษรทั้งใบใหม่ทุกเฟรม (re-raster) ทำให้ตอนเปิดกระตุกเห็นชัด
+             * เลื่อนขึ้น + จาง ให้ผลทางสายตาใกล้เคียงกันแต่เบากว่ามาก
+             */
+            initial={isMotionSafe ? { opacity: 0, y: 14 } : { opacity: 0 }}
+            animate={isMotionSafe ? { opacity: 1, y: 0 } : { opacity: 1 }}
+            exit={isMotionSafe ? { opacity: 0, y: 10 } : { opacity: 0 }}
             transition={isMotionSafe ? SPRING.modal : TWEEN.fast}
-            className={`relative z-10 w-full ${maxWidthClass} max-h-[90vh] flex flex-col bg-gradient-to-b from-[#191230]/95 via-[#100b20]/98 to-[#0a0714] border border-[#e5c07b]/30 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] backdrop-blur-xl overflow-hidden focus:outline-none ${className}`}
+            className={`relative z-10 w-full ${maxWidthClass} max-h-[90vh] flex flex-col bg-gradient-to-b from-[#191230]/95 via-[#100b20]/98 to-[#0a0714] border border-[#e5c07b]/30 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden focus:outline-none ${className}`}
           >
             {/* Header */}
             {(title || showCloseButton) && (

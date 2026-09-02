@@ -35,7 +35,7 @@ export function AnnouncementBanner() {
   const when = ent!.announceResetDate?.trim();
 
   return (
-    <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-[#e5c07b]/40 bg-[#100b20]/90 p-4 font-serif-th text-xs text-[#f5deaa] shadow-xl backdrop-blur sm:text-sm">
+    <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-[#e5c07b]/40 bg-[#100b20]/96 p-4 font-serif-th text-xs text-[#f5deaa] shadow-xl sm:text-sm">
       <span className="flex-1">
         <span className="text-[#e5c07b]">✦</span> เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
         <strong>

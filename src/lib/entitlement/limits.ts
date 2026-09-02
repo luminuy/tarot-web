@@ -17,8 +17,14 @@ export const DAILY_LIMIT = 3;
 /** compatibility alias — โค้ดเก่าบางจุดยังเรียกชื่อนี้ */
 export const WEEKLY_LIMIT = DAILY_LIMIT;
 
-/** โบนัสก้อนที่ได้ทันทีเมื่อสมัครสมาชิกใหม่ (ไม่หมดอายุ) */
-export const SIGNUP_BONUS = 3;
+/**
+ * โบนัสก้อนที่แจกให้ตอนสมัครสมาชิกใหม่
+ *
+ * ⚠️ ตั้งเป็น 0 ตามคำสั่งเจ้าของโปรเจกต์ (2026-09-02): **ไม่ทำระบบโบนัสสะสมแจกฟรี**
+ * สมาชิกได้สิทธิ์รายวันอย่างเดียว ส่วนตาราง `user_bonus` ยังใช้อยู่ —
+ * แต่ใช้เก็บ "รอบที่เติมไว้" จากการซื้อแพ็กเกจเท่านั้น (ดู api/entitlement/checkout/confirm)
+ */
+export const SIGNUP_BONUS = 0;
 
 /** โบนัสชดเชยผู้ใช้เดิมก่อนเปิดระบบสิทธิ์ */
 export const GRANDFATHER_BONUS = 10;

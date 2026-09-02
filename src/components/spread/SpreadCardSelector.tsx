@@ -390,7 +390,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#0d091a]/95 border-2 border-[#e5c07b]/60 backdrop-blur-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)]"
+          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#0d091a]/97 border-2 border-[#e5c07b]/60 shadow-[0_0_40px_rgba(0,0,0,0.8)]"
         >
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}

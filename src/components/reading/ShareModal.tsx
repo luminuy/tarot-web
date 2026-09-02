@@ -315,7 +315,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         aria-modal="true"
         aria-label="แชร์ผลคำทำนาย"
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/93-xl"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.92, y: 20 }}

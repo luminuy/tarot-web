@@ -7,7 +7,7 @@ import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
 import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
-import { DAILY_LIMIT, MEMBER_BENEFITS, SIGNUP_BONUS } from "@/lib/entitlement/copy";
+import { DAILY_LIMIT, MEMBER_BENEFITS } from "@/lib/entitlement/copy";
 
 export interface AuthModalProps {
   isOpen: boolean;
@@ -217,7 +217,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-2xl"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/93"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
@@ -281,7 +281,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <p className="text-xs text-[#a79cc2] font-serif-th max-w-xs mx-auto leading-relaxed">
               {mode === "signin" && `เข้าสู่ระบบเพื่อใช้สิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง และดูประวัติดวงย้อนหลัง`}
               {mode === "signup" &&
-                `สมัครฟรี รับโบนัสเปิดไพ่ทันที ${SIGNUP_BONUS} ครั้ง แล้วเปิดต่อได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
+                `สมัครฟรี ไม่ต้องผูกบัตร เปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
               {mode === "forgot" && "ระบุอีเมลเพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย"}
             </p>
           </div>

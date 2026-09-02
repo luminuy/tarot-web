@@ -31,7 +31,6 @@ import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner"
 import { ToastNotification, type ToastData } from "@/components/ui/ToastNotification";
 import {
   DAILY_LIMIT,
-  SIGNUP_BONUS,
   describeEntitlement,
   type UpgradeReason,
   isStandardSpread,
@@ -313,7 +312,7 @@ export default function TarotPage() {
         setToast({
           type: "success",
           title: "ยืนยันอีเมลสำเร็จ ✦",
-          subtitle: `รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมโบนัสต้อนรับอีก ${SIGNUP_BONUS} ครั้งเรียบร้อยแล้ว`,
+          subtitle: `รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้งเรียบร้อยแล้ว`,
           duration: 4500,
         });
         refreshEntitlement();
@@ -338,7 +337,7 @@ export default function TarotPage() {
                 setToast({
                   type: "welcome",
                   title: "ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์ ✦",
-                  subtitle: `คุณได้รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมโบนัสต้อนรับเรียบร้อยแล้ว`,
+                  subtitle: `คุณได้รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้งเรียบร้อยแล้ว`,
                   duration: 4800,
                 });
               } else {
@@ -824,7 +823,7 @@ export default function TarotPage() {
       <MysticBackground />
 
       {/* Top Sacred Header */}
-      <header className="w-full border-b border-[#e5c07b]/20 bg-[#07040f]/80 backdrop-blur-xl sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.9)]">
+      <header className="w-full border-b border-[#e5c07b]/20 bg-[#07040f]/95 sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.9)]">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Luxury Brand Logo — P1-U2: กลับหน้าแรก ไม่ล้าง state (ปุ่ม "เริ่มดูดวงใหม่" ทำหน้าที่นั้น) */}
           <Link
@@ -1314,7 +1313,7 @@ export default function TarotPage() {
         <div className="max-w-4xl mx-auto px-5 pt-10 pb-8 space-y-8 relative z-10">
 
           {/* Row 1: AI Disclosure Card */}
-          <div className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-[#0f0a1e]/80 to-[#080510]/80 border border-[#e5c07b]/15 backdrop-blur-sm">
+          <div className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-[#0f0a1e]/95 to-[#080510]/95 border border-[#e5c07b]/15">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a1230] to-[#0d081a] border border-[#e5c07b]/25 flex items-center justify-center flex-shrink-0 shadow-lg text-[#e5c07b]">
               <OracleEyeIcon className="w-4.5 h-4.5" />
             </div>
