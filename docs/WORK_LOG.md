@@ -34,6 +34,21 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: เชื่อมต่อระบบยืนยันความเป็นเจ้าของ Google Search Console
+
+**คำขอของผู้ใช้**:
+- ส่งโค้ดยืนยัน Google Site Verification: `google-site-verification: google2c921e9d8c8c3a55.html`
+
+**สิ่งที่พัฒนาและสร้างใหม่เสร็จสมบูรณ์**:
+1. **Google HTML Verification File (`public/google2c921e9d8c8c3a55.html`)**:
+   - บรรจุข้อความยืนยัน `google-site-verification: google2c921e9d8c8c3a55.html`
+   - สามารถเข้าถึงได้โดยตรงผ่าน `https://seertarot.net/google2c921e9d8c8c3a55.html`
+2. **HTML Meta Tag Verification (`src/app/layout.tsx`)**:
+   - เพิ่ม `verification: { google: "google2c921e9d8c8c3a55" }` ใน Metadata
+   - รองรับทั้งวิธี HTML File และ HTML Tag ในการยืนยันบน Search Console
+
+---
+
 ### 🗓️ 2026-09-02: เติมเต็มช่องว่างเอกสารวิศวกรรมครบถ้วน 100% (Documentation Gaps Resolution)
 
 **คำขอของผู้ใช้**:
