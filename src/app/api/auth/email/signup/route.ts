@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     if (existingUser) {
       if (existingUser.hasPassword) {
         try {
-          await sendEmail(email, "การแจ้งเตือนเกี่ยวกับบัญชี — Luminuy Tarot", accountExistsHtml(existingUser.name));
+          await sendEmail(email, "การแจ้งเตือนเกี่ยวกับบัญชี — SeerTarot", accountExistsHtml(existingUser.name));
         } catch {
           // ignore email sending errors
         }
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
         try {
           const resetToken = await issueToken(existingUser.id, "reset", 15 * 60 * 1000);
           const setupLink = `${origin}/reset-password?token=${encodeURIComponent(resetToken)}`;
-          await sendEmail(email, "คำขอตั้งรหัสผ่านใหม่ — Luminuy Tarot", resetPasswordHtml(setupLink, existingUser.name));
+          await sendEmail(email, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", resetPasswordHtml(setupLink, existingUser.name));
         } catch {
           // ignore
         }
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
     try {
       const verifyToken = await issueToken(newUser.id, "verify", 24 * 60 * 60 * 1000);
       const verifyLink = `${origin}/api/auth/email/verify?token=${encodeURIComponent(verifyToken)}`;
-      await sendEmail(email, "ยืนยันที่อยู่อีเมลของคุณ — Luminuy Tarot", verifyEmailHtml(verifyLink, name));
+      await sendEmail(email, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot", verifyEmailHtml(verifyLink, name));
     } catch (emailErr) {
       console.error("[Signup verify email failed]", emailErr);
     }

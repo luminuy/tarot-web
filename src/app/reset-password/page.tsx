@@ -180,7 +180,7 @@ export default function ResetPasswordPage() {
             ตั้งรหัสผ่านใหม่
           </h1>
           <p className="text-xs text-[#cfc8e2] font-serif-th leading-relaxed">
-            กำหนดรหัสผ่านใหม่สำหรับบัญชี Luminuy Tarot ของคุณ
+            กำหนดรหัสผ่านใหม่สำหรับบัญชี SeerTarot ของคุณ
           </p>
         </div>
 

@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     const verifyToken = await issueToken(user.id, "verify", 24 * 60 * 60 * 1000);
     const verifyLink = `${origin}/api/auth/email/verify?token=${encodeURIComponent(verifyToken)}`;
 
-    await sendEmail(user.email, "ยืนยันที่อยู่อีเมลของคุณ — Luminuy Tarot", verifyEmailHtml(verifyLink, user.name));
+    await sendEmail(user.email, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot", verifyEmailHtml(verifyLink, user.name));
 
     return NextResponse.json({ ok: true, message: "ส่งลิงก์ยืนยันใหม่ไปยังอีเมลของคุณเรียบร้อยแล้ว" });
   } catch (err) {

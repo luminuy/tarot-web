@@ -34,6 +34,42 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: ยกระดับแผงแอดมินสู่ระดับโลก (World-Class Admin Panel & Cloud Health Suite)
+
+**คำขอของผู้ใช้**: *"ปรับทั้งหมดเลยสิ่งที่ขาดด้วย ต้องการ แผงแอดมิน ระดับโลก"*
+
+**สิ่งที่ทำเสร็จแล้ว**:
+1. **API Endpoint สด (`/api/admin/system-health`)**: ตรวจสอบสถานะและ Latency ของ 8 ระบบสำคัญ (Domain, Google OAuth, LINE Login, Resend Email, D1 DB, KV Store, Cryptography Security, และ AI Engines)
+2. **แดชบอร์ดระดับโลก (`src/components/admin/SystemHealthPanel.tsx`)**:
+   - แบนเนอร์แสดงสถานะรวม (All Systems Operational 100%)
+   - ปุ่มยิงตรวจสัญญาณสดแบบเรียลไทม์ (Live Probe) พร้อมเวลาล่าสุด
+   - การ์ดสถานะทั้ง 8 เสาหลัก พร้อมตัวเลขสถิติสมาชิกและปุ่ม Quick Copy สำหรับ Callback URLs
+3. **ปรับโฉมแผงควบคุมหลัก (`src/app/admin/page.tsx`)**:
+   - Header สไตล์ Dark & Gold Sanctuary หรูหราทันสมัย
+   - ปุ่มทางลัด "✦ เปิดหน้าเว็บจริง (seertarot.net ↗)"
+   - แท็บแรกเป็น "✦ สถานะระบบ (Cloud Health)"
+4. **ความปลอดภัย & คุณภาพ**:
+   - Typecheck 0 errors
+   - Repo Verification ผ่านครบทั้ง 21 ด่าน
+
+### 🗓️ 2026-09-02: ปรับเปลี่ยนชื่อแบรนด์ทั้งหมดเป็น `SeerTarot` (seertarot.net)
+
+**คำขอของผู้ใช้**: *"ไม่ใช่ luminuy อันนี้ต่างหาก seertarot"*
+
+**สิ่งที่ปรับปรุง**:
+1. **Email Templates (`src/lib/email/templates.ts`)**:
+   - เปลี่ยนหัวแบนเนอร์อีเมลเป็น `✦ SEERTAROT ✦`
+   - ปรับข้อความและ Subject ของอีเมลยืนยันตัวตน, รีเซ็ตรหัสผ่าน, และแจ้งเตือนบัญชีเป็น `SeerTarot` ทั้งหมด
+2. **Auth Routes (`src/app/api/auth/email/*`)**:
+   - อัปเดต Subject ของอีเมลใน `forgot`, `resend`, `signup` ให้เป็น `SeerTarot`
+3. **App Metadata & Reset Password (`src/app/layout.tsx`, `src/app/reset-password/page.tsx`)**:
+   - ปรับ Creator/Publisher ใน Metadata เป็น `SeerTarot Sanctuary`
+   - ปรับข้อความบรรยายหน้าตั้งรหัสผ่านใหม่
+4. **Security Banner (`src/components/security/AntiTheftShield.tsx`)**:
+   - ปรับคอนโซลแบนเนอร์และลายน้ำลิขสิทธิ์เป็น `🔮 SEERTAROT ORACLE` / `SeerTarot`
+5. **Admin Dashboard (`src/app/admin/page.tsx`, `SystemHealthPanel.tsx`)**:
+   - อัปเดตหัวแผงควบคุมระบบเป็น `แผงควบคุมระบบ SeerTarot (seertarot.net)` พร้อมแท็บ Cloud Health ตรวจสอบระบบภายนอก
+
 ### 🗓️ 2026-09-02: ตั้งโดเมนจริง `seertarot.net` + รวมโดเมนไว้ที่ไฟล์เดียว
 
 **คำขอของผู้ใช้**: *"มีโดเมน ซื้อกับ godaddy"* → โดเมนจริงคือ **`seertarot.net`** (กำลัง Add site เข้า Cloudflare)

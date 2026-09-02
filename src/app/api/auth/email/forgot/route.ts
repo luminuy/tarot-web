@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         await invalidateUserTokens(user.id, "reset");
         const resetToken = await issueToken(user.id, "reset", 15 * 60 * 1000);
         const resetLink = `${origin}/reset-password?token=${encodeURIComponent(resetToken)}`;
-        await sendEmail(user.email, "คำขอตั้งรหัสผ่านใหม่ — Luminuy Tarot", resetPasswordHtml(resetLink, user.name));
+        await sendEmail(user.email, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", resetPasswordHtml(resetLink, user.name));
       } catch (err) {
         console.error("[Forgot password send email failed]", err);
       }
