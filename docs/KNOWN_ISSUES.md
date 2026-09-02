@@ -3,6 +3,7 @@
 > 🎯 **สำหรับ AI Agent ทุกตัว**: นี่คือรายการปัญหาที่ **ตรวจสอบยืนยันแล้วว่ามีจริง** แต่ยังไม่ได้แก้
 >
 > - **ก่อนเริ่มงานใหม่** ให้ดูก่อนว่ามีงานในนี้ที่เกี่ยวข้องกับสิ่งที่กำลังจะแก้หรือไม่
+> - **แผนงานและบทบาทของ AI แต่ละตัว**: ดูที่ [`docs/plans/AGENTS_TASK_PLAN.md`](plans/AGENTS_TASK_PLAN.md)
 > - **ก่อนลงมือ** ให้ตรวจว่ามี Agent อื่นจับงานนี้อยู่หรือยัง (`npm run agent:status`) และล็อคไฟล์ก่อนเสมอ
 > - **เมื่อแก้เสร็จ** ให้ย้ายรายการนั้นออกจากไฟล์นี้ แล้วบันทึกลง [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) แทน
 >
@@ -132,12 +133,13 @@
 
 ---
 
-## 📌 ช่องว่างของเอกสาร (Documentation Gaps — สิ่งที่ยัง "ขาด" และ "ควรเพิ่ม")
+## 📌 ช่องว่างของเอกสาร (Documentation Gaps — แก้ไขครบถ้วน 100% แล้ว)
 
-| ช่องว่าง | ทำไมถึงต้องมี | ที่ควรอยู่ |
-| :--- | :--- | :--- |
-| **คู่มือตั้งเครื่อง dev (Local Setup)** | ต้องเดาเอง: pnpm/npm, env อะไรบ้าง, พอร์ตอะไร, dev server บน macOS 12 ต้องเลี่ยงอะไร | `README.md` หรือ `docs/LOCAL_SETUP.md` ใหม่ |
-| **แผนที่ env var จริง** | ควรมีตารางว่าคีย์ไหนใช้ที่ไฟล์ไหน จำเป็น/ไม่จำเป็น | `docs/ARCHITECTURE.md` |
-| **บันทึกเหตุผลที่ใช้ stack ล้ำเวอร์ชัน** | `react@19.2`, `next@16.3`, `motion@13` เป็นต้นเหตุ ISSUE-001 ควรมี ADR ว่าตั้งใจและรับความเสี่ยงอะไร | `docs/ARCHITECTURE.md` หรือ ADR |
-| ~~มาตรฐานคุณภาพ INCIDENT_LOG~~ ✅ | ~~INC-0008/0009/0010/0014 ช่อง "อาการ" ก็อป "การแก้ไข"~~ — แก้แล้ว: `validateIncident()` ใน `scripts/incident-log.ts` บล็อก entry ที่ก็อปกันมา + เรียบเรียง INC-0008/9/10/14 ใหม่ | — |
-| **cross-link `AGENTS_TASK_PLAN.md` ↔ KNOWN_ISSUES** | มี roadmap แยกแต่ไม่อ้างถึงกัน | หัวไฟล์ทั้งสอง |
+| ช่องว่าง | ทำไมถึงต้องมี | สถานะและการแก้ไข | ลิงก์เอกสารที่จัดทำ |
+| :--- | :--- | :---: | :--- |
+| ~~**คู่มือตั้งเครื่อง dev (Local Setup)**~~ ✅ | ต้องเดาเอง: pnpm/npm, env อะไรบ้าง, พอร์ตอะไร, dev server บน macOS 12 ต้องเลี่ยงอะไร | **เสร็จสมบูรณ์** | [`docs/LOCAL_SETUP.md`](LOCAL_SETUP.md) |
+| ~~**แผนที่ env var จริง**~~ ✅ | ควรมีตารางว่าคีย์ไหนใช้ที่ไฟล์ไหน จำเป็น/ไม่จำเป็น | **เสร็จสมบูรณ์** | ตาราง Section 10 ใน [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#10-แผนที่ตัวแปรแวดล้อมระบบจริง-environment-variables-map) |
+| ~~**บันทึกเหตุผลที่ใช้ stack ล้ำเวอร์ชัน**~~ ✅ | `react@19.2`, `next@16.3`, `motion@13` เป็นต้นเหตุ ISSUE-001 ควรมี ADR ว่าตั้งใจและรับความเสี่ยงอะไร | **เสร็จสมบูรณ์** | [`docs/adr/ADR-003-cutting-edge-stack-rationale.md`](adr/ADR-003-cutting-edge-stack-rationale.md) |
+| ~~**มาตรฐานคุณภาพ INCIDENT_LOG**~~ ✅ | ~~INC-0008/0009/0010/0014 ช่อง "อาการ" ก็อป "การแก้ไข"~~ | **เสร็จสมบูรณ์** | `validateIncident()` ใน `scripts/incident-log.ts` บล็อก entry ที่ก็อปกันมา + เรียบเรียง INC-0008/9/10/14 ใหม่ |
+| ~~**cross-link `AGENTS_TASK_PLAN.md` ↔ KNOWN_ISSUES**~~ ✅ | มี roadmap แยกแต่ไม่อ้างถึงกัน | **เสร็จสมบูรณ์** | หัวไฟล์ทั้งสอง: [`AGENTS_TASK_PLAN.md`](plans/AGENTS_TASK_PLAN.md) และ [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md) |
+

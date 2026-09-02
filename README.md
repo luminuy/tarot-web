@@ -77,6 +77,7 @@ npm run dev
 | เอกสาร | วัตถุประสงค์หลัก |
 | :--- | :--- |
 | **[`docs/INDEX.md`](docs/INDEX.md)** | 🌟 **สารบรรณและแผนที่นำทางเอกสารทั้งหมด (Documentation Sitemap)** — อ่านเพื่อเข้าใจภาพรวมโครงสร้าง |
+| **[`docs/LOCAL_SETUP.md`](docs/LOCAL_SETUP.md)** | 💻 **คู่มือการติดตั้งและรันในเครื่อง (Local Setup)** — Node/npm, พอร์ต, .env.local และข้อควรระวังบน macOS |
 | **[`docs/INCIDENT_LOG.md`](docs/INCIDENT_LOG.md)** | 📋 บทเรียนความผิดพลาดทุกครั้ง พร้อม **กฎป้องกันถาวร** (INC-0001 เป็นต้นไป) — อ่านก่อนเสมอ |
 | **[`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md)** | 🐛 บั๊กที่ยืนยันแล้วและดัชนีสถานะงานค้าง ป้องกันการแก้ซ้ำซ้อน |
 | **[`docs/AI_COLLABORATION_GUIDELINES.md`](docs/AI_COLLABORATION_GUIDELINES.md)** | 🎖️ คู่มือแม่บท — มาตรฐานวิศวกรรมระดับโลก, Domain Mapping, และ 10 Golden Design Rules |

@@ -34,6 +34,29 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: เติมเต็มช่องว่างเอกสารวิศวกรรมครบถ้วน 100% (Documentation Gaps Resolution)
+
+**คำขอของผู้ใช้**:
+- *"เราแก้ยัง"* (พร้อมภาพตารางช่องว่างเอกสารจาก `docs/KNOWN_ISSUES.md`) ➔ *"ทำซะ"*
+
+**สิ่งที่พัฒนาและสร้างใหม่เสร็จสมบูรณ์**:
+1. **คู่มือตั้งเครื่อง dev ในเครื่อง (`docs/LOCAL_SETUP.md`)**:
+   - บันทึกข้อกำหนด Node.js (>=20.x), กฎการใช้ `npm` เท่านั้น (ห้าม `pnpm`/`yarn`), ขั้นตอนติดตั้ง และการสร้างไฟล์ `.env.local`
+   - ระบุพอร์ตและการแก้ปัญหาพอร์ตชนบน macOS 12+ (เลี่ยงพอร์ต 5000/7000 ของ AirPlay Receiver)
+   - เชื่อมโยงคู่มือลงใน [`README.md`](../README.md) และ [`docs/INDEX.md`](INDEX.md)
+2. **แผนที่ตัวแปรแวดล้อมระบบจริง (Real Env Var Map)**:
+   - เพิ่มตาราง Section 10 ใน [`docs/ARCHITECTURE.md`](ARCHITECTURE.md#10-แผนที่ตัวแปรแวดล้อมระบบจริง-environment-variables-map)
+   - รวบรวมตัวแปรแวดล้อมและ Cloudflare Secrets ทั้ง 11 ตัว พร้อมระบุบทบาท, ความสำคัญ, แหล่งจัดเก็บ, และไฟล์ที่เรียกใช้จริง
+3. **บันทึกเหตุผลการเลือกใช้ Stack ล้ำสมัย (`docs/adr/ADR-003-cutting-edge-stack-rationale.md`)**:
+   - บันทึกการตัดสินใจเชิงสถาปัตยกรรม (ADR) อธิบายเหตุผลที่เลือกใช้ `React 19.2`, `Next.js 16.3`, และ `Motion 13`
+   - ชี้แจงที่มาและมาตรการบริหารความเสี่ยงสำหรับ ISSUE-001 (Peer Dependencies) และ Edge Runtime Parity
+4. **Cross-Link เชื่อมโยงเอกสาร AI และปัญหาค้าง**:
+   - ใส่ Cross-link ระหว่าง [`docs/plans/AGENTS_TASK_PLAN.md`](plans/AGENTS_TASK_PLAN.md) ↔ [`docs/KNOWN_ISSUES.md`](KNOWN_ISSUES.md) ที่หัวไฟล์ทั้งสอง
+5. **อัปเดตทะเบียนปัญหา (`docs/KNOWN_ISSUES.md`)**:
+   - ขีดฆ่าและทำเครื่องหมาย ✅ ผ่านครบทุกช่องในตาราง Documentation Gaps พร้อมแนบลิงก์เอกสารอ้างอิงตรงจุด
+
+---
+
 ### 🗓️ 2026-09-02: เปิดตัวระบบ 20 บทความ SEO ไฮทราฟฟิก (High-Traffic SEO Content Engine)
 
 **คำขอของผู้ใช้**: *"วางแผนเขียน บทความ seo กันเถอะ" ➔ "เขียน ทำมาให้หมดทีเดียว เรียกใช้ เอเจนมาช่วยได้"*

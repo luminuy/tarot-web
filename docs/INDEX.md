@@ -16,7 +16,8 @@ docs/
 │   └── WORK_LOG.md                      # บันทึกประวัติการพัฒนาและสถานะส่งต่องาน (Live Handoff)
 │
 ├── 🏛️ สถาปัตยกรรมและคู่มือระบบ (Architecture & System Manuals)
-│   ├── ARCHITECTURE.md                  # สถาปัตยกรรมระบบ Edge, Provably Fair, Data Flow
+│   ├── ARCHITECTURE.md                  # สถาปัตยกรรมระบบ Edge, Provably Fair, Data Flow, แผนที่ Env Vars
+│   ├── LOCAL_SETUP.md                   # คู่มือติดตั้งและเริ่มรัน Development Server ในเครื่อง
 │   ├── CLOUDFLARE_DEPLOYMENT_GUIDE.md   # คู่มือนำระบบขึ้น Cloudflare Workers & Custom Domain
 │   ├── ADMIN_PANEL.md                   # คู่มือแผงควบคุมแอดมินและการมอนิเตอร์สถานะระบบ
 │   ├── PENDING_SETUP.md                 # เช็กลิสต์ความพร้อมบริการภายนอก (เสร็จสมบูรณ์ 100%)
@@ -25,7 +26,8 @@ docs/
 ├── ⚖️ บันทึกการตัดสินใจทางสถาปัตยกรรม (Architecture Decision Records)
 │   └── adr/
 │       ├── ADR-001-marketplace-pdpa.md # ข้อตกลงความยินยอมข้อมูลส่วนบุคคล (PDPA Consent)
-│       └── ADR-002-bot-challenge.md     # กลยุทธ์ป้องกันบอทและควบคุมต้นทุน AI
+│       ├── ADR-002-bot-challenge.md     # กลยุทธ์ป้องกันบอทและควบคุมต้นทุน AI
+│       └── ADR-003-cutting-edge-stack-rationale.md # เหตุผลการใช้ React 19.2 + Next 16.3 + Motion 13
 │
 ├── 📐 ข้อกำหนดเชิงฟังก์ชัน (Functional Specifications)
 │   └── specs/

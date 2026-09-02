@@ -178,5 +178,36 @@ src/
 6. **Session Invalidation via `token_version`**:
    - ทุกครั้งที่มีการเปลี่ยนหรือรีเซ็ตรหัสผ่าน ค่า `token_version` ในฐานข้อมูลจะถูกเพิ่มขึ้น 1 ทำให้เซสชันเดิมบนอุปกรณ์อื่นทั้งหมดถูกเพิกถอนทันที
 
+## 10. แผนที่ตัวแปรแวดล้อมระบบจริง (Environment Variables Map)
+
+ตารางต่อไปนี้แสดงรายการตัวแปรแวดล้อม (Environment Variables & Cloudflare Secrets) ทั้งหมดที่ใช้งานจริงในระบบ ความสำคัญ แหล่งจัดเก็บ และไฟล์ที่เรียกใช้งาน:
+
+| ตัวแปร (Variable Name) | บทบาทหน้าที่ | ระดับความสำคัญ | แหล่งจัดเก็บ (Production / Local) | ไฟล์ที่เรียกใช้งานจริง |
+| :--- | :--- | :---: | :--- | :--- |
+| **`GEMINI_API_KEY`**<br>`(หรือ GOOGLE_API_KEY)` | คีย์เชื่อมต่อ Google Gemini (3.7 / 2.5 Flash) เพื่อสตรีมคำทำนายไพ่และตอบแชท | 🔴 **จำเป็นสำหรับ AI จริง** *(มีคลังสำรองออฟไลน์หากไม่มี)* | Cloudflare Secret (`wrangler secret put`) / `.env.local` | `src/app/api/reading/[id]/read/route.ts`<br>`src/app/api/reading/[id]/chat/route.ts`<br>`src/app/api/admin/ai-health/route.ts`<br>`src/lib/ai/gemini.ts` |
+| **`GROQ_API_KEY`** | คีย์เชื่อมต่อ Groq Cloud LPU เพื่อเป็นระบบ AI สำรองความเร็วสูง (400ms) เมื่อ Gemini ชนโควตา | 🟡 **แนะนำสูง** *(ระบบสองประสาน)* | Cloudflare Secret (`wrangler secret put`) / `.env.local` | `src/lib/ai/groq.ts`<br>`src/app/api/reading/[id]/chat/route.ts`<br>`src/app/api/admin/ai-health/route.ts` |
+| **`SESSION_SECRET`** | คีย์ลับสำหรับลงนามและเข้ารหัส Session Token ของการเปิดไพ่ ป้องกันการดัดแปลงสถานะ | 🔴 **จำเป็นสำหรับความปลอดภัย** | Cloudflare Secret / `.env.local` | `src/lib/security/session.ts`<br>`src/lib/security/privileged.ts` |
+| **`JWT_SECRET`** | คีย์ลับสำหรับลงนามและตรวจสอบสิทธิ์ JSON Web Token ของบัญชีผู้ใช้งาน | 🔴 **จำเป็นสำหรับระบบสมาชิก** | Cloudflare Secret / `.env.local` | `src/lib/auth/jwt.ts`<br>`src/app/api/auth/*` |
+| **`PASSWORD_PEPPER`** | ค่า Pepper ฝั่งเซิร์ฟเวอร์สำหรับผสมในการแฮชรหัสผ่าน PBKDF2-HMAC-SHA256 | 🔴 **จำเป็นสำหรับความปลอดภัย** | Cloudflare Secret / `.env.local` | `src/lib/auth/password.ts` |
+| **`ADMIN_PASSWORD`** | รหัสผ่านสำหรับเข้าสู่ระบบแผงควบคุมผู้ดูแลระบบหลังบ้าน (`/admin`) | 🔴 **จำเป็นสำหรับแอดมิน** | Cloudflare Secret / `.env.local` | `src/lib/security/admin-auth.ts`<br>`src/app/api/admin/login/route.ts` |
+| **`ADMIN_TOKEN`** | Bearer Token สำหรับยืนยันตัวตนแอดมินผ่าน HTTP Header ในการเรียก Admin APIs | 🟡 **แนะนำสำหรับแอดมิน** | Cloudflare Secret / `.env.local` | `src/lib/security/admin-auth.ts` |
+| **`RATE_LIMIT_BYPASS_TOKEN`** | โทเคนลับสำหรับให้ระบบ CI / Automated Testing รันข้าม Rate Limit ได้อย่างปลอดภัย | 🟢 **ใช้ใน CI / Testing** | GitHub Actions Secret / Cloudflare Secret | `src/lib/security/privileged.ts`<br>`.github/workflows/*` |
+| **`AI_DAILY_CALL_CAP`** | ตัวเลขจำกัดเพดานการเรียก AI รายวันเพื่อควบคุมค่าใช้จ่าย (ค่าเริ่มต้น: 500) | 🟢 **ตัวเลือกปรับแต่ง** | Cloudflare Environment Variable | `src/lib/security/ai-budget.ts` |
+| **`APP_DB`** *(Binding)* | Cloudflare D1 Database Binding สำหรับเก็บข้อมูลสมาชิก, ประวัติดูดวง, และบันทึกสิทธิ์ | 🔴 **จำเป็นบน Production** *(Local ใช้ SQLite Mock)* | `wrangler.jsonc` (`d1_databases`) | `src/lib/platform/db.ts`<br>`src/server/db/*` |
+| **`APP_KV`** *(Binding)* | Cloudflare KV Namespace Binding สำหรับเก็บแคชชั่วคราว, Rate Limit, และ AI Budget | 🔴 **จำเป็นบน Production** *(Local ใช้ In-Memory Mock)* | `wrangler.jsonc` (`kv_namespaces`) | `src/lib/platform/kv.ts`<br>`src/lib/security/ai-budget.ts` |
+
+---
+
+## 11. บันทึกการตัดสินใจทางสถาปัตยกรรม (Architecture Decision Records - ADR Index)
+
+การตัดสินใจสำคัญด้านโครงสร้างและเทคโนโลยีทั้งหมดได้รับการบันทึกอย่างเป็นทางการในโฟลเดอร์ [`docs/adr/`](adr/):
+
+* **[ADR-001: สถาปัตยกรรม Marketplace แม่หมอและการคุ้มครองข้อมูลส่วนบุคคล (PDPA Architecture & Compliance)](adr/ADR-001-marketplace-pdpa.md)** — การแยกชั้นข้อมูลอ่อนไหว, Data Minimization, และการส่งต่อ Off-Platform
+* **[ADR-002: กลยุทธ์ป้องกันบอทและการควบคุมต้นทุน AI โดยไม่ทำลายประสบการณ์ผู้ใช้](adr/ADR-002-bot-challenge.md)** — การควบคุมค่าใช้จ่ายและการป้องกันบอท 7 ชั้นโดยไม่ใช้ Captcha รบกวนผู้ใช้
+* **[ADR-003: เหตุผลการเลือกใช้เทคโนโลยีเวอร์ชันล้ำสมัยและการบริหารความเสี่ยง (Cutting-Edge Stack Rationale & Risk Management)](adr/ADR-003-cutting-edge-stack-rationale.md)** — การเลือกใช้ `React 19.2`, `Next.js 16.3`, และ `Motion 13` เพื่อ 60fps Animation บน Edge พร้อมมาตรการรับมือความเสี่ยง
+
+---
+
 ระบบถูกออกแบบภายใต้มาตรฐานความน่าเชื่อถือระดับสูง (High Reliability & Fault Tolerance) เพื่อมอบประสบการณ์ดูดวงไพ่ทาโรต์ออนไลน์ที่ดีที่สุดในระดับสากล ✦
+
 
