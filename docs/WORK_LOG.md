@@ -34,6 +34,29 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: เปิดตัวระบบแชร์ 4 โซเชียลมีเดีย, ปรึกษาแม่หมอตัวจริง และระบบวัดผล GA4 / Meta Pixel
+
+**คำขอของผู้ใช้**:
+- *"ทำ 2 เเชร์ได้ facbook tiktok x thred เเละ 4 เเละ 5"*
+
+**สิ่งที่พัฒนาและสร้างใหม่เสร็จสมบูรณ์**:
+1. **ระบบแชร์ตรงสู่ 4 โซเชียลมีเดีย (`ShareModal.tsx`)**:
+   - เพิ่มแถบแชร์ 1-Click ตรงสู่ **Facebook**, **TikTok**, **X (Twitter)**, และ **Threads**
+   - **Facebook**: สร้าง URL Share Intent พร้อมแคปชันและลิงก์
+   - **X (Twitter)**: สรุปคำทำนายและแฮชแท็ก #ไพ่ทาโรต์ #ดูดวง #SeerTarot พร้อมแชร์
+   - **Threads**: สร้าง Intent โพสต์เข้า Threads App ทันที
+   - **TikTok**: สร้างและดาวน์โหลด Story Card (9:16) ความละเอียดสูงอัตโนมัติ พร้อมคัดลอกแคปชันลงคลิปบอร์ดและแนะนำวิธีโพสต์ลง TikTok Story
+2. **ระบบเชื่อมต่อส่งต่อการปรึกษาแม่หมอตัวจริง (`StreamReader.tsx`)**:
+   - เพิ่มการ์ด CTA หรูหราสีทองเปลวท้ายผลการอ่านคำทำนายของ AI
+   - นำทางตรงสู่ตลาดรวมแม่หมอตัวจริง (`/readers`) พร้อมดักจับ Event การกดปรึกษา
+3. **ระบบวัดผลการตลาดขั้นสูง GA4 & Meta Pixel (`AnalyticsTracker.tsx`, `analytics.ts`)**:
+   - สร้างโมดูล `trackEvent()` แบบ Type-Safe และเคารพ PDPA
+   - รองรับการโหลด GA4 (`NEXT_PUBLIC_GA_ID`) และ Meta Pixel (`NEXT_PUBLIC_META_PIXEL_ID`) ผ่าน `next/script` แบบ `afterInteractive` ไม่บล็อกการเรนเดอร์หน้าแรก
+   - ดักจับ Events: `tarot_shuffle`, `tarot_draw`, `reading_complete`, `share_click`, `reader_consult_click`
+   - อัปเดตตารางตัวแปรแวดล้อมใน [`docs/ARCHITECTURE.md`](ARCHITECTURE.md)
+
+---
+
 ### 🗓️ 2026-09-02: อัปเกรดระบบ SEO, Robots.txt และ Schema.org JSON-LD ครบทุกหน้าสู่มาตรฐานระดับโลก
 
 **คำขอของผู้ใช้**: *"scham lobot.txt อะไรพวกนี้เขียนครบยัง"* ➔ *"เขียนยทความเสร็จหมดเเล้ว"*

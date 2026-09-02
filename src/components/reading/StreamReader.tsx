@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { STAGGER, DUR, EASE } from "@/lib/motion";
 import type { Reading } from "@/lib/schema/reading";
@@ -10,6 +11,7 @@ import { cardByIndex, type TarotCard } from "@/data/cards";
 import { ElementalBalanceWidget } from "@/components/reading/ElementalBalanceWidget";
 import { OracleMantraCard } from "@/components/reading/OracleMantraCard";
 import { soundManager } from "@/lib/utils/audio";
+import { trackEvent } from "@/lib/analytics";
 import { ASK_ORACLE_SECTION_ID } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
 import { ProvablyFairPanel } from "./ProvablyFairPanel";
@@ -553,6 +555,32 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               isReversed: !!c.isReversed,
             }))}
           />
+
+          {/* Real Human Reader Marketplace Consultation CTA */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-[#1b1236] via-[#120a26] to-[#1b1236] border border-[#e5c07b]/40 shadow-2xl space-y-3 relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-amber-400">✨</span>
+                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#f5deaa]">
+                    ต้องการคำปรึกษาเจาะลึกเฉพาะบุคคลเพิ่มเติม?
+                  </h4>
+                </div>
+                <p className="text-[11px] sm:text-xs text-[#b8aed4] leading-relaxed font-serif-th">
+                  ปรึกษาแม่หมอตัวจริงตัวเป็นๆ พร้อมส่งต่อผังไพ่ชุดนี้ให้อัตโนมัติ เพื่อสนทนาเจาะลึกผ่าน LINE ส่วนตัว
+                </p>
+              </div>
+
+              <Link
+                href="/readers"
+                onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
+                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-bold text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <span>ปรึกษาแม่หมอตัวจริง</span>
+                <span>➔</span>
+              </Link>
+            </div>
+          </div>
         </div>
       )}
 
