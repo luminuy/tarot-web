@@ -4,7 +4,13 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { kvGetJSON, KEY } from "@/lib/platform/kv-store";
 import { utcDay } from "@/lib/stats/record";
 import { getAiDailyCap } from "@/lib/security/ai-budget";
-import { CANDIDATE_GEMINI_MODELS, CHAT_GEMINI_MODELS, extractGeminiAnswer } from "@/lib/ai/gemini";
+import {
+  CANDIDATE_GEMINI_MODELS,
+  WORKING_GEMINI_MODELS,
+  GEMINI_FIRST_MODEL_TIMEOUT_MS,
+  GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
+  extractGeminiAnswer,
+} from "@/lib/ai/gemini";
 import { buildSystemPrompt } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 
@@ -197,11 +203,14 @@ async function probeRealChatPayload(
   }
 
   const out: Array<Record<string, unknown>> = [];
-  for (const [idx, model] of CHAT_GEMINI_MODELS.entries()) {
+  for (const [idx, model] of WORKING_GEMINI_MODELS.entries()) {
     const startedAt = Date.now();
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), idx === 0 ? 30000 : 15000);
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        idx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
+      );
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {

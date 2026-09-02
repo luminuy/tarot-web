@@ -66,6 +66,11 @@ const READING_JSON_SCHEMA = {
  * - `gemini-3.5-flash-lite` = เบาสุด เหลือเป็นตาข่ายสุดท้ายก่อน mock
  * ถ้าจะแก้ ยึดผลจริงจาก `GET https://generativelanguage.googleapis.com/v1beta/models?key=…`
  */
+/**
+ * รายชื่อโมเดล "ทุกตัวที่เรารู้จัก" — ตอนนี้ใช้ที่เดียวคือด่านตรวจ /api/admin/ai-health
+ * เพื่อวัดผลทุกตัวต่อไปเรื่อย ๆ จะได้รู้ว่าตัวที่เคยตายกลับมาใช้ได้แล้วหรือยัง
+ * ⚠️ ห้ามเอารายการนี้ไปใช้ในเส้นทางที่มีผู้ใช้นั่งรอ — ใช้ WORKING_GEMINI_MODELS แทน
+ */
 export const CANDIDATE_GEMINI_MODELS = [
   "gemini-3.6-flash",
   "gemini-3.7-flash",
@@ -74,22 +79,31 @@ export const CANDIDATE_GEMINI_MODELS = [
 ];
 
 /**
- * รายชื่อโมเดลสำหรับ "ห้องคุยถามแม่หมอ" โดยเฉพาะ — สั้นกว่ารายการหลักโดยตั้งใจ
+ * โมเดลที่ "พิสูจน์แล้วว่าตอบได้จริง" — ใช้กับทุกเส้นทางที่ผู้ใช้นั่งรออยู่
+ * (คำอ่านไพ่ · ห้องคุยถามแม่หมอ · สรุปดวงรายเดือน)
  * ------------------------------------------------------------------------
- * ต่างจากคำอ่านไพ่ตรงที่แชทเป็น `generateContent` (ไม่ใช่สตรีม) ผู้ใช้จึงนั่งรอ
- * ครบทุกวินาทีของโมเดลที่ค้าง ก่อนจะได้คำตอบสำรอง
+ * 📊 วัดจริงจากแท็บ "สุขภาพ AI" บน production 3 ครั้งติด (2026-09-02 14:17 / 14:20 / 14:23):
  *
- * 📊 วัดจริงจากแท็บ "สุขภาพ AI" บน production (2026-09-02):
- *   • `gemini-3.6-flash`      ตอบใน  2,129ms  ✅
- *   • `gemini-3.7-flash`      ค้างจนครบ timeout 20,000ms  ❌
- *   • `gemini-flash-latest`   ค้างจนครบ timeout 20,000ms  ❌
- *   • `gemini-3.5-flash-lite` ตอบใน    768ms  ✅
+ *   | โมเดล                  | ครั้ง 1  | ครั้ง 2  | ครั้ง 3  | สรุป              |
+ *   | `gemini-3.6-flash`     | ❌ 20s   | ✅ 2397ms| ✅ 3210ms| 2/3 · ไม่แน่นอน   |
+ *   | `gemini-3.7-flash`     | ❌ 20s   | ❌ 20s   | ❌ 20s   | 0/3 · ตายสนิท     |
+ *   | `gemini-flash-latest`  | ❌ 20s   | ❌ 20s   | ❌ 20s   | 0/3 · ตายสนิท     |
+ *   | `gemini-3.5-flash-lite`| ✅ 861ms | ✅ 843ms | ✅ 722ms | 3/3 · เร็วและนิ่ง |
  *
- * ของเดิมแชทลอง 3 ตัวแรก = ได้ตัวที่ค้าง 2 ตัวเต็ม ๆ และ **ไม่เคยลองตัวที่เร็วที่สุดเลย**
- * จึงเหลือเฉพาะ 2 ตัวที่พิสูจน์แล้วว่าตอบได้จริง (บทเรียน INC-0053)
- * ถ้าจะแก้รายการนี้ ให้ยึดผลจาก /admin → แท็บ "สุขภาพ AI" เท่านั้น ห้ามเดา
+ * `3.7-flash` และ `flash-latest` ไม่ตอบเลยสักครั้งจาก 3 ครั้ง จึงตัดออกจากเส้นทางที่มีคนรอ
+ * เก็บ `3.6-flash` ไว้เป็นตัวแรกเพราะคุณภาพคำตอบดีกว่าเมื่อมันว่าง แต่ต้องมีเพดานเวลาสั้น ๆ
+ * แล้วตกไป `3.5-flash-lite` ทันที (กลยุทธ์ hedge — เจ้าของโปรเจกต์เลือกเอง 2026-09-02)
+ *
+ * ⚠️ ถ้าจะแก้รายการนี้ ให้ยึดผลจาก /admin → แท็บ "สุขภาพ AI" เท่านั้น **ห้ามเดา** (บทเรียน INC-0053)
  */
-export const CHAT_GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"];
+export const WORKING_GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"];
+
+/**
+ * เพดานเวลารอ "การตอบกลับครั้งแรก" ต่อโมเดล (มิลลิวินาที)
+ * ตัวแรกให้สั้น เพราะถ้ามันไม่ว่างก็ไม่ควรให้ผู้ใช้รอ — ตกไปตัวที่ 2 ซึ่งวัดได้ต่ำกว่า 1 วินาทีเสมอ
+ */
+export const GEMINI_FIRST_MODEL_TIMEOUT_MS = 8000;
+export const GEMINI_FALLBACK_MODEL_TIMEOUT_MS = 15000;
 
 /**
  * ดึง "ข้อความคำตอบจริง" ออกจาก parts ของ Gemini
@@ -149,7 +163,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
   let response: Response | null = null;
 
-  for (const model of CANDIDATE_GEMINI_MODELS) {
+  for (const [modelIdx, model] of WORKING_GEMINI_MODELS.entries()) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
     // camelCase ล้วน + ตัด thinkingConfig/responseSchema ออก —
     // Gemini 3.x (3.6/3.5-lite) คืน 400 "invalid argument" ถ้ามี thinkingBudget:0 หรือ responseSchema แบบ OpenAPI เก่า
@@ -164,15 +178,25 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
       },
     };
 
+    // ⏱️ เดิมไม่มี timeout เลยแม้แต่ตัวเดียว — ถ้าโมเดลค้าง คำอ่านจะค้างไปเรื่อย ๆ ไม่มีเพดาน
+    // จับเวลาเฉพาะ "การตอบกลับครั้งแรก" (headers) แล้วเคลียร์ทันทีที่ได้ response
+    // ห้ามปล่อยตัวจับเวลาไว้ข้ามไปตอนอ่านสตรีม ไม่งั้นมันจะไปตัดสตรีมกลางคัน
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
+    );
     try {
       const res = await fetch(endpoint, {
         method: "POST",
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
           "X-goog-api-key": apiKey,
         },
         body: JSON.stringify(requestBody),
       });
+      clearTimeout(timeoutId);
 
       if (res.ok) {
         response = res;
@@ -185,6 +209,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         );
       }
     } catch (e) {
+      clearTimeout(timeoutId);
       console.warn(`Gemini Model ${model} fetch failed:`, e);
     }
   }
