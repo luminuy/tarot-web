@@ -58,7 +58,9 @@ function generateContextualTarotChatReply(params: {
     return safety.message || "หากคุณกำลังเผชิญช่วงเวลาที่ยากลำบาก สายด่วนสุขภาพจิต 1323 พร้อมรับฟังเสมอค่ะ";
   }
 
-  const cards = record.drawn?.map((d) => cardByIndex(d.cardIndex)) || [];
+  const cards = (record.drawn?.map((d) => cardByIndex(d.cardIndex)) || []).filter(
+    (c): c is import("@/data/cards").TarotCard => !!c
+  );
   const primaryCard = cards[0];
 
   const q = userQuestion.toLowerCase();
@@ -268,43 +270,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           createdAt: Date.now(),
           intake: {},
         };
-      } else {
-        // Safe default reading context fallback
-        record = {
-          id,
-          question: "ภาพรวมพลังงาน",
-          spreadId: "daily",
-          personaId: "warm",
-          drawn: [{ order: 0, cardIndex: 0, isReversed: false }],
-          result: {
-            opening: "",
-            cards: [],
-            connections: "",
-            summary: "จงเชื่อมั่นในสัญชาตญาณและก้าวต่อไปอย่างมีสติ",
-            advice: [],
-            timing: "",
-            mood: "อบอุ่น",
-            yesNoAnswer: null,
-          },
-          status: "COMPLETED",
-          category: "general",
-          safetyFlag: "none",
-          commitment: "",
-          serverSeed: "",
-          createdAt: Date.now(),
-          intake: {},
-        };
       }
+    }
+
+    if (!record || !record.drawn || record.drawn.length === 0) {
+      return NextResponse.json(
+        {
+          error: "ไม่พบสำรับไพ่ที่เปิดไว้ในรอบนี้ กรุณารีเฟรชหน้าเว็บเพื่อเชื่อมต่อกับสำรับไพ่ของคุณอีกครั้ง",
+          reason: "reading_not_found",
+        },
+        { status: 404 },
+      );
     }
 
     const personaId = record.personaId || "warm";
     const spread = getSpread(record.spreadId || "single");
     const overrideDoc = await getContentOverrides();
-    const cards = (record.drawn || []).map((d) => {
-      const card = resolveCardByIndex(overrideDoc, d.cardIndex);
-      const pos = spread?.positions[d.order];
-      return `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"}`;
-    });
+    const cards = (record.drawn || [])
+      .map((d) => {
+        const card = resolveCardByIndex(overrideDoc, d.cardIndex);
+        if (!card) return null;
+        const pos = spread?.positions[d.order];
+        return `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"}`;
+      })
+      .filter((line): line is string => !!line);
 
     const systemInstruction = `${buildSystemPrompt(personaId, {
       systemCore: resolveSystemCore(overrideDoc),

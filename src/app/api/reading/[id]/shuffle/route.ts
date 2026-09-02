@@ -100,21 +100,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (record.drawn && record.drawn.length > 0) {
     const { signReadingSessionToken } = await import("@/lib/security/session-token");
     const sessionToken = signReadingSessionToken(record);
+    const resolvedCards = [];
+    for (const d of record.drawn) {
+      const card = cardByIndex(d.cardIndex);
+      if (!card) {
+        return NextResponse.json(
+          { error: "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง", code: "CARD_DATA_NOT_FOUND" },
+          { status: 500 }
+        );
+      }
+      resolvedCards.push({
+        id: card.id,
+        nameTh: card.nameTh,
+        nameEn: card.nameEn,
+        image: card.image,
+        element: card.element,
+        keywords: d.isReversed ? card.keywords.reversed : card.keywords.upright,
+      });
+    }
+
     return NextResponse.json({
       clientSeed: record.clientSeed,
       drawn: record.drawn,
       sessionToken,
-      cards: record.drawn.map((d) => {
-        const card = cardByIndex(d.cardIndex);
-        return {
-          id: card.id,
-          nameTh: card.nameTh,
-          nameEn: card.nameEn,
-          image: card.image,
-          element: card.element,
-          keywords: d.isReversed ? card.keywords.reversed : card.keywords.upright,
-        };
-      }),
+      cards: resolvedCards,
     });
   }
 
@@ -161,16 +170,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     clientSeed,
     drawn,
     sessionToken,
-    cards: drawn.map((d) => {
-      const card = cardByIndex(d.cardIndex);
-      return {
-        id: card.id,
-        nameTh: card.nameTh,
-        nameEn: card.nameEn,
-        image: card.image,
-        element: card.element,
-        keywords: d.isReversed ? card.keywords.reversed : card.keywords.upright,
-      };
-    }),
+    cards: (() => {
+      const resolved = [];
+      for (const d of drawn) {
+        const card = cardByIndex(d.cardIndex);
+        if (!card) {
+          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง");
+        }
+        resolved.push({
+          id: card.id,
+          nameTh: card.nameTh,
+          nameEn: card.nameEn,
+          image: card.image,
+          element: card.element,
+          keywords: d.isReversed ? card.keywords.reversed : card.keywords.upright,
+        });
+      }
+      return resolved;
+    })(),
   });
 }

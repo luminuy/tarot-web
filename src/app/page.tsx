@@ -264,10 +264,14 @@ export default function TarotPage() {
       setActiveCardIndex(saved.activeCardIndex || 0);
       setReadingResult(saved.readingResult);
       setCurrentStep(saved.currentStep);
-      // สตรีม AI ตายไปแล้วหลัง refresh — ถ้าค้างที่ขั้นอ่านไพ่โดยยังไม่ได้บทสรุป
-      // ให้ขึ้นปุ่มลองใหม่แทนที่จะค้างหน้าเปล่า
-      if (saved.currentStep === "READING" && !saved.readingResult?.summary) {
-        setErrorMsg("การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กดลองใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ");
+      // ตรวจสอบความสมบูรณ์ของไพ่ที่กู้คืน — ถ้าไพ่สูญหายหรือข้อมูลไม่สมบูรณ์ ห้ามกุ The Fool
+      const isCorrupted =
+        saved.drawnCards &&
+        saved.drawnCards.some((d) => !d || d.cardIndex === undefined || !d.card?.nameTh);
+      if (isCorrupted) {
+        setErrorMsg("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+      } else if (saved.currentStep === "READING" && !saved.readingResult?.summary) {
+        setErrorMsg("การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กรุณากดโหลดใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ");
       }
     } else {
       const searchParams = new URLSearchParams(window.location.search);
@@ -573,9 +577,19 @@ export default function TarotPage() {
 
       const { cardByIndex } = await import("@/data/cards");
 
-      const enrichedCards: DrawnSlotCard[] = (data.drawn || []).map((d: any) => {
+      if (!data.drawn || !Array.isArray(data.drawn) || data.drawn.length === 0) {
+        throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+      }
+
+      const enrichedCards: DrawnSlotCard[] = data.drawn.map((d: any) => {
+        if (d.cardIndex === undefined || d.cardIndex === null) {
+          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+        }
         const fullCard = cardByIndex(d.cardIndex);
-        const kw = fullCard?.keywords;
+        if (!fullCard) {
+          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+        }
+        const kw = fullCard.keywords;
         const extractedKeywords = Array.isArray(kw)
           ? kw
           : d.isReversed
@@ -584,7 +598,7 @@ export default function TarotPage() {
 
         return {
           order: d.order ?? 0,
-          cardIndex: d.cardIndex ?? 0,
+          cardIndex: d.cardIndex,
           isReversed: !!d.isReversed,
           position: selectedSpread?.positions?.[d.order] || {
             index: d.order ?? 0,
@@ -644,7 +658,7 @@ export default function TarotPage() {
           return;
         }
         throw new Error(
-          errData.error || "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กดปุ่มลองอ่านใหม่ได้เลยค่ะ",
+          errData.error || "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้งค่ะ",
         );
       }
 
@@ -729,7 +743,7 @@ export default function TarotPage() {
               } else if (eventType === "error") {
                 streamCompleted = true;
                 setIsStreaming(false);
-                setErrorMsg(data.message || "เกิดข้อผิดพลาดในการอ่านไพ่");
+                setErrorMsg(data.message || "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง");
               }
             } catch (parseErr) {
               console.error("Parse event error", parseErr);
@@ -741,12 +755,12 @@ export default function TarotPage() {
       // P1-4 Guard: If stream ended without 'done' event
       if (!streamCompleted) {
         setIsStreaming(false);
-        setErrorMsg("คำทำนายส่งมาไม่ครบสักนิดค่ะ กดปุ่มลองอ่านใหม่ แม่หมอพร้อมเปิดไพ่ให้ทันที");
+        setErrorMsg("คำทำนายส่งมาไม่ครบสักนิดค่ะ กรุณากดโหลดใหม่อีกครั้ง แม่หมอพร้อมเปิดไพ่ให้ทันที");
       }
     } catch (err: any) {
       console.error("Stream reading failed", err);
       setIsStreaming(false);
-      setErrorMsg(err.message || "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กดปุ่มลองอ่านใหม่ได้เลย");
+      setErrorMsg(err.message || "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กรุณากดโหลดใหม่อีกครั้ง");
     }
   };
 
@@ -893,8 +907,20 @@ export default function TarotPage() {
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-950/90 border border-rose-700 text-rose-200 text-xs sm:text-sm text-center shadow-2xl backdrop-blur">
-            {errorMsg}
+          <div className="mb-6 p-4 rounded-2xl bg-rose-950/90 border border-rose-700 text-rose-200 text-xs sm:text-sm text-center shadow-2xl backdrop-blur flex flex-col sm:flex-row items-center justify-center gap-3">
+            <span>{errorMsg}</span>
+            {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ/.test(errorMsg) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setErrorMsg(null);
+                  startAIStreaming(readingId, drawnCards);
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-bold text-xs shadow hover:opacity-95 transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
+              >
+                <span>✦</span> โหลดใหม่อีกครั้ง
+              </button>
+            )}
           </div>
         )}
 

@@ -96,9 +96,9 @@ export function applyCardOverride(card: TarotCard, o: CardOverride | undefined):
   };
 }
 
-export function resolveCardByIndex(doc: ContentOverrideDoc, index: number | null | undefined): TarotCard {
+export function resolveCardByIndex(doc: ContentOverrideDoc, index: number | null | undefined): TarotCard | undefined {
   const card = cardByIndex(index);
-  return applyCardOverride(card, doc.cards?.[card.id]);
+  return card ? applyCardOverride(card, doc.cards?.[card.id]) : undefined;
 }
 
 export function resolveCardById(doc: ContentOverrideDoc, id: string): TarotCard | undefined {

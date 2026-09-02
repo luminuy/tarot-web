@@ -224,7 +224,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 onClick={onRetry}
                 className="self-end sm:self-auto px-5 py-2 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] text-xs font-bold font-serif-th shadow hover:opacity-95 cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
               >
-                <span>✦</span> ลองอ่านใหม่
+                <span>✦</span> {/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่"}
               </button>
             )}
           </div>
@@ -272,12 +272,19 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               <div className="flex items-center gap-3.5">
                 {/* Real 1909 Rider-Waite Thumbnail */}
                 <div className={`w-14 h-[95px] rounded-lg overflow-hidden border border-[#e5c07b]/60 flex-shrink-0 shadow-md ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}>
-                  <CardImage
-                    image={cardData?.image || "major-00.jpg"}
-                    alt={cardData?.nameTh || "Tarot"}
-                    className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-                    sizes="88px"
-                  />
+                  {cardData?.image ? (
+                    <CardImage
+                      image={cardData.image}
+                      alt={cardData?.nameTh || "Tarot"}
+                      className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                      sizes="88px"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#120a22] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#e5c07b]/30">
+                      <span className="text-[#ffd700] text-xs">✦</span>
+                      <span className="text-[9px] text-[#9c93b8] font-serif-th mt-0.5 leading-tight">ไม่พบข้อมูล</span>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -285,15 +292,23 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     ✦ ตำแหน่งที่ {activeCardIndex + 1}: {activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}
                   </span>
                   <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#f5deaa] mt-0.5">
-                    {cardData?.nameTh || `ไพ่ใบที่ ${activeCardIndex + 1}`}{" "}
-                    {cardData?.nameEn && (
-                      <span className="text-xs font-mono font-normal text-[#9c93b8]">
-                        ({cardData.nameEn})
+                    {cardData ? (
+                      <>
+                        {cardData.nameTh}{" "}
+                        {cardData.nameEn && (
+                          <span className="text-xs font-mono font-normal text-[#9c93b8]">
+                            ({cardData.nameEn})
+                          </span>
+                        )}{" "}
+                        <span className="text-xs font-serif-th font-semibold text-[#e5c07b]">
+                          {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว (Reversed)" : "· ไพ่ตรง (Upright)"}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-amber-200/85 text-sm font-normal">
+                        ไม่พบข้อมูลไพ่ (กรุณากดโหลดใหม่อีกครั้ง)
                       </span>
-                    )}{" "}
-                    <span className="text-xs font-serif-th font-semibold text-[#e5c07b]">
-                      {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว (Reversed)" : "· ไพ่ตรง (Upright)"}
-                    </span>
+                    )}
                   </h4>
                 </div>
               </div>
@@ -329,6 +344,24 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 </div>
               ) : null;
             })()}
+
+            {/* If card data could not be found, show reload prompt instead of fake reading */}
+            {!cardData && (
+              <div className="p-4 rounded-xl bg-[#140b24] border border-[#e5c07b]/30 text-center space-y-2.5 my-2">
+                <p className="text-xs text-[#f5deaa] font-serif-th">
+                  ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง
+                </p>
+                {onRetry && (
+                  <button
+                    type="button"
+                    onClick={onRetry}
+                    className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] text-xs font-bold font-serif-th shadow hover:opacity-95 cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
+                  >
+                    <span>✦</span> โหลดใหม่อีกครั้ง
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Interpretation Body */}
             <div className="space-y-2 pt-1">

@@ -54,6 +54,8 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     const path = await import("node:path");
     const dbPath = path.resolve(process.cwd(), ".dev-marketplace.db");
     const db = new sqlite.DatabaseSync(dbPath);
+    db.exec("PRAGMA journal_mode = WAL;");
+    db.exec("PRAGMA busy_timeout = 5000;");
 
     // Auto-migrate local sqlite schema
     db.exec(`
