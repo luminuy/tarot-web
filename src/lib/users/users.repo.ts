@@ -160,6 +160,70 @@ export async function getUserByEmail(email: string): Promise<AppUser | null> {
 }
 
 /**
+ * ดึงผู้ใช้ตามอีเมล **รวมบัญชีที่ถูกลบไปแล้ว (soft delete)**
+ *
+ * ⚠️ จำเป็นเพราะ `UNIQUE INDEX idx_users_email_lower` ไม่สนใจ `deleted_at`
+ * แถวที่ถูกลบยังจองอีเมลนั้นไว้ในดัชนีอยู่ · ถ้าเช็กด้วย `getUserByEmail()` (ซึ่งกรอง
+ * `deleted_at IS NULL` ทิ้ง) จะไม่เห็นแถวนั้น แล้วไป INSERT ทับจนชน unique
+ * → throw → ผู้ใช้เห็นแค่ "ไม่สามารถสร้างบัญชีได้ในขณะนี้" และสมัครไม่ได้อีกเลยตลอดกาล
+ */
+export async function getUserByEmailIncludingDeleted(email: string): Promise<AppUser | null> {
+  const db = await getAppDB();
+  const emailLower = normalizeEmail(email);
+  const row = await db
+    .prepare(
+      `SELECT * FROM users
+       WHERE email_lower = ? OR lower(email) = ?
+       LIMIT 1`
+    )
+    .bind(emailLower, emailLower)
+    .first<RawUserRow>();
+
+  return row ? mapRowToUser(row) : null;
+}
+
+/**
+ * คืนชีพบัญชีที่ถูกลบไปแล้ว เมื่อเจ้าของกลับมาสมัครด้วยอีเมลเดิม
+ *
+ * ใช้ id เดิมโดยตั้งใจ — โบนัสสมัครใหม่ผูกกับ `(user_id, reason)` แบบ idempotent
+ * ถ้าสร้าง id ใหม่ทุกครั้งจะกลายเป็นช่องให้ลบบัญชีแล้วสมัครใหม่วนรับโบนัสไม่รู้จบ
+ * (ฝั่ง OAuth ก็คืนชีพด้วย `deleted_at = NULL` ใน upsertUserOnLogin อยู่แล้ว — ทำให้ตรงกัน)
+ */
+export async function reviveEmailUser(p: {
+  id: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+}): Promise<AppUser> {
+  const db = await getAppDB();
+  const now = Date.now();
+  const emailLower = normalizeEmail(p.email);
+
+  await db
+    .prepare(
+      `UPDATE users
+       SET deleted_at = NULL,
+           provider = 'email',
+           email = ?,
+           email_lower = ?,
+           name = ?,
+           password_hash = ?,
+           email_verified = 0,
+           token_version = token_version + 1,
+           last_seen_at = ?
+       WHERE id = ?`
+    )
+    .bind(p.email.trim(), emailLower, p.name.trim(), p.passwordHash, now, p.id)
+    .run();
+
+  const user = await getUserById(p.id);
+  if (!user) {
+    throw new Error("ไม่สามารถคืนชีพบัญชีผู้ใช้ได้");
+  }
+  return user;
+}
+
+/**
  * ดึงรหัสผ่านแฮชของผู้ใช้สำหรับการตรวจสอบความถูกต้อง (Internal Auth Only)
  */
 export async function getUserPasswordHash(id: string): Promise<string | null> {

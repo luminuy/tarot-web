@@ -9,7 +9,13 @@ import { sendEmail } from "@/lib/email/send";
 import { accountExistsHtml, resetPasswordHtml, verifyEmailHtml } from "@/lib/email/templates";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
-import { createEmailUser, getUserByEmail, normalizeEmail } from "@/lib/users/users.repo";
+import {
+  createEmailUser,
+  getUserByEmail,
+  getUserByEmailIncludingDeleted,
+  normalizeEmail,
+  reviveEmailUser,
+} from "@/lib/users/users.repo";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
@@ -79,13 +85,18 @@ export async function POST(request: Request) {
       });
     }
 
-    // สร้างบัญชีใหม่
+    // สร้างบัญชีใหม่ — หรือคืนชีพบัญชีเดิมที่เจ้าของเคยลบไว้
+    //
+    // ⚠️ ถึงตรงนี้แปลว่า getUserByEmail() (ซึ่งกรอง deleted_at IS NULL ทิ้ง) ไม่เจอใคร
+    // แต่ยังอาจมีแถวที่ถูก soft-delete จองอีเมลนี้ค้างอยู่ใน UNIQUE INDEX ได้
+    // ถ้าดันไป INSERT เลยจะชน unique แล้ว throw → ผู้ใช้เห็นแค่ "ไม่สามารถสร้างบัญชีได้ในขณะนี้"
+    // และสมัครด้วยอีเมลตัวเองไม่ได้อีกเลยตลอดกาล (INC-0048)
     const passwordHash = await hashPassword(password);
-    const newUser = await createEmailUser({
-      email,
-      name,
-      passwordHash,
-    });
+    const deletedUser = await getUserByEmailIncludingDeleted(emailLower);
+
+    const newUser = deletedUser
+      ? await reviveEmailUser({ id: deletedUser.id, email, name, passwordHash })
+      : await createEmailUser({ email, name, passwordHash });
 
     // โบนัสสมัครใหม่ (ENTITLEMENT_PLAN ข้อ 5) — idempotent
     try {
