@@ -30,6 +30,7 @@
     "commit": "tsx scripts/git-author-guard.ts",
     "incident": "tsx scripts/incident-log.ts",
     "hooks:setup": "git config core.hooksPath .githooks",
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
     "audit:show": "tsx scripts/audit-tracker.ts show",
     "audit:track": "tsx scripts/audit-tracker.ts track",
     "entitlement:grandfather": "tsx scripts/entitlement-grandfather.ts"

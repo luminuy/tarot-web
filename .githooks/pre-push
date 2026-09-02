@@ -9,7 +9,16 @@ echo "✅ [Pre-Push ผ่าน] พร้อม Push ขึ้น Cloudflare W
 # ต้องเปิด PR ด้วย `npm run pr:auto` เสมอ — บทเรียน INC-0015
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
 if [ -n "$BRANCH" ] && [ "$BRANCH" != "main" ] && [ "$BRANCH" != "HEAD" ]; then
-  if ! gh pr list --head "$BRANCH" --state open --json number -q '.[0].number' 2>/dev/null | grep -q '[0-9]'; then
+  if ! command -v gh >/dev/null 2>&1; then
+    # ⚠️ ห้ามเงียบตรงนี้ — ของเดิม `2>/dev/null` กลืน "ไม่มีคำสั่ง gh" ทิ้ง
+    # แล้วรายงานเหมือนกับ "ไม่มี PR" ทั้งที่จริงคือ "ตรวจไม่ได้" (บทเรียน INC-0043)
+    echo ""
+    echo "📌 [เตือน] ตรวจไม่ได้ว่า branch \"$BRANCH\" มี PR หรือยัง — เครื่องนี้ไม่มีคำสั่ง gh"
+    echo "   (เกิดกับ Claude Code บนเว็บ / container ที่ไม่ได้ติดตั้ง GitHub CLI)"
+    echo "   การ push เฉยๆ จะ 'ไม่' ทำให้ระบบ merge หรือ deploy ให้ (INC-0015)"
+    echo "   ถ้ายังไม่ได้เปิด PR ให้เปิดผ่าน GitHub API/MCP แทน แล้วอย่าหยุดแค่ push (INC-0043)"
+    echo ""
+  elif ! gh pr list --head "$BRANCH" --state open --json number -q '.[0].number' 2>/dev/null | grep -q '[0-9]'; then
     echo ""
     echo "📌 [เตือน] branch \"$BRANCH\" ยังไม่มี PR เปิดอยู่"
     echo "   การ push เฉยๆ จะ 'ไม่' ทำให้ระบบ merge หรือ deploy ให้ (INC-0015)"
