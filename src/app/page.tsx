@@ -988,6 +988,15 @@ export default function TarotPage() {
                   setSelectedSpread(sp);
                 }}
                 isPassHolder={isPassHolder}
+                proceedLabel={
+                  entitlementView?.blocked
+                    ? entitlementView.blockedReason === "daily_exhausted"
+                      ? "เติมรอบเพื่อเปิดไพ่ต่อ"
+                      : "สมัครสมาชิกฟรีเพื่อเปิดไพ่"
+                    : !isPassHolder && !isStandardSpread(selectedSpread.id)
+                    ? "ปลดล็อกผังนี้เพื่อเปิดไพ่"
+                    : undefined
+                }
                 onRequireUpgrade={() => {
                   openAccessDialog("grand_spread");
                 }}

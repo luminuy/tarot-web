@@ -41,6 +41,11 @@ interface SpreadCardSelectorProps {
   onProceed?: () => void;
   isPassHolder?: boolean;
   onRequireUpgrade?: (reason: "grand_spread", spread: Spread) => void;
+  /**
+   * ถ้อยคำบนปุ่มเริ่ม — ส่งมาทับได้เมื่อสิทธิ์ยังไม่พอ
+   * เพื่อบอกล่วงหน้าตั้งแต่ก่อนกดว่าต้องสมัคร/ปลดล็อกก่อน (กันเซอร์ไพรส์ตอนกดแล้วเจอหน้าต่างสิทธิ์)
+   */
+  proceedLabel?: string;
 }
 
 type SpreadCategory = "all" | "recommended" | "love" | "career" | "master";
@@ -105,6 +110,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   onProceed,
   isPassHolder = false,
   onRequireUpgrade,
+  proceedLabel,
 }) => {
   const [activeCategory, setActiveCategory] = useState<SpreadCategory>("recommended");
 
@@ -436,7 +442,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             onClick={onProceed}
             className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-bold font-serif-th text-sm sm:text-base shadow-[0_0_25px_rgba(229,192,123,0.45)] hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
           >
-            <span>ถัดไป: ตั้งคำถามและเลือกแม่หมอ</span>
+            <span>{proceedLabel ?? "ถัดไป: ตั้งคำถามและเลือกแม่หมอ"}</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
         </motion.div>
