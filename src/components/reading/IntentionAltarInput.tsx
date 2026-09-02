@@ -100,7 +100,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
   const isQuestionEmpty = touchedQuestion && !question.trim();
 
   return (
-    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#160e2a]/95 via-[#0b0716]/95 to-[#05040a]/95 backdrop-blur-2xl p-5 sm:p-8 shadow-[0_0_60px_rgba(0,0,0,0.9)] space-y-6 relative overflow-hidden">
+    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#160e2a]/95 via-[#0b0716]/95 to-[#05040a]/95 p-5 sm:p-8 shadow-[0_0_60px_rgba(0,0,0,0.9)] space-y-6 relative overflow-hidden">
       {/* Background Sacred Geometric Aura */}
       <div className="absolute top-0 right-0 w-80 h-80 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-2xl" />
 
@@ -110,7 +110,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
           <CardImage
             image={persona?.cardImage || "major-02.jpg"}
             alt={persona?.nameTh || "แม่หมอ"}
-            className="w-full h-full object-cover object-top filter contrast-[1.05] tarot-hd-card-image"
+            className="w-full h-full object-cover object-top contrast-[1.05] tarot-hd-card-image"
             sizes="40px"
           />
         </div>
@@ -281,7 +281,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                     <CardImage
                       image={seal.image}
                       alt={seal.title}
-                      className="w-full h-full object-cover object-top filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                      className="w-full h-full object-cover object-top tarot-hd-card-image"
                       sizes="112px"
                     />
                   </div>

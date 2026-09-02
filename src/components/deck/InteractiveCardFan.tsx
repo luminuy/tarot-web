@@ -143,7 +143,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             </div>
 
             {/* Position Heading with Inline Non-Breaking Quotes */}
-            <h3 className="text-lg sm:text-3xl font-serif-th font-bold font-mystic-gold tracking-wide filter drop-shadow leading-snug py-0.5 px-2">
+            <h3 className="text-lg sm:text-3xl font-serif-th font-bold font-mystic-gold tracking-wide drop-shadow leading-snug py-0.5 px-2">
               เลือกไพ่สำหรับ{" "}
               <span className="text-[#f5deaa] inline-block font-bold">
                 &ldquo;{currentPositionName}&rdquo;
@@ -170,7 +170,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
       </div>
 
       {/* Unified Masterpiece Altar Stage (No Row-Level Clipping) */}
-      <div className="w-full relative rounded-2xl sm:rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 backdrop-blur-2xl shadow-[0_0_70px_rgba(0,0,0,0.95)] overflow-hidden">
+      <div className="w-full relative rounded-2xl sm:rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 shadow-[0_0_70px_rgba(0,0,0,0.95)] overflow-hidden">
         {/* Background Sacred Geometric Mandala */}
         <div className="absolute inset-0 flex items-center justify-center opacity-15 pointer-events-none">
           <div className="w-[600px] h-[600px] rounded-full border border-dashed border-[#e5c07b] animate-[spin_160s_linear_infinite]" />
@@ -232,7 +232,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                 <CardImage
                   image="major-01.jpg"
                   alt="Sacred Tarot Altar"
-                  className="w-full h-full object-cover object-top filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                  className="w-full h-full object-cover object-top tarot-hd-card-image"
                   sizes="72px"
                 />
                 <div className="gold-foil-sheen absolute inset-0 opacity-40 pointer-events-none" />

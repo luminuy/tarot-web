@@ -114,7 +114,7 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
                 stiffness: 360,
                 damping: 25,
               }}
-              className="rounded-2xl p-3.5 sm:p-4 bg-gradient-to-br from-[#1d1433]/95 via-[#150e28]/95 to-[#100a20]/95 border border-[#e5c07b]/40 shadow-[0_4px_20px_rgba(0,0,0,0.35)] space-y-1.5 backdrop-blur transition-all duration-300 hover:border-[#ffd700] hover:shadow-[0_0_20px_rgba(229,192,123,0.25)]"
+              className="rounded-2xl p-3.5 sm:p-4 bg-gradient-to-br from-[#1d1433]/95 via-[#150e28]/95 to-[#100a20]/95 border border-[#e5c07b]/40 shadow-[0_4px_20px_rgba(0,0,0,0.35)] space-y-1.5 transition-all duration-300 hover:border-[#ffd700] hover:shadow-[0_0_20px_rgba(229,192,123,0.25)]"
             >
               <div className="flex items-center gap-2 text-[#ffd700] font-bold text-xs sm:text-sm font-serif-th">
                 <span className="text-[#e5c07b] text-xs animate-pulse">✦</span>
@@ -167,7 +167,7 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
               stiffness: 360,
               damping: 25,
             }}
-            className="rounded-2xl rounded-tl-xs bg-[#19122c]/95 border border-[#e5c07b]/25 p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#f5deaa] font-serif-th shadow-md backdrop-blur hover:border-[#e5c07b]/45 transition-colors"
+            className="rounded-2xl rounded-tl-xs bg-[#19122c]/95 border border-[#e5c07b]/25 p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#f5deaa] font-serif-th shadow-md hover:border-[#e5c07b]/45 transition-colors"
           >
             <p className="leading-relaxed">{renderFormattedText(p)}</p>
           </motion.div>
@@ -297,7 +297,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
     <section
       id={ASK_ORACLE_SECTION_ID}
       aria-labelledby="ask-oracle-title"
-      className="w-full scroll-mt-24 rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 backdrop-blur-2xl p-4 sm:p-6 shadow-[0_0_50px_rgba(0,0,0,0.85)] flex flex-col h-[660px] sm:h-[720px] relative overflow-hidden justify-between"
+      className="w-full scroll-mt-24 rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 p-4 sm:p-6 shadow-[0_0_50px_rgba(0,0,0,0.85)] flex flex-col h-[660px] sm:h-[720px] relative overflow-hidden justify-between"
     >
       {/* Background Sacred Geometric Aura */}
       <div className="absolute top-0 right-0 w-72 h-72 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-2xl" />
@@ -356,7 +356,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             />
           </div>
           <div className="max-w-[88%] space-y-1">
-            <div className="rounded-2xl rounded-tl-xs bg-[#19122c]/90 border border-[#e5c07b]/25 p-3.5 sm:p-4 text-xs sm:text-sm text-[#f5deaa] font-serif-th leading-relaxed shadow-lg backdrop-blur">
+            <div className="rounded-2xl rounded-tl-xs bg-[#19122c]/96 border border-[#e5c07b]/25 p-3.5 sm:p-4 text-xs sm:text-sm text-[#f5deaa] font-serif-th leading-relaxed shadow-lg">
               <p>
                 สวัสดีค่ะ ยินดีที่ได้ร่วมเปิดไพ่ด้วยกันนะคะ ✨ มีจุดไหนในคำทำนายที่ยังสงสัย หรืออยากให้แม่หมอช่วยเจาะลึกแนวทางเพิ่มเติม พิมพ์ถามได้ตลอดเลยนะคะ
               </p>

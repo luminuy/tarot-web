@@ -146,7 +146,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
             return (
               <div
                 key={spread.id}
-                className="content-visibility-auto rounded-3xl border border-[#e5c07b]/25 bg-gradient-to-b from-[#140e28]/95 via-[#0c081a]/95 to-[#06040e]/95 p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#ffd700]/70 hover:shadow-[0_8px_35px_rgba(229,192,123,0.22)] transition-all duration-300 shadow-xl relative overflow-hidden group"
+                className="rounded-3xl border border-[#e5c07b]/25 bg-gradient-to-b from-[#140e28]/95 via-[#0c081a]/95 to-[#06040e]/95 p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#ffd700]/70 hover:shadow-[0_8px_35px_rgba(229,192,123,0.22)] transition-all duration-300 shadow-xl relative overflow-hidden group"
               >
                 {/* Header Tag */}
                 <div className="flex items-center justify-between z-10">

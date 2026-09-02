@@ -197,7 +197,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Center Position Tag & Tap to Reveal Badge */}
           <div className="flex flex-col items-center justify-center my-auto gap-1.5 relative z-10">
             {positionLabel && (
-              <span className="text-[9px] text-[#f5deaa] font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-black/85 border border-[#e5c07b]/40 backdrop-blur-md line-clamp-1 max-w-[95%] shadow-[0_0_10px_rgba(0,0,0,0.8)]">
+              <span className="text-[9px] text-[#f5deaa] font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-black/95 border border-[#e5c07b]/40 line-clamp-1 max-w-[95%] shadow-[0_0_10px_rgba(0,0,0,0.8)]">
                 {positionLabel}
               </span>
             )}
@@ -254,7 +254,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
                 image={effectiveCard?.image}
                 cardId={effectiveCard?.id}
                 alt={effectiveCard?.nameTh || "Tarot"}
-                className="w-full h-full object-cover object-center filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
+                className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
                 sizes={effectiveImageSizes}
                 full={imageFull}
               />
@@ -268,7 +268,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Sleek Floating Reversed Badge if applicable */}
           {isReversed && (
             <div className="absolute top-2 left-2 z-20 pointer-events-none">
-              <span className="text-[8px] font-bold font-serif-th bg-rose-950/90 text-rose-200 border border-rose-500/70 px-2 py-0.5 rounded-full shadow-lg backdrop-blur-md">
+              <span className="text-[8px] font-bold font-serif-th bg-rose-950/90 text-rose-200 border border-rose-500/70 px-2 py-0.5 rounded-full shadow-lg">
                 กลับหัว
               </span>
             </div>

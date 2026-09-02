@@ -58,7 +58,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   return (
     <div className="space-y-8 relative z-10">
       {/* World-Class Sacred Search & Filter Dashboard */}
-      <div className="rounded-3xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#130d24]/90 via-[#0a0715]/95 to-[#05040a]/95 p-4 sm:p-6 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] space-y-5">
+      <div className="rounded-3xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#130d24]/96 via-[#0a0715]/95 to-[#05040a]/95 p-4 sm:p-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)] space-y-5">
         {/* Search Bar & Result Stats */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
@@ -181,7 +181,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               <Link
                 key={card.id}
                 href={`/cards/${card.id}`}
-                className="content-visibility-auto rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#160e2c]/95 via-[#0d081c]/95 to-[#06040d]/95 p-3 flex flex-col justify-between hover:border-[#ffd700] hover:shadow-[0_12px_35px_rgba(229,192,123,0.3)] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5"
+                className="rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#160e2c]/95 via-[#0d081c]/95 to-[#06040d]/95 p-3 flex flex-col justify-between hover:border-[#ffd700] hover:shadow-[0_12px_35px_rgba(229,192,123,0.3)] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5"
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
                 <div className="relative aspect-[7/12] w-full rounded-xl overflow-hidden border border-[#e5c07b]/35 shadow-inner bg-[#040308] mb-3">
@@ -189,17 +189,17 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     image={card.image}
                     cardId={card.id}
                     alt={card.nameTh}
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 filter contrast-[1.08] saturate-[1.08] brightness-[1.03] tarot-hd-card-image"
-                    sizes="(min-width: 1024px) 260px, (min-width: 768px) 240px, (min-width: 640px) 260px, 50vw"
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 tarot-hd-card-image"
+                    sizes="(min-width: 1024px) 160px, (min-width: 768px) 170px, (min-width: 640px) 190px, 45vw"
                   />
                   <div className="gold-foil-sheen absolute inset-0 opacity-10 group-hover:opacity-40 transition-opacity pointer-events-none" />
 
                   {/* Top Badge: Number & Arcana */}
                   <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-black/85 text-[#ffd700] border border-[#ffd700]/40 backdrop-blur shadow">
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-black/90 text-[#ffd700] border border-[#ffd700]/40 shadow">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
-                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-md backdrop-blur border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold shadow`}>
+                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-md border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold shadow`}>
                       {card.element}
                     </span>
                   </div>

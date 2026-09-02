@@ -11,7 +11,7 @@ export const DUR = {
   fast: 0.14,
   base: 0.24,
   slow: 0.42,
-  page: 0.36,
+  page: 0.28,
   ritual: 0.52,
 } as const;
 

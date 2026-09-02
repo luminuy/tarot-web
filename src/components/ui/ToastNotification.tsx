@@ -91,7 +91,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
       className={`fixed top-18 sm:top-22 left-1/2 -translate-x-1/2 z-50 pointer-events-auto
         max-w-md w-[calc(100%-2rem)] sm:w-auto min-w-[320px] sm:min-w-[420px]
         rounded-2xl p-3.5 sm:p-4 overflow-hidden
-        backdrop-blur-md transition-all duration-200
+        transition-all duration-200
         ${
           isError
             ? "bg-[#18080c]/98 border border-rose-500/40 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_20px_rgba(244,63,94,0.18)]"

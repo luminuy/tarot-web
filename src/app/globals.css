@@ -27,7 +27,7 @@
   --dur-fast: 140ms;
   --dur-base: 240ms;
   --dur-slow: 420ms;
-  --dur-page: 360ms;
+  --dur-page: 280ms;
   --dur-ritual: 520ms;
 
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
@@ -41,7 +41,7 @@
   --dur-fast: 140ms;
   --dur-base: 240ms;
   --dur-slow: 420ms;
-  --dur-page: 360ms;
+  --dur-page: 280ms;
   --dur-ritual: 520ms;
 
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
@@ -73,18 +73,20 @@ body {
 }
 
 /* กรอบแท่นบูชา Obsidian & Gold (Optimized 10px blur for zero stutter) */
+/*
+ * ⚠️ ห้ามใส่ backdrop-filter กลับเข้ามาในสองคลาสนี้ (บทเรียน INC ครั้งนี้)
+ * แผงแท่นบูชาถูกใช้ 32 จุดทั่วเว็บ และมี canvas พื้นหลังขยับอยู่ตลอด
+ * เบราว์เซอร์จึงต้องคำนวณเบลอ "ใหม่ทุกเฟรม" ทุกแผง → เฟรมตกทั้งเว็บ
+ * ใช้พื้นหลังทึบขึ้นแทน หน้าตาบนพื้นมืดแทบไม่ต่างกันเลย
+ */
 .altar-panel {
-  background: radial-gradient(circle at 50% 0%, rgba(37, 28, 68, 0.5) 0%, rgba(10, 7, 20, 0.92) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: radial-gradient(circle at 50% 0%, rgba(35, 26, 64, 0.97) 0%, rgba(10, 7, 20, 0.98) 100%);
   border: 1px solid rgba(229, 192, 123, 0.22);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 240, 212, 0.15);
 }
 
 .altar-panel-active {
-  background: radial-gradient(circle at 50% 0%, rgba(65, 45, 115, 0.65) 0%, rgba(16, 11, 32, 0.98) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: radial-gradient(circle at 50% 0%, rgba(62, 43, 110, 0.98) 0%, rgba(16, 11, 32, 0.99) 100%);
   border: 1px solid rgba(229, 192, 123, 0.6);
   box-shadow: 0 0 35px rgba(229, 192, 123, 0.25), 0 25px 60px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(229, 192, 123, 0.15);
 }
@@ -128,18 +130,34 @@ body {
   image-rendering: auto;
 }
 
+/*
+ * เพิ่มความคมชัดของภาพไพ่ — ใช้ได้เฉพาะ "ไพ่ใบใหญ่ที่มีไม่กี่ใบบนจอ"
+ * (ไพ่ที่เปิดแล้ว · หน้ารายละเอียดไพ่ · ภาพแชร์)
+ *
+ * ⚠️ ห้ามใส่กับกริด/แถวไพ่จำนวนมาก (เช่นหน้าไพ่ 78 ใบ, ภาพตัวอย่างผัง, พัดไพ่)
+ * CSS filter บังคับให้เบราว์เซอร์วาดภาพเพิ่มอีกหนึ่งรอบต่อ 1 ใบ
+ * วัดจริงแล้วหน้าไพ่ 78 ใบตกจาก 60 fps เหลือ 51 fps (เฟรมตก 10 ครั้ง) เพราะฟิลเตอร์นี้
+ */
+.tarot-card-enhance {
+  filter: contrast(1.08) saturate(1.08) brightness(1.03);
+}
+
 /* แสงสะท้อนประกายฟอยล์ทอง (Gold Foil Sheen) */
 .gold-foil-sheen {
   background: linear-gradient(
     125deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.04) 30%,
-    rgba(229, 192, 123, 0.28) 48%,
-    rgba(168, 85, 247, 0.2) 58%,
-    rgba(255, 159, 67, 0.25) 68%,
+    rgba(255, 255, 255, 0.05) 30%,
+    rgba(229, 192, 123, 0.20) 48%,
+    rgba(168, 85, 247, 0.14) 58%,
+    rgba(255, 159, 67, 0.17) 68%,
     transparent 85%
   );
-  mix-blend-mode: color-dodge;
+  /*
+   * เดิมใช้ mix-blend-mode: color-dodge — บังคับให้ทุกใบกลายเป็นเลเยอร์ผสมสีกับพื้นหลัง
+   * หน้าไพ่ 78 ใบจึงมี 78 เลเยอร์ผสมสี ทำให้เลื่อนหน้าแล้วเฟรมตก
+   * ใช้ไล่สีทองตรง ๆ แทน (ปรับความสว่างชดเชยแล้ว) บนพื้นมืดให้ผลตาเกือบเหมือนเดิม
+   */
   pointer-events: none;
 }
 
@@ -188,10 +206,17 @@ body {
 
 /* ===== Mobile-First GPU Optimizations (85%+ mobile users) ===== */
 
-/* Force GPU compositing on animated elements for buttery 60fps on mid-range phones */
-.card-scene,
-.card-inner {
-  will-change: transform;
+/*
+ * ชั้น GPU ของไพ่ 3D
+ *
+ * ⚠️ ห้ามตั้ง `will-change: transform` ถาวรตรงนี้ (ของเดิมตั้งไว้)
+ * เพราะมันสร้างเลเยอร์ GPU ค้างไว้ให้ไพ่ "ทุกใบ" ตลอดเวลา แม้ตอนไม่ได้พลิก
+ * บนมือถือที่แสดงไพ่หลายใบพร้อมกันจะกินหน่วยความจำ GPU จนวาดภาพช้าลง
+ * motion จะใส่ will-change ให้เองเฉพาะช่วงที่กำลังอนิเมตจริงอยู่แล้ว
+ *
+ * `.card-inner` ก็ไม่ต้องตั้ง transform ตายตัว — motion เขียน transform ทับตลอด
+ */
+.card-scene {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
@@ -201,12 +226,7 @@ body {
   .gold-foil-sheen {
     display: none !important;
   }
-  /* Reduce backdrop-filter intensity on mobile for performance */
-  .altar-panel,
-  .altar-panel-active {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
+  /* แผงแท่นบูชาไม่ใช้ backdrop-filter แล้ว จึงไม่ต้อง override ซ้ำตรงนี้ */
 }
 
 /* Tap highlight removal for native feel */
@@ -237,10 +257,22 @@ html {
   display: none;
 }
 
-/* Peak Performance: Content Visibility & Containment for 60fps Grid / List Rendering */
+/*
+ * content-visibility: ข้ามการวาดส่วนที่ยังไม่เข้าจอ
+ *
+ * ⚠️ วัดจริงแล้ว **ไม่เหมาะกับกริดการ์ดของเว็บนี้** — การ์ดเบาอยู่แล้ว
+ * ต้นทุน "วาดใหม่ตอนเลื่อนเข้าจอ" แพงกว่าที่ประหยัดได้
+ * (หน้าไพ่ 78 ใบ: เปิดไว้ 53 fps เฟรมตก 7 · ปิด 60 fps เฟรมตก 0)
+ * เก็บคลาสไว้ใช้กับรายการที่ "หนักจริงและยาวมาก" ในอนาคตเท่านั้น — ต้องวัดก่อนใช้ทุกครั้ง
+ */
 .content-visibility-auto {
   content-visibility: auto;
-  contain-intrinsic-size: 0 350px;
+  /*
+   * `auto` = ให้เบราว์เซอร์จำความสูงจริงที่เคยวาดไว้
+   * ของเดิมกำหนดตายตัว 350px ทั้งที่การ์ดจริงสูงไม่เท่ากัน พอเลื่อนเข้า/ออกจอ
+   * ความสูงจะเด้งไปมา → คำนวณ layout ใหม่ทั้งกริดซ้ำ ๆ (เจอ long task 268ms ตอนเลื่อนหน้าไพ่)
+   */
+  contain-intrinsic-size: auto 350px;
 }
 
 .gpu-accelerated {

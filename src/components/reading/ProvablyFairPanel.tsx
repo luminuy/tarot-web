@@ -95,7 +95,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({
   return (
     <section
       aria-label="ตรวจสอบความโปร่งใส Provably-Fair"
-      className="my-4 rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#140d28]/95 via-[#0c071a]/98 to-[#06040e]/95 shadow-2xl backdrop-blur-md transition-all overflow-hidden"
+      className="my-4 rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#140d28]/95 via-[#0c071a]/98 to-[#06040e]/95 shadow-2xl transition-all overflow-hidden"
     >
       {/* Header — แตะเพื่อยุบ/ขยาย (เริ่มต้นยุบไว้ ไม่ให้หน้ายาว) */}
       <button

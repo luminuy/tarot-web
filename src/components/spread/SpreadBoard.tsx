@@ -155,7 +155,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
                 e.stopPropagation();
                 onZoomCard(drawn);
               }}
-              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#22153d]/95 to-[#100720]/95 hover:from-[#c59b27] hover:to-[#f5deaa] border border-[#e5c07b]/70 hover:border-[#ffd700] text-[#f5deaa] hover:text-[#05040a] shadow-[0_0_20px_rgba(0,0,0,0.95),0_0_12px_rgba(229,192,123,0.45)] backdrop-blur-xl transition-all duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
+              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#22153d]/95 to-[#100720]/95 hover:from-[#c59b27] hover:to-[#f5deaa] border border-[#e5c07b]/70 hover:border-[#ffd700] text-[#f5deaa] hover:text-[#05040a] shadow-[0_0_20px_rgba(0,0,0,0.95),0_0_12px_rgba(229,192,123,0.45)] transition-all duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
               title="ซูมดูไพ่ 3D ความละเอียดสูง"
             >
               <span className="text-[10px] text-[#e5c07b] group-hover:text-[#05040a] transition-colors">⛶</span>
@@ -193,7 +193,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
   };
 
   return (
-    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 backdrop-blur-2xl p-5 sm:p-7 shadow-[0_0_50px_rgba(0,0,0,0.85)] flex flex-col justify-between space-y-5 select-none relative overflow-hidden">
+    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 p-5 sm:p-7 shadow-[0_0_50px_rgba(0,0,0,0.85)] flex flex-col justify-between space-y-5 select-none relative overflow-hidden">
       {/* Background Sacred Geometric Mandala */}
       <div className="absolute inset-0 flex items-center justify-center opacity-15 pointer-events-none">
         <div className="w-80 h-80 sm:w-[480px] sm:h-[480px] rounded-full border border-dashed border-[#e5c07b] animate-[spin_120s_linear_infinite]" />
@@ -267,7 +267,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(-1)}
             disabled={!canScrollLeft}
             aria-label="เลื่อนดูไพ่ทางซ้าย"
-            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#e5c07b]/50 bg-[#0d0818]/90 text-[#f5deaa] shadow-lg backdrop-blur transition-all hover:bg-[#1a1130] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#e5c07b]/50 bg-[#0d0818]/96 text-[#f5deaa] shadow-lg transition-all hover:bg-[#1a1130] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
               canScrollLeft ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -278,7 +278,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(1)}
             disabled={!canScrollRight}
             aria-label="เลื่อนดูไพ่ทางขวา"
-            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#e5c07b]/50 bg-[#0d0818]/90 text-[#f5deaa] shadow-lg backdrop-blur transition-all hover:bg-[#1a1130] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#e5c07b]/50 bg-[#0d0818]/96 text-[#f5deaa] shadow-lg transition-all hover:bg-[#1a1130] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
               canScrollRight ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >

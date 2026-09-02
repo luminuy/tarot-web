@@ -264,7 +264,7 @@ export default function ReadersManager() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl border border-[#e5c07b]/40 bg-[#171226] px-4 py-2.5 text-xs font-semibold text-[#f5deaa] shadow-2xl backdrop-blur-md">
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl border border-[#e5c07b]/40 bg-[#171226] px-4 py-2.5 text-xs font-semibold text-[#f5deaa] shadow-2xl">
           {toastMessage}
         </div>
       )}

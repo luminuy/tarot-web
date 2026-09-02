@@ -43,7 +43,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
   return (
     <div className="space-y-6">
       {/* Search and Filter Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-[#130d24]/60 border border-[#e5c07b]/20 p-4 rounded-2xl backdrop-blur-md">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-[#130d24]/92 border border-[#e5c07b]/20 p-4 rounded-2xl">
         {/* Search Input */}
         <div className="relative flex-1">
           <input
