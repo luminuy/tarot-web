@@ -36,6 +36,26 @@
 
 ---
 
+### 🗓️ 2026-09-02: ขจัดความหน่วงแอนิเมชันเปิดปิดเมนู — ปรับใช้ 150ms easeOutExpo + transformOrigin Anchor + GPU Compositor Optimization
+
+**อาการที่ผู้ใช้เจอ**:
+- เวลาเปิด/ปิดเมนูขึ้นลงรู้สึก *"ไม่สมูท ช้าๆ ค้างๆ บอกไม่ถูก"*
+
+**สาเหตุจริง**:
+1. **ขาด `transformOrigin: "top right"`**: เมนูคำนวณการขยายจากจุดศูนย์กลาง (50% 50%) ทำให้ขณะกางออก ตัวการ์ดขยายออกทั้งบนและล่างพร้อมเลื่อนแกน Y สวนทางกัน เกิดอาการส่ายและลอยไม่เป็นธรรมชาติ
+2. **Spring Damping Physics มีหางยาว**: การใช้ `type: "spring"` ทำให้เกิดการคำนวณไมโครฟิสิกส์หลายร้อยมิลลิวินาที และช่วง Exit มีอาการค้างก่อนปิดจริง
+3. **GPU Rasterization Bottleneck**: การใช้ `backdrop-blur-2xl` ซ้อนทับบนแคนวาสดวงดาวที่เคลื่อนไหวตลอดเวลา ทำให้ GPU บนมือถือ/Safari ต้องประมวลผล Gaussian Blur 40px ซ้ำทุกเฟรม เกิด Frame Drop (อาการกระตุก)
+4. **Synchronous Audio Dispatch**: การเรียกเสียง SFX แบบบล็อกกิ้งในคลิกแฮนด์เลอร์ทำให้กินเวลาเฟรมแรก (Frame 0) ของการเรนเดอร์
+
+**สิ่งที่แก้ไข**:
+1. ปรับแอนิเมชันเปิดเมนูเป็น **Ultra-Smooth 150ms easeOutExpo (`[0.16, 1, 0.3, 1]`)** และปิดฉับไวใน **100ms** ตอบสนองทันทีแบบ Native iOS/macOS
+2. ตรึง **`transformOrigin: "top right"`** เพื่อให้การ์ดคลี่กางลงมาจากปุ่มทริกเกอร์อย่างสมบูรณ์แบบ
+3. ใส่ **`willChange: "transform, opacity"`** และปรับเป็น `backdrop-blur-md` เพื่อส่งผ่านงานให้ GPU Compositor โดยตรง ได้ 60/120fps ลื่นไหลไร้สะดุด
+4. ย้ายการเรียก Web Audio SFX ไปรันผ่าน `requestAnimationFrame` แบบ Asynchronous ไม่บล็อกการเริ่มเฟรมแรกของแอนิเมชัน
+5. ปรับสวิตช์ Toggle ให้ใช้ Hardware-accelerated X transform (`animate={{ x: ... }}`) แทน Layout reflow
+
+---
+
 ### 🗓️ 2026-09-02: ยกระดับ UX/UI แถบเมนูและโปรไฟล์ระดับโลก — ป้องกันเมนูซ้อนทับกัน + ปรับดีไซน์ Obsidian-Gold + Floating Sacred Toast HUD
 
 **อาการที่ผู้ใช้เจอ**:

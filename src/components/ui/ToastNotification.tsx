@@ -70,10 +70,20 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
   return (
     <motion.aside
       key={toast.id || toast.title}
-      initial={{ opacity: 0, y: -24, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -16, scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 450, damping: 32 }}
+      initial={{ opacity: 0, y: -16, scale: 0.96 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] },
+      }}
+      exit={{
+        opacity: 0,
+        y: -10,
+        scale: 0.97,
+        transition: { duration: 0.12, ease: [0.4, 0, 1, 1] },
+      }}
+      style={{ willChange: "transform, opacity" }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       role={isError ? "alert" : "status"}
@@ -81,11 +91,11 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
       className={`fixed top-18 sm:top-22 left-1/2 -translate-x-1/2 z-50 pointer-events-auto
         max-w-md w-[calc(100%-2rem)] sm:w-auto min-w-[320px] sm:min-w-[420px]
         rounded-2xl p-3.5 sm:p-4 overflow-hidden
-        backdrop-blur-2xl transition-all duration-300
+        backdrop-blur-md transition-all duration-200
         ${
           isError
-            ? "bg-[#18080c]/95 border border-rose-500/40 shadow-[0_16px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(244,63,94,0.18)]"
-            : "bg-[#0d0a1b]/95 border border-[#d4af37]/40 shadow-[0_16px_50px_rgba(0,0,0,0.9),0_0_30px_rgba(212,175,55,0.22)]"
+            ? "bg-[#18080c]/98 border border-rose-500/40 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_20px_rgba(244,63,94,0.18)]"
+            : "bg-[#0d0a1b]/98 border border-[#d4af37]/40 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_25px_rgba(212,175,55,0.2)]"
         }`}
     >
       {/* Top ambient gold / ruby highlight */}
