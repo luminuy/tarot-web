@@ -12,6 +12,7 @@ import {
   CrystalBallTabIcon,
   AllSpreadsTabIcon,
 } from "@/components/ui/TarotArtIcons";
+import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 
 interface SpreadsLibraryProps {
@@ -155,7 +156,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                     </span>
                     {!isStandardSpread(spread.id) && (
                       <span className="text-[9px] text-[#ffd700] bg-gradient-to-r from-[#2a1340] to-[#150a24] border border-[#ffd700]/40 px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 shadow-[0_0_8px_rgba(255,215,0,0.2)]">
-                        <span>🔒</span>
+                        <SealedLockIcon className="w-3 h-3" />
                         <span>✦ ญาณพิเศษ</span>
                       </span>
                     )}

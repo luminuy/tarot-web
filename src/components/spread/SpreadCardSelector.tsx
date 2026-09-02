@@ -31,6 +31,7 @@ import {
   AllSpreadsTabIcon,
 } from "@/components/ui/TarotArtIcons";
 import { CardImage } from "@/components/card/CardImage";
+import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { soundManager } from "@/lib/utils/audio";
 
@@ -290,7 +291,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   </span>
                   {isLocked ? (
                     <span className="text-[9px] text-[#ffd700] bg-gradient-to-r from-[#2a1340] to-[#150a24] border border-[#ffd700]/40 px-2.5 py-0.5 rounded-full font-serif-th font-bold shadow-[0_0_12px_rgba(255,215,0,0.2)] flex items-center gap-1">
-                      <span>🔒</span>
+                      <SealedLockIcon className="w-3 h-3" />
                       <span>✦ ญาณพิเศษ</span>
                     </span>
                   ) : isRecommended ? (
@@ -301,10 +302,26 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 </div>
 
                 {/* 1909 Tarot Spread Centerpiece */}
-                <div className="my-auto py-2.5 flex items-center justify-center relative">
-                  <div className={`relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.25)] ${isLocked ? "opacity-90" : ""}`}>
+                <div className="my-auto py-2.5 flex flex-col items-center justify-center gap-2 relative">
+                  <div
+                    className={`relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.25)] transition-all duration-300 ${
+                      isLocked ? "opacity-65 saturate-[0.9] group-hover/card:opacity-90" : ""
+                    }`}
+                  >
                     {renderSpreadIllustration(spread.id)}
                   </div>
+
+                  {/* ตราผนึกญาณพิเศษ — วาง "ใต้" ภาพผังในสายธรรมดา (ไม่ absolute)
+                      เพื่อไม่ให้ไปทับหน้าไพ่ และไม่มีวันจมอยู่หลังไพ่เหมือนโอเวอร์เลย์เดิม
+                      อีกทั้งเห็นได้ตลอดโดยไม่ต้อง hover เพราะจอสัมผัสไม่มี hover */}
+                  {isLocked && (
+                    <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#ffd700]/75 bg-[#07040f]/92 px-3 py-1 shadow-[0_0_18px_rgba(229,192,123,0.45),0_3px_10px_rgba(0,0,0,0.8)] group-hover/card:border-[#ffd700] group-hover/card:shadow-[0_0_26px_rgba(255,215,0,0.6),0_3px_10px_rgba(0,0,0,0.8)] transition-all duration-300">
+                      <SealedLockIcon className="w-3.5 h-3.5 text-[#ffd700] flex-shrink-0" />
+                      <span className="text-[10.5px] font-serif-th font-bold text-[#ffd700] whitespace-nowrap">
+                        แตะเพื่อปลดล็อกผังนี้
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Footer Titles */}
@@ -325,16 +342,6 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#ffd700]">✦</div>
                     <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#ffd700]">✦</div>
                   </>
-                )}
-
-                {/* Locked Hover Teaser Overlay */}
-                {isLocked && (
-                  <div className="absolute inset-0 bg-black/20 pointer-events-none rounded-2xl flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200">
-                    <div className="bg-[#0b0716]/95 border border-[#ffd700]/70 px-3 py-1.5 rounded-xl text-[10.5px] font-serif-th font-bold text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.4)] flex items-center gap-1.5">
-                      <span>✦</span>
-                      <span>แตะเพื่อปลดล็อกผังนี้</span>
-                    </div>
-                  </div>
                 )}
 
                 {/* Holographic Sheen Layer */}
