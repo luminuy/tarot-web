@@ -61,6 +61,7 @@ export async function GET(
   try {
     let profile: UserProfile | null = null;
     let providerUserId = "";
+    let isNewUser = false;
 
     if (oauthProvider === "google") {
       const clientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -196,6 +197,7 @@ export async function GET(
           profile.tokenVersion = created.tokenVersion;
           await linkOAuthIdentity(oauthProvider, providerUserId, profile.id);
           await grantSignupBonus(profile.id);
+          isNewUser = true;
         }
       } else {
         // 4. OAuth without email (หรืออีเมลที่ผู้ให้บริการยังไม่ยืนยัน)
@@ -209,6 +211,7 @@ export async function GET(
         profile.tokenVersion = created.tokenVersion;
         await linkOAuthIdentity(oauthProvider, providerUserId, profile.id);
         await grantSignupBonus(profile.id);
+        isNewUser = true;
       }
     } catch (dbErr) {
       console.error("[OAuth D1 User Upsert Warning]:", dbErr);
@@ -216,7 +219,12 @@ export async function GET(
     }
 
     const sessionToken = await signUserSession(profile);
-    const response = NextResponse.redirect(`${origin}/?auth_success=1`);
+    const redirectUrl = new URL(origin);
+    redirectUrl.searchParams.set("auth_success", "1");
+    if (isNewUser) {
+      redirectUrl.searchParams.set("new_user", "1");
+    }
+    const response = NextResponse.redirect(redirectUrl.toString());
     setAuthCookie(response, sessionToken);
     response.cookies.set(OAUTH_STATE_COOKIE, "", { path: "/", maxAge: 0 });
 
