@@ -34,6 +34,30 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: ระบบ AI สองประสาน (Multi-Provider High-Availability Failover ด้วย Groq LPU & Gemini)
+
+**คำขอของผู้ใช้**:
+- *"เกิดอะไรขึ้น"* (ภาพแอดมินแสดง HTTP 429 ในโมเดล Gemini 3.6/3.7 จากการชนเพดาน Free Tier 20 ครั้ง/วัน)
+- *"เราสามารถหา ai ฟรีจากไหนมาใช้ได้ก่อน เพราะตอนนี้งบหมด"*
+- ได้รับ Groq API Key จากผู้ใช้ (`gsk_...`)
+
+**สิ่งที่แก้ไข & พัฒนา**:
+1. **จัดลำดับโมเดล Gemini ใหม่ (`src/lib/ai/gemini.ts`)**:
+   - ปรับ `WORKING_GEMINI_MODELS` ให้ `gemini-3.5-flash-lite` ขึ้นเป็นอันดับ 1 เพื่อใช้โควตาฟรี 1,500 ครั้ง/วัน สปีด 0.6 วินาที โดยไม่ต้องเสียเวลาติดเพดาน 20 ครั้งของโมเดล 3.6
+2. **สร้างโมดูล Groq LPU Integration (`src/lib/ai/groq.ts`)**:
+   - รองรับ `qwen/qwen3.8-27b` (ภาษาไทยอบอุ่นเป็นธรรมชาติสูงสุด สปีด 0.5–0.7s) และ `openai/gpt-oss-120b` (120 พันล้านพารามิเตอร์ สปีด 0.3s)
+   - มีระบบ AbortController timeout 6 วินาที และกำหนด `max_tokens: 1200` ให้มีพื้นที่เพียงพอสำหรับ reasoning tokens
+   - ฟังก์ชัน `probeGroqHealth()` สำหรับทดสอบสุขภาพการเชื่อมต่อ
+3. **ระบบสลับอัตโนมัติในห้องคุยกับแม่หมอ (`src/app/api/reading/[id]/chat/route.ts`)**:
+   - เมื่อ Gemini ทั้งหมดติด 429 หรือขัดข้อง ระบบจะสลับไปเรียก Groq LPU ทันทีแบบไร้รอยต่อในเสี้ยววินาที ผู้ใช้จะได้รับคำตอบจาก AI จริงเสมอ
+4. **แผงตรวจสุขภาพ AI แอดมิน (`src/app/api/admin/ai-health/route.ts`)**:
+   - ตรวจสอบทั้ง Gemini และ Groq LPU พร้อมกัน แสดงสถานะและ latency ในตารางเดียว
+   - ป้องกัน secret รั่วไหลด้วยการ scrub ค่าคีย์ทั้งสองตัวออกจาก error message 100%
+5. **ความปลอดภัยและระบบอัตโนมัติ**:
+   - อัปโหลด `GROQ_API_KEY` เข้าสู่ Cloudflare Workers Secrets (`wrangler secret put`) และ GitHub Actions Secrets (`gh secret set`) โดยไม่ฮาร์ดโค้ดลง git เด็ดขาด
+   - เพิ่ม Gate 21 ใน `scripts/github-auto.ts` (`scripts/qa/test-groq-failover.ts`)
+   - ผ่านครบทั้ง 21 ด่าน (Typecheck, QA Suites, Parity, Security)
+
 ### 🗓️ 2026-09-02: ยกระดับความคมชัดห้องแชท (แยกการ์ด Tarot Insight + แคปซูลไร้กรอบซ้อน + ชิปถามด่วนไม่ตกขอบ)
 
 **คำขอของผู้ใช้**:

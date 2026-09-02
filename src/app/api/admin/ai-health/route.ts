@@ -38,9 +38,15 @@ export async function GET() {
       : null;
   const apiKey = keyFromEnv ? process.env[keyFromEnv] : undefined;
 
+  const groqKey = process.env.GROQ_API_KEY;
+
   /** ตัดค่าคีย์ออกจากข้อความก่อนส่งกลับหน้าเว็บ ป้องกันคีย์หลุดผ่านข้อความ error */
-  const scrub = (text: string) =>
-    (apiKey ? text.split(apiKey).join("***") : text).slice(0, 400);
+  const scrub = (text: string) => {
+    let s = text;
+    if (apiKey) s = s.split(apiKey).join("***");
+    if (groqKey) s = s.split(groqKey).join("***");
+    return s.slice(0, 400);
+  };
 
   const day = utcDay();
   const capDoc = await kvGetJSON<{ count: number }>(KEY.aiCap(day)).catch(() => null);
@@ -55,21 +61,21 @@ export async function GET() {
   };
 
   const key = {
-    configured: !!apiKey,
-    envVar: keyFromEnv,
-    length: apiKey?.length ?? 0,
+    configured: !!apiKey || !!groqKey,
+    envVar: keyFromEnv ? (groqKey ? `${keyFromEnv} + GROQ_API_KEY` : keyFromEnv) : (groqKey ? "GROQ_API_KEY" : null),
+    length: (apiKey?.length ?? 0) + (groqKey ? ` (Groq: ${groqKey.length})` : ""),
     // เป็นแค่ข้อสังเกต ไม่ใช่คำตัดสิน — Google ออกคีย์หลายรูปแบบและมีคีย์ที่ไม่ขึ้นต้น AIza
     // แต่เรียกงานได้จริง · ตัวชี้ขาดคือผลยิงจริงในตาราง models ด้านล่างเท่านั้น
     startsWithAIza: !!apiKey && apiKey.startsWith("AIza"),
   };
 
-  if (!apiKey) {
+  if (!apiKey && !groqKey) {
     return NextResponse.json({
       ok: false,
       verdict: "no_api_key",
       summary:
-        "ยังไม่ได้ตั้ง GEMINI_API_KEY (หรือ GOOGLE_API_KEY) บน Worker — คำอ่านและห้องคุยจะตกไปใช้คำตอบสำเร็จรูปทั้งหมด",
-      nextStep: "รัน: npx wrangler secret put GEMINI_API_KEY แล้ว deploy ใหม่ (ดู docs/PENDING_SETUP.md)",
+        "ยังไม่ได้ตั้ง GEMINI_API_KEY หรือ GROQ_API_KEY บน Worker — คำอ่านและห้องคุยจะตกไปใช้คำตอบสำเร็จรูปทั้งหมด",
+      nextStep: "รัน: npx wrangler secret put GEMINI_API_KEY หรือ GROQ_API_KEY แล้ว deploy ใหม่ (ดู docs/PENDING_SETUP.md)",
       key,
       budget,
       models: [],
@@ -79,61 +85,92 @@ export async function GET() {
 
   // ยิงจริงทีละโมเดล ด้วย prompt สั้นที่สุดเท่าที่จะสั้นได้ (ค่าใช้จ่ายแทบเป็นศูนย์)
   const models: Array<Record<string, unknown>> = [];
-  for (const model of CANDIDATE_GEMINI_MODELS) {
-    const startedAt = Date.now();
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: "POST",
-          signal: controller.signal,
-          headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: "ตอบกลับคำเดียวว่า: พร้อม" }] }],
-            generationConfig: { temperature: 0 },
-          }),
-        },
-      );
-      clearTimeout(timeoutId);
+  if (apiKey) {
+    for (const model of CANDIDATE_GEMINI_MODELS) {
+      const startedAt = Date.now();
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          {
+            method: "POST",
+            signal: controller.signal,
+            headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey || "" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: "ตอบกลับคำเดียวว่า: พร้อม" }] }],
+              generationConfig: { temperature: 0 },
+            }),
+          },
+        );
+        clearTimeout(timeoutId);
 
-      const elapsedMs = Date.now() - startedAt;
-      if (!res.ok) {
+        const elapsedMs = Date.now() - startedAt;
+        if (!res.ok) {
+          models.push({
+            model,
+            ok: false,
+            status: res.status,
+            elapsedMs,
+            error: scrub(await res.text().catch(() => "")),
+          });
+          continue;
+        }
+
+        const data = (await res.json()) as any;
+        const answer = extractGeminiAnswer(data);
+        models.push({
+          model,
+          ok: !!answer,
+          status: 200,
+          elapsedMs,
+          finishReason: data?.candidates?.[0]?.finishReason ?? null,
+          // จำนวน part ทั้งหมด vs part ที่เป็นความคิด — ยืนยันว่าตัวแยกคำตอบทำงานถูก
+          partCount: Array.isArray(data?.candidates?.[0]?.content?.parts)
+            ? data.candidates[0].content.parts.length
+            : 0,
+          thoughtPartCount: Array.isArray(data?.candidates?.[0]?.content?.parts)
+            ? data.candidates[0].content.parts.filter((p: any) => p?.thought === true).length
+            : 0,
+          answerPreview: answer.slice(0, 120),
+          error: answer ? null : "ตอบ 200 แต่แยกข้อความคำตอบไม่ได้",
+        });
+      } catch (e) {
         models.push({
           model,
           ok: false,
-          status: res.status,
-          elapsedMs,
-          error: scrub(await res.text().catch(() => "")),
+          status: null,
+          elapsedMs: Date.now() - startedAt,
+          error: scrub(e instanceof Error ? `${e.name}: ${e.message}` : String(e)),
         });
-        continue;
       }
+    }
+  }
 
-      const data = (await res.json()) as any;
-      const answer = extractGeminiAnswer(data);
-      models.push({
-        model,
-        ok: !!answer,
-        status: 200,
-        elapsedMs,
-        finishReason: data?.candidates?.[0]?.finishReason ?? null,
-        // จำนวน part ทั้งหมด vs part ที่เป็นความคิด — ยืนยันว่าตัวแยกคำตอบทำงานถูก
-        partCount: Array.isArray(data?.candidates?.[0]?.content?.parts)
-          ? data.candidates[0].content.parts.length
-          : 0,
-        thoughtPartCount: Array.isArray(data?.candidates?.[0]?.content?.parts)
-          ? data.candidates[0].content.parts.filter((p: any) => p?.thought === true).length
-          : 0,
-        answerPreview: answer.slice(0, 120),
-        error: answer ? null : "ตอบ 200 แต่แยกข้อความคำตอบไม่ได้",
-      });
+  // ทดสอบ Groq LPU ควบคู่กัน
+  if (groqKey) {
+    try {
+      const { probeGroqHealth } = await import("@/lib/ai/groq");
+      const groqResults = await probeGroqHealth(groqKey);
+      for (const gr of groqResults) {
+        models.push({
+          model: `groq · ${gr.model}`,
+          ok: gr.ok,
+          status: gr.status,
+          elapsedMs: gr.elapsedMs,
+          finishReason: gr.ok ? "STOP" : null,
+          partCount: gr.ok ? 1 : 0,
+          thoughtPartCount: 0,
+          answerPreview: gr.answerPreview,
+          error: gr.error ? scrub(gr.error) : null,
+        });
+      }
     } catch (e) {
       models.push({
-        model,
+        model: "groq",
         ok: false,
         status: null,
-        elapsedMs: Date.now() - startedAt,
+        elapsedMs: 0,
         error: scrub(e instanceof Error ? `${e.name}: ${e.message}` : String(e)),
       });
     }
@@ -147,17 +184,25 @@ export async function GET() {
   let nextStep: string;
   if (ok && budget.memberCapReached) {
     verdict = "ai_daily_cap";
-    summary = `Gemini เรียกได้ปกติ แต่วันนี้ใช้ครบเพดานแล้ว (${usedToday}/${cap} ครั้ง) ระบบจึงตัดไปใช้คำตอบสำรอง`;
+    summary = `AI เรียกได้ปกติ แต่วันนี้ใช้ครบเพดานแล้ว (${usedToday}/${cap} ครั้ง) ระบบจึงตัดไปใช้คำตอบสำรอง`;
     nextStep = "ขยายเพดานด้วย env AI_DAILY_CALL_CAP หรือรอรีเซ็ตเที่ยงคืน UTC";
   } else if (ok) {
     verdict = "healthy";
-    summary = `เชื่อมต่อ Gemini ได้ปกติ ${working.length}/${models.length} โมเดล — แม่หมอตอบด้วย AI จริงได้แล้ว`;
+    const hasGroqWorking = working.some((m) => String(m.model).startsWith("groq"));
+    const hasGeminiWorking = working.some((m) => !String(m.model).startsWith("groq"));
+    if (hasGroqWorking && hasGeminiWorking) {
+      summary = `เชื่อมต่อ AI ได้ปกติทั้ง Gemini และ Groq LPU (${working.length}/${models.length} โมเดล) — ระบบสลับอัตโนมัติพร้อมทำงาน 100%`;
+    } else if (hasGroqWorking) {
+      summary = `เชื่อมต่อ Groq LPU สำเร็จ (${working.length}/${models.length} โมเดล) — แม่หมอตอบด้วย AI ผ่าน Groq LPU ได้ปกติ`;
+    } else {
+      summary = `เชื่อมต่อ Gemini ได้ปกติ ${working.length}/${models.length} โมเดล — แม่หมอตอบด้วย AI จริงได้แล้ว`;
+    }
     nextStep = "ถ้าหน้าเว็บยังขึ้นแถบคำตอบสำรองอยู่ ให้ลองรีเฟรชหน้าและถามใหม่อีกครั้ง";
   } else {
     verdict = "gemini_unavailable";
-    summary = "มีคีย์อยู่ แต่เรียก Gemini ไม่สำเร็จสักโมเดล — ดูช่อง error ของแต่ละโมเดลด้านล่าง";
+    summary = "มีคีย์อยู่ แต่เรียก AI ไม่สำเร็จสักโมเดล — ดูช่อง error ของแต่ละโมเดลด้านล่าง";
     nextStep =
-      "status 400 = คีย์/พารามิเตอร์ผิด · 403 = คีย์ถูกปิดหรือไม่ได้เปิด Generative Language API · 429 = โควตา Google หมด · 404 = ชื่อโมเดลถูกปลดแล้ว";
+      "status 400 = คีย์/พารามิเตอร์ผิด · 403 = คีย์ถูกปิดหรือไม่ได้เปิด API · 429 = โควตาหมด · 404 = ชื่อโมเดลถูกปลดแล้ว";
   }
 
   return NextResponse.json({
@@ -168,7 +213,7 @@ export async function GET() {
     key,
     budget,
     models,
-    chatProbe: await probeRealChatPayload(apiKey, scrub),
+    chatProbe: await probeRealChatPayload(apiKey, groqKey, scrub),
     checkedAt: new Date().toISOString(),
   });
 }
@@ -180,7 +225,8 @@ export async function GET() {
  * และโมเดลต้องใช้เวลาคิดนานกว่า · ช่องนี้จึงเป็นตัวชี้ขาดว่าแชทใช้งานได้จริงไหม
  */
 async function probeRealChatPayload(
-  apiKey: string,
+  apiKey: string | undefined,
+  groqKey: string | undefined,
   scrub: (t: string) => string,
 ): Promise<Array<Record<string, unknown>>> {
   const personaId = "warm";
@@ -203,56 +249,91 @@ async function probeRealChatPayload(
   }
 
   const out: Array<Record<string, unknown>> = [];
-  for (const [idx, model] of WORKING_GEMINI_MODELS.entries()) {
-    const startedAt = Date.now();
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(
-        () => controller.abort(),
-        idx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
-      );
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-        {
-          method: "POST",
-          signal: controller.signal,
-          headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: "ขยายความไพ่ใบนี้ให้หน่อย" }] }],
-            systemInstruction: { parts: [{ text: systemInstruction }] },
-            generationConfig: { temperature: 0.7 },
-          }),
-        },
-      );
-      clearTimeout(timeoutId);
-      const elapsedMs = Date.now() - startedAt;
+  if (apiKey) {
+    for (const [idx, model] of WORKING_GEMINI_MODELS.entries()) {
+      const startedAt = Date.now();
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(
+          () => controller.abort(),
+          idx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
+        );
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          {
+            method: "POST",
+            signal: controller.signal,
+            headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey || "" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: "ขยายความไพ่ใบนี้ให้หน่อย" }] }],
+              systemInstruction: { parts: [{ text: systemInstruction }] },
+              generationConfig: { temperature: 0.7 },
+            }),
+          },
+        );
+        clearTimeout(timeoutId);
+        const elapsedMs = Date.now() - startedAt;
 
-      if (!res.ok) {
+        if (!res.ok) {
+          out.push({
+            model,
+            ok: false,
+            status: res.status,
+            elapsedMs,
+            error: scrub(await res.text().catch(() => "")),
+          });
+          continue;
+        }
+        const data = (await res.json()) as any;
+        const answer = extractGeminiAnswer(data);
+        out.push({
+          model,
+          ok: !!answer,
+          status: 200,
+          elapsedMs,
+          promptChars: systemInstruction.length,
+          finishReason: data?.candidates?.[0]?.finishReason ?? null,
+          answerPreview: answer.slice(0, 160),
+          error: answer ? null : "ตอบ 200 แต่แยกข้อความคำตอบไม่ได้",
+        });
+        if (answer) break; // เจอตัวที่ตอบได้แล้ว เหมือนห้องคุยจริงที่จะหยุดที่ตัวแรกที่สำเร็จ
+      } catch (e) {
         out.push({
           model,
           ok: false,
-          status: res.status,
-          elapsedMs,
-          error: scrub(await res.text().catch(() => "")),
+          status: null,
+          elapsedMs: Date.now() - startedAt,
+          error: scrub(e instanceof Error ? `${e.name}: ${e.message}` : String(e)),
         });
-        continue;
       }
-      const data = (await res.json()) as any;
-      const answer = extractGeminiAnswer(data);
-      out.push({
-        model,
-        ok: !!answer,
-        status: 200,
-        elapsedMs,
-        promptChars: systemInstruction.length,
-        finishReason: data?.candidates?.[0]?.finishReason ?? null,
-        answerPreview: answer.slice(0, 160),
-        error: answer ? null : "ตอบ 200 แต่แยกข้อความคำตอบไม่ได้",
+    }
+  }
+
+  // ถ้า Gemini ไม่สำเร็จ หรือมี Groq สำรองอยู่ ให้ทดสอบยิงแชทจริงผ่าน Groq ด้วย
+  if (groqKey && !out.some((m) => m.ok)) {
+    const startedAt = Date.now();
+    try {
+      const { generateGroqChatReply } = await import("@/lib/ai/groq");
+      const groqRes = await generateGroqChatReply({
+        systemInstruction,
+        messages: [{ role: "user", content: "ขยายความไพ่ใบนี้ให้หน่อย" }],
+        apiKey: groqKey,
       });
-      if (answer) break; // เจอตัวที่ตอบได้แล้ว เหมือนห้องคุยจริงที่จะหยุดที่ตัวแรกที่สำเร็จ
+      if (groqRes && groqRes.reply) {
+        out.push({
+          model: `groq · ${groqRes.model}`,
+          ok: true,
+          status: 200,
+          elapsedMs: groqRes.elapsedMs,
+          promptChars: systemInstruction.length,
+          finishReason: "STOP",
+          answerPreview: groqRes.reply.slice(0, 160),
+          error: null,
+        });
+      }
     } catch (e) {
       out.push({
-        model,
+        model: "groq",
         ok: false,
         status: null,
         elapsedMs: Date.now() - startedAt,
@@ -260,5 +341,6 @@ async function probeRealChatPayload(
       });
     }
   }
+
   return out;
 }
