@@ -26,12 +26,13 @@ const sarabun = Sarabun({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
   title: {
-    default: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI | ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite",
-    template: "%s · วิหารพยากรณ์ไพ่ทาโรต์",
+    default: "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI",
+    template: "%s · SeerTarot",
   },
   description:
     "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง 78 ใบ แล้วให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair SHA-256",
   keywords: [
+    "SeerTarot",
     "ไพ่ทาโรต์",
     "ดูดวงออนไลน์",
     "เปิดไพ่",
@@ -43,9 +44,18 @@ export const metadata: Metadata = {
     "1909 Rider-Waite",
     "Provably Fair Tarot",
   ],
-  authors: [{ name: "วิหารพยากรณ์ไพ่ทาโรต์" }],
+  authors: [{ name: "SeerTarot Sanctuary" }],
   creator: "SeerTarot Sanctuary",
   publisher: "SeerTarot Sanctuary",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   robots: {
     index: true,
     follow: true,
@@ -63,8 +73,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "th_TH",
-    siteName: "วิหารพยากรณ์ไพ่ทาโรต์ (Sacred Oracle Tarot)",
-    title: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI ✦ ดูดวงไพ่ทาโรต์ออนไลน์",
+    siteName: "SeerTarot",
+    title: "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI",
     description:
       "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair",
     url: SITE_ORIGIN,
@@ -73,13 +83,13 @@ export const metadata: Metadata = {
         url: "/cards/major-01.webp",
         width: 300,
         height: 520,
-        alt: "วิหารพยากรณ์ไพ่ทาโรต์ 1909 Rider-Waite",
+        alt: "SeerTarot 1909 Rider-Waite",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "วิหารพยากรณ์ไพ่ทาโรต์ กับแม่หมอ AI",
+    title: "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI",
     description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมระบบ Provably-Fair",
     images: ["/cards/major-01.webp"],
   },

@@ -2,23 +2,24 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "วิหารพยากรณ์ไพ่ทาโรต์ (Sacred Oracle Tarot)",
-    short_name: "ไพ่ทาโรต์ 1909",
-    description: "ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมแม่หมอ AI และระบบ Provably-Fair",
+    name: "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite",
+    short_name: "SeerTarot",
+    description:
+      "ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมแม่หมอ AI และระบบความโปร่งใส Provably-Fair",
     start_url: "/",
     display: "standalone",
     background_color: "#05040a",
     theme_color: "#05040a",
     icons: [
       {
-        src: "/cards/major-01.webp",
+        src: "/icons/icon-192x192.png",
         sizes: "192x192",
-        type: "image/webp",
+        type: "image/png",
       },
       {
-        src: "/cards/major-01.webp",
+        src: "/icons/icon-512x512.png",
         sizes: "512x512",
-        type: "image/webp",
+        type: "image/png",
       },
     ],
   };
