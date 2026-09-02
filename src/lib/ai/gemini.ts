@@ -73,6 +73,32 @@ export const CANDIDATE_GEMINI_MODELS = [
   "gemini-3.5-flash-lite",
 ];
 
+/**
+ * ดึง "ข้อความคำตอบจริง" ออกจาก parts ของ Gemini
+ * ------------------------------------------------
+ * Gemini 3.x เปิดโหมดคิด (thinking) เป็นค่าเริ่มต้น → `content.parts` จะมีทั้ง
+ * part ความคิดภายใน (`thought: true` บางทีมีแต่ `thoughtSignature` ไม่มี `text` เลย)
+ * และ part คำตอบจริงปนกัน และ **ลำดับไม่แน่นอน** — `parts[0]` จึงไม่ใช่คำตอบเสมอไป
+ *
+ * ใครที่อ่าน `parts[0].text` ตรง ๆ จะได้ค่าว่างหรือได้ข้อความความคิดแทนคำตอบ
+ * (บทเรียน INC-0052 · เคยทำให้ห้องแชทถามแม่หมอตกไปใช้คำตอบสำเร็จรูปทุกครั้ง)
+ *
+ * ⚠️ ฟังก์ชันนี้ **ไม่ trim** เพราะถูกใช้ต่อสตรีมทีละ chunk ด้วย
+ * การ trim รายชิ้นจะกินช่องว่างในสตริง JSON จนพัง — ถ้าต้องการ trim ใช้ `extractGeminiAnswer()`
+ */
+export function joinGeminiAnswerParts(parts: unknown): string {
+  if (!Array.isArray(parts)) return "";
+  return parts
+    .filter((p: any) => p && p.thought !== true && typeof p.text === "string")
+    .map((p: any) => p.text as string)
+    .join("");
+}
+
+/** ดึงคำตอบจาก response ก้อนเดียว (generateContent ที่ไม่ใช่สตรีม) พร้อม trim */
+export function extractGeminiAnswer(payload: any): string {
+  return joinGeminiAnswerParts(payload?.candidates?.[0]?.content?.parts).trim();
+}
+
 // ค่าเริ่มต้นก่อนได้ usageMetadata จริงจาก Gemini — ตั้งเป็นศูนย์แทนการเดาตัวเลข
 // เพื่อไม่ให้ระบบคิดต้นทุน/เครดิตหลงเชื่อตัวเลขปลอมถ้า Gemini เปลี่ยน API แล้วไม่ส่ง usageMetadata มา
 const DEFAULT_USAGE: UsageInfo = {
@@ -192,16 +218,8 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
               };
             }
 
-            // Gemini 3.x เปิด "thinking" เป็นค่าเริ่มต้น → content.parts มีทั้ง part ความคิด
-            // (`thought: true`) และ part คำตอบจริง · ต้องวน parts ทั้งหมด + ข้าม thought
-            // ไม่งั้นข้อความความคิดจะปนเข้า jsonAccumulator ทำให้ JSON.parse พัง (ทุกคำอ่านตกไป fallback)
-            const parts = chunk.candidates?.[0]?.content?.parts;
-            const answerText = Array.isArray(parts)
-              ? parts
-                  .filter((p: any) => p && p.thought !== true && typeof p.text === "string")
-                  .map((p: any) => p.text)
-                  .join("")
-              : undefined;
+            // ข้าม part ความคิดของ Gemini 3.x — รายละเอียดอยู่ใน joinGeminiAnswerParts()
+            const answerText = joinGeminiAnswerParts(chunk.candidates?.[0]?.content?.parts);
             if (answerText) {
               jsonAccumulator += answerText;
               const partial = parsePartialReading(jsonAccumulator);

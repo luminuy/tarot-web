@@ -128,7 +128,7 @@ ${historyText}
   "empowermentQuote": "คำคมพลังใจศักดิ์สิทธิ์ประจำเดือนที่ประทับใจ"
 }`;
 
-    const { CANDIDATE_GEMINI_MODELS } = await import("@/lib/ai/gemini");
+    const { CANDIDATE_GEMINI_MODELS, extractGeminiAnswer } = await import("@/lib/ai/gemini");
     let res: Response | null = null;
     for (const model of CANDIDATE_GEMINI_MODELS.slice(0, 3)) {
       const r = await fetch(
@@ -159,7 +159,8 @@ ${historyText}
     }
 
     const resJson = await res.json() as any;
-    const responseText = resJson?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    // ห้ามอ่าน parts[0].text ตรง ๆ — Gemini 3.x แทรก part ความคิดไว้ด้วย (บทเรียน INC-0052)
+    const responseText = extractGeminiAnswer(resJson) || "{}";
     const parsedAI = JSON.parse(responseText);
 
     return NextResponse.json({

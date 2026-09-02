@@ -13,6 +13,8 @@ interface Message {
   id: string;
   sender: "user" | "bot";
   text: string;
+  /** `true` = คำตอบสำเร็จรูปออฟไลน์ ไม่ได้มาจาก AI จริง (เซิร์ฟเวอร์ติดธง `fallback` มา) */
+  isFallback?: boolean;
 }
 
 interface FollowUpChatProps {
@@ -98,6 +100,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
           id: (Date.now() + 1).toString(),
           sender: "bot",
           text: data.reply,
+          isFallback: data.fallback === true,
         };
         setMessages((prev) => [...prev, botMsg]);
       } else {
@@ -207,6 +210,14 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                     personaId={persona.id}
                     className="text-[10px] py-1 px-2.5"
                   />
+                )}
+                {/* บอกตรง ๆ เมื่อคำตอบนี้ไม่ได้มาจาก AI จริง — ห้ามปล่อยให้ผู้ใช้เข้าใจผิด
+                    ว่ากำลังคุยกับแม่หมอ AI ทั้งที่เป็นข้อความสำเร็จรูป (บทเรียน INC-0052) */}
+                {msg.isFallback && (
+                  <p className="max-w-[85%] font-serif-th text-[10px] leading-relaxed text-[#9c93b8]">
+                    ✦ ตอนนี้แม่หมอตอบจากคลังคำตอบสำรอง เพราะระบบ AI ขัดข้องชั่วคราว
+                    ลองถามใหม่อีกครั้งในอีกสักครู่นะ
+                  </p>
                 )}
               </div>
             </motion.div>
