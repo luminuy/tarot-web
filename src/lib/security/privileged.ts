@@ -1,6 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { ADMIN_COOKIE_NAME, verifyAdminSession } from "@/lib/auth/admin-auth";
 import { getSessionUser } from "@/lib/auth/session";
 import { TESTER_COOKIE_NAME, verifyTesterSession } from "@/lib/auth/tester-auth";
 import { isUnlimitedEmail } from "@/lib/auth/unlimited-users";
@@ -36,11 +35,8 @@ export function isBypassConfigured(): boolean {
 export async function isPrivilegedTestRequest(request: Request): Promise<boolean> {
   try {
     const cookieStore = await cookies();
-    const adminCookie = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
-    if (adminCookie && verifyAdminSession(adminCookie)) {
-      recordEvent("ratelimit_bypass:admin");
-      return true;
-    }
+    // ⚠️ tarot_admin เป็น cookie แอดมินสำหรับเข้าใช้งานแผง /admin เท่านั้น
+    // ต้องแยกขาดจากหน้าเว็บฝั่งผู้ใช้ ไม่นำมาใช้ตรวจสอบสิทธิ์ในหน้าเว็บทั่วไปเด็ดขาด
     const testerCookie = cookieStore.get(TESTER_COOKIE_NAME)?.value;
     if (testerCookie && verifyTesterSession(testerCookie)) {
       recordEvent("ratelimit_bypass:tester");

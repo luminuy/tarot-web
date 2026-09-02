@@ -35,14 +35,11 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
   // ป้องกันอาการ Ghost Slot: ช่องปุ่มโครงกระดูกโผล่มาแวบหนึ่งแล้วหายไป
   if (!view) return null;
 
-  const isAdmin = view.isAdmin;
   const unlimited = view.isUnlimited;
   const empty = view.tone === "empty";
 
   const title = unlimited
-    ? isAdmin
-      ? "โหมดผู้ดูแลระบบ — เปิดไพ่ได้ไม่จำกัด (กดเพื่อไปแผงผู้ดูแล)"
-      : "บัญชีนี้ใช้ได้ไม่จำกัด (กดเพื่อดูรายละเอียดสิทธิ์)"
+    ? "บัญชีนี้ใช้ได้ไม่จำกัด (กดเพื่อดูรายละเอียดสิทธิ์)"
     : `${view.statusLine}${countdown && !empty ? ` · รีเซ็ต${countdown}` : ""} — กดเพื่อดูรายละเอียดสิทธิ์`;
 
   const srLabel = unlimited
@@ -52,15 +49,7 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
   return (
     <button
       type="button"
-      onClick={() => {
-        // ผู้ทดสอบ/อีเมล allowlist ก็ได้สิทธิ์ไม่จำกัดเหมือนกัน แต่ไม่มีสิทธิ์แผงแอดมิน
-        // จึงห้ามพาไป /admin — ให้เปิดหน้าต่างรายละเอียดสิทธิ์ตามปกติ
-        if (isAdmin) {
-          window.location.href = "/admin";
-          return;
-        }
-        onOpenDetails();
-      }}
+      onClick={onOpenDetails}
       title={title}
       aria-label={srLabel}
       className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border px-2 py-1 sm:px-2.5 font-serif-th text-[10px] font-semibold whitespace-nowrap transition-all select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a] ${
@@ -76,7 +65,7 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
           <span className="animate-pulse text-[#ffd700]">✦</span>
           <span className="hidden sm:inline">ไม่จำกัดสิทธิ์</span>
           <span translate="no" className="rounded bg-[#ffd700]/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#ffd700]">
-            {isAdmin ? "ADMIN" : "VIP"}
+            VIP
           </span>
         </>
       ) : empty ? (

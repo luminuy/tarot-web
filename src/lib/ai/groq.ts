@@ -10,12 +10,14 @@
 
 export const WORKING_GROQ_MODELS = [
   "qwen/qwen3.8-27b",
+  "qwen/qwen3.6-27b",
   "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b",
 ] as const;
 
 export type GroqModelName = (typeof WORKING_GROQ_MODELS)[number];
 
-export const GROQ_DEFAULT_TIMEOUT_MS = 6000;
+export const GROQ_DEFAULT_TIMEOUT_MS = 12000;
 
 export interface GroqChatMessage {
   role: "system" | "user" | "assistant";
@@ -48,7 +50,8 @@ export function getGroqApiKey(): string | undefined {
 }
 
 /**
- * ยิงข้อความถาม-ตอบกับ Groq LPU รองรับการหมุนเวียนโมเดลอัตโนมัติ
+ * ยิงข้อความถาม-ตอบกับ Groq LPU รองรับการหมุนเวียน 4 โมเดลอัตโนมัติ
+ * ไม่กำหนดเพดาน max_tokens เพื่อให้ทดสอบและคุยบทสนทนายาวได้เต็มที่
  */
 export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
   reply: string;
@@ -60,8 +63,6 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
 
   const timeoutMs = options.timeoutMs || GROQ_DEFAULT_TIMEOUT_MS;
   const temperature = options.temperature ?? 0.7;
-  // ตั้ง 1200 tokens เพื่อให้มีที่ว่างพอสำหรับ reasoning tokens ของโมเดลตระกูล 120b
-  const maxTokens = options.maxTokens ?? 1200;
 
   const payloadMessages: GroqChatMessage[] = [
     { role: "system", content: options.systemInstruction },
@@ -77,6 +78,18 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+      const requestBody: Record<string, unknown> = {
+        model,
+        messages: payloadMessages,
+        temperature,
+      };
+
+      // ไม่จำกัดเพดาน max_tokens บีบสั้น เพื่อให้ทดสอบความยาวการสนทนาได้เต็มที่
+      // หากผู้เรียกส่ง maxTokens มาจึงจะกำหนด มิฉะนั้นปล่อยตามขีดจำกัดธรรมชาติของโมเดล
+      if (typeof options.maxTokens === "number") {
+        requestBody.max_tokens = options.maxTokens;
+      }
+
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         signal: controller.signal,
@@ -84,12 +97,7 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model,
-          messages: payloadMessages,
-          temperature,
-          max_tokens: maxTokens,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       clearTimeout(timeoutId);

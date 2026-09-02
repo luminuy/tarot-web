@@ -360,9 +360,8 @@ ${cards.join("\n")}
             modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
           );
 
-          // เดิมส่งแค่ 4 ข้อความ (= คุยกันแค่ 2 รอบ) แม่หมอจึงลืมบริบทเร็วมาก
-          // จนคำตอบวนซ้ำและไม่ต่อเนื่องเหมือนแชท AI จริง — ขยายเป็น 10
-          const rawHistory = history.slice(-10).map((h) => ({
+          // ขยายประวัติสนทนาเป็น 20 ข้อความ เพื่อให้คุยต่อเนื่องได้ยาวนานโดยไม่ลืมบริบท
+          const rawHistory = history.slice(-20).map((h) => ({
             role: h.sender === "user" ? "user" : "model",
             parts: [{ text: h.text.slice(0, 4000) }],
           }));
@@ -430,7 +429,7 @@ ${cards.join("\n")}
         const groqResult = await generateGroqChatReply({
           systemInstruction,
           messages: [
-            ...history.slice(-10).map((h) => ({
+            ...history.slice(-20).map((h) => ({
               role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant",
               content: h.text,
             })),

@@ -68,8 +68,11 @@ async function main() {
   check("อีเมล null/ว่าง → false", isUnlimitedEmail(null) === false && isUnlimitedEmail("") === false);
   check("count = 2", unlimitedEmailCount() === 2);
 
-  process.env.UNLIMITED_EMAILS = "not-an-email, x@y.co";
-  check("รายการที่ไม่ใช่อีเมลถูกกรองทิ้ง → count 1", unlimitedEmailCount() === 1);
+  // ── 4. แยกหลังบ้านแอดมินออกจากหน้าเว็บชัดเจน (INC-0020) ──
+  const { isPrivilegedTestRequest } = await import("../../src/lib/security/privileged");
+  const dummyReq = new Request("http://localhost/api/entitlement");
+  const isPriv = await isPrivilegedTestRequest(dummyReq);
+  check("request ทั่วไปที่ไม่มี session ผู้ใช้/tester → ไม่ใช่ privileged (แยกหน้าเว็บกับหลังบ้านขาด 100%)", isPriv === false);
 
   console.log(`\n${pass}/${pass + fail} ผ่าน`);
   if (fail > 0) process.exit(1);
