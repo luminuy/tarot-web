@@ -111,28 +111,17 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.16,
+        duration: 0.15,
         ease: EASE.enter,
-        staggerChildren: 0.025,
-        delayChildren: 0.01,
       },
     },
     exit: {
       opacity: 0,
       y: -6,
       transition: {
-        duration: 0.09,
+        duration: 0.1,
         ease: EASE.exit,
       },
-    },
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: -4 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.14, ease: EASE.enter },
     },
   };
 
@@ -178,7 +167,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            style={{ willChange: "transform, opacity" }}
+            style={{
+              transform: "translateZ(0)",
+              WebkitBackfaceVisibility: "hidden",
+              backfaceVisibility: "hidden",
+            }}
             className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-3xl bg-[#0c071a] border border-[#e5c07b]/40 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(212,175,55,0.15)] p-2.5 sm:p-3 z-50 overflow-hidden space-y-1.5"
           >
             {/* Ambient Top Foil Glow */}
@@ -200,7 +193,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               {navItems.map((item) => {
                 const Icon = item.Icon;
                 return (
-                  <motion.div key={item.href} variants={itemVariants}>
+                  <div key={item.href}>
                     <Link
                       href={item.href}
                       onClick={() => {
@@ -226,13 +219,13 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                         </p>
                       </div>
                     </Link>
-                  </motion.div>
+                  </div>
                 );
               })}
 
               {/* Reading Journal / History Trigger */}
               {onOpenHistory && (
-                <motion.div variants={itemVariants}>
+                <div>
                   <button
                     type="button"
                     onClick={() => {
@@ -259,7 +252,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                       </p>
                     </div>
                   </button>
-                </motion.div>
+                </div>
               )}
             </div>
 

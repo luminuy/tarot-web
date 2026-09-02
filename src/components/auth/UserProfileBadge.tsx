@@ -139,28 +139,17 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.16,
+        duration: 0.15,
         ease: EASE_ENTER,
-        staggerChildren: 0.025,
-        delayChildren: 0.01,
       },
     },
     exit: {
       opacity: 0,
       y: -6,
       transition: {
-        duration: 0.09,
+        duration: 0.1,
         ease: EASE_EXIT,
       },
-    },
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: -4 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.14, ease: EASE_ENTER },
     },
   };
 
@@ -252,14 +241,18 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             initial="hidden"
             animate="visible"
             exit="exit"
-            style={{ willChange: "transform, opacity" }}
+            style={{
+              transform: "translateZ(0)",
+              WebkitBackfaceVisibility: "hidden",
+              backfaceVisibility: "hidden",
+            }}
             className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-3xl bg-[#0c071a] border border-[#e5c07b]/40 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(212,175,55,0.15)] p-3 z-50 overflow-hidden space-y-2 font-serif-th text-xs"
           >
             {/* Ambient Top Foil Glow */}
             <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#ffd700]/40 to-transparent -mt-0.5 mb-1" />
 
             {/* Member Profile Banner */}
-            <motion.div variants={itemVariants} className="p-3 rounded-2xl bg-gradient-to-r from-[#1c1033] to-[#120a22] border border-[#e5c07b]/25 flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-gradient-to-r from-[#1c1033] to-[#120a22] border border-[#e5c07b]/25 flex items-center gap-3">
               {user.avatar ? (
                 <img
                   src={user.avatar}
@@ -287,11 +280,11 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   </span>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Unverified Email Warning Badge */}
             {user.provider === "email" && user.emailVerified === false && (
-              <motion.div variants={itemVariants} className="p-2.5 rounded-2xl bg-amber-950/60 border border-amber-500/40 text-amber-200 text-[11px] space-y-1.5">
+              <div className="p-2.5 rounded-2xl bg-amber-950/60 border border-amber-500/40 text-amber-200 text-[11px] space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold flex items-center gap-1">
                     <span className="text-amber-400">✦</span>
@@ -305,12 +298,12 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                     {resendStatus || "ส่งลิงก์ใหม่"}
                   </button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* Pending Reviews Notification Callout */}
             {pendingCount > 0 && (
-              <motion.div variants={itemVariants} className="p-2.5 rounded-2xl bg-[#ffd700]/10 border border-[#ffd700]/30 text-[#ffd700] text-[11px] flex items-center justify-between shadow-[0_0_12px_rgba(255,215,0,0.1)]">
+              <div className="p-2.5 rounded-2xl bg-[#ffd700]/10 border border-[#ffd700]/30 text-[#ffd700] text-[11px] flex items-center justify-between shadow-[0_0_12px_rgba(255,215,0,0.1)]">
                 <span className="flex items-center gap-1.5">
                   <span>✦</span>
                   <span>รอติดตามผลคำทำนาย</span>
@@ -318,11 +311,11 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 <span className="font-bold bg-[#ffd700]/20 px-2 py-0.5 rounded-full">
                   {pendingCount} รายการ
                 </span>
-              </motion.div>
+              </div>
             )}
 
             {/* Marketing / Follow-up Consent Luxury Toggle */}
-            <motion.div variants={itemVariants} className="p-2.5 rounded-2xl bg-[#160c2b]/70 border border-[#e5c07b]/15 flex items-center justify-between">
+            <div className="p-2.5 rounded-2xl bg-[#160c2b]/70 border border-[#e5c07b]/15 flex items-center justify-between">
               <div className="pr-2">
                 <span className="block text-[11px] font-semibold text-[#f5deaa]">รับคำทำนายติดตามผล</span>
                 <span className="text-[10px] text-[#9c93b8]">แจ้งเตือนเมื่อถึงกำหนดคำทำนายทางอีเมล</span>
@@ -345,10 +338,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   }`}
                 />
               </button>
-            </motion.div>
+            </div>
 
             {/* Logout Action */}
-            <motion.div variants={itemVariants} className="pt-1 border-t border-[#e5c07b]/15">
+            <div className="pt-1 border-t border-[#e5c07b]/15">
               <button
                 type="button"
                 onClick={handleLogout}
@@ -362,7 +355,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   →
                 </span>
               </button>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
