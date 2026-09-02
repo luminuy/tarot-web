@@ -6,6 +6,7 @@ import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import { HourglassIcon, SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import {
   DAILY_LIMIT,
+  GUEST_LIMIT,
   UPGRADE_COPY,
   describeEntitlement,
   formatResetCountdown,
@@ -79,7 +80,7 @@ export function EntitlementGate({
           <p className="font-serif-th text-xs font-semibold text-[#f5deaa] sm:text-sm">{copy.title}</p>
           <p className="font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
             {isGuest
-              ? `สมัครฟรีเปิดต่อวันละ ${DAILY_LIMIT} ครั้ง · เลือกดูผังไว้ก่อนได้`
+              ? `ทดลองฟรีได้ ${GUEST_LIMIT} ครั้ง (ใช้ครบแล้ว) · สมัครสมาชิกฟรีแล้วเปิดได้วันละ ${DAILY_LIMIT} ครั้ง`
               : countdown
               ? `โควตาฟรีชุดใหม่ ${countdown} · เลือกดูผังไว้ก่อนได้`
               : view.statusLine}
