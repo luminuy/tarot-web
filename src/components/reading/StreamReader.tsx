@@ -234,23 +234,29 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {/* TAB 1: CARD-BY-CARD INSPECTION VIEW */}
       {activeTab === "card" && (
         <div className="space-y-5">
-          {/* Card Selector Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {/* Card Selector Pills — ตัดบรรทัดลงมา (flex-wrap) ไม่ใช่เลื่อนแนวนอน
+              เพราะผังใหญ่ ๆ ปุ่มใบท้าย ๆ จะหลุดออกนอกกรอบจนกดไม่ถึง (คำร้องเจ้าของโปรเจกต์) */}
+          <div className="flex flex-wrap items-center gap-1.5 pb-1">
             {drawnCards.map((d, i) => (
               <button
                 key={d.order}
                 type="button"
+                aria-pressed={activeCardIndex === d.order}
                 onClick={() => onSelectCardIndex(d.order)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-serif-th font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 select-none ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-serif-th font-semibold transition-all cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
                   activeCardIndex === d.order
                     ? "bg-[#e5c07b] text-[#05040a] font-bold shadow-md"
                     : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
                 }`}
               >
-                <span>ใบที่ {i + 1}</span>
+                <span className="whitespace-nowrap">ใบที่ {i + 1}</span>
                 {(() => {
                   const card = d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined);
-                  return card ? <span className="text-[10px] opacity-80 font-normal">({card.nameTh})</span> : null;
+                  return card ? (
+                    <span className="min-w-0 truncate text-[10px] font-normal opacity-80">
+                      ({card.nameTh})
+                    </span>
+                  ) : null;
                 })()}
               </button>
             ))}

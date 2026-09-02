@@ -214,13 +214,36 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
         </AnimatePresence>
 
         {loading && (
+          /* ฟองแชท "กำลังพิมพ์" — จุดสามจุดเด้งไล่กันเหมือนคนกำลังพิมพ์จริง ๆ
+             ใส่ aria-live เพื่อให้ screen reader รู้ว่าแม่หมอกำลังตอบอยู่ */
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center gap-2 text-xs text-[#e0c088] font-serif-th"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-start"
+            role="status"
+            aria-live="polite"
+            aria-label={`${persona.nameTh} กำลังพิมพ์ตอบ`}
           >
-            <span className="w-2 h-2 rounded-full bg-[#e0c088] animate-ping" />
-            {persona.nameTh} กำลังมองไพ่และพิมพ์ตอบคุณ...
+            <div className="flex items-center gap-2.5 rounded-2xl rounded-tl-none border border-[#e5c07b]/30 bg-[#1b1530] px-4 py-3 shadow-lg">
+              <span className="flex items-end gap-1" aria-hidden="true">
+                {[0, 1, 2].map((i) => (
+                  <motion.span
+                    key={i}
+                    className="block h-1.5 w-1.5 rounded-full bg-[#e5c07b]"
+                    animate={{ y: [0, -5, 0], opacity: [0.45, 1, 0.45] }}
+                    transition={{
+                      duration: 0.9,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: i * 0.15,
+                    }}
+                  />
+                ))}
+              </span>
+              <span className="font-serif-th text-xs text-[#cfc8e2]">
+                {persona.nameTh} กำลังมองไพ่และเรียบเรียงคำตอบ
+              </span>
+            </div>
           </motion.div>
         )}
       </div>
