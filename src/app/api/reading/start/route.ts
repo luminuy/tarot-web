@@ -9,7 +9,7 @@ import { createCommitment } from "@/lib/tarot/shuffle";
 import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
-import { DAILY_LIMIT, GUEST_LIMIT } from "@/lib/entitlement/limits";
+import { DAILY_LIMIT, GUEST_LIMIT, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
 
 export const runtime = "nodejs";
 
@@ -106,6 +106,24 @@ export async function POST(request: Request) {
           },
           { status: 403 },
         );
+      }
+
+      // ── ผังใหญ่ + ปรมาจารย์ลับ = สงวนไว้สำหรับผู้ซื้อ credits เท่านั้น (server-side enforcement) ──
+      if (!ent.hasPaidCredits) {
+        if (!isStandardSpread(spreadId)) {
+          recordEvent("entitlement_blocked_grand_spread");
+          return NextResponse.json(
+            { error: "ผังพยากรณ์นี้สงวนไว้สำหรับผู้ถือญาณพยากรณ์พิเศษ", reason: "grand_spread" },
+            { status: 403 },
+          );
+        }
+        if (isMasterPersona(personaId)) {
+          recordEvent("entitlement_blocked_master_persona");
+          return NextResponse.json(
+            { error: "ปรมาจารย์ท่านนี้สงวนไว้สำหรับผู้ถือญาณพยากรณ์พิเศษ", reason: "master_persona" },
+            { status: 403 },
+          );
+        }
       }
       if (viewer.kind === "guest") {
         // เพดานเฉพาะผู้เยี่ยมชมต่อ IP/ซับเน็ต — เช็คที่นี่ (ก่อนพิธีจับไพ่) เพื่อ UX ที่ดี

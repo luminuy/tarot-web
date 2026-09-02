@@ -36,6 +36,12 @@ export interface Entitlement {
   weeklyRemaining: number;
   /** สมาชิกเท่านั้น */
   bonusRemaining: number;
+  /**
+   * ผู้ใช้มีสิทธิ์จากการซื้อ (purchase_*) ที่ยังเหลือรอบอยู่หรือไม่
+   * ใช้แยกจาก bonusRemaining ซึ่งรวมโบนัสฟรี (signup/grandfather) ด้วย
+   * เฉพาะค่า true เท่านั้นที่ปลดล็อกผังใหญ่ + ปรมาจารย์ลับ
+   */
+  hasPaidCredits: boolean;
   /** ISO string เวลาโควตารายวันรีเซ็ต (null สำหรับผู้เยี่ยมชม) */
   resetAt: string | null;
   /** ไพ่ประจำวันฟรีของวันนี้ยังใช้ได้หรือไม่ */
@@ -46,12 +52,12 @@ export interface Entitlement {
   kind: "guest" | "member";
 }
 
-async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGranted: number; bonusUsed: number }> {
+async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGranted: number; bonusUsed: number; paidGranted: number }> {
   const db = await getAppDB();
   const dk = todayDateKey();
   const wk = weekKey();
 
-  const [dailyRow, bonusGrantRow, bonusUsedRow] = await Promise.all([
+  const [dailyRow, bonusGrantRow, bonusUsedRow, paidGrantRow] = await Promise.all([
     db
       .prepare(
         `SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND (week_key = ? OR (week_key = ? AND source = 'daily')) AND source != 'bonus'`,
@@ -66,12 +72,17 @@ async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGr
       .prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND source = 'bonus'`)
       .bind(userId)
       .first<{ n: number }>(),
+    db
+      .prepare(`SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ? AND reason LIKE 'purchase_%'`)
+      .bind(userId)
+      .first<{ n: number }>(),
   ]);
 
   return {
     dailyUsed: Number(dailyRow?.n ?? 0),
     bonusGranted: Number(bonusGrantRow?.n ?? 0),
     bonusUsed: Number(bonusUsedRow?.n ?? 0),
+    paidGranted: Number(paidGrantRow?.n ?? 0),
   };
 }
 
@@ -95,6 +106,7 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
       dailyRemaining: 0,
       weeklyRemaining: 0,
       bonusRemaining: 0,
+      hasPaidCredits: false,
       resetAt: null,
       dailyFreeAvailable,
       dailyStreak,
@@ -102,10 +114,15 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
     };
   }
 
-  const { dailyUsed: usedToday, bonusGranted, bonusUsed } = await memberUsage(v.userId);
+  const { dailyUsed: usedToday, bonusGranted, bonusUsed, paidGranted } = await memberUsage(v.userId);
   const dailyRemaining = Math.max(0, DAILY_LIMIT - usedToday);
   const bonusRemaining = Math.max(0, bonusGranted - bonusUsed);
   const remaining = dailyRemaining + bonusRemaining;
+  // ผู้ใช้ถือสิทธิ์พรีเมียมก็ต่อเมื่อเคยซื้อ (purchase_*) และยอดซื้อยังไม่ถูกใช้หมด
+  // bonusUsed กินจาก signup/grandfather ก่อน เหลือจึงกิน paid → ถ้า paidGranted > max(0, bonusUsed - freeGranted) แสดงว่ายังเหลือ
+  const freeGranted = Math.max(0, bonusGranted - paidGranted);
+  const paidRemaining = Math.max(0, paidGranted - Math.max(0, bonusUsed - freeGranted));
+  const hasPaidCredits = paidRemaining > 0;
 
   return {
     kind: "member",
@@ -116,6 +133,7 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
     dailyRemaining,
     weeklyRemaining: dailyRemaining,
     bonusRemaining,
+    hasPaidCredits,
     resetAt: nextResetAt(),
     dailyFreeAvailable,
     dailyStreak,
