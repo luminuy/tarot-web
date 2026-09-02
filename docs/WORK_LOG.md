@@ -36,6 +36,15 @@
 
 ---
 
+### 🗓️ 2026-09-02: D1 Migrations รันอัตโนมัติตอน deploy
+
+- เพิ่มขั้น **"🗄️ Apply D1 Migrations (remote)"** (`pnpm run db:migrate`) ใน `.github/workflows/deploy.yml` ก่อนขั้น build & deploy — รันทุกครั้งที่ push เข้า `main`
+- idempotent: wrangler ข้าม migration ที่ apply ไปแล้วเองจากตาราง `d1_migrations` — ไม่ต้อง apply ด้วยมืออีกต่อไป แค่เพิ่มไฟล์ migration ใหม่ใน `migrations/` แล้ว merge เข้า main
+- ต้องการสิทธิ์ **D1:Edit** เพิ่มใน `CLOUDFLARE_API_TOKEN` (เดิมมีแค่ Workers Scripts:Edit + Workers KV Storage:Edit)
+- อัปเดต `docs/PENDING_SETUP.md` ข้อ 5 เป็นสถานะ ✅ แก้แล้ว
+
+---
+
 ### 🗓️ 2026-09-01: รื้อ UX/UI ระบบสิทธิ์การใช้งานใหม่ทั้งหมด (ทดลองฟรี 1 ครั้ง → สมัครสมาชิก)
 
 - **ความต้องการ**: ทำ workflow เรื่องสิทธิ์การใช้งานใหม่ทั้งชุดให้ได้มาตรฐานเว็บระดับโลก —
