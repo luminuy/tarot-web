@@ -3,7 +3,7 @@
  * Run with: npx tsx scripts/qa/test-password.ts
  */
 
-import { hashPassword, verifyPassword } from "../../src/lib/auth/password";
+import { hashPassword, isPasswordConfigError, verifyPassword } from "../../src/lib/auth/password";
 import {
   createEmailUser,
   findUserIdByOAuth,
@@ -106,9 +106,63 @@ async function runPasswordTests() {
   }
   console.log("  ✓ 10. linkOAuthIdentity & findUserIdByOAuth ผูกบัญชีสำเร็จ");
 
+  // ── 11. PASSWORD_PEPPER: กับดักที่ทำให้ "รหัสผ่านถูกแต่ล็อกอินไม่ได้" (INC-0045) ──
+  // NODE_ENV ถูกประกาศเป็น read-only ใน type ของ Node — เข้าถึงผ่าน index signature เพื่อสลับค่าในเทสต์
+  const env = process.env as Record<string, string | undefined>;
+  const savedPepper = env.PASSWORD_PEPPER;
+  const savedNodeEnv = env.NODE_ENV;
+  try {
+    const pw = "SacredTarotMaster2026!#";
+
+    // 11.1 แฮชผูกกับ pepper — เปลี่ยน pepper แล้วแฮชใบเดิมต้องใช้ไม่ได้
+    env.NODE_ENV = "development";
+    env.PASSWORD_PEPPER = "pepper-one-".padEnd(40, "1");
+    const hashWithPepperOne = await hashPassword(pw);
+    if (!(await verifyPassword(pw, hashWithPepperOne))) {
+      throw new Error("❌ แฮชที่เพิ่งสร้างตรวจกลับไม่ผ่านด้วย pepper เดิม");
+    }
+
+    env.PASSWORD_PEPPER = "pepper-two-".padEnd(40, "2");
+    if (await verifyPassword(pw, hashWithPepperOne)) {
+      throw new Error("❌ แฮชผ่านได้ทั้งที่ pepper คนละค่า — pepper ไม่ได้ถูกใช้จริง");
+    }
+
+    // 11.2 ⚠️ หัวใจของด่านนี้: ลืมตั้ง PASSWORD_PEPPER บน production
+    //      ต้อง "โยน error ของการตั้งค่า" ไม่ใช่คืน false เงียบ ๆ
+    //      ถ้าคืน false หน้าเว็บจะขึ้นว่า "อีเมลหรือรหัสผ่านไม่ถูกต้อง" ทั้งที่รหัสผ่านถูก
+    //      ผู้ใช้ก็นั่งลองรหัสผ่านซ้ำ ๆ เจ้าของระบบก็ไล่หาสาเหตุผิดที่ (เกิดขึ้นจริงมาแล้ว)
+    delete env.PASSWORD_PEPPER;
+    env.NODE_ENV = "production";
+
+    let threw = false;
+    try {
+      const silentResult = await verifyPassword(pw, hashWithPepperOne);
+      throw new Error(
+        `❌ production ที่ไม่ได้ตั้ง PASSWORD_PEPPER คืนค่า ${silentResult} เงียบ ๆ ` +
+          "แทนที่จะโยน PasswordConfigError — บั๊กนี้ทำให้ทุกคนล็อกอินไม่ได้โดยหน้าเว็บโทษรหัสผ่านของผู้ใช้",
+      );
+    } catch (err) {
+      if (!isPasswordConfigError(err)) throw err;
+      threw = true;
+    }
+    if (!threw) throw new Error("❌ ไม่ได้โยน PasswordConfigError");
+
+    // 11.3 error ของ "รหัสผ่านผิดจริง" ต้องไม่ถูกนับเป็น config error
+    env.PASSWORD_PEPPER = "pepper-one-".padEnd(40, "1");
+    if (await verifyPassword("รหัสผ่านผิดแน่นอน-9999", hashWithPepperOne)) {
+      throw new Error("❌ รหัสผ่านผิดกลับผ่าน");
+    }
+  } finally {
+    if (savedPepper === undefined) delete env.PASSWORD_PEPPER;
+    else env.PASSWORD_PEPPER = savedPepper;
+    if (savedNodeEnv === undefined) delete env.NODE_ENV;
+    else env.NODE_ENV = savedNodeEnv;
+  }
+  console.log("  ✓ 11. PASSWORD_PEPPER: แฮชผูกกับ pepper · ลืมตั้งบน prod = โยน config error ไม่ใช่ 'รหัสผ่านผิด'");
+
   // Cleanup
   await softDeleteUser(createdUser.id);
-  console.log("  ✓ 11. Soft delete ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
+  console.log("  ✓ 12. Soft delete ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
 
   console.log("\n✨ [QA] Password Hashing & Email Auth Schema ผ่านครบทุกด่าน 100%!");
 }

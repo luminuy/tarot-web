@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { signUserSession } from "@/lib/auth/edge-auth";
 import { setAuthCookie } from "@/lib/auth/session";
-import { verifyPassword } from "@/lib/auth/password";
+import { isPasswordConfigError, verifyPassword } from "@/lib/auth/password";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { clearAuthRateLimit, peekAuthRateLimit, recordAuthFailure } from "@/lib/security/auth-ratelimit";
 import { getUserByEmail, getUserPasswordHash, normalizeEmail, touchLastSeen } from "@/lib/users/users.repo";
@@ -104,6 +104,12 @@ export async function POST(request: Request) {
 
     return response;
   } catch (err) {
+    // ⚠️ ระบบตั้งค่าไม่ครบ ต้องไม่ตอบว่า "รหัสผ่านไม่ถูกต้อง" — ผู้ใช้จะนั่งลองรหัสผ่านซ้ำ ๆ
+    // และเจ้าของระบบจะไล่หาสาเหตุไม่เจอ เพราะหน้าเว็บชี้ไปผิดที่ (บทเรียน INC-0045)
+    if (isPasswordConfigError(err)) {
+      console.error("[Email Login] ตั้งค่าไม่ครบ:", err.message);
+      return NextResponse.json({ error: "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
+    }
     console.error("[Email Login Error]", err);
     return NextResponse.json({ error: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้" }, { status: 500 });
   }

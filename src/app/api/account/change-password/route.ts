@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { signUserSession } from "@/lib/auth/edge-auth";
 import { getSessionUser, invalidateTokenVersionCache, setAuthCookie } from "@/lib/auth/session";
-import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { hashPassword, isPasswordConfigError, verifyPassword } from "@/lib/auth/password";
 import { validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
@@ -92,6 +92,10 @@ export async function POST(request: Request) {
 
     return response;
   } catch (err) {
+    if (isPasswordConfigError(err)) {
+      console.error("[Change Password] ตั้งค่าไม่ครบ:", err.message);
+      return NextResponse.json({ error: "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
+    }
     console.error("[Change Password Error]", err);
     return NextResponse.json({ error: "ไม่สามารถเปลี่ยนรหัสผ่านได้ในขณะนี้" }, { status: 500 });
   }
