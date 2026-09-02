@@ -64,7 +64,10 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   }, [isOpen]);
 
   const toggleDropdown = () => {
-    soundManager.playCardSelectSound();
+    // Run audio asynchronously on next frame to avoid hitching frame 0 of animation
+    requestAnimationFrame(() => {
+      soundManager.playCardSelectSound();
+    });
     setIsOpen((prev) => {
       const next = !prev;
       if (next) {
@@ -106,9 +109,9 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       <button
         type="button"
         onClick={toggleDropdown}
-        className={`min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 border shadow-sm select-none ${
+        className={`min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 border shadow-sm select-none ${
           isOpen
-            ? "bg-[#22123a] border-[#ffd700] text-[#ffd700] shadow-[0_0_20px_rgba(229,192,123,0.35),inset_0_1px_1px_rgba(255,215,0,0.3)] scale-[1.02]"
+            ? "bg-[#22123a] border-[#ffd700] text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.32),inset_0_1px_1px_rgba(255,215,0,0.3)] scale-[1.01]"
             : "bg-[#100b20]/90 text-[#f5deaa] hover:text-[#ffd700] border-[#e5c07b]/25 hover:border-[#ffd700]/60 hover:bg-[#181033] hover:shadow-[0_0_15px_rgba(229,192,123,0.2)]"
         }`}
         aria-expanded={isOpen}
@@ -120,7 +123,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           viewBox="0 0 20 20"
           fill="currentColor"
           animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ type: "spring", stiffness: 450, damping: 28 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${isOpen ? "text-[#ffd700]" : "text-[#c59b27]"}`}
           aria-hidden="true"
         >
@@ -136,11 +139,24 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 450, damping: 30 }}
-            className="absolute right-0 top-full mt-2.5 w-72 sm:w-80 rounded-3xl bg-[#0a0516]/98 backdrop-blur-2xl border border-[#e5c07b]/35 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(212,175,55,0.15)] p-2.5 sm:p-3 z-50 overflow-hidden space-y-1.5"
+            initial={{ opacity: 0, scale: 0.96, y: -6 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.97,
+              y: -4,
+              transition: { duration: 0.1, ease: [0.4, 0, 1, 1] },
+            }}
+            style={{
+              transformOrigin: "top right",
+              willChange: "transform, opacity",
+            }}
+            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-3xl bg-[#0b0618]/98 backdrop-blur-md border border-[#e5c07b]/35 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_20px_rgba(212,175,55,0.12)] p-2.5 sm:p-3 z-50 overflow-hidden space-y-1.5"
           >
             {/* Ambient Top Foil Glow */}
             <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#ffd700]/40 to-transparent -mt-0.5 mb-1.5" />

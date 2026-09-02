@@ -72,7 +72,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
   }, [user]);
 
   const toggleMenu = () => {
-    soundManager.playCardSelectSound();
+    // Run audio asynchronously on next frame to avoid hitching frame 0 of animation
+    requestAnimationFrame(() => {
+      soundManager.playCardSelectSound();
+    });
     setMenuOpen((prev) => {
       const next = !prev;
       if (next) {
@@ -85,7 +88,9 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
   };
 
   const handleLogout = async () => {
-    soundManager.playCardSelectSound();
+    requestAnimationFrame(() => {
+      soundManager.playCardSelectSound();
+    });
     setMenuOpen(false);
     try {
       await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
@@ -98,7 +103,9 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
   };
 
   const handleUpdateConsent = async (consent: boolean) => {
-    soundManager.playCardSelectSound();
+    requestAnimationFrame(() => {
+      soundManager.playCardSelectSound();
+    });
     await fetch("/api/account/consent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -109,7 +116,9 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
   };
 
   const handleResendVerify = async () => {
-    soundManager.playCardSelectSound();
+    requestAnimationFrame(() => {
+      soundManager.playCardSelectSound();
+    });
     setResendStatus("กำลังส่ง…");
     try {
       const res = await fetch("/api/auth/email/resend", { method: "POST", credentials: "same-origin" });
@@ -134,10 +143,12 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
       <button
         type="button"
         onClick={() => {
-          soundManager.playCardSelectSound();
+          requestAnimationFrame(() => {
+            soundManager.playCardSelectSound();
+          });
           onOpenAuthModal();
         }}
-        className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-[#140b24]/90 border border-[#e5c07b]/35 text-[#f5deaa] hover:bg-[#201338] hover:border-[#ffd700] hover:text-[#ffd700] hover:shadow-[0_0_15px_rgba(229,192,123,0.25)] text-xs font-serif-th font-bold shadow transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] select-none"
+        className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-[#140b24]/90 border border-[#e5c07b]/35 text-[#f5deaa] hover:bg-[#201338] hover:border-[#ffd700] hover:text-[#ffd700] hover:shadow-[0_0_15px_rgba(229,192,123,0.25)] text-xs font-serif-th font-bold shadow transition-all duration-200 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] select-none"
       >
         <span className="text-[#ffd700] text-xs">✦</span>
         <span>เข้าสู่ระบบ</span>
@@ -157,9 +168,9 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
       <button
         type="button"
         onClick={toggleMenu}
-        className={`min-h-[38px] px-3 sm:px-3.5 py-1.5 rounded-2xl transition-all duration-300 cursor-pointer flex items-center gap-2 border shadow-sm relative select-none ${
+        className={`min-h-[38px] px-3 sm:px-3.5 py-1.5 rounded-2xl transition-all duration-200 cursor-pointer flex items-center gap-2 border shadow-sm relative select-none ${
           menuOpen
-            ? "bg-[#22123a] border-[#ffd700] text-[#ffd700] shadow-[0_0_20px_rgba(229,192,123,0.35),inset_0_1px_1px_rgba(255,215,0,0.3)] scale-[1.02]"
+            ? "bg-[#22123a] border-[#ffd700] text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.32),inset_0_1px_1px_rgba(255,215,0,0.3)] scale-[1.01]"
             : "bg-[#100b20]/90 text-[#f5deaa] hover:text-[#ffd700] border-[#e5c07b]/25 hover:border-[#ffd700]/60 hover:bg-[#181033] hover:shadow-[0_0_15px_rgba(229,192,123,0.2)]"
         }`}
         aria-expanded={menuOpen}
@@ -181,7 +192,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           viewBox="0 0 20 20"
           fill="currentColor"
           animate={{ rotate: menuOpen ? 180 : 0 }}
-          transition={{ type: "spring", stiffness: 450, damping: 28 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${menuOpen ? "text-[#ffd700]" : "text-[#c59b27]"}`}
           aria-hidden="true"
         >
@@ -202,11 +213,24 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 450, damping: 30 }}
-            className="absolute right-0 top-full mt-2.5 w-72 sm:w-80 rounded-3xl bg-[#0a0516]/98 backdrop-blur-2xl border border-[#e5c07b]/35 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(212,175,55,0.15)] p-3 z-50 overflow-hidden space-y-2.5 font-serif-th text-xs"
+            initial={{ opacity: 0, scale: 0.96, y: -6 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.97,
+              y: -4,
+              transition: { duration: 0.1, ease: [0.4, 0, 1, 1] },
+            }}
+            style={{
+              transformOrigin: "top right",
+              willChange: "transform, opacity",
+            }}
+            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-3xl bg-[#0b0618]/98 backdrop-blur-md border border-[#e5c07b]/35 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_20px_rgba(212,175,55,0.12)] p-3 z-50 overflow-hidden space-y-2.5 font-serif-th text-xs"
           >
             {/* Ambient Top Foil Glow */}
             <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#ffd700]/40 to-transparent -mt-0.5 mb-1" />
@@ -283,7 +307,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <button
                 type="button"
                 onClick={() => handleUpdateConsent(!user.marketingConsent)}
-                className={`w-10 h-6 rounded-full transition-all duration-300 p-0.5 relative cursor-pointer flex-shrink-0 border ${
+                className={`w-10 h-6 rounded-full transition-all duration-200 p-0.5 relative cursor-pointer flex-shrink-0 border ${
                   user.marketingConsent
                     ? "bg-[#d4af37] border-[#ffd700] shadow-[0_0_12px_rgba(212,175,55,0.4)]"
                     : "bg-white/10 border-white/10 hover:bg-white/15"
@@ -291,10 +315,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 aria-label="เปิดปิดการรับอีเมลติดตามผล"
               >
                 <motion.div
-                  layout
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  animate={{ x: user.marketingConsent ? 16 : 0 }}
+                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                   className={`w-4.5 h-4.5 rounded-full shadow-md ${
-                    user.marketingConsent ? "bg-[#090514] ml-auto" : "bg-[#a99fc2]"
+                    user.marketingConsent ? "bg-[#090514]" : "bg-[#a99fc2]"
                   }`}
                 />
               </button>
