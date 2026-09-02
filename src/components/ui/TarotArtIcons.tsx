@@ -259,48 +259,129 @@ export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className 
   </div>
 );
 
-// 9. Celtic Cross (10 ใบ) — Perfect Geometry Fit
-export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
-  <div className={`flex items-center justify-center gap-3.5 relative ${className}`}>
-    {/* Left: Cross Formation */}
-    <div className="relative w-28 h-28 flex items-center justify-center">
-      <div className="absolute top-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-04.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-      <div className="absolute bottom-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-18.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-      <div className="absolute left-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-19.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-      <div className="absolute right-0 w-7.5 h-[48px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-17.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-      <div className="relative z-10 w-9 h-[60px] rounded-lg border-2 border-[#ffd700] overflow-hidden shadow-xl">
-        <CardImage image="major-00.jpg" alt="Center" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-      <div className="absolute z-20 w-9 h-[60px] rounded-lg border border-[#e5c07b] overflow-hidden rotate-90 shadow-lg opacity-90">
-        <CardImage image="major-10.jpg" alt="Cross" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-    </div>
+// 9. Celtic Cross (10 ใบ) — Sacred Geometry (คำนวณพิกัดจริง ไม่ให้ไพ่ทับกัน)
+//
+// ⚠️ บทเรียน INC-0058: เวอร์ชันเดิมวางไพ่ด้วย `absolute top-0/bottom-0` ในกล่อง 112px
+// ทำให้แขนกางเขนกินพื้นที่ทับไพ่กลาง และเสาไพ่ 4 ใบ (188px) ทะลุกรอบ 160px
+// เวอร์ชันนี้จึงคำนวณพิกัดทุกใบจากค่าคงที่ด้านล่าง (หน่วย px) แล้วยืนยันด้วยเลขว่าไม่มีใบไหนซ้อนกัน
+const CC = {
+  cardW: 26,
+  cardH: 45,
+  colGap: 14,   // เว้นให้ไพ่ใบขวางที่หมุน 90° (กว้าง 45px) ไม่แตะแขนซ้าย/ขวา
+  rowGap: 7,
+  staffW: 20,
+  staffH: 34,
+  staffGap: 4,
+  armGap: 12,   // ระยะจากปลายกางเขนถึงเสาไพ่
+} as const;
 
-    {/* Right: Vertical Staff of 4 Cards */}
-    <div className="flex flex-col gap-1">
-      <div className="w-7 h-[44px] rounded-md border border-[#ffd700]/80 overflow-hidden shadow">
-        <CardImage image="major-21.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-      <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-14.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-      <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-11.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
-      </div>
-      <div className="w-7 h-[44px] rounded-md border border-[#e5c07b]/60 overflow-hidden opacity-90 shadow">
-        <CardImage image="major-09.jpg" alt="" className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image" sizes="96px" />
+const CC_COL = [0, CC.cardW + CC.colGap, (CC.cardW + CC.colGap) * 2];
+const CC_ROW = [0, CC.cardH + CC.rowGap, (CC.cardH + CC.rowGap) * 2];
+const CC_CROSS_W = CC.cardW * 3 + CC.colGap * 2;
+const CC_CROSS_H = CC.cardH * 3 + CC.rowGap * 2;
+const CC_STAFF_X = CC_CROSS_W + CC.armGap;
+const CC_STAFF_TOP = (CC_CROSS_H - (CC.staffH * 4 + CC.staffGap * 3)) / 2;
+const CC_BOX_W = CC_STAFF_X + CC.staffW;
+
+export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => {
+  const arms = [
+    { image: "major-04.jpg", x: CC_COL[1], y: CC_ROW[0] }, // 5 สิ่งที่อยู่ในใจ
+    { image: "major-19.jpg", x: CC_COL[0], y: CC_ROW[1] }, // 4 อดีต
+    { image: "major-17.jpg", x: CC_COL[2], y: CC_ROW[1] }, // 6 อนาคตอันใกล้
+    { image: "major-18.jpg", x: CC_COL[1], y: CC_ROW[2] }, // 3 รากฐานจิตใต้สำนึก
+  ];
+  const staff = ["major-21.jpg", "major-14.jpg", "major-11.jpg", "major-09.jpg"];
+
+  return (
+    <div className={`flex items-center justify-center relative ${className}`}>
+      <div className="relative" style={{ width: CC_BOX_W, height: CC_CROSS_H }}>
+        {/* แสงเรืองใต้ใจกลางกางเขน (อยู่หลังไพ่เสมอ ไม่บังหน้าไพ่) */}
+        <div
+          className="absolute rounded-full bg-[#e5c07b]/10 blur-2xl pointer-events-none"
+          style={{
+            left: CC_COL[1] + CC.cardW / 2 - 45,
+            top: CC_ROW[1] + CC.cardH / 2 - 45,
+            width: 90,
+            height: 90,
+          }}
+        />
+
+        {/* แขนกางเขน 4 ทิศ */}
+        {arms.map((arm) => (
+          <div
+            key={arm.image}
+            className="absolute rounded-md border border-[#e5c07b]/55 overflow-hidden shadow-[0_3px_8px_rgba(0,0,0,0.7)] opacity-95"
+            style={{ left: arm.x, top: arm.y, width: CC.cardW, height: CC.cardH }}
+          >
+            <CardImage
+              image={arm.image}
+              alt=""
+              className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+              sizes="96px"
+            />
+          </div>
+        ))}
+
+        {/* ใบที่ 1 สถานการณ์ปัจจุบัน (ใจกลาง) */}
+        <div
+          className="absolute z-10 rounded-md border-2 border-[#ffd700] overflow-hidden shadow-[0_0_16px_rgba(255,215,0,0.35),0_4px_12px_rgba(0,0,0,0.85)]"
+          style={{ left: CC_COL[1], top: CC_ROW[1], width: CC.cardW, height: CC.cardH }}
+        >
+          <CardImage
+            image="major-00.jpg"
+            alt=""
+            className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+            sizes="96px"
+          />
+        </div>
+
+        {/* ใบที่ 2 สิ่งที่ขวางอยู่ (วางขวางทับใบกลางตามธรรมเนียมเซลติกครอส) */}
+        <div
+          className="absolute z-20 rounded-md border border-[#f5deaa]/90 overflow-hidden shadow-[0_4px_14px_rgba(0,0,0,0.9)]"
+          style={{
+            left: CC_COL[1],
+            top: CC_ROW[1],
+            width: CC.cardW,
+            height: CC.cardH,
+            transform: "rotate(90deg)",
+          }}
+        >
+          <CardImage
+            image="major-10.jpg"
+            alt=""
+            className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+            sizes="96px"
+          />
+        </div>
+
+        {/* เสาไพ่ 4 ใบด้านขวา (ใบที่ 7–10) */}
+        {staff.map((image, idx) => (
+          <div
+            key={image}
+            className={`absolute rounded-md overflow-hidden shadow-[0_3px_8px_rgba(0,0,0,0.7)] ${
+              idx === 0
+                ? "border border-[#ffd700]/80 shadow-[0_0_10px_rgba(255,215,0,0.3)]"
+                : "border border-[#e5c07b]/50 opacity-90"
+            }`}
+            style={{
+              left: CC_STAFF_X,
+              top: CC_STAFF_TOP + idx * (CC.staffH + CC.staffGap),
+              width: CC.staffW,
+              height: CC.staffH,
+            }}
+          >
+            <CardImage
+              image={image}
+              alt=""
+              className="w-full h-full object-cover filter contrast-[1.08] saturate-[1.08] tarot-hd-card-image"
+              sizes="96px"
+            />
+          </div>
+        ))}
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // 10. ผัง 12 เดือน / วงล้อจักรราศี (12 ใบ)
 export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
