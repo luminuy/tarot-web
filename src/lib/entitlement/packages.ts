@@ -19,8 +19,8 @@ export interface CreditPackage {
 export const CREDIT_PACKAGES: CreditPackage[] = [
   {
     id: "pack_3",
-    name: "แพ็กเกจเริ่มต้น 3 ครั้ง",
-    tagline: "เหมาะสำหรับเปิดไพ่ดูดวงคำถามสำคัญเฉพาะหน้า",
+    name: "กุญแจดวงชะตา 3 ครั้ง",
+    tagline: "ปลดล็อกผังใหญ่และคำทำนายเจาะลึก สำหรับคำถามสำคัญเฉพาะหน้า",
     credits: 3,
     priceThb: 59,
     amountSatang: 5900,
@@ -28,8 +28,8 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
   },
   {
     id: "pack_10",
-    name: "แพ็กเกจยอดนิยม 10 ครั้ง",
-    tagline: "เปิดผังใหญ่และคุยถามเจาะลึกกับแม่หมอได้ต่อเนื่อง",
+    name: "ญาณหยั่งรู้มหาคัมภีร์ 10 ครั้ง",
+    tagline: "เปิดผังเซลติกครอส คุยถามเจาะลึกกับแม่หมอได้ต่อเนื่องไม่สะดุด",
     credits: 10,
     priceThb: 149,
     amountSatang: 14900,
@@ -38,8 +38,8 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
   },
   {
     id: "pack_30",
-    name: "แพ็กเกจมูจัดเต็ม 30 ครั้ง",
-    tagline: "เปิดได้ไม่อั้น คุ้มค่าที่สุด ไม่มีวันหมดอายุ",
+    name: "คลังญาณชะตาลิขิต 30 ครั้ง",
+    tagline: "ปลดล็อกทุกมิติคำทำนายชั้นสูง คุ้มค่าสูงสุด ไม่มีวันหมดอายุ",
     credits: 30,
     priceThb: 299,
     amountSatang: 29900,

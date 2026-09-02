@@ -40,6 +40,14 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
   const [loading, setLoading] = useState(false);
   const ent = useEntitlement();
   const chatLocked = !!ent && ent.enabled && !ent.canChat;
+  const isUnlimited =
+    !ent ||
+    !ent.enabled ||
+    ent.role === "admin" ||
+    ent.role === "unlimited" ||
+    (typeof ent.bonusRemaining === "number" && ent.bonusRemaining > 0);
+  const userQuestionsCount = messages.filter((m) => m.sender === "user").length;
+  const freeChatLimitReached = !isUnlimited && userQuestionsCount >= 2;
   const chatLogRef = React.useRef<HTMLDivElement>(null);
 
   // เลื่อนเฉพาะ "กล่องแชท" ให้เห็นข้อความล่าสุด — ห้ามใช้ scrollIntoView เพราะมันจะ
@@ -226,30 +234,68 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             <span className="mr-1.5">✦</span> สมัครสมาชิกฟรีเพื่อถามต่อ
           </button>
         </div>
+      ) : freeChatLimitReached ? (
+        /* โควตาแชทฟรี 2 ข้อครบแล้ว — ชวนปลดล็อกญาณพยากรณ์พิเศษ */
+        <div className="mt-2 space-y-3 rounded-2xl border border-[#ffd700]/40 bg-gradient-to-b from-[#1b1035] to-[#120b22] p-4 shadow-[0_0_25px_rgba(212,175,55,0.18)]">
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#ffd700]/40 bg-[#251545] text-[#ffd700]">
+              <span className="font-bold text-sm">✦</span>
+            </span>
+            <div className="min-w-0 space-y-1">
+              <p className="font-serif-th text-xs font-bold text-[#f5deaa] sm:text-sm">
+                คุณใช้สิทธิ์ถามคำถามต่อยอดฟรีครบ 2 ข้อแล้ว
+              </p>
+              <p className="font-serif-th text-[11px] leading-relaxed text-[#cfc8e2]">
+                ปลดล็อก <strong>ญาณพยากรณ์พิเศษ</strong> เพื่อคุยถามเจาะลึกกับแม่หมอได้ไม่จำกัดข้อ พร้อมคำแนะนำลึกซึ้ง
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => requestUpgrade("daily_exhausted")}
+            className="w-full rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-4 py-3 font-serif-th text-xs font-bold text-[#0a0812] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+          >
+            <span className="mr-1.5">✦</span> ปลดล็อกญาณพยากรณ์พิเศษเพื่อถามต่อไม่จำกัด
+          </button>
+        </div>
       ) : (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          sendMessage();
-        }}
-        className="flex items-center gap-2 pt-2"
-      >
-        <input
-          type="text"
-          placeholder="พิมพ์คำถามเพิ่มเติมเกี่ยวกับไพ่ชุดนี้..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={loading}
-          className="flex-1 bg-[#1b1530] border border-[#e0c088]/30 rounded-xl px-3.5 py-2.5 text-xs text-[#f0dcb4] placeholder-[#9c93b8]/50 focus:outline-none focus:border-[#e0c088]"
-        />
-        <button
-          type="submit"
-          disabled={loading || !input.trim()}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a25e] to-[#e0c088] text-[#0a0812] text-xs font-semibold font-serif-th hover:opacity-90 active:scale-95 disabled:opacity-40 transition-all cursor-pointer flex-shrink-0"
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendMessage();
+          }}
+          className="space-y-1.5 pt-2"
         >
-          ส่งคำถาม
-        </button>
-      </form>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="พิมพ์คำถามเพิ่มเติมเกี่ยวกับไพ่ชุดนี้..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              disabled={loading}
+              className="flex-1 bg-[#1b1530] border border-[#e0c088]/30 rounded-xl px-3.5 py-2.5 text-xs text-[#f0dcb4] placeholder-[#9c93b8]/50 focus:outline-none focus:border-[#e0c088]"
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#c9a25e] to-[#e0c088] text-[#0a0812] text-xs font-semibold font-serif-th hover:opacity-90 active:scale-95 disabled:opacity-40 transition-all cursor-pointer flex-shrink-0"
+            >
+              ส่งคำถาม
+            </button>
+          </div>
+          {!isUnlimited && (
+            <div className="flex justify-between items-center px-1 text-[10px] text-[#9c93b8] font-serif-th">
+              <span>โควตาถามต่อฟรีสำหรับสมาชิก: เหลืออีก {Math.max(0, 2 - userQuestionsCount)} ข้อ</span>
+              <button
+                type="button"
+                onClick={() => requestUpgrade("daily_exhausted")}
+                className="text-[#ffd700] hover:underline cursor-pointer"
+              >
+                ✦ ปลดล็อกถามไม่จำกัด
+              </button>
+            </div>
+          )}
+        </form>
       )}
     </div>
   );
