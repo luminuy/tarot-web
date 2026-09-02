@@ -318,6 +318,13 @@ a,
   box-shadow: 0 0 0 2px #05040a, 0 0 0 4px #ffd700 !important;
 }
 
+.no-focus-ring:focus-visible,
+.no-focus-ring input:focus-visible,
+input.no-focus-ring:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 /* Mobile Safe Area Padding Helpers */
 .safe-pb {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));

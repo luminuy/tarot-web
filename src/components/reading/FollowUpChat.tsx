@@ -62,20 +62,29 @@ function renderFormattedText(text: string) {
 }
 
 /**
- * คอมโพเนนต์แสดงผลฟองแชทของแม่หมอ:
- * - แยกย่อหน้าและเว้นวรรคให้อ่านง่าย
- * - แยกข้อแนะนำที่เป็นลำดับ (1. 2. 3. หรือ •) ออกเป็นการ์ดคำแนะนำย่อยสบายตา
+ * คอมโพเนนต์แสดงผลข้อความแม่หมอ:
+ * - แยกความคิดออกเป็นบับเบิ้ลย่อยๆ เหมือนคนพิมพ์คุยกัน
+ * - ตรวจจับการวิเคราะห์ไพ่รายใบ และแยกออกเป็น "Tarot Insight Card" มีกรอบทองคำ อ่านง่าย สบายตา
+ * - ตรวจจับข้อแนะนำลำดับขั้นตอน (1. 2. 3.) และแยกเป็นการ์ดทีละข้อ
  */
 const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ text, isError }) => {
   if (isError) {
-    return <p className="font-serif-th text-xs sm:text-sm leading-relaxed text-rose-200">{text}</p>;
+    return (
+      <div className="rounded-2xl rounded-tl-xs bg-[#25131a] border border-rose-500/40 p-3.5 sm:p-4 text-rose-200 font-serif-th text-xs sm:text-sm leading-relaxed shadow-md">
+        {text}
+      </div>
+    );
   }
 
-  // ปรับการตัดข้อความ: หากมีตัวเลข 1. 2. 3. ติดกัน ให้แยกย่อหน้าใหม่
+  // ปรับการตัดข้อความ:
+  // 1. แยกไพ่ที่ถูกเขียนต่อกันด้วยเครื่องหมาย - หรือ ✦ ในบรรทัดเดียว
+  // 2. แยกลำดับขั้นตอน 1. 2. 3. ออกเป็นข้อๆ
   const preProcessed = text
-    .replace(/([.!?:)”"])\s+(\d+\.\s+\*\*)/g, "$1\n\n$2")
-    .replace(/([.!?:)”"])\s+(\d+\.\s+)/g, "$1\n\n$2")
-    .replace(/([.!?:)”"])\s+([•\-]\s+)/g, "$1\n\n$2");
+    .replace(/\s+[-–—]\s*([^\n:]+):/g, "\n\n• **$1:**")
+    .replace(/✦\s*([^\n:]+):/g, "\n\n• **$1:**")
+    .replace(/([^\n])\s+(\d+\.\s+\*\*)/g, "$1\n\n$2")
+    .replace(/([^\n])\s+(\d+\.\s+[ก-๙a-zA-Z])/g, "$1\n\n$2")
+    .trim();
 
   // แยกตามการเว้นบรรทัด
   const paragraphs = preProcessed
@@ -84,9 +93,33 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
     .filter(Boolean);
 
   return (
-    <div className="space-y-3 font-serif-th text-xs sm:text-sm text-[#f5deaa]/95 leading-relaxed">
+    <div className="space-y-2.5 w-full">
       {paragraphs.map((p, pIdx) => {
-        // ตรวจสอบว่าขึ้นต้นด้วยตัวเลขข้อหรือไม่ เช่น "1. ..." หรือ "2. ..."
+        // Case 1: การ์ดวิเคราะห์ไพ่ทาโรต์ (เช่น "• **ตำแหน่งหัวใจ (9 ดาบ):** คำอธิบาย..." หรือ "• ตำแหน่ง...:")
+        const cardMatch =
+          p.match(/^[•\-✦]\s*\*\*(.*?)\*\*\s*:?\s*(.*)/s) ||
+          p.match(/^[•\-✦]\s*([^\n:]+):\s*(.*)/s);
+
+        if (cardMatch) {
+          const cardTitle = cardMatch[1];
+          const cardBody = cardMatch[2];
+          return (
+            <div
+              key={pIdx}
+              className="rounded-2xl p-3.5 sm:p-4 bg-gradient-to-br from-[#1d1433] via-[#150e28] to-[#100a20] border border-[#e5c07b]/35 shadow-lg space-y-1.5 backdrop-blur transition-all hover:border-[#ffd700]/60"
+            >
+              <div className="flex items-center gap-2 text-[#ffd700] font-bold text-xs sm:text-sm font-serif-th">
+                <span className="text-[#e5c07b] text-xs">✦</span>
+                <span>{renderFormattedText(cardTitle)}</span>
+              </div>
+              <p className="text-xs sm:text-sm text-[#f5deaa]/95 leading-relaxed font-serif-th pl-3.5 border-l-2 border-[#e5c07b]/35">
+                {renderFormattedText(cardBody)}
+              </p>
+            </div>
+          );
+        }
+
+        // Case 2: ลำดับขั้นตอนคำแนะนำ (เช่น "1. **พักสมอง:** ...")
         const stepMatch = p.match(/^(\d+)\.\s*(.*)/s);
         if (stepMatch) {
           const stepNum = stepMatch[1];
@@ -94,34 +127,26 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
           return (
             <div
               key={pIdx}
-              className="flex items-start gap-2.5 p-3 rounded-xl bg-[#140d25]/80 border border-[#e5c07b]/25 my-1.5 shadow-sm"
+              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-2xl bg-[#17102b] border border-[#e5c07b]/25 shadow-sm"
             >
               <span className="w-5 h-5 rounded-full bg-gradient-to-r from-[#d4af37] to-[#c59b27] text-[#0a0715] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 shadow">
                 {stepNum}
               </span>
-              <div className="flex-1 min-w-0 leading-relaxed text-[#f5deaa]">
+              <div className="flex-1 min-w-0 leading-relaxed font-serif-th text-xs sm:text-sm text-[#f5deaa]">
                 {renderFormattedText(stepBody)}
               </div>
             </div>
           );
         }
 
-        // ตรวจสอบว่าเป็น bullet หรือไม่ เช่น "• ..." หรือ "- ..."
-        const bulletMatch = p.match(/^[•\-]\s*(.*)/s);
-        if (bulletMatch) {
-          return (
-            <div key={pIdx} className="flex items-start gap-2 pl-1 my-1">
-              <span className="text-[#ffd700] text-xs shrink-0 mt-0.5">✦</span>
-              <div className="flex-1 leading-relaxed text-[#f5deaa]">{renderFormattedText(bulletMatch[1])}</div>
-            </div>
-          );
-        }
-
-        // ข้อความย่อหน้าทั่วไป
+        // Case 3: ฟองแชทสนทนาทั่วไป (บับเบิ้ลโค้งมน นุ่มนวล สบายตา)
         return (
-          <p key={pIdx} className="leading-relaxed">
-            {renderFormattedText(p)}
-          </p>
+          <div
+            key={pIdx}
+            className="rounded-2xl rounded-tl-xs bg-[#19122c]/95 border border-[#e5c07b]/25 p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#f5deaa] font-serif-th shadow-md backdrop-blur"
+          >
+            <p className="leading-relaxed">{renderFormattedText(p)}</p>
+          </div>
         );
       })}
     </div>
@@ -352,30 +377,28 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
               )}
 
               <div className={`flex flex-col gap-1 ${msg.sender === "user" ? "items-end max-w-[85%]" : "items-start max-w-[88%]"}`}>
-                <div
-                  className={`rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-lg ${
-                    msg.sender === "user"
-                      ? "rounded-tr-xs bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-semibold shadow-[0_4px_15px_rgba(212,175,55,0.2)]"
-                      : msg.isError
-                      ? "rounded-tl-xs bg-[#25131a] border border-rose-500/40 text-rose-200 font-serif-th shadow-md"
-                      : "rounded-tl-xs bg-[#19122c]/95 border border-[#e5c07b]/30 text-[#f5deaa] font-serif-th shadow-lg backdrop-blur"
-                  }`}
-                >
-                  <ChatMessageRenderer text={msg.text} isError={msg.isError} />
+                {msg.sender === "user" ? (
+                  <div className="rounded-2xl rounded-tr-xs bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-semibold px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-[0_4px_15px_rgba(212,175,55,0.2)]">
+                    {msg.text}
+                  </div>
+                ) : (
+                  <div className="w-full space-y-2">
+                    <ChatMessageRenderer text={msg.text} isError={msg.isError} />
 
-                  {msg.isError && msg.text.includes("ไม่พบสำรับไพ่") && (
-                    <button
-                      type="button"
-                      onClick={() => window.location.reload()}
-                      className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[#e5c07b]/40 bg-[#140e24] px-3 py-1.5 text-xs font-semibold text-[#ffd700] hover:bg-[#20163a] cursor-pointer shadow"
-                    >
-                      <span>↻</span> รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง
-                    </button>
-                  )}
-                </div>
+                    {msg.isError && msg.text.includes("ไม่พบสำรับไพ่") && (
+                      <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[#e5c07b]/40 bg-[#140e24] px-3 py-1.5 text-xs font-semibold text-[#ffd700] hover:bg-[#20163a] cursor-pointer shadow"
+                      >
+                        <span>↻</span> รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {/* Sub-bubble Actions (Timestamp & TTS) */}
-                <div className="flex items-center gap-2 text-[10px] text-[#9c93b8]/70 font-serif-th px-1">
+                <div className="flex items-center gap-2 text-[10px] text-[#9c93b8]/70 font-serif-th px-1 pt-0.5">
                   {msg.timestamp && <span>{msg.timestamp}</span>}
                   {msg.sender === "bot" && !msg.isError && (
                     <TTSReaderButton
@@ -441,16 +464,20 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       {/* ── 3. Quick Follow-Up Chips & Messenger Input Dock ── */}
       <div className="shrink-0 pt-2 border-t border-[#e5c07b]/15 space-y-2">
         {messages.length > 0 && !loading && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 px-0.5 pb-0.5">
             <span className="text-[11px] text-[#e5c07b] font-serif-th font-semibold shrink-0">✦ ถามต่อด่วน:</span>
-            {["สรุปให้หน่อยเป็นข้อๆ", "สิ่งที่ต้องระวังเป็นพิเศษ", "แนวทางเริ่มต้นก้าวแรก"].map((chip, idx) => (
+            {[
+              { label: "สรุปเป็นข้อๆ", query: "ช่วยสรุปคำแนะนำให้ฉันหน่อยเป็นข้อๆ แบบเข้าใจง่าย" },
+              { label: "สิ่งที่ต้องระวัง", query: "สิ่งที่ฉันต้องระวังเป็นพิเศษจากไพ่ชุดนี้คืออะไร?" },
+              { label: "แนวทางก้าวแรก", query: "แนวทางเริ่มต้นก้าวแรกที่ควรทำทันทีคืออะไร?" },
+            ].map((chip, idx) => (
               <button
                 key={idx}
                 type="button"
-                onClick={() => sendMessage(chip)}
-                className="text-[11px] text-[#cfc8e2] bg-[#140e24] hover:bg-[#22173d] hover:text-[#ffd700] border border-[#e5c07b]/25 rounded-full px-3 py-1 transition-all cursor-pointer shrink-0 font-serif-th whitespace-nowrap shadow-sm"
+                onClick={() => sendMessage(chip.query)}
+                className="text-[11px] text-[#cfc8e2] bg-[#160f29] hover:bg-[#251945] hover:text-[#ffd700] border border-[#e5c07b]/30 hover:border-[#ffd700]/60 rounded-full px-3 py-1 transition-all cursor-pointer font-serif-th shadow-sm"
               >
-                "{chip}"
+                "{chip.label}"
               </button>
             ))}
           </div>
@@ -510,7 +537,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             }}
             className="space-y-1.5"
           >
-            <div className="flex items-center gap-2 rounded-2xl border border-[#e5c07b]/40 bg-[#120b22]/90 p-1.5 pl-3.5 focus-within:border-[#ffd700] transition-colors shadow-inner">
+            <div className="flex items-center gap-2 rounded-full border border-[#e5c07b]/35 bg-[#120b22]/95 p-1.5 pl-4 focus-within:border-[#ffd700] focus-within:shadow-[0_0_15px_rgba(212,175,55,0.25)] transition-all">
               <input
                 type="text"
                 placeholder={`พิมพ์ถาม ${persona.nameTh} ที่นี่...`}
@@ -518,15 +545,16 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 onChange={(e) => setInput(e.target.value)}
                 disabled={loading}
                 aria-label="พิมพ์คำถามถึงแม่หมอ"
-                className="min-w-0 flex-1 bg-transparent font-serif-th text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/60 focus:outline-none"
+                className="no-focus-ring min-w-0 flex-1 bg-transparent font-serif-th text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/60 border-none outline-none focus:outline-none focus:border-none focus:ring-0 !shadow-none"
               />
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="shrink-0 cursor-pointer rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] px-4 py-2 font-serif-th text-xs sm:text-sm font-bold text-[#0a0812] shadow-[0_0_12px_rgba(212,175,55,0.3)] transition-all hover:opacity-95 active:scale-95 disabled:opacity-40 disabled:shadow-none flex items-center gap-1"
+                className="h-9 w-9 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] flex items-center justify-center font-bold shadow hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 transition-all shrink-0 cursor-pointer"
+                aria-label="ส่งข้อความ"
+                title="ส่งคำถาม"
               >
-                <span>ส่ง</span>
-                <span className="text-[10px]">✦</span>
+                <span className="text-sm">✦</span>
               </button>
             </div>
 
@@ -548,4 +576,5 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
     </section>
   );
 };
+
 
