@@ -34,6 +34,25 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: อัปเกรดระบบแชร์โซเชียลมีเดีย 5 ช่องทาง เพิ่ม Instagram พร้อมโลโก้เวกเตอร์ทางการของแต่ละแบรนด์ (Official SVG Logos)
+
+**คำขอของผู้ใช้**:
+- *"ขาด ig ไปได้เลย พวกปุ่มเเชร์ ขอเป็นโลโก้จริงๆ ของเเบรนนะ"*
+
+**สิ่งที่พัฒนาและสร้างใหม่เสร็จสมบูรณ์**:
+1. **เพิ่มช่องทางแชร์ Instagram (`ShareModal.tsx`)**:
+   - เพิ่มฟังก์ชัน `handleShareInstagram` ที่สร้าง Story Card (9:16) ความละเอียดสูง ดาวน์โหลดลงเครื่อง และคัดลอกแคปชันลงคลิปบอร์ด พร้อมเปิด Intent สตอรี่บนอุปกรณ์พกพา
+2. **เปลี่ยนไอคอนเป็นโลโก้เวกเตอร์ทางการแท้จริงของทั้ง 5 แบรนด์ (Official SVGs)**:
+   - **Facebook**: Official SVG Glyph ตัว `f` วงกลมสีน้ำเงิน Meta
+   - **Instagram**: Official SVG Camera Glyph พร้อมสีชมพูเฉดแบรนด์
+   - **TikTok**: Official SVG Musical Note Glyph ของ TikTok
+   - **X (Twitter)**: Official SVG Vector โลโก้ `𝕏`
+   - **Threads**: Official SVG Vector โลโก้ `@` Loop ของ Threads
+3. **จัดระเบียบ Layout 5 แบรนด์**:
+   - Responsive Grid: `grid-cols-2 sm:grid-cols-3 lg:grid-cols-5` สวยงาม สมมาตร ไร้รอยต่อ
+
+---
+
 ### 🗓️ 2026-09-02: ปรับแต่ง Favicon ตราประทับไพ่ทาโรต์ทองคำ และเปลี่ยนชื่อ Browser Tab นำหน้าด้วย SeerTarot
 
 **คำขอของผู้ใช้**:
