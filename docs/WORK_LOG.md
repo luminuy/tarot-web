@@ -34,6 +34,25 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: อัปเกรดระบบ SEO, Robots.txt และ Schema.org JSON-LD ครบทุกหน้าสู่มาตรฐานระดับโลก
+
+**คำขอของผู้ใช้**: *"scham lobot.txt อะไรพวกนี้เขียนครบยัง"* ➔ *"เขียนยทความเสร็จหมดเเล้ว"*
+
+**สิ่งที่พัฒนาและสร้างใหม่เสร็จสมบูรณ์**:
+1. **ยกระดับ `robots.ts` (`/robots.txt`)**:
+   - บล็อกเส้นทางข้อมูลส่วนตัวและลิงก์ความลับอย่างรัดกุม (`/account`, `/tester`, `/reset-password`, `/admin`, `/readers/console`)
+   - เพิ่มบล็อก AI Scraping Bots (`GPTBot`, `ChatGPT-User`, `CCBot`, `Google-Extended`, `anthropic-ai`, `Claude-Web`, `Bytespider`, `Diffbot`) ป้องกันการแอบดูดฐานข้อมูลความหมายไพ่และบทความไปเทรนโมเดล
+   - กำหนด `host: SITE_ORIGIN` และเชื่อมต่อไปยัง `/sitemap.xml` ชัดเจน
+2. **ฝัง Schema.org (JSON-LD Structured Data) ครอบคลุมทั้งระบบ**:
+   - หน้าแรก (`layout.tsx`): เพิ่ม `Organization` (SeerTarot Sanctuary) และ `WebSite` เสริมจาก `WebApplication` เดิม
+   - สารานุกรม 78 ใบ (`/cards`): เพิ่ม `CollectionPage` + `ItemList` ครบ 78 ใบ พร้อมภาพและลิงก์ตรง
+   - ผังพยากรณ์ 20 แบบ (`/spreads`): เพิ่ม `CollectionPage` + `ItemList` ครบ 20 ผัง พร้อมคำอธิบาย
+   - คัมภีร์บทความ (`/blog`): เพิ่ม `Blog` + `BlogPosting` ครบทั้ง 20 บทความไฮทราฟฟิก และ `BreadcrumbList`
+   - หน้ารายละเอียดบทความ (`/blog/[slug]`): มี `Article`, `BreadcrumbList`, และ `FAQPage` เต็มรูปแบบ
+3. **ตรวจสอบความสมบูรณ์ของ `sitemap.xml`**: ครอบคลุมครบ 103 URLs (Static 5 หน้า, ไพ่ 78 ใบ, บทความ 20 บทความ)
+
+---
+
 ### 🗓️ 2026-09-02: เชื่อมต่อระบบยืนยันความเป็นเจ้าของ Google Search Console
 
 **คำขอของผู้ใช้**:

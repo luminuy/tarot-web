@@ -32,8 +32,67 @@ export const metadata: Metadata = {
 export default function BlogPage() {
   const articles = getAllArticles();
 
+  const blogJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "คัมภีร์บทความ & คู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909 | SeerTarot Blog",
+    description: "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 20 แบบ และความหมายไพ่ 78 ใบ",
+    url: `${SITE_ORIGIN}/blog`,
+    inLanguage: "th",
+    publisher: {
+      "@type": "Organization",
+      name: "SeerTarot",
+      url: SITE_ORIGIN,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_ORIGIN}/icons/icon-512x512.png`,
+      },
+    },
+    blogPost: articles.map((article) => ({
+      "@type": "BlogPosting",
+      headline: article.title,
+      description: article.description,
+      url: `${SITE_ORIGIN}/blog/${article.slug}`,
+      datePublished: article.publishedAt,
+      dateModified: article.updatedAt,
+      author: {
+        "@type": "Organization",
+        name: "SeerTarot Sanctuary",
+      },
+    })),
+  };
+
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "หน้าแรก",
+        item: SITE_ORIGIN,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "คัมภีร์บทความ",
+        item: `${SITE_ORIGIN}/blog`,
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700]">
+      {/* Schema.org Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
+      />
+
       <div className="max-w-5xl mx-auto space-y-8 pb-16">
         {/* Navigation Breadcrumb & Back button */}
         <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4">

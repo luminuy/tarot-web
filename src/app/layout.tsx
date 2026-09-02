@@ -111,6 +111,26 @@ const webAppJsonLd = {
   inLanguage: "th",
 };
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "SeerTarot Sanctuary",
+  url: SITE_ORIGIN,
+  logo: `${SITE_ORIGIN}/cards/major-01.webp`,
+  sameAs: ["https://github.com/luminuy/tarot-web"],
+  description:
+    "วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ระดับพรีเมียม 1909 Rider-Waite-Smith พร้อมระบบสุ่มที่พิสูจน์ความยุติธรรมได้ (Provably Fair) และแม่หมอ AI",
+};
+
+const webSiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "SeerTarot",
+  alternateName: "วิหารพยากรณ์ไพ่ทาโรต์",
+  url: SITE_ORIGIN,
+  inLanguage: "th",
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th" className={`${notoSerifThai.variable} ${sarabun.variable}`}>
@@ -118,6 +138,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
       </head>
       <body className="min-h-dvh font-sans antialiased">
