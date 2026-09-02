@@ -34,6 +34,29 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: ล้างระบบกุไพ่ปลอม (The Fool) ถาวร + ลดเพดานเวลาโมเดลตัวแรกเหลือ 4 วิ (INC-0056)
+
+**คำขอของผู้ใช้**:
+- *"เจอบั๊คเยอะมากเราต้องเช็คอย่างละเอียดว่าแอบซ่อนอะไรไว้อีก เเละยื่งส่วนเเชทกับแม่หมอคือ คีร์หลัก ท่าไม้ตายของเว็บเราเลย"* (พร้อมภาพหน้าจอชี้บั๊กที่เมื่อเซิร์ฟเวอร์หาข้อมูลดวงไม่เจอ โค้ดดันกุ The Fool ขึ้นมาเอง และเสนอให้ลดเพดานเวลาตัวแรกลงเพื่อความเร็ว)
+
+**สาเหตุราก (Root Cause)**:
+1. **Fake Card Fabrication (The Fool Fallback)**: ใน `chat/route.ts` โค้ดเดิมเมื่อหา `record` ไม่เจอใน memory, token หรือ snapshot ดันเขียน `else` กุไพ่ปลอม `drawn: [{ order: 0, cardIndex: 0, isReversed: false }]` (The Fool) ส่งให้ AI ทำนาย ทำให้แม่หมออ้างถึง The Fool อย่างมั่นใจ ทั้งที่ผู้ใช้ไม่เคยเปิดไพ่ใบนี้เลย ซึ่งขัดกับหัวใจหลักเรื่องความโปร่งใส (Provably Fair) อย่างร้ายแรง รวมถึงใน `cardByIndex` เดิมทีคืนค่า `DECK[0]` เมื่อดัชนีไม่ถูกต้อง
+2. **Wasted 8s Latency on First Model**: `GEMINI_FIRST_MODEL_TIMEOUT_MS = 8000` ทำให้ทุกครั้งที่ `gemini-3.6-flash` ติดคอขวด ผู้ใช้ต้องรอนานถึง 8 วินาทีเต็มก่อนที่คำขอจะ abort แล้วตกไปหา `gemini-3.5-flash-lite`
+
+**สิ่งที่แก้ไข**:
+1. **กำจัดไพ่ปลอมทั้งระบบ (Zero Fake Cards)**:
+   - ใน `cardByIndex`: ปรับให้คืน `undefined` เสมอเมื่อดัชนีไม่ถูกต้อง (`undefined`, `null`, `NaN`, `< 0`, `>= 78`) แทนการคืน `DECK[0]` (The Fool)
+   - ใน `resolveCardByIndex`: ปรับให้คืน `TarotCard | undefined`
+   - ใน `shuffle/route.ts` และ `read/route.ts`: ตรวจสอบไพ่ทุกใบ หากหาไม่เจอจะส่ง Error 500 `"ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง"` (code: `CARD_DATA_NOT_FOUND`)
+   - ใน `chat/route.ts`: กรองไพ่ที่ถูกต้องและตัดบล็อก fallback ที่เคยกุ The Fool ทิ้ง
+   - ใน `src/app/page.tsx`: ตรวจสอบ `data.drawn` และ `cardIndex` หากไม่พบคืน Error `"ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง"` พร้อมแสดงปุ่ม **"✦ โหลดใหม่อีกครั้ง"**
+   - ใน `StreamReader.tsx`: ลบ fallback `"major-00.jpg"` ออก เมื่อไม่พบไพ่จะแสดงแท่นพลังงานศักดิ์สิทธิ์พร้อมปุ่ม **"✦ โหลดใหม่อีกครั้ง"** แทนการกุไพ่ The Fool
+2. **ขยายด่านตรวจอัตโนมัติเป็น 20 ด่าน (Gate 20)**:
+   - สร้าง `scripts/qa/test-no-fake-card.ts` ตรวจสอบ 19 เงื่อนไข ครอบคลุม `cardByIndex` และ `resolveCardByIndex`
+   - บรรจุเข้า `scripts/github-auto.ts` ผ่านครบทั้ง 20 ด่าน 100%
+
+---
+
 ### 🗓️ 2026-09-02: แก้บั๊กคำถามต่อเนื่องในห้องแชทแม่หมอคืนค่า "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม" (INC-0055)
 
 **คำขอของผู้ใช้**:

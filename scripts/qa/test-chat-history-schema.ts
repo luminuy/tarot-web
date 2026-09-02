@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { z } from "zod";
 
 const BodySchema = z.object({
@@ -85,7 +87,15 @@ export function runChatSchemaTests() {
   if (!snapshotRes.success) {
     throw new Error(`Test 3 Failed: long snapshot was rejected: ${snapshotRes.error}`);
   }
-  console.log("  ✓ Test 3: Multi-turn chat with 4 turns and long snapshot passes smoothly");
+  // Test 4: Provably Fair Guard - Ensure no fake card fallback exists in chat/route.ts
+  const chatRouteContent = fs.readFileSync(path.join(process.cwd(), "src/app/api/reading/[id]/chat/route.ts"), "utf-8");
+  if (chatRouteContent.includes("order: 0, cardIndex: 0, isReversed: false") || chatRouteContent.includes("Safe default reading context fallback")) {
+    throw new Error("Test 4 Failed: Fake card fallback (The Fool) was detected in chat/route.ts! Provably Fair violation.");
+  }
+  if (!chatRouteContent.includes("reading_not_found")) {
+    throw new Error("Test 4 Failed: chat/route.ts must return reading_not_found when cards are missing!");
+  }
+  console.log("  ✓ Test 4: Provably Fair Guard - No fake card fallback (The Fool) in chat route, 404 returned on missing cards");
 
   console.log("✨ All Chat BodySchema tests passed successfully!");
 }

@@ -218,7 +218,16 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                       : "bg-[#1b1530] border border-[#e0c088]/30 text-[#f0dcb4] font-serif-th rounded-tl-none shadow-lg"
                   }`}
                 >
-                  {msg.text}
+                  <p>{msg.text}</p>
+                  {msg.isError && msg.text.includes("ไม่พบสำรับไพ่") && (
+                    <button
+                      type="button"
+                      onClick={() => window.location.reload()}
+                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg border border-[#e0c088]/40 bg-[#1b1530] px-3 py-1.5 text-xs font-semibold text-[#ffd700] transition-colors hover:bg-[#262040] hover:text-[#fff] cursor-pointer"
+                    >
+                      <span>↻</span> รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง
+                    </button>
+                  )}
                 </div>
                 {msg.sender === "bot" && !msg.isError && (
                   <TTSReaderButton
@@ -330,8 +339,23 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             e.preventDefault();
             sendMessage();
           }}
-          className="space-y-1.5 pt-2"
+          className="space-y-2 pt-2"
         >
+          {messages.length > 0 && !loading && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+              <span className="text-[11px] text-[#e5c07b] flex-shrink-0 font-serif-th font-medium">✦ ถามต่อด่วน:</span>
+              {["สรุปให้หน่อยเป็นข้อๆ", "สิ่งที่ต้องระวังเป็นพิเศษ", "แนวทางเริ่มต้นก้าวแรก"].map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => sendMessage(chip)}
+                  className="text-[11px] text-[#cfc8e2] bg-[#1b1530] hover:bg-[#262040] hover:text-[#f5deaa] border border-[#e5c07b]/25 rounded-full px-2.5 py-0.5 transition-all cursor-pointer flex-shrink-0 font-serif-th"
+                >
+                  "{chip}"
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex items-center gap-2.5">
             <input
               type="text"

@@ -186,6 +186,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     async start(controller) {
       try {
         const overrideDoc = await getContentOverrides();
+        const resolvedCards = record.drawn!.map((d) => resolveCardByIndex(overrideDoc, d.cardIndex));
+        if (resolvedCards.some((c) => !c)) {
+          send(controller, "error", {
+            message: "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง",
+            code: "CARD_DATA_NOT_FOUND",
+          });
+          controller.close();
+          return;
+        }
+
         const readingCtx = {
           personaId: record.personaId,
           spread,
@@ -194,7 +204,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           intake: record.intake,
           nickname: record.nickname,
           drawn: record.drawn!,
-          cards: record.drawn!.map((d) => resolveCardByIndex(overrideDoc, d.cardIndex)),
+          cards: resolvedCards as import("@/data/cards").TarotCard[],
           safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
         };
 

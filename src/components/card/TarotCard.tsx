@@ -114,7 +114,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
       : rawCard?.id
       ? cardById(rawCard.id) || rawCard
       : rawCard?.cardIndex !== undefined
-      ? cardByIndex(rawCard.cardIndex)
+      ? cardByIndex(rawCard.cardIndex) || rawCard
       : rawCard;
 
   const elem = effectiveCard?.element ? ELEMENT_CONFIG[effectiveCard.element] || ELEMENT_CONFIG["ไฟ"] : ELEMENT_CONFIG["ไฟ"];

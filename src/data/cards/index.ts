@@ -41,13 +41,13 @@ export function cardById(id?: string | null): TarotCard | undefined {
   return BY_ID.get(id);
 }
 
-export function cardByIndex(index?: number | null): TarotCard {
-  if (index === null || index === undefined) return DECK[0];
+export function cardByIndex(index?: number | null): TarotCard | undefined {
+  if (index === null || index === undefined) return undefined;
   const num = typeof index === "number" ? index : Number(index);
   if (!isNaN(num) && num >= 0 && num < DECK.length) {
     return DECK[num];
   }
-  return DECK[0];
+  return undefined;
 }
 
 export type { TarotCard } from "./types";
