@@ -80,12 +80,30 @@ async function main() {
   if (email) {
     const safeEmail = email.trim().toLowerCase().replace(/'/g, "''");
     const safeHash = hash.replace(/'/g, "''");
-    console.log("\n📋 คำสั่งอัปเดตบัญชีที่มีอยู่แล้ว (token_version +1 เพื่อเตะเซสชันเก่าออก):\n");
+
+    /**
+     * ⚠️ ห้ามพิมพ์คำสั่งที่ห่อ SQL ด้วย double quote เด็ดขาด
+     * แฮช PHC มี `$` คั่นทุกช่อง (`pbkdf2$sha256$150000$salt$hash`) พอผู้ใช้ก็อปไปวางใน bash
+     * shell จะขยาย `$sha256` `$salt` `$hash` เป็นค่าว่างทั้งหมด — แฮชเหลือแค่ `pbkdf250000`
+     * แล้วเขียนขยะลงฐานข้อมูลโดยไม่มีใครรู้ตัว (ล็อกอินไม่ได้ต่อ หาสาเหตุไม่เจอ)
+     *
+     * จึงต้องออกเป็น heredoc ที่ปิดการขยายทั้งก้อน (`<<'SQL'`) แล้วสั่งด้วย --file
+     */
+    console.log("\n📋 ก็อปทั้งก้อนนี้ไปวางในเทอร์มินัลได้เลย (token_version +1 เพื่อเตะเซสชันเก่าออก):\n");
+    console.log("cat > /tmp/tarot-set-password.sql <<'SQL'");
     console.log(
-      `npx wrangler d1 execute tarot-app-db --remote --command "UPDATE users SET password_hash='${safeHash}', token_version=token_version+1 WHERE email_lower='${safeEmail}' AND deleted_at IS NULL;"`,
+      `UPDATE users SET password_hash='${safeHash}', token_version=token_version+1 WHERE email_lower='${safeEmail}' AND deleted_at IS NULL;`,
+    );
+    console.log("SQL");
+    console.log("npx wrangler d1 execute tarot-app-db --remote --file /tmp/tarot-set-password.sql");
+    console.log("rm /tmp/tarot-set-password.sql");
+    // คำสั่งตรวจนี้ห่อ double quote ได้ปลอดภัย เพราะไม่มี `$` อยู่ในนั้นเลย
+    console.log("\n   ตรวจว่าเข้าจริงไหม (ต้องขึ้นต้นด้วย pbkdf2 แล้วตามด้วย sha256):");
+    console.log(
+      `   npx wrangler d1 execute tarot-app-db --remote --command "SELECT substr(password_hash,1,25) AS hash_head FROM users WHERE email_lower='${safeEmail}';"`,
     );
   } else {
-    console.log("\n   ใส่ --email <อีเมล> เพิ่ม เพื่อให้สคริปต์พิมพ์คำสั่ง wrangler d1 ให้พร้อมรัน");
+    console.log("\n   ใส่ --email <อีเมล> เพิ่ม เพื่อให้สคริปต์พิมพ์คำสั่งอัปเดตฐานข้อมูลให้พร้อมรัน");
   }
   console.log("");
 }
