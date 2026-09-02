@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "motion/react";
 import { invalidateSessionCache, patchSessionUser, useSessionUser } from "@/lib/auth/use-session";
+import { useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { describeEntitlement, CHEAPEST_PACKAGE_THB } from "@/lib/entitlement/copy";
 import { soundManager } from "@/lib/utils/audio";
 
 const EASE = {
@@ -12,10 +15,18 @@ const EASE = {
 
 export interface UserProfileBadgeProps {
   onOpenAuthModal: () => void;
+  onOpenPlans?: () => void;
+  onBuyCredits?: () => void;
 }
 
-export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthModal }) => {
+export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
+  onOpenAuthModal,
+  onOpenPlans,
+  onBuyCredits,
+}) => {
   const { user, loading } = useSessionUser();
+  const ent = useEntitlement();
+  const view = describeEntitlement(ent);
   const [menuOpen, setMenuOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
@@ -279,6 +290,83 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                     <span>{getProviderLabel()}</span>
                   </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Sacred Plan & Quota Management Card */}
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-[#1a102e] via-[#140b24] to-[#0d0718] border border-[#ffd700]/30 shadow-[0_4px_20px_rgba(0,0,0,0.5),0_0_15px_rgba(212,175,55,0.12)] space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[#ffd700] text-xs">✦</span>
+                  <span className="text-[11px] font-bold text-[#f5deaa] tracking-wide">สิทธิ์และแพ็กเกจ</span>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-[#ffd700] bg-[#ffd700]/15 border border-[#ffd700]/30 px-2 py-0.5 rounded-full">
+                  {view?.isUnlimited
+                    ? "VIP UNLIMITED"
+                    : view?.remaining != null
+                    ? `เหลือ ${view.remaining}/${view.limit} ครั้ง`
+                    : "สมาชิกวิหาร"}
+                </span>
+              </div>
+
+              <div className="text-[10.5px] text-[#b0a5c7] leading-relaxed">
+                {view?.isUnlimited ? (
+                  <p>คุณมีสิทธิ์เปิดไพ่และสนทนาปรึกษาได้ไม่จำกัด</p>
+                ) : (
+                  <p>
+                    เปิดฟรีวันละ {view?.limit ?? 3} ครั้ง{ent?.bonusRemaining ? ` · ญาณพิเศษสะสม +${ent.bonusRemaining} ครั้ง` : ""}
+                  </p>
+                )}
+              </div>
+
+              {/* Primary Gold CTA to Buy Credits / Upgrade */}
+              {onBuyCredits && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.playMenuTapSound();
+                    setMenuOpen(false);
+                    onBuyCredits();
+                  }}
+                  className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#ffd700] to-[#aa8010] text-[#090514] font-serif-th font-bold text-xs shadow-[0_0_15px_rgba(212,175,55,0.35)] hover:shadow-[0_0_20px_rgba(255,215,0,0.5)] hover:scale-[1.01] transition-all duration-150 cursor-pointer flex items-center justify-between active:scale-[0.98]"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span>✨</span>
+                    <span>ซื้อรอบเพิ่ม / อัปเกรดญาณ</span>
+                  </span>
+                  <span className="text-[10px] bg-[#090514]/20 px-1.5 py-0.5 rounded font-mono font-semibold">
+                    เริ่มต้น ฿{CHEAPEST_PACKAGE_THB}
+                  </span>
+                </button>
+              )}
+
+              {/* Secondary Navigation: Compare Plans & Account Hub */}
+              <div className="flex items-center justify-between pt-1 border-t border-[#e5c07b]/15 text-[10.5px]">
+                {onOpenPlans && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundManager.playMenuTapSound();
+                      setMenuOpen(false);
+                      onOpenPlans();
+                    }}
+                    className="text-[#ffd700]/90 hover:text-white transition-colors cursor-pointer flex items-center gap-1 font-semibold"
+                  >
+                    <span>✦</span>
+                    <span>เปรียบเทียบทุกแพลน</span>
+                  </button>
+                )}
+                <Link
+                  href="/account"
+                  onClick={() => {
+                    soundManager.playMenuTapSound();
+                    setMenuOpen(false);
+                  }}
+                  className="text-[#9c93b8] hover:text-[#f5deaa] transition-colors flex items-center gap-1 ml-auto"
+                >
+                  <span>จัดการบัญชี</span>
+                  <span>→</span>
+                </Link>
               </div>
             </div>
 

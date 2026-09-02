@@ -843,13 +843,18 @@ export default function TarotPage() {
           {/* Right Toolbar Controls (UserProfileBadge, Sacred Dropdown & Reset Button) */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <QuotaMeter onOpenDetails={() => openAccessDialog("explore")} />
-            <UserProfileBadge onOpenAuthModal={() => openAuth("signin")} />
+            <UserProfileBadge
+              onOpenAuthModal={() => openAuth("signin")}
+              onOpenPlans={() => openAccessDialog("explore")}
+              onBuyCredits={() => setIsBuyCreditsOpen(true)}
+            />
 
             <SacredNavDropdown
               onOpenHistory={() => {
                 soundManager.playCardSelectSound();
                 setIsHistoryOpen(true);
               }}
+              onOpenPlans={() => openAccessDialog("explore")}
               onReset={handleReset}
               canReset={currentStep !== "SPREAD_SELECT"}
             />
