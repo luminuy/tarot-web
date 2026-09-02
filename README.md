@@ -2,7 +2,7 @@
 
 > **เว็บดูดวงไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite-Smith ที่ผสานศาสตร์พยากรณ์โบราณเข้ากับเทคโนโลยีปัญญาประดิษฐ์ (AI) และระบบสุ่มที่พิสูจน์ความยุติธรรมได้ (Provably Fair) บน Cloudflare Edge Network**
 
-[![Live Production](https://img.shields.io/badge/Production-Live-success?style=for-the-badge&logo=cloudflare&logoColor=white&color=F38020)](https://tarot-web.bankjack10452.workers.dev)
+[![Live Production](https://img.shields.io/badge/Production-Live-success?style=for-the-badge&logo=cloudflare&logoColor=white&color=F38020)](https://seertarot.net)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict%200%20Errors-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![AI Engine](https://img.shields.io/badge/AI-Claude%20%2B%20Gemini%20%2B%20Antigravity-purple?style=for-the-badge)](https://www.anthropic.com/)
@@ -12,7 +12,7 @@
 
 ## 🌐 ลิงก์เข้าใช้งานจริง (Production Live URL)
 
-> 🔗 **[https://tarot-web.bankjack10452.workers.dev](https://tarot-web.bankjack10452.workers.dev)**
+> 🔗 **[https://seertarot.net](https://seertarot.net)** (หรือ `https://www.seertarot.net`)
 
 ---
 
@@ -37,7 +37,7 @@
 
 | ผู้พัฒนา / AI Contributor | บทบาทและความรับผิดชอบ | องค์กร / โมเดล |
 | :--- | :--- | :--- |
-| 👑 **Luminut ([@luminuy](https://github.com/luminuy))** | **Creator, Project Owner & Senior Developer** — เขียนโค้ดเองทั้ง feature / fix / refactor, รีวิวและตัดสินใจสถาปัตยกรรมขั้นสุดท้าย, กำหนดทิศทางผลิตภัณฑ์และดีไซน์, เป็นเจ้าของโครงสร้างพื้นฐาน (Cloudflare / GitHub / โดเมน / Secrets), ทดสอบบนอุปกรณ์จริง (Chrome/Safari, มือถือ) และกำกับงาน AI ทุกตัว | Project Maintainer |
+| 👑 **SEERTAROT ([@luminuy](https://github.com/luminuy))** | **Creator, Oracle Diviner & Project Owner (ผู้สร้าง, ผู้พยากรณ์ และเจ้าของโครงการ)** — ผู้เชี่ยวชาญศาสตร์พยากรณ์และทาโรต์, รีวิวและตัดสินใจสถาปัตยกรรมขั้นสุดท้าย, กำหนดทิศทางผลิตภัณฑ์และดีไซน์, เป็นเจ้าของโครงสร้างพื้นฐาน (Cloudflare / GitHub / โดเมน / Secrets), ทดสอบบนอุปกรณ์จริง (Chrome/Safari, มือถือ) และกำกับงาน AI ทุกตัว | Project Maintainer & Oracle |
 | 🏛️ **Anthropic Claude (Sonnet 5 / Opus 5)** | **Lead Engineering & System Review** — ตรวจสอบและวางสถาปัตยกรรม, หาสาเหตุรากของบั๊ก (root-cause debugging), วางระเบียบวิศวกรรม (Incident Log, ด่านตรวจอัตโนมัติ, กติกา PR), ระบบ Edge Caching (OpenNext + KV), Provably-Fair Shuffle และ Code Review ทุก PR ก่อน merge | Anthropic |
 | 🔮 **Google DeepMind Antigravity AI** | **Full-Stack Implementation** — เขียนฟีเจอร์ตามแผน, งาน UI/Motion, ปรับแต่งประสิทธิภาพ, SEO และการทำ Multi-Agent Collision Guard | Google DeepMind |
 | ✨ **Google Gemini AI (3.7 Flash)** | **Interpretation Engine** — เครื่องอ่านคำทำนายไพ่ทาโรต์และสตรีมคำอ่านแบบเรียลไทม์ (SSE) | Google AI |
