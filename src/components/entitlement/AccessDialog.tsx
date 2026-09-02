@@ -131,7 +131,7 @@ export function AccessDialog({
         {!showCredits && (
           <section className="space-y-3">
             <h3 className="font-serif-th text-sm font-bold text-[#f5deaa]">
-              <span className="text-[#e5c07b]">✦</span> สมัครสมาชิกฟรีแล้วได้อะไรบ้าง
+              <span className="text-[#e5c07b]">✦</span> {view?.isMember ? "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)" : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง"}
             </h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {MEMBER_BENEFITS.map((b) => (
@@ -168,10 +168,10 @@ export function AccessDialog({
             </div>
             <div className="rounded-2xl border border-[#ffd700]/45 bg-gradient-to-b from-[#1a1030] to-[#0c0718] p-4 shadow-[0_0_25px_rgba(229,192,123,0.12)]">
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#ffd700]">
-                <CoinSealIcon className="h-4 w-4" /> เติมรอบไว้ใช้ต่อ
+                <CoinSealIcon className="h-4 w-4" /> ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)
               </span>
               <p className="font-serif-th text-[11px] leading-relaxed text-[#cfc8e2]">
-                จ่ายครั้งเดียวเริ่มต้น {CHEAPEST_PACKAGE_THB} บาท · รอบที่เติมไม่มีวันหมดอายุ และไม่ตัดเงินอัตโนมัติ
+                จ่ายครั้งเดียวเริ่มต้น {CHEAPEST_PACKAGE_THB} บาท · ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด ไม่มีวันหมดอายุ
               </p>
             </div>
           </section>
@@ -183,20 +183,27 @@ export function AccessDialog({
             {ACCESS_PLANS.map((plan) => {
               const isCurrent =
                 (plan.id === "guest" && isGuest) || (plan.id === "member" && view?.isMember);
+              const isSpecial = plan.id === "credits";
               return (
                 <div
                   key={plan.id}
                   className={`relative flex flex-col rounded-2xl border p-4 ${
-                    plan.highlight
-                      ? "border-[#ffd700]/55 bg-gradient-to-b from-[#1a1030] to-[#0c0718] shadow-[0_0_25px_rgba(229,192,123,0.14)]"
+                    isSpecial
+                      ? "border-[#ffd700]/60 bg-gradient-to-b from-[#1e123a] to-[#0c0718] shadow-[0_0_30px_rgba(229,192,123,0.2)]"
+                      : plan.highlight
+                      ? "border-[#ffd700]/45 bg-gradient-to-b from-[#1a1030] to-[#0c0718] shadow-[0_0_25px_rgba(229,192,123,0.14)]"
                       : "border-[#e5c07b]/18 bg-[#0a0714]/70"
                   }`}
                 >
-                  {plan.highlight && (
+                  {isSpecial ? (
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#0a0715] shadow-[0_0_12px_rgba(212,175,55,0.4)]">
+                      ✦ ปลดล็อกขั้นสุด
+                    </span>
+                  ) : plan.highlight ? (
                     <span className="absolute -top-2.5 right-3 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#0a0715]">
                       {plan.highlight}
                     </span>
-                  )}
+                  ) : null}
                   <span className="font-serif-th text-sm font-bold text-[#f5deaa]">{plan.name}</span>
                   <span className="mt-1 font-mono text-lg font-bold text-[#ffd700]">{plan.price}</span>
                   <span className="font-serif-th text-[10px] text-[#9c93b8]">{plan.priceNote}</span>
@@ -232,8 +239,7 @@ export function AccessDialog({
 
         {/* ── ปุ่มลงมือ ───────────────────────────────────────────── */}
         <div className="space-y-2.5">
-          {/* สมาชิกที่กดดูเองไม่ต้องเห็นปุ่มชวนสมัครอีก */}
-          {!(reason === "explore" && view?.isMember) && (
+          {!(reason === "explore" && view?.isMember) ? (
             <button
               type="button"
               onClick={handlePrimary}
@@ -241,6 +247,19 @@ export function AccessDialog({
             >
               <span className="mr-1.5">✦</span>
               {copy.primaryLabel}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                trackEntitlementEvent("access_dialog_primary:explore_credits");
+                onClose();
+                onBuyCredits();
+              }}
+              className="w-full rounded-2xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-6 py-3.5 font-serif-th text-sm font-bold text-[#05040a] shadow-[0_0_25px_rgba(212,175,55,0.4)] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0714]"
+            >
+              <span className="mr-1.5">✦</span>
+              ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม {CHEAPEST_PACKAGE_THB}.-)
             </button>
           )}
 

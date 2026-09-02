@@ -111,7 +111,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={resetModalState} title="✦ เติมโควตาเปิดไพ่ทาโรต์ (AI Credits)">
+    <Modal isOpen={isOpen} onClose={resetModalState} title="✦ ปลดล็อกญาณพยากรณ์พิเศษ (Mystic Oracle Pass)">
       <div className="space-y-6 pt-1 text-[#e2d9f3]">
         {errorMsg && (
           <div className="p-3.5 rounded-xl bg-rose-950/80 border border-rose-600/50 text-rose-200 text-xs font-serif-th text-center">
@@ -129,8 +129,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
           <>
             <div className="text-center space-y-1">
               <p className="text-xs text-[#9c93b8] font-serif-th">
-                จ่ายครั้งเดียว ไม่ใช่รายเดือน และไม่มีการตัดเงินอัตโนมัติ ·
-                รอบที่เติมใช้ต่อจากโควตาฟรีได้ทันที และไม่มีวันหมดอายุ
+                ปลดล็อกผังใหญ่ 10–12 ใบและคุยถามเจาะลึกได้ไม่จำกัด · จ่ายครั้งเดียว ไม่ใช่รายเดือน · ไม่มีวันหมดอายุ
               </p>
             </div>
 

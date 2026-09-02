@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion, type Variants } from "motion/react";
 import {
   TarotSpreadNavIcon,
   TarotDeckNavIcon,
@@ -10,6 +10,11 @@ import {
   MarketplaceReaderNavIcon,
 } from "@/components/ui/TarotArtIcons";
 import { soundManager } from "@/lib/utils/audio";
+
+const EASE = {
+  enter: [0.16, 1, 0.3, 1] as [number, number, number, number],
+  exit: [0.4, 0, 1, 1] as [number, number, number, number],
+};
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
@@ -64,10 +69,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   }, [isOpen]);
 
   const toggleDropdown = () => {
-    // Run audio asynchronously on next frame to avoid hitching frame 0 of animation
-    requestAnimationFrame(() => {
-      soundManager.playCardSelectSound();
-    });
+    soundManager.playMenuTapSound();
     setIsOpen((prev) => {
       const next = !prev;
       if (next) {
@@ -103,15 +105,46 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     },
   ];
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0, y: -8 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.16,
+        ease: EASE.enter,
+        staggerChildren: 0.025,
+        delayChildren: 0.01,
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: -6,
+      transition: {
+        duration: 0.09,
+        ease: EASE.exit,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: -4 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.14, ease: EASE.enter },
+    },
+  };
+
   return (
     <div className="relative select-none" ref={dropdownRef}>
       {/* Refined Luxury Obsidian-Gold Trigger Button */}
       <button
         type="button"
         onClick={toggleDropdown}
-        className={`min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 border shadow-sm select-none ${
+        className={`min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer flex items-center gap-2 border shadow-sm select-none ${
           isOpen
-            ? "bg-[#22123a] border-[#ffd700] text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.32),inset_0_1px_1px_rgba(255,215,0,0.3)] scale-[1.01]"
+            ? "bg-[#201138] border-[#ffd700] text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.32),inset_0_1px_1px_rgba(255,215,0,0.3)]"
             : "bg-[#100b20]/90 text-[#f5deaa] hover:text-[#ffd700] border-[#e5c07b]/25 hover:border-[#ffd700]/60 hover:bg-[#181033] hover:shadow-[0_0_15px_rgba(229,192,123,0.2)]"
         }`}
         aria-expanded={isOpen}
@@ -124,6 +157,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           fill="currentColor"
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          style={{ transformOrigin: "50% 48%" }}
           className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${isOpen ? "text-[#ffd700]" : "text-[#c59b27]"}`}
           aria-hidden="true"
         >
@@ -139,24 +173,13 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: -6 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: 0,
-              transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
-            }}
-            exit={{
-              opacity: 0,
-              scale: 0.97,
-              y: -4,
-              transition: { duration: 0.1, ease: [0.4, 0, 1, 1] },
-            }}
-            style={{
-              transformOrigin: "top right",
-              willChange: "transform, opacity",
-            }}
-            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-3xl bg-[#0b0618]/98 backdrop-blur-md border border-[#e5c07b]/35 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_20px_rgba(212,175,55,0.12)] p-2.5 sm:p-3 z-50 overflow-hidden space-y-1.5"
+            key="sacred-nav-panel"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            style={{ willChange: "transform, opacity" }}
+            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-3xl bg-[#0c071a] border border-[#e5c07b]/40 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(212,175,55,0.15)] p-2.5 sm:p-3 z-50 overflow-hidden space-y-1.5"
           >
             {/* Ambient Top Foil Glow */}
             <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#ffd700]/40 to-transparent -mt-0.5 mb-1.5" />
@@ -177,63 +200,66 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               {navItems.map((item) => {
                 const Icon = item.Icon;
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => {
-                      soundManager.playCardSelectSound();
-                      setIsOpen(false);
-                    }}
-                    className="w-full flex items-start gap-3 p-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-[#201238] hover:to-[#140b26] border border-transparent hover:border-[#ffd700]/30 hover:shadow-[0_0_15px_rgba(229,192,123,0.12)] transition-all duration-200 group cursor-pointer"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1c1033] to-[#120a22] border border-[#e5c07b]/30 flex items-center justify-center text-[#e5c07b] group-hover:text-[#ffd700] group-hover:border-[#ffd700]/80 group-hover:shadow-[0_0_14px_rgba(229,192,123,0.35)] transition-all flex-shrink-0 mt-0.5">
-                      <Icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-serif-th font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors">
-                          {item.label}
-                        </span>
-                        <span className="text-[9px] font-serif-th text-[#d4af37] bg-[#ffd700]/10 px-2 py-0.5 rounded-full border border-[#ffd700]/25">
-                          {item.badge}
-                        </span>
+                  <motion.div key={item.href} variants={itemVariants}>
+                    <Link
+                      href={item.href}
+                      onClick={() => {
+                        soundManager.playMenuTapSound();
+                        setIsOpen(false);
+                      }}
+                      className="w-full flex items-start gap-3 p-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-[#201238] hover:to-[#140b26] border border-transparent hover:border-[#ffd700]/30 hover:shadow-[0_0_15px_rgba(229,192,123,0.12)] transition-all duration-150 group cursor-pointer"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1c1033] to-[#120a22] border border-[#e5c07b]/30 flex items-center justify-center text-[#e5c07b] group-hover:text-[#ffd700] group-hover:border-[#ffd700]/80 group-hover:shadow-[0_0_14px_rgba(229,192,123,0.35)] transition-all flex-shrink-0 mt-0.5">
+                        <Icon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
                       </div>
-                      <p className="text-[11px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
-                        {item.sublabel}
-                      </p>
-                    </div>
-                  </Link>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-serif-th font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors">
+                            {item.label}
+                          </span>
+                          <span className="text-[9px] font-serif-th text-[#d4af37] bg-[#ffd700]/10 px-2 py-0.5 rounded-full border border-[#ffd700]/25">
+                            {item.badge}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
+                          {item.sublabel}
+                        </p>
+                      </div>
+                    </Link>
+                  </motion.div>
                 );
               })}
 
               {/* Reading Journal / History Trigger */}
               {onOpenHistory && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundManager.playCardSelectSound();
-                    setIsOpen(false);
-                    onOpenHistory();
-                  }}
-                  className="w-full flex items-start gap-3 p-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-[#201238] hover:to-[#140b26] border border-transparent hover:border-[#ffd700]/30 hover:shadow-[0_0_15px_rgba(229,192,123,0.12)] transition-all duration-200 group cursor-pointer text-left"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1c1033] to-[#120a22] border border-[#e5c07b]/30 flex items-center justify-center text-[#e5c07b] group-hover:text-[#ffd700] group-hover:border-[#ffd700]/80 group-hover:shadow-[0_0_14px_rgba(229,192,123,0.35)] transition-all flex-shrink-0 mt-0.5">
-                    <JournalScrollNavIcon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-serif-th font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors">
-                        ประวัติการดูดวง
-                      </span>
-                      <span className="text-[9px] font-serif-th text-[#d4af37] bg-[#ffd700]/10 px-2 py-0.5 rounded-full border border-[#ffd700]/25">
-                        บันทึก
-                      </span>
+                <motion.div variants={itemVariants}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundManager.playMenuTapSound();
+                      setIsOpen(false);
+                      onOpenHistory();
+                    }}
+                    className="w-full flex items-start gap-3 p-2.5 rounded-2xl hover:bg-gradient-to-r hover:from-[#201238] hover:to-[#140b26] border border-transparent hover:border-[#ffd700]/30 hover:shadow-[0_0_15px_rgba(229,192,123,0.12)] transition-all duration-150 group cursor-pointer text-left"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1c1033] to-[#120a22] border border-[#e5c07b]/30 flex items-center justify-center text-[#e5c07b] group-hover:text-[#ffd700] group-hover:border-[#ffd700]/80 group-hover:shadow-[0_0_14px_rgba(229,192,123,0.35)] transition-all flex-shrink-0 mt-0.5">
+                      <JournalScrollNavIcon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
                     </div>
-                    <p className="text-[11px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
-                      ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้
-                    </p>
-                  </div>
-                </button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-serif-th font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors">
+                          ประวัติการดูดวง
+                        </span>
+                        <span className="text-[9px] font-serif-th text-[#d4af37] bg-[#ffd700]/10 px-2 py-0.5 rounded-full border border-[#ffd700]/25">
+                          บันทึก
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#9c93b8] group-hover:text-[#c5bed8] transition-colors line-clamp-1 mt-0.5 leading-snug">
+                        ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้
+                      </p>
+                    </div>
+                  </button>
+                </motion.div>
               )}
             </div>
 

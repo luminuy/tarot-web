@@ -177,7 +177,7 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
 export const MEMBER_BENEFITS: Array<{ title: string; detail: string }> = [
   {
     title: `เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง`,
-    detail: "รีเซ็ตให้ใหม่ทุกเที่ยงคืน ไม่ต้องจ่ายอะไรเพิ่ม",
+    detail: "รีเซ็ตให้ใหม่ทุกเที่ยงคืน สำหรับผังมาตรฐาน 1–4 ใบ",
   },
   {
     title: `โบนัสต้อนรับอีก ${SIGNUP_BONUS} ครั้ง`,
@@ -185,7 +185,7 @@ export const MEMBER_BENEFITS: Array<{ title: string; detail: string }> = [
   },
   {
     title: "คุยถามแม่หมอต่อได้หลังเปิดไพ่",
-    detail: "ถามเจาะลึกต่อจากคำทำนายเดิมได้ ไม่ต้องเปิดไพ่ใหม่",
+    detail: "ถามเจาะลึกต่อจากคำทำนายเดิมได้ 2 คำถามต่อรอบ",
   },
   {
     title: "เก็บประวัติดูดวงไว้ทุกเครื่อง",
@@ -218,11 +218,11 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
   daily_exhausted: {
     eyebrow: "โควตาประจำวัน",
     title: `วันนี้คุณเปิดไพ่ครบ ${DAILY_LIMIT} ครั้งแล้ว`,
-    body: "โควตาฟรีชุดใหม่จะมาถึงตอนเที่ยงคืน ถ้าอยากถามต่อคืนนี้เลย เติมรอบเปิดไพ่ได้ตามจำนวนที่ต้องการ",
-    primaryLabel: "เติมรอบเปิดไพ่",
+    body: "โควตาฟรีชุดใหม่จะมาถึงตอนเที่ยงคืน ถ้าอยากถามต่อคืนนี้เลย ปลดล็อกญาณพยากรณ์พิเศษเพื่อเปิดผังใหญ่และคุยต่อได้ทันที",
+    primaryLabel: "ปลดล็อกญาณพยากรณ์พิเศษ",
     primaryAction: "credits",
     secondaryLabel: "ไว้พรุ่งนี้ค่อยมาใหม่",
-    reassurance: "รอบที่เติมไม่มีวันหมดอายุ · ยังอ่านคำทำนายเก่าและคลังความหมายไพ่ได้ฟรีเสมอ",
+    reassurance: "รอบสะสมไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ 10 ใบและถามเจาะลึกได้ไม่จำกัด",
   },
   members_only: {
     eyebrow: "เฉพาะสมาชิก",
@@ -264,35 +264,35 @@ export const ACCESS_PLANS: AccessPlan[] = [
       { label: `เปิดไพ่ทดลอง ${GUEST_LIMIT} ครั้ง`, included: true },
       { label: "อ่านคำทำนายเต็มทุกองก์", included: true },
       { label: "คลังความหมายไพ่ 78 ใบ", included: true },
-      { label: "คุยถามแม่หมอต่อ", included: false },
-      { label: "เก็บประวัติข้ามอุปกรณ์", included: false },
+      { label: "คุยถามแม่หมอต่อ (ต้องเป็นสมาชิก)", included: false },
+      { label: "เก็บประวัติข้ามอุปกรณ์ (ต้องเป็นสมาชิก)", included: false },
     ],
   },
   {
     id: "member",
-    name: "สมาชิก",
+    name: "สมาชิกทั่วไป",
     price: "ฟรี",
     priceNote: "สมัครด้วยอีเมล Google หรือ LINE",
     highlight: "แนะนำ",
     features: [
-      { label: `เปิดไพ่วันละ ${DAILY_LIMIT} ครั้ง`, included: true },
-      { label: `โบนัสต้อนรับ ${SIGNUP_BONUS} ครั้ง`, included: true },
-      { label: "คุยถามแม่หมอต่อ", included: true },
-      { label: "เก็บประวัติข้ามอุปกรณ์", included: true },
+      { label: `เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง (ผังมาตรฐาน)`, included: true },
+      { label: `โบนัสต้อนรับ ${SIGNUP_BONUS} ครั้งแรก`, included: true },
+      { label: "คุยถามแม่หมอต่อ 2 คำถาม/รอบ", included: true },
+      { label: "เก็บประวัติคำทำนายข้ามเครื่อง", included: true },
       { label: "ขอลบข้อมูลทั้งหมดได้ทุกเมื่อ", included: true },
     ],
   },
   {
     id: "credits",
-    name: "เติมรอบเพิ่ม",
+    name: "ญาณพยากรณ์พิเศษ",
     price: `เริ่ม ${CHEAPEST_PACKAGE_THB}.-`,
     priceNote: "จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ",
     features: [
-      { label: "ใช้ต่อจากโควตาฟรีได้ทันที", included: true },
-      { label: "ไม่มีวันหมดอายุ", included: true },
-      { label: "เปิดผังใหญ่ได้ไม่จำกัดรอบ", included: true },
-      { label: "ต้องเป็นสมาชิกก่อน", included: true },
-      { label: "ไม่ใช่การสมัครรายเดือน", included: true },
+      { label: "ปลดล็อกผังใหญ่ 10–12 ใบ (เซลติกครอส)", included: true },
+      { label: "วิเคราะห์จังหวะเวลา (Timing) & ไพ่เงา", included: true },
+      { label: "คุยถามแม่หมอเจาะลึกได้ไม่จำกัด", included: true },
+      { label: "วอลเปเปอร์ยันต์ 4K & ใบดวงชะตาทองคำ", included: true },
+      { label: "รอบสะสมไม่มีวันหมดอายุ ไม่ใช่รายเดือน", included: true },
     ],
   },
 ];
