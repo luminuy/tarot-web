@@ -103,7 +103,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔐 เซสชันล็อกอิน (tokenVersion · host injection · rate limit ไม่ล็อกเจ้าของบัญชี)", cmd: TSX, args: ["scripts/qa/test-session-guard.ts"] },
   { label: "💎 ระบบล็อกฟีเจอร์พรีเมียม (ผังใหญ่ 13 แบบ & ปรมาจารย์ลับ 2 ท่าน)", cmd: TSX, args: ["scripts/qa/test-feature-gating.ts"] },
   { label: "💬 ความยืดหยุ่นของประวัติแชทแม่หมอ (Zod BodySchema & Error Handling)", cmd: TSX, args: ["scripts/qa/test-chat-history-schema.ts"] },
-  { label: "🃏 ระบบป้องกันไพ่ปลอม (ไม่กุ The Fool เมื่อข้อมูลไม่ครบ · ให้โหลดใหม่)", cmd: TSX, args: ["scripts/qa/test-no-fake-card.ts"] },
+  { label: "🃏 Zero Fabricated Cards Policy (ห้ามกุหรือมโนไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด · ให้โหลดใหม่)", cmd: TSX, args: ["scripts/qa/test-no-fake-card.ts"] },
 ];
 
 /**
