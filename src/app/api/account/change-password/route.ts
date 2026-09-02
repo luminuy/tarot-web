@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { z } from "zod";
-import { AUTH_COOKIE_NAME, signUserSession, verifyUserSession } from "@/lib/auth/edge-auth";
+import { signUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser, invalidateTokenVersionCache, setAuthCookie } from "@/lib/auth/session";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
@@ -21,13 +21,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get(AUTH_COOKIE_NAME)?.value;
-    if (!sessionToken) {
-      return NextResponse.json({ error: "กรุณาเข้าสู่ระบบก่อนทำรายการ" }, { status: 401 });
-    }
-
-    const session = await verifyUserSession(sessionToken);
+    const session = await getSessionUser();
     if (!session?.id) {
       return NextResponse.json({ error: "เซสชันไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
     }
@@ -74,6 +68,8 @@ export async function POST(request: Request) {
     // แฮชและบันทึกรหัสผ่านใหม่ (เพิ่ม token_version อัตโนมัติเพื่อเตะ session เก่าบนเครื่องอื่นออก)
     const newHash = await hashPassword(newPassword);
     await setPasswordHash(user.id, newHash);
+    // เตะเซสชันเก่าทันที ไม่ต้องรอแคช token_version หมดอายุเอง
+    invalidateTokenVersionCache(user.id);
 
     const updatedUser = await getUserById(user.id);
 
@@ -92,13 +88,7 @@ export async function POST(request: Request) {
       message: "เปลี่ยนรหัสผ่านสำเร็จเรียบร้อยแล้ว",
     });
 
-    response.cookies.set(AUTH_COOKIE_NAME, newSessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60,
-      path: "/",
-    });
+    setAuthCookie(response, newSessionToken);
 
     return response;
   } catch (err) {

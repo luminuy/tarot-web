@@ -1,6 +1,4 @@
-import { cookies } from "next/headers";
-
-import { AUTH_COOKIE_NAME, verifyUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser } from "@/lib/auth/session";
 import { GUEST_LIMIT, type Viewer } from "@/lib/entitlement/entitlement";
 import { isGuestUsedOnServer, readGuestCookie } from "@/lib/entitlement/guest";
 
@@ -11,13 +9,12 @@ import { isGuestUsedOnServer, readGuestCookie } from "@/lib/entitlement/guest";
  */
 export async function getViewer(_request?: Request): Promise<Viewer> {
   try {
-    const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
-    if (token) {
-      const user = await verifyUserSession(token);
-      if (user?.id) return { kind: "member", userId: user.id };
-    }
+    // ผ่าน getSessionUser() เท่านั้น — เซสชันที่ถูกเพิกถอน (เปลี่ยนรหัสผ่าน/ลบบัญชี)
+    // ต้องตกกลับไปนับสิทธิ์แบบผู้เยี่ยมชม ไม่ใช่ยังได้โควตาสมาชิกต่อ
+    const user = await getSessionUser();
+    if (user?.id) return { kind: "member", userId: user.id };
   } catch {
-    // cookies() อาจ throw ในบางบริบท — ถือว่าเป็นผู้เยี่ยมชม
+    // อ่านคุกกี้ไม่ได้ในบางบริบท — ถือว่าเป็นผู้เยี่ยมชม
   }
 
   const guest = await readGuestCookie();

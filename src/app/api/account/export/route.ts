@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser } from "@/lib/auth/session";
 import { getUserById } from "@/lib/users/users.repo";
 import { listJournal } from "@/lib/journal/journal.repo";
 
@@ -8,15 +7,9 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("tarot_auth_session")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "ต้องเข้าสู่ระบบก่อนส่งออกข้อมูล" }, { status: 401 });
-    }
-
-    const user = await verifyUserSession(token);
+    const user = await getSessionUser();
     if (!user) {
-      return NextResponse.json({ error: "เซสชันหมดอายุ" }, { status: 401 });
+      return NextResponse.json({ error: "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
     }
 
     const dbUser = await getUserById(user.id);

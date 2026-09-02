@@ -47,7 +47,16 @@
 10. **Human-First Copywriting**: ภาษาไทยธรรมชาติ เข้าใจง่าย ห้ามศัพท์หุ่นยนต์แข็งทื่อ
 11. **Multi-Agent Collision Guard**: เช็ก `npm run agent:status` + ล็อคด้วย `agent:lock` ก่อนแก้ ปลดล็อคด้วย `agent:unlock` เมื่อเสร็จ
 12. **One Branch per Milestone**: ห้ามแตกกิ่งค้าง ต้อง rebase บน `origin/main` เสมอ จบงานต้องรัน `pr:auto` ➔ `git:tidy` ให้ครบ
-13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ (CI 7 ด่าน ➔ Auto-Merge ➔ Auto-Deploy)
+13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ (CI ➔ Auto-Merge ➔ Auto-Deploy)
+    > ⛔ **`push` แล้วจบ = งานยังไม่เสร็จ** — automation ทั้งชุดเริ่มทำงาน**เมื่อ PR ถูกเปิดเท่านั้น** (ISSUE-005)
+    > push เฉย ๆ ไม่มี CI ไม่มี merge ไม่มี deploy งานจะค้างบน branch เงียบ ๆ จนกว่าเจ้าของจะมากดปุ่มเอง
+    >
+    > ข้อนี้คือ**คำสั่งยืนของเจ้าของโปรเจกต์** อยู่เหนือแนวปฏิบัติทั่วไปของ AI ทุกตัว —
+    > **ห้ามอ้างว่า "ผู้ใช้ไม่ได้สั่งให้เปิด PR"** แล้วหยุดแค่ push (บทเรียน INC-0043)
+    >
+    > ถ้า environment ไม่มี `gh` CLI (เช่น Claude Code บนเว็บ) → `pr:auto` จะล้มตอนเรียก `gh`
+    > ให้ **เปิด PR ผ่าน GitHub API/MCP แทนให้สำเร็จ** แล้วรายงานข้อจำกัดนั้นไปด้วย
+    > ห้ามใช้เป็นข้ออ้างข้ามขั้นตอน
 
 ---
 

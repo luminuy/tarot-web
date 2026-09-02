@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE_NAME, verifyAdminSession } from "@/lib/auth/admin-auth";
-import { AUTH_COOKIE_NAME, verifyUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser } from "@/lib/auth/session";
 import { TESTER_COOKIE_NAME, verifyTesterSession } from "@/lib/auth/tester-auth";
 import { isUnlimitedEmail } from "@/lib/auth/unlimited-users";
 import { recordEvent } from "@/lib/stats/record";
@@ -46,13 +46,10 @@ export async function isPrivilegedTestRequest(request: Request): Promise<boolean
       recordEvent("ratelimit_bypass:tester");
       return true;
     }
-    const authCookie = cookieStore.get(AUTH_COOKIE_NAME)?.value;
-    if (authCookie) {
-      const user = await verifyUserSession(authCookie);
-      if (user?.email && isUnlimitedEmail(user.email)) {
-        recordEvent("ratelimit_bypass:unlimited_user");
-        return true;
-      }
+    const user = await getSessionUser();
+    if (user?.email && isUnlimitedEmail(user.email)) {
+      recordEvent("ratelimit_bypass:unlimited_user");
+      return true;
     }
   } catch {
     // cookies() may fail in certain environments/contexts

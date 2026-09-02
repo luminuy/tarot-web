@@ -6,19 +6,13 @@ import { resetPasswordHtml } from "@/lib/email/templates";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { getUserByEmail, normalizeEmail } from "@/lib/users/users.repo";
+import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
 
 const ForgotSchema = z.object({
   email: z.string().trim().email("รูปแบบอีเมลไม่ถูกต้อง").max(120),
 });
-
-function getOriginUrl(request: Request): string {
-  const url = new URL(request.url);
-  const rawHost = request.headers.get("x-forwarded-host") || url.host;
-  const protocol = request.headers.get("x-forwarded-proto") || (url.protocol.replace(":", ""));
-  return process.env.APP_ORIGIN || `${protocol}://${rawHost}`;
-}
 
 export async function POST(request: Request) {
   if (!isRequestAuthorizedOrigin(request)) {
@@ -45,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     const user = await getUserByEmail(emailLower);
-    const origin = getOriginUrl(request);
+    const origin = resolveAppOrigin(request);
 
     // Anti-Enumeration: ถ้ามีผู้ใช้ ให้ส่งอีเมลจริง แต่ถ้าไม่มี ก็ตอบ 200 สำเร็จเหมือนกัน
     if (user && user.email) {

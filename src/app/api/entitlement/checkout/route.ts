@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { AUTH_COOKIE_NAME, verifyUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser } from "@/lib/auth/session";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
 import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
 import { createPaymentRecord } from "@/lib/marketplace/payments.repo";
@@ -11,14 +10,8 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     const isPrivileged = await isPrivilegedTestRequest(request);
-    const cookieStore = await cookies();
-    const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
-
-    let userId = "";
-    if (token) {
-      const user = await verifyUserSession(token);
-      if (user) userId = user.id;
-    }
+    const user = await getSessionUser();
+    let userId = user?.id ?? "";
 
     // สำหรับ Privileged Testing อนุญาต mock user id
     if (!userId && isPrivileged) {
