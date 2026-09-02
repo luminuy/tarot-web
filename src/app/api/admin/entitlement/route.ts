@@ -8,7 +8,7 @@ import { KEY, kvGetJSON, kvPutJSON, invalidateMemo } from "@/lib/platform/kv-sto
 
 export const runtime = "nodejs";
 
-const ENABLED_KEY = KEY.flag("entitlement.enabled");
+const ENABLED_KEY = KEY.flag("entitlement.enforced");
 const ANNOUNCE_KEY = KEY.flag("entitlement.announce");
 
 const Body = z.object({
@@ -18,7 +18,10 @@ const Body = z.object({
 });
 
 function truthy(raw: unknown): boolean {
-  return raw === true || (!!raw && typeof raw === "object" && (raw as { value?: boolean }).value === true);
+  if (raw === false || (!!raw && typeof raw === "object" && (raw as { value?: boolean }).value === false)) {
+    return false;
+  }
+  return true;
 }
 
 /** GET — สถานะธง + metric ที่ต้องเฝ้าดูใน 48 ชม.แรก */

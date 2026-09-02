@@ -8,12 +8,9 @@ import { KEY, kvGetJSON } from "@/lib/platform/kv-store";
  * (เดิมค่าเริ่มต้นเป็น "ปิด" ตอน PR A–F เพื่อให้ปล่อยโค้ดขึ้นได้อย่างปลอดภัยก่อน)
  *
  * ผลของการเป็น default-on: ถ้า KV ล่ม อ่านค่าไม่ได้ หรือคีย์หาย → ระบบ **ยังบังคับสิทธิ์ต่อ**
- * (fail-closed) ไม่ใช่เปิดให้ใช้ฟรีไม่จำกัด · ตั้งใจให้เป็นแบบนี้เพื่อกันบิลบานปลาย
- * ถ้าต้องการปิดฉุกเฉิน ต้องสั่งปิดที่ KV อย่างชัดเจน (`/admin` → แท็บ "สิทธิ์เปิดไพ่")
- *
- * เก็บเป็น KV key `app:flag:entitlement.enabled` → `{ "value": false }` หรือ `false` เพื่อปิด
+ * เก็บเป็น KV key `app:flag:entitlement.enforced` → `{ "value": false }` หรือ `false` เพื่อปิด
  */
-const FLAG_NAME = "entitlement.enabled";
+const FLAG_NAME = "entitlement.enforced";
 const MEMO_MS = 30_000;
 
 export async function isEntitlementEnabled(): Promise<boolean> {
