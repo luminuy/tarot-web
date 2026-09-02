@@ -34,6 +34,22 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: แก้ปัญหาเมนูดรอปดาวน์เลื่อนลงมากระพริบและเกิดภาพซ้อนบนมือถือ (Mobile Dropdown Ghosting & Stagger Flicker Elimination)
+
+**อาการที่ผู้ใช้เจอ**:
+- เมนูดรอปดาวน์ทั้ง 2 ตัว (เมนูวิหารพยากรณ์ และ การ์ดข้อมูลโปรไฟล์สมาชิก) *"เลื่อนลงมาในมือถือ กระพริบ เเละ เหมือนมีภาพซ้อน"*
+
+**สาเหตุจริงเชิงลึก**:
+1. **Motion Disparity จากการทำ Double Transform + Stagger**: โค้ดเดิมมีการใส่ `staggerChildren` ที่ตัวแม่ (`containerVariants` วิ่ง `y: -8 ➔ 0`) และใส่ `itemVariants` (`y: -4 ➔ 0`) ซ้ำที่ลูกทุกชิ้นด้านใน ส่งผลให้ขณะที่กล่องกำลังเคลื่อนที่ แถวรายการแต่ละแถวก็กำลังเคลื่อนที่ด้วยความเร็วและตำแหน่งที่เหลื่อมกันบนเลเยอร์ GPU คนละตัว ทำให้สายตามองเห็นเป็นภาพซ้อน (Ghosting / Double Trail) ชัดเจนบนจอมือถือ
+2. **Layer Antialiasing Flicker จาก `willChange` + Staggered Opacity**: การสั่ง `willChange: "transform, opacity"` ร่วมกับการค่อยๆ จางเข้ามาทีละแถว ทำให้ WebKit บน iOS / Blink บน Android สลับการเรนเดอร์ตัวอักษรเป็น Texture Bitmap และกระพริบเมื่อแต่ละแถว Fade เสร็จสิ้น
+
+**การแก้ไขถาวร**:
+1. **เปลี่ยนเป็นระเบียบ Unified Single Panel**: นำ `itemVariants`, `staggerChildren`, และ `delayChildren` ออกทั้งหมด รวมเมนูทั้งหมดให้อยู่นิ่งบนแผ่นการ์ด และให้การ์ดเลื่อนลงมาอย่างสง่างามเป็นผืนเดียวกัน 100%
+2. **ล็อก GPU Compositing ด้วย Hardware Acceleration**: กำหนด `transform: "translateZ(0)"`, `-webkit-backface-visibility: "hidden"`, `backface-visibility: "hidden"` เพื่อตัดอาการกระตุกของตัวอักษร และตัด `willChange` ที่สร้างปัญหา Layer Snapping ออก
+3. ตรวจสอบครบ 16 ด่าน (`repo:verify`) ผ่าน 100% สีเขียว
+
+---
+
 ### 🗓️ 2026-09-02: ขจัดอาการช่องปุ่มกระพริบโผล่มาแล้วหายไป (Ghost Slot Skeleton Flicker) ตอนเข้า/ออกจากระบบ
 
 **อาการที่ผู้ใช้เจอ**:
