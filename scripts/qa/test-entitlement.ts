@@ -228,6 +228,10 @@ async function main() {
   check("streak ถูกบันทึกเป็น 1 วัน", (await getDailyStreak(dailyUser)) >= 1);
   await softDeleteUser(dailyUser);
 
+  // ── 9. ตรวจสอบธงระบบสิทธิ์เปิดใช้งานโดยค่าเริ่มต้น (Fail-Closed Enforcement) ──
+  const { isEntitlementEnabled } = await import("../../src/lib/entitlement/flag");
+  check("ระบบสิทธิ์เปิดทำงานโดยค่าเริ่มต้น (isEntitlementEnabled = true)", (await isEntitlementEnabled()) === true);
+
   console.log(`\n${pass}/${pass + fail} ผ่าน`);
   if (fail > 0) process.exit(1);
 }

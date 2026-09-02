@@ -104,18 +104,26 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
           const cardTitle = cardMatch[1];
           const cardBody = cardMatch[2];
           return (
-            <div
+            <motion.div
               key={pIdx}
-              className="rounded-2xl p-3.5 sm:p-4 bg-gradient-to-br from-[#1d1433] via-[#150e28] to-[#100a20] border border-[#e5c07b]/35 shadow-lg space-y-1.5 backdrop-blur transition-all hover:border-[#ffd700]/60"
+              initial={{ opacity: 0, y: 14, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{
+                delay: pIdx * 0.12,
+                type: "spring",
+                stiffness: 360,
+                damping: 25,
+              }}
+              className="rounded-2xl p-3.5 sm:p-4 bg-gradient-to-br from-[#1d1433]/95 via-[#150e28]/95 to-[#100a20]/95 border border-[#e5c07b]/40 shadow-[0_4px_20px_rgba(0,0,0,0.35)] space-y-1.5 backdrop-blur transition-all duration-300 hover:border-[#ffd700] hover:shadow-[0_0_20px_rgba(229,192,123,0.25)]"
             >
               <div className="flex items-center gap-2 text-[#ffd700] font-bold text-xs sm:text-sm font-serif-th">
-                <span className="text-[#e5c07b] text-xs">✦</span>
+                <span className="text-[#e5c07b] text-xs animate-pulse">✦</span>
                 <span>{renderFormattedText(cardTitle)}</span>
               </div>
-              <p className="text-xs sm:text-sm text-[#f5deaa]/95 leading-relaxed font-serif-th pl-3.5 border-l-2 border-[#e5c07b]/35">
+              <p className="text-xs sm:text-sm text-[#f5deaa]/95 leading-relaxed font-serif-th pl-3.5 border-l-2 border-[#e5c07b]/40">
                 {renderFormattedText(cardBody)}
               </p>
-            </div>
+            </motion.div>
           );
         }
 
@@ -125,9 +133,17 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
           const stepNum = stepMatch[1];
           const stepBody = stepMatch[2];
           return (
-            <div
+            <motion.div
               key={pIdx}
-              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-2xl bg-[#17102b] border border-[#e5c07b]/25 shadow-sm"
+              initial={{ opacity: 0, y: 14, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{
+                delay: pIdx * 0.12,
+                type: "spring",
+                stiffness: 360,
+                damping: 25,
+              }}
+              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-2xl bg-[#17102b]/95 border border-[#e5c07b]/25 shadow-sm hover:border-[#ffd700]/50 transition-all duration-300"
             >
               <span className="w-5 h-5 rounded-full bg-gradient-to-r from-[#d4af37] to-[#c59b27] text-[#0a0715] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 shadow">
                 {stepNum}
@@ -135,18 +151,26 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
               <div className="flex-1 min-w-0 leading-relaxed font-serif-th text-xs sm:text-sm text-[#f5deaa]">
                 {renderFormattedText(stepBody)}
               </div>
-            </div>
+            </motion.div>
           );
         }
 
         // Case 3: ฟองแชทสนทนาทั่วไป (บับเบิ้ลโค้งมน นุ่มนวล สบายตา)
         return (
-          <div
+          <motion.div
             key={pIdx}
-            className="rounded-2xl rounded-tl-xs bg-[#19122c]/95 border border-[#e5c07b]/25 p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#f5deaa] font-serif-th shadow-md backdrop-blur"
+            initial={{ opacity: 0, y: 14, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{
+              delay: pIdx * 0.12,
+              type: "spring",
+              stiffness: 360,
+              damping: 25,
+            }}
+            className="rounded-2xl rounded-tl-xs bg-[#19122c]/95 border border-[#e5c07b]/25 p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#f5deaa] font-serif-th shadow-md backdrop-blur hover:border-[#e5c07b]/45 transition-colors"
           >
             <p className="leading-relaxed">{renderFormattedText(p)}</p>
-          </div>
+          </motion.div>
         );
       })}
     </div>
@@ -170,13 +194,22 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
   const chatLogRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (messages.length === 0) return;
+    if (messages.length === 0 && !loading) return;
     const el = chatLogRef.current;
     if (!el) return;
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
-    if (nearBottom) {
-      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-    }
+    const scrollBottom = () => {
+      el.scrollTo({
+        top: el.scrollHeight,
+        behavior: "smooth",
+      });
+    };
+    scrollBottom();
+    const t1 = setTimeout(scrollBottom, 120);
+    const t2 = setTimeout(scrollBottom, 350);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [messages, loading]);
 
   const getTimeString = () => {
@@ -359,26 +392,39 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
           {messages.map((msg) => (
             <motion.div
               key={msg.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
+              initial={
+                msg.sender === "user"
+                  ? { opacity: 0, x: 28, scale: 0.94 }
+                  : { opacity: 0, x: -16, y: 10, scale: 0.97 }
+              }
+              animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 380,
+                damping: 26,
+              }}
               className={`flex items-start gap-2.5 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               {/* Bot Avatar on Left */}
               {msg.sender === "bot" && (
-                <div className="w-7 h-10 rounded border border-[#e5c07b]/40 overflow-hidden shrink-0 mt-1 shadow bg-[#0a0715]">
+                <motion.div
+                  initial={{ scale: 0.75, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 24 }}
+                  className="w-7 h-10 rounded border border-[#e5c07b]/40 overflow-hidden shrink-0 mt-1 shadow-[0_0_12px_rgba(229,192,123,0.35)] bg-[#0a0715]"
+                >
                   <CardImage
                     image={`${persona.cardImage || "major-02.jpg"}`}
                     alt={persona.nameTh}
                     className="w-full h-full object-cover object-top"
                     sizes="32px"
                   />
-                </div>
+                </motion.div>
               )}
 
               <div className={`flex flex-col gap-1 ${msg.sender === "user" ? "items-end max-w-[85%]" : "items-start max-w-[88%]"}`}>
                 {msg.sender === "user" ? (
-                  <div className="rounded-2xl rounded-tr-xs bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-semibold px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-[0_4px_15px_rgba(212,175,55,0.2)]">
+                  <div className="rounded-2xl rounded-tr-xs bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-semibold px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-[0_4px_20px_rgba(212,175,55,0.25)] select-text">
                     {msg.text}
                   </div>
                 ) : (
@@ -419,17 +465,19 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
           ))}
         </AnimatePresence>
 
-        {/* Realistic Human-Like Typing Indicator */}
+        {/* Realistic Mystical Human-Like Typing Indicator */}
         {loading && (
           <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 380, damping: 25 }}
             className="flex items-start gap-2.5"
             role="status"
             aria-live="polite"
             aria-label={`${persona.nameTh} กำลังพิมพ์ตอบ`}
           >
-            <div className="w-7 h-10 rounded border border-[#e5c07b]/40 overflow-hidden shrink-0 mt-1 shadow bg-[#0a0715]">
+            <div className="w-7 h-10 rounded border border-[#e5c07b]/40 overflow-hidden shrink-0 mt-1 shadow-[0_0_12px_rgba(229,192,123,0.3)] bg-[#0a0715]">
               <CardImage
                 image={`${persona.cardImage || "major-02.jpg"}`}
                 alt={persona.nameTh}
@@ -437,15 +485,19 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 sizes="32px"
               />
             </div>
-            <div className="rounded-2xl rounded-tl-xs border border-[#e5c07b]/30 bg-[#19122c]/95 px-4 py-3 shadow-lg flex items-center gap-3">
+            <div className="rounded-2xl rounded-tl-xs border border-[#ffd700]/35 bg-gradient-to-r from-[#1c1233]/95 via-[#160e29]/95 to-[#120a22]/95 px-4 py-3 shadow-[0_0_25px_rgba(229,192,123,0.18)] flex items-center gap-3">
               <span className="flex items-center gap-1.5" aria-hidden="true">
                 {[0, 1, 2].map((i) => (
                   <motion.span
                     key={i}
-                    className="block h-2 w-2 rounded-full bg-gradient-to-r from-[#ffd700] to-[#e5c07b]"
-                    animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
+                    className="block h-2 w-2 rounded-full bg-gradient-to-r from-[#ffd700] via-[#f7e7b4] to-[#c59b27] shadow-[0_0_8px_rgba(255,215,0,0.7)]"
+                    animate={{
+                      y: [0, -7, 0],
+                      scale: [0.85, 1.3, 0.85],
+                      opacity: [0.45, 1, 0.45],
+                    }}
                     transition={{
-                      duration: 0.85,
+                      duration: 0.95,
                       repeat: Infinity,
                       ease: "easeInOut",
                       delay: i * 0.18,
@@ -453,8 +505,9 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                   />
                 ))}
               </span>
-              <span className="font-serif-th text-xs text-[#f5deaa]">
-                {persona.nameTh} กำลังดูไพ่และพิมพ์ตอบ...
+              <span className="font-serif-th text-xs text-[#f5deaa] flex items-center gap-1.5">
+                <span className="text-[#ffd700] text-xs animate-pulse">✦</span>
+                <span>{persona.nameTh} กำลังหยั่งรู้ไพ่และพิมพ์ตอบ...</span>
               </span>
             </div>
           </motion.div>
@@ -464,23 +517,33 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       {/* ── 3. Quick Follow-Up Chips & Messenger Input Dock ── */}
       <div className="shrink-0 pt-2 border-t border-[#e5c07b]/15 space-y-2">
         {messages.length > 0 && !loading && (
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 px-0.5 pb-0.5">
-            <span className="text-[11px] text-[#e5c07b] font-serif-th font-semibold shrink-0">✦ ถามต่อด่วน:</span>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className="flex flex-wrap items-center gap-1.5 sm:gap-2 px-0.5 pb-0.5"
+          >
+            <span className="text-[11px] text-[#e5c07b] font-serif-th font-semibold shrink-0 flex items-center gap-1">
+              <span className="text-[#ffd700]">✦</span>
+              <span>ถามต่อด่วน:</span>
+            </span>
             {[
               { label: "สรุปเป็นข้อๆ", query: "ช่วยสรุปคำแนะนำให้ฉันหน่อยเป็นข้อๆ แบบเข้าใจง่าย" },
               { label: "สิ่งที่ต้องระวัง", query: "สิ่งที่ฉันต้องระวังเป็นพิเศษจากไพ่ชุดนี้คืออะไร?" },
               { label: "แนวทางก้าวแรก", query: "แนวทางเริ่มต้นก้าวแรกที่ควรทำทันทีคืออะไร?" },
             ].map((chip, idx) => (
-              <button
+              <motion.button
                 key={idx}
                 type="button"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => sendMessage(chip.query)}
-                className="text-[11px] text-[#cfc8e2] bg-[#160f29] hover:bg-[#251945] hover:text-[#ffd700] border border-[#e5c07b]/30 hover:border-[#ffd700]/60 rounded-full px-3 py-1 transition-all cursor-pointer font-serif-th shadow-sm"
+                className="text-[11px] text-[#cfc8e2] bg-gradient-to-r from-[#170f2b] to-[#1c1236] hover:from-[#26174a] hover:to-[#311c5e] hover:text-[#ffd700] border border-[#e5c07b]/30 hover:border-[#ffd700]/70 rounded-full px-3.5 py-1.5 transition-all cursor-pointer font-serif-th shadow-sm hover:shadow-[0_0_12px_rgba(255,215,0,0.2)] active:scale-95"
               >
                 "{chip.label}"
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {chatLocked ? (
@@ -547,15 +610,17 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 aria-label="พิมพ์คำถามถึงแม่หมอ"
                 className="no-focus-ring min-w-0 flex-1 bg-transparent font-serif-th text-xs sm:text-sm text-[#f5deaa] placeholder-[#9c93b8]/60 border-none outline-none focus:outline-none focus:border-none focus:ring-0 !shadow-none"
               />
-              <button
+              <motion.button
                 type="submit"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
                 disabled={loading || !input.trim()}
-                className="h-9 w-9 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] flex items-center justify-center font-bold shadow hover:scale-105 active:scale-95 disabled:opacity-40 disabled:scale-100 transition-all shrink-0 cursor-pointer"
+                className="h-9 w-9 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] flex items-center justify-center font-bold shadow hover:shadow-[0_0_15px_rgba(255,215,0,0.5)] disabled:opacity-40 disabled:scale-100 transition-all shrink-0 cursor-pointer"
                 aria-label="ส่งข้อความ"
                 title="ส่งคำถาม"
               >
                 <span className="text-sm">✦</span>
-              </button>
+              </motion.button>
             </div>
 
             {!isUnlimited && (
