@@ -79,7 +79,8 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
           <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} size="sm" />
           <span className="hidden sm:inline">{view.badgeLabel}</span>
           <span className="sm:hidden font-mono">
-            {view.remaining}/{view.limit}
+            {/* มีรอบที่เติมไว้ ยอดรวมจะเกินเพดานรายวัน — โชว์เศษส่วนแล้วอ่านเป็น "6/3" งง */}
+            {view.remaining > view.limit ? view.remaining : `${view.remaining}/${view.limit}`}
           </span>
         </>
       )}

@@ -59,6 +59,8 @@ async function main() {
   const uid = `test_ent_${Date.now()}`;
   await upsertUserOnLogin({ id: uid, provider: "google", email: `${uid}@example.com`, name: "ทดสอบสิทธิ์" });
   const member: Viewer = { kind: "member", userId: uid };
+  /** จำนวนรอบที่จำลองว่าเติมมาจากการซื้อแพ็กเกจ (แทนโบนัสสมัครใหม่ที่ยกเลิกไปแล้ว) */
+  const TOPUP_ROUNDS = 3;
 
   const em0 = await getEntitlement(member);
   check("สมาชิกใหม่ (ยังไม่โบนัส): dailyRemaining = 3", em0.dailyRemaining === DAILY_LIMIT);
@@ -66,13 +68,19 @@ async function main() {
   check("สมาชิก: canChat = true", em0.canChat === true);
   check("สมาชิก: resetAt ไม่ใช่ null", em0.resetAt !== null);
 
-  // grantSignupBonus + idempotent (เกณฑ์: ให้ซ้ำไม่ได้)
+  // นโยบาย 2026-09-02: เลิกแจกโบนัสสมัครใหม่ — grantSignupBonus ต้องไม่เพิ่มสิทธิ์ให้ใครอีก
+  check("ปิดโบนัสแจกฟรี: SIGNUP_BONUS = 0", SIGNUP_BONUS === 0);
   await grantSignupBonus(uid);
   await grantSignupBonus(uid); // เรียกซ้ำ
-  await grantBonus(uid, 99, "signup"); // reason เดิม — ต้องไม่เพิ่ม
+  const emNoBonus = await getEntitlement(member);
+  check("สมัครใหม่ไม่ได้โบนัส: bonusRemaining = 0", emNoBonus.bonusRemaining === 0);
+
+  // "รอบที่เติมไว้" จากการซื้อแพ็กเกจยังต้องทำงานเหมือนเดิม (idempotent ต่อ reason)
+  await grantBonus(uid, TOPUP_ROUNDS, "purchase_test_topup");
+  await grantBonus(uid, 99, "purchase_test_topup"); // reason เดิม — ต้องไม่เพิ่ม
   const em1 = await getEntitlement(member);
-  check("grantSignupBonus idempotent: bonusRemaining = 3 (ไม่ใช่ 6 หรือ 105)", em1.bonusRemaining === SIGNUP_BONUS);
-  check("สมาชิกหลังโบนัส: remaining = 6", em1.remaining === DAILY_LIMIT + SIGNUP_BONUS);
+  check("เติมรอบ idempotent: bonusRemaining = 3 (ไม่ใช่ 6 หรือ 102)", em1.bonusRemaining === TOPUP_ROUNDS);
+  check("สมาชิกหลังเติมรอบ: remaining = 6", em1.remaining === DAILY_LIMIT + TOPUP_ROUNDS);
 
   // ── 4. ลำดับการหัก: daily ก่อน bonus (เกณฑ์ข้อ 5) ──
   check("หัก #1", (await consumeReading(member, `r_${uid}_1`)) === true);
@@ -193,11 +201,11 @@ async function main() {
   // ── 9b. โบนัสเปลี่ยนผ่าน (grandfather) — เพิ่มบน signup, idempotent ต่อ reason ──
   const gfUid = `test_gf_${Date.now()}`;
   await upsertUserOnLogin({ id: gfUid, provider: "google", email: `${gfUid}@e.com`, name: "ผู้ใช้เก่า" });
-  await grantSignupBonus(gfUid);
+  await grantSignupBonus(gfUid); // ไม่แจกแล้ว — ต้องไม่บวกเพิ่ม
   await grantBonus(gfUid, 10, "grandfather");
   await grantBonus(gfUid, 10, "grandfather"); // ซ้ำ — ต้องไม่เพิ่ม
   const gfEnt = await getEntitlement({ kind: "member", userId: gfUid });
-  check("grandfather + signup: bonusRemaining = 13 (3+10, ไม่ใช่ 23)", gfEnt.bonusRemaining === 13);
+  check("grandfather: bonusRemaining = 10 (ไม่ใช่ 13 หรือ 20)", gfEnt.bonusRemaining === 10);
   await softDeleteUser(gfUid);
 
   // ── 11. เติมแพ็กเกจโควตา (AI Reading Credit Packages) ──

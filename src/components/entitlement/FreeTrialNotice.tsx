@@ -50,7 +50,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
   const isGuest = view.isGuest;
 
   return (
-    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#e5c07b]/25 bg-gradient-to-r from-[#120c22]/90 to-[#0a0714]/90 px-4 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.55)] backdrop-blur">
+    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#e5c07b]/25 bg-gradient-to-r from-[#120c22]/90 to-[#0a0714]/90 px-4 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.55)]">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e5c07b]/30 bg-[#1a1030] text-[#ffd700]">
         {isGuest ? <SparkSealIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
       </span>
@@ -63,8 +63,8 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
           {isGuest
             ? `อ่านคำทำนายเต็มทุกองก์ · หลังใช้ครบ สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อวันละ ${DAILY_LIMIT} ครั้ง`
             : countdown
-            ? `โควตาฟรีชุดใหม่ ${countdown} · โบนัสสะสมใช้ได้ตลอด ไม่มีวันหมดอายุ`
-            : "โควตาฟรีรีเซ็ตทุกเที่ยงคืน · โบนัสสะสมใช้ได้ตลอด"}
+            ? `โควตาฟรีชุดใหม่ ${countdown} · รอบที่เติมไว้ใช้ได้ตลอด ไม่มีวันหมดอายุ`
+            : "โควตาฟรีรีเซ็ตทุกเที่ยงคืน · รอบที่เติมไว้ใช้ได้ตลอด"}
         </p>
       </div>
 

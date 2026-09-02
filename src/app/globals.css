@@ -220,6 +220,12 @@ html {
   text-size-adjust: 100%;
   /* Smooth momentum scrolling on iOS */
   -webkit-overflow-scrolling: touch;
+  /*
+   * จองรางแถบเลื่อนไว้ตลอด — เวลาเปิดโมดัล (Modal ล็อก body overflow เป็น hidden)
+   * แถบเลื่อนจะหายไปแล้วเนื้อหาทั้งหน้าเลื่อนกระตุกไปทางขวา ~15px
+   * scrollbar-gutter ทำให้ความกว้างคงที่ ไม่ว่าจะล็อกสกรอลล์อยู่หรือไม่
+   */
+  scrollbar-gutter: stable;
 }
 
 /* Hide scrollbar on horizontal card fan (touch-scroll only) */

@@ -160,7 +160,7 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
   const hasQuota = remaining > 0;
   const tone: QuotaTone = !hasQuota ? "empty" : remaining <= 1 ? "low" : "ample";
 
-  const bonusSuffix = bonus > 0 ? ` (+ โบนัสสะสม ${bonus} ครั้ง)` : "";
+  const bonusSuffix = bonus > 0 ? ` (+ รอบที่เติมไว้ ${bonus} ครั้ง)` : "";
 
   return {
     enabled: true,
@@ -193,10 +193,6 @@ export const MEMBER_BENEFITS: Array<{ title: string; detail: string }> = [
   {
     title: `เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง`,
     detail: "รีเซ็ตให้ใหม่ทุกเที่ยงคืน สำหรับผังมาตรฐาน 1–4 ใบ",
-  },
-  {
-    title: `โบนัสต้อนรับอีก ${SIGNUP_BONUS} ครั้ง`,
-    detail: "ได้ทันทีที่สมัครเสร็จ เก็บไว้ใช้วันไหนก็ได้ ไม่มีวันหมดอายุ",
   },
   {
     title: "คุยถามแม่หมอต่อได้หลังเปิดไพ่",
@@ -237,7 +233,7 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     primaryLabel: "ปลดล็อกญาณพยากรณ์พิเศษ",
     primaryAction: "credits",
     secondaryLabel: "ไว้พรุ่งนี้ค่อยมาใหม่",
-    reassurance: "รอบสะสมไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ 10 ใบและถามเจาะลึกได้ไม่จำกัด",
+    reassurance: "รอบที่เติมไว้ไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ 10 ใบและถามเจาะลึกได้ไม่จำกัด",
   },
   members_only: {
     eyebrow: "เฉพาะสมาชิก",
@@ -246,7 +242,7 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     primaryLabel: "สมัครสมาชิกฟรี",
     primaryAction: "signup",
     secondaryLabel: "มีบัญชีอยู่แล้ว เข้าสู่ระบบ",
-    reassurance: `สมัครฟรี ได้โบนัสเปิดไพ่อีก ${SIGNUP_BONUS} ครั้งทันที`,
+    reassurance: `สมัครฟรี ไม่ต้องผูกบัตร · เปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`,
   },
   explore: {
     eyebrow: "สิทธิ์การใช้งาน",
@@ -264,7 +260,7 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     primaryLabel: `ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
     primaryAction: "credits",
     secondaryLabel: "เลือกผังมาตรฐาน 1–4 ใบไปก่อน",
-    reassurance: "รอบสะสมไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ 20 ผัง + คุยเจาะลึกไม่จำกัด",
+    reassurance: "รอบที่เติมไว้ไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ 20 ผัง + คุยเจาะลึกไม่จำกัด",
   },
   master_persona: {
     eyebrow: "✦ ปรมาจารย์ลับ",
@@ -273,7 +269,7 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     primaryLabel: `ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
     primaryAction: "credits",
     secondaryLabel: "เลือกแม่หมอพื้นฐาน 3 ท่านไปก่อน",
-    reassurance: "รอบสะสมไม่มีวันหมดอายุ · ปลดล็อกปรมาจารย์ + ถามเจาะลึกไม่จำกัด",
+    reassurance: "รอบที่เติมไว้ไม่มีวันหมดอายุ · ปลดล็อกปรมาจารย์ + ถามเจาะลึกไม่จำกัด",
   },
 };
 
@@ -309,7 +305,6 @@ export const ACCESS_PLANS: AccessPlan[] = [
     highlight: "แนะนำ",
     features: [
       { label: `เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง (ผังมาตรฐาน)`, included: true },
-      { label: `โบนัสต้อนรับ ${SIGNUP_BONUS} ครั้งแรก`, included: true },
       { label: "คุยถามแม่หมอต่อ 2 คำถาม/รอบ", included: true },
       { label: "เก็บประวัติคำทำนายข้ามเครื่อง", included: true },
       { label: "ขอลบข้อมูลทั้งหมดได้ทุกเมื่อ", included: true },
@@ -325,7 +320,7 @@ export const ACCESS_PLANS: AccessPlan[] = [
       { label: "วิเคราะห์จังหวะเวลา (Timing) & ไพ่เงา", included: true },
       { label: "คุยถามแม่หมอเจาะลึกได้ไม่จำกัด", included: true },
       { label: "วอลเปเปอร์ยันต์ 4K & ใบดวงชะตาทองคำ", included: true },
-      { label: "รอบสะสมไม่มีวันหมดอายุ ไม่ใช่รายเดือน", included: true },
+      { label: "รอบที่เติมไว้ไม่มีวันหมดอายุ ไม่ใช่รายเดือน", included: true },
     ],
   },
 ];

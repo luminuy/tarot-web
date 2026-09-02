@@ -253,7 +253,8 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
             animate="visible"
             exit="exit"
             style={{
-              transform: "translateZ(0)",
+              // ห้ามใส่ transform ตายตัวตรงนี้ — motion อนิเมต y ผ่าน transform อยู่
+              // ถ้าใส่ไว้ React จะเขียนทับกลางอนิเมชันแล้วพาเนลกระตุก (บทเรียน INC ครั้งนี้)
               WebkitBackfaceVisibility: "hidden",
               backfaceVisibility: "hidden",
             }}

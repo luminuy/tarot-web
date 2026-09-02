@@ -31,7 +31,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
         aria-modal="true"
         aria-label={`ซูมดูไพ่ ${card.nameTh} (${card.nameEn})`}
         onClick={onClose}
-        className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl cursor-zoom-out"
+        className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/95 cursor-zoom-out"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.85, y: 30 }}

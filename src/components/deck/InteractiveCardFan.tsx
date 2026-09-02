@@ -222,7 +222,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
         </div>
 
         {/* Masterpiece Sacred Selection Slim Progress Dock */}
-        <div className="border-t border-[#e5c07b]/25 bg-[#090614]/90 p-3 sm:p-5 backdrop-blur-2xl flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 relative z-20">
+        <div className="border-t border-[#e5c07b]/25 bg-[#090614]/96 p-3 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 relative z-20">
           {/* Left: Layered Sacred Deck Emblem & Status */}
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {/* Tarot Deck Seal Icon */}
