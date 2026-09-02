@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
-import { CheckMarkIcon, HourglassIcon, SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
+import { HourglassIcon, SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import {
-  MEMBER_BENEFITS,
+  DAILY_LIMIT,
   UPGRADE_COPY,
   describeEntitlement,
   formatResetCountdown,
@@ -15,14 +15,19 @@ import { trackEntitlementEvent } from "@/lib/entitlement/track";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 
 /**
- * การ์ดกั้นสิทธิ์บนขั้นเลือกผัง
+ * แถบแจ้งสิทธิ์บนขั้นเลือกผัง
  * ------------------------------------------------------------------
- * ของเดิม: สิทธิ์หมด → **ลบหน้าเลือกผังทิ้งทั้งหน้า** เหลือกล่องเล็ก ๆ กล่องเดียว
- * ผู้ใช้จึงมองไม่เห็นว่าเว็บนี้มีอะไรให้บ้าง = เสียทั้งความรู้สึกและโอกาสสมัคร
+ * รุ่นแรก: สิทธิ์หมด → ลบหน้าเลือกผังทิ้งทั้งหน้า เหลือกล่องเล็ก ๆ กล่องเดียว
+ * รุ่นสอง: การ์ดกั้นใบใหญ่คาไว้บนหัว — ยังเลือกผังได้ก็จริง แต่กินครึ่งจอมือถือ
+ *          และพูดเรื่องเดียวกับหน้าต่างสิทธิ์ (AccessDialog) ซ้ำอีกรอบตอนกดเริ่ม
  *
- * ของใหม่: ยัง **เลือกดูผังทั้ง 20 แบบได้ตามปกติ** (การดูไม่ใช่การใช้สิทธิ์)
- * แค่ขึ้นการ์ดอธิบายไว้ด้านบนว่าทำไมกดเริ่มไม่ได้ และทำอย่างไรต่อ
- * ส่วนการบังคับสิทธิ์จริงอยู่ฝั่ง server เสมอ (การซ่อนปุ่มไม่ใช่การบังคับสิทธิ์)
+ * รุ่นนี้ (Value-first + Just-in-time):
+ *  1. เหลือ **แถบบาง 1 บรรทัด** บอกสถานะ ไม่ขวางทาง ไม่ใช่กำแพง
+ *  2. เลือกดูผังทั้ง 20 แบบได้ตามปกติ (การดูไม่ใช่การใช้สิทธิ์)
+ *  3. ปุ่ม "เริ่มเปิดไพ่" เปลี่ยนถ้อยคำล่วงหน้าเมื่อสิทธิ์หมด (กันเซอร์ไพรส์ตอนกด)
+ *  4. ปิดการขายที่ AccessDialog ตอนกดจริง — จังหวะที่ผู้ใช้ตั้งใจสูงสุด
+ *
+ * การบังคับสิทธิ์จริงอยู่ฝั่ง server เสมอ (การซ่อนปุ่มไม่ใช่การบังคับสิทธิ์)
  */
 export function EntitlementGate({
   active,
@@ -57,74 +62,45 @@ export function EntitlementGate({
   const copy = UPGRADE_COPY[reason];
   const isGuest = view.isGuest;
 
+  const ctaLabel = isGuest ? "สมัครฟรี" : "เติมรอบเปิดไพ่";
+
   return (
-    <div className="space-y-8">
-      <section
+    <div className="space-y-6">
+      {/* แถบแจ้งสิทธิ์แบบบาง — บอกสถานะ ไม่ขวางทาง ไม่ซ้ำกับหน้าต่างสิทธิ์ตอนกดเริ่ม */}
+      <div
         aria-live="polite"
-        className="altar-panel mx-auto max-w-2xl rounded-3xl border border-[#e5c07b]/35 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.75)] sm:p-7"
+        className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-r from-[#160d2a]/90 to-[#0a0714]/90 px-4 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.55)] backdrop-blur"
       >
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center self-center rounded-2xl border border-[#e5c07b]/40 bg-[#1a1030] text-[#ffd700] shadow-[0_0_20px_rgba(229,192,123,0.25)] sm:self-start">
-            {isGuest ? <SealedLockIcon className="h-5 w-5" /> : <HourglassIcon className="h-5 w-5" />}
-          </span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e5c07b]/35 bg-[#1a1030] text-[#ffd700]">
+          {isGuest ? <SealedLockIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
+        </span>
 
-          <div className="min-w-0 flex-1 space-y-4 text-center sm:text-left">
-            <div className="space-y-2">
-              <h2 className="font-serif-th text-lg font-bold font-mystic-gold sm:text-xl">{copy.title}</h2>
-              <p className="font-serif-th text-sm leading-relaxed text-[#cfc8e2]">{copy.body}</p>
-            </div>
-
-            {/* สถานะสิทธิ์ + เวลารีเซ็ต */}
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-xl border border-[#e5c07b]/15 bg-[#0a0714]/70 px-3 py-2 sm:justify-start">
-              <QuotaPips remaining={view.remaining} limit={view.limit} tone="empty" />
-              <span className="font-serif-th text-[11px] text-[#9c93b8]">{view.statusLine}</span>
-              {!isGuest && countdown && (
-                <span className="font-serif-th text-[11px] text-[#e5c07b]">· โควตาใหม่ {countdown}</span>
-              )}
-            </div>
-
-            {/* สิทธิ์ที่จะได้ — เฉพาะกรณีชวนสมัคร */}
-            {isGuest && (
-              <ul className="grid gap-1.5 text-left sm:grid-cols-2">
-                {MEMBER_BENEFITS.map((b) => (
-                  <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#cfc8e2]">
-                    <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#ffd700]" />
-                    {b.title}
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <div className="flex flex-col gap-2.5 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => onRequestUpgrade(reason)}
-                className="flex-1 rounded-2xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-6 py-3.5 font-serif-th text-sm font-bold text-[#05040a] shadow-[0_0_25px_rgba(212,175,55,0.4)] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
-              >
-                <span className="mr-1.5">✦</span>
-                {copy.primaryLabel}
-              </button>
-              <button
-                type="button"
-                onClick={() => onRequestUpgrade("explore")}
-                className="rounded-2xl border border-[#e5c07b]/30 px-5 py-3.5 font-serif-th text-xs text-[#cfc8e2] transition-colors hover:bg-[#191230] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
-              >
-                เทียบสิทธิ์แต่ละแบบ
-              </button>
-            </div>
-
-            <p className="font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">{copy.reassurance}</p>
-          </div>
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <p className="font-serif-th text-xs font-semibold text-[#f5deaa] sm:text-sm">{copy.title}</p>
+          <p className="font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+            {isGuest
+              ? `สมัครฟรีเปิดต่อวันละ ${DAILY_LIMIT} ครั้ง · เลือกดูผังไว้ก่อนได้`
+              : countdown
+              ? `โควตาฟรีชุดใหม่ ${countdown} · เลือกดูผังไว้ก่อนได้`
+              : view.statusLine}
+          </p>
         </div>
-      </section>
+
+        <div className="flex items-center gap-3">
+          <QuotaPips remaining={view.remaining} limit={view.limit} tone="empty" />
+          <button
+            type="button"
+            onClick={() => onRequestUpgrade(reason)}
+            className="min-h-[36px] shrink-0 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-4 py-1.5 font-serif-th text-[11px] font-bold text-[#05040a] shadow-[0_0_18px_rgba(212,175,55,0.35)] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
+          >
+            <span className="mr-1">✦</span>
+            {ctaLabel}
+          </button>
+        </div>
+      </div>
 
       {/* ยังเลือกดูผังได้ตามปกติ — การดูไม่กินสิทธิ์ */}
-      <div className="space-y-2">
-        <p className="text-center font-serif-th text-[11px] text-[#9c93b8]">
-          <span className="text-[#e5c07b]">✦</span> เลือกดูผังทั้งหมดไว้ก่อนได้ ผังที่เลือกไว้จะรออยู่ตรงนี้เมื่อคุณได้สิทธิ์แล้ว
-        </p>
-        {children}
-      </div>
+      {children}
     </div>
   );
 }

@@ -52,7 +52,13 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
   };
 
   return (
-    <section className="altar-panel mx-auto mt-6 max-w-2xl overflow-hidden rounded-3xl border border-[#e5c07b]/30 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.6)] sm:p-6">
+    <section
+      className={`altar-panel mx-auto mt-6 max-w-2xl overflow-hidden rounded-3xl p-5 sm:p-6 ${
+        usedUpTrial
+          ? "border-2 border-[#ffd700]/60 shadow-[0_0_40px_rgba(255,215,0,0.22),0_18px_50px_rgba(0,0,0,0.6)]"
+          : "border border-[#e5c07b]/30 shadow-[0_18px_50px_rgba(0,0,0,0.6)]"
+      }`}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 gap-3">
           <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#e5c07b]/35 bg-[#1a1030] text-[#ffd700] sm:flex">
