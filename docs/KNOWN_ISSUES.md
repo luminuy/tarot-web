@@ -17,10 +17,10 @@
 
 | หัวข้อ | ค่า |
 | :--- | :--- |
-| **วันที่** | 2026-08-31 |
-| **commit ฐาน** | `main` (`451b057`) — PR #24 Consolidated Platform Upgrades |
-| **วิธีตรวจ** | dev server + `npm run repo:verify` (7/7 ด่าน) + `npm run build` (91 static pages) + Edge deploy |
-| **ผลสรุป** | ✅ **ISSUE-001, ISSUE-002, ISSUE-003, ISSUE-008, ISSUE-009, ISSUE-010, ISSUE-010b, ISSUE-011 แก้ไขและทดสอบสมบูรณ์ 100%** |
+| **วันที่** | 2026-09-02 |
+| **commit ฐาน** | `main` — Production Live (`seertarot.net`) |
+| **วิธีตรวจ** | dev server + `npm run repo:verify` (21/21 ด่าน) + Cloudflare Workers Deploy |
+| **ผลสรุป** | ✅ **ISSUE-001, ISSUE-002, ISSUE-003, ISSUE-008, ISSUE-009, ISSUE-010, ISSUE-010b, ISSUE-011, ISSUE-012, ISSUE-016 แก้ไขและทดสอบสมบูรณ์ 100%** |
 
 ### 🗂️ ดัชนีสถานะปัญหาและข้อจำกัดของระบบ
 
@@ -33,7 +33,7 @@
 | **004** | 🔵 Note | รัน `wrangler dev` บน macOS 12.6 ไม่ได้ | (สภาพแวดล้อมเครื่อง) | 🔵 ข้อจำกัด OS เครื่อง (ใช้ dev server แทน) |
 | **006** | 🔵 Note | GitHub Actions runner configuration | `.github/workflows/*.yml` | 🟢 อัปเกรด Node 22 รองรับครบ |
 | **007** | 🟢 Resolved | ~~Prisma schema พร้อมต่อ PostgreSQL~~ → ย้ายไป Cloudflare D1 แล้ว | `wrangler.jsonc`, `migrations/`, `src/lib/platform/db.ts` | ✅ **ปิดแล้ว** — ไม่ใช้ Prisma · D1 ใช้งานจริง |
-| **012** | 🟡 Config | อีเมล/โดเมน/LINE ยังไม่ตั้ง (email signup พัง 500 บน prod · Google login ปกติ) | secrets, `src/lib/email/send.ts` | 📋 เจ้าของทำทีหลัง — ดู [`docs/PENDING_SETUP.md`](PENDING_SETUP.md) · **ไม่ปิดฟีเจอร์ (ตัดสินใจ 2026-09-01)** |
+| **012** | 🟢 Resolved | อีเมล/โดเมน/LINE ตั้งค่าครบถ้วนสมบูรณ์ (seertarot.net, LINE, Resend) | secrets, `src/lib/config/site.ts` | ✅ **แก้แล้ว** — ผูกโดเมน seertarot.net, LINE, Resend ครบ 100% |
 | **016** | 🟢 Resolved | คำอ่าน AI ตกไป mock/fallback → `usage=0` → ระบบสิทธิ์ไม่หักโควตา ทุกคนเปิดไพ่ไม่จำกัด | `src/lib/ai/gemini.ts`, secrets | ✅ **แก้แล้ว** (PR #104–110) — ตั้ง `GEMINI_API_KEY` + แก้ชื่อโมเดล 3.6/3.7 + request body + thought-parts + responseJsonSchema · verify curl guest flow: คำอ่านจริง 3 องก์ + `remaining` 1→0 + start#2 403 |
 
 ---
