@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0050 · 2026-09-02 10:19 · 🟡 Medium · strip auth query params from URL via replaceState and verify user session before displaying login banner
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ผู้ใช้ยังไม่ได้เข้าสู่ระบบ แต่หน้าเว็บแสดงแบนเนอร์สีเขียว เข้าสู่ระบบเรียบร้อยแล้ว เนื่องจาก URL มี auth_success=1 ค้างอยู่ |
+| **สาเหตุราก** | พารามิเตอร์ auth_success ไม่เคยถูกล้างออกจาก URL ผ่าน history.replaceState ทำให้ค้างใน address bar และ page.tsx สั่งแสดงแบนเนอร์โดยไม่ได้ตรวจว่ามี session ผู้ใช้จริงหรือไม่ |
+| **การแก้ไข** | ล้าง auth query params ออกจาก URL ทันทีด้วย window.history.replaceState และตรวจ fetchSessionUser ก่อนแสดงแบนเนอร์เข้าสู่ระบบสำเร็จ |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามแสดงแบนเนอร์สถานะยืนยันตัวตนโดยไม่ตรวจเซสชันจริง และต้องล้าง query string ที่ทำงานเสร็จแล้วออกจาก address bar เสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน repo:verify ผ่านครบ 16 ด่าน และทดสอบเปิดหน้าเว็บที่มี auth_success=1 โดยไม่มีเซสชันจะไม่แสดงแบนเนอร์ |
+| **บันทึกโดย** | Antigravity AI · branch `fix/auth-success-param-cleanup` · commit `b4c39b1` |
+
+
 ### INC-0049 · 2026-09-02 10:10 · 🟠 High · cap PBKDF2 iterations to 100,000 for Cloudflare Workers Web Crypto compatibility and relax signup rate limit
 
 | หัวข้อ | รายละเอียด |
