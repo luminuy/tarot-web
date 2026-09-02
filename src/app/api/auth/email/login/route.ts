@@ -15,7 +15,7 @@ export const runtime = "nodejs";
  * และเวลาตอบจะสั้นกว่าเคสมีบัญชีอย่างเห็นได้ชัด
  */
 const DUMMY_PASSWORD_HASH =
-  "pbkdf2$sha256$150000$BwcHBwcHBwcHBwcHBwcHBw$CwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCws";
+  "pbkdf2$sha256$100000$BwcHBwcHBwcHBwcHBwcHBw$CwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCws";
 
 const LoginSchema = z.object({
   email: z.string().trim().email("รูปแบบอีเมลไม่ถูกต้อง").max(120),

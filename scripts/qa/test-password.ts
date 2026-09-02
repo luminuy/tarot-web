@@ -29,7 +29,7 @@ async function runPasswordTests() {
 
   console.log(`  ✓ 1. hashPassword สำเร็จ (เวลา: ${duration}ms, hash: ${hash.slice(0, 35)}...)`);
 
-  if (!hash.startsWith("pbkdf2$sha256$150000$")) {
+  if (!hash.startsWith("pbkdf2$sha256$100000$")) {
     throw new Error(`❌ Format ของ password hash ไม่ถูกต้อง: ${hash}`);
   }
 

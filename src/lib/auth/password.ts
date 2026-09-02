@@ -3,7 +3,9 @@
  * ออกแบบมาเพื่อทำงานบน Cloudflare Workers / Node.js runtime โดยไม่มี external dependencies
  */
 
-const ITERATIONS = 150_000;
+// Cloudflare Workers Web Crypto จำกัด iteration counts สูงสุดไม่เกิน 100,000
+// เกินกว่านี้จะเกิด NotSupportedError: Pbkdf2 failed: iteration counts above 100000 are not supported
+const ITERATIONS = 100_000;
 const KEYLEN = 32; // 256 bits
 
 /**

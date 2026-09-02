@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0049 · 2026-09-02 10:10 · 🟠 High · cap PBKDF2 iterations to 100,000 for Cloudflare Workers Web Crypto compatibility and relax signup rate limit
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ผู้ใช้กดสมัครสมาชิกด้วยอีเมลแล้วขึ้น ไม่สามารถสร้างบัญชีได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง และพอกดซ้ำติด Rate Limit คุณทำรายการบ่อยเกินไป กรุณารออีก 1577 วินาที |
+| **สาเหตุราก** | Cloudflare Workers Web Crypto API จำกัด PBKDF2 iterations ไม่เกิน 100,000 แต่โค้ดตั้งไว้ 150,000 ทำให้ crypto.subtle.deriveBits โยน NotSupportedError ส่งผลให้ route signup ตอบ 500 และ rate limit เพดานแคบทำให้ผู้ใช้ถูกล็อก 1 ชั่วโมง |
+| **การแก้ไข** | ปรับ ITERATIONS เป็น 100,000 ใน password.ts และ login/route.ts, ขยายเพดาน signup rate limit เป็น pairMax 8 และเคลียร์ bucket เมื่อสำเร็จ, ล้างคีย์ rate limit ค้างใน KV ทั้งหมด |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามตั้ง PBKDF2 iterations เกิน 100,000 บน Cloudflare Workers เด็ดขาด และล้าง rate limit อัตโนมัติเมื่อสมัครสำเร็จ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน repo:verify ผ่านครบ 16 ด่าน และทดสอบแฮชและ verify ในรันไทม์ได้ 100,000 รอบอย่างถูกต้อง |
+| **บันทึกโดย** | Antigravity AI · branch `fix/pbkdf2-iterations-cloudflare-limit` · commit `3f2f440` |
+
+
 ### INC-0048 · 2026-09-02 09:30 · 🟠 High · ลบบัญชีแล้วสมัครด้วยอีเมลเดิมไม่ได้อีกเลย — คืนชีพแถวเดิมแทนการ INSERT ทับ
 
 | หัวข้อ | รายละเอียด |
