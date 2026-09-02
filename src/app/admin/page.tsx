@@ -22,14 +22,19 @@ const EntitlementAdmin = dynamic(() => import("@/components/admin/EntitlementAdm
   ssr: false,
   loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>,
 });
+const AiHealthPanel = dynamic(() => import("@/components/admin/AiHealthPanel"), {
+  ssr: false,
+  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>,
+});
 
-type Tab = "stats" | "content" | "readers" | "entitlement";
+type Tab = "stats" | "content" | "readers" | "entitlement" | "ai";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "stats", label: "สถิติ" },
   { id: "content", label: "เนื้อหา (prompt / ไพ่ / AI)" },
   { id: "readers", label: "แม่หมอ (Marketplace)" },
   { id: "entitlement", label: "สิทธิ์เปิดไพ่" },
+  { id: "ai", label: "สุขภาพ AI" },
 ];
 
 export default function AdminHome() {
@@ -98,6 +103,8 @@ export default function AdminHome() {
           <ContentEditor />
         ) : tab === "readers" ? (
           <ReadersManager />
+        ) : tab === "ai" ? (
+          <AiHealthPanel />
         ) : (
           <EntitlementAdmin />
         )}
