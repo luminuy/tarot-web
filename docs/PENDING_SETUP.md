@@ -80,7 +80,13 @@ npx wrangler secret put EMAIL_FROM          # แม่หมอลูมิน�
 - จดโดเมนอื่น → ต้องแก้ `luminuy.com` ในไฟล์เหล่านี้:
   - `src/app/layout.tsx` (`metadataBase`), `src/app/sitemap.ts`, `src/app/robots.ts`
   - `src/lib/security/anti-theft.ts` (allowlist host), `src/lib/email/send.ts` (EMAIL_FROM default)
+  - **`src/lib/security/app-origin.ts` (allowlist โดเมนสำหรับประกอบลิงก์ในอีเมลและ OAuth redirect_uri)**
   - `next.config.ts`? · docs ต่าง ๆ
+
+> 🔐 **แนะนำให้ตั้ง `APP_ORIGIN` ด้วย** (เช่น `npx wrangler secret put APP_ORIGIN` → `https://tarot.luminuy.com`)
+> ตอนนี้ยังไม่ได้ตั้ง ระบบจึงตกไปใช้ allowlist ใน `app-origin.ts` แทน ซึ่งปลอดภัยแล้ว
+> (ก่อนหน้านี้ไม่มี allowlist — ใครส่ง `X-Forwarded-Host` เข้ามาก็สั่งให้ระบบส่งลิงก์ตั้งรหัสผ่านใหม่
+> พร้อม token จริงไปโดเมนตัวเองได้) แต่การตั้ง `APP_ORIGIN` ตรง ๆ ชัดเจนกว่าและไม่ต้องพึ่ง allowlist
 - ผูก Custom Domain ใน Cloudflare Workers dashboard → Settings → Domains & Routes
 
 **ได้อะไร:** URL สวย + ปลดล็อกอีเมล (ข้อ 1)

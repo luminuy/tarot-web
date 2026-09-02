@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { z } from "zod";
-import { verifyUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser } from "@/lib/auth/session";
 import { updateJournalOutcome, deleteJournalItem } from "@/lib/journal/journal.repo";
 
 export const runtime = "nodejs";
@@ -12,10 +11,7 @@ const UpdateOutcomeSchema = z.object({
 });
 
 async function getAuthenticatedUserId(): Promise<string | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("tarot_auth_session")?.value;
-  if (!token) return null;
-  const user = await verifyUserSession(token);
+  const user = await getSessionUser();
   return user?.id || null;
 }
 

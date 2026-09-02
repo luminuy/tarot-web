@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { AUTH_COOKIE_NAME, signUserSession } from "@/lib/auth/edge-auth";
+import { signUserSession } from "@/lib/auth/edge-auth";
+import { setAuthCookie } from "@/lib/auth/session";
 import { issueToken } from "@/lib/auth/auth-tokens.repo";
 import { hashPassword } from "@/lib/auth/password";
 import { validatePasswordPolicy } from "@/lib/auth/password-policy";
@@ -9,6 +10,7 @@ import { accountExistsHtml, resetPasswordHtml, verifyEmailHtml } from "@/lib/ema
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { createEmailUser, getUserByEmail, normalizeEmail } from "@/lib/users/users.repo";
+import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
 
@@ -17,13 +19,6 @@ const SignupSchema = z.object({
   password: z.string().min(10, "รหัสผ่านต้องมีความยาวอย่างน้อย 10 ตัวอักษร").max(200, "รหัสผ่านยาวเกินไป"),
   name: z.string().trim().min(1, "กรุณาระบุชื่อของคุณ").max(80, "ชื่อยาวเกินไป"),
 });
-
-function getOriginUrl(request: Request): string {
-  const url = new URL(request.url);
-  const rawHost = request.headers.get("x-forwarded-host") || url.host;
-  const protocol = request.headers.get("x-forwarded-proto") || (url.protocol.replace(":", ""));
-  return process.env.APP_ORIGIN || `${protocol}://${rawHost}`;
-}
 
 export async function POST(request: Request) {
   if (!isRequestAuthorizedOrigin(request)) {
@@ -55,7 +50,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: policy.reason || "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย" }, { status: 400 });
     }
 
-    const origin = getOriginUrl(request);
+    const origin = resolveAppOrigin(request);
     const existingUser = await getUserByEmail(emailLower);
 
     // Anti-Enumeration: หากมีบัญชีอยู่แล้ว ให้ตอบ 200 Generic และส่งอีเมลแจ้งเตือน
@@ -130,13 +125,7 @@ export async function POST(request: Request) {
       },
     });
 
-    response.cookies.set(AUTH_COOKIE_NAME, sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60,
-      path: "/",
-    });
+    setAuthCookie(response, sessionToken);
 
     return response;
   } catch (err) {

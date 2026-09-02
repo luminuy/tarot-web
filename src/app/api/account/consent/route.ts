@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { z } from "zod";
-import { verifyUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser } from "@/lib/auth/session";
 import { setMarketingConsent } from "@/lib/users/users.repo";
 
 export const runtime = "nodejs";
@@ -12,13 +11,7 @@ const ConsentSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("tarot_auth_session")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "ต้องเข้าสู่ระบบก่อนตั้งค่าความยินยอม" }, { status: 401 });
-    }
-
-    const user = await verifyUserSession(token);
+    const user = await getSessionUser();
     if (!user) {
       return NextResponse.json({ error: "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
     }

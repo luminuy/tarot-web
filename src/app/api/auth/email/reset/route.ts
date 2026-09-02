@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { AUTH_COOKIE_NAME, signUserSession } from "@/lib/auth/edge-auth";
+import { signUserSession } from "@/lib/auth/edge-auth";
+import { invalidateTokenVersionCache, setAuthCookie } from "@/lib/auth/session";
 import { consumeToken, invalidateUserTokens } from "@/lib/auth/auth-tokens.repo";
 import { hashPassword } from "@/lib/auth/password";
 import { validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { getUserById, setPasswordHash } from "@/lib/users/users.repo";
 
 export const runtime = "nodejs";
@@ -27,6 +29,15 @@ export async function POST(request: Request) {
     }
 
     const { token, password } = parsed.data;
+
+    // กันการยิง token มั่ว ๆ รัว ๆ ต่อ IP (token สุ่ม 32 ไบต์เดาไม่ได้จริง แต่ไม่ควรปล่อยให้ยิงฟรี)
+    const limit = await checkAuthRateLimit(request, "reset");
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
+        { status: 429 }
+      );
+    }
 
     // Consume single-use reset token
     const tokenResult = await consumeToken(token, "reset");
@@ -51,6 +62,8 @@ export async function POST(request: Request) {
     // Hash & Save (bumps token_version automatically)
     const newHash = await hashPassword(password);
     await setPasswordHash(user.id, newHash);
+    // เตะเซสชันเก่าทุกอุปกรณ์ทันที (จุดประสงค์หลักของการรีเซ็ตรหัสผ่าน)
+    invalidateTokenVersionCache(user.id);
     await invalidateUserTokens(user.id, "reset");
 
     // ดึงข้อมูลผู้ใช้ล่าสุดหลังอัปเดต token_version
@@ -77,13 +90,7 @@ export async function POST(request: Request) {
       },
     });
 
-    response.cookies.set(AUTH_COOKIE_NAME, sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60,
-      path: "/",
-    });
+    setAuthCookie(response, sessionToken);
 
     return response;
   } catch (err) {

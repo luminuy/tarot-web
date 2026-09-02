@@ -1,21 +1,14 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { AUTH_COOKIE_NAME, verifyUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser } from "@/lib/auth/session";
 import { issueToken } from "@/lib/auth/auth-tokens.repo";
 import { sendEmail } from "@/lib/email/send";
 import { verifyEmailHtml } from "@/lib/email/templates";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { getUserById } from "@/lib/users/users.repo";
+import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
-
-function getOriginUrl(request: Request): string {
-  const url = new URL(request.url);
-  const rawHost = request.headers.get("x-forwarded-host") || url.host;
-  const protocol = request.headers.get("x-forwarded-proto") || (url.protocol.replace(":", ""));
-  return process.env.APP_ORIGIN || `${protocol}://${rawHost}`;
-}
 
 export async function POST(request: Request) {
   if (!isRequestAuthorizedOrigin(request)) {
@@ -23,13 +16,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get(AUTH_COOKIE_NAME)?.value;
-    if (!sessionCookie) {
-      return NextResponse.json({ error: "กรุณาเข้าสู่ระบบก่อนทำรายการ" }, { status: 401 });
-    }
-
-    const session = await verifyUserSession(sessionCookie);
+    const session = await getSessionUser();
     if (!session?.id) {
       return NextResponse.json({ error: "เซสชันไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
     }
@@ -52,7 +39,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, message: "อีเมลของคุณได้รับการยืนยันเรียบร้อยแล้ว" });
     }
 
-    const origin = getOriginUrl(request);
+    const origin = resolveAppOrigin(request);
     const verifyToken = await issueToken(user.id, "verify", 24 * 60 * 60 * 1000);
     const verifyLink = `${origin}/api/auth/email/verify?token=${encodeURIComponent(verifyToken)}`;
 

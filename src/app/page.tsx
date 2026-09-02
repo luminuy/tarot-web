@@ -22,6 +22,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
+import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
 import { QuotaMeter } from "@/components/entitlement/QuotaMeter";
 import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
 import { FreeTrialNotice } from "@/components/entitlement/FreeTrialNotice";
@@ -144,13 +145,22 @@ export default function TarotPage() {
     setIsAuthOpen(true);
   };
 
+  // ดึงสถานะล็อกอินผ่านแคชกลาง — ยิง /api/auth/me ครั้งเดียวต่อหน้า ไม่ใช่ทุกครั้งที่
+  // เปิด/ปิดหน้าต่างเข้าสู่ระบบ (ของเดิมยิงซ้ำทุกครั้ง = อ่าน D1 ฟรี ๆ รอบละครั้ง)
+  const authWasOpenRef = useRef(false);
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.user) setCurrentUser(data.user);
-      })
-      .catch(() => {});
+    let alive = true;
+    // อ่านใหม่จริง ๆ เฉพาะจังหวะ "เพิ่งปิดหน้าต่างเข้าสู่ระบบ" (อาจเพิ่งล็อกอินสำเร็จ)
+    // ไม่ใช่ทุกครั้งที่ effect ทำงาน ไม่งั้นจะไปล้างแคชที่คอมโพเนนต์ลูกเพิ่งเติมไว้
+    if (authWasOpenRef.current && !isAuthOpen) invalidateSessionCache();
+    authWasOpenRef.current = isAuthOpen;
+
+    fetchSessionUser().then((user) => {
+      if (alive && user) setCurrentUser(user);
+    });
+    return () => {
+      alive = false;
+    };
   }, [isAuthOpen]);
 
   // Selection state
@@ -278,7 +288,7 @@ export default function TarotPage() {
       } else if (verifyError) {
         setAuthBanner({ type: "error", text: "ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือถูกใช้งานไปแล้ว" });
       } else if (authError) {
-        setAuthBanner({ type: "error", text: authError });
+        setAuthBanner({ type: "error", text: describeAuthError(authError) });
       }
 
       if (isAuthSuccess || isVerified || isPwReset) {

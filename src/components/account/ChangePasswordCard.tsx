@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
+import { useSessionUser } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 
 export function ChangePasswordCard() {
-  const [user, setUser] = useState<{ id: string; email?: string; provider: string; name: string } | null>(null);
-  const [hasPassword, setHasPassword] = useState(false);
+  const { user, refresh } = useSessionUser();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,18 +17,11 @@ export function ChangePasswordCard() {
 
   const strength = calculatePasswordStrength(newPassword);
 
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.user) {
-          setUser(data.user);
-          // Check if user has password
-          setHasPassword(data.user.provider === "email");
-        }
-      })
-      .catch(() => {});
-  }, []);
+  // ต้องอ่านจากฐานข้อมูลจริง (`hasPassword`) ไม่ใช่เดาจาก provider —
+  // บัญชี Google/LINE ที่ตั้งรหัสผ่านเพิ่มไว้แล้วก็ต้องกรอกรหัสผ่านเดิม
+  // ของเดิมเดาว่า `provider === "email"` เท่านั้น ทำให้คนกลุ่มนี้ส่งฟอร์มแล้วโดน
+  // "กรุณาระบุรหัสผ่านเดิม" ทุกครั้งโดยไม่มีช่องให้กรอก
+  const hasPassword = user?.hasPassword ?? user?.provider === "email";
 
   if (!user) return null;
 
@@ -53,13 +46,14 @@ export function ChangePasswordCard() {
       const res = await fetch("/api/account/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({
           oldPassword: oldPassword || undefined,
           newPassword,
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({} as { error?: string }));
       if (!res.ok) {
         throw new Error(data.error || "ไม่สามารถเปลี่ยนรหัสผ่านได้");
       }
@@ -69,7 +63,8 @@ export function ChangePasswordCard() {
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setHasPassword(true);
+      // token_version เพิ่งถูกเพิ่ม → ต้องอ่านโปรไฟล์ใหม่ (hasPassword เปลี่ยนเป็น true แล้ว)
+      await refresh();
     } catch (err: any) {
       setErrorMsg(err.message || "เกิดข้อผิดพลาด");
     } finally {

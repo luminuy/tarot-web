@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
+import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
 import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
@@ -136,52 +137,78 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     window.location.href = "/api/auth/line";
   };
 
+  /**
+   * ยิง API แล้วอ่าน JSON แบบไม่พัง
+   * ⚠️ `res.json()` เปล่า ๆ จะโยน "Unexpected end of JSON input" เมื่อเซิร์ฟเวอร์ตอบ
+   * 500/502 โดยไม่มี body — ผู้ใช้จะเห็นข้อความภาษาอังกฤษของ JS แทนคำอธิบายไทย
+   * (บทเรียน INC-0026 · เกิดจริงกับ signup บน production ตอนยังไม่ตั้งค่าอีเมล)
+   */
+  const postJson = async (url: string, payload: Record<string, unknown>, fallbackError: string) => {
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      throw new Error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่");
+    }
+
+    const data = (await res.json().catch(() => ({}))) as { error?: string; message?: string; user?: unknown };
+    if (!res.ok) {
+      throw new Error(data.error || fallbackError);
+    }
+    return data;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // กันกดส่งซ้ำระหว่างรอผล (ของเดิมกดรัวได้ → ชนเพดาน rate limit ตัวเอง)
     setErrorMsg(null);
     setSuccessMsg(null);
     setLoading(true);
 
+    // ตัดช่องว่างหัวท้ายเสมอ — คีย์บอร์ดมือถือเติมช่องว่างท้ายอีเมลให้อัตโนมัติบ่อยมาก
+    const emailValue = email.trim();
+    const nameValue = name.trim();
+
     try {
       if (mode === "signin") {
-        const res = await fetch("/api/auth/email/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-        }
+        await postJson(
+          "/api/auth/email/login",
+          { email: emailValue, password },
+          "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+        );
         soundManager.playCardSelectSound();
+        invalidateSessionCache();
         window.location.reload();
       } else if (mode === "signup") {
-        const res = await fetch("/api/auth/email/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, name }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "ไม่สามารถสร้างบัญชีได้");
-        }
+        const data = await postJson(
+          "/api/auth/email/signup",
+          { email: emailValue, password, name: nameValue },
+          "ไม่สามารถสร้างบัญชีได้",
+        );
         soundManager.playCardSelectSound();
         if (data.user) {
+          invalidateSessionCache();
           window.location.reload();
         } else {
           setSuccessMsg(data.message || "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว");
         }
       } else if (mode === "forgot") {
-        const res = await fetch("/api/auth/email/forgot", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-        const data = await res.json();
+        // ต้องเช็ก res.ok ด้วย — ของเดิมโดน 429 แล้วยังขึ้น "ส่งลิงก์ให้แล้ว"
+        // ผู้ใช้เลยนั่งรออีเมลที่ไม่มีวันมา
+        const data = await postJson(
+          "/api/auth/email/forgot",
+          { email: emailValue },
+          "ไม่สามารถส่งลิงก์ตั้งรหัสผ่านใหม่ได้ กรุณาลองใหม่อีกครั้ง",
+        );
         setSuccessMsg(data.message || "หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว");
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }

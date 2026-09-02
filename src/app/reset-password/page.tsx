@@ -63,10 +63,12 @@ function ResetPasswordForm() {
       const res = await fetch("/api/auth/email/reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ token, password }),
       });
 
-      const data = await res.json();
+      // กัน "Unexpected end of JSON input" เมื่อเซิร์ฟเวอร์ตอบโดยไม่มี body (INC-0026)
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
 
       if (!res.ok) {
         throw new Error(data.error || "ไม่สามารถตั้งรหัสผ่านใหม่ได้");

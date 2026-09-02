@@ -1,19 +1,12 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyUserSession } from "@/lib/auth/edge-auth";
+import { getSessionUser } from "@/lib/auth/session";
 import { countPendingOlderThan } from "@/lib/journal/journal.repo";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("tarot_auth_session")?.value;
-    if (!token) {
-      return NextResponse.json({ count: 0 });
-    }
-
-    const user = await verifyUserSession(token);
+    const user = await getSessionUser();
     if (!user) {
       return NextResponse.json({ count: 0 });
     }

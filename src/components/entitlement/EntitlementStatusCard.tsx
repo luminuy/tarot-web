@@ -13,6 +13,7 @@ import {
   resetClockLabel,
 } from "@/lib/entitlement/copy";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { useSessionUser } from "@/lib/auth/use-session";
 
 const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
@@ -28,16 +29,9 @@ const BuyCreditsModal = dynamic(
 export function EntitlementStatusCard() {
   const ent = useEntitlement();
   const view = describeEntitlement(ent);
-  const [user, setUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
+  const { user } = useSessionUser();
   const [buyOpen, setBuyOpen] = useState(false);
   const [countdown, setCountdown] = useState("");
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setUser(d?.user ?? null))
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (!ent?.resetAt) return;

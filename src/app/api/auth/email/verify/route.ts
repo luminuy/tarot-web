@@ -1,21 +1,16 @@
 import { NextResponse } from "next/server";
-import { AUTH_COOKIE_NAME, signUserSession } from "@/lib/auth/edge-auth";
+import { signUserSession } from "@/lib/auth/edge-auth";
+import { setAuthCookie } from "@/lib/auth/session";
 import { consumeToken } from "@/lib/auth/auth-tokens.repo";
 import { getUserById, markEmailVerified } from "@/lib/users/users.repo";
+import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
-
-function getOriginUrl(request: Request): string {
-  const url = new URL(request.url);
-  const rawHost = request.headers.get("x-forwarded-host") || url.host;
-  const protocol = request.headers.get("x-forwarded-proto") || (url.protocol.replace(":", ""));
-  return process.env.APP_ORIGIN || `${protocol}://${rawHost}`;
-}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const token = url.searchParams.get("token");
-  const origin = getOriginUrl(request);
+  const origin = resolveAppOrigin(request);
 
   if (!token) {
     return NextResponse.redirect(`${origin}/?verify_error=invalid`);
@@ -44,13 +39,7 @@ export async function GET(request: Request) {
         tokenVersion: user.tokenVersion,
       });
 
-      response.cookies.set(AUTH_COOKIE_NAME, sessionToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 30 * 24 * 60 * 60,
-        path: "/",
-      });
+      setAuthCookie(response, sessionToken);
     }
 
     return response;

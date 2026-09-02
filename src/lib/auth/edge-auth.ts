@@ -110,6 +110,9 @@ export async function verifyPayload<T = Record<string, unknown>>(token: string):
 export async function signUserSession(profile: UserProfile): Promise<string> {
   const payload = JSON.stringify({
     ...profile,
+    // ปักหมุดเป็นตัวเลขเสมอ เพื่อให้ฝั่งตรวจเทียบรุ่นเซสชันได้โดยไม่ต้องเดา undefined
+    tokenVersion: typeof profile.tokenVersion === "number" ? profile.tokenVersion : 0,
+    iat: Date.now(),
     exp: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days session
   });
   const encodedPayload = base64UrlEncode(payload);
@@ -176,6 +179,8 @@ export async function verifyUserSession(token: string): Promise<UserProfile | nu
       return null; // Expired
     }
 
+    // ⚠️ ต้องคืน `tokenVersion` ออกไปด้วยเสมอ — ถ้าตกหล่น ทุกคนที่เคยเปลี่ยน/รีเซ็ตรหัสผ่าน
+    // (token_version ≥ 1) จะถูกระบบเตะออกทันทีที่ /api/auth/me ตรวจรุ่นเซสชัน (INC login-audit)
     return {
       id: payload.id,
       provider: payload.provider,
@@ -183,6 +188,7 @@ export async function verifyUserSession(token: string): Promise<UserProfile | nu
       name: payload.name,
       avatar: payload.avatar,
       createdAt: payload.createdAt,
+      tokenVersion: typeof payload.tokenVersion === "number" ? payload.tokenVersion : 0,
     };
   } catch {
     return null;

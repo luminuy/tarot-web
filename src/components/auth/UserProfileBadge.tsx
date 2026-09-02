@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import type { UserProfile } from "@/lib/auth/edge-auth";
+import { invalidateSessionCache, patchSessionUser, useSessionUser } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 
 export interface UserProfileBadgeProps {
@@ -9,42 +9,38 @@ export interface UserProfileBadgeProps {
 }
 
 export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthModal }) => {
-  const [user, setUser] = useState<
-    (UserProfile & { marketingConsent?: boolean; emailVerified?: boolean }) | null
-  >(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useSessionUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data.user || null);
-        setLoading(false);
-        if (data.user) {
-          fetch("/api/journal/pending-count")
-            .then((r) => r.json())
-            .then((res) => {
-              if (res.count && typeof res.count === "number") {
-                setPendingCount(res.count);
-              }
-            })
-            .catch(() => {});
-        }
+    if (!user) {
+      setPendingCount(0);
+      return;
+    }
+    let alive = true;
+    fetch("/api/journal/pending-count")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((res) => {
+        if (alive && typeof res?.count === "number") setPendingCount(res.count);
       })
-      .catch(() => {
-        setUser(null);
-        setLoading(false);
-      });
-  }, []);
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [user]);
 
   const handleLogout = async () => {
     soundManager.playCardSelectSound();
-    await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
     setMenuOpen(false);
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+    } catch {
+      // ต่อเซิร์ฟเวอร์ไม่ได้ — ยังต้องล้างสถานะฝั่งหน้าเว็บและรีโหลดอยู่ดี
+    }
+    // ล้างแคชก่อนรีโหลด ไม่งั้นหน้าที่โหลดใหม่อาจหยิบผู้ใช้คนเดิมจากแคชในหน่วยความจำ
+    invalidateSessionCache();
     window.location.reload();
   };
 
@@ -53,19 +49,20 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
     await fetch("/api/account/consent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({ marketing: consent }),
     }).catch(() => {});
-    if (user) {
-      setUser({ ...user, marketingConsent: consent });
-    }
+    patchSessionUser({ marketingConsent: consent });
   };
 
   const handleResendVerify = async () => {
     soundManager.playCardSelectSound();
     setResendStatus("กำลังส่ง…");
     try {
-      const res = await fetch("/api/auth/email/resend", { method: "POST" });
-      const data = await res.json();
+      const res = await fetch("/api/auth/email/resend", { method: "POST", credentials: "same-origin" });
+      // API อาจตอบ 500 โดยไม่มี body — `res.json()` ที่ไม่กันไว้จะโยน
+      // "Unexpected end of JSON input" ขึ้นหน้าจอผู้ใช้แทนข้อความไทย (บทเรียน INC-0026)
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setResendStatus("✓ ส่งแล้ว");
         setTimeout(() => setResendStatus(null), 3000);
