@@ -43,8 +43,8 @@ export const metadata: Metadata = {
     "Provably Fair Tarot",
   ],
   authors: [{ name: "วิหารพยากรณ์ไพ่ทาโรต์" }],
-  creator: "Luminuy Sanctuary",
-  publisher: "Luminuy Sanctuary",
+  creator: "SeerTarot Sanctuary",
+  publisher: "SeerTarot Sanctuary",
   robots: {
     index: true,
     follow: true,

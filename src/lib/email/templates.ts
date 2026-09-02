@@ -96,13 +96,13 @@ function baseLayout(contentHtml: string, title: string): string {
   <div class="wrapper">
     <div class="card">
       <div class="brand">
-        <div class="brand-title">✦ LUMINUY TAROT ✦</div>
+        <div class="brand-title">✦ SEERTAROT ✦</div>
         <div class="brand-sub">วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์</div>
       </div>
       ${contentHtml}
     </div>
     <div class="footer">
-      อีเมลนี้ส่งจากระบบอัตโนมัติของ Luminuy Tarot หากท่านไม่ได้เป็นผู้ทำรายการ กรุณาเพิกเฉยต่ออีเมลนี้
+      อีเมลนี้ส่งจากระบบอัตโนมัติของ SeerTarot หากท่านไม่ได้เป็นผู้ทำรายการ กรุณาเพิกเฉยต่ออีเมลนี้
     </div>
   </div>
 </body>
@@ -124,7 +124,7 @@ export function verifyEmailHtml(link: string, name?: string): string {
       <a href="${link}" style="color: #d4a72c;">${link}</a>
     </div>
   `;
-  return baseLayout(content, "ยืนยันที่อยู่อีเมลของคุณ — Luminuy Tarot");
+  return baseLayout(content, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot");
 }
 
 export function resetPasswordHtml(link: string, name?: string): string {
@@ -132,7 +132,7 @@ export function resetPasswordHtml(link: string, name?: string): string {
   const content = `
     <h1>คำขอตั้งรหัสผ่านใหม่</h1>
     <p>${greeting},</p>
-    <p>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชี Luminuy Tarot ของคุณ หากคุณเป็นผู้ส่งคำขอนี้ สามารถตั้งรหัสผ่านใหม่ได้โดยกดปุ่มด้านล่าง</p>
+    <p>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชี SeerTarot ของคุณ หากคุณเป็นผู้ส่งคำขอนี้ สามารถตั้งรหัสผ่านใหม่ได้โดยกดปุ่มด้านล่าง</p>
     <div class="btn-container">
       <a href="${link}" class="btn">✦ ตั้งรหัสผ่านใหม่</a>
     </div>
@@ -142,7 +142,7 @@ export function resetPasswordHtml(link: string, name?: string): string {
       <a href="${link}" style="color: #d4a72c;">${link}</a>
     </div>
   `;
-  return baseLayout(content, "คำขอตั้งรหัสผ่านใหม่ — Luminuy Tarot");
+  return baseLayout(content, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot");
 }
 
 export function accountExistsHtml(name?: string): string {
@@ -150,8 +150,8 @@ export function accountExistsHtml(name?: string): string {
   const content = `
     <h1>การแจ้งเตือนเกี่ยวกับบัญชีของคุณ</h1>
     <p>${greeting},</p>
-    <p>มีการพยายามสมัครสมาชิกด้วยอีเมลนี้บน Luminuy Tarot แต่ที่อยู่อีเมลนี้มีบัญชีในระบบเรียบร้อยแล้ว</p>
+    <p>มีการพยายามสมัครสมาชิกด้วยอีเมลนี้บน SeerTarot แต่ที่อยู่อีเมลนี้มีบัญชีในระบบเรียบร้อยแล้ว</p>
     <p>หากคุณจำรหัสผ่านไม่ได้ สามารถกดขอรีเซ็ตรหัสผ่านได้จากหน้าเข้าสู่ระบบ หรือหากเข้าใช้งานผ่าน Google / LINE สามารถเข้าสู่ระบบได้ตามปกติ</p>
   `;
-  return baseLayout(content, "การแจ้งเตือนเกี่ยวกับบัญชี — Luminuy Tarot");
+  return baseLayout(content, "การแจ้งเตือนเกี่ยวกับบัญชี — SeerTarot");
 }
