@@ -141,12 +141,10 @@ npx wrangler secret put UNLIMITED_EMAILS    # คั่นด้วย comma เ
 
 - นับใน stat `ratelimit_bypass:unlimited_user` · dev: `UNLIMITED_EMAILS=...` ใน `.env.local`
 
-### 5. D1 Migrations ไม่รันอัตโนมัติตอน deploy
+### 5. ✅ D1 Migrations รันอัตโนมัติตอน deploy แล้ว
 
-`.github/workflows/deploy.yml` ไม่มีขั้น `wrangler d1 migrations apply`
-- ตารางของ marketplace/users/journal/email (0001–0006) — apply ด้วยมือไปแล้ว (ฟีเจอร์ทำงานอยู่)
-- ตาราง entitlement (0007) — ใช้ปุ่ม **"เตรียมฐานข้อมูล"** ในแท็บ "สิทธิ์เปิดไพ่" แทน (หรือ `npm run db:migrate`)
-- ถ้าเพิ่ม migration ใหม่ → ต้อง `npm run db:migrate` เอง หรือเพิ่มขั้นใน deploy.yml
+`.github/workflows/deploy.yml` มีขั้น **"🗄️ Apply D1 Migrations (remote)"** (`pnpm run db:migrate`) รันก่อน build & deploy ทุกครั้งที่ push เข้า `main` — idempotent (wrangler ข้าม migration ที่ apply แล้วเองจากตาราง `d1_migrations`) ไม่ต้อง apply ด้วยมืออีก แค่เพิ่มไฟล์ migration ใหม่ในโฟลเดอร์ `migrations/` แล้ว merge เข้า main ก็พอ
+- ต้องการ `CLOUDFLARE_API_TOKEN` ที่มีสิทธิ์ **D1:Edit** เพิ่มจากเดิม (Workers Scripts:Edit + Workers KV Storage:Edit) — ถ้าขาดสิทธิ์ ขั้นนี้จะ fail ระบุชัดว่าขาดอะไร
 
 ---
 
