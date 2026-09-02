@@ -37,7 +37,7 @@ export type TarotAnalyticsEvent =
   | {
       name: "share_click";
       params: {
-        platform: "facebook" | "twitter" | "threads" | "tiktok" | "copy" | "native" | "story_download" | "post_download";
+        platform: "facebook" | "instagram" | "twitter" | "threads" | "tiktok" | "copy" | "native" | "story_download" | "post_download";
         spread_id?: string;
       };
     }

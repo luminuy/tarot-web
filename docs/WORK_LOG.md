@@ -34,6 +34,27 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-02: ปรับแต่ง Favicon ตราประทับไพ่ทาโรต์ทองคำ และเปลี่ยนชื่อ Browser Tab นำหน้าด้วย SeerTarot
+
+**คำขอของผู้ใช้**:
+- *"favicon ยังไม่ได้ใส่เลย ใช่รูปไพ่ เเบบโลโก้ก็ได้ รูป2 เป็นชื่อเว็บขึ้น seertarot เเละต่ออะไรก็ได้ตามสมควร"*
+
+**สิ่งที่พัฒนาและสร้างใหม่เสร็จสมบูรณ์**:
+1. **สร้าง Favicon และ App Icon สไตล์ไพ่ทาโรต์เวทมนตร์ (`src/app/icon.svg`, `public/icon.svg`)**:
+   - ออกแบบ Vector SVG ตราสัญลักษณ์ไพ่ทาโรต์ 1909: ตัวการ์ดมนขอบทองคำประกายดาว 8 แฉก (Celestial 8-Pointed Star) ตรงกลาง พร้อมประกายเวทมนตร์สีม่วง-ทอง คมชัดบนทุกความละเอียด
+   - เรนเดอร์ไฟล์ขนาดมาตรฐานด้วย `sharp`:
+     - `public/favicon.ico` และ `src/app/favicon.ico` (32x32)
+     - `src/app/apple-icon.png` (180x180 สำหรับ Safari & iOS Home Screen)
+     - `public/icons/icon-192x192.png` และ `public/icons/icon-512x512.png` (สำหรับ PWA Manifest)
+2. **เปลี่ยนชื่อแท็บบราวเซอร์ขึ้นต้นด้วย "SeerTarot" เสมอ (`src/app/layout.tsx`)**:
+   - หน้าแรก: `SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI`
+   - เทมเพลตหน้ารอง: `%s · SeerTarot` (เช่น สารานุกรมไพ่ 78 ใบ · SeerTarot, คลัง 20 ผังพยากรณ์ · SeerTarot)
+   - เชื่อมโยงแท็ก `<link rel="icon">` และ `<link rel="apple-touch-icon">` ครบถ้วน
+3. **อัปเดต PWA Manifest (`src/app/manifest.ts`)**:
+   - ปรับชื่อแอปเป็น `SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite` และ short_name เป็น `SeerTarot`
+
+---
+
 ### 🗓️ 2026-09-02: เปิดตัวระบบแชร์ 4 โซเชียลมีเดีย, ปรึกษาแม่หมอตัวจริง และระบบวัดผล GA4 / Meta Pixel
 
 **คำขอของผู้ใช้**:
