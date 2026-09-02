@@ -6,6 +6,8 @@
 import { hashPassword, isPasswordConfigError, verifyPassword } from "../../src/lib/auth/password";
 import {
   createEmailUser,
+  getUserByEmailIncludingDeleted,
+  reviveEmailUser,
   findUserIdByOAuth,
   getUserByEmail,
   getUserPasswordHash,
@@ -160,9 +162,56 @@ async function runPasswordTests() {
   }
   console.log("  ✓ 11. PASSWORD_PEPPER: แฮชผูกกับ pepper · ลืมตั้งบน prod = โยน config error ไม่ใช่ 'รหัสผ่านผิด'");
 
+  // ── 12. ลบบัญชีแล้วต้องสมัครด้วยอีเมลเดิมได้อีก (INC-0048) ────────────────
+  // UNIQUE INDEX บน email_lower ไม่สนใจ deleted_at แถวที่ลบแล้วยังจองอีเมลไว้
+  // ถ้า signup เช็กด้วย getUserByEmail() อย่างเดียวจะมองไม่เห็น แล้ว INSERT ชน unique
+  const revivalEmail = `revive_${Date.now()}@example.com`;
+  const firstAccount = await createEmailUser({
+    email: revivalEmail,
+    name: "รอบแรก",
+    passwordHash: await hashPassword("FirstAccountPass2026!#"),
+  });
+  await softDeleteUser(firstAccount.id);
+
+  if (await getUserByEmail(revivalEmail)) {
+    throw new Error("❌ getUserByEmail ยังเห็นบัญชีที่ถูกลบไปแล้ว");
+  }
+  const ghost = await getUserByEmailIncludingDeleted(revivalEmail);
+  if (!ghost) {
+    throw new Error(
+      "❌ getUserByEmailIncludingDeleted มองไม่เห็นแถวที่ถูก soft-delete — " +
+        "signup จะไป INSERT ทับแล้วชน UNIQUE INDEX จนสมัครด้วยอีเมลเดิมไม่ได้อีกเลย",
+    );
+  }
+
+  const revived = await reviveEmailUser({
+    id: ghost.id,
+    email: revivalEmail,
+    name: "กลับมาใหม่",
+    passwordHash: await hashPassword("SecondAccountPass2026!#"),
+  });
+  if (revived.id !== firstAccount.id) {
+    throw new Error("❌ คืนชีพแล้วได้ id ใหม่ — โบนัสสมัครใหม่จะถูกแจกซ้ำได้ไม่จำกัด");
+  }
+  if (revived.deletedAt) throw new Error("❌ คืนชีพแล้ว deleted_at ยังไม่ถูกล้าง");
+  if (!revived.hasPassword) throw new Error("❌ คืนชีพแล้วไม่มีรหัสผ่านใหม่");
+  if (revived.emailVerified) throw new Error("❌ คืนชีพแล้วต้องเริ่มนับยืนยันอีเมลใหม่");
+  if (revived.tokenVersion <= firstAccount.tokenVersion) {
+    throw new Error("❌ คืนชีพแล้วต้องเพิ่ม token_version เพื่อเตะเซสชันเก่าออก");
+  }
+
+  const loginAgain = await getUserByEmail(revivalEmail);
+  if (!loginAgain) throw new Error("❌ คืนชีพแล้วยังหาบัญชีด้วยอีเมลไม่เจอ");
+  const revivedHash = await getUserPasswordHash(loginAgain.id);
+  if (!revivedHash || !(await verifyPassword("SecondAccountPass2026!#", revivedHash))) {
+    throw new Error("❌ คืนชีพแล้วล็อกอินด้วยรหัสผ่านใหม่ไม่ได้");
+  }
+  await softDeleteUser(firstAccount.id);
+  console.log("  ✓ 12. ลบบัญชีแล้วสมัครด้วยอีเมลเดิมได้อีก (คืนชีพ id เดิม กันโบนัสซ้ำ)");
+
   // Cleanup
   await softDeleteUser(createdUser.id);
-  console.log("  ✓ 12. Soft delete ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
+  console.log("  ✓ 13. Soft delete ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
 
   console.log("\n✨ [QA] Password Hashing & Email Auth Schema ผ่านครบทุกด่าน 100%!");
 }
