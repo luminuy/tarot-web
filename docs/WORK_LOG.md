@@ -34,6 +34,16 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ปิดงาน Cloudflare Free Stack — Cron (lazy prune) + Email Routing (doc) + สรุปที่บล็อกจริง
+
+- **Cron cleanup** → ทำเป็น **lazy prune** แทน (OpenNext 1.20.4 ไม่ export `scheduled()` · custom `main` เสี่ยงพัง deploy ทั้ง repo · worker แยกไม่คุ้ม)
+  - `src/lib/auth/auth-tokens.repo.ts` — `pruneExpiredAuthTokens(limit=200)` (export) · `issueToken()` เรียก ~5% ผ่าน `getWaitUntil()` fire-and-forget → ลบ `auth_tokens` หมดอายุเกิน 1 วัน
+- **Email Routing** → dashboard-only (โดเมน `seertarot.net` อยู่บน Cloudflare แล้ว — memory เก่าว่า "ยังไม่ซื้อโดเมน" ผิด) · ขั้นตอน forward support@/noreply@ อยู่ใน `CLOUDFLARE_FREE_STACK.md` §Wave 1-2
+- **บล็อกจริง (ทำไม่ได้)**: Durable Objects + Realtime — payoff คือห้องสด Marketplace ซึ่งยังไม่เปิด (รอ D1 provisioning + PDPA sign-off — เป็นการตัดสินใจเชิงธุรกิจ/กฎหมาย ไม่ใช่งานโค้ด)
+- **ผลการทดสอบ**: `tsc` ✅ · `repo:verify` 23/23 ✅
+
+---
+
 ### 🗓️ 2026-09-03: ✅ Cloudflare Free Stack เสร็จ — verified บน production ครบ 6 บริการ
 
 - **AI Gateway** (#189 #196) — log traffic คำอ่านจริง (`gemini-3.5-flash-lite` · $0.0018 · 2.9s) · cache แบบเลือกเส้น (คำอ่าน ttl 0)
