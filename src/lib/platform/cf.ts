@@ -111,6 +111,38 @@ export async function getAppKV(): Promise<AppKV> {
   return cachedKV;
 }
 
+/** ส่วนของ Workers AI binding ที่แอปนี้ใช้จริง (structural) */
+export interface AppAI {
+  run(
+    model: string,
+    input: Record<string, unknown>,
+  ): Promise<{ response?: string } & Record<string, unknown>>;
+}
+
+let cachedAI: AppAI | null | undefined;
+
+/**
+ * คืน Workers AI binding (`env.AI`) — ใช้กับตัวจำแนกความปลอดภัยชั้น 3
+ * dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกต้อง fail-open เอง)
+ */
+export async function getAiBinding(): Promise<AppAI | null> {
+  if (cachedAI !== undefined) return cachedAI;
+
+  try {
+    const ctx = await safelyGetCloudflareContext();
+    const binding = (ctx?.env as Record<string, unknown> | undefined)?.AI;
+    if (binding && typeof (binding as AppAI).run === "function") {
+      cachedAI = binding as AppAI;
+      return cachedAI;
+    }
+  } catch {
+    // ไม่มี Cloudflare context — ตกไป null
+  }
+
+  cachedAI = null;
+  return null;
+}
+
 /**
  * คืน execution context เพื่อใช้ `waitUntil` (งาน background เช่น บันทึกสถิติ)
  * ถ้าไม่มี (dev) จะคืน shim ที่รัน callback ทันทีแบบ fire-and-forget

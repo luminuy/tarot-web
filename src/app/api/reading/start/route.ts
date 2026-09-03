@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getSpread } from "@/data/spreads";
-import { checkQuestion } from "@/lib/safety/guardrails";
+import { checkQuestion, CRISIS_MESSAGE } from "@/lib/safety/guardrails";
+import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { createCommitment } from "@/lib/tarot/shuffle";
 import { saveReading, persistReading } from "@/server/store";
@@ -82,6 +83,13 @@ export async function POST(request: Request) {
   if (verdict.block) {
     recordEvents(["reading_blocked", `safety_flag:${verdict.flag}`]);
     return NextResponse.json({ blocked: true, message: verdict.message }, { status: 200 });
+  }
+
+  // ชั้น 3: ตัวจำแนกด้วย Workers AI — จับสัญญาณวิกฤตแบบอ้อมที่ regex ไม่จับ
+  // (เรียกเฉพาะเคสคลุมเครือ · fail-open ถ้า Workers AI ไม่พร้อม)
+  if (await assessCrisisRisk(textToScan)) {
+    recordEvents(["reading_blocked", "safety_flag:crisis_ai"]);
+    return NextResponse.json({ blocked: true, message: CRISIS_MESSAGE }, { status: 200 });
   }
 
   // ── สิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 1: ล็อกขั้น 1 · ยังไม่หัก) ──
