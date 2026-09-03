@@ -11,15 +11,15 @@
 | Wave | บริการ | สถานะ | PR |
 | :--- | :--- | :--- | :--- |
 | 1-1 | **AI Gateway** — log ค่าใช้จ่าย/latency ทุก provider + cache แบบเลือกเส้น | ✅ **LIVE** (verified — log เห็น traffic คำอ่านจริง) | #189 #196 |
-| 1-2 | **Email Routing** | 🔴 บล็อก — รอซื้อโดเมน | — |
+| 1-2 | **Email Routing** | 🟢 พร้อมเปิด — dashboard-only (โดเมน `seertarot.net` อยู่บน Cloudflare แล้ว) · ดู §Wave 1-2 | — |
 | 1-3 | **Turnstile** — กันบอท signup/login/forgot | ✅ **LIVE** (verified — flow ครบ) | #191 #194 #197 |
 | 2-4 | **Workers AI** — safety guard ชั้น 3 (กฎ 6) | ✅ **LIVE** (auto) | #192 |
 | 2-5 | **KV ไพ่ประจำวันของทุกคน** | ✅ **LIVE** (deterministic + KV, ไม่ต้อง cron) | #198 |
-| — | Cron cleanup jobs | ⏳ ข้ามไว้ (โควตา rolling-window แล้ว · ต้อง worker แยก) | — |
+| — | Cron cleanup jobs | 🟢 ทำเป็น **lazy prune** แทน cron — `issueToken` เรียก `pruneExpiredAuthTokens()` ~5% ผ่าน `waitUntil` (OpenNext ไม่มี `scheduled()` · worker แยกไม่คุ้ม) | #206 |
 | 3-6 | **R2** — ลิงก์แชร์การ์ดมี OG image | ✅ **LIVE** (verified — round-trip PNG) · lifecycle 90 วันตั้งแล้ว | #201 #202 #203 |
 | 3-7 | **Vectorize** — ค้นหาเชิงความหมาย + "ไพ่ที่พลังงานใกล้เคียง" | ✅ **LIVE** (verified — `?q=` + related cards) · index มี 102 รายการ | #199 #200 |
-| 4-8 | **Durable Objects** | ⏳ payoff จริงตอนมี Marketplace | — |
-| 4-9 | **Realtime (SFU/TURN)** | 🔴 บล็อก — รอ Marketplace (D1 + PDPA) | — |
+| 4-8 | **Durable Objects** | 🔴 บล็อก — payoff คือห้องสด Marketplace · Marketplace ยังไม่เปิด (D1 provisioning + PDPA sign-off — `docs/specs/MARKETPLACE.md`) | — |
+| 4-9 | **Realtime (SFU/TURN)** | 🔴 บล็อก — ต้องมี Marketplace + Durable Objects ก่อน | — |
 
 ### 📌 ค่าที่ตั้งบน production แล้ว
 | ตัว | ค่า |
@@ -66,9 +66,17 @@
 
 ## Wave 1-2 — Email Routing
 
-**ทำอะไร:** รับเมลที่ `@seertarot.net` (support@, จัดการ bounce ของ noreply@) — ต่อกับระบบ email auth ที่มีอยู่
+**ทำอะไร:** รับเมลที่ `@seertarot.net` (support@, เห็น bounce ของ noreply@) — โดเมนอยู่บน Cloudflare แล้ว (`docs/PENDING_SETUP.md`)
 
-**บล็อก:** ยังไม่ได้ซื้อโดเมน (ดู `docs/PENDING_SETUP.md`) — Email Routing ตั้งค่าใน dashboard ล้วน แทบไม่มีโค้ด ทำได้ทันทีที่ domain ผูกกับ Cloudflare
+**dashboard-only · ไม่มีโค้ด** (แค่ forward ไป Gmail):
+1. Cloudflare → เลือกโดเมน `seertarot.net` → **Email** → **Email Routing** → **Enable**
+2. Cloudflare เพิ่ม MX + SPF records ให้อัตโนมัติ (กด Add records)
+3. **Custom addresses** → Add:
+   - `support@seertarot.net` → forward ไปอีเมลเจ้าของ (ต้อง verify อีเมลปลายทางครั้งเดียว)
+   - `noreply@seertarot.net` → forward ไปเจ้าของ (เห็น bounce/reply ที่หลุดมา)
+4. (ตัวเลือก) **Catch-all** → forward ทุกอย่างที่เหลือ
+
+**ถ้าต้องประมวลผลเมลด้วยโค้ด** (parse bounce อัตโนมัติ) — ต้อง Email Worker แยก · OpenNext ไม่ export `email()` handler · ยังไม่คุ้มตอนนี้
 
 ---
 
@@ -109,18 +117,15 @@
 
 ---
 
-## Wave 2-5 — KV ไพ่ประจำวัน + Cron
+## Wave 2-5 — KV ไพ่ประจำวัน 🟢 + Cron (ทำเป็น lazy prune)
 
-**Spike ก่อนลงมือ:** OpenNext (`@opennextjs/cloudflare`) export `scheduled()` handler ได้ไหม — ถ้าไม่ได้ ต้องเขียน worker wrapper เอง
+**Spike ผล:** OpenNext 1.20.4 **ไม่ export `scheduled()`** — `cli/templates/worker.js` copy ตรง ๆ ไม่มี hook · จะทำ cron ต้อง (ก) แก้ `main` ชี้ wrapper (เสี่ยงพัง deploy ทั้ง repo · verify ไม่ได้ถ้าไม่มี CF_API_TOKEN) หรือ (ข) worker แยกอีกตัว + deploy step ที่ 2
 
-**งาน:**
-- `kv_namespaces` เพิ่ม binding `DAILY_TAROT_KV` (แยกจาก `NEXT_INC_CACHE_KV`)
-- `triggers.crons`:
-  - `0 17 * * *` (= 00:00 ไทย) → สุ่มไพ่ประจำวัน (provably-fair seed จากวันที่) เขียนลง KV
-  - `30 18 * * *` → ลบ auth token หมดอายุ + แถว rate-limit เก่าใน D1
-- การ์ด "ไพ่ประจำวัน" บนหน้าแรกอ่านจาก KV (0ms edge) แทนสุ่มสดตอนโหลด
+**ที่ทำจริง:**
+- **ไพ่ประจำวัน** (#198) — ไม่ต้อง cron: deterministic จากวันที่ + KV edge cache · คนแรกของวันเขียน คนอื่นอ่าน
+- **Cron cleanup** → **lazy prune** (#206): `issueToken()` เรียก `pruneExpiredAuthTokens()` ~5% ของครั้ง ผ่าน `waitUntil` (fire-and-forget) — ลบ `auth_tokens` ที่หมดอายุเกิน 1 วัน batch 200 แถว · ไม่มี infra ใหม่ · เรียกตรงจาก `pruneExpiredAuthTokens()` ได้ถ้าอยากทำ endpoint
 
-**หมายเหตุ:** โควตารายวัน/สัปดาห์เป็น rolling-window (`lib/entitlement/week.ts`) อยู่แล้ว → cron ไม่เกี่ยวกับการรีเซ็ตโควตา
+**หมายเหตุ:** โควตารายวัน/สัปดาห์เป็น rolling-window (`lib/entitlement/week.ts`) อยู่แล้ว — ไม่ต้อง cron รีเซ็ต · `queue_tickets` (Marketplace) จะ prune ตอน Marketplace เปิด
 
 ---
 

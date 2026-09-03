@@ -1,7 +1,29 @@
 import { createHash, randomBytes } from "node:crypto";
 import { getAppDB } from "@/lib/platform/db";
+import { getWaitUntil } from "@/lib/platform/cf";
 
 export type AuthTokenKind = "verify" | "reset";
+
+/** เก็บ token ที่หมดอายุไว้ต่ออีก 1 วันก่อนลบ (กันแข่งเวลากับ consume ที่กำลังทำงาน) */
+const CLEANUP_GRACE_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * ลบ auth_tokens ที่หมดอายุแล้ว (bounded batch) — ไม่มี cron จึงเรียกแบบ lazy
+ * จาก `issueToken` ~5% ของครั้ง ผ่าน `waitUntil` (ไม่บล็อกผู้ใช้)
+ * export ไว้ให้ endpoint แอดมิน/สคริปต์เรียกตรงได้ด้วย
+ */
+export async function pruneExpiredAuthTokens(limit = 200): Promise<number> {
+  const db = await getAppDB();
+  const cutoff = Date.now() - CLEANUP_GRACE_MS;
+  const res = await db
+    .prepare(
+      `DELETE FROM auth_tokens
+       WHERE id IN (SELECT id FROM auth_tokens WHERE expires_at < ? LIMIT ?)`,
+    )
+    .bind(cutoff, limit)
+    .run();
+  return (res.meta as { changes?: number } | undefined)?.changes ?? 0;
+}
 
 /**
  * แฮช Token ดิบด้วย SHA-256 ก่อนจัดเก็บลงฐานข้อมูล เพื่อความปลอดภัยสูงสุด
@@ -33,6 +55,20 @@ export async function issueToken(
     )
     .bind(tokenId, userId, kind, tokenHash, expiresAt, now)
     .run();
+
+  // เก็บกวาด token หมดอายุแบบ lazy (~5% ของครั้ง · ไม่บล็อกผู้ใช้)
+  if (Math.random() < 0.05) {
+    try {
+      const waitUntil = await getWaitUntil();
+      waitUntil(
+        pruneExpiredAuthTokens().catch((e) =>
+          console.warn("[auth-tokens] lazy prune ล้มเหลว:", e),
+        ),
+      );
+    } catch {
+      /* ไม่มี exec context ก็ข้าม */
+    }
+  }
 
   return rawToken;
 }
