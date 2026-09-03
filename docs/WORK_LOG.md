@@ -34,6 +34,22 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: แก้ Turnstile ให้เปิดใช้ได้จริงผ่าน wrangler secret (เดิม NEXT_PUBLIC ใช้ไม่ได้กับ pipeline นี้)
+
+#### 1. site key ดึงตอน runtime แทน build-time
+- **ปัญหา**: `TurnstileWidget` (#191) อ่าน `NEXT_PUBLIC_TURNSTILE_SITE_KEY` — แต่ `deploy.yml` ไม่ส่ง env ตอน `next build` → inline เป็น `undefined` เสมอ → widget ไม่มีวันโผล่บน production (เหมือน `NEXT_PUBLIC_GA_ID` ที่ตายอยู่แล้ว)
+- **สิ่งที่ทำ**:
+  - `src/app/api/config/turnstile/route.ts` (ใหม่) — `GET` คืน `{ siteKey }` จาก `process.env` ตอน runtime (cache 5 นาที)
+  - `src/lib/security/turnstile.ts` — `getTurnstileSiteKey()` + `isTurnstileConfigured()` เช็ค **ทั้งคู่** (site + secret) · `verifyTurnstile` บังคับเฉพาะเมื่อครบคู่ (กันเคสตั้งครึ่งเดียวแล้วล็อกผู้ใช้)
+  - `TurnstileWidget.tsx` — fetch `/api/config/turnstile` ตอน mount · contract `onToken(null | "" | token)`: null=ด่านปิด, ""=รอผ่าน, token=ผ่าน
+  - `AuthModal.tsx` — `turnstileToken: string | null` · ปุ่มส่ง disable เฉพาะเมื่อ `=== ""`
+  - `.env.example` + `PENDING_SETUP` + `CLOUDFLARE_FREE_STACK`: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` → `TURNSTILE_SITE_KEY` (ตั้งผ่าน `wrangler secret put`)
+- **ไฟล์ที่แก้ไข**: `src/app/api/config/turnstile/route.ts` (ใหม่), `src/lib/security/turnstile.ts`, `src/components/auth/TurnstileWidget.tsx`, `src/components/auth/AuthModal.tsx`, `.env.example`, `docs/PENDING_SETUP.md`, `docs/plans/CLOUDFLARE_FREE_STACK.md`
+- **ผลการทดสอบ** (dev + test keys): config endpoint คืน siteKey/`null` ถูก · widget เรนเดอร์เมื่อมี key · submit gate ทำงาน · server: dummy token → ผ่าน · ไม่มี token (มี secret) → 403 · ไม่มี key เลย → ฟอร์มปกติ (401 creds) · `tsc` + `repo:verify` 21/21 ผ่าน
+- **ผลลัพธ์**: เจ้าของโปรเจกต์เปิด Turnstile ได้ด้วย `wrangler secret put TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` เท่านั้น (ไม่ต้องแตะ CI / build)
+
+---
+
 ### 🗓️ 2026-09-03: สรุปสถานะแผน CLOUDFLARE_FREE_STACK + จุดที่ต้องรอเจ้าของโปรเจกต์
 
 - **เสร็จ + merge**: Wave 1-1 AI Gateway (#189) · 1-3 Turnstile (#191) · 2-4 Workers AI safety guard (#192) — ทั้ง 3 ไม่กระทบระบบเดิมถ้ายังไม่ตั้งค่า
