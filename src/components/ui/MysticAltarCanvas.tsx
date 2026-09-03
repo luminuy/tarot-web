@@ -29,9 +29,9 @@ export const MysticAltarCanvas: React.FC = () => {
       height * 0.38,
       Math.max(width, height) * 0.75
     );
-    bgGrad.addColorStop(0, "rgba(253, 247, 240, 0.7)");
-    bgGrad.addColorStop(0.5, "rgba(252, 240, 230, 0.9)");
-    bgGrad.addColorStop(1, "rgba(247, 232, 218, 0.98)");
+    bgGrad.addColorStop(0, "rgba(255, 255, 255, 0.8)");
+    bgGrad.addColorStop(0.5, "rgba(250, 248, 245, 0.92)");
+    bgGrad.addColorStop(1, "rgba(245, 239, 230, 0.98)");
 
     const handleResize = () => {
       if (!canvas) return;
@@ -45,9 +45,9 @@ export const MysticAltarCanvas: React.FC = () => {
         height * 0.38,
         Math.max(width, height) * 0.75
       );
-      bgGrad.addColorStop(0, "rgba(253, 247, 240, 0.7)");
-      bgGrad.addColorStop(0.5, "rgba(252, 240, 230, 0.9)");
-      bgGrad.addColorStop(1, "rgba(247, 232, 218, 0.98)");
+      bgGrad.addColorStop(0, "rgba(255, 255, 255, 0.8)");
+      bgGrad.addColorStop(0.5, "rgba(250, 248, 245, 0.92)");
+      bgGrad.addColorStop(1, "rgba(245, 239, 230, 0.98)");
 
       if (prefersReducedMotion) {
         drawStaticBackground();

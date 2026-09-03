@@ -34,6 +34,33 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ปฏิรูปดีไซน์ทั้งเว็บไซต์สู่ระดับ World-Class Masterpiece Luxury (ขจัดความจืดชืดสีน้ำตาล/เบจ สู่ความงามสง่า ละมุนตา เปล่งประกาย)
+
+**คำขอของผู้ใช้**:
+- *"ยังดูไม่สวยเลยเราเป็น นักออกแบบ ระดับโลกนะ มันต้องเห็นเเล้ว คำว่าสวยขึ้นมาเลย"*
+- ส่งภาพหน้าจอ `media_1788406867761.png` แสดงให้เห็นว่าสีพื้นหลัง `#FCF0E6` ทึบแบนเหมือนกระดาษลัง ขาดคอนทราสต์ ขาดความลึก สำรับไพ่ตรงกลางลอยโดดเดี่ยว และการ์ดผังพยากรณ์ดูเป็นกล่องธรรมดา
+
+**สิ่งที่ดำเนินการเสร็จสิ้น (World-Class Masterpiece Overhaul)**:
+1. **Pristine Warm Luminous Ivory Canvas (`#FAF8F5`)**:
+   - อัปเกรด `globals.css`: เปลี่ยน Base Canvas จาก `#FCF0E6` เป็น `#FAF8F5` ผสานแสงเรืองสวรรค์ (Ethereal Sunlight Radiance)
+   - ปรับรัศมีแสง Celestial Dome ใน `GalaxyCanvas.tsx` และ `MysticAltarCanvas.tsx` ให้มีมิติ นุ่มนวล เปล่งประกาย
+2. **Royal Espresso & Burnished Gold Typography**:
+   - อัปเกรด `.font-mystic-gold`: จากสีน้ำตาลมัว กลายเป็นเกรเดียนต์ **Deep Royal Espresso to Luminous Burnished Gold** (`#231812` ถึง `#C5A059`) คมกริบ สง่างาม สะกดสายตา สไตล์นิตยสารลักชูรีระดับโลก
+   - ตัวหนังสือหลักใช้ `#231812` (Deep Royal Espresso) ชัดเจน 100% อ่านง่าย สบายตา
+3. **The Majestic 78-Card Hero Deck Altar**:
+   - เพิ่มความหนาของสำรับ 3 มิติ (Layered 3D Edge Deck) แสดงขอบทองซ้อนกัน 3 ชั้น ให้ความรู้สึกถึงสำรับ 78 ใบจริง
+   - รัศมีแสงสุริยะ (Radiant Solar Aura Halo) ส่องสว่างรอบสำรับไพ่ หายใจแผ่วเบา พร้อมประกายแสงสะท้อนทองคำ
+4. **Porcelain & Champagne Spread Cards with Altar Pads**:
+   - ตัวการ์ดผังพยากรณ์ 20 แบบใช้พื้นผิวพอร์ซเลนสีขาวนวลสะอาดตา (`#FFFFFF`) ตัดขอบทองแชมเปญ 2 ชั้น
+   - เพิ่มแท่นผ้ารองอ่านไพ่ (Ethereal Altar Pad) รองรับภาพหน้าไพ่ 1909 ทำให้ภาพหน้าไพ่ดั้งเดิม 1909 โดดเด่น คมชัด ลอยเด่นสวยงาม
+   - การ์ดที่ถูกเลือกเปล่งประกายด้วยขอบทองคำแท้ (`#D4AF37`), รัศมีสีทองนุ่มลึก (`shadow-[0_16px_40px_-6px_rgba(197,160,89,0.35)]`), และตราประทับมุมทอง 4 ทิศ
+5. **Crystal-Clear Header & Radiant Gold CTA**:
+   - Header ด้านบนปรับเป็นกระจกใสโมเดิร์นหรูหรา (`bg-[#FFFFFF]/85 backdrop-blur-xl border-b border-[#D6B48D]/30`)
+   - ปุ่ม CTA หลักและปุ่มเริ่มดูดวงใหม่ปรับเป็น **Radiant Imperial Gold** (`.btn-gold`) หรูหรา เปล่งประกาย ชวนกด
+   - แถบสรุปสิทธิ์ทดลองใช้ (`FreeTrialNotice.tsx`) ปรับเป็นแคปซูลคริสตัลไอวอรีหรูหรา
+
+---
+
 ### 🗓️ 2026-09-03: ปรับปรุงพื้นหลังเว็บใหม่ทั้งหมด (Ethereal Warm Sanctuary) และเก็บรายละเอียดปุ่ม/คอมโพเนนต์สีดำที่ตกค้าง 100%
 
 **คำขอของผู้ใช้**:
