@@ -12,7 +12,6 @@ import { ElementalBalanceWidget } from "@/components/reading/ElementalBalanceWid
 import { OracleMantraCard } from "@/components/reading/OracleMantraCard";
 import { soundManager } from "@/lib/utils/audio";
 import { trackEvent } from "@/lib/analytics";
-import { ASK_ORACLE_SECTION_ID } from "./FollowUpChat";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
 import { ProvablyFairPanel } from "./ProvablyFairPanel";
 import { CollapsibleCard } from "./CollapsibleCard";
@@ -66,14 +65,6 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       );
       if (ok) setIsSpeakingVoice(true);
     }
-  };
-
-  // เลื่อนลงไปห้องคุยกับแม่หมอ (ส่วนแยกด้านล่าง) — เคารพ prefers-reduced-motion
-  const scrollToAskOracle = () => {
-    const el = typeof document !== "undefined" ? document.getElementById(ASK_ORACLE_SECTION_ID) : null;
-    if (!el) return;
-    const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
   };
 
   const activeDrawnCard = drawnCards.find((d) => d.order === activeCardIndex);
@@ -177,11 +168,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         </button>
       </div>
 
-      {/* ทางลัดลงไปห้องคุยกับแม่หมอ */}
+      {/* ทางลัดเปิดห้องแชทเต็มจอกับแม่หมอ (หน้า /reading/chat) */}
       {readingId && (
-        <button
-          type="button"
-          onClick={scrollToAskOracle}
+        <Link
+          href="/reading/chat"
           className="group flex w-full items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] px-4 py-3 text-left transition-all hover:border-[#8F5C1A] hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           <span className="min-w-0">
@@ -189,13 +179,13 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               <span className="mr-1.5 text-[#8F5C1A]">✦</span> มีอะไรอยากถามแม่หมอต่อไหม
             </span>
             <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
-              พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที แตะเพื่อเริ่มพิมพ์คุยได้เลย
+              เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที
             </span>
           </span>
-          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#D9C8AC] text-[#8F5C1A] transition-transform group-hover:translate-y-0.5">
-            ↓
+          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#D9C8AC] text-[#8F5C1A] transition-transform group-hover:translate-x-0.5">
+            →
           </span>
-        </button>
+        </Link>
       )}
 
       {/* Error / Recovery Banner — โทนทองอุ่น ไม่ใช่แดงตกใจ · ซ่อนปุ่มลองใหม่เมื่อเป็นเรื่องโควตา */}

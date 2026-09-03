@@ -34,6 +34,25 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: หน้าผลไพ่ — เลย์เอาต์แถวเดียว + แยกห้องแชทเป็นหน้าเต็มจอ `/reading/chat`
+
+**สิ่งที่ต้องการ (จากภาพเจ้าของโปรเจกต์)**:
+1. **รูปที่ 1 + รูปที่ 2 (สีขาวข้างใต้)**: มีแถบ/พื้นที่ครีมว่างเปล่าโผล่ใต้ฟุตเตอร์ — เอาออก
+2. **รวมรูปที่ 4 (แผงคำทำนาย `StreamReader`) ไว้ใต้รูปที่ 3 (ผังไพ่ `SpreadBoard`)**: เลิกวางคู่ซ้าย-ขวา จัดเป็นคอลัมน์เดียวอ่านไล่ลงมา ให้สวยงาม
+3. **รูปที่ 5 (`FollowUpChat`) ทำเป็นปุ่มกด**: กดแล้วไปหน้าแชทออนไลน์กับแม่หมอที่เห็นชัด เป็น "หน้าแชทอย่างเดียว" เต็มจอ
+
+**สิ่งที่แก้ไข**:
+1. `src/app/page.tsx`:
+   - ลบ `pb-24` ออกจาก `<main>` — เดิมสร้างแถบครีมสูง 6rem ใต้ฟุตเตอร์สีเข้ม (คำร้องข้อ 1)
+   - ยุบ dual-pane grid (`lg:grid-cols-2`) เป็นคอลัมน์เดียว `max-w-3xl mx-auto`: `SpreadBoard` → `StreamReader` → ปุ่มแชท (คำร้องข้อ 2)
+   - แทน `<FollowUpChat>` ที่ฝังในแพนขวา ด้วยปุ่มการ์ด `<Link href="/reading/chat">` เด่นชัด (ภาพการ์ดแม่หมอ + ป้าย "ออนไลน์" + ลูกศร →) (คำร้องข้อ 3)
+   - ลบ dynamic import `FollowUpChat` ที่ไม่ใช้แล้ว
+2. `src/app/reading/chat/page.tsx` (**ไฟล์ใหม่**): หน้าแชทเต็มจอ — แถบหัวบาง (ปุ่มกลับ + ชื่อแม่หมอ) + `FollowUpChat` เต็มความสูง อ่านสถานะรอบดูดวงจาก `sessionStorage` ผ่าน `loadFlowState()` (ต่อบทสนทนากับไพ่ชุดเดิม) · ถ้าไม่มีรอบค้างไว้ แสดง empty state พร้อมปุ่มกลับไปเปิดไพ่
+3. `src/components/reading/FollowUpChat.tsx`: เพิ่ม prop `heightClass` (ดีฟอลต์ `h-[660px] sm:h-[720px]`) ให้หน้าแชทเต็มจอส่งความสูง `h-[calc(100dvh-6.5rem)]` มาแทนได้
+4. `src/components/reading/StreamReader.tsx`: ปุ่มทางลัด "มีอะไรอยากถามแม่หมอต่อไหม" เปลี่ยนจากปุ่มเลื่อนหน้าจอ (scroll) เป็น `<Link href="/reading/chat">` · ลบ helper `scrollToAskOracle` + import `ASK_ORACLE_SECTION_ID` ที่ไม่ใช้แล้ว
+
+**สถานะ**: `npm run typecheck` ✅ 0 errors · ตรวจด้วย dev server: หน้า `/reading/chat` (มีรอบ/ไม่มีรอบ) + ปุ่มแชทหน้าผลไพ่ + ฟุตเตอร์ชิดขอบล่างไม่มีครีมเกิน ✅
+
 ### 🗓️ 2026-09-03: ปรับทูลบาร์แถบหัวเว็บสู่สไตล์ไอคอนมินิมอล (Hamburger & Profile Icon, นำ QuotaMeter ออก)
 
 **สิ่งที่ต้องการ (จากภาพเจ้าของโปรเจกต์)**:

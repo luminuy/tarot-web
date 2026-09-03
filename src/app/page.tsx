@@ -48,9 +48,6 @@ const SpreadBoard = dynamic(() => import("@/components/spread/SpreadBoard").then
 const StreamReader = dynamic(() => import("@/components/reading/StreamReader").then((m) => m.StreamReader), {
   ssr: false,
 });
-const FollowUpChat = dynamic(() => import("@/components/reading/FollowUpChat").then((m) => m.FollowUpChat), {
-  ssr: false,
-});
 const ShareModal = dynamic(() => import("@/components/reading/ShareModal").then((m) => m.ShareModal), { ssr: false });
 const ReadingHistoryModal = dynamic(
   () => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
@@ -799,7 +796,7 @@ export default function TarotPage() {
   };
 
   return (
-    <main className="min-h-screen pb-24 text-[#29261F] relative overflow-hidden bg-[#F3F0EA]">
+    <main className="min-h-screen text-[#29261F] relative overflow-hidden bg-[#F3F0EA]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
@@ -1156,9 +1153,9 @@ export default function TarotPage() {
                 />
               </section>
 
-              {/* DUAL PANE ROW: Reading & Follow-up Chat Side-by-Side (รูปที่ 3 & 4: อยู่คู่กันด้านล่าง) */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
-                {/* LEFT PANE: Card Interpretation & Summary (รูปที่ 3) */}
+              {/* SINGLE COLUMN: คำทำนายไพ่วางต่อใต้ผังไพ่ อ่านไล่ลงมาแถวเดียว
+                  แล้วปิดท้ายด้วยปุ่มเปิดห้องแชทเต็มจอกับแม่หมอ (แยกไปหน้า /reading/chat) */}
+              <div className="mx-auto w-full max-w-3xl space-y-6">
                 <section aria-label="คำทำนายไพ่ทาโรต์" className="w-full">
                   <StreamReader
                     readingId={readingId}
@@ -1179,26 +1176,39 @@ export default function TarotPage() {
                   />
                 </section>
 
-                {/* RIGHT PANE: Human-like Live Consultation Chat (รูปที่ 4 & 5) */}
+                {/* ปุ่มเข้าห้องแชทกับแม่หมอ — เด่นชัด กดแล้วเปิดหน้าแชทเต็มจอสำหรับคุยอย่างเดียว */}
                 {readingId && (
-                  <section aria-label="ห้องสนทนากับแม่หมอ" className="w-full lg:sticky lg:top-20">
-                    <FollowUpChat
-                      readingId={readingId}
-                      persona={selectedPersona}
-                      sessionToken={sessionToken}
-                      readingSnapshot={{
-                        question: question || undefined,
-                        spreadId: selectedSpread.id,
-                        summary: readingResult?.summary,
-                        personaId: selectedPersona.id,
-                        drawn: drawnCards.map((d) => ({
-                          order: d.order,
-                          cardIndex: d.cardIndex,
-                          isReversed: !!d.isReversed,
-                        })),
-                      }}
-                    />
-                  </section>
+                  <Link
+                    href="/reading/chat"
+                    onClick={() => soundManager.playCardSelectSound()}
+                    aria-label={`แชทออนไลน์กับ${selectedPersona.nameTh}`}
+                    className="group flex items-center gap-4 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 shadow-xs transition-all hover:border-[#A58A5C] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
+                  >
+                    <span className="relative flex h-14 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#D5CEC2] bg-[#F3EDE2]">
+                      <CardImage
+                        image={selectedPersona.cardImage}
+                        alt={selectedPersona.nameTh}
+                        className="h-full w-full object-cover object-top"
+                        sizes="44px"
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="font-serif-th text-sm font-bold text-[#29261F] sm:text-base">
+                          แชทออนไลน์กับ{selectedPersona.nameTh}
+                        </span>
+                        <span className="flex items-center gap-1 rounded-full border border-[#D5CEC2] bg-[#EBF3ED] px-2 py-0.5 text-[13px] font-medium text-[#3A7044]">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#3A7044] animate-pulse" /> ออนไลน์
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+                        เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อจากไพ่ชุดนี้ได้ทันที
+                      </span>
+                    </span>
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#29261F] text-[#F3F0EA] text-lg transition-transform group-hover:translate-x-0.5">
+                      →
+                    </span>
+                  </Link>
                 )}
               </div>
 
