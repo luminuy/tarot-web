@@ -5,6 +5,7 @@ import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/co
 import { type Reading, ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
 
+import { hasForeignScript, objectHasForeignScript, stripForeignScript, stripForeignScriptDeep } from "@/lib/ai/language";
 /**
  * ตัวเชื่อมกับ Google Gemini API (Ultra-Low Latency Streaming)
  * -------------------------------------------------
@@ -140,6 +141,19 @@ const DEFAULT_USAGE: UsageInfo = {
   cacheWriteTokens: 0,
 };
 
+
+/**
+ * กันอักษรต่างภาษาหลุดออกไปหาผู้ใช้ระหว่างสตรีม
+ *
+ * โมเดลบางตัวหลุดพ่นอักษรจีน/ญี่ปุ่นปนกลางประโยคไทย พอเป็นสตรีมจะย้อนกลับไปขอใหม่ไม่ได้แล้ว
+ * (ข้อความออกไปแสดงบนจอแล้ว) จึงล้างทิ้งตรงจุดที่ yield แทน แล้ว log ไว้ดูอัตราการเกิด
+ */
+function thaiOnly(text: string, where: string): string {
+  if (!hasForeignScript(text)) return text;
+  console.warn(`[lang] พบอักษรต่างภาษาใน "${where}" — ล้างทิ้งก่อนส่งออก`);
+  return stripForeignScript(text);
+}
+
 export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<ReadingEvent> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
@@ -269,7 +283,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
               if (!sentOpening && partial.opening) {
                 sentOpening = true;
-                yield { type: "opening", text: partial.opening };
+                yield { type: "opening", text: thaiOnly(partial.opening, "opening") };
               }
 
               while (cardsSent < partial.cards.length) {
@@ -278,19 +292,19 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
                 yield {
                   type: "card",
                   position: card.position,
-                  headline: card.headline,
-                  reading: card.reading,
+                  headline: thaiOnly(card.headline, `card[${card.position}].headline`),
+                  reading: thaiOnly(card.reading, `card[${card.position}].reading`),
                 };
               }
 
               if (!sentConnections && partial.connections) {
                 sentConnections = true;
-                yield { type: "connections", text: partial.connections };
+                yield { type: "connections", text: thaiOnly(partial.connections, "connections") };
               }
 
               if (!sentSummary && partial.summary) {
                 sentSummary = true;
-                yield { type: "summary", text: partial.summary };
+                yield { type: "summary", text: thaiOnly(partial.summary, "summary") };
               }
             }
           } catch (e) {
@@ -330,9 +344,14 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
       };
       yield { type: "done", reading: fallbackReading, usage };
     } else {
-      const readingData = parsed.data;
+      let readingData = parsed.data;
       if (!ctx.spread.yesNoMode) {
         readingData.yesNoAnswer = null;
+      }
+      // ผลสุดท้ายคือตัวที่ถูกบันทึกลงสมุดบันทึกดวง — ต้องสะอาดแน่นอน
+      if (objectHasForeignScript(readingData)) {
+        console.warn("[lang] คำทำนายฉบับสมบูรณ์มีอักษรต่างภาษาปน — ล้างก่อนบันทึก");
+        readingData = stripForeignScriptDeep(readingData);
       }
       yield { type: "done", reading: readingData, usage };
     }

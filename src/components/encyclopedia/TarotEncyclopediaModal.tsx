@@ -55,12 +55,12 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 20 }}
-          className="w-full max-w-4xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-5 sm:p-7 shadow-[var(--shadow-overlay)] flex flex-col relative space-y-4 overflow-hidden"
+          className="w-full max-w-4xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-5 sm:p-7 shadow-[var(--shadow-overlay)] flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#E4D8C4]/30 pb-3">
+          <div className="flex items-center justify-between border-b border-[#D9C8AC]/30 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full border border-[#E4D8C4] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#F0E8DB] font-bold">
+              <div className="w-8 h-8 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#F3EDE2] font-bold">
                 ✦
               </div>
               <div>
@@ -77,7 +77,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
               type="button"
               onClick={onClose}
               aria-label="ปิดความหมายไพ่ทาโรต์"
-              className="w-11 h-11 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+              className="w-11 h-11 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
               ✕
             </button>
@@ -107,7 +107,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                   className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                     filter === tab.id
                       ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                      : "bg-[#FFFFFF] text-[#6F5B4A] hover:text-[#2E211A] border border-[#E4D8C4]"
+                      : "bg-[#FFFFFF] text-[#6F5B4A] hover:text-[#2E211A] border border-[#D9C8AC]"
                   }`}
                 >
                   {tab.label}
@@ -120,7 +120,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
               placeholder="✦ ค้นหาตามชื่อไพ่ (เช่น The Fool, ราชินีถ้วย, ความรัก, การเงิน)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg px-3.5 py-2 text-xs text-[#2E211A] placeholder:text-[#6F5B4A]/70 focus:outline-none focus:border-[#8F5C1A] "
+              className="w-full bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg px-3.5 py-2 text-xs text-[#2E211A] placeholder:text-[#6F5B4A]/70 focus:outline-none focus:border-[#8F5C1A] "
             />
           </div>
 
@@ -141,9 +141,9 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         handleSelectCard(c);
                       }
                     }}
-                    className="p-2 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] transition-all cursor-pointer flex flex-col items-center text-center space-y-1.5 hover:scale-105 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                    className="p-2 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all cursor-pointer flex flex-col items-center text-center space-y-1.5 hover:scale-105 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                   >
-                    <div className="w-16 h-[108px] sm:w-18 sm:h-[122px] rounded-lg overflow-hidden flex-shrink-0 bg-[#F0E8DB]">
+                    <div className="w-16 h-[108px] sm:w-18 sm:h-[122px] rounded-lg overflow-hidden flex-shrink-0 bg-[#F3EDE2]">
                       <TarotCardComponent
                         card={c}
                         isRevealed={true}
@@ -191,20 +191,20 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="w-full max-w-2xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border-2 border-[#E4D8C4] p-5 sm:p-7 shadow-[var(--shadow-overlay)] flex flex-col relative space-y-4 overflow-y-auto text-[#2E211A]"
+                className="w-full max-w-2xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-7 shadow-[var(--shadow-overlay)] flex flex-col relative space-y-4 overflow-y-auto text-[#2E211A]"
               >
                 <button
                   type="button"
                   onClick={() => setSelectedCard(null)}
                   aria-label="ปิดหน้ารายละเอียดไพ่"
-                  className="absolute top-4 right-4 w-11 h-11 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                  className="absolute top-4 right-4 w-11 h-11 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                 >
                   ✕
                 </button>
 
                 {/* Card Title & Meta */}
-                <div className="flex items-start gap-4 pb-3 border-b border-[#E4D8C4]/30">
-                  <div className="w-24 h-[163px] flex-shrink-0 bg-[#F0E8DB] rounded-lg overflow-hidden ">
+                <div className="flex items-start gap-4 pb-3 border-b border-[#D9C8AC]/30">
+                  <div className="w-24 h-[163px] flex-shrink-0 bg-[#F3EDE2] rounded-lg overflow-hidden ">
                     <TarotCardComponent
                       card={selectedCard}
                       isRevealed={true}
@@ -222,13 +222,13 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                       <span className="text-xs text-[#6F5B4A] font-mono">({selectedCard.nameEn})</span>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap text-[10px] text-[#2E211A]">
-                      <span className="px-2 py-0.5 rounded-full bg-[#FFFFFF] border border-[#E4D8C4] text-[#8F5C1A] font-semibold">
+                      <span className="px-2 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[#8F5C1A] font-semibold">
                         ธาตุ: {selectedCard.element}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full bg-[#FFFFFF] border border-[#E4D8C4]">
+                      <span className="px-2 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC]">
                         โหราศาสตร์: {selectedCard.astrology}
                       </span>
-                      <span className="px-2 py-0.5 rounded-full bg-[#FFFFFF] border border-[#E4D8C4]">
+                      <span className="px-2 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC]">
                         ตัวเลข: {selectedCard.numerology}
                       </span>
                     </div>
@@ -239,8 +239,8 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         onClick={() => setViewOrientation("upright")}
                         className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
                           viewOrientation === "upright"
-                            ? "bg-[#EBF3ED] text-[#3A7044] border border-[#E4D8C4]"
-                            : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#E4D8C4]"
+                            ? "bg-[#EBF3ED] text-[#3A7044] border border-[#D9C8AC]"
+                            : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#D9C8AC]"
                         }`}
                       >
                         ✦ หัวตั้ง (Upright)
@@ -249,8 +249,8 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         onClick={() => setViewOrientation("reversed")}
                         className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
                           viewOrientation === "reversed"
-                            ? "bg-[#FCEEEA] text-[#A6392C] border border-[#E4D8C4]"
-                            : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#E4D8C4]"
+                            ? "bg-[#FCEEEA] text-[#A6392C] border border-[#D9C8AC]"
+                            : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#D9C8AC]"
                         }`}
                       >
                         ↷ กลับหัว (Reversed)
@@ -260,13 +260,13 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                 </div>
 
                 {/* Keywords List */}
-                <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] space-y-1 ">
+                <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
                   <span className="text-[10px] text-[#8F5C1A] font-bold block">✦ คำสำคัญ (Keywords):</span>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedCard.keywords[viewOrientation].map((kw, i) => (
                       <span
                         key={i}
-                        className="px-2.5 py-0.5 rounded bg-[#F0E8DB] border border-[#E4D8C4] text-xs font-serif-th text-[#2E211A] font-medium"
+                        className="px-2.5 py-0.5 rounded bg-[#F3EDE2] border border-[#D9C8AC] text-xs font-serif-th text-[#2E211A] font-medium"
                       >
                         {kw}
                       </span>
@@ -290,7 +290,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         className={`px-3 py-1 rounded-lg text-xs font-serif-th font-semibold transition-all cursor-pointer whitespace-nowrap ${
                           activeMeaningCategory === cat.id
                             ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                            : "bg-[#FFFFFF] text-[#6F5B4A] hover:text-[#2E211A] border border-[#E4D8C4]"
+                            : "bg-[#FFFFFF] text-[#6F5B4A] hover:text-[#2E211A] border border-[#D9C8AC]"
                         }`}
                       >
                         {cat.label}
@@ -298,7 +298,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                     ))}
                   </div>
 
-                  <div className="p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-xs text-[#2E211A] font-serif-th leading-relaxed min-h-[90px]">
+                  <div className="p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-xs text-[#2E211A] font-serif-th leading-relaxed min-h-[90px]">
                     {selectedCard.meanings[activeMeaningCategory][viewOrientation]}
                   </div>
                 </div>

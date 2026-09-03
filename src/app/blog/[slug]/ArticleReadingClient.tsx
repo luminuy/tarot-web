@@ -33,7 +33,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {/* Article Header */}
       <header className="space-y-4 text-center sm:text-left">
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs font-mono">
-          <span className="px-3 py-1 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[#8F5C1A] font-bold">
+          <span className="px-3 py-1 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A] font-bold">
             ✦ {article.categoryTh}
           </span>
           <span className="text-[#6F5B4A]">⏱ เวลาอ่าน {article.readTime}</span>
@@ -43,14 +43,14 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
         <h1 className="font-serif-th text-2xl sm:text-4xl font-bold font-mystic-gold leading-tight">{article.title}</h1>
 
-        <p className="text-sm sm:text-base text-[#2E211A] font-serif-th leading-relaxed border-l-2 border-[#E4D8C4] pl-4 py-1 italic bg-[#FFFFFF] rounded-r-lg">
+        <p className="text-sm sm:text-base text-[#2E211A] font-serif-th leading-relaxed border-l-2 border-[#D9C8AC] pl-4 py-1 italic bg-[#FFFFFF] rounded-r-lg">
           {article.description}
         </p>
       </header>
 
       {/* Table of Contents (TOC) */}
       {article.toc && article.toc.length > 0 && (
-        <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-5 sm:p-6 space-y-3 ">
+        <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6 space-y-3 ">
           <div className="flex items-center gap-2 text-xs font-serif-th font-bold text-[#2E211A]">
             <span>✦</span> สารบัญคัมภีร์ความรู้ (Table of Contents)
           </div>
@@ -69,7 +69,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
       {/* Target Card Highlight Box if available */}
       {article.targetCardId && article.cardNameTh && (
-        <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 ">
+        <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 ">
           <div className="space-y-1 text-center sm:text-left">
             <div className="text-[10px] font-mono text-[#8F5C1A] font-bold">✦ สำรวจไพ่ใบนี้ในสารานุกรม 78 ใบ</div>
             <div className="font-serif-th font-bold text-base text-[#2E211A]">
@@ -81,7 +81,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           </div>
           <Link
             href={`/cards/${article.targetCardId}`}
-            className="shrink-0 px-4 py-2 rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] hover:bg-[#FFFFFF] text-[#8F5C1A] text-xs font-serif-th font-bold transition-all "
+            className="shrink-0 px-4 py-2 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] hover:bg-[#FFFFFF] text-[#8F5C1A] text-xs font-serif-th font-bold transition-all "
           >
             เปิดดูรายละเอียดไพ่ 78 ใบ →
           </Link>
@@ -95,21 +95,21 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             __html: article.content
               .replace(
                 /## (.*?)\n/g,
-                '<h2 class="text-lg sm:text-2xl font-bold font-mystic-gold mt-8 mb-4 border-b border-[#E4D8C4]/30 pb-2">$1</h2>'
+                '<h2 class="text-lg sm:text-2xl font-bold font-mystic-gold mt-8 mb-4 border-b border-[#D9C8AC]/30 pb-2">$1</h2>'
               )
               .replace(/### (.*?)\n/g, '<h3 class="text-base sm:text-xl font-bold text-[#2E211A] mt-6 mb-3">$1</h3>')
               .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#2E211A] font-semibold">$1</strong>')
               .replace(/\*(.*?)\*/g, '<em class="text-[#8F5C1A] font-medium">$1</em>')
               .replace(/- (.*?)\n/g, '<li class="ml-4 list-disc text-[#2E211A] my-1">$1</li>')
               .replace(/\n\n/g, '<p class="my-4 leading-relaxed text-[#2E211A]"></p>')
-              .replace(/---/g, '<hr class="border-[#E4D8C4]/30 my-6" />'),
+              .replace(/---/g, '<hr class="border-[#D9C8AC]/30 my-6" />'),
           }}
         />
       </article>
 
       {/* FAQ Section with Accordion */}
       {article.faqs && article.faqs.length > 0 && (
-        <section className="space-y-4 pt-6 border-t border-[#E4D8C4]/20">
+        <section className="space-y-4 pt-6 border-t border-[#D9C8AC]/20">
           <div className="flex items-center gap-2 text-sm sm:text-base font-serif-th font-bold font-mystic-gold">
             <span>❓</span> คำถามที่พบบ่อย (FAQ)
           </div>
@@ -119,7 +119,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
               return (
                 <div
                   key={idx}
-                  className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] overflow-hidden transition-all "
+                  className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] overflow-hidden transition-all "
                 >
                   <button
                     onClick={() => toggleFaq(idx)}
@@ -129,7 +129,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                     <span className="text-[#8F5C1A] font-mono text-sm font-bold">{isOpen ? "−" : "+"}</span>
                   </button>
                   {isOpen && (
-                    <div className="p-4 pt-0 text-xs font-serif-th text-[#2E211A] leading-relaxed border-t border-[#E4D8C4]/30 bg-[#F0E8DB] p-4">
+                    <div className="p-4 pt-0 text-xs font-serif-th text-[#2E211A] leading-relaxed border-t border-[#D9C8AC]/30 bg-[#F3EDE2] p-4">
                       {faq.answer}
                     </div>
                   )}
@@ -141,8 +141,8 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       )}
 
       {/* High-Impact Interactive CTA Box */}
-      <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-6 sm:p-8 text-center space-y-4 relative overflow-hidden">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#E4D8C4] bg-[#F0E8DB] text-[11px] text-[#8F5C1A] font-mono font-bold ">
+      <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-6 sm:p-8 text-center space-y-4 relative overflow-hidden">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[11px] text-[#8F5C1A] font-mono font-bold ">
           <span>✦</span> Interactive Provably-Fair Reading <span>✦</span>
         </div>
         <h2 className="font-serif-th text-xl sm:text-3xl font-bold font-mystic-gold">
@@ -164,12 +164,12 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       </div>
 
       {/* Share / Copy Link Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-[#E4D8C4]/30 text-xs font-serif-th">
+      <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-[#D9C8AC]/30 text-xs font-serif-th">
         <div className="flex items-center gap-2 text-[#6F5B4A]">
           <span>แชร์คัมภีร์นี้:</span>
           <button
             onClick={handleCopyLink}
-            className="px-3 py-1 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] text-[#2E211A] hover:border-[#8F5C1A] hover:text-[#8F5C1A] transition-colors flex items-center gap-1.5 cursor-pointer "
+            className="px-3 py-1 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] hover:border-[#8F5C1A] hover:text-[#8F5C1A] transition-colors flex items-center gap-1.5 cursor-pointer "
           >
             <span>✦</span>
             <span>{copied ? "คัดลอกลิงก์สำเร็จ!" : "คัดลอกลิงก์"}</span>
@@ -189,7 +189,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
               <Link
                 key={rel.slug}
                 href={`/blog/${rel.slug}`}
-                className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 space-y-2 hover:border-[#8F5C1A] hover:bg-[#F6F1E9] transition-all group flex flex-col justify-between"
+                className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 space-y-2 hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-all group flex flex-col justify-between"
               >
                 <div className="space-y-1.5">
                   <div className="text-[10px] font-mono text-[#8F5C1A] font-bold">{rel.categoryTh}</div>
@@ -197,7 +197,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                     {rel.title}
                   </h3>
                 </div>
-                <div className="text-[10px] text-[#6F5B4A] font-mono pt-2 border-t border-[#E4D8C4]/30">
+                <div className="text-[10px] text-[#6F5B4A] font-mono pt-2 border-t border-[#D9C8AC]/30">
                   ⏱ {rel.readTime}
                 </div>
               </Link>

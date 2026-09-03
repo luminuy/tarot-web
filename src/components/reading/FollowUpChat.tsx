@@ -70,7 +70,7 @@ function renderFormattedText(text: string) {
 const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ text, isError }) => {
   if (isError) {
     return (
-      <div className="rounded-lg rounded-tl-xs bg-[#FCEEEA] border border-[#E4D8C4] p-3.5 sm:p-4 text-[#A6392C] font-serif-th text-xs sm:text-sm leading-relaxed ">
+      <div className="rounded-lg rounded-tl-xs bg-[#FCEEEA] border border-[#D9C8AC] p-3.5 sm:p-4 text-[#A6392C] font-serif-th text-xs sm:text-sm leading-relaxed ">
         {text}
       </div>
     );
@@ -112,13 +112,13 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
                 stiffness: 360,
                 damping: 25,
               }}
-              className="rounded-lg p-3.5 sm:p-4 bg-[#FFFFFF] border border-[#E4D8C4] space-y-1.5 transition-all duration-300 hover:border-[#8F5C1A]"
+              className="rounded-lg p-3.5 sm:p-4 bg-[#FFFFFF] border border-[#D9C8AC] space-y-1.5 transition-all duration-300 hover:border-[#8F5C1A]"
             >
               <div className="flex items-center gap-2 text-[#8F5C1A] font-bold text-xs sm:text-sm font-serif-th">
                 <span className="text-[#8F5C1A] text-xs">✦</span>
                 <span>{renderFormattedText(cardTitle)}</span>
               </div>
-              <p className="text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th pl-3.5 border-l-2 border-[#E4D8C4]">
+              <p className="text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th pl-3.5 border-l-2 border-[#D9C8AC]">
                 {renderFormattedText(cardBody)}
               </p>
             </motion.div>
@@ -141,7 +141,7 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
                 stiffness: 360,
                 damping: 25,
               }}
-              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] transition-all duration-300"
+              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300"
             >
               <span className="w-5 h-5 rounded-full bg-[#8F5C1A] text-[#FFFFFF] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 ">
                 {stepNum}
@@ -165,7 +165,7 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
               stiffness: 360,
               damping: 25,
             }}
-            className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#E4D8C4] p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#2E211A] font-serif-th hover:border-[#8F5C1A] transition-colors"
+            className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#D9C8AC] p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#2E211A] font-serif-th hover:border-[#8F5C1A] transition-colors"
           >
             <p className="leading-relaxed">{renderFormattedText(p)}</p>
           </motion.div>
@@ -295,17 +295,17 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
     <section
       id={ASK_ORACLE_SECTION_ID}
       aria-labelledby="ask-oracle-title"
-      className="w-full scroll-mt-24 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col h-[660px] sm:h-[720px] relative overflow-hidden justify-between"
+      className="w-full scroll-mt-24 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col h-[660px] sm:h-[720px] relative overflow-hidden justify-between"
     >
       {/* Background Sacred Geometric Aura */}
 
       {/* ── 1. Modern Messenger Header ── */}
-      <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#E4D8C4]/30 shrink-0">
+      <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#D9C8AC]/30 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           {/* Authentic 1909 Persona Card Avatar */}
           <div
-            className="w-10 h-14 rounded-lg border-2 overflow-hidden bg-[#F0E8DB] relative shrink-0"
-            style={{ borderColor: "#E4D8C4" }}
+            className="w-10 h-14 rounded-lg border-2 overflow-hidden bg-[#F3EDE2] relative shrink-0"
+            style={{ borderColor: "#D9C8AC" }}
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
@@ -323,7 +323,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
               >
                 {persona.nameTh}
               </h3>
-              <span className="flex items-center gap-1 text-[10px] text-[#3A7044] font-sans font-medium px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#E4D8C4] shrink-0">
+              <span className="flex items-center gap-1 text-[10px] text-[#3A7044] font-sans font-medium px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#D9C8AC] shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3A7044] animate-pulse" />
                 ออนไลน์
               </span>
@@ -335,7 +335,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
         </div>
 
         {/* Status Pill */}
-        <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-[#2E211A] border border-[#E4D8C4] bg-[#F0E8DB]/25 px-3 py-1 rounded-full font-serif-th shrink-0 font-bold">
+        <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-[#2E211A] border border-[#D9C8AC] bg-[#F3EDE2]/25 px-3 py-1 rounded-full font-serif-th shrink-0 font-bold">
           <span>✦</span> ถือสำรับของคุณอยู่
         </span>
       </div>
@@ -344,7 +344,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       <div ref={chatLogRef} className="flex-1 overflow-y-auto space-y-4 py-3.5 pr-1.5 no-scrollbar scroll-smooth">
         {/* First Persona Welcome Greeting */}
         <div className="flex items-start gap-2.5">
-          <div className="w-7 h-10 rounded border border-[#E4D8C4] overflow-hidden shrink-0 mt-1 bg-[#F0E8DB]">
+          <div className="w-7 h-10 rounded border border-[#D9C8AC] overflow-hidden shrink-0 mt-1 bg-[#F3EDE2]">
             <CardImage
               image={`${persona.cardImage || "major-02.jpg"}`}
               alt={persona.nameTh}
@@ -353,7 +353,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             />
           </div>
           <div className="max-w-[88%] space-y-1">
-            <div className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#E4D8C4] p-3.5 sm:p-4 text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed ">
+            <div className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#D9C8AC] p-3.5 sm:p-4 text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed ">
               <p>
                 สวัสดีค่ะ ยินดีที่ได้ร่วมเปิดไพ่ด้วยกันนะคะ ✨ มีจุดไหนในคำทำนายที่ยังสงสัย
                 หรืออยากให้แม่หมอช่วยเจาะลึกแนวทางเพิ่มเติม พิมพ์ถามได้ตลอดเลยนะคะ
@@ -375,7 +375,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                   key={idx}
                   type="button"
                   onClick={() => sendMessage(q)}
-                  className="text-left font-serif-th text-xs text-[#2E211A] hover:text-[#8F5C1A] p-2.5 rounded-lg bg-[#F0E8DB] hover:bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] transition-all cursor-pointer flex items-center justify-between group "
+                  className="text-left font-serif-th text-xs text-[#2E211A] hover:text-[#8F5C1A] p-2.5 rounded-lg bg-[#F3EDE2] hover:bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all cursor-pointer flex items-center justify-between group "
                 >
                   <span>"{q}"</span>
                   <span className="text-[#8F5C1A] text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
@@ -409,7 +409,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                   initial={{ scale: 0.75, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 420, damping: 24 }}
-                  className="w-7 h-10 rounded border border-[#E4D8C4] overflow-hidden shrink-0 mt-1 bg-[#F0E8DB]"
+                  className="w-7 h-10 rounded border border-[#D9C8AC] overflow-hidden shrink-0 mt-1 bg-[#F3EDE2]"
                 >
                   <CardImage
                     image={`${persona.cardImage || "major-02.jpg"}`}
@@ -435,7 +435,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                       <button
                         type="button"
                         onClick={() => window.location.reload()}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] px-3 py-1.5 text-xs font-semibold text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#F6F1E9] cursor-pointer "
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1.5 text-xs font-semibold text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] cursor-pointer "
                       >
                         <span>↻</span> รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง
                       </button>
@@ -473,7 +473,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             aria-live="polite"
             aria-label={`${persona.nameTh} กำลังพิมพ์ตอบ`}
           >
-            <div className="w-7 h-10 rounded border border-[#E4D8C4] overflow-hidden shrink-0 mt-1 bg-[#F0E8DB]">
+            <div className="w-7 h-10 rounded border border-[#D9C8AC] overflow-hidden shrink-0 mt-1 bg-[#F3EDE2]">
               <CardImage
                 image={`${persona.cardImage || "major-02.jpg"}`}
                 alt={persona.nameTh}
@@ -481,7 +481,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 sizes="32px"
               />
             </div>
-            <div className="rounded-lg rounded-tl-xs border border-[#E4D8C4] bg-[#FFFFFF] px-4 py-3 flex items-center gap-3">
+            <div className="rounded-lg rounded-tl-xs border border-[#D9C8AC] bg-[#FFFFFF] px-4 py-3 flex items-center gap-3">
               <span className="flex items-center gap-1.5" aria-hidden="true">
                 {[0, 1, 2].map((i) => (
                   <motion.span
@@ -510,7 +510,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       </div>
 
       {/* ── 3. Quick Follow-Up Chips & Messenger Input Dock ── */}
-      <div className="shrink-0 pt-2 border-t border-[#E4D8C4]/30 space-y-2">
+      <div className="shrink-0 pt-2 border-t border-[#D9C8AC]/30 space-y-2">
         {messages.length > 0 && !loading && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -533,7 +533,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => sendMessage(chip.query)}
-                className="text-[11px] text-[#2E211A] bg-[#F0E8DB] hover:bg-[#FFFFFF] hover:text-[#8F5C1A] border border-[#E4D8C4] hover:border-[#8F5C1A] rounded-full px-3.5 py-1.5 transition-all cursor-pointer font-serif-th active:scale-95"
+                className="text-[11px] text-[#2E211A] bg-[#F3EDE2] hover:bg-[#FFFFFF] hover:text-[#8F5C1A] border border-[#D9C8AC] hover:border-[#8F5C1A] rounded-full px-3.5 py-1.5 transition-all cursor-pointer font-serif-th active:scale-95"
               >
                 "{chip.label}"
               </motion.button>
@@ -542,9 +542,9 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
         )}
 
         {chatLocked ? (
-          <div className="space-y-2 rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] p-3.5">
+          <div className="space-y-2 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-3.5">
             <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] text-[#8F5C1A]">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] text-[#8F5C1A]">
                 <SealedLockIcon className="h-3.5 w-3.5" />
               </span>
               <div className="min-w-0 space-y-0.5">
@@ -563,9 +563,9 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             </button>
           </div>
         ) : freeChatLimitReached ? (
-          <div className="space-y-2 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-3.5 ">
+          <div className="space-y-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3.5 ">
             <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] text-[#8F5C1A] text-xs font-bold">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] text-[#8F5C1A] text-xs font-bold">
                 ✦
               </span>
               <div className="min-w-0 space-y-0.5">
@@ -593,7 +593,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             }}
             className="space-y-1.5"
           >
-            <div className="flex items-center gap-2 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] p-1.5 pl-4 focus-within:border-[#E4D8C4] focus-within: transition-all">
+            <div className="flex items-center gap-2 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] p-1.5 pl-4 focus-within:border-[#D9C8AC] focus-within: transition-all">
               <input
                 type="text"
                 placeholder={`พิมพ์ถาม ${persona.nameTh} ที่นี่...`}

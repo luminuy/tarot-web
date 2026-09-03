@@ -54,12 +54,12 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
   return (
     <section
       className={`mx-auto mt-6 max-w-2xl overflow-hidden rounded-lg p-5 sm:p-6 bg-[#FFFFFF] border ${
-        usedUpTrial ? "border-2 border-[#E4D8C4]" : "border border-[#E4D8C4]"
+        usedUpTrial ? "border-2 border-[#D9C8AC]" : "border border-[#D9C8AC]"
       }`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 gap-3">
-          <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] text-[#8F5C1A] sm:flex">
+          <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] text-[#8F5C1A] sm:flex">
             <SparkSealIcon className="h-4.5 w-4.5" />
           </span>
           <div className="min-w-0 space-y-1.5">
@@ -77,7 +77,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
           type="button"
           onClick={dismiss}
           aria-label="ปิดคำชวนสมัครสมาชิก"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm text-[#6F5B4A] transition-colors hover:bg-[#F0E8DB] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm text-[#6F5B4A] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           ✕
         </button>

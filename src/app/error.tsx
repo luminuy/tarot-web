@@ -9,9 +9,9 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#F0E8DB] text-[#2E211A] flex items-center justify-center p-4">
-      <div className="max-w-md w-full p-8 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] shadow-[var(--shadow-overlay)] text-center space-y-6">
-        <div className="w-16 h-16 mx-auto rounded-full bg-[#F0E8DB] border border-[#E4D8C4] flex items-center justify-center text-2xl text-[#8F5C1A] font-bold ">
+    <div className="min-h-screen bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center p-4">
+      <div className="max-w-md w-full p-8 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] shadow-[var(--shadow-overlay)] text-center space-y-6">
+        <div className="w-16 h-16 mx-auto rounded-full bg-[#F3EDE2] border border-[#D9C8AC] flex items-center justify-center text-2xl text-[#8F5C1A] font-bold ">
           ✦
         </div>
 
@@ -31,7 +31,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
           </button>
           <Link
             href="/"
-            className="flex-1 py-3 px-4 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] font-bold text-sm font-serif-th hover:bg-[#FFFFFF] transition-all text-center flex items-center justify-center "
+            className="flex-1 py-3 px-4 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] font-bold text-sm font-serif-th hover:bg-[#FFFFFF] transition-all text-center flex items-center justify-center "
           >
             กลับหน้าหลัก
           </Link>

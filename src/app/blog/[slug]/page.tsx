@@ -135,7 +135,7 @@ export default async function ArticleDetailPage({ params }: Props) {
       : null;
 
   return (
-    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
+    <main className="min-h-screen bg-[#FAF7F2] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
       {/* Inject Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdArticle) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }} />
@@ -147,7 +147,7 @@ export default async function ArticleDetailPage({ params }: Props) {
         {/* Top Breadcrumb Navigation */}
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-xs font-serif-th text-[#6F5B4A] border-b border-[#E4D8C4]/30 pb-4 overflow-x-auto whitespace-nowrap"
+          className="flex items-center gap-2 text-xs font-serif-th text-[#6F5B4A] border-b border-[#D9C8AC]/30 pb-4 overflow-x-auto whitespace-nowrap"
         >
           <Link href="/" className="hover:text-[#8F5C1A] transition-colors">
             หน้าแรก

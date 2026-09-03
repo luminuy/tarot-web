@@ -14,14 +14,14 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#FFFFFF] border border-[#E4D8C4] p-6 rounded-lg ">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#FFFFFF] border border-[#D9C8AC] p-6 rounded-lg ">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-serif-th font-bold text-base text-[#2E211A]">
               พร้อมรับคำทำนายจาก {reader.displayName} แล้วหรือยัง?
             </h3>
             {isLiveOpen && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#3A7044] bg-[#EBF3ED] px-2 py-0.5 rounded-full border border-[#E4D8C4]">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#3A7044] bg-[#EBF3ED] px-2 py-0.5 rounded-full border border-[#D9C8AC]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#3A7044] animate-pulse" />
                 เปิดรับคิวสด
               </span>

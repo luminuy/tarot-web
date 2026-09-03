@@ -40,7 +40,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
     return (
       <div
         aria-hidden="true"
-        className="mx-auto mb-6 h-[68px] max-w-2xl animate-pulse rounded-lg border border-[#E4D8C4]/40 bg-[#FFFFFF]/60"
+        className="mx-auto mb-6 h-[68px] max-w-2xl animate-pulse rounded-lg border border-[#D9C8AC]/40 bg-[#FFFFFF]/60"
       />
     );
   }
@@ -50,8 +50,8 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
   const isGuest = view.isGuest;
 
   return (
-    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-[#E4D8C4] bg-white px-4 py-3 shadow-[var(--shadow-raised)]">
-      <div className="relative w-8 h-12 shrink-0 overflow-hidden rounded border border-[#E4D8C4] bg-[#F0E8DB] shadow-xs">
+    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-[#D9C8AC] bg-white px-4 py-3 shadow-[var(--shadow-raised)]">
+      <div className="relative w-8 h-12 shrink-0 overflow-hidden rounded border border-[#D9C8AC] bg-[#F3EDE2] shadow-xs">
         <CardImage
           image={isGuest ? "major-00.jpg" : "major-10.jpg"}
           alt={isGuest ? "The Fool - สิทธิ์เปิดไพ่ทดลองฟรี" : "Wheel of Fortune - โควตาสิทธิ์รายวัน"}
@@ -81,7 +81,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
             trackEntitlementEvent("quota_meter_opened");
             onOpenAccess();
           }}
-          className="min-h-[36px] rounded border border-[#E4D8C4] bg-white px-3 py-1.5 font-serif-th text-[11px] text-[#2E211A] font-semibold transition-colors hover:border-[#8F5C1A] hover:text-[#8F5C1A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="min-h-[36px] rounded border border-[#D9C8AC] bg-white px-3 py-1.5 font-serif-th text-[11px] text-[#2E211A] font-semibold transition-colors hover:border-[#8F5C1A] hover:text-[#8F5C1A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           ดูสิทธิ์ทั้งหมด
         </button>

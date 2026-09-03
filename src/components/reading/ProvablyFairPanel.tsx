@@ -91,7 +91,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
   return (
     <section
       aria-label="ตรวจสอบความโปร่งใส Provably-Fair"
-      className="my-4 rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] transition-all overflow-hidden"
+      className="my-4 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] transition-all overflow-hidden"
     >
       {/* Header — แตะเพื่อยุบ/ขยาย (เริ่มต้นยุบไว้ ไม่ให้หน้ายาว) */}
       <button
@@ -102,7 +102,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
         className="flex w-full items-center justify-between gap-2 p-4 sm:p-5 text-left transition-colors hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 flex-shrink-0 rounded-full border border-[#E4D8C4] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#FFFFFF] ">
+          <div className="w-8 h-8 flex-shrink-0 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#FFFFFF] ">
             ✦
           </div>
           <div className="min-w-0">
@@ -118,7 +118,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="hidden sm:inline-block rounded-full border border-[#E4D8C4] bg-[#FFFFFF] px-2.5 py-0.5 text-[10px] font-mono font-bold text-[#2E211A]">
+          <span className="hidden sm:inline-block rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-2.5 py-0.5 text-[10px] font-mono font-bold text-[#2E211A]">
             SHA-256 Commit-Reveal
           </span>
           <span
@@ -143,10 +143,10 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
             transition={SPRING.snappy}
             className="overflow-hidden"
           >
-            <div className="border-t border-[#E4D8C4]/30 p-5 sm:p-6 space-y-4">
+            <div className="border-t border-[#D9C8AC]/30 p-5 sm:p-6 space-y-4">
               {/* State 1: Before Reveal (No serverSeed yet) */}
               {!isRevealed && (
-                <div className="space-y-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
+                <div className="space-y-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
                   <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
                     <span className="text-[#2E211A] font-serif-th font-bold flex items-center gap-1.5">
                       <span className="text-[#8F5C1A]">✦</span> คำมั่นความสุ่มที่เซิร์ฟเวอร์ผูกมัดไว้ (Commitment):
@@ -159,7 +159,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                       {copiedKey === "comm_pre" ? "✓ คัดลอกแล้ว" : "คัดลอก Hash"}
                     </button>
                   </div>
-                  <p className="font-mono text-[11px] text-[#2E211A] break-all bg-[#FFFFFF] p-2.5 rounded-lg border border-[#E4D8C4] select-all ">
+                  <p className="font-mono text-[11px] text-[#2E211A] break-all bg-[#FFFFFF] p-2.5 rounded-lg border border-[#D9C8AC] select-all ">
                     {effectiveCommitment || "กำลังสร้างคำมั่นความสุ่ม…"}
                   </p>
                   <p className="text-[11px] text-[#6F5B4A] font-serif-th leading-relaxed">
@@ -176,7 +176,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                   {/* Seeds Display Grid */}
                   <div className="grid grid-cols-1 gap-2.5 text-xs font-mono">
                     {/* Commitment */}
-                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] space-y-1 ">
+                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
                       <div className="flex items-center justify-between text-[10.5px]">
                         <span className="text-[#6F5B4A] font-serif-th">1. คำมั่นความสุ่มดั้งเดิม (Commitment):</span>
                         <button
@@ -191,7 +191,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     </div>
 
                     {/* Server Seed */}
-                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] space-y-1 ">
+                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
                       <div className="flex items-center justify-between text-[10.5px]">
                         <span className="text-[#6F5B4A] font-serif-th">
                           2. ซี้ดของเซิร์ฟเวอร์ที่เฉลย (Server Seed):
@@ -208,7 +208,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     </div>
 
                     {/* Client Seed */}
-                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] space-y-1 ">
+                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
                       <div className="flex items-center justify-between text-[10.5px]">
                         <span className="text-[#6F5B4A] font-serif-th">3. ซี้ดของคุณจากการขยับมือ (Client Seed):</span>
                         <button
@@ -278,7 +278,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           </div>
                         ) : (
                           /* Mismatch Warning Box */
-                          <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] space-y-2 ">
+                          <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] space-y-2 ">
                             <div className="flex items-center gap-2 text-[#A6392C] font-serif-th font-bold text-xs sm:text-sm">
                               <span className="w-5 h-5 rounded-full bg-[#FCEEEA] text-[#A6392C] flex items-center justify-center text-xs">
                                 ✕
@@ -306,7 +306,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                   </AnimatePresence>
 
                   {/* Independent Verification Accordion */}
-                  <div className="pt-2 border-t border-[#E4D8C4]/30">
+                  <div className="pt-2 border-t border-[#D9C8AC]/30">
                     <button
                       type="button"
                       onClick={() => setShowIndependentGuide((prev) => !prev)}
@@ -324,7 +324,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="mt-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] space-y-3 text-xs "
+                        className="mt-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-3 text-xs "
                       >
                         <p className="text-[#6F5B4A] font-serif-th leading-relaxed">
                           คุณสามารถคัดลอกชุดข้อมูล JSON นี้ไปรันผ่าน Node.js, Python หรือเครื่องมือภายนอกใด ๆ
@@ -332,13 +332,13 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                         </p>
 
                         <div className="relative">
-                          <pre className="p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-[10px] text-[#2E211A] font-mono overflow-x-auto max-h-48 ">
+                          <pre className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[10px] text-[#2E211A] font-mono overflow-x-auto max-h-48 ">
                             {verificationPayloadJson}
                           </pre>
                           <button
                             type="button"
                             onClick={() => handleCopy(verificationPayloadJson, "payload")}
-                            className="absolute top-2 right-2 px-2.5 py-1 rounded bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] text-[10px] font-serif-th hover:bg-[#FFFFFF] hover:border-[#8F5C1A] cursor-pointer "
+                            className="absolute top-2 right-2 px-2.5 py-1 rounded bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-[10px] font-serif-th hover:bg-[#FFFFFF] hover:border-[#8F5C1A] cursor-pointer "
                           >
                             {copiedKey === "payload" ? "✓ คัดลอกแล้ว" : "คัดลอก JSON"}
                           </button>

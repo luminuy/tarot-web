@@ -38,14 +38,14 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.85, y: 30 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-sm rounded-lg bg-[#FFFFFF] border-2 border-[#E4D8C4] p-6 shadow-[var(--shadow-overlay)] flex flex-col items-center text-center space-y-4 relative cursor-default"
+          className="w-full max-w-sm rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-6 shadow-[var(--shadow-overlay)] flex flex-col items-center text-center space-y-4 relative cursor-default"
         >
           {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
             aria-label="ปิดหน้าต่างซูมไพ่"
-            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
             ✕
           </button>
@@ -77,10 +77,10 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
             </p>
 
             <div className="flex items-center justify-center gap-2 pt-2 flex-wrap text-[11px]">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#E4D8C4] text-[#8F5C1A] font-semibold">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[#8F5C1A] font-semibold">
                 ธาตุ: {card.element}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A]">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A]">
                 {card.astrology}
               </span>
             </div>
@@ -90,7 +90,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           <button
             type="button"
             onClick={() => setFlipped(!flipped)}
-            className="w-full py-2.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-xs font-serif-th font-semibold text-[#2E211A] hover:bg-[#F0E8DB] transition-all cursor-pointer "
+            className="w-full py-2.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-xs font-serif-th font-semibold text-[#2E211A] hover:bg-[#F3EDE2] transition-all cursor-pointer "
           >
             ✦ พลิกดูหน้าไพ่ / หลังไพ่
           </button>

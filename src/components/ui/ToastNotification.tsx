@@ -95,7 +95,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
  ${
    isError
      ? "bg-[#FFFFFF] border border-[#A6392C] text-[#A6392C]"
-     : "bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A]"
+     : "bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A]"
  }`}
     >
       {/* Top ambient gold / ruby highlight */}
@@ -112,8 +112,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         <div
           className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-serif ${
             isError
-              ? "bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C]"
-              : "bg-[#F0E8DB] border border-[#E4D8C4] text-[#8F5C1A]"
+              ? "bg-[#FCEEEA] border border-[#D9C8AC] text-[#A6392C]"
+              : "bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A]"
           }`}
         >
           {isError ? "✦" : "✨"}
@@ -145,7 +145,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer shrink-0 ${
             isError
               ? "text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA]"
-              : "text-[#6F5B4A] hover:text-[#2E211A] hover:bg-[#F0E8DB]"
+              : "text-[#6F5B4A] hover:text-[#2E211A] hover:bg-[#F3EDE2]"
           }`}
         >
           ✕
@@ -153,7 +153,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
       </div>
 
       {/* Micro Progress Bar Countdown */}
-      <div className="absolute bottom-0 inset-x-0 h-[2px] bg-[#F0E8DB] overflow-hidden">
+      <div className="absolute bottom-0 inset-x-0 h-[2px] bg-[#F3EDE2] overflow-hidden">
         <motion.div
           key={toast.id || toast.title}
           initial={{ width: "100%" }}

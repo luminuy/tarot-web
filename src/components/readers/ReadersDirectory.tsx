@@ -43,7 +43,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
   return (
     <div className="space-y-6">
       {/* Search and Filter Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-[#FFFFFF] border border-[#E4D8C4] p-4 rounded-lg ">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-[#FFFFFF] border border-[#D9C8AC] p-4 rounded-lg ">
         {/* Search Input */}
         <div className="relative flex-1">
           <input
@@ -51,7 +51,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาแม่หมอ, ความถนัด (เช่น ความรัก, การงาน)…"
-            className="w-full bg-[#F0E8DB] border border-[#E4D8C4] rounded-lg px-4 py-2.5 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/60 focus:outline-none focus:border-[#8F5C1A] transition-colors"
+            className="w-full bg-[#F3EDE2] border border-[#D9C8AC] rounded-lg px-4 py-2.5 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/60 focus:outline-none focus:border-[#8F5C1A] transition-colors"
           />
           {search && (
             <button
@@ -80,7 +80,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
             className={`px-3 py-1 rounded-full text-xs font-serif-th transition-all duration-200 cursor-pointer ${
               selectedSpecialty === "all"
                 ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#E4D8C4] hover:border-[#8F5C1A]"
+                : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#D9C8AC] hover:border-[#8F5C1A]"
             }`}
           >
             ทั้งหมด
@@ -93,7 +93,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               className={`px-3 py-1 rounded-full text-xs font-serif-th transition-all duration-200 cursor-pointer ${
                 selectedSpecialty === spec
                   ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                  : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#E4D8C4] hover:border-[#8F5C1A]"
+                  : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#D9C8AC] hover:border-[#8F5C1A]"
               }`}
             >
               {spec}
@@ -104,7 +104,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
 
       {/* Readers Grid */}
       {filtered.length === 0 ? (
-        <div className="bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg p-12 text-center space-y-3 ">
+        <div className="bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg p-12 text-center space-y-3 ">
           <p className="text-sm font-semibold text-[#2E211A]">ไม่พบแม่หมอที่ตรงกับเงื่อนไขการค้นหา</p>
           <p className="text-xs text-[#6F5B4A]">ลองล้างคำค้นหา หรือเลือกหมวดหมู่อื่นเพื่อค้นหาแม่หมอท่านอื่น</p>
           <button
@@ -113,7 +113,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               setSearch("");
               setSelectedSpecialty("all");
             }}
-            className="mt-3 px-4 py-1.5 rounded-full border border-[#E4D8C4] text-xs text-[#8F5C1A] hover:bg-[#F0E8DB] transition-colors cursor-pointer font-bold"
+            className="mt-3 px-4 py-1.5 rounded-full border border-[#D9C8AC] text-xs text-[#8F5C1A] hover:bg-[#F3EDE2] transition-colors cursor-pointer font-bold"
           >
             ล้างตัวกรองทั้งหมด
           </button>
@@ -123,12 +123,12 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
           {filtered.map((reader) => (
             <div
               key={reader.id}
-              className="bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg p-5 flex flex-col justify-between hover:border-[#8F5C1A] transition-all duration-300 group"
+              className="bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg p-5 flex flex-col justify-between hover:border-[#8F5C1A] transition-all duration-300 group"
             >
               <div className="space-y-4">
                 {/* Header: Avatar + Name */}
                 <div className="flex items-center gap-3.5">
-                  <div className="h-14 w-14 shrink-0 rounded-full border-2 border-[#E4D8C4] bg-[#F0E8DB] overflow-hidden flex items-center justify-center text-xl font-bold text-[#8F5C1A] shadow-inner">
+                  <div className="h-14 w-14 shrink-0 rounded-full border-2 border-[#D9C8AC] bg-[#F3EDE2] overflow-hidden flex items-center justify-center text-xl font-bold text-[#8F5C1A] shadow-inner">
                     {reader.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={reader.avatarUrl} alt={reader.displayName} className="h-full w-full object-cover" />
@@ -142,7 +142,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                         {reader.displayName}
                       </h3>
                     </div>
-                    <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#E4D8C4] text-[10px] text-[#3A7044] font-semibold">
+                    <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#D9C8AC] text-[10px] text-[#3A7044] font-semibold">
                       <span>✦</span> แม่หมอตัวจริง (ยืนยันแล้ว)
                     </div>
                   </div>
@@ -158,7 +158,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                   {reader.specialties.map((s, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-0.5 rounded bg-[#F0E8DB] border border-[#E4D8C4] text-[11px] text-[#2E211A] font-medium"
+                      className="px-2 py-0.5 rounded bg-[#F3EDE2] border border-[#D9C8AC] text-[11px] text-[#2E211A] font-medium"
                     >
                       {s}
                     </span>
@@ -167,7 +167,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               </div>
 
               {/* Action Button */}
-              <div className="pt-5 border-t border-[#E4D8C4]/30 mt-4">
+              <div className="pt-5 border-t border-[#D9C8AC]/30 mt-4">
                 <Link
                   href={`/readers/${reader.id}`}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-serif-th font-bold transition-all "

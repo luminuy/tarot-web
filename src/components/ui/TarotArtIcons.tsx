@@ -19,7 +19,7 @@ interface MiniCardProps {
 export const MiniRwsCard: React.FC<MiniCardProps> = ({
   src,
   className = "w-12 h-[82px]",
-  borderColor = "#E4D8C4",
+  borderColor = "#D9C8AC",
   highlight = false,
   rotate = 0,
 }) => (
@@ -49,7 +49,7 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
 // ============================================================================
 
 export const HighPriestessIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#E4D8C4] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
     <CardImage
       image="major-02.jpg"
       alt="The High Priestess"
@@ -60,7 +60,7 @@ export const HighPriestessIllustration: React.FC<{ className?: string }> = ({ cl
 );
 
 export const JusticeIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#E4D8C4] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
     <CardImage
       image="major-11.jpg"
       alt="Justice"
@@ -71,7 +71,7 @@ export const JusticeIllustration: React.FC<{ className?: string }> = ({ classNam
 );
 
 export const HermitIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#E4D8C4] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
     <CardImage
       image="major-09.jpg"
       alt="The Hermit"
@@ -82,7 +82,7 @@ export const HermitIllustration: React.FC<{ className?: string }> = ({ className
 );
 
 export const TheStarIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#E4D8C4] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
     <CardImage
       image="major-17.jpg"
       alt="The Star"
@@ -93,7 +93,7 @@ export const TheStarIllustration: React.FC<{ className?: string }> = ({ classNam
 );
 
 export const MagicianIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#E4D8C4] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
     <CardImage
       image="major-01.jpg"
       alt="The Magician"
@@ -112,7 +112,7 @@ export const DailySpreadArt: React.FC<{ className?: string }> = ({ className = "
   <div className={`flex items-center justify-center relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-19.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-16 h-[108px] sm:w-17 sm:h-[115px]"
       highlight
     />
@@ -129,7 +129,7 @@ export const QuickSpreadArt: React.FC<{ className?: string }> = ({ className = "
     />
     <MiniRwsCard
       src="/cards/major-01.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-14 h-[95px] sm:w-15 sm:h-[102px]"
       highlight
     />
@@ -146,7 +146,7 @@ export const YesNoSpreadArt: React.FC<{ className?: string }> = ({ className = "
     />
     <MiniRwsCard
       src="/cards/major-10.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-13 h-[88px] sm:w-14 sm:h-[95px]"
       highlight
     />
@@ -161,11 +161,11 @@ export const YesNoSpreadArt: React.FC<{ className?: string }> = ({ className = "
 // 4. อดีต ปัจจุบัน อนาคต (3 ใบ)
 export const ThreeCardSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`flex items-center justify-center gap-2 relative ${className}`}>
-    <div className="absolute w-36 h-0.5 border-b border-dashed border-[#E4D8C4]/40 top-1/2 -translate-y-1/2 z-0" />
+    <div className="absolute w-36 h-0.5 border-b border-dashed border-[#D9C8AC]/40 top-1/2 -translate-y-1/2 z-0" />
     <MiniRwsCard src="/cards/major-09.jpg" className="w-11 h-[75px] sm:w-12 sm:h-[82px] z-10 opacity-90" />
     <MiniRwsCard
       src="/cards/major-17.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-13 h-[88px] sm:w-14 sm:h-[95px] z-10"
       highlight
     />
@@ -178,7 +178,7 @@ export const LoveSpreadArt: React.FC<{ className?: string }> = ({ className = "w
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-06.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-10 h-[68px]"
       highlight
     />
@@ -186,7 +186,7 @@ export const LoveSpreadArt: React.FC<{ className?: string }> = ({ className = "w
       <MiniRwsCard src="/cards/cups-02.jpg" className="w-8.5 h-[58px]" />
       <MiniRwsCard src="/cards/swords-04.jpg" borderColor="#A6392C" className="w-8.5 h-[58px] opacity-85" />
       <MiniRwsCard src="/cards/cups-03.jpg" className="w-8.5 h-[58px]" />
-      <MiniRwsCard src="/cards/cups-10.jpg" borderColor="#E4D8C4" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/cups-10.jpg" borderColor="#D9C8AC" className="w-8.5 h-[58px]" />
     </div>
   </div>
 );
@@ -196,7 +196,7 @@ export const CareerSpreadArt: React.FC<{ className?: string }> = ({ className = 
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-04.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-10 h-[68px]"
       highlight
     />
@@ -214,7 +214,7 @@ export const MoneySpreadArt: React.FC<{ className?: string }> = ({ className = "
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/pentacles-10.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-10 h-[68px]"
       highlight
     />
@@ -231,16 +231,16 @@ export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className 
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-07.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-9.5 h-[65px]"
       highlight
     />
     <div className="flex items-center justify-center gap-2">
-      <div className="flex gap-1 p-0.5 rounded-lg border border-[#E4D8C4]/30 bg-[#F0E8DB]/5">
+      <div className="flex gap-1 p-0.5 rounded-lg border border-[#D9C8AC]/30 bg-[#F3EDE2]/5">
         <MiniRwsCard src="/cards/swords-02.jpg" className="w-8 h-[54px]" />
         <MiniRwsCard src="/cards/wands-07.jpg" className="w-8 h-[54px]" />
       </div>
-      <div className="flex gap-1 p-0.5 rounded-lg border border-[#E4D8C4]/30 bg-[#F0E8DB]/5">
+      <div className="flex gap-1 p-0.5 rounded-lg border border-[#D9C8AC]/30 bg-[#F3EDE2]/5">
         <MiniRwsCard src="/cards/pentacles-02.jpg" className="w-8 h-[54px]" />
         <MiniRwsCard src="/cards/cups-09.jpg" className="w-8 h-[54px]" />
       </div>
@@ -299,7 +299,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
         {arms.map((arm) => (
           <div
             key={arm.image}
-            className="absolute rounded border border-[#E4D8C4]/55 overflow-hidden opacity-95"
+            className="absolute rounded border border-[#D9C8AC]/55 overflow-hidden opacity-95"
             style={{ left: arm.x, top: arm.y, width: CC.cardW, height: CC.cardH }}
           >
             <CardImage
@@ -313,7 +313,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
 
         {/* ใบที่ 1 สถานการณ์ปัจจุบัน (ใจกลาง) */}
         <div
-          className="absolute z-10 rounded border-2 border-[#E4D8C4] overflow-hidden "
+          className="absolute z-10 rounded border-2 border-[#D9C8AC] overflow-hidden "
           style={{ left: CC_COL[1], top: CC_ROW[1], width: CC.cardW, height: CC.cardH }}
         >
           <CardImage
@@ -326,7 +326,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
 
         {/* ใบที่ 2 สิ่งที่ขวางอยู่ (วางขวางทับใบกลางตามธรรมเนียมเซลติกครอส) */}
         <div
-          className="absolute z-20 rounded border border-[#E4D8C4]/90 overflow-hidden "
+          className="absolute z-20 rounded border border-[#D9C8AC]/90 overflow-hidden "
           style={{
             left: CC_COL[1],
             top: CC_ROW[1],
@@ -348,7 +348,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
           <div
             key={image}
             className={`absolute rounded overflow-hidden ${
-              idx === 0 ? "border border-[#E4D8C4]/80" : "border border-[#E4D8C4]/50 opacity-90"
+              idx === 0 ? "border border-[#D9C8AC]/80" : "border border-[#D9C8AC]/50 opacity-90"
             }`}
             style={{
               left: CC_STAFF_X,
@@ -368,7 +368,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
 // 10. ผัง 12 เดือน / วงล้อจักรราศี (12 ใบ)
 export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`relative w-28 h-28 mx-auto flex items-center justify-center ${className}`}>
-    <div className="w-6 h-6 rounded-full border-1.5 border-[#E4D8C4] bg-black/90 flex items-center justify-center text-[8.5px] text-[#8F5C1A] z-10 font-bold">
+    <div className="w-6 h-6 rounded-full border-1.5 border-[#D9C8AC] bg-black/90 flex items-center justify-center text-[8.5px] text-[#8F5C1A] z-10 font-bold">
       ✦
     </div>
     {Array.from({ length: 12 }).map((_, i) => {
@@ -382,7 +382,7 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
       return (
         <div
           key={i}
-          className="absolute w-5 h-[34px] rounded border border-[#E4D8C4]/70 overflow-hidden shadow"
+          className="absolute w-5 h-[34px] rounded border border-[#D9C8AC]/70 overflow-hidden shadow"
           style={{
             transform: `translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
           }}
@@ -424,13 +424,13 @@ export const MindBodySpiritSpreadArt: React.FC<{ className?: string }> = ({ clas
     <MiniRwsCard src="/cards/pentacles-04.jpg" borderColor="#3A7044" className="w-11 h-[75px] sm:w-12 sm:h-[82px]" />
     <MiniRwsCard
       src="/cards/cups-14.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-13 h-[88px]"
       highlight
     />
     <MiniRwsCard
       src="/cards/major-17.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-13 h-[88px]"
       highlight
     />
@@ -442,14 +442,14 @@ export const HowTheyFeelSpreadArt: React.FC<{ className?: string }> = ({ classNa
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/swords-02.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-10 h-[68px]"
       highlight
     />
     <div className="flex items-center justify-center gap-2">
       <MiniRwsCard src="/cards/cups-02.jpg" className="w-9 h-[62px]" />
       <MiniRwsCard src="/cards/cups-04.jpg" className="w-9 h-[62px]" />
-      <MiniRwsCard src="/cards/wands-01.jpg" borderColor="#E4D8C4" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/wands-01.jpg" borderColor="#D9C8AC" className="w-9 h-[62px]" />
     </div>
   </div>
 );
@@ -459,7 +459,7 @@ export const ExReconciliationSpreadArt: React.FC<{ className?: string }> = ({ cl
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-20.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-10 h-[68px]"
       highlight
     />
@@ -476,7 +476,7 @@ export const SoulmateSpreadArt: React.FC<{ className?: string }> = ({ className 
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-06.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-10 h-[68px]"
       highlight
     />
@@ -484,7 +484,7 @@ export const SoulmateSpreadArt: React.FC<{ className?: string }> = ({ className 
       <MiniRwsCard src="/cards/cups-02.jpg" className="w-8.5 h-[58px]" />
       <MiniRwsCard src="/cards/wands-04.jpg" className="w-8.5 h-[58px]" />
       <MiniRwsCard src="/cards/major-17.jpg" className="w-8.5 h-[58px]" />
-      <MiniRwsCard src="/cards/major-21.jpg" borderColor="#E4D8C4" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/major-21.jpg" borderColor="#D9C8AC" className="w-8.5 h-[58px]" />
     </div>
   </div>
 );
@@ -501,7 +501,7 @@ export const CareerSwitchSpreadArt: React.FC<{ className?: string }> = ({ classN
     <div className="flex items-center justify-center gap-1.5">
       <MiniRwsCard src="/cards/wands-02.jpg" className="w-8.5 h-[58px]" />
       <MiniRwsCard src="/cards/pentacles-03.jpg" className="w-8.5 h-[58px]" />
-      <MiniRwsCard src="/cards/wands-08.jpg" borderColor="#E4D8C4" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/wands-08.jpg" borderColor="#D9C8AC" className="w-8.5 h-[58px]" />
       <MiniRwsCard src="/cards/major-00.jpg" className="w-8.5 h-[58px]" />
     </div>
   </div>
@@ -512,7 +512,7 @@ export const InnerPotentialSpreadArt: React.FC<{ className?: string }> = ({ clas
   <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-08.jpg"
-      borderColor="#E4D8C4"
+      borderColor="#D9C8AC"
       className="w-10 h-[68px]"
       highlight
     />
@@ -532,7 +532,7 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
       {[{ card: "01" }, { card: "04" }, { card: "07" }, { card: "10" }].map((item, idx) => (
         <div
           key={idx}
-          className="w-8.5 h-[58px] rounded-lg border border-[#E4D8C4]/40 overflow-hidden shadow opacity-90 hover:opacity-100 flex-shrink-0"
+          className="w-8.5 h-[58px] rounded-lg border border-[#D9C8AC]/40 overflow-hidden shadow opacity-90 hover:opacity-100 flex-shrink-0"
         >
           <CardImage
             image={`major-${item.card}.jpg`}
@@ -549,7 +549,7 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
         <div
           key={idx}
           className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 transition-all ${
-            item.highlight ? "border-2 border-[#E4D8C4] scale-105 z-10" : "border border-[#E4D8C4]/40 shadow opacity-90"
+            item.highlight ? "border-2 border-[#D9C8AC] scale-105 z-10" : "border border-[#D9C8AC]/40 shadow opacity-90"
           }`}
         >
           <CardImage

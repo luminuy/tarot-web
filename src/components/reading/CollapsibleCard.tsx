@@ -34,7 +34,7 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
   const panelId = useId();
 
   return (
-    <section className="my-4 overflow-hidden rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] ">
+    <section className="my-4 overflow-hidden rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] ">
       <button
         type="button"
         aria-expanded={open}
@@ -42,7 +42,7 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
-        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#E4D8C4] bg-[#F0E8DB] text-xs text-[#8F5C1A]">
+        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-xs text-[#8F5C1A]">
           {icon}
         </span>
         <span className="min-w-0 flex-1">
@@ -50,7 +50,7 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
           {hint && <span className="mt-0.5 block truncate font-serif-th text-[10.5px] text-[#6F5B4A]">{hint}</span>}
         </span>
         {badge && (
-          <span className="flex-shrink-0 rounded-full border border-[#E4D8C4] bg-[#F0E8DB] px-2 py-0.5 text-[10px] font-semibold text-[#2E211A]">
+          <span className="flex-shrink-0 rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-2 py-0.5 text-[10px] font-semibold text-[#2E211A]">
             {badge}
           </span>
         )}
@@ -75,7 +75,7 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
             transition={{ duration: DUR.base, ease: EASE.out }}
             className="overflow-hidden"
           >
-            <div className="border-t border-[#E4D8C4]/30 px-3 pb-3 pt-1 [&>*]:!my-0">{children}</div>
+            <div className="border-t border-[#D9C8AC]/30 px-3 pb-3 pt-1 [&>*]:!my-0">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>

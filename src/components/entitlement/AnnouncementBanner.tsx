@@ -35,7 +35,7 @@ export function AnnouncementBanner() {
   const when = ent!.announceResetDate?.trim();
 
   return (
-    <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 font-serif-th text-xs text-[#2E211A] sm:text-sm">
+    <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 font-serif-th text-xs text-[#2E211A] sm:text-sm">
       <span className="flex-1">
         <span className="text-[#8F5C1A]">✦</span> เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
         <strong>
@@ -54,7 +54,7 @@ export function AnnouncementBanner() {
           setDismissed(true);
         }}
         aria-label="ปิดประกาศระบบสิทธิ์"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#6F5B4A] transition-colors hover:bg-[#F0E8DB] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#6F5B4A] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
         ✕
       </button>

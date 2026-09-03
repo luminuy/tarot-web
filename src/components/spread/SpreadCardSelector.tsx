@@ -215,14 +215,14 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                 isActive
                   ? "bg-[#8F5C1A] text-[#FFFFFF] border border-[#8F5C1A]"
-                  : "bg-[#FFFFFF] text-[#2E211A] hover:text-[#8F5C1A] border border-[#E4D8C4]/50 hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+                  : "bg-[#FFFFFF] text-[#2E211A] hover:text-[#8F5C1A] border border-[#D9C8AC]/50 hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
               }`}
             >
               <cat.Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#FFFFFF]" : "text-[#8F5C1A]"}`} />
               <span>{cat.label}</span>
               <span
                 className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                  isActive ? "bg-white/20 text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#E4D8C4]/40"
+                  isActive ? "bg-white/20 text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#D9C8AC]/40"
                 }`}
               >
                 {cat.count}
@@ -279,20 +279,20 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 }}
                 className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition-all duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/card ${
                   isSelected
-                    ? "bg-[#FFFFFF] border-2 border-[#E4D8C4] ring-4 ring-[#8F5C1A]/20 shadow-[var(--shadow-overlay)]"
+                    ? "bg-[#FFFFFF] border-2 border-[#D9C8AC] ring-4 ring-[#8F5C1A]/20 shadow-[var(--shadow-overlay)]"
                     : isLocked
-                      ? "bg-[#FFFFFF]/90 border border-[#E4D8C4]/50 hover:border-[#8F5C1A] hover:bg-[#F6F1E9] opacity-90 hover:opacity-100"
-                      : "bg-[#FFFFFF] border border-[#E4D8C4]/50 hover:border-[#8F5C1A] hover:shadow-[var(--shadow-overlay)]"
+                      ? "bg-[#FFFFFF]/90 border border-[#D9C8AC]/50 hover:border-[#8F5C1A] hover:bg-[#FAF7F2] opacity-90 hover:opacity-100"
+                      : "bg-[#FFFFFF] border border-[#D9C8AC]/50 hover:border-[#8F5C1A] hover:shadow-[var(--shadow-overlay)]"
                 }`}
                 style={{ minHeight: "320px" }}
               >
                 {/* Top Card Header Tags */}
                 <div className="flex items-center justify-between z-10 pb-1">
-                  <span className="text-[10px] text-[#2E211A] bg-[#FFFFFF] px-2.5 py-0.5 rounded-full border border-[#E4D8C4]/60 font-semibold font-mono ">
+                  <span className="text-[10px] text-[#2E211A] bg-[#FFFFFF] px-2.5 py-0.5 rounded-full border border-[#D9C8AC]/60 font-semibold font-mono ">
                     {spread.positions.length} ใบ
                   </span>
                   {isLocked ? (
-                    <span className="text-[9px] text-[#6F5B4A] bg-[#FFFFFF] border border-[#E4D8C4]/60 px-2.5 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
+                    <span className="text-[9px] text-[#6F5B4A] bg-[#FFFFFF] border border-[#D9C8AC]/60 px-2.5 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
                       <SealedLockIcon className="w-3 h-3 text-[#8F5C1A]" />
                       <span>✦ ญาณพิเศษ</span>
                     </span>
@@ -306,7 +306,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 {/* 1909 Tarot Spread Centerpiece on Dedicated Altar Pad */}
                 <div className="my-auto py-2 flex flex-col items-center justify-center gap-2 relative">
                   <div
-                    className={`w-full flex items-center justify-center p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4]/25 shadow-inner relative group-hover/card:scale-105 transition-transform duration-300 ${
+                    className={`w-full flex items-center justify-center p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC]/25 shadow-inner relative group-hover/card:scale-105 transition-transform duration-300 ${
                       isLocked ? "opacity-65 saturate-[0.9] group-hover/card:opacity-90" : ""
                     }`}
                   >
@@ -317,7 +317,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
                   {/* ตราผนึกญาณพิเศษ */}
                   {isLocked && (
-                    <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] px-3 py-1 group-hover/card:border-[#E4D8C4] transition-all duration-300">
+                    <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/card:border-[#D9C8AC] transition-all duration-300">
                       <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
                       <span className="text-[10.5px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
                         แตะเพื่อปลดล็อกผังนี้
@@ -327,7 +327,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 </div>
 
                 {/* Card Footer Titles */}
-                <div className="pt-2.5 border-t border-[#E4D8C4]/30 text-center z-10">
+                <div className="pt-2.5 border-t border-[#D9C8AC]/30 text-center z-10">
                   <h4 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] group-hover/card:text-[#8F5C1A] transition-colors leading-tight">
                     {spread.nameTh}
                   </h4>
@@ -386,11 +386,11 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#E4D8C4]/50 shadow-[var(--shadow-overlay)]"
+          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#D9C8AC]/50 shadow-[var(--shadow-overlay)]"
         >
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}
-            <div className="w-9 h-14 sm:w-10 sm:h-15 rounded-lg border-2 border-[#E4D8C4] overflow-hidden bg-[#FFFFFF] relative flex-shrink-0">
+            <div className="w-9 h-14 sm:w-10 sm:h-15 rounded-lg border-2 border-[#D9C8AC] overflow-hidden bg-[#FFFFFF] relative flex-shrink-0">
               <CardImage
                 image={`${
                   selectedSpread.id === "daily"

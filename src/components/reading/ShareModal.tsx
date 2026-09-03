@@ -69,13 +69,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         // 1. พื้นหลัง — ผ้าลินินครีมอุ่นตามระบบดีไซน์ V2 (canvas → inset)
         const grad = ctx.createLinearGradient(0, 0, 0, height);
         grad.addColorStop(0, "#FFFDF9");
-        grad.addColorStop(0.55, "#F6F1E9");
-        grad.addColorStop(1, "#F0E8DB");
+        grad.addColorStop(0.55, "#FAF7F2");
+        grad.addColorStop(1, "#F3EDE2");
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
 
         // 2. กรอบเส้นเดี่ยวบาง ๆ (ไม่มีเงา ไม่มีดาวระยิบ)
-        ctx.strokeStyle = "#E4D8C4";
+        ctx.strokeStyle = "#D9C8AC";
         ctx.lineWidth = 2;
         ctx.strokeRect(48, 48, width - 96, height - 96);
 
@@ -91,7 +91,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         ctx.fillText(`ผังการวางไพ่: ${spreadName}`, width / 2, headerY + 45);
 
         // Divider
-        ctx.strokeStyle = "#E4D8C4";
+        ctx.strokeStyle = "#D9C8AC";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(120, headerY + 70);
@@ -145,7 +145,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           const cardObj = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
 
           // พื้นรองไพ่
-          ctx.fillStyle = "#F0E8DB";
+          ctx.fillStyle = "#F3EDE2";
           ctx.beginPath();
           ctx.roundRect(cx, cardY, cardW, cardH, 8);
           ctx.fill();
@@ -168,7 +168,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           }
 
           // เส้นขอบไพ่ 1px (ไม่มีเงา)
-          ctx.strokeStyle = "#E4D8C4";
+          ctx.strokeStyle = "#D9C8AC";
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.roundRect(cx, cardY, cardW, cardH, 8);
@@ -196,7 +196,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         const summaryH = height - summaryY - 120;
 
         ctx.fillStyle = "#FFFFFF";
-        ctx.strokeStyle = "#E4D8C4";
+        ctx.strokeStyle = "#D9C8AC";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(80, summaryY, width - 160, summaryH, 8);
@@ -358,10 +358,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-xl rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-4 sm:p-6 shadow-[var(--shadow-overlay)] space-y-4 my-auto relative text-[#2E211A]"
+          className="w-full max-w-xl rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-4 sm:p-6 shadow-[var(--shadow-overlay)] space-y-4 my-auto relative text-[#2E211A]"
         >
           {/* Modal Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#E4D8C4]/30">
+          <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/30">
             <div className="flex items-center gap-2">
               <span className="text-[#8F5C1A] text-sm">✦</span>
               <div>
@@ -375,7 +375,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               type="button"
               onClick={onClose}
               aria-label="ปิดหน้าต่างแชร์ผลคำทำนาย"
-              className="w-10 h-10 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+              className="w-10 h-10 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
               ✕
             </button>
@@ -387,7 +387,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="p-2.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-center text-xs text-[#2E211A] font-serif-th "
+              className="p-2.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-center text-xs text-[#2E211A] font-serif-th "
             >
               <span className="text-[#8F5C1A]">✨ </span>
               {toastMessage}
@@ -397,7 +397,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           {/* Social Share Preview Card (Redesigned Layout) */}
           <div
             ref={cardRef}
-            className="w-full rounded-lg bg-[#FFFFFF] border-2 border-[#E4D8C4] p-5 sm:p-6 space-y-4 relative overflow-hidden text-center"
+            className="w-full rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-6 space-y-4 relative overflow-hidden text-center"
           >
             {/* Ornate Corner Accents */}
             <span className="absolute top-2.5 left-3 text-[#8F5C1A] text-xs select-none">✦</span>
@@ -416,7 +416,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                 </span>
                 <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#6F5B4A]" />
               </div>
-              <div className="inline-block px-3 py-0.5 rounded-full bg-[#F0E8DB] border border-[#E4D8C4]">
+              <div className="inline-block px-3 py-0.5 rounded-full bg-[#F3EDE2] border border-[#D9C8AC]">
                 <span className="text-[11px] sm:text-xs text-[#2E211A] font-serif-th font-semibold">
                   ผัง: {spreadName}
                 </span>
@@ -448,7 +448,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
                     {/* Card Frame */}
                     <div
-                      className={`w-full rounded-lg overflow-hidden relative border-2 border-[#E4D8C4] bg-[#F0E8DB] ${
+                      className={`w-full rounded-lg overflow-hidden relative border-2 border-[#D9C8AC] bg-[#F3EDE2] ${
                         isSingle ? "h-48 sm:h-60" : "h-32 sm:h-38"
                       } ${c.isReversed ? "rotate-180" : ""}`}
                     >
@@ -469,8 +469,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                       <span
                         className={`text-[9px] px-2 py-0.5 rounded-full font-serif-th inline-block font-semibold ${
                           c.isReversed
-                            ? "bg-[#FCEEEA] text-[#A6392C] border border-[#E4D8C4]"
-                            : "bg-[#EBF3ED] text-[#3A7044] border border-[#E4D8C4]"
+                            ? "bg-[#FCEEEA] text-[#A6392C] border border-[#D9C8AC]"
+                            : "bg-[#EBF3ED] text-[#3A7044] border border-[#D9C8AC]"
                         }`}
                       >
                         {c.isReversed ? "กลับหัว ↷" : "หัวตั้ง ✦"}
@@ -483,7 +483,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
             {/* 4. Oracle Prophecy / Interpretation */}
             {reading?.summary && (
-              <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#E4D8C4]/30">
+              <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#D9C8AC]/30">
                 <span className="text-[10px] sm:text-[11px] text-[#8F5C1A] font-serif-th tracking-wider uppercase block font-bold">
                   ✦ สารพยากรณ์จากแม่หมอ {persona.nameTh} ✦
                 </span>
@@ -494,14 +494,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             )}
 
             {/* 5. Footer Watermark */}
-            <div className="pt-2 border-t border-[#E4D8C4]/20 relative z-10 flex items-center justify-between px-2 text-[9px] text-[#6F5B4A] font-mono tracking-widest uppercase font-bold">
+            <div className="pt-2 border-t border-[#D9C8AC]/20 relative z-10 flex items-center justify-between px-2 text-[9px] text-[#6F5B4A] font-mono tracking-widest uppercase font-bold">
               <span>PROVABLY-FAIR SHA-256</span>
               <span>SEERTAROT.NET</span>
             </div>
           </div>
 
           {/* Social Sharing Control Bar (5 Official Brand Icons, Perfectly Centered, Zero Clipping) */}
-          <div className="py-3 px-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] flex items-center justify-center gap-3.5 sm:gap-6 ">
+          <div className="py-3 px-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex items-center justify-center gap-3.5 sm:gap-6 ">
             {/* Facebook (#1877F2) */}
             <button
               type="button"

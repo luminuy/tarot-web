@@ -115,7 +115,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         )}
 
         {successMsg && (
-          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-[#E4D8C4] text-[#3A7044] text-sm font-serif-th text-center font-bold ">
+          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-[#D9C8AC] text-[#3A7044] text-sm font-serif-th text-center font-bold ">
             {successMsg}
           </div>
         )}
@@ -140,8 +140,8 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                     onClick={() => setSelectedPkg(pkg)}
                     className={`rounded-lg p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                       isSelected
-                        ? "bg-[#FFFFFF] border-[#E4D8C4] ring-2 ring-[#8F5C1A]/70 scale-[1.02]"
-                        : "bg-[#FFFFFF] border-[#E4D8C4] hover:border-[#8F5C1A] hover:bg-[#F0E8DB]"
+                        ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/70 scale-[1.02]"
+                        : "bg-[#FFFFFF] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#F3EDE2]"
                     }`}
                   >
                     {pkg.badge && (
@@ -155,7 +155,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                       <p className="text-[11px] text-[#6F5B4A] mt-1 leading-tight font-serif-th">{pkg.tagline}</p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-[#E4D8C4]/30 flex items-baseline justify-between">
+                    <div className="mt-4 pt-3 border-t border-[#D9C8AC]/30 flex items-baseline justify-between">
                       <span className="text-lg font-bold font-mono text-[#8F5C1A]">฿{pkg.priceThb}</span>
                       <span className="text-[10px] text-[#2E211A] font-serif-th font-semibold">
                         {pkg.credits} ครั้ง
@@ -186,8 +186,8 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         ) : (
           /* Payment Screen */
           <div className="text-center space-y-4">
-            <div className="p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] space-y-3 ">
-              <div className="flex items-center justify-between text-xs text-[#6F5B4A] font-serif-th border-b border-[#E4D8C4]/30 pb-2">
+            <div className="p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-3 ">
+              <div className="flex items-center justify-between text-xs text-[#6F5B4A] font-serif-th border-b border-[#D9C8AC]/30 pb-2">
                 <span>รายการ</span>
                 <span className="font-bold text-[#2E211A]">
                   {selectedPkg.name} ({selectedPkg.credits} ครั้ง)
@@ -200,12 +200,12 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
             </div>
 
             {checkoutData.qrCodeUri ? (
-              <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-white text-[#2E211A] max-w-[240px] mx-auto border border-[#E4D8C4]">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-white text-[#2E211A] max-w-[240px] mx-auto border border-[#D9C8AC]">
                 <img src={checkoutData.qrCodeUri} alt="PromptPay QR Code" className="w-48 h-48 object-contain" />
                 <span className="text-[11px] text-[#6F5B4A] font-serif-th">สแกนด้วยแอปพลิเคชันธนาคารทุกแห่ง</span>
               </div>
             ) : (
-              <div className="p-5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-center space-y-2 ">
+              <div className="p-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-center space-y-2 ">
                 <div className="text-2xl text-[#8F5C1A]">✦</div>
                 <h4 className="font-serif-th text-sm font-bold text-[#2E211A]">
                   ระบบจำลองการชำระเงิน (Test Gateway Simulator)

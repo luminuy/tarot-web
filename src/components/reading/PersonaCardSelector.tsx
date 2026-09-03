@@ -138,21 +138,21 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               }}
               className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/persona ${
                 isSelected
-                  ? "bg-[#FFFFFF] border-[#E4D8C4] ring-2 ring-[#8F5C1A]/50 shadow-[var(--shadow-overlay)]"
+                  ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-[var(--shadow-overlay)]"
                   : isLocked
-                    ? "bg-[#FFFFFF]/80 border-[#E4D8C4]/70 hover:border-[#8F5C1A] hover:bg-[#F6F1E9] opacity-90 hover:opacity-100"
-                    : "bg-[#FFFFFF] border-[#E4D8C4] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+                    ? "bg-[#FFFFFF]/80 border-[#D9C8AC]/70 hover:border-[#8F5C1A] hover:bg-[#FAF7F2] opacity-90 hover:opacity-100"
+                    : "bg-[#FFFFFF] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
               }`}
               style={{ minHeight: "315px" }}
             >
               {/* Top Card Archetype Tag */}
-              <div className="text-center pb-1.5 border-b border-[#E4D8C4]/30">
+              <div className="text-center pb-1.5 border-b border-[#D9C8AC]/30">
                 <div className="flex items-center justify-center gap-1.5 flex-wrap">
                   <span className="text-[9px] uppercase tracking-widest text-[#8F5C1A] font-mono font-semibold block">
                     {meta.roleTitle}
                   </span>
                   {isLocked && (
-                    <span className="text-[8px] text-[#8F5C1A] bg-[#F0E8DB] border border-[#E4D8C4] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
+                    <span className="text-[8px] text-[#8F5C1A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
                       <span>✦ ปรมาจารย์ลับ</span>
                     </span>
                   )}
@@ -170,7 +170,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
 
                 {/* ตราผนึกปรมาจารย์ลับ — ป้ายแคปซูลหรูหราใต้ภาพไพ่ (ไม่ปิดทับหน้าไพ่เด็ดขาด) */}
                 {isLocked && (
-                  <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] px-3 py-1 group-hover/persona:border-[#8F5C1A] transition-all duration-300 shadow-xs">
+                  <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/persona:border-[#8F5C1A] transition-all duration-300 shadow-xs">
                     <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
                     <span className="text-[10.5px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
                       แตะเพื่อปลดล็อก
@@ -180,7 +180,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               </div>
 
               {/* Card Footer Titles */}
-              <div className="pt-2 border-t border-[#E4D8C4]/30 text-center">
+              <div className="pt-2 border-t border-[#D9C8AC]/30 text-center">
                 <div className="flex items-center justify-center gap-1.5">
                   <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight">
                     {p.nameTh}
@@ -198,7 +198,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                       const greeting = PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
                       soundManager.speakProphecy(greeting, p.id);
                     }}
-                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F0E8DB]/40 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F3EDE2]/40 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                     title={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                     aria-label={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                   >

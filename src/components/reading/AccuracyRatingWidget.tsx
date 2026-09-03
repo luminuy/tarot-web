@@ -74,7 +74,7 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={SPRING.snappy}
-          className="flex items-center justify-center gap-2 py-3 text-xs text-[#2E211A] font-serif-th bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg px-4 my-2 "
+          className="flex items-center justify-center gap-2 py-3 text-xs text-[#2E211A] font-serif-th bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg px-4 my-2 "
         >
           <span className="text-[#8F5C1A]">✨</span>
           <span>
@@ -114,7 +114,7 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
                 key={score}
                 type="button"
                 onClick={() => handleRate(score)}
-                className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] hover:bg-[#F6F1E9] transition-all cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-all cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                 title={label}
                 aria-label={`ให้คะแนนระดับ: ${label}`}
               >

@@ -100,12 +100,12 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
   const isQuestionEmpty = touchedQuestion && !question.trim();
 
   return (
-    <div className="w-full rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-5 sm:p-8 space-y-6 relative overflow-hidden">
+    <div className="w-full rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-8 space-y-6 relative overflow-hidden">
       {/* Background Sacred Geometric Aura */}
 
       {/* Persona Welcoming Sanctuary Dialogue */}
-      <div className="flex items-start gap-3.5 p-4 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] relative overflow-hidden">
-        <div className="w-10 h-15 rounded-lg border-2 border-[#E4D8C4] overflow-hidden flex-shrink-0 bg-[#FFFFFF]">
+      <div className="flex items-start gap-3.5 p-4 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] relative overflow-hidden">
+        <div className="w-10 h-15 rounded-lg border-2 border-[#D9C8AC] overflow-hidden flex-shrink-0 bg-[#FFFFFF]">
           <CardImage
             image={persona?.cardImage || "major-02.jpg"}
             alt={persona?.nameTh || "แม่หมอ"}
@@ -155,7 +155,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             className={`w-full bg-[#FFFFFF] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all duration-200 ${
               isNicknameEmpty
                 ? "border border-[#A6392C] focus:border-[#A6392C] focus:ring-1 focus:ring-[#A6392C]"
-                : "border border-[#E4D8C4] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
+                : "border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
             }`}
           />
         </div>
@@ -176,7 +176,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={situation}
             onChange={(e) => onSituationChange(e.target.value)}
             placeholder="เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"
-            className="w-full bg-[#FFFFFF] border border-[#E4D8C4] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all"
+            className="w-full bg-[#FFFFFF] border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all"
           />
         </div>
       </div>
@@ -198,7 +198,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
               className={`px-3 py-1.5 rounded-lg text-xs font-serif-th transition-all cursor-pointer ${
                 situation === sit
                   ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                  : "bg-[#F0E8DB] text-[#2E211A] hover:bg-[#FFFFFF]/30 border border-[#E4D8C4]"
+                  : "bg-[#F3EDE2] text-[#2E211A] hover:bg-[#FFFFFF]/30 border border-[#D9C8AC]"
               }`}
             >
               {sit}
@@ -231,14 +231,14 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             className={`w-full bg-[#FFFFFF] rounded-lg p-4 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all duration-200 leading-relaxed resize-none ${
               isQuestionEmpty
                 ? "border border-[#A6392C] focus:border-[#A6392C] focus:ring-2 focus:ring-[#A6392C]/30"
-                : "border border-[#E4D8C4] group-hover:border-[#8F5C1A] focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/30"
+                : "border border-[#D9C8AC] group-hover:border-[#8F5C1A] focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/30"
             }`}
           />
         </div>
       </div>
 
       {/* 4 Authentic 1909 Rider-Waite Cards for Quick Question Selection */}
-      <div className="space-y-3 pt-2 border-t border-[#E4D8C4]/30">
+      <div className="space-y-3 pt-2 border-t border-[#D9C8AC]/30">
         <label className="text-xs sm:text-sm font-serif-th font-bold text-[#2E211A] tracking-wide flex items-center gap-2">
           <span className="text-[#8F5C1A]">✦</span> หรือเลือกหัวข้อคำถามสำเร็จรูป (แตะเพื่อใช้งานทันที)
         </label>
@@ -266,14 +266,14 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 }}
                 className={`rounded-lg border transition-all duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                   isActive
-                    ? "bg-[#FFFFFF] border-[#E4D8C4] ring-2 ring-[#8F5C1A]/50 shadow-[var(--shadow-overlay)]"
-                    : "bg-[#F0E8DB] border-[#E4D8C4] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+                    ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-[var(--shadow-overlay)]"
+                    : "bg-[#F3EDE2] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
                 }`}
                 style={{ minHeight: "260px" }}
               >
                 {/* Top Card Badge: Roman Numeral & Title */}
-                <div className="flex items-center justify-between text-[10px] text-[#6F5B4A] font-mono pb-1.5 border-b border-[#E4D8C4]/30">
-                  <span className="text-[#2E211A] font-bold bg-[#F0E8DB]/25 px-1.5 py-0.5 rounded">
+                <div className="flex items-center justify-between text-[10px] text-[#6F5B4A] font-mono pb-1.5 border-b border-[#D9C8AC]/30">
+                  <span className="text-[#2E211A] font-bold bg-[#F3EDE2]/25 px-1.5 py-0.5 rounded">
                     {seal.romanNum}
                   </span>
                   <span className="tracking-widest uppercase text-[9px] truncate max-w-[90px] text-[#6F5B4A]">
@@ -283,7 +283,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
 
                 {/* Center Authentic 1909 Rider-Waite Image */}
                 <div className="my-auto py-1 flex items-center justify-center">
-                  <div className="w-18 h-28 sm:w-20 sm:h-30 rounded-lg border border-[#E4D8C4] overflow-hidden ">
+                  <div className="w-18 h-28 sm:w-20 sm:h-30 rounded-lg border border-[#D9C8AC] overflow-hidden ">
                     <CardImage
                       image={seal.image}
                       alt={seal.title}
@@ -294,7 +294,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 </div>
 
                 {/* Bottom Card Title & Subtitle */}
-                <div className="text-center pt-2 border-t border-[#E4D8C4]/30">
+                <div className="text-center pt-2 border-t border-[#D9C8AC]/30">
                   <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] group-hover:text-[#8F5C1A] transition-colors">
                     {seal.title}
                   </h4>

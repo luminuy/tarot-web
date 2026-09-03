@@ -3,9 +3,9 @@
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <html lang="th">
-      <body className="min-h-screen bg-[#F0E8DB] text-[#2E211A] flex items-center justify-center p-4 font-sans">
-        <div className="max-w-md w-full p-8 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] shadow-[var(--shadow-overlay)] text-center space-y-6">
-          <div className="w-16 h-16 mx-auto rounded-full bg-[#F0E8DB] border border-[#E4D8C4] flex items-center justify-center text-2xl text-[#8F5C1A] font-bold ">
+      <body className="min-h-screen bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center p-4 font-sans">
+        <div className="max-w-md w-full p-8 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] shadow-[var(--shadow-overlay)] text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#F3EDE2] border border-[#D9C8AC] flex items-center justify-center text-2xl text-[#8F5C1A] font-bold ">
             ✦
           </div>
           <div className="space-y-2">

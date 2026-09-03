@@ -3,20 +3,20 @@
 /*
   ✦ สเปกระบบดีไซน์ V2 — พื้นหลังและพาเลตต์สี (Warm Minimal Sanctuary)
   8 Core Tokens:
-  1. canvas    : #F6F1E9 (พื้นหน้าเว็บ — ชั้นเดียวทั้งเว็บ)
+  1. canvas    : #FAF7F2 (พื้นหน้าเว็บ — ชั้นเดียวทั้งเว็บ)
   2. surface   : #FFFFFF (พื้นผิวที่ลอยขึ้น — การ์ด, โมดัล, header)
-  3. inset     : #F0E8DB (พื้นผิวที่จมลง — แท่นบูชา, ช่องกรอก, กล่องคำทำนาย)
-  4. line      : #E4D8C4 (เส้นขอบและเส้นคั่น 1px ระดับเดียว ไม่มี opacity modifier)
+  3. inset     : #F3EDE2 (พื้นผิวที่จมลง — แท่นบูชา, ช่องกรอก, กล่องคำทำนาย)
+  4. line      : #D9C8AC (เส้นขอบและเส้นคั่น 1px ระดับเดียว ไม่มี opacity modifier)
   5. ink       : #2E211A (ตัวอักษรหลัก — หัวข้อ, เนื้อหา, ไอคอนหลัก)
   6. muted     : #6F5B4A (ตัวอักษรรอง — คำอธิบาย, วันที่, placeholder)
   7. gold      : #8F5C1A (สีเน้นเดียว — ตัวอักษรทอง, ไอคอน, ปุ่มหลัก, focus ring)
   8. ok / err  : #3A7044 / #A6392C (สถานะ สำเร็จ / ผิดพลาด)
 */
 @theme {
-  --color-canvas: #F6F1E9;
+  --color-canvas: #FAF7F2;
   --color-surface: #FFFFFF;
-  --color-inset: #F0E8DB;
-  --color-line: #E4D8C4;
+  --color-inset: #F3EDE2;
+  --color-line: #D9C8AC;
   --color-ink: #2E211A;
   --color-muted: #6F5B4A;
   --color-gold: #8F5C1A;
@@ -27,18 +27,18 @@
 
   /* Semantic Theme Mappings for Harmonious Continuity */
   --color-main-card: #FFFFFF;
-  --color-inner-card: #F0E8DB;
+  --color-inner-card: #F3EDE2;
   --color-cta-gold: #8F5C1A;
   --color-walnut: #2E211A;
   --color-chestnut: #6F5B4A;
-  --color-sand: #E4D8C4;
+  --color-sand: #D9C8AC;
   --color-celestial: #8F5C1A;
 
-  --color-void: #F6F1E9;
+  --color-void: #FAF7F2;
   --color-obsidian-950: #FFFFFF;
-  --color-obsidian-900: #F0E8DB;
-  --color-obsidian-800: #F0E8DB;
-  --color-obsidian-700: #E4D8C4;
+  --color-obsidian-900: #F3EDE2;
+  --color-obsidian-800: #F3EDE2;
+  --color-obsidian-700: #D9C8AC;
   --color-gold-200: #6F5B4A;
   --color-gold-300: #2E211A;
   --color-gold-400: #8F5C1A;
@@ -93,7 +93,7 @@
 
 html,
 body {
-  background-color: #F6F1E9;                    /* canvas */
+  background-color: #FAF7F2;                    /* canvas */
   color: #2E211A;                               /* ink */
   font-family: var(--font-sans-th);
   line-height: 1.618;
@@ -146,8 +146,8 @@ body > * {
 
 /* โซนแท่นบูชา (ผ้าปูไพ่) — ใช้เฉพาะที่ไพ่วางจริง */
 .altar-cloth {
-  background: #F0E8DB;              /* inset — จมลง 1 ชั้น */
-  border: 1px solid #E4D8C4;        /* line */
+  background: #F3EDE2;              /* inset — จมลง 1 ชั้น */
+  border: 1px solid #D9C8AC;        /* line */
   border-radius: 8px;
 }
 
@@ -167,7 +167,7 @@ body > * {
 /* กรอบแท่นบูชาตามระบบ V2 */
 .altar-panel {
   background: #FFFFFF;
-  border: 1px solid #E4D8C4;
+  border: 1px solid #D9C8AC;
   box-shadow: var(--shadow-raised);
 }
 
@@ -180,7 +180,7 @@ body > * {
 /* การ์ดพอร์ซเลนระดับลักชูรี */
 .altar-card-porcelain {
   background: #FFFFFF;
-  border: 1px solid #E4D8C4;
+  border: 1px solid #D9C8AC;
   box-shadow: var(--shadow-raised);
   transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -269,7 +269,7 @@ body > * {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F0E8DB;
+  background: #F3EDE2;
 }
 ::-webkit-scrollbar-thumb {
   background: #6F5B4A;
@@ -285,7 +285,7 @@ body > * {
  */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #6F5B4A #F0E8DB;
+  scrollbar-color: #6F5B4A #F3EDE2;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -304,7 +304,7 @@ html {
   height: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #F0E8DB;
+  background: #F3EDE2;
   border-radius: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -446,7 +446,7 @@ a,
 /* Focus Visible Global Ring (Design System V2) */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #F6F1E9, 0 0 0 4px #8F5C1A !important;
+  box-shadow: 0 0 0 2px #FAF7F2, 0 0 0 4px #8F5C1A !important;
 }
 
 .no-focus-ring:focus-visible,

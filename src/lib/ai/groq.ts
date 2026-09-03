@@ -8,6 +8,15 @@
  * - openai/gpt-oss-120b: โมเดล 120 พันล้านพารามิเตอร์ วิเคราะห์ดวงและเหตุผลเชิงลึก (อันดับ 2)
  */
 
+import { hasForeignScript, stripForeignScript } from "@/lib/ai/language";
+
+/**
+ * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)
+ *
+ * ⚠️ แลกมาด้วยความเสี่ยง: Qwen เทรนด้วยคลังจีนเป็นหลัก บางครั้งหลุดพ่นอักษรจีนปนกลางประโยคไทย
+ * จึงต้องมีด่าน `hasForeignScript()` คัดทิ้งแล้วเลื่อนไปโมเดลถัดไป (ดู `src/lib/ai/language.ts`)
+ * **ห้ามลบด่านนั้นออกโดยไม่สลับลำดับโมเดลก่อน**
+ */
 export const WORKING_GROQ_MODELS = [
   "qwen/qwen3.8-27b",
   "qwen/qwen3.6-27b",
@@ -112,8 +121,21 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
       const data = (await res.json()) as any;
       const content = data?.choices?.[0]?.message?.content;
       if (typeof content === "string" && content.trim()) {
+        const reply = content.trim();
+
+        // ด่านภาษา — ถ้าโมเดลหลุดพ่นอักษรจีน/ญี่ปุ่น/เกาหลี ให้ทิ้งแล้วลองโมเดลถัดไป
+        // (โมเดลสุดท้ายในลิสต์ไม่มีตัวถัดไปให้ลอง จึงล้างอักษรทิ้งแทนการคืน null)
+        if (hasForeignScript(reply)) {
+          const isLastModel = model === WORKING_GROQ_MODELS[WORKING_GROQ_MODELS.length - 1];
+          console.warn(`[Groq ${model}] คำตอบมีอักษรต่างภาษาปน — ${isLastModel ? "ล้างทิ้ง" : "ข้ามไปโมเดลถัดไป"}`);
+          if (!isLastModel) continue;
+          const cleaned = stripForeignScript(reply);
+          if (!cleaned) continue;
+          return { reply: cleaned, model, elapsedMs };
+        }
+
         return {
-          reply: content.trim(),
+          reply,
           model,
           elapsedMs,
         };

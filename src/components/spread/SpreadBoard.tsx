@@ -144,7 +144,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         <div
           className={`relative transition-all duration-300 rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] ${
             isCurrentReading
-              ? "ring-4 ring-[#8F5C1A] ring-offset-2 ring-offset-[#F0E8DB] shadow-[var(--shadow-overlay)] scale-105"
+              ? "ring-4 ring-[#8F5C1A] ring-offset-2 ring-offset-[#F3EDE2] shadow-[var(--shadow-overlay)] scale-105"
               : "hover:scale-105"
           }`}
         >
@@ -155,7 +155,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
                 e.stopPropagation();
                 onZoomCard(drawn);
               }}
-              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] hover:bg-[#F6F1E9] border border-[#E4D8C4] hover:border-[#8F5C1A] text-[#2E211A] hover:text-[#8F5C1A] transition-all duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
+              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] text-[#2E211A] hover:text-[#8F5C1A] transition-all duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
               title="ซูมดูไพ่ 3D ความละเอียดสูง"
             >
               <ExpandTabIcon className="w-3 h-3 text-[#8F5C1A] group-hover:text-[#74490F] transition-colors" />
@@ -173,7 +173,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               className="w-24 h-[163px] sm:w-28 sm:h-[190px]"
             />
           ) : (
-            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-lg border-2 border-dashed border-[#E4D8C4] bg-[#F0E8DB] flex items-center justify-center text-xs text-[#6F5B4A]">
+            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-lg border-2 border-dashed border-[#D9C8AC] bg-[#F3EDE2] flex items-center justify-center text-xs text-[#6F5B4A]">
               {pos.index + 1}
             </div>
           )}
@@ -194,9 +194,9 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
   };
 
   return (
-    <div className="w-full rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col justify-between space-y-4 select-none relative overflow-hidden">
+    <div className="w-full rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col justify-between space-y-4 select-none relative overflow-hidden">
       {/* Header Bar: Spread Name & Quick Flip Button */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#E4D8C4]/30 relative z-10">
+      <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/30 relative z-10">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-widest text-[#6F5B4A] font-mono">ผังพยากรณ์:</span>
@@ -210,7 +210,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         {/* Reveal All Cards Action Button or Revealed Badge */}
         {drawnCards.length > 0 &&
           (isAllRevealed ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#6F5B4A] text-xs font-serif-th font-semibold ">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#6F5B4A] text-xs font-serif-th font-semibold ">
               <span className="text-[#8F5C1A]">✦</span>
               <span>เปิดไพ่ครบแล้ว</span>
             </div>
@@ -259,7 +259,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(-1)}
             disabled={!canScrollLeft}
             aria-label="เลื่อนดูไพ่ทางซ้าย"
-            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#E4D8C4] bg-[#F0E8DB] text-[#2E211A] transition-all hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[#2E211A] transition-all hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
               canScrollLeft ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -270,7 +270,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(1)}
             disabled={!canScrollRight}
             aria-label="เลื่อนดูไพ่ทางขวา"
-            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#E4D8C4] bg-[#F0E8DB] text-[#2E211A] transition-all hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[#2E211A] transition-all hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
               canScrollRight ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -285,7 +285,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       )}
 
       {/* Helpful Hint */}
-      <div className="text-center pt-2 border-t border-[#E4D8C4]/30 text-[11px] text-[#6F5B4A] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
+      <div className="text-center pt-2 border-t border-[#D9C8AC]/30 text-[11px] text-[#6F5B4A] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
         <span className="text-[#8F5C1A]">✦</span>
         <span>
           {useRail

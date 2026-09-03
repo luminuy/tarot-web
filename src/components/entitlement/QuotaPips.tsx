@@ -23,7 +23,7 @@ export function QuotaPips({
   const dot = size === "sm" ? "h-1.5 w-1.5" : "h-2 w-2";
 
   const litClass =
-    tone === "empty" ? "bg-[#F0E8DB]/30" : tone === "low" ? "bg-[#8F5C1A] shadow-xs" : "bg-[#8F5C1A] shadow-xs";
+    tone === "empty" ? "bg-[#F3EDE2]/30" : tone === "low" ? "bg-[#8F5C1A] shadow-xs" : "bg-[#8F5C1A] shadow-xs";
 
   return (
     <span className="inline-flex items-center gap-1" aria-hidden="true">
@@ -31,7 +31,7 @@ export function QuotaPips({
         <span
           key={i}
           className={`${dot} rounded-full transition-colors duration-300 ${
-            i < lit ? litClass : "bg-[#F0E8DB]/30 ring-1 ring-inset ring-[#8F5C1A]/40"
+            i < lit ? litClass : "bg-[#F3EDE2]/30 ring-1 ring-inset ring-[#8F5C1A]/40"
           }`}
         />
       ))}

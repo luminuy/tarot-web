@@ -70,9 +70,9 @@ export function EntitlementGate({
       {/* แถบแจ้งสิทธิ์แบบบาง — บอกสถานะ ไม่ขวางทาง ไม่ซ้ำกับหน้าต่างสิทธิ์ตอนกดเริ่ม */}
       <div
         aria-live="polite"
-        className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] px-4 py-3 "
+        className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-4 py-3 "
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] text-[#8F5C1A]">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] text-[#8F5C1A]">
           {isGuest ? <SealedLockIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
         </span>
 
