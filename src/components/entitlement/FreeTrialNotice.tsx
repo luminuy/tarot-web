@@ -64,7 +64,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
         <p className="font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm">
           {isGuest ? "เปิดไพ่ทดลองฟรีได้เลย ไม่ต้องสมัครสมาชิก" : view.statusLine}
         </p>
-        <p className="font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
+        <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
           {isGuest
             ? `อ่านคำทำนายเต็มทุกองก์ · หลังใช้ครบ สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อวันละ ${DAILY_LIMIT} ครั้ง`
             : countdown
@@ -81,7 +81,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
             trackEntitlementEvent("quota_meter_opened");
             onOpenAccess();
           }}
-          className="min-h-[36px] rounded border border-[#D9C8AC] bg-white px-3 py-1.5 font-serif-th text-[11px] text-[#2E211A] font-semibold transition-colors hover:border-[#8F5C1A] hover:text-[#8F5C1A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="min-h-[36px] rounded border border-[#D9C8AC] bg-white px-3 py-1.5 font-serif-th text-[13px] text-[#2E211A] font-semibold transition-colors hover:border-[#8F5C1A] hover:text-[#8F5C1A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           ดูสิทธิ์ทั้งหมด
         </button>

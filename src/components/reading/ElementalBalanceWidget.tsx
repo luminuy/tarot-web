@@ -32,7 +32,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             <h4 className="font-serif-th text-sm font-bold text-[#2E211A] sm:text-base">
               สมดุลพลังงาน 4 ธาตุในผัง (Elemental Dignities)
             </h4>
-            <p className="text-xs text-[#6F5B4A]">วิเคราะห์คลื่นพลังงาน ไฟ · น้ำ · ลม · ดิน</p>
+            <p className="text-xs text-[#635B4E]">วิเคราะห์คลื่นพลังงาน ไฟ · น้ำ · ลม · ดิน</p>
           </div>
         </div>
         <span className="rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-2.5 py-1 text-xs font-bold text-[#8F5C1A] ">
@@ -123,7 +123,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
       <div className="mt-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] ">
         <p className="font-serif-th font-bold text-[#8F5C1A]">✦ {breakdown.dominantTitleTh}:</p>
         <p className="mt-1 text-[#2E211A] leading-relaxed font-serif-th">{breakdown.dominantInsightTh}</p>
-        <p className="mt-2 text-[#6F5B4A] font-serif-th">
+        <p className="mt-2 text-[#635B4E] font-serif-th">
           <span className="text-[#8F5C1A]">✨</span> <span className="font-bold text-[#2E211A]">วิธีปรับสมดุล:</span>{" "}
           {breakdown.balancingAdviceTh}
         </p>

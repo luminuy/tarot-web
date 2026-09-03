@@ -57,7 +57,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
             <button
               type="button"
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#756F66] hover:text-[#29261F] cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#635B4E] hover:text-[#29261F] cursor-pointer"
             >
               ✕
             </button>
@@ -65,7 +65,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
         </div>
 
         {/* Total Count Badge */}
-        <div className="text-xs text-[#756F66] text-right shrink-0 font-mono">
+        <div className="text-xs text-[#635B4E] text-right shrink-0 font-mono">
           พบ <span className="text-[#29261F] font-bold">{filtered.length}</span> ท่าน
         </div>
       </div>
@@ -73,7 +73,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
       {/* Specialty Filter Pills */}
       {allSpecialties.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs text-[#756F66] mr-1 font-serif-th">หมวดความถนัด:</span>
+          <span className="text-xs text-[#635B4E] mr-1 font-serif-th">หมวดความถนัด:</span>
           <button
             type="button"
             onClick={() => setSelectedSpecialty("all")}
@@ -106,7 +106,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
       {filtered.length === 0 ? (
         <div className="bg-[#FFFFFF] border border-[#D5CEC2] rounded-xl p-12 text-center space-y-3 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
           <p className="text-sm font-semibold text-[#29261F] font-serif-th">ไม่พบแม่หมอที่ตรงกับเงื่อนไขการค้นหา</p>
-          <p className="text-xs text-[#756F66] font-serif-th">ลองล้างคำค้นหา หรือเลือกหมวดหมู่อื่นเพื่อค้นหาแม่หมอท่านอื่น</p>
+          <p className="text-xs text-[#635B4E] font-serif-th">ลองล้างคำค้นหา หรือเลือกหมวดหมู่อื่นเพื่อค้นหาแม่หมอท่านอื่น</p>
           <button
             type="button"
             onClick={() => {
@@ -142,14 +142,14 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                         {reader.displayName}
                       </h3>
                     </div>
-                    <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#D5CEC2] text-[10px] text-[#3A7044] font-semibold">
+                    <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#D5CEC2] text-[13px] text-[#3A7044] font-semibold">
                       <span>✦</span> แม่หมอตัวจริง (ยืนยันแล้ว)
                     </div>
                   </div>
                 </div>
 
                 {/* Bio snippet */}
-                <p className="text-xs text-[#756F66] leading-relaxed line-clamp-3 font-serif-th">
+                <p className="text-xs text-[#635B4E] leading-relaxed line-clamp-3 font-serif-th">
                   {reader.bio || "พร้อมให้คำปรึกษาและชี้แนะแนวทางชีวิตอย่างลึกซึ้งผ่านไพ่ทาโรต์"}
                 </p>
 
@@ -158,7 +158,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                   {reader.specialties.map((s, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-0.5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[11px] text-[#29261F] font-medium font-serif-th"
+                      className="px-2.5 py-0.5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[13px] text-[#29261F] font-medium font-serif-th"
                     >
                       {s}
                     </span>

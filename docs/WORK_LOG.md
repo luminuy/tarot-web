@@ -34,6 +34,23 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ยกระดับความอ่านง่ายของตัวอักษรทั้งเว็บ (Legibility Pass สำหรับผู้สูงวัย/สายตาไม่ดี)
+
+#### 1. ยกสเกลตัวอักษร + คอนทราสต์ทั้งเว็บ
+- **ปัญหาเดิม**: เจ้าของโปรเจกต์แจ้ง "คนมีอายุ สายตาไม่ดีอ่านยากมาก" — ทั้งเว็บใช้ตัวอักษรจิ๋ว (`text-[8px]`–`text-[11px]` รวม ~290 จุด, `text-xs` 12px ~420 จุด) และสีตัวอักษรรอง `#756F66` คอนทราสต์เพียง ~4.4:1 (ตกเกณฑ์ WCAG AA)
+- **สิ่งที่แก้ไข** (`src/app/globals.css`):
+  - ยกสเกล Tailwind: `--text-xs` 12→13px, `--text-sm` 14→15px, `--text-base` 16→17px, `--text-lg` 18→19px + เพิ่ม line-height ทุกระดับ
+  - `body` line-height 1.618→1.7, เพิ่ม `-moz-osx-font-smoothing: grayscale` + `text-rendering: optimizeLegibility`
+  - โทเคน `--color-muted` (+ alias chestnut/ash/amethyst/gold-200) `#756F66`→`#635B4E` (คอนทราสต์ ~6:1 ผ่าน AA แม้ตัวเล็ก)
+- **Codemod ทั่วทั้ง `src/`** (68 ไฟล์):
+  - ตัวเลขขนาดตัวอักษรดิบ `text-[≤9.5px]`→`text-[12px]`, `text-[10–11px]`→`text-[13px]` (ไม่มีตัวอักษรต่ำกว่า 12px เหลือทั้งเว็บแล้ว)
+  - สีตัวอักษรรองฮาร์ดโค้ด `text-[#756F66]` / `text-[#6F5B4A]` (รวม 221 จุด) → `text-[#635B4E]` และลบ opacity ที่จาง (`/30`–`/70`) ออก
+  - footer หน้าแรก: `font-light`→ปกติ, ข้อความ provably-fair/ลิขสิทธิ์เลิกใช้ opacity จาง
+- **ไฟล์ที่แก้ไข**: `src/app/globals.css` + 67 ไฟล์ `.tsx/.ts` (codemod)
+- **ผลการทดสอบ**: `npx tsc --noEmit` ➔ ✅ 0 errors; ตรวจ dev server (มือถือ 375px + เดสก์ท็อป): ขนาดตัวอักษรเล็กสุดบนหน้าแรก = 12px (เดิม 8–10px), ไม่มี horizontal scroll, เลย์เอาต์ทุกหน้าปกติ, ไม่มี console error ใหม่
+
+---
+
 ### 🗓️ 2026-09-03: ปรับ Footer หน้าแรก — ตัดแถบลิงก์ Editorial, ใส่โลโก้เว็บแทนคำว่า SEE TAROT, เพิ่มบรรทัดลิขสิทธิ์
 
 #### 1. ปรับส่วนหัวและท้ายของ Footer (`src/app/page.tsx`)

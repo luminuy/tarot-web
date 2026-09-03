@@ -35,7 +35,7 @@ export function QuotaPips({
           }`}
         />
       ))}
-      {limit > 6 && <span className="ml-0.5 font-mono text-[10px] text-[#2E211A]">/{limit}</span>}
+      {limit > 6 && <span className="ml-0.5 font-mono text-[13px] text-[#2E211A]">/{limit}</span>}
     </span>
   );
 }

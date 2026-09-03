@@ -109,7 +109,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
             <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A]">
               ความโปร่งใสทางคณิตศาสตร์ (Provably-Fair Verification)
             </h4>
-            <p className="text-[10.5px] text-[#6F5B4A] font-serif-th">
+            <p className="text-[13px] text-[#635B4E] font-serif-th">
               {isPanelOpen
                 ? "พิสูจน์ได้ว่าผลไพ่ถูกกำหนดจาก Seed ล่วงหน้า ไม่มีการเลือกไพ่ทีหลัง"
                 : "แตะเพื่อดูวิธีตรวจสอบว่าผลไพ่ยุติธรรม 100%"}
@@ -118,11 +118,11 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="hidden sm:inline-block rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-2.5 py-0.5 text-[10px] font-mono font-bold text-[#2E211A]">
+          <span className="hidden sm:inline-block rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-2.5 py-0.5 text-[13px] font-mono font-bold text-[#2E211A]">
             SHA-256 Commit-Reveal
           </span>
           <span
-            className={`font-mono text-xs text-[#6F5B4A] transition-transform duration-200 ${
+            className={`font-mono text-xs text-[#635B4E] transition-transform duration-200 ${
               isPanelOpen ? "rotate-180" : ""
             }`}
             aria-hidden
@@ -154,15 +154,15 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     <button
                       type="button"
                       onClick={() => handleCopy(effectiveCommitment, "comm_pre")}
-                      className="text-[10px] text-[#8F5C1A] hover:underline cursor-pointer font-mono font-semibold"
+                      className="text-[13px] text-[#8F5C1A] hover:underline cursor-pointer font-mono font-semibold"
                     >
                       {copiedKey === "comm_pre" ? "✓ คัดลอกแล้ว" : "คัดลอก Hash"}
                     </button>
                   </div>
-                  <p className="font-mono text-[11px] text-[#2E211A] break-all bg-[#FFFFFF] p-2.5 rounded-lg border border-[#D9C8AC] select-all ">
+                  <p className="font-mono text-[13px] text-[#2E211A] break-all bg-[#FFFFFF] p-2.5 rounded-lg border border-[#D9C8AC] select-all ">
                     {effectiveCommitment || "กำลังสร้างคำมั่นความสุ่ม…"}
                   </p>
-                  <p className="text-[11px] text-[#6F5B4A] font-serif-th leading-relaxed">
+                  <p className="text-[13px] text-[#635B4E] font-serif-th leading-relaxed">
                     เซิร์ฟเวอร์ผูกมัดกับผลไพ่นี้แล้วตั้งแต่ก่อนคุณสับไพ่ — ค่า{" "}
                     <code className="text-[#8F5C1A] font-bold">serverSeed</code> จะถูกเฉลยหลังอ่านไพ่เสร็จสมบูรณ์
                     ให้คุณตรวจย้อนหลังได้
@@ -177,49 +177,49 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                   <div className="grid grid-cols-1 gap-2.5 text-xs font-mono">
                     {/* Commitment */}
                     <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
-                      <div className="flex items-center justify-between text-[10.5px]">
-                        <span className="text-[#6F5B4A] font-serif-th">1. คำมั่นความสุ่มดั้งเดิม (Commitment):</span>
+                      <div className="flex items-center justify-between text-[13px]">
+                        <span className="text-[#635B4E] font-serif-th">1. คำมั่นความสุ่มดั้งเดิม (Commitment):</span>
                         <button
                           type="button"
                           onClick={() => handleCopy(effectiveCommitment, "comm")}
-                          className="text-[10px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
+                          className="text-[13px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
                         >
                           {copiedKey === "comm" ? "✓ คัดลอกแล้ว" : "คัดลอก"}
                         </button>
                       </div>
-                      <p className="text-[11px] text-[#2E211A] break-all select-all font-mono">{effectiveCommitment}</p>
+                      <p className="text-[13px] text-[#2E211A] break-all select-all font-mono">{effectiveCommitment}</p>
                     </div>
 
                     {/* Server Seed */}
                     <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
-                      <div className="flex items-center justify-between text-[10.5px]">
-                        <span className="text-[#6F5B4A] font-serif-th">
+                      <div className="flex items-center justify-between text-[13px]">
+                        <span className="text-[#635B4E] font-serif-th">
                           2. ซี้ดของเซิร์ฟเวอร์ที่เฉลย (Server Seed):
                         </span>
                         <button
                           type="button"
                           onClick={() => handleCopy(serverSeed || "", "server")}
-                          className="text-[10px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
+                          className="text-[13px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
                         >
                           {copiedKey === "server" ? "✓ คัดลอกแล้ว" : "คัดลอก"}
                         </button>
                       </div>
-                      <p className="text-[11px] text-[#2E211A] break-all select-all font-mono">{serverSeed}</p>
+                      <p className="text-[13px] text-[#2E211A] break-all select-all font-mono">{serverSeed}</p>
                     </div>
 
                     {/* Client Seed */}
                     <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
-                      <div className="flex items-center justify-between text-[10.5px]">
-                        <span className="text-[#6F5B4A] font-serif-th">3. ซี้ดของคุณจากการขยับมือ (Client Seed):</span>
+                      <div className="flex items-center justify-between text-[13px]">
+                        <span className="text-[#635B4E] font-serif-th">3. ซี้ดของคุณจากการขยับมือ (Client Seed):</span>
                         <button
                           type="button"
                           onClick={() => handleCopy(clientSeed || "", "client")}
-                          className="text-[10px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
+                          className="text-[13px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
                         >
                           {copiedKey === "client" ? "✓ คัดลอกแล้ว" : "คัดลอก"}
                         </button>
                       </div>
-                      <p className="text-[11px] text-[#2E211A] break-all select-all font-mono">{clientSeed}</p>
+                      <p className="text-[13px] text-[#2E211A] break-all select-all font-mono">{clientSeed}</p>
                     </div>
                   </div>
 
@@ -264,7 +264,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                                 <span>✓</span>
                                 <span>
                                   <strong>คำมั่นตรงกับ Seed:</strong>{" "}
-                                  <code className="font-mono text-[11px]">SHA256(serverSeed) === commitment</code>
+                                  <code className="font-mono text-[13px]">SHA256(serverSeed) === commitment</code>
                                 </span>
                               </li>
                               <li className="flex items-center gap-1.5">
@@ -296,7 +296,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           <button
                             type="button"
                             onClick={handleVerify}
-                            className="text-[11px] text-[#8F5C1A] hover:text-[#74490F] font-serif-th hover:underline cursor-pointer font-semibold"
+                            className="text-[13px] text-[#8F5C1A] hover:text-[#74490F] font-serif-th hover:underline cursor-pointer font-semibold"
                           >
                             ✦ รันการคำนวณซ้ำอีกครั้ง
                           </button>
@@ -326,19 +326,19 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                         exit={{ opacity: 0, height: 0 }}
                         className="mt-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-3 text-xs "
                       >
-                        <p className="text-[#6F5B4A] font-serif-th leading-relaxed">
+                        <p className="text-[#635B4E] font-serif-th leading-relaxed">
                           คุณสามารถคัดลอกชุดข้อมูล JSON นี้ไปรันผ่าน Node.js, Python หรือเครื่องมือภายนอกใด ๆ
                           เพื่อยืนยันว่าผลลัพธ์มาจากสูตรคณิตศาสตร์จริง โดยไม่ต้องพึ่งพาหน้าเว็บของเรา:
                         </p>
 
                         <div className="relative">
-                          <pre className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[10px] text-[#2E211A] font-mono overflow-x-auto max-h-48 ">
+                          <pre className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[13px] text-[#2E211A] font-mono overflow-x-auto max-h-48 ">
                             {verificationPayloadJson}
                           </pre>
                           <button
                             type="button"
                             onClick={() => handleCopy(verificationPayloadJson, "payload")}
-                            className="absolute top-2 right-2 px-2.5 py-1 rounded bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-[10px] font-serif-th hover:bg-[#FFFFFF] hover:border-[#8F5C1A] cursor-pointer "
+                            className="absolute top-2 right-2 px-2.5 py-1 rounded bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-[13px] font-serif-th hover:bg-[#FFFFFF] hover:border-[#8F5C1A] cursor-pointer "
                           >
                             {copiedKey === "payload" ? "✓ คัดลอกแล้ว" : "คัดลอก JSON"}
                           </button>

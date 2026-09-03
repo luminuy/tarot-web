@@ -118,7 +118,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             <span className="text-xs sm:text-sm font-serif-th font-bold font-mystic-gold">
               {persona?.nameTh || "แม่หมอประจำวิหาร"}
             </span>
-            <span className="text-[10px] text-[#6F5B4A] font-serif-th">· ให้ข้อมูลเบื้องต้น</span>
+            <span className="text-[13px] text-[#635B4E] font-serif-th">· ให้ข้อมูลเบื้องต้น</span>
           </div>
           <p className="text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th">
             {persona?.id === "direct"
@@ -142,7 +142,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
               <span className="text-[#8F5C1A]">✦</span> 1. ชื่อเล่นของคุณ{" "}
               <span className="text-[#A6392C] font-mono text-xs">(จำเป็น *)</span>
             </label>
-            <span className="text-[10px] text-[#6F5B4A] font-mono">{nickname.length}/24</span>
+            <span className="text-[13px] text-[#635B4E] font-mono">{nickname.length}/24</span>
           </div>
           <input
             id="altar-nickname"
@@ -167,7 +167,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold"
           >
             <span className="text-[#8F5C1A]">✦</span> 2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ{" "}
-            <span className="text-[10px] text-[#6F5B4A] font-normal">(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)</span>
+            <span className="text-[13px] text-[#635B4E] font-normal">(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)</span>
           </label>
           <input
             id="altar-situation"
@@ -183,7 +183,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
 
       {/* Quick Situation Selector Chips */}
       <div className="space-y-2">
-        <span className="text-[11px] text-[#6F5B4A] font-serif-th">✦ หรือแตะเลือกเรื่องราวด่วน:</span>
+        <span className="text-[13px] text-[#635B4E] font-serif-th">✦ หรือแตะเลือกเรื่องราวด่วน:</span>
         <div className="flex flex-wrap gap-2">
           {[
             "เพิ่งเริ่มต้น กำลังดูทิศทาง",
@@ -217,7 +217,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             <span className="text-[#8F5C1A]">✦</span> 3. คำถามที่คุณอยากรู้มากที่สุด{" "}
             <span className="text-[#A6392C] font-mono text-xs">(จำเป็น *)</span>
           </label>
-          <span className="text-[10px] text-[#6F5B4A] font-mono">{question.length}/300</span>
+          <span className="text-[13px] text-[#635B4E] font-mono">{question.length}/300</span>
         </div>
         <div className="relative group">
           <textarea
@@ -272,11 +272,11 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 style={{ minHeight: "260px" }}
               >
                 {/* Top Card Badge: Roman Numeral & Title */}
-                <div className="flex items-center justify-between text-[10px] text-[#6F5B4A] font-mono pb-1.5 border-b border-[#D9C8AC]/30">
+                <div className="flex items-center justify-between text-[13px] text-[#635B4E] font-mono pb-1.5 border-b border-[#D9C8AC]/30">
                   <span className="text-[#2E211A] font-bold bg-[#F3EDE2]/25 px-1.5 py-0.5 rounded">
                     {seal.romanNum}
                   </span>
-                  <span className="tracking-widest uppercase text-[9px] truncate max-w-[90px] text-[#6F5B4A]">
+                  <span className="tracking-widest uppercase text-[12px] truncate max-w-[90px] text-[#635B4E]">
                     {seal.majorCard}
                   </span>
                 </div>
@@ -298,7 +298,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                   <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] group-hover:text-[#8F5C1A] transition-colors">
                     {seal.title}
                   </h4>
-                  <p className="text-[9.5px] text-[#6F5B4A] mt-0.5">{seal.subtitle}</p>
+                  <p className="text-[12px] text-[#635B4E] mt-0.5">{seal.subtitle}</p>
                 </div>
 
                 {/* Holographic Sheen Layer */}

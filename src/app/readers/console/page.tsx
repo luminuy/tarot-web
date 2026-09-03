@@ -106,7 +106,7 @@ function ReaderConsoleInner() {
       <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
           <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-[#6F5B4A]">กำลังเชื่อมต่อแผงควบคุมแม่หมอ…</p>
+          <p className="text-xs text-[#635B4E]">กำลังเชื่อมต่อแผงควบคุมแม่หมอ…</p>
         </div>
       </main>
     );
@@ -117,7 +117,7 @@ function ReaderConsoleInner() {
       <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-[#A6392C]/40">
           <h2 className="text-base font-bold text-[#A6392C]">ไม่สามารถเข้าใช้งานได้</h2>
-          <p className="text-xs text-[#6F5B4A]">{error || "โปรดใช้ลิงก์เข้าสู่ระบบเฉพาะบุคคลจากผู้ดูแลระบบ"}</p>
+          <p className="text-xs text-[#635B4E]">{error || "โปรดใช้ลิงก์เข้าสู่ระบบเฉพาะบุคคลจากผู้ดูแลระบบ"}</p>
           <Link href="/" className="inline-block text-xs text-[#8F5C1A] underline">
             กลับหน้าหลัก
           </Link>
@@ -145,7 +145,7 @@ function ReaderConsoleInner() {
             <div>
               <div className="flex items-center gap-2 justify-center sm:justify-start">
                 <h1 className="font-serif-th text-xl font-bold text-[#f5deaa]">{reader.displayName}</h1>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+                <span className="text-[13px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
                   ✦ แผงแม่หมอ
                 </span>
               </div>
@@ -159,7 +159,7 @@ function ReaderConsoleInner() {
               <p className="text-xs font-semibold text-[#f5deaa]">
                 {isLiveOpen ? "🟢 เปิดรับคิวสดอยู่" : "⚪ ปิดรับคิวสด"}
               </p>
-              <p className="text-[10px] text-[#9c93b8]">
+              <p className="text-[13px] text-[#9c93b8]">
                 {isLiveOpen ? "ลูกค้าสามารถกดรับคิวได้ทันที" : "รับเฉพาะคิวที่นัดล่วงหน้า"}
               </p>
             </div>
@@ -237,7 +237,7 @@ function ReaderConsoleInner() {
                     </div>
 
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                      className={`text-[13px] px-2 py-0.5 rounded-full font-semibold ${
                         isReady
                           ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
                           : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
@@ -251,15 +251,15 @@ function ReaderConsoleInner() {
                   {ticket.screening && (
                     <div className="rounded-2xl bg-[#140e26] border border-[#e5c07b]/20 p-3.5 space-y-2 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-[#ffd700] uppercase tracking-wider">
+                        <span className="text-[13px] font-bold text-[#ffd700] uppercase tracking-wider">
                           ✦ สรุปประเด็นโดย AI
                         </span>
                         <div className="flex gap-1.5">
-                          <span className="px-1.5 py-0.5 rounded bg-[#2d1f4d] text-[10px] text-[#e5c07b]">
+                          <span className="px-1.5 py-0.5 rounded bg-[#2d1f4d] text-[13px] text-[#e5c07b]">
                             {ticket.screening.category}
                           </span>
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] ${
+                            className={`px-1.5 py-0.5 rounded text-[13px] ${
                               ticket.screening.urgency === "high"
                                 ? "bg-red-500/20 text-red-300"
                                 : "bg-white/10 text-[#9c93b8]"
@@ -275,7 +275,7 @@ function ReaderConsoleInner() {
                       </p>
 
                       {ticket.screening.suggestedSpread && (
-                        <p className="text-[11px] text-[#9c93b8]">
+                        <p className="text-[13px] text-[#9c93b8]">
                           ผังแนะนำ:{" "}
                           <span className="text-[#f5deaa] font-medium">
                             {ticket.screening.suggestedSpread}
@@ -336,7 +336,7 @@ export default function ReaderConsolePage() {
         <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
           <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
             <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-[#6F5B4A]">กำลังโหลดแผงควบคุมแม่หมอ…</p>
+            <p className="text-xs text-[#635B4E]">กำลังโหลดแผงควบคุมแม่หมอ…</p>
           </div>
         </main>
       }

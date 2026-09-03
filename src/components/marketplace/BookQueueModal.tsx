@@ -96,7 +96,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
 
         {/* Live Availability Status */}
         <div className="flex items-center justify-between rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-3 text-xs ">
-          <span className="text-[#6F5B4A]">สถานะการเปิดรับคิวสด:</span>
+          <span className="text-[#635B4E]">สถานะการเปิดรับคิวสด:</span>
           {isLiveOpen ? (
             <span className="inline-flex items-center gap-1 font-semibold text-[#3A7044]">
               <span className="h-2 w-2 rounded-full bg-[#3A7044] animate-pulse" />
@@ -116,7 +116,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
               className={`rounded-lg py-2 text-xs font-semibold border transition-all cursor-pointer ${
                 kind === "walkup"
                   ? "bg-[#8F5C1A] border-[#D9C8AC] text-[#FFFFFF]"
-                  : "bg-[#FFFFFF] border-[#D9C8AC] text-[#6F5B4A] hover:text-[#2E211A]"
+                  : "bg-[#FFFFFF] border-[#D9C8AC] text-[#635B4E] hover:text-[#2E211A]"
               }`}
             >
               ✦ รับคิวสดทันที
@@ -127,7 +127,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
               className={`rounded-lg py-2 text-xs font-semibold border transition-all cursor-pointer ${
                 kind === "booking"
                   ? "bg-[#8F5C1A] border-[#D9C8AC] text-[#FFFFFF]"
-                  : "bg-[#FFFFFF] border-[#D9C8AC] text-[#6F5B4A] hover:text-[#2E211A]"
+                  : "bg-[#FFFFFF] border-[#D9C8AC] text-[#635B4E] hover:text-[#2E211A]"
               }`}
             >
               ✦ จองคิวล่วงหน้า
@@ -139,7 +139,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         <div className="flex items-center justify-between rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-3 text-xs ">
           <div className="flex items-center gap-2">
             <span className="text-[#8F5C1A] font-bold text-sm">✦ ค่าบริการ / บูชาครู</span>
-            <span className="text-[10px] text-[#6F5B4A]">(30 นาที)</span>
+            <span className="text-[13px] text-[#635B4E]">(30 นาที)</span>
           </div>
           <span className="font-bold text-[#8F5C1A] text-sm">299 บาท</span>
         </div>

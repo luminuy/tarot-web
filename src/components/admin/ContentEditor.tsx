@@ -159,7 +159,7 @@ export default function ContentEditor() {
 function ResetLink({ show, onClick }: { show: boolean; onClick: () => void }) {
   if (!show) return null;
   return (
-    <button onClick={onClick} className="text-[10px] text-[#9c93b8] underline hover:text-[#e5c07b]">
+    <button onClick={onClick} className="text-[13px] text-[#9c93b8] underline hover:text-[#e5c07b]">
       คืนค่าเริ่มต้น
     </button>
   );
@@ -191,14 +191,14 @@ function PromptTab({
         onChange={(e) => onChange(e.target.value)}
         className="font-mono text-xs leading-relaxed"
       />
-      <div className="flex justify-between text-[10px] text-[#9c93b8]">
+      <div className="flex justify-between text-[13px] text-[#9c93b8]">
         <button onClick={() => setShow((s) => !s)} className="underline hover:text-[#e5c07b]">
           {show ? "ซ่อน" : "ดู"}ค่าเริ่มต้น ({fallback.length.toLocaleString()} ตัวอักษร)
         </button>
         <span>{value.length.toLocaleString()} / 24,000</span>
       </div>
       {show ? (
-        <pre className="max-h-64 overflow-auto rounded-xl bg-[#0c0818] p-3 text-[10px] leading-relaxed text-[#9c93b8]">
+        <pre className="max-h-64 overflow-auto rounded-xl bg-[#0c0818] p-3 text-[13px] leading-relaxed text-[#9c93b8]">
           {fallback}
         </pre>
       ) : null}
@@ -283,7 +283,7 @@ function PersonaTab({
               onChange={(e) => setField("voice", e.target.value)}
               className="font-mono text-xs leading-relaxed"
             />
-            <div className="mt-1 flex justify-between text-[10px] text-[#9c93b8]">
+            <div className="mt-1 flex justify-between text-[13px] text-[#9c93b8]">
               <ResetLink show={!!o.voice} onClick={() => setField("voice", "")} />
               <span>{(o.voice ?? "").length} / 9,000</span>
             </div>
@@ -413,7 +413,7 @@ function CardTab({
                   return (
                     <div key={side}>
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-[#9c93b8]">
+                        <span className="text-[13px] text-[#9c93b8]">
                           {side === "upright" ? "หัวตั้ง" : "หัวกลับ"}
                         </span>
                         <ResetLink show={!!cur} onClick={() => setMeaning(cat.id, side, "")} />

@@ -76,7 +76,7 @@ export default function CustomerQueuePage() {
       <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
           <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-[#6F5B4A]">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
+          <p className="text-xs text-[#635B4E]">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
         </div>
       </main>
     );
@@ -129,7 +129,7 @@ export default function CustomerQueuePage() {
               <h2 className="font-serif-th font-bold text-[#f5deaa] text-base">{reader.displayName}</h2>
               <div className="flex flex-wrap gap-1 mt-1">
                 {reader.specialties.slice(0, 3).map((s, idx) => (
-                  <span key={idx} className="text-[10px] px-1.5 py-0.5 rounded bg-[#2d1f4d] text-[#e5c07b]">
+                  <span key={idx} className="text-[13px] px-1.5 py-0.5 rounded bg-[#2d1f4d] text-[#e5c07b]">
                     {s}
                   </span>
                 ))}
@@ -151,7 +151,7 @@ export default function CustomerQueuePage() {
           {ticket.status === "waiting" && (
             <div className="text-center py-6 space-y-4">
               <div className="inline-flex flex-col items-center justify-center h-28 w-28 rounded-full border-2 border-[#ffd700]/60 bg-gradient-to-b from-[#2d1a4d] to-[#120b24] shadow-[0_0_30px_rgba(255,215,0,0.2)]">
-                <span className="text-[11px] text-[#9c93b8]">ลำดับคิว</span>
+                <span className="text-[13px] text-[#9c93b8]">ลำดับคิว</span>
                 <span className="text-4xl font-bold text-[#ffd700]">#{ticket.position || 1}</span>
               </div>
 
@@ -163,7 +163,7 @@ export default function CustomerQueuePage() {
               </div>
 
               {/* Polling Indicator */}
-              <div className="inline-flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              <div className="inline-flex items-center gap-1.5 text-[13px] text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
                 กำลังอัปเดตสถานะคิวสดแบบ Real-Time
               </div>

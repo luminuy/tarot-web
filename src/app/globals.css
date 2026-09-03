@@ -8,7 +8,7 @@
   3. inset     : #EAE7E0 (Soft Ivory — พื้นผิวที่จมลง, แท่นบูชา, ช่องกรอก)
   4. line      : #D5CEC2 (Taupe Line — เส้นขอบและเส้นคั่น 1px)
   5. ink       : #29261F (Deep Brown — ตัวอักษรหลัก, หัวข้อ, เนื้อหา)
-  6. muted     : #756F66 (Muted Brown — ตัวอักษรรอง, คำอธิบาย, วันที่)
+  6. muted     : #635B4E (Muted Brown — ตัวอักษรรอง, คำอธิบาย, วันที่ · เข้มพอผ่าน WCAG AA)
   7. gold      : #A58A5C (Muted Gold Accent — สีเน้นพิเศษ <3% visual surface)
   8. ok / err  : #3A7044 / #A6392C (สถานะ สำเร็จ / ผิดพลาด)
   9. dark      : #171512 (Near Black — Dark Footer, Deep Reading Mode)
@@ -19,7 +19,8 @@
   --color-inset: #EAE7E0;
   --color-line: #D5CEC2;
   --color-ink: #29261F;
-  --color-muted: #756F66;
+  /* muted เข้มขึ้นจาก #756F66 (คอนทราสต์ ~4.4:1 ตกเกณฑ์) → ~6:1 ผ่าน WCAG AA แม้ตัวเล็ก */
+  --color-muted: #635B4E;
   --color-gold: #A58A5C;
   --color-gold-deep: #8E754C;
   --color-gold-wash: rgba(165, 138, 92, 0.08);
@@ -32,7 +33,7 @@
   --color-inner-card: #EAE7E0;
   --color-cta-gold: #A58A5C;
   --color-walnut: #29261F;
-  --color-chestnut: #756F66;
+  --color-chestnut: #635B4E;
   --color-sand: #D5CEC2;
   --color-celestial: #A58A5C;
 
@@ -41,18 +42,33 @@
   --color-obsidian-900: #EAE7E0;
   --color-obsidian-800: #EAE7E0;
   --color-obsidian-700: #D5CEC2;
-  --color-gold-200: #756F66;
+  --color-gold-200: #635B4E;
   --color-gold-300: #29261F;
   --color-gold-400: #A58A5C;
   --color-gold-500: #A58A5C;
   --color-gold-600: #8E754C;
-  --color-amethyst: #756F66;
+  --color-amethyst: #635B4E;
   --color-ember: #A6392C;
   --color-vellum: #29261F;
-  --color-ash: #756F66;
+  --color-ash: #635B4E;
 
   --font-serif-th: var(--font-noto-serif-thai), "Noto Serif Thai", serif;
   --font-sans-th: var(--font-sarabun), "Sarabun", system-ui, sans-serif;
+
+  /*
+   * ✦ อ่านง่ายสำหรับทุกวัย (Legibility Floor)
+   * คำสั่งเจ้าของโปรเจกต์: "คนมีอายุ สายตาไม่ดีอ่านยากมาก"
+   * ยกสเกลตัวอักษรเล็กทั้งชุดขึ้น + เพิ่มระยะบรรทัด ให้ตัวหนังสือคมและโปร่งขึ้น
+   * ค่าเดิมของ Tailwind v4: xs 12px · sm 14px · base 16px
+   */
+  --text-xs: 0.8125rem;   /* 13px (เดิม 12) */
+  --text-xs--line-height: 1.6;
+  --text-sm: 0.9375rem;   /* 15px (เดิม 14) */
+  --text-sm--line-height: 1.6;
+  --text-base: 1.0625rem; /* 17px (เดิม 16) */
+  --text-base--line-height: 1.65;
+  --text-lg: 1.1875rem;   /* 19px (เดิม 18) */
+  --text-lg--line-height: 1.6;
 
   /* Golden Ratio 1.618 Typography Scale */
   --text-golden-sm: 0.8125rem; /* 13px (Fibonacci) */
@@ -98,8 +114,10 @@ body {
   background-color: #F3F0EA;                    /* Warm Ivory canvas */
   color: #29261F;                               /* Deep Brown ink */
   font-family: var(--font-sans-th);
-  line-height: 1.618;
+  line-height: 1.7;                             /* โปร่งขึ้นเพื่อสายตาทุกวัย */
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
 }
 

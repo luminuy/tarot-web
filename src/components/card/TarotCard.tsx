@@ -188,7 +188,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         >
           {/* Top Frame Gold Header */}
           <div className="w-full flex justify-center items-center opacity-85 z-10">
-            <span className="text-[8px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
+            <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
               SACRED ORACLE
             </span>
           </div>
@@ -196,7 +196,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Center Position Tag & Tap to Reveal Badge */}
           <div className="flex flex-col items-center justify-center my-auto gap-1.5 relative z-10">
             {positionLabel && (
-              <span className="text-[9px] text-[#FFFFFF] font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-[#2E211A]/90 border border-[#D9C8AC] line-clamp-1 max-w-[95%] ">
+              <span className="text-[12px] text-[#FFFFFF] font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-[#2E211A]/90 border border-[#D9C8AC] line-clamp-1 max-w-[95%] ">
                 {positionLabel}
               </span>
             )}
@@ -204,7 +204,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
               <motion.div
                 animate={{ scale: [0.95, 1.05, 0.95] }}
                 transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-                className="px-2.5 py-1 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] z-20 flex items-center gap-1 text-[8.5px] text-[#2E211A] font-serif-th font-bold"
+                className="px-2.5 py-1 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] z-20 flex items-center gap-1 text-[12px] text-[#2E211A] font-serif-th font-bold"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A] animate-ping" />
                 <span>แตะเพื่อเปิด</span>
@@ -261,7 +261,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Sleek Floating Reversed Badge if applicable */}
           {isReversed && (
             <div className="absolute top-2 left-2 z-20 pointer-events-none">
-              <span className="text-[8px] font-bold font-serif-th bg-[#2E211A]/90 text-[#FFFFFF] border border-[#D9C8AC]/80 px-2 py-0.5 rounded-full ">
+              <span className="text-[12px] font-bold font-serif-th bg-[#2E211A]/90 text-[#FFFFFF] border border-[#D9C8AC]/80 px-2 py-0.5 rounded-full ">
                 กลับหัว
               </span>
             </div>

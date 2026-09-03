@@ -65,12 +65,12 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
       </div>
 
       {/* Source Meta & Action */}
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#D9C8AC]/30 pt-4 text-xs text-[#6F5B4A]">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#D9C8AC]/30 pt-4 text-xs text-[#635B4E]">
         <div className="flex items-center gap-2 text-left">
           <span className="text-[#8F5C1A] text-xs">✦</span>
           <div>
             <span className="font-serif-th font-semibold text-[#2E211A]">{mantra.sourceCard.nameTh}</span>
-            <span className="ml-1.5 text-[#6F5B4A] font-mono text-[11px]">({mantra.elementSymbol})</span>
+            <span className="ml-1.5 text-[#635B4E] font-mono text-[13px]">({mantra.elementSymbol})</span>
           </div>
         </div>
 

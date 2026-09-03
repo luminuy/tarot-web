@@ -90,7 +90,7 @@ export function AccessDialog({
     >
       <div className="space-y-6 text-[#2E211A]">
         {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร */}
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#8F5C1A]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-3 py-1 font-mono text-[13px] uppercase tracking-[0.18em] text-[#8F5C1A]">
           {showCredits ? (
             <HourglassIcon className="h-3.5 w-3.5" />
           ) : reason === "explore" ? (
@@ -106,7 +106,7 @@ export function AccessDialog({
           <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-5 ">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#6F5B4A]">
+                <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-[#635B4E]">
                   สถานะตอนนี้
                 </span>
                 <span className="block font-serif-th text-sm font-bold text-[#2E211A]">{view.statusLine}</span>
@@ -115,7 +115,7 @@ export function AccessDialog({
             </div>
 
             {!isGuest && (
-              <div className="mt-3 flex items-center gap-2 border-t border-[#D9C8AC]/30 pt-3 font-serif-th text-xs text-[#6F5B4A]">
+              <div className="mt-3 flex items-center gap-2 border-t border-[#D9C8AC]/30 pt-3 font-serif-th text-xs text-[#635B4E]">
                 <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-[#8F5C1A]" />
                 <span>
                   โควตาฟรีชุดใหม่มาถึง{countdown ? ` ${countdown}` : ""} · รีเซ็ต{resetClockLabel()}
@@ -140,7 +140,7 @@ export function AccessDialog({
                   </span>
                   <span className="min-w-0">
                     <span className="block font-serif-th text-xs font-bold text-[#2E211A]">{b.title}</span>
-                    <span className="block font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">{b.detail}</span>
+                    <span className="block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">{b.detail}</span>
                   </span>
                 </li>
               ))}
@@ -155,7 +155,7 @@ export function AccessDialog({
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#2E211A]">
                 <HourglassIcon className="h-4 w-4 text-[#8F5C1A]" /> รอโควตาฟรีรอบใหม่
               </span>
-              <p className="font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
+              <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
                 ไม่ต้องจ่ายอะไร กลับมาหลังเที่ยงคืนแล้วเปิดไพ่ได้อีก {DAILY_LIMIT} ครั้ง
                 {countdown ? ` (${countdown})` : ""}
               </p>
@@ -164,7 +164,7 @@ export function AccessDialog({
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#8F5C1A]">
                 <CoinSealIcon className="h-4 w-4" /> ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)
               </span>
-              <p className="font-serif-th text-[11px] leading-relaxed text-[#2E211A]">
+              <p className="font-serif-th text-[13px] leading-relaxed text-[#2E211A]">
                 จ่ายครั้งเดียวเริ่มต้น {CHEAPEST_PACKAGE_THB} บาท · ปลดล็อกผังใหญ่ 10–12 ใบ
                 และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด ไม่มีวันหมดอายุ
               </p>
@@ -190,19 +190,19 @@ export function AccessDialog({
                   }`}
                 >
                   {isSpecial ? (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#8F5C1A] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#FFFFFF] ">
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#8F5C1A] px-2 py-0.5 font-serif-th text-[12px] font-bold text-[#FFFFFF] ">
                       ✦ ปลดล็อกขั้นสุด
                     </span>
                   ) : plan.highlight ? (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#2E211A]">
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 font-serif-th text-[12px] font-bold text-[#2E211A]">
                       {plan.highlight}
                     </span>
                   ) : null}
                   <span className="font-serif-th text-sm font-bold text-[#2E211A]">{plan.name}</span>
                   <span className="mt-1 font-mono text-lg font-bold text-[#8F5C1A]">{plan.price}</span>
-                  <span className="font-serif-th text-[10px] text-[#6F5B4A]">{plan.priceNote}</span>
+                  <span className="font-serif-th text-[13px] text-[#635B4E]">{plan.priceNote}</span>
                   {isCurrent && (
-                    <span className="mt-2 inline-flex w-fit rounded border border-[#D9C8AC] bg-[#F3EDE2] px-1.5 py-0.5 font-serif-th text-[9px] text-[#2E211A]">
+                    <span className="mt-2 inline-flex w-fit rounded border border-[#D9C8AC] bg-[#F3EDE2] px-1.5 py-0.5 font-serif-th text-[12px] text-[#2E211A]">
                       แผนปัจจุบันของคุณ
                     </span>
                   )}
@@ -210,11 +210,11 @@ export function AccessDialog({
                     {plan.features.map((f) => (
                       <li
                         key={f.label}
-                        className={`flex items-start gap-1.5 font-serif-th text-[11px] leading-snug ${
-                          f.included ? "text-[#2E211A]" : "text-[#6F5B4A]/50"
+                        className={`flex items-start gap-1.5 font-serif-th text-[13px] leading-snug ${
+                          f.included ? "text-[#2E211A]" : "text-[#635B4E]"
                         }`}
                       >
-                        <span className={`mt-0.5 shrink-0 ${f.included ? "text-[#8F5C1A]" : "text-[#6F5B4A]/40"}`}>
+                        <span className={`mt-0.5 shrink-0 ${f.included ? "text-[#8F5C1A]" : "text-[#635B4E]"}`}>
                           {f.included ? <CheckMarkIcon className="h-3 w-3" /> : <DashMarkIcon className="h-3 w-3" />}
                         </span>
                         {f.label}
@@ -261,7 +261,7 @@ export function AccessDialog({
             {copy.secondaryLabel}
           </button>
 
-          <p className="pt-1 text-center font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
+          <p className="pt-1 text-center font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
             {copy.reassurance}
           </p>
         </div>

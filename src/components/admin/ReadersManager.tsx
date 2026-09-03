@@ -311,7 +311,7 @@ export default function ReadersManager() {
                     <div>
                       <h3 className="font-bold text-[#f5deaa]">{r.displayName}</h3>
                       <span
-                        className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold ${
+                        className={`inline-block rounded px-2 py-0.5 text-[13px] font-semibold ${
                           r.status === "approved"
                             ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                             : r.status === "pending"
@@ -339,7 +339,7 @@ export default function ReadersManager() {
                   {r.specialties.map((s, idx) => (
                     <span
                       key={idx}
-                      className="rounded-full bg-[#32254e]/60 px-2 py-0.5 text-[10px] text-[#e5c07b]"
+                      className="rounded-full bg-[#32254e]/60 px-2 py-0.5 text-[13px] text-[#e5c07b]"
                     >
                       {s}
                     </span>
@@ -347,7 +347,7 @@ export default function ReadersManager() {
                 </div>
 
                 {/* Contact & Meta */}
-                <div className="mt-4 space-y-1 rounded-xl bg-black/20 p-2.5 text-[11px] text-[#9c93b8]">
+                <div className="mt-4 space-y-1 rounded-xl bg-black/20 p-2.5 text-[13px] text-[#9c93b8]">
                   <div className="flex justify-between">
                     <span>LINE ติดต่อ:</span>
                     <span className="font-mono text-[#f5deaa] truncate max-w-[140px]">{r.lineUrl}</span>
@@ -386,7 +386,7 @@ export default function ReadersManager() {
                   </button>
                 </div>
 
-                <div className="flex gap-2 text-[11px]">
+                <div className="flex gap-2 text-[13px]">
                   <button
                     onClick={() => copyConsoleLink(r)}
                     className="flex-1 rounded-lg border border-[#e5c07b]/30 py-1 text-[#e5c07b] hover:bg-[#e5c07b]/10 transition-colors"

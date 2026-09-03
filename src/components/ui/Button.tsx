@@ -22,7 +22,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const variantStyles = {
       gold: "bg-[#8F5C1A] hover:bg-[#74490F] text-white font-bold",
       outline: "bg-white text-[#2E211A] border border-[#D9C8AC] hover:border-[#8F5C1A]",
-      ghost: "bg-transparent text-[#6F5B4A] hover:bg-[rgba(143,92,26,0.08)] hover:text-[#2E211A]",
+      ghost: "bg-transparent text-[#635B4E] hover:bg-[rgba(143,92,26,0.08)] hover:text-[#2E211A]",
       pill: "bg-[#F3EDE2] text-[#2E211A] border border-[#D9C8AC] rounded-full hover:border-[#8F5C1A]",
     }[variant];
 

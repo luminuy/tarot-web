@@ -81,7 +81,7 @@ export function ChangePasswordCard() {
         </h2>
       </div>
 
-      <p className="text-xs text-[#6F5B4A] leading-relaxed">
+      <p className="text-xs text-[#635B4E] leading-relaxed">
         {hasPassword
           ? "กำหนดรหัสผ่านใหม่เพื่อความปลอดภัย ระบบจะลงชื่อออกจากอุปกรณ์อื่นโดยอัตโนมัติ"
           : "คุณสามารถตั้งรหัสผ่านเพื่อเข้าสู่ระบบด้วยอีเมลได้ นอกเหนือจากการเข้าสู่ระบบผ่าน Google หรือ LINE"}
@@ -120,7 +120,7 @@ export function ChangePasswordCard() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-xs text-[#6F5B4A] hover:text-[#2E211A] cursor-pointer"
+              className="text-xs text-[#635B4E] hover:text-[#2E211A] cursor-pointer"
             >
               {showPassword ? "ซ่อน" : "ดูรหัสผ่าน"}
             </button>
@@ -141,8 +141,8 @@ export function ChangePasswordCard() {
                   style={{ width: `${(strength.score / 4) * 100}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[11px] font-serif-th">
-                <span className="text-[#6F5B4A]">ความปลอดภัย:</span>
+              <div className="flex justify-between text-[13px] font-serif-th">
+                <span className="text-[#635B4E]">ความปลอดภัย:</span>
                 <span className={strength.colorClass}>{strength.label}</span>
               </div>
             </div>

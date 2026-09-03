@@ -54,7 +54,7 @@ export function AnnouncementBanner() {
           setDismissed(true);
         }}
         aria-label="ปิดประกาศระบบสิทธิ์"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#6F5B4A] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#635B4E] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
         ✕
       </button>

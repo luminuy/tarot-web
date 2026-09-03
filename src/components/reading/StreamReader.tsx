@@ -118,7 +118,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <div className="flex items-center gap-2">
               <h4 className="font-serif-th text-base font-bold font-mystic-gold">{persona.nameTh}</h4>
             </div>
-            <p className="text-xs text-[#6F5B4A] mt-0.5">{persona.tagline}</p>
+            <p className="text-xs text-[#635B4E] mt-0.5">{persona.tagline}</p>
           </div>
         </div>
 
@@ -153,7 +153,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               : "bg-[#F3EDE2] text-[#2E211A] hover:text-[#8F5C1A] border border-[#D9C8AC]"
           }`}
         >
-          <span className="text-[11px]">✦</span>
+          <span className="text-[13px]">✦</span>
           <span>
             อ่านรายใบ ({activeCardIndex + 1}/{totalCards})
           </span>
@@ -188,7 +188,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <span className="block font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm">
               <span className="mr-1.5 text-[#8F5C1A]">✦</span> มีอะไรอยากถามแม่หมอต่อไหม
             </span>
-            <span className="mt-0.5 block font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
+            <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
               พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที แตะเพื่อเริ่มพิมพ์คุยได้เลย
             </span>
           </span>
@@ -209,7 +209,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               className="anim-page-transition p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 "
             >
               <div className="flex items-start gap-2.5 text-xs sm:text-sm text-[#2E211A] font-serif-th">
-                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[#D9C8AC] text-[10px] text-[#8F5C1A]">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[#D9C8AC] text-[13px] text-[#8F5C1A]">
                   ✦
                 </span>
                 <span className="leading-relaxed">{errorMsg}</span>
@@ -249,7 +249,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 {(() => {
                   const card = d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined);
                   return card ? (
-                    <span className="min-w-0 truncate text-[10px] font-normal opacity-80">({card.nameTh})</span>
+                    <span className="min-w-0 truncate text-[13px] font-normal opacity-80">({card.nameTh})</span>
                   ) : null;
                 })()}
               </button>
@@ -278,13 +278,13 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   ) : (
                     <div className="w-full h-full bg-[#F3EDE2] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#D9C8AC]">
                       <span className="text-[#8F5C1A] text-xs">✦</span>
-                      <span className="text-[9px] text-[#6F5B4A] font-serif-th mt-0.5 leading-tight">ไม่พบข้อมูล</span>
+                      <span className="text-[12px] text-[#635B4E] font-serif-th mt-0.5 leading-tight">ไม่พบข้อมูล</span>
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <span className="text-[10px] uppercase tracking-widest text-[#8F5C1A] font-mono font-semibold">
+                  <span className="text-[13px] uppercase tracking-widest text-[#8F5C1A] font-mono font-semibold">
                     ✦ ตำแหน่งที่ {activeCardIndex + 1}: {activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}
                   </span>
                   <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#2E211A] mt-0.5">
@@ -292,7 +292,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                       <>
                         {cardData.nameTh}{" "}
                         {cardData.nameEn && (
-                          <span className="text-xs font-mono font-normal text-[#6F5B4A]">({cardData.nameEn})</span>
+                          <span className="text-xs font-mono font-normal text-[#635B4E]">({cardData.nameEn})</span>
                         )}{" "}
                         <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
                           {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว" : "· ไพ่หัวตั้ง"}
@@ -309,7 +309,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
               {/* Elemental & Meaning Tag */}
               {activeDrawnCard?.position.meaning && (
-                <span className="text-[10px] text-[#2E211A] bg-[#F3EDE2]/25 border border-[#D9C8AC] px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
+                <span className="text-[13px] text-[#2E211A] bg-[#F3EDE2]/25 border border-[#D9C8AC] px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
                   {activeDrawnCard.position.meaning}
                 </span>
               )}
@@ -328,11 +328,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
               return keywords && keywords.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[10px] text-[#6F5B4A] font-serif-th font-semibold">ความหมายหลัก:</span>
+                  <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">ความหมายหลัก:</span>
                   {keywords.map((kw: string, idx: number) => (
                     <span
                       key={idx}
-                      className="text-[10px] text-[#2E211A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded"
+                      className="text-[13px] text-[#2E211A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded"
                     >
                       {kw}
                     </span>
@@ -401,7 +401,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     : activeCardReading.reading}
                 </p>
               ) : (
-                <p className="text-xs sm:text-sm text-[#6F5B4A]/60 leading-relaxed font-serif-th font-normal italic">
+                <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed font-serif-th font-normal italic">
                   {isStreaming
                     ? "แม่หมอกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำทำนายของไพ่ใบนี้..."
                     : "รอการเปิดม่านพยากรณ์"}
@@ -418,7 +418,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
                   activeCardIndex > 0
                     ? "border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] hover:bg-[#FAF7F2] hover:border-[#8F5C1A] cursor-pointer"
-                    : "border-transparent text-[#6F5B4A]/30 cursor-not-allowed"
+                    : "border-transparent text-[#635B4E] cursor-not-allowed"
                 }`}
               >
                 <span>← ใบก่อนหน้า</span>
@@ -431,7 +431,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
                   activeCardIndex < totalCards - 1
                     ? "border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] hover:bg-[#FAF7F2] hover:border-[#8F5C1A] cursor-pointer"
-                    : "border-transparent text-[#6F5B4A]/30 cursor-not-allowed"
+                    : "border-transparent text-[#635B4E] cursor-not-allowed"
                 }`}
               >
                 <span>ใบถัดไป →</span>
@@ -498,7 +498,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               <ul className="space-y-2">
                 {reading.advice.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2.5 text-xs text-[#2E211A]">
-                    <span className="w-4 h-4 rounded-full bg-[#8F5C1A]/20 text-[#8F5C1A] font-bold flex items-center justify-center flex-shrink-0 text-[10px] mt-0.5">
+                    <span className="w-4 h-4 rounded-full bg-[#8F5C1A]/20 text-[#8F5C1A] font-bold flex items-center justify-center flex-shrink-0 text-[13px] mt-0.5">
                       ✓
                     </span>
                     <span>{item}</span>
@@ -545,7 +545,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     ต้องการคำปรึกษาเจาะลึกเฉพาะบุคคลเพิ่มเติม?
                   </h4>
                 </div>
-                <p className="text-[11px] sm:text-xs text-[#6F5B4A] leading-relaxed font-serif-th">
+                <p className="text-[13px] sm:text-xs text-[#635B4E] leading-relaxed font-serif-th">
                   ปรึกษาแม่หมอผู้เชี่ยวชาญแบบตัวต่อตัว พร้อมส่งต่อผลการเปิดไพ่ชุดนี้เพื่อพูดคุยเจาะลึกผ่าน LINE ส่วนตัวได้ทันที
                 </p>
               </div>
@@ -565,7 +565,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
       {/* AI Disclosure Note & Accuracy Rating */}
       <div className="mt-4 pt-3 border-t border-[#D9C8AC]/30 space-y-2">
-        <p className="text-[10.5px] text-[#6F5B4A] leading-relaxed text-center font-serif-th">
+        <p className="text-[13px] text-[#635B4E] leading-relaxed text-center font-serif-th">
           <span className="text-[#8F5C1A]">✦</span> คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง
           จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต
         </p>

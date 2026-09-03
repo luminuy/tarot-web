@@ -66,7 +66,7 @@ const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicke
       style={{ zIndex: tierIdx * 40 + posInTier, originY: 1 }}
     >
       <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-lg sm:rounded-lg border-2 card-back-pattern flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#D9C8AC] group-hover:border-[#8F5C1A] group-hover:ring-2 group-hover:ring-[#8F5C1A]/60 group-focus-visible:border-[#D9C8AC] group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] bg-[#382518]">
-        <div className="w-full flex items-center justify-end text-[7px] sm:text-[8px] text-[#8F5C1A]/90">
+        <div className="w-full flex items-center justify-end text-[12px] sm:text-[12px] text-[#8F5C1A]/90">
           <span className="font-mono opacity-80">#{cardIdx + 1}</span>
         </div>
         <div className="gold-foil-sheen absolute inset-0 opacity-20 group-hover:opacity-50 transition-opacity pointer-events-none" />
@@ -129,7 +129,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             {/* Status Pill Badge — Warm Minimalist Luxury */}
             <div className="inline-flex items-center gap-2 bg-[#FFFFFF] border border-[#D9C8AC] px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full ">
               <span className="w-2 h-2 rounded-full bg-[#8F5C1A] animate-ping" />
-              <span className="text-[11px] sm:text-xs font-serif-th font-bold text-[#2E211A]">
+              <span className="text-[13px] sm:text-xs font-serif-th font-bold text-[#2E211A]">
                 เลือกไพ่ใบที่ {pickedIndices.length + 1} จากทั้งหมด {targetCount} ใบ
               </span>
             </div>
@@ -139,7 +139,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               เลือกไพ่สำหรับ{" "}
               <span className="text-[#8F5C1A] inline-block font-bold">&ldquo;{currentPositionName}&rdquo;</span>
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#6F5B4A] max-w-xl mx-auto leading-normal">
+            <p className="text-[13px] sm:text-xs text-[#635B4E] max-w-xl mx-auto leading-normal">
               แตะเลือกไพ่ใบที่คุณรู้สึกถูกชะตา หรือกดปุ่ม &ldquo;สุ่มเลือกให้ฉัน&rdquo; ด้านล่าง
             </p>
           </motion.div>
@@ -152,7 +152,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             <h3 className="text-lg sm:text-2xl font-serif-th font-bold font-mystic-gold flex items-center justify-center gap-2">
               <span>✨</span> เลือกไพ่ครบ {targetCount} ใบเรียบร้อยแล้ว <span>✨</span>
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#6F5B4A]">กำลังเตรียมเปิดไพ่และคำทำนายของคุณ...</p>
+            <p className="text-[13px] sm:text-xs text-[#635B4E]">กำลังเตรียมเปิดไพ่และคำทำนายของคุณ...</p>
           </motion.div>
         )}
       </div>
@@ -213,7 +213,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                 />
                 <div className="gold-foil-sheen absolute inset-0 opacity-20 pointer-events-none" />
               </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#8F5C1A] border border-[#D9C8AC] flex items-center justify-center text-[7px] text-[#FFFFFF] font-bold">
+              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#8F5C1A] border border-[#D9C8AC] flex items-center justify-center text-[12px] text-[#FFFFFF] font-bold">
                 ✦
               </div>
             </div>
@@ -221,11 +221,11 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             {/* Typography & Animated Progress Bar */}
             <div className="space-y-1 flex-1 min-w-[160px]">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#2E211A] font-mono font-bold flex items-center gap-1">
+                <span className="text-[13px] sm:text-[13px] uppercase tracking-wider text-[#2E211A] font-mono font-bold flex items-center gap-1">
                   <span className="text-[#8F5C1A]">✦</span>
                   <span>ความคืบหน้าพิธีจับไพ่</span>
                 </span>
-                <span className="text-[11px] sm:text-xs font-mono font-bold text-[#2E211A] bg-[#FFFFFF] border border-[#D9C8AC] px-2 py-0.2 rounded-full ">
+                <span className="text-[13px] sm:text-xs font-mono font-bold text-[#2E211A] bg-[#FFFFFF] border border-[#D9C8AC] px-2 py-0.2 rounded-full ">
                   {pickedIndices.length} / {targetCount}
                 </span>
               </div>
@@ -244,7 +244,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] sm:text-[11px] text-[#6F5B4A] font-serif-th leading-tight truncate">
+                <p className="text-[13px] sm:text-[13px] text-[#635B4E] font-serif-th leading-tight truncate">
                   {isComplete ? (
                     <span className="text-[#3A7044] font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
                   ) : (
@@ -260,7 +260,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     type="button"
                     onClick={handleAutoPick}
                     disabled={disabled}
-                    className="flex-shrink-0 text-[10px] sm:text-[11px] text-[#2E211A] hover:text-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#F3EDE2] border border-[#D9C8AC] hover:border-[#8F5C1A] px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
+                    className="flex-shrink-0 text-[13px] sm:text-[13px] text-[#2E211A] hover:text-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#F3EDE2] border border-[#D9C8AC] hover:border-[#8F5C1A] px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
                     aria-label="สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"
                   >
                     ✦ สุ่มเลือกให้ฉัน
@@ -280,26 +280,26 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                 <motion.div
                   key={idx}
                   whileHover={{ scale: 1.04 }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-xs transition-all duration-300 font-serif-th whitespace-nowrap select-none ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[13px] sm:text-xs transition-all duration-300 font-serif-th whitespace-nowrap select-none ${
                     isFilled
                       ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold border border-[#D9C8AC]"
                       : isCurrent
                         ? "bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A] ring-1 ring-[#8F5C1A]/40 font-bold"
-                        : "bg-[#F3EDE2] border border-[#D9C8AC]/50 text-[#6F5B4A]/50"
+                        : "bg-[#F3EDE2] border border-[#D9C8AC]/50 text-[#635B4E]"
                   }`}
                 >
                   <div
-                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-mono font-bold ${
+                    className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[12px] font-mono font-bold ${
                       isFilled
                         ? "bg-[#FFFFFF] text-[#2E211A]"
                         : isCurrent
                           ? "bg-[#8F5C1A] text-[#FFFFFF]"
-                          : "bg-[#F3EDE2]/30 text-[#6F5B4A]"
+                          : "bg-[#F3EDE2]/30 text-[#635B4E]"
                     }`}
                   >
                     {isFilled ? "✓" : idx + 1}
                   </div>
-                  <span className="text-[10px] sm:text-[11px] tracking-wide">ใบที่ {idx + 1}</span>
+                  <span className="text-[13px] sm:text-[13px] tracking-wide">ใบที่ {idx + 1}</span>
                 </motion.div>
               );
             })}

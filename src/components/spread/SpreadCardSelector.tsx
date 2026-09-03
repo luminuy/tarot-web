@@ -221,8 +221,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               <cat.Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#FFFFFF]" : "text-[#8F5C1A]"}`} />
               <span>{cat.label}</span>
               <span
-                className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                  isActive ? "bg-white/20 text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#D9C8AC]/40"
+                className={`text-[12px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  isActive ? "bg-white/20 text-[#FFFFFF]" : "bg-[#FFFFFF] text-[#635B4E] border border-[#D9C8AC]/40"
                 }`}
               >
                 {cat.count}
@@ -288,16 +288,16 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               >
                 {/* Top Card Header Tags */}
                 <div className="flex items-center justify-between z-10 pb-1">
-                  <span className="text-[10px] text-[#2E211A] bg-[#FFFFFF] px-2.5 py-0.5 rounded-full border border-[#D9C8AC]/60 font-semibold font-mono ">
+                  <span className="text-[13px] text-[#2E211A] bg-[#FFFFFF] px-2.5 py-0.5 rounded-full border border-[#D9C8AC]/60 font-semibold font-mono ">
                     {spread.positions.length} ใบ
                   </span>
                   {isLocked ? (
-                    <span className="text-[9px] text-[#6F5B4A] bg-[#FFFFFF] border border-[#D9C8AC]/60 px-2.5 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
+                    <span className="text-[12px] text-[#635B4E] bg-[#FFFFFF] border border-[#D9C8AC]/60 px-2.5 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
                       <SealedLockIcon className="w-3 h-3 text-[#8F5C1A]" />
                       <span>✦ ญาณพิเศษ</span>
                     </span>
                   ) : isRecommended ? (
-                    <span className="text-[9px] text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                    <span className="text-[12px] text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
                       <span>✦</span> ยอดนิยม
                     </span>
                   ) : null}
@@ -319,7 +319,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   {isLocked && (
                     <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/card:border-[#D9C8AC] transition-all duration-300">
                       <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
-                      <span className="text-[10.5px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
+                      <span className="text-[13px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
                         แตะเพื่อปลดล็อกผังนี้
                       </span>
                     </div>
@@ -331,7 +331,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   <h4 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] group-hover/card:text-[#8F5C1A] transition-colors leading-tight">
                     {spread.nameTh}
                   </h4>
-                  <p className="text-[11px] text-[#6F5B4A] line-clamp-2 mt-1 leading-snug font-serif-th">
+                  <p className="text-[13px] text-[#635B4E] line-clamp-2 mt-1 leading-snug font-serif-th">
                     {spread.tagline}
                   </p>
                 </div>
@@ -339,10 +339,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 {/* Selected Golden Corner Seals */}
                 {isSelected && (
                   <>
-                    <div className="absolute top-1.5 left-1.5 text-[8px] text-[#8F5C1A]">✦</div>
-                    <div className="absolute top-1.5 right-1.5 text-[8px] text-[#8F5C1A]">✦</div>
-                    <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#8F5C1A]">✦</div>
-                    <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#8F5C1A]">✦</div>
+                    <div className="absolute top-1.5 left-1.5 text-[12px] text-[#8F5C1A]">✦</div>
+                    <div className="absolute top-1.5 right-1.5 text-[12px] text-[#8F5C1A]">✦</div>
+                    <div className="absolute bottom-1.5 left-1.5 text-[12px] text-[#8F5C1A]">✦</div>
+                    <div className="absolute bottom-1.5 right-1.5 text-[12px] text-[#8F5C1A]">✦</div>
                   </>
                 )}
 
@@ -419,14 +419,14 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-widest text-[#6F5B4A] font-mono">ผังที่เลือกไว้:</span>
-                <span className="text-[10px] text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.2 rounded-full font-bold font-mono ">
+                <span className="text-[13px] uppercase tracking-widest text-[#635B4E] font-mono">ผังที่เลือกไว้:</span>
+                <span className="text-[13px] text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.2 rounded-full font-bold font-mono ">
                   {selectedSpread.positions.length} ใบ
                 </span>
               </div>
               <h4 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] leading-tight mt-0.5">
                 {selectedSpread.nameTh}
-                <span className="text-xs font-normal text-[#6F5B4A] ml-2 hidden sm:inline font-serif-th">
+                <span className="text-xs font-normal text-[#635B4E] ml-2 hidden sm:inline font-serif-th">
                   — {selectedSpread.tagline}
                 </span>
               </h4>

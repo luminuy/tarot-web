@@ -49,7 +49,7 @@ export function EntitlementStatusCard() {
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] px-4 py-3">
         <div className="space-y-1">
-          <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#6F5B4A]">
+          <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-[#635B4E]">
             {view.isAdmin
               ? "ผู้ดูแลระบบ"
               : view.isUnlimited
@@ -65,13 +65,13 @@ export function EntitlementStatusCard() {
 
       {view.isMember && !view.isUnlimited && (
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="flex items-center gap-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[11px] text-[#2E211A]">
+          <div className="flex items-center gap-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[13px] text-[#2E211A]">
             <HourglassIcon className="h-4 w-4 shrink-0 text-[#8F5C1A]" />
             <span>
               โควตาฟรีชุดใหม่{countdown ? ` ${countdown}` : ""} · รีเซ็ต{resetClockLabel()}
             </span>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[11px] text-[#2E211A]">
+          <div className="flex items-center gap-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[13px] text-[#2E211A]">
             <SparkSealIcon className="h-4 w-4 shrink-0 text-[#8F5C1A]" />
             <span>
               รอบที่เติมไว้ <strong className="text-[#8F5C1A] font-bold">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ
@@ -83,7 +83,7 @@ export function EntitlementStatusCard() {
       {view.isGuest && (
         <ul className="grid gap-1.5 sm:grid-cols-2">
           {MEMBER_BENEFITS.map((b) => (
-            <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#2E211A]">
+            <li key={b.title} className="flex items-start gap-2 font-serif-th text-[13px] text-[#2E211A]">
               <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#8F5C1A]" />
               {b.title}
             </li>

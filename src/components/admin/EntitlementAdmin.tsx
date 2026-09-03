@@ -290,7 +290,7 @@ export default function EntitlementAdmin() {
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {Object.entries(METRIC_LABEL).map(([k, label]) => (
             <div key={k} className="rounded-xl bg-[#0c0818]/70 p-3">
-              <p className="text-[10px] text-[#9c93b8]">{label}</p>
+              <p className="text-[13px] text-[#9c93b8]">{label}</p>
               <p className="mt-0.5 text-lg font-bold text-[#f5deaa]">
                 {(s.metrics[k] ?? 0).toLocaleString("th-TH")}
               </p>

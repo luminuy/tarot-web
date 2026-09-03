@@ -88,11 +88,11 @@ function CopyBadge({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="inline-flex items-center gap-1 rounded bg-[#201438] px-2 py-0.5 text-[11px] text-[#e5c07b] hover:bg-[#2e1d52] hover:text-[#ffd700] transition-colors border border-[#e5c07b]/20"
+      className="inline-flex items-center gap-1 rounded bg-[#201438] px-2 py-0.5 text-[13px] text-[#e5c07b] hover:bg-[#2e1d52] hover:text-[#ffd700] transition-colors border border-[#e5c07b]/20"
       title="คลิกเพื่อคัดลอก"
     >
       <span className="font-mono truncate max-w-[200px] sm:max-w-xs">{text}</span>
-      <span className="text-[10px] opacity-75">{copied ? "✦ คัดลอกแล้ว" : "คัดลอก"}</span>
+      <span className="text-[13px] opacity-75">{copied ? "✦ คัดลอกแล้ว" : "คัดลอก"}</span>
     </button>
   );
 }
@@ -160,7 +160,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
               {data?.summary || "ระบบมอนิเตอร์และตรวจสอบการเชื่อมต่อบริการภายนอก 7 เสาหลักแบบเรียลไทม์"}
             </p>
             {data && (
-              <p className="text-[11px] text-[#9c93b8]">
+              <p className="text-[13px] text-[#9c93b8]">
                 ตรวจสัญญาณสดล่าสุด: <span className="text-[#e5c07b] font-mono">{formattedTime}</span> · ผ่าน {data.passedCount} จาก {data.totalCount} ระบบ
               </p>
             )}
@@ -314,7 +314,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                 <span className="text-[#9c93b8]">จำนวนสมาชิกทั้งหมด:</span>
                 <span className="font-bold text-[#f5deaa]">{data.services.d1.metrics.totalUsers} คน</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-white/5 text-[11px] text-[#9c93b8]">
+              <div className="flex justify-between py-1 border-b border-white/5 text-[13px] text-[#9c93b8]">
                 <span>สัดส่วนช่องทาง:</span>
                 <span>
                   Google: {data.services.d1.metrics.googleUsers} · LINE: {data.services.d1.metrics.lineUsers} · Email: {data.services.d1.metrics.emailUsers}

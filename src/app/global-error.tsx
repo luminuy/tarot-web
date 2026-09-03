@@ -10,7 +10,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-bold font-serif-th text-[#2E211A]">เกิดข้อผิดพลาดชั่วคราวในการโหลดระบบ</h2>
-            <p className="text-xs text-[#6F5B4A] leading-relaxed font-serif-th">
+            <p className="text-xs text-[#635B4E] leading-relaxed font-serif-th">
               แตะปุ่มด้านล่างเพื่อลองโหลดหน้าเว็บใหม่อีกครั้ง
             </p>
           </div>

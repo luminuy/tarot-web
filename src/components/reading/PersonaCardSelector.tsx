@@ -148,16 +148,16 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               {/* Top Card Archetype Tag */}
               <div className="text-center pb-1.5 border-b border-[#D9C8AC]/30">
                 <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                  <span className="text-[9px] uppercase tracking-widest text-[#8F5C1A] font-mono font-semibold block">
+                  <span className="text-[12px] uppercase tracking-widest text-[#8F5C1A] font-mono font-semibold block">
                     {meta.roleTitle}
                   </span>
                   {isLocked && (
-                    <span className="text-[8px] text-[#8F5C1A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
+                    <span className="text-[12px] text-[#8F5C1A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
                       <span>✦ ผู้เชี่ยวชาญพิเศษ</span>
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] text-[#6F5B4A] font-serif-th block mt-0.5">{meta.archetype}</span>
+                <span className="text-[13px] text-[#635B4E] font-serif-th block mt-0.5">{meta.archetype}</span>
               </div>
 
               {/* Authentic Tarot Persona Character Artwork with Altar Aura */}
@@ -172,7 +172,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                 {isLocked && (
                   <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/persona:border-[#8F5C1A] transition-all duration-300 shadow-xs">
                     <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
-                    <span className="text-[10.5px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
+                    <span className="text-[13px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
                       แตะเพื่อปลดล็อก
                     </span>
                   </div>
@@ -205,16 +205,16 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                     <SpeakerTabIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <p className="text-[10px] text-[#6F5B4A] mt-1 leading-snug">{p.tagline}</p>
+                <p className="text-[13px] text-[#635B4E] mt-1 leading-snug">{p.tagline}</p>
               </div>
 
               {/* Selected Golden Corner Seals */}
               {isSelected && (
                 <>
-                  <div className="absolute top-1.5 left-1.5 text-[8px] text-[#8F5C1A]">✦</div>
-                  <div className="absolute top-1.5 right-1.5 text-[8px] text-[#8F5C1A]">✦</div>
-                  <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#8F5C1A]">✦</div>
-                  <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#8F5C1A]">✦</div>
+                  <div className="absolute top-1.5 left-1.5 text-[12px] text-[#8F5C1A]">✦</div>
+                  <div className="absolute top-1.5 right-1.5 text-[12px] text-[#8F5C1A]">✦</div>
+                  <div className="absolute bottom-1.5 left-1.5 text-[12px] text-[#8F5C1A]">✦</div>
+                  <div className="absolute bottom-1.5 right-1.5 text-[12px] text-[#8F5C1A]">✦</div>
                 </>
               )}
 

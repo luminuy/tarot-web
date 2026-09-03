@@ -17,7 +17,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
 
         <div className="space-y-2">
           <h2 className="text-xl font-bold font-serif-th text-[#2E211A]">เกิดข้อผิดพลาดชั่วคราวในการแสดงผล</h2>
-          <p className="text-xs text-[#6F5B4A] leading-relaxed font-serif-th">
+          <p className="text-xs text-[#635B4E] leading-relaxed font-serif-th">
             ระบบได้บันทึกข้อผิดพลาดไว้เรียบร้อยแล้ว คุณสามารถแตะปุ่มด้านล่างเพื่อเริ่มการทำงานใหม่
           </p>
         </div>

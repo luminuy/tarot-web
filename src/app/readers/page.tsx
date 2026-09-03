@@ -42,7 +42,7 @@ export default async function ReadersPage() {
           <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide">
             ปรึกษาแม่หมอตัวจริง
           </h1>
-          <p className="text-xs sm:text-sm text-[#6F5B4A] max-w-xl mx-auto leading-relaxed font-serif-th">
+          <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto leading-relaxed font-serif-th">
             เลือกแม่หมอที่มีความถนัดตรงกับเรื่องที่คุณต้องการคำปรึกษา พร้อมระบบ AI ช่วยสังเคราะห์บรีฟคำถามก่อนเริ่มสนทนา
           </p>
         </div>

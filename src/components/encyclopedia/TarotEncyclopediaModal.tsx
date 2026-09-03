@@ -67,7 +67,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                 <h3 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold">
                   ความหมายไพ่ทาโรต์ 78 ใบ
                 </h3>
-                <p className="text-[10px] text-[#6F5B4A] font-serif-th">
+                <p className="text-[13px] text-[#635B4E] font-serif-th">
                   ดูคำแปลและความหมายของไพ่ทาโรต์ทั้ง 78 ใบ (ความรัก การงาน การเงิน)
                 </p>
               </div>
@@ -107,7 +107,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                   className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold whitespace-nowrap transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                     filter === tab.id
                       ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                      : "bg-[#FFFFFF] text-[#6F5B4A] hover:text-[#2E211A] border border-[#D9C8AC]"
+                      : "bg-[#FFFFFF] text-[#635B4E] hover:text-[#2E211A] border border-[#D9C8AC]"
                   }`}
                 >
                   {tab.label}
@@ -120,7 +120,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
               placeholder="✦ ค้นหาตามชื่อไพ่ (เช่น The Fool, ราชินีถ้วย, ความรัก, การเงิน)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg px-3.5 py-2 text-xs text-[#2E211A] placeholder:text-[#6F5B4A]/70 focus:outline-none focus:border-[#8F5C1A] "
+              className="w-full bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg px-3.5 py-2 text-xs text-[#2E211A] placeholder:text-[#635B4E] focus:outline-none focus:border-[#8F5C1A] "
             />
           </div>
 
@@ -152,10 +152,10 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         className="w-full h-full"
                       />
                     </div>
-                    <span className="text-[10px] font-serif-th font-bold text-[#2E211A] truncate max-w-full block leading-tight">
+                    <span className="text-[13px] font-serif-th font-bold text-[#2E211A] truncate max-w-full block leading-tight">
                       {c.nameTh}
                     </span>
-                    <span className="text-[8px] text-[#6F5B4A] font-mono truncate max-w-full block">{c.nameEn}</span>
+                    <span className="text-[12px] text-[#635B4E] font-mono truncate max-w-full block">{c.nameEn}</span>
                   </div>
                 ))}
               </div>
@@ -219,9 +219,9 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                       <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
                         {selectedCard.nameTh}
                       </h3>
-                      <span className="text-xs text-[#6F5B4A] font-mono">({selectedCard.nameEn})</span>
+                      <span className="text-xs text-[#635B4E] font-mono">({selectedCard.nameEn})</span>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap text-[10px] text-[#2E211A]">
+                    <div className="flex items-center gap-2 flex-wrap text-[13px] text-[#2E211A]">
                       <span className="px-2 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[#8F5C1A] font-semibold">
                         ธาตุ: {selectedCard.element}
                       </span>
@@ -240,7 +240,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
                           viewOrientation === "upright"
                             ? "bg-[#EBF3ED] text-[#3A7044] border border-[#D9C8AC]"
-                            : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#D9C8AC]"
+                            : "bg-[#FFFFFF] text-[#635B4E] border border-[#D9C8AC]"
                         }`}
                       >
                         ✦ หัวตั้ง (Upright)
@@ -250,7 +250,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
                           viewOrientation === "reversed"
                             ? "bg-[#FCEEEA] text-[#A6392C] border border-[#D9C8AC]"
-                            : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#D9C8AC]"
+                            : "bg-[#FFFFFF] text-[#635B4E] border border-[#D9C8AC]"
                         }`}
                       >
                         ↷ กลับหัว (Reversed)
@@ -261,7 +261,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
 
                 {/* Keywords List */}
                 <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
-                  <span className="text-[10px] text-[#8F5C1A] font-bold block">✦ คำสำคัญ (Keywords):</span>
+                  <span className="text-[13px] text-[#8F5C1A] font-bold block">✦ คำสำคัญ (Keywords):</span>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedCard.keywords[viewOrientation].map((kw, i) => (
                       <span
@@ -290,7 +290,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         className={`px-3 py-1 rounded-lg text-xs font-serif-th font-semibold transition-all cursor-pointer whitespace-nowrap ${
                           activeMeaningCategory === cat.id
                             ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                            : "bg-[#FFFFFF] text-[#6F5B4A] hover:text-[#2E211A] border border-[#D9C8AC]"
+                            : "bg-[#FFFFFF] text-[#635B4E] hover:text-[#2E211A] border border-[#D9C8AC]"
                         }`}
                       >
                         {cat.label}

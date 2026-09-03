@@ -26,14 +26,14 @@ const ELEMENT_CONFIG: Record<string, { border: string; glow: string; text: strin
   น้ำ: {
     border: "border-[#6F5B4A]/40",
     glow: "rgba(143, 92, 26, 0.12)",
-    text: "text-[#6F5B4A]",
+    text: "text-[#635B4E]",
     bg: "bg-[#6F5B4A]/15",
     icon: "✦",
   },
   ลม: {
     border: "border-[#6F5B4A]/40",
     glow: "rgba(143, 92, 26, 0.12)",
-    text: "text-[#6F5B4A]",
+    text: "text-[#635B4E]",
     bg: "bg-[#6F5B4A]/15",
     icon: "✦",
   },
@@ -80,7 +80,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         >
           <span>←</span> กลับหน้ารวมไพ่ 78 ใบ
         </Link>
-        <span className="text-[#756F66]">
+        <span className="text-[#635B4E]">
           ลำดับที่ <strong className="text-[#A58A5C]">{currentIndex + 1}</strong> / {totalCards}
         </span>
       </div>
@@ -115,11 +115,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
                 {/* Top Floating Badge */}
                 <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#29261F] text-[#F3F0EA] border border-[#D5CEC2]">
+                  <span className="text-[13px] font-mono font-bold px-2 py-0.5 rounded bg-[#29261F] text-[#F3F0EA] border border-[#D5CEC2]">
                     {card.arcana === "major" ? `Major #${card.number}` : card.suit?.toUpperCase()}
                   </span>
                   <span
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${elem.border} ${elem.bg} ${elem.text} font-bold`}
+                    className={`text-[13px] font-mono px-2 py-0.5 rounded border ${elem.border} ${elem.bg} ${elem.text} font-bold`}
                   >
                     {elem.icon} {card.element}
                   </span>
@@ -134,7 +134,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               type="button"
               onClick={() => setOrientation("upright")}
               className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#756F66] hover:text-[#29261F]"
+                isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
               }`}
             >
               <span>✦</span> ไพ่หัวตั้ง (ปกติ)
@@ -143,7 +143,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               type="button"
               onClick={() => setOrientation("reversed")}
               className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                !isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#756F66] hover:text-[#29261F]"
+                !isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
               }`}
             >
               <span>↻</span> ไพ่หัวกลับ
@@ -183,18 +183,18 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               <span className="px-2.5 py-0.5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] font-semibold uppercase text-[#29261F]">
                 {card.arcana === "major" ? "Major Arcana" : `${card.suit} Suit`}
               </span>
-              <span className="text-[#756F66]">|</span>
+              <span className="text-[#635B4E]">|</span>
               <span className="text-[#29261F] font-sans tracking-wide">{card.nameEn}</span>
             </div>
             <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] leading-tight">
               {card.nameTh}
             </h1>
-            <p className="text-xs sm:text-sm text-[#756F66] leading-relaxed pt-1 font-serif-th">{card.numerology}</p>
+            <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed pt-1 font-serif-th">{card.numerology}</p>
           </div>
 
           {/* Keywords Ribbon */}
           <div className="space-y-2">
-            <h4 className="text-[11px] font-mono text-[#A58A5C] uppercase tracking-wider flex items-center gap-1.5 font-bold">
+            <h4 className="text-[13px] font-mono text-[#A58A5C] uppercase tracking-wider flex items-center gap-1.5 font-bold">
               <span>✦</span> สัญลักษณ์และคีย์เวิร์ด ({isUpright ? "ไพ่หัวตั้ง" : "ไพ่หัวกลับ"})
             </h4>
             <div className="flex flex-wrap gap-2">
@@ -278,7 +278,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               />
             </div>
             <div className="text-left overflow-hidden">
-              <span className="text-[10px] font-mono text-[#756F66] block">← ใบก่อนหน้า</span>
+              <span className="text-[13px] font-mono text-[#635B4E] block">← ใบก่อนหน้า</span>
               <span className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] truncate block">
                 {prevCard.nameTh}
               </span>
@@ -294,7 +294,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             className="flex items-center gap-3 p-3.5 rounded-xl border border-[#D5CEC2] hover:border-[#A58A5C] bg-[#FFFFFF] hover:bg-[#EAE7E0] transition-all group max-w-[48%] text-right shadow-xs"
           >
             <div className="text-right overflow-hidden">
-              <span className="text-[10px] font-mono text-[#756F66] block">ใบถัดไป →</span>
+              <span className="text-[13px] font-mono text-[#635B4E] block">ใบถัดไป →</span>
               <span className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] truncate block">
                 {nextCard.nameTh}
               </span>
