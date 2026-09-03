@@ -42,3 +42,20 @@ npm run typecheck
 - จังหวะแนวตั้ง (ยึดชุด `8 / 16 / 24 / 40 / 64`)
 - อิโมจิการ์ตูน (กฎเหล็กข้อ 2) — ใช้ไอคอนเส้นใน `src/components/ui/TarotArtIcons.tsx` หรือ `✦`
 - ภาพแชร์ที่วาดด้วย canvas (`ShareModal.tsx`) และเทมเพลตอีเมล (`src/lib/email/templates.ts`)
+
+## ⚠️ จุดบอดของ codemod (INC — บทเรียน 2026-09-03)
+
+สคริปต์ทั้งหมดอิง**คลาส Tailwind** จึงมองไม่เห็น 2 อย่างนี้ — **ต้องตรวจด้วยมือทุกครั้ง**
+
+```bash
+# 1. เงาที่เขียนใน inline style
+grep -rn "boxShadow" src --include='*.tsx' | grep -viE 'admin|tester|/readers'
+
+# 2. สีที่เขียนเป็น rgba() (ds-colors.py จับเฉพาะ #hex)
+grep -rnoE 'rgba?\([0-9 ,.]+\)' src --include='*.tsx' --include='*.ts' \
+  | grep -viE 'admin|tester|/readers' \
+  | grep -viE 'rgba\((46, ?33, ?26|143, ?92, ?26|255, ?255, ?255|90, ?67, ?47)'
+```
+
+เคสจริง: ภาพตัวอย่างผังทุกใบยังมี `0 3px 8px rgba(0,0,0,0.7)` (เงาดำจากธีมมืดเดิม)
+ซ้อนกับ prop `glowColor` สีชมพู/ฟ้า/ม่วง/เขียว 19 จุด ทั้งที่ผ่าน codemod ครบทุกตัวแล้ว
