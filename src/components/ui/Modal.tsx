@@ -115,7 +115,7 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0 }}
             transition={TWEEN.fast}
             onClick={onClose}
-            className="fixed inset-0 bg-[#5A432F]/40 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-[#2E211A]/50 backdrop-blur-[3px]"
           />
 
           {/* Modal Dialog Card */}
@@ -132,21 +132,21 @@ export const Modal: React.FC<ModalProps> = ({
             animate={isMotionSafe ? { opacity: 1, y: 0 } : { opacity: 1 }}
             exit={isMotionSafe ? { opacity: 0, y: 10 } : { opacity: 0 }}
             transition={isMotionSafe ? SPRING.modal : TWEEN.fast}
-            className={`relative z-10 w-full ${maxWidthClass} max-h-[90vh] flex flex-col bg-[#FDF7F0] border border-[#D6B48D] rounded-[1.618rem] shadow-[0_20px_50px_rgba(90,67,47,0.15)] text-[#5A432F] overflow-hidden focus:outline-none ${className}`}
+            className={`relative z-10 w-full ${maxWidthClass} max-h-[90vh] flex flex-col bg-white border border-[#E4D8C4] rounded-2xl shadow-[var(--shadow-overlay)] text-[#2E211A] overflow-hidden focus:outline-none ${className}`}
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-start justify-between p-6 pb-4 border-b border-[#D6B48D]/30">
+              <div className="flex items-start justify-between p-6 pb-4 border-b border-[#E4D8C4]">
                 <div>
                   {title && <h2 className="text-xl sm:text-2xl font-bold font-mystic-gold">{title}</h2>}
-                  {description && <div className="mt-1 text-xs sm:text-sm text-[#8C735D]">{description}</div>}
+                  {description && <div className="mt-1 text-xs sm:text-sm text-[#6F5B4A]">{description}</div>}
                 </div>
                 {showCloseButton && (
                   <button
                     type="button"
                     onClick={onClose}
                     aria-label="ปิดหน้าต่าง"
-                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] text-[#8C735D] hover:text-[#5A432F] hover:border-[#CD9F5B] hover:bg-[#E4C09F]/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] cursor-pointer"
+                    className="w-11 h-11 flex items-center justify-center rounded-md bg-[#F0E8DB] border border-[#E4D8C4] text-[#6F5B4A] hover:text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[rgba(143,92,26,0.08)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] cursor-pointer"
                   >
                     ✕
                   </button>

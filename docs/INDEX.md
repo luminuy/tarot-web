@@ -31,6 +31,7 @@ docs/
 │
 ├── 📐 ข้อกำหนดเชิงฟังก์ชัน (Functional Specifications)
 │   └── specs/
+│       ├── DESIGN_SYSTEM_V2.md          # สเปกระบบดีไซน์ V2 — พื้นหลังและพาเลตต์สี (Warm Minimal Sanctuary)
 │       ├── INTERACTIVE_CARD_PICKING.md   # ระบบแผ่ไพ่ 78 ใบและการแตะเลือกไพ่ 3D
 │       ├── MARKETPLACE.md               # สถาปัตยกรรมระบบ Marketplace แม่หมอตัวจริง
 │       └── ENTITLEMENT_ABUSE_MODEL.md   # แบบจำลองการป้องกันการละเมิดโควตาดูดวง

@@ -2,7 +2,6 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { DECK, cardById } from "@/data/cards";
 import { CardDetailView } from "@/components/encyclopedia/CardDetailView";
-import { MysticBackground } from "@/components/ui/MysticBackground";
 import type { Metadata } from "next";
 import { SITE_ORIGIN } from "@/lib/config/site";
 
@@ -86,12 +85,11 @@ export default async function CardDetailPage({ params }: CardPageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-[#FCF0E6] text-[#5A432F] p-4 sm:p-8 font-sans selection:bg-[#CD9F5B]/30 selection:text-[#5A432F] relative overflow-hidden">
+    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(cardJsonLd) }}
       />
-      <MysticBackground />
       <CardDetailView
         card={card}
         prevCard={prevCard}

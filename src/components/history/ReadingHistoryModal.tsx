@@ -147,7 +147,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label="สมุดบันทึกดวงชะตา"
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#5A432F]/40 backdrop-blur-md"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2E211A]/50 backdrop-blur-[3px]"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 20 }}

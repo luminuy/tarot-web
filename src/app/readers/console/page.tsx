@@ -3,7 +3,6 @@
 import React, { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { MysticBackground } from "@/components/ui/MysticBackground";
 import { Button } from "@/components/ui/Button";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 
@@ -104,11 +103,10 @@ function ReaderConsoleInner() {
 
   if (loading && !data) {
     return (
-      <main className="min-h-screen bg-[#05040a] text-[#f5deaa] flex items-center justify-center p-4">
-        <MysticBackground />
+      <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
-          <div className="h-8 w-8 mx-auto border-2 border-[#ffd700] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-[#9c93b8]">กำลังเชื่อมต่อแผงควบคุมแม่หมอ…</p>
+          <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-[#6F5B4A]">กำลังเชื่อมต่อแผงควบคุมแม่หมอ…</p>
         </div>
       </main>
     );
@@ -116,12 +114,11 @@ function ReaderConsoleInner() {
 
   if (error || !data) {
     return (
-      <main className="min-h-screen bg-[#05040a] text-[#f5deaa] flex items-center justify-center p-4">
-        <MysticBackground />
-        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-red-500/30">
-          <h2 className="text-base font-bold text-[#f0a0a0]">ไม่สามารถเข้าใช้งานได้</h2>
-          <p className="text-xs text-[#c3bdd8]">{error || "โปรดใช้ลิงก์เข้าสู่ระบบเฉพาะบุคคลจากผู้ดูแลระบบ"}</p>
-          <Link href="/" className="inline-block text-xs text-[#e5c07b] underline">
+      <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
+        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-[#A6392C]/40">
+          <h2 className="text-base font-bold text-[#A6392C]">ไม่สามารถเข้าใช้งานได้</h2>
+          <p className="text-xs text-[#6F5B4A]">{error || "โปรดใช้ลิงก์เข้าสู่ระบบเฉพาะบุคคลจากผู้ดูแลระบบ"}</p>
+          <Link href="/" className="inline-block text-xs text-[#8F5C1A] underline">
             กลับหน้าหลัก
           </Link>
         </div>
@@ -132,9 +129,7 @@ function ReaderConsoleInner() {
   const { reader, isLiveOpen, tickets, totalWaiting } = data;
 
   return (
-    <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700] relative overflow-hidden">
-      <MysticBackground />
-
+    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
       <div className="max-w-5xl mx-auto space-y-6 relative z-10">
         {/* Header Console Bar */}
         <div className="altar-panel rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-[#e5c07b]/30 shadow-xl">
@@ -338,11 +333,10 @@ export default function ReaderConsolePage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#05040a] text-[#f5deaa] flex items-center justify-center p-4">
-          <MysticBackground />
+        <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
           <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
-            <div className="h-8 w-8 mx-auto border-2 border-[#ffd700] border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-[#9c93b8]">กำลังโหลดแผงควบคุมแม่หมอ…</p>
+            <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs text-[#6F5B4A]">กำลังโหลดแผงควบคุมแม่หมอ…</p>
           </div>
         </main>
       }

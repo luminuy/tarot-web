@@ -50,16 +50,16 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
   const isGuest = view.isGuest;
 
   return (
-    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#D6B48D]/45 bg-[#FFFFFF]/90 backdrop-blur-md px-4 py-3 shadow-[0_4px_20px_rgba(90,67,47,0.05)]">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D6B48D]/50 bg-[#FAF8F5] text-[#C5A059]">
+    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#E4D8C4] bg-white px-4 py-3 shadow-[var(--shadow-raised)]">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#E4D8C4] bg-[#F0E8DB] text-[#8F5C1A]">
         {isGuest ? <SparkSealIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
       </span>
 
       <div className="min-w-0 flex-1 space-y-0.5">
-        <p className="font-serif-th text-xs font-bold text-[#231812] sm:text-sm">
+        <p className="font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm">
           {isGuest ? "เปิดไพ่ทดลองฟรีได้เลย ไม่ต้องสมัครสมาชิก" : view.statusLine}
         </p>
-        <p className="font-serif-th text-[11px] leading-relaxed text-[#7C6553]">
+        <p className="font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
           {isGuest
             ? `อ่านคำทำนายเต็มทุกองก์ · หลังใช้ครบ สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อวันละ ${DAILY_LIMIT} ครั้ง`
             : countdown
@@ -76,7 +76,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
             trackEntitlementEvent("quota_meter_opened");
             onOpenAccess();
           }}
-          className="min-h-[36px] rounded-xl border border-[#D6B48D]/50 bg-[#FAF8F5] px-3 py-1.5 font-serif-th text-[11px] text-[#231812] font-semibold transition-colors hover:border-[#C5A059] hover:bg-[#FFFFFF] hover:text-[#B8853E] cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059]"
+          className="min-h-[36px] rounded-md border border-[#E4D8C4] bg-white px-3 py-1.5 font-serif-th text-[11px] text-[#2E211A] font-semibold transition-colors hover:border-[#8F5C1A] hover:text-[#8F5C1A] cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           ดูสิทธิ์ทั้งหมด
         </button>

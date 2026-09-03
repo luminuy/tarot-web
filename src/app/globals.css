@@ -1,43 +1,53 @@
 @import "tailwindcss";
 
 /*
-  ธีมวิหารพยากรณ์แสงสว่างอบอุ่นระดับโลก (World-Class Masterpiece Luxury Sanctuary / Golden Ratio 1.618)
-  Core Palette:
-  1. พื้นหลังหลัก (Page Canvas)     : #FAF8F5 (Pristine Warm Luminous Ivory Pearl)
-  2. พื้นหลังการ์ดใหญ่ (Main Card)   : #FFFFFF (Pure Warm Porcelain)
-  3. พื้นหลังการ์ดย่อย (Inner Card)   : #FDFBF7 (Silky Warm Milk Cream)
-  4. ป้ายหัวข้อ & ปุ่มหลัก (CTA/Badge): #B8863B (Radiant Imperial Honey Gold)
-  5. ตัวหนังสือหลัก (Heading & Body) : #231812 (Deep Royal Espresso — คมชัด สง่างาม)
-  6. ตัวหนังสือรอง (Muted Text)      : #7C6553 (Warm Chestnut Brown)
-  7. เส้นขอบ (Borders & Dividers)    : #D6B48D (Luminous Golden Sand)
-  8. ประกายดาว & ไอคอน (Mystic Spark): #C5A059 (Champagne Celestial Gold)
+  ✦ สเปกระบบดีไซน์ V2 — พื้นหลังและพาเลตต์สี (Warm Minimal Sanctuary)
+  8 Core Tokens:
+  1. canvas    : #F6F1E9 (พื้นหน้าเว็บ — ชั้นเดียวทั้งเว็บ)
+  2. surface   : #FFFFFF (พื้นผิวที่ลอยขึ้น — การ์ด, โมดัล, header)
+  3. inset     : #F0E8DB (พื้นผิวที่จมลง — แท่นบูชา, ช่องกรอก, กล่องคำทำนาย)
+  4. line      : #E4D8C4 (เส้นขอบและเส้นคั่น 1px ระดับเดียว ไม่มี opacity modifier)
+  5. ink       : #2E211A (ตัวอักษรหลัก — หัวข้อ, เนื้อหา, ไอคอนหลัก)
+  6. muted     : #6F5B4A (ตัวอักษรรอง — คำอธิบาย, วันที่, placeholder)
+  7. gold      : #8F5C1A (สีเน้นเดียว — ตัวอักษรทอง, ไอคอน, ปุ่มหลัก, focus ring)
+  8. ok / err  : #3A7044 / #A6392C (สถานะ สำเร็จ / ผิดพลาด)
 */
 @theme {
-  /* 8 Core Palette Tokens */
-  --color-canvas: #FAF8F5;
-  --color-main-card: #FFFFFF;
-  --color-inner-card: #FDFBF7;
-  --color-cta-gold: #B8863B;
-  --color-walnut: #231812;
-  --color-chestnut: #7C6553;
-  --color-sand: #D6B48D;
-  --color-celestial: #C5A059;
+  --color-canvas: #F6F1E9;
+  --color-surface: #FFFFFF;
+  --color-inset: #F0E8DB;
+  --color-line: #E4D8C4;
+  --color-ink: #2E211A;
+  --color-muted: #6F5B4A;
+  --color-gold: #8F5C1A;
+  --color-gold-deep: #74490F;
+  --color-gold-wash: rgba(143, 92, 26, 0.08);
+  --color-ok: #3A7044;
+  --color-err: #A6392C;
 
   /* Semantic Theme Mappings for Harmonious Continuity */
-  --color-void: #FAF8F5;
+  --color-main-card: #FFFFFF;
+  --color-inner-card: #F0E8DB;
+  --color-cta-gold: #8F5C1A;
+  --color-walnut: #2E211A;
+  --color-chestnut: #6F5B4A;
+  --color-sand: #E4D8C4;
+  --color-celestial: #8F5C1A;
+
+  --color-void: #F6F1E9;
   --color-obsidian-950: #FFFFFF;
-  --color-obsidian-900: #FDFBF7;
-  --color-obsidian-800: #F5EFEB;
-  --color-obsidian-700: #EEDCCE;
-  --color-gold-200: #7C6553;
-  --color-gold-300: #231812;
-  --color-gold-400: #C5A059;
-  --color-gold-500: #B8863B;
-  --color-gold-600: #8C5E28;
-  --color-amethyst: #9F7E69;
-  --color-ember: #D97736;
-  --color-vellum: #231812;
-  --color-ash: #7C6553;
+  --color-obsidian-900: #F0E8DB;
+  --color-obsidian-800: #F0E8DB;
+  --color-obsidian-700: #E4D8C4;
+  --color-gold-200: #6F5B4A;
+  --color-gold-300: #2E211A;
+  --color-gold-400: #8F5C1A;
+  --color-gold-500: #8F5C1A;
+  --color-gold-600: #74490F;
+  --color-amethyst: #6F5B4A;
+  --color-ember: #A6392C;
+  --color-vellum: #2E211A;
+  --color-ash: #6F5B4A;
 
   --font-serif-th: var(--font-noto-serif-thai), "Noto Serif Thai", serif;
   --font-sans-th: var(--font-sarabun), "Sarabun", system-ui, sans-serif;
@@ -65,6 +75,9 @@
 }
 
 :root {
+  --shadow-raised: 0 1px 2px rgba(46, 33, 26, 0.04), 0 4px 12px -2px rgba(46, 33, 26, 0.06);
+  --shadow-overlay: 0 12px 40px -8px rgba(46, 33, 26, 0.18);
+
   --dur-instant: 80ms;
   --dur-fast: 140ms;
   --dur-base: 240ms;
@@ -80,53 +93,81 @@
 
 html,
 body {
-  background-color: var(--color-canvas);
-  color: var(--color-walnut);
+  background-color: #F6F1E9;                    /* canvas */
+  color: #2E211A;                               /* ink */
   font-family: var(--font-sans-th);
   line-height: 1.618;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* ตัวอักษรทองคำหลวง (Royal Deep Espresso to Radiant Burnished Gold) — คมกริบ สง่างาม ระดับ Masterpiece */
-.font-mystic-gold {
-  background: linear-gradient(135deg, #231812 0%, #4A3324 35%, #8C5E28 65%, #C5A059 85%, #231812 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
-  line-height: 1.35;
-  padding-top: 0.1em;
-  padding-bottom: 0.1em;
-  vertical-align: middle;
-  letter-spacing: -0.015em;
+/* ชั้นที่ 1 — แสงเทียนเหนือแท่นบูชา (นิ่ง ไม่ขยับ) */
+body {
+  background-image: radial-gradient(
+    120% 75% at 50% -8%,
+    #FFFDF9 0%,
+    rgba(255, 253, 249, 0) 62%
+  );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
-/* กรอบแท่นบูชา Soft Milk Cream & Golden Sand (Minimalist Warm Sanctuary) */
+/* ชั้นที่ 2 — เนื้อผ้าลินิน (SVG นิ่ง ไม่มี JS ไม่มีเฟรม) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* เนื้อหาทุกอย่างต้องอยู่เหนือชั้นลินิน */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* โซนแท่นบูชา (ผ้าปูไพ่) — ใช้เฉพาะที่ไพ่วางจริง */
+.altar-cloth {
+  background: #F0E8DB;              /* inset — จมลง 1 ชั้น */
+  border: 1px solid #E4D8C4;        /* line */
+  border-radius: 8px;
+}
+
+/* ตัวอักษรสีทองศักดิ์สิทธิ์ตามระบบ V2 — คมชัด ผ่าน WCAG AA */
+.font-mystic-gold {
+  color: #8F5C1A;
+  font-weight: 700;
+  display: inline-block;
+}
+
+/* กรอบแท่นบูชาตามระบบ V2 */
 .altar-panel {
   background: #FFFFFF;
-  border: 1px solid rgba(214, 180, 141, 0.45);
-  box-shadow: 0 10px 30px -4px rgba(90, 67, 47, 0.06), 0 4px 12px -2px rgba(90, 67, 47, 0.03);
+  border: 1px solid #E4D8C4;
+  box-shadow: var(--shadow-raised);
 }
 
 .altar-panel-active {
   background: #FFFFFF;
-  border: 1.618px solid #C5A059;
-  box-shadow: 0 14px 34px -4px rgba(197, 160, 89, 0.25), 0 0 0 1px #C5A059;
+  border: 1.618px solid #8F5C1A;
+  box-shadow: var(--shadow-raised);
 }
 
-/* การ์ดพอร์ซเลนระดับลักชูรี (Luxury Warm Porcelain Card Surface) */
+/* การ์ดพอร์ซเลนระดับลักชูรี */
 .altar-card-porcelain {
   background: #FFFFFF;
-  border: 1px solid rgba(214, 180, 141, 0.5);
-  box-shadow: 0 4px 20px -2px rgba(90, 67, 47, 0.06), 0 1px 3px rgba(90, 67, 47, 0.03);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  border: 1px solid #E4D8C4;
+  box-shadow: var(--shadow-raised);
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .altar-card-porcelain:hover {
-  border-color: #C5A059;
-  box-shadow: 0 16px 36px -6px rgba(184, 134, 59, 0.18), 0 4px 12px rgba(90, 67, 47, 0.05);
-  transform: translateY(-4px);
+  border-color: #8F5C1A;
+  box-shadow: var(--shadow-overlay);
+  transform: translateY(-2px);
 }
 
 /* ลวดลายหลังไพ่ศักดิ์สิทธิ์ (Warm Chocolate & Celestial Gold Inset) */
@@ -372,29 +413,10 @@ a,
   touch-action: manipulation;
 }
 
-.btn-gold {
-  background: linear-gradient(135deg, #B8853E 0%, #D4AF37 50%, #B8853E 100%);
-  color: #FFFFFF;
-  font-weight: 700;
-  border: 1px solid rgba(255, 240, 212, 0.45);
-  box-shadow: 0 4px 18px rgba(184, 133, 62, 0.3);
-  transition: all var(--dur-fast) var(--ease-out);
-}
-
-.btn-gold:hover:not(:disabled) {
-  background: linear-gradient(135deg, #A6732B 0%, #E5C07B 50%, #B8853E 100%);
-  box-shadow: 0 6px 24px rgba(184, 133, 62, 0.45);
-  transform: translateY(-1.5px);
-}
-
-.btn-gold:active:not(:disabled) {
-  transform: scale(0.97);
-}
-
-/* Focus Visible Global Ring — Warm Imperial Gold Halo */
+/* Focus Visible Global Ring (Design System V2) */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #FAF8F5, 0 0 0 3.5px #C5A059 !important;
+  box-shadow: 0 0 0 2px #F6F1E9, 0 0 0 4px #8F5C1A !important;
 }
 
 .no-focus-ring:focus-visible,
