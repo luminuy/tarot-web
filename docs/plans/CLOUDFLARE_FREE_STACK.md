@@ -10,9 +10,9 @@
 
 | Wave | บริการ | ค่าฟรี | สถานะ |
 | :--- | :--- | :--- | :--- |
-| 1-1 | **AI Gateway** | ไม่จำกัด | 🟡 โค้ดเสร็จ · รอ dashboard |
+| 1-1 | **AI Gateway** | ไม่จำกัด | ✅ merge #189 · รอ dashboard เปิดใช้ |
 | 1-2 | **Email Routing** | ไม่จำกัด | ⏳ รอโดเมน (ยังไม่ซื้อ) |
-| 1-3 | **Turnstile** | 1M verify/เดือน | ⏳ รอ site key + secret |
+| 1-3 | **Turnstile** | 1M verify/เดือน | 🟡 โค้ดเสร็จ · รอ site key + secret |
 | 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ⏳ |
 | 2-5 | **KV ไพ่ประจำวัน + Cron Triggers** | KV 100k read/วัน · cron ไม่จำกัด | ⏳ spike |
 | 3-6 | **R2** — Destiny Card share image | 10 GB + egress ฟรี | ⏳ |
@@ -58,18 +58,22 @@
 
 ---
 
-## Wave 1-3 — Turnstile
+## Wave 1-3 — Turnstile 🟡 (โค้ดเสร็จ)
 
 **ทำอะไร:** กันบอทฟาร์มสิทธิ์เปิดไพ่ฟรี / spam สมัคร (ผูกกับ `docs/specs/ENTITLEMENT_ABUSE_MODEL.md`)
 
-**พร้อมแล้ว:** CSP ใน `next.config.ts` อนุญาต `challenges.cloudflare.com` (script/connect/frame) อยู่แล้ว
+**โค้ดที่เพิ่ม:**
+- `src/lib/security/turnstile.ts` — `verifyTurnstile(token, ip)`: ไม่มี secret = ผ่านตลอด · siteverify ล่ม = ผ่าน (fail-safe, ชั้น rate-limit เดิมยังทำงาน)
+- `src/components/auth/TurnstileWidget.tsx` — client widget · ไม่มี `NEXT_PUBLIC_TURNSTILE_SITE_KEY` = ไม่เรนเดอร์ ไม่บล็อกฟอร์ม
+- `AuthModal.tsx` — ฝัง widget + ส่ง `turnstileToken` ไปกับ signup/login/forgot + ปุ่มส่งถูก disable จนกว่าจะผ่าน
+- verify ฝั่ง server ใน `api/auth/email/{signup,login,forgot}` หลังเช็ค origin ก่อนงานหนัก
+- CSP อนุญาต `challenges.cloudflare.com` (script/connect/frame) อยู่แล้ว
 
-**ต้องทำ:**
-- Dashboard → Turnstile → สร้าง widget → ได้ Site Key (public) + Secret Key
-- `TURNSTILE_SITE_KEY` เป็น var, `npx wrangler secret put TURNSTILE_SECRET_KEY`
-- `<Turnstile>` component ใน `AuthModal` (สมัคร + ล็อกอิน) — โหมด managed/invisible
-- ฝั่ง server: verify token กับ `https://challenges.cloudflare.com/turnstile/v0/siteverify` ใน `api/auth/email` + `api/auth/[provider]` **ก่อน** สร้าง user/session
-- ใส่ feature-flag `turnstile.enabled` ปิดได้ทันทีถ้าพัง (บทเรียน: rate-limit/gate ห้ามล็อกเจ้าของบัญชี)
+**ต้องทำต่อ (เจ้าของโปรเจกต์):**
+- Dashboard → Turnstile → Add widget (Domain: `seertarot.net`, `localhost`) → Site Key + Secret
+- var `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `npx wrangler secret put TURNSTILE_SECRET_KEY`
+
+**ยังไม่ครอบ:** OAuth (`api/auth/[provider]` — redirect flow, บอตฟาร์ม Google/LINE ยาก), `api/auth/email/resend` (มี rate-limit อยู่แล้ว) — เพิ่มได้ทีหลังถ้าเจอ abuse
 
 ---
 

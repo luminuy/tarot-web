@@ -45,6 +45,22 @@
 - ปลายทางยังเป็นหน้า `/reading/chat` เต็มจอเหมือนเดิม
 
 **สถานะ**: `npm run typecheck` ✅ · `next build --webpack` ✅ (route `/reading/chat` prerender ผ่าน)
+### 🗓️ 2026-09-03: เพิ่ม Cloudflare Turnstile กันบอทหน้า signup/login/forgot (Wave 1-3)
+
+#### 1. ด่านกันบอทหน้าเข้าสู่ระบบ
+- **สิ่งที่ต้องการ**: กันบอทฟาร์มบัญชีอีเมลเพื่อกินสิทธิ์เปิดไพ่ฟรี + ยิงอีเมล spam (ผูกกับ `docs/specs/ENTITLEMENT_ABUSE_MODEL.md`)
+- **สิ่งที่ทำ**:
+  - `src/lib/security/turnstile.ts` (ใหม่) — `verifyTurnstile(token, ip)`: ไม่มี `TURNSTILE_SECRET_KEY` = ผ่านตลอด · siteverify ล่ม/timeout = ผ่าน (fail-safe — ชั้น rate-limit เดิมยังทำงาน ไม่ล็อกผู้ใช้จริง)
+  - `src/components/auth/TurnstileWidget.tsx` (ใหม่) — client widget โหลดสคริปต์จาก challenges.cloudflare.com (CSP อนุญาตแล้ว) · ไม่มี `NEXT_PUBLIC_TURNSTILE_SITE_KEY` = ไม่เรนเดอร์ ไม่บล็อกฟอร์ม
+  - `AuthModal.tsx` — ฝัง widget + ส่ง `turnstileToken` กับทั้ง 3 โหมด + ปุ่มส่ง disable จนกว่าจะผ่าน
+  - verify ฝั่ง server ใน `api/auth/email/signup`, `login`, `forgot` (หลังเช็ค origin ก่อนงานหนัก) → 403 ถ้าไม่ผ่าน
+  - `.env.example` + `docs/PENDING_SETUP.md`: เพิ่ม `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`
+- **ไฟล์ที่แก้ไข**: `src/lib/security/turnstile.ts` (ใหม่), `src/components/auth/TurnstileWidget.tsx` (ใหม่), `src/components/auth/AuthModal.tsx`, `src/app/api/auth/email/{signup,login,forgot}/route.ts`, `.env.example`, `docs/PENDING_SETUP.md`, `docs/plans/CLOUDFLARE_FREE_STACK.md`
+- **ผลการทดสอบ**: `npx tsc --noEmit` ➔ ✅; dev server (ไม่มี key = ด่านปิด) AuthModal เรนเดอร์ปกติ ไม่มี widget, สมัคร/ล็อกอินได้เหมือนเดิม
+- **ค้างต่อ (เจ้าของโปรเจกต์)**: Dashboard → Turnstile → Add widget (domain `seertarot.net` + `localhost`) → ตั้ง `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (var) + `wrangler secret put TURNSTILE_SECRET_KEY`
+- **ยังไม่ครอบ**: OAuth `[provider]`, `email/resend` (มี rate-limit อยู่แล้ว)
+
+---
 
 ### 🗓️ 2026-09-03: หน้าผลไพ่ — เลย์เอาต์แถวเดียว + แยกห้องแชทเป็นหน้าเต็มจอ `/reading/chat`
 
