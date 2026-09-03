@@ -160,7 +160,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               </div>
               <div>
                 <h3 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold">
-                  สมุดบันทึกดวงชะตา & ติดตามผลจริง
+                  ประวัติการดูดวง &amp; บันทึกผลลัพธ์จริง
                 </h3>
                 <p className="text-[10px] text-[#6F5B4A] font-serif-th">
                   บันทึกคำทำนายและบันทึกผลลัพธ์ในชีวิต ({readings.length} รายการ)
@@ -181,7 +181,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="ปิดสมุดบันทึกดวงชะตา"
+                aria-label="ปิดประวัติการดูดวง"
                 className="w-11 h-11 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
               >
                 ✕
@@ -196,10 +196,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <span className="text-sm text-[#8F5C1A]">✨</span>
                 <div>
                   <h4 className="text-xs sm:text-sm font-serif-th font-bold text-[#2E211A]">
-                    กระจกสะท้อนดวงรอบเดือน (AI Monthly Destiny Retrospective)
+                    สรุปภาพรวมดวงประจำเดือนด้วย AI
                   </h4>
                   <p className="text-[10px] text-[#6F5B4A]">
-                    ให้ AI วิเคราะห์ Pattern ไพ่ที่ออกบ่อยและสรุปบทเรียนชีวิตจากบันทึกของคุณ
+                    ให้ AI วิเคราะห์ไพ่ที่เปิดได้บ่อย พร้อมสรุปข้อคิดและบทเรียนสำคัญประจำเดือนของคุณ
                   </p>
                 </div>
               </div>
