@@ -21,9 +21,9 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/cards/major-01.webp",
-        width: 300,
-        height: 520,
+        url: "/cards/major-01.jpg",
+        width: 825,
+        height: 1429,
         alt: "สารานุกรมความหมายไพ่ทาโรต์ 78 ใบ 1909 Rider-Waite",
       },
     ],

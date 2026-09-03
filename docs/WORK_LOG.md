@@ -45,6 +45,17 @@
 1. `src/components/ui/SacredNavDropdown.tsx`: เปลี่ยน Trigger Button เป็นปุ่มวงกลมมินิมอล (`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-[#D5CEC2] bg-[#FFFFFF]`) ภายในแสดงไอคอนแฮมเบอร์เกอร์ 3 เส้นตรงตามรูปที่ 2
 2. `src/components/auth/UserProfileBadge.tsx`: เปลี่ยน Trigger Button เป็นปุ่มวงกลมมินิมอล (`w-9 h-9 sm:w-10 sm:h-10 rounded-full`) ภายในแสดงไอคอนบุคคล outline ตรงตามรูปที่ 3 พร้อมจุดแจ้งเตือนสถานะออนไลน์และตัวนับแจ้งเตือน
 3. `src/app/page.tsx`: นำคอมโพเนนต์ `<QuotaMeter />` ออกจากแถบหัวเว็บ พร้อมลบ import ที่ไม่ได้ใช้งานออก
+### 🗓️ 2026-09-03: ทำภาพไพ่ให้คมชัดทุกจุด (Image Sharpness Pass)
+
+#### 1. เพิ่มชั้นความละเอียด w768 + แก้จุดภาพเบลอ
+- **ปัญหาเดิม**: srcSet ภาพไพ่มีเพดานแค่ w512 — บนจอ 2x–3x ภาพใบใหญ่ (หน้ารายละเอียดไพ่ `w-64/w-72`, กริดสารานุกรม 2 คอลัมน์ ~45vw) ต้องอัปสเกลจนเบลอ; และ OG/Twitter/JSON-LD ชี้ไป `/cards/major-01.webp` ที่ **ไม่มีอยู่จริง** (มีแต่ `.jpg` และ `w512/…webp`) → รูปพรีวิวแชร์เป็นภาพเสีย
+- **สิ่งที่แก้ไข**:
+  - `scripts/generate-card-variants.ts` + `src/lib/tarot/card-image.ts`: เพิ่มชั้น `w768` (q92, ย่อจริงจากต้นฉบับ ~825px ไม่อัปสเกล) เข้า `CARD_IMAGE_VARIANTS` → srcSet มี 128/256/512/768w อัตโนมัติทุกจุดที่ใช้ `<CardImage />`
+  - `npm run cards:variants`: สร้าง `public/cards/w768/*.webp` ครบ 78 ใบ
+  - `src/components/encyclopedia/CardDetailView.tsx`: ภาพไพ่หลักหน้ารายละเอียด ใส่ `full` (ใช้ไฟล์ต้นฉบับ 825px — คมสุดเท่าที่มี)
+  - `src/app/layout.tsx`, `src/app/cards/page.tsx`, `src/app/spreads/page.tsx`: แก้ OG/Twitter/JSON-LD `logo` ให้ชี้ `/cards/major-01.jpg` (มีจริง) + แก้ `width/height` เป็น 825×1429 ให้ตรงไฟล์จริง
+- **ไฟล์ที่แก้ไข**: `scripts/generate-card-variants.ts`, `src/lib/tarot/card-image.ts`, `src/components/encyclopedia/CardDetailView.tsx`, `src/app/layout.tsx`, `src/app/cards/page.tsx`, `src/app/spreads/page.tsx` + `public/cards/w768/` (78 ไฟล์ใหม่)
+- **ผลการทดสอบ**: `npx tsc --noEmit` ➔ ✅; `test-image-paths.ts` (กฎ C: ครบทุก variant บนดิสก์) ➔ ผ่าน; ตรวจ dev server หน้ารายละเอียดไพ่ + กริดสารานุกรมบนมือถือ: ภาพคมขึ้นชัดเจน
 
 ---
 
