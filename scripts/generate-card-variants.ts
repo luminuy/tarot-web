@@ -23,6 +23,9 @@ const REMASTER_CACHE_DIR = path.join(process.cwd(), "scratch", "remaster_temp");
 
 /** ขนาดที่ต้องสร้าง — ต้องตรงกับ CARD_IMAGE_VARIANTS ใน src/lib/tarot/card-image.ts */
 const VARIANTS = [
+  // w64 — ภาพพรีวิวผังขนาดจิ๋ว (18-32px) เช่น เซลติกครอส, ผัง 12 เดือน, ผังจักระ, ไอคอน Footer
+  // ขนาดไฟล์เพียง ~2.5–3KB ช่วยลด LCP และ Payload หน้าแรกบนมือถือลง 95%
+  { dir: "w64", width: 64, quality: 84 },
   { dir: "w128", width: 128, quality: 86 },
   { dir: "w256", width: 256, quality: 88 },
   { dir: "w512", width: 512, quality: 92 },

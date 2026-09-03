@@ -17,6 +17,7 @@
 
 /** ขนาดภาพย่อ WebP ที่มีอยู่จริงใน `public/cards/<dir>/` (ย่อจากต้นฉบับจริง ~829px) */
 export const CARD_IMAGE_VARIANTS = [
+  { dir: "w64", width: 64 },
   { dir: "w128", width: 128 },
   { dir: "w256", width: 256 },
   { dir: "w512", width: 512 },
@@ -64,7 +65,7 @@ export function getCardWebpSrcSet(
  */
 export function getCardWebpVariantSrc(
   image?: string | null,
-  variant: "w128" | "w256" | "w512" | "w768" = "w128",
+  variant: "w64" | "w128" | "w256" | "w512" | "w768" = "w128",
   fallbackId?: string | null,
 ): string | null {
   const src = getCardImageSrc(image, fallbackId);

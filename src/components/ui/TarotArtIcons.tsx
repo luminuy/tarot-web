@@ -14,6 +14,8 @@ interface MiniCardProps {
   borderColor?: string;
   highlight?: boolean;
   rotate?: number;
+  sizes?: string;
+  loading?: "lazy" | "eager";
 }
 
 export const MiniRwsCard: React.FC<MiniCardProps> = ({
@@ -22,27 +24,44 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
   borderColor = "#D9C8AC",
   highlight = false,
   rotate = 0,
-}) => (
-  <div
-    className={`relative rounded-lg overflow-hidden border transition-all duration-300 flex-shrink-0 select-none ${className} ${
-      highlight
-        ? "ring-1.5 ring-[#8F5C1A] ring-offset-1 ring-offset-[#FFFFFF] z-10 scale-[1.04]"
-        : "hover:border-[#8F5C1A]"
-    }`}
-    style={{
-      borderColor: highlight ? "#8F5C1A" : borderColor,
-      transform: rotate ? `rotate(${rotate}deg)` : undefined,
-    }}
-  >
-    {/* 100% Pure 1909 Rider-Waite Card Art */}
-    <CardImage
-      image={src}
-      alt="Tarot Card"
-      className="w-full h-full object-cover object-center tarot-hd-card-image"
-      sizes="96px"
-    />
-  </div>
-);
+  sizes,
+  loading = "lazy",
+}) => {
+  const resolvedSizes =
+    sizes ||
+    (className.includes("w-16") || className.includes("w-17")
+      ? "68px"
+      : className.includes("w-13") || className.includes("w-14")
+        ? "56px"
+        : className.includes("w-10") || className.includes("w-11") || className.includes("w-12")
+          ? "48px"
+          : className.includes("w-8") || className.includes("w-9") || className.includes("w-7")
+            ? "36px"
+            : "48px");
+
+  return (
+    <div
+      className={`relative rounded-lg overflow-hidden border transition-all duration-300 flex-shrink-0 select-none ${className} ${
+        highlight
+          ? "ring-1.5 ring-[#8F5C1A] ring-offset-1 ring-offset-[#FFFFFF] z-10 scale-[1.04]"
+          : "hover:border-[#8F5C1A]"
+      }`}
+      style={{
+        borderColor: highlight ? "#8F5C1A" : borderColor,
+        transform: rotate ? `rotate(${rotate}deg)` : undefined,
+      }}
+    >
+      {/* 100% Pure 1909 Rider-Waite Card Art */}
+      <CardImage
+        image={src}
+        alt="Tarot Card"
+        className="w-full h-full object-cover object-center tarot-hd-card-image"
+        sizes={resolvedSizes}
+        loading={loading}
+      />
+    </div>
+  );
+};
 
 // ============================================================================
 // 2. ORACLE GUIDES (3 PERSONAS - 1909 RIDER-WAITE)
@@ -54,7 +73,7 @@ export const HighPriestessIllustration: React.FC<{ className?: string }> = ({ cl
       image="major-02.jpg"
       alt="The High Priestess"
       className="w-full h-full object-cover object-center tarot-hd-card-image"
-      sizes="112px"
+      sizes="80px"
     />
   </div>
 );
@@ -65,7 +84,7 @@ export const JusticeIllustration: React.FC<{ className?: string }> = ({ classNam
       image="major-11.jpg"
       alt="Justice"
       className="w-full h-full object-cover object-center tarot-hd-card-image"
-      sizes="112px"
+      sizes="80px"
     />
   </div>
 );
@@ -76,7 +95,7 @@ export const HermitIllustration: React.FC<{ className?: string }> = ({ className
       image="major-09.jpg"
       alt="The Hermit"
       className="w-full h-full object-cover object-center tarot-hd-card-image"
-      sizes="112px"
+      sizes="80px"
     />
   </div>
 );
@@ -87,7 +106,7 @@ export const TheStarIllustration: React.FC<{ className?: string }> = ({ classNam
       image="major-17.jpg"
       alt="The Star"
       className="w-full h-full object-cover object-center tarot-hd-card-image"
-      sizes="112px"
+      sizes="80px"
     />
   </div>
 );
@@ -98,7 +117,7 @@ export const MagicianIllustration: React.FC<{ className?: string }> = ({ classNa
       image="major-01.jpg"
       alt="The Magician"
       className="w-full h-full object-cover object-center tarot-hd-card-image"
-      sizes="112px"
+      sizes="80px"
     />
   </div>
 );
@@ -115,6 +134,7 @@ export const DailySpreadArt: React.FC<{ className?: string }> = ({ className = "
       borderColor="#D9C8AC"
       className="w-16 h-[108px] sm:w-17 sm:h-[115px]"
       highlight
+      loading="eager"
     />
   </div>
 );
@@ -306,7 +326,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
               image={arm.image}
               alt=""
               className="w-full h-full object-cover tarot-hd-card-image"
-              sizes="96px"
+              sizes="28px"
             />
           </div>
         ))}
@@ -320,7 +340,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
             image="major-00.jpg"
             alt=""
             className="w-full h-full object-cover tarot-hd-card-image"
-            sizes="96px"
+            sizes="28px"
           />
         </div>
 
@@ -339,7 +359,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
             image="major-10.jpg"
             alt=""
             className="w-full h-full object-cover tarot-hd-card-image"
-            sizes="96px"
+            sizes="28px"
           />
         </div>
 
@@ -357,7 +377,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
               height: CC.staffH,
             }}
           >
-            <CardImage image={image} alt="" className="w-full h-full object-cover tarot-hd-card-image" sizes="96px" />
+            <CardImage image={image} alt="" className="w-full h-full object-cover tarot-hd-card-image" sizes="22px" />
           </div>
         ))}
       </div>
@@ -391,7 +411,7 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
             image={`major-${cardNum}.jpg`}
             alt=""
             className="w-full h-full object-cover tarot-hd-card-image"
-            sizes="96px"
+            sizes="22px"
           />
         </div>
       );
@@ -538,7 +558,7 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
             image={`major-${item.card}.jpg`}
             alt=""
             className="w-full h-full object-cover tarot-hd-card-image"
-            sizes="96px"
+            sizes="36px"
           />
         </div>
       ))}
@@ -556,7 +576,7 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
             image={`major-${item.card}.jpg`}
             alt=""
             className="w-full h-full object-cover tarot-hd-card-image"
-            sizes="96px"
+            sizes="36px"
           />
         </div>
       ))}
@@ -606,7 +626,7 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
               image={`major-${chk.card}.jpg`}
               alt=""
               className="w-full h-full object-cover tarot-hd-card-image"
-              sizes="96px"
+              sizes="36px"
             />
           </div>
         ))}
@@ -623,7 +643,7 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
               image={`major-${chk.card}.jpg`}
               alt=""
               className="w-full h-full object-cover tarot-hd-card-image"
-              sizes="96px"
+              sizes="36px"
             />
           </div>
         ))}
