@@ -63,12 +63,13 @@ export const GalaxyCanvas: React.FC = () => {
         height * 0.05,
         20,
         width / 2,
-        height * 0.15,
-        Math.max(width, height) * 0.65
+        height * 0.18,
+        Math.max(width, height) * 0.75
       );
-      auraGrad.addColorStop(0, "rgba(228, 192, 159, 0.22)");
-      auraGrad.addColorStop(0.4, "rgba(205, 159, 91, 0.08)");
-      auraGrad.addColorStop(1, "rgba(250, 246, 240, 0)");
+      auraGrad.addColorStop(0, "rgba(243, 230, 212, 0.5)");
+      auraGrad.addColorStop(0.35, "rgba(228, 192, 159, 0.18)");
+      auraGrad.addColorStop(0.7, "rgba(205, 159, 91, 0.06)");
+      auraGrad.addColorStop(1, "rgba(250, 248, 245, 0)");
       ctx.fillStyle = auraGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -83,7 +84,7 @@ export const GalaxyCanvas: React.FC = () => {
       ctx.rotate(angle);
 
       // Outer delicate ring
-      ctx.strokeStyle = "rgba(214, 180, 141, 0.14)";
+      ctx.strokeStyle = "rgba(197, 160, 89, 0.22)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -93,7 +94,7 @@ export const GalaxyCanvas: React.FC = () => {
       ctx.beginPath();
       ctx.setLineDash([6, 12]);
       ctx.arc(0, 0, radius * 0.78, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(205, 159, 91, 0.12)";
+      ctx.strokeStyle = "rgba(214, 180, 141, 0.18)";
       ctx.stroke();
       ctx.setLineDash([]);
 
@@ -108,7 +109,7 @@ export const GalaxyCanvas: React.FC = () => {
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
       }
-      ctx.strokeStyle = "rgba(214, 180, 141, 0.10)";
+      ctx.strokeStyle = "rgba(214, 180, 141, 0.14)";
       ctx.stroke();
       ctx.restore();
 

@@ -815,24 +815,24 @@ export default function TarotPage() {
   };
 
   return (
-    <main className="min-h-screen pb-24 text-[#5A432F] relative overflow-hidden bg-[#FCF0E6]">
+    <main className="min-h-screen pb-24 text-[#231812] relative overflow-hidden bg-[#FAF8F5]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
       {/* Mystic Altar Floating Particles & Sacred Circles */}
       <MysticBackground />
 
-      {/* Top Sacred Header */}
-      <header className="w-full border-b border-[#D6B48D]/40 bg-[#FCF0E6]/95 backdrop-blur-md sticky top-0 z-50 shadow-[0_4px_20px_rgba(90,67,47,0.06)]">
+      {/* Top Sacred Header — Crystal-Clear Luminous Glassmorphism */}
+      <header className="w-full border-b border-[#D6B48D]/30 bg-[#FFFFFF]/85 backdrop-blur-xl sticky top-0 z-50 shadow-[0_4px_24px_rgba(90,67,47,0.04)]">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Luxury Brand Logo — P1-U2: กลับหน้าแรก ไม่ล้าง state (ปุ่ม "เริ่มดูดวงใหม่" ทำหน้าที่นั้น) */}
           <Link
             href="/"
             aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
-            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-2xl p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#CD9F5B]/60"
+            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-2xl p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C5A059]/60"
           >
             {/* World-Class Miniature 1909 Tarot Card Brand Logo */}
-            <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-lg border-2 border-[#D6B48D] overflow-hidden shadow-[0_2px_12px_rgba(205,159,91,0.3)] relative flex-shrink-0 bg-[#FDF7F0] group-hover:scale-105 transition-all duration-300">
+            <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-xl border-2 border-[#D6B48D] overflow-hidden shadow-[0_4px_16px_rgba(197,160,89,0.25)] relative flex-shrink-0 bg-[#FFFFFF] group-hover:scale-105 transition-all duration-300">
               <CardImage
                 image="major-01.jpg"
                 alt="The Magician Tarot Seal"
@@ -846,12 +846,12 @@ export default function TarotPage() {
                 (ชื่อแบรนด์ที่ตัดคำหรือล้นทับปุ่มแย่กว่าการซ่อนชื่อไว้ก่อน) */}
             <div className="hidden min-w-0 flex-col justify-center sm:flex">
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className="text-[#CD9F5B] text-xs">✦</span>
+                <span className="text-[#C5A059] text-xs">✦</span>
                 <h1 className="font-serif-th text-sm sm:text-lg font-bold font-mystic-gold tracking-wide leading-snug py-0.5 whitespace-nowrap">
                   ดูดวงไพ่ทาโรต์
                 </h1>
               </div>
-              <span className="hidden sm:block text-[10px] tracking-[0.22em] text-[#8C735D] font-mono uppercase font-semibold pl-4">
+              <span className="hidden sm:block text-[10px] tracking-[0.22em] text-[#7C6553] font-mono uppercase font-semibold pl-4">
                 1909 RIDER-WAITE TAROT
               </span>
             </div>
@@ -880,7 +880,7 @@ export default function TarotPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-[#FDF7F0] font-bold bg-[#CD9F5B] hover:bg-[#B8853E] px-3.5 py-1.5 sm:py-2 rounded-2xl shadow-[0_2px_12px_rgba(205,159,91,0.3)] transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1 font-serif-th"
+                className="text-xs text-[#FFFFFF] font-bold btn-gold px-4 py-1.5 sm:py-2 rounded-2xl shadow-md transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1 font-serif-th"
               >
                 <span>✦</span> เริ่มดูดวงใหม่
               </button>
@@ -915,7 +915,7 @@ export default function TarotPage() {
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-3.5 py-1.5 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-serif-th font-bold text-xs shadow transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
+                className="px-3.5 py-1.5 rounded-xl btn-gold text-[#FFFFFF] font-serif-th font-bold text-xs shadow transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
               >
                 <span>✦</span> โหลดใหม่อีกครั้ง
               </button>
@@ -937,44 +937,52 @@ export default function TarotPage() {
             >
               <EntitlementGate active={currentStep === "SPREAD_SELECT"} onRequestUpgrade={openAccessDialog}>
                 <FreeTrialNotice onOpenAccess={() => openAccessDialog("explore")} />
-              <div className="text-center space-y-3 relative">
-                {/* 3D Floating Tarot Stage with Sacred Geometric Aura (Matching Step 3 Shuffle) */}
-                <div className="h-60 sm:h-72 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1200 }}>
-                  {/* Background Sacred Geometric Aura */}
-                  <div className="absolute inset-0 flex items-center justify-center -z-10 opacity-30 pointer-events-none">
-                    <div className="w-64 h-64 sm:w-[400px] sm:h-[400px] rounded-full border border-dashed border-[#D6B48D] animate-[spin_80s_linear_infinite]" />
-                    <div className="absolute w-48 h-48 sm:w-[280px] sm:h-[280px] rounded-full border border-[#CD9F5B]/40 animate-[spin_50s_linear_infinite_reverse]" />
+              <div className="text-center space-y-4 relative">
+                {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
+                <div className="h-64 sm:h-80 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1200 }}>
+                  {/* Radiant Golden Solar Halo (Breathes softly) */}
+                  <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none">
+                    <div className="w-72 h-72 sm:w-[460px] sm:h-[460px] rounded-full bg-radial from-[#C5A059]/20 via-[#D6B48D]/08 to-transparent blur-2xl animate-[pulse_6s_ease-in-out_infinite]" />
+                    <div className="absolute w-64 h-64 sm:w-[400px] sm:h-[400px] rounded-full border border-dashed border-[#D6B48D]/40 animate-[spin_80s_linear_infinite]" />
+                    <div className="absolute w-48 h-48 sm:w-[290px] sm:h-[290px] rounded-full border border-[#C5A059]/30 animate-[spin_50s_linear_infinite_reverse]" />
                   </div>
 
-                  {/* Idle Floating Deck with CSS Animation */}
-                  <div
-                    onClick={() => soundManager.playCardSelectSound()}
-                    className="w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#D6B48D] card-back-pattern shadow-[0_8px_30px_rgba(90,67,47,0.18)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative anim-tarot-idle gpu-layer transition-transform duration-150 active:scale-95 hover:scale-105"
-                  >
-                    <div className="w-full flex justify-center items-center opacity-85">
-                      <span className="text-[9px] font-serif-th text-[#FDF7F0] tracking-[0.2em] uppercase font-bold">
-                        SACRED ORACLE
+                  {/* 3D Realistic 78-Card Stacked Deck Container */}
+                  <div className="relative group cursor-pointer" onClick={() => soundManager.playCardSelectSound()}>
+                    {/* Layer 3: Deep Stack Base (Gold Gilded Edge) */}
+                    <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-2xl bg-[#5A3E26] border border-[#B8853E]/60 translate-x-[6px] translate-y-[6px] shadow-[0_12px_36px_rgba(90,67,47,0.22)]" />
+                    {/* Layer 2: Middle Stack Deck */}
+                    <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-2xl bg-[#4A3320] border border-[#D6B48D]/70 translate-x-[3px] translate-y-[3px]" />
+
+                    {/* Layer 1: Top Floating Hero Card */}
+                    <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#D6B48D] card-back-pattern shadow-[0_16px_40px_rgba(90,67,47,0.25)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+                      <div className="w-full flex justify-center items-center opacity-90">
+                        <span className="text-[9px] font-serif-th text-[#FAF8F5] tracking-[0.25em] uppercase font-bold">
+                          ✦ SACRED ORACLE ✦
+                        </span>
+                      </div>
+
+                      {/* Sacred Center Emblem */}
+                      <div className="my-auto w-12 h-12 rounded-full border border-[#D6B48D]/60 flex items-center justify-center bg-black/20 shadow-inner">
+                        <span className="text-base text-[#D4AF37] animate-pulse">✨</span>
+                      </div>
+
+                      <span className="text-xs font-serif-th font-bold text-[#FAF8F5] tracking-widest uppercase">
+                        ไพ่ทาโรต์ 1909
                       </span>
+
+                      {/* Dynamic Gold Sheen Sweep */}
+                      <div className="gold-foil-sheen absolute inset-0 opacity-35 group-hover:opacity-75 transition-opacity" />
                     </div>
-
-                    {/* Clean Center */}
-                    <div className="my-auto" />
-
-                    <span className="text-xs font-serif-th font-bold text-[#FDF7F0] tracking-wide">
-                      ไพ่ทาโรต์ 1909
-                    </span>
-
-                    {/* Dynamic Gold Sheen */}
-                    <div className="gold-foil-sheen absolute inset-0 opacity-30 group-hover:opacity-65 transition-opacity" />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide">
+                <div className="space-y-1.5">
+                  <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide drop-shadow-xs">
                     เลือกผังการเปิดไพ่
                   </h2>
-                  <p className="text-xs sm:text-sm text-[#8C735D] max-w-xl mx-auto">
-                    เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการคำตอบ
+                  <p className="text-xs sm:text-sm text-[#7C6553] max-w-xl mx-auto font-serif-th">
+                    เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการค้นหาคำตอบในจิตใจ
                   </p>
                 </div>
               </div>
