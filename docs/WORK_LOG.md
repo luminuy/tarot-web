@@ -34,6 +34,17 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ไพ่ประจำวันของทุกคน (Global Daily Tarot · KV-cached · Wave 2-5 ครึ่งแรก)
+
+- **ทำอะไร**: ไพ่ใบเดียวต่อวัน เหมือนกันทุกคนทั้งเว็บ — "พลังงานประจำวัน" บนขั้นเลือกผัง (ไม่กินโควตา)
+- **ไม่ต้อง cron**: เลือกไพ่ deterministic จากวันที่เวลาไทย `SHA-256("<salt>:<YYYY-MM-DD>") → 4 ไบต์แรก mod 78` → คนแรกของวันเขียน KV, คนที่เหลืออ่าน edge (~0ms) · KV ล่ม = คำนวณสด (ถูกต้องเท่ากัน)
+- **provably-fair**: ส่ง `proof` (SHA-256 hex เต็ม) ให้ผู้ใช้ตรวจเองได้
+- **ไฟล์**: `src/lib/tarot/daily-card.ts` (ใหม่), `src/app/api/daily-card/route.ts` (ใหม่), `src/components/reading/DailyCardStrip.tsx` (ใหม่), `src/app/page.tsx` (ฝังใต้ FreeTrialNotice), `src/lib/platform/kv-store.ts` (KEY.dailyCard), `scripts/qa/test-daily-card.ts` (ใหม่ + ลง CHECKS)
+- **ผลการทดสอบ**: `tsc` ✅ · `repo:verify` **22/22** ✅ (เพิ่มด่านใหม่) · `test-daily-card` 7/7 (deterministic · กระจาย 76/78 ใบใน 1 ปี · proof ถูกฟอร์แมต) · ตรวจ dev: strip เรนเดอร์ใต้ FreeTrialNotice ไม่มี hscroll
+- **ยังไม่ทำ (Wave 2-5 ครึ่งหลัง)**: Cron cleanup jobs — ต้อง worker แยก · คุณค่าต่ำ (rolling-window อยู่แล้ว) · ข้ามไว้ก่อน
+
+---
+
 ### 🗓️ 2026-09-03: Turnstile LIVE บน production + เพิ่มข้อความ "กำลังตรวจสอบความปลอดภัย…"
 
 - **ยืนยัน**: ตั้ง secret `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` บน production แล้ว — ตรวจครบ flow บน seertarot.net จริง (widget โหลด → ได้ token 752 ตัวอักษร → server รับ token → 401 creds · ไม่มี token → 403)

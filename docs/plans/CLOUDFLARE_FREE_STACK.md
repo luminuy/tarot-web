@@ -15,7 +15,7 @@
 | 1-2 | **Email Routing** | ไม่จำกัด | 🔴 บล็อก — รอซื้อโดเมน |
 | 1-3 | **Turnstile** | 1M verify/เดือน | ✅ #191 merge · รอ site key + secret |
 | 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ✅ #192 merge · ใช้ได้เลยหลัง deploy |
-| 2-5 | **KV ไพ่ประจำวัน + Cron Triggers** | KV 100k read/วัน · cron ไม่จำกัด | 🟠 ต้อง spike custom worker entry (`scheduled()`) — เสี่ยงพัง deploy ต้องทดสอบ pipeline จริง |
+| 2-5 | **KV ไพ่ประจำวัน** + Cron | KV 100k read/วัน · cron ไม่จำกัด | 🟢 ไพ่ประจำวัน merge แล้ว (deterministic + KV, ไม่ต้อง cron) · Cron cleanup ยังไม่ทำ (worker แยก, คุณค่าต่ำ) |
 | 3-6 | **R2** — Destiny Card share image | 10 GB + egress ฟรี | ⏳ ต้องสร้าง bucket + เพิ่ม lib เรนเดอร์ภาพ (satori/resvg) |
 | 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | ⏳ ต้องสร้าง index + สร้าง embedding pipeline (ใช้ Workers AI จาก 2-4) |
 | 4-8 | **Durable Objects** | free tier (SQLite) | ⏳ payoff จริงตอนมี Marketplace |
