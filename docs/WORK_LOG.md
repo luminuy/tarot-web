@@ -34,6 +34,17 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: 🔴 HOTFIX — ปิด r2_buckets binding (CI token ขาดสิทธิ์ R2 → deploy fail ทั้ง repo)
+
+- **อาการ**: หลัง merge #201 → Production Deploy #385 fail: `A request to the Cloudflare API (/accounts/***/r2/buckets/seertarot-share) failed. Authentication error [code: 10000]`
+- **สาเหตุราก**: `wrangler deploy` ตรวจสอบ bucket ที่ผูกใน `r2_buckets` ผ่าน R2 API — แต่ `CLOUDFLARE_API_TOKEN` (GitHub Actions secret) มีสิทธิ์ Workers/KV/D1/AI/Vectorize แต่**ไม่มี Workers R2 Storage** → auth fail → deploy ล้ม → **บล็อก deploy ทุก PR หลังจากนี้**
+- **การแก้ไข**: comment `r2_buckets` block ใน `wrangler.jsonc` ทิ้ง (worker size ไม่ใช่ปัญหา — gzip 1858 KiB) · โค้ด route R2 คงไว้ (degrade: `getShareBucket()` → null → `/api/share/image` 503 → `ShareModal` แชร์ลิงก์หน้าแรก)
+- **การพิสูจน์**: `node` parse wrangler.jsonc (strip comments) ผ่าน · `repo:verify` ผ่าน
+- **🛡️ กฎป้องกัน**: **ก่อนเพิ่ม binding ใหม่ที่ wrangler ต้อง validate ผ่าน API (R2/Queues/Hyperdrive ฯลฯ) ต้องเช็คก่อนว่า `CLOUDFLARE_API_TOKEN` ใน CI มี scope นั้น** — `ai`/`vectorize`/`kv`/`d1` ไม่ validate ตอน deploy จึงผ่าน แต่ `r2_buckets` validate
+- **ค้างต่อ (เจ้าของโปรเจกต์)**: เพิ่ม permission **Account · Workers R2 Storage · Edit** ให้ token ที่ CI ใช้ → แล้วค่อย uncomment binding กลับ
+
+---
+
 ### 🗓️ 2026-09-03: R2 — ลิงก์แชร์การ์ดคำทำนายมี OG image (Wave 3-6)
 
 - **แนวทาง**: reuse `<canvas>` ที่ `ShareModal` สร้างอยู่แล้ว — **ไม่ใส่ satori/resvg** (worker gzip 1.85MB, เพดาน ~3MB, wasm ~1.2MB เสี่ยงเกิน)

@@ -16,7 +16,7 @@
 | 1-3 | **Turnstile** | 1M verify/เดือน | ✅ #191 merge · รอ site key + secret |
 | 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ✅ #192 merge · ใช้ได้เลยหลัง deploy |
 | 2-5 | **KV ไพ่ประจำวัน** + Cron | KV 100k read/วัน · cron ไม่จำกัด | 🟢 ไพ่ประจำวัน merge แล้ว (deterministic + KV, ไม่ต้อง cron) · Cron cleanup ยังไม่ทำ (worker แยก, คุณค่าต่ำ) |
-| 3-6 | **R2** — share image + OG | 10 GB + egress ฟรี | 🟡 bucket `seertarot-share` สร้างแล้ว · โค้ดเสร็จ (reuse canvas เดิม ไม่ต้อง wasm) |
+| 3-6 | **R2** — share image + OG | 10 GB + egress ฟรี | 🔴 bucket + โค้ดเสร็จ แต่ binding ปิดไว้ — `CLOUDFLARE_API_TOKEN` (GitHub Actions) ขาดสิทธิ์ R2 → deploy fail |
 | 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | 🟡 index `card-meanings` สร้างแล้ว (1024d/cosine) · โค้ดเสร็จ · รอ deploy + รัน rebuild index |
 | 4-8 | **Durable Objects** | free tier (SQLite) | ⏳ payoff จริงตอนมี Marketplace |
 | 4-9 | **Realtime (SFU/TURN)** | 1,000 GB/เดือน | 🔴 บล็อก — รอ Marketplace (D1 + PDPA) |
@@ -128,9 +128,15 @@
 
 ## Wave 3 — R2 + Vectorize
 
-### 3-6 R2 — share image + OG 🟡 (โค้ดเสร็จ)
-- **ไม่ต้อง satori/resvg** — reuse `<canvas>` ที่ `ShareModal` สร้างอยู่แล้ว (worker gzip 1.85MB, ใส่ wasm เสี่ยงเกิน 3MB)
-- `wrangler.jsonc` — binding `SHARE_BUCKET` → `seertarot-share` (schema + opennext build · INC-0034)
+### 3-6 R2 — share image + OG 🔴 (binding ปิด · รอสิทธิ์ token)
+- **โค้ดทั้งหมด merge #201 แล้ว** แต่ `r2_buckets` binding ใน `wrangler.jsonc` **comment ทิ้ง** (#202 hotfix)
+  - เหตุ: `wrangler deploy` เช็ค bucket ผ่าน R2 API → `CLOUDFLARE_API_TOKEN` (GitHub secret) ขาดสิทธิ์ **Workers R2 Storage: Edit** → `Auth error 10000` → **deploy fail + บล็อก deploy ทั้ง repo**
+- **ต้องทำ (เจ้าของโปรเจกต์):**
+  1. Dashboard → My Profile → API Tokens → แก้ token ที่ CI ใช้ → เพิ่ม permission **Account · Workers R2 Storage · Edit** → Save
+  2. บอกผม → ผม uncomment `r2_buckets` กลับ (PR ใหม่) → deploy ผ่าน
+- ระหว่างนี้: `getShareBucket()` คืน null → `/api/share/image` 503 → `ShareModal` แชร์ลิงก์หน้าแรกแบบเดิม (ไม่พัง)
+- **ไม่ต้อง satori/resvg** — reuse `<canvas>` ที่ `ShareModal` สร้างอยู่แล้ว
+- `wrangler.jsonc` — binding `SHARE_BUCKET` → `seertarot-share` (schema + opennext build ผ่าน · INC-0034 · แต่ deploy fail ที่ขั้น R2 API)
 - `POST /api/share/image` — รับ PNG จาก canvas (≤1.2MB, ตรวจ magic bytes, rate-limit 12/10นาที) → R2 → คืน `{ id, url: /s/<id> }`
 - `GET /api/share/image/<id>` — Worker อ่าน R2 คืนรูป (ไม่เปิด public bucket)
 - `GET /s/<id>` — หน้า OG จิ๋ว (`og:image` + `twitter:card`) + redirect ไปหน้าแรก · `robots: noindex`
