@@ -13,7 +13,7 @@
 | **🔑 Google OAuth** | ✅ **พร้อมใช้งาน** | Authorized Origins: `https://seertarot.net`, Redirect URI: `https://seertarot.net/api/auth/google/callback`, Client ID & Secret ใส่ใน Worker แล้ว |
 | **💬 LINE Login** | ✅ **พร้อมใช้งาน** | LINE Channel: `SeerTarot` (Status: Published 🟢), Channel ID: `2011389525`, Callback URL: `https://seertarot.net/api/auth/line/callback` |
 | **✉️ Resend Email Service** | ✅ **พร้อมใช้งาน** | โดเมน `seertarot.net` ผ่านการ Verify DKIM/SPF ครบ 100%, ผู้ส่ง: `แม่หมอทาโรต์ <noreply@seertarot.net>`, โควตาฟรี 3,000 ฉบับ/เดือน · อีเมลระบบส่ง HTML + plain-text ควบคู่ และตั้ง `Reply-To: support@seertarot.net` (#207) |
-| **📨 Cloudflare Email Routing** | 🟡 **ควรเปิด** | อีเมลระบบตั้ง `Reply-To: support@seertarot.net` แล้ว แต่ยังไม่ได้ forward — ต้อง Enable Email Routing + Add `support@` / `noreply@` forward เข้า Gmail (dashboard-only · `docs/plans/CLOUDFLARE_FREE_STACK.md` §Wave 1-2) |
+| **📨 Cloudflare Email Routing** | ✅ **พร้อมใช้งาน** | Enabled · `support@` / `noreply@seertarot.net` → forward `bankjack10452@gmail.com` (Verified) · DNS Enabled (MX ×3 + DKIM + SPF root · ไม่ชนกับ Resend) · Catch-all = Drop · ผูกกับ Reply-To (#207) |
 | **🔒 ระบบเข้ารหัสผ่าน (PBKDF2)** | ✅ **พร้อมใช้งาน** | `PASSWORD_PEPPER` ขนาด 32 ไบต์ ติดตั้งบน Worker เรียบร้อย สมัครและล็อกอินด้วยอีเมลได้สมบูรณ์ |
 | **🤖 เครื่องยนต์ AI (Gemini)** | ✅ **พร้อมใช้งาน** | `GEMINI_API_KEY` ติดตั้งแล้ว สตรีมคำทำนายจริง 3 องก์ และคุยต่อเนื่องในห้องแชทได้ 100% |
 | **🗄️ ฐานข้อมูล Cloudflare D1** | ✅ **พร้อมใช้งาน** | รัน Migration 0001–0006 บน Remote DB เรียบร้อย รองรับตาราง `users`, `reading_journal`, `reading_usage` |
