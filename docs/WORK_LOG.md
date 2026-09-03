@@ -34,6 +34,18 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: สรุปสถานะแผน CLOUDFLARE_FREE_STACK + จุดที่ต้องรอเจ้าของโปรเจกต์
+
+- **เสร็จ + merge**: Wave 1-1 AI Gateway (#189) · 1-3 Turnstile (#191) · 2-4 Workers AI safety guard (#192) — ทั้ง 3 ไม่กระทบระบบเดิมถ้ายังไม่ตั้งค่า
+- **บล็อกที่โค้ดต่อไม่ได้เอง**:
+  - 1-2 Email Routing → รอซื้อโดเมน
+  - 2-5 KV+Cron → ต้อง spike custom worker entry สำหรับ `scheduled()` ซึ่งเสี่ยงพัง production deploy (แบบ INC-0034) ต้องทดสอบ pipeline จริง — ไม่ควรทำ blind
+  - 3-6 R2 / 3-7 Vectorize → ต้องสร้าง bucket / index ใน Cloudflare ก่อน (ไม่มี API token ใน env นี้) · ถ้าใส่ id ปลอมจะ 404 (ISSUE-008)
+  - 4-8 / 4-9 → รอ Marketplace
+- ตารางสิ่งที่เจ้าของโปรเจกต์ต้องทำใน dashboard อยู่ใน `docs/plans/CLOUDFLARE_FREE_STACK.md` §"ต้องทำก่อนไปต่อ"
+
+---
+
 ### 🗓️ 2026-09-03: Workers AI — ตัวคัดกรองความปลอดภัยชั้น 3 จับสัญญาณวิกฤตแบบอ้อม (Wave 2-4)
 
 #### 1. เสริมด่านกฎเหล็กข้อ 6 ด้วย Workers AI (ฟรี)
