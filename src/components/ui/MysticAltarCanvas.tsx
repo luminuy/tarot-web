@@ -75,10 +75,9 @@ export const MysticAltarCanvas: React.FC = () => {
     document.addEventListener("visibilitychange", handleVisibility);
     motionQuery.addEventListener("change", handleMotionChange);
 
-    // Adaptive Particles: 12 on mobile, 30 on desktop
+    // Adaptive Particles: 10 on mobile, 18 on desktop (Very sparse and gentle)
     const isMobile = width < 768;
-    const PARTICLE_COUNT = isMobile ? 12 : 30;
-    const COLORS = ["#CD9F5B", "#D6B48D", "#E4C09F", "#B8853E", "#CD9F5B"];
+    const PARTICLE_COUNT = isMobile ? 10 : 18;
 
     const particles: Array<{
       x: number;
@@ -89,20 +88,18 @@ export const MysticAltarCanvas: React.FC = () => {
       baseOpacity: number;
       phase: number;
       fadeSpeed: number;
-      color: string;
     }> = [];
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        size: Math.random() * 1.8 + 0.5,
-        speedY: -(Math.random() * 0.35 + 0.08),
-        speedX: (Math.random() - 0.5) * 0.25,
-        baseOpacity: Math.random() * 0.4 + 0.3,
+        size: Math.random() * 0.8 + 0.4,
+        speedY: -(Math.random() * 0.25 + 0.05),
+        speedX: (Math.random() - 0.5) * 0.15,
+        baseOpacity: Math.random() * 0.3 + 0.15,
         phase: Math.random() * Math.PI * 2,
         fadeSpeed: Math.random() * 0.003 + 0.001,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
       });
     }
 
@@ -114,7 +111,7 @@ export const MysticAltarCanvas: React.FC = () => {
 
     let angle = 0;
     let lastRenderTime = 0;
-    const frameInterval = isMobile ? 33.3 : 16.6; // 30 FPS on mobile, 60 FPS on desktop
+    const frameInterval = isMobile ? 33.3 : 20.0; // 30 FPS on mobile, 50 FPS on desktop
 
     const render = (timestamp: number = 0) => {
       if (!isVisible || prefersReducedMotion) return;
@@ -132,9 +129,9 @@ export const MysticAltarCanvas: React.FC = () => {
       ctx.fillRect(0, 0, width, height);
 
       // Rotating Sacred Altar Geometry
-      angle += 0.0015;
+      angle += 0.0006;
       const centerX = width / 2;
-      const centerY = height * 0.42;
+      const centerY = height * 0.40;
       const radius = Math.min(width, height) * 0.32;
 
       ctx.save();
@@ -142,17 +139,17 @@ export const MysticAltarCanvas: React.FC = () => {
 
       // Outer ring
       ctx.rotate(angle);
-      ctx.strokeStyle = "rgba(214, 180, 141, 0.25)";
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(214, 180, 141, 0.15)";
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(0, 0, radius, 0, Math.PI * 2);
       ctx.stroke();
 
       // Dashed inner ring
       ctx.beginPath();
-      ctx.setLineDash([8, 12]);
-      ctx.arc(0, 0, radius * 0.75, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(205, 159, 91, 0.22)";
+      ctx.setLineDash([6, 12]);
+      ctx.arc(0, 0, radius * 0.78, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(205, 159, 91, 0.12)";
       ctx.stroke();
       ctx.setLineDash([]);
 
@@ -160,18 +157,18 @@ export const MysticAltarCanvas: React.FC = () => {
       ctx.beginPath();
       for (let i = 0; i < 12; i++) {
         const rad = (i * Math.PI) / 6;
-        const x1 = Math.cos(rad) * (radius * 0.75);
-        const y1 = Math.sin(rad) * (radius * 0.75);
+        const x1 = Math.cos(rad) * (radius * 0.78);
+        const y1 = Math.sin(rad) * (radius * 0.78);
         const x2 = Math.cos(rad) * radius;
         const y2 = Math.sin(rad) * radius;
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
       }
-      ctx.strokeStyle = "rgba(214, 180, 141, 0.18)";
+      ctx.strokeStyle = "rgba(214, 180, 141, 0.10)";
       ctx.stroke();
       ctx.restore();
 
-      // Floating Mystic Embers
+      // Floating Ethereal Soft Light Glimmers (Clean white/gold motes)
       const now = Date.now();
       for (const p of particles) {
         p.y += p.speedY;
@@ -182,9 +179,15 @@ export const MysticAltarCanvas: React.FC = () => {
           p.x = Math.random() * width;
         }
 
-        const alpha = Math.max(0.1, Math.min(0.8, p.baseOpacity + Math.sin(now * p.fadeSpeed + p.phase) * 0.25));
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = alpha;
+        const alpha = Math.max(0.08, Math.min(0.55, p.baseOpacity + Math.sin(now * p.fadeSpeed + p.phase) * 0.2));
+        // Soft gold halo
+        ctx.fillStyle = `rgba(205, 159, 91, ${alpha * 0.35})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // White center
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();

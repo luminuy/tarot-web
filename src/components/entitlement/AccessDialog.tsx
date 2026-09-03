@@ -88,9 +88,9 @@ export function AccessDialog({
       title={copy.title}
       description={<span className="font-serif-th leading-relaxed">{copy.body}</span>}
     >
-      <div className="space-y-6 text-[#e2d9f3]">
+      <div className="space-y-6 text-[#5A432F]">
         {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร */}
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e5c07b]/35 bg-[#140b24] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#e5c07b]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D6B48D] bg-[#FCF0E6] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#CD9F5B]">
           {showCredits ? (
             <HourglassIcon className="h-3.5 w-3.5" />
           ) : reason === "explore" ? (
@@ -103,13 +103,13 @@ export function AccessDialog({
 
         {/* ── สถานะสิทธิ์ปัจจุบัน ─────────────────────────────────── */}
         {view && (
-          <div className="rounded-2xl border border-[#e5c07b]/25 bg-[#0a0714]/80 p-4 sm:p-5">
+          <div className="rounded-2xl border border-[#D6B48D] bg-[#FDF7F0] p-4 sm:p-5 shadow-xs">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#9c93b8]">
+                <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#8C735D]">
                   สถานะตอนนี้
                 </span>
-                <span className="block font-serif-th text-sm font-semibold text-[#f5deaa]">
+                <span className="block font-serif-th text-sm font-bold text-[#5A432F]">
                   {view.statusLine}
                 </span>
               </div>
@@ -117,8 +117,8 @@ export function AccessDialog({
             </div>
 
             {!isGuest && (
-              <div className="mt-3 flex items-center gap-2 border-t border-[#e5c07b]/12 pt-3 font-serif-th text-xs text-[#9c93b8]">
-                <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-[#e5c07b]" />
+              <div className="mt-3 flex items-center gap-2 border-t border-[#D6B48D]/30 pt-3 font-serif-th text-xs text-[#8C735D]">
+                <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-[#CD9F5B]" />
                 <span>
                   โควตาฟรีชุดใหม่มาถึง{countdown ? ` ${countdown}` : ""} · รีเซ็ต{resetClockLabel()}
                 </span>
@@ -130,21 +130,21 @@ export function AccessDialog({
         {/* ── สิ่งที่ได้เพิ่ม ─────────────────────────────────────── */}
         {!showCredits && (
           <section className="space-y-3">
-            <h3 className="font-serif-th text-sm font-bold text-[#f5deaa]">
-              <span className="text-[#e5c07b]">✦</span> {view?.isMember ? "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)" : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง"}
+            <h3 className="font-serif-th text-sm font-bold text-[#5A432F]">
+              <span className="text-[#CD9F5B]">✦</span> {view?.isMember ? "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)" : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง"}
             </h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {MEMBER_BENEFITS.map((b) => (
                 <li
                   key={b.title}
-                  className="flex gap-2.5 rounded-xl border border-[#e5c07b]/15 bg-[#100b20]/70 p-3"
+                  className="flex gap-2.5 rounded-xl border border-[#D6B48D] bg-[#FCF0E6] p-3 shadow-xs"
                 >
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e5c07b]/15 text-[#ffd700]">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CD9F5B]/20 text-[#CD9F5B]">
                     <CheckMarkIcon className="h-3 w-3" />
                   </span>
                   <span className="min-w-0">
-                    <span className="block font-serif-th text-xs font-semibold text-[#f5deaa]">{b.title}</span>
-                    <span className="block font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+                    <span className="block font-serif-th text-xs font-bold text-[#5A432F]">{b.title}</span>
+                    <span className="block font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
                       {b.detail}
                     </span>
                   </span>
@@ -157,20 +157,20 @@ export function AccessDialog({
         {/* ── ทางเลือกเมื่อโควตาวันนี้หมด ─────────────────────────── */}
         {showCredits && (
           <section className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-[#e5c07b]/20 bg-[#100b20]/70 p-4">
-              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#f5deaa]">
-                <HourglassIcon className="h-4 w-4 text-[#e5c07b]" /> รอโควตาฟรีรอบใหม่
+            <div className="rounded-2xl border border-[#D6B48D] bg-[#FCF0E6] p-4 shadow-xs">
+              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#5A432F]">
+                <HourglassIcon className="h-4 w-4 text-[#CD9F5B]" /> รอโควตาฟรีรอบใหม่
               </span>
-              <p className="font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+              <p className="font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
                 ไม่ต้องจ่ายอะไร กลับมาหลังเที่ยงคืนแล้วเปิดไพ่ได้อีก {DAILY_LIMIT} ครั้ง
                 {countdown ? ` (${countdown})` : ""}
               </p>
             </div>
-            <div className="rounded-2xl border border-[#ffd700]/45 bg-gradient-to-b from-[#1a1030] to-[#0c0718] p-4 shadow-[0_0_25px_rgba(229,192,123,0.12)]">
-              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#ffd700]">
+            <div className="rounded-2xl border-2 border-[#CD9F5B] bg-[#FDF7F0] p-4 shadow-xs">
+              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#CD9F5B]">
                 <CoinSealIcon className="h-4 w-4" /> ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)
               </span>
-              <p className="font-serif-th text-[11px] leading-relaxed text-[#cfc8e2]">
+              <p className="font-serif-th text-[11px] leading-relaxed text-[#5A432F]">
                 จ่ายครั้งเดียวเริ่มต้น {CHEAPEST_PACKAGE_THB} บาท · ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด ไม่มีวันหมดอายุ
               </p>
             </div>
@@ -187,40 +187,40 @@ export function AccessDialog({
               return (
                 <div
                   key={plan.id}
-                  className={`relative flex flex-col rounded-2xl border p-4 ${
+                  className={`relative flex flex-col rounded-2xl border p-4 shadow-xs ${
                     isSpecial
-                      ? "border-[#ffd700]/60 bg-gradient-to-b from-[#1e123a] to-[#0c0718] shadow-[0_0_30px_rgba(229,192,123,0.2)]"
+                      ? "border-2 border-[#CD9F5B] bg-[#FFFFFF] shadow-sm"
                       : plan.highlight
-                      ? "border-[#ffd700]/45 bg-gradient-to-b from-[#1a1030] to-[#0c0718] shadow-[0_0_25px_rgba(229,192,123,0.14)]"
-                      : "border-[#e5c07b]/18 bg-[#0a0714]/70"
+                      ? "border border-[#CD9F5B]/80 bg-[#FDF7F0]"
+                      : "border border-[#D6B48D]/60 bg-[#FCF0E6]"
                   }`}
                 >
                   {isSpecial ? (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#0a0715] shadow-[0_0_12px_rgba(212,175,55,0.4)]">
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#CD9F5B] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#FDF7F0] shadow-xs">
                       ✦ ปลดล็อกขั้นสุด
                     </span>
                   ) : plan.highlight ? (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#0a0715]">
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#E4C09F] border border-[#D6B48D] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#5A432F]">
                       {plan.highlight}
                     </span>
                   ) : null}
-                  <span className="font-serif-th text-sm font-bold text-[#f5deaa]">{plan.name}</span>
-                  <span className="mt-1 font-mono text-lg font-bold text-[#ffd700]">{plan.price}</span>
-                  <span className="font-serif-th text-[10px] text-[#9c93b8]">{plan.priceNote}</span>
+                  <span className="font-serif-th text-sm font-bold text-[#5A432F]">{plan.name}</span>
+                  <span className="mt-1 font-mono text-lg font-bold text-[#CD9F5B]">{plan.price}</span>
+                  <span className="font-serif-th text-[10px] text-[#8C735D]">{plan.priceNote}</span>
                   {isCurrent && (
-                    <span className="mt-2 inline-flex w-fit rounded-md border border-[#e5c07b]/40 px-1.5 py-0.5 font-serif-th text-[9px] text-[#e5c07b]">
+                    <span className="mt-2 inline-flex w-fit rounded-md border border-[#D6B48D] bg-[#FCF0E6] px-1.5 py-0.5 font-serif-th text-[9px] text-[#5A432F]">
                       แผนปัจจุบันของคุณ
                     </span>
                   )}
-                  <ul className="mt-3 space-y-1.5 border-t border-[#e5c07b]/12 pt-3">
+                  <ul className="mt-3 space-y-1.5 border-t border-[#D6B48D]/30 pt-3">
                     {plan.features.map((f) => (
                       <li
                         key={f.label}
                         className={`flex items-start gap-1.5 font-serif-th text-[11px] leading-snug ${
-                          f.included ? "text-[#cfc8e2]" : "text-[#9c93b8]/60"
+                          f.included ? "text-[#5A432F]" : "text-[#8C735D]/50"
                         }`}
                       >
-                        <span className={`mt-0.5 shrink-0 ${f.included ? "text-[#ffd700]" : "text-[#9c93b8]/50"}`}>
+                        <span className={`mt-0.5 shrink-0 ${f.included ? "text-[#CD9F5B]" : "text-[#8C735D]/40"}`}>
                           {f.included ? (
                             <CheckMarkIcon className="h-3 w-3" />
                           ) : (
@@ -243,7 +243,7 @@ export function AccessDialog({
             <button
               type="button"
               onClick={handlePrimary}
-              className="w-full rounded-2xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-6 py-3.5 font-serif-th text-sm font-bold text-[#05040a] shadow-[0_0_25px_rgba(212,175,55,0.4)] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0714]"
+              className="w-full rounded-2xl bg-[#CD9F5B] hover:bg-[#B8853E] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FDF7F0] shadow-sm transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
             >
               <span className="mr-1.5">✦</span>
               {copy.primaryLabel}
@@ -256,7 +256,7 @@ export function AccessDialog({
                 onClose();
                 onBuyCredits();
               }}
-              className="w-full rounded-2xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-6 py-3.5 font-serif-th text-sm font-bold text-[#05040a] shadow-[0_0_25px_rgba(212,175,55,0.4)] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0714]"
+              className="w-full rounded-2xl bg-[#CD9F5B] hover:bg-[#B8853E] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FDF7F0] shadow-sm transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
             >
               <span className="mr-1.5">✦</span>
               ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม {CHEAPEST_PACKAGE_THB}.-)
@@ -266,12 +266,12 @@ export function AccessDialog({
           <button
             type="button"
             onClick={handleSecondary}
-            className="w-full rounded-2xl border border-[#e5c07b]/25 bg-[#100b20] px-6 py-3 font-serif-th text-xs text-[#cfc8e2] transition-colors hover:bg-[#191230] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+            className="w-full rounded-2xl border border-[#D6B48D] bg-[#FCF0E6] hover:bg-[#FFFFFF] hover:border-[#CD9F5B] px-6 py-3 font-serif-th text-xs text-[#5A432F] font-semibold transition-colors cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
           >
             {copy.secondaryLabel}
           </button>
 
-          <p className="pt-1 text-center font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+          <p className="pt-1 text-center font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
             {copy.reassurance}
           </p>
         </div>

@@ -70,15 +70,15 @@ export function EntitlementGate({
       {/* แถบแจ้งสิทธิ์แบบบาง — บอกสถานะ ไม่ขวางทาง ไม่ซ้ำกับหน้าต่างสิทธิ์ตอนกดเริ่ม */}
       <div
         aria-live="polite"
-        className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-r from-[#160d2a]/90 to-[#0a0714]/90 px-4 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.55)]"
+        className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#D6B48D] bg-[#FDF7F0] px-4 py-3 shadow-xs"
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e5c07b]/35 bg-[#1a1030] text-[#ffd700]">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D6B48D] bg-[#FCF0E6] text-[#CD9F5B]">
           {isGuest ? <SealedLockIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
         </span>
 
         <div className="min-w-0 flex-1 space-y-0.5">
-          <p className="font-serif-th text-xs font-semibold text-[#f5deaa] sm:text-sm">{copy.title}</p>
-          <p className="font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+          <p className="font-serif-th text-xs font-bold text-[#5A432F] sm:text-sm">{copy.title}</p>
+          <p className="font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
             {isGuest
               ? `ทดลองฟรีได้ ${GUEST_LIMIT} ครั้ง (ใช้ครบแล้ว) · สมัครสมาชิกฟรีแล้วเปิดได้วันละ ${DAILY_LIMIT} ครั้ง`
               : countdown
@@ -92,7 +92,7 @@ export function EntitlementGate({
           <button
             type="button"
             onClick={() => onRequestUpgrade(reason)}
-            className="min-h-[36px] shrink-0 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] px-4 py-1.5 font-serif-th text-[11px] font-bold text-[#05040a] shadow-[0_0_18px_rgba(212,175,55,0.35)] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
+            className="min-h-[36px] shrink-0 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] px-4 py-1.5 font-serif-th text-[11px] font-bold text-[#FDF7F0] shadow-xs transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
           >
             <span className="mr-1">✦</span>
             {ctaLabel}

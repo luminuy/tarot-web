@@ -40,7 +40,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
     return (
       <div
         aria-hidden="true"
-        className="mx-auto mb-6 h-[68px] max-w-2xl animate-pulse rounded-2xl border border-[#e5c07b]/12 bg-[#100b20]/40"
+        className="mx-auto mb-6 h-[68px] max-w-2xl animate-pulse rounded-2xl border border-[#D6B48D]/40 bg-[#FDF7F0]/60"
       />
     );
   }
@@ -50,16 +50,16 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
   const isGuest = view.isGuest;
 
   return (
-    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#e5c07b]/25 bg-gradient-to-r from-[#120c22]/90 to-[#0a0714]/90 px-4 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.55)]">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e5c07b]/30 bg-[#1a1030] text-[#ffd700]">
+    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#D6B48D] bg-[#FDF7F0] px-4 py-3 shadow-xs">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D6B48D] bg-[#FCF0E6] text-[#CD9F5B]">
         {isGuest ? <SparkSealIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
       </span>
 
       <div className="min-w-0 flex-1 space-y-0.5">
-        <p className="font-serif-th text-xs font-semibold text-[#f5deaa] sm:text-sm">
+        <p className="font-serif-th text-xs font-bold text-[#5A432F] sm:text-sm">
           {isGuest ? "เปิดไพ่ทดลองฟรีได้เลย ไม่ต้องสมัครสมาชิก" : view.statusLine}
         </p>
-        <p className="font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+        <p className="font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
           {isGuest
             ? `อ่านคำทำนายเต็มทุกองก์ · หลังใช้ครบ สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อวันละ ${DAILY_LIMIT} ครั้ง`
             : countdown
@@ -76,7 +76,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
             trackEntitlementEvent("quota_meter_opened");
             onOpenAccess();
           }}
-          className="min-h-[36px] rounded-xl border border-[#e5c07b]/30 px-3 py-1.5 font-serif-th text-[11px] text-[#e5c07b] transition-colors hover:border-[#ffd700] hover:text-[#ffd700] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+          className="min-h-[36px] rounded-xl border border-[#D6B48D] bg-[#FCF0E6] px-3 py-1.5 font-serif-th text-[11px] text-[#5A432F] font-semibold transition-colors hover:border-[#CD9F5B] hover:bg-[#FFFFFF] hover:text-[#CD9F5B] cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
         >
           ดูสิทธิ์ทั้งหมด
         </button>

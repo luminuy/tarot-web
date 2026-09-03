@@ -214,8 +214,8 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               {/* Locked Hover Teaser Overlay */}
               {isLocked && (
                 <div className="absolute inset-0 bg-black/20 pointer-events-none rounded-2xl flex items-center justify-center opacity-0 group-hover/persona:opacity-100 transition-opacity duration-200">
-                  <div className="bg-[#0b0716]/95 border border-[#ffd700]/70 px-3 py-1.5 rounded-xl text-[10.5px] font-serif-th font-bold text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.4)] flex items-center gap-1.5">
-                    <span>✦</span>
+                  <div className="bg-[#5A432F]/95 border border-[#CD9F5B] px-3 py-1.5 rounded-xl text-[10.5px] font-serif-th font-bold text-[#FDF7F0] shadow-md flex items-center gap-1.5">
+                    <span className="text-[#CD9F5B]">✦</span>
                     <span>แตะเพื่อปลดล็อกปรมาจารย์</span>
                   </div>
                 </div>

@@ -134,10 +134,10 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="space-y-1.5"
           >
-            {/* Status Pill Badge */}
-            <div className="inline-flex items-center gap-2 bg-[#140d28]/95 border border-[#e5c07b]/40 px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full shadow-[0_0_25px_rgba(229,192,123,0.25)]">
-              <span className="w-2 h-2 rounded-full bg-[#e5c07b] animate-ping" />
-              <span className="text-[11px] sm:text-xs font-serif-th font-bold text-[#f5deaa]">
+            {/* Status Pill Badge — Warm Minimalist Luxury */}
+            <div className="inline-flex items-center gap-2 bg-[#FDF7F0] border border-[#D6B48D] px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-[#CD9F5B] animate-ping" />
+              <span className="text-[11px] sm:text-xs font-serif-th font-bold text-[#5A432F]">
                 เลือกไพ่ใบที่ {pickedIndices.length + 1} จากทั้งหมด {targetCount} ใบ
               </span>
             </div>
@@ -145,7 +145,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             {/* Position Heading with Inline Non-Breaking Quotes */}
             <h3 className="text-lg sm:text-3xl font-serif-th font-bold font-mystic-gold tracking-wide drop-shadow leading-snug py-0.5 px-2">
               เลือกไพ่สำหรับ{" "}
-              <span className="text-[#f5deaa] inline-block font-bold">
+              <span className="text-[#CD9F5B] inline-block font-bold">
                 &ldquo;{currentPositionName}&rdquo;
               </span>
             </h3>

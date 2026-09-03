@@ -142,9 +142,9 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       >
         {/* Card Container with Active Glow */}
         <div
-          className={`relative transition-all duration-300 rounded-2xl group-focus-visible:ring-2 group-focus-visible:ring-[#ffd700] ${
+          className={`relative transition-all duration-300 rounded-2xl group-focus-visible:ring-2 group-focus-visible:ring-[#CD9F5B] ${
             isCurrentReading
-              ? "ring-4 ring-[#e5c07b] ring-offset-2 ring-offset-[#07040f] shadow-[0_0_30px_rgba(229,192,123,0.7)] scale-105"
+              ? "ring-4 ring-[#CD9F5B] ring-offset-2 ring-offset-[#FCF0E6] shadow-[0_4px_24px_rgba(205,159,91,0.35)] scale-105"
               : "hover:scale-105"
           }`}
         >
@@ -155,10 +155,10 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
                 e.stopPropagation();
                 onZoomCard(drawn);
               }}
-              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#22153d]/95 to-[#100720]/95 hover:from-[#c59b27] hover:to-[#f5deaa] border border-[#e5c07b]/70 hover:border-[#ffd700] text-[#f5deaa] hover:text-[#05040a] shadow-[0_0_20px_rgba(0,0,0,0.95),0_0_12px_rgba(229,192,123,0.45)] transition-all duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
+              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-[#FDF7F0] hover:bg-[#FFFFFF] border border-[#D6B48D] hover:border-[#CD9F5B] text-[#5A432F] hover:text-[#CD9F5B] shadow-xs transition-all duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
               title="ซูมดูไพ่ 3D ความละเอียดสูง"
             >
-              <span className="text-[10px] text-[#e5c07b] group-hover:text-[#05040a] transition-colors">⛶</span>
+              <span className="text-[10px] text-[#CD9F5B] group-hover:text-[#B8853E] transition-colors">⛶</span>
               <span className="text-[9.5px] font-serif-th font-bold tracking-wide">ขยาย</span>
             </button>
           )}
@@ -173,18 +173,18 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               className="w-24 h-[163px] sm:w-28 sm:h-[190px]"
             />
           ) : (
-            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-2xl border-2 border-dashed border-[#e5c07b]/30 bg-[#07040f]/60 flex items-center justify-center text-xs text-[#9c93b8]">
+            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-2xl border-2 border-dashed border-[#D6B48D] bg-[#FCF0E6] flex items-center justify-center text-xs text-[#8C735D]">
               {pos.index + 1}
             </div>
           )}
         </div>
 
         {/* Slot Position Name Tag */}
-        <div className="text-center mt-2.5 w-24 sm:w-28">
-          <span className="text-[9px] text-[#e5c07b] font-mono block">
+        <div className="text-center mt-2.5 w-28 sm:w-32">
+          <span className="text-[10px] text-[#CD9F5B] font-mono block font-semibold">
             ใบที่ {pos.index + 1}
           </span>
-          <span className="text-xs font-serif-th font-semibold text-[#f5deaa] leading-tight block truncate">
+          <span className="text-xs font-serif-th font-bold text-[#5A432F] leading-tight block truncate" title={pos.nameTh}>
             {pos.nameTh}
           </span>
         </div>
@@ -193,11 +193,11 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
   };
 
   return (
-    <div className="w-full rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-5 sm:p-7 shadow-md flex flex-col justify-between space-y-5 select-none relative overflow-hidden">
+    <div className="w-full rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-4 sm:p-6 shadow-sm flex flex-col justify-between space-y-4 select-none relative overflow-hidden">
       {/* Background Sacred Geometric Mandala */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-        <div className="w-80 h-80 sm:w-[480px] sm:h-[480px] rounded-full border border-dashed border-[#D6B48D] animate-[spin_120s_linear_infinite]" />
-        <div className="absolute w-56 h-56 sm:w-[320px] sm:h-[320px] rounded-full border border-[#CD9F5B]/30 animate-[spin_80s_linear_infinite_reverse]" />
+      <div className="absolute inset-0 flex items-center justify-center opacity-15 pointer-events-none">
+        <div className="w-72 h-72 sm:w-[420px] sm:h-[420px] rounded-full border border-dashed border-[#D6B48D] animate-[spin_120s_linear_infinite]" />
+        <div className="absolute w-48 h-48 sm:w-[280px] sm:h-[280px] rounded-full border border-[#CD9F5B]/30 animate-[spin_80s_linear_infinite_reverse]" />
         <div className="absolute w-full h-full bg-radial from-[#CD9F5B]/10 via-transparent to-transparent blur-3xl" />
       </div>
 
@@ -206,7 +206,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-widest text-[#8C735D] font-mono">ผังพยากรณ์:</span>
-            <span className="text-xs text-[#FDF7F0] bg-[#CD9F5B] px-2 py-0.2 rounded-full font-bold font-mono shadow-xs">
+            <span className="text-xs text-[#FDF7F0] bg-[#CD9F5B] px-2.5 py-0.5 rounded-full font-bold font-mono shadow-xs">
               {spread.positions.length} ใบ
             </span>
           </div>
@@ -215,20 +215,23 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
           </h3>
         </div>
 
-        {/* Reveal All Cards Action Button */}
-        {onRevealAll && drawnCards.length > 0 && (
-          <button
-            type="button"
-            onClick={onRevealAll}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-serif-th font-semibold border transition-all cursor-pointer flex items-center gap-1.5 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
-              isAllRevealed
-                ? "bg-[#FCF0E6] border-[#D6B48D] text-[#8C735D]"
-                : "bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-bold border-transparent shadow-xs"
-            }`}
-          >
-            <span>✨</span>
-            <span>{isAllRevealed ? "พลิกดูครบแล้ว" : "พลิกดูไพ่ทั้งหมด"}</span>
-          </button>
+        {/* Reveal All Cards Action Button or Revealed Badge */}
+        {drawnCards.length > 0 && (
+          isAllRevealed ? (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] text-[#8C735D] text-xs font-serif-th font-semibold shadow-xs">
+              <span className="text-[#CD9F5B]">✦</span>
+              <span>เปิดไพ่ครบแล้ว</span>
+            </div>
+          ) : onRevealAll ? (
+            <button
+              type="button"
+              onClick={onRevealAll}
+              className="px-3.5 py-1.5 rounded-xl text-xs font-serif-th font-bold bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] transition-all cursor-pointer flex items-center gap-1.5 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] active:scale-95"
+            >
+              <span>✨</span>
+              <span>พลิกดูไพ่ทั้งหมด</span>
+            </button>
+          ) : null
         )}
       </div>
 
@@ -285,7 +288,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         </div>
       ) : (
         /* ── ผังเล็ก: แท่นบูชา Unified Canvas แบบเดิม เห็นครบทุกใบในตาเดียว ── */
-        <div className="w-full flex-1 flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-4 relative z-10 min-h-[300px]">
+        <div className="w-full flex-1 flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-2 relative z-10 min-h-[220px]">
           {spread.positions.map((pos) => renderSlot(pos))}
         </div>
       )}

@@ -435,7 +435,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                       <button
                         type="button"
                         onClick={() => window.location.reload()}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[#e5c07b]/40 bg-[#140e24] px-3 py-1.5 text-xs font-semibold text-[#ffd700] hover:bg-[#20163a] cursor-pointer shadow"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[#D6B48D] bg-[#FDF7F0] px-3 py-1.5 text-xs font-semibold text-[#5A432F] hover:border-[#CD9F5B] hover:bg-[#FFFFFF] cursor-pointer shadow-xs"
                       >
                         <span>↻</span> รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง
                       </button>
@@ -444,7 +444,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 )}
 
                 {/* Sub-bubble Actions (Timestamp & TTS) */}
-                <div className="flex items-center gap-2 text-[10px] text-[#9c93b8]/70 font-serif-th px-1 pt-0.5">
+                <div className="flex items-center gap-2 text-[10px] text-[#8C735D] font-serif-th px-1 pt-0.5">
                   {msg.timestamp && <span>{msg.timestamp}</span>}
                   {msg.sender === "bot" && !msg.isError && (
                     <TTSReaderButton
@@ -456,7 +456,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 </div>
 
                 {msg.isFallback && (
-                  <p className="font-serif-th text-[10px] leading-relaxed text-[#9c93b8] px-1">
+                  <p className="font-serif-th text-[10px] leading-relaxed text-[#8C735D] px-1">
                     ✦ ตอนนี้แม่หมอตอบจากคลังคำตอบสำรอง ลองถามใหม่อีกครั้งในอีกสักครู่นะคะ
                   </p>
                 )}

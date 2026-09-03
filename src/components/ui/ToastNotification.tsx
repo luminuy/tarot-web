@@ -94,16 +94,16 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         transition-all duration-200
         ${
           isError
-            ? "bg-[#18080c]/98 border border-rose-500/40 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_20px_rgba(244,63,94,0.18)]"
-            : "bg-[#0d0a1b]/98 border border-[#d4af37]/40 shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_25px_rgba(212,175,55,0.2)]"
+            ? "bg-[#FDF7F0] border border-rose-400 text-rose-900 shadow-md"
+            : "bg-[#FDF7F0] border border-[#D6B48D] text-[#5A432F] shadow-md"
         }`}
     >
       {/* Top ambient gold / ruby highlight */}
       <div
         className={`absolute inset-x-4 top-0 h-[1.5px] ${
           isError
-            ? "bg-gradient-to-r from-transparent via-rose-500/70 to-transparent"
-            : "bg-gradient-to-r from-transparent via-[#ffd700]/80 to-transparent"
+            ? "bg-gradient-to-r from-transparent via-rose-400 to-transparent"
+            : "bg-gradient-to-r from-transparent via-[#CD9F5B] to-transparent"
         }`}
       />
 
@@ -112,8 +112,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         <div
           className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-serif ${
             isError
-              ? "bg-rose-500/15 border border-rose-500/40 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
-              : "bg-gradient-to-br from-[#ffd700]/25 to-[#c59b27]/10 border border-[#ffd700]/40 text-[#ffd700] shadow-[0_0_15px_rgba(212,175,55,0.35)]"
+              ? "bg-rose-100 border border-rose-300 text-rose-700"
+              : "bg-[#FCF0E6] border border-[#D6B48D] text-[#CD9F5B]"
           }`}
         >
           {isError ? "✦" : "✨"}
@@ -123,7 +123,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         <div className="flex-1 min-w-0 pr-1">
           <h4
             className={`text-sm font-semibold tracking-wide truncate ${
-              isError ? "text-rose-100" : "text-[#f5deaa]"
+              isError ? "text-rose-900" : "text-[#5A432F]"
             }`}
           >
             {toast.title}
@@ -131,7 +131,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           {toast.subtitle && (
             <p
               className={`text-xs font-serif-th leading-relaxed mt-0.5 line-clamp-2 ${
-                isError ? "text-rose-300/85" : "text-[#d6cfe6]"
+                isError ? "text-rose-700" : "text-[#8C735D]"
               }`}
             >
               {toast.subtitle}
@@ -146,8 +146,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           aria-label="ปิดการแจ้งเตือน"
           className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer shrink-0 ${
             isError
-              ? "text-rose-400/70 hover:text-rose-200 hover:bg-rose-500/15"
-              : "text-[#9c93b8] hover:text-[#f5deaa] hover:bg-white/10"
+              ? "text-rose-600 hover:text-rose-900 hover:bg-rose-100"
+              : "text-[#8C735D] hover:text-[#5A432F] hover:bg-[#FCF0E6]"
           }`}
         >
           ✕
@@ -155,7 +155,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
       </div>
 
       {/* Micro Progress Bar Countdown */}
-      <div className="absolute bottom-0 inset-x-0 h-[2px] bg-black/40 overflow-hidden">
+      <div className="absolute bottom-0 inset-x-0 h-[2px] bg-[#FCF0E6] overflow-hidden">
         <motion.div
           key={toast.id || toast.title}
           initial={{ width: "100%" }}
@@ -163,8 +163,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           transition={{ duration: duration / 1000, ease: "linear" }}
           className={`h-full ${
             isError
-              ? "bg-gradient-to-r from-rose-600 via-rose-400 to-rose-300"
-              : "bg-gradient-to-r from-[#c59b27] via-[#ffd700] to-[#f3e5ab]"
+              ? "bg-rose-500"
+              : "bg-[#CD9F5B]"
           }`}
         />
       </div>
