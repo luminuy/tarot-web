@@ -54,12 +54,17 @@
 ### ⏳ รอตั้งเพิ่ม — Turnstile (Wave 1-3)
 
 ```
-├── NEXT_PUBLIC_TURNSTILE_SITE_KEY   # Site Key (public · เป็น build-time var ไม่ใช่ secret)
-└── TURNSTILE_SECRET_KEY             # Secret Key (npx wrangler secret put)
+├── TURNSTILE_SITE_KEY     # Site Key — ตั้งผ่าน secret (pipeline ไม่ส่ง env ตอน build) · client ดึงผ่าน /api/config/turnstile
+└── TURNSTILE_SECRET_KEY   # Secret Key
 ```
 
-> Dashboard → Turnstile → Add widget (Domain: `seertarot.net` + `localhost`)
-> ต้องตั้งคู่กันทั้งสองตัว ด่านกันบอทหน้า signup/login/forgot ถึงจะเปิด — ไม่ตั้ง = ด่านผ่านตลอด (verify ฝั่ง server มี fail-safe: ถ้า siteverify ล่มก็ปล่อยผ่าน)
+> Dashboard → Turnstile → Add widget (Widget Mode: **Managed**, Domain: `seertarot.net` + `localhost`)
+> ```
+> npx wrangler secret put TURNSTILE_SITE_KEY      # 0x4AAAA...
+> npx wrangler secret put TURNSTILE_SECRET_KEY    # 0x4AAAA...
+> ```
+> ต้องตั้งคู่กันทั้งสองตัว ด่านกันบอทหน้า signup/login/forgot ถึงจะเปิด — ไม่ตั้ง = ด่านผ่านตลอด
+> (verify ฝั่ง server มี fail-safe: siteverify ล่ม/timeout = ปล่อยผ่าน · ตั้งมาแค่ตัวเดียว = ถือว่ายังไม่เปิด)
 
 ---
 

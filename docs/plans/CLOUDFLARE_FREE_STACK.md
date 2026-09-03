@@ -27,7 +27,7 @@
 | # | สิ่งที่ต้องทำใน Cloudflare | ปลดล็อกอะไร |
 | :--- | :--- | :--- |
 | 1 | สร้าง AI Gateway `seertarot-ai` → ตั้ง `CF_AI_GATEWAY_ACCOUNT_ID` + `CF_AI_GATEWAY_ID` | เปิดใช้ 1-1 จริง + เป็นท่อของ Workers AI |
-| 2 | Turnstile → Add widget → `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `wrangler secret put TURNSTILE_SECRET_KEY` | เปิดใช้ 1-3 จริง |
+| 2 | Turnstile → Add widget (Managed) → `wrangler secret put TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` | เปิดใช้ 1-3 จริง |
 | 3 | ซื้อโดเมน + ผูก Cloudflare | ปลดบล็อก 1-2 (Email Routing) |
 | 4 | สร้าง R2 bucket `seertarot-share` | เริ่ม 3-6 ได้ |
 | 5 | สร้าง Vectorize index `card-meanings` (768 dim, cosine) | เริ่ม 3-7 ได้ |
@@ -76,14 +76,14 @@
 
 **โค้ดที่เพิ่ม:**
 - `src/lib/security/turnstile.ts` — `verifyTurnstile(token, ip)`: ไม่มี secret = ผ่านตลอด · siteverify ล่ม = ผ่าน (fail-safe, ชั้น rate-limit เดิมยังทำงาน)
-- `src/components/auth/TurnstileWidget.tsx` — client widget · ไม่มี `NEXT_PUBLIC_TURNSTILE_SITE_KEY` = ไม่เรนเดอร์ ไม่บล็อกฟอร์ม
+- `src/components/auth/TurnstileWidget.tsx` — client widget · ดึง site key จาก `/api/config/turnstile` ตอน runtime (ไม่ใช้ `NEXT_PUBLIC_*` เพราะ pipeline deploy ไม่ส่ง env ตอน build) · config = null → ไม่เรนเดอร์ ไม่บล็อกฟอร์ม
 - `AuthModal.tsx` — ฝัง widget + ส่ง `turnstileToken` ไปกับ signup/login/forgot + ปุ่มส่งถูก disable จนกว่าจะผ่าน
 - verify ฝั่ง server ใน `api/auth/email/{signup,login,forgot}` หลังเช็ค origin ก่อนงานหนัก
 - CSP อนุญาต `challenges.cloudflare.com` (script/connect/frame) อยู่แล้ว
 
 **ต้องทำต่อ (เจ้าของโปรเจกต์):**
-- Dashboard → Turnstile → Add widget (Domain: `seertarot.net`, `localhost`) → Site Key + Secret
-- var `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `npx wrangler secret put TURNSTILE_SECRET_KEY`
+- Dashboard → Turnstile → Add widget (Managed · Domain: `seertarot.net`, `localhost`)
+- `npx wrangler secret put TURNSTILE_SITE_KEY` + `npx wrangler secret put TURNSTILE_SECRET_KEY`
 
 **ยังไม่ครอบ:** OAuth (`api/auth/[provider]` — redirect flow, บอตฟาร์ม Google/LINE ยาก), `api/auth/email/resend` (มี rate-limit อยู่แล้ว) — เพิ่มได้ทีหลังถ้าเจอ abuse
 

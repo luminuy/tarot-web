@@ -16,9 +16,20 @@
 
 const SITEVERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
-/** เปิดใช้ Turnstile อยู่หรือไม่ (มี secret ฝั่ง server) */
+/**
+ * เปิดใช้ Turnstile อยู่หรือไม่ — ต้องมี **ทั้งคู่** (site + secret)
+ * ตั้งมาแค่ตัวเดียว = ยังไม่เปิด (กันเคสฝั่ง server บังคับ แต่ client ไม่มี widget → ล็อกผู้ใช้)
+ */
 export function isTurnstileConfigured(): boolean {
-  return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim());
+  return Boolean(
+    process.env.TURNSTILE_SECRET_KEY?.trim() && process.env.TURNSTILE_SITE_KEY?.trim(),
+  );
+}
+
+/** site key สำหรับ widget ฝั่ง client — คืน null ถ้ายังไม่ได้ตั้งครบคู่ */
+export function getTurnstileSiteKey(): string | null {
+  if (!isTurnstileConfigured()) return null;
+  return process.env.TURNSTILE_SITE_KEY!.trim();
 }
 
 export interface TurnstileResult {
@@ -41,7 +52,7 @@ export async function verifyTurnstile(
   remoteIp?: string | null,
 ): Promise<TurnstileResult> {
   const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
-  if (!secret) return { ok: true };
+  if (!secret || !isTurnstileConfigured()) return { ok: true };
 
   if (!token || typeof token !== "string") {
     return { ok: false, reason: "missing-token" };

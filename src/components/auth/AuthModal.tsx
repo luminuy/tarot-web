@@ -8,7 +8,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
 import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
 import { DAILY_LIMIT, MEMBER_BENEFITS } from "@/lib/entitlement/copy";
-import { TurnstileWidget, turnstileEnabledClient } from "@/components/auth/TurnstileWidget";
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 
 export interface AuthModalProps {
   isOpen: boolean;
@@ -59,7 +59,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState("");
+  // null = ด่านปิด/ยังไม่รู้ · "" = ด่านเปิดแต่ยังไม่ผ่าน · string = ผ่านแล้ว
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
@@ -121,7 +122,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setName("");
     setErrorMsg(null);
     setSuccessMsg(null);
-    setTurnstileToken("");
+    setTurnstileToken(null);
   };
 
   const switchMode = (newMode: "signin" | "signup" | "forgot") => {
@@ -171,7 +172,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     if (loading) return; // กันกดส่งซ้ำระหว่างรอผล (ของเดิมกดรัวได้ → ชนเพดาน rate limit ตัวเอง)
 
     // เปิดใช้ Turnstile แต่ผู้ใช้ยังไม่ผ่านกล่องตรวจ → หยุดไว้ก่อน
-    if (turnstileEnabledClient && !turnstileToken) {
+    if (turnstileToken === "") {
       setErrorMsg("กรุณายืนยันว่าคุณไม่ใช่บอตก่อนดำเนินการต่อ");
       return;
     }
@@ -188,7 +189,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (mode === "signin") {
         await postJson(
           "/api/auth/email/login",
-          { email: emailValue, password, turnstileToken },
+          { email: emailValue, password, turnstileToken: turnstileToken ?? "" },
           "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
         );
         soundManager.playCardSelectSound();
@@ -197,7 +198,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       } else if (mode === "signup") {
         const data = await postJson(
           "/api/auth/email/signup",
-          { email: emailValue, password, name: nameValue, turnstileToken },
+          { email: emailValue, password, name: nameValue, turnstileToken: turnstileToken ?? "" },
           "ไม่สามารถสร้างบัญชีได้"
         );
         soundManager.playCardSelectSound();
@@ -212,7 +213,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         // ผู้ใช้เลยนั่งรออีเมลที่ไม่มีวันมา
         const data = await postJson(
           "/api/auth/email/forgot",
-          { email: emailValue, turnstileToken },
+          { email: emailValue, turnstileToken: turnstileToken ?? "" },
           "ไม่สามารถส่งลิงก์ตั้งรหัสผ่านใหม่ได้ กรุณาลองใหม่อีกครั้ง"
         );
         setSuccessMsg(data.message || "หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว");
@@ -459,12 +460,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
 
             {/* ด่านกันบอท (แสดงเฉพาะเมื่อตั้งค่า NEXT_PUBLIC_TURNSTILE_SITE_KEY) */}
-            <TurnstileWidget onVerify={setTurnstileToken} resetKey={mode} />
+            <TurnstileWidget onToken={setTurnstileToken} resetKey={mode} />
 
             {/* Primary Submit Button */}
             <button
               type="submit"
-              disabled={loading || (turnstileEnabledClient && !turnstileToken)}
+              disabled={loading || turnstileToken === ""}
               aria-busy={loading}
               className="w-full h-11.5 mt-2 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs sm:text-sm active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
             >
