@@ -32,6 +32,8 @@ export const KEY = {
   guestIpQuota: (day: string, ipHash: string) => `app:guest:ipq:${day}:${ipHash}`,
   /** โควตาการเปิดไพ่ของผู้เยี่ยมชมต่อซับเน็ต (/24 หรือ /64) ต่อวัน */
   guestSubnetQuota: (day: string, subnetHash: string) => `app:guest:subq:${day}:${subnetHash}`,
+  /** ไพ่ประจำวันของทุกคน (deterministic จากวันที่ · แคชที่ edge): app:daily:card:YYYY-MM-DD */
+  dailyCard: (day: string) => `app:daily:card:${day}`,
 } as const;
 
 /** memo cache ระดับ isolate — กัน round-trip ซ้ำภายในคำขอเดียว / ข้ามคำขอในช่วงสั้น */
