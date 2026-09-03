@@ -34,6 +34,18 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: หน้าผลไพ่ — ปรับเป็น 2 คอลัมน์ 75/25 (คำทำนายซ้าย · การ์ดแชทแม่หมอขวาติดหนึบ)
+
+**สิ่งที่ต้องการ (ต่อจากภาพเจ้าของโปรเจกต์)**: เอาแผงคำทำนาย (`StreamReader`) กับการ์ดปุ่มแชทแม่หมอมาอยู่แถวเดียวกัน — ซ้าย ~75% ขวา ~25% การ์ดแชทอยู่ขวามือ
+
+**สิ่งที่แก้ไข** — `src/app/page.tsx` (บล็อก READING/SUMMARY):
+- เปลี่ยนจากคอลัมน์เดียว `max-w-3xl` เป็น `grid lg:grid-cols-4 gap-6 lg:items-start` บน `max-w-5xl` · `SpreadBoard` ยังเป็น hero เต็มกว้างด้านบนเหมือนเดิม
+- `StreamReader` → `lg:col-span-3` (75%) · การ์ดปุ่มแชท → `<aside lg:col-span-1 lg:sticky lg:top-24>` (25% เลื่อนตามจอ)
+- การ์ดแชทจัดเลย์เอาต์ใหม่เป็นแนวตั้ง (avatar+ป้ายออนไลน์แถวบน → หัวข้อ → คำอธิบาย → ปุ่ม "เปิดห้องแชท →") ให้พอดีคอลัมน์แคบ ~230px · จอเล็ก `grid-cols-1` เรียงบนลงล่างเต็มกว้าง
+- ปลายทางยังเป็นหน้า `/reading/chat` เต็มจอเหมือนเดิม
+
+**สถานะ**: `npm run typecheck` ✅ · `next build --webpack` ✅ (route `/reading/chat` prerender ผ่าน)
+
 ### 🗓️ 2026-09-03: หน้าผลไพ่ — เลย์เอาต์แถวเดียว + แยกห้องแชทเป็นหน้าเต็มจอ `/reading/chat`
 
 **สิ่งที่ต้องการ (จากภาพเจ้าของโปรเจกต์)**:
