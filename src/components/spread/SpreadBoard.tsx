@@ -159,7 +159,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               title="ซูมดูไพ่ 3D ความละเอียดสูง"
             >
               <ExpandTabIcon className="w-3 h-3 text-[#8F5C1A] group-hover:text-[#74490F] transition-colors" />
-              <span className="text-[9.5px] font-serif-th font-bold tracking-wide">ขยาย</span>
+              <span className="text-[12px] font-serif-th font-bold tracking-wide">ขยาย</span>
             </button>
           )}
 
@@ -173,7 +173,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               className="w-24 h-[163px] sm:w-28 sm:h-[190px]"
             />
           ) : (
-            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-lg border-2 border-dashed border-[#D9C8AC] bg-[#F3EDE2] flex items-center justify-center text-xs text-[#6F5B4A]">
+            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-lg border-2 border-dashed border-[#D9C8AC] bg-[#F3EDE2] flex items-center justify-center text-xs text-[#635B4E]">
               {pos.index + 1}
             </div>
           )}
@@ -181,7 +181,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 
         {/* Slot Position Name Tag */}
         <div className="text-center mt-2.5 w-28 sm:w-32">
-          <span className="text-[10px] text-[#8F5C1A] font-mono block font-semibold">ใบที่ {pos.index + 1}</span>
+          <span className="text-[13px] text-[#8F5C1A] font-mono block font-semibold">ใบที่ {pos.index + 1}</span>
           <span
             className="text-xs font-serif-th font-bold text-[#2E211A] leading-tight block truncate"
             title={pos.nameTh}
@@ -199,7 +199,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/30 relative z-10">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-widest text-[#6F5B4A] font-mono">ผังพยากรณ์:</span>
+            <span className="text-[13px] uppercase tracking-widest text-[#635B4E] font-mono">ผังพยากรณ์:</span>
             <span className="text-xs text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.5 rounded-full font-bold font-mono ">
               {spread.positions.length} ใบ
             </span>
@@ -210,7 +210,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         {/* Reveal All Cards Action Button or Revealed Badge */}
         {drawnCards.length > 0 &&
           (isAllRevealed ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#6F5B4A] text-xs font-serif-th font-semibold ">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#635B4E] text-xs font-serif-th font-semibold ">
               <span className="text-[#8F5C1A]">✦</span>
               <span>เปิดไพ่ครบแล้ว</span>
             </div>
@@ -285,7 +285,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       )}
 
       {/* Helpful Hint */}
-      <div className="text-center pt-2 border-t border-[#D9C8AC]/30 text-[11px] text-[#6F5B4A] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
+      <div className="text-center pt-2 border-t border-[#D9C8AC]/30 text-[13px] text-[#635B4E] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
         <span className="text-[#8F5C1A]">✦</span>
         <span>
           {useRail

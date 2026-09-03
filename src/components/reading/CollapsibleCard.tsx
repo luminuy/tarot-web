@@ -47,15 +47,15 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm">{title}</span>
-          {hint && <span className="mt-0.5 block truncate font-serif-th text-[10.5px] text-[#6F5B4A]">{hint}</span>}
+          {hint && <span className="mt-0.5 block truncate font-serif-th text-[13px] text-[#635B4E]">{hint}</span>}
         </span>
         {badge && (
-          <span className="flex-shrink-0 rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-2 py-0.5 text-[10px] font-semibold text-[#2E211A]">
+          <span className="flex-shrink-0 rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-2 py-0.5 text-[13px] font-semibold text-[#2E211A]">
             {badge}
           </span>
         )}
         <span
-          className={`flex-shrink-0 font-mono text-xs text-[#6F5B4A] transition-transform duration-200 ${
+          className={`flex-shrink-0 font-mono text-xs text-[#635B4E] transition-transform duration-200 ${
             open ? "rotate-180" : ""
           }`}
           aria-hidden

@@ -20,19 +20,19 @@ export default function AccountPage() {
           >
             <span>←</span> กลับสู่วิหารพยากรณ์
           </Link>
-          <span className="text-xs font-mono text-[#756F66]">User Sanctuary &amp; Privacy</span>
+          <span className="text-xs font-mono text-[#635B4E]">User Sanctuary &amp; Privacy</span>
         </div>
 
         <div className="text-center space-y-2 py-4">
           {/* ต้องมี wrapper ระดับ block คั่น — `.font-mystic-gold` เป็น display:inline-block
               ถ้าวางชิดกับ inline-flex หัวข้อจะไหลไปอยู่บรรทัดเดียวกับป้าย */}
           <div>
-            <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[11px] text-[#A58A5C] font-bold shadow-xs">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[13px] text-[#A58A5C] font-bold shadow-xs">
               <span>✦</span> Sacred Sanctuary Profile <span>✦</span>
             </span>
           </div>
           <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-[#29261F]">บัญชีและประวัติของคุณ</h1>
-          <p className="text-xs sm:text-sm text-[#756F66] max-w-lg mx-auto">
+          <p className="text-xs sm:text-sm text-[#635B4E] max-w-lg mx-auto">
             ควบคุมข้อมูลความเป็นส่วนตัว ประวัติคำทำนาย และการตั้งค่าตามสิทธิ์ PDPA
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function AccountPage() {
               ความเป็นส่วนตัวและการจัดเก็บข้อมูล
             </h2>
           </div>
-          <p className="text-xs text-[#756F66] leading-relaxed">
+          <p className="text-xs text-[#635B4E] leading-relaxed">
             ระบบของเรายึดหลักความเป็นส่วนตัวระดับสูงสุด ข้อมูลคำถามและประวัติการดูดวงทั้งหมดจะถูกจัดเก็บในเครื่องของคุณ
             (Local Storage) เท่านั้น โดยไม่มีการเก็บถาวรบนเซิร์ฟเวอร์
           </p>

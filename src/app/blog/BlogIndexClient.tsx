@@ -49,13 +49,13 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ค้นหาบทความ ความหมายไพ่ ความรัก การงาน หรือผังพยากรณ์..."
-            className="w-full bg-[#FFFFFF] border border-[#D5CEC2] rounded-xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-[#29261F] placeholder:text-[#756F66]/60 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
+            className="w-full bg-[#FFFFFF] border border-[#D5CEC2] rounded-xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-[#29261F] placeholder:text-[#635B4E] focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
           />
           <SearchTabIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A58A5C]" />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#756F66] hover:text-[#29261F] cursor-pointer"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#635B4E] hover:text-[#29261F] cursor-pointer"
             >
               ✕ ล้างคำค้น
             </button>
@@ -90,17 +90,17 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
       {selectedCat === "all" && !searchQuery && featured && (
         <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-8 relative overflow-hidden group hover:border-[#A58A5C] transition-all shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
           <div className="relative z-10 space-y-4 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#EAE7E0] text-[11px] text-[#A58A5C] font-mono font-bold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#EAE7E0] text-[13px] text-[#A58A5C] font-mono font-bold">
               <span>✦</span> บทความแนะนำประจำสัปดาห์ (Featured)
             </div>
             <h2 className="font-serif-th text-xl sm:text-3xl font-bold text-[#29261F] leading-snug">
               {featured.title}
             </h2>
-            <p className="text-xs sm:text-sm text-[#756F66] font-serif-th leading-relaxed line-clamp-3">
+            <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed line-clamp-3">
               {featured.description}
             </p>
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              <span className="text-[11px] text-[#756F66] font-mono">
+              <span className="text-[13px] text-[#635B4E] font-mono">
                 ⏱ เวลาอ่าน {featured.readTime} · หมวด {featured.categoryTh}
               </span>
               <Link
@@ -117,7 +117,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
       {/* Articles Grid */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between text-xs text-[#756F66] px-1 font-serif-th">
+        <div className="flex items-center justify-between text-xs text-[#635B4E] px-1 font-serif-th">
           <span>พบบทความ {filtered.length} เรื่อง</span>
           {selectedCat !== "all" && (
             <button
@@ -156,18 +156,18 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 space-y-3 hover:border-[#A58A5C] transition-all hover:scale-[1.01] flex flex-col justify-between group shadow-[0_10px_30px_rgba(42,38,31,0.04)]"
               >
                 <div className="space-y-2.5">
-                  <div className="flex items-center justify-between gap-2 text-[10px] font-mono">
+                  <div className="flex items-center justify-between gap-2 text-[13px] font-mono">
                     <span className="px-2.5 py-0.5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] font-bold">
                       {article.categoryTh}
                     </span>
-                    <span className="text-[#756F66]">⏱ {article.readTime}</span>
+                    <span className="text-[#635B4E]">⏱ {article.readTime}</span>
                   </div>
 
                   <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors leading-snug">
                     <Link href={`/blog/${article.slug}`}>{article.title}</Link>
                   </h3>
 
-                  <p className="text-xs text-[#756F66] font-serif-th leading-relaxed line-clamp-3">
+                  <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed line-clamp-3">
                     {article.description}
                   </p>
                 </div>
@@ -177,7 +177,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                     {article.keywords.slice(0, 2).map((kw) => (
                       <span
                         key={kw}
-                        className="text-[9px] text-[#756F66] font-mono bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]"
+                        className="text-[12px] text-[#635B4E] font-mono bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]"
                       >
                         #{kw}
                       </span>

@@ -107,19 +107,19 @@ export default async function ReaderDetailPage({
             <div className="grid gap-3 sm:grid-cols-3 text-xs">
               <div className="rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-4 space-y-1.5">
                 <span className="text-[#8F5C1A] font-bold text-base">1. สับไพ่และตั้งจิต</span>
-                <p className="text-[#6F5B4A] leading-relaxed">
+                <p className="text-[#635B4E] leading-relaxed">
                   เลือกผังและเปิดไพ่ด้วยตนเองผ่านระบบ หรือระบุหัวข้อคำถามที่ต้องการคำตอบ
                 </p>
               </div>
               <div className="rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-4 space-y-1.5">
                 <span className="text-[#8F5C1A] font-bold text-base">2. AI สรุปสาระสำคัญ</span>
-                <p className="text-[#6F5B4A] leading-relaxed">
+                <p className="text-[#635B4E] leading-relaxed">
                   ระบบช่วยประมวลผลตำแหน่งไพ่และบริบทคำถาม เพื่อเตรียมข้อมูลส่งต่อให้แม่หมอ
                 </p>
               </div>
               <div className="rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-4 space-y-1.5">
                 <span className="text-[#8F5C1A] font-bold text-base">3. สนทนากับแม่หมอ</span>
-                <p className="text-[#6F5B4A] leading-relaxed">
+                <p className="text-[#635B4E] leading-relaxed">
                   เชื่อมต่อไปยัง LINE ส่วนตัวของแม่หมอเพื่อสนทนาเจาะลึกและไขข้อข้องใจ
                 </p>
               </div>
@@ -130,7 +130,7 @@ export default async function ReaderDetailPage({
           <div className="border-t border-[#E4D8C4]/30 pt-6 space-y-3 text-center sm:text-left">
             <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} />
 
-            <p className="text-[11px] text-[#6F5B4A] text-center pt-2 font-serif-th">
+            <p className="text-[13px] text-[#635B4E] text-center pt-2 font-serif-th">
               🔒 ข้อมูลคำถามจะถูกส่งต่อไปยังแม่หมอโดยตรง และจะถูกลบออกจากระบบภายใน 30 วันตามมาตรฐาน PDPA
             </p>
           </div>

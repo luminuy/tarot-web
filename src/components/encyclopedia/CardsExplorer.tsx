@@ -42,13 +42,13 @@ const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string;
   },
   น้ำ: {
     bg: "bg-[#6F5B4A]/10",
-    text: "text-[#6F5B4A]",
+    text: "text-[#635B4E]",
     border: "border-[#6F5B4A]/30",
     glow: "rgba(143, 92, 26, 0.12)",
   },
   ลม: {
     bg: "bg-[#6F5B4A]/10",
-    text: "text-[#6F5B4A]",
+    text: "text-[#635B4E]",
     border: "border-[#6F5B4A]/30",
     glow: "rgba(143, 92, 26, 0.12)",
   },
@@ -112,14 +112,14 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#756F66] hover:text-[#29261F] text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#635B4E] hover:text-[#29261F] text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-[#756F66]">
+          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-[#635B4E]">
             <span>
               ค้นพบ <strong className="text-[#A58A5C] text-sm font-bold">{filteredCards.length}</strong> จาก{" "}
               {cards.length} ใบ
@@ -131,7 +131,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   setSearchQuery("");
                   setActiveFilter("all");
                 }}
-                className="text-[11px] text-[#A58A5C] hover:underline cursor-pointer font-bold font-serif-th"
+                className="text-[13px] text-[#A58A5C] hover:underline cursor-pointer font-bold font-serif-th"
               >
                 ล้างคำค้นหา
               </button>
@@ -176,8 +176,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 <div className="flex items-center justify-between w-full mb-1">
                   <tab.Icon className="w-4 h-4 text-[#A58A5C]" />
                   <span
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
-                      isActive ? "bg-[#29261F] text-[#F3F0EA]" : "bg-black/5 text-[#756F66] group-hover:text-[#29261F]"
+                    className={`text-[13px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                      isActive ? "bg-[#29261F] text-[#F3F0EA]" : "bg-black/5 text-[#635B4E] group-hover:text-[#29261F]"
                     }`}
                   >
                     {tab.count}
@@ -191,7 +191,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   >
                     {tab.label}
                   </h4>
-                  <p className="text-[10px] text-[#756F66] truncate mt-0.5">{tab.desc}</p>
+                  <p className="text-[13px] text-[#635B4E] truncate mt-0.5">{tab.desc}</p>
                 </div>
               </button>
             );
@@ -230,11 +230,11 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                   {/* Top Badge: Number & Arcana */}
                   <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#29261F] text-[#F3F0EA] border border-[#D5CEC2]">
+                    <span className="text-[12px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#29261F] text-[#F3F0EA] border border-[#D5CEC2]">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold`}
+                      className={`text-[12px] font-mono px-1.5 py-0.5 rounded border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold`}
                     >
                       {card.element}
                     </span>
@@ -242,7 +242,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                   {/* Bottom Hover Action Overlay */}
                   <div className="absolute inset-x-0 bottom-0 p-2 bg-[#29261F]/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-[10px] font-serif-th font-bold text-[#F3F0EA] flex items-center gap-1">
+                    <span className="text-[13px] font-serif-th font-bold text-[#F3F0EA] flex items-center gap-1">
                       <span>✦</span> ดูความหมาย
                     </span>
                   </div>
@@ -250,7 +250,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                 {/* Card Title & English Subtitle */}
                 <div className="text-center space-y-1 z-10">
-                  <span className="text-[10px] font-mono text-[#756F66] block truncate">{card.nameEn}</span>
+                  <span className="text-[13px] font-mono text-[#635B4E] block truncate">{card.nameEn}</span>
                   <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors truncate">
                     {card.nameTh}
                   </h3>
@@ -260,7 +260,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     {card.keywords.upright.slice(0, 2).map((kw, i) => (
                       <span
                         key={i}
-                        className="text-[9px] font-serif-th px-2 py-0.5 rounded-full bg-[#EAE7E0] text-[#29261F] border border-[#D5CEC2] truncate max-w-full"
+                        className="text-[12px] font-serif-th px-2 py-0.5 rounded-full bg-[#EAE7E0] text-[#29261F] border border-[#D5CEC2] truncate max-w-full"
                       >
                         {kw}
                       </span>
@@ -269,7 +269,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 </div>
 
                 {/* Subtle Luxury Corner Sparkle */}
-                <div className="absolute top-1 right-1 text-[8px] text-[#756F66] group-hover:text-[#A58A5C] transition-colors pointer-events-none">
+                <div className="absolute top-1 right-1 text-[12px] text-[#635B4E] group-hover:text-[#A58A5C] transition-colors pointer-events-none">
                   ✦
                 </div>
               </Link>
@@ -285,7 +285,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
           <h3 className="font-serif-th text-lg font-bold text-[#29261F]">
             ไม่พบไพ่ที่ตรงกับ &ldquo;{searchQuery}&rdquo;
           </h3>
-          <p className="text-xs text-[#756F66] max-w-md mx-auto font-serif-th">
+          <p className="text-xs text-[#635B4E] max-w-md mx-auto font-serif-th">
             ลองค้นหาด้วยชื่ออื่น เช่น &ldquo;ความรัก&rdquo;, &ldquo;The Sun&rdquo;, &ldquo;ดาวพฤหัสบดี&rdquo; หรือ
             &ldquo;ธาตุไฟ&rdquo;
           </p>

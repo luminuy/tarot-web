@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
         {/* Header */}
         <div className="text-center space-y-3 pb-6 border-b border-[#D5CEC2]/40">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#29261F] font-serif-th">นโยบายความเป็นส่วนตัว</h1>
-          <p className="text-xs text-[#756F66]">Privacy Policy &amp; PDPA Compliance</p>
+          <p className="text-xs text-[#635B4E]">Privacy Policy &amp; PDPA Compliance</p>
         </div>
 
         {/* Section 1 */}
@@ -146,7 +146,7 @@ export default function PrivacyPolicyPage() {
         {/* Section 7: Export & Delete Data */}
         <section className="pt-4 border-t border-[#D5CEC2]/40 space-y-4 font-serif-th">
           <h2 className="text-lg font-bold text-[#A58A5C]">7. จัดการข้อมูลส่วนบุคคลของคุณ</h2>
-          <p className="text-xs text-[#756F66]">
+          <p className="text-xs text-[#635B4E]">
             คุณสามารถดาวน์โหลดสำเนาข้อมูลของคุณ หรือสั่งลบข้อมูลทั้งหมดทั้งในเครื่องและบนระบบเซิร์ฟเวอร์ได้อย่างสมบูรณ์
           </p>
           <div className="flex flex-wrap items-center gap-3">

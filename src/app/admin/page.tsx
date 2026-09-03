@@ -99,7 +99,7 @@ export default function AdminHome() {
             className="inline-flex items-center gap-1.5 rounded-xl border border-[#e5c07b]/30 bg-[#170e2a] px-3 py-1.5 text-xs text-[#f5deaa] hover:border-[#ffd700] hover:text-white transition-colors"
           >
             <span>✦ เปิดหน้าเว็บจริง</span>
-            <span className="text-[10px] text-[#9c93b8]">↗</span>
+            <span className="text-[13px] text-[#9c93b8]">↗</span>
           </a>
           <Button variant="ghost" size="sm" onClick={logout} className="text-xs text-[#9c93b8] hover:text-rose-300">
             ออกจากระบบ

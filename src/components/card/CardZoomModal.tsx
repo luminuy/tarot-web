@@ -72,11 +72,11 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           {/* Card Meta & Details */}
           <div className="space-y-1 w-full">
             <h3 className="font-serif-th text-lg sm:text-xl font-bold font-mystic-gold">{card.nameTh}</h3>
-            <p className="text-xs text-[#6F5B4A] font-mono">
+            <p className="text-xs text-[#635B4E] font-mono">
               {card.nameEn} · {isReversed ? "กลับหัว (Reversed)" : "หัวตั้ง (Upright)"}
             </p>
 
-            <div className="flex items-center justify-center gap-2 pt-2 flex-wrap text-[11px]">
+            <div className="flex items-center justify-center gap-2 pt-2 flex-wrap text-[13px]">
               <span className="px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[#8F5C1A] font-semibold">
                 ธาตุ: {card.element}
               </span>

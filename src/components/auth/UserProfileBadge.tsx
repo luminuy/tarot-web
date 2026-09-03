@@ -160,7 +160,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
   if (loading) {
     return (
-      <div className="min-h-[38px] px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-full text-[#6F5B4A] text-xs font-serif-th font-bold flex items-center gap-1.5 whitespace-nowrap select-none opacity-80 pointer-events-none">
+      <div className="min-h-[38px] px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-full text-[#635B4E] text-xs font-serif-th font-bold flex items-center gap-1.5 whitespace-nowrap select-none opacity-80 pointer-events-none">
         <span className="text-[#8F5C1A] text-xs">✦</span>
         <span>เข้าสู่ระบบ</span>
       </div>
@@ -175,7 +175,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           soundManager.playMenuTapSound();
           onOpenAuthModal();
         }}
-        className="min-h-[38px] px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-full text-[#6F5B4A] hover:text-[#8F5C1A] text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] select-none"
+        className="min-h-[38px] px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-full text-[#635B4E] hover:text-[#8F5C1A] text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] select-none"
       >
         <span className="text-[#8F5C1A] text-xs">✦</span>
         <span>เข้าสู่ระบบ</span>
@@ -210,7 +210,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             className="w-6 h-6 rounded-full object-cover ring-1.5 ring-[#8F5C1A] "
           />
         ) : (
-          <div className="w-6 h-6 rounded-full bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center font-bold text-[10px] ring-1.5 ring-[#8F5C1A]">
+          <div className="w-6 h-6 rounded-full bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center font-bold text-[13px] ring-1.5 ring-[#8F5C1A]">
             {user.name.slice(0, 1).toUpperCase()}
           </div>
         )}
@@ -221,7 +221,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           animate={{ rotate: menuOpen ? 180 : 0 }}
           transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           style={{ transformOrigin: "50% 48%" }}
-          className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${menuOpen ? "text-[#8F5C1A]" : "text-[#6F5B4A]"}`}
+          className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${menuOpen ? "text-[#8F5C1A]" : "text-[#635B4E]"}`}
           aria-hidden="true"
         >
           <path
@@ -231,7 +231,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           />
         </motion.svg>
         {pendingCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-[9px] font-bold flex items-center justify-center animate-pulse">
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-[12px] font-bold flex items-center justify-center animate-pulse">
             {pendingCount > 9 ? "9+" : pendingCount}
           </span>
         )}
@@ -271,10 +271,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <div className="flex-1 min-w-0">
                 <span className="block text-sm font-bold text-[#2E211A] truncate tracking-wide">{user.name}</span>
                 {user.email && (
-                  <span className="block text-[11px] text-[#6F5B4A] truncate font-sans">{user.email}</span>
+                  <span className="block text-[13px] text-[#635B4E] truncate font-sans">{user.email}</span>
                 )}
                 <div className="mt-1 flex items-center gap-1.5">
-                  <span className="text-[10px] text-[#2E211A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.2 rounded-full inline-flex items-center gap-1">
+                  <span className="text-[13px] text-[#2E211A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.2 rounded-full inline-flex items-center gap-1">
                     <span className="text-[#8F5C1A]">✦</span>
                     <span>{getProviderLabel()}</span>
                   </span>
@@ -287,9 +287,9 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[#8F5C1A] text-xs">✦</span>
-                  <span className="text-[11px] font-bold text-[#2E211A] tracking-wide">สิทธิ์และแพ็กเกจ</span>
+                  <span className="text-[13px] font-bold text-[#2E211A] tracking-wide">สิทธิ์และแพ็กเกจ</span>
                 </div>
-                <span className="text-[10px] font-mono font-bold text-[#FFFFFF] bg-[#8F5C1A] px-2 py-0.5 rounded-full">
+                <span className="text-[13px] font-mono font-bold text-[#FFFFFF] bg-[#8F5C1A] px-2 py-0.5 rounded-full">
                   {view?.isUnlimited
                     ? "VIP UNLIMITED"
                     : view?.remaining != null
@@ -298,7 +298,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 </span>
               </div>
 
-              <div className="text-[10.5px] text-[#6F5B4A] leading-relaxed">
+              <div className="text-[13px] text-[#635B4E] leading-relaxed">
                 {view?.isUnlimited ? (
                   <p>คุณมีสิทธิ์เปิดไพ่และสนทนาปรึกษาได้ไม่จำกัด</p>
                 ) : (
@@ -324,14 +324,14 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                     <span>✨</span>
                     <span>ซื้อรอบเพิ่ม / อัปเกรดญาณ</span>
                   </span>
-                  <span className="text-[10px] bg-black/15 px-1.5 py-0.5 rounded font-mono font-semibold">
+                  <span className="text-[13px] bg-black/15 px-1.5 py-0.5 rounded font-mono font-semibold">
                     เริ่มต้น ฿{CHEAPEST_PACKAGE_THB}
                   </span>
                 </button>
               )}
 
               {/* Secondary Navigation: Compare Plans & Account Hub */}
-              <div className="flex items-center justify-between pt-1 border-t border-[#D9C8AC]/30 text-[10.5px]">
+              <div className="flex items-center justify-between pt-1 border-t border-[#D9C8AC]/30 text-[13px]">
                 {onOpenPlans && (
                   <button
                     type="button"
@@ -352,7 +352,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                     soundManager.playMenuTapSound();
                     setMenuOpen(false);
                   }}
-                  className="text-[#6F5B4A] hover:text-[#2E211A] transition-colors flex items-center gap-1 ml-auto font-medium"
+                  className="text-[#635B4E] hover:text-[#2E211A] transition-colors flex items-center gap-1 ml-auto font-medium"
                 >
                   <span>จัดการบัญชี</span>
                   <span>→</span>
@@ -362,7 +362,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
             {/* Unverified Email Warning Badge */}
             {user.provider === "email" && user.emailVerified === false && (
-              <div className="p-2.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A] text-[11px] space-y-1.5">
+              <div className="p-2.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A] text-[13px] space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold flex items-center gap-1">
                     <span className="text-[#8F5C1A]">✦</span>
@@ -371,7 +371,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   <button
                     type="button"
                     onClick={handleResendVerify}
-                    className="text-[10.5px] text-[#8F5C1A] hover:text-[#2E211A] hover:underline font-bold cursor-pointer transition-colors"
+                    className="text-[13px] text-[#8F5C1A] hover:text-[#2E211A] hover:underline font-bold cursor-pointer transition-colors"
                   >
                     {resendStatus || "ส่งลิงก์ใหม่"}
                   </button>
@@ -381,7 +381,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
             {/* Pending Reviews Notification Callout */}
             {pendingCount > 0 && (
-              <div className="p-2.5 rounded-full bg-[#8F5C1A]/15 border border-[#D9C8AC]/30 text-[#2E211A] text-[11px] flex items-center justify-between ">
+              <div className="p-2.5 rounded-full bg-[#8F5C1A]/15 border border-[#D9C8AC]/30 text-[#2E211A] text-[13px] flex items-center justify-between ">
                 <span className="flex items-center gap-1.5">
                   <span className="text-[#8F5C1A]">✦</span>
                   <span>รอติดตามผลคำทำนาย</span>
@@ -395,8 +395,8 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             {/* Marketing / Follow-up Consent Luxury Toggle */}
             <div className="p-2.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] flex items-center justify-between">
               <div className="pr-2">
-                <span className="block text-[11px] font-semibold text-[#2E211A]">รับคำทำนายติดตามผล</span>
-                <span className="text-[10px] text-[#6F5B4A]">แจ้งเตือนเมื่อถึงกำหนดคำทำนายทางอีเมล</span>
+                <span className="block text-[13px] font-semibold text-[#2E211A]">รับคำทำนายติดตามผล</span>
+                <span className="text-[13px] text-[#635B4E]">แจ้งเตือนเมื่อถึงกำหนดคำทำนายทางอีเมล</span>
               </div>
               <button
                 type="button"
@@ -425,7 +425,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   <span className="text-[#A6392C] group-hover:rotate-12 transition-transform">✦</span>
                   <span>ออกจากระบบ</span>
                 </span>
-                <span className="text-[11px] text-[#A6392C] group-hover:text-[#A6392C] group-hover:translate-x-0.5 transition-all">
+                <span className="text-[13px] text-[#A6392C] group-hover:text-[#A6392C] group-hover:translate-x-0.5 transition-all">
                   →
                 </span>
               </button>

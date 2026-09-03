@@ -11,7 +11,7 @@ export interface PasswordStrength {
 
 export function calculatePasswordStrength(password: string): PasswordStrength {
   if (!password || password.length === 0) {
-    return { score: 0, label: "กรุณาระบุรหัสผ่าน", colorClass: "text-[#6F5B4A]", barColor: "bg-[#D9C8AC]" };
+    return { score: 0, label: "กรุณาระบุรหัสผ่าน", colorClass: "text-[#635B4E]", barColor: "bg-[#D9C8AC]" };
   }
 
   let points = 0;

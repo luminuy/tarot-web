@@ -834,7 +834,7 @@ export default function TarotPage() {
                   ดูดวงไพ่ทาโรต์
                 </h1>
               </div>
-              <span className="hidden sm:block text-[10px] tracking-[0.22em] text-[#756F66] font-mono uppercase font-semibold pl-4">
+              <span className="hidden sm:block text-[13px] tracking-[0.22em] text-[#635B4E] font-mono uppercase font-semibold pl-4">
                 1909 RIDER-WAITE TAROT
               </span>
             </div>
@@ -937,7 +937,7 @@ export default function TarotPage() {
                       {/* Layer 1: Top Floating Hero Card */}
                       <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-xl border-2 border-[#D5CEC2] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
                         <div className="w-full flex justify-center items-center opacity-90">
-                          <span className="text-[9px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
+                          <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
                             ✦ SACRED ORACLE ✦
                           </span>
                         </div>
@@ -961,7 +961,7 @@ export default function TarotPage() {
                     <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide">
                       เลือกผังการเปิดไพ่
                     </h2>
-                    <p className="text-xs sm:text-sm text-[#756F66] max-w-xl mx-auto font-serif-th">
+                    <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto font-serif-th">
                       เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการค้นหาคำตอบในจิตใจ
                     </p>
                   </div>
@@ -1020,7 +1020,7 @@ export default function TarotPage() {
                 <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F]">
                   ตั้งคำถาม &amp; เลือกแม่หมอ
                 </h2>
-                <p className="text-xs sm:text-sm text-[#756F66] font-serif-th">
+                <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th">
                   พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
                 </p>
               </div>
@@ -1065,7 +1065,7 @@ export default function TarotPage() {
                 >
                   <span aria-hidden="true">←</span>
                   <span>เปลี่ยนผัง</span>
-                  <span className="hidden lg:inline truncate text-[#756F66]">({selectedSpread.nameTh})</span>
+                  <span className="hidden lg:inline truncate text-[#635B4E]">({selectedSpread.nameTh})</span>
                 </button>
 
                 <button
@@ -1075,7 +1075,7 @@ export default function TarotPage() {
                   aria-label="ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"
                   className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-full text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shadow-sm ${
                     !nickname.trim() || !question.trim()
-                      ? "bg-[#EAE7E0] text-[#756F66]/50 border border-[#D5CEC2] cursor-not-allowed"
+                      ? "bg-[#EAE7E0] text-[#635B4E] border border-[#D5CEC2] cursor-not-allowed"
                       : "bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] active:scale-95 cursor-pointer"
                   }`}
                 >
@@ -1208,7 +1208,7 @@ export default function TarotPage() {
 
               {/* Bottom Quick Luxury Actions Deck */}
               <div className="p-5 sm:p-6 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-wrap items-center justify-between gap-4 shadow-xs">
-                <div className="flex items-center gap-2 text-xs text-[#756F66] font-serif-th">
+                <div className="flex items-center gap-2 text-xs text-[#635B4E] font-serif-th">
                   <span className="text-[#A58A5C]">✦</span>
                   <span>บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้</span>
                 </div>
@@ -1323,7 +1323,7 @@ export default function TarotPage() {
                 SeerTarot
               </span>
             </Link>
-            <p className="font-serif-th text-sm text-[#D5CEC2] font-light">
+            <p className="font-serif-th text-sm text-[#E4DECF]">
               พื้นที่สงบสำหรับหยุด คิด ถาม และอ่านความหมายของตัวเอง
             </p>
           </div>
@@ -1339,10 +1339,10 @@ export default function TarotPage() {
               />
             </div>
             <div className="space-y-1 min-w-0">
-              <h4 className="text-[11px] font-bold text-[#A58A5C] uppercase tracking-wider font-serif-th">
+              <h4 className="text-[13px] font-bold text-[#A58A5C] uppercase tracking-wider font-serif-th">
                 ข้อควรทราบเกี่ยวกับการทำนาย
               </h4>
-              <p className="text-[11px] text-[#D5CEC2] leading-[1.7] font-serif-th">
+              <p className="text-[13px] text-[#D5CEC2] leading-[1.7] font-serif-th">
                 คำทำนายทั้งหมดประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเลือกและเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต ไม่สามารถใช้แทนคำปรึกษาทางการแพทย์ กฎหมาย หรือการเงินได้ การตัดสินใจทุกอย่างยังคงเป็นของคุณเสมอ
               </p>
             </div>
@@ -1364,10 +1364,10 @@ export default function TarotPage() {
                 />
               </div>
               <div>
-                <span className="text-[11px] font-bold text-[#A58A5C] block font-serif-th">
+                <span className="text-[13px] font-bold text-[#A58A5C] block font-serif-th">
                   นโยบายความเป็นส่วนตัว
                 </span>
-                <span className="text-[10px] text-[#D5CEC2] group-hover:text-[#F3F0EA] transition-colors font-serif-th">
+                <span className="text-[13px] text-[#D5CEC2] group-hover:text-[#F3F0EA] transition-colors font-serif-th">
                   คุ้มครองข้อมูลส่วนบุคคล (PDPA)
                 </span>
               </div>
@@ -1384,12 +1384,12 @@ export default function TarotPage() {
                 />
               </div>
               <div>
-                <span className="text-[11px] font-bold text-[#3A7044] block font-serif-th">
+                <span className="text-[13px] font-bold text-[#3A7044] block font-serif-th">
                   สายด่วนสุขภาพจิต
                 </span>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-sm font-bold text-[#F3F0EA] font-mono tracking-wider">1323</span>
-                  <span className="text-[9.5px] text-[#D5CEC2] font-serif-th">โทรฟรี 24 ชม.</span>
+                  <span className="text-[12px] text-[#D5CEC2] font-serif-th">โทรฟรี 24 ชม.</span>
                 </div>
               </div>
             </div>
@@ -1405,12 +1405,12 @@ export default function TarotPage() {
                 />
               </div>
               <div>
-                <span className="text-[11px] font-bold text-[#A6392C] block font-serif-th">
+                <span className="text-[13px] font-bold text-[#A6392C] block font-serif-th">
                   แจ้งเหตุเจ็บป่วยฉุกเฉิน
                 </span>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-sm font-bold text-[#F3F0EA] font-mono tracking-wider">1669</span>
-                  <span className="text-[9.5px] text-[#D5CEC2] font-serif-th">โทรฟรี 24 ชม.</span>
+                  <span className="text-[12px] text-[#D5CEC2] font-serif-th">โทรฟรี 24 ชม.</span>
                 </div>
               </div>
             </div>
@@ -1427,17 +1427,17 @@ export default function TarotPage() {
                   sizes="24px"
                 />
               </div>
-              <span className="text-[10px] font-serif-th font-semibold tracking-wider text-[#D5CEC2]">
+              <span className="text-[13px] font-serif-th font-semibold tracking-wider text-[#D5CEC2]">
                 SeerTarot · ไพ่ทาโรต์ 1909 Rider-Waite
               </span>
               <div className="w-5 h-7 rounded overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
                 <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="24px" />
               </div>
             </div>
-            <p className="text-[10px] text-[#D5CEC2]/70 font-serif-th text-center">
+            <p className="text-[13px] text-[#D5CEC2] font-serif-th text-center">
               ระบบสับไพ่โปร่งใสตรวจสอบได้ (Provably Fair) · สำรับดั้งเดิม 1909 Rider-Waite · คำทำนายประมวลผลด้วย AI
             </p>
-            <p className="text-[10px] text-[#D5CEC2]/60 font-serif-th text-center">
+            <p className="text-[13px] text-[#D5CEC2] font-serif-th text-center">
               © 2026 SeerTarot · สงวนลิขสิทธิ์ ·{" "}
               <Link href="/privacy" className="hover:text-[#A58A5C] transition-colors">
                 นโยบายความเป็นส่วนตัว

@@ -87,7 +87,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#D9C8AC] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
           >
             <div className="w-full flex justify-center items-center opacity-85">
-              <span className="text-[9px] font-serif-th text-[#FFFFFF] tracking-[0.2em] uppercase font-bold">
+              <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.2em] uppercase font-bold">
                 SACRED ORACLE
               </span>
             </div>
@@ -203,20 +203,20 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
       </div>
 
       {/* Sacred Ritual Subtitle & Title */}
-      <span className="text-[11px] font-serif-th text-[#2E211A] font-bold bg-[#F3EDE2]/30 px-4 py-1 rounded-full border border-[#D9C8AC] mb-2 inline-block ">
+      <span className="text-[13px] font-serif-th text-[#2E211A] font-bold bg-[#F3EDE2]/30 px-4 py-1 rounded-full border border-[#D9C8AC] mb-2 inline-block ">
         ✦ ขั้นตอนสับไพ่ ✦
       </span>
       <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter py-0.5 leading-normal">
         ตั้งสมาธิและนึกถึงคำถามของคุณ
       </h2>
-      <p className="text-xs sm:text-sm text-[#6F5B4A] mt-1 max-w-md leading-relaxed">
+      <p className="text-xs sm:text-sm text-[#635B4E] mt-1 max-w-md leading-relaxed">
         ทำใจให้สบาย แล้วนึกถึงเรื่องที่อยากรู้สำหรับผัง{" "}
         <span className="text-[#2E211A] font-semibold">"{spreadName}"</span>
       </p>
 
       {/* Commitment Preview for Commit-Reveal Transparency */}
       {commitment && (
-        <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[10px] font-mono text-[#6F5B4A]">
+        <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[13px] font-mono text-[#635B4E]">
           <span>
             รหัสยืนยันความโปร่งใส (SHA-256): {commitment.slice(0, 16)}…{commitment.slice(-8)}
           </span>

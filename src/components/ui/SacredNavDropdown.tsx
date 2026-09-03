@@ -159,7 +159,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         aria-label="เมนูหลักวิหารพยากรณ์"
       >
         <TarotDeckNavIcon
-          className={`w-4 h-4 flex-shrink-0 transition-colors ${isOpen ? "text-[#A58A5C]" : "text-[#756F66]"}`}
+          className={`w-4 h-4 flex-shrink-0 transition-colors ${isOpen ? "text-[#A58A5C]" : "text-[#635B4E]"}`}
         />
         <span className="tracking-wide">เมนู</span>
         <motion.svg
@@ -168,7 +168,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           style={{ transformOrigin: "50% 48%" }}
-          className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${isOpen ? "text-[#A58A5C]" : "text-[#756F66]"}`}
+          className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${isOpen ? "text-[#A58A5C]" : "text-[#635B4E]"}`}
           aria-hidden="true"
         >
           <path
@@ -198,12 +198,12 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#A58A5C]/35 to-transparent -mt-0.5 mb-1.5" />
 
             {/* Header Title inside Dropdown */}
-            <div className="px-3 py-1.5 flex items-center justify-between text-[11px] font-serif-th font-semibold text-[#756F66] border-b border-[#D5CEC2]/40 pb-2">
+            <div className="px-3 py-1.5 flex items-center justify-between text-[13px] font-serif-th font-semibold text-[#635B4E] border-b border-[#D5CEC2]/40 pb-2">
               <span className="flex items-center gap-1.5 text-[#A58A5C]">
                 <span>✦</span>
                 <span className="font-bold">วิหารพยากรณ์</span>
               </span>
-              <span className="text-[#29261F] text-[10px] font-mono tracking-wider bg-[#EAE7E0] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-bold">
+              <span className="text-[#29261F] text-[13px] font-mono tracking-wider bg-[#EAE7E0] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-bold">
                 1909 RWS
               </span>
             </div>
@@ -224,11 +224,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                         <span className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors">
                           {item.label}
                         </span>
-                        <span className="text-[9px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
+                        <span className="text-[12px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
                           {item.badge}
                         </span>
                       </div>
-                      <p className="text-[10px] font-serif-th text-[#756F66] truncate mt-0.5">{item.sublabel}</p>
+                      <p className="text-[13px] font-serif-th text-[#635B4E] truncate mt-0.5">{item.sublabel}</p>
                     </div>
                   </>
                 );
@@ -283,11 +283,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                         <span className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors">
                           ประวัติการดูดวง
                         </span>
-                        <span className="text-[9px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
+                        <span className="text-[12px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
                           บันทึก
                         </span>
                       </div>
-                      <p className="text-[10px] font-serif-th text-[#756F66] truncate mt-0.5">
+                      <p className="text-[13px] font-serif-th text-[#635B4E] truncate mt-0.5">
                         ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้
                       </p>
                     </div>

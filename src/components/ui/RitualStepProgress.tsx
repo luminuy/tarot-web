@@ -54,12 +54,12 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
 
           const dot = (
             <span
-              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-mono font-bold transition-all duration-300 ${
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[13px] sm:text-xs font-mono font-bold transition-all duration-300 ${
                 isActive
                   ? "bg-[#8F5C1A] border-2 border-[#8F5C1A] text-white ring-4 ring-[rgba(143,92,26,0.15)]"
                   : isPassed
                     ? "bg-white border-2 border-[#8F5C1A] text-[#8F5C1A] font-bold"
-                    : "bg-[#F3EDE2] border border-[#D9C8AC] text-[#6F5B4A]"
+                    : "bg-[#F3EDE2] border border-[#D9C8AC] text-[#635B4E]"
               }`}
             >
               {isPassed ? "✓" : step.num}
@@ -73,8 +73,8 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
            */
           const label = (
             <span
-              className={`text-[10px] sm:text-[11px] font-serif-th mt-1.5 transition-colors whitespace-nowrap ${
-                isActive ? "font-bold text-[#2E211A]" : "text-[#6F5B4A]"
+              className={`text-[13px] sm:text-[13px] font-serif-th mt-1.5 transition-colors whitespace-nowrap ${
+                isActive ? "font-bold text-[#2E211A]" : "text-[#635B4E]"
               }`}
             >
               {step.title}

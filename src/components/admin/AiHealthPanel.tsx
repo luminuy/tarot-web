@@ -105,7 +105,7 @@ export default function AiHealthPanel() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-[#e5c07b]/25 bg-[#0d0818] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-widest text-[#e5c07b]">คีย์ AI</p>
+              <p className="text-[13px] uppercase tracking-widest text-[#e5c07b]">คีย์ AI</p>
               <p className="mt-1 text-xs text-[#cfc8e2]">
                 {data.key.configured
                   ? `ตั้งไว้แล้วที่ ${data.key.envVar} · ยาว ${data.key.length} ตัว${
@@ -115,7 +115,7 @@ export default function AiHealthPanel() {
               </p>
             </div>
             <div className="rounded-xl border border-[#e5c07b]/25 bg-[#0d0818] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-widest text-[#e5c07b]">เพดานเรียก AI วันนี้</p>
+              <p className="text-[13px] uppercase tracking-widest text-[#e5c07b]">เพดานเรียก AI วันนี้</p>
               <p className="mt-1 text-xs text-[#cfc8e2]">
                 ใช้ไป {data.budget.usedToday} / {data.budget.dailyCap} ครั้ง
                 {data.budget.memberCapReached
@@ -141,22 +141,22 @@ export default function AiHealthPanel() {
                 <tbody className="text-[#cfc8e2]">
                   {data.models.map((m) => (
                     <tr key={m.model} className="border-t border-[#e5c07b]/12 align-top">
-                      <td className="px-3 py-2 font-mono text-[11px]">{m.model}</td>
+                      <td className="px-3 py-2 font-mono text-[13px]">{m.model}</td>
                       <td className={`px-3 py-2 font-semibold ${m.ok ? "text-emerald-300" : "text-red-300"}`}>
                         {m.ok ? "ผ่าน" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
                       </td>
-                      <td className="px-3 py-2 font-mono text-[11px]">{m.elapsedMs}ms</td>
+                      <td className="px-3 py-2 font-mono text-[13px]">{m.elapsedMs}ms</td>
                       <td className="px-3 py-2 leading-relaxed">
                         {m.ok ? (
                           <>
                             ตอบว่า “{m.answerPreview}”
-                            <span className="block text-[10px] text-[#9c93b8]">
+                            <span className="block text-[13px] text-[#9c93b8]">
                               parts ทั้งหมด {m.partCount} · เป็น part ความคิด {m.thoughtPartCount}
                               {m.finishReason ? ` · finishReason ${m.finishReason}` : ""}
                             </span>
                           </>
                         ) : (
-                          <span className="break-all text-[11px] text-red-300/90">{m.error}</span>
+                          <span className="break-all text-[13px] text-red-300/90">{m.error}</span>
                         )}
                       </td>
                     </tr>
@@ -170,7 +170,7 @@ export default function AiHealthPanel() {
             <div className="space-y-2">
               <div>
                 <h3 className="text-sm font-bold text-[#f5deaa]">ทดสอบแบบห้องคุยจริง</h3>
-                <p className="mt-0.5 text-[11px] leading-relaxed text-[#9c93b8]">
+                <p className="mt-0.5 text-[13px] leading-relaxed text-[#9c93b8]">
                   ยิงด้วย prompt ชุดเดียวกับที่ห้องคุยใช้จริง (บุคลิกแม่หมอเต็ม + ไพ่ + ประวัติสนทนา)
                   — ผ่าน ping สั้น ๆ ไม่ได้แปลว่าห้องคุยจะผ่าน ช่องนี้คือตัวชี้ขาด
                 </p>
@@ -183,13 +183,13 @@ export default function AiHealthPanel() {
                   }`}
                 >
                   <p className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[11px] text-[#cfc8e2]">{m.model}</span>
+                    <span className="font-mono text-[13px] text-[#cfc8e2]">{m.model}</span>
                     <span className={m.ok ? "font-semibold text-emerald-300" : "font-semibold text-red-300"}>
                       {m.ok ? "ตอบได้จริง" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
                     </span>
-                    <span className="font-mono text-[11px] text-[#9c93b8]">{m.elapsedMs}ms</span>
+                    <span className="font-mono text-[13px] text-[#9c93b8]">{m.elapsedMs}ms</span>
                     {m.promptChars ? (
-                      <span className="text-[10px] text-[#9c93b8]">prompt {m.promptChars} ตัวอักษร</span>
+                      <span className="text-[13px] text-[#9c93b8]">prompt {m.promptChars} ตัวอักษร</span>
                     ) : null}
                   </p>
                   <p className={`mt-1.5 leading-relaxed ${m.ok ? "text-[#cfc8e2]" : "break-all text-red-300/90"}`}>
@@ -200,7 +200,7 @@ export default function AiHealthPanel() {
             </div>
           )}
 
-          <p className="text-[10px] text-[#9c93b8]">
+          <p className="text-[13px] text-[#9c93b8]">
             ตรวจเมื่อ {new Date(data.checkedAt).toLocaleString("th-TH")}
           </p>
         </>

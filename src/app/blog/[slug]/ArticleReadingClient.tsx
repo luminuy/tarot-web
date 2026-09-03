@@ -36,9 +36,9 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           <span className="px-3 py-1 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#A58A5C] font-bold">
             ✦ {article.categoryTh}
           </span>
-          <span className="text-[#756F66]">⏱ เวลาอ่าน {article.readTime}</span>
-          <span className="text-[#756F66]">·</span>
-          <span className="text-[#756F66]">โดย {article.author}</span>
+          <span className="text-[#635B4E]">⏱ เวลาอ่าน {article.readTime}</span>
+          <span className="text-[#635B4E]">·</span>
+          <span className="text-[#635B4E]">โดย {article.author}</span>
         </div>
 
         <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-[#29261F] leading-tight">{article.title}</h1>
@@ -71,11 +71,11 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {article.targetCardId && article.cardNameTh && (
         <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
           <div className="space-y-1 text-center sm:text-left">
-            <div className="text-[10px] font-mono text-[#A58A5C] font-bold">✦ สำรวจไพ่ใบนี้ในสารานุกรม 78 ใบ</div>
+            <div className="text-[13px] font-mono text-[#A58A5C] font-bold">✦ สำรวจไพ่ใบนี้ในสารานุกรม 78 ใบ</div>
             <div className="font-serif-th font-bold text-base text-[#29261F]">
               ไพ่ {article.cardNameTh} (1909 Rider-Waite)
             </div>
-            <p className="text-xs text-[#756F66] font-serif-th">
+            <p className="text-xs text-[#635B4E] font-serif-th">
               ดูภาพขยาย 1909 ความหมายลึกซึ้ง 5 ด้าน และตำแหน่งในผังพยากรณ์
             </p>
           </div>
@@ -142,13 +142,13 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
       {/* High-Impact Interactive CTA Box */}
       <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-8 text-center space-y-4 relative overflow-hidden shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#EAE7E0] text-[11px] text-[#A58A5C] font-mono font-bold">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#EAE7E0] text-[13px] text-[#A58A5C] font-mono font-bold">
           <span>✦</span> Interactive Provably-Fair Reading <span>✦</span>
         </div>
         <h2 className="font-serif-th text-xl sm:text-3xl font-bold text-[#29261F]">
           พร้อมเปิดไพ่รับคำตอบสำหรับชีวิตคุณหรือยัง?
         </h2>
-        <p className="text-xs sm:text-sm text-[#756F66] font-serif-th max-w-lg mx-auto leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th max-w-lg mx-auto leading-relaxed">
           สัมผัสประสบการณ์สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยตัวคุณเองแบบ 3D พร้อมรับคำพยากรณ์เจาะลึกจากแม่หมอ AI ตลอด 24
           ชั่วโมง
         </p>
@@ -165,7 +165,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
       {/* Share / Copy Link Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-[#D5CEC2]/40 text-xs font-serif-th">
-        <div className="flex items-center gap-2 text-[#756F66]">
+        <div className="flex items-center gap-2 text-[#635B4E]">
           <span>แชร์คัมภีร์นี้:</span>
           <button
             onClick={handleCopyLink}
@@ -192,12 +192,12 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                 className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 space-y-2 hover:border-[#A58A5C] transition-all group flex flex-col justify-between shadow-[0_10px_30px_rgba(42,38,31,0.04)]"
               >
                 <div className="space-y-1.5">
-                  <div className="text-[10px] font-mono text-[#A58A5C] font-bold">{rel.categoryTh}</div>
+                  <div className="text-[13px] font-mono text-[#A58A5C] font-bold">{rel.categoryTh}</div>
                   <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors line-clamp-2">
                     {rel.title}
                   </h3>
                 </div>
-                <div className="text-[10px] text-[#756F66] font-mono pt-2 border-t border-[#D5CEC2]/40">
+                <div className="text-[13px] text-[#635B4E] font-mono pt-2 border-t border-[#D5CEC2]/40">
                   ⏱ {rel.readTime}
                 </div>
               </Link>

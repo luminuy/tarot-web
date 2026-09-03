@@ -28,7 +28,7 @@ export function Field({ label, hint, error, children }: FieldProps) {
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-xs text-[#6F5B4A]">
+        <p id={`${id}-hint`} className="text-xs text-[#635B4E]">
           {hint}
         </p>
       ) : null}

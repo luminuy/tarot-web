@@ -28,7 +28,7 @@ function ResetPasswordForm() {
           ✕
         </div>
         <h2 className="text-xl font-bold font-serif-th text-[#2E211A]">ลิงก์ไม่ถูกต้องหรือหมดอายุ</h2>
-        <p className="text-xs text-[#6F5B4A] font-serif-th leading-relaxed max-w-sm mx-auto">
+        <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed max-w-sm mx-auto">
           ไม่พบ Token สำหรับการตั้งรหัสผ่านใหม่ หรือลิงก์นี้อาจหมดอายุไปแล้ว (อายุ 15 นาที)
         </p>
         <div className="pt-2">
@@ -110,7 +110,7 @@ function ResetPasswordForm() {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6F5B4A] hover:text-[#2E211A] text-xs cursor-pointer"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#635B4E] hover:text-[#2E211A] text-xs cursor-pointer"
           >
             {showPassword ? "ซ่อน" : "ดู"}
           </button>
@@ -125,8 +125,8 @@ function ResetPasswordForm() {
                 style={{ width: `${(strength.score / 4) * 100}%` }}
               />
             </div>
-            <div className="flex justify-between text-[11px] font-serif-th">
-              <span className="text-[#6F5B4A]">ความปลอดภัย:</span>
+            <div className="flex justify-between text-[13px] font-serif-th">
+              <span className="text-[#635B4E]">ความปลอดภัย:</span>
               <span className={strength.colorClass}>{strength.label}</span>
             </div>
           </div>
@@ -177,14 +177,14 @@ export default function ResetPasswordPage() {
 
         <div className="space-y-1">
           <h1 className="text-xl sm:text-2xl font-serif-th font-bold font-mystic-gold">ตั้งรหัสผ่านใหม่</h1>
-          <p className="text-xs text-[#6F5B4A] font-serif-th leading-relaxed">
+          <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed">
             กำหนดรหัสผ่านใหม่สำหรับบัญชี SeerTarot ของคุณ
           </p>
         </div>
 
         <Suspense
           fallback={
-            <div className="py-8 text-center text-xs text-[#6F5B4A] font-serif-th animate-pulse">กำลังโหลดข้อมูล…</div>
+            <div className="py-8 text-center text-xs text-[#635B4E] font-serif-th animate-pulse">กำลังโหลดข้อมูล…</div>
           }
         >
           <ResetPasswordForm />

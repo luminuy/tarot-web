@@ -52,11 +52,11 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
       onClick={onOpenDetails}
       title={title}
       aria-label={srLabel}
-      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-2.5 py-1 sm:px-3 font-serif-th text-[10px] font-semibold whitespace-nowrap transition-colors select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-2.5 py-1 sm:px-3 font-serif-th text-[13px] font-semibold whitespace-nowrap transition-colors select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
         unlimited
           ? "bg-[#F3EDE2] text-[#8F5C1A] hover:bg-[#EFE6D6]"
           : empty
-            ? "bg-[#F3EDE2] text-[#6F5B4A] hover:bg-[#EFE6D6]"
+            ? "bg-[#F3EDE2] text-[#635B4E] hover:bg-[#EFE6D6]"
             : "bg-[#F3EDE2] text-[#8F5C1A] hover:bg-[#EFE6D6]"
       }`}
     >
@@ -66,14 +66,14 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
           <span className="hidden sm:inline">ไม่จำกัดสิทธิ์</span>
           <span
             translate="no"
-            className="rounded-full bg-[#8F5C1A]/15 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#8F5C1A]"
+            className="rounded-full bg-[#8F5C1A]/15 px-1.5 py-0.5 font-mono text-[12px] font-bold text-[#8F5C1A]"
           >
             VIP
           </span>
         </>
       ) : empty ? (
         <>
-          <SealedLockIcon className="h-3.5 w-3.5 text-[#6F5B4A]" />
+          <SealedLockIcon className="h-3.5 w-3.5 text-[#635B4E]" />
           <span className="hidden sm:inline">{view.badgeLabel}</span>
           <span className="sm:hidden font-mono">0/{view.limit}</span>
         </>

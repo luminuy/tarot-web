@@ -78,7 +78,7 @@ export function EntitlementGate({
 
         <div className="min-w-0 flex-1 space-y-0.5">
           <p className="font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm">{copy.title}</p>
-          <p className="font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
+          <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
             {isGuest
               ? `ทดลองฟรีได้ ${GUEST_LIMIT} ครั้ง (ใช้ครบแล้ว) · สมัครสมาชิกฟรีแล้วเปิดได้วันละ ${DAILY_LIMIT} ครั้ง`
               : countdown
@@ -92,7 +92,7 @@ export function EntitlementGate({
           <button
             type="button"
             onClick={() => onRequestUpgrade(reason)}
-            className="min-h-[36px] shrink-0 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-1.5 font-serif-th text-[11px] font-bold text-[#FFFFFF] transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="min-h-[36px] shrink-0 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-1.5 font-serif-th text-[13px] font-bold text-[#FFFFFF] transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
             <span className="mr-1">✦</span>
             {ctaLabel}

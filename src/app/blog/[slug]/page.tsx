@@ -147,7 +147,7 @@ export default async function ArticleDetailPage({ params }: Props) {
         {/* Top Breadcrumb Navigation */}
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-xs font-serif-th text-[#756F66] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
+          className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
         >
           <Link href="/" className="hover:text-[#A58A5C] transition-colors">
             หน้าแรก

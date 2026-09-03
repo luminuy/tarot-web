@@ -366,7 +366,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               <span className="text-[#8F5C1A] text-sm">✦</span>
               <div>
                 <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">แชร์ผลคำทำนาย</h3>
-                <p className="text-[11px] text-[#6F5B4A] font-serif-th">
+                <p className="text-[13px] text-[#635B4E] font-serif-th">
                   บันทึกรูปภาพพรีเมียมหรือแชร์ตรงสู่โซเชียลมีเดีย
                 </p>
               </div>
@@ -411,13 +411,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             <div className="space-y-1 relative z-10">
               <div className="flex items-center justify-center gap-2">
                 <span className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-[#6F5B4A]" />
-                <span className="text-[11px] sm:text-xs font-serif-th tracking-[0.2em] uppercase text-[#8F5C1A] font-bold">
+                <span className="text-[13px] sm:text-xs font-serif-th tracking-[0.2em] uppercase text-[#8F5C1A] font-bold">
                   SEERTAROT · วิหารพยากรณ์
                 </span>
                 <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#6F5B4A]" />
               </div>
               <div className="inline-block px-3 py-0.5 rounded-full bg-[#F3EDE2] border border-[#D9C8AC]">
-                <span className="text-[11px] sm:text-xs text-[#2E211A] font-serif-th font-semibold">
+                <span className="text-[13px] sm:text-xs text-[#2E211A] font-serif-th font-semibold">
                   ผัง: {spreadName}
                 </span>
               </div>
@@ -442,7 +442,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                     }`}
                   >
                     {/* Position Name */}
-                    <span className="text-[10.5px] sm:text-xs text-[#8F5C1A] font-serif-th tracking-wide block font-bold whitespace-nowrap">
+                    <span className="text-[13px] sm:text-xs text-[#8F5C1A] font-serif-th tracking-wide block font-bold whitespace-nowrap">
                       {c.position.nameTh}
                     </span>
 
@@ -467,7 +467,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                         {c.card?.nameTh || `ใบที่ ${i + 1}`}
                       </h5>
                       <span
-                        className={`text-[9px] px-2 py-0.5 rounded-full font-serif-th inline-block font-semibold ${
+                        className={`text-[12px] px-2 py-0.5 rounded-full font-serif-th inline-block font-semibold ${
                           c.isReversed
                             ? "bg-[#FCEEEA] text-[#A6392C] border border-[#D9C8AC]"
                             : "bg-[#EBF3ED] text-[#3A7044] border border-[#D9C8AC]"
@@ -484,7 +484,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {/* 4. Oracle Prophecy / Interpretation */}
             {reading?.summary && (
               <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#D9C8AC]/30">
-                <span className="text-[10px] sm:text-[11px] text-[#8F5C1A] font-serif-th tracking-wider uppercase block font-bold">
+                <span className="text-[13px] sm:text-[13px] text-[#8F5C1A] font-serif-th tracking-wider uppercase block font-bold">
                   ✦ สารพยากรณ์จากแม่หมอ {persona.nameTh} ✦
                 </span>
                 <p className="font-serif-th text-xs sm:text-[13px] text-[#2E211A] leading-relaxed italic">
@@ -494,7 +494,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             )}
 
             {/* 5. Footer Watermark */}
-            <div className="pt-2 border-t border-[#D9C8AC]/20 relative z-10 flex items-center justify-between px-2 text-[9px] text-[#6F5B4A] font-mono tracking-widest uppercase font-bold">
+            <div className="pt-2 border-t border-[#D9C8AC]/20 relative z-10 flex items-center justify-between px-2 text-[12px] text-[#635B4E] font-mono tracking-widest uppercase font-bold">
               <span>PROVABLY-FAIR SHA-256</span>
               <span>SEERTAROT.NET</span>
             </div>

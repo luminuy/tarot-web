@@ -107,7 +107,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
 
   return (
     <Modal isOpen={isOpen} onClose={resetModalState} title="✦ เติมรอบดูดวง (Tarot Pass)">
-      <div className="space-y-6 pt-1 text-[#6F5B4A]">
+      <div className="space-y-6 pt-1 text-[#635B4E]">
         {errorMsg && (
           <div className="p-3.5 rounded-lg bg-[#A6392C]/80 border border-[#A6392C]/50 text-[#A6392C] text-xs font-serif-th text-center">
             {errorMsg}
@@ -123,7 +123,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         {!checkoutData ? (
           <>
             <div className="text-center space-y-1">
-              <p className="text-xs text-[#6F5B4A] font-serif-th">
+              <p className="text-xs text-[#635B4E] font-serif-th">
                 ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด · จ่ายครั้งเดียว ไม่ใช่รายเดือน · สิทธิ์ไม่มีวันหมดอายุ
               </p>
             </div>
@@ -145,19 +145,19 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                     }`}
                   >
                     {pkg.badge && (
-                      <span className="absolute -top-2.5 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#8F5C1A] text-[#FFFFFF] ">
+                      <span className="absolute -top-2.5 right-3 text-[12px] font-bold px-2 py-0.5 rounded-full bg-[#8F5C1A] text-[#FFFFFF] ">
                         {pkg.badge}
                       </span>
                     )}
 
                     <div>
                       <h4 className="font-serif-th text-sm font-bold text-[#2E211A] leading-snug">{pkg.name}</h4>
-                      <p className="text-[11px] text-[#6F5B4A] mt-1 leading-tight font-serif-th">{pkg.tagline}</p>
+                      <p className="text-[13px] text-[#635B4E] mt-1 leading-tight font-serif-th">{pkg.tagline}</p>
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-[#D9C8AC]/30 flex items-baseline justify-between">
                       <span className="text-lg font-bold font-mono text-[#8F5C1A]">฿{pkg.priceThb}</span>
-                      <span className="text-[10px] text-[#2E211A] font-serif-th font-semibold">
+                      <span className="text-[13px] text-[#2E211A] font-serif-th font-semibold">
                         {pkg.credits} ครั้ง
                       </span>
                     </div>
@@ -187,13 +187,13 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
           /* Payment Screen */
           <div className="text-center space-y-4">
             <div className="p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-3 ">
-              <div className="flex items-center justify-between text-xs text-[#6F5B4A] font-serif-th border-b border-[#D9C8AC]/30 pb-2">
+              <div className="flex items-center justify-between text-xs text-[#635B4E] font-serif-th border-b border-[#D9C8AC]/30 pb-2">
                 <span>รายการ</span>
                 <span className="font-bold text-[#2E211A]">
                   {selectedPkg.name} ({selectedPkg.credits} ครั้ง)
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs text-[#6F5B4A] font-serif-th">
+              <div className="flex items-center justify-between text-xs text-[#635B4E] font-serif-th">
                 <span>ยอดชำระ</span>
                 <span className="text-base font-bold font-mono text-[#8F5C1A]">฿{selectedPkg.priceThb} บาท</span>
               </div>
@@ -202,7 +202,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
             {checkoutData.qrCodeUri ? (
               <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-white text-[#2E211A] max-w-[240px] mx-auto border border-[#D9C8AC]">
                 <img src={checkoutData.qrCodeUri} alt="PromptPay QR Code" className="w-48 h-48 object-contain" />
-                <span className="text-[11px] text-[#6F5B4A] font-serif-th">สแกนด้วยแอปพลิเคชันธนาคารทุกแห่ง</span>
+                <span className="text-[13px] text-[#635B4E] font-serif-th">สแกนด้วยแอปพลิเคชันธนาคารทุกแห่ง</span>
               </div>
             ) : (
               <div className="p-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-center space-y-2 ">
@@ -210,7 +210,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                 <h4 className="font-serif-th text-sm font-bold text-[#2E211A]">
                   ระบบจำลองการชำระเงิน (Test Gateway Simulator)
                 </h4>
-                <p className="text-xs text-[#6F5B4A] font-serif-th">
+                <p className="text-xs text-[#635B4E] font-serif-th">
                   ระบบพร้อมผูกกับ Omise PromptPay QR เมื่อตั้งค่า Secret บน Cloudflare Workers
                 </p>
               </div>
@@ -229,7 +229,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               <button
                 type="button"
                 onClick={() => setCheckoutData(null)}
-                className="text-xs text-[#6F5B4A] hover:text-[#2E211A] py-1 cursor-pointer font-serif-th"
+                className="text-xs text-[#635B4E] hover:text-[#2E211A] py-1 cursor-pointer font-serif-th"
               >
                 ← เปลี่ยนแพ็กเกจ
               </button>

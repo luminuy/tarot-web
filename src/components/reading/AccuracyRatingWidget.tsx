@@ -118,10 +118,10 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
                 title={label}
                 aria-label={`ให้คะแนนระดับ: ${label}`}
               >
-                <span className="text-[11px] text-[#8F5C1A] font-mono group-hover:scale-115 transition-transform">
+                <span className="text-[13px] text-[#8F5C1A] font-mono group-hover:scale-115 transition-transform">
                   {symbol}
                 </span>
-                <span className="text-[10px] text-[#6F5B4A] group-hover:text-[#2E211A] font-serif-th font-medium transition-colors">
+                <span className="text-[13px] text-[#635B4E] group-hover:text-[#2E211A] font-serif-th font-medium transition-colors">
                   {label}
                 </span>
               </button>

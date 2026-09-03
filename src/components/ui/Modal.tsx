@@ -139,14 +139,14 @@ export const Modal: React.FC<ModalProps> = ({
               <div className="flex items-start justify-between p-6 pb-4 border-b border-[#D9C8AC]">
                 <div>
                   {title && <h2 className="text-xl sm:text-2xl font-bold font-mystic-gold">{title}</h2>}
-                  {description && <div className="mt-1 text-xs sm:text-sm text-[#6F5B4A]">{description}</div>}
+                  {description && <div className="mt-1 text-xs sm:text-sm text-[#635B4E]">{description}</div>}
                 </div>
                 {showCloseButton && (
                   <button
                     type="button"
                     onClick={onClose}
                     aria-label="ปิดหน้าต่าง"
-                    className="w-11 h-11 flex items-center justify-center rounded bg-[#F3EDE2] border border-[#D9C8AC] text-[#6F5B4A] hover:text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[rgba(143,92,26,0.08)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] cursor-pointer"
+                    className="w-11 h-11 flex items-center justify-center rounded bg-[#F3EDE2] border border-[#D9C8AC] text-[#635B4E] hover:text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[rgba(143,92,26,0.08)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] cursor-pointer"
                   >
                     ✕
                   </button>

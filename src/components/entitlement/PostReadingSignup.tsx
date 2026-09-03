@@ -66,7 +66,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
             <h3 className="font-serif-th text-base font-bold text-[#2E211A]">
               {usedUpTrial ? "นี่คือการเปิดไพ่ทดลองฟรีของคุณ" : "เก็บดวงนี้ไว้ และเปิดไพ่ต่อได้อีก"}
             </h3>
-            <p className="font-serif-th text-sm leading-relaxed text-[#6F5B4A]">
+            <p className="font-serif-th text-sm leading-relaxed text-[#635B4E]">
               {usedUpTrial
                 ? `สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อวันละ ${DAILY_LIMIT} ครั้ง คุยถามแม่หมอต่อจากไพ่ชุดนี้ และเก็บคำทำนายไว้ดูย้อนหลังได้ทุกเครื่อง`
                 : `สมัครสมาชิกฟรี — เปิดไพ่วันละ ${DAILY_LIMIT} ครั้ง คุยถามแม่หมอต่อได้ และเก็บประวัติดูดวงไว้ทุกเครื่อง`}
@@ -77,7 +77,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
           type="button"
           onClick={dismiss}
           aria-label="ปิดคำชวนสมัครสมาชิก"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm text-[#6F5B4A] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm text-[#635B4E] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           ✕
         </button>
@@ -85,7 +85,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
 
       <ul className="mt-4 grid gap-1.5 sm:grid-cols-2">
         {MEMBER_BENEFITS.map((b) => (
-          <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#2E211A]">
+          <li key={b.title} className="flex items-start gap-2 font-serif-th text-[13px] text-[#2E211A]">
             <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#8F5C1A]" />
             {b.title}
           </li>
@@ -103,7 +103,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
         <span className="mr-1.5">✦</span> สมัครสมาชิกฟรี (ใช้เวลาไม่ถึงนาที)
       </button>
 
-      <p className="mt-2.5 text-center font-serif-th text-[11px] text-[#6F5B4A]">
+      <p className="mt-2.5 text-center font-serif-th text-[13px] text-[#635B4E]">
         ไม่ต้องผูกบัตร · คำทำนายที่เพิ่งอ่านจะถูกย้ายเข้าบัญชีให้อัตโนมัติ
       </p>
     </section>

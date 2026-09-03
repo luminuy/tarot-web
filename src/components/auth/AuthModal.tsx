@@ -262,7 +262,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {mode === "signup" && "สมัครสมาชิกฟรี"}
               {mode === "forgot" && "ตั้งรหัสผ่านใหม่ (ลืมรหัสผ่าน)"}
             </h3>
-            <p className="text-xs text-[#756F66] font-serif-th max-w-xs mx-auto leading-relaxed">
+            <p className="text-xs text-[#635B4E] font-serif-th max-w-xs mx-auto leading-relaxed">
               {mode === "signin" &&
                 `เข้าสู่ระบบเพื่อรับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมบันทึกประวัติการดูดวงของคุณ`}
               {mode === "signup" && `สมัครสมาชิกฟรี ไม่ต้องผูกบัตรเครดิต เปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
@@ -274,7 +274,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {fromEntitlementWall && mode !== "forgot" && (
             <ul className="w-full mb-4 grid gap-1.5 rounded-xl border border-[#D5CEC2] bg-[#EAE7E0] p-3 shadow-xs">
               {MEMBER_BENEFITS.map((b) => (
-                <li key={b.title} className="flex items-start gap-2 text-[11px] font-serif-th text-[#29261F]">
+                <li key={b.title} className="flex items-start gap-2 text-[13px] font-serif-th text-[#29261F]">
                   <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#A58A5C]" />
                   {b.title}
                 </li>
@@ -289,7 +289,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="button"
                 onClick={() => switchMode("signin")}
                 className={`py-2 rounded-full text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-                  mode === "signin" ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#756F66] hover:text-[#29261F]"
+                  mode === "signin" ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
                 }`}
               >
                 <span>✦</span>
@@ -300,7 +300,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="button"
                 onClick={() => switchMode("signup")}
                 className={`py-2 rounded-full text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-                  mode === "signup" ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#756F66] hover:text-[#29261F]"
+                  mode === "signup" ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
                 }`}
               >
                 <span>✨</span>
@@ -327,7 +327,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <form onSubmit={handleSubmit} className="w-full space-y-3.5">
             {mode === "signup" && (
               <div className="space-y-1.5 text-left">
-                <label htmlFor="auth-name" className="block text-[11px] font-semibold text-[#29261F] font-serif-th">
+                <label htmlFor="auth-name" className="block text-[13px] font-semibold text-[#29261F] font-serif-th">
                   ชื่อหรือนามแฝง
                 </label>
                 <div className="relative flex items-center">
@@ -349,7 +349,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
 
             <div className="space-y-1.5 text-left">
-              <label htmlFor="auth-email" className="block text-[11px] font-semibold text-[#29261F] font-serif-th">
+              <label htmlFor="auth-email" className="block text-[13px] font-semibold text-[#29261F] font-serif-th">
                 ที่อยู่อีเมล
               </label>
               <div className="relative flex items-center">
@@ -375,7 +375,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="flex justify-between items-center">
                   <label
                     htmlFor="auth-password"
-                    className="block text-[11px] font-semibold text-[#29261F] font-serif-th"
+                    className="block text-[13px] font-semibold text-[#29261F] font-serif-th"
                   >
                     รหัสผ่าน
                   </label>
@@ -383,7 +383,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <button
                       type="button"
                       onClick={() => switchMode("forgot")}
-                      className="text-[11px] text-[#A58A5C] hover:text-[#29261F] hover:underline cursor-pointer font-serif-th font-bold"
+                      className="text-[13px] text-[#A58A5C] hover:text-[#29261F] hover:underline cursor-pointer font-serif-th font-bold"
                     >
                       ลืมรหัสผ่าน?
                     </button>
@@ -407,7 +407,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
-                    className="absolute right-3 text-[#756F66] hover:text-[#29261F] text-xs font-serif-th cursor-pointer px-1 py-0.5 rounded transition-colors"
+                    className="absolute right-3 text-[#635B4E] hover:text-[#29261F] text-xs font-serif-th cursor-pointer px-1 py-0.5 rounded transition-colors"
                   >
                     {showPassword ? "ซ่อน" : "ดู"}
                   </button>
@@ -435,7 +435,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         );
                       })}
                     </div>
-                    <div className="flex justify-between items-center text-[10px] font-serif-th text-[#756F66]">
+                    <div className="flex justify-between items-center text-[13px] font-serif-th text-[#635B4E]">
                       <span>ความปลอดภัย:</span>
                       <span className={`font-semibold ${strength.colorClass}`}>{strength.label}</span>
                     </div>
@@ -468,7 +468,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Mode Switcher Return Link for Forgot Password */}
           {mode === "forgot" && (
-            <div className="pt-3 text-xs font-serif-th text-[#756F66]">
+            <div className="pt-3 text-xs font-serif-th text-[#635B4E]">
               จำรหัสผ่านได้แล้ว?{" "}
               <button
                 type="button"
@@ -483,7 +483,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Sanctuary Divider */}
           <div className="w-full flex items-center my-4">
             <div className="flex-1 border-t border-[#D5CEC2]/40" />
-            <span className="px-3 text-[10px] text-[#756F66] font-serif-th tracking-wider">หรือเชื่อมต่อทันทีด้วย</span>
+            <span className="px-3 text-[13px] text-[#635B4E] font-serif-th tracking-wider">หรือเชื่อมต่อทันทีด้วย</span>
             <div className="flex-1 border-t border-[#D5CEC2]/40" />
           </div>
 
@@ -534,7 +534,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           {/* Cryptographic Assurance & PDPA Footnote */}
-          <div className="mt-5 text-[10px] text-[#756F66] font-serif-th text-center flex items-center justify-center gap-1 opacity-80">
+          <div className="mt-5 text-[13px] text-[#635B4E] font-serif-th text-center flex items-center justify-center gap-1 opacity-80">
             <span className="text-[#A58A5C]">✦</span>
             <span>เข้ารหัสความปลอดภัยระดับสากล · ลบบัญชีและข้อมูลทั้งหมดได้ทุกเมื่อ</span>
           </div>

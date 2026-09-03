@@ -129,7 +129,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           {toast.subtitle && (
             <p
               className={`text-xs font-serif-th leading-relaxed mt-0.5 line-clamp-2 ${
-                isError ? "text-[#A6392C]" : "text-[#6F5B4A]"
+                isError ? "text-[#A6392C]" : "text-[#635B4E]"
               }`}
             >
               {toast.subtitle}
@@ -145,7 +145,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer shrink-0 ${
             isError
               ? "text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA]"
-              : "text-[#6F5B4A] hover:text-[#2E211A] hover:bg-[#F3EDE2]"
+              : "text-[#635B4E] hover:text-[#2E211A] hover:bg-[#F3EDE2]"
           }`}
         >
           ✕
