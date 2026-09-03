@@ -14,20 +14,20 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#FDF7F0] border border-[#D6B48D] p-6 rounded-[1.618rem] shadow-xs">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#FFFFFF] border border-[#E4D8C4] p-6 rounded-lg ">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="font-serif-th font-bold text-base text-[#5A432F]">
+            <h3 className="font-serif-th font-bold text-base text-[#2E211A]">
               พร้อมรับคำทำนายจาก {reader.displayName} แล้วหรือยัง?
             </h3>
             {isLiveOpen && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#3A7044] bg-[#EBF3ED] px-2 py-0.5 rounded-full border border-[#E4D8C4]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#3A7044] animate-pulse" />
                 เปิดรับคิวสด
               </span>
             )}
           </div>
-          <p className="text-xs text-[#8C735D] mt-1 font-serif-th">
+          <p className="text-xs text-[#6F5B4A] mt-1 font-serif-th">
             ระบบ AI จะช่วยสรุปบรีฟคำถามและประเด็นสำคัญ เพื่อส่งต่อให้แม่หมอทันที
           </p>
         </div>
@@ -35,7 +35,7 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-serif-th font-bold text-xs sm:text-sm shadow-xs transition-all shrink-0 cursor-pointer"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs sm:text-sm transition-all shrink-0 cursor-pointer"
         >
           <span>✦ เริ่มต้นขอคำปรึกษา / จองคิว</span>
           <span>→</span>

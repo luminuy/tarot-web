@@ -18,10 +18,7 @@ const RATING_OPTIONS = [
 ];
 
 /** ประเมินความแม่นยำหลังอ่านไพ่ — ใช้เป็น A/B data สำหรับปรับ prompt */
-export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({
-  personaId,
-  readingId,
-}) => {
+export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ personaId, readingId }) => {
   const [submitted, setSubmitted] = useState(false);
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
 
@@ -77,14 +74,24 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={SPRING.snappy}
-          className="flex items-center justify-center gap-2 py-3 text-xs text-[#5A432F] font-serif-th bg-[#FDF7F0] border border-[#D6B48D] rounded-2xl px-4 my-2 shadow-xs"
+          className="flex items-center justify-center gap-2 py-3 text-xs text-[#2E211A] font-serif-th bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg px-4 my-2 "
         >
-          <span className="text-[#CD9F5B]">✨</span>
+          <span className="text-[#8F5C1A]">✨</span>
           <span>
             ขอบคุณสำหรับการให้คะแนน!{" "}
             {selectedScore !== null && (
-              <span className="text-[#CD9F5B] font-bold">
-                ({selectedScore === 1 ? "ไม่ตรง" : selectedScore === 2 ? "ตรงบ้าง" : selectedScore === 3 ? "ตรงพอใช้" : selectedScore === 4 ? "ตรงมาก" : "ตรงเป๊ะ!"})
+              <span className="text-[#8F5C1A] font-bold">
+                (
+                {selectedScore === 1
+                  ? "ไม่ตรง"
+                  : selectedScore === 2
+                    ? "ตรงบ้าง"
+                    : selectedScore === 3
+                      ? "ตรงพอใช้"
+                      : selectedScore === 4
+                        ? "ตรงมาก"
+                        : "ตรงเป๊ะ!"}
+                )
               </span>
             )}
           </span>
@@ -97,8 +104,8 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({
           exit={{ opacity: 0, scale: 0.95 }}
           className="flex flex-col items-center gap-2.5 py-3 my-2"
         >
-          <span className="text-xs text-[#5A432F] font-serif-th font-semibold flex items-center gap-1.5">
-            <span className="text-[#CD9F5B]">✦</span>
+          <span className="text-xs text-[#2E211A] font-serif-th font-semibold flex items-center gap-1.5">
+            <span className="text-[#8F5C1A]">✦</span>
             <span>คำทำนายครั้งนี้ตรงกับสถานการณ์จริงของคุณไหม?</span>
           </span>
           <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -107,14 +114,14 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({
                 key={score}
                 type="button"
                 onClick={() => handleRate(score)}
-                className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-xl bg-[#FDF7F0] border border-[#D6B48D] hover:border-[#CD9F5B] hover:bg-[#FFFFFF] hover:shadow-[0_2px_12px_rgba(205,159,91,0.2)] transition-all cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
+                className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] hover:bg-[#F6F1E9] transition-all cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                 title={label}
                 aria-label={`ให้คะแนนระดับ: ${label}`}
               >
-                <span className="text-[11px] text-[#CD9F5B] font-mono group-hover:scale-115 transition-transform">
+                <span className="text-[11px] text-[#8F5C1A] font-mono group-hover:scale-115 transition-transform">
                   {symbol}
                 </span>
-                <span className="text-[10px] text-[#8C735D] group-hover:text-[#5A432F] font-serif-th font-medium transition-colors">
+                <span className="text-[10px] text-[#6F5B4A] group-hover:text-[#2E211A] font-serif-th font-medium transition-colors">
                   {label}
                 </span>
               </button>

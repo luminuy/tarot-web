@@ -6,17 +6,18 @@ import { motion, AnimatePresence } from "motion/react";
 import type { Article } from "@/data/articles";
 import { soundManager } from "@/lib/utils/audio";
 
+import { SearchTabIcon } from "@/components/ui/TarotArtIcons";
 interface BlogIndexClientProps {
   articles: Article[];
 }
 
 const CATEGORIES = [
   { id: "all", label: "✦ ทั้งหมด (20 เรื่อง)" },
-  { id: "love", label: "💖 ความรัก & เนื้อคู่" },
-  { id: "career", label: "💼 การงาน & การเงิน" },
-  { id: "spreads", label: "📐 ผังการเปิดไพ่" },
-  { id: "cards", label: "🃏 ความหมายไพ่" },
-  { id: "wisdom", label: "🔮 จิตวิทยา & AI" },
+  { id: "love", label: "ความรัก & เนื้อคู่" },
+  { id: "career", label: "การงาน & การเงิน" },
+  { id: "spreads", label: "ผังการเปิดไพ่" },
+  { id: "cards", label: "ความหมายไพ่" },
+  { id: "wisdom", label: "จิตวิทยา & AI" },
 ];
 
 export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) => {
@@ -48,15 +49,13 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ค้นหาบทความ ความหมายไพ่ ความรัก การงาน หรือผังพยากรณ์..."
-            className="w-full bg-[#FFFFFF] border border-[#D6B48D] rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-[#5A432F] placeholder:text-[#8C735D]/60 focus:outline-none focus:border-[#CD9F5B] focus:ring-2 focus:ring-[#CD9F5B]/20 transition-all shadow-xs"
+            className="w-full bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg px-5 py-3.5 pl-11 text-xs sm:text-sm text-[#2E211A] placeholder:text-[#6F5B4A]/60 focus:outline-none focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/20 transition-all "
           />
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#CD9F5B] text-base">
-            🔍
-          </span>
+          <SearchTabIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8F5C1A]" />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#8C735D] hover:text-[#5A432F] cursor-pointer"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#6F5B4A] hover:text-[#2E211A] cursor-pointer"
             >
               ✕ ล้างคำค้น
             </button>
@@ -76,8 +75,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 }}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold font-serif-th transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-[#CD9F5B] border border-[#D6B48D] text-[#FDF7F0] shadow-xs scale-[1.03]"
-                    : "bg-[#FDF7F0] border border-[#D6B48D] text-[#5A432F] hover:border-[#CD9F5B] hover:text-[#CD9F5B] hover:bg-[#FFFFFF]"
+                    ? "bg-[#8F5C1A] border border-[#E4D8C4] text-[#FFFFFF] scale-[1.03]"
+                    : "bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A] hover:border-[#8F5C1A] hover:text-[#8F5C1A] hover:bg-[#F6F1E9]"
                 }`}
               >
                 {cat.label}
@@ -89,25 +88,24 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
       {/* Featured Hero Article (when no filter is applied) */}
       {selectedCat === "all" && !searchQuery && featured && (
-        <div className="rounded-[1.618rem] border border-[#D6B48D] bg-[#FFFFFF] p-6 sm:p-8 relative overflow-hidden shadow-md group hover:border-[#CD9F5B] transition-all">
-          <div className="absolute -right-16 -top-16 w-64 h-64 bg-radial from-[#CD9F5B]/15 to-transparent rounded-full blur-2xl pointer-events-none" />
+        <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-6 sm:p-8 relative overflow-hidden group hover:border-[#8F5C1A] transition-all">
           <div className="relative z-10 space-y-4 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D6B48D] bg-[#FCF0E6] text-[11px] text-[#CD9F5B] font-mono font-bold shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#E4D8C4] bg-[#F0E8DB] text-[11px] text-[#8F5C1A] font-mono font-bold ">
               <span>✦</span> บทความแนะนำประจำสัปดาห์ (Featured)
             </div>
             <h2 className="font-serif-th text-xl sm:text-3xl font-bold font-mystic-gold leading-snug">
               {featured.title}
             </h2>
-            <p className="text-xs sm:text-sm text-[#8C735D] font-serif-th leading-relaxed line-clamp-3">
+            <p className="text-xs sm:text-sm text-[#6F5B4A] font-serif-th leading-relaxed line-clamp-3">
               {featured.description}
             </p>
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              <span className="text-[11px] text-[#8C735D] font-mono">
+              <span className="text-[11px] text-[#6F5B4A] font-mono">
                 ⏱ เวลาอ่าน {featured.readTime} · หมวด {featured.categoryTh}
               </span>
               <Link
                 href={`/blog/${featured.slug}`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-semibold text-xs transition-all shadow-xs font-serif-th"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-semibold text-xs transition-all font-serif-th"
               >
                 <span>อ่านคัมภีร์ฉบับเต็ม</span>
                 <span>→</span>
@@ -119,12 +117,12 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
       {/* Articles Grid */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between text-xs text-[#8C735D] px-1 font-serif-th">
+        <div className="flex items-center justify-between text-xs text-[#6F5B4A] px-1 font-serif-th">
           <span>พบบทความ {filtered.length} เรื่อง</span>
           {selectedCat !== "all" && (
             <button
               onClick={() => setSelectedCat("all")}
-              className="text-[#CD9F5B] hover:underline cursor-pointer font-bold"
+              className="text-[#8F5C1A] hover:underline cursor-pointer font-bold"
             >
               แสดงทั้งหมด
             </button>
@@ -132,9 +130,9 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-12 text-center space-y-3 shadow-xs">
-            <p className="text-3xl">🔮</p>
-            <p className="font-serif-th text-sm text-[#5A432F]">
+          <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-12 text-center space-y-3 ">
+            <p className="text-3xl text-[#8F5C1A]">✦</p>
+            <p className="font-serif-th text-sm text-[#2E211A]">
               ไม่พบบทความที่ตรงกับคำค้นหา &ldquo;{searchQuery}&rdquo;
             </p>
             <button
@@ -142,7 +140,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 setSearchQuery("");
                 setSelectedCat("all");
               }}
-              className="text-xs text-[#CD9F5B] underline hover:text-[#5A432F] cursor-pointer"
+              className="text-xs text-[#8F5C1A] underline hover:text-[#2E211A] cursor-pointer"
             >
               ล้างตัวกรองทั้งหมด
             </button>
@@ -155,33 +153,31 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: Math.min(idx * 0.04, 0.3) }}
-                className="rounded-[1.618rem] border border-[#D6B48D] bg-[#FFFFFF] p-5 sm:p-6 space-y-3 hover:border-[#CD9F5B] hover:bg-[#FDF7F0] transition-all hover:scale-[1.01] shadow-xs flex flex-col justify-between group"
+                className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-5 sm:p-6 space-y-3 hover:border-[#8F5C1A] hover:bg-[#F6F1E9] transition-all hover:scale-[1.01] flex flex-col justify-between group"
               >
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between gap-2 text-[10px] font-mono">
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#FCF0E6] border border-[#D6B48D] text-[#CD9F5B] font-bold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[#8F5C1A] font-bold">
                       {article.categoryTh}
                     </span>
-                    <span className="text-[#8C735D]">⏱ {article.readTime}</span>
+                    <span className="text-[#6F5B4A]">⏱ {article.readTime}</span>
                   </div>
 
-                  <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold group-hover:text-[#CD9F5B] transition-colors leading-snug">
-                    <Link href={`/blog/${article.slug}`}>
-                      {article.title}
-                    </Link>
+                  <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold group-hover:text-[#8F5C1A] transition-colors leading-snug">
+                    <Link href={`/blog/${article.slug}`}>{article.title}</Link>
                   </h3>
 
-                  <p className="text-xs text-[#8C735D] font-serif-th leading-relaxed line-clamp-3">
+                  <p className="text-xs text-[#6F5B4A] font-serif-th leading-relaxed line-clamp-3">
                     {article.description}
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-[#D6B48D]/30 flex items-center justify-between text-xs">
+                <div className="pt-3 border-t border-[#E4D8C4]/30 flex items-center justify-between text-xs">
                   <div className="flex flex-wrap gap-1.5">
                     {article.keywords.slice(0, 2).map((kw) => (
                       <span
                         key={kw}
-                        className="text-[9px] text-[#5A432F] font-mono bg-[#FCF0E6] px-1.5 py-0.5 rounded border border-[#D6B48D]"
+                        className="text-[9px] text-[#2E211A] font-mono bg-[#F0E8DB] px-1.5 py-0.5 rounded border border-[#E4D8C4]"
                       >
                         #{kw}
                       </span>
@@ -189,7 +185,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   </div>
                   <Link
                     href={`/blog/${article.slug}`}
-                    className="inline-flex items-center gap-1 text-xs text-[#CD9F5B] group-hover:text-[#5A432F] group-hover:translate-x-1 transition-all font-serif-th font-bold"
+                    className="inline-flex items-center gap-1 text-xs text-[#8F5C1A] group-hover:text-[#2E211A] group-hover:translate-x-1 transition-all font-serif-th font-bold"
                   >
                     <span>อ่านต่อ</span>
                     <span>→</span>

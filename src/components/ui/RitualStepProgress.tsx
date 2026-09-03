@@ -26,14 +26,11 @@ const getStepIndex = (step: RitualStep) => {
   return 4; // READING or SUMMARY
 };
 
-export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({
-  currentStep,
-  onStepClick,
-}) => {
+export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentStep, onStepClick }) => {
   const currentIndex = getStepIndex(currentStep);
 
   return (
-    <nav aria-label="ความคืบหน้าการดูดวง" className="w-full max-w-2xl mx-auto mb-8 px-2 select-none">
+    <nav aria-label="ความคืบหน้าการดูดวง" className="w-full max-w-2xl mx-auto mb-10 px-2 select-none">
       <ol className="flex items-center justify-between relative list-none">
         {/* Background Connecting Rail */}
         <div className="absolute left-0 top-[14px] sm:top-4 w-full h-[1px] bg-[#E4D8C4] z-0" aria-hidden="true" />
@@ -59,10 +56,10 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({
             <span
               className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-mono font-bold transition-all duration-300 ${
                 isActive
-                  ? "bg-[#8F5C1A] border-2 border-[#8F5C1A] text-white ring-4 ring-[rgba(143,92,26,0.15)] shadow-xs"
+                  ? "bg-[#8F5C1A] border-2 border-[#8F5C1A] text-white ring-4 ring-[rgba(143,92,26,0.15)]"
                   : isPassed
-                  ? "bg-white border-2 border-[#8F5C1A] text-[#8F5C1A] font-bold shadow-xs"
-                  : "bg-[#F0E8DB] border border-[#E4D8C4] text-[#6F5B4A]"
+                    ? "bg-white border-2 border-[#8F5C1A] text-[#8F5C1A] font-bold"
+                    : "bg-[#F0E8DB] border border-[#E4D8C4] text-[#6F5B4A]"
               }`}
             >
               {isPassed ? "✓" : step.num}

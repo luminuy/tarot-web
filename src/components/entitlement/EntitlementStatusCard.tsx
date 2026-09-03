@@ -6,18 +6,13 @@ import Link from "next/link";
 
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import { CheckMarkIcon, HourglassIcon, SparkSealIcon } from "@/components/entitlement/EntitlementIcons";
-import {
-  MEMBER_BENEFITS,
-  describeEntitlement,
-  formatResetCountdown,
-  resetClockLabel,
-} from "@/lib/entitlement/copy";
+import { MEMBER_BENEFITS, describeEntitlement, formatResetCountdown, resetClockLabel } from "@/lib/entitlement/copy";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useSessionUser } from "@/lib/auth/use-session";
 
 const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
-  { ssr: false },
+  { ssr: false }
 );
 
 /**
@@ -46,40 +41,40 @@ export function EntitlementStatusCard() {
   const bonus = ent?.bonusRemaining ?? 0;
 
   return (
-    <div className="space-y-4 rounded-[1.618rem] border border-[#D6B48D] bg-[#FFFFFF] p-5 shadow-xs sm:p-6">
+    <div className="space-y-4 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-5 sm:p-6">
       <div className="flex items-center gap-2">
-        <span className="text-[#CD9F5B]">✦</span>
+        <span className="text-[#8F5C1A]">✦</span>
         <h2 className="font-serif-th text-base font-bold font-mystic-gold sm:text-lg">สิทธิ์การใช้งานของฉัน</h2>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#D6B48D] bg-[#FCF0E6] px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] px-4 py-3">
         <div className="space-y-1">
-          <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#8C735D]">
+          <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#6F5B4A]">
             {view.isAdmin
               ? "ผู้ดูแลระบบ"
               : view.isUnlimited
-              ? "บัญชีไม่จำกัดสิทธิ์"
-              : view.isGuest
-              ? "ผู้เยี่ยมชม"
-              : "สมาชิก"}
+                ? "บัญชีไม่จำกัดสิทธิ์"
+                : view.isGuest
+                  ? "ผู้เยี่ยมชม"
+                  : "สมาชิก"}
           </span>
-          <span className="block font-serif-th text-sm font-semibold text-[#5A432F]">{view.statusLine}</span>
+          <span className="block font-serif-th text-sm font-semibold text-[#2E211A]">{view.statusLine}</span>
         </div>
         <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />
       </div>
 
       {view.isMember && !view.isUnlimited && (
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="flex items-center gap-2 rounded-xl border border-[#D6B48D] bg-[#FDF7F0] px-3 py-2.5 font-serif-th text-[11px] text-[#5A432F]">
-            <HourglassIcon className="h-4 w-4 shrink-0 text-[#CD9F5B]" />
+          <div className="flex items-center gap-2 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[11px] text-[#2E211A]">
+            <HourglassIcon className="h-4 w-4 shrink-0 text-[#8F5C1A]" />
             <span>
               โควตาฟรีชุดใหม่{countdown ? ` ${countdown}` : ""} · รีเซ็ต{resetClockLabel()}
             </span>
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-[#D6B48D] bg-[#FDF7F0] px-3 py-2.5 font-serif-th text-[11px] text-[#5A432F]">
-            <SparkSealIcon className="h-4 w-4 shrink-0 text-[#CD9F5B]" />
+          <div className="flex items-center gap-2 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[11px] text-[#2E211A]">
+            <SparkSealIcon className="h-4 w-4 shrink-0 text-[#8F5C1A]" />
             <span>
-              รอบที่เติมไว้ <strong className="text-[#CD9F5B] font-bold">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ
+              รอบที่เติมไว้ <strong className="text-[#8F5C1A] font-bold">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ
             </span>
           </div>
         </div>
@@ -88,25 +83,25 @@ export function EntitlementStatusCard() {
       {view.isGuest && (
         <ul className="grid gap-1.5 sm:grid-cols-2">
           {MEMBER_BENEFITS.map((b) => (
-            <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#5A432F]">
-              <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#CD9F5B]" />
+            <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#2E211A]">
+              <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#8F5C1A]" />
               {b.title}
             </li>
           ))}
         </ul>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#D6B48D]/30 pt-3">
-        <Link href="/" className="text-xs text-[#CD9F5B] underline transition-colors hover:text-[#5A432F] font-bold">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E4D8C4]/30 pt-3">
+        <Link href="/" className="text-xs text-[#8F5C1A] underline transition-colors hover:text-[#2E211A] font-bold">
           {view.isGuest ? "กลับไปเปิดไพ่และสมัครสมาชิก" : "กลับไปเปิดไพ่"}
         </Link>
         {view.isMember && !view.isUnlimited && (
           <button
             type="button"
             onClick={() => setBuyOpen(true)}
-            className="min-h-[40px] rounded-xl border border-[#D6B48D] bg-[#CD9F5B] hover:bg-[#B8853E] px-4 py-2 font-serif-th text-xs font-semibold text-[#FDF7F0] transition-colors shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
+            className="min-h-[40px] rounded-full border border-[#E4D8C4] bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2 font-serif-th text-xs font-semibold text-[#FFFFFF] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
-            <span className="mr-1.5 text-[#FDF7F0]">✦</span> เติมรอบเปิดไพ่
+            <span className="mr-1.5 text-[#FFFFFF]">✦</span> เติมรอบเปิดไพ่
           </button>
         )}
       </div>

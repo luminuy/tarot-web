@@ -82,32 +82,26 @@ export default function BlogPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FCF0E6] text-[#5A432F] p-4 sm:p-8 font-sans selection:bg-[#CD9F5B]/30 selection:text-[#5A432F]">
+    <main className="min-h-screen bg-[#F0E8DB] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
       {/* Schema.org Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-5xl mx-auto space-y-8 pb-16">
         {/* Navigation Breadcrumb & Back button */}
-        <div className="flex items-center justify-between border-b border-[#D6B48D]/30 pb-4">
+        <div className="flex items-center justify-between border-b border-[#E4D8C4]/30 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#5A432F] hover:text-[#CD9F5B] transition-colors font-serif-th shadow-xs py-1.5 px-3.5 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D]"
+            className="inline-flex items-center gap-1.5 text-xs text-[#2E211A] hover:text-[#8F5C1A] transition-colors font-serif-th py-1.5 px-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4]"
           >
             <span>←</span> กลับสู่วิหารพยากรณ์
           </Link>
-          <div className="flex items-center gap-3 text-xs font-mono text-[#8C735D]">
-            <Link href="/spreads" className="hover:text-[#CD9F5B] transition-colors">
+          <div className="flex items-center gap-3 text-xs font-mono text-[#6F5B4A]">
+            <Link href="/spreads" className="hover:text-[#8F5C1A] transition-colors">
               ผัง 20 แบบ
             </Link>
             <span>·</span>
-            <Link href="/cards" className="hover:text-[#CD9F5B] transition-colors">
+            <Link href="/cards" className="hover:text-[#8F5C1A] transition-colors">
               ไพ่ 78 ใบ
             </Link>
           </div>
@@ -115,13 +109,13 @@ export default function BlogPage() {
 
         {/* Hero Header */}
         <div className="text-center space-y-3 py-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D6B48D] bg-[#FDF7F0] text-[11px] text-[#CD9F5B] font-mono shadow-xs font-bold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] text-[11px] text-[#8F5C1A] font-mono font-bold">
             <span>✦</span> Sacred Knowledge & Wisdom <span>✦</span>
           </div>
           <h1 className="font-serif-th text-2xl sm:text-4xl font-bold font-mystic-gold leading-tight">
             คัมภีร์บทความ & ศาสตร์ไพ่ทาโรต์
           </h1>
-          <p className="text-xs sm:text-sm text-[#8C735D] font-serif-th leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#6F5B4A] font-serif-th leading-relaxed">
             คู่มือการพยากรณ์ เจาะลึกความหมายไพ่ 78 ใบ เทคนิคเปิดไพ่ความรัก การงาน และจิตวิทยาเพื่อการพัฒนาตนเอง
           </p>
         </div>

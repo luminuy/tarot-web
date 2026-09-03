@@ -118,49 +118,46 @@ export default async function ArticleDetailPage({ params }: Props) {
     ],
   };
 
-  const jsonLdFaq = article.faqs.length > 0 ? {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: article.faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    })),
-  } : null;
+  const jsonLdFaq =
+    article.faqs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: article.faqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: faq.answer,
+            },
+          })),
+        }
+      : null;
 
   return (
-    <main className="min-h-screen bg-[#FCF0E6] text-[#5A432F] p-4 sm:p-8 font-sans selection:bg-[#CD9F5B]/30 selection:text-[#5A432F]">
+    <main className="min-h-screen bg-[#F0E8DB] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
       {/* Inject Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdArticle) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdArticle) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }} />
       {jsonLdFaq && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }} />
       )}
 
       <div className="max-w-4xl mx-auto space-y-8 pb-20">
         {/* Top Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#8C735D] border-b border-[#D6B48D]/30 pb-4 overflow-x-auto whitespace-nowrap">
-          <Link href="/" className="hover:text-[#CD9F5B] transition-colors">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-2 text-xs font-serif-th text-[#6F5B4A] border-b border-[#E4D8C4]/30 pb-4 overflow-x-auto whitespace-nowrap"
+        >
+          <Link href="/" className="hover:text-[#8F5C1A] transition-colors">
             หน้าแรก
           </Link>
           <span>/</span>
-          <Link href="/blog" className="hover:text-[#CD9F5B] transition-colors">
+          <Link href="/blog" className="hover:text-[#8F5C1A] transition-colors">
             คัมภีร์บทความ
           </Link>
           <span>/</span>
-          <span className="text-[#CD9F5B] truncate font-bold">{article.categoryTh}</span>
+          <span className="text-[#8F5C1A] truncate font-bold">{article.categoryTh}</span>
         </nav>
 
         {/* Client Interactive Reader Component */}

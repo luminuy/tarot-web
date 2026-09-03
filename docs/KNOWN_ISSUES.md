@@ -121,6 +121,17 @@
 | **ผลกระทบ** | ตอนนี้ยังทำงานได้ แต่จะพังเมื่อ GitHub เลิกรองรับจริง |
 | **ทางแก้** | อัปเป็น `actions/checkout@v5` + `actions/setup-node@v5` ให้ครบ **ทั้ง 3 ไฟล์** แล้วดู CI ผ่านครบ 7 ด่าน |
 
+### ISSUE-008 · Hydration mismatch ที่หน้าแรก — `stepDirectionRef` ถูกอ่านตอน SSR
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการ** | คอนโซลขึ้น `A tree hydrated but some attributes of the server rendered HTML didn't match` ที่ `<motion.div custom={stepDirectionRef.current}>` — SSR ให้ `translateX(40px)` แต่ client ให้ `translateX(-40px)` |
+| **ตรวจยืนยันล่าสุด** | 2026-09-03 — `src/app/page.tsx` (`custom={motionSafe ? stepDirectionRef.current : 0}` ที่ทั้ง 3 `motion.div` ของแต่ละขั้น) |
+| **ต้นเหตุ** | `useRef` ที่เก็บทิศทางการเปลี่ยนขั้น ถูกอ่านระหว่างเรนเดอร์ ค่าจึงต่างกันระหว่างเซิร์ฟเวอร์กับเบราว์เซอร์ |
+| **ผลกระทบ** | React ไม่ patch ให้ แต่ framer-motion เขียนทับด้วย animate ทันที **ผู้ใช้ไม่เห็นความผิดปกติ** — เป็นเสียงรบกวนในคอนโซล dev |
+| **ทางแก้** | ย้ายทิศทางไป `useState` แล้วอ่านหลัง mount หรือส่ง `custom={0}` ตอนเรนเดอร์แรกแล้วค่อยอัปเดตใน `useEffect` |
+| **หมายเหตุ** | **มีมาก่อน**งานปรับดีไซน์ (2026-09-03) ไม่ได้เกิดจาก Design System V2 |
+
 ### ~~ISSUE-007 · Prisma ออกแบบ schema ไว้แล้วแต่ยังไม่ได้ต่อใช้จริง~~ — 🟢 **ปิดแล้ว (ตรวจ 2026-09-01)**
 
 | หัวข้อ | รายละเอียด |

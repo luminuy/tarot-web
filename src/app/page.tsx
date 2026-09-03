@@ -39,30 +39,21 @@ import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
-const ShuffleRitual = dynamic(
-  () => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual),
-  { ssr: false }
-);
+const ShuffleRitual = dynamic(() => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual), {
+  ssr: false,
+});
 const InteractiveCardFan = dynamic(
   () => import("@/components/deck/InteractiveCardFan").then((m) => m.InteractiveCardFan),
   { ssr: false }
 );
-const SpreadBoard = dynamic(
-  () => import("@/components/spread/SpreadBoard").then((m) => m.SpreadBoard),
-  { ssr: false }
-);
-const StreamReader = dynamic(
-  () => import("@/components/reading/StreamReader").then((m) => m.StreamReader),
-  { ssr: false }
-);
-const FollowUpChat = dynamic(
-  () => import("@/components/reading/FollowUpChat").then((m) => m.FollowUpChat),
-  { ssr: false }
-);
-const ShareModal = dynamic(
-  () => import("@/components/reading/ShareModal").then((m) => m.ShareModal),
-  { ssr: false }
-);
+const SpreadBoard = dynamic(() => import("@/components/spread/SpreadBoard").then((m) => m.SpreadBoard), { ssr: false });
+const StreamReader = dynamic(() => import("@/components/reading/StreamReader").then((m) => m.StreamReader), {
+  ssr: false,
+});
+const FollowUpChat = dynamic(() => import("@/components/reading/FollowUpChat").then((m) => m.FollowUpChat), {
+  ssr: false,
+});
+const ShareModal = dynamic(() => import("@/components/reading/ShareModal").then((m) => m.ShareModal), { ssr: false });
 const ReadingHistoryModal = dynamic(
   () => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
   { ssr: false }
@@ -71,22 +62,17 @@ const TarotEncyclopediaModal = dynamic(
   () => import("@/components/encyclopedia/TarotEncyclopediaModal").then((m) => m.TarotEncyclopediaModal),
   { ssr: false }
 );
-const AuthModal = dynamic(
-  () => import("@/components/auth/AuthModal").then((m) => m.AuthModal),
-  { ssr: false }
-);
-const CardZoomModal = dynamic(
-  () => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal),
-  { ssr: false }
-);
+const AuthModal = dynamic(() => import("@/components/auth/AuthModal").then((m) => m.AuthModal), { ssr: false });
+const CardZoomModal = dynamic(() => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal), {
+  ssr: false,
+});
 const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
   { ssr: false }
 );
-const AccessDialog = dynamic(
-  () => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog),
-  { ssr: false }
-);
+const AccessDialog = dynamic(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog), {
+  ssr: false,
+});
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick }: { onClick: () => void }) {
@@ -94,7 +80,7 @@ function StepBackButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#FDF7F0] border border-[#D6B48D] text-xs font-serif-th text-[#5A432F] hover:bg-[#FFFFFF] hover:border-[#CD9F5B] transition-colors duration-150 cursor-pointer touch-manipulation shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FCF0E6]"
+      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-xs font-serif-th text-[#2E211A] hover:bg-[#F6F1E9] hover:border-[#8F5C1A] transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F0E8DB]"
     >
       <span aria-hidden="true">←</span> ย้อนกลับ
     </button>
@@ -126,7 +112,6 @@ export default function TarotPage() {
     setCurrentStep(next);
   };
 
-
   // Modals state
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -141,10 +126,7 @@ export default function TarotPage() {
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const entitlement = useEntitlement();
   const entitlementView = describeEntitlement(entitlement);
-  const isPassHolder = Boolean(
-    entitlementView?.isUnlimited ||
-    entitlement?.hasPaidCredits
-  );
+  const isPassHolder = Boolean(entitlementView?.isUnlimited || entitlement?.hasPaidCredits);
 
   /**
    * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้
@@ -264,8 +246,7 @@ export default function TarotPage() {
       setCurrentStep(saved.currentStep);
       // ตรวจสอบความสมบูรณ์ของไพ่ที่กู้คืน — ถ้าไพ่สูญหายหรือข้อมูลไม่สมบูรณ์ ห้ามกุ The Fool
       const isCorrupted =
-        saved.drawnCards &&
-        saved.drawnCards.some((d) => !d || d.cardIndex === undefined || !d.card?.nameTh);
+        saved.drawnCards && saved.drawnCards.some((d) => !d || d.cardIndex === undefined || !d.card?.nameTh);
       if (isCorrupted) {
         setErrorMsg("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
       } else if (saved.currentStep === "READING" && !saved.readingResult?.summary) {
@@ -437,9 +418,23 @@ export default function TarotPage() {
     }, 400);
     return () => clearTimeout(t);
   }, [
-    currentStep, selectedSpread, selectedPersona, selectedCategory, question, nickname,
-    situation, readingId, sessionToken, commitment, clientSeed, pickedIndices, drawnCards,
-    revealedOrders, activeCardIndex, readingResult, proof,
+    currentStep,
+    selectedSpread,
+    selectedPersona,
+    selectedCategory,
+    question,
+    nickname,
+    situation,
+    readingId,
+    sessionToken,
+    commitment,
+    clientSeed,
+    pickedIndices,
+    drawnCards,
+    revealedOrders,
+    activeCardIndex,
+    readingResult,
+    proof,
   ]);
 
   // Step 1 -> Step 2: Start Reading Session
@@ -588,11 +583,7 @@ export default function TarotPage() {
           throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
         }
         const kw = fullCard.keywords;
-        const extractedKeywords = Array.isArray(kw)
-          ? kw
-          : d.isReversed
-          ? kw?.reversed ?? []
-          : kw?.upright ?? [];
+        const extractedKeywords = Array.isArray(kw) ? kw : d.isReversed ? (kw?.reversed ?? []) : (kw?.upright ?? []);
 
         return {
           order: d.order ?? 0,
@@ -647,7 +638,7 @@ export default function TarotPage() {
       });
 
       if (!res.ok || !res.body) {
-        const errData = await res.json().catch(() => ({} as { reason?: string; error?: string }));
+        const errData = await res.json().catch(() => ({}) as { reason?: string; error?: string });
         const blockedReason = mapBlockedReason(errData.reason);
         if (blockedReason) {
           setIsStreaming(false);
@@ -655,9 +646,7 @@ export default function TarotPage() {
           openAccessDialog(blockedReason);
           return;
         }
-        throw new Error(
-          errData.error || "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้งค่ะ",
-        );
+        throw new Error(errData.error || "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้งค่ะ");
       }
 
       const reader = res.body.getReader();
@@ -764,9 +753,7 @@ export default function TarotPage() {
 
   // Flip card manually
   const handleFlipCard = (order: number) => {
-    setRevealedOrders((prev) =>
-      prev.includes(order) ? prev.filter((o) => o !== order) : [...prev, order]
-    );
+    setRevealedOrders((prev) => (prev.includes(order) ? prev.filter((o) => o !== order) : [...prev, order]));
     setActiveCardIndex(order);
   };
 
@@ -825,10 +812,10 @@ export default function TarotPage() {
           <Link
             href="/"
             aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
-            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-2xl p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]/60"
+            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]/60"
           >
             {/* Seer Brand Logo */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#E4D8C4] overflow-hidden shadow-xs relative flex-shrink-0 bg-[#F6F1E9] group-hover:scale-105 transition-all duration-300">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#E4D8C4] overflow-hidden relative flex-shrink-0 bg-[#F6F1E9] group-hover:scale-105 transition-all duration-300">
               <img
                 src="/logo.webp"
                 alt="Seer Tarot Brand Logo"
@@ -877,7 +864,7 @@ export default function TarotPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-white font-bold bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-1.5 sm:py-2 rounded-md shadow-xs transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1 font-serif-th"
+                className="text-xs text-white font-bold bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-1.5 sm:py-2 rounded transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1 font-serif-th"
               >
                 <span>✦</span> เริ่มดูดวงใหม่
               </button>
@@ -887,23 +874,18 @@ export default function TarotPage() {
       </header>
 
       {/* World-Class Sacred Floating Toast Notification HUD */}
-      <AnimatePresence>
-        {toast && <ToastNotification toast={toast} onClose={() => setToast(null)} />}
-      </AnimatePresence>
+      <AnimatePresence>{toast && <ToastNotification toast={toast} onClose={() => setToast(null)} />}</AnimatePresence>
 
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
         <AnnouncementBanner />
 
         {/* Step Tracker Progress Bar */}
-        <RitualStepProgress
-          currentStep={currentStep}
-          onStepClick={(step) => navigateStep(step)}
-        />
+        <RitualStepProgress currentStep={currentStep} onStepClick={(step) => navigateStep(step)} />
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-800 text-xs sm:text-sm text-center shadow-md flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mb-6 p-4 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3">
             <span>{errorMsg}</span>
             {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ/.test(errorMsg) && (
               <button
@@ -912,7 +894,7 @@ export default function TarotPage() {
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-3.5 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-white font-serif-th font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
+                className="px-3.5 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-white font-serif-th font-bold text-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
               >
                 <span>✦</span> โหลดใหม่อีกครั้ง
               </button>
@@ -930,94 +912,90 @@ export default function TarotPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              className="space-y-8"
+              className="space-y-10"
             >
               <EntitlementGate active={currentStep === "SPREAD_SELECT"} onRequestUpgrade={openAccessDialog}>
                 <FreeTrialNotice onOpenAccess={() => openAccessDialog("explore")} />
-              <div className="text-center space-y-4 relative">
-                {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
-                <div className="h-64 sm:h-80 w-full flex items-center justify-center relative my-2 select-none" style={{ perspective: 1200 }}>
-                  {/* Radiant Golden Solar Halo (Breathes softly) */}
-                  <div className="absolute inset-0 flex items-center justify-center -z-10 pointer-events-none">
-                    <div className="w-72 h-72 sm:w-[460px] sm:h-[460px] rounded-full bg-radial from-[#C5A059]/20 via-[#D6B48D]/08 to-transparent blur-2xl animate-[pulse_6s_ease-in-out_infinite]" />
-                    <div className="absolute w-64 h-64 sm:w-[400px] sm:h-[400px] rounded-full border border-dashed border-[#D6B48D]/40 animate-[spin_80s_linear_infinite]" />
-                    <div className="absolute w-48 h-48 sm:w-[290px] sm:h-[290px] rounded-full border border-[#C5A059]/30 animate-[spin_50s_linear_infinite_reverse]" />
-                  </div>
+                <div className="text-center space-y-6 relative">
+                  {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
+                  <div
+                    className="h-56 sm:h-72 w-full flex items-center justify-center relative select-none"
+                    style={{ perspective: 1200 }}
+                  >
+                    {/* 3D Realistic 78-Card Stacked Deck Container */}
+                    <div className="relative group cursor-pointer" onClick={() => soundManager.playCardSelectSound()}>
+                      {/* Layer 3: Deep Stack Base (Gold Gilded Edge) */}
+                      <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-lg bg-[#5A3E26] border border-[#E4D8C4]/60 translate-x-[6px] translate-y-[6px] shadow-[var(--shadow-overlay)]" />
+                      {/* Layer 2: Middle Stack Deck */}
+                      <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-lg bg-[#4A3320] border border-[#E4D8C4]/70 translate-x-[3px] translate-y-[3px]" />
 
-                  {/* 3D Realistic 78-Card Stacked Deck Container */}
-                  <div className="relative group cursor-pointer" onClick={() => soundManager.playCardSelectSound()}>
-                    {/* Layer 3: Deep Stack Base (Gold Gilded Edge) */}
-                    <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-2xl bg-[#5A3E26] border border-[#B8853E]/60 translate-x-[6px] translate-y-[6px] shadow-[0_12px_36px_rgba(90,67,47,0.22)]" />
-                    {/* Layer 2: Middle Stack Deck */}
-                    <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-2xl bg-[#4A3320] border border-[#D6B48D]/70 translate-x-[3px] translate-y-[3px]" />
+                      {/* Layer 1: Top Floating Hero Card */}
+                      <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#E4D8C4] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+                        <div className="w-full flex justify-center items-center opacity-90">
+                          <span className="text-[9px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
+                            ✦ SACRED ORACLE ✦
+                          </span>
+                        </div>
 
-                    {/* Layer 1: Top Floating Hero Card */}
-                    <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#D6B48D] card-back-pattern shadow-[0_16px_40px_rgba(90,67,47,0.25)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
-                      <div className="w-full flex justify-center items-center opacity-90">
-                        <span className="text-[9px] font-serif-th text-[#FAF8F5] tracking-[0.25em] uppercase font-bold">
-                          ✦ SACRED ORACLE ✦
+                        {/* Sacred Center Emblem */}
+                        <div className="my-auto w-12 h-12 rounded-full border border-[#E4D8C4]/60 flex items-center justify-center bg-black/20 shadow-inner">
+                          <span className="text-base text-[#E4D8C4]">✨</span>
+                        </div>
+
+                        <span className="text-xs font-serif-th font-bold text-[#FFFFFF] tracking-widest uppercase">
+                          ไพ่ทาโรต์ 1909
                         </span>
+
+                        {/* Dynamic Gold Sheen Sweep */}
+                        <div className="gold-foil-sheen absolute inset-0 opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
                       </div>
-
-                      {/* Sacred Center Emblem */}
-                      <div className="my-auto w-12 h-12 rounded-full border border-[#D6B48D]/60 flex items-center justify-center bg-black/20 shadow-inner">
-                        <span className="text-base text-[#D4AF37] animate-pulse">✨</span>
-                      </div>
-
-                      <span className="text-xs font-serif-th font-bold text-[#FAF8F5] tracking-widest uppercase">
-                        ไพ่ทาโรต์ 1909
-                      </span>
-
-                      {/* Dynamic Gold Sheen Sweep */}
-                      <div className="gold-foil-sheen absolute inset-0 opacity-35 group-hover:opacity-75 transition-opacity" />
                     </div>
                   </div>
+
+                  <div className="space-y-1.5">
+                    <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide ">
+                      เลือกผังการเปิดไพ่
+                    </h2>
+                    <p className="text-xs sm:text-sm text-[#6F5B4A] max-w-xl mx-auto font-serif-th">
+                      เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการค้นหาคำตอบในจิตใจ
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide drop-shadow-xs">
-                    เลือกผังการเปิดไพ่
-                  </h2>
-                  <p className="text-xs sm:text-sm text-[#7C6553] max-w-xl mx-auto font-serif-th">
-                    เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการค้นหาคำตอบในจิตใจ
-                  </p>
-                </div>
-              </div>
-
-              {/* Spread Selector Grid */}
-              <SpreadCardSelector
-                selectedSpread={selectedSpread}
-                onSelectSpread={(sp) => {
-                  soundManager.playCardSelectSound();
-                  setSelectedSpread(sp);
-                }}
-                isPassHolder={isPassHolder}
-                proceedLabel={
-                  entitlementView?.blocked
-                    ? entitlementView.blockedReason === "daily_exhausted"
-                      ? "เติมรอบเพื่อเปิดไพ่ต่อ"
-                      : "สมัครสมาชิกฟรีเพื่อเปิดไพ่"
-                    : !isPassHolder && !isStandardSpread(selectedSpread.id)
-                    ? "ปลดล็อกผังนี้เพื่อเปิดไพ่"
-                    : undefined
-                }
-                onRequireUpgrade={() => {
-                  openAccessDialog("grand_spread");
-                }}
-                onProceed={() => {
-                  if (entitlementView?.blocked) {
-                    openAccessDialog(entitlementView.blockedReason ?? "guest_used");
-                    return;
+                {/* Spread Selector Grid */}
+                <SpreadCardSelector
+                  selectedSpread={selectedSpread}
+                  onSelectSpread={(sp) => {
+                    soundManager.playCardSelectSound();
+                    setSelectedSpread(sp);
+                  }}
+                  isPassHolder={isPassHolder}
+                  proceedLabel={
+                    entitlementView?.blocked
+                      ? entitlementView.blockedReason === "daily_exhausted"
+                        ? "เติมรอบเพื่อเปิดไพ่ต่อ"
+                        : "สมัครสมาชิกฟรีเพื่อเปิดไพ่"
+                      : !isPassHolder && !isStandardSpread(selectedSpread.id)
+                        ? "ปลดล็อกผังนี้เพื่อเปิดไพ่"
+                        : undefined
                   }
-                  if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
+                  onRequireUpgrade={() => {
                     openAccessDialog("grand_spread");
-                    return;
-                  }
-                  soundManager.playCardSelectSound();
-                  scrollToSanctuaryTop();
-                  navigateStep("INTENTION_SELECT");
-                }}
-              />
+                  }}
+                  onProceed={() => {
+                    if (entitlementView?.blocked) {
+                      openAccessDialog(entitlementView.blockedReason ?? "guest_used");
+                      return;
+                    }
+                    if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
+                      openAccessDialog("grand_spread");
+                      return;
+                    }
+                    soundManager.playCardSelectSound();
+                    scrollToSanctuaryTop();
+                    navigateStep("INTENTION_SELECT");
+                  }}
+                />
               </EntitlementGate>
             </motion.div>
           )}
@@ -1031,13 +1009,13 @@ export default function TarotPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              className="space-y-8"
+              className="space-y-10"
             >
               <div className="text-center space-y-1">
                 <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold">
                   ตั้งคำถาม &amp; เลือกแม่หมอ
                 </h2>
-                <p className="text-xs sm:text-sm text-[#8C735D]">
+                <p className="text-xs sm:text-sm text-[#6F5B4A]">
                   พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
                 </p>
               </div>
@@ -1075,7 +1053,7 @@ export default function TarotPage() {
                 แล้วปุ่มตกไปคนละบรรทัด · ตอนนี้ล็อกเป็น flex-nowrap: ปุ่มย้อนกลับกว้างเท่าที่จำเป็น
                 (ชื่อผังโชว์เฉพาะจอกว้าง) ส่วนปุ่มหลักยืดเต็มพื้นที่ที่เหลือ
               */}
-              <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-[1.618rem] bg-[#FDF7F0] border border-[#D6B48D] shadow-md flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3">
+              <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -1084,11 +1062,11 @@ export default function TarotPage() {
                     navigateStep("SPREAD_SELECT");
                   }}
                   aria-label={`เปลี่ยนผัง (ตอนนี้เลือก ${selectedSpread.nameTh})`}
-                  className="shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] text-xs font-serif-th text-[#5A432F] hover:bg-[#E4C09F]/30 transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
+                  className="shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-xs font-serif-th text-[#2E211A] hover:bg-[#FFFFFF]/30 transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
                 >
                   <span aria-hidden="true">←</span>
                   <span>เปลี่ยนผัง</span>
-                  <span className="hidden lg:inline truncate text-[#8C735D]">({selectedSpread.nameTh})</span>
+                  <span className="hidden lg:inline truncate text-[#6F5B4A]">({selectedSpread.nameTh})</span>
                 </button>
 
                 <button
@@ -1096,10 +1074,10 @@ export default function TarotPage() {
                   onClick={handleStartSession}
                   disabled={loading || !nickname.trim() || !question.trim()}
                   aria-label="ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"
-                  className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-xl text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 shadow-md flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap ${
+                  className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-lg text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                     !nickname.trim() || !question.trim()
-                      ? "bg-[#E4C09F]/40 text-[#8C735D]/60 border border-[#D6B48D]/40 cursor-not-allowed"
-                      : "bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] active:scale-95 cursor-pointer shadow-[0_4px_16px_rgba(205,159,91,0.35)]"
+                      ? "bg-[#F0E8DB]/40 text-[#6F5B4A]/60 border border-[#E4D8C4]/40 cursor-not-allowed"
+                      : "bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] active:scale-95 cursor-pointer"
                   }`}
                 >
                   <span aria-hidden="true">✦</span>
@@ -1151,9 +1129,7 @@ export default function TarotPage() {
               <InteractiveCardFan
                 pickedIndices={pickedIndices}
                 targetCount={selectedSpread.positions.length}
-                currentPositionName={
-                  selectedSpread.positions[pickedIndices.length]?.nameTh || "ตำแหน่งที่เหลือ"
-                }
+                currentPositionName={selectedSpread.positions[pickedIndices.length]?.nameTh || "ตำแหน่งที่เหลือ"}
                 onPickCard={handlePickCard}
                 disabled={loading}
               />
@@ -1170,7 +1146,7 @@ export default function TarotPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              className="space-y-8"
+              className="space-y-10"
             >
               {/* HERO ROW: Centered 3D Sacred Spread Altar (รูปที่ 2: ผังไพ่อันเดียวตรงกลางสง่างาม) */}
               <section aria-label="แท่นผังไพ่พยากรณ์" className="w-full max-w-5xl mx-auto">
@@ -1232,9 +1208,9 @@ export default function TarotPage() {
               </div>
 
               {/* Bottom Quick Luxury Actions Deck */}
-              <div className="p-5 sm:p-6 rounded-[1.618rem] bg-[#FDF7F0] border border-[#D6B48D] flex flex-wrap items-center justify-between gap-4 shadow-md">
-                <div className="flex items-center gap-2 text-xs text-[#8C735D] font-serif-th">
-                  <span className="text-[#CD9F5B]">✦</span>
+              <div className="p-5 sm:p-6 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] flex flex-wrap items-center justify-between gap-4 ">
+                <div className="flex items-center gap-2 text-xs text-[#6F5B4A] font-serif-th">
+                  <span className="text-[#8F5C1A]">✦</span>
                   <span>บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้</span>
                 </div>
 
@@ -1245,15 +1221,15 @@ export default function TarotPage() {
                       soundManager.playCardSelectSound();
                       setIsShareOpen(true);
                     }}
-                    className="py-3 px-5 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] text-[#5A432F] font-serif-th text-xs hover:bg-[#E4C09F]/30 transition-all cursor-pointer flex items-center gap-2 shadow-xs"
+                    className="py-3 px-5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] font-serif-th text-xs hover:bg-[#FFFFFF]/30 transition-all cursor-pointer flex items-center gap-2 "
                   >
-                    <span className="text-[#CD9F5B]">✨</span> แชร์ผลคำทำนาย
+                    <span className="text-[#8F5C1A]">✨</span> แชร์ผลคำทำนาย
                   </button>
 
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="py-3 px-6 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-bold font-serif-th text-xs shadow-md active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                    className="py-3 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th text-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
                   >
                     <span>✦</span> ดูดวงเรื่องอื่นต่อ
                   </button>
@@ -1279,10 +1255,7 @@ export default function TarotPage() {
         reading={readingResult}
       />
 
-      <ReadingHistoryModal
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-      />
+      <ReadingHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
 
       <AuthModal
         isOpen={isAuthOpen}
@@ -1310,10 +1283,7 @@ export default function TarotPage() {
         onBuyCredits={() => setIsBuyCreditsOpen(true)}
       />
 
-      <TarotEncyclopediaModal
-        isOpen={isEncyclopediaOpen}
-        onClose={() => setIsEncyclopediaOpen(false)}
-      />
+      <TarotEncyclopediaModal isOpen={isEncyclopediaOpen} onClose={() => setIsEncyclopediaOpen(false)} />
 
       <CardZoomModal
         card={zoomedCard ? (zoomedCard.card as any) : null}
@@ -1329,24 +1299,23 @@ export default function TarotPage() {
       {/* ═══════════════════════════════════════════════════════════════
           Site-Wide Sanctuary Footer — World-Class Warm Minimalist Luxury Design
           ═══════════════════════════════════════════════════════════════ */}
-      <footer className="w-full mt-16 relative overflow-hidden border-t border-[#D6B48D]/40 bg-[#FCF0E6]/80">
+      <footer className="w-full relative overflow-hidden border-t border-[#E4D8C4]/40 bg-[#F0E8DB]/80">
         {/* Ambient gold line above footer */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#CD9F5B]/30 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#8F5C1A]/30 to-transparent" />
         </div>
 
         <div className="max-w-4xl mx-auto px-5 pt-10 pb-8 space-y-6 relative z-10">
-
           {/* Row 1: AI Disclosure Card */}
-          <div className="flex items-start gap-4 p-5 rounded-[1.618rem] bg-[#FDF7F0] border border-[#D6B48D] shadow-xs">
-            <div className="w-10 h-10 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] flex items-center justify-center flex-shrink-0 shadow-xs text-[#CD9F5B]">
+          <div className="flex items-start gap-4 p-5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
+            <div className="w-10 h-10 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] flex items-center justify-center flex-shrink-0 text-[#8F5C1A]">
               <OracleEyeIcon className="w-4.5 h-4.5" />
             </div>
             <div className="space-y-1 min-w-0">
-              <h4 translate="no" className="text-[11px] font-bold text-[#CD9F5B] uppercase tracking-wider font-mono">
+              <h4 translate="no" className="text-[11px] font-bold text-[#8F5C1A] uppercase tracking-wider font-mono">
                 AI-Generated Reading
               </h4>
-              <p className="text-[11px] text-[#8C735D] leading-[1.7] font-serif-th">
+              <p className="text-[11px] text-[#6F5B4A] leading-[1.7] font-serif-th">
                 คำทำนายทั้งหมดสร้างโดยปัญญาประดิษฐ์ (AI) จากไพ่ที่คุณเปิดจริง มีไว้เพื่อการใคร่ครวญและความบันเทิง
                 ไม่ใช่คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน การตัดสินใจทุกอย่างยังเป็นของคุณเสมอ
               </p>
@@ -1358,63 +1327,71 @@ export default function TarotPage() {
             {/* Privacy */}
             <a
               href="/privacy"
-              className="group flex items-center gap-3 p-4 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] hover:border-[#CD9F5B] transition-all duration-300 hover:bg-[#FFFFFF] shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
+              className="group flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] transition-all duration-300 hover:bg-[#F6F1E9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#FCF0E6] border border-[#D6B48D]/50 flex items-center justify-center flex-shrink-0 group-hover:bg-[#CD9F5B]/15 transition-colors text-[#CD9F5B]">
+              <div className="w-8 h-8 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4]/50 flex items-center justify-center flex-shrink-0 group-hover:bg-[#8F5C1A]/15 transition-colors text-[#8F5C1A]">
                 <LockTabIcon className="w-4 h-4" />
               </div>
               <div>
-                <span translate="no" className="text-[10px] font-bold text-[#CD9F5B] uppercase tracking-wider font-mono block">
+                <span
+                  translate="no"
+                  className="text-[10px] font-bold text-[#8F5C1A] uppercase tracking-wider font-mono block"
+                >
                   Privacy & PDPA
                 </span>
-                <span className="text-[10px] text-[#8C735D] group-hover:text-[#5A432F] transition-colors font-serif-th">
+                <span className="text-[10px] text-[#6F5B4A] group-hover:text-[#2E211A] transition-colors font-serif-th">
                   นโยบายความเป็นส่วนตัว
                 </span>
               </div>
             </a>
 
             {/* Mental Health Hotline */}
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] shadow-xs">
-              <div className="w-8 h-8 rounded-lg bg-[#EBF3ED] flex items-center justify-center flex-shrink-0 text-[#2D5A27]">
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
+              <div className="w-8 h-8 rounded-lg bg-[#EBF3ED] flex items-center justify-center flex-shrink-0 text-[#3A7044]">
                 <CareLineIcon className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#2D5A27] uppercase tracking-wider font-mono block font-serif-th">
+                <span className="text-[10px] font-bold text-[#3A7044] uppercase tracking-wider font-mono block font-serif-th">
                   สายด่วนสุขภาพจิต
                 </span>
-                <span className="text-sm font-bold text-[#5A432F] font-mono tracking-widest">1323</span>
-                <span className="text-[9px] text-[#8C735D] ml-1.5 font-serif-th">24 ชม.</span>
+                <span className="text-sm font-bold text-[#2E211A] font-mono tracking-widest">1323</span>
+                <span className="text-[9px] text-[#6F5B4A] ml-1.5 font-serif-th">24 ชม.</span>
               </div>
             </div>
 
             {/* Emergency */}
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] shadow-xs">
-              <div className="w-8 h-8 rounded-lg bg-[#FCEEEA] flex items-center justify-center flex-shrink-0 text-[#8C3B2D]">
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
+              <div className="w-8 h-8 rounded-lg bg-[#FCEEEA] flex items-center justify-center flex-shrink-0 text-[#A6392C]">
                 <EmergencyTabIcon className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#8C3B2D] uppercase tracking-wider font-mono block font-serif-th">
+                <span className="text-[10px] font-bold text-[#A6392C] uppercase tracking-wider font-mono block font-serif-th">
                   เหตุฉุกเฉิน
                 </span>
-                <span className="text-sm font-bold text-[#5A432F] font-mono tracking-widest">1669</span>
+                <span className="text-sm font-bold text-[#2E211A] font-mono tracking-widest">1669</span>
               </div>
             </div>
           </div>
 
           {/* Row 3: Bottom Branding Strip */}
-          <div className="flex flex-col items-center gap-2 pt-4 border-t border-[#D6B48D]/30">
+          <div className="flex flex-col items-center gap-2 pt-4 border-t border-[#E4D8C4]/30">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#D6B48D] flex-shrink-0 shadow-xs">
-                <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="24px" />
+              <div className="w-5 h-7 rounded overflow-hidden border border-[#E4D8C4] flex-shrink-0 ">
+                <CardImage
+                  image="major-01.jpg"
+                  alt="The Magician"
+                  className="w-full h-full object-cover"
+                  sizes="24px"
+                />
               </div>
-              <span translate="no" className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#8C735D]">
+              <span translate="no" className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#6F5B4A]">
                 Sacred Oracle Tarot · 1909
               </span>
-              <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#D6B48D] flex-shrink-0 shadow-xs">
+              <div className="w-5 h-7 rounded overflow-hidden border border-[#E4D8C4] flex-shrink-0 ">
                 <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="24px" />
               </div>
             </div>
-            <p translate="no" className="text-[9.5px] text-[#8C735D]/70 font-mono text-center">
+            <p translate="no" className="text-[9.5px] text-[#6F5B4A]/70 font-mono text-center">
               Provably-Fair Cryptographic Shuffle · Rider-Waite-Smith 1909 · All readings AI-generated
             </p>
           </div>

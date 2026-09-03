@@ -11,11 +11,7 @@ interface ShuffleRitualProps {
   onShuffleComplete: (clientSeed: string) => void;
 }
 
-export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
-  commitment,
-  spreadName,
-  onShuffleComplete,
-}) => {
+export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spreadName, onShuffleComplete }) => {
   const [shuffling, setShuffling] = useState(false);
   const [shufflePhase, setShufflePhase] = useState<"idle" | "split" | "riffle" | "bridge" | "gather">("idle");
   const [progress, setProgress] = useState(0);
@@ -79,13 +75,6 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
       onPointerMove={handlePointerMove}
       className="w-full max-w-xl mx-auto flex flex-col items-center justify-center p-6 text-center select-none relative z-10"
     >
-      {/* Background Sacred Geometric Aura */}
-      <div className="absolute inset-0 flex items-center justify-center -z-10 opacity-35 pointer-events-none">
-        <div className="w-80 h-80 sm:w-[450px] sm:h-[450px] rounded-full border border-dashed border-[#D6B48D] animate-[spin_60s_linear_infinite]" />
-        <div className="absolute w-56 h-56 sm:w-[320px] sm:h-[320px] rounded-full border border-[#CD9F5B]/40 animate-[spin_40s_linear_infinite_reverse]" />
-        <div className="absolute w-full h-full bg-radial from-[#CD9F5B]/15 via-transparent to-transparent blur-3xl" />
-      </div>
-
       {/* 3D Physical Riffle & Cascade Deck Stage */}
       <div className="h-64 sm:h-72 w-full flex items-center justify-center relative my-4" style={{ perspective: 1400 }}>
         {!shuffling ? (
@@ -95,10 +84,10 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
             whileTap={{ scale: 0.96 }}
             onClick={startShuffle}
             aria-label="แตะเพื่อเริ่มสับไพ่"
-            className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-2xl border-2 border-[#D6B48D] card-back-pattern shadow-[0_8px_30px_rgba(90,67,47,0.2)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FCF0E6]"
+            className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#E4D8C4] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F0E8DB]"
           >
             <div className="w-full flex justify-center items-center opacity-85">
-              <span className="text-[9px] font-serif-th text-[#FDF7F0] tracking-[0.2em] uppercase font-bold">
+              <span className="text-[9px] font-serif-th text-[#FFFFFF] tracking-[0.2em] uppercase font-bold">
                 SACRED ORACLE
               </span>
             </div>
@@ -106,42 +95,75 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
             {/* Clean Center */}
             <div className="my-auto" />
 
-            <span className="text-xs font-serif-th font-bold text-[#FDF7F0] tracking-wide">
-              สัมผัสเพื่อสับไพ่
-            </span>
+            <span className="text-xs font-serif-th font-bold text-[#FFFFFF] tracking-wide">สัมผัสเพื่อสับไพ่</span>
 
             {/* Dynamic Gold Sheen */}
             <div className="gold-foil-sheen absolute inset-0 opacity-30 group-hover:opacity-60 transition-opacity" />
           </motion.button>
         ) : (
           /* Multi-Layer Physical 3D Riffle Shuffle Animation */
-          <div className="relative w-72 h-64 flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
+          <div
+            className="relative w-72 h-64 flex items-center justify-center"
+            style={{ transformStyle: "preserve-3d" }}
+          >
             {/* Left Deck Stack */}
             <motion.div
               animate={{
-                x: shufflePhase === "split" ? -60 : shufflePhase === "riffle" ? [-60, -10, -60] : shufflePhase === "bridge" ? -15 : 0,
+                x:
+                  shufflePhase === "split"
+                    ? -60
+                    : shufflePhase === "riffle"
+                      ? [-60, -10, -60]
+                      : shufflePhase === "bridge"
+                        ? -15
+                        : 0,
                 y: shufflePhase === "bridge" ? -25 : 0,
-                rotateZ: shufflePhase === "split" ? -16 : shufflePhase === "riffle" ? [-16, -4, -16] : shufflePhase === "bridge" ? -8 : 0,
+                rotateZ:
+                  shufflePhase === "split"
+                    ? -16
+                    : shufflePhase === "riffle"
+                      ? [-16, -4, -16]
+                      : shufflePhase === "bridge"
+                        ? -8
+                        : 0,
                 rotateY: shufflePhase === "split" ? 25 : 0,
               }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="w-32 h-48 sm:w-36 sm:h-54 rounded-2xl border-2 border-[#D6B48D] card-back-pattern absolute shadow-[0_6px_24px_rgba(90,67,47,0.18)] flex items-center justify-center"
+              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#E4D8C4] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
             >
-              <div className="w-8 h-8 rounded-full border border-[#D6B48D] flex items-center justify-center text-xs text-[#CD9F5B]">✨</div>
+              <div className="w-8 h-8 rounded-full border border-[#E4D8C4] flex items-center justify-center text-xs text-[#8F5C1A]">
+                ✨
+              </div>
             </motion.div>
 
             {/* Right Deck Stack */}
             <motion.div
               animate={{
-                x: shufflePhase === "split" ? 60 : shufflePhase === "riffle" ? [60, 10, 60] : shufflePhase === "bridge" ? 15 : 0,
+                x:
+                  shufflePhase === "split"
+                    ? 60
+                    : shufflePhase === "riffle"
+                      ? [60, 10, 60]
+                      : shufflePhase === "bridge"
+                        ? 15
+                        : 0,
                 y: shufflePhase === "bridge" ? -25 : 0,
-                rotateZ: shufflePhase === "split" ? 16 : shufflePhase === "riffle" ? [16, 4, 16] : shufflePhase === "bridge" ? 8 : 0,
+                rotateZ:
+                  shufflePhase === "split"
+                    ? 16
+                    : shufflePhase === "riffle"
+                      ? [16, 4, 16]
+                      : shufflePhase === "bridge"
+                        ? 8
+                        : 0,
                 rotateY: shufflePhase === "split" ? -25 : 0,
               }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="w-32 h-48 sm:w-36 sm:h-54 rounded-2xl border-2 border-[#D6B48D] card-back-pattern absolute shadow-[0_6px_24px_rgba(90,67,47,0.18)] flex items-center justify-center"
+              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#E4D8C4] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
             >
-              <div className="w-8 h-8 rounded-full border border-[#D6B48D] flex items-center justify-center text-xs text-[#CD9F5B]">✨</div>
+              <div className="w-8 h-8 rounded-full border border-[#E4D8C4] flex items-center justify-center text-xs text-[#8F5C1A]">
+                ✨
+              </div>
             </motion.div>
 
             {/* Center Weaving Cascade Cards */}
@@ -149,52 +171,61 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
               <>
                 <motion.div
                   initial={{ y: 0, rotateZ: 0, scale: 1, opacity: 0 }}
-                  animate={{ y: [-14, 10, -8, 6, -4, 2, 0], rotateZ: [-5, 5, -3, 3, -1, 1, 0], scale: [0.95, 1.04, 0.97, 1.02, 0.99, 1.01, 1], opacity: 1 }}
+                  animate={{
+                    y: [-14, 10, -8, 6, -4, 2, 0],
+                    rotateZ: [-5, 5, -3, 3, -1, 1, 0],
+                    scale: [0.95, 1.04, 0.97, 1.02, 0.99, 1.01, 1],
+                    opacity: 1,
+                  }}
                   transition={{ duration: 1.4, ease: "easeInOut" }}
-                  className="w-30 h-44 rounded-2xl border border-[#D6B48D] card-back-pattern absolute z-20 shadow-xl opacity-95"
+                  className="w-30 h-44 rounded-lg border border-[#E4D8C4] card-back-pattern absolute z-20 shadow-[var(--shadow-overlay)] opacity-95"
                 />
                 <motion.div
                   initial={{ y: 0, rotateZ: 0, scale: 1, opacity: 0 }}
-                  animate={{ y: [10, -14, 6, -8, 2, -4, 0], rotateZ: [5, -5, 3, -3, 1, -1, 0], scale: [1.02, 0.96, 1.01, 0.98, 1, 0.99, 1], opacity: 1 }}
+                  animate={{
+                    y: [10, -14, 6, -8, 2, -4, 0],
+                    rotateZ: [5, -5, 3, -3, 1, -1, 0],
+                    scale: [1.02, 0.96, 1.01, 0.98, 1, 0.99, 1],
+                    opacity: 1,
+                  }}
                   transition={{ duration: 1.4, ease: "easeInOut", delay: 0.05 }}
-                  className="w-30 h-44 rounded-2xl border border-[#CD9F5B] card-back-pattern absolute z-20 shadow-xl opacity-90"
+                  className="w-30 h-44 rounded-lg border border-[#E4D8C4] card-back-pattern absolute z-20 shadow-[var(--shadow-overlay)] opacity-90"
                 />
               </>
             )}
 
             {/* Bridge Arch Glow Effect */}
             {shufflePhase === "bridge" && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1.15 }}
-                className="absolute w-44 h-44 rounded-full bg-radial from-[#CD9F5B]/30 via-[#E4C09F]/20 to-transparent blur-xl pointer-events-none z-30"
-              />
+              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1.15 }} />
             )}
           </div>
         )}
       </div>
 
       {/* Sacred Ritual Subtitle & Title */}
-      <span className="text-[11px] font-serif-th text-[#5A432F] font-bold bg-[#E4C09F]/30 px-4 py-1 rounded-full border border-[#D6B48D] mb-2 inline-block shadow-xs">
+      <span className="text-[11px] font-serif-th text-[#2E211A] font-bold bg-[#F0E8DB]/30 px-4 py-1 rounded-full border border-[#E4D8C4] mb-2 inline-block ">
         ✦ ขั้นตอนสับไพ่ ✦
       </span>
-      <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter drop-shadow-xs py-0.5 leading-normal">
+      <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter py-0.5 leading-normal">
         ตั้งสมาธิและนึกถึงคำถามของคุณ
       </h2>
-      <p className="text-xs sm:text-sm text-[#8C735D] mt-1 max-w-md leading-relaxed">
-        ทำใจให้สบาย แล้วนึกถึงเรื่องที่อยากรู้สำหรับผัง <span className="text-[#5A432F] font-semibold">"{spreadName}"</span>
+      <p className="text-xs sm:text-sm text-[#6F5B4A] mt-1 max-w-md leading-relaxed">
+        ทำใจให้สบาย แล้วนึกถึงเรื่องที่อยากรู้สำหรับผัง{" "}
+        <span className="text-[#2E211A] font-semibold">"{spreadName}"</span>
       </p>
 
       {/* Commitment Preview for Commit-Reveal Transparency */}
       {commitment && (
-        <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FCF0E6] border border-[#D6B48D] text-[10px] font-mono text-[#8C735D]">
-          <span>คำมั่นความสุ่ม (SHA-256): {commitment.slice(0, 16)}…{commitment.slice(-8)}</span>
+        <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[10px] font-mono text-[#6F5B4A]">
+          <span>
+            คำมั่นความสุ่ม (SHA-256): {commitment.slice(0, 16)}…{commitment.slice(-8)}
+          </span>
           <button
             type="button"
             onClick={() => navigator.clipboard.writeText(commitment)}
             title="คัดลอกคำมั่นความสุ่มเต็ม"
             aria-label="คัดลอกคำมั่นความสุ่ม"
-            className="text-[#CD9F5B] hover:text-[#5A432F] cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#CD9F5B]"
+            className="text-[#8F5C1A] hover:text-[#2E211A] cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
           >
             ⧉
           </button>
@@ -207,7 +238,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
           <button
             type="button"
             onClick={startShuffle}
-            className="w-full py-4 px-6 rounded-2xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-bold font-serif-th shadow-[0_4px_20px_rgba(205,159,91,0.35)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-4 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th shadow-[var(--shadow-overlay)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <span>✨</span>
             <span>แตะเพื่อเริ่มสับไพ่</span>
@@ -215,14 +246,14 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({
           </button>
         ) : (
           <div className="space-y-3">
-            <div className="w-full h-2.5 bg-[#FCF0E6] rounded-full overflow-hidden border border-[#D6B48D]">
+            <div className="w-full h-2.5 bg-[#F0E8DB] rounded-full overflow-hidden border border-[#E4D8C4]">
               <motion.div
-                className="h-full bg-gradient-to-r from-[#CD9F5B] via-[#E4C09F] to-[#CD9F5B]"
+                className="h-full bg-gradient-to-r from-[#8F5C1A] via-[#6F5B4A] to-[#8F5C1A]"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <span className="text-xs text-[#5A432F] font-medium flex items-center justify-center gap-1.5 animate-pulse font-serif-th">
-              <span className="w-2 h-2 rounded-full bg-[#CD9F5B]" />
+            <span className="text-xs text-[#2E211A] font-medium flex items-center justify-center gap-1.5 animate-pulse font-serif-th">
+              <span className="w-2 h-2 rounded-full bg-[#8F5C1A]" />
               {shufflePhase === "split" && "กำลังแบ่งสำรับไพ่..."}
               {shufflePhase === "riffle" && `กำลังสับไพ่ทั้ง 78 ใบ (${progress}%)`}
               {shufflePhase === "bridge" && "กำลังรวมสำรับไพ่เข้าด้วยกัน..."}

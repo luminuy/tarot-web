@@ -6,24 +6,58 @@ import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 
+import {
+  AirElementIcon,
+  CrownTabIcon,
+  FireElementIcon,
+  PentacleTabIcon,
+  SparkleTabIcon,
+  WaterElementIcon,
+} from "@/components/ui/TarotArtIcons";
 interface CardsExplorerProps {
   cards: readonly TarotCard[];
 }
 
 const SUIT_TABS = [
-  { id: "all", label: "ไพ่ทั้งหมด", icon: "✦", desc: "ครบ 78 ใบ", count: 78 },
-  { id: "major", label: "ไพ่ชุดใหญ่ (Major)", icon: "👑", desc: "ไพ่หลัก 22 ใบ", count: 22 },
-  { id: "wands", label: "ไม้เท้า (Wands)", icon: "🔥", desc: "ธาตุไฟ • พลังงาน & การงาน", count: 14 },
-  { id: "cups", label: "ถ้วย (Cups)", icon: "🌊", desc: "ธาตุน้ำ • ความรัก & อารมณ์", count: 14 },
-  { id: "swords", label: "ดาบ (Swords)", icon: "⚔️", desc: "ธาตุลม • ความคิด & การตัดสินใจ", count: 14 },
-  { id: "pentacles", label: "เหรียญ (Pentacles)", icon: "🪙", desc: "ธาตุดิน • การเงิน & ความมั่นคง", count: 14 },
+  { id: "all", label: "ไพ่ทั้งหมด", Icon: SparkleTabIcon, desc: "ครบ 78 ใบ", count: 78 },
+  { id: "major", label: "ไพ่ชุดใหญ่ (Major)", Icon: CrownTabIcon, desc: "ไพ่หลัก 22 ใบ", count: 22 },
+  { id: "wands", label: "ไม้เท้า (Wands)", Icon: FireElementIcon, desc: "ธาตุไฟ • พลังงาน & การงาน", count: 14 },
+  { id: "cups", label: "ถ้วย (Cups)", Icon: WaterElementIcon, desc: "ธาตุน้ำ • ความรัก & อารมณ์", count: 14 },
+  { id: "swords", label: "ดาบ (Swords)", Icon: AirElementIcon, desc: "ธาตุลม • ความคิด & การตัดสินใจ", count: 14 },
+  {
+    id: "pentacles",
+    label: "เหรียญ (Pentacles)",
+    Icon: PentacleTabIcon,
+    desc: "ธาตุดิน • การเงิน & ความมั่นคง",
+    count: 14,
+  },
 ];
 
 const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string; glow: string }> = {
-  ไฟ: { bg: "bg-amber-500/10", text: "text-amber-300", border: "border-amber-500/30", glow: "rgba(245, 158, 11, 0.25)" },
-  น้ำ: { bg: "bg-sky-500/10", text: "text-sky-300", border: "border-sky-500/30", glow: "rgba(56, 189, 248, 0.25)" },
-  ลม: { bg: "bg-purple-500/10", text: "text-purple-300", border: "border-purple-500/30", glow: "rgba(168, 85, 247, 0.25)" },
-  ดิน: { bg: "bg-emerald-500/10", text: "text-emerald-300", border: "border-emerald-500/30", glow: "rgba(16, 185, 129, 0.25)" },
+  ไฟ: {
+    bg: "bg-[#8F5C1A]/10",
+    text: "text-[#8F5C1A]",
+    border: "border-[#8F5C1A]/30",
+    glow: "rgba(245, 158, 11, 0.25)",
+  },
+  น้ำ: {
+    bg: "bg-[#6F5B4A]/10",
+    text: "text-[#6F5B4A]",
+    border: "border-[#6F5B4A]/30",
+    glow: "rgba(56, 189, 248, 0.25)",
+  },
+  ลม: {
+    bg: "bg-[#6F5B4A]/10",
+    text: "text-[#6F5B4A]",
+    border: "border-[#6F5B4A]/30",
+    glow: "rgba(168, 85, 247, 0.25)",
+  },
+  ดิน: {
+    bg: "bg-[#3A7044]/10",
+    text: "text-[#3A7044]",
+    border: "border-[#3A7044]/30",
+    glow: "rgba(16, 185, 129, 0.25)",
+  },
 };
 
 export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
@@ -51,18 +85,20 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       const astro = card.astrology?.toLowerCase() || "";
       const keywords = [...card.keywords.upright, ...card.keywords.reversed].join(" ").toLowerCase();
 
-      return nameTh.includes(q) || nameEn.includes(q) || keywords.includes(q) || element.includes(q) || astro.includes(q);
+      return (
+        nameTh.includes(q) || nameEn.includes(q) || keywords.includes(q) || element.includes(q) || astro.includes(q)
+      );
     });
   }, [cards, activeFilter, searchQuery]);
 
   return (
     <div className="space-y-8 relative z-10">
       {/* Sacred Search & Filter Dashboard */}
-      <div className="rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-4 sm:p-6 shadow-md space-y-5">
+      <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 sm:p-6 space-y-5">
         {/* Search Bar & Result Stats */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#CD9F5B] text-sm pointer-events-none">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8F5C1A] text-sm pointer-events-none">
               ✦
             </span>
             <input
@@ -70,22 +106,23 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."
-              className="w-full pl-10 pr-10 py-3.5 rounded-2xl border border-[#D6B48D] bg-[#FFFFFF] text-[#5A432F] placeholder-[#8C735D]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#CD9F5B] focus:ring-2 focus:ring-[#CD9F5B]/30 transition-all shadow-xs"
+              className="w-full pl-10 pr-10 py-3.5 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] text-[#2E211A] placeholder-[#6F5B4A]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/30 transition-all "
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C735D] hover:text-[#5A432F] text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6F5B4A] hover:text-[#2E211A] text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-[#8C735D]">
+          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-[#6F5B4A]">
             <span>
-              ค้นพบ <strong className="text-[#CD9F5B] text-sm font-bold">{filteredCards.length}</strong> จาก {cards.length} ใบ
+              ค้นพบ <strong className="text-[#8F5C1A] text-sm font-bold">{filteredCards.length}</strong> จาก{" "}
+              {cards.length} ใบ
             </span>
             {searchQuery && (
               <button
@@ -94,7 +131,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   setSearchQuery("");
                   setActiveFilter("all");
                 }}
-                className="text-[11px] text-[#CD9F5B] hover:underline cursor-pointer font-bold"
+                className="text-[11px] text-[#8F5C1A] hover:underline cursor-pointer font-bold"
               >
                 ล้างคำค้นหา
               </button>
@@ -130,35 +167,33 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     nextTab?.focus();
                   }
                 }}
-                className={`p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
+                className={`p-3 rounded-lg border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                   isActive
-                    ? "border-[#CD9F5B] bg-[#FFFFFF] shadow-sm scale-[1.02]"
-                    : "border-[#D6B48D] bg-[#FCF0E6] hover:border-[#CD9F5B] hover:bg-[#FFFFFF]"
+                    ? "border-[#E4D8C4] bg-[#FFFFFF] scale-[1.02]"
+                    : "border-[#E4D8C4] bg-[#F0E8DB] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-1">
-                  <span className="text-base">{tab.icon}</span>
+                  <tab.Icon className="w-4 h-4" />
                   <span
                     className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
-                      isActive
-                        ? "bg-[#CD9F5B] text-[#FDF7F0]"
-                        : "bg-black/5 text-[#8C735D] group-hover:text-[#5A432F]"
+                      isActive ? "bg-[#8F5C1A] text-[#FFFFFF]" : "bg-black/5 text-[#6F5B4A] group-hover:text-[#2E211A]"
                     }`}
                   >
                     {tab.count}
                   </span>
                 </div>
                 <div>
-                  <h4 className={`font-serif-th text-xs font-bold leading-tight ${
-                    isActive ? "text-[#CD9F5B]" : "text-[#5A432F] group-hover:text-[#CD9F5B]"
-                  }`}>
+                  <h4
+                    className={`font-serif-th text-xs font-bold leading-tight ${
+                      isActive ? "text-[#8F5C1A]" : "text-[#2E211A] group-hover:text-[#74490F]"
+                    }`}
+                  >
                     {tab.label}
                   </h4>
-                  <p className="text-[10px] text-[#8C735D] truncate mt-0.5">{tab.desc}</p>
+                  <p className="text-[10px] text-[#6F5B4A] truncate mt-0.5">{tab.desc}</p>
                 </div>
-                {isActive && (
-                  <div className="gold-foil-sheen absolute inset-0 opacity-15 pointer-events-none" />
-                )}
+                {isActive && <div className="gold-foil-sheen absolute inset-0 opacity-15 pointer-events-none" />}
               </button>
             );
           })}
@@ -181,10 +216,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               <Link
                 key={card.id}
                 href={`/cards/${card.id}`}
-                className="rounded-[1.618rem] border border-[#D6B48D] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#CD9F5B] hover:shadow-md transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 shadow-xs"
+                className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#8F5C1A] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 "
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
-                <div className="relative aspect-[7/12] w-full rounded-xl overflow-hidden border border-[#D6B48D] shadow-xs bg-[#FCF0E6] mb-3">
+                <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-[#E4D8C4] bg-[#F0E8DB] mb-3">
                   <CardImage
                     image={card.image}
                     cardId={card.id}
@@ -196,17 +231,19 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                   {/* Top Badge: Number & Arcana */}
                   <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-[#5A432F] text-[#FDF7F0] border border-[#D6B48D] shadow-xs">
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#2E211A] text-[#FFFFFF] border border-[#E4D8C4] ">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
-                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-md border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold shadow-xs`}>
+                    <span
+                      className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold `}
+                    >
                       {card.element}
                     </span>
                   </div>
 
                   {/* Bottom Hover Action Overlay */}
-                  <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-[#5A432F]/90 via-[#5A432F]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-[10px] font-serif-th font-bold text-[#FDF7F0] flex items-center gap-1">
+                  <div className="absolute inset-x-0 bottom-0 p-2 bg-[#2E211A] to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-[10px] font-serif-th font-bold text-[#FFFFFF] flex items-center gap-1">
                       <span>✦</span> ดูความหมาย
                     </span>
                   </div>
@@ -214,10 +251,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                 {/* Card Title & English Subtitle */}
                 <div className="text-center space-y-1 z-10">
-                  <span className="text-[10px] font-mono text-[#8C735D] block truncate">
-                    {card.nameEn}
-                  </span>
-                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#5A432F] group-hover:text-[#CD9F5B] transition-colors truncate">
+                  <span className="text-[10px] font-mono text-[#6F5B4A] block truncate">{card.nameEn}</span>
+                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] group-hover:text-[#8F5C1A] transition-colors truncate">
                     {card.nameTh}
                   </h3>
 
@@ -226,7 +261,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     {card.keywords.upright.slice(0, 2).map((kw, i) => (
                       <span
                         key={i}
-                        className="text-[9px] font-serif-th px-1.5 py-0.5 rounded-md bg-[#FCF0E6] text-[#5A432F] border border-[#D6B48D] truncate max-w-full"
+                        className="text-[9px] font-serif-th px-1.5 py-0.5 rounded bg-[#F0E8DB] text-[#2E211A] border border-[#E4D8C4] truncate max-w-full"
                       >
                         {kw}
                       </span>
@@ -235,7 +270,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 </div>
 
                 {/* Subtle Luxury Corner Sparkle */}
-                <div className="absolute top-1 right-1 text-[8px] text-[#D6B48D] group-hover:text-[#CD9F5B] transition-colors pointer-events-none">
+                <div className="absolute top-1 right-1 text-[8px] text-[#6F5B4A] group-hover:text-[#8F5C1A] transition-colors pointer-events-none">
                   ✦
                 </div>
               </Link>
@@ -246,13 +281,14 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
       {/* Empty State */}
       {filteredCards.length === 0 && (
-        <div className="text-center py-16 rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-8 space-y-3 shadow-sm">
-          <div className="text-3xl text-[#CD9F5B]">✦</div>
-          <h3 className="font-serif-th text-lg font-bold text-[#5A432F]">
+        <div className="text-center py-16 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-8 space-y-3 ">
+          <div className="text-3xl text-[#8F5C1A]">✦</div>
+          <h3 className="font-serif-th text-lg font-bold text-[#2E211A]">
             ไม่พบไพ่ที่ตรงกับ &ldquo;{searchQuery}&rdquo;
           </h3>
-          <p className="text-xs text-[#8C735D] max-w-md mx-auto">
-            ลองค้นหาด้วยชื่ออื่น เช่น &ldquo;ความรัก&rdquo;, &ldquo;The Sun&rdquo;, &ldquo;ดาวพฤหัสบดี&rdquo; หรือ &ldquo;ธาตุไฟ&rdquo;
+          <p className="text-xs text-[#6F5B4A] max-w-md mx-auto">
+            ลองค้นหาด้วยชื่ออื่น เช่น &ldquo;ความรัก&rdquo;, &ldquo;The Sun&rdquo;, &ldquo;ดาวพฤหัสบดี&rdquo; หรือ
+            &ldquo;ธาตุไฟ&rdquo;
           </p>
           <button
             type="button"
@@ -260,7 +296,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               setSearchQuery("");
               setActiveFilter("all");
             }}
-            className="px-5 py-2 rounded-xl text-xs font-serif-th font-bold bg-[#CD9F5B] hover:bg-[#B8853E] border border-[#D6B48D] text-[#FDF7F0] transition-all cursor-pointer shadow-xs"
+            className="px-5 py-2 rounded-full text-xs font-serif-th font-bold bg-[#8F5C1A] hover:bg-[#74490F] border border-[#E4D8C4] text-[#FFFFFF] transition-all cursor-pointer "
           >
             ล้างตัวกรองทั้งหมด
           </button>

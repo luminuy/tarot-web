@@ -38,10 +38,7 @@ const CATEGORY_MAP_TH: Record<string, string> = {
   decision: "การตัดสินใจ",
 };
 
-export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
+export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen, onClose }) => {
   const [readings, setReadings] = useState<SavedReadingItem[]>([]);
   const [search, setSearch] = useState("");
   const [outcomeFilter, setOutcomeFilter] = useState<"ALL" | ReadingOutcome>("ALL");
@@ -153,19 +150,19 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 20 }}
-          className="w-full max-w-2xl max-h-[88vh] rounded-[1.618rem] bg-[#FDF7F0] border border-[#D6B48D] p-5 sm:p-7 shadow-2xl flex flex-col relative space-y-4 overflow-hidden"
+          className="w-full max-w-2xl max-h-[88vh] rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-5 sm:p-7 shadow-[var(--shadow-overlay)] flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#D6B48D]/30 pb-3">
+          <div className="flex items-center justify-between border-b border-[#E4D8C4]/30 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full border border-[#D6B48D] flex items-center justify-center text-xs text-[#CD9F5B] bg-[#FCF0E6] shadow-xs font-bold">
+              <div className="w-8 h-8 rounded-full border border-[#E4D8C4] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#F0E8DB] font-bold">
                 ✦
               </div>
               <div>
                 <h3 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold">
                   สมุดบันทึกดวงชะตา & ติดตามผลจริง
                 </h3>
-                <p className="text-[10px] text-[#8C735D] font-serif-th">
+                <p className="text-[10px] text-[#6F5B4A] font-serif-th">
                   บันทึกคำทำนายและบันทึกผลลัพธ์ในชีวิต ({readings.length} รายการ)
                 </p>
               </div>
@@ -176,7 +173,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-[10px] text-rose-700 hover:text-rose-900 border border-rose-200 bg-rose-50 px-2.5 py-1 rounded-lg transition-all cursor-pointer font-serif-th shadow-xs"
+                  className="text-[10px] text-[#A6392C] hover:text-[#A6392C] border border-[#E4D8C4] bg-[#FCEEEA] px-2.5 py-1 rounded-lg transition-all cursor-pointer font-serif-th "
                 >
                   ลบทั้งหมด
                 </button>
@@ -185,7 +182,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label="ปิดสมุดบันทึกดวงชะตา"
-                className="w-11 h-11 rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] text-[#5A432F] hover:bg-[#CD9F5B] hover:text-[#FDF7F0] text-sm flex items-center justify-center transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
+                className="w-11 h-11 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
               >
                 ✕
               </button>
@@ -194,14 +191,14 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
 
           {/* AI Monthly Synthesis Banner / Trigger */}
           {readings.length >= 1 && (
-            <div className="p-3.5 rounded-2xl bg-[#FFFFFF] border border-[#D6B48D] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+            <div className="p-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] flex flex-col sm:flex-row items-center justify-between gap-3 ">
               <div className="flex items-center gap-2.5 text-left">
-                <span className="text-sm text-[#CD9F5B]">✨</span>
+                <span className="text-sm text-[#8F5C1A]">✨</span>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-serif-th font-bold text-[#5A432F]">
+                  <h4 className="text-xs sm:text-sm font-serif-th font-bold text-[#2E211A]">
                     กระจกสะท้อนดวงรอบเดือน (AI Monthly Destiny Retrospective)
                   </h4>
-                  <p className="text-[10px] text-[#8C735D]">
+                  <p className="text-[10px] text-[#6F5B4A]">
                     ให้ AI วิเคราะห์ Pattern ไพ่ที่ออกบ่อยและสรุปบทเรียนชีวิตจากบันทึกของคุณ
                   </p>
                 </div>
@@ -211,11 +208,11 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 type="button"
                 disabled={isGeneratingSummary}
                 onClick={handleGenerateMonthlySummary}
-                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-serif-th font-bold text-xs shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 flex-shrink-0"
+                className="w-full sm:w-auto px-4 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 flex-shrink-0"
               >
                 {isGeneratingSummary ? (
                   <>
-                    <span className="w-3 h-3 rounded-full border-2 border-[#FDF7F0] border-t-transparent animate-spin" />
+                    <span className="w-3 h-3 rounded-full border-2 border-[#E4D8C4] border-t-transparent animate-spin" />
                     <span>กำลังวิเคราะห์...</span>
                   </>
                 ) : (
@@ -233,19 +230,19 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-2xl bg-[#FFFFFF] border-2 border-[#CD9F5B] space-y-2.5 shadow-md relative"
+              className="p-4 rounded-lg bg-[#FFFFFF] border-2 border-[#E4D8C4] space-y-2.5 relative"
             >
               <button
                 type="button"
                 onClick={() => setMonthlySummary(null)}
-                className="absolute top-3 right-3 text-[#8C735D] hover:text-[#5A432F] text-xs p-1 cursor-pointer"
+                className="absolute top-3 right-3 text-[#6F5B4A] hover:text-[#2E211A] text-xs p-1 cursor-pointer"
                 title="ปิดสรุป"
               >
                 ✕
               </button>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#CD9F5B] text-[#FDF7F0] font-bold font-mono text-[10px] shadow-xs">
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#8F5C1A] text-[#FFFFFF] font-bold font-mono text-[10px] ">
                   ธาตุ{monthlySummary.dominantElement}เด่น
                 </span>
                 <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold truncate">
@@ -253,19 +250,19 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 </h4>
               </div>
 
-              <p className="text-xs text-[#5A432F] font-serif-th leading-relaxed italic">
+              <p className="text-xs text-[#2E211A] font-serif-th leading-relaxed italic">
                 “{monthlySummary.synthesis}”
               </p>
 
               {monthlySummary.lifeLessons && monthlySummary.lifeLessons.length > 0 && (
                 <div className="pt-1 space-y-1">
-                  <span className="text-[10px] text-[#CD9F5B] font-bold block font-serif-th">
+                  <span className="text-[10px] text-[#8F5C1A] font-bold block font-serif-th">
                     ✦ บทเรียนสำคัญในรอบเดือน:
                   </span>
-                  <ul className="space-y-1 text-[11px] text-[#5A432F]">
+                  <ul className="space-y-1 text-[11px] text-[#2E211A]">
                     {monthlySummary.lifeLessons.map((lesson, idx) => (
                       <li key={idx} className="flex items-start gap-1.5">
-                        <span className="text-[#CD9F5B]">✓</span>
+                        <span className="text-[#8F5C1A]">✓</span>
                         <span>{lesson}</span>
                       </li>
                     ))}
@@ -274,7 +271,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
               )}
 
               {monthlySummary.empowermentQuote && (
-                <div className="text-[10px] text-[#CD9F5B] pt-1 border-t border-[#D6B48D]/30 font-serif-th text-center font-bold">
+                <div className="text-[10px] text-[#8F5C1A] pt-1 border-t border-[#E4D8C4]/30 font-serif-th text-center font-bold">
                   ✨ {monthlySummary.empowermentQuote}
                 </div>
               )}
@@ -282,7 +279,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
           )}
 
           {summaryError && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-serif-th text-center shadow-xs">
+            <div className="p-3 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] text-xs font-serif-th text-center ">
               {summaryError}
             </div>
           )}
@@ -294,10 +291,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("ALL")}
-                  className={`px-3 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ALL"
-                      ? "bg-[#CD9F5B] text-[#FDF7F0] font-bold shadow-xs"
-                      : "bg-[#FFFFFF] text-[#8C735D] hover:text-[#5A432F] border border-[#D6B48D]"
+                      ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
+                      : "bg-[#FFFFFF] text-[#6F5B4A] hover:text-[#2E211A] border border-[#E4D8C4]"
                   }`}
                 >
                   ทั้งหมด ({readings.length})
@@ -305,10 +302,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("ACCURATE")}
-                  className={`px-3 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ACCURATE"
-                      ? "bg-emerald-600 text-white font-bold shadow-xs"
-                      : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300"
+                      ? "bg-[#3A7044] text-white font-bold"
+                      : "bg-[#EBF3ED] text-[#3A7044] hover:bg-[#EBF3ED] border border-[#E4D8C4]"
                   }`}
                 >
                   ✨ เกิดขึ้นจริง ({readings.filter((r) => r.outcome === "ACCURATE").length})
@@ -316,10 +313,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("PARTIAL")}
-                  className={`px-3 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PARTIAL"
-                      ? "bg-amber-600 text-white font-bold shadow-xs"
-                      : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300"
+                      ? "bg-[#8F5C1A] text-white font-bold"
+                      : "bg-[#F0E8DB] text-[#8F5C1A] hover:bg-[#F0E8DB] border border-[#E4D8C4]"
                   }`}
                 >
                   ✦ จริงบางส่วน ({readings.filter((r) => r.outcome === "PARTIAL").length})
@@ -327,10 +324,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("PENDING")}
-                  className={`px-3 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PENDING"
-                      ? "bg-[#E4C09F] text-[#5A432F] font-bold shadow-xs"
-                      : "bg-[#FDF7F0] text-[#8C735D] hover:text-[#5A432F] border border-[#D6B48D]"
+                      ? "bg-[#F0E8DB] text-[#2E211A] font-bold"
+                      : "bg-[#FFFFFF] text-[#6F5B4A] hover:text-[#8F5C1A] border border-[#E4D8C4]"
                   }`}
                 >
                   ⏳ รอผล ({readings.filter((r) => !r.outcome || r.outcome === "PENDING").length})
@@ -340,10 +337,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="🔍 ค้นหาตามคำถาม, ผัง, ชื่อไพ่ หรือบันทึกโน้ต..."
+                  placeholder="ค้นหาตามคำถาม, ผัง, ชื่อไพ่ หรือบันทึกโน้ต..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-[#FFFFFF] border border-[#D6B48D] rounded-xl px-3.5 py-2 text-xs text-[#5A432F] placeholder:text-[#8C735D]/60 focus:outline-none focus:border-[#CD9F5B] shadow-xs"
+                  className="w-full bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg px-3.5 py-2 text-xs text-[#2E211A] placeholder:text-[#6F5B4A]/60 focus:outline-none focus:border-[#8F5C1A] "
                 />
               </div>
             </div>
@@ -353,8 +350,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
           <div className="flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar min-h-[220px]">
             {filtered.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-2 opacity-70">
-                <span className="text-3xl">🔮</span>
-                <p className="font-serif-th text-xs text-[#8C735D]">
+                <span className="text-3xl text-[#8F5C1A]">✦</span>
+                <p className="font-serif-th text-xs text-[#6F5B4A]">
                   {readings.length === 0
                     ? "ยังไม่มีประวัติการดูดวง เมื่อคุณดูดวงเสร็จจะถูกบันทึกไว้ที่นี่โดยอัตโนมัติ"
                     : "ไม่พบบันทึกที่ตรงกับเงื่อนไขการค้นหา"}
@@ -377,24 +374,24 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                   <div
                     key={item.id}
                     onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                    className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#D6B48D] hover:border-[#CD9F5B] transition-all cursor-pointer space-y-2.5 shadow-xs"
+                    className="p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] transition-all cursor-pointer space-y-2.5 "
                   >
                     {/* Top Row: Spread & Date */}
                     <div className="flex items-center justify-between text-[10px]">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="bg-[#FCF0E6] text-[#CD9F5B] border border-[#D6B48D] px-2 py-0.5 rounded-full font-serif-th font-bold">
+                        <span className="bg-[#F0E8DB] text-[#8F5C1A] border border-[#E4D8C4] px-2 py-0.5 rounded-full font-serif-th font-bold">
                           ผัง: {item.spreadName}
                         </span>
-                        <span className="text-[#8C735D]">หมวด: {CATEGORY_MAP_TH[item.category] || item.category}</span>
-                        <span className="text-[#CD9F5B]">· แม่หมอ {item.personaName}</span>
+                        <span className="text-[#6F5B4A]">หมวด: {CATEGORY_MAP_TH[item.category] || item.category}</span>
+                        <span className="text-[#8F5C1A]">· แม่หมอ {item.personaName}</span>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="text-[#8C735D] font-mono">{formattedDate}</span>
+                        <span className="text-[#6F5B4A] font-mono">{formattedDate}</span>
                         <button
                           type="button"
                           onClick={(e) => handleDelete(e, item.id)}
-                          className="text-rose-600 hover:text-rose-800 p-1 text-xs transition-colors cursor-pointer"
+                          className="text-[#A6392C] hover:text-[#A6392C] p-1 text-xs transition-colors cursor-pointer"
                           title="ลบบันทึกนี้"
                           aria-label="ลบบันทึกนี้"
                         >
@@ -404,47 +401,43 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                     </div>
 
                     {/* Question */}
-                    <p className="font-serif-th text-xs sm:text-sm font-bold text-[#5A432F]">
-                      "{item.question}"
-                    </p>
+                    <p className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A]">"{item.question}"</p>
 
                     {/* Miniature Cards Preview */}
                     <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
                       {item.cards.map((c, i) => (
                         <div
                           key={i}
-                          className="px-2 py-1 rounded-lg bg-[#FCF0E6] border border-[#D6B48D] flex items-center gap-1.5 flex-shrink-0 text-[10px]"
+                          className="px-2 py-1 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] flex items-center gap-1.5 flex-shrink-0 text-[10px]"
                         >
-                          <span>{c.element === "ไฟ" ? "🔥" : c.element === "น้ำ" ? "🌊" : c.element === "ลม" ? "🌪️" : "🌿"}</span>
-                          <span className="font-serif-th text-[#5A432F] font-medium">
-                            {c.cardNameTh}
-                          </span>
+                          <span>{"✦"}</span>
+                          <span className="font-serif-th text-[#2E211A] font-medium">{c.cardNameTh}</span>
                           {c.isReversed && (
-                            <span className="text-[8px] text-rose-600 font-mono font-bold">(กลับหัว)</span>
+                            <span className="text-[8px] text-[#A6392C] font-mono font-bold">(กลับหัว)</span>
                           )}
                         </div>
                       ))}
                     </div>
 
                     {/* Summary Quote */}
-                    <p className="text-xs text-[#8C735D] font-serif-th leading-relaxed line-clamp-2">
+                    <p className="text-xs text-[#6F5B4A] font-serif-th leading-relaxed line-clamp-2">
                       “{item.summary}”
                     </p>
 
                     {/* Outcome Status Selector Tag Deck */}
                     <div
-                      className="pt-2 border-t border-[#D6B48D]/30 flex flex-wrap items-center justify-between gap-2"
+                      className="pt-2 border-t border-[#E4D8C4]/30 flex flex-wrap items-center justify-between gap-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center gap-1.5 flex-wrap text-[10px] font-serif-th">
-                        <span className="text-[#8C735D]">ผลจริงในชีวิต:</span>
+                        <span className="text-[#6F5B4A]">ผลจริงในชีวิต:</span>
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "ACCURATE")}
-                          className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                          className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                             outcome === "ACCURATE"
-                              ? "bg-emerald-600 text-white font-bold shadow-xs"
-                              : "bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100"
+                              ? "bg-[#3A7044] text-white font-bold"
+                              : "bg-[#EBF3ED] text-[#3A7044] border border-[#E4D8C4] hover:bg-[#EBF3ED]"
                           }`}
                         >
                           ✨ เกิดขึ้นจริง
@@ -453,10 +446,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "PARTIAL")}
-                          className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                          className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                             outcome === "PARTIAL"
-                              ? "bg-amber-600 text-white font-bold shadow-xs"
-                              : "bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100"
+                              ? "bg-[#8F5C1A] text-white font-bold"
+                              : "bg-[#F0E8DB] text-[#8F5C1A] border border-[#E4D8C4] hover:bg-[#F0E8DB]"
                           }`}
                         >
                           ✦ จริงบางส่วน
@@ -465,10 +458,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "PENDING")}
-                          className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                          className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                             outcome === "PENDING"
-                              ? "bg-[#E4C09F] text-[#5A432F] font-bold shadow-xs"
-                              : "bg-[#FDF7F0] text-[#8C735D] border border-[#D6B48D] hover:bg-[#FFFFFF]"
+                              ? "bg-[#F0E8DB] text-[#2E211A] font-bold"
+                              : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#E4D8C4] hover:bg-[#F6F1E9]"
                           }`}
                         >
                           ⏳ รอผล
@@ -477,10 +470,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "NOT_HAPPENED")}
-                          className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                          className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                             outcome === "NOT_HAPPENED"
-                              ? "bg-rose-600 text-white font-bold shadow-xs"
-                              : "bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100"
+                              ? "bg-[#A6392C] text-white font-bold"
+                              : "bg-[#FCEEEA] text-[#A6392C] border border-[#E4D8C4] hover:bg-[#FCEEEA]"
                           }`}
                         >
                           ✕ ไม่เกิดขึ้น
@@ -494,24 +487,24 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                           setEditingNoteId(isEditingNote ? null : item.id);
                           setNoteDraft(item.userNote || "");
                         }}
-                        className="text-[10px] text-[#CD9F5B] hover:text-[#5A432F] flex items-center gap-1 font-serif-th cursor-pointer font-bold"
+                        className="text-[10px] text-[#8F5C1A] hover:text-[#2E211A] flex items-center gap-1 font-serif-th cursor-pointer font-bold"
                       >
-                        <span>📝</span>
+                        <span>✦</span>
                         <span>{item.userNote ? "แก้ไขโน้ต" : "+ จดบันทึกผล"}</span>
                       </button>
                     </div>
 
                     {/* Private User Reflection Note Box */}
                     {item.userNote && !isEditingNote && (
-                      <div className="p-2.5 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] text-[11px] text-[#5A432F] font-serif-th italic">
-                        💬 <span className="font-semibold text-[#CD9F5B]">บันทึกผลจริง:</span> {item.userNote}
+                      <div className="p-2.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[11px] text-[#2E211A] font-serif-th italic">
+                        <span className="font-semibold text-[#8F5C1A]">✦ บันทึกผลจริง:</span> {item.userNote}
                       </div>
                     )}
 
                     {/* Edit Note Input */}
                     {isEditingNote && (
                       <div
-                        className="p-3 rounded-xl bg-[#FDF7F0] border border-[#D6B48D] space-y-2 shadow-xs"
+                        className="p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] space-y-2 "
                         onClick={(e) => e.stopPropagation()}
                       >
                         <textarea
@@ -519,20 +512,20 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                           value={noteDraft}
                           onChange={(e) => setNoteDraft(e.target.value)}
                           placeholder="จดบันทึกเหตุการณ์จริงที่เกิดขึ้นหลังจากเปิดไพ่ใบนี้..."
-                          className="w-full bg-[#FFFFFF] border border-[#D6B48D] rounded-lg p-2 text-xs text-[#5A432F] placeholder:text-[#8C735D]/60 focus:outline-none focus:border-[#CD9F5B]"
+                          className="w-full bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg p-2 text-xs text-[#2E211A] placeholder:text-[#6F5B4A]/60 focus:outline-none focus:border-[#8F5C1A]"
                         />
                         <div className="flex items-center justify-end gap-2 text-xs">
                           <button
                             type="button"
                             onClick={() => setEditingNoteId(null)}
-                            className="px-2.5 py-1 rounded-md text-[#8C735D] hover:text-[#5A432F] cursor-pointer"
+                            className="px-2.5 py-1 rounded text-[#6F5B4A] hover:text-[#2E211A] cursor-pointer"
                           >
                             ยกเลิก
                           </button>
                           <button
                             type="button"
                             onClick={(e) => handleSaveNote(e, item.id, item.outcome)}
-                            className="px-3 py-1 rounded-md bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-bold font-serif-th cursor-pointer shadow-xs"
+                            className="px-3 py-1 rounded bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th cursor-pointer "
                           >
                             บันทึกโน้ต
                           </button>
@@ -545,14 +538,14 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        className="pt-2 border-t border-[#D6B48D]/30 space-y-2 text-xs"
+                        className="pt-2 border-t border-[#E4D8C4]/30 space-y-2 text-xs"
                       >
                         {item.advice && item.advice.length > 0 && (
                           <div>
-                            <span className="text-[10px] text-[#CD9F5B] font-bold block font-serif-th">
+                            <span className="text-[10px] text-[#8F5C1A] font-bold block font-serif-th">
                               ✦ คำแนะนำและสิ่งที่ควรทำ:
                             </span>
-                            <ul className="list-disc list-inside space-y-0.5 text-[#5A432F] text-[11px] pt-1">
+                            <ul className="list-disc list-inside space-y-0.5 text-[#2E211A] text-[11px] pt-1">
                               {item.advice.map((adv, idx) => (
                                 <li key={idx}>{adv}</li>
                               ))}
@@ -560,8 +553,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({
                           </div>
                         )}
                         {item.timing && (
-                          <div className="text-[10px] text-[#8C735D]">
-                            ⏳ ช่วงเวลา: <span className="text-[#5A432F] font-bold">{item.timing}</span>
+                          <div className="text-[10px] text-[#6F5B4A]">
+                            ⏳ ช่วงเวลา: <span className="text-[#2E211A] font-bold">{item.timing}</span>
                           </div>
                         )}
                       </motion.div>

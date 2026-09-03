@@ -35,9 +35,9 @@ export function AnnouncementBanner() {
   const when = ent!.announceResetDate?.trim();
 
   return (
-    <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-[#D6B48D] bg-[#FDF7F0] p-4 font-serif-th text-xs text-[#5A432F] shadow-sm sm:text-sm">
+    <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 font-serif-th text-xs text-[#2E211A] sm:text-sm">
       <span className="flex-1">
-        <span className="text-[#CD9F5B]">✦</span> เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
+        <span className="text-[#8F5C1A]">✦</span> เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
         <strong>
           ผู้เยี่ยมชมทดลองฟรี {GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ {DAILY_LIMIT} ครั้ง
         </strong>
@@ -54,7 +54,7 @@ export function AnnouncementBanner() {
           setDismissed(true);
         }}
         aria-label="ปิดประกาศระบบสิทธิ์"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[#8C735D] transition-colors hover:bg-[#FCF0E6] hover:text-[#5A432F] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#6F5B4A] transition-colors hover:bg-[#F0E8DB] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
         ✕
       </button>

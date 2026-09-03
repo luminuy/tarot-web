@@ -28,11 +28,10 @@ export function DeleteAllDataButton() {
       type="button"
       onClick={handleDelete}
       disabled={loading}
-      className="px-5 py-2.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-200 text-xs font-bold hover:bg-rose-900/80 transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+      className="px-5 py-2.5 rounded-lg bg-[#A6392C]/80 border border-[#A6392C]/50 text-[#A6392C] text-xs font-bold hover:bg-[#A6392C]/80 transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
     >
       <span>✦</span>
       <span>{loading ? "กำลังลบข้อมูล..." : "ลบข้อมูลและบัญชีทั้งหมด"}</span>
     </button>
   );
 }
-

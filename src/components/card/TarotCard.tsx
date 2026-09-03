@@ -34,36 +34,37 @@ export interface TarotCardProps {
   imageFull?: boolean;
 }
 
-const ELEMENT_CONFIG: Record<string, { border: string; glow: string; icon: string; name: string; bgGradient: string }> = {
-  ไฟ: {
-    border: "#CD9F5B",
-    glow: "rgba(205, 159, 91, 0.4)",
-    icon: "✦",
-    name: "ธาตุไฟ (Wands)",
-    bgGradient: "from-[#FDF7F0] via-[#FCF0E6] to-[#FDF7F0]",
-  },
-  น้ำ: {
-    border: "#8CB4C8",
-    glow: "rgba(140, 180, 200, 0.4)",
-    icon: "✦",
-    name: "ธาตุน้ำ (Cups)",
-    bgGradient: "from-[#FDF7F0] via-[#FCF0E6] to-[#FDF7F0]",
-  },
-  ลม: {
-    border: "#B4A0C8",
-    glow: "rgba(180, 160, 200, 0.4)",
-    icon: "✦",
-    name: "ธาตุลม (Swords)",
-    bgGradient: "from-[#FDF7F0] via-[#FCF0E6] to-[#FDF7F0]",
-  },
-  ดิน: {
-    border: "#8CAE88",
-    glow: "rgba(140, 174, 136, 0.4)",
-    icon: "✦",
-    name: "ธาตุดิน (Pentacles)",
-    bgGradient: "from-[#FDF7F0] via-[#FCF0E6] to-[#FDF7F0]",
-  },
-};
+const ELEMENT_CONFIG: Record<string, { border: string; glow: string; icon: string; name: string; bgGradient: string }> =
+  {
+    ไฟ: {
+      border: "#E4D8C4",
+      glow: "rgba(143, 92, 26, 0.12)",
+      icon: "✦",
+      name: "ธาตุไฟ (Wands)",
+      bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
+    },
+    น้ำ: {
+      border: "#E4D8C4",
+      glow: "rgba(143, 92, 26, 0.12)",
+      icon: "✦",
+      name: "ธาตุน้ำ (Cups)",
+      bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
+    },
+    ลม: {
+      border: "#E4D8C4",
+      glow: "rgba(143, 92, 26, 0.12)",
+      icon: "✦",
+      name: "ธาตุลม (Swords)",
+      bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
+    },
+    ดิน: {
+      border: "#E4D8C4",
+      glow: "rgba(143, 92, 26, 0.12)",
+      icon: "✦",
+      name: "ธาตุดิน (Pentacles)",
+      bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
+    },
+  };
 
 const SIZE_MAP = {
   sm: "w-20 h-[136px] text-xs",
@@ -112,12 +113,14 @@ export const TarotCard: React.FC<TarotCardProps> = ({
     rawCard?.image && rawCard?.nameTh
       ? rawCard
       : rawCard?.id
-      ? cardById(rawCard.id) || rawCard
-      : rawCard?.cardIndex !== undefined
-      ? cardByIndex(rawCard.cardIndex) || rawCard
-      : rawCard;
+        ? cardById(rawCard.id) || rawCard
+        : rawCard?.cardIndex !== undefined
+          ? cardByIndex(rawCard.cardIndex) || rawCard
+          : rawCard;
 
-  const elem = effectiveCard?.element ? ELEMENT_CONFIG[effectiveCard.element] || ELEMENT_CONFIG["ไฟ"] : ELEMENT_CONFIG["ไฟ"];
+  const elem = effectiveCard?.element
+    ? ELEMENT_CONFIG[effectiveCard.element] || ELEMENT_CONFIG["ไฟ"]
+    : ELEMENT_CONFIG["ไฟ"];
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -151,7 +154,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
       style={{ perspective: 1800 }}
     >
       <motion.div
-        className="w-full h-full relative card-inner rounded-2xl"
+        className="w-full h-full relative card-inner rounded-lg"
         animate={{
           rotateY: isRevealed ? 180 : 0,
           scale: isHighlighted ? 1.08 : isHovered ? 1.05 : 1,
@@ -174,7 +177,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         {/* 1. ด้านหลังไพ่ (Sacred Card Back - Obsidian & Gold Filigree) */}
         {/* ========================================================= */}
         <div
-          className={`card-face absolute inset-0 rounded-2xl overflow-hidden shadow-2xl border-2 border-[#e5c07b]/60 card-back-pattern flex flex-col items-center justify-between p-3 transition-opacity duration-300 ${
+          className={`card-face absolute inset-0 rounded-lg overflow-hidden shadow-[var(--shadow-overlay)] border-2 border-[#E4D8C4]/60 card-back-pattern flex flex-col items-center justify-between p-3 transition-opacity duration-300 ${
             isRevealed ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
           style={{
@@ -183,13 +186,13 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             boxShadow: isHighlighted
               ? "0 4px 20px rgba(205, 159, 91, 0.45)"
               : isHovered
-              ? "0 4px 16px rgba(90, 67, 47, 0.2)"
-              : "0 2px 10px rgba(90, 67, 47, 0.12)",
+                ? "0 4px 16px rgba(90, 67, 47, 0.2)"
+                : "0 2px 10px rgba(90, 67, 47, 0.12)",
           }}
         >
           {/* Top Frame Gold Header */}
           <div className="w-full flex justify-center items-center opacity-85 z-10">
-            <span className="text-[8px] font-serif-th text-[#FDF7F0] tracking-[0.25em] uppercase font-bold">
+            <span className="text-[8px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
               SACRED ORACLE
             </span>
           </div>
@@ -197,7 +200,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Center Position Tag & Tap to Reveal Badge */}
           <div className="flex flex-col items-center justify-center my-auto gap-1.5 relative z-10">
             {positionLabel && (
-              <span className="text-[9px] text-[#FDF7F0] font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-[#5A432F]/90 border border-[#D6B48D] line-clamp-1 max-w-[95%] shadow-xs">
+              <span className="text-[9px] text-[#FFFFFF] font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-[#2E211A]/90 border border-[#E4D8C4] line-clamp-1 max-w-[95%] ">
                 {positionLabel}
               </span>
             )}
@@ -205,9 +208,9 @@ export const TarotCard: React.FC<TarotCardProps> = ({
               <motion.div
                 animate={{ scale: [0.95, 1.05, 0.95] }}
                 transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-                className="px-2.5 py-1 rounded-full bg-[#FDF7F0] border border-[#CD9F5B] shadow-xs z-20 flex items-center gap-1 text-[8.5px] text-[#5A432F] font-serif-th font-bold"
+                className="px-2.5 py-1 rounded-full bg-[#FFFFFF] border border-[#E4D8C4] z-20 flex items-center gap-1 text-[8.5px] text-[#2E211A] font-serif-th font-bold"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#CD9F5B] animate-ping" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A] animate-ping" />
                 <span>แตะเพื่อเปิด</span>
               </motion.div>
             )}
@@ -215,7 +218,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
 
           {/* Bottom Frame Subtle Border */}
           <div className="w-full flex justify-center items-center opacity-60 z-10">
-            <div className="w-12 h-0.5 bg-[#D6B48D]/60 rounded-full" />
+            <div className="w-12 h-0.5 bg-[#F0E8DB]/60 rounded-full" />
           </div>
 
           {/* Ethereal Dynamic Gold Foil Glint Reflection */}
@@ -231,11 +234,9 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         {/* 2. ด้านหน้าไพ่ (Card Face - Pure 1909 Rider-Waite Luxury) */}
         {/* ========================================================= */}
         <div
-          className={`card-face card-face--back absolute inset-0 rounded-2xl overflow-hidden shadow-md border-2 bg-[#FCF0E6] transition-opacity duration-300 ${
+          className={`card-face card-face--back absolute inset-0 rounded-lg overflow-hidden border-2 bg-[#F0E8DB] transition-opacity duration-300 ${
             !isRevealed ? "pointer-events-none opacity-0" : "opacity-100"
-          } ${
-            isHighlighted ? "ring-2 ring-[#CD9F5B] ring-offset-2 ring-offset-[#FCF0E6]" : ""
-          }`}
+          } ${isHighlighted ? "ring-2 ring-[#8F5C1A] ring-offset-2 ring-offset-[#F0E8DB]" : ""}`}
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
@@ -243,8 +244,8 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             boxShadow: isHighlighted
               ? `0 0 25px ${elem.glow}, 0 4px 20px rgba(205, 159, 91, 0.3)`
               : isHovered
-              ? `0 0 15px ${elem.glow}, 0 4px 15px rgba(90, 67, 47, 0.15)`
-              : "0 2px 10px rgba(90, 67, 47, 0.1)",
+                ? `0 0 15px ${elem.glow}, 0 4px 15px rgba(90, 67, 47, 0.15)`
+                : "0 2px 10px rgba(90, 67, 47, 0.1)",
           }}
         >
           {/* Full Authentic 1909 Rider-Waite Card Face */}
@@ -259,8 +260,8 @@ export const TarotCard: React.FC<TarotCardProps> = ({
                 full={imageFull}
               />
             ) : (
-              <div className="w-full h-full bg-[#FDF7F0] flex items-center justify-center">
-                <span className="text-xs text-[#CD9F5B]">✦</span>
+              <div className="w-full h-full bg-[#FFFFFF] flex items-center justify-center">
+                <span className="text-xs text-[#8F5C1A]">✦</span>
               </div>
             )}
           </div>
@@ -268,7 +269,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Sleek Floating Reversed Badge if applicable */}
           {isReversed && (
             <div className="absolute top-2 left-2 z-20 pointer-events-none">
-              <span className="text-[8px] font-bold font-serif-th bg-[#5A432F]/90 text-[#FDF7F0] border border-[#CD9F5B]/80 px-2 py-0.5 rounded-full shadow-xs">
+              <span className="text-[8px] font-bold font-serif-th bg-[#2E211A]/90 text-[#FFFFFF] border border-[#E4D8C4]/80 px-2 py-0.5 rounded-full ">
                 กลับหัว
               </span>
             </div>

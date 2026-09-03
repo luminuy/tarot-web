@@ -53,22 +53,20 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
 
   return (
     <section
-      className={`mx-auto mt-6 max-w-2xl overflow-hidden rounded-[1.618rem] p-5 sm:p-6 bg-[#FDF7F0] border shadow-sm ${
-        usedUpTrial
-          ? "border-2 border-[#CD9F5B]"
-          : "border border-[#D6B48D]"
+      className={`mx-auto mt-6 max-w-2xl overflow-hidden rounded-lg p-5 sm:p-6 bg-[#FFFFFF] border ${
+        usedUpTrial ? "border-2 border-[#E4D8C4]" : "border border-[#E4D8C4]"
       }`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 gap-3">
-          <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#D6B48D] bg-[#FCF0E6] text-[#CD9F5B] sm:flex">
+          <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] text-[#8F5C1A] sm:flex">
             <SparkSealIcon className="h-4.5 w-4.5" />
           </span>
           <div className="min-w-0 space-y-1.5">
-            <h3 className="font-serif-th text-base font-bold text-[#5A432F]">
+            <h3 className="font-serif-th text-base font-bold text-[#2E211A]">
               {usedUpTrial ? "นี่คือการเปิดไพ่ทดลองฟรีของคุณ" : "เก็บดวงนี้ไว้ และเปิดไพ่ต่อได้อีก"}
             </h3>
-            <p className="font-serif-th text-sm leading-relaxed text-[#8C735D]">
+            <p className="font-serif-th text-sm leading-relaxed text-[#6F5B4A]">
               {usedUpTrial
                 ? `สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อวันละ ${DAILY_LIMIT} ครั้ง คุยถามแม่หมอต่อจากไพ่ชุดนี้ และเก็บคำทำนายไว้ดูย้อนหลังได้ทุกเครื่อง`
                 : `สมัครสมาชิกฟรี — เปิดไพ่วันละ ${DAILY_LIMIT} ครั้ง คุยถามแม่หมอต่อได้ และเก็บประวัติดูดวงไว้ทุกเครื่อง`}
@@ -79,7 +77,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
           type="button"
           onClick={dismiss}
           aria-label="ปิดคำชวนสมัครสมาชิก"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm text-[#8C735D] transition-colors hover:bg-[#FCF0E6] hover:text-[#5A432F] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm text-[#6F5B4A] transition-colors hover:bg-[#F0E8DB] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           ✕
         </button>
@@ -87,8 +85,8 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
 
       <ul className="mt-4 grid gap-1.5 sm:grid-cols-2">
         {MEMBER_BENEFITS.map((b) => (
-          <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#5A432F]">
-            <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#CD9F5B]" />
+          <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#2E211A]">
+            <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#8F5C1A]" />
             {b.title}
           </li>
         ))}
@@ -100,12 +98,12 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
           trackEntitlementEvent("signup_card_clicked");
           onOpenAuth();
         }}
-        className="mt-4 w-full rounded-2xl bg-[#CD9F5B] hover:bg-[#B8853E] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FDF7F0] shadow-sm transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
+        className="mt-4 w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
         <span className="mr-1.5">✦</span> สมัครสมาชิกฟรี (ใช้เวลาไม่ถึงนาที)
       </button>
 
-      <p className="mt-2.5 text-center font-serif-th text-[11px] text-[#8C735D]">
+      <p className="mt-2.5 text-center font-serif-th text-[11px] text-[#6F5B4A]">
         ไม่ต้องผูกบัตร · คำทำนายที่เพิ่งอ่านจะถูกย้ายเข้าบัญชีให้อัตโนมัติ
       </p>
     </section>
