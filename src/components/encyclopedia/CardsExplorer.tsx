@@ -38,25 +38,25 @@ const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string;
     bg: "bg-[#8F5C1A]/10",
     text: "text-[#8F5C1A]",
     border: "border-[#8F5C1A]/30",
-    glow: "rgba(245, 158, 11, 0.25)",
+    glow: "rgba(143, 92, 26, 0.12)",
   },
   น้ำ: {
     bg: "bg-[#6F5B4A]/10",
     text: "text-[#6F5B4A]",
     border: "border-[#6F5B4A]/30",
-    glow: "rgba(56, 189, 248, 0.25)",
+    glow: "rgba(143, 92, 26, 0.12)",
   },
   ลม: {
     bg: "bg-[#6F5B4A]/10",
     text: "text-[#6F5B4A]",
     border: "border-[#6F5B4A]/30",
-    glow: "rgba(168, 85, 247, 0.25)",
+    glow: "rgba(143, 92, 26, 0.12)",
   },
   ดิน: {
     bg: "bg-[#3A7044]/10",
     text: "text-[#3A7044]",
     border: "border-[#3A7044]/30",
-    glow: "rgba(16, 185, 129, 0.25)",
+    glow: "rgba(143, 92, 26, 0.12)",
   },
 };
 

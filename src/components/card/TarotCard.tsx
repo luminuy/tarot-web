@@ -183,11 +183,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
-            boxShadow: isHighlighted
-              ? "0 4px 20px rgba(205, 159, 91, 0.45)"
-              : isHovered
-                ? "0 4px 16px rgba(90, 67, 47, 0.2)"
-                : "0 2px 10px rgba(90, 67, 47, 0.12)",
+            boxShadow: isHighlighted || isHovered ? "var(--shadow-overlay)" : "var(--shadow-raised)",
           }}
         >
           {/* Top Frame Gold Header */}
@@ -223,7 +219,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
 
           {/* Ethereal Dynamic Gold Foil Glint Reflection */}
           <motion.div
-            className="absolute inset-0 pointer-events-none opacity-40 group-hover:opacity-75 transition-opacity"
+            className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-60 transition-opacity duration-500"
             style={{
               background: `radial-gradient(circle at ${glintX.get()}% ${glintY.get()}%, rgba(205,159,91,0.3) 0%, rgba(214,180,141,0.1) 40%, transparent 70%)`,
             }}
@@ -241,11 +237,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             borderColor: elem.border,
-            boxShadow: isHighlighted
-              ? `0 0 25px ${elem.glow}, 0 4px 20px rgba(205, 159, 91, 0.3)`
-              : isHovered
-                ? `0 0 15px ${elem.glow}, 0 4px 15px rgba(90, 67, 47, 0.15)`
-                : "0 2px 10px rgba(90, 67, 47, 0.1)",
+            boxShadow: isHighlighted || isHovered ? "var(--shadow-overlay)" : "var(--shadow-raised)",
           }}
         >
           {/* Full Authentic 1909 Rider-Waite Card Face */}

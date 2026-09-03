@@ -18,28 +18,28 @@ interface CardDetailViewProps {
 const ELEMENT_CONFIG: Record<string, { border: string; glow: string; text: string; bg: string; icon: string }> = {
   ไฟ: {
     border: "border-[#8F5C1A]/40",
-    glow: "rgba(245, 158, 11, 0.35)",
+    glow: "rgba(143, 92, 26, 0.12)",
     text: "text-[#8F5C1A]",
     bg: "bg-[#8F5C1A]/15",
     icon: "✦",
   },
   น้ำ: {
     border: "border-[#6F5B4A]/40",
-    glow: "rgba(56, 189, 248, 0.35)",
+    glow: "rgba(143, 92, 26, 0.12)",
     text: "text-[#6F5B4A]",
     bg: "bg-[#6F5B4A]/15",
     icon: "✦",
   },
   ลม: {
     border: "border-[#6F5B4A]/40",
-    glow: "rgba(168, 85, 247, 0.35)",
+    glow: "rgba(143, 92, 26, 0.12)",
     text: "text-[#6F5B4A]",
     bg: "bg-[#6F5B4A]/15",
     icon: "✦",
   },
   ดิน: {
     border: "border-[#3A7044]/40",
-    glow: "rgba(16, 185, 129, 0.35)",
+    glow: "rgba(143, 92, 26, 0.12)",
     text: "text-[#3A7044]",
     bg: "bg-[#3A7044]/15",
     icon: "✦",
