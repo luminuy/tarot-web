@@ -13,7 +13,7 @@
 | 1-1 | **AI Gateway** | ไม่จำกัด | ✅ merge #189 · รอ dashboard เปิดใช้ |
 | 1-2 | **Email Routing** | ไม่จำกัด | ⏳ รอโดเมน (ยังไม่ซื้อ) |
 | 1-3 | **Turnstile** | 1M verify/เดือน | 🟡 โค้ดเสร็จ · รอ site key + secret |
-| 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ⏳ |
+| 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | 🟡 โค้ดเสร็จ · รอ deploy (binding `AI`) |
 | 2-5 | **KV ไพ่ประจำวัน + Cron Triggers** | KV 100k read/วัน · cron ไม่จำกัด | ⏳ spike |
 | 3-6 | **R2** — Destiny Card share image | 10 GB + egress ฟรี | ⏳ |
 | 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | ⏳ |
@@ -77,15 +77,21 @@
 
 ---
 
-## Wave 2-4 — Workers AI (safety guard ก่อน)
+## Wave 2-4 — Workers AI · safety guard ชั้น 3 🟡 (โค้ดเสร็จ)
 
-**ทำอะไร (เรียงความสำคัญ):**
-1. **คัดกรองสัญญาณทำร้ายตัวเอง (กฎเหล็กข้อ 6)** — classifier แทน/เสริม regex ใน `src/lib/safety/guardrails.ts` แม่นกว่ามาก โดยเฉพาะประโยคอ้อม → ยังโชว์สายด่วน 1323 เหมือนเดิม
-2. AI สำรองตัวที่ 3 (ต่อจาก Gemini → Groq)
-3. แปลไทย / ตรวจภาษาปน (แทน `hasForeignScript` heuristic)
-4. embeddings สำหรับ Wave 3-7
+**ทำแล้ว — คัดกรองสัญญาณทำร้ายตัวเองแบบอ้อม (กฎเหล็กข้อ 6):**
+- `wrangler.jsonc`: เพิ่ม binding `ai` → `AI` (ตรวจ schema + `wrangler deploy --dry-run` ผ่าน — INC-0034)
+- `src/lib/platform/cf.ts`: `getAiBinding()` — dev/ยังไม่ deploy = `null`
+- `src/lib/safety/ai-classifier.ts` (ใหม่) — สถาปัตยกรรม 3 ชั้น:
+  1. regex `checkQuestion()` จับรูปตรง (เดิม)
+  2. `mayNeedDeepCrisisCheck()` — regex คำทุกข์ระดับอ่อน (คลุมเครือ) → คัดเฉพาะเคสที่ควรถามต่อ
+  3. `assessCrisisRisk()` — ถาม Workers AI (`@cf/meta/llama-3.1-8b-instruct`) YES/NO เฉพาะเคสชั้น 2 · timeout 3.5s · **fail-open** (ไม่มี binding/ล่ม = ไม่บล็อก เพราะชั้น 1+prompt ยังทำงาน)
+- ต่อเข้า `api/reading/start` + `api/reading/[id]/chat` หลัง regex → บล็อกด้วย `CRISIS_MESSAGE` เดิม (สายด่วน 1323)
+- จำกัดจำนวนเรียก: เฉพาะเคสชั้น 2 เท่านั้น → ประหยัด neuron (ฟรี ~10k/วัน เหลือเฟือ)
 
-**หมายเหตุ:** เรียกผ่าน binding `env.AI` หรือ REST ผ่าน AI Gateway (slug `workers-ai`) — ใช้ gateway เดียวกับ 1-1
+**ต้องทำต่อ (เจ้าของโปรเจกต์):** ไม่มี — Workers AI binding ใช้ได้เลยหลัง deploy (ไม่ต้อง provision) · ตรวจ log `[safety-ai]` ใน Worker หลัง deploy
+
+**ต่อยอดภายหลัง (ไม่อยู่ใน PR นี้):** AI สำรองตัวที่ 3, แปลไทย/ตรวจภาษาปน, embeddings สำหรับ Wave 3-7
 
 ---
 

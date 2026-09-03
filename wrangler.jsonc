@@ -31,6 +31,14 @@
     }
   ],
 
+  // ── Workers AI (ฟรี ~10k neurons/วัน) ────────────────────────────────────────
+  // ใช้กับตัวจำแนกความปลอดภัยชั้น 3 (src/lib/safety/ai-classifier.ts) — จับสัญญาณ
+  // ทำร้ายตัวเองแบบอ้อมที่ regex ไม่จับ · fail-open ถ้าไม่พร้อม จึงไม่ต้อง provision อะไรก่อน
+  // schema: RawConfig.ai = { binding: string } (ตรวจกับ config-schema.json แล้ว — INC-0034)
+  "ai": {
+    "binding": "AI"
+  },
+
   "vars": {
     "NODE_ENV": "production"
   }

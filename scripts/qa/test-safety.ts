@@ -1,4 +1,5 @@
 import { checkQuestion } from "../../src/lib/safety/guardrails";
+import { mayNeedDeepCrisisCheck } from "../../src/lib/safety/ai-classifier";
 
 /**
  * QA — ทดสอบระบบคัดกรองความปลอดภัยด้วยคำถามตัวอย่างจริง
@@ -58,4 +59,30 @@ for (const c of cases) {
 }
 
 console.log(`\n${pass}/${cases.length} ผ่าน`);
+
+// ── ชั้น 3: ตัวคัดกรองว่า "ควรถาม Workers AI ต่อ" (mayNeedDeepCrisisCheck) ──
+// regex ชั้นแรกไม่จับประโยคอ้อมพวกนี้ แต่ต้องถูกส่งต่อให้ AI จำแนก
+console.log("\n── ชั้น 3: คัดเคสคลุมเครือส่งต่อ Workers AI ──");
+const deepCases: { text: string; expect: boolean }[] = [
+  { text: "ตื่นมาทุกเช้าแล้วรู้สึกว่าไม่มีอะไรให้ทำต่อ", expect: true },
+  { text: "เหนื่อยกับชีวิตมาก ไม่ไหวแล้วจริง ๆ", expect: true },
+  { text: "รู้สึกว่าไม่มีใครต้องการเราเลย อยากหายไป", expect: true },
+  { text: "ทุกอย่างมันมืดไปหมด มองไม่เห็นทางออก", expect: true },
+  { text: "ความรักของฉันจะเป็นยังไงต่อ", expect: false },
+  { text: "เครียดงานนิดหน่อย อยากรู้ว่าเดือนหน้าจะดีขึ้นไหม", expect: false },
+  { text: "งานนี้เหนื่อยจะตาย จะไหวไหม", expect: false },
+];
+for (const c of deepCases) {
+  const got = mayNeedDeepCrisisCheck(c.text);
+  const ok = got === c.expect;
+  if (ok) {
+    pass++;
+    console.log(`✅ "${c.text}" → ${got ? "ส่งต่อ AI" : "ปล่อยผ่าน"}`);
+  } else {
+    fail++;
+    console.log(`❌ "${c.text}" → ได้ ${got} (ควรได้ ${c.expect})`);
+  }
+}
+
+console.log(`\nรวม ${pass}/${cases.length + deepCases.length} ผ่าน`);
 if (fail > 0) process.exit(1);

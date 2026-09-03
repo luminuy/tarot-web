@@ -8,7 +8,8 @@ import { getContentOverrides, resolveCardByIndex, resolvePersona, resolveSystemC
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
-import { checkQuestion } from "@/lib/safety/guardrails";
+import { checkQuestion, CRISIS_MESSAGE } from "@/lib/safety/guardrails";
+import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 
@@ -229,6 +230,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         blocked: true,
         crisisCard: true,
       });
+    }
+
+    // ชั้น 3: ตัวจำแนกด้วย Workers AI สำหรับสัญญาณวิกฤตแบบอ้อม (fail-open)
+    if (await assessCrisisRisk(userQuestion)) {
+      recordEvents(["chat_blocked", "safety_flag:crisis_ai"]);
+      return NextResponse.json({ reply: CRISIS_MESSAGE, blocked: true, crisisCard: true });
     }
 
     // Resilient server store resolution with session token and client snapshot fallback (Edge Failover Safe)

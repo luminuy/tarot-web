@@ -34,6 +34,23 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: Workers AI — ตัวคัดกรองความปลอดภัยชั้น 3 จับสัญญาณวิกฤตแบบอ้อม (Wave 2-4)
+
+#### 1. เสริมด่านกฎเหล็กข้อ 6 ด้วย Workers AI (ฟรี)
+- **สิ่งที่ต้องการ**: `checkQuestion()` (regex) จับประโยคตรงได้ แต่พลาดประโยคอ้อม เช่น "ตื่นมาทุกเช้าแล้วรู้สึกว่าไม่มีอะไรให้ทำต่อ"
+- **สิ่งที่ทำ — สถาปัตยกรรม 3 ชั้น**:
+  1. regex `checkQuestion()` — จับรูปตรง (เดิม ไม่แตะ)
+  2. `mayNeedDeepCrisisCheck()` — regex คำทุกข์ระดับอ่อน คัดเฉพาะเคสคลุมเครือ (บอกว่า "ควรถาม AI ต่อ")
+  3. `assessCrisisRisk()` — ถาม Workers AI `@cf/meta/llama-3.1-8b-instruct` YES/NO เฉพาะเคสชั้น 2 · timeout 3.5s
+  - **fail-open**: ไม่มี binding / โมเดลล่ม / timeout → ไม่บล็อก (ชั้น 1 + system prompt ยังทำงาน — AI เป็นส่วนเสริม)
+  - จำกัดจำนวนเรียก Workers AI เฉพาะเคสชั้น 2 → ประหยัด neuron
+- **ต่อเข้า**: `api/reading/start` + `api/reading/[id]/chat` (หลัง regex) → บล็อกด้วย `CRISIS_MESSAGE` เดิม (สายด่วน 1323, 1669)
+- **ไฟล์ที่แก้ไข**: `wrangler.jsonc` (binding `ai` → `AI`), `src/lib/platform/cf.ts` (`getAiBinding()`), `src/lib/safety/ai-classifier.ts` (ใหม่), `src/lib/safety/guardrails.ts` (export `CRISIS_MESSAGE`), `src/app/api/reading/start/route.ts`, `src/app/api/reading/[id]/chat/route.ts`, `scripts/qa/test-safety.ts` (+7 เคสชั้น 3)
+- **ผลการทดสอบ**: `tsc` ➔ ✅; `npx wrangler deploy --dry-run` ➔ config parse ผ่าน เห็น `env.AI → AI` (INC-0034); `test-safety.ts` ➔ 21/21; `npm run build:worker` (opennextjs-cloudflare) ➔ ✅ "OpenNext build complete"
+- **ค้างต่อ (เจ้าของโปรเจกต์)**: ไม่มี — Workers AI ใช้ได้เลยหลัง deploy · ตรวจ log `[safety-ai]` ใน Worker
+
+---
+
 ### 🗓️ 2026-09-03: หน้าผลไพ่ — ปรับเป็น 2 คอลัมน์ 75/25 (คำทำนายซ้าย · การ์ดแชทแม่หมอขวาติดหนึบ)
 
 **สิ่งที่ต้องการ (ต่อจากภาพเจ้าของโปรเจกต์)**: เอาแผงคำทำนาย (`StreamReader`) กับการ์ดปุ่มแชทแม่หมอมาอยู่แถวเดียวกัน — ซ้าย ~75% ขวา ~25% การ์ดแชทอยู่ขวามือ
