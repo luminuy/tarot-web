@@ -26,6 +26,9 @@ const VARIANTS = [
   { dir: "w128", width: 128, quality: 86 },
   { dir: "w256", width: 256, quality: 88 },
   { dir: "w512", width: 512, quality: 92 },
+  // w768 — ภาพใบใหญ่บนจอ 2x–3x (ผังวางไพ่, พรีวิว, สารานุกรม) ให้คมไม่เบลอ
+  // ต้นฉบับกว้าง ~825px จึงยังเป็นการ "ย่อ" จริง (ไม่อัปสเกล) — คมกว่า w512 ชัดบนมือถือ
+  { dir: "w768", width: 768, quality: 92 },
 ] as const;
 
 function ensureCwebp(): void {

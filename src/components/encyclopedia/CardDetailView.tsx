@@ -109,6 +109,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     className="w-full h-full object-cover tarot-card-enhance tarot-hd-card-image"
                     sizes="(min-width: 640px) 600px, 400px"
                     loading="eager"
+                    full
                   />
                 </motion.div>
                 <div className="gold-foil-sheen absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity pointer-events-none" />

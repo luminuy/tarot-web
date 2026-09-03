@@ -80,9 +80,9 @@ export const metadata: Metadata = {
     url: SITE_ORIGIN,
     images: [
       {
-        url: "/cards/major-01.webp",
-        width: 300,
-        height: 520,
+        url: "/cards/major-01.jpg",
+        width: 825,
+        height: 1429,
         alt: "SeerTarot 1909 Rider-Waite",
       },
     ],
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI",
     description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมระบบ Provably-Fair",
-    images: ["/cards/major-01.webp"],
+    images: ["/cards/major-01.jpg"],
   },
   alternates: {
     canonical: "/",
@@ -127,7 +127,7 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: "SeerTarot Sanctuary",
   url: SITE_ORIGIN,
-  logo: `${SITE_ORIGIN}/cards/major-01.webp`,
+  logo: `${SITE_ORIGIN}/cards/major-01.jpg`,
   sameAs: ["https://github.com/luminuy/tarot-web"],
   description:
     "วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ระดับพรีเมียม 1909 Rider-Waite-Smith พร้อมระบบสุ่มที่พิสูจน์ความยุติธรรมได้ (Provably Fair) และแม่หมอ AI",
