@@ -13,6 +13,7 @@ import {
 } from "@/lib/ai/gemini";
 import { buildSystemPrompt } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
+import { stripThinkingTags } from "@/lib/ai/language";
 
 export const runtime = "nodejs";
 
@@ -160,8 +161,8 @@ export async function GET() {
           elapsedMs: gr.elapsedMs,
           finishReason: gr.ok ? "STOP" : null,
           partCount: gr.ok ? 1 : 0,
-          thoughtPartCount: 0,
-          answerPreview: gr.answerPreview,
+          thoughtPartCount: gr.hasReasoning ? 1 : 0,
+          answerPreview: stripThinkingTags(gr.answerPreview),
           error: gr.error ? scrub(gr.error) : null,
         });
       }
@@ -320,15 +321,16 @@ async function probeRealChatPayload(
         apiKey: groqKey,
       });
       if (groqRes && groqRes.reply) {
+        const cleanReply = stripThinkingTags(groqRes.reply);
         out.push({
           model: `groq · ${groqRes.model}`,
-          ok: true,
+          ok: cleanReply.length > 0,
           status: 200,
           elapsedMs: groqRes.elapsedMs,
           promptChars: systemInstruction.length,
           finishReason: "STOP",
-          answerPreview: groqRes.reply.slice(0, 160),
-          error: null,
+          answerPreview: cleanReply.slice(0, 160),
+          error: cleanReply.length > 0 ? null : "ตอบ 200 แต่ไม่มีข้อความคำตอบหลังตัด thinking tags",
         });
       }
     } catch (e) {

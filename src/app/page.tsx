@@ -15,7 +15,7 @@ import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { PersonaCardSelector } from "@/components/reading/PersonaCardSelector";
 import { IntentionAltarInput } from "@/components/reading/IntentionAltarInput";
 import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
-import { RitualStepProgress, type RitualStep } from "@/components/ui/RitualStepProgress";
+import type { RitualStep } from "@/components/ui/RitualStepProgress";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
@@ -875,9 +875,6 @@ export default function TarotPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
         <AnnouncementBanner />
 
-        {/* Step Tracker Progress Bar */}
-        <RitualStepProgress currentStep={currentStep} onStepClick={(step) => navigateStep(step)} />
-
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (
           <div className="mb-6 p-4 rounded-xl bg-[#FCEEEA] border border-[#D5CEC2] text-[#A6392C] text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3 shadow-xs">
@@ -1433,14 +1430,14 @@ export default function TarotPage() {
                   image="major-01.jpg"
                   alt="The Magician"
                   className="w-full h-full object-cover"
-                  sizes="24px"
+                  sizes="20px"
                 />
               </div>
               <span className="text-[13px] font-serif-th font-semibold tracking-wider text-[#D5CEC2]">
                 SeerTarot · ไพ่ทาโรต์ 1909 Rider-Waite
               </span>
               <div className="w-5 h-7 rounded overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
-                <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="24px" />
+                <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="20px" />
               </div>
             </div>
             <p className="text-[13px] text-[#D5CEC2] font-serif-th text-center">

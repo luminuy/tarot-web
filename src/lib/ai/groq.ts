@@ -8,7 +8,7 @@
  * - openai/gpt-oss-120b: โมเดล 120 พันล้านพารามิเตอร์ วิเคราะห์ดวงและเหตุผลเชิงลึก (อันดับ 2)
  */
 
-import { hasForeignScript, stripForeignScript } from "@/lib/ai/language";
+import { hasForeignScript, stripForeignScript, stripThinkingTags } from "@/lib/ai/language";
 import { aiGatewayHeaders, groqChatCompletionsEndpoint } from "@/lib/ai/gateway";
 
 /**
@@ -48,6 +48,7 @@ export interface GroqProbeResult {
   ok: boolean;
   status: number | null;
   elapsedMs: number;
+  hasReasoning?: boolean;
   answerPreview?: string;
   error?: string | null;
 }
@@ -92,6 +93,7 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
         model,
         messages: payloadMessages,
         temperature,
+        reasoning_format: "parsed",
       };
 
       // ไม่จำกัดเพดาน max_tokens บีบสั้น เพื่อให้ทดสอบความยาวการสนทนาได้เต็มที่
@@ -121,9 +123,13 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
       }
 
       const data = (await res.json()) as any;
-      const content = data?.choices?.[0]?.message?.content;
-      if (typeof content === "string" && content.trim()) {
-        const reply = content.trim();
+      const rawContent = data?.choices?.[0]?.message?.content;
+      if (typeof rawContent === "string" && rawContent.trim()) {
+        const reply = stripThinkingTags(rawContent);
+        if (!reply) {
+          console.warn(`[Groq ${model}] ข้อความว่างเปล่าหลังตัด thinking tags ออก`);
+          continue;
+        }
 
         // ด่านภาษา — ถ้าโมเดลหลุดพ่นอักษรจีน/ญี่ปุ่น/เกาหลี ให้ทิ้งแล้วลองโมเดลถัดไป
         // (โมเดลสุดท้ายในลิสต์ไม่มีตัวถัดไปให้ลอง จึงล้างอักษรทิ้งแทนการคืน null)
@@ -188,8 +194,9 @@ export async function probeGroqHealth(apiKey?: string): Promise<GroqProbeResult[
         body: JSON.stringify({
           model,
           messages: [{ role: "user", content: "ตอบกลับคำเดียวว่า: พร้อม" }],
-          max_tokens: 150,
+          max_tokens: 1000,
           temperature: 0,
+          reasoning_format: "parsed",
         }),
       });
 
@@ -209,14 +216,19 @@ export async function probeGroqHealth(apiKey?: string): Promise<GroqProbeResult[
       }
 
       const data = (await res.json()) as any;
-      const content = data?.choices?.[0]?.message?.content;
+      const rawContent = data?.choices?.[0]?.message?.content;
+      const reasoning = data?.choices?.[0]?.message?.reasoning;
+      const cleanAnswer = typeof rawContent === "string" ? stripThinkingTags(rawContent) : "";
+      const hasReasoning = typeof reasoning === "string" && reasoning.trim().length > 0;
+
       results.push({
         model,
-        ok: typeof content === "string" && content.trim().length > 0,
+        ok: cleanAnswer.length > 0,
         status: 200,
         elapsedMs,
-        answerPreview: typeof content === "string" ? content.trim().slice(0, 100) : "",
-        error: content ? null : "ตอบ 200 แต่แยกข้อความไม่ได้",
+        hasReasoning,
+        answerPreview: cleanAnswer.slice(0, 100),
+        error: cleanAnswer ? null : "ตอบ 200 แต่ไม่มีข้อความคำตอบ (หลังตัด thinking ออก)",
       });
     } catch (err: any) {
       results.push({

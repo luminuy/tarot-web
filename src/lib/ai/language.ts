@@ -54,3 +54,19 @@ export function stripForeignScriptDeep<T>(value: T): T {
   }
   return value;
 }
+
+/**
+ * ลบแท็กกระบวนการคิดภายในของ AI เช่น <think>...</think>, <thought>...</thought>, <reasoning>...</reasoning>
+ * ---------------------------------------------------------------------------------------------------
+ * ที่มา: โมเดลประเภท Reasoning (เช่น Qwen 2.5/3.x, DeepSeek R1 บน Groq)
+ * จะส่งแท็ก <think>...</think> ออกมาแสดงกระบวนการคิด ซึ่งเป็นข้อมูลภายในของโมเดล
+ * ไม่ควรแสดงให้ผู้ใช้หรือแสดงในแผงผู้ดูแลระบบเด็ดขาด
+ */
+export function stripThinkingTags(text: string | null | undefined): string {
+  if (!text) return "";
+  // 1. ตัด <think>...</think>, <thought>...</thought>, <reasoning>...</reasoning> ทั้งหมด
+  let cleaned = text.replace(/<(think|thought|reasoning)>[\s\S]*?<\/\1>/gi, "");
+  // 2. กรณีสตรีมหรือโดนตัดคำก่อนปิดแท็ก (ไม่มีแท็กปิด) ให้ตัดตั้งแต่แท็กเปิดไปจนสุด
+  cleaned = cleaned.replace(/<(think|thought|reasoning)>[\s\S]*$/gi, "");
+  return cleaned.trim();
+}

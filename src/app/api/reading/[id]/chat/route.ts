@@ -12,6 +12,7 @@ import { checkQuestion, CRISIS_MESSAGE } from "@/lib/safety/guardrails";
 import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
+import { stripThinkingTags } from "@/lib/ai/language";
 
 export const runtime = "nodejs";
 
@@ -448,11 +449,14 @@ ${cards.join("\n")}
         });
 
         if (groqResult && groqResult.reply) {
-          return NextResponse.json({
-            reply: groqResult.reply,
-            provider: "groq",
-            model: groqResult.model,
-          });
+          const cleanReply = stripThinkingTags(groqResult.reply);
+          if (cleanReply) {
+            return NextResponse.json({
+              reply: cleanReply,
+              provider: "groq",
+              model: groqResult.model,
+            });
+          }
         }
       } catch (groqErr) {
         console.warn("[chat] Groq fallback error:", groqErr);

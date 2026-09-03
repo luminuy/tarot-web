@@ -182,6 +182,26 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     }
   }, [activeCategory]);
 
+  // Defer off-screen carousel spread illustrations on mobile to keep initial LCP and image payload minimal
+  const [shouldRenderAllSpreads, setShouldRenderAllSpreads] = useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.innerWidth >= 640) {
+      setShouldRenderAllSpreads(true);
+      return;
+    }
+    const idleCallback =
+      "requestIdleCallback" in window
+        ? (window as any).requestIdleCallback(() => setShouldRenderAllSpreads(true), { timeout: 2000 })
+        : setTimeout(() => setShouldRenderAllSpreads(true), 1200);
+
+    return () => {
+      if ("cancelIdleCallback" in window) (window as any).cancelIdleCallback(idleCallback);
+      else clearTimeout(idleCallback);
+    };
+  }, []);
+
   return (
     <div className="space-y-6 w-full">
       {/* Category Filter Tabs (Linear / Apple Tier Navigation) */}
@@ -263,6 +283,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               scrollToCard(idx);
             };
 
+            const isCardVisibleOrNear =
+              idx <= 1 || shouldRenderAllSpreads || Math.abs(idx - activeScrollIndex) <= 1;
+
             return (
               <div
                 key={spread.id}
@@ -310,8 +333,17 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                       isLocked ? "opacity-65 saturate-[0.9] group-hover/card:opacity-90" : ""
                     }`}
                   >
-                    <div className="drop-shadow-[0_4px_12px_rgba(90,67,47,0.16)]">
-                      {renderSpreadIllustration(spread.id)}
+                    <div className="drop-shadow-[0_4px_12px_rgba(90,67,47,0.16)] w-full flex items-center justify-center">
+                      {isCardVisibleOrNear ? (
+                        renderSpreadIllustration(spread.id)
+                      ) : (
+                        <div
+                          aria-hidden="true"
+                          className="w-full h-40 flex items-center justify-center pointer-events-none"
+                        >
+                          <div className="w-12 h-16 rounded border border-[#D9C8AC]/25 bg-[#F3EDE2]/40 animate-pulse" />
+                        </div>
+                      )}
                     </div>
                   </div>
 

@@ -55,6 +55,14 @@
 - **เหตุผล**: HTML-only = สัญญาณ spam · ตอบกลับ noreply แล้วเมลตกหาย → ตั้ง Reply-To ให้มีปลายทาง
 - **ค้างต่อ (เจ้าของโปรเจกต์ · dashboard-only)**: เปิด Cloudflare Email Routing forward `support@` / `noreply@` เข้า Gmail — ตอนนี้ Reply-To ชี้ไป support@ แต่ยังไม่มีคนรับ (ดู `CLOUDFLARE_FREE_STACK.md` §Wave 1-2 · `PENDING_SETUP.md`)
 - **ทดสอบ**: `tsc` ✅ · `test-email-auth.ts` 8/8 ✅ · `repo:verify` 23/23 ✅
+### 🗓️ 2026-09-03: ปรับ UX — นำแถบขั้นตอน (RitualStepProgress) ด้านบนออกตามคำขอ
+
+- **ปัญหา/ข้อสังเกต**: แถบขั้นตอน 5 สเต็ป (`1 เลือกผัง -> 2 ตั้งคำถาม -> 3 สับไพ่ -> 4 เลือกไพ่ -> 5 คำทำนาย`) กินพื้นที่ด้านบนจอ (Fold Area) บนมือถือไปกว่า 40–50% ร่วมกับกล่องสิทธิ์ ทำให้ผู้ใช้ต้องไถหน้าจอลงไปลึกกว่าจะเห็นกองไพ่ และคำว่า "1 เลือกผัง" สร้างความรู้สึกลังเลและอึดอัดแก่คนทั่วไปที่ไม่คุ้นเคยกับคำว่า "ผัง"
+- **สิ่งที่ทำ**:
+  - นำ `<RitualStepProgress />` ออกจากหน้าหลัก `src/app/page.tsx`
+  - ปรับการ import เป็น `import type { RitualStep }` เพื่อรักษาความถูกต้องของ TypeScript
+  - หน้าเว็บโล่ง คลีน สง่างามขึ้นทันที กองไพ่หลักและผังถูกดึงขึ้นมาอยู่ในระดับสายตาโดยไม่ต้องไถหน้าจอ และขั้นตอนการดูดวงยังคงไหลลื่นด้วยหัวข้อและปุ่มนำทางในแต่ละหน้าอย่างเป็นธรรมชาติ
+- **ผลการทดสอบ**: `npm run typecheck` ผ่าน 0 errors · `npm run repo:verify` ผ่านครบ 23/23 ด่าน
 
 ---
 
@@ -65,6 +73,19 @@
 - **Email Routing** → dashboard-only (โดเมน `seertarot.net` อยู่บน Cloudflare แล้ว — memory เก่าว่า "ยังไม่ซื้อโดเมน" ผิด) · ขั้นตอน forward support@/noreply@ อยู่ใน `CLOUDFLARE_FREE_STACK.md` §Wave 1-2
 - **บล็อกจริง (ทำไม่ได้)**: Durable Objects + Realtime — payoff คือห้องสด Marketplace ซึ่งยังไม่เปิด (รอ D1 provisioning + PDPA sign-off — เป็นการตัดสินใจเชิงธุรกิจ/กฎหมาย ไม่ใช่งานโค้ด)
 - **ผลการทดสอบ**: `tsc` ✅ · `repo:verify` 23/23 ✅
+### 🗓️ 2026-09-03: ป้องกันแท็กกระบวนการคิด AI หลุด (<think>...</think> Leak Guard)
+
+- **ปัญหาที่พบ**: แอดมินและผู้ใช้พบว่า Groq LPU (โมเดล Qwen `qwen/qwen3.6-27b`) ตอบคำถามแปลก ๆ โดยมีข้อความกระบวนการคิดภาษาอังกฤษ `<think> Here's a thinking process: 1. **Analyze User Input:** ...` หลุดออกมาในช่องคำตอบจริง และในหน้าตรวจสุขภาพ AI ขึ้น `thoughtPartCount: 0` ทั้งที่ข้อความเริ่มต้นด้วยแท็กคิด
+- **สาเหตุราก**:
+  1. โมเดลประเภท Reasoning (เช่น Qwen 3.x และ GPT-OSS บน Groq) จะพ่นแท็ก `<think>...</think>` ออกมาเป็นส่วนหนึ่งของ `content` เป็นค่าเริ่มต้น (raw format)
+  2. ใน `probeGroqHealth` กำหนด `max_tokens: 150` ซึ่งทำให้โมเดลใช้โควตาโทเค็นหมดไปกับกระบวนการคิดภายในก่อนจะทันได้เริ่มตอบคำตอบจริง
+  3. ระบบยังไม่มีตัวกรอง `stripThinkingTags()` เพื่อตัดแท็กความคิด `<think>`, `<thought>`, `<reasoning>` ออกก่อนส่งข้อความไปยังผู้ใช้หรือแสดงพรีวิว
+- **สิ่งที่แก้ไข**:
+  1. **เปิดใช้ `reasoning_format: "parsed"`**: ใน `generateGroqChatReply` และ `probeGroqHealth` ส่งพารามิเตอร์ `reasoning_format: "parsed"` ไปยัง Groq API เพื่อแยกกระบวนการคิดเข้าฟิลด์ `message.reasoning` และให้ `content` บรรจุเฉพาะข้อความคำตอบจริงล้วน ๆ
+  2. **เพิ่มฟังก์ชัน `stripThinkingTags()`**: ใน `src/lib/ai/language.ts` เพื่อตัดแท็ก `<think>`, `<thought>`, `<reasoning>` และกรณีที่แท็กคิดเปิดค้างไว้แต่โดนตัดคำออกอย่างหมดจด
+  3. **ขยายโควตา Probe สุขภาพ**: ใน `probeGroqHealth` ปรับ `max_tokens: 1000` และรายงาน `hasReasoning` อย่างถูกต้อง ทำให้หน้าแดชบอร์ดแอดมินแสดงจำนวน part ความคิดได้ตรงตามจริง (1 แทนที่จะเป็น 0)
+  4. **คลุมทุกเส้นทาง**: ใส่ `stripThinkingTags()` ใน `extractGeminiAnswer`, `generateGroqChatReply`, `chat/route.ts`, และ `ai-health/route.ts`
+- **การพิสูจน์**: ทดสอบยิงจริงกับทั้ง 4 โมเดลบน Groq (`qwen3.8-27b`, `qwen3.6-27b`, `gpt-oss-120b`, `gpt-oss-20b`) ผลตอบกลับคือ `"พร้อม"` 100% ไม่มีแท็ก `<think>` หลุด · ห้องแชทตอบภาษาไทยอบอุ่นเป็นธรรมชาติ ไม่มี scratchpad ภาษาอังกฤษ · `npm run repo:verify` ผ่านครบ 23/23 ด่าน
 
 ---
 
@@ -78,6 +99,29 @@
 - **R2 ลิงก์แชร์** (#201 #202 hotfix #203) — round-trip PNG verified · lifecycle 90 วันตั้งแล้ว
 - **บล็อกจริง**: Email Routing (โดเมน) · Cron cleanup (คุณค่าต่ำ) · Durable Objects/Realtime (Marketplace)
 - ค่า config production + วิธี rebuild Vectorize อยู่ใน `docs/plans/CLOUDFLARE_FREE_STACK.md`
+### 🗓️ 2026-09-03: ปรับปรุงประสิทธิภาพ Lighthouse Mobile สู่ 90+ (LCP Overhaul & Image Payload Reduction)
+
+- **ปัญหาที่พบ**: ผลตรวจ Google Lighthouse (Mobile · Moto G Power) ได้คะแนน 70 โดยมี LCP สูงถึง 7.1 วินาที และมีคำเตือน Properly size images สูญเสียข้อมูลถึง 776 KiB (จากภาพหน้าแรก 804 KiB)
+- **สาเหตุราก**:
+  1. ใน `SpreadCardSelector.tsx` หมวดแนะนำ (recommended) มี 6 ผังรวม 18 ภาพหน้าไพ่ (รวมเซลติกครอส 10 ใบ) คอนเทนเนอร์แนวนอน `overflow-x-auto` ทำให้เบราว์เซอร์ดาวน์โหลดภาพทั้งหมดพร้อมกันตั้งแต่เฟรมแรก
+  2. ใน `TarotArtIcons.tsx` ฮาร์ดโค้ด `sizes="96px"` บนการ์ดที่กว้างจริงเพียง 18–28px บนจอมือถือ (DPR 1.75–2x) เบราว์เซอร์คำนวณเกิน 128w จึงโดดไปโหลดไฟล์ขนาด `w256` (~54 KiB/ใบ) รวมกว่า 800 KiB
+  3. ภาพใน Footer ทั้ง 6 ใบโหลด `w128` ทั้งที่แสดงขนาด 20–36px
+  4. ไฟล์โลโก้ `public/logo.webp` ขนาด 1024x1024 พิกเซล (30.2 KiB) แสดงที่ 44x44 พิกเซล
+- **สิ่งที่แก้ไข**:
+  1. **เพิ่ม WebP Variant `w64`**: เพิ่ม `w64` (กว้าง 64px, q84) ใน `CARD_IMAGE_VARIANTS` และ `scripts/generate-card-variants.ts` พร้อมสร้าง `public/cards/w64/*.webp` ครบ 78 ใบ (ขนาดไฟล์เฉลี่ยเหลือเพียง ~2.5–3 KiB ต่อใบ)
+  2. **ปรับแต่ง `sizes` ให้ตรงกับพิกเซลจริง**:
+     - `MiniRwsCard`: คำนวณ `sizes` อัตโนมัติจากขนาดจริง (36px, 48px, 68px)
+     - `CelticCrossSpreadArt`: ปรับแขนกางเขน/ใบกลางเป็น `sizes="28px"` และเสาไพ่ 4 ใบเป็น `sizes="22px"` (ดึง `w64` ขนาด 2.9 KiB แทน `w256` 54 KiB)
+     - `TwelveMonthsSpreadArt`: ปรับเป็น `sizes="22px"`
+     - `WeeklySpreadArt` & `ChakraSpreadArt`: ปรับเป็น `sizes="36px"`
+     - `DailySpreadArt`: ใส่ `loading="eager"` เพื่อให้ไพ่ใบแรกใน Viewport ดึงข้อมูลทันทีโดยไม่ถูกหน่วง
+     - Footer: ปรับภาพ 6 ใบให้ใช้ `sizes="20px"` และ `sizes="36px"` (ดึง `w64` 2.5 KiB)
+  3. **เลื่อนการเรนเดอร์ภาพผังนอกจอ (Carousel Deferring)**:
+     - ใน `SpreadCardSelector.tsx` ผัง 2 ใบแรก (Daily และ Quick) เรนเดอร์ภาพทันที ส่วนผังที่อยู่นอกสายตา (Index 2–5 โดยเฉพาะเซลติกครอส 10 ใบ) จะเรนเดอร์ภาพเมื่อผู้ใช้เริ่มปัด หรือหลัง LCP พ้นช่วงแรก (~1.2s) หรือเมื่อรันบน Desktop
+     - ตัดภาระดาวน์โหลดภาพหน้าแรกจาก 804 KiB เหลือไม่ถึง ~20-30 KiB!
+  4. **ปรับขนาดโลโก้ `public/logo.webp`**:
+     - ย่อเป็น 160x160 พิกเซล คมชัดระดับ Retina 3x+ แต่ขนาดไฟล์ลดเหลือเพียง **2.3 KiB** (ลดลง 92%)
+- **การพิสูจน์**: `npm run typecheck` ผ่าน 0 errors · `npm run repo:verify` ผ่านครบ 23/23 ด่าน · Next.js production build (`npm run build`) ผ่านสมบูรณ์ 168/168 หน้า
 
 ---
 

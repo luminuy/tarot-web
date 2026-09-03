@@ -5,7 +5,13 @@ import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/co
 import { type Reading, ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
 
-import { hasForeignScript, objectHasForeignScript, stripForeignScript, stripForeignScriptDeep } from "@/lib/ai/language";
+import {
+  hasForeignScript,
+  objectHasForeignScript,
+  stripForeignScript,
+  stripForeignScriptDeep,
+  stripThinkingTags,
+} from "@/lib/ai/language";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 /**
  * ตัวเชื่อมกับ Google Gemini API (Ultra-Low Latency Streaming)
@@ -128,9 +134,10 @@ export function joinGeminiAnswerParts(parts: unknown): string {
     .join("");
 }
 
-/** ดึงคำตอบจาก response ก้อนเดียว (generateContent ที่ไม่ใช่สตรีม) พร้อม trim */
+/** ดึงคำตอบจาก response ก้อนเดียว (generateContent ที่ไม่ใช่สตรีม) พร้อม trim และตัด thinking tags */
 export function extractGeminiAnswer(payload: any): string {
-  return joinGeminiAnswerParts(payload?.candidates?.[0]?.content?.parts).trim();
+  const text = joinGeminiAnswerParts(payload?.candidates?.[0]?.content?.parts);
+  return stripThinkingTags(text);
 }
 
 // ค่าเริ่มต้นก่อนได้ usageMetadata จริงจาก Gemini — ตั้งเป็นศูนย์แทนการเดาตัวเลข
