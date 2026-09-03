@@ -50,15 +50,18 @@
     }
   ],
 
-  // ── R2 (ฟรี 10GB · ไม่มีค่า egress) — ⚠️ ปิดไว้ชั่วคราว ──────────────────────
-  // เก็บภาพการ์ดแชร์ (client canvas) → OG image ให้ลิงก์แชร์
-  // bucket `seertarot-share` สร้างแล้ว แต่ `CLOUDFLARE_API_TOKEN` ใน GitHub Actions
-  // ยังไม่มีสิทธิ์ "Workers R2 Storage: Edit" → wrangler deploy fail (Auth error 10000)
-  // ⚠️ เพิ่ม binding กลับได้ก็ต่อเมื่อเติมสิทธิ์ R2 ให้ token แล้ว (ดู CLOUDFLARE_FREE_STACK.md)
-  // ระหว่างนี้: getShareBucket() คืน null → /api/share/image 503 → ShareModal ถอยไปแชร์ลิงก์หน้าแรก
-  // "r2_buckets": [
-  //   { "binding": "SHARE_BUCKET", "bucket_name": "seertarot-share" }
-  // ],
+  // ── R2 (ฟรี 10GB · ไม่มีค่า egress) ──────────────────────────────────────────
+  // เก็บภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (client canvas) → OG image ให้ลิงก์แชร์
+  // bucket `seertarot-share` · ควรตั้ง lifecycle ลบอัตโนมัติ ~90 วัน (PDPA)
+  // schema: RawConfig.r2_buckets = [{ binding, bucket_name }] (ตรวจ config-schema.json — INC-0034)
+  // ⚠️ wrangler validate bucket ผ่าน R2 API ตอน deploy → `CLOUDFLARE_API_TOKEN` ใน CI
+  //    ต้องมี permission "Account · Workers R2 Storage · Edit" (เติมแล้ว 2026-09-03 · ดู INC hotfix #202)
+  "r2_buckets": [
+    {
+      "binding": "SHARE_BUCKET",
+      "bucket_name": "seertarot-share"
+    }
+  ],
 
   "vars": {
     "NODE_ENV": "production"
