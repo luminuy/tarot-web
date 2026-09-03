@@ -23,7 +23,6 @@ import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-p
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
 import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
-import { FreeTrialNotice } from "@/components/entitlement/FreeTrialNotice";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
 import { ToastNotification, type ToastData } from "@/components/ui/ToastNotification";
@@ -907,7 +906,6 @@ export default function TarotPage() {
               className="space-y-10"
             >
               <EntitlementGate active={currentStep === "SPREAD_SELECT"} onRequestUpgrade={openAccessDialog}>
-                <FreeTrialNotice onOpenAccess={() => openAccessDialog("explore")} />
                 <DailyCardStrip />
                 <div className="text-center space-y-6 relative">
                   {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
