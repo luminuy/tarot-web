@@ -44,6 +44,17 @@
   - เอา mobile edge-fade masks ออก (ไม่มี scroll แล้ว)
 - **ผลทดสอบ (dev)**: 1440 / 1280 / 390px — ไพ่ทั้ง 78 ใบพอดีกรอบ ไม่มี scroll แนวนอน · หยิบไพ่แล้วพัดวัดใหม่ถูกต้อง · `tsc` ✅ · `repo:verify` 23/23 ✅
 - **หมายเหตุ**: บนมือถือ 390px ไพ่เล็กลงมาก (scale ~0.34) — เป็นผลจากข้อกำหนด "ไม่เลื่อน" + ไพ่ 78 ใบ · ยังมีปุ่ม "สุ่มเลือกให้ฉัน" เป็นทางเลือก a11y
+### 🗓️ 2026-09-03: เพิ่มปุ่มลอย TikTok (Floating Action Button) มุมขวาล่าง
+
+- **ความต้องการ**: ผู้ใช้ต้องการปุ่มลอยสไตล์ Floating Action Button (เหมือนปุ่มติดต่อ LINE มุมขวาล่างในตัวอย่าง) แสดงทั้งบนหน้าจอคอมและมือถือ โดยใช้โลโก้จริงทางการของ TikTok และเชื่อมต่อไปยังบัญชีแม่หมอ: `https://www.tiktok.com/@seerada.tarot`
+- **สิ่งที่ทำ**:
+  - สร้างคอมโพเนนต์ `src/components/ui/TikTokFloatingButton.tsx`:
+    - ตำแหน่งลอยตัวมุมขวาล่าง: `fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40` พร้อมคำนวณ Safe Area Inset สำหรับหน้าจอมือถือ (iPhone Home Bar)
+    - โลโก้แท้ทางการ 100%: ใช้เวกเตอร์ทางการของ TikTok แบบ Chromatic Anaglyph 3 เลเยอร์ (Cyan `#00F2EA`, Red `#FF004F`, White `#FFFFFF`) บนพื้นหลังวงกลมสีดำพรีเมียม `#050507` พร้อมเอฟเฟกต์ Outer Glow แสงนีออนแวววาว
+    - ลิงก์ตรงไปยัง `https://www.tiktok.com/@seerada.tarot` พร้อม `target="_blank"` และ `rel="noopener noreferrer"`
+    - Desktop Hover Pill: เมื่อนำเมาส์ไปชี้บนจอคอม จะมีแถบ Tooltip สวยหรูสไลด์ออกมาว่า `"✦ ติดตามแม่หมอ @seerada.tarot"`
+  - เชื่อมต่อไว้ใน `RootLayout` (`src/app/layout.tsx`) ให้แสดงผลครอบคลุมทุกหน้าทั้งบนคอมและมือถือ
+- **ผลการทดสอบ**: `npm run typecheck` ผ่าน 0 errors · `npm run repo:verify` ผ่านครบ 23/23 ด่าน
 
 ---
 
