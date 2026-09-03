@@ -34,6 +34,17 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ปรับ UX — นำแบนเนอร์กั้นสิทธิ์ (EntitlementGate / FreeTrialNotice) ด้านบนออก
+
+- **ปัญหา/ข้อสังเกต**: แบนเนอร์กั้นสิทธิ์ด้านบน (เช่น "คุณใช้สิทธิ์ทดลองฟรีครบแล้ว" หรือ "เปิดไพ่ทดลองฟรีได้เลย") สร้างบรรยากาศที่ดูเหมือนถูกทวงเงินหรือบีบให้สมัครสมาชิกตั้งแต่แรกเข้าเว็บ (Buzzkill) และกินพื้นที่ด้านบนหน้าจอซ้ำซ้อน
+- **สิ่งที่ทำ**:
+  - ซ่อนแบนเนอร์กั้นสิทธิ์ด้านบนออกจากหน้าแรกทั้งหมด (`EntitlementGate` คืนค่า `{children}` ล้วน ๆ และ `FreeTrialNotice` คืนค่า `null`)
+  - นำ `<FreeTrialNotice />` ออกจาก `src/app/page.tsx`
+  - ใช้หลักการ **Just-In-Time Conversion**: ให้ผู้ใช้ดื่มด่ำกับบรรยากาศและความศักดิ์สิทธิ์ของสำรับไพ่ได้อย่างอิสระ เมื่อผู้ใช้เลือกผังแล้วกดปุ่ม "เริ่มเปิดไพ่" ด้านล่าง ตัวปุ่มจะปรับข้อความล่วงหน้าและเปิดหน้าต่าง `AccessDialog` เพื่อแนะนำการสมัครสมาชิกหรือเติมรอบในจังหวะที่มีความตั้งใจสูงสุด (High-intent)
+- **ผลการทดสอบ**: `npm run typecheck` ผ่าน 0 errors · `npm run repo:verify` ผ่านครบ 23/23 ด่าน
+
+---
+
 ### 🗓️ 2026-09-03: ✅ Cloudflare Email Routing เปิดใช้งานจริง (ต่อจาก #207)
 
 - เปิด Email Routing บน zone `seertarot.net` ผ่าน dashboard (account → Compute → Email Service → Email Routing — เมนูระดับ zone ไม่มีแล้ว)
