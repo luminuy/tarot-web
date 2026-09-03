@@ -109,13 +109,13 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
     <Modal isOpen={isOpen} onClose={resetModalState} title="✦ ปลดล็อกญาณพยากรณ์พิเศษ (Mystic Oracle Pass)">
       <div className="space-y-6 pt-1 text-[#6F5B4A]">
         {errorMsg && (
-          <div className="p-3.5 rounded-lg bg-rose-950/80 border border-rose-600/50 text-rose-200 text-xs font-serif-th text-center">
+          <div className="p-3.5 rounded-lg bg-[#A6392C]/80 border border-[#A6392C]/50 text-[#A6392C] text-xs font-serif-th text-center">
             {errorMsg}
           </div>
         )}
 
         {successMsg && (
-          <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-serif-th text-center font-bold ">
+          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-[#E4D8C4] text-[#3A7044] text-sm font-serif-th text-center font-bold ">
             {successMsg}
           </div>
         )}
@@ -221,7 +221,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                 type="button"
                 disabled={loading}
                 onClick={handleConfirmPayment}
-                className="w-full py-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-serif-th text-sm active:scale-[0.98] transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-lg bg-[#3A7044] hover:bg-[#3A7044] text-white font-bold font-serif-th text-sm active:scale-[0.98] transition-all cursor-pointer"
               >
                 {loading ? "กำลังตรวจสอบรายการ..." : "✦ ยืนยันการชำระเงินแล้ว"}
               </button>

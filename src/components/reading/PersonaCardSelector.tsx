@@ -151,7 +151,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   </span>
                   {isLocked && (
                     <span className="text-[8px] text-[#2E211A] bg-[#F0E8DB]/30 border border-[#E4D8C4] px-1.5 py-0.2 rounded-full font-serif-th font-bold flex items-center gap-0.5 ">
-                      <span>🔒</span>
+                      <span>✦</span>
                       <span>✦ ปรมาจารย์ลับ</span>
                     </span>
                   )}
@@ -191,7 +191,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                     title={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                     aria-label={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                   >
-                    🔊
+                    ✦
                   </button>
                 </div>
                 <p className="text-[10px] text-[#6F5B4A] mt-1 leading-snug">{p.tagline}</p>

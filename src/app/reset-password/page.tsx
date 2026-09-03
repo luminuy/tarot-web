@@ -24,7 +24,7 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="text-center space-y-4">
-        <div className="w-14 h-14 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-center justify-center text-2xl mx-auto ">
+        <div className="w-14 h-14 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] flex items-center justify-center text-2xl mx-auto ">
           ✕
         </div>
         <h2 className="text-xl font-bold font-serif-th text-[#2E211A]">ลิงก์ไม่ถูกต้องหรือหมดอายุ</h2>
@@ -86,7 +86,7 @@ function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-left">
       {errorMsg && (
-        <div className="p-3 rounded-lg bg-red-950/60 border border-red-500/40 text-red-200 text-xs font-serif-th text-center">
+        <div className="p-3 rounded-lg bg-[#A6392C]/60 border border-[#A6392C]/40 text-[#A6392C] text-xs font-serif-th text-center">
           {errorMsg}
         </div>
       )}

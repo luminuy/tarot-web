@@ -88,13 +88,13 @@ export function ChangePasswordCard() {
       </p>
 
       {errorMsg && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs font-serif-th text-center">
+        <div className="p-3 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] text-xs font-serif-th text-center">
           {errorMsg}
         </div>
       )}
 
       {successMsg && (
-        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-serif-th text-center">
+        <div className="p-3 rounded-lg bg-[#EBF3ED] border border-[#E4D8C4] text-[#3A7044] text-xs font-serif-th text-center">
           {successMsg}
         </div>
       )}

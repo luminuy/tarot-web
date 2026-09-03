@@ -173,7 +173,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-[10px] text-rose-700 hover:text-rose-900 border border-rose-200 bg-rose-50 px-2.5 py-1 rounded-lg transition-all cursor-pointer font-serif-th "
+                  className="text-[10px] text-[#A6392C] hover:text-[#A6392C] border border-[#E4D8C4] bg-[#FCEEEA] px-2.5 py-1 rounded-lg transition-all cursor-pointer font-serif-th "
                 >
                   ลบทั้งหมด
                 </button>
@@ -279,7 +279,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           )}
 
           {summaryError && (
-            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs font-serif-th text-center ">
+            <div className="p-3 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] text-xs font-serif-th text-center ">
               {summaryError}
             </div>
           )}
@@ -304,8 +304,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   onClick={() => setOutcomeFilter("ACCURATE")}
                   className={`px-3 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ACCURATE"
-                      ? "bg-emerald-600 text-white font-bold"
-                      : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300"
+                      ? "bg-[#3A7044] text-white font-bold"
+                      : "bg-[#EBF3ED] text-[#3A7044] hover:bg-[#EBF3ED] border border-[#E4D8C4]"
                   }`}
                 >
                   ✨ เกิดขึ้นจริง ({readings.filter((r) => r.outcome === "ACCURATE").length})
@@ -315,8 +315,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   onClick={() => setOutcomeFilter("PARTIAL")}
                   className={`px-3 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PARTIAL"
-                      ? "bg-amber-600 text-white font-bold"
-                      : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300"
+                      ? "bg-[#8F5C1A] text-white font-bold"
+                      : "bg-[#F0E8DB] text-[#8F5C1A] hover:bg-[#F0E8DB] border border-[#E4D8C4]"
                   }`}
                 >
                   ✦ จริงบางส่วน ({readings.filter((r) => r.outcome === "PARTIAL").length})
@@ -337,7 +337,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="🔍 ค้นหาตามคำถาม, ผัง, ชื่อไพ่ หรือบันทึกโน้ต..."
+                  placeholder="ค้นหาตามคำถาม, ผัง, ชื่อไพ่ หรือบันทึกโน้ต..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg px-3.5 py-2 text-xs text-[#2E211A] placeholder:text-[#6F5B4A]/60 focus:outline-none focus:border-[#8F5C1A] "
@@ -350,7 +350,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           <div className="flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar min-h-[220px]">
             {filtered.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-2 opacity-70">
-                <span className="text-3xl">🔮</span>
+                <span className="text-3xl text-[#8F5C1A]">✦</span>
                 <p className="font-serif-th text-xs text-[#6F5B4A]">
                   {readings.length === 0
                     ? "ยังไม่มีประวัติการดูดวง เมื่อคุณดูดวงเสร็จจะถูกบันทึกไว้ที่นี่โดยอัตโนมัติ"
@@ -391,7 +391,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleDelete(e, item.id)}
-                          className="text-rose-600 hover:text-rose-800 p-1 text-xs transition-colors cursor-pointer"
+                          className="text-[#A6392C] hover:text-[#A6392C] p-1 text-xs transition-colors cursor-pointer"
                           title="ลบบันทึกนี้"
                           aria-label="ลบบันทึกนี้"
                         >
@@ -410,12 +410,10 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           key={i}
                           className="px-2 py-1 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] flex items-center gap-1.5 flex-shrink-0 text-[10px]"
                         >
-                          <span>
-                            {c.element === "ไฟ" ? "🔥" : c.element === "น้ำ" ? "🌊" : c.element === "ลม" ? "🌪️" : "🌿"}
-                          </span>
+                          <span>{"✦"}</span>
                           <span className="font-serif-th text-[#2E211A] font-medium">{c.cardNameTh}</span>
                           {c.isReversed && (
-                            <span className="text-[8px] text-rose-600 font-mono font-bold">(กลับหัว)</span>
+                            <span className="text-[8px] text-[#A6392C] font-mono font-bold">(กลับหัว)</span>
                           )}
                         </div>
                       ))}
@@ -438,8 +436,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           onClick={(e) => handleSetOutcome(e, item.id, "ACCURATE")}
                           className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                             outcome === "ACCURATE"
-                              ? "bg-emerald-600 text-white font-bold"
-                              : "bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100"
+                              ? "bg-[#3A7044] text-white font-bold"
+                              : "bg-[#EBF3ED] text-[#3A7044] border border-[#E4D8C4] hover:bg-[#EBF3ED]"
                           }`}
                         >
                           ✨ เกิดขึ้นจริง
@@ -450,8 +448,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           onClick={(e) => handleSetOutcome(e, item.id, "PARTIAL")}
                           className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                             outcome === "PARTIAL"
-                              ? "bg-amber-600 text-white font-bold"
-                              : "bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100"
+                              ? "bg-[#8F5C1A] text-white font-bold"
+                              : "bg-[#F0E8DB] text-[#8F5C1A] border border-[#E4D8C4] hover:bg-[#F0E8DB]"
                           }`}
                         >
                           ✦ จริงบางส่วน
@@ -474,8 +472,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           onClick={(e) => handleSetOutcome(e, item.id, "NOT_HAPPENED")}
                           className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                             outcome === "NOT_HAPPENED"
-                              ? "bg-rose-600 text-white font-bold"
-                              : "bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100"
+                              ? "bg-[#A6392C] text-white font-bold"
+                              : "bg-[#FCEEEA] text-[#A6392C] border border-[#E4D8C4] hover:bg-[#FCEEEA]"
                           }`}
                         >
                           ✕ ไม่เกิดขึ้น
@@ -491,7 +489,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         }}
                         className="text-[10px] text-[#8F5C1A] hover:text-[#2E211A] flex items-center gap-1 font-serif-th cursor-pointer font-bold"
                       >
-                        <span>📝</span>
+                        <span>✦</span>
                         <span>{item.userNote ? "แก้ไขโน้ต" : "+ จดบันทึกผล"}</span>
                       </button>
                     </div>
@@ -499,7 +497,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                     {/* Private User Reflection Note Box */}
                     {item.userNote && !isEditingNote && (
                       <div className="p-2.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[11px] text-[#2E211A] font-serif-th italic">
-                        💬 <span className="font-semibold text-[#8F5C1A]">บันทึกผลจริง:</span> {item.userNote}
+                        <span className="font-semibold text-[#8F5C1A]">✦ บันทึกผลจริง:</span> {item.userNote}
                       </div>
                     )}
 

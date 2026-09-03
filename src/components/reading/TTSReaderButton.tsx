@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { soundManager } from "@/lib/utils/audio";
 
+import { SpeakerTabIcon } from "@/components/ui/TarotArtIcons";
 interface TTSReaderButtonProps {
   textToRead: string;
   personaId?: string;
@@ -63,7 +64,7 @@ export const TTSReaderButton: React.FC<TTSReaderButtonProps> = ({ textToRead, pe
         </>
       ) : (
         <>
-          <span className="text-[#8F5C1A] text-sm leading-none">🔊</span>
+          <SpeakerTabIcon className="w-4 h-4 text-[#8F5C1A]" />
           <span>✦ ฟังเสียงอ่านคำทำนาย</span>
         </>
       )}

@@ -246,7 +246,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[10px] sm:text-[11px] text-[#6F5B4A] font-serif-th leading-tight truncate">
                   {isComplete ? (
-                    <span className="text-emerald-600 font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
+                    <span className="text-[#3A7044] font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
                   ) : (
                     <span>
                       กำลังเลือกใบสำหรับ <strong className="text-[#2E211A]">&ldquo;{currentPositionName}&rdquo;</strong>

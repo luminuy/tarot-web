@@ -140,7 +140,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
               className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold"
             >
               <span className="text-[#8F5C1A]">✦</span> 1. ชื่อเล่นของคุณ{" "}
-              <span className="text-rose-600 font-mono text-xs">(จำเป็น *)</span>
+              <span className="text-[#A6392C] font-mono text-xs">(จำเป็น *)</span>
             </label>
             <span className="text-[10px] text-[#6F5B4A] font-mono">{nickname.length}/24</span>
           </div>
@@ -154,7 +154,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             placeholder="เช่น ฟ้า, บิ๊ก, พลอย, เมย์"
             className={`w-full bg-[#FFFFFF] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all duration-200 ${
               isNicknameEmpty
-                ? "border border-rose-400 focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                ? "border border-[#A6392C] focus:border-[#A6392C] focus:ring-1 focus:ring-[#A6392C]"
                 : "border border-[#E4D8C4] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
             }`}
           />
@@ -215,7 +215,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold"
           >
             <span className="text-[#8F5C1A]">✦</span> 3. คำถามที่คุณอยากรู้มากที่สุด{" "}
-            <span className="text-rose-600 font-mono text-xs">(จำเป็น *)</span>
+            <span className="text-[#A6392C] font-mono text-xs">(จำเป็น *)</span>
           </label>
           <span className="text-[10px] text-[#6F5B4A] font-mono">{question.length}/300</span>
         </div>
@@ -230,7 +230,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             placeholder="พิมพ์คำถามที่คุณอยากให้ไพ่ช่วยชี้ทาง เช่น ความสัมพันธ์กับเขาจะมีทิศทางอย่างไร / งานใหม่ที่กำลังจะย้ายไปจะดีไหม..."
             className={`w-full bg-[#FFFFFF] rounded-lg p-4 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all duration-200 leading-relaxed resize-none ${
               isQuestionEmpty
-                ? "border border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-400/30"
+                ? "border border-[#A6392C] focus:border-[#A6392C] focus:ring-2 focus:ring-[#A6392C]/30"
                 : "border border-[#E4D8C4] group-hover:border-[#8F5C1A] focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/30"
             }`}
           />

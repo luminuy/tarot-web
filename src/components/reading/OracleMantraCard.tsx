@@ -87,7 +87,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex items-center gap-1.5 text-emerald-700 font-bold"
+                className="flex items-center gap-1.5 text-[#3A7044] font-bold"
               >
                 <span>✓</span>
                 <span>คัดลอกคำคมแล้ว!</span>

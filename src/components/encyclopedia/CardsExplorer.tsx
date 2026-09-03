@@ -6,37 +6,56 @@ import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 
+import {
+  AirElementIcon,
+  CrownTabIcon,
+  FireElementIcon,
+  PentacleTabIcon,
+  SparkleTabIcon,
+  WaterElementIcon,
+} from "@/components/ui/TarotArtIcons";
 interface CardsExplorerProps {
   cards: readonly TarotCard[];
 }
 
 const SUIT_TABS = [
-  { id: "all", label: "ไพ่ทั้งหมด", icon: "✦", desc: "ครบ 78 ใบ", count: 78 },
-  { id: "major", label: "ไพ่ชุดใหญ่ (Major)", icon: "👑", desc: "ไพ่หลัก 22 ใบ", count: 22 },
-  { id: "wands", label: "ไม้เท้า (Wands)", icon: "🔥", desc: "ธาตุไฟ • พลังงาน & การงาน", count: 14 },
-  { id: "cups", label: "ถ้วย (Cups)", icon: "🌊", desc: "ธาตุน้ำ • ความรัก & อารมณ์", count: 14 },
-  { id: "swords", label: "ดาบ (Swords)", icon: "⚔️", desc: "ธาตุลม • ความคิด & การตัดสินใจ", count: 14 },
-  { id: "pentacles", label: "เหรียญ (Pentacles)", icon: "🪙", desc: "ธาตุดิน • การเงิน & ความมั่นคง", count: 14 },
+  { id: "all", label: "ไพ่ทั้งหมด", Icon: SparkleTabIcon, desc: "ครบ 78 ใบ", count: 78 },
+  { id: "major", label: "ไพ่ชุดใหญ่ (Major)", Icon: CrownTabIcon, desc: "ไพ่หลัก 22 ใบ", count: 22 },
+  { id: "wands", label: "ไม้เท้า (Wands)", Icon: FireElementIcon, desc: "ธาตุไฟ • พลังงาน & การงาน", count: 14 },
+  { id: "cups", label: "ถ้วย (Cups)", Icon: WaterElementIcon, desc: "ธาตุน้ำ • ความรัก & อารมณ์", count: 14 },
+  { id: "swords", label: "ดาบ (Swords)", Icon: AirElementIcon, desc: "ธาตุลม • ความคิด & การตัดสินใจ", count: 14 },
+  {
+    id: "pentacles",
+    label: "เหรียญ (Pentacles)",
+    Icon: PentacleTabIcon,
+    desc: "ธาตุดิน • การเงิน & ความมั่นคง",
+    count: 14,
+  },
 ];
 
 const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string; glow: string }> = {
   ไฟ: {
-    bg: "bg-amber-500/10",
-    text: "text-amber-300",
-    border: "border-amber-500/30",
+    bg: "bg-[#8F5C1A]/10",
+    text: "text-[#8F5C1A]",
+    border: "border-[#8F5C1A]/30",
     glow: "rgba(245, 158, 11, 0.25)",
   },
-  น้ำ: { bg: "bg-sky-500/10", text: "text-sky-300", border: "border-sky-500/30", glow: "rgba(56, 189, 248, 0.25)" },
+  น้ำ: {
+    bg: "bg-[#6F5B4A]/10",
+    text: "text-[#6F5B4A]",
+    border: "border-[#6F5B4A]/30",
+    glow: "rgba(56, 189, 248, 0.25)",
+  },
   ลม: {
-    bg: "bg-purple-500/10",
-    text: "text-purple-300",
-    border: "border-purple-500/30",
+    bg: "bg-[#6F5B4A]/10",
+    text: "text-[#6F5B4A]",
+    border: "border-[#6F5B4A]/30",
     glow: "rgba(168, 85, 247, 0.25)",
   },
   ดิน: {
-    bg: "bg-emerald-500/10",
-    text: "text-emerald-300",
-    border: "border-emerald-500/30",
+    bg: "bg-[#3A7044]/10",
+    text: "text-[#3A7044]",
+    border: "border-[#3A7044]/30",
     glow: "rgba(16, 185, 129, 0.25)",
   },
 };
@@ -155,7 +174,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-1">
-                  <span className="text-base">{tab.icon}</span>
+                  <tab.Icon className="w-4 h-4" />
                   <span
                     className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
                       isActive ? "bg-[#8F5C1A] text-[#FFFFFF]" : "bg-black/5 text-[#6F5B4A] group-hover:text-[#2E211A]"

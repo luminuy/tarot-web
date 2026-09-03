@@ -66,58 +66,32 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         canvas.width = width;
         canvas.height = height;
 
-        // 1. Background Luxury Celestial Gradient
+        // 1. พื้นหลัง — ผ้าลินินครีมอุ่นตามระบบดีไซน์ V2 (canvas → inset)
         const grad = ctx.createLinearGradient(0, 0, 0, height);
-        grad.addColorStop(0, "#190e38");
-        grad.addColorStop(0.4, "#0d071d");
-        grad.addColorStop(1, "#05030a");
+        grad.addColorStop(0, "#FFFDF9");
+        grad.addColorStop(0.55, "#F6F1E9");
+        grad.addColorStop(1, "#F0E8DB");
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
 
-        // 2. Starry Sparkles
-        ctx.fillStyle = "#ffffff";
-        for (let i = 0; i < (format === "story" ? 130 : 80); i++) {
-          const sx = Math.random() * width;
-          const sy = Math.random() * height;
-          const sr = Math.random() * 2 + 0.5;
-          const sa = Math.random() * 0.7 + 0.2;
-          ctx.globalAlpha = sa;
-          ctx.beginPath();
-          ctx.arc(sx, sy, sr, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.globalAlpha = 1.0;
-
-        // 3. Ornate Double Gold Border & Corner Stars
-        ctx.strokeStyle = "#e5c07b";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(40, 40, width - 80, height - 80);
-        ctx.strokeStyle = "rgba(229, 192, 123, 0.35)";
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(52, 52, width - 104, height - 104);
-
-        // Corner Star Ornaments
-        ctx.fillStyle = "#e5c07b";
-        ctx.font = "24px 'Noto Serif Thai', serif";
-        ctx.textAlign = "center";
-        ctx.fillText("✦", 65, 75);
-        ctx.fillText("✦", width - 65, 75);
-        ctx.fillText("✦", 65, height - 60);
-        ctx.fillText("✦", width - 65, height - 60);
+        // 2. กรอบเส้นเดี่ยวบาง ๆ (ไม่มีเงา ไม่มีดาวระยิบ)
+        ctx.strokeStyle = "#E4D8C4";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(48, 48, width - 96, height - 96);
 
         // 4. Header: Brand & Spread
         const headerY = format === "story" ? 150 : 110;
-        ctx.fillStyle = "#f5deaa";
+        ctx.fillStyle = "#8F5C1A";
         ctx.font = "bold 40px 'Noto Serif Thai', serif, sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("✦ SEERTAROT · วิหารพยากรณ์ ✦", width / 2, headerY);
 
-        ctx.fillStyle = "#e5c07b";
+        ctx.fillStyle = "#6F5B4A";
         ctx.font = "bold 24px 'Noto Sans Thai', sans-serif";
         ctx.fillText(`ผังการวางไพ่: ${spreadName}`, width / 2, headerY + 45);
 
         // Divider
-        ctx.strokeStyle = "rgba(229, 192, 123, 0.4)";
+        ctx.strokeStyle = "#E4D8C4";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(120, headerY + 70);
@@ -127,7 +101,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         // 5. Question Quote
         let nextY = headerY + 110;
         if (question) {
-          ctx.fillStyle = "#f5deaa";
+          ctx.fillStyle = "#2E211A";
           ctx.font = "italic 28px 'Noto Serif Thai', serif, sans-serif";
           ctx.textAlign = "center";
           ctx.fillText(`“${question.slice(0, 48)}${question.length > 48 ? "..." : ""}”`, width / 2, nextY);
@@ -144,7 +118,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         const gap = isSingle ? 0 : 22;
         const totalWidth = totalDisplay * cardW + (totalDisplay - 1) * gap;
         const startX = (width - totalWidth) / 2;
-        const cardY = nextY + 15;
+        const cardY = nextY + 46; // เว้นที่ให้ป้ายตำแหน่งเหนือไพ่
 
         // Preload card images
         const loadedImages = await Promise.all(
@@ -170,17 +144,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           const cardImg = loadedImages[idx];
           const cardObj = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
 
-          // Card Background
-          ctx.fillStyle = "#090614";
+          // พื้นรองไพ่
+          ctx.fillStyle = "#F0E8DB";
           ctx.beginPath();
-          ctx.roundRect(cx, cardY, cardW, cardH, 20);
+          ctx.roundRect(cx, cardY, cardW, cardH, 8);
           ctx.fill();
 
           // Draw Artwork
           if (cardImg) {
             ctx.save();
             ctx.beginPath();
-            ctx.roundRect(cx, cardY, cardW, cardH, 20);
+            ctx.roundRect(cx, cardY, cardW, cardH, 8);
             ctx.clip();
 
             if (c.isReversed) {
@@ -193,49 +167,49 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             ctx.restore();
           }
 
-          // Gold Border
-          ctx.strokeStyle = "#e5c07b";
-          ctx.lineWidth = 3.5;
+          // เส้นขอบไพ่ 1px (ไม่มีเงา)
+          ctx.strokeStyle = "#E4D8C4";
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.roundRect(cx, cardY, cardW, cardH, 20);
+          ctx.roundRect(cx, cardY, cardW, cardH, 8);
           ctx.stroke();
 
-          // Position Label
-          ctx.fillStyle = "#f5deaa";
+          // ป้ายตำแหน่ง — เหนือไพ่ ไม่ทับงานศิลป์
+          ctx.fillStyle = "#8F5C1A";
           ctx.font = `bold ${isSingle ? "22px" : "16px"} 'Noto Sans Thai', sans-serif`;
           ctx.textAlign = "center";
-          ctx.fillText(c.position.nameTh.slice(0, 14), cx + cardW / 2, cardY + (isSingle ? 35 : 28));
+          ctx.fillText(c.position.nameTh.slice(0, 14), cx + cardW / 2, cardY - 16);
 
-          // Card Name
-          ctx.fillStyle = "#ffffff";
+          // ชื่อไพ่ — ใต้ไพ่
+          ctx.fillStyle = "#2E211A";
           ctx.font = `bold ${isSingle ? "26px" : "19px"} 'Noto Serif Thai', serif, sans-serif`;
-          ctx.fillText(cardObj?.nameTh || "ไพ่ทาโรต์", cx + cardW / 2, cardY + cardH - (isSingle ? 45 : 35));
+          ctx.fillText(cardObj?.nameTh || "ไพ่ทาโรต์", cx + cardW / 2, cardY + cardH + 30);
 
-          // Orientation Status
-          ctx.fillStyle = c.isReversed ? "#fda4af" : "#86efac";
+          // สถานะหัวตั้ง/กลับหัว
+          ctx.fillStyle = c.isReversed ? "#A6392C" : "#3A7044";
           ctx.font = `bold ${isSingle ? "18px" : "14px"} 'Noto Sans Thai', sans-serif`;
-          ctx.fillText(c.isReversed ? "กลับหัว ↷" : "หัวตั้ง ✦", cx + cardW / 2, cardY + cardH - (isSingle ? 18 : 12));
+          ctx.fillText(c.isReversed ? "กลับหัว ↷" : "หัวตั้ง ✦", cx + cardW / 2, cardY + cardH + 56);
         });
 
         // 7. Oracle Summary Block
-        const summaryY = cardY + cardH + 45;
+        const summaryY = cardY + cardH + 82;
         const summaryH = height - summaryY - 120;
 
-        ctx.fillStyle = "rgba(12, 7, 24, 0.94)";
-        ctx.strokeStyle = "rgba(229, 192, 123, 0.4)";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.strokeStyle = "#E4D8C4";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(80, summaryY, width - 160, summaryH, 22);
+        ctx.roundRect(80, summaryY, width - 160, summaryH, 8);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = "#e5c07b";
+        ctx.fillStyle = "#8F5C1A";
         ctx.font = "bold 26px 'Noto Serif Thai', serif, sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(`✦ สารพยากรณ์จากแม่หมอ ${persona.nameTh} ✦`, width / 2, summaryY + 50);
 
         // Multi-line wrap summary
-        ctx.fillStyle = "#f3e8d2";
+        ctx.fillStyle = "#2E211A";
         ctx.font = "italic 25px 'Noto Serif Thai', serif, sans-serif";
         ctx.textAlign = "left";
         const words = (reading?.summary || "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ").split("");
@@ -256,7 +230,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         ctx.fillText(line, 120, lineY);
 
         // 8. Footer Watermark
-        ctx.fillStyle = "#c59b27";
+        ctx.fillStyle = "#6F5B4A";
         ctx.font = "bold 20px 'Noto Sans Thai', sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("PROVABLY-FAIR SHA-256 · SEERTAROT.NET", width / 2, height - 65);
@@ -495,8 +469,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                       <span
                         className={`text-[9px] px-2 py-0.5 rounded-full font-serif-th inline-block font-semibold ${
                           c.isReversed
-                            ? "bg-rose-50 text-rose-700 border border-rose-200"
-                            : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                            ? "bg-[#FCEEEA] text-[#A6392C] border border-[#E4D8C4]"
+                            : "bg-[#EBF3ED] text-[#3A7044] border border-[#E4D8C4]"
                         }`}
                       >
                         {c.isReversed ? "กลับหัว ↷" : "หัวตั้ง ✦"}

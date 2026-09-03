@@ -91,15 +91,15 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={`✦ ขอคำปรึกษากับ ${readerName}`}>
       <form onSubmit={handleSubmit} className="space-y-4 pt-2 font-serif-th">
         {error && (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 ">{error}</div>
+          <div className="rounded-lg border border-[#E4D8C4] bg-[#FCEEEA] p-3 text-xs text-[#A6392C] ">{error}</div>
         )}
 
         {/* Live Availability Status */}
         <div className="flex items-center justify-between rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-3 text-xs ">
           <span className="text-[#6F5B4A]">สถานะการเปิดรับคิวสด:</span>
           {isLiveOpen ? (
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1 font-semibold text-[#3A7044]">
+              <span className="h-2 w-2 rounded-full bg-[#3A7044] animate-pulse" />
               เปิดรับคิวสดทันที
             </span>
           ) : (
@@ -130,7 +130,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
                   : "bg-[#FFFFFF] border-[#E4D8C4] text-[#6F5B4A] hover:text-[#2E211A]"
               }`}
             >
-              📅 จองคิวล่วงหน้า
+              ✦ จองคิวล่วงหน้า
             </button>
           </div>
         )}

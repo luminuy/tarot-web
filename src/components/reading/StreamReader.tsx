@@ -299,7 +299,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                         </span>
                       </>
                     ) : (
-                      <span className="text-rose-700 text-sm font-normal">
+                      <span className="text-[#A6392C] text-sm font-normal">
                         ไม่พบข้อมูลไพ่ (กรุณากดโหลดใหม่อีกครั้ง)
                       </span>
                     )}
@@ -343,8 +343,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
             {/* If card data could not be found, show reload prompt instead of fake reading */}
             {!cardData && (
-              <div className="p-4 rounded-lg bg-rose-50 border border-rose-300 text-center space-y-2.5 my-2">
-                <p className="text-xs text-rose-800 font-serif-th">
+              <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-center space-y-2.5 my-2">
+                <p className="text-xs text-[#A6392C] font-serif-th">
                   ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง
                 </p>
                 {onRetry && (

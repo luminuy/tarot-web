@@ -13,9 +13,9 @@ function baseLayout(contentHtml: string, title: string): string {
     body {
       margin: 0;
       padding: 0;
-      background-color: #0b0714;
+      background-color: #F6F1E9;
       font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #e5e0f8;
+      color: #2E211A;
     }
     .wrapper {
       max-width: 560px;
@@ -23,30 +23,29 @@ function baseLayout(contentHtml: string, title: string): string {
       padding: 32px 20px;
     }
     .card {
-      background: linear-gradient(180deg, #181028 0%, #100a1c 100%);
-      border: 1px solid rgba(212, 167, 44, 0.3);
-      border-radius: 16px;
+      background: #FFFFFF;
+      border: 1px solid #E4D8C4;
+      border-radius: 8px;
       padding: 36px 28px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
     .brand {
       text-align: center;
       margin-bottom: 24px;
     }
     .brand-title {
-      color: #ffd700;
+      color: #8F5C1A;
       font-size: 20px;
       font-weight: bold;
       letter-spacing: 1px;
       margin: 0;
     }
     .brand-sub {
-      color: #9c93b8;
+      color: #6F5B4A;
       font-size: 13px;
       margin-top: 4px;
     }
     h1 {
-      color: #ffffff;
+      color: #2E211A;
       font-size: 20px;
       font-weight: 600;
       margin-top: 0;
@@ -54,7 +53,7 @@ function baseLayout(contentHtml: string, title: string): string {
       text-align: center;
     }
     p {
-      color: #c4bcd8;
+      color: #2E211A;
       font-size: 15px;
       line-height: 1.6;
       margin-bottom: 20px;
@@ -65,29 +64,28 @@ function baseLayout(contentHtml: string, title: string): string {
     }
     .btn {
       display: inline-block;
-      background: linear-gradient(135deg, #d4a72c 0%, #a27b14 100%);
-      color: #0b0714 !important;
+      background: #8F5C1A;
+      color: #FFFFFF !important;
       font-weight: bold;
       font-size: 15px;
       text-decoration: none;
       padding: 14px 32px;
-      border-radius: 30px;
-      box-shadow: 0 4px 15px rgba(212, 167, 44, 0.35);
+      border-radius: 999px;
     }
     .fallback {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px dashed rgba(255, 255, 255, 0.15);
+      background: #F0E8DB;
+      border: 1px solid #E4D8C4;
       border-radius: 8px;
       padding: 12px;
       font-size: 12px;
-      color: #8c82a8;
+      color: #6F5B4A;
       word-break: break-all;
       margin-top: 24px;
     }
     .footer {
       text-align: center;
       margin-top: 28px;
-      color: #685e82;
+      color: #6F5B4A;
       font-size: 12px;
     }
   </style>
@@ -121,7 +119,7 @@ export function verifyEmailHtml(link: string, name?: string): string {
     <p>ลิงก์นี้มีอายุการใช้งาน 24 ชั่วโมง</p>
     <div class="fallback">
       หากปุ่มด้านบนใช้งานไม่ได้ กรุณาคัดลอกลิงก์นี้ไปเปิดในเบราว์เซอร์:<br>
-      <a href="${link}" style="color: #d4a72c;">${link}</a>
+      <a href="${link}" style="color: #8F5C1A;">${link}</a>
     </div>
   `;
   return baseLayout(content, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot");
@@ -136,10 +134,10 @@ export function resetPasswordHtml(link: string, name?: string): string {
     <div class="btn-container">
       <a href="${link}" class="btn">✦ ตั้งรหัสผ่านใหม่</a>
     </div>
-    <p style="color: #eab308; font-size: 13px;">⚠️ ลิงก์นี้มีความปลอดภัยระดับสูงและมีอายุการใช้งาน 15 นาที</p>
+    <p style="color: #A6392C; font-size: 13px;">✦ ลิงก์นี้มีความปลอดภัยระดับสูงและมีอายุการใช้งาน 15 นาที</p>
     <div class="fallback">
       หากปุ่มด้านบนใช้งานไม่ได้ กรุณาคัดลอกลิงก์นี้ไปเปิดในเบราว์เซอร์:<br>
-      <a href="${link}" style="color: #d4a72c;">${link}</a>
+      <a href="${link}" style="color: #8F5C1A;">${link}</a>
     </div>
   `;
   return baseLayout(content, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot");

@@ -6,6 +6,7 @@ import type { Spread, SpreadPosition } from "@/data/spreads";
 import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
 
+import { ExpandTabIcon } from "@/components/ui/TarotArtIcons";
 export interface DrawnSlotCard {
   order: number;
   cardIndex: number;
@@ -157,7 +158,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] hover:bg-[#F6F1E9] border border-[#E4D8C4] hover:border-[#8F5C1A] text-[#2E211A] hover:text-[#8F5C1A] transition-all duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
               title="ซูมดูไพ่ 3D ความละเอียดสูง"
             >
-              <span className="text-[10px] text-[#8F5C1A] group-hover:text-[#74490F] transition-colors">⛶</span>
+              <ExpandTabIcon className="w-3 h-3 text-[#8F5C1A] group-hover:text-[#74490F] transition-colors" />
               <span className="text-[9.5px] font-serif-th font-bold tracking-wide">ขยาย</span>
             </button>
           )}

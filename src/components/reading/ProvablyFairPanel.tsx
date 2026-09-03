@@ -252,9 +252,9 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                       >
                         {result.commitmentOk && result.drawMatches ? (
                           /* Success Box */
-                          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-emerald-400/50 space-y-2 ">
+                          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-[#3A7044]/50 space-y-2 ">
                             <div className="flex items-center gap-2 text-[#3A7044] font-serif-th font-bold text-xs sm:text-sm">
-                              <span className="w-5 h-5 rounded-full bg-emerald-200 text-[#3A7044] flex items-center justify-center text-xs">
+                              <span className="w-5 h-5 rounded-full bg-[#EBF3ED] text-[#3A7044] flex items-center justify-center text-xs">
                                 ✓
                               </span>
                               <span>✦ การเปิดไพ่นี้พิสูจน์แล้วว่าโปร่งใสสมบูรณ์แบบ</span>
@@ -278,9 +278,9 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           </div>
                         ) : (
                           /* Mismatch Warning Box */
-                          <div className="p-4 rounded-lg bg-[#FCEEEA] border border-rose-300 space-y-2 ">
+                          <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] space-y-2 ">
                             <div className="flex items-center gap-2 text-[#A6392C] font-serif-th font-bold text-xs sm:text-sm">
-                              <span className="w-5 h-5 rounded-full bg-rose-200 text-[#A6392C] flex items-center justify-center text-xs">
+                              <span className="w-5 h-5 rounded-full bg-[#FCEEEA] text-[#A6392C] flex items-center justify-center text-xs">
                                 ✕
                               </span>
                               <span>พบข้อแตกต่างในการตรวจสอบความสอดคล้อง</span>

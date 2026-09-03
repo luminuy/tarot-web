@@ -70,7 +70,7 @@ function renderFormattedText(text: string) {
 const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ text, isError }) => {
   if (isError) {
     return (
-      <div className="rounded-lg rounded-tl-xs bg-rose-50 border border-rose-200 p-3.5 sm:p-4 text-rose-800 font-serif-th text-xs sm:text-sm leading-relaxed ">
+      <div className="rounded-lg rounded-tl-xs bg-[#FCEEEA] border border-[#E4D8C4] p-3.5 sm:p-4 text-[#A6392C] font-serif-th text-xs sm:text-sm leading-relaxed ">
         {text}
       </div>
     );
@@ -323,8 +323,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
               >
                 {persona.nameTh}
               </h3>
-              <span className="flex items-center gap-1 text-[10px] text-emerald-800 font-sans font-medium px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-300 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="flex items-center gap-1 text-[10px] text-[#3A7044] font-sans font-medium px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#E4D8C4] shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3A7044] animate-pulse" />
                 ออนไลน์
               </span>
             </div>

@@ -239,7 +239,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         onClick={() => setViewOrientation("upright")}
                         className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
                           viewOrientation === "upright"
-                            ? "bg-emerald-50 text-emerald-800 border border-emerald-300"
+                            ? "bg-[#EBF3ED] text-[#3A7044] border border-[#E4D8C4]"
                             : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#E4D8C4]"
                         }`}
                       >
@@ -249,7 +249,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                         onClick={() => setViewOrientation("reversed")}
                         className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
                           viewOrientation === "reversed"
-                            ? "bg-rose-50 text-rose-800 border border-rose-300"
+                            ? "bg-[#FCEEEA] text-[#A6392C] border border-[#E4D8C4]"
                             : "bg-[#FFFFFF] text-[#6F5B4A] border border-[#E4D8C4]"
                         }`}
                       >
@@ -279,10 +279,10 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                   <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
                     {[
                       { id: "general", label: "ภาพรวมทั่วไป" },
-                      { id: "work", label: "💼 การงาน" },
-                      { id: "money", label: "💰 การเงิน" },
+                      { id: "work", label: "การงาน" },
+                      { id: "money", label: "การเงิน" },
                       { id: "love", label: "❤️ ความรัก" },
-                      { id: "self", label: "🌱 จิตวิญญาณ" },
+                      { id: "self", label: "จิตวิญญาณ" },
                     ].map((cat) => (
                       <button
                         key={cat.id}

@@ -126,9 +126,11 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* Section 6: Safety */}
-        <section className="space-y-3 p-5 rounded-lg bg-[#FFFFFF] border border-rose-200 ">
-          <h2 className="text-lg font-bold text-rose-700 font-serif-th">6. ความปลอดภัยของผู้ใช้ (Safety Guardrails)</h2>
-          <div className="text-sm text-rose-950 leading-relaxed space-y-2 font-serif-th">
+        <section className="space-y-3 p-5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
+          <h2 className="text-lg font-bold text-[#A6392C] font-serif-th">
+            6. ความปลอดภัยของผู้ใช้ (Safety Guardrails)
+          </h2>
+          <div className="text-sm text-[#A6392C] leading-relaxed space-y-2 font-serif-th">
             <p>ระบบของเรามีตัวกรองความปลอดภัยที่ทำงานตลอดเวลา:</p>
             <ul className="space-y-1.5 list-disc list-inside">
               <li>

@@ -247,11 +247,9 @@ body > * {
   background: linear-gradient(
     125deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.05) 30%,
-    rgba(229, 192, 123, 0.20) 48%,
-    rgba(168, 85, 247, 0.14) 58%,
-    rgba(255, 159, 67, 0.17) 68%,
-    transparent 85%
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(228, 216, 196, 0.28) 50%,
+    transparent 80%
   );
   /*
    * เดิมใช้ mix-blend-mode: color-dodge — บังคับให้ทุกใบกลายเป็นเลเยอร์ผสมสีกับพื้นหลัง

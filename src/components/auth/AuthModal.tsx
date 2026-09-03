@@ -316,12 +316,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Feedback messages */}
           <div aria-live="polite" className="w-full">
             {errorMsg && (
-              <div className="w-full mb-3 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs font-serif-th text-center ">
+              <div className="w-full mb-3 p-3 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] text-xs font-serif-th text-center ">
                 {errorMsg}
               </div>
             )}
             {successMsg && (
-              <div className="w-full mb-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-serif-th text-center ">
+              <div className="w-full mb-3 p-3 rounded-lg bg-[#EBF3ED] border border-[#E4D8C4] text-[#3A7044] text-xs font-serif-th text-center ">
                 {successMsg}
               </div>
             )}
@@ -429,10 +429,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                             className={`h-1.5 rounded-full transition-all duration-300 ${
                               active
                                 ? strength.score <= 1
-                                  ? "bg-rose-500"
+                                  ? "bg-[#A6392C]"
                                   : strength.score === 2
-                                    ? "bg-amber-400"
-                                    : "bg-emerald-500"
+                                    ? "bg-[#8F5C1A]"
+                                    : "bg-[#3A7044]"
                                 : "bg-[#F0E8DB]/30"
                             }`}
                           />
@@ -499,7 +499,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               onClick={handleLoginGoogle}
               className="py-2.5 px-3.5 rounded-lg bg-[#FFFFFF] hover:bg-[#F0E8DB] border border-[#E4D8C4] hover:border-[#8F5C1A] text-[#2E211A] font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
             >
-              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 border border-gray-100">
+              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 border border-[#E4D8C4]">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"

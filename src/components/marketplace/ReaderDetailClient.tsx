@@ -21,8 +21,8 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
               พร้อมรับคำทำนายจาก {reader.displayName} แล้วหรือยัง?
             </h3>
             {isLiveOpen && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#3A7044] bg-[#EBF3ED] px-2 py-0.5 rounded-full border border-[#E4D8C4]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#3A7044] animate-pulse" />
                 เปิดรับคิวสด
               </span>
             )}

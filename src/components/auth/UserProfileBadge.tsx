@@ -362,10 +362,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
             {/* Unverified Email Warning Badge */}
             {user.provider === "email" && user.emailVerified === false && (
-              <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 text-[11px] space-y-1.5">
+              <div className="p-2.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#8F5C1A] text-[11px] space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold flex items-center gap-1">
-                    <span className="text-amber-600">✦</span>
+                    <span className="text-[#8F5C1A]">✦</span>
                     <span>ยังไม่ยืนยันอีเมล</span>
                   </span>
                   <button
@@ -419,13 +419,13 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full text-left p-2.5 rounded-lg text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-transparent hover:border-rose-300 transition-all duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
+                className="w-full text-left p-2.5 rounded-lg text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA] border border-transparent hover:border-[#E4D8C4] transition-all duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
               >
                 <span className="flex items-center gap-1.5 font-bold">
-                  <span className="text-rose-600 group-hover:rotate-12 transition-transform">✦</span>
+                  <span className="text-[#A6392C] group-hover:rotate-12 transition-transform">✦</span>
                   <span>ออกจากระบบ</span>
                 </span>
-                <span className="text-[11px] text-rose-400 group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all">
+                <span className="text-[11px] text-[#A6392C] group-hover:text-[#A6392C] group-hover:translate-x-0.5 transition-all">
                   →
                 </span>
               </button>

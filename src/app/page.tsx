@@ -885,7 +885,7 @@ export default function TarotPage() {
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (
-          <div className="mb-6 p-4 rounded-lg bg-rose-50 border border-rose-300 text-rose-800 text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mb-6 p-4 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3">
             <span>{errorMsg}</span>
             {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ/.test(errorMsg) && (
               <button

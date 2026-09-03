@@ -17,32 +17,32 @@ interface CardDetailViewProps {
 
 const ELEMENT_CONFIG: Record<string, { border: string; glow: string; text: string; bg: string; icon: string }> = {
   ไฟ: {
-    border: "border-amber-500/40",
+    border: "border-[#8F5C1A]/40",
     glow: "rgba(245, 158, 11, 0.35)",
-    text: "text-amber-300",
-    bg: "bg-amber-500/15",
-    icon: "🔥",
+    text: "text-[#8F5C1A]",
+    bg: "bg-[#8F5C1A]/15",
+    icon: "✦",
   },
   น้ำ: {
-    border: "border-sky-500/40",
+    border: "border-[#6F5B4A]/40",
     glow: "rgba(56, 189, 248, 0.35)",
-    text: "text-sky-300",
-    bg: "bg-sky-500/15",
-    icon: "🌊",
+    text: "text-[#6F5B4A]",
+    bg: "bg-[#6F5B4A]/15",
+    icon: "✦",
   },
   ลม: {
-    border: "border-purple-500/40",
+    border: "border-[#6F5B4A]/40",
     glow: "rgba(168, 85, 247, 0.35)",
-    text: "text-purple-300",
-    bg: "bg-purple-500/15",
-    icon: "🌪️",
+    text: "text-[#6F5B4A]",
+    bg: "bg-[#6F5B4A]/15",
+    icon: "✦",
   },
   ดิน: {
-    border: "border-emerald-500/40",
+    border: "border-[#3A7044]/40",
     glow: "rgba(16, 185, 129, 0.35)",
-    text: "text-emerald-300",
-    bg: "bg-emerald-500/15",
-    icon: "🌿",
+    text: "text-[#3A7044]",
+    bg: "bg-[#3A7044]/15",
+    icon: "✦",
   },
 };
 
@@ -64,8 +64,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
   const categories = [
     { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", icon: "✦", color: "#8F5C1A" },
-    { id: "love" as const, nameTh: "ความรักและคนในใจ", icon: "♥", color: "#A6392C" },
-    { id: "work" as const, nameTh: "การงานและโครงการ", icon: "★", color: "#6F5B4A" },
+    { id: "love" as const, nameTh: "ความรักและคนในใจ", icon: "✦", color: "#A6392C" },
+    { id: "work" as const, nameTh: "การงานและโครงการ", icon: "✦", color: "#6F5B4A" },
     { id: "money" as const, nameTh: "การเงินและโชคลาภ", icon: "◆", color: "#3A7044" },
     { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", icon: "✧", color: "#6F5B4A" },
   ];
@@ -163,17 +163,17 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             </span>
             {card.astrology && (
               <span className="px-3 py-1 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] text-[#2E211A]">
-                🪐 {card.astrology}
+                ✦ {card.astrology}
               </span>
             )}
             {card.yesNo && (
               <span
                 className={`px-3 py-1 rounded-full border font-bold ${
                   card.yesNo === "yes"
-                    ? "border-emerald-500/40 bg-emerald-50 text-emerald-800"
+                    ? "border-[#3A7044]/40 bg-[#EBF3ED] text-[#3A7044]"
                     : card.yesNo === "no"
-                      ? "border-rose-500/40 bg-rose-50 text-rose-800"
-                      : "border-amber-500/40 bg-amber-50 text-amber-800"
+                      ? "border-[#A6392C]/40 bg-[#FCEEEA] text-[#A6392C]"
+                      : "border-[#8F5C1A]/40 bg-[#F0E8DB] text-[#8F5C1A]"
                 }`}
               >
                 Yes/No: {card.yesNo === "yes" ? "ใช่ (Yes)" : card.yesNo === "no" ? "ไม่ใช่ (No)" : "ไม่แน่ชัด (Maybe)"}

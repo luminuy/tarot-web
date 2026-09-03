@@ -93,14 +93,16 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
  rounded-lg p-3.5 sm:p-4 overflow-hidden
  transition-all duration-200
  ${
-   isError ? "bg-[#FFFFFF] border border-rose-400 text-rose-900" : "bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A]"
+   isError
+     ? "bg-[#FFFFFF] border border-[#A6392C] text-[#A6392C]"
+     : "bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A]"
  }`}
     >
       {/* Top ambient gold / ruby highlight */}
       <div
         className={`absolute inset-x-4 top-0 h-[1.5px] ${
           isError
-            ? "bg-gradient-to-r from-transparent via-rose-400 to-transparent"
+            ? "bg-gradient-to-r from-transparent via-[#A6392C] to-transparent"
             : "bg-gradient-to-r from-transparent via-[#8F5C1A] to-transparent"
         }`}
       />
@@ -110,7 +112,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         <div
           className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-serif ${
             isError
-              ? "bg-rose-100 border border-rose-300 text-rose-700"
+              ? "bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C]"
               : "bg-[#F0E8DB] border border-[#E4D8C4] text-[#8F5C1A]"
           }`}
         >
@@ -120,14 +122,14 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         {/* Content text */}
         <div className="flex-1 min-w-0 pr-1">
           <h4
-            className={`text-sm font-semibold tracking-wide truncate ${isError ? "text-rose-900" : "text-[#2E211A]"}`}
+            className={`text-sm font-semibold tracking-wide truncate ${isError ? "text-[#A6392C]" : "text-[#2E211A]"}`}
           >
             {toast.title}
           </h4>
           {toast.subtitle && (
             <p
               className={`text-xs font-serif-th leading-relaxed mt-0.5 line-clamp-2 ${
-                isError ? "text-rose-700" : "text-[#6F5B4A]"
+                isError ? "text-[#A6392C]" : "text-[#6F5B4A]"
               }`}
             >
               {toast.subtitle}
@@ -142,7 +144,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           aria-label="ปิดการแจ้งเตือน"
           className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer shrink-0 ${
             isError
-              ? "text-rose-600 hover:text-rose-900 hover:bg-rose-100"
+              ? "text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA]"
               : "text-[#6F5B4A] hover:text-[#2E211A] hover:bg-[#F0E8DB]"
           }`}
         >
@@ -157,7 +159,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           initial={{ width: "100%" }}
           animate={{ width: isPaused ? undefined : "0%" }}
           transition={{ duration: duration / 1000, ease: "linear" }}
-          className={`h-full ${isError ? "bg-rose-500" : "bg-[#8F5C1A]"}`}
+          className={`h-full ${isError ? "bg-[#A6392C]" : "bg-[#8F5C1A]"}`}
         />
       </div>
     </motion.aside>

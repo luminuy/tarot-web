@@ -6,17 +6,18 @@ import { motion, AnimatePresence } from "motion/react";
 import type { Article } from "@/data/articles";
 import { soundManager } from "@/lib/utils/audio";
 
+import { SearchTabIcon } from "@/components/ui/TarotArtIcons";
 interface BlogIndexClientProps {
   articles: Article[];
 }
 
 const CATEGORIES = [
   { id: "all", label: "✦ ทั้งหมด (20 เรื่อง)" },
-  { id: "love", label: "💖 ความรัก & เนื้อคู่" },
-  { id: "career", label: "💼 การงาน & การเงิน" },
-  { id: "spreads", label: "📐 ผังการเปิดไพ่" },
-  { id: "cards", label: "🃏 ความหมายไพ่" },
-  { id: "wisdom", label: "🔮 จิตวิทยา & AI" },
+  { id: "love", label: "ความรัก & เนื้อคู่" },
+  { id: "career", label: "การงาน & การเงิน" },
+  { id: "spreads", label: "ผังการเปิดไพ่" },
+  { id: "cards", label: "ความหมายไพ่" },
+  { id: "wisdom", label: "จิตวิทยา & AI" },
 ];
 
 export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) => {
@@ -50,7 +51,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
             placeholder="ค้นหาบทความ ความหมายไพ่ ความรัก การงาน หรือผังพยากรณ์..."
             className="w-full bg-[#FFFFFF] border border-[#E4D8C4] rounded-lg px-5 py-3.5 pl-11 text-xs sm:text-sm text-[#2E211A] placeholder:text-[#6F5B4A]/60 focus:outline-none focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/20 transition-all "
           />
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8F5C1A] text-base">🔍</span>
+          <SearchTabIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8F5C1A]" />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
@@ -130,7 +131,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
         {filtered.length === 0 ? (
           <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-12 text-center space-y-3 ">
-            <p className="text-3xl">🔮</p>
+            <p className="text-3xl text-[#8F5C1A]">✦</p>
             <p className="font-serif-th text-sm text-[#2E211A]">
               ไม่พบบทความที่ตรงกับคำค้นหา &ldquo;{searchQuery}&rdquo;
             </p>

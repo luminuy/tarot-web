@@ -52,7 +52,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {article.toc && article.toc.length > 0 && (
         <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-5 sm:p-6 space-y-3 ">
           <div className="flex items-center gap-2 text-xs font-serif-th font-bold text-[#2E211A]">
-            <span>📜</span> สารบัญคัมภีร์ความรู้ (Table of Contents)
+            <span>✦</span> สารบัญคัมภีร์ความรู้ (Table of Contents)
           </div>
           <ul className="space-y-2 text-xs sm:text-sm font-serif-th text-[#2E211A]">
             {article.toc.map((item, idx) => (
@@ -171,7 +171,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             onClick={handleCopyLink}
             className="px-3 py-1 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] text-[#2E211A] hover:border-[#8F5C1A] hover:text-[#8F5C1A] transition-colors flex items-center gap-1.5 cursor-pointer "
           >
-            <span>🔗</span>
+            <span>✦</span>
             <span>{copied ? "คัดลอกลิงก์สำเร็จ!" : "คัดลอกลิงก์"}</span>
           </button>
         </div>

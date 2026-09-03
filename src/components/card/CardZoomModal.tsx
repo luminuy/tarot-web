@@ -92,7 +92,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
             onClick={() => setFlipped(!flipped)}
             className="w-full py-2.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-xs font-serif-th font-semibold text-[#2E211A] hover:bg-[#F0E8DB] transition-all cursor-pointer "
           >
-            🔄 พลิกดูหน้าไพ่ / หลังไพ่
+            ✦ พลิกดูหน้าไพ่ / หลังไพ่
           </button>
         </motion.div>
       </div>
