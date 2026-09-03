@@ -800,21 +800,21 @@ export default function TarotPage() {
   };
 
   return (
-    <main className="min-h-screen pb-24 text-[#2E211A] relative overflow-hidden bg-[#FAF7F2]">
+    <main className="min-h-screen pb-24 text-[#29261F] relative overflow-hidden bg-[#F3F0EA]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
       {/* Top Sacred Header — Solid White with Clean Dividing Line */}
-      <header className="w-full border-b border-[#D9C8AC] bg-white sticky top-0 z-50 shadow-[var(--shadow-raised)]">
+      <header className="w-full border-b border-[#D5CEC2] bg-[#FFFFFF] sticky top-0 z-50 shadow-[var(--shadow-raised)]">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Luxury Brand Logo — P1-U2: กลับหน้าแรก ไม่ล้าง state (ปุ่ม "เริ่มดูดวงใหม่" ทำหน้าที่นั้น) */}
           <Link
             href="/"
             aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
-            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]/60"
+            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
           >
             {/* Seer Brand Logo */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D9C8AC] overflow-hidden relative flex-shrink-0 bg-[#FAF7F2] group-hover:scale-105 transition-all duration-300">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition-all duration-300">
               <img
                 src="/logo.webp"
                 alt="Seer Tarot Brand Logo"
@@ -829,12 +829,12 @@ export default function TarotPage() {
                 (ชื่อแบรนด์ที่ตัดคำหรือล้นทับปุ่มแย่กว่าการซ่อนชื่อไว้ก่อน) */}
             <div className="hidden min-w-0 flex-col justify-center sm:flex">
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className="text-[#8F5C1A] text-xs">✦</span>
-                <h1 className="font-serif-th text-sm sm:text-lg font-bold font-mystic-gold tracking-wide leading-snug py-0.5 whitespace-nowrap">
+                <span className="text-[#A58A5C] text-xs">✦</span>
+                <h1 className="font-serif-th text-sm sm:text-lg font-bold text-[#29261F] tracking-wide leading-snug py-0.5 whitespace-nowrap">
                   ดูดวงไพ่ทาโรต์
                 </h1>
               </div>
-              <span className="hidden sm:block text-[10px] tracking-[0.22em] text-[#6F5B4A] font-mono uppercase font-semibold pl-4">
+              <span className="hidden sm:block text-[10px] tracking-[0.22em] text-[#756F66] font-mono uppercase font-semibold pl-4">
                 1909 RIDER-WAITE TAROT
               </span>
             </div>
@@ -863,7 +863,7 @@ export default function TarotPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-white font-bold bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-1.5 sm:py-2 rounded transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1 font-serif-th"
+                className="text-xs text-[#F3F0EA] font-bold bg-[#29261F] hover:bg-[#A58A5C] px-4 py-1.5 sm:py-2 rounded-full transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
               >
                 <span>✦</span> เริ่มดูดวงใหม่
               </button>
@@ -884,7 +884,7 @@ export default function TarotPage() {
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (
-          <div className="mb-6 p-4 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-[#A6392C] text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mb-6 p-4 rounded-xl bg-[#FCEEEA] border border-[#D5CEC2] text-[#A6392C] text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3 shadow-xs">
             <span>{errorMsg}</span>
             {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ/.test(errorMsg) && (
               <button
@@ -893,7 +893,7 @@ export default function TarotPage() {
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-3.5 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-white font-serif-th font-bold text-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
+                className="px-4 py-1.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
               >
                 <span>✦</span> โหลดใหม่อีกครั้ง
               </button>
@@ -921,21 +921,21 @@ export default function TarotPage() {
                     className="h-56 sm:h-72 w-full flex items-center justify-center relative select-none"
                     style={{ perspective: 1200 }}
                   >
-                    {/* แสงเทียนนุ่ม ๆ รอบสำรับ — นิ่งสนิท ไม่เต้น ไม่หมุน (คนละเรื่องกับเงาเรืองแสงที่ตัดทิ้งไป) */}
+                    {/* แสงเทียนนุ่ม ๆ รอบสำรับ — นิ่งสนิท ไม่เต้น ไม่หมุน */}
                     <div
                       aria-hidden="true"
-                      className="absolute w-72 h-72 sm:w-[400px] sm:h-[400px] rounded-full -z-10 pointer-events-none blur-2xl bg-radial from-[#8F5C1A]/18 via-[#8F5C1A]/06 to-transparent"
+                      className="absolute w-72 h-72 sm:w-[400px] sm:h-[400px] rounded-full -z-10 pointer-events-none blur-2xl bg-radial from-[#A58A5C]/18 via-[#A58A5C]/06 to-transparent"
                     />
 
                     {/* 3D Realistic 78-Card Stacked Deck Container */}
                     <div className="relative group cursor-pointer" onClick={() => soundManager.playCardSelectSound()}>
                       {/* Layer 3: Deep Stack Base (Gold Gilded Edge) */}
-                      <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-lg bg-[#5A3E26] border border-[#D9C8AC]/60 translate-x-[6px] translate-y-[6px] shadow-[var(--shadow-overlay)]" />
+                      <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-xl bg-[#5A3E26] border border-[#D5CEC2]/60 translate-x-[6px] translate-y-[6px] shadow-[var(--shadow-overlay)]" />
                       {/* Layer 2: Middle Stack Deck */}
-                      <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-lg bg-[#4A3320] border border-[#D9C8AC]/70 translate-x-[3px] translate-y-[3px]" />
+                      <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-xl bg-[#4A3320] border border-[#D5CEC2]/70 translate-x-[3px] translate-y-[3px]" />
 
                       {/* Layer 1: Top Floating Hero Card */}
-                      <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#D9C8AC] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+                      <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-xl border-2 border-[#D5CEC2] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
                         <div className="w-full flex justify-center items-center opacity-90">
                           <span className="text-[9px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
                             ✦ SACRED ORACLE ✦
@@ -943,7 +943,7 @@ export default function TarotPage() {
                         </div>
 
                         {/* Sacred Center Emblem */}
-                        <div className="my-auto w-12 h-12 rounded-full border border-[#D9C8AC]/60 flex items-center justify-center bg-black/20 shadow-inner">
+                        <div className="my-auto w-12 h-12 rounded-full border border-[#D5CEC2]/60 flex items-center justify-center bg-black/20 shadow-inner">
                           <span className="text-base text-[#E8C88A]">✨</span>
                         </div>
 
@@ -958,10 +958,10 @@ export default function TarotPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold tracking-wide ">
+                    <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide">
                       เลือกผังการเปิดไพ่
                     </h2>
-                    <p className="text-xs sm:text-sm text-[#6F5B4A] max-w-xl mx-auto font-serif-th">
+                    <p className="text-xs sm:text-sm text-[#756F66] max-w-xl mx-auto font-serif-th">
                       เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการค้นหาคำตอบในจิตใจ
                     </p>
                   </div>
@@ -1017,10 +1017,10 @@ export default function TarotPage() {
               className="space-y-10"
             >
               <div className="text-center space-y-1">
-                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold">
+                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F]">
                   ตั้งคำถาม &amp; เลือกแม่หมอ
                 </h2>
-                <p className="text-xs sm:text-sm text-[#6F5B4A]">
+                <p className="text-xs sm:text-sm text-[#756F66] font-serif-th">
                   พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
                 </p>
               </div>
@@ -1052,13 +1052,7 @@ export default function TarotPage() {
               />
 
               {/* Action Bar */}
-              {/*
-                แถบปุ่มต้องอยู่ "บรรทัดเดียวกัน" เสมอ — ของเดิมใช้ flex-wrap แล้วใส่ชื่อผังเต็ม ๆ
-                ไว้ในปุ่มย้อนกลับ (เช่น "ส่องชะตาเจาะลึก 10 มิติ (เซลติกครอส)") ความกว้างรวมจึงเกินกรอบ
-                แล้วปุ่มตกไปคนละบรรทัด · ตอนนี้ล็อกเป็น flex-nowrap: ปุ่มย้อนกลับกว้างเท่าที่จำเป็น
-                (ชื่อผังโชว์เฉพาะจอกว้าง) ส่วนปุ่มหลักยืดเต็มพื้นที่ที่เหลือ
-              */}
-              <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3">
+              <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3 shadow-xs">
                 <button
                   type="button"
                   onClick={() => {
@@ -1067,11 +1061,11 @@ export default function TarotPage() {
                     navigateStep("SPREAD_SELECT");
                   }}
                   aria-label={`เปลี่ยนผัง (ตอนนี้เลือก ${selectedSpread.nameTh})`}
-                  className="shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-xs font-serif-th text-[#2E211A] hover:bg-[#FFFFFF]/30 transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
+                  className="shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-xs font-serif-th text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
                 >
                   <span aria-hidden="true">←</span>
                   <span>เปลี่ยนผัง</span>
-                  <span className="hidden lg:inline truncate text-[#6F5B4A]">({selectedSpread.nameTh})</span>
+                  <span className="hidden lg:inline truncate text-[#756F66]">({selectedSpread.nameTh})</span>
                 </button>
 
                 <button
@@ -1079,10 +1073,10 @@ export default function TarotPage() {
                   onClick={handleStartSession}
                   disabled={loading || !nickname.trim() || !question.trim()}
                   aria-label="ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"
-                  className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-lg text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap ${
+                  className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-full text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shadow-sm ${
                     !nickname.trim() || !question.trim()
-                      ? "bg-[#F3EDE2]/40 text-[#6F5B4A]/60 border border-[#D9C8AC]/40 cursor-not-allowed"
-                      : "bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] active:scale-95 cursor-pointer"
+                      ? "bg-[#EAE7E0] text-[#756F66]/50 border border-[#D5CEC2] cursor-not-allowed"
+                      : "bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] active:scale-95 cursor-pointer"
                   }`}
                 >
                   <span aria-hidden="true">✦</span>
@@ -1213,9 +1207,9 @@ export default function TarotPage() {
               </div>
 
               {/* Bottom Quick Luxury Actions Deck */}
-              <div className="p-5 sm:p-6 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex flex-wrap items-center justify-between gap-4 ">
-                <div className="flex items-center gap-2 text-xs text-[#6F5B4A] font-serif-th">
-                  <span className="text-[#8F5C1A]">✦</span>
+              <div className="p-5 sm:p-6 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-wrap items-center justify-between gap-4 shadow-xs">
+                <div className="flex items-center gap-2 text-xs text-[#756F66] font-serif-th">
+                  <span className="text-[#A58A5C]">✦</span>
                   <span>บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้</span>
                 </div>
 
@@ -1226,15 +1220,15 @@ export default function TarotPage() {
                       soundManager.playCardSelectSound();
                       setIsShareOpen(true);
                     }}
-                    className="py-3 px-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] font-serif-th text-xs hover:bg-[#FFFFFF]/30 transition-all cursor-pointer flex items-center gap-2 "
+                    className="py-3 px-5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] font-serif-th text-xs transition-all cursor-pointer flex items-center gap-2 shadow-xs"
                   >
-                    <span className="text-[#8F5C1A]">✨</span> แชร์ผลคำทำนาย
+                    <span className="text-[#A58A5C]">✨</span> แชร์ผลคำทำนาย
                   </button>
 
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="py-3 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th text-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+                    className="py-3 px-6 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
                   >
                     <span>✦</span> ดูดวงเรื่องอื่นต่อ
                   </button>
@@ -1299,18 +1293,49 @@ export default function TarotPage() {
       />
 
       {/* ═══════════════════════════════════════════════════════════════
-          Site-Wide Sanctuary Footer — World-Class Warm Minimalist Luxury Design
+          Site-Wide Sanctuary Footer — Dark Editorial Quiet Luxury (#171512)
           ═══════════════════════════════════════════════════════════════ */}
-      <footer className="w-full relative overflow-hidden border-t border-[#D9C8AC]/40 bg-[#F3EDE2]/80">
+      <footer className="w-full relative overflow-hidden border-t border-[#D5CEC2]/30 bg-[#171512] text-[#F3F0EA]">
         {/* Ambient gold line above footer */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#8F5C1A]/30 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-5 pt-10 pb-8 space-y-6 relative z-10">
+        <div className="max-w-4xl mx-auto px-5 pt-12 pb-10 space-y-8 relative z-10">
+          {/* Brand & Mission Statement */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[#D5CEC2]/20 pb-6 text-center sm:text-left">
+            <div>
+              <span className="font-serif-th text-xs font-bold tracking-[0.2em] text-[#A58A5C] uppercase block">
+                ✦ SEE TAROT ✦
+              </span>
+              <p className="font-serif-th text-sm text-[#F3F0EA] font-light mt-0.5">
+                พื้นที่สงบสำหรับหยุด คิด ถาม และอ่านความหมายของตัวเอง
+              </p>
+            </div>
+
+            {/* Editorial Navigation Links */}
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-serif-th text-[#D5CEC2]">
+              <Link href="/spreads" className="hover:text-[#A58A5C] transition-colors">
+                ผังการเปิดไพ่ (20 แบบ)
+              </Link>
+              <Link href="/cards" className="hover:text-[#A58A5C] transition-colors">
+                ความหมายไพ่ (78 ใบ)
+              </Link>
+              <Link href="/readers" className="hover:text-[#A58A5C] transition-colors">
+                ปรึกษาแม่หมอ
+              </Link>
+              <Link href="/blog" className="hover:text-[#A58A5C] transition-colors">
+                บทความ &amp; ภูมิปัญญา
+              </Link>
+              <Link href="/privacy" className="hover:text-[#A58A5C] transition-colors">
+                ความเป็นส่วนตัว (PDPA)
+              </Link>
+            </div>
+          </div>
+
           {/* Row 1: AI Disclosure Card */}
-          <div className="flex items-start gap-4 p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
-            <div className="w-9 h-13 sm:w-10 sm:h-15 rounded overflow-hidden border border-[#D9C8AC] flex-shrink-0 bg-[#F3EDE2]">
+          <div className="flex items-start gap-4 p-5 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20 shadow-sm">
+            <div className="w-9 h-13 sm:w-10 sm:h-15 rounded-lg overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
               <CardImage
                 image="major-02.jpg"
                 alt="The High Priestess - ข้อควรทราบเกี่ยวกับการทำนาย"
@@ -1319,10 +1344,10 @@ export default function TarotPage() {
               />
             </div>
             <div className="space-y-1 min-w-0">
-              <h4 className="text-[11px] font-bold text-[#8F5C1A] uppercase tracking-wider font-serif-th">
+              <h4 className="text-[11px] font-bold text-[#A58A5C] uppercase tracking-wider font-serif-th">
                 ข้อควรทราบเกี่ยวกับการทำนาย
               </h4>
-              <p className="text-[11px] text-[#6F5B4A] leading-[1.7] font-serif-th">
+              <p className="text-[11px] text-[#D5CEC2] leading-[1.7] font-serif-th">
                 คำทำนายทั้งหมดประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเลือกและเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต ไม่สามารถใช้แทนคำปรึกษาทางการแพทย์ กฎหมาย หรือการเงินได้ การตัดสินใจทุกอย่างยังคงเป็นของคุณเสมอ
               </p>
             </div>
@@ -1333,9 +1358,9 @@ export default function TarotPage() {
             {/* Privacy */}
             <a
               href="/privacy"
-              className="group flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 hover:bg-[#FAF7F2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+              className="group flex items-center gap-3 p-4 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20 hover:border-[#A58A5C] transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
             >
-              <div className="w-8 h-12 rounded overflow-hidden border border-[#D9C8AC] group-hover:border-[#8F5C1A] transition-colors flex-shrink-0 bg-[#F3EDE2]">
+              <div className="w-8 h-12 rounded-lg overflow-hidden border border-[#D5CEC2]/30 group-hover:border-[#A58A5C] transition-colors flex-shrink-0 bg-[#171512]">
                 <CardImage
                   image="major-11.jpg"
                   alt="Justice - นโยบายความเป็นส่วนตัว PDPA"
@@ -1344,18 +1369,18 @@ export default function TarotPage() {
                 />
               </div>
               <div>
-                <span className="text-[11px] font-bold text-[#8F5C1A] block font-serif-th">
+                <span className="text-[11px] font-bold text-[#A58A5C] block font-serif-th">
                   นโยบายความเป็นส่วนตัว
                 </span>
-                <span className="text-[10px] text-[#6F5B4A] group-hover:text-[#2E211A] transition-colors font-serif-th">
+                <span className="text-[10px] text-[#D5CEC2] group-hover:text-[#F3F0EA] transition-colors font-serif-th">
                   คุ้มครองข้อมูลส่วนบุคคล (PDPA)
                 </span>
               </div>
             </a>
 
             {/* Mental Health Hotline */}
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
-              <div className="w-8 h-12 rounded overflow-hidden border border-[#D9C8AC] flex-shrink-0 bg-[#F3EDE2]">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20">
+              <div className="w-8 h-12 rounded-lg overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
                 <CardImage
                   image="major-17.jpg"
                   alt="The Star - สายด่วนสุขภาพจิต 1323"
@@ -1368,15 +1393,15 @@ export default function TarotPage() {
                   สายด่วนสุขภาพจิต
                 </span>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-bold text-[#2E211A] font-mono tracking-wider">1323</span>
-                  <span className="text-[9.5px] text-[#6F5B4A] font-serif-th">โทรฟรี 24 ชม.</span>
+                  <span className="text-sm font-bold text-[#F3F0EA] font-mono tracking-wider">1323</span>
+                  <span className="text-[9.5px] text-[#D5CEC2] font-serif-th">โทรฟรี 24 ชม.</span>
                 </div>
               </div>
             </div>
 
             {/* Emergency */}
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
-              <div className="w-8 h-12 rounded overflow-hidden border border-[#D9C8AC] flex-shrink-0 bg-[#F3EDE2]">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20">
+              <div className="w-8 h-12 rounded-lg overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
                 <CardImage
                   image="major-08.jpg"
                   alt="Strength - แจ้งเหตุเจ็บป่วยฉุกเฉิน 1669"
@@ -1389,17 +1414,17 @@ export default function TarotPage() {
                   แจ้งเหตุเจ็บป่วยฉุกเฉิน
                 </span>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-bold text-[#2E211A] font-mono tracking-wider">1669</span>
-                  <span className="text-[9.5px] text-[#6F5B4A] font-serif-th">โทรฟรี 24 ชม.</span>
+                  <span className="text-sm font-bold text-[#F3F0EA] font-mono tracking-wider">1669</span>
+                  <span className="text-[9.5px] text-[#D5CEC2] font-serif-th">โทรฟรี 24 ชม.</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Row 3: Bottom Branding Strip */}
-          <div className="flex flex-col items-center gap-2 pt-4 border-t border-[#D9C8AC]/30">
+          <div className="flex flex-col items-center gap-2 pt-4 border-t border-[#D5CEC2]/20">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-7 rounded overflow-hidden border border-[#D9C8AC] flex-shrink-0 ">
+              <div className="w-5 h-7 rounded overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
                 <CardImage
                   image="major-01.jpg"
                   alt="The Magician"
@@ -1407,14 +1432,14 @@ export default function TarotPage() {
                   sizes="24px"
                 />
               </div>
-              <span className="text-[10px] font-serif-th font-semibold tracking-wider text-[#6F5B4A]">
+              <span className="text-[10px] font-serif-th font-semibold tracking-wider text-[#D5CEC2]">
                 SeerTarot · ไพ่ทาโรต์ 1909 Rider-Waite
               </span>
-              <div className="w-5 h-7 rounded overflow-hidden border border-[#D9C8AC] flex-shrink-0 ">
+              <div className="w-5 h-7 rounded overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
                 <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="24px" />
               </div>
             </div>
-            <p className="text-[10px] text-[#6F5B4A]/80 font-serif-th text-center">
+            <p className="text-[10px] text-[#D5CEC2]/70 font-serif-th text-center">
               ระบบสับไพ่โปร่งใสตรวจสอบได้ (Provably Fair) · สำรับดั้งเดิม 1909 Rider-Waite · คำทำนายประมวลผลด้วย AI
             </p>
           </div>
