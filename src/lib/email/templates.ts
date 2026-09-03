@@ -13,7 +13,7 @@ function baseLayout(contentHtml: string, title: string): string {
     body {
       margin: 0;
       padding: 0;
-      background-color: #F6F1E9;
+      background-color: #FAF7F2;
       font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       color: #2E211A;
     }
@@ -24,7 +24,7 @@ function baseLayout(contentHtml: string, title: string): string {
     }
     .card {
       background: #FFFFFF;
-      border: 1px solid #E4D8C4;
+      border: 1px solid #D9C8AC;
       border-radius: 8px;
       padding: 36px 28px;
     }
@@ -73,8 +73,8 @@ function baseLayout(contentHtml: string, title: string): string {
       border-radius: 999px;
     }
     .fallback {
-      background: #F0E8DB;
-      border: 1px solid #E4D8C4;
+      background: #F3EDE2;
+      border: 1px solid #D9C8AC;
       border-radius: 8px;
       padding: 12px;
       font-size: 12px;

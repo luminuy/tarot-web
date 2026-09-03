@@ -47,8 +47,8 @@ export const TTSReaderButton: React.FC<TTSReaderButtonProps> = ({ textToRead, pe
       aria-label={isSpeaking ? "หยุดเสียงอ่านคำทำนาย" : "ฟังเสียงอ่านคำทำนาย"}
       className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-serif-th font-semibold transition-all duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
         isSpeaking
-          ? "bg-[#8F5C1A] border-[#E4D8C4] text-[#FFFFFF]"
-          : "bg-[#FFFFFF] border-[#E4D8C4] text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+          ? "bg-[#8F5C1A] border-[#D9C8AC] text-[#FFFFFF]"
+          : "bg-[#FFFFFF] border-[#D9C8AC] text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
       } ${className}`}
     >
       {isSpeaking ? (

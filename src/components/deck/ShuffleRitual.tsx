@@ -84,7 +84,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             whileTap={{ scale: 0.96 }}
             onClick={startShuffle}
             aria-label="แตะเพื่อเริ่มสับไพ่"
-            className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#E4D8C4] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F0E8DB]"
+            className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#D9C8AC] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
           >
             <div className="w-full flex justify-center items-center opacity-85">
               <span className="text-[9px] font-serif-th text-[#FFFFFF] tracking-[0.2em] uppercase font-bold">
@@ -129,9 +129,9 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
                 rotateY: shufflePhase === "split" ? 25 : 0,
               }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#E4D8C4] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
+              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#D9C8AC] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
             >
-              <div className="w-8 h-8 rounded-full border border-[#E4D8C4] flex items-center justify-center text-xs text-[#8F5C1A]">
+              <div className="w-8 h-8 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A]">
                 ✨
               </div>
             </motion.div>
@@ -159,9 +159,9 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
                 rotateY: shufflePhase === "split" ? -25 : 0,
               }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#E4D8C4] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
+              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#D9C8AC] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
             >
-              <div className="w-8 h-8 rounded-full border border-[#E4D8C4] flex items-center justify-center text-xs text-[#8F5C1A]">
+              <div className="w-8 h-8 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A]">
                 ✨
               </div>
             </motion.div>
@@ -178,7 +178,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
                     opacity: 1,
                   }}
                   transition={{ duration: 1.4, ease: "easeInOut" }}
-                  className="w-30 h-44 rounded-lg border border-[#E4D8C4] card-back-pattern absolute z-20 shadow-[var(--shadow-overlay)] opacity-95"
+                  className="w-30 h-44 rounded-lg border border-[#D9C8AC] card-back-pattern absolute z-20 shadow-[var(--shadow-overlay)] opacity-95"
                 />
                 <motion.div
                   initial={{ y: 0, rotateZ: 0, scale: 1, opacity: 0 }}
@@ -189,7 +189,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
                     opacity: 1,
                   }}
                   transition={{ duration: 1.4, ease: "easeInOut", delay: 0.05 }}
-                  className="w-30 h-44 rounded-lg border border-[#E4D8C4] card-back-pattern absolute z-20 shadow-[var(--shadow-overlay)] opacity-90"
+                  className="w-30 h-44 rounded-lg border border-[#D9C8AC] card-back-pattern absolute z-20 shadow-[var(--shadow-overlay)] opacity-90"
                 />
               </>
             )}
@@ -203,7 +203,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
       </div>
 
       {/* Sacred Ritual Subtitle & Title */}
-      <span className="text-[11px] font-serif-th text-[#2E211A] font-bold bg-[#F0E8DB]/30 px-4 py-1 rounded-full border border-[#E4D8C4] mb-2 inline-block ">
+      <span className="text-[11px] font-serif-th text-[#2E211A] font-bold bg-[#F3EDE2]/30 px-4 py-1 rounded-full border border-[#D9C8AC] mb-2 inline-block ">
         ✦ ขั้นตอนสับไพ่ ✦
       </span>
       <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter py-0.5 leading-normal">
@@ -216,7 +216,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
 
       {/* Commitment Preview for Commit-Reveal Transparency */}
       {commitment && (
-        <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[10px] font-mono text-[#6F5B4A]">
+        <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[10px] font-mono text-[#6F5B4A]">
           <span>
             คำมั่นความสุ่ม (SHA-256): {commitment.slice(0, 16)}…{commitment.slice(-8)}
           </span>
@@ -246,7 +246,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
           </button>
         ) : (
           <div className="space-y-3">
-            <div className="w-full h-2.5 bg-[#F0E8DB] rounded-full overflow-hidden border border-[#E4D8C4]">
+            <div className="w-full h-2.5 bg-[#F3EDE2] rounded-full overflow-hidden border border-[#D9C8AC]">
               <motion.div
                 className="h-full bg-gradient-to-r from-[#8F5C1A] via-[#6F5B4A] to-[#8F5C1A]"
                 style={{ width: `${progress}%` }}

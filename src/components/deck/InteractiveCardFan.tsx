@@ -65,7 +65,7 @@ const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicke
       className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group focus-visible:outline-none"
       style={{ zIndex: tierIdx * 40 + posInTier, originY: 1 }}
     >
-      <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-lg sm:rounded-lg border-2 card-back-pattern flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#E4D8C4] group-hover:border-[#8F5C1A] group-hover:ring-2 group-hover:ring-[#8F5C1A]/60 group-focus-visible:border-[#E4D8C4] group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] bg-[#382518]">
+      <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-lg sm:rounded-lg border-2 card-back-pattern flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#D9C8AC] group-hover:border-[#8F5C1A] group-hover:ring-2 group-hover:ring-[#8F5C1A]/60 group-focus-visible:border-[#D9C8AC] group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] bg-[#382518]">
         <div className="w-full flex items-center justify-end text-[7px] sm:text-[8px] text-[#8F5C1A]/90">
           <span className="font-mono opacity-80">#{cardIdx + 1}</span>
         </div>
@@ -127,7 +127,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
         {!isComplete ? (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="space-y-1.5">
             {/* Status Pill Badge — Warm Minimalist Luxury */}
-            <div className="inline-flex items-center gap-2 bg-[#FFFFFF] border border-[#E4D8C4] px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full ">
+            <div className="inline-flex items-center gap-2 bg-[#FFFFFF] border border-[#D9C8AC] px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full ">
               <span className="w-2 h-2 rounded-full bg-[#8F5C1A] animate-ping" />
               <span className="text-[11px] sm:text-xs font-serif-th font-bold text-[#2E211A]">
                 เลือกไพ่ใบที่ {pickedIndices.length + 1} จากทั้งหมด {targetCount} ใบ
@@ -158,7 +158,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
       </div>
 
       {/* Unified Masterpiece Altar Stage (No Row-Level Clipping) */}
-      <div className="w-full relative rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] overflow-hidden">
+      <div className="w-full relative rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] overflow-hidden">
         {/* Mobile Edge Fade Masks */}
         <div className="absolute top-0 bottom-0 left-0 w-6 bg-[#FFFFFF] to-transparent pointer-events-none z-20 sm:hidden" />
         <div className="absolute top-0 bottom-0 right-0 w-6 bg-[#FFFFFF] to-transparent pointer-events-none z-20 sm:hidden" />
@@ -198,13 +198,13 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
         </div>
 
         {/* Masterpiece Sacred Selection Slim Progress Dock */}
-        <div className="border-t border-[#E4D8C4]/30 bg-[#F0E8DB] p-3 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 relative z-20">
+        <div className="border-t border-[#D9C8AC]/30 bg-[#F3EDE2] p-3 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 relative z-20">
           {/* Left: Layered Sacred Deck Emblem & Status */}
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {/* Tarot Deck Seal Icon */}
             <div className="relative w-9 h-12 sm:w-11 sm:h-15 flex-shrink-0 group">
-              <div className="absolute inset-0 translate-x-1 -translate-y-0.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] transform rotate-4 opacity-70" />
-              <div className="absolute inset-0 rounded-lg border-2 border-[#E4D8C4] overflow-hidden bg-[#FFFFFF] transform -rotate-1 group-hover:rotate-0 transition-transform duration-300">
+              <div className="absolute inset-0 translate-x-1 -translate-y-0.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] transform rotate-4 opacity-70" />
+              <div className="absolute inset-0 rounded-lg border-2 border-[#D9C8AC] overflow-hidden bg-[#FFFFFF] transform -rotate-1 group-hover:rotate-0 transition-transform duration-300">
                 <CardImage
                   image="major-01.jpg"
                   alt="Sacred Tarot Altar"
@@ -213,7 +213,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                 />
                 <div className="gold-foil-sheen absolute inset-0 opacity-20 pointer-events-none" />
               </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#8F5C1A] border border-[#E4D8C4] flex items-center justify-center text-[7px] text-[#FFFFFF] font-bold">
+              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#8F5C1A] border border-[#D9C8AC] flex items-center justify-center text-[7px] text-[#FFFFFF] font-bold">
                 ✦
               </div>
             </div>
@@ -225,13 +225,13 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                   <span className="text-[#8F5C1A]">✦</span>
                   <span>ความคืบหน้าพิธีจับไพ่</span>
                 </span>
-                <span className="text-[11px] sm:text-xs font-mono font-bold text-[#2E211A] bg-[#FFFFFF] border border-[#E4D8C4] px-2 py-0.2 rounded-full ">
+                <span className="text-[11px] sm:text-xs font-mono font-bold text-[#2E211A] bg-[#FFFFFF] border border-[#D9C8AC] px-2 py-0.2 rounded-full ">
                   {pickedIndices.length} / {targetCount}
                 </span>
               </div>
 
               {/* Luminous Animated Progress Bar */}
-              <div className="w-full h-1.5 sm:h-2 rounded-full bg-[#FFFFFF] border border-[#E4D8C4] overflow-hidden p-0.5 relative">
+              <div className="w-full h-1.5 sm:h-2 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] overflow-hidden p-0.5 relative">
                 <motion.div
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: pickedIndices.length / targetCount }}
@@ -260,7 +260,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     type="button"
                     onClick={handleAutoPick}
                     disabled={disabled}
-                    className="flex-shrink-0 text-[10px] sm:text-[11px] text-[#2E211A] hover:text-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#F0E8DB] border border-[#E4D8C4] hover:border-[#8F5C1A] px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
+                    className="flex-shrink-0 text-[10px] sm:text-[11px] text-[#2E211A] hover:text-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#F3EDE2] border border-[#D9C8AC] hover:border-[#8F5C1A] px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
                     aria-label="สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"
                   >
                     ✦ สุ่มเลือกให้ฉัน
@@ -282,10 +282,10 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                   whileHover={{ scale: 1.04 }}
                   className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[10px] sm:text-xs transition-all duration-300 font-serif-th whitespace-nowrap select-none ${
                     isFilled
-                      ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold border border-[#E4D8C4]"
+                      ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold border border-[#D9C8AC]"
                       : isCurrent
-                        ? "bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A] ring-1 ring-[#8F5C1A]/40 font-bold"
-                        : "bg-[#F0E8DB] border border-[#E4D8C4]/50 text-[#6F5B4A]/50"
+                        ? "bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A] ring-1 ring-[#8F5C1A]/40 font-bold"
+                        : "bg-[#F3EDE2] border border-[#D9C8AC]/50 text-[#6F5B4A]/50"
                   }`}
                 >
                   <div
@@ -294,7 +294,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                         ? "bg-[#FFFFFF] text-[#2E211A]"
                         : isCurrent
                           ? "bg-[#8F5C1A] text-[#FFFFFF]"
-                          : "bg-[#F0E8DB]/30 text-[#6F5B4A]"
+                          : "bg-[#F3EDE2]/30 text-[#6F5B4A]"
                     }`}
                   >
                     {isFilled ? "✓" : idx + 1}

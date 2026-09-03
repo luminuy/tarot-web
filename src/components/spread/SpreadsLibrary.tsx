@@ -109,7 +109,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                 isActive
                   ? "bg-[#8F5C1A] text-[#FFFFFF] border border-[#8F5C1A]"
-                  : "bg-[#FFFFFF] text-[#2E211A] hover:text-[#8F5C1A] border border-[#E4D8C4] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+                  : "bg-[#FFFFFF] text-[#2E211A] hover:text-[#8F5C1A] border border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
               }`}
             >
               <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#FFFFFF]" : "text-[#8F5C1A]"}`} />
@@ -145,16 +145,16 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
             return (
               <div
                 key={spread.id}
-                className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#8F5C1A] transition-all duration-300 relative overflow-hidden group"
+                className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#8F5C1A] transition-all duration-300 relative overflow-hidden group"
               >
                 {/* Header Tag */}
                 <div className="flex items-center justify-between z-10">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-mono font-bold text-[#2E211A] bg-[#F0E8DB] px-2.5 py-0.5 rounded-full border border-[#E4D8C4] ">
+                    <span className="text-[10px] font-mono font-bold text-[#2E211A] bg-[#F3EDE2] px-2.5 py-0.5 rounded-full border border-[#D9C8AC] ">
                       {spread.positions.length} ใบ
                     </span>
                     {!isStandardSpread(spread.id) && (
-                      <span className="text-[9px] text-[#8F5C1A] bg-[#FFFFFF] border border-[#E4D8C4] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
+                      <span className="text-[9px] text-[#8F5C1A] bg-[#FFFFFF] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
                         <SealedLockIcon className="w-3 h-3" />
                         <span>✦ ญาณพิเศษ</span>
                       </span>
@@ -166,12 +166,12 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                 </div>
 
                 {/* Interactive Spread Visual Diagram on Illuminated Pedestal */}
-                <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-lg bg-[#F0E8DB] border border-[#E4D8C4]/50 p-2 group-hover:border-[#8F5C1A] transition-colors">
+                <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-lg bg-[#F3EDE2] border border-[#D9C8AC]/50 p-2 group-hover:border-[#8F5C1A] transition-colors">
                   {renderSpreadIllustration(spread.id)}
                 </div>
 
                 {/* Titles & Tagline */}
-                <div className="space-y-1.5 z-10 pt-3 border-t border-[#E4D8C4]/30">
+                <div className="space-y-1.5 z-10 pt-3 border-t border-[#D9C8AC]/30">
                   <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold leading-tight">
                     {spread.nameTh}
                   </h3>
@@ -185,7 +185,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   <button
                     type="button"
                     onClick={() => toggleExpand(spread.id)}
-                    className="w-full text-left text-[11px] font-serif-th text-[#8F5C1A] hover:text-[#2E211A] flex items-center justify-between py-1.5 border-t border-[#E4D8C4]/30 cursor-pointer transition-colors font-bold"
+                    className="w-full text-left text-[11px] font-serif-th text-[#8F5C1A] hover:text-[#2E211A] flex items-center justify-between py-1.5 border-t border-[#D9C8AC]/30 cursor-pointer transition-colors font-bold"
                   >
                     <span className="flex items-center gap-1.5">
                       <span>✦</span> ดูรายละเอียด {spread.positions.length} ตำแหน่งไพ่
@@ -205,7 +205,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                         {spread.positions.map((pos, idx) => (
                           <div
                             key={idx}
-                            className="text-[10.5px] p-2 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] flex items-start gap-2"
+                            className="text-[10.5px] p-2 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] flex items-start gap-2"
                           >
                             <span className="text-[#8F5C1A] font-mono font-bold flex-shrink-0 text-[10px]">
                               #{idx + 1}

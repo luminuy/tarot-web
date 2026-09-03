@@ -40,7 +40,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
     return (
       <div
         aria-hidden="true"
-        className="mx-auto mb-6 h-[68px] max-w-2xl animate-pulse rounded-lg border border-[#E4D8C4]/40 bg-[#FFFFFF]/60"
+        className="mx-auto mb-6 h-[68px] max-w-2xl animate-pulse rounded-lg border border-[#D9C8AC]/40 bg-[#FFFFFF]/60"
       />
     );
   }
@@ -50,8 +50,8 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
   const isGuest = view.isGuest;
 
   return (
-    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-[#E4D8C4] bg-white px-4 py-3 shadow-[var(--shadow-raised)]">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[#E4D8C4] bg-[#F0E8DB] text-[#8F5C1A]">
+    <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-[#D9C8AC] bg-white px-4 py-3 shadow-[var(--shadow-raised)]">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[#D9C8AC] bg-[#F3EDE2] text-[#8F5C1A]">
         {isGuest ? <SparkSealIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
       </span>
 
@@ -76,7 +76,7 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
             trackEntitlementEvent("quota_meter_opened");
             onOpenAccess();
           }}
-          className="min-h-[36px] rounded border border-[#E4D8C4] bg-white px-3 py-1.5 font-serif-th text-[11px] text-[#2E211A] font-semibold transition-colors hover:border-[#8F5C1A] hover:text-[#8F5C1A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="min-h-[36px] rounded border border-[#D9C8AC] bg-white px-3 py-1.5 font-serif-th text-[11px] text-[#2E211A] font-semibold transition-colors hover:border-[#8F5C1A] hover:text-[#8F5C1A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           ดูสิทธิ์ทั้งหมด
         </button>

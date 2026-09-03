@@ -82,17 +82,17 @@ export default function BlogPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F0E8DB] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
+    <main className="min-h-screen bg-[#F3EDE2] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
       {/* Schema.org Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-5xl mx-auto space-y-8 pb-16">
         {/* Navigation Breadcrumb & Back button */}
-        <div className="flex items-center justify-between border-b border-[#E4D8C4]/30 pb-4">
+        <div className="flex items-center justify-between border-b border-[#D9C8AC]/30 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#2E211A] hover:text-[#8F5C1A] transition-colors font-serif-th py-1.5 px-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4]"
+            className="inline-flex items-center gap-1.5 text-xs text-[#2E211A] hover:text-[#8F5C1A] transition-colors font-serif-th py-1.5 px-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC]"
           >
             <span>←</span> กลับสู่วิหารพยากรณ์
           </Link>
@@ -109,7 +109,7 @@ export default function BlogPage() {
 
         {/* Hero Header */}
         <div className="text-center space-y-3 py-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] text-[11px] text-[#8F5C1A] font-mono font-bold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] text-[11px] text-[#8F5C1A] font-mono font-bold">
             <span>✦</span> Sacred Knowledge & Wisdom <span>✦</span>
           </div>
           <h1 className="font-serif-th text-2xl sm:text-4xl font-bold font-mystic-gold leading-tight">

@@ -8,10 +8,10 @@ export const metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-[#F0E8DB] text-[#2E211A]">
+    <main className="min-h-screen bg-[#F3EDE2] text-[#2E211A]">
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         {/* Header */}
-        <div className="text-center space-y-3 pb-6 border-b border-[#E4D8C4]/30">
+        <div className="text-center space-y-3 pb-6 border-b border-[#D9C8AC]/30">
           <h1 className="text-2xl sm:text-3xl font-bold font-mystic-gold font-serif-th">นโยบายความเป็นส่วนตัว</h1>
           <p className="text-xs text-[#6F5B4A]">Privacy Policy &amp; PDPA Compliance</p>
         </div>
@@ -109,7 +109,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* Section 5: AI Disclosure */}
-        <section className="space-y-3 p-5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
+        <section className="space-y-3 p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
           <h2 className="text-lg font-bold text-[#8F5C1A] font-serif-th">
             5. การเปิดเผยเรื่อง AI (AI Transparency Disclosure)
           </h2>
@@ -126,7 +126,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* Section 6: Safety */}
-        <section className="space-y-3 p-5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
+        <section className="space-y-3 p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
           <h2 className="text-lg font-bold text-[#A6392C] font-serif-th">
             6. ความปลอดภัยของผู้ใช้ (Safety Guardrails)
           </h2>
@@ -144,7 +144,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* Section 7: Export & Delete Data */}
-        <section className="pt-4 border-t border-[#E4D8C4]/30 space-y-4 font-serif-th">
+        <section className="pt-4 border-t border-[#D9C8AC]/30 space-y-4 font-serif-th">
           <h2 className="text-lg font-bold text-[#8F5C1A]">7. จัดการข้อมูลส่วนบุคคลของคุณ</h2>
           <p className="text-xs text-[#6F5B4A]">
             คุณสามารถดาวน์โหลดสำเนาข้อมูลของคุณ หรือสั่งลบข้อมูลทั้งหมดทั้งในเครื่องและบนระบบเซิร์ฟเวอร์ได้อย่างสมบูรณ์
@@ -153,7 +153,7 @@ export default function PrivacyPolicyPage() {
             <a
               href="/api/account/export"
               download
-              className="px-5 py-2.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A] text-xs font-bold hover:bg-[#F6F1E9] hover:border-[#8F5C1A] transition-all cursor-pointer inline-flex items-center gap-1.5 "
+              className="px-5 py-2.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A] text-xs font-bold hover:bg-[#FAF7F2] hover:border-[#8F5C1A] transition-all cursor-pointer inline-flex items-center gap-1.5 "
             >
               <span>✦</span>
               <span>ดาวน์โหลดข้อมูลของฉัน (Export JSON)</span>

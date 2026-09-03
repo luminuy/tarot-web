@@ -228,7 +228,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           ref={dialogRef}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-6 sm:p-8 shadow-[var(--shadow-overlay)] flex flex-col items-center relative max-h-[92vh] overflow-y-auto z-10 select-none"
+          className="w-full max-w-md rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-6 sm:p-8 shadow-[var(--shadow-overlay)] flex flex-col items-center relative max-h-[92vh] overflow-y-auto z-10 select-none"
         >
           {/* Subtle Ambient Gold Aura */}
 
@@ -237,7 +237,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="ปิดหน้าต่างเข้าสู่ระบบ"
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] hover:text-[#8F5C1A] hover:border-[#8F5C1A] hover:bg-[#FFFFFF] text-xs flex items-center justify-center transition-all cursor-pointer "
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:text-[#8F5C1A] hover:border-[#8F5C1A] hover:bg-[#FFFFFF] text-xs flex items-center justify-center transition-all cursor-pointer "
           >
             ✕
           </button>
@@ -247,7 +247,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {/* Sacred Rotating Dashed Ring */}
 
             {/* Circular Seer Brand Logo */}
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-[#E4D8C4] overflow-hidden relative flex-shrink-0 bg-[#F6F1E9] group-hover:scale-105 transition-all duration-300">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-[#D9C8AC] overflow-hidden relative flex-shrink-0 bg-[#FAF7F2] group-hover:scale-105 transition-all duration-300">
               <img
                 src="/logo.webp"
                 alt="Seer Tarot Brand Logo"
@@ -276,7 +276,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* สิ่งที่จะได้รับ — แสดงเมื่อผู้ใช้ถูกพามาจากกำแพงสิทธิ์ จะได้รู้ว่าสมัครไปเพื่ออะไร */}
           {fromEntitlementWall && mode !== "forgot" && (
-            <ul className="w-full mb-4 grid gap-1.5 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-3 ">
+            <ul className="w-full mb-4 grid gap-1.5 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3 ">
               {MEMBER_BENEFITS.map((b) => (
                 <li key={b.title} className="flex items-start gap-2 text-[11px] font-serif-th text-[#2E211A]">
                   <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#8F5C1A]" />
@@ -288,7 +288,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Segmented Mode Switcher (Tab System) */}
           {mode !== "forgot" && (
-            <div className="w-full grid grid-cols-2 p-1 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] mb-4">
+            <div className="w-full grid grid-cols-2 p-1 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] mb-4">
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
@@ -316,12 +316,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Feedback messages */}
           <div aria-live="polite" className="w-full">
             {errorMsg && (
-              <div className="w-full mb-3 p-3 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] text-xs font-serif-th text-center ">
+              <div className="w-full mb-3 p-3 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-[#A6392C] text-xs font-serif-th text-center ">
                 {errorMsg}
               </div>
             )}
             {successMsg && (
-              <div className="w-full mb-3 p-3 rounded-lg bg-[#EBF3ED] border border-[#E4D8C4] text-[#3A7044] text-xs font-serif-th text-center ">
+              <div className="w-full mb-3 p-3 rounded-lg bg-[#EBF3ED] border border-[#D9C8AC] text-[#3A7044] text-xs font-serif-th text-center ">
                 {successMsg}
               </div>
             )}
@@ -346,7 +346,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="เช่น ผู้แสวงหาคำตอบ"
-                    className="w-full h-11 pl-9 pr-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A] text-xs font-serif-th placeholder-[#6F5B4A]/50 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]/40 transition-all "
+                    className="w-full h-11 pl-9 pr-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A] text-xs font-serif-th placeholder-[#6F5B4A]/50 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]/40 transition-all "
                   />
                 </div>
               </div>
@@ -369,7 +369,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full h-11 pl-9 pr-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A] text-xs font-serif-th placeholder-[#6F5B4A]/50 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]/40 transition-all "
+                  className="w-full h-11 pl-9 pr-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A] text-xs font-serif-th placeholder-[#6F5B4A]/50 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]/40 transition-all "
                 />
               </div>
             </div>
@@ -405,7 +405,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={mode === "signup" ? "อย่างน้อย 10 ตัวอักษร" : "••••••••••"}
-                    className="w-full h-11 pl-9 pr-12 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A] text-xs font-serif-th placeholder-[#6F5B4A]/50 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]/40 transition-all "
+                    className="w-full h-11 pl-9 pr-12 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A] text-xs font-serif-th placeholder-[#6F5B4A]/50 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]/40 transition-all "
                   />
                   <button
                     type="button"
@@ -433,7 +433,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                                   : strength.score === 2
                                     ? "bg-[#8F5C1A]"
                                     : "bg-[#3A7044]"
-                                : "bg-[#F0E8DB]/30"
+                                : "bg-[#F3EDE2]/30"
                             }`}
                           />
                         );
@@ -486,9 +486,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Sanctuary Divider */}
           <div className="w-full flex items-center my-4">
-            <div className="flex-1 border-t border-[#E4D8C4]/30" />
+            <div className="flex-1 border-t border-[#D9C8AC]/30" />
             <span className="px-3 text-[10px] text-[#6F5B4A] font-serif-th tracking-wider">หรือเชื่อมต่อทันทีด้วย</span>
-            <div className="flex-1 border-t border-[#E4D8C4]/30" />
+            <div className="flex-1 border-t border-[#D9C8AC]/30" />
           </div>
 
           {/* World-Class Luxury Social OAuth Cards */}
@@ -497,9 +497,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={handleLoginGoogle}
-              className="py-2.5 px-3.5 rounded-lg bg-[#FFFFFF] hover:bg-[#F0E8DB] border border-[#E4D8C4] hover:border-[#8F5C1A] text-[#2E211A] font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
+              className="py-2.5 px-3.5 rounded-lg bg-[#FFFFFF] hover:bg-[#F3EDE2] border border-[#D9C8AC] hover:border-[#8F5C1A] text-[#2E211A] font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
             >
-              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 border border-[#E4D8C4]">
+              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 border border-[#D9C8AC]">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"

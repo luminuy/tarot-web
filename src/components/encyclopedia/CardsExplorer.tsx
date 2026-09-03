@@ -94,7 +94,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   return (
     <div className="space-y-8 relative z-10">
       {/* Sacred Search & Filter Dashboard */}
-      <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 sm:p-6 space-y-5">
+      <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-6 space-y-5">
         {/* Search Bar & Result Stats */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
@@ -106,7 +106,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."
-              className="w-full pl-10 pr-10 py-3.5 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] text-[#2E211A] placeholder-[#6F5B4A]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/30 transition-all "
+              className="w-full pl-10 pr-10 py-3.5 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] placeholder-[#6F5B4A]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/30 transition-all "
             />
             {searchQuery && (
               <button
@@ -169,8 +169,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 }}
                 className={`p-3 rounded-lg border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                   isActive
-                    ? "border-[#E4D8C4] bg-[#FFFFFF] scale-[1.02]"
-                    : "border-[#E4D8C4] bg-[#F0E8DB] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+                    ? "border-[#D9C8AC] bg-[#FFFFFF] scale-[1.02]"
+                    : "border-[#D9C8AC] bg-[#F3EDE2] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-1">
@@ -216,10 +216,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               <Link
                 key={card.id}
                 href={`/cards/${card.id}`}
-                className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#8F5C1A] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 "
+                className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#8F5C1A] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 "
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
-                <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-[#E4D8C4] bg-[#F0E8DB] mb-3">
+                <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-[#D9C8AC] bg-[#F3EDE2] mb-3">
                   <CardImage
                     image={card.image}
                     cardId={card.id}
@@ -231,7 +231,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                   {/* Top Badge: Number & Arcana */}
                   <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#2E211A] text-[#FFFFFF] border border-[#E4D8C4] ">
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#2E211A] text-[#FFFFFF] border border-[#D9C8AC] ">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
                     <span
@@ -261,7 +261,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     {card.keywords.upright.slice(0, 2).map((kw, i) => (
                       <span
                         key={i}
-                        className="text-[9px] font-serif-th px-1.5 py-0.5 rounded bg-[#F0E8DB] text-[#2E211A] border border-[#E4D8C4] truncate max-w-full"
+                        className="text-[9px] font-serif-th px-1.5 py-0.5 rounded bg-[#F3EDE2] text-[#2E211A] border border-[#D9C8AC] truncate max-w-full"
                       >
                         {kw}
                       </span>
@@ -281,7 +281,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
       {/* Empty State */}
       {filteredCards.length === 0 && (
-        <div className="text-center py-16 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-8 space-y-3 ">
+        <div className="text-center py-16 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-8 space-y-3 ">
           <div className="text-3xl text-[#8F5C1A]">✦</div>
           <h3 className="font-serif-th text-lg font-bold text-[#2E211A]">
             ไม่พบไพ่ที่ตรงกับ &ldquo;{searchQuery}&rdquo;
@@ -296,7 +296,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               setSearchQuery("");
               setActiveFilter("all");
             }}
-            className="px-5 py-2 rounded-full text-xs font-serif-th font-bold bg-[#8F5C1A] hover:bg-[#74490F] border border-[#E4D8C4] text-[#FFFFFF] transition-all cursor-pointer "
+            className="px-5 py-2 rounded-full text-xs font-serif-th font-bold bg-[#8F5C1A] hover:bg-[#74490F] border border-[#D9C8AC] text-[#FFFFFF] transition-all cursor-pointer "
           >
             ล้างตัวกรองทั้งหมด
           </button>

@@ -91,11 +91,11 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={`✦ ขอคำปรึกษากับ ${readerName}`}>
       <form onSubmit={handleSubmit} className="space-y-4 pt-2 font-serif-th">
         {error && (
-          <div className="rounded-lg border border-[#E4D8C4] bg-[#FCEEEA] p-3 text-xs text-[#A6392C] ">{error}</div>
+          <div className="rounded-lg border border-[#D9C8AC] bg-[#FCEEEA] p-3 text-xs text-[#A6392C] ">{error}</div>
         )}
 
         {/* Live Availability Status */}
-        <div className="flex items-center justify-between rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-3 text-xs ">
+        <div className="flex items-center justify-between rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-3 text-xs ">
           <span className="text-[#6F5B4A]">สถานะการเปิดรับคิวสด:</span>
           {isLiveOpen ? (
             <span className="inline-flex items-center gap-1 font-semibold text-[#3A7044]">
@@ -115,8 +115,8 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
               onClick={() => setKind("walkup")}
               className={`rounded-lg py-2 text-xs font-semibold border transition-all cursor-pointer ${
                 kind === "walkup"
-                  ? "bg-[#8F5C1A] border-[#E4D8C4] text-[#FFFFFF]"
-                  : "bg-[#FFFFFF] border-[#E4D8C4] text-[#6F5B4A] hover:text-[#2E211A]"
+                  ? "bg-[#8F5C1A] border-[#D9C8AC] text-[#FFFFFF]"
+                  : "bg-[#FFFFFF] border-[#D9C8AC] text-[#6F5B4A] hover:text-[#2E211A]"
               }`}
             >
               ✦ รับคิวสดทันที
@@ -126,8 +126,8 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
               onClick={() => setKind("booking")}
               className={`rounded-lg py-2 text-xs font-semibold border transition-all cursor-pointer ${
                 kind === "booking"
-                  ? "bg-[#8F5C1A] border-[#E4D8C4] text-[#FFFFFF]"
-                  : "bg-[#FFFFFF] border-[#E4D8C4] text-[#6F5B4A] hover:text-[#2E211A]"
+                  ? "bg-[#8F5C1A] border-[#D9C8AC] text-[#FFFFFF]"
+                  : "bg-[#FFFFFF] border-[#D9C8AC] text-[#6F5B4A] hover:text-[#2E211A]"
               }`}
             >
               ✦ จองคิวล่วงหน้า
@@ -136,7 +136,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         )}
 
         {/* Service Fee Display */}
-        <div className="flex items-center justify-between rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-3 text-xs ">
+        <div className="flex items-center justify-between rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-3 text-xs ">
           <div className="flex items-center gap-2">
             <span className="text-[#8F5C1A] font-bold text-sm">✦ ค่าบริการ / บูชาครู</span>
             <span className="text-[10px] text-[#6F5B4A]">(30 นาที)</span>
@@ -172,13 +172,13 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         </Field>
 
         {/* PDPA Consent Checkbox */}
-        <div className="rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] p-3.5 space-y-2 ">
+        <div className="rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] p-3.5 space-y-2 ">
           <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#2E211A] select-none">
             <input
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 rounded border-[#E4D8C4] accent-[#8F5C1A] focus:ring-0"
+              className="mt-0.5 rounded border-[#D9C8AC] accent-[#8F5C1A] focus:ring-0"
             />
             <span className="leading-relaxed">
               ข้าพเจ้ายินยอมให้ส่งต่อข้อมูลชื่อเล่น คำถาม และสรุปไพ่ไปยังแม่หมอ โดยข้อมูลจะถูกลบอัตโนมัติภายใน 30
@@ -188,7 +188,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-3 pt-3 border-t border-[#E4D8C4]/30">
+        <div className="flex justify-end gap-3 pt-3 border-t border-[#D9C8AC]/30">
           <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
             ยกเลิก
           </Button>

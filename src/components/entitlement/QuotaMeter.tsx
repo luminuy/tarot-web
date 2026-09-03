@@ -52,21 +52,21 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
       onClick={onOpenDetails}
       title={title}
       aria-label={srLabel}
-      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border px-2 py-1 sm:px-2.5 font-serif-th text-[10px] font-semibold whitespace-nowrap transition-all select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-2.5 py-1 sm:px-3 font-serif-th text-[10px] font-semibold whitespace-nowrap transition-colors select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
         unlimited
-          ? "border-[#E4D8C4] bg-[#FFFFFF] text-[#8F5C1A] hover:scale-105"
+          ? "bg-[#F3EDE2] text-[#8F5C1A] hover:bg-[#EFE6D6]"
           : empty
-            ? "border-[#E4D8C4] bg-[#F0E8DB] text-[#6F5B4A] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
-            : "border-[#E4D8C4] bg-[#FFFFFF] text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+            ? "bg-[#F3EDE2] text-[#6F5B4A] hover:bg-[#EFE6D6]"
+            : "bg-[#F3EDE2] text-[#8F5C1A] hover:bg-[#EFE6D6]"
       }`}
     >
       {unlimited ? (
         <>
-          <span className="animate-pulse text-[#8F5C1A]">✦</span>
+          <span className="text-[#8F5C1A]">✦</span>
           <span className="hidden sm:inline">ไม่จำกัดสิทธิ์</span>
           <span
             translate="no"
-            className="rounded bg-[#8F5C1A]/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#2E211A]"
+            className="rounded-full bg-[#8F5C1A]/15 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#8F5C1A]"
           >
             VIP
           </span>

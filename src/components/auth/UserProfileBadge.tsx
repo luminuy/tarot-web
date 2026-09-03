@@ -160,7 +160,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
   if (loading) {
     return (
-      <div className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] text-xs font-serif-th font-bold flex items-center gap-1.5 whitespace-nowrap select-none opacity-80 pointer-events-none">
+      <div className="min-h-[38px] px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-full text-[#6F5B4A] text-xs font-serif-th font-bold flex items-center gap-1.5 whitespace-nowrap select-none opacity-80 pointer-events-none">
         <span className="text-[#8F5C1A] text-xs">✦</span>
         <span>เข้าสู่ระบบ</span>
       </div>
@@ -175,7 +175,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           soundManager.playMenuTapSound();
           onOpenAuthModal();
         }}
-        className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] text-[#2E211A] hover:bg-[#F6F1E9] hover:border-[#8F5C1A] hover:text-[#8F5C1A] text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] select-none"
+        className="min-h-[38px] px-2 sm:px-2.5 py-1.5 sm:py-2 rounded-full text-[#6F5B4A] hover:text-[#8F5C1A] text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] select-none"
       >
         <span className="text-[#8F5C1A] text-xs">✦</span>
         <span>เข้าสู่ระบบ</span>
@@ -197,8 +197,8 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
         onClick={toggleMenu}
         className={`min-h-[38px] px-3 sm:px-3.5 py-1.5 rounded-lg transition-colors duration-150 cursor-pointer flex items-center gap-2 border relative select-none ${
           menuOpen
-            ? "bg-[#FFFFFF] border-[#E4D8C4] text-[#8F5C1A]"
-            : "bg-[#FFFFFF] text-[#2E211A] hover:text-[#74490F] border-[#E4D8C4] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+            ? "bg-[#FFFFFF] border-[#D9C8AC] text-[#8F5C1A]"
+            : "bg-[#FFFFFF] text-[#2E211A] hover:text-[#74490F] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
         }`}
         aria-expanded={menuOpen}
         aria-label="โปรไฟล์ผู้ใช้งาน"
@@ -210,7 +210,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             className="w-6 h-6 rounded-full object-cover ring-1.5 ring-[#8F5C1A] "
           />
         ) : (
-          <div className="w-6 h-6 rounded-full bg-[#F0E8DB] text-[#2E211A] flex items-center justify-center font-bold text-[10px] ring-1.5 ring-[#8F5C1A]">
+          <div className="w-6 h-6 rounded-full bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center font-bold text-[10px] ring-1.5 ring-[#8F5C1A]">
             {user.name.slice(0, 1).toUpperCase()}
           </div>
         )}
@@ -250,13 +250,13 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               WebkitBackfaceVisibility: "hidden",
               backfaceVisibility: "hidden",
             }}
-            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] shadow-[var(--shadow-overlay)] p-3 z-50 overflow-hidden space-y-2 font-serif-th text-xs"
+            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] shadow-[var(--shadow-overlay)] p-3 z-50 overflow-hidden space-y-2 font-serif-th text-xs"
           >
             {/* Ambient Top Foil Glow */}
             <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#8F5C1A]/40 to-transparent -mt-0.5 mb-1" />
 
             {/* Member Profile Banner */}
-            <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] flex items-center gap-3 ">
+            <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex items-center gap-3 ">
               {user.avatar ? (
                 <img
                   src={user.avatar}
@@ -264,7 +264,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   className="w-11 h-11 rounded-lg object-cover ring-1.5 ring-[#8F5C1A] flex-shrink-0"
                 />
               ) : (
-                <div className="w-11 h-11 rounded-lg bg-[#F0E8DB] text-[#2E211A] flex items-center justify-center font-bold text-base ring-1.5 ring-[#8F5C1A] flex-shrink-0">
+                <div className="w-11 h-11 rounded-lg bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center font-bold text-base ring-1.5 ring-[#8F5C1A] flex-shrink-0">
                   {user.name.slice(0, 1).toUpperCase()}
                 </div>
               )}
@@ -274,7 +274,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   <span className="block text-[11px] text-[#6F5B4A] truncate font-sans">{user.email}</span>
                 )}
                 <div className="mt-1 flex items-center gap-1.5">
-                  <span className="text-[10px] text-[#2E211A] bg-[#F0E8DB] border border-[#E4D8C4] px-2 py-0.2 rounded-full inline-flex items-center gap-1">
+                  <span className="text-[10px] text-[#2E211A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.2 rounded-full inline-flex items-center gap-1">
                     <span className="text-[#8F5C1A]">✦</span>
                     <span>{getProviderLabel()}</span>
                   </span>
@@ -283,7 +283,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             </div>
 
             {/* Sacred Plan & Quota Management Card */}
-            <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] space-y-2.5">
+            <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[#8F5C1A] text-xs">✦</span>
@@ -331,7 +331,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               )}
 
               {/* Secondary Navigation: Compare Plans & Account Hub */}
-              <div className="flex items-center justify-between pt-1 border-t border-[#E4D8C4]/30 text-[10.5px]">
+              <div className="flex items-center justify-between pt-1 border-t border-[#D9C8AC]/30 text-[10.5px]">
                 {onOpenPlans && (
                   <button
                     type="button"
@@ -362,7 +362,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
             {/* Unverified Email Warning Badge */}
             {user.provider === "email" && user.emailVerified === false && (
-              <div className="p-2.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#8F5C1A] text-[11px] space-y-1.5">
+              <div className="p-2.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A] text-[11px] space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold flex items-center gap-1">
                     <span className="text-[#8F5C1A]">✦</span>
@@ -381,7 +381,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
             {/* Pending Reviews Notification Callout */}
             {pendingCount > 0 && (
-              <div className="p-2.5 rounded-full bg-[#8F5C1A]/15 border border-[#E4D8C4]/30 text-[#2E211A] text-[11px] flex items-center justify-between ">
+              <div className="p-2.5 rounded-full bg-[#8F5C1A]/15 border border-[#D9C8AC]/30 text-[#2E211A] text-[11px] flex items-center justify-between ">
                 <span className="flex items-center gap-1.5">
                   <span className="text-[#8F5C1A]">✦</span>
                   <span>รอติดตามผลคำทำนาย</span>
@@ -393,7 +393,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             )}
 
             {/* Marketing / Follow-up Consent Luxury Toggle */}
-            <div className="p-2.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] flex items-center justify-between">
+            <div className="p-2.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] flex items-center justify-between">
               <div className="pr-2">
                 <span className="block text-[11px] font-semibold text-[#2E211A]">รับคำทำนายติดตามผล</span>
                 <span className="text-[10px] text-[#6F5B4A]">แจ้งเตือนเมื่อถึงกำหนดคำทำนายทางอีเมล</span>
@@ -402,24 +402,24 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 type="button"
                 onClick={() => handleUpdateConsent(!user.marketingConsent)}
                 className={`w-10 h-6 rounded-full transition-all duration-150 p-0.5 relative cursor-pointer flex-shrink-0 border ${
-                  user.marketingConsent ? "bg-[#8F5C1A] border-[#E4D8C4]" : "bg-[#F0E8DB]/30 border-[#E4D8C4]"
+                  user.marketingConsent ? "bg-[#8F5C1A] border-[#D9C8AC]" : "bg-[#F3EDE2]/30 border-[#D9C8AC]"
                 }`}
                 aria-label="เปิดปิดการรับอีเมลติดตามผล"
               >
                 <motion.div
                   animate={{ x: user.marketingConsent ? 16 : 0 }}
                   transition={{ duration: 0.14, ease: EASE_ENTER }}
-                  className={`w-4.5 h-4.5 rounded-full ${user.marketingConsent ? "bg-[#FFFFFF]" : "bg-[#F0E8DB]"}`}
+                  className={`w-4.5 h-4.5 rounded-full ${user.marketingConsent ? "bg-[#FFFFFF]" : "bg-[#F3EDE2]"}`}
                 />
               </button>
             </div>
 
             {/* Logout Action */}
-            <div className="pt-1 border-t border-[#E4D8C4]/30">
+            <div className="pt-1 border-t border-[#D9C8AC]/30">
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full text-left p-2.5 rounded-lg text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA] border border-transparent hover:border-[#E4D8C4] transition-all duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
+                className="w-full text-left p-2.5 rounded-lg text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA] border border-transparent hover:border-[#D9C8AC] transition-all duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
               >
                 <span className="flex items-center gap-1.5 font-bold">
                   <span className="text-[#A6392C] group-hover:rotate-12 transition-transform">✦</span>

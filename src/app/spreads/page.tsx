@@ -71,17 +71,17 @@ export default function SpreadsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
+    <main className="min-h-screen bg-[#FAF7F2] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
       {/* Schema.org Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(spreadsJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Top Breadcrumbs & Dropdown */}
-        <div className="flex items-center justify-between border-b border-[#E4D8C4]/30 pb-4">
+        <div className="flex items-center justify-between border-b border-[#D9C8AC]/30 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#2E211A] hover:text-[#8F5C1A] transition-colors py-1.5 px-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] font-serif-th "
+            className="inline-flex items-center gap-1.5 text-xs text-[#2E211A] hover:text-[#8F5C1A] transition-colors py-1.5 px-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] font-serif-th "
           >
             <span>←</span> กลับหน้าดูดวงหลัก
           </Link>
@@ -90,7 +90,7 @@ export default function SpreadsPage() {
 
         {/* Hero Header */}
         <div className="text-center space-y-2.5 py-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] text-xs text-[#8F5C1A] font-serif-th font-bold">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] text-xs text-[#8F5C1A] font-serif-th font-bold">
             <span>✦</span> 20 ผังการเปิดไพ่มาตรฐานสากล <span>✦</span>
           </div>
           <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide">

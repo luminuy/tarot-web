@@ -42,12 +42,12 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.32 }}
-      className="relative my-6 overflow-hidden rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] p-6 text-center "
+      className="relative my-6 overflow-hidden rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-6 text-center "
     >
       {/* Decorative Ornaments */}
 
       {/* Card Header Badge */}
-      <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] px-3 py-1 text-xs font-medium text-[#2E211A] ">
+      <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 text-xs font-medium text-[#2E211A] ">
         <span className="text-[#8F5C1A]">✨</span>
         <span className="font-serif-th font-semibold">คำคมพลังใจศักดิ์สิทธิ์ (Sacred Oracle Mantra)</span>
         <span className="text-[#8F5C1A]">✦</span>
@@ -59,13 +59,13 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
       </blockquote>
 
       {/* Affirmation Box */}
-      <div className="my-4 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] sm:text-sm ">
+      <div className="my-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] sm:text-sm ">
         <p className="font-serif-th font-bold text-[#8F5C1A]">✦ คำประกาศเจตจำนง (Affirmation):</p>
         <p className="mt-1 font-serif-th font-medium text-[#2E211A]">{mantra.affirmationTh}</p>
       </div>
 
       {/* Source Meta & Action */}
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#E4D8C4]/30 pt-4 text-xs text-[#6F5B4A]">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#D9C8AC]/30 pt-4 text-xs text-[#6F5B4A]">
         <div className="flex items-center gap-2 text-left">
           <span className="text-[#8F5C1A] text-xs">✦</span>
           <div>
@@ -78,7 +78,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
           type="button"
           onClick={handleCopy}
           aria-label="คัดลอกคำคมแชร์ลงสตอรี่"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] px-3.5 py-1.5 text-xs font-semibold text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#F6F1E9] hover:text-[#8F5C1A] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3.5 py-1.5 text-xs font-semibold text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] hover:text-[#8F5C1A] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           <AnimatePresence mode="wait">
             {copied ? (

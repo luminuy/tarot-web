@@ -24,7 +24,7 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="text-center space-y-4">
-        <div className="w-14 h-14 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] flex items-center justify-center text-2xl mx-auto ">
+        <div className="w-14 h-14 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-[#A6392C] flex items-center justify-center text-2xl mx-auto ">
           ✕
         </div>
         <h2 className="text-xl font-bold font-serif-th text-[#2E211A]">ลิงก์ไม่ถูกต้องหรือหมดอายุ</h2>
@@ -104,7 +104,7 @@ function ResetPasswordForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="อย่างน้อย 10 ตัวอักษร"
-            className="w-full h-11 px-3.5 pr-10 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
+            className="w-full h-11 px-3.5 pr-10 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
           />
           <button
             type="button"
@@ -119,7 +119,7 @@ function ResetPasswordForm() {
         {/* Strength Meter */}
         {password.length > 0 && (
           <div className="pt-1.5 space-y-1">
-            <div className="w-full h-1.5 bg-[#F0E8DB]/30 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-[#F3EDE2]/30 rounded-full overflow-hidden">
               <div
                 className={`h-full ${strength.barColor} transition-all duration-300`}
                 style={{ width: `${(strength.score / 4) * 100}%` }}
@@ -145,7 +145,7 @@ function ResetPasswordForm() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="ระบุรหัสผ่านให้ตรงกัน"
-          className="w-full h-11 px-3.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
+          className="w-full h-11 px-3.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
         />
       </div>
 
@@ -169,9 +169,9 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="min-h-screen bg-[#F0E8DB] text-[#2E211A] flex items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-6 sm:p-8 relative overflow-hidden text-center space-y-6">
-        <div className="w-14 h-14 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#8F5C1A] flex items-center justify-center text-2xl mx-auto">
+    <main className="min-h-screen bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center p-4">
+      <div className="w-full max-w-md rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-6 sm:p-8 relative overflow-hidden text-center space-y-6">
+        <div className="w-14 h-14 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A] flex items-center justify-center text-2xl mx-auto">
           ✦
         </div>
 

@@ -73,7 +73,7 @@ export function ChangePasswordCard() {
   };
 
   return (
-    <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-5 sm:p-6 space-y-4 text-left">
+    <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6 space-y-4 text-left">
       <div className="flex items-center gap-2">
         <span className="text-[#8F5C1A]">✦</span>
         <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
@@ -88,13 +88,13 @@ export function ChangePasswordCard() {
       </p>
 
       {errorMsg && (
-        <div className="p-3 rounded-lg bg-[#FCEEEA] border border-[#E4D8C4] text-[#A6392C] text-xs font-serif-th text-center">
+        <div className="p-3 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-[#A6392C] text-xs font-serif-th text-center">
           {errorMsg}
         </div>
       )}
 
       {successMsg && (
-        <div className="p-3 rounded-lg bg-[#EBF3ED] border border-[#E4D8C4] text-[#3A7044] text-xs font-serif-th text-center">
+        <div className="p-3 rounded-lg bg-[#EBF3ED] border border-[#D9C8AC] text-[#3A7044] text-xs font-serif-th text-center">
           {successMsg}
         </div>
       )}
@@ -109,7 +109,7 @@ export function ChangePasswordCard() {
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               placeholder="••••••••••"
-              className="w-full h-10 px-3.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
+              className="w-full h-10 px-3.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
             />
           </div>
         )}
@@ -131,11 +131,11 @@ export function ChangePasswordCard() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="อย่างน้อย 10 ตัวอักษร"
-            className="w-full h-10 px-3.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
+            className="w-full h-10 px-3.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
           />
           {newPassword.length > 0 && (
             <div className="pt-1.5 space-y-1">
-              <div className="w-full h-1.5 bg-[#F0E8DB]/30 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-[#F3EDE2]/30 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${strength.barColor} transition-all duration-300`}
                   style={{ width: `${(strength.score / 4) * 100}%` }}
@@ -157,7 +157,7 @@ export function ChangePasswordCard() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="ระบุรหัสผ่านให้ตรงกัน"
-            className="w-full h-10 px-3.5 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
+            className="w-full h-10 px-3.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
           />
         </div>
 

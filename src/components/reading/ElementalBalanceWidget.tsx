@@ -23,9 +23,9 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
   if (!breakdown) return null;
 
   return (
-    <div className="my-6 rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] p-5 transition-all duration-300">
+    <div className="my-6 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-5 transition-all duration-300">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between border-b border-[#E4D8C4]/30 pb-3">
+      <div className="mb-4 flex items-center justify-between border-b border-[#D9C8AC]/30 pb-3">
         <div className="flex items-center gap-2">
           <span className="text-sm text-[#8F5C1A]">✦</span>
           <div>
@@ -35,7 +35,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             <p className="text-xs text-[#6F5B4A]">วิเคราะห์คลื่นพลังงาน ไฟ · น้ำ · ลม · ดิน</p>
           </div>
         </div>
-        <span className="rounded-full border border-[#E4D8C4] bg-[#FFFFFF] px-2.5 py-1 text-xs font-bold text-[#8F5C1A] ">
+        <span className="rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-2.5 py-1 text-xs font-bold text-[#8F5C1A] ">
           {breakdown.dominantElement === "สมดุล" ? "✦ สมดุลกลมกลืน" : `ธาตุ${breakdown.dominantElement}เด่น`}
         </span>
       </div>
@@ -50,7 +50,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </span>
             <span className="font-mono font-bold text-[#2E211A]">{breakdown.fire}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-[#FFFFFF] border border-[#E4D8C4]/40">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/40">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: breakdown.fire / 100 }}
@@ -69,7 +69,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </span>
             <span className="font-mono font-bold text-[#2E211A]">{breakdown.water}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-[#FFFFFF] border border-[#E4D8C4]/40">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/40">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: breakdown.water / 100 }}
@@ -88,7 +88,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </span>
             <span className="font-mono font-bold text-[#2E211A]">{breakdown.air}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-[#FFFFFF] border border-[#E4D8C4]/40">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/40">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: breakdown.air / 100 }}
@@ -107,7 +107,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </span>
             <span className="font-mono font-bold text-[#2E211A]">{breakdown.earth}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-[#FFFFFF] border border-[#E4D8C4]/40">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/40">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: breakdown.earth / 100 }}
@@ -120,7 +120,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
       </div>
 
       {/* Dominant & Balancing Advice */}
-      <div className="mt-4 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] ">
+      <div className="mt-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] ">
         <p className="font-serif-th font-bold text-[#8F5C1A]">✦ {breakdown.dominantTitleTh}:</p>
         <p className="mt-1 text-[#2E211A] leading-relaxed font-serif-th">{breakdown.dominantInsightTh}</p>
         <p className="mt-2 text-[#6F5B4A] font-serif-th">

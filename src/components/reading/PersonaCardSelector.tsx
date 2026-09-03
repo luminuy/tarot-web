@@ -136,21 +136,21 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               }}
               className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/persona ${
                 isSelected
-                  ? "bg-[#FFFFFF] border-[#E4D8C4] ring-2 ring-[#8F5C1A]/50 shadow-[var(--shadow-overlay)]"
+                  ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-[var(--shadow-overlay)]"
                   : isLocked
-                    ? "bg-[#FFFFFF]/80 border-[#E4D8C4]/70 hover:border-[#8F5C1A] hover:bg-[#F6F1E9] opacity-90 hover:opacity-100"
-                    : "bg-[#FFFFFF] border-[#E4D8C4] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+                    ? "bg-[#FFFFFF]/80 border-[#D9C8AC]/70 hover:border-[#8F5C1A] hover:bg-[#FAF7F2] opacity-90 hover:opacity-100"
+                    : "bg-[#FFFFFF] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
               }`}
               style={{ minHeight: "315px" }}
             >
               {/* Top Card Archetype Tag */}
-              <div className="text-center pb-1.5 border-b border-[#E4D8C4]/30">
+              <div className="text-center pb-1.5 border-b border-[#D9C8AC]/30">
                 <div className="flex items-center justify-center gap-1.5 flex-wrap">
                   <span className="text-[9px] uppercase tracking-widest text-[#8F5C1A] font-mono font-semibold block">
                     {meta.roleTitle}
                   </span>
                   {isLocked && (
-                    <span className="text-[8px] text-[#2E211A] bg-[#F0E8DB]/30 border border-[#E4D8C4] px-1.5 py-0.2 rounded-full font-serif-th font-bold flex items-center gap-0.5 ">
+                    <span className="text-[8px] text-[#2E211A] bg-[#F3EDE2]/30 border border-[#D9C8AC] px-1.5 py-0.2 rounded-full font-serif-th font-bold flex items-center gap-0.5 ">
                       <span>✦</span>
                       <span>✦ ปรมาจารย์ลับ</span>
                     </span>
@@ -169,7 +169,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               </div>
 
               {/* Card Footer Titles */}
-              <div className="pt-2 border-t border-[#E4D8C4]/30 text-center">
+              <div className="pt-2 border-t border-[#D9C8AC]/30 text-center">
                 <div className="flex items-center justify-center gap-1.5">
                   <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight">
                     {p.nameTh}
@@ -187,7 +187,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                       const greeting = PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
                       soundManager.speakProphecy(greeting, p.id);
                     }}
-                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F0E8DB]/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F3EDE2]/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                     title={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                     aria-label={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                   >
@@ -210,7 +210,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               {/* Locked Hover Teaser Overlay */}
               {isLocked && (
                 <div className="absolute inset-0 bg-black/20 pointer-events-none rounded-lg flex items-center justify-center opacity-0 group-hover/persona:opacity-100 transition-opacity duration-200">
-                  <div className="bg-[#2E211A]/95 border border-[#E4D8C4] px-3 py-1.5 rounded-lg text-[10.5px] font-serif-th font-bold text-[#FFFFFF] flex items-center gap-1.5">
+                  <div className="bg-[#2E211A]/95 border border-[#D9C8AC] px-3 py-1.5 rounded-lg text-[10.5px] font-serif-th font-bold text-[#FFFFFF] flex items-center gap-1.5">
                     <span className="text-[#8F5C1A]">✦</span>
                     <span>แตะเพื่อปลดล็อกปรมาจารย์</span>
                   </div>

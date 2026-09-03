@@ -90,7 +90,7 @@ export function AccessDialog({
     >
       <div className="space-y-6 text-[#2E211A]">
         {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร */}
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E4D8C4] bg-[#F0E8DB] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#8F5C1A]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#8F5C1A]">
           {showCredits ? (
             <HourglassIcon className="h-3.5 w-3.5" />
           ) : reason === "explore" ? (
@@ -103,7 +103,7 @@ export function AccessDialog({
 
         {/* ── สถานะสิทธิ์ปัจจุบัน ─────────────────────────────────── */}
         {view && (
-          <div className="rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 sm:p-5 ">
+          <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-5 ">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
                 <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#6F5B4A]">
@@ -115,7 +115,7 @@ export function AccessDialog({
             </div>
 
             {!isGuest && (
-              <div className="mt-3 flex items-center gap-2 border-t border-[#E4D8C4]/30 pt-3 font-serif-th text-xs text-[#6F5B4A]">
+              <div className="mt-3 flex items-center gap-2 border-t border-[#D9C8AC]/30 pt-3 font-serif-th text-xs text-[#6F5B4A]">
                 <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-[#8F5C1A]" />
                 <span>
                   โควตาฟรีชุดใหม่มาถึง{countdown ? ` ${countdown}` : ""} · รีเซ็ต{resetClockLabel()}
@@ -134,7 +134,7 @@ export function AccessDialog({
             </h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {MEMBER_BENEFITS.map((b) => (
-                <li key={b.title} className="flex gap-2.5 rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] p-3 ">
+                <li key={b.title} className="flex gap-2.5 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-3 ">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8F5C1A]/20 text-[#8F5C1A]">
                     <CheckMarkIcon className="h-3 w-3" />
                   </span>
@@ -151,7 +151,7 @@ export function AccessDialog({
         {/* ── ทางเลือกเมื่อโควตาวันนี้หมด ─────────────────────────── */}
         {showCredits && (
           <section className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] p-4 ">
+            <div className="rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-4 ">
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#2E211A]">
                 <HourglassIcon className="h-4 w-4 text-[#8F5C1A]" /> รอโควตาฟรีรอบใหม่
               </span>
@@ -160,7 +160,7 @@ export function AccessDialog({
                 {countdown ? ` (${countdown})` : ""}
               </p>
             </div>
-            <div className="rounded-lg border-2 border-[#E4D8C4] bg-[#FFFFFF] p-4 ">
+            <div className="rounded-lg border-2 border-[#D9C8AC] bg-[#FFFFFF] p-4 ">
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#8F5C1A]">
                 <CoinSealIcon className="h-4 w-4" /> ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)
               </span>
@@ -183,10 +183,10 @@ export function AccessDialog({
                   key={plan.id}
                   className={`relative flex flex-col rounded-lg border p-4 ${
                     isSpecial
-                      ? "border-2 border-[#E4D8C4] bg-[#FFFFFF]"
+                      ? "border-2 border-[#D9C8AC] bg-[#FFFFFF]"
                       : plan.highlight
-                        ? "border border-[#E4D8C4]/80 bg-[#FFFFFF]"
-                        : "border border-[#E4D8C4]/60 bg-[#F0E8DB]"
+                        ? "border border-[#D9C8AC]/80 bg-[#FFFFFF]"
+                        : "border border-[#D9C8AC]/60 bg-[#F3EDE2]"
                   }`}
                 >
                   {isSpecial ? (
@@ -194,7 +194,7 @@ export function AccessDialog({
                       ✦ ปลดล็อกขั้นสุด
                     </span>
                   ) : plan.highlight ? (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#2E211A]">
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 font-serif-th text-[9px] font-bold text-[#2E211A]">
                       {plan.highlight}
                     </span>
                   ) : null}
@@ -202,11 +202,11 @@ export function AccessDialog({
                   <span className="mt-1 font-mono text-lg font-bold text-[#8F5C1A]">{plan.price}</span>
                   <span className="font-serif-th text-[10px] text-[#6F5B4A]">{plan.priceNote}</span>
                   {isCurrent && (
-                    <span className="mt-2 inline-flex w-fit rounded border border-[#E4D8C4] bg-[#F0E8DB] px-1.5 py-0.5 font-serif-th text-[9px] text-[#2E211A]">
+                    <span className="mt-2 inline-flex w-fit rounded border border-[#D9C8AC] bg-[#F3EDE2] px-1.5 py-0.5 font-serif-th text-[9px] text-[#2E211A]">
                       แผนปัจจุบันของคุณ
                     </span>
                   )}
-                  <ul className="mt-3 space-y-1.5 border-t border-[#E4D8C4]/30 pt-3">
+                  <ul className="mt-3 space-y-1.5 border-t border-[#D9C8AC]/30 pt-3">
                     {plan.features.map((f) => (
                       <li
                         key={f.label}
@@ -256,7 +256,7 @@ export function AccessDialog({
           <button
             type="button"
             onClick={handleSecondary}
-            className="w-full rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] hover:bg-[#FFFFFF] hover:border-[#8F5C1A] px-6 py-3 font-serif-th text-xs text-[#2E211A] font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="w-full rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] hover:bg-[#FFFFFF] hover:border-[#8F5C1A] px-6 py-3 font-serif-th text-xs text-[#2E211A] font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
             {copy.secondaryLabel}
           </button>
