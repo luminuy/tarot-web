@@ -16,7 +16,7 @@
 | 1-3 | **Turnstile** | 1M verify/เดือน | ✅ #191 merge · รอ site key + secret |
 | 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ✅ #192 merge · ใช้ได้เลยหลัง deploy |
 | 2-5 | **KV ไพ่ประจำวัน** + Cron | KV 100k read/วัน · cron ไม่จำกัด | 🟢 ไพ่ประจำวัน merge แล้ว (deterministic + KV, ไม่ต้อง cron) · Cron cleanup ยังไม่ทำ (worker แยก, คุณค่าต่ำ) |
-| 3-6 | **R2** — Destiny Card share image | 10 GB + egress ฟรี | ⏳ ต้องสร้าง bucket + เพิ่ม lib เรนเดอร์ภาพ (satori/resvg) |
+| 3-6 | **R2** — share image + OG | 10 GB + egress ฟรี | 🟡 bucket `seertarot-share` สร้างแล้ว · โค้ดเสร็จ (reuse canvas เดิม ไม่ต้อง wasm) |
 | 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | 🟡 index `card-meanings` สร้างแล้ว (1024d/cosine) · โค้ดเสร็จ · รอ deploy + รัน rebuild index |
 | 4-8 | **Durable Objects** | free tier (SQLite) | ⏳ payoff จริงตอนมี Marketplace |
 | 4-9 | **Realtime (SFU/TURN)** | 1,000 GB/เดือน | 🔴 บล็อก — รอ Marketplace (D1 + PDPA) |
@@ -128,9 +128,15 @@
 
 ## Wave 3 — R2 + Vectorize
 
-### 3-6 R2 — Destiny Card share image
-- route ใหม่ `GET /api/share/[readingId]/card.png` → render ภาพสรุปคำทำนาย (satori หรือ `@cf/` image) → เก็บ R2 (`SHARE_BUCKET`) → คืน URL
-- ใส่ใน OG tag ของหน้าแชร์ → พรีวิวสวยตอนแปะ IG/FB/LINE = viral loop
+### 3-6 R2 — share image + OG 🟡 (โค้ดเสร็จ)
+- **ไม่ต้อง satori/resvg** — reuse `<canvas>` ที่ `ShareModal` สร้างอยู่แล้ว (worker gzip 1.85MB, ใส่ wasm เสี่ยงเกิน 3MB)
+- `wrangler.jsonc` — binding `SHARE_BUCKET` → `seertarot-share` (schema + opennext build · INC-0034)
+- `POST /api/share/image` — รับ PNG จาก canvas (≤1.2MB, ตรวจ magic bytes, rate-limit 12/10นาที) → R2 → คืน `{ id, url: /s/<id> }`
+- `GET /api/share/image/<id>` — Worker อ่าน R2 คืนรูป (ไม่เปิด public bucket)
+- `GET /s/<id>` — หน้า OG จิ๋ว (`og:image` + `twitter:card`) + redirect ไปหน้าแรก · `robots: noindex`
+- `ShareModal` — Twitter/Facebook/Threads อัปโหลด canvas → แชร์ `/s/<id>` (ขึ้นรูปพรีวิว) · IG/TikTok ยังใช้ native share + ดาวน์โหลดเหมือนเดิม
+- **PDPA**: id สุ่ม (UUID) · meta เก็บแค่หัวข้อ+ชื่อผัง · **เจ้าของโปรเจกต์ต้องตั้ง R2 lifecycle ลบอัตโนมัติ ~90 วัน**:
+  `npx wrangler r2 bucket lifecycle add seertarot-share --prefix "" --expire-days 90` (หรือใน dashboard)
 
 ### 3-7 Vectorize — ค้นหาเชิงความหมาย 🟡 (โค้ดเสร็จ)
 - index `card-meanings` · **1024 มิติ · cosine** (ตรงกับ `@cf/baai/bge-m3` multilingual — รองรับไทย)

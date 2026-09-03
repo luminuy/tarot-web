@@ -50,6 +50,17 @@
     }
   ],
 
+  // ── R2 (ฟรี 10GB · ไม่มีค่า egress) ──────────────────────────────────────────
+  // เก็บภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (client canvas) → ทำ OG image ให้ลิงก์แชร์
+  // bucket สร้างไว้แล้ว: seertarot-share · ควรตั้ง lifecycle ลบอัตโนมัติ ~90 วัน (PDPA)
+  // schema: RawConfig.r2_buckets = [{ binding, bucket_name }] (ตรวจ config-schema.json — INC-0034)
+  "r2_buckets": [
+    {
+      "binding": "SHARE_BUCKET",
+      "bucket_name": "seertarot-share"
+    }
+  ],
+
   "vars": {
     "NODE_ENV": "production"
   }

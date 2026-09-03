@@ -66,6 +66,18 @@
 > ต้องตั้งคู่กันทั้งสองตัว ด่านกันบอทหน้า signup/login/forgot ถึงจะเปิด — ไม่ตั้ง = ด่านผ่านตลอด
 > (verify ฝั่ง server มี fail-safe: siteverify ล่ม/timeout = ปล่อยผ่าน · ตั้งมาแค่ตัวเดียว = ถือว่ายังไม่เปิด)
 
+### ⏳ รอตั้งเพิ่ม — Vectorize / R2 (Wave 3)
+
+**Vectorize** (binding อยู่ใน `wrangler.jsonc` แล้ว — deploy รอบถัดไปทำงานเลย):
+- หลัง deploy → `/admin` → แท็บสุขภาพระบบ → การ์ด Cloudflare Free Stack → ปุ่ม **"สร้าง index ใหม่"** (รันครั้งเดียว)
+
+**R2** (bucket `seertarot-share` + binding พร้อม — deploy รอบถัดไปทำงานเลย):
+- ตั้ง lifecycle ลบภาพแชร์อัตโนมัติ ~90 วัน (PDPA):
+  ```
+  npx wrangler r2 bucket lifecycle add seertarot-share --prefix "" --expire-days 90
+  ```
+  (หรือ Dashboard → R2 → seertarot-share → Settings → Object lifecycle rules)
+
 ---
 
 ## 🧪 3. การตรวจสอบความพร้อมด้วย Live Diagnostics
