@@ -942,10 +942,8 @@ export default function TarotPage() {
                           </span>
                         </div>
 
-                        {/* Sacred Center Emblem */}
-                        <div className="my-auto w-12 h-12 rounded-full border border-[#D5CEC2]/60 flex items-center justify-center bg-black/20 shadow-inner">
-                          <span className="text-base text-[#E8C88A]">✨</span>
-                        </div>
+                        {/* Clean Center */}
+                        <div className="my-auto" />
 
                         <span className="text-xs font-serif-th font-bold text-[#FFFFFF] tracking-widest uppercase">
                           ไพ่ทาโรต์ 1909
