@@ -17,7 +17,7 @@
 | 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ✅ #192 merge · ใช้ได้เลยหลัง deploy |
 | 2-5 | **KV ไพ่ประจำวัน** + Cron | KV 100k read/วัน · cron ไม่จำกัด | 🟢 ไพ่ประจำวัน merge แล้ว (deterministic + KV, ไม่ต้อง cron) · Cron cleanup ยังไม่ทำ (worker แยก, คุณค่าต่ำ) |
 | 3-6 | **R2** — Destiny Card share image | 10 GB + egress ฟรี | ⏳ ต้องสร้าง bucket + เพิ่ม lib เรนเดอร์ภาพ (satori/resvg) |
-| 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | ⏳ ต้องสร้าง index + สร้าง embedding pipeline (ใช้ Workers AI จาก 2-4) |
+| 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | 🟡 index `card-meanings` สร้างแล้ว (1024d/cosine) · โค้ดเสร็จ · รอ deploy + รัน rebuild index |
 | 4-8 | **Durable Objects** | free tier (SQLite) | ⏳ payoff จริงตอนมี Marketplace |
 | 4-9 | **Realtime (SFU/TURN)** | 1,000 GB/เดือน | 🔴 บล็อก — รอ Marketplace (D1 + PDPA) |
 
@@ -132,9 +132,13 @@
 - route ใหม่ `GET /api/share/[readingId]/card.png` → render ภาพสรุปคำทำนาย (satori หรือ `@cf/` image) → เก็บ R2 (`SHARE_BUCKET`) → คืน URL
 - ใส่ใน OG tag ของหน้าแชร์ → พรีวิวสวยตอนแปะ IG/FB/LINE = viral loop
 
-### 3-7 Vectorize — ค้นหาเชิงความหมาย
-- index `card-meanings` (78 ใบ) + `articles` (20 บทความ) — embed ด้วย Workers AI (3-4)
-- ใช้: "ไพ่/บทความที่ใกล้เคียง", แนะนำบทความจากผลไพ่, ค้นหาในสารานุกรมแบบเข้าใจความหมาย
+### 3-7 Vectorize — ค้นหาเชิงความหมาย 🟡 (โค้ดเสร็จ)
+- index `card-meanings` · **1024 มิติ · cosine** (ตรงกับ `@cf/baai/bge-m3` multilingual — รองรับไทย)
+- corpus = ความหมายไพ่ 78 + บทความ 24 · id `card:<id>` / `article:<slug>` · metadata string ล้วน (ไม่ต้อง metadata index)
+- **โค้ด**: `src/lib/search/vectorize.ts` (corpus/embed/rebuild/search/relatedTo), `src/lib/platform/cf.ts` (`getVectorizeBinding`), `/api/search` (`?q=` หรือ `?like=card:<id>`), `/api/admin/rebuild-search-index`, `<RelatedCards>` ท้ายหน้ารายละเอียดไพ่
+- **degrade เงียบ**: ไม่มี binding / index ว่าง → คืน `[]` → UI ซ่อนส่วนนั้น
+- **ต้องทำต่อ (เจ้าของโปรเจกต์)** หลัง deploy: `POST /api/admin/rebuild-search-index` (ปุ่มในแท็บสุขภาพระบบ) รันครั้งเดียว — embed ทั้ง corpus เข้า index
+- **ต่อยอด**: ช่องค้นหาเชิงความหมายในหน้า `/cards`, แนะนำบทความจากผลไพ่
 
 ---
 

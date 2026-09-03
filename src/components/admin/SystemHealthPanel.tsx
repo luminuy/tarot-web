@@ -76,6 +76,7 @@ interface HealthData {
       aiGateway: { enabled: boolean; accountIdSet: boolean; gatewayIdSet: boolean };
       turnstile: { enabled: boolean; siteKeySet: boolean; secretKeySet: boolean };
       workersAi: { bindingAvailable: boolean };
+      vectorize: { bindingAvailable: boolean };
     };
   };
 }
@@ -121,6 +122,26 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
   const [data, setData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rebuild, setRebuild] = useState<{ busy: boolean; msg: string | null }>({ busy: false, msg: null });
+
+  const rebuildSearchIndex = useCallback(async () => {
+    setRebuild({ busy: true, msg: null });
+    try {
+      const res = await fetch("/api/admin/rebuild-search-index", { method: "POST" });
+      const j = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        upserted?: number;
+        embedded?: number;
+        error?: string;
+      };
+      setRebuild({
+        busy: false,
+        msg: j.ok ? `✅ อัปเดต index แล้ว ${j.upserted} รายการ` : `❌ ${j.error || "ล้มเหลว"}`,
+      });
+    } catch {
+      setRebuild({ busy: false, msg: "❌ เชื่อมต่อไม่ได้" });
+    }
+  }, []);
 
   const probe = useCallback(async () => {
     setLoading(true);
@@ -445,12 +466,35 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                     : `ยังไม่เปิด (${data.services.cloudflareStack.turnstile.siteKeySet ? "" : "ขาด SITE_KEY "}${data.services.cloudflareStack.turnstile.secretKeySet ? "" : "ขาด SECRET_KEY"})`.trim() || "ยังไม่เปิด"}
                 </span>
               </div>
-              <div className="flex justify-between py-1">
+              <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-[#9c93b8]">Workers AI (safety ชั้น 3):</span>
                 <span className={data.services.cloudflareStack.workersAi.bindingAvailable ? "text-emerald-300" : "text-[#9c93b8]"}>
                   {data.services.cloudflareStack.workersAi.bindingAvailable ? "binding พร้อม" : "ไม่มี binding (dev / ยังไม่ deploy)"}
                 </span>
               </div>
+              <div className="flex items-center justify-between gap-3 py-1">
+                <span className="text-[#9c93b8]">Vectorize (ค้นหาเชิงความหมาย):</span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={
+                      data.services.cloudflareStack.vectorize.bindingAvailable ? "text-emerald-300" : "text-[#9c93b8]"
+                    }
+                  >
+                    {data.services.cloudflareStack.vectorize.bindingAvailable ? "binding พร้อม" : "ไม่มี binding"}
+                  </span>
+                  {data.services.cloudflareStack.vectorize.bindingAvailable && (
+                    <button
+                      type="button"
+                      onClick={rebuildSearchIndex}
+                      disabled={rebuild.busy}
+                      className="rounded border border-[#e5c07b]/40 px-2 py-1 text-[11px] text-[#e5c07b] hover:bg-[#e5c07b]/10 disabled:opacity-50 cursor-pointer"
+                    >
+                      {rebuild.busy ? "กำลัง index…" : "สร้าง index ใหม่"}
+                    </button>
+                  )}
+                </div>
+              </div>
+              {rebuild.msg && <p className="pt-1 text-[11px] text-[#c5bed8]">{rebuild.msg}</p>}
             </div>
           </div>
         </div>
