@@ -62,21 +62,22 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({
                   ? "bg-[#8F5C1A] border-2 border-[#8F5C1A] text-white ring-4 ring-[rgba(143,92,26,0.15)] shadow-xs"
                   : isPassed
                   ? "bg-white border-2 border-[#8F5C1A] text-[#8F5C1A] font-bold shadow-xs"
-                  : "bg-[#F0E8DB] border border-[#E4D8C4] text-[#6F5B4A]/50"
+                  : "bg-[#F0E8DB] border border-[#E4D8C4] text-[#6F5B4A]"
               }`}
             >
               {isPassed ? "✓" : step.num}
             </span>
           );
 
+          /*
+           * สถานะของแต่ละขั้นสื่อด้วย "รูปทรงของจุด" (ทองทึบ / ทองขอบพร้อม ✓ / ร่องเปล่า)
+           * ไม่ใช่ด้วยการหรี่ตัวหนังสือ — ของเดิมใช้ /50 ได้คอนทราสต์ 2.05 ซึ่งอ่านไม่ออก
+           * และขั้นที่ยังไม่ถึงคือข้อมูลที่ผู้ใช้ต้องอ่านได้ ไม่ใช่ปุ่มที่ถูกปิดใช้งาน
+           */
           const label = (
             <span
               className={`text-[10px] sm:text-[11px] font-serif-th mt-1.5 transition-colors whitespace-nowrap ${
-                isActive
-                  ? "font-bold text-[#2E211A]"
-                  : isPassed
-                  ? "text-[#6F5B4A]"
-                  : "text-[#6F5B4A]/50"
+                isActive ? "font-bold text-[#2E211A]" : "text-[#6F5B4A]"
               }`}
             >
               {step.title}

@@ -101,19 +101,34 @@ body {
   overflow-x: hidden;
 }
 
-/* ชั้นที่ 1 — แสงเทียนเหนือแท่นบูชา (นิ่ง ไม่ขยับ) */
-body {
+/*
+ * ชั้นที่ 1 — แสงเทียนเหนือแท่นบูชา (นิ่ง ไม่ขยับ)
+ *
+ * ⚠️ ห้ามย้ายกลับไปใส่เป็น `background-image` + `background-attachment: fixed` บน <body>
+ * iOS Safari ไม่รองรับ `background-attachment: fixed` จริง (ปฏิบัติเป็น `scroll`)
+ * แสงจะเลื่อนหายไปตอนผู้ใช้สกรอลล์ — กระทบผู้ใช้มือถือซึ่งเป็น 85% ของเว็บนี้
+ * และบนเดสก์ท็อปมันยังบังคับให้เบราว์เซอร์วาดพื้นหลังใหม่ทุกครั้งที่สกรอลล์ด้วย
+ * ใช้ pseudo-element ที่ `position: fixed` แทน — ยึดกับ viewport จริงทุกแพลตฟอร์ม
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-image: radial-gradient(
     120% 75% at 50% -8%,
     #FFFDF9 0%,
     rgba(255, 253, 249, 0) 62%
   );
-  background-attachment: fixed;
-  background-repeat: no-repeat;
 }
 
-/* ชั้นที่ 2 — เนื้อผ้าลินิน (SVG นิ่ง ไม่มี JS ไม่มีเฟรม) */
-body::before {
+/*
+ * ชั้นที่ 2 — เนื้อผ้าลินิน (SVG นิ่ง ไม่มี JS ไม่มีเฟรม)
+ * ต้องอยู่เหนือชั้นแสง เพื่อให้ผิวสัมผัสคลุมทั้งพื้น จึงใช้ ::after
+ * opacity ต้องอยู่ระหว่าง 0.045–0.070 เท่านั้น เกิน 0.08 จะกลายเป็นจอทีวีไม่มีสัญญาณ
+ */
+body::after {
   content: "";
   position: fixed;
   inset: 0;
@@ -137,9 +152,15 @@ body > * {
 }
 
 /* ตัวอักษรสีทองศักดิ์สิทธิ์ตามระบบ V2 — คมชัด ผ่าน WCAG AA */
+/*
+ * ⚠️ คลาสนี้กำหนด `color` จึงชนะ utility `text-*` ที่ใส่มาคู่กันเสมอ
+ * ถ้าต้องการสีอื่น (รวมถึง `group-hover:text-*`) อย่าใช้คลาสนี้
+ *
+ * ไม่กำหนด `font-weight` ตรงนี้ — ที่เรียกใช้ทุกจุดใส่ `font-bold` มาเองอยู่แล้ว
+ * ถ้ากำหนดไว้จะไปบังคับน้ำหนักทับหัวข้อที่ตั้งค่าไว้แล้วโดยที่มองไม่เห็นสาเหตุ
+ */
 .font-mystic-gold {
   color: #8F5C1A;
-  font-weight: 700;
   display: inline-block;
 }
 
@@ -240,22 +261,33 @@ body > * {
   pointer-events: none;
 }
 
-/* Custom Scrollbar */
-/* Custom Scrollbar — Warm Ivory Linen & Golden Sand */
+/*
+ * แถบเลื่อน (Design System V2)
+ * รางคือร่องที่จมลง จึงใช้ inset · ตัวเลื่อนใช้ muted ให้เห็นชัดตามแบบแถบเลื่อนของระบบปฏิบัติการ
+ * ของเดิมใช้ทราย #D6B48D บนครีม #FCF0E6 คอนทราสต์ 1.74 — มองแทบไม่เห็นว่ามีแถบเลื่อนอยู่
+ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #FCF0E6;
+  background: #F0E8DB;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D6B48D;
+  background: #6F5B4A;
   border-radius: 4px;
-  border: 1px solid rgba(205, 159, 91, 0.4);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #CD9F5B;
+  background: #2E211A;
+}
+
+/*
+ * Firefox — ตั้งที่ <html> แล้วให้สืบทอดลงไป
+ * (ไม่ใช้ `*` เพราะจะบังคับทุกอิลิเมนต์ และ `.no-scrollbar` จะกลายเป็นสู้กันเรื่อง specificity)
+ */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #6F5B4A #F0E8DB;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -268,21 +300,21 @@ body > * {
   }
 }
 
-/* Sleek Golden Scrollbar for Deck Tableau */
+/* แถบเลื่อนของแท่นวางไพ่ — ใช้ชุดสีเดียวกับแถบเลื่อนหลัก */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #FDF7F0;
+  background: #F0E8DB;
   border-radius: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #D6B48D;
+  background: #6F5B4A;
   border-radius: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #CD9F5B;
+  background: #2E211A;
 }
 
 /* ===== Mobile-First GPU Optimizations (85%+ mobile users) ===== */
