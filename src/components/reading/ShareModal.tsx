@@ -31,7 +31,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   reading,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -271,42 +270,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     });
   };
 
-  const handleDownloadImage = async (format: "post" | "story" = "story") => {
-    soundManager.playCardSelectSound();
-    trackEvent("share_click", { platform: "story_download", spread_id: spreadName });
-    setIsGenerating(true);
-
-    try {
-      const blob = await createReadingImageBlob(format);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.download = `SeerTarot-${spreadName.replace(/\s+/g, "_")}-${new Date().toISOString().slice(0, 10)}.png`;
-      link.href = url;
-      link.click();
-      URL.revokeObjectURL(url);
-      showToast("บันทึกรูปภาพความละเอียดสูงลงเครื่องเรียบร้อยแล้ว ✨");
-    } catch (err) {
-      console.error("Download image error", err);
-      showToast("เกิดข้อผิดพลาดในการสร้างรูปภาพ กรุณาลองใหม่อีกครั้ง");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleCopyText = async () => {
-    soundManager.playCardSelectSound();
-    trackEvent("share_click", { platform: "copy", spread_id: spreadName });
-    try {
-      await navigator.clipboard.writeText(shareText);
-      setCopied(true);
-      showToast("คัดลอกข้อความคำทำนายลงคลิปบอร์ดแล้ว ✦");
-      setTimeout(() => setCopied(false), 2500);
-    } catch {
-      setCopied(false);
-      showToast("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
-    }
-  };
-
   const handleShareToBrand = async (brand: "facebook" | "instagram" | "tiktok" | "twitter" | "threads") => {
     soundManager.playCardSelectSound();
     trackEvent("share_click", { platform: brand, spread_id: spreadName });
@@ -495,7 +458,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                     }`}
                   >
                     {/* Position Name */}
-                    <span className="text-[10px] sm:text-[11px] text-[#e5c07b] font-serif-th tracking-wider block font-medium truncate max-w-[130px]">
+                    <span className="text-[10.5px] sm:text-xs text-[#e5c07b] font-serif-th tracking-wide block font-medium whitespace-nowrap">
                       {c.position.nameTh}
                     </span>
 
@@ -538,7 +501,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {reading?.summary && (
               <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#e5c07b]/20">
                 <span className="text-[10px] sm:text-[11px] text-[#c59b27] font-serif-th tracking-wider uppercase block font-semibold">
-                  ✦ สารพยากรณ์จากแม่หมอ ${persona.nameTh} ✦
+                  ✦ สารพยากรณ์จากแม่หมอ {persona.nameTh} ✦
                 </span>
                 <p className="font-serif-th text-xs sm:text-[13px] text-[#e9dfcc] leading-relaxed italic">
                   “{reading.summary}”
@@ -553,99 +516,72 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             </div>
           </div>
 
-          {/* Unified Action & Social Sharing Control Bar (Single Row, No Duplicates) */}
-          <div className="p-3 rounded-2xl bg-[#120a24]/90 border border-[#e5c07b]/30 flex flex-col sm:flex-row items-center justify-between gap-3">
-            {/* Primary Action Buttons */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => handleDownloadImage("story")}
-                disabled={isGenerating}
-                className="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-bold text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
-              >
-                <span>✦</span>
-                <span>{isGenerating ? "กำลังสร้างภาพ..." : "บันทึกรูปภาพ (HD)"}</span>
-              </button>
+          {/* Social Sharing Control Bar (5 Official Brand Icons, Perfectly Centered, Zero Clipping) */}
+          <div className="py-3 px-4 rounded-2xl bg-[#120a24]/90 border border-[#e5c07b]/30 flex items-center justify-center gap-3.5 sm:gap-6">
+            {/* Facebook (#1877F2) */}
+            <button
+              type="button"
+              title="แชร์ไปยัง Facebook"
+              aria-label="แชร์ไปยัง Facebook"
+              onClick={() => handleShareToBrand("facebook")}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-[0_4px_16px_rgba(24,119,242,0.45)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+            </button>
 
-              <button
-                type="button"
-                onClick={handleCopyText}
-                className="flex-1 sm:flex-none py-2.5 px-3.5 rounded-xl bg-[#1d1235] border border-[#e5c07b]/40 text-[#f5deaa] font-serif-th font-semibold text-xs hover:bg-[#2c1b50] transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow active:scale-95 whitespace-nowrap"
-              >
-                <span className="text-[#ffd700]">{copied ? "✓" : "✦"}</span>
-                <span>{copied ? "คัดลอกแล้ว!" : "คัดลอกข้อความ"}</span>
-              </button>
-            </div>
+            {/* Instagram (Official Gradient) */}
+            <button
+              type="button"
+              title="แชร์ไปยัง Instagram"
+              aria-label="แชร์ไปยัง Instagram"
+              onClick={() => handleShareToBrand("instagram")}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shadow-[0_4px_16px_rgba(220,39,67,0.45)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+              </svg>
+            </button>
 
-            {/* 5 Official Brand Logos (Icons only, Exact authentic brand colors) */}
-            <div className="flex items-center justify-center gap-2.5 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-[#e5c07b]/15">
-              <span className="text-[10px] text-[#9c93b8] font-serif-th hidden md:inline mr-1">แชร์สู่:</span>
+            {/* TikTok (#000000) */}
+            <button
+              type="button"
+              title="แชร์ไปยัง TikTok"
+              aria-label="แชร์ไปยัง TikTok"
+              onClick={() => handleShareToBrand("tiktok")}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+              </svg>
+            </button>
 
-              {/* Facebook (#1877F2) */}
-              <button
-                type="button"
-                title="แชร์ไปยัง Facebook"
-                aria-label="แชร์ไปยัง Facebook"
-                onClick={() => handleShareToBrand("facebook")}
-                className="w-10 h-10 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-[0_4px_12px_rgba(24,119,242,0.4)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              </button>
+            {/* X / Twitter (#000000) */}
+            <button
+              type="button"
+              title="แชร์ไปยัง X (Twitter)"
+              aria-label="แชร์ไปยัง X (Twitter)"
+              onClick={() => handleShareToBrand("twitter")}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </button>
 
-              {/* Instagram (Official Gradient) */}
-              <button
-                type="button"
-                title="แชร์ไปยัง Instagram"
-                aria-label="แชร์ไปยัง Instagram"
-                onClick={() => handleShareToBrand("instagram")}
-                className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shadow-[0_4px_12px_rgba(220,39,67,0.4)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                </svg>
-              </button>
-
-              {/* TikTok (#000000) */}
-              <button
-                type="button"
-                title="แชร์ไปยัง TikTok"
-                aria-label="แชร์ไปยัง TikTok"
-                onClick={() => handleShareToBrand("tiktok")}
-                className="w-10 h-10 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
-              >
-                <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                </svg>
-              </button>
-
-              {/* X / Twitter (#000000) */}
-              <button
-                type="button"
-                title="แชร์ไปยัง X"
-                aria-label="แชร์ไปยัง X"
-                onClick={() => handleShareToBrand("twitter")}
-                className="w-10 h-10 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </button>
-
-              {/* Threads (#000000) */}
-              <button
-                type="button"
-                title="แชร์ไปยัง Threads"
-                aria-label="แชร์ไปยัง Threads"
-                onClick={() => handleShareToBrand("threads")}
-                className="w-10 h-10 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.186 24c-3.784 0-6.787-1.325-8.683-3.83-1.89-2.5-2.61-5.99-2.14-10.37.49-4.57 2.45-8.22 5.82-10.87C9.97 1.13 13.9 0 18.89 0c3.34 0 6.25.68 8.65 2.02l-1.75 3.39c-1.95-1.09-4.32-1.64-7.05-1.64-3.9 0-6.99.88-9.19 2.61-2.2 1.73-3.48 4.2-3.8 7.34-.34 3.36.21 6.04 1.63 7.96 1.43 1.93 3.68 2.91 6.7 2.91 3.51 0 6.37-1.23 8.5-3.66l2.84 2.63C22.61 22.18 18.3 24 12.186 24zm2.14-8.85c-1.73 0-3.1-.48-4.08-1.44-.98-.95-1.44-2.27-1.37-3.92.08-1.68.7-3.03 1.84-4.01 1.15-.99 2.67-1.49 4.52-1.49 1.64 0 3.01.41 4.07 1.22l-1.73 3.35c-.71-.52-1.57-.78-2.58-.78-1.02 0-1.85.27-2.47.81-.62.55-.95 1.32-.99 2.31-.04.99.23 1.76.81 2.3.58.55 1.39.82 2.42.82 1.2 0 2.22-.39 3.06-1.17v3.91c-1.02.72-2.19 1.09-3.5 1.09z" />
-                </svg>
-              </button>
-            </div>
+            {/* Threads (#000000) with Official Meta Threads SVG Path */}
+            <button
+              type="button"
+              title="แชร์ไปยัง Threads"
+              aria-label="แชร์ไปยัง Threads"
+              onClick={() => handleShareToBrand("threads")}
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 192 192" fill="currentColor">
+                <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6855C105.707 61.7381 111.932 64.1366 115.961 68.814C118.893 72.2193 120.854 76.925 121.825 82.8638C114.511 81.6207 106.601 81.2385 98.145 81.7233C74.3247 83.0954 59.0111 96.9879 60.0396 116.292C60.5615 126.084 65.4397 134.508 73.775 140.011C80.8224 144.663 89.899 146.938 99.3323 146.423C111.79 145.74 121.563 140.987 128.381 132.296C133.559 125.696 136.834 117.143 138.28 106.366C144.217 109.949 148.617 114.664 151.047 120.332C155.179 129.967 155.42 145.8 142.501 158.708C131.182 170.016 117.576 174.908 97.0135 175.059C74.2042 174.89 56.9538 167.575 45.7381 153.317C35.2355 139.966 29.8077 120.682 29.6052 96C29.8077 71.3178 35.2355 52.0336 45.7381 38.6827C56.9538 24.4249 74.2039 17.11 97.0132 16.9405C119.988 17.1113 137.539 24.4614 149.184 38.788C154.894 45.8136 159.199 54.6488 162.037 64.9503L178.184 60.6422C174.744 47.9622 169.331 37.0357 161.965 27.974C147.036 9.60668 125.202 0.195148 97.0695 0H96.9569C68.8816 0.19447 47.2921 9.6418 32.7883 28.0793C19.8819 44.4864 13.2244 67.3157 13.0007 95.9325L13 96L13.0007 96.0675C13.2244 124.684 19.8819 147.514 32.7883 163.921C47.2921 182.358 68.8816 191.806 96.9569 192H97.0695C122.03 191.827 139.624 185.292 154.118 170.811C173.081 151.866 172.51 128.119 166.26 113.541C161.776 103.087 153.227 94.5962 141.537 88.9883ZM98.4405 129.507C88.0005 130.095 77.1544 125.409 76.6196 115.372C76.2232 107.93 81.9158 99.626 99.0812 98.6368C101.047 98.5234 102.976 98.468 104.871 98.468C111.106 98.468 116.939 99.0737 122.242 100.233C120.264 124.935 108.662 128.946 98.4405 129.507Z" />
+              </svg>
+            </button>
           </div>
         </motion.div>
       </div>
