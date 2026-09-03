@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { invalidateUserTokens, issueToken } from "@/lib/auth/auth-tokens.repo";
 import { sendEmail } from "@/lib/email/send";
-import { resetPasswordHtml } from "@/lib/email/templates";
+import { resetPasswordHtml, resetPasswordText } from "@/lib/email/templates";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { getRequestIp, verifyTurnstile } from "@/lib/security/turnstile";
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
         await invalidateUserTokens(user.id, "reset");
         const resetToken = await issueToken(user.id, "reset", 15 * 60 * 1000);
         const resetLink = `${origin}/reset-password?token=${encodeURIComponent(resetToken)}`;
-        await sendEmail(user.email, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", resetPasswordHtml(resetLink, user.name));
+        await sendEmail(user.email, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", resetPasswordHtml(resetLink, user.name), resetPasswordText(resetLink, user.name));
       } catch (err) {
         console.error("[Forgot password send email failed]", err);
       }
