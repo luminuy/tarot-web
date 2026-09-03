@@ -31,6 +31,8 @@ interface FollowUpChatProps {
     personaId?: string;
     drawn?: Array<{ order: number; cardIndex: number; isReversed: boolean }>;
   };
+  /** ความสูงของกล่องแชท — หน้าแชทเต็มจอ (/reading/chat) ส่งค่าเต็มจอมาแทน */
+  heightClass?: string;
 }
 
 /** id ของส่วน "คุยต่อกับแม่หมอ" — ใช้เป็นจุดหมายของปุ่มเลื่อนลงมาจากแผงคำทำนาย */
@@ -175,7 +177,13 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
   );
 };
 
-export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, sessionToken, readingSnapshot }) => {
+export const FollowUpChat: React.FC<FollowUpChatProps> = ({
+  readingId,
+  persona,
+  sessionToken,
+  readingSnapshot,
+  heightClass = "h-[660px] sm:h-[720px]",
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -295,7 +303,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
     <section
       id={ASK_ORACLE_SECTION_ID}
       aria-labelledby="ask-oracle-title"
-      className="w-full scroll-mt-24 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col h-[660px] sm:h-[720px] relative overflow-hidden justify-between"
+      className={`w-full scroll-mt-24 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col ${heightClass} relative overflow-hidden justify-between`}
     >
       {/* Background Sacred Geometric Aura */}
 
