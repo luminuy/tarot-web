@@ -34,6 +34,21 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ปรับ Footer หน้าแรก — ตัดแถบลิงก์ Editorial, ใส่โลโก้เว็บแทนคำว่า SEE TAROT, เพิ่มบรรทัดลิขสิทธิ์
+
+#### 1. ปรับส่วนหัวและท้ายของ Footer (`src/app/page.tsx`)
+- **สิ่งที่ต้องการ (จากภาพเจ้าของโปรเจกต์)**:
+  - รูปที่ 1: แถบลิงก์ Editorial ใน footer (ผังการเปิดไพ่/ความหมายไพ่/ปรึกษาแม่หมอ/บทความ/PDPA) → เอาออก ไม่ต้องโชว์
+  - รูปที่ 2: ตัวอักษร `✦ SEE TAROT ✦` → เปลี่ยนเป็นโลโก้เว็บ (`/logo.webp`)
+  - รูปที่ 4: บรรทัดปิดท้าย footer อยากให้เป็นสไตล์เดียวกับ Bottom Branding Strip (รูปที่ 3)
+- **สิ่งที่แก้ไข**:
+  - บล็อก Brand & Mission จัดกึ่งกลาง แสดงโลโก้วงกลม + คำว่า SeerTarot + ประโยคภารกิจ ลบแถบลิงก์ Editorial ทั้งชุด
+  - เพิ่มบรรทัด `© 2026 SeerTarot · สงวนลิขสิทธิ์ · นโยบายความเป็นส่วนตัว` ต่อท้าย Bottom Branding Strip (โทน/ฟอนต์เดียวกับรูปที่ 3)
+- **ไฟล์ที่แก้ไข**: `src/app/page.tsx`
+- **ผลการทดสอบ**: `npx tsc --noEmit` ➔ ✅ ผ่าน 0 errors; ตรวจ footer ผ่าน dev server (`footer.innerText`) ยืนยันว่าแถบลิงก์หายไป มีโลโก้ และมีบรรทัดลิขสิทธิ์แล้ว
+
+---
+
 ### 🗓️ 2026-09-03: Editorial Quiet Luxury Redesign ครบถ้วนทุกหน้า ทุกโมดัล และระบบสไตล์ทั้งเว็บ
 
 **คำขอของผู้ใช้**:
