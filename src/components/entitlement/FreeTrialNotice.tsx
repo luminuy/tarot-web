@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
-import { HourglassIcon, SparkSealIcon } from "@/components/entitlement/EntitlementIcons";
+import { CardImage } from "@/components/card/CardImage";
 import { DAILY_LIMIT, describeEntitlement, formatResetCountdown } from "@/lib/entitlement/copy";
 import { trackEntitlementEvent } from "@/lib/entitlement/track";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
@@ -51,9 +51,14 @@ export function FreeTrialNotice({ onOpenAccess }: { onOpenAccess: () => void }) 
 
   return (
     <div className="mx-auto mb-6 flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-[#D9C8AC] bg-white px-4 py-3 shadow-[var(--shadow-raised)]">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[#D9C8AC] bg-[#F3EDE2] text-[#8F5C1A]">
-        {isGuest ? <SparkSealIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
-      </span>
+      <div className="relative w-8 h-12 shrink-0 overflow-hidden rounded border border-[#D9C8AC] bg-[#F3EDE2] shadow-xs">
+        <CardImage
+          image={isGuest ? "major-00.jpg" : "major-10.jpg"}
+          alt={isGuest ? "The Fool - สิทธิ์เปิดไพ่ทดลองฟรี" : "Wheel of Fortune - โควตาสิทธิ์รายวัน"}
+          className="w-full h-full object-cover"
+          sizes="32px"
+        />
+      </div>
 
       <div className="min-w-0 flex-1 space-y-0.5">
         <p className="font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm">

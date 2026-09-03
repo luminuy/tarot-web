@@ -10,7 +10,9 @@ import {
   TheStarIllustration,
   MagicianIllustration,
   HermitIllustration,
+  SpeakerTabIcon,
 } from "@/components/ui/TarotArtIcons";
+import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isMasterPersona } from "@/lib/entitlement/limits";
 
 interface PersonaCardSelectorProps {
@@ -150,8 +152,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                     {meta.roleTitle}
                   </span>
                   {isLocked && (
-                    <span className="text-[8px] text-[#2E211A] bg-[#F3EDE2]/30 border border-[#D9C8AC] px-1.5 py-0.2 rounded-full font-serif-th font-bold flex items-center gap-0.5 ">
-                      <span>✦</span>
+                    <span className="text-[8px] text-[#8F5C1A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
                       <span>✦ ปรมาจารย์ลับ</span>
                     </span>
                   )}
@@ -160,12 +161,22 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               </div>
 
               {/* Authentic Tarot Persona Character Artwork with Altar Aura */}
-              <div className="my-auto py-2 flex items-center justify-center relative">
+              <div className="my-auto py-2 flex flex-col items-center justify-center gap-2 relative">
                 <div
                   className={`relative z-10 filter drop-shadow-[0_2px_8px_rgba(90,67,47,0.15)] ${isLocked ? "opacity-90" : ""}`}
                 >
                   {meta.renderArt()}
                 </div>
+
+                {/* ตราผนึกปรมาจารย์ลับ — ป้ายแคปซูลหรูหราใต้ภาพไพ่ (ไม่ปิดทับหน้าไพ่เด็ดขาด) */}
+                {isLocked && (
+                  <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/persona:border-[#8F5C1A] transition-all duration-300 shadow-xs">
+                    <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
+                    <span className="text-[10.5px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
+                      แตะเพื่อปลดล็อก
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Card Footer Titles */}
@@ -187,11 +198,11 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                       const greeting = PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
                       soundManager.speakProphecy(greeting, p.id);
                     }}
-                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F3EDE2]/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F3EDE2]/40 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                     title={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                     aria-label={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                   >
-                    ✦
+                    <SpeakerTabIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <p className="text-[10px] text-[#6F5B4A] mt-1 leading-snug">{p.tagline}</p>
@@ -205,16 +216,6 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#8F5C1A]">✦</div>
                   <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#8F5C1A]">✦</div>
                 </>
-              )}
-
-              {/* Locked Hover Teaser Overlay */}
-              {isLocked && (
-                <div className="absolute inset-0 bg-black/20 pointer-events-none rounded-lg flex items-center justify-center opacity-0 group-hover/persona:opacity-100 transition-opacity duration-200">
-                  <div className="bg-[#2E211A]/95 border border-[#D9C8AC] px-3 py-1.5 rounded-lg text-[10.5px] font-serif-th font-bold text-[#FFFFFF] flex items-center gap-1.5">
-                    <span className="text-[#8F5C1A]">✦</span>
-                    <span>แตะเพื่อปลดล็อกปรมาจารย์</span>
-                  </div>
-                </div>
               )}
 
               {/* Holographic Sheen Layer */}

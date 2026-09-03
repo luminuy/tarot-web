@@ -82,7 +82,7 @@ export default function BlogPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F3EDE2] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
+    <main className="min-h-screen bg-[#FAF7F2] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
       {/* Schema.org Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
