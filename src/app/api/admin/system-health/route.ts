@@ -199,8 +199,11 @@ export async function GET(request: Request) {
   // 9. Cloudflare Free Stack (ส่วนเสริม — ไม่นับเป็น critical · ไม่ตั้ง = ระบบเดิมทำงานปกติ)
   const { isAiGatewayEnabled } = await import("@/lib/ai/gateway");
   const { isTurnstileConfigured } = await import("@/lib/security/turnstile");
-  const { getAiBinding } = await import("@/lib/platform/cf");
-  const workersAiBinding = await getAiBinding();
+  const { getAiBinding, getVectorizeBinding } = await import("@/lib/platform/cf");
+  const [workersAiBinding, vectorizeBinding] = await Promise.all([
+    getAiBinding(),
+    getVectorizeBinding(),
+  ]);
 
   const cloudflareStackHealth = {
     aiGateway: {
@@ -215,6 +218,9 @@ export async function GET(request: Request) {
     },
     workersAi: {
       bindingAvailable: Boolean(workersAiBinding),
+    },
+    vectorize: {
+      bindingAvailable: Boolean(vectorizeBinding),
     },
   };
 

@@ -34,6 +34,25 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: Vectorize — ค้นหาเชิงความหมาย + "ไพ่ที่พลังงานใกล้เคียง" (Wave 3-7)
+
+- **index**: `card-meanings` (สร้างแล้ว · 1024 มิติ · cosine) — ตรงกับ `@cf/baai/bge-m3` (multilingual รองรับไทย)
+- **corpus**: ความหมายไพ่ 78 + บทความ 24 · id `card:<id>` / `article:<slug>` · metadata string ล้วน (ไม่ต้อง metadata index — over-fetch + filter ใน JS)
+- **โค้ด**:
+  - `src/lib/platform/cf.ts` — `getVectorizeBinding()`
+  - `src/lib/search/vectorize.ts` — `buildSearchCorpus / embedTexts (bge-m3) / rebuildSearchIndex / semanticSearch / relatedTo`
+  - `src/app/api/search/route.ts` — `GET ?q=<text>` หรือ `?like=card:<id>` (public, origin-gated)
+  - `src/app/api/admin/rebuild-search-index/route.ts` — `POST` embed ทั้ง corpus เข้า index (admin)
+  - `src/components/encyclopedia/RelatedCards.tsx` — "ไพ่ที่พลังงานใกล้เคียง" ท้ายหน้ารายละเอียดไพ่
+  - `SystemHealthPanel` — สถานะ Vectorize + ปุ่ม "สร้าง index ใหม่"
+- **degrade เงียบ**: ไม่มี binding / index ว่าง → คืน `[]` → UI ซ่อนส่วนนั้น ไม่ throw
+- **ไฟล์**: + `wrangler.jsonc` (vectorize binding), `scripts/qa/test-search-corpus.ts` (+ ลง CHECKS → 23 ด่าน)
+- **ผลการทดสอบ**: `tsc` ✅ · `repo:verify` **23/23** ✅ · `test-search-corpus` 7/7 · `npx wrangler` config parse + `opennextjs-cloudflare build` "complete" (INC-0034) · dev: `/api/search` คืน `[]` เมื่อไม่มี binding, หน้ารายละเอียดไพ่เรนเดอร์ปกติ
+- **ค้างต่อ (เจ้าของโปรเจกต์)**: หลัง deploy → `/admin` แท็บสุขภาพระบบ → ปุ่ม "สร้าง index ใหม่" (หรือ `POST /api/admin/rebuild-search-index`) รันครั้งเดียว
+- **ต่อยอด**: ช่องค้นหาเชิงความหมายในหน้า `/cards`, แนะนำบทความจากผลไพ่
+
+---
+
 ### 🗓️ 2026-09-03: ไพ่ประจำวันของทุกคน (Global Daily Tarot · KV-cached · Wave 2-5 ครึ่งแรก)
 
 - **ทำอะไร**: ไพ่ใบเดียวต่อวัน เหมือนกันทุกคนทั้งเว็บ — "พลังงานประจำวัน" บนขั้นเลือกผัง (ไม่กินโควตา)

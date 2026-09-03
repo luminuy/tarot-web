@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
+import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
 
 interface CardDetailViewProps {
@@ -261,6 +262,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ไพ่ที่พลังงานใกล้เคียง (Vectorize · ซ่อนตัวเองถ้า index ยังว่าง) */}
+      <RelatedCards cardId={card.id} />
 
       {/* Bottom Previous / Next Card Navigation Bar */}
       <div className="pt-8 border-t border-[#D5CEC2]/40 flex items-center justify-between gap-4">

@@ -143,6 +143,46 @@ export async function getAiBinding(): Promise<AppAI | null> {
   return null;
 }
 
+/** ส่วนของ Vectorize binding ที่แอปนี้ใช้จริง (structural) */
+export interface AppVectorizeMatch {
+  id: string;
+  score: number;
+  metadata?: Record<string, unknown>;
+  values?: number[];
+}
+export interface AppVectorize {
+  query(
+    vector: number[],
+    opts?: { topK?: number; returnValues?: boolean; returnMetadata?: boolean | "all" | "none" },
+  ): Promise<{ matches: AppVectorizeMatch[]; count?: number }>;
+  upsert(
+    vectors: { id: string; values: number[]; metadata?: Record<string, unknown> }[],
+  ): Promise<{ mutationId?: string } | unknown>;
+  getByIds(ids: string[]): Promise<AppVectorizeMatch[]>;
+}
+
+let cachedVectorize: AppVectorize | null | undefined;
+
+/**
+ * คืน Vectorize binding (`env.VECTORIZE`) — ใช้กับค้นหาเชิงความหมาย
+ * dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกต้อง degrade เอง)
+ */
+export async function getVectorizeBinding(): Promise<AppVectorize | null> {
+  if (cachedVectorize !== undefined) return cachedVectorize;
+  try {
+    const ctx = await safelyGetCloudflareContext();
+    const binding = (ctx?.env as Record<string, unknown> | undefined)?.VECTORIZE;
+    if (binding && typeof (binding as AppVectorize).query === "function") {
+      cachedVectorize = binding as AppVectorize;
+      return cachedVectorize;
+    }
+  } catch {
+    // ไม่มี Cloudflare context
+  }
+  cachedVectorize = null;
+  return null;
+}
+
 /**
  * คืน execution context เพื่อใช้ `waitUntil` (งาน background เช่น บันทึกสถิติ)
  * ถ้าไม่มี (dev) จะคืน shim ที่รัน callback ทันทีแบบ fire-and-forget

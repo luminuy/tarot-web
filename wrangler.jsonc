@@ -39,6 +39,17 @@
     "binding": "AI"
   },
 
+  // ── Vectorize (ฟรี 30M dim-query/เดือน) ──────────────────────────────────────
+  // ค้นหาเชิงความหมาย — "ไพ่/บทความที่พลังงานใกล้เคียง" (src/lib/search/vectorize.ts)
+  // index สร้างไว้แล้ว: card-meanings · 1024 มิติ · cosine (ตรงกับ @cf/baai/bge-m3)
+  // schema: RawConfig.vectorize = [{ binding, index_name }] (ตรวจ config-schema.json — INC-0034)
+  "vectorize": [
+    {
+      "binding": "VECTORIZE",
+      "index_name": "card-meanings"
+    }
+  ],
+
   "vars": {
     "NODE_ENV": "production"
   }
