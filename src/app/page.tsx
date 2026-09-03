@@ -827,13 +827,14 @@ export default function TarotPage() {
             aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
             className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-2xl p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]/60"
           >
-            {/* World-Class Miniature 1909 Tarot Card Brand Logo */}
-            <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-xl border-2 border-[#E4D8C4] overflow-hidden shadow-xs relative flex-shrink-0 bg-white group-hover:scale-105 transition-all duration-300">
-              <CardImage
-                image="major-01.jpg"
-                alt="The Magician Tarot Seal"
-                className="w-full h-full object-cover object-[50%_12%] filter contrast-[1.08] saturate-[1.1] brightness-[1.02] tarot-hd-card-image"
-                sizes="64px"
+            {/* Seer Brand Logo */}
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#E4D8C4] overflow-hidden shadow-xs relative flex-shrink-0 bg-[#F6F1E9] group-hover:scale-105 transition-all duration-300">
+              <img
+                src="/logo.webp"
+                alt="Seer Tarot Brand Logo"
+                width={44}
+                height={44}
+                className="w-full h-full object-cover"
                 loading="eager"
               />
             </div>

@@ -247,24 +247,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ✕
           </button>
 
-          {/* Authentic 1909 Rider-Waite Tarot Card Seal (Matching Brand Logo) */}
+          {/* Seer Brand Logo Frame */}
           <div className="relative mb-3.5 group select-none">
-            {/* Ambient Gold Halo Aura */}
-            <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-[#CD9F5B]/20 via-[#D6B48D]/30 to-[#CD9F5B]/20 blur-md opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
             {/* Sacred Rotating Dashed Ring */}
-            <div className="absolute -inset-3 rounded-full border border-dashed border-[#D6B48D]/50 animate-[spin_50s_linear_infinite] pointer-events-none" />
+            <div className="absolute -inset-2.5 rounded-full border border-dashed border-[#E4D8C4] animate-[spin_50s_linear_infinite] pointer-events-none" />
 
-            {/* Miniature 1909 Tarot Card Frame */}
-            <div className="w-12 h-[72px] sm:w-13 sm:h-[78px] rounded-xl border-2 border-[#D6B48D] overflow-hidden shadow-md relative flex-shrink-0 bg-[#FCF0E6] group-hover:scale-105 transition-all duration-300">
-              <CardImage
-                image="major-01.jpg"
-                alt="The Magician Tarot Brand Seal"
-                className="w-full h-full object-cover object-[50%_12%] filter contrast-[1.05] saturate-[1.05] tarot-hd-card-image"
-                sizes="80px"
+            {/* Circular Seer Brand Logo */}
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-[#E4D8C4] overflow-hidden shadow-xs relative flex-shrink-0 bg-[#F6F1E9] group-hover:scale-105 transition-all duration-300">
+              <img
+                src="/logo.webp"
+                alt="Seer Tarot Brand Logo"
+                width={72}
+                height={72}
+                className="w-full h-full object-cover"
                 loading="eager"
               />
-              <div className="gold-foil-sheen absolute inset-0 opacity-20 pointer-events-none" />
             </div>
           </div>
 

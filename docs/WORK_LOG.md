@@ -34,6 +34,26 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ปรับเปลี่ยน Brand Logo และ Favicon สู่ภาพสัญลักษณ์พระจันทร์เสี้ยว SEER สีทองมินิมอล
+
+**คำขอของผู้ใช้**:
+- *"เปลี่ยนเอาอันนี้เป็น logo web favicon"* พร้อมอัปโหลดภาพ `media_1788412631074.jpg` (พระจันทร์เสี้ยว ดวงดาว และคำว่า SEER สีทองบนพื้นครีม)
+
+**สิ่งที่ดำเนินการเสร็จสิ้น**:
+1. **สร้างไฟล์ Master Logo และ Web Assets**:
+   - `public/logo.png` & `public/logo.webp`: รูปภาพโลโก้ต้นฉบับความละเอียดสูงและ WebP
+2. **สร้าง Favicon และ App Icons ทุกขนาด**:
+   - `public/favicon.ico` & `src/app/favicon.ico`: Multi-resolution ICO (16x16, 32x32, 48x48, 64x64)
+   - `public/icon.svg` & `src/app/icon.svg`: เวกเตอร์ SVG สัดส่วนมนหรูหราสำหรับเบราว์เซอร์ยุคใหม่
+   - `public/apple-icon.png` & `src/app/apple-icon.png`: Apple Touch Icon (180x180)
+   - `public/icons/icon-192x192.png` & `public/icons/icon-512x512.png`: PWA Manifest Icons (192x192, 512x512)
+3. **อัปเดต Brand Logo บนหน้าเว็บ**:
+   - Header หลักใน `src/app/page.tsx`: ปรับจากตราไพ่จิ๋ว The Magician เป็นตราสัญลักษณ์วงกลม SEER (`w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#E4D8C4]`)
+   - โมดัลเข้าสู่ระบบใน `src/components/auth/AuthModal.tsx`: ปรับเป็นตราสัญลักษณ์วงกลม SEER หมุนล้อมด้วยวงเวทย์สีทรายทอง
+4. **ผ่านเกณฑ์ตรวจสอบ**:
+   - `npm run repo:verify` ผ่านครบ 21 ด่าน
+   - `npm run typecheck` 0 errors
+
 ### 🗓️ 2026-09-03: ปฏิรูประบบดีไซน์ V2 (Warm Minimal Sanctuary) สเปกแม่บท DESIGN_SYSTEM_V2.md
 
 **คำขอของผู้ใช้**:
