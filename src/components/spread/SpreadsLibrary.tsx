@@ -105,18 +105,18 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   nextTab?.focus();
                 }
               }}
-              className={`px-4 py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
+              className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
                 isActive
-                  ? "bg-[#CD9F5B] text-[#FDF7F0] border border-[#D6B48D] shadow-sm scale-[1.03]"
+                  ? "bg-[#8F5C1A] text-[#FFFFFF] border border-[#8F5C1A]"
                   : "bg-[#FDF7F0] text-[#5A432F] hover:text-[#CD9F5B] border border-[#D6B48D] hover:border-[#CD9F5B] hover:bg-[#FFFFFF]"
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#FDF7F0]" : "text-[#CD9F5B]"}`} />
+              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#FFFFFF]" : "text-[#CD9F5B]"}`} />
               <span>{cat.label}</span>
               <span
                 className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
                   isActive
-                    ? "bg-black/15 text-[#FDF7F0]"
+                    ? "bg-white/20 text-[#FFFFFF]"
                     : "bg-black/5 text-[#8C735D]"
                 }`}
               >

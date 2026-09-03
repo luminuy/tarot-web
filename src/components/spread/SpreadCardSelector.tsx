@@ -214,9 +214,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   nextTab?.focus();
                 }
               }}
-              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-serif-th font-bold transition-all duration-300 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] ${
+              className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C5A059] ${
                 isActive
-                  ? "bg-gradient-to-r from-[#B8853E] via-[#D4AF37] to-[#B8853E] text-[#FFFFFF] shadow-[0_4px_16px_rgba(184,133,62,0.35)] scale-[1.03] border-none"
+                  ? "bg-[#8F5C1A] text-[#FFFFFF] border border-[#8F5C1A]"
                   : "bg-[#FFFFFF] text-[#231812] hover:text-[#B8853E] border border-[#D6B48D]/50 hover:border-[#C5A059] hover:bg-[#FAF8F5] shadow-xs"
               }`}
             >
@@ -225,7 +225,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               <span
                 className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
                   isActive
-                    ? "bg-white/25 text-[#FFFFFF]"
+                    ? "bg-white/20 text-[#FFFFFF]"
                     : "bg-[#FAF8F5] text-[#7C6553] border border-[#D6B48D]/40"
                 }`}
               >
@@ -440,7 +440,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           <button
             type="button"
             onClick={onProceed}
-            className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-md bg-[#8F5C1A] hover:bg-[#74490F] text-white font-bold font-serif-th text-sm sm:text-base shadow-xs active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
+            className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-white font-bold font-serif-th text-sm sm:text-base shadow-xs active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
           >
             <span>{proceedLabel ?? "ถัดไป: ตั้งคำถามและเลือกแม่หมอ"}</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>

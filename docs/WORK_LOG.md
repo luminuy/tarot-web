@@ -34,6 +34,22 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ปรับชิปหมวดหมู่และปุ่ม CTA ตามแนวทาง Stitch Mockup (แบนราบ ไร้แสง ขอบมน)
+
+**คำขอของผู้ใช้**:
+- อ้างอิงไฟล์ต้นแบบ `stitch_minimalist_tarot_reading_website/code.html` — *"วิเคราะห์จุดไหนที่นำมาปรับเข้ากับเราได้บ้าง"*
+- *"รูป 1 ยอดนิยมไม่ต้องมีแสง ต้องขอบแบบเก่า"* → ชิป `ยอดนิยมแนะนำ` ตอน active ห้ามมี glow ให้คงเส้นขอบ
+- *"รูปที่ 2 ขอบมน ไม่เป็นเหลี่ยมแบบเก่า"* → ปุ่ม CTA ต้องเป็นทรงแคปซูล
+
+**สิ่งที่ทำ**:
+1. `src/components/spread/SpreadCardSelector.tsx` — ชิปหมวดหมู่ active เปลี่ยนจาก gold gradient + `shadow-[0_4px_16px]` + `scale-[1.03]` เป็นสีทึบ `#8F5C1A` พร้อม `border` 1px และตัด glow/scale ออก, เปลี่ยน `rounded-2xl` ➔ `rounded-full`
+2. `src/components/spread/SpreadsLibrary.tsx` — ปรับชิปหมวดหมู่ในคลังผังให้ตรงกัน (สีทึบ ไร้ scale ทรงแคปซูล)
+3. ปุ่ม CTA `ถัดไป: ตั้งคำถามและเลือกแม่หมอ` และปุ่มลัดในหน้าแรก เปลี่ยน `rounded-md` ➔ `rounded-full`
+
+**ผลลัพธ์**: `npm run typecheck` ➔ 0 errors · ชิปและปุ่มทั้งเว็บใช้ทรงแคปซูลชุดเดียวกัน ไม่มีเงาเรืองแสงเหลืออยู่
+
+---
+
 ### 🗓️ 2026-09-03: ปรับเปลี่ยน Brand Logo และ Favicon สู่ภาพสัญลักษณ์พระจันทร์เสี้ยว SEER สีทองมินิมอล
 
 **คำขอของผู้ใช้**:

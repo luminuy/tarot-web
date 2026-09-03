@@ -912,7 +912,7 @@ export default function TarotPage() {
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-3.5 py-1.5 rounded-md bg-[#8F5C1A] hover:bg-[#74490F] text-white font-serif-th font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
+                className="px-3.5 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-white font-serif-th font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
               >
                 <span>✦</span> โหลดใหม่อีกครั้ง
               </button>
