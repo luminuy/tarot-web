@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function AccountPage() {
   return (
-    <main className="min-h-screen bg-[#F0E8DB] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
+    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between border-b border-[#E4D8C4]/30 pb-4">
           <Link
