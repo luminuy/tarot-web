@@ -132,7 +132,7 @@ export const Modal: React.FC<ModalProps> = ({
             animate={isMotionSafe ? { opacity: 1, y: 0 } : { opacity: 1 }}
             exit={isMotionSafe ? { opacity: 0, y: 10 } : { opacity: 0 }}
             transition={isMotionSafe ? SPRING.modal : TWEEN.fast}
-            className={`relative z-10 w-full ${maxWidthClass} max-h-[90vh] flex flex-col bg-white border border-[#E4D8C4] rounded-2xl shadow-[var(--shadow-overlay)] text-[#2E211A] overflow-hidden focus:outline-none ${className}`}
+            className={`relative z-10 w-full ${maxWidthClass} max-h-[90vh] flex flex-col bg-white border border-[#E4D8C4] rounded-lg shadow-[var(--shadow-overlay)] text-[#2E211A] overflow-hidden focus:outline-none ${className}`}
           >
             {/* Header */}
             {(title || showCloseButton) && (
@@ -146,7 +146,7 @@ export const Modal: React.FC<ModalProps> = ({
                     type="button"
                     onClick={onClose}
                     aria-label="ปิดหน้าต่าง"
-                    className="w-11 h-11 flex items-center justify-center rounded-md bg-[#F0E8DB] border border-[#E4D8C4] text-[#6F5B4A] hover:text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[rgba(143,92,26,0.08)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] cursor-pointer"
+                    className="w-11 h-11 flex items-center justify-center rounded bg-[#F0E8DB] border border-[#E4D8C4] text-[#6F5B4A] hover:text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[rgba(143,92,26,0.08)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] cursor-pointer"
                   >
                     ✕
                   </button>

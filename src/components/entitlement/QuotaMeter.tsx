@@ -52,25 +52,28 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
       onClick={onOpenDetails}
       title={title}
       aria-label={srLabel}
-      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border px-2 py-1 sm:px-2.5 font-serif-th text-[10px] font-semibold whitespace-nowrap transition-all select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
+      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border px-2 py-1 sm:px-2.5 font-serif-th text-[10px] font-semibold whitespace-nowrap transition-all select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
         unlimited
-          ? "border-[#CD9F5B] bg-[#FDF7F0] text-[#CD9F5B] shadow-xs hover:scale-105"
+          ? "border-[#E4D8C4] bg-[#FFFFFF] text-[#8F5C1A] hover:scale-105"
           : empty
-          ? "border-[#D6B48D] bg-[#FCF0E6] text-[#8C735D] hover:border-[#CD9F5B] hover:bg-[#FFFFFF]"
-          : "border-[#D6B48D] bg-[#FDF7F0] text-[#5A432F] hover:border-[#CD9F5B] hover:bg-[#FFFFFF] shadow-xs"
+            ? "border-[#E4D8C4] bg-[#F0E8DB] text-[#6F5B4A] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
+            : "border-[#E4D8C4] bg-[#FFFFFF] text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#F6F1E9]"
       }`}
     >
       {unlimited ? (
         <>
-          <span className="animate-pulse text-[#CD9F5B]">✦</span>
+          <span className="animate-pulse text-[#8F5C1A]">✦</span>
           <span className="hidden sm:inline">ไม่จำกัดสิทธิ์</span>
-          <span translate="no" className="rounded bg-[#CD9F5B]/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#5A432F]">
+          <span
+            translate="no"
+            className="rounded bg-[#8F5C1A]/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#2E211A]"
+          >
             VIP
           </span>
         </>
       ) : empty ? (
         <>
-          <SealedLockIcon className="h-3.5 w-3.5 text-[#8C735D]" />
+          <SealedLockIcon className="h-3.5 w-3.5 text-[#6F5B4A]" />
           <span className="hidden sm:inline">{view.badgeLabel}</span>
           <span className="sm:hidden font-mono">0/{view.limit}</span>
         </>

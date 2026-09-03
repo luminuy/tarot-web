@@ -14,9 +14,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       "inline-flex items-center justify-center font-semibold transition-all duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F1E9] active:scale-[0.97] touch-manipulation cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
 
     const sizeStyles = {
-      sm: "px-3 py-1.5 text-xs rounded-md gap-1.5",
-      md: "px-5 py-2.5 text-sm rounded-md gap-2",
-      lg: "px-7 py-3.5 text-base rounded-md gap-2.5",
+      sm: "px-3 py-1.5 text-xs rounded gap-1.5",
+      md: "px-5 py-2.5 text-sm rounded gap-2",
+      lg: "px-7 py-3.5 text-base rounded gap-2.5",
     }[size];
 
     const variantStyles = {

@@ -52,7 +52,7 @@ function renderFormattedText(text: string) {
     if (part.startsWith("**") && part.endsWith("**")) {
       const inner = part.slice(2, -2);
       return (
-        <strong key={idx} className="text-[#CD9F5B] font-bold">
+        <strong key={idx} className="text-[#8F5C1A] font-bold">
           {inner}
         </strong>
       );
@@ -70,7 +70,7 @@ function renderFormattedText(text: string) {
 const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ text, isError }) => {
   if (isError) {
     return (
-      <div className="rounded-2xl rounded-tl-xs bg-rose-50 border border-rose-200 p-3.5 sm:p-4 text-rose-800 font-serif-th text-xs sm:text-sm leading-relaxed shadow-xs">
+      <div className="rounded-lg rounded-tl-xs bg-rose-50 border border-rose-200 p-3.5 sm:p-4 text-rose-800 font-serif-th text-xs sm:text-sm leading-relaxed ">
         {text}
       </div>
     );
@@ -96,9 +96,7 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
     <div className="space-y-2.5 w-full">
       {paragraphs.map((p, pIdx) => {
         // Case 1: การ์ดวิเคราะห์ไพ่ทาโรต์ (เช่น "• **ตำแหน่งหัวใจ (9 ดาบ):** คำอธิบาย..." หรือ "• ตำแหน่ง...:")
-        const cardMatch =
-          p.match(/^[•\-✦]\s*\*\*(.*?)\*\*\s*:?\s*(.*)/s) ||
-          p.match(/^[•\-✦]\s*([^\n:]+):\s*(.*)/s);
+        const cardMatch = p.match(/^[•\-✦]\s*\*\*(.*?)\*\*\s*:?\s*(.*)/s) || p.match(/^[•\-✦]\s*([^\n:]+):\s*(.*)/s);
 
         if (cardMatch) {
           const cardTitle = cardMatch[1];
@@ -114,13 +112,13 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
                 stiffness: 360,
                 damping: 25,
               }}
-              className="rounded-2xl p-3.5 sm:p-4 bg-[#FFFFFF] border border-[#D6B48D] shadow-xs space-y-1.5 transition-all duration-300 hover:border-[#CD9F5B]"
+              className="rounded-lg p-3.5 sm:p-4 bg-[#FFFFFF] border border-[#E4D8C4] space-y-1.5 transition-all duration-300 hover:border-[#8F5C1A]"
             >
-              <div className="flex items-center gap-2 text-[#CD9F5B] font-bold text-xs sm:text-sm font-serif-th">
-                <span className="text-[#CD9F5B] text-xs">✦</span>
+              <div className="flex items-center gap-2 text-[#8F5C1A] font-bold text-xs sm:text-sm font-serif-th">
+                <span className="text-[#8F5C1A] text-xs">✦</span>
                 <span>{renderFormattedText(cardTitle)}</span>
               </div>
-              <p className="text-xs sm:text-sm text-[#5A432F] leading-relaxed font-serif-th pl-3.5 border-l-2 border-[#D6B48D]">
+              <p className="text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th pl-3.5 border-l-2 border-[#E4D8C4]">
                 {renderFormattedText(cardBody)}
               </p>
             </motion.div>
@@ -143,12 +141,12 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
                 stiffness: 360,
                 damping: 25,
               }}
-              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-2xl bg-[#FFFFFF] border border-[#D6B48D] shadow-xs hover:border-[#CD9F5B] transition-all duration-300"
+              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] transition-all duration-300"
             >
-              <span className="w-5 h-5 rounded-full bg-[#CD9F5B] text-[#FDF7F0] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 shadow-xs">
+              <span className="w-5 h-5 rounded-full bg-[#8F5C1A] text-[#FFFFFF] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 ">
                 {stepNum}
               </span>
-              <div className="flex-1 min-w-0 leading-relaxed font-serif-th text-xs sm:text-sm text-[#5A432F]">
+              <div className="flex-1 min-w-0 leading-relaxed font-serif-th text-xs sm:text-sm text-[#2E211A]">
                 {renderFormattedText(stepBody)}
               </div>
             </motion.div>
@@ -167,7 +165,7 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
               stiffness: 360,
               damping: 25,
             }}
-            className="rounded-2xl rounded-tl-xs bg-[#FFFFFF] border border-[#D6B48D] p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#5A432F] font-serif-th shadow-xs hover:border-[#CD9F5B] transition-colors"
+            className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#E4D8C4] p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-[#2E211A] font-serif-th hover:border-[#8F5C1A] transition-colors"
           >
             <p className="leading-relaxed">{renderFormattedText(p)}</p>
           </motion.div>
@@ -297,18 +295,17 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
     <section
       id={ASK_ORACLE_SECTION_ID}
       aria-labelledby="ask-oracle-title"
-      className="w-full scroll-mt-24 rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-4 sm:p-6 shadow-md flex flex-col h-[660px] sm:h-[720px] relative overflow-hidden justify-between"
+      className="w-full scroll-mt-24 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col h-[660px] sm:h-[720px] relative overflow-hidden justify-between"
     >
       {/* Background Sacred Geometric Aura */}
-      <div className="absolute top-0 right-0 w-72 h-72 bg-radial from-[#CD9F5B]/15 via-transparent to-transparent pointer-events-none blur-2xl" />
 
       {/* ── 1. Modern Messenger Header ── */}
-      <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#D6B48D]/30 shrink-0">
+      <div className="flex items-center justify-between gap-3 pb-3.5 border-b border-[#E4D8C4]/30 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           {/* Authentic 1909 Persona Card Avatar */}
           <div
-            className="w-10 h-14 rounded-lg border-2 overflow-hidden shadow-xs bg-[#FCF0E6] relative shrink-0"
-            style={{ borderColor: "#D6B48D" }}
+            className="w-10 h-14 rounded-lg border-2 overflow-hidden bg-[#F0E8DB] relative shrink-0"
+            style={{ borderColor: "#E4D8C4" }}
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
@@ -320,7 +317,10 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 id="ask-oracle-title" className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold truncate">
+              <h3
+                id="ask-oracle-title"
+                className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold truncate"
+              >
                 {persona.nameTh}
               </h3>
               <span className="flex items-center gap-1 text-[10px] text-emerald-800 font-sans font-medium px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-300 shrink-0">
@@ -328,26 +328,23 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 ออนไลน์
               </span>
             </div>
-            <p className="font-serif-th text-xs text-[#8C735D] truncate mt-0.5">
+            <p className="font-serif-th text-xs text-[#6F5B4A] truncate mt-0.5">
               {persona.tagline || "เปิดใจคุยได้ทุกเรื่อง ไพ่พร้อมตอบเสมอ"}
             </p>
           </div>
         </div>
 
         {/* Status Pill */}
-        <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-[#5A432F] border border-[#D6B48D] bg-[#E4C09F]/25 px-3 py-1 rounded-full font-serif-th shrink-0 font-bold">
+        <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-[#2E211A] border border-[#E4D8C4] bg-[#F0E8DB]/25 px-3 py-1 rounded-full font-serif-th shrink-0 font-bold">
           <span>✦</span> ถือสำรับของคุณอยู่
         </span>
       </div>
 
       {/* ── 2. Chat Log Messages Area ── */}
-      <div
-        ref={chatLogRef}
-        className="flex-1 overflow-y-auto space-y-4 py-3.5 pr-1.5 no-scrollbar scroll-smooth"
-      >
+      <div ref={chatLogRef} className="flex-1 overflow-y-auto space-y-4 py-3.5 pr-1.5 no-scrollbar scroll-smooth">
         {/* First Persona Welcome Greeting */}
         <div className="flex items-start gap-2.5">
-          <div className="w-7 h-10 rounded border border-[#D6B48D] overflow-hidden shrink-0 mt-1 shadow-xs bg-[#FCF0E6]">
+          <div className="w-7 h-10 rounded border border-[#E4D8C4] overflow-hidden shrink-0 mt-1 bg-[#F0E8DB]">
             <CardImage
               image={`${persona.cardImage || "major-02.jpg"}`}
               alt={persona.nameTh}
@@ -356,20 +353,21 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             />
           </div>
           <div className="max-w-[88%] space-y-1">
-            <div className="rounded-2xl rounded-tl-xs bg-[#FFFFFF] border border-[#D6B48D] p-3.5 sm:p-4 text-xs sm:text-sm text-[#5A432F] font-serif-th leading-relaxed shadow-xs">
+            <div className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#E4D8C4] p-3.5 sm:p-4 text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed ">
               <p>
-                สวัสดีค่ะ ยินดีที่ได้ร่วมเปิดไพ่ด้วยกันนะคะ ✨ มีจุดไหนในคำทำนายที่ยังสงสัย หรืออยากให้แม่หมอช่วยเจาะลึกแนวทางเพิ่มเติม พิมพ์ถามได้ตลอดเลยนะคะ
+                สวัสดีค่ะ ยินดีที่ได้ร่วมเปิดไพ่ด้วยกันนะคะ ✨ มีจุดไหนในคำทำนายที่ยังสงสัย
+                หรืออยากให้แม่หมอช่วยเจาะลึกแนวทางเพิ่มเติม พิมพ์ถามได้ตลอดเลยนะคะ
               </p>
             </div>
-            <span className="text-[10px] text-[#8C735D] font-serif-th pl-1">แม่หมอพร้อมรับฟังเสมอ</span>
+            <span className="text-[10px] text-[#6F5B4A] font-serif-th pl-1">แม่หมอพร้อมรับฟังเสมอ</span>
           </div>
         </div>
 
         {/* Suggested Quick Questions if user hasn't asked yet */}
         {messages.length === 0 && !chatLocked && (
           <div className="pl-9 space-y-2 pt-1">
-            <span className="text-[11px] text-[#5A432F] font-serif-th font-semibold flex items-center gap-1">
-              <span className="text-[#CD9F5B]">✦</span> หรือแตะเลือกคำถามยอดนิยม:
+            <span className="text-[11px] text-[#2E211A] font-serif-th font-semibold flex items-center gap-1">
+              <span className="text-[#8F5C1A]">✦</span> หรือแตะเลือกคำถามยอดนิยม:
             </span>
             <div className="flex flex-col gap-1.5">
               {SUGGESTED_QUESTIONS.map((q, idx) => (
@@ -377,10 +375,12 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                   key={idx}
                   type="button"
                   onClick={() => sendMessage(q)}
-                  className="text-left font-serif-th text-xs text-[#5A432F] hover:text-[#CD9F5B] p-2.5 rounded-xl bg-[#FCF0E6] hover:bg-[#FFFFFF] border border-[#D6B48D] hover:border-[#CD9F5B] transition-all cursor-pointer flex items-center justify-between group shadow-xs"
+                  className="text-left font-serif-th text-xs text-[#2E211A] hover:text-[#8F5C1A] p-2.5 rounded-lg bg-[#F0E8DB] hover:bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] transition-all cursor-pointer flex items-center justify-between group "
                 >
                   <span>"{q}"</span>
-                  <span className="text-[#CD9F5B] text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">✦</span>
+                  <span className="text-[#8F5C1A] text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                    ✦
+                  </span>
                 </button>
               ))}
             </div>
@@ -393,9 +393,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             <motion.div
               key={msg.id}
               initial={
-                msg.sender === "user"
-                  ? { opacity: 0, x: 28, scale: 0.94 }
-                  : { opacity: 0, x: -16, y: 10, scale: 0.97 }
+                msg.sender === "user" ? { opacity: 0, x: 28, scale: 0.94 } : { opacity: 0, x: -16, y: 10, scale: 0.97 }
               }
               animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
               transition={{
@@ -411,7 +409,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                   initial={{ scale: 0.75, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 420, damping: 24 }}
-                  className="w-7 h-10 rounded border border-[#D6B48D] overflow-hidden shrink-0 mt-1 shadow-xs bg-[#FCF0E6]"
+                  className="w-7 h-10 rounded border border-[#E4D8C4] overflow-hidden shrink-0 mt-1 bg-[#F0E8DB]"
                 >
                   <CardImage
                     image={`${persona.cardImage || "major-02.jpg"}`}
@@ -422,9 +420,11 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 </motion.div>
               )}
 
-              <div className={`flex flex-col gap-1 ${msg.sender === "user" ? "items-end max-w-[85%]" : "items-start max-w-[88%]"}`}>
+              <div
+                className={`flex flex-col gap-1 ${msg.sender === "user" ? "items-end max-w-[85%]" : "items-start max-w-[88%]"}`}
+              >
                 {msg.sender === "user" ? (
-                  <div className="rounded-2xl rounded-tr-xs bg-[#CD9F5B] text-[#FDF7F0] font-serif-th font-semibold px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-xs select-text">
+                  <div className="rounded-full rounded-tr-xs bg-[#8F5C1A] text-[#FFFFFF] font-serif-th font-semibold px-4 py-2.5 text-xs sm:text-sm leading-relaxed select-text">
                     {msg.text}
                   </div>
                 ) : (
@@ -435,7 +435,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                       <button
                         type="button"
                         onClick={() => window.location.reload()}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-[#D6B48D] bg-[#FDF7F0] px-3 py-1.5 text-xs font-semibold text-[#5A432F] hover:border-[#CD9F5B] hover:bg-[#FFFFFF] cursor-pointer shadow-xs"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] px-3 py-1.5 text-xs font-semibold text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#F6F1E9] cursor-pointer "
                       >
                         <span>↻</span> รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง
                       </button>
@@ -444,19 +444,15 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 )}
 
                 {/* Sub-bubble Actions (Timestamp & TTS) */}
-                <div className="flex items-center gap-2 text-[10px] text-[#8C735D] font-serif-th px-1 pt-0.5">
+                <div className="flex items-center gap-2 text-[10px] text-[#6F5B4A] font-serif-th px-1 pt-0.5">
                   {msg.timestamp && <span>{msg.timestamp}</span>}
                   {msg.sender === "bot" && !msg.isError && (
-                    <TTSReaderButton
-                      textToRead={msg.text}
-                      personaId={persona.id}
-                      className="text-[10px] py-0.5 px-2"
-                    />
+                    <TTSReaderButton textToRead={msg.text} personaId={persona.id} className="text-[10px] py-0.5 px-2" />
                   )}
                 </div>
 
                 {msg.isFallback && (
-                  <p className="font-serif-th text-[10px] leading-relaxed text-[#8C735D] px-1">
+                  <p className="font-serif-th text-[10px] leading-relaxed text-[#6F5B4A] px-1">
                     ✦ ตอนนี้แม่หมอตอบจากคลังคำตอบสำรอง ลองถามใหม่อีกครั้งในอีกสักครู่นะคะ
                   </p>
                 )}
@@ -477,7 +473,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             aria-live="polite"
             aria-label={`${persona.nameTh} กำลังพิมพ์ตอบ`}
           >
-            <div className="w-7 h-10 rounded border border-[#D6B48D] overflow-hidden shrink-0 mt-1 shadow-xs bg-[#FCF0E6]">
+            <div className="w-7 h-10 rounded border border-[#E4D8C4] overflow-hidden shrink-0 mt-1 bg-[#F0E8DB]">
               <CardImage
                 image={`${persona.cardImage || "major-02.jpg"}`}
                 alt={persona.nameTh}
@@ -485,12 +481,12 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 sizes="32px"
               />
             </div>
-            <div className="rounded-2xl rounded-tl-xs border border-[#D6B48D] bg-[#FFFFFF] px-4 py-3 shadow-xs flex items-center gap-3">
+            <div className="rounded-lg rounded-tl-xs border border-[#E4D8C4] bg-[#FFFFFF] px-4 py-3 flex items-center gap-3">
               <span className="flex items-center gap-1.5" aria-hidden="true">
                 {[0, 1, 2].map((i) => (
                   <motion.span
                     key={i}
-                    className="block h-2 w-2 rounded-full bg-[#CD9F5B]"
+                    className="block h-2 w-2 rounded-full bg-[#8F5C1A]"
                     animate={{
                       y: [0, -7, 0],
                       scale: [0.85, 1.3, 0.85],
@@ -505,7 +501,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                   />
                 ))}
               </span>
-              <span className="font-serif-th text-xs text-[#8C735D]">
+              <span className="font-serif-th text-xs text-[#6F5B4A]">
                 <span>{persona.nameTh} กำลังหยั่งรู้ไพ่และพิมพ์ตอบ...</span>
               </span>
             </div>
@@ -514,7 +510,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
       </div>
 
       {/* ── 3. Quick Follow-Up Chips & Messenger Input Dock ── */}
-      <div className="shrink-0 pt-2 border-t border-[#D6B48D]/30 space-y-2">
+      <div className="shrink-0 pt-2 border-t border-[#E4D8C4]/30 space-y-2">
         {messages.length > 0 && !loading && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -522,8 +518,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             transition={{ type: "spring", stiffness: 350, damping: 25 }}
             className="flex flex-wrap items-center gap-1.5 sm:gap-2 px-0.5 pb-0.5"
           >
-            <span className="text-[11px] text-[#5A432F] font-serif-th font-semibold shrink-0 flex items-center gap-1">
-              <span className="text-[#CD9F5B]">✦</span>
+            <span className="text-[11px] text-[#2E211A] font-serif-th font-semibold shrink-0 flex items-center gap-1">
+              <span className="text-[#8F5C1A]">✦</span>
               <span>ถามต่อด่วน:</span>
             </span>
             {[
@@ -537,7 +533,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => sendMessage(chip.query)}
-                className="text-[11px] text-[#5A432F] bg-[#FCF0E6] hover:bg-[#FFFFFF] hover:text-[#CD9F5B] border border-[#D6B48D] hover:border-[#CD9F5B] rounded-full px-3.5 py-1.5 transition-all cursor-pointer font-serif-th shadow-xs active:scale-95"
+                className="text-[11px] text-[#2E211A] bg-[#F0E8DB] hover:bg-[#FFFFFF] hover:text-[#8F5C1A] border border-[#E4D8C4] hover:border-[#8F5C1A] rounded-full px-3.5 py-1.5 transition-all cursor-pointer font-serif-th active:scale-95"
               >
                 "{chip.label}"
               </motion.button>
@@ -546,16 +542,14 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
         )}
 
         {chatLocked ? (
-          <div className="space-y-2 rounded-2xl border border-[#D6B48D] bg-[#FCF0E6] p-3.5">
+          <div className="space-y-2 rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] p-3.5">
             <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-[#D6B48D] bg-[#FDF7F0] text-[#CD9F5B]">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] text-[#8F5C1A]">
                 <SealedLockIcon className="h-3.5 w-3.5" />
               </span>
               <div className="min-w-0 space-y-0.5">
-                <p className="font-serif-th text-xs font-bold text-[#5A432F]">
-                  ถามต่อจากไพ่ชุดนี้ได้เมื่อเป็นสมาชิก
-                </p>
-                <p className="font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
+                <p className="font-serif-th text-xs font-bold text-[#2E211A]">ถามต่อจากไพ่ชุดนี้ได้เมื่อเป็นสมาชิก</p>
+                <p className="font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
                   สมัครฟรีเพื่อคุยถามเจาะลึกต่อ เก็บบทสนทนาไว้กับดวงชุดนี้ได้ทุกเครื่อง
                 </p>
               </div>
@@ -563,22 +557,22 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             <button
               type="button"
               onClick={() => requestUpgrade("members_only")}
-              className="w-full rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FDF7F0] transition-all cursor-pointer shadow-sm"
+              className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition-all cursor-pointer "
             >
               ✦ สมัครสมาชิกฟรีเพื่อถามต่อ
             </button>
           </div>
         ) : freeChatLimitReached ? (
-          <div className="space-y-2 rounded-2xl border border-[#CD9F5B] bg-[#FFFFFF] p-3.5 shadow-sm">
+          <div className="space-y-2 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] p-3.5 ">
             <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl border border-[#D6B48D] bg-[#FCF0E6] text-[#CD9F5B] text-xs font-bold">
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] text-[#8F5C1A] text-xs font-bold">
                 ✦
               </span>
               <div className="min-w-0 space-y-0.5">
-                <p className="font-serif-th text-xs font-bold text-[#5A432F]">
+                <p className="font-serif-th text-xs font-bold text-[#2E211A]">
                   ใช้สิทธิ์ถามคำถามต่อยอดฟรีครบ 2 ข้อแล้ว
                 </p>
-                <p className="font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
+                <p className="font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
                   ปลดล็อก <strong>ญาณพยากรณ์พิเศษ</strong> เพื่อคุยถามเจาะลึกกับแม่หมอได้ไม่จำกัดข้อ
                 </p>
               </div>
@@ -586,7 +580,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             <button
               type="button"
               onClick={() => requestUpgrade("daily_exhausted")}
-              className="w-full rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FDF7F0] transition-all cursor-pointer shadow-sm"
+              className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition-all cursor-pointer "
             >
               ✦ ปลดล็อกญาณพยากรณ์พิเศษเพื่อถามต่อไม่จำกัด
             </button>
@@ -599,7 +593,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             }}
             className="space-y-1.5"
           >
-            <div className="flex items-center gap-2 rounded-full border border-[#D6B48D] bg-[#FFFFFF] p-1.5 pl-4 focus-within:border-[#CD9F5B] focus-within:shadow-xs transition-all">
+            <div className="flex items-center gap-2 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] p-1.5 pl-4 focus-within:border-[#E4D8C4] focus-within: transition-all">
               <input
                 type="text"
                 placeholder={`พิมพ์ถาม ${persona.nameTh} ที่นี่...`}
@@ -607,14 +601,14 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                 onChange={(e) => setInput(e.target.value)}
                 disabled={loading}
                 aria-label="พิมพ์คำถามถึงแม่หมอ"
-                className="no-focus-ring min-w-0 flex-1 bg-transparent font-serif-th text-xs sm:text-sm text-[#5A432F] placeholder-[#8C735D]/60 border-none outline-none focus:outline-none focus:border-none focus:ring-0 !shadow-none"
+                className="no-focus-ring min-w-0 flex-1 bg-transparent font-serif-th text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/60 border-none outline-none focus:outline-none focus:border-none focus:ring-0 !shadow-none"
               />
               <motion.button
                 type="submit"
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
                 disabled={loading || !input.trim()}
-                className="h-9 w-9 rounded-full bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] flex items-center justify-center font-bold shadow-xs disabled:opacity-40 disabled:scale-100 transition-all shrink-0 cursor-pointer"
+                className="h-9 w-9 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] flex items-center justify-center font-bold disabled:opacity-40 disabled:scale-100 transition-all shrink-0 cursor-pointer"
                 aria-label="ส่งข้อความ"
                 title="ส่งคำถาม"
               >
@@ -623,12 +617,12 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
             </div>
 
             {!isUnlimited && (
-              <div className="flex justify-between items-center px-2 text-[10px] text-[#8C735D] font-serif-th">
+              <div className="flex justify-between items-center px-2 text-[10px] text-[#6F5B4A] font-serif-th">
                 <span>สิทธิ์ถามฟรี: เหลืออีก {Math.max(0, 2 - userQuestionsCount)} ข้อ</span>
                 <button
                   type="button"
                   onClick={() => requestUpgrade("daily_exhausted")}
-                  className="text-[#CD9F5B] hover:underline cursor-pointer font-bold"
+                  className="text-[#8F5C1A] hover:underline cursor-pointer font-bold"
                 >
                   ปลดล็อกไม่จำกัด ✦
                 </button>
@@ -640,5 +634,3 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
     </section>
   );
 };
-
-

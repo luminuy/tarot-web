@@ -70,20 +70,20 @@ export function EntitlementGate({
       {/* แถบแจ้งสิทธิ์แบบบาง — บอกสถานะ ไม่ขวางทาง ไม่ซ้ำกับหน้าต่างสิทธิ์ตอนกดเริ่ม */}
       <div
         aria-live="polite"
-        className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-[#D6B48D] bg-[#FDF7F0] px-4 py-3 shadow-xs"
+        className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border border-[#E4D8C4] bg-[#FFFFFF] px-4 py-3 "
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#D6B48D] bg-[#FCF0E6] text-[#CD9F5B]">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E4D8C4] bg-[#F0E8DB] text-[#8F5C1A]">
           {isGuest ? <SealedLockIcon className="h-4 w-4" /> : <HourglassIcon className="h-4 w-4" />}
         </span>
 
         <div className="min-w-0 flex-1 space-y-0.5">
-          <p className="font-serif-th text-xs font-bold text-[#5A432F] sm:text-sm">{copy.title}</p>
-          <p className="font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
+          <p className="font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm">{copy.title}</p>
+          <p className="font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
             {isGuest
               ? `ทดลองฟรีได้ ${GUEST_LIMIT} ครั้ง (ใช้ครบแล้ว) · สมัครสมาชิกฟรีแล้วเปิดได้วันละ ${DAILY_LIMIT} ครั้ง`
               : countdown
-              ? `โควตาฟรีชุดใหม่ ${countdown} · เลือกดูผังไว้ก่อนได้`
-              : view.statusLine}
+                ? `โควตาฟรีชุดใหม่ ${countdown} · เลือกดูผังไว้ก่อนได้`
+                : view.statusLine}
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export function EntitlementGate({
           <button
             type="button"
             onClick={() => onRequestUpgrade(reason)}
-            className="min-h-[36px] shrink-0 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] px-4 py-1.5 font-serif-th text-[11px] font-bold text-[#FDF7F0] shadow-xs transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
+            className="min-h-[36px] shrink-0 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-1.5 font-serif-th text-[11px] font-bold text-[#FFFFFF] transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
             <span className="mr-1">✦</span>
             {ctaLabel}

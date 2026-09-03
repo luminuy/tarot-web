@@ -37,6 +37,6 @@ export function calculatePasswordStrength(password: string): PasswordStrength {
       return { score: 3, label: "ปลอดภัยดี", colorClass: "text-emerald-400", barColor: "bg-emerald-500" };
     case 4:
     default:
-      return { score: 4, label: "ปลอดภัยสูงมาก ✦", colorClass: "text-[#ffd700]", barColor: "bg-gradient-to-r from-emerald-400 to-[#ffd700]" };
+      return { score: 4, label: "ปลอดภัยสูงมาก ✦", colorClass: "text-[#8F5C1A]", barColor: "bg-gradient-to-r from-emerald-400 to-[#8F5C1A]" };
   }
 }
