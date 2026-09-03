@@ -6,7 +6,8 @@
  *
  * AI Gateway (ฟรี) ให้ทั้งหมดนั้นโดย "เปลี่ยนแค่ base URL":
  *   - Dashboard เดียวเห็นทุก request/ราคา/ความเร็ว แยกตาม provider + model
- *   - แคช response ที่เหมือนกันเป๊ะ (ประหยัดโควตา provider)
+ *   - แคช response (คุมรายเส้นด้วย `cf-aig-cache-ttl` — ดู aiGatewayHeaders)
+ *     ⚠️ คำอ่านไพ่/แชท บังคับ ttl=0 เสมอ: ต้องสด + cache hit ทำให้ usage=0 → ระบบไม่หักโควตา
  *   - rate-limit / retry / fallback ระดับ gateway
  *
  * ⚙️ การตั้งค่า (ไม่บังคับ — ไม่ตั้งก็ยิงตรงเหมือนเดิม ไม่พัง):
@@ -39,12 +40,22 @@ export function isAiGatewayEnabled(): boolean {
 /**
  * Header เสริมสำหรับ AI Gateway (ผสานเข้ากับ headers เดิมของแต่ละ provider)
  * - `cf-aig-authorization` ใส่เฉพาะเมื่อเปิด Authenticated Gateway
+ * - `cf-aig-cache-ttl` คุมการแคชระดับ request:
+ *     0        = ห้ามแคชเด็ดขาด (ใช้กับคำอ่านไพ่ / แชท — ต้องสด + กันหักโควตาพลาด)
+ *     > 0      = แคชได้ N วินาที (ใช้กับ safety classifier / สรุปรายเดือน)
+ *     undefined = ตามค่า default ของ gateway
+ *
  * คืน object ว่างถ้าไม่ได้เปิด gateway — spread เข้าไปได้เลยไม่ต้องเช็ค
  */
-export function aiGatewayHeaders(): Record<string, string> {
+export function aiGatewayHeaders(opts: { cacheTtl?: number } = {}): Record<string, string> {
   if (!isAiGatewayEnabled()) return {};
+  const headers: Record<string, string> = {};
   const token = process.env.CF_AI_GATEWAY_TOKEN?.trim();
-  return token ? { "cf-aig-authorization": `Bearer ${token}` } : {};
+  if (token) headers["cf-aig-authorization"] = `Bearer ${token}`;
+  if (typeof opts.cacheTtl === "number" && opts.cacheTtl >= 0) {
+    headers["cf-aig-cache-ttl"] = String(Math.floor(opts.cacheTtl));
+  }
+  return headers;
 }
 
 /**

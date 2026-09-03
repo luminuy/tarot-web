@@ -43,17 +43,21 @@
 **โค้ดที่เพิ่ม:**
 - `src/lib/ai/gateway.ts` — helper สร้าง endpoint: ถ้าตั้ง env ก็ route ผ่าน gateway ไม่ตั้งก็ยิงตรง (ไม่พัง)
 - แก้ 5 จุดที่เรียก AI: `gemini.ts`, `groq.ts` (เส้นจริง — ด่านตรวจสุขภาพยังยิงตรง), `claude.ts` (baseURL SDK), `journal/monthly-summary`, `reading/[id]/chat`
+- **cache แบบเลือกเส้น** (`cf-aig-cache-ttl` ต่อ request):
+  - คำอ่านไพ่ + แชทแม่หมอ → **ttl 0 (ห้ามแคชเด็ดขาด)** — ต้องสด + cache hit ทำให้ usage=0 → ระบบไม่หักโควตา (INC-0096)
+  - สรุปดวงรายเดือน → ttl 6 ชม.
+  - จึง**เปิด Cache Responses ที่ gateway ได้เลยอย่างปลอดภัย** — เส้นที่ห้ามแคชถูกกันด้วย header แล้ว
 
 **ต้องทำต่อ (เจ้าของโปรเจกต์):**
-1. Dashboard → AI → AI Gateway → สร้างชื่อ `seertarot-ai` → คัดลอก Account ID
-2. ตั้ง secret:
+1. Dashboard → AI → AI Gateway → **Create a custom gateway** ชื่อ `seertarot-ai`
+   - **ปิด "Authenticated Gateway"** (โค้ดยิงผ่าน fetch ธรรมดา ถ้าเปิดจะโดน 401)
+   - Collect Logs เปิด · Cache/Rate-limit/Retry เปิดทีหลังในหน้า gateway ได้
+2. ตั้ง secret (ไม่ต้องมี token):
    ```
-   npx wrangler secret put CF_AI_GATEWAY_ACCOUNT_ID
-   npx wrangler secret put CF_AI_GATEWAY_ID          # = seertarot-ai
+   npx wrangler secret put CF_AI_GATEWAY_ACCOUNT_ID   # f5af6f66302ba6872d8f51aebf43d3fe
+   npx wrangler secret put CF_AI_GATEWAY_ID           # seertarot-ai
    ```
-   (ปล่อย `CF_AI_GATEWAY_TOKEN` ว่างไว้ = Unauthenticated Gateway ก็พอ)
-3. ใน dashboard เปิด: Caching (TTL สั้น ๆ เช่น 60s สำหรับ chat), Rate limiting, Retry
-4. Deploy → เปิดหน้า Gateway ดู traffic ไหลเข้า + `/admin` แท็บสุขภาพ AI ยังเขียว
+3. Deploy → เปิดหน้า Gateway ดู traffic ไหลเข้า + `/admin` → การ์ด Cloudflare Free Stack ต้องขึ้น "AI Gateway: เปิดใช้แล้ว"
 
 **ความเสี่ยง/กันไว้:**
 - ไม่ตั้ง env = พฤติกรรมเดิมเป๊ะ (helper คืน URL ตรง)

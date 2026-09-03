@@ -106,7 +106,7 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
-          ...aiGatewayHeaders(),
+          ...aiGatewayHeaders({ cacheTtl: 0 }),
         },
         body: JSON.stringify(requestBody),
       });

@@ -34,6 +34,20 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: AI Gateway — cache แบบเลือกเส้น (คำอ่าน/แชท ห้ามแคช · สรุปรายเดือนแคชได้)
+
+- **ทำไม**: เจ้าของโปรเจกต์จะเปิด "Cache Responses" ที่ gateway — แต่ถ้าคำอ่านไพ่โดนแคช คนที่ 2 จะได้คำอ่านคนแรก + usage=0 → ระบบไม่หักโควตา (ช่องโหว่ INC-0096)
+- **สิ่งที่ทำ**: `aiGatewayHeaders({ cacheTtl })` — ส่ง header `cf-aig-cache-ttl` ต่อ request
+  - คำอ่านไพ่ (`gemini.ts` / `claude.ts` / `groq.ts`) + แชท (`reading/[id]/chat`) → **ttl 0 (ห้ามแคช)**
+  - สรุปดวงรายเดือน (`journal/monthly-summary`) → ttl 21600 (6 ชม.)
+- **ผลลัพธ์**: เปิด Cache Responses ที่ gateway ได้เลยอย่างปลอดภัย — เส้นที่ห้ามแคชถูกกันด้วย header
+- **ยังไม่ครอบ**: safety classifier (`assessCrisisRisk`) ใช้ `env.AI` binding ตรง ไม่ผ่าน gateway → แคชผ่าน header ไม่ได้ (ถ้าจะแคชต้อง route ผ่าน slug `workers-ai` — ทีหลัง)
+- **ไฟล์ที่แก้ไข**: `src/lib/ai/gateway.ts`, `src/lib/ai/gemini.ts`, `src/lib/ai/groq.ts`, `src/lib/ai/claude.ts`, `src/app/api/reading/[id]/chat/route.ts`, `src/app/api/journal/monthly-summary/route.ts`, `docs/plans/CLOUDFLARE_FREE_STACK.md`
+- **ผลการทดสอบ**: `tsc` ✅ · `repo:verify` 21/21 ✅
+- **⚠️ ลำดับ deploy**: PR นี้ต้อง merge + deploy **ก่อน** ตั้ง secret `CF_AI_GATEWAY_*` ไม่งั้นมีช่องว่างที่คำอ่านโดนแคช
+
+---
+
 ### 🗓️ 2026-09-03: /admin — แสดงสถานะ Cloudflare Free Stack (AI Gateway / Turnstile / Workers AI)
 
 - **ทำไม**: หลัง `wrangler secret put` แล้วเจ้าของโปรเจกต์ต้องรู้ว่าตั้งครบไหม — เดิมไม่มีที่ดู
