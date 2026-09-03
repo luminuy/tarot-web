@@ -15,8 +15,7 @@
 
 import { DECK } from "@/data/cards";
 import { ARTICLES } from "@/data/articles";
-import { getAiBinding } from "@/lib/platform/cf";
-import { getVectorizeBinding } from "@/lib/platform/cf";
+import { getAiBinding, getVectorizeBinding } from "@/lib/platform/cf";
 
 const EMBED_MODEL = "@cf/baai/bge-m3";
 const EMBED_BATCH = 90;
@@ -161,7 +160,7 @@ export async function semanticSearch(
   if (!embedding) return [];
 
   const topK = opts.topK ?? 8;
-  const res = await vec.query(embedding, { topK: topK + 5, returnMetadata: "all" }).catch(() => null);
+  const res = await vec.query(embedding, { topK: topK + 5, returnMetadata: "all" }).catch((e) => { console.warn("[search] query ล้มเหลว:", e); return null; });
   if (!res?.matches) return [];
 
   return res.matches
@@ -170,7 +169,10 @@ export async function semanticSearch(
     .slice(0, topK);
 }
 
-/** ไพ่/บทความที่ใกล้เคียงกับ item ที่ระบุ (เช่นไพ่ใบหนึ่ง) */
+/**
+ * ไพ่/บทความที่ใกล้เคียงกับ item ที่ระบุ (เช่นไพ่ใบหนึ่ง)
+ * re-embed ข้อความของ item เอง แล้ว query — ไม่พึ่ง `getByIds` (บาง tier ไม่คืน values)
+ */
 export async function relatedTo(
   itemId: string,
   opts: { topK?: number; type?: SearchType } = {},
@@ -178,12 +180,14 @@ export async function relatedTo(
   const vec = await getVectorizeBinding();
   if (!vec) return [];
 
-  const own = await vec.getByIds([itemId]).catch(() => []);
-  const vector = own[0]?.values;
-  if (!vector) return [];
+  const doc = buildSearchCorpus().find((d) => d.id === itemId);
+  if (!doc) return [];
+
+  const [embedding] = await embedTexts([doc.text]);
+  if (!embedding) return [];
 
   const topK = opts.topK ?? 4;
-  const res = await vec.query(vector, { topK: topK + 6, returnMetadata: "all" }).catch(() => null);
+  const res = await vec.query(embedding, { topK: topK + 6, returnMetadata: "all" }).catch((e) => { console.warn("[search] related query ล้มเหลว:", e); return null; });
   if (!res?.matches) return [];
 
   return res.matches
