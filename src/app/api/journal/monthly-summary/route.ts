@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 
 export const runtime = "nodejs";
 
@@ -145,11 +146,11 @@ ${historyText}
       let r: Response;
       try {
         r = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          geminiEndpoint(model, "generateContent"),
           {
             method: "POST",
             signal: controller.signal,
-            headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey },
+            headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey, ...aiGatewayHeaders() },
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {

@@ -6,6 +6,7 @@ import { type Reading, ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
 
 import { hasForeignScript, objectHasForeignScript, stripForeignScript, stripForeignScriptDeep } from "@/lib/ai/language";
+import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 /**
  * ตัวเชื่อมกับ Google Gemini API (Ultra-Low Latency Streaming)
  * -------------------------------------------------
@@ -178,7 +179,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   let response: Response | null = null;
 
   for (const [modelIdx, model] of WORKING_GEMINI_MODELS.entries()) {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
+    const endpoint = geminiEndpoint(model, "streamGenerateContent", { sse: true });
     // camelCase ล้วน + ตัด thinkingConfig/responseSchema ออก —
     // Gemini 3.x (3.6/3.5-lite) คืน 400 "invalid argument" ถ้ามี thinkingBudget:0 หรือ responseSchema แบบ OpenAPI เก่า
     // JSON ที่ได้ยัง parse ได้ปกติผ่าน parsePartialReading + ReadingSchema.safeParse + fallback ด้านล่าง
@@ -207,6 +208,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         headers: {
           "Content-Type": "application/json",
           "X-goog-api-key": apiKey,
+          ...aiGatewayHeaders(),
         },
         body: JSON.stringify(requestBody),
       });
