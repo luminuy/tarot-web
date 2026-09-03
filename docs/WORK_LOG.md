@@ -34,6 +34,19 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: UX — พัดไพ่ 78 ใบ (InteractiveCardFan) ย่อพอดีกรอบ ไม่ต้องเลื่อนแนวนอน
+
+- **ปัญหา**: `InteractiveCardFan` ใช้ `overflow-x-auto` + `min-w-max` → พัด 3 ชั้น (26 ใบ/ชั้น) กว้าง ~1400px ล้นจอ ต้องเลื่อนแนวนอนถึงจะเห็นครบ (ขัดกฎเหล็กข้อ 3 Zero-Clipping)
+- **สิ่งที่ทำ** (`src/components/deck/InteractiveCardFan.tsx`):
+  - เปลี่ยน stage เป็น `overflow-hidden` (เลิก scroll container) · วัดความกว้าง layout ของพัด (`offsetWidth` + เผื่อ 32px กันใบริมที่หมุน) เทียบพื้นที่ว่างจริงของ stage แล้ว `transform: scale()` ย่อให้พอดี
+  - `transformOrigin: top left` (พัดกว้างกว่ากรอบ → `mx-auto` pin ซ้าย → origin ต้องซ้าย) · ชดเชยพื้นที่ว่างด้านล่างที่ scale ทิ้งไว้ด้วย `marginBottom: -trimY`
+  - วัดใหม่ผ่าน `ResizeObserver` + หลังหยิบไพ่ (พัดแคบลง → ขยายกลับ)
+  - เอา mobile edge-fade masks ออก (ไม่มี scroll แล้ว)
+- **ผลทดสอบ (dev)**: 1440 / 1280 / 390px — ไพ่ทั้ง 78 ใบพอดีกรอบ ไม่มี scroll แนวนอน · หยิบไพ่แล้วพัดวัดใหม่ถูกต้อง · `tsc` ✅ · `repo:verify` 23/23 ✅
+- **หมายเหตุ**: บนมือถือ 390px ไพ่เล็กลงมาก (scale ~0.34) — เป็นผลจากข้อกำหนด "ไม่เลื่อน" + ไพ่ 78 ใบ · ยังมีปุ่ม "สุ่มเลือกให้ฉัน" เป็นทางเลือก a11y
+
+---
+
 ### 🗓️ 2026-09-03: ปรับ UX — นำแบนเนอร์กั้นสิทธิ์ (EntitlementGate / FreeTrialNotice) ด้านบนออก
 
 - **ปัญหา/ข้อสังเกต**: แบนเนอร์กั้นสิทธิ์ด้านบน (เช่น "คุณใช้สิทธิ์ทดลองฟรีครบแล้ว" หรือ "เปิดไพ่ทดลองฟรีได้เลย") สร้างบรรยากาศที่ดูเหมือนถูกทวงเงินหรือบีบให้สมัครสมาชิกตั้งแต่แรกเข้าเว็บ (Buzzkill) และกินพื้นที่ด้านบนหน้าจอซ้ำซ้อน

@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
+
+// useLayoutEffect ฝั่ง server จะเตือน — สลับเป็น useEffect ตอน SSR
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 interface InteractiveCardFanProps {
   totalCards?: number;
@@ -86,8 +89,46 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
   onPickCard,
   disabled = false,
 }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const fanRef = useRef<HTMLDivElement>(null);
+  const [fanFit, setFanFit] = useState({ scale: 1, trimY: 0 });
   const isComplete = pickedIndices.length >= targetCount;
+
+  // จัดพัดไพ่ให้พอดีความกว้างคอนเทนเนอร์เสมอ (ไม่ต้องเลื่อนแนวนอน)
+  // offsetWidth = ความกว้าง layout (ไม่สนใจ transform/animation) + เผื่อระยะที่ไพ่ริมสุด "หมุน" ล้นออกมา
+  const fitFan = useCallback(() => {
+    const stage = stageRef.current;
+    const fan = fanRef.current;
+    if (!stage || !fan) return;
+    const cs = getComputedStyle(stage);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const avail = stage.clientWidth - padX;
+    const natural = fan.offsetWidth + 32; // เผื่อไพ่ริมสุดที่หมุน ~11° ล้นด้านละ ~14px
+    if (avail <= 0 || natural <= 0) return;
+    const scale = Math.min(1, avail / natural);
+    // scale ย่อจากขอบบน → เก็บพื้นที่ว่างด้านล่างที่เกินมาคืน
+    const trimY = fan.offsetHeight * (1 - scale);
+    setFanFit((prev) =>
+      Math.abs(prev.scale - scale) < 0.003 && Math.abs(prev.trimY - trimY) < 0.5
+        ? prev
+        : { scale, trimY }
+    );
+  }, []);
+
+  useIsoLayoutEffect(() => {
+    fitFan();
+    const stage = stageRef.current;
+    if (!stage || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(fitFan);
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, [fitFan]);
+
+  // ไพ่ถูกหยิบออก → พัดแคบลง → วัดใหม่ให้ขยายกลับได้
+  useEffect(() => {
+    const id = window.setTimeout(fitFan, 320);
+    return () => window.clearTimeout(id);
+  }, [pickedIndices.length, targetCount, fitFan]);
 
   // Split 78 cards into 3 cascading tiers (26 cards each)
   const tiers = useMemo(() => {
@@ -159,16 +200,21 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
 
       {/* Unified Masterpiece Altar Stage (No Row-Level Clipping) */}
       <div className="w-full relative rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] overflow-hidden">
-        {/* Mobile Edge Fade Masks */}
-        <div className="absolute top-0 bottom-0 left-0 w-6 bg-[#FFFFFF] to-transparent pointer-events-none z-20 sm:hidden" />
-        <div className="absolute top-0 bottom-0 right-0 w-6 bg-[#FFFFFF] to-transparent pointer-events-none z-20 sm:hidden" />
-
-        {/* SINGLE UNIFIED SCROLL CONTAINER FOR ALL 3 TIERS (P1-U10 overscroll-contain) */}
+        {/* UNIFIED STAGE — พัดไพ่ทั้ง 3 ชั้นย่อพอดีความกว้าง ไม่ต้องเลื่อน (P1-U10) */}
         <div
-          ref={scrollContainerRef}
-          className="w-full overflow-x-auto custom-scrollbar pt-6 pb-6 sm:pt-10 sm:pb-8 px-4 sm:px-8 relative z-10 overscroll-x-contain"
+          ref={stageRef}
+          className="w-full overflow-hidden pt-6 pb-6 sm:pt-10 sm:pb-8 px-4 sm:px-8 relative z-10"
         >
-          <div className="min-w-max mx-auto flex flex-col items-center gap-3.5 sm:gap-6 py-1">
+          <div
+            ref={fanRef}
+            className="min-w-max mx-auto flex flex-col items-center gap-3.5 sm:gap-6 py-1"
+            style={{
+              transform: `scale(${fanFit.scale})`,
+              // ย่อจากมุมซ้ายบน: เมื่อพัดกว้างกว่ากรอบ mx-auto จะ pin ไว้ซ้าย → origin ต้องเป็นซ้ายด้วย
+              transformOrigin: "top left",
+              marginBottom: -fanFit.trimY,
+            }}
+          >
             {tiers.map((tierCards, tierIdx) => {
               const tierOffsetClass = tierIdx === 1 ? "pl-6 sm:pl-10" : tierIdx === 2 ? "pl-12 sm:pl-20" : "pl-0";
 
