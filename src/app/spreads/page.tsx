@@ -71,7 +71,7 @@ export default function SpreadsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700] relative overflow-hidden">
+    <main className="min-h-screen bg-[#FCF0E6] text-[#5A432F] p-4 sm:p-8 font-sans selection:bg-[#CD9F5B]/30 selection:text-[#5A432F] relative overflow-hidden">
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
@@ -87,10 +87,10 @@ export default function SpreadsPage() {
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Top Breadcrumbs & Dropdown */}
-        <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4">
+        <div className="flex items-center justify-between border-b border-[#D6B48D]/30 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#e5c07b] hover:text-[#ffd700] transition-colors py-1.5 px-3.5 rounded-2xl bg-[#130d24]/60 border border-[#e5c07b]/20 hover:border-[#e5c07b]/50 font-serif-th"
+            className="inline-flex items-center gap-1.5 text-xs text-[#5A432F] hover:text-[#CD9F5B] transition-colors py-1.5 px-3.5 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] hover:border-[#CD9F5B] font-serif-th shadow-xs"
           >
             <span>←</span> กลับหน้าดูดวงหลัก
           </Link>
@@ -99,13 +99,13 @@ export default function SpreadsPage() {
 
         {/* Hero Header */}
         <div className="text-center space-y-2.5 py-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#e5c07b]/30 bg-[#130d24]/80 text-xs text-[#e5c07b] shadow-[0_0_15px_rgba(229,192,123,0.2)] font-serif-th">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D6B48D] bg-[#FDF7F0] text-xs text-[#CD9F5B] shadow-xs font-serif-th font-bold">
             <span>✦</span> 20 ผังการเปิดไพ่มาตรฐานสากล <span>✦</span>
           </div>
           <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide">
             ผังการเปิดไพ่ทาโรต์ 20 รูปแบบ
           </h1>
-          <p className="text-xs sm:text-sm text-[#9c93b8] max-w-xl mx-auto leading-relaxed font-serif-th">
+          <p className="text-xs sm:text-sm text-[#8C735D] max-w-xl mx-auto leading-relaxed font-serif-th">
             เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ (แตะเพื่อดูตัวอย่างการจัดวางและความหมายแต่ละตำแหน่ง)
           </p>
         </div>

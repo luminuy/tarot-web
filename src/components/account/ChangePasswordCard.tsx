@@ -73,28 +73,28 @@ export function ChangePasswordCard() {
   };
 
   return (
-    <div className="rounded-2xl border border-[#e5c07b]/25 bg-gradient-to-b from-[#130d24]/90 to-[#07040f]/90 p-5 sm:p-6 space-y-4 shadow-xl text-left">
+    <div className="rounded-[1.618rem] border border-[#D6B48D] bg-[#FFFFFF] p-5 sm:p-6 space-y-4 shadow-xs text-left">
       <div className="flex items-center gap-2">
-        <span className="text-[#ffd700]">✦</span>
+        <span className="text-[#CD9F5B]">✦</span>
         <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
           {hasPassword ? "เปลี่ยนรหัสผ่าน" : "ตั้งรหัสผ่านสำหรับเข้าสู่ระบบด้วยอีเมล"}
         </h2>
       </div>
 
-      <p className="text-xs text-[#9c93b8] leading-relaxed">
+      <p className="text-xs text-[#8C735D] leading-relaxed">
         {hasPassword
           ? "กำหนดรหัสผ่านใหม่เพื่อความปลอดภัย ระบบจะลงชื่อออกจากอุปกรณ์อื่นโดยอัตโนมัติ"
           : "คุณสามารถตั้งรหัสผ่านเพื่อเข้าสู่ระบบด้วยอีเมลได้ นอกเหนือจากการเข้าสู่ระบบผ่าน Google หรือ LINE"}
       </p>
 
       {errorMsg && (
-        <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs font-serif-th text-center">
+        <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-serif-th text-center">
           {errorMsg}
         </div>
       )}
 
       {successMsg && (
-        <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs font-serif-th text-center">
+        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-serif-th text-center">
           {successMsg}
         </div>
       )}
@@ -102,25 +102,25 @@ export function ChangePasswordCard() {
       <form onSubmit={handleSubmit} className="space-y-3 pt-2">
         {hasPassword && (
           <div className="space-y-1">
-            <label className="block text-xs text-[#c4bcd8] font-serif-th">รหัสผ่านเดิม</label>
+            <label className="block text-xs text-[#5A432F] font-serif-th font-semibold">รหัสผ่านเดิม</label>
             <input
               type={showPassword ? "text" : "password"}
               required
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               placeholder="••••••••••"
-              className="w-full h-10 px-3.5 rounded-xl bg-[#170e2c] border border-[#e5c07b]/30 text-white text-sm focus:outline-none focus:border-[#ffd700] transition-colors"
+              className="w-full h-10 px-3.5 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] text-[#5A432F] text-sm focus:outline-none focus:border-[#CD9F5B] transition-colors"
             />
           </div>
         )}
 
         <div className="space-y-1">
           <div className="flex justify-between items-center">
-            <label className="block text-xs text-[#c4bcd8] font-serif-th">รหัสผ่านใหม่</label>
+            <label className="block text-xs text-[#5A432F] font-serif-th font-semibold">รหัสผ่านใหม่</label>
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-xs text-[#9c93b8] hover:text-white cursor-pointer"
+              className="text-xs text-[#8C735D] hover:text-[#5A432F] cursor-pointer"
             >
               {showPassword ? "ซ่อน" : "ดูรหัสผ่าน"}
             </button>
@@ -131,18 +131,18 @@ export function ChangePasswordCard() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="อย่างน้อย 10 ตัวอักษร"
-            className="w-full h-10 px-3.5 rounded-xl bg-[#170e2c] border border-[#e5c07b]/30 text-white text-sm focus:outline-none focus:border-[#ffd700] transition-colors"
+            className="w-full h-10 px-3.5 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] text-[#5A432F] text-sm focus:outline-none focus:border-[#CD9F5B] transition-colors"
           />
           {newPassword.length > 0 && (
             <div className="pt-1.5 space-y-1">
-              <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-[#D6B48D]/30 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${strength.barColor} transition-all duration-300`}
                   style={{ width: `${(strength.score / 4) * 100}%` }}
                 />
               </div>
               <div className="flex justify-between text-[11px] font-serif-th">
-                <span className="text-[#9c93b8]">ความปลอดภัย:</span>
+                <span className="text-[#8C735D]">ความปลอดภัย:</span>
                 <span className={strength.colorClass}>{strength.label}</span>
               </div>
             </div>
@@ -150,21 +150,21 @@ export function ChangePasswordCard() {
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xs text-[#c4bcd8] font-serif-th">ยืนยันรหัสผ่านใหม่อีกครั้ง</label>
+          <label className="block text-xs text-[#5A432F] font-serif-th font-semibold">ยืนยันรหัสผ่านใหม่อีกครั้ง</label>
           <input
             type={showPassword ? "text" : "password"}
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="ระบุรหัสผ่านให้ตรงกัน"
-            className="w-full h-10 px-3.5 rounded-xl bg-[#170e2c] border border-[#e5c07b]/30 text-white text-sm focus:outline-none focus:border-[#ffd700] transition-colors"
+            className="w-full h-10 px-3.5 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] text-[#5A432F] text-sm focus:outline-none focus:border-[#CD9F5B] transition-colors"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-[#d4a72c] to-[#a27b14] hover:from-[#e5b83d] hover:to-[#b38c25] text-[#0b0714] font-semibold font-serif-th text-xs shadow transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
+          className="py-2.5 px-5 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-semibold font-serif-th text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
         >
           {loading ? "กำลังบันทึก…" : "✦ บันทึกรหัสผ่าน"}
         </button>

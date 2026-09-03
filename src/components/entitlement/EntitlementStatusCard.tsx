@@ -46,15 +46,15 @@ export function EntitlementStatusCard() {
   const bonus = ent?.bonusRemaining ?? 0;
 
   return (
-    <div className="space-y-4 rounded-2xl border border-[#e5c07b]/25 bg-gradient-to-b from-[#130d24]/90 to-[#07040f]/90 p-5 shadow-xl sm:p-6">
+    <div className="space-y-4 rounded-[1.618rem] border border-[#D6B48D] bg-[#FFFFFF] p-5 shadow-xs sm:p-6">
       <div className="flex items-center gap-2">
-        <span className="text-[#ffd700]">✦</span>
+        <span className="text-[#CD9F5B]">✦</span>
         <h2 className="font-serif-th text-base font-bold font-mystic-gold sm:text-lg">สิทธิ์การใช้งานของฉัน</h2>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e5c07b]/15 bg-[#0a0714]/70 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#D6B48D] bg-[#FCF0E6] px-4 py-3">
         <div className="space-y-1">
-          <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#9c93b8]">
+          <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-[#8C735D]">
             {view.isAdmin
               ? "ผู้ดูแลระบบ"
               : view.isUnlimited
@@ -63,23 +63,23 @@ export function EntitlementStatusCard() {
               ? "ผู้เยี่ยมชม"
               : "สมาชิก"}
           </span>
-          <span className="block font-serif-th text-sm font-semibold text-[#f5deaa]">{view.statusLine}</span>
+          <span className="block font-serif-th text-sm font-semibold text-[#5A432F]">{view.statusLine}</span>
         </div>
         <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />
       </div>
 
       {view.isMember && !view.isUnlimited && (
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="flex items-center gap-2 rounded-xl border border-[#e5c07b]/12 bg-[#100b20]/60 px-3 py-2.5 font-serif-th text-[11px] text-[#cfc8e2]">
-            <HourglassIcon className="h-4 w-4 shrink-0 text-[#e5c07b]" />
+          <div className="flex items-center gap-2 rounded-xl border border-[#D6B48D] bg-[#FDF7F0] px-3 py-2.5 font-serif-th text-[11px] text-[#5A432F]">
+            <HourglassIcon className="h-4 w-4 shrink-0 text-[#CD9F5B]" />
             <span>
               โควตาฟรีชุดใหม่{countdown ? ` ${countdown}` : ""} · รีเซ็ต{resetClockLabel()}
             </span>
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-[#e5c07b]/12 bg-[#100b20]/60 px-3 py-2.5 font-serif-th text-[11px] text-[#cfc8e2]">
-            <SparkSealIcon className="h-4 w-4 shrink-0 text-[#e5c07b]" />
+          <div className="flex items-center gap-2 rounded-xl border border-[#D6B48D] bg-[#FDF7F0] px-3 py-2.5 font-serif-th text-[11px] text-[#5A432F]">
+            <SparkSealIcon className="h-4 w-4 shrink-0 text-[#CD9F5B]" />
             <span>
-              รอบที่เติมไว้ <strong className="text-[#ffd700]">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ
+              รอบที่เติมไว้ <strong className="text-[#CD9F5B] font-bold">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ
             </span>
           </div>
         </div>
@@ -88,25 +88,25 @@ export function EntitlementStatusCard() {
       {view.isGuest && (
         <ul className="grid gap-1.5 sm:grid-cols-2">
           {MEMBER_BENEFITS.map((b) => (
-            <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#cfc8e2]">
-              <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#ffd700]" />
+            <li key={b.title} className="flex items-start gap-2 font-serif-th text-[11px] text-[#5A432F]">
+              <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#CD9F5B]" />
               {b.title}
             </li>
           ))}
         </ul>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e5c07b]/15 pt-3">
-        <Link href="/" className="text-xs text-[#e5c07b] underline transition-colors hover:text-[#ffd700]">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#D6B48D]/30 pt-3">
+        <Link href="/" className="text-xs text-[#CD9F5B] underline transition-colors hover:text-[#5A432F] font-bold">
           {view.isGuest ? "กลับไปเปิดไพ่และสมัครสมาชิก" : "กลับไปเปิดไพ่"}
         </Link>
         {view.isMember && !view.isUnlimited && (
           <button
             type="button"
             onClick={() => setBuyOpen(true)}
-            className="min-h-[40px] rounded-xl border border-[#e5c07b]/40 bg-[#140b24] px-4 py-2 font-serif-th text-xs font-semibold text-[#f5deaa] transition-colors hover:border-[#ffd700] hover:bg-[#201338] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+            className="min-h-[40px] rounded-xl border border-[#D6B48D] bg-[#CD9F5B] hover:bg-[#B8853E] px-4 py-2 font-serif-th text-xs font-semibold text-[#FDF7F0] transition-colors shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
           >
-            <span className="mr-1.5 text-[#e5c07b]">✦</span> เติมรอบเปิดไพ่
+            <span className="mr-1.5 text-[#FDF7F0]">✦</span> เติมรอบเปิดไพ่
           </button>
         )}
       </div>

@@ -47,7 +47,7 @@ export const GalaxyCanvas: React.FC = () => {
     let prefersReducedMotion = motionQuery.matches;
 
     const STAR_COUNT = Math.min(130, Math.floor((width * height) / 8500));
-    const STAR_COLORS = ["#ffffff", "#f0dcb4", "#e0c088", "#cfc8e2", "#dfd8f5"];
+    const STAR_COLORS = ["#CD9F5B", "#D6B48D", "#E4C09F", "#B8853E", "#A07840"];
     let stars: Star[] = [];
     let shootingStars: ShootingStar[] = [];
     const mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2 };
@@ -118,7 +118,7 @@ export const GalaxyCanvas: React.FC = () => {
         ctx.fill();
 
         if (star.size > 1.6 && alphaClamped > 0.75) {
-          ctx.strokeStyle = "rgba(240, 220, 180, 0.35)";
+          ctx.strokeStyle = "rgba(205, 159, 91, 0.4)";
           ctx.lineWidth = 0.5;
           ctx.beginPath();
           ctx.moveTo(star.x + dx - 3.5, star.y + dy);
@@ -145,7 +145,7 @@ export const GalaxyCanvas: React.FC = () => {
           const tailY = ss.y - Math.sin(ss.angle) * ss.length;
           const grad = ctx.createLinearGradient(tailX, tailY, ss.x, ss.y);
           grad.addColorStop(0, "transparent");
-          grad.addColorStop(1, `rgba(240, 220, 180, ${ss.alpha})`);
+          grad.addColorStop(1, `rgba(205, 159, 91, ${ss.alpha})`);
           ctx.strokeStyle = grad;
           ctx.lineWidth = 1.2;
           ctx.beginPath();

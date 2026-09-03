@@ -154,10 +154,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-selected={activeTab === "card"}
           aria-controls="chamber-panel-card"
           onClick={() => setActiveTab("card")}
-          className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+          className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
             activeTab === "card"
-              ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_15px_rgba(229,192,123,0.4)]"
-              : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
+              ? "bg-[#CD9F5B] text-[#FDF7F0] shadow-xs"
+              : "bg-[#FCF0E6] text-[#5A432F] hover:text-[#CD9F5B] border border-[#D6B48D]"
           }`}
         >
           <span className="text-[11px]">✦</span>
@@ -171,35 +171,34 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-selected={activeTab === "summary"}
           aria-controls="chamber-panel-summary"
           onClick={() => setActiveTab("summary")}
-          className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+          className={`px-4 py-2 rounded-xl text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
             activeTab === "summary"
-              ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] shadow-[0_0_15px_rgba(229,192,123,0.4)]"
-              : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
+              ? "bg-[#CD9F5B] text-[#FDF7F0] shadow-xs"
+              : "bg-[#FCF0E6] text-[#5A432F] hover:text-[#CD9F5B] border border-[#D6B48D]"
           }`}
         >
-          <span className="text-[#e5c07b]">✨</span>
+          <span className="text-[#CD9F5B]">✨</span>
           <span>สรุปภาพรวม & คำแนะนำ</span>
         </button>
 
       </div>
 
-      {/* ทางลัดลงไปห้องคุยกับแม่หมอ — ตัวห้องคุยย้ายออกไปเป็นส่วนของตัวเองด้านล่างแล้ว
-          ปุ่มนี้ไม่ใช่แท็บ จึงอยู่นอก role="tablist" เพื่อไม่ให้ screen reader สับสน */}
+      {/* ทางลัดลงไปห้องคุยกับแม่หมอ */}
       {readingId && (
         <button
           type="button"
           onClick={scrollToAskOracle}
-          className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-[#e5c07b]/35 bg-[#100b20]/80 px-4 py-3 text-left transition-all hover:border-[#e5c07b]/60 hover:bg-[#171029] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+          className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-[#D6B48D] bg-[#FCF0E6] px-4 py-3 text-left transition-all hover:border-[#CD9F5B] hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
         >
           <span className="min-w-0">
-            <span className="block font-serif-th text-xs font-bold text-[#f5deaa] sm:text-sm">
-              <span className="mr-1.5 text-[#e5c07b]">✦</span> มีอะไรอยากถามแม่หมอต่อไหม
+            <span className="block font-serif-th text-xs font-bold text-[#5A432F] sm:text-sm">
+              <span className="mr-1.5 text-[#CD9F5B]">✦</span> มีอะไรอยากถามแม่หมอต่อไหม
             </span>
-            <span className="mt-0.5 block font-serif-th text-[11px] leading-relaxed text-[#9c93b8]">
+            <span className="mt-0.5 block font-serif-th text-[11px] leading-relaxed text-[#8C735D]">
               พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที แตะเพื่อเริ่มพิมพ์คุยได้เลย
             </span>
           </span>
-          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#e5c07b]/40 text-[#e5c07b] transition-transform group-hover:translate-y-0.5">
+          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#D6B48D] text-[#CD9F5B] transition-transform group-hover:translate-y-0.5">
             ↓
           </span>
         </button>
@@ -245,10 +244,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 type="button"
                 aria-pressed={activeCardIndex === d.order}
                 onClick={() => onSelectCardIndex(d.order)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-serif-th font-semibold transition-all cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-serif-th font-semibold transition-all cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
                   activeCardIndex === d.order
-                    ? "bg-[#e5c07b] text-[#05040a] font-bold shadow-md"
-                    : "bg-[#100b20] text-[#9c93b8] hover:text-[#f5deaa] border border-[#e5c07b]/20"
+                    ? "bg-[#CD9F5B] text-[#FDF7F0] font-bold shadow-xs"
+                    : "bg-[#FCF0E6] text-[#5A432F] hover:bg-[#FFFFFF] border border-[#D6B48D]"
                 }`}
               >
                 <span className="whitespace-nowrap">ใบที่ {i + 1}</span>
@@ -267,13 +266,13 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {/* Active Card Interpretation Showcase */}
           <div
             key={activeCardIndex}
-            className="anim-page-transition p-5 sm:p-6 rounded-2xl bg-[#090614] border border-[#e5c07b]/30 shadow-inner space-y-4"
+            className="anim-page-transition p-5 sm:p-6 rounded-2xl bg-[#FFFFFF] border border-[#D6B48D] shadow-xs space-y-4"
           >
             {/* Position & Card Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#e5c07b]/15">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#D6B48D]/30">
               <div className="flex items-center gap-3.5">
                 {/* Real 1909 Rider-Waite Thumbnail */}
-                <div className={`w-14 h-[95px] rounded-lg overflow-hidden border border-[#e5c07b]/60 flex-shrink-0 shadow-md ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}>
+                <div className={`w-14 h-[95px] rounded-lg overflow-hidden border border-[#D6B48D] flex-shrink-0 shadow-xs ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}>
                   {cardData?.image ? (
                     <CardImage
                       image={cardData.image}
@@ -282,32 +281,32 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                       sizes="88px"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#120a22] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#e5c07b]/30">
-                      <span className="text-[#ffd700] text-xs">✦</span>
-                      <span className="text-[9px] text-[#9c93b8] font-serif-th mt-0.5 leading-tight">ไม่พบข้อมูล</span>
+                    <div className="w-full h-full bg-[#FCF0E6] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#D6B48D]">
+                      <span className="text-[#CD9F5B] text-xs">✦</span>
+                      <span className="text-[9px] text-[#8C735D] font-serif-th mt-0.5 leading-tight">ไม่พบข้อมูล</span>
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <span className="text-[10px] uppercase tracking-widest text-[#e5c07b] font-mono font-semibold">
+                  <span className="text-[10px] uppercase tracking-widest text-[#CD9F5B] font-mono font-semibold">
                     ✦ ตำแหน่งที่ {activeCardIndex + 1}: {activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}
                   </span>
-                  <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#f5deaa] mt-0.5">
+                  <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#5A432F] mt-0.5">
                     {cardData ? (
                       <>
                         {cardData.nameTh}{" "}
                         {cardData.nameEn && (
-                          <span className="text-xs font-mono font-normal text-[#9c93b8]">
+                          <span className="text-xs font-mono font-normal text-[#8C735D]">
                             ({cardData.nameEn})
                           </span>
                         )}{" "}
-                        <span className="text-xs font-serif-th font-semibold text-[#e5c07b]">
+                        <span className="text-xs font-serif-th font-semibold text-[#CD9F5B]">
                           {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว (Reversed)" : "· ไพ่ตรง (Upright)"}
                         </span>
                       </>
                     ) : (
-                      <span className="text-amber-200/85 text-sm font-normal">
+                      <span className="text-rose-700 text-sm font-normal">
                         ไม่พบข้อมูลไพ่ (กรุณากดโหลดใหม่อีกครั้ง)
                       </span>
                     )}
@@ -317,7 +316,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
               {/* Elemental & Meaning Tag */}
               {activeDrawnCard?.position.meaning && (
-                <span className="text-[10px] text-[#e5c07b] bg-[#e5c07b]/10 border border-[#e5c07b]/25 px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
+                <span className="text-[10px] text-[#5A432F] bg-[#E4C09F]/25 border border-[#D6B48D] px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
                   {activeDrawnCard.position.meaning}
                 </span>
               )}
@@ -334,11 +333,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
               return keywords && keywords.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[10px] text-[#9c93b8] font-mono">คีย์เวิร์ด:</span>
+                  <span className="text-[10px] text-[#8C735D] font-mono">คีย์เวิร์ด:</span>
                   {keywords.map((kw: string, idx: number) => (
                     <span
                       key={idx}
-                      className="text-[10px] text-[#f5deaa] bg-white/5 border border-white/10 px-2 py-0.5 rounded-md"
+                      className="text-[10px] text-[#5A432F] bg-[#FCF0E6] border border-[#D6B48D] px-2 py-0.5 rounded-md"
                     >
                       {kw}
                     </span>
@@ -349,15 +348,15 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
             {/* If card data could not be found, show reload prompt instead of fake reading */}
             {!cardData && (
-              <div className="p-4 rounded-xl bg-[#140b24] border border-[#e5c07b]/30 text-center space-y-2.5 my-2">
-                <p className="text-xs text-[#f5deaa] font-serif-th">
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-300 text-center space-y-2.5 my-2">
+                <p className="text-xs text-rose-800 font-serif-th">
                   ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง
                 </p>
                 {onRetry && (
                   <button
                     type="button"
                     onClick={onRetry}
-                    className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] text-xs font-bold font-serif-th shadow hover:opacity-95 cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
+                    className="px-4 py-1.5 rounded-lg bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
                   >
                     <span>✦</span> โหลดใหม่อีกครั้ง
                   </button>
@@ -369,7 +368,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between gap-2">
                 {activeCardReading?.headline && (
-                  <h5 className="font-serif-th text-sm font-bold text-[#e5c07b]">
+                  <h5 className="font-serif-th text-sm font-bold text-[#5A432F]">
                     ✦ {activeCardReading.headline}
                   </h5>
                 )}
@@ -386,7 +385,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               {activeCardReading?.reading ? (
                 <p
                   key={`oracle-${activeCardIndex}`}
-                  className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed font-serif-th font-normal"
+                  className="text-xs sm:text-sm text-[#5A432F] leading-relaxed font-serif-th font-normal"
                   aria-live="polite"
                   aria-label="คำทำนายจากแม่หมอ"
                 >
@@ -454,18 +453,18 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         <div className="space-y-4">
           {/* Opening Greeting */}
           {reading?.opening && (
-            <div className="p-4 rounded-2xl bg-[#090614] border border-[#e5c07b]/25 text-xs sm:text-sm text-[#f5deaa] font-serif-th leading-relaxed italic">
+            <div className="p-4 rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] text-xs sm:text-sm text-[#5A432F] font-serif-th leading-relaxed italic">
               “{reading.opening}”
             </div>
           )}
 
           {/* Connections */}
           {reading?.connections && (
-            <div className="p-5 rounded-2xl bg-[#110a22] border border-[#8b5cf6]/40 space-y-1.5 shadow-lg">
-              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#e5c07b] flex items-center gap-2">
-                <span>✨</span> ความเชื่อมโยงของไพ่ทั้งชุด
+            <div className="p-5 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] space-y-1.5 shadow-xs">
+              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#5A432F] flex items-center gap-2">
+                <span className="text-[#CD9F5B]">✨</span> ความเชื่อมโยงของไพ่ทั้งชุด
               </h5>
-              <p className="text-xs sm:text-sm text-[#cfc8e2] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#5A432F] leading-relaxed">
                 {reading.connections}
               </p>
             </div>
@@ -473,14 +472,14 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
           {/* Core Summary */}
           {reading?.summary && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-[#1c1338] to-[#0d071a] border-2 border-[#e5c07b]/50 space-y-2 shadow-xl">
+            <div className="p-5 rounded-2xl bg-[#FFFFFF] border-2 border-[#CD9F5B] space-y-2 shadow-sm">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h5 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold flex items-center gap-2">
-                  <span>✦</span> บทสรุปคำทำนายและแนวโน้ม
+                  <span className="text-[#CD9F5B]">✦</span> บทสรุปคำทำนายและแนวโน้ม
                 </h5>
                 <div className="flex items-center gap-2">
                   {reading.yesNoAnswer && (
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#e5c07b] text-[#05040a]">
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#CD9F5B] text-[#FDF7F0]">
                       คำตอบ: {reading.yesNoAnswer}
                     </span>
                   )}
@@ -492,11 +491,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   />
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-[#f5deaa] font-serif-th leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#5A432F] font-serif-th leading-relaxed">
                 {reading.summary}
               </p>
               {reading.timing && (
-                <p className="text-xs text-[#e5c07b] pt-1 font-mono">
+                <p className="text-xs text-[#CD9F5B] pt-1 font-mono font-semibold">
                   ✦ ช่วงเวลา: {reading.timing}
                 </p>
               )}
@@ -505,14 +504,14 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
           {/* Actionable Advice Checklist */}
           {reading?.advice && reading.advice.length > 0 && (
-            <div className="p-5 rounded-2xl bg-[#090614] border border-[#e5c07b]/25 space-y-2.5">
-              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#e5c07b] flex items-center gap-2">
-                <span>✦</span> คำแนะนำและสิ่งที่ควรทำ
+            <div className="p-5 rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] space-y-2.5">
+              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#5A432F] flex items-center gap-2">
+                <span className="text-[#CD9F5B]">✦</span> คำแนะนำและสิ่งที่ควรทำ
               </h5>
               <ul className="space-y-2">
                 {reading.advice.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-xs text-[#cfc8e2]">
-                    <span className="w-4 h-4 rounded-full bg-[#e5c07b]/20 text-[#e5c07b] flex items-center justify-center flex-shrink-0 text-[10px] mt-0.5">
+                  <li key={idx} className="flex items-start gap-2.5 text-xs text-[#5A432F]">
+                    <span className="w-4 h-4 rounded-full bg-[#CD9F5B]/20 text-[#CD9F5B] font-bold flex items-center justify-center flex-shrink-0 text-[10px] mt-0.5">
                       ✓
                     </span>
                     <span>{item}</span>

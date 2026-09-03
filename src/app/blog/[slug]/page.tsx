@@ -132,7 +132,7 @@ export default async function ArticleDetailPage({ params }: Props) {
   } : null;
 
   return (
-    <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700]">
+    <main className="min-h-screen bg-[#FCF0E6] text-[#5A432F] p-4 sm:p-8 font-sans selection:bg-[#CD9F5B]/30 selection:text-[#5A432F]">
       {/* Inject Structured Data */}
       <script
         type="application/ld+json"
@@ -151,16 +151,16 @@ export default async function ArticleDetailPage({ params }: Props) {
 
       <div className="max-w-4xl mx-auto space-y-8 pb-20">
         {/* Top Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#9c93b8] border-b border-[#e5c07b]/20 pb-4 overflow-x-auto whitespace-nowrap">
-          <Link href="/" className="hover:text-[#ffd700] transition-colors">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#8C735D] border-b border-[#D6B48D]/30 pb-4 overflow-x-auto whitespace-nowrap">
+          <Link href="/" className="hover:text-[#CD9F5B] transition-colors">
             หน้าแรก
           </Link>
           <span>/</span>
-          <Link href="/blog" className="hover:text-[#ffd700] transition-colors">
+          <Link href="/blog" className="hover:text-[#CD9F5B] transition-colors">
             คัมภีร์บทความ
           </Link>
           <span>/</span>
-          <span className="text-[#e5c07b] truncate">{article.categoryTh}</span>
+          <span className="text-[#CD9F5B] truncate font-bold">{article.categoryTh}</span>
         </nav>
 
         {/* Client Interactive Reader Component */}

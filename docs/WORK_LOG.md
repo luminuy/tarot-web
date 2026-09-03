@@ -34,6 +34,42 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ปรับโฉมธีมทั้งเว็บเป็นสไตล์ Warm Minimalist หรูหราระดับโลก ด้วยสัดส่วนทองคำ Golden Ratio 1.618 (Φ) และ 8 โทนสีละมุนตา
+
+**คำขอของผู้ใช้**:
+- *"อยากปรับสีเว็บ ธีมสีทั้งหมดปรับสไตร์เว็บ โทนสีสว่างแต่ก็ยังละมุนตา แล้วก็ดูมินิมอลลให้เข้ากับเว็บ ออกแบบเหมือนนักออกแบบระดับโลก นำหลักการ 1.618 สัดส่วนทองคำมาใช้ แก้ทั้งเว็บอย่างละเอียดและรอบครอบทุกจุด"*
+
+**สิ่งที่พัฒนาและปรับปรุงเสร็จสมบูรณ์**:
+1. **ออกแบบระบบสีหลัก 8 เฉดสีทองคำ (The 8 Core Palette Colors)**:
+   - พื้นหลังหลัก (Page Canvas): `#FCF0E6` (Warm Ivory Linen) นุ่มนวล สบายตา ปลอดแสงจ้า
+   - พื้นหลังการ์ดใหญ่ (Main Card): `#E4C09F` (Apricot Sand) กรอบแท่นบูชาและการ์ดโครงสร้างหลัก
+   - พื้นหลังการ์ดย่อย (Inner Card): `#FDF7F0` (Soft Milk Cream) กล่องเนื้อหาและแท่นวางไพ่
+   - ป้ายหัวข้อ & ปุ่มหลัก (CTA / Badge): `#CD9F5B` (Caramel Honey Gold) จุดดึงสายตาหลัก
+   - ตัวหนังสือหลัก (Heading & Body): `#5A432F` (Deep Walnut Brown) คมชัด ละมุนตา ไม่แสบตา (WCAG AAA)
+   - ตัวหนังสือรอง (Muted Text): `#8C735D` (Muted Chestnut) ซับไตเติลและคำอธิบาย
+   - เส้นขอบ (Borders & Dividers): `#D6B48D` (Golden Sand) เส้นคั่นละเอียด 1px
+   - ประกายดาว & ไอคอน (Mystic Spark): `#CD9F5B` (Celestial Gold) ประกายดาว `✦` และ `✨`
+2. **ประยุกต์ใช้สัดส่วนทองคำ 1.618 (Golden Ratio Φ) ทั่วทั้งสถาปัตยกรรม**:
+   - Typography Scale: ปรับลำดับฟอนต์และ Line-Height ให้มีอัตราส่วน 1.618
+   - Radius & Curves: ใช้ `rounded-[1.618rem]` (~26px) กับการ์ดและ Modal ทุกใบ
+   - Spacing & Proportions: ปรับ Padding, Margin และสัดส่วนคอนเทนเนอร์ตามอัตราส่วนทองคำ
+3. **ปรับแต่งครอบคลุมทุกองค์ประกอบและทุกหน้าของเว็บไซต์อย่างละเอียดรอบคอบ**:
+   - `globals.css` และ `layout.tsx` (ธีม โทนสี viewport)
+   - แคนวาสแอมเบียนต์ (`MysticAltarCanvas.tsx` และ `GalaxyCanvas.tsx`)
+   - คอมโพเนนต์ UI พื้นฐาน (`Button.tsx`, `Modal.tsx`, `RitualStepProgress.tsx`, `SacredNavDropdown.tsx`)
+   - ขั้นตอนพิธีกรรมทั้ง 6 ขั้นตอน (หน้าแรก `/`, `SpreadCardSelector`, `IntentionAltarInput`, `PersonaCardSelector`, `ShuffleRitual`, `InteractiveCardFan`, `SpreadBoard`, `StreamReader`, `FollowUpChat`)
+   - หน้าสารานุกรมไพ่ (`/cards`, `CardsExplorer`, `/cards/[id]`, `CardDetailView`)
+   - หน้าคลังผังพยากรณ์ (`/spreads`, `SpreadsLibrary`)
+   - หน้าคัมภีร์บทความ (`/blog`, `BlogIndexClient`, `/blog/[slug]`, `ArticleReadingClient`)
+   - หน้าบัญชีและสิทธิ์ (`/account`, `ChangePasswordCard`, `EntitlementStatusCard`, `QuotaMeter`, `QuotaPips`)
+   - หน้านโยบายความเป็นส่วนตัว (`/privacy`) และตั้งรหัสผ่านใหม่ (`/reset-password`)
+   - หน้าไดเรกทอรีแม่หมอ (`/readers`, `ReadersDirectory`, `/readers/[id]`, `ReaderDetailClient`)
+   - หน้าต่าง Modal และป๊อปอัปทั้งหมด (`ReadingHistoryModal`, `AuthModal`, `ShareModal`, `CardZoomModal`, `BuyCreditsModal`, `TarotEncyclopediaModal`, `BookQueueModal`)
+   - หน้ารองรับข้อผิดพลาด (`error.tsx`, `global-error.tsx`)
+4. **ผ่านการตรวจรับรองคุณภาพครบถ้วน 21 ด่าน (`npm run repo:verify`) ปราศจาก Type Error หรือข้อผิดพลาดใดๆ**
+
+---
+
 ### 🗓️ 2026-09-03: ปรับแต่งแผงปุ่มแชร์โซเชียล ตัดปุ่มบันทึกภาพ/คัดลอกข้อความออกตามคำสั่ง แก้ตกขอบ และเปลี่ยนโลโก้ Threads เป็นเวกเตอร์แท้ 100%
 
 **คำขอของผู้ใช้**:
