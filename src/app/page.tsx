@@ -1153,10 +1153,10 @@ export default function TarotPage() {
                 />
               </section>
 
-              {/* SINGLE COLUMN: คำทำนายไพ่วางต่อใต้ผังไพ่ อ่านไล่ลงมาแถวเดียว
-                  แล้วปิดท้ายด้วยปุ่มเปิดห้องแชทเต็มจอกับแม่หมอ (แยกไปหน้า /reading/chat) */}
-              <div className="mx-auto w-full max-w-3xl space-y-6">
-                <section aria-label="คำทำนายไพ่ทาโรต์" className="w-full">
+              {/* TWO-COLUMN ROW: คำทำนายไพ่ (ซ้าย ~75%) + การ์ดเข้าห้องแชทแม่หมอ (ขวา ~25% ติดหนึบ)
+                  จอเล็กเรียงบนลงล่าง · จอ lg ขึ้นไปแบ่ง 3:1 */}
+              <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 lg:grid-cols-4 lg:items-start">
+                <section aria-label="คำทำนายไพ่ทาโรต์" className="w-full lg:col-span-3">
                   <StreamReader
                     readingId={readingId}
                     persona={selectedPersona}
@@ -1176,39 +1176,40 @@ export default function TarotPage() {
                   />
                 </section>
 
-                {/* ปุ่มเข้าห้องแชทกับแม่หมอ — เด่นชัด กดแล้วเปิดหน้าแชทเต็มจอสำหรับคุยอย่างเดียว */}
+                {/* การ์ดเข้าห้องแชทกับแม่หมอ — จัดวางแนวตั้งให้พอดีคอลัมน์แคบ กดแล้วไปหน้าแชทเต็มจอ */}
                 {readingId && (
-                  <Link
-                    href="/reading/chat"
-                    onClick={() => soundManager.playCardSelectSound()}
-                    aria-label={`แชทออนไลน์กับ${selectedPersona.nameTh}`}
-                    className="group flex items-center gap-4 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 shadow-xs transition-all hover:border-[#A58A5C] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
-                  >
-                    <span className="relative flex h-14 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#D5CEC2] bg-[#F3EDE2]">
-                      <CardImage
-                        image={selectedPersona.cardImage}
-                        alt={selectedPersona.nameTh}
-                        className="h-full w-full object-cover object-top"
-                        sizes="44px"
-                      />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex flex-wrap items-center gap-2">
-                        <span className="font-serif-th text-sm font-bold text-[#29261F] sm:text-base">
-                          แชทออนไลน์กับ{selectedPersona.nameTh}
+                  <aside className="w-full lg:col-span-1 lg:sticky lg:top-24">
+                    <Link
+                      href="/reading/chat"
+                      onClick={() => soundManager.playCardSelectSound()}
+                      aria-label={`แชทออนไลน์กับ${selectedPersona.nameTh}`}
+                      className="group flex flex-col gap-3 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 shadow-xs transition-all hover:border-[#A58A5C] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
+                    >
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="relative flex h-14 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#D5CEC2] bg-[#F3EDE2]">
+                          <CardImage
+                            image={selectedPersona.cardImage}
+                            alt={selectedPersona.nameTh}
+                            className="h-full w-full object-cover object-top"
+                            sizes="44px"
+                          />
                         </span>
                         <span className="flex items-center gap-1 rounded-full border border-[#D5CEC2] bg-[#EBF3ED] px-2 py-0.5 text-[13px] font-medium text-[#3A7044]">
                           <span className="h-1.5 w-1.5 rounded-full bg-[#3A7044] animate-pulse" /> ออนไลน์
                         </span>
                       </span>
-                      <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+                      <span className="block font-serif-th text-sm font-bold text-[#29261F]">
+                        แชทออนไลน์กับ{selectedPersona.nameTh}
+                      </span>
+                      <span className="block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
                         เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อจากไพ่ชุดนี้ได้ทันที
                       </span>
-                    </span>
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#29261F] text-[#F3F0EA] text-lg transition-transform group-hover:translate-x-0.5">
-                      →
-                    </span>
-                  </Link>
+                      <span className="mt-1 flex items-center justify-center gap-2 rounded-full bg-[#29261F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#F3F0EA] transition-colors group-hover:bg-[#A58A5C]">
+                        เปิดห้องแชท
+                        <span className="transition-transform group-hover:translate-x-0.5">→</span>
+                      </span>
+                    </Link>
+                  </aside>
                 )}
               </div>
 
