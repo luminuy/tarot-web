@@ -139,19 +139,29 @@ body {
   overflow-x: hidden;
 }
 
-/* ชั้นที่ 1 — แสงเทียนเหนือแท่นบูชา (นิ่ง ไม่ขยับ) */
-body {
+/*
+ * ชั้นที่ 1 — แสงเทียนเหนือแท่นบูชา (นิ่ง ไม่ขยับ)
+ *
+ * ⚠️ ห้ามใช้ `background-image` + `background-attachment: fixed` บน <body>
+ * iOS Safari ไม่รองรับ `background-attachment: fixed` จริง (ปฏิบัติเป็น `scroll`)
+ * แสงจะเลื่อนหายไปตอนสกรอลล์ — กระทบผู้ใช้มือถือซึ่งเป็น 85% ของเว็บนี้
+ * และบนเดสก์ท็อปยังบังคับให้วาดพื้นหลังใหม่ทุกครั้งที่สกรอลล์
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-image: radial-gradient(
     120% 75% at 50% -8%,
     #FFFDF9 0%,
     rgba(255, 253, 249, 0) 62%
   );
-  background-attachment: fixed;
-  background-repeat: no-repeat;
 }
 
-/* ชั้นที่ 2 — เนื้อผ้าลินิน (SVG นิ่ง ไม่มี JS ไม่มีเฟรม) */
-body::before {
+/* ชั้นที่ 2 — เนื้อผ้าลินิน (SVG นิ่ง ไม่มี JS ไม่มีเฟรม) ต้องอยู่เหนือชั้นแสง จึงใช้ ::after */
+body::after {
   content: "";
   position: fixed;
   inset: 0;
@@ -161,7 +171,7 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* เนื้อหาทุกอย่างต้องอยู่เหนือชั้นลินิน */
+/* เนื้อหาทุกอย่างต้องอยู่เหนือทั้งสองชั้น */
 body > * {
   position: relative;
   z-index: 1;
@@ -280,6 +290,9 @@ src/app/readers/console/page.tsx (4 จุด) · src/app/readers/queue/[id]/pag
 | `#EAB308` · `#F59E0B` · `#F97316` | 4 | `#8F5C1A` (gold — ใช้เป็นสีเตือน) |
 | `#EC4899` · `#A855F7` · `#38BDF8` · `#F472B6` | 19 | `#8F5C1A` (gold) |
 
+> **ข้อยกเว้น**: `rgba(168,85,247,…)` และ `rgba(255,159,67,…)` ที่อยู่ใน `.gold-foil-sheen`
+> **ห้ามแปลง** — เป็นประกายฟอยล์บนหลังไพ่ (ใช้ 13 จุด) เข้าข่ายเดียวกับ §7.3 คือลวดลายบนตัวไพ่ ไม่ใช่ UI
+
 \* `#06C755` ที่เป็น **ปุ่ม LINE** ห้ามแปลง — ดูข้อ 7.4
 
 ### 5.5 ธีมมืด/ม่วงที่ค้างอยู่ — ลบทิ้ง
@@ -359,7 +372,25 @@ src/app/readers/console/page.tsx (4 จุด) · src/app/readers/queue/[id]/pag
 แปลง: `rounded-[1.618rem]` (45 ครั้ง) · `rounded-xl` (136) · `rounded-3xl` (7) · `rounded-lg` (32) · `rounded-sm` (2) → เข้า 3 ค่าข้างบน
 > `rounded-full` (184 ครั้ง) คงไว้ตามเดิม
 
-### 6.6 Focus ring
+### 6.6 `.font-mystic-gold`
+
+คลาสนี้กำหนด `color` จึงชนะ utility `text-*` ที่ใส่มาคู่กันเสมอ (รวม `group-hover:text-*`)
+- ห้ามกำหนด `font-weight` ในคลาส — ที่เรียกใช้ทุกจุดใส่ `font-bold` มาเองอยู่แล้ว ถ้ากำหนดไว้จะบังคับน้ำหนักทับหัวข้อโดยมองไม่เห็นสาเหตุ
+- ถ้าต้องการสีอื่นหรือมี hover เปลี่ยนสี **อย่าใช้คลาสนี้** ให้ใส่ `text-[#8F5C1A]` ตรง ๆ แทน
+
+### 6.7 แถบเลื่อน (Scrollbar)
+
+| ส่วน | ค่า |
+|---|---|
+| ราง (track) | `#F0E8DB` (inset — เป็นร่องที่จมลง) |
+| ตัวเลื่อน (thumb) | `#6F5B4A` (muted) |
+| ตัวเลื่อนตอน hover | `#2E211A` (ink) |
+| Firefox | `scrollbar-width: thin` + `scrollbar-color` ตั้งที่ `html` (ไม่ใช่ `*`) |
+
+ของเดิมใช้ทราย `#D6B48D` บนครีม `#FCF0E6` = คอนทราสต์ **1.74** มองแทบไม่เห็นว่ามีแถบเลื่อน
+ต้องแก้ทั้ง `::-webkit-scrollbar` และ `.custom-scrollbar::-webkit-scrollbar`
+
+### 6.8 Focus ring
 
 ```css
 :focus-visible {
@@ -476,8 +507,9 @@ grep -rniE '#(CD9F5B|D6B48D|5A432F|8C735D|FDF7F0|FCF0E6|FFD700|B8853E|E5C07B|E4C
 grep -rn 'border-\[#E4D8C4\]/' src --include='*.tsx'
 # คาดหวัง: ไม่มีผลลัพธ์
 
-# 5. ต้องไม่มีเงา arbitrary ใหม่
-grep -rn 'shadow-\[' src --include='*.tsx' --exclude-dir=admin | wc -l
+# 5. ต้องไม่มีเงาที่เขียนค่าดิบ (shadow-[var(--shadow-*)] คือการใช้โทเคน ถือว่าถูกต้อง)
+grep -rn 'shadow-\[' src --include='*.tsx' --exclude-dir=admin \
+  | grep -v 'shadow-\[var(--shadow-' | wc -l
 # คาดหวังหลัง PR 5: 0
 ```
 
