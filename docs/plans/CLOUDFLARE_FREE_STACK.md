@@ -1,38 +1,36 @@
 # ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
 
-> **สถานะ:** Wave 1-1 / 1-3 / 2-4 โค้ด merge เข้า main แล้ว (#189 #191 #192)
-> ทั้ง 3 ตัวออกแบบให้ **ไม่กระทบระบบเดิมถ้ายังไม่ตั้งค่า** (helper fallback / fail-open)
-> **ฐานอ้างอิง:** สาขา `claude/image-logo-adjustments-943250` (2026-09-03)
-> **เจ้าของโปรเจกต์เลือกเอง:** เอาทั้ง 7 บริการ จัดลำดับตามพึ่งพา + คุ้มแรง
+> **สถานะ (2026-09-03):** ✅ **6 บริการ LIVE + verified บน production แล้ว** — เหลือ 3 ตัวที่บล็อกจริง
+> ทุกตัวออกแบบให้ **degrade เงียบ** — ไม่มี binding/config = ระบบเดิมทำงานปกติ
+> **เจ้าของโปรเจกต์เลือกเอง:** เอาทั้ง 9 บริการ จัดลำดับตามพึ่งพา + คุ้มแรง
 
 ---
 
 ## ลำดับรวม (4 Wave)
 
-| Wave | บริการ | ค่าฟรี | สถานะ |
+| Wave | บริการ | สถานะ | PR |
 | :--- | :--- | :--- | :--- |
-| 1-1 | **AI Gateway** | ไม่จำกัด | ✅ #189 merge · รอ dashboard เปิดใช้ |
-| 1-2 | **Email Routing** | ไม่จำกัด | 🔴 บล็อก — รอซื้อโดเมน |
-| 1-3 | **Turnstile** | 1M verify/เดือน | ✅ #191 merge · รอ site key + secret |
-| 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ✅ #192 merge · ใช้ได้เลยหลัง deploy |
-| 2-5 | **KV ไพ่ประจำวัน** + Cron | KV 100k read/วัน · cron ไม่จำกัด | 🟢 ไพ่ประจำวัน merge แล้ว (deterministic + KV, ไม่ต้อง cron) · Cron cleanup ยังไม่ทำ (worker แยก, คุณค่าต่ำ) |
-| 3-6 | **R2** — share image + OG | 10 GB + egress ฟรี | 🟢 เปิดแล้ว (#201+#203 · token ได้สิทธิ์ R2) |
-| 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | 🟡 index `card-meanings` สร้างแล้ว (1024d/cosine) · โค้ดเสร็จ · รอ deploy + รัน rebuild index |
-| 4-8 | **Durable Objects** | free tier (SQLite) | ⏳ payoff จริงตอนมี Marketplace |
-| 4-9 | **Realtime (SFU/TURN)** | 1,000 GB/เดือน | 🔴 บล็อก — รอ Marketplace (D1 + PDPA) |
+| 1-1 | **AI Gateway** — log ค่าใช้จ่าย/latency ทุก provider + cache แบบเลือกเส้น | ✅ **LIVE** (verified — log เห็น traffic คำอ่านจริง) | #189 #196 |
+| 1-2 | **Email Routing** | 🔴 บล็อก — รอซื้อโดเมน | — |
+| 1-3 | **Turnstile** — กันบอท signup/login/forgot | ✅ **LIVE** (verified — flow ครบ) | #191 #194 #197 |
+| 2-4 | **Workers AI** — safety guard ชั้น 3 (กฎ 6) | ✅ **LIVE** (auto) | #192 |
+| 2-5 | **KV ไพ่ประจำวันของทุกคน** | ✅ **LIVE** (deterministic + KV, ไม่ต้อง cron) | #198 |
+| — | Cron cleanup jobs | ⏳ ข้ามไว้ (โควตา rolling-window แล้ว · ต้อง worker แยก) | — |
+| 3-6 | **R2** — ลิงก์แชร์การ์ดมี OG image | ✅ **LIVE** (verified — round-trip PNG) · lifecycle 90 วันตั้งแล้ว | #201 #202 #203 |
+| 3-7 | **Vectorize** — ค้นหาเชิงความหมาย + "ไพ่ที่พลังงานใกล้เคียง" | ✅ **LIVE** (verified — `?q=` + related cards) · index มี 102 รายการ | #199 #200 |
+| 4-8 | **Durable Objects** | ⏳ payoff จริงตอนมี Marketplace | — |
+| 4-9 | **Realtime (SFU/TURN)** | 🔴 บล็อก — รอ Marketplace (D1 + PDPA) | — |
 
-**เส้นทางวิกฤต:** 1-1 → 2-4 → 3-7 (AI Gateway ปลดล็อก Workers AI ปลดล็อก Vectorize embeddings)
+### 📌 ค่าที่ตั้งบน production แล้ว
+| ตัว | ค่า |
+| :--- | :--- |
+| AI Gateway | `CF_AI_GATEWAY_ACCOUNT_ID` = `f5af6f66302ba6872d8f51aebf43d3fe` · `CF_AI_GATEWAY_ID` = `seertarot-ai` (Unauthenticated · Cache 60s · Logs on) |
+| Turnstile | `TURNSTILE_SITE_KEY` `0x4AAAAAAEl-wIjxl3hSrWTn` · `TURNSTILE_SECRET_KEY` (Managed widget) |
+| Vectorize | index `card-meanings` 1024d/cosine · CI token ได้สิทธิ์ Vectorize (ไม่จำเป็น — ไม่ validate ตอน deploy) |
+| R2 | bucket `seertarot-share` · CI token `tarot-web deploy` เพิ่ม **Workers R2 Storage: Edit** · lifecycle `auto-delete-90d` |
 
-### 📌 ต้องทำก่อนไปต่อ (เจ้าของโปรเจกต์)
-| # | สิ่งที่ต้องทำใน Cloudflare | ปลดล็อกอะไร |
-| :--- | :--- | :--- |
-| 1 | สร้าง AI Gateway `seertarot-ai` → ตั้ง `CF_AI_GATEWAY_ACCOUNT_ID` + `CF_AI_GATEWAY_ID` | เปิดใช้ 1-1 จริง + เป็นท่อของ Workers AI |
-| 2 | Turnstile → Add widget (Managed) → `wrangler secret put TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` | เปิดใช้ 1-3 จริง |
-| 3 | ซื้อโดเมน + ผูก Cloudflare | ปลดบล็อก 1-2 (Email Routing) |
-| 4 | สร้าง R2 bucket `seertarot-share` | เริ่ม 3-6 ได้ |
-| 5 | สร้าง Vectorize index `card-meanings` (768 dim, cosine) | เริ่ม 3-7 ได้ |
-
-> Wave 2-4 (Workers AI) **ไม่ต้องทำอะไรเพิ่ม** — binding `AI` ทำงานเลยหลัง deploy รอบถัดไป
+### 🔁 ต้องรันซ้ำเมื่อแก้ข้อมูลไพ่/บทความ
+- `/admin` → แท็บสุขภาพระบบ → การ์ด Cloudflare Free Stack → ปุ่ม **"สร้าง index ใหม่"** (rebuild Vectorize)
 
 ---
 
@@ -136,11 +134,12 @@
 - `GET /api/share/image/<id>` — Worker อ่าน R2 คืนรูป (ไม่เปิด public bucket)
 - `GET /s/<id>` — หน้า OG จิ๋ว (`og:image` + `twitter:card`) + redirect ไปหน้าแรก · `robots: noindex`
 - `ShareModal` — Twitter/Facebook/Threads อัปโหลด canvas → แชร์ `/s/<id>` (ขึ้นรูปพรีวิว) · IG/TikTok ยังใช้ native share + ดาวน์โหลดเหมือนเดิม
-- **PDPA**: id สุ่ม (UUID) · meta เก็บแค่หัวข้อ+ชื่อผัง · **เจ้าของโปรเจกต์ต้องตั้ง R2 lifecycle ลบอัตโนมัติ ~90 วัน**:
-  `npx wrangler r2 bucket lifecycle add seertarot-share --prefix "" --expire-days 90` (หรือใน dashboard)
+- **PDPA**: id สุ่ม (UUID) · meta เก็บแค่หัวข้อ+ชื่อผัง · lifecycle `auto-delete-90d` (Delete objects after 90 days) **ตั้งใน dashboard แล้ว**
+- verified บน production: POST PNG → 200 · GET กลับ byte ตรงเป๊ะ · `/s/<id>` มี `og:image` + `twitter:card`
 
-### 3-7 Vectorize — ค้นหาเชิงความหมาย 🟡 (โค้ดเสร็จ)
-- index `card-meanings` · **1024 มิติ · cosine** (ตรงกับ `@cf/baai/bge-m3` multilingual — รองรับไทย)
+### 3-7 Vectorize — ค้นหาเชิงความหมาย 🟢 (LIVE)
+- index `card-meanings` · **1024 มิติ · cosine** (ตรงกับ `@cf/baai/bge-m3` multilingual — รองรับไทย) · มี 102 รายการ (ไพ่ 78 + บทความ 24)
+- verified บน production: `?q=ความรัก` → คู่รัก (The Lovers) อันดับ 1 · related cards ท้ายหน้าไพ่ทำงาน
 - corpus = ความหมายไพ่ 78 + บทความ 24 · id `card:<id>` / `article:<slug>` · metadata string ล้วน (ไม่ต้อง metadata index)
 - **โค้ด**: `src/lib/search/vectorize.ts` (corpus/embed/rebuild/search/relatedTo), `src/lib/platform/cf.ts` (`getVectorizeBinding`), `/api/search` (`?q=` หรือ `?like=card:<id>`), `/api/admin/rebuild-search-index`, `<RelatedCards>` ท้ายหน้ารายละเอียดไพ่
 - **degrade เงียบ**: ไม่มี binding / index ว่าง → คืน `[]` → UI ซ่อนส่วนนั้น
