@@ -51,6 +51,16 @@
 
 > ยังไม่ตั้ง = การเรียก AI ยิงตรงไป provider เหมือนเดิม ไม่พัง — helper `src/lib/ai/gateway.ts` fallback ให้อัตโนมัติ
 
+### ⏳ รอตั้งเพิ่ม — Turnstile (Wave 1-3)
+
+```
+├── NEXT_PUBLIC_TURNSTILE_SITE_KEY   # Site Key (public · เป็น build-time var ไม่ใช่ secret)
+└── TURNSTILE_SECRET_KEY             # Secret Key (npx wrangler secret put)
+```
+
+> Dashboard → Turnstile → Add widget (Domain: `seertarot.net` + `localhost`)
+> ต้องตั้งคู่กันทั้งสองตัว ด่านกันบอทหน้า signup/login/forgot ถึงจะเปิด — ไม่ตั้ง = ด่านผ่านตลอด (verify ฝั่ง server มี fail-safe: ถ้า siteverify ล่มก็ปล่อยผ่าน)
+
 ---
 
 ## 🧪 3. การตรวจสอบความพร้อมด้วย Live Diagnostics

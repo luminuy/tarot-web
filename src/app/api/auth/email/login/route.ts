@@ -5,6 +5,7 @@ import { setAuthCookie } from "@/lib/auth/session";
 import { isPasswordConfigError, verifyPassword } from "@/lib/auth/password";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { clearAuthRateLimit, peekAuthRateLimit, recordAuthFailure } from "@/lib/security/auth-ratelimit";
+import { getRequestIp, verifyTurnstile } from "@/lib/security/turnstile";
 import { getUserByEmail, getUserPasswordHash, normalizeEmail, touchLastSeen } from "@/lib/users/users.repo";
 
 export const runtime = "nodejs";
@@ -29,6 +30,17 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
+
+    // ด่านกันบอท (Turnstile) — ผ่านตลอดถ้ายังไม่ได้ตั้ง TURNSTILE_SECRET_KEY
+    const ts = await verifyTurnstile(body?.turnstileToken, getRequestIp(request));
+    if (!ts.ok) {
+      console.warn(`[turnstile] login ปฏิเสธ: ${ts.reason}`);
+      return NextResponse.json(
+        { error: "ระบบตรวจพบว่าอาจไม่ใช่การใช้งานจากคนจริง กรุณารีเฟรชหน้าแล้วลองใหม่" },
+        { status: 403 },
+      );
+    }
+
     const parsed = LoginSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
