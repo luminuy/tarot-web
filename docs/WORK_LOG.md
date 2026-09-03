@@ -34,6 +34,23 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: R2 — ลิงก์แชร์การ์ดคำทำนายมี OG image (Wave 3-6)
+
+- **แนวทาง**: reuse `<canvas>` ที่ `ShareModal` สร้างอยู่แล้ว — **ไม่ใส่ satori/resvg** (worker gzip 1.85MB, เพดาน ~3MB, wasm ~1.2MB เสี่ยงเกิน)
+- **สิ่งที่ทำ**:
+  - `wrangler.jsonc` — binding `SHARE_BUCKET` → `seertarot-share` (schema + `opennextjs-cloudflare build` · INC-0034)
+  - `src/lib/platform/cf.ts` — `getShareBucket()`
+  - `POST /api/share/image` — รับ PNG (≤1.2MB · ตรวจ PNG magic bytes · rate-limit 12/10นาที) → R2 (`<id>.png` + `<id>.json` meta) → คืน `{ id, url: /s/<id> }`
+  - `GET /api/share/image/<id>` — Worker อ่าน R2 คืนรูป (ไม่เปิด public bucket)
+  - `src/app/s/[id]/page.tsx` — หน้า OG (`og:image`/`twitter:card` จาก meta) + `<meta refresh>` ไปหน้าแรก · `robots: noindex`
+  - `ShareModal` — `buildShareLink()`: Twitter/Facebook/Threads อัปโหลด canvas → แชร์ `/s/<id>` (ลิงก์ขึ้นรูปพรีวิว) · IG/TikTok ใช้ native share เหมือนเดิม
+  - degrade: R2 ไม่พร้อม → `buildShareLink` คืน origin หน้าแรก (แชร์แบบเดิม)
+- **ไฟล์**: `wrangler.jsonc`, `src/lib/platform/cf.ts`, `src/app/api/share/image/route.ts` (ใหม่), `src/app/api/share/image/[id]/route.ts` (ใหม่), `src/app/s/[id]/page.tsx` (ใหม่), `src/components/reading/ShareModal.tsx`
+- **ผลการทดสอบ**: `tsc` ✅ · `repo:verify` [รอ] · `opennextjs-cloudflare build` [รอผล]
+- **ค้างต่อ (เจ้าของโปรเจกต์)**: ตั้ง R2 lifecycle `npx wrangler r2 bucket lifecycle add seertarot-share --prefix "" --expire-days 90` (PDPA — ลบภาพเก่าอัตโนมัติ)
+
+---
+
 ### 🗓️ 2026-09-03: Vectorize — ค้นหาเชิงความหมาย + "ไพ่ที่พลังงานใกล้เคียง" (Wave 3-7)
 
 - **index**: `card-meanings` (สร้างแล้ว · 1024 มิติ · cosine) — ตรงกับ `@cf/baai/bge-m3` (multilingual รองรับไทย)

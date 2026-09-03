@@ -183,6 +183,46 @@ export async function getVectorizeBinding(): Promise<AppVectorize | null> {
   return null;
 }
 
+/** ส่วนของ R2 bucket ที่แอปนี้ใช้จริง (structural) */
+export interface AppR2Object {
+  body: ReadableStream | null;
+  httpMetadata?: { contentType?: string };
+  size: number;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+export interface AppR2Bucket {
+  put(
+    key: string,
+    value: ArrayBuffer | ReadableStream | string,
+    opts?: { httpMetadata?: { contentType?: string; cacheControl?: string } },
+  ): Promise<unknown>;
+  get(key: string): Promise<AppR2Object | null>;
+  head(key: string): Promise<{ size: number } | null>;
+  delete(key: string): Promise<void>;
+}
+
+let cachedShareBucket: AppR2Bucket | null | undefined;
+
+/**
+ * คืน R2 bucket สำหรับภาพการ์ดแชร์ (`env.SHARE_BUCKET`)
+ * dev / test / ยังไม่ deploy = ไม่มี binding → คืน `null` (ผู้เรียกต้อง degrade เอง)
+ */
+export async function getShareBucket(): Promise<AppR2Bucket | null> {
+  if (cachedShareBucket !== undefined) return cachedShareBucket;
+  try {
+    const ctx = await safelyGetCloudflareContext();
+    const binding = (ctx?.env as Record<string, unknown> | undefined)?.SHARE_BUCKET;
+    if (binding && typeof (binding as AppR2Bucket).put === "function") {
+      cachedShareBucket = binding as AppR2Bucket;
+      return cachedShareBucket;
+    }
+  } catch {
+    // ไม่มี Cloudflare context
+  }
+  cachedShareBucket = null;
+  return null;
+}
+
 /**
  * คืน execution context เพื่อใช้ `waitUntil` (งาน background เช่น บันทึกสถิติ)
  * ถ้าไม่มี (dev) จะคืน shim ที่รัน callback ทันทีแบบ fire-and-forget

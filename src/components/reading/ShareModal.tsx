@@ -246,10 +246,41 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     });
   };
 
+  /**
+   * อัปโหลดการ์ดภาพขึ้น R2 → คืนลิงก์ /s/<id> ที่มี OG image (ลิงก์แชร์ขึ้นรูปพรีวิว)
+   * ล้มเหลว/ยังไม่พร้อม → คืน origin หน้าแรกแบบเดิม
+   */
+  const buildShareLink = async (): Promise<string> => {
+    const fallback = typeof window !== "undefined" ? window.location.origin : "https://seertarot.net";
+    try {
+      const blob = await createReadingImageBlob("post");
+      const qs = new URLSearchParams({
+        title: `คำทำนายไพ่ทาโรต์ "${question || "ภาพรวมดวงชะตา"}" — SeerTarot`,
+        spread: spreadName,
+      });
+      const res = await fetch(`/api/share/image?${qs}`, {
+        method: "POST",
+        headers: { "Content-Type": "image/png" },
+        credentials: "same-origin",
+        body: blob,
+      });
+      if (!res.ok) return fallback;
+      const data = (await res.json()) as { url?: string };
+      return data.url || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   const handleShareToBrand = async (brand: "facebook" | "instagram" | "tiktok" | "twitter" | "threads") => {
     soundManager.playCardSelectSound();
     trackEvent("share_click", { platform: brand, spread_id: spreadName });
-    const shareUrl = typeof window !== "undefined" ? window.location.origin : "https://seertarot.net";
+    const shareUrl =
+      brand === "twitter" || brand === "facebook" || brand === "threads"
+        ? await buildShareLink()
+        : typeof window !== "undefined"
+          ? window.location.origin
+          : "https://seertarot.net";
 
     // Twitter / X
     if (brand === "twitter") {
