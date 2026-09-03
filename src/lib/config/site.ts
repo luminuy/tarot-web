@@ -26,6 +26,13 @@ export const SITE_NAME_TH = "วิหารพยากรณ์ไพ่ทา
 export const DEFAULT_EMAIL_FROM = `แม่หมอทาโรต์ <noreply@${SITE_DOMAIN}>`;
 
 /**
+ * อีเมลรับเรื่อง — ใช้เป็น `Reply-To` ของอีเมลระบบทุกฉบับ เพื่อให้ผู้ใช้กด "ตอบกลับ"
+ * จาก noreply แล้วมีปลายทางจริง · ต้องตั้ง Cloudflare Email Routing forward เข้ากล่องจริง
+ * (ดู `docs/plans/CLOUDFLARE_FREE_STACK.md` §Wave 1-2) · ทับได้ด้วย env `SUPPORT_EMAIL`
+ */
+export const DEFAULT_SUPPORT_EMAIL = `support@${SITE_DOMAIN}`;
+
+/**
  * host ที่ถือว่าเป็น "เว็บเรา" — ใช้ทั้ง allowlist กันปลอม host และกันดูดเนื้อหา
  * รวม `www.` และโดเมน preview ของ Cloudflare (`*.workers.dev`) กับเครื่อง dev
  */

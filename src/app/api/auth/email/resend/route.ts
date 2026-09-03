@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { issueToken } from "@/lib/auth/auth-tokens.repo";
 import { sendEmail } from "@/lib/email/send";
-import { verifyEmailHtml } from "@/lib/email/templates";
+import { verifyEmailHtml, verifyEmailText } from "@/lib/email/templates";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { getUserById } from "@/lib/users/users.repo";
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     const verifyToken = await issueToken(user.id, "verify", 24 * 60 * 60 * 1000);
     const verifyLink = `${origin}/api/auth/email/verify?token=${encodeURIComponent(verifyToken)}`;
 
-    await sendEmail(user.email, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot", verifyEmailHtml(verifyLink, user.name));
+    await sendEmail(user.email, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot", verifyEmailHtml(verifyLink, user.name), verifyEmailText(verifyLink, user.name));
 
     return NextResponse.json({ ok: true, message: "ส่งลิงก์ยืนยันใหม่ไปยังอีเมลของคุณเรียบร้อยแล้ว" });
   } catch (err) {

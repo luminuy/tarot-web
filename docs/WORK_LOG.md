@@ -34,6 +34,18 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: Email deliverability hardening — plain-text ควบคู่ + Reply-To: support@
+
+- **`src/lib/email/send.ts`** — `sendEmail()` รับ param `text?` เพิ่ม · ส่ง `text` ควบคู่ `html` เสมอ (ไม่ส่งมา = `htmlToText()` ถอดหยาบ ๆ ให้) · ใส่ `reply_to` = `SUPPORT_EMAIL` env หรือ `support@seertarot.net` · dev-log โชว์ Reply-To + เนื้อ text
+- **`src/lib/email/templates.ts`** — เพิ่ม `verifyEmailText` / `resetPasswordText` / `accountExistsText` (เขียนมือ อ่านลื่นกว่า strip HTML)
+- **`src/lib/config/site.ts`** — `DEFAULT_SUPPORT_EMAIL`
+- **3 routes** (`signup` / `forgot` / `resend`) — ส่งเวอร์ชัน text เข้าไปทุกจุดที่เรียก `sendEmail`
+- **เหตุผล**: HTML-only = สัญญาณ spam · ตอบกลับ noreply แล้วเมลตกหาย → ตั้ง Reply-To ให้มีปลายทาง
+- **ค้างต่อ (เจ้าของโปรเจกต์ · dashboard-only)**: เปิด Cloudflare Email Routing forward `support@` / `noreply@` เข้า Gmail — ตอนนี้ Reply-To ชี้ไป support@ แต่ยังไม่มีคนรับ (ดู `CLOUDFLARE_FREE_STACK.md` §Wave 1-2 · `PENDING_SETUP.md`)
+- **ทดสอบ**: `tsc` ✅ · `test-email-auth.ts` 8/8 ✅ · `repo:verify` 23/23 ✅
+
+---
+
 ### 🗓️ 2026-09-03: ปิดงาน Cloudflare Free Stack — Cron (lazy prune) + Email Routing (doc) + สรุปที่บล็อกจริง
 
 - **Cron cleanup** → ทำเป็น **lazy prune** แทน (OpenNext 1.20.4 ไม่ export `scheduled()` · custom `main` เสี่ยงพัง deploy ทั้ง repo · worker แยกไม่คุ้ม)

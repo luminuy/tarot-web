@@ -11,7 +11,7 @@
 | Wave | บริการ | สถานะ | PR |
 | :--- | :--- | :--- | :--- |
 | 1-1 | **AI Gateway** — log ค่าใช้จ่าย/latency ทุก provider + cache แบบเลือกเส้น | ✅ **LIVE** (verified — log เห็น traffic คำอ่านจริง) | #189 #196 |
-| 1-2 | **Email Routing** | 🟢 พร้อมเปิด — dashboard-only (โดเมน `seertarot.net` อยู่บน Cloudflare แล้ว) · ดู §Wave 1-2 | — |
+| 1-2 | **Email Routing** | 🟡 **ควรเปิดแล้ว** — โค้ดตั้ง `Reply-To: support@seertarot.net` ทุกอีเมลระบบ (#207) · ยังไม่ forward = ผู้ใช้ตอบกลับแล้วเมลตกหาย · dashboard-only ดู §Wave 1-2 | — |
 | 1-3 | **Turnstile** — กันบอท signup/login/forgot | ✅ **LIVE** (verified — flow ครบ) | #191 #194 #197 |
 | 2-4 | **Workers AI** — safety guard ชั้น 3 (กฎ 6) | ✅ **LIVE** (auto) | #192 |
 | 2-5 | **KV ไพ่ประจำวันของทุกคน** | ✅ **LIVE** (deterministic + KV, ไม่ต้อง cron) | #198 |
@@ -68,9 +68,13 @@
 
 **ทำอะไร:** รับเมลที่ `@seertarot.net` (support@, เห็น bounce ของ noreply@) — โดเมนอยู่บน Cloudflare แล้ว (`docs/PENDING_SETUP.md`)
 
+> ⚠️ **ยกระดับความสำคัญ (#207)**: อีเมลระบบทุกฉบับ (ยืนยันอีเมล / ลืมรหัส / แจ้งเตือนบัญชี) ตอนนี้ตั้ง
+> `Reply-To: support@seertarot.net` แล้ว — ถ้ายังไม่ทำ forward ด้านล่าง เมลที่ผู้ใช้กด "ตอบกลับ" จะตกหายเงียบ
+
 **dashboard-only · ไม่มีโค้ด** (แค่ forward ไป Gmail):
 1. Cloudflare → เลือกโดเมน `seertarot.net` → **Email** → **Email Routing** → **Enable**
-2. Cloudflare เพิ่ม MX + SPF records ให้อัตโนมัติ (กด Add records)
+2. Cloudflare เพิ่ม MX + SPF (TXT) records ให้อัตโนมัติ (กด Add records)
+   - **ปลอดภัยกับ Resend**: Resend ส่งออกทาง DKIM ของ subdomain ไม่พึ่ง MX ของ root · SPF ที่ Cloudflare เพิ่มเป็น `include` เพิ่ม ไม่ทับของ Resend — แต่ **ตรวจว่า TXT SPF ของ root มี record เดียว** (รวม `include:_spf.mx.cloudflare.net` กับของ Resend ไว้บรรทัดเดียว ถ้ามีสองบรรทัดจะ fail)
 3. **Custom addresses** → Add:
    - `support@seertarot.net` → forward ไปอีเมลเจ้าของ (ต้อง verify อีเมลปลายทางครั้งเดียว)
    - `noreply@seertarot.net` → forward ไปเจ้าของ (เห็น bounce/reply ที่หลุดมา)

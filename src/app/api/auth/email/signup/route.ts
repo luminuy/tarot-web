@@ -6,7 +6,14 @@ import { issueToken } from "@/lib/auth/auth-tokens.repo";
 import { hashPassword, isPasswordConfigError } from "@/lib/auth/password";
 import { validatePasswordPolicy } from "@/lib/auth/password-policy";
 import { sendEmail } from "@/lib/email/send";
-import { accountExistsHtml, resetPasswordHtml, verifyEmailHtml } from "@/lib/email/templates";
+import {
+  accountExistsHtml,
+  accountExistsText,
+  resetPasswordHtml,
+  resetPasswordText,
+  verifyEmailHtml,
+  verifyEmailText,
+} from "@/lib/email/templates";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkAuthRateLimit, clearAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { getRequestIp, verifyTurnstile } from "@/lib/security/turnstile";
@@ -75,7 +82,7 @@ export async function POST(request: Request) {
     if (existingUser) {
       if (existingUser.hasPassword) {
         try {
-          await sendEmail(email, "การแจ้งเตือนเกี่ยวกับบัญชี — SeerTarot", accountExistsHtml(existingUser.name));
+          await sendEmail(email, "การแจ้งเตือนเกี่ยวกับบัญชี — SeerTarot", accountExistsHtml(existingUser.name), accountExistsText(existingUser.name));
         } catch {
           // ignore email sending errors
         }
@@ -84,7 +91,7 @@ export async function POST(request: Request) {
         try {
           const resetToken = await issueToken(existingUser.id, "reset", 15 * 60 * 1000);
           const setupLink = `${origin}/reset-password?token=${encodeURIComponent(resetToken)}`;
-          await sendEmail(email, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", resetPasswordHtml(setupLink, existingUser.name));
+          await sendEmail(email, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", resetPasswordHtml(setupLink, existingUser.name), resetPasswordText(setupLink, existingUser.name));
         } catch {
           // ignore
         }
@@ -122,7 +129,7 @@ export async function POST(request: Request) {
     try {
       const verifyToken = await issueToken(newUser.id, "verify", 24 * 60 * 60 * 1000);
       const verifyLink = `${origin}/api/auth/email/verify?token=${encodeURIComponent(verifyToken)}`;
-      await sendEmail(email, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot", verifyEmailHtml(verifyLink, name));
+      await sendEmail(email, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot", verifyEmailHtml(verifyLink, name), verifyEmailText(verifyLink, name));
     } catch (emailErr) {
       console.error("[Signup verify email failed]", emailErr);
     }
