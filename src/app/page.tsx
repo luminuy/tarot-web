@@ -15,7 +15,6 @@ import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { PersonaCardSelector } from "@/components/reading/PersonaCardSelector";
 import { IntentionAltarInput } from "@/components/reading/IntentionAltarInput";
 import { RitualStepProgress, type RitualStep } from "@/components/ui/RitualStepProgress";
-import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/components/ui/TarotArtIcons";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
@@ -1308,8 +1307,13 @@ export default function TarotPage() {
         <div className="max-w-4xl mx-auto px-5 pt-10 pb-8 space-y-6 relative z-10">
           {/* Row 1: AI Disclosure Card */}
           <div className="flex items-start gap-4 p-5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
-            <div className="w-10 h-10 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4] flex items-center justify-center flex-shrink-0 text-[#8F5C1A]">
-              <OracleEyeIcon className="w-4.5 h-4.5" />
+            <div className="w-9 h-13 sm:w-10 sm:h-15 rounded overflow-hidden border border-[#E4D8C4] flex-shrink-0 bg-[#F0E8DB]">
+              <CardImage
+                image="major-02.jpg"
+                alt="The High Priestess - AI-Generated Reading"
+                className="w-full h-full object-cover"
+                sizes="40px"
+              />
             </div>
             <div className="space-y-1 min-w-0">
               <h4 translate="no" className="text-[11px] font-bold text-[#8F5C1A] uppercase tracking-wider font-mono">
@@ -1329,8 +1333,13 @@ export default function TarotPage() {
               href="/privacy"
               className="group flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] transition-all duration-300 hover:bg-[#F6F1E9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#F0E8DB] border border-[#E4D8C4]/50 flex items-center justify-center flex-shrink-0 group-hover:bg-[#8F5C1A]/15 transition-colors text-[#8F5C1A]">
-                <LockTabIcon className="w-4 h-4" />
+              <div className="w-8 h-12 rounded overflow-hidden border border-[#E4D8C4] group-hover:border-[#8F5C1A] transition-colors flex-shrink-0 bg-[#F0E8DB]">
+                <CardImage
+                  image="major-11.jpg"
+                  alt="Justice - นโยบายความเป็นส่วนตัว PDPA"
+                  className="w-full h-full object-cover"
+                  sizes="32px"
+                />
               </div>
               <div>
                 <span
@@ -1347,8 +1356,13 @@ export default function TarotPage() {
 
             {/* Mental Health Hotline */}
             <div className="flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
-              <div className="w-8 h-8 rounded-lg bg-[#EBF3ED] flex items-center justify-center flex-shrink-0 text-[#3A7044]">
-                <CareLineIcon className="w-4 h-4" />
+              <div className="w-8 h-12 rounded overflow-hidden border border-[#E4D8C4] flex-shrink-0 bg-[#F0E8DB]">
+                <CardImage
+                  image="major-17.jpg"
+                  alt="The Star - สายด่วนสุขภาพจิต 1323"
+                  className="w-full h-full object-cover"
+                  sizes="32px"
+                />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-[#3A7044] uppercase tracking-wider font-mono block font-serif-th">
@@ -1361,8 +1375,13 @@ export default function TarotPage() {
 
             {/* Emergency */}
             <div className="flex items-center gap-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] ">
-              <div className="w-8 h-8 rounded-lg bg-[#FCEEEA] flex items-center justify-center flex-shrink-0 text-[#A6392C]">
-                <EmergencyTabIcon className="w-4 h-4" />
+              <div className="w-8 h-12 rounded overflow-hidden border border-[#E4D8C4] flex-shrink-0 bg-[#F0E8DB]">
+                <CardImage
+                  image="major-08.jpg"
+                  alt="Strength - เหตุฉุกเฉิน 1669"
+                  className="w-full h-full object-cover"
+                  sizes="32px"
+                />
               </div>
               <div>
                 <span className="text-[10px] font-bold text-[#A6392C] uppercase tracking-wider font-mono block font-serif-th">
@@ -1388,7 +1407,7 @@ export default function TarotPage() {
                 Sacred Oracle Tarot · 1909
               </span>
               <div className="w-5 h-7 rounded overflow-hidden border border-[#E4D8C4] flex-shrink-0 ">
-                <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="24px" />
+                <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="24px" />
               </div>
             </div>
             <p translate="no" className="text-[9.5px] text-[#6F5B4A]/70 font-mono text-center">
