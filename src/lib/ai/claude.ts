@@ -33,7 +33,7 @@ export function getClient(): Anthropic {
     // baseURL / headers = undefined/{} เมื่อไม่ได้เปิด AI Gateway → SDK ใช้ค่า default
     cachedClient = new Anthropic({
       baseURL: anthropicBaseUrl(),
-      defaultHeaders: aiGatewayHeaders(),
+      defaultHeaders: aiGatewayHeaders({ cacheTtl: 0 }),
     });
   }
   return cachedClient;

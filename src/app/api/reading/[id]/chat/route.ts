@@ -398,7 +398,7 @@ ${cards.join("\n")}
             headers: {
               "Content-Type": "application/json",
               "X-goog-api-key": geminiKey,
-              ...aiGatewayHeaders(),
+              ...aiGatewayHeaders({ cacheTtl: 0 }),
             },
             body: JSON.stringify({
               contents: contentsPayload,

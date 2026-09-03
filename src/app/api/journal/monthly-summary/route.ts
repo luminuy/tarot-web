@@ -150,7 +150,7 @@ ${historyText}
           {
             method: "POST",
             signal: controller.signal,
-            headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey, ...aiGatewayHeaders() },
+            headers: { "Content-Type": "application/json", "X-goog-api-key": apiKey, ...aiGatewayHeaders({ cacheTtl: 21600 }) },
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {

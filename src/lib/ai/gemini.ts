@@ -208,7 +208,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         headers: {
           "Content-Type": "application/json",
           "X-goog-api-key": apiKey,
-          ...aiGatewayHeaders(),
+          ...aiGatewayHeaders({ cacheTtl: 0 }),
         },
         body: JSON.stringify(requestBody),
       });
