@@ -12,7 +12,6 @@ interface MiniCardProps {
   src: string;
   className?: string;
   borderColor?: string;
-  glowColor?: string;
   highlight?: boolean;
   rotate?: number;
 }
@@ -20,22 +19,18 @@ interface MiniCardProps {
 export const MiniRwsCard: React.FC<MiniCardProps> = ({
   src,
   className = "w-12 h-[82px]",
-  borderColor = "rgba(229, 192, 123, 0.6)",
-  glowColor = "rgba(229, 192, 123, 0.25)",
+  borderColor = "#E4D8C4",
   highlight = false,
   rotate = 0,
 }) => (
   <div
     className={`relative rounded-lg overflow-hidden border transition-all duration-300 flex-shrink-0 select-none ${className} ${
       highlight
-        ? "ring-1.5 ring-[#8F5C1A] ring-offset-1 ring-offset-[#2E211A] z-10 scale-[1.04]"
-        : "hover:border-[#E4D8C4]/90"
+        ? "ring-1.5 ring-[#8F5C1A] ring-offset-1 ring-offset-[#FFFFFF] z-10 scale-[1.04]"
+        : "hover:border-[#8F5C1A]"
     }`}
     style={{
       borderColor: highlight ? "#8F5C1A" : borderColor,
-      boxShadow: highlight
-        ? `0 0 16px ${glowColor}, 0 4px 12px rgba(0,0,0,0.85)`
-        : `0 3px 8px rgba(0,0,0,0.7), 0 0 8px ${glowColor}`,
       transform: rotate ? `rotate(${rotate}deg)` : undefined,
     }}
   >
@@ -118,7 +113,6 @@ export const DailySpreadArt: React.FC<{ className?: string }> = ({ className = "
     <MiniRwsCard
       src="/cards/major-19.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.6)"
       className="w-16 h-[108px] sm:w-17 sm:h-[115px]"
       highlight
     />
@@ -130,13 +124,12 @@ export const QuickSpreadArt: React.FC<{ className?: string }> = ({ className = "
   <div className={`flex items-center justify-center gap-3 relative ${className}`}>
     <MiniRwsCard
       src="/cards/major-00.jpg"
-      borderColor="rgba(229, 192, 123, 0.7)"
+      borderColor="#8F5C1A"
       className="w-13 h-[88px] sm:w-14 sm:h-[95px]"
     />
     <MiniRwsCard
       src="/cards/major-01.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.5)"
       className="w-14 h-[95px] sm:w-15 sm:h-[102px]"
       highlight
     />
@@ -148,21 +141,18 @@ export const YesNoSpreadArt: React.FC<{ className?: string }> = ({ className = "
   <div className={`flex items-center justify-center gap-2 relative ${className}`}>
     <MiniRwsCard
       src="/cards/swords-03.jpg"
-      borderColor="rgba(244,63,94,0.65)"
-      glowColor="rgba(244,63,94,0.3)"
+      borderColor="#A6392C"
       className="w-11 h-[75px] opacity-85"
     />
     <MiniRwsCard
       src="/cards/major-10.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.6)"
       className="w-13 h-[88px] sm:w-14 sm:h-[95px]"
       highlight
     />
     <MiniRwsCard
       src="/cards/cups-02.jpg"
-      borderColor="rgba(16,185,129,0.65)"
-      glowColor="rgba(16,185,129,0.3)"
+      borderColor="#3A7044"
       className="w-11 h-[75px] opacity-85"
     />
   </div>
@@ -176,7 +166,6 @@ export const ThreeCardSpreadArt: React.FC<{ className?: string }> = ({ className
     <MiniRwsCard
       src="/cards/major-17.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.6)"
       className="w-13 h-[88px] sm:w-14 sm:h-[95px] z-10"
       highlight
     />
@@ -190,7 +179,6 @@ export const LoveSpreadArt: React.FC<{ className?: string }> = ({ className = "w
     <MiniRwsCard
       src="/cards/major-06.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(236,72,153,0.5)"
       className="w-10 h-[68px]"
       highlight
     />
@@ -209,7 +197,6 @@ export const CareerSpreadArt: React.FC<{ className?: string }> = ({ className = 
     <MiniRwsCard
       src="/cards/major-04.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.5)"
       className="w-10 h-[68px]"
       highlight
     />
@@ -228,7 +215,6 @@ export const MoneySpreadArt: React.FC<{ className?: string }> = ({ className = "
     <MiniRwsCard
       src="/cards/pentacles-10.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.5)"
       className="w-10 h-[68px]"
       highlight
     />
@@ -246,7 +232,6 @@ export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className 
     <MiniRwsCard
       src="/cards/major-07.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.5)"
       className="w-9.5 h-[65px]"
       highlight
     />
@@ -421,14 +406,12 @@ export const SituationSolutionSpreadArt: React.FC<{ className?: string }> = ({ c
     <MiniRwsCard
       src="/cards/swords-10.jpg"
       borderColor="#A6392C"
-      glowColor="rgba(244,63,94,0.4)"
       className="w-12 h-[82px]"
       highlight
     />
     <MiniRwsCard
       src="/cards/major-01.jpg"
       borderColor="#3A7044"
-      glowColor="rgba(16,185,129,0.5)"
       className="w-13 h-[88px] sm:w-14 sm:h-[95px]"
       highlight
     />
@@ -442,14 +425,12 @@ export const MindBodySpiritSpreadArt: React.FC<{ className?: string }> = ({ clas
     <MiniRwsCard
       src="/cards/cups-14.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(56,189,248,0.5)"
       className="w-13 h-[88px]"
       highlight
     />
     <MiniRwsCard
       src="/cards/major-17.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(168,85,247,0.5)"
       className="w-13 h-[88px]"
       highlight
     />
@@ -462,7 +443,6 @@ export const HowTheyFeelSpreadArt: React.FC<{ className?: string }> = ({ classNa
     <MiniRwsCard
       src="/cards/swords-02.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(236,72,153,0.5)"
       className="w-10 h-[68px]"
       highlight
     />
@@ -480,7 +460,6 @@ export const ExReconciliationSpreadArt: React.FC<{ className?: string }> = ({ cl
     <MiniRwsCard
       src="/cards/major-20.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.5)"
       className="w-10 h-[68px]"
       highlight
     />
@@ -498,7 +477,6 @@ export const SoulmateSpreadArt: React.FC<{ className?: string }> = ({ className 
     <MiniRwsCard
       src="/cards/major-06.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(236,72,153,0.5)"
       className="w-10 h-[68px]"
       highlight
     />
@@ -517,7 +495,6 @@ export const CareerSwitchSpreadArt: React.FC<{ className?: string }> = ({ classN
     <MiniRwsCard
       src="/cards/major-07.jpg"
       borderColor="#3A7044"
-      glowColor="rgba(16,185,129,0.5)"
       className="w-10 h-[68px]"
       highlight
     />
@@ -536,7 +513,6 @@ export const InnerPotentialSpreadArt: React.FC<{ className?: string }> = ({ clas
     <MiniRwsCard
       src="/cards/major-08.jpg"
       borderColor="#E4D8C4"
-      glowColor="rgba(255,215,0,0.5)"
       className="w-10 h-[68px]"
       highlight
     />
@@ -641,7 +617,7 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
           <div
             key={chk.num}
             className="w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 border shadow"
-            style={{ borderColor: chk.color, boxShadow: `0 0 8px ${chk.color}35` }}
+            style={{ borderColor: chk.color }}
           >
             <CardImage
               image={`major-${chk.card}.jpg`}
