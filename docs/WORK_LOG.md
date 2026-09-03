@@ -34,6 +34,16 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: Turnstile LIVE บน production + เพิ่มข้อความ "กำลังตรวจสอบความปลอดภัย…"
+
+- **ยืนยัน**: ตั้ง secret `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` บน production แล้ว — ตรวจครบ flow บน seertarot.net จริง (widget โหลด → ได้ token 752 ตัวอักษร → server รับ token → 401 creds · ไม่มี token → 403)
+- **AI Gateway** ก็ LIVE แล้ว — log เห็นคำอ่านจริงผ่าน `gemini-3.5-flash-lite` (2900 in / 359 out · $0.0018 · 2.9s)
+- **สิ่งที่เพิ่ม**: `AuthModal` แสดง spinner + "กำลังตรวจสอบความปลอดภัย…" ใต้ฟอร์ม ระหว่าง Turnstile ยังไม่ผ่าน (Managed mode ใช้เวลา ~2-6 วิบน browser สะอาด) — ผู้ใช้จะได้รู้ว่าปุ่มกดไม่ได้เพราะอะไร
+- **ไฟล์ที่แก้ไข**: `src/components/auth/AuthModal.tsx`
+- **ผลการทดสอบ**: `tsc` ✅ · `repo:verify` 21/21 ✅
+
+---
+
 ### 🗓️ 2026-09-03: AI Gateway — cache แบบเลือกเส้น (คำอ่าน/แชท ห้ามแคช · สรุปรายเดือนแคชได้)
 
 - **ทำไม**: เจ้าของโปรเจกต์จะเปิด "Cache Responses" ที่ gateway — แต่ถ้าคำอ่านไพ่โดนแคช คนที่ 2 จะได้คำอ่านคนแรก + usage=0 → ระบบไม่หักโควตา (ช่องโหว่ INC-0096)

@@ -459,8 +459,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             )}
 
-            {/* ด่านกันบอท (แสดงเฉพาะเมื่อตั้งค่า NEXT_PUBLIC_TURNSTILE_SITE_KEY) */}
+            {/* ด่านกันบอท (แสดงเฉพาะเมื่อตั้งค่า Turnstile ครบ) */}
             <TurnstileWidget onToken={setTurnstileToken} resetKey={mode} />
+
+            {/* กำลังตรวจ Turnstile อยู่ — บอกผู้ใช้ว่าปุ่มกดไม่ได้เพราะอะไร */}
+            {turnstileToken === "" && !loading && (
+              <p className="text-xs text-[#635B4E] text-center flex items-center justify-center gap-1.5">
+                <span className="inline-block w-3 h-3 rounded-full border-2 border-[#A58A5C] border-t-transparent animate-spin" />
+                กำลังตรวจสอบความปลอดภัย…
+              </p>
+            )}
 
             {/* Primary Submit Button */}
             <button
