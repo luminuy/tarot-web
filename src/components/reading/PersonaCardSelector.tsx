@@ -10,7 +10,9 @@ import {
   TheStarIllustration,
   MagicianIllustration,
   HermitIllustration,
+  SpeakerTabIcon,
 } from "@/components/ui/TarotArtIcons";
+import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isMasterPersona } from "@/lib/entitlement/limits";
 
 interface PersonaCardSelectorProps {
