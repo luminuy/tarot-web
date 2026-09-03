@@ -1,0 +1,118 @@
+# ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
+
+> **สถานะ:** 🟡 กำลังทำ — Wave 1 #1 (AI Gateway) เชื่อมโค้ดแล้ว รอ dashboard + secret
+> **ฐานอ้างอิง:** สาขา `claude/image-logo-adjustments-943250` (2026-09-03)
+> **เจ้าของโปรเจกต์เลือกเอง:** เอาทั้ง 7 บริการ จัดลำดับตามพึ่งพา + คุ้มแรง
+
+---
+
+## ลำดับรวม (4 Wave)
+
+| Wave | บริการ | ค่าฟรี | สถานะ |
+| :--- | :--- | :--- | :--- |
+| 1-1 | **AI Gateway** | ไม่จำกัด | 🟡 โค้ดเสร็จ · รอ dashboard |
+| 1-2 | **Email Routing** | ไม่จำกัด | ⏳ รอโดเมน (ยังไม่ซื้อ) |
+| 1-3 | **Turnstile** | 1M verify/เดือน | ⏳ รอ site key + secret |
+| 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ⏳ |
+| 2-5 | **KV ไพ่ประจำวัน + Cron Triggers** | KV 100k read/วัน · cron ไม่จำกัด | ⏳ spike |
+| 3-6 | **R2** — Destiny Card share image | 10 GB + egress ฟรี | ⏳ |
+| 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | ⏳ |
+| 4-8 | **Durable Objects** | free tier (SQLite) | ⏳ payoff จริงตอนมี Marketplace |
+| 4-9 | **Realtime (SFU/TURN)** | 1,000 GB/เดือน | 🔴 บล็อก — รอ Marketplace (D1 + PDPA) |
+
+**เส้นทางวิกฤต:** 1-1 → 2-4 → 3-7 (AI Gateway ปลดล็อก Workers AI ปลดล็อก Vectorize embeddings)
+
+---
+
+## Wave 1-1 — AI Gateway ✅ (โค้ด)
+
+**ทำอะไร:** route ทุกการเรียก AI (Gemini / Groq / Claude) ผ่าน gateway เดียว → dashboard เห็นค่าใช้จ่าย/latency/อัตราพลาดทุก provider + แคช response ซ้ำ + rate-limit/retry ระดับ gateway
+
+**โค้ดที่เพิ่ม:**
+- `src/lib/ai/gateway.ts` — helper สร้าง endpoint: ถ้าตั้ง env ก็ route ผ่าน gateway ไม่ตั้งก็ยิงตรง (ไม่พัง)
+- แก้ 5 จุดที่เรียก AI: `gemini.ts`, `groq.ts` (เส้นจริง — ด่านตรวจสุขภาพยังยิงตรง), `claude.ts` (baseURL SDK), `journal/monthly-summary`, `reading/[id]/chat`
+
+**ต้องทำต่อ (เจ้าของโปรเจกต์):**
+1. Dashboard → AI → AI Gateway → สร้างชื่อ `seertarot-ai` → คัดลอก Account ID
+2. ตั้ง secret:
+   ```
+   npx wrangler secret put CF_AI_GATEWAY_ACCOUNT_ID
+   npx wrangler secret put CF_AI_GATEWAY_ID          # = seertarot-ai
+   ```
+   (ปล่อย `CF_AI_GATEWAY_TOKEN` ว่างไว้ = Unauthenticated Gateway ก็พอ)
+3. ใน dashboard เปิด: Caching (TTL สั้น ๆ เช่น 60s สำหรับ chat), Rate limiting, Retry
+4. Deploy → เปิดหน้า Gateway ดู traffic ไหลเข้า + `/admin` แท็บสุขภาพ AI ยังเขียว
+
+**ความเสี่ยง/กันไว้:**
+- ไม่ตั้ง env = พฤติกรรมเดิมเป๊ะ (helper คืน URL ตรง)
+- SSE streaming ผ่าน gateway ได้ — ทดสอบแล้วว่า path ถูกต้อง
+- ด่านตรวจสุขภาพ (`probeGroqHealth`, ai-health) **ตั้งใจยิงตรง** เพื่อวัด provider ต้นทาง ไม่ใช่ gateway
+
+---
+
+## Wave 1-2 — Email Routing
+
+**ทำอะไร:** รับเมลที่ `@seertarot.net` (support@, จัดการ bounce ของ noreply@) — ต่อกับระบบ email auth ที่มีอยู่
+
+**บล็อก:** ยังไม่ได้ซื้อโดเมน (ดู `docs/PENDING_SETUP.md`) — Email Routing ตั้งค่าใน dashboard ล้วน แทบไม่มีโค้ด ทำได้ทันทีที่ domain ผูกกับ Cloudflare
+
+---
+
+## Wave 1-3 — Turnstile
+
+**ทำอะไร:** กันบอทฟาร์มสิทธิ์เปิดไพ่ฟรี / spam สมัคร (ผูกกับ `docs/specs/ENTITLEMENT_ABUSE_MODEL.md`)
+
+**พร้อมแล้ว:** CSP ใน `next.config.ts` อนุญาต `challenges.cloudflare.com` (script/connect/frame) อยู่แล้ว
+
+**ต้องทำ:**
+- Dashboard → Turnstile → สร้าง widget → ได้ Site Key (public) + Secret Key
+- `TURNSTILE_SITE_KEY` เป็น var, `npx wrangler secret put TURNSTILE_SECRET_KEY`
+- `<Turnstile>` component ใน `AuthModal` (สมัคร + ล็อกอิน) — โหมด managed/invisible
+- ฝั่ง server: verify token กับ `https://challenges.cloudflare.com/turnstile/v0/siteverify` ใน `api/auth/email` + `api/auth/[provider]` **ก่อน** สร้าง user/session
+- ใส่ feature-flag `turnstile.enabled` ปิดได้ทันทีถ้าพัง (บทเรียน: rate-limit/gate ห้ามล็อกเจ้าของบัญชี)
+
+---
+
+## Wave 2-4 — Workers AI (safety guard ก่อน)
+
+**ทำอะไร (เรียงความสำคัญ):**
+1. **คัดกรองสัญญาณทำร้ายตัวเอง (กฎเหล็กข้อ 6)** — classifier แทน/เสริม regex ใน `src/lib/safety/guardrails.ts` แม่นกว่ามาก โดยเฉพาะประโยคอ้อม → ยังโชว์สายด่วน 1323 เหมือนเดิม
+2. AI สำรองตัวที่ 3 (ต่อจาก Gemini → Groq)
+3. แปลไทย / ตรวจภาษาปน (แทน `hasForeignScript` heuristic)
+4. embeddings สำหรับ Wave 3-7
+
+**หมายเหตุ:** เรียกผ่าน binding `env.AI` หรือ REST ผ่าน AI Gateway (slug `workers-ai`) — ใช้ gateway เดียวกับ 1-1
+
+---
+
+## Wave 2-5 — KV ไพ่ประจำวัน + Cron
+
+**Spike ก่อนลงมือ:** OpenNext (`@opennextjs/cloudflare`) export `scheduled()` handler ได้ไหม — ถ้าไม่ได้ ต้องเขียน worker wrapper เอง
+
+**งาน:**
+- `kv_namespaces` เพิ่ม binding `DAILY_TAROT_KV` (แยกจาก `NEXT_INC_CACHE_KV`)
+- `triggers.crons`:
+  - `0 17 * * *` (= 00:00 ไทย) → สุ่มไพ่ประจำวัน (provably-fair seed จากวันที่) เขียนลง KV
+  - `30 18 * * *` → ลบ auth token หมดอายุ + แถว rate-limit เก่าใน D1
+- การ์ด "ไพ่ประจำวัน" บนหน้าแรกอ่านจาก KV (0ms edge) แทนสุ่มสดตอนโหลด
+
+**หมายเหตุ:** โควตารายวัน/สัปดาห์เป็น rolling-window (`lib/entitlement/week.ts`) อยู่แล้ว → cron ไม่เกี่ยวกับการรีเซ็ตโควตา
+
+---
+
+## Wave 3 — R2 + Vectorize
+
+### 3-6 R2 — Destiny Card share image
+- route ใหม่ `GET /api/share/[readingId]/card.png` → render ภาพสรุปคำทำนาย (satori หรือ `@cf/` image) → เก็บ R2 (`SHARE_BUCKET`) → คืน URL
+- ใส่ใน OG tag ของหน้าแชร์ → พรีวิวสวยตอนแปะ IG/FB/LINE = viral loop
+
+### 3-7 Vectorize — ค้นหาเชิงความหมาย
+- index `card-meanings` (78 ใบ) + `articles` (20 บทความ) — embed ด้วย Workers AI (3-4)
+- ใช้: "ไพ่/บทความที่ใกล้เคียง", แนะนำบทความจากผลไพ่, ค้นหาในสารานุกรมแบบเข้าใจความหมาย
+
+---
+
+## Wave 4 — รอปลดบล็อก
+
+- **Durable Objects:** ใช้ได้เลยสำหรับ provably-fair session state + rate-limit แม่นยำต่อผู้ใช้ แต่ payoff ใหญ่คือห้องคุยสด Marketplace → ทำพร้อม Marketplace
+- **Realtime (SFU/TURN):** บล็อกเต็มตัว — รอ Marketplace ปลดบล็อก (D1 provisioning + PDPA sign-off ตาม `docs/specs/MARKETPLACE.md`)

@@ -41,6 +41,16 @@
 └── UNLIMITED_EMAILS        # บัญชีอีเมลที่ได้รับสิทธิ์ดูดวงไม่จำกัด
 ```
 
+### ⏳ รอตั้งเพิ่ม — AI Gateway (ดู `docs/plans/CLOUDFLARE_FREE_STACK.md` Wave 1-1)
+
+```
+├── CF_AI_GATEWAY_ACCOUNT_ID   # Cloudflare Account ID (dashboard → AI Gateway)
+├── CF_AI_GATEWAY_ID           # ชื่อ gateway (แนะนำ: seertarot-ai)
+└── CF_AI_GATEWAY_TOKEN        # (ไม่บังคับ) ใส่เมื่อเปิด Authenticated Gateway
+```
+
+> ยังไม่ตั้ง = การเรียก AI ยิงตรงไป provider เหมือนเดิม ไม่พัง — helper `src/lib/ai/gateway.ts` fallback ให้อัตโนมัติ
+
 ---
 
 ## 🧪 3. การตรวจสอบความพร้อมด้วย Live Diagnostics

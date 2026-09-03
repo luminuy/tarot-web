@@ -9,6 +9,7 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 import { checkQuestion } from "@/lib/safety/guardrails";
+import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
@@ -349,7 +350,7 @@ ${cards.join("\n")}
       const modelsToTry = WORKING_GEMINI_MODELS;
 
       for (const [modelIdx, model] of modelsToTry.entries()) {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+        const endpoint = geminiEndpoint(model, "generateContent");
         try {
           // กลยุทธ์ hedge: ให้ตัวแรก (คุณภาพดีกว่าแต่ไม่แน่นอน) แค่ 8 วินาที
           // ถ้าไม่ทันก็ตัดใจไป flash-lite ที่วัดได้ต่ำกว่า 1 วินาทีทุกครั้ง
@@ -390,6 +391,7 @@ ${cards.join("\n")}
             headers: {
               "Content-Type": "application/json",
               "X-goog-api-key": geminiKey,
+              ...aiGatewayHeaders(),
             },
             body: JSON.stringify({
               contents: contentsPayload,

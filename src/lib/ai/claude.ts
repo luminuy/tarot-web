@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
+import { anthropicBaseUrl, aiGatewayHeaders } from "@/lib/ai/gateway";
 import { parsePartialReading } from "@/lib/utils/partial-json";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
@@ -29,7 +30,11 @@ export function getClient(): Anthropic {
     if (!process.env.ANTHROPIC_API_KEY) {
       throw new Error("ยังไม่ได้ตั้งค่า ANTHROPIC_API_KEY — คัดลอก .env.example เป็น .env แล้วใส่คีย์");
     }
-    cachedClient = new Anthropic();
+    // baseURL / headers = undefined/{} เมื่อไม่ได้เปิด AI Gateway → SDK ใช้ค่า default
+    cachedClient = new Anthropic({
+      baseURL: anthropicBaseUrl(),
+      defaultHeaders: aiGatewayHeaders(),
+    });
   }
   return cachedClient;
 }

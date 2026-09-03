@@ -64,6 +64,22 @@
 1. `src/components/ui/SacredNavDropdown.tsx`: เปลี่ยน Trigger Button เป็นปุ่มวงกลมมินิมอล (`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-[#D5CEC2] bg-[#FFFFFF]`) ภายในแสดงไอคอนแฮมเบอร์เกอร์ 3 เส้นตรงตามรูปที่ 2
 2. `src/components/auth/UserProfileBadge.tsx`: เปลี่ยน Trigger Button เป็นปุ่มวงกลมมินิมอล (`w-9 h-9 sm:w-10 sm:h-10 rounded-full`) ภายในแสดงไอคอนบุคคล outline ตรงตามรูปที่ 3 พร้อมจุดแจ้งเตือนสถานะออนไลน์และตัวนับแจ้งเตือน
 3. `src/app/page.tsx`: นำคอมโพเนนต์ `<QuotaMeter />` ออกจากแถบหัวเว็บ พร้อมลบ import ที่ไม่ได้ใช้งานออก
+### 🗓️ 2026-09-03: เชื่อม Cloudflare AI Gateway (Wave 1-1 ของแผน CLOUDFLARE_FREE_STACK)
+
+#### 1. Route การเรียก AI ทุก provider ผ่าน AI Gateway (ฟรี)
+- **สิ่งที่ต้องการ**: รวม log ค่าใช้จ่าย/latency/อัตราพลาดของ Gemini+Groq+Claude ไว้ที่เดียว + แคช response ซ้ำ + rate-limit/retry ระดับ gateway
+- **สิ่งที่ทำ**:
+  - เพิ่ม `src/lib/ai/gateway.ts` — helper สร้าง endpoint: ตั้ง env `CF_AI_GATEWAY_ACCOUNT_ID` + `CF_AI_GATEWAY_ID` = route ผ่าน gateway, ไม่ตั้ง = ยิงตรงเหมือนเดิม (ไม่พัง)
+  - แก้จุดเรียก AI 5 จุด: `src/lib/ai/gemini.ts` (stream), `src/lib/ai/groq.ts` (เส้นจริง — ด่านตรวจสุขภาพ `probeGroqHealth` ยังยิงตรงโดยตั้งใจ), `src/lib/ai/claude.ts` (`baseURL` + `defaultHeaders` ของ SDK), `src/app/api/journal/monthly-summary/route.ts`, `src/app/api/reading/[id]/chat/route.ts`
+  - `.env.example` + `docs/PENDING_SETUP.md` เพิ่มรายการ secret ใหม่
+  - แผนเต็ม 4 Wave (7 บริการ) → `docs/plans/CLOUDFLARE_FREE_STACK.md` + ลง INDEX
+- **ไฟล์ที่แก้ไข**: `src/lib/ai/gateway.ts` (ใหม่), `src/lib/ai/gemini.ts`, `src/lib/ai/groq.ts`, `src/lib/ai/claude.ts`, `src/app/api/journal/monthly-summary/route.ts`, `src/app/api/reading/[id]/chat/route.ts`, `.env.example`, `docs/plans/CLOUDFLARE_FREE_STACK.md` (ใหม่), `docs/INDEX.md`, `docs/PENDING_SETUP.md`
+- **ผลการทดสอบ**: `npx tsc --noEmit` ➔ ✅ 0 errors; dev server บูตผ่าน, route `/api/admin/ai-health` (import → gemini → gateway) compile + ตอบ 503 guard ปกติ ไม่ crash
+- **ค้างต่อ (เจ้าของโปรเจกต์)**: สร้าง gateway ชื่อ `seertarot-ai` ใน dashboard → `wrangler secret put CF_AI_GATEWAY_ACCOUNT_ID` + `CF_AI_GATEWAY_ID` → เปิด caching/retry ใน dashboard
+- **ถัดไป**: Wave 1-3 Turnstile (รอ site key), Wave 2-4 Workers AI safety guard
+
+---
+
 ### 🗓️ 2026-09-03: ทำภาพไพ่ให้คมชัดทุกจุด (Image Sharpness Pass)
 
 #### 1. เพิ่มชั้นความละเอียด w768 + แก้จุดภาพเบลอ

@@ -9,6 +9,7 @@
  */
 
 import { hasForeignScript, stripForeignScript } from "@/lib/ai/language";
+import { aiGatewayHeaders, groqChatCompletionsEndpoint } from "@/lib/ai/gateway";
 
 /**
  * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)
@@ -99,12 +100,13 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
         requestBody.max_tokens = options.maxTokens;
       }
 
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const res = await fetch(groqChatCompletionsEndpoint(), {
         method: "POST",
         signal: controller.signal,
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
+          ...aiGatewayHeaders(),
         },
         body: JSON.stringify(requestBody),
       });
@@ -174,6 +176,8 @@ export async function probeGroqHealth(apiKey?: string): Promise<GroqProbeResult[
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);
 
+      // ด่านตรวจสุขภาพยิงตรงไป Groq เสมอ — ตั้งใจ ไม่ผ่าน AI Gateway
+      // เพราะต้องการวัด "provider ต้นทางยังเรียกได้ไหม" ไม่ใช่สุขภาพของ gateway
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         signal: controller.signal,
