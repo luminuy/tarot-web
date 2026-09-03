@@ -160,11 +160,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
               }}
               transition={{ duration: 0.35, ease: "easeOut" }}
               className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#D9C8AC] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
-            >
-              <div className="w-8 h-8 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A]">
-                ✨
-              </div>
-            </motion.div>
+            />
 
             {/* Center Weaving Cascade Cards */}
             {shufflePhase === "riffle" && (
