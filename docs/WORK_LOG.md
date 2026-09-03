@@ -34,6 +34,18 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ✅ Cloudflare Email Routing เปิดใช้งานจริง (ต่อจาก #207)
+
+- เปิด Email Routing บน zone `seertarot.net` ผ่าน dashboard (account → Compute → Email Service → Email Routing — เมนูระดับ zone ไม่มีแล้ว)
+- **Add missing records** → DNS 5 rec: MX ×3 root + DKIM `cf2024-1._domainkey` + SPF root → Status **Enabled**
+- Routing rules (Active): `support@` / `noreply@seertarot.net` → forward `bankjack10452@gmail.com` (Verified)
+- Catch-all คงเป็น Drop (ปิด)
+- **ตรวจไม่ชนกับ Resend**: Resend ตั้ง MX/SPF/DKIM บน `send.seertarot.net` + `resend._domainkey` แยกจาก root ทั้งหมด — แต่ละ hostname มี SPF record เดียว = valid · DMARC เดิมไม่แตะ
+- doc: `CLOUDFLARE_FREE_STACK.md` §Wave 1-2 + status table + `PENDING_SETUP.md` → ✅ LIVE
+- **ผล**: ผู้ใช้กด "ตอบกลับ" อีเมลยืนยัน/ลืมรหัส → เข้า Gmail เจ้าของจริง
+
+---
+
 ### 🗓️ 2026-09-03: Email deliverability hardening — plain-text ควบคู่ + Reply-To: support@
 
 - **`src/lib/email/send.ts`** — `sendEmail()` รับ param `text?` เพิ่ม · ส่ง `text` ควบคู่ `html` เสมอ (ไม่ส่งมา = `htmlToText()` ถอดหยาบ ๆ ให้) · ใส่ `reply_to` = `SUPPORT_EMAIL` env หรือ `support@seertarot.net` · dev-log โชว์ Reply-To + เนื้อ text

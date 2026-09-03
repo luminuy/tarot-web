@@ -11,7 +11,7 @@
 | Wave | บริการ | สถานะ | PR |
 | :--- | :--- | :--- | :--- |
 | 1-1 | **AI Gateway** — log ค่าใช้จ่าย/latency ทุก provider + cache แบบเลือกเส้น | ✅ **LIVE** (verified — log เห็น traffic คำอ่านจริง) | #189 #196 |
-| 1-2 | **Email Routing** | 🟡 **ควรเปิดแล้ว** — โค้ดตั้ง `Reply-To: support@seertarot.net` ทุกอีเมลระบบ (#207) · ยังไม่ forward = ผู้ใช้ตอบกลับแล้วเมลตกหาย · dashboard-only ดู §Wave 1-2 | — |
+| 1-2 | **Email Routing** | ✅ **LIVE** — `support@` / `noreply@seertarot.net` → forward `bankjack10452@gmail.com` (verified) · DNS Enabled (MX ×3 + DKIM `cf2024-1` + SPF root) · rules Active · Catch-all = Drop (ปิด) · Reply-To ผูกจาก #207 | — |
 | 1-3 | **Turnstile** — กันบอท signup/login/forgot | ✅ **LIVE** (verified — flow ครบ) | #191 #194 #197 |
 | 2-4 | **Workers AI** — safety guard ชั้น 3 (กฎ 6) | ✅ **LIVE** (auto) | #192 |
 | 2-5 | **KV ไพ่ประจำวันของทุกคน** | ✅ **LIVE** (deterministic + KV, ไม่ต้อง cron) | #198 |
@@ -64,21 +64,23 @@
 
 ---
 
-## Wave 1-2 — Email Routing
+## Wave 1-2 — Email Routing ✅ LIVE (2026-09-03)
 
-**ทำอะไร:** รับเมลที่ `@seertarot.net` (support@, เห็น bounce ของ noreply@) — โดเมนอยู่บน Cloudflare แล้ว (`docs/PENDING_SETUP.md`)
+**ทำแล้ว:** รับเมลที่ `@seertarot.net` แล้ว forward เข้า Gmail — ผูกกับ `Reply-To: support@seertarot.net` ที่ทุกอีเมลระบบตั้งไว้ (#207)
 
-> ⚠️ **ยกระดับความสำคัญ (#207)**: อีเมลระบบทุกฉบับ (ยืนยันอีเมล / ลืมรหัส / แจ้งเตือนบัญชี) ตอนนี้ตั้ง
-> `Reply-To: support@seertarot.net` แล้ว — ถ้ายังไม่ทำ forward ด้านล่าง เมลที่ผู้ใช้กด "ตอบกลับ" จะตกหายเงียบ
+**สถานะปัจจุบัน:**
+- **Status: Enabled** · **DNS records: Enabled (Locked)**
+- Routing rules (Active): `support@seertarot.net` → `bankjack10452@gmail.com` · `noreply@seertarot.net` → `bankjack10452@gmail.com`
+- Catch-all = **Drop** (ปิด — ไม่ forward สิ่งที่เหลือ กัน spam)
+- Destination `bankjack10452@gmail.com` = Verified · `jaysasima10@gmail.com` = Pending (ไม่ได้ใช้)
 
-**dashboard-only · ไม่มีโค้ด** (แค่ forward ไป Gmail):
-1. Cloudflare → เลือกโดเมน `seertarot.net` → **Email** → **Email Routing** → **Enable**
-2. Cloudflare เพิ่ม MX + SPF (TXT) records ให้อัตโนมัติ (กด Add records)
-   - **ปลอดภัยกับ Resend**: Resend ส่งออกทาง DKIM ของ subdomain ไม่พึ่ง MX ของ root · SPF ที่ Cloudflare เพิ่มเป็น `include` เพิ่ม ไม่ทับของ Resend — แต่ **ตรวจว่า TXT SPF ของ root มี record เดียว** (รวม `include:_spf.mx.cloudflare.net` กับของ Resend ไว้บรรทัดเดียว ถ้ามีสองบรรทัดจะ fail)
-3. **Custom addresses** → Add:
-   - `support@seertarot.net` → forward ไปอีเมลเจ้าของ (ต้อง verify อีเมลปลายทางครั้งเดียว)
-   - `noreply@seertarot.net` → forward ไปเจ้าของ (เห็น bounce/reply ที่หลุดมา)
-4. (ตัวเลือก) **Catch-all** → forward ทุกอย่างที่เหลือ
+**DNS ที่ถูกเพิ่ม (13 records รวม · ไม่ชนกับ Resend):**
+- MX ×3 บน root → `route1/2/3.mx.cloudflare.net` (Resend อยู่บน `send.seertarot.net` แยกกัน)
+- TXT DKIM `cf2024-1._domainkey` (Resend ใช้ `resend._domainkey` แยก)
+- TXT SPF root → `v=spf1 include:_spf.mx.cloudflare.net ~all` (Resend SPF อยู่บน `send.` แยก · แต่ละ hostname มี SPF record เดียว = valid)
+- DMARC เดิม `p=quarantine` ไม่แตะ
+
+**วิธีเปิดใหม่/แก้ (ถ้าต้อง):** account level → **Compute → Email Service → Email Routing** → เลือก zone `seertarot.net` (nav ระดับ zone ไม่มีเมนูนี้แล้ว มีแค่ DMARC Management / Email Security)
 
 **ถ้าต้องประมวลผลเมลด้วยโค้ด** (parse bounce อัตโนมัติ) — ต้อง Email Worker แยก · OpenNext ไม่ export `email()` handler · ยังไม่คุ้มตอนนี้
 
