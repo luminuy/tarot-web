@@ -34,6 +34,19 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ✅ Cloudflare Free Stack เสร็จ — verified บน production ครบ 6 บริการ
+
+- **AI Gateway** (#189 #196) — log traffic คำอ่านจริง (`gemini-3.5-flash-lite` · $0.0018 · 2.9s) · cache แบบเลือกเส้น (คำอ่าน ttl 0)
+- **Turnstile** (#191 #194 #197) — flow ครบบน production (widget → token 752 ตัวอักษร → server 401/403 ถูกต้อง)
+- **Workers AI safety ชั้น 3** (#192) — auto
+- **KV ไพ่ประจำวัน** (#198) — deterministic + edge cache
+- **Vectorize** (#199 #200) — index 102 รายการ · `?q=ความรัก` → The Lovers อันดับ 1 · related cards ท้ายหน้าไพ่
+- **R2 ลิงก์แชร์** (#201 #202 hotfix #203) — round-trip PNG verified · lifecycle 90 วันตั้งแล้ว
+- **บล็อกจริง**: Email Routing (โดเมน) · Cron cleanup (คุณค่าต่ำ) · Durable Objects/Realtime (Marketplace)
+- ค่า config production + วิธี rebuild Vectorize อยู่ใน `docs/plans/CLOUDFLARE_FREE_STACK.md`
+
+---
+
 ### 🗓️ 2026-09-03: เปิด r2_buckets binding กลับ — token ได้สิทธิ์ R2 แล้ว
 
 - เจ้าของโปรเจกต์เติม permission **Account · Workers R2 Storage · Edit** ให้ token `tarot-web deploy` (แก้ token เดิม ค่าไม่เปลี่ยน ไม่ต้องแตะ GitHub secret)
