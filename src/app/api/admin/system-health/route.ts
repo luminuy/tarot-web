@@ -196,6 +196,28 @@ export async function GET(request: Request) {
     ok: Boolean(geminiKey || groqKey),
   };
 
+  // 9. Cloudflare Free Stack (ส่วนเสริม — ไม่นับเป็น critical · ไม่ตั้ง = ระบบเดิมทำงานปกติ)
+  const { isAiGatewayEnabled } = await import("@/lib/ai/gateway");
+  const { isTurnstileConfigured } = await import("@/lib/security/turnstile");
+  const { getAiBinding } = await import("@/lib/platform/cf");
+  const workersAiBinding = await getAiBinding();
+
+  const cloudflareStackHealth = {
+    aiGateway: {
+      enabled: isAiGatewayEnabled(),
+      accountIdSet: Boolean(process.env.CF_AI_GATEWAY_ACCOUNT_ID),
+      gatewayIdSet: Boolean(process.env.CF_AI_GATEWAY_ID),
+    },
+    turnstile: {
+      enabled: isTurnstileConfigured(),
+      siteKeySet: Boolean(process.env.TURNSTILE_SITE_KEY),
+      secretKeySet: Boolean(process.env.TURNSTILE_SECRET_KEY),
+    },
+    workersAi: {
+      bindingAvailable: Boolean(workersAiBinding),
+    },
+  };
+
   // Overall System Status Assessment
   const criticalSystems = [
     domainHealth.ok,
@@ -238,6 +260,7 @@ export async function GET(request: Request) {
       kv: kvHealth,
       security: securityHealth,
       ai: aiHealth,
+      cloudflareStack: cloudflareStackHealth,
     },
   });
 }

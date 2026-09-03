@@ -34,6 +34,19 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: /admin — แสดงสถานะ Cloudflare Free Stack (AI Gateway / Turnstile / Workers AI)
+
+- **ทำไม**: หลัง `wrangler secret put` แล้วเจ้าของโปรเจกต์ต้องรู้ว่าตั้งครบไหม — เดิมไม่มีที่ดู
+- **สิ่งที่ทำ**: เพิ่มการ์ด "Cloudflare Free Stack (ส่วนเสริม)" ในแท็บสุขภาพระบบ `/admin`
+  - AI Gateway: เปิดใช้แล้ว / ขาด ACCOUNT_ID / ขาด GATEWAY_ID
+  - Turnstile: เปิดใช้แล้ว / ขาด SITE_KEY / ขาด SECRET_KEY
+  - Workers AI: binding พร้อม / ไม่มี (dev)
+  - **ไม่นับเป็น critical** — ไม่ตั้งก็ไม่กระทบสถานะระบบรวม
+- **ไฟล์ที่แก้ไข**: `src/app/api/admin/system-health/route.ts`, `src/components/admin/SystemHealthPanel.tsx`
+- **ผลการทดสอบ**: `tsc` ✅ · `repo:verify` 21/21 ✅ · route compile (401 auth-gate ปกติ ไม่ crash)
+
+---
+
 ### 🗓️ 2026-09-03: แก้ Turnstile ให้เปิดใช้ได้จริงผ่าน wrangler secret (เดิม NEXT_PUBLIC ใช้ไม่ได้กับ pipeline นี้)
 
 #### 1. site key ดึงตอน runtime แทน build-time

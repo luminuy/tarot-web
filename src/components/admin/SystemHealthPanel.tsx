@@ -72,6 +72,11 @@ interface HealthData {
       groqConfigured: boolean;
       ok: boolean;
     };
+    cloudflareStack: {
+      aiGateway: { enabled: boolean; accountIdSet: boolean; gatewayIdSet: boolean };
+      turnstile: { enabled: boolean; siteKeySet: boolean; secretKeySet: boolean };
+      workersAi: { bindingAvailable: boolean };
+    };
   };
 }
 
@@ -413,6 +418,38 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                     <span>✦ ตรวจสอบเชิงลึกรายโมเดล & วัด Latency ในแท็บสุขภาพ AI →</span>
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+
+          {/* 9. Cloudflare Free Stack (ส่วนเสริม — ไม่ตั้งก็ไม่กระทบระบบเดิม) */}
+          <div className="altar-panel rounded-2xl p-5 border border-[#e5c07b]/20 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[#e5c07b]">✦</span>
+              <h3 className="font-semibold text-sm text-white">Cloudflare Free Stack (ส่วนเสริม)</h3>
+            </div>
+            <div className="space-y-1.5 text-xs text-[#c5bed8]">
+              <div className="flex justify-between py-1 border-b border-white/5">
+                <span className="text-[#9c93b8]">AI Gateway:</span>
+                <span className={data.services.cloudflareStack.aiGateway.enabled ? "text-emerald-300" : "text-[#9c93b8]"}>
+                  {data.services.cloudflareStack.aiGateway.enabled
+                    ? "เปิดใช้ (route AI ผ่าน gateway)"
+                    : `ยังไม่เปิด (${data.services.cloudflareStack.aiGateway.accountIdSet ? "" : "ขาด ACCOUNT_ID "}${data.services.cloudflareStack.aiGateway.gatewayIdSet ? "" : "ขาด GATEWAY_ID"})`.trim() || "ยังไม่เปิด"}
+                </span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-white/5">
+                <span className="text-[#9c93b8]">Turnstile (กันบอท):</span>
+                <span className={data.services.cloudflareStack.turnstile.enabled ? "text-emerald-300" : "text-[#9c93b8]"}>
+                  {data.services.cloudflareStack.turnstile.enabled
+                    ? "เปิดใช้ (signup/login/forgot)"
+                    : `ยังไม่เปิด (${data.services.cloudflareStack.turnstile.siteKeySet ? "" : "ขาด SITE_KEY "}${data.services.cloudflareStack.turnstile.secretKeySet ? "" : "ขาด SECRET_KEY"})`.trim() || "ยังไม่เปิด"}
+                </span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-[#9c93b8]">Workers AI (safety ชั้น 3):</span>
+                <span className={data.services.cloudflareStack.workersAi.bindingAvailable ? "text-emerald-300" : "text-[#9c93b8]"}>
+                  {data.services.cloudflareStack.workersAi.bindingAvailable ? "binding พร้อม" : "ไม่มี binding (dev / ยังไม่ deploy)"}
+                </span>
               </div>
             </div>
           </div>
