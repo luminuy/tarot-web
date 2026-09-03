@@ -1302,35 +1302,30 @@ export default function TarotPage() {
         </div>
 
         <div className="max-w-4xl mx-auto px-5 pt-12 pb-10 space-y-8 relative z-10">
-          {/* Brand & Mission Statement */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-[#D5CEC2]/20 pb-6 text-center sm:text-left">
-            <div>
-              <span className="font-serif-th text-xs font-bold tracking-[0.2em] text-[#A58A5C] uppercase block">
-                ✦ SEE TAROT ✦
+          {/* Brand & Mission Statement — โลโก้เว็บ + ประโยคภารกิจ (ไม่มีแถบลิงก์) */}
+          <div className="flex flex-col items-center justify-center gap-3 border-b border-[#D5CEC2]/20 pb-6 text-center">
+            <Link
+              href="/"
+              aria-label="SeerTarot — หน้าแรก"
+              className="inline-flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
+            >
+              <span className="w-11 h-11 rounded-full border border-[#A58A5C]/40 overflow-hidden bg-[#F3F0EA] flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+                <img
+                  src="/logo.webp"
+                  alt="SeerTarot"
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
               </span>
-              <p className="font-serif-th text-sm text-[#F3F0EA] font-light mt-0.5">
-                พื้นที่สงบสำหรับหยุด คิด ถาม และอ่านความหมายของตัวเอง
-              </p>
-            </div>
-
-            {/* Editorial Navigation Links */}
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-serif-th text-[#D5CEC2]">
-              <Link href="/spreads" className="hover:text-[#A58A5C] transition-colors">
-                ผังการเปิดไพ่ (20 แบบ)
-              </Link>
-              <Link href="/cards" className="hover:text-[#A58A5C] transition-colors">
-                ความหมายไพ่ (78 ใบ)
-              </Link>
-              <Link href="/readers" className="hover:text-[#A58A5C] transition-colors">
-                ปรึกษาแม่หมอ
-              </Link>
-              <Link href="/blog" className="hover:text-[#A58A5C] transition-colors">
-                บทความ &amp; ภูมิปัญญา
-              </Link>
-              <Link href="/privacy" className="hover:text-[#A58A5C] transition-colors">
-                ความเป็นส่วนตัว (PDPA)
-              </Link>
-            </div>
+              <span className="font-serif-th text-lg font-bold tracking-wide text-[#F3F0EA]">
+                SeerTarot
+              </span>
+            </Link>
+            <p className="font-serif-th text-sm text-[#D5CEC2] font-light">
+              พื้นที่สงบสำหรับหยุด คิด ถาม และอ่านความหมายของตัวเอง
+            </p>
           </div>
 
           {/* Row 1: AI Disclosure Card */}
@@ -1441,6 +1436,12 @@ export default function TarotPage() {
             </div>
             <p className="text-[10px] text-[#D5CEC2]/70 font-serif-th text-center">
               ระบบสับไพ่โปร่งใสตรวจสอบได้ (Provably Fair) · สำรับดั้งเดิม 1909 Rider-Waite · คำทำนายประมวลผลด้วย AI
+            </p>
+            <p className="text-[10px] text-[#D5CEC2]/60 font-serif-th text-center">
+              © 2026 SeerTarot · สงวนลิขสิทธิ์ ·{" "}
+              <Link href="/privacy" className="hover:text-[#A58A5C] transition-colors">
+                นโยบายความเป็นส่วนตัว
+              </Link>
             </p>
           </div>
         </div>
