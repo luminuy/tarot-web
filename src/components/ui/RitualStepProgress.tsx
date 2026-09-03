@@ -36,11 +36,11 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({
     <nav aria-label="ความคืบหน้าการดูดวง" className="w-full max-w-2xl mx-auto mb-8 px-2 select-none">
       <ol className="flex items-center justify-between relative list-none">
         {/* Background Connecting Rail */}
-        <div className="absolute left-0 top-[14px] sm:top-4 w-full h-[1px] bg-[#e5c07b]/20 z-0" aria-hidden="true" />
+        <div className="absolute left-0 top-[14px] sm:top-4 w-full h-[1px] bg-[#D6B48D]/40 z-0" aria-hidden="true" />
 
         {/* Active Golden Progress Rail */}
         <motion.div
-          className="absolute left-0 top-[14px] sm:top-4 h-[2px] bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] shadow-[0_0_12px_rgba(229,192,123,0.8)] z-0"
+          className="absolute left-0 top-[14px] sm:top-4 h-[2px] bg-gradient-to-r from-[#CD9F5B] via-[#E4C09F] to-[#CD9F5B] shadow-[0_0_10px_rgba(205,159,91,0.5)] z-0"
           aria-hidden="true"
           initial={false}
           animate={{ width: `${(currentIndex / (STEPS.length - 1)) * 100}%` }}
@@ -59,10 +59,10 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({
             <span
               className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-mono font-bold transition-all duration-300 ${
                 isActive
-                  ? "bg-[#05040a] border-2 border-[#e5c07b] text-[#f5deaa] ring-4 ring-[#e5c07b]/30 shadow-[0_0_20px_rgba(229,192,123,0.6)]"
+                  ? "bg-[#CD9F5B] border-2 border-[#D6B48D] text-[#FDF7F0] ring-4 ring-[#CD9F5B]/25 shadow-[0_2px_10px_rgba(205,159,91,0.4)]"
                   : isPassed
-                  ? "bg-[#c59b27] border border-[#f5deaa] text-[#05040a] shadow-[0_0_10px_rgba(229,192,123,0.4)]"
-                  : "bg-[#0c071a] border border-[#e5c07b]/30 text-[#9c93b8]/60"
+                  ? "bg-[#E4C09F] border border-[#D6B48D] text-[#5A432F] shadow-sm"
+                  : "bg-[#FDF7F0] border border-[#D6B48D]/50 text-[#8C735D]/60"
               }`}
             >
               {isPassed ? "✓" : step.num}
@@ -73,10 +73,10 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({
             <span
               className={`text-[10px] sm:text-[11px] font-serif-th mt-1.5 transition-colors whitespace-nowrap ${
                 isActive
-                  ? "font-bold text-[#f5deaa] drop-shadow"
+                  ? "font-bold text-[#5A432F] drop-shadow-xs"
                   : isPassed
-                  ? "text-[#e5c07b]/80"
-                  : "text-[#9c93b8]/50"
+                  ? "text-[#8C735D]"
+                  : "text-[#8C735D]/50"
               }`}
             >
               {step.title}

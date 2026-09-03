@@ -57,12 +57,12 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
   return (
     <div className="space-y-8 relative z-10">
-      {/* World-Class Sacred Search & Filter Dashboard */}
-      <div className="rounded-3xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#130d24]/96 via-[#0a0715]/95 to-[#05040a]/95 p-4 sm:p-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)] space-y-5">
+      {/* Sacred Search & Filter Dashboard */}
+      <div className="rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-4 sm:p-6 shadow-md space-y-5">
         {/* Search Bar & Result Stats */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#e5c07b] text-sm pointer-events-none">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#CD9F5B] text-sm pointer-events-none">
               ✦
             </span>
             <input
@@ -70,22 +70,22 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."
-              className="w-full pl-10 pr-10 py-3.5 rounded-2xl border border-[#e5c07b]/35 bg-[#090514]/90 text-white placeholder-gray-400 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#ffd700] focus:ring-2 focus:ring-[#ffd700]/30 transition-all shadow-inner"
+              className="w-full pl-10 pr-10 py-3.5 rounded-2xl border border-[#D6B48D] bg-[#FFFFFF] text-[#5A432F] placeholder-[#8C735D]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#CD9F5B] focus:ring-2 focus:ring-[#CD9F5B]/30 transition-all shadow-xs"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs bg-white/10 hover:bg-white/20 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C735D] hover:text-[#5A432F] text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-[#9c93b8]">
+          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-[#8C735D]">
             <span>
-              ค้นพบ <strong className="text-[#ffd700] text-sm font-bold">{filteredCards.length}</strong> จาก {cards.length} ใบ
+              ค้นพบ <strong className="text-[#CD9F5B] text-sm font-bold">{filteredCards.length}</strong> จาก {cards.length} ใบ
             </span>
             {searchQuery && (
               <button
@@ -94,7 +94,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   setSearchQuery("");
                   setActiveFilter("all");
                 }}
-                className="text-[11px] text-[#e5c07b] hover:text-[#ffd700] underline cursor-pointer"
+                className="text-[11px] text-[#CD9F5B] hover:underline cursor-pointer font-bold"
               >
                 ล้างคำค้นหา
               </button>
@@ -102,7 +102,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
           </div>
         </div>
 
-        {/* Suit & Arcana Filter Tabs (World-Class Interactive Badges) */}
+        {/* Suit & Arcana Filter Tabs */}
         <div
           role="tablist"
           aria-label="หมวดหมู่ชุดไพ่และสำรับ"
@@ -130,10 +130,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     nextTab?.focus();
                   }
                 }}
-                className={`p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+                className={`p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
                   isActive
-                    ? "border-[#ffd700] bg-gradient-to-b from-[#2d224d] via-[#1d1438] to-[#100b24] shadow-[0_0_25px_rgba(229,192,123,0.35)] scale-[1.02]"
-                    : "border-[#e5c07b]/20 bg-[#0c081a]/80 hover:border-[#e5c07b]/50 hover:bg-[#150e2e]"
+                    ? "border-[#CD9F5B] bg-[#FFFFFF] shadow-sm scale-[1.02]"
+                    : "border-[#D6B48D] bg-[#FCF0E6] hover:border-[#CD9F5B] hover:bg-[#FFFFFF]"
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-1">
@@ -141,8 +141,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   <span
                     className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
                       isActive
-                        ? "bg-gradient-to-r from-[#c59b27] to-[#f5deaa] text-[#05040a]"
-                        : "bg-white/5 text-[#9c93b8] group-hover:text-white"
+                        ? "bg-[#CD9F5B] text-[#FDF7F0]"
+                        : "bg-black/5 text-[#8C735D] group-hover:text-[#5A432F]"
                     }`}
                   >
                     {tab.count}
@@ -150,14 +150,14 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 </div>
                 <div>
                   <h4 className={`font-serif-th text-xs font-bold leading-tight ${
-                    isActive ? "text-[#ffd700]" : "text-[#f5deaa] group-hover:text-[#ffd700]"
+                    isActive ? "text-[#CD9F5B]" : "text-[#5A432F] group-hover:text-[#CD9F5B]"
                   }`}>
                     {tab.label}
                   </h4>
-                  <p className="text-[10px] text-[#9c93b8] truncate mt-0.5">{tab.desc}</p>
+                  <p className="text-[10px] text-[#8C735D] truncate mt-0.5">{tab.desc}</p>
                 </div>
                 {isActive && (
-                  <div className="gold-foil-sheen absolute inset-0 opacity-20 pointer-events-none" />
+                  <div className="gold-foil-sheen absolute inset-0 opacity-15 pointer-events-none" />
                 )}
               </button>
             );
@@ -181,10 +181,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               <Link
                 key={card.id}
                 href={`/cards/${card.id}`}
-                className="rounded-2xl border border-[#e5c07b]/30 bg-gradient-to-b from-[#160e2c]/95 via-[#0d081c]/95 to-[#06040d]/95 p-3 flex flex-col justify-between hover:border-[#ffd700] hover:shadow-[0_12px_35px_rgba(229,192,123,0.3)] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5"
+                className="rounded-[1.618rem] border border-[#D6B48D] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#CD9F5B] hover:shadow-md transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 shadow-xs"
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
-                <div className="relative aspect-[7/12] w-full rounded-xl overflow-hidden border border-[#e5c07b]/35 shadow-inner bg-[#040308] mb-3">
+                <div className="relative aspect-[7/12] w-full rounded-xl overflow-hidden border border-[#D6B48D] shadow-xs bg-[#FCF0E6] mb-3">
                   <CardImage
                     image={card.image}
                     cardId={card.id}
@@ -192,21 +192,21 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 tarot-hd-card-image"
                     sizes="(min-width: 1024px) 160px, (min-width: 768px) 170px, (min-width: 640px) 190px, 45vw"
                   />
-                  <div className="gold-foil-sheen absolute inset-0 opacity-10 group-hover:opacity-40 transition-opacity pointer-events-none" />
+                  <div className="gold-foil-sheen absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity pointer-events-none" />
 
                   {/* Top Badge: Number & Arcana */}
                   <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-black/90 text-[#ffd700] border border-[#ffd700]/40 shadow">
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-[#5A432F] text-[#FDF7F0] border border-[#D6B48D] shadow-xs">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
-                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-md border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold shadow`}>
+                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-md border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold shadow-xs`}>
                       {card.element}
                     </span>
                   </div>
 
                   {/* Bottom Hover Action Overlay */}
-                  <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-[10px] font-serif-th font-bold text-[#ffd700] flex items-center gap-1">
+                  <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-[#5A432F]/90 via-[#5A432F]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-[10px] font-serif-th font-bold text-[#FDF7F0] flex items-center gap-1">
                       <span>✦</span> ดูความหมาย
                     </span>
                   </div>
@@ -214,10 +214,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                 {/* Card Title & English Subtitle */}
                 <div className="text-center space-y-1 z-10">
-                  <span className="text-[10px] font-mono text-[#e5c07b]/85 block truncate">
+                  <span className="text-[10px] font-mono text-[#8C735D] block truncate">
                     {card.nameEn}
                   </span>
-                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#f5deaa] group-hover:text-[#ffd700] transition-colors truncate">
+                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#5A432F] group-hover:text-[#CD9F5B] transition-colors truncate">
                     {card.nameTh}
                   </h3>
 
@@ -226,7 +226,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     {card.keywords.upright.slice(0, 2).map((kw, i) => (
                       <span
                         key={i}
-                        className="text-[9px] font-serif-th px-1.5 py-0.5 rounded-md bg-[#1d1438]/80 text-[#d8cce8] border border-white/5 truncate max-w-full"
+                        className="text-[9px] font-serif-th px-1.5 py-0.5 rounded-md bg-[#FCF0E6] text-[#5A432F] border border-[#D6B48D] truncate max-w-full"
                       >
                         {kw}
                       </span>
@@ -235,7 +235,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 </div>
 
                 {/* Subtle Luxury Corner Sparkle */}
-                <div className="absolute top-1 right-1 text-[8px] text-[#e5c07b]/20 group-hover:text-[#ffd700]/70 transition-colors pointer-events-none">
+                <div className="absolute top-1 right-1 text-[8px] text-[#D6B48D] group-hover:text-[#CD9F5B] transition-colors pointer-events-none">
                   ✦
                 </div>
               </Link>
@@ -246,12 +246,12 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
       {/* Empty State */}
       {filteredCards.length === 0 && (
-        <div className="text-center py-16 rounded-3xl border border-[#e5c07b]/20 bg-[#0d081c]/80 p-8 space-y-3">
-          <div className="text-3xl text-[#ffd700]">✦</div>
-          <h3 className="font-serif-th text-lg font-bold text-[#f5deaa]">
+        <div className="text-center py-16 rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-8 space-y-3 shadow-sm">
+          <div className="text-3xl text-[#CD9F5B]">✦</div>
+          <h3 className="font-serif-th text-lg font-bold text-[#5A432F]">
             ไม่พบไพ่ที่ตรงกับ &ldquo;{searchQuery}&rdquo;
           </h3>
-          <p className="text-xs text-[#9c93b8] max-w-md mx-auto">
+          <p className="text-xs text-[#8C735D] max-w-md mx-auto">
             ลองค้นหาด้วยชื่ออื่น เช่น &ldquo;ความรัก&rdquo;, &ldquo;The Sun&rdquo;, &ldquo;ดาวพฤหัสบดี&rdquo; หรือ &ldquo;ธาตุไฟ&rdquo;
           </p>
           <button
@@ -260,7 +260,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               setSearchQuery("");
               setActiveFilter("all");
             }}
-            className="px-5 py-2 rounded-xl text-xs font-serif-th font-bold bg-[#1d1438] border border-[#e5c07b]/40 text-[#ffd700] hover:bg-[#2a1d4f] transition-all cursor-pointer"
+            className="px-5 py-2 rounded-xl text-xs font-serif-th font-bold bg-[#CD9F5B] hover:bg-[#B8853E] border border-[#D6B48D] text-[#FDF7F0] transition-all cursor-pointer shadow-xs"
           >
             ล้างตัวกรองทั้งหมด
           </button>

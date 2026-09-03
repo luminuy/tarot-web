@@ -1,26 +1,54 @@
 @import "tailwindcss";
 
 /*
-  ธีมวิหารพยากรณ์ลึกลับ (Mystic Sanctuary / Obsidian & Gold Leaf)
+  ธีมวิหารพยากรณ์แสงสว่างอบอุ่นระดับโลก (World-Class Warm Minimalist Sanctuary / Golden Ratio 1.618)
+  Core Palette:
+  1. พื้นหลังหลัก (Page Canvas)     : #FCF0E6 (Warm Ivory Linen)
+  2. พื้นหลังการ์ดใหญ่ (Main Card)   : #E4C09F (Apricot Sand)
+  3. พื้นหลังการ์ดย่อย (Inner Card)   : #FDF7F0 (Soft Milk Cream)
+  4. ป้ายหัวข้อ & ปุ่มหลัก (CTA/Badge): #CD9F5B (Caramel Honey Gold)
+  5. ตัวหนังสือหลัก (Heading & Body) : #5A432F (Deep Walnut Brown)
+  6. ตัวหนังสือรอง (Muted Text)      : #8C735D (Muted Chestnut)
+  7. เส้นขอบ (Borders & Dividers)    : #D6B48D (Golden Sand)
+  8. ประกายดาว & ไอคอน (Mystic Spark): #CD9F5B (Celestial Gold)
 */
 @theme {
-  --color-void: #05040a;
-  --color-obsidian-950: #0a0714;
-  --color-obsidian-900: #100b20;
-  --color-obsidian-800: #191230;
-  --color-obsidian-700: #251c44;
-  --color-gold-200: #fff0d4;
-  --color-gold-300: #f5deaa;
-  --color-gold-400: #e5c07b;
-  --color-gold-500: #c59b27;
-  --color-gold-600: #9e791b;
-  --color-amethyst: #a855f7;
-  --color-ember: #ff9f43;
-  --color-vellum: #e2d9f3;
-  --color-ash: #9c93b8;
+  /* 8 Core Palette Tokens */
+  --color-canvas: #FCF0E6;
+  --color-main-card: #E4C09F;
+  --color-inner-card: #FDF7F0;
+  --color-cta-gold: #CD9F5B;
+  --color-walnut: #5A432F;
+  --color-chestnut: #8C735D;
+  --color-sand: #D6B48D;
+  --color-celestial: #CD9F5B;
+
+  /* Semantic Theme Mappings for Harmonious Continuity */
+  --color-void: #FCF0E6;
+  --color-obsidian-950: #FDF7F0;
+  --color-obsidian-900: #F7EFE6;
+  --color-obsidian-800: #EEDCCE;
+  --color-obsidian-700: #E4C09F;
+  --color-gold-200: #8C735D;
+  --color-gold-300: #5A432F;
+  --color-gold-400: #CD9F5B;
+  --color-gold-500: #B8853E;
+  --color-gold-600: #8C5E28;
+  --color-amethyst: #9F7E69;
+  --color-ember: #D97736;
+  --color-vellum: #5A432F;
+  --color-ash: #8C735D;
 
   --font-serif-th: var(--font-noto-serif-thai), "Noto Serif Thai", serif;
   --font-sans-th: var(--font-sarabun), "Sarabun", system-ui, sans-serif;
+
+  /* Golden Ratio 1.618 Typography Scale */
+  --text-golden-sm: 0.8125rem; /* 13px (Fibonacci) */
+  --text-golden-base: 1rem;    /* 16px */
+  --text-golden-lg: 1.3125rem; /* 21px (Fibonacci) */
+  --text-golden-xl: 1.625rem;  /* 26px (16 * 1.618) */
+  --text-golden-2xl: 2.125rem; /* 34px (Fibonacci) */
+  --text-golden-3xl: 3.4375rem;/* 55px (Fibonacci) */
 
   /* FDN-2: Motion Tokens */
   --dur-instant: 80ms;
@@ -52,16 +80,17 @@
 
 html,
 body {
-  background-color: var(--color-void);
-  color: var(--color-vellum);
+  background-color: var(--color-canvas);
+  color: var(--color-walnut);
   font-family: var(--font-sans-th);
+  line-height: 1.618;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* ตัวอักษรทองคำโบราณ (Ancient Gold Leaf) — ป้องกันวรรณยุกต์และสระภาษาไทยถูกตัดขอบ */
+/* ตัวอักษรทองคำโบราณ (Antique Warm Gold Leaf) — คมชัด หรูหรา บนพื้นสว่างนวลตา */
 .font-mystic-gold {
-  background: linear-gradient(135deg, #ffffff 0%, #fff0d4 20%, #e5c07b 45%, #c59b27 75%, #ffffff 100%);
+  background: linear-gradient(135deg, #5A432F 0%, #8C5E28 25%, #CD9F5B 50%, #B8853E 75%, #5A432F 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -72,35 +101,29 @@ body {
   vertical-align: middle;
 }
 
-/* กรอบแท่นบูชา Obsidian & Gold (Optimized 10px blur for zero stutter) */
-/*
- * ⚠️ ห้ามใส่ backdrop-filter กลับเข้ามาในสองคลาสนี้ (บทเรียน INC ครั้งนี้)
- * แผงแท่นบูชาถูกใช้ 32 จุดทั่วเว็บ และมี canvas พื้นหลังขยับอยู่ตลอด
- * เบราว์เซอร์จึงต้องคำนวณเบลอ "ใหม่ทุกเฟรม" ทุกแผง → เฟรมตกทั้งเว็บ
- * ใช้พื้นหลังทึบขึ้นแทน หน้าตาบนพื้นมืดแทบไม่ต่างกันเลย
- */
+/* กรอบแท่นบูชา Soft Milk Cream & Golden Sand (Minimalist Warm Sanctuary) */
 .altar-panel {
-  background: radial-gradient(circle at 50% 0%, rgba(35, 26, 64, 0.97) 0%, rgba(10, 7, 20, 0.98) 100%);
-  border: 1px solid rgba(229, 192, 123, 0.22);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 240, 212, 0.15);
+  background: #FDF7F0;
+  border: 1px solid #D6B48D;
+  box-shadow: 0 10px 30px -4px rgba(90, 67, 47, 0.07), 0 4px 12px -2px rgba(90, 67, 47, 0.04);
 }
 
 .altar-panel-active {
-  background: radial-gradient(circle at 50% 0%, rgba(62, 43, 110, 0.98) 0%, rgba(16, 11, 32, 0.99) 100%);
-  border: 1px solid rgba(229, 192, 123, 0.6);
-  box-shadow: 0 0 35px rgba(229, 192, 123, 0.25), 0 25px 60px rgba(0, 0, 0, 0.9), inset 0 0 15px rgba(229, 192, 123, 0.15);
+  background: #FFFFFF;
+  border: 1.618px solid #CD9F5B;
+  box-shadow: 0 14px 34px -4px rgba(205, 159, 91, 0.25), 0 0 0 1px #CD9F5B;
 }
 
-/* ลวดลายหลังไพ่ศักดิ์สิทธิ์ (Sacred Geometry Card Back - Obsidian Velvet & Gold Inset) */
+/* ลวดลายหลังไพ่ศักดิ์สิทธิ์ (Warm Chocolate & Celestial Gold Inset) */
 .card-back-pattern {
-  background-color: #0b0716;
+  background-color: #382518;
   background-image:
-    radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.28) 0%, transparent 60%),
-    repeating-linear-gradient(45deg, rgba(229, 192, 123, 0.16) 0 1.5px, transparent 1.5px 7px),
-    repeating-linear-gradient(-45deg, rgba(229, 192, 123, 0.16) 0 1.5px, transparent 1.5px 7px),
-    radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.3), transparent 70%),
-    radial-gradient(circle at 50% 100%, rgba(229, 192, 123, 0.18), transparent 70%);
-  box-shadow: inset 0 0 0 1px rgba(255, 215, 0, 0.35), inset 0 0 14px rgba(0, 0, 0, 0.85);
+    radial-gradient(circle at 50% 50%, rgba(205, 159, 91, 0.42) 0%, transparent 60%),
+    repeating-linear-gradient(45deg, rgba(214, 180, 141, 0.28) 0 1.5px, transparent 1.5px 7px),
+    repeating-linear-gradient(-45deg, rgba(214, 180, 141, 0.28) 0 1.5px, transparent 1.5px 7px),
+    radial-gradient(circle at 50% 0%, rgba(228, 192, 159, 0.35), transparent 70%),
+    radial-gradient(circle at 50% 100%, rgba(205, 159, 91, 0.3), transparent 70%);
+  box-shadow: inset 0 0 0 1.618px rgba(205, 159, 91, 0.7), inset 0 0 14px rgba(26, 16, 10, 0.75);
 }
 
 /* การพลิกไพ่ 3D Scene และระบบเรนเดอร์ภาพคมชัดระดับ HD */
@@ -162,20 +185,21 @@ body {
 }
 
 /* Custom Scrollbar */
+/* Custom Scrollbar — Warm Ivory Linen & Golden Sand */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #05040a;
+  background: #FCF0E6;
 }
 ::-webkit-scrollbar-thumb {
-  background: #251c44;
+  background: #D6B48D;
   border-radius: 4px;
-  border: 1px solid rgba(229, 192, 123, 0.3);
+  border: 1px solid rgba(205, 159, 91, 0.4);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c59b27;
+  background: #CD9F5B;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -191,17 +215,18 @@ body {
 /* Sleek Golden Scrollbar for Deck Tableau */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(10, 7, 20, 0.6);
+  background: #FDF7F0;
   border-radius: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(229, 192, 123, 0.35);
+  background: #D6B48D;
   border-radius: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(229, 192, 123, 0.7);
+  background: #CD9F5B;
 }
 
 /* ===== Mobile-First GPU Optimizations (85%+ mobile users) ===== */

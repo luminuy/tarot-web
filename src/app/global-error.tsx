@@ -9,23 +9,23 @@ export default function GlobalError({
 }) {
   return (
     <html lang="th">
-      <body className="min-h-screen bg-[#07070b] text-[#f8f5ee] flex items-center justify-center p-4">
-        <div className="max-w-md w-full p-8 rounded-2xl bg-[#12111a] border border-[#e5c07b]/30 shadow-[0_0_50px_rgba(229,192,123,0.15)] text-center space-y-6">
-          <div className="w-16 h-16 mx-auto rounded-full bg-[#e5c07b]/10 border border-[#e5c07b]/40 flex items-center justify-center text-2xl text-[#e5c07b]">
+      <body className="min-h-screen bg-[#FCF0E6] text-[#5A432F] flex items-center justify-center p-4 font-sans">
+        <div className="max-w-md w-full p-8 rounded-[1.618rem] bg-[#FFFFFF] border border-[#D6B48D] shadow-xl text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#FCF0E6] border border-[#D6B48D] flex items-center justify-center text-2xl text-[#CD9F5B] font-bold shadow-xs">
             ✦
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-medium text-[#f8f5ee]">
+            <h2 className="text-xl font-bold font-serif-th text-[#5A432F]">
               เกิดข้อผิดพลาดชั่วคราวในการโหลดระบบ
             </h2>
-            <p className="text-xs text-[#9d9385] leading-relaxed">
+            <p className="text-xs text-[#8C735D] leading-relaxed font-serif-th">
               แตะปุ่มด้านล่างเพื่อลองโหลดหน้าเว็บใหม่อีกครั้ง
             </p>
           </div>
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#d4af37] to-[#e5c07b] text-[#07070b] font-medium text-sm hover:brightness-110 active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+            className="w-full py-3 px-4 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-bold text-sm font-serif-th active:scale-95 transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
           >
             ✦ ลองใหม่อีกครั้ง
           </button>

@@ -20,18 +20,18 @@ export const MysticAltarCanvas: React.FC = () => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let prefersReducedMotion = motionQuery.matches;
 
-    // Cache background gradient on resize (Zero GC allocations in render loop)
+    // Cache background gradient on resize (Warm Ivory Linen & Milk Cream)
     let bgGrad = ctx.createRadialGradient(
       width / 2,
-      height * 0.4,
+      height * 0.38,
       50,
       width / 2,
-      height * 0.4,
-      Math.max(width, height) * 0.7
+      height * 0.38,
+      Math.max(width, height) * 0.75
     );
-    bgGrad.addColorStop(0, "rgba(8, 6, 16, 0.65)");
-    bgGrad.addColorStop(0.5, "rgba(6, 4, 12, 0.9)");
-    bgGrad.addColorStop(1, "rgba(5, 4, 10, 0.98)");
+    bgGrad.addColorStop(0, "rgba(253, 247, 240, 0.7)");
+    bgGrad.addColorStop(0.5, "rgba(252, 240, 230, 0.9)");
+    bgGrad.addColorStop(1, "rgba(247, 232, 218, 0.98)");
 
     const handleResize = () => {
       if (!canvas) return;
@@ -39,15 +39,15 @@ export const MysticAltarCanvas: React.FC = () => {
       height = canvas.height = window.innerHeight;
       bgGrad = ctx.createRadialGradient(
         width / 2,
-        height * 0.4,
+        height * 0.38,
         50,
         width / 2,
-        height * 0.4,
-        Math.max(width, height) * 0.7
+        height * 0.38,
+        Math.max(width, height) * 0.75
       );
-      bgGrad.addColorStop(0, "rgba(8, 6, 16, 0.65)");
-      bgGrad.addColorStop(0.5, "rgba(6, 4, 12, 0.9)");
-      bgGrad.addColorStop(1, "rgba(5, 4, 10, 0.98)");
+      bgGrad.addColorStop(0, "rgba(253, 247, 240, 0.7)");
+      bgGrad.addColorStop(0.5, "rgba(252, 240, 230, 0.9)");
+      bgGrad.addColorStop(1, "rgba(247, 232, 218, 0.98)");
 
       if (prefersReducedMotion) {
         drawStaticBackground();
@@ -78,7 +78,7 @@ export const MysticAltarCanvas: React.FC = () => {
     // Adaptive Particles: 12 on mobile, 30 on desktop
     const isMobile = width < 768;
     const PARTICLE_COUNT = isMobile ? 12 : 30;
-    const COLORS = ["#e5c07b", "#ffd700", "#ff9f43", "#a855f7", "#ffffff"];
+    const COLORS = ["#CD9F5B", "#D6B48D", "#E4C09F", "#B8853E", "#CD9F5B"];
 
     const particles: Array<{
       x: number;
@@ -142,7 +142,7 @@ export const MysticAltarCanvas: React.FC = () => {
 
       // Outer ring
       ctx.rotate(angle);
-      ctx.strokeStyle = "rgba(229, 192, 123, 0.07)";
+      ctx.strokeStyle = "rgba(214, 180, 141, 0.25)";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(0, 0, radius, 0, Math.PI * 2);
@@ -152,7 +152,7 @@ export const MysticAltarCanvas: React.FC = () => {
       ctx.beginPath();
       ctx.setLineDash([8, 12]);
       ctx.arc(0, 0, radius * 0.75, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(168, 85, 247, 0.08)";
+      ctx.strokeStyle = "rgba(205, 159, 91, 0.22)";
       ctx.stroke();
       ctx.setLineDash([]);
 
@@ -167,7 +167,7 @@ export const MysticAltarCanvas: React.FC = () => {
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
       }
-      ctx.strokeStyle = "rgba(229, 192, 123, 0.05)";
+      ctx.strokeStyle = "rgba(214, 180, 141, 0.18)";
       ctx.stroke();
       ctx.restore();
 

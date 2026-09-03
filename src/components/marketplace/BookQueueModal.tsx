@@ -91,21 +91,21 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={`✦ ขอคำปรึกษากับ ${readerName}`}>
       <form onSubmit={handleSubmit} className="space-y-4 pt-2 font-serif-th">
         {error && (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-[#f0a0a0]">
+          <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 shadow-xs">
             {error}
           </div>
         )}
 
         {/* Live Availability Status */}
-        <div className="flex items-center justify-between rounded-xl bg-[#140e26] border border-[#e5c07b]/20 p-3 text-xs">
-          <span className="text-[#9c93b8]">สถานะการเปิดรับคิวสด:</span>
+        <div className="flex items-center justify-between rounded-xl bg-[#FFFFFF] border border-[#D6B48D] p-3 text-xs shadow-xs">
+          <span className="text-[#8C735D]">สถานะการเปิดรับคิวสด:</span>
           {isLiveOpen ? (
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-300">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               เปิดรับคิวสดทันที
             </span>
           ) : (
-            <span className="text-[#e5c07b]">จองคิวล่วงหน้า</span>
+            <span className="text-[#CD9F5B] font-bold">จองคิวล่วงหน้า</span>
           )}
         </div>
 
@@ -115,10 +115,10 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
             <button
               type="button"
               onClick={() => setKind("walkup")}
-              className={`rounded-xl py-2 text-xs font-semibold border transition-all ${
+              className={`rounded-xl py-2 text-xs font-semibold border transition-all cursor-pointer ${
                 kind === "walkup"
-                  ? "bg-[#e5c07b]/20 border-[#ffd700] text-[#f5deaa]"
-                  : "bg-black/20 border-white/10 text-[#9c93b8]"
+                  ? "bg-[#CD9F5B] border-[#CD9F5B] text-[#FDF7F0] shadow-xs"
+                  : "bg-[#FFFFFF] border-[#D6B48D] text-[#8C735D] hover:text-[#5A432F]"
               }`}
             >
               ✦ รับคิวสดทันที
@@ -126,10 +126,10 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
             <button
               type="button"
               onClick={() => setKind("booking")}
-              className={`rounded-xl py-2 text-xs font-semibold border transition-all ${
+              className={`rounded-xl py-2 text-xs font-semibold border transition-all cursor-pointer ${
                 kind === "booking"
-                  ? "bg-[#e5c07b]/20 border-[#ffd700] text-[#f5deaa]"
-                  : "bg-black/20 border-white/10 text-[#9c93b8]"
+                  ? "bg-[#CD9F5B] border-[#CD9F5B] text-[#FDF7F0] shadow-xs"
+                  : "bg-[#FFFFFF] border-[#D6B48D] text-[#8C735D] hover:text-[#5A432F]"
               }`}
             >
               📅 จองคิวล่วงหน้า
@@ -138,12 +138,12 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         )}
 
         {/* Service Fee Display */}
-        <div className="flex items-center justify-between rounded-xl bg-[#1c1333] border border-[#ffd700]/30 p-3 text-xs">
+        <div className="flex items-center justify-between rounded-xl bg-[#FFFFFF] border border-[#D6B48D] p-3 text-xs shadow-xs">
           <div className="flex items-center gap-2">
-            <span className="text-[#ffd700] font-bold text-sm">✦ ค่าบริการ / บูชาครู</span>
-            <span className="text-[10px] text-[#9c93b8]">(30 นาที)</span>
+            <span className="text-[#CD9F5B] font-bold text-sm">✦ ค่าบริการ / บูชาครู</span>
+            <span className="text-[10px] text-[#8C735D]">(30 นาที)</span>
           </div>
-          <span className="font-bold text-[#ffd700] text-sm">299 บาท</span>
+          <span className="font-bold text-[#CD9F5B] text-sm">299 บาท</span>
         </div>
 
         <Field label="ชื่อเล่นของคุณ (Nickname) *">
@@ -174,13 +174,13 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         </Field>
 
         {/* PDPA Consent Checkbox */}
-        <div className="rounded-xl bg-black/20 border border-[#e5c07b]/20 p-3.5 space-y-2">
-          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#c3bdd8] select-none">
+        <div className="rounded-xl bg-[#FCF0E6] border border-[#D6B48D] p-3.5 space-y-2 shadow-xs">
+          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#5A432F] select-none">
             <input
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 rounded border-[#e5c07b] text-[#e5c07b] focus:ring-0"
+              className="mt-0.5 rounded border-[#D6B48D] accent-[#CD9F5B] focus:ring-0"
             />
             <span className="leading-relaxed">
               ข้าพเจ้ายินยอมให้ส่งต่อข้อมูลชื่อเล่น คำถาม และสรุปไพ่ไปยังแม่หมอ โดยข้อมูลจะถูกลบอัตโนมัติภายใน 30 วันตามมาตรฐาน PDPA
@@ -189,7 +189,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
+        <div className="flex justify-end gap-3 pt-3 border-t border-[#D6B48D]/30">
           <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
             ยกเลิก
           </Button>

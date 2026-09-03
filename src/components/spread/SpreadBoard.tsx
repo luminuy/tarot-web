@@ -193,24 +193,24 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
   };
 
   return (
-    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 p-5 sm:p-7 shadow-[0_0_50px_rgba(0,0,0,0.85)] flex flex-col justify-between space-y-5 select-none relative overflow-hidden">
+    <div className="w-full rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] p-5 sm:p-7 shadow-md flex flex-col justify-between space-y-5 select-none relative overflow-hidden">
       {/* Background Sacred Geometric Mandala */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-15 pointer-events-none">
-        <div className="w-80 h-80 sm:w-[480px] sm:h-[480px] rounded-full border border-dashed border-[#e5c07b] animate-[spin_120s_linear_infinite]" />
-        <div className="absolute w-56 h-56 sm:w-[320px] sm:h-[320px] rounded-full border border-[#8b5cf6]/40 animate-[spin_80s_linear_infinite_reverse]" />
-        <div className="absolute w-full h-full bg-radial from-[#e5c07b]/10 via-transparent to-transparent blur-3xl" />
+      <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+        <div className="w-80 h-80 sm:w-[480px] sm:h-[480px] rounded-full border border-dashed border-[#D6B48D] animate-[spin_120s_linear_infinite]" />
+        <div className="absolute w-56 h-56 sm:w-[320px] sm:h-[320px] rounded-full border border-[#CD9F5B]/30 animate-[spin_80s_linear_infinite_reverse]" />
+        <div className="absolute w-full h-full bg-radial from-[#CD9F5B]/10 via-transparent to-transparent blur-3xl" />
       </div>
 
       {/* Header Bar: Spread Name & Quick Flip Button */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#e5c07b]/20 relative z-10">
+      <div className="flex items-center justify-between pb-3 border-b border-[#D6B48D]/30 relative z-10">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-widest text-[#e5c07b] font-mono">ผังพยากรณ์:</span>
-            <span className="text-xs text-[#05040a] bg-gradient-to-r from-[#c59b27] to-[#f5deaa] px-2 py-0.2 rounded-full font-bold font-mono shadow">
+            <span className="text-[10px] uppercase tracking-widest text-[#8C735D] font-mono">ผังพยากรณ์:</span>
+            <span className="text-xs text-[#FDF7F0] bg-[#CD9F5B] px-2 py-0.2 rounded-full font-bold font-mono shadow-xs">
               {spread.positions.length} ใบ
             </span>
           </div>
-          <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#f5deaa] mt-0.5">
+          <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#5A432F] mt-0.5">
             {spread.nameTh}
           </h3>
         </div>
@@ -220,10 +220,10 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
           <button
             type="button"
             onClick={onRevealAll}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-serif-th font-semibold border transition-all cursor-pointer flex items-center gap-1.5 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-serif-th font-semibold border transition-all cursor-pointer flex items-center gap-1.5 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
               isAllRevealed
-                ? "bg-[#100b20] border-[#e5c07b]/30 text-[#9c93b8]"
-                : "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] font-bold border-transparent shadow-[0_0_15px_rgba(229,192,123,0.4)] hover:opacity-90"
+                ? "bg-[#FCF0E6] border-[#D6B48D] text-[#8C735D]"
+                : "bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-bold border-transparent shadow-xs"
             }`}
           >
             <span>✨</span>
@@ -233,9 +233,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       </div>
 
       {useRail ? (
-        /* ── ผังใหญ่: รางเลื่อนแนวนอนผืนเดียว (Unified Rail) ──
-           ยังเป็น canvas ผืนเดียวกันทั้งผัง ไม่ได้ซอยเป็นแถวย่อยหลายแถวที่เลื่อนแยกกัน
-           และเว้น py-6 ไว้ให้ ring / ปุ่มขยาย (-top-2.5) ลอยได้โดยไม่โดนตัดขอบ */
+        /* ── ผังใหญ่: รางเลื่อนแนวนอนผืนเดียว (Unified Rail) ── */
         <div className="relative z-10">
           <div
             ref={railRef}
@@ -250,24 +248,24 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
           {/* ขอบจางซ้าย/ขวา บอกใบ้ว่ายังมีไพ่ต่อไปอีก */}
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[#0a0714] to-transparent transition-opacity duration-300 ${
+            className={`pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[#FDF7F0] to-transparent transition-opacity duration-300 ${
               canScrollLeft ? "opacity-100" : "opacity-0"
             }`}
           />
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#0a0714] to-transparent transition-opacity duration-300 ${
+            className={`pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#FDF7F0] to-transparent transition-opacity duration-300 ${
               canScrollRight ? "opacity-100" : "opacity-0"
             }`}
           />
 
-          {/* ปุ่มเลื่อนสำหรับเมาส์/คีย์บอร์ด (มือถือปัดนิ้วได้อยู่แล้ว) */}
+          {/* ปุ่มเลื่อนสำหรับเมาส์/คีย์บอร์ด */}
           <button
             type="button"
             onClick={() => nudgeRail(-1)}
             disabled={!canScrollLeft}
             aria-label="เลื่อนดูไพ่ทางซ้าย"
-            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#e5c07b]/50 bg-[#0d0818]/96 text-[#f5deaa] shadow-lg transition-all hover:bg-[#1a1130] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D6B48D] bg-[#FCF0E6] text-[#5A432F] shadow-md transition-all hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
               canScrollLeft ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -278,7 +276,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(1)}
             disabled={!canScrollRight}
             aria-label="เลื่อนดูไพ่ทางขวา"
-            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#e5c07b]/50 bg-[#0d0818]/96 text-[#f5deaa] shadow-lg transition-all hover:bg-[#1a1130] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D6B48D] bg-[#FCF0E6] text-[#5A432F] shadow-md transition-all hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
               canScrollRight ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -293,8 +291,8 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       )}
 
       {/* Helpful Hint */}
-      <div className="text-center pt-2 border-t border-[#e5c07b]/15 text-[11px] text-[#9c93b8] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
-        <span className="text-[#e5c07b]">✦</span>
+      <div className="text-center pt-2 border-t border-[#D6B48D]/30 text-[11px] text-[#8C735D] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
+        <span className="text-[#CD9F5B]">✦</span>
         <span>
           {useRail
             ? "ปัดซ้าย–ขวาเพื่อดูไพ่ใบอื่น แตะที่การ์ดเพื่อพลิกดูหน้าไพ่"

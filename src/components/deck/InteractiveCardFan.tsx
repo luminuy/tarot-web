@@ -66,11 +66,11 @@ const FanCard = React.memo<FanCardProps>(
         className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group focus-visible:outline-none"
         style={{ zIndex: tierIdx * 40 + posInTier, originY: 1 }}
       >
-        <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-xl sm:rounded-2xl border-2 card-back-pattern shadow-xl flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#e5c07b]/45 group-hover:border-[#ffd700] group-hover:ring-2 group-hover:ring-[#ffd700]/70 group-hover:shadow-[0_0_25px_rgba(255,215,0,0.8)] group-focus-visible:border-[#ffd700] group-focus-visible:ring-2 group-focus-visible:ring-[#ffd700] bg-[#0d0918]">
-          <div className="w-full flex items-center justify-end text-[7px] sm:text-[8px] text-[#e5c07b]/80">
-            <span className="font-mono opacity-60">#{cardIdx + 1}</span>
+        <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-xl sm:rounded-2xl border-2 card-back-pattern shadow-sm flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#D6B48D] group-hover:border-[#CD9F5B] group-hover:ring-2 group-hover:ring-[#CD9F5B]/60 group-hover:shadow-[0_0_20px_rgba(205,159,91,0.5)] group-focus-visible:border-[#CD9F5B] group-focus-visible:ring-2 group-focus-visible:ring-[#CD9F5B] bg-[#382518]">
+          <div className="w-full flex items-center justify-end text-[7px] sm:text-[8px] text-[#CD9F5B]/90">
+            <span className="font-mono opacity-80">#{cardIdx + 1}</span>
           </div>
-          <div className="gold-foil-sheen absolute inset-0 opacity-25 group-hover:opacity-60 transition-opacity pointer-events-none" />
+          <div className="gold-foil-sheen absolute inset-0 opacity-20 group-hover:opacity-50 transition-opacity pointer-events-none" />
         </div>
       </motion.div>
     );
@@ -149,7 +149,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                 &ldquo;{currentPositionName}&rdquo;
               </span>
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#9c93b8] max-w-xl mx-auto leading-normal">
+            <p className="text-[11px] sm:text-xs text-[#8C735D] max-w-xl mx-auto leading-normal">
               แตะเลือกไพ่ใบที่คุณรู้สึกถูกชะตา หรือกดปุ่ม &ldquo;สุ่มเลือกให้ฉัน&rdquo; ด้านล่าง
             </p>
           </motion.div>
@@ -162,7 +162,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             <h3 className="text-lg sm:text-2xl font-serif-th font-bold font-mystic-gold flex items-center justify-center gap-2">
               <span>✨</span> เลือกไพ่ครบ {targetCount} ใบเรียบร้อยแล้ว <span>✨</span>
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#9c93b8]">
+            <p className="text-[11px] sm:text-xs text-[#8C735D]">
               กำลังเตรียมเปิดไพ่และคำทำนายของคุณ...
             </p>
           </motion.div>
@@ -170,17 +170,17 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
       </div>
 
       {/* Unified Masterpiece Altar Stage (No Row-Level Clipping) */}
-      <div className="w-full relative rounded-2xl sm:rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 shadow-[0_0_70px_rgba(0,0,0,0.95)] overflow-hidden">
+      <div className="w-full relative rounded-[1.618rem] border border-[#D6B48D] bg-[#FDF7F0] shadow-md overflow-hidden">
         {/* Background Sacred Geometric Mandala */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-15 pointer-events-none">
-          <div className="w-[600px] h-[600px] rounded-full border border-dashed border-[#e5c07b] animate-[spin_160s_linear_infinite]" />
-          <div className="absolute w-[420px] h-[420px] rounded-full border border-[#8b5cf6]/40 animate-[spin_100s_linear_infinite_reverse]" />
-          <div className="absolute w-full h-full bg-radial from-[#e5c07b]/15 via-transparent to-transparent blur-3xl" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+          <div className="w-[600px] h-[600px] rounded-full border border-dashed border-[#D6B48D] animate-[spin_160s_linear_infinite]" />
+          <div className="absolute w-[420px] h-[420px] rounded-full border border-[#CD9F5B]/30 animate-[spin_100s_linear_infinite_reverse]" />
+          <div className="absolute w-full h-full bg-radial from-[#CD9F5B]/10 via-transparent to-transparent blur-3xl" />
         </div>
 
         {/* Mobile Edge Fade Masks */}
-        <div className="absolute top-0 bottom-0 left-0 w-6 bg-gradient-to-r from-[#140d28] to-transparent pointer-events-none z-20 sm:hidden" />
-        <div className="absolute top-0 bottom-0 right-0 w-6 bg-gradient-to-l from-[#140d28] to-transparent pointer-events-none z-20 sm:hidden" />
+        <div className="absolute top-0 bottom-0 left-0 w-6 bg-gradient-to-r from-[#FDF7F0] to-transparent pointer-events-none z-20 sm:hidden" />
+        <div className="absolute top-0 bottom-0 right-0 w-6 bg-gradient-to-l from-[#FDF7F0] to-transparent pointer-events-none z-20 sm:hidden" />
 
         {/* SINGLE UNIFIED SCROLL CONTAINER FOR ALL 3 TIERS (P1-U10 overscroll-contain) */}
         <div
@@ -222,22 +222,22 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
         </div>
 
         {/* Masterpiece Sacred Selection Slim Progress Dock */}
-        <div className="border-t border-[#e5c07b]/25 bg-[#090614]/96 p-3 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 relative z-20">
+        <div className="border-t border-[#D6B48D]/30 bg-[#FCF0E6] p-3 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 relative z-20">
           {/* Left: Layered Sacred Deck Emblem & Status */}
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {/* Tarot Deck Seal Icon */}
             <div className="relative w-9 h-12 sm:w-11 sm:h-15 flex-shrink-0 group">
-              <div className="absolute inset-0 translate-x-1 -translate-y-0.5 rounded-lg bg-[#19102e] border border-[#e5c07b]/30 shadow transform rotate-4 opacity-70" />
-              <div className="absolute inset-0 rounded-lg border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_15px_rgba(229,192,123,0.45)] bg-[#07050d] transform -rotate-1 group-hover:rotate-0 transition-transform duration-300">
+              <div className="absolute inset-0 translate-x-1 -translate-y-0.5 rounded-lg bg-[#E4C09F] border border-[#D6B48D] shadow-xs transform rotate-4 opacity-70" />
+              <div className="absolute inset-0 rounded-lg border-2 border-[#D6B48D] overflow-hidden shadow-xs bg-[#FDF7F0] transform -rotate-1 group-hover:rotate-0 transition-transform duration-300">
                 <CardImage
                   image="major-01.jpg"
                   alt="Sacred Tarot Altar"
                   className="w-full h-full object-cover object-top tarot-hd-card-image"
                   sizes="72px"
                 />
-                <div className="gold-foil-sheen absolute inset-0 opacity-40 pointer-events-none" />
+                <div className="gold-foil-sheen absolute inset-0 opacity-20 pointer-events-none" />
               </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-gradient-to-r from-[#ffd700] to-[#e5c07b] border border-[#05040a] shadow-[0_0_6px_#ffd700] flex items-center justify-center text-[7px] text-[#05040a] font-bold">
+              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#CD9F5B] border border-[#FDF7F0] shadow-xs flex items-center justify-center text-[7px] text-[#FDF7F0] font-bold">
                 ✦
               </div>
             </div>
@@ -245,35 +245,35 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             {/* Typography & Animated Progress Bar */}
             <div className="space-y-1 flex-1 min-w-[160px]">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#e5c07b] font-mono font-bold flex items-center gap-1">
-                  <span>✦</span>
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#5A432F] font-mono font-bold flex items-center gap-1">
+                  <span className="text-[#CD9F5B]">✦</span>
                   <span>ความคืบหน้าพิธีจับไพ่</span>
                 </span>
-                <span className="text-[11px] sm:text-xs font-mono font-bold text-[#f5deaa] bg-[#1a1130] border border-[#e5c07b]/30 px-2 py-0.2 rounded-full shadow-inner">
+                <span className="text-[11px] sm:text-xs font-mono font-bold text-[#5A432F] bg-[#FFFFFF] border border-[#D6B48D] px-2 py-0.2 rounded-full shadow-xs">
                   {pickedIndices.length} / {targetCount}
                 </span>
               </div>
 
               {/* Luminous Animated Progress Bar */}
-              <div className="w-full h-1.5 sm:h-2 rounded-full bg-[#0d081a] border border-[#e5c07b]/25 overflow-hidden p-0.5 relative">
+              <div className="w-full h-1.5 sm:h-2 rounded-full bg-[#FFFFFF] border border-[#D6B48D] overflow-hidden p-0.5 relative">
                 <motion.div
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: pickedIndices.length / targetCount }}
                   style={{ transformOrigin: "left" }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="h-full w-full rounded-full bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#ffd700] shadow-[0_0_10px_rgba(255,215,0,0.8)] relative"
+                  className="h-full w-full rounded-full bg-gradient-to-r from-[#CD9F5B] via-[#E4C09F] to-[#CD9F5B] shadow-xs relative"
                 >
-                  <div className="absolute inset-0 bg-white/25 animate-[pulse_2s_infinite]" />
+                  <div className="absolute inset-0 bg-white/35 animate-[pulse_2s_infinite]" />
                 </motion.div>
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] sm:text-[11px] text-[#9c93b8] font-serif-th leading-tight truncate">
+                <p className="text-[10px] sm:text-[11px] text-[#8C735D] font-serif-th leading-tight truncate">
                   {isComplete ? (
-                    <span className="text-emerald-400 font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
+                    <span className="text-emerald-600 font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
                   ) : (
                     <span>
-                      กำลังเลือกใบสำหรับ <strong className="text-[#f5deaa]">&ldquo;{currentPositionName}&rdquo;</strong>
+                      กำลังเลือกใบสำหรับ <strong className="text-[#5A432F]">&ldquo;{currentPositionName}&rdquo;</strong>
                     </span>
                   )}
                 </p>
@@ -284,7 +284,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     type="button"
                     onClick={handleAutoPick}
                     disabled={disabled}
-                    className="flex-shrink-0 text-[10px] sm:text-[11px] text-[#e5c07b] hover:text-[#ffd700] bg-[#1a1130] hover:bg-[#251842] border border-[#e5c07b]/30 hover:border-[#ffd700]/60 px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#ffd700]"
+                    className="flex-shrink-0 text-[10px] sm:text-[11px] text-[#5A432F] hover:text-[#CD9F5B] bg-[#FFFFFF] hover:bg-[#FCF0E6] border border-[#D6B48D] hover:border-[#CD9F5B] px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#CD9F5B]"
                     aria-label="สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"
                   >
                     ✦ สุ่มเลือกให้ฉัน
@@ -304,21 +304,21 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                 <motion.div
                   key={idx}
                   whileHover={{ scale: 1.04 }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[10px] sm:text-xs transition-all duration-300 font-serif-th whitespace-nowrap select-none shadow-sm ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-[10px] sm:text-xs transition-all duration-300 font-serif-th whitespace-nowrap select-none shadow-xs ${
                     isFilled
-                      ? "bg-gradient-to-r from-[#c59b27] via-[#f5deaa] to-[#e5c07b] text-[#05040a] font-bold shadow-[0_0_12px_rgba(229,192,123,0.5)] border border-[#fff0d4]"
+                      ? "bg-[#CD9F5B] text-[#FDF7F0] font-bold shadow-xs border border-[#D6B48D]"
                       : isCurrent
-                      ? "bg-gradient-to-br from-[#251842] to-[#120b22] border border-[#ffd700] text-[#f5deaa] shadow-[0_0_15px_rgba(229,192,123,0.4)] ring-1 ring-[#e5c07b]/40 font-bold"
-                      : "bg-[#0c0818]/90 border border-[#e5c07b]/20 text-[#9c93b8]/40"
+                      ? "bg-[#FFFFFF] border border-[#CD9F5B] text-[#5A432F] shadow-xs ring-1 ring-[#CD9F5B]/40 font-bold"
+                      : "bg-[#FCF0E6] border border-[#D6B48D]/50 text-[#8C735D]/50"
                   }`}
                 >
                   <div
                     className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-mono font-bold ${
                       isFilled
-                        ? "bg-[#05040a] text-[#ffd700]"
+                        ? "bg-[#FDF7F0] text-[#5A432F]"
                         : isCurrent
-                        ? "bg-[#e5c07b] text-[#05040a]"
-                        : "bg-[#18112c] text-[#9c93b8]/50"
+                        ? "bg-[#CD9F5B] text-[#FDF7F0]"
+                        : "bg-[#E4C09F]/30 text-[#8C735D]"
                     }`}
                   >
                     {isFilled ? "✓" : idx + 1}

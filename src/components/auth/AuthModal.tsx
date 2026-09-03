@@ -217,7 +217,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/93"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#5A432F]/40 backdrop-blur-md"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
@@ -232,17 +232,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           ref={dialogRef}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md rounded-3xl bg-gradient-to-b from-[#130b24] via-[#090514] to-[#05030a] border border-[#e5c07b]/40 p-6 sm:p-8 shadow-[0_0_60px_rgba(0,0,0,0.95)] flex flex-col items-center relative max-h-[92vh] overflow-y-auto z-10 select-none"
+          className="w-full max-w-md rounded-[1.618rem] bg-[#FDF7F0] border border-[#D6B48D] p-6 sm:p-8 shadow-2xl flex flex-col items-center relative max-h-[92vh] overflow-y-auto z-10 select-none"
         >
           {/* Subtle Ambient Gold Aura */}
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-radial from-[#e5c07b]/15 via-transparent to-transparent pointer-events-none blur-2xl" />
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-radial from-[#CD9F5B]/15 via-transparent to-transparent pointer-events-none blur-2xl" />
 
           {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
             aria-label="ปิดหน้าต่างเข้าสู่ระบบ"
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#120a22] border border-[#e5c07b]/30 text-[#e5c07b] hover:text-[#ffd700] hover:border-[#ffd700] hover:bg-[#1f1138] text-xs flex items-center justify-center transition-all cursor-pointer shadow-md"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#FCF0E6] border border-[#D6B48D] text-[#5A432F] hover:text-[#CD9F5B] hover:border-[#CD9F5B] hover:bg-[#FFFFFF] text-xs flex items-center justify-center transition-all cursor-pointer shadow-xs"
           >
             ✕
           </button>
@@ -250,21 +250,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Authentic 1909 Rider-Waite Tarot Card Seal (Matching Brand Logo) */}
           <div className="relative mb-3.5 group select-none">
             {/* Ambient Gold Halo Aura */}
-            <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-[#d4af37]/35 via-[#ffd700]/45 to-[#c59b27]/35 blur-md opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-[#CD9F5B]/20 via-[#D6B48D]/30 to-[#CD9F5B]/20 blur-md opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
             {/* Sacred Rotating Dashed Ring */}
-            <div className="absolute -inset-3 rounded-full border border-dashed border-[#e5c07b]/35 animate-[spin_50s_linear_infinite] pointer-events-none" />
+            <div className="absolute -inset-3 rounded-full border border-dashed border-[#D6B48D]/50 animate-[spin_50s_linear_infinite] pointer-events-none" />
 
             {/* Miniature 1909 Tarot Card Frame */}
-            <div className="w-12 h-[72px] sm:w-13 sm:h-[78px] rounded-xl border-2 border-[#e5c07b] overflow-hidden shadow-[0_0_25px_rgba(229,192,123,0.6)] relative flex-shrink-0 bg-[#07050d] group-hover:scale-105 group-hover:shadow-[0_0_35px_rgba(229,192,123,0.85)] transition-all duration-300">
+            <div className="w-12 h-[72px] sm:w-13 sm:h-[78px] rounded-xl border-2 border-[#D6B48D] overflow-hidden shadow-md relative flex-shrink-0 bg-[#FCF0E6] group-hover:scale-105 transition-all duration-300">
               <CardImage
                 image="major-01.jpg"
                 alt="The Magician Tarot Brand Seal"
-                className="w-full h-full object-cover object-[50%_12%] filter contrast-[1.12] saturate-[1.15] brightness-[1.05] tarot-hd-card-image"
+                className="w-full h-full object-cover object-[50%_12%] filter contrast-[1.05] saturate-[1.05] tarot-hd-card-image"
                 sizes="80px"
                 loading="eager"
               />
-              <div className="gold-foil-sheen absolute inset-0 opacity-25 pointer-events-none" />
+              <div className="gold-foil-sheen absolute inset-0 opacity-20 pointer-events-none" />
             </div>
           </div>
 
@@ -272,13 +272,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="space-y-1 text-center mb-5">
             <h3
               id="auth-modal-title"
-              className="text-xl sm:text-2xl font-serif-th font-bold bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] bg-clip-text text-transparent"
+              className="text-xl sm:text-2xl font-serif-th font-bold font-mystic-gold"
             >
               {mode === "signin" && "เข้าสู่วิหารศักดิ์สิทธิ์"}
               {mode === "signup" && "สมัครสมาชิกร่วมผูกดวง"}
               {mode === "forgot" && "ฟื้นฟูดวงชะตา (ลืมรหัสผ่าน)"}
             </h3>
-            <p className="text-xs text-[#a79cc2] font-serif-th max-w-xs mx-auto leading-relaxed">
+            <p className="text-xs text-[#8C735D] font-serif-th max-w-xs mx-auto leading-relaxed">
               {mode === "signin" && `เข้าสู่ระบบเพื่อใช้สิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง และดูประวัติดวงย้อนหลัง`}
               {mode === "signup" &&
                 `สมัครฟรี ไม่ต้องผูกบัตร เปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
@@ -288,10 +288,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* สิ่งที่จะได้รับ — แสดงเมื่อผู้ใช้ถูกพามาจากกำแพงสิทธิ์ จะได้รู้ว่าสมัครไปเพื่ออะไร */}
           {fromEntitlementWall && mode !== "forgot" && (
-            <ul className="w-full mb-4 grid gap-1.5 rounded-2xl border border-[#e5c07b]/20 bg-[#0b0617]/80 p-3">
+            <ul className="w-full mb-4 grid gap-1.5 rounded-2xl border border-[#D6B48D] bg-[#FFFFFF] p-3 shadow-xs">
               {MEMBER_BENEFITS.map((b) => (
-                <li key={b.title} className="flex items-start gap-2 text-[11px] font-serif-th text-[#cfc8e2]">
-                  <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#ffd700]" />
+                <li key={b.title} className="flex items-start gap-2 text-[11px] font-serif-th text-[#5A432F]">
+                  <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#CD9F5B]" />
                   {b.title}
                 </li>
               ))}
@@ -300,14 +300,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Segmented Mode Switcher (Tab System) */}
           {mode !== "forgot" && (
-            <div className="w-full grid grid-cols-2 p-1 rounded-2xl bg-[#090514] border border-[#e5c07b]/25 mb-4">
+            <div className="w-full grid grid-cols-2 p-1 rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] mb-4">
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
                 className={`py-2 rounded-xl text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                   mode === "signin"
-                    ? "bg-gradient-to-r from-[#e5c07b]/25 via-[#ffd700]/25 to-[#c59b27]/25 border border-[#ffd700]/60 text-[#ffd700] shadow-[0_0_12px_rgba(229,192,123,0.25)]"
-                    : "text-[#9c93b8] hover:text-[#f5deaa]"
+                    ? "bg-[#CD9F5B] text-[#FDF7F0] shadow-xs"
+                    : "text-[#8C735D] hover:text-[#5A432F]"
                 }`}
               >
                 <span>✦</span>
@@ -319,8 +319,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 onClick={() => switchMode("signup")}
                 className={`py-2 rounded-xl text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                   mode === "signup"
-                    ? "bg-gradient-to-r from-[#e5c07b]/25 via-[#ffd700]/25 to-[#c59b27]/25 border border-[#ffd700]/60 text-[#ffd700] shadow-[0_0_12px_rgba(229,192,123,0.25)]"
-                    : "text-[#9c93b8] hover:text-[#f5deaa]"
+                    ? "bg-[#CD9F5B] text-[#FDF7F0] shadow-xs"
+                    : "text-[#8C735D] hover:text-[#5A432F]"
                 }`}
               >
                 <span>✨</span>
@@ -332,12 +332,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Feedback messages */}
           <div aria-live="polite" className="w-full">
             {errorMsg && (
-              <div className="w-full mb-3 p-3 rounded-xl bg-rose-950/80 border border-rose-600/50 text-rose-200 text-xs font-serif-th text-center shadow-lg">
+              <div className="w-full mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-serif-th text-center shadow-xs">
                 {errorMsg}
               </div>
             )}
             {successMsg && (
-              <div className="w-full mb-3 p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs font-serif-th text-center shadow-lg">
+              <div className="w-full mb-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-serif-th text-center shadow-xs">
                 {successMsg}
               </div>
             )}
@@ -347,11 +347,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <form onSubmit={handleSubmit} className="w-full space-y-3.5">
             {mode === "signup" && (
               <div className="space-y-1.5 text-left">
-                <label htmlFor="auth-name" className="block text-[11px] font-semibold text-[#e5c07b] font-serif-th">
+                <label htmlFor="auth-name" className="block text-[11px] font-semibold text-[#5A432F] font-serif-th">
                   ชื่อหรือนามแฝง
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#9c93b8] pointer-events-none"><FieldIcon variant="person" /></span>
+                  <span className="absolute left-3.5 text-[#CD9F5B] pointer-events-none"><FieldIcon variant="person" /></span>
                   <input
                     id="auth-name"
                     type="text"
@@ -360,18 +360,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="เช่น ผู้แสวงหาคำตอบ"
-                    className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#0b0617] border border-[#e5c07b]/25 text-[#f5deaa] text-xs font-serif-th placeholder-[#9c93b8]/50 focus:outline-none focus:border-[#ffd700] focus:ring-1 focus:ring-[#ffd700]/40 transition-all shadow-inner"
+                    className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#FFFFFF] border border-[#D6B48D] text-[#5A432F] text-xs font-serif-th placeholder-[#8C735D]/50 focus:outline-none focus:border-[#CD9F5B] focus:ring-1 focus:ring-[#CD9F5B]/40 transition-all shadow-xs"
                   />
                 </div>
               </div>
             )}
 
             <div className="space-y-1.5 text-left">
-              <label htmlFor="auth-email" className="block text-[11px] font-semibold text-[#e5c07b] font-serif-th">
+              <label htmlFor="auth-email" className="block text-[11px] font-semibold text-[#5A432F] font-serif-th">
                 ที่อยู่อีเมล
               </label>
               <div className="relative flex items-center">
-                <span className="absolute left-3.5 text-[#9c93b8] pointer-events-none"><FieldIcon variant="mail" /></span>
+                <span className="absolute left-3.5 text-[#CD9F5B] pointer-events-none"><FieldIcon variant="mail" /></span>
                 <input
                   id="auth-email"
                   type="email"
@@ -381,7 +381,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#0b0617] border border-[#e5c07b]/25 text-[#f5deaa] text-xs font-serif-th placeholder-[#9c93b8]/50 focus:outline-none focus:border-[#ffd700] focus:ring-1 focus:ring-[#ffd700]/40 transition-all shadow-inner"
+                  className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#FFFFFF] border border-[#D6B48D] text-[#5A432F] text-xs font-serif-th placeholder-[#8C735D]/50 focus:outline-none focus:border-[#CD9F5B] focus:ring-1 focus:ring-[#CD9F5B]/40 transition-all shadow-xs"
                 />
               </div>
             </div>
@@ -389,21 +389,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {mode !== "forgot" && (
               <div className="space-y-1.5 text-left">
                 <div className="flex justify-between items-center">
-                  <label htmlFor="auth-password" className="block text-[11px] font-semibold text-[#e5c07b] font-serif-th">
+                  <label htmlFor="auth-password" className="block text-[11px] font-semibold text-[#5A432F] font-serif-th">
                     รหัสผ่าน
                   </label>
                   {mode === "signin" && (
                     <button
                       type="button"
                       onClick={() => switchMode("forgot")}
-                      className="text-[11px] text-[#e5c07b] hover:text-[#ffd700] hover:underline cursor-pointer font-serif-th"
+                      className="text-[11px] text-[#CD9F5B] hover:text-[#5A432F] hover:underline cursor-pointer font-serif-th font-bold"
                     >
                       ลืมรหัสผ่าน?
                     </button>
                   )}
                 </div>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3.5 text-[#9c93b8] pointer-events-none"><FieldIcon variant="key" /></span>
+                  <span className="absolute left-3.5 text-[#CD9F5B] pointer-events-none"><FieldIcon variant="key" /></span>
                   <input
                     id="auth-password"
                     type={showPassword ? "text" : "password"}
@@ -412,13 +412,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={mode === "signup" ? "อย่างน้อย 10 ตัวอักษร" : "••••••••••"}
-                    className="w-full h-11 pl-9 pr-12 rounded-xl bg-[#0b0617] border border-[#e5c07b]/25 text-[#f5deaa] text-xs font-serif-th placeholder-[#9c93b8]/50 focus:outline-none focus:border-[#ffd700] focus:ring-1 focus:ring-[#ffd700]/40 transition-all shadow-inner"
+                    className="w-full h-11 pl-9 pr-12 rounded-xl bg-[#FFFFFF] border border-[#D6B48D] text-[#5A432F] text-xs font-serif-th placeholder-[#8C735D]/50 focus:outline-none focus:border-[#CD9F5B] focus:ring-1 focus:ring-[#CD9F5B]/40 transition-all shadow-xs"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
-                    className="absolute right-3 text-[#9c93b8] hover:text-[#ffd700] text-xs font-serif-th cursor-pointer px-1 py-0.5 rounded transition-colors"
+                    className="absolute right-3 text-[#8C735D] hover:text-[#5A432F] text-xs font-serif-th cursor-pointer px-1 py-0.5 rounded transition-colors"
                   >
                     {showPassword ? "ซ่อน" : "ดู"}
                   </button>
@@ -436,17 +436,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                             className={`h-1.5 rounded-full transition-all duration-300 ${
                               active
                                 ? strength.score <= 1
-                                  ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"
+                                  ? "bg-rose-500 shadow-xs"
                                   : strength.score === 2
-                                  ? "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]"
-                                  : "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"
-                                : "bg-white/10"
+                                  ? "bg-amber-400 shadow-xs"
+                                  : "bg-emerald-500 shadow-xs"
+                                : "bg-[#D6B48D]/30"
                             }`}
                           />
                         );
                       })}
                     </div>
-                    <div className="flex justify-between items-center text-[10px] font-serif-th text-[#9c93b8]">
+                    <div className="flex justify-between items-center text-[10px] font-serif-th text-[#8C735D]">
                       <span>ความปลอดภัย:</span>
                       <span className={`font-semibold ${strength.colorClass}`}>{strength.label}</span>
                     </div>
@@ -460,7 +460,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="w-full h-11.5 mt-2 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#07050e] font-bold font-serif-th text-xs sm:text-sm shadow-[0_0_25px_rgba(229,192,123,0.4)] hover:opacity-95 hover:shadow-[0_0_30px_rgba(229,192,123,0.5)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full h-11.5 mt-2 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-bold font-serif-th text-xs sm:text-sm shadow-xs active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <span>กำลังดำเนินการ…</span>
@@ -479,12 +479,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Mode Switcher Return Link for Forgot Password */}
           {mode === "forgot" && (
-            <div className="pt-3 text-xs font-serif-th text-[#9c93b8]">
+            <div className="pt-3 text-xs font-serif-th text-[#8C735D]">
               จำรหัสผ่านได้แล้ว?{" "}
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
-                className="text-[#ffd700] hover:underline font-semibold cursor-pointer ml-1"
+                className="text-[#CD9F5B] hover:underline font-bold cursor-pointer ml-1"
               >
                 กลับไปเข้าสู่ระบบ
               </button>
@@ -493,11 +493,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Sanctuary Divider */}
           <div className="w-full flex items-center my-4">
-            <div className="flex-1 border-t border-[#e5c07b]/15" />
-            <span className="px-3 text-[10px] text-[#9c93b8] font-serif-th tracking-wider">
+            <div className="flex-1 border-t border-[#D6B48D]/30" />
+            <span className="px-3 text-[10px] text-[#8C735D] font-serif-th tracking-wider">
               หรือเชื่อมต่อทันทีด้วย
             </span>
-            <div className="flex-1 border-t border-[#e5c07b]/15" />
+            <div className="flex-1 border-t border-[#D6B48D]/30" />
           </div>
 
           {/* World-Class Luxury Social OAuth Cards */}
@@ -506,9 +506,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={handleLoginGoogle}
-              className="py-2.5 px-3.5 rounded-xl bg-[#0c081a] hover:bg-[#160f2c] border border-[#e5c07b]/25 hover:border-[#ffd700]/60 text-[#f5deaa] font-serif-th font-semibold text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
+              className="py-2.5 px-3.5 rounded-xl bg-[#FFFFFF] hover:bg-[#FCF0E6] border border-[#D6B48D] hover:border-[#CD9F5B] text-[#5A432F] font-serif-th font-semibold text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
             >
-              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
+              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 shadow-xs border border-gray-100">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
@@ -528,27 +528,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   />
                 </svg>
               </div>
-              <span className="group-hover:text-white transition-colors">Google</span>
+              <span className="group-hover:text-[#CD9F5B] transition-colors">Google</span>
             </button>
 
             {/* LINE Sanctuary Card */}
             <button
               type="button"
               onClick={handleLoginLine}
-              className="py-2.5 px-3.5 rounded-xl bg-[#08170e] hover:bg-[#0e2417] border border-[#06C755]/35 hover:border-[#06C755]/70 text-[#b4f3cd] font-serif-th font-semibold text-xs shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
+              className="py-2.5 px-3.5 rounded-xl bg-[#FFFFFF] hover:bg-[#F0FFF4] border border-[#06C755]/50 hover:border-[#06C755] text-[#1E7E34] font-serif-th font-semibold text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
             >
-              <div className="w-5 h-5 rounded-full bg-[#06C755] flex items-center justify-center flex-shrink-0 shadow-sm text-white">
+              <div className="w-5 h-5 rounded-full bg-[#06C755] flex items-center justify-center flex-shrink-0 shadow-xs text-white">
                 <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
                   <path d="M24 10.3c0-4.8-5.4-8.8-12-8.8S0 5.5 0 10.3c0 4.3 3.8 7.9 9 8.6.4.1.9.3 1 .6.1.4 0 1.2-.1 1.7-.1.4-.4 1.7-.6 2.1-.2.5-.9 2 .8 1.1 1.8-.9 4.8-2.9 6.5-4.9 4.6-1.5 7.4-4.8 7.4-8.6zm-14.7 2.7H6.5c-.3 0-.5-.2-.5-.5V7.5c0-.3.2-.5.5-.5s.5.2.5.5v4.5h2.3c.3 0 .5.2.5.5s-.2.5-.5.5zm2.6-.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V7.5c0-.3.2-.5.5-.5s.5.2.5.5v5zm4.8 0c0 .3-.2.5-.5.5-.2 0-.4-.1-.5-.3L13.8 9v3.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V7.5c0-.3.2-.5.5-.5s-.5.2-.5.5v5zm3.7-3.2h-2.3v1.4h2.3c.3 0 .5.2.5.5s-.2.5-.5.5h-2.8c-.3 0-.5-.2-.5-.5V7.5c0-.3.2-.5.5-.5h2.8c.3 0 .5.2.5.5s-.2.5-.5.5h-2.3v1.3h2.3c.3 0 .5.2.5.5s-.2.5-.5.5z" />
                 </svg>
               </div>
-              <span className="group-hover:text-white transition-colors">LINE</span>
+              <span className="group-hover:text-[#06C755] transition-colors">LINE</span>
             </button>
           </div>
 
           {/* Cryptographic Assurance & PDPA Footnote */}
-          <div className="mt-5 text-[10px] text-[#7d7398] font-serif-th text-center flex items-center justify-center gap-1 opacity-80">
-            <span className="text-[#e5c07b]">✦</span>
+          <div className="mt-5 text-[10px] text-[#8C735D] font-serif-th text-center flex items-center justify-center gap-1 opacity-80">
+            <span className="text-[#CD9F5B]">✦</span>
             <span>เข้ารหัสความปลอดภัยระดับสากล · ลบบัญชีและข้อมูลทั้งหมดได้ทุกเมื่อ</span>
           </div>
         </motion.div>

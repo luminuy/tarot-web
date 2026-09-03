@@ -20,10 +20,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }[size];
 
     const variantStyles = {
-      gold: "bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#c59b27] text-[#05040a] font-bold shadow-[0_0_25px_rgba(212,175,55,0.35)] hover:shadow-[0_0_35px_rgba(212,175,55,0.5)] border border-[#fff0d4]/30",
-      ghost: "bg-transparent text-[#e2d9f3] hover:bg-[#191230]/60 hover:text-[#ffd700] border border-transparent",
-      pill: "bg-[#100b20]/80 text-[#e2d9f3] border border-[#e5c07b]/30 hover:border-[#ffd700]/70 hover:bg-[#191230] rounded-full",
-      outline: "bg-transparent text-[#e5c07b] border border-[#e5c07b]/50 hover:bg-[#e5c07b]/10 hover:border-[#ffd700]",
+      gold: "bg-gradient-to-r from-[#CD9F5B] via-[#E4C09F] to-[#CD9F5B] text-[#5A432F] font-bold shadow-[0_4px_16px_rgba(205,159,91,0.28)] hover:shadow-[0_6px_22px_rgba(205,159,91,0.4)] border border-[#FDF7F0]/60",
+      ghost: "bg-transparent text-[#5A432F] hover:bg-[#E4C09F]/25 hover:text-[#CD9F5B] border border-transparent",
+      pill: "bg-[#FDF7F0] text-[#5A432F] border border-[#D6B48D] hover:border-[#CD9F5B] hover:bg-[#FCF0E6] rounded-full shadow-sm",
+      outline: "bg-transparent text-[#5A432F] border border-[#D6B48D] hover:bg-[#E4C09F]/20 hover:border-[#CD9F5B] hover:text-[#CD9F5B]",
     }[variant];
 
     return (

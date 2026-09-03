@@ -166,8 +166,8 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
 
   if (loading) {
     return (
-      <div className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-[#140b24]/90 border border-[#e5c07b]/35 text-[#f5deaa] text-xs font-serif-th font-bold flex items-center gap-1.5 whitespace-nowrap select-none opacity-80 pointer-events-none">
-        <span className="text-[#ffd700] text-xs">✦</span>
+      <div className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] text-[#5A432F] text-xs font-serif-th font-bold flex items-center gap-1.5 whitespace-nowrap select-none opacity-80 pointer-events-none">
+        <span className="text-[#CD9F5B] text-xs">✦</span>
         <span>เข้าสู่ระบบ</span>
       </div>
     );
@@ -181,9 +181,9 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
           soundManager.playMenuTapSound();
           onOpenAuthModal();
         }}
-        className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-[#140b24]/90 border border-[#e5c07b]/35 text-[#f5deaa] hover:bg-[#201338] hover:border-[#ffd700] hover:text-[#ffd700] hover:shadow-[0_0_15px_rgba(229,192,123,0.25)] text-xs font-serif-th font-bold shadow transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] select-none"
+        className="min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] text-[#5A432F] hover:bg-[#FFFFFF] hover:border-[#CD9F5B] hover:text-[#CD9F5B] text-xs font-serif-th font-bold shadow-xs transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] select-none"
       >
-        <span className="text-[#ffd700] text-xs">✦</span>
+        <span className="text-[#CD9F5B] text-xs">✦</span>
         <span>เข้าสู่ระบบ</span>
       </button>
     );
@@ -197,14 +197,14 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
 
   return (
     <div className="relative select-none" ref={containerRef}>
-      {/* Refined Luxury Obsidian-Gold Trigger Button */}
+      {/* Refined Luxury Trigger Button */}
       <button
         type="button"
         onClick={toggleMenu}
-        className={`min-h-[38px] px-3 sm:px-3.5 py-1.5 rounded-2xl transition-colors duration-150 cursor-pointer flex items-center gap-2 border shadow-sm relative select-none ${
+        className={`min-h-[38px] px-3 sm:px-3.5 py-1.5 rounded-2xl transition-colors duration-150 cursor-pointer flex items-center gap-2 border shadow-xs relative select-none ${
           menuOpen
-            ? "bg-[#201138] border-[#ffd700] text-[#ffd700] shadow-[0_0_18px_rgba(229,192,123,0.32),inset_0_1px_1px_rgba(255,215,0,0.3)]"
-            : "bg-[#100b20]/90 text-[#f5deaa] hover:text-[#ffd700] border-[#e5c07b]/25 hover:border-[#ffd700]/60 hover:bg-[#181033] hover:shadow-[0_0_15px_rgba(229,192,123,0.2)]"
+            ? "bg-[#FFFFFF] border-[#CD9F5B] text-[#CD9F5B] shadow-xs"
+            : "bg-[#FDF7F0] text-[#5A432F] hover:text-[#CD9F5B] border-[#D6B48D] hover:border-[#CD9F5B] hover:bg-[#FFFFFF]"
         }`}
         aria-expanded={menuOpen}
         aria-label="โปรไฟล์ผู้ใช้งาน"
@@ -213,10 +213,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
           <img
             src={user.avatar}
             alt={user.name}
-            className="w-6 h-6 rounded-full object-cover ring-1.5 ring-[#ffd700]/70 shadow-[0_0_8px_rgba(229,192,123,0.4)]"
+            className="w-6 h-6 rounded-full object-cover ring-1.5 ring-[#CD9F5B] shadow-xs"
           />
         ) : (
-          <div className="w-6 h-6 rounded-full bg-[#201338] text-[#ffd700] flex items-center justify-center font-bold text-[10px] ring-1.5 ring-[#ffd700]/50">
+          <div className="w-6 h-6 rounded-full bg-[#E4C09F] text-[#5A432F] flex items-center justify-center font-bold text-[10px] ring-1.5 ring-[#D6B48D]">
             {user.name.slice(0, 1).toUpperCase()}
           </div>
         )}
@@ -227,7 +227,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
           animate={{ rotate: menuOpen ? 180 : 0 }}
           transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           style={{ transformOrigin: "50% 48%" }}
-          className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${menuOpen ? "text-[#ffd700]" : "text-[#c59b27]"}`}
+          className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${menuOpen ? "text-[#CD9F5B]" : "text-[#8C735D]"}`}
           aria-hidden="true"
         >
           <path
@@ -237,7 +237,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
           />
         </motion.svg>
         {pendingCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#ffd700] text-[#05040a] text-[9px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(255,215,0,0.6)] animate-pulse">
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#CD9F5B] text-[#FDF7F0] text-[9px] font-bold flex items-center justify-center shadow-xs animate-pulse">
             {pendingCount > 9 ? "9+" : pendingCount}
           </span>
         )}
@@ -253,41 +253,39 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
             animate="visible"
             exit="exit"
             style={{
-              // ห้ามใส่ transform ตายตัวตรงนี้ — motion อนิเมต y ผ่าน transform อยู่
-              // ถ้าใส่ไว้ React จะเขียนทับกลางอนิเมชันแล้วพาเนลกระตุก (บทเรียน INC ครั้งนี้)
               WebkitBackfaceVisibility: "hidden",
               backfaceVisibility: "hidden",
             }}
-            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-3xl bg-[#0c071a] border border-[#e5c07b]/40 shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_25px_rgba(212,175,55,0.15)] p-3 z-50 overflow-hidden space-y-2 font-serif-th text-xs"
+            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-[1.618rem] bg-[#FDF7F0] border border-[#D6B48D] shadow-lg p-3 z-50 overflow-hidden space-y-2 font-serif-th text-xs"
           >
             {/* Ambient Top Foil Glow */}
-            <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#ffd700]/40 to-transparent -mt-0.5 mb-1" />
+            <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#CD9F5B]/40 to-transparent -mt-0.5 mb-1" />
 
             {/* Member Profile Banner */}
-            <div className="p-3 rounded-2xl bg-gradient-to-r from-[#1c1033] to-[#120a22] border border-[#e5c07b]/25 flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-[#FFFFFF] border border-[#D6B48D] flex items-center gap-3 shadow-xs">
               {user.avatar ? (
                 <img
                   src={user.avatar}
                   alt={user.name}
-                  className="w-11 h-11 rounded-2xl object-cover ring-1.5 ring-[#ffd700]/70 shadow-[0_0_12px_rgba(229,192,123,0.3)] flex-shrink-0"
+                  className="w-11 h-11 rounded-2xl object-cover ring-1.5 ring-[#CD9F5B] shadow-xs flex-shrink-0"
                 />
               ) : (
-                <div className="w-11 h-11 rounded-2xl bg-[#201338] text-[#ffd700] flex items-center justify-center font-bold text-base ring-1.5 ring-[#ffd700]/60 flex-shrink-0">
+                <div className="w-11 h-11 rounded-2xl bg-[#E4C09F] text-[#5A432F] flex items-center justify-center font-bold text-base ring-1.5 ring-[#D6B48D] flex-shrink-0">
                   {user.name.slice(0, 1).toUpperCase()}
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <span className="block text-sm font-bold text-[#f5deaa] truncate tracking-wide">
+                <span className="block text-sm font-bold text-[#5A432F] truncate tracking-wide">
                   {user.name}
                 </span>
                 {user.email && (
-                  <span className="block text-[11px] text-[#9c93b8] truncate font-sans">
+                  <span className="block text-[11px] text-[#8C735D] truncate font-sans">
                     {user.email}
                   </span>
                 )}
                 <div className="mt-1 flex items-center gap-1.5">
-                  <span className="text-[10px] text-[#ffd700] bg-[#ffd700]/10 border border-[#ffd700]/25 px-2 py-0.2 rounded-full inline-flex items-center gap-1">
-                    <span>✦</span>
+                  <span className="text-[10px] text-[#5A432F] bg-[#FCF0E6] border border-[#D6B48D] px-2 py-0.2 rounded-full inline-flex items-center gap-1">
+                    <span className="text-[#CD9F5B]">✦</span>
                     <span>{getProviderLabel()}</span>
                   </span>
                 </div>
@@ -295,13 +293,13 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
             </div>
 
             {/* Sacred Plan & Quota Management Card */}
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-[#1a102e] via-[#140b24] to-[#0d0718] border border-[#ffd700]/30 shadow-[0_4px_20px_rgba(0,0,0,0.5),0_0_15px_rgba(212,175,55,0.12)] space-y-2.5">
+            <div className="p-3 rounded-2xl bg-[#FFFFFF] border border-[#D6B48D] shadow-xs space-y-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[#ffd700] text-xs">✦</span>
-                  <span className="text-[11px] font-bold text-[#f5deaa] tracking-wide">สิทธิ์และแพ็กเกจ</span>
+                  <span className="text-[#CD9F5B] text-xs">✦</span>
+                  <span className="text-[11px] font-bold text-[#5A432F] tracking-wide">สิทธิ์และแพ็กเกจ</span>
                 </div>
-                <span className="text-[10px] font-mono font-bold text-[#ffd700] bg-[#ffd700]/15 border border-[#ffd700]/30 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-mono font-bold text-[#FDF7F0] bg-[#CD9F5B] px-2 py-0.5 rounded-full">
                   {view?.isUnlimited
                     ? "VIP UNLIMITED"
                     : view?.remaining != null
@@ -310,7 +308,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
                 </span>
               </div>
 
-              <div className="text-[10.5px] text-[#b0a5c7] leading-relaxed">
+              <div className="text-[10.5px] text-[#8C735D] leading-relaxed">
                 {view?.isUnlimited ? (
                   <p>คุณมีสิทธิ์เปิดไพ่และสนทนาปรึกษาได้ไม่จำกัด</p>
                 ) : (
@@ -329,20 +327,20 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
                     setMenuOpen(false);
                     onBuyCredits();
                   }}
-                  className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#ffd700] to-[#aa8010] text-[#090514] font-serif-th font-bold text-xs shadow-[0_0_15px_rgba(212,175,55,0.35)] hover:shadow-[0_0_20px_rgba(255,215,0,0.5)] hover:scale-[1.01] transition-all duration-150 cursor-pointer flex items-center justify-between active:scale-[0.98]"
+                  className="w-full py-2 px-3 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-serif-th font-bold text-xs shadow-xs hover:scale-[1.01] transition-all duration-150 cursor-pointer flex items-center justify-between active:scale-[0.98]"
                 >
                   <span className="flex items-center gap-1.5">
                     <span>✨</span>
                     <span>ซื้อรอบเพิ่ม / อัปเกรดญาณ</span>
                   </span>
-                  <span className="text-[10px] bg-[#090514]/20 px-1.5 py-0.5 rounded font-mono font-semibold">
+                  <span className="text-[10px] bg-black/15 px-1.5 py-0.5 rounded font-mono font-semibold">
                     เริ่มต้น ฿{CHEAPEST_PACKAGE_THB}
                   </span>
                 </button>
               )}
 
               {/* Secondary Navigation: Compare Plans & Account Hub */}
-              <div className="flex items-center justify-between pt-1 border-t border-[#e5c07b]/15 text-[10.5px]">
+              <div className="flex items-center justify-between pt-1 border-t border-[#D6B48D]/30 text-[10.5px]">
                 {onOpenPlans && (
                   <button
                     type="button"
@@ -351,7 +349,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
                       setMenuOpen(false);
                       onOpenPlans();
                     }}
-                    className="text-[#ffd700]/90 hover:text-white transition-colors cursor-pointer flex items-center gap-1 font-semibold"
+                    className="text-[#CD9F5B] hover:text-[#5A432F] transition-colors cursor-pointer flex items-center gap-1 font-semibold"
                   >
                     <span>✦</span>
                     <span>เปรียบเทียบทุกแพลน</span>
@@ -363,7 +361,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
                     soundManager.playMenuTapSound();
                     setMenuOpen(false);
                   }}
-                  className="text-[#9c93b8] hover:text-[#f5deaa] transition-colors flex items-center gap-1 ml-auto"
+                  className="text-[#8C735D] hover:text-[#5A432F] transition-colors flex items-center gap-1 ml-auto font-medium"
                 >
                   <span>จัดการบัญชี</span>
                   <span>→</span>
@@ -373,16 +371,16 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
 
             {/* Unverified Email Warning Badge */}
             {user.provider === "email" && user.emailVerified === false && (
-              <div className="p-2.5 rounded-2xl bg-amber-950/60 border border-amber-500/40 text-amber-200 text-[11px] space-y-1.5">
+              <div className="p-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-800 text-[11px] space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold flex items-center gap-1">
-                    <span className="text-amber-400">✦</span>
+                    <span className="text-amber-600">✦</span>
                     <span>ยังไม่ยืนยันอีเมล</span>
                   </span>
                   <button
                     type="button"
                     onClick={handleResendVerify}
-                    className="text-[10.5px] text-[#ffd700] hover:text-[#fff] hover:underline font-bold cursor-pointer transition-colors"
+                    className="text-[10.5px] text-[#CD9F5B] hover:text-[#5A432F] hover:underline font-bold cursor-pointer transition-colors"
                   >
                     {resendStatus || "ส่งลิงก์ใหม่"}
                   </button>
@@ -392,55 +390,55 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({
 
             {/* Pending Reviews Notification Callout */}
             {pendingCount > 0 && (
-              <div className="p-2.5 rounded-2xl bg-[#ffd700]/10 border border-[#ffd700]/30 text-[#ffd700] text-[11px] flex items-center justify-between shadow-[0_0_12px_rgba(255,215,0,0.1)]">
+              <div className="p-2.5 rounded-2xl bg-[#CD9F5B]/15 border border-[#CD9F5B]/30 text-[#5A432F] text-[11px] flex items-center justify-between shadow-xs">
                 <span className="flex items-center gap-1.5">
-                  <span>✦</span>
+                  <span className="text-[#CD9F5B]">✦</span>
                   <span>รอติดตามผลคำทำนาย</span>
                 </span>
-                <span className="font-bold bg-[#ffd700]/20 px-2 py-0.5 rounded-full">
+                <span className="font-bold bg-[#CD9F5B] text-[#FDF7F0] px-2 py-0.5 rounded-full">
                   {pendingCount} รายการ
                 </span>
               </div>
             )}
 
             {/* Marketing / Follow-up Consent Luxury Toggle */}
-            <div className="p-2.5 rounded-2xl bg-[#160c2b]/70 border border-[#e5c07b]/15 flex items-center justify-between">
+            <div className="p-2.5 rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] flex items-center justify-between">
               <div className="pr-2">
-                <span className="block text-[11px] font-semibold text-[#f5deaa]">รับคำทำนายติดตามผล</span>
-                <span className="text-[10px] text-[#9c93b8]">แจ้งเตือนเมื่อถึงกำหนดคำทำนายทางอีเมล</span>
+                <span className="block text-[11px] font-semibold text-[#5A432F]">รับคำทำนายติดตามผล</span>
+                <span className="text-[10px] text-[#8C735D]">แจ้งเตือนเมื่อถึงกำหนดคำทำนายทางอีเมล</span>
               </div>
               <button
                 type="button"
                 onClick={() => handleUpdateConsent(!user.marketingConsent)}
                 className={`w-10 h-6 rounded-full transition-all duration-150 p-0.5 relative cursor-pointer flex-shrink-0 border ${
                   user.marketingConsent
-                    ? "bg-[#d4af37] border-[#ffd700] shadow-[0_0_12px_rgba(212,175,55,0.4)]"
-                    : "bg-white/10 border-white/10 hover:bg-white/15"
+                    ? "bg-[#CD9F5B] border-[#CD9F5B] shadow-xs"
+                    : "bg-[#D6B48D]/30 border-[#D6B48D]"
                 }`}
                 aria-label="เปิดปิดการรับอีเมลติดตามผล"
               >
                 <motion.div
                   animate={{ x: user.marketingConsent ? 16 : 0 }}
                   transition={{ duration: 0.14, ease: EASE_ENTER }}
-                  className={`w-4.5 h-4.5 rounded-full shadow-md ${
-                    user.marketingConsent ? "bg-[#090514]" : "bg-[#a99fc2]"
+                  className={`w-4.5 h-4.5 rounded-full shadow-xs ${
+                    user.marketingConsent ? "bg-[#FFFFFF]" : "bg-[#8C735D]"
                   }`}
                 />
               </button>
             </div>
 
             {/* Logout Action */}
-            <div className="pt-1 border-t border-[#e5c07b]/15">
+            <div className="pt-1 border-t border-[#D6B48D]/30">
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full text-left p-2.5 rounded-2xl text-rose-400 hover:text-rose-200 hover:bg-rose-950/40 border border-transparent hover:border-rose-500/30 transition-all duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
+                className="w-full text-left p-2.5 rounded-2xl text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-transparent hover:border-rose-300 transition-all duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
               >
                 <span className="flex items-center gap-1.5 font-bold">
-                  <span className="text-rose-400 group-hover:rotate-12 transition-transform">✦</span>
+                  <span className="text-rose-600 group-hover:rotate-12 transition-transform">✦</span>
                   <span>ออกจากระบบ</span>
                 </span>
-                <span className="text-[11px] text-rose-400/60 group-hover:text-rose-300 group-hover:translate-x-0.5 transition-all">
+                <span className="text-[11px] text-rose-400 group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all">
                   →
                 </span>
               </button>

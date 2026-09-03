@@ -120,7 +120,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
         )}
 
         {successMsg && (
-          <div className="p-4 rounded-xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-200 text-sm font-serif-th text-center font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-serif-th text-center font-bold shadow-xs">
             {successMsg}
           </div>
         )}
@@ -128,7 +128,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
         {!checkoutData ? (
           <>
             <div className="text-center space-y-1">
-              <p className="text-xs text-[#9c93b8] font-serif-th">
+              <p className="text-xs text-[#8C735D] font-serif-th">
                 ปลดล็อกผังใหญ่ 10–12 ใบและคุยถามเจาะลึกได้ไม่จำกัด · จ่ายครั้งเดียว ไม่ใช่รายเดือน · ไม่มีวันหมดอายุ
               </p>
             </div>
@@ -143,32 +143,32 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
                     type="button"
                     aria-pressed={isSelected}
                     onClick={() => setSelectedPkg(pkg)}
-                    className={`rounded-2xl p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+                    className={`rounded-2xl p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
                       isSelected
-                        ? "bg-[#140b28] border-[#ffd700] ring-2 ring-[#ffd700]/70 shadow-[0_0_25px_rgba(229,192,123,0.3)] scale-[1.02]"
-                        : "bg-[#0a0714] border-[#e5c07b]/20 hover:border-[#e5c07b]/50 hover:bg-[#100a20]"
+                        ? "bg-[#FFFFFF] border-[#CD9F5B] ring-2 ring-[#CD9F5B]/70 shadow-md scale-[1.02]"
+                        : "bg-[#FFFFFF] border-[#D6B48D] hover:border-[#CD9F5B] hover:bg-[#FCF0E6]"
                     }`}
                   >
                     {pkg.badge && (
-                      <span className="absolute -top-2.5 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] shadow">
+                      <span className="absolute -top-2.5 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full bg-[#CD9F5B] text-[#FDF7F0] shadow-xs">
                         {pkg.badge}
                       </span>
                     )}
 
                     <div>
-                      <h4 className="font-serif-th text-sm font-bold text-[#f5deaa] leading-snug">
+                      <h4 className="font-serif-th text-sm font-bold text-[#5A432F] leading-snug">
                         {pkg.name}
                       </h4>
-                      <p className="text-[11px] text-[#9c93b8] mt-1 leading-tight font-serif-th">
+                      <p className="text-[11px] text-[#8C735D] mt-1 leading-tight font-serif-th">
                         {pkg.tagline}
                       </p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-[#e5c07b]/15 flex items-baseline justify-between">
-                      <span className="text-lg font-bold font-mono text-[#ffd700]">
+                    <div className="mt-4 pt-3 border-t border-[#D6B48D]/30 flex items-baseline justify-between">
+                      <span className="text-lg font-bold font-mono text-[#CD9F5B]">
                         ฿{pkg.priceThb}
                       </span>
-                      <span className="text-[10px] text-[#e5c07b] font-serif-th font-semibold">
+                      <span className="text-[10px] text-[#5A432F] font-serif-th font-semibold">
                         {pkg.credits} ครั้ง
                       </span>
                     </div>
@@ -182,7 +182,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
               type="button"
               disabled={loading}
               onClick={handleStartCheckout}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-bold font-serif-th text-sm shadow-[0_0_25px_rgba(229,192,123,0.4)] hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-bold font-serif-th text-sm shadow-xs active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span>กำลังเตรียมรายการ...</span>
@@ -197,39 +197,39 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
         ) : (
           /* Payment Screen */
           <div className="text-center space-y-4">
-            <div className="p-4 rounded-2xl bg-[#0a0714] border border-[#e5c07b]/30 space-y-3">
-              <div className="flex items-center justify-between text-xs text-[#9c93b8] font-serif-th border-b border-[#e5c07b]/15 pb-2">
+            <div className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#D6B48D] space-y-3 shadow-xs">
+              <div className="flex items-center justify-between text-xs text-[#8C735D] font-serif-th border-b border-[#D6B48D]/30 pb-2">
                 <span>รายการ</span>
-                <span className="font-bold text-[#f5deaa]">
+                <span className="font-bold text-[#5A432F]">
                   {selectedPkg.name} ({selectedPkg.credits} ครั้ง)
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs text-[#9c93b8] font-serif-th">
+              <div className="flex items-center justify-between text-xs text-[#8C735D] font-serif-th">
                 <span>ยอดชำระ</span>
-                <span className="text-base font-bold font-mono text-[#ffd700]">
+                <span className="text-base font-bold font-mono text-[#CD9F5B]">
                   ฿{selectedPkg.priceThb} บาท
                 </span>
               </div>
             </div>
 
             {checkoutData.qrCodeUri ? (
-              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white text-black max-w-[240px] mx-auto shadow-2xl">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white text-[#5A432F] max-w-[240px] mx-auto shadow-md border border-[#D6B48D]">
                 <img
                   src={checkoutData.qrCodeUri}
                   alt="PromptPay QR Code"
                   className="w-48 h-48 object-contain"
                 />
-                <span className="text-[11px] text-gray-600 font-serif-th">
+                <span className="text-[11px] text-[#8C735D] font-serif-th">
                   สแกนด้วยแอปพลิเคชันธนาคารทุกแห่ง
                 </span>
               </div>
             ) : (
-              <div className="p-5 rounded-2xl bg-[#140b28] border border-[#ffd700]/40 text-center space-y-2">
-                <div className="text-2xl text-[#ffd700]">✦</div>
-                <h4 className="font-serif-th text-sm font-bold text-[#f5deaa]">
+              <div className="p-5 rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] text-center space-y-2 shadow-xs">
+                <div className="text-2xl text-[#CD9F5B]">✦</div>
+                <h4 className="font-serif-th text-sm font-bold text-[#5A432F]">
                   ระบบจำลองการชำระเงิน (Test Gateway Simulator)
                 </h4>
-                <p className="text-xs text-[#9c93b8] font-serif-th">
+                <p className="text-xs text-[#8C735D] font-serif-th">
                   ระบบพร้อมผูกกับ Omise PromptPay QR เมื่อตั้งค่า Secret บน Cloudflare Workers
                 </p>
               </div>
@@ -240,7 +240,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
                 type="button"
                 disabled={loading}
                 onClick={handleConfirmPayment}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#059669] text-white font-bold font-serif-th text-sm shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold font-serif-th text-sm shadow-xs active:scale-[0.98] transition-all cursor-pointer"
               >
                 {loading ? "กำลังตรวจสอบรายการ..." : "✦ ยืนยันการชำระเงินแล้ว"}
               </button>
@@ -248,7 +248,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({
               <button
                 type="button"
                 onClick={() => setCheckoutData(null)}
-                className="text-xs text-[#9c93b8] hover:text-[#f5deaa] py-1 cursor-pointer font-serif-th"
+                className="text-xs text-[#8C735D] hover:text-[#5A432F] py-1 cursor-pointer font-serif-th"
               >
                 ← เปลี่ยนแพ็กเกจ
               </button>

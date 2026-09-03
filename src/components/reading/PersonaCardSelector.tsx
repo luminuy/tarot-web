@@ -135,43 +135,43 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   handlePersonaClick();
                 }
               }}
-              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] group/persona ${
+              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-[1.618rem] border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] group/persona ${
                 isSelected
-                  ? "bg-gradient-to-b from-[#281d4a] via-[#140b28] to-[#07040f] border-[#ffd700] ring-2 ring-[#e5c07b]/90 shadow-[0_0_35px_rgba(229,192,123,0.45)]"
+                  ? "bg-[#FFFFFF] border-[#CD9F5B] ring-2 ring-[#CD9F5B]/50 shadow-[0_8px_30px_rgba(205,159,91,0.25)]"
                   : isLocked
-                  ? "bg-gradient-to-b from-[#0f091c]/90 via-[#0a0515]/90 to-[#05020c]/90 border-[#e5c07b]/20 hover:border-[#ffd700]/60 hover:bg-[#160d29] opacity-85 hover:opacity-100 shadow-lg"
-                  : "bg-gradient-to-b from-[#130d24]/95 to-[#07040f]/95 border-[#e5c07b]/25 hover:border-[#e5c07b]/60 hover:bg-[#181130] shadow-xl"
+                  ? "bg-[#FDF7F0]/80 border-[#D6B48D]/70 hover:border-[#CD9F5B] hover:bg-[#FFFFFF] opacity-90 hover:opacity-100 shadow-sm"
+                  : "bg-[#FDF7F0] border-[#D6B48D] hover:border-[#CD9F5B] hover:bg-[#FFFFFF] shadow-sm hover:shadow-md"
               }`}
               style={{ minHeight: "315px" }}
             >
               {/* Top Card Archetype Tag */}
-              <div className="text-center pb-1.5 border-b border-[#e5c07b]/15">
+              <div className="text-center pb-1.5 border-b border-[#D6B48D]/30">
                 <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                  <span className="text-[9px] uppercase tracking-widest text-[#e5c07b] font-mono font-semibold block">
+                  <span className="text-[9px] uppercase tracking-widest text-[#CD9F5B] font-mono font-semibold block">
                     {meta.roleTitle}
                   </span>
                   {isLocked && (
-                    <span className="text-[8px] text-[#ffd700] bg-gradient-to-r from-[#2a1340] to-[#150a24] border border-[#ffd700]/40 px-1.5 py-0.2 rounded-full font-serif-th font-bold flex items-center gap-0.5 shadow-[0_0_8px_rgba(255,215,0,0.2)]">
+                    <span className="text-[8px] text-[#5A432F] bg-[#E4C09F]/30 border border-[#D6B48D] px-1.5 py-0.2 rounded-full font-serif-th font-bold flex items-center gap-0.5 shadow-xs">
                       <span>🔒</span>
                       <span>✦ ปรมาจารย์ลับ</span>
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] text-[#9c93b8] font-serif-th block mt-0.5">
+                <span className="text-[10px] text-[#8C735D] font-serif-th block mt-0.5">
                   {meta.archetype}
                 </span>
               </div>
 
               {/* Authentic Tarot Persona Character Artwork with Altar Aura */}
               <div className="my-auto py-2 flex items-center justify-center relative">
-                <div className="absolute inset-0 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-xl" />
-                <div className={`relative z-10 filter drop-shadow-[0_0_12px_rgba(229,192,123,0.3)] ${isLocked ? "opacity-90" : ""}`}>
+                <div className="absolute inset-0 bg-radial from-[#CD9F5B]/15 via-transparent to-transparent pointer-events-none blur-xl" />
+                <div className={`relative z-10 filter drop-shadow-[0_2px_8px_rgba(90,67,47,0.15)] ${isLocked ? "opacity-90" : ""}`}>
                   {meta.renderArt()}
                 </div>
               </div>
 
               {/* Card Footer Titles */}
-              <div className="pt-2 border-t border-[#e5c07b]/15 text-center">
+              <div className="pt-2 border-t border-[#D6B48D]/30 text-center">
                 <div className="flex items-center justify-center gap-1.5">
                   <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight">
                     {p.nameTh}
@@ -189,14 +189,14 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                       const greeting = PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
                       soundManager.speakProphecy(greeting, p.id);
                     }}
-                    className="p-1.5 rounded-full text-xs text-amber-300/80 hover:text-amber-200 hover:bg-amber-500/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+                    className="p-1.5 rounded-full text-xs text-[#CD9F5B] hover:text-[#5A432F] hover:bg-[#E4C09F]/30 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
                     title={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                     aria-label={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
                   >
                     🔊
                   </button>
                 </div>
-                <p className="text-[10px] text-[#cfc8e2]/80 mt-1 leading-snug">
+                <p className="text-[10px] text-[#8C735D] mt-1 leading-snug">
                   {p.tagline}
                 </p>
               </div>
@@ -204,10 +204,10 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               {/* Selected Golden Corner Seals */}
               {isSelected && (
                 <>
-                  <div className="absolute top-1.5 left-1.5 text-[8px] text-[#ffd700]">✦</div>
-                  <div className="absolute top-1.5 right-1.5 text-[8px] text-[#ffd700]">✦</div>
-                  <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#ffd700]">✦</div>
-                  <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#ffd700]">✦</div>
+                  <div className="absolute top-1.5 left-1.5 text-[8px] text-[#CD9F5B]">✦</div>
+                  <div className="absolute top-1.5 right-1.5 text-[8px] text-[#CD9F5B]">✦</div>
+                  <div className="absolute bottom-1.5 left-1.5 text-[8px] text-[#CD9F5B]">✦</div>
+                  <div className="absolute bottom-1.5 right-1.5 text-[8px] text-[#CD9F5B]">✦</div>
                 </>
               )}
 

@@ -360,7 +360,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         aria-modal="true"
         aria-label="แชร์ผลคำทำนาย"
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#5A432F]/40 backdrop-blur-md overflow-y-auto"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -368,17 +368,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-xl rounded-3xl bg-[#0e081e] border border-[#e5c07b]/40 p-4 sm:p-6 shadow-2xl space-y-4 my-auto relative text-white"
+          className="w-full max-w-xl rounded-[1.618rem] bg-[#FDF7F0] border border-[#D6B48D] p-4 sm:p-6 shadow-2xl space-y-4 my-auto relative text-[#5A432F]"
         >
           {/* Modal Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#e5c07b]/20">
+          <div className="flex items-center justify-between pb-3 border-b border-[#D6B48D]/30">
             <div className="flex items-center gap-2">
-              <span className="text-[#ffd700] text-sm">✦</span>
+              <span className="text-[#CD9F5B] text-sm">✦</span>
               <div>
-                <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#f5deaa]">
+                <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
                   แชร์ผลคำทำนาย
                 </h3>
-                <p className="text-[11px] text-[#9c93b8] font-serif-th">
+                <p className="text-[11px] text-[#8C735D] font-serif-th">
                   บันทึกรูปภาพพรีเมียมหรือแชร์ตรงสู่โซเชียลมีเดีย
                 </p>
               </div>
@@ -387,7 +387,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               type="button"
               onClick={onClose}
               aria-label="ปิดหน้าต่างแชร์ผลคำทำนาย"
-              className="w-10 h-10 rounded-full bg-[#1b1230] border border-[#e5c07b]/30 text-[#e5c07b] hover:bg-[#e5c07b] hover:text-[#05040a] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+              className="w-10 h-10 rounded-full bg-[#FCF0E6] border border-[#D6B48D] text-[#5A432F] hover:bg-[#CD9F5B] hover:text-[#FDF7F0] text-sm flex items-center justify-center transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
             >
               ✕
             </button>
@@ -399,9 +399,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="p-2.5 rounded-xl bg-gradient-to-r from-[#2a174a] via-[#1f1038] to-[#2a174a] border border-[#ffd700]/50 text-center text-xs text-[#f5deaa] font-serif-th shadow-lg"
+              className="p-2.5 rounded-xl bg-[#FFFFFF] border border-[#CD9F5B] text-center text-xs text-[#5A432F] font-serif-th shadow-md"
             >
-              <span>✨ </span>
+              <span className="text-[#CD9F5B]">✨ </span>
               {toastMessage}
             </motion.div>
           )}
@@ -409,29 +409,29 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           {/* Social Share Preview Card (Redesigned Layout) */}
           <div
             ref={cardRef}
-            className="w-full rounded-2xl bg-gradient-to-b from-[#180f2e] via-[#0d071b] to-[#06040d] border-2 border-[#e5c07b]/60 p-5 sm:p-6 shadow-[0_0_40px_rgba(0,0,0,0.8)] space-y-4 relative overflow-hidden text-center"
+            className="w-full rounded-2xl bg-[#FFFFFF] border-2 border-[#D6B48D] p-5 sm:p-6 shadow-md space-y-4 relative overflow-hidden text-center"
           >
             {/* Ornate Corner Accents */}
-            <span className="absolute top-2.5 left-3 text-[#e5c07b]/60 text-xs select-none">✦</span>
-            <span className="absolute top-2.5 right-3 text-[#e5c07b]/60 text-xs select-none">✦</span>
-            <span className="absolute bottom-2.5 left-3 text-[#e5c07b]/60 text-xs select-none">✦</span>
-            <span className="absolute bottom-2.5 right-3 text-[#e5c07b]/60 text-xs select-none">✦</span>
+            <span className="absolute top-2.5 left-3 text-[#CD9F5B] text-xs select-none">✦</span>
+            <span className="absolute top-2.5 right-3 text-[#CD9F5B] text-xs select-none">✦</span>
+            <span className="absolute bottom-2.5 left-3 text-[#CD9F5B] text-xs select-none">✦</span>
+            <span className="absolute bottom-2.5 right-3 text-[#CD9F5B] text-xs select-none">✦</span>
 
             {/* Background Glow Lights */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-36 bg-[#e5c07b]/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-72 h-36 bg-[#8b5cf6]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-36 bg-[#CD9F5B]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-72 h-36 bg-[#E4C09F]/10 rounded-full blur-3xl pointer-events-none" />
 
             {/* 1. Brand & Spread Title */}
             <div className="space-y-1 relative z-10">
               <div className="flex items-center justify-center gap-2">
-                <span className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-[#e5c07b]/60" />
-                <span className="text-[11px] sm:text-xs font-serif-th tracking-[0.2em] uppercase text-[#e5c07b] font-bold">
+                <span className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-[#D6B48D]" />
+                <span className="text-[11px] sm:text-xs font-serif-th tracking-[0.2em] uppercase text-[#CD9F5B] font-bold">
                   SEERTAROT · วิหารพยากรณ์
                 </span>
-                <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#e5c07b]/60" />
+                <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#D6B48D]" />
               </div>
-              <div className="inline-block px-3 py-0.5 rounded-full bg-[#e5c07b]/10 border border-[#e5c07b]/30">
-                <span className="text-[11px] sm:text-xs text-[#f5deaa] font-serif-th font-medium">
+              <div className="inline-block px-3 py-0.5 rounded-full bg-[#FCF0E6] border border-[#D6B48D]">
+                <span className="text-[11px] sm:text-xs text-[#5A432F] font-serif-th font-semibold">
                   ผัง: {spreadName}
                 </span>
               </div>
@@ -440,7 +440,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {/* 2. Querent's Sacred Inquiry (คำถาม) */}
             {question && (
               <div className="max-w-md mx-auto py-0.5 px-3 relative z-10">
-                <p className="font-serif-th text-xs sm:text-sm text-[#f5deaa]/90 italic leading-relaxed">
+                <p className="font-serif-th text-xs sm:text-sm text-[#5A432F] italic leading-relaxed">
                   “{question}”
                 </p>
               </div>
@@ -458,13 +458,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                     }`}
                   >
                     {/* Position Name */}
-                    <span className="text-[10.5px] sm:text-xs text-[#e5c07b] font-serif-th tracking-wide block font-medium whitespace-nowrap">
+                    <span className="text-[10.5px] sm:text-xs text-[#CD9F5B] font-serif-th tracking-wide block font-bold whitespace-nowrap">
                       {c.position.nameTh}
                     </span>
 
                     {/* Card Frame */}
                     <div
-                      className={`w-full rounded-xl overflow-hidden relative border-2 border-[#e5c07b]/70 shadow-[0_0_20px_rgba(229,192,123,0.3)] bg-[#05030a] ${
+                      className={`w-full rounded-xl overflow-hidden relative border-2 border-[#D6B48D] shadow-xs bg-[#FCF0E6] ${
                         isSingle ? "h-48 sm:h-60" : "h-32 sm:h-38"
                       } ${c.isReversed ? "rotate-180" : ""}`}
                     >
@@ -479,14 +479,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
                     {/* Card Title & State */}
                     <div className="space-y-0.5">
-                      <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#f5deaa] leading-tight">
+                      <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#5A432F] leading-tight">
                         {c.card?.nameTh || `ใบที่ ${i + 1}`}
                       </h5>
                       <span
-                        className={`text-[9px] px-2 py-0.5 rounded-full font-serif-th inline-block ${
+                        className={`text-[9px] px-2 py-0.5 rounded-full font-serif-th inline-block font-semibold ${
                           c.isReversed
-                            ? "bg-rose-950/80 text-rose-300 border border-rose-500/40"
-                            : "bg-emerald-950/80 text-emerald-300 border border-emerald-500/40"
+                            ? "bg-rose-50 text-rose-700 border border-rose-200"
+                            : "bg-emerald-50 text-emerald-800 border border-emerald-200"
                         }`}
                       >
                         {c.isReversed ? "กลับหัว ↷" : "หัวตั้ง ✦"}
@@ -499,25 +499,25 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
             {/* 4. Oracle Prophecy / Interpretation */}
             {reading?.summary && (
-              <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#e5c07b]/20">
-                <span className="text-[10px] sm:text-[11px] text-[#c59b27] font-serif-th tracking-wider uppercase block font-semibold">
+              <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#D6B48D]/30">
+                <span className="text-[10px] sm:text-[11px] text-[#CD9F5B] font-serif-th tracking-wider uppercase block font-bold">
                   ✦ สารพยากรณ์จากแม่หมอ {persona.nameTh} ✦
                 </span>
-                <p className="font-serif-th text-xs sm:text-[13px] text-[#e9dfcc] leading-relaxed italic">
+                <p className="font-serif-th text-xs sm:text-[13px] text-[#5A432F] leading-relaxed italic">
                   “{reading.summary}”
                 </p>
               </div>
             )}
 
             {/* 5. Footer Watermark */}
-            <div className="pt-2 border-t border-[#e5c07b]/15 relative z-10 flex items-center justify-between px-2 text-[9px] text-[#c59b27]/80 font-mono tracking-widest uppercase">
+            <div className="pt-2 border-t border-[#D6B48D]/20 relative z-10 flex items-center justify-between px-2 text-[9px] text-[#8C735D] font-mono tracking-widest uppercase font-bold">
               <span>PROVABLY-FAIR SHA-256</span>
               <span>SEERTAROT.NET</span>
             </div>
           </div>
 
           {/* Social Sharing Control Bar (5 Official Brand Icons, Perfectly Centered, Zero Clipping) */}
-          <div className="py-3 px-4 rounded-2xl bg-[#120a24]/90 border border-[#e5c07b]/30 flex items-center justify-center gap-3.5 sm:gap-6">
+          <div className="py-3 px-4 rounded-2xl bg-[#FFFFFF] border border-[#D6B48D] flex items-center justify-center gap-3.5 sm:gap-6 shadow-xs">
             {/* Facebook (#1877F2) */}
             <button
               type="button"

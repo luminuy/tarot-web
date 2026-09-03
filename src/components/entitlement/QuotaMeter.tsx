@@ -52,25 +52,25 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
       onClick={onOpenDetails}
       title={title}
       aria-label={srLabel}
-      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border px-2 py-1 sm:px-2.5 font-serif-th text-[10px] font-semibold whitespace-nowrap transition-all select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a] ${
+      className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border px-2 py-1 sm:px-2.5 font-serif-th text-[10px] font-semibold whitespace-nowrap transition-all select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
         unlimited
-          ? "border-[#ffd700] bg-gradient-to-r from-[#1c1233] to-[#2d184d] text-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.3)] hover:scale-105"
+          ? "border-[#CD9F5B] bg-[#FDF7F0] text-[#CD9F5B] shadow-xs hover:scale-105"
           : empty
-          ? "border-[#f0a868]/50 bg-[#1c1024] text-[#f0c79a] hover:border-[#f0a868] hover:bg-[#241430]"
-          : "border-[#e5c07b]/40 bg-[#140b24] text-[#f5deaa] hover:border-[#ffd700] hover:bg-[#1f1038]"
+          ? "border-[#D6B48D] bg-[#FCF0E6] text-[#8C735D] hover:border-[#CD9F5B] hover:bg-[#FFFFFF]"
+          : "border-[#D6B48D] bg-[#FDF7F0] text-[#5A432F] hover:border-[#CD9F5B] hover:bg-[#FFFFFF] shadow-xs"
       }`}
     >
       {unlimited ? (
         <>
-          <span className="animate-pulse text-[#ffd700]">✦</span>
+          <span className="animate-pulse text-[#CD9F5B]">✦</span>
           <span className="hidden sm:inline">ไม่จำกัดสิทธิ์</span>
-          <span translate="no" className="rounded bg-[#ffd700]/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#ffd700]">
+          <span translate="no" className="rounded bg-[#CD9F5B]/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#5A432F]">
             VIP
           </span>
         </>
       ) : empty ? (
         <>
-          <SealedLockIcon className="h-3.5 w-3.5 text-[#f0a868]" />
+          <SealedLockIcon className="h-3.5 w-3.5 text-[#8C735D]" />
           <span className="hidden sm:inline">{view.badgeLabel}</span>
           <span className="sm:hidden font-mono">0/{view.limit}</span>
         </>

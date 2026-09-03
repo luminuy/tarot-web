@@ -24,10 +24,10 @@ export function QuotaPips({
 
   const litClass =
     tone === "empty"
-      ? "bg-[#9c93b8]/30"
+      ? "bg-[#8C735D]/30"
       : tone === "low"
-      ? "bg-[#f0a868] shadow-[0_0_6px_rgba(240,168,104,0.7)]"
-      : "bg-[#ffd700] shadow-[0_0_6px_rgba(255,215,0,0.7)]";
+      ? "bg-[#CD9F5B] shadow-xs"
+      : "bg-[#CD9F5B] shadow-xs";
 
   return (
     <span className="inline-flex items-center gap-1" aria-hidden="true">
@@ -35,11 +35,11 @@ export function QuotaPips({
         <span
           key={i}
           className={`${dot} rounded-full transition-colors duration-300 ${
-            i < lit ? litClass : "bg-[#e5c07b]/15 ring-1 ring-inset ring-[#e5c07b]/25"
+            i < lit ? litClass : "bg-[#D6B48D]/30 ring-1 ring-inset ring-[#D6B48D]/40"
           }`}
         />
       ))}
-      {limit > 6 && <span className="ml-0.5 font-mono text-[10px] text-[#e5c07b]">/{limit}</span>}
+      {limit > 6 && <span className="ml-0.5 font-mono text-[10px] text-[#5A432F]">/{limit}</span>}
     </span>
   );
 }
