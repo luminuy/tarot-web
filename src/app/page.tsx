@@ -21,7 +21,6 @@ import { saveReading } from "@/lib/utils/history";
 import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
-import { QuotaMeter } from "@/components/entitlement/QuotaMeter";
 import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
 import { FreeTrialNotice } from "@/components/entitlement/FreeTrialNotice";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
@@ -842,7 +841,6 @@ export default function TarotPage() {
 
           {/* Right Toolbar Controls (UserProfileBadge, Sacred Dropdown & Reset Button) */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
-            <QuotaMeter onOpenDetails={() => openAccessDialog("explore")} />
             <UserProfileBadge
               onOpenAuthModal={() => openAuth("signin")}
               onOpenPlans={() => openAccessDialog("explore")}

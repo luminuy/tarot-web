@@ -146,37 +146,33 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
   return (
     <div className="relative select-none" ref={dropdownRef}>
-      {/* Refined Luxury Warm Minimalist Trigger Button */}
+      {/* Refined Luxury Warm Minimalist Trigger Button — Hamburger Icon (Image 2) */}
       <button
         type="button"
         onClick={toggleDropdown}
-        className={`min-h-[38px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer flex items-center gap-2 border select-none ${
+        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border transition-all duration-150 cursor-pointer select-none shadow-xs active:scale-95 ${
           isOpen
             ? "bg-[#EAE7E0] border-[#D5CEC2] text-[#29261F]"
             : "bg-[#FFFFFF] text-[#29261F] hover:text-[#A58A5C] border-[#D5CEC2] hover:border-[#A58A5C]"
         }`}
         aria-expanded={isOpen}
-        aria-label="เมนูหลักวิหารพยากรณ์"
+        aria-label="เมนูหลัก"
+        title="เมนูหลัก"
       >
-        <TarotDeckNavIcon
-          className={`w-4 h-4 flex-shrink-0 transition-colors ${isOpen ? "text-[#A58A5C]" : "text-[#635B4E]"}`}
-        />
-        <span className="tracking-wide">เมนู</span>
-        <motion.svg
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-          style={{ transformOrigin: "50% 48%" }}
-          className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${isOpen ? "text-[#A58A5C]" : "text-[#635B4E]"}`}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="w-4 h-4 sm:w-5 sm:h-5 transition-colors"
           aria-hidden="true"
         >
-          <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clipRule="evenodd"
-          />
-        </motion.svg>
+          <line x1="4" y1="7" x2="20" y2="7" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="17" x2="20" y2="17" />
+        </svg>
       </button>
 
       {/* World-Class Warm Milk Cream Floating Sanctuary Menu */}
