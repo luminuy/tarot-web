@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0066 · 2026-09-03 21:11 · 🟠 High · เพิ่ม r2_buckets binding → CLOUDFLARE_API_TOKEN ขาดสิทธิ์ R2 → deploy fail ทั้ง repo
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หลัง merge PR #201 (เพิ่ม `r2_buckets` → `seertarot-share` ใน wrangler.jsonc) ทุก Production Deploy fail ที่ขั้น `pnpm run deploy` → `A request to the Cloudflare API (/accounts/***/r2/buckets/seertarot-share) failed. Authentication error [code: 10000]` · โค้ด PR ถัด ๆ ไปค้างบน main deploy ไม่ขึ้น |
+| **สาเหตุราก** | `wrangler deploy` **validate ว่า R2 bucket ที่ผูกใน `r2_buckets` มีอยู่จริง** โดยยิง R2 API ตอน deploy — แต่ `CLOUDFLARE_API_TOKEN` (GitHub Actions secret) มีสิทธิ์ Workers Scripts / KV / D1 แต่**ไม่มี Workers R2 Storage** · binding `ai` / `vectorize` ที่เพิ่มก่อนหน้าไม่โดน validate ตอน deploy จึงผ่านไปได้โดยไม่มีใครเห็นความต่างนี้ · `opennextjs-cloudflare build` (INC-0034 check) ก็ผ่านเพราะ build ไม่ยิง API |
+| **การแก้ไข** | (1) hotfix #202: comment `r2_buckets` block ใน wrangler.jsonc ทิ้ง → deploy กลับมาทำงาน · โค้ด route R2 คงไว้ (`getShareBucket()` คืน null → `/api/share/image` 503 → ShareModal fallback) (2) เจ้าของโปรเจกต์เติม permission **Account · Workers R2 Storage · Edit** ให้ token `tarot-web deploy` (แก้ token เดิม ค่าไม่เปลี่ยน) (3) #203: uncomment `r2_buckets` กลับ → deploy #389 ผ่าน · verified round-trip PNG บน production |
+| **🛡️ กฎป้องกันถาวร** | **ก่อนเพิ่ม binding ที่ `wrangler deploy` validate ผ่าน API (`r2_buckets` · `queues` · `hyperdrive` · `mtls_certificates`) ต้องยืนยันก่อนว่า `CLOUDFLARE_API_TOKEN` ใน CI มี scope ที่ตรง** — binding ที่ไม่ถูก validate ตอน deploy (`ai` · `vectorize` · `kv_namespaces` · `d1_databases`) เพิ่มได้เลย · การ์ด "Cloudflare Free Stack" ใน `/admin` ช่วยดูสถานะ binding หลัง deploy |
+| **การพิสูจน์ว่าแก้ได้จริง** | Deploy #389 (commit `7997c1a`) = success · `POST /api/share/image` (PNG จริง) → 200 → `GET /api/share/image/<id>` byte ตรงเป๊ะ · `GET /s/<id>` มี `<meta og:image>` |
+| **บันทึกโดย** | Claude Sonnet 5 · branch `claude/image-logo-adjustments-943250` · commit `e5ddc44` (#202) + `7997c1a` (#203) |
+
+
 ### INC-0065 · 2026-09-03 16:36 · 🟡 Medium · ลบวงกลมประกายดาวกลางหลังไพ่ทาโรต์ออก คืนลายแท้คลีนเรียบหรู
 
 | หัวข้อ | รายละเอียด |
