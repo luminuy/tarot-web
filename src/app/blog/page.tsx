@@ -82,40 +82,40 @@ export default function BlogPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FAF7F2] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
+    <main className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans selection:bg-[#A58A5C]/20 selection:text-[#29261F]">
       {/* Schema.org Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-5xl mx-auto space-y-8 pb-16">
         {/* Navigation Breadcrumb & Back button */}
-        <div className="flex items-center justify-between border-b border-[#D9C8AC]/30 pb-4">
+        <div className="flex items-center justify-between border-b border-[#D5CEC2]/40 pb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#2E211A] hover:text-[#8F5C1A] transition-colors font-serif-th py-1.5 px-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC]"
+            className="inline-flex items-center gap-1.5 text-xs text-[#29261F] hover:text-[#A58A5C] transition-colors font-serif-th py-2 px-4 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] shadow-xs"
           >
             <span>←</span> กลับสู่วิหารพยากรณ์
           </Link>
-          <div className="flex items-center gap-3 text-xs font-mono text-[#6F5B4A]">
-            <Link href="/spreads" className="hover:text-[#8F5C1A] transition-colors">
+          <div className="flex items-center gap-3 text-xs font-mono text-[#756F66]">
+            <Link href="/spreads" className="hover:text-[#A58A5C] transition-colors">
               ผัง 20 แบบ
             </Link>
             <span>·</span>
-            <Link href="/cards" className="hover:text-[#8F5C1A] transition-colors">
+            <Link href="/cards" className="hover:text-[#A58A5C] transition-colors">
               ไพ่ 78 ใบ
             </Link>
           </div>
         </div>
 
         {/* Hero Header */}
-        <div className="text-center space-y-3 py-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] text-[11px] text-[#8F5C1A] font-mono font-bold">
-            <span>✦</span> Sacred Knowledge & Wisdom <span>✦</span>
+        <div className="text-center space-y-3 py-6 max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[11px] text-[#A58A5C] font-mono font-bold shadow-xs">
+            <span>✦</span> Sacred Knowledge &amp; Wisdom <span>✦</span>
           </div>
-          <h1 className="font-serif-th text-2xl sm:text-4xl font-bold font-mystic-gold leading-tight">
-            คัมภีร์บทความ & ศาสตร์ไพ่ทาโรต์
+          <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-[#29261F] leading-tight">
+            คัมภีร์บทความ &amp; ศาสตร์ไพ่ทาโรต์
           </h1>
-          <p className="text-xs sm:text-sm text-[#6F5B4A] font-serif-th leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#756F66] font-serif-th leading-relaxed">
             คู่มือการพยากรณ์ เจาะลึกความหมายไพ่ 78 ใบ เทคนิคเปิดไพ่ความรัก การงาน และจิตวิทยาเพื่อการพัฒนาตนเอง
           </p>
         </div>

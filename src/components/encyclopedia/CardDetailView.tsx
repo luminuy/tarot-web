@@ -73,15 +73,15 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   return (
     <div className="space-y-8 w-full max-w-5xl mx-auto relative z-10">
       {/* Top Breadcrumbs & Header Bar */}
-      <div className="flex items-center justify-between border-b border-[#D9C8AC]/30 pb-4 text-xs font-mono">
+      <div className="flex items-center justify-between border-b border-[#D5CEC2]/40 pb-4 text-xs font-mono">
         <Link
           href="/cards"
-          className="inline-flex items-center gap-1.5 text-[#2E211A] hover:text-[#8F5C1A] transition-colors py-1 px-3 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] font-serif-th "
+          className="inline-flex items-center gap-1.5 text-[#29261F] hover:text-[#A58A5C] transition-colors py-1.5 px-4 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] hover:border-[#A58A5C] font-serif-th shadow-xs"
         >
           <span>←</span> กลับหน้ารวมไพ่ 78 ใบ
         </Link>
-        <span className="text-[#6F5B4A]">
-          ลำดับที่ <strong className="text-[#8F5C1A]">{currentIndex + 1}</strong> / {totalCards}
+        <span className="text-[#756F66]">
+          ลำดับที่ <strong className="text-[#A58A5C]">{currentIndex + 1}</strong> / {totalCards}
         </span>
       </div>
 
@@ -91,18 +91,12 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         <div className="md:col-span-5 lg:col-span-4 flex flex-col items-center space-y-5">
           {/* 3D Sacred Card Container */}
           <div className="relative group">
-            {/* Celestial Ambient Halo Glow */}
-            <div
-              className="absolute -inset-4 rounded-lg opacity-20 blur-2xl transition-all duration-500 group-hover:opacity-40"
-              style={{ background: elem.glow }}
-            />
-
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative w-64 sm:w-72 aspect-[7/12] rounded-lg overflow-hidden border-2 border-[#D9C8AC] p-1.5 bg-[#FFFFFF] "
+              className="relative w-64 sm:w-72 aspect-[7/12] rounded-xl overflow-hidden border-2 border-[#D5CEC2] p-1.5 bg-[#FFFFFF] shadow-[0_10px_30px_rgba(42,38,31,0.08)]"
             >
-              <div className="relative w-full h-full rounded-lg overflow-hidden bg-[#F3EDE2]">
+              <div className="relative w-full h-full rounded-lg overflow-hidden bg-[#EAE7E0]">
                 <motion.div
                   animate={{ rotate: isUpright ? 0 : 180 }}
                   transition={{ type: "spring", stiffness: 220, damping: 22 }}
@@ -121,11 +115,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
                 {/* Top Floating Badge */}
                 <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
-                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#2E211A] text-[#FFFFFF] border border-[#D9C8AC] ">
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#29261F] text-[#F3F0EA] border border-[#D5CEC2]">
                     {card.arcana === "major" ? `Major #${card.number}` : card.suit?.toUpperCase()}
                   </span>
                   <span
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${elem.border} ${elem.bg} ${elem.text} font-bold `}
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${elem.border} ${elem.bg} ${elem.text} font-bold`}
                   >
                     {elem.icon} {card.element}
                   </span>
@@ -135,12 +129,12 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           </div>
 
           {/* Upright / Reversed Orientation Switcher */}
-          <div className="flex items-center justify-center p-1.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] w-full max-w-xs select-none ">
+          <div className="flex items-center justify-center p-1 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] w-full max-w-xs select-none">
             <button
               type="button"
               onClick={() => setOrientation("upright")}
-              className={`flex-1 py-2.5 text-xs font-serif-th font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                isUpright ? "bg-[#8F5C1A] text-[#FFFFFF]" : "text-[#6F5B4A] hover:text-[#2E211A]"
+              className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#756F66] hover:text-[#29261F]"
               }`}
             >
               <span>✦</span> ไพ่หัวตั้ง (ปกติ)
@@ -148,8 +142,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             <button
               type="button"
               onClick={() => setOrientation("reversed")}
-              className={`flex-1 py-2.5 text-xs font-serif-th font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                !isUpright ? "bg-[#F3EDE2] text-[#2E211A] font-bold" : "text-[#6F5B4A] hover:text-[#8F5C1A]"
+              className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                !isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#756F66] hover:text-[#29261F]"
               }`}
             >
               <span>↻</span> ไพ่หัวกลับ
@@ -162,7 +156,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               ธาตุ{card.element}
             </span>
             {card.astrology && (
-              <span className="px-3 py-1 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A]">
+              <span className="px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F]">
                 ✦ {card.astrology}
               </span>
             )}
@@ -173,7 +167,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     ? "border-[#3A7044]/40 bg-[#EBF3ED] text-[#3A7044]"
                     : card.yesNo === "no"
                       ? "border-[#A6392C]/40 bg-[#FCEEEA] text-[#A6392C]"
-                      : "border-[#8F5C1A]/40 bg-[#F3EDE2] text-[#8F5C1A]"
+                      : "border-[#D5CEC2] bg-[#EAE7E0] text-[#A58A5C]"
                 }`}
               >
                 Yes/No: {card.yesNo === "yes" ? "ใช่ (Yes)" : card.yesNo === "no" ? "ไม่ใช่ (No)" : "ไม่แน่ชัด (Maybe)"}
@@ -185,29 +179,29 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         {/* Right Column: Titles, Keywords & Categorized Deep Meanings */}
         <div className="md:col-span-7 lg:col-span-8 space-y-6">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-mono text-[#8F5C1A]">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] font-semibold uppercase">
+            <div className="flex items-center gap-2 text-xs font-mono text-[#A58A5C]">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] font-semibold uppercase text-[#29261F]">
                 {card.arcana === "major" ? "Major Arcana" : `${card.suit} Suit`}
               </span>
-              <span className="text-[#6F5B4A]">|</span>
-              <span className="text-[#2E211A] font-sans tracking-wide">{card.nameEn}</span>
+              <span className="text-[#756F66]">|</span>
+              <span className="text-[#29261F] font-sans tracking-wide">{card.nameEn}</span>
             </div>
-            <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold font-mystic-gold leading-tight">
+            <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] leading-tight">
               {card.nameTh}
             </h1>
-            <p className="text-xs sm:text-sm text-[#6F5B4A] leading-relaxed pt-1">{card.numerology}</p>
+            <p className="text-xs sm:text-sm text-[#756F66] leading-relaxed pt-1 font-serif-th">{card.numerology}</p>
           </div>
 
           {/* Keywords Ribbon */}
           <div className="space-y-2">
-            <h4 className="text-[11px] font-mono text-[#8F5C1A] uppercase tracking-wider flex items-center gap-1.5 font-bold">
+            <h4 className="text-[11px] font-mono text-[#A58A5C] uppercase tracking-wider flex items-center gap-1.5 font-bold">
               <span>✦</span> สัญลักษณ์และคีย์เวิร์ด ({isUpright ? "ไพ่หัวตั้ง" : "ไพ่หัวกลับ"})
             </h4>
             <div className="flex flex-wrap gap-2">
               {currentKeywords.map((kw, i) => (
                 <span
                   key={i}
-                  className="text-xs px-3 py-1.5 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] font-serif-th font-semibold "
+                  className="text-xs px-3 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] font-serif-th font-semibold shadow-xs"
                 >
                   ✦ {kw}
                 </span>
@@ -217,8 +211,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
           {/* 5 Categorized Meanings List */}
           <div className="space-y-3.5 pt-2">
-            <h3 className="font-serif-th text-base font-bold text-[#2E211A] flex items-center gap-2">
-              <span className="text-[#8F5C1A]">✦</span> ความหมายและการทำนาย 5 ด้าน ({isUpright ? "หัวตั้ง" : "หัวกลับ"})
+            <h3 className="font-serif-th text-base font-bold text-[#29261F] flex items-center gap-2">
+              <span className="text-[#A58A5C]">✦</span> ความหมายและการทำนาย 5 ด้าน ({isUpright ? "หัวตั้ง" : "หัวกลับ"})
             </h3>
 
             <AnimatePresence mode="wait">
@@ -237,15 +231,15 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   return (
                     <div
                       key={cat.id}
-                      className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-5 space-y-2 hover:border-[#8F5C1A] transition-all group"
+                      className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 space-y-2 hover:border-[#A58A5C] transition-all group shadow-xs"
                     >
                       <div className="flex items-center gap-2">
                         <span style={{ color: cat.color }} className="text-sm">
                           {cat.icon}
                         </span>
-                        <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A]">{cat.nameTh}</h4>
+                        <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F]">{cat.nameTh}</h4>
                       </div>
-                      <p className="font-serif-th text-xs sm:text-sm text-[#2E211A] leading-relaxed pl-4 border-l-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] transition-colors">
+                      <p className="font-serif-th text-xs sm:text-sm text-[#29261F] leading-relaxed pl-4 border-l-2 border-[#D5CEC2] group-hover:border-[#A58A5C] transition-colors">
                         {text || "กำลังรวบรวมคำแปลมิตินี้"}
                       </p>
                     </div>
@@ -259,7 +253,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           <div className="pt-4 flex items-center gap-4 flex-wrap">
             <Link
               href="/"
-              className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] hover:scale-105 transition-transform flex items-center gap-2"
+              className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition-all flex items-center gap-2 shadow-sm"
             >
               <span>✦</span> ไปหน้าดูดวงหลัก
             </Link>
@@ -268,13 +262,13 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       </div>
 
       {/* Bottom Previous / Next Card Navigation Bar */}
-      <div className="pt-8 border-t border-[#D9C8AC]/30 flex items-center justify-between gap-4">
+      <div className="pt-8 border-t border-[#D5CEC2]/40 flex items-center justify-between gap-4">
         {prevCard ? (
           <Link
             href={`/cards/${prevCard.id}`}
-            className="flex items-center gap-3 p-3.5 rounded-lg border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#FAF7F2] transition-all group max-w-[48%] "
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-[#D5CEC2] hover:border-[#A58A5C] bg-[#FFFFFF] hover:bg-[#EAE7E0] transition-all group max-w-[48%] shadow-xs"
           >
-            <div className="w-9 h-14 rounded-lg overflow-hidden border border-[#D9C8AC] flex-shrink-0 bg-[#F3EDE2]">
+            <div className="w-9 h-14 rounded-lg overflow-hidden border border-[#D5CEC2] flex-shrink-0 bg-[#EAE7E0]">
               <CardImage
                 image={prevCard.image}
                 cardId={prevCard.id}
@@ -284,8 +278,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               />
             </div>
             <div className="text-left overflow-hidden">
-              <span className="text-[10px] font-mono text-[#6F5B4A] block">← ใบก่อนหน้า</span>
-              <span className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] group-hover:text-[#8F5C1A] truncate block">
+              <span className="text-[10px] font-mono text-[#756F66] block">← ใบก่อนหน้า</span>
+              <span className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] truncate block">
                 {prevCard.nameTh}
               </span>
             </div>
@@ -297,15 +291,15 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         {nextCard ? (
           <Link
             href={`/cards/${nextCard.id}`}
-            className="flex items-center gap-3 p-3.5 rounded-lg border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#FAF7F2] transition-all group max-w-[48%] text-right "
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-[#D5CEC2] hover:border-[#A58A5C] bg-[#FFFFFF] hover:bg-[#EAE7E0] transition-all group max-w-[48%] text-right shadow-xs"
           >
             <div className="text-right overflow-hidden">
-              <span className="text-[10px] font-mono text-[#6F5B4A] block">ใบถัดไป →</span>
-              <span className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] group-hover:text-[#8F5C1A] truncate block">
+              <span className="text-[10px] font-mono text-[#756F66] block">ใบถัดไป →</span>
+              <span className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] truncate block">
                 {nextCard.nameTh}
               </span>
             </div>
-            <div className="w-9 h-14 rounded-lg overflow-hidden border border-[#D9C8AC] flex-shrink-0 bg-[#F3EDE2]">
+            <div className="w-9 h-14 rounded-lg overflow-hidden border border-[#D5CEC2] flex-shrink-0 bg-[#EAE7E0]">
               <CardImage
                 image={nextCard.image}
                 cardId={nextCard.id}

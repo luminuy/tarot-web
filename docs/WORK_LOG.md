@@ -34,6 +34,48 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: Editorial Quiet Luxury Redesign ครบถ้วนทุกหน้า ทุกโมดัล และระบบสไตล์ทั้งเว็บ
+
+**คำขอของผู้ใช้**:
+- *"เช็คหลายหน้าหลายจุดยังไม่อัพเดท ดีไซร์ให้ตรงกับหน้าแแรกเลย"*
+- *"SeeTarot_Editorial_Quiet_Luxury_Redesign ลองศึกษา md ตัวนี้ที่หน้าจอ เหมาะเอามาปรับเข้ากับเว็บเราไหม"*
+- *"ปรับทั่งหมดเลย ทำทุกอย่าง"*
+
+**สิ่งที่ดำเนินการเสร็จสิ้น**:
+1. **แกนระบบสีและโทนหลัก (Design System Tokens ใน `src/app/globals.css`)**:
+   - ปรับใช้ 8 Master Tokens ตามสเปก Editorial Quiet Luxury (`SeeTarot_Editorial_Quiet_Luxury_Redesign.md`):
+     - `canvas`: `#F3F0EA` (Warm Ivory)
+     - `surface`: `#FFFFFF` (Porcelain)
+     - `inset`: `#EAE7E0` (Soft Ivory)
+     - `line`: `#D5CEC2` (Taupe Line 1px)
+     - `ink`: `#29261F` (Deep Brown)
+     - `muted`: `#756F66` (Muted Brown)
+     - `gold`: `#A58A5C` (Muted Gold Accent <3% visual surface)
+     - `dark`: `#171512` (Near Black สำหรับ Footer และ Immersive Mode)
+   - ปรับแต่ง Shadow, Border Radius และ Utility Classes ให้เข้าคู่กันทั้งหมด
+2. **หน้าหลักและส่วนท้ายวิหาร (`src/app/page.tsx`)**:
+   - ปรับ Canvas พื้นหลังเป็น `#F3F0EA` และตัวหนังสือเป็น Deep Brown `#29261F`
+   - แถบหัวเว็บและปุ่มย้อนกลับ/เริ่มดูดวงใหม่ปรับเป็นปุ่มแคปซูลมน (`rounded-full bg-[#29261F] text-[#F3F0EA] hover:bg-[#A58A5C]`)
+   - ปรับแต่ง Hero Stacked Deck และ แสงเทียนนุ่มให้เข้ากับโทน `#A58A5C`
+   - แถบ Action Bar ในขั้นตอนที่ 2 และ แถบล่างขั้นตอนสรุปผลปรับเป็น `rounded-xl border-[#D5CEC2] bg-[#FFFFFF] shadow-xs`
+   - **Footer ปรับสู่ Dark Editorial Mode (`#171512`)**:
+     - เพิ่ม Brand Statement: *SEE TAROT — พื้นที่สงบสำหรับหยุด คิด ถาม และอ่านความหมายของตัวเอง*
+     - เพิ่ม Editorial Navigation Links: ผัง 20 แบบ, ไพ่ 78 ใบ, ปรึกษาแม่หมอ, บทความ, นโยบายความเป็นส่วนตัว
+     - กล่องข้อควรทราบเกี่ยวกับการทำนาย (AI Disclosure), นโยบายความเป็นส่วนตัว (PDPA), สายด่วนสุขภาพจิต 1323, แจ้งเหตุเจ็บป่วยฉุกเฉิน 1669 และภาพหน้าไพ่ Rider-Waite 1909 อยู่ครบถ้วน 100%
+3. **สารานุกรมไพ่ 78 ใบ (`CardsExplorer.tsx` & `CardDetailView.tsx`)**:
+   - ปรับช่องค้นหา, แท็บชุดไพ่, และการ์ดแสดงผลไพ่ทั้ง 78 ใบให้เป็นโทน `#FFFFFF`, `#D5CEC2`, `#29261F`, `#756F66`, `#A58A5C`
+   - หน้ารายละเอียดไพ่รายใบ: กรอบแสดงไพ่ 3D, แท็บสลับหัวตั้ง/หัวกลับ (`rounded-full`), และการ์ดทำนาย 5 มิติปรับเป็น Editorial Quiet Luxury ทั้งหมด
+4. **คลังผังพยากรณ์ 20 แบบ (`/spreads` & `SpreadsLibrary.tsx`)**:
+   - ปรับแถบหมวดหมู่เป็นแคปซูลมน และผังพยากรณ์ 20 แบบเป็นกรอบเรียบหรูไร้แสงแยงตา
+5. **ตลาดปรึกษาแม่หมอ (`/readers` & `ReadersDirectory.tsx`)**:
+   - ปรับการ์ดแม่หมอ, แท็กความเชี่ยวชาญ, และปุ่มนัดหมายให้เป็นมินิมอลเงียบสงบ
+6. **คลังบทความและภูมิปัญญา (`/blog` & `ArticleReadingClient.tsx`)**:
+   - ปรับโฉมหน้าแรกบทความ, หน้าอ่านบทความ, สารบัญ, กล่องไฮไลท์ไพ่, และ FAQ Accordion ให้เป็น Editorial Warm Ivory & Deep Brown
+7. **หน้าบัญชีและนโยบายความเป็นส่วนตัว (`/account` & `/privacy`)**:
+   - ปรับโทนสีและการ์ดทั้งหมดให้เป็นระเบียบเรียบหรูเดียวกัน
+8. **หน้าต่างโมดัล (`ReadingHistoryModal.tsx` & `AuthModal.tsx`)**:
+   - ปรับพื้นหลังโมดัล, แท็บกรองสถานะจริงในชีวิต, กล่อง AI สรุปประจำเดือน, และปุ่มเข้าสู่ระบบ / Google / LINE ให้เป็นแคปซูลมนเข้าชุดกัน
+
 ### 🗓️ 2026-09-03: ปรับปรุงภาษาไทยทั้งเว็บให้เป็นธรรมชาติ สุภาพ ตรงไปตรงมา เหมือนคนไทยคุยกันจริง (Rule 10)
 
 **คำขอของผู้ใช้**:

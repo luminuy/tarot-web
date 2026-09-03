@@ -135,7 +135,7 @@ export default async function ArticleDetailPage({ params }: Props) {
       : null;
 
   return (
-    <main className="min-h-screen bg-[#FAF7F2] text-[#2E211A] p-4 sm:p-8 font-sans selection:bg-[#8F5C1A]/30 selection:text-[#2E211A]">
+    <main className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans selection:bg-[#A58A5C]/20 selection:text-[#29261F]">
       {/* Inject Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdArticle) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }} />
@@ -147,17 +147,17 @@ export default async function ArticleDetailPage({ params }: Props) {
         {/* Top Breadcrumb Navigation */}
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-xs font-serif-th text-[#6F5B4A] border-b border-[#D9C8AC]/30 pb-4 overflow-x-auto whitespace-nowrap"
+          className="flex items-center gap-2 text-xs font-serif-th text-[#756F66] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
         >
-          <Link href="/" className="hover:text-[#8F5C1A] transition-colors">
+          <Link href="/" className="hover:text-[#A58A5C] transition-colors">
             หน้าแรก
           </Link>
           <span>/</span>
-          <Link href="/blog" className="hover:text-[#8F5C1A] transition-colors">
+          <Link href="/blog" className="hover:text-[#A58A5C] transition-colors">
             คัมภีร์บทความ
           </Link>
           <span>/</span>
-          <span className="text-[#8F5C1A] truncate font-bold">{article.categoryTh}</span>
+          <span className="text-[#29261F] truncate font-bold">{article.categoryTh}</span>
         </nav>
 
         {/* Client Interactive Reader Component */}

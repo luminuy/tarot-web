@@ -1,53 +1,55 @@
 @import "tailwindcss";
 
 /*
-  ✦ สเปกระบบดีไซน์ V2 — พื้นหลังและพาเลตต์สี (Warm Minimal Sanctuary)
+  ✦ สเปกระบบดีไซน์ Editorial Quiet Luxury (Warm Ivory & Deep Brown)
   8 Core Tokens:
-  1. canvas    : #FAF7F2 (พื้นหน้าเว็บ — ชั้นเดียวทั้งเว็บ)
-  2. surface   : #FFFFFF (พื้นผิวที่ลอยขึ้น — การ์ด, โมดัล, header)
-  3. inset     : #F3EDE2 (พื้นผิวที่จมลง — แท่นบูชา, ช่องกรอก, กล่องคำทำนาย)
-  4. line      : #D9C8AC (เส้นขอบและเส้นคั่น 1px ระดับเดียว ไม่มี opacity modifier)
-  5. ink       : #2E211A (ตัวอักษรหลัก — หัวข้อ, เนื้อหา, ไอคอนหลัก)
-  6. muted     : #6F5B4A (ตัวอักษรรอง — คำอธิบาย, วันที่, placeholder)
-  7. gold      : #8F5C1A (สีเน้นเดียว — ตัวอักษรทอง, ไอคอน, ปุ่มหลัก, focus ring)
+  1. canvas    : #F3F0EA (Warm Ivory — พื้นหน้าเว็บ)
+  2. surface   : #FFFFFF (Off-white / Porcelain — พื้นผิวการ์ด, โมดัล)
+  3. inset     : #EAE7E0 (Soft Ivory — พื้นผิวที่จมลง, แท่นบูชา, ช่องกรอก)
+  4. line      : #D5CEC2 (Taupe Line — เส้นขอบและเส้นคั่น 1px)
+  5. ink       : #29261F (Deep Brown — ตัวอักษรหลัก, หัวข้อ, เนื้อหา)
+  6. muted     : #756F66 (Muted Brown — ตัวอักษรรอง, คำอธิบาย, วันที่)
+  7. gold      : #A58A5C (Muted Gold Accent — สีเน้นพิเศษ <3% visual surface)
   8. ok / err  : #3A7044 / #A6392C (สถานะ สำเร็จ / ผิดพลาด)
+  9. dark      : #171512 (Near Black — Dark Footer, Deep Reading Mode)
 */
 @theme {
-  --color-canvas: #FAF7F2;
+  --color-canvas: #F3F0EA;
   --color-surface: #FFFFFF;
-  --color-inset: #F3EDE2;
-  --color-line: #D9C8AC;
-  --color-ink: #2E211A;
-  --color-muted: #6F5B4A;
-  --color-gold: #8F5C1A;
-  --color-gold-deep: #74490F;
-  --color-gold-wash: rgba(143, 92, 26, 0.08);
+  --color-inset: #EAE7E0;
+  --color-line: #D5CEC2;
+  --color-ink: #29261F;
+  --color-muted: #756F66;
+  --color-gold: #A58A5C;
+  --color-gold-deep: #8E754C;
+  --color-gold-wash: rgba(165, 138, 92, 0.08);
+  --color-dark: #171512;
   --color-ok: #3A7044;
   --color-err: #A6392C;
 
-  /* Semantic Theme Mappings for Harmonious Continuity */
+  /* Semantic Theme Mappings for Editorial Quiet Luxury Continuity */
   --color-main-card: #FFFFFF;
-  --color-inner-card: #F3EDE2;
-  --color-cta-gold: #8F5C1A;
-  --color-walnut: #2E211A;
-  --color-chestnut: #6F5B4A;
-  --color-sand: #D9C8AC;
-  --color-celestial: #8F5C1A;
+  --color-inner-card: #EAE7E0;
+  --color-cta-gold: #A58A5C;
+  --color-walnut: #29261F;
+  --color-chestnut: #756F66;
+  --color-sand: #D5CEC2;
+  --color-celestial: #A58A5C;
 
-  --color-void: #FAF7F2;
+  --color-void: #F3F0EA;
   --color-obsidian-950: #FFFFFF;
-  --color-obsidian-900: #F3EDE2;
-  --color-obsidian-800: #F3EDE2;
-  --color-obsidian-700: #D9C8AC;
-  --color-gold-200: #6F5B4A;
-  --color-gold-300: #2E211A;
-  --color-gold-400: #8F5C1A;
-  --color-gold-500: #8F5C1A;
-  --color-gold-600: #74490F;
-  --color-amethyst: #6F5B4A;
+  --color-obsidian-900: #EAE7E0;
+  --color-obsidian-800: #EAE7E0;
+  --color-obsidian-700: #D5CEC2;
+  --color-gold-200: #756F66;
+  --color-gold-300: #29261F;
+  --color-gold-400: #A58A5C;
+  --color-gold-500: #A58A5C;
+  --color-gold-600: #8E754C;
+  --color-amethyst: #756F66;
   --color-ember: #A6392C;
-  --color-vellum: #2E211A;
-  --color-ash: #6F5B4A;
+  --color-vellum: #29261F;
+  --color-ash: #756F66;
 
   --font-serif-th: var(--font-noto-serif-thai), "Noto Serif Thai", serif;
   --font-sans-th: var(--font-sarabun), "Sarabun", system-ui, sans-serif;
@@ -75,8 +77,8 @@
 }
 
 :root {
-  --shadow-raised: 0 1px 2px rgba(46, 33, 26, 0.04), 0 4px 12px -2px rgba(46, 33, 26, 0.06);
-  --shadow-overlay: 0 12px 40px -8px rgba(46, 33, 26, 0.18);
+  --shadow-raised: 0 1px 3px rgba(41, 38, 31, 0.04), 0 6px 16px -2px rgba(41, 38, 31, 0.06);
+  --shadow-overlay: 0 16px 48px -8px rgba(41, 38, 31, 0.16);
 
   --dur-instant: 80ms;
   --dur-fast: 140ms;
@@ -93,8 +95,8 @@
 
 html,
 body {
-  background-color: #FAF7F2;                    /* canvas */
-  color: #2E211A;                               /* ink */
+  background-color: #F3F0EA;                    /* Warm Ivory canvas */
+  color: #29261F;                               /* Deep Brown ink */
   font-family: var(--font-sans-th);
   line-height: 1.618;
   -webkit-font-smoothing: antialiased;
@@ -146,9 +148,9 @@ body > * {
 
 /* โซนแท่นบูชา (ผ้าปูไพ่) — ใช้เฉพาะที่ไพ่วางจริง */
 .altar-cloth {
-  background: #F3EDE2;              /* inset — จมลง 1 ชั้น */
-  border: 1px solid #D9C8AC;        /* line */
-  border-radius: 8px;
+  background: #EAE7E0;              /* inset — Soft Ivory */
+  border: 1px solid #D5CEC2;        /* line — Taupe Line */
+  border-radius: 12px;
 }
 
 /* ตัวอักษรสีทองศักดิ์สิทธิ์ตามระบบ V2 — คมชัด ผ่าน WCAG AA */
@@ -160,33 +162,33 @@ body > * {
  * ถ้ากำหนดไว้จะไปบังคับน้ำหนักทับหัวข้อที่ตั้งค่าไว้แล้วโดยที่มองไม่เห็นสาเหตุ
  */
 .font-mystic-gold {
-  color: #8F5C1A;
+  color: #A58A5C;
   display: inline-block;
 }
 
-/* กรอบแท่นบูชาตามระบบ V2 */
+/* กรอบแท่นบูชาตามระบบ Editorial Quiet Luxury */
 .altar-panel {
   background: #FFFFFF;
-  border: 1px solid #D9C8AC;
+  border: 1px solid #D5CEC2;
   box-shadow: var(--shadow-raised);
 }
 
 .altar-panel-active {
   background: #FFFFFF;
-  border: 1.618px solid #8F5C1A;
+  border: 1.5px solid #A58A5C;
   box-shadow: var(--shadow-raised);
 }
 
 /* การ์ดพอร์ซเลนระดับลักชูรี */
 .altar-card-porcelain {
   background: #FFFFFF;
-  border: 1px solid #D9C8AC;
+  border: 1px solid #D5CEC2;
   box-shadow: var(--shadow-raised);
   transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .altar-card-porcelain:hover {
-  border-color: #8F5C1A;
+  border-color: #A58A5C;
   box-shadow: var(--shadow-overlay);
   transform: translateY(-2px);
 }
