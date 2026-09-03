@@ -51,7 +51,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#5A432F]/40 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2E211A]/50 backdrop-blur-[3px]">
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -188,7 +188,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({
               role="dialog"
               aria-modal="true"
               aria-label={`ความหมายไพ่ ${selectedCard.nameTh}`}
-              className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-[#5A432F]/50 backdrop-blur-md"
+              className="fixed inset-0 z-60 flex items-center justify-center p-3 bg-[#2E211A]/50 backdrop-blur-[3px]"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}

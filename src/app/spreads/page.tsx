@@ -3,7 +3,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { SPREADS } from "@/data/spreads";
 import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
-import { MysticBackground } from "@/components/ui/MysticBackground";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { SITE_ORIGIN } from "@/lib/config/site";
 
@@ -71,7 +70,7 @@ export default function SpreadsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FCF0E6] text-[#5A432F] p-4 sm:p-8 font-sans selection:bg-[#CD9F5B]/30 selection:text-[#5A432F] relative overflow-hidden">
+    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
@@ -81,9 +80,6 @@ export default function SpreadsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
       />
-
-      {/* Floating Mystic Background Particles */}
-      <MysticBackground />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Top Breadcrumbs & Dropdown */}

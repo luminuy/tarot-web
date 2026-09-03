@@ -360,7 +360,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         aria-modal="true"
         aria-label="แชร์ผลคำทำนาย"
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#5A432F]/40 backdrop-blur-md overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2E211A]/50 backdrop-blur-[3px] overflow-y-auto"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}

@@ -15,7 +15,6 @@ import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { PersonaCardSelector } from "@/components/reading/PersonaCardSelector";
 import { IntentionAltarInput } from "@/components/reading/IntentionAltarInput";
 import { RitualStepProgress, type RitualStep } from "@/components/ui/RitualStepProgress";
-import { MysticBackground } from "@/components/ui/MysticBackground";
 import { OracleEyeIcon, LockTabIcon, CareLineIcon, EmergencyTabIcon } from "@/components/ui/TarotArtIcons";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
@@ -815,24 +814,21 @@ export default function TarotPage() {
   };
 
   return (
-    <main className="min-h-screen pb-24 text-[#231812] relative overflow-hidden bg-[#FAF8F5]">
+    <main className="min-h-screen pb-24 text-[#2E211A] relative overflow-hidden bg-[#F6F1E9]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
-      {/* Mystic Altar Floating Particles & Sacred Circles */}
-      <MysticBackground />
-
-      {/* Top Sacred Header — Crystal-Clear Luminous Glassmorphism */}
-      <header className="w-full border-b border-[#D6B48D]/30 bg-[#FFFFFF]/85 backdrop-blur-xl sticky top-0 z-50 shadow-[0_4px_24px_rgba(90,67,47,0.04)]">
+      {/* Top Sacred Header — Solid White with Clean Dividing Line */}
+      <header className="w-full border-b border-[#E4D8C4] bg-white sticky top-0 z-50 shadow-[var(--shadow-raised)]">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Luxury Brand Logo — P1-U2: กลับหน้าแรก ไม่ล้าง state (ปุ่ม "เริ่มดูดวงใหม่" ทำหน้าที่นั้น) */}
           <Link
             href="/"
             aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
-            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-2xl p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C5A059]/60"
+            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-2xl p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]/60"
           >
             {/* World-Class Miniature 1909 Tarot Card Brand Logo */}
-            <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-xl border-2 border-[#D6B48D] overflow-hidden shadow-[0_4px_16px_rgba(197,160,89,0.25)] relative flex-shrink-0 bg-[#FFFFFF] group-hover:scale-105 transition-all duration-300">
+            <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-xl border-2 border-[#E4D8C4] overflow-hidden shadow-xs relative flex-shrink-0 bg-white group-hover:scale-105 transition-all duration-300">
               <CardImage
                 image="major-01.jpg"
                 alt="The Magician Tarot Seal"
@@ -846,12 +842,12 @@ export default function TarotPage() {
                 (ชื่อแบรนด์ที่ตัดคำหรือล้นทับปุ่มแย่กว่าการซ่อนชื่อไว้ก่อน) */}
             <div className="hidden min-w-0 flex-col justify-center sm:flex">
               <div className="flex min-w-0 items-center gap-1.5">
-                <span className="text-[#C5A059] text-xs">✦</span>
+                <span className="text-[#8F5C1A] text-xs">✦</span>
                 <h1 className="font-serif-th text-sm sm:text-lg font-bold font-mystic-gold tracking-wide leading-snug py-0.5 whitespace-nowrap">
                   ดูดวงไพ่ทาโรต์
                 </h1>
               </div>
-              <span className="hidden sm:block text-[10px] tracking-[0.22em] text-[#7C6553] font-mono uppercase font-semibold pl-4">
+              <span className="hidden sm:block text-[10px] tracking-[0.22em] text-[#6F5B4A] font-mono uppercase font-semibold pl-4">
                 1909 RIDER-WAITE TAROT
               </span>
             </div>
@@ -880,7 +876,7 @@ export default function TarotPage() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-[#FFFFFF] font-bold btn-gold px-4 py-1.5 sm:py-2 rounded-2xl shadow-md transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1 font-serif-th"
+                className="text-xs text-white font-bold bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-1.5 sm:py-2 rounded-md shadow-xs transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1 font-serif-th"
               >
                 <span>✦</span> เริ่มดูดวงใหม่
               </button>
@@ -915,7 +911,7 @@ export default function TarotPage() {
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-3.5 py-1.5 rounded-xl btn-gold text-[#FFFFFF] font-serif-th font-bold text-xs shadow transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
+                className="px-3.5 py-1.5 rounded-md bg-[#8F5C1A] hover:bg-[#74490F] text-white font-serif-th font-bold text-xs shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1"
               >
                 <span>✦</span> โหลดใหม่อีกครั้ง
               </button>

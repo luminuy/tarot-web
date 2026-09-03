@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { MysticBackground } from "@/components/ui/MysticBackground";
 import { Button } from "@/components/ui/Button";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 
@@ -74,11 +73,10 @@ export default function CustomerQueuePage() {
 
   if (loading && !data) {
     return (
-      <main className="min-h-screen bg-[#05040a] text-[#f5deaa] flex items-center justify-center p-4">
-        <MysticBackground />
+      <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
-          <div className="h-8 w-8 mx-auto border-2 border-[#ffd700] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-[#9c93b8]">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
+          <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-[#6F5B4A]">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
         </div>
       </main>
     );
@@ -86,10 +84,9 @@ export default function CustomerQueuePage() {
 
   if (error || !data) {
     return (
-      <main className="min-h-screen bg-[#05040a] text-[#f5deaa] flex items-center justify-center p-4">
-        <MysticBackground />
-        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10">
-          <p className="text-sm text-[#f0a0a0]">{error || "ไม่พบตั๋วคิว"}</p>
+      <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
+        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-[#A6392C]/40">
+          <p className="text-sm text-[#A6392C]">{error || "ไม่พบตั๋วคิว"}</p>
           <Button variant="gold" onClick={() => router.push("/readers")}>
             กลับไปหน้ารวมแม่หมอ
           </Button>
@@ -103,9 +100,7 @@ export default function CustomerQueuePage() {
   const isCrisis = ticket.screening?.flags.includes("self_harm") || ticket.screening?.flags.includes("crisis");
 
   return (
-    <main className="min-h-screen bg-[#05040a] text-[#f5deaa] p-4 sm:p-8 font-sans selection:bg-[#ffd700]/30 selection:text-[#ffd700] relative overflow-hidden flex items-center justify-center">
-      <MysticBackground />
-
+    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden flex items-center justify-center">
       <div className="max-w-xl w-full mx-auto space-y-6 relative z-10">
         {/* Top Header */}
         <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4">

@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
-import { MysticBackground } from "@/components/ui/MysticBackground";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 
 export const dynamic = "force-dynamic";
@@ -36,9 +35,7 @@ export default async function ReaderDetailPage({
   const isLiveOpen = await getReaderLiveAvailability(id);
 
   return (
-    <main className="min-h-screen bg-[#FCF0E6] text-[#5A432F] p-4 sm:p-8 font-sans selection:bg-[#CD9F5B]/30 selection:text-[#5A432F] relative overflow-hidden">
-      <MysticBackground />
-
+    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
       <div className="max-w-4xl mx-auto space-y-6 relative z-10">
         {/* Top Breadcrumbs */}
         <div className="flex items-center justify-between border-b border-[#D6B48D]/40 pb-4">

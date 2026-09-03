@@ -34,6 +34,40 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: ปฏิรูประบบดีไซน์ V2 (Warm Minimal Sanctuary) สเปกแม่บท DESIGN_SYSTEM_V2.md
+
+**คำขอของผู้ใช้**:
+- *"แก้ได้เลย ปรับปรุงแก้ไข"* (ตามเอกสารสเปก `docs/specs/DESIGN_SYSTEM_V2.md`)
+
+**สิ่งที่ดำเนินการเสร็จสิ้น (Design System V2 Implementation)**:
+1. **ย้ายและเชื่อมโยงเอกสารสเปก**:
+   - บันทึก `docs/specs/DESIGN_SYSTEM_V2.md` และเพิ่มเข้าสู่ `docs/INDEX.md`
+2. **ระบบพื้นหลังใหม่แบบ Static CSS (ตัด Canvas Animation 100%)**:
+   - ลบ 3 ไฟล์พื้นหลังแคนวาส: `GalaxyCanvas.tsx`, `MysticAltarCanvas.tsx`, `MysticBackground.tsx`
+   - ลบการเรียกใช้งาน `<MysticBackground />` ออกจากทุกเพจ (8 ไฟล์: `page.tsx`, `cards/page.tsx`, `cards/[id]/page.tsx`, `spreads/page.tsx`, `readers/page.tsx`, `readers/[id]/page.tsx`, `readers/console/page.tsx`, `readers/queue/[id]/page.tsx`)
+   - นำเข้าพื้นหลัง CSS สองชั้นใน `globals.css`:
+     - ชั้นที่ 1: แสงเทียนเหนือแท่นบูชา `radial-gradient(120% 75% at 50% -8%, #FFFDF9 0%, rgba(255, 253, 249, 0) 62%)` แบบ `fixed` นิ่งสนิท
+     - ชั้นที่ 2: เนื้อผ้าลินินธรรมชาติ SVG `feTurbulence` (opacity 0.055, pointer-events: none, ไม่ใช้ JS, เฟรมตก 0)
+3. **กำหนดโทเคนสี 8 สีหลักใน `@theme` & `:root`**:
+   - `canvas`: `#F6F1E9` (พื้นหลังหน้า)
+   - `surface`: `#FFFFFF` (พื้นการ์ด, โมดัล, header)
+   - `inset`: `#F0E8DB` (ช่องกรอก, พื้นหลังผ้าปูแท่นบูชา `.altar-cloth`)
+   - `line`: `#E4D8C4` (เส้นขอบ 1px คงที่ ไม่มี opacity modifier)
+   - `ink`: `#2E211A` (ตัวอักษรหลัก ผ่าน WCAG AA 11.23:1)
+   - `muted`: `#6F5B4A` (ตัวอักษรรอง ผ่าน WCAG AA 5.37:1)
+   - `gold`: `#8F5C1A` (สีเน้นเดียว, hover `#74490F`, wash `rgba(143, 92, 26, 0.08)`)
+   - `ok` / `err`: `#3A7044` / `#A6392C`
+4. **อัปเดตคอมโพเนนต์หลัก**:
+   - `Button.tsx`: กำหนด 4 variant ชัดเจน (`gold`, `outline`, `ghost`, `pill`), ลบ gradient และเงาสีทองฟุ้ง, ใช้ตัวหนังสือสีขาวบนพื้นทอง
+   - ลบคลาส `.btn-gold` ออกจาก `globals.css` และปรับปุ่มใน `page.tsx`, `SpreadCardSelector.tsx` ให้เป็นไปตามมาตรฐาน
+   - Scrim โมดัลทุกตัวปรับเป็น `bg-[#2E211A]/50 backdrop-blur-[3px]` (`Modal.tsx`, `AuthModal.tsx`, `ShareModal.tsx`, `ReadingHistoryModal.tsx`, `TarotEncyclopediaModal.tsx`, `CardZoomModal.tsx`)
+   - อัปเดต `layout.tsx` (`themeColor: #F6F1E9`) และ `manifest.ts` (`background_color: #F6F1E9`, `theme_color: #F6F1E9`)
+   - ปรับปรุง `RitualStepProgress.tsx` และ `FreeTrialNotice.tsx` เข้าสู่พาเลตต์ 8 โทเคน V2
+5. **ผ่านเกณฑ์ Definition of Done ครบถ้วน**:
+   - ไม่เหลือ Canvas background / `MysticBackground` ในระบบ
+   - `npm run repo:verify` ผ่านครบ 21 ด่าน
+   - `npm run typecheck` ผ่าน 0 errors
+
 ### 🗓️ 2026-09-03: ปฏิรูปดีไซน์ทั้งเว็บไซต์สู่ระดับ World-Class Masterpiece Luxury (ขจัดความจืดชืดสีน้ำตาล/เบจ สู่ความงามสง่า ละมุนตา เปล่งประกาย)
 
 **คำขอของผู้ใช้**:
