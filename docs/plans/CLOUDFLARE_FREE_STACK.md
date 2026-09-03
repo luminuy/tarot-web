@@ -1,6 +1,7 @@
 # ☁️ แผนใช้บริการฟรีของ Cloudflare ต่อยอด SeerTarot
 
-> **สถานะ:** 🟡 กำลังทำ — Wave 1 #1 (AI Gateway) เชื่อมโค้ดแล้ว รอ dashboard + secret
+> **สถานะ:** Wave 1-1 / 1-3 / 2-4 โค้ด merge เข้า main แล้ว (#189 #191 #192)
+> ทั้ง 3 ตัวออกแบบให้ **ไม่กระทบระบบเดิมถ้ายังไม่ตั้งค่า** (helper fallback / fail-open)
 > **ฐานอ้างอิง:** สาขา `claude/image-logo-adjustments-943250` (2026-09-03)
 > **เจ้าของโปรเจกต์เลือกเอง:** เอาทั้ง 7 บริการ จัดลำดับตามพึ่งพา + คุ้มแรง
 
@@ -10,17 +11,28 @@
 
 | Wave | บริการ | ค่าฟรี | สถานะ |
 | :--- | :--- | :--- | :--- |
-| 1-1 | **AI Gateway** | ไม่จำกัด | ✅ merge #189 · รอ dashboard เปิดใช้ |
-| 1-2 | **Email Routing** | ไม่จำกัด | ⏳ รอโดเมน (ยังไม่ซื้อ) |
-| 1-3 | **Turnstile** | 1M verify/เดือน | 🟡 โค้ดเสร็จ · รอ site key + secret |
-| 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | 🟡 โค้ดเสร็จ · รอ deploy (binding `AI`) |
-| 2-5 | **KV ไพ่ประจำวัน + Cron Triggers** | KV 100k read/วัน · cron ไม่จำกัด | ⏳ spike |
-| 3-6 | **R2** — Destiny Card share image | 10 GB + egress ฟรี | ⏳ |
-| 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | ⏳ |
+| 1-1 | **AI Gateway** | ไม่จำกัด | ✅ #189 merge · รอ dashboard เปิดใช้ |
+| 1-2 | **Email Routing** | ไม่จำกัด | 🔴 บล็อก — รอซื้อโดเมน |
+| 1-3 | **Turnstile** | 1M verify/เดือน | ✅ #191 merge · รอ site key + secret |
+| 2-4 | **Workers AI** — safety guard (กฎ 6) | ~10k neurons/วัน | ✅ #192 merge · ใช้ได้เลยหลัง deploy |
+| 2-5 | **KV ไพ่ประจำวัน + Cron Triggers** | KV 100k read/วัน · cron ไม่จำกัด | 🟠 ต้อง spike custom worker entry (`scheduled()`) — เสี่ยงพัง deploy ต้องทดสอบ pipeline จริง |
+| 3-6 | **R2** — Destiny Card share image | 10 GB + egress ฟรี | ⏳ ต้องสร้าง bucket + เพิ่ม lib เรนเดอร์ภาพ (satori/resvg) |
+| 3-7 | **Vectorize** — ค้นหาเชิงความหมาย | 30M dim-query/เดือน | ⏳ ต้องสร้าง index + สร้าง embedding pipeline (ใช้ Workers AI จาก 2-4) |
 | 4-8 | **Durable Objects** | free tier (SQLite) | ⏳ payoff จริงตอนมี Marketplace |
 | 4-9 | **Realtime (SFU/TURN)** | 1,000 GB/เดือน | 🔴 บล็อก — รอ Marketplace (D1 + PDPA) |
 
 **เส้นทางวิกฤต:** 1-1 → 2-4 → 3-7 (AI Gateway ปลดล็อก Workers AI ปลดล็อก Vectorize embeddings)
+
+### 📌 ต้องทำก่อนไปต่อ (เจ้าของโปรเจกต์)
+| # | สิ่งที่ต้องทำใน Cloudflare | ปลดล็อกอะไร |
+| :--- | :--- | :--- |
+| 1 | สร้าง AI Gateway `seertarot-ai` → ตั้ง `CF_AI_GATEWAY_ACCOUNT_ID` + `CF_AI_GATEWAY_ID` | เปิดใช้ 1-1 จริง + เป็นท่อของ Workers AI |
+| 2 | Turnstile → Add widget → `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `wrangler secret put TURNSTILE_SECRET_KEY` | เปิดใช้ 1-3 จริง |
+| 3 | ซื้อโดเมน + ผูก Cloudflare | ปลดบล็อก 1-2 (Email Routing) |
+| 4 | สร้าง R2 bucket `seertarot-share` | เริ่ม 3-6 ได้ |
+| 5 | สร้าง Vectorize index `card-meanings` (768 dim, cosine) | เริ่ม 3-7 ได้ |
+
+> Wave 2-4 (Workers AI) **ไม่ต้องทำอะไรเพิ่ม** — binding `AI` ทำงานเลยหลัง deploy รอบถัดไป
 
 ---
 
