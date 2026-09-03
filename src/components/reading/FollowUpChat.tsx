@@ -573,7 +573,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
                   ใช้สิทธิ์ถามคำถามต่อยอดฟรีครบ 2 ข้อแล้ว
                 </p>
                 <p className="font-serif-th text-[11px] leading-relaxed text-[#6F5B4A]">
-                  ปลดล็อก <strong>ญาณพยากรณ์พิเศษ</strong> เพื่อคุยถามเจาะลึกกับแม่หมอได้ไม่จำกัดข้อ
+                  เติมรอบดูดวง หรือสมัครสมาชิก เพื่อคุยถามเจาะลึกกับแม่หมอได้ไม่จำกัด
                 </p>
               </div>
             </div>
@@ -582,7 +582,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({ readingId, persona, 
               onClick={() => requestUpgrade("daily_exhausted")}
               className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition-all cursor-pointer "
             >
-              ✦ ปลดล็อกญาณพยากรณ์พิเศษเพื่อถามต่อไม่จำกัด
+              ✦ เติมรอบดูดวงเพื่อถามต่อได้ไม่จำกัด
             </button>
           </div>
         ) : (

@@ -153,7 +153,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   </span>
                   {isLocked && (
                     <span className="text-[8px] text-[#8F5C1A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
-                      <span>✦ ปรมาจารย์ลับ</span>
+                      <span>✦ ผู้เชี่ยวชาญพิเศษ</span>
                     </span>
                   )}
                 </div>

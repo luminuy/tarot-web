@@ -1313,18 +1313,17 @@ export default function TarotPage() {
             <div className="w-9 h-13 sm:w-10 sm:h-15 rounded overflow-hidden border border-[#D9C8AC] flex-shrink-0 bg-[#F3EDE2]">
               <CardImage
                 image="major-02.jpg"
-                alt="The High Priestess - AI-Generated Reading"
+                alt="The High Priestess - ข้อควรทราบเกี่ยวกับการทำนาย"
                 className="w-full h-full object-cover"
                 sizes="40px"
               />
             </div>
             <div className="space-y-1 min-w-0">
-              <h4 translate="no" className="text-[11px] font-bold text-[#8F5C1A] uppercase tracking-wider font-mono">
-                AI-Generated Reading
+              <h4 className="text-[11px] font-bold text-[#8F5C1A] uppercase tracking-wider font-serif-th">
+                ข้อควรทราบเกี่ยวกับการทำนาย
               </h4>
               <p className="text-[11px] text-[#6F5B4A] leading-[1.7] font-serif-th">
-                คำทำนายทั้งหมดสร้างโดยปัญญาประดิษฐ์ (AI) จากไพ่ที่คุณเปิดจริง มีไว้เพื่อการใคร่ครวญและความบันเทิง
-                ไม่ใช่คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน การตัดสินใจทุกอย่างยังเป็นของคุณเสมอ
+                คำทำนายทั้งหมดประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเลือกและเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต ไม่สามารถใช้แทนคำปรึกษาทางการแพทย์ กฎหมาย หรือการเงินได้ การตัดสินใจทุกอย่างยังคงเป็นของคุณเสมอ
               </p>
             </div>
           </div>
@@ -1345,14 +1344,11 @@ export default function TarotPage() {
                 />
               </div>
               <div>
-                <span
-                  translate="no"
-                  className="text-[10px] font-bold text-[#8F5C1A] uppercase tracking-wider font-mono block"
-                >
-                  Privacy & PDPA
+                <span className="text-[11px] font-bold text-[#8F5C1A] block font-serif-th">
+                  นโยบายความเป็นส่วนตัว
                 </span>
                 <span className="text-[10px] text-[#6F5B4A] group-hover:text-[#2E211A] transition-colors font-serif-th">
-                  นโยบายความเป็นส่วนตัว
+                  คุ้มครองข้อมูลส่วนบุคคล (PDPA)
                 </span>
               </div>
             </a>
@@ -1368,11 +1364,13 @@ export default function TarotPage() {
                 />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#3A7044] uppercase tracking-wider font-mono block font-serif-th">
+                <span className="text-[11px] font-bold text-[#3A7044] block font-serif-th">
                   สายด่วนสุขภาพจิต
                 </span>
-                <span className="text-sm font-bold text-[#2E211A] font-mono tracking-widest">1323</span>
-                <span className="text-[9px] text-[#6F5B4A] ml-1.5 font-serif-th">24 ชม.</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-bold text-[#2E211A] font-mono tracking-wider">1323</span>
+                  <span className="text-[9.5px] text-[#6F5B4A] font-serif-th">โทรฟรี 24 ชม.</span>
+                </div>
               </div>
             </div>
 
@@ -1381,16 +1379,19 @@ export default function TarotPage() {
               <div className="w-8 h-12 rounded overflow-hidden border border-[#D9C8AC] flex-shrink-0 bg-[#F3EDE2]">
                 <CardImage
                   image="major-08.jpg"
-                  alt="Strength - เหตุฉุกเฉิน 1669"
+                  alt="Strength - แจ้งเหตุเจ็บป่วยฉุกเฉิน 1669"
                   className="w-full h-full object-cover"
                   sizes="32px"
                 />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-[#A6392C] uppercase tracking-wider font-mono block font-serif-th">
-                  เหตุฉุกเฉิน
+                <span className="text-[11px] font-bold text-[#A6392C] block font-serif-th">
+                  แจ้งเหตุเจ็บป่วยฉุกเฉิน
                 </span>
-                <span className="text-sm font-bold text-[#2E211A] font-mono tracking-widest">1669</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-bold text-[#2E211A] font-mono tracking-wider">1669</span>
+                  <span className="text-[9.5px] text-[#6F5B4A] font-serif-th">โทรฟรี 24 ชม.</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1406,15 +1407,15 @@ export default function TarotPage() {
                   sizes="24px"
                 />
               </div>
-              <span translate="no" className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#6F5B4A]">
-                Sacred Oracle Tarot · 1909
+              <span className="text-[10px] font-serif-th font-semibold tracking-wider text-[#6F5B4A]">
+                SeerTarot · ไพ่ทาโรต์ 1909 Rider-Waite
               </span>
               <div className="w-5 h-7 rounded overflow-hidden border border-[#D9C8AC] flex-shrink-0 ">
                 <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="24px" />
               </div>
             </div>
-            <p translate="no" className="text-[9.5px] text-[#6F5B4A]/70 font-mono text-center">
-              Provably-Fair Cryptographic Shuffle · Rider-Waite-Smith 1909 · All readings AI-generated
+            <p className="text-[10px] text-[#6F5B4A]/80 font-serif-th text-center">
+              ระบบสับไพ่โปร่งใสตรวจสอบได้ (Provably Fair) · สำรับดั้งเดิม 1909 Rider-Waite · คำทำนายประมวลผลด้วย AI
             </p>
           </div>
         </div>

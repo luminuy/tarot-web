@@ -262,15 +262,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Header Typography */}
           <div className="space-y-1 text-center mb-5">
             <h3 id="auth-modal-title" className="text-xl sm:text-2xl font-serif-th font-bold font-mystic-gold">
-              {mode === "signin" && "เข้าสู่วิหารศักดิ์สิทธิ์"}
-              {mode === "signup" && "สมัครสมาชิกร่วมผูกดวง"}
-              {mode === "forgot" && "ฟื้นฟูดวงชะตา (ลืมรหัสผ่าน)"}
+              {mode === "signin" && "เข้าสู่ระบบ"}
+              {mode === "signup" && "สมัครสมาชิกฟรี"}
+              {mode === "forgot" && "ตั้งรหัสผ่านใหม่ (ลืมรหัสผ่าน)"}
             </h3>
             <p className="text-xs text-[#6F5B4A] font-serif-th max-w-xs mx-auto leading-relaxed">
               {mode === "signin" &&
-                `เข้าสู่ระบบเพื่อใช้สิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง และดูประวัติดวงย้อนหลัง`}
-              {mode === "signup" && `สมัครฟรี ไม่ต้องผูกบัตร เปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
-              {mode === "forgot" && "ระบุอีเมลเพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย"}
+                `เข้าสู่ระบบเพื่อรับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมบันทึกประวัติการดูดวงของคุณ`}
+              {mode === "signup" && `สมัครสมาชิกฟรี ไม่ต้องผูกบัตรเครดิต เปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
+              {mode === "forgot" && "ระบุอีเมลของคุณ เพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย"}
             </p>
           </div>
 
@@ -345,7 +345,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     autoComplete="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="เช่น ผู้แสวงหาคำตอบ"
+                    placeholder="เช่น ฟ้า, พลอย, บิ๊ก"
                     className="w-full h-11 pl-9 pr-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A] text-xs font-serif-th placeholder-[#6F5B4A]/50 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]/40 transition-all "
                   />
                 </div>

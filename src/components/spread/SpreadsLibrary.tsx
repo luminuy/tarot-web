@@ -76,11 +76,11 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
 
   return (
     <div className="space-y-6">
-      {/* Category Tabs with Refined Golden Halo */}
+      {/* Category Tabs with Editorial Styling */}
       <div
         role="tablist"
         aria-label="หมวดหมู่คลังผังพยากรณ์"
-        className="flex items-center justify-start gap-2 overflow-x-auto pb-2 px-1 no-scrollbar select-none"
+        className="flex items-center justify-start gap-2 overflow-x-auto pb-3 px-1 no-scrollbar select-none border-b border-[#D5CEC2]/40"
       >
         {categories.map((cat, catIdx) => {
           const isActive = activeCategory === cat.id;
@@ -106,17 +106,17 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   nextTab?.focus();
                 }
               }}
-              className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+              className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
                 isActive
-                  ? "bg-[#8F5C1A] text-[#FFFFFF] border border-[#8F5C1A]"
-                  : "bg-[#FFFFFF] text-[#2E211A] hover:text-[#8F5C1A] border border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
+                  ? "bg-[#29261F] text-[#F3F0EA] shadow-sm"
+                  : "bg-[#EAE7E0] text-[#29261F] hover:text-[#A58A5C] border border-[#D5CEC2] hover:border-[#A58A5C]"
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#FFFFFF]" : "text-[#8F5C1A]"}`} />
+              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#A58A5C]" : "text-[#756F66]"}`} />
               <span>{cat.label}</span>
               <span
                 className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                  isActive ? "bg-white/20 text-[#FFFFFF]" : "bg-black/5 text-[#6F5B4A]"
+                  isActive ? "bg-white/20 text-[#F3F0EA]" : "bg-black/5 text-[#756F66]"
                 }`}
               >
                 {cat.count}
@@ -145,47 +145,47 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
             return (
               <div
                 key={spread.id}
-                className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#8F5C1A] transition-all duration-300 relative overflow-hidden group"
+                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#A58A5C] transition-all duration-300 relative overflow-hidden group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
               >
                 {/* Header Tag */}
                 <div className="flex items-center justify-between z-10">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-mono font-bold text-[#2E211A] bg-[#F3EDE2] px-2.5 py-0.5 rounded-full border border-[#D9C8AC] ">
+                    <span className="text-[10px] font-mono font-bold text-[#29261F] bg-[#EAE7E0] px-2.5 py-0.5 rounded-full border border-[#D5CEC2]">
                       {spread.positions.length} ใบ
                     </span>
                     {!isStandardSpread(spread.id) && (
-                      <span className="text-[9px] text-[#8F5C1A] bg-[#FFFFFF] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
+                      <span className="text-[9px] text-[#A58A5C] bg-[#FFFFFF] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
                         <SealedLockIcon className="w-3 h-3" />
                         <span>✦ ญาณพิเศษ</span>
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-[#6F5B4A] font-serif-th">
+                  <span className="text-[10px] text-[#756F66] font-serif-th">
                     หมวด: {CATEGORY_MAP_TH[spread.defaultCategory] || spread.defaultCategory}
                   </span>
                 </div>
 
                 {/* Interactive Spread Visual Diagram on Illuminated Pedestal */}
-                <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-lg bg-[#F3EDE2] border border-[#D9C8AC]/50 p-2 group-hover:border-[#8F5C1A] transition-colors">
+                <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-xl bg-[#EAE7E0] border border-[#D5CEC2] p-2 group-hover:border-[#A58A5C] transition-colors">
                   {renderSpreadIllustration(spread.id)}
                 </div>
 
                 {/* Titles & Tagline */}
-                <div className="space-y-1.5 z-10 pt-3 border-t border-[#D9C8AC]/30">
-                  <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold leading-tight">
+                <div className="space-y-1.5 z-10 pt-3 border-t border-[#D5CEC2]/40">
+                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] leading-tight">
                     {spread.nameTh}
                   </h3>
-                  <p className="text-xs text-[#6F5B4A] leading-snug">{spread.tagline}</p>
+                  <p className="text-xs text-[#756F66] leading-snug font-serif-th">{spread.tagline}</p>
                 </div>
 
-                <p className="text-[11px] text-[#2E211A] leading-relaxed line-clamp-2 z-10">{spread.description}</p>
+                <p className="text-[11px] text-[#29261F] leading-relaxed line-clamp-2 z-10 font-serif-th">{spread.description}</p>
 
                 {/* Expandable Positions Breakdown */}
                 <div className="z-10 space-y-2">
                   <button
                     type="button"
                     onClick={() => toggleExpand(spread.id)}
-                    className="w-full text-left text-[11px] font-serif-th text-[#8F5C1A] hover:text-[#2E211A] flex items-center justify-between py-1.5 border-t border-[#D9C8AC]/30 cursor-pointer transition-colors font-bold"
+                    className="w-full text-left text-[11px] font-serif-th text-[#A58A5C] hover:text-[#29261F] flex items-center justify-between py-1.5 border-t border-[#D5CEC2]/40 cursor-pointer transition-colors font-bold"
                   >
                     <span className="flex items-center gap-1.5">
                       <span>✦</span> ดูรายละเอียด {spread.positions.length} ตำแหน่งไพ่
@@ -205,14 +205,14 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                         {spread.positions.map((pos, idx) => (
                           <div
                             key={idx}
-                            className="text-[10.5px] p-2 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] flex items-start gap-2"
+                            className="text-[10.5px] p-2 rounded-lg bg-[#EAE7E0] border border-[#D5CEC2] flex items-start gap-2"
                           >
-                            <span className="text-[#8F5C1A] font-mono font-bold flex-shrink-0 text-[10px]">
+                            <span className="text-[#A58A5C] font-mono font-bold flex-shrink-0 text-[10px]">
                               #{idx + 1}
                             </span>
                             <div>
-                              <strong className="text-[#2E211A] font-serif-th">{pos.nameTh}:</strong>{" "}
-                              <span className="text-[#6F5B4A] leading-relaxed">{pos.meaning}</span>
+                              <strong className="text-[#29261F] font-serif-th">{pos.nameTh}:</strong>{" "}
+                              <span className="text-[#756F66] leading-relaxed font-serif-th">{pos.meaning}</span>
                             </div>
                           </div>
                         ))}
@@ -224,7 +224,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                 {/* Primary Action Button: Link directly to Altar */}
                 <Link
                   href={`/?spread=${spread.id}`}
-                  className="w-full py-3 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5 z-10"
+                  className="w-full py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
                 >
                   <span>✦ {isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้"}</span>
                 </Link>

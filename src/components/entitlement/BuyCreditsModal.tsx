@@ -85,7 +85,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
       }
 
       mutateEntitlement();
-      setSuccessMsg(`เติมโควตาสำเร็จ +${data.grantedCredits} ครั้งเรียบร้อยแล้ว! ✨`);
+      setSuccessMsg(`เติมรอบเปิดไพ่สำเร็จ +${data.grantedCredits} ครั้งเรียบร้อยแล้ว! ✨`);
       setTimeout(() => {
         setCheckoutData(null);
         setSuccessMsg(null);
@@ -106,7 +106,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={resetModalState} title="✦ ปลดล็อกญาณพยากรณ์พิเศษ (Mystic Oracle Pass)">
+    <Modal isOpen={isOpen} onClose={resetModalState} title="✦ เติมรอบดูดวง (Tarot Pass)">
       <div className="space-y-6 pt-1 text-[#6F5B4A]">
         {errorMsg && (
           <div className="p-3.5 rounded-lg bg-[#A6392C]/80 border border-[#A6392C]/50 text-[#A6392C] text-xs font-serif-th text-center">
@@ -124,7 +124,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
           <>
             <div className="text-center space-y-1">
               <p className="text-xs text-[#6F5B4A] font-serif-th">
-                ปลดล็อกผังใหญ่ 10–12 ใบและคุยถามเจาะลึกได้ไม่จำกัด · จ่ายครั้งเดียว ไม่ใช่รายเดือน · ไม่มีวันหมดอายุ
+                ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด · จ่ายครั้งเดียว ไม่ใช่รายเดือน · สิทธิ์ไม่มีวันหมดอายุ
               </p>
             </div>
 

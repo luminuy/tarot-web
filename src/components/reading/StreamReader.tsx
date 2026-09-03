@@ -295,7 +295,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                           <span className="text-xs font-mono font-normal text-[#6F5B4A]">({cardData.nameEn})</span>
                         )}{" "}
                         <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
-                          {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว (Reversed)" : "· ไพ่ตรง (Upright)"}
+                          {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว" : "· ไพ่หัวตั้ง"}
                         </span>
                       </>
                     ) : (
@@ -328,7 +328,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
               return keywords && keywords.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[10px] text-[#6F5B4A] font-mono">คีย์เวิร์ด:</span>
+                  <span className="text-[10px] text-[#6F5B4A] font-serif-th font-semibold">ความหมายหลัก:</span>
                   {keywords.map((kw: string, idx: number) => (
                     <span
                       key={idx}
@@ -546,7 +546,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   </h4>
                 </div>
                 <p className="text-[11px] sm:text-xs text-[#6F5B4A] leading-relaxed font-serif-th">
-                  ปรึกษาแม่หมอตัวจริงตัวเป็นๆ พร้อมส่งต่อผังไพ่ชุดนี้ให้อัตโนมัติ เพื่อสนทนาเจาะลึกผ่าน LINE ส่วนตัว
+                  ปรึกษาแม่หมอผู้เชี่ยวชาญแบบตัวต่อตัว พร้อมส่งต่อผลการเปิดไพ่ชุดนี้เพื่อพูดคุยเจาะลึกผ่าน LINE ส่วนตัวได้ทันที
                 </p>
               </div>
 
@@ -566,8 +566,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {/* AI Disclosure Note & Accuracy Rating */}
       <div className="mt-4 pt-3 border-t border-[#D9C8AC]/30 space-y-2">
         <p className="text-[10.5px] text-[#6F5B4A] leading-relaxed text-center font-serif-th">
-          <span className="text-[#8F5C1A]">✦</span> คำอ่านนี้สร้างโดยปัญญาประดิษฐ์ (AI) จากไพ่ที่คุณเปิดจริง
-          มีไว้เพื่อการใคร่ครวญและแนวทางชีวิต
+          <span className="text-[#8F5C1A]">✦</span> คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง
+          จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต
         </p>
 
         {/* Accuracy Rating — A/B data collection */}

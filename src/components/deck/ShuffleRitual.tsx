@@ -218,13 +218,13 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
       {commitment && (
         <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[10px] font-mono text-[#6F5B4A]">
           <span>
-            คำมั่นความสุ่ม (SHA-256): {commitment.slice(0, 16)}…{commitment.slice(-8)}
+            รหัสยืนยันความโปร่งใส (SHA-256): {commitment.slice(0, 16)}…{commitment.slice(-8)}
           </span>
           <button
             type="button"
             onClick={() => navigator.clipboard.writeText(commitment)}
-            title="คัดลอกคำมั่นความสุ่มเต็ม"
-            aria-label="คัดลอกคำมั่นความสุ่ม"
+            title="คัดลอกรหัสยืนยันความโปร่งใส"
+            aria-label="คัดลอกรหัสยืนยันความโปร่งใส"
             className="text-[#8F5C1A] hover:text-[#2E211A] cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
           >
             ⧉
