@@ -34,34 +34,34 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
   const panelId = useId();
 
   return (
-    <section className="my-4 overflow-hidden rounded-2xl border border-[#e5c07b]/25 bg-[#090614]/95 shadow-lg">
+    <section className="my-4 overflow-hidden rounded-2xl border border-[#D6B48D] bg-[#FDF7F0] shadow-xs">
       <button
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#e5c07b]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
       >
-        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#e5c07b]/50 bg-[#07050f] text-xs text-[#ffd700]">
+        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[#D6B48D] bg-[#FCF0E6] text-xs text-[#CD9F5B]">
           {icon}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block font-serif-th text-xs font-bold text-[#f5deaa] sm:text-sm">
+          <span className="block font-serif-th text-xs font-bold text-[#5A432F] sm:text-sm">
             {title}
           </span>
           {hint && (
-            <span className="mt-0.5 block truncate font-serif-th text-[10.5px] text-[#9c93b8]">
+            <span className="mt-0.5 block truncate font-serif-th text-[10.5px] text-[#8C735D]">
               {hint}
             </span>
           )}
         </span>
         {badge && (
-          <span className="flex-shrink-0 rounded-full border border-[#e5c07b]/30 bg-[#e5c07b]/10 px-2 py-0.5 text-[10px] font-semibold text-[#e5c07b]">
+          <span className="flex-shrink-0 rounded-full border border-[#D6B48D] bg-[#FCF0E6] px-2 py-0.5 text-[10px] font-semibold text-[#5A432F]">
             {badge}
           </span>
         )}
         <span
-          className={`flex-shrink-0 font-mono text-xs text-[#e5c07b] transition-transform duration-200 ${
+          className={`flex-shrink-0 font-mono text-xs text-[#8C735D] transition-transform duration-200 ${
             open ? "rotate-180" : ""
           }`}
           aria-hidden
@@ -81,7 +81,7 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
             transition={{ duration: DUR.base, ease: EASE.out }}
             className="overflow-hidden"
           >
-            <div className="border-t border-[#e5c07b]/15 px-3 pb-3 pt-1 [&>*]:!my-0">
+            <div className="border-t border-[#D6B48D]/30 px-3 pb-3 pt-1 [&>*]:!my-0">
               {children}
             </div>
           </motion.div>

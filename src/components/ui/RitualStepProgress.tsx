@@ -94,7 +94,7 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({
                   type="button"
                   onClick={() => onStepClick?.(step.id)}
                   aria-label={`ย้อนกลับไปขั้นที่ ${step.num}: ${step.title}`}
-                  className="flex flex-col items-center cursor-pointer group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a] hover:scale-110 transition-transform"
+                  className="flex flex-col items-center cursor-pointer group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FCF0E6] hover:scale-110 transition-transform"
                 >
                   {dot}
                   {label}

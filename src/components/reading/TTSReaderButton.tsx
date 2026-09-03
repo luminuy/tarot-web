@@ -48,26 +48,26 @@ export const TTSReaderButton: React.FC<TTSReaderButtonProps> = ({
       type="button"
       onClick={handleToggle}
       aria-label={isSpeaking ? "หยุดเสียงอ่านคำทำนาย" : "ฟังเสียงอ่านคำทำนาย"}
-      className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-serif-th font-semibold transition-all duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] ${
+      className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-serif-th font-semibold transition-all duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] ${
         isSpeaking
-          ? "bg-[#20133a] border-[#ffd700] text-[#ffd700] shadow-[0_0_15px_rgba(229,192,123,0.35)]"
-          : "bg-[#0f091c]/80 border-[#e5c07b]/30 text-[#e2d9f3] hover:border-[#ffd700] hover:bg-[#170e2c] hover:text-[#ffd700]"
+          ? "bg-[#CD9F5B] border-[#CD9F5B] text-[#FDF7F0] shadow-xs"
+          : "bg-[#FDF7F0] border-[#D6B48D] text-[#5A432F] hover:border-[#CD9F5B] hover:bg-[#FFFFFF] shadow-xs"
       } ${className}`}
     >
       {isSpeaking ? (
         <>
           {/* Animated sound wave bars */}
           <div className="flex items-center gap-0.5 h-3">
-            <span className="w-0.5 bg-[#ffd700] rounded-full animate-[pulse_0.6s_ease-in-out_infinite] h-3" />
-            <span className="w-0.5 bg-[#ffd700] rounded-full animate-[pulse_0.4s_ease-in-out_infinite_0.2s] h-2" />
-            <span className="w-0.5 bg-[#ffd700] rounded-full animate-[pulse_0.7s_ease-in-out_infinite_0.4s] h-3.5" />
-            <span className="w-0.5 bg-[#ffd700] rounded-full animate-[pulse_0.5s_ease-in-out_infinite_0.1s] h-2" />
+            <span className="w-0.5 bg-[#FDF7F0] rounded-full animate-[pulse_0.6s_ease-in-out_infinite] h-3" />
+            <span className="w-0.5 bg-[#FDF7F0] rounded-full animate-[pulse_0.4s_ease-in-out_infinite_0.2s] h-2" />
+            <span className="w-0.5 bg-[#FDF7F0] rounded-full animate-[pulse_0.7s_ease-in-out_infinite_0.4s] h-3.5" />
+            <span className="w-0.5 bg-[#FDF7F0] rounded-full animate-[pulse_0.5s_ease-in-out_infinite_0.1s] h-2" />
           </div>
           <span>กำลังอ่าน... (กดเพื่อหยุด)</span>
         </>
       ) : (
         <>
-          <span className="text-[#e5c07b] text-sm leading-none">🔊</span>
+          <span className="text-[#CD9F5B] text-sm leading-none">🔊</span>
           <span>✦ ฟังเสียงอ่านคำทำนาย</span>
         </>
       )}

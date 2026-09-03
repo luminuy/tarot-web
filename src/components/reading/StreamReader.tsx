@@ -99,25 +99,25 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   const totalCards = drawnCards.length;
 
   return (
-    <div className="w-full rounded-3xl border border-[#e5c07b]/35 bg-gradient-to-b from-[#140d28]/95 via-[#0a0714]/95 to-[#05040a]/95 p-5 sm:p-7 shadow-[0_0_50px_rgba(0,0,0,0.85)] flex flex-col justify-between space-y-6 relative overflow-hidden">
+    <div className="w-full rounded-3xl border border-[#D6B48D] bg-[#FDF7F0] p-5 sm:p-7 shadow-sm flex flex-col justify-between space-y-6 relative overflow-hidden">
       {/* Background Sacred Geometric Aura */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-radial from-[#e5c07b]/10 via-transparent to-transparent pointer-events-none blur-2xl" />
+      <div className="absolute top-0 right-0 w-80 h-80 bg-radial from-[#CD9F5B]/10 via-transparent to-transparent pointer-events-none blur-2xl" />
 
       {/* Oracle Guide Header & Streaming Status */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#e5c07b]/20">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#D6B48D]/30">
         <div className="flex items-center gap-3.5">
           {/* Authentic 1909 Tarot Card Persona Avatar */}
           <div
-            className="w-10 h-15 rounded-lg border-2 overflow-hidden shadow-[0_0_20px_rgba(229,192,123,0.45)] bg-[#07050d] relative flex-shrink-0"
-            style={{ borderColor: persona.accent || "#e5c07b" }}
+            className="w-10 h-15 rounded-lg border-2 overflow-hidden shadow-xs bg-[#FCF0E6] relative flex-shrink-0"
+            style={{ borderColor: "#D6B48D" }}
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
               alt={persona.nameTh}
-              className="w-full h-full object-cover object-top tarot-card-enhance contrast-[1.04] brightness-[1.02] tarot-hd-card-image"
+              className="w-full h-full object-cover object-top filter contrast-[1.05] brightness-[1.02] tarot-hd-card-image"
               sizes="40px"
             />
-            <div className="gold-foil-sheen absolute inset-0 opacity-30" />
+            <div className="gold-foil-sheen absolute inset-0 opacity-20" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -125,18 +125,18 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 {persona.nameTh}
               </h4>
             </div>
-            <p className="text-xs text-[#cfc8e2]/80 mt-0.5">{persona.tagline}</p>
+            <p className="text-xs text-[#8C735D] mt-0.5">{persona.tagline}</p>
           </div>
         </div>
 
         {/* Live Status Pill */}
         {isStreaming ? (
-          <span className="text-xs font-semibold bg-[#e5c07b]/15 text-[#f5deaa] border border-[#e5c07b]/40 px-3.5 py-1.5 rounded-full flex items-center gap-2 animate-pulse shadow">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#e5c07b]" /> แม่หมอกำลังอ่านคำทำนาย...
+          <span className="text-xs font-semibold bg-[#FCF0E6] text-[#5A432F] border border-[#D6B48D] px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-xs">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#CD9F5B] animate-ping" /> แม่หมอกำลังอ่านคำทำนาย...
           </span>
         ) : (
-          <span className="text-xs font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" /> อ่านคำทำนายครบถ้วนแล้ว
+          <span className="text-xs font-semibold bg-[#EBF3ED] text-[#2D5A27] border border-[#2D5A27]/30 px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-[#2D5A27]" /> อ่านคำทำนายครบถ้วนแล้ว
           </span>
         )}
       </div>
@@ -145,7 +145,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       <div
         role="tablist"
         aria-label="ส่วนแสดงผลคำทำนาย"
-        className="flex items-center gap-2 border-b border-[#e5c07b]/15 pb-2 overflow-x-auto no-scrollbar"
+        className="flex items-center gap-2 border-b border-[#D6B48D]/30 pb-2 overflow-x-auto no-scrollbar"
       >
         <button
           type="button"
@@ -211,10 +211,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           <div
             role="alert"
             aria-live="assertive"
-            className="anim-page-transition p-4 rounded-2xl bg-[#1c1330]/96 border border-[#e5c07b]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg"
+            className="anim-page-transition p-4 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
           >
-            <div className="flex items-start gap-2.5 text-xs sm:text-sm text-[#f5deaa] font-serif-th">
-              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[#e5c07b]/60 text-[10px] text-[#ffd700]">
+            <div className="flex items-start gap-2.5 text-xs sm:text-sm text-[#5A432F] font-serif-th">
+              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[#D6B48D] text-[10px] text-[#CD9F5B]">
                 ✦
               </span>
               <span className="leading-relaxed">{errorMsg}</span>
@@ -223,7 +223,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               <button
                 type="button"
                 onClick={onRetry}
-                className="self-end sm:self-auto px-5 py-2 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] text-xs font-bold font-serif-th shadow hover:opacity-95 cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+                className="self-end sm:self-auto px-5 py-2 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] text-xs font-bold font-serif-th shadow-xs cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
               >
                 <span>✦</span> {/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่"}
               </button>
@@ -417,15 +417,15 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             </div>
 
             {/* Next / Prev Card Navigation Arrows */}
-            <div className="flex items-center justify-between pt-3 border-t border-[#e5c07b]/15 text-xs">
+            <div className="flex items-center justify-between pt-3 border-t border-[#D6B48D]/30 text-xs">
               <button
                 type="button"
                 onClick={() => onSelectCardIndex(Math.max(0, activeCardIndex - 1))}
                 disabled={activeCardIndex === 0}
-                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
+                className={`px-3 py-1.5 rounded-xl border flex items-center gap-1 transition-all ${
                   activeCardIndex > 0
-                    ? "border-[#e5c07b]/40 text-[#f5deaa] hover:bg-[#140b24] cursor-pointer"
-                    : "border-transparent text-[#9c93b8]/30 cursor-not-allowed"
+                    ? "border-[#D6B48D] bg-[#FDF7F0] text-[#5A432F] hover:bg-[#FFFFFF] hover:border-[#CD9F5B] cursor-pointer shadow-xs"
+                    : "border-transparent text-[#8C735D]/30 cursor-not-allowed"
                 }`}
               >
                 <span>← ใบก่อนหน้า</span>
@@ -435,10 +435,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 type="button"
                 onClick={() => onSelectCardIndex(Math.min(totalCards - 1, activeCardIndex + 1))}
                 disabled={activeCardIndex === totalCards - 1}
-                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
+                className={`px-3 py-1.5 rounded-xl border flex items-center gap-1 transition-all ${
                   activeCardIndex < totalCards - 1
-                    ? "border-[#e5c07b]/40 text-[#f5deaa] hover:bg-[#140b24] cursor-pointer"
-                    : "border-transparent text-[#9c93b8]/30 cursor-not-allowed"
+                    ? "border-[#D6B48D] bg-[#FDF7F0] text-[#5A432F] hover:bg-[#FFFFFF] hover:border-[#CD9F5B] cursor-pointer shadow-xs"
+                    : "border-transparent text-[#8C735D]/30 cursor-not-allowed"
                 }`}
               >
                 <span>ใบถัดไป →</span>
@@ -556,16 +556,16 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           />
 
           {/* Real Human Reader Marketplace Consultation CTA */}
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-[#1b1236] via-[#120a26] to-[#1b1236] border border-[#e5c07b]/40 shadow-2xl space-y-3 relative overflow-hidden">
+          <div className="p-5 rounded-2xl bg-[#FCF0E6] border border-[#D6B48D] shadow-xs space-y-3 relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-amber-400">✨</span>
-                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#f5deaa]">
+                  <span className="text-[#CD9F5B]">✨</span>
+                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#5A432F]">
                     ต้องการคำปรึกษาเจาะลึกเฉพาะบุคคลเพิ่มเติม?
                   </h4>
                 </div>
-                <p className="text-[11px] sm:text-xs text-[#b8aed4] leading-relaxed font-serif-th">
+                <p className="text-[11px] sm:text-xs text-[#8C735D] leading-relaxed font-serif-th">
                   ปรึกษาแม่หมอตัวจริงตัวเป็นๆ พร้อมส่งต่อผังไพ่ชุดนี้ให้อัตโนมัติ เพื่อสนทนาเจาะลึกผ่าน LINE ส่วนตัว
                 </p>
               </div>
@@ -573,7 +573,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               <Link
                 href="/readers"
                 onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
-                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#f7e7b4] to-[#c59b27] text-[#0a0715] font-serif-th font-bold text-xs shadow-lg hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#CD9F5B] hover:bg-[#B8853E] text-[#FDF7F0] font-serif-th font-bold text-xs shadow-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
               >
                 <span>ปรึกษาแม่หมอตัวจริง</span>
                 <span>➔</span>
@@ -583,11 +583,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         </div>
       )}
 
-      {/* AI Disclosure Banner — ต้องแสดงเสมอ ห้ามซ่อน */}
-      <div className="mt-4 pt-3 border-t border-[#e5c07b]/15 space-y-3">
-        <p className="text-[10px] text-[#9c93b8] leading-relaxed text-center font-serif-th">
-          🤖 คำอ่านนี้สร้างโดยปัญญาประดิษฐ์ (AI) จากไพ่ที่คุณเปิดจริง มีไว้เพื่อการใคร่ครวญและความบันเทิง
-          ไม่ใช่คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน การตัดสินใจทุกอย่างยังเป็นของคุณเสมอ
+      {/* AI Disclosure Note & Accuracy Rating */}
+      <div className="mt-4 pt-3 border-t border-[#D6B48D]/30 space-y-2">
+        <p className="text-[10.5px] text-[#8C735D] leading-relaxed text-center font-serif-th">
+          <span className="text-[#CD9F5B]">✦</span> คำอ่านนี้สร้างโดยปัญญาประดิษฐ์ (AI) จากไพ่ที่คุณเปิดจริง มีไว้เพื่อการใคร่ครวญและแนวทางชีวิต
         </p>
 
         {/* Accuracy Rating — A/B data collection */}

@@ -358,16 +358,17 @@ a,
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, #d4af37 0%, #f3e5ab 50%, #c59b27 100%);
-  color: #05040a;
+  background: #CD9F5B;
+  color: #FDF7F0;
   font-weight: 700;
-  border: 1px solid rgba(255, 240, 212, 0.35);
-  box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+  border: 1px solid #D6B48D;
+  box-shadow: 0 4px 14px rgba(205, 159, 91, 0.25);
   transition: all var(--dur-fast) var(--ease-out);
 }
 
 .btn-gold:hover:not(:disabled) {
-  box-shadow: 0 0 35px rgba(212, 175, 55, 0.55);
+  background: #B8853E;
+  box-shadow: 0 6px 18px rgba(205, 159, 91, 0.35);
   transform: translateY(-1px);
 }
 
@@ -375,10 +376,10 @@ a,
   transform: scale(0.97);
 }
 
-/* Focus Visible Global Ring */
+/* Focus Visible Global Ring — Warm Honey Gold Halo */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #05040a, 0 0 0 4px #ffd700 !important;
+  box-shadow: 0 0 0 2px #FCF0E6, 0 0 0 3.5px #CD9F5B !important;
 }
 
 .no-focus-ring:focus-visible,

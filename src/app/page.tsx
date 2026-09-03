@@ -95,7 +95,7 @@ function StepBackButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#100b20] border border-[#e5c07b]/30 text-[11px] font-serif-th text-[#cfc8e2] hover:bg-[#191230] transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700] focus-visible:ring-offset-2 focus-visible:ring-offset-[#05040a]"
+      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-xl bg-[#FDF7F0] border border-[#D6B48D] text-xs font-serif-th text-[#5A432F] hover:bg-[#FFFFFF] hover:border-[#CD9F5B] transition-colors duration-150 cursor-pointer touch-manipulation shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FCF0E6]"
     >
       <span aria-hidden="true">←</span> ย้อนกลับ
     </button>
@@ -829,7 +829,7 @@ export default function TarotPage() {
           <Link
             href="/"
             aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
-            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FCF0E6]"
+            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-2xl p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#CD9F5B]/60"
           >
             {/* World-Class Miniature 1909 Tarot Card Brand Logo */}
             <div className="w-8.5 h-[50px] sm:w-9.5 sm:h-[56px] rounded-lg border-2 border-[#D6B48D] overflow-hidden shadow-[0_2px_12px_rgba(205,159,91,0.3)] relative flex-shrink-0 bg-[#FDF7F0] group-hover:scale-105 transition-all duration-300">
@@ -1032,7 +1032,7 @@ export default function TarotPage() {
                 <h2 className="text-2xl sm:text-4xl font-serif-th font-bold font-mystic-gold">
                   ตั้งคำถาม &amp; เลือกแม่หมอ
                 </h2>
-                <p className="text-xs sm:text-sm text-[#9c93b8]">
+                <p className="text-xs sm:text-sm text-[#8C735D]">
                   พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
                 </p>
               </div>
@@ -1321,24 +1321,27 @@ export default function TarotPage() {
       {/* ═══════════════════════════════════════════════════════════════
           Site-Wide Sanctuary Footer — World-Class Luxury Design
           ═══════════════════════════════════════════════════════════════ */}
-      <footer className="w-full mt-16 relative overflow-hidden">
+      {/* ═══════════════════════════════════════════════════════════════
+          Site-Wide Sanctuary Footer — World-Class Warm Minimalist Luxury Design
+          ═══════════════════════════════════════════════════════════════ */}
+      <footer className="w-full mt-16 relative overflow-hidden border-t border-[#D6B48D]/40 bg-[#FCF0E6]/80">
         {/* Ambient gold line above footer */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#e5c07b]/30 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#CD9F5B]/30 to-transparent" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-5 pt-10 pb-8 space-y-8 relative z-10">
+        <div className="max-w-4xl mx-auto px-5 pt-10 pb-8 space-y-6 relative z-10">
 
           {/* Row 1: AI Disclosure Card */}
-          <div className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-[#0f0a1e]/95 to-[#080510]/95 border border-[#e5c07b]/15">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a1230] to-[#0d081a] border border-[#e5c07b]/25 flex items-center justify-center flex-shrink-0 shadow-lg text-[#e5c07b]">
+          <div className="flex items-start gap-4 p-5 rounded-[1.618rem] bg-[#FDF7F0] border border-[#D6B48D] shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-[#FCF0E6] border border-[#D6B48D] flex items-center justify-center flex-shrink-0 shadow-xs text-[#CD9F5B]">
               <OracleEyeIcon className="w-4.5 h-4.5" />
             </div>
-            <div className="space-y-1.5 min-w-0">
-              <h4 translate="no" className="text-[11px] font-bold text-[#e5c07b] uppercase tracking-wider font-mono">
+            <div className="space-y-1 min-w-0">
+              <h4 translate="no" className="text-[11px] font-bold text-[#CD9F5B] uppercase tracking-wider font-mono">
                 AI-Generated Reading
               </h4>
-              <p className="text-[11px] text-[#9c93b8] leading-[1.7] font-serif-th">
+              <p className="text-[11px] text-[#8C735D] leading-[1.7] font-serif-th">
                 คำทำนายทั้งหมดสร้างโดยปัญญาประดิษฐ์ (AI) จากไพ่ที่คุณเปิดจริง มีไว้เพื่อการใคร่ครวญและความบันเทิง
                 ไม่ใช่คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน การตัดสินใจทุกอย่างยังเป็นของคุณเสมอ
               </p>
@@ -1350,63 +1353,63 @@ export default function TarotPage() {
             {/* Privacy */}
             <a
               href="/privacy"
-              className="group flex items-center gap-3 p-4 rounded-xl bg-[#0a0714]/60 border border-[#e5c07b]/10 hover:border-[#e5c07b]/40 transition-all duration-300 hover:bg-[#110a22]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd700]"
+              className="group flex items-center gap-3 p-4 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] hover:border-[#CD9F5B] transition-all duration-300 hover:bg-[#FFFFFF] shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9F5B]"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#e5c07b]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#e5c07b]/20 transition-colors text-[#e5c07b]">
+              <div className="w-8 h-8 rounded-lg bg-[#FCF0E6] border border-[#D6B48D]/50 flex items-center justify-center flex-shrink-0 group-hover:bg-[#CD9F5B]/15 transition-colors text-[#CD9F5B]">
                 <LockTabIcon className="w-4 h-4" />
               </div>
               <div>
-                <span translate="no" className="text-[10px] font-bold text-[#e5c07b] uppercase tracking-wider font-mono block">
+                <span translate="no" className="text-[10px] font-bold text-[#CD9F5B] uppercase tracking-wider font-mono block">
                   Privacy & PDPA
                 </span>
-                <span className="text-[10px] text-[#9c93b8] group-hover:text-[#cfc8e2] transition-colors font-serif-th">
+                <span className="text-[10px] text-[#8C735D] group-hover:text-[#5A432F] transition-colors font-serif-th">
                   นโยบายความเป็นส่วนตัว
                 </span>
               </div>
             </a>
 
             {/* Mental Health Hotline */}
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0a0714]/60 border border-[#e5c07b]/10">
-              <div className="w-8 h-8 rounded-lg bg-emerald-950/40 flex items-center justify-center flex-shrink-0 text-emerald-400">
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] shadow-xs">
+              <div className="w-8 h-8 rounded-lg bg-[#EBF3ED] flex items-center justify-center flex-shrink-0 text-[#2D5A27]">
                 <CareLineIcon className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono block font-serif-th">
+                <span className="text-[10px] font-bold text-[#2D5A27] uppercase tracking-wider font-mono block font-serif-th">
                   สายด่วนสุขภาพจิต
                 </span>
-                <span className="text-sm font-bold text-[#f5deaa] font-mono tracking-widest">1323</span>
-                <span className="text-[9px] text-[#9c93b8] ml-1.5 font-serif-th">24 ชม.</span>
+                <span className="text-sm font-bold text-[#5A432F] font-mono tracking-widest">1323</span>
+                <span className="text-[9px] text-[#8C735D] ml-1.5 font-serif-th">24 ชม.</span>
               </div>
             </div>
 
             {/* Emergency */}
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0a0714]/60 border border-[#e5c07b]/10">
-              <div className="w-8 h-8 rounded-lg bg-rose-950/40 flex items-center justify-center flex-shrink-0 text-rose-400">
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#FDF7F0] border border-[#D6B48D] shadow-xs">
+              <div className="w-8 h-8 rounded-lg bg-[#FCEEEA] flex items-center justify-center flex-shrink-0 text-[#8C3B2D]">
                 <EmergencyTabIcon className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider font-mono block font-serif-th">
+                <span className="text-[10px] font-bold text-[#8C3B2D] uppercase tracking-wider font-mono block font-serif-th">
                   เหตุฉุกเฉิน
                 </span>
-                <span className="text-sm font-bold text-[#f5deaa] font-mono tracking-widest">1669</span>
+                <span className="text-sm font-bold text-[#5A432F] font-mono tracking-widest">1669</span>
               </div>
             </div>
           </div>
 
           {/* Row 3: Bottom Branding Strip */}
-          <div className="flex flex-col items-center gap-2 pt-4 border-t border-[#e5c07b]/8">
+          <div className="flex flex-col items-center gap-2 pt-4 border-t border-[#D6B48D]/30">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#e5c07b]/40 flex-shrink-0">
+              <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#D6B48D] flex-shrink-0 shadow-xs">
                 <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="24px" />
               </div>
-              <span translate="no" className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#e5c07b]/60">
+              <span translate="no" className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#8C735D]">
                 Sacred Oracle Tarot · 1909
               </span>
-              <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#e5c07b]/40 flex-shrink-0">
+              <div className="w-5 h-7 rounded-sm overflow-hidden border border-[#D6B48D] flex-shrink-0 shadow-xs">
                 <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="24px" />
               </div>
             </div>
-            <p translate="no" className="text-[9px] text-[#9c93b8]/50 font-mono text-center">
+            <p translate="no" className="text-[9.5px] text-[#8C735D]/70 font-mono text-center">
               Provably-Fair Cryptographic Shuffle · Rider-Waite-Smith 1909 · All readings AI-generated
             </p>
           </div>

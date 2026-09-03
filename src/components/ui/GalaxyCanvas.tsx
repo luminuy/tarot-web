@@ -2,32 +2,19 @@
 
 import React, { useEffect, useRef } from "react";
 
-interface Star {
+interface Glimmer {
   x: number;
   y: number;
   size: number;
   baseAlpha: number;
-  alpha: number;
   twinkleSpeed: number;
   twinklePhase: number;
-  color: string;
-}
-
-interface ShootingStar {
-  x: number;
-  y: number;
-  length: number;
-  speed: number;
-  angle: number;
-  alpha: number;
-  active: boolean;
 }
 
 /**
- * พื้นหลังกาแลคซี่โทนดำสนิท (Obsidian Night Sky) — ดาวระยิบระยับ, ดาวตก, พารัลแลกซ์ตามเมาส์
- * ใช้เฉพาะเดสก์ท็อป (ผ่าน <MysticBackground />) — มือถือใช้ <MysticAltarCanvas /> ที่เบากว่า
- *
- * สีพื้นหลังสม่ำเสมอเข้มสนิททั่วทั้งหน้าจอ ไม่ซีดจางหรือสว่างขึ้นเมื่อเลื่อนหน้าจอลงมา
+ * พื้นหลังวิหารแสงสว่างอบอุ่นระดับโลก (World-Class Warm Minimalist Sanctuary Canvas)
+ * ให้บรรยากาศสงบนิ่ง ละมุนตา สว่างแต่ไม่แสบตา ไร้จุดละอองฝุ่นรกตา
+ * มีวงแหวนเรขาคณิตศักดิ์สิทธิ์หมุนอย่างแผ่วเบา และประกายแสงสีทองนวลตา
  */
 export const GalaxyCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -46,120 +33,108 @@ export const GalaxyCanvas: React.FC = () => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let prefersReducedMotion = motionQuery.matches;
 
-    const STAR_COUNT = Math.min(130, Math.floor((width * height) / 8500));
-    const STAR_COLORS = ["#CD9F5B", "#D6B48D", "#E4C09F", "#B8853E", "#A07840"];
-    let stars: Star[] = [];
-    let shootingStars: ShootingStar[] = [];
-    const mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2 };
+    // ประกายแสงนุ่มนวลเพียง 28 ดวง เพื่อความสะอาดตา ไม่รกเป็นฝุ่นผง
+    const GLIMMER_COUNT = Math.min(28, Math.max(16, Math.floor(width / 50)));
+    let glimmers: Glimmer[] = [];
+    let angle = 0;
 
     const initElements = () => {
-      stars = [];
-      for (let i = 0; i < STAR_COUNT; i++) {
-        stars.push({
+      glimmers = [];
+      for (let i = 0; i < GLIMMER_COUNT; i++) {
+        glimmers.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          size: Math.random() * 1.6 + 0.35,
-          baseAlpha: Math.random() * 0.65 + 0.15,
-          alpha: Math.random(),
-          twinkleSpeed: Math.random() * 0.025 + 0.008,
+          size: Math.random() * 0.9 + 0.4, // 0.4px - 1.3px ขนาดเล็กละมุน
+          baseAlpha: Math.random() * 0.35 + 0.15,
+          twinkleSpeed: Math.random() * 0.015 + 0.005,
           twinklePhase: Math.random() * Math.PI * 2,
-          color: STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)],
         });
       }
-
-      shootingStars = Array.from({ length: 3 }, () => ({
-        x: 0,
-        y: 0,
-        length: 0,
-        speed: 0,
-        angle: 0,
-        alpha: 0,
-        active: false,
-      }));
     };
 
     initElements();
 
-    const spawnShootingStar = () => {
-      const inactive = shootingStars.find((s) => !s.active);
-      if (inactive && Math.random() < 0.018) {
-        inactive.x = Math.random() * width * 0.9;
-        inactive.y = Math.random() * (height * 0.45);
-        inactive.length = Math.random() * 80 + 60;
-        inactive.speed = Math.random() * 12 + 15;
-        inactive.angle = Math.PI / 4 + (Math.random() - 0.5) * 0.2;
-        inactive.alpha = 0.9;
-        inactive.active = true;
-      }
-    };
-
     const drawFrame = (animate: boolean) => {
       ctx.clearRect(0, 0, width, height);
 
-      if (animate) {
-        mouse.x += (mouse.targetX - mouse.x) * 0.04;
-        mouse.y += (mouse.targetY - mouse.y) * 0.04;
+      // 1. Soft Ambient Celestial Radiance at top center
+      const auraGrad = ctx.createRadialGradient(
+        width / 2,
+        height * 0.05,
+        20,
+        width / 2,
+        height * 0.15,
+        Math.max(width, height) * 0.65
+      );
+      auraGrad.addColorStop(0, "rgba(228, 192, 159, 0.22)");
+      auraGrad.addColorStop(0.4, "rgba(205, 159, 91, 0.08)");
+      auraGrad.addColorStop(1, "rgba(250, 246, 240, 0)");
+      ctx.fillStyle = auraGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // 2. Slow-Rotating Delicate Sacred Geometry
+      if (animate) angle += 0.0006;
+      const centerX = width / 2;
+      const centerY = height * 0.38;
+      const radius = Math.min(width, height) * 0.34;
+
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(angle);
+
+      // Outer delicate ring
+      ctx.strokeStyle = "rgba(214, 180, 141, 0.14)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Middle dashed ring
+      ctx.beginPath();
+      ctx.setLineDash([6, 12]);
+      ctx.arc(0, 0, radius * 0.78, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(205, 159, 91, 0.12)";
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 12-Ray Sacred Division
+      ctx.beginPath();
+      for (let i = 0; i < 12; i++) {
+        const rad = (i * Math.PI) / 6;
+        const x1 = Math.cos(rad) * (radius * 0.78);
+        const y1 = Math.sin(rad) * (radius * 0.78);
+        const x2 = Math.cos(rad) * radius;
+        const y2 = Math.sin(rad) * radius;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
       }
+      ctx.strokeStyle = "rgba(214, 180, 141, 0.10)";
+      ctx.stroke();
+      ctx.restore();
 
-      // Stars + twinkle (Crisp Obsidian Sky)
-      for (let i = 0; i < stars.length; i++) {
-        const star = stars[i];
-        if (animate) star.twinklePhase += star.twinkleSpeed;
-        const currentAlpha = star.baseAlpha + Math.sin(star.twinklePhase) * 0.3;
-        const alphaClamped = Math.max(0.1, Math.min(0.95, currentAlpha));
+      // 3. Ethereal Soft White & Champagne Glimmers (Clean, not dirty dust)
+      for (let i = 0; i < glimmers.length; i++) {
+        const g = glimmers[i];
+        if (animate) g.twinklePhase += g.twinkleSpeed;
+        const currentAlpha = g.baseAlpha + Math.sin(g.twinklePhase) * 0.25;
+        const alphaClamped = Math.max(0.08, Math.min(0.65, currentAlpha));
 
-        const dx = animate ? (mouse.x - width / 2) * (star.size * 0.01) : 0;
-        const dy = animate ? (mouse.y - height / 2) * (star.size * 0.01) : 0;
-
-        ctx.fillStyle = star.color;
-        ctx.globalAlpha = alphaClamped;
+        // Soft gold halo
+        ctx.fillStyle = `rgba(205, 159, 91, ${alphaClamped * 0.4})`;
         ctx.beginPath();
-        ctx.arc(star.x + dx, star.y + dy, star.size, 0, Math.PI * 2);
+        ctx.arc(g.x, g.y, g.size * 2, 0, Math.PI * 2);
         ctx.fill();
 
-        if (star.size > 1.6 && alphaClamped > 0.75) {
-          ctx.strokeStyle = "rgba(205, 159, 91, 0.4)";
-          ctx.lineWidth = 0.5;
-          ctx.beginPath();
-          ctx.moveTo(star.x + dx - 3.5, star.y + dy);
-          ctx.lineTo(star.x + dx + 3.5, star.y + dy);
-          ctx.moveTo(star.x + dx, star.y + dy - 3.5);
-          ctx.lineTo(star.x + dx, star.y + dy + 3.5);
-          ctx.stroke();
-        }
+        // White pearl center
+        ctx.fillStyle = `rgba(255, 255, 255, ${alphaClamped})`;
+        ctx.beginPath();
+        ctx.arc(g.x, g.y, g.size, 0, Math.PI * 2);
+        ctx.fill();
       }
-
-      // Shooting stars (animate only)
-      if (animate) {
-        spawnShootingStar();
-        for (const ss of shootingStars) {
-          if (!ss.active) continue;
-          ss.x += Math.cos(ss.angle) * ss.speed;
-          ss.y += Math.sin(ss.angle) * ss.speed;
-          ss.alpha -= 0.015;
-          if (ss.alpha <= 0 || ss.x > width || ss.y > height) {
-            ss.active = false;
-            continue;
-          }
-          const tailX = ss.x - Math.cos(ss.angle) * ss.length;
-          const tailY = ss.y - Math.sin(ss.angle) * ss.length;
-          const grad = ctx.createLinearGradient(tailX, tailY, ss.x, ss.y);
-          grad.addColorStop(0, "transparent");
-          grad.addColorStop(1, `rgba(205, 159, 91, ${ss.alpha})`);
-          ctx.strokeStyle = grad;
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(tailX, tailY);
-          ctx.lineTo(ss.x, ss.y);
-          ctx.stroke();
-        }
-      }
-
-      ctx.globalAlpha = 1;
     };
 
-    // ~45fps throttle
-    const FRAME_INTERVAL = 22;
+    // ~30-40fps for battery efficiency & whisper quiet smoothness
+    const FRAME_INTERVAL = 28;
     let last = 0;
     const render = (t: number) => {
       if (!isVisible || prefersReducedMotion) return;
@@ -184,21 +159,18 @@ export const GalaxyCanvas: React.FC = () => {
       initElements();
       start();
     };
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.targetX = e.clientX;
-      mouse.targetY = e.clientY;
-    };
+
     const handleVisibility = () => {
       isVisible = !document.hidden;
       start();
     };
+
     const handleMotionChange = (e: MediaQueryListEvent) => {
       prefersReducedMotion = e.matches;
       start();
     };
 
     window.addEventListener("resize", handleResize);
-    window.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("visibilitychange", handleVisibility);
     motionQuery.addEventListener("change", handleMotionChange);
 
@@ -206,7 +178,6 @@ export const GalaxyCanvas: React.FC = () => {
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("visibilitychange", handleVisibility);
       motionQuery.removeEventListener("change", handleMotionChange);
       cancelAnimationFrame(animId);
@@ -216,7 +187,7 @@ export const GalaxyCanvas: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0 opacity-80"
+      className="fixed inset-0 pointer-events-none z-0 opacity-90"
     />
   );
 };
