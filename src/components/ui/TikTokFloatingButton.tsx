@@ -16,11 +16,14 @@ import React from "react";
 export function TikTokFloatingButton() {
   return (
     <aside
+      data-floating="true"
       aria-label="ช่องทางติดตาม TikTok"
       className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 select-none print:hidden pointer-events-auto"
       style={{
+        position: "fixed",
         bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))",
         right: "calc(1.25rem + env(safe-area-inset-right, 0px))",
+        zIndex: 40,
       }}
     >
       <a
@@ -42,7 +45,7 @@ export function TikTokFloatingButton() {
         </span>
 
         {/* ปุ่มวงกลมหลักสีดำพรีเมียม พร้อมเงาลึกและเส้นขอบ */}
-        <div className="relative w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-[#050507] border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.5)] group-hover:shadow-[0_10px_30px_rgba(0,242,234,0.3)] group-hover:border-[#00F2EA]/60 group-hover:scale-108 active:scale-95 transition-all duration-300 flex items-center justify-center shrink-0">
+        <div className="relative w-[52px] h-[52px] sm:w-14 sm:h-14 rounded-full bg-[#050507] border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.5)] group-hover:shadow-[0_10px_30px_rgba(0,242,234,0.3)] group-hover:border-[#00F2EA]/60 group-hover:scale-108 active:scale-95 transition-all duration-300 flex items-center justify-center shrink-0">
           {/* Subtle Outer Ambient Glow */}
           <div
             aria-hidden="true"

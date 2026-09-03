@@ -34,6 +34,20 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: แก้ไขตำแหน่งปุ่มลอย TikTok (Fixed Position vs Body > * Cascade Layer Conflict)
+
+- **อาการ/ปัญหา**: ปุ่มลอย TikTok หลุดไปอยู่ท้ายหน้าเว็บใต้ Footer ทางฝั่งซ้ายและถูกขอบหน้าจอบังครึ่งล่าง ไม่ลอยตรึงมุมขวาล่าง (`fixed bottom-right`)
+- **สาเหตุเชิงลึก**:
+  - ใน `src/app/globals.css` มีกฎระดับ Unlayered CSS `body > * { position: relative; z-index: 1; }` สำหรับชั้นเนื้อหา
+  - เนื่องจากคอมโพเนนต์ `<TikTokFloatingButton />` อยู่เป็น Direct Child ของ `<body>` ใน `RootLayout` จึงโดนกฎ Unlayered `body > *` ทับค่า `position: fixed` ของ Tailwind v4 (ซึ่งอยู่ใน `@layer utilities` ที่มี Precedence ต่ำกว่า Unlayered Styles ตามมาตรฐาน CSS Cascade Layers)
+  - ทำให้กลายเป็น `position: relative` ที่ไหลไปอยู่ท้ายสุดของเอกสาร และถูกดันด้วย `right: 20px` (ผลักไปทางซ้าย 20px) และหลุดเฟรมไปอยู่ด้านล่างสุด
+- **การแก้ไข**:
+  1. ปรับ Selector ใน `src/app/globals.css` เป็น `body > *:not(.fixed):not([data-floating])` เพื่อไม่ให้ทับ Element ที่เป็น Fixed Floating Portal
+  2. กำหนด `position: "fixed"`, `zIndex: 40`, และ `data-floating="true"` ใน `TikTokFloatingButton.tsx` อย่างเด็ดขาด พร้อมปรับขนาดขนาดวงกลมเป็น `w-[52px] h-[52px] sm:w-14 sm:h-14`
+- **ผลการทดสอบ**: ตรวจสอบด้วย Chrome Headless & CDP ยืนยันตำแหน่ง `position: fixed` อยู่มุมขวาล่างแท้จริง (`right: 20px`, `bottom: 20px`) ลอยเด่นตลอดการสกรอลล์ · `repo:verify` ผ่านครบ 23/23 ด่าน
+
+---
+
 ### 🗓️ 2026-09-03: UX — พัดไพ่ 78 ใบ (InteractiveCardFan) ย่อพอดีกรอบ ไม่ต้องเลื่อนแนวนอน
 
 - **ปัญหา**: `InteractiveCardFan` ใช้ `overflow-x-auto` + `min-w-max` → พัด 3 ชั้น (26 ใบ/ชั้น) กว้าง ~1400px ล้นจอ ต้องเลื่อนแนวนอนถึงจะเห็นครบ (ขัดกฎเหล็กข้อ 3 Zero-Clipping)
