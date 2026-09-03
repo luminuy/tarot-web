@@ -34,6 +34,15 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-03: เปิด r2_buckets binding กลับ — token ได้สิทธิ์ R2 แล้ว
+
+- เจ้าของโปรเจกต์เติม permission **Account · Workers R2 Storage · Edit** ให้ token `tarot-web deploy` (แก้ token เดิม ค่าไม่เปลี่ยน ไม่ต้องแตะ GitHub secret)
+- uncomment `r2_buckets` block ใน `wrangler.jsonc` กลับ (`SHARE_BUCKET` → `seertarot-share`)
+- ผลลัพธ์: `/api/share/image` เก็บ R2 จริง · `/s/<id>` มี OG image · ShareModal Twitter/FB/Threads แชร์ลิงก์ขึ้นรูปพรีวิว
+- **ค้างต่อ**: เจ้าของโปรเจกต์ตั้ง R2 lifecycle `npx wrangler r2 bucket lifecycle add seertarot-share --prefix "" --expire-days 90` (PDPA)
+
+---
+
 ### 🗓️ 2026-09-03: 🔴 HOTFIX — ปิด r2_buckets binding (CI token ขาดสิทธิ์ R2 → deploy fail ทั้ง repo)
 
 - **อาการ**: หลัง merge #201 → Production Deploy #385 fail: `A request to the Cloudflare API (/accounts/***/r2/buckets/seertarot-share) failed. Authentication error [code: 10000]`
