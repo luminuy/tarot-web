@@ -89,6 +89,9 @@ function StepBackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+/** ลำดับขั้นของพิธีกรรมดูดวง — คงที่ ประกาศนอกคอมโพเนนต์เพื่อไม่ให้สร้างอาเรย์ใหม่ทุกเรนเดอร์ */
+const STEP_ORDER: RitualStep[] = ["SPREAD_SELECT", "INTENTION_SELECT", "SHUFFLE", "PICK_CARDS", "READING", "SUMMARY"];
+
 /**
  * แปลง `reason` ที่ API ส่งกลับมาเป็นเหตุผลของกำแพงสิทธิ์ฝั่ง UI
  * คืน null ถ้าไม่ใช่เรื่องสิทธิ์ (เช่น AI ล่ม) — กรณีนั้นให้แสดง error ตามปกติ
@@ -104,13 +107,14 @@ export default function TarotPage() {
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
   const motionSafe = useMotionSafe();
 
-  // Direction tracking for AnimatePresence transitions (+1 = forward, -1 = back)
-  const STEP_ORDER: RitualStep[] = ["SPREAD_SELECT", "INTENTION_SELECT", "SHUFFLE", "PICK_CARDS", "READING", "SUMMARY"];
-  const stepDirectionRef = useRef<number>(1);
+  // ทิศทางการเปลี่ยนขั้นของ AnimatePresence (+1 = เดินหน้า, -1 = ย้อนกลับ)
+  // ⚠️ ต้องเป็น state ไม่ใช่ ref — ref ที่ถูกอ่านระหว่างเรนเดอร์ทำให้ HTML ฝั่งเซิร์ฟเวอร์
+  // กับฝั่งเบราว์เซอร์ไม่ตรงกันจนเกิด hydration mismatch (ISSUE-008)
+  const [stepDirection, setStepDirection] = useState(1);
   const navigateStep = (next: RitualStep) => {
     const curIdx = STEP_ORDER.indexOf(currentStep);
     const nxtIdx = STEP_ORDER.indexOf(next);
-    stepDirectionRef.current = nxtIdx >= curIdx ? 1 : -1;
+    setStepDirection(nxtIdx >= curIdx ? 1 : -1);
     setCurrentStep(next);
   };
 
@@ -905,11 +909,11 @@ export default function TarotPage() {
         )}
 
         {/* ── Directional Step Transitions (P1-M1) ─────────────────────── */}
-        <AnimatePresence mode="wait" custom={stepDirectionRef.current}>
+        <AnimatePresence mode="wait" initial={false} custom={stepDirection}>
           {currentStep === "SPREAD_SELECT" && (
             <motion.div
               key="spread-select"
-              custom={motionSafe ? stepDirectionRef.current : 0}
+              custom={motionSafe ? stepDirection : 0}
               variants={stepVariants}
               initial="enter"
               animate="center"
@@ -1013,7 +1017,7 @@ export default function TarotPage() {
           {currentStep === "INTENTION_SELECT" && (
             <motion.div
               key="intention"
-              custom={motionSafe ? stepDirectionRef.current : 0}
+              custom={motionSafe ? stepDirection : 0}
               variants={stepVariants}
               initial="enter"
               animate="center"
@@ -1102,7 +1106,7 @@ export default function TarotPage() {
           {currentStep === "SHUFFLE" && (
             <motion.div
               key="shuffle"
-              custom={motionSafe ? stepDirectionRef.current : 0}
+              custom={motionSafe ? stepDirection : 0}
               variants={stepVariants}
               initial="enter"
               animate="center"
@@ -1122,7 +1126,7 @@ export default function TarotPage() {
           {currentStep === "PICK_CARDS" && (
             <motion.div
               key="picking"
-              custom={motionSafe ? stepDirectionRef.current : 0}
+              custom={motionSafe ? stepDirection : 0}
               variants={stepVariants}
               initial="enter"
               animate="center"
@@ -1144,7 +1148,7 @@ export default function TarotPage() {
           {(currentStep === "READING" || currentStep === "SUMMARY") && (
             <motion.div
               key="reading-summary"
-              custom={motionSafe ? stepDirectionRef.current : 0}
+              custom={motionSafe ? stepDirection : 0}
               variants={stepVariants}
               initial="enter"
               animate="center"

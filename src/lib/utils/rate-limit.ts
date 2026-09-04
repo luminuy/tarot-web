@@ -105,11 +105,20 @@ export function checkRateLimit(
 
   // Allow request
   record.timestamps.push(now);
-  record.concurrent += 1;
+
+  // ⚠️ นับ concurrent เฉพาะปลายทางที่ขอ `maxConcurrent` มาเท่านั้น
+  // ของเดิม +1 ทุกครั้งแบบไม่มีเงื่อนไข แต่มีแค่ 2 ใน 9 ปลายทางที่เรียก releaseConcurrency()
+  // (read / chat / share) — อีก 7 ปลายทาง (start, shuffle, journal*, admin_login, tester_login)
+  // จึงทิ้งค่าค้างไว้ตลอด ทำให้ 2 เรื่องพังพร้อมกัน:
+  //   1. performLazyCleanup() ลบ entry ไม่ได้เลย (เงื่อนไขบังคับ concurrent <= 0)
+  //      → clientStore โตขึ้นเรื่อย ๆ 1 entry ต่อ IP ต่อ prefix ตลอดอายุ isolate
+  //   2. ถ้าวันหนึ่งมีคนใส่ maxConcurrent ให้ปลายทางเหล่านั้น IP นั้นจะถูกล็อกถาวรทันที
+  const tracksConcurrency = Boolean(config.maxConcurrent);
+  if (tracksConcurrency) record.concurrent += 1;
 
   let released = false;
   const releaseConcurrency = () => {
-    if (!released) {
+    if (!released && tracksConcurrency) {
       released = true;
       if (record) {
         record.concurrent = Math.max(0, record.concurrent - 1);

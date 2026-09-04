@@ -13,14 +13,17 @@ import { SITE_NAME_TH, SITE_ORIGIN } from "@/lib/config/site";
 export function AntiTheftShield() {
   useEffect(() => {
     // 1. 🛡️ Console Security & IP Protection Banner
+    // ⚠️ ต้องใช้ console.warn ไม่ใช่ console.log — `next.config.ts` ตั้ง
+    // `compiler.removeConsole = { exclude: ["error", "warn"] }` ใน production
+    // แบนเนอร์นี้จึงถูกตัดทิ้งใน build เดียวที่มันทำงาน (แสดงผลไม่เคยขึ้นเลยสักครั้ง)
     const isDev = process.env.NODE_ENV === "development";
     if (!isDev) {
-      console.log(
+      console.warn(
         "%c🔮 SEERTAROT ORACLE %c PROTECTED INTELLECTUAL PROPERTY ",
         "background: #18122B; color: #F5DEAA; font-weight: bold; padding: 4px 8px; border-radius: 4px 0 0 4px; border: 1px solid #D4AF37;",
         "background: #4A0E4E; color: #FFF; font-weight: bold; padding: 4px 8px; border-radius: 0 4px 4px 0; border: 1px solid #D4AF37;"
       );
-      console.log(
+      console.warn(
         "%c✦ สงวนลิขสิทธิ์ (c) 2026 SeerTarot & Core Contributors\n✦ ภายใต้สัญญาอนุญาต PolyForm Noncommercial 1.0.0 & CC BY-NC-ND 4.0\n❌ ห้ามคัดลอก ดัดแปลง ดูดข้อมูล (Scraping) หรือนำไปใช้ในเชิงพาณิชย์โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร",
         "color: #D4AF37; font-size: 11px; line-height: 1.6;"
       );

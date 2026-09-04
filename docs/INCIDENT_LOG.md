@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0075 · 2026-09-04 13:53 · 🟠 High · แก้ hydration mismatch หน้าแรก (ISSUE-008) + โมดัลทำให้หน้าเว็บเลื่อนไม่ได้ถาวร + rate limiter รั่วในหน่วยความจำ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | คอนโซลขึ้น 'A tree hydrated but some attributes ... didn't match' ที่หน้าแรกสำหรับเครื่องที่เปิด prefers-reduced-motion · ปิดโมดัลแล้วหน้าเว็บเลื่อนไม่ได้อีกเลยต้องรีเฟรช และฟอร์มแก้ไขแม่หมอในแผงแอดมินเด้งโฟกัสกลับไปที่ปุ่มปิดทุกครั้งที่พิมพ์ 1 ตัวอักษร · แบนเนอร์ลิขสิทธิ์ในคอนโซลไม่เคยขึ้นบน production เลย |
+| **สาเหตุราก** | useReducedMotion() ของ motion คืน null ตอน SSR แต่คืน true/false จริงบนเบราว์เซอร์ ค่าที่ได้จึงต่างกันสองฝั่ง แล้วยังอ่านทิศทางจาก useRef ระหว่างเรนเดอร์อีกชั้น · Modal ใส่ onClose ไว้ใน dependency ของ effect ทั้งที่ผู้เรียกส่ง arrow function ใหม่ทุกเรนเดอร์ effect จึงรันซ้ำ จับค่า originalOverflow ได้ 'hidden' แล้วคืนค่านั้นกลับตอนปิด · checkRateLimit เพิ่ม concurrent ทุกครั้งแต่มีแค่ 3 ใน 10 ปลายทางที่ปล่อยคืน cleanup จึงลบ entry ไม่ได้เลย · console.log ถูก compiler.removeConsole ตัดทิ้งใน production ซึ่งเป็น build เดียวที่โค้ดนั้นทำงาน |
+| **การแก้ไข** | ย้ายทิศทางเปลี่ยนขั้นจาก useRef ไป useState และใส่ initial={false} ให้ AnimatePresence ทั้งที่หน้าแรกและ SpreadCardSelector เพื่อให้เรนเดอร์แรกออกมาที่สถานะพร้อมอ่าน (opacity 1) เหมือนกันทั้งสองฝั่ง · Modal เก็บ onClose ไว้ใน ref แล้วเหลือ deps เพียง [isOpen] พร้อมเพิ่ม cancelAnimationFrame ตอน cleanup · checkRateLimit นับ concurrent เฉพาะเมื่อ config.maxConcurrent ถูกตั้ง · auth-ratelimit กวาดถังหมดอายุออกจาก Map และเลิกใช้สำเนา getClientIp ของตัวเองที่หยิบ x-forwarded-for ตัวซ้ายสุด · เปลี่ยนแบนเนอร์เป็น console.warn ซึ่งอยู่ใน exclude list · อัปเกรด GitHub Actions เป็น checkout@v5 setup-node@v5 github-script@v8 ปิด ISSUE-006 |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามอ่านค่าที่ขึ้นกับเบราว์เซอร์ (prefers-reduced-motion, matchMedia, ref ที่เปลี่ยนตอนโต้ตอบ) ระหว่างเรนเดอร์ของคอมโพเนนต์ที่ถูก SSR — เรนเดอร์แรกต้องออกมาเหมือนกันทั้งสองฝั่งเสมอ และ motion component ที่ถูก SSR ต้องใส่ initial={false} ทั้งเพื่อกัน mismatch และไม่ให้เนื้อหาหลักถูกส่งออกไปแบบ opacity:0 · callback prop ที่ผู้เรียกสร้างใหม่ทุกเรนเดอร์ห้ามอยู่ใน dependency ของ effect ที่มี side effect ระดับ document ให้เก็บลง ref แทน · ตัวนับ concurrency ต้องเพิ่มเฉพาะเมื่อมีคนตั้งใจใช้และมีทางปล่อยคืนเสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน dev server แล้วเปิดหน้าแรกด้วยเบราว์เซอร์ที่เปิด Reduced Motion: ก่อนแก้ console แสดง hydration mismatch พร้อม diff opacity:0/translateX(-40px) vs opacity:1/none จริง หลังแก้ console สะอาด 0 error · curl หน้าแรกแล้ว grep ไม่พบ opacity:0 หรือ translateX ใน HTML ฝั่งเซิร์ฟเวอร์อีก · repo:verify 24/24 |
+| **บันทึกโดย** | Claude · branch `claude/read-md-improve-code-9be6c8` · commit `fca960f` |
+
+
 ### INC-0074 · 2026-09-04 13:50 · 🔴 Critical · ปิดช่องแจกโควตาฟรีโดยไม่ต้องจ่ายเงิน + ยึดบัญชีล่วงหน้า + สิทธิ์สมาชิกถูกล็อกยาวทั้งสัปดาห์
 
 | หัวข้อ | รายละเอียด |

@@ -26,7 +26,7 @@ jobs:
     if: github.event.pull_request.draft == false
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -34,7 +34,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: ⚙️ Setup Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -52,7 +52,7 @@ jobs:
         run: pnpm run build
 
       - name: 🏷️ Auto-Label PR Based on Modified Files
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -83,7 +83,7 @@ jobs:
             }
 
       - name: 📝 Post Automated Verification Review Comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -117,7 +117,7 @@ jobs:
             });
 
       - name: 🔀 Auto-Merge Verified PR into main
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

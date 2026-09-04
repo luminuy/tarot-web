@@ -159,6 +159,32 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "เกิดข้อผิดพลาดด้านความสมบูรณ์ของข้อมูล กรุณาเริ่มใหม่" }, { status: 500 });
   }
 
+  // ⚠️ ต้องแปลง index → ไพ่จริงให้ครบ **ก่อน** บันทึกผลการเปิดไพ่
+  // ของเดิมทำใน IIFE ตอนประกอบ response ซึ่งอยู่หลัง updateReading + persistReading ไปแล้ว
+  // ถ้าข้อมูลไพ่ไม่ครบ throw ตรงนั้นจะทะลุออกไปเป็น 500 ที่ไม่มี JSON ให้ไคลเอนต์อ่าน
+  // แต่ผลการเปิดไพ่ถูกเขียนลงหน่วยความจำ + KV ไปแล้ว → ผู้ใช้กด "โหลดใหม่" ก็ตกเข้า
+  // replay guard เส้นทางเดิมซ้ำ ๆ เซสชันค้างถาวรแทนที่จะกู้คืนได้
+  // (กฎเหล็กข้อ 14 — ห้ามกุไพ่ ต้องล้มดัง ๆ พร้อมบอกให้โหลดใหม่)
+  const resolvedCards = [];
+  for (const d of drawn) {
+    const card = cardByIndex(d.cardIndex);
+    if (!card) {
+      console.error("[PF] card index not found before commit", { id, cardIndex: d.cardIndex });
+      return NextResponse.json(
+        { error: "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง", code: "CARD_DATA_NOT_FOUND" },
+        { status: 500 }
+      );
+    }
+    resolvedCards.push({
+      id: card.id,
+      nameTh: card.nameTh,
+      nameEn: card.nameEn,
+      image: card.image,
+      element: card.element,
+      keywords: d.isReversed ? card.keywords.reversed : card.keywords.upright,
+    });
+  }
+
   const updated = updateReading(id, { drawn, clientSeed, pickedIndices: pickedIndices ?? undefined });
   if (updated) {
     await persistReading(updated);
@@ -170,23 +196,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     clientSeed,
     drawn,
     sessionToken,
-    cards: (() => {
-      const resolved = [];
-      for (const d of drawn) {
-        const card = cardByIndex(d.cardIndex);
-        if (!card) {
-          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง");
-        }
-        resolved.push({
-          id: card.id,
-          nameTh: card.nameTh,
-          nameEn: card.nameEn,
-          image: card.image,
-          element: card.element,
-          keywords: d.isReversed ? card.keywords.reversed : card.keywords.upright,
-        });
-      }
-      return resolved;
-    })(),
+    cards: resolvedCards,
   });
 }
