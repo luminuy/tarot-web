@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { CardImage } from "@/components/card/CardImage";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input, Textarea } from "@/components/ui/Input";
@@ -294,6 +295,17 @@ function PersonaTab({
   );
 }
 
+type SuitFilter = "all" | "major" | "wands" | "cups" | "swords" | "pentacles";
+
+const SUIT_OPTIONS: { id: SuitFilter; label: string }[] = [
+  { id: "all", label: "ทั้งหมด" },
+  { id: "major", label: "Major (22)" },
+  { id: "wands", label: "ไม้เท้า (14)" },
+  { id: "cups", label: "ถ้วย (14)" },
+  { id: "swords", label: "ดาบ (14)" },
+  { id: "pentacles", label: "เหรียญ (14)" },
+];
+
 function CardTab({
   cards,
   doc,
@@ -304,19 +316,30 @@ function CardTab({
   patch: (fn: (d: Doc) => Doc) => void;
 }) {
   const [q, setQ] = useState("");
+  const [suitFilter, setSuitFilter] = useState<SuitFilter>("all");
   const [selId, setSelId] = useState<string | null>(null);
   const [detail, setDetail] = useState<CardDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   const filtered = useMemo(() => {
+    let list = cards;
+    if (suitFilter === "major") {
+      list = list.filter((c) => c.id.startsWith("major-"));
+    } else if (suitFilter !== "all") {
+      list = list.filter((c) => c.id.startsWith(`${suitFilter}-`));
+    }
+
     const s = q.trim().toLowerCase();
-    const list = s
-      ? cards.filter(
-          (c) => c.nameTh.toLowerCase().includes(s) || c.nameEn.toLowerCase().includes(s) || c.id.includes(s),
-        )
-      : cards;
-    return list.slice(0, 60);
-  }, [q, cards]);
+    if (s) {
+      list = list.filter(
+        (c) =>
+          c.nameTh.toLowerCase().includes(s) ||
+          c.nameEn.toLowerCase().includes(s) ||
+          c.id.includes(s),
+      );
+    }
+    return list;
+  }, [q, cards, suitFilter]);
 
   useEffect(() => {
     if (!selId) return;
@@ -357,79 +380,189 @@ function CardTab({
     });
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
-      <div className="altar-panel flex flex-col gap-2 rounded-2xl p-3">
-        <Input placeholder="ค้นหาไพ่…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <ul className="max-h-[420px] overflow-auto text-xs">
-          {filtered.map((c) => {
-            const edited = !!doc.cards?.[c.id];
+    <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+      <div className="altar-panel flex flex-col gap-3 rounded-2xl p-3">
+        <Input
+          placeholder="ค้นหาไพ่ (ชื่อไทย / อังกฤษ / id)…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="text-xs"
+        />
+
+        {/* หมวดหมู่ไพ่ / Suit Filter */}
+        <div className="flex flex-wrap gap-1">
+          {SUIT_OPTIONS.map((opt) => {
+            const active = suitFilter === opt.id;
             return (
-              <li key={c.id}>
-                <button
-                  onClick={() => setSelId(c.id)}
-                  className={`flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left ${
-                    selId === c.id ? "bg-[#e5c07b]/15 text-[#f5deaa]" : "text-[#e2d9f3] hover:bg-[#191230]/60"
-                  }`}
-                >
-                  <span className="truncate">{c.nameTh}</span>
-                  {edited ? <span className="text-[#ffd700]">✦</span> : null}
-                </button>
-              </li>
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setSuitFilter(opt.id)}
+                className={`rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
+                  active
+                    ? "bg-[#e5c07b] text-[#120f1d] shadow-sm"
+                    : "bg-[#191230]/70 text-[#9c93b8] hover:bg-[#191230] hover:text-[#e2d9f3]"
+                }`}
+              >
+                {opt.label}
+              </button>
             );
           })}
+        </div>
+
+        <div className="flex items-center justify-between px-1 text-[11px] text-[#9c93b8]">
+          <span>รายการไพ่ ({filtered.length} ใบ)</span>
+          {suitFilter !== "all" || q ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSuitFilter("all");
+                setQ("");
+              }}
+              className="text-[#e5c07b] hover:underline"
+            >
+              ล้างตัวกรอง
+            </button>
+          ) : null}
+        </div>
+
+        <ul className="max-h-[460px] overflow-auto space-y-0.5 text-xs pr-1">
+          {filtered.length === 0 ? (
+            <li className="py-6 text-center text-xs text-[#9c93b8]">
+              ไม่พบไพ่ที่ตรงกับคำค้น
+            </li>
+          ) : (
+            filtered.map((c) => {
+              const edited = !!doc.cards?.[c.id];
+              const isSelected = selId === c.id;
+              return (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    onClick={() => setSelId(c.id)}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
+                      isSelected
+                        ? "bg-[#e5c07b]/20 font-medium text-[#f5deaa] border border-[#e5c07b]/30"
+                        : "text-[#e2d9f3] hover:bg-[#191230]/70"
+                    }`}
+                  >
+                    <div className="truncate pr-2">
+                      <div className="truncate text-xs">{c.nameTh}</div>
+                      <div className="truncate text-[10px] text-[#9c93b8]">{c.nameEn}</div>
+                    </div>
+                    {edited ? (
+                      <span className="shrink-0 text-[#ffd700] text-[11px]" title="มีการปรับแต่ง">
+                        ✦
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              );
+            })
+          )}
         </ul>
       </div>
 
-      <div className="altar-panel rounded-2xl p-4">
+      <div className="altar-panel rounded-2xl p-5">
         {!selId ? (
-          <p className="text-sm text-[#9c93b8]">เลือกไพ่จากรายการทางซ้าย</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <span className="text-3xl text-[#e5c07b]/40 mb-2">✦</span>
+            <p className="text-sm font-medium text-[#e2d9f3]">เลือกไพ่จากรายการทางซ้าย</p>
+            <p className="text-xs text-[#9c93b8] mt-1 max-w-sm">
+              คุณสามารถแก้ไขความหมายเฉพาะของไพ่แต่ละใบ ทั้ง 5 ด้าน และค่าผลทำนาย ใช่/ไม่ใช่
+            </p>
+          </div>
         ) : loadingDetail || !detail ? (
-          <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#e5c07b] border-t-transparent mb-2" />
+            <p className="text-xs text-[#9c93b8]">กำลังโหลดข้อมูลไพ่…</p>
+          </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-semibold text-[#e5c07b]">
-              {detail.nameTh} <span className="text-[#9c93b8]">({detail.id})</span>
-            </h3>
-
-            <label className="flex items-center gap-2 text-xs text-[#e2d9f3]">
-              คำตอบ Yes/No:
-              <select
-                value={o.yesNo ?? "default"}
-                onChange={(e) => setYesNo(e.target.value)}
-                className="rounded-lg border border-[#e5c07b]/25 bg-[#0c0818] px-2 py-1 text-xs"
-              >
-                <option value="default">ค่าเริ่มต้น ({detail.defaults.yesNo})</option>
-                <option value="yes">yes</option>
-                <option value="no">no</option>
-                <option value="maybe">maybe</option>
-              </select>
-            </label>
-
-            {CATS.map((cat) => (
-              <div key={cat.id} className="flex flex-col gap-2 border-t border-[#e5c07b]/15 pt-3">
-                <p className="text-xs font-semibold text-[#e5c07b]">{cat.label}</p>
-                {(["upright", "reversed"] as const).map((side) => {
-                  const cur = o.meanings?.[cat.id]?.[side] ?? "";
-                  return (
-                    <div key={side}>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[13px] text-[#9c93b8]">
-                          {side === "upright" ? "หัวตั้ง" : "หัวกลับ"}
-                        </span>
-                        <ResetLink show={!!cur} onClick={() => setMeaning(cat.id, side, "")} />
-                      </div>
-                      <Textarea
-                        rows={2}
-                        value={cur}
-                        placeholder={detail.defaults.meanings[cat.id][side]}
-                        onChange={(e) => setMeaning(cat.id, side, e.target.value)}
-                        className="text-xs"
-                      />
-                    </div>
-                  );
-                })}
+          <div className="flex flex-col gap-5">
+            {/* Header แสดงรูปและชื่อไพ่ 1909 */}
+            <div className="flex items-start gap-4 border-b border-[#e5c07b]/15 pb-4">
+              <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-lg border border-[#e5c07b]/30 bg-[#0c0818] shadow-md">
+                <CardImage
+                  cardId={detail.id}
+                  alt={detail.nameTh}
+                  sizes="64px"
+                  className="h-full w-full object-cover"
+                />
               </div>
-            ))}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-semibold text-[#e5c07b]">
+                    {detail.nameTh}
+                  </h3>
+                  <span className="rounded bg-[#191230] px-1.5 py-0.5 text-[10px] text-[#9c93b8] font-mono">
+                    {detail.id}
+                  </span>
+                </div>
+                <p className="text-xs text-[#9c93b8] mt-1">
+                  ปรับแต่งความหมายเฉพาะของไพ่ใบนี้ (จะถูกนำไปแทนที่หรือเสริมความหมายมาตรฐาน)
+                </p>
+
+                <div className="mt-3 flex items-center gap-3">
+                  <label className="flex items-center gap-2 text-xs text-[#e2d9f3]">
+                    คำตอบ Yes/No:
+                    <select
+                      value={o.yesNo ?? "default"}
+                      onChange={(e) => setYesNo(e.target.value)}
+                      className="rounded-lg border border-[#e5c07b]/25 bg-[#0c0818] px-2.5 py-1 text-xs text-[#e5c07b] focus:outline-none focus:border-[#e5c07b]"
+                    >
+                      <option value="default">ค่าเริ่มต้น ({detail.defaults.yesNo})</option>
+                      <option value="yes">Yes (ใช่/สำเร็จ)</option>
+                      <option value="no">No (ไม่ใช่/ยังไม่ถึงเวลา)</option>
+                      <option value="maybe">Maybe (ขึ้นอยู่กับปัจจัยอื่น)</option>
+                    </select>
+                  </label>
+                  {o.yesNo ? (
+                    <button
+                      type="button"
+                      onClick={() => setYesNo("default")}
+                      className="text-[11px] text-[#9c93b8] hover:text-[#e5c07b] underline"
+                    >
+                      คืนค่าเริ่มต้น
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            {/* หมวดความหมาย 5 ด้าน */}
+            <div className="space-y-4">
+              {CATS.map((cat) => (
+                <div key={cat.id} className="flex flex-col gap-2 rounded-xl bg-[#0c0818]/60 p-3.5 border border-[#e5c07b]/10">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold text-[#e5c07b]">
+                      ✦ ด้าน{cat.label}
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {(["upright", "reversed"] as const).map((side) => {
+                      const cur = o.meanings?.[cat.id]?.[side] ?? "";
+                      return (
+                        <div key={side} className="flex flex-col gap-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[12px] font-medium text-[#9c93b8]">
+                              {side === "upright" ? "หัวตั้ง (Upright)" : "หัวกลับ (Reversed)"}
+                            </span>
+                            <ResetLink show={!!cur} onClick={() => setMeaning(cat.id, side, "")} />
+                          </div>
+                          <Textarea
+                            rows={3}
+                            value={cur}
+                            placeholder={detail.defaults.meanings[cat.id][side]}
+                            onChange={(e) => setMeaning(cat.id, side, e.target.value)}
+                            className="text-xs leading-relaxed"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
