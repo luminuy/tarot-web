@@ -37,6 +37,11 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          # ⚠️ ต้องปิดไว้เสมอ — setup-node@v5 เปิดแคชของ package manager ให้เองโดยอัตโนมัติ
+          # (v4 ไม่เปิดถ้าไม่ได้ใส่ `cache:`) มันอ่าน `packageManager: pnpm@9.15.4` ใน package.json
+          # แล้วมองหา `pnpm-lock.yaml` ซึ่ง repo นี้ไม่มี (ใช้ `pnpm install --no-frozen-lockfile`)
+          # ผลคือ workflow ล้มทันทีด้วย "Dependencies lock file is not found" (บทเรียน INC หลัง PR #234)
+          package-manager-cache: false
 
       - name: 📦 Install dependencies
         run: pnpm install --no-frozen-lockfile

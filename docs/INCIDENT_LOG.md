@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0078 · 2026-09-04 18:43 · 🟠 High · ปิดแคช package manager ของ setup-node@v5 ที่ทำให้ทุก workflow ล้มเพราะหา pnpm-lock.yaml ไม่เจอ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หลัง merge PR #234 ทั้ง pr.yml และ deploy.yml ล้มที่ขั้น 'Setup Node.js 22' ด้วย 'Dependencies lock file is not found in /home/runner/work/tarot-web/tarot-web. Supported file patterns: pnpm-lock.yaml' — งานเข้า main แล้วแต่ deploy ขึ้น Cloudflare Workers ไม่สำเร็จ |
+| **สาเหตุราก** | actions/setup-node@v5 เปลี่ยนค่าเริ่มต้นให้ package-manager-cache เป็น true (v4 จะเปิดแคชเฉพาะเมื่อใส่ input cache: มาเอง) มันอ่านฟิลด์ packageManager: pnpm@9.15.4 ใน package.json แล้วบังคับหา pnpm-lock.yaml แต่ repo นี้มีแค่ package-lock.json และติดตั้งด้วย pnpm install --no-frozen-lockfile มาตลอด · ตอนอัป action ปิด ISSUE-006 ตรวจแค่ว่าชื่อเวอร์ชันถูกต้อง ไม่ได้ตรวจว่าค่าเริ่มต้นของ input เปลี่ยนไปด้วย |
+| **การแก้ไข** | ใส่ package-manager-cache: false ให้ทุกขั้น setup-node@v5 ครบทั้ง 3 จุด (pr.yml 1 จุด, deploy.yml 2 จุด) เพื่อคืนพฤติกรรมเดิมของ v4 พร้อมคอมเมนต์อธิบายเหตุผลกำกับไว้ที่ทุกจุด |
+| **🛡️ กฎป้องกันถาวร** | **การอัปเวอร์ชันหลักของ GitHub Action ไม่ใช่แค่เปลี่ยนตัวเลข ต้องอ่าน breaking changes ของค่าเริ่มต้น input ทุกตัวก่อนเสมอ และต้องดูผล CI รอบแรกหลัง merge จริง ๆ ไม่ใช่ถือว่าจบเมื่อ PR ถูก merge · ถ้าวันหนึ่งย้ายมาใช้ pnpm เต็มตัวให้ commit pnpm-lock.yaml แล้วค่อยเปิดแคชกลับ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ตรวจว่าทุก setup-node@v5 ทั้ง 3 จุดมี package-manager-cache: false ครบ แล้วดูผลรัน CI จริงของ PR นี้ว่าผ่านขั้น Setup Node.js |
+| **บันทึกโดย** | Claude · branch `claude/fix-ci-setup-node-cache` · commit `89513ed` |
+
+
 ### INC-0077 · 2026-09-04 18:35 · 🟡 Medium · ให้คะแนนความแม่นและลบรายการในสมุดบันทึกดวงบันทึกขึ้นเซิร์ฟเวอร์ได้จริง + อัปเดตเอกสารรอบตรวจใหญ่
 
 | หัวข้อ | รายละเอียด |
