@@ -32,7 +32,8 @@ export function SpreadPositionMap({ positions }: { positions: SpreadPosition[] }
             transform: `translate(-50%, -50%) rotate(${pos.rotate ?? 0}deg)`,
           }}
         >
-          {idx + 1}
+          {/* หมุนเลขกลับให้ตั้งตรงเสมอ แม้การ์ดจะวางขวาง (เช่นใบที่ 2 ของเซลติกครอส) */}
+          <span style={{ transform: `rotate(${-(pos.rotate ?? 0)}deg)` }}>{idx + 1}</span>
         </div>
       ))}
     </div>
