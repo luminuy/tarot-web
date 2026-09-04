@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0068 · 2026-09-04 08:04 · 🟠 High · ปิดช่องล้มเงียบของระบบสิทธิ์ + ประกาศนโยบายเมื่อ D1 ล่มให้ชัด
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ถ้า D1 ล่มหรือตารางสิทธิ์หาย สมาชิกเปิดไพ่แล้วเจอ 500 ทั้งหน้า (QuotaBadge พังด้วย) และถ้า INSERT ล้มด้วยเหตุอื่นที่ไม่ใช่ชน UNIQUE ผู้ใช้จะได้เปิดไพ่ฟรีโดยไม่ถูกหักสิทธิ์ ไม่มี log ไม่มี metric ให้ใครรู้ |
+| **สาเหตุราก** | catch ท้าย consumeReading() เหมาว่า error ทุกชนิดคือการชน UNIQUE จึงคืน true เสมอ ทำให้ error จริงกลายเป็นการเปิดไพ่ฟรีแบบไร้ร่องรอย ส่วน getEntitlement() เรียก memberUsage() โดยไม่มี catch จึง throw ทะลุออกเป็น 500 และ refundReading() ใช้ catch เปล่ากลืน error ทิ้ง |
+| **การแก้ไข** | เพิ่ม isUniqueViolation() แยกชนิด error ให้เฉพาะการชน UNIQUE คืน true, เพิ่ม onDbFailure() ที่ยิง recordEvent(entitlement_db_error) พร้อม console.error แล้วคืนค่าตาม DB_FAILURE_POLICY, ครอบ getEntitlement() ใน consumeReading ด้วย try/catch, ให้ getEntitlement คืนสิทธิ์แบบ degrade แทนการ throw เมื่อ memberUsage ล้ม, และเปลี่ยน catch เปล่าใน refundReading เป็นการยิง entitlement_refund_failed พร้อม log |
+| **🛡️ กฎป้องกันถาวร** | **ประกาศ DB_FAILURE_POLICY เป็นค่าคงที่เดียวพร้อมเหตุผลกำกับในไฟล์ ห้ามปล่อยให้พฤติกรรมตอนระบบล่มเป็นผลพลอยได้ของ try/catch อีก และทุก catch ที่แตะ D1 ต้องยิง metric ก่อนตัดสินใจเสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | stub globalThis.__tarot_d1_shim__ ให้ throw D1_ERROR no such table แล้วเรียกฟังก์ชันจริง ก่อนแก้ consumeReading/getEntitlement throw ทั้งคู่ หลังแก้คืน true และคืนสิทธิ์ degrade remaining 3 ตามลำดับ ผู้เยี่ยมชมยังคืน true เมื่อยังไม่ใช้และ false เมื่อใช้หมด repo:verify ผ่าน 23/23 รวมด่านกันหักซ้ำ |
+| **บันทึกโดย** | Antigravity AI · branch `fix/entitlement-db-failure-policy` · commit `2b46d60` |
+
+
 ### INC-0067 · 2026-09-04 07:42 · 🟡 Medium · เมนู dropdown เลิกกระพริบตอนเลื่อนหน้า — คืนชีพ sticky header
 
 | หัวข้อ | รายละเอียด |
