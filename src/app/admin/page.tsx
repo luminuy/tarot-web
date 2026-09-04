@@ -1,150 +1,576 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 
+// Dynamic Admin Panels
+const AdminOverview = dynamic(() => import("@/components/admin/AdminOverview"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดภาพรวมระบบ…" />,
+});
 const StatsDashboard = dynamic(() => import("@/components/admin/StatsDashboard"), {
   ssr: false,
-  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดแดชบอร์ด…</p>,
+  loading: () => <AdminLoading label="กำลังโหลดสถิติ…" />,
 });
 const SystemHealthPanel = dynamic(() => import("@/components/admin/SystemHealthPanel"), {
   ssr: false,
-  loading: () => <p className="text-sm text-[#9c93b8]">กำลังตรวจสถานะระบบ…</p>,
-});
-const ContentEditor = dynamic(() => import("@/components/admin/ContentEditor"), {
-  ssr: false,
-  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดตัวแก้เนื้อหา…</p>,
-});
-const ReadersManager = dynamic(() => import("@/components/admin/ReadersManager"), {
-  ssr: false,
-  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลดรายการแม่หมอ…</p>,
-});
-const EntitlementAdmin = dynamic(() => import("@/components/admin/EntitlementAdmin"), {
-  ssr: false,
-  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>,
+  loading: () => <AdminLoading label="กำลังตรวจสุขภาพระบบ…" />,
 });
 const AiHealthPanel = dynamic(() => import("@/components/admin/AiHealthPanel"), {
   ssr: false,
-  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>,
+  loading: () => <AdminLoading label="กำลังตรวจสุขภาพ AI…" />,
+});
+const ContentEditor = dynamic(() => import("@/components/admin/ContentEditor"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดตัวแก้เนื้อหา…" />,
+});
+const ReadersManager = dynamic(() => import("@/components/admin/ReadersManager"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดรายชื่อหมอดู…" />,
+});
+const EntitlementAdmin = dynamic(() => import("@/components/admin/EntitlementAdmin"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดสิทธิ์และโควตา…" />,
 });
 const MarketingAudience = dynamic(() => import("@/components/admin/MarketingAudience"), {
   ssr: false,
-  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>,
+  loading: () => <AdminLoading label="กำลังโหลดระบบข่าวสาร…" />,
 });
 
-type Tab = "system" | "stats" | "content" | "readers" | "entitlement" | "ai" | "marketing";
+function AdminLoading({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#e5c07b] border-t-transparent mb-3" />
+      <p className="text-xs text-[#9c93b8] font-sans">{label}</p>
+    </div>
+  );
+}
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "system", label: "✦ สถานะระบบ (Cloud Health)" },
-  { id: "stats", label: "สถิติ" },
-  { id: "content", label: "เนื้อหา (prompt / ไพ่ / AI)" },
-  { id: "readers", label: "แม่หมอ (Marketplace)" },
-  { id: "entitlement", label: "สิทธิ์เปิดไพ่" },
-  { id: "ai", label: "สุขภาพ AI" },
-  { id: "marketing", label: "ข่าวสาร (Consent)" },
+export type TabId =
+  | "overview"
+  | "stats"
+  | "health"
+  | "content"
+  | "entitlement"
+  | "readers"
+  | "marketing";
+
+interface NavItem {
+  id: TabId;
+  label: string;
+  badge?: string;
+  description: string;
+}
+
+interface NavSection {
+  group: string;
+  items: NavItem[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    group: "ภาพรวมและข้อมูล",
+    items: [
+      {
+        id: "overview",
+        label: "ภาพรวมระบบ",
+        description: "ศูนย์บัญชาการสถานะรวม, สถิติสด, และบันทึกประวัติการกระทำ",
+      },
+      {
+        id: "stats",
+        label: "สถิติการใช้งาน",
+        description: "กราฟและตัวเลขการเปิดไพ่ อัตราความนิยมของหมวดหมู่และไพ่",
+      },
+    ],
+  },
+  {
+    group: "ระบบและโครงสร้าง",
+    items: [
+      {
+        id: "health",
+        label: "สุขภาพระบบ & AI",
+        description: "ตรวจสอบการเชื่อมต่อ Cloudflare D1, KV, Vectorize, และโมเดล AI",
+      },
+      {
+        id: "entitlement",
+        label: "สิทธิ์ & โควตา",
+        description: "ควบคุมสวิตช์ระบบสิทธิ์, โควตาเปิดไพ่ฟรี, และโครงสร้างฐานข้อมูล D1",
+      },
+    ],
+  },
+  {
+    group: "เนื้อหาและการบริการ",
+    items: [
+      {
+        id: "content",
+        label: "เนื้อหา & ไพ่ 78 ใบ",
+        description: "แก้ไข System Prompt, เสียงแม่หมอ 6 สไตล์, และความหมายไพ่ทั้ง 78 ใบ",
+      },
+      {
+        id: "readers",
+        label: "หมอดูพาร์ทเนอร์",
+        description: "จัดการโปรไฟล์ ตรวจสอบคุณสมบัติ และรายการจองคิวแม่หมอ",
+      },
+      {
+        id: "marketing",
+        label: "ข่าวสาร & สมาชิก",
+        description: "รายชื่อผู้ยินยอมรับข่าวสาร สมาชิก และการส่งออกข้อมูล CSV",
+      },
+    ],
+  },
 ];
 
-export default function AdminHome() {
-  const router = useRouter();
-  const [state, setState] = useState<"loading" | "ready" | "denied">("loading");
-  const [tab, setTab] = useState<Tab>("system");
+// SVG Icons for clean, sacred executive feel (No cartoon emojis)
+function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string }) {
+  switch (id) {
+    case "overview":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+          />
+        </svg>
+      );
+    case "stats":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+      );
+    case "health":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          />
+        </svg>
+      );
+    case "content":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          />
+        </svg>
+      );
+    case "entitlement":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+          />
+        </svg>
+      );
+    case "readers":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      );
+    case "marketing":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          />
+        </svg>
+      );
+  }
+}
 
+function AdminContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [authState, setAuthState] = useState<"loading" | "ready" | "denied">("loading");
+  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [healthSubTab, setHealthSubTab] = useState<"system" | "ai">("system");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Sync tab from URL query params
+  useEffect(() => {
+    const rawTab = searchParams.get("tab");
+    if (!rawTab) {
+      setActiveTab("overview");
+      return;
+    }
+
+    if (rawTab === "system") {
+      setActiveTab("health");
+      setHealthSubTab("system");
+    } else if (rawTab === "ai") {
+      setActiveTab("health");
+      setHealthSubTab("ai");
+    } else if (
+      ["overview", "stats", "health", "content", "readers", "entitlement", "marketing"].includes(
+        rawTab,
+      )
+    ) {
+      setActiveTab(rawTab as TabId);
+    }
+  }, [searchParams]);
+
+  // Authenticate session
   useEffect(() => {
     fetch("/api/admin/session")
       .then((r) => r.json())
       .then((d) => {
-        if (d.admin) setState("ready");
+        if (d.admin) setAuthState("ready");
         else {
-          setState("denied");
+          setAuthState("denied");
           router.replace("/admin/login");
         }
       })
       .catch(() => {
-        setState("denied");
+        setAuthState("denied");
         router.replace("/admin/login");
       });
   }, [router]);
+
+  const selectTab = useCallback(
+    (tabId: string) => {
+      let resolvedTab: TabId = "overview";
+      if (tabId === "system") {
+        resolvedTab = "health";
+        setHealthSubTab("system");
+      } else if (tabId === "ai") {
+        resolvedTab = "health";
+        setHealthSubTab("ai");
+      } else if (
+        ["overview", "stats", "health", "content", "readers", "entitlement", "marketing"].includes(
+          tabId,
+        )
+      ) {
+        resolvedTab = tabId as TabId;
+      }
+
+      setActiveTab(resolvedTab);
+      setMobileMenuOpen(false);
+
+      const params = new URLSearchParams(window.location.search);
+      params.set("tab", resolvedTab);
+      router.replace(`/admin?${params.toString()}`, { scroll: false });
+    },
+    [router],
+  );
 
   const logout = useCallback(async () => {
     await fetch("/api/admin/logout", { method: "POST" }).catch(() => {});
     router.replace("/admin/login");
   }, [router]);
 
-  if (state !== "ready") {
+  if (authState !== "ready") {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-[#9c93b8]">
-        กำลังตรวจสอบสิทธิ์…
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#05040a] text-sm text-[#9c93b8]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#e5c07b] border-t-transparent" />
+        <p className="font-sans">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ…</p>
       </div>
     );
   }
 
+  // Find active metadata for header breadcrumb
+  let activeItem: NavItem | undefined;
+  for (const sec of NAV_SECTIONS) {
+    const it = sec.items.find((i) => i.id === activeTab);
+    if (it) {
+      activeItem = it;
+      break;
+    }
+  }
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 space-y-6">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5c07b]/20">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[#ffd700] text-xl">✦</span>
-            <h1 className="font-mystic-gold text-lg sm:text-2xl font-bold tracking-wide text-white">
-              แผงควบคุมระบบ SeerTarot
-            </h1>
+    <div className="min-h-screen bg-[#05040a] text-[#f5deaa]">
+      {/* ─── Top Executive Bar ──────────────────────────────────────── */}
+      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[#e5c07b]/20 bg-[#0c0818]/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3">
+          {/* Mobile hamburger button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e5c07b]/20 bg-[#170e2a] text-[#e5c07b] lg:hidden hover:border-[#e5c07b]/40"
+            aria-label="เปิดเมนูนำทาง"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+
+          <div className="flex items-center gap-2.5">
+            <span className="text-[#ffd700] text-xl font-bold">✦</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mystic-gold text-base sm:text-lg font-bold tracking-wide text-white">
+                  SeerTarot Admin
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  LIVE
+                </span>
+              </div>
+              <p className="hidden md:block text-[11px] text-[#9c93b8]">
+                ศูนย์บริหารวิหารพยากรณ์ไพ่ทาโรต์ระดับพรีเมียม
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-[#9c93b8] mt-1 font-serif-th">
-            ศูนย์บริหารจัดการ วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ระดับพรีเมียม (seertarot.net)
-          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <a
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[#e5c07b]/30 bg-[#170e2a] px-3 py-1.5 text-xs text-[#f5deaa] hover:border-[#ffd700] hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#e5c07b]/30 bg-[#170e2a] px-3 py-1.5 text-xs text-[#f5deaa] hover:border-[#ffd700] hover:text-white transition-all shadow-sm"
           >
             <span>✦ เปิดหน้าเว็บจริง</span>
-            <span className="text-[13px] text-[#9c93b8]">↗</span>
+            <span className="text-[11px] text-[#9c93b8]">↗</span>
           </a>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-xs text-[#9c93b8] hover:text-rose-300">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            className="text-xs text-[#9c93b8] hover:text-rose-300 hover:bg-rose-950/20"
+          >
             ออกจากระบบ
           </Button>
         </div>
       </header>
 
-      <nav className="flex flex-wrap gap-2">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-              tab === t.id
-                ? "border-[#ffd700] bg-[#e5c07b]/20 text-[#ffd700] shadow-[0_0_15px_rgba(229,192,123,0.2)]"
-                : "border-[#e5c07b]/25 text-[#9c93b8] hover:border-[#ffd700]/40 hover:text-[#e5c07b]"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
+      {/* ─── Main Admin Workspace ──────────────────────────────────── */}
+      <div className="mx-auto flex max-w-7xl flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
+        {/* ─── Desktop Sidebar ────────────────────────────────────── */}
+        <aside className="hidden w-64 shrink-0 border-r border-[#e5c07b]/15 bg-[#090614]/70 p-4 lg:block">
+          <div className="sticky top-20 space-y-6">
+            {NAV_SECTIONS.map((section) => (
+              <div key={section.group} className="space-y-1.5">
+                <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-[#9c93b8]/70">
+                  {section.group}
+                </p>
+                <nav className="space-y-1">
+                  {section.items.map((item) => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => selectTab(item.id)}
+                        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition-all ${
+                          isActive
+                            ? "bg-[#e5c07b]/15 text-[#ffd700] font-semibold border border-[#e5c07b]/30 shadow-[0_0_15px_rgba(229,192,123,0.1)]"
+                            : "text-[#c2b7de] hover:bg-[#191230]/70 hover:text-white"
+                        }`}
+                      >
+                        <span
+                          className={`transition-colors ${
+                            isActive ? "text-[#ffd700]" : "text-[#9c93b8] group-hover:text-[#e5c07b]"
+                          }`}
+                        >
+                          <TabIcon id={item.id} className="w-4 h-4" />
+                        </span>
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {isActive && <span className="text-[10px] text-[#ffd700]">✦</span>}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+            ))}
 
-      <section className="pt-2">
-        {tab === "system" ? (
-          <SystemHealthPanel onSwitchTab={(t) => setTab(t)} />
-        ) : tab === "stats" ? (
-          <StatsDashboard />
-        ) : tab === "content" ? (
-          <ContentEditor />
-        ) : tab === "readers" ? (
-          <ReadersManager />
-        ) : tab === "ai" ? (
-          <AiHealthPanel />
-        ) : tab === "marketing" ? (
-          <MarketingAudience />
-        ) : (
-          <EntitlementAdmin />
+            <div className="rounded-xl border border-[#e5c07b]/15 bg-[#120b22]/60 p-3 text-[11px] text-[#9c93b8]">
+              <div className="flex items-center gap-1.5 font-medium text-[#e5c07b]">
+                <span>✦</span>
+                <span>มาตรฐานระบบ</span>
+              </div>
+              <p className="mt-1 text-[10px] leading-relaxed text-[#9c93b8]">
+                Provably-Fair Tarot 100% ควบคุมด้วย Cloudflare Workers & D1 Architecture
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        {/* ─── Mobile Drawer Menu ──────────────────────────────────── */}
+        {mobileMenuOpen && (
+          <div className="border-b border-[#e5c07b]/20 bg-[#090614] p-4 lg:hidden animate-in fade-in slide-in-from-top duration-200">
+            <div className="space-y-4">
+              {NAV_SECTIONS.map((section) => (
+                <div key={section.group} className="space-y-1">
+                  <p className="px-2 text-[10px] font-semibold uppercase tracking-wider text-[#9c93b8]">
+                    {section.group}
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {section.items.map((item) => {
+                      const isActive = activeTab === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => selectTab(item.id)}
+                          className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs ${
+                            isActive
+                              ? "bg-[#e5c07b] text-[#120f1d] font-semibold"
+                              : "bg-[#170e2a] text-[#e2d9f3] hover:bg-[#20153a]"
+                          }`}
+                        >
+                          <TabIcon id={item.id} className="w-3.5 h-3.5 shrink-0" />
+                          <span className="truncate">{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
-      </section>
+
+        {/* ─── Mobile Horizontal Quick Pill Strip ───────────────────── */}
+        <div className="flex overflow-x-auto border-b border-[#e5c07b]/15 bg-[#090614]/90 px-4 py-2.5 gap-1.5 lg:hidden no-scrollbar">
+          {NAV_SECTIONS.flatMap((s) => s.items).map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => selectTab(item.id)}
+                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors ${
+                  isActive
+                    ? "bg-[#e5c07b] text-[#120f1d] font-semibold shadow-sm"
+                    : "border border-[#e5c07b]/20 bg-[#120b22] text-[#9c93b8]"
+                }`}
+              >
+                <TabIcon id={item.id} className="w-3 h-3" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ─── Tab Content Workspace ──────────────────────────────── */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+          {/* Header Description Banner */}
+          {activeItem && (
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e5c07b]/15 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[#ffd700]">✦</span>
+                  <h2 className="text-lg sm:text-xl font-bold text-white font-mystic-gold">
+                    {activeItem.label}
+                  </h2>
+                </div>
+                <p className="text-xs text-[#9c93b8] mt-0.5">
+                  {activeItem.description}
+                </p>
+              </div>
+
+              {/* Special Sub-navigation when on "health" tab */}
+              {activeTab === "health" && (
+                <div className="flex items-center gap-1 rounded-xl border border-[#e5c07b]/25 bg-[#0c0818] p-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setHealthSubTab("system")}
+                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
+                      healthSubTab === "system"
+                        ? "bg-[#e5c07b] text-[#120f1d] shadow-sm font-semibold"
+                        : "text-[#9c93b8] hover:text-[#e2d9f3]"
+                    }`}
+                  >
+                    ✦ Cloudflare & D1
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHealthSubTab("ai")}
+                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
+                      healthSubTab === "ai"
+                        ? "bg-[#e5c07b] text-[#120f1d] shadow-sm font-semibold"
+                        : "text-[#9c93b8] hover:text-[#e2d9f3]"
+                    }`}
+                  >
+                    ✨ ประสิทธิภาพ AI
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Active Panel View */}
+          <div className="space-y-6">
+            {activeTab === "overview" && (
+              <AdminOverview onNavigateTab={selectTab} />
+            )}
+
+            {activeTab === "stats" && <StatsDashboard />}
+
+            {activeTab === "health" && (
+              <div>
+                {healthSubTab === "system" ? (
+                  <SystemHealthPanel
+                    onSwitchTab={(target) => {
+                      if (target === "ai") setHealthSubTab("ai");
+                      else selectTab(target);
+                    }}
+                  />
+                ) : (
+                  <AiHealthPanel />
+                )}
+              </div>
+            )}
+
+            {activeTab === "content" && <ContentEditor />}
+
+            {activeTab === "readers" && <ReadersManager />}
+
+            {activeTab === "entitlement" && <EntitlementAdmin />}
+
+            {activeTab === "marketing" && <MarketingAudience />}
+          </div>
+        </main>
+      </div>
     </div>
+  );
+}
+
+export default function AdminHome() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#05040a] text-sm text-[#9c93b8]">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#e5c07b] border-t-transparent" />
+          <p className="font-sans">กำลังเตรียมแผงควบคุมระบบ…</p>
+        </div>
+      }
+    >
+      <AdminContent />
+    </Suspense>
   );
 }

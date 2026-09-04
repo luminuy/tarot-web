@@ -35,6 +35,30 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: Rebuild แผงควบคุมผู้ดูแลระบบ (/admin) สู่มาตรฐานระดับโลก — โดย Antigravity
+
+- **Executive Command Center (`src/components/admin/AdminOverview.tsx`)**:
+  - สร้างคอมโพเนนต์แดชบอร์ดสรุปภาพรวมผู้บริหาร: รวมบัตรสรุปตัวเลขสำคัญ (Total Users ใน D1, จำนวนครั้งการเปิดไพ่รวม, สถานะสุขภาพ Cloudflare Stack, อัตรา Quota & Safety Block)
+  - ชีพจรโครงสร้างพื้นฐานสด (Cloud Infrastructure Pulse): เชื่อมต่อสดกับ D1, KV, Vectorize, Dual AI Providers (Gemini & Groq LPU)
+  - แผง Quick Actions ทางลัดด่วน: เข้าแก้ Prompt/ไพ่, สร้าง Semantic Index ใหม่, โหลด CSV ข่าวสาร, เตรียมตาราง D1
+  - ตาราง Audit Log กิจกรรมล่าสุด: แสดงการเข้าสู่ระบบ, การแก้ prompt/content, การปรับ quota พร้อมเวลาภาษาไทยที่อ่านง่ายและ tag สี
+- **สถาปัตยกรรม App Shell ทันสมัย (`src/app/admin/page.tsx`)**:
+  - เมนูนำทางแบบ Sidebar บนเดสก์ท็อป และ Mobile Drawer / Horizontal Pill Bar บนมือถือ
+  - จัดหมวดหมู่ 3 กลุ่ม 7 แท็บ เป็นสัดส่วน เข้าใจง่าย ไม่ซับซ้อน:
+    - ภาพรวมและข้อมูล: `overview` (ภาพรวมระบบ), `stats` (สถิติการใช้งาน)
+    - ระบบและโครงสร้าง: `health` (สุขภาพระบบ & AI รวม System + AI เข้าด้วยกันอย่างลงตัวพร้อม sub-tabs), `entitlement` (สิทธิ์ & โควตา)
+    - เนื้อหาและการบริการ: `content` (เนื้อหา & ไพ่ 78 ใบ), `readers` (หมอดูพาร์ทเนอร์), `marketing` (ข่าวสาร & สมาชิก)
+  - ซิงก์ URL Query Param อัตโนมัติ (`?tab=...`) รองรับการรีเฟรชและการแชร์ลิงก์ตรง โดยครอบ `<Suspense>` ป้องกัน CSR bailout
+  - คงความเข้ากันได้แบบ Backward Compatible 100% กับลิงก์เดิม (`?tab=system`, `?tab=ai`, `onSwitchTab`)
+- **แก้ไขและยกระดับตัวแก้ไขไพ่ (`src/components/admin/ContentEditor.tsx`)**:
+  - แก้ไขจุดบกพร่อง `slice(0, 60)` ที่ซ่อนไพ่ 18 ใบสุดท้าย ทำให้สามารถเลือกและแก้ไขไพ่ครบทั้ง 78 ใบ
+  - เพิ่มปุ่มกรองชุดไพ่ (Suit Filter): `ทั้งหมด`, `Major (22)`, `ไม้เท้า (14)`, `ถ้วย (14)`, `ดาบ (14)`, `เหรียญ (14)`
+  - ผสานรวมคอมโพเนนต์ `<CardImage />` ขนาด 64px แสดงพรีวิวภาพหน้าไพ่จริง 1909 Rider-Waite ขณะแก้ไขความหมาย
+  - ปรับดีไซน์ขอบทองคำเปลวและข้อความภาษาไทยให้เรียบหรู เข้าใจง่าย
+- **การตรวจสอบคุณภาพ**:
+  - ผ่าน `npm run typecheck` (0 errors)
+  - ผ่าน `npm run repo:verify` ครบ 24 ด่าน 100%
+
 ### 🗓️ 2026-09-04: ปิดงานค้างทั้ง 7 รายการตาม HANDOFF_2026-09-04.md (ISSUE-017 ถึง 023) — โดย Antigravity
 
 - **ISSUE-018 (PDPA Security for Marketplace Queue)**:
