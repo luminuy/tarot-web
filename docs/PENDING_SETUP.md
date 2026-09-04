@@ -26,47 +26,35 @@
 
 สามารถตรวจสอบได้ด้วยคำสั่ง: `npx wrangler secret list`
 
-```
-├── ADMIN_PASSWORD          # รหัสผ่านสำหรับเข้าแผงควบคุมหลังบ้าน (/admin)
-├── APP_ORIGIN              # https://seertarot.net (ใช้สร้าง Callback และลิงก์รีเซ็ตรหัสผ่าน)
-├── EMAIL_FROM              # แม่หมอทาโรต์ <noreply@seertarot.net>
-├── GEMINI_API_KEY          # Google Gemini AI API Key
-├── GOOGLE_CLIENT_ID        # Google OAuth Client ID
-├── GOOGLE_CLIENT_SECRET    # Google OAuth Client Secret
-├── LINE_CHANNEL_ID         # LINE Login Channel ID (2011389525)
-├── LINE_CHANNEL_SECRET     # LINE Login Channel Secret
-├── PASSWORD_PEPPER         # กุญแจลับระดับเซิร์ฟเวอร์สำหรับ PBKDF2 Password Hashing
-├── RESEND_API_KEY          # Resend API Key (re_...) สำหรับส่งอีเมล
-│   (SUPPORT_EMAIL)         # ตัวเลือก — ทับ Reply-To ของอีเมลระบบ (ค่าเริ่มต้น support@seertarot.net)
-├── TAROT_SESSION_SECRET    # กุญแจลับสำหรับเซ็น Session Token (Provably Fair & Auth)
-├── TESTER_PASSWORD         # รหัสผ่านสำหรับโหมดผู้ทดสอบไม่จำกัด (/tester)
-└── UNLIMITED_EMAILS        # บัญชีอีเมลที่ได้รับสิทธิ์ดูดวงไม่จำกัด
-```
-
-### ⏳ รอตั้งเพิ่ม — AI Gateway (ดู `docs/plans/CLOUDFLARE_FREE_STACK.md` Wave 1-1)
+ยืนยันจาก `npx wrangler secret list` (2026-09-04) — **ตั้งครบ 18 ตัว**:
 
 ```
-├── CF_AI_GATEWAY_ACCOUNT_ID   # Cloudflare Account ID (dashboard → AI Gateway)
-├── CF_AI_GATEWAY_ID           # ชื่อ gateway (แนะนำ: seertarot-ai)
-└── CF_AI_GATEWAY_TOKEN        # (ไม่บังคับ) ใส่เมื่อเปิด Authenticated Gateway
+├── ADMIN_PASSWORD            # รหัสผ่านเข้าแผงควบคุม /admin
+├── APP_ORIGIN                # https://seertarot.net (Callback + ลิงก์รีเซ็ตรหัสผ่าน)
+├── CF_AI_GATEWAY_ACCOUNT_ID  # Cloudflare Account ID (AI Gateway)
+├── CF_AI_GATEWAY_ID          # ชื่อ gateway = seertarot-ai
+├── EMAIL_FROM                # แม่หมอทาโรต์ <noreply@seertarot.net>
+├── GEMINI_API_KEY            # Google Gemini — เอนจินคำอ่าน Tier 2 (fallback)
+├── GOOGLE_CLIENT_ID          # Google OAuth Client ID
+├── GOOGLE_CLIENT_SECRET      # Google OAuth Client Secret
+├── GROQ_API_KEY              # Groq LPU — เอนจินคำอ่าน Tier 1 (Qwen3-27B · โควตาฟรี 14.4k/วัน)
+├── LINE_CHANNEL_ID           # LINE Login Channel ID (2011389525)
+├── LINE_CHANNEL_SECRET       # LINE Login Channel Secret
+├── PASSWORD_PEPPER           # กุญแจลับ PBKDF2 Password Hashing
+├── RESEND_API_KEY            # Resend API Key (re_...) ส่งอีเมล
+├── TAROT_SESSION_SECRET      # กุญแจเซ็น Session Token (Provably Fair & Auth)
+├── TESTER_PASSWORD           # รหัสผ่านโหมดผู้ทดสอบไม่จำกัด (/tester)
+├── TURNSTILE_SECRET_KEY      # Turnstile — กันบอท signup/login/forgot
+├── TURNSTILE_SITE_KEY        # Turnstile Site Key (client ดึงผ่าน /api/config/turnstile)
+└── UNLIMITED_EMAILS          # allowlist อีเมลดูดวงไม่จำกัด
 ```
 
-> ยังไม่ตั้ง = การเรียก AI ยิงตรงไป provider เหมือนเดิม ไม่พัง — helper `src/lib/ai/gateway.ts` fallback ให้อัตโนมัติ
+**ตัวเลือก (ยังไม่ได้ตั้ง — ไม่บังคับ):**
+- `SUPPORT_EMAIL` — ทับ Reply-To ของอีเมลระบบ (ค่าเริ่มต้น `support@seertarot.net`)
+- `CF_AI_GATEWAY_TOKEN` — ใส่เมื่อเปิด Authenticated Gateway
 
-### ⏳ รอตั้งเพิ่ม — Turnstile (Wave 1-3)
-
-```
-├── TURNSTILE_SITE_KEY     # Site Key — ตั้งผ่าน secret (pipeline ไม่ส่ง env ตอน build) · client ดึงผ่าน /api/config/turnstile
-└── TURNSTILE_SECRET_KEY   # Secret Key
-```
-
-> Dashboard → Turnstile → Add widget (Widget Mode: **Managed**, Domain: `seertarot.net` + `localhost`)
-> ```
-> npx wrangler secret put TURNSTILE_SITE_KEY      # 0x4AAAA...
-> npx wrangler secret put TURNSTILE_SECRET_KEY    # 0x4AAAA...
-> ```
-> ต้องตั้งคู่กันทั้งสองตัว ด่านกันบอทหน้า signup/login/forgot ถึงจะเปิด — ไม่ตั้ง = ด่านผ่านตลอด
-> (verify ฝั่ง server มี fail-safe: siteverify ล่ม/timeout = ปล่อยผ่าน · ตั้งมาแค่ตัวเดียว = ถือว่ายังไม่เปิด)
+> **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
+> **AI Gateway / Turnstile**: ตั้งครบแล้ว ไม่ใช่รายการค้างอีกต่อไป
 
 ### ⏳ รอตั้งเพิ่ม — Vectorize / R2 (Wave 3)
 
