@@ -264,6 +264,35 @@ export async function markEmailVerified(userId: string): Promise<void> {
 }
 
 /**
+ * 🛡️ ยึดคืนบัญชีอีเมลที่ยัง **ไม่เคยยืนยันอีเมล** ให้เจ้าของตัวจริงที่ล็อกอินผ่าน OAuth
+ * ---------------------------------------------------------------------------
+ * กันช่องโหว่ "จองบัญชีล่วงหน้า" (pre-account hijacking):
+ * ผู้โจมตีสมัครด้วยอีเมลของเหยื่อพร้อมรหัสผ่านที่ตัวเองรู้ (ระบบยังไม่บังคับยืนยันอีเมล)
+ * ต่อมาเหยื่อกด "เข้าสู่ระบบด้วย Google" ซึ่งพิสูจน์แล้วว่าเป็นเจ้าของอีเมลจริง
+ * ถ้าเราผูก identity เข้ากับแถวเดิมเฉย ๆ เหยื่อจะเดินเข้าไปอยู่ในบัญชีของผู้โจมตี
+ * และผู้โจมตียังเข้าได้ด้วยรหัสผ่านเดิม → อ่านสมุดบันทึกดวง/ส่งออกข้อมูลของเหยื่อได้
+ *
+ * เมื่อ OAuth ยืนยันความเป็นเจ้าของอีเมลแล้ว จึงต้อง:
+ *   1. ล้างรหัสผ่านเดิมทิ้ง (ผู้โจมตีเข้าด้วยรหัสผ่านไม่ได้อีก)
+ *   2. เพิ่ม token_version (เตะเซสชันเดิมของผู้โจมตีออกทั้งหมดทันที)
+ *   3. ทำเครื่องหมายว่าอีเมลยืนยันแล้ว (ผู้ให้บริการ OAuth ยืนยันให้)
+ * คืนค่า token_version ใหม่ เพื่อให้ผู้เรียกออกเซสชันด้วยเลขที่ถูกต้อง
+ */
+export async function reclaimUnverifiedEmailAccount(userId: string): Promise<number> {
+  const db = await getAppDB();
+  await db
+    .prepare(
+      `UPDATE users
+       SET password_hash = NULL, email_verified = 1, token_version = token_version + 1, last_seen_at = ?
+       WHERE id = ? AND deleted_at IS NULL`
+    )
+    .bind(Date.now(), userId)
+    .run();
+
+  return getTokenVersion(userId);
+}
+
+/**
  * ดึง token_version ของผู้ใช้
  */
 export async function getTokenVersion(userId: string): Promise<number> {

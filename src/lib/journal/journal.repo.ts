@@ -70,8 +70,12 @@ export async function listJournal(
   opts?: { limit?: number; before?: number }
 ): Promise<SavedReadingItem[]> {
   const db = await getAppDB();
-  const limit = Math.min(200, opts?.limit ?? 50);
-  const before = opts?.before ?? Date.now() + 10000;
+  // ⚠️ ต้องมีขอบล่างด้วย ไม่ใช่แค่ Math.min — `?limit=-1` ทำให้ได้ `LIMIT -1`
+  // ซึ่งใน SQLite แปลว่า "ไม่จำกัด" คืนสมุดบันทึกทั้งเล่มพร้อม cards_json ในครั้งเดียว
+  const rawLimit = Number(opts?.limit);
+  const limit = Number.isFinite(rawLimit) ? Math.min(200, Math.max(1, Math.floor(rawLimit))) : 50;
+  const rawBefore = Number(opts?.before);
+  const before = Number.isFinite(rawBefore) && rawBefore > 0 ? rawBefore : Date.now() + 10000;
 
   const { results } = await db
     .prepare(

@@ -46,14 +46,32 @@ export async function GET(
 
 /**
  * DELETE /api/marketplace/tickets/[id] - ยกเลิกตั๋วคิว
+ *
+ * ⚠️ ต้องแนบ `customerRef` ของเจ้าของตั๋วมาด้วยเสมอ
+ * ก่อนหน้านี้ยกเลิกได้ด้วย ticket id เพียงอย่างเดียว ซึ่ง id ปรากฏอยู่ในลิงก์
+ * `/readers/queue/<id>` ที่ผู้ใช้แชร์ต่อ/ค้างอยู่ในประวัติเบราว์เซอร์ได้
+ * ใครเห็นลิงก์ก็เตะลูกค้าที่จ่ายเงินแล้วออกจากคิวแม่หมอได้ทันทีโดยไม่ต้องล็อกอิน
  */
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   try {
-    const ok = await cancelQueueTicket(id);
+    const url = new URL(request.url);
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+    const customerRef =
+      (typeof body.customerRef === "string" ? body.customerRef : "") ||
+      (url.searchParams.get("customerRef") ?? "");
+
+    if (!customerRef) {
+      return NextResponse.json(
+        { error: "ต้องระบุรหัสอ้างอิงของผู้จองคิว (customerRef)" },
+        { status: 400 }
+      );
+    }
+
+    const ok = await cancelQueueTicket(id, customerRef);
     if (!ok) {
       return NextResponse.json({ error: "ไม่สามารถยกเลิกตั๋วคิวได้" }, { status: 404 });
     }
