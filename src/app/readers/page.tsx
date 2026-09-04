@@ -21,7 +21,7 @@ export default async function ReadersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
+    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-x-clip">
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Top Breadcrumbs & Dropdown */}
         <div className="flex items-center justify-between border-b border-[#E4D8C4]/40 pb-4">
