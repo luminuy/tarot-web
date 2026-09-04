@@ -10,8 +10,10 @@
 
 import {
   countForeignCharacters,
+  FOREIGN_LEAK_SWITCH_THRESHOLD,
   hasForeignScript,
   isSevereForeignLeak,
+  SEVERE_FOREIGN_LEAK_THRESHOLD,
   objectHasForeignScript,
   sanitizeTarotText,
   stripForeignScript,
@@ -146,7 +148,9 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
         const sanitized = sanitizeTarotText(reply);
         if (hasForeignScript(sanitized)) {
           if (isSevereForeignLeak(sanitized)) {
-            console.warn(`[Groq ${model}] ⚠️ Severe foreign leak (>= 20 chars) — ตัดวงจร Groq สลับไป Gemini ทันที`);
+            console.warn(
+              `[Groq ${model}] ⚠️ Severe foreign leak (>= ${SEVERE_FOREIGN_LEAK_THRESHOLD} chars) — ตัดวงจร Groq สลับไป Gemini ทันที`,
+            );
             recordEvent("ai_severe_foreign_leak");
             recordEvent(`ai_severe_foreign_leak:${model}`);
             break;
@@ -380,8 +384,8 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
               if (foreignCount > 0) {
                 totalForeignChars += foreignCount;
                 // reasoning ถูกแยกออกแล้ว (reasoning_format: hidden) → นับเฉพาะเนื้อคำตอบจริง
-                // เกิน 14 ตัว = โมเดลนี้หลุดจีนใน content จริง สลับทันที
-                if (totalForeignChars >= 14) {
+                // ถึงเกณฑ์ SWITCH = โมเดลนี้หลุดจีนใน content จริง สลับโมเดลทันที
+                if (totalForeignChars >= FOREIGN_LEAK_SWITCH_THRESHOLD) {
                   console.warn(
                     `[Groq Reading ${model}] ⚠️ Circuit Breaker: อักษรต่างด้าวสะสม ${totalForeignChars} ตัว — สลับโมเดล`,
                   );
@@ -435,9 +439,12 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
       }
 
       if (foreignCircuitBreaker) {
-        if (totalForeignChars >= 20 || isSevereForeignLeak(jsonAccumulator)) {
+        if (
+          totalForeignChars >= SEVERE_FOREIGN_LEAK_THRESHOLD ||
+          isSevereForeignLeak(jsonAccumulator)
+        ) {
           console.warn(
-            `[Groq Reading ${model}] ⚠️ Severe foreign leak (สะสม ${totalForeignChars} ตัว >= 20) — ตัดวงจร Groq ข้ามไป Gemini ทันที`,
+            `[Groq Reading ${model}] ⚠️ Severe foreign leak (สะสม ${totalForeignChars} ตัว >= ${SEVERE_FOREIGN_LEAK_THRESHOLD}) — ตัดวงจร Groq ข้ามไป Gemini ทันที`,
           );
           recordEvent("ai_severe_foreign_leak");
           recordEvent(`ai_severe_foreign_leak:${model}`);

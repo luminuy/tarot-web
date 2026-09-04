@@ -76,10 +76,29 @@ export const CHINESE_LEAK_MAP: Record<string, string> = {
 };
 
 /**
- * ตรวจว่ามีการหลุดของภาษาต่างด้าวอย่างร้ายแรงหรือไม่ (เช่น หลุดทั้งประโยคหรือทั้งย่อหน้า >= 20 ตัวอักษร)
- * ใช้เป็นเกณฑ์ในการตัดวงจร (Circuit Breaker) เพื่อสลับไปเรียก Gemini 3.6 ทันที
+ * 🚦 เกณฑ์ตัดวงจรเมื่อคำอ่านหลุดภาษาต่างด้าว — **แหล่งความจริงเดียวของตัวเลขทั้งสองระดับ**
+ * ---------------------------------------------------------------------------
+ * ⚠️ ห้ามเขียนตัวเลขพวกนี้ซ้ำที่อื่นเด็ดขาด ให้ import ไปใช้เท่านั้น
+ * ของเดิมเลข 14 กับ 20 ถูกฮาร์ดโค้ดไว้ใน `groq.ts` แยกจากค่า default ของฟังก์ชันข้างล่าง
+ * ถ้ามีคนปรับที่ไฟล์ใดไฟล์หนึ่ง อีกที่จะยังใช้ค่าเดิมโดยไม่มีอะไรเตือน
+ * แล้วเกณฑ์ "สลับโมเดล" กับ "เลิกกับ Groq ทั้งชุด" จะเพี้ยนไปคนละทางแบบเงียบ ๆ
+ *
+ * สองระดับต่างกันตรงนี้:
+ * - `SWITCH`  = โมเดลตัวนี้เริ่มหลุด → ลองโมเดล Groq ตัวถัดไป
+ * - `SEVERE`  = หลุดหนักระดับทั้งประโยค → เลิกกับ Groq ทั้งชุด กระโดดไป Gemini ทันที
  */
-export function isSevereForeignLeak(text: string | null | undefined, threshold = 20): boolean {
+export const FOREIGN_LEAK_SWITCH_THRESHOLD = 14;
+export const SEVERE_FOREIGN_LEAK_THRESHOLD = 20;
+
+/**
+ * ตรวจว่ามีการหลุดของภาษาต่างด้าวอย่างร้ายแรงหรือไม่
+ * (หลุดทั้งประโยคหรือทั้งย่อหน้า >= `SEVERE_FOREIGN_LEAK_THRESHOLD` ตัวอักษร)
+ * ใช้เป็นเกณฑ์ตัดวงจร (Circuit Breaker) เพื่อข้ามโมเดล Groq ที่เหลือแล้วสลับไป Gemini ทันที
+ */
+export function isSevereForeignLeak(
+  text: string | null | undefined,
+  threshold: number = SEVERE_FOREIGN_LEAK_THRESHOLD,
+): boolean {
   return countForeignCharacters(text) >= threshold;
 }
 
