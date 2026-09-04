@@ -137,8 +137,12 @@ export default function StatsDashboard() {
     const tokIn = r.ai_tokens_in ?? 0;
     const tokOut = r.ai_tokens_out ?? 0;
     const latSum = r.ai_latency_ms ?? 0;
-    const aiCalls = r["ai_call:gemini"] ?? 0;
+    const groqCalls = r["ai_call:groq"] ?? 0;
+    const geminiCalls = r["ai_call:gemini"] ?? 0;
+    const aiCalls = groqCalls + geminiCalls;
     const aiCapHit = r.ai_cap_hit ?? 0;
+    const foreignTrips = breakdown(r, "ai_foreign_trip:").filter((x) => x.key === "groq").reduce((s, x) => s + x.count, 0);
+    const schemaFails = breakdown(r, "ai_schema_fail:").filter((x) => x.key === "groq").reduce((s, x) => s + x.count, 0);
     return {
       started,
       completed,
@@ -148,7 +152,13 @@ export default function StatsDashboard() {
       avgLatency: aiCalls ? `${(latSum / aiCalls / 1000).toFixed(1)} วิ` : "—",
       tokens: tokIn + tokOut,
       aiCalls,
-      aiErrors: r["ai_error:gemini"] ?? 0,
+      groqCalls,
+      geminiCalls,
+      groqShare: pct(groqCalls, aiCalls),
+      groqFailover: r.ai_groq_failover ?? 0,
+      foreignTrips,
+      schemaFails,
+      aiErrors: (r["ai_error:gemini"] ?? 0) + (r["ai_error:groq"] ?? 0),
       aiCapHit,
       chat: r.chat_message ?? 0,
       spreads: breakdown(r, "spread:"),
@@ -199,7 +209,16 @@ export default function StatsDashboard() {
               value={`${n(data?.aiCapToday ?? 0)} / ${n(data?.aiDailyCap ?? 2000)}`}
               sub={view.aiCapHit > 0 ? `เต็มโควตา ${n(view.aiCapHit)} ครั้ง` : "ใช้งานปกติ"}
             />
-            <StatCard label="เรียก AI (Gemini)" value={n(view.aiCalls)} sub={`ผิดพลาด ${n(view.aiErrors)} ครั้ง`} />
+            <StatCard
+              label="เรียก AI (Groq / Gemini)"
+              value={`${n(view.groqCalls)} / ${n(view.geminiCalls)}`}
+              sub={`Groq ${view.groqShare} · ผิดพลาด ${n(view.aiErrors)} ครั้ง`}
+            />
+            <StatCard
+              label="Groq เอนจิน — สุขภาพ"
+              value={`${n(view.groqFailover)} failover`}
+              sub={`จีนหลุดตัดวงจร ${n(view.foreignTrips)} · schema fail ${n(view.schemaFails)}`}
+            />
             <StatCard label="เวลาเฉลี่ย/คำอ่าน" value={view.avgLatency} />
             <StatCard label="Token รวม" value={n(view.tokens)} sub="in + out" />
           </div>

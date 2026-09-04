@@ -8,11 +8,14 @@ import { getContentOverrides, resolveCardByIndex, resolvePersona, resolveSystemC
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
+import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
+import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
+import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
 import { checkQuestion, CRISIS_MESSAGE } from "@/lib/safety/guardrails";
 import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
-import { stripThinkingTags } from "@/lib/ai/language";
+import { sanitizeTarotText, stripThinkingTags } from "@/lib/ai/language";
 
 export const runtime = "nodejs";
 
@@ -300,9 +303,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         const card = resolveCardByIndex(overrideDoc, d.cardIndex);
         if (!card) return null;
         const pos = spread?.positions[d.order];
-        return `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"}`;
+        const lore = formatCardLoreForPrompt(card.id);
+        const cardHeader = `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"} | ธาตุ: ${card.element}`;
+        return lore ? `${cardHeader}\n   ${lore}` : cardHeader;
       })
       .filter((line): line is string => !!line);
+
+    const rawCards = (record.drawn || [])
+      .map((d) => cardByIndex(d.cardIndex))
+      .filter((c): c is import("@/data/cards").TarotCard => !!c);
+    const gazeDialogue = analyzeSpatialGazeDialogue(rawCards);
+    const questionDiagnosis = diagnoseQuestionEnergy(userQuestion);
 
     const systemInstruction = `${buildSystemPrompt(personaId, {
       systemCore: resolveSystemCore(overrideDoc),
@@ -317,6 +328,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 ${cards.join("\n")}
 
 • สรุปคำทำนายเดิมที่คุณเคยบอกไว้: "${record.result?.summary || "กำลังอยู่ในช่วงการเปลี่ยนแปลงที่ดี"}"
+${gazeDialogue.dialogueNarrative ? `\n• บทสนทนาทางสายตาบนหน้าไพ่:\n${gazeDialogue.dialogueNarrative}` : ""}
+${questionDiagnosis.promptDirective}
 
 ## กฎเหล็กการคิดและตอบคำถามต่อยอด (Think & Speak Like The World's Best Tarot Master)
 1. **การรักษาตัวตนและน้ำเสียง (Persona Consistency)**: สวมบทบาทแม่หมอตามบุคลิกที่เลือก 100% พูดจาเป็นธรรมชาติ ไหลลื่น เหมือนเพื่อนสนิท/พี่สาว/ผู้หยั่งรู้ นั่งคุยกันในห้องส่วนตัว
@@ -342,8 +355,39 @@ ${cards.join("\n")}
    - เน้นคำสำคัญด้วยเครื่องหมายตัวหนา เช่น **ตัวหนา** เท่าที่จำเป็น
    - ห้ามใช้คำหุ่นยนต์ เช่น "ตามหลักการของไพ่ระบุว่า..."`;
 
-    // Pure Google Gemini 3.7 Flash AI Engine
-    // แชท = สมาชิกเท่านั้น (หรือธงปิด = พฤติกรรมเดิม) → ใช้เพดานชั้นสมาชิก (100%) เสมอ
+    // ── Tier 1: Groq LPU AI Engine (Qwen 3.8 27B) — ทัพหน้าความเร็ว 300+ tok/s ตอบใน 0.5-1s รองรับ 14,400 req/day ──
+    const groqKey = process.env.GROQ_API_KEY;
+    if (groqKey) {
+      try {
+        const { generateGroqChatReply } = await import("@/lib/ai/groq");
+        const groqResult = await generateGroqChatReply({
+          systemInstruction,
+          messages: [
+            ...history.slice(-20).map((h) => ({
+              role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant",
+              content: h.text,
+            })),
+            { role: "user", content: userQuestion },
+          ],
+          apiKey: groqKey,
+        });
+
+        if (groqResult && groqResult.reply) {
+          const cleanReply = sanitizeTarotText(stripThinkingTags(groqResult.reply));
+          if (cleanReply) {
+            return NextResponse.json({
+              reply: cleanReply,
+              provider: "groq",
+              model: groqResult.model,
+            });
+          }
+        }
+      } catch (groqErr) {
+        console.warn("[chat] Groq Tier 1 error:", groqErr);
+      }
+    }
+
+    // ── Tier 2: Google Gemini Flash Engine (เมื่อ Groq ขัดข้องหรือไม่มีคีย์) ──
     const { isAiCapReached } = await import("@/lib/security/ai-budget");
     const aiCapHit = !privileged && (await isAiCapReached("member"));
 
@@ -360,9 +404,7 @@ ${cards.join("\n")}
       for (const [modelIdx, model] of modelsToTry.entries()) {
         const endpoint = geminiEndpoint(model, "generateContent");
         try {
-          // กลยุทธ์ hedge: ให้ตัวแรก (คุณภาพดีกว่าแต่ไม่แน่นอน) แค่ 8 วินาที
-          // ถ้าไม่ทันก็ตัดใจไป flash-lite ที่วัดได้ต่ำกว่า 1 วินาทีทุกครั้ง
-          // → ผู้ใช้รอนานสุด ~9 วินาที แทนที่จะเป็น 45 วินาทีแบบเดิม
+          // กลยุทธ์ hedge: ให้ตัวแรกแค่ 8 วินาที ถ้าไม่ทันก็ตัดใจไปตัวถัดไป
           const controller = new AbortController();
           const timeoutId = setTimeout(
             () => controller.abort(),
@@ -415,7 +457,14 @@ ${cards.join("\n")}
           if (response.ok) {
             const data = await response.json();
             const replyText = extractGeminiAnswer(data);
-            if (replyText) return NextResponse.json({ reply: replyText });
+            if (replyText) {
+              const cleanReply = sanitizeTarotText(replyText);
+              return NextResponse.json({
+                reply: cleanReply,
+                provider: "gemini",
+                model,
+              });
+            }
             console.warn(
               `[Gemini Flash Chat ${model}] 200 แต่ไม่มีข้อความคำตอบ · finishReason=${
                 data.candidates?.[0]?.finishReason
@@ -428,38 +477,6 @@ ${cards.join("\n")}
         } catch (err) {
           console.warn(`[Gemini Flash Chat ${model}] error:`, err);
         }
-      }
-    }
-
-    // ── ด่านที่ 2: ถ้า Gemini ทั้งหมดล้มเหลว (เช่น ติดโควตา 429) สลับไปหา Groq LPU ทันที ──
-    const groqKey = process.env.GROQ_API_KEY;
-    if (groqKey) {
-      try {
-        const { generateGroqChatReply } = await import("@/lib/ai/groq");
-        const groqResult = await generateGroqChatReply({
-          systemInstruction,
-          messages: [
-            ...history.slice(-20).map((h) => ({
-              role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant",
-              content: h.text,
-            })),
-            { role: "user", content: userQuestion },
-          ],
-          apiKey: groqKey,
-        });
-
-        if (groqResult && groqResult.reply) {
-          const cleanReply = stripThinkingTags(groqResult.reply);
-          if (cleanReply) {
-            return NextResponse.json({
-              reply: cleanReply,
-              provider: "groq",
-              model: groqResult.model,
-            });
-          }
-        }
-      } catch (groqErr) {
-        console.warn("[chat] Groq fallback error:", groqErr);
       }
     }
 

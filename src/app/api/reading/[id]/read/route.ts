@@ -208,10 +208,43 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
         };
 
-        for await (const event of streamGeminiReading(readingCtx)) {
+        let activeProvider = "gemini";
+
+        async function* streamMultiProviderReading(): AsyncGenerator<
+          import("@/lib/ai/claude").ReadingEvent & { provider?: "groq" | "gemini" }
+        > {
+          // Tier 1: Groq Qwen (High-speed LPU, deep Thai comprehension, 14.4k req/day free quota)
+          if (process.env.GROQ_API_KEY) {
+            try {
+              const { streamGroqReading } = await import("@/lib/ai/groq");
+              let gotDone = false;
+              for await (const event of streamGroqReading(readingCtx)) {
+                if (event.type === "done") gotDone = true;
+                yield { ...event, provider: "groq" };
+              }
+              if (gotDone) {
+                activeProvider = "groq";
+                return;
+              }
+              recordEvent("ai_groq_failover"); // Groq ทุกโมเดลไม่จบ → ตกไป Gemini
+            } catch (err) {
+              recordEvent("ai_groq_failover");
+              console.warn("[read/route] Groq stream encountered error, failing over to Gemini:", err);
+            }
+          }
+
+          // Tier 2: Google Gemini (3.6 Flash / 3.5 Flash-Lite)
+          activeProvider = "gemini";
+          for await (const event of streamGeminiReading(readingCtx)) {
+            yield { ...event, provider: "gemini" };
+          }
+        }
+
+        for await (const event of streamMultiProviderReading()) {
           if (isClosed) break;
 
           if (event.type === "done") {
+            const providerUsed = event.provider || activeProvider;
             // คำอ่านสำรอง/ออฟไลน์ (token = 0) ไม่ควรหักสิทธิ์ผู้ใช้ — คืนให้
             const realReading =
               (event.usage?.inputTokens ?? 0) > 0 || (event.usage?.outputTokens ?? 0) > 0;
@@ -241,7 +274,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             }
             recordEvents([
               "reading_completed",
-              "ai_call:gemini",
+              `ai_call:${providerUsed}`,
               ["ai_latency_ms", Date.now() - startedAt],
               ["ai_tokens_in", event.usage?.inputTokens ?? 0],
               ["ai_tokens_out", event.usage?.outputTokens ?? 0],
@@ -265,7 +298,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           } else if (event.type === "error") {
             updateReading(id, { status: "FAILED" });
             await refundIfConsumed();
-            recordEvents(["reading_failed", "ai_error:gemini"]);
+            recordEvents(["reading_failed", `ai_error:${event.provider || activeProvider}`]);
             send(controller, "error", { message: event.message });
           } else {
             send(controller, event.type, event);

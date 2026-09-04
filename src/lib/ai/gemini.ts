@@ -108,9 +108,9 @@ export const WORKING_GEMINI_MODELS = ["gemini-3.5-flash-lite", "gemini-3.6-flash
 
 /**
  * เพดานเวลารอ "การตอบกลับครั้งแรก" ต่อโมเดล (มิลลิวินาที)
- * ตัวแรกให้สั้น (4 วินาที) เพราะถ้ามันไม่ว่างก็ไม่ควรให้ผู้ใช้รอ — ตกไปตัวที่ 2 ซึ่งวัดได้ต่ำกว่า 1 วินาทีเสมอ
+ * ตัวแรกให้ 9 วินาทีเพื่อความลึกซึ้ง หากติดขัดตกไปตัวที่ 2 (3.5-flash-lite) ทันที
  */
-export const GEMINI_FIRST_MODEL_TIMEOUT_MS = 4000;
+export const GEMINI_FIRST_MODEL_TIMEOUT_MS = 9000;
 export const GEMINI_FALLBACK_MODEL_TIMEOUT_MS = 15000;
 
 /**
