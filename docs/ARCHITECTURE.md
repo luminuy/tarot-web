@@ -36,12 +36,13 @@ graph TD
 | Layer | เทคโนโลยี | วัตถุประสงค์และจุดเด่น |
 | :--- | :--- | :--- |
 | **Edge Compute** | **Cloudflare Workers (OpenNext v1.20)** | Zero-Cold-Start Serverless Edge Network ทั่วโลก |
-| **Database** | **Cloudflare D1 (`APP_DB`) + Cloudflare KV** | Relational Database สำหรับระบบแม่หมอ Marketplace และ KV สำหรับ Caching/Audit |
+| **Database & Cache** | **Cloudflare D1 (`APP_DB`) + KV (`NEXT_INC_CACHE_KV`)** | Relational Database (users, journal, usage) และ Edge Key-Value Store |
+| **Storage & Vectors** | **Cloudflare R2 (`SHARE_BUCKET`) + Vectorize (`VECTORIZE`)** | R2 เก็บการ์ดภาพแชร์ 90 วัน + ค้นหาเชิงความหมาย 1024-dim |
 | **Framework** | **Next.js 16.3 (App Router) + React 19** | Hybrid Static/Dynamic Routing + Server-Sent Events (SSE) |
 | **Language** | **TypeScript 7 (Strict Mode)** | ความปลอดภัยระดับ 0 Type Errors 100% |
-| **Design & UI** | **Tailwind CSS v4 + Motion v13** | Mystical Obsidian Velvet & Gold Leaf Theme + GPU-Accelerated Animations |
+| **Design & UI** | **Tailwind CSS v4 + Hardware GPU Compositor** | Mystical Warm Minimal Sanctuary Theme + 60fps GPU Transitions |
 | **Asset Pipeline** | **4-Tier WebP/AVIF Remastered (`w128`, `w256`, `w512`, `w1024`)** | ลดขนาด Asset 85% คมชัดระดับ Retina |
-| **AI LLM Engine** | **Google Gemini (`gemini-2.5-flash / pro`)** | Real-time SSE Streaming พร้อม Structured JSON Validation |
+| **AI LLM Engine** | **Groq LPU (Qwen 2.5 Tier 1) + Google Gemini (Tier 2 Failover)** | คำอ่านความเร็วสูง 400ms พร้อมระบบสลับอัตโนมัติผ่าน Cloudflare AI Gateway |
 | **Validation** | **Zod v4** | Schema Validation แบบ Strict ป้องกันความผิดพลาดของ Input/Output |
 
 ---
@@ -182,21 +183,27 @@ src/
 
 ตารางต่อไปนี้แสดงรายการตัวแปรแวดล้อม (Environment Variables & Cloudflare Secrets) ทั้งหมดที่ใช้งานจริงในระบบ ความสำคัญ แหล่งจัดเก็บ และไฟล์ที่เรียกใช้งาน:
 
-| ตัวแปร (Variable Name) | บทบาทหน้าที่ | ระดับความสำคัญ | แหล่งจัดเก็บ (Production / Local) | ไฟล์ที่เรียกใช้งานจริง |
+| ตัวแปร / Secret / Binding | บทบาทหน้าที่ | ระดับความสำคัญ | แหล่งจัดเก็บ (Production / Local) | ไฟล์ที่เรียกใช้งานจริง |
 | :--- | :--- | :---: | :--- | :--- |
-| **`GEMINI_API_KEY`**<br>`(หรือ GOOGLE_API_KEY)` | คีย์เชื่อมต่อ Google Gemini (3.7 / 2.5 Flash) เพื่อสตรีมคำทำนายไพ่และตอบแชท | 🔴 **จำเป็นสำหรับ AI จริง** *(มีคลังสำรองออฟไลน์หากไม่มี)* | Cloudflare Secret (`wrangler secret put`) / `.env.local` | `src/app/api/reading/[id]/read/route.ts`<br>`src/app/api/reading/[id]/chat/route.ts`<br>`src/app/api/admin/ai-health/route.ts`<br>`src/lib/ai/gemini.ts` |
-| **`GROQ_API_KEY`** | คีย์เชื่อมต่อ Groq Cloud LPU เพื่อเป็นระบบ AI สำรองความเร็วสูง (400ms) เมื่อ Gemini ชนโควตา | 🟡 **แนะนำสูง** *(ระบบสองประสาน)* | Cloudflare Secret (`wrangler secret put`) / `.env.local` | `src/lib/ai/groq.ts`<br>`src/app/api/reading/[id]/chat/route.ts`<br>`src/app/api/admin/ai-health/route.ts` |
-| **`SESSION_SECRET`** | คีย์ลับสำหรับลงนามและเข้ารหัส Session Token ของการเปิดไพ่ ป้องกันการดัดแปลงสถานะ | 🔴 **จำเป็นสำหรับความปลอดภัย** | Cloudflare Secret / `.env.local` | `src/lib/security/session.ts`<br>`src/lib/security/privileged.ts` |
-| **`JWT_SECRET`** | คีย์ลับสำหรับลงนามและตรวจสอบสิทธิ์ JSON Web Token ของบัญชีผู้ใช้งาน | 🔴 **จำเป็นสำหรับระบบสมาชิก** | Cloudflare Secret / `.env.local` | `src/lib/auth/jwt.ts`<br>`src/app/api/auth/*` |
-| **`PASSWORD_PEPPER`** | ค่า Pepper ฝั่งเซิร์ฟเวอร์สำหรับผสมในการแฮชรหัสผ่าน PBKDF2-HMAC-SHA256 | 🔴 **จำเป็นสำหรับความปลอดภัย** | Cloudflare Secret / `.env.local` | `src/lib/auth/password.ts` |
-| **`ADMIN_PASSWORD`** | รหัสผ่านสำหรับเข้าสู่ระบบแผงควบคุมผู้ดูแลระบบหลังบ้าน (`/admin`) | 🔴 **จำเป็นสำหรับแอดมิน** | Cloudflare Secret / `.env.local` | `src/lib/security/admin-auth.ts`<br>`src/app/api/admin/login/route.ts` |
-| **`ADMIN_TOKEN`** | Bearer Token สำหรับยืนยันตัวตนแอดมินผ่าน HTTP Header ในการเรียก Admin APIs | 🟡 **แนะนำสำหรับแอดมิน** | Cloudflare Secret / `.env.local` | `src/lib/security/admin-auth.ts` |
-| **`RATE_LIMIT_BYPASS_TOKEN`** | โทเคนลับสำหรับให้ระบบ CI / Automated Testing รันข้าม Rate Limit ได้อย่างปลอดภัย | 🟢 **ใช้ใน CI / Testing** | GitHub Actions Secret / Cloudflare Secret | `src/lib/security/privileged.ts`<br>`.github/workflows/*` |
-| **`AI_DAILY_CALL_CAP`** | ตัวเลขจำกัดเพดานการเรียก AI รายวันเพื่อควบคุมค่าใช้จ่าย (ค่าเริ่มต้น: 500) | 🟢 **ตัวเลือกปรับแต่ง** | Cloudflare Environment Variable | `src/lib/security/ai-budget.ts` |
-| **`APP_DB`** *(Binding)* | Cloudflare D1 Database Binding สำหรับเก็บข้อมูลสมาชิก, ประวัติดูดวง, และบันทึกสิทธิ์ | 🔴 **จำเป็นบน Production** *(Local ใช้ SQLite Mock)* | `wrangler.jsonc` (`d1_databases`) | `src/lib/platform/db.ts`<br>`src/server/db/*` |
-| **`APP_KV`** *(Binding)* | Cloudflare KV Namespace Binding สำหรับเก็บแคชชั่วคราว, Rate Limit, และ AI Budget | 🔴 **จำเป็นบน Production** *(Local ใช้ In-Memory Mock)* | `wrangler.jsonc` (`kv_namespaces`) | `src/lib/platform/kv.ts`<br>`src/lib/security/ai-budget.ts` |
-| **`NEXT_PUBLIC_GA_ID`** | รหัส Measurement ID ของ Google Analytics 4 (เช่น `G-XXXXXXXXXX`) เพื่อวัดผลทราฟฟิก | 🟢 **ตัวเลือกเสริมการตลาด** | Cloudflare Env / `.env.local` | `src/components/analytics/AnalyticsTracker.tsx`<br>`src/lib/analytics.ts` |
-| **`NEXT_PUBLIC_META_PIXEL_ID`** | รหัส Pixel ID ของ Meta/Facebook เพื่อวัดผลแคมเปญโฆษณาและการแปลงผล (Conversions) | 🟢 **ตัวเลือกเสริมการตลาด** | Cloudflare Env / `.env.local` | `src/components/analytics/AnalyticsTracker.tsx`<br>`src/lib/analytics.ts` |
+| **`GROQ_API_KEY`** | คีย์เชื่อมต่อ Groq Cloud LPU เอนจินหลักความเร็วสูง (Qwen 2.5 72B/32B Tier 1, ~400ms) | 🔴 **จำเป็นสำหรับ AI ปฐมภูมิ** | Cloudflare Secret / `.env.local` | `src/lib/ai/groq.ts`<br>`src/app/api/reading/[id]/chat/route.ts`<br>`src/app/api/admin/ai-health/route.ts` |
+| **`GEMINI_API_KEY`**<br>`(หรือ GOOGLE_API_KEY)` | คีย์เชื่อมต่อ Google Gemini (3.7 / 2.5 Flash Tier 2) สำรองเมื่อ Groq ชนโควตา | 🔴 **จำเป็นสำหรับ AI สำรอง** | Cloudflare Secret / `.env.local` | `src/app/api/reading/[id]/read/route.ts`<br>`src/app/api/reading/[id]/chat/route.ts`<br>`src/lib/ai/gemini.ts` |
+| **`TAROT_SESSION_SECRET`** | กุญแจลับลงนาม Session Token ในการสับไพ่และกู้คืนเซสชัน (บังคับ ≥32 bytes) | 🔴 **จำเป็นสำหรับ Provably-Fair** | Cloudflare Secret / `.env.local` | `src/lib/security/session-token.ts`<br>`src/lib/auth/admin-auth.ts` |
+| **`PASSWORD_PEPPER`** | ค่า Server-side Pepper ผสมในการแฮชรหัสผ่าน PBKDF2-HMAC-SHA256 (32 bytes) | 🔴 **จำเป็นสำหรับ Email Auth** | Cloudflare Secret / `.env.local` | `src/lib/auth/password.ts` |
+| **`ADMIN_PASSWORD`** | รหัสผ่านสำหรับเข้าสู่แผงควบคุมระบบหลังบ้าน (`/admin`) | 🔴 **จำเป็นสำหรับแอดมิน** | Cloudflare Secret / `.env.local` | `src/lib/auth/admin-auth.ts`<br>`src/app/api/admin/login/route.ts` |
+| **`APP_ORIGIN`** | Base URL ระบบ (`https://seertarot.net`) สำหรับ Callback และลิงก์อีเมล | 🔴 **จำเป็นบน Production** | Cloudflare Secret / `.env.local` | `src/lib/config/site.ts`<br>`src/app/api/auth/*` |
+| **`RESEND_API_KEY`** | API Key จาก Resend สำหรับส่งอีเมลยืนยันตัวตนและรีเซ็ตรหัสผ่าน | 🔴 **จำเป็นสำหรับระบบอีเมล** | Cloudflare Secret / `.env.local` | `src/lib/email/resend.ts` |
+| **`EMAIL_FROM`** | ชื่อและที่อยู่อีเมลผู้ส่ง (`แม่หมอทาโรต์ <noreply@seertarot.net>`) | 🟡 **จำเป็นสำหรับระบบอีเมล** | Cloudflare Secret / `.env.local` | `src/lib/email/resend.ts` |
+| **`GOOGLE_CLIENT_ID` / `_SECRET`** | คีย์เชื่อมต่อ Google OAuth Sign-in | 🟡 **จำเป็นสำหรับ Google Login** | Cloudflare Secret / `.env.local` | `src/app/api/auth/google/*` |
+| **`LINE_CHANNEL_ID` / `_SECRET`** | คีย์เชื่อมต่อ LINE Login Channel | 🟡 **จำเป็นสำหรับ LINE Login** | Cloudflare Secret / `.env.local` | `src/app/api/auth/line/*` |
+| **`TURNSTILE_SITE_KEY` / `_SECRET_KEY`** | Cloudflare Turnstile ป้องกันบอทหน้าลงทะเบียน/เข้าสู่ระบบ | 🟡 **จำเป็นสำหรับ Bot Defense** | Cloudflare Secret / `.env.local` | `src/app/api/config/turnstile`<br>`src/lib/security/turnstile.ts` |
+| **`CF_AI_GATEWAY_ACCOUNT_ID` / `_ID`** | Cloudflare AI Gateway สำหรับรวม log, retry, และวัดผล AI ทุกค่าย | 🟢 **เพิ่มความเสถียร AI** | Cloudflare Secret / `.env.local` | `src/lib/ai/gateway.ts` |
+| **`TESTER_PASSWORD`** | รหัสผ่านปลดล็อกโหมดผู้ทดสอบไม่จำกัด (`/tester`) | 🟢 **สำหรับทดสอบระบบ** | Cloudflare Secret / `.env.local` | `src/app/api/tester/login` |
+| **`UNLIMITED_EMAILS`** | รายชื่ออีเมล Allowlist ที่ได้รับสิทธิ์ดูดวงไม่จำกัด | 🟢 **สำหรับทีมงาน** | Cloudflare Secret / `.env.local` | `src/lib/entitlement/entitlement.ts` |
+| **`APP_DB`** *(D1 Binding)* | Cloudflare D1 Relational DB สำหรับเก็บ users, journal, usage, bonus | 🔴 **จำเป็นบน Production** | `wrangler.jsonc` (`d1_databases`) | `src/lib/platform/db.ts` |
+| **`NEXT_INC_CACHE_KV`** *(KV Binding)* | Cloudflare KV สำหรับ OpenNext Edge Caching, Overrides, Session Backstop | 🔴 **จำเป็นบน Production** | `wrangler.jsonc` (`kv_namespaces`) | `src/lib/platform/cf.ts`<br>`src/lib/platform/kv-store.ts` |
+| **`AI`** *(Workers AI Binding)* | Cloudflare Workers AI สำหรับตัวคัดกรองความปลอดภัยฉุกเฉินชั้น 3 | 🟢 **ฟรี 10k neurons/วัน** | `wrangler.jsonc` (`ai`) | `src/lib/safety/ai-classifier.ts` |
+| **`VECTORIZE`** *(Binding)* | Cloudflare Vectorize Index (`card-meanings`) ค้นหาไพ่และความหมายเชิงความหมาย 1024d | 🟢 **ฟรี 30M queries/เดือน** | `wrangler.jsonc` (`vectorize`) | `src/lib/search/vectorize.ts` |
+| **`SHARE_BUCKET`** *(R2 Binding)* | Cloudflare R2 Bucket (`seertarot-share`) เก็บภาพการ์ดแชร์ที่สร้างจาก Canvas | 🟢 **ฟรี 10GB ไม่มี egress** | `wrangler.jsonc` (`r2_buckets`) | `src/app/api/share/card/route.ts` |
 
 ---
 

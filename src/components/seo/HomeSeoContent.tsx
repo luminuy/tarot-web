@@ -564,7 +564,7 @@ export function HomeSeoContent() {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5: คำถามที่พบบ่อย (FAQ Accordion — Refined Spacing)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="faq-title" className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
+      <section aria-labelledby="faq-title" className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10 pb-16 sm:pb-20">
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />

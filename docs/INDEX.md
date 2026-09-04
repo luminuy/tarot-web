@@ -10,7 +10,7 @@
 ```
 docs/
 ├── 🛡️ ระเบียบปฏิบัติการและกฎแม่บท (Core Operating Protocols)
-│   ├── AI_COLLABORATION_GUIDELINES.md   # กฎเหล็ก AI, การแบ่ง Domain, 10 Golden Design Rules
+│   ├── AI_COLLABORATION_GUIDELINES.md   # กฎเหล็ก AI, การแบ่ง Domain, 14 Golden Design Rules
 │   ├── INCIDENT_LOG.md                  # บันทึกบทเรียนความผิดพลาด (Blameless Post-Mortem)
 │   ├── KNOWN_ISSUES.md                  # ดัชนีสถานะบั๊กค้างและข้อจำกัดระบบ
 │   └── WORK_LOG.md                      # บันทึกประวัติการพัฒนาและสถานะส่งต่องาน (Live Handoff)
@@ -58,7 +58,7 @@ docs/
 > ⚠️ **ก่อนแก้ไขโค้ดใดๆ ต้องอ่าน 3 ไฟล์นี้ตามลำดับเสมอ**:
 1. **[`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md)**: **(สำคัญที่สุด)** ทุกบทเรียนความผิดพลาดที่เคยเกิดขึ้นพร้อมกฎป้องกันถาวร (ทำผิดซ้ำเรื่องเดิม = ข้อบกพร่องร้ายแรง)
 2. **[`docs/KNOWN_ISSUES.md`](KNOWN_ISSUES.md)**: ดูก่อนเริ่มงานใหม่เพื่อไม่แก้ซ้ำซ้อนกับ Agent ตัวอื่น
-3. **[`docs/AI_COLLABORATION_GUIDELINES.md`](AI_COLLABORATION_GUIDELINES.md)**: คู่มือแม่บทระเบียบวิศวกรรม, กฎดีไซน์ 10 ข้อ, และระบบ Agent Lock
+3. **[`docs/AI_COLLABORATION_GUIDELINES.md`](AI_COLLABORATION_GUIDELINES.md)**: คู่มือแม่บทระเบียบวิศวกรรม, กฎดีไซน์ 14 ข้อ, และระบบ Agent Lock
 
 ---
 
@@ -79,11 +79,11 @@ docs/
 
 | คำสั่ง | หน้าที่และวัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **ตรวจครบทั้ง 21 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Provably-Fair, PDPA) |
+| `npm run repo:verify` | **ตรวจครบทั้ง 24 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Types (ต้องผ่าน 0 Errors) |
 | `npm run agent:status` | ตรวจสอบว่ามี Agent ตัวไหนกำลังทำงานหรือล็อคไฟล์อยู่หรือไม่ |
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงานป้องกันการชนกันของ AI หลายตัว |
 | `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จสมบูรณ์ |
-| `npm run pr:auto` | ตรวจครบ 21 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
+| `npm run pr:auto` | ตรวจครบ 24 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
 | `npm run git:tidy` | เก็บกวาดกิ่งงานที่ Merge ไปแล้วทั้งในเครื่องและบน Remote ตามกฎ Zero Leftovers |
 | `npm run dev` | รันเซิร์ฟเวอร์จำลองสำหรับพัฒนา (Next.js Local Server) |

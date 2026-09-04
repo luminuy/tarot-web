@@ -34,6 +34,21 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: คืนสมดุลช่องไฟแนวตั้งระหว่างกล่องคำถามที่พบบ่อย (FAQ Section) และ Dark Footer สู่ความพอดีระดับสากล (Balanced Vertical Breathing Room)
+
+- **ความต้องการของผู้ใช้**:
+  - "ช่องว่างหายไปไหน ทำไมติดกัน" พร้อมภาพแคปเจอร์ที่แสดงว่าขอบล่างของการ์ดคำถามที่พบบ่อย (FAQ) ข้อสุดท้าย สัมผัสและชิดติดกับขอบบนของแถบ Dark Footer สีดำสนิทโดยไม่มีระยะห่างเลย (0px gap)
+- **การวิเคราะห์รากเหง้าอย่างละเอียด (Root Cause Analysis)**:
+  - ในการแก้ไขก่อนหน้านี้ เพื่อตอบสนองต่อข้อสังเกตเรื่องระยะห่างที่กว้างเกินไป (~250px จากการมีทั้ง padding-bottom, divider และ margin-top ซ้อนกัน) ผู้แก้ไขได้นำตัวคั่นและระยะห่างออกทั้งหมดโดยไม่ได้ใส่ระยะห่างพื้นฐานชดเชยไว้
+  - ทำให้ `<section aria-labelledby="faq-title">` ไม่มี `pb-*` หรือ `mb-*` เลย การ์ด FAQ ใบสุดท้ายจึงชนชิดกับขอบบนของ `<footer className="w-full bg-[#171512] ...">` ทันที
+- **การแก้ไขระดับวิศวกรรมดีไซน์ (Quiet Luxury Design Solutions)**:
+  - เพิ่ม `pb-16 sm:pb-20` ให้กับ `<section aria-labelledby="faq-title">` ใน `src/components/seo/HomeSeoContent.tsx`
+  - สร้างระยะห่างที่สมดุลสมมาตร (64px บนมือถือ / 80px บนเดสก์ท็อป) บนพื้นหลัง Warm Ivory ก่อนเข้าสู่ Dark Footer
+  - สอดรับพอดี 1:1 กับ Padding ภายในส่วนบนของ Footer (`pt-16 sm:pt-20`) ทำให้มีจังหวะหายใจที่สมดุล สบายตา ไม่ชิดติดกัน และไม่เวิ้งว้างจนเกินไป
+- **ผลการทดสอบ & ยืนยันผล (Verification)**:
+  - `npm run typecheck` ➔ **0 errors**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 24/24 ด่านสมบูรณ์ 100%**
+
 ### 🗓️ 2026-09-04: ขจัดอาการกระตุกตอนกดเปิดเมนู Dropdown (วิหารพยากรณ์และโปรไฟล์สมาชิก) อย่างถาวร 100% ด้วย Hardware-Accelerated GPU Compositor Transitions + Non-Blocking Audio Decoupling
 
 - **ความต้องการของผู้ใช้**:

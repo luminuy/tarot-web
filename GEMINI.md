@@ -39,7 +39,7 @@
 10. **Human-First Natural Copywriting**: ใช้คำภาษาไทยที่เป็นธรรมชาติ เข้าใจง่าย ตรงไปตรงมาเหมือนมนุษย์คุยกัน ห้ามใช้ศัพท์หุ่นยนต์/AI แข็งทื่อ เช่น ใช้ "เมนู", "ผังการเปิดไพ่ (20 แบบ)", "ความหมายไพ่ (78 ใบ)", "ประวัติการดูดวง" แทนศัพท์ซับซ้อน
 11. **Multi-Agent Collision Guard**: ก่อนเริ่มงานให้ตรวจสอบ `npm run agent:status` และล็อคไฟล์ด้วย `npm run agent:lock` เสมอ หลังทำเสร็จให้ปลดล็อคด้วย `npm run agent:unlock` เพื่อไม่ให้ AI หลายตัวแก้งานชนกัน
 12. **One Unified Branch per Milestone & Zero Leftovers**: ห้ามแตกกิ่งย่อยกระจัดกระจายโดยไม่เปิด PR ทันที ต้อง Rebase บน `origin/main` ล่าสุดเสมอ และเมื่อทำงานเสร็จต้องรัน `npm run pr:auto` ➔ `npm run git:tidy` ให้จบสมบูรณ์ 100% ห้ามทิ้งกิ่งค้างหรือปล่อยภาระให้ผู้อื่นตามแก้
-13. **Auto-Merge Workflow Enforcement**: เมื่อเปิด PR ให้ใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 7 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers จบในคำสั่งเดียว
+13. **Auto-Merge Workflow Enforcement**: เมื่อเปิด PR ให้ใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 24 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers จบในคำสั่งเดียว
 14. **Zero Fabricated Cards Policy (ห้ามกุไพ่ปลอมทุกใบเด็ดขาด)**: ในทุกขั้นตอนการสับไพ่, เลือกไพ่, กู้คืนเซสชัน, สตรีมคำทำนาย, และแชทถามตอบ **ห้ามเขียนโค้ด fallback มโนหรือกุไพ่ใบใดใบหนึ่งในสำรับ 78 ใบขึ้นมาเองเด็ดขาด** (ไม่ว่าจะ The Fool, The Magician หรือใบใดๆ ทั้งสิ้น) หากข้อมูลไพ่สูญหายหรือไม่สมบูรณ์ ระบบต้องคืนค่า `undefined` หรือส่ง Error แจ้งเตือนให้ผู้ใช้ **'โหลดใหม่อีกครั้ง'** ทันที เพื่อรักษาหลักการความโปร่งใส (Provably Fair) 100%
 
 ---
@@ -50,7 +50,7 @@
 - **ดูสถานะ Agent ที่กำลังทำงาน**: `npm run agent:status`
 - **ล็อคไฟล์ก่อนเริ่มแก้**: `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>`
 - **ปลดล็อคไฟล์เมื่อทำเสร็จ**: `npm run agent:unlock -- --agent <ชื่อ>`
-- **ตรวจครบ 7 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)**: `npm run repo:verify`
+- **ตรวจครบ 24 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)**: `npm run repo:verify`
 - **ตรวจ Typecheck อย่างเดียว**: `npm run typecheck`
 - **ซิงก์สถานะและบันทึกงานอัตโนมัติ (Mandatory)**: `npm run log:sync`
 - **สร้างภาพไพ่ย่อ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)**: `npm run cards:variants`

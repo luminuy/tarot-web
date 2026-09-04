@@ -1,16 +1,16 @@
 # 🔧 แผงแอดมิน (Admin Panel) — คู่มือระบบ
 
-> สถานะ: **M0–M3 เสร็จ** (platform · auth · shell · สถิติ · แก้เนื้อหา live) · M4–M7 (marketplace) ยังไม่เริ่ม
-> แผนเต็ม: `~/.claude/plans/breezy-percolating-llama.md`
+> สถานะ: **M0–M3 เสร็จสมบูรณ์** (platform · auth · shell · สถิติ · แก้เนื้อหา live) · D1 Database ใช้งานจริง (migrations 0001–0006) · แท็บ Cloud Health ตรวจสัญญาณสดและเมตริก D1 ทำงาน 100% · M4–M7 (Marketplace Booking) อยู่ในเฟสถัดไป
 
 ---
 
 ## ภาพรวม
 
 แผงที่ `/admin` ให้แอดมิน:
-1. **ดูสถิติ** ทุกมิติของการใช้งาน (M2)
+1. **ดูสถิติและเมตริก D1**: สถิติการใช้งาน, ผู้ใช้, การเปิดไพ่, โควตา (M2)
 2. **แก้ prompt / ความหมายไพ่ / บุคลิกแม่หมอ แบบ live โดยไม่ต้อง deploy** (M3)
-3. จัดการ **Marketplace แม่หมอตัวจริง** (M4–M7)
+3. **ตรวจสอบสุขภาพระบบสด (Cloud Health Diagnostics)**: สัญญาณ D1, KV, Groq LPU, Gemini, Resend, Turnstile, AI Gateway
+4. จัดการ **Marketplace แม่หมอตัวจริง** (M4–M7)
 
 เข้าด้วย **รหัสผ่านแอดมินแยก** — ไม่เกี่ยวกับ Google/LINE OAuth ของผู้ใช้ทั่วไป
 
@@ -20,9 +20,9 @@
 
 | ชั้น | ใช้เก็บอะไร | หมายเหตุ |
 | :-- | :-- | :-- |
-| **KV** (`NEXT_INC_CACHE_KV`, prefix `app:`) | config overrides, feature flags, stat counters, audit log | reuse namespace เดิม — ไม่ต้อง provision · eventually-consistent (~60s) |
-| **D1** (`APP_DB`, เข้ามา M4) | readers, availability, queue, bookings, payments | ต้อง `wrangler d1 create` + binding ใน wrangler.jsonc |
-| in-memory (`src/server/store.ts`) | reading state ระหว่างขั้นตอน (เดิม) | ไม่เกี่ยวกับแอดมิน |
+| **KV** (`NEXT_INC_CACHE_KV`, prefix `app:`) | config overrides, feature flags, stat counters, audit log | reuse namespace เดิม — eventually-consistent (~60s) |
+| **D1** (`APP_DB`) | users, reading_journal, reading_usage, user_bonus, marketplace | ใช้งานจริงบน Cloudflare D1 (database_id: `560fdbe7...`) |
+| in-memory (`src/server/store.ts`) | reading state ระหว่างขั้นตอน (อายุสั้น 2 ชม. มี KV backstop) | ไม่เกี่ยวกับแอดมิน |
 
 **Platform access layer** (`src/lib/platform/`):
 - `cf.ts` — `getAppKV()` / `getWaitUntil()` · fallback เป็น in-memory shim อัตโนมัติเมื่อรันนอก Cloudflare (`next dev`)

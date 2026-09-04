@@ -33,7 +33,7 @@
 
 ---
 
-## 🏛️ กฎเหล็ก 13 ข้อ
+## 🏛️ กฎเหล็ก 14 ข้อ
 
 0. **บันทึกบทเรียนทุกครั้งที่แก้บั๊ก**: commit `fix` ต้องมี `--cause` และ `--prevention` (ระบบบล็อกอัตโนมัติถ้าไม่มี) → บันทึกลง `INCIDENT_LOG.md` ให้เอง
 1. **บันทึกงานทุกครั้ง**: ทำเสร็จ/แก้บั๊ก/เพิ่มฟีเจอร์ → อัปเดต `docs/WORK_LOG.md` ทันที
@@ -48,7 +48,7 @@
 10. **Human-First Copywriting**: ภาษาไทยธรรมชาติ เข้าใจง่าย ห้ามศัพท์หุ่นยนต์แข็งทื่อ
 11. **Multi-Agent Collision Guard**: เช็ก `npm run agent:status` + ล็อคด้วย `agent:lock` ก่อนแก้ ปลดล็อคด้วย `agent:unlock` เมื่อเสร็จ
 12. **One Branch per Milestone**: ห้ามแตกกิ่งค้าง ต้อง rebase บน `origin/main` เสมอ จบงานต้องรัน `pr:auto` ➔ `git:tidy` ให้ครบ
-13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ (CI ➔ Auto-Merge ➔ Auto-Deploy)
+13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 24 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
     > ⛔ **`push` แล้วจบ = งานยังไม่เสร็จ** — automation ทั้งชุดเริ่มทำงาน**เมื่อ PR ถูกเปิดเท่านั้น** (ISSUE-005)
     > push เฉย ๆ ไม่มี CI ไม่มี merge ไม่มี deploy งานจะค้างบน branch เงียบ ๆ จนกว่าเจ้าของจะมากดปุ่มเอง
     >
@@ -58,6 +58,7 @@
     > ถ้า environment ไม่มี `gh` CLI (เช่น Claude Code บนเว็บ) → `pr:auto` จะล้มตอนเรียก `gh`
     > ให้ **เปิด PR ผ่าน GitHub API/MCP แทนให้สำเร็จ** แล้วรายงานข้อจำกัดนั้นไปด้วย
     > ห้ามใช้เป็นข้ออ้างข้ามขั้นตอน
+14. **Zero Fabricated Cards Policy (ห้ามกุไพ่ปลอมทุกใบเด็ดขาด)**: ในทุกขั้นตอนการสับไพ่, เลือกไพ่, กู้คืนเซสชัน, สตรีมคำทำนาย, และแชทถามตอบ **ห้ามเขียนโค้ด fallback มโนหรือกุไพ่ใบใดใบหนึ่งในสำรับ 78 ใบขึ้นมาเองเด็ดขาด** (ไม่ว่าจะ The Fool, The Magician หรือใบใดๆ ทั้งสิ้น) หากข้อมูลไพ่สูญหายหรือไม่สมบูรณ์ ระบบต้องคืนค่า `undefined` หรือส่ง Error แจ้งเตือนให้ผู้ใช้ **'โหลดใหม่อีกครั้ง'** ทันที เพื่อรักษาหลักการความโปร่งใส (Provably Fair) 100%
 
 ---
 
@@ -67,7 +68,7 @@
 - `npm run agent:status` — ดูสถานะ Agent ที่ทำงานอยู่
 - `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` — ล็อคไฟล์ก่อนแก้
 - `npm run agent:unlock -- --agent <ชื่อ>` — ปลดล็อคเมื่อเสร็จ
-- `npm run repo:verify` — ตรวจครบ 7 ด่าน (ใช้หลัก)
+- `npm run repo:verify` — ตรวจครบทั้ง 24 ด่าน (ใช้หลัก)
 - `npm run typecheck` — typecheck อย่างเดียว
 - `npm run log:sync` — ซิงก์สถานะ/บันทึกงาน (บังคับ)
 - `npm run cards:variants` — สร้างภาพไพ่ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)

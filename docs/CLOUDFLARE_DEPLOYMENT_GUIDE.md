@@ -26,36 +26,22 @@
 
 | Binding | ประเภท | หน้าที่ |
 | :--- | :--- | :--- |
-| `NEXT_INC_CACHE_KV` | KV Namespace | เก็บ HTML/RSC ของหน้า SSG ทั้งหมด (seed ตอน deploy) |
+| `NEXT_INC_CACHE_KV` | KV Namespace | เก็บ HTML/RSC ของหน้า SSG ทั้งหมด (seed ตอน deploy), Stat Counters, Content Overrides |
 | `ASSETS` | Static Assets | ภาพไพ่ 1909, `_next/static` |
+| `APP_DB` | D1 Database | เก็บข้อมูล users, reading_journal, reading_usage, user_bonus, marketplace |
+| `AI` | Workers AI | ตัวคัดกรองความปลอดภัยฉุกเฉินชั้น 3 |
+| `VECTORIZE` | Vectorize Index | ค้นหาความหมายไพ่และบทความเชิงความหมาย (`card-meanings` 1024d) |
+| `SHARE_BUCKET` | R2 Bucket | จัดเก็บภาพการ์ดแชร์ที่ผู้ใช้สร้างเอง (`seertarot-share` auto-delete 90 วัน) |
 
 config อยู่ใน [`wrangler.jsonc`](../wrangler.jsonc) + [`open-next.config.ts`](../open-next.config.ts)
 `enableCacheInterception: true` ทำให้หน้า SSG ตอบจาก KV ที่ edge โดยไม่ boot Next runtime (ยืนยันด้วย header `x-opennext-cache: HIT`)
 
-> 💡 **ถ้าวันหน้าเพิ่ม ISR / on-demand revalidation** ต้องเติม `d1TagCache` + `doQueue` ใน `open-next.config.ts`
-> พร้อม binding `NEXT_TAG_CACHE_D1` (D1) + `NEXT_CACHE_DO_QUEUE` (Durable Object) + `WORKER_SELF_REFERENCE` ใน `wrangler.jsonc`
-> — ดูตัวอย่างเต็มใน git history PR #19
-
-### สร้าง resource ครั้งแรก (ทำครั้งเดียวต่อบัญชี)
-
-> ⚠️ **binding เพิ่มผ่านหน้า dashboard ไม่ติด** — `wrangler deploy` เขียนทับ config ของ Worker
-> ด้วย `wrangler.jsonc` ทุกครั้ง ต้องแก้ที่ไฟล์เท่านั้น
-
-```bash
-# KV — เอา id ที่ได้ไปใส่ wrangler.jsonc > kv_namespaces[0].id
-npx wrangler kv namespace create NEXT_INC_CACHE_KV
-```
-
-> ✅ resource ปัจจุบัน (บัญชี `bankjack10452@gmail.com`): KV `3b06e256c46948949fc17ac6641cafa3`
-
 ### สิทธิ์ของ API Token (CI)
 
-`CLOUDFLARE_API_TOKEN` ใน GitHub Secrets ต้องมี **2 อย่าง** (เดิมมีแค่ตัวแรก):
-
+`CLOUDFLARE_API_TOKEN` ใน GitHub Secrets สำหรับ deploy อัตโนมัติ:
 - **Account › Workers Scripts › Edit**
-- **Account › Workers KV Storage › Edit**  ← เพิ่มใหม่ (จำเป็นตอน populateCache seed หน้าลง KV)
-
-ถ้าขาด ขั้น `opennextjs-cloudflare deploy` จะ fail แบบระบุชัดว่าขาดสิทธิ์อะไร
+- **Account › Workers KV Storage › Edit**
+- **Account › Workers R2 Storage › Edit**
 
 ---
 
@@ -72,13 +58,34 @@ npx wrangler login
 
 ### ขั้นที่ 2: ตั้งค่า Secrets (สำคัญมาก ⚠️)
 
+สามารถตั้งค่า Secrets ครบทั้ง 18 ตัว (ดูรายละเอียดเต็มใน [`docs/PENDING_SETUP.md`](PENDING_SETUP.md)):
+
 ```bash
-npx wrangler secret put GEMINI_API_KEY
-npx wrangler secret put TAROT_SESSION_SECRET   # openssl rand -hex 32 — จำเป็น! ไม่งั้น Provably-Fair ใช้ค่า default ที่ทุกคนรู้
-npx wrangler secret put AUTH_SECRET            # openssl rand -hex 32 — สำหรับเข้ารหัส JWT Session ของผู้ใช้
-npx wrangler secret put PASSWORD_PEPPER        # openssl rand -hex 32 — สำหรับ Server-side Pepper แฮชรหัสผ่าน
-npx wrangler secret put RESEND_API_KEY         # API Key จาก Resend.com สำหรับส่งอีเมลยืนยันตัวตนและรีเซ็ตรหัสผ่าน
-npx wrangler secret put EMAIL_FROM             # แม่หมอลูมินัย <noreply@tarot.luminuy.com>
+# เอนจิน AI สองประสาน
+npx wrangler secret put GROQ_API_KEY            # Groq LPU (Tier 1)
+npx wrangler secret put GEMINI_API_KEY          # Google Gemini (Tier 2 Failover)
+
+# ความปลอดภัยและระบบสิทธิ์
+npx wrangler secret put TAROT_SESSION_SECRET    # openssl rand -hex 32 (Provably Fair)
+npx wrangler secret put PASSWORD_PEPPER         # openssl rand -hex 32 (PBKDF2 Pepper)
+npx wrangler secret put ADMIN_PASSWORD          # รหัสผ่านเข้าสู่ระบบ /admin
+
+# การสื่อสารและอีเมล
+npx wrangler secret put RESEND_API_KEY          # API Key จาก Resend.com
+npx wrangler secret put EMAIL_FROM              # แม่หมอทาโรต์ <noreply@seertarot.net>
+npx wrangler secret put APP_ORIGIN              # https://seertarot.net
+
+# OAuth, Bot Defense, AI Gateway, Tester
+npx wrangler secret put GOOGLE_CLIENT_ID
+npx wrangler secret put GOOGLE_CLIENT_SECRET
+npx wrangler secret put LINE_CHANNEL_ID
+npx wrangler secret put LINE_CHANNEL_SECRET
+npx wrangler secret put TURNSTILE_SITE_KEY
+npx wrangler secret put TURNSTILE_SECRET_KEY
+npx wrangler secret put CF_AI_GATEWAY_ACCOUNT_ID
+npx wrangler secret put CF_AI_GATEWAY_ID
+npx wrangler secret put TESTER_PASSWORD
+npx wrangler secret put UNLIMITED_EMAILS
 ```
 
 > ส่วน KV namespace สำหรับ edge cache สร้างครั้งเดียวแล้ว (ดูหัวข้อ **1.5** ด้านบน) — ไม่ต้องสร้างใหม่ทุกครั้ง

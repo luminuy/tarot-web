@@ -89,7 +89,7 @@ npm run agent:lock -- --agent <ชื่อคุณ> --domain <หมวด> --
 
 # 3. แก้งาน — วัดก่อนเดา หาสาเหตุราก พิสูจน์ผลจริง
 
-# 4. ตรวจครบ 7 ด่าน
+# 4. ตรวจครบทั้ง 24 ด่าน
 npm run repo:verify
 
 # 5. commit (ถ้าเป็น fix ต้องมี --cause และ --prevention)
@@ -102,7 +102,7 @@ npm run commit -- --agent <ชื่อคุณ> --type <feat|fix|perf|refactor
 npm run agent:unlock -- --agent <ชื่อคุณ>
 npm run log:sync
 
-# 7. เปิด PR (ระบบจะตรวจ 7 ด่านซ้ำ + merge + deploy ให้เอง)
+# 7. เปิด PR (ระบบจะตรวจครบ 24 ด่านซ้ำ + merge + deploy ให้เอง)
 #    ⚠️ ขั้นนี้ "ห้ามข้าม" — ดู INC-0015 ด้านล่าง
 #    ใส่ --wait เพื่อให้รอจน merge เสร็จ แล้วสลับกลับ main + ลบ branch ให้อัตโนมัติ
 npm run pr:auto -- "<title>" --body-file <path> --wait
@@ -170,6 +170,12 @@ npm run git:tidy
    - ❌ **ห้ามใส่ `image-rendering: crisp-edges` / `pixelated` / `-webkit-optimize-contrast` กับภาพไพ่เด็ดขาด** — ค่าเหล่านี้บังคับให้เบราว์เซอร์ย่อภาพแบบ nearest-neighbour ทำให้ลายเส้นแตกเป็นเม็ดหยาบจนดูเบลอ (ต้องใช้ `image-rendering: auto` เท่านั้น)
    - `public/_headers` ตั้ง `Cache-Control: max-age=31536000, immutable` ให้ `/cards/*` ไว้แล้ว **ถ้าจำเป็นต้องเปลี่ยนไฟล์ภาพจริงๆ ต้องเปลี่ยนชื่อไฟล์หรือชื่อโฟลเดอร์ด้วยเสมอ** ไม่งั้นคนที่เคยเข้าเว็บจะยังเห็นภาพเก่าไปอีก 1 ปี
    - ℹ️ ภาพเก็บบน **Cloudflare Workers Static Assets** ซึ่งเป็น edge CDN อยู่แล้วและไม่คิดเงินต่อ request — **ไม่ต้องย้ายไป Cloudflare Images หรือ R2** (มีแต่จะเพิ่มค่าใช้จ่าย/latency) ส่วน Image Transformations (`/cdn-cgi/image/`) ใช้ได้เฉพาะเมื่อมี custom domain เท่านั้น
+13. **🚀 Auto-Merge Workflow Enforcement (เปิด PR เสมอ)**:
+   - เมื่อเปิด PR ให้ใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจครบ 24 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers จบในคำสั่งเดียว
+   - ห้าม push branch ทิ้งไว้โดยไม่เปิด PR
+14. **🃏 Zero Fabricated Cards Policy (ห้ามกุไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด)**:
+   - ในทุกขั้นตอนการสับไพ่, เลือกไพ่, กู้คืนเซสชัน, สตรีมคำทำนาย, และแชทถามตอบ **ห้ามเขียนโค้ด fallback มโนหรือกุไพ่ใบใดใบหนึ่งในสำรับ 78 ใบขึ้นมาเองเด็ดขาด** (ไม่ว่าจะ The Fool, The Magician หรือใบใดๆ ทั้งสิ้น)
+   - หากข้อมูลไพ่สูญหายหรือไม่สมบูรณ์ ระบบต้องคืนค่า `undefined` หรือส่ง Error แจ้งเตือนให้ผู้ใช้ **'โหลดใหม่อีกครั้ง'** ทันที เพื่อรักษาหลักการความโปร่งใส (Provably Fair) 100%
 
 ---
 
@@ -184,10 +190,10 @@ npm run git:tidy
 | **Step 4: Pick (78 Cards)** | `src/components/deck/InteractiveCardFan.tsx` | โต๊ะแผ่กระจายไพ่ 78 ใบแบบ 3 ชั้นริบบิ้น พร้อม Progress Dock | **ห้ามใส่ปุ่มลูกศรข้าง** และต้องใช้ Unified Canvas |
 | **Step 5: Reading Board** | `src/components/spread/SpreadBoard.tsx` | ผังวางไพ่ 3D ตามพิกัด Spread | ไพ่ต้องคว่ำหน้าเริ่มต้น และแตะพลิก 3D ทีละใบ |
 | **Step 5: AI Prophet** | `src/components/reading/StreamReader.tsx` | อ่านคำทำนายแบบ Real-Time SSE Stream พร้อมเสียง TTS | มีปุ่มเปิดเสียงแม่หมอ และ A/B Accuracy Rating ท้ายคำอ่าน |
-| **Services Layer** | `src/services/*.service.ts` | Business Logic: `reading`, `shuffle`, `pick`, `safety`, `interpretation` | แยก Logic จาก UI ไม่เขียน Database/Crypto ซ้ำซ้อนใน Component |
-| **Server Repositories** | `src/server/repositories/` | Data Access: `reading.repository.ts` | เป็น Interface สำหรับเชื่อมต่อ DB หรือ Memory Storage |
-| **Global Types** | `src/types/*.ts` | สัญญา Type ของทั้งระบบ (`reading`, `tarot`, `safety`) | ใช้ Types จากที่นี่เป็น Single Source of Truth |
-| **Verification & Crypto** | `src/components/verification/`, `src/lib/crypto/` | Provably Fair SHA-256 Hash Badge & Modal | ห้ามเปลี่ยนสูตรการสับไพ่ Deterministic Fisher-Yates |
+| **AI Dual-Engine Layer** | `src/lib/ai/groq.ts`, `src/lib/ai/gemini.ts` | ระบบสองประสาน: Tier 1 Groq LPU (Qwen 2.5) ความเร็วสูง + Tier 2 Gemini สำรอง | มีเกราะป้องกันภาษาจีนและ AI Gateway Fallback |
+| **Platform DB & KV** | `src/lib/platform/db.ts`, `src/server/store.ts` | Cloudflare D1 (`APP_DB`) เก็บ users/journal/usage + KV cache/overrides | ใช้งาน parameterized SQL ป้องกัน SQL Injection 100% |
+| **Entitlement & Quota** | `src/lib/entitlement/entitlement.ts` | โควตาดูดวงฟรี 1 ครั้ง/สัปดาห์ 3 ครั้ง ป้องกันการหักซ้ำ | Self-heal migration อัตโนมัติเมื่อ table หาย |
+| **Verification & Crypto** | `src/components/verification/`, `src/lib/tarot/shuffle.ts` | Provably Fair SHA-256 Hash Badge & Modal | ห้ามเปลี่ยนสูตรการสับไพ่ Deterministic Fisher-Yates |
 | **Pages & Routes** | `src/app/cards/`, `spreads/`, `blog/`, `account/` | หน้าเว็บเฉพาะทาง (สารานุกรม 78 ใบ, คลังผัง, บทความ, บัญชี) | ออกแบบด้วยธีม Sacred Gold และรองรับ Mobile 100% |
 | **Audio & TTS Engine** | `src/lib/utils/audio.ts` | เสียงสังเคราะห์ Web Audio API (สับไพ่/พลิกไพ่) + Web Speech TTS | ปิด/เปิดเสียงผ่าน `soundManager` เท่านั้น |
 | **Safety & PDPA** | `src/lib/safety/`, `src/app/privacy/page.tsx` | กรองคำถามอันตราย, สายด่วน 1323, นโยบาย PDPA, AI Disclosure | ห้ามลบ Disclaimer หรือตัวกรองความปลอดภัย |
@@ -244,8 +250,8 @@ npm run git:tidy
 ก่อนและหลังแก้ไขโค้ดทุกครั้ง AI **ต้องรันคำสั่งเหล่านี้เพื่อตรวจสอบความถูกต้อง**:
 
 ```bash
-# ✅ คำสั่งเดียวจบ — ตรวจครบทั้ง 7 ด่านในรอบเดียว
-#    (Collision Guard, Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Safety Guardrails, Provably-Fair Shuffle, Card Image Path Guard)
+# ✅ คำสั่งเดียวจบ — ตรวจครบทั้ง 24 ด่านในรอบเดียว
+#    (Collision Guard, Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Safety Guardrails, Provably-Fair Shuffle, D1 Sync, Entitlement, Groq Failover ฯลฯ)
 #    ถ้าไม่ผ่าน จะบอกครบทุกด่านที่พังพร้อมข้อความ error เต็ม ไม่ต้องแก้ทีละรอบ
 npm run repo:verify
 
@@ -278,4 +284,9 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000
 | **2026-08-31** | **IG Story 9:16 & Post 4:5 Export** | ระบบสร้างการ์ดรูปภาพพร้อมแชร์ความละเอียดสูง | Antigravity AI |
 | **2026-08-31** | **Provably-Fair Shuffle Engine** | Fisher-Yates + SHA-256 Commit-Reveal Cryptographic Verification | Antigravity AI |
 | **2026-09-01** | **7-Layer AI Cost Control & Defense** | Rate Limit Bypass, AI Daily Cap Circuit Breaker, Origin Guard, KV IP Quota, ADR-002 | Antigravity AI |
+| **2026-09-02** | **Cloudflare Free Stack (Waves 1-3)** | ติดตั้ง AI Gateway, Turnstile, Email Routing, KV Daily Card, R2 Share, Vectorize Search | Claude & Antigravity |
+| **2026-09-03** | **Editorial Quiet Luxury Redesign** | ยกเครื่องสุนทรียภาพ: Warm sanctuary canvas, 3D porcelain cards, typography balance | Antigravity AI |
+| **2026-09-04** | **Dual-Engine AI (Groq Qwen + Gemini)** | ปฐมภูมิ Groq LPU (Qwen 2.5) 400ms + ทุติยภูมิ Gemini Failover + เกราะกันภาษาจีน 100% | Antigravity AI |
+| **2026-09-04** | **Mobile PageSpeed 100 Optimization** | LCP Preload 1.8s, WebP optimization, dynamic code-splitting, Cache-Control 1 ปี | Antigravity AI |
+| **2026-09-04** | **Thai Typography & Dropdown Stutter Fix** | GPU-composited transitions, line-box headroom, ขจัดอาการกระตุก 60fps | Antigravity AI |
 

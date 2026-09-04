@@ -49,13 +49,12 @@ GROQ_API_KEY="gsk_..."
 # ==========================================
 # 🔐 Security & Authentication
 # ==========================================
-# Secret สำหรับลงนาม Session Token และ JWT
-SESSION_SECRET="your-super-secret-random-key-at-least-32-chars"
-JWT_SECRET="your-super-secret-jwt-key"
+# Secret สำหรับลงนาม Session Token (ความยาว ≥ 32 ตัวอักษร)
+TAROT_SESSION_SECRET="your-super-secret-random-key-at-least-32-chars"
+PASSWORD_PEPPER="your-super-secret-pepper-32-bytes"
 
 # รหัสผ่านแอดมินสำหรับเข้าสู่แผงควบคุม /admin
 ADMIN_PASSWORD="your-secure-admin-password"
-ADMIN_TOKEN="your-admin-bearer-token"
 
 # ==========================================
 # ⚙️ Platform & Simulation Flags (Optional for Dev)
@@ -99,14 +98,14 @@ PORT=3001 npm run dev
 
 | คำสั่ง | วัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 21 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Provably Fair, Agent Lock ฯลฯ) |
+| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 24 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Provably Fair, Agent Lock ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Typecheck อย่างเดียว (ต้องได้ 0 errors เสมอ) |
 | `npm run cards:variants` | สร้างรูปภาพไพ่ WebP หลายขนาด (`w128`, `w256`, `w512`, `w1024`) อัตโนมัติ (รันเมื่อมีการเพิ่มภาพใหม่ใน `/public/cards/`) |
 | `npm run agent:status` | ตรวจสอบสถานะการล็อคไฟล์ของ AI Agent เพื่อป้องกันการแก้ไขชนกัน |
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงาน `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` |
 | `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จ |
 | `npm run commit` | บันทึก Commit ผ่านระบบ Git Author Guard |
-| `npm run pr:auto` | ตรวจ 21 ด่าน ➔ Push ➔ สร้าง PR ➔ Auto-Merge ➔ Deploy อัตโนมัติ |
+| `npm run pr:auto` | ตรวจ 24 ด่าน ➔ Push ➔ สร้าง PR ➔ Auto-Merge ➔ Deploy อัตโนมัติ |
 | `npm run git:tidy` | เก็บกวาด Branch ที่ถูก Merge ไปแล้วออกจากเครื่องและ Remote |
 
 ---
