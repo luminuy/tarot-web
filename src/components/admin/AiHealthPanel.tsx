@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-
 import { Button } from "@/components/ui/Button";
 
 interface ModelResult {
@@ -63,50 +62,55 @@ export default function AiHealthPanel() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-mystic-gold text-base font-bold">สุขภาพการเชื่อมต่อ AI</h2>
-          <p className="mt-0.5 text-xs text-[#9c93b8]">
+          <h2 className="font-mystic-gold text-base font-bold text-[#29261F]">สุขภาพการเชื่อมต่อ AI</h2>
+          <p className="mt-0.5 text-xs text-[#635B4E]">
             ยิงถาม Gemini จริง 1 ครั้งต่อโมเดล เพื่อดูว่าแม่หมอตอบด้วย AI ได้จริงหรือกำลังใช้คำตอบสำรอง
           </p>
         </div>
-        <Button size="sm" onClick={run} disabled={loading}>
-          {loading ? "กำลังตรวจ…" : "ตรวจอีกครั้ง"}
+        <Button
+          size="sm"
+          onClick={run}
+          disabled={loading}
+          className="bg-[#29261F] hover:bg-[#171512] text-white font-medium text-xs shadow-xs"
+        >
+          {loading ? "กำลังตรวจ…" : "✦ ตรวจอีกครั้ง"}
         </Button>
       </div>
 
       {err && (
-        <p className="rounded-xl border border-red-500/40 bg-red-950/30 px-4 py-3 text-xs text-red-300">
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
           {err}
         </p>
       )}
 
-      {loading && !data && <p className="text-sm text-[#9c93b8]">กำลังติดต่อ Gemini…</p>}
+      {loading && !data && <p className="text-sm text-[#635B4E]">กำลังติดต่อ Gemini…</p>}
 
       {data && (
         <>
           <div
-            className={`rounded-2xl border px-4 py-4 ${
+            className={`rounded-2xl border px-5 py-4 shadow-xs ${
               data.ok && data.verdict === "healthy"
-                ? "border-emerald-500/40 bg-emerald-950/25"
-                : "border-[#e5c07b]/45 bg-[#1c1330]/70"
+                ? "border-emerald-200 bg-emerald-50/70"
+                : "border-amber-200 bg-amber-50/70"
             }`}
           >
             <p
               className={`text-sm font-bold ${
-                data.ok && data.verdict === "healthy" ? "text-emerald-300" : "text-[#f5deaa]"
+                data.ok && data.verdict === "healthy" ? "text-emerald-900" : "text-amber-900"
               }`}
             >
               {VERDICT_LABEL[data.verdict]}
             </p>
-            <p className="mt-1.5 text-xs leading-relaxed text-[#cfc8e2]">{data.summary}</p>
-            <p className="mt-2 text-xs leading-relaxed text-[#9c93b8]">
-              <span className="text-[#e5c07b]">สิ่งที่ต้องทำต่อ:</span> {data.nextStep}
+            <p className="mt-1.5 text-xs leading-relaxed text-[#29261F]">{data.summary}</p>
+            <p className="mt-2 text-xs leading-relaxed text-[#635B4E]">
+              <span className="font-semibold text-[#29261F]">สิ่งที่ต้องทำต่อ:</span> {data.nextStep}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-[#e5c07b]/25 bg-[#0d0818] px-4 py-3">
-              <p className="text-[13px] font-semibold text-[#e5c07b]">คีย์ AI</p>
-              <p className="mt-1 text-xs text-[#cfc8e2]">
+            <div className="rounded-2xl border border-[#D5CEC2] bg-white px-5 py-4 shadow-xs">
+              <p className="text-xs font-semibold text-[#29261F]">คีย์ AI</p>
+              <p className="mt-1 text-xs text-[#635B4E]">
                 {data.key.configured
                   ? `ตั้งไว้แล้วที่ ${data.key.envVar} · ยาว ${data.key.length} ตัว${
                       data.key.startsWithAIza ? " · ขึ้นต้น AIza" : ""
@@ -114,9 +118,9 @@ export default function AiHealthPanel() {
                   : "ยังไม่ได้ตั้ง GEMINI_API_KEY / GOOGLE_API_KEY"}
               </p>
             </div>
-            <div className="rounded-xl border border-[#e5c07b]/25 bg-[#0d0818] px-4 py-3">
-              <p className="text-[13px] font-semibold text-[#e5c07b]">เพดานเรียก AI วันนี้</p>
-              <p className="mt-1 text-xs text-[#cfc8e2]">
+            <div className="rounded-2xl border border-[#D5CEC2] bg-white px-5 py-4 shadow-xs">
+              <p className="text-xs font-semibold text-[#29261F]">เพดานเรียก AI วันนี้</p>
+              <p className="mt-1 text-xs text-[#635B4E]">
                 ใช้ไป {data.budget.usedToday} / {data.budget.dailyCap} ครั้ง
                 {data.budget.memberCapReached
                   ? " · เต็มเพดานแล้ว"
@@ -128,35 +132,43 @@ export default function AiHealthPanel() {
           </div>
 
           {data.models.length > 0 && (
-            <div className="overflow-x-auto rounded-xl border border-[#e5c07b]/25">
+            <div className="overflow-x-auto rounded-2xl border border-[#D5CEC2] bg-white shadow-xs">
               <table className="w-full min-w-[560px] text-left text-xs">
-                <thead className="bg-[#140d28] text-[#e5c07b]">
+                <thead className="bg-[#FAF8F5] text-[#635B4E] border-b border-[#D5CEC2]">
                   <tr>
-                    <th className="px-3 py-2 font-semibold">โมเดล</th>
-                    <th className="px-3 py-2 font-semibold">ผล</th>
-                    <th className="px-3 py-2 font-semibold">เวลา</th>
-                    <th className="px-3 py-2 font-semibold">รายละเอียด</th>
+                    <th className="px-3.5 py-2.5 font-semibold">โมเดล</th>
+                    <th className="px-3.5 py-2.5 font-semibold">ผล</th>
+                    <th className="px-3.5 py-2.5 font-semibold">เวลา</th>
+                    <th className="px-3.5 py-2.5 font-semibold">รายละเอียด</th>
                   </tr>
                 </thead>
-                <tbody className="text-[#cfc8e2]">
+                <tbody className="divide-y divide-[#E8E2D8] text-[#29261F]">
                   {data.models.map((m) => (
-                    <tr key={m.model} className="border-t border-[#e5c07b]/12 align-top">
-                      <td className="px-3 py-2 font-mono text-[13px]">{m.model}</td>
-                      <td className={`px-3 py-2 font-semibold ${m.ok ? "text-emerald-300" : "text-red-300"}`}>
-                        {m.ok ? "ผ่าน" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
+                    <tr key={m.model} className="hover:bg-[#FAF8F5] transition-colors align-top">
+                      <td className="px-3.5 py-3 font-mono text-xs">{m.model}</td>
+                      <td className="px-3.5 py-3">
+                        <span
+                          className={`inline-block rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                            m.ok
+                              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                              : "bg-rose-50 text-rose-800 border border-rose-200"
+                          }`}
+                        >
+                          {m.ok ? "ผ่าน" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
+                        </span>
                       </td>
-                      <td className="px-3 py-2 font-mono text-[13px]">{m.elapsedMs}ms</td>
-                      <td className="px-3 py-2 leading-relaxed">
+                      <td className="px-3.5 py-3 font-mono text-xs text-[#635B4E]">{m.elapsedMs}ms</td>
+                      <td className="px-3.5 py-3 leading-relaxed">
                         {m.ok ? (
                           <>
-                            ตอบว่า “{m.answerPreview}”
-                            <span className="block text-[13px] text-[#9c93b8]">
+                            <span className="text-[#29261F]">ตอบว่า “{m.answerPreview}”</span>
+                            <span className="block text-[11px] text-[#756F66] mt-0.5">
                               parts ทั้งหมด {m.partCount} · เป็น part ความคิด {m.thoughtPartCount}
                               {m.finishReason ? ` · finishReason ${m.finishReason}` : ""}
                             </span>
                           </>
                         ) : (
-                          <span className="break-all text-[13px] text-red-300/90">{m.error}</span>
+                          <span className="break-all text-xs text-rose-700 font-mono">{m.error}</span>
                         )}
                       </td>
                     </tr>
@@ -167,10 +179,10 @@ export default function AiHealthPanel() {
           )}
 
           {data.chatProbe && data.chatProbe.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div>
-                <h3 className="text-sm font-bold text-[#f5deaa]">ทดสอบแบบห้องคุยจริง</h3>
-                <p className="mt-0.5 text-[13px] leading-relaxed text-[#9c93b8]">
+                <h3 className="text-sm font-bold text-[#29261F]">ทดสอบแบบห้องคุยจริง</h3>
+                <p className="mt-0.5 text-xs leading-relaxed text-[#635B4E]">
                   ยิงด้วย prompt ชุดเดียวกับที่ห้องคุยใช้จริง (บุคลิกแม่หมอเต็ม + ไพ่ + ประวัติสนทนา)
                   — ผ่าน ping สั้น ๆ ไม่ได้แปลว่าห้องคุยจะผ่าน ช่องนี้คือตัวชี้ขาด
                 </p>
@@ -178,21 +190,29 @@ export default function AiHealthPanel() {
               {data.chatProbe.map((m) => (
                 <div
                   key={m.model}
-                  className={`rounded-xl border px-4 py-3 text-xs ${
-                    m.ok ? "border-emerald-500/35 bg-emerald-950/20" : "border-red-500/35 bg-red-950/15"
+                  className={`rounded-2xl border p-4 text-xs shadow-xs ${
+                    m.ok
+                      ? "border-emerald-200 bg-emerald-50/50"
+                      : "border-rose-200 bg-rose-50/50"
                   }`}
                 >
                   <p className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[13px] text-[#cfc8e2]">{m.model}</span>
-                    <span className={m.ok ? "font-semibold text-emerald-300" : "font-semibold text-red-300"}>
+                    <span className="font-mono text-xs font-semibold text-[#29261F]">{m.model}</span>
+                    <span
+                      className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                        m.ok
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-rose-100 text-rose-800"
+                      }`}
+                    >
                       {m.ok ? "ตอบได้จริง" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
                     </span>
-                    <span className="font-mono text-[13px] text-[#9c93b8]">{m.elapsedMs}ms</span>
+                    <span className="font-mono text-xs text-[#635B4E]">{m.elapsedMs}ms</span>
                     {m.promptChars ? (
-                      <span className="text-[13px] text-[#9c93b8]">prompt {m.promptChars} ตัวอักษร</span>
+                      <span className="text-xs text-[#756F66]">prompt {m.promptChars} ตัวอักษร</span>
                     ) : null}
                   </p>
-                  <p className={`mt-1.5 leading-relaxed ${m.ok ? "text-[#cfc8e2]" : "break-all text-red-300/90"}`}>
+                  <p className={`mt-2 leading-relaxed ${m.ok ? "text-[#29261F]" : "break-all text-rose-800 font-mono"}`}>
                     {m.ok ? `“${m.answerPreview}”` : m.error}
                   </p>
                 </div>
@@ -200,7 +220,7 @@ export default function AiHealthPanel() {
             </div>
           )}
 
-          <p className="text-[13px] text-[#9c93b8]">
+          <p className="text-xs text-[#756F66]">
             ตรวจเมื่อ {new Date(data.checkedAt).toLocaleString("th-TH")}
           </p>
         </>

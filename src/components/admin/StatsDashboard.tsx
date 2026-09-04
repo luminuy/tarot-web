@@ -53,10 +53,10 @@ function breakdown(src: Record<string, number>, prefix: string) {
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="altar-panel rounded-2xl p-4">
-      <p className="text-xs text-[#9c93b8]">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-[#f5deaa]">{value}</p>
-      {sub ? <p className="mt-0.5 text-xs text-[#9c93b8]">{sub}</p> : null}
+    <div className="rounded-2xl border border-[#D5CEC2] bg-white p-4 shadow-xs">
+      <p className="text-xs font-semibold text-[#635B4E]">{label}</p>
+      <p className="mt-1 text-2xl font-bold font-mono text-[#29261F]">{value}</p>
+      {sub ? <p className="mt-0.5 text-xs text-[#756F66]">{sub}</p> : null}
     </div>
   );
 }
@@ -72,24 +72,24 @@ function BarList({
 }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
   return (
-    <div className="altar-panel rounded-2xl p-4">
-      <h3 className="text-sm font-semibold text-[#e5c07b]">{title}</h3>
+    <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+      <h3 className="font-mystic-gold text-sm font-bold text-[#29261F]">{title}</h3>
       {rows.length === 0 ? (
-        <p className="mt-3 text-xs text-[#9c93b8]">ยังไม่มีข้อมูล</p>
+        <p className="mt-3 text-xs text-[#756F66]">ยังไม่มีข้อมูล</p>
       ) : (
-        <ul className="mt-3 flex flex-col gap-2">
+        <ul className="mt-3 flex flex-col gap-2.5">
           {rows.map((r) => (
             <li key={r.key} className="flex items-center gap-3">
-              <span className="w-40 shrink-0 truncate text-xs text-[#e2d9f3]" title={nameMap?.[r.key] ?? r.key}>
+              <span className="w-40 shrink-0 truncate text-xs font-medium text-[#29261F]" title={nameMap?.[r.key] ?? r.key}>
                 {nameMap?.[r.key] ?? r.key}
               </span>
-              <span className="h-2 flex-1 overflow-hidden rounded-full bg-[#1a1330]">
+              <span className="h-2 flex-1 overflow-hidden rounded-full bg-[#EAE7E0]">
                 <span
-                  className="block h-full rounded-full bg-gradient-to-r from-[#c59b27] to-[#f3e5ab]"
+                  className="block h-full rounded-full bg-[#A58A5C]"
                   style={{ width: `${(r.count / max) * 100}%` }}
                 />
               </span>
-              <span className="w-12 shrink-0 text-right text-xs tabular-nums text-[#9c93b8]">{n(r.count)}</span>
+              <span className="w-12 shrink-0 text-right text-xs font-mono text-[#635B4E]">{n(r.count)}</span>
             </li>
           ))}
         </ul>
@@ -149,13 +149,12 @@ export default function StatsDashboard() {
       failed,
       blocked,
       completionRate: pct(completed, started),
-      avgLatency: aiCalls ? `${(latSum / aiCalls / 1000).toFixed(1)} วิ` : "—",
       tokens: tokIn + tokOut,
-      aiCalls,
+      avgLatency: completed ? `${Math.round(latSum / completed)}ms` : "-",
       groqCalls,
       geminiCalls,
       groqShare: pct(groqCalls, aiCalls),
-      groqFailover: r.ai_groq_failover ?? 0,
+      groqFailover: r.ai_failover_groq_to_gemini ?? 0,
       foreignTrips,
       schemaFails,
       aiErrors: (r["ai_error:gemini"] ?? 0) + (r["ai_error:groq"] ?? 0),
@@ -175,11 +174,12 @@ export default function StatsDashboard() {
           {[7, 30, 90].map((d) => (
             <button
               key={d}
+              type="button"
               onClick={() => setDays(d)}
-              className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
                 days === d
-                  ? "border-[#ffd700]/70 bg-[#e5c07b]/15 text-[#f5deaa]"
-                  : "border-[#e5c07b]/25 text-[#9c93b8] hover:text-[#e5c07b]"
+                  ? "bg-[#29261F] text-white shadow-xs"
+                  : "border border-[#D5CEC2] bg-[#FAF8F5] text-[#635B4E] hover:bg-white hover:text-[#29261F]"
               }`}
             >
               {d} วัน
@@ -187,15 +187,16 @@ export default function StatsDashboard() {
           ))}
         </div>
         <button
+          type="button"
           onClick={() => load(days)}
-          className="text-xs text-[#9c93b8] hover:text-[#e5c07b]"
+          className="text-xs text-[#635B4E] hover:text-[#29261F] font-medium"
           disabled={loading}
         >
-          {loading ? "กำลังโหลด…" : "รีเฟรช ✦"}
+          {loading ? "กำลังโหลด…" : "✦ รีเฟรชข้อมูล"}
         </button>
       </div>
 
-      {err ? <p className="text-sm text-[#f0a0a0]">{err}</p> : null}
+      {err ? <p className="text-sm text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-xl">{err}</p> : null}
 
       {view ? (
         <>
@@ -217,7 +218,7 @@ export default function StatsDashboard() {
             <StatCard
               label="Groq เอนจิน — สุขภาพ"
               value={`${n(view.groqFailover)} failover`}
-              sub={`จีนหลุดตัดวงจร ${n(view.foreignTrips)} · schema fail ${n(view.schemaFails)}`}
+              sub={`ตัดวงจรอักษรแปลก ${n(view.foreignTrips)} · schema fail ${n(view.schemaFails)}`}
             />
             <StatCard label="เวลาเฉลี่ย/คำอ่าน" value={view.avgLatency} />
             <StatCard label="Token รวม" value={n(view.tokens)} sub="in + out" />
@@ -230,16 +231,16 @@ export default function StatsDashboard() {
             <BarList title="ธงความปลอดภัยที่ตรวจพบ" rows={view.flags} nameMap={FLAG_NAME} />
           </div>
 
-          <div className="altar-panel rounded-2xl p-4">
-            <h3 className="text-sm font-semibold text-[#e5c07b]">บันทึกการเข้าแอดมิน (ล่าสุด)</h3>
-            <ul className="mt-3 flex flex-col gap-1.5 text-xs text-[#9c93b8]">
+          <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+            <h3 className="font-mystic-gold text-sm font-bold text-[#29261F]">บันทึกการเข้าแอดมิน (ล่าสุด)</h3>
+            <ul className="mt-3 flex flex-col gap-2 text-xs">
               {data!.audit.length === 0 ? (
-                <li>ยังไม่มีบันทึก</li>
+                <li className="text-[#756F66]">ยังไม่มีบันทึก</li>
               ) : (
                 data!.audit.slice(0, 20).map((a, i) => (
-                  <li key={i} className="flex justify-between gap-3">
-                    <span className="text-[#e2d9f3]">{a.action}</span>
-                    <span className="tabular-nums">{new Date(a.ts).toLocaleString("th-TH")}</span>
+                  <li key={i} className="flex justify-between gap-3 border-b border-[#E8E2D8] pb-1.5 last:border-0 last:pb-0">
+                    <span className="text-[#29261F] font-mono">{a.action}</span>
+                    <span className="tabular-nums text-[#756F66]">{new Date(a.ts).toLocaleString("th-TH")}</span>
                   </li>
                 ))
               )}
@@ -247,7 +248,7 @@ export default function StatsDashboard() {
           </div>
         </>
       ) : loading ? (
-        <p className="text-sm text-[#9c93b8]">กำลังโหลดสถิติ…</p>
+        <p className="text-sm text-[#635B4E]">กำลังโหลดสถิติ…</p>
       ) : null}
     </div>
   );

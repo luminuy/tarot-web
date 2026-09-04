@@ -144,27 +144,31 @@ export default function EntitlementAdmin() {
     [gfDate, load],
   );
 
-  if (!s) return <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>;
+  if (!s) return <p className="text-sm text-[#635B4E]">กำลังโหลด…</p>;
 
   return (
     <div className="flex flex-col gap-5">
-      {msg ? <p className="text-xs text-[#9c93b8]">{msg}</p> : null}
+      {msg ? <p className="text-xs text-[#635B4E]">{msg}</p> : null}
 
       {/* ── สถานะฐานข้อมูล ── */}
-      <div className="altar-panel rounded-2xl p-5">
+      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-sm font-semibold text-[#e5c07b]">
+            <h3 className="text-sm font-semibold text-[#29261F]">
               1 · เตรียมฐานข้อมูล{" "}
               {dbReady === null ? (
-                <span className="text-[#9c93b8]">(กำลังตรวจ…)</span>
+                <span className="text-[#635B4E] text-xs font-normal">(กำลังตรวจ…)</span>
               ) : dbReady ? (
-                <span className="text-emerald-400">✓ พร้อม</span>
+                <span className="inline-flex items-center rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                  ✓ พร้อม
+                </span>
               ) : (
-                <span className="text-[#f0a0a0]">✗ ยังไม่พร้อม</span>
+                <span className="inline-flex items-center rounded border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-semibold text-rose-800">
+                  ✗ ยังไม่พร้อม
+                </span>
               )}
             </h3>
-            <p className="mt-1 text-xs text-[#9c93b8]">
+            <p className="mt-1 text-xs text-[#635B4E]">
               สร้างตารางเก็บโควตา (ทำครั้งเดียว · กดซ้ำได้ ปลอดภัย)
             </p>
           </div>
@@ -175,9 +179,9 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── โบนัสเปลี่ยนผ่าน ── */}
-      <div className="altar-panel rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-[#e5c07b]">2 · โบนัสเปลี่ยนผ่านผู้ใช้เดิม (10 ครั้ง)</h3>
-        <p className="mt-1 mb-3 text-xs text-[#9c93b8]">
+      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-[#29261F]">2 · โบนัสเปลี่ยนผ่านผู้ใช้เดิม (10 ครั้ง)</h3>
+        <p className="mt-1 mb-3 text-xs text-[#635B4E]">
           ทำครั้งเดียวก่อนเปิดระบบ — ผู้ใช้ที่สมัคร <strong>ก่อน</strong> วันตัด จะได้โบนัส 10 ครั้ง (ไม่หมดอายุ) · กดซ้ำได้
         </p>
         <div className="flex flex-wrap items-end gap-3">
@@ -186,7 +190,6 @@ export default function EntitlementAdmin() {
               <Input
                 id={id}
                 type="date"
-                className="[color-scheme:dark]"
                 max={todayISO()}
                 value={gfDate}
                 onChange={(e) => setGfDate(e.target.value)}
@@ -203,13 +206,13 @@ export default function EntitlementAdmin() {
             ให้โบนัส
           </Button>
         </div>
-        {gfResult ? <p className="mt-3 text-xs text-[#f5deaa]">{gfResult}</p> : null}
+        {gfResult ? <p className="mt-3 text-xs text-[#29261F] font-medium">{gfResult}</p> : null}
       </div>
 
       {/* ── แบนเนอร์ประกาศล่วงหน้า ── */}
-      <div className="altar-panel rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-[#e5c07b]">3 · แบนเนอร์ประกาศล่วงหน้า</h3>
-        <p className="mt-1 mb-3 text-xs text-[#9c93b8]">
+      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-[#29261F]">3 · แบนเนอร์ประกาศล่วงหน้า</h3>
+        <p className="mt-1 mb-3 text-xs text-[#635B4E]">
           แสดงบนหน้าแรกเมื่อระบบยังปิด — เปิดล่วงหน้าอย่างน้อย <strong>7 วัน</strong> ก่อนเปิดระบบจริง
         </p>
         <div className="flex flex-wrap items-end gap-3">
@@ -218,7 +221,6 @@ export default function EntitlementAdmin() {
               <Input
                 id={id}
                 type="date"
-                className="[color-scheme:dark]"
                 min={todayISO()}
                 value={announceISO}
                 onChange={(e) => {
@@ -250,9 +252,9 @@ export default function EntitlementAdmin() {
             {s.announce ? "ประกาศเปิดอยู่ — กดเพื่อปิด" : "ประกาศปิดอยู่ — กดเพื่อเปิด"}
           </Button>
         </div>
-        <p className="mt-3 rounded-lg border border-[#e5c07b]/20 bg-[#0c0818]/60 p-3 text-xs text-[#9c93b8]">
+        <p className="mt-3 rounded-xl border border-[#D5CEC2] bg-[#F8F6F2] p-3 text-xs text-[#635B4E]">
           ตัวอย่างแบนเนอร์:{" "}
-          <span className="text-[#f5deaa]">
+          <span className="text-[#29261F] font-semibold">
             เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น ผู้เยี่ยมชม {GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ {DAILY_LIMIT} ครั้ง
             {s.announceResetDate?.trim() ? ` เริ่ม ${s.announceResetDate.trim()}` : ""}
           </span>
@@ -260,14 +262,14 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── ธงเปิดระบบจริง ── */}
-      <div className="altar-panel rounded-2xl border border-[#f0a0a0]/25 p-5">
+      <div className="altar-panel rounded-2xl border border-rose-300 bg-white p-5 shadow-xs">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-sm font-semibold text-[#e5c07b]">4 · เปิดระบบสิทธิ์จริง</h3>
-            <p className="mt-1 text-xs text-[#9c93b8]">
+            <h3 className="text-sm font-semibold text-[#29261F]">4 · เปิดระบบสิทธิ์จริง</h3>
+            <p className="mt-1 text-xs text-[#635B4E]">
               เปิด = ผู้เยี่ยมชม {GUEST_LIMIT} ครั้ง · สมาชิกวันละ {DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก
               <br />
-              <strong className="text-[#f0a0a0]">
+              <strong className="text-rose-700">
                 ⚠️ ทำข้อ 1–3 ให้ครบและรอประกาศ ≥ 7 วันก่อน — จะลดสิทธิ์ผู้ใช้เดิมทันที
               </strong>
             </p>
@@ -292,27 +294,27 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── Metric เฝ้าดู 48 ชม.แรก ── */}
-      <div className="altar-panel rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-[#e5c07b]">สถิติระบบสิทธิ์ (7 วันล่าสุด)</h3>
+      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-[#29261F]">สถิติระบบสิทธิ์ (7 วันล่าสุด)</h3>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {Object.entries(METRIC_LABEL).map(([k, label]) => (
-            <div key={k} className="rounded-xl bg-[#0c0818]/70 p-3">
-              <p className="text-[13px] text-[#9c93b8]">{label}</p>
-              <p className="mt-0.5 text-lg font-bold text-[#f5deaa]">
+            <div key={k} className="rounded-xl border border-[#D5CEC2] bg-[#F8F6F2] p-3">
+              <p className="text-[13px] text-[#635B4E]">{label}</p>
+              <p className="mt-0.5 text-lg font-bold text-[#29261F]">
                 {(s.metrics[k] ?? 0).toLocaleString("th-TH")}
               </p>
             </div>
           ))}
         </div>
-        <button onClick={load} className="mt-3 text-xs text-[#9c93b8] hover:text-[#e5c07b]">
+        <button onClick={load} className="mt-3 text-xs text-[#635B4E] hover:text-[#29261F]">
           รีเฟรช ✦
         </button>
       </div>
 
       {/* ── สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด) ── */}
-      <div className="altar-panel rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-[#e5c07b]">สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด)</h3>
-        <p className="mt-1 text-xs text-[#9c93b8]">
+      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-[#29261F]">สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด)</h3>
+        <p className="mt-1 text-xs text-[#635B4E]">
           ทุกค่าควรเป็น <strong>0</strong> — ถ้าไม่ใช่ แปลว่าโควตาอาจไม่ถูกบังคับจริงในช่วงนั้น
         </p>
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -322,15 +324,17 @@ export default function EntitlementAdmin() {
             return (
               <div
                 key={key}
-                className={`rounded-xl p-3 ${
-                  bad ? "bg-[#3a1420] border border-[#f0a0a0]/40" : "bg-[#0c0818]/70"
+                className={`rounded-xl p-3 border ${
+                  bad
+                    ? "bg-rose-50 border-rose-200"
+                    : "bg-[#F8F6F2] border-[#D5CEC2]"
                 }`}
               >
-                <p className="text-[13px] text-[#9c93b8]">{label}</p>
-                <p className={`mt-0.5 text-lg font-bold ${bad ? "text-[#f0a0a0]" : "text-emerald-400"}`}>
+                <p className="text-[13px] text-[#635B4E]">{label}</p>
+                <p className={`mt-0.5 text-lg font-bold ${bad ? "text-rose-700" : "text-emerald-700"}`}>
                   {value.toLocaleString("th-TH")}
                 </p>
-                <p className="mt-1 text-[11px] leading-snug text-[#9c93b8]">{hint}</p>
+                <p className="mt-1 text-[11px] leading-snug text-[#635B4E]">{hint}</p>
               </div>
             );
           })}
