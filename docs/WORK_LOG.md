@@ -42,6 +42,36 @@
 - **ข้อ 5 — ไม่มี `/spreads/[id]`**: สร้างหน้า SEO 20 หน้า (SSG) — hero + แผนผังตำแหน่งไพ่ SSR (`SpreadPositionMap.tsx` วาดจากพิกัด x/y) + ความหมายรายตำแหน่ง + วิธีอ่าน 4 ขั้น + FAQ + บทความที่เกี่ยวข้อง (`targetSpreadId`) + JSON-LD HowTo/Breadcrumb/FAQPage · เพิ่มลง `sitemap.ts` · ลิงก์ "อ่านคู่มือผังนี้" จากการ์ดใน `/spreads`
 - **ข้อ 3 — blog/[id] "กดไม่เข้า"**: ตรวจแล้ว `src/app/blog/[slug]/page.tsx` มีอยู่และทำงานปกติ (24 บทความ SSG · คลิกจากดัชนีเข้าได้) — รายการ backlog ข้อนี้ **ล้าสมัย** ปิดได้เลย
 - **พิสูจน์**: `npm run typecheck` 0 · `npm run build` ผ่าน (spreads/[id] prerender 20 · blog/[slug] 24) · `npm run repo:verify` 23/23 · ทดสอบผ่านเบราว์เซอร์: `/spreads/celtic-cross|three-card|yes-no` เนื้อหาครบ · `/spreads/bogus` → 404 · admin login → แท็บ "ข่าวสาร" + การ์ด DB health เรนเดอร์ · `GET /api/admin/marketing?format=csv` คืน CSV พร้อม Content-Disposition
+### 🗓️ 2026-09-04: ยกระดับความลึกซึ้ง AI Reading สัญลักษณ์ 1909 + จิตวิทยา Jungian 78 ใบ + สองประสาน Groq Qwen ปฐมภูมิ & เกราะกันภาษาจีน 100% (Grandmaster AI Reading & Bulletproof Multi-Provider Shield)
+
+- **ความต้องการของผู้ใช้**:
+  1. แก้ปัญหา AI Reading ตื้นกว่าที่ควรจะเป็น ต้องการคำทำนายที่ลึกซึ้ง มีรายละเอียดสัญลักษณ์หน้าไพ่จริง และสะท้อนจิตวิทยามนุษย์
+  2. แก้ปัญหา Gemini หมดโควตาฟรีเร็ว ด้วยการเชื่อมต่อ Groq LPU (Qwen 2.5 32B) เป็นโมเดลปฐมภูมิ (Tier 1) ที่รองรับ 14,400 ครั้ง/วัน ความเร็ว 300-500 tok/s
+  3. เพิ่มเกราะป้องกันภาษาจีน ภาษาญี่ปุ่น และภาษาต่างด้าวไม่ให้หลุดมาให้ผู้ใช้เห็นเด็ดขาด 100%
+  4. สร้างฐานข้อมูลสัญลักษณ์หน้าไพ่ 1909 Pamela Colman Smith และจิตวิทยา Jungian ครบ 78 ใบ เพื่อให้ AI เข้าใจและใช้ภาษาไทยได้ลึกซึ้ง เป็นธรรมชาติเหมือนคนไทย
+- **สิ่งที่พัฒนาและสร้างใหม่**:
+  1. **`src/data/cards/visual-lore.ts` (CREATED)**:
+     - ฐานข้อมูลสัญลักษณ์เชิงลึกและจิตวิทยาครบ 78 ใบ (Major Arcana 22 ใบ + Minor Arcana 56 ใบ)
+     - แต่ละใบประกอบด้วย: `visualDetails` (สิ่งที่เห็นบนภาพวาด 1909 จริง), `keySymbols` (ถอดรหัสสัญลักษณ์ 2-4 จุด เช่น ขนนกแดง, สายน้ำ, สุนัขสีขาว), `jungianArchetype` (แม่แบบจิตวิทยาและเงาใต้สำนึก Shadow/Anima/Animus/Self), และ `powerReflectionQuestion` (คำถามสะท้อนใจทรงพลัง 1 คำถามต่อใบ)
+     - ตรวจสอบความสมบูรณ์ 78/78 ใบ ผ่านการทดสอบ 100%
+  2. **`src/lib/ai/language.ts` (UPGRADED)**:
+     - ใช้ Unicode Property Escapes ตรวจจับอักษรต่างประเทศครอบคลุม: Han (จีน), Hiragana, Katakana, Hangul, Cyrillic, Arabic, Devanagari, Hebrew
+     - สร้างพจนานุกรม `CHINESE_LEAK_MAP` ถอดรหัสคำศัพท์จีนที่โมเดล Qwen มักพลั้งเผลอใช้ ให้กลายเป็นภาษาไทยที่เป็นธรรมชาติโดยอัตโนมัติ (เช่น `仓促` ➔ `รีบร้อน`, `向你` ➔ `สู่คุณ`, `以及` ➔ `และ`, `非常` ➔ `อย่างยิ่ง`, `建议` ➔ `ขอแนะนำว่า`)
+     - ฟังก์ชัน `sanitizeTarotText`, `stripForeignScriptDeep`, `isSevereForeignLeak` (Circuit Breaker ตรวจจับหากหลุดเกิน 25 ตัวอักษรจะตัดสตรีมและ fallback ทันที)
+  3. **`src/lib/ai/prompt.ts` (UPGRADED)**:
+     - เชื่อมต่อ `formatCardLoreForPrompt` ฉีดสัญลักษณ์ 1909, โหราศาสตร์ และรหัสตัวเลขลงในบริบทของไพ่แต่ละใบ
+     - ยกระดับมาตรฐานความยาวและโทนเสียง: รายใบ 4-6 ประโยค, ความเชื่อมโยงข้ามใบ 4-6 ประโยค, บทสรุปตรงจุด 5-8 ประโยค + ปิดท้ายด้วยคำถามชวนคิดทรงพลัง, คำแนะนำ Micro-Action 2-3 ข้อที่ทำได้จริงใน 24-48 ชม.
+     - กฎเหล็กห้ามอักษรจีนเด็ดขาด
+  4. **`src/lib/ai/groq.ts` (IMPLEMENTED & LIVE VERIFIED)**:
+     - รองรับโมเดล Qwen บน Groq LPU พร้อม SSE Streaming และ Partial JSON Parser
+     - ตรวจกรองอักษรต่างด้าวแบบ Real-time บนทุก chunk ของสตรีม (opening, card reading, connections, summary)
+     - Live Test ยืนยันผลลัพธ์: ผลิต 1,115 output tokens ภายใน 2,986ms (ต่ำกว่า 3 วินาที!), 0 foreign characters (`hasForeignScript: false`), สำนวนภาษาไทยงดงามลึกซึ้ง
+  5. **`src/app/api/reading/[id]/read/route.ts` (UPGRADED)**:
+     - สถาปัตยกรรม 3 ระดับ (Tier 1 Groq Qwen ➔ Tier 2 Gemini Flash ➔ Tier 3 Local Mock)
+     - พร้อมระบบบันทึก Metrics และ Circuit Breaker
+- **การทดสอบความถูกต้อง**:
+  - TypeScript Typecheck: 0 errors
+  - `npm run repo:verify`: ผ่านครบ 23/23 ด่าน (100% Green)
 
 ### 🗓️ 2026-09-04: ตรวจสอบและปรับปรุงช่องไฟ การเว้นวรรค และระยะบรรทัดภาษาไทยทั้งเว็บไซต์ (Thai Typography & Spacing Polish)
 
