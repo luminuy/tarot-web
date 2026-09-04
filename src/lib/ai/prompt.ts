@@ -6,7 +6,7 @@ import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
 import { analyzeNumerologicalRhythm } from "@/lib/ai/numerology";
 import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
 import { generateMindfulMicroRitual } from "@/lib/ai/ritual";
-import { analyzeKarmicBridge } from "@/lib/ai/karmic";
+import { analyzeKarmicBridge, type PastReadingSnapshot } from "@/lib/ai/karmic";
 import type { Spread } from "@/data/spreads";
 import { getPersona, type Persona } from "@/data/personas";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
@@ -131,6 +131,7 @@ export interface ReadingContext {
   cards: TarotCard[];
   safety: SafetyVerdict;
   nickname?: string;
+  pastReading?: PastReadingSnapshot;
 }
 
 /**
@@ -164,7 +165,7 @@ ${loreStr}`;
   const numerology = analyzeNumerologicalRhythm(cards);
   const diagnosis = diagnoseQuestionEnergy(question || "", intake);
   const ritual = generateMindfulMicroRitual(alchemy.lackingElements, alchemy.dominantElement);
-  const karmic = analyzeKarmicBridge(cards);
+  const karmic = analyzeKarmicBridge(cards, ctx.pastReading);
 
   const intakeLines = [
     intake.situation && `สถานการณ์ปัจจุบัน: ${intake.situation}`,

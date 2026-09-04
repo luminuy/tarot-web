@@ -108,6 +108,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔮 สัญญา prompt คำอ่านไพ่ (reasoning_format · max_tokens · ความยาวตามจำนวนไพ่ · ReadingSchema)", cmd: TSX, args: ["scripts/qa/test-ai-reading-golden.ts"] },
   { label: "🌅 ไพ่ประจำวันของทุกคน (deterministic + กระจายทั่วสำรับ + provably-fair proof)", cmd: TSX, args: ["scripts/qa/test-daily-card.ts"] },
   { label: "🔎 corpus ค้นหาเชิงความหมาย (ไพ่ 78 + บทความครบ · metadata Vectorize ถูกฟอร์แมต)", cmd: TSX, args: ["scripts/qa/test-search-corpus.ts"] },
+  { label: "📊 คุณภาพคำอ่าน AI & Telemetry (Consistency Checker / Karmic Bridge / Golden Set / reading_quality)", cmd: TSX, args: ["scripts/qa/test-reading-quality.ts"] },
 ];
 
 /**

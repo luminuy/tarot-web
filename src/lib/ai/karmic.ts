@@ -10,10 +10,13 @@
 import type { TarotCard } from "@/data/cards";
 
 export interface PastReadingSnapshot {
-  date: string;
-  question: string;
+  date?: string;
+  question?: string;
   primaryCardName: string;
-  summary: string;
+  summary?: string;
+  outcome?: string | null;
+  daysAgo?: number;
+  recentPrimaryCards?: string[];
 }
 
 export interface KarmicBridgeAnalysis {
@@ -57,10 +60,26 @@ export function analyzeKarmicBridge(
   let transitionInsight = "";
 
   // ตรวจจับคู่การเปลี่ยนผ่านที่มีนัยสำคัญ
+  const pastCardLower = pastReading.primaryCardName.toLowerCase();
   for (const [pastId, targetMap] of Object.entries(NOTABLE_TRANSITIONS)) {
-    if (pastReading.primaryCardName.toLowerCase().includes(pastId)) {
+    const matchesPast =
+      pastCardLower.includes(pastId) ||
+      (pastId === "tower" && pastCardLower.includes("หอคอย")) ||
+      (pastId === "death" && pastCardLower.includes("ความตาย")) ||
+      (pastId === "devil" && pastCardLower.includes("ปีศาจ"));
+
+    if (matchesPast) {
       for (const [currentId, desc] of Object.entries(targetMap)) {
-        if (primaryCurrent.id === currentId || primaryCurrent.nameEn.toLowerCase().includes(currentId)) {
+        if (
+          primaryCurrent.id === currentId ||
+          primaryCurrent.nameEn.toLowerCase().includes(currentId) ||
+          (currentId === "star" && primaryCurrent.nameTh.includes("ดวงดาว")) ||
+          (currentId === "sun" && primaryCurrent.nameTh.includes("ดวงอาทิตย์")) ||
+          (currentId === "world" && primaryCurrent.nameTh.includes("โลก")) ||
+          (currentId === "fool" && primaryCurrent.nameTh.includes("เดอะฟูล")) ||
+          (currentId === "empress" && primaryCurrent.nameTh.includes("จักรพรรดินี")) ||
+          (currentId === "judgement" && primaryCurrent.nameTh.includes("จัดจ์เมนต์"))
+        ) {
           transitionInsight = desc;
           break;
         }
@@ -69,9 +88,26 @@ export function analyzeKarmicBridge(
   }
 
   const narrativeParts: string[] = [];
+  const timeDesc = pastReading.daysAgo !== undefined
+    ? pastReading.daysAgo === 0
+      ? " (เมื่อวันนี้)"
+      : pastReading.daysAgo === 1
+      ? " (เมื่อวานนี้)"
+      : ` (เมื่อ ${pastReading.daysAgo} วันที่แล้ว)`
+    : "";
+  const questionDesc = pastReading.question ? `ในเรื่อง "${pastReading.question}"` : "";
+
   narrativeParts.push(
-    `✦ ความจำวิวัฒนาการดวงชะตา (Past Karmic Memory): ผู้ถามเคยมาเปิดไพ่ครั้งล่าสุดในเรื่อง "${pastReading.question}" และได้ไพ่เด่นคือ ${pastReading.primaryCardName}`
+    `✦ ความจำวิวัฒนาการดวงชะตา (Past Karmic Memory): ผู้ถามเคยมาเปิดไพ่ครั้งล่าสุด${timeDesc} ${questionDesc} และได้ไพ่เด่นคือ ${pastReading.primaryCardName}`.trim()
   );
+
+  if (pastReading.outcome && pastReading.outcome !== "PENDING") {
+    narrativeParts.push(`• ผลการทำนายครั้งก่อนที่ผู้ถามบันทึกไว้: ${pastReading.outcome}`);
+  }
+
+  if (pastReading.recentPrimaryCards && pastReading.recentPrimaryCards.length > 0) {
+    narrativeParts.push(`• ไพ่เด่นในอดีตครั้งอื่นๆ: ${pastReading.recentPrimaryCards.join(", ")}`);
+  }
 
   if (transitionInsight) {
     narrativeParts.push(`• การเปลี่ยนผ่านของชีวิต: ${transitionInsight}`);

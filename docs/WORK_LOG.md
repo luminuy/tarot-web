@@ -35,6 +35,34 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: ยกระดับความฉลาด AI คลื่นที่ 1 — ฐาน (Telemetry, Karmic Bridge, Consistency Checker) — โดย Antigravity
+
+- **W1.1 · เครื่องวัดคุณภาพ AI & สถิติทางไกล (Reading Quality Telemetry & Prompt Versioning)**:
+  - สร้างไมเกรชัน `migrations/0009_reading_quality.sql` และเพิ่ม DDL ใน `createLocalSQLiteDB()` ที่ `src/lib/platform/db.ts` เพื่อรองรับตาราง `reading_quality` แบบแยกจากข้อมูลผู้ใช้ (PDPA-compliant)
+  - กำหนด `PROMPT_VERSION = "20260904-1"` ใน `src/lib/ai/prompt-version.ts` และเพิ่มด่านตรวจใน `test-ai-reading-golden.ts` เพื่อให้ทุกการปรับปรุง prompt มีการติดตามเวอร์ชันอย่างเป็นระบบ
+  - สร้าง `src/lib/ai/quality.repo.ts` สำหรับบันทึก telemetry (`recordReadingQuality`), ซิงก์ผลลัพธ์ (`updateQualityOutcome`), และสรุปสถิติ (`getQualityStats`)
+  - ใน `src/app/api/reading/[id]/read/route.ts`: บันทึกข้อมูลเมตริก AI แบบ fire-and-forget (`.catch(() => {})`) เมื่อสตรีมจบ (`done`) ไม่กระทบต่อการใช้งานของผู้ใช้
+  - ใน `src/app/api/journal/[id]/route.ts`: อัปเดต `outcome` ใน `reading_quality` อัตโนมัติเมื่อผู้ใช้ประเมินผล
+  - ใน `src/components/admin/AiHealthPanel.tsx` และ `src/app/api/admin/quality/route.ts`: เพิ่มการ์ดสถิติคุณภาพ AI แสดงอัตราความแม่นยำ, เวลาตอบสนองเฉลี่ย, อัตราการสลับโมเดล (Failover), พร้อมการแจกแจงตามเวอร์ชัน Prompt และ Provider
+  - สร้าง Golden Set Fixtures 30 เคสใน `scripts/qa/fixtures/golden-readings.json` ครอบคลุม 5 หมวดและผังพยากรณ์หลัก
+- **W1.2 · เชื่อมต่อสะพานแห่งโชคชะตาข้ามเซสชัน (Cross-Session Karmic Bridge)**:
+  - สร้าง `src/lib/ai/memory.ts` พร้อมฟังก์ชัน `loadKarmicMemory()` ดึงประวัติการเปิดไพ่ครั้งล่าสุดของผู้ใช้แบบย่อ ปลอดภัย และมี Timeout Race 250ms เพื่อรักษา TTFB Budget ไม่ให้กระทบต่อความเร็วในการเริ่มสตรีม
+  - ปรับปรุง `src/lib/ai/karmic.ts` ขยาย `PastReadingSnapshot` รองรับ `daysAgo`, `outcome`, `recentPrimaryCards` พร้อมตรวจจับการเปลี่ยนผ่านของชีวิต (Notable Transitions: เช่น Tower ➔ Star, Death ➔ Fool, Devil ➔ Star)
+  - ปรับปรุง `src/lib/ai/prompt.ts` เพิ่ม `pastReading` ใน `ReadingContext` และส่งเข้า `analyzeKarmicBridge(cards, ctx.pastReading)`
+  - ใน `src/app/api/reading/[id]/read/route.ts`: ยิงดึงข้อมูลความจำขนานกับ `getContentOverrides()` ด้วย `Promise.all`
+- **W1.3 · ด่านตรวจความสอดคล้องเชิงกำหนด (Deterministic Reading Consistency Gate)**:
+  - สร้าง `src/lib/ai/consistency.ts` ตรวจจับความถูกต้องด้วยโค้ด:
+    1. ตำแหน่งไพ่ครบถ้วนและไม่ซ้ำซ้อน (`MISSING_POSITION`, `DUPLICATE_POSITION`)
+    2. บังคับกฎเหล็กข้อ 14 (Zero Fabricated Cards) ในระดับข้อความ (`FOREIGN_CARD`): ตรวจจับไพ่นอกชุดที่เปิดจริง พร้อมเกราะป้องกันผลบวกลวง (False Positive Guard) สำหรับคำไทยสามัญ (ดวงอาทิตย์, ดวงจันทร์, โลก, ความตาย, พลัง, ความพอดี) โดยนับเฉพาะเมื่อมีคำว่า "ไพ่" นำหน้า หรืออยู่ในวงเล็บ
+    3. ตรวจจับความขัดแย้งของโหมด ใช่/ไม่ใช่ (`YESNO_CONTRADICTION`) ระหว่างผลฟันธงและคำสรุป
+    4. ตรวจจับการใส่ Mindful Ritual ในคำแนะนำ (`ADVICE_MISSING_MINDFUL`)
+    5. ตรวจสอบความยาวคำอ่านรายใบ (`CARD_READING_TOO_SHORT`)
+  - เชื่อมต่อด่านตรวจเข้ากับ `src/lib/ai/groq.ts` และ `src/lib/ai/gemini.ts` หากพบความผิดพลาดร้ายแรงจะตัดวงจรและสลับโมเดลทันที
+  - สร้างชุดทดสอบ `scripts/qa/test-reading-quality.ts` (23 การทดสอบ) และเพิ่มเป็นด่านที่ 25 ใน `scripts/github-auto.ts`
+- **การตรวจสอบคุณภาพ**:
+  - `npm run typecheck` ➔ ✅ 0 Errors
+  - `npm run repo:verify` ➔ ✅ ผ่านครบทั้ง 25/25 ด่านสมบูรณ์ 100%
+
 ### 🗓️ 2026-09-04: ยกระดับธีมแอดมิน (/admin) ขาวดำมาตรฐาน คอนทราสต์สูง คมชัด อ่านง่าย 100% พร้อมใส่โลโก้ทางการและซ่อน TikTok — โดย Antigravity
 
 - **ซ่อนปุ่ม TikTok ในทุกหน้าแอดมิน (`src/components/ui/TikTokFloatingButton.tsx`)**:
