@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
-import { SPRING, DUR } from "@/lib/motion";
 
 interface ShuffleRitualProps {
   commitment: string;

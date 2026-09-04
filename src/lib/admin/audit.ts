@@ -43,11 +43,3 @@ export async function listAudit(limit = 100): Promise<AuditEntry[]> {
   }
   return out;
 }
-
-/** ใช้ที่หน้า dashboard: นับ event ต่อ action แบบเร็วๆ (อ่านจาก audit ล่าสุด) */
-export async function auditSummary(): Promise<Record<string, number>> {
-  const entries = await listAudit(500);
-  const summary: Record<string, number> = {};
-  for (const e of entries) summary[e.action] = (summary[e.action] ?? 0) + 1;
-  return summary;
-}

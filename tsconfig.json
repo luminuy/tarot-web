@@ -9,6 +9,11 @@
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
+    // ด่านกันโค้ดตายกลับมาสะสมอีก — ตัวแปร/พารามิเตอร์/import ที่ไม่มีใครใช้จะทำให้
+    // `npm run typecheck` (และ CI ทั้ง 24 ด่าน) ไม่ผ่านทันที
+    // เปิดได้หลังเก็บกวาดของค้าง 43 จุดจนหมดแล้ว ห้ามปิดกลับเพื่อให้ commit ผ่าน
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",

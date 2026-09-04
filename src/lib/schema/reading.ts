@@ -93,5 +93,3 @@ export const FollowUpSchema = z.object({
     .array(z.number().int().min(0))
     .describe("index ของตำแหน่งไพ่ที่ใช้ตอบคำถามนี้ เพื่อให้หน้าเว็บไฮไลต์ไพ่ใบนั้นได้"),
 });
-
-export type FollowUp = z.infer<typeof FollowUpSchema>;

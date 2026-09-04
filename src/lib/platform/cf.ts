@@ -72,7 +72,13 @@ function createMemoryKV(): AppKV {
   };
 }
 
-async function safelyGetCloudflareContext() {
+/**
+ * เข้าถึง binding ของ Cloudflare อย่างปลอดภัย (คืน null เมื่อรันนอก Workers)
+ * ⚠️ มีที่เดียวเท่านั้น — เดิมมีสำเนาเหมือนกันทุกตัวอักษรอยู่ใน `db.ts` ด้วย
+ * ถ้าวันหนึ่งต้องแก้วิธีเข้าถึง context (เช่นเปลี่ยน API ของ OpenNext) จะต้องไล่แก้สองที่
+ * แล้วมีโอกาสแก้ตกหล่นจนฝั่ง D1 กับฝั่ง KV ทำงานคนละแบบ
+ */
+export async function safelyGetCloudflareContext() {
   try {
     const mod = await import("@opennextjs/cloudflare");
     if (typeof mod?.getCloudflareContext === "function") {

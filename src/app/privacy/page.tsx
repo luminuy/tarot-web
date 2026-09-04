@@ -1,4 +1,3 @@
-import React from "react";
 import type { Metadata } from "next";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
 import { SITE_ORIGIN } from "@/lib/config/site";

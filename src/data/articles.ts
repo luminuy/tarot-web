@@ -1074,10 +1074,6 @@ export function getArticleBySlug(slug: string): Article | undefined {
   return ARTICLES.find((a) => a.slug === slug);
 }
 
-export function getArticlesByCategory(category: Article["category"]): Article[] {
-  return ARTICLES.filter((a) => a.category === category);
-}
-
 export function getRelatedArticles(currentSlug: string, limit: number = 3): Article[] {
   const current = getArticleBySlug(currentSlug);
   if (!current) return ARTICLES.slice(0, limit);

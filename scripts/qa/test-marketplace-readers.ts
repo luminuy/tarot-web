@@ -7,11 +7,6 @@ import {
   createReader,
   deleteReader,
   getPublicReaderById,
-  getReaderById,
-  listPublicApprovedReaders,
-  recordAdminAudit,
-  setReaderStatus,
-  updateReader,
 } from "../../src/lib/marketplace/readers.repo";
 
 import {
@@ -27,7 +22,6 @@ import {
   cancelQueueTicket,
   cleanupExpiredTickets,
   createQueueTicket,
-  getQueueTicketById,
   getReaderLiveAvailability,
   listReaderQueueTickets,
   setReaderLiveAvailability,
@@ -158,7 +152,6 @@ async function runTest() {
   const {
     calculateReaderEarnings,
     createPaymentRecord,
-    getPaymentById,
     recordReaderPayout,
     updatePaymentStatus,
   } = await import("../../src/lib/marketplace/payments.repo");

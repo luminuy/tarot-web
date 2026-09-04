@@ -1,4 +1,3 @@
-import React from "react";
 
 import type { SpreadPosition } from "@/data/spreads";
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { STAGGER, DUR, EASE } from "@/lib/motion";
 import type { Reading } from "@/lib/schema/reading";
 import type { Persona } from "@/data/personas";
@@ -10,7 +10,6 @@ import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { cardByIndex, type TarotCard } from "@/data/cards";
 import { ElementalBalanceWidget } from "@/components/reading/ElementalBalanceWidget";
 import { OracleMantraCard } from "@/components/reading/OracleMantraCard";
-import { soundManager } from "@/lib/utils/audio";
 import { trackEvent } from "@/lib/analytics";
 import { AccuracyRatingWidget } from "./AccuracyRatingWidget";
 import { ProvablyFairPanel } from "./ProvablyFairPanel";
@@ -50,22 +49,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   onRetry,
 }) => {
   const [activeTab, setActiveTab] = useState<"card" | "summary">("card");
-  const [isSpeakingVoice, setIsSpeakingVoice] = useState(false);
-
-  const handleToggleVoice = (textToSpeak: string) => {
-    if (isSpeakingVoice) {
-      soundManager.stopSpeaking();
-      setIsSpeakingVoice(false);
-    } else {
-      const ok = soundManager.speakProphecy(
-        textToSpeak,
-        persona.id,
-        () => setIsSpeakingVoice(false),
-        () => setIsSpeakingVoice(false)
-      );
-      if (ok) setIsSpeakingVoice(true);
-    }
-  };
+  // การอ่านออกเสียงย้ายไปอยู่ใน <TTSReaderButton /> ทั้งหมดแล้ว
+  // (ของเดิมเหลือ state + handler ค้างไว้ที่นี่โดยไม่มีปุ่มไหนเรียกใช้)
 
   const activeDrawnCard = drawnCards.find((d) => d.order === activeCardIndex);
   const cardData =

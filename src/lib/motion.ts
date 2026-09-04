@@ -44,31 +44,6 @@ export const TWEEN = {
   slow: { duration: DUR.slow, ease: EASE.out } as Transition,
 } as const;
 
-export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: TWEEN.base,
-  },
-  exit: {
-    opacity: 0,
-    y: -8,
-    transition: TWEEN.fast,
-  },
-};
-
-export const staggerContainer = (staggerDelta: number = STAGGER.base, delayChildren = 0): Variants => ({
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: staggerDelta,
-      delayChildren,
-    },
-  },
-});
-
 export const stepVariants: Variants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 40 : -40,

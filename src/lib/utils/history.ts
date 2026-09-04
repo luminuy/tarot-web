@@ -150,30 +150,6 @@ export function updateReadingOutcome(
 }
 
 /**
- * นำเข้าประวัติลง LocalStorage
- */
-export function importReadings(newItems: SavedReadingItem[]): void {
-  if (!Array.isArray(newItems) || newItems.length === 0) return;
-  const current = getReadings();
-  const existingIds = new Set(current.map((r) => r.id));
-  const merged = [...current];
-
-  for (const item of newItems) {
-    if (!existingIds.has(item.id)) {
-      merged.push(item);
-      existingIds.add(item.id);
-    }
-  }
-
-  merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const capped = merged.slice(0, 50);
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(capped));
-  }
-}
-
-/**
  * ซิงก์ประวัติทั้งหมดในเครื่อง (LocalStorage) ขึ้นเซิร์ฟเวอร์หลังล็อกอิน
  */
 export async function syncAnonymousHistoryToServer(): Promise<{ merged: number; skipped: number }> {

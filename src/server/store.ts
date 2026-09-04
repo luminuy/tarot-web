@@ -35,8 +35,6 @@ export interface ReadingRecord {
 declare global {
   // eslint-disable-next-line no-var
   var __tarot_readings_store__: Map<string, ReadingRecord> | undefined;
-  // eslint-disable-next-line no-var
-  var __tarot_rate_buckets_store__: Map<string, number[]> | undefined;
 }
 
 const readings: Map<string, ReadingRecord> =

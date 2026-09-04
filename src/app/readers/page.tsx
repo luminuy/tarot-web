@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marketplace/readers.repo";
 import { ReadersDirectory } from "@/components/readers/ReadersDirectory";

@@ -33,20 +33,6 @@ export interface QueueTicket {
   screening?: AIScreeningRecord | null;
 }
 
-export interface ReaderAvailability {
-  id: string;
-  readerId: string;
-  mode: "live" | "scheduled";
-  weekday: number | null;
-  startMin: number | null;
-  endMin: number | null;
-  slotMinutes: number;
-  timezone: string;
-  isOpen: boolean;
-  createdAt: number;
-  updatedAt: number;
-}
-
 interface RawTicketRow {
   id: string;
   reader_id: string;

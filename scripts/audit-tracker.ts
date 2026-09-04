@@ -88,7 +88,6 @@ export function recordAudit(
   const timestampTh = now.toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
   const timestampIso = now.toISOString();
 
-  const gitUser = runCmd("git config user.name") || os.userInfo().username || "Developer";
   const gitEmail = runCmd("git config user.email") || "dev@tarot-web.local";
   const branch = runCmd("git branch --show-current") || "main";
   const commitSha = runCmd("git rev-parse --short HEAD") || "initial";

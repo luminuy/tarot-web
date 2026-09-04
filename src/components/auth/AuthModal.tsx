@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
-import { CardImage } from "@/components/card/CardImage";
 import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
 import { DAILY_LIMIT, MEMBER_BENEFITS } from "@/lib/entitlement/copy";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";

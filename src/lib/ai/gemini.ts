@@ -19,16 +19,6 @@ import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
  * ไฟล์นี้ทำงานฝั่งเซิร์ฟเวอร์เท่านั้น
  */
 
-export const GEMINI_MODEL = "gemini-3.6-flash";
-
-export function getGeminiApiKey(): string {
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (!key) {
-    throw new Error("ยังไม่ได้ตั้งค่า GEMINI_API_KEY หรือ GOOGLE_API_KEY");
-  }
-  return key;
-}
-
 /**
  * Schema บังคับโครงสร้าง JSON ของคำอ่าน (responseJsonSchema — มาตรฐาน JSON Schema)
  * -------------------------------------------------------------------------------

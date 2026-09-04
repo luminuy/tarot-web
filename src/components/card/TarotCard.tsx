@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { SPRING } from "@/lib/motion";
 import { cardById, cardByIndex } from "@/data/cards";
@@ -93,7 +93,6 @@ export const TarotCard: React.FC<TarotCardProps> = ({
   imageFull = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [imgFailed, setImgFailed] = useState(false);
 
   const effectiveImageSizes = imageSizes ?? DEFAULT_IMAGE_SIZES[size] ?? "120px";
 
@@ -150,10 +149,6 @@ export const TarotCard: React.FC<TarotCardProps> = ({
   };
 
   const imageSrc = getCardImageSrc(effectiveCard?.image, effectiveCard?.id);
-
-  useEffect(() => {
-    setImgFailed(false);
-  }, [imageSrc]);
 
   return (
     <div

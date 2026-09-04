@@ -13,7 +13,6 @@ import {
   grantSignupBonus,
   purgeEntitlementData,
   DAILY_LIMIT,
-  WEEKLY_LIMIT,
   GUEST_LIMIT,
   SIGNUP_BONUS,
   type Viewer,

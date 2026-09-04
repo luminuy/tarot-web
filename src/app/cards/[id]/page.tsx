@@ -1,4 +1,3 @@
-import React from "react";
 import { notFound } from "next/navigation";
 import { DECK, cardById } from "@/data/cards";
 import { CardDetailView } from "@/components/encyclopedia/CardDetailView";

@@ -1,5 +1,5 @@
 import { getAppDB } from "@/lib/platform/db";
-import { dayKey, nextResetAt, weekKey } from "@/lib/entitlement/week";
+import { nextResetAt, weekKey } from "@/lib/entitlement/week";
 import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading, todayDateKey } from "@/lib/entitlement/daily";
 import { DAILY_LIMIT, GUEST_LIMIT, SIGNUP_BONUS } from "@/lib/entitlement/limits";
 import { recordEvent } from "@/lib/stats/record";

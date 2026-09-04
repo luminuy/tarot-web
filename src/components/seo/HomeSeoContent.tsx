@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 import { CardImage } from "@/components/card/CardImage";
 import { HOME_FAQS } from "@/data/home-seo";

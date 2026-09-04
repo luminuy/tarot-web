@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
-import { getCardImageSrc } from "@/lib/tarot/card-image";
 import { useHasMounted } from "@/lib/motion";
 
 interface CardDetailViewProps {
@@ -61,9 +60,6 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   const isUpright = orientation === "upright";
   const currentKeywords = isUpright ? card.keywords.upright : card.keywords.reversed;
   const elem = ELEMENT_CONFIG[card.element] || ELEMENT_CONFIG["ไฟ"];
-
-  // ภาพหน้าไพ่ใบหลักใช้ไฟล์ต้นฉบับความละเอียดเต็ม (แสดงใหญ่ 256-288px)
-  const getImageSrc = (targetCard?: TarotCard) => getCardImageSrc(targetCard?.image, targetCard?.id) ?? "";
 
   const categories = [
     { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", icon: "✦", color: "#8F5C1A" },
