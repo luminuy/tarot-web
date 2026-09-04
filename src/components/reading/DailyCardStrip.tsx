@@ -59,7 +59,7 @@ export function DailyCardStrip() {
       </div>
 
       <div className="min-w-0 flex-1 space-y-1">
-        <p className="font-serif-th text-[11px] font-bold uppercase tracking-[0.16em] text-[#8F5C1A]">
+        <p className="font-serif-th text-xs font-bold text-[#8F5C1A]">
           ✦ ไพ่ประจำวันนี้
         </p>
         <p className="font-serif-th text-sm font-bold text-[#2E211A]">
@@ -70,7 +70,7 @@ export function DailyCardStrip() {
           {daily.keywords.map((kw) => (
             <span
               key={kw}
-              className="rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-2 py-0.5 font-serif-th text-[11px] text-[#635B4E]"
+              className="rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-2 py-0.5 font-serif-th text-xs text-[#635B4E]"
             >
               {kw}
             </span>

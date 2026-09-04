@@ -183,7 +183,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         <div className="text-center mt-2.5 w-28 sm:w-32">
           <span className="text-[13px] text-[#8F5C1A] font-mono block font-semibold">ใบที่ {pos.index + 1}</span>
           <span
-            className="text-xs font-serif-th font-bold text-[#2E211A] leading-tight block truncate"
+            className="text-xs font-serif-th font-bold text-[#2E211A] leading-snug py-0.5 block truncate"
             title={pos.nameTh}
           >
             {pos.nameTh}
@@ -199,7 +199,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/30 relative z-10">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[13px] uppercase tracking-widest text-[#635B4E] font-mono">ผังพยากรณ์:</span>
+            <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">ผังพยากรณ์:</span>
             <span className="text-xs text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.5 rounded-full font-bold font-mono ">
               {spread.positions.length} ใบ
             </span>

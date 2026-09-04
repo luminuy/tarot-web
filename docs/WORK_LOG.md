@@ -34,6 +34,36 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: ตรวจสอบและปรับปรุงช่องไฟ การเว้นวรรค และระยะบรรทัดภาษาไทยทั้งเว็บไซต์ (Thai Typography & Spacing Polish)
+
+- **ความต้องการ**: ผู้ใช้ขอให้ตรวจสอบความเรียบร้อยของตัวอักษรภาษาไทยทั้งเว็บ ได้แก่ ช่องไฟ (Letter-spacing), การเว้นวรรค (Word-spacing), และการซ้อนทับกัน (Text overlap/collision)
+- **การตรวจสอบเชิงลึก (Automated Audit)**:
+  - ใช้ Headless Chrome & CDP สแกนโหนดข้อความภาษาไทยทุกขนาดหน้าจอ (360px, 390px, 768px, 1280px)
+  - ไม่พบการซ้อนทับกันของเลเยอร์ข้อความ (Text Collisions = 0)
+  - พบจุดที่ช่องไฟและระยะบรรทัดมีปัญหาทางหลักอักขรวิธีไทย:
+    1. มีการใช้ `tracking-widest` และ `tracking-wider` กับข้อความภาษาไทย ทำให้สระบน/ล่างและวรรณยุกต์หลุดลอยแยกจากพยัญชนะ (เช่น ป้าย "ผังที่เลือกไว้:", "ผังพยากรณ์:", และหลังไพ่ "ไพ่ทาโรต์ 1909")
+    2. มีการใช้ `leading-tight` (1.25 เท่า) กับชื่อผัง 20 แบบและหัวข้อบทความ ซึ่งเมื่อตัดเป็น 2 บรรทัดบนมือถือ สระบนของบรรทัดล่างจะชิดชนกับขอบล่างของบรรทัดบน
+    3. ป้ายหัวข้อไพ่ประจำวันมีขนาด 11px ต่ำกว่าเกณฑ์อ่านสบายตา (Legibility Floor 13px)
+- **สิ่งที่ทำ**:
+  - `src/app/globals.css`: เพิ่ม `overflow-wrap: break-word` และ `word-break: break-word` ในระดับสากล เพื่อป้องกันคำภาษาไทยยาว ๆ ล้นขอบกล่องบนจอมือถือ
+  - `src/app/page.tsx`: ปลด `tracking-widest` และ `uppercase` ออกจากหลังไพ่ "ไพ่ทาโรต์ 1909" และเอา `tracking-wider` ออกจากข้อความท้ายเว็บ
+  - `src/components/spread/SpreadCardSelector.tsx`: เปลี่ยนชื่อผังเป็นการระบายระยะบรรทัดแบบ `leading-snug py-0.5` และแก้ป้าย "ผังที่เลือกไว้:" ให้เป็นฟอนต์ `font-serif-th font-semibold` ธรรมชาติ ไม่ใช้ `font-mono tracking-widest`
+  - `src/components/spread/SpreadBoard.tsx`: ปรับป้าย "ผังพยากรณ์:" และข้อความชื่อตำแหน่งไพ่ให้มีระยะบรรทัดระบายสระสวยงาม
+  - `src/components/reading/DailyCardStrip.tsx`: ยกระดับขนาดตัวอักษรป้ายหัวข้อเป็น `text-xs` (13px) และเอา tracking ออก
+  - `src/components/deck/InteractiveCardFan.tsx`: ปรับหัวข้อความคืบหน้าพิธีจับไพ่และข้อความสถานะให้เป็น `leading-normal` ธรรมชาติ
+  - `src/components/reading/StreamReader.tsx`: ปรับป้ายตำแหน่งไพ่และข้อความไม่พบข้อมูลให้สระไม่ชนขอบ
+  - `src/components/encyclopedia/RelatedCards.tsx`: ปลด tracking ออกจากหัวข้อ "✦ ไพ่ที่พลังงานใกล้เคียง"
+  - `src/components/spread/SpreadsLibrary.tsx`: ปรับชื่อผังเป็น `leading-snug py-0.5`
+  - `src/app/blog/page.tsx` & `ArticleReadingClient.tsx`: ปรับหัวข้อบทความภาษาไทยเป็น `leading-snug sm:leading-normal py-0.5`
+  - `src/components/auth/AuthModal.tsx`: ปลด tracking ออกจากป้ายเส้นคั่น "หรือเชื่อมต่อทันทีด้วย"
+  - `src/components/admin/AiHealthPanel.tsx`: ปลด tracking-widest ออกจากป้ายกำกับภาษาไทย
+- **ผลการทดสอบ**:
+  - สแกน static code ซ้ำ ยืนยันเหลือจุดผิดเพี้ยน = 0
+  - `npm run typecheck` ผ่าน 0 errors
+  - `npm run repo:verify` ผ่านครบ 23/23 ด่าน
+
+---
+
 ### 🗓️ 2026-09-03: แก้ไขตำแหน่งปุ่มลอย TikTok (Fixed Position vs Body > * Cascade Layer Conflict)
 
 - **อาการ/ปัญหา**: ปุ่มลอย TikTok หลุดไปอยู่ท้ายหน้าเว็บใต้ Footer ทางฝั่งซ้ายและถูกขอบหน้าจอบังครึ่งล่าง ไม่ลอยตรึงมุมขวาล่าง (`fixed bottom-right`)

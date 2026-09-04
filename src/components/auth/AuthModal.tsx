@@ -509,7 +509,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Sanctuary Divider */}
           <div className="w-full flex items-center my-4">
             <div className="flex-1 border-t border-[#D5CEC2]/40" />
-            <span className="px-3 text-[13px] text-[#635B4E] font-serif-th tracking-wider">หรือเชื่อมต่อทันทีด้วย</span>
+            <span className="px-3 text-[13px] text-[#635B4E] font-serif-th font-medium">หรือเชื่อมต่อทันทีด้วย</span>
             <div className="flex-1 border-t border-[#D5CEC2]/40" />
           </div>
 

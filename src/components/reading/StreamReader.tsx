@@ -268,13 +268,13 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   ) : (
                     <div className="w-full h-full bg-[#F3EDE2] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#D9C8AC]">
                       <span className="text-[#8F5C1A] text-xs">✦</span>
-                      <span className="text-[12px] text-[#635B4E] font-serif-th mt-0.5 leading-tight">ไม่พบข้อมูล</span>
+                      <span className="text-xs text-[#635B4E] font-serif-th mt-0.5 leading-normal">ไม่พบข้อมูล</span>
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <span className="text-[13px] uppercase tracking-widest text-[#8F5C1A] font-mono font-semibold">
+                  <span className="text-[13px] text-[#8F5C1A] font-serif-th font-semibold">
                     ✦ ตำแหน่งที่ {activeCardIndex + 1}: {activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}
                   </span>
                   <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#2E211A] mt-0.5">
