@@ -626,25 +626,16 @@ export function HomeSeoContent() {
         </div>
       </section>
 
-      {/* Sacred Gold Transition Zone before Dark Footer */}
-      <div className="w-full flex items-center justify-center py-5 sm:py-6" aria-hidden="true">
-        <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
-          <span className="text-xs sm:text-sm text-[#8F5C1A]/70">✦</span>
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
-        </div>
-      </div>
-
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 6: FAT FOOTER (Editorial Dark Quiet Luxury #171512)
           ═══════════════════════════════════════════════════════════════ */}
-      <footer className="w-full bg-[#171512] text-[#D5CEC2] pt-10 sm:pt-12 pb-12 border-t border-[#D5CEC2]/30 relative overflow-hidden">
+      <footer className="w-full bg-[#171512] text-[#D5CEC2] pt-16 sm:pt-20 pb-12 sm:pb-16 border-t border-[#D5CEC2]/30 relative overflow-hidden">
         {/* Ambient Gold Accent Line */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent pointer-events-none" />
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 relative z-10">
-          {/* Brand & Mission Statement */}
-          <div className="flex flex-col items-center justify-center gap-3 border-b border-[#D5CEC2]/20 pb-8 text-center">
+          {/* Brand & Mission Statement — Generous Breathing Room */}
+          <div className="flex flex-col items-center justify-center gap-3.5 border-b border-[#D5CEC2]/20 pb-8 sm:pb-10 pt-2 sm:pt-4 text-center">
             <Link
               href="/"
               aria-label="SeerTarot — หน้าแรก"
@@ -660,11 +651,11 @@ export function HomeSeoContent() {
                   loading="lazy"
                 />
               </span>
-              <span className="font-serif-th text-lg font-bold tracking-wide text-[#F3F0EA]">
+              <span className="font-serif-th text-xl sm:text-2xl font-bold tracking-wider text-[#FAF7F2]">
                 SeerTarot
               </span>
             </Link>
-            <p className="font-serif-th text-sm text-[#E4DECF] max-w-md">
+            <p className="font-serif-th text-xs sm:text-sm text-[#D5CEC2]/85 max-w-md leading-relaxed">
               วิหารพยากรณ์ไพ่ทาโรต์ 1909 Rider-Waite ออนไลน์ — พื้นที่สงบสำหรับหยุด คิด ถาม และอ่านความหมายของตัวเอง
             </p>
           </div>
