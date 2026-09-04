@@ -7,6 +7,9 @@ import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { SITE_ORIGIN } from "@/lib/config/site";
+import { getCardWebpVariantSrc } from "@/lib/tarot/card-image";
+
+const heroCardLcpSrc = getCardWebpVariantSrc("major-19.jpg", "w128");
 
 const notoSerifThai = Noto_Serif_Thai({
   subsets: ["thai", "latin"],
@@ -159,6 +162,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
+        {/* Preload critical LCP Hero Tarot Card (0ms download delay) */}
+        {heroCardLcpSrc && (
+          <link
+            rel="preload"
+            as="image"
+            type="image/webp"
+            href={heroCardLcpSrc}
+            fetchPriority="high"
+          />
+        )}
       </head>
       <body className="min-h-dvh font-sans antialiased">
         <AppMotionProvider>

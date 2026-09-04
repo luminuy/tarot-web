@@ -12,8 +12,6 @@ import { CardImage } from "@/components/card/CardImage";
 import type { Reading } from "@/lib/schema/reading";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
-import { PersonaCardSelector } from "@/components/reading/PersonaCardSelector";
-import { IntentionAltarInput } from "@/components/reading/IntentionAltarInput";
 import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
 import type { RitualStep } from "@/components/ui/RitualStepProgress";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
@@ -68,6 +66,14 @@ const BuyCreditsModal = dynamic(
 const AccessDialog = dynamic(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog), {
   ssr: false,
 });
+const PersonaCardSelector = dynamic(
+  () => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector),
+  { ssr: false }
+);
+const IntentionAltarInput = dynamic(
+  () => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput),
+  { ssr: false }
+);
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick }: { onClick: () => void }) {
