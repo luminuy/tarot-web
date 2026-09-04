@@ -105,7 +105,7 @@ export default function AiHealthPanel() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-[#e5c07b]/25 bg-[#0d0818] px-4 py-3">
-              <p className="text-[13px] uppercase tracking-widest text-[#e5c07b]">คีย์ AI</p>
+              <p className="text-[13px] font-semibold text-[#e5c07b]">คีย์ AI</p>
               <p className="mt-1 text-xs text-[#cfc8e2]">
                 {data.key.configured
                   ? `ตั้งไว้แล้วที่ ${data.key.envVar} · ยาว ${data.key.length} ตัว${
@@ -115,7 +115,7 @@ export default function AiHealthPanel() {
               </p>
             </div>
             <div className="rounded-xl border border-[#e5c07b]/25 bg-[#0d0818] px-4 py-3">
-              <p className="text-[13px] uppercase tracking-widest text-[#e5c07b]">เพดานเรียก AI วันนี้</p>
+              <p className="text-[13px] font-semibold text-[#e5c07b]">เพดานเรียก AI วันนี้</p>
               <p className="mt-1 text-xs text-[#cfc8e2]">
                 ใช้ไป {data.budget.usedToday} / {data.budget.dailyCap} ครั้ง
                 {data.budget.memberCapReached

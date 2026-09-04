@@ -360,7 +360,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
                 {/* Card Footer Titles */}
                 <div className="pt-2.5 border-t border-[#D9C8AC]/30 text-center z-10">
-                  <h4 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] group-hover/card:text-[#8F5C1A] transition-colors leading-tight">
+                  <h4 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] group-hover/card:text-[#8F5C1A] transition-colors leading-snug py-0.5">
                     {spread.nameTh}
                   </h4>
                   <p className="text-[13px] text-[#635B4E] line-clamp-2 mt-1 leading-snug font-serif-th">
@@ -451,12 +451,12 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[13px] uppercase tracking-widest text-[#635B4E] font-mono">ผังที่เลือกไว้:</span>
+                <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">ผังที่เลือกไว้:</span>
                 <span className="text-[13px] text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.2 rounded-full font-bold font-mono ">
                   {selectedSpread.positions.length} ใบ
                 </span>
               </div>
-              <h4 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] leading-tight mt-0.5">
+              <h4 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] leading-snug py-0.5 mt-0.5">
                 {selectedSpread.nameTh}
                 <span className="text-xs font-normal text-[#635B4E] ml-2 hidden sm:inline font-serif-th">
                   — {selectedSpread.tagline}

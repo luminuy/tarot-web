@@ -112,7 +112,7 @@ export default function BlogPage() {
           <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[13px] text-[#A58A5C] font-mono font-bold shadow-xs">
             <span>✦</span> Sacred Knowledge &amp; Wisdom <span>✦</span>
           </div>
-          <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-[#29261F] leading-tight">
+          <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-[#29261F] leading-snug sm:leading-normal py-0.5">
             คัมภีร์บทความ &amp; ศาสตร์ไพ่ทาโรต์
           </h1>
           <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed">

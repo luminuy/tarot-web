@@ -41,7 +41,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           <span className="text-[#635B4E]">โดย {article.author}</span>
         </div>
 
-        <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-[#29261F] leading-tight">{article.title}</h1>
+        <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-[#29261F] leading-snug sm:leading-normal py-0.5">{article.title}</h1>
 
         <p className="text-sm sm:text-base text-[#29261F] font-serif-th leading-relaxed border-l-2 border-[#D5CEC2] pl-4 py-1 italic bg-[#FFFFFF] rounded-r-xl shadow-xs">
           {article.description}

@@ -267,7 +267,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             {/* Typography & Animated Progress Bar */}
             <div className="space-y-1 flex-1 min-w-[160px]">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[13px] sm:text-[13px] uppercase tracking-wider text-[#2E211A] font-mono font-bold flex items-center gap-1">
+                <span className="text-[13px] text-[#2E211A] font-serif-th font-bold flex items-center gap-1">
                   <span className="text-[#8F5C1A]">✦</span>
                   <span>ความคืบหน้าพิธีจับไพ่</span>
                 </span>
@@ -290,7 +290,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[13px] sm:text-[13px] text-[#635B4E] font-serif-th leading-tight truncate">
+                <p className="text-[13px] sm:text-[13px] text-[#635B4E] font-serif-th leading-normal truncate">
                   {isComplete ? (
                     <span className="text-[#3A7044] font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
                   ) : (

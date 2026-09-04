@@ -937,7 +937,7 @@ export default function TarotPage() {
                         {/* Clean Center */}
                         <div className="my-auto" />
 
-                        <span className="text-xs font-serif-th font-bold text-[#FFFFFF] tracking-widest uppercase">
+                        <span className="text-xs font-serif-th font-bold text-[#FFFFFF]">
                           ไพ่ทาโรต์ 1909
                         </span>
 
@@ -1431,7 +1431,7 @@ export default function TarotPage() {
                   sizes="20px"
                 />
               </div>
-              <span className="text-[13px] font-serif-th font-semibold tracking-wider text-[#D5CEC2]">
+              <span className="text-[13px] font-serif-th font-semibold text-[#D5CEC2]">
                 SeerTarot · ไพ่ทาโรต์ 1909 Rider-Waite
               </span>
               <div className="w-5 h-7 rounded overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">

@@ -172,7 +172,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
 
                 {/* Titles & Tagline */}
                 <div className="space-y-1.5 z-10 pt-3 border-t border-[#D5CEC2]/40">
-                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] leading-tight">
+                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] leading-snug py-0.5">
                     {spread.nameTh}
                   </h3>
                   <p className="text-xs text-[#635B4E] leading-snug font-serif-th">{spread.tagline}</p>
