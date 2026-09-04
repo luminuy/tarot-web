@@ -34,8 +34,24 @@ const VERDICT_LABEL: Record<Health["verdict"], string> = {
   gemini_unavailable: "✦ มีคีย์ แต่เรียก Gemini ไม่สำเร็จ",
 };
 
+interface QualityStats {
+  totalReadings: number;
+  ratedReadings: number;
+  accurateCount: number;
+  partialCount: number;
+  notHappenedCount: number;
+  accurateRate: number;
+  notHappenedRate: number;
+  avgElapsedMs: number;
+  failoverRate: number;
+  byVersion: Record<string, { total: number; accurate: number; rate: number }>;
+  byProvider: Record<string, { total: number; accurate: number; rate: number }>;
+  byPersona: Record<string, { total: number; accurate: number; rate: number }>;
+}
+
 export default function AiHealthPanel() {
   const [data, setData] = useState<Health | null>(null);
+  const [quality, setQuality] = useState<QualityStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -43,10 +59,18 @@ export default function AiHealthPanel() {
     setLoading(true);
     setErr(null);
     try {
-      const res = await fetch("/api/admin/ai-health", { cache: "no-store" });
+      const [res, qRes] = await Promise.all([
+        fetch("/api/admin/ai-health", { cache: "no-store" }),
+        fetch("/api/admin/quality", { cache: "no-store" }).catch(() => null),
+      ]);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
       setData(json);
+
+      if (qRes && qRes.ok) {
+        const qJson = await qRes.json();
+        setQuality(qJson);
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "ตรวจไม่สำเร็จ");
     } finally {
@@ -129,6 +153,112 @@ export default function AiHealthPanel() {
                     : " · ยังเหลือ"}
               </p>
             </div>
+          </div>
+
+          {/* 📊 AI Reading Quality Telemetry (AI_INTELLIGENCE_PLAN W1.1) */}
+          <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E8E2D8] pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-[#29261F] flex items-center gap-1.5">
+                  <span className="text-[#A58A5C]">✦</span> สถิติคุณภาพและการตอบสนอง AI (Reading Quality Telemetry)
+                </h3>
+                <p className="mt-0.5 text-xs text-[#635B4E]">
+                  ประมวลผลจากตาราง reading_quality: อัตราความแม่นยำจริง, เวลาหน่วง, อัตราสลับโมเดล และเทียบตามเวอร์ชัน Prompt
+                </p>
+              </div>
+              {quality && (
+                <span className="rounded-full bg-[#FAF8F5] border border-[#D5CEC2] px-2.5 py-0.5 text-[11px] font-semibold text-[#29261F]">
+                  บันทึกทั้งหมด {quality.totalReadings.toLocaleString()} ครั้ง
+                </span>
+              )}
+            </div>
+
+            {quality ? (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="rounded-xl border border-[#E8E2D8] bg-[#FAF8F5] p-3 text-center">
+                    <p className="text-[11px] font-medium text-[#635B4E]">ความแม่นยำรวม</p>
+                    <p className="mt-1 text-xl font-bold text-[#29261F]">
+                      {quality.ratedReadings > 0 ? `${quality.accurateRate}%` : "—"}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-[#756F66]">
+                      ประเมินแล้ว {quality.ratedReadings} ครั้ง
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-[#E8E2D8] bg-[#FAF8F5] p-3 text-center">
+                    <p className="text-[11px] font-medium text-[#635B4E]">เวลาสร้างคำอ่านเฉลี่ย</p>
+                    <p className="mt-1 text-xl font-bold text-[#29261F]">
+                      {quality.avgElapsedMs > 0 ? `${(quality.avgElapsedMs / 1000).toFixed(1)}s` : "—"}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-[#756F66]">
+                      เฉลี่ย {quality.avgElapsedMs} ms
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-[#E8E2D8] bg-[#FAF8F5] p-3 text-center">
+                    <p className="text-[11px] font-medium text-[#635B4E]">อัตราสลับโมเดล (Failover)</p>
+                    <p className="mt-1 text-xl font-bold text-[#29261F]">
+                      {quality.failoverRate}%
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-[#756F66]">
+                      Groq ➔ Gemini สำรอง
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-[#E8E2D8] bg-[#FAF8F5] p-3 text-center">
+                    <p className="text-[11px] font-medium text-[#635B4E]">ผลลัพธ์ที่ได้รับ</p>
+                    <p className="mt-1 text-xs font-semibold text-[#29261F]">
+                      แม่น {quality.accurateCount} · ก้ำกึ่ง {quality.partialCount} · ไม่ตรง {quality.notHappenedCount}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-[#756F66]">
+                      ไม่เกิดจริง {quality.notHappenedRate}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sub-breakdown: Versions & Providers */}
+                <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                  <div className="rounded-xl border border-[#E8E2D8] p-3">
+                    <p className="text-xs font-semibold text-[#29261F] mb-2">เปรียบเทียบตามเวอร์ชัน Prompt</p>
+                    {Object.keys(quality.byVersion).length > 0 ? (
+                      <div className="space-y-1.5 text-xs">
+                        {Object.entries(quality.byVersion).map(([ver, stats]) => (
+                          <div key={ver} className="flex items-center justify-between py-1 border-b border-[#F0EBE1] last:border-none">
+                            <span className="font-mono text-[11px] text-[#29261F] font-semibold">{ver}</span>
+                            <span className="text-[11px] text-[#635B4E]">
+                              {stats.total} ครั้ง · แม่น {stats.rate}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-[#756F66]">ยังไม่มีข้อมูลเวอร์ชัน</p>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-[#E8E2D8] p-3">
+                    <p className="text-xs font-semibold text-[#29261F] mb-2">ผู้ให้บริการ (Provider)</p>
+                    {Object.keys(quality.byProvider).length > 0 ? (
+                      <div className="space-y-1.5 text-xs">
+                        {Object.entries(quality.byProvider).map(([prov, stats]) => (
+                          <div key={prov} className="flex items-center justify-between py-1 border-b border-[#F0EBE1] last:border-none">
+                            <span className="font-mono text-[11px] text-[#29261F] font-semibold uppercase">{prov}</span>
+                            <span className="text-[11px] text-[#635B4E]">
+                              {stats.total} ครั้ง · แม่น {stats.rate}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-[#756F66]">ยังไม่มีข้อมูลผู้ให้บริการ</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-xs text-[#635B4E] py-2">กำลังโหลดข้อมูล telemetry...</p>
+            )}
           </div>
 
           {data.models.length > 0 && (

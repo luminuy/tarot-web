@@ -17,7 +17,7 @@ export type ReadingEvent =
   | { type: "card"; position: number; headline: string; reading: string }
   | { type: "connections"; text: string }
   | { type: "summary"; text: string }
-  | { type: "done"; reading: Reading; usage: UsageInfo }
+  | { type: "done"; reading: Reading; usage: UsageInfo; model?: string; consistencyOk?: boolean }
   | { type: "error"; message: string };
 
 export interface UsageInfo {

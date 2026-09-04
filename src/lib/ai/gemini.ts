@@ -13,6 +13,8 @@ import {
   stripThinkingTags,
 } from "@/lib/ai/language";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
+import { checkReadingConsistency } from "@/lib/ai/consistency";
+import { recordEvent } from "@/lib/stats/record";
 /**
  * ตัวเชื่อมกับ Google Gemini API (Ultra-Low Latency Streaming)
  * -------------------------------------------------
@@ -174,6 +176,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
   const userPrompt = buildReadingMessage(ctx);
 
   let response: Response | null = null;
+  let activeModel: string = WORKING_GEMINI_MODELS[0];
 
   for (const [modelIdx, model] of WORKING_GEMINI_MODELS.entries()) {
     const endpoint = geminiEndpoint(model, "streamGenerateContent", { sse: true });
@@ -213,6 +216,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
       if (res.ok) {
         response = res;
+        activeModel = model;
         break;
       } else {
         // log body ด้วย (ไม่ใช่แค่ status) — ช่วยแยก "คีย์ผิด" / "โมเดลไม่มี" / "โควตาหมด" ได้ทันทีจาก Worker log
@@ -341,7 +345,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         mood: "ครุ่นคิด",
         yesNoAnswer: ctx.spread.yesNoMode ? "ยังไม่แน่" : null,
       };
-      yield { type: "done", reading: fallbackReading, usage };
+      yield { type: "done", reading: fallbackReading, usage, model: activeModel, consistencyOk: false };
     } else {
       let readingData = parsed.data;
       if (!ctx.spread.yesNoMode) {
@@ -352,7 +356,21 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         console.warn("[lang] คำทำนายฉบับสมบูรณ์มีอักษรต่างภาษาปน — ล้างก่อนบันทึก");
         readingData = stripForeignScriptDeep(readingData);
       }
-      yield { type: "done", reading: readingData, usage };
+
+      // 🛡️ ด่านตรวจความสอดคล้อง (AI_INTELLIGENCE_PLAN W1.3)
+      const consistency = checkReadingConsistency(readingData, ctx.cards, {
+        drawnCount: ctx.drawn.length,
+        yesNoMode: ctx.spread.yesNoMode,
+        pastReading: ctx.pastReading,
+      });
+
+      if (!consistency.ok) {
+        for (const issue of consistency.issues) {
+          recordEvent(`ai_consistency_${issue.fatal ? "fail" : "warn"}:${issue.code.toLowerCase()}`);
+        }
+      }
+
+      yield { type: "done", reading: readingData, usage, model: activeModel, consistencyOk: consistency.ok };
     }
   } catch (error) {
     console.error("Gemini stream failed:", error);
@@ -465,5 +483,5 @@ export async function* streamMockGeminiReading(ctx: ReadingContext): AsyncGenera
     yesNoAnswer: null,
   };
 
-  yield { type: "done", reading: finalReading, usage: DEFAULT_USAGE };
+  yield { type: "done", reading: finalReading, usage: DEFAULT_USAGE, model: "mock-gemini", consistencyOk: true };
 }

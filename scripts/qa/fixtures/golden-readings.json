@@ -1,0 +1,530 @@
+[
+  {
+    "id": "gold-001",
+    "category": "love",
+    "spreadId": "three-card",
+    "question": "เขายังคิดถึงเราอยู่ไหม",
+    "cardIds": [
+      "major-06",
+      "cups-08",
+      "major-17"
+    ],
+    "reversed": [
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "id": "gold-002",
+    "category": "work",
+    "spreadId": "three-card",
+    "question": "ควรเปลี่ยนงานช่วงนี้ดีไหม",
+    "cardIds": [
+      "wands-08",
+      "swords-02",
+      "pentacles-03"
+    ],
+    "reversed": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-003",
+    "category": "finance",
+    "spreadId": "three-card",
+    "question": "การเงินในอีก 3 เดือนข้างหน้าจะเป็นอย่างไร",
+    "cardIds": [
+      "pentacles-01",
+      "pentacles-04",
+      "major-10"
+    ],
+    "reversed": [
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "id": "gold-004",
+    "category": "self",
+    "spreadId": "daily",
+    "question": "พลังงานนำทางชีวิตประจำวันนี้",
+    "cardIds": [
+      "major-19"
+    ],
+    "reversed": [
+      false
+    ]
+  },
+  {
+    "id": "gold-005",
+    "category": "general",
+    "spreadId": "three-card",
+    "question": "ภาพรวมอุปสรรคและโอกาสในสัปดาห์นี้",
+    "cardIds": [
+      "swords-05",
+      "major-14",
+      "wands-01"
+    ],
+    "reversed": [
+      true,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-006",
+    "category": "love",
+    "spreadId": "love",
+    "question": "ความสัมพันธ์นี้มีโอกาสพัฒนาไปต่อแค่ไหน",
+    "cardIds": [
+      "cups-02",
+      "major-15",
+      "cups-04",
+      "major-21",
+      "major-06"
+    ],
+    "reversed": [
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-007",
+    "category": "work",
+    "spreadId": "career",
+    "question": "ทิศทางอาชีพและความก้าวหน้าในโปรเจกต์ใหม่",
+    "cardIds": [
+      "major-01",
+      "pentacles-08",
+      "swords-03",
+      "wands-06",
+      "major-04"
+    ],
+    "reversed": [
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-008",
+    "category": "finance",
+    "spreadId": "money",
+    "question": "ควรลงทุนในธุรกิจนี้ตอนนี้หรือไม่",
+    "cardIds": [
+      "pentacles-07",
+      "major-16",
+      "pentacles-10",
+      "wands-01"
+    ],
+    "reversed": [
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-009",
+    "category": "self",
+    "spreadId": "chakra",
+    "question": "สภาวะจิตใจและจุดติดขัดภายใน",
+    "cardIds": [
+      "major-09",
+      "cups-05",
+      "major-18",
+      "swords-04",
+      "major-14",
+      "cups-01",
+      "major-17"
+    ],
+    "reversed": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-010",
+    "category": "love",
+    "spreadId": "soulmate",
+    "question": "เมื่อไหร่จะได้เจอคนที่ใช่ และควรเปิดใจอย่างไร",
+    "cardIds": [
+      "major-00",
+      "cups-06",
+      "wands-04",
+      "cups-02",
+      "major-19"
+    ],
+    "reversed": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-011",
+    "category": "general",
+    "spreadId": "decision",
+    "question": "เลือกทางเลือก A หรือ B ดีกว่ากัน",
+    "cardIds": [
+      "swords-07",
+      "major-11",
+      "cups-01",
+      "wands-02",
+      "major-08"
+    ],
+    "reversed": [
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-012",
+    "category": "work",
+    "spreadId": "daily",
+    "question": "สิ่งที่ต้องระวังในการประชุมวันนี้",
+    "cardIds": [
+      "swords-09"
+    ],
+    "reversed": [
+      true
+    ]
+  },
+  {
+    "id": "gold-013",
+    "category": "finance",
+    "spreadId": "three-card",
+    "question": "หนี้สินและสภาพคล่องจะคลี่คลายเมื่อไหร่",
+    "cardIds": [
+      "pentacles-05",
+      "major-20",
+      "pentacles-06"
+    ],
+    "reversed": [
+      true,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-014",
+    "category": "love",
+    "spreadId": "ex-reconciliation",
+    "question": "คนเก่าจะติดต่อกลับมาไหม",
+    "cardIds": [
+      "swords-06",
+      "major-12",
+      "cups-07",
+      "cups-08"
+    ],
+    "reversed": [
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-015",
+    "category": "self",
+    "spreadId": "mind-body-spirit",
+    "question": "บทเรียนชีวิตที่กำลังเผชิญอยู่ในตอนนี้คืออะไร",
+    "cardIds": [
+      "major-13",
+      "major-17",
+      "wands-03"
+    ],
+    "reversed": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-016",
+    "category": "general",
+    "spreadId": "weekly",
+    "question": "แนวโน้มชีวิตช่วงสัปดาห์นี้",
+    "cardIds": [
+      "wands-07",
+      "cups-03",
+      "pentacles-02",
+      "major-03",
+      "major-07",
+      "swords-10",
+      "major-19"
+    ],
+    "reversed": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "id": "gold-017",
+    "category": "work",
+    "spreadId": "career-switch",
+    "question": "การย้ายสายงานไปเทคโนโลยีจะเป็นอย่างไร",
+    "cardIds": [
+      "cups-10",
+      "swords-01",
+      "pentacles-09",
+      "major-05",
+      "major-01"
+    ],
+    "reversed": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-018",
+    "category": "love",
+    "spreadId": "how-they-feel",
+    "question": "เขารู้สึกอย่างไรกับเรากันแน่",
+    "cardIds": [
+      "cups-09",
+      "major-02",
+      "wands-10",
+      "cups-03"
+    ],
+    "reversed": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  {
+    "id": "gold-019",
+    "category": "finance",
+    "spreadId": "quick",
+    "question": "โชคลาภและการเงินประจำวัน",
+    "cardIds": [
+      "pentacles-01"
+    ],
+    "reversed": [
+      false
+    ]
+  },
+  {
+    "id": "gold-020",
+    "category": "self",
+    "spreadId": "inner-potential",
+    "question": "ศักยภาพที่ซ่อนอยู่และจิตใต้สำนึก",
+    "cardIds": [
+      "major-18",
+      "swords-08",
+      "major-14",
+      "major-08"
+    ],
+    "reversed": [
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-021",
+    "category": "general",
+    "spreadId": "celtic-cross",
+    "question": "ภาพรวมชีวิต ชะตากรรม และทิศทางแห่งความสำเร็จ",
+    "cardIds": [
+      "major-01",
+      "swords-02",
+      "cups-01",
+      "pentacles-04",
+      "major-10",
+      "wands-08",
+      "major-08",
+      "cups-04",
+      "major-17",
+      "major-21"
+    ],
+    "reversed": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-022",
+    "category": "work",
+    "spreadId": "situation-solution",
+    "question": "ควรแก้ปัญหาในที่ทำงานตอนนี้อย่างไร",
+    "cardIds": [
+      "wands-05",
+      "major-00",
+      "pentacles-10"
+    ],
+    "reversed": [
+      true,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-023",
+    "category": "love",
+    "spreadId": "yes-no",
+    "question": "เขาจะทักมาภายในสัปดาห์นี้ไหม",
+    "cardIds": [
+      "wands-08",
+      "cups-02",
+      "swords-04"
+    ],
+    "reversed": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-024",
+    "category": "finance",
+    "spreadId": "yes-no",
+    "question": "จะกู้เงินผ่านหรือไม่",
+    "cardIds": [
+      "pentacles-04",
+      "swords-05",
+      "pentacles-08"
+    ],
+    "reversed": [
+      true,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-025",
+    "category": "self",
+    "spreadId": "daily",
+    "question": "ข้อคิดเตือนใจสำหรับการก้าวผ่านความเครียด",
+    "cardIds": [
+      "major-12"
+    ],
+    "reversed": [
+      false
+    ]
+  },
+  {
+    "id": "gold-026",
+    "category": "love",
+    "spreadId": "three-card",
+    "question": "ทำไมเขาถึงเงียบหายไป",
+    "cardIds": [
+      "swords-04",
+      "cups-05",
+      "major-09"
+    ],
+    "reversed": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-027",
+    "category": "work",
+    "spreadId": "daily",
+    "question": "การเจรจาธุรกิจในบ่ายนี้จะเป็นอย่างไร",
+    "cardIds": [
+      "wands-06"
+    ],
+    "reversed": [
+      false
+    ]
+  },
+  {
+    "id": "gold-028",
+    "category": "finance",
+    "spreadId": "money",
+    "question": "จะได้รับเงินที่รอคอยอยู่ไหม",
+    "cardIds": [
+      "pentacles-06",
+      "major-11",
+      "wands-09",
+      "pentacles-01"
+    ],
+    "reversed": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-029",
+    "category": "general",
+    "spreadId": "weekly",
+    "question": "ดวงชะตาประจำสัปดาห์นี้",
+    "cardIds": [
+      "major-19",
+      "cups-03",
+      "swords-01",
+      "pentacles-07",
+      "major-06",
+      "wands-04",
+      "major-21"
+    ],
+    "reversed": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "id": "gold-030",
+    "category": "self",
+    "spreadId": "three-card",
+    "question": "พลังบวกและพลังงานที่ควรเติมเต็มให้ตนเอง",
+    "cardIds": [
+      "cups-01",
+      "major-03",
+      "major-17"
+    ],
+    "reversed": [
+      false,
+      false,
+      false
+    ]
+  }
+]

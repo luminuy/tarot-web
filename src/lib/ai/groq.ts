@@ -27,6 +27,7 @@ import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/l
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
+import { checkReadingConsistency } from "@/lib/ai/consistency";
 
 /**
  * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)
@@ -473,12 +474,30 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
           readingData = stripForeignScriptDeep(readingData);
         }
 
+        // 🛡️ ด่านตรวจความสอดคล้อง (AI_INTELLIGENCE_PLAN W1.3)
+        const consistency = checkReadingConsistency(readingData, ctx.cards, {
+          drawnCount: ctx.drawn.length,
+          yesNoMode: ctx.spread.yesNoMode,
+          pastReading: ctx.pastReading,
+        });
+
+        if (consistency.fatal) {
+          const fatalIssue = consistency.issues.find((i) => i.fatal);
+          console.warn(
+            `[Groq Reading ${model}] ⚠️ ความสอดคล้องล้มเหลว (Fatal): ${fatalIssue?.code} - ${fatalIssue?.message} — สลับโมเดลถัดไป`,
+          );
+          if (fatalIssue) {
+            recordEvent(`ai_consistency_fail:${fatalIssue.code.toLowerCase()}`);
+          }
+          continue; // สลับไปโมเดลถัดไป หรือตกไปหา Gemini
+        }
+
         if (usage.inputTokens === 0) {
           usage.inputTokens = Math.round((systemInstruction.length + userMessage.length) / 3.5);
           usage.outputTokens = Math.round(cleanJson.length / 3.5);
         }
 
-        yield { type: "done", reading: readingData, usage };
+        yield { type: "done", reading: readingData, usage, model, consistencyOk: consistency.ok };
         return; // ทำงานสำเร็จสมบูรณ์!
       } else {
         recordEvent("ai_schema_fail:groq");

@@ -13,6 +13,7 @@ import { ReadingSchema } from "../../src/lib/schema/reading";
 import { ALL_CARDS } from "../../src/data/cards";
 import { getSpread } from "../../src/data/spreads";
 import { WORKING_GROQ_MODELS } from "../../src/lib/ai/groq";
+import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
 
 let pass = 0;
 let fail = 0;
@@ -134,6 +135,10 @@ async function main() {
   const schemaSrc = fs.readFileSync(path.resolve(process.cwd(), "src/lib/schema/reading.ts"), "utf-8");
   check("reading.ts: summary describe ระบุ 5-8 ประโยค + Power Reflection Question", schemaSrc.includes("5-8 ประโยค") && schemaSrc.includes("Power Reflection Question"));
   check("reading.ts: advice describe ระบุกิจกรรมฝึกสติ 🧘", schemaSrc.includes("🧘"));
+
+  // 9. PROMPT_VERSION sync guard (AI_INTELLIGENCE_PLAN W1.1)
+  check("PROMPT_VERSION มีการระบุและขึ้นรูปแบบ YYYYMMDD-X", /^\d{8}-\d+$/.test(PROMPT_VERSION));
+  check("PROMPT_VERSION ไม่ว่างเปล่า", typeof PROMPT_VERSION === "string" && PROMPT_VERSION.length >= 8);
 
   console.log(`\n${fail === 0 ? "✨" : "⚠️"} ผ่าน ${pass} · ล้มเหลว ${fail}`);
   if (fail > 0) process.exit(1);

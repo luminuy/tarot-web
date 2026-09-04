@@ -37,6 +37,11 @@ export async function PATCH(
     if (!changed) {
       return NextResponse.json({ error: "ไม่พบบันทึกดวงรายการนี้" }, { status: 404 });
     }
+
+    // 📊 Sync outcome to reading_quality for model telemetry (AI_INTELLIGENCE_PLAN W1.1)
+    const { updateQualityOutcome } = await import("@/lib/ai/quality.repo");
+    void updateQualityOutcome(id, parsed.data.outcome).catch(() => {});
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[Journal Item PATCH Error]:", error);

@@ -100,6 +100,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let capTier: "guest" | "member" = "member"; // ธงปิด → เพดานเต็ม (พฤติกรรมเดิม)
   let guestNeedsConsume = false; // ผู้เยี่ยมชมผ่าน gate → ต้องออก ticket หลังอ่านสำเร็จจริง
   let guestGid: string | null = null; // gid ของผู้เยี่ยมชม — ใช้ mark ฝั่ง server ตอนอ่านจบ
+  let memberUserId: string | null = null;
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
     if (await isEntitlementEnabled()) {
@@ -107,6 +108,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const { consumeReading } = await import("@/lib/entitlement/entitlement");
       const viewer = await getViewer(request);
       capTier = viewer.kind;
+      if (viewer.kind === "member") {
+        memberUserId = viewer.userId;
+      }
       consumed = await consumeReading(viewer, id, record.spreadId);
       if (!consumed) {
         limit.releaseConcurrency();
@@ -185,7 +189,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const overrideDoc = await getContentOverrides();
+        if (!memberUserId) {
+          try {
+            const { getSessionUser } = await import("@/lib/auth/session");
+            const user = await getSessionUser();
+            if (user?.id) memberUserId = user.id;
+          } catch {}
+        }
+
+        const { loadKarmicMemory } = await import("@/lib/ai/memory");
+        const [overrideDoc, pastReading] = await Promise.all([
+          getContentOverrides(),
+          loadKarmicMemory(memberUserId),
+        ]);
         const resolvedCards = record.drawn!.map((d) => resolveCardByIndex(overrideDoc, d.cardIndex));
         if (resolvedCards.some((c) => !c)) {
           send(controller, "error", {
@@ -206,6 +222,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           drawn: record.drawn!,
           cards: resolvedCards as import("@/data/cards").TarotCard[],
           safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
+          pastReading,
         };
 
         let activeProvider = "gemini";
@@ -281,6 +298,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             ]);
             void recordAiCall(1);
             void recordPerIpReadQuota(clientIp);
+
+            // 📊 บันทึกบริบทตอนสร้างคำอ่าน สำหรับวัดคุณภาพ AI (AI_INTELLIGENCE_PLAN W1.1)
+            const { recordReadingQuality } = await import("@/lib/ai/quality.repo");
+            const { PROMPT_VERSION } = await import("@/lib/ai/prompt-version");
+            void recordReadingQuality({
+              readingId: id,
+              provider: providerUsed,
+              model: event.model || (providerUsed === "groq" ? "qwen3.8-27b" : "gemini-2.5-flash"),
+              personaId: record.personaId || "default",
+              spreadId: record.spreadId,
+              cardCount: record.drawn!.length,
+              category: record.category,
+              promptVersion: PROMPT_VERSION,
+              elapsedMs: Date.now() - startedAt,
+              outputTokens: event.usage?.outputTokens ?? 0,
+              hadFailover: providerUsed === "gemini" && Boolean(process.env.GROQ_API_KEY),
+              consistencyOk: event.consistencyOk ?? true,
+            }).catch(() => {});
+
             // เฉลย serverSeed ตอนนี้ — ผู้ใช้ตรวจย้อนหลังได้ว่าไพ่ไม่ได้ถูกเลือกทีหลัง
             send(controller, "done", {
               reading: event.reading,
