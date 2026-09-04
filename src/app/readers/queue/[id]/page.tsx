@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 
 interface PollResponse {
@@ -47,12 +48,7 @@ export default function CustomerQueuePage() {
     }
   }, [ticketId]);
 
-  useEffect(() => {
-    fetchTicketStatus();
-    // Poll every 4 seconds
-    const interval = setInterval(fetchTicketStatus, 4000);
-    return () => clearInterval(interval);
-  }, [fetchTicketStatus]);
+  useVisibleInterval(fetchTicketStatus, 4000);
 
   const handleCancel = async () => {
     if (!confirm("คุณต้องการยกเลิกคิวนี้ใช่หรือไม่?")) return;

@@ -234,9 +234,53 @@ async function runTest() {
   console.log("  ✓ 11. Revenue & Commission: คำนวณส่วนแบ่งรายได้และบันทึก Payout Ledger สำเร็จ");
 
   // ── PDPA Cleanup ─────────────────────────────────────────────────────────
+  // 12. PDPA Cookie Authentication & Zero-Leak Projection (ISSUE-018)
+  const { GET: getTicketsRoute } = await import("../../src/app/api/marketplace/tickets/route");
+  const { GET: getTicketByIdRoute } = await import("../../src/app/api/marketplace/tickets/[id]/route");
+  const { CUSTOMER_REF_COOKIE } = await import("../../src/lib/marketplace/customer-ref");
+  const { signPayload } = await import("../../src/lib/auth/edge-auth");
+
+  // 12.1 Unauthenticated requests must fail with 401 or 404
+  const unauthListReq = new Request("http://localhost:3000/api/marketplace/tickets");
+  const unauthListRes = await getTicketsRoute(unauthListReq);
+  if (unauthListRes.status !== 401) {
+    throw new Error(`❌ Unauthenticated /tickets GET expected 401, got ${unauthListRes.status}`);
+  }
+
+  const unauthTicketReq = new Request(`http://localhost:3000/api/marketplace/tickets/${ticket1.id}`);
+  const unauthTicketRes = await getTicketByIdRoute(unauthTicketReq, { params: Promise.resolve({ id: ticket1.id }) });
+  if (unauthTicketRes.status !== 404) {
+    throw new Error(`❌ Zero Info Leakage failed: Unauthenticated ticket GET expected 404, got ${unauthTicketRes.status}`);
+  }
+
+  // 12.2 Attacker with different customerRef must be rejected with 404 (not 403)
+  const attackerToken = await signPayload({ ref: "cust_unauthorized_attacker_99" });
+  const attackerReq = new Request(`http://localhost:3000/api/marketplace/tickets/${ticket1.id}`, {
+    headers: { cookie: `${CUSTOMER_REF_COOKIE}=${attackerToken}` },
+  });
+  const attackerRes = await getTicketByIdRoute(attackerReq, { params: Promise.resolve({ id: ticket1.id }) });
+  if (attackerRes.status !== 404) {
+    throw new Error(`❌ Attacker accessing ticket expected 404, got ${attackerRes.status}`);
+  }
+
+  // 12.3 Legitimate owner with valid signed cookie must succeed with 200
+  const ownerToken = await signPayload({ ref: "cust_client_device_1" });
+  const ownerReq = new Request(`http://localhost:3000/api/marketplace/tickets/${ticket1.id}`, {
+    headers: { cookie: `${CUSTOMER_REF_COOKIE}=${ownerToken}` },
+  });
+  const ownerRes = await getTicketByIdRoute(ownerReq, { params: Promise.resolve({ id: ticket1.id }) });
+  if (ownerRes.status !== 200) {
+    throw new Error(`❌ Valid ticket owner GET failed: expected 200, got ${ownerRes.status}`);
+  }
+  const ownerJson = await ownerRes.json() as { ticket: { id: string } };
+  if (ownerJson.ticket.id !== ticket1.id) {
+    throw new Error(`❌ Valid ticket owner GET returned wrong ticket ID`);
+  }
+  console.log("  ✓ 12. PDPA Cookie Auth: ป้องกัน URL Enumeration และยืนยันตัวตนผ่าน Signed Cookie สำเร็จ 100%");
+
   await cancelQueueTicket(ticket2.id);
   const purgedCount = await cleanupExpiredTickets();
-  console.log(`  ✓ 12. PDPA Data Retention: Auto-cleanup expired tickets (${purgedCount} purged)`);
+  console.log(`  ✓ 13. PDPA Data Retention: Auto-cleanup expired tickets (${purgedCount} purged)`);
 
   // Cleanup test reader
   await deleteReader(created.id);

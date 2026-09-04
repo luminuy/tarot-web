@@ -30,17 +30,43 @@ export default async function ReadersPage() {
     console.error("[ReadersPage] Failed to fetch readers:", err);
   }
 
+  const breadcrumbsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "หน้าแรก",
+        item: SITE_ORIGIN,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "ปรึกษาแม่หมอตัวจริง",
+        item: `${SITE_ORIGIN}/readers`,
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-x-clip">
+      {/* Schema.org Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
+      />
+
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Top Breadcrumbs & Dropdown */}
         <div className="flex items-center justify-between border-b border-[#E4D8C4]/40 pb-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#2E211A] hover:text-[#8F5C1A] transition-colors py-1.5 px-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] font-serif-th"
-          >
-            <span>←</span> กลับหน้าหลัก
-          </Link>
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E]">
+            <Link href="/" className="hover:text-[#8F5C1A] transition-colors">
+              หน้าแรก
+            </Link>
+            <span>/</span>
+            <span className="text-[#2E211A] font-bold">ปรึกษาแม่หมอตัวจริง</span>
+          </nav>
           <SacredNavDropdown />
         </div>
 

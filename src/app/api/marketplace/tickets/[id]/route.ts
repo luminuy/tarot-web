@@ -1,20 +1,33 @@
 import { NextResponse } from "next/server";
 import { cancelQueueTicket, getQueueTicketById } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
+import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
+import { requireReader } from "@/lib/auth/reader-auth";
 
 export const runtime = "nodejs";
 
 /**
  * GET /api/marketplace/tickets/[id] - ดึงสถานะคิวล่าสุด (Poll)
+ * 🔒 ป้องกันข้อมูลอ่อนไหวตาม PDPA: ต้องเป็นเจ้าของตั๋ว (ตรงกับ Cookie) หรือเป็นแม่หมอเจ้าของคิวเท่านั้น
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   try {
     const ticket = await getQueueTicketById(id);
     if (!ticket) {
+      return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
+    }
+
+    const customerRef = await readCustomerRefFromCookie(request);
+    const isOwner = Boolean(customerRef) && ticket.customerRef === customerRef;
+    const readerAuth = await requireReader(request);
+    const isReader = readerAuth.success && readerAuth.readerId === ticket.readerId;
+
+    if (!isOwner && !isReader) {
+      // ⚠️ ตอบ 404 ไม่ใช่ 403 — ไม่ให้ยืนยันว่า ticket id นี้มีอยู่จริง (Zero Info Leakage)
       return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
     }
 
@@ -47,10 +60,7 @@ export async function GET(
 /**
  * DELETE /api/marketplace/tickets/[id] - ยกเลิกตั๋วคิว
  *
- * ⚠️ ต้องแนบ `customerRef` ของเจ้าของตั๋วมาด้วยเสมอ
- * ก่อนหน้านี้ยกเลิกได้ด้วย ticket id เพียงอย่างเดียว ซึ่ง id ปรากฏอยู่ในลิงก์
- * `/readers/queue/<id>` ที่ผู้ใช้แชร์ต่อ/ค้างอยู่ในประวัติเบราว์เซอร์ได้
- * ใครเห็นลิงก์ก็เตะลูกค้าที่จ่ายเงินแล้วออกจากคิวแม่หมอได้ทันทีโดยไม่ต้องล็อกอิน
+ * ⚠️ ต้องยืนยันตัวตนเจ้าของตั๋วผ่าน Signed Cookie
  */
 export async function DELETE(
   request: Request,
@@ -58,16 +68,11 @@ export async function DELETE(
 ) {
   const { id } = await params;
   try {
-    const url = new URL(request.url);
-    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
-    const customerRef =
-      (typeof body.customerRef === "string" ? body.customerRef : "") ||
-      (url.searchParams.get("customerRef") ?? "");
-
+    const customerRef = await readCustomerRefFromCookie(request);
     if (!customerRef) {
       return NextResponse.json(
-        { error: "ต้องระบุรหัสอ้างอิงของผู้จองคิว (customerRef)" },
-        { status: 400 }
+        { error: "ต้องระบุสิทธิ์ของผู้จองคิวผ่าน Cookie" },
+        { status: 401 }
       );
     }
 

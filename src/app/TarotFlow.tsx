@@ -20,7 +20,6 @@ import { saveReading } from "@/lib/utils/history";
 import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
 import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
-import { EntitlementGate } from "@/components/entitlement/EntitlementGate";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
 import { ToastNotification, type ToastData } from "@/components/ui/ToastNotification";
@@ -944,9 +943,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               exit="exit"
               className="space-y-10"
             >
-              <EntitlementGate active={currentStep === "SPREAD_SELECT"} onRequestUpgrade={openAccessDialog}>
-                <DailyCardStrip />
-                <div className="text-center space-y-6 relative">
+              <DailyCardStrip />
+              <div className="text-center space-y-6 relative">
                   {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
                   <div
                     className="h-56 sm:h-72 w-full flex items-center justify-center relative select-none"
@@ -1033,7 +1031,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     navigateStep("INTENTION_SELECT");
                   }}
                 />
-              </EntitlementGate>
             </motion.div>
           )}
 

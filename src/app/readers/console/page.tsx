@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { useVisibleInterval } from "@/lib/utils/use-visible-interval";
 import type { QueueTicket } from "@/lib/marketplace/queue.repo";
 
 export const dynamic = "force-dynamic";
@@ -56,11 +57,7 @@ function ReaderConsoleInner() {
     }
   }, [token, readerId]);
 
-  useEffect(() => {
-    fetchConsoleData();
-    const interval = setInterval(fetchConsoleData, 5000);
-    return () => clearInterval(interval);
-  }, [fetchConsoleData]);
+  useVisibleInterval(fetchConsoleData, 5000);
 
   const handleToggleLive = async () => {
     if (!data) return;

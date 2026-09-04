@@ -130,6 +130,49 @@ async function main() {
   check("ใช้ครบ 6: canStartReading = false", !em4.canStartReading && (em4.reason === "daily_exhausted" || em4.reason === "weekly_exhausted"));
   check("consumeReading เมื่อสิทธิ์หมด = false", (await consumeReading(member, `r_${uid}_8`)) === false);
 
+  // ── 7b. ป้องกัน Double-Spend เมื่อยิงคำขอเปิดไพ่ขนาน (ISSUE-017) ──
+  const concUid = `test_conc_${Date.now()}`;
+  await upsertUserOnLogin({ id: concUid, provider: "google", email: `${concUid}@example.com`, name: "ทดสอบ Double Spend" });
+  const concMember: Viewer = { kind: "member", userId: concUid };
+
+  // 1) ใช้ไปแล้ว 2 ครั้ง เหลือ daily อีก 1 ครั้งพอดี
+  await consumeReading(concMember, `r_setup_1`);
+  await consumeReading(concMember, `r_setup_2`);
+  const concEntBefore = await getEntitlement(concMember);
+  check("เหลือโควตารายวัน 1 ครั้งพอดี", concEntBefore.dailyRemaining === 1 && concEntBefore.remaining === 1);
+
+  // ยิงขนาน 5 คำขอด้วย readingId ต่างกัน
+  const concDailyResults = await Promise.all([
+    consumeReading(concMember, `r_parallel_d1`),
+    consumeReading(concMember, `r_parallel_d2`),
+    consumeReading(concMember, `r_parallel_d3`),
+    consumeReading(concMember, `r_parallel_d4`),
+    consumeReading(concMember, `r_parallel_d5`),
+  ]);
+  const dailySuccesses = concDailyResults.filter((r) => r === true).length;
+  const dailyFailures = concDailyResults.filter((r) => r === false).length;
+  check("Double-Spend Daily: ยิงขนาน 5 ครั้งเมื่อเหลือ 1 สิทธิ์ → สำเร็จเพียง 1 ครั้งเท่านั้น", dailySuccesses === 1);
+  check("Double-Spend Daily: อีก 4 ครั้งล้มเหลวถูกต้อง", dailyFailures === 4);
+
+  // 2) ทดสอบโควตาโบนัส: เติม 1 ครั้ง (daily หมดแล้ว) แล้วยิงขนาน 5 ครั้ง
+  await grantBonus(concUid, 1, "purchase_conc_test");
+  const concBonusEnt = await getEntitlement(concMember);
+  check("เหลือโควตาโบนัส 1 ครั้งพอดี (daily = 0)", concBonusEnt.dailyRemaining === 0 && concBonusEnt.bonusRemaining === 1);
+
+  const concBonusResults = await Promise.all([
+    consumeReading(concMember, `r_parallel_b1`),
+    consumeReading(concMember, `r_parallel_b2`),
+    consumeReading(concMember, `r_parallel_b3`),
+    consumeReading(concMember, `r_parallel_b4`),
+    consumeReading(concMember, `r_parallel_b5`),
+  ]);
+  const bonusSuccesses = concBonusResults.filter((r) => r === true).length;
+  const bonusFailures = concBonusResults.filter((r) => r === false).length;
+  check("Double-Spend Bonus: ยิงขนาน 5 ครั้งเมื่อเหลือ 1 สิทธิ์โบนัส → สำเร็จเพียง 1 ครั้งเท่านั้น", bonusSuccesses === 1);
+  check("Double-Spend Bonus: อีก 4 ครั้งล้มเหลวถูกต้อง", bonusFailures === 4);
+
+  await softDeleteUser(concUid);
+
   // ── 8. PDPA: ลบบัญชี → ข้อมูลสิทธิ์หายตาม (เกณฑ์ข้อ 8) ──
   await softDeleteUser(uid);
   const ruLeft = (await db.prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ?`).bind(uid).first<{ n: number }>())?.n;

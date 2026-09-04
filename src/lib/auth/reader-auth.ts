@@ -73,8 +73,19 @@ export async function requireReader(request?: Request): Promise<ReaderAuthResult
   let readerIdParam: string | undefined;
 
   // 1. Check cookies
-  const cookieStore = await cookies();
-  token = cookieStore.get(READER_COOKIE_NAME)?.value;
+  if (request) {
+    const cookieHeader = request.headers.get("cookie") ?? "";
+    const match = cookieHeader.match(new RegExp(`(?:^|; )${READER_COOKIE_NAME}=([^;]*)`));
+    if (match) token = decodeURIComponent(match[1]);
+  }
+  if (!token) {
+    try {
+      const cookieStore = await cookies();
+      token = cookieStore.get(READER_COOKIE_NAME)?.value;
+    } catch {
+      // Not in Next.js request context (e.g. test environment)
+    }
+  }
 
   // 2. Check query params or headers if request provided
   if (request) {

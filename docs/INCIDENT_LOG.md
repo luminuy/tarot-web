@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0079 · 2026-09-04 21:10 · 🟠 High · resolve pending handoff issues 017-023
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | customerRef in query string risked PDPA leak, concurrent reading requests bypassed quota limits, robots.txt blocked AI citation bots, isSevereForeignLeak was unreferenced, background tabs polled continuously, readers pages lacked breadcrumb structured data, and EntitlementGate was dead code |
+| **สาเหตุราก** | architectural design debt identified in 2026-09-04 audit: bearer auth in URL, read-check-then-insert without atomic database condition, broad crawler disallow, unconnected circuit breaker, lack of visibility listeners, and deprecated UI gating component |
+| **การแก้ไข** | Resolve 7 pending issues from HANDOFF_2026-09-04.md: ISSUE-018 PDPA signed cookie for ticket queue, ISSUE-017 double-spend quota protection with conditional atomic SQL INSERT, ISSUE-019 allowed rule for AI Search & Citation Bots, ISSUE-020 foreign script circuit breaker in Groq models, ISSUE-022 useVisibleInterval hook, ISSUE-023 BreadcrumbList for reader pages, and ISSUE-021 EntitlementGate cleanup |
+| **🛡️ กฎป้องกันถาวร** | **migrated ticket security to signed HttpOnly cookies with 404 zero-leak responses, implemented atomic SQL conditional INSERT with meta.changes, updated robots.txt allowlist for live citation crawlers, wired circuit breaker into Groq stream loop, introduced useVisibleInterval hook, added BreadcrumbList JSON-LD, and verified all 24 gates** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify 24/24 gates and targeted QA suites in test-marketplace-readers.ts and test-entitlement.ts |
+| **บันทึกโดย** | Antigravity · branch `fix/resolve-handoff-issues-017-023` · commit `ff59661` |
+
+
 ### INC-0078 · 2026-09-04 18:43 · 🟠 High · ปิดแคช package manager ของ setup-node@v5 ที่ทำให้ทุก workflow ล้มเพราะหา pnpm-lock.yaml ไม่เจอ
 
 | หัวข้อ | รายละเอียด |
