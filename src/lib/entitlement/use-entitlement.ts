@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 /**
  * สถานะสิทธิ์ฝั่ง client — ดึงจาก GET /api/entitlement ครั้งเดียว แล้ว cache ระดับโมดูล
- * ให้ทุกคอมโพเนนต์ (QuotaBadge / EntitlementGate / FollowUpChat) ใช้ค่าเดียวกัน
+ * ให้ทุกคอมโพเนนต์ (QuotaBadge / AccessDialog / FollowUpChat) ใช้ค่าเดียวกัน
  * ห้ามคำนวณสิทธิ์เองฝั่งเบราว์เซอร์ — นี่แค่ "สะท้อน" ค่าจาก server เพื่อแสดงผล
  */
 

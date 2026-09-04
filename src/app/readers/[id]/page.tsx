@@ -36,17 +36,38 @@ export default async function ReaderDetailPage({
 
   const isLiveOpen = await getReaderLiveAvailability(id);
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "หน้าแรก", item: SITE_ORIGIN },
+      { "@type": "ListItem", position: 2, name: "ปรึกษาแม่หมอตัวจริง", item: `${SITE_ORIGIN}/readers` },
+      { "@type": "ListItem", position: 3, name: reader.displayName, item: `${SITE_ORIGIN}/readers/${reader.id}` },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-x-clip">
+      {/* Schema.org Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
       <div className="max-w-4xl mx-auto space-y-6 relative z-10">
         {/* Top Breadcrumbs */}
         <div className="flex items-center justify-between border-b border-[#E4D8C4]/40 pb-4">
-          <Link
-            href="/readers"
-            className="inline-flex items-center gap-1.5 text-xs text-[#2E211A] hover:text-[#8F5C1A] transition-colors py-1.5 px-3.5 rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] hover:border-[#8F5C1A] font-serif-th"
-          >
-            <span>←</span> หน้ารวมแม่หมอทั้งหมด
-          </Link>
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] overflow-x-auto whitespace-nowrap">
+            <Link href="/" className="hover:text-[#8F5C1A] transition-colors">
+              หน้าแรก
+            </Link>
+            <span>/</span>
+            <Link href="/readers" className="hover:text-[#8F5C1A] transition-colors">
+              ปรึกษาแม่หมอตัวจริง
+            </Link>
+            <span>/</span>
+            <span className="text-[#2E211A] font-bold truncate">{reader.displayName}</span>
+          </nav>
           <SacredNavDropdown />
         </div>
 

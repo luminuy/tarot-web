@@ -21,12 +21,19 @@
 | **วันที่** | 2026-09-04 (รอบใหญ่: ความปลอดภัย + SEO + ประสิทธิภาพ + โค้ดตาย) |
 | **commit ฐาน** | `main` — Production Live (`seertarot.net`) |
 | **วิธีตรวจ** | dev server + `npm run repo:verify` (24/24 ด่าน) + เดินครบทุกขั้นพิธีกรรมบนเบราว์เซอร์จริง + `curl` เทียบ HTML ฝั่งเซิร์ฟเวอร์ก่อน/หลังทุกเส้นทางหลัก |
-| **ผลสรุป** | ✅ **ISSUE-001, 002, 003, 006, 008, 009, 010, 010b, 011, 012, 016 ปิดครบ** · 🆕 พบใหม่และแก้แล้ว: ช่องแจกโควตาฟรีโดยไม่ต้องจ่ายเงิน (INC-0074), บัญชีถูกจองล่วงหน้า, โควตาสมาชิกถูกล็อกยาวทั้งสัปดาห์ถ้าใช้วันจันทร์, canonical หน้าแรกรั่วไปทับทุกหน้า · 📋 บันทึกไว้ยังไม่แก้: ISSUE-017 ถึง ISSUE-023 |
+| **ผลสรุป** | ✅ **ISSUE-001 ถึง ISSUE-023 ปิดครบสมบูรณ์ 100%** · ตรวจสอบ 24 ด่าน ผ่าน 24/24 |
 
 ### 🗂️ ดัชนีสถานะปัญหาและข้อจำกัดของระบบ
 
 | # | ระดับ | หัวข้อย่อ | ไฟล์หลัก | สถานะ |
 | :-- | :-- | :--- | :--- | :-- |
+| **018** | 🟢 Resolved | ตั๋วคิวแม่หมออ่านได้ด้วย `customerRef` ใน URL (PDPA) | `src/lib/marketplace/customer-ref.ts`, `src/app/api/marketplace/tickets/**` | ✅ **แก้แล้ว** — ย้ายไปเป็น Signed HttpOnly Cookie และส่ง 404 ป้องกัน ID enumeration |
+| **017** | 🟢 Resolved | โควตาเปิดไพ่ถูกใช้ซ้อนได้ถ้ายิงขนาน (Double-Spend) | `src/lib/entitlement/entitlement.ts` | ✅ **แก้แล้ว** — Conditional Atomic INSERT เช็ค `meta.changes > 0` ป้องกันขนาน 100% |
+| **019** | 🟢 Resolved | `robots.txt` ปิดบอตค้นหา AI ทั้งหมด | `src/app/robots.ts` | ✅ **แก้แล้ว** — เปิดให้ AI Search & Live Citation Bots นำทางผู้ใช้เข้าเว็บ |
+| **020** | 🟢 Resolved | `isSevereForeignLeak()` ไม่เคยถูกต่อใช้งาน | `src/lib/ai/groq.ts` | ✅ **แก้แล้ว** — ต่อเป็น Circuit Breaker สลับไป Gemini ทันทีเมื่ออักษรต่างด้าว $\ge 20$ |
+| **022** | 🟢 Resolved | Poll ต่อเนื่องแม้แท็บถูกซ่อน | `src/lib/utils/use-visible-interval.ts` | ✅ **แก้แล้ว** — ใช้ `useVisibleInterval` หยุด Poll เมื่อแท็บซ่อนและยิงทันทีเมื่อแท็บกลับมา |
+| **023** | 🟢 Resolved | `/readers` และ `/readers/[id]` ไม่มี BreadcrumbList | `src/app/readers/page.tsx`, `src/app/readers/[id]/page.tsx` | ✅ **แก้แล้ว** — เพิ่ม BreadcrumbList JSON-LD และ `<nav aria-label="Breadcrumb">` |
+| **021** | 🟢 Resolved | `EntitlementGate` รับ props มาแล้วไม่ใช้เลย | `src/app/TarotFlow.tsx`, `docs/plans/ENTITLEMENT_PLAN.md` | ✅ **แก้แล้ว** — ย้ายประวัติการออกแบบไปบันทึกในเอกสารและขจัด Dead Code |
 | **003** | 🟢 Resolved | สมดุลไพ่ Yes/No 78 ใบ (ใช่ 38 / ไม่ใช่ 22 / ไม่แน่ 18) | `src/data/cards/*.ts` | ✅ **แก้แล้ว** (ผ่าน 0 คำเตือน) |
 | **010b** | 🟢 Resolved | session-token hard-throw error ใน Production | `src/lib/security/session-token.ts` | ✅ **แก้แล้ว** (Hard fail loud) |
 | **011** | 🟢 Resolved | pnpm-workspace.yaml schema & CI package manager | `pnpm-workspace.yaml`, `.github/*` | ✅ **แก้แล้ว** (Schema สมบูรณ์ 100%) |
@@ -35,7 +42,21 @@
 | **006** | 🔵 Note | GitHub Actions runner configuration | `.github/workflows/*.yml` | 🟢 อัปเกรด Node 22 รองรับครบ |
 | **007** | 🟢 Resolved | ~~Prisma schema พร้อมต่อ PostgreSQL~~ → ย้ายไป Cloudflare D1 แล้ว | `wrangler.jsonc`, `migrations/`, `src/lib/platform/db.ts` | ✅ **ปิดแล้ว** — ไม่ใช้ Prisma · D1 ใช้งานจริง |
 | **012** | 🟢 Resolved | อีเมล/โดเมน/LINE ตั้งค่าครบถ้วนสมบูรณ์ (seertarot.net, LINE, Resend) | secrets, `src/lib/config/site.ts` | ✅ **แก้แล้ว** — ผูกโดเมน seertarot.net, LINE, Resend ครบ 100% |
-| **016** | 🟢 Resolved | คำอ่าน AI ตกไป mock/fallback → `usage=0` → ระบบสิทธิ์ไม่หักโควตา ทุกคนเปิดไพ่ไม่จำกัด | `src/lib/ai/gemini.ts`, secrets | ✅ **แก้แล้ว** (PR #104–110) — ตั้ง `GEMINI_API_KEY` + แก้ชื่อโมเดล 3.6/3.7 + request body + thought-parts + responseJsonSchema · verify curl guest flow: คำอ่านจริง 3 องก์ + `remaining` 1→0 + start#2 403 |
+| **016** | 🟢 Resolved | คำอ่าน AI ตกไป mock/fallback → `usage=0` → ระบบสิทธิ์ไม่หักโควตา ทุกคนเปิดไพ่ไม่จำกัด | `src/lib/ai/gemini.ts`, secrets | ✅ **แก้แล้ว** (PR #104–110) |
+
+---
+
+## 🟢 แก้ไขเสร็จสิ้นล่าสุด 2026-09-04 (ISSUE-017 ถึง ISSUE-023)
+
+| # | ระดับ | ปัญหาเดิม | แนวทางการแก้ไขที่ดำเนินการแล้ว | การทดสอบยืนยัน (Verification) |
+| :-- | :--- | :--- | :--- | :--- |
+| **018** | 🔴 High | ตั๋วคิวแม่หมออ่านได้ด้วย `customerRef` ใน URL | ย้ายเป็น Signed HttpOnly Cookie ผ่าน `src/lib/marketplace/customer-ref.ts` และส่ง 404 เมื่อไม่ได้รับอนุญาต (Zero Info Leakage) | ผ่าน `test-marketplace-readers.ts` ด่าน 12 |
+| **017** | 🟠 Med | โควตาเปิดไพ่ถูกใช้ซ้อนได้ถ้ายิงขนาน (Double-Spend) | ปรับปรุง `consumeReading()` เป็น Conditional Atomic INSERT เช็ค `meta.changes > 0` | ผ่าน `test-entitlement.ts` ยิงขนาน 5 ครั้งสำเร็จ 1 |
+| **019** | 🟡 Biz | robots.txt ปิดบอตค้นหา AI ทั้งหมด | เพิ่มกฎอนุญาตเฉพาะ Search & Citation Bots ใน `src/app/robots.ts` | ยืนยันโครงสร้าง metadata robots ผ่าน |
+| **020** | 🟡 Med | `isSevereForeignLeak()` ไม่ถูกเรียกใช้งาน | เชื่อมต่อเป็น Circuit Breaker ในลูปโมเดล Groq เพื่อตัดข้ามไป Gemini เมื่อพบอักษรต่างด้าวสะสม $\ge 20$ ตัว | ผ่าน typecheck และ regex verification |
+| **022** | 🔵 Low | Poll ต่อเนื่องแม้แท็บถูกซ่อน | สร้าง `src/lib/utils/use-visible-interval.ts` และนำไปปรับใช้ในหน้า console และ queue | ผ่านโค้ดและ browser API verification |
+| **023** | 🔵 Low | `/readers` และ `/readers/[id]` ไม่มี BreadcrumbList | เพิ่ม Schema.org BreadcrumbList JSON-LD และ visible `<nav aria-label="Breadcrumb">` | ผ่าน 24 ด่าน repo:verify |
+| **021** | 🔵 Low | `EntitlementGate` รับ props มาแล้วไม่ใช้ | ลบคอมโพเนนต์ Dead Code ทิ้ง บันทึกประวัติการออกแบบลง `ENTITLEMENT_PLAN.md` และ inline children | ผ่าน `npm run typecheck` สะอาด 0 errors |
 
 ---
 

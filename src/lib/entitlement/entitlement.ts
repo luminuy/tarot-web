@@ -302,28 +302,47 @@ export async function consumeReading(
     .catch(() => null);
   if (already) return true;
 
-  // อ่านยอดคงเหลือ — ถ้า D1 ล่มตรงนี้ ของเดิมจะ throw ทะลุออกไปเป็น 500
-  let ent: Entitlement;
-  try {
-    ent = await getEntitlement(v);
-  } catch (e) {
-    return onDbFailure("consumeReading/getEntitlement", e);
-  }
-  if (!ent.canStartReading && ent.remaining <= 0) return false;
-
-  // ใช้โควตารายวันก่อน เก็บโบนัสไว้ให้นานที่สุด
-  const source = ent.dailyRemaining > 0 ? "daily" : "bonus";
+  const now = Date.now();
   const dk = todayDateKey();
+  const wk = weekKey();
 
-  try {
-    await db
+  const doConditionalInsert = async (): Promise<boolean> => {
+    // ── ชั้นที่ 1: โควตารายวัน (3 ครั้ง/วัน) ──
+    // เงื่อนไขนับต้องตรงกับ memberUsage() เป๊ะ ๆ (ป้องกันปัญหาข้ามวันจันทร์ตาม INC-0074)
+    const daily = await db
       .prepare(
         `INSERT INTO reading_usage (id, user_id, reading_id, week_key, source, consumed_at)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+         SELECT ?, ?, ?, ?, 'daily', ?
+          WHERE (
+            SELECT COUNT(*) FROM reading_usage
+             WHERE user_id = ?
+               AND (
+                 (source = 'weekly' AND week_key = ?)
+                 OR (source NOT IN ('weekly', 'bonus') AND week_key = ?)
+               )
+          ) < ?`
       )
-      .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, source, Date.now())
+      .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, now, v.userId, wk, dk, DAILY_LIMIT)
       .run();
-    return true;
+
+    if ((daily.meta?.changes ?? 0) > 0) return true;
+
+    // ── ชั้นที่ 2: โควตาโบนัส/ที่ซื้อมา ──
+    const bonus = await db
+      .prepare(
+        `INSERT INTO reading_usage (id, user_id, reading_id, week_key, source, consumed_at)
+         SELECT ?, ?, ?, ?, 'bonus', ?
+          WHERE (SELECT COALESCE(SUM(granted), 0) FROM user_bonus WHERE user_id = ?)
+              > (SELECT COUNT(*) FROM reading_usage WHERE user_id = ? AND source = 'bonus')`
+      )
+      .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, now, v.userId, v.userId)
+      .run();
+
+    return (bonus.meta?.changes ?? 0) > 0;
+  };
+
+  try {
+    return await doConditionalInsert();
   } catch (e) {
     // แยกให้ชัด: ชน UNIQUE(reading_id) = เคยหักไปแล้วจริง ๆ → ผ่าน ไม่หักซ้ำ
     if (isUniqueViolation(e)) return true;
@@ -332,14 +351,7 @@ export async function consumeReading(
     // (ถ้าสำเร็จ ผู้ใช้ถูกหักสิทธิ์ถูกต้องตามจริง ไม่ได้ของฟรีเพราะระบบพัง)
     if (isMissingTable(e) && (await trySelfHeal())) {
       try {
-        await db
-          .prepare(
-            `INSERT INTO reading_usage (id, user_id, reading_id, week_key, source, consumed_at)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-          )
-          .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, source, Date.now())
-          .run();
-        return true;
+        return await doConditionalInsert();
       } catch (retryErr) {
         if (isUniqueViolation(retryErr)) return true;
         return onDbFailure("consumeReading/insert-after-heal", retryErr);

@@ -35,6 +35,39 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: ปิดงานค้างทั้ง 7 รายการตาม HANDOFF_2026-09-04.md (ISSUE-017 ถึง 023) — โดย Antigravity
+
+- **ISSUE-018 (PDPA Security for Marketplace Queue)**:
+  - สร้าง `src/lib/marketplace/customer-ref.ts` ใช้ signed HttpOnly cookie (`tarot_customer_ref`) ผ่าน HMAC-SHA256
+  - ปิดการรับ `customerRef` ผ่าน query string 100% ใน `GET /api/marketplace/tickets` (401 หากไม่มีสิทธิ์)
+  - `GET /api/marketplace/tickets/[id]` ส่ง **404** (Zero Info Leakage) ทันทีหากไม่ใช่เจ้าของหรือแม่หมอเจ้าของคิว
+  - อัปเดต `scripts/qa/test-marketplace-readers.ts` เพิ่มการตรวจยืนยันสิทธิ์ผ่าน cookie สำเร็จ
+- **ISSUE-017 (Double-Spend Protection on Quota)**:
+  - แก้ไข `consumeReading()` ใน `src/lib/entitlement/entitlement.ts` ให้ใช้ **Conditional Atomic INSERT** คำนวณและตรวจสอบเงื่อนไข `COUNT(*) < DAILY_LIMIT` ภายในคำสั่ง SQL เดียว
+  - ตรวจสอบผลลัพธ์ผ่าน `meta.changes > 0` ทำงานตรงกันทั้ง Cloudflare D1 จริงและ Local SQLite shim
+  - เพิ่มชุดทดสอบใน `scripts/qa/test-entitlement.ts` จำลองการยิงคำขอขนาน 5 ครั้งพร้อมกันเมื่อเหลือโควตา 1 ครั้ง ผลคือสำเร็จเพียง 1 ครั้งและอีก 4 ครั้งล้มเหลวถูกต้อง ทั้งในระดับ daily และ bonus
+- **ISSUE-019 (AI Search & Citation Bots in robots.txt)**:
+  - ปรับปรุง `src/app/robots.ts` แยกกลุ่ม AI Search & Citation Bots (`OAI-SearchBot`, `ChatGPT-User`, `Claude-SearchBot`, `Claude-User`, `PerplexityBot`) เป็นกลุ่ม allowed เพื่อดึงทราฟฟิกและรองรับ Live Citations
+  - คงการบล็อกบอตสำหรับเทรนโมเดล (`GPTBot`, `ClaudeBot`, `CCBot` ฯลฯ) ไว้อย่างเหนียวแน่น
+- **ISSUE-020 (Severe Foreign Script Circuit Breaker)**:
+  - เชื่อมต่อ `isSevereForeignLeak()` ใน `src/lib/ai/groq.ts` ทั้งใน `askGroqTarot()` และ `streamGroqReading()`
+  - หากตรวจพบอักษรต่างด้าวสะสม $\ge 20$ ตัว ให้บันทึก event `ai_severe_foreign_leak` และ `break` ออกจากลูป Groq เพื่อสลับไปเรียก Gemini ทันที
+- **ISSUE-022 (Visibility-Aware Polling)**:
+  - สร้าง `src/lib/utils/use-visible-interval.ts` ตรวจสอบ `document.visibilityState` เพื่อหยุดการยิง poll เมื่อผู้ใช้สลับแท็บไปหน้าอื่น ช่วยประหยัดโควตา Cloudflare D1
+  - นำไปปรับใช้ใน `src/app/readers/console/page.tsx` และ `src/app/readers/queue/[id]/page.tsx`
+- **ISSUE-023 (BreadcrumbList for Readers)**:
+  - เพิ่ม Schema.org `BreadcrumbList` JSON-LD และ `<nav aria-label="Breadcrumb">` ใน `src/app/readers/page.tsx` และ `src/app/readers/[id]/page.tsx`
+- **ISSUE-021 (Dead Code Cleanup & Entitlement History)**:
+  - ลบคอมโพเนนต์ `src/components/entitlement/EntitlementGate.tsx` ที่รับ props มาแล้วไม่ใช้งาน
+  - ย้ายประวัติและวิวัฒนาการการออกแบบ UI 3 รุ่นไปบันทึกถาวรใน `docs/plans/ENTITLEMENT_PLAN.md` (หัวข้อ 12)
+  - Inline children ใน `src/app/TarotFlow.tsx` โค้ดสะอาด 100%
+- **Verification**:
+  - `npm run typecheck` (0 errors)
+  - `npm run repo:verify` (24/24 gates passed)
+  - `npx tsx scripts/qa/test-marketplace-readers.ts` (ผ่าน 100%)
+  - `npx tsx scripts/qa/test-entitlement.ts` (ผ่าน 64/64 ข้อ)
+  - `npx tsx scripts/qa/test-no-fake-card.ts` (ผ่าน 38/38 ข้อ)
+
 ### 🗓️ 2026-09-04: ตรวจใหญ่ทั้งระบบ 4 ด้าน (ความปลอดภัย · SEO · ประสิทธิภาพ · โค้ดตาย) — 5 commit โดย Claude
 
 > **ที่มา**: เจ้าของโปรเจกต์สั่งให้อ่านเอกสารแม่บททั้งหมดแล้วตรวจทุกจุดอย่างละเอียด

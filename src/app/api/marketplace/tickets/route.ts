@@ -7,6 +7,10 @@ import {
   listActiveTicketsForCustomer,
 } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
+import {
+  readCustomerRefFromCookie,
+  attachCustomerRefCookie,
+} from "@/lib/marketplace/customer-ref";
 
 export const runtime = "nodejs";
 
@@ -24,14 +28,13 @@ const CreateTicketSchema = z.object({
 });
 
 /**
- * GET /api/marketplace/tickets?customerRef=...
+ * GET /api/marketplace/tickets — ดึงรายการคิวของลูกค้าผ่าน HttpOnly Cookie
  */
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const customerRef = searchParams.get("customerRef");
+    const customerRef = await readCustomerRefFromCookie(request);
     if (!customerRef) {
-      return NextResponse.json({ error: "ต้องระบุ customerRef" }, { status: 400 });
+      return NextResponse.json({ error: "ไม่พบสิทธิ์เข้าถึงคิวนี้" }, { status: 401 });
     }
 
     const tickets = await listActiveTicketsForCustomer(customerRef);
@@ -87,11 +90,12 @@ export async function POST(request: Request) {
       slotStart,
     });
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       ticket,
       redirectUrl: `/readers/queue/${ticket.id}`,
     });
+    return await attachCustomerRefCookie(res, customerRef);
   } catch (err) {
     console.error("[API Tickets POST Error]", err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการสร้างตั๋วคิว" }, { status: 500 });

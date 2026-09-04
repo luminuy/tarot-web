@@ -11,6 +11,7 @@
 import {
   countForeignCharacters,
   hasForeignScript,
+  isSevereForeignLeak,
   objectHasForeignScript,
   sanitizeTarotText,
   stripForeignScript,
@@ -144,6 +145,12 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
         // ด่านภาษา — ทำความสะอาดและแปลงคำจีนที่โมเดลเผลอใช้กลับเป็นไทยก่อน
         const sanitized = sanitizeTarotText(reply);
         if (hasForeignScript(sanitized)) {
+          if (isSevereForeignLeak(sanitized)) {
+            console.warn(`[Groq ${model}] ⚠️ Severe foreign leak (>= 20 chars) — ตัดวงจร Groq สลับไป Gemini ทันที`);
+            recordEvent("ai_severe_foreign_leak");
+            recordEvent(`ai_severe_foreign_leak:${model}`);
+            break;
+          }
           const isLastModel = model === WORKING_GROQ_MODELS[WORKING_GROQ_MODELS.length - 1];
           console.warn(`[Groq ${model}] คำตอบยังมีอักษรต่างภาษาปนหลัง sanitize — ${isLastModel ? "ล้างทิ้ง" : "ข้ามไปโมเดลถัดไป"}`);
           if (!isLastModel) continue;
@@ -428,6 +435,14 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
       }
 
       if (foreignCircuitBreaker) {
+        if (totalForeignChars >= 20 || isSevereForeignLeak(jsonAccumulator)) {
+          console.warn(
+            `[Groq Reading ${model}] ⚠️ Severe foreign leak (สะสม ${totalForeignChars} ตัว >= 20) — ตัดวงจร Groq ข้ามไป Gemini ทันที`,
+          );
+          recordEvent("ai_severe_foreign_leak");
+          recordEvent(`ai_severe_foreign_leak:${model}`);
+          break; // ข้ามโมเดล Groq ที่เหลือทั้งหมด สลับไป Gemini ทันที
+        }
         continue; // ลองโมเดลถัดไปหรือตกไปหา Gemini
       }
 
