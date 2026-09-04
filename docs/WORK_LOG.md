@@ -13,11 +13,12 @@
 > เป็นต้นเหตุ merge conflict แทบทุก PR ที่ทำขนานกัน จึงย้ายออกมา
 >
 > ประวัติงานถาวรและสิ่งที่ค้าง อยู่ในหัวข้อ **"บันทึกประวัติการพัฒนา"** ด้านล่างนี้
-> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `1/9/2569 02:34:14` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
+> ⚡ **อัปเดตสถานะอัตโนมัติล่าสุด**: `4/9/2569 13:10:00` (ทุกครั้งที่มีการทดสอบ/รันระบบ)
 
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
-- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock (16 ไฟล์ที่กำลังแก้, 0 Locks ที่ใช้งานอยู่)
+- **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 24/24 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -29,9 +30,9 @@
 | **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
 | **คลัง 20 ผังพยากรณ์** | `/spreads` & `/spreads/[id]` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง + หน้าคู่มือราย spread 20 หน้า (SEO/SSG · JSON-LD HowTo) | แชร์ผังพยากรณ์แบบรูปภาพ |
 | **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ | เพิ่มฟังก์ชัน Bookmark บทความ |
-| **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | หน้าประวัติดูดวงเต็มรูปแบบในบัญชี |
+| **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
-| **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
+| **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
 ### 🗓️ 2026-09-04: คืนสมดุลช่องไฟแนวตั้งระหว่างกล่องคำถามที่พบบ่อย (FAQ Section) และ Dark Footer สู่ความพอดีระดับสากล (Balanced Vertical Breathing Room)
