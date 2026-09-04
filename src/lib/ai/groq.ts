@@ -144,19 +144,19 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
           continue;
         }
 
-        // ด่านภาษา — ถ้าโมเดลหลุดพ่นอักษรจีน/ญี่ปุ่น/เกาหลี ให้ทิ้งแล้วลองโมเดลถัดไป
-        // (โมเดลสุดท้ายในลิสต์ไม่มีตัวถัดไปให้ลอง จึงล้างอักษรทิ้งแทนการคืน null)
-        if (hasForeignScript(reply)) {
+        // ด่านภาษา — ทำความสะอาดและแปลงคำจีนที่โมเดลเผลอใช้กลับเป็นไทยก่อน
+        const sanitized = sanitizeTarotText(reply);
+        if (hasForeignScript(sanitized)) {
           const isLastModel = model === WORKING_GROQ_MODELS[WORKING_GROQ_MODELS.length - 1];
-          console.warn(`[Groq ${model}] คำตอบมีอักษรต่างภาษาปน — ${isLastModel ? "ล้างทิ้ง" : "ข้ามไปโมเดลถัดไป"}`);
+          console.warn(`[Groq ${model}] คำตอบยังมีอักษรต่างภาษาปนหลัง sanitize — ${isLastModel ? "ล้างทิ้ง" : "ข้ามไปโมเดลถัดไป"}`);
           if (!isLastModel) continue;
-          const cleaned = stripForeignScript(reply);
+          const cleaned = stripForeignScript(sanitized);
           if (!cleaned) continue;
           return { reply: cleaned, model, elapsedMs };
         }
 
         return {
-          reply,
+          reply: sanitized,
           model,
           elapsedMs,
         };

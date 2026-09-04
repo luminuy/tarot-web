@@ -42,6 +42,33 @@
 - **ข้อ 5 — ไม่มี `/spreads/[id]`**: สร้างหน้า SEO 20 หน้า (SSG) — hero + แผนผังตำแหน่งไพ่ SSR (`SpreadPositionMap.tsx` วาดจากพิกัด x/y) + ความหมายรายตำแหน่ง + วิธีอ่าน 4 ขั้น + FAQ + บทความที่เกี่ยวข้อง (`targetSpreadId`) + JSON-LD HowTo/Breadcrumb/FAQPage · เพิ่มลง `sitemap.ts` · ลิงก์ "อ่านคู่มือผังนี้" จากการ์ดใน `/spreads`
 - **ข้อ 3 — blog/[id] "กดไม่เข้า"**: ตรวจแล้ว `src/app/blog/[slug]/page.tsx` มีอยู่และทำงานปกติ (24 บทความ SSG · คลิกจากดัชนีเข้าได้) — รายการ backlog ข้อนี้ **ล้าสมัย** ปิดได้เลย
 - **พิสูจน์**: `npm run typecheck` 0 · `npm run build` ผ่าน (spreads/[id] prerender 20 · blog/[slug] 24) · `npm run repo:verify` 23/23 · ทดสอบผ่านเบราว์เซอร์: `/spreads/celtic-cross|three-card|yes-no` เนื้อหาครบ · `/spreads/bogus` → 404 · admin login → แท็บ "ข่าวสาร" + การ์ด DB health เรนเดอร์ · `GET /api/admin/marketing?format=csv` คืน CSV พร้อม Content-Disposition
+### 🗓️ 2026-09-04: เสริมประสิทธิภาพ Grandmaster AI Reading: เครื่องยนต์เคมีธาตุ Golden Dawn + พลังงานจันทรคติ Moon Phase Real-Time + อัปเกรดสมองระบบแชท Groq Qwen Tier 1 (Cosmic-Alchemy & Ultra-Fast Chat Brain)
+
+- **ความต้องการของผู้ใช้**:
+  1. เสริมประสิทธิภาพให้ระบบเก่งขึ้น ลึกซึ้งขึ้น และแม่นยำยิ่งขึ้น
+  2. เลือกระบบ Groq Qwen (`qwen3.8-27b`) เป็นแกนหลักพร้อมขอเหตุผลทางเทคนิคเชิงลึก
+  3. อนุมัติแผนงานการยกระดับระบบแชทต่อเนื่อง, เครื่องยนต์เคมีธาตุ, และบริบทดาราศาสตร์ตามเวลาจริง
+- **สิ่งที่พัฒนาและสร้างใหม่**:
+  1. **`src/lib/ai/cosmic.ts` (CREATED)**:
+     - เครื่องยนต์คำนวณดิถีพระจันทร์ 8 สถานะ (Moon Phase: จันทร์ดับ ถึง จันทร์เสี้ยวข้างแรม) และดาวครองวัน (Planetary Day Ruler: อาทิตย์-เสาร์) ด้วยสูตรดาราศาสตร์คณิตศาสตร์ในเครื่อง 100% (Zero External API Cost)
+     - สร้าง Anchor พลังงานจักรวาลตามเวลาจริง เช่น *"วันศุกร์ ครองโดยดาวศุกร์ (ธาตุน้ำ) | ดิถีพระจันทร์: จันทร์ครึ่งดวงสุดท้าย สว่าง 54%"*
+  2. **`src/lib/ai/alchemy.ts` (CREATED)**:
+     - เครื่องยนต์ถอดรหัสเคมีธาตุโบราณ (Golden Dawn Elemental Dignities)
+     - วิเคราะห์ธาตุเด่น (Dominant Element), จุดบอด/ธาตุที่ขาดหาย (Void/Lacking Elements เช่น ขาดธาตุน้ำ = ใช้ตรรกะจนลืมหัวใจ), และการปะทะ/เกื้อหนุนของคู่ธาตุ (Harmonious: ไฟ+ลม, น้ำ+ดิน / Tension: ไฟ+น้ำ, ลม+ดิน)
+     - สรุปเป็น Alchemical Narrative ส่งให้ AI ร้อยเรียงในส่วน `connections` ทำให้คำทำนายภาพรวมคมกริบและลึกซึ้ง
+  3. **`src/lib/ai/prompt.ts` (UPGRADED)**:
+     - ผสาน `getCosmicContext()` และ `analyzeElementalAlchemy()` เข้าสู่ User Profile และ Alchemical Matrix ใน `buildReadingMessage()`
+  4. **`src/lib/ai/groq.ts` (UPGRADED)**:
+     - ปรับปรุง `generateGroqChatReply` ให้รัน `sanitizeTarotText` แปลงคำจีนก่อนตรวจจับอักษรต่างด้าว เพื่อไม่ทิ้งคำตอบที่ยอดเยี่ยมของ Qwen โดยไม่จำเป็น
+  5. **`src/app/api/reading/[id]/chat/route.ts` (UPGRADED)**:
+     - ยกระดับ Groq Qwen (`qwen3.8-27b`) ขึ้นเป็นทัพหน้า Tier 1 Primary ตอบกลับทันใจใน 0.5–1.0 วินาที รองรับ 14,400 ครั้ง/วัน
+     - Gemini Flash สแตนด์บายเป็น Tier 2 Fallback
+     - ฉีดคลังสัญลักษณ์ 1909 Visual Lore ของไพ่ที่เปิดได้เข้าสู่บริบทสมองของแชท ทำให้แม่หมอคุยเจาะลึกรายละเอียดภาพบนหน้าไพ่ได้เสมือนจริง 100%
+- **การทดสอบความถูกต้อง**:
+  - TypeScript Typecheck: 0 errors
+  - `npx tsx scripts/qa/test-groq-failover.ts`: ผ่านฉลุย 8/8 การทดสอบ
+  - `npm run repo:verify`: ผ่านครบทั้ง 23 ด่าน (100% Green)
+
 ### 🗓️ 2026-09-04: ยกระดับความลึกซึ้ง AI Reading สัญลักษณ์ 1909 + จิตวิทยา Jungian 78 ใบ + สองประสาน Groq Qwen ปฐมภูมิ & เกราะกันภาษาจีน 100% (Grandmaster AI Reading & Bulletproof Multi-Provider Shield)
 
 - **ความต้องการของผู้ใช้**:
