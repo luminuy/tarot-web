@@ -34,6 +34,39 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: ยกระดับ On-Page SEO หน้าแรก: H1 ชัดเจนบนมือถือ + บทความศาสตร์ 1909 RWS & Provably Fair + FAQ & HowTo Schema + Fat Footer ลิงก์ภายใน (Helpful Content & Mobile-First Indexing)
+
+- **ความต้องการของผู้ใช้**:
+  - "หน้าแรกเราขาดอะไรบ้าง ถ้าต้องถูกหลัก seo" ➔ ผู้ใช้อนุมัติแผนการปรับปรุงหน้าแรกให้ถูกหลัก SEO สากลระดับโลก
+- **การวิเคราะห์จุดบกพร่อง On-Page SEO เดิม**:
+  1. **Heading Hierarchy บกพร่อง**: `<h1>` เดิมอยู่ใน Navbar ซ่อนอยู่ใต้คลาส `hidden sm:flex` บนมือถือ ทำให้ Google Mobile-First Indexing บอทมองไม่เห็น `<h1>` เมื่อเรนเดอร์ในมุมมอง Mobile Viewport นอกจากนี้ `SpreadCardSelector` ใช้ `<h4>` ทำให้ข้ามลำดับ Heading (Skip level)
+  2. **Thin Content ปัญหาใหญ่ของ Interactive Single-Page App**: หน้าแรกเดิมมีข้อความให้อ่านน้อยกว่า 100 คำ ขาดเนื้อหาเชิงลึกที่ตอบ Search Intent ของผู้ค้นหาคำว่า "ดูดวงไพ่ทาโรต์", "ไพ่ยิปซีออนไลน์", "วิธีดูดวงไพ่ทาโรต์"
+  3. **ขาด Schema.org Rich Snippets**: ไม่มี `FAQPage` และ `HowTo` JSON-LD ใน `<head>` ทำให้เสียโอกาสชิงพื้นที่แสดงผล Accordion Rich Snippet บนหน้าแรกของ Google Search
+  4. **ขาด Internal Link Equity (Link Juice) บนหน้าแรก**: ลิงก์เข้าสู่ผัง 20 แบบ (`/spreads`), ไพ่ 78 ใบ (`/cards`) และคลังบทความ 20 เรื่อง (`/blog`) ขาดหายจากหน้าแรก ทำให้คะแนน PageRank ไม่กระจายสู่หน้าลูก
+  5. **OpenGraph / Twitter Image URLs เป็น Relative Path**: มีความเสี่ยงที่ Social Crawlers บางตัวไม่ยอมแปลง URL สัมพัทธ์
+- **การแก้ไขและยกระดับอย่างเป็นระบบ**:
+  1. **จัดลำดับหัวข้อ Semantic Heading 100% ตามมาตรฐาน W3C & Google**:
+     - เปลี่ยน Brand ใน Navbar จาก `<h1>` เป็น `<span>` (เพื่อไม่ให้ซ่อน `<h1>` บนมือถือ)
+     - สถาปนาหัวข้อวิหารหลักเป็น `<h1>` สดใส ชัดเจน โดดเด่นบนทุกอุปกรณ์: *"ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI"*
+     - เรียงลำดับ `<h2>✦ เลือกผังการเปิดไพ่พยากรณ์</h2>` และปรับการ์ดผังใน `SpreadCardSelector` จาก `<h4>` เป็น `<h3>` ปราศจากการข้าม Heading Level
+  2. **สร้างคอมโพเนนต์ `HomeSeoContent.tsx` เพิ่มเนื้อหาคุณภาพสูงกว่า 1,000 คำ (Google Helpful Content)**:
+     - **Section 1: How It Works 5 ขั้นตอนศักดิ์สิทธิ์**: อธิบายขั้นตอนการเปิดไพ่ด้วยภาษาที่ประณีต ตรงใจผู้ใช้
+     - **Section 2: มนต์เสน่ห์ 1909 Rider-Waite & Provably Fair**: อธิบายคุณค่าของสำรับประวัติศาสตร์และกลไกสับไพ่ SHA-256 โปร่งใสไร้การล็อกผล
+     - **Section 3: Featured Spreads & Major Arcana Showcase**: แนะนำผังยอดนิยมและไพ่ใบหลักด้วย `<CardImage />` ตามกฎ Rule 8
+     - **Section 4: บทความแนะนำจากคัมภีร์พยากรณ์**: เชื่อมโยงสู่ 4 บทความหลักใน `/blog`
+     - **Section 5: คำถามที่พบบ่อย (FAQ Accordion)**: 6 คำถามพบบ่อย พร้อมแท็ก Semantic `<details>` / `<summary>` ที่เข้าถึงได้ง่าย (Accessible)
+  3. **ติดตั้ง Schema.org Rich Snippets ใน `src/app/layout.tsx`**:
+     - เพิ่ม `generateFaqJsonLd()` (`@type: FAQPage`) และ `generateHowToJsonLd()` (`@type: HowTo`) ใน `<head>`
+     - แปลง `openGraph.images` และ `twitter.images` ให้เป็น Absolute URL เต็มรูปแบบ
+  4. **Fat Footer ลิงก์ภายในครบทุกมิติ (Comprehensive Fat Footer)**:
+     - การ์ด AI Disclosure และข้อควรทราบในการทำนาย
+     - เมนู 4 คอลัมน์: บริการพยากรณ์, สารานุกรม 78 ใบ, บทความน่าอ่าน, ความโปร่งใส & สุขภาพจิต
+     - คงไว้ซึ่งสายด่วนสุขภาพจิต **1323**, เหตุฉุกเฉิน **1669**, และนโยบายคุ้มครองข้อมูลส่วนบุคคล **PDPA** อย่างสมบูรณ์
+- **ผลการทดสอบ & ยืนยันผล (Verification)**:
+  - `npm run typecheck` ➔ **0 errors**
+  - `npx tsx scripts/qa/test-image-paths.ts` ➔ **ไม่พบการละเมิดกฎภาพไพ่ (ผ่าน Rule 8 100%)**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 24 ด่าน 100%**
+
 ### 🗓️ 2026-09-04: เก็บงานค้าง backlog ข้อ 3–6 — spreads/[id] · admin metrics · marketing consent · blog
 
 - **ที่มา**: เจ้าของโปรเจกต์ส่ง handoff รายการ "สิ่งที่ยังขาด" 6 ข้อ ให้ทำข้อ 3, 4, 5, 6

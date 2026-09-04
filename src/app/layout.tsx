@@ -8,8 +8,11 @@ import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { SITE_ORIGIN } from "@/lib/config/site";
 import { getCardWebpVariantSrc } from "@/lib/tarot/card-image";
+import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
 
 const heroCardLcpSrc = getCardWebpVariantSrc("major-19.jpg", "w128");
+const faqJsonLd = generateFaqJsonLd();
+const howToJsonLd = generateHowToJsonLd();
 
 const notoSerifThai = Noto_Serif_Thai({
   subsets: ["thai", "latin"],
@@ -84,7 +87,7 @@ export const metadata: Metadata = {
     url: SITE_ORIGIN,
     images: [
       {
-        url: "/cards/major-01.jpg",
+        url: `${SITE_ORIGIN}/cards/major-01.jpg`,
         width: 825,
         height: 1429,
         alt: "SeerTarot 1909 Rider-Waite",
@@ -95,7 +98,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI",
     description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมระบบ Provably-Fair",
-    images: ["/cards/major-01.jpg"],
+    images: [`${SITE_ORIGIN}/cards/major-01.jpg`],
   },
   alternates: {
     canonical: "/",
@@ -161,6 +164,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
         />
         {/* Preload critical LCP Hero Tarot Card (0ms download delay) */}
         {heroCardLcpSrc && (

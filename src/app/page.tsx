@@ -33,6 +33,7 @@ import {
 } from "@/lib/entitlement/copy";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { HomeSeoContent } from "@/components/seo/HomeSeoContent";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
 const ShuffleRitual = dynamic(() => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual), {
@@ -836,9 +837,9 @@ export default function TarotPage() {
             <div className="hidden min-w-0 flex-col justify-center sm:flex">
               <div className="flex min-w-0 items-center gap-1.5">
                 <span className="text-[#A58A5C] text-xs">✦</span>
-                <h1 className="font-serif-th text-sm sm:text-lg font-bold text-[#29261F] tracking-wide leading-snug py-0.5 whitespace-nowrap">
+                <span className="font-serif-th text-sm sm:text-lg font-bold text-[#29261F] tracking-wide leading-snug py-0.5 whitespace-nowrap">
                   ดูดวงไพ่ทาโรต์
-                </h1>
+                </span>
               </div>
               <span className="hidden sm:block text-[13px] tracking-[0.22em] text-[#635B4E] font-mono uppercase font-semibold pl-4">
                 1909 RIDER-WAITE TAROT
@@ -957,13 +958,16 @@ export default function TarotPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide">
-                      เลือกผังการเปิดไพ่
-                    </h2>
-                    <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto font-serif-th">
-                      เลือกรูปแบบการเปิดไพ่ที่เหมาะกับเรื่องที่คุณต้องการค้นหาคำตอบในจิตใจ
+                  <div className="space-y-2 text-center">
+                    <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide">
+                      ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI
+                    </h1>
+                    <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed">
+                      สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256
                     </p>
+                    <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
+                      ✦ เลือกผังการเปิดไพ่พยากรณ์
+                    </h2>
                   </div>
                 </div>
 
@@ -1307,159 +1311,9 @@ export default function TarotPage() {
       />
 
       {/* ═══════════════════════════════════════════════════════════════
-          Site-Wide Sanctuary Footer — Dark Editorial Quiet Luxury (#171512)
+          Rich SEO Editorial Content & Fat Footer (Google Helpful Content & Mobile-First)
           ═══════════════════════════════════════════════════════════════ */}
-      <footer className="w-full relative overflow-hidden border-t border-[#D5CEC2]/30 bg-[#171512] text-[#F3F0EA]">
-        {/* Ambient gold line above footer */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent" />
-        </div>
-
-        <div className="max-w-4xl mx-auto px-5 pt-12 pb-10 space-y-8 relative z-10">
-          {/* Brand & Mission Statement — โลโก้เว็บ + ประโยคภารกิจ (ไม่มีแถบลิงก์) */}
-          <div className="flex flex-col items-center justify-center gap-3 border-b border-[#D5CEC2]/20 pb-6 text-center">
-            <Link
-              href="/"
-              aria-label="SeerTarot — หน้าแรก"
-              className="inline-flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
-            >
-              <span className="w-11 h-11 rounded-full border border-[#A58A5C]/40 overflow-hidden bg-[#F3F0EA] flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
-                <img
-                  src="/logo.webp"
-                  alt="SeerTarot"
-                  width={44}
-                  height={44}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </span>
-              <span className="font-serif-th text-lg font-bold tracking-wide text-[#F3F0EA]">
-                SeerTarot
-              </span>
-            </Link>
-            <p className="font-serif-th text-sm text-[#E4DECF]">
-              พื้นที่สงบสำหรับหยุด คิด ถาม และอ่านความหมายของตัวเอง
-            </p>
-          </div>
-
-          {/* Row 1: AI Disclosure Card */}
-          <div className="flex items-start gap-4 p-5 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20 shadow-sm">
-            <div className="w-9 h-13 sm:w-10 sm:h-15 rounded-lg overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
-              <CardImage
-                image="major-02.jpg"
-                alt="The High Priestess - ข้อควรทราบเกี่ยวกับการทำนาย"
-                className="w-full h-full object-cover"
-                sizes="40px"
-              />
-            </div>
-            <div className="space-y-1 min-w-0">
-              <h4 className="text-[13px] font-bold text-[#A58A5C] uppercase tracking-wider font-serif-th">
-                ข้อควรทราบเกี่ยวกับการทำนาย
-              </h4>
-              <p className="text-[13px] text-[#D5CEC2] leading-[1.7] font-serif-th">
-                คำทำนายทั้งหมดประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเลือกและเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต ไม่สามารถใช้แทนคำปรึกษาทางการแพทย์ กฎหมาย หรือการเงินได้ การตัดสินใจทุกอย่างยังคงเป็นของคุณเสมอ
-              </p>
-            </div>
-          </div>
-
-          {/* Row 2: Three-Column Info Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Privacy */}
-            <a
-              href="/privacy"
-              className="group flex items-center gap-3 p-4 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20 hover:border-[#A58A5C] transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
-            >
-              <div className="w-8 h-12 rounded-lg overflow-hidden border border-[#D5CEC2]/30 group-hover:border-[#A58A5C] transition-colors flex-shrink-0 bg-[#171512]">
-                <CardImage
-                  image="major-11.jpg"
-                  alt="Justice - นโยบายความเป็นส่วนตัว PDPA"
-                  className="w-full h-full object-cover"
-                  sizes="32px"
-                />
-              </div>
-              <div>
-                <span className="text-[13px] font-bold text-[#A58A5C] block font-serif-th">
-                  นโยบายความเป็นส่วนตัว
-                </span>
-                <span className="text-[13px] text-[#D5CEC2] group-hover:text-[#F3F0EA] transition-colors font-serif-th">
-                  คุ้มครองข้อมูลส่วนบุคคล (PDPA)
-                </span>
-              </div>
-            </a>
-
-            {/* Mental Health Hotline */}
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20">
-              <div className="w-8 h-12 rounded-lg overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
-                <CardImage
-                  image="major-17.jpg"
-                  alt="The Star - สายด่วนสุขภาพจิต 1323"
-                  className="w-full h-full object-cover"
-                  sizes="32px"
-                />
-              </div>
-              <div>
-                <span className="text-[13px] font-bold text-[#3A7044] block font-serif-th">
-                  สายด่วนสุขภาพจิต
-                </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-bold text-[#F3F0EA] font-mono tracking-wider">1323</span>
-                  <span className="text-[12px] text-[#D5CEC2] font-serif-th">โทรฟรี 24 ชม.</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Emergency */}
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20">
-              <div className="w-8 h-12 rounded-lg overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
-                <CardImage
-                  image="major-08.jpg"
-                  alt="Strength - แจ้งเหตุเจ็บป่วยฉุกเฉิน 1669"
-                  className="w-full h-full object-cover"
-                  sizes="32px"
-                />
-              </div>
-              <div>
-                <span className="text-[13px] font-bold text-[#A6392C] block font-serif-th">
-                  แจ้งเหตุเจ็บป่วยฉุกเฉิน
-                </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-bold text-[#F3F0EA] font-mono tracking-wider">1669</span>
-                  <span className="text-[12px] text-[#D5CEC2] font-serif-th">โทรฟรี 24 ชม.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Row 3: Bottom Branding Strip */}
-          <div className="flex flex-col items-center gap-2 pt-4 border-t border-[#D5CEC2]/20">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-7 rounded overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
-                <CardImage
-                  image="major-01.jpg"
-                  alt="The Magician"
-                  className="w-full h-full object-cover"
-                  sizes="20px"
-                />
-              </div>
-              <span className="text-[13px] font-serif-th font-semibold text-[#D5CEC2]">
-                SeerTarot · ไพ่ทาโรต์ 1909 Rider-Waite
-              </span>
-              <div className="w-5 h-7 rounded overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
-                <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="20px" />
-              </div>
-            </div>
-            <p className="text-[13px] text-[#D5CEC2] font-serif-th text-center">
-              ระบบสับไพ่โปร่งใสตรวจสอบได้ (Provably Fair) · สำรับดั้งเดิม 1909 Rider-Waite · คำทำนายประมวลผลด้วย AI
-            </p>
-            <p className="text-[13px] text-[#D5CEC2] font-serif-th text-center">
-              © 2026 SeerTarot · สงวนลิขสิทธิ์ ·{" "}
-              <Link href="/privacy" className="hover:text-[#A58A5C] transition-colors">
-                นโยบายความเป็นส่วนตัว
-              </Link>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <HomeSeoContent />
     </main>
   );
 }
