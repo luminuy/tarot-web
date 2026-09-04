@@ -2,16 +2,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence, type Variants } from "motion/react";
 import { invalidateSessionCache, patchSessionUser, useSessionUser } from "@/lib/auth/use-session";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { describeEntitlement, CHEAPEST_PACKAGE_THB } from "@/lib/entitlement/copy";
 import { soundManager } from "@/lib/utils/audio";
 
-const EASE = {
-  enter: [0.16, 1, 0.3, 1],
-  exit: [0.4, 0, 1, 1],
-} as const;
 
 export interface UserProfileBadgeProps {
   onOpenAuthModal: () => void;
@@ -135,29 +130,6 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
     }
   };
 
-  const EASE_ENTER: [number, number, number, number] = [0.16, 1, 0.3, 1];
-  const EASE_EXIT: [number, number, number, number] = [0.4, 0, 1, 1];
-
-  const containerVariants: Variants = {
-    hidden: { opacity: 0, y: -8 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.15,
-        ease: EASE_ENTER,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -6,
-      transition: {
-        duration: 0.1,
-        ease: EASE_EXIT,
-      },
-    },
-  };
-
   if (loading) {
     return (
       <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] flex items-center justify-center text-[#635B4E] opacity-60 pointer-events-none select-none">
@@ -186,7 +158,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           soundManager.playMenuTapSound();
           onOpenAuthModal();
         }}
-        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] flex items-center justify-center transition-all duration-150 cursor-pointer shadow-xs active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] select-none"
+        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] flex items-center justify-center transition-colors duration-150 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] select-none"
         aria-label="เข้าสู่ระบบ"
         title="เข้าสู่ระบบ"
       >
@@ -215,16 +187,17 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
   return (
     <div className="relative select-none" ref={containerRef}>
-      {/* Refined Luxury Trigger Button — Person Icon (Image 3) */}
+      {/* Refined Luxury Trigger Button — Person Icon */}
       <button
         type="button"
         onClick={toggleMenu}
-        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-all duration-150 cursor-pointer flex items-center justify-center relative select-none shadow-xs active:scale-95 ${
+        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-colors duration-150 cursor-pointer flex items-center justify-center relative select-none shadow-xs ${
           menuOpen
             ? "bg-[#EAE7E0] border-[#D5CEC2] text-[#29261F]"
             : "bg-[#FFFFFF] text-[#29261F] hover:text-[#A58A5C] border-[#D5CEC2] hover:border-[#A58A5C]"
         }`}
         aria-expanded={menuOpen}
+        aria-controls="user-profile-panel"
         aria-label={`โปรไฟล์ผู้ใช้งาน (${user.name})`}
         title={user.name}
       >
@@ -253,21 +226,16 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
         )}
       </button>
 
-      {/* World-Class Obsidian Gold Floating Member Card */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            key="user-profile-panel"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            style={{
-              WebkitBackfaceVisibility: "hidden",
-              backfaceVisibility: "hidden",
-            }}
-            className="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)] space-y-2 font-serif-th text-xs"
-          >
+      {/* World-Class Obsidian Gold Floating Member Card — Hardware-Accelerated Zero-Stutter Layer */}
+      <div
+        id="user-profile-panel"
+        role="region"
+        aria-label={`ข้อมูลบัญชี ${user.name}`}
+        aria-hidden={!menuOpen}
+        className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)] space-y-2 font-serif-th text-xs no-scrollbar dropdown-panel-base ${
+          menuOpen ? "dropdown-panel-entering" : "dropdown-panel-exiting"
+        }`}
+      >
             {/* Ambient Top Foil Glow */}
             <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent -mt-0.5 mb-1" />
 
@@ -417,15 +385,15 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <button
                 type="button"
                 onClick={() => handleUpdateConsent(!user.marketingConsent)}
-                className={`w-10 h-6 rounded-full transition-all duration-150 p-0.5 relative cursor-pointer flex-shrink-0 border ${
+                className={`w-10 h-6 rounded-full transition-colors duration-150 p-0.5 relative cursor-pointer flex-shrink-0 border ${
                   user.marketingConsent ? "bg-[#29261F] border-[#29261F]" : "bg-[#FFFFFF] border-[#D5CEC2]"
                 }`}
                 aria-label="เปิดปิดการรับอีเมลติดตามผล"
               >
-                <motion.div
-                  animate={{ x: user.marketingConsent ? 16 : 0 }}
-                  transition={{ duration: 0.14, ease: EASE_ENTER }}
-                  className={`w-4.5 h-4.5 rounded-full ${user.marketingConsent ? "bg-[#F3F0EA]" : "bg-[#635B4E]"}`}
+                <div
+                  className={`w-4.5 h-4.5 rounded-full transition-transform duration-150 ease-out ${
+                    user.marketingConsent ? "bg-[#F3F0EA] translate-x-4" : "bg-[#635B4E] translate-x-0"
+                  }`}
                 />
               </button>
             </div>
@@ -435,7 +403,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full text-left p-2.5 rounded-xl text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA] border border-transparent hover:border-[#D5CEC2] transition-all duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
+                className="w-full text-left p-2.5 rounded-xl text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA] border border-transparent hover:border-[#D5CEC2] transition-colors duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
               >
                 <span className="flex items-center gap-1.5 font-bold">
                   <span className="text-[#A6392C] group-hover:rotate-12 transition-transform">✦</span>
@@ -446,9 +414,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 </span>
               </button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 };

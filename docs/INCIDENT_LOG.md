@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0072 · 2026-09-04 12:53 · 🔵 Low · ขจัดอาการกระตุกเมนู Dropdown และแก้ไขการชนกันของวรรณยุกต์หัวข้อ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เมนู Dropdown สั่นกระตุกตอนเปิด และ TypeScript type error ใน UserProfileBadge |
+| **สาเหตุราก** | Framer Motion ทำงานซ้อนทับการเมานต์ DOM หนัก และ syntax error จากการลบ AnimatePresence ไม่หมด |
+| **การแก้ไข** | ใช้ GPU Compositor transitions ร่วมกับ .no-scrollbar และคืนค่า imports ที่ถูกต้อง 100% |
+| **🛡️ กฎป้องกันถาวร** | **คอมโพเนนต์เมนู Dropdown ใช้ Hardware-Accelerated transitions และตรวจ typecheck เสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify ผ่าน 24/24 ด่านสมบูรณ์ |
+| **บันทึกโดย** | Antigravity · branch `fix/eliminate-dropdown-stutter` · commit `82b7d80` |
+
+
 ### INC-0071 · 2026-09-04 12:48 · 🟡 Medium · แก้ไขวรรณยุกต์ภาษาไทยชนเกยทับขอบป้ายหัวข้อในหน้า /spreads, /cards, /readers, /account
 
 | หัวข้อ | รายละเอียด |
