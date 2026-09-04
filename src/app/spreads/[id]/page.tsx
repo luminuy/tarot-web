@@ -190,11 +190,11 @@ export default async function SpreadDetailPage({ params }: Props) {
               {standard ? "ผังมาตรฐาน" : "✦ ญาณพิเศษ"}
             </span>
           </div>
-          <h1 className="font-serif-th text-3xl font-bold leading-tight sm:text-4xl">
+          <h1 className="font-serif-th text-3xl font-bold leading-tight sm:text-4xl [text-wrap:balance]">
             ผัง{spread.nameTh}
           </h1>
-          <p className="font-serif-th text-lg text-[#A58A5C]">{spread.tagline}</p>
-          <p className="max-w-2xl font-serif-th leading-relaxed text-[#29261F]">
+          <p className="font-serif-th text-lg text-[#A58A5C] [text-wrap:balance]">{spread.tagline}</p>
+          <p className="max-w-2xl font-serif-th leading-relaxed text-[#29261F] [text-wrap:pretty]">
             {spread.description}
           </p>
           <Link

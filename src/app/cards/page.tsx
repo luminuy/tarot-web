@@ -96,8 +96,8 @@ export default function CardsPage() {
           <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-[#29261F] tracking-wide">
             ความหมายไพ่ทาโรต์ทั้ง 78 ใบ
           </h1>
-          <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto leading-relaxed font-serif-th">
-            ดูคำแปลและความหมายของไพ่ทาโรต์ทั้ง 78 ใบ ทั้งความรัก การงาน การเงิน (แตะที่การ์ดเพื่อดูรายละเอียด)
+          <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
+            ค้นหาความหมายและคำทำนายของไพ่ทาโรต์ 78 ใบ ครบทุกมิติความรัก การงาน และการเงิน
           </p>
         </div>
 

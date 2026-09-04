@@ -360,10 +360,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
                 {/* Card Footer Titles */}
                 <div className="pt-2.5 border-t border-[#D9C8AC]/30 text-center z-10">
-                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] group-hover/card:text-[#8F5C1A] transition-colors leading-snug py-0.5">
+                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] group-hover/card:text-[#8F5C1A] transition-colors leading-snug py-0.5 [text-wrap:balance]">
                     {spread.nameTh}
                   </h3>
-                  <p className="text-[13px] text-[#635B4E] line-clamp-2 mt-1 leading-snug font-serif-th">
+                  <p className="text-[13px] text-[#635B4E] line-clamp-2 mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">
                     {spread.tagline}
                   </p>
                 </div>

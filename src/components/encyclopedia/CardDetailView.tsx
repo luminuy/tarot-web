@@ -188,10 +188,10 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               <span className="text-[#635B4E]">|</span>
               <span className="text-[#29261F] font-sans tracking-wide">{card.nameEn}</span>
             </div>
-            <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] leading-tight">
+            <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] leading-tight [text-wrap:balance]">
               {card.nameTh}
             </h1>
-            <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed pt-1 font-serif-th">{card.numerology}</p>
+            <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed pt-1 font-serif-th [text-wrap:pretty]">{card.numerology}</p>
           </div>
 
           {/* Keywords Ribbon */}
@@ -241,7 +241,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                         </span>
                         <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F]">{cat.nameTh}</h4>
                       </div>
-                      <p className="font-serif-th text-xs sm:text-sm text-[#29261F] leading-relaxed pl-4 border-l-2 border-[#D5CEC2] group-hover:border-[#A58A5C] transition-colors">
+                      <p className="font-serif-th text-xs sm:text-sm text-[#29261F] leading-relaxed pl-4 border-l-2 border-[#D5CEC2] group-hover:border-[#A58A5C] transition-colors [text-wrap:pretty]">
                         {text || "กำลังรวบรวมคำแปลมิตินี้"}
                       </p>
                     </div>

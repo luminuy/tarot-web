@@ -137,10 +137,10 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
           <div className="flex justify-between items-center">
             <label
               htmlFor="altar-nickname"
-              className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold"
+              className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
             >
               <span className="text-[#8F5C1A]">✦</span> 1. ชื่อเล่นของคุณ{" "}
-              <span className="text-[#A6392C] font-mono text-xs">(จำเป็น *)</span>
+              <span className="whitespace-nowrap text-[#A6392C] font-mono text-xs">(จำเป็น *)</span>
             </label>
             <span className="text-[13px] text-[#635B4E] font-mono">{nickname.length}/24</span>
           </div>
@@ -164,10 +164,10 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         <div className="space-y-1.5">
           <label
             htmlFor="altar-situation"
-            className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold"
+            className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
           >
             <span className="text-[#8F5C1A]">✦</span> 2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ{" "}
-            <span className="text-[13px] text-[#635B4E] font-normal">(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)</span>
+            <span className="whitespace-nowrap text-[13px] text-[#635B4E] font-normal">(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)</span>
           </label>
           <input
             id="altar-situation"
@@ -212,10 +212,10 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         <div className="flex justify-between items-center">
           <label
             htmlFor="altar-question"
-            className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold"
+            className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
           >
             <span className="text-[#8F5C1A]">✦</span> 3. คำถามที่คุณอยากรู้มากที่สุด{" "}
-            <span className="text-[#A6392C] font-mono text-xs">(จำเป็น *)</span>
+            <span className="whitespace-nowrap text-[#A6392C] font-mono text-xs">(จำเป็น *)</span>
           </label>
           <span className="text-[13px] text-[#635B4E] font-mono">{question.length}/300</span>
         </div>
@@ -239,7 +239,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
 
       {/* 4 Authentic 1909 Rider-Waite Cards for Quick Question Selection */}
       <div className="space-y-3 pt-2 border-t border-[#D9C8AC]/30">
-        <label className="text-xs sm:text-sm font-serif-th font-bold text-[#2E211A] tracking-wide flex items-center gap-2">
+        <label className="text-xs sm:text-sm font-serif-th font-bold text-[#2E211A] tracking-wide flex items-center gap-2 [text-wrap:balance]">
           <span className="text-[#8F5C1A]">✦</span> หรือเลือกหัวข้อคำถามสำเร็จรูป (แตะเพื่อใช้งานทันที)
         </label>
 

@@ -98,11 +98,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       badge: "78 ใบ",
     },
     {
-      label: "บทความดูดวง & ความรู้ไพ่ (20 เรื่อง)",
+      label: "บทความดูดวง & ความรู้ไพ่ (24 เรื่อง)",
       sublabel: "ความรู้ไพ่ทาโรต์ ความรัก การงาน และผังยอดนิยม",
       href: "/blog",
       Icon: JournalScrollNavIcon,
-      badge: "20 บทความ",
+      badge: "24 บทความ",
     },
     ...(onOpenPlans
       ? [

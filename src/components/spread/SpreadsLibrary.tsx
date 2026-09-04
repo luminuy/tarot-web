@@ -172,13 +172,13 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
 
                 {/* Titles & Tagline */}
                 <div className="space-y-1.5 z-10 pt-3 border-t border-[#D5CEC2]/40">
-                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] leading-snug py-0.5">
+                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] leading-snug py-0.5 [text-wrap:balance]">
                     {spread.nameTh}
                   </h3>
-                  <p className="text-xs text-[#635B4E] leading-snug font-serif-th">{spread.tagline}</p>
+                  <p className="text-xs text-[#635B4E] leading-relaxed font-serif-th">{spread.tagline}</p>
                 </div>
 
-                <p className="text-[13px] text-[#29261F] leading-relaxed line-clamp-2 z-10 font-serif-th">{spread.description}</p>
+                <p className="text-[13px] text-[#29261F] leading-relaxed line-clamp-2 z-10 font-serif-th [text-wrap:pretty]">{spread.description}</p>
 
                 {/* Expandable Positions Breakdown */}
                 <div className="z-10 space-y-2">

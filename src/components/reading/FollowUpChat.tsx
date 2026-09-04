@@ -361,7 +361,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             />
           </div>
           <div className="max-w-[88%] space-y-1">
-            <div className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#D9C8AC] p-3.5 sm:p-4 text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed ">
+            <div className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#D9C8AC] p-3.5 sm:p-4 text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed [text-wrap:pretty]">
               <p>
                 สวัสดีค่ะ ยินดีที่ได้ร่วมเปิดไพ่ด้วยกันนะคะ ✨ มีจุดไหนในคำทำนายที่ยังสงสัย
                 หรืออยากให้แม่หมอช่วยเจาะลึกแนวทางเพิ่มเติม พิมพ์ถามได้ตลอดเลยนะคะ
@@ -556,8 +556,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 <SealedLockIcon className="h-3.5 w-3.5" />
               </span>
               <div className="min-w-0 space-y-0.5">
-                <p className="font-serif-th text-xs font-bold text-[#2E211A]">ถามต่อจากไพ่ชุดนี้ได้เมื่อเป็นสมาชิก</p>
-                <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+                <p className="font-serif-th text-xs font-bold text-[#2E211A] [text-wrap:balance]">ถามต่อจากไพ่ชุดนี้ได้เมื่อเป็นสมาชิก</p>
+                <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
                   สมัครฟรีเพื่อคุยถามเจาะลึกต่อ เก็บบทสนทนาไว้กับดวงชุดนี้ได้ทุกเครื่อง
                 </p>
               </div>
@@ -577,10 +577,10 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 ✦
               </span>
               <div className="min-w-0 space-y-0.5">
-                <p className="font-serif-th text-xs font-bold text-[#2E211A]">
+                <p className="font-serif-th text-xs font-bold text-[#2E211A] [text-wrap:balance]">
                   ใช้สิทธิ์ถามคำถามต่อยอดฟรีครบ 2 ข้อแล้ว
                 </p>
-                <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+                <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
                   เติมรอบดูดวง หรือสมัครสมาชิก เพื่อคุยถามเจาะลึกกับแม่หมอได้ไม่จำกัด
                 </p>
               </div>
