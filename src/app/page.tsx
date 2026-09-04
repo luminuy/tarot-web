@@ -1312,8 +1312,27 @@ export default function TarotPage() {
 
       {/* ═══════════════════════════════════════════════════════════════
           Rich SEO Editorial Content & Fat Footer (Google Helpful Content & Mobile-First)
+          แสดงเฉพาะหน้าเลือกผังพยากรณ์ (SPREAD_SELECT) เพื่อไม่รบกวนสมาธิในพิธีกรรมหน้า 2-5
           ═══════════════════════════════════════════════════════════════ */}
-      <HomeSeoContent />
+      {currentStep === "SPREAD_SELECT" ? (
+        <HomeSeoContent />
+      ) : (
+        <footer className="w-full py-6 mt-12 border-t border-[#D5CEC2]/40 text-center text-xs text-[#635B4E] font-serif-th">
+          <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[#8F5C1A]">✦</span>
+              <span>SeerTarot · วิหารพยากรณ์ไพ่ทาโรต์ 1909 Rider-Waite ออนไลน์</span>
+            </div>
+            <div className="flex items-center gap-4 text-[11px] text-[#635B4E]">
+              <Link href="/privacy" className="hover:text-[#8F5C1A] transition-colors underline">
+                นโยบายความเป็นส่วนตัว
+              </Link>
+              <span>·</span>
+              <span className="text-[#3A7044] font-medium">สายด่วนสุขภาพจิต 1323</span>
+            </div>
+          </div>
+        </footer>
+      )}
     </main>
   );
 }
