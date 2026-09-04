@@ -226,7 +226,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
                 activeProvider = "groq";
                 return;
               }
+              recordEvent("ai_groq_failover"); // Groq ทุกโมเดลไม่จบ → ตกไป Gemini
             } catch (err) {
+              recordEvent("ai_groq_failover");
               console.warn("[read/route] Groq stream encountered error, failing over to Gemini:", err);
             }
           }
@@ -296,7 +298,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           } else if (event.type === "error") {
             updateReading(id, { status: "FAILED" });
             await refundIfConsumed();
-            recordEvents(["reading_failed", "ai_error:gemini"]);
+            recordEvents(["reading_failed", `ai_error:${event.provider || activeProvider}`]);
             send(controller, "error", { message: event.message });
           } else {
             send(controller, event.type, event);

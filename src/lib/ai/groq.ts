@@ -19,6 +19,7 @@ import {
 } from "@/lib/ai/language";
 import { aiGatewayHeaders, groqChatCompletionsEndpoint } from "@/lib/ai/gateway";
 import { parsePartialReading } from "@/lib/utils/partial-json";
+import { recordEvent } from "@/lib/stats/record";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { type Reading, ReadingSchema } from "@/lib/schema/reading";
@@ -106,14 +107,12 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
         model,
         messages: payloadMessages,
         temperature,
+        // reasoning model (Qwen3) แยกโทเค็นความคิดออกจาก content — content สะอาดตั้งแต่ต้นทาง
         reasoning_format: "parsed",
+        // เพดานเริ่มต้น 2,400 โทเค็น (~ตอบแชทยาว 4 ท่อน) กันโมเดล reasoning เผางบไม่จบ
+        // ผู้เรียกทับได้ด้วย options.maxTokens
+        max_tokens: typeof options.maxTokens === "number" ? options.maxTokens : 2400,
       };
-
-      // ไม่จำกัดเพดาน max_tokens บีบสั้น เพื่อให้ทดสอบความยาวการสนทนาได้เต็มที่
-      // หากผู้เรียกส่ง maxTokens มาจึงจะกำหนด มิฉะนั้นปล่อยตามขีดจำกัดธรรมชาติของโมเดล
-      if (typeof options.maxTokens === "number") {
-        requestBody.max_tokens = options.maxTokens;
-      }
 
       const res = await fetch(groqChatCompletionsEndpoint(), {
         method: "POST",
@@ -207,7 +206,8 @@ export async function probeGroqHealth(apiKey?: string): Promise<GroqProbeResult[
         body: JSON.stringify({
           model,
           messages: [{ role: "user", content: "ตอบกลับคำเดียวว่า: พร้อม" }],
-          max_tokens: 1000,
+          // 400 พอสำหรับคำเดียว แม้โมเดล reasoning จะคิดสั้น ๆ ก่อน (เดิม 1000 = เผาเปล่า)
+          max_tokens: 400,
           temperature: 0,
           reasoning_format: "parsed",
         }),
@@ -260,10 +260,12 @@ export async function probeGroqHealth(apiKey?: string): Promise<GroqProbeResult[
 /**
  * 🔮 สตรีมคำทำนายไพ่ทาโรต์เชิงลึกด้วย Groq LPU (Ultra-Fast 300+ tok/s)
  * ------------------------------------------------------------------
- * - ใช้งานโมเดลตระกูล Qwen (qwen3.8-27b / qwen3.6-27b) ภาษาไทยสละสลวยและเข้าใจบริบทลึกซึ้ง
- * - มีเกราะป้องกันภาษาต่างด้าว (Foreign Script Circuit Breaker) หากหลุดอักษรจีนเกิน 2 ตัวจะตัดวงจรทันที
- * - ทำความสะอาดแบบ Real-time ด้วย sanitizeTarotText() ก่อนส่งต่อถึงผู้ใช้
- * - คืนค่าเสร็จสมบูรณ์ตาม ReadingSchema หรือปล่อยให้เส้นทางหลักสลับไปหา Google Gemini
+ * - โมเดล: qwen3.8-27b → qwen3.6-27b → gpt-oss-120b (Qwen ภาษาไทยสวย · 120b reasoning ลึก ไม่หลุดจีน)
+ * - `reasoning_format: "hidden"` — แยกโทเค็นความคิดออกจาก content (สำคัญมากกับ reasoning model)
+ * - `max_tokens` ปรับตามจำนวนไพ่ (1,600 + 340/ใบ) กันคำอ่านโดนตัดกลาง
+ * - Foreign Script Circuit Breaker: อักษรต่างด้าวใน content สะสม ≥ 14 ตัว → สลับโมเดล + นับสถิติ
+ * - sanitizeTarotText() ทำความสะอาด real-time · stripForeignScriptDeep() กวาดรอบสุดท้าย
+ * - สำเร็จตาม ReadingSchema หรือปล่อยให้ route caller สลับไป Gemini
  */
 export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<ReadingEvent> {
   const apiKey = getGroqApiKey();
@@ -278,9 +280,18 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
   const systemInstruction = buildSystemPrompt(ctx.personaId, { systemCore, persona });
   const userMessage = buildReadingMessage(ctx);
 
-  const qwenModels = ["qwen/qwen3.8-27b", "qwen/qwen3.6-27b"] as const;
+  // Qwen 2 ตัวก่อน (ภาษาไทยสวยสุด) → gpt-oss-120b (reasoning ลึก ไม่มีปัญหาจีนหลุด)
+  // เป็นตาข่ายสุดท้ายก่อนตกไป Gemini
+  const readingModels = [
+    "qwen/qwen3.8-27b",
+    "qwen/qwen3.6-27b",
+    "openai/gpt-oss-120b",
+  ] as const;
 
-  for (const model of qwenModels) {
+  // เพดานผลลัพธ์: ฐาน 1,600 + 340/ใบ (ผัง 10 ใบ ≈ 5,000) — กันคำอ่านโดนตัดกลางจนต้อง failover
+  const maxReadingTokens = Math.min(6000, 1600 + ctx.drawn.length * 340);
+
+  for (const model of readingModels) {
     const startedAt = Date.now();
     let jsonAccumulator = "";
     let sentOpening = false;
@@ -299,7 +310,7 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
 
     try {
       const controller = new AbortController();
-      // Groq LPU ประมวลผลไวมาก (~300 tok/s) เพดานเวลา 20 วินาทีเพียงพอสำหรับคำอ่านยาว 1500 tokens
+      // Groq LPU ประมวลผลไวมาก (~300 tok/s) เพดานเวลา 20 วินาทีเพียงพอสำหรับคำอ่านยาว
       const timeoutId = setTimeout(() => controller.abort(), 20000);
 
       const res = await fetch(groqChatCompletionsEndpoint(), {
@@ -318,7 +329,11 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
           ],
           response_format: { type: "json_object" },
           stream: true,
-          temperature: 0.65,
+          // ⚠️ สำคัญ: Qwen3 เป็น reasoning model — ถ้าไม่ตั้งค่านี้ โทเค็น <think> จะปนใน delta.content
+          // ทำให้ (1) partial parse เพี้ยน คำอ่านใบแรกโผล่ช้า (2) circuit breaker นับคำจีนใน "ความคิด" ของโมเดล
+          reasoning_format: "hidden",
+          max_tokens: maxReadingTokens,
+          temperature: 0.6,
         }),
       });
 
@@ -360,10 +375,14 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
               const foreignCount = countForeignCharacters(delta);
               if (foreignCount > 0) {
                 totalForeignChars += foreignCount;
-                if (totalForeignChars >= 25) {
+                // reasoning ถูกแยกออกแล้ว (reasoning_format: hidden) → นับเฉพาะเนื้อคำตอบจริง
+                // เกิน 14 ตัว = โมเดลนี้หลุดจีนใน content จริง สลับทันที
+                if (totalForeignChars >= 14) {
                   console.warn(
-                    `[Groq Reading ${model}] ⚠️ Circuit Breaker: พบอักษรต่างด้าวสะสมรุนแรง ${totalForeignChars} ตัว — สลับโมเดลทันที`,
+                    `[Groq Reading ${model}] ⚠️ Circuit Breaker: อักษรต่างด้าวสะสม ${totalForeignChars} ตัว — สลับโมเดล`,
                   );
+                  recordEvent("ai_foreign_trip:groq");
+                  recordEvent(`ai_foreign_trip:${model}`);
                   foreignCircuitBreaker = true;
                   break;
                 }
@@ -443,6 +462,8 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
         yield { type: "done", reading: readingData, usage };
         return; // ทำงานสำเร็จสมบูรณ์!
       } else {
+        recordEvent("ai_schema_fail:groq");
+        recordEvent(`ai_schema_fail:${model}`);
         console.warn(
           `[Groq Reading ${model}] JSON ไม่ตรง ReadingSchema · parseLen=${cleanJson.length} · zodErr=${
             parsed ? JSON.stringify(parsed.error.issues?.slice(0, 3)) : "JSON.parse failed"

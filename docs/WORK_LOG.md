@@ -230,6 +230,22 @@
 
 ---
 
+### 🗓️ 2026-09-04: ปรับประสิทธิภาพเอนจินคำอ่าน Groq Qwen — แก้บั๊ก reasoning model + เสริมคุณภาพ (ต่อจาก feat/deep-ai-reading-qwen-gemini)
+
+- **🔴 บั๊กจริง — `streamGroqReading` ไม่ตั้ง `reasoning_format`**: Qwen3 เป็น reasoning model → โทเค็น `<think>` ปนใน `delta.content` ทำให้ partial parse เพี้ยน (ใบแรกโผล่ช้า) + circuit breaker นับคำจีนใน "ความคิด" ของโมเดล (false trip) → เพิ่ม `reasoning_format: "hidden"`
+- **`max_tokens` ตามจำนวนไพ่** (`1600 + 340/ใบ`, cap 6000) — กันคำอ่านผังใหญ่โดนตัดกลาง → JSON.parse fail → failover เสียเวลา ~15s
+- **`gpt-oss-120b` เสียบเป็น Tier ก่อนตก Gemini** (`streamGroqReading` เดิม loop เฉพาะ qwen 2 ตัว hardcode ทั้งที่ 120b อยู่ใน `WORKING_GROQ_MODELS`)
+- **Circuit breaker** ปรับ `>= 25` → `>= 14` (หลังแยก reasoning แล้วนับเฉพาะ content จริง)
+- **Few-shot exemplar** — เพิ่มตัวอย่างคำอ่านทองคำ (Eight of Pentacles 1 ใบ) ใน `SYSTEM_CORE_KNOWLEDGE` anchor โทน/ความลึก/reflection question
+- **ความยาวปรับตามจำนวนไพ่** (`buildReadingMessage`): ≤2 ใบ = 5-7 ประโยค/ใบ · ≤5 ใบ = 3-4 · ≥6 ใบ = 2-3 กระชับ (กันกำแพงข้อความผัง 10 ใบ)
+- **`temperature`** reading 0.65 → 0.6 · **`reading.ts`** sync คำอธิบายกับ prompt (summary 5-8 + reflection question · advice ข้อ 3 = ฝึกสติ 🧘)
+- **`generateGroqChatReply`** เพิ่มเพดาน `max_tokens: 2400` เริ่มต้น (chat) · **`probeGroqHealth`** `1000` → `400`
+- **สถิติใหม่** (`recordEvent`): `ai_call:groq` · `ai_foreign_trip:*` · `ai_schema_fail:*` · `ai_groq_failover` → แสดงใน `/admin` StatsDashboard (Groq share · failover · จีนหลุด · schema fail)
+- **QA ใหม่**: `scripts/qa/test-ai-reading-golden.ts` (32 เคส · prompt contract + schema · offline) เข้า `repo:verify`
+- **ผลทดสอบ**: `tsc` ✅ · golden 32/32 ✅ · `repo:verify` 24/24 ✅
+
+---
+
 ### 🗓️ 2026-09-03: ✅ Cloudflare Email Routing เปิดใช้งานจริง (ต่อจาก #207)
 
 - เปิด Email Routing บน zone `seertarot.net` ผ่าน dashboard (account → Compute → Email Service → Email Routing — เมนูระดับ zone ไม่มีแล้ว)

@@ -105,6 +105,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "💬 ความยืดหยุ่นของประวัติแชทแม่หมอ (Zod BodySchema & Error Handling)", cmd: TSX, args: ["scripts/qa/test-chat-history-schema.ts"] },
   { label: "🃏 Zero Fabricated Cards Policy (ห้ามกุหรือมโนไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด · ให้โหลดใหม่)", cmd: TSX, args: ["scripts/qa/test-no-fake-card.ts"] },
   { label: "⚡ ระบบ AI สองประสาน (Multi-Provider Failover ด้วย Groq LPU & Gemini)", cmd: TSX, args: ["scripts/qa/test-groq-failover.ts"] },
+  { label: "🔮 สัญญา prompt คำอ่านไพ่ (reasoning_format · max_tokens · ความยาวตามจำนวนไพ่ · ReadingSchema)", cmd: TSX, args: ["scripts/qa/test-ai-reading-golden.ts"] },
   { label: "🌅 ไพ่ประจำวันของทุกคน (deterministic + กระจายทั่วสำรับ + provably-fair proof)", cmd: TSX, args: ["scripts/qa/test-daily-card.ts"] },
   { label: "🔎 corpus ค้นหาเชิงความหมาย (ไพ่ 78 + บทความครบ · metadata Vectorize ถูกฟอร์แมต)", cmd: TSX, args: ["scripts/qa/test-search-corpus.ts"] },
 ];
