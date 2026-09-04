@@ -107,7 +107,7 @@ export function HomeSeoContent() {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1: วิธีดูดวงไพ่ทาโรต์ 5 ขั้นตอนศักดิ์สิทธิ์ (Ritual Stations)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="how-it-works-title" className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
+      <section aria-labelledby="how-it-works-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-12">
         {/* Section Header */}
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-3">
@@ -134,7 +134,7 @@ export function HomeSeoContent() {
           {RITUAL_STEPS.map((step) => (
             <div
               key={step.stepNum}
-              className="rounded-2xl bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] border border-[#D9C8AC]/80 hover:border-[#8F5C1A] p-5 lg:p-4 xl:p-5 shadow-[0_2px_8px_rgba(41,38,31,0.04)] hover:shadow-[0_12px_28px_rgba(143,92,26,0.12)] hover:-translate-y-1.5 transition-all duration-300 group flex flex-col justify-between relative select-none"
+              className="rounded-2xl bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] border border-[#D9C8AC] hover:border-[#8F5C1A] p-5 lg:p-4 xl:p-5 shadow-[0_2px_8px_rgba(41,38,31,0.04)] hover:shadow-[0_8px_24px_rgba(143,92,26,0.10)] transition-all duration-300 group flex flex-col justify-between relative overflow-hidden select-none"
             >
               <div className="space-y-3.5">
                 {/* Step Header */}
@@ -564,7 +564,7 @@ export function HomeSeoContent() {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5: คำถามที่พบบ่อย (FAQ Accordion — Refined Spacing)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="faq-title" className="max-w-4xl mx-auto px-4 space-y-10">
+      <section aria-labelledby="faq-title" className="max-w-4xl mx-auto px-4 space-y-10 pb-16 sm:pb-24">
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
@@ -626,10 +626,19 @@ export function HomeSeoContent() {
         </div>
       </section>
 
+      {/* Sacred Gold Transition Zone before Dark Footer */}
+      <div className="w-full flex items-center justify-center py-4 sm:py-8" aria-hidden="true">
+        <div className="flex items-center gap-3 text-[#D9C8AC]/70">
+          <span className="w-20 sm:w-28 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+          <span className="text-sm text-[#8F5C1A]/70">✦</span>
+          <span className="w-20 sm:w-28 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+        </div>
+      </div>
+
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 6: FAT FOOTER (Editorial Dark Quiet Luxury #171512)
           ═══════════════════════════════════════════════════════════════ */}
-      <footer className="w-full bg-[#171512] text-[#D5CEC2] pt-16 pb-12 border-t border-[#D5CEC2]/30 relative overflow-hidden">
+      <footer className="w-full bg-[#171512] text-[#D5CEC2] pt-16 pb-12 border-t border-[#D5CEC2]/30 relative overflow-hidden mt-16 sm:mt-24">
         {/* Ambient Gold Accent Line */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent pointer-events-none" />
 
