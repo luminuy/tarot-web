@@ -27,12 +27,21 @@
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
 | **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
-| **คลัง 20 ผังพยากรณ์** | `/spreads` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
+| **คลัง 20 ผังพยากรณ์** | `/spreads` & `/spreads/[id]` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง + หน้าคู่มือราย spread 20 หน้า (SEO/SSG · JSON-LD HowTo) | แชร์ผังพยากรณ์แบบรูปภาพ |
 | **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | หน้าประวัติดูดวงเต็มรูปแบบในบัญชี |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-04: เก็บงานค้าง backlog ข้อ 3–6 — spreads/[id] · admin metrics · marketing consent · blog
+
+- **ที่มา**: เจ้าของโปรเจกต์ส่ง handoff รายการ "สิ่งที่ยังขาด" 6 ข้อ ให้ทำข้อ 3, 4, 5, 6
+- **ข้อ 6 — metric DB สิทธิ์ใน `/admin`**: event `entitlement_db_error` / `entitlement_db_selfheal` / `entitlement_db_selfheal_failed` ถูกบันทึกอยู่แล้วใน `entitlement.ts` แต่ไม่เคยโผล่ในแอดมิน → เพิ่มเข้า `GET /api/admin/entitlement` (`metrics.dbError/dbSelfheal/dbSelfhealFailed`) + การ์ด "สุขภาพฐานข้อมูลสิทธิ์" ใน `EntitlementAdmin.tsx` (ค่า > 0 = แดง)
+- **ข้อ 4 — marketing consent ไม่เคยถูกใช้**: `listConsentedUsersWithEmail()` เป็น dead code → เพิ่ม `GET /api/admin/marketing` (สรุปจำนวน + รายชื่อ 200 แรก) และ `?format=csv` (ดาวน์โหลดไปใช้กับเครื่องมือส่งเมลภายนอก · audit ทุกครั้งที่ export) + แท็บใหม่ "ข่าวสาร (Consent)" ในแอดมิน — ยังไม่ผูกระบบส่งเมลจำนวนมาก (รอ PDPA sign-off)
+- **ข้อ 5 — ไม่มี `/spreads/[id]`**: สร้างหน้า SEO 20 หน้า (SSG) — hero + แผนผังตำแหน่งไพ่ SSR (`SpreadPositionMap.tsx` วาดจากพิกัด x/y) + ความหมายรายตำแหน่ง + วิธีอ่าน 4 ขั้น + FAQ + บทความที่เกี่ยวข้อง (`targetSpreadId`) + JSON-LD HowTo/Breadcrumb/FAQPage · เพิ่มลง `sitemap.ts` · ลิงก์ "อ่านคู่มือผังนี้" จากการ์ดใน `/spreads`
+- **ข้อ 3 — blog/[id] "กดไม่เข้า"**: ตรวจแล้ว `src/app/blog/[slug]/page.tsx` มีอยู่และทำงานปกติ (24 บทความ SSG · คลิกจากดัชนีเข้าได้) — รายการ backlog ข้อนี้ **ล้าสมัย** ปิดได้เลย
+- **พิสูจน์**: `npm run typecheck` 0 · `npm run build` ผ่าน (spreads/[id] prerender 20 · blog/[slug] 24) · `npm run repo:verify` 23/23 · ทดสอบผ่านเบราว์เซอร์: `/spreads/celtic-cross|three-card|yes-no` เนื้อหาครบ · `/spreads/bogus` → 404 · admin login → แท็บ "ข่าวสาร" + การ์ด DB health เรนเดอร์ · `GET /api/admin/marketing?format=csv` คืน CSV พร้อม Content-Disposition
 
 ### 🗓️ 2026-09-04: ตรวจสอบและปรับปรุงช่องไฟ การเว้นวรรค และระยะบรรทัดภาษาไทยทั้งเว็บไซต์ (Thai Typography & Spacing Polish)
 

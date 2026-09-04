@@ -30,8 +30,12 @@ const AiHealthPanel = dynamic(() => import("@/components/admin/AiHealthPanel"), 
   ssr: false,
   loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>,
 });
+const MarketingAudience = dynamic(() => import("@/components/admin/MarketingAudience"), {
+  ssr: false,
+  loading: () => <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>,
+});
 
-type Tab = "system" | "stats" | "content" | "readers" | "entitlement" | "ai";
+type Tab = "system" | "stats" | "content" | "readers" | "entitlement" | "ai" | "marketing";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "system", label: "✦ สถานะระบบ (Cloud Health)" },
@@ -40,6 +44,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "readers", label: "แม่หมอ (Marketplace)" },
   { id: "entitlement", label: "สิทธิ์เปิดไพ่" },
   { id: "ai", label: "สุขภาพ AI" },
+  { id: "marketing", label: "ข่าวสาร (Consent)" },
 ];
 
 export default function AdminHome() {
@@ -134,6 +139,8 @@ export default function AdminHome() {
           <ReadersManager />
         ) : tab === "ai" ? (
           <AiHealthPanel />
+        ) : tab === "marketing" ? (
+          <MarketingAudience />
         ) : (
           <EntitlementAdmin />
         )}
