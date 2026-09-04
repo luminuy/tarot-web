@@ -18,9 +18,9 @@
 
 | หัวข้อ | ค่า |
 | :--- | :--- |
-| **วันที่** | 2026-09-02 |
+| **วันที่** | 2026-09-04 |
 | **commit ฐาน** | `main` — Production Live (`seertarot.net`) |
-| **วิธีตรวจ** | dev server + `npm run repo:verify` (21/21 ด่าน) + Cloudflare Workers Deploy |
+| **วิธีตรวจ** | dev server + `npm run repo:verify` (24/24 ด่าน) + Cloudflare Workers Deploy |
 | **ผลสรุป** | ✅ **ISSUE-001, ISSUE-002, ISSUE-003, ISSUE-008, ISSUE-009, ISSUE-010, ISSUE-010b, ISSUE-011, ISSUE-012, ISSUE-016 แก้ไขและทดสอบสมบูรณ์ 100%** |
 
 ### 🗂️ ดัชนีสถานะปัญหาและข้อจำกัดของระบบ
@@ -119,7 +119,7 @@
 | **อาการ** | ทุก workflow run ขึ้น annotation: `Node.js 20 is deprecated. ... actions/checkout@v4, actions/setup-node@v4` |
 | **ตรวจยืนยันล่าสุด** | 2026-08-31 — `@v4` ที่ `deploy.yml` (4 จุด), `pr.yml` (2 จุด), `auto-release.yml` (1 จุด) |
 | **ผลกระทบ** | ตอนนี้ยังทำงานได้ แต่จะพังเมื่อ GitHub เลิกรองรับจริง |
-| **ทางแก้** | อัปเป็น `actions/checkout@v5` + `actions/setup-node@v5` ให้ครบ **ทั้ง 3 ไฟล์** แล้วดู CI ผ่านครบ 7 ด่าน |
+| **ทางแก้** | อัปเป็น `actions/checkout@v5` + `actions/setup-node@v5` ให้ครบ **ทั้ง 3 ไฟล์** แล้วดู CI ผ่านครบ 24 ด่าน |
 
 ### ISSUE-008 · Hydration mismatch ที่หน้าแรก — `stepDirectionRef` ถูกอ่านตอน SSR
 

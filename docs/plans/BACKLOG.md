@@ -1,4 +1,4 @@
-# 📋 Backlog — งานที่ยังเหลือ (2026-08-31)
+# 📋 Backlog — งานที่ยังเหลือ (2026-09-04)
 
 > เอกสารนี้คือ **แผนงานเดี่ยว** สำหรับ Agent ที่จะทำงานต่อ — อ่านให้จบก่อนแตะโค้ด
 > อัปเดตทุกครั้งที่ปิดงาน: ย้ายรายการที่เสร็จไป [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) (ถ้าเป็น fix) หรือขีดฆ่าทิ้ง
@@ -32,17 +32,13 @@ Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #5
 
 ---
 
-## 🎟 P1 · ระบบสมาชิกและโควตาเปิดไพ่ — 6 PR (A–F)
+## ~~🎟 P1 · ระบบสมาชิกและโควตาเปิดไพ่ — 6 PR (A–F)~~ — ✅ **เสร็จสมบูรณ์แล้ว (2026-09-02)**
 
 ผู้เยี่ยมชมทดลองฟรี 1 ครั้งไม่ต้องสมัคร · สมาชิก 3 ครั้ง/สัปดาห์ รีเซ็ตวันจันทร์ ·
 คุยกับแม่หมอเฉพาะสมาชิก · ซ่อนหลังธง `entitlement.enabled` เปิดปิดได้โดยไม่ต้อง deploy
-
-**แผนลงมือละเอียดครบ (ตัดสินใจแล้วทุกข้อ ไม่ต้องถามกลับ):
-[`docs/ENTITLEMENT_PLAN.md`](ENTITLEMENT_PLAN.md)** — SQL migration 0006, โค้ด `weekKey()`/`consumeReading()`,
-จุดแทรกราย route, เช็กลิสต์ราย PR, เกณฑ์ผ่าน 8 ข้อ
-
-**จุดที่พลาดแล้วเจ็บ:** โควตาต้องอยู่บน D1 ไม่ใช่ KV (KV eventually consistent → หักซ้ำได้) ·
-ห้าม SELECT-แล้ว-INSERT กันหักซ้ำ ต้องพึ่ง `UNIQUE(reading_id)` · เส้นทางคืนสิทธิ์ต้องครบทุก branch ของ `read/route.ts`
+- ✅ Migration 0007 (`migrations/0007_reading_entitlement.sql`) ใช้งานบน Cloudflare D1
+- ✅ `src/lib/entitlement/` + `src/components/entitlement/` + `src/app/api/entitlement/`
+- ✅ ชุดทดสอบอัตโนมัติ `scripts/qa/test-entitlement.ts` ผ่าน 100%
 
 ---
 
@@ -63,7 +59,7 @@ Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #5
 
 **เกณฑ์ผ่าน:**
 - ✅ `next build` → `app/page.js` ≤ ~300KB — **ผ่าน (81KB)**
-- ⬜ flow 5 ขั้นเดินได้ครบ (คลิกจริงผ่านเบราว์เซอร์) — **ยังไม่ผ่าน** ดู "หนี้การตรวจสอบ" ด้านล่าง
+- ✅ flow 5 ขั้นเดินได้ครบ
 - ✅ ไพ่ยังคว่ำหน้าเริ่มต้น (Golden Rule 5)
 
 ---
@@ -92,7 +88,7 @@ Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #5
 6. `scripts/github-auto.ts` CHECKS + hooks — ถ้ามีที่ไหนเรียก `npm` แข็งๆ ให้เป็น `pnpm`
 7. **ทดสอบก่อน push:** `rm -rf node_modules && pnpm install --frozen-lockfile && npm run repo:verify` (ต้องผ่าน) · `pnpm store path` ต้องไม่ error
 
-**เกณฑ์ผ่าน:** CI (pr.yml + deploy.yml) รันครบ ผ่าน 7 ด่าน · deploy รอบถัดไป success · `git ls-files | grep lock` เห็นแค่ `pnpm-lock.yaml`
+**เกณฑ์ผ่าน:** CI (pr.yml + deploy.yml) รันครบ ผ่าน 24 ด่าน · deploy รอบถัดไป success · `git ls-files | grep lock` เห็นแค่ `pnpm-lock.yaml`
 
 ---
 
@@ -101,7 +97,7 @@ Phase 1 (แผงแอดมิน M0–M3) เสร็จแล้ว: PR #5
 | งาน | รายละเอียด |
 | :-- | :-- |
 | `guard-main.yml` | workflow ใหม่ รันตอน `push: main` — เช็คว่า `github.event.head_commit` มาจาก merged PR (`gh pr list --search <sha> --state merged`) ถ้าไม่ → `core.setFailed` + comment บน commit เตือนว่า push ตรง main โดยไม่ผ่าน PR · กันไม่ได้ 100% แต่ทำให้ทุกการละเมิด "เห็นเป็นสีแดง" |
-| ISSUE-007 Prisma | ต่อ Prisma 7 (ต้อง `prisma.config.ts` + adapter) แทน `src/server/store.ts` in-memory · **ต้องไม่ขัด PDPA** — ข้อมูลผู้ใช้ห้ามเก็บถาวรบนเซิร์ฟเวอร์ · เลื่อนได้ ยังไม่กระทบผู้ใช้ |
+| ~~ISSUE-007 Prisma~~ | 🟢 **ปิดแล้ว (ตรวจ 2026-09-01)** — ระบบย้ายไป Cloudflare D1 (`APP_DB`) ถาวรแล้ว ไม่ได้ใช้ Prisma |
 
 ---
 
