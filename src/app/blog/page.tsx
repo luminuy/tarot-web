@@ -125,10 +125,10 @@ export default function BlogPage() {
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
           </div>
-          <h1 className="font-serif-th text-2xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] tracking-wide leading-tight py-0.5">
+          <h1 className="font-serif-th text-2xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] tracking-wide leading-tight py-0.5 [text-wrap:balance]">
             คัมภีร์บทความและสาระน่ารู้ไพ่ทาโรต์
           </h1>
-          <p className="text-xs sm:text-base text-[#635B4E] font-serif-th leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xs sm:text-base text-[#635B4E] font-serif-th leading-relaxed max-w-2xl mx-auto [text-wrap:balance]">
             เจาะลึกศาสตร์พยากรณ์ 1909 Rider-Waite ถอดรหัสสัญลักษณ์จิตวิทยาของ Carl Jung เทคนิคเปิดไพ่ความรัก การงาน และคู่มือไพ่ครบ 78 ใบ
           </p>
         </div>

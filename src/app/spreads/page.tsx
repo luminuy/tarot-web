@@ -96,8 +96,8 @@ export default function SpreadsPage() {
           <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-[#29261F] tracking-wide">
             ผังการเปิดไพ่ทาโรต์ 20 รูปแบบ
           </h1>
-          <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto leading-relaxed font-serif-th">
-            เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ (แตะเพื่อดูตัวอย่างการจัดวางและความหมายแต่ละตำแหน่ง)
+          <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
+            เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ พร้อมดูตัวอย่างการจัดวางและความหมายของแต่ละตำแหน่ง
           </p>
         </div>
 

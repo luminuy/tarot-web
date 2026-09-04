@@ -103,13 +103,13 @@ export function HomeSeoContent() {
   };
 
   return (
-    <div className="w-full mt-24 sm:mt-32 space-y-24 sm:space-y-36 text-[#29261F]">
+    <div className="w-full mt-4 sm:mt-6 text-[#29261F]">
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1: วิธีดูดวงไพ่ทาโรต์ 5 ขั้นตอนศักดิ์สิทธิ์ (Ritual Stations)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="how-it-works-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-12">
+      <section aria-labelledby="how-it-works-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
         {/* Section Header */}
-        <div className="text-center space-y-3">
+        <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
             <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
@@ -119,13 +119,13 @@ export function HomeSeoContent() {
           </div>
           <h2
             id="how-it-works-title"
-            className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide"
+            className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide [text-wrap:balance]"
           >
             วิธีดูดวงไพ่ทาโรต์ออนไลน์ 5 ขั้นตอนศักดิ์สิทธิ์
           </h2>
-          <p className="text-sm sm:text-base text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed">
-            สัมผัสประสบการณ์เชื่อมโยงจิตใต้สำนึก สับและเลือกหยิบไพ่ด้วยตัวคุณเองอย่างโปร่งใส 
-            พร้อมรับคำทำนายที่โอบอุ้มจิตใจตามหลักสัญลักษณ์วิทยา 1909 Rider-Waite และจิตวิทยาของ Carl Jung
+          <p className="text-sm sm:text-base text-[#635B4E] max-w-3xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
+            สัมผัสประสบการณ์เชื่อมโยงจิตใต้สำนึก สับและเลือกหยิบไพ่ด้วยตัวคุณเองอย่างโปร่งใส<br className="hidden sm:inline" />
+            พร้อมรับคำทำนายที่โอบอุ้มจิตใจตามหลักสัญลักษณ์วิทยา 1909 Rider-Waite และจิตวิทยา Carl Jung
           </p>
         </div>
 
@@ -191,20 +191,20 @@ export function HomeSeoContent() {
       </section>
 
       {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-2" aria-hidden="true">
+      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
           <span className="text-xs text-[#8F5C1A]/60">✦</span>
-          <span className="w-16 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 2: ศาสตร์ 1909 RWS & PROVABLY FAIR (Sacred Triptych)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="heritage-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+      <section aria-labelledby="heritage-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
         {/* Section Header */}
-        <div className="text-center space-y-3">
+        <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
             <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
@@ -212,12 +212,12 @@ export function HomeSeoContent() {
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
           </div>
-          <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide">
+          <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide [text-wrap:balance]">
             มนต์เสน่ห์ไพ่ 1909 Rider-Waite &amp; ความโปร่งใสระดับสากล
           </h2>
-          <p className="text-sm sm:text-base text-[#635B4E] font-serif-th max-w-2xl mx-auto leading-relaxed">
-            ผสานคุณค่าทางประวัติศาสตร์และศิลปะแห่งจิตวิญญาณกว่า 110 ปี เข้ากับระบบเข้ารหัสความโปร่งใสและจิตวิทยาเชิงลึก 
-            เพื่อเป็นวิหารพยากรณ์ที่โอบอุ้มจิตใจอย่างแท้จริง
+          <p className="text-sm sm:text-base text-[#635B4E] font-serif-th max-w-3xl mx-auto leading-relaxed [text-wrap:balance]">
+            ผสานคุณค่าทางประวัติศาสตร์และศิลปะกว่า 110 ปี เข้ากับระบบสุ่มโปร่งใส Provably Fair<br className="hidden sm:inline" />
+            และหลักจิตวิทยาเชิงลึก เพื่อเป็นวิหารพยากรณ์ที่โอบอุ้มจิตใจอย่างแท้จริง
           </p>
         </div>
 
@@ -334,24 +334,24 @@ export function HomeSeoContent() {
       </section>
 
       {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-2" aria-hidden="true">
+      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
           <span className="text-xs text-[#8F5C1A]/60">✦</span>
-          <span className="w-16 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 3: ผังพยากรณ์และสารานุกรม 78 ใบ (Explore Spreads & Cards)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="spreads-and-cards-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+      <section aria-labelledby="spreads-and-cards-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-[#D9C8AC]/50">
           <div className="space-y-2">
             <span className="text-[#8F5C1A] text-xs font-serif-th tracking-widest uppercase block">
               ✦ SPREADS &amp; CARDS
             </span>
-            <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F]">
+            <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F] [text-wrap:balance]">
               ผังการเปิดไพ่พยากรณ์และสำรับไพ่ 78 ใบยอดนิยม
             </h2>
             <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th max-w-2xl">
@@ -487,27 +487,27 @@ export function HomeSeoContent() {
       </section>
 
       {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-2" aria-hidden="true">
+      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
           <span className="text-xs text-[#8F5C1A]/60">✦</span>
-          <span className="w-16 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: บทความและสาระน่ารู้ (Featured Articles with Card Companion)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="articles-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
+      <section aria-labelledby="articles-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-[#D9C8AC]/50">
           <div className="space-y-2">
             <span className="text-[#8F5C1A] text-xs font-serif-th tracking-widest uppercase block">
               ✦ WISDOM &amp; ARTICLES
             </span>
-            <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F]">
+            <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F] [text-wrap:balance]">
               คัมภีร์บทความและสาระน่ารู้เกี่ยวกับไพ่ทาโรต์
             </h2>
-            <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th max-w-2xl [text-wrap:balance]">
               เจาะลึกเทคนิคการเปิดไพ่ ความหมายสัญลักษณ์โบราณ และศาสตร์จิตวิทยาไพ่ทาโรต์
             </p>
           </div>
@@ -515,7 +515,7 @@ export function HomeSeoContent() {
             href="/blog"
             className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
           >
-            อ่านบทความทั้งหมด 20 เรื่อง <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+            อ่านบทความทั้งหมด (24 เรื่อง) <span className="group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
         </div>
 
@@ -553,19 +553,19 @@ export function HomeSeoContent() {
       </section>
 
       {/* Decorative Gold Divider */}
-      <div className="w-full flex items-center justify-center py-2" aria-hidden="true">
+      <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
           <span className="text-xs text-[#8F5C1A]/60">✦</span>
-          <span className="w-16 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5: คำถามที่พบบ่อย (FAQ Accordion — Refined Spacing)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="faq-title" className="max-w-4xl mx-auto px-4 space-y-10 pb-16 sm:pb-24">
-        <div className="text-center space-y-3">
+      <section aria-labelledby="faq-title" className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
+        <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
             <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
@@ -573,15 +573,15 @@ export function HomeSeoContent() {
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
           </div>
-          <h2 id="faq-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide">
+          <h2 id="faq-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide [text-wrap:balance]">
             คำถามที่พบบ่อยเกี่ยวกับการดูดวงไพ่ทาโรต์ (FAQ)
           </h2>
-          <p className="text-sm sm:text-base text-[#635B4E] font-serif-th max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-[#635B4E] font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">
             ไขข้อข้องใจเกี่ยวกับระบบดูดวงออนไลน์ ความแม่นยำ และหลักการทำงานของ SeerTarot
           </p>
         </div>
 
-        <div className="space-y-3.5">
+        <div className="space-y-3 sm:space-y-3.5">
           {HOME_FAQS.map((faq) => {
             const isOpen = openFaqId === faq.id;
             return (
@@ -627,18 +627,18 @@ export function HomeSeoContent() {
       </section>
 
       {/* Sacred Gold Transition Zone before Dark Footer */}
-      <div className="w-full flex items-center justify-center py-4 sm:py-8" aria-hidden="true">
+      <div className="w-full flex items-center justify-center py-5 sm:py-6" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-20 sm:w-28 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
-          <span className="text-sm text-[#8F5C1A]/70">✦</span>
-          <span className="w-20 sm:w-28 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+          <span className="text-xs sm:text-sm text-[#8F5C1A]/70">✦</span>
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 6: FAT FOOTER (Editorial Dark Quiet Luxury #171512)
           ═══════════════════════════════════════════════════════════════ */}
-      <footer className="w-full bg-[#171512] text-[#D5CEC2] pt-16 pb-12 border-t border-[#D5CEC2]/30 relative overflow-hidden mt-16 sm:mt-24">
+      <footer className="w-full bg-[#171512] text-[#D5CEC2] pt-10 sm:pt-12 pb-12 border-t border-[#D5CEC2]/30 relative overflow-hidden">
         {/* Ambient Gold Accent Line */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent pointer-events-none" />
 
@@ -767,26 +767,26 @@ export function HomeSeoContent() {
               <ul className="space-y-2 text-xs font-serif-th text-[#D5CEC2]/80">
                 <li>
                   <Link href="/blog" className="hover:text-[#FAF7F2] transition-colors">
-                    คลังบทความทั้งหมด (20 บทความ)
+                    คลังบทความทั้งหมด (24 บทความ)
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog/how-to-read-tarot-for-beginners" className="hover:text-[#FAF7F2] transition-colors">
-                    วิธีเปิดไพ่สำหรับผู้เริ่มต้น
+                  <Link href="/blog/how-to-ask-tarot-questions" className="hover:text-[#FAF7F2] transition-colors">
+                    วิธีตั้งคำถามไพ่ทาโรต์ให้ชัดเจน
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog/tarot-love-reading-guide" className="hover:text-[#FAF7F2] transition-colors">
-                    วิธีอ่านไพ่ทาโรต์เรื่องความรัก
+                  <Link href="/blog/tarot-love-3-cards-feelings" className="hover:text-[#FAF7F2] transition-colors">
+                    ดูดวงความรัก 3 ใบ: เขารู้สึกอย่างไร
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog/celtic-cross-spread-deep-dive" className="hover:text-[#FAF7F2] transition-colors">
-                    ถอดรหัสผังเซลติกครอส 10 ตำแหน่ง
+                  <Link href="/blog/celtic-cross-spread-guide" className="hover:text-[#FAF7F2] transition-colors">
+                    คู่มือผังเซลติกครอส 10 ตำแหน่ง
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog/jungian-psychology-and-tarot" className="hover:text-[#FAF7F2] transition-colors">
+                  <Link href="/blog/tarot-and-carl-jung-psychology" className="hover:text-[#FAF7F2] transition-colors">
                     จิตวิทยาของ Carl Jung กับไพ่ทาโรต์
                   </Link>
                 </li>

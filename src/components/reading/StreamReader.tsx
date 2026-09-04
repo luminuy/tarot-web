@@ -175,10 +175,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           className="group flex w-full items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] px-4 py-3 text-left transition-all hover:border-[#8F5C1A] hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           <span className="min-w-0">
-            <span className="block font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm">
+            <span className="block font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm [text-wrap:balance]">
               <span className="mr-1.5 text-[#8F5C1A]">✦</span> มีอะไรอยากถามแม่หมอต่อไหม
             </span>
-            <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+            <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
               เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที
             </span>
           </span>
@@ -531,11 +531,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[#8F5C1A]">✨</span>
-                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A]">
+                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] [text-wrap:balance]">
                     ต้องการคำปรึกษาเจาะลึกเฉพาะบุคคลเพิ่มเติม?
                   </h4>
                 </div>
-                <p className="text-[13px] sm:text-xs text-[#635B4E] leading-relaxed font-serif-th">
+                <p className="text-[13px] sm:text-xs text-[#635B4E] leading-relaxed font-serif-th [text-wrap:pretty]">
                   ปรึกษาแม่หมอผู้เชี่ยวชาญแบบตัวต่อตัว พร้อมส่งต่อผลการเปิดไพ่ชุดนี้เพื่อพูดคุยเจาะลึกผ่าน LINE ส่วนตัวได้ทันที
                 </p>
               </div>
@@ -555,7 +555,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
       {/* AI Disclosure Note & Accuracy Rating */}
       <div className="mt-4 pt-3 border-t border-[#D9C8AC]/30 space-y-2">
-        <p className="text-[13px] text-[#635B4E] leading-relaxed text-center font-serif-th">
+        <p className="text-[13px] text-[#635B4E] leading-relaxed text-center font-serif-th max-w-2xl mx-auto [text-wrap:balance]">
           <span className="text-[#8F5C1A]">✦</span> คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง
           จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต
         </p>

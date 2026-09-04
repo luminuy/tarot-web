@@ -959,10 +959,10 @@ export default function TarotPage() {
                   </div>
 
                   <div className="space-y-2 text-center">
-                    <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide">
+                    <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide [text-wrap:balance]">
                       ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI
                     </h1>
-                    <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed">
+                    <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
                       สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256
                     </p>
                     <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
@@ -1021,10 +1021,10 @@ export default function TarotPage() {
               className="space-y-10"
             >
               <div className="text-center space-y-1">
-                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F]">
+                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] [text-wrap:balance]">
                   ตั้งคำถาม &amp; เลือกแม่หมอ
                 </h2>
-                <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th">
+                <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th [text-wrap:balance]">
                   พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
                 </p>
               </div>
@@ -1210,9 +1210,9 @@ export default function TarotPage() {
                         </span>
                       </span>
                       <span className="block font-serif-th text-sm font-bold text-[#29261F]">
-                        แชทออนไลน์กับ{selectedPersona.nameTh}
+                        แชทออนไลน์กับ {selectedPersona.nameTh}
                       </span>
-                      <span className="block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+                      <span className="block font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
                         เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อจากไพ่ชุดนี้ได้ทันที
                       </span>
                       <span className="mt-1 flex items-center justify-center gap-2 rounded-full bg-[#29261F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#F3F0EA] transition-colors group-hover:bg-[#A58A5C]">

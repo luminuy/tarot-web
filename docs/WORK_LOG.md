@@ -34,6 +34,58 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: ยกระดับระบบตัวอักษรและความสมดุลข้อความทั่วทั้งเว็บ (Typography & Text-Wrapping Overhaul): ไร้คำตกหล่น ไร้การทับซ้อน ละมุนตาด้วย [text-wrap:balance] & [text-wrap:pretty]
+
+- **ความต้องการของผู้ใช้**:
+  - "ปรับช่องว่างเเล้ว ปรับตัวอักษร ให้พอดี ไม่ตก ไม่ทับ มีอีกหลายจุดในเว็บ"
+- **การวินิจฉัยปัญหาด้าน Typography (Root Cause Analysis)**:
+  1. **ปัญหาคำโดดเดี่ยวตกบรรทัด (Orphan Words)**: ในภาษาไทยและภาษาผสม เมื่อหน้าจอแคบลง คำท้ายประโยคหรือคำสั้นๆ เช่น "Jung", "ตำแหน่ง)", "*)", "(จำเป็น *)" จะตกลงมาอยู่บรรทัดใหม่อย่างโดดเดี่ยว ทำให้สายตาเสียจังหวะในการอ่าน
+  2. **สระและวรรณยุกต์ภาษาไทยชนกัน/แหว่ง (Tone Mark Clipping)**: การใช้ `leading-snug` (1.375) กับฟอนต์ `font-serif-th` ในคำอธิบายยาวๆ ทำให้สระบน (อิ, อี, อึ, อือ, ไม้เอก, ไม้โท) และสระล่าง (อุ, อู) มีระยะห่างที่แน่นเกินไป
+  3. **ข้อความและวงเล็บขาดจากกัน**: ป้ายสถานะเช่น `(จำเป็น *)` และ `(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)` ขาดออกจากข้อความนำหน้าและห้อยตกลงมา
+  4. **ความไม่สอดคล้องของจำนวนบทความและลิงก์ 404 ใน Footer**: ใน `SacredNavDropdown`, `HomeSeoContent` และ `ArticleReadingClient` มีการระบุตัวเลขเก่า "20 เรื่อง / 20 บทความ" ทั้งที่คลังจริงมี 24 บทความ และลิงก์ 4 บทความใน Footer หน้าแรกชี้ไปยัง slug ที่ไม่มีอยู่จริง
+- **การแก้ไขระดับวิศวกรรม (Engineering Refinements)**:
+  1. **นำ `[text-wrap:balance]` มาใช้กับหัวข้อและ Label ทุกจุด**:
+     - `HomeSeoContent.tsx`: หัวข้อทั้ง 5 เซกชัน (`#how-it-works-title`, `#heritage-title`, `#spreads-and-cards-title`, `#articles-title`, `#faq-title`) และหัวข้อบล็อกย่อย
+     - `page.tsx`: Hero title & subtitle, Step 2 title & subtitle และเพิ่มเคาะเว้นวรรคชื่อแม่หมอ
+     - `SpreadCardSelector.tsx`, `SpreadsLibrary.tsx`: ชื่อผังพยากรณ์และหัวข้อหลัก
+     - `PersonaCardSelector.tsx`: หัวข้อเลือกแม่หมอและชื่อแม่หมอ
+     - `IntentionAltarInput.tsx`: ป้ายกำกับขั้นตอน 1, 2, 3 และหัวข้อ Quick Seed
+     - `StreamReader.tsx`, `FollowUpChat.tsx`: การ์ดทางลัดถามต่อ, กล่องสิทธิ์/โควตา, ข้อความเตือน AI
+     - `spreads/page.tsx`, `spreads/[id]/page.tsx`, `cards/page.tsx`, `CardDetailView.tsx`, `blog/page.tsx`, `ArticleReadingClient.tsx`: หัวข้อและ Hero ของทุกหน้าระบบ
+  2. **นำ `[text-wrap:pretty]` และ `leading-relaxed font-serif-th` มาใช้กับพารากราฟและคำอธิบาย**:
+     - เพิ่ม `[text-wrap:pretty]` และ `leading-relaxed` ใน Tagline ผัง, คำอธิบายผัง, คำนำบทความ, คำบรรยายแม่หมอ, พารากราฟถอดรหัสไพ่ 5 มิติ, และข้อความต้อนรับในแชท ทำให้ข้อความไหลเรียงสวยงาม ไร้คำตกหล่น
+  3. **ป้องกันป้ายกำกับและวงเล็บขาดจากกันด้วย `whitespace-nowrap`**:
+     - ห่อหุ้ม `(จำเป็น *)` และ `(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)` ใน `IntentionAltarInput.tsx` ป้องกันไม่ให้เครื่องหมายดอกจันหรือวงเล็บปิดหลุดตกบรรทัด
+  4. **ซิงก์ข้อมูลบทความและแก้ไข Broken Slugs**:
+     - อัปเดตตัวเลขใน `SacredNavDropdown.tsx`, `HomeSeoContent.tsx`, และ `ArticleReadingClient.tsx` จาก 20 เป็น **24 บทความ** ให้ตรงกับความจริง 100%
+     - อัปเดต slug บทความแนะนำใน Footer ของ `HomeSeoContent.tsx` ให้ชี้ไปยังบทความที่มีอยู่จริง ไร้ 404
+- **ผลการทดสอบ & ยืนยันผล (Verification)**:
+  - `npm run typecheck` ➔ **0 errors**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 24 ด่านสมบูรณ์ 100%**
+
+### 🗓️ 2026-09-04: ปรับปรุงช่องไฟและระยะห่างระหว่างเซกชันหน้าแรก (HomeSeoContent): สัดส่วนทองคำ ละมุน พอดี ไม่เวิ้งว้าง ไร้ช่องว่างมหาศาล
+
+- **ความต้องการของผู้ใช้**:
+  - "อ่าน md ก่อน ปรับช่องว่างให้พอดี สวย" พร้อมภาพแคปเจอร์ 5 จุดที่ช่องว่างระหว่างเซกชันห่างเกินไปมาก
+- **การวินิจฉัยปัญหา (Root Cause Analysis)**:
+  1. Root Container ใน `HomeSeoContent.tsx` เดิมใส่ `mt-24 sm:mt-32 space-y-24 sm:space-y-36` ซ้อนทับกับคอนเทนเนอร์แม่ใน `page.tsx` ที่มี `pb-12 sm:pb-16` อยู่แล้ว ทำให้มีช่องว่างใต้แถบเลือกผังพยากรณ์เกือบ 200px (รูปที่ 1)
+  2. Tailwind utility `space-y-*` นำ margin-top ไปใส่ให้กับทุก direct sibling elements ซึ่งรวมถึงองค์ประกอบ Divider คั่นระหว่างเซกชันด้วย ส่งผลให้ระหว่างเซกชันก่อนหน้าและตัว Divider มีระยะห่าง 144px และจากตัว Divider ไปยังเซกชันถัดไปมีอีก 144px กลายเป็นช่องว่างเปล่าๆ รวมกว่า 296px (รูปที่ 2-5)
+  3. รอยต่อ FAQ และ Footer: Section 5 มี `pb-16 sm:pb-24` + `space-y-36` 144px + Transition Zone + `space-y-36` 144px + Footer `mt-16 sm:mt-24` ซ้อนกันกลายเป็นช่องว่างกว่า 500px
+- **การแก้ไขระดับวิศวกรรม (Engineering Refinements)**:
+  1. **ถอด `space-y-24 sm:space-y-36` ออกจาก root container**: คุมระยะห่างแต่ละเซกชันอย่างอิสระและแม่นยำ ปรับขอบบนเป็น `mt-4 sm:mt-6` รวมกับระยะของ `page.tsx` ได้ระยะห่างใต้แถบเลือกผังพยากรณ์ 64px (Mobile) / 88px (Desktop) พอดีสายตา
+  2. **ปรับระยะ Divider คั่นทุกเซกชัน (Dividers 1, 2, 3, 4) เป็น `py-10 sm:py-14`**:
+     - เส้นคั่นทองคำ `✦` วางกึ่งกลางสมบูรณ์แบบ (Equidistant Golden Ratio)
+     - ได้ระยะห่างจากขอบล่างเซกชันก่อนหน้าถึงเส้นคั่น 40px/56px และจากเส้นคั่นถึงหัวข้อเซกชันถัดไป 40px/56px
+     - ระยะห่างรวมระหว่างแต่ละเซกชันอยู่ที่ 80px (Mobile) / 112px (Desktop) ซึ่งโปร่ง สบายตา สง่างาม และไม่เวิ้งว้าง
+  3. **ขจัดช่องว่างซ้ำซ้อนระหว่าง FAQ และ Dark Footer**:
+     - นำ `pb-16 sm:pb-24` ออกจาก Section 5 (FAQ)
+     - นำ `mt-16 sm:mt-24` ออกจาก `<footer>`
+     - กำหนดให้ Transition Zone เป็นตัวเชื่อมต่อสายตาที่ `pt-10 pb-12 sm:pt-14 sm:pb-16` ได้ระยะห่างที่สง่างาม 88px (Mobile) / 120px (Desktop) จากการ์ด FAQ ใบสุดท้ายถึงขอบฟุตเตอร์สีเข้ม
+  4. **ปรับระยะห่างภายในเซกชัน**: ปรับ Header และ Grid ภายในเซกชัน 1, 2, 3, 4, 5 ให้เป็น `space-y-8 sm:space-y-10` และ Header เป็น `space-y-2.5 sm:space-y-3` ให้กระชับ สละสลวย
+- **ผลการทดสอบ & ยืนยันผล (Verification)**:
+  - `npm run typecheck` ➔ **0 errors**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 24 ด่านสมบูรณ์ 100%**
+
 ### 🗓️ 2026-09-04: แก้ไขการชนกันขององค์ประกอบหน้าแรก (FAQ-Footer & Ritual Cards) + ยกระดับดีไซน์หน้า Blog สู่ Quiet Luxury & Mystic Sanctuary
 
 - **ความต้องการของผู้ใช้**:

@@ -92,7 +92,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
 
   return (
     <div className="space-y-4 w-full">
-      <label className="text-xs sm:text-sm font-serif-th font-bold text-[#8F5C1A] tracking-wide flex items-center gap-2">
+      <label className="text-xs sm:text-sm font-serif-th font-bold text-[#8F5C1A] tracking-wide flex items-center gap-2 [text-wrap:balance]">
         <span className="text-[#8F5C1A]">✦</span> เลือกสไตล์การทำนายของแม่หมอ ({PERSONAS.length} สไตล์)
       </label>
 
@@ -182,7 +182,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               {/* Card Footer Titles */}
               <div className="pt-2 border-t border-[#D9C8AC]/30 text-center">
                 <div className="flex items-center justify-center gap-1.5">
-                  <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight">
+                  <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight [text-wrap:balance]">
                     {p.nameTh}
                   </h4>
                   <button
@@ -205,7 +205,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                     <SpeakerTabIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <p className="text-[13px] text-[#635B4E] mt-1 leading-snug">{p.tagline}</p>
+                <p className="text-[13px] text-[#635B4E] mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">{p.tagline}</p>
               </div>
 
               {/* Selected Golden Corner Seals */}
