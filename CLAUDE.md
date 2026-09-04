@@ -31,8 +31,7 @@
 | [docs/plans/ENTITLEMENT_PLAN.md](docs/plans/ENTITLEMENT_PLAN.md) | แผนพัฒนาระบบสมาชิกและโควตาเปิดไพ่ |
 | [docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md) | แผนกระจายงาน 5 เอเจนท์เฉพาะทาง |
 | [docs/plans/HANDOFF_2026-09-04.md](docs/plans/HANDOFF_2026-09-04.md) | 📦 แผนส่งต่องานค้าง (ISSUE-017 ถึง 023) — ปิดครบแล้ว |
-| [docs/plans/AI_INTELLIGENCE_PLAN.md](docs/plans/AI_INTELLIGENCE_PLAN.md) | 🧠 แผนยกระดับความฉลาดแม่หมอ AI — **กลยุทธ์** (3 ระบบที่สร้างไว้แล้วแต่ไม่ได้ต่อ) |
-| [docs/plans/AI_INTELLIGENCE_EXECUTION.md](docs/plans/AI_INTELLIGENCE_EXECUTION.md) | 🛠️ **แผนลงมือ 8 งาน** แบ่ง PR A-H พร้อมโค้ดเป้าหมายและเกณฑ์ผ่านรายข้อ |
+| [docs/plans/AI_INTELLIGENCE_PLAN.md](docs/plans/AI_INTELLIGENCE_PLAN.md) | 🧠 **แผนแม่บทยกระดับแม่หมอ AI** — เอกสารเดียวจบ (3 ระบบที่ไม่ได้ต่อ + 10 งานแบ่ง 3 คลื่น + เกณฑ์ผ่านรายข้อ) |
 
 ---
 
