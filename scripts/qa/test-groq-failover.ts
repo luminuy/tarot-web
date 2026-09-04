@@ -11,6 +11,11 @@ import {
   generateGroqChatReply,
   probeGroqHealth,
 } from "../../src/lib/ai/groq";
+import {
+  FOREIGN_LEAK_SWITCH_THRESHOLD,
+  SEVERE_FOREIGN_LEAK_THRESHOLD,
+  isSevereForeignLeak,
+} from "../../src/lib/ai/language";
 
 let pass = 0;
 let fail = 0;
@@ -104,6 +109,43 @@ async function main() {
   } else {
     console.log("\n⚠️ ไม่พบ GROQ_API_KEY ใน environment สำหรับการทดสอบยิงสด (ข้ามขั้นยิงจริง)");
   }
+
+  // ── เกณฑ์ตัดวงจรภาษาต่างด้าว ต้องมาจากค่าคงที่ที่เดียว ────────────────
+  // ⚠️ ด่านนี้มีไว้กันเลข 14 / 20 หลุดกลับไปฮาร์ดโค้ดใน groq.ts อีก
+  // ถ้าปรับเกณฑ์ที่ language.ts แล้วอีกที่ยังใช้เลขเดิม เกณฑ์ "สลับโมเดล"
+  // กับ "เลิกกับ Groq ทั้งชุด" จะเพี้ยนไปคนละทางโดยไม่มีอะไรเตือน
+  console.log("\n🚦 เกณฑ์ตัดวงจรเมื่อคำอ่านหลุดภาษาต่างด้าว");
+
+  check(
+    `SEVERE ต้องสูงกว่า SWITCH (${SEVERE_FOREIGN_LEAK_THRESHOLD} > ${FOREIGN_LEAK_SWITCH_THRESHOLD})`,
+    SEVERE_FOREIGN_LEAK_THRESHOLD > FOREIGN_LEAK_SWITCH_THRESHOLD,
+  );
+
+  const cn = (n: number) => "中".repeat(n);
+  check(
+    `isSevereForeignLeak: อักษรจีน ${SEVERE_FOREIGN_LEAK_THRESHOLD} ตัว → true`,
+    isSevereForeignLeak(cn(SEVERE_FOREIGN_LEAK_THRESHOLD)) === true,
+  );
+  check(
+    `isSevereForeignLeak: อักษรจีน ${SEVERE_FOREIGN_LEAK_THRESHOLD - 1} ตัว → false`,
+    isSevereForeignLeak(cn(SEVERE_FOREIGN_LEAK_THRESHOLD - 1)) === false,
+  );
+  check("isSevereForeignLeak: ข้อความไทยล้วน → false", isSevereForeignLeak("แม่หมอทักทายคุณอย่างอบอุ่น") === false);
+  check("isSevereForeignLeak: null / undefined → false", !isSevereForeignLeak(null) && !isSevereForeignLeak(undefined));
+
+  const groqSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/ai/groq.ts"), "utf-8");
+  check(
+    "groq.ts ใช้ค่าคงที่จาก language.ts ไม่ฮาร์ดโค้ดตัวเลขเกณฑ์เอง",
+    !/totalForeignChars\s*>=\s*\d/.test(groqSrc),
+  );
+  check(
+    "groq.ts import ค่าคงที่เกณฑ์ทั้งสองระดับมาใช้จริง",
+    groqSrc.includes("FOREIGN_LEAK_SWITCH_THRESHOLD") && groqSrc.includes("SEVERE_FOREIGN_LEAK_THRESHOLD"),
+  );
+  check(
+    "streamGroqReading ต่อ isSevereForeignLeak ไว้จริง (circuit breaker ไม่ใช่โค้ดตาย)",
+    groqSrc.includes("isSevereForeignLeak("),
+  );
 
   console.log(`\n📊 ผลสรุป: ผ่าน ${pass} / ล้มเหลว ${fail}`);
   if (fail > 0) {

@@ -7,6 +7,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { FOREIGN_LEAK_SWITCH_THRESHOLD } from "../../src/lib/ai/language";
 import { SYSTEM_CORE_KNOWLEDGE, buildReadingMessage, type ReadingContext } from "../../src/lib/ai/prompt";
 import { ReadingSchema } from "../../src/lib/schema/reading";
 import { ALL_CARDS } from "../../src/data/cards";
@@ -55,7 +56,17 @@ async function main() {
   const groqSrc = fs.readFileSync(path.resolve(process.cwd(), "src/lib/ai/groq.ts"), "utf-8");
   check('streamGroqReading ตั้ง reasoning_format: "hidden"', groqSrc.includes('reasoning_format: "hidden"'));
   check("streamGroqReading กำหนด max_tokens ตามจำนวนไพ่ (maxReadingTokens)", groqSrc.includes("max_tokens: maxReadingTokens"));
-  check("Circuit breaker threshold ปรับเป็น >= 14", groqSrc.includes("totalForeignChars >= 14"));
+  // ⚠️ เดิมด่านนี้ grep หาสตริง "totalForeignChars >= 14" ตรง ๆ
+  // พอเลขถูกย้ายไปเป็นค่าคงที่ใน language.ts (แหล่งความจริงเดียว) ด่านก็ล้มทันที
+  // ต้องตรวจที่ "ค่าจริง" ไม่ใช่ที่หน้าตาของโค้ด — ไม่งั้นด่านจะขวางการ refactor ที่ถูกต้อง
+  check(
+    `Circuit breaker threshold (สลับโมเดล) = ${FOREIGN_LEAK_SWITCH_THRESHOLD}`,
+    FOREIGN_LEAK_SWITCH_THRESHOLD === 14,
+  );
+  check(
+    "groq.ts ใช้ค่าคงที่ FOREIGN_LEAK_SWITCH_THRESHOLD ไม่ฮาร์ดโค้ดตัวเลขเอง",
+    groqSrc.includes("totalForeignChars >= FOREIGN_LEAK_SWITCH_THRESHOLD"),
+  );
   check("นับสถิติ ai_foreign_trip เมื่อ circuit breaker ตัด", groqSrc.includes('recordEvent("ai_foreign_trip:groq")'));
   check("นับสถิติ ai_schema_fail เมื่อ JSON ไม่ตรง schema", groqSrc.includes('recordEvent("ai_schema_fail:groq")'));
   check('generateGroqChatReply มีเพดาน max_tokens เริ่มต้น (2400)', groqSrc.includes("2400"));
