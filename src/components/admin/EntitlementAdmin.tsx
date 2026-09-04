@@ -42,6 +42,13 @@ const METRIC_LABEL: Record<string, string> = {
   signupDismissed: "การ์ดชวนสมัคร: ปิด",
 };
 
+/** metric สุขภาพฐานข้อมูล — ค่าที่ > 0 แปลว่ามีปัญหาจริง ต้องรีบดู */
+const DB_HEALTH_METRICS: { key: string; label: string; hint: string }[] = [
+  { key: "dbError", label: "DB สิทธิ์ล่ม", hint: "โควตาไม่ได้ถูกบังคับจริงในช่วงนั้น" },
+  { key: "dbSelfheal", label: "สร้างตารางใหม่อัตโนมัติ", hint: "ตารางเคยหาย ระบบซ่อมเองสำเร็จ" },
+  { key: "dbSelfhealFailed", label: "ซ่อมตารางไม่สำเร็จ", hint: "ต้องกดปุ่ม “เตรียมฐานข้อมูล” ด้านบนเอง" },
+];
+
 async function ops(action: string, before?: string) {
   const res = await fetch("/api/admin/entitlement/ops", {
     method: "POST",
@@ -300,6 +307,34 @@ export default function EntitlementAdmin() {
         <button onClick={load} className="mt-3 text-xs text-[#9c93b8] hover:text-[#e5c07b]">
           รีเฟรช ✦
         </button>
+      </div>
+
+      {/* ── สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด) ── */}
+      <div className="altar-panel rounded-2xl p-5">
+        <h3 className="text-sm font-semibold text-[#e5c07b]">สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด)</h3>
+        <p className="mt-1 text-xs text-[#9c93b8]">
+          ทุกค่าควรเป็น <strong>0</strong> — ถ้าไม่ใช่ แปลว่าโควตาอาจไม่ถูกบังคับจริงในช่วงนั้น
+        </p>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {DB_HEALTH_METRICS.map(({ key, label, hint }) => {
+            const value = s.metrics[key] ?? 0;
+            const bad = value > 0;
+            return (
+              <div
+                key={key}
+                className={`rounded-xl p-3 ${
+                  bad ? "bg-[#3a1420] border border-[#f0a0a0]/40" : "bg-[#0c0818]/70"
+                }`}
+              >
+                <p className="text-[13px] text-[#9c93b8]">{label}</p>
+                <p className={`mt-0.5 text-lg font-bold ${bad ? "text-[#f0a0a0]" : "text-emerald-400"}`}>
+                  {value.toLocaleString("th-TH")}
+                </p>
+                <p className="mt-1 text-[11px] leading-snug text-[#9c93b8]">{hint}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

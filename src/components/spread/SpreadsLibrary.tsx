@@ -228,6 +228,12 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                 >
                   <span>✦ {isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้"}</span>
                 </Link>
+                <Link
+                  href={`/spreads/${spread.id}`}
+                  className="z-10 -mt-1 text-center text-[13px] font-serif-th text-[#A58A5C] hover:text-[#29261F] transition-colors"
+                >
+                  อ่านคู่มือผังนี้ →
+                </Link>
               </div>
             );
           })}

@@ -49,6 +49,10 @@ export async function GET() {
       signupShown: r.signup_card_shown ?? 0,
       signupClicked: r.signup_card_clicked ?? 0,
       signupDismissed: r.signup_card_dismissed ?? 0,
+      // สุขภาพฐานข้อมูลสิทธิ์ — ถ้าตัวเลขพวกนี้ขึ้น = โควตาอาจไม่ได้ถูกบังคับจริงในช่วงนั้น (ดู entitlement.ts)
+      dbError: r.entitlement_db_error ?? 0,
+      dbSelfheal: r.entitlement_db_selfheal ?? 0,
+      dbSelfhealFailed: r.entitlement_db_selfheal_failed ?? 0,
     },
   });
 }
