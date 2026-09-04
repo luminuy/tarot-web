@@ -2,6 +2,11 @@ import type { Category, TarotCard } from "@/data/cards/types";
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
 import { getCosmicContext } from "@/lib/ai/cosmic";
 import { analyzeElementalAlchemy } from "@/lib/ai/alchemy";
+import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
+import { analyzeNumerologicalRhythm } from "@/lib/ai/numerology";
+import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
+import { generateMindfulMicroRitual } from "@/lib/ai/ritual";
+import { analyzeKarmicBridge } from "@/lib/ai/karmic";
 import type { Spread } from "@/data/spreads";
 import { getPersona, type Persona } from "@/data/personas";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
@@ -139,9 +144,14 @@ export function buildReadingMessage(ctx: ReadingContext): string {
 ${loreStr}`;
   });
 
-  // Pre-compute Real-Time Cosmic Context & Golden Dawn Alchemy Matrix
+  // Pre-compute Real-Time Cosmic & Grandmaster Cognitive Matrices
   const cosmic = getCosmicContext();
   const alchemy = analyzeElementalAlchemy(cards);
+  const gaze = analyzeSpatialGazeDialogue(cards);
+  const numerology = analyzeNumerologicalRhythm(cards);
+  const diagnosis = diagnoseQuestionEnergy(question || "", intake);
+  const ritual = generateMindfulMicroRitual(alchemy.lackingElements, alchemy.dominantElement);
+  const karmic = analyzeKarmicBridge(cards);
 
   const intakeLines = [
     intake.situation && `สถานการณ์ปัจจุบัน: ${intake.situation}`,
@@ -157,8 +167,13 @@ ${loreStr}`;
     ? `\n## โหมดฟันธง ใช่/ไม่ใช่\nกรอก yesNoAnswer เป็น "ใช่", "ไม่ใช่", หรือ "ยังไม่แน่" พร้อมเหตุผลสรุปใน summary\n`
     : "";
 
-  const alchemyBlock = `## 🔮 ข้อมูลการสังเคราะห์เชิงสัญลักษณ์และเคมีธาตุ (Golden Dawn Alchemical Matrix)
-${alchemy.alchemyNarrative}`;
+  const cognitiveBlock = `## 🔮 ข้อมูลการสังเคราะห์เชิงสัญลักษณ์และเคมีธาตุ (Grandmaster Cognitive Matrix)
+${alchemy.alchemyNarrative}
+${gaze.dialogueNarrative ? `\n• บทสนทนาทางสายตาและภาษากาย (Spatial Gaze Dialogue):\n${gaze.dialogueNarrative}` : ""}
+${numerology.narrativeTh ? `\n• จังหวะตัวเลขและวงจรชีวิต (Numerological Rhythm):\n${numerology.narrativeTh}` : ""}
+${diagnosis.promptDirective}
+${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
+• กิจกรรมฝึกสติประจำผัง (Mindful Ritual Guidance): ขอให้นำแนวทางนี้ไปใส่เป็นข้อสุดท้ายใน advice -> "${ritual.adviceString}"`;
 
   const cleanNickname = (nickname || "คุณ (ผู้มาขอคำทำนาย)").replace(/[\x00-\x1F\x7F]/g, "").trim();
   const cleanQuestion = (question || "ภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้").replace(/[\x00-\x1F\x7F]/g, "").trim();
@@ -174,7 +189,7 @@ ${alchemy.alchemyNarrative}`;
 ## ผังไพ่ที่ใช้: ${spread.nameTh} (${spread.description})
 หมวดคำทำนาย: ${category}
 
-${alchemyBlock}
+${cognitiveBlock}
 
 ## ไพ่ที่ผู้ถามสุ่มเลือกหยิบได้จริง (${drawn.length} ใบ):
 ${cardBlocks.join("\n\n")}
@@ -191,7 +206,11 @@ ${guard}${yesNo}
   }],
   "connections": "ถอดรหัสความเชื่อมโยง การส่งพลังงาน บทสนทนาทางสายตา และเคมีธาตุระหว่างไพ่ 4-6 ประโยค",
   "summary": "สรุปคำตอบโดยตรงอย่างลึกซึ้งรอบด้านและมอบพลังบวก 5-8 ประโยค (ประโยคสุดท้ายต้องเป็น 1 คำถามชวนคิดทรงพลัง)",
-  "advice": ["ข้อแนะนำที่เป็น Micro-Action ลงมือทำได้จริงใน 24-48 ชม. 2-3 ข้อ"],
+  "advice": [
+    "ข้อแนะนำที่เป็น Micro-Action ลงมือทำได้จริงใน 24-48 ชม. ข้อที่ 1",
+    "ข้อแนะนำที่เป็น Micro-Action ลงมือทำได้จริงใน 24-48 ชม. ข้อที่ 2",
+    "กิจกรรมฝึกสติ 1 นาทีตาม Mindful Ritual ด้านบน (ขึ้นต้นด้วย 🧘 กิจกรรมฝึกสติ 1 นาที:)"
+  ],
   "timing": "กรอบเวลาโดยประมาณ",
   "mood": "หนึ่งใน: สดใส | อบอุ่น | สงบ | ครุ่นคิด | ท้าทาย"
 }

@@ -9,6 +9,8 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
+import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
+import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
 import { checkQuestion, CRISIS_MESSAGE } from "@/lib/safety/guardrails";
 import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
@@ -307,6 +309,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       })
       .filter((line): line is string => !!line);
 
+    const rawCards = (record.drawn || [])
+      .map((d) => cardByIndex(d.cardIndex))
+      .filter((c): c is import("@/data/cards").TarotCard => !!c);
+    const gazeDialogue = analyzeSpatialGazeDialogue(rawCards);
+    const questionDiagnosis = diagnoseQuestionEnergy(userQuestion);
+
     const systemInstruction = `${buildSystemPrompt(personaId, {
       systemCore: resolveSystemCore(overrideDoc),
       persona: resolvePersona(overrideDoc, personaId),
@@ -320,6 +328,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 ${cards.join("\n")}
 
 • สรุปคำทำนายเดิมที่คุณเคยบอกไว้: "${record.result?.summary || "กำลังอยู่ในช่วงการเปลี่ยนแปลงที่ดี"}"
+${gazeDialogue.dialogueNarrative ? `\n• บทสนทนาทางสายตาบนหน้าไพ่:\n${gazeDialogue.dialogueNarrative}` : ""}
+${questionDiagnosis.promptDirective}
 
 ## กฎเหล็กการคิดและตอบคำถามต่อยอด (Think & Speak Like The World's Best Tarot Master)
 1. **การรักษาตัวตนและน้ำเสียง (Persona Consistency)**: สวมบทบาทแม่หมอตามบุคลิกที่เลือก 100% พูดจาเป็นธรรมชาติ ไหลลื่น เหมือนเพื่อนสนิท/พี่สาว/ผู้หยั่งรู้ นั่งคุยกันในห้องส่วนตัว

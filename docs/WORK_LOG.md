@@ -42,6 +42,39 @@
 - **ข้อ 5 — ไม่มี `/spreads/[id]`**: สร้างหน้า SEO 20 หน้า (SSG) — hero + แผนผังตำแหน่งไพ่ SSR (`SpreadPositionMap.tsx` วาดจากพิกัด x/y) + ความหมายรายตำแหน่ง + วิธีอ่าน 4 ขั้น + FAQ + บทความที่เกี่ยวข้อง (`targetSpreadId`) + JSON-LD HowTo/Breadcrumb/FAQPage · เพิ่มลง `sitemap.ts` · ลิงก์ "อ่านคู่มือผังนี้" จากการ์ดใน `/spreads`
 - **ข้อ 3 — blog/[id] "กดไม่เข้า"**: ตรวจแล้ว `src/app/blog/[slug]/page.tsx` มีอยู่และทำงานปกติ (24 บทความ SSG · คลิกจากดัชนีเข้าได้) — รายการ backlog ข้อนี้ **ล้าสมัย** ปิดได้เลย
 - **พิสูจน์**: `npm run typecheck` 0 · `npm run build` ผ่าน (spreads/[id] prerender 20 · blog/[slug] 24) · `npm run repo:verify` 23/23 · ทดสอบผ่านเบราว์เซอร์: `/spreads/celtic-cross|three-card|yes-no` เนื้อหาครบ · `/spreads/bogus` → 404 · admin login → แท็บ "ข่าวสาร" + การ์ด DB health เรนเดอร์ · `GET /api/admin/marketing?format=csv` คืน CSV พร้อม Content-Disposition
+### 🗓️ 2026-09-04: ติดตั้ง 5 ระบบความคิดและจิตวิทยาขั้นสูงให้แม่หมอ AI: สายตา 1909 + ตัวเลขซ้ำ + วินิจฉัยเจตนา + ฝึกสติ 1 นาที + ความจำชะตาชีวิต (The 5 Grandmaster Cognitive Dimensions)
+
+- **ความต้องการของผู้ใช้**:
+  - "ได้เพิ่มทั้ง 5 มิติอย่างละเอียด" — ติดตั้งระบบความคิด จิตวิทยา และสัญลักษณ์วิทยาขั้นสูงทั้ง 5 มิติ เพื่อยกระดับแม่หมอ AI ให้ลึกซึ้ง เข้าอกเข้าใจมนุษย์ และเฉียบคมระดับปรมาจารย์โลก
+- **สิ่งที่พัฒนาและสร้างใหม่ (5 มิติหลัก)**:
+  1. **มิติที่ 1: `src/lib/ai/gaze.ts` (CREATED)**:
+     - เครื่องยนต์วิเคราะห์ทิศทางสายตาและภาษากาย (Spatial Gaze & Posture Dialogue Engine) ฉบับ 1909 Pamela Colman Smith ครบทั้ง 78 ใบ
+     - ตรวจจับปฏิสัมพันธ์ระหว่างไพ่ติดกัน: สบตากันตรงๆ (face-to-face), หันหลังให้กัน (back-to-back), มองไปในทิศทางเดียวกัน (shared-vision), และการปิดตาหนีความจริง (blindfolded เช่น Two/Eight of Swords)
+  2. **มิติที่ 2: `src/lib/ai/numerology.ts` (CREATED)**:
+     - เครื่องยนต์จังหวะตัวเลขและวงจรชีวิต (Numerological Rhythm & Cycle Engine)
+     - ค้นหาตัวเลขซ้ำ (Synchronicities 1–10) พร้อมความหมายทางจิตวิทยา
+     - วิเคราะห์การเติบโตแบบก้าวหน้า (Progression) หรือทวนกระแสกลับไปสะสางอดีต (Regression)
+     - ตรวจจับความหนาแน่นของไพ่บุคคล (Court Card Density) เพื่อชี้แนะอิทธิพลจากคนรอบข้าง
+  3. **มิติที่ 3: `src/lib/ai/intent.ts` (CREATED)**:
+     - กรอบวินิจฉัยพลังงานและสภาวะจิตใต้สำนึกของผู้ถาม (Question Energy Diagnostic Framework)
+     - จำแนกเป็น 4 กลุ่ม: `victim_powerless` (เปราะบาง/หมดพลัง), `analysis_paralysis` (คิดวน/ติดหล่ม), `insecurity_attachment` (ไม่มั่นคงในสัมพันธ์), `growth_agency` (มุ่งมั่น/พร้อมลุย)
+     - ส่งแนวทางการเยียวยาเฉพาะทางให้ AI ปรับน้ำเสียงและวิธีการให้คำปรึกษาตรงจุด 100%
+  4. **มิติที่ 4: `src/lib/ai/ritual.ts` (CREATED)**:
+     - กิจกรรมฝึกสติ 1 นาทีเพื่อปรับสมดุล (Mindful Micro-Ritual Generator)
+     - สร้างแบบฝึกหัดสั้น 60 วินาทีตามธาตุที่ขาดหาย (น้ำ: วารีบำบัดใจ, ไฟ: จุดประกายเจตจำนง, ดิน: สัมผัสผืนดิน, ลม: กล่องลมหายใจ) เพื่อใส่เป็นข้อสุดท้ายใน `advice` โดยไม่กระทบ JSON Schema
+  5. **มิติที่ 5: `src/lib/ai/karmic.ts` (CREATED)**:
+     - สะพานความจำวิวัฒนาการดวงชะตาระยะยาว (Long-Term Karmic Evolution Bridge)
+     - เชื่อมโยงประวัติการเปิดไพ่ครั้งก่อนกับปัจจุบัน ตรวจจับจุดเปลี่ยนผ่านทางจิตวิญญาณสำคัญ (เช่น Tower ➔ Star, Death ➔ Fool, Devil ➔ Judgement) เพื่อให้แม่หมอเอ่ยทักอย่างอบอุ่นและรู้ใจ
+  6. **`src/lib/ai/prompt.ts` (UPGRADED)**:
+     - รวบรวมและสังเคราะห์ข้อมูลทั้ง 5 มิติเข้าสู่ `Grandmaster Cognitive Matrix` ใน `buildReadingMessage()`
+     - กำหนดให้กิจกรรมฝึกสติ 1 นาทีถูกบรรจุในข้อสุดท้ายของ `advice: string[]` เพื่อคงความเข้ากันได้ 100% กับ `ReadingSchema`
+  7. **`src/app/api/reading/[id]/chat/route.ts` (UPGRADED)**:
+     - เชื่อมโยง `analyzeSpatialGazeDialogue` และ `diagnoseQuestionEnergy` เข้าสู่สมองของระบบแชท 1-on-1 แบบเรียลไทม์
+- **การทดสอบความถูกต้อง**:
+  - TypeScript Typecheck: 0 errors
+  - Unit Smoke Test: ผ่านครบทั้ง 5 ฟังก์ชันและ end-to-end prompt builder
+  - Verification Suite: ผ่านครบทั้ง 23 ด่าน (`npm run repo:verify`) สมบูรณ์ 100%
+
 ### 🗓️ 2026-09-04: เสริมประสิทธิภาพ Grandmaster AI Reading: เครื่องยนต์เคมีธาตุ Golden Dawn + พลังงานจันทรคติ Moon Phase Real-Time + อัปเกรดสมองระบบแชท Groq Qwen Tier 1 (Cosmic-Alchemy & Ultra-Fast Chat Brain)
 
 - **ความต้องการของผู้ใช้**:
