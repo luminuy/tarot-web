@@ -23,6 +23,7 @@ interface CardImageProps {
   full?: boolean;
   loading?: "lazy" | "eager";
   decoding?: "async" | "sync" | "auto";
+  fetchPriority?: "high" | "low" | "auto";
   draggable?: boolean;
   onError?: () => void;
 }
@@ -46,6 +47,7 @@ export function CardImage({
   full = false,
   loading = "lazy",
   decoding = "async",
+  fetchPriority,
   draggable = false,
   onError,
 }: CardImageProps) {
@@ -62,6 +64,7 @@ export function CardImage({
       style={style}
       loading={loading}
       decoding={decoding}
+      fetchPriority={fetchPriority}
       draggable={draggable}
       onError={onError}
     />
