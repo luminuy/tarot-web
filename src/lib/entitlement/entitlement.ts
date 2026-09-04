@@ -2,6 +2,43 @@ import { getAppDB } from "@/lib/platform/db";
 import { dayKey, nextResetAt, weekKey } from "@/lib/entitlement/week";
 import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading, todayDateKey } from "@/lib/entitlement/daily";
 import { DAILY_LIMIT, GUEST_LIMIT, SIGNUP_BONUS } from "@/lib/entitlement/limits";
+import { recordEvent } from "@/lib/stats/record";
+
+/**
+ * นโยบายเมื่อ **ฐานข้อมูลสิทธิ์ล่ม** (ตารางหาย / D1 throttle / schema ไม่ตรง)
+ *
+ * ต้องเป็นการตัดสินใจที่เขียนไว้ชัด ๆ ตรงนี้ ไม่ใช่ผลพลอยได้ของ `try/catch`
+ * (บทเรียน: ENTITLEMENT_PLAN §11 — ของเดิม `catch { return true }` เหมาว่า error
+ *  ทุกชนิดคือการชน UNIQUE ทำให้ error จริงกลายเป็น "เปิดไพ่ฟรี" แบบไม่มีร่องรอย)
+ *
+ * - `"allow"` — ปล่อยให้เปิดไพ่ต่อไปโดยไม่หักสิทธิ์
+ * - `"deny"`  — ปิดกั้นไว้ก่อน
+ *
+ * **เลือก `"allow"` เพราะ:** ต้นทุนถูกคุมด้วย `AI_DAILY_CALL_CAP` ซึ่งเป็นเพดานแยก
+ * ที่ทำงานอยู่แล้ว ความเสียหายด้านเงินจึงมีขอบเขตจำกัดอยู่ดี · ขณะที่การ `deny`
+ * จะบล็อก **เฉพาะสมาชิก** (ผู้เยี่ยมชมนับด้วยคุกกี้ ไม่แตะ D1) ซึ่งคือคนที่สมัครแล้ว
+ * — ลงโทษผู้ใช้ที่ดีที่สุดเพราะระบบเราเองพัง
+ *
+ * เปลี่ยนเป็น `"deny"` ได้ด้วยการแก้บรรทัดเดียว ถ้าวันหนึ่งต้นทุนสำคัญกว่าประสบการณ์ผู้ใช้
+ */
+const DB_FAILURE_POLICY: "allow" | "deny" = "allow";
+
+/** true เฉพาะเมื่อ error คือการชน UNIQUE/constraint จริง ๆ (= เคยหักสิทธิ์ไปแล้ว) */
+function isUniqueViolation(e: unknown): boolean {
+  const msg = String((e as { message?: unknown })?.message ?? e ?? "");
+  return /unique|constraint/i.test(msg);
+}
+
+/**
+ * บันทึกว่าฐานข้อมูลสิทธิ์ล่ม แล้วคืนค่าตามนโยบาย
+ * metric `entitlement_db_error` โผล่ในการ์ด "สถิติระบบสิทธิ์" ของ `/admin`
+ * — ถ้าเห็นตัวเลขนี้ขึ้น แปลว่าโควตาไม่ได้ถูกบังคับจริงในช่วงนั้น ต้องรีบดู
+ */
+function onDbFailure(where: string, e: unknown): boolean {
+  recordEvent("entitlement_db_error");
+  console.error(`[entitlement] DB ล่มที่ ${where} — ใช้นโยบาย ${DB_FAILURE_POLICY}`, e);
+  return DB_FAILURE_POLICY === "allow";
+}
 
 /**
  * แกนสิทธิ์การเปิดไพ่ — แหล่งความจริงเดียว (ENTITLEMENT_PLAN ข้อ 5)
@@ -114,7 +151,30 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
     };
   }
 
-  const { dailyUsed: usedToday, bonusGranted, bonusUsed, paidGranted } = await memberUsage(v.userId);
+  // D1 ล่มตรงนี้ = อ่านยอดใช้ไม่ได้ · ของเดิม throw ทะลุไปทำให้ `/api/entitlement`
+  // ตอบ 500 แล้ว QuotaBadge/หน้าเว็บพังทั้งหน้า — ให้ degrade ตามนโยบายแทน
+  let usage: Awaited<ReturnType<typeof memberUsage>>;
+  try {
+    usage = await memberUsage(v.userId);
+  } catch (e) {
+    const allow = onDbFailure("getEntitlement/memberUsage", e);
+    return {
+      kind: "member",
+      canStartReading: allow,
+      canChat: true,
+      remaining: allow ? DAILY_LIMIT : 0,
+      limit: DAILY_LIMIT,
+      dailyRemaining: allow ? DAILY_LIMIT : 0,
+      weeklyRemaining: allow ? DAILY_LIMIT : 0,
+      bonusRemaining: 0,
+      hasPaidCredits: false,
+      resetAt: nextResetAt(),
+      dailyFreeAvailable,
+      dailyStreak,
+      reason: allow ? undefined : "daily_exhausted",
+    };
+  }
+  const { dailyUsed: usedToday, bonusGranted, bonusUsed, paidGranted } = usage;
   const dailyRemaining = Math.max(0, DAILY_LIMIT - usedToday);
   const bonusRemaining = Math.max(0, bonusGranted - bonusUsed);
   const remaining = dailyRemaining + bonusRemaining;
@@ -174,7 +234,13 @@ export async function consumeReading(
     .catch(() => null);
   if (already) return true;
 
-  const ent = await getEntitlement(v);
+  // อ่านยอดคงเหลือ — ถ้า D1 ล่มตรงนี้ ของเดิมจะ throw ทะลุออกไปเป็น 500
+  let ent: Entitlement;
+  try {
+    ent = await getEntitlement(v);
+  } catch (e) {
+    return onDbFailure("consumeReading/getEntitlement", e);
+  }
   if (!ent.canStartReading && ent.remaining <= 0) return false;
 
   // ใช้โควตารายวันก่อน เก็บโบนัสไว้ให้นานที่สุด
@@ -190,9 +256,12 @@ export async function consumeReading(
       .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, source, Date.now())
       .run();
     return true;
-  } catch {
-    // ชน UNIQUE(reading_id) = เคยหักไปแล้ว → ถือว่าผ่าน ไม่หักซ้ำ
-    return true;
+  } catch (e) {
+    // แยกให้ชัด: ชน UNIQUE(reading_id) = เคยหักไปแล้วจริง ๆ → ผ่าน ไม่หักซ้ำ
+    if (isUniqueViolation(e)) return true;
+    // error อื่น (ตารางหาย / throttle / schema ไม่ตรง) = โควตาไม่ได้ถูกบันทึก
+    // ห้ามกลืนเงียบเหมือนของเดิม — ยิง metric แล้วตัดสินตามนโยบายที่ประกาศไว้
+    return onDbFailure("consumeReading/insert", e);
   }
 }
 
@@ -204,8 +273,12 @@ export async function refundReading(readingId: string): Promise<void> {
   try {
     const db = await getAppDB();
     await db.prepare(`DELETE FROM reading_usage WHERE reading_id = ?`).bind(readingId).run();
-  } catch {
-    // best-effort
+  } catch (e) {
+    // คืนสิทธิ์ไม่สำเร็จ = ผู้ใช้เสียสิทธิ์ทั้งที่ระบบเราพัง — ห้ามเงียบ
+    // ไม่ throw ต่อ เพราะจุดเรียกอยู่ใน error path ของ stream อยู่แล้ว
+    // (throw ซ้ำจะกลบ error ต้นทางที่สำคัญกว่า) แต่ต้องมี metric ให้เห็น
+    recordEvent("entitlement_refund_failed");
+    console.error("[entitlement] คืนสิทธิ์ไม่สำเร็จ", { readingId }, e);
   }
 }
 
