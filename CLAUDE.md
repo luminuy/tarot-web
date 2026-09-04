@@ -30,7 +30,8 @@
 | [docs/specs/ENTITLEMENT_ABUSE_MODEL.md](docs/specs/ENTITLEMENT_ABUSE_MODEL.md) | ระบบกันโกงสิทธิ์ฟรี — threat model |
 | [docs/plans/ENTITLEMENT_PLAN.md](docs/plans/ENTITLEMENT_PLAN.md) | แผนพัฒนาระบบสมาชิกและโควตาเปิดไพ่ |
 | [docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md) | แผนกระจายงาน 5 เอเจนท์เฉพาะทาง |
-| [docs/plans/HANDOFF_2026-09-04.md](docs/plans/HANDOFF_2026-09-04.md) | 📦 **แผนส่งต่องานค้าง** (ISSUE-017 ถึง 023) พร้อมโค้ดเป้าหมายและเกณฑ์ผ่านรายข้อ |
+| [docs/plans/HANDOFF_2026-09-04.md](docs/plans/HANDOFF_2026-09-04.md) | 📦 แผนส่งต่องานค้าง (ISSUE-017 ถึง 023) — ปิดครบแล้ว |
+| [docs/plans/AI_INTELLIGENCE_PLAN.md](docs/plans/AI_INTELLIGENCE_PLAN.md) | 🧠 **แผนยกระดับความฉลาดของแม่หมอ AI** — 3 ระบบที่สร้างไว้แล้วแต่ไม่ได้ต่อ + เทคนิคที่เสนอเป็นเฟส |
 
 ---
 
