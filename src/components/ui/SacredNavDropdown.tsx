@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion, type Variants } from "motion/react";
 import {
   TarotSpreadNavIcon,
   TarotDeckNavIcon,
@@ -11,11 +10,6 @@ import {
 } from "@/components/ui/TarotArtIcons";
 import { CoinSealIcon } from "@/components/entitlement/EntitlementIcons";
 import { soundManager } from "@/lib/utils/audio";
-
-const EASE = {
-  enter: [0.16, 1, 0.3, 1] as [number, number, number, number],
-  exit: [0.4, 0, 1, 1] as [number, number, number, number],
-};
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;

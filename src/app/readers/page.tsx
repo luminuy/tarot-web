@@ -35,14 +35,16 @@ export default async function ReadersPage() {
         </div>
 
         {/* Hero Header */}
-        <div className="text-center space-y-2.5 py-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] text-xs text-[#8F5C1A] font-bold font-serif-th">
-            <span>✦</span> ตลาดรวมแม่หมอตัวจริง (Tarot Marketplace) <span>✦</span>
+        <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
+          <div>
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] text-xs text-[#8F5C1A] font-bold font-serif-th shadow-xs">
+              <span>✦</span> ตลาดรวมแม่หมอตัวจริง (Tarot Marketplace) <span>✦</span>
+            </span>
           </div>
-          <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide">
+          <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
             ปรึกษาแม่หมอตัวจริง
           </h1>
-          <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto leading-relaxed font-serif-th">
+          <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
             เลือกแม่หมอที่มีความถนัดตรงกับเรื่องที่คุณต้องการคำปรึกษา พร้อมระบบ AI ช่วยสังเคราะห์บรีฟคำถามก่อนเริ่มสนทนา
           </p>
         </div>

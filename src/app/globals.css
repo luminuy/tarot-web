@@ -470,6 +470,32 @@ html {
   backface-visibility: hidden;
 }
 
+/* World-Class Hardware-Accelerated Dropdown Transitions (Zero Frame-Drop Compositor Layer) */
+.dropdown-panel-base {
+  transform-origin: top right;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 160ms;
+}
+
+.dropdown-panel-entering {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.dropdown-panel-exiting {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(0, -6px, 0) scale(0.98);
+}
+
+
 /* FDN-5: Shared Button & Touch Manipulation Utilities */
 button,
 a,

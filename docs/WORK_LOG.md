@@ -34,6 +34,30 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: แก้ไขวรรณยุกต์ภาษาไทยชนขอบป้ายหัวข้อ (Header Badge & Title Overlap Fix): ขยายระยะห่าง ปรับ Headroom และ Line-Height สมบูรณ์แบบ
+
+- **ความต้องการของผู้ใช้**:
+  - "ทำไมยังทับอยู่ ตัวอักษร" พร้อมแนบภาพแคปเจอร์ 2 ภาพจากหน้า `/spreads` ("ผังการเปิดไพ่ทาโรต์ 20 รูปแบบ") และหน้า `/cards` ("ความหมายไพ่ทาโรต์ทั้ง 78 ใบ") ซึ่งวรรณยุกต์บนและสระบน (ไม้หันอากาศ, ไม้เอก, ไม้โท, สระอิ, สระไอ) ชนเกยทับขอบล่างของป้าย pill badge สีขาว
+- **การวินิจฉัยปัญหาด้าน Typography & Layout (Root Cause Analysis)**:
+  1. **สระ/วรรณยุกต์ไทยพุ่งล้น Line-Box (Font Ascender Overflow)**: ฟอนต์ไทย `font-serif-th` (Noto Serif Thai) มีตัวอักษรที่มีสระและวรรณยุกต์ซ้อนสองชั้นสูงกว่าอักษรภาษาอังกฤษมาก เมื่อหัวข้อใช้ `text-5xl` โดยไม่ได้กำหนด line-height (Tailwind default สำหรับ `text-5xl` คือ `line-height: 1`) กรอบ line-box จะสูงเพียง 48px ทำให้ยอดสระ/วรรณยุกต์พุ่งล้นออกนอก line-box ด้านบนไปราว 16–18px
+  2. **ระยะห่างแนวตั้งไม่เพียงพอ (`space-y-2.5`)**: คอนเทนเนอร์แม่กำหนด `space-y-2.5` ซึ่งมีระยะห่างเพียง 10px เมื่อยอดสระไทยล้นขึ้นมา 16px ในช่องว่าง 10px ตัวอักษรจึงชนและเกยทับขอบล่างของป้าย Pill Badge ด้านบนทันที
+  3. **การขาด Block Wrapper ให้กับ Inline-Flex Badge**: ป้าย Pill ถูกกำหนดเป็น `inline-flex` ตรงๆ ใต้กล่อง `text-center` ทำให้การคำนวณ Margin/Baseline ใน Flow ผสมกลมกลืนกับ Inline Context
+- **การแก้ไขระดับวิศวกรรม (Engineering Solutions)**:
+  1. **ห่อหุ้มป้าย Pill Badge ด้วย Block `<div>`**: แยกโครงสร้างเลย์เอาต์ระดับ Block ชัดเจน ไม่ให้เกิดการเบียดชนของ Inline Formatting Context
+  2. **ขยายระยะห่างหัวข้อเป็น `space-y-4 sm:space-y-5 py-6 sm:py-8`**: ให้ระยะห่างระหว่างป้ายกับหัวข้อมีพื้นที่หายใจกว้าง 16px (Mobile) / 20px (Desktop) อย่างสง่างาม
+  3. **กำหนด `leading-normal sm:leading-tight pt-1` และ `[text-wrap:balance]`**:
+     - `leading-normal sm:leading-tight`: ให้ line-height ของหัวข้อมี Headroom เพียงพอสำหรับสระและวรรณยุกต์ไทยทุกตัว
+     - `pt-1`: สร้าง Padding ด้านบน 4px ดันเส้นฐานและยอดวรรณยุกต์ลงมาพ้นรัศมีการทับซ้อน 100%
+  4. **ปรับใช้ครบทั้ง 5 จุดทั่วทั้งระบบ**:
+     - `src/app/spreads/page.tsx`: ป้าย "✦ 20 ผังการเปิดไพ่มาตรฐานสากล ✦" กับหัวข้อ "ผังการเปิดไพ่ทาโรต์ 20 รูปแบบ"
+     - `src/app/cards/page.tsx`: ป้าย "✦ สารานุกรมความหมายไพ่ 78 ใบ ✦" กับหัวข้อ "ความหมายไพ่ทาโรต์ทั้ง 78 ใบ"
+     - `src/app/readers/page.tsx`: ป้าย "✦ ตลาดรวมแม่หมอตัวจริง (Tarot Marketplace) ✦" กับหัวข้อ "ปรึกษาแม่หมอตัวจริง"
+     - `src/app/account/page.tsx`: ป้าย "✦ Sacred Sanctuary Profile ✦" กับหัวข้อ "บัญชีและประวัติของคุณ"
+     - `src/app/page.tsx`: เพิ่ม `leading-snug sm:leading-normal pt-1` และระยะห่างในหัวข้อ Step 1 และ Step 2
+- **ผลการทดสอบ & ยืนยันผล (Verification)**:
+  - `npm run typecheck` ➔ **0 errors**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 24 ด่านสมบูรณ์ 100%**
+
 ### 🗓️ 2026-09-04: ปรับการแสดงผล SEO Content เฉพาะหน้าแรก (Step 1) + ปรับสมดุลช่องไฟ FAQ & Dark Footer ให้สง่างาม
 
 - **ความต้องการของผู้ใช้**:
