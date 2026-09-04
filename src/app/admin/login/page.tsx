@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -48,9 +49,21 @@ export default function AdminLoginPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
-      <div className="altar-panel rounded-3xl p-7">
-        <h1 className="font-mystic-gold text-xl font-bold">✦ แผงแอดมิน</h1>
-        <p className="mt-1 text-sm text-[#9c93b8]">ใส่รหัสผ่านแอดมินเพื่อเข้าจัดการระบบ</p>
+      <div className="altar-panel rounded-3xl border border-[#D5CEC2] bg-white p-7 shadow-xs">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-[#D5CEC2] bg-[#F8F6F2] shadow-xs">
+          <Image
+            src="/logo.webp"
+            alt="SeerTarot Logo"
+            width={56}
+            height={56}
+            className="h-full w-full object-cover"
+            priority
+          />
+        </div>
+        <h1 className="text-center text-lg font-bold text-[#29261F]">✦ แผงแอดมิน SeerTarot</h1>
+        <p className="mt-1 text-center text-xs text-[#635B4E]">
+          ใส่รหัสผ่านผู้ดูแลระบบเพื่อเข้าจัดการ
+        </p>
 
         <form onSubmit={submit} className="mt-6 flex flex-col gap-4">
           <Field label="รหัสผ่านแอดมิน" error={error}>

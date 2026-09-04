@@ -35,7 +35,29 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
-### 🗓️ 2026-09-04: Rebuild แผงควบคุมผู้ดูแลระบบ (/admin) สู่มาตรฐานระดับโลก — โดย Antigravity
+### 🗓️ 2026-09-04: ยกระดับธีมแอดมิน (/admin) ขาวดำมาตรฐาน คอนทราสต์สูง คมชัด อ่านง่าย 100% พร้อมใส่โลโก้ทางการและซ่อน TikTok — โดย Antigravity
+
+- **ซ่อนปุ่ม TikTok ในทุกหน้าแอดมิน (`src/components/ui/TikTokFloatingButton.tsx`)**:
+  - ดัก `usePathname()` หาก `pathname?.startsWith("/admin")` ให้ return `null` ไม่แสดงปุ่มลอย TikTok บนหน้าจัดการระบบเด็ดขาด
+- **ใส่โลโก้ทางการของเว็บ (`/logo.webp`) ที่ส่วนหัวแอดมินและหน้าล็อกอิน**:
+  - Header แอดมิน (`src/app/admin/page.tsx`): แสดงโลโก้แบรนด์ SeerTarot ในกรอบวงกลมพรีเมียมขนาด 40px
+  - หน้า Login แอดมิน (`src/app/admin/login/page.tsx`): แสดงโลโก้ทางการขนาด 56px สวยสง่า กึ่งกลางการ์ด
+- **ยกเครื่องระบบสีแอดมินสู่มาตรฐาน Quiet Luxury Monochrome / Light Theme อ่านง่าย คมชัดสูงสุด**:
+  - `src/app/admin/layout.tsx`: เปลี่ยนจากพื้นหลังมืดม่วง `#05040a` เป็นโทนสว่างมาตรฐาน `#F8F6F2` และสีหมึกคมชัด `#29261F`
+  - ขจัดปัญหากล่องขาวจ้า (`.altar-panel`) ที่ตัวหนังสือสีทองจางกลืนกับพื้นจนอ่านไม่ออก: ปรับตัวหนังสือหลักเป็น `#29261F` (Ink เข้ม) และตัวหนังสือรองเป็น `#635B4E` (Muted คมชัด)
+  - ปรับการ์ดและตารางทุกหน้าเป็นโทนสว่าง คอนทราสต์สูง:
+    - `src/components/admin/AdminOverview.tsx`: การ์ด KPI, ระบบ Cloud Pulse สด, คำสั่งด่วน, Audit Log
+    - `src/components/admin/SystemHealthPanel.tsx`: แบนเนอร์ระบบ, การ์ดสถานะคลาวด์ 9 การ์ด, บล็อกตัวอย่างการตั้งค่า
+    - `src/components/admin/AiHealthPanel.tsx`: บัตรสรุป AI, โควตา, ตารางเปรียบเทียบโมเดล, กล่องทดสอบแชท
+    - `src/components/admin/StatsDashboard.tsx`: ตัวเลขสถิติ, กราฟแท่ง, แท็บช่วงเวลา, ประวัติการเข้าสู่ระบบ
+    - `src/components/admin/ContentEditor.tsx`: แท็บ Prompt กลาง, บุคลิกแม่หมอ, คลังไพ่ 78 ใบ และช่องกรอกความหมาย 5 ด้าน
+    - `src/components/admin/EntitlementAdmin.tsx`: ขั้นตอนเปิดระบบสิทธิ์ 4 ขั้น, ตารางสถิติ และสถานะฐานข้อมูล
+    - `src/components/admin/MarketingAudience.tsx`: ตารางรายชื่อสมาชิกยินยอมรับข่าวสาร, กล่องสรุปยอด และปุ่มส่งออก CSV
+    - `src/components/admin/ReadersManager.tsx`: การ์ดแม่หมอ, แท็บกรองสถานะ, ปุ่มอนุมัติ/พักงาน/แก้ไข, โมดัลจัดการโปรไฟล์
+  - Badges สถานะมาตรฐาน: เขียว `bg-emerald-50 text-emerald-800 border-emerald-200`, เหลือง `bg-amber-50 text-amber-800 border-amber-200`, แดง `bg-rose-50 text-rose-800 border-rose-200`
+- **การตรวจสอบคุณภาพ**:
+  - ผ่าน `npm run typecheck` (0 errors)
+  - ผ่าน `npm run repo:verify` ครบ 24 ด่าน 100%
 
 - **Executive Command Center (`src/components/admin/AdminOverview.tsx`)**:
   - สร้างคอมโพเนนต์แดชบอร์ดสรุปภาพรวมผู้บริหาร: รวมบัตรสรุปตัวเลขสำคัญ (Total Users ใน D1, จำนวนครั้งการเปิดไพ่รวม, สถานะสุขภาพ Cloudflare Stack, อัตรา Quota & Safety Block)

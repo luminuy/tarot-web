@@ -219,8 +219,8 @@ export default function ReadersManager() {
       {/* Top Action Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-bold text-[#f5deaa]">✦ จัดการแม่หมอตัวจริง (Marketplace)</h2>
-          <p className="text-xs text-[#9c93b8]">
+          <h2 className="text-xl font-bold text-[#29261F]">✦ จัดการแม่หมอตัวจริง (Marketplace)</h2>
+          <p className="text-xs text-[#635B4E]">
             ควบคุมโปรไฟล์ อนุมัติสถานะ และจัดการแม่หมอในระบบพยากรณ์
           </p>
         </div>
@@ -243,8 +243,8 @@ export default function ReadersManager() {
               onClick={() => setStatusFilter(tab.id)}
               className={`rounded-full px-3 py-1.5 font-medium transition-colors ${
                 statusFilter === tab.id
-                  ? "bg-[#e5c07b] text-[#120f1d]"
-                  : "bg-white/5 text-[#9c93b8] hover:bg-white/10 hover:text-[#f5deaa]"
+                  ? "bg-[#29261F] text-white shadow-xs"
+                  : "border border-[#D5CEC2] bg-white text-[#635B4E] hover:bg-[#F2EFE9] hover:text-[#29261F]"
               }`}
             >
               {tab.label}
@@ -264,27 +264,27 @@ export default function ReadersManager() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl border border-[#e5c07b]/40 bg-[#171226] px-4 py-2.5 text-xs font-semibold text-[#f5deaa] shadow-2xl">
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl border border-[#D5CEC2] bg-white px-4 py-2.5 text-xs font-semibold text-[#29261F] shadow-lg">
           {toastMessage}
         </div>
       )}
 
       {/* Readers List */}
       {loading ? (
-        <div className="altar-panel flex h-48 items-center justify-center rounded-2xl text-xs text-[#9c93b8]">
+        <div className="altar-panel flex h-48 items-center justify-center rounded-2xl border border-[#D5CEC2] bg-white text-xs text-[#635B4E]">
           กำลังโหลดข้อมูลแม่หมอ…
         </div>
       ) : error ? (
-        <div className="altar-panel rounded-2xl p-6 text-center text-xs text-[#f0a0a0]">
+        <div className="altar-panel rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center text-xs text-rose-800">
           <p>{error}</p>
           <Button onClick={fetchReaders} variant="ghost" className="mt-3 text-xs">
             ลองใหม่
           </Button>
         </div>
       ) : filteredReaders.length === 0 ? (
-        <div className="altar-panel flex flex-col items-center justify-center rounded-2xl py-12 text-center">
-          <p className="text-sm font-semibold text-[#f5deaa]">ยังไม่มีแม่หมอในหมวดนี้</p>
-          <p className="mt-1 text-xs text-[#9c93b8]">คลิกปุ่ม &quot;+ เพิ่มแม่หมอใหม่&quot; เพื่อเริ่มต้นสร้างโปรไฟล์</p>
+        <div className="altar-panel flex flex-col items-center justify-center rounded-2xl border border-[#D5CEC2] bg-white py-12 text-center">
+          <p className="text-sm font-semibold text-[#29261F]">ยังไม่มีแม่หมอในหมวดนี้</p>
+          <p className="mt-1 text-xs text-[#635B4E]">คลิกปุ่ม &quot;+ เพิ่มแม่หมอใหม่&quot; เพื่อเริ่มต้นสร้างโปรไฟล์</p>
           <Button onClick={openCreateModal} variant="outline" className="mt-4 text-xs">
             + เพิ่มแม่หมอ
           </Button>
@@ -294,13 +294,13 @@ export default function ReadersManager() {
           {filteredReaders.map((r) => (
             <div
               key={r.id}
-              className="altar-panel flex flex-col justify-between rounded-2xl p-5 transition-all hover:border-[#e5c07b]/30"
+              className="altar-panel flex flex-col justify-between rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs transition-all hover:border-[#29261F]/40"
             >
               <div>
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#e5c07b]/30 bg-[#231b38] text-lg font-bold text-[#f5deaa] overflow-hidden">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#D5CEC2] bg-[#F8F6F2] text-lg font-bold text-[#29261F] overflow-hidden">
                       {r.avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={r.avatarUrl} alt={r.displayName} className="h-full w-full object-cover" />
@@ -309,14 +309,14 @@ export default function ReadersManager() {
                       )}
                     </div>
                     <div>
-                      <h3 className="font-bold text-[#f5deaa]">{r.displayName}</h3>
+                      <h3 className="font-bold text-[#29261F]">{r.displayName}</h3>
                       <span
                         className={`inline-block rounded px-2 py-0.5 text-[13px] font-semibold ${
                           r.status === "approved"
-                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                             : r.status === "pending"
-                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                              : "bg-red-500/20 text-red-300 border border-red-500/30"
+                              ? "bg-amber-50 text-amber-800 border border-amber-200"
+                              : "bg-rose-50 text-rose-800 border border-rose-200"
                         }`}
                       >
                         {r.status === "approved"
@@ -330,7 +330,7 @@ export default function ReadersManager() {
                 </div>
 
                 {/* Bio */}
-                <p className="mt-3 text-xs leading-relaxed text-[#c3bdd8] line-clamp-3">
+                <p className="mt-3 text-xs leading-relaxed text-[#635B4E] line-clamp-3">
                   {r.bio || "ยังไม่มีข้อมูลประวัติ"}
                 </p>
 
@@ -339,7 +339,7 @@ export default function ReadersManager() {
                   {r.specialties.map((s, idx) => (
                     <span
                       key={idx}
-                      className="rounded-full bg-[#32254e]/60 px-2 py-0.5 text-[13px] text-[#e5c07b]"
+                      className="rounded-full border border-[#D5CEC2] bg-[#F8F6F2] px-2 py-0.5 text-[12px] font-medium text-[#29261F]"
                     >
                       {s}
                     </span>
@@ -347,25 +347,25 @@ export default function ReadersManager() {
                 </div>
 
                 {/* Contact & Meta */}
-                <div className="mt-4 space-y-1 rounded-xl bg-black/20 p-2.5 text-[13px] text-[#9c93b8]">
+                <div className="mt-4 space-y-1 rounded-xl border border-[#D5CEC2] bg-[#F8F6F2] p-2.5 text-[13px] text-[#635B4E]">
                   <div className="flex justify-between">
                     <span>LINE ติดต่อ:</span>
-                    <span className="font-mono text-[#f5deaa] truncate max-w-[140px]">{r.lineUrl}</span>
+                    <span className="font-mono text-[#29261F] truncate max-w-[140px]">{r.lineUrl}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>ส่วนแบ่งระบบ:</span>
-                    <span className="text-[#f5deaa]">{r.commissionPct}%</span>
+                    <span className="font-semibold text-[#29261F]">{r.commissionPct}%</span>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-5 border-t border-white/5 pt-3 space-y-2">
+              <div className="mt-5 border-t border-[#D5CEC2] pt-3 space-y-2">
                 <div className="flex gap-2">
                   {r.status !== "approved" && (
                     <button
                       onClick={() => handleQuickStatus(r.id, "approved")}
-                      className="flex-1 rounded-lg bg-emerald-500/20 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-500/30 transition-colors"
+                      className="flex-1 rounded-lg border border-emerald-200 bg-emerald-50 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100 transition-colors"
                     >
                       อนุมัติ
                     </button>
@@ -373,14 +373,14 @@ export default function ReadersManager() {
                   {r.status !== "suspended" && (
                     <button
                       onClick={() => handleQuickStatus(r.id, "suspended")}
-                      className="flex-1 rounded-lg bg-red-500/20 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/30 transition-colors"
+                      className="flex-1 rounded-lg border border-rose-200 bg-rose-50 py-1.5 text-xs font-medium text-rose-800 hover:bg-rose-100 transition-colors"
                     >
                       พักงาน
                     </button>
                   )}
                   <button
                     onClick={() => openEditModal(r)}
-                    className="flex-1 rounded-lg bg-white/5 py-1.5 text-xs font-medium text-[#c3bdd8] hover:bg-white/10 hover:text-white transition-colors"
+                    className="flex-1 rounded-lg border border-[#D5CEC2] bg-white py-1.5 text-xs font-medium text-[#29261F] hover:bg-[#F2EFE9] transition-colors"
                   >
                     แก้ไข
                   </button>
@@ -389,13 +389,13 @@ export default function ReadersManager() {
                 <div className="flex gap-2 text-[13px]">
                   <button
                     onClick={() => copyConsoleLink(r)}
-                    className="flex-1 rounded-lg border border-[#e5c07b]/30 py-1 text-[#e5c07b] hover:bg-[#e5c07b]/10 transition-colors"
+                    className="flex-1 rounded-lg border border-[#D5CEC2] bg-[#F8F6F2] py-1 text-[#29261F] hover:bg-[#EAE5DC] transition-colors"
                   >
                     ✦ ลิงก์แผงแม่หมอ
                   </button>
                   <button
                     onClick={() => handleDelete(r)}
-                    className="px-2.5 py-1 text-[#f0a0a0] hover:text-red-400 transition-colors"
+                    className="px-2.5 py-1 text-rose-700 hover:text-rose-900 transition-colors"
                   >
                     ลบ
                   </button>
@@ -414,7 +414,7 @@ export default function ReadersManager() {
       >
         <form onSubmit={handleSave} className="space-y-4 pt-2">
           {formError && (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-[#f0a0a0]">
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
               {formError}
             </div>
           )}
@@ -484,7 +484,7 @@ export default function ReadersManager() {
                   id={id}
                   value={status}
                   onChange={(e) => setStatus(e.target.value as ReaderStatus)}
-                  className="w-full rounded-xl border border-white/10 bg-[#161224] px-3 py-2 text-xs text-[#f5deaa] outline-none focus:border-[#e5c07b]"
+                  className="w-full rounded-xl border border-[#D5CEC2] bg-white px-3 py-2 text-xs text-[#29261F] outline-none focus:border-[#29261F]"
                 >
                   <option value="approved">เปิดรับงาน (Approved)</option>
                   <option value="pending">รอตรวจสอบ (Pending)</option>
@@ -507,7 +507,7 @@ export default function ReadersManager() {
             </Field>
           </div>
 
-          <div className="mt-6 flex justify-end gap-3 border-t border-white/10 pt-4">
+          <div className="mt-6 flex justify-end gap-3 border-t border-[#D5CEC2] pt-4">
             <Button
               type="button"
               variant="ghost"

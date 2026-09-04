@@ -43,8 +43,8 @@ const MarketingAudience = dynamic(() => import("@/components/admin/MarketingAudi
 function AdminLoading({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#e5c07b] border-t-transparent mb-3" />
-      <p className="text-xs text-[#9c93b8] font-sans">{label}</p>
+      <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#A58A5C] border-t-transparent mb-3" />
+      <p className="text-xs text-[#635B4E] font-sans">{label}</p>
     </div>
   );
 }
@@ -123,7 +123,7 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-// SVG Icons for clean, sacred executive feel (No cartoon emojis)
+// SVG Icons for clean, standardized executive feel (No cartoon emojis)
 function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string }) {
   switch (id) {
     case "overview":
@@ -289,8 +289,8 @@ function AdminContent() {
 
   if (authState !== "ready") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#05040a] text-sm text-[#9c93b8]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#e5c07b] border-t-transparent" />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#F8F6F2] text-sm text-[#635B4E]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#A58A5C] border-t-transparent" />
         <p className="font-sans">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ…</p>
       </div>
     );
@@ -307,15 +307,15 @@ function AdminContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#05040a] text-[#f5deaa]">
+    <div className="min-h-screen bg-[#F8F6F2] text-[#29261F]">
       {/* ─── Top Executive Bar ──────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[#e5c07b]/20 bg-[#0c0818]/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[#D5CEC2] bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:px-8 shadow-2xs">
         <div className="flex items-center gap-3">
           {/* Mobile hamburger button */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e5c07b]/20 bg-[#170e2a] text-[#e5c07b] lg:hidden hover:border-[#e5c07b]/40"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#D5CEC2] bg-[#FAF8F5] text-[#29261F] lg:hidden hover:bg-white transition-colors"
             aria-label="เปิดเมนูนำทาง"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -327,20 +327,30 @@ function AdminContent() {
             </svg>
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <span className="text-[#ffd700] text-xl font-bold">✦</span>
+          <div className="flex items-center gap-3">
+            {/* ✦ Official Brand Logo ✦ */}
+            <div className="w-10 h-10 rounded-full border border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] shadow-2xs">
+              <img
+                src="/logo.webp"
+                alt="SeerTarot Admin"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+            </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-mystic-gold text-base sm:text-lg font-bold tracking-wide text-white">
+                <span className="font-mystic-gold text-base sm:text-lg font-bold tracking-tight text-[#29261F]">
                   SeerTarot Admin
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-emerald-600/25 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
                   LIVE
                 </span>
               </div>
-              <p className="hidden md:block text-[11px] text-[#9c93b8]">
-                ศูนย์บริหารวิหารพยากรณ์ไพ่ทาโรต์ระดับพรีเมียม
+              <p className="hidden md:block text-[11px] text-[#635B4E]">
+                ศูนย์บริหารจัดการวิหารพยากรณ์ไพ่ทาโรต์ระดับพรีเมียม
               </p>
             </div>
           </div>
@@ -351,16 +361,16 @@ function AdminContent() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[#e5c07b]/30 bg-[#170e2a] px-3 py-1.5 text-xs text-[#f5deaa] hover:border-[#ffd700] hover:text-white transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] px-3.5 py-1.5 text-xs font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition-all shadow-2xs"
           >
             <span>✦ เปิดหน้าเว็บจริง</span>
-            <span className="text-[11px] text-[#9c93b8]">↗</span>
+            <span className="text-[11px] text-[#635B4E]">↗</span>
           </a>
           <Button
             variant="ghost"
             size="sm"
             onClick={logout}
-            className="text-xs text-[#9c93b8] hover:text-rose-300 hover:bg-rose-950/20"
+            className="text-xs text-[#635B4E] hover:text-rose-600 hover:bg-rose-50 transition-colors"
           >
             ออกจากระบบ
           </Button>
@@ -370,11 +380,11 @@ function AdminContent() {
       {/* ─── Main Admin Workspace ──────────────────────────────────── */}
       <div className="mx-auto flex max-w-7xl flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
         {/* ─── Desktop Sidebar ────────────────────────────────────── */}
-        <aside className="hidden w-64 shrink-0 border-r border-[#e5c07b]/15 bg-[#090614]/70 p-4 lg:block">
+        <aside className="hidden w-64 shrink-0 border-r border-[#D5CEC2] bg-white p-4 lg:block">
           <div className="sticky top-20 space-y-6">
             {NAV_SECTIONS.map((section) => (
               <div key={section.group} className="space-y-1.5">
-                <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-[#9c93b8]/70">
+                <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-[#756F66]">
                   {section.group}
                 </p>
                 <nav className="space-y-1">
@@ -387,19 +397,19 @@ function AdminContent() {
                         onClick={() => selectTab(item.id)}
                         className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition-all ${
                           isActive
-                            ? "bg-[#e5c07b]/15 text-[#ffd700] font-semibold border border-[#e5c07b]/30 shadow-[0_0_15px_rgba(229,192,123,0.1)]"
-                            : "text-[#c2b7de] hover:bg-[#191230]/70 hover:text-white"
+                            ? "bg-[#F3F0EA] text-[#29261F] font-semibold border border-[#D5CEC2] shadow-2xs"
+                            : "text-[#635B4E] hover:bg-[#FAF8F5] hover:text-[#29261F]"
                         }`}
                       >
                         <span
                           className={`transition-colors ${
-                            isActive ? "text-[#ffd700]" : "text-[#9c93b8] group-hover:text-[#e5c07b]"
+                            isActive ? "text-[#A58A5C]" : "text-[#756F66] group-hover:text-[#29261F]"
                           }`}
                         >
                           <TabIcon id={item.id} className="w-4 h-4" />
                         </span>
                         <span className="flex-1 truncate">{item.label}</span>
-                        {isActive && <span className="text-[10px] text-[#ffd700]">✦</span>}
+                        {isActive && <span className="text-[10px] text-[#A58A5C]">✦</span>}
                       </button>
                     );
                   })}
@@ -407,12 +417,12 @@ function AdminContent() {
               </div>
             ))}
 
-            <div className="rounded-xl border border-[#e5c07b]/15 bg-[#120b22]/60 p-3 text-[11px] text-[#9c93b8]">
-              <div className="flex items-center gap-1.5 font-medium text-[#e5c07b]">
-                <span>✦</span>
+            <div className="rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-[11px] text-[#635B4E]">
+              <div className="flex items-center gap-1.5 font-semibold text-[#29261F]">
+                <span className="text-[#A58A5C]">✦</span>
                 <span>มาตรฐานระบบ</span>
               </div>
-              <p className="mt-1 text-[10px] leading-relaxed text-[#9c93b8]">
+              <p className="mt-1 text-[11px] leading-relaxed text-[#635B4E]">
                 Provably-Fair Tarot 100% ควบคุมด้วย Cloudflare Workers & D1 Architecture
               </p>
             </div>
@@ -421,11 +431,11 @@ function AdminContent() {
 
         {/* ─── Mobile Drawer Menu ──────────────────────────────────── */}
         {mobileMenuOpen && (
-          <div className="border-b border-[#e5c07b]/20 bg-[#090614] p-4 lg:hidden animate-in fade-in slide-in-from-top duration-200">
+          <div className="border-b border-[#D5CEC2] bg-white p-4 lg:hidden animate-in fade-in slide-in-from-top duration-200">
             <div className="space-y-4">
               {NAV_SECTIONS.map((section) => (
                 <div key={section.group} className="space-y-1">
-                  <p className="px-2 text-[10px] font-semibold uppercase tracking-wider text-[#9c93b8]">
+                  <p className="px-2 text-[11px] font-semibold uppercase tracking-wider text-[#756F66]">
                     {section.group}
                   </p>
                   <div className="grid grid-cols-2 gap-1.5">
@@ -436,10 +446,10 @@ function AdminContent() {
                           key={item.id}
                           type="button"
                           onClick={() => selectTab(item.id)}
-                          className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs ${
+                          className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
                             isActive
-                              ? "bg-[#e5c07b] text-[#120f1d] font-semibold"
-                              : "bg-[#170e2a] text-[#e2d9f3] hover:bg-[#20153a]"
+                              ? "bg-[#29261F] text-white font-semibold"
+                              : "bg-[#FAF8F5] text-[#29261F] border border-[#D5CEC2] hover:bg-white"
                           }`}
                         >
                           <TabIcon id={item.id} className="w-3.5 h-3.5 shrink-0" />
@@ -455,7 +465,7 @@ function AdminContent() {
         )}
 
         {/* ─── Mobile Horizontal Quick Pill Strip ───────────────────── */}
-        <div className="flex overflow-x-auto border-b border-[#e5c07b]/15 bg-[#090614]/90 px-4 py-2.5 gap-1.5 lg:hidden no-scrollbar">
+        <div className="flex overflow-x-auto border-b border-[#D5CEC2] bg-white px-4 py-2.5 gap-1.5 lg:hidden no-scrollbar">
           {NAV_SECTIONS.flatMap((s) => s.items).map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -465,8 +475,8 @@ function AdminContent() {
                 onClick={() => selectTab(item.id)}
                 className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors ${
                   isActive
-                    ? "bg-[#e5c07b] text-[#120f1d] font-semibold shadow-sm"
-                    : "border border-[#e5c07b]/20 bg-[#120b22] text-[#9c93b8]"
+                    ? "bg-[#29261F] text-white font-semibold shadow-xs"
+                    : "border border-[#D5CEC2] bg-[#FAF8F5] text-[#635B4E] hover:text-[#29261F]"
                 }`}
               >
                 <TabIcon id={item.id} className="w-3 h-3" />
@@ -480,29 +490,29 @@ function AdminContent() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
           {/* Header Description Banner */}
           {activeItem && (
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e5c07b]/15 pb-4">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D5CEC2] pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[#ffd700]">✦</span>
-                  <h2 className="text-lg sm:text-xl font-bold text-white font-mystic-gold">
+                  <span className="text-[#A58A5C]">✦</span>
+                  <h2 className="text-lg sm:text-xl font-bold text-[#29261F] font-mystic-gold">
                     {activeItem.label}
                   </h2>
                 </div>
-                <p className="text-xs text-[#9c93b8] mt-0.5">
+                <p className="text-xs text-[#635B4E] mt-0.5">
                   {activeItem.description}
                 </p>
               </div>
 
               {/* Special Sub-navigation when on "health" tab */}
               {activeTab === "health" && (
-                <div className="flex items-center gap-1 rounded-xl border border-[#e5c07b]/25 bg-[#0c0818] p-1 text-xs">
+                <div className="flex items-center gap-1 rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-1 text-xs">
                   <button
                     type="button"
                     onClick={() => setHealthSubTab("system")}
                     className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
                       healthSubTab === "system"
-                        ? "bg-[#e5c07b] text-[#120f1d] shadow-sm font-semibold"
-                        : "text-[#9c93b8] hover:text-[#e2d9f3]"
+                        ? "bg-white text-[#29261F] shadow-2xs font-semibold border border-[#D5CEC2]"
+                        : "text-[#635B4E] hover:text-[#29261F]"
                     }`}
                   >
                     ✦ Cloudflare & D1
@@ -512,8 +522,8 @@ function AdminContent() {
                     onClick={() => setHealthSubTab("ai")}
                     className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
                       healthSubTab === "ai"
-                        ? "bg-[#e5c07b] text-[#120f1d] shadow-sm font-semibold"
-                        : "text-[#9c93b8] hover:text-[#e2d9f3]"
+                        ? "bg-white text-[#29261F] shadow-2xs font-semibold border border-[#D5CEC2]"
+                        : "text-[#635B4E] hover:text-[#29261F]"
                     }`}
                   >
                     ✨ ประสิทธิภาพ AI
@@ -564,8 +574,8 @@ export default function AdminHome() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#05040a] text-sm text-[#9c93b8]">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#e5c07b] border-t-transparent" />
+        <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-[#F8F6F2] text-sm text-[#635B4E]">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#A58A5C] border-t-transparent" />
           <p className="font-sans">กำลังเตรียมแผงควบคุมระบบ…</p>
         </div>
       }

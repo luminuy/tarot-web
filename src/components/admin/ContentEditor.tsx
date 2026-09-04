@@ -105,7 +105,7 @@ export default function ContentEditor() {
   }, [doc]);
 
   if (loading || !defaults) {
-    return <p className="text-sm text-[#9c93b8]">กำลังโหลด…</p>;
+    return <p className="text-sm text-[#635B4E]">กำลังโหลด…</p>;
   }
 
   return (
@@ -122,10 +122,10 @@ export default function ContentEditor() {
             <button
               key={id}
               onClick={() => setSub(id)}
-              className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+              className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                 sub === id
-                  ? "border-[#ffd700]/70 bg-[#e5c07b]/15 text-[#f5deaa]"
-                  : "border-[#e5c07b]/25 text-[#9c93b8] hover:text-[#e5c07b]"
+                  ? "border-[#29261F] bg-[#29261F] text-white shadow-xs"
+                  : "border-[#D5CEC2] bg-white text-[#635B4E] hover:bg-[#F2EFE9] hover:text-[#29261F]"
               }`}
             >
               {label}
@@ -133,7 +133,7 @@ export default function ContentEditor() {
           ))}
         </div>
         <div className="flex items-center gap-3">
-          {msg ? <span className="text-xs text-[#9c93b8]">{msg}</span> : null}
+          {msg ? <span className="text-xs text-[#635B4E]">{msg}</span> : null}
           <Button size="sm" onClick={save} isLoading={saving} disabled={!dirty}>
             บันทึกทั้งหมด
           </Button>
@@ -160,7 +160,7 @@ export default function ContentEditor() {
 function ResetLink({ show, onClick }: { show: boolean; onClick: () => void }) {
   if (!show) return null;
   return (
-    <button onClick={onClick} className="text-[13px] text-[#9c93b8] underline hover:text-[#e5c07b]">
+    <button onClick={onClick} className="text-[13px] text-[#635B4E] underline hover:text-[#29261F]">
       คืนค่าเริ่มต้น
     </button>
   );
@@ -177,12 +177,12 @@ function PromptTab({
 }) {
   const [show, setShow] = useState(false);
   return (
-    <div className="altar-panel flex flex-col gap-2 rounded-2xl p-4">
+    <div className="altar-panel flex flex-col gap-2 rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[#e5c07b]">คำสั่งระบบกลาง (system prompt)</h3>
+        <h3 className="text-sm font-semibold text-[#29261F]">คำสั่งระบบกลาง (system prompt)</h3>
         <ResetLink show={value.length > 0} onClick={() => onChange("")} />
       </div>
-      <p className="text-xs text-[#9c93b8]">
+      <p className="text-xs text-[#635B4E]">
         ปล่อยว่าง = ใช้ค่าเริ่มต้นในโค้ด · แก้แล้วมีผลกับทุกบุคลิกแม่หมอ
       </p>
       <Textarea
@@ -192,14 +192,14 @@ function PromptTab({
         onChange={(e) => onChange(e.target.value)}
         className="font-mono text-xs leading-relaxed"
       />
-      <div className="flex justify-between text-[13px] text-[#9c93b8]">
-        <button onClick={() => setShow((s) => !s)} className="underline hover:text-[#e5c07b]">
+      <div className="flex justify-between text-[13px] text-[#635B4E]">
+        <button onClick={() => setShow((s) => !s)} className="underline hover:text-[#29261F]">
           {show ? "ซ่อน" : "ดู"}ค่าเริ่มต้น ({fallback.length.toLocaleString()} ตัวอักษร)
         </button>
         <span>{value.length.toLocaleString()} / 24,000</span>
       </div>
       {show ? (
-        <pre className="max-h-64 overflow-auto rounded-xl bg-[#0c0818] p-3 text-[13px] leading-relaxed text-[#9c93b8]">
+        <pre className="max-h-64 overflow-auto rounded-xl border border-[#D5CEC2] bg-[#F8F6F2] p-3 font-mono text-[13px] leading-relaxed text-[#29261F]">
           {fallback}
         </pre>
       ) : null}
@@ -232,18 +232,21 @@ function PersonaTab({
     });
 
   return (
-    <div className="altar-panel flex flex-col gap-4 rounded-2xl p-4">
-      <select
-        value={sel}
-        onChange={(e) => setSel(e.target.value)}
-        className="w-full max-w-xs rounded-xl border border-[#e5c07b]/25 bg-[#0c0818] px-3 py-2 text-sm text-[#f5deaa]"
-      >
-        {personas.map((x) => (
-          <option key={x.id} value={x.id}>
-            {x.nameTh}
-          </option>
-        ))}
-      </select>
+    <div className="altar-panel flex flex-col gap-4 rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+      <div>
+        <label className="mb-1 block text-xs font-semibold text-[#635B4E]">เลือกแม่หมอ</label>
+        <select
+          value={sel}
+          onChange={(e) => setSel(e.target.value)}
+          className="w-full max-w-xs rounded-xl border border-[#D5CEC2] bg-white px-3 py-2 text-sm text-[#29261F] focus:border-[#29261F] focus:outline-none"
+        >
+          {personas.map((x) => (
+            <option key={x.id} value={x.id}>
+              {x.nameTh}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <Field label="ชื่อที่แสดงในคำอ่าน (nameTh)">
         {(id) => (
@@ -284,7 +287,7 @@ function PersonaTab({
               onChange={(e) => setField("voice", e.target.value)}
               className="font-mono text-xs leading-relaxed"
             />
-            <div className="mt-1 flex justify-between text-[13px] text-[#9c93b8]">
+            <div className="mt-1 flex justify-between text-[13px] text-[#635B4E]">
               <ResetLink show={!!o.voice} onClick={() => setField("voice", "")} />
               <span>{(o.voice ?? "").length} / 9,000</span>
             </div>
@@ -381,7 +384,7 @@ function CardTab({
 
   return (
     <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
-      <div className="altar-panel flex flex-col gap-3 rounded-2xl p-3">
+      <div className="altar-panel flex flex-col gap-3 rounded-2xl border border-[#D5CEC2] bg-white p-3 shadow-xs">
         <Input
           placeholder="ค้นหาไพ่ (ชื่อไทย / อังกฤษ / id)…"
           value={q}
@@ -400,8 +403,8 @@ function CardTab({
                 onClick={() => setSuitFilter(opt.id)}
                 className={`rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
                   active
-                    ? "bg-[#e5c07b] text-[#120f1d] shadow-sm"
-                    : "bg-[#191230]/70 text-[#9c93b8] hover:bg-[#191230] hover:text-[#e2d9f3]"
+                    ? "bg-[#29261F] text-white shadow-xs"
+                    : "border border-[#D5CEC2] bg-white text-[#635B4E] hover:bg-[#F2EFE9] hover:text-[#29261F]"
                 }`}
               >
                 {opt.label}
@@ -410,7 +413,7 @@ function CardTab({
           })}
         </div>
 
-        <div className="flex items-center justify-between px-1 text-[11px] text-[#9c93b8]">
+        <div className="flex items-center justify-between px-1 text-[11px] text-[#635B4E]">
           <span>รายการไพ่ ({filtered.length} ใบ)</span>
           {suitFilter !== "all" || q ? (
             <button
@@ -419,7 +422,7 @@ function CardTab({
                 setSuitFilter("all");
                 setQ("");
               }}
-              className="text-[#e5c07b] hover:underline"
+              className="text-[#29261F] font-medium hover:underline"
             >
               ล้างตัวกรอง
             </button>
@@ -428,7 +431,7 @@ function CardTab({
 
         <ul className="max-h-[460px] overflow-auto space-y-0.5 text-xs pr-1">
           {filtered.length === 0 ? (
-            <li className="py-6 text-center text-xs text-[#9c93b8]">
+            <li className="py-6 text-center text-xs text-[#635B4E]">
               ไม่พบไพ่ที่ตรงกับคำค้น
             </li>
           ) : (
@@ -442,16 +445,16 @@ function CardTab({
                     onClick={() => setSelId(c.id)}
                     className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
                       isSelected
-                        ? "bg-[#e5c07b]/20 font-medium text-[#f5deaa] border border-[#e5c07b]/30"
-                        : "text-[#e2d9f3] hover:bg-[#191230]/70"
+                        ? "border border-[#29261F] bg-[#F2EFE9] font-medium text-[#29261F]"
+                        : "text-[#29261F] hover:bg-[#F8F6F2]"
                     }`}
                   >
                     <div className="truncate pr-2">
                       <div className="truncate text-xs">{c.nameTh}</div>
-                      <div className="truncate text-[10px] text-[#9c93b8]">{c.nameEn}</div>
+                      <div className="truncate text-[10px] text-[#635B4E]">{c.nameEn}</div>
                     </div>
                     {edited ? (
-                      <span className="shrink-0 text-[#ffd700] text-[11px]" title="มีการปรับแต่ง">
+                      <span className="shrink-0 text-[#29261F] text-[11px]" title="มีการปรับแต่ง">
                         ✦
                       </span>
                     ) : null}
@@ -463,25 +466,25 @@ function CardTab({
         </ul>
       </div>
 
-      <div className="altar-panel rounded-2xl p-5">
+      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
         {!selId ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <span className="text-3xl text-[#e5c07b]/40 mb-2">✦</span>
-            <p className="text-sm font-medium text-[#e2d9f3]">เลือกไพ่จากรายการทางซ้าย</p>
-            <p className="text-xs text-[#9c93b8] mt-1 max-w-sm">
+            <span className="text-3xl text-[#D5CEC2] mb-2">✦</span>
+            <p className="text-sm font-medium text-[#29261F]">เลือกไพ่จากรายการทางซ้าย</p>
+            <p className="text-xs text-[#635B4E] mt-1 max-w-sm">
               คุณสามารถแก้ไขความหมายเฉพาะของไพ่แต่ละใบ ทั้ง 5 ด้าน และค่าผลทำนาย ใช่/ไม่ใช่
             </p>
           </div>
         ) : loadingDetail || !detail ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#e5c07b] border-t-transparent mb-2" />
-            <p className="text-xs text-[#9c93b8]">กำลังโหลดข้อมูลไพ่…</p>
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#29261F] border-t-transparent mb-2" />
+            <p className="text-xs text-[#635B4E]">กำลังโหลดข้อมูลไพ่…</p>
           </div>
         ) : (
           <div className="flex flex-col gap-5">
             {/* Header แสดงรูปและชื่อไพ่ 1909 */}
-            <div className="flex items-start gap-4 border-b border-[#e5c07b]/15 pb-4">
-              <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-lg border border-[#e5c07b]/30 bg-[#0c0818] shadow-md">
+            <div className="flex items-start gap-4 border-b border-[#D5CEC2] pb-4">
+              <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-lg border border-[#D5CEC2] bg-white shadow-xs">
                 <CardImage
                   cardId={detail.id}
                   alt={detail.nameTh}
@@ -491,24 +494,24 @@ function CardTab({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-semibold text-[#e5c07b]">
+                  <h3 className="text-base font-semibold text-[#29261F]">
                     {detail.nameTh}
                   </h3>
-                  <span className="rounded bg-[#191230] px-1.5 py-0.5 text-[10px] text-[#9c93b8] font-mono">
+                  <span className="rounded border border-[#D5CEC2] bg-[#F2EFE9] px-1.5 py-0.5 text-[10px] text-[#635B4E] font-mono">
                     {detail.id}
                   </span>
                 </div>
-                <p className="text-xs text-[#9c93b8] mt-1">
+                <p className="text-xs text-[#635B4E] mt-1">
                   ปรับแต่งความหมายเฉพาะของไพ่ใบนี้ (จะถูกนำไปแทนที่หรือเสริมความหมายมาตรฐาน)
                 </p>
 
                 <div className="mt-3 flex items-center gap-3">
-                  <label className="flex items-center gap-2 text-xs text-[#e2d9f3]">
+                  <label className="flex items-center gap-2 text-xs text-[#29261F]">
                     คำตอบ Yes/No:
                     <select
                       value={o.yesNo ?? "default"}
                       onChange={(e) => setYesNo(e.target.value)}
-                      className="rounded-lg border border-[#e5c07b]/25 bg-[#0c0818] px-2.5 py-1 text-xs text-[#e5c07b] focus:outline-none focus:border-[#e5c07b]"
+                      className="rounded-lg border border-[#D5CEC2] bg-white px-2.5 py-1 text-xs text-[#29261F] focus:outline-none focus:border-[#29261F]"
                     >
                       <option value="default">ค่าเริ่มต้น ({detail.defaults.yesNo})</option>
                       <option value="yes">Yes (ใช่/สำเร็จ)</option>
@@ -520,7 +523,7 @@ function CardTab({
                     <button
                       type="button"
                       onClick={() => setYesNo("default")}
-                      className="text-[11px] text-[#9c93b8] hover:text-[#e5c07b] underline"
+                      className="text-[11px] text-[#635B4E] hover:text-[#29261F] underline"
                     >
                       คืนค่าเริ่มต้น
                     </button>
@@ -532,9 +535,9 @@ function CardTab({
             {/* หมวดความหมาย 5 ด้าน */}
             <div className="space-y-4">
               {CATS.map((cat) => (
-                <div key={cat.id} className="flex flex-col gap-2 rounded-xl bg-[#0c0818]/60 p-3.5 border border-[#e5c07b]/10">
+                <div key={cat.id} className="flex flex-col gap-2 rounded-xl bg-[#F8F6F2] p-3.5 border border-[#D5CEC2]">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-[#e5c07b]">
+                    <p className="text-xs font-semibold text-[#29261F]">
                       ✦ ด้าน{cat.label}
                     </p>
                   </div>
@@ -544,7 +547,7 @@ function CardTab({
                       return (
                         <div key={side} className="flex flex-col gap-1.5">
                           <div className="flex items-center justify-between">
-                            <span className="text-[12px] font-medium text-[#9c93b8]">
+                            <span className="text-[12px] font-medium text-[#635B4E]">
                               {side === "upright" ? "หัวตั้ง (Upright)" : "หัวกลับ (Reversed)"}
                             </span>
                             <ResetLink show={!!cur} onClick={() => setMeaning(cat.id, side, "")} />

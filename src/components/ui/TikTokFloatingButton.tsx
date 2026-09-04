@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 
 /**
  * ✦ TikTok Floating Action Button (FAB)
@@ -13,6 +14,9 @@
  * - Accessible: aria-label, rel="noopener noreferrer", focus-visible ring
  */
 export function TikTokFloatingButton() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <aside
       data-floating="true"
