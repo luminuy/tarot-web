@@ -7,7 +7,7 @@ import { ARTICLES } from "@/data/articles";
 import { SPREADS, getSpread } from "@/data/spreads";
 import { SpreadPositionMap } from "@/components/spread/SpreadPositionMap";
 import { isStandardSpread } from "@/lib/entitlement/limits";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -31,9 +31,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const spread = getSpread(id);
-  if (!spread) return { title: "ไม่พบผังพยากรณ์ | SeerTarot" };
+  if (!spread) return { title: "ไม่พบผังพยากรณ์", robots: { index: false, follow: true } };
 
-  const title = `ผัง${spread.nameTh} — วิธีอ่านและความหมายไพ่ ${spread.positions.length} ใบ | SeerTarot`;
+  const title = `ผัง${spread.nameTh} — วิธีอ่านไพ่ ${spread.positions.length} ใบ`;
   const description = `${spread.description} เจาะลึกความหมายไพ่ทั้ง ${spread.positions.length} ตำแหน่ง พร้อมวิธีตั้งคำถามและอ่านผลด้วยไพ่ 1909 Rider-Waite`;
   const url = `${SITE_ORIGIN}/spreads/${spread.id}`;
 
@@ -54,8 +54,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       siteName: "SeerTarot",
       type: "article",
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE_URL] },
   };
 }
 

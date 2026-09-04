@@ -100,12 +100,20 @@ function main() {
     check("read/route.ts ตรวจสอบ resolvedCards และคืน CARD_DATA_NOT_FOUND", readSrc.includes("CARD_DATA_NOT_FOUND"));
   }
 
-  // 5.4 ตรวจ page.tsx ว่าไม่มี cardIndex ?? 0
-  const pagePath = path.join(rootDir, "app/page.tsx");
-  if (fs.existsSync(pagePath)) {
-    const pageSrc = fs.readFileSync(pagePath, "utf-8");
-    check("page.tsx ไม่มี cardIndex ?? 0", !pageSrc.includes("cardIndex ?? 0"));
-    check("page.tsx มีการตรวจสอบความสมบูรณ์ของไพ่และแจ้งเตือนให้โหลดใหม่", pageSrc.includes("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง"));
+  // 5.4 ตรวจไฟล์พิธีกรรมดูดวงฝั่งไคลเอนต์ว่าไม่มี cardIndex ?? 0
+  // ⚠️ ต้อง fail ถ้าหาไฟล์ไม่เจอ ห้ามใช้ `if (fs.existsSync) {...}` เงียบ ๆ
+  // ไม่งั้นวันที่มีคนเปลี่ยนชื่อ/ย้ายไฟล์ ด่านนี้จะ "หายไปเฉย ๆ" แทนที่จะเตือน
+  // (เคยเกิดจริงตอนแยก app/page.tsx ออกเป็น server shell + app/TarotFlow.tsx)
+  const flowPath = path.join(rootDir, "app/TarotFlow.tsx");
+  if (!fs.existsSync(flowPath)) {
+    check("หาไฟล์พิธีกรรมดูดวง (app/TarotFlow.tsx) เจอ", false);
+  } else {
+    const pageSrc = fs.readFileSync(flowPath, "utf-8");
+    check("TarotFlow.tsx ไม่มี cardIndex ?? 0", !pageSrc.includes("cardIndex ?? 0"));
+    check(
+      "TarotFlow.tsx มีการตรวจสอบความสมบูรณ์ของไพ่และแจ้งเตือนให้โหลดใหม่",
+      pageSrc.includes("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง")
+    );
   }
 
   // 5.5 ตรวจ StreamReader.tsx ว่าไม่มี fallback ภาพไพ่เดี่ยวใดๆ

@@ -12,7 +12,6 @@ interface Props {
 
 export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles }) => {
   const [copied, setCopied] = useState(false);
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const handleCopyLink = () => {
     soundManager.playMenuTapSound();
@@ -21,11 +20,6 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }
-  };
-
-  const toggleFaq = (idx: number) => {
-    soundManager.playCardFlipSound();
-    setOpenFaqIndex(openFaqIndex === idx ? null : idx);
   };
 
   return (
@@ -110,32 +104,32 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {/* FAQ Section with Accordion */}
       {article.faqs && article.faqs.length > 0 && (
         <section className="space-y-4 pt-6 border-t border-[#D5CEC2]/40">
-          <div className="flex items-center gap-2 text-sm sm:text-base font-serif-th font-bold text-[#29261F]">
-            <span>❓</span> คำถามที่พบบ่อย (FAQ)
-          </div>
+          <h2 className="flex items-center gap-2 text-sm sm:text-base font-serif-th font-bold text-[#29261F]">
+            <span aria-hidden="true" className="text-[#A58A5C]">✦</span> คำถามที่พบบ่อย (FAQ)
+          </h2>
+          {/* ใช้ <details> ของเบราว์เซอร์ เพื่อให้ "คำตอบ" อยู่ใน HTML ตั้งแต่ฝั่งเซิร์ฟเวอร์เสมอ
+              หน้านี้ประกาศ FAQPage JSON-LD ที่มีทั้งคำถามและคำตอบไว้ ถ้าคำตอบโผล่เฉพาะตอนคลิก
+              จะกลายเป็น structured data ที่อ้างถึงข้อความซึ่งไม่มีอยู่บนหน้า */}
           <div className="space-y-3">
-            {article.faqs.map((faq, idx) => {
-              const isOpen = openFaqIndex === idx;
-              return (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] overflow-hidden transition-all shadow-xs"
-                >
-                  <button
-                    onClick={() => toggleFaq(idx)}
-                    className="w-full flex items-center justify-between p-4 text-left font-serif-th text-xs sm:text-sm font-semibold text-[#29261F] hover:text-[#A58A5C] transition-colors gap-3 cursor-pointer"
+            {article.faqs.map((faq, idx) => (
+              <details
+                key={idx}
+                className="group rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] overflow-hidden transition-all shadow-xs"
+              >
+                <summary className="w-full flex items-center justify-between p-4 text-left font-serif-th text-xs sm:text-sm font-semibold text-[#29261F] hover:text-[#A58A5C] transition-colors gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <span>✦ {faq.question}</span>
+                  <span
+                    aria-hidden="true"
+                    className="text-[#A58A5C] font-mono text-sm font-bold transition-transform duration-300 group-open:rotate-45"
                   >
-                    <span>✦ {faq.question}</span>
-                    <span className="text-[#A58A5C] font-mono text-sm font-bold">{isOpen ? "−" : "+"}</span>
-                  </button>
-                  {isOpen && (
-                    <div className="p-4 pt-0 text-xs font-serif-th text-[#29261F] leading-relaxed border-t border-[#D5CEC2]/40 bg-[#EAE7E0]">
-                      {faq.answer}
-                    </div>
-                  )}
+                    +
+                  </span>
+                </summary>
+                <div className="p-4 pt-0 text-xs font-serif-th text-[#29261F] leading-relaxed border-t border-[#D5CEC2]/40 bg-[#EAE7E0]">
+                  {faq.answer}
                 </div>
-              );
-            })}
+              </details>
+            ))}
           </div>
         </section>
       )}

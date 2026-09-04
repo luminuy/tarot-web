@@ -19,6 +19,22 @@ export const SITE_DOMAIN = "seertarot.net";
 /** origin เต็มรูปแบบ เช่น `https://seertarot.net` */
 export const SITE_ORIGIN = `https://${SITE_DOMAIN}` as const;
 
+/**
+ * 🖼️ ภาพพรีวิวตอนแชร์ลิงก์ (Open Graph / Twitter Card) — 1200×630 (~1.91:1)
+ * ⚠️ ห้ามชี้ไปที่ภาพไพ่ใน `/cards/` เด็ดขาด ภาพไพ่เป็นแนวตั้ง 825×1429
+ * Facebook / LINE / X จะครอบตัดกลางภาพจนอ่านไม่ออกทุกครั้งที่มีคนแชร์
+ * สร้างไฟล์ใหม่ได้ด้วย `npm run og:image` (scripts/generate-og-image.py)
+ * ทุกหน้าที่ประกาศ `openGraph` ของตัวเองต้องใส่ `images` ด้วยเสมอ —
+ * Next.js **แทนที่** อ็อบเจกต์ openGraph ทั้งก้อน ไม่ได้ผสานทีละฟิลด์
+ */
+export const OG_IMAGE_URL = `${SITE_ORIGIN}/og/default.png` as const;
+export const OG_IMAGE_ALT = "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite";
+
+/** บล็อก `openGraph.images` / `twitter.images` มาตรฐาน ใช้ซ้ำได้ทุกหน้า */
+export const OG_IMAGE_BLOCK = [
+  { url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT },
+] as const;
+
 /** ชื่อเว็บสำหรับข้อความ/ลายน้ำ/ไฟล์ส่งออกข้อมูล */
 export const SITE_NAME_TH = "วิหารพยากรณ์ไพ่ทาโรต์";
 

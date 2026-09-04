@@ -3,13 +3,24 @@ import Link from "next/link";
 import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marketplace/readers.repo";
 import { ReadersDirectory } from "@/components/readers/ReadersDirectory";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
+import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "ปรึกษาแม่หมอตัวจริง | Marketplace แม่หมอทาโรต์มืออาชีพ",
+export const metadata: Metadata = {
+  title: "ปรึกษาแม่หมอตัวจริง · Marketplace แม่หมอทาโรต์",
   description:
     "เลือกปรึกษาและดูดวงกับแม่หมอตัวจริงผู้เชี่ยวชาญศาสตร์ไพ่ทาโรต์ พร้อมระบบ AI ช่วยบรีฟคำถามและสรุปผังไพ่เบื้องต้น",
+  alternates: { canonical: `${SITE_ORIGIN}/readers` },
+  openGraph: {
+    title: "ปรึกษาแม่หมอตัวจริง · SeerTarot",
+    description: "เลือกปรึกษาและดูดวงกับแม่หมอตัวจริงผู้เชี่ยวชาญศาสตร์ไพ่ทาโรต์",
+    url: `${SITE_ORIGIN}/readers`,
+    siteName: "SeerTarot",
+    type: "website",
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+  },
 };
 
 export default async function ReadersPage() {

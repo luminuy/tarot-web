@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0076 · 2026-09-04 14:16 · 🟠 High · หยุด canonical หน้าแรกรั่วไปทับทุกหน้า + ส่งเนื้อหาหลักออกจากเซิร์ฟเวอร์แบบมองเห็นได้ + ภาพแชร์ 1200x630
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | curl หน้า /privacy /readers /account /reading/chat ได้ canonical เป็น https://seertarot.net ทุกหน้า (บอกกูเกิลว่าทุกหน้าเป็นสำเนาของหน้าแรก) · HTML ของ /blog ส่งการ์ดบทความ 24 ใบออกมาเป็น opacity:0 ทั้งหมด · ชื่อเรื่องขึ้น 'SeerTarot · SeerTarot' ซ้ำสองรอบ · แชร์ลิงก์บน LINE/Facebook ได้ภาพไพ่แนวตั้งที่ถูกครอบตัดจนอ่านไม่ออก · ตั้ง NEXT_PUBLIC_GA_ID แล้วไม่มีข้อมูลเข้า GA เลย |
+| **สาเหตุราก** | หน้าแรกเป็น 'use client' จึง export metadata เองไม่ได้ canonical และ JSON-LD ของหน้าแรก (WebApplication/FAQPage/HowTo) เลยถูกไปฝากไว้ที่ root layout ซึ่ง Next.js สืบทอดลงทุกเส้นทางที่ไม่ได้ประกาศทับ · motion เขียนค่า initial ลงเป็น inline style ตั้งแต่ HTML ฝั่งเซิร์ฟเวอร์ เนื้อหาหลักจึงออกไปแบบ opacity:0 · หลายหน้าเติม '| SeerTarot' เองทั้งที่ template ของ layout เติมให้อยู่แล้ว · CSP ไม่ได้อนุญาตโฮสต์ของ gtag กับ fbevents |
+| **การแก้ไข** | แยก src/app/page.tsx เป็น Server Component ที่ถือ canonical กับ JSON-LD เฉพาะหน้าแรก และย้ายพิธีกรรมดูดวงไปเป็น src/app/TarotFlow.tsx · ถอด alternates.canonical และ schema เฉพาะหน้าแรกออกจาก root layout แล้วเติม canonical ให้ /privacy /readers /readers/[id] /account · เพิ่ม layout noindex ให้ /reset-password /readers/console /readers/queue /reading · ใส่ initial={false} ให้ AnimatePresence และเพิ่ม hook useHasMounted() สำหรับ motion ที่ถูก SSR · เปลี่ยน FAQ ทั้งหน้าแรกและหน้าบทความเป็น <details> เพื่อให้คำตอบอยู่ใน HTML ตรงกับ FAQPage schema (HomeSeoContent เลยกลายเป็น Server Component ล้วน) · สร้าง public/og/default.png 1200x630 พร้อมสคริปต์ npm run og:image · ตัด '| SeerTarot' ที่เติมเองออกทุกหน้าและใช้ article.seoTitle ที่มีอยู่แล้วแต่ไม่เคยถูกใช้ · เพิ่ม /readers ใน sitemap และเลิกใช้ new Date() เป็น lastModified · แก้ชื่อ AI crawler ที่เป็นรุ่นเก่า · เพิ่ม BreadcrumbList ให้หน้าไพ่ 78 ใบ · แก้ระดับหัวข้อที่ข้ามขั้น · เพิ่ม not-found.tsx · อนุญาตโฮสต์ GA4/Meta Pixel ใน CSP |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามวาง alternates.canonical, openGraph.url หรือ JSON-LD ที่เป็นจริงเฉพาะหน้าใดหน้าหนึ่งไว้ใน root layout เด็ดขาด — Next.js สืบทอด metadata ลงทุกเส้นทาง ถ้าหน้าไหนเป็น client component ให้ทำ Server Component ครอบแทน · ทุกหน้าที่อยู่ใน sitemap ต้องประกาศ canonical ของตัวเอง และหน้าส่วนตัวต้อง noindex จริง ไม่ใช่พึ่ง robots.txt · หน้าที่ประกาศ openGraph เองต้องใส่ images ด้วยเสมอเพราะ Next แทนที่ทั้งก้อนไม่ได้ผสานทีละฟิลด์ · motion component ที่ถูก SSR ต้องเรนเดอร์แรกออกมาที่สถานะปลายทาง (initial={false} หรือ useHasMounted) · เนื้อหาที่ประกาศไว้ใน structured data ต้องอยู่ใน DOM ตั้งแต่ฝั่งเซิร์ฟเวอร์ ห้ามใส่ทีหลังตอนคลิก** |
+| **การพิสูจน์ว่าแก้ได้จริง** | curl ทุกเส้นทางหลักเทียบก่อน/หลัง: canonical ของ /readers /privacy เปลี่ยนจาก https://seertarot.net เป็น URL ของตัวเอง · จำนวน opacity:0 ใน HTML ฝั่งเซิร์ฟเวอร์ลดจาก /blog 24 /cards 1 /spreads 1 /cards/major-00 2 เหลือ 0 ทุกหน้า · จำนวนบล็อก ld+json ต่อหน้าลดจาก 10-16 เหลือ 4-10 · ความยาว <title> ของ /cards/major-00 ลดจาก 101 เหลือ 93 ไบต์ · repo:verify 24/24 |
+| **บันทึกโดย** | Claude · branch `claude/read-md-improve-code-9be6c8` · commit `cc53cf8` |
+
+
 ### INC-0075 · 2026-09-04 13:53 · 🟠 High · แก้ hydration mismatch หน้าแรก (ISSUE-008) + โมดัลทำให้หน้าเว็บเลื่อนไม่ได้ถาวร + rate limiter รั่วในหน่วยความจำ
 
 | หัวข้อ | รายละเอียด |

@@ -10,6 +10,14 @@ import { CardImage } from "@/components/card/CardImage";
 
 interface MiniCardProps {
   src: string;
+  /**
+   * คำบรรยายภาพ — ค่าเริ่มต้นคือ "" (ภาพประกอบล้วน)
+   * ภาพไพ่ในไดอะแกรมผังเป็นแค่องค์ประกอบตกแต่ง กล่องแม่ของมันมี aria-label
+   * ที่อธิบายผังทั้งผังอยู่แล้ว การใส่ alt="Tarot Card" ซ้ำ ๆ ทุกใบทำให้
+   * โปรแกรมอ่านหน้าจออ่านคำเดียวกันรัวติดกันหลายสิบครั้งโดยไม่ได้ข้อมูลเพิ่ม
+   * ใบไหนที่สื่อความหมายด้วยตัวเองให้ส่ง `alt` เข้ามาเป็นภาษาไทยที่บรรยายจริง
+   */
+  alt?: string;
   className?: string;
   borderColor?: string;
   highlight?: boolean;
@@ -21,6 +29,7 @@ interface MiniCardProps {
 
 export const MiniRwsCard: React.FC<MiniCardProps> = ({
   src,
+  alt = "",
   className = "w-12 h-[82px]",
   borderColor = "#D9C8AC",
   highlight = false,
@@ -56,7 +65,7 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
       {/* 100% Pure 1909 Rider-Waite Card Art */}
       <CardImage
         image={src}
-        alt="Tarot Card"
+        alt={alt}
         className="w-full h-full object-cover object-center tarot-hd-card-image"
         sizes={resolvedSizes}
         loading={loading}
@@ -737,75 +746,9 @@ export const AllSpreadsTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }
   </svg>
 );
 
-export const OracleEyeIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.6}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
-    <circle cx="12" cy="12" r="3" />
-    <path d="M12 9.5v-1M12 15.5v-1" strokeWidth={1.2} />
-  </svg>
-);
 
-export const LockTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.6}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-  >
-    <rect x="5" y="10.5" width="14" height="9.5" rx="2" />
-    <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" />
-    <path d="M12 14.3v2.4" strokeWidth={1.8} />
-  </svg>
-);
 
-export const CareLineIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.5}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M12 19.5c-.2 0-.5-.1-.7-.2-3.4-2.5-6.3-5.2-6.3-8.4 0-2.2 1.7-3.9 3.9-3.9 1.2 0 2.3.6 3.1 1.6.8-1 1.9-1.6 3.1-1.6 2.2 0 3.9 1.7 3.9 3.9 0 3.2-2.9 5.9-6.3 8.4-.2.1-.5.2-.7.2Z" />
-    <path d="M7 11.3h2.1l1.1-2 1.6 3.6 1-1.6h2.2" />
-  </svg>
-);
 
-export const EmergencyTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.6}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-  >
-    <circle cx="12" cy="12" r="8.3" />
-    <path d="M12 8.3v7.4M8.3 12h7.4" />
-  </svg>
-);
-
-// ============================================================================
-// 5. NAVBAR SACRED TAROT ICONS
-// ============================================================================
 
 // ── ไอคอนเส้นชุดเสริม (แทนอิโมจิการ์ตูน — กฎเหล็กข้อ 2) ─────────────────────
 
@@ -835,21 +778,7 @@ export const SpeakerTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) =
   </svg>
 );
 
-export const FlipCardIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <path d="M19.5 11a7.5 7.5 0 0 0-13-4.6" />
-    <path d="M4.5 13a7.5 7.5 0 0 0 13 4.6" />
-    <path d="M6.5 3v3.4H10" />
-    <path d="M17.5 21v-3.4H14" />
-  </svg>
-);
 
-export const CalendarTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <rect x="4" y="5.5" width="16" height="14" rx="2" />
-    <path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" />
-  </svg>
-);
 
 export const CrownTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
   <svg {...line(className)}>
@@ -879,61 +808,13 @@ export const AirElementIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) =
   </svg>
 );
 
-export const EarthElementIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <circle cx="12" cy="12" r="8.3" />
-    <path d="M12 3.7v16.6M3.7 12h16.6" />
-  </svg>
-);
 
-export const SwordElementIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <path d="M19.5 4.5 10 14l-.5 3.5L13 17l9.5-9.5z" transform="translate(-2 0)" />
-    <path d="M7.5 13.5 4 17l3 3 3.5-3.5" />
-  </svg>
-);
 
-export const NoteTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <path d="M6 3.5h8.5L19 8v12.5H6z" />
-    <path d="M14 3.5V8h5M9 12.5h6M9 16h4" />
-  </svg>
-);
 
-export const ChatTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <path d="M20 12.4c0 3.6-3.6 6.5-8 6.5-.9 0-1.8-.1-2.6-.35L4.5 20l1.2-3.2A6.1 6.1 0 0 1 4 12.4C4 8.8 7.6 6 12 6s8 2.8 8 6.4Z" />
-  </svg>
-);
 
-export const AstrologyTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <circle cx="12" cy="12" r="5" />
-    <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-22 12 12)" />
-  </svg>
-);
 
-export const BriefcaseTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <rect x="3.5" y="7.5" width="17" height="12" rx="2" />
-    <path d="M9 7.5V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8v1.7M3.5 12.5h17" />
-  </svg>
-);
 
-export const CoinTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <circle cx="12" cy="12" r="8.3" />
-    <path d="M12 7.5v9M14.4 9.6a2.6 2.6 0 0 0-2.4-1.4c-1.4 0-2.4.8-2.4 1.9 0 2.6 5 1.4 5 4 0 1.2-1.1 2-2.6 2a2.7 2.7 0 0 1-2.5-1.5" />
-  </svg>
-);
 
-export const SeedTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <path d="M12 20.5v-7" />
-    <path d="M12 13.5c0-3.4 2.6-6 6-6 0 3.4-2.6 6-6 6Z" />
-    <path d="M12 16.5c0-2.6-2-4.6-4.6-4.6 0 2.6 2 4.6 4.6 4.6Z" />
-  </svg>
-);
 
 export const ExpandTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
   <svg {...line(className)}>

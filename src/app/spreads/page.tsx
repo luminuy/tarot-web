@@ -4,29 +4,22 @@ import type { Metadata } from "next";
 import { SPREADS } from "@/data/spreads";
 import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
-  title: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม | Spreads Library",
+  title: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม",
   description:
     "รวบรวม 20 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล ความรัก การงาน การเงิน และผังใหญ่เจาะลึก 10 มิติ พร้อมภาพไดอะแกรมการจัดวางจริง",
   alternates: {
     canonical: `${SITE_ORIGIN}/spreads`,
   },
   openGraph: {
-    title: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม | SeerTarot",
+    title: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม · SeerTarot",
     description: "รวบรวม 20 ผังพยากรณ์มาตรฐานสากล ความรัก การงาน การเงิน พร้อมภาพจัดวางจริง",
     url: `${SITE_ORIGIN}/spreads`,
     siteName: "SeerTarot",
     type: "website",
-    images: [
-      {
-        url: "/cards/major-01.jpg",
-        width: 825,
-        height: 1429,
-        alt: "20 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล",
-      },
-    ],
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
   },
 };
 

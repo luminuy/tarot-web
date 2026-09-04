@@ -4,9 +4,17 @@ import { ARTICLES } from "@/data/articles";
 import { SPREADS } from "@/data/spreads";
 import { SITE_ORIGIN } from "@/lib/config/site";
 
+/**
+ * วันแก้ไขล่าสุดของหน้าที่เนื้อหาไม่ได้เปลี่ยนตามการ deploy
+ * ⚠️ ห้ามใช้ `new Date()` — ทุกครั้งที่ deploy จะประทับ "แก้ไขเมื่อกี้" ลง 100+ URL
+ * ที่ไม่ได้เปลี่ยนอะไรเลย Google จึงเรียนรู้ว่าสัญญาณ lastModified ของเว็บนี้เชื่อถือไม่ได้
+ * แล้วเลิกใช้ไปเลย · อัปเดตค่านี้ด้วยมือเมื่อแก้เนื้อหาโครงสร้างจริง ๆ
+ */
+const STRUCTURAL_CONTENT_UPDATED_AT = new Date("2026-09-04T00:00:00+07:00");
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_ORIGIN;
-  const now = new Date();
+  const now = STRUCTURAL_CONTENT_UPDATED_AT;
 
   // Core Static Pages
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -35,6 +43,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      // /readers ถูกลิงก์จากเมนูหลักทุกหน้าและไม่ได้ถูก robots กัน แต่เคยตกหล่นจาก sitemap
+      url: `${baseUrl}/readers`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/privacy`,
       lastModified: now,
       changeFrequency: "monthly",
@@ -50,7 +65,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  // All 20 SEO High-Traffic Blog Articles
+  // บทความ SEO ทั้งหมด (ใช้ updatedAt ของแต่ละบทความจริง ๆ)
   const blogRoutes: MetadataRoute.Sitemap = ARTICLES.map((article) => ({
     url: `${baseUrl}/blog/${article.slug}`,
     lastModified: new Date(article.updatedAt),

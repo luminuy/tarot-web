@@ -17,6 +17,11 @@ export interface ArticleTocItem {
 export interface Article {
   slug: string;
   title: string;
+  /**
+   * ชื่อเรื่องสำหรับ <title> โดยเฉพาะ (สั้นกว่า `title` ที่เป็นพาดหัวเชิงบรรณาธิการ)
+   * ⚠️ ห้ามใส่ชื่อแบรนด์ต่อท้าย — `template: "%s · SeerTarot"` ใน root layout เติมให้เองแล้ว
+   * ใส่เองจะได้ "… — SeerTarot · SeerTarot" ซ้ำสองรอบและยาวเกินที่ SERP แสดง
+   */
   seoTitle: string;
   description: string;
   category: "love" | "career" | "spreads" | "cards" | "wisdom";
@@ -41,7 +46,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-love-3-cards-feelings",
     title: "ดูดวงไพ่ยิปซีความรัก 3 ใบ: เขารู้สึกอย่างไรกับเรา คิดยังไง และอนาคตจะเป็นอย่างไร",
-    seoTitle: "ดูดวงไพ่ยิปซีความรัก 3 ใบ เขารู้สึกอย่างไรกับเรา — SeerTarot",
+    seoTitle: "ดูดวงไพ่ยิปซีความรัก 3 ใบ เขารู้สึกอย่างไรกับเรา",
     description: "วิธีเปิดไพ่ยิปซีความรัก 3 ใบ เช็คความรู้สึกจริงของเขา สิ่งที่เขาคิด และแนวโน้มความสัมพันธ์ในอนาคต พร้อมคำแนะนำเจาะลึก 1909 Rider-Waite",
     category: "love",
     categoryTh: "ความรักและความสัมพันธ์",
@@ -104,7 +109,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-ex-return-signs",
     title: "ดูดวงไพ่ทาโรต์: แฟนเก่าจะกลับมาไหม? ส่อง 5 สัญญาณไพ่บอกการรีเทิร์นและการเริ่มต้นใหม่",
-    seoTitle: "แฟนเก่าจะกลับมาไหม ไพ่ยิปซี 5 สัญญาณไพ่รีเทิร์น — SeerTarot",
+    seoTitle: "แฟนเก่าจะกลับมาไหม ไพ่ยิปซี 5 สัญญาณไพ่รีเทิร์น",
     description: "เช็คดวงความรัก แฟนเก่าคิดถึงเราไหม จะมีโอกาสกลับมาคืนดีกันหรือไม่ ผ่าน 5 สัญญาณไพ่ทาโรต์ 1909 และแนวทางการมูฟออนอย่างมีความสุข",
     category: "love",
     categoryTh: "ความรักและความสัมพันธ์",
@@ -165,7 +170,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "top-10-soulmate-tarot-cards",
     title: "10 ไพ่ทาโรต์บอกรักแท้ & เนื้อคู่: เปิดได้ใบไหนแปลว่าคนที่ใช่กำลังจะเข้ามา",
-    seoTitle: "10 ไพ่เนื้อคู่ ทาโรต์บอกรักแท้ คนที่ใช่กำลังมา — SeerTarot",
+    seoTitle: "10 ไพ่เนื้อคู่ ทาโรต์บอกรักแท้ คนที่ใช่กำลังมา",
     description: "เช็ค 10 สุดยอดไพ่ยิปซีความรัก บ่งบอกถึงเนื้อคู่ คู่แท้ พรหมลิขิต และความสุขสมหวังในชีวิตคู่ พร้อมวิธีดูสัญญาณความรัก 1909 RWS",
     category: "love",
     categoryTh: "ความรักและความสัมพันธ์",
@@ -222,7 +227,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-single-timing-love",
     title: "ดูดวงคนโสด: เมื่อไหร่จะมีความรัก? เจาะลึกจังหวะดวงความรักด้วยไพ่ทาโรต์ 1909",
-    seoTitle: "ดูดวงคนโสดเมื่อไหร่จะมีแฟน เจาะจังหวะเวลาความรัก — SeerTarot",
+    seoTitle: "ดูดวงคนโสดเมื่อไหร่จะมีแฟน เจาะจังหวะเวลาความรัก",
     description: "คนโสดเตรียมตัว! วิธีดูดวงไพ่ยิปซีเช็คจังหวะเวลาความรัก เมื่อไหร่คนที่ใช่จะเข้ามา พร้อมวิธีเปิดไพ่สะท้อนเสน่ห์และอุปสรรคความโสด",
     category: "love",
     categoryTh: "ความรักและความสัมพันธ์",
@@ -273,7 +278,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-career-change-spread",
     title: "ดูดวงการงาน ไพ่ยิปซี: ควรเปลี่ยนงานหรืออยู่ที่เดิม? วิธีเปิดไพ่ทางแยก 4 ใบช่วยตัดสินใจ",
-    seoTitle: "ควรเปลี่ยนงานหรืออยู่ที่เดิม ไพ่ยิปซี ผังทางแยก 4 ใบ — SeerTarot",
+    seoTitle: "ควรเปลี่ยนงานหรืออยู่ที่เดิม ไพ่ยิปซี ผังทางแยก 4 ใบ",
     description: "สับสนเรื่องงาน? วิธีใช้ไพ่ทาโรต์ผังทางแยก 4 ใบ เปรียบเทียบข้อดี-ข้อเสียระหว่างการอยู่ที่เดิมกับการย้ายงานใหม่ ช่วยคุณตัดสินใจอย่างมั่นใจ",
     category: "career",
     categoryTh: "การงานและการเงิน",
@@ -313,7 +318,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-job-interview-one-card",
     title: "สัมภาษณ์งานจะได้ไหม? ผ่านโปรหรือไม่? ดูดวงไพ่ทาโรต์ 1 ใบ เช็คผลแบบตรงไปตรงมา",
-    seoTitle: "สัมภาษณ์งานจะได้ไหม ไพ่ยิปซี 1 ใบ เช็คผลด่วน — SeerTarot",
+    seoTitle: "สัมภาษณ์งานจะได้ไหม ไพ่ยิปซี 1 ใบ เช็คผลด่วน",
     description: "วิธีเปิดไพ่ทาโรต์ 1 ใบ เช็คผลการสัมภาษณ์งาน ผลการพิจารณาเลื่อนขั้น และความสำเร็จในหน้าที่การงาน แม่นยำ ตรงไปตรงมา",
     category: "career",
     categoryTh: "การงานและการเงิน",
@@ -353,7 +358,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-wealth-money-cards",
     title: "ดูดวงการเงิน & โชคลาภ: 7 ไพ่ยิปซีมหาเศรษฐี ชี้ช่องทางรวยและปลดหนี้",
-    seoTitle: "ดูดวงการเงิน โชคลาภ 7 ไพ่ยิปซีมหาเศรษฐี — SeerTarot",
+    seoTitle: "ดูดวงการเงิน โชคลาภ 7 ไพ่ยิปซีมหาเศรษฐี",
     description: "เจาะลึก 7 ไพ่ทาโรต์แห่งความมั่งคั่ง ทรัพย์สิน และโชคลาภ เปิดได้ใบไหนแปลว่าการเงินกำลังจะพุ่ง ปลดหนี้ได้สำเร็จ",
     category: "career",
     categoryTh: "การงานและการเงิน",
@@ -396,7 +401,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-business-elements-spread",
     title: "เริ่มธุรกิจใหม่จะรอดไหม? วิธีใช้ไพ่ทาโรต์ประเมินความเสี่ยงและจุดบอดก่อนลงทุน",
-    seoTitle: "ดูดวงธุรกิจใหม่ ไพ่ยิปซีประเมินความเสี่ยงก่อนลงทุน — SeerTarot",
+    seoTitle: "ดูดวงธุรกิจใหม่ ไพ่ยิปซีประเมินความเสี่ยงก่อนลงทุน",
     description: "เจ้าของธุรกิจควรรู้! วิธีเปิดไพ่ทาโรต์ผังสี่ธาตุ (Four Elements) วิเคราะห์ตลาด การเงิน ทีมงาน และกลยุทธ์ ป้องกันการขาดทุน",
     category: "career",
     categoryTh: "การงานและการเงิน",
@@ -439,7 +444,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "celtic-cross-spread-guide",
     title: "ผังเซลติกครอส (Celtic Cross 10 ใบ): ตำนานผังพยากรณ์ที่แม่นยำที่สุด พร้อมวิธีอ่านทีละตำแหน่ง",
-    seoTitle: "ผังเซลติกครอส 10 ใบ วิธีดูไพ่ยิปซีละเอียดทุกตำแหน่ง — SeerTarot",
+    seoTitle: "ผังเซลติกครอส 10 ใบ วิธีดูไพ่ยิปซีละเอียดทุกตำแหน่ง",
     description: "คู่มือฉบับสมบูรณ์ของผังเซลติกครอส 10 ใบ (Celtic Cross Spread) ไขความลับตำแหน่งกากบาทและเสาพลังงาน ทำนายดวงชะตาทุกมิติ",
     category: "spreads",
     categoryTh: "ผังและการเปิดไพ่",
@@ -485,7 +490,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-daily-card-guide",
     title: "วิธีดูดวงไพ่ยิปซีรายวัน: เปิดไพ่ 1 ใบ เช็คพลังงานและคำแนะนำประจำวันอย่างไรให้ได้ผลจริง",
-    seoTitle: "ดูดวงไพ่ยิปซีรายวัน เปิดไพ่ 1 ใบนำทางชีวิต — SeerTarot",
+    seoTitle: "ดูดวงไพ่ยิปซีรายวัน เปิดไพ่ 1 ใบนำทางชีวิต",
     description: "เริ่มต้นเช้าวันใหม่อย่างมีสติ ด้วยการดูดวงไพ่ยิปซีรายวัน 1 ใบ (Daily Tarot) วิธีตั้งจิตรับคำแนะนำและข้อควรระวังในแต่ละวัน",
     category: "spreads",
     categoryTh: "ผังและการเปิดไพ่",
@@ -523,7 +528,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-7-chakras-spread",
     title: "ผัง 7 จักระ (Chakra Spread): ตรวจเช็คสมดุลพลังงาน กาย-ใจ-จิตวิญญาณ ด้วยไพ่ 7 ใบ",
-    seoTitle: "ผัง 7 จักระ ไพ่ยิปซีตรวจเช็คสมดุลพลังงานบำบัด — SeerTarot",
+    seoTitle: "ผัง 7 จักระ ไพ่ยิปซีตรวจเช็คสมดุลพลังงานบำบัด",
     description: "เช็คพลังงานตกค้างและจุดติดขัดในร่างกายและจิตวิญญาณ ผ่านผังไพ่ 7 จักระ พร้อมแนวทางการปรับสมดุลและฟื้นฟูพลังงานชีวิต",
     category: "spreads",
     categoryTh: "ผังและการเปิดไพ่",
@@ -565,7 +570,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "how-to-ask-tarot-questions",
     title: "วิธีตั้งคำถามกับไพ่ทาโรต์ให้ได้คำตอบแม่นยำ: หลีกเลี่ยงคำถามปิด แล้วชีวิตจะเปลี่ยน",
-    seoTitle: "วิธีตั้งคำถามไพ่ยิปซีให้แม่นยำ เปลี่ยนชีวิต — SeerTarot",
+    seoTitle: "วิธีตั้งคำถามไพ่ยิปซีให้แม่นยำ เปลี่ยนชีวิต",
     description: "เทคนิคการตั้งคำถามกับไพ่ทาโรต์ เปลี่ยนจากคำถามปิดที่ไร้ทางออก เป็นคำถามเปิดที่มอบพลังและกลยุทธ์สร้างอนาคตด้วยตัวคุณเอง",
     category: "spreads",
     categoryTh: "ผังและการเปิดไพ่",
@@ -605,7 +610,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "the-lovers-card-meaning",
     title: "ไพ่ The Lovers (คู่รัก): ความหมายเรื่องความรัก เนื้อคู่ และทางแยกแห่งการตัดสินใจ",
-    seoTitle: "ความหมายไพ่ The Lovers ความรัก การงาน จิตวิทยา 1909 — SeerTarot",
+    seoTitle: "ความหมายไพ่ The Lovers ความรัก การงาน จิตวิทยา 1909",
     description: "เจาะลึกความหมายไพ่หมายเลข 6 The Lovers ถอดรหัสสัญลักษณ์อดัมกับอีฟ เทวทูตราฟาเอล ความรักแท้ และทางเลือกสำคัญของชีวิต",
     category: "cards",
     categoryTh: "ความหมายไพ่",
@@ -646,7 +651,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "the-tower-and-death-meaning",
     title: "ไพ่ The Tower (หอคอยฟ้าผ่า) & Death: ไพ่ที่คนกลัวที่สุด แท้จริงกำลังบอกอะไรคุณ",
-    seoTitle: "ไพ่ The Tower และ Death ความหมายที่แท้จริง ไม่ได้น่ากลัวอย่างที่คิด — SeerTarot",
+    seoTitle: "ไพ่ The Tower และ Death ความหมายที่แท้จริง ไม่ได้น่ากลัวอย่างที่คิด",
     description: "ไขข้อข้องใจไพ่ที่น่ากลัวที่สุดในสำรับทาโรต์ The Tower และ Death ทำไมการพังทลายและการจบลง จึงเป็นของขวัญที่ดีที่สุดของชีวิต",
     category: "cards",
     categoryTh: "ความหมายไพ่",
@@ -683,7 +688,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "the-fool-journey-meaning",
     title: "ไพ่ The Fool (คนโง่เขลาหรือผู้กล้า?): จุดเริ่มต้นของชีวิต และก้าวแรกสู่ความสำเร็จ",
-    seoTitle: "ความหมายไพ่ The Fool การเริ่มต้นใหม่และการเดินทางของชีวิต — SeerTarot",
+    seoTitle: "ความหมายไพ่ The Fool การเริ่มต้นใหม่และการเดินทางของชีวิต",
     description: "เจาะลึกไพ่หมายเลข 0 The Fool สัญลักษณ์ของความไร้เดียงสา ความกล้าหาญ การกระโดดข้ามหน้าผาแห่งความกลัว และการเดินทางของจิตวิญญาณ",
     category: "cards",
     categoryTh: "ความหมายไพ่",
@@ -716,7 +721,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "the-wheel-of-fortune-meaning",
     title: "ไพ่ The Wheel of Fortune: กงล้อแห่งโชคชะตา จังหวะฟ้าเปิด และการเปลี่ยนแปลงครั้งใหญ่",
-    seoTitle: "ความหมายไพ่ The Wheel of Fortune กงล้อโชคชะตาพลิกฟื้นดวง — SeerTarot",
+    seoTitle: "ความหมายไพ่ The Wheel of Fortune กงล้อโชคชะตาพลิกฟื้นดวง",
     description: "ถอดรหัสไพ่หมายเลข 10 The Wheel of Fortune เมื่อจังหวะดวงดาวและจักรวาลหมุนเปลี่ยน การพลิกฟื้นจากร้ายกลายเป็นดี และโชคลาภที่ไม่คาดฝัน",
     category: "cards",
     categoryTh: "ความหมายไพ่",
@@ -753,7 +758,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "reversed-tarot-cards-guide",
     title: "ไพ่กลับหัว (Reversed Tarot Cards): ควรอ่านอย่างไร? ร้ายจริงไหม หรือเป็นแค่พลังงานแฝง",
-    seoTitle: "วิธีอ่านไพ่ทาโรต์กลับหัว ความหมายและมิติพลังงานแฝง — SeerTarot",
+    seoTitle: "วิธีอ่านไพ่ทาโรต์กลับหัว ความหมายและมิติพลังงานแฝง",
     description: "เข้าใจศาสตร์แห่งไพ่กลับหัว (Reversed Cards) อย่างถูกต้อง ไม่ได้แปลว่าโชคร้าย แต่คือพลังงานภายใน ความล่าช้า และโอกาสในการทบทวนตนเอง",
     category: "wisdom",
     categoryTh: "จิตวิทยาและศาสตร์ลึกซึ้ง",
@@ -791,7 +796,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "provably-fair-tarot-guide",
     title: "ดูดวงออนไลน์แบบ Provably-Fair: นวัตกรรมการสับไพ่ SHA-256 ที่การันตีความโปร่งใส 100%",
-    seoTitle: "ดูดวงออนไลน์ Provably Fair SHA-256 สับไพ่โปร่งใส 100% — SeerTarot",
+    seoTitle: "ดูดวงออนไลน์ Provably Fair SHA-256 สับไพ่โปร่งใส 100%",
     description: "เจาะลึกระบบสับไพ่แบบ Provably-Fair บน SeerTarot การผสานคณิตศาสตร์การเข้ารหัสลับ SHA-256 เพื่อการันตีว่าผลไพ่ไม่ถูกล็อกหรือดัดแปลง 100%",
     category: "wisdom",
     categoryTh: "จิตวิทยาและศาสตร์ลึกซึ้ง",
@@ -827,7 +832,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-and-carl-jung-psychology",
     title: "ไพ่ทาโรต์กับจิตวิทยา Carl Jung: ทำไมสัญลักษณ์บนหน้าไพ่ถึงดึงความจริงจากจิตใต้สำนึกได้",
-    seoTitle: "ไพ่ทาโรต์และจิตวิทยา Carl Jung สัญลักษณ์สะท้อนจิตใต้สำนึก — SeerTarot",
+    seoTitle: "ไพ่ทาโรต์และจิตวิทยา Carl Jung สัญลักษณ์สะท้อนจิตใต้สำนึก",
     description: "ค้นพบความลับทางจิตวิทยาเบื้องหลังไพ่ทาโรต์ ทฤษฎีจิตไร้สำนึกร่วม (Collective Unconscious), แม่แบบจิตวิทยา (Archetypes), และปรากฏการณ์ความพ้องพาน (Synchronicity)",
     category: "wisdom",
     categoryTh: "จิตวิทยาและศาสตร์ลึกซึ้ง",
@@ -860,7 +865,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "ai-tarot-oracle-vs-human-reader",
     title: "ดูดวงกับแม่หมอ AI vs หมอดูมนุษย์: ข้อดี ข้อจำกัด และมิติใหม่แห่งการฮีลใจตลอด 24 ชั่วโมง",
-    seoTitle: "ดูดวงแม่หมอ AI กับหมอดูคน แตกต่างกันอย่างไร ข้อดีข้อจำกัด — SeerTarot",
+    seoTitle: "ดูดวงแม่หมอ AI กับหมอดูคน แตกต่างกันอย่างไร ข้อดีข้อจำกัด",
     description: "เปรียบเทียบการดูดวงด้วย AI กับหมอดูมนุษย์ ความเป็นส่วนตัว ความแม่นยำทางสถิติ และการไม่มีอคติส่วนบุคคล ทางเลือกใหม่แห่งการเยียวยาจิตใจ 24/7",
     category: "wisdom",
     categoryTh: "จิตวิทยาและศาสตร์ลึกซึ้ง",
@@ -901,7 +906,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "tarot-history-1909-rider-waite",
     title: "ต้นกำเนิดไพ่ทาโรต์ 1909 Rider-Waite-Smith: สำรับไพ่ที่ทรงอิทธิพลที่สุดในโลก",
-    seoTitle: "ประวัติไพ่ทาโรต์ 1909 Rider-Waite-Smith ที่โลกหลงรัก — SeerTarot",
+    seoTitle: "ประวัติไพ่ทาโรต์ 1909 Rider-Waite-Smith ที่โลกหลงรัก",
     description: "เรื่องราวประวัติศาสตร์ของ Arthur Edward Waite และศิลปินหญิง Pamela Colman Smith ผู้ปฏิวัติศาสตร์ไพ่ทาโรต์จนกลายเป็นมาตรฐานระดับโลก",
     category: "wisdom",
     categoryTh: "จิตวิทยาและศาสตร์ลึกซึ้ง",
@@ -938,7 +943,7 @@ Waite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** �
   {
     slug: "major-arcana-22-cards-complete-guide",
     title: "สรุปความหมายไพ่ชุดใหญ่ Major Arcana 22 ใบ: เส้นทางแห่งจิตวิญญาณ The Fool's Journey",
-    seoTitle: "สรุปความหมายไพ่ชุดใหญ่ Major Arcana 22 ใบ ครบถ้วน — SeerTarot",
+    seoTitle: "สรุปความหมายไพ่ชุดใหญ่ Major Arcana 22 ใบ ครบถ้วน",
     description: "คัมภีร์สรุปความหมายไพ่ทาโรต์ชุดใหญ่ 22 ใบ ตั้งแต่ The Fool ถึง The World ถอดรหัสบทเรียนชีวิตและจิตวิญญาณมนุษย์",
     category: "cards",
     categoryTh: "ความหมายไพ่",
@@ -979,7 +984,7 @@ Waite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** �
   {
     slug: "minor-arcana-4-suits-guide",
     title: "ไขรหัสไพ่ชุดเล็ก Minor Arcana 56 ใบ: 4 ธาตุ ดิน น้ำ ลม ไฟ กับชีวิตประจำวัน",
-    seoTitle: "คู่มือไพ่ชุดเล็ก Minor Arcana 56 ใบ 4 ธาตุ ดิน น้ำ ลม ไฟ — SeerTarot",
+    seoTitle: "คู่มือไพ่ชุดเล็ก Minor Arcana 56 ใบ 4 ธาตุ ดิน น้ำ ลม ไฟ",
     description: "เข้าใจไพ่ทาโรต์ชุดเล็ก 56 ใบ ผ่านหลักการ 4 ธาตุ ถ้วย ไม้เท้า ดาบ เหรียญ สะท้อนเรื่องราวความรัก การงาน อารมณ์ และเงินทองในชีวิตประจำวัน",
     category: "cards",
     categoryTh: "ความหมายไพ่",
@@ -1017,7 +1022,7 @@ Waite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** �
   {
     slug: "tarot-yes-no-spread-guide",
     title: "ดูดวงไพ่ยิปซี ใช่ หรือ ไม่ (Yes/No Tarot): เทคนิคฟันธงคำตอบให้แม่นยำ 100%",
-    seoTitle: "ดูดวงไพ่ยิปซี ใช่หรือไม่ Yes No ฟันธงคำตอบแม่นๆ — SeerTarot",
+    seoTitle: "ดูดวงไพ่ยิปซี ใช่หรือไม่ Yes No ฟันธงคำตอบแม่นๆ",
     description: "วิธีเปิดไพ่ทาโรต์แบบ ใช่หรือไม่ (Yes/No Oracle) วิเคราะห์พลังงานบวกและลบของไพ่แต่ละใบ ช่วยให้คุณฟันธงคำตอบได้อย่างมั่นใจ ไร้ความลังเล",
     category: "spreads",
     categoryTh: "ผังและการเปิดไพ่",

@@ -3,12 +3,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getAllArticles } from "@/data/articles";
 import { BlogIndexClient } from "./BlogIndexClient";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 
 export const metadata: Metadata = {
-  title: "คัมภีร์บทความ & คู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909 | SeerTarot Blog",
+  title: "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909",
   description:
     "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 20 แบบ และความหมายไพ่ 78 ใบ โดยแม่หมอแห่งวิหาร SeerTarot",
   keywords: [
@@ -23,11 +23,12 @@ export const metadata: Metadata = {
     canonical: `${SITE_ORIGIN}/blog`,
   },
   openGraph: {
-    title: "คัมภีร์บทความ & คู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909 | SeerTarot",
+    title: "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909 · SeerTarot",
     description: "รวมบทความเจาะลึกศาสตร์ไพ่ทาโรต์ ความรัก การงาน และจิตวิทยาพยากรณ์",
     url: `${SITE_ORIGIN}/blog`,
     siteName: "SeerTarot",
     type: "website",
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
   },
 };
 
