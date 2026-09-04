@@ -61,6 +61,24 @@
   - สแกน static code ซ้ำ ยืนยันเหลือจุดผิดเพี้ยน = 0
   - `npm run typecheck` ผ่าน 0 errors
   - `npm run repo:verify` ผ่านครบ 23/23 ด่าน
+### 🗓️ 2026-09-04: แก้เมนู dropdown กระพริบตอนเลื่อนหน้า — เจอสาเหตุจริง sticky header พังเพราะ `overflow-x: hidden` บน body (INC-0067)
+
+**อาการที่ผู้ใช้เจอ** (แจ้งซ้ำหลายรอบ): *"ส่วนนี้ทั้ง 2 อัน (เมนูวิหารพยากรณ์ + การ์ดโปรไฟล์สมาชิก) เลื่อนลงมาแล้วไม่สมูท มีการกระพริบตลอด ทำไมยังไม่จบซักที"*
+
+**ทำไมแก้หลายรอบไม่จบ**: รอบก่อน ๆ (WORK_LOG 2026-09-02 ×4 ครั้ง + INC-0060) แก้ที่ตัวอนิเมชันเปิด/ปิดล้วน ๆ — ตัด `staggerChildren`, ตัด `scale`, ตัด `backdrop-blur`, ล็อก `backface-visibility`/`translateZ` — ไม่มีรอบไหนแตะ**สาเหตุจริง**
+
+**สาเหตุจริง**: `src/app/globals.css` → `html, body { overflow-x: hidden }`
+- `overflow-x: hidden` บังคับ `overflow-y` เป็น `auto` → `<body>` (สูงเท่าเนื้อหา) กลายเป็น scroll container ที่ไม่มีวันเลื่อน
+- `position: sticky` ของ `<header>` เลยยึดกับ `<body>` แทน viewport → **หัวเว็บไม่ sticky จริง เลื่อนหลุดตามหน้า**
+- แผงเมนูเป็น `absolute` ใต้หัวเว็บ + เป็น GPU layer + มีเงาเบลอ 30px → พอทั้งก้อน translate ทุกเฟรมตอนเลื่อน เบราว์เซอร์วาดเงา/ไล่สีใหม่ทุกเฟรม = กระพริบ
+- `<main className="overflow-hidden">` ซ้อนปัญหาเดียวกันอีกชั้น
+
+**สิ่งที่แก้**:
+1. `globals.css`: เอา `overflow-x: hidden` ออกจาก `html, body` → ใช้ `html { overflow-x: clip }` แทน (`clip` กันล้นได้เท่าเดิมแต่ไม่สร้าง scroll container จึงไม่แตะ sticky)
+2. `<main>` ทั้ง 5 หน้า (`/`, `/cards`, `/spreads`, `/readers`, `/readers/[id]`): `overflow-hidden` → `overflow-x-clip`
+3. `SacredNavDropdown.tsx` + `UserProfileBadge.tsx`: แผงเมนู `overflow-hidden` → `overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)]` (เผื่อจอเตี้ยที่แผงยาวเกินจอ ให้เลื่อนในแผงเองแทนดันหน้า)
+
+**ผลทดสอบ**: dev + Playwright JS มือถือ 375px — เปิดเมนูแล้วเลื่อนไป y=0/150/300/500/800/1200 → `header.top`=0 และ `panel.top`=52 ทุกจุด (ก่อนแก้: panel เลื่อนตามจนหลุดจอ) · `repo:verify` 23/23 · `tsc` 0 errors
 
 ---
 

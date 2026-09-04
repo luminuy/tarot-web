@@ -795,8 +795,12 @@ export default function TarotPage() {
     }
   };
 
+  // overflow-x-clip (ไม่ใช่ overflow-hidden) — overflow-hidden ทำให้ <main> กลายเป็น scroll
+  // container ทำให้ position: sticky ของ <header> ข้างในพัง หัวเว็บเลื่อนหลุดตามหน้า พอเปิดเมนู
+  // dropdown แล้วเลื่อน แผงที่ composite อยู่ (เงา + ไล่สี) ถูกวาดใหม่ทุกเฟรม → กระพริบ
+  // overflow-x: clip กันล้นแนวนอนได้เหมือนเดิมแต่ไม่สร้าง scroll container จึง sticky ทำงานปกติ
   return (
-    <main className="min-h-screen text-[#29261F] relative overflow-hidden bg-[#F3F0EA]">
+    <main className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 

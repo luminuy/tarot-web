@@ -118,9 +118,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
   overflow-wrap: break-word;
   word-break: break-word;
+}
+
+/*
+ * กันเนื้อหาล้นแนวนอน — ต้องใช้ `overflow-x: clip` ที่ <html> เท่านั้น
+ *
+ * ⚠️ ห้ามใส่ `overflow-x: hidden` ที่ `body` (หรือ `html, body` รวมกัน) เด็ดขาด
+ * `overflow-x: hidden` บังคับ `overflow-y` เป็น `auto` ทำให้ <body> กลายเป็น scroll
+ * container ที่ไม่มีวันเลื่อน (สูงเท่าเนื้อหา) → `position: sticky` ของหัวเว็บพัง
+ * หัวเว็บเลื่อนหลุดตามหน้า พอเปิดเมนู dropdown แล้วเลื่อนจึงเห็นแผงกระพริบ (INC-0060 กลับมาซ้ำ)
+ * `overflow-x: clip` กันล้นได้เหมือนกันแต่ไม่สร้าง scroll container จึงไม่กระทบ sticky
+ */
+html {
+  overflow-x: clip;
 }
 
 /*

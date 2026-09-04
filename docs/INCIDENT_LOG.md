@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0067 · 2026-09-04 07:42 · 🟡 Medium · เมนู dropdown เลิกกระพริบตอนเลื่อนหน้า — คืนชีพ sticky header
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เปิดเมนูวิหารพยากรณ์หรือการ์ดโปรไฟล์แล้วเลื่อนหน้าลง แผงเมนูกระพริบตลอดเวลาที่เลื่อน ทั้งมือถือและเดสก์ท็อป แจ้งซ้ำหลายรอบไม่จบ |
+| **สาเหตุราก** | globals.css ตั้ง overflow-x:hidden บน body ซึ่งบังคับ overflow-y เป็น auto ทำให้ body กลายเป็น scroll container ที่ไม่มีวันเลื่อน position:sticky ของ header จึงยึดกับ body แทน viewport หัวเว็บไม่ sticky จริงเลื่อนหลุดตามหน้า แผงเมนู absolute ที่เป็น GPU layer พร้อมเงาเบลอ 30px ถูก translate ทุกเฟรมระหว่างเลื่อน เบราว์เซอร์วาดเงาใหม่ทุกเฟรมจึงกระพริบ main ที่ overflow-hidden ซ้อนปัญหาอีกชั้น รอบก่อนแก้ที่อนิเมชันล้วนไม่เคยแตะรากนี้ |
+| **การแก้ไข** | globals.css: ลบ overflow-x:hidden จาก html,body ใช้ html{overflow-x:clip} แทน · main ทั้ง 5 หน้าเปลี่ยน overflow-hidden เป็น overflow-x-clip · แผงเมนู SacredNavDropdown+UserProfileBadge เปลี่ยนเป็น overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)] |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามใส่ overflow-x:hidden หรือ overflow:hidden บน body หรือ ancestor ใดของ position:sticky เพราะทำให้ ancestor นั้นเป็น scroll container ที่ไม่เลื่อนแล้ว sticky พังเงียบ กันล้นแนวนอนให้ใช้ overflow-x:clip ที่ html เท่านั้น (clip ไม่สร้าง scroll container) เวลาเจอเมนูกระพริบตอนเลื่อนให้เช็ก overflow ของ ancestor chain ก่อนไปแก้อนิเมชัน** |
+| **การพิสูจน์ว่าแก้ได้จริง** | dev+Playwright JS มือถือ 375px: เปิดเมนูแล้วเลื่อน y=0..1200 header.top=0 panel.top=52 ทุกจุด (ก่อนแก้ panel หลุดจอ) · repo:verify 23/23 · tsc 0 errors |
+| **บันทึกโดย** | Claude Sonnet 5 · branch `claude/scroll-flicker-issue-a6cdb6` · commit `7359be7` |
+
+
 ### INC-0066 · 2026-09-03 21:11 · 🟠 High · เพิ่ม r2_buckets binding → CLOUDFLARE_API_TOKEN ขาดสิทธิ์ R2 → deploy fail ทั้ง repo
 
 | หัวข้อ | รายละเอียด |
