@@ -1,7 +1,9 @@
 import { execFileSync, execSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { recordAudit } from "./audit-tracker";
 import { recordIncident, type Severity } from "./incident-log";
 import { syncWorkLog } from "./sync-worklog";
+import { ownedAndForeignLocks } from "./agent-guard";
 
 function run(cmd: string): string {
   try {
@@ -105,6 +107,92 @@ const commitBody = [
   `Co-authored-by: Google Gemini <gemini-ai@users.noreply.github.com>`,
 ].filter(Boolean).join("\n");
 
+// ============================================================================
+// 🧹 Scoped Staging — stage เฉพาะไฟล์ของ commit นี้ ไม่ใช่ทั้ง working tree
+// ============================================================================
+// `git add .` แบบเดิมกวาดทุกไฟล์ที่ถูกแก้ค้างไว้ รวมงานที่ยังไม่เสร็จของเอเจนต์อื่น
+// (ที่รันอยู่ในโฟลเดอร์เดียวกัน) เข้า commit/PR ของเราด้วย → งานเขาหาย เราได้ PR ปนเป
+// วิธีใหม่: รู้ให้ชัดว่าไฟล์ไหนเป็นของ commit นี้ (--files หรือ .ai-locks.json ของเราเอง)
+// แล้ว stage เฉพาะไฟล์นั้น · ถ้ายังไม่รู้และมีเอเจนต์อื่นถือ lock อยู่ → บล็อกทันที
+// ถ้าไม่มีเอเจนต์อื่นเลย (รันเดี่ยว) → stage ทั้งหมดได้ตามเดิม
+const BOOKKEEPING_FILES = ["docs/WORK_LOG.md", "docs/INCIDENT_LOG.md"];
+
+function changedPaths(): string[] {
+  // ห้ามใช้ run() ตรงนี้ — run() เรียก .trim() ทั้งก้อน ทำให้บรรทัดแรกเสียช่องว่างนำหน้า
+  // (" M path" → "M path") แล้ว slice(3) จะกินตัวอักษรแรกของ path ไปด้วย
+  const out = execSync("git status --porcelain", { encoding: "utf-8" });
+  return out
+    .split("\n")
+    .filter((l) => l.length > 3)
+    .map((l) => l.slice(3).replace(/^"(.*)"$/, "$1").split(" -> ").pop()!.trim());
+}
+
+function stageForCommit() {
+  const explicit = (args["files"] || args["file"] || "")
+    .split(",")
+    .map((f) => f.trim())
+    .filter(Boolean);
+  const forceAll = args["all"] === "true" || args["add-all"] === "true";
+
+  const changed = changedPaths();
+  if (changed.length === 0) return; // ไม่มีอะไรให้ stage — ปล่อยให้ git commit ฟ้องเอง
+
+  if (forceAll) {
+    console.warn("  ⚠️  --all: stage ทั้ง working tree (git add -A) — ต้องมั่นใจว่าไม่มีเอเจนต์อื่นทำงานพร้อมกัน");
+    run("git add -A");
+    return;
+  }
+
+  const changedSet = new Set(changed);
+  const { ownedFiles, hasWildcardLock, foreign } = ownedAndForeignLocks(agent);
+  const owned = explicit.length > 0 ? explicit : ownedFiles;
+
+  if (owned.length === 0) {
+    if (foreign.length > 0 && !hasWildcardLock) {
+      console.error("\n❌ [Commit ถูกบล็อก] มีเอเจนต์อื่นถือ lock อยู่ แต่ commit นี้ไม่ได้ระบุว่าไฟล์ไหนเป็นของคุณ");
+      for (const l of foreign) {
+        console.error(`   ✦ [${l.agentName}] ${l.task} — ${l.files.join(", ")}`);
+      }
+      console.error("\n   `git add .` จะกวาดงานที่ยังไม่เสร็จของเอเจนต์อื่นเข้า PR ของคุณ (INC-0069)");
+      console.error("   ทางแก้ (เลือกอย่างใดอย่างหนึ่ง):");
+      console.error(`     • ระบุไฟล์ของคุณเอง:  npm run commit -- ... --files "src/a.ts,src/b.ts"`);
+      console.error(`     • ล็อคไฟล์ก่อนแก้:     npm run agent:lock -- --agent ${agent} --files "..." --task "..."`);
+      console.error(`     • ทำงานใน git worktree แยก (.claude/worktrees/) แล้ว git add . จะปลอดภัยเอง`);
+      console.error(`     • ยืนยันว่ารันเดี่ยวจริง:  เพิ่ม --all`);
+      process.exit(1);
+    }
+    console.log(`  ℹ️  ไม่มี lock ของเอเจนต์อื่น — stage ทั้ง ${changed.length} ไฟล์`);
+    run("git add -A");
+    return;
+  }
+
+  const missing = explicit.filter((f) => !changedSet.has(f) && !existsSync(f));
+  if (missing.length > 0) {
+    console.error(`\n❌ [Commit ถูกบล็อก] --files ระบุไฟล์ที่ไม่มีอยู่จริง: ${missing.join(", ")}`);
+    process.exit(1);
+  }
+
+  const toAdd = [
+    ...new Set([
+      ...owned.filter((f) => changedSet.has(f) || existsSync(f)),
+      ...BOOKKEEPING_FILES.filter((f) => changedSet.has(f)),
+    ]),
+  ];
+  if (toAdd.length === 0) {
+    console.error("\n❌ [Commit ถูกบล็อก] ไฟล์ที่ระบุไม่มีการเปลี่ยนแปลงให้ commit");
+    process.exit(1);
+  }
+
+  execFileSync("git", ["add", "--", ...toAdd], { stdio: "inherit" });
+
+  const staged = new Set(run("git diff --cached --name-only").split("\n").filter(Boolean));
+  const leftForOthers = changed.filter((p) => !staged.has(p));
+  console.log(`  ✅ stage เฉพาะไฟล์ของ commit นี้: ${[...staged].join(", ")}`);
+  if (leftForOthers.length > 0) {
+    console.log(`  📌 ปล่อยไว้ให้เจ้าของอื่น (ไม่ stage): ${leftForOthers.join(", ")}`);
+  }
+}
+
 async function executeCommit() {
   try {
     recordAudit(agent, (type.toUpperCase() || "FEAT") as any, message);
@@ -131,7 +219,7 @@ async function executeCommit() {
     // Auto-sync work log into docs/WORK_LOG.md automatically on EVERY commit
     await syncWorkLog();
 
-    run("git add .");
+    stageForCommit();
     // ส่ง argument เป็น array ไม่ผ่าน shell — ข้อความ commit จึงมี " ` $ ( ) ได้อย่างปลอดภัย
     // TAROT_VERIFIED=1 บอก .githooks/pre-commit ว่าตรวจผ่านมาแล้ว ไม่ต้องรันซ้ำ
     execFileSync("git", ["commit", "-m", commitTitle, "-m", commitBody], {

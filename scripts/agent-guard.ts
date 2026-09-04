@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, realpathSync } from "fs";
 import { execSync } from "child_process";
 import { join } from "path";
+import { fileURLToPath } from "url";
 
 const ROOT_DIR = process.cwd();
 const LOCKS_FILE = join(ROOT_DIR, ".ai-locks.json");
@@ -24,7 +25,7 @@ export interface LocksData {
 
 const DEFAULT_TTL_MINUTES = 30;
 
-function readLocks(): LocksData {
+export function readLocks(): LocksData {
   if (!existsSync(LOCKS_FILE)) {
     return {
       version: "1.0",
@@ -49,7 +50,7 @@ function saveLocks(data: LocksData) {
   writeFileSync(LOCKS_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
-function cleanExpired(data: LocksData): LocksData {
+export function cleanExpired(data: LocksData): LocksData {
   const now = new Date().getTime();
   const active = data.locks.filter((lock) => {
     const exp = new Date(lock.expiresAt).getTime();
@@ -261,7 +262,39 @@ export function printStatus() {
   console.log();
 }
 
-// CLI RUNNER
+// 5. LOCKED FILES OWNED BY THE CURRENT AGENT (for scoped `git add`)
+//    คืนรายชื่อไฟล์ที่ agent นี้ล็อคไว้ (ไม่รวม "*") + รายชื่อ lock ของ agent อื่นที่ยัง active
+export function ownedAndForeignLocks(currentAgent?: string): {
+  ownedFiles: string[];
+  hasWildcardLock: boolean;
+  foreign: AgentLock[];
+} {
+  const agent = currentAgent || inferCurrentAgent();
+  const data = cleanExpired(readLocks());
+  const mine = data.locks.filter((l) => isSameAgent(l.agentName, agent));
+  const foreign = data.locks.filter((l) => !isSameAgent(l.agentName, agent));
+  const ownedFiles = [
+    ...new Set(mine.flatMap((l) => l.files).filter((f) => f && f !== "*")),
+  ];
+  const hasWildcardLock = mine.some((l) => l.files.includes("*"));
+  return { ownedFiles, hasWildcardLock, foreign };
+}
+
+// CLI RUNNER — รันเฉพาะตอนถูกเรียกตรง ๆ (npm run agent:*)
+// ห้ามรันตอนถูก import จากสคริปต์อื่น (เช่น git-author-guard) ไม่งั้นจะไป parse argv ผิดตัว
+function isRunDirectly(): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return realpathSync(entry) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+}
+
+if (isRunDirectly()) runCli();
+
+function runCli() {
 const action = process.argv[2] || "status";
 const args = parseArgs(process.argv.slice(3));
 
@@ -307,4 +340,5 @@ switch (action) {
   default:
     printStatus();
     break;
+}
 }
