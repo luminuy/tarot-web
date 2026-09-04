@@ -34,6 +34,30 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: แก้ไขการชนกันขององค์ประกอบหน้าแรก (FAQ-Footer & Ritual Cards) + ยกระดับดีไซน์หน้า Blog สู่ Quiet Luxury & Mystic Sanctuary
+
+- **ความต้องการของผู้ใช้**:
+  - "1 แก้ รุป 1 -2 ทับ เเละ รูป 3 ปรับปรุงหน้า blog ให้สวยเเละเข้ากับเรามากกว่านี้"
+- **การวินิจฉัยและแก้ไข (Audit & Engineering Solutions)**:
+  1. **รูปที่ 1 (FAQ ชนขอบ Dark Footer)**:
+     - ปัญหา: การ์ด FAQ ใบสุดท้ายชนชิดขอบบนของแถบ Dark Footer (`bg-[#171512]`) ไร้ระยะห่าง
+     - แก้ไข: ขยาย `pb-16 sm:pb-24` ให้กับ Section 5 (FAQ), เสริม **Sacred Gold Transition Ornament Block** ระหว่าง FAQ และ Footer คั่นด้วยเส้นทองคำเปลวบางเบา `✦`, และเพิ่ม `mt-16 sm:mt-24` ให้กับ `<footer className="w-full bg-[#171512] ...">` สร้างระยะห่างที่ผ่อนคลายและสง่างาม 100%
+  2. **รูปที่ 2 (การ์ดขั้นตอนพิธีกรรมมีเส้นขอบซ้อนเหลื่อม)**:
+     - ปัญหา: ความกว้าง `max-w-7xl` ยื่นล้นกว่าเซกชันอื่น และ `hover:-translate-y-1.5` ก่อให้เกิด artifact ซ้อนเหลื่อม
+     - แก้ไข: ปรับคอนเทนเนอร์กลับสู่ `max-w-6xl` สมดุลเท่ากับทุกเซกชัน, ใส่ `overflow-hidden` ป้องกันแสงหรือมุมแลบออกนอกกรอบ, เปลี่ยนจาก translation เป็นการยกเงาและเส้นขอบสีทองอย่างนุ่มนวล
+  3. **รูปที่ 3 (ยกระดับหน้าดัชนีบทความ `/blog` สู่ Quiet Luxury & Mystic Sanctuary)**:
+     - ปัญหา: หน้าบทความเดิมดูเป็นกล่องเรียบแข็งทื่อ ขาดความเป็นวิหารพยากรณ์ มี emoji นาฬิกา `⏱️` ขัดต่อกฎเหล็กข้อ 2 และไม่มีภาพไพ่ 1909 ประกอบบทความเลย
+     - แก้ไข:
+       - อัปเกรด Header และ Navigation ด้วย `SacredNavDropdown`, คุมโทน Warm Ivory & Taupe, และหัวข้อ Noto Serif Thai สี Deep Brown
+       - ช่องค้นหา Soft Porcelain พร้อมไอคอนทองคำ `✦` และปุ่มล้างคำค้น
+       - แท็บกรองหมวดหมู่สไตล์ Quiet Luxury คุมโทนสีทองและน้ำตาลช็อกโกแลต
+       - Featured Article Hero Card: นิตยสารคัมภีร์พยากรณ์ พร้อมภาพไพ่ 1909 Rider-Waite ประจำบทความ (`sizes="112px"`), ป้ายกำกับทองคำ, กำจัด emoji `⏱️` แทนด้วย `✦ เวลาอ่าน X นาที`
+       - Article Cards Grid: การ์ดบทความทุกใบแสดงภาพหน้าไพ่ 1909 Rider-Waite ประจำเรื่องเคียงข้างเนื้อหา, แท็กหัวข้อกรอบทองคำ, และปุ่ม `อ่านต่อ →`
+- **ผลการทดสอบ & ยืนยันผล (Verification)**:
+  - `npm run typecheck` ➔ **0 errors**
+  - `npx tsx scripts/qa/test-image-paths.ts` ➔ **0 broken paths (CardImage 100%)**
+  - `AGENT_NAME=Antigravity npm run repo:verify` ➔ **24/24 ด่านเขียวสมบูรณ์ 100%**
+
 ### 🗓️ 2026-09-04: ปรับปรุงช่องไฟ สัดส่วน และ Typographic Spacing (HomeSeoContent): ขยาย Breathing Room + ขจัดกล่องซ้อนกล่อง + ภาพไพ่ประกอบบทความ + เส้นคั่นทองคำหรูหรา
 
 - **ความต้องการของผู้ใช้**:
