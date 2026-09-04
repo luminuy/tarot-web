@@ -34,6 +34,37 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | Service Layer + Repository + Provably Fair SHA-256 | เชื่อมต่อ Prisma PostgreSQL ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-04: ยกเครื่องดีไซน์ใหม่หมดจดสู่ Editorial Quiet Luxury & Mystic Sanctuary (HomeSeoContent): เปลี่ยนกล่องขาว SaaS เป็นแท่นบูชาไพ่ 1909 RWS แท้ + คัมภีร์พยากรณ์วิหารทองคำ
+
+- **ความต้องการของผู้ใช้**:
+  - "ปรับปรุงออกแบบใหม่ให้เข้ากับเรา ตามแบบเราไม่สวยเลย" พร้อมส่งภาพเปรียบเทียบกล่องขั้นตอน 5 ข้อและกล่อง 3 คอลัมน์เดิมที่ดูเป็นกล่องขาวเรียบเหมือนเว็บ SaaS ทั่วไป ขาดบรรยากาศมนต์ขลังและเอกลักษณ์วิหารไพ่ทาโรต์ SeerTarot
+- **การวินิจฉัยจุดที่ไม่เข้ากับอัตลักษณ์ของแบรนด์**:
+  1. **Section 1 (5 ขั้นตอนพยากรณ์)**: เดิมเป็นการ์ดขาวสี่เหลี่ยมเรียบๆ พร้อมตัวเลขกลม 1-5 คล้ายแบบฟอร์มขั้นตอน Onboarding ของซอฟต์แวร์ ไม่มีภาพไพ่ทาโรต์แม้แต่ใบเดียว
+  2. **Section 2 (มรดก 1909 & Provably Fair)**: เดิมเป็นการ์ดขาวกล่องใหญ่ขอบโค้ง พร้อม 3 คอลัมน์และไอคอนเหลี่ยมเล็กๆ ให้ความรู้สึกเป็น SaaS Features ("Fast, Secure, Scalable") ไม่ใช่คัมภีร์พยากรณ์โบราณ
+- **การปรับปรุงและรังสรรค์ใหม่ทั้งหมด (Total Design Redesign)**:
+  1. **แปลงร่าง 5 ขั้นตอนสู่ 5 แท่นบูชาพยากรณ์ (Sacred Ritual Stations)**:
+     - ผูกโยงแต่ละขั้นตอนเข้ากับไพ่ทาโรต์ 1909 Rider-Waite ประจำขั้นตอนจริง ผ่านคอมโพเนนต์ `<CardImage />`:
+       - ขั้นที่ ๑ · ปฐมบท: The Fool (`major-00.jpg`) — ก้าวแรกแห่งการเดินทางสู่ความจริง
+       - ขั้นที่ ๒ · สงบจิต: The High Priestess (`major-02.jpg`) — สมาธิและปัญญาญาณภายใน
+       - ขั้นที่ ๓ · สับไพ่: Wheel of Fortune (`major-10.jpg`) — กงล้อโชคชะตาและสับไพ่ Provably Fair
+       - ขั้นที่ ๔ · เลือกไพ่: The Magician (`major-01.jpg`) — อำนาจเจตจำนงและการเลือกด้วยมือตน
+       - ขั้นที่ ๕ · เปิดเผย: The Star (`major-17.jpg`) — ดวงประทีปนำทางและคำทำนาย AI
+     - กรอบแท่นบูชาการ์ดไล่เฉดสีนวลตา Warm Parchment (`bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB]`) ขอบเส้นทองโบราณ (`border-[#D9C8AC]`) พร้อม Watermark เลขโรมันโบราณ (I, II, III, IV, V) และตราประทับทองคำ `✦` สี่มุมเมื่อ Hover
+  2. **รังสรรค์คัมภีร์วิหารทองคำ (Sacred Heritage & Provably Fair Manuscript)**:
+     - เปลี่ยนกรอบขาวเรียบเป็นแผ่นคัมภีร์วิหารพยากรณ์ขนาดใหญ่ ขอบทองสองชั้นพร้อมเส้นประกายทองคำ Ambient Gold Hairline
+     - แบ่ง 3 เสาเอกศักดิ์สิทธิ์ (Sacred Triptych):
+       - **เสาเอกที่ ๑**: มรดกสำรับ 1909 โดย Pamela Colman Smith พร้อมการ์ดซ้อนคู่ (The Magician + The World)
+       - **เสาเอกที่ ๒**: ความโปร่งใส Provably Fair SHA-256 Commit-Reveal พร้อมการ์ดซ้อนคู่ (Wheel of Fortune + Justice)
+       - **เสาเอกที่ ๓**: จิตวิทยา Jungian Archetypes & แม่หมอ AI ผู้โอบอุ้ม พร้อมการ์ดซ้อนคู่ (The High Priestess + The Star)
+  3. **ยกระดับความประณีตทั่วทั้งหน้า**:
+     - ผังพยากรณ์แนะนำ (Celtic Cross, Three-Card, Decision) และกริด 6 เมเจอร์อาร์คานา ปรับสีพื้นเป็นนวลตาและไฮไลท์ทองคำ
+     - FAQ Accordion เพิ่มสถานะเปิด-ปิดด้วยกรอบทองคำเปลวและสีนวลตา
+     - แก้ไข URL ลิงก์ผังพยากรณ์ให้ตรงกับ schema จริง (`/spreads/three-card`, `/spreads/decision`, `/spreads/daily`)
+- **ผลการทดสอบ & ยืนยันผล (Verification)**:
+  - `npm run typecheck` ➔ **0 errors**
+  - `npx tsx scripts/qa/test-image-paths.ts` ➔ **ผ่าน Rule 8 100%**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 24 ด่าน 100%**
+
 ### 🗓️ 2026-09-04: ยกระดับ On-Page SEO หน้าแรก: H1 ชัดเจนบนมือถือ + บทความศาสตร์ 1909 RWS & Provably Fair + FAQ & HowTo Schema + Fat Footer ลิงก์ภายใน (Helpful Content & Mobile-First Indexing)
 
 - **ความต้องการของผู้ใช้**:
