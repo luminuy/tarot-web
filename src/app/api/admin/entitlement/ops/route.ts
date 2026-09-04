@@ -5,6 +5,7 @@ import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { GRANDFATHER_BONUS, grantBonus } from "@/lib/entitlement/entitlement";
 import { getAppDB } from "@/lib/platform/db";
+import { ENTITLEMENT_DDL_STATEMENTS } from "@/lib/entitlement/schema";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -21,20 +22,7 @@ const Body = z.object({
   before: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
-const ENTITLEMENT_DDL = `
-  CREATE TABLE IF NOT EXISTS reading_usage (
-    id TEXT PRIMARY KEY, user_id TEXT NOT NULL, reading_id TEXT NOT NULL,
-    week_key TEXT NOT NULL, source TEXT NOT NULL, consumed_at INTEGER NOT NULL
-  );
-  CREATE UNIQUE INDEX IF NOT EXISTS idx_ru_reading ON reading_usage(reading_id);
-  CREATE INDEX IF NOT EXISTS idx_ru_user_week ON reading_usage(user_id, week_key, source);
-  CREATE TABLE IF NOT EXISTS user_bonus (
-    id TEXT PRIMARY KEY, user_id TEXT NOT NULL, granted INTEGER NOT NULL DEFAULT 0,
-    reason TEXT NOT NULL, granted_at INTEGER NOT NULL
-  );
-  CREATE UNIQUE INDEX IF NOT EXISTS idx_ub_user_reason ON user_bonus(user_id, reason);
-  CREATE INDEX IF NOT EXISTS idx_ub_user ON user_bonus(user_id);
-`;
+// DDL ย้ายไป @/lib/entitlement/schema แล้ว — ใช้ชุดเดียวกับการซ่อมตัวเองตอน runtime
 
 async function tableExists(db: Awaited<ReturnType<typeof getAppDB>>, name: string): Promise<boolean> {
   try {
@@ -69,7 +57,7 @@ export async function POST(request: Request) {
 
   if (action === "init_db") {
     // รันทีละ statement — ปลอดภัยทั้ง D1 จริงและ local sqlite shim
-    for (const stmt of ENTITLEMENT_DDL.split(";").map((x) => x.trim()).filter(Boolean)) {
+    for (const stmt of ENTITLEMENT_DDL_STATEMENTS) {
       await db.prepare(stmt).run();
     }
     await recordAudit("entitlement_init_db");
