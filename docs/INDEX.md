@@ -47,6 +47,7 @@ docs/
         ├── AGENTS_TASK_PLAN.md          # แผนกระจายงาน 5 AI Agents เฉพาะทาง
         ├── CLOUDFLARE_FREE_STACK.md     # แผนใช้บริการฟรี CF ต่อยอด (AI Gateway/Turnstile/KV/R2/Vectorize/DO) 4 Wave
         ├── AUDIT_2026-09-01.md          # รายงานการตรวจสุขภาพระบบประจำวันที่ 1 ก.ย. 2569
+        ├── HANDOFF_2026-09-04.md        # 📦 แผนส่งต่องานค้างหลังตรวจใหญ่ (ISSUE-017 ถึง 023) — อ่านก่อนหยิบงานใหม่
         └── BACKLOG.md                   # คลังรายการงานที่ทำเสร็จแล้วย้อนหลัง
 ```
 
