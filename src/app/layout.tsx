@@ -6,13 +6,7 @@ import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
-import { SITE_ORIGIN } from "@/lib/config/site";
-import { getCardWebpVariantSrc } from "@/lib/tarot/card-image";
-import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
-
-const heroCardLcpSrc = getCardWebpVariantSrc("major-19.jpg", "w128");
-const faqJsonLd = generateFaqJsonLd();
-const howToJsonLd = generateHowToJsonLd();
+import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 const notoSerifThai = Noto_Serif_Thai({
   subsets: ["thai", "latin"],
@@ -84,13 +78,12 @@ export const metadata: Metadata = {
     title: "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI",
     description:
       "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair",
-    url: SITE_ORIGIN,
     images: [
       {
-        url: `${SITE_ORIGIN}/cards/major-01.jpg`,
-        width: 825,
-        height: 1429,
-        alt: "SeerTarot 1909 Rider-Waite",
+        url: OG_IMAGE_URL,
+        width: 1200,
+        height: 630,
+        alt: OG_IMAGE_ALT,
       },
     ],
   },
@@ -98,10 +91,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI",
     description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมระบบ Provably-Fair",
-    images: [`${SITE_ORIGIN}/cards/major-01.jpg`],
-  },
-  alternates: {
-    canonical: "/",
+    images: [OG_IMAGE_URL],
   },
 };
 
@@ -113,28 +103,18 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-const webAppJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: "วิหารพยากรณ์ไพ่ทาโรต์ (Sacred Oracle Tarot)",
-  url: SITE_ORIGIN,
-  description: "เว็บดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite สับไพ่และเลือกจับไพ่ด้วยตนเอง พร้อมแม่หมอ AI และระบบความสุ่มโปร่งใส Provably-Fair SHA-256",
-  applicationCategory: "LifestyleApplication",
-  operatingSystem: "All",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "THB",
-  },
-  inLanguage: "th",
-};
-
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "SeerTarot Sanctuary",
   url: SITE_ORIGIN,
-  logo: `${SITE_ORIGIN}/cards/major-01.jpg`,
+  // ต้องเป็นตราสัญลักษณ์จริง ไม่ใช่ภาพหน้าไพ่ (Google ใช้ช่องนี้แสดงโลโก้แบรนด์ใน Knowledge Panel)
+  logo: {
+    "@type": "ImageObject",
+    url: `${SITE_ORIGIN}/icons/icon-512x512.png`,
+    width: 512,
+    height: 512,
+  },
   sameAs: ["https://github.com/luminuy/tarot-web"],
   description:
     "วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ระดับพรีเมียม 1909 Rider-Waite-Smith พร้อมระบบสุ่มที่พิสูจน์ความยุติธรรมได้ (Provably Fair) และแม่หมอ AI",
@@ -153,10 +133,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="th" className={`${notoSerifThai.variable} ${sarabun.variable}`}>
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
-        />
+        {/* เฉพาะ schema ที่เป็นจริงกับ "ทุกหน้า" เท่านั้นที่อยู่ตรงนี้ได้
+            WebApplication / FAQPage / HowTo เป็นความจริงเฉพาะหน้าแรก → ย้ายไป src/app/page.tsx */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
@@ -165,24 +143,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
-        />
-        {/* Preload critical LCP Hero Tarot Card (0ms download delay) */}
-        {heroCardLcpSrc && (
-          <link
-            rel="preload"
-            as="image"
-            type="image/webp"
-            href={heroCardLcpSrc}
-            fetchPriority="high"
-          />
-        )}
       </head>
       <body className="min-h-dvh font-sans antialiased">
         <AppMotionProvider>

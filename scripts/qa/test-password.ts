@@ -13,7 +13,6 @@ import {
   getUserPasswordHash,
   linkOAuthIdentity,
   markEmailVerified,
-  normalizeEmail,
   setPasswordHash,
   softDeleteUser,
 } from "../../src/lib/users/users.repo";

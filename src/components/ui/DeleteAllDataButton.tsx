@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 export function DeleteAllDataButton() {
   const [loading, setLoading] = useState(false);

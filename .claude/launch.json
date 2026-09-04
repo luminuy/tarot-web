@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "tarot-dev",
-      "runtimeExecutable": "node_modules/.bin/next",
-      "runtimeArgs": ["dev", "--webpack"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
       "port": 3000
     }
   ]

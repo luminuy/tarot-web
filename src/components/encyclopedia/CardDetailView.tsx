@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
-import { getCardImageSrc } from "@/lib/tarot/card-image";
+import { useHasMounted } from "@/lib/motion";
 
 interface CardDetailViewProps {
   card: TarotCard;
@@ -54,14 +54,12 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   totalCards,
   currentIndex,
 }) => {
+  const hasMounted = useHasMounted();
   const [orientation, setOrientation] = useState<"upright" | "reversed">("upright");
 
   const isUpright = orientation === "upright";
   const currentKeywords = isUpright ? card.keywords.upright : card.keywords.reversed;
   const elem = ELEMENT_CONFIG[card.element] || ELEMENT_CONFIG["ไฟ"];
-
-  // ภาพหน้าไพ่ใบหลักใช้ไฟล์ต้นฉบับความละเอียดเต็ม (แสดงใหญ่ 256-288px)
-  const getImageSrc = (targetCard?: TarotCard) => getCardImageSrc(targetCard?.image, targetCard?.id) ?? "";
 
   const categories = [
     { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", icon: "✦", color: "#8F5C1A" },
@@ -93,7 +91,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* 3D Sacred Card Container */}
           <div className="relative group">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={hasMounted ? { opacity: 0, scale: 0.95 } : false}
               animate={{ opacity: 1, scale: 1 }}
               className="relative w-64 sm:w-72 aspect-[7/12] rounded-xl overflow-hidden border-2 border-[#D5CEC2] p-1.5 bg-[#FFFFFF] shadow-[0_10px_30px_rgba(42,38,31,0.08)]"
             >
@@ -106,7 +104,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   <CardImage
                     image={card.image}
                     cardId={card.id}
-                    alt={card.nameTh}
+                    alt={`ภาพหน้าไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`}
                     className="w-full h-full object-cover tarot-card-enhance tarot-hd-card-image"
                     sizes="(min-width: 640px) 600px, 400px"
                     loading="eager"
@@ -196,9 +194,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
           {/* Keywords Ribbon */}
           <div className="space-y-2">
-            <h4 className="text-[13px] font-mono text-[#A58A5C] uppercase tracking-wider flex items-center gap-1.5 font-bold">
+            <h2 className="text-[13px] font-mono text-[#A58A5C] uppercase tracking-wider flex items-center gap-1.5 font-bold">
               <span>✦</span> สัญลักษณ์และคีย์เวิร์ด ({isUpright ? "ไพ่หัวตั้ง" : "ไพ่หัวกลับ"})
-            </h4>
+            </h2>
             <div className="flex flex-wrap gap-2">
               {currentKeywords.map((kw, i) => (
                 <span
@@ -213,11 +211,13 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
           {/* 5 Categorized Meanings List */}
           <div className="space-y-3.5 pt-2">
-            <h3 className="font-serif-th text-base font-bold text-[#29261F] flex items-center gap-2">
+            <h2 className="font-serif-th text-base font-bold text-[#29261F] flex items-center gap-2">
               <span className="text-[#A58A5C]">✦</span> ความหมายและการทำนาย 5 ด้าน ({isUpright ? "หัวตั้ง" : "หัวกลับ"})
-            </h3>
+            </h2>
 
-            <AnimatePresence mode="wait">
+            {/* initial={false} — ความหมายไพ่ 5 ด้านคือเนื้อหาหลักของหน้าไพ่ทั้ง 78 ใบ
+                ต้องอยู่ใน HTML แบบมองเห็นได้ · การสลับหัวตั้ง/หัวกลับยังมีอนิเมชันครบ */}
+            <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={orientation}
                 initial={{ opacity: 0, y: 10 }}
@@ -239,7 +239,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                         <span style={{ color: cat.color }} className="text-sm">
                           {cat.icon}
                         </span>
-                        <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F]">{cat.nameTh}</h4>
+                        <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F]">{cat.nameTh}</h3>
                       </div>
                       <p className="font-serif-th text-xs sm:text-sm text-[#29261F] leading-relaxed pl-4 border-l-2 border-[#D5CEC2] group-hover:border-[#A58A5C] transition-colors [text-wrap:pretty]">
                         {text || "กำลังรวบรวมคำแปลมิตินี้"}

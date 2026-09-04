@@ -154,12 +154,15 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
 
       {/* Micro Progress Bar Countdown */}
       <div className="absolute bottom-0 inset-x-0 h-[2px] bg-[#F3EDE2] overflow-hidden">
+        {/* scaleX แทน width — width ทำให้เบราว์เซอร์คำนวณ layout ใหม่ทุกเฟรมตลอด 3-5 วินาที
+            ส่วน transform วิ่งบน compositor ไม่แตะ main thread เลย (กล่องแม่มี overflow-hidden อยู่แล้ว) */}
         <motion.div
           key={toast.id || toast.title}
-          initial={{ width: "100%" }}
-          animate={{ width: isPaused ? undefined : "0%" }}
+          initial={{ scaleX: 1 }}
+          animate={{ scaleX: isPaused ? undefined : 0 }}
           transition={{ duration: duration / 1000, ease: "linear" }}
-          className={`h-full ${isError ? "bg-[#A6392C]" : "bg-[#8F5C1A]"}`}
+          style={{ transformOrigin: "left" }}
+          className={`h-full w-full ${isError ? "bg-[#A6392C]" : "bg-[#8F5C1A]"}`}
         />
       </div>
     </motion.aside>

@@ -1,3 +1,4 @@
+import { normalizeEmail } from "@/lib/users/users.repo";
 /**
  * รายชื่ออีเมลที่ใช้เว็บได้ "ไม่จำกัด" — สำหรับเจ้าของ/หุ้นส่วน/ทีมงาน
  * -----------------------------------------------------------------
@@ -12,10 +13,6 @@
  * ต่างจาก `/tester` (รหัสผ่านรวม): อันนี้ผูกกับ "บัญชีจริง" — มีประวัติดูดวง ซิงก์ข้ามเครื่อง คุยแม่หมอได้
  * ยังบังคับ: safety guard, provably-fair — เหมือน bypass ทุกแบบ
  */
-
-function normalizeEmail(email: string): string {
-  return (email || "").trim().toLowerCase();
-}
 
 let cache: { raw: string; set: Set<string> } | null = null;
 

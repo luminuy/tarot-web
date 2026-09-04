@@ -25,27 +25,10 @@ export const ENTITLEMENT_DDL_STATEMENTS: readonly string[] = [
   `CREATE INDEX IF NOT EXISTS idx_ub_user ON user_bonus(user_id)`,
 ];
 
-/** รูปแบบเดิมสำหรับที่ที่ยังใช้ `exec()` ทีเดียวทั้งก้อน */
-export const ENTITLEMENT_DDL = ENTITLEMENT_DDL_STATEMENTS.join(";\n") + ";";
-
 /** สร้างตารางทั้งหมด (idempotent) — โยน error ต่อถ้าสร้างไม่สำเร็จจริง ๆ */
 export async function ensureEntitlementSchema(): Promise<void> {
   const db = await getAppDB();
   for (const stmt of ENTITLEMENT_DDL_STATEMENTS) {
     await db.prepare(stmt).run();
-  }
-}
-
-/** true ถ้าตารางนี้มีอยู่จริงบนฐานข้อมูล */
-export async function entitlementTableExists(name: string): Promise<boolean> {
-  try {
-    const db = await getAppDB();
-    const row = await db
-      .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name=? LIMIT 1`)
-      .bind(name)
-      .first<{ name: string }>();
-    return !!row;
-  } catch {
-    return false;
   }
 }

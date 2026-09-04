@@ -1,22 +1,24 @@
-import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
+import { SITE_ORIGIN } from "@/lib/config/site";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const reader = await getPublicReaderById(id);
   if (!reader) {
-    return { title: "ไม่พบแม่หมอ | Tarot Marketplace" };
+    return { title: "ไม่พบแม่หมอ", robots: { index: false, follow: true } };
   }
   return {
-    title: `${reader.displayName} | ปรึกษาแม่หมอตัวจริง`,
+    title: `${reader.displayName} · ปรึกษาแม่หมอตัวจริง`,
     description: reader.bio || `ปรึกษาดวงชะตากับ ${reader.displayName} ผ่านศาสตร์ไพ่ทาโรต์`,
+    alternates: { canonical: `${SITE_ORIGIN}/readers/${reader.id}` },
   };
 }
 

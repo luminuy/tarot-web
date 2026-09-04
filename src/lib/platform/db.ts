@@ -6,6 +6,9 @@
  *   พร้อม auto-migrate ตาราง readers และ admin_audit
  */
 
+// ตัวเข้าถึง Cloudflare context อยู่ที่ `cf.ts` ที่เดียว (เดิมมีสำเนาเหมือนกันเป๊ะอยู่ที่นี่ด้วย)
+import { safelyGetCloudflareContext } from "@/lib/platform/cf";
+
 export interface D1ExecResult {
   success: boolean;
   meta?: {
@@ -29,18 +32,6 @@ export interface AppDB {
 }
 
 let cachedDB: AppDB | null = null;
-
-async function safelyGetCloudflareContext() {
-  try {
-    const mod = await import("@opennextjs/cloudflare");
-    if (typeof mod?.getCloudflareContext === "function") {
-      return await mod.getCloudflareContext({ async: true });
-    }
-  } catch {
-    // Dynamic import fails gracefully in local dev or standalone test runner
-  }
-  return null;
-}
 
 /**
  * สร้าง Local SQLite Adapter ด้วย node:sqlite สำหรับ Local Dev และ Automated Tests

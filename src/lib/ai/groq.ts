@@ -22,8 +22,8 @@ import { parsePartialReading } from "@/lib/utils/partial-json";
 import { recordEvent } from "@/lib/stats/record";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
-import { type Reading, ReadingSchema } from "@/lib/schema/reading";
-import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
+import { ReadingSchema } from "@/lib/schema/reading";
+import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
 
 /**
  * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)
@@ -38,8 +38,6 @@ export const WORKING_GROQ_MODELS = [
   "openai/gpt-oss-120b",
   "openai/gpt-oss-20b",
 ] as const;
-
-export type GroqModelName = (typeof WORKING_GROQ_MODELS)[number];
 
 export const GROQ_DEFAULT_TIMEOUT_MS = 12000;
 
@@ -292,7 +290,6 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
   const maxReadingTokens = Math.min(6000, 1600 + ctx.drawn.length * 340);
 
   for (const model of readingModels) {
-    const startedAt = Date.now();
     let jsonAccumulator = "";
     let sentOpening = false;
     let sentConnections = false;

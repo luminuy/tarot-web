@@ -143,14 +143,34 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
     return [t1, t2, t3];
   }, [totalCards]);
 
-  const handleCardClick = (idx: number) => {
-    if (disabled || isComplete || pickedIndices.includes(idx)) return;
-    soundManager.playCardSelectSound(pickedIndices.length);
+  /**
+   * ⚠️ ต้องเป็น useCallback ที่ identity นิ่ง ไม่งั้น React.memo ของ FanCard ไร้ผลทั้งหมด
+   * ของเดิมประกาศเป็น arrow function ธรรมดา ทุกเรนเดอร์จึงได้ฟังก์ชันตัวใหม่
+   * prop `onClick` เปลี่ยนทุกครั้ง memo เทียบแล้วไม่ตรงเสมอ → ไพ่ครบ 78 ใบ
+   * re-render ใหม่หมดทุกครั้งที่แตะเลือกไพ่ 1 ใบ และทุกครั้งที่ fitFan ปรับขนาด
+   *
+   * `pickedIndices` เก็บลง ref ด้วย เพราะตัวมันเปลี่ยนทุกครั้งที่เลือกไพ่
+   * ถ้าใส่ไว้ใน dependency โดยตรง callback ก็จะเปลี่ยน identity ทุกการเลือกอยู่ดี
+   */
+  const pickedIndicesRef = useRef(pickedIndices);
+  pickedIndicesRef.current = pickedIndices;
+  // `onPickCard` ที่ TarotFlow ส่งมาก็เป็น arrow function ใหม่ทุกเรนเดอร์เช่นกัน
+  // จึงต้องเก็บลง ref ด้วย ไม่งั้น callback ตัวนี้ก็ยังเปลี่ยน identity อยู่ดี
+  const onPickCardRef = useRef(onPickCard);
+  onPickCardRef.current = onPickCard;
+  const disabledRef = useRef(disabled);
+  disabledRef.current = disabled;
+  const isCompleteRef = useRef(isComplete);
+  isCompleteRef.current = isComplete;
+
+  const handleCardClick = useCallback((idx: number) => {
+    if (disabledRef.current || isCompleteRef.current || pickedIndicesRef.current.includes(idx)) return;
+    soundManager.playCardSelectSound(pickedIndicesRef.current.length);
     if (typeof navigator !== "undefined" && navigator.vibrate) {
       navigator.vibrate(30);
     }
-    onPickCard(idx);
-  };
+    onPickCardRef.current(idx);
+  }, []);
 
   // P1-U6: Accessible Auto-Pick Fallback (Randomly select next card)
   const handleAutoPick = () => {

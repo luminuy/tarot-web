@@ -1,9 +1,8 @@
-import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllArticles, getArticleBySlug, getRelatedArticles } from "@/data/articles";
-import { SITE_ORIGIN, SITE_NAME_TH } from "@/lib/config/site";
+import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 import { ArticleReadingClient } from "./ArticleReadingClient";
 
 interface Props {
@@ -30,7 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const url = `${SITE_ORIGIN}/blog/${article.slug}`;
 
   return {
-    title: `${article.title} | SeerTarot`,
+    // ใช้ `seoTitle` ที่เขียนไว้ให้ยาวพอดี SERP ครบทั้ง 24 บทความ
+    // ของเดิมใช้ `article.title` ซึ่งเป็นพาดหัวเชิงบรรณาธิการที่ยาวมาก แล้วยังต่อ
+    // "| SeerTarot" เองอีก ทั้งที่ template ของ root layout เติม "· SeerTarot" ให้อยู่แล้ว
+    // ผลคือชื่อเรื่องยาวเกิน 80 ตัวอักษรและมีชื่อแบรนด์ซ้ำสองครั้ง
+    title: article.seoTitle,
     description: article.description,
     keywords: article.keywords,
     alternates: {
@@ -45,11 +48,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt,
       authors: [article.author],
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
       description: article.description,
+      images: [OG_IMAGE_URL],
     },
   };
 }
@@ -71,6 +76,7 @@ export default async function ArticleDetailPage({ params }: Props) {
     "@type": "Article",
     headline: article.title,
     description: article.description,
+    image: [OG_IMAGE_URL],
     datePublished: article.publishedAt,
     dateModified: article.updatedAt,
     author: {

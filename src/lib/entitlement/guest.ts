@@ -75,25 +75,6 @@ export async function readGuestCookie(): Promise<GuestState | null> {
   }
 }
 
-/** สร้าง state ผู้เยี่ยมชมใหม่ (ยังไม่ใช้สิทธิ์) */
-export function freshGuest(): GuestState {
-  return { gid: newGid(), used: 0 };
-}
-
-/** เซ็ตคุกกี้ผู้เยี่ยมชมลงใน response */
-export async function writeGuestCookie(res: Response, state: GuestState): Promise<void> {
-  const token = await signPayload({ gid: state.gid, used: state.used, iat: Date.now() });
-  const parts = [
-    `${GUEST_COOKIE_NAME}=${token}`,
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Lax",
-    `Max-Age=${MAX_AGE_SEC}`,
-  ];
-  if (process.env.NODE_ENV === "production") parts.push("Secure");
-  res.headers.append("Set-Cookie", parts.join("; "));
-}
-
 /** ค่า Set-Cookie แบบ string (สำหรับ NextResponse.cookies หรือ header object) */
 export async function guestCookieValue(state: GuestState): Promise<string> {
   return signPayload({ gid: state.gid, used: state.used, iat: Date.now() });

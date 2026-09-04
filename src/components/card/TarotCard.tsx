@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { SPRING } from "@/lib/motion";
 import { cardById, cardByIndex } from "@/data/cards";
@@ -93,7 +93,6 @@ export const TarotCard: React.FC<TarotCardProps> = ({
   imageFull = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [imgFailed, setImgFailed] = useState(false);
 
   const effectiveImageSizes = imageSizes ?? DEFAULT_IMAGE_SIZES[size] ?? "120px";
 
@@ -122,15 +121,28 @@ export const TarotCard: React.FC<TarotCardProps> = ({
     ? ELEMENT_CONFIG[effectiveCard.element] || ELEMENT_CONFIG["ไฟ"]
     : ELEMENT_CONFIG["ไฟ"];
 
+  /**
+   * ⚠️ อ่านขนาดกล่องครั้งเดียวตอนเมาส์เข้า ไม่ใช่ทุกครั้งที่เมาส์ขยับ
+   * `getBoundingClientRect()` บังคับให้เบราว์เซอร์คำนวณ layout ใหม่ทันที (forced reflow)
+   * เรียกทุก mousemove ขณะที่การ์ดกำลังเล่น transform อยู่ = สะดุดชัดเจน
+   * และผังใหญ่มีการ์ดแบบนี้พร้อมกันได้ถึง 10 ใบ
+   */
+  const rectRef = useRef<DOMRect | null>(null);
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    rectRef.current = e.currentTarget.getBoundingClientRect();
+    setIsHovered(true);
+  };
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
+    const rect = rectRef.current;
+    if (!rect || rect.width === 0 || rect.height === 0) return;
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
   };
 
   const handleMouseLeave = () => {
+    rectRef.current = null;
     mouseX.set(0);
     mouseY.set(0);
     setIsHovered(false);
@@ -138,15 +150,11 @@ export const TarotCard: React.FC<TarotCardProps> = ({
 
   const imageSrc = getCardImageSrc(effectiveCard?.image, effectiveCard?.id);
 
-  useEffect(() => {
-    setImgFailed(false);
-  }, [imageSrc]);
-
   return (
     <div
       onClick={onClick}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={`card-scene select-none group relative ${SIZE_MAP[size]} ${className} ${
         onClick ? "cursor-pointer" : ""

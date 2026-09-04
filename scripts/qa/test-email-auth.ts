@@ -9,7 +9,6 @@ import { validatePasswordPolicy } from "../../src/lib/auth/password-policy";
 import {
   createEmailUser,
   findUserIdByOAuth,
-  getUserByEmail,
   getUserById,
   getUserPasswordHash,
   linkOAuthIdentity,

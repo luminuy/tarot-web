@@ -33,7 +33,10 @@ export async function PATCH(
       return NextResponse.json({ error: "ข้อมูลสถานะไม่ถูกต้อง" }, { status: 400 });
     }
 
-    await updateJournalOutcome(userId, id, parsed.data.outcome, parsed.data.userNote);
+    const changed = await updateJournalOutcome(userId, id, parsed.data.outcome, parsed.data.userNote);
+    if (!changed) {
+      return NextResponse.json({ error: "ไม่พบบันทึกดวงรายการนี้" }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[Journal Item PATCH Error]:", error);
@@ -52,7 +55,10 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await deleteJournalItem(userId, id);
+    const deleted = await deleteJournalItem(userId, id);
+    if (!deleted) {
+      return NextResponse.json({ error: "ไม่พบบันทึกดวงรายการนี้" }, { status: 404 });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[Journal Item DELETE Error]:", error);

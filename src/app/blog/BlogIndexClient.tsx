@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
+import { useHasMounted } from "@/lib/motion";
 import type { Article } from "@/data/articles";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
@@ -68,6 +69,8 @@ function getArticleCardArt(article: Article): { image: string; alt: string } {
 }
 
 export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) => {
+  // การ์ดบทความทั้ง 24 ใบเคยถูกส่งออกจากเซิร์ฟเวอร์เป็น opacity:0 ทั้งหมด
+  const hasMounted = useHasMounted();
   const [selectedCat, setSelectedCat] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -229,7 +232,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               return (
                 <motion.article
                   key={article.slug}
-                  initial={{ opacity: 0, y: 12 }}
+                  initial={hasMounted ? { opacity: 0, y: 12 } : false}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, delay: Math.min(idx * 0.03, 0.25) }}
                   className="rounded-2xl border border-[#D9C8AC] bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-[#8F5C1A] transition-all duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"

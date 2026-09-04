@@ -28,7 +28,7 @@
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable
 
-# ไฟล์เสียงประกอบ SFX
-/sounds/*
-  Cache-Control: public, max-age=31536000, immutable
+# ภาพพรีวิวตอนแชร์ลิงก์ (สร้างด้วย npm run og:image)
+/og/*
+  Cache-Control: public, max-age=604800
 

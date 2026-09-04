@@ -93,7 +93,6 @@ try {
 
 // Step 2: Formulate Structured & Attributed Commit Message
 const branch = run("git branch --show-current") || "main";
-const timestamp = new Date().toISOString();
 
 const commitTitle = `${type}(${scope})[${agent}]: ${message}`;
 const commitBody = [

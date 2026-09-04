@@ -1,32 +1,24 @@
-import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { DECK } from "@/data/cards";
 import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
-  title: "คัมภีร์ไพ่ทาโรต์ 78 ใบ (1909 Rider-Waite-Smith) | สารานุกรมความหมายไพ่",
+  title: "คัมภีร์ไพ่ทาโรต์ 78 ใบ · สารานุกรมความหมายไพ่ 1909",
   description:
     "รวบรวมความหมายไพ่ทาโรต์ 78 ใบครบถ้วน ทั้ง Major Arcana และ Minor Arcana พร้อมคำแปลไทย 5 หมวด โหราศาสตร์ และธาตุ",
   alternates: {
     canonical: `${SITE_ORIGIN}/cards`,
   },
   openGraph: {
-    title: "คัมภีร์ไพ่ทาโรต์ 78 ใบ (1909 Rider-Waite-Smith) | SeerTarot",
+    title: "คัมภีร์ไพ่ทาโรต์ 78 ใบ (1909 Rider-Waite-Smith) · SeerTarot",
     description: "รวบรวมความหมายไพ่ทาโรต์ 78 ใบครบถ้วน พร้อมคำแปลไทย 5 มิติ โหราศาสตร์ และธาตุ",
     url: `${SITE_ORIGIN}/cards`,
     siteName: "SeerTarot",
     type: "website",
-    images: [
-      {
-        url: "/cards/major-01.jpg",
-        width: 825,
-        height: 1429,
-        alt: "สารานุกรมความหมายไพ่ทาโรต์ 78 ใบ 1909 Rider-Waite",
-      },
-    ],
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
   },
 };
 

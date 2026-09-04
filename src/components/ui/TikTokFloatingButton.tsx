@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 
 /**
  * ✦ TikTok Floating Action Button (FAB)

@@ -253,7 +253,11 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
       </div>
 
       {/* World-Class Responsive Tarot Cards (Mobile Horizontal Swipe / Desktop Grid) */}
-      <AnimatePresence mode="wait">
+      {/* initial={false} — เรนเดอร์แรก (ฝั่งเซิร์ฟเวอร์) ต้องออกมาที่สถานะพร้อมอ่านเสมอ
+          ไม่ใช่ opacity:0 เพราะ (1) ผู้ใช้ที่เปิด prefers-reduced-motion จะได้ HTML ไม่ตรงกับฝั่ง
+          เซิร์ฟเวอร์จนเกิด hydration mismatch (ISSUE-008) และ (2) เนื้อหาหลักของหน้าแรก
+          ไม่ควรถูกส่งออกไปแบบมองไม่เห็นสำหรับบอทค้นหา · การสลับแท็บยังมีอนิเมชันครบเหมือนเดิม */}
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={activeCategory}
           role="tabpanel"

@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
-import { CardImage } from "@/components/card/CardImage";
 import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
 import { DAILY_LIMIT, MEMBER_BENEFITS } from "@/lib/entitlement/copy";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
@@ -261,7 +260,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition-all duration-300 shadow-xs">
               <img
                 src="/logo.webp"
-                alt="Seer Tarot Brand Logo"
+                alt="SeerTarot"
                 width={72}
                 height={72}
                 className="w-full h-full object-cover"

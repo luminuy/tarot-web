@@ -62,6 +62,54 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0077 · 2026-09-04 18:35 · 🟡 Medium · ให้คะแนนความแม่นและลบรายการในสมุดบันทึกดวงบันทึกขึ้นเซิร์ฟเวอร์ได้จริง + อัปเดตเอกสารรอบตรวจใหญ่
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | กดให้คะแนน 'แม่นมาก' หรือกดลบรายการในสมุดบันทึกดวง หน้าจอขึ้นว่าสำเร็จ แต่พอรีเฟรชหรือเข้าจากอุปกรณ์อื่น รายการที่ลบกลับมาเหมือนเดิมและผลที่ให้ไว้กลายเป็น 'ยังไม่ระบุ' ทุกครั้ง |
+| **สาเหตุราก** | ฝั่งเครื่องสร้าง id เอง (reading_<เวลา>_<สุ่ม>) แต่ SaveReadingSchema ของ POST /api/journal ไม่มีฟิลด์ id เซิร์ฟเวอร์จึงออก id ใหม่เป็น rj_<uuid> เสมอ และไม่เคยส่งกลับมาให้ฝั่งเครื่องจำ · การกด PATCH/DELETE ทีหลังจึงยิงไปที่ id ที่ไม่มีอยู่จริง แมตช์ 0 แถว แต่ทั้งสอง route ไม่ได้อ่าน meta.changes เลยตอบ success ทุกครั้ง |
+| **การแก้ไข** | saveReading() อ่าน id ที่เซิร์ฟเวอร์ออกให้จาก response แล้วเขียนทับ id ชั่วคราวใน localStorage · เปลี่ยน updateJournalOutcome() กับ deleteJournalItem() ให้คืน boolean จาก meta.changes แทน void · ทั้งสอง route ตอบ 404 เมื่อไม่พบแถว · ปิด ISSUE-003/006/008 ใน KNOWN_ISSUES และบันทึก ISSUE-017 ถึง 023 ที่พบใหม่แต่ยังไม่ได้แก้ พร้อมเขียนสรุปรอบตรวจใหญ่ลง WORK_LOG |
+| **🛡️ กฎป้องกันถาวร** | **ฝั่งเครื่องกับฝั่งเซิร์ฟเวอร์ต้องใช้ id ตัวเดียวกันเสมอ — ถ้าเซิร์ฟเวอร์เป็นคนออก id ต้องส่งกลับมาให้ไคลเอนต์จำทันทีที่บันทึกสำเร็จ · ทุกคำสั่ง UPDATE/DELETE ที่มีเงื่อนไข WHERE ต้องตรวจ meta.changes ก่อนตอบ success ห้ามถือว่า 'ไม่ throw = สำเร็จ' เพราะ SQL ที่ไม่แมตช์แถวไหนเลยก็ไม่ throw** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run test:journal ผ่านครบ 6 ข้อ · tsc --noEmit 0 errors · repo:verify 24/24 |
+| **บันทึกโดย** | Claude · branch `claude/read-md-improve-code-9be6c8` · commit `e1dd8e4` |
+
+
+### INC-0076 · 2026-09-04 14:16 · 🟠 High · หยุด canonical หน้าแรกรั่วไปทับทุกหน้า + ส่งเนื้อหาหลักออกจากเซิร์ฟเวอร์แบบมองเห็นได้ + ภาพแชร์ 1200x630
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | curl หน้า /privacy /readers /account /reading/chat ได้ canonical เป็น https://seertarot.net ทุกหน้า (บอกกูเกิลว่าทุกหน้าเป็นสำเนาของหน้าแรก) · HTML ของ /blog ส่งการ์ดบทความ 24 ใบออกมาเป็น opacity:0 ทั้งหมด · ชื่อเรื่องขึ้น 'SeerTarot · SeerTarot' ซ้ำสองรอบ · แชร์ลิงก์บน LINE/Facebook ได้ภาพไพ่แนวตั้งที่ถูกครอบตัดจนอ่านไม่ออก · ตั้ง NEXT_PUBLIC_GA_ID แล้วไม่มีข้อมูลเข้า GA เลย |
+| **สาเหตุราก** | หน้าแรกเป็น 'use client' จึง export metadata เองไม่ได้ canonical และ JSON-LD ของหน้าแรก (WebApplication/FAQPage/HowTo) เลยถูกไปฝากไว้ที่ root layout ซึ่ง Next.js สืบทอดลงทุกเส้นทางที่ไม่ได้ประกาศทับ · motion เขียนค่า initial ลงเป็น inline style ตั้งแต่ HTML ฝั่งเซิร์ฟเวอร์ เนื้อหาหลักจึงออกไปแบบ opacity:0 · หลายหน้าเติม '| SeerTarot' เองทั้งที่ template ของ layout เติมให้อยู่แล้ว · CSP ไม่ได้อนุญาตโฮสต์ของ gtag กับ fbevents |
+| **การแก้ไข** | แยก src/app/page.tsx เป็น Server Component ที่ถือ canonical กับ JSON-LD เฉพาะหน้าแรก และย้ายพิธีกรรมดูดวงไปเป็น src/app/TarotFlow.tsx · ถอด alternates.canonical และ schema เฉพาะหน้าแรกออกจาก root layout แล้วเติม canonical ให้ /privacy /readers /readers/[id] /account · เพิ่ม layout noindex ให้ /reset-password /readers/console /readers/queue /reading · ใส่ initial={false} ให้ AnimatePresence และเพิ่ม hook useHasMounted() สำหรับ motion ที่ถูก SSR · เปลี่ยน FAQ ทั้งหน้าแรกและหน้าบทความเป็น <details> เพื่อให้คำตอบอยู่ใน HTML ตรงกับ FAQPage schema (HomeSeoContent เลยกลายเป็น Server Component ล้วน) · สร้าง public/og/default.png 1200x630 พร้อมสคริปต์ npm run og:image · ตัด '| SeerTarot' ที่เติมเองออกทุกหน้าและใช้ article.seoTitle ที่มีอยู่แล้วแต่ไม่เคยถูกใช้ · เพิ่ม /readers ใน sitemap และเลิกใช้ new Date() เป็น lastModified · แก้ชื่อ AI crawler ที่เป็นรุ่นเก่า · เพิ่ม BreadcrumbList ให้หน้าไพ่ 78 ใบ · แก้ระดับหัวข้อที่ข้ามขั้น · เพิ่ม not-found.tsx · อนุญาตโฮสต์ GA4/Meta Pixel ใน CSP |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามวาง alternates.canonical, openGraph.url หรือ JSON-LD ที่เป็นจริงเฉพาะหน้าใดหน้าหนึ่งไว้ใน root layout เด็ดขาด — Next.js สืบทอด metadata ลงทุกเส้นทาง ถ้าหน้าไหนเป็น client component ให้ทำ Server Component ครอบแทน · ทุกหน้าที่อยู่ใน sitemap ต้องประกาศ canonical ของตัวเอง และหน้าส่วนตัวต้อง noindex จริง ไม่ใช่พึ่ง robots.txt · หน้าที่ประกาศ openGraph เองต้องใส่ images ด้วยเสมอเพราะ Next แทนที่ทั้งก้อนไม่ได้ผสานทีละฟิลด์ · motion component ที่ถูก SSR ต้องเรนเดอร์แรกออกมาที่สถานะปลายทาง (initial={false} หรือ useHasMounted) · เนื้อหาที่ประกาศไว้ใน structured data ต้องอยู่ใน DOM ตั้งแต่ฝั่งเซิร์ฟเวอร์ ห้ามใส่ทีหลังตอนคลิก** |
+| **การพิสูจน์ว่าแก้ได้จริง** | curl ทุกเส้นทางหลักเทียบก่อน/หลัง: canonical ของ /readers /privacy เปลี่ยนจาก https://seertarot.net เป็น URL ของตัวเอง · จำนวน opacity:0 ใน HTML ฝั่งเซิร์ฟเวอร์ลดจาก /blog 24 /cards 1 /spreads 1 /cards/major-00 2 เหลือ 0 ทุกหน้า · จำนวนบล็อก ld+json ต่อหน้าลดจาก 10-16 เหลือ 4-10 · ความยาว <title> ของ /cards/major-00 ลดจาก 101 เหลือ 93 ไบต์ · repo:verify 24/24 |
+| **บันทึกโดย** | Claude · branch `claude/read-md-improve-code-9be6c8` · commit `cc53cf8` |
+
+
+### INC-0075 · 2026-09-04 13:53 · 🟠 High · แก้ hydration mismatch หน้าแรก (ISSUE-008) + โมดัลทำให้หน้าเว็บเลื่อนไม่ได้ถาวร + rate limiter รั่วในหน่วยความจำ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | คอนโซลขึ้น 'A tree hydrated but some attributes ... didn't match' ที่หน้าแรกสำหรับเครื่องที่เปิด prefers-reduced-motion · ปิดโมดัลแล้วหน้าเว็บเลื่อนไม่ได้อีกเลยต้องรีเฟรช และฟอร์มแก้ไขแม่หมอในแผงแอดมินเด้งโฟกัสกลับไปที่ปุ่มปิดทุกครั้งที่พิมพ์ 1 ตัวอักษร · แบนเนอร์ลิขสิทธิ์ในคอนโซลไม่เคยขึ้นบน production เลย |
+| **สาเหตุราก** | useReducedMotion() ของ motion คืน null ตอน SSR แต่คืน true/false จริงบนเบราว์เซอร์ ค่าที่ได้จึงต่างกันสองฝั่ง แล้วยังอ่านทิศทางจาก useRef ระหว่างเรนเดอร์อีกชั้น · Modal ใส่ onClose ไว้ใน dependency ของ effect ทั้งที่ผู้เรียกส่ง arrow function ใหม่ทุกเรนเดอร์ effect จึงรันซ้ำ จับค่า originalOverflow ได้ 'hidden' แล้วคืนค่านั้นกลับตอนปิด · checkRateLimit เพิ่ม concurrent ทุกครั้งแต่มีแค่ 3 ใน 10 ปลายทางที่ปล่อยคืน cleanup จึงลบ entry ไม่ได้เลย · console.log ถูก compiler.removeConsole ตัดทิ้งใน production ซึ่งเป็น build เดียวที่โค้ดนั้นทำงาน |
+| **การแก้ไข** | ย้ายทิศทางเปลี่ยนขั้นจาก useRef ไป useState และใส่ initial={false} ให้ AnimatePresence ทั้งที่หน้าแรกและ SpreadCardSelector เพื่อให้เรนเดอร์แรกออกมาที่สถานะพร้อมอ่าน (opacity 1) เหมือนกันทั้งสองฝั่ง · Modal เก็บ onClose ไว้ใน ref แล้วเหลือ deps เพียง [isOpen] พร้อมเพิ่ม cancelAnimationFrame ตอน cleanup · checkRateLimit นับ concurrent เฉพาะเมื่อ config.maxConcurrent ถูกตั้ง · auth-ratelimit กวาดถังหมดอายุออกจาก Map และเลิกใช้สำเนา getClientIp ของตัวเองที่หยิบ x-forwarded-for ตัวซ้ายสุด · เปลี่ยนแบนเนอร์เป็น console.warn ซึ่งอยู่ใน exclude list · อัปเกรด GitHub Actions เป็น checkout@v5 setup-node@v5 github-script@v8 ปิด ISSUE-006 |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามอ่านค่าที่ขึ้นกับเบราว์เซอร์ (prefers-reduced-motion, matchMedia, ref ที่เปลี่ยนตอนโต้ตอบ) ระหว่างเรนเดอร์ของคอมโพเนนต์ที่ถูก SSR — เรนเดอร์แรกต้องออกมาเหมือนกันทั้งสองฝั่งเสมอ และ motion component ที่ถูก SSR ต้องใส่ initial={false} ทั้งเพื่อกัน mismatch และไม่ให้เนื้อหาหลักถูกส่งออกไปแบบ opacity:0 · callback prop ที่ผู้เรียกสร้างใหม่ทุกเรนเดอร์ห้ามอยู่ใน dependency ของ effect ที่มี side effect ระดับ document ให้เก็บลง ref แทน · ตัวนับ concurrency ต้องเพิ่มเฉพาะเมื่อมีคนตั้งใจใช้และมีทางปล่อยคืนเสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน dev server แล้วเปิดหน้าแรกด้วยเบราว์เซอร์ที่เปิด Reduced Motion: ก่อนแก้ console แสดง hydration mismatch พร้อม diff opacity:0/translateX(-40px) vs opacity:1/none จริง หลังแก้ console สะอาด 0 error · curl หน้าแรกแล้ว grep ไม่พบ opacity:0 หรือ translateX ใน HTML ฝั่งเซิร์ฟเวอร์อีก · repo:verify 24/24 |
+| **บันทึกโดย** | Claude · branch `claude/read-md-improve-code-9be6c8` · commit `fca960f` |
+
+
+### INC-0074 · 2026-09-04 13:50 · 🔴 Critical · ปิดช่องแจกโควตาฟรีโดยไม่ต้องจ่ายเงิน + ยึดบัญชีล่วงหน้า + สิทธิ์สมาชิกถูกล็อกยาวทั้งสัปดาห์
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ยิง POST /api/entitlement/checkout/confirm ด้วย orderId มั่ว ๆ ก็ได้โควตาเปิดไพ่ 30 ครั้งฟรีทันที เปลี่ยน orderId แล้วยิงซ้ำได้ไม่จำกัด และใส่ userId ของคนอื่นก็ได้ · สมาชิกที่ใช้โควตา 3 ครั้งหมดในวันจันทร์ เปิดไพ่ไม่ได้อีกเลยจนถึงวันอาทิตย์ ทั้งที่หน้าเว็บบอกว่ารีเซ็ตเที่ยงคืน · ผู้ที่เพิ่งกด 'เข้าสู่ระบบด้วย Google' ครั้งแรกกลับเห็นสมุดบันทึกดวงของคนอื่น |
+| **สาเหตุราก** | โค้ดเชื่อว่า 'ถูกเรียกกลับมาที่ return_uri' และ 'มีอีเมลตรงกันในฐานข้อมูล' คือหลักฐานเพียงพอ ทั้งที่ทั้งสองอย่างผู้ใช้ปลอมเองได้ · ส่วนโควตาสมาชิกเขียนเงื่อนไข SQL เผื่อ 'แถวยุคเก่า' ด้วยค่า source ที่ไม่มีอยู่จริง ('daily' แทน 'weekly') ทำให้ทุกวันจันทร์ dayKey เท่ากับ weekKey แล้วแถวของวันจันทร์ค้างนับไปทั้งสัปดาห์ |
+| **การแก้ไข** | เปลี่ยน confirm route ให้ต้องผ่าน 4 ด่านก่อนแจกโควตา (session ตรงกับ userId, มีแถว payments ของ orderId จริง, amount_satang ตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์, status='paid') และย้ายการแจกโควตาตัวจริงไปไว้ใน webhook ที่ตรวจ HMAC แล้ว · ถอด amountSatang กับ returnUri ออกจาก schema ของ /api/marketplace/payments แล้วใช้ค่าคงที่ CONSULTATION_PRICE_SATANG กับ resolveAppOrigin แทน · บังคับ customerRef ตอนยกเลิกตั๋วคิว · เพิ่ม reclaimUnverifiedEmailAccount() ล้าง password_hash และเพิ่ม token_version เมื่อ OAuth ยืนยันเจ้าของอีเมลที่บัญชีเดิมยังไม่ยืนยัน · เขียน SQL memberUsage ใหม่ให้แยก source='weekly' นับตามสัปดาห์ ส่วน source อื่นนับตามวัน · เติมขอบล่างให้ limit ของ listJournal กัน LIMIT -1 · หนีอักขระเริ่มสูตรใน CSV export |
+| **🛡️ กฎป้องกันถาวร** | **ทุกจุดที่ 'ให้ของมีมูลค่า' ต้องยืนยันจากฝั่งที่ปลอมไม่ได้เท่านั้น (session ของเจ้าของ + แถว payments ที่ webhook ตรวจลายเซ็นแล้ว + ยอดเงินตรงกับราคาฝั่งเซิร์ฟเวอร์) ห้ามรับ userId ราคา หรือปลายทาง redirect จาก request · บัญชีที่ยังไม่ยืนยันอีเมลห้ามถือเป็นหลักฐานความเป็นเจ้าของอีเมล · เงื่อนไข SQL ที่อ้าง 'ความเข้ากันได้ย้อนหลัง' ต้องอ้างค่าที่มีอยู่จริงใน migration และต้องทดสอบวันขอบเขต (จันทร์) เสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify ผ่าน 24/24 · tsc --noEmit 0 errors · อ่านโค้ดยืนยันว่า confirm route ต้องผ่านครบ 4 ด่านก่อนเรียก grantBonus และ memberUsage นับ source='daily' ตามวันเท่านั้น ไม่นับข้ามสัปดาห์อีก |
+| **บันทึกโดย** | Claude · branch `claude/read-md-improve-code-9be6c8` · commit `c268a59` |
+
+
 ### INC-0073 · 2026-09-04 13:09 · 🔵 Low · คืนสมดุลช่องไฟแนวตั้งระหว่าง FAQ และ Dark Footer ให้พอดี ไม่ชิดติดกัน
 
 | หัวข้อ | รายละเอียด |

@@ -211,7 +211,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         let activeProvider = "gemini";
 
         async function* streamMultiProviderReading(): AsyncGenerator<
-          import("@/lib/ai/claude").ReadingEvent & { provider?: "groq" | "gemini" }
+          import("@/lib/ai/types").ReadingEvent & { provider?: "groq" | "gemini" }
         > {
           // Tier 1: Groq Qwen (High-speed LPU, deep Thai comprehension, 14.4k req/day free quota)
           if (process.env.GROQ_API_KEY) {
@@ -321,6 +321,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           isClosed = true;
         }
       }
+    },
+    /**
+     * ผู้ใช้ปิดแท็บ / กดย้อนกลับ / เน็ตหลุด → แพลตฟอร์มเรียก cancel() ตรงนี้
+     * ต้องตั้ง `isClosed` ทันที เพื่อให้ลูป `for await` ข้างบน `break` ในรอบถัดไป
+     * ไม่งั้นเราจะยังดูดคำตอบจากโมเดลต่อจนจบทั้งก้อน = จ่ายค่า token ให้คำอ่าน
+     * ที่ไม่มีใครได้เห็น (ของเดิมรอให้ enqueue โยน error เองซึ่งช้ากว่าและไม่แน่นอน)
+     */
+    cancel() {
+      isClosed = true;
     },
   });
 

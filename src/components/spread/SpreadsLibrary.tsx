@@ -127,7 +127,8 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       </div>
 
       {/* 20 Spreads Grid */}
-      <AnimatePresence mode="wait">
+      {/* initial={false} — กริดผังคือเนื้อหาหลักของหน้า ต้องมองเห็นได้ใน HTML ฝั่งเซิร์ฟเวอร์ */}
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={activeCategory}
           role="tabpanel"
@@ -172,9 +173,10 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
 
                 {/* Titles & Tagline */}
                 <div className="space-y-1.5 z-10 pt-3 border-t border-[#D5CEC2]/40">
-                  <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] leading-snug py-0.5 [text-wrap:balance]">
+                  {/* ชื่อผังแต่ละแบบคือหัวข้อระดับที่สองของหน้า /spreads (h1 = ชื่อหน้า) */}
+                  <h2 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] leading-snug py-0.5 [text-wrap:balance]">
                     {spread.nameTh}
-                  </h3>
+                  </h2>
                   <p className="text-xs text-[#635B4E] leading-relaxed font-serif-th">{spread.tagline}</p>
                 </div>
 

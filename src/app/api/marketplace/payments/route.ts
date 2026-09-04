@@ -2,17 +2,25 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
-import { createPaymentRecord, getPaymentByTicketId } from "@/lib/marketplace/payments.repo";
+import {
+  CONSULTATION_PRICE_SATANG,
+  createPaymentRecord,
+  getPaymentByTicketId,
+} from "@/lib/marketplace/payments.repo";
 import { getQueueTicketById } from "@/lib/marketplace/queue.repo";
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import { getAppDB } from "@/lib/platform/db";
+import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
 
+// ⚠️ ทั้ง `amountSatang` และ `returnUri` ถูกถอดออกจากสัญญาฝั่งไคลเอนต์โดยตั้งใจ
+//    ราคา = ค่าคงที่ฝั่งเซิร์ฟเวอร์ (กันตั้งราคาเอง) · ปลายทาง redirect = origin ของเราเอง
+//    (กันส่งผู้ใช้ออกไปหน้าฟิชชิงหลังจ่ายเงินผ่าน return_uri ที่ผู้โจมตีกำหนด)
+//    `customerRef` บังคับใส่ เพื่อกันคนนอกเปิดรายการชำระเงินทับตั๋วของคนอื่น
 const CreatePaymentSchema = z.object({
   ticketId: z.string().min(1, "กรุณาระบุ ticketId"),
-  amountSatang: z.number().int().min(1000).optional().default(29900), // Default 299 THB (29900 satang)
-  returnUri: z.string().url().optional(),
+  customerRef: z.string().min(6, "รหัสอ้างอิงอุปกรณ์ไม่ถูกต้อง"),
 });
 
 /**
@@ -30,11 +38,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const { ticketId, amountSatang, returnUri } = parsed.data;
+    const { ticketId, customerRef } = parsed.data;
+    const amountSatang = CONSULTATION_PRICE_SATANG;
 
-    // 1. Verify Ticket
+    // 1. Verify Ticket + ต้องเป็นตั๋วของผู้ขอเองเท่านั้น
     const ticket = await getQueueTicketById(ticketId);
     if (!ticket) {
+      return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
+    }
+    if (ticket.customerRef !== customerRef) {
       return NextResponse.json({ error: "ไม่พบตั๋วคิวที่ระบุ" }, { status: 404 });
     }
 
@@ -84,7 +96,7 @@ export async function POST(request: Request) {
     }
 
     // 4. Create Gateway Charge
-    const defaultReturnUri = returnUri || `${new URL(request.url).origin}/readers/queue/${ticketId}?paid=1`;
+    const defaultReturnUri = `${resolveAppOrigin(request)}/readers/queue/${encodeURIComponent(ticketId)}?paid=1`;
     const charge = await createGatewayCharge({
       amountSatang,
       currency: "THB",

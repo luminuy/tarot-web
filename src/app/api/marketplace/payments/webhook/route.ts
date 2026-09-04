@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/marketplace/payment-gateway";
 import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
 import { getAppDB } from "@/lib/platform/db";
+import { getCreditPackageById } from "@/lib/entitlement/packages";
+import { grantBonus } from "@/lib/entitlement/entitlement";
 
 export const runtime = "nodejs";
 
@@ -43,9 +45,11 @@ export async function POST(request: Request) {
     // Look up payment by providerRef (chargeId)
     const db = await getAppDB();
     const paymentRow = await db
-      .prepare("SELECT id, booking_id, ticket_id FROM payments WHERE provider_ref = ? LIMIT 1")
+      .prepare(
+        "SELECT id, booking_id, ticket_id, amount_satang FROM payments WHERE provider_ref = ? LIMIT 1"
+      )
       .bind(chargeId)
-      .first<{ id: string; booking_id: string; ticket_id: string | null }>();
+      .first<{ id: string; booking_id: string; ticket_id: string | null; amount_satang: number }>();
 
     if (!paymentRow) {
       // Return 200 to acknowledge webhook even if event is for untracked charge
@@ -57,6 +61,28 @@ export async function POST(request: Request) {
         providerRef: chargeId,
         webhookLog: rawBody,
       });
+
+      // 💎 เติมโควตาเปิดไพ่ให้ทันทีที่การชำระเงินได้รับการยืนยันจากเกตเวย์
+      // ---------------------------------------------------------------------
+      // ที่นี่คือ "จุดเดียวที่พิสูจน์การจ่ายเงินได้จริง" เพราะผ่านการตรวจลายเซ็นมาแล้ว
+      // ทำที่นี่ด้วย (ไม่รอ return_uri) เพราะผู้ใช้อาจปิดเบราว์เซอร์หลังจ่ายเงิน
+      // แล้วไม่เคยกลับมาที่ `/api/entitlement/checkout/confirm` เลย
+      // grantBonus เป็น idempotent ต่อ (user_id, reason) จึงเรียกซ้ำได้ปลอดภัย
+      const metadata = (data.metadata ?? {}) as Record<string, unknown>;
+      const buyerId = typeof metadata.userId === "string" ? metadata.userId : "";
+      const boughtPackageId = typeof metadata.packageId === "string" ? metadata.packageId : "";
+      if (!paymentRow.ticket_id && buyerId && boughtPackageId) {
+        const pkg = getCreditPackageById(boughtPackageId);
+        // ยอดเงินที่บันทึกไว้ต้องตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์ ไม่งั้นไม่แจก
+        if (pkg && Number(paymentRow.amount_satang) === pkg.amountSatang) {
+          await grantBonus(buyerId, pkg.credits, `purchase_${paymentRow.booking_id}`);
+        } else {
+          console.warn(
+            "[Payment Webhook] ยอดเงินไม่ตรงกับแพ็กเกจ — ไม่แจกโควตา",
+            paymentRow.booking_id
+          );
+        }
+      }
 
       // Advance ticket or booking status if associated
       if (paymentRow.ticket_id) {

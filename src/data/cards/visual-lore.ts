@@ -587,13 +587,6 @@ export const CARD_VISUAL_LORE: Record<string, CardVisualLore> = {
 };
 
 /**
- * ดึงข้อมูลสัญลักษณ์และจิตวิทยาของไพ่ตาม ID
- */
-export function getCardVisualLore(cardId: string): CardVisualLore | undefined {
-  return CARD_VISUAL_LORE[cardId];
-}
-
-/**
  * จัดฟอร์แมตข้อมูลสัญลักษณ์ 1909 สำหรับแทรกใน prompt ของ AI
  */
 export function formatCardLoreForPrompt(cardId: string): string {

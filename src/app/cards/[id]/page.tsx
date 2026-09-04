@@ -1,4 +1,3 @@
-import React from "react";
 import { notFound } from "next/navigation";
 import { DECK, cardById } from "@/data/cards";
 import { CardDetailView } from "@/components/encyclopedia/CardDetailView";
@@ -21,11 +20,12 @@ export async function generateMetadata({ params }: CardPageProps): Promise<Metad
 
   if (!card) {
     return {
-      title: "ไม่พบไพ่ทาโรต์ | Tarot Encyclopedia",
+      title: "ไม่พบไพ่ทาโรต์",
+      robots: { index: false, follow: true },
     };
   }
 
-  const title = `ความหมายไพ่ ${card.nameTh} (${card.nameEn}) | 1909 Rider-Waite Tarot`;
+  const title = `ความหมายไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`;
   const description = `เจาะลึกความหมายไพ่ ${card.nameTh} (${card.nameEn}) ทั้งหัวตั้งและหัวกลับ 5 หมวดชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element} ภาพดั้งเดิม 1909`;
 
   return {
@@ -84,11 +84,32 @@ export default async function CardDetailPage({ params }: CardPageProps) {
     inLanguage: "th",
   };
 
+  // หน้าไพ่ 78 ใบเป็นชุดหน้าที่ใหญ่ที่สุดและมีโอกาสได้ breadcrumb ใน SERP มากที่สุด
+  // แต่เดิมมีแค่ DefinedTerm ไม่มี BreadcrumbList (ต่างจาก /blog/[slug] และ /spreads/[id])
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "หน้าแรก", item: SITE_ORIGIN },
+      { "@type": "ListItem", position: 2, name: "คัมภีร์ไพ่ 78 ใบ", item: `${SITE_ORIGIN}/cards` },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: card.nameTh,
+        item: `${SITE_ORIGIN}/cards/${card.id}`,
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-[#FAF7F2] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(cardJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <CardDetailView
         card={card}

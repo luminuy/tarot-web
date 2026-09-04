@@ -1,4 +1,4 @@
-import { cardById, cardByIndex } from "@/data/cards";
+import { cardByIndex } from "@/data/cards";
 import type { Category, Interpretation, TarotCard, YesNo } from "@/data/cards/types";
 import { getPersona, type Persona } from "@/data/personas";
 import { SYSTEM_CORE_KNOWLEDGE } from "@/lib/ai/prompt";
@@ -98,10 +98,5 @@ export function applyCardOverride(card: TarotCard, o: CardOverride | undefined):
 
 export function resolveCardByIndex(doc: ContentOverrideDoc, index: number | null | undefined): TarotCard | undefined {
   const card = cardByIndex(index);
-  return card ? applyCardOverride(card, doc.cards?.[card.id]) : undefined;
-}
-
-export function resolveCardById(doc: ContentOverrideDoc, id: string): TarotCard | undefined {
-  const card = cardById(id);
   return card ? applyCardOverride(card, doc.cards?.[card.id]) : undefined;
 }

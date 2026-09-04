@@ -355,6 +355,19 @@ ${questionDiagnosis.promptDirective}
    - เน้นคำสำคัญด้วยเครื่องหมายตัวหนา เช่น **ตัวหนา** เท่าที่จำเป็น
    - ห้ามใช้คำหุ่นยนต์ เช่น "ตามหลักการของไพ่ระบุว่า..."`;
 
+    // ── เพดานค่าใช้จ่าย AI รายวัน — ต้องตรวจ "ก่อน" เรียกผู้ให้บริการรายใดก็ตาม ──
+    // ของเดิมตรวจหลังชั้น Groq ทำให้ทางเดิน Groq (ซึ่งเป็นทางหลัก) ไม่เคยถูกนับ
+    // และไม่เคยถูกเบรกเลย — `AI_DAILY_CALL_CAP` บังคับใช้กับการอ่านไพ่ฝั่งเดียว
+    // ส่วนแชทถามต่อใช้เงินได้ไม่จำกัดและไม่ปรากฏใน /admin
+    const { isAiCapReached, recordAiCall } = await import("@/lib/security/ai-budget");
+    const aiCapHit = !privileged && (await isAiCapReached("member"));
+    if (aiCapHit) {
+      return NextResponse.json(
+        { error: "ระบบให้บริการคำทำนายครบโควตาของวันนี้แล้ว กรุณากลับมาใหม่พรุ่งนี้" },
+        { status: 429 }
+      );
+    }
+
     // ── Tier 1: Groq LPU AI Engine (Qwen 3.8 27B) — ทัพหน้าความเร็ว 300+ tok/s ตอบใน 0.5-1s รองรับ 14,400 req/day ──
     const groqKey = process.env.GROQ_API_KEY;
     if (groqKey) {
@@ -363,9 +376,12 @@ ${questionDiagnosis.promptDirective}
         const groqResult = await generateGroqChatReply({
           systemInstruction,
           messages: [
+            // ตัดความยาวเท่ากับทาง Gemini (4,000 ตัวอักษร/ข้อความ)
+            // ของเดิมส่ง h.text แบบไม่ตัด ทั้งที่ schema ยอมรับได้ถึง 50 ข้อความ × 50,000 ตัวอักษร
+            // = ผู้ใช้คนเดียวยัดข้อความราว 1 MB ต่อคำขอเข้าโมเดลได้
             ...history.slice(-20).map((h) => ({
               role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant",
-              content: h.text,
+              content: h.text.slice(0, 4000),
             })),
             { role: "user", content: userQuestion },
           ],
@@ -375,6 +391,7 @@ ${questionDiagnosis.promptDirective}
         if (groqResult && groqResult.reply) {
           const cleanReply = sanitizeTarotText(stripThinkingTags(groqResult.reply));
           if (cleanReply) {
+            await recordAiCall(1);
             return NextResponse.json({
               reply: cleanReply,
               provider: "groq",
@@ -388,10 +405,7 @@ ${questionDiagnosis.promptDirective}
     }
 
     // ── Tier 2: Google Gemini Flash Engine (เมื่อ Groq ขัดข้องหรือไม่มีคีย์) ──
-    const { isAiCapReached } = await import("@/lib/security/ai-budget");
-    const aiCapHit = !privileged && (await isAiCapReached("member"));
-
-    const geminiKey = !aiCapHit ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY : undefined;
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     if (geminiKey) {
       const {
         WORKING_GEMINI_MODELS,
@@ -459,6 +473,7 @@ ${questionDiagnosis.promptDirective}
             const replyText = extractGeminiAnswer(data);
             if (replyText) {
               const cleanReply = sanitizeTarotText(replyText);
+              await recordAiCall(1);
               return NextResponse.json({
                 reply: cleanReply,
                 provider: "gemini",
@@ -486,7 +501,7 @@ ${questionDiagnosis.promptDirective}
     // ต่อไปนี้ต้องติดธง `fallback` กลับไปเสมอ ให้หน้าเว็บบอกผู้ใช้ตรง ๆ
     console.warn(
       `[chat] ตกไปใช้คำตอบสำรองออฟไลน์ · reason=${
-        aiCapHit ? "ai_daily_cap" : geminiKey ? "gemini_unavailable" : "no_api_key"
+        geminiKey ? "gemini_unavailable" : "no_api_key"
       } · readingId=${id}`,
     );
     recordEvent("chat_offline_fallback");
@@ -501,7 +516,7 @@ ${questionDiagnosis.promptDirective}
     return NextResponse.json({
       reply: dynamicReply,
       fallback: true,
-      fallbackReason: aiCapHit ? "ai_daily_cap" : geminiKey ? "gemini_unavailable" : "no_api_key",
+      fallbackReason: geminiKey ? "gemini_unavailable" : "no_api_key",
     });
   } finally {
     limit.releaseConcurrency();

@@ -18,10 +18,6 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(ab, bb);
 }
 
-export function isBypassConfigured(): boolean {
-  return (process.env.RATE_LIMIT_BYPASS_TOKEN ?? "").trim().length >= MIN_BYPASS_LEN;
-}
-
 /**
  * true = "ผู้ทดสอบที่ได้รับอนุญาต" — ข้าม: rate limit ต่อ IP, concurrency, global spend cap, origin guard
  * ไม่ข้าม: safety checkQuestion, provably-fair integrity, body-size cap, auth ของ feature อื่น

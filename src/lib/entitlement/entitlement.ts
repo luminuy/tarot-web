@@ -1,5 +1,5 @@
 import { getAppDB } from "@/lib/platform/db";
-import { dayKey, nextResetAt, weekKey } from "@/lib/entitlement/week";
+import { nextResetAt, weekKey } from "@/lib/entitlement/week";
 import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading, todayDateKey } from "@/lib/entitlement/daily";
 import { DAILY_LIMIT, GUEST_LIMIT, SIGNUP_BONUS } from "@/lib/entitlement/limits";
 import { recordEvent } from "@/lib/stats/record";
@@ -131,10 +131,21 @@ async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGr
 
   const [dailyRow, bonusGrantRow, bonusUsedRow, paidGrantRow] = await Promise.all([
     db
+      // ⚠️ `week_key` ของแถวยุคปัจจุบันเก็บ "วันไทยของวันที่เปิดไพ่" ไม่ใช่วันจันทร์ต้นสัปดาห์
+      // (ดู consumeReading ที่ bind `dk`) — ชื่อคอลัมน์เป็นมรดกจากยุคโควตารายสัปดาห์
+      // เงื่อนไขเดิมเขียนว่า `(week_key = dk OR (week_key = wk AND source = 'daily'))`
+      // ซึ่งพังทุกวันจันทร์: วันจันทร์ dk == wk แถวที่เปิดวันจันทร์จึงติดเงื่อนไขที่สอง
+      // ไปตลอดทั้งสัปดาห์ ทำให้สมาชิกที่ใช้โควตาวันจันทร์หมด ถูกล็อกยาวถึงวันอาทิตย์
+      // แถวมรดกจริง ๆ ใช้ source = 'weekly' (ดู migrations/0007) ไม่ใช่ 'daily'
       .prepare(
-        `SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND (week_key = ? OR (week_key = ? AND source = 'daily')) AND source != 'bonus'`,
+        `SELECT COUNT(*) AS n FROM reading_usage
+          WHERE user_id = ?
+            AND (
+              (source = 'weekly' AND week_key = ?)
+              OR (source NOT IN ('weekly', 'bonus') AND week_key = ?)
+            )`,
       )
-      .bind(userId, dk, wk)
+      .bind(userId, wk, dk)
       .first<{ n: number }>(),
     db
       .prepare(`SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ?`)

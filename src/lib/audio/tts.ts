@@ -119,14 +119,20 @@ export class TextToSpeechManager {
     window.speechSynthesis.speak(utterance);
   }
 
+  /**
+   * ⚠️ ต้องเช็ก `currentUtterance` ด้วย ไม่ใช่เชื่อ `state.isSpeaking` อย่างเดียว
+   * บางเบราว์เซอร์จบเสียงโดยไม่ยิง onend ทำให้ state ค้างเป็น "กำลังพูด" ทั้งที่เงียบไปแล้ว
+   * แล้วสั่ง pause() ใส่คิวว่าง ๆ จนกดเล่นต่อไม่ขึ้นอีกเลย
+   * (ก่อนหน้านี้ฟิลด์นี้ถูกเขียนอย่างเดียว ไม่เคยถูกอ่าน จึงไม่ได้ช่วยอะไรเลย)
+   */
   public pause() {
-    if (this.state.isSupported && this.state.isSpeaking && !this.state.isPaused) {
+    if (this.state.isSupported && this.currentUtterance && this.state.isSpeaking && !this.state.isPaused) {
       window.speechSynthesis.pause();
     }
   }
 
   public resume() {
-    if (this.state.isSupported && this.state.isPaused) {
+    if (this.state.isSupported && this.currentUtterance && this.state.isPaused) {
       window.speechSynthesis.resume();
     }
   }
@@ -153,5 +159,3 @@ export class TextToSpeechManager {
     }
   }
 }
-
-export const ttsManager = typeof window !== "undefined" ? TextToSpeechManager.getInstance() : (null as any);

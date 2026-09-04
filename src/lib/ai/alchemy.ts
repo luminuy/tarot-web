@@ -10,12 +10,6 @@ import type { TarotCard } from "@/data/cards";
 
 export type TarotElement = "ไฟ" | "น้ำ" | "ลม" | "ดิน";
 
-export interface ElementalCount {
-  element: TarotElement;
-  count: number;
-  percentage: number;
-}
-
 export interface ElementalPairInteraction {
   cardA: string;
   cardB: string;

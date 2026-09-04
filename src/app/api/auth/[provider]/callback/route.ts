@@ -180,9 +180,18 @@ export async function GET(
         // 2. Check if a user with this email already exists
         const existingEmailUser = await getUserByEmail(profile.email);
         if (existingEmailUser) {
+          // ⚠️ บัญชีเดิมที่ "ยังไม่ยืนยันอีเมล" ไม่ถือเป็นหลักฐานความเป็นเจ้าของอีเมลนั้น
+          // ใครก็สมัครด้วยอีเมลคนอื่นไว้ล่วงหน้าได้ — ถ้าผูก identity เข้าไปเฉย ๆ
+          // เจ้าของตัวจริงจะถูกพาเข้าไปอยู่ในบัญชีของคนที่จองไว้ (pre-account hijacking)
+          // OAuth เพิ่งยืนยันแล้วว่าคนที่กำลังล็อกอินคือเจ้าของอีเมลนี้จริง → ยึดแถวคืนให้เขา
+          if (!existingEmailUser.emailVerified) {
+            const { reclaimUnverifiedEmailAccount } = await import("@/lib/users/users.repo");
+            profile.tokenVersion = await reclaimUnverifiedEmailAccount(existingEmailUser.id);
+          } else {
+            profile.tokenVersion = existingEmailUser.tokenVersion;
+          }
           await linkOAuthIdentity(oauthProvider, providerUserId, existingEmailUser.id);
           profile.id = existingEmailUser.id;
-          profile.tokenVersion = existingEmailUser.tokenVersion;
           if (existingEmailUser.name) profile.name = existingEmailUser.name;
           if (existingEmailUser.avatarUrl) profile.avatar = existingEmailUser.avatarUrl;
         } else {

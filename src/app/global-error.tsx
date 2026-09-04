@@ -1,6 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  // ของเดิมรับ `error` มาแล้วทิ้งไปเฉย ๆ — เมื่อ layout ระดับรากพัง จึงไม่เหลือร่องรอยให้ตามเลย
+  // `console.error` อยู่ใน exclude ของ compiler.removeConsole จึงรอดถึง production
+  useEffect(() => {
+    console.error("[global-error] root layout crashed:", error, error.digest);
+  }, [error]);
+
   return (
     <html lang="th">
       <body className="min-h-screen bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center p-4 font-sans">

@@ -184,13 +184,15 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   </span>
                 </div>
                 <div>
-                  <h4
-                    className={`font-serif-th text-xs font-bold leading-tight ${
+                  {/* ป้ายกำกับปุ่มกรอง ไม่ใช่หัวข้อของเอกสาร — เดิมเป็น <h4> ทำให้โครงหัวข้อ
+                      ของหน้า /cards กระโดดจาก h1 ไป h4 โดยไม่มี h2 เลย */}
+                  <span
+                    className={`block font-serif-th text-xs font-bold leading-tight ${
                       isActive ? "text-[#A58A5C]" : "text-[#29261F] group-hover:text-[#A58A5C]"
                     }`}
                   >
                     {tab.label}
-                  </h4>
+                  </span>
                   <p className="text-[13px] text-[#635B4E] truncate mt-0.5">{tab.desc}</p>
                 </div>
               </button>
@@ -200,7 +202,9 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       </div>
 
       {/* 78 Cards Luxury Masterpiece Grid */}
-      <AnimatePresence mode="wait">
+      {/* initial={false} — เรนเดอร์แรก (ฝั่งเซิร์ฟเวอร์) ต้องออกมาที่ opacity 1
+          การสลับหมวดหลัง mount ยังมีอนิเมชันครบเหมือนเดิม */}
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={activeFilter}
           initial={{ opacity: 0, y: 15 }}
@@ -222,7 +226,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   <CardImage
                     image={card.image}
                     cardId={card.id}
-                    alt={card.nameTh}
+                    alt={`ไพ่ ${card.nameTh} (${card.nameEn})`}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 tarot-hd-card-image"
                     sizes="(min-width: 1024px) 160px, (min-width: 768px) 170px, (min-width: 640px) 190px, 45vw"
                   />
@@ -251,9 +255,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 {/* Card Title & English Subtitle */}
                 <div className="text-center space-y-1 z-10">
                   <span className="text-[13px] font-mono text-[#635B4E] block truncate">{card.nameEn}</span>
-                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors truncate">
+                  {/* ชื่อไพ่แต่ละใบคือหัวข้อระดับที่สองของหน้า /cards (h1 = ชื่อหน้า) */}
+                  <h2 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors truncate">
                     {card.nameTh}
-                  </h3>
+                  </h2>
 
                   {/* Top 2 Upright Keywords */}
                   <div className="flex flex-wrap items-center justify-center gap-1 pt-1">
@@ -282,9 +287,9 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       {filteredCards.length === 0 && (
         <div className="text-center py-16 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-8 space-y-3 shadow-xs">
           <div className="text-3xl text-[#A58A5C]">✦</div>
-          <h3 className="font-serif-th text-lg font-bold text-[#29261F]">
+          <h2 className="font-serif-th text-lg font-bold text-[#29261F]">
             ไม่พบไพ่ที่ตรงกับ &ldquo;{searchQuery}&rdquo;
-          </h3>
+          </h2>
           <p className="text-xs text-[#635B4E] max-w-md mx-auto font-serif-th">
             ลองค้นหาด้วยชื่ออื่น เช่น &ldquo;ความรัก&rdquo;, &ldquo;The Sun&rdquo;, &ldquo;ดาวพฤหัสบดี&rdquo; หรือ
             &ldquo;ธาตุไฟ&rdquo;

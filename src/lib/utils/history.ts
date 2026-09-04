@@ -107,9 +107,26 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(item),
-      }).catch(() => {
-        // Silently ignore 401 for anonymous users
-      });
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data: { reading?: { id?: string } } | null) => {
+          // ⚠️ ต้องรับ id ที่เซิร์ฟเวอร์ออกให้ (`rj_…`) มาเขียนทับ id ชั่วคราวฝั่งเครื่อง
+          // (`reading_…`) เพราะ SaveReadingSchema ไม่มีฟิลด์ id ฝั่งเซิร์ฟเวอร์จึงออก id ใหม่เสมอ
+          // ถ้าไม่ซิงก์กลับ การกดให้คะแนนความแม่นหรือลบรายการทีหลังจะยิงไปที่ id ที่ไม่มีอยู่จริง
+          // `UPDATE/DELETE ... WHERE id = ?` จะแมตช์ 0 แถวแบบเงียบ ๆ (route ไม่ได้เช็ก changes)
+          // ผู้ใช้เห็นว่าสำเร็จ แต่พอ fetchServerReadings() ทับ localStorage รายการที่ลบก็กลับมา
+          // และผลที่ให้ไว้ก็กลายเป็น PENDING เหมือนเดิม
+          const serverId = data?.reading?.id;
+          if (!serverId || serverId === newItem.id) return;
+          const list = getReadings();
+          const idx = list.findIndex((r) => r.id === newItem.id);
+          if (idx === -1) return;
+          list[idx] = { ...list[idx], id: serverId };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        })
+        .catch(() => {
+          // Silently ignore 401 for anonymous users
+        });
     }
   }
 
@@ -146,30 +163,6 @@ export function updateReadingOutcome(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ outcome, userNote }),
     }).catch(() => {});
-  }
-}
-
-/**
- * นำเข้าประวัติลง LocalStorage
- */
-export function importReadings(newItems: SavedReadingItem[]): void {
-  if (!Array.isArray(newItems) || newItems.length === 0) return;
-  const current = getReadings();
-  const existingIds = new Set(current.map((r) => r.id));
-  const merged = [...current];
-
-  for (const item of newItems) {
-    if (!existingIds.has(item.id)) {
-      merged.push(item);
-      existingIds.add(item.id);
-    }
-  }
-
-  merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const capped = merged.slice(0, 50);
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(capped));
   }
 }
 

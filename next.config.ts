@@ -5,11 +5,16 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com data:",
+      // ⚠️ โฮสต์ของ GA4 กับ Meta Pixel ต้องอยู่ใน allowlist ไม่งั้น CSP บล็อกเงียบ
+      // `AnalyticsTracker` โหลด gtag จาก googletagmanager และ fbevents จาก connect.facebook.net
+      // ก่อนหน้านี้ทั้งสองตัวถูกบล็อกทั้งหมด = ตั้ง NEXT_PUBLIC_GA_ID ไปก็ไม่มีข้อมูลเข้า GA เลย
+      // และไม่มี field data ให้ PageSpeed/CrUX ใช้วัดผลการปรับ SEO ที่ทำไป
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://connect.facebook.net",
+      // next/font โฮสต์ฟอนต์เองในโดเมนเรา จึงไม่เคยเรียก fonts.googleapis.com / fonts.gstatic.com เลย
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self' data:",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://generativelanguage.googleapis.com https://challenges.cloudflare.com",
+      "connect-src 'self' https://generativelanguage.googleapis.com https://challenges.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://www.facebook.com",
       "frame-src 'self' https://challenges.cloudflare.com",
       "base-uri 'none'",
       "frame-ancestors 'none'",

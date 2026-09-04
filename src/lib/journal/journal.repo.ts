@@ -70,8 +70,12 @@ export async function listJournal(
   opts?: { limit?: number; before?: number }
 ): Promise<SavedReadingItem[]> {
   const db = await getAppDB();
-  const limit = Math.min(200, opts?.limit ?? 50);
-  const before = opts?.before ?? Date.now() + 10000;
+  // ⚠️ ต้องมีขอบล่างด้วย ไม่ใช่แค่ Math.min — `?limit=-1` ทำให้ได้ `LIMIT -1`
+  // ซึ่งใน SQLite แปลว่า "ไม่จำกัด" คืนสมุดบันทึกทั้งเล่มพร้อม cards_json ในครั้งเดียว
+  const rawLimit = Number(opts?.limit);
+  const limit = Number.isFinite(rawLimit) ? Math.min(200, Math.max(1, Math.floor(rawLimit))) : 50;
+  const rawBefore = Number(opts?.before);
+  const before = Number.isFinite(rawBefore) && rawBefore > 0 ? rawBefore : Date.now() + 10000;
 
   const { results } = await db
     .prepare(
@@ -167,11 +171,13 @@ export async function updateJournalOutcome(
   id: string,
   outcome: ReadingOutcome,
   note?: string
-): Promise<void> {
+): Promise<boolean> {
   const db = await getAppDB();
   const now = Date.now();
 
-  await db
+  // ⚠️ ต้องคืนผลว่าแตะแถวได้จริงไหม — ของเดิมคืน void เสมอ ปลายทางจึงตอบ success
+  // แม้จะไม่มีแถวไหนตรงเลย (เกิดขึ้นจริงเมื่อ id ฝั่งเครื่องกับฝั่งเซิร์ฟเวอร์ไม่ตรงกัน)
+  const res = await db
     .prepare(
       `UPDATE reading_journal
        SET outcome = ?, user_note = COALESCE(?, user_note), outcome_updated_at = ?
@@ -179,17 +185,21 @@ export async function updateJournalOutcome(
     )
     .bind(outcome, note ?? null, now, id, userId)
     .run();
+
+  return (res.meta?.changes ?? 0) > 0;
 }
 
 /**
  * ลบบันทึกการดูดวง 1 รายการ
  */
-export async function deleteJournalItem(userId: string, id: string): Promise<void> {
+export async function deleteJournalItem(userId: string, id: string): Promise<boolean> {
   const db = await getAppDB();
-  await db
+  const res = await db
     .prepare(`DELETE FROM reading_journal WHERE id = ? AND user_id = ?`)
     .bind(id, userId)
     .run();
+
+  return (res.meta?.changes ?? 0) > 0;
 }
 
 /**

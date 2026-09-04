@@ -1,12 +1,15 @@
-import React from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ChangePasswordCard } from "@/components/account/ChangePasswordCard";
 import { EntitlementStatusCard } from "@/components/entitlement/EntitlementStatusCard";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
 
-export const metadata = {
-  title: "บัญชีและประวัติการดูดวง | Sacred Account Sanctuary",
+export const metadata: Metadata = {
+  title: "บัญชีและประวัติการดูดวง",
   description: "จัดการข้อมูลส่วนบุคคล สิทธิ์ความเป็นส่วนตัว และบันทึกประวัติการดูดวงไพ่ทาโรต์",
+  // หน้าส่วนตัว — ต้อง noindex ไม่ใช่พึ่ง robots.txt อย่างเดียว
+  // เพราะเมื่อบอตคลานไม่ได้ มันก็ "อ่านไม่เห็น" ว่าห้าม index แล้ว URL ยังโผล่ใน SERP ได้
+  robots: { index: false, follow: false },
 };
 
 export default function AccountPage() {

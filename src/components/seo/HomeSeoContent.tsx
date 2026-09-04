@@ -1,6 +1,3 @@
-"use client";
-
-import React, { useState } from "react";
 import Link from "next/link";
 import { CardImage } from "@/components/card/CardImage";
 import { HOME_FAQS } from "@/data/home-seo";
@@ -95,13 +92,19 @@ const FEATURED_ARTICLES = [
   },
 ];
 
+/**
+ * เนื้อหา SEO และ Fat Footer ของหน้าแรก — **Server Component ล้วน**
+ *
+ * ⚠️ ห้ามใส่ "use client" กลับเข้ามา และห้ามใช้ useState/onClick ในไฟล์นี้
+ * เหตุผล 2 ข้อ:
+ *   1. ไฟล์นี้ยาว 800+ บรรทัด ถ้าเป็น client component จะถูกส่งเป็น JavaScript
+ *      ให้เบราว์เซอร์ดาวน์โหลดและ hydrate ทุกครั้งที่เปิดหน้าแรก ทั้งที่เป็นข้อความนิ่งล้วน
+ *   2. คำตอบ FAQ ต้องอยู่ใน HTML ตั้งแต่ฝั่งเซิร์ฟเวอร์เสมอ — เรามี FAQPage JSON-LD
+ *      ประกาศทั้งคำถามและคำตอบไว้ ถ้าคำตอบโผล่เฉพาะตอนคลิก (`{isOpen && ...}`)
+ *      แปลว่า schema พูดถึงข้อความที่ไม่มีอยู่บนหน้า ซึ่งผิดนโยบาย structured data ของ Google
+ * แอคคอร์เดียนจึงใช้ `<details>/<summary>` ของเบราว์เซอร์ ไม่ต้องใช้ JavaScript เลย
+ */
 export function HomeSeoContent() {
-  const [openFaqId, setOpenFaqId] = useState<string | null>(null);
-
-  const toggleFaq = (id: string) => {
-    setOpenFaqId((prev) => (prev === id ? null : id));
-  };
-
   return (
     <div className="w-full mt-4 sm:mt-6 text-[#29261F]">
       {/* ═══════════════════════════════════════════════════════════════
@@ -582,47 +585,28 @@ export function HomeSeoContent() {
         </div>
 
         <div className="space-y-3 sm:space-y-3.5">
-          {HOME_FAQS.map((faq) => {
-            const isOpen = openFaqId === faq.id;
-            return (
-              <div
-                key={faq.id}
-                className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
-                  isOpen
-                    ? "bg-[#FFFFFF] border-[#8F5C1A] shadow-sm"
-                    : "bg-[#FFFFFF] border-[#D9C8AC]/80 hover:border-[#8F5C1A] hover:shadow-2xs"
-                }`}
-              >
-                <button
-                  type="button"
-                  onClick={() => toggleFaq(faq.id)}
-                  aria-expanded={isOpen}
-                  aria-controls={`faq-answer-${faq.id}`}
-                  className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-serif-th font-bold text-base text-[#29261F] hover:text-[#8F5C1A] transition-colors cursor-pointer group"
+          {HOME_FAQS.map((faq) => (
+            <details
+              key={faq.id}
+              className="group rounded-2xl border bg-[#FFFFFF] border-[#D9C8AC]/80 transition-all duration-300 overflow-hidden open:border-[#8F5C1A] open:shadow-sm hover:border-[#8F5C1A] hover:shadow-2xs"
+            >
+              <summary className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-serif-th font-bold text-base text-[#29261F] hover:text-[#8F5C1A] transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <span className="flex items-center gap-3 sm:gap-3.5">
+                  <span className="text-[#8F5C1A] text-sm transition-transform group-hover:scale-125">✦</span>
+                  <span className="leading-snug">{faq.question}</span>
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="text-xs text-[#8F5C1A] font-mono transition-transform duration-300 flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-[#FAF7F2] border border-[#D9C8AC]/50 group-open:rotate-180 group-open:bg-[#8F5C1A] group-open:text-[#FFFFFF] group-open:border-[#8F5C1A]"
                 >
-                  <span className="flex items-center gap-3 sm:gap-3.5">
-                    <span className="text-[#8F5C1A] text-sm group-hover:scale-125 transition-transform">✦</span>
-                    <span className="leading-snug">{faq.question}</span>
-                  </span>
-                  <span
-                    className={`text-xs text-[#8F5C1A] font-mono transition-transform duration-300 flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-[#FAF7F2] border border-[#D9C8AC]/50 ${
-                      isOpen ? "rotate-180 bg-[#8F5C1A] text-[#FFFFFF] border-[#8F5C1A]" : ""
-                    }`}
-                  >
-                    ▼
-                  </span>
-                </button>
-                {isOpen && (
-                  <div
-                    id={`faq-answer-${faq.id}`}
-                    className="px-6 pb-6 pt-2 text-xs sm:text-sm font-serif-th text-[#635B4E] leading-relaxed border-t border-[#D9C8AC]/30 bg-[#FAF7F2]/40"
-                  >
-                    {faq.answer}
-                  </div>
-                )}
+                  ▼
+                </span>
+              </summary>
+              <div className="px-6 pb-6 pt-2 text-xs sm:text-sm font-serif-th text-[#635B4E] leading-relaxed border-t border-[#D9C8AC]/30 bg-[#FAF7F2]/40">
+                {faq.answer}
               </div>
-            );
-          })}
+            </details>
+          ))}
         </div>
       </section>
 

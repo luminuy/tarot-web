@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { getAppKV } from "@/lib/platform/cf";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
+import { getClientIdentifier } from "@/lib/utils/rate-limit";
 
 interface RateLimitBucket {
   count: number;
@@ -10,14 +11,15 @@ interface RateLimitBucket {
 // In-memory fallback (ใช้เมื่อ KV ยังไม่พร้อม / dev)
 const memoryBuckets = new Map<string, RateLimitBucket>();
 
+/**
+ * ⚠️ ใช้ตัวเดียวกับ rate limiter หลัก (`getClientIdentifier`) เสมอ
+ * ของเดิมมีสำเนาของตัวเองที่หยิบ `x-forwarded-for` ตัว **ซ้ายสุด** ซึ่งไคลเอนต์
+ * ปลอมได้ทั้งหมด — ถ้าวันไหนไม่มี `cf-connecting-ip` (เช่นย้ายออกจาก Cloudflare
+ * หรือเรียกผ่าน proxy ชั้นอื่น) ผู้โจมตีแค่หมุนค่า header ก็ข้ามเพดานเดารหัสผ่านได้ทันที
+ * ตัวหลักหยิบ hop **ขวาสุด** ซึ่งเป็นค่าที่ proxy ของเราเติมเอง ปลอมไม่ได้
+ */
 function getClientIp(request: Request): string {
-  const cfConnectingIp = request.headers.get("cf-connecting-ip");
-  if (cfConnectingIp) return cfConnectingIp.trim();
-
-  const xForwardedFor = request.headers.get("x-forwarded-for");
-  if (xForwardedFor) return xForwardedFor.split(",")[0].trim();
-
-  return "127.0.0.1";
+  return getClientIdentifier(request);
 }
 
 /**
@@ -85,6 +87,19 @@ function keysFor(request: Request, action: AuthRateLimitAction, identifier?: str
   return keys;
 }
 
+/**
+ * กวาดถังที่หมดอายุออกจากหน่วยความจำ
+ * สำเนาใน KV หมดอายุเองด้วย TTL แต่สำเนาในหน่วยความจำไม่เคยหมดอายุ
+ * ทุกความพยายามล็อกอินที่ล้มเหลวจาก IP ใหม่ทิ้ง entry ไว้ถาวรสูงสุด 3 รายการ
+ * ซึ่งพอดีกับรูปแบบทราฟฟิกแบบ credential stuffing ที่ทำให้ Map โตเร็วที่สุด
+ */
+function pruneExpiredBuckets(now: number): void {
+  if (memoryBuckets.size < 2000) return;
+  for (const [k, b] of memoryBuckets) {
+    if (b.resetAt <= now) memoryBuckets.delete(k);
+  }
+}
+
 async function readBucket(key: string): Promise<RateLimitBucket | null> {
   try {
     const kv = await getAppKV();
@@ -93,10 +108,16 @@ async function readBucket(key: string): Promise<RateLimitBucket | null> {
   } catch {
     // KV ไม่พร้อม / JSON เสีย — ตกไปใช้ในหน่วยความจำ
   }
-  return memoryBuckets.get(key) ?? null;
+  const cached = memoryBuckets.get(key);
+  if (cached && cached.resetAt <= Date.now()) {
+    memoryBuckets.delete(key);
+    return null;
+  }
+  return cached ?? null;
 }
 
 async function writeBucket(key: string, bucket: RateLimitBucket): Promise<void> {
+  pruneExpiredBuckets(Date.now());
   memoryBuckets.set(key, bucket);
   try {
     const kv = await getAppKV();
