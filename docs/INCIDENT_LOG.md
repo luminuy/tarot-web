@@ -62,6 +62,30 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0072 · 2026-09-04 12:53 · 🔵 Low · ขจัดอาการกระตุกเมนู Dropdown และแก้ไขการชนกันของวรรณยุกต์หัวข้อ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เมนู Dropdown สั่นกระตุกตอนเปิด และ TypeScript type error ใน UserProfileBadge |
+| **สาเหตุราก** | Framer Motion ทำงานซ้อนทับการเมานต์ DOM หนัก และ syntax error จากการลบ AnimatePresence ไม่หมด |
+| **การแก้ไข** | ใช้ GPU Compositor transitions ร่วมกับ .no-scrollbar และคืนค่า imports ที่ถูกต้อง 100% |
+| **🛡️ กฎป้องกันถาวร** | **คอมโพเนนต์เมนู Dropdown ใช้ Hardware-Accelerated transitions และตรวจ typecheck เสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify ผ่าน 24/24 ด่านสมบูรณ์ |
+| **บันทึกโดย** | Antigravity · branch `fix/eliminate-dropdown-stutter` · commit `82b7d80` |
+
+
+### INC-0071 · 2026-09-04 12:48 · 🟡 Medium · แก้ไขวรรณยุกต์ภาษาไทยชนเกยทับขอบป้ายหัวข้อในหน้า /spreads, /cards, /readers, /account
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | สระบนและวรรณยุกต์ไทย (ไม้หันอากาศ, สระอิ, สระไอ, ไม้เอก, ไม้โท) ในหัวข้อ h1 ชนเกยทับขอบล่างของป้าย pill badge ด้านบนในหน้าคลังผังและสารานุกรมไพ่ |
+| **สาเหตุราก** | Tailwind text-5xl ตั้ง line-height: 1 โดยปริยาย ทำให้ line-box สูงเท่าตัวอักษรภาษาอังกฤษ ขณะที่อักษรไทยมีวรรณยุกต์พุ่งล้นขึ้นไป 16px และ parent container มีระยะห่าง space-y-2.5 แค่ 10px ยอดวรรณยุกต์จึงทะลุชนป้ายด้านบน |
+| **การแก้ไข** | ห่อหุ้มป้าย pill ด้วย block div, ขยายระยะห่างแม่เป็น space-y-4/5 py-6/8, และกำหนด leading-normal sm:leading-tight พร้อม pt-1 ดัน headroom ให้อักษรไทย |
+| **🛡️ กฎป้องกันถาวร** | **ทุกหัวข้อภาษาไทยขนาด text-3xl ขึ้นไปที่มีป้ายกำกับด้านบน ต้องใช้ space-y-4/5 ห่อป้ายด้วย block div และใส่ leading-normal/tight พร้อม pt-1 ดัน headroom เสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify ผ่านครบ 24/24 ด่าน และตรวจสอบระยะ Headroom วรรณยุกต์ไทยพ้นขอบป้าย 100% |
+| **บันทึกโดย** | Antigravity · branch `fix/eliminate-dropdown-stutter` · commit `1d0f7fe` |
+
+
 ### INC-0070 · 2026-09-04 09:02 · 🟡 Medium · เลขตำแหน่งในแผนผังผังพยากรณ์ตั้งตรงเสมอ แม้การ์ดวางขวาง
 
 | หัวข้อ | รายละเอียด |

@@ -153,27 +153,30 @@ class MysticAudioEngine {
     }
   }
 
-  /** ✨ เสียงแตะสัมผัสเบาๆ สไตล์ Apple Haptic สำหรับเมนูและทริกเกอร์ (15ms Zero-Lag Tap) */
+  /** ✨ เสียงแตะสัมผัสเบาๆ สไตล์ Apple Haptic สำหรับเมนูและทริกเกอร์ (15ms Zero-Lag Tap — Non-blocking decoupled) */
   public playMenuTapSound() {
     if (!this.soundEnabled) return;
-    const ctx = this.getContext();
-    if (!ctx) return;
-    try {
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(620, now);
-      osc.frequency.exponentialRampToValueAtTime(320, now + 0.015);
-      gain.gain.setValueAtTime(0.06, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.018);
-    } catch {
-      // Audio fallback
-    }
+    // Decouple audio graph initialization to prevent blocking the UI animation frame
+    setTimeout(() => {
+      try {
+        const ctx = this.getContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(620, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.015);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.015);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.018);
+      } catch {
+        // Audio fallback
+      }
+    }, 0);
   }
 
   /** 🪄 เสียงพลิกไพ่ 3D (Tactile Linen Flip & Celestial Air Swoosh) */

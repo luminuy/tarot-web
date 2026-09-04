@@ -958,8 +958,8 @@ export default function TarotPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2 text-center">
-                    <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide [text-wrap:balance]">
+                  <div className="space-y-2.5 sm:space-y-3 text-center">
+                    <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
                       ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI
                     </h1>
                     <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
@@ -1020,11 +1020,11 @@ export default function TarotPage() {
               exit="exit"
               className="space-y-10"
             >
-              <div className="text-center space-y-1">
-                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] [text-wrap:balance]">
+              <div className="text-center space-y-2 sm:space-y-2.5">
+                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
                   ตั้งคำถาม &amp; เลือกแม่หมอ
                 </h2>
-                <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th [text-wrap:balance]">
+                <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed [text-wrap:balance]">
                   พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
                 </p>
               </div>
