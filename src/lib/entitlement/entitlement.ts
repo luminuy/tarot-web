@@ -29,6 +29,41 @@ function isUniqueViolation(e: unknown): boolean {
   return /unique|constraint/i.test(msg);
 }
 
+/** true เมื่อ error คือ "ตารางไม่มีอยู่" — เคสเดียวที่ซ่อมตัวเองได้ */
+function isMissingTable(e: unknown): boolean {
+  const msg = String((e as { message?: unknown })?.message ?? e ?? "");
+  return /no such table|no such column|does not exist/i.test(msg);
+}
+
+/**
+ * ซ่อมตัวเองเมื่อตารางสิทธิ์หาย — สร้างตารางจาก DDL ชุดเดียวกับปุ่มในแอดมิน
+ *
+ * ทำไมต้องมี: `deploy.yml` รัน migrations ให้อยู่แล้ว แต่ยังมีทางที่ตารางหายได้
+ * (สร้าง D1 ใหม่ · สลับฐานข้อมูล · migration ล้มเงียบ) และเป็นความล้มเหลวแบบ
+ * **ค้างยาว** ไม่หายเอง — ต่างจาก D1 ล่มชั่วคราวที่เดี๋ยวก็กลับมา
+ * ถ้าไม่ซ่อม ระบบจะปล่อยให้เปิดไพ่ฟรีไปเรื่อย ๆ จนกว่าจะมีคนสังเกตเห็น metric
+ *
+ * กันยิงรัว: ลองแค่ครั้งเดียวต่อ isolate · DDL เป็น `IF NOT EXISTS` ทั้งหมด
+ * จึงปลอดภัยแม้หลาย isolate ยิงพร้อมกัน
+ */
+let selfHealAttempted = false;
+
+async function trySelfHeal(): Promise<boolean> {
+  if (selfHealAttempted) return false;
+  selfHealAttempted = true;
+  try {
+    const { ensureEntitlementSchema } = await import("@/lib/entitlement/schema");
+    await ensureEntitlementSchema();
+    recordEvent("entitlement_db_selfheal");
+    console.warn("[entitlement] ตารางหาย — สร้างใหม่อัตโนมัติสำเร็จ");
+    return true;
+  } catch (e) {
+    recordEvent("entitlement_db_selfheal_failed");
+    console.error("[entitlement] ซ่อมตารางอัตโนมัติไม่สำเร็จ", e);
+    return false;
+  }
+}
+
 /**
  * บันทึกว่าฐานข้อมูลสิทธิ์ล่ม แล้วคืนค่าตามนโยบาย
  * metric `entitlement_db_error` โผล่ในการ์ด "สถิติระบบสิทธิ์" ของ `/admin`
@@ -156,8 +191,18 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
   let usage: Awaited<ReturnType<typeof memberUsage>>;
   try {
     usage = await memberUsage(v.userId);
-  } catch (e) {
-    const allow = onDbFailure("getEntitlement/memberUsage", e);
+  } catch (firstErr) {
+    // ตารางหาย → สร้างแล้วอ่านใหม่ · ตารางเพิ่งสร้างจะว่างเปล่า = ยอดใช้ 0 ซึ่งถูกต้อง
+    if (isMissingTable(firstErr) && (await trySelfHeal())) {
+      try {
+        usage = await memberUsage(v.userId);
+        const { dailyUsed: u2, bonusGranted: bg2, bonusUsed: bu2, paidGranted: pg2 } = usage;
+        return buildMemberEntitlement(u2, bg2, bu2, pg2, dailyFreeAvailable, dailyStreak);
+      } catch {
+        /* ซ่อมแล้วยังอ่านไม่ได้ → ตกไปใช้ค่า degrade ด้านล่าง */
+      }
+    }
+    const allow = onDbFailure("getEntitlement/memberUsage", firstErr);
     return {
       kind: "member",
       canStartReading: allow,
@@ -175,6 +220,18 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
     };
   }
   const { dailyUsed: usedToday, bonusGranted, bonusUsed, paidGranted } = usage;
+  return buildMemberEntitlement(usedToday, bonusGranted, bonusUsed, paidGranted, dailyFreeAvailable, dailyStreak);
+}
+
+/** ประกอบสิทธิ์ของสมาชิกจากยอดที่อ่านมา — แยกไว้เพราะเรียกจาก 2 ทาง (ปกติ / หลังซ่อมตาราง) */
+function buildMemberEntitlement(
+  usedToday: number,
+  bonusGranted: number,
+  bonusUsed: number,
+  paidGranted: number,
+  dailyFreeAvailable: boolean,
+  dailyStreak: number,
+): Entitlement {
   const dailyRemaining = Math.max(0, DAILY_LIMIT - usedToday);
   const bonusRemaining = Math.max(0, bonusGranted - bonusUsed);
   const remaining = dailyRemaining + bonusRemaining;
@@ -259,7 +316,26 @@ export async function consumeReading(
   } catch (e) {
     // แยกให้ชัด: ชน UNIQUE(reading_id) = เคยหักไปแล้วจริง ๆ → ผ่าน ไม่หักซ้ำ
     if (isUniqueViolation(e)) return true;
-    // error อื่น (ตารางหาย / throttle / schema ไม่ตรง) = โควตาไม่ได้ถูกบันทึก
+
+    // ตารางหาย = ซ่อมได้ → สร้างตารางแล้วหักใหม่อีกครั้งเดียว
+    // (ถ้าสำเร็จ ผู้ใช้ถูกหักสิทธิ์ถูกต้องตามจริง ไม่ได้ของฟรีเพราะระบบพัง)
+    if (isMissingTable(e) && (await trySelfHeal())) {
+      try {
+        await db
+          .prepare(
+            `INSERT INTO reading_usage (id, user_id, reading_id, week_key, source, consumed_at)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+          )
+          .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, source, Date.now())
+          .run();
+        return true;
+      } catch (retryErr) {
+        if (isUniqueViolation(retryErr)) return true;
+        return onDbFailure("consumeReading/insert-after-heal", retryErr);
+      }
+    }
+
+    // error อื่น (throttle / schema drift) = โควตาไม่ได้ถูกบันทึก
     // ห้ามกลืนเงียบเหมือนของเดิม — ยิง metric แล้วตัดสินตามนโยบายที่ประกาศไว้
     return onDbFailure("consumeReading/insert", e);
   }
