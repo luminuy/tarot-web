@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { DECK } from "@/data/cards";
 import { ARTICLES } from "@/data/articles";
+import { SPREADS } from "@/data/spreads";
 import { SITE_ORIGIN } from "@/lib/config/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -57,5 +58,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...cardRoutes, ...blogRoutes];
+  // All 20 Spread Guide Pages
+  const spreadRoutes: MetadataRoute.Sitemap = SPREADS.map((spread) => ({
+    url: `${baseUrl}/spreads/${spread.id}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...cardRoutes, ...blogRoutes, ...spreadRoutes];
 }
