@@ -18,10 +18,10 @@
 
 | หัวข้อ | ค่า |
 | :--- | :--- |
-| **วันที่** | 2026-09-04 |
+| **วันที่** | 2026-09-04 (รอบใหญ่: ความปลอดภัย + SEO + ประสิทธิภาพ + โค้ดตาย) |
 | **commit ฐาน** | `main` — Production Live (`seertarot.net`) |
-| **วิธีตรวจ** | dev server + `npm run repo:verify` (24/24 ด่าน) + Cloudflare Workers Deploy |
-| **ผลสรุป** | ✅ **ISSUE-001, ISSUE-002, ISSUE-003, ISSUE-008, ISSUE-009, ISSUE-010, ISSUE-010b, ISSUE-011, ISSUE-012, ISSUE-016 แก้ไขและทดสอบสมบูรณ์ 100%** |
+| **วิธีตรวจ** | dev server + `npm run repo:verify` (24/24 ด่าน) + เดินครบทุกขั้นพิธีกรรมบนเบราว์เซอร์จริง + `curl` เทียบ HTML ฝั่งเซิร์ฟเวอร์ก่อน/หลังทุกเส้นทางหลัก |
+| **ผลสรุป** | ✅ **ISSUE-001, 002, 003, 006, 008, 009, 010, 010b, 011, 012, 016 ปิดครบ** · 🆕 พบใหม่และแก้แล้ว: ช่องแจกโควตาฟรีโดยไม่ต้องจ่ายเงิน (INC-0074), บัญชีถูกจองล่วงหน้า, โควตาสมาชิกถูกล็อกยาวทั้งสัปดาห์ถ้าใช้วันจันทร์, canonical หน้าแรกรั่วไปทับทุกหน้า · 📋 บันทึกไว้ยังไม่แก้: ISSUE-017 ถึง ISSUE-023 |
 
 ### 🗂️ ดัชนีสถานะปัญหาและข้อจำกัดของระบบ
 
@@ -75,17 +75,55 @@
 | **การแก้ไข** | อัปเกรด `getSessionSecret()` ให้ **Hard-throw ทันทีใน Production** หากไม่มี `TAROT_SESSION_SECRET` หรือความยาวน้อยกว่า 32 ตัวอักษร หรือใช้ค่า default พร้อมตัด fallback เงียบออก 100% |
 | **สถานะ** | ✅ **แก้ไขและผ่านการทดสอบ Hard Fail สมบูรณ์ 100%** |
 
-### ISSUE-003 · ฐานข้อมูลไพ่เอนเอียงด้าน "ใช่" มากเกินไป ทำให้ผังใช่/ไม่ใช่ ตอบเพี้ยน
+### ~~ISSUE-003 · ฐานข้อมูลไพ่เอนเอียงด้าน "ใช่" มากเกินไป~~ — 🟢 **ปิดแล้ว (ตรวจ 2026-09-04)**
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการ** | `npm run repo:verify` เตือนทุกครั้ง: `yesNo เอียงไปด้านเดียวมาก (ใช่ 43 / ไม่ใช่ 18 / ไม่แน่ 17)` |
-| **ตรวจยืนยันล่าสุด** | 2026-08-31 — `tsx scripts/verify-cards.ts` ➔ `yesNo — ใช่ 43 / ไม่ใช่ 18 / ไม่แน่ 17` (ยังเท่าเดิม) |
-| **ผลกระทบ** | ผัง **"ใช่หรือไม่ (ไพ่ 3 ใบ)"** มีโอกาสตอบ "ใช่" ราว 55% ทั้งที่ควรสมดุลกว่านี้ |
-| **เริ่มดูตรงไหน** | ฟิลด์ `yesNo` ใน `src/data/cards/*.ts` (78 ใบ) และ `scripts/verify-cards.ts` |
-| **แนวทางแก้** | ทบทวน `yesNo` ของไพ่ที่ความหมายค่อนไปทางลบ/กลาง ให้สะท้อนตำรา 1909 Rider-Waite จริง — ไม่ใช่ปรับให้ตัวเลขสวย |
-| **เกณฑ์ว่าแก้สำเร็จ** | `verify-cards.ts` ไม่ขึ้นคำเตือนนี้ และการเปลี่ยนแต่ละใบมีเหตุผลอ้างอิงความหมายไพ่กำกับ |
-| **ข้อควรระวัง** | ⚠️ ห้ามแก้ `structure` ของไพ่ 78 ใบ · รัน `verify-cards.ts` ทุกครั้งหลังแก้ |
+| **สรุป** | `npm run verify:cards` ตอบ `yesNo — ใช่ 38 / ไม่ใช่ 22 / ไม่แน่ 18` และ **ไม่ขึ้นคำเตือนแล้ว** ส่วนรายละเอียดเดิมในไฟล์นี้ยังอ้างตัวเลข 43/18/17 ของ 2026-08-31 ซึ่งล้าสมัยไปแล้ว |
+| **ข้อควรระวังที่ยังใช้อยู่** | ⚠️ ห้ามแก้ `structure` ของไพ่ 78 ใบ · รัน `verify-cards.ts` ทุกครั้งหลังแก้ค่า `yesNo` |
+
+---
+
+## 🟡 ระดับ Medium — พบจากการตรวจใหญ่ 2026-09-04 (ยังไม่ได้แก้)
+
+### ISSUE-017 · โควตาเปิดไพ่ถูกใช้ซ้อนได้ถ้ายิงพร้อมกันหลายคำขอ (double-spend)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการ** | สมาชิกที่เหลือโควตา 1 ครั้ง เรียก `POST /api/reading/start` 3 ครั้งให้ได้ id A, B, C แล้วยิง `POST /api/reading/{A,B,C}/read` พร้อมกัน — ทั้งสามผ่านหมด ใช้ AI 3 รอบโดยหักโควตาแค่ 1 |
+| **ต้นเหตุ** | [`consumeReading()`](../src/lib/entitlement/entitlement.ts) เป็น read-check-then-insert ที่ไม่มี transaction · `UNIQUE(reading_id)` กันได้แค่การหักซ้ำของ **reading เดียวกัน** ไม่ได้กันคนละ reading · ตัวจำกัด `maxConcurrent` ใน `rate-limit.ts` เก็บ state ใน Map ระดับโมดูล คนละ isolate จึงเห็น `concurrent = 0` เหมือนกันหมด |
+| **แนวทางแก้** | เปลี่ยนเป็น `INSERT ... SELECT ... WHERE (SELECT COUNT(*) ...) < DAILY_LIMIT` แล้วถือว่า `changes === 0` คือโควตาหมด · หรือย้ายตัวนับไป Durable Object |
+| **ความเสี่ยงจริง** | ต้องตั้งใจยิงขนานเท่านั้น ผู้ใช้ทั่วไปไม่เจอ — แต่เป็นช่องให้ใช้ AI เกินโควตาได้ |
+
+### ISSUE-018 · ข้อมูลตั๋วคิวแม่หมออ่านได้ด้วย `customerRef` ที่ส่งมาใน query string (PDPA)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการ** | `GET /api/marketplace/tickets?customerRef=...` และ `GET /api/marketplace/tickets/<id>` ไม่ตรวจ session เลย · `customerRef` เป็นความลับแบบ bearer แต่ถูกส่งใน URL จึงไปโผล่ใน log ของ CDN/proxy และ referrer ได้ |
+| **ผลกระทบ** | คำถามดูดวงคือข้อมูลอ่อนไหวตรงตามที่ PDPA คุ้มครอง (สุขภาพ ความสัมพันธ์ การเงิน) · ถ้า `customerRef` รั่ว คนนอกอ่าน `nickname` `question` `readingSnapshot` และบทสรุป AI ได้ทั้งหมด |
+| **แก้ไปแล้วบางส่วน** | 2026-09-04 บังคับ `customerRef` ตอน **ยกเลิก** ตั๋วและตอนเปิดรายการชำระเงินแล้ว (เดิมใช้แค่ ticket id) — ส่วนการ **อ่าน** ยังเปิดอยู่ |
+| **แนวทางแก้** | ย้าย `customerRef` ไปเป็น httpOnly cookie ที่เซ็นด้วย `signPayload`/`verifyPayload` ใน `edge-auth.ts` แล้วตรวจจาก cookie แทน query string |
+| **หมายเหตุ** | Marketplace ยังไม่เปิดใช้จริง (ติด PDPA sign-off) — ต้องแก้ให้เสร็จ **ก่อน** เปิดใช้งาน |
+
+### ISSUE-019 · robots.txt ปิดบอตค้นหา AI ทั้งหมด — เสียทราฟฟิกอ้างอิงจาก ChatGPT / Claude / Perplexity
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **สถานะ** | 🟠 **เป็นการตัดสินใจเชิงธุรกิจ ไม่ใช่บั๊ก — รอเจ้าของโปรเจกต์ชี้ขาด** |
+| **สิ่งที่แก้ไปแล้ว** | ชื่อ user-agent เดิม (`anthropic-ai`, `Claude-Web`) เป็นชื่อรุ่นเก่าที่เลิกใช้แล้ว บล็อกไม่ติดจริงสักตัว — 2026-09-04 แก้เป็นชื่อปัจจุบันครบทั้งชุดแล้ว |
+| **ประเด็นที่ต้องตัดสินใจ** | บอตกลุ่ม "ค้นหา" (`OAI-SearchBot`, `Claude-SearchBot`, `PerplexityBot`) **ไม่ได้เอาข้อมูลไปเทรนโมเดล** แต่เป็นตัวที่ทำให้เว็บถูกอ้างอิงและมีคนคลิกเข้ามา · ตอนนี้เลือก "ปิดทั้งหมด" ตามนโยบายกันดูดข้อมูลเดิม |
+| **ถ้าจะเปิด** | แยก 3 ตัวนั้นออกมาเป็นกฎ `allow` ต่างหากใน [`src/app/robots.ts`](../src/app/robots.ts) โดยยังปิดกลุ่มเทรนโมเดลไว้เหมือนเดิม |
+
+---
+
+## 🔵 ระดับ Low — หนี้เล็ก ๆ ที่บันทึกไว้ (ตรวจ 2026-09-04)
+
+| # | เรื่อง | ไฟล์ | รายละเอียด |
+| :-- | :--- | :--- | :--- |
+| **020** | `isSevereForeignLeak()` เขียนไว้เป็น circuit breaker สลับไป Gemini เมื่อคำอ่านหลุดภาษาต่างด้าว แต่**ไม่เคยถูกเรียกใช้เลย** | [`src/lib/ai/language.ts`](../src/lib/ai/language.ts) | คงไว้โดยตั้งใจ (ไม่ลบทิ้งเหมือน dead code ตัวอื่น) เพราะเป็นกลไกความปลอดภัยที่ตั้งใจทำ — ต้องต่อเข้ากับ `streamGroqReading` ให้ครบ |
+| **021** | `EntitlementGate` รับ props มาแล้วไม่ใช้เลย คืน `<>{children}</>` เฉย ๆ | [`src/components/entitlement/EntitlementGate.tsx`](../src/components/entitlement/EntitlementGate.tsx) | คอมเมนต์ในไฟล์อธิบายประวัติการออกแบบไว้ดี จึงยังไม่ลบ — ให้ตัดสินใจว่าจะคืนบทบาทให้มันหรือ inline children ไปเลย |
+| **022** | หน้าแผงคิวแม่หมอและหน้าสถานะคิว poll ทุก 4-5 วินาทีโดยไม่ดู `document.visibilityState` | [`readers/console`](../src/app/readers/console/page.tsx) · [`readers/queue/[id]`](../src/app/readers/queue/[id]/page.tsx) | แท็บที่เปิดค้างไว้เบื้องหลังจะยิง D1 ทั้งวัน — ควรหยุด poll เมื่อแท็บถูกซ่อน |
+| **023** | `MarketplaceReaderNavIcon` และหน้า `/readers/[id]` ยังไม่มี BreadcrumbList | [`src/app/readers/[id]/page.tsx`](../src/app/readers/[id]/page.tsx) | หน้าอื่นมีครบแล้ว (blog, spreads, cards) เหลือกลุ่ม readers |
 
 ---
 
@@ -112,25 +150,21 @@
 | **ทางแก้ (ถ้าจะเปิดจริง — AI ทำเองไม่ได้)** | 1. อัปเกรด `luminuy` เป็น **GitHub Pro** (~$4/เดือน) · 2. เปลี่ยน repo เป็น **public** |
 | **สรุป** | **ปล่อยไว้แบบนี้ได้** — automation ปัจจุบันครบวงจร ไม่ต้องเสียเงิน |
 
-### ISSUE-006 · GitHub Actions เตือน Node.js 20 กำลังเลิกรองรับ
+### ~~ISSUE-006 · GitHub Actions เตือน Node.js 20 กำลังเลิกรองรับ~~ — 🟢 **แก้แล้ว (2026-09-04)**
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการ** | ทุก workflow run ขึ้น annotation: `Node.js 20 is deprecated. ... actions/checkout@v4, actions/setup-node@v4` |
-| **ตรวจยืนยันล่าสุด** | 2026-08-31 — `@v4` ที่ `deploy.yml` (4 จุด), `pr.yml` (2 จุด), `auto-release.yml` (1 จุด) |
-| **ผลกระทบ** | ตอนนี้ยังทำงานได้ แต่จะพังเมื่อ GitHub เลิกรองรับจริง |
-| **ทางแก้** | อัปเป็น `actions/checkout@v5` + `actions/setup-node@v5` ให้ครบ **ทั้ง 3 ไฟล์** แล้วดู CI ผ่านครบ 24 ด่าน |
+| **การแก้ไข** | อัปเป็น `actions/checkout@v5` + `actions/setup-node@v5` + `actions/github-script@v8` ครบทั้ง 4 ไฟล์ (`pr.yml`, `deploy.yml`, `auto-release.yml`, `dependabot-automerge.yml`) |
+| **ที่ยังเหลือ** | `pnpm/action-setup@v4` · `softprops/action-gh-release@v2` · `dependabot/fetch-metadata@v2` ยังรันบน node20 — เป็น action ของบุคคลที่สาม รอต้นทางอัปเดตเอง เราบังคับไม่ได้ |
 
-### ISSUE-008 · Hydration mismatch ที่หน้าแรก — `stepDirectionRef` ถูกอ่านตอน SSR
+### ~~ISSUE-008 · Hydration mismatch ที่หน้าแรก~~ — 🟢 **แก้แล้ว (2026-09-04, INC-0075)**
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
-| **อาการ** | คอนโซลขึ้น `A tree hydrated but some attributes of the server rendered HTML didn't match` ที่ `<motion.div custom={stepDirectionRef.current}>` — SSR ให้ `translateX(40px)` แต่ client ให้ `translateX(-40px)` |
-| **ตรวจยืนยันล่าสุด** | 2026-09-03 — `src/app/page.tsx` (`custom={motionSafe ? stepDirectionRef.current : 0}` ที่ทั้ง 3 `motion.div` ของแต่ละขั้น) |
-| **ต้นเหตุ** | `useRef` ที่เก็บทิศทางการเปลี่ยนขั้น ถูกอ่านระหว่างเรนเดอร์ ค่าจึงต่างกันระหว่างเซิร์ฟเวอร์กับเบราว์เซอร์ |
-| **ผลกระทบ** | React ไม่ patch ให้ แต่ framer-motion เขียนทับด้วย animate ทันที **ผู้ใช้ไม่เห็นความผิดปกติ** — เป็นเสียงรบกวนในคอนโซล dev |
-| **ทางแก้** | ย้ายทิศทางไป `useState` แล้วอ่านหลัง mount หรือส่ง `custom={0}` ตอนเรนเดอร์แรกแล้วค่อยอัปเดตใน `useEffect` |
-| **หมายเหตุ** | **มีมาก่อน**งานปรับดีไซน์ (2026-09-03) ไม่ได้เกิดจาก Design System V2 |
+| **สาเหตุรากที่แท้จริง** | ไม่ใช่แค่ `stepDirectionRef` — `useReducedMotion()` ของ motion **คืน `null` ตอน SSR** แต่คืน `true`/`false` จริงบนเบราว์เซอร์ ผู้ใช้ที่เปิด prefers-reduced-motion จึงได้ HTML คนละแบบกับฝั่งเซิร์ฟเวอร์ · ซ้ำร้าย motion เขียนค่า `initial` ลงเป็น inline style ตั้งแต่ใน HTML ทำให้เนื้อหาหลักถูกส่งออกไปเป็น `opacity:0` (หน้า `/blog` ส่งการ์ดบทความ **ทั้ง 24 ใบ** ออกไปแบบมองไม่เห็น) |
+| **การแก้ไข** | ย้ายทิศทางไป `useState` · ใส่ `initial={false}` ให้ทุก `AnimatePresence` ที่ถูก SSR · เพิ่ม hook `useHasMounted()` ใน `src/lib/motion.ts` สำหรับ motion component ที่ไม่ได้อยู่ใน AnimatePresence |
+| **การพิสูจน์** | reproduce ได้จริงบนเบราว์เซอร์ที่เปิด Reduced Motion — ก่อนแก้ console แสดง diff `opacity:0 / translateX(-40px)` เทียบกับ `opacity:1 / none` · หลังแก้ console สะอาด 0 error และ `curl` ทุกหน้าหลักไม่พบ `opacity:0` ใน HTML ฝั่งเซิร์ฟเวอร์อีก |
+| 🛡️ **กฎถาวร** | ห้ามอ่านค่าที่ขึ้นกับเบราว์เซอร์ระหว่างเรนเดอร์ของคอมโพเนนต์ที่ถูก SSR · motion component ที่ถูก SSR ต้องเรนเดอร์แรกออกมาที่สถานะปลายทางเสมอ |
 
 ### ~~ISSUE-007 · Prisma ออกแบบ schema ไว้แล้วแต่ยังไม่ได้ต่อใช้จริง~~ — 🟢 **ปิดแล้ว (ตรวจ 2026-09-01)**
 

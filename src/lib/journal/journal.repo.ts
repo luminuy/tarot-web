@@ -171,11 +171,13 @@ export async function updateJournalOutcome(
   id: string,
   outcome: ReadingOutcome,
   note?: string
-): Promise<void> {
+): Promise<boolean> {
   const db = await getAppDB();
   const now = Date.now();
 
-  await db
+  // ⚠️ ต้องคืนผลว่าแตะแถวได้จริงไหม — ของเดิมคืน void เสมอ ปลายทางจึงตอบ success
+  // แม้จะไม่มีแถวไหนตรงเลย (เกิดขึ้นจริงเมื่อ id ฝั่งเครื่องกับฝั่งเซิร์ฟเวอร์ไม่ตรงกัน)
+  const res = await db
     .prepare(
       `UPDATE reading_journal
        SET outcome = ?, user_note = COALESCE(?, user_note), outcome_updated_at = ?
@@ -183,17 +185,21 @@ export async function updateJournalOutcome(
     )
     .bind(outcome, note ?? null, now, id, userId)
     .run();
+
+  return (res.meta?.changes ?? 0) > 0;
 }
 
 /**
  * ลบบันทึกการดูดวง 1 รายการ
  */
-export async function deleteJournalItem(userId: string, id: string): Promise<void> {
+export async function deleteJournalItem(userId: string, id: string): Promise<boolean> {
   const db = await getAppDB();
-  await db
+  const res = await db
     .prepare(`DELETE FROM reading_journal WHERE id = ? AND user_id = ?`)
     .bind(id, userId)
     .run();
+
+  return (res.meta?.changes ?? 0) > 0;
 }
 
 /**
