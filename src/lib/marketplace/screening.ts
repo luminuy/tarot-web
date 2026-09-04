@@ -239,26 +239,43 @@ export async function performAIScreening(input: PerformScreeningInput): Promise<
 /**
  * ดึงผลการคัดกรองด้วย Screening ID
  */
-export async function getAIScreeningById(id: string): Promise<AIScreeningRecord | null> {
+/**
+ * อ่านบทสรุป AI หลายรายการในคำสั่งเดียว (คืนเป็น Map ตาม id)
+ * มีไว้แทนการวนเรียก `getAIScreeningById()` ทีละใบ ซึ่งกลายเป็น N+1 query
+ * ที่แผงคิวของแม่หมอ (หน้านั้น poll ทุก 5 วินาที คิว 20 ใบ = 21 คำสั่งต่อรอบ)
+ */
+export async function getAIScreeningsByIds(ids: string[]): Promise<Map<string, AIScreeningRecord>> {
+  const unique = Array.from(new Set(ids.filter(Boolean)));
+  const out = new Map<string, AIScreeningRecord>();
+  if (unique.length === 0) return out;
+
   const db = await getAppDB();
-  const row = await db
-    .prepare("SELECT * FROM ai_screening WHERE id = ? LIMIT 1")
-    .bind(id)
-    .first<{
-      id: string;
-      ticket_id: string | null;
-      verdict: string;
-      category: string;
-      urgency: string;
-      in_scope: number;
-      brief: string;
-      suggested_spread: string;
-      flags: string;
-      created_at: number;
-    }>();
+  const placeholders = unique.map(() => "?").join(",");
+  const { results } = await db
+    .prepare(`SELECT * FROM ai_screening WHERE id IN (${placeholders})`)
+    .bind(...unique)
+    .all<RawScreeningRow>();
 
-  if (!row) return null;
+  for (const row of results || []) {
+    out.set(row.id, mapRowToScreening(row));
+  }
+  return out;
+}
 
+interface RawScreeningRow {
+  id: string;
+  ticket_id: string | null;
+  verdict: string;
+  category: string;
+  urgency: string;
+  in_scope: number;
+  brief: string;
+  suggested_spread: string;
+  flags: string;
+  created_at: number;
+}
+
+function mapRowToScreening(row: RawScreeningRow): AIScreeningRecord {
   let flags: string[] = [];
   try {
     flags = JSON.parse(row.flags || "[]");
@@ -278,4 +295,26 @@ export async function getAIScreeningById(id: string): Promise<AIScreeningRecord 
     flags,
     createdAt: row.created_at,
   };
+}
+
+export async function getAIScreeningById(id: string): Promise<AIScreeningRecord | null> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare("SELECT * FROM ai_screening WHERE id = ? LIMIT 1")
+    .bind(id)
+    .first<{
+      id: string;
+      ticket_id: string | null;
+      verdict: string;
+      category: string;
+      urgency: string;
+      in_scope: number;
+      brief: string;
+      suggested_spread: string;
+      flags: string;
+      created_at: number;
+    }>();
+
+  if (!row) return null;
+  return mapRowToScreening(row);
 }

@@ -23,7 +23,7 @@ import { recordEvent } from "@/lib/stats/record";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { type Reading, ReadingSchema } from "@/lib/schema/reading";
-import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
+import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
 
 /**
  * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)

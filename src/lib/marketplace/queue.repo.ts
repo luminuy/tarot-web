@@ -1,6 +1,7 @@
 import { getAppDB } from "@/lib/platform/db";
 import {
   getAIScreeningById,
+  getAIScreeningsByIds,
   performAIScreening,
   type AIScreeningRecord,
 } from "@/lib/marketplace/screening";
@@ -294,10 +295,12 @@ export async function listReaderQueueTickets(
 
   const tickets = (results || []).map(mapRowToTicket);
 
-  // Attach screening briefs
-  for (const t of tickets) {
-    if (t.aiScreenId) {
-      t.screening = await getAIScreeningById(t.aiScreenId);
+  // Attach screening briefs — อ่านครั้งเดียวทั้งชุด ไม่ใช่วนอ่านทีละใบ (N+1)
+  const screeningIds = tickets.map((t) => t.aiScreenId).filter((v): v is string => Boolean(v));
+  if (screeningIds.length > 0) {
+    const briefs = await getAIScreeningsByIds(screeningIds);
+    for (const t of tickets) {
+      if (t.aiScreenId) t.screening = briefs.get(t.aiScreenId) ?? null;
     }
   }
 

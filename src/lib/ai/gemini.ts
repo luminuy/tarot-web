@@ -3,7 +3,7 @@ import { parsePartialReading } from "@/lib/utils/partial-json";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { type Reading, ReadingSchema } from "@/lib/schema/reading";
-import type { ReadingEvent, UsageInfo } from "@/lib/ai/claude";
+import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
 
 import {
   hasForeignScript,

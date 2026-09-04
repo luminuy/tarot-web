@@ -634,7 +634,22 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   };
 
   // Step 4: Stream AI interpretation
+  /**
+   * ตัวยกเลิกสตรีมคำอ่านที่กำลังทำงานอยู่
+   * ถ้าผู้ใช้ออกจากหน้าไประหว่างที่แม่หมอกำลังอ่าน ต้องบอกเซิร์ฟเวอร์ให้หยุดจริง ๆ
+   * ไม่งั้นฝั่งเซิร์ฟเวอร์จะดูดคำตอบจากโมเดลต่อจนจบ = จ่ายค่า token ให้คำอ่านที่ไม่มีใครเห็น
+   */
+  const readStreamAbortRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    return () => readStreamAbortRef.current?.abort();
+  }, []);
+
   const startAIStreaming = async (id: string, cards: DrawnSlotCard[], currentToken?: string | null) => {
+    // ยกเลิกรอบก่อนหน้าเสมอ — กันกด "โหลดใหม่อีกครั้ง" รัว ๆ แล้วมีสองสตรีมวิ่งพร้อมกัน
+    readStreamAbortRef.current?.abort();
+    const abortController = new AbortController();
+    readStreamAbortRef.current = abortController;
+
     setIsStreaming(true);
     setReadingResult({});
     setErrorMsg(null);
@@ -643,6 +658,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     try {
       const res = await fetch(`/api/reading/${id}/read`, {
         method: "POST",
+        signal: abortController.signal,
         headers: {
           "Content-Type": "application/json",
           "x-reading-token": currentToken || sessionToken || "",
@@ -757,6 +773,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         setErrorMsg("คำทำนายส่งมาไม่ครบสักนิดค่ะ กรุณากดโหลดใหม่อีกครั้ง แม่หมอพร้อมเปิดไพ่ให้ทันที");
       }
     } catch (err: any) {
+      // ผู้ใช้ออกจากหน้าไปเอง / เริ่มรอบใหม่ทับ — ไม่ใช่ความผิดพลาด ไม่ต้องขึ้นข้อความ error
+      if (err?.name === "AbortError") return;
       console.error("Stream reading failed", err);
       setIsStreaming(false);
       setErrorMsg(err.message || "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กรุณากดโหลดใหม่อีกครั้ง");

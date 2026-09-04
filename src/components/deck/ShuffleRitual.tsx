@@ -14,15 +14,27 @@ interface ShuffleRitualProps {
 export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spreadName, onShuffleComplete }) => {
   const [shuffling, setShuffling] = useState(false);
   const [shufflePhase, setShufflePhase] = useState<"idle" | "split" | "riffle" | "bridge" | "gather">("idle");
-  const [progress, setProgress] = useState(0);
   const entropyRef = useRef<number[]>([]);
   const rafRef = useRef<number | null>(null);
+  const finishTimerRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
+  /**
+   * ⚠️ ความคืบหน้าการสับไพ่เขียนลง DOM ตรง ๆ ไม่เก็บเป็น React state
+   * ของเดิมเรียก setProgress ทุกเฟรม = React reconcile ทั้งเวทีสับไพ่
+   * (รวมลูก motion ทุกตัว) ราว 100 รอบภายใน 2.2 วินาที แย่งเวลา main thread
+   * กับอนิเมชันที่กำลังเล่นอยู่พอดี · เหลือ state ไว้แค่ "เฟส" ซึ่งเปลี่ยนแค่ 4 ครั้ง
+   */
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const progressTextRef = useRef<HTMLSpanElement>(null);
 
   // Cleanup rAF on unmount
   useEffect(() => {
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      // ⚠️ ต้องเคลียร์ตัวจับเวลา 420ms ท้ายพิธีด้วย ของเดิมเคลียร์แต่ rAF
+      // ถ้า unmount ในช่วงนั้น onShuffleComplete จะยิงบนคอมโพเนนต์ที่ตายแล้ว
+      // แล้วดันขั้นตอนพิธีกรรมเดินหน้าเองโดยที่ผู้ใช้ออกจากหน้าไปแล้ว
+      if (finishTimerRef.current !== null) window.clearTimeout(finishTimerRef.current);
     };
   }, []);
 
@@ -40,7 +52,9 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
     if (startTimeRef.current === 0) startTimeRef.current = timestamp;
     const elapsed = timestamp - startTimeRef.current;
     const cur = Math.min(100, (elapsed / SHUFFLE_DURATION_MS) * 100);
-    setProgress(Math.round(cur));
+    // scaleX เป็น transform (composited) ไม่ทำให้เกิด layout ซ้ำเหมือนการเปลี่ยน width
+    if (progressBarRef.current) progressBarRef.current.style.transform = `scaleX(${cur / 100})`;
+    if (progressTextRef.current) progressTextRef.current.textContent = String(Math.round(cur));
 
     // Phase transitions
     if (cur >= 10 && cur < 20) setShufflePhase("split");
@@ -52,7 +66,8 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
       rafRef.current = requestAnimationFrame(shuffleTick);
     } else {
       rafRef.current = null;
-      setTimeout(() => {
+      finishTimerRef.current = window.setTimeout(() => {
+        finishTimerRef.current = null;
         const rawSeed = entropyRef.current.join(":") + ":" + Date.now();
         onShuffleComplete(rawSeed);
       }, 420);
@@ -243,15 +258,20 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
         ) : (
           <div className="space-y-3">
             <div className="w-full h-2.5 bg-[#F3EDE2] rounded-full overflow-hidden border border-[#D9C8AC]">
-              <motion.div
-                className="h-full bg-gradient-to-r from-[#8F5C1A] via-[#6F5B4A] to-[#8F5C1A]"
-                style={{ width: `${progress}%` }}
+              <div
+                ref={progressBarRef}
+                className="h-full w-full origin-left bg-gradient-to-r from-[#8F5C1A] via-[#6F5B4A] to-[#8F5C1A]"
+                style={{ transform: "scaleX(0)" }}
               />
             </div>
             <span className="text-xs text-[#2E211A] font-medium flex items-center justify-center gap-1.5 animate-pulse font-serif-th">
               <span className="w-2 h-2 rounded-full bg-[#8F5C1A]" />
               {shufflePhase === "split" && "กำลังแบ่งสำรับไพ่..."}
-              {shufflePhase === "riffle" && `กำลังสับไพ่ทั้ง 78 ใบ (${progress}%)`}
+              {shufflePhase === "riffle" && (
+                <>
+                  กำลังสับไพ่ทั้ง 78 ใบ (<span ref={progressTextRef}>0</span>%)
+                </>
+              )}
               {shufflePhase === "bridge" && "กำลังรวมสำรับไพ่เข้าด้วยกัน..."}
               {shufflePhase === "gather" && "สับไพ่เรียบร้อย กำลังคลี่ไพ่ให้คุณเลือก..."}
             </span>

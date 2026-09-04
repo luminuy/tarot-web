@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Persona } from "@/data/personas";
 import { CardImage } from "@/components/card/CardImage";
@@ -69,7 +69,30 @@ function renderFormattedText(text: string) {
  * - ตรวจจับการวิเคราะห์ไพ่รายใบ และแยกออกเป็น "Tarot Insight Card" มีกรอบทองคำ อ่านง่าย สบายตา
  * - ตรวจจับข้อแนะนำลำดับขั้นตอน (1. 2. 3.) และแยกเป็นการ์ดทีละข้อ
  */
-const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ text, isError }) => {
+/**
+ * ⚠️ ต้องเป็น React.memo + useMemo
+ * ช่องพิมพ์ข้อความ (`input`) เป็น state ของ FollowUpChat ตัวเดียวกับที่เรนเดอร์รายการข้อความ
+ * ทุกตัวอักษรที่ผู้ใช้พิมพ์จึงทำให้คอมโพเนนต์นี้ถูกเรียกใหม่ทุกข้อความในบทสนทนา
+ * แล้วรัน regex แทนที่ 4 ชุด + split + regex รายย่อหน้าอีกใหม่หมด
+ * คำตอบแม่หมอภาษาไทยยาวหลายพันตัวอักษร พอคุยไปหลายรอบจะรู้สึกได้ว่าพิมพ์แล้วหน่วง
+ */
+const ChatMessageRenderer = React.memo<{ text: string; isError?: boolean }>(({ text, isError }) => {
+  // ปรับการตัดข้อความ:
+  // 1. แยกไพ่ที่ถูกเขียนต่อกันด้วยเครื่องหมาย - หรือ ✦ ในบรรทัดเดียว
+  // 2. แยกลำดับขั้นตอน 1. 2. 3. ออกเป็นข้อๆ
+  const paragraphs = useMemo<string[]>(() => {
+    if (isError) return [];
+    return text
+      .replace(/\s+[-–—]\s*([^\n:]+):/g, "\n\n• **$1:**")
+      .replace(/✦\s*([^\n:]+):/g, "\n\n• **$1:**")
+      .replace(/([^\n])\s+(\d+\.\s+\*\*)/g, "$1\n\n$2")
+      .replace(/([^\n])\s+(\d+\.\s+[ก-๙a-zA-Z])/g, "$1\n\n$2")
+      .trim()
+      .split(/\n\s*\n+/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+  }, [text, isError]);
+
   if (isError) {
     return (
       <div className="rounded-lg rounded-tl-xs bg-[#FCEEEA] border border-[#D9C8AC] p-3.5 sm:p-4 text-[#A6392C] font-serif-th text-xs sm:text-sm leading-relaxed ">
@@ -77,22 +100,6 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
       </div>
     );
   }
-
-  // ปรับการตัดข้อความ:
-  // 1. แยกไพ่ที่ถูกเขียนต่อกันด้วยเครื่องหมาย - หรือ ✦ ในบรรทัดเดียว
-  // 2. แยกลำดับขั้นตอน 1. 2. 3. ออกเป็นข้อๆ
-  const preProcessed = text
-    .replace(/\s+[-–—]\s*([^\n:]+):/g, "\n\n• **$1:**")
-    .replace(/✦\s*([^\n:]+):/g, "\n\n• **$1:**")
-    .replace(/([^\n])\s+(\d+\.\s+\*\*)/g, "$1\n\n$2")
-    .replace(/([^\n])\s+(\d+\.\s+[ก-๙a-zA-Z])/g, "$1\n\n$2")
-    .trim();
-
-  // แยกตามการเว้นบรรทัด
-  const paragraphs = preProcessed
-    .split(/\n\s*\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
 
   return (
     <div className="space-y-2.5 w-full">
@@ -175,7 +182,8 @@ const ChatMessageRenderer: React.FC<{ text: string; isError?: boolean }> = ({ te
       })}
     </div>
   );
-};
+});
+ChatMessageRenderer.displayName = "ChatMessageRenderer";
 
 export const FollowUpChat: React.FC<FollowUpChatProps> = ({
   readingId,

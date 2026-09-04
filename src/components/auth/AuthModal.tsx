@@ -261,7 +261,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition-all duration-300 shadow-xs">
               <img
                 src="/logo.webp"
-                alt="Seer Tarot Brand Logo"
+                alt="SeerTarot"
                 width={72}
                 height={72}
                 className="w-full h-full object-cover"
