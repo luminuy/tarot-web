@@ -24,14 +24,16 @@ const REMASTER_CACHE_DIR = path.join(process.cwd(), "scratch", "remaster_temp");
 /** ขนาดที่ต้องสร้าง — ต้องตรงกับ CARD_IMAGE_VARIANTS ใน src/lib/tarot/card-image.ts */
 const VARIANTS = [
   // w64 — ภาพพรีวิวผังขนาดจิ๋ว (18-32px) เช่น เซลติกครอส, ผัง 12 เดือน, ผังจักระ, ไอคอน Footer
-  // ขนาดไฟล์เพียง ~2.5–3KB ช่วยลด LCP และ Payload หน้าแรกบนมือถือลง 95%
-  { dir: "w64", width: 64, quality: 84 },
-  { dir: "w128", width: 128, quality: 86 },
-  { dir: "w256", width: 256, quality: 88 },
-  { dir: "w512", width: 512, quality: 92 },
-  // w768 — ภาพใบใหญ่บนจอ 2x–3x (ผังวางไพ่, พรีวิว, สารานุกรม) ให้คมไม่เบลอ
-  // ต้นฉบับกว้าง ~825px จึงยังเป็นการ "ย่อ" จริง (ไม่อัปสเกล) — คมกว่า w512 ชัดบนมือถือ
-  { dir: "w768", width: 768, quality: 92 },
+  // ขนาดไฟล์เพียง ~1.8–2.2KB ช่วยลด LCP และ Payload หน้าแรกบนมือถือลง 95%
+  { dir: "w64", width: 64, quality: 72 },
+  // w128 — ขนาดสำหรับพรีวิวการ์ด 36-68px บีบอัดระดับ PageSpeed 100 (~5KB แทน 13KB เดิม)
+  { dir: "w128", width: 128, quality: 75 },
+  // w256 — สำหรับการ์ดขนาดกลาง 80-128px (~10KB)
+  { dir: "w256", width: 256, quality: 78 },
+  // w512 — สำหรับผังวางไพ่, สารานุกรมไพ่ 78 ใบ (~22KB)
+  { dir: "w512", width: 512, quality: 82 },
+  // w768 — ภาพใบใหญ่บนจอ 2x–3x (ผังวางไพ่, พรีวิว, สารานุกรม) ให้คมชัดไม่เบลอ (~38KB)
+  { dir: "w768", width: 768, quality: 85 },
 ] as const;
 
 function ensureCwebp(): void {
@@ -92,8 +94,10 @@ function main(): void {
       const inPath = hasRemaster && fs.existsSync(remasteredInPath) ? remasteredInPath : rawInPath;
       const outPath = path.join(outDir, file.replace(/\.jpg$/i, ".webp"));
 
-      // ข้ามถ้าไฟล์ย่อใหม่กว่าต้นฉบับอยู่แล้ว (idempotent — รันซ้ำได้ไม่เปลืองเวลา)
+      // ข้ามถ้าไฟล์ย่อใหม่กว่าต้นฉบับอยู่แล้ว (idempotent — รันซ้ำได้ไม่เปลืองเวลา) เว้นแต่สั่ง --force
+      const forceRebuild = process.argv.includes("--force");
       if (
+        !forceRebuild &&
         fs.existsSync(outPath) &&
         fs.statSync(outPath).mtimeMs >= fs.statSync(rawInPath).mtimeMs &&
         (!hasRemaster || fs.statSync(outPath).mtimeMs >= fs.statSync(remasteredInPath).mtimeMs)

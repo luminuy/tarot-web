@@ -16,6 +16,7 @@ interface MiniCardProps {
   rotate?: number;
   sizes?: string;
   loading?: "lazy" | "eager";
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 export const MiniRwsCard: React.FC<MiniCardProps> = ({
@@ -26,6 +27,7 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
   rotate = 0,
   sizes,
   loading = "lazy",
+  fetchPriority,
 }) => {
   const resolvedSizes =
     sizes ||
@@ -58,6 +60,7 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
         className="w-full h-full object-cover object-center tarot-hd-card-image"
         sizes={resolvedSizes}
         loading={loading}
+        fetchPriority={fetchPriority}
       />
     </div>
   );
@@ -135,6 +138,7 @@ export const DailySpreadArt: React.FC<{ className?: string }> = ({ className = "
       className="w-16 h-[108px] sm:w-17 sm:h-[115px]"
       highlight
       loading="eager"
+      fetchPriority="high"
     />
   </div>
 );
@@ -188,6 +192,8 @@ export const ThreeCardSpreadArt: React.FC<{ className?: string }> = ({ className
       borderColor="#D9C8AC"
       className="w-13 h-[88px] sm:w-14 sm:h-[95px] z-10"
       highlight
+      loading="eager"
+      fetchPriority="high"
     />
     <MiniRwsCard src="/cards/major-21.jpg" className="w-11 h-[75px] sm:w-12 sm:h-[82px] z-10 opacity-90" />
   </div>
