@@ -93,7 +93,10 @@ npm run agent:lock -- --agent <ชื่อคุณ> --domain <หมวด> --
 npm run repo:verify
 
 # 5. commit (ถ้าเป็น fix ต้องมี --cause และ --prevention)
-npm run commit -- --agent <ชื่อคุณ> --type <feat|fix|perf|refactor|docs> --scope <หมวด> --msg "..."
+#    ถ้ามีเอเจนต์อื่นทำงานพร้อมกันในโฟลเดอร์เดียวกัน commit จะ "ไม่" ยอม git add . ให้
+#    → ต้องระบุไฟล์ของคุณเอง --files "src/a.ts,src/b.ts" (หรือ agent:lock ไว้ก่อนแล้วมันอ่านจาก lock เอง)
+#    รันเดี่ยวไม่มี lock ของใคร → stage ทั้งหมดตามเดิม · ยืนยันรันเดี่ยวด้วย --all
+npm run commit -- --agent <ชื่อคุณ> --type <feat|fix|perf|refactor|docs> --scope <หมวด> --msg "..." --files "<ไฟล์ของคุณ>"
 
 # 6. ปลดล็อคและซิงก์บันทึกงาน
 npm run agent:unlock -- --agent <ชื่อคุณ>

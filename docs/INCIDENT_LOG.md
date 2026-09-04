@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0069 · 2026-09-04 08:38 · 🟠 High · commit stage เฉพาะไฟล์ของตัวเอง ไม่กวาดงานเอเจนต์อื่นเข้า PR
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | PR ของเอเจนต์หนึ่งมีไฟล์ที่เอเจนต์อื่นกำลังแก้ค้างในโฟลเดอร์เดียวกันติดไปด้วย งานอีกฝั่งเลยหายหรือกลายเป็น diff ปนกันใน PR เดียว |
+| **สาเหตุราก** | scripts/git-author-guard.ts เรียก git add . ก่อน commit เสมอ ซึ่ง stage ทุกไฟล์ใน working tree รวมงานที่ยังไม่เสร็จของเอเจนต์อื่นที่รันในโฟลเดอร์เดียวกัน ไม่มีการจำกัดขอบเขตว่าไฟล์ไหนเป็นของ commit นี้ |
+| **การแก้ไข** | แทน git add . ด้วย stageForCommit() ที่หาชุดไฟล์ของ commit นี้จาก --files หรือ lock ของเอเจนต์เองใน .ai-locks.json แล้ว git add -- เฉพาะไฟล์นั้น + ไฟล์บันทึกอัตโนมัติ (WORK_LOG/INCIDENT_LOG ที่ merge=union) · ถ้าไม่รู้ขอบเขตและมีเอเจนต์อื่นถือ lock อยู่ให้ exit 1 พร้อมบอกทางแก้ 4 ทาง · ไม่มี lock ของใครเลยหรือใส่ --all ถึงจะ git add -A · export readLocks/cleanExpired/ownedAndForeignLocks จาก agent-guard และครอบ CLI ด้วย isRunDirectly กัน side-effect ตอน import |
+| **🛡️ กฎป้องกันถาวร** | **npm run commit ต้อง stage เฉพาะไฟล์ที่เป็นเจ้าของ (จาก --files หรือ .ai-locks.json ของเอเจนต์เอง) ถ้าไม่รู้ขอบเขตและมีเอเจนต์อื่นถือ lock อยู่ให้บล็อกทันที ห้าม git add . เงียบ ๆ · stage ทั้งหมดทำได้เฉพาะตอนไม่มี lock ของใครหรือใส่ --all** |
+| **การพิสูจน์ว่าแก้ได้จริง** | unit test ownedAndForeignLocks 4 เคสผ่าน · typecheck 0 · repo:verify 23/23 · dogfood commit นี้ด้วย --files stage เฉพาะ 3 ไฟล์ที่ระบุ + bookkeeping ไม่ติด pnpm-lock.yaml ที่ค้างอยู่ |
+| **บันทึกโดย** | Claude Sonnet 5 · branch `claude/unsolved-problem-19f3b5` · commit `91a4f30` |
+
+
 ### INC-0068 · 2026-09-04 08:04 · 🟠 High · ปิดช่องล้มเงียบของระบบสิทธิ์ + ประกาศนโยบายเมื่อ D1 ล่มให้ชัด
 
 | หัวข้อ | รายละเอียด |
