@@ -234,15 +234,6 @@ export function QuickFortunePicker({
     <div className="space-y-5 sm:space-y-6 w-full">
       {/* ส่วนหัวแนะนำการทำนายด่วน สไตล์วิหารพยากรณ์ */}
       <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
-        {/* สัญลักษณ์ดวงดาวประดับ */}
-        <div className="flex items-center justify-center gap-2 text-[#A58A5C]/60 text-xs select-none">
-          <span>✦</span>
-          <span className="w-8 sm:w-10 h-px bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent" />
-          <span>✧</span>
-          <span className="w-8 sm:w-10 h-px bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent" />
-          <span>✦</span>
-        </div>
-
         {/* ป้ายกล่องทองคำเปลว */}
         <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full text-[11px] font-serif-th font-semibold tracking-wide bg-[#FBF8F3] border border-[#D5CEC2] text-[#8F5C1A] shadow-xs">
           <span>✨</span>
@@ -253,9 +244,6 @@ export function QuickFortunePicker({
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
           เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้
         </h2>
-        <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
-          แตะเลือก 1 หัวข้อเพื่อเปิดไพ่ทาโรต์ 1909 ทันที พร้อมระบบสลับไพ่โปร่งใสตรวจสอบได้ Provably-Fair SHA-256
-        </p>
       </div>
 
       {/* การ์ด 4 หัวข้อยอดนิยม (Mobile: Horizontal Swipe / Desktop: 4-Column Grid พอเหมาะกับเว็บ) */}

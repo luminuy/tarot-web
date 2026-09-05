@@ -36,6 +36,16 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ปรับปรุงส่วนหัวทำนายด่วนให้คลีน มินิมอล นำสัญลักษณ์ดวงดาวและข้อความเทคนิคออก — โดย Antigravity AI
+
+- **ปรับปรุง `src/components/reading/QuickFortunePicker.tsx` ตามคำขอผู้ใช้**:
+  - **Clean & Focused Header**: นำสัญลักษณ์ดวงดาวประดับ (`✦ ── ✧ ── ✦`) และข้อความคำอธิบายยาวที่ซ้ำซ้อน (`แตะเลือก 1 หัวข้อ... Provably-Fair SHA-256`) ออกทั้งหมด
+  - **Visual Clarity**: ช่วยให้สายตาโฟกัสไปที่ป้ายกล่องทองคำเปลวและหัวข้อหลักทันที และนำการ์ด 4 ใบด้านล่างลอยขึ้นมาอยู่ในระยะสายตา (Above the fold) ได้เร็วขึ้น มินิมอล สบายตา และดูพรีเมียมยิ่งขึ้น
+- **ผลการทดสอบ**:
+  - TypeScript Typecheck: `0 errors`
+  - QA Test (`scripts/qa/test-quick-fortune.ts`): `45/45 ผ่านสมบูรณ์`
+  - Verification Suite (`npm run repo:verify`): `27/27 ด่านผ่านสมบูรณ์ 100%`
+
 ### 🗓️ 2026-09-05: ปรับขนาดและเลย์เอาต์การ์ดทำนายด่วนให้สมส่วน พอดีกับคอนเทนเนอร์ของเว็บ — โดย Antigravity AI
 
 - **ปรับปรุง `src/components/reading/QuickFortunePicker.tsx` ให้เข้ากับภาพรวมของวิหารพยากรณ์ตามคำขอผู้ใช้และภาพจริง**:
