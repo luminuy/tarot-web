@@ -223,6 +223,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           cards: resolvedCards as import("@/data/cards").TarotCard[],
           safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
           pastReading,
+          lang: record.lang || "th",
         };
 
         let activeProvider = "gemini";

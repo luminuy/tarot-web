@@ -11,7 +11,7 @@ import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
 import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
 import { analyzeSpatialGazeDialogue } from "@/lib/ai/gaze";
-import { checkQuestion, CRISIS_MESSAGE } from "@/lib/safety/guardrails";
+import { checkQuestion, getCrisisMessage } from "@/lib/safety/guardrails";
 import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
@@ -21,6 +21,7 @@ export const runtime = "nodejs";
 
 const BodySchema = z.object({
   message: z.string().min(1, "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม").max(2000, "คำถามยาวเกิน 2,000 ตัวอักษร"),
+  lang: z.enum(["th", "en"]).optional(),
   history: z
     .array(
       z.object({
@@ -55,19 +56,37 @@ function generateContextualTarotChatReply(params: {
   history?: Array<{ sender: "user" | "bot"; text: string }>;
   personaId: string;
   record: Partial<ReadingRecord>;
+  lang?: "th" | "en";
 }): string {
-  const { userQuestion, history = [], personaId, record } = params;
+  const { userQuestion, history = [], personaId, record, lang = "th" } = params;
 
   // Crisis / self-harm safety check for offline fallback
-  const safety = checkQuestion(userQuestion);
+  const safety = checkQuestion(userQuestion, lang);
   if (safety.block) {
-    return safety.message || "หากคุณกำลังเผชิญช่วงเวลาที่ยากลำบาก สายด่วนสุขภาพจิต 1323 พร้อมรับฟังเสมอค่ะ";
+    return safety.message || (lang === "en" ? "If you or someone you know is going through a tough time, please call or text 988 to reach the Suicide & Crisis Lifeline." : "หากคุณกำลังเผชิญช่วงเวลาที่ยากลำบาก สายด่วนสุขภาพจิต 1323 พร้อมรับฟังเสมอค่ะ");
   }
 
   const cards = (record.drawn?.map((d) => cardByIndex(d.cardIndex)) || []).filter(
     (c): c is import("@/data/cards").TarotCard => !!c
   );
   const primaryCard = cards[0];
+
+  if (lang === "en") {
+    const cardName = primaryCard?.nameEn || "primary card";
+    if (personaId === "playful") {
+      return `Hey! Looking at ${cardName}, don't sweat the small stuff right now. Take a deep breath, trust your intuition, and focus on what brings you joy today! ✨`;
+    }
+    if (personaId === "master") {
+      return `Regarding your inquiry through ${cardName}: Strategic discernment is vital here. Separate emotional impulses from tangible facts, and take clear, decisive action over the next 48 hours.`;
+    }
+    if (personaId === "direct") {
+      return `Here's the honest truth with ${cardName}: Stop overanalyzing and take decisive action. Face reality directly, set firm boundaries, and take ownership of your path forward.`;
+    }
+    if (personaId === "mystic") {
+      return `The sacred energies of ${cardName} remind you that true clarity emerges in quiet stillness. Release external noise and trust the profound wisdom awakening within your soul.`;
+    }
+    return `Looking at the energy of ${cardName}, be gentle with yourself as you navigate this. Take it one grounded step at a time, trust your resilience, and know that clarity is steadily unfolding.`;
+  }
 
   const q = userQuestion.toLowerCase();
   const isDirect = personaId === "direct";
@@ -222,11 +241,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const userQuestion = parsed.data.message;
     const history = parsed.data.history || [];
     const clientSnapshot = parsed.data.readingSnapshot;
+    const initialLang: "th" | "en" = parsed.data.lang || "th";
 
     recordEvent("chat_message");
 
-    // P0-4 Guard: Screen userQuestion for crisis / self-harm signals (Golden Rule 6 & Hotline 1323)
-    const safetyVerdict = checkQuestion(userQuestion);
+    // P0-4 Guard: Screen userQuestion for crisis / self-harm signals (Golden Rule 6 & Hotline 1323 / 988)
+    const safetyVerdict = checkQuestion(userQuestion, initialLang);
     if (safetyVerdict.block) {
       recordEvents(["chat_blocked", `safety_flag:${safetyVerdict.flag}`]);
       return NextResponse.json({
@@ -239,7 +259,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // ชั้น 3: ตัวจำแนกด้วย Workers AI สำหรับสัญญาณวิกฤตแบบอ้อม (fail-open)
     if (await assessCrisisRisk(userQuestion)) {
       recordEvents(["chat_blocked", "safety_flag:crisis_ai"]);
-      return NextResponse.json({ reply: CRISIS_MESSAGE, blocked: true, crisisCard: true });
+      return NextResponse.json({ reply: getCrisisMessage(initialLang), blocked: true, crisisCard: true });
     }
 
     // Resilient server store resolution with session token and client snapshot fallback (Edge Failover Safe)
@@ -288,12 +308,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (!record || !record.drawn || record.drawn.length === 0) {
       return NextResponse.json(
         {
-          error: "ไม่พบสำรับไพ่ที่เปิดไว้ในรอบนี้ กรุณารีเฟรชหน้าเว็บเพื่อเชื่อมต่อกับสำรับไพ่ของคุณอีกครั้ง",
+          error: initialLang === "en" ? "Reading deck not found for this session. Please refresh to reconnect." : "ไม่พบสำรับไพ่ที่เปิดไว้ในรอบนี้ กรุณารีเฟรชหน้าเว็บเพื่อเชื่อมต่อกับสำรับไพ่ของคุณอีกครั้ง",
           reason: "reading_not_found",
         },
         { status: 404 },
       );
     }
+
+    const activeLang: "th" | "en" = parsed.data.lang || record.lang || initialLang;
+    const isEnglish = activeLang === "en";
 
     const personaId = record.personaId || "warm";
     const spread = getSpread(record.spreadId || "single");
@@ -304,7 +327,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         if (!card) return null;
         const pos = spread?.positions[d.order];
         const lore = formatCardLoreForPrompt(card.id);
-        const cardHeader = `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"} | ธาตุ: ${card.element}`;
+        const cardHeader = isEnglish
+          ? `${d.order + 1}. Position "${pos?.nameEn || pos?.nameTh || d.order}": Card ${card.nameEn} (${card.nameTh}) - ${d.isReversed ? "Reversed" : "Upright"} | Element: ${card.element}`
+          : `${d.order + 1}. ตำแหน่ง "${pos?.nameTh || d.order}": ไพ่ ${card.nameTh} (${card.nameEn}) - ${d.isReversed ? "หัวกลับ" : "หัวตั้ง"} | ธาตุ: ${card.element}`;
         return lore ? `${cardHeader}\n   ${lore}` : cardHeader;
       })
       .filter((line): line is string => !!line);
@@ -315,10 +340,40 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const gazeDialogue = analyzeSpatialGazeDialogue(rawCards);
     const questionDiagnosis = diagnoseQuestionEnergy(userQuestion);
 
-    const systemInstruction = `${buildSystemPrompt(personaId, {
-      systemCore: resolveSystemCore(overrideDoc),
-      persona: resolvePersona(overrideDoc, personaId),
-    })}
+    const systemInstruction = isEnglish
+      ? `${buildSystemPrompt(personaId, {
+          persona: resolvePersona(overrideDoc, personaId),
+          lang: "en",
+        })}
+
+## Master Tarot Consultation Dialogue (1-on-1 Private Session)
+The seeker just drew these cards with you:
+• Initial Question: "${record.question || "Life Path & Guidance"}"
+• Spread: "${spread?.nameEn || spread?.nameTh || "General"}"
+• Drawn Cards:
+${cards.join("\n")}
+
+• Previous Reading Summary: "${record.result?.summary || "Energy is moving towards a positive resolution."}"
+${gazeDialogue.dialogueNarrative ? `\n• Visual Card Dialogue:\n${gazeDialogue.dialogueNarrative}` : ""}
+
+## Consultation Guidelines (Authentic American English Reader)
+1. **Persona Consistency**: Embody the chosen tarot reader persona with warmth, psychological depth, and intuitive wisdom. Speak naturally like a trusted mentor or sister in a private sanctum.
+2. **Deep Card Dialogue**: Directly connect every insight to the specific cards drawn. Never give generic horoscopic statements.
+3. **Intent-Driven Guidance**:
+   - If asking for solutions/action: Provide practical, step-by-step guidance executable within 24-48 hours.
+   - If asking about relationships: Offer empathetic psychological insight and healthy communication boundaries.
+   - If asking about timing: Frame cyclical timing without fatalistic determinism.
+   - If expressing anxiety/fear: Ground their emotional state and offer constructive mindfulness.
+4. **Natural Chat Rhythm & Spacing**:
+   - Use double line breaks between paragraphs for mobile readability.
+   - When referencing cards, place each card on a new line with bold titles:
+     • **Heart of the Matter (9 of Swords):** Insight...
+   - 3-4 concise conversational beats: greeting/direct answer, card connection, practical empowerment, and an open caring follow-up question.`
+      : `${buildSystemPrompt(personaId, {
+          systemCore: resolveSystemCore(overrideDoc),
+          persona: resolvePersona(overrideDoc, personaId),
+          lang: "th",
+        })}
 
 ## บริบทการสนทนาส่วนตัวแบบ 1-on-1 (Master Tarot Consultation Dialogue)
 ผู้ถามเพิ่งเปิดไพ่ชุดนี้กับคุณ:
@@ -511,6 +566,7 @@ ${questionDiagnosis.promptDirective}
       history,
       personaId: record.personaId || "warm",
       record,
+      lang: activeLang,
     });
 
     return NextResponse.json({

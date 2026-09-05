@@ -16,6 +16,9 @@ export interface ElementalBreakdown {
   dominantTitleTh: string;
   dominantInsightTh: string;
   balancingAdviceTh: string;
+  dominantTitleEn?: string;
+  dominantInsightEn?: string;
+  balancingAdviceEn?: string;
 }
 
 export function calculateElementalBalance(cards: TarotCard[], drawn?: DrawnCard[]): ElementalBreakdown {
@@ -33,6 +36,9 @@ export function calculateElementalBalance(cards: TarotCard[], drawn?: DrawnCard[
       dominantTitleTh: "พลังงาน 4 ธาตุสมดุล",
       dominantInsightTh: "ธาตุทั้งสี่อยู่ในสภาวะกลมกลืน ไร้แรงกดดันด้านใดด้านหนึ่ง",
       balancingAdviceTh: "รักษาความสงบและมุ่งเน้นการลงมือทำตามเป้าหมายต่อไป",
+      dominantTitleEn: "Elemental Balance Harmony",
+      dominantInsightEn: "All four elements rest in fluid equilibrium with no excessive elemental pressure.",
+      balancingAdviceEn: "Maintain inner composure and sustain grounded momentum toward your aspirations.",
     };
   }
 
@@ -61,6 +67,9 @@ export function calculateElementalBalance(cards: TarotCard[], drawn?: DrawnCard[
   let dominantTitleTh = "พลังงาน 4 ธาตุสมดุล";
   let dominantInsightTh = "ธาตุทั้งสี่ทำงานสอดประสานกันอย่างยอดเยี่ยม มีทั้งความคิด อารมณ์ แพชชัน และความมั่นคง";
   let balancingAdviceTh = "เดินหน้าตามแผนการที่ตั้งไว้ ทุกมิติในชีวิตพร้อมรองรับการเติบโต";
+  let dominantTitleEn = "Elemental Balance Harmony";
+  let dominantInsightEn = "All four elemental currents weave together harmoniously—aligning intellect, emotional depth, creative will, and tangible foundation.";
+  let balancingAdviceEn = "Proceed along your deliberate course; all dimensions of your life are primed to support sustainable expansion.";
 
   if (!isBalanced) {
     if (fire === maxVal) {
@@ -68,21 +77,33 @@ export function calculateElementalBalance(cards: TarotCard[], drawn?: DrawnCard[
       dominantTitleTh = "พลังงานธาตุไฟโดดเด่น (Fire Passion & Drive)";
       dominantInsightTh = "ช่วงนี้มีแรงขับเคลื่อนสูง กระตือรือร้น อยากสร้างสรรค์ หรือมีการเปลี่ยนแปลงที่รวดเร็ว";
       balancingAdviceTh = "เพิ่มพลังธาตุน้ำ (ความใจเย็น/การฟังผู้อื่น) และธาตุดิน (การวางแผนรอบคอบ) เพื่อป้องกันอาการ Burnout หรือความใจร้อน";
+      dominantTitleEn = "Dominant Fire Current (Passion & Will)";
+      dominantInsightEn = "Dynamic creative momentum, ambition, and swift transformational currents are currently foregrounded.";
+      balancingAdviceEn = "Cultivate water (empathetic listening and stillness) and earth (methodical pacing) to guard against burnout and impulsivity.";
     } else if (water === maxVal) {
       dominantElement = "น้ำ";
       dominantTitleTh = "พลังงานธาตุน้ำโดดเด่น (Water Emotion & Intuition)";
       dominantInsightTh = "หัวใจและสัญชาตญาณกำลังนำทาง มีความรู้สึกและอารมณ์ที่ลึกซึ้งต่อสถานการณ์นี้";
       balancingAdviceTh = "เพิ่มพลังธาตุลม (การใช้เหตุผล/การมองภาพใหญ่) และธาตุดิน (การลงมือทำจริง) เพื่อไม่ให้ความกังวลครอบงำ";
+      dominantTitleEn = "Dominant Water Current (Emotion & Intuition)";
+      dominantInsightEn = "Subconscious wisdom, profound relational currents, and intuitive tides are navigating your path right now.";
+      balancingAdviceEn = "Invite air (lucid objectivity) and earth (tangible small actions) to anchor high emotional sensitivity and prevent overwhelm.";
     } else if (air === maxVal) {
       dominantElement = "ลม";
       dominantTitleTh = "พลังงานธาตุลมโดดเด่น (Air Logic & Truth)";
       dominantInsightTh = "กำลังใช้ความคิด ตรรกะ การสื่อสาร หรือต้องตัดสินใจในเรื่องสำคัญที่ต้องอาศัยความชัดเจน";
       balancingAdviceTh = "เพิ่มพลังธาตุน้ำ (การเมตตาตัวเอง) และธาตุไฟ (ความกล้าลงมือทำ) เพื่อไม่ให้ติดอยู่ในวังวน Overthinking";
+      dominantTitleEn = "Dominant Air Current (Intellect & Discernment)";
+      dominantInsightEn = "Analytical inquiry, truth-seeking, communication, and decisive mental clarity take precedence.";
+      balancingAdviceEn = "Integrate water (self-compassion) and fire (courageous initiation) so that analytical vigilance does not devolve into rumination.";
     } else {
       dominantElement = "ดิน";
       dominantTitleTh = "พลังงานธาตุดินโดดเด่น (Earth Stability & Wealth)";
       dominantInsightTh = "เน้นเรื่องความมั่นคง การเงิน ผลลัพธ์ที่จับต้องได้ และความยั่งยืนในระยะยาว";
       balancingAdviceTh = "เพิ่มพลังธาตุไฟ (ความยืดหยุ่น/ความคิดริเริ่มใหม่ๆ) เพื่อให้ชีวิตไม่ตึงเครียดหรือยึดติดกับกรอบเดิมจนเกินไป";
+      dominantTitleEn = "Dominant Earth Current (Stability & Grounding)";
+      dominantInsightEn = "Long-term security, material realities, pragmatic mastery, and grounded durability are in sharp focus.";
+      balancingAdviceEn = "Infuse fire (spontaneity and visionary spark) to ensure prudent discipline does not turn into rigid resistance to change.";
     }
   }
 
@@ -101,5 +122,8 @@ export function calculateElementalBalance(cards: TarotCard[], drawn?: DrawnCard[
     dominantTitleTh,
     dominantInsightTh,
     balancingAdviceTh,
+    dominantTitleEn,
+    dominantInsightEn,
+    balancingAdviceEn,
   };
 }

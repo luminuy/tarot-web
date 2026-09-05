@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { CardImage } from "@/components/card/CardImage";
+import { useLocale } from "@/lib/i18n";
 import type { DailyCard } from "@/lib/tarot/daily-card";
 
 /**
@@ -14,6 +15,7 @@ import type { DailyCard } from "@/lib/tarot/daily-card";
  * กันที่ว่างไว้ระหว่างโหลด ไม่ให้แถบแทรกเข้ามาแล้วดันทั้งหน้า
  */
 export function DailyCardStrip() {
+  const { isEnglish } = useLocale();
   const [daily, setDaily] = useState<DailyCard | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -47,12 +49,12 @@ export function DailyCardStrip() {
     <Link
       href={`/cards/${daily.cardId}`}
       className="group mx-auto mb-6 flex max-w-2xl items-center gap-4 rounded-lg border border-[#D9C8AC] bg-white px-4 py-3 shadow-[var(--shadow-raised)] transition-colors hover:border-[#8F5C1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
-      title={`ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
+      title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
     >
       <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-[#D9C8AC] bg-[#F3EDE2] shadow-xs">
         <CardImage
           image={daily.image}
-          alt={`${daily.nameTh} — ไพ่ประจำวันนี้`}
+          alt={isEnglish ? `${daily.nameEn} — Card of the Day` : `${daily.nameTh} — ไพ่ประจำวันนี้`}
           className="h-full w-full object-cover"
           sizes="36px"
         />
@@ -60,11 +62,11 @@ export function DailyCardStrip() {
 
       <div className="min-w-0 flex-1 space-y-1">
         <p className="font-serif-th text-xs font-bold text-[#8F5C1A]">
-          ✦ ไพ่ประจำวันนี้
+          ✦ {isEnglish ? "Card of the Day" : "ไพ่ประจำวันนี้"}
         </p>
         <p className="font-serif-th text-sm font-bold text-[#2E211A]">
-          {daily.nameTh}{" "}
-          <span className="font-normal text-[#635B4E]">· {daily.nameEn}</span>
+          {isEnglish ? daily.nameEn : daily.nameTh}{" "}
+          <span className="font-normal text-[#635B4E]">· {isEnglish ? daily.nameTh : daily.nameEn}</span>
         </p>
         <div className="flex flex-wrap gap-1.5">
           {daily.keywords.map((kw) => (
@@ -79,7 +81,7 @@ export function DailyCardStrip() {
       </div>
 
       <span className="hidden shrink-0 font-serif-th text-[13px] font-semibold text-[#8F5C1A] group-hover:underline sm:inline">
-        อ่านความหมายเต็ม →
+        {isEnglish ? "Read Full Archetype →" : "อ่านความหมายเต็ม →"}
       </span>
     </Link>
   );

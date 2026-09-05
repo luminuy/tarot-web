@@ -4,17 +4,26 @@ import { useState, useEffect, useRef } from "react";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 
+import { useLocale } from "@/lib/i18n";
+
 export interface QuickTopic {
   id: "love" | "work" | "money" | "general";
   category: Category;
   title: string;
+  titleEn?: string;
   tagline: string;
+  taglineEn?: string;
   defaultQuestion: string;
+  defaultQuestionEn?: string;
   badge: string;
+  badgeEn?: string;
   highlightText: string;
+  highlightTextEn?: string;
   cardImage: string;
   cardAlt: string;
+  cardAltEn?: string;
   elementalGlyph: string;
+  elementalGlyphEn?: string;
   themeColors: {
     border: string;
     borderHover: string;
@@ -33,13 +42,20 @@ export const QUICK_TOPICS: QuickTopic[] = [
     id: "love",
     category: "love",
     title: "ความรัก & ความสัมพันธ์",
+    titleEn: "Love & Relationships",
     tagline: "เช็กความรู้สึก แนวโน้มหัวใจ คนคุย แฟน หรือคนโสด",
+    taglineEn: "Heartspace dynamics, soul connection, partners, or dating clarity",
     defaultQuestion: "ภาพรวมความรักและความสัมพันธ์ตอนนี้เป็นอย่างไร และควรเปิดใจรับมืออย่างไร",
+    defaultQuestionEn: "What is the present energy surrounding my love life and relationships, and how should I best navigate my heart?",
     badge: "✦ ยอดนิยมอันดับ 1",
+    badgeEn: "✦ #1 Most Popular",
     highlightText: "เปิดไพ่ดูดวงความรัก",
+    highlightTextEn: "Love Tarot Reading",
     cardImage: "major-06.jpg",
     cardAlt: "ไพ่ The Lovers - ความรักและการผูกพันทางจิตวิญญาณ",
+    cardAltEn: "The Lovers - Sacred bond, emotional resonance, and spiritual choice",
     elementalGlyph: "✦ ธาตุน้ำ · สายใยหัวใจ ✦",
+    elementalGlyphEn: "✦ Water Element · Heartspace Bonds ✦",
     themeColors: {
       border: "border-[#EADFD5]",
       borderHover: "hover:border-[#C48464]",
@@ -56,13 +72,20 @@ export const QUICK_TOPICS: QuickTopic[] = [
     id: "work",
     category: "work",
     title: "การงาน & โอกาสใหม่",
+    titleEn: "Career & New Horizons",
     tagline: "เจาะลึกทิศทางงาน การสอบ เลื่อนตำแหน่ง และอุปสรรค",
+    taglineEn: "Professional trajectory, promotions, ventures, and breakthroughs",
     defaultQuestion: "ทิศทางการงานและโปรเจกต์ช่วงนี้จะราบรื่นไหม มีสิ่งใดที่ควรระวังเป็นพิเศษ",
+    defaultQuestionEn: "What energies are guiding my career and creative projects right now, and what should I be mindful of?",
     badge: "✦ ยอดนิยม",
+    badgeEn: "✦ High Impact",
     highlightText: "เปิดไพ่ดูดวงการงาน",
+    highlightTextEn: "Career Tarot Reading",
     cardImage: "major-01.jpg",
     cardAlt: "ไพ่ The Magician - การริเริ่ม ทักษะ และการสร้างสรรค์โอกาส",
+    cardAltEn: "The Magician - Conscious manifestation, creative mastery, and willpower",
     elementalGlyph: "✦ ธาตุไฟ · ศักยภาพ & ลงมือทำ ✦",
+    elementalGlyphEn: "✦ Fire Element · Agency & Action ✦",
     themeColors: {
       border: "border-[#E6DEC9]",
       borderHover: "hover:border-[#8F5C1A]",
@@ -79,13 +102,20 @@ export const QUICK_TOPICS: QuickTopic[] = [
     id: "money",
     category: "money",
     title: "การเงิน & โชคลาภ",
+    titleEn: "Finances & Abundance",
     tagline: "ประเมินกระแสเงินสด ความคล่องตัว และจังหวะลงทุน",
+    taglineEn: "Financial flow, material grounding, investments, and prosperity",
     defaultQuestion: "สภาพคล่องทางการเงินและโชคลาภช่วงนี้เป็นอย่างไร ควรบริหารจัดการอย่างไร",
+    defaultQuestionEn: "What is the financial current around me at this time, and how can I best cultivate grounded stability?",
     badge: "✦ เด่นชัด",
+    badgeEn: "✦ Clear Alignment",
     highlightText: "เปิดไพ่ดูดวงการเงิน",
+    highlightTextEn: "Financial Tarot Reading",
     cardImage: "pentacles-01.jpg",
     cardAlt: "ไพ่ Ace of Pentacles - ความอุดมสมบูรณ์และโอกาสทางการเงิน",
+    cardAltEn: "Ace of Pentacles - Seeds of material opportunity, security, and prosperity",
     elementalGlyph: "✦ ธาตุดิน · ความมั่นคง & โชคลาภ ✦",
+    elementalGlyphEn: "✦ Earth Element · Grounding & Wealth ✦",
     themeColors: {
       border: "border-[#E6E0CB]",
       borderHover: "hover:border-[#B38728]",
@@ -102,13 +132,20 @@ export const QUICK_TOPICS: QuickTopic[] = [
     id: "general",
     category: "general",
     title: "ภาพรวมดวงชะตา & พลังงานวันนี้",
+    titleEn: "Daily Energy & Universal Guidance",
     tagline: "สิ่งที่จักรวาลอยากบอก ข้อคิดนำทางชีวิตประจำวัน",
+    taglineEn: "Core atmospheric guidance and mindfulness for today's journey",
     defaultQuestion: "ภาพรวมพลังงานดวงชะตาตอนนี้เป็นอย่างไร มีข้อคิดหรือคำเตือนใดที่ควรใส่ใจ",
+    defaultQuestionEn: "What universal message or guiding principle does the cosmos offer for my journey today?",
     badge: "✦ สมดุล",
+    badgeEn: "✦ Centered",
     highlightText: "เปิดไพ่รับพลังงานวันนี้",
+    highlightTextEn: "Daily Guidance Reading",
     cardImage: "major-19.jpg",
     cardAlt: "ไพ่ The Sun - ความสว่างไสว พลังบวก และความจริงแห่งชีวิต",
+    cardAltEn: "The Sun - Radiance, vitality, conscious clarity, and authentic joy",
     elementalGlyph: "✦ นภากาศ · สัจธรรม & พลังบวก ✦",
+    elementalGlyphEn: "✦ Quintessence · Cosmic Illumination ✦",
     themeColors: {
       border: "border-[#E2DED5]",
       borderHover: "hover:border-[#6B6152]",
@@ -136,6 +173,7 @@ export function QuickFortunePicker({
   onSelectTopic,
   isLoading = false,
 }: QuickFortunePickerProps) {
+  const { isEnglish } = useLocale();
   const [selectedPendingTopic, setSelectedPendingTopic] = useState<QuickTopic | null>(null);
   const [inputNickname, setInputNickname] = useState("");
   const [showNicknameModal, setShowNicknameModal] = useState(false);
@@ -190,7 +228,7 @@ export function QuickFortunePicker({
     if (e) e.preventDefault();
     const trimmed = inputNickname.trim();
     if (!trimmed) {
-      setNicknameError("กรุณาระบุชื่อเล่นเพื่อเริ่มทำนาย");
+      setNicknameError(isEnglish ? "Please provide a name to begin your reading" : "กรุณาระบุชื่อเล่นเพื่อเริ่มทำนาย");
       return;
     }
 
@@ -237,12 +275,18 @@ export function QuickFortunePicker({
         {/* ป้ายกล่องทองคำเปลว */}
         <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full text-[11px] font-serif-th font-semibold tracking-wide bg-[#FBF8F3] border border-[#D5CEC2] text-[#8F5C1A] shadow-xs">
           <span>✨</span>
-          <span>เปิดไพ่ด่วน 1 ใบ · สรุปความหมายตรงประเด็น</span>
+          <span>
+            {isEnglish
+              ? "Rapid Single-Card Reading · Direct & Insightful"
+              : "เปิดไพ่ด่วน 1 ใบ · สรุปความหมายตรงประเด็น"}
+          </span>
           <span>✨</span>
         </div>
 
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
-          เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้
+          {isEnglish
+            ? "Choose the area calling for clarity today"
+            : "เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้"}
         </h2>
       </div>
 
@@ -281,10 +325,10 @@ export function QuickFortunePicker({
                 <span
                   className={`text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border shadow-2xs ${topic.themeColors.badgeBg} ${topic.themeColors.badgeText} ${topic.themeColors.badgeBorder}`}
                 >
-                  {topic.badge}
+                  {isEnglish ? (topic.badgeEn || topic.badge) : topic.badge}
                 </span>
                 <span className="text-[11px] sm:text-xs font-serif-th text-[#A58A5C] flex items-center gap-1 group-hover:text-[#8F5C1A] transition-colors">
-                  <span>ไพ่ 1 ใบ</span>
+                  <span>{isEnglish ? "1 Card" : "ไพ่ 1 ใบ"}</span>
                   <span>✦</span>
                 </span>
               </div>
@@ -301,7 +345,7 @@ export function QuickFortunePicker({
                   >
                     <CardImage
                       image={topic.cardImage}
-                      alt={topic.cardAlt}
+                      alt={isEnglish ? (topic.cardAltEn || topic.cardAlt) : topic.cardAlt}
                       sizes="(min-width: 640px) 54px, 50px"
                       className="w-full h-full object-cover object-center"
                       loading="eager"
@@ -313,13 +357,13 @@ export function QuickFortunePicker({
                 {/* ข้อความและคำอธิบาย */}
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="text-[10px] sm:text-[11px] font-serif-th text-[#8F5C1A] tracking-wider font-semibold truncate">
-                    {topic.elementalGlyph}
+                    {isEnglish ? (topic.elementalGlyphEn || topic.elementalGlyph) : topic.elementalGlyph}
                   </div>
                   <h3 className="text-sm sm:text-base font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors duration-200 leading-snug">
-                    {topic.title}
+                    {isEnglish ? (topic.titleEn || topic.title) : topic.title}
                   </h3>
                   <p className="text-[11px] sm:text-xs font-serif-th text-[#635B4E] leading-relaxed line-clamp-2">
-                    {topic.tagline}
+                    {isEnglish ? (topic.taglineEn || topic.tagline) : topic.tagline}
                   </p>
                 </div>
               </div>
@@ -328,10 +372,10 @@ export function QuickFortunePicker({
               <div className="pt-2 border-t border-[#D5CEC2]/40 relative z-10">
                 <div className="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl bg-[#F6F2EA]/70 group-hover:bg-[#29261F] text-[#4A3E31] group-hover:text-[#FAF7F2] transition-colors duration-300 shadow-2xs">
                   <span className="text-[11px] sm:text-xs font-serif-th font-medium truncate mr-1">
-                    {topic.highlightText}
+                    {isEnglish ? (topic.highlightTextEn || topic.highlightText) : topic.highlightText}
                   </span>
                   <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-serif-th font-semibold text-[#8F5C1A] group-hover:text-[#E8D5B5] transition-colors shrink-0">
-                    <span>เริ่มทำนาย</span>
+                    <span>{isEnglish ? "Begin Reading" : "เริ่มทำนาย"}</span>
                     <span className="group-hover:translate-x-0.5 transition-transform duration-200">➔</span>
                   </span>
                 </div>
@@ -349,7 +393,7 @@ export function QuickFortunePicker({
                 key={topic.id}
                 type="button"
                 onClick={() => scrollToIndex(index)}
-                aria-label={`ไปยังหัวข้อ ${topic.title}`}
+                aria-label={isEnglish ? `Navigate to ${topic.titleEn || topic.title}` : `ไปยังหัวข้อ ${topic.title}`}
                 className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none ${
                   activeIndex === index
                     ? "w-6 bg-[#8F5C1A] shadow-xs"
@@ -362,7 +406,7 @@ export function QuickFortunePicker({
           {/* Swipe hint */}
           <p className="text-[10px] font-serif-th text-[#A58A5C] flex items-center gap-1 opacity-75">
             <span>✦</span>
-            <span>ปัดซ้าย-ขวาเพื่อเลือกเรื่อง</span>
+            <span>{isEnglish ? "Swipe left or right to explore topics" : "ปัดซ้าย-ขวาเพื่อเลือกเรื่อง"}</span>
             <span>✦</span>
           </p>
         </div>
@@ -377,7 +421,7 @@ export function QuickFortunePicker({
               <div className="flex items-center justify-between">
                 <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] flex items-center gap-1.5">
                   <span className="text-[#8F5C1A]">✦</span>
-                  <span>นามสมมุติของคุณ</span>
+                  <span>{isEnglish ? "Your Name or Pseudonym" : "นามสมมุติของคุณ"}</span>
                 </h3>
                 <button
                   type="button"
@@ -391,7 +435,9 @@ export function QuickFortunePicker({
                 </button>
               </div>
               <p className="text-xs font-serif-th text-[#635B4E] leading-relaxed">
-                ขอทราบชื่อเล่นเพื่อเชื่อมจิตกับไพ่ (ระบบจะจำไว้ ไม่ต้องกรอกซ้ำในครั้งถัดไป)
+                {isEnglish
+                  ? "Please share a name to connect with the cards (saved locally for future sessions)"
+                  : "ขอทราบชื่อเล่นเพื่อเชื่อมจิตกับไพ่ (ระบบจะจำไว้ ไม่ต้องกรอกซ้ำในครั้งถัดไป)"}
               </p>
             </div>
 
@@ -405,7 +451,7 @@ export function QuickFortunePicker({
                     setInputNickname(e.target.value);
                     if (nicknameError) setNicknameError(null);
                   }}
-                  placeholder="เช่น บี, น้ำ, เจมส์, วิน..."
+                  placeholder={isEnglish ? "e.g., Alex, Jordan, Taylor..." : "เช่น บี, น้ำ, เจมส์, วิน..."}
                   maxLength={40}
                   className="w-full px-3.5 py-2.5 text-sm font-serif-th rounded-xl border border-[#D5CEC2] focus:border-[#A58A5C] focus:outline-none focus:ring-1 focus:ring-[#A58A5C] bg-[#FAF7F2] text-[#29261F]"
                 />
@@ -425,14 +471,14 @@ export function QuickFortunePicker({
                   }}
                   className="px-3.5 py-2 text-xs font-serif-th text-[#635B4E] hover:text-[#29261F] transition-colors"
                 >
-                  ยกเลิก
+                  {isEnglish ? "Cancel" : "ยกเลิก"}
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !inputNickname.trim()}
                   className="px-4 py-2 text-xs font-serif-th font-semibold rounded-xl bg-[#29261F] text-[#FAF7F2] hover:bg-[#3D372E] border border-[#8F5C1A]/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs"
                 >
-                  <span>เริ่มทำนายทันที</span>
+                  <span>{isEnglish ? "Begin Reading Now" : "เริ่มทำนายทันที"}</span>
                   <span>✨</span>
                 </button>
               </div>

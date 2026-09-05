@@ -16,6 +16,7 @@ import { ProvablyFairPanel } from "./ProvablyFairPanel";
 import { CollapsibleCard } from "./CollapsibleCard";
 import { CardImage } from "@/components/card/CardImage";
 import { TTSReaderButton } from "./TTSReaderButton";
+import { useLocale } from "@/lib/i18n";
 
 interface StreamReaderProps {
   reading?: Partial<Reading> | null;
@@ -48,6 +49,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   errorMsg,
   onRetry,
 }) => {
+  const { isEnglish } = useLocale();
   const [activeTab, setActiveTab] = useState<"card" | "summary">("card");
   // การอ่านออกเสียงย้ายไปอยู่ใน <TTSReaderButton /> ทั้งหมดแล้ว
   // (ของเดิมเหลือ state + handler ค้างไว้ที่นี่โดยไม่มีปุ่มไหนเรียกใช้)
@@ -84,7 +86,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
-              alt={persona.nameTh}
+              alt={isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh}
               className="w-full h-full object-cover object-top filter contrast-[1.05] brightness-[1.02] tarot-hd-card-image"
               sizes="40px"
             />
@@ -92,20 +94,20 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="font-serif-th text-base font-bold font-mystic-gold">{persona.nameTh}</h4>
+              <h4 className="font-serif-th text-base font-bold font-mystic-gold">{isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh}</h4>
             </div>
-            <p className="text-xs text-[#635B4E] mt-0.5">{persona.tagline}</p>
+            <p className="text-xs text-[#635B4E] mt-0.5">{isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline}</p>
           </div>
         </div>
 
         {/* Live Status Pill */}
         {isStreaming ? (
           <span className="text-xs font-semibold bg-[#F3EDE2] text-[#2E211A] border border-[#D9C8AC] px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8F5C1A] animate-ping" /> แม่หมอกำลังอ่านคำทำนาย...
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8F5C1A] animate-ping" /> {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
         ) : (
           <span className="text-xs font-semibold bg-[#EBF3ED] text-[#3A7044] border border-[#3A7044]/30 px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
-            <span className="w-2 h-2 rounded-full bg-[#EBF3ED]" /> อ่านคำทำนายครบถ้วนแล้ว
+            <span className="w-2 h-2 rounded-full bg-[#EBF3ED]" /> {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
           </span>
         )}
       </div>
@@ -113,7 +115,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {/* World-Class Chamber Navigation Tabs */}
       <div
         role="tablist"
-        aria-label="ส่วนแสดงผลคำทำนาย"
+        aria-label={isEnglish ? "Tarot interpretation sections" : "ส่วนแสดงผลคำทำนาย"}
         className="flex items-center gap-2 border-b border-[#D9C8AC]/30 pb-2 overflow-x-auto no-scrollbar"
       >
         <button
@@ -131,7 +133,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         >
           <span className="text-[13px]">✦</span>
           <span>
-            อ่านรายใบ ({activeCardIndex + 1}/{totalCards})
+            {isEnglish ? `Card Analysis (${activeCardIndex + 1}/${totalCards})` : `อ่านรายใบ (${activeCardIndex + 1}/${totalCards})`}
           </span>
         </button>
 
@@ -149,7 +151,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           }`}
         >
           <span className="text-[#8F5C1A]">✨</span>
-          <span>สรุปภาพรวม & คำแนะนำ</span>
+          <span>{isEnglish ? "Overview & Guidance" : "สรุปภาพรวม & คำแนะนำ"}</span>
         </button>
       </div>
 
@@ -161,10 +163,12 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
         >
           <span className="min-w-0">
             <span className="block font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm [text-wrap:balance]">
-              <span className="mr-1.5 text-[#8F5C1A]">✦</span> มีอะไรอยากถามแม่หมอต่อไหม
+              <span className="mr-1.5 text-[#8F5C1A]">✦</span> {isEnglish ? "Have more questions for your reader?" : "มีอะไรอยากถามแม่หมอต่อไหม"}
             </span>
             <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
-              เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที
+              {isEnglish
+                ? "Open full-screen interactive consultation to delve deeper into these drawn cards."
+                : "เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที"}
             </span>
           </span>
           <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#D9C8AC] text-[#8F5C1A] transition-transform group-hover:translate-x-0.5">
@@ -176,7 +180,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {/* Error / Recovery Banner — โทนทองอุ่น ไม่ใช่แดงตกใจ · ซ่อนปุ่มลองใหม่เมื่อเป็นเรื่องโควตา */}
       {errorMsg &&
         (() => {
-          const isQuota = /สมัครสมาชิก|เติมรอบ|โควตา|สิทธิ์/.test(errorMsg);
+          const isQuota = /สมัครสมาชิก|เติมรอบ|โควตา|สิทธิ์|quota|credit|member/i.test(errorMsg);
           return (
             <div
               role="alert"
@@ -195,7 +199,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   onClick={onRetry}
                   className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
-                  <span>✦</span> {/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่"}
+                  <span>✦</span> {isEnglish ? (/reload|not found/i.test(errorMsg) ? "Reload Reading" : "Retry Reading") : (/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่")}
                 </button>
               )}
             </div>
@@ -220,11 +224,13 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     : "bg-[#F3EDE2] text-[#2E211A] hover:bg-[#FFFFFF] border border-[#D9C8AC]"
                 }`}
               >
-                <span className="whitespace-nowrap">ใบที่ {i + 1}</span>
+                <span className="whitespace-nowrap">{isEnglish ? `Card ${i + 1}` : `ใบที่ ${i + 1}`}</span>
                 {(() => {
                   const card = d.card || (d.cardIndex !== undefined ? cardByIndex(d.cardIndex) : undefined);
                   return card ? (
-                    <span className="min-w-0 truncate text-[13px] font-normal opacity-80">({card.nameTh})</span>
+                    <span className="min-w-0 truncate text-[13px] font-normal opacity-80">
+                      ({isEnglish ? (card.nameEn || card.nameTh) : card.nameTh})
+                    </span>
                   ) : null;
                 })()}
               </button>
@@ -246,36 +252,42 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   {cardData?.image ? (
                     <CardImage
                       image={cardData.image}
-                      alt={cardData?.nameTh || "Tarot"}
+                      alt={isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}
                       className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
                       sizes="88px"
                     />
                   ) : (
                     <div className="w-full h-full bg-[#F3EDE2] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#D9C8AC]">
                       <span className="text-[#8F5C1A] text-xs">✦</span>
-                      <span className="text-xs text-[#635B4E] font-serif-th mt-0.5 leading-normal">ไม่พบข้อมูล</span>
+                      <span className="text-xs text-[#635B4E] font-serif-th mt-0.5 leading-normal">
+                        {isEnglish ? "Not Found" : "ไม่พบข้อมูล"}
+                      </span>
                     </div>
                   )}
                 </div>
 
                 <div>
                   <span className="text-[13px] text-[#8F5C1A] font-serif-th font-semibold">
-                    ✦ ตำแหน่งที่ {activeCardIndex + 1}: {activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}
+                    ✦ {isEnglish
+                        ? `Position ${activeCardIndex + 1}: ${activeDrawnCard?.position.nameEn || activeDrawnCard?.position.nameTh || "Energy Point"}`
+                        : `ตำแหน่งที่ ${activeCardIndex + 1}: ${activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}`}
                   </span>
                   <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#2E211A] mt-0.5">
                     {cardData ? (
                       <>
-                        {cardData.nameTh}{" "}
-                        {cardData.nameEn && (
+                        {isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}{" "}
+                        {!isEnglish && cardData.nameEn && (
                           <span className="text-xs font-mono font-normal text-[#635B4E]">({cardData.nameEn})</span>
                         )}{" "}
                         <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
-                          {activeDrawnCard?.isReversed ? "· ไพ่กลับหัว" : "· ไพ่หัวตั้ง"}
+                          {activeDrawnCard?.isReversed
+                            ? (isEnglish ? "· Reversed" : "· ไพ่กลับหัว")
+                            : (isEnglish ? "· Upright" : "· ไพ่หัวตั้ง")}
                         </span>
                       </>
                     ) : (
                       <span className="text-[#A6392C] text-sm font-normal">
-                        ไม่พบข้อมูลไพ่ (กรุณากดโหลดใหม่อีกครั้ง)
+                        {isEnglish ? "Card data not found (Please reload)" : "ไม่พบข้อมูลไพ่ (กรุณากดโหลดใหม่อีกครั้ง)"}
                       </span>
                     )}
                   </h4>
@@ -283,9 +295,11 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               </div>
 
               {/* Elemental & Meaning Tag */}
-              {activeDrawnCard?.position.meaning && (
+              {(activeDrawnCard?.position.meaningEn || activeDrawnCard?.position.meaning) && (
                 <span className="text-[13px] text-[#2E211A] bg-[#F3EDE2]/25 border border-[#D9C8AC] px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
-                  {activeDrawnCard.position.meaning}
+                  {isEnglish
+                    ? (activeDrawnCard.position.meaningEn || activeDrawnCard.position.meaning)
+                    : (activeDrawnCard.position.meaning || activeDrawnCard.position.meaningEn)}
                 </span>
               )}
             </div>
@@ -303,7 +317,9 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
               return keywords && keywords.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">ความหมายหลัก:</span>
+                  <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">
+                    {isEnglish ? "Key Themes:" : "ความหมายหลัก:"}
+                  </span>
                   {keywords.map((kw: string, idx: number) => (
                     <span
                       key={idx}
@@ -320,7 +336,9 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             {!cardData && (
               <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-center space-y-2.5 my-2">
                 <p className="text-xs text-[#A6392C] font-serif-th">
-                  ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง
+                  {isEnglish
+                    ? "Card data for this position could not be found. Please reload."
+                    : "ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง"}
                 </p>
                 {onRetry && (
                   <button
@@ -328,7 +346,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     onClick={onRetry}
                     className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
                   >
-                    <span>✦</span> โหลดใหม่อีกครั้ง
+                    <span>✦</span> {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
                   </button>
                 )}
               </div>
@@ -355,7 +373,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                   key={`oracle-${activeCardIndex}`}
                   className="text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th font-normal"
                   aria-live="polite"
-                  aria-label="คำทำนายจากแม่หมอ"
+                  aria-label={isEnglish ? "Oracle's interpretation" : "คำทำนายจากแม่หมอ"}
                 >
                   {isStreaming
                     ? activeCardReading.reading.split(" ").map((word, i) => (
@@ -378,8 +396,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               ) : (
                 <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed font-serif-th font-normal italic">
                   {isStreaming
-                    ? "แม่หมอกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำทำนายของไพ่ใบนี้..."
-                    : "รอการเปิดม่านพยากรณ์"}
+                    ? (isEnglish
+                        ? "The oracle is attuning to the energetic currents of this card..."
+                        : "แม่หมอกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำทำนายของไพ่ใบนี้...")
+                    : (isEnglish ? "Awaiting oracle revelation" : "รอการเปิดม่านพยากรณ์")}
                 </p>
               )}
             </div>
@@ -396,7 +416,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     : "border-transparent text-[#635B4E] cursor-not-allowed"
                 }`}
               >
-                <span>← ใบก่อนหน้า</span>
+                <span>{isEnglish ? "← Previous Card" : "← ใบก่อนหน้า"}</span>
               </button>
 
               <button
@@ -409,7 +429,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                     : "border-transparent text-[#635B4E] cursor-not-allowed"
                 }`}
               >
-                <span>ใบถัดไป →</span>
+                <span>{isEnglish ? "Next Card →" : "ใบถัดไป →"}</span>
               </button>
             </div>
           </div>
@@ -430,7 +450,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {reading?.connections && (
             <div className="p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1.5 ">
               <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-2">
-                <span className="text-[#8F5C1A]">✨</span> ความเชื่อมโยงของไพ่ทั้งชุด
+                <span className="text-[#8F5C1A]">✨</span> {isEnglish ? "Spread Synergy & Resonance" : "ความเชื่อมโยงของไพ่ทั้งชุด"}
               </h5>
               <p className="text-xs sm:text-sm text-[#2E211A] leading-relaxed">{reading.connections}</p>
             </div>
@@ -441,17 +461,17 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <div className="p-5 rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] space-y-2 ">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h5 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold flex items-center gap-2">
-                  <span className="text-[#8F5C1A]">✦</span> บทสรุปคำทำนายและแนวโน้ม
+                  <span className="text-[#8F5C1A]">✦</span> {isEnglish ? "Executive Summary & Trajectory" : "บทสรุปคำทำนายและแนวโน้ม"}
                 </h5>
                 <div className="flex items-center gap-2">
                   {reading.yesNoAnswer && (
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#8F5C1A] text-[#FFFFFF]">
-                      คำตอบ: {reading.yesNoAnswer}
+                      {isEnglish ? `Answer: ${reading.yesNoAnswer}` : `คำตอบ: ${reading.yesNoAnswer}`}
                     </span>
                   )}
                   <TTSReaderButton
-                    textToRead={`บทสรุปคำทำนายและแนวโน้ม. ${reading.summary || ""}. ${
-                      reading.advice ? "คำแนะนำคือ " + reading.advice.join(", ") : ""
+                    textToRead={`${isEnglish ? "Executive Summary and Guidance. " : "บทสรุปคำทำนายและแนวโน้ม. "}${reading.summary || ""}. ${
+                      reading.advice ? (isEnglish ? "Actionable guidance: " : "คำแนะนำคือ ") + reading.advice.join(", ") : ""
                     }`}
                     personaId={persona.id}
                   />
@@ -459,7 +479,9 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
               </div>
               <p className="text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed">{reading.summary}</p>
               {reading.timing && (
-                <p className="text-xs text-[#8F5C1A] pt-1 font-mono font-semibold">✦ ช่วงเวลา: {reading.timing}</p>
+                <p className="text-xs text-[#8F5C1A] pt-1 font-mono font-semibold">
+                  ✦ {isEnglish ? "Timing: " : "ช่วงเวลา: "}{reading.timing}
+                </p>
               )}
             </div>
           )}
@@ -468,7 +490,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {reading?.advice && reading.advice.length > 0 && (
             <div className="p-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] space-y-2.5">
               <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-2">
-                <span className="text-[#8F5C1A]">✦</span> คำแนะนำและสิ่งที่ควรทำ
+                <span className="text-[#8F5C1A]">✦</span> {isEnglish ? "Actionable Guidance & Next Steps" : "คำแนะนำและสิ่งที่ควรทำ"}
               </h5>
               <ul className="space-y-2">
                 {reading.advice.map((item, idx) => (
@@ -487,14 +509,21 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
           {/* Sacred Oracle Mantra Card */}
           {allCards.length > 0 && (
-            <CollapsibleCard title="คำคมพลังใจศักดิ์สิทธิ์" hint="ข้อคิดนำทางที่กลั่นจากไพ่ทั้งชุด" icon="✨">
-              <OracleMantraCard cards={allCards} drawn={drawnCards} personaNameTh={persona.nameTh} />
+            <CollapsibleCard
+              title={isEnglish ? "Sacred Oracle Wisdom" : "คำคมพลังใจศักดิ์สิทธิ์"}
+              hint={isEnglish ? "Core guiding wisdom synthesized from the spread" : "ข้อคิดนำทางที่กลั่นจากไพ่ทั้งชุด"}
+              icon="✨"
+            >
+              <OracleMantraCard cards={allCards} drawn={drawnCards} personaNameTh={isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh} />
             </CollapsibleCard>
           )}
 
           {/* Elemental Balance 4-Elements Analysis */}
           {allCards.length > 0 && (
-            <CollapsibleCard title="สมดุลพลังงาน 4 ธาตุในผัง" hint="วิเคราะห์คลื่นพลังงาน ไฟ · น้ำ · ลม · ดิน">
+            <CollapsibleCard
+              title={isEnglish ? "Elemental Balance Analysis" : "สมดุลพลังงาน 4 ธาตุในผัง"}
+              hint={isEnglish ? "Energy current breakdown: Fire · Water · Air · Earth" : "วิเคราะห์คลื่นพลังงาน ไฟ · น้ำ · ลม · ดิน"}
+            >
               <ElementalBalanceWidget cards={allCards} drawn={drawnCards} />
             </CollapsibleCard>
           )}
@@ -517,11 +546,13 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="text-[#8F5C1A]">✨</span>
                   <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] [text-wrap:balance]">
-                    ต้องการคำปรึกษาเจาะลึกเฉพาะบุคคลเพิ่มเติม?
+                    {isEnglish ? "Seek In-Depth Personal Consultation?" : "ต้องการคำปรึกษาเจาะลึกเฉพาะบุคคลเพิ่มเติม?"}
                   </h4>
                 </div>
                 <p className="text-[13px] sm:text-xs text-[#635B4E] leading-relaxed font-serif-th [text-wrap:pretty]">
-                  ปรึกษาแม่หมอผู้เชี่ยวชาญแบบตัวต่อตัว พร้อมส่งต่อผลการเปิดไพ่ชุดนี้เพื่อพูดคุยเจาะลึกผ่าน LINE ส่วนตัวได้ทันที
+                  {isEnglish
+                    ? "Consult a certified human tarot master 1-on-1. Send your drawn spread directly to continue the dialogue in private."
+                    : "ปรึกษาแม่หมอผู้เชี่ยวชาญแบบตัวต่อตัว พร้อมส่งต่อผลการเปิดไพ่ชุดนี้เพื่อพูดคุยเจาะลึกผ่าน LINE ส่วนตัวได้ทันที"}
                 </p>
               </div>
 
@@ -530,7 +561,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
                 className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
               >
-                <span>ปรึกษาแม่หมอตัวจริง</span>
+                <span>{isEnglish ? "Consult Human Reader" : "ปรึกษาแม่หมอตัวจริง"}</span>
                 <span>➔</span>
               </Link>
             </div>
@@ -541,8 +572,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {/* AI Disclosure Note & Accuracy Rating */}
       <div className="mt-4 pt-3 border-t border-[#D9C8AC]/30 space-y-2">
         <p className="text-[13px] text-[#635B4E] leading-relaxed text-center font-serif-th max-w-2xl mx-auto [text-wrap:balance]">
-          <span className="text-[#8F5C1A]">✦</span> คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง
-          จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต
+          <span className="text-[#8F5C1A]">✦</span>{" "}
+          {isEnglish
+            ? "This reading is synthesized with AI from your authentic drawn cards. Provided for reflection, introspection, and spiritual guidance."
+            : "คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต"}
         </p>
 
         {/* Accuracy Rating — A/B data collection */}

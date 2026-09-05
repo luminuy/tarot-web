@@ -10,6 +10,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
 import { cardByIndex } from "@/data/cards";
 import { trackEvent } from "@/lib/analytics";
+import { useLocale } from "@/lib/i18n";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -30,26 +31,45 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   cards,
   reading,
 }) => {
+  const { isEnglish } = useLocale();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
+  const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
+  const defaultQuestion = isEnglish ? "General Life & Archetypal Overview" : "ภาพรวมดวงชะตา";
+  const defaultSummary = isEnglish ? "Trust your inner wisdom and proceed with mindful intention." : "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ";
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const shareText = `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot
+  const shareText = isEnglish
+    ? `✨ 1909 Rider-Waite Tarot Reading by SeerTarot
+✦ Spread: ${spreadName}
+✦ Sacred Question: "${question || defaultQuestion}"
+✦ Cards Drawn: ${cards
+        .map((c) => {
+          const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
+          const posName = c.position.nameEn || c.position.nameTh;
+          const cardName = card?.nameEn || card?.nameTh || "Tarot Card";
+          return `${posName}: ${cardName}${c.isReversed ? " (Reversed)" : ""}`;
+        })
+        .join(", ")}
+✦ Oracle Insight from ${personaName}: "${reading?.summary || defaultSummary}"
+✦ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`
+    : `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot
 ✦ ผังการวางไพ่: ${spreadName}
 ✦ คำถามอธิษฐาน: "${question || "ภาพรวมดวงชะตา"}"
 ✦ ไพ่ที่เปิดได้: ${cards
-    .map((c) => {
-      const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
-      return `${c.position.nameTh}: ${card?.nameTh || "ไพ่"}${c.isReversed ? " (กลับหัว)" : ""}`;
-    })
-    .join(", ")}
+        .map((c) => {
+          const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
+          return `${c.position.nameTh}: ${card?.nameTh || "ไพ่"}${c.isReversed ? " (กลับหัว)" : ""}`;
+        })
+        .join(", ")}
 ✦ คำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary || "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ"}"
 ✦ สัมผัสวิหารไพ่ทาโรต์ออนไลน์: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`;
 
@@ -82,13 +102,21 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         // 4. Header: Brand & Spread
         const headerY = format === "story" ? 150 : 110;
         ctx.fillStyle = "#8F5C1A";
-        ctx.font = "bold 40px 'Noto Serif Thai', serif, sans-serif";
+        ctx.font = "bold 38px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("✦ SEERTAROT · วิหารพยากรณ์ ✦", width / 2, headerY);
+        ctx.fillText(
+          isEnglish ? "✦ SEERTAROT · SANCTUARY OF ARCHETYPES ✦" : "✦ SEERTAROT · วิหารพยากรณ์ ✦",
+          width / 2,
+          headerY
+        );
 
         ctx.fillStyle = "#6F5B4A";
         ctx.font = "bold 24px 'Noto Sans Thai', sans-serif";
-        ctx.fillText(`ผังการวางไพ่: ${spreadName}`, width / 2, headerY + 45);
+        ctx.fillText(
+          isEnglish ? `Spread: ${spreadName}` : `ผังการวางไพ่: ${spreadName}`,
+          width / 2,
+          headerY + 45
+        );
 
         // Divider
         ctx.strokeStyle = "#D9C8AC";
@@ -102,7 +130,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         let nextY = headerY + 110;
         if (question) {
           ctx.fillStyle = "#2E211A";
-          ctx.font = "italic 28px 'Noto Serif Thai', serif, sans-serif";
+          ctx.font = "italic 28px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
           ctx.textAlign = "center";
           ctx.fillText(`“${question.slice(0, 48)}${question.length > 48 ? "..." : ""}”`, width / 2, nextY);
           nextY += 45;
@@ -175,20 +203,30 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           ctx.stroke();
 
           // ป้ายตำแหน่ง — เหนือไพ่ ไม่ทับงานศิลป์
+          const posName = isEnglish ? (c.position.nameEn || c.position.nameTh) : c.position.nameTh;
           ctx.fillStyle = "#8F5C1A";
           ctx.font = `bold ${isSingle ? "22px" : "16px"} 'Noto Sans Thai', sans-serif`;
           ctx.textAlign = "center";
-          ctx.fillText(c.position.nameTh.slice(0, 14), cx + cardW / 2, cardY - 16);
+          ctx.fillText(posName.slice(0, 18), cx + cardW / 2, cardY - 16);
 
           // ชื่อไพ่ — ใต้ไพ่
+          const cardName = isEnglish
+            ? (cardObj?.nameEn || cardObj?.nameTh || "Tarot Card")
+            : (cardObj?.nameTh || "ไพ่ทาโรต์");
           ctx.fillStyle = "#2E211A";
-          ctx.font = `bold ${isSingle ? "26px" : "19px"} 'Noto Serif Thai', serif, sans-serif`;
-          ctx.fillText(cardObj?.nameTh || "ไพ่ทาโรต์", cx + cardW / 2, cardY + cardH + 30);
+          ctx.font = `bold ${isSingle ? "26px" : "19px"} 'Cinzel', 'Noto Serif Thai', serif, sans-serif`;
+          ctx.fillText(cardName, cx + cardW / 2, cardY + cardH + 30);
 
           // สถานะหัวตั้ง/กลับหัว
           ctx.fillStyle = c.isReversed ? "#A6392C" : "#3A7044";
           ctx.font = `bold ${isSingle ? "18px" : "14px"} 'Noto Sans Thai', sans-serif`;
-          ctx.fillText(c.isReversed ? "กลับหัว ↷" : "หัวตั้ง ✦", cx + cardW / 2, cardY + cardH + 56);
+          ctx.fillText(
+            c.isReversed
+              ? (isEnglish ? "Reversed ↷" : "กลับหัว ↷")
+              : (isEnglish ? "Upright ✦" : "หัวตั้ง ✦"),
+            cx + cardW / 2,
+            cardY + cardH + 56
+          );
         });
 
         // 7. Oracle Summary Block
@@ -204,23 +242,28 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         ctx.stroke();
 
         ctx.fillStyle = "#8F5C1A";
-        ctx.font = "bold 26px 'Noto Serif Thai', serif, sans-serif";
+        ctx.font = "bold 26px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText(`✦ สารพยากรณ์จากแม่หมอ ${persona.nameTh} ✦`, width / 2, summaryY + 50);
+        ctx.fillText(
+          isEnglish ? `✦ Oracle Insight from ${personaName} ✦` : `✦ สารพยากรณ์จากแม่หมอ ${persona.nameTh} ✦`,
+          width / 2,
+          summaryY + 50
+        );
 
         // Multi-line wrap summary
         ctx.fillStyle = "#2E211A";
-        ctx.font = "italic 25px 'Noto Serif Thai', serif, sans-serif";
+        ctx.font = "italic 25px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
         ctx.textAlign = "left";
-        const words = (reading?.summary || "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ").split("");
+        const summaryText = reading?.summary || defaultSummary;
+        const tokens = isEnglish ? summaryText.split(" ") : summaryText.split("");
         let line = "";
         let lineY = summaryY + 105;
-        for (let n = 0; n < words.length; n++) {
-          const testLine = line + words[n];
+        for (let n = 0; n < tokens.length; n++) {
+          const testLine = line + (isEnglish ? (line ? " " : "") : "") + tokens[n];
           const metrics = ctx.measureText(testLine);
           if (metrics.width > width - 240 && n > 0) {
             ctx.fillText(line, 120, lineY);
-            line = words[n];
+            line = tokens[n];
             lineY += 42;
             if (lineY > summaryY + summaryH - 35) break;
           } else {
@@ -254,8 +297,11 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     const fallback = typeof window !== "undefined" ? window.location.origin : "https://seertarot.net";
     try {
       const blob = await createReadingImageBlob("post");
+      const titleText = isEnglish
+        ? `Tarot Reading "${question || defaultQuestion}" — SeerTarot`
+        : `คำทำนายไพ่ทาโรต์ "${question || "ภาพรวมดวงชะตา"}" — SeerTarot`;
       const qs = new URLSearchParams({
-        title: `คำทำนายไพ่ทาโรต์ "${question || "ภาพรวมดวงชะตา"}" — SeerTarot`,
+        title: titleText,
         spread: spreadName,
       });
       const res = await fetch(`/api/share/image?${qs}`, {
@@ -279,9 +325,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     trackEvent("share_click", { platform: brand, spread_id: spreadName });
 
     // ⚠️ ต้องเปิดแท็บเปล่าไว้ "ทันทีแบบ sync" ในนี้ก่อน await ใด ๆ ทั้งสิ้น
-    // เพราะกว่าจะได้ shareUrl ต้องรอ createReadingImageBlob (canvas + preload รูปไพ่) และ fetch อัปโหลดขึ้น R2
-    // ถ้าปล่อยให้ window.open ทำงาน "หลัง await" เบราว์เซอร์ (โดยเฉพาะ Safari) จะตัดสินว่าไม่ได้มาจาก
-    // user gesture โดยตรงอีกต่อไป แล้วบล็อกป็อปอัปเงียบ ๆ (ไม่มี error ให้เห็นเลย) — นี่คือสาเหตุที่ "แชร์กดแล้วไม่ขึ้นอะไร"
     const needsPopup = brand === "twitter" || brand === "facebook" || brand === "threads";
     const pendingPopup =
       needsPopup && typeof window !== "undefined"
@@ -303,7 +346,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
     // Twitter / X
     if (brand === "twitter") {
-      const tweetText = `✨ ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
+      const tweetText = isEnglish
+        ? `✨ 1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nOracle insight from ${personaName}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#tarot #oracle #archetypes #SeerTarot`
+        : `✨ ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
       openOrRedirect(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`
       );
@@ -312,7 +357,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
     // Threads
     if (brand === "threads") {
-      const threadsText = `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนาย: "${reading?.summary || ""}"\n${shareUrl}`;
+      const threadsText = isEnglish
+        ? `✨ 1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nInsight: "${reading?.summary || ""}"\n${shareUrl}`
+        : `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนาย: "${reading?.summary || ""}"\n${shareUrl}`;
       openOrRedirect(`https://www.threads.net/intent/post?text=${encodeURIComponent(threadsText)}`);
       return;
     }
@@ -328,7 +375,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             pendingPopup?.close(); // ใช้ native share sheet แทน ไม่ต้องใช้แท็บที่จองไว้
             await navigator.share({
               files: [file],
-              title: `คำทำนายไพ่ทาโรต์ SeerTarot (${spreadName})`,
+              title: isEnglish ? `SeerTarot Reading (${spreadName})` : `คำทำนายไพ่ทาโรต์ SeerTarot (${spreadName})`,
               text: shareText,
             });
             return;
@@ -344,7 +391,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       }
       // Web fallback
       await navigator.clipboard.writeText(shareText).catch(() => {});
-      showToast("คัดลอกข้อความแล้ว! กำลังเปิดหน้าแชร์ Facebook...");
+      showToast(isEnglish ? "Caption copied! Opening Facebook share window..." : "คัดลอกข้อความแล้ว! กำลังเปิดหน้าแชร์ Facebook...");
       openOrRedirect(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`);
       return;
     }
@@ -361,10 +408,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           setIsGenerating(false);
           await navigator.share({
             files: [file],
-            title: `คำทำนายไพ่ทาโรต์ SeerTarot (${spreadName})`,
+            title: isEnglish ? `SeerTarot Reading (${spreadName})` : `คำทำนายไพ่ทาโรต์ SeerTarot (${spreadName})`,
             text: shareText,
           });
-          showToast(`เปิดหน้าแชร์ไปยัง ${brand === "instagram" ? "Instagram" : "TikTok"} แล้ว ✨`);
+          showToast(
+            isEnglish
+              ? `Shared to ${brand === "instagram" ? "Instagram" : "TikTok"} ✨`
+              : `เปิดหน้าแชร์ไปยัง ${brand === "instagram" ? "Instagram" : "TikTok"} แล้ว ✨`
+          );
           return;
         }
 
@@ -377,14 +428,19 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         URL.revokeObjectURL(url);
         await navigator.clipboard.writeText(shareText).catch(() => {});
         showToast(
-          `บันทึกการ์ดรูปภาพ (9:16) และคัดลอกแคปชันแล้ว! นำไปโพสต์ใน ${brand === "instagram" ? "Instagram" : "TikTok"} ได้ทันที ✦`
+          isEnglish
+            ? `Story card saved (9:16) and caption copied! Ready to post to ${brand === "instagram" ? "Instagram" : "TikTok"} ✦`
+            : `บันทึกการ์ดรูปภาพ (9:16) และคัดลอกแคปชันแล้ว! นำไปโพสต์ใน ${brand === "instagram" ? "Instagram" : "TikTok"} ได้ทันที ✦`
         );
       } catch (err) {
         if (!isUserAbort(err)) {
           console.error("Share error", err);
-          showToast("ไม่สามารถเปิดแอปได้ กรุณากดปุ่มบันทึกรูปภาพแทน");
+          showToast(
+            isEnglish
+              ? "Unable to open app. Please save the image to your device instead."
+              : "ไม่สามารถเปิดแอปได้ กรุณากดปุ่มบันทึกรูปภาพแทน"
+          );
         }
-        // AbortError = ผู้ใช้กดยกเลิกหน้าต่างแชร์เอง ไม่ใช่ความผิดพลาด ไม่ต้องโชว์ toast
       } finally {
         setIsGenerating(false);
       }
@@ -397,7 +453,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="แชร์ผลคำทำนาย"
+        aria-label={isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
         onClick={onClose}
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2E211A]/50 backdrop-blur-[3px] overflow-y-auto"
       >
@@ -414,16 +470,20 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-[#8F5C1A] text-sm">✦</span>
               <div>
-                <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">แชร์ผลคำทำนาย</h3>
+                <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
+                  {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
+                </h3>
                 <p className="text-[13px] text-[#635B4E] font-serif-th">
-                  บันทึกรูปภาพพรีเมียมหรือแชร์ตรงสู่โซเชียลมีเดีย
+                  {isEnglish
+                    ? "Save HD visual card or share directly to social channels"
+                    : "บันทึกรูปภาพพรีเมียมหรือแชร์ตรงสู่โซเชียลมีเดีย"}
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              aria-label="ปิดหน้าต่างแชร์ผลคำทำนาย"
+              aria-label={isEnglish ? "Close share dialog" : "ปิดหน้าต่างแชร์ผลคำทำนาย"}
               className="w-10 h-10 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
               ✕
@@ -461,13 +521,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               <div className="flex items-center justify-center gap-2">
                 <span className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-[#6F5B4A]" />
                 <span className="text-[13px] sm:text-xs font-serif-th tracking-[0.2em] uppercase text-[#8F5C1A] font-bold">
-                  SEERTAROT · วิหารพยากรณ์
+                  {isEnglish ? "SEERTAROT · SANCTUARY" : "SEERTAROT · วิหารพยากรณ์"}
                 </span>
                 <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#6F5B4A]" />
               </div>
               <div className="inline-block px-3 py-0.5 rounded-full bg-[#F3EDE2] border border-[#D9C8AC]">
                 <span className="text-[13px] sm:text-xs text-[#2E211A] font-serif-th font-semibold">
-                  ผัง: {spreadName}
+                  {isEnglish ? `Spread: ${spreadName}` : `ผัง: ${spreadName}`}
                 </span>
               </div>
             </div>
@@ -492,7 +552,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   >
                     {/* Position Name */}
                     <span className="text-[13px] sm:text-xs text-[#8F5C1A] font-serif-th tracking-wide block font-bold whitespace-nowrap">
-                      {c.position.nameTh}
+                      {isEnglish ? (c.position.nameEn || c.position.nameTh) : c.position.nameTh}
                     </span>
 
                     {/* Card Frame */}
@@ -513,7 +573,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                     {/* Card Title & State */}
                     <div className="space-y-0.5">
                       <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] leading-tight">
-                        {c.card?.nameTh || `ใบที่ ${i + 1}`}
+                        {isEnglish
+                          ? (c.card?.nameEn || c.card?.nameTh || `Card ${i + 1}`)
+                          : (c.card?.nameTh || `ใบที่ ${i + 1}`)}
                       </h5>
                       <span
                         className={`text-[12px] px-2 py-0.5 rounded-full font-serif-th inline-block font-semibold ${
@@ -522,7 +584,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                             : "bg-[#EBF3ED] text-[#3A7044] border border-[#D9C8AC]"
                         }`}
                       >
-                        {c.isReversed ? "กลับหัว ↷" : "หัวตั้ง ✦"}
+                        {c.isReversed
+                          ? (isEnglish ? "Reversed ↷" : "กลับหัว ↷")
+                          : (isEnglish ? "Upright ✦" : "หัวตั้ง ✦")}
                       </span>
                     </div>
                   </div>
@@ -534,7 +598,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {reading?.summary && (
               <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#D9C8AC]/30">
                 <span className="text-[13px] sm:text-[13px] text-[#8F5C1A] font-serif-th tracking-wider uppercase block font-bold">
-                  ✦ สารพยากรณ์จากแม่หมอ {persona.nameTh} ✦
+                  {isEnglish
+                    ? `✦ Oracle Insight from ${personaName} ✦`
+                    : `✦ สารพยากรณ์จากแม่หมอ ${persona.nameTh} ✦`}
                 </span>
                 <p className="font-serif-th text-xs sm:text-[13px] text-[#2E211A] leading-relaxed italic">
                   “{reading.summary}”
@@ -554,8 +620,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {/* Facebook (#1877F2) */}
             <button
               type="button"
-              title="แชร์ไปยัง Facebook"
-              aria-label="แชร์ไปยัง Facebook"
+              title={isEnglish ? "Share to Facebook" : "แชร์ไปยัง Facebook"}
+              aria-label={isEnglish ? "Share to Facebook" : "แชร์ไปยัง Facebook"}
               onClick={() => handleShareToBrand("facebook")}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
             >
@@ -567,8 +633,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {/* Instagram (Official Gradient) */}
             <button
               type="button"
-              title="แชร์ไปยัง Instagram"
-              aria-label="แชร์ไปยัง Instagram"
+              title={isEnglish ? "Share to Instagram" : "แชร์ไปยัง Instagram"}
+              aria-label={isEnglish ? "Share to Instagram" : "แชร์ไปยัง Instagram"}
               onClick={() => handleShareToBrand("instagram")}
               disabled={isGenerating}
               aria-busy={isGenerating}
@@ -582,8 +648,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {/* TikTok (#000000) */}
             <button
               type="button"
-              title="แชร์ไปยัง TikTok"
-              aria-label="แชร์ไปยัง TikTok"
+              title={isEnglish ? "Share to TikTok" : "แชร์ไปยัง TikTok"}
+              aria-label={isEnglish ? "Share to TikTok" : "แชร์ไปยัง TikTok"}
               onClick={() => handleShareToBrand("tiktok")}
               disabled={isGenerating}
               aria-busy={isGenerating}
@@ -597,8 +663,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {/* X / Twitter (#000000) */}
             <button
               type="button"
-              title="แชร์ไปยัง X (Twitter)"
-              aria-label="แชร์ไปยัง X (Twitter)"
+              title={isEnglish ? "Share to X (Twitter)" : "แชร์ไปยัง X (Twitter)"}
+              aria-label={isEnglish ? "Share to X (Twitter)" : "แชร์ไปยัง X (Twitter)"}
               onClick={() => handleShareToBrand("twitter")}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
             >
@@ -610,8 +676,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             {/* Threads (#000000) with Official Meta Threads SVG Path */}
             <button
               type="button"
-              title="แชร์ไปยัง Threads"
-              aria-label="แชร์ไปยัง Threads"
+              title={isEnglish ? "Share to Threads" : "แชร์ไปยัง Threads"}
+              aria-label={isEnglish ? "Share to Threads" : "แชร์ไปยัง Threads"}
               onClick={() => handleShareToBrand("threads")}
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
             >

@@ -104,6 +104,8 @@ export const renderSpreadIllustration = (spreadId: string) => {
   }
 };
 
+import { useLocale } from "@/lib/i18n";
+
 export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   selectedSpread,
   onSelectSpread,
@@ -112,17 +114,18 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   onRequireUpgrade,
   proceedLabel,
 }) => {
+  const { isEnglish } = useLocale();
   const [activeCategory, setActiveCategory] = useState<SpreadCategory>("recommended");
 
   const categories: CategoryTab[] = useMemo(
     () => [
-      { id: "recommended", label: "ยอดนิยมแนะนำ", Icon: SparkleTabIcon, count: 6 },
-      { id: "love", label: "ความรัก & คนในใจ", Icon: HeartTabIcon, count: 5 },
-      { id: "career", label: "การงาน & การเงิน", Icon: PentacleTabIcon, count: 5 },
-      { id: "master", label: "ผังใหญ่เจาะลึก", Icon: CrystalBallTabIcon, count: 5 },
-      { id: "all", label: "ผังทั้งหมด", Icon: AllSpreadsTabIcon, count: SPREADS.length },
+      { id: "recommended", label: isEnglish ? "Featured" : "ยอดนิยมแนะนำ", Icon: SparkleTabIcon, count: 6 },
+      { id: "love", label: isEnglish ? "Love & Relationships" : "ความรัก & คนในใจ", Icon: HeartTabIcon, count: 5 },
+      { id: "career", label: isEnglish ? "Career & Abundance" : "การงาน & การเงิน", Icon: PentacleTabIcon, count: 5 },
+      { id: "master", label: isEnglish ? "Grand Spreads" : "ผังใหญ่เจาะลึก", Icon: CrystalBallTabIcon, count: 5 },
+      { id: "all", label: isEnglish ? "All Spreads" : "ผังทั้งหมด", Icon: AllSpreadsTabIcon, count: SPREADS.length },
     ],
-    []
+    [isEnglish]
   );
 
   const filteredSpreads = useMemo(() => {
@@ -296,7 +299,11 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
-                aria-label={`ผัง ${spread.nameTh} (${spread.positions.length} ใบ)${isLocked ? " - ปลดล็อกด้วยญาณพยากรณ์พิเศษ" : ""} - ${spread.description}`}
+                aria-label={
+                  isEnglish
+                    ? `Spread ${spread.nameEn || spread.nameTh} (${spread.positions.length} cards)${isLocked ? " - Unlock with Grand Tier" : ""} - ${spread.descriptionEn || spread.description}`
+                    : `ผัง ${spread.nameTh} (${spread.positions.length} ใบ)${isLocked ? " - ปลดล็อกด้วยญาณพยากรณ์พิเศษ" : ""} - ${spread.description}`
+                }
                 onClick={handleCardClick}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -316,16 +323,16 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 {/* Top Card Header Tags */}
                 <div className="flex items-center justify-between z-10 pb-1">
                   <span className="text-[13px] text-[#2E211A] bg-[#FFFFFF] px-2.5 py-0.5 rounded-full border border-[#D9C8AC]/60 font-semibold font-mono ">
-                    {spread.positions.length} ใบ
+                    {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
                   </span>
                   {isLocked ? (
                     <span className="text-[12px] text-[#635B4E] bg-[#FFFFFF] border border-[#D9C8AC]/60 px-2.5 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
                       <SealedLockIcon className="w-3 h-3 text-[#8F5C1A]" />
-                      <span>✦ ญาณพิเศษ</span>
+                      <span>{isEnglish ? "✦ Master Tier" : "✦ ญาณพิเศษ"}</span>
                     </span>
                   ) : isRecommended ? (
                     <span className="text-[12px] text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-                      <span>✦</span> ยอดนิยม
+                      <span>✦</span> {isEnglish ? "Popular" : "ยอดนิยม"}
                     </span>
                   ) : null}
                 </div>
@@ -356,7 +363,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/card:border-[#D9C8AC] transition-all duration-300">
                       <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
                       <span className="text-[13px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
-                        แตะเพื่อปลดล็อกผังนี้
+                        {isEnglish ? "Tap to unlock this spread" : "แตะเพื่อปลดล็อกผังนี้"}
                       </span>
                     </div>
                   )}
@@ -365,10 +372,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 {/* Card Footer Titles */}
                 <div className="pt-2.5 border-t border-[#D9C8AC]/30 text-center z-10">
                   <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] group-hover/card:text-[#8F5C1A] transition-colors leading-snug py-0.5 [text-wrap:balance]">
-                    {spread.nameTh}
+                    {isEnglish ? (spread.nameEn || spread.nameTh) : spread.nameTh}
                   </h3>
                   <p className="text-[13px] text-[#635B4E] line-clamp-2 mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">
-                    {spread.tagline}
+                    {isEnglish ? (spread.taglineEn || spread.tagline) : spread.tagline}
                   </p>
                 </div>
 
@@ -411,7 +418,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     ? "w-3 bg-[#8F5C1A]/60"
                     : "w-1.5 bg-[#8F5C1A]/20 hover:bg-[#74490F]/45"
               }`}
-              aria-label={`เลือกผัง ${spread.nameTh}`}
+              aria-label={isEnglish ? `Select spread ${spread.nameEn || spread.nameTh}` : `เลือกผัง ${spread.nameTh}`}
             />
           );
         })}
@@ -447,7 +454,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                                   ? "major-02.jpg"
                                   : "major-17.jpg"
                 }`}
-                alt={selectedSpread.nameTh}
+                alt={isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
                 className="w-full h-full object-cover object-top tarot-hd-card-image"
                 sizes="72px"
               />
@@ -455,15 +462,17 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">ผังที่เลือกไว้:</span>
+                <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">
+                  {isEnglish ? "Selected Spread:" : "ผังที่เลือกไว้:"}
+                </span>
                 <span className="text-[13px] text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.2 rounded-full font-bold font-mono ">
-                  {selectedSpread.positions.length} ใบ
+                  {selectedSpread.positions.length} {isEnglish ? "Cards" : "ใบ"}
                 </span>
               </div>
               <div className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] leading-snug py-0.5 mt-0.5">
-                {selectedSpread.nameTh}
+                {isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
                 <span className="text-xs font-normal text-[#635B4E] ml-2 hidden sm:inline font-serif-th">
-                  — {selectedSpread.tagline}
+                  — {isEnglish ? (selectedSpread.taglineEn || selectedSpread.tagline) : selectedSpread.tagline}
                 </span>
               </div>
             </div>
@@ -474,7 +483,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             onClick={onProceed}
             className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-white font-bold font-serif-th text-sm sm:text-base active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
           >
-            <span>{proceedLabel ?? "ถัดไป: ตั้งคำถามและเลือกแม่หมอ"}</span>
+            <span>{proceedLabel ?? (isEnglish ? "Next: Set Intention & Choose Reader" : "ถัดไป: ตั้งคำถามและเลือกแม่หมอ")}</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
         </motion.div>

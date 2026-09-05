@@ -6,6 +6,7 @@ import type { TarotCard } from "@/data/cards/types";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import { generateSacredMantra } from "@/lib/tarot/mantra";
 import { SITE_ORIGIN } from "@/lib/config/site";
+import { useLocale } from "@/lib/i18n";
 
 interface OracleMantraCardProps {
   cards: TarotCard[];
@@ -14,6 +15,7 @@ interface OracleMantraCardProps {
 }
 
 export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn, personaNameTh = "แม่หมอทาโรต์" }) => {
+  const { isEnglish } = useLocale();
   const [copied, setCopied] = useState(false);
   const mantra = useMemo(() => {
     try {
@@ -25,9 +27,17 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
 
   if (!mantra) return null;
 
+  const quote = isEnglish && mantra.quoteEn ? mantra.quoteEn : mantra.quoteTh;
+  const affirmation = isEnglish && mantra.affirmationEn ? mantra.affirmationEn : mantra.affirmationTh;
+  const elementSymbol = isEnglish && mantra.elementSymbolEn ? mantra.elementSymbolEn : mantra.elementSymbol;
+  const cardName = isEnglish ? (mantra.sourceCard.nameEn || mantra.sourceCard.nameTh) : mantra.sourceCard.nameTh;
+  const powerWord = isEnglish && mantra.powerWordEn ? mantra.powerWordEn : mantra.powerWord;
+
   const handleCopy = async () => {
     const origin = typeof window !== "undefined" ? window.location.origin : SITE_ORIGIN;
-    const textToCopy = `✨ คำคมพลังใจศักดิ์สิทธิ์จาก ${personaNameTh}\n${mantra.quoteTh}\n✦ ข้อคิดนำทาง: "${mantra.affirmationTh}"\n(ไพ่สะท้อนพลัง: ${mantra.sourceCard.nameTh} - ${mantra.powerWord})\nดูดวงออนไลน์พรีเมียม: ${origin}`;
+    const textToCopy = isEnglish
+      ? `✨ Sacred Oracle Wisdom from ${personaNameTh}\n${quote}\n✦ Guiding Affirmation: "${affirmation}"\n(Resonant Card: ${cardName} - ${powerWord})\nTarot Sanctuary: ${origin}`
+      : `✨ คำคมพลังใจศักดิ์สิทธิ์จาก ${personaNameTh}\n${quote}\n✦ ข้อคิดนำทาง: "${affirmation}"\n(ไพ่สะท้อนพลัง: ${cardName} - ${powerWord})\nดูดวงออนไลน์พรีเมียม: ${origin}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
@@ -49,19 +59,25 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
       {/* Card Header Badge */}
       <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 text-xs font-medium text-[#2E211A] ">
         <span className="text-[#8F5C1A]">✨</span>
-        <span className="font-serif-th font-semibold">คำคมพลังใจศักดิ์สิทธิ์ (Sacred Oracle Mantra)</span>
+        <span className="font-serif-th font-semibold">
+          {isEnglish ? "Sacred Oracle Wisdom (Oracle Mantra)" : "คำคมพลังใจศักดิ์สิทธิ์ (Sacred Oracle Mantra)"}
+        </span>
         <span className="text-[#8F5C1A]">✦</span>
       </div>
 
       {/* Main Quote */}
       <blockquote className="my-4 font-serif-th text-lg font-bold leading-relaxed text-[#2E211A] sm:text-xl md:text-2xl">
-        &ldquo;{mantra.quoteTh}&rdquo;
+        &ldquo;{quote.replace(/^["“”]|["“”]$/g, "")}&rdquo;
       </blockquote>
 
       {/* Affirmation Box */}
       <div className="my-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] sm:text-sm ">
-        <p className="font-serif-th font-bold text-[#8F5C1A]">✦ คำประกาศเจตจำนง (Affirmation):</p>
-        <p className="mt-1 font-serif-th font-medium text-[#2E211A]">{mantra.affirmationTh}</p>
+        <p className="font-serif-th font-bold text-[#8F5C1A]">
+          ✦ {isEnglish ? "Guiding Affirmation:" : "คำประกาศเจตจำนง (Affirmation):"}
+        </p>
+        <p className="mt-1 font-serif-th font-medium text-[#2E211A]">
+          {affirmation.replace(/^["“”]|["“”]$/g, "")}
+        </p>
       </div>
 
       {/* Source Meta & Action */}
@@ -69,15 +85,15 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
         <div className="flex items-center gap-2 text-left">
           <span className="text-[#8F5C1A] text-xs">✦</span>
           <div>
-            <span className="font-serif-th font-semibold text-[#2E211A]">{mantra.sourceCard.nameTh}</span>
-            <span className="ml-1.5 text-[#635B4E] font-mono text-[13px]">({mantra.elementSymbol})</span>
+            <span className="font-serif-th font-semibold text-[#2E211A]">{cardName}</span>
+            <span className="ml-1.5 text-[#635B4E] font-mono text-[13px]">({elementSymbol})</span>
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleCopy}
-          aria-label="คัดลอกคำคมแชร์ลงสตอรี่"
+          aria-label={isEnglish ? "Copy wisdom to clipboard" : "คัดลอกคำคมแชร์ลงสตอรี่"}
           className="inline-flex items-center gap-1.5 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3.5 py-1.5 text-xs font-semibold text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] hover:text-[#8F5C1A] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           <AnimatePresence mode="wait">
@@ -90,7 +106,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
                 className="flex items-center gap-1.5 text-[#3A7044] font-bold"
               >
                 <span>✓</span>
-                <span>คัดลอกคำคมแล้ว!</span>
+                <span>{isEnglish ? "Wisdom Copied!" : "คัดลอกคำคมแล้ว!"}</span>
               </motion.span>
             ) : (
               <motion.span
@@ -101,7 +117,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
                 className="flex items-center gap-1.5 font-serif-th"
               >
                 <span className="text-[#8F5C1A]">✦</span>
-                <span>คัดลอกคำคมแชร์ลงสตอรี่</span>
+                <span>{isEnglish ? "Copy Wisdom" : "คัดลอกคำคมแชร์ลงสตอรี่"}</span>
               </motion.span>
             )}
           </AnimatePresence>

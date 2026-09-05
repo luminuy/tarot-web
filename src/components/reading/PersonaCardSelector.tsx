@@ -15,6 +15,8 @@ import {
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isMasterPersona } from "@/lib/entitlement/limits";
 
+import { useLocale } from "@/lib/i18n";
+
 interface PersonaCardSelectorProps {
   selectedPersona: Persona;
   onSelectPersona: (persona: Persona) => void;
@@ -30,30 +32,43 @@ const PERSONA_GREETINGS: Record<string, string> = {
   mystic: "ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์ ดวงดาวและจักรวาลกำลังส่งสัญญาณถึงคุณ",
 };
 
-const PERSONA_DETAILS: Record<string, { roleTitle: string; archetype: string; renderArt: () => React.ReactNode }> = {
+const PERSONA_GREETINGS_EN: Record<string, string> = {
+  warm: "Welcome, seeker. Whatever weighs on your heart today, know you are held in sacred space.",
+  playful: "Hey there! Ready to see what magic the cards have in store for you today? Let's dive in! ✨",
+  direct: "Greetings. The cards cut straight to the core. Are you ready for clear, honest truth?",
+  master: "Greetings. Every crossroad carries strategic opportunity. Let us examine the patterns and forge your path.",
+  mystic: "Welcome to the sacred sanctuary. The celestial currents and ancient archetypes are whispering your name.",
+};
+
+const PERSONA_DETAILS: Record<string, { roleTitle: string; archetypeTh: string; archetypeEn: string; renderArt: () => React.ReactNode }> = {
   warm: {
     roleTitle: "THE HIGH PRIESTESS",
-    archetype: "สไตล์: อบอุ่น ให้กำลังใจ เหมือนพี่สาว",
+    archetypeTh: "สไตล์: อบอุ่น ให้กำลังใจ เหมือนพี่สาว",
+    archetypeEn: "Style: Warm, nurturing, compassionate sister",
     renderArt: () => <HighPriestessIllustration className="w-20 h-[136px] mx-auto" />,
   },
   playful: {
     roleTitle: "THE MAGICIAN & BESTIE",
-    archetype: "สไตล์: คุยสนุก เป็นกันเอง เม้าท์มันส์",
+    archetypeTh: "สไตล์: คุยสนุก เป็นกันเอง เม้าท์มันส์",
+    archetypeEn: "Style: Playful, spirited, best-friend energy",
     renderArt: () => <MagicianIllustration className="w-20 h-[136px] mx-auto" />,
   },
   direct: {
     roleTitle: "JUSTICE & TRUTH",
-    archetype: "สไตล์: ตรงไปตรงมา ชัดเจน ไม่อ้อมค้อม",
+    archetypeTh: "สไตล์: ตรงไปตรงมา ชัดเจน ไม่อ้อมค้อม",
+    archetypeEn: "Style: Direct, sharp, unfiltered clarity",
     renderArt: () => <JusticeIllustration className="w-20 h-[136px] mx-auto" />,
   },
   master: {
     roleTitle: "THE MASTER STRATEGIST",
-    archetype: "สไตล์: จริงจัง สุขุม ให้กลยุทธ์ฟันธง",
+    archetypeTh: "สไตล์: จริงจัง สุขุม ให้กลยุทธ์ฟันธง",
+    archetypeEn: "Style: Strategic, grounded, executive clarity",
     renderArt: () => <HermitIllustration className="w-20 h-[136px] mx-auto" />,
   },
   mystic: {
     roleTitle: "THE ASTRAL STAR",
-    archetype: "สไตล์: ลึกซึ้ง มองภาพรวมและพลังงาน",
+    archetypeTh: "สไตล์: ลึกซึ้ง มองภาพรวมและพลังงาน",
+    archetypeEn: "Style: Esoteric, cosmic, deep intuitive symbolism",
     renderArt: () => <TheStarIllustration className="w-20 h-[136px] mx-auto" />,
   },
 };
@@ -64,6 +79,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   isPassHolder = false,
   onRequireUpgrade,
 }) => {
+  const { isEnglish } = useLocale();
   const carouselRef = React.useRef<HTMLDivElement>(null);
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
 
@@ -93,14 +109,17 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   return (
     <div className="space-y-4 w-full">
       <label className="text-xs sm:text-sm font-serif-th font-bold text-[#8F5C1A] tracking-wide flex items-center gap-2 [text-wrap:balance]">
-        <span className="text-[#8F5C1A]">✦</span> เลือกสไตล์การทำนายของแม่หมอ ({PERSONAS.length} สไตล์)
+        <span className="text-[#8F5C1A]">✦</span>{" "}
+        {isEnglish
+          ? `Select Reader Persona (${PERSONAS.length} Archetypes)`
+          : `เลือกสไตล์การทำนายของแม่หมอ (${PERSONAS.length} สไตล์)`}
       </label>
 
       {/* Responsive Persona Carousel (Mobile Swipe / Desktop Grid) */}
       <div
         ref={carouselRef}
         role="radiogroup"
-        aria-label="เลือกสไตล์การทำนายของแม่หมอ"
+        aria-label={isEnglish ? "Select reader persona" : "เลือกสไตล์การทำนายของแม่หมอ"}
         onScroll={handleCarouselScroll}
         className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 sm:gap-4 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
       >
@@ -126,7 +145,11 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               role="radio"
               tabIndex={0}
               aria-checked={isSelected}
-              aria-label={`แม่หมอ ${p.nameTh} (${meta.roleTitle})${isLocked ? " - ปลดล็อกด้วยญาณพยากรณ์พิเศษ" : ""} - ${p.tagline}`}
+              aria-label={
+                isEnglish
+                  ? `Reader ${p.nameEn || p.nameTh} (${meta.roleTitle})${isLocked ? " - Unlock with Grand Tier" : ""} - ${p.taglineEn || p.tagline}`
+                  : `แม่หมอ ${p.nameTh} (${meta.roleTitle})${isLocked ? " - ปลดล็อกด้วยญาณพยากรณ์พิเศษ" : ""} - ${p.tagline}`
+              }
               whileHover={{ y: -5, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handlePersonaClick}
@@ -153,11 +176,13 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   </span>
                   {isLocked && (
                     <span className="text-[12px] text-[#8F5C1A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
-                      <span>✦ ผู้เชี่ยวชาญพิเศษ</span>
+                      <span>{isEnglish ? "✦ Master Tier" : "✦ ผู้เชี่ยวชาญพิเศษ"}</span>
                     </span>
                   )}
                 </div>
-                <span className="text-[13px] text-[#635B4E] font-serif-th block mt-0.5">{meta.archetype}</span>
+                <span className="text-[13px] text-[#635B4E] font-serif-th block mt-0.5">
+                  {isEnglish ? meta.archetypeEn : meta.archetypeTh}
+                </span>
               </div>
 
               {/* Authentic Tarot Persona Character Artwork with Altar Aura */}
@@ -173,7 +198,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/persona:border-[#8F5C1A] transition-all duration-300 shadow-xs">
                     <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
                     <span className="text-[13px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
-                      แตะเพื่อปลดล็อก
+                      {isEnglish ? "Tap to unlock" : "แตะเพื่อปลดล็อก"}
                     </span>
                   </div>
                 )}
@@ -183,7 +208,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               <div className="pt-2 border-t border-[#D9C8AC]/30 text-center">
                 <div className="flex items-center justify-center gap-1.5">
                   <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight [text-wrap:balance]">
-                    {p.nameTh}
+                    {isEnglish ? (p.nameEn || p.nameTh) : p.nameTh}
                   </h4>
                   <button
                     type="button"
@@ -195,17 +220,29 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                         return;
                       }
                       onSelectPersona(p);
-                      const greeting = PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ";
+                      const greeting = isEnglish
+                        ? (PERSONA_GREETINGS_EN[p.id] || "Greetings, seeker.")
+                        : (PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ");
                       soundManager.speakProphecy(greeting, p.id);
                     }}
                     className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F3EDE2]/40 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
-                    title={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
-                    aria-label={isLocked ? `ปลดล็อกเสียงทักทายของ ${p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`}
+                    title={
+                      isLocked
+                        ? (isEnglish ? `Unlock voice greeting of ${p.nameEn || p.nameTh}` : `ปลดล็อกเสียงทักทายของ ${p.nameTh}`)
+                        : (isEnglish ? `Listen to voice of ${p.nameEn || p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`)
+                    }
+                    aria-label={
+                      isLocked
+                        ? (isEnglish ? `Unlock voice greeting of ${p.nameEn || p.nameTh}` : `ปลดล็อกเสียงทักทายของ ${p.nameTh}`)
+                        : (isEnglish ? `Listen to voice of ${p.nameEn || p.nameTh}` : `ฟังเสียงทักทายของ ${p.nameTh}`)
+                    }
                   >
                     <SpeakerTabIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <p className="text-[13px] text-[#635B4E] mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">{p.tagline}</p>
+                <p className="text-[13px] text-[#635B4E] mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">
+                  {isEnglish ? (p.taglineEn || p.tagline) : p.tagline}
+                </p>
               </div>
 
               {/* Selected Golden Corner Seals */}
@@ -246,7 +283,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                     ? "w-3 bg-[#8F5C1A]/60"
                     : "w-1.5 bg-[#8F5C1A]/20 hover:bg-[#74490F]/45"
               }`}
-              aria-label={`เลือก ${p.nameTh}`}
+              aria-label={isEnglish ? `Select ${p.nameEn || p.nameTh}` : `เลือก ${p.nameTh}`}
             />
           );
         })}

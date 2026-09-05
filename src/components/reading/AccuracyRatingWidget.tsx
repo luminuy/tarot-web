@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { SPRING } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n";
 
 interface AccuracyRatingWidgetProps {
   personaId: string;
@@ -10,17 +11,23 @@ interface AccuracyRatingWidgetProps {
 }
 
 const RATING_OPTIONS = [
-  { score: 1, label: "ไม่ตรง", symbol: "✦" },
-  { score: 2, label: "ตรงบ้าง", symbol: "✦✦" },
-  { score: 3, label: "ตรงพอใช้", symbol: "✦✦✦" },
-  { score: 4, label: "ตรงมาก", symbol: "✦✦✦✦" },
-  { score: 5, label: "ตรงเป๊ะ!", symbol: "✦✦✦✦✦" },
+  { score: 1, labelTh: "ไม่ตรง", labelEn: "Not resonant", symbol: "✦" },
+  { score: 2, labelTh: "ตรงบ้าง", labelEn: "Somewhat", symbol: "✦✦" },
+  { score: 3, labelTh: "ตรงพอใช้", labelEn: "Fair", symbol: "✦✦✦" },
+  { score: 4, labelTh: "ตรงมาก", labelEn: "Very accurate", symbol: "✦✦✦✦" },
+  { score: 5, labelTh: "ตรงเป๊ะ!", labelEn: "Spot on!", symbol: "✦✦✦✦✦" },
 ];
 
 /** ประเมินความแม่นยำหลังอ่านไพ่ — ใช้เป็น A/B data สำหรับปรับ prompt */
 export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ personaId, readingId }) => {
+  const { isEnglish } = useLocale();
   const [submitted, setSubmitted] = useState(false);
   const [selectedScore, setSelectedScore] = useState<number | null>(null);
+
+  const getScoreLabel = (score: number) => {
+    const opt = RATING_OPTIONS.find((o) => o.score === score);
+    return isEnglish ? opt?.labelEn : opt?.labelTh;
+  };
 
   // ตรวจว่าเคยให้คะแนนการอ่านนี้ไปแล้วหรือยัง
   useEffect(() => {
@@ -78,20 +85,10 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
         >
           <span className="text-[#8F5C1A]">✨</span>
           <span>
-            ขอบคุณสำหรับการให้คะแนน!{" "}
+            {isEnglish ? "Thank you for your resonance feedback! " : "ขอบคุณสำหรับการให้คะแนน! "}
             {selectedScore !== null && (
               <span className="text-[#8F5C1A] font-bold">
-                (
-                {selectedScore === 1
-                  ? "ไม่ตรง"
-                  : selectedScore === 2
-                    ? "ตรงบ้าง"
-                    : selectedScore === 3
-                      ? "ตรงพอใช้"
-                      : selectedScore === 4
-                        ? "ตรงมาก"
-                        : "ตรงเป๊ะ!"}
-                )
+                ({getScoreLabel(selectedScore)})
               </span>
             )}
           </span>
@@ -106,26 +103,33 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
         >
           <span className="text-xs text-[#2E211A] font-serif-th font-semibold flex items-center gap-1.5">
             <span className="text-[#8F5C1A]">✦</span>
-            <span>คำทำนายครั้งนี้ตรงกับสถานการณ์จริงของคุณไหม?</span>
+            <span>
+              {isEnglish
+                ? "Did this reading resonate with your situation?"
+                : "คำทำนายครั้งนี้ตรงกับสถานการณ์จริงของคุณไหม?"}
+            </span>
           </span>
           <div className="flex items-center gap-2 flex-wrap justify-center">
-            {RATING_OPTIONS.map(({ score, label, symbol }) => (
-              <button
-                key={score}
-                type="button"
-                onClick={() => handleRate(score)}
-                className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-all cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
-                title={label}
-                aria-label={`ให้คะแนนระดับ: ${label}`}
-              >
-                <span className="text-[13px] text-[#8F5C1A] font-mono group-hover:scale-115 transition-transform">
-                  {symbol}
-                </span>
-                <span className="text-[13px] text-[#635B4E] group-hover:text-[#2E211A] font-serif-th font-medium transition-colors">
-                  {label}
-                </span>
-              </button>
-            ))}
+            {RATING_OPTIONS.map(({ score, labelTh, labelEn, symbol }) => {
+              const label = isEnglish ? labelEn : labelTh;
+              return (
+                <button
+                  key={score}
+                  type="button"
+                  onClick={() => handleRate(score)}
+                  className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-all cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                  title={label}
+                  aria-label={isEnglish ? `Rating: ${label}` : `ให้คะแนนระดับ: ${label}`}
+                >
+                  <span className="text-[13px] text-[#8F5C1A] font-mono group-hover:scale-115 transition-transform">
+                    {symbol}
+                  </span>
+                  <span className="text-[13px] text-[#635B4E] group-hover:text-[#2E211A] font-serif-th font-medium transition-colors">
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </motion.div>
       )}

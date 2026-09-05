@@ -170,8 +170,9 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
 
   const overrideDoc = await getContentOverrides();
   const systemInstruction = buildSystemPrompt(ctx.personaId, {
-    systemCore: resolveSystemCore(overrideDoc),
+    systemCore: ctx.lang === "en" ? undefined : resolveSystemCore(overrideDoc),
     persona: resolvePersona(overrideDoc, ctx.personaId),
+    lang: ctx.lang,
   });
   const userPrompt = buildReadingMessage(ctx);
 

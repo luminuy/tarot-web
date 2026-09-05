@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import { trackEvent } from "@/lib/analytics";
+import { useLocale } from "@/lib/i18n";
 
 import {
   AirElementIcon,
@@ -20,16 +21,18 @@ interface CardsExplorerProps {
 }
 
 const SUIT_TABS = [
-  { id: "all", label: "ไพ่ทั้งหมด", Icon: SparkleTabIcon, desc: "ครบ 78 ใบ", count: 78 },
-  { id: "major", label: "ไพ่ชุดใหญ่ (Major)", Icon: CrownTabIcon, desc: "ไพ่หลัก 22 ใบ", count: 22 },
-  { id: "wands", label: "ไม้เท้า (Wands)", Icon: FireElementIcon, desc: "ธาตุไฟ • พลังงาน & การงาน", count: 14 },
-  { id: "cups", label: "ถ้วย (Cups)", Icon: WaterElementIcon, desc: "ธาตุน้ำ • ความรัก & อารมณ์", count: 14 },
-  { id: "swords", label: "ดาบ (Swords)", Icon: AirElementIcon, desc: "ธาตุลม • ความคิด & การตัดสินใจ", count: 14 },
+  { id: "all", labelTh: "ไพ่ทั้งหมด", labelEn: "All Cards", Icon: SparkleTabIcon, descTh: "ครบ 78 ใบ", descEn: "Complete 78 cards", count: 78 },
+  { id: "major", labelTh: "ไพ่ชุดใหญ่ (Major)", labelEn: "Major Arcana", Icon: CrownTabIcon, descTh: "ไพ่หลัก 22 ใบ", descEn: "22 Trump cards", count: 22 },
+  { id: "wands", labelTh: "ไม้เท้า (Wands)", labelEn: "Wands", Icon: FireElementIcon, descTh: "ธาตุไฟ • พลังงาน & การงาน", descEn: "Fire • Passion & Will", count: 14 },
+  { id: "cups", labelTh: "ถ้วย (Cups)", labelEn: "Cups", Icon: WaterElementIcon, descTh: "ธาตุน้ำ • ความรัก & อารมณ์", descEn: "Water • Love & Emotion", count: 14 },
+  { id: "swords", labelTh: "ดาบ (Swords)", labelEn: "Swords", Icon: AirElementIcon, descTh: "ธาตุลม • ความคิด & การตัดสินใจ", descEn: "Air • Intellect & Truth", count: 14 },
   {
     id: "pentacles",
-    label: "เหรียญ (Pentacles)",
+    labelTh: "เหรียญ (Pentacles)",
+    labelEn: "Pentacles",
     Icon: PentacleTabIcon,
-    desc: "ธาตุดิน • การเงิน & ความมั่นคง",
+    descTh: "ธาตุดิน • การเงิน & ความมั่นคง",
+    descEn: "Earth • Material & Stability",
     count: 14,
   },
 ];
@@ -62,6 +65,7 @@ const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string;
 };
 
 export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
+  const { isEnglish } = useLocale();
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -117,7 +121,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."
+              placeholder={isEnglish ? "Search by card name, keyword, zodiac, or element..." : "ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."}
               className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] placeholder-[#756F66]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
             />
             {searchQuery && (
@@ -133,8 +137,15 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
           <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-[#635B4E]">
             <span>
-              ค้นพบ <strong className="text-[#A58A5C] text-sm font-bold">{filteredCards.length}</strong> จาก{" "}
-              {cards.length} ใบ
+              {isEnglish ? (
+                <>
+                  Found <strong className="text-[#A58A5C] text-sm font-bold">{filteredCards.length}</strong> of {cards.length} cards
+                </>
+              ) : (
+                <>
+                  ค้นพบ <strong className="text-[#A58A5C] text-sm font-bold">{filteredCards.length}</strong> จาก {cards.length} ใบ
+                </>
+              )}
             </span>
             {searchQuery && (
               <button
@@ -145,7 +156,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 }}
                 className="text-[13px] text-[#A58A5C] hover:underline cursor-pointer font-bold font-serif-th"
               >
-                ล้างคำค้นหา
+                {isEnglish ? "Clear Search" : "ล้างคำค้นหา"}
               </button>
             )}
           </div>
@@ -154,7 +165,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         {/* Suit & Arcana Filter Tabs */}
         <div
           role="tablist"
-          aria-label="หมวดหมู่ชุดไพ่และสำรับ"
+          aria-label={isEnglish ? "Card suits and arcana categories" : "หมวดหมู่ชุดไพ่และสำรับ"}
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5"
         >
           {SUIT_TABS.map((tab, tabIdx) => {
@@ -196,16 +207,14 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   </span>
                 </div>
                 <div>
-                  {/* ป้ายกำกับปุ่มกรอง ไม่ใช่หัวข้อของเอกสาร — เดิมเป็น <h4> ทำให้โครงหัวข้อ
-                      ของหน้า /cards กระโดดจาก h1 ไป h4 โดยไม่มี h2 เลย */}
                   <span
                     className={`block font-serif-th text-xs font-bold leading-tight ${
                       isActive ? "text-[#A58A5C]" : "text-[#29261F] group-hover:text-[#A58A5C]"
                     }`}
                   >
-                    {tab.label}
+                    {isEnglish ? tab.labelEn : tab.labelTh}
                   </span>
-                  <p className="text-[13px] text-[#635B4E] truncate mt-0.5">{tab.desc}</p>
+                  <p className="text-[13px] text-[#635B4E] truncate mt-0.5">{isEnglish ? tab.descEn : tab.descTh}</p>
                 </div>
               </button>
             );
@@ -259,17 +268,17 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   {/* Bottom Hover Action Overlay */}
                   <div className="absolute inset-x-0 bottom-0 p-2 bg-[#29261F]/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="text-[13px] font-serif-th font-bold text-[#F3F0EA] flex items-center gap-1">
-                      <span>✦</span> ดูความหมาย
+                      <span>✦</span> {isEnglish ? "View Meaning" : "ดูความหมาย"}
                     </span>
                   </div>
                 </div>
 
                 {/* Card Title & English Subtitle */}
                 <div className="text-center space-y-1 z-10">
-                  <span className="text-[13px] font-mono text-[#635B4E] block truncate">{card.nameEn}</span>
+                  <span className="text-[13px] font-mono text-[#635B4E] block truncate">{isEnglish ? card.nameTh : card.nameEn}</span>
                   {/* ชื่อไพ่แต่ละใบคือหัวข้อระดับที่สองของหน้า /cards (h1 = ชื่อหน้า) */}
                   <h2 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors truncate">
-                    {card.nameTh}
+                    {isEnglish ? card.nameEn : card.nameTh}
                   </h2>
 
                   {/* Top 2 Upright Keywords */}
@@ -300,11 +309,12 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         <div className="text-center py-16 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-8 space-y-3 shadow-xs">
           <div className="text-3xl text-[#A58A5C]">✦</div>
           <h2 className="font-serif-th text-lg font-bold text-[#29261F]">
-            ไม่พบไพ่ที่ตรงกับ &ldquo;{searchQuery}&rdquo;
+            {isEnglish ? `No cards matching "${searchQuery}"` : `ไม่พบไพ่ที่ตรงกับ "${searchQuery}"`}
           </h2>
           <p className="text-xs text-[#635B4E] max-w-md mx-auto font-serif-th">
-            ลองค้นหาด้วยชื่ออื่น เช่น &ldquo;ความรัก&rdquo;, &ldquo;The Sun&rdquo;, &ldquo;ดาวพฤหัสบดี&rdquo; หรือ
-            &ldquo;ธาตุไฟ&rdquo;
+            {isEnglish
+              ? 'Try searching by another term such as "Love", "The Sun", "Jupiter", or "Fire".'
+              : 'ลองค้นหาด้วยชื่ออื่น เช่น "ความรัก", "The Sun", "ดาวพฤหัสบดี" หรือ "ธาตุไฟ"'}
           </p>
           <button
             type="button"
@@ -314,7 +324,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             }}
             className="px-6 py-2 rounded-full text-xs font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition-all cursor-pointer shadow-xs"
           >
-            ล้างตัวกรองทั้งหมด
+            {isEnglish ? "Clear All Filters" : "ล้างตัวกรองทั้งหมด"}
           </button>
         </div>
       )}

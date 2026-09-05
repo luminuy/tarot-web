@@ -36,6 +36,7 @@ import {
 } from "@/lib/entitlement/copy";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { useLocale } from "@/lib/i18n";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
 const ShuffleRitual = dynamic(() => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual), {
@@ -83,14 +84,14 @@ const IntentionAltarInput = dynamic(
 );
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
-function StepBackButton({ onClick }: { onClick: () => void }) {
+function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-xs font-serif-th text-[#2E211A] hover:bg-[#FAF7F2] hover:border-[#8F5C1A] transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
     >
-      <span aria-hidden="true">←</span> ย้อนกลับ
+      <span aria-hidden="true">←</span> {label || "ย้อนกลับ"}
     </button>
   );
 }
@@ -117,6 +118,7 @@ function mapBlockedReason(reason?: string): UpgradeReason | null {
  * (ไฟล์นี้เป็น "use client" — อะไรที่ import เข้ามาตรง ๆ จะกลายเป็นโค้ดฝั่งไคลเอนต์ทั้งหมด)
  */
 export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode }) {
+  const { locale, isEnglish } = useLocale();
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
   const motionSafe = useMotionSafe();
 
@@ -482,12 +484,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     const trimmedQuestion = question.trim();
 
     if (!trimmedNickname) {
-      setErrorMsg("กรุณากรอกชื่อเล่นของคุณก่อนเริ่มดูดวง");
+      setErrorMsg(isEnglish ? "Please enter your name before beginning." : "กรุณากรอกชื่อเล่นของคุณก่อนเริ่มดูดวง");
       return;
     }
 
     if (!trimmedQuestion) {
-      setErrorMsg("กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง");
+      setErrorMsg(isEnglish ? "Please enter your question before beginning." : "กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง");
       return;
     }
 
@@ -506,6 +508,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           nickname: trimmedNickname,
           category: selectedCategory,
           intake: { situation: situation.trim() || undefined },
+          lang: locale,
         }),
       });
 
@@ -518,7 +521,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           openAccessDialog(blockedReason);
           return;
         }
-        throw new Error(data.error || "ไม่สามารถเริ่มดูดวงได้");
+        throw new Error(data.error || (isEnglish ? "Unable to begin tarot reading." : "ไม่สามารถเริ่มดูดวงได้"));
       }
 
       const sessionReadingId = data.readingId || data.id;
@@ -536,7 +539,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
       navigateStep("SHUFFLE");
     } catch (err: any) {
-      setErrorMsg(err.message || "เกิดข้อผิดพลาดในการเริ่มดูดวง");
+      setErrorMsg(err.message || (isEnglish ? "An error occurred while beginning the reading." : "เกิดข้อผิดพลาดในการเริ่มดูดวง"));
     } finally {
       setLoading(false);
     }
@@ -549,11 +552,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       return;
     }
 
+    const chosenQuestion = (isEnglish && topic.defaultQuestionEn) ? topic.defaultQuestionEn : topic.defaultQuestion;
     const quickSpread = SPREADS.find((s) => s.id === "quick") || selectedSpread;
     setSelectedSpread(quickSpread);
     setSelectedCategory(topic.category);
     setNickname(userNickname);
-    setQuestion(topic.defaultQuestion);
+    setQuestion(chosenQuestion);
     setLoading(true);
     setErrorMsg(null);
     soundManager.playCardSelectSound();
@@ -565,11 +569,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           spreadId: quickSpread.id,
-          question: topic.defaultQuestion,
+          question: chosenQuestion,
           personaId: selectedPersona.id,
           nickname: userNickname,
           category: topic.category,
           intake: {},
+          lang: locale,
         }),
       });
 
@@ -581,7 +586,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           openAccessDialog(blockedReason);
           return;
         }
-        throw new Error(data.error || "ไม่สามารถเริ่มดูดวงได้");
+        throw new Error(data.error || (isEnglish ? "Unable to begin tarot reading." : "ไม่สามารถเริ่มดูดวงได้"));
       }
 
       const sessionReadingId = data.readingId || data.id;
@@ -613,9 +618,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       const shuffleData = await shuffleRes.json().catch(() => ({}));
       if (!shuffleRes.ok) {
         if (shuffleRes.status === 410 || shuffleData.code === "SESSION_SEED_LOST") {
-          throw new Error("เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
+          throw new Error(isEnglish ? "Session expired during shuffle. Please start again." : "เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
         }
-        throw new Error(shuffleData.error || "ไม่สามารถจัดสำรับไพ่ได้");
+        throw new Error(shuffleData.error || (isEnglish ? "Unable to organize the tarot deck." : "ไม่สามารถจัดสำรับไพ่ได้"));
       }
 
       const latestToken = shuffleData.sessionToken || activeSessionToken;
@@ -623,16 +628,16 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
       const { cardByIndex } = await import("@/data/cards");
       if (!shuffleData.drawn || !Array.isArray(shuffleData.drawn) || shuffleData.drawn.length === 0) {
-        throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+        throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
       }
 
       const enrichedCards: DrawnSlotCard[] = shuffleData.drawn.map((d: any) => {
         if (d.cardIndex === undefined || d.cardIndex === null) {
-          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+          throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
         }
         const fullCard = cardByIndex(d.cardIndex);
         if (!fullCard) {
-          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+          throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
         }
         const kw = fullCard.keywords;
         const extractedKeywords = Array.isArray(kw) ? kw : d.isReversed ? (kw?.reversed ?? []) : (kw?.upright ?? []);
@@ -644,7 +649,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           position: quickSpread?.positions?.[d.order] || {
             index: d.order ?? 0,
             nameTh: "คำตอบต่อเรื่องนี้",
+            nameEn: "Answer to your inquiry",
             meaning: "คำตอบตรงต่อคำถามที่ผู้ถามตั้งจิตถาม",
+            meaningEn: "Direct answer to the querent's question",
           },
           card: {
             id: fullCard.id,
@@ -665,13 +672,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
       // เริ่มสตรีมคำทำนาย AI เบื้องหลังทันที พร้อมส่งคำถามเต็มจริง ๆ และหมวดหมู่ตรงหัวข้อ ป้องกัน stale closure
       startAIStreaming(sessionReadingId, enrichedCards, latestToken, {
-        question: topic.defaultQuestion,
+        question: chosenQuestion,
         category: topic.category,
         spread: quickSpread,
         nickname: userNickname,
       });
     } catch (err: any) {
-      setErrorMsg(err.message || "เกิดข้อผิดพลาดในการประมวลผลไพ่ด่วน");
+      setErrorMsg(err.message || (isEnglish ? "An error occurred while processing the quick reading." : "เกิดข้อผิดพลาดในการประมวลผลไพ่ด่วน"));
     } finally {
       setLoading(false);
     }
@@ -741,25 +748,25 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         if (res.status === 410 || data.code === "SESSION_SEED_LOST") {
-          throw new Error("เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
+          throw new Error(isEnglish ? "Session expired during shuffle. Please start again." : "เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
         }
-        throw new Error(data.error || "ไม่สามารถจัดสำรับไพ่ได้");
+        throw new Error(data.error || (isEnglish ? "Unable to organize the tarot deck." : "ไม่สามารถจัดสำรับไพ่ได้"));
       }
       if (data.sessionToken) setSessionToken(data.sessionToken);
 
       const { cardByIndex } = await import("@/data/cards");
 
       if (!data.drawn || !Array.isArray(data.drawn) || data.drawn.length === 0) {
-        throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+        throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
       }
 
       const enrichedCards: DrawnSlotCard[] = data.drawn.map((d: any) => {
         if (d.cardIndex === undefined || d.cardIndex === null) {
-          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+          throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
         }
         const fullCard = cardByIndex(d.cardIndex);
         if (!fullCard) {
-          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+          throw new Error(isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
         }
         const kw = fullCard.keywords;
         const extractedKeywords = Array.isArray(kw) ? kw : d.isReversed ? (kw?.reversed ?? []) : (kw?.upright ?? []);
@@ -771,7 +778,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           position: selectedSpread?.positions?.[d.order] || {
             index: d.order ?? 0,
             nameTh: `ตำแหน่งที่ ${(d.order ?? 0) + 1}`,
+            nameEn: `Position ${(d.order ?? 0) + 1}`,
             meaning: "",
+            meaningEn: "",
           },
           card: {
             id: fullCard.id,
@@ -792,7 +801,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       // Auto start streaming AI interpretation in background
       startAIStreaming(activeId, enrichedCards, data.sessionToken || sessionToken);
     } catch (err: any) {
-      setErrorMsg(err.message || "เกิดข้อผิดพลาดในการประมวลผลไพ่");
+      setErrorMsg(err.message || (isEnglish ? "An error occurred while processing the cards." : "เกิดข้อผิดพลาดในการประมวลผลไพ่"));
       // P2-5: ถอยกลับแค่ไพ่ใบสุดท้าย ให้เลือกใหม่ได้ทันทีโดยไม่ต้องเริ่มจับใหม่ทั้งหมด
       setPickedIndices((p) => p.slice(0, -1));
     } finally {
@@ -851,7 +860,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           openAccessDialog(blockedReason);
           return;
         }
-        throw new Error(errData.error || "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้งค่ะ");
+        throw new Error(errData.error || (isEnglish ? "Oracle connection momentarily lost. Please click reload to try again." : "แม่หมอเชื่อมสัญญาณไม่ติดสักครู่ กรุณากดโหลดใหม่อีกครั้งค่ะ"));
       }
 
       const reader = res.body.getReader();
@@ -910,7 +919,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
                 // Auto-save to Reading Journal
                 if (data.reading) {
-                  const effectiveQuestion = overrides?.question?.trim() || question.trim() || "ภาพรวมดวงชะตา";
+                  const fallbackQ = isEnglish ? "General Life Overview" : "ภาพรวมดวงชะตา";
+                  const effectiveQuestion = overrides?.question?.trim() || question.trim() || fallbackQ;
                   const effectiveCategory = overrides?.category || selectedCategory;
                   const effectiveSpread = overrides?.spread || selectedSpread;
                   const effectiveNickname = (overrides?.nickname ?? nickname).trim() || undefined;
@@ -919,13 +929,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     nickname: effectiveNickname,
                     question: effectiveQuestion,
                     spreadId: effectiveSpread.id,
-                    spreadName: effectiveSpread.nameTh,
+                    spreadName: isEnglish ? (effectiveSpread.nameEn || effectiveSpread.nameTh) : effectiveSpread.nameTh,
                     category: effectiveCategory,
                     personaId: selectedPersona.id,
-                    personaName: selectedPersona.nameTh,
+                    personaName: isEnglish ? (selectedPersona.nameEn || selectedPersona.nameTh) : selectedPersona.nameTh,
                     cards: cards.map((c) => ({
                       order: c.order,
-                      positionName: c.position.nameTh,
+                      positionName: isEnglish ? (c.position.nameEn || c.position.nameTh) : c.position.nameTh,
                       cardIndex: c.cardIndex,
                       cardNameTh: c.card?.nameTh || "",
                       cardNameEn: c.card?.nameEn || "",
@@ -945,7 +955,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               } else if (eventType === "error") {
                 streamCompleted = true;
                 setIsStreaming(false);
-                setErrorMsg(data.message || "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง");
+                setErrorMsg(data.message || (isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง"));
               }
             } catch (parseErr) {
               console.error("Parse event error", parseErr);
@@ -957,14 +967,14 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       // P1-4 Guard: If stream ended without 'done' event
       if (!streamCompleted) {
         setIsStreaming(false);
-        setErrorMsg("คำทำนายส่งมาไม่ครบสักนิดค่ะ กรุณากดโหลดใหม่อีกครั้ง แม่หมอพร้อมเปิดไพ่ให้ทันที");
+        setErrorMsg(isEnglish ? "The reading stream was interrupted. Please click reload to resume immediately." : "คำทำนายส่งมาไม่ครบสักนิดค่ะ กรุณากดโหลดใหม่อีกครั้ง แม่หมอพร้อมเปิดไพ่ให้ทันที");
       }
     } catch (err: any) {
       // ผู้ใช้ออกจากหน้าไปเอง / เริ่มรอบใหม่ทับ — ไม่ใช่ความผิดพลาด ไม่ต้องขึ้นข้อความ error
       if (err?.name === "AbortError") return;
       console.error("Stream reading failed", err);
       setIsStreaming(false);
-      setErrorMsg(err.message || "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กรุณากดโหลดใหม่อีกครั้ง");
+      setErrorMsg(err.message || (isEnglish ? "The connection momentarily stuttered. Please click reload to continue." : "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กรุณากดโหลดใหม่อีกครั้ง"));
     }
   };
 
@@ -991,7 +1001,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     if (
       midFlow &&
       typeof window !== "undefined" &&
-      !window.confirm("ต้องการเริ่มดูดวงใหม่หรือไม่? คำถาม ชื่อเล่น และไพ่ที่เลือกไว้ในรอบนี้จะถูกล้างทั้งหมด")
+      !window.confirm(
+        isEnglish
+          ? "Do you want to start a new reading? Your question, nickname, and chosen cards in this session will be cleared."
+          : "ต้องการเริ่มดูดวงใหม่หรือไม่? คำถาม ชื่อเล่น และไพ่ที่เลือกไว้ในรอบนี้จะถูกล้างทั้งหมด"
+      )
     ) {
       return;
     }
@@ -1064,7 +1078,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 onClick={handleReset}
                 className="text-xs text-[#F3F0EA] font-bold bg-[#29261F] hover:bg-[#A58A5C] px-4 py-1.5 sm:py-2 rounded-full transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
               >
-                <span>✦</span> เริ่มดูดวงใหม่
+                <span>✦</span> {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
               </button>
             )}
           </>
@@ -1082,7 +1096,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         {errorMsg && currentStep !== "SUMMARY" && (
           <div className="mb-6 p-4 rounded-xl bg-[#FCEEEA] border border-[#D5CEC2] text-[#A6392C] text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3 shadow-xs">
             <span>{errorMsg}</span>
-            {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ/.test(errorMsg) && (
+            {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ|quota|credit|member/.test(errorMsg) && (
               <button
                 type="button"
                 onClick={() => {
@@ -1091,7 +1105,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 }}
                 className="px-4 py-1.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
               >
-                <span>✦</span> โหลดใหม่อีกครั้ง
+                <span>✦</span> {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
               </button>
             )}
           </div>
@@ -1122,13 +1136,15 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <div className="space-y-10">
                 <div className="text-center space-y-2.5 sm:space-y-3 pt-2">
                   <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
-                    ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI
+                    {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI"}
                   </h1>
                   <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
-                    สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256
+                    {isEnglish
+                      ? "Shuffle and select cards from the authentic 78-card deck with provably-fair SHA-256 randomness and archetypal psychological insights."
+                      : "สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256"}
                   </p>
                   <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
-                    ✦ เลือกผังการเปิดไพ่พยากรณ์
+                    ✦ {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
                   </h2>
                 </div>
 
@@ -1149,10 +1165,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     proceedLabel={
                       entitlementView?.blocked
                         ? entitlementView.blockedReason === "daily_exhausted"
-                          ? "เติมรอบเพื่อเปิดไพ่ต่อ"
-                          : "สมัครสมาชิกฟรีเพื่อเปิดไพ่"
+                          ? (isEnglish ? "Refill Quota to Continue" : "เติมรอบเพื่อเปิดไพ่ต่อ")
+                          : (isEnglish ? "Sign Up Free to Draw Cards" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่")
                         : !isPassHolder && !isStandardSpread(selectedSpread.id)
-                          ? "ปลดล็อกผังนี้เพื่อเปิดไพ่"
+                          ? (isEnglish ? "Unlock Spread to Draw Cards" : "ปลดล็อกผังนี้เพื่อเปิดไพ่")
                           : undefined
                     }
                     onRequireUpgrade={() => {
@@ -1189,10 +1205,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
             >
               <div className="text-center space-y-2 sm:space-y-2.5">
                 <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
-                  ตั้งคำถาม &amp; เลือกแม่หมอ
+                  {isEnglish ? "Set Your Intention & Choose Reader" : "ตั้งคำถาม & เลือกแม่หมอ"}
                 </h2>
                 <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed [text-wrap:balance]">
-                  พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย
+                  {isEnglish
+                    ? "Formulate your question and choose your preferred oracle archetype"
+                    : "พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย"}
                 </p>
               </div>
 
@@ -1235,19 +1253,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     scrollToSanctuaryTop();
                     navigateStep("SPREAD_SELECT");
                   }}
-                  aria-label={`เปลี่ยนผัง (ตอนนี้เลือก ${selectedSpread.nameTh})`}
+                  aria-label={isEnglish ? `Change spread (currently ${selectedSpread.nameEn || selectedSpread.nameTh})` : `เปลี่ยนผัง (ตอนนี้เลือก ${selectedSpread.nameTh})`}
                   className="shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-xs font-serif-th text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
                 >
                   <span aria-hidden="true">←</span>
-                  <span>เปลี่ยนผัง</span>
-                  <span className="hidden lg:inline truncate text-[#635B4E]">({selectedSpread.nameTh})</span>
+                  <span>{isEnglish ? "Change Spread" : "เปลี่ยนผัง"}</span>
+                  <span className="hidden lg:inline truncate text-[#635B4E]">({isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh})</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleStartSession}
                   disabled={loading || !nickname.trim() || !question.trim()}
-                  aria-label="ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"
+                  aria-label={isEnglish ? "Next: Shuffle and select cards yourself" : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}
                   className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-full text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shadow-sm ${
                     !nickname.trim() || !question.trim()
                       ? "bg-[#EAE7E0] text-[#635B4E] border border-[#D5CEC2] cursor-not-allowed"
@@ -1256,11 +1274,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 >
                   <span aria-hidden="true">✦</span>
                   {loading ? (
-                    <span className="truncate">กำลังโหลด...</span>
+                    <span className="truncate">{isEnglish ? "Loading..." : "กำลังโหลด..."}</span>
                   ) : (
                     <>
-                      <span className="truncate sm:hidden">ต่อไป: สับไพ่</span>
-                      <span className="truncate hidden sm:inline">ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง</span>
+                      <span className="truncate sm:hidden">{isEnglish ? "Next: Shuffle" : "ต่อไป: สับไพ่"}</span>
+                      <span className="truncate hidden sm:inline">{isEnglish ? "Next: Shuffle and Select Cards" : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}</span>
                     </>
                   )}
                   <span aria-hidden="true">→</span>
@@ -1282,10 +1300,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
             >
               <ShuffleRitual
                 commitment={commitment}
-                spreadName={selectedSpread.nameTh}
+                spreadName={isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
                 onShuffleComplete={handleShuffleComplete}
               />
-              <StepBackButton onClick={handleStepBack} />
+              <StepBackButton onClick={handleStepBack} label={isEnglish ? "Back" : "ย้อนกลับ"} />
             </motion.div>
           )}
 
@@ -1303,11 +1321,15 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <InteractiveCardFan
                 pickedIndices={pickedIndices}
                 targetCount={selectedSpread.positions.length}
-                currentPositionName={selectedSpread.positions[pickedIndices.length]?.nameTh || "ตำแหน่งที่เหลือ"}
+                currentPositionName={
+                  isEnglish
+                    ? (selectedSpread.positions[pickedIndices.length]?.nameEn || selectedSpread.positions[pickedIndices.length]?.nameTh || "Remaining position")
+                    : (selectedSpread.positions[pickedIndices.length]?.nameTh || "ตำแหน่งที่เหลือ")
+                }
                 onPickCard={handlePickCard}
                 disabled={loading}
               />
-              <StepBackButton onClick={handleStepBack} />
+              <StepBackButton onClick={handleStepBack} label={isEnglish ? "Back" : "ย้อนกลับ"} />
             </motion.div>
           )}
 
@@ -1323,7 +1345,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               className="space-y-10"
             >
               {/* HERO ROW: Centered 3D Sacred Spread Altar (รูปที่ 2: ผังไพ่อันเดียวตรงกลางสง่างาม) */}
-              <section aria-label="แท่นผังไพ่พยากรณ์" className="w-full max-w-5xl mx-auto">
+              <section aria-label={isEnglish ? "Sacred Tarot spread altar" : "แท่นผังไพ่พยากรณ์"} className="w-full max-w-5xl mx-auto">
                 <SpreadBoard
                   spread={selectedSpread}
                   drawnCards={drawnCards}
@@ -1338,7 +1360,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               {/* TWO-COLUMN ROW: คำทำนายไพ่ (ซ้าย ~75%) + การ์ดเข้าห้องแชทแม่หมอ (ขวา ~25% ติดหนึบ)
                   จอเล็กเรียงบนลงล่าง · จอ lg ขึ้นไปแบ่ง 3:1 */}
               <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 lg:grid-cols-4 lg:items-start">
-                <section aria-label="คำทำนายไพ่ทาโรต์" className="w-full lg:col-span-3">
+                <section aria-label={isEnglish ? "Tarot reading interpretation" : "คำทำนายไพ่ทาโรต์"} className="w-full lg:col-span-3">
                   {selectedSpread.resultStyle === "quick" ? (
                     <QuickChatResult
                       readingId={readingId}
@@ -1382,30 +1404,32 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     <Link
                       href="/reading/chat"
                       onClick={() => soundManager.playCardSelectSound()}
-                      aria-label={`แชทออนไลน์กับ${selectedPersona.nameTh}`}
+                      aria-label={isEnglish ? `Chat online with ${selectedPersona.nameEn || selectedPersona.nameTh}` : `แชทออนไลน์กับ${selectedPersona.nameTh}`}
                       className="group flex flex-col gap-3 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 shadow-xs transition-all hover:border-[#A58A5C] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
                     >
                       <span className="flex items-center justify-between gap-2">
                         <span className="relative flex h-14 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#D5CEC2] bg-[#F3EDE2]">
                           <CardImage
                             image={selectedPersona.cardImage}
-                            alt={selectedPersona.nameTh}
+                            alt={isEnglish ? (selectedPersona.nameEn || selectedPersona.nameTh) : selectedPersona.nameTh}
                             className="h-full w-full object-cover object-top"
                             sizes="44px"
                           />
                         </span>
                         <span className="flex items-center gap-1 rounded-full border border-[#D5CEC2] bg-[#EBF3ED] px-2 py-0.5 text-[13px] font-medium text-[#3A7044]">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#3A7044] animate-pulse" /> ออนไลน์
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#3A7044] animate-pulse" /> {isEnglish ? "Online" : "ออนไลน์"}
                         </span>
                       </span>
                       <span className="block font-serif-th text-sm font-bold text-[#29261F]">
-                        แชทออนไลน์กับ {selectedPersona.nameTh}
+                        {isEnglish ? `Chat Online with ${selectedPersona.nameEn || selectedPersona.nameTh}` : `แชทออนไลน์กับ ${selectedPersona.nameTh}`}
                       </span>
                       <span className="block font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
-                        เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อจากไพ่ชุดนี้ได้ทันที
+                        {isEnglish
+                          ? "Open full-screen chat to delve deeper into these drawn cards with your oracle reader."
+                          : "เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อจากไพ่ชุดนี้ได้ทันที"}
                       </span>
                       <span className="mt-1 flex items-center justify-center gap-2 rounded-full bg-[#29261F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#F3F0EA] transition-colors group-hover:bg-[#A58A5C]">
-                        เปิดห้องแชท
+                        {isEnglish ? "Open Chat" : "เปิดห้องแชท"}
                         <span className="transition-transform group-hover:translate-x-0.5">→</span>
                       </span>
                     </Link>
@@ -1417,7 +1441,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <div className="p-5 sm:p-6 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-wrap items-center justify-between gap-4 shadow-xs">
                 <div className="flex items-center gap-2 text-xs text-[#635B4E] font-serif-th">
                   <span className="text-[#A58A5C]">✦</span>
-                  <span>บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้</span>
+                  <span>{isEnglish ? "Save or share this tarot reading for future reference" : "บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้"}</span>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
@@ -1429,7 +1453,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     }}
                     className="py-3 px-5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] font-serif-th text-xs transition-all cursor-pointer flex items-center gap-2 shadow-xs"
                   >
-                    <span className="text-[#A58A5C]">✨</span> แชร์ผลคำทำนาย
+                    <span className="text-[#A58A5C]">✨</span> {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
                   </button>
 
                   <button
@@ -1437,7 +1461,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     onClick={handleReset}
                     className="py-3 px-6 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
                   >
-                    <span>✦</span> ดูดวงเรื่องอื่นต่อ
+                    <span>✦</span> {isEnglish ? "Start Another Reading" : "ดูดวงเรื่องอื่นต่อ"}
                   </button>
                 </div>
               </div>
@@ -1456,7 +1480,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         onClose={() => setIsShareOpen(false)}
         persona={selectedPersona}
         question={question}
-        spreadName={selectedSpread.nameTh}
+        spreadName={isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
         cards={drawnCards}
         reading={readingResult}
       />
@@ -1493,7 +1517,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
       <CardZoomModal
         card={zoomedCard ? (zoomedCard.card as any) : null}
-        positionName={zoomedCard?.position.nameTh}
+        positionName={isEnglish ? (zoomedCard?.position.nameEn || zoomedCard?.position.nameTh) : zoomedCard?.position.nameTh}
         isReversed={zoomedCard?.isReversed}
         isOpen={!!zoomedCard}
         onClose={() => setZoomedCard(null)}

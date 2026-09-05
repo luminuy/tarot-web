@@ -287,7 +287,11 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
   const overrides = await getContentOverrides();
   const persona = resolvePersona(overrides, ctx.personaId);
   const systemCore = resolveSystemCore(overrides);
-  const systemInstruction = buildSystemPrompt(ctx.personaId, { systemCore, persona });
+  const systemInstruction = buildSystemPrompt(ctx.personaId, {
+    systemCore: ctx.lang === "en" ? undefined : systemCore,
+    persona,
+    lang: ctx.lang,
+  });
   const userMessage = buildReadingMessage(ctx);
 
   // Qwen 2 ตัวก่อน (ภาษาไทยสวยสุด) → gpt-oss-120b (reasoning ลึก ไม่มีปัญหาจีนหลุด)
