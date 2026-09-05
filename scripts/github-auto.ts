@@ -83,7 +83,7 @@ const TSX = "./node_modules/.bin/tsx";
  * ⚠️ ถ้าเพิ่มสคริปต์ทดสอบใหม่ใน scripts/qa/ ต้องมาเพิ่มในรายการนี้ด้วยเสมอ
  *    ไม่งั้นเทสต์จะไม่เคยถูกรันโดยอัตโนมัติเลย
  */
-const CHECKS: { label: string; cmd: string; args: string[] }[] = [
+export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🛡️  ไม่มี Agent อื่นล็อคไฟล์ทับ", cmd: "npm", args: ["run", "agent:check"] },
   { label: "🔍 TypeScript Typecheck (0 errors)", cmd: "npm", args: ["run", "typecheck"] },
   { label: "🃏 ไพ่ 78 ใบครบถ้วนสมบูรณ์", cmd: TSX, args: ["scripts/verify-cards.ts"] },
@@ -116,6 +116,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🃏 สารานุกรมไพ่ยิปซี 7 หน้าใหม่ (SEO Wave 2)", cmd: TSX, args: ["scripts/qa/test-seo-wave2.ts"] },
   { label: "📐 ผังพยากรณ์ 25 แบบ & 6 หน้ารวมตามหมวดชีวิต (SEO Wave 3)", cmd: TSX, args: ["scripts/qa/test-seo-wave3.ts"] },
   { label: "🔮 เครื่องมือไพ่ประจำตัว & ตารางตำแหน่ง & SEO แตกต่าง (SEO Wave 4)", cmd: TSX, args: ["scripts/qa/test-seo-wave4.ts"] },
+  { label: "📚 ตัวเลขในเอกสารแม่บทตรงกับของจริง (ด่าน/ผัง/ตำแหน่ง/ไพ่)", cmd: TSX, args: ["scripts/qa/test-docs-numbers.ts"] },
 ];
 
 /**
@@ -544,28 +545,36 @@ function actionStatus(): void {
 // Entry point
 // ============================================================================
 
-for (let i = 0; i < process.argv.length; i++) {
-  if (process.argv[i] === "--agent" && process.argv[i + 1]) {
-    process.env.AGENT_NAME = process.argv[i + 1];
-    process.env.TAROT_AGENT = process.argv[i + 1];
+const isDirectRun = process.argv[1] && (
+  process.argv[1].endsWith("github-auto.ts") ||
+  process.argv[1].endsWith("github-auto")
+);
+
+if (isDirectRun) {
+  for (let i = 0; i < process.argv.length; i++) {
+    if (process.argv[i] === "--agent" && process.argv[i + 1]) {
+      process.env.AGENT_NAME = process.argv[i + 1];
+      process.env.TAROT_AGENT = process.argv[i + 1];
+    }
+  }
+
+  const argv = process.argv.slice(2);
+  const action = argv[0] && !argv[0].startsWith("--") ? argv[0] : "status";
+
+  switch (action) {
+    case "verify-all":
+      actionVerify();
+      break;
+    case "pr":
+      actionPr(argv.slice(1));
+      break;
+    case "tidy":
+      actionTidy(argv.includes("--dry-run"));
+      break;
+    case "status":
+    default:
+      actionStatus();
+      break;
   }
 }
 
-const argv = process.argv.slice(2);
-const action = argv[0] && !argv[0].startsWith("--") ? argv[0] : "status";
-
-switch (action) {
-  case "verify-all":
-    actionVerify();
-    break;
-  case "pr":
-    actionPr(argv.slice(1));
-    break;
-  case "tidy":
-    actionTidy(argv.includes("--dry-run"));
-    break;
-  case "status":
-  default:
-    actionStatus();
-    break;
-}

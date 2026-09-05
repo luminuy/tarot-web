@@ -48,9 +48,14 @@ function main() {
 
   for (const g of groups) {
     check(`หมวด ${g.id} มีคำว่า 'ยิปซี' ใน SEO Title`, g.seoTitleTh.includes("ยิปซี"));
-    const textLength = g.introContentTh.paragraphs.join(" ").length;
-    // ≥ 300 คำในภาษาไทย หรือ ~800 ตัวอักษรขึ้นไป
-    check(`หมวด ${g.id} มีเนื้อหาบทนำเข้มข้น (${textLength} ตัวอักษร ≥ 700)`, textLength >= 700);
+    // เกณฑ์แผนคลื่น 2 คือบทนำ ≥ 300 คำ · ภาษาไทยเฉลี่ย ~3.5 อักษร/คำ ⇒ 300 × 3.5 = 1,050 อักษรไทย
+    // นับเฉพาะอักษรไทยเพื่อไม่ให้วงเล็บ ชื่ออังกฤษ และเครื่องหมายวรรคตอนมาปั๊มตัวเลขให้ดูเยอะเกินจริง
+    const MIN_THAI_CHARS = 1050;
+    const thaiChars = (g.introContentTh.paragraphs.join(" ").match(/[฀-๿]/g) ?? []).length;
+    check(
+      `หมวด ${g.id} บทนำถึงเกณฑ์ 300 คำ (${thaiChars} อักษรไทย ≈ ${Math.round(thaiChars / 3.5)} คำ ≥ ${MIN_THAI_CHARS})`,
+      thaiChars >= MIN_THAI_CHARS,
+    );
     check(`หมวด ${g.id} มี Highlights 3 ข้อ`, g.introContentTh.highlights.length === 3);
   }
 
