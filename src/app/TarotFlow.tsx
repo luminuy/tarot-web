@@ -23,6 +23,7 @@ import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/l
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
 import { ToastNotification, type ToastData } from "@/components/ui/ToastNotification";
+import { trackEvent } from "@/lib/analytics";
 import {
   DAILY_LIMIT,
   describeEntitlement,
@@ -144,9 +145,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
    * ห้ามเปิด AuthModal หรือ BuyCreditsModal ตรง ๆ พร้อมกับขึ้นแถบ error อีก
    * (ของเดิมทำสองอย่างพร้อมกัน ผู้ใช้เลยเจอข้อความซ้อนกันสองชั้น)
    */
-  const openAccessDialog = (reason: UpgradeReason) => setAccessReason(reason);
+  const openAccessDialog = (reason: UpgradeReason) => {
+    trackEvent("upgrade_dialog_open", { reason });
+    setAccessReason(reason);
+  };
 
   const openAuth = (mode: "signin" | "signup" = "signin", fromWall = false) => {
+    trackEvent("auth_modal_open", { mode, source: fromWall ? "wall" : "direct" });
     setAuthMode(mode);
     setAuthFromWall(fromWall);
     setIsAuthOpen(true);
@@ -514,6 +519,14 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       if (data.sessionToken) setSessionToken(data.sessionToken);
       setCommitment(data.commitment || "");
       setClientSeed(data.clientSeed || "");
+
+      trackEvent("tarot_session_start", {
+        spread_id: selectedSpread.id,
+        persona_id: selectedPersona.id,
+        category: selectedCategory,
+        has_situation: Boolean(situation.trim()),
+      });
+
       navigateStep("SHUFFLE");
     } catch (err: any) {
       setErrorMsg(err.message || "เกิดข้อผิดพลาดในการเริ่มดูดวง");
@@ -526,6 +539,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const handleShuffleComplete = (finalClientSeed: string) => {
     if (finalClientSeed) setClientSeed(finalClientSeed);
     soundManager.playShuffleSound();
+
+    trackEvent("tarot_shuffle", {
+      spread_id: selectedSpread.id,
+      card_count: selectedSpread.positions.length,
+    });
+
     navigateStep("PICK_CARDS");
   };
 
@@ -535,6 +554,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
     const newPicked = [...pickedIndices, fanIndex];
     setPickedIndices(newPicked);
+
+    trackEvent("tarot_draw", {
+      spread_id: selectedSpread.id,
+      picked_order: newPicked.length,
+      picked_total: newPicked.length,
+      required_total: selectedSpread.positions.length,
+    });
 
     // If picked all required cards for this spread, submit to server
     if (newPicked.length >= selectedSpread.positions.length) {
@@ -754,6 +780,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     timing: data.reading.timing || "",
                   });
                 }
+                trackEvent("reading_complete", {
+                  spread_id: selectedSpread.id,
+                  persona_id: selectedPersona.id,
+                  card_count: cards.length,
+                });
               } else if (eventType === "error") {
                 streamCompleted = true;
                 setIsStreaming(false);
@@ -782,6 +813,16 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
   // Flip card manually
   const handleFlipCard = (order: number) => {
+    const card = drawnCards.find((c) => c.order === order);
+    if (card && !revealedOrders.includes(order)) {
+      trackEvent("card_reveal", {
+        spread_id: selectedSpread.id,
+        position_order: order,
+        card_id: card.card?.id || `card-${card.cardIndex}`,
+        card_name: card.card?.nameTh || "",
+        is_reversed: card.isReversed,
+      });
+    }
     setRevealedOrders((prev) => (prev.includes(order) ? prev.filter((o) => o !== order) : [...prev, order]));
     setActiveCardIndex(order);
   };
@@ -1003,6 +1044,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   onSelectSpread={(sp) => {
                     soundManager.playCardSelectSound();
                     setSelectedSpread(sp);
+                    trackEvent("spread_select", {
+                      spread_id: sp.id,
+                      spread_name: sp.nameTh,
+                      card_count: sp.positions.length,
+                      category: sp.defaultCategory,
+                    });
                   }}
                   isPassHolder={isPassHolder}
                   proceedLabel={
@@ -1060,6 +1107,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 onSelectPersona={(p) => {
                   soundManager.playCardSelectSound();
                   setSelectedPersona(p);
+                  trackEvent("persona_select", {
+                    persona_id: p.id,
+                    persona_name: p.nameTh,
+                  });
                 }}
                 isPassHolder={isPassHolder}
                 onRequireUpgrade={() => {

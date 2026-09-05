@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
+import { trackEvent } from "@/lib/analytics";
 
 import {
   AirElementIcon,
@@ -90,6 +91,17 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       );
     });
   }, [cards, activeFilter, searchQuery]);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    const timer = setTimeout(() => {
+      trackEvent("card_search", {
+        query: searchQuery.trim(),
+        results_count: filteredCards.length,
+      });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filteredCards.length]);
 
   return (
     <div className="space-y-8 relative z-10">

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import type { Article } from "@/data/articles";
 import { soundManager } from "@/lib/utils/audio";
+import { trackEvent } from "@/lib/analytics";
 
 interface Props {
   article: Article;
@@ -12,6 +13,14 @@ interface Props {
 
 export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles }) => {
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    trackEvent("blog_read", {
+      slug: article.slug,
+      title: article.title,
+      category: article.category,
+    });
+  }, [article.slug, article.title, article.category]);
 
   const handleCopyLink = () => {
     soundManager.playMenuTapSound();

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { verifyReading, type VerificationResult } from "@/lib/tarot/verify-client";
 import { SPRING } from "@/lib/motion";
+import { trackEvent } from "@/lib/analytics";
 
 export interface ProvablyFairPanelProps {
   commitment: string;
@@ -40,6 +41,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
     try {
       await navigator.clipboard.writeText(text);
       setCopiedKey(key);
+      trackEvent("provably_fair_verify", { action: "copy_hash" });
       setTimeout(() => setCopiedKey(null), 2000);
     } catch {
       // ignore
@@ -49,6 +51,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
   const handleVerify = async () => {
     if (!serverSeed || !clientSeed || !effectiveCommitment) return;
     setIsVerifying(true);
+    trackEvent("provably_fair_verify", { action: "external_verify" });
 
     try {
       // Small intentional delay for smooth UI feedback animation
@@ -98,7 +101,15 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
         type="button"
         aria-expanded={isPanelOpen}
         aria-controls="provably-fair-body"
-        onClick={() => setIsPanelOpen((v) => !v)}
+        onClick={() => {
+          setIsPanelOpen((v) => {
+            const next = !v;
+            if (next) {
+              trackEvent("provably_fair_verify", { action: "open_modal" });
+            }
+            return next;
+          });
+        }}
         className="flex w-full items-center justify-between gap-2 p-4 sm:p-5 text-left transition-colors hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
         <div className="flex items-center gap-2.5 min-w-0">

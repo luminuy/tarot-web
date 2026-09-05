@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { soundManager } from "@/lib/utils/audio";
+import { trackEvent } from "@/lib/analytics";
 
 import { SpeakerTabIcon } from "@/components/ui/TarotArtIcons";
 interface TTSReaderButtonProps {
@@ -29,6 +30,7 @@ export const TTSReaderButton: React.FC<TTSReaderButtonProps> = ({ textToRead, pe
     if (isSpeaking) {
       soundManager.stopSpeaking();
       setIsSpeaking(false);
+      trackEvent("tts_stop", { persona_id: personaId });
     } else {
       const ok = soundManager.speakProphecy(
         textToRead,
@@ -36,7 +38,10 @@ export const TTSReaderButton: React.FC<TTSReaderButtonProps> = ({ textToRead, pe
         () => setIsSpeaking(false),
         () => setIsSpeaking(false)
       );
-      if (ok) setIsSpeaking(true);
+      if (ok) {
+        setIsSpeaking(true);
+        trackEvent("tts_play", { persona_id: personaId });
+      }
     }
   };
 
