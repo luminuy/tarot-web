@@ -374,7 +374,7 @@ Embody your resident persona and interpret this spread for the seeker with profo
 This spread has ${cardCount} cards → Strictly observe these lengths: reading ${depthEn.perCard}/card · connections ${depthEn.conn} · summary ${depthEn.summary}
 ${
   isQuick
-    ? `⚡ SPECIAL DIRECTIVE FOR QUICK READING: The seeker needs a direct, concise answer. Strictly set "connections" to "" (empty string) and provide no more than 2 "advice" items.\n`
+    ? `⚡ SPECIAL DIRECTIVE FOR QUICK READING: The seeker needs a direct, concise answer addressing the specific inquiry in <question>. Interpret this card directly to answer their question clearly without vagueness. Strictly set "connections" to "" (empty string) and provide no more than 2 "advice" items.\n`
     : ""
 }{
   "opening": "Empathetic greeting and overall impression of the spread in 2-3 sentences",
@@ -418,7 +418,7 @@ ${guard}${yesNo}
 ผังนี้มี ${cardCount} ใบ → คุมความยาวตามนี้เป๊ะ: reading ${depth.perCard}/ใบ · connections ${depth.conn} · summary ${depth.summary}
 ${
   isQuick
-    ? `⚡ คำสั่งพิเศษสำหรับโหมดทำนายด่วน: ผู้ถามต้องการคำตอบไวและตรงประเด็นที่สุด ห้ามเขียนยาวเกินสเปกเด็ดขาด! บังคับให้ "connections" เป็น "" (สตริงว่าง) และ "advice" มีไม่เกิน 2 ข้อ\n`
+    ? `⚡ คำสั่งพิเศษสำหรับโหมดทำนายด่วน: ผู้ถามต้องการคำตอบไว ชัดเจน และตอบตรงคำถามใน <question> โดยเฉพาะ! ให้ตีความไพ่ใบนี้เพื่อฟันธงตอบคำถามของผู้ถามโดยตรงอย่างมีวุฒิภาวะ ห้ามตอบกว้างเกินไปหรือวกวนเด็ดขาด! บังคับให้ "connections" เป็น "" (สตริงว่าง) และ "advice" มีไม่เกิน 2 ข้อ\n`
     : ""
 }{
   "opening": "${isQuick ? "1 ประโยคสั้นมากไม่เกิน 10 คำ (ค่านี้ไม่ถูกแสดงผลในโหมดด่วน เขียนสั้นที่สุดเพื่อประหยัดเวลา)" : "คำทักทายและความรู้สึกแรกเมื่อเห็นภาพรวมไพ่ทั้งชุด 2-3 ประโยค"}",

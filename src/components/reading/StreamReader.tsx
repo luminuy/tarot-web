@@ -34,6 +34,8 @@ interface StreamReaderProps {
     deckSize?: number;
   };
   errorMsg?: string | null;
+  question?: string;
+  nickname?: string;
   onRetry?: () => void;
 }
 
@@ -47,6 +49,8 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   readingId,
   proof,
   errorMsg,
+  question,
+  nickname,
   onRetry,
 }) => {
   const { isEnglish } = useLocale();
@@ -111,6 +115,23 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           </span>
         )}
       </div>
+
+      {/* Querent Sacred Question Banner */}
+      {question && (
+        <div className="anim-page-transition p-4 rounded-xl bg-[#FAF7F2] border border-[#D9C8AC] space-y-1.5 shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-[#8F5C1A] font-serif-th font-semibold">
+            <span>{isEnglish ? "Your Sacred Question" : "คำถามที่คุณตั้งจิตถาม"}</span>
+            {nickname && (
+              <span className="text-[#635B4E] font-normal">
+                {isEnglish ? `Querent: ${nickname}` : `ผู้รับคำทำนาย: ${nickname}`}
+              </span>
+            )}
+          </div>
+          <p className="text-sm sm:text-base font-serif-th text-[#2E211A] font-medium leading-relaxed italic">
+            “{question}”
+          </p>
+        </div>
+      )}
 
       {/* World-Class Chamber Navigation Tabs */}
       <div

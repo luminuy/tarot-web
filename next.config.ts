@@ -67,6 +67,31 @@ const nextConfig: NextConfig = {
         destination: "/blog/tarot-and-carl-jung-psychology",
         permanent: true,
       },
+      {
+        source: "/tarot-daily",
+        destination: "/daily",
+        permanent: true,
+      },
+      {
+        source: "/daily-tarot",
+        destination: "/daily",
+        permanent: true,
+      },
+      {
+        source: "/tarot-love",
+        destination: "/love/1-card",
+        permanent: true,
+      },
+      {
+        source: "/love",
+        destination: "/love/1-card",
+        permanent: true,
+      },
+      {
+        source: "/love-tarot",
+        destination: "/love/1-card",
+        permanent: true,
+      },
     ];
   },
   async headers() {

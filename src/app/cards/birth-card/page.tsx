@@ -167,54 +167,122 @@ export default function BirthCardPage() {
         {/* Interactive Calculator Component */}
         <BirthCardCalculator />
 
-        {/* Editorial Guide Article */}
-        <article className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-10 space-y-6 shadow-xs">
-          <h2 className="text-xl sm:text-2xl font-bold font-serif-th text-[#29261F] border-b border-[#E8E2D8] pb-4">
-            ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: กระจกส่องจิตวิญญาณตลอดชีวิต
-          </h2>
+        {/* Editorial Guide Article (Altar Panel) */}
+        <article className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-10 space-y-6 shadow-[var(--shadow-raised)]">
+          <div className="space-y-2 border-b border-[#E8E2D8] pb-4">
+            <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
+              SACRED ESSENCE & PSYCHOLOGICAL ARCHETYPES
+            </span>
+            <h2 className="text-xl sm:text-2xl font-bold font-serif-th text-[#29261F]">
+              ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: พิมพ์เขียวพลังงานและกระจกส่องจิตวิญญาณตลอดชีวิต
+            </h2>
+          </div>
 
           <div className="space-y-4 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
             <p>
-              ในศาสตร์ไพ่ทาโรต์ดั้งเดิม วันเกิดของเราไม่ใช่เพียงตัวเลขบนปฏิทิน หากแต่เป็นพิมพ์เขียวของคลื่นพลังงาน
-              (Vibrational Blueprint) ที่กำหนดบทบาทและบทเรียนสำคัญในชีวิตมนุษย์ แนวคิดเรื่องไพ่ทาโรต์ประจำตัว
-              (Birth Card) ได้รับการพัฒนาอย่างเป็นระบบโดยนักวิชาการและปรมาจารย์ด้านไพ่ทาโรต์สากล เช่น Mary K. Greer
-              และ Angeles Arrien ซึ่งเชื่อมโยงตัวเลขเข้ากับแม่พิมพ์จิตวิทยาดั้งเดิม (Archetypes) ตามทฤษฎีของ คาร์ล ยุง (Carl Jung)
+              ในศาสตร์ไพ่ทาโรต์และเลขศาสตร์สากล วันเกิดของมนุษย์แต่ละคนไม่ใช่เรื่องบังเอิญ แต่เป็นหมุดหมายแห่งกาลเวลาที่กำหนดคลื่นความถี่พลังงาน
+              (Vibrational Blueprint) และพิมพ์เขียวแห่งจิตวิญญาณ การคำนวณหาไพ่ทาโรต์ประจำตัว (Tarot Birth Card) ได้รับการวางรากฐานทางวิชาการ
+              โดยนักค้นคว้าและปรมาจารย์ด้านไพ่ทาโรต์ร่วมสมัย เช่น Mary K. Greer (ผู้เขียนหนังสือ <em>Who Are You in the Tarot?</em>)
+              และ Angeles Arrien ซึ่งผสานศาสตร์แห่งสัญลักษณ์วิทยาโบราณเข้ากับทฤษฎีแม่พิมพ์จิตวิทยาดั้งเดิม (Archetypes) ของ คาร์ล ยุง (Carl Gustav Jung)
             </p>
 
             <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
-              หลักการคำนวณและการทำงานของตัวเลข
+              กลไกการคำนวณและมิติแห่งตัวเลข (Digit Reduction & Major Arcana)
             </h3>
             <p>
-              การคำนวณไพ่ประจำตัวจะใช้วันเกิด เดือนเกิด และปีเกิด (ค.ศ.) มารวมกัน แล้วทำการลดทอนตัวเลข
-              (Digit Reduction) จนได้ตัวเลขที่ตรงกับไพ่ชุดใหญ่ (Major Arcana) หมายเลข 0 ถึง 21 ไพ่ชุดใหญ่เหล่านี้
-              คือตัวแทนของการเดินทางของจิตวิญญาณ (The Fool’s Journey) ซึ่งสะท้อนความท้าทาย พรสวรรค์ และจุดที่ต้องก้าวข้าม
+              การคำนวณไพ่ประจำตัวจะใช้วันที่ เดือน และปีเกิดที่เป็นปีสากล (คริสต์ศักราช ค.ศ.) มาบวกรวมกันเป็นผลรวมเดียว
+              จากนั้นจึงทำการลดทอนตัวเลข (Digit Reduction) ให้เหลือค่าที่สอดคล้องกับไพ่ชุดใหญ่ (Major Arcana) หมายเลข 0 ถึง 21
+              โดยไพ่ชุดใหญ่นี้เปรียบเสมือนการเดินทางของจิตวิญญาณ (The Fool’s Journey) ที่มนุษย์ทุกคนต้องผ่านด่านการเรียนรู้
+            </p>
+            <p>
+              ในระบบเลขศาสตร์ทาโรต์ หากผลรวมขั้นแรกมีค่าตั้งแต่ 10 ถึง 21 ผลรวมนั้นจะเป็นตัวกำหนด <strong>ไพ่บุคลิกภาพ (Personality Card)</strong>
+              และเมื่อนำตัวเลขสองหลักนั้นมาบวกกันอีกครั้ง จะได้ตัวเลขหลักเดียว (1-9) ซึ่งเป็นตัวแทนของ <strong>ไพ่จิตวิญญาณ (Soul Card)</strong>
+              ส่วนผู้ที่มีผลลัพธ์เป็นตัวเลข 1 ถึง 9 ตั้งแต่แรก จะถือว่ามีพลังงานของไพ่บุคลิกภาพและจิตวิญญาณเป็นหนึ่งเดียวกันอย่างลึกซึ้ง
             </p>
 
             <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
-              วิธีนำพลังงานของไพ่ประจำตัวไปปรับใช้ในชีวิตจริง
+              ความสัมพันธ์ของคู่ไพ่แห่งดวงวิญญาณ (Archetypal Constellations)
             </h3>
-            <ul className="list-disc pl-5 space-y-1.5 text-[#5E5240]">
+            <p>
+              คู่ไพ่ประจำตัวช่วยให้เราเข้าใจความขัดแย้งและความสมดุลภายในตนเอง ตัวอย่างเช่น:
+            </p>
+            <ul className="list-disc pl-5 space-y-2 text-[#5E5240]">
               <li>
-                <strong>ทำความเข้าใจจุดแข็งและจุดเปราะบาง:</strong> ไพ่ทุกใบมีทั้งด้านสว่าง (Upright) และด้านเงา (Reversed)
-                การรู้จักไพ่ของตนเองช่วยให้คุณระมัดระวังไม่ให้ตกหลุมพรางของความกลัวหรือความวิตกกังวล
+                <strong>The Wheel of Fortune (10) และ The Magician (1):</strong> ผู้ที่ถือครองคู่ไพ่นี้มักเผชิญกับจุดเปลี่ยนและจังหวะชีวิตที่ไม่หยุดนิ่ง
+                แต่มีพรสวรรค์ในการแปรเปลี่ยนวิกฤตให้เป็นโอกาสด้วยสติปัญญาและทักษะรอบด้าน
               </li>
               <li>
-                <strong>ใช้เป็นเครื่องมือสะท้อนตนเองในยามสับสน:</strong> เมื่อต้องเผชิญหน้ากับการตัดสินใจครั้งใหญ่
-                ลองกลับมาถามตนเองว่า ในฐานะผู้ถือพลังงานของไพ่ใบนี้ ทางเลือกใดคือวิถีทางที่สอดคล้องกับคุณค่าสูงสุดของคุณ
+                <strong>Justice (11) และ The High Priestess (2):</strong> สะท้อนบุคคลผู้มีญาณหยั่งรู้ลึกซึ้ง ควบคู่กับความยึดมั่นในสัจธรรมและความยุติธรรม
+                มักทำหน้าที่เป็นที่พึ่งทางปัญญาและผู้ไกล่เกลี่ยปัญหาให้ผู้อื่น
               </li>
               <li>
-                <strong>เชื่อมโยงกับการฝึกสมาธิ:</strong> การนำภาพสัญลักษณ์ 1909 Rider-Waite ของไพ่ประจำตัวมาทำสมาธิ
-                จะช่วยเปิดประตูสู่ปัญญาญาณภายในและความสงบสุขทางอารมณ์
+                <strong>The Hanged Man (12) และ The Empress (3):</strong> สัญลักษณ์แห่งการยอมจำนนเพื่อค้นพบมุมมองใหม่ นำไปสู่การกำเนิดของความคิดสร้างสรรค์
+                และความอุดมสมบูรณ์ทางจิตใจ
+              </li>
+              <li>
+                <strong>Death (13) และ The Emperor (4):</strong> พลังงานแห่งการผลัดเปลี่ยนโครงสร้างเดิม การทลายสิ่งเก่าที่ไม่จำเป็นเพื่อสถาปนาความมั่นคง
+                และระเบียบวินัยใหม่อันแข็งแกร่ง
+              </li>
+              <li>
+                <strong>Temperance (14) และ The Hierophant (5):</strong> การผสมผสานความเชื่อ ธรรมเนียมประเพณี เข้ากับความยืดหยุ่นและการประนีประนอม
+                เพื่อสร้างสันติภาพและการเรียนรู้ทางจิตวิญญาณ
+              </li>
+              <li>
+                <strong>The Devil (15) และ The Lovers (6):</strong> บททดสอบแห่งความปรารถนา กิเลส และพันธนาการทางใจ ซึ่งท้าทายให้มนุษย์เลือกเส้นทางแห่งความรักบริสุทธิ์
+                และการตระหนักรู้ในอิสรภาพที่แท้จริง
+              </li>
+              <li>
+                <strong>The Tower (16) และ The Chariot (7):</strong> พลังงานแห่งความมุ่งมั่นพุ่งทะยานที่ต้องผ่านบทเรียนการปล่อยวางตัวตน (Ego)
+                เมื่อเผชิญกับการเปลี่ยนแปลงแบบฉับพลัน เพื่อสร้างความแข็งแกร่งจากภายใน
+              </li>
+              <li>
+                <strong>The Star (17) และ Strength (8):</strong> ความหวัง การเยียวยาจิตวิญญาณ และพลังแห่งความอ่อนโยนที่สามารถสยบความดุร้ายของสัญชาตญาณได้อย่างสงบงาม
+              </li>
+              <li>
+                <strong>The Moon (18) และ The Hermit (9):</strong> การเดินทางข้ามผ่านความกลัว ความกำกวม และภาพลวงตาในจิตใต้สำนึก โดยอาศัยแสงประทีปแห่งปัญญา
+                และการปลีกวิเวกเพื่อค้นพบสัจธรรมในตน
+              </li>
+              <li>
+                <strong>The Sun (19), The Wheel of Fortune (10) และ The Magician (1):</strong> กลุ่มไพ่สามประสานแห่งแสงสว่าง ความกระจ่างแจ้ง และความสำเร็จอันเบิกบาน
+              </li>
+              <li>
+                <strong>Judgement (20) และ The High Priestess (2):</strong> เสียงเพรียกแห่งการตื่นรู้ทางจิตวิญญาณและการปลดปล่อยอดีตเพื่อเริ่มต้นชีวิตใหม่อย่างบริสุทธิ์
+              </li>
+              <li>
+                <strong>The World (21) และ The Empress (3):</strong> ความสมบูรณ์แบบของการเดินทาง ความอุดมสมบูรณ์ และการรวมเป็นหนึ่งเดียวกับจักรวาล
               </li>
             </ul>
+
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
+              วิธีนำพลังงานไพ่ประจำตัวไปปรับใช้เพื่อการพัฒนาตนเอง
+            </h3>
+            <p>
+              การรู้จักไพ่ทาโรต์ประจำตัวไม่ใช่การทำนายดวงชะตาแบบพยากรณ์ตายตัว แต่เป็นเครื่องมือสำหรับการใคร่ครวญตนเอง (Self-Reflection):
+            </p>
+            <ol className="list-decimal pl-5 space-y-2 text-[#5E5240]">
+              <li>
+                <strong>โอบรับทั้งด้านสว่างและด้านเงา:</strong> ไพ่ทุกใบสะท้อนศักยภาพสูงสุดเมื่อมีสติ (Light Aspect)
+                และความผิดพลาดที่อาจเกิดขึ้นเมื่อตกอยู่ใต้ความกลัว (Shadow Aspect) การตระหนักรู้ในไพ่ของตนเองช่วยให้คุณจับสัญญาณเตือนภัยได้ก่อนก้าวพลาด
+              </li>
+              <li>
+                <strong>เข็มทิศในการตัดสินใจครั้งสำคัญ:</strong> เมื่อถึงทางแยกของชีวิต ให้ถามตนเองว่า การตัดสินใจแบบใดสอดคล้องกับคุณค่าและแม่พิมพ์ของไพ่ประจำตัวคุณมากที่สุด
+              </li>
+              <li>
+                <strong>ใช้ภาพสัญลักษณ์ 1909 Rider-Waite เป็นจุดรวมสมาธิ:</strong> การเพ่งพินิจสัญลักษณ์ สี และท่าทางของตัวละครบนหน้าไพ่ดั้งเดิม 1909
+                จะช่วยกระตุ้นการทำงานของจิตใต้สำนึกและเชื่อมโยงคุณเข้ากับปัญญาญาณภายใน
+              </li>
+            </ol>
           </div>
         </article>
 
-        {/* FAQs */}
-        <section className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-10 space-y-6 shadow-xs">
+        {/* FAQs (Altar Panel) */}
+        <section className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-10 space-y-6 shadow-[var(--shadow-raised)]">
           <div className="space-y-1">
+            <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
+              QUESTIONS & ANSWERS
+            </span>
             <h2 className="text-lg sm:text-xl font-bold font-serif-th text-[#29261F]">
-              คำถามพบบ่อยเกี่ยวกับไพ่ประจำตัว
+              คำถามพบบ่อยเกี่ยวกับไพ่ประจำตัว (Birth Card FAQ)
             </h2>
             <p className="text-xs text-[#7A6F5D] font-serif-th">
               ความรู้ความเข้าใจเกี่ยวกับเลขศาสตร์และพลังงานไพ่ทาโรต์
@@ -240,6 +308,14 @@ export default function BirthCardPage() {
             สารานุกรมไพ่ 78 ใบ
           </Link>
           <span className="text-[#D5CEC2]">·</span>
+          <Link href="/daily" className="hover:text-[#29261F] underline underline-offset-4">
+            ดูดวงรายวัน 1 ใบ
+          </Link>
+          <span className="text-[#D5CEC2]">·</span>
+          <Link href="/love/1-card" className="hover:text-[#29261F] underline underline-offset-4">
+            ดูดวงความรัก 1 ใบ
+          </Link>
+          <span className="text-[#D5CEC2]">·</span>
           <Link href="/spreads" className="hover:text-[#29261F] underline underline-offset-4">
             ผังพยากรณ์ 25 แบบ
           </Link>
@@ -252,3 +328,4 @@ export default function BirthCardPage() {
     </main>
   );
 }
+

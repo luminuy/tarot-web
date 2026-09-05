@@ -7,6 +7,9 @@ import {
   TarotDeckNavIcon,
   JournalScrollNavIcon,
   MarketplaceReaderNavIcon,
+  DailyTarotNavIcon,
+  LoveTarotNavIcon,
+  BirthCardNavIcon,
 } from "@/components/ui/TarotArtIcons";
 import { CoinSealIcon } from "@/components/entitlement/EntitlementIcons";
 import { soundManager } from "@/lib/utils/audio";
@@ -85,7 +88,31 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     setIsOpen(willOpen);
   };
 
-  const navItems = [
+  const featuredItems = [
+    {
+      label: isEnglish ? "Daily Tarot (1 Card)" : "ไพ่ยิปซีรายวัน (ไพ่ 1 ใบ)",
+      sublabel: isEnglish ? "Check your daily energy, career & love guidance" : "เช็กพลังงานรายวัน การงาน การเงิน และความรัก",
+      href: "/daily",
+      Icon: DailyTarotNavIcon,
+      badge: isEnglish ? "Daily Free" : "เปิดฟรี",
+    },
+    {
+      label: isEnglish ? "Love Tarot (1 Card)" : "ดูดวงความรัก (ไพ่ 1 ใบ)",
+      sublabel: isEnglish ? "Clarity for singles, talking stages, couples & breakups" : "คนโสด คนคุย มีแฟน หรือเพิ่งเลิกรา ไขคำตอบหัวใจ",
+      href: "/love/1-card",
+      Icon: LoveTarotNavIcon,
+      badge: isEnglish ? "Love" : "ความรัก",
+    },
+    {
+      label: isEnglish ? "Tarot Birth Card" : "คำนวณไพ่ประจำตัว (Birth Card)",
+      sublabel: isEnglish ? "Calculate your personality & soul tarot archetypes" : "คำนวณไพ่บุคลิกภาพและจิตวิญญาณจากวันเกิด",
+      href: "/cards/birth-card",
+      Icon: BirthCardNavIcon,
+      badge: isEnglish ? "Birthday" : "วันเกิด",
+    },
+  ];
+
+  const knowledgeItems = [
     {
       label: isEnglish ? "Tarot Spreads (25 Spreads)" : "ผังการเปิดไพ่ (25 แบบ)",
       sublabel: isEnglish ? "Love, career, finance & destiny spreads" : "ความรัก การงาน การเงิน และดวงชะตา",
@@ -127,6 +154,70 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     },
   ];
 
+  const renderNavCard = (
+    item: {
+      label: string;
+      sublabel: string;
+      href?: string;
+      Icon: React.ComponentType<{ className?: string }>;
+      badge: string;
+      onClick?: () => void;
+    },
+    idx: number
+  ) => {
+    const Icon = item.Icon;
+    const isAction = typeof item.onClick === "function";
+
+    const content = (
+      <>
+        <div className="w-8.5 h-8.5 rounded-lg bg-[#EAE7E0] border border-[#D5CEC2] flex items-center justify-center text-[#A58A5C] group-hover:text-[#29261F] group-hover:border-[#A58A5C] transition-colors duration-150 flex-shrink-0 mt-0.5">
+          <Icon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors">
+              {item.label}
+            </span>
+            <span className="text-[11px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
+              {item.badge}
+            </span>
+          </div>
+          <p className="text-[12px] font-serif-th text-[#635B4E] truncate mt-0.5">{item.sublabel}</p>
+        </div>
+      </>
+    );
+
+    return (
+      <div key={item.href ? item.href : `action-${idx}`}>
+        {isAction ? (
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.playMenuTapSound();
+              setIsOpen(false);
+              item.onClick?.();
+            }}
+            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-[#EAE7E0]/60 border border-transparent hover:border-[#D5CEC2]/60 transition-colors duration-150 group cursor-pointer text-left"
+          >
+            {content}
+          </button>
+        ) : (
+          <Link
+            href={item.href || "#"}
+            prefetch={false}
+            onClick={() => {
+              soundManager.playMenuTapSound();
+              setIsOpen(false);
+            }}
+            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-[#EAE7E0]/60 border border-transparent hover:border-[#D5CEC2]/60 transition-colors duration-150 group cursor-pointer"
+          >
+            {content}
+          </Link>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="relative select-none" ref={dropdownRef}>
       {/* Refined Luxury Warm Minimalist Trigger Button — Hamburger Icon */}
@@ -165,7 +256,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         role="region"
         aria-label={isEnglish ? "Sanctuary navigation menu" : "เมนูวิหารพยากรณ์"}
         aria-hidden={!isOpen}
-        className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-2.5 sm:p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)] space-y-1.5 no-scrollbar dropdown-panel-base ${
+        className={`absolute right-0 top-full mt-2 w-72 sm:w-84 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-2.5 sm:p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)] space-y-1 no-scrollbar dropdown-panel-base ${
           isOpen ? "dropdown-panel-entering" : "dropdown-panel-exiting"
         }`}
       >
@@ -173,71 +264,37 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#A58A5C]/35 to-transparent -mt-0.5 mb-1.5" />
 
         {/* Header Title inside Dropdown */}
-        <div className="px-3 py-1.5 flex items-center justify-between text-[13px] font-serif-th font-semibold text-[#635B4E] border-b border-[#D5CEC2]/40 pb-2">
+        <div className="px-3 py-1 flex items-center justify-between text-[13px] font-serif-th font-semibold text-[#635B4E] border-b border-[#D5CEC2]/40 pb-1.5">
           <span className="flex items-center gap-1.5 text-[#A58A5C]">
-            
             <span className="font-bold">{isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}</span>
           </span>
-          <span className="text-[#29261F] text-[13px] font-mono tracking-wider bg-[#EAE7E0] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-bold">
+          <span className="text-[#29261F] text-[12px] font-mono tracking-wider bg-[#EAE7E0] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-bold">
             1909 RWS
           </span>
         </div>
 
-        {/* Navigation Portals */}
-        <div className="space-y-1 pt-0.5">
-          {navItems.map((item, idx) => {
-            const Icon = item.Icon;
-            const isAction = "onClick" in item && typeof item.onClick === "function";
+        {/* Section 1: พิธีกรรมยอดนิยม */}
+        <div className="pt-1">
+          <div className="px-2 py-1 text-[11px] font-serif-th font-bold text-[#8F5C1A] uppercase tracking-wider">
+            {isEnglish ? "Featured Rituals & Tools" : "พิธีกรรมยอดนิยม & เครื่องมือ"}
+          </div>
+          <div className="space-y-0.5">
+            {featuredItems.map((item, idx) => renderNavCard(item, idx))}
+          </div>
+        </div>
 
-            const content = (
-              <>
-                <div className="w-9 h-9 rounded-lg bg-[#EAE7E0] border border-[#D5CEC2] flex items-center justify-center text-[#A58A5C] group-hover:text-[#29261F] group-hover:border-[#A58A5C] transition-colors duration-150 flex-shrink-0 mt-0.5">
-                  <Icon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors">
-                      {item.label}
-                    </span>
-                    <span className="text-[12px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
-                      {item.badge}
-                    </span>
-                  </div>
-                  <p className="text-[13px] font-serif-th text-[#635B4E] truncate mt-0.5">{item.sublabel}</p>
-                </div>
-              </>
-            );
+        {/* Divider */}
+        <div className="h-[1px] w-full bg-[#D5CEC2]/40 my-1" />
 
-            return (
-              <div key={"href" in item && item.href ? item.href : `action-${idx}`}>
-                {isAction ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundManager.playMenuTapSound();
-                      setIsOpen(false);
-                      item.onClick();
-                    }}
-                    className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#EAE7E0]/60 border border-transparent hover:border-[#D5CEC2]/60 transition-colors duration-150 group cursor-pointer text-left"
-                  >
-                    {content}
-                  </button>
-                ) : (
-                  <Link
-                    href={"href" in item ? (item.href as string) : "#"}
-                    prefetch={false}
-                    onClick={() => {
-                      soundManager.playMenuTapSound();
-                      setIsOpen(false);
-                    }}
-                    className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#EAE7E0]/60 border border-transparent hover:border-[#D5CEC2]/60 transition-colors duration-150 group cursor-pointer"
-                  >
-                    {content}
-                  </Link>
-                )}
-              </div>
-            );
-          })}
+        {/* Section 2: คลังความรู้ & ผังพยากรณ์ */}
+        <div>
+          <div className="px-2 py-1 text-[11px] font-serif-th font-bold text-[#8F5C1A] uppercase tracking-wider">
+            {isEnglish ? "Knowledge & Spreads" : "คลังความรู้ & ผังพยากรณ์"}
+          </div>
+          <div className="space-y-0.5">
+            {knowledgeItems.map((item, idx) => renderNavCard(item, idx + 10))}
+          </div>
+        </div>
 
           {/* Reading Journal / History Trigger */}
           {onOpenHistory && (
@@ -270,7 +327,6 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               </button>
             </div>
           )}
-        </div>
 
         {/* Reset Sanctuary Session Option */}
         {canReset && onReset && (

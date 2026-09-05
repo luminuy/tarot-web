@@ -961,3 +961,55 @@ export const MarketplaceReaderNavIcon: React.FC<IconProps> = ({ className = "w-3
     <path d="M19 8l1.5 1.5L23 7" strokeWidth={1.4} className="stroke-[#8F5C1A]" />
   </svg>
 );
+
+export const DailyTarotNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.7}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4" className="fill-[#8F5C1A]/15 stroke-[#8F5C1A]" />
+    <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" />
+  </svg>
+);
+
+export const LoveTarotNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.7}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path
+      d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+      className="fill-[#8F5C1A]/15 stroke-[#8F5C1A]"
+    />
+  </svg>
+);
+
+export const BirthCardNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.7}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="8" className="fill-[#8F5C1A]/10 stroke-[#8F5C1A]" />
+    <circle cx="12" cy="12" r="3" className="fill-[#8F5C1A]/25 stroke-[#8F5C1A]" />
+    <path d="M12 4v2M12 18v2M4 12h2M18 12h2" strokeWidth={1.4} />
+  </svg>
+);
+
