@@ -36,6 +36,13 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ปรับความกระชับของหน้าต่างเข้าสู่ระบบและสมัครสมาชิก (Clean Auth Modal Layout) — โดย Antigravity AI
+
+- **ลดทอนข้อความส่วนเกินเพื่อเพิ่มความกระชับและรองรับหน้าจอมือถืออย่างสมบูรณ์แบบ (`AuthModal.tsx`)**:
+  - ซ่อนข้อความคำอธิบายสิทธิ์ใต้หัวข้อ (`mode === "signin"` และ `mode === "signup"`) เพื่อให้หน้าต่างเข้าสู่ระบบ/สมัครสมาชิกดูสะอาด เรียบง่าย และสบายตา
+  - ซ่อนข้อความเข้ารหัสท้ายล่างสุด (`✦ เข้ารหัสความปลอดภัยระดับสากล · ลบบัญชีและข้อมูลทั้งหมดได้ทุกเมื่อ`) เพื่อลดความยาวของหน้าต่าง Modal ไม่ให้ล้นจอในอุปกรณ์ขนาดเล็ก
+  - ปรับระยะขอบล่างของหัวข้อ (`mb-4`) ให้สมดุลกับแท็บสลับโหมดเข้าสู่ระบบและสมัครสมาชิก
+
 ### 🗓️ 2026-09-05: คัมภีร์ความหมายไพ่ 78 ใบ 5 มิติ สองภาษาฉบับสมบูรณ์ (Complete 78-Card English Interpretations & Metadata) — โดย Antigravity AI
 
 - **ยกระดับคลังความรู้สารานุกรมไพ่ 78 ใบสู่มาตรฐานสากลระดับโลก (World-Class 1909 Rider-Waite-Smith Lineage & Jungian Psychology)**:

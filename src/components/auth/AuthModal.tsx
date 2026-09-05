@@ -6,7 +6,7 @@ import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
-import { DAILY_LIMIT, getMemberBenefits } from "@/lib/entitlement/copy";
+import { getMemberBenefits } from "@/lib/entitlement/copy";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useLocale } from "@/lib/i18n";
 
@@ -273,26 +273,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           {/* Header Typography */}
-          <div className="space-y-1 text-center mb-5">
+          <div className="space-y-1 text-center mb-4">
             <h3 id="auth-modal-title" className="text-xl sm:text-2xl font-serif-th font-bold text-[#29261F]">
               {mode === "signin" && (isEn ? "Sign In" : "เข้าสู่ระบบ")}
               {mode === "signup" && (isEn ? "Create Free Account" : "สมัครสมาชิกฟรี")}
               {mode === "forgot" && (isEn ? "Reset Password" : "ตั้งรหัสผ่านใหม่ (ลืมรหัสผ่าน)")}
             </h3>
-            <p className="text-xs text-[#635B4E] font-serif-th max-w-xs mx-auto leading-relaxed">
-              {mode === "signin" &&
-                (isEn
-                  ? `Sign in to receive ${DAILY_LIMIT} free daily readings and sync your tarot journal`
-                  : `เข้าสู่ระบบเพื่อรับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมบันทึกประวัติการดูดวงของคุณ`)}
-              {mode === "signup" &&
-                (isEn
-                  ? `Free account with no credit card required. Receive ${DAILY_LIMIT} daily readings & journal sync`
-                  : `สมัครสมาชิกฟรี ไม่ต้องผูกบัตรเครดิต เปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`)}
-              {mode === "forgot" &&
-                (isEn
+            {mode === "forgot" && (
+              <p className="text-xs text-[#635B4E] font-serif-th max-w-xs mx-auto leading-relaxed">
+                {isEn
                   ? "Enter your registered email address to receive a secure password reset link"
-                  : "ระบุอีเมลของคุณ เพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย")}
-            </p>
+                  : "ระบุอีเมลของคุณ เพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย"}
+              </p>
+            )}
           </div>
 
           {/* สิ่งที่จะได้รับ — แสดงเมื่อผู้ใช้ถูกพามาจากกำแพงสิทธิ์ จะได้รู้ว่าสมัครไปเพื่ออะไร */}
@@ -569,16 +562,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
               <span className="group-hover:text-[#06C755] transition-colors">LINE</span>
             </button>
-          </div>
-
-          {/* Cryptographic Assurance & PDPA Footnote */}
-          <div className="mt-5 text-[13px] text-[#635B4E] font-serif-th text-center flex items-center justify-center gap-1 opacity-80">
-            <span className="text-[#A58A5C]">✦</span>
-            <span>
-              {isEn
-                ? "End-to-end encrypted · Export or delete your data anytime under PDPA"
-                : "เข้ารหัสความปลอดภัยระดับสากล · ลบบัญชีและข้อมูลทั้งหมดได้ทุกเมื่อ"}
-            </span>
           </div>
         </motion.div>
       </div>
