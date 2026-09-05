@@ -45,9 +45,15 @@ export function DailyCardStrip() {
     );
   }
 
+  const displayKeywords =
+    isEnglish && daily.keywordsEn && daily.keywordsEn.length > 0
+      ? daily.keywordsEn
+      : daily.keywords;
+
   return (
     <Link
       href={`/cards/${daily.cardId}`}
+      prefetch={false}
       className="group mx-auto mb-6 flex max-w-2xl items-center gap-4 rounded-lg border border-[#D9C8AC] bg-white px-4 py-3 shadow-[var(--shadow-raised)] transition-colors hover:border-[#8F5C1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
     >
@@ -65,11 +71,17 @@ export function DailyCardStrip() {
           ✦ {isEnglish ? "Card of the Day" : "ไพ่ประจำวันนี้"}
         </p>
         <p className="font-serif-th text-sm font-bold text-[#2E211A]">
-          {isEnglish ? daily.nameEn : daily.nameTh}{" "}
-          <span className="font-normal text-[#635B4E]">· {isEnglish ? daily.nameTh : daily.nameEn}</span>
+          {isEnglish ? (
+            daily.nameEn
+          ) : (
+            <>
+              {daily.nameTh}{" "}
+              <span className="font-normal text-[#635B4E]">· {daily.nameEn}</span>
+            </>
+          )}
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {daily.keywords.map((kw) => (
+          {displayKeywords.map((kw) => (
             <span
               key={kw}
               className="rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-2 py-0.5 font-serif-th text-xs text-[#635B4E]"

@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0083 · 2026-09-05 16:09 · 🟠 High · แปลคีย์เวิร์ดไพ่ทาโรต์เป็นภาษาอังกฤษและแก้ไขปัญหาการนำทาง /cards/[id]
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ในโหมดภาษาอังกฤษ แถบไพ่ประจำวันยังแสดงคีย์เวิร์ดภาษาไทย และเมื่อคลิกอ่านความหมายไพ่จะเกิดข้อผิดพลาดหน้าเว็บแคชร่วงเข้า error.tsx |
+| **สาเหตุราก** | ข้อมูลไพ่ทาโรต์ไม่มีชุดคีย์เวิร์ดภาษาอังกฤษ และใน next.config.ts มีการกำหนด header immutable ให้กับ /cards/:path* คลุมทับ page route ทำให้ Next.js RSC router ไม่สามารถดึง flight stream ได้ |
+| **การแก้ไข** | สร้างพจนานุกรม keywords-en.ts รวบรวมคีย์เวิร์ด 78 ใบทั้งหัวตั้งและหัวกลับ พร้อมปรับปรุง next.config.ts ให้แคช immutable เฉพาะนามสกุลไฟล์ภาพเท่านั้น |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามกำหนด Cache-Control immutable ให้กับ path ที่แชร์ชื่อกับ App Router page route และต้องเพิ่ม unit test ตรวจสอบคีย์เวิร์ดภาษาอังกฤษของไพ่ทาโรต์** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน repo:verify ผ่านทั้ง 27 ด่าน และทดสอบการแสดงผลคีย์เวิร์ดภาษาอังกฤษสมบูรณ์ |
+| **บันทึกโดย** | Antigravity AI · branch `fix/english-keywords-and-card-navigation` · commit `fe93d35` |
+
+
 ### INC-0082 · 2026-09-05 11:23 · 🟡 Medium · resolve 4 missing featured blog articles and harmonize SEO links
 
 | หัวข้อ | รายละเอียด |

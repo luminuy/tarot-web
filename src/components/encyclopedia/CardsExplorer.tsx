@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
+import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
@@ -97,11 +98,14 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       const elementEn = (ELEMENT_EN[card.element] || "").toLowerCase();
       const astro = card.astrology?.toLowerCase() || "";
       const keywords = [...card.keywords.upright, ...card.keywords.reversed].join(" ").toLowerCase();
+      const kwEnObj = CARD_KEYWORDS_EN[card.id];
+      const keywordsEn = kwEnObj ? [...kwEnObj.upright, ...kwEnObj.reversed].join(" ").toLowerCase() : "";
 
       return (
         nameTh.includes(q) ||
         nameEn.includes(q) ||
         keywords.includes(q) ||
+        keywordsEn.includes(q) ||
         element.includes(q) ||
         elementEn.includes(q) ||
         astro.includes(q)
@@ -315,14 +319,18 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                   {/* Top 2 Upright Keywords */}
                   <div className="flex flex-wrap items-center justify-center gap-1 pt-1">
-                    {card.keywords.upright.slice(0, 2).map((kw, i) => (
-                      <span
-                        key={i}
-                        className="text-[12px] font-serif-th px-2 py-0.5 rounded-full bg-[#EAE7E0] text-[#29261F] border border-[#D5CEC2] truncate max-w-full"
-                      >
-                        {kw}
-                      </span>
-                    ))}
+                    {(() => {
+                      const kwEnList = CARD_KEYWORDS_EN[card.id]?.upright;
+                      const displayKws = isEnglish && kwEnList && kwEnList.length > 0 ? kwEnList.slice(0, 2) : card.keywords.upright.slice(0, 2);
+                      return displayKws.map((kw, i) => (
+                        <span
+                          key={i}
+                          className="text-[12px] font-serif-th px-2 py-0.5 rounded-full bg-[#EAE7E0] text-[#29261F] border border-[#D5CEC2] truncate max-w-full"
+                        >
+                          {kw}
+                        </span>
+                      ));
+                    })()}
                   </div>
                 </div>
 

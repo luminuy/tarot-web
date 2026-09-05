@@ -14,6 +14,7 @@
  */
 
 import { cardByIndex, DECK, type TarotCard } from "@/data/cards";
+import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { dayKey } from "@/lib/entitlement/week";
 import { KEY, kvGetJSON, kvPutJSON } from "@/lib/platform/kv-store";
 
@@ -31,8 +32,10 @@ export interface DailyCard {
   nameEn: string;
   /** ชื่อไฟล์ภาพ เช่น 'major-00.jpg' — ส่งต่อให้ <CardImage image=...> */
   image: string;
-  /** คำสำคัญ 4 คำสำหรับโชว์ใต้ไพ่ */
+  /** คำสำคัญ 4 คำสำหรับโชว์ใต้ไพ่ (ภาษาไทย) */
   keywords: string[];
+  /** คำสำคัญ 4 คำสำหรับโชว์ใต้ไพ่ (ภาษาอังกฤษ) */
+  keywordsEn: string[];
   element: TarotCard["element"];
   astrology: string;
   /** ประโยคพลังงานประจำวัน (ตัดจาก meanings.general.upright) */
@@ -74,6 +77,7 @@ export async function computeDailyCard(dateKey: string): Promise<DailyCard> {
     nameEn: card.nameEn,
     image: card.image,
     keywords: card.keywords.upright.slice(0, 4),
+    keywordsEn: CARD_KEYWORDS_EN[card.id]?.upright.slice(0, 4) || [],
     element: card.element,
     astrology: card.astrology,
     message: trimMessage(card.meanings.general.upright),
