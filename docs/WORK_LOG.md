@@ -36,6 +36,13 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ตรวจทานและอัปเดตเอกสารส่งมอบงานแถบ Header ค้างอย่างละเอียด (HANDOFF_HEADER_20260905.md) — โดย Antigravity AI
+
+- **ปรับปรุงสถานะเอกสารสู่ Resolved & Verified Record สมบูรณ์ 100%**:
+  - บันทึกผลการแก้ไขจริงของทั้ง 7 ปัญหา (ISSUE-024 ถึง ISSUE-030) ที่รวมเข้าสู่ `main` ใน PR #277 (commit `82efa0b`)
+  - แก้ไขข้อความในเอกสารเดิมที่ขัดต่อกฎเหล็กข้อ 2 (ลบคำแนะนำการใช้สัญลักษณ์ดวงดาว `✦` / `✨` ออก เพื่อคงมาตรฐาน Editorial Luxury Typography)
+  - อัปเดต Checklist ครบถ้วนทุกข้อ พร้อมบันทึกผลการทดสอบภาคสนามบน Mobile Chrome, Safari iOS, Desktop และการเพิ่มด่านตรวจอัตโนมัติ 2 ตัว (`test-will-change.ts` และ `test-modal-effect-deps.ts`) สู่ `repo:verify` (29 ด่าน)
+
 ### 🗓️ 2026-09-05: แก้ปัญหา Lighthouse Charset Detection, robots/llms.txt CORS Fetch, และลด Payload มหาศาล 34MB (INC-0087) — โดย Antigravity AI
 
 - **แก้ปัญหา Lighthouse Best Practices (Properly defines charset)**:
