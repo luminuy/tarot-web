@@ -4,6 +4,7 @@ import React, { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallba
 import { motion, AnimatePresence } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
+import { useLocale } from "@/lib/i18n";
 
 // useLayoutEffect ฝั่ง server จะเตือน — สลับเป็น useEffect ตอน SSR
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -24,9 +25,10 @@ interface FanCardProps {
   isPicked: boolean;
   disabled: boolean;
   onClick: (idx: number) => void;
+  isEnglish?: boolean;
 }
 
-const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicked, disabled, onClick }) => {
+const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicked, disabled, onClick, isEnglish }) => {
   if (isPicked) return null;
 
   // P1-M4: True mathematical arc geometry
@@ -45,7 +47,7 @@ const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicke
     <motion.div
       role="button"
       tabIndex={disabled ? -1 : 0}
-      aria-label={`เลือกไพ่ใบที่ ${cardIdx + 1}`}
+      aria-label={isEnglish ? `Select card #${cardIdx + 1}` : `เลือกไพ่ใบที่ ${cardIdx + 1}`}
       aria-disabled={disabled}
       initial={{ opacity: 0, scale: 0.8, y: 10 }}
       animate={{ opacity: 1, scale: 1, rotate: angle, y: arcY }}
@@ -89,6 +91,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
   onPickCard,
   disabled = false,
 }) => {
+  const { isEnglish } = useLocale();
   const stageRef = useRef<HTMLDivElement>(null);
   const fanRef = useRef<HTMLDivElement>(null);
   const [fanFit, setFanFit] = useState({ scale: 1, trimY: 0 });
@@ -254,6 +257,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                         isPicked={pickedIndices.includes(cardIdx)}
                         disabled={disabled}
                         onClick={handleCardClick}
+                        isEnglish={isEnglish}
                       />
                     ))}
                   </AnimatePresence>
@@ -289,7 +293,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13px] text-[#2E211A] font-serif-th font-bold flex items-center gap-1">
                   <span className="text-[#8F5C1A]">✦</span>
-                  <span>ความคืบหน้าพิธีจับไพ่</span>
+                  <span>{isEnglish ? "Sacred Card Selection" : "ความคืบหน้าพิธีจับไพ่"}</span>
                 </span>
                 <span className="text-[13px] sm:text-xs font-mono font-bold text-[#2E211A] bg-[#FFFFFF] border border-[#D9C8AC] px-2 py-0.2 rounded-full ">
                   {pickedIndices.length} / {targetCount}
@@ -312,10 +316,22 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[13px] sm:text-[13px] text-[#635B4E] font-serif-th leading-normal truncate">
                   {isComplete ? (
-                    <span className="text-[#3A7044] font-semibold">✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย</span>
+                    <span className="text-[#3A7044] font-semibold">
+                      {isEnglish
+                        ? "✨ All cards chosen. Revealing sacred prophecies..."
+                        : "✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย"}
+                    </span>
                   ) : (
                     <span>
-                      กำลังเลือกใบสำหรับ <strong className="text-[#2E211A]">&ldquo;{currentPositionName}&rdquo;</strong>
+                      {isEnglish ? (
+                        <>
+                          Drawing for <strong className="text-[#2E211A]">&ldquo;{currentPositionName}&rdquo;</strong>
+                        </>
+                      ) : (
+                        <>
+                          กำลังเลือกใบสำหรับ <strong className="text-[#2E211A]">&ldquo;{currentPositionName}&rdquo;</strong>
+                        </>
+                      )}
                     </span>
                   )}
                 </p>
@@ -327,9 +343,9 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     onClick={handleAutoPick}
                     disabled={disabled}
                     className="flex-shrink-0 text-[13px] sm:text-[13px] text-[#2E211A] hover:text-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#F3EDE2] border border-[#D9C8AC] hover:border-[#8F5C1A] px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
-                    aria-label="สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"
+                    aria-label={isEnglish ? "Auto-draw next card" : "สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"}
                   >
-                    ✦ สุ่มเลือกให้ฉัน
+                    {isEnglish ? "✦ Draw for Me" : "✦ สุ่มเลือกให้ฉัน"}
                   </button>
                 )}
               </div>
@@ -365,7 +381,9 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                   >
                     {isFilled ? "✓" : idx + 1}
                   </div>
-                  <span className="text-[13px] sm:text-[13px] tracking-wide">ใบที่ {idx + 1}</span>
+                  <span className="text-[13px] sm:text-[13px] tracking-wide">
+                    {isEnglish ? `Card #${idx + 1}` : `ใบที่ ${idx + 1}`}
+                  </span>
                 </motion.div>
               );
             })}

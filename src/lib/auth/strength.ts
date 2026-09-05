@@ -9,9 +9,14 @@ export interface PasswordStrength {
   barColor: string;
 }
 
-export function calculatePasswordStrength(password: string): PasswordStrength {
+export function calculatePasswordStrength(password: string, isEnglish?: boolean): PasswordStrength {
   if (!password || password.length === 0) {
-    return { score: 0, label: "กรุณาระบุรหัสผ่าน", colorClass: "text-[#635B4E]", barColor: "bg-[#D9C8AC]" };
+    return {
+      score: 0,
+      label: isEnglish ? "Enter password" : "กรุณาระบุรหัสผ่าน",
+      colorClass: "text-[#635B4E]",
+      barColor: "bg-[#D9C8AC]",
+    };
   }
 
   let points = 0;
@@ -30,13 +35,33 @@ export function calculatePasswordStrength(password: string): PasswordStrength {
   switch (score) {
     case 0:
     case 1:
-      return { score: 1, label: "รหัสผ่านสั้นเกินไป", colorClass: "text-[#A6392C]", barColor: "bg-[#A6392C]" };
+      return {
+        score: 1,
+        label: isEnglish ? "Too weak" : "รหัสผ่านสั้นเกินไป",
+        colorClass: "text-[#A6392C]",
+        barColor: "bg-[#A6392C]",
+      };
     case 2:
-      return { score: 2, label: "พอใช้", colorClass: "text-[#8F5C1A]", barColor: "bg-[#8F5C1A]" };
+      return {
+        score: 2,
+        label: isEnglish ? "Fair" : "พอใช้",
+        colorClass: "text-[#8F5C1A]",
+        barColor: "bg-[#8F5C1A]",
+      };
     case 3:
-      return { score: 3, label: "ปลอดภัยดี", colorClass: "text-[#3A7044]", barColor: "bg-[#3A7044]" };
+      return {
+        score: 3,
+        label: isEnglish ? "Strong" : "ปลอดภัยดี",
+        colorClass: "text-[#3A7044]",
+        barColor: "bg-[#3A7044]",
+      };
     case 4:
     default:
-      return { score: 4, label: "ปลอดภัยสูงมาก ✦", colorClass: "text-[#8F5C1A]", barColor: "bg-[#3A7044]" };
+      return {
+        score: 4,
+        label: isEnglish ? "Very Strong ✦" : "ปลอดภัยสูงมาก ✦",
+        colorClass: "text-[#8F5C1A]",
+        barColor: "bg-[#3A7044]",
+      };
   }
 }

@@ -64,6 +64,13 @@ const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string;
   },
 };
 
+const ELEMENT_EN: Record<string, string> = {
+  ไฟ: "Fire",
+  น้ำ: "Water",
+  ลม: "Air",
+  ดิน: "Earth",
+};
+
 export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   const { isEnglish } = useLocale();
   const [activeFilter, setActiveFilter] = useState<string>("all");
@@ -87,11 +94,17 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       const nameTh = card.nameTh.toLowerCase();
       const nameEn = card.nameEn.toLowerCase();
       const element = card.element?.toLowerCase() || "";
+      const elementEn = (ELEMENT_EN[card.element] || "").toLowerCase();
       const astro = card.astrology?.toLowerCase() || "";
       const keywords = [...card.keywords.upright, ...card.keywords.reversed].join(" ").toLowerCase();
 
       return (
-        nameTh.includes(q) || nameEn.includes(q) || keywords.includes(q) || element.includes(q) || astro.includes(q)
+        nameTh.includes(q) ||
+        nameEn.includes(q) ||
+        keywords.includes(q) ||
+        element.includes(q) ||
+        elementEn.includes(q) ||
+        astro.includes(q)
       );
     });
   }, [cards, activeFilter, searchQuery]);
@@ -109,6 +122,25 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
   return (
     <div className="space-y-8 relative z-10">
+      {/* Dynamic Bilingual Hero Header */}
+      <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
+        <div>
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs text-[#A58A5C] font-serif-th font-bold shadow-xs">
+            <span>✦</span>{" "}
+            {isEnglish ? "78-CARD TAROT ENCYCLOPEDIA" : "สารานุกรมความหมายไพ่ 78 ใบ"}{" "}
+            <span>✦</span>
+          </span>
+        </div>
+        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-[#29261F] tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
+          {isEnglish ? "The Complete 78 Tarot Cards & Meanings" : "ความหมายไพ่ทาโรต์ทั้ง 78 ใบ"}
+        </h1>
+        <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
+          {isEnglish
+            ? "Explore depth psychological, archetypal, and practical divinatory meanings across love, career, and finances in the 1909 Rider-Waite lineage."
+            : "ค้นหาความหมายและคำทำนายของไพ่ทาโรต์ 78 ใบ ครบทุกมิติความรัก การงาน และการเงิน"}
+        </p>
+      </div>
+
       {/* Sacred Search & Filter Dashboard */}
       <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-6 space-y-5 shadow-xs">
         {/* Search Bar & Result Stats */}
@@ -261,7 +293,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     <span
                       className={`text-[12px] font-mono px-1.5 py-0.5 rounded border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold`}
                     >
-                      {card.element}
+                      {isEnglish ? ELEMENT_EN[card.element] || card.element : card.element}
                     </span>
                   </div>
 

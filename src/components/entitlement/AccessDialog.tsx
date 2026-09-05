@@ -13,18 +13,19 @@ import {
   SparkSealIcon,
 } from "@/components/entitlement/EntitlementIcons";
 import {
-  ACCESS_PLANS,
   CHEAPEST_PACKAGE_THB,
   DAILY_LIMIT,
-  MEMBER_BENEFITS,
-  UPGRADE_COPY,
   describeEntitlement,
   formatResetCountdown,
+  getAccessPlans,
+  getMemberBenefits,
+  getUpgradeCopy,
   resetClockLabel,
   type UpgradeReason,
 } from "@/lib/entitlement/copy";
 import { trackEntitlementEvent } from "@/lib/entitlement/track";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { useLocale } from "@/lib/i18n";
 
 /**
  * หน้าต่างสิทธิ์การใช้งาน — จุดเดียวที่อธิบายเรื่องสิทธิ์ทั้งหมด
@@ -51,20 +52,24 @@ export function AccessDialog({
   onSignin: () => void;
   onBuyCredits: () => void;
 }) {
+  const { locale, isEnglish } = useLocale();
+  const isEn = isEnglish || locale === "en";
   const ent = useEntitlement();
-  const view = describeEntitlement(ent);
+  const view = describeEntitlement(ent, isEn);
   const isOpen = reason !== null;
 
   useEffect(() => {
     if (reason) trackEntitlementEvent(`access_dialog_shown:${reason}`);
   }, [reason]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !reason) return null;
 
-  const copy = UPGRADE_COPY[reason];
-  const countdown = formatResetCountdown(ent?.resetAt ?? null);
+  const copy = getUpgradeCopy(reason, isEn);
+  const countdown = formatResetCountdown(ent?.resetAt ?? null, Date.now(), isEn);
   const isGuest = view?.isGuest ?? true;
   const showCredits = copy.primaryAction === "credits";
+  const memberBenefits = getMemberBenefits(isEn);
+  const accessPlans = getAccessPlans(isEn);
 
   const handlePrimary = () => {
     trackEntitlementEvent(`access_dialog_primary:${reason}`);
@@ -107,7 +112,7 @@ export function AccessDialog({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
                 <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-[#635B4E]">
-                  สถานะตอนนี้
+                  {isEn ? "Current Status" : "สถานะตอนนี้"}
                 </span>
                 <span className="block font-serif-th text-sm font-bold text-[#2E211A]">{view.statusLine}</span>
               </div>
@@ -118,7 +123,9 @@ export function AccessDialog({
               <div className="mt-3 flex items-center gap-2 border-t border-[#D9C8AC]/30 pt-3 font-serif-th text-xs text-[#635B4E]">
                 <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-[#8F5C1A]" />
                 <span>
-                  โควตาฟรีชุดใหม่มาถึง{countdown ? ` ${countdown}` : ""} · รีเซ็ต{resetClockLabel()}
+                  {isEn
+                    ? `New daily readings arrive${countdown ? ` in ${countdown}` : ""} · Resets ${resetClockLabel(true)}`
+                    : `โควตาฟรีชุดใหม่มาถึง${countdown ? ` ${countdown}` : ""} · รีเซ็ต${resetClockLabel(false)}`}
                 </span>
               </div>
             )}
@@ -130,10 +137,12 @@ export function AccessDialog({
           <section className="space-y-3">
             <h3 className="font-serif-th text-sm font-bold text-[#2E211A]">
               <span className="text-[#8F5C1A]">✦</span>{" "}
-              {view?.isMember ? "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)" : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง"}
+              {view?.isMember
+                ? (isEn ? "Your Active Member Benefits" : "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)")
+                : (isEn ? "Benefits of Creating a Free Account" : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง")}
             </h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
-              {MEMBER_BENEFITS.map((b) => (
+              {memberBenefits.map((b) => (
                 <li key={b.title} className="flex gap-2.5 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-3 ">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8F5C1A]/20 text-[#8F5C1A]">
                     <CheckMarkIcon className="h-3 w-3" />
@@ -153,20 +162,24 @@ export function AccessDialog({
           <section className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-4 ">
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#2E211A]">
-                <HourglassIcon className="h-4 w-4 text-[#8F5C1A]" /> รอโควตาฟรีรอบใหม่
+                <HourglassIcon className="h-4 w-4 text-[#8F5C1A]" />
+                {isEn ? "Wait for Free Daily Renewal" : "รอโควตาฟรีรอบใหม่"}
               </span>
               <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
-                ไม่ต้องจ่ายอะไร กลับมาหลังเที่ยงคืนแล้วเปิดไพ่ได้อีก {DAILY_LIMIT} ครั้ง
-                {countdown ? ` (${countdown})` : ""}
+                {isEn
+                  ? `Completely free. Return after midnight for ${DAILY_LIMIT} fresh readings${countdown ? ` (${countdown})` : ""}.`
+                  : `ไม่ต้องจ่ายอะไร กลับมาหลังเที่ยงคืนแล้วเปิดไพ่ได้อีก ${DAILY_LIMIT} ครั้ง${countdown ? ` (${countdown})` : ""}`}
               </p>
             </div>
             <div className="rounded-lg border-2 border-[#D9C8AC] bg-[#FFFFFF] p-4 ">
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#8F5C1A]">
-                <CoinSealIcon className="h-4 w-4" /> ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)
+                <CoinSealIcon className="h-4 w-4" />
+                {isEn ? "Sacred Tokens (Continue Now)" : "ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)"}
               </span>
               <p className="font-serif-th text-[13px] leading-relaxed text-[#2E211A]">
-                จ่ายครั้งเดียวเริ่มต้น {CHEAPEST_PACKAGE_THB} บาท · ปลดล็อกผังใหญ่ 10–12 ใบ
-                และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด ไม่มีวันหมดอายุ
+                {isEn
+                  ? `One-time purchase starting at ${CHEAPEST_PACKAGE_THB} THB · Unlock full 10–12 card spreads and unlimited archetypal dialogue. Never expires.`
+                  : `จ่ายครั้งเดียวเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท · ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด ไม่มีวันหมดอายุ`}
               </p>
             </div>
           </section>
@@ -175,7 +188,7 @@ export function AccessDialog({
         {/* ── ตารางเทียบสิทธิ์ ────────────────────────────────────── */}
         {reason === "explore" && (
           <section className="grid gap-3 sm:grid-cols-3">
-            {ACCESS_PLANS.map((plan) => {
+            {accessPlans.map((plan) => {
               const isCurrent = (plan.id === "guest" && isGuest) || (plan.id === "member" && view?.isMember);
               const isSpecial = plan.id === "credits";
               return (
@@ -191,7 +204,7 @@ export function AccessDialog({
                 >
                   {isSpecial ? (
                     <span className="absolute -top-2.5 right-3 rounded-full bg-[#8F5C1A] px-2 py-0.5 font-serif-th text-[12px] font-bold text-[#FFFFFF] ">
-                      ✦ ปลดล็อกขั้นสุด
+                      {isEn ? "✦ Highest Level" : "✦ ปลดล็อกขั้นสุด"}
                     </span>
                   ) : plan.highlight ? (
                     <span className="absolute -top-2.5 right-3 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 font-serif-th text-[12px] font-bold text-[#2E211A]">
@@ -203,7 +216,7 @@ export function AccessDialog({
                   <span className="font-serif-th text-[13px] text-[#635B4E]">{plan.priceNote}</span>
                   {isCurrent && (
                     <span className="mt-2 inline-flex w-fit rounded border border-[#D9C8AC] bg-[#F3EDE2] px-1.5 py-0.5 font-serif-th text-[12px] text-[#2E211A]">
-                      แผนปัจจุบันของคุณ
+                      {isEn ? "Your Current Plan" : "แผนปัจจุบันของคุณ"}
                     </span>
                   )}
                   <ul className="mt-3 space-y-1.5 border-t border-[#D9C8AC]/30 pt-3">
@@ -249,7 +262,9 @@ export function AccessDialog({
               className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
               <span className="mr-1.5">✦</span>
-              ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม {CHEAPEST_PACKAGE_THB}.-)
+              {isEn
+                ? `Unlock Sacred Tokens (From ${CHEAPEST_PACKAGE_THB}.-)`
+                : `ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`}
             </button>
           )}
 

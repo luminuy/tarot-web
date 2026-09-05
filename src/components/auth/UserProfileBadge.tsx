@@ -6,7 +6,7 @@ import { invalidateSessionCache, patchSessionUser, useSessionUser } from "@/lib/
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { describeEntitlement, CHEAPEST_PACKAGE_THB } from "@/lib/entitlement/copy";
 import { soundManager } from "@/lib/utils/audio";
-
+import { useLocale } from "@/lib/i18n";
 
 export interface UserProfileBadgeProps {
   onOpenAuthModal: () => void;
@@ -15,9 +15,11 @@ export interface UserProfileBadgeProps {
 }
 
 export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthModal, onOpenPlans, onBuyCredits }) => {
+  const { locale, isEnglish } = useLocale();
+  const isEn = isEnglish || locale === "en";
   const { user, loading } = useSessionUser();
   const ent = useEntitlement();
-  const view = describeEntitlement(ent);
+  const view = describeEntitlement(ent, isEn);
   const [menuOpen, setMenuOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
@@ -115,18 +117,18 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
   const handleResendVerify = async () => {
     soundManager.playMenuTapSound();
-    setResendStatus("กำลังส่ง…");
+    setResendStatus(isEn ? "Sending…" : "กำลังส่ง…");
     try {
       const res = await fetch("/api/auth/email/resend", { method: "POST", credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        setResendStatus("✓ ส่งแล้ว");
+        setResendStatus(isEn ? "✓ Sent" : "✓ ส่งแล้ว");
         setTimeout(() => setResendStatus(null), 3000);
       } else {
-        setResendStatus(data.error || "ส่งไม่สำเร็จ");
+        setResendStatus(data.error || (isEn ? "Failed to send" : "ส่งไม่สำเร็จ"));
       }
     } catch {
-      setResendStatus("เกิดข้อผิดพลาด");
+      setResendStatus(isEn ? "An error occurred" : "เกิดข้อผิดพลาด");
     }
   };
 
@@ -159,8 +161,8 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           onOpenAuthModal();
         }}
         className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] flex items-center justify-center transition-colors duration-150 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] select-none"
-        aria-label="เข้าสู่ระบบ"
-        title="เข้าสู่ระบบ"
+        aria-label={isEn ? "Sign In" : "เข้าสู่ระบบ"}
+        title={isEn ? "Sign In" : "เข้าสู่ระบบ"}
       >
         <svg
           viewBox="0 0 24 24"
@@ -182,7 +184,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
   const getProviderLabel = () => {
     if (user.provider === "google") return "Google Account";
     if (user.provider === "line") return "LINE Account";
-    return "บัญชีอีเมล";
+    return isEn ? "Email Account" : "บัญชีอีเมล";
   };
 
   return (
@@ -198,7 +200,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
         }`}
         aria-expanded={menuOpen}
         aria-controls="user-profile-panel"
-        aria-label={`โปรไฟล์ผู้ใช้งาน (${user.name})`}
+        aria-label={isEn ? `User Profile (${user.name})` : `โปรไฟล์ผู้ใช้งาน (${user.name})`}
         title={user.name}
       >
         <svg
@@ -230,7 +232,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
       <div
         id="user-profile-panel"
         role="region"
-        aria-label={`ข้อมูลบัญชี ${user.name}`}
+        aria-label={isEn ? `Account details for ${user.name}` : `ข้อมูลบัญชี ${user.name}`}
         aria-hidden={!menuOpen}
         className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)] space-y-2 font-serif-th text-xs no-scrollbar dropdown-panel-base ${
           menuOpen ? "dropdown-panel-entering" : "dropdown-panel-exiting"
@@ -271,24 +273,27 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[#A58A5C] text-xs">✦</span>
-                  <span className="text-[13px] font-bold text-[#29261F] tracking-wide">สิทธิ์และแพ็กเกจ</span>
+                  <span className="text-[13px] font-bold text-[#29261F] tracking-wide">
+                    {isEn ? "Tier & Allowances" : "สิทธิ์และแพ็กเกจ"}
+                  </span>
                 </div>
                 <span className="text-[11px] font-mono font-bold text-[#F3F0EA] bg-[#29261F] px-2 py-0.5 rounded-full">
                   {view?.isUnlimited
                     ? "VIP UNLIMITED"
                     : view?.remaining != null
-                      ? `เหลือ ${view.remaining}/${view.limit} ครั้ง`
-                      : "สมาชิกวิหาร"}
+                      ? (isEn ? `${view.remaining}/${view.limit} left` : `เหลือ ${view.remaining}/${view.limit} ครั้ง`)
+                      : (isEn ? "Sanctuary Member" : "สมาชิกวิหาร")}
                 </span>
               </div>
 
               <div className="text-[13px] text-[#635B4E] leading-relaxed">
                 {view?.isUnlimited ? (
-                  <p>คุณมีสิทธิ์เปิดไพ่และสนทนาปรึกษาได้ไม่จำกัด</p>
+                  <p>{isEn ? "You have unrestricted readings and consultations." : "คุณมีสิทธิ์เปิดไพ่และสนทนาปรึกษาได้ไม่จำกัด"}</p>
                 ) : (
                   <p>
-                    เปิดฟรีวันละ {view?.limit ?? 3} ครั้ง
-                    {ent?.bonusRemaining ? ` · ญาณพิเศษสะสม +${ent.bonusRemaining} ครั้ง` : ""}
+                    {isEn
+                      ? `${view?.limit ?? 3} free daily readings${ent?.bonusRemaining ? ` · +${ent.bonusRemaining} bonus credits` : ""}`
+                      : `เปิดฟรีวันละ ${view?.limit ?? 3} ครั้ง${ent?.bonusRemaining ? ` · ญาณพิเศษสะสม +${ent.bonusRemaining} ครั้ง` : ""}`}
                   </p>
                 )}
               </div>
@@ -306,10 +311,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 >
                   <span className="flex items-center gap-1.5">
                     <span>✨</span>
-                    <span>ซื้อรอบเพิ่ม / อัปเกรดญาณ</span>
+                    <span>{isEn ? "Add Credits / Upgrade Tier" : "ซื้อรอบเพิ่ม / อัปเกรดญาณ"}</span>
                   </span>
                   <span className="text-[11px] bg-black/20 px-1.5 py-0.5 rounded font-mono font-semibold">
-                    เริ่มต้น ฿{CHEAPEST_PACKAGE_THB}
+                    {isEn ? `From ฿${CHEAPEST_PACKAGE_THB}` : `เริ่มต้น ฿${CHEAPEST_PACKAGE_THB}`}
                   </span>
                 </button>
               )}
@@ -327,7 +332,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                     className="text-[#A58A5C] hover:text-[#29261F] transition-colors cursor-pointer flex items-center gap-1 font-semibold"
                   >
                     <span>✦</span>
-                    <span>เปรียบเทียบทุกแพลน</span>
+                    <span>{isEn ? "Compare All Plans" : "เปรียบเทียบทุกแพลน"}</span>
                   </button>
                 )}
                 <Link
@@ -338,7 +343,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   }}
                   className="text-[#635B4E] hover:text-[#29261F] transition-colors flex items-center gap-1 ml-auto font-medium"
                 >
-                  <span>จัดการบัญชี</span>
+                  <span>{isEn ? "Account Settings" : "จัดการบัญชี"}</span>
                   <span>→</span>
                 </Link>
               </div>
@@ -350,14 +355,14 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 <div className="flex items-center justify-between">
                   <span className="font-semibold flex items-center gap-1">
                     <span className="text-[#A6392C]">✦</span>
-                    <span>ยังไม่ยืนยันอีเมล</span>
+                    <span>{isEn ? "Email Not Verified" : "ยังไม่ยืนยันอีเมล"}</span>
                   </span>
                   <button
                     type="button"
                     onClick={handleResendVerify}
                     className="text-[12px] text-[#A6392C] hover:text-[#29261F] hover:underline font-bold cursor-pointer transition-colors"
                   >
-                    {resendStatus || "ส่งลิงก์ใหม่"}
+                    {resendStatus || (isEn ? "Resend Link" : "ส่งลิงก์ใหม่")}
                   </button>
                 </div>
               </div>
@@ -368,10 +373,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <div className="p-2.5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] text-[12px] flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <span className="text-[#A58A5C]">✦</span>
-                  <span>รอติดตามผลคำทำนาย</span>
+                  <span>{isEn ? "Pending Outcomes" : "รอติดตามผลคำทำนาย"}</span>
                 </span>
                 <span className="font-bold bg-[#29261F] text-[#F3F0EA] px-2 py-0.5 rounded-full">
-                  {pendingCount} รายการ
+                  {isEn ? `${pendingCount} ${pendingCount === 1 ? "entry" : "entries"}` : `${pendingCount} รายการ`}
                 </span>
               </div>
             )}
@@ -379,8 +384,12 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             {/* Marketing / Follow-up Consent Luxury Toggle */}
             <div className="p-2.5 rounded-xl bg-[#EAE7E0] border border-[#D5CEC2] flex items-center justify-between">
               <div className="pr-2">
-                <span className="block text-[13px] font-semibold text-[#29261F]">รับคำทำนายติดตามผล</span>
-                <span className="text-[12px] text-[#635B4E]">แจ้งเตือนเมื่อถึงกำหนดคำทำนายทางอีเมล</span>
+                <span className="block text-[13px] font-semibold text-[#29261F]">
+                  {isEn ? "Follow-up Insights" : "รับคำทำนายติดตามผล"}
+                </span>
+                <span className="text-[12px] text-[#635B4E]">
+                  {isEn ? "Email updates when timing predictions arrive" : "แจ้งเตือนเมื่อถึงกำหนดคำทำนายทางอีเมล"}
+                </span>
               </div>
               <button
                 type="button"
@@ -388,7 +397,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 className={`w-10 h-6 rounded-full transition-colors duration-150 p-0.5 relative cursor-pointer flex-shrink-0 border ${
                   user.marketingConsent ? "bg-[#29261F] border-[#29261F]" : "bg-[#FFFFFF] border-[#D5CEC2]"
                 }`}
-                aria-label="เปิดปิดการรับอีเมลติดตามผล"
+                aria-label={isEn ? "Toggle follow-up prediction emails" : "เปิดปิดการรับอีเมลติดตามผล"}
               >
                 <div
                   className={`w-4.5 h-4.5 rounded-full transition-transform duration-150 ease-out ${
@@ -407,7 +416,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               >
                 <span className="flex items-center gap-1.5 font-bold">
                   <span className="text-[#A6392C] group-hover:rotate-12 transition-transform">✦</span>
-                  <span>ออกจากระบบ</span>
+                  <span>{isEn ? "Sign Out" : "ออกจากระบบ"}</span>
                 </span>
                 <span className="text-[13px] text-[#A6392C] group-hover:text-[#A6392C] group-hover:translate-x-0.5 transition-all">
                   →

@@ -58,6 +58,50 @@ export const HOME_FAQS: HomeFaqItem[] = [
   },
 ];
 
+export const HOME_FAQS_EN: HomeFaqItem[] = [
+  {
+    id: "faq-free-reading",
+    question: "Is online tarot divination on SeerTarot free of charge?",
+    answer:
+      "Yes, you can consult the tarot for free. We provide daily card reading allocations for everyone at no cost. For expansive grand spreads or in-depth counseling sessions, quota unlocks and premium options are available according to your needs.",
+  },
+  {
+    id: "faq-accuracy",
+    question: "Is an online tarot reading as accurate as visiting an in-person reader?",
+    answer:
+      "Tarot accuracy hinges upon the querent's mindfulness, intentionality, and focus. SeerTarot is engineered so that you physically shuffle and draw from all 78 cards with your own touch—never through arbitrary computer automation. Our AI oracles, trained in 1909 Rider-Waite symbolism and depth psychology, translate and mirror your psychological state with unfiltered resonance.",
+  },
+  {
+    id: "faq-provably-fair",
+    question: "What is Provably Fair shuffling, and how does it guarantee transparency?",
+    answer:
+      "Provably Fair is a cryptographic verification system using SHA-256, identical to protocols used in high-security environments. The deck sequence is hashed and sealed before you pick your cards (Commitment), and the cryptographic key is revealed afterward (Reveal) so you can independently verify that the deck was never manipulated.",
+  },
+  {
+    id: "faq-frequency",
+    question: "How often should I consult the tarot, and what guidelines should I follow?",
+    answer:
+      "For general guidance, once daily or whenever facing a significant crossroads is ideal. Avoid repeatedly asking the identical question in a single day, as anxiety disrupts clarity. Most importantly, tarot serves as an intuitive compass; ultimate choice and sovereign agency always remain entirely in your hands.",
+  },
+  {
+    id: "faq-rws-1909",
+    question: "How does the 1909 Rider-Waite-Smith deck differ from other tarot decks?",
+    answer:
+      "Created by Pamela Colman Smith under the direction of Arthur Edward Waite, the 1909 deck established the worldwide gold standard. It was the first deck where every single card—both 22 Major Arcana and 56 Minor Arcana—features rich narrative scenes with posture, eye direction, landscape, and color symbolism that speak directly to the subconscious.",
+  },
+  {
+    id: "faq-good-questions",
+    question: "What types of questions work best for tarot consultations?",
+    answer:
+      "Open-ended questions focused on growth and situational dynamics—such as 'What energies are currently at play in this situation?', 'How can I navigate this challenge constructively?', or 'What blind spot am I overlooking in this relationship?'—yield far deeper, more transformative guidance than simple yes-or-no queries.",
+  },
+];
+
+export function getHomeFaqs(isEnglishOrLocale?: boolean | string): HomeFaqItem[] {
+  const isEn = typeof isEnglishOrLocale === "boolean" ? isEnglishOrLocale : isEnglishOrLocale === "en";
+  return isEn ? HOME_FAQS_EN : HOME_FAQS;
+}
+
 export const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
   {
     name: "1. เลือกผังการเปิดไพ่",
@@ -91,11 +135,50 @@ export const HOME_HOW_TO_STEPS: HomeHowToStep[] = [
   },
 ];
 
-export function generateFaqJsonLd() {
+export const HOME_HOW_TO_STEPS_EN: HomeHowToStep[] = [
+  {
+    name: "1. Choose Your Spread",
+    text: "Select an archetypal layout tailored to your inquiry, from a 1-card daily compass and 3-card temporal spread to the 10-card Celtic Cross.",
+    url: `${SITE_ORIGIN}/#spread-select`,
+    image: `${SITE_ORIGIN}/cards/major-01.jpg`,
+  },
+  {
+    name: "2. Set Your Intention & Focus",
+    text: "Take a deep breath, formulate your inquiry sincerely, and choose the AI oracle archetype whose tone and lineage best serve you.",
+    url: `${SITE_ORIGIN}/#intention-select`,
+    image: `${SITE_ORIGIN}/cards/major-02.jpg`,
+  },
+  {
+    name: "3. Shuffle with Your Own Touch",
+    text: "Shuffle the complete 78-card deck via Web Crypto API with Provably Fair SHA-256 cryptographic randomness.",
+    url: `${SITE_ORIGIN}/#shuffle`,
+    image: `${SITE_ORIGIN}/cards/major-10.jpg`,
+  },
+  {
+    name: "4. Select and Draw Cards",
+    text: "The deck fans out across an illuminated altar. Use your fingertips to deliberately select each card, infusing your energy into the draw.",
+    url: `${SITE_ORIGIN}/#pick-cards`,
+    image: `${SITE_ORIGIN}/cards/major-17.jpg`,
+  },
+  {
+    name: "5. Receive Wisdom & Converse",
+    text: "Turn over authentic 1909 Rider-Waite cards, listen to streaming interpretations, and converse in depth with your AI oracle.",
+    url: `${SITE_ORIGIN}/#reading`,
+    image: `${SITE_ORIGIN}/cards/major-19.jpg`,
+  },
+];
+
+export function getHomeHowToSteps(isEnglishOrLocale?: boolean | string): HomeHowToStep[] {
+  const isEn = typeof isEnglishOrLocale === "boolean" ? isEnglishOrLocale : isEnglishOrLocale === "en";
+  return isEn ? HOME_HOW_TO_STEPS_EN : HOME_HOW_TO_STEPS;
+}
+
+export function generateFaqJsonLd(isEnglishOrLocale?: boolean | string) {
+  const faqs = getHomeFaqs(isEnglishOrLocale);
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: HOME_FAQS.map((faq) => ({
+    mainEntity: faqs.map((faq) => ({
       "@type": "Question",
       name: faq.question,
       acceptedAnswer: {
@@ -106,31 +189,37 @@ export function generateFaqJsonLd() {
   };
 }
 
-export function generateHowToJsonLd() {
+export function generateHowToJsonLd(isEnglishOrLocale?: boolean | string) {
+  const isEn = typeof isEnglishOrLocale === "boolean" ? isEnglishOrLocale : isEnglishOrLocale === "en";
+  const steps = getHomeHowToSteps(isEnglishOrLocale);
   return {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    name: "วิธีดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับ SeerTarot",
-    description: "ขั้นตอนการสับไพ่ เลือกไพ่ 78 ใบด้วยตนเอง และรับคำทำนายจากแม่หมอ AI พร้อมระบบตรวจสอบความโปร่งใส Provably Fair",
+    name: isEn
+      ? "How to Consult 1909 Rider-Waite Tarot Online with SeerTarot"
+      : "วิธีดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับ SeerTarot",
+    description: isEn
+      ? "Step-by-step divination: physically shuffle, draw 78 cards with personal agency, and receive interpretations with Provably Fair verification."
+      : "ขั้นตอนการสับไพ่ เลือกไพ่ 78 ใบด้วยตนเอง และรับคำทำนายจากแม่หมอ AI พร้อมระบบตรวจสอบความโปร่งใส Provably Fair",
     totalTime: "PT3M",
     estimatedCost: {
       "@type": "MonetaryAmount",
-      currency: "THB",
+      currency: isEn ? "USD" : "THB",
       value: "0",
     },
     supply: [
       {
         "@type": "HowToSupply",
-        name: "สำรับไพ่ทาโรต์ 1909 Rider-Waite ดั้งเดิม 78 ใบ",
+        name: isEn ? "Authentic 78-Card 1909 Rider-Waite Tarot Deck" : "สำรับไพ่ทาโรต์ 1909 Rider-Waite ดั้งเดิม 78 ใบ",
       },
     ],
     tool: [
       {
         "@type": "HowToTool",
-        name: "เว็บเบราว์เซอร์หรือสมาร์ทโฟน",
+        name: isEn ? "Web Browser or Mobile Device" : "เว็บเบราว์เซอร์หรือสมาร์ทโฟน",
       },
     ],
-    step: HOME_HOW_TO_STEPS.map((s, index) => ({
+    step: steps.map((s, index) => ({
       "@type": "HowToStep",
       position: index + 1,
       name: s.name,

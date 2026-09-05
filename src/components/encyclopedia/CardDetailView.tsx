@@ -50,6 +50,13 @@ const ELEMENT_CONFIG: Record<string, { border: string; glow: string; text: strin
   },
 };
 
+const ELEMENT_EN: Record<string, string> = {
+  ไฟ: "Fire",
+  น้ำ: "Water",
+  ลม: "Air",
+  ดิน: "Earth",
+};
+
 export const CardDetailView: React.FC<CardDetailViewProps> = ({
   card,
   prevCard,
@@ -128,7 +135,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   <span
                     className={`text-[13px] font-mono px-2 py-0.5 rounded border ${elem.border} ${elem.bg} ${elem.text} font-bold`}
                   >
-                    {elem.icon} {card.element}
+                    {elem.icon} {isEnglish ? ELEMENT_EN[card.element] || card.element : card.element}
                   </span>
                 </div>
               </div>
@@ -160,7 +167,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* Astrological & Numerological Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-mono">
             <span className={`px-3 py-1 rounded-full border ${elem.border} ${elem.bg} ${elem.text} font-bold`}>
-              ธาตุ{card.element}
+              {isEnglish ? `Element: ${ELEMENT_EN[card.element] || card.element}` : `ธาตุ${card.element}`}
             </span>
             {card.astrology && (
               <span className="px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F]">
@@ -177,7 +184,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                       : "border-[#D5CEC2] bg-[#EAE7E0] text-[#A58A5C]"
                 }`}
               >
-                Yes/No: {card.yesNo === "yes" ? "ใช่ (Yes)" : card.yesNo === "no" ? "ไม่ใช่ (No)" : "ไม่แน่ชัด (Maybe)"}
+                Yes/No: {isEnglish ? (card.yesNo === "yes" ? "Yes" : card.yesNo === "no" ? "No" : "Uncertain") : (card.yesNo === "yes" ? "ใช่ (Yes)" : card.yesNo === "no" ? "ไม่ใช่ (No)" : "ไม่แน่ชัด (Maybe)")}
               </span>
             )}
           </div>
@@ -191,10 +198,10 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                 {card.arcana === "major" ? "Major Arcana" : `${card.suit} Suit`}
               </span>
               <span className="text-[#635B4E]">|</span>
-              <span className="text-[#29261F] font-sans tracking-wide">{card.nameEn}</span>
+              <span className="text-[#29261F] font-sans tracking-wide">{isEnglish ? card.nameTh : card.nameEn}</span>
             </div>
             <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] leading-tight [text-wrap:balance]">
-              {card.nameTh}
+              {isEnglish ? card.nameEn : card.nameTh}
             </h1>
             <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed pt-1 font-serif-th [text-wrap:pretty]">{card.numerology}</p>
           </div>
@@ -264,7 +271,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               href="/"
               className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition-all flex items-center gap-2 shadow-sm"
             >
-              <span>✦</span> ไปหน้าดูดวงหลัก
+              <span>✦</span> {isEnglish ? "Begin Tarot Reading" : "ไปหน้าดูดวงหลัก"}
             </Link>
           </div>
         </div>
@@ -290,9 +297,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               />
             </div>
             <div className="text-left overflow-hidden">
-              <span className="text-[13px] font-mono text-[#635B4E] block">← ใบก่อนหน้า</span>
+              <span className="text-[13px] font-mono text-[#635B4E] block">
+                {isEnglish ? "← Previous Card" : "← ใบก่อนหน้า"}
+              </span>
               <span className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] truncate block">
-                {prevCard.nameTh}
+                {isEnglish ? prevCard.nameEn : prevCard.nameTh}
               </span>
             </div>
           </Link>
@@ -306,9 +315,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             className="flex items-center gap-3 p-3.5 rounded-xl border border-[#D5CEC2] hover:border-[#A58A5C] bg-[#FFFFFF] hover:bg-[#EAE7E0] transition-all group max-w-[48%] text-right shadow-xs"
           >
             <div className="text-right overflow-hidden">
-              <span className="text-[13px] font-mono text-[#635B4E] block">ใบถัดไป →</span>
+              <span className="text-[13px] font-mono text-[#635B4E] block">
+                {isEnglish ? "Next Card →" : "ใบถัดไป →"}
+              </span>
               <span className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] truncate block">
-                {nextCard.nameTh}
+                {isEnglish ? nextCard.nameEn : nextCard.nameTh}
               </span>
             </div>
             <div className="w-9 h-14 rounded-lg overflow-hidden border border-[#D5CEC2] flex-shrink-0 bg-[#EAE7E0]">

@@ -6,9 +6,10 @@ import Link from "next/link";
 
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import { CheckMarkIcon, HourglassIcon, SparkSealIcon } from "@/components/entitlement/EntitlementIcons";
-import { MEMBER_BENEFITS, describeEntitlement, formatResetCountdown, resetClockLabel } from "@/lib/entitlement/copy";
+import { getMemberBenefits, describeEntitlement, formatResetCountdown, resetClockLabel } from "@/lib/entitlement/copy";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useSessionUser } from "@/lib/auth/use-session";
+import { useLocale } from "@/lib/i18n";
 
 const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
@@ -22,19 +23,22 @@ const BuyCreditsModal = dynamic(
  * หน้าบัญชีคือที่ที่คนไปหาคำตอบว่า "ฉันเหลือกี่ครั้ง / รีเซ็ตเมื่อไหร่ / โบนัสอยู่ไหน"
  */
 export function EntitlementStatusCard() {
+  const { locale, isEnglish } = useLocale();
+  const isEn = isEnglish || locale === "en";
   const ent = useEntitlement();
-  const view = describeEntitlement(ent);
+  const view = describeEntitlement(ent, isEn);
   const { user } = useSessionUser();
   const [buyOpen, setBuyOpen] = useState(false);
   const [countdown, setCountdown] = useState("");
+  const memberBenefits = getMemberBenefits(isEn);
 
   useEffect(() => {
     if (!ent?.resetAt) return;
-    const tick = () => setCountdown(formatResetCountdown(ent.resetAt));
+    const tick = () => setCountdown(formatResetCountdown(ent.resetAt, Date.now(), isEn));
     tick();
     const timer = setInterval(tick, 60_000);
     return () => clearInterval(timer);
-  }, [ent?.resetAt]);
+  }, [ent?.resetAt, isEn]);
 
   if (!view) return null;
 
@@ -44,19 +48,21 @@ export function EntitlementStatusCard() {
     <div className="space-y-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6">
       <div className="flex items-center gap-2">
         <span className="text-[#8F5C1A]">✦</span>
-        <h2 className="font-serif-th text-base font-bold font-mystic-gold sm:text-lg">สิทธิ์การใช้งานของฉัน</h2>
+        <h2 className="font-serif-th text-base font-bold font-mystic-gold sm:text-lg">
+          {isEn ? "My Reading Entitlement" : "สิทธิ์การใช้งานของฉัน"}
+        </h2>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] px-4 py-3">
         <div className="space-y-1">
           <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-[#635B4E]">
             {view.isAdmin
-              ? "ผู้ดูแลระบบ"
+              ? (isEn ? "Administrator" : "ผู้ดูแลระบบ")
               : view.isUnlimited
-                ? "บัญชีไม่จำกัดสิทธิ์"
+                ? (isEn ? "Unlimited Account" : "บัญชีไม่จำกัดสิทธิ์")
                 : view.isGuest
-                  ? "ผู้เยี่ยมชม"
-                  : "สมาชิก"}
+                  ? (isEn ? "Guest Visitor" : "ผู้เยี่ยมชม")
+                  : (isEn ? "Member" : "สมาชิก")}
           </span>
           <span className="block font-serif-th text-sm font-semibold text-[#2E211A]">{view.statusLine}</span>
         </div>
@@ -68,13 +74,19 @@ export function EntitlementStatusCard() {
           <div className="flex items-center gap-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[13px] text-[#2E211A]">
             <HourglassIcon className="h-4 w-4 shrink-0 text-[#8F5C1A]" />
             <span>
-              โควตาฟรีชุดใหม่{countdown ? ` ${countdown}` : ""} · รีเซ็ต{resetClockLabel()}
+              {isEn
+                ? `New free quota${countdown ? ` in ${countdown}` : ""} · Resets ${resetClockLabel(true)}`
+                : `โควตาฟรีชุดใหม่${countdown ? ` ${countdown}` : ""} · รีเซ็ต${resetClockLabel(false)}`}
             </span>
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[13px] text-[#2E211A]">
             <SparkSealIcon className="h-4 w-4 shrink-0 text-[#8F5C1A]" />
             <span>
-              รอบที่เติมไว้ <strong className="text-[#8F5C1A] font-bold">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ
+              {isEn ? (
+                <>Purchased Tokens: <strong className="text-[#8F5C1A] font-bold">{bonus}</strong> · Never expires</>
+              ) : (
+                <>รอบที่เติมไว้ <strong className="text-[#8F5C1A] font-bold">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ</>
+              )}
             </span>
           </div>
         </div>
@@ -82,7 +94,7 @@ export function EntitlementStatusCard() {
 
       {view.isGuest && (
         <ul className="grid gap-1.5 sm:grid-cols-2">
-          {MEMBER_BENEFITS.map((b) => (
+          {memberBenefits.map((b) => (
             <li key={b.title} className="flex items-start gap-2 font-serif-th text-[13px] text-[#2E211A]">
               <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#8F5C1A]" />
               {b.title}
@@ -93,7 +105,9 @@ export function EntitlementStatusCard() {
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#D9C8AC]/30 pt-3">
         <Link href="/" className="text-xs text-[#8F5C1A] underline transition-colors hover:text-[#2E211A] font-bold">
-          {view.isGuest ? "กลับไปเปิดไพ่และสมัครสมาชิก" : "กลับไปเปิดไพ่"}
+          {view.isGuest
+            ? (isEn ? "Return to Tarot & Create Account" : "กลับไปเปิดไพ่และสมัครสมาชิก")
+            : (isEn ? "Return to Tarot Reading" : "กลับไปเปิดไพ่")}
         </Link>
         {view.isMember && !view.isUnlimited && (
           <button
@@ -101,7 +115,8 @@ export function EntitlementStatusCard() {
             onClick={() => setBuyOpen(true)}
             className="min-h-[40px] rounded-full border border-[#D9C8AC] bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2 font-serif-th text-xs font-semibold text-[#FFFFFF] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
-            <span className="mr-1.5 text-[#FFFFFF]">✦</span> เติมรอบเปิดไพ่
+            <span className="mr-1.5 text-[#FFFFFF]">✦</span>
+            {isEn ? "Get Reading Passes" : "เติมรอบเปิดไพ่"}
           </button>
         )}
       </div>
