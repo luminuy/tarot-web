@@ -115,6 +115,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔒 ความปลอดภัยของ Modal Lifecycle & Scroll Lock (deps ไร้ onClose · ป้องกันโฟกัสหลุด)", cmd: TSX, args: ["scripts/qa/test-modal-effect-deps.ts"] },
   { label: "🃏 สารานุกรมไพ่ยิปซี 7 หน้าใหม่ (SEO Wave 2)", cmd: TSX, args: ["scripts/qa/test-seo-wave2.ts"] },
   { label: "📐 ผังพยากรณ์ 25 แบบ & 6 หน้ารวมตามหมวดชีวิต (SEO Wave 3)", cmd: TSX, args: ["scripts/qa/test-seo-wave3.ts"] },
+  { label: "🔮 เครื่องมือไพ่ประจำตัว & ตารางตำแหน่ง & SEO แตกต่าง (SEO Wave 4)", cmd: TSX, args: ["scripts/qa/test-seo-wave4.ts"] },
 ];
 
 /**

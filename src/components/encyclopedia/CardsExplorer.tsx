@@ -288,6 +288,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             <Link href="/cards/all" className="text-[#8F5C1A] hover:underline font-bold">
               {isEnglish ? "Summary Table (78)" : "ตารางสรุป 78 ใบ"}
             </Link>
+            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
+            <Link href="/cards/birth-card" className="text-[#8F5C1A] hover:underline font-bold">
+              {isEnglish ? "Birth Card Tool" : "คำนวณไพ่ประจำตัว"}
+            </Link>
           </div>
         </div>
       </div>
