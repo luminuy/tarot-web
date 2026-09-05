@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0089 · 2026-09-06 06:34 · 🟡 Medium · ปิด elastic overscroll ที่ root กันหัวเว็บ sticky เด้งบนมือถือ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เล่นเว็บบนมือถือ (iOS Safari) แล้วลากหน้าจนสุด หัวเว็บกระตุกเด้ง เกิดช่องว่างสีขาวเหนือแถบหัวเว็บโชว์พื้นหลัง/เนื้อหาทะลุ |
+| **สาเหตุราก** | หัวเว็บเป็น position:sticky top-0 · iOS Safari เปิด elastic rubber-band overscroll เป็นค่าเริ่มต้น พอผู้ใช้ลากเกินขอบบน/ล่าง เอกสารทั้งหน้าถูกดึงเลื่อนเกิน scroll range แล้วลาก sticky header ตามลงมาด้วย จึงเห็นช่องว่างเหนือหัวเว็บ |
+| **การแก้ไข** | เพิ่มบรรทัดเดียวใน globals.css: html { overscroll-behavior-y: none } บน scroll container ระดับ root — iOS Safari 16+ รับค่านี้และปิด rubber-band ทั้งขอบบน/ล่าง เอกสารจึงหยุดที่ scroll range พอดี sticky header ไม่ถูกลากหลุด · ไม่แตะ overflow-x:clip / scroll-padding-top เดิม |
+| **🛡️ กฎป้องกันถาวร** | **ตั้ง overscroll-behavior-y: none ที่ scroll container (html) เสมอเมื่อมี sticky header top-0 เพื่อปิด rubber-band ที่ทำให้ sticky หลุดตำแหน่ง** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify ผ่าน 32/32 · typecheck 0 error · เลื่อนหน้า 2000px แล้ว header.getBoundingClientRect().top===0 คงที่ · getComputedStyle(html).overscrollBehaviorY==='none' · overflow-x:clip เดิมไม่กระทบ |
+| **บันทึกโดย** | Claude · branch `claude/mobile-header-bounce-gap-4780be` · commit `249f491` |
+
+
 ### INC-0088 · 2026-09-05 21:24 · 🟠 High · resolve charset detection, robots/llms CORS fetch, and 34MB prefetch avalanche
 
 | หัวข้อ | รายละเอียด |
