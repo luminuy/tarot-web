@@ -15,18 +15,19 @@ import { usePathname } from "next/navigation";
  */
 export function TikTokFloatingButton() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/admin")) return null;
+  // ซ่อนบนหน้าแอดมิน และหน้าห้องแชท/ผลพยากรณ์ (/reading/chat ฯลฯ) เพื่อไม่ให้ลอยบังปุ่มส่งข้อความหรือแผงสนทนาบนมือถือ
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/reading")) return null;
 
   return (
     <aside
       data-floating="true"
       aria-label="ช่องทางติดตาม TikTok"
-      className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 select-none print:hidden pointer-events-auto"
+      className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-30 select-none print:hidden pointer-events-auto"
       style={{
         position: "fixed",
         bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))",
         right: "calc(1.25rem + env(safe-area-inset-right, 0px))",
-        zIndex: 40,
+        zIndex: 30,
       }}
     >
       <a

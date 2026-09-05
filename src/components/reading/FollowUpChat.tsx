@@ -658,7 +658,7 @@ isEnglish
             }}
             className="space-y-1.5"
           >
-            <div className="flex items-center gap-2 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] p-1.5 pl-4 focus-within:border-[#D9C8AC] focus-within: transition-all">
+            <div className="flex items-center gap-2 rounded-full border-2 border-[#D9C8AC] bg-[#FFFFFF] p-1.5 pl-4 sm:pl-5 shadow-[0_2px_12px_rgba(41,38,31,0.06)] focus-within:border-[#8F5C1A] focus-within:ring-2 focus-within:ring-[#8F5C1A]/20 transition-all">
               <input
                 type="text"
                 placeholder={isEnglish ? `Ask ${personaName} anything about your spread...` : `พิมพ์ถาม ${persona.nameTh} ที่นี่...`}
@@ -670,14 +670,33 @@ isEnglish
               />
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.08 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.92 }}
                 disabled={loading || !input.trim()}
-                className="h-9 w-9 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] flex items-center justify-center font-bold disabled:opacity-40 disabled:scale-100 transition-all shrink-0 cursor-pointer"
+                className={`h-9 w-9 sm:h-10 sm:w-10 rounded-full flex items-center justify-center font-bold transition-all shrink-0 ${
+                  input.trim() && !loading
+                    ? "bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] shadow-[0_2px_8px_rgba(143,92,26,0.35)] cursor-pointer active:scale-95"
+                    : "bg-[#EAE4D9] text-[#A59A88] cursor-not-allowed opacity-70"
+                }`}
                 aria-label={isEnglish ? "Send message" : "ส่งข้อความ"}
                 title={isEnglish ? "Send inquiry" : "ส่งคำถาม"}
               >
-                
+                {loading ? (
+                  <span className="w-4 h-4 rounded-full border-2 border-[#FFFFFF] border-t-transparent animate-spin" />
+                ) : (
+                  <svg
+                    className="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-200"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
               </motion.button>
             </div>
 

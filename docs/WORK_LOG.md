@@ -35,6 +35,25 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+### 🗓️ 2026-09-06: ยกระดับความพรีเมียม "สรุปตรงใจ" สู่การ์ดทองคำศักดิ์สิทธิ์ และแก้ปัญหาปุ่มแชทบนมือถือ (โดย Antigravity AI)
+
+> **ขอบเขตงานตามความต้องการของผู้ใช้**:
+> 1. **ปรับปรุงส่วน "สรุปตรงใจ" (Core Insight) ใน `QuickChatResult.tsx` และ `StreamReader.tsx` ให้สวย สง่างาม และเด่นชัดที่สุด**:
+>    - แปลงจากกล่องข้อความธรรมดา สู่ **Sacred Oracle Core Insight Card** สไตล์ Editorial Quiet Luxury
+>    - ติดตั้งแถบทองคำเหลือบแสงด้านบน (`h-1 bg-gradient-to-r from-[#8F5C1A] via-[#E2C38A] to-[#8F5C1A]`)
+>    - มีป้ายกำกับหรูหรา `สรุปตรงใจจากแม่หมอ` (`Core Oracle Insight`) พร้อมปุ่มเสียงอ่าน TTS ประจำการ์ดโดยเฉพาะ
+>    - ตกแต่งด้วยเส้นคั่นฝั่งซ้ายสีทองคำแท้ (`border-l-2 border-[#8F5C1A]/50`) และการจัดพิมพ์ตัวหนังสือสัดส่วนทองคำ
+> 2. **แก้ปัญหาปุ่มแชทบนมือถือ ("ปุ่มบังในมือถือ" & ปรับปุ่มให้ "ปัง")**:
+>    - **แก้ TikTok Floating Button บังปุ่มส่งข้อความ**: กำหนดให้ `TikTokFloatingButton.tsx` ไม่แสดงผลบนเส้นทางกลุ่ม `/reading` (เช่น `/reading/chat`) เพื่อไม่ให้ปุ่ม TikTok บังปุ่มส่งข้อความหรือบดบังบทสนทนาบนหน้าจอมือถือ
+>    - **ปรับปุ่มส่งข้อความใน `FollowUpChat.tsx` ให้เด่นชัดและกดง่าย**:
+>      - เพิ่มไอคอนลูกศรพุ่งขึ้นสีขาวคมชัด (แทนที่ปุ่มเดิมที่ว่างเปล่าไม่มีไอคอน)
+>      - ขยาย Tap Target บนมือถือเป็นขนาดสมส่วน `w-9 h-9 sm:w-10 sm:h-10`
+>      - เพิ่มมิติความลึกด้วยเงาสีทอง (`shadow-[0_2px_8px_rgba(143,92,26,0.35)]`) เมื่อมีการพิมพ์ข้อความ และแอนิเมชันตอนกด
+>      - เพิ่ม Micro-spinner ขณะรอคำตอบ
+>      - อัปเกรดแผง Input Dock ให้มี `border-2`, เงาพรีเมียม, และ Focus Ring ชัดเจน
+>    - **ปรับปรุง Layout หน้า `/reading/chat/page.tsx`**: เพิ่ม Safe Area Inset (`env(safe-area-inset-bottom)`) ป้องกันขอบล่างของมือถือบดบังกล่องข้อความ
+> 3. **ปฏิบัติตามกฎเหล็ก**: ไร้อิโมจิดาวแฟนซี (Rule 2) 100%, ผ่าน 32 ด่านทดสอบสมบูรณ์แบบ
+
 ### 🗓️ 2026-09-06: ยกเครื่องการออกแบบใหม่ทั้งหมดระดับโลก (Complete World-Class Luxury Redesign) สำหรับ /daily, /love/1-card, และ /cards/birth-card (โดย Antigravity AI)
 
 > **ขอบเขต**: 

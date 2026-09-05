@@ -55,7 +55,7 @@ export default function ReadingChatPage() {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-2xl px-4 py-4">
+      <div className="mx-auto w-full max-w-2xl px-3 sm:px-4 py-2 sm:py-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
         {flow === undefined ? (
           <div className="flex h-[60dvh] items-center justify-center font-serif-th text-sm text-[#635B4E]">
             {isEnglish ? "Opening sanctuary chamber..." : "กำลังเปิดห้องแชท..."}
@@ -65,7 +65,7 @@ export default function ReadingChatPage() {
             readingId={flow!.readingId as string}
             persona={persona}
             sessionToken={flow!.sessionToken}
-            heightClass="h-[calc(100dvh-6.5rem)]"
+            heightClass="h-[calc(100dvh-5rem-env(safe-area-inset-bottom,0px))] sm:h-[calc(100dvh-6.5rem)]"
             readingSnapshot={{
               question: flow!.question || undefined,
               spreadId: flow!.spreadId,
