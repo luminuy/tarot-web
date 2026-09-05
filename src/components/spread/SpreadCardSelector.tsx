@@ -119,7 +119,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
   const categories: CategoryTab[] = useMemo(
     () => [
-      { id: "recommended", label: isEnglish ? "Featured" : "ยอดนิยมแนะนำ", Icon: SparkleTabIcon, count: 6 },
+      { id: "recommended", label: isEnglish ? "Featured" : "ยอดนิยมแนะนำ", Icon: SparkleTabIcon, count: 5 },
       { id: "love", label: isEnglish ? "Love & Relationships" : "ความรัก & คนในใจ", Icon: HeartTabIcon, count: 5 },
       { id: "career", label: isEnglish ? "Career & Abundance" : "การงาน & การเงิน", Icon: PentacleTabIcon, count: 5 },
       { id: "master", label: isEnglish ? "Grand Spreads" : "ผังใหญ่เจาะลึก", Icon: CrystalBallTabIcon, count: 5 },
@@ -132,7 +132,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     switch (activeCategory) {
       case "recommended":
         return SPREADS.filter((s) =>
-          ["daily", "quick", "yes-no", "three-card", "situation-solution", "celtic-cross"].includes(s.id)
+          ["daily", "quick", "yes-no", "three-card", "celtic-cross"].includes(s.id)
         );
       case "love":
         return SPREADS.filter((s) =>
