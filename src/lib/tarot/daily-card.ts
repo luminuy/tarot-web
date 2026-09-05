@@ -94,7 +94,12 @@ export async function getGlobalDailyCard(now: Date = new Date()): Promise<DailyC
   const cacheKey = KEY.dailyCard(dk);
 
   const cached = await kvGetJSON<DailyCard>(cacheKey, MEMO_TTL_MS).catch(() => null);
-  if (cached && cached.dateKey === dk && cached.proof) return cached;
+  if (cached && cached.dateKey === dk && cached.proof) {
+    if (!cached.keywordsEn || cached.keywordsEn.length === 0) {
+      cached.keywordsEn = CARD_KEYWORDS_EN[cached.cardId]?.upright.slice(0, 4) || [];
+    }
+    return cached;
+  }
 
   const fresh = await computeDailyCard(dk);
   await kvPutJSON(cacheKey, fresh, { expirationTtl: CACHE_TTL_SEC }).catch(() => {

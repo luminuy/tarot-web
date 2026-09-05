@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
+import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import type { DailyCard } from "@/lib/tarot/daily-card";
 
 /**
@@ -45,10 +46,11 @@ export function DailyCardStrip() {
     );
   }
 
-  const displayKeywords =
-    isEnglish && daily.keywordsEn && daily.keywordsEn.length > 0
-      ? daily.keywordsEn
-      : daily.keywords;
+  const displayKeywords = isEnglish
+    ? (daily.keywordsEn && daily.keywordsEn.length > 0
+        ? daily.keywordsEn
+        : CARD_KEYWORDS_EN[daily.cardId]?.upright.slice(0, 4) || daily.keywords)
+    : daily.keywords;
 
   return (
     <Link
