@@ -135,7 +135,7 @@ export const MagicianIllustration: React.FC<{ className?: string }> = ({ classNa
 );
 
 // ============================================================================
-// 3. SACRED SPREAD PREVIEW FORMATIONS (20 SPREADS — PERFECT FIT & ZERO OVERFLOW)
+// 3. SACRED SPREAD PREVIEW FORMATIONS (25 SPREADS — PERFECT FIT & ZERO OVERFLOW)
 // ============================================================================
 
 // 1. ไพ่ประจำวัน (1 ใบ)
@@ -666,6 +666,64 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
     </div>
   );
 };
+
+// 21. ดวงความรักเจาะลึก 6 ใบ (6 ใบ) — 2-Tier Balanced (3+3)
+export const LoveSixSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/cups-02.jpg" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/major-06.jpg" borderColor="#D9C8AC" className="w-9.5 h-[65px]" highlight />
+      <MiniRwsCard src="/cards/cups-03.jpg" className="w-9 h-[62px]" />
+    </div>
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/swords-03.jpg" borderColor="#A6392C" className="w-9 h-[62px] opacity-85" />
+      <MiniRwsCard src="/cards/cups-06.jpg" borderColor="#3A7044" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/cups-10.jpg" borderColor="#D9C8AC" className="w-9.5 h-[65px]" highlight />
+    </div>
+  </div>
+);
+
+// 22. ดวงรายเดือนเจาะลึก 10 ใบ (10 ใบ) — Celtic Cross Grand Formation
+export const MonthlyTenSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <CelticCrossSpreadArt className={className} />
+);
+
+// 23. ดวงบริวารและคนรอบข้าง (5 ใบ) — Cross Kinship Formation
+export const FamilySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/cups-10.jpg" borderColor="#D9C8AC" className="w-9 h-[62px]" highlight />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/cups-03.jpg" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/pentacles-04.jpg" borderColor="#3A7044" className="w-9 h-[62px]" />
+      <MiniRwsCard src="/cards/wands-06.jpg" className="w-8.5 h-[58px]" />
+    </div>
+    <MiniRwsCard src="/cards/major-19.jpg" borderColor="#D9C8AC" className="w-9 h-[62px]" />
+  </div>
+);
+
+// 24. ดวงโชคลาภและการเสี่ยงโชค (4 ใบ) — Diamond Fortune Formation
+export const LuckSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1 relative ${className}`}>
+    <MiniRwsCard src="/cards/major-10.jpg" borderColor="#D9C8AC" className="w-9 h-[62px]" highlight />
+    <div className="flex items-center justify-center gap-3">
+      <MiniRwsCard src="/cards/pentacles-01.jpg" borderColor="#8F5C1A" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/pentacles-09.jpg" borderColor="#3A7044" className="w-8.5 h-[58px]" />
+    </div>
+    <MiniRwsCard src="/cards/major-21.jpg" borderColor="#D9C8AC" className="w-9 h-[62px]" />
+  </div>
+);
+
+// 25. ดวงการเรียนและการสอบ (4 ใบ) — Pyramid Academic Formation
+export const StudySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
+  <div className={`flex flex-col items-center justify-center gap-1.5 relative ${className}`}>
+    <MiniRwsCard src="/cards/major-01.jpg" borderColor="#D9C8AC" className="w-9.5 h-[65px]" highlight />
+    <div className="flex items-center justify-center gap-2">
+      <MiniRwsCard src="/cards/swords-01.jpg" borderColor="#6F5B4A" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/pentacles-08.jpg" borderColor="#3A7044" className="w-8.5 h-[58px]" />
+      <MiniRwsCard src="/cards/wands-01.jpg" borderColor="#8F5C1A" className="w-8.5 h-[58px]" />
+    </div>
+  </div>
+);
 
 // ============================================================================
 // 4. CATEGORY TAB ICONS (Minimal Line-Art)

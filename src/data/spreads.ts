@@ -1,7 +1,7 @@
 import type { Category } from "./cards/types";
 
 /**
- * รูปแบบการวางไพ่ (Spread) 20 ผังพยากรณ์ยอดนิยม — ภาษาเข้าใจง่าย กระชับ สมดุล
+ * รูปแบบการวางไพ่ (Spread) 25 ผังพยากรณ์ยอดนิยม — ภาษาเข้าใจง่าย กระชับ สมดุล
  * รองรับทั้งภาษาไทยและ American English ระดับมืออาชีพ
  */
 
@@ -26,7 +26,7 @@ export interface Spread {
   /**
    * ชื่อสำหรับ SEO เท่านั้น — ใช้ใน <title> และ <h1> ของหน้า /spreads/[id]
    *
-   * ⚠️ ห้ามนำไปใช้ใน UI เลือกผังเด็ดขาด เพราะทั้ง 20 ผังขึ้นต้นด้วย
+   * ⚠️ ห้ามนำไปใช้ใน UI เลือกผังเด็ดขาด เพราะทั้ง 25 ผังขึ้นต้นด้วย
    * "ดูดวงไพ่ยิปซี" เหมือนกันหมด ผู้ใช้จะแยกไม่ออกว่าผังไหนคือผังไหน
    * UI ทุกจุดต้องใช้ `nameTh` ต่อไป (ดู HANDOFF_SEO_WAVE1_2026-09-05.md)
    *
@@ -939,6 +939,357 @@ export const SPREADS: Spread[] = [
         y: 0.5 + Math.sin(angle) * 0.38,
       };
     }),
+  },
+
+  // ==========================================
+  // หมวดใหม่: SEO Wave 3 Spreads
+  // ==========================================
+  {
+    id: "love-six",
+    nameTh: "ดวงความรักเจาะลึก (ไพ่ 6 ใบ)",
+    nameEn: "Deep Love & Soul Connection (6 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีความรัก 6 ใบ เจาะลึกหัวใจ",
+    tagline: "เปิดมิติความรัก 6 ด้าน ความรู้สึก ปัญหา และอนาคต",
+    taglineEn: "Unveil 6 dimensions of romantic feelings, obstacles, and true destiny",
+    description:
+      "ผังพยากรณ์ความรักเจาะลึก 6 ใบยอดนิยม สำรวจตัวคุณ คนรัก สายใยความผูกพัน อุปสรรค และบทสรุปปลายทางความสัมพันธ์",
+    descriptionEn:
+      "A deep 6-card love spread exploring your inner heart, your partner's true feelings, bond, hidden obstacles, and the relationship outcome.",
+    defaultCategory: "love",
+    credits: 2,
+    guestAllowed: false,
+    positions: [
+      {
+        index: 0,
+        nameTh: "1. ตัวตนและความรู้สึกของคุณ",
+        nameEn: "1. Your Inner Heart",
+        meaning: "สภาวะอารมณ์ ทัศนคติ และความต้องการที่แท้จริงของคุณในความสัมพันธ์นี้",
+        meaningEn: "Your emotional truth, unspoken longing, and mindset toward this bond",
+        x: 0.25,
+        y: 0.3,
+      },
+      {
+        index: 1,
+        nameTh: "2. ตัวตนและความในใจของเขา",
+        nameEn: "2. Partner's True Feelings",
+        meaning: "สิ่งที่เขาคิด ความรู้สึกส่วนลึกที่อาจไม่ได้พูดออกมา",
+        meaningEn: "Their perspective, hidden feelings, and emotional reality",
+        x: 0.75,
+        y: 0.3,
+      },
+      {
+        index: 2,
+        nameTh: "3. สายใยและจุดเชื่อมโยง",
+        nameEn: "3. The Sacred Bond",
+        meaning: "จุดร่วม พลังงานดึงดูด และสิ่งที่เชื่อมทั้งสองคนไว้ด้วยกัน",
+        meaningEn: "Mutual attraction, shared values, and the current karmic connection",
+        x: 0.5,
+        y: 0.3,
+      },
+      {
+        index: 3,
+        nameTh: "4. อุปสรรคหรือสิ่งที่ต้องระวัง",
+        nameEn: "4. Challenge & Obstacle",
+        meaning: "ความขัดแย้ง ความไม่เข้าใจ หรือปัจจัยภายนอกที่สั่นคลอนความรัก",
+        meaningEn: "Underlying tensions, misunderstandings, or external pressures",
+        x: 0.25,
+        y: 0.7,
+      },
+      {
+        index: 4,
+        nameTh: "5. แนวทางปรับตัวและคำแนะนำ",
+        nameEn: "5. Guidance & Healing",
+        meaning: "วิธีปฏิบัติตัว การสื่อสาร และการปรับสมดุลเพื่อให้รักราบรื่น",
+        meaningEn: "Actionable counsel on empathy, dialogue, and mutual understanding",
+        x: 0.5,
+        y: 0.7,
+      },
+      {
+        index: 5,
+        nameTh: "6. แนวโน้มบทสรุปในอนาคต",
+        nameEn: "6. Relationship Outcome",
+        meaning: "ทิศทางและปลายทางของความสัมพันธ์นี้ในระยะข้างหน้า",
+        meaningEn: "The evolving trajectory and likely outcome of this connection",
+        x: 0.75,
+        y: 0.7,
+      },
+    ],
+  },
+  {
+    id: "monthly-ten",
+    nameTh: "ดวงรายเดือนเจาะลึก (ไพ่ 10 ใบ)",
+    nameEn: "Monthly Comprehensive Forecast (10 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีรายเดือน 10 ใบ แม่นๆ ฟรี",
+    tagline: "ผังใหญ่ 10 มิติ เช็กภาพรวมชีวิตในรอบเดือน",
+    taglineEn: "10-card grand forecast charting all dimensions of your coming month",
+    description:
+      "เจาะลึกดวงชะตารายเดือนครบ 10 มิติ ทั้งภาพรวมการงาน การเงิน ความรัก สุขภาพ อุปสรรค และโอกาสความสำเร็จตลอดทั้งเดือน",
+    descriptionEn:
+      "Comprehensive 10-card monthly forecast uncovering work, finances, relationships, health, challenges, and golden opportunities.",
+    defaultCategory: "general",
+    credits: 3,
+    guestAllowed: false,
+    positions: [
+      {
+        index: 0,
+        nameTh: "1. ภาพรวมพลังงานประจำเดือน",
+        nameEn: "1. Core Monthly Theme",
+        meaning: "กระแสพลังงานหลักและบรรยากาศทั่วไปที่ครอบคลุมชีวิตคุณในเดือนนี้",
+        meaningEn: "The central archetype and dominant theme governing this entire month",
+        x: 0.35,
+        y: 0.5,
+      },
+      {
+        index: 1,
+        nameTh: "2. บททดสอบหรือความท้าทาย",
+        nameEn: "2. Immediate Challenge",
+        meaning: "เรื่องที่เข้ามาทดสอบจิตใจ อุปสรรคเฉพาะหน้าที่ต้องรับมือ",
+        meaningEn: "Obstacles, conflicting cross-currents, or trials demanding attention",
+        x: 0.35,
+        y: 0.5,
+        rotate: 90,
+      },
+      {
+        index: 2,
+        nameTh: "3. รากฐานเดิมและสิ่งที่สั่งสมมา",
+        nameEn: "3. Foundation & Past Roots",
+        meaning: "บทเรียนหรือสิ่งที่ทำไว้ก่อนหน้า ซึ่งส่งผลต่อสถานการณ์ปัจจุบัน",
+        meaningEn: "Past actions, established patterns, and karmic roots",
+        x: 0.35,
+        y: 0.8,
+      },
+      {
+        index: 3,
+        nameTh: "4. อิทธิพลที่กำลังจะผ่านพ้นไป",
+        nameEn: "4. Passing Energy",
+        meaning: "เรื่องราวหรือความรู้สึกที่กำลังคลี่คลายและลดบทบาทลง",
+        meaningEn: "Circumstances, emotions, or influences that are fading away",
+        x: 0.15,
+        y: 0.5,
+      },
+      {
+        index: 4,
+        nameTh: "5. โอกาสและความเป็นไปได้สูงสุด",
+        nameEn: "5. Crowning Potential",
+        meaning: "จุดพีคหรือสิ่งดีที่สุดที่คุณสามารถคว้ามาได้ในรอบเดือน",
+        meaningEn: "Peak opportunities, creative inspiration, and highest attainable outcome",
+        x: 0.35,
+        y: 0.2,
+      },
+      {
+        index: 5,
+        nameTh: "6. สิ่งที่กำลังจะเข้ามาในครึ่งเดือนหลัง",
+        nameEn: "6. Near Future Shift",
+        meaning: "การเปลี่ยนแปลงหรือข่าวสารใหม่ๆ ในช่วงครึ่งหลังของเดือน",
+        meaningEn: "New developments and energy arriving in the latter half of the month",
+        x: 0.55,
+        y: 0.5,
+      },
+      {
+        index: 6,
+        nameTh: "7. สภาพจิตใจและพลังภายใน",
+        nameEn: "7. Inner Stance & Mindset",
+        meaning: "ความรู้สึก ทัศนคติ และการจัดการอารมณ์ของคุณเอง",
+        meaningEn: "Your internal attitude, mental resilience, and emotional balance",
+        x: 0.72,
+        y: 0.8,
+      },
+      {
+        index: 7,
+        nameTh: "8. สิ่งแวดล้อมและคนรอบข้าง",
+        nameEn: "8. Social Realm & Allies",
+        meaning: "อิทธิพลจากเพื่อนร่วมงาน ครอบครัว หรือสภาพแวดล้อมภายนอก",
+        meaningEn: "External community, workplace climate, and interpersonal factors",
+        x: 0.72,
+        y: 0.6,
+      },
+      {
+        index: 8,
+        nameTh: "9. ความหวังหรือสิ่งที่ซ่อนเร้น",
+        nameEn: "9. Hopes & Hidden Fears",
+        meaning: "ความคาดหวังในใจลึกๆ หรือความกังวลที่ต้องสังเกต",
+        meaningEn: "Subconscious yearnings, unexpressed hopes, or anxieties to be mindful of",
+        x: 0.72,
+        y: 0.4,
+      },
+      {
+        index: 9,
+        nameTh: "10. บทสรุปและผลลัพธ์ปลายเดือน",
+        nameEn: "10. Monthly Synthesis",
+        meaning: "ภาพรวมปลายทางของเรื่องราวทั้งหมดเมื่อสิ้นสุดเดือนนี้",
+        meaningEn: "The cumulative result and closing energetic summary of the month",
+        x: 0.72,
+        y: 0.2,
+      },
+    ],
+  },
+  {
+    id: "family",
+    nameTh: "ดวงบริวารและคนรอบข้าง (ไพ่ 5 ใบ)",
+    nameEn: "Circle & Kinship (5 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี บริวาร ครอบครัว เพื่อนฝูง 5 ใบ",
+    tagline: "คนรอบตัวคิดยังไงกับเรา ใครหนุนใครฉุด",
+    taglineEn: "Family, team dynamics, friends, and trusted allies around you",
+    description:
+      "ตรวจเช็กดวงบริวาร ครอบครัว และเพื่อนร่วมงาน รู้ทันความรู้สึกที่แท้จริง ใครเกื้อหนุน ใครสร้างปัญหา พร้อมวิธีสานสัมพันธ์",
+    descriptionEn:
+      "Examine bonds with family, friends, subordinates, and inner circle members. Identify mutual support, hidden tensions, and harmonious resolution.",
+    defaultCategory: "self",
+    credits: 0,
+    guestAllowed: true,
+    positions: [
+      {
+        index: 0,
+        nameTh: "1. สภาวะของคุณท่ามกลางคนรอบตัว",
+        nameEn: "1. Your Central Position",
+        meaning: "บทบาท อารมณ์ความรู้สึก และจุดยืนของคุณต่อสังคมรอบข้าง",
+        meaningEn: "Your personal role, boundaries, and emotional stance within your circle",
+        x: 0.5,
+        y: 0.5,
+      },
+      {
+        index: 1,
+        nameTh: "2. บรรยากาศครอบครัวและญาติสนิท",
+        nameEn: "2. Family & Kinship",
+        meaning: "พลังงานในบ้าน ความสัมพันธ์กับพ่อแม่ ญาติ หรือคนในครอบครัว",
+        meaningEn: "Home harmony, household dynamics, and immediate family bonds",
+        x: 0.5,
+        y: 0.18,
+      },
+      {
+        index: 2,
+        nameTh: "3. มิตรภาพและเพื่อนฝูง",
+        nameEn: "3. Friends & Social Circle",
+        meaning: "ความจริงใจของเพื่อน มิตรแท้ หรือความรู้สึกของเพื่อนฝูงรอบตัว",
+        meaningEn: "Friendship sincerity, social alliances, and companions",
+        x: 0.2,
+        y: 0.5,
+      },
+      {
+        index: 3,
+        nameTh: "4. บริวาร ทีมงาน และผู้ใต้บังคับบัญชา",
+        nameEn: "4. Subordinates & Team",
+        meaning: "การร่วมมือของทีมงาน ลูกน้อง ผู้ช่วย หรือคนที่คุณดูแล",
+        meaningEn: "Teamwork, subordinate loyalty, and collective productivity",
+        x: 0.8,
+        y: 0.5,
+      },
+      {
+        index: 4,
+        nameTh: "5. แนวทางสร้างความสามัคคีและข้อควรระวัง",
+        nameEn: "5. Harmonious Resolution",
+        meaning: "วิธีจัดการความสัมพันธ์ให้ราบรื่น ป้องกันการเอาเปรียบหรือขัดแย้ง",
+        meaningEn: "Strategic counsel to foster trust and prevent interpersonal discord",
+        x: 0.5,
+        y: 0.82,
+      },
+    ],
+  },
+  {
+    id: "luck",
+    nameTh: "ดวงโชคลาภและการเสี่ยงโชค (ไพ่ 4 ใบ)",
+    nameEn: "Fortune & Serendipity (4 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี โชคลาภ เสี่ยงโชค 4 ใบ",
+    tagline: "จังหวะเสี่ยงโชค โอกาสฟลุ๊ก และลาภลอย",
+    taglineEn: "Auspicious timing, windfalls, and serendipitous opportunities",
+    description:
+      "เปิดไพ่ตรวจดวงโชคลาภ จังหวะลาภลอย และการเสี่ยงโชค ทิศทางพลังงานการเงินก้อนใหญ่ และวิธีเปิดรับโชคอย่างมีสติ",
+    descriptionEn:
+      "Divination for fortune, sudden luck, and financial windfalls. Understand auspicious timing, risk appetite, and mindful opportunities.",
+    defaultCategory: "money",
+    credits: 0,
+    guestAllowed: true,
+    positions: [
+      {
+        index: 0,
+        nameTh: "1. ฐานโชคลาภและวาสนาในปัจจุบัน",
+        nameEn: "1. Present Fortune Base",
+        meaning: "ระดับพลังงานดวงโชคลาภและความคล่องตัวทางการเงินของคุณในเวลานี้",
+        meaningEn: "Current financial fortune baseline and energetic readiness for abundance",
+        x: 0.5,
+        y: 0.8,
+      },
+      {
+        index: 1,
+        nameTh: "2. ทิศทางของลาภลอยหรือโอกาสเสี่ยงโชค",
+        nameEn: "2. Windfall & Opportunity",
+        meaning: "โอกาสที่จะได้เงินพิเศษ ลาภลอย หรือโชคจากการเสี่ยงทาย",
+        meaningEn: "Unexpected financial gains, serendipitous timing, and prize prospects",
+        x: 0.22,
+        y: 0.48,
+      },
+      {
+        index: 2,
+        nameTh: "3. อุปสรรคหรือความโลภที่ต้องระวัง",
+        nameEn: "3. Caution & Greed Guard",
+        meaning: "ข้อควรระวัง การบริหารความเสี่ยง และกับดักความโลภที่อาจทำให้เสียทรัพย์",
+        meaningEn: "Risks of reckless speculation, greed traps, and mindful boundary setting",
+        x: 0.78,
+        y: 0.48,
+      },
+      {
+        index: 3,
+        nameTh: "4. โอกาสรับทรัพย์และผลลัพธ์",
+        nameEn: "4. Manifested Outcome",
+        meaning: "ผลลัพธ์สุดท้ายในการเปิดรับโชคลาภ และคำแนะนำเพื่อให้เงินทองงอกเงย",
+        meaningEn: "Ultimate tangible fruition and advice to preserve and grow wealth",
+        x: 0.5,
+        y: 0.18,
+      },
+    ],
+  },
+  {
+    id: "study",
+    nameTh: "ดวงการเรียนและการสอบ (ไพ่ 4 ใบ)",
+    nameEn: "Academic & Exam Success (4 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี การเรียน สอบ 4 ใบ",
+    tagline: "เช็กแนวโน้มผลสอบ สมาธิ และทางเลือกการศึกษา",
+    taglineEn: "Exam outcomes, study focus, and higher education paths",
+    description:
+      "พยากรณ์ดวงการเรียน การสอบแข่งขัน การศึกษาต่อ และสมาธิในการอ่านหนังสือ พร้อมคำแนะนำเพื่อความสำเร็จทางวิชาการ",
+    descriptionEn:
+      "Guidance for academic tests, competitive examinations, admissions, and mental focus to achieve peak scholarly success.",
+    defaultCategory: "work",
+    credits: 0,
+    guestAllowed: true,
+    positions: [
+      {
+        index: 0,
+        nameTh: "1. สมาธิและความพร้อมในการเรียนปัจจุบัน",
+        nameEn: "1. Present Scholarly Readiness",
+        meaning: "สภาวะจิตใจ ความตั้งใจ และระดับความเข้าใจในเนื้อหาบทเรียนขณะนี้",
+        meaningEn: "Your mental focus, discipline, and current comprehension levels",
+        x: 0.5,
+        y: 0.8,
+      },
+      {
+        index: 1,
+        nameTh: "2. อุปสรรคหรือสิ่งรบกวน",
+        nameEn: "2. Academic Distraction",
+        meaning: "สิ่งที่ทำให้เสียสมาธิ ความเครียด หรือจุดอ่อนในวิชาที่ต้องแก้ไข",
+        meaningEn: "Mental burnout, external distractions, or subject areas needing review",
+        x: 0.22,
+        y: 0.48,
+      },
+      {
+        index: 2,
+        nameTh: "3. แนวทางและเทคนิคเสริมความจำ",
+        nameEn: "3. Learning Strategy",
+        meaning: "กลยุทธ์การอ่านหนังสือ การติว หรือเทคนิคที่จะช่วยให้เข้าใจไวขึ้น",
+        meaningEn: "Optimal study techniques, collaboration, and retention strategies",
+        x: 0.78,
+        y: 0.48,
+      },
+      {
+        index: 3,
+        nameTh: "4. แนวโน้มผลสอบและความสำเร็จ",
+        nameEn: "4. Examination Outcome",
+        meaning: "ผลคะแนน การผ่านเกณฑ์ และโอกาสสำเร็จตามเป้าหมายทางวิชาการ",
+        meaningEn: "Likely test results, admission chances, and overall educational achievement",
+        x: 0.5,
+        y: 0.18,
+      },
+    ],
   },
 ];
 
