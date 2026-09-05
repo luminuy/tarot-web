@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { getPublicReaderById } from "@/lib/marketplace/readers.repo";
 import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
-import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SITE_ORIGIN } from "@/lib/config/site";
 import type { Metadata } from "next";
 
@@ -47,17 +48,18 @@ export default async function ReaderDetailPage({
   };
 
   return (
-    <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-x-clip">
-      {/* Schema.org Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
+    <>
+      <SiteHeader />
+      <main className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-x-clip">
+        {/* Schema.org Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
 
-      <div className="max-w-4xl mx-auto space-y-6 relative z-10">
-        {/* Top Breadcrumbs */}
-        <div className="flex items-center justify-between border-b border-[#E4D8C4]/40 pb-4">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] overflow-x-auto whitespace-nowrap">
+        <div className="max-w-4xl mx-auto space-y-6 relative z-10">
+          {/* Top Breadcrumbs */}
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#E4D8C4]/40 pb-4 overflow-x-auto whitespace-nowrap">
             <Link href="/" className="hover:text-[#8F5C1A] transition-colors">
               หน้าแรก
             </Link>
@@ -68,8 +70,6 @@ export default async function ReaderDetailPage({
             <span>/</span>
             <span className="text-[#2E211A] font-bold truncate">{reader.displayName}</span>
           </nav>
-          <SacredNavDropdown />
-        </div>
 
         {/* Reader Profile Container */}
         <div className="bg-[#FFFFFF] rounded-lg p-6 sm:p-10 space-y-8 border border-[#E4D8C4]">
@@ -160,5 +160,7 @@ export default async function ReaderDetailPage({
         </div>
       </div>
     </main>
+    <SiteFooter />
+  </>
   );
 }

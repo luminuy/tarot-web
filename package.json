@@ -20,6 +20,7 @@
     "test:journal": "tsx scripts/qa/test-journal-sync.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "cards:variants": "tsx scripts/generate-card-variants.ts",
+    "cards:related": "tsx scripts/generate-related-cards.ts",
     "og:image": "python3 scripts/generate-og-image.py",
     "agent:status": "tsx scripts/agent-guard.ts status",
     "agent:check": "tsx scripts/agent-guard.ts check",

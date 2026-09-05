@@ -51,6 +51,29 @@
   - เพิ่มเคสทดสอบ `isValidGoogleAdsId`, `isValidGoogleAdsConversionLabel`, และการ dispatch conversion ใน `scripts/qa/test-analytics-integrity.ts` (ผ่านครบ 30/30 ด่าน)
   - ตรวจสอบผ่านครบทั้ง 26 ด่านใน `npm run repo:verify`
 
+### 🗓️ 2026-09-05: ยกระดับโครงสร้าง Site Shell & Server-Side Related Cards ตามแผน SITE_SHELL_SEO_PLAN.md สมบูรณ์แบบ — โดย Antigravity
+
+- **Server-Side Related Cards (PR-B / Deterministic Offline Matrix)**:
+  - พัฒนาเครื่องมือคำนวณความสัมพันธ์ไพ่ `scripts/generate-related-cards.ts` คำนวณความคล้ายคลึงของไพ่ 78 ใบแบบ 100% Deterministic (Keyword Jaccard 40%, Major/Minor Distance 18%, Element 15%, Astrology 12%, Suit 10%, YesNo 5%, Neighbor Penalty -15%) พร้อม tiebreaker ด้วย ID
+  - เพิ่มคำสั่ง `npm run cards:related` ใน `package.json` สร้างไฟล์ผลลัพธ์ `src/data/cards/related.generated.ts` มี 78 รายการ ใบละ 4 ใบ (รวม 312 internal links คุณภาพสูงฝังตรงใน Server-Rendered HTML)
+  - อัปเกรด `scripts/verify-cards.ts` เพิ่มการตรวจ `RELATED_CARDS` ครบ 78 ใบ ใบละ 4 ใบ ไม่มีการอ้างอิงตัวเอง และไม่กุไพ่ปลอมตามกฎ Rule 14
+  - แปลง `src/components/encyclopedia/RelatedCards.tsx` เป็น Server Component ทำให้อ่านข้อมูล synchronous ได้ทันที ไม่ต้องพึ่งพา Vectorize / Client fetch
+  - อัปเดต `src/components/encyclopedia/CardDetailView.tsx` และ `src/app/cards/[id]/page.tsx` รองรับการแทรก Server Component `<RelatedCards cardId={card.id} />` และ Breadcrumb นำทางมาตรฐาน
+
+- **Unified SiteHeader (PR-A / Global Luxury Header)**:
+  - สร้าง Server Component `src/components/layout/SiteHeader.tsx` แบบ Sticky Top-0 พร้อมแบรนด์โลโก้ WebP, Breadcrumb slot, Nav slot, และ Toolbar slot
+  - สร้าง `src/components/layout/nav-links.ts` เป็น Single Source of Truth สำหรับข้อมูลสถิติเว็บ (78 ไพ่, 20 ผัง, 24 บทความ) และเมนูลิงก์ 4 คอลัมน์
+  - ติดตั้งใน `TarotFlow.tsx` (แอปหลัก) และสร้าง layout กลางสำหรับ `/cards`, `/spreads`, `/blog`, `/privacy`, `/account` รวมถึงเชื่อมต่อใน `/readers`
+
+- **Unified Fat Footer & SiteShell (PR-C / Site-wide Dark Luxury Footer)**:
+  - สร้าง Server Component `src/components/layout/SiteFooter.tsx` ยกเครื่องส่วนท้ายสไตล์ Dark Luxury `#171512` จาก `HomeSeoContent.tsx` พร้อมลิงก์ภายในกว่า 20 จุด, สถิติระบบ, ตราประทับ Provably Fair SHA-256, ลิงก์ PDPA, และสายด่วนสุขภาพจิต 1323 / ฉุกเฉิน 1669 ตามกฎ Rule 6
+  - ปรับปรุง `HomeSeoContent.tsx` ถอด Section 6 เดิมออก โดยยังคงระยะห่าง `pb-16 sm:pb-20` บน Section 5 FAQ ป้องกันบั๊กการชนกันของเลย์เอาต์ (INC-0073)
+  - สร้าง `src/components/layout/SiteShell.tsx` เป็น Convenience Wrapper
+
+- **ผลการทดสอบและการตรวจสอบคุณภาพ (Verification Results)**:
+  - `npm run typecheck` ➔ **0 Errors**
+  - `npm run cards:related` ➔ **100% Deterministic (Clean git diff)**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 26/26 ด่านความปลอดภัย**
 
 ### 🗓️ 2026-09-05: วางระบบ Google Analytics 4 (GA4) & Meta Pixel สมบูรณ์แบบ ละเอียดครบทุกจุด — โดย Antigravity
 

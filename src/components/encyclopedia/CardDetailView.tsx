@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
-import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
 import { useHasMounted } from "@/lib/motion";
 import { trackEvent } from "@/lib/analytics";
 
@@ -15,6 +14,8 @@ interface CardDetailViewProps {
   nextCard?: TarotCard;
   totalCards: number;
   currentIndex: number;
+  /** ไพ่ที่พลังงานใกล้เคียง — Server Component ส่งเข้ามาเพื่อให้ลิงก์อยู่ใน HTML */
+  related?: React.ReactNode;
 }
 
 const ELEMENT_CONFIG: Record<string, { border: string; glow: string; text: string; bg: string; icon: string }> = {
@@ -54,6 +55,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   nextCard,
   totalCards,
   currentIndex,
+  related,
 }) => {
   const hasMounted = useHasMounted();
   const [orientation, setOrientation] = useState<"upright" | "reversed">("upright");
@@ -80,14 +82,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
   return (
     <div className="space-y-8 w-full max-w-5xl mx-auto relative z-10">
-      {/* Top Breadcrumbs & Header Bar */}
-      <div className="flex items-center justify-between border-b border-[#D5CEC2]/40 pb-4 text-xs font-mono">
-        <Link
-          href="/cards"
-          className="inline-flex items-center gap-1.5 text-[#29261F] hover:text-[#A58A5C] transition-colors py-1.5 px-4 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] hover:border-[#A58A5C] font-serif-th shadow-xs"
-        >
-          <span>←</span> กลับหน้ารวมไพ่ 78 ใบ
-        </Link>
+      {/* Top Header Bar — Card Counter */}
+      <div className="flex items-center justify-end border-b border-[#D5CEC2]/40 pb-4 text-xs font-mono">
         <span className="text-[#635B4E]">
           ลำดับที่ <strong className="text-[#A58A5C]">{currentIndex + 1}</strong> / {totalCards}
         </span>
@@ -272,8 +268,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         </div>
       </div>
 
-      {/* ไพ่ที่พลังงานใกล้เคียง (Vectorize · ซ่อนตัวเองถ้า index ยังว่าง) */}
-      <RelatedCards cardId={card.id} />
+      {/* ไพ่ที่พลังงานใกล้เคียง — Server Component ส่งเข้ามาเพื่อให้ลิงก์อยู่ใน HTML ทันที */}
+      {related}
 
       {/* Bottom Previous / Next Card Navigation Bar */}
       <div className="pt-8 border-t border-[#D5CEC2]/40 flex items-center justify-between gap-4">
