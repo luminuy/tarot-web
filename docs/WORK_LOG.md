@@ -33,8 +33,24 @@
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
-| **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 (`NEXT_PUBLIC_GA_ID`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + App Router SPA Pageviews | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
+| **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-05: วางระบบ Google Ads Conversion Tracking & Remarketing แบบ Native — โดย Antigravity
+
+- **โครงสร้างและการตั้งค่าตัวแปร Google Ads (Environment & Runtime Config)**:
+  - รองรับ `NEXT_PUBLIC_GOOGLE_ADS_ID` (`AW-XXXXXXXXX`), `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL`
+  - ขยาย Runtime Endpoint `src/app/api/config/analytics/route.ts` ให้คืนค่า `googleAdsId` โดยรองรับทั้ง `NEXT_PUBLIC_GOOGLE_ADS_ID`, `GOOGLE_ADS_ID`, `AW_CONVERSION_ID` ผ่าน Cloudflare Secret (`npx wrangler secret put GOOGLE_ADS_ID`)
+  - อัปเดต `.env.example` และ `.github/workflows/deploy.yml` รองรับตัวแปร Google Ads ในระบบ CI/CD
+- **ระบบแท็กและการส่งข้อมูล Conversion (`src/lib/analytics.ts` & `AnalyticsTracker.tsx`)**:
+  - เพิ่ม Validators: `isValidGoogleAdsId()` (`AW-\d{7,15}`) และ `isValidGoogleAdsConversionLabel()`
+  - อัปเกรด `AnalyticsTracker.tsx`: โหลดและตั้งค่า `gtag('config', googleAdsId, { send_page_view: false })` โดยอัตโนมัติร่วมกับ GA4 ภายใต้ single `gtag.js` script tag (ไม่โหลดสคริปต์ซ้ำซ้อน)
+  - เพิ่มฟังก์ชัน `trackGoogleAdsConversion(sendTo, params)` สำหรับยิง Conversion โดยตรง พร้อมรองรับทั้งแบบ `AW-XXXXX/LABEL` และระบุเฉพาะ Label
+  - ส่ง Conversion อัตโนมัติเมื่อผู้ใช้อ่านไพ่จบ (`reading_complete`) หากมีการตั้งค่า Google Ads ID และ Conversion Label
+- **การทดสอบอัตโนมัติ (Gate 26 QA Suite)**:
+  - เพิ่มเคสทดสอบ `isValidGoogleAdsId`, `isValidGoogleAdsConversionLabel`, และการ dispatch conversion ใน `scripts/qa/test-analytics-integrity.ts` (ผ่านครบ 30/30 ด่าน)
+  - ตรวจสอบผ่านครบทั้ง 26 ด่านใน `npm run repo:verify`
+
 
 ### 🗓️ 2026-09-05: วางระบบ Google Analytics 4 (GA4) & Meta Pixel สมบูรณ์แบบ ละเอียดครบทุกจุด — โดย Antigravity
 

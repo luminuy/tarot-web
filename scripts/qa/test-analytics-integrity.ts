@@ -16,8 +16,11 @@
 import {
   isValidGaId,
   isValidMetaPixelId,
+  isValidGoogleAdsId,
+  isValidGoogleAdsConversionLabel,
   trackEvent,
   trackPageView,
+  trackGoogleAdsConversion,
   setAnalyticsConsent,
   type TarotAnalyticsEvent,
 } from "../../src/lib/analytics";
@@ -37,7 +40,7 @@ function check(title: string, condition: boolean, detail?: string) {
 
 async function runTests() {
   console.log("══════════════════════════════════════════════════════════════════");
-  console.log("📊 [QA] Google Analytics 4 & Analytics Tracker Integrity Suite");
+  console.log("📊 [QA] Google Analytics 4, Google Ads & Analytics Integrity Suite");
   console.log("══════════════════════════════════════════════════════════════════\n");
 
   // ─────────────────────────────────────────────────────────────────
@@ -57,6 +60,14 @@ async function runTests() {
   check("Reject short Meta Pixel ID (12345)", !isValidMetaPixelId("12345"));
   check("Reject non-numeric Meta Pixel ID", !isValidMetaPixelId("1234567890abcde"));
   check("Reject empty Meta Pixel ID", !isValidMetaPixelId(""));
+
+  check("Valid Google Ads ID (AW-1234567890)", isValidGoogleAdsId("AW-1234567890"));
+  check("Valid Google Ads ID with lowercase (aw-987654321)", isValidGoogleAdsId("aw-987654321"));
+  check("Reject Google Ads ID without AW prefix (1234567890)", !isValidGoogleAdsId("1234567890"));
+  check("Reject empty Google Ads ID", !isValidGoogleAdsId(""));
+  check("Valid Google Ads Conversion Label", isValidGoogleAdsConversionLabel("AbCdEfGhIjK123_"));
+  check("Reject too short Conversion Label (abc)", !isValidGoogleAdsConversionLabel("abc"));
+
 
   // ─────────────────────────────────────────────────────────────────
   // 2. SSR Safety (Non-browser environment)
@@ -133,8 +144,16 @@ async function runTests() {
   check("setAnalyticsConsent updates gtag consent to granted", gtagConsent?.params?.analytics_storage === "granted");
   check("ad_storage remains denied for privacy", gtagConsent?.params?.ad_storage === "denied");
 
+  // Test Google Ads conversion dispatch
+  trackGoogleAdsConversion("AW-1234567890/AbCdEfGh123", { value: 150, currency: "THB" });
+  const gtagConversion = capturedGtag.find((e) => e.command === "event" && e.action === "conversion");
+  check("trackGoogleAdsConversion fires gtag conversion", Boolean(gtagConversion));
+  check("gtag conversion send_to matches target", gtagConversion?.params?.send_to === "AW-1234567890/AbCdEfGh123");
+  check("gtag conversion value and currency match", gtagConversion?.params?.value === 150 && gtagConversion?.params?.currency === "THB");
+
   // Cleanup mock
   delete (global as any).window;
+
 
   // ─────────────────────────────────────────────────────────────────
   // 4. Event Types Coverage Check

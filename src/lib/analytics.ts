@@ -33,6 +33,18 @@ export function isValidMetaPixelId(id?: string | null): boolean {
   return /^\d{12,17}$/.test(id.trim());
 }
 
+/** ตรวจสอบรูปแบบ Measurement ID ของ Google Ads (ต้องขึ้นต้นด้วย AW- ตามด้วยตัวเลข 7-15 หลัก) */
+export function isValidGoogleAdsId(id?: string | null): boolean {
+  if (!id) return false;
+  return /^AW-\d{7,15}$/i.test(id.trim());
+}
+
+/** ตรวจสอบรูปแบบ Conversion Label ของ Google Ads */
+export function isValidGoogleAdsConversionLabel(label?: string | null): boolean {
+  if (!label) return false;
+  return /^[A-Za-z0-9_-]{10,35}$/.test(label.trim());
+}
+
 /** ดึง GA Measurement ID จาก Environment Variable */
 export function getGaMeasurementId(): string | undefined {
   const id = process.env.NEXT_PUBLIC_GA_ID?.trim();
@@ -43,6 +55,18 @@ export function getGaMeasurementId(): string | undefined {
 export function getMetaPixelId(): string | undefined {
   const id = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
   return isValidMetaPixelId(id) ? id : undefined;
+}
+
+/** ดึง Google Ads ID จาก Environment Variable */
+export function getGoogleAdsId(): string | undefined {
+  const id = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID?.trim();
+  return isValidGoogleAdsId(id) ? id : undefined;
+}
+
+/** ดึง Google Ads Conversion Label จาก Environment Variable (ถ้ามี) */
+export function getGoogleAdsConversionLabel(): string | undefined {
+  const label = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL?.trim();
+  return isValidGoogleAdsConversionLabel(label) ? label : undefined;
 }
 
 export type TarotAnalyticsEvent =
@@ -247,10 +271,58 @@ export function trackEvent<T extends TarotAnalyticsEvent>(
         window.fbq("trackCustom", name, payload);
       }
     }
+
+    // 3. Google Ads Conversion (ส่งอัตโนมัติเมื่อระบุ GOOGLE_ADS_ID และ CONVERSION_LABEL)
+    if (typeof window.gtag === "function") {
+      const googleAdsId = getGoogleAdsId();
+      const defaultLabel = getGoogleAdsConversionLabel();
+      if (googleAdsId && defaultLabel && name === "reading_complete") {
+        window.gtag("event", "conversion", {
+          send_to: `${googleAdsId}/${defaultLabel}`,
+          value: 1.0,
+          currency: "THB",
+        });
+      }
+    }
   } catch (err) {
     // ป้องกันไม่ให้ข้อผิดพลาดจาก Analytics ส่งผลกระทบต่อ UX ของผู้ใช้
     if (process.env.NODE_ENV !== "production") {
       console.debug("[Analytics] Error sending event:", err);
+    }
+  }
+}
+
+/**
+ * ส่ง Conversion โดยตรงไปยัง Google Ads
+ * @param sendTo รูปแบบ 'AW-XXXXXXXXX/AbCdEfGhIjK' หรือรหัส label เดี่ยวๆ เมื่อมี NEXT_PUBLIC_GOOGLE_ADS_ID
+ */
+export function trackGoogleAdsConversion(
+  sendTo: string,
+  params?: {
+    value?: number;
+    currency?: string;
+    transaction_id?: string;
+  }
+) {
+  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+
+  try {
+    const googleAdsId = getGoogleAdsId();
+    const target = sendTo.includes("/")
+      ? sendTo
+      : googleAdsId
+      ? `${googleAdsId}/${sendTo}`
+      : sendTo;
+
+    window.gtag("event", "conversion", {
+      send_to: target,
+      value: params?.value ?? 1.0,
+      currency: params?.currency || "THB",
+      ...(params?.transaction_id ? { transaction_id: params.transaction_id } : {}),
+    });
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("[Analytics] Error sending Google Ads conversion:", err);
     }
   }
 }
@@ -308,3 +380,4 @@ export function setAnalyticsConsent(granted: boolean) {
     ad_personalization: "denied",
   });
 }
+
