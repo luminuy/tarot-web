@@ -36,6 +36,28 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ยกระดับดีไซน์การ์ดทำนายด่วน (Quick Fortune) สู่ความวิจิตรบรรจงระดับวิหารพยากรณ์ — โดย Antigravity
+
+- **แรงผลักดันและข้อเสนอแนะจากผู้ใช้**:
+  - ผู้ใช้ขอปรับแต่งการ์ดทำนายด่วน 4 หัวข้อให้ "สวยๆ เข้ากับเราด้วย" เพื่อให้งดงาม หรูหรา สอดคล้องกับธีมวิหารพยากรณ์ของเว็บ
+- **การยกระดับความงามและอัตลักษณ์วิหารพยากรณ์ (`src/components/reading/QuickFortunePicker.tsx`)**:
+  - นำภาพหน้าไพ่ 1909 Rider-Waite แท้จริงอันทรงพลังมาประดิษฐานบนการ์ดแต่ละหัวข้อ ผ่าน `<CardImage />` (ตามกฎข้อ 8):
+    - **ความรัก & ความสัมพันธ์**: ไพ่ **The Lovers** (`major-06.jpg`) สื่อถึงความรัก สายใยจิตวิญญาณ โทน Rose-Gold ประกายอบอุ่น
+    - **การงาน & โอกาสใหม่**: ไพ่ **The Magician** (`major-01.jpg`) สื่อถึงการริเริ่ม ทักษะ ศักยภาพ และการลงมือทำ โทน Imperial Bronze & Amber Gold
+    - **การเงิน & โชคลาภ**: ไพ่ **Ace of Pentacles** (`pentacles-01.jpg`) สื่อถึงความมั่งคั่ง โอกาสทอง และความอุดมสมบูรณ์ โทน Gilded Coin Gold
+    - **ภาพรวมดวงชะตา & พลังงานวันนี้**: ไพ่ **The Sun** (`major-19.jpg`) สื่อถึงแสงสว่าง ปัญญาญาณ ความแจ่มใส และสัจธรรมจักรวาล โทน Celestial Platinum & Sun Gold
+  - เพิ่มสัญลักษณ์มุมทองคำเปลว (Sacred Corner Accents `✦`) และรัศมีแสงออร่านุ่มนวล (Radial Altar Aura) เบื้องหลังไพ่
+  - ยกระดับปุ่มเชิญชวนทำนาย (Action Bar) ด้านล่างเป็นแผงทองคำเปลวแบบสลับโทนเข้ม-สว่างเมื่อสัมผัส (Tactile Interaction)
+  - ตกแต่งส่วนหัวด้วยสัญลักษณ์ดวงดาวประดับ `✦ ── ✧ ── ✦` และป้ายมนต์ทองคำเปลว `✨ เปิดไพ่ด่วน 1 ใบ · สรุปความหมายตรงประเด็น ✨`
+  - ยกระดับกล่องถามชื่อเล่น (Nickname Popover) ให้เป็นสไตล์แผ่นพับวิหารสีงาช้างทองหรูหรา
+- **การทดสอบและการประกันคุณภาพ**:
+  - `npm run typecheck` ➔ **0 Errors**
+  - `npx tsx scripts/qa/test-quick-fortune.ts` ➔ **42/42 ผ่าน**
+  - `npx tsx scripts/qa/test-image-paths.ts` ➔ **ผ่าน (0 violations)**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 27/27 ด่าน**
+
+---
+
 ### 🗓️ 2026-09-05: แก้หัวเว็บกลางไม่ sticky และแผงเมนูถูกเนื้อหาทับ + ถอดแถบ breadcrumb ออกจากหน้าดัชนี — โดย Claude
 
 - **อาการ**: หลัง PR #248 ย้าย `<SiteHeader/>` มาเป็นลูกโดยตรงของ `<body>` หัวเว็บ **เลิก sticky ทุกหน้าที่ใช้ layout** (`/cards`, `/cards/[id]`, `/blog`, `/spreads`, `/privacy`, `/account`) และกดปุ่มเมนูแล้ว **แผง dropdown โผล่มาแค่แถบบาง ๆ ใต้หัวเว็บ** ที่เหลือถูกเนื้อหาหน้าทับ
