@@ -310,7 +310,7 @@ export function QuickFortunePicker({
                   handleCardClick(topic);
                 }
               }}
-              className={`w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition-all duration-300 transform-gpu hover:-translate-y-1 hover:shadow-md cursor-pointer select-none text-left overflow-hidden min-h-[252px] sm:min-h-[264px]`}
+              className={`w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition-all duration-300 transform-gpu hover:-translate-y-1 hover:shadow-md cursor-pointer select-none text-left overflow-hidden min-h-[368px] sm:min-h-[392px]`}
             >
               {/* สัญลักษณ์มุมการ์ดทองคำเปลว */}
               <div className="absolute top-2.5 right-2.5 text-[9px] text-[#A58A5C]/40 group-hover:text-[#A58A5C]/90 transition-colors pointer-events-none select-none">
@@ -333,20 +333,20 @@ export function QuickFortunePicker({
                 </span>
               </div>
 
-              {/* ส่วนกลาง: ภาพไพ่ 1909 Rider-Waite ในกรอบวิหาร + รายละเอียดหัวข้อ */}
-              <div className="flex items-center gap-3.5 sm:gap-4 mb-3.5 relative z-10">
+              {/* ส่วนกลาง: ภาพไพ่ 1909 Rider-Waite ขนาดใหญ่กลางการ์ด (สัดส่วนเท่าการ์ดผังพยากรณ์) + รายละเอียดหัวข้อ */}
+              <div className="flex flex-col items-center text-center gap-2.5 mb-3.5 relative z-10">
                 {/* ภาพหน้าไพ่ 1909 Rider-Waite ประจำหัวข้อ */}
                 <div className="relative flex-shrink-0">
                   {/* รัศมีแสงทองนุ่มนวลเบื้องหลัง */}
-                  <div className="absolute -inset-1 rounded-xl bg-radial from-[#A58A5C]/20 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute -inset-1.5 rounded-xl bg-radial from-[#A58A5C]/20 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
                   <div
-                    className="relative w-[66px] h-[103px] sm:w-[74px] sm:h-[116px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition-all duration-300 transform-gpu bg-[#FFFFFF]"
+                    className="relative w-[92px] h-[152px] sm:w-[104px] sm:h-[172px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition-all duration-300 transform-gpu bg-[#FFFFFF]"
                     style={{ borderColor: topic.themeColors.cardBorder }}
                   >
                     <CardImage
                       image={topic.cardImage}
                       alt={isEnglish ? (topic.cardAltEn || topic.cardAlt) : topic.cardAlt}
-                      sizes="(min-width: 640px) 74px, 66px"
+                      sizes="(min-width: 640px) 104px, 92px"
                       className="w-full h-full object-cover object-center"
                       loading="eager"
                     />
@@ -355,7 +355,7 @@ export function QuickFortunePicker({
                 </div>
 
                 {/* ข้อความและคำอธิบาย */}
-                <div className="flex-1 min-w-0 space-y-1">
+                <div className="w-full min-w-0 space-y-1 px-1">
                   <div className="text-[10px] sm:text-[11px] font-serif-th text-[#8F5C1A] tracking-wider font-semibold truncate">
                     {isEnglish ? (topic.elementalGlyphEn || topic.elementalGlyph) : topic.elementalGlyph}
                   </div>
