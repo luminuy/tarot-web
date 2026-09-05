@@ -35,6 +35,115 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+### 🗓️ 2026-09-06: ยกเครื่องการออกแบบใหม่ทั้งหมดระดับโลก (Complete World-Class Luxury Redesign) สำหรับ /daily, /love/1-card, และ /cards/birth-card (โดย Antigravity AI)
+
+> **ขอบเขต**: 
+> 1. ปรับโฉมสุนทรียภาพใหม่ทั้งหมดสู่ระดับ **World-Class Digital Masterpiece** เทียบชั้นมาตรฐานดิจิทัลไฮเอนด์ (Apple, Hermès, Aesop, Kinfolk):
+>    - **Atmospheric Ethereal Lighting**: ติดตั้ง Radial Celestial Aura ด้านบนของทุกหน้า ให้มิติแสงศักดิ์สิทธิ์นวลตา
+>    - **Architectural Porcelain Altar**: ปรับแผงพิธีกรรมเป็น `rounded-3xl` พร้อมเงาลึกซ้อนชั้น `shadow-[var(--shadow-overlay)]` และขอบทองคำแท้ 1px
+>    - **Illuminated Manuscript Layout**: จัดวางคำทำนายด้วยอักษรนำตัวใหญ่ (Drop Cap), คัมภีร์แยกเสาหลักชัดเจน, และการจัดพิมพ์สัดส่วนทองคำ
+> 2. **หน้าไพ่ยิปซีรายวัน (`/daily`)**:
+>    - ออกแบบ *The Sacred Daily Chronometer* แสดงวันที่สากลและสุริยคติไทยแบบนาฬิกาไฮเอนด์
+>    - สร้าง *The Five Elemental Chambers* (`I. มหาภาพรวม`, `II. ภารกิจและการงาน`, `III. ความมั่งคั่งและการเงิน`, `IV. มิติแห่งดวงใจ`, `V. สติปัญญาและจิตวิญญาณ`) ด้วยการ์ดพอร์ซเลนสลักเลขโรมัน
+>    - แท่นสับไพ่ 3D ลอยตัวเหนือผ้าปูโต๊ะพิธีกรรม `.altar-cloth` และริบบิ้นไพ่ชุดใหญ่ 22 ใบแบบโต้ตอบได้
+>    - คัมภีร์คำทำนาย 5 เสาหลักสไตล์นิตยสารวรรณกรรม พร้อมตราประทับบันทึกสมุดดูดวงและแชร์ผล
+> 3. **หน้าดูดวงความรัก 1 ใบ (`/love/1-card`)**:
+>    - ออกแบบ *The Sanctuary of the Heart* พร้อม 4 วิหารแห่งความรู้สึก: `I. ดวงใจแห่งอิสรภาพ (คนโสด)`, `II. ม่านหมอกแห่งความรู้สึก (คนคุย/ไม่ชัดเจน)`, `III. พันธสัญญาแห่งสองดวงจิต (คนมีคู่)`, `IV. วิหารแห่งการเยียวยา (พักใจ/คนเก่า)`
+>    - ช่องจารึกชื่อและเจตจำนงคู่รักสไตล์สมุดบันทึกวิหารพยากรณ์
+>    - วิเคราะห์ความรัก 4 เสาหลัก (สารหลัก, บทวิเคราะห์ตามสถานะ, ทางนำแห่งแสงสว่าง, สัญญาณเตือนใจ)
+> 4. **หน้าคำนวณไพ่ประจำตัว (`/cards/birth-card`)**:
+>    - ออกแบบ *The Astronomical Chronometer & Natal Codex* พร้อมแป้นหมุน วัน, เดือน, ปี พ.ศ./ค.ศ. สไตล์เครื่องมือดาราศาสตร์โบราณ
+>    - แอนิเมชันสรุปผลรวมตัวเลข (Numerical Reduction) แสดงที่มาของตัวเลขไพ่อย่างโปร่งใส
+>    - แท่นจัดแสดงไพ่คู่ขนาน Personality & Soul Card ด้วยการ์ด 3D ขนาดใหญ่ `<TarotCard size="lg" />` เอียงตามองศาเมาส์
+> 5. **บทความวิชาการ 800+ คำ และ FAQ Accordion**: ปรับกล่องบทความทุกหน้าเป็น `rounded-3xl p-6 sm:p-12 shadow-[var(--shadow-raised)]` พร้อม Schema.org ครบชุด
+
+1. **หน้าไพ่ยิปซีรายวัน (`src/app/daily/`)**:
+   - สร้าง `layout.tsx` ติดตั้ง Sticky `<SiteHeader />` และ Quiet Luxury `<SiteFooter />`
+   - พัฒนา `DailyClient.tsx` สไตล์ Altar แท่นบูชาพยากรณ์: แผงเลือกโฟกัสพลังงาน 5 มิติ (ภาพรวม, การงาน, การเงิน, ความรัก, สุขภาพจิต), ขั้นตอนสับไพ่ Provably Fair, พัดไพ่ 22 ใบสำรับใหญ่, พลิกไพ่ 3D ด้วยคอมโพเนนต์ `<TarotCard />`
+   - เชื่อมต่อการบันทึกประวัติ `saveReading` โดยอัตโนมัติ เพื่อให้ผู้ใช้ย้อนกลับมาดูดวงย้อนหลังได้จากเมนูประวัติ
+   - อัปเกรด `page.tsx` ด้วยบทความคู่มือรายวันและ Schema.org ครบชุด
+
+2. **หน้าดูดวงความรัก 1 ใบ (`src/app/love/1-card/`)**:
+   - สร้าง `src/app/love/layout.tsx` ติดตั้ง `<SiteHeader />` และ `<SiteFooter />`
+   - พัฒนา `LoveOneCardClient.tsx` ตามธีมหน้าหลัก: ตัวเลือกสถานะความรัก 4 รูปแบบ (คนโสด, คนคุย/ไม่ชัดเจน, คนมีคู่, คนอกหัก/พักใจ), พัดไพ่แผ่กว้างแบบโต้ตอบได้, พลิกไพ่ 3D หรูหรา
+   - สังเคราะห์คำทำนายความรักเจาะลึก 4 มิติ: แก่นพลังงาน, คำเตือนด้านเงา, คำแนะนำนำทางใจ, สัญญาณและสัญลักษณ์
+   - เชื่อมต่อไปยังผังความรักขั้นสูง (ผัง 5 ใบ / ผัง 6 ใบ) และแม่หมอด้านความรัก
+
+3. **หน้าคำนวณไพ่ประจำตัว (`src/app/cards/birth-card/`)**:
+   - ยืนยันการห่อหุ้มด้วย `<SiteHeader />` และ `<SiteFooter />` จาก `src/app/cards/layout.tsx`
+   - ปรับปรุง `BirthCardCalculator.tsx`: ฟอร์ม `.altar-panel`, แท่นวางไพ่ `.altar-cloth`, แสดงไพ่ด้วย `<TarotCard size="lg" isRevealed={true} />` สัมผัส 3D Gyro/Mouse Tilt สวยงาม
+   - อัปเกรด `page.tsx`: บทความวิชาการเลขศาสตร์ทาโรต์ 12 คู่ไพ่ดวงวิญญาณสากล พร้อม FAQ Schema
+
+---
+
+### 🗓️ 2026-09-06: ปรับปรุงระบบทำนายด่วน (Quick Fortune) เพิ่มช่องใส่คำถามตรง & แก้ไขบั๊กไม่ถามชื่อเมื่อเริ่มทำนายใหม่ (โดย Antigravity AI)
+
+> **ขอบเขต**: 
+> 1. เพิ่มช่องระบุคำถามลงในโมดัลของระบบทำนายด่วน 4 หัวข้อยอดนิยม (`QuickFortunePicker.tsx`) พร้อมปุ่มใช้คำถามแนะนำ และส่งต่อคำถามไปยัง AI ให้ทำนายตอบคำถามโดยตรง พร้อมแสดงผลบนหน้าคำทำนาย (`QuickChatResult.tsx`, `StreamReader.tsx`)
+> 2. แก้ไขบั๊กระบบจำชื่อใน localStorage / state แล้วข้ามโมดัลโดยไม่ให้ใส่ชื่อเมื่อกดทำนายรอบใหม่ โดยบังคับเปิดโมดัลถามชื่อและคำถามทุกครั้งเมื่อเริ่มทำนายใหม่ และเคลียร์ state เมื่อกดเริ่มใหม่
+
+1. **เพิ่มช่องใส่คำถามในโมดัลทำนายด่วน (`src/components/reading/QuickFortunePicker.tsx`)**:
+   - เพิ่มฟิลด์ `inputQuestion` พร้อม Textarea (สูงสุด 300 ตัวอักษร) สไตล์ Luxury Editorial
+   - มีปุ่ม "ใช้คำถามแนะนำ" ให้กดเลือกคำถามตั้งต้นของแต่ละหัวข้อได้ทันที หรือพิมพ์คำถามเจาะจงเองได้อย่างอิสระ
+   - ขยายขนาดโมดัลเป็น `max-w-md` จัดสัดส่วนให้สวยงามทั้งบนมือถือและจอคอมพิวเตอร์
+   - ส่ง `effectiveQuestion` ต่อไปยัง callback `onSelectTopic(topic, nickname, question)`
+
+2. **แก้ไขบั๊กไม่ถามชื่อและข้ามขั้นตอนเมื่อเริ่มทำนายใหม่ (`QuickFortunePicker.tsx`, `TarotFlow.tsx`)**:
+   - ยกเลิกการดึงและบันทึกชื่อค้างใน `localStorage.getItem("seertarot_nickname")` ที่ทำให้ระบบ bypass โมดัล
+   - แก้ไข `handleCardClick` ให้เปิดโมดัลถามชื่อเล่นและคำถามทุกครั้งเมื่อกดการ์ดหัวข้อ เพื่อให้ผู้ใช้กำหนดตัวตนและเรื่องที่ต้องการถามใหม่ได้เสมอ
+   - ใน `TarotFlow.tsx` ฟังก์ชัน `handleReset` เพิ่มการล้าง state `nickname`, `question`, `situation` และลบ `seertarot_nickname` ออกจากเบราว์เซอร์อย่างหมดจด
+
+3. **ส่งคำถามให้ AI และแสดงผลแบนเนอร์คำถามบนหน้าคำทำนาย (`TarotFlow.tsx`, `QuickChatResult.tsx`, `StreamReader.tsx`, `src/lib/ai/prompt.ts`)**:
+   - `handleQuickFortuneSelect` ใน `TarotFlow.tsx` รับ `userQuestion` และส่งเข้า API `/api/reading/start` และ `startAIStreaming`
+   - เพิ่มการส่ง prop `question` และ `nickname` ไปยัง `<QuickChatResult />` และ `<StreamReader />`
+   - สร้างแบนเนอร์ "คำถามที่คุณตั้งจิตถาม" บนหน้าแสดงผลคำทำนาย สไตล์พรีเมียมสีทองอ่อน สอดคล้องกับธีมของวิหาร
+   - ยกระดับคำสั่ง prompt directive ของโหมดทำนายด่วนใน `src/lib/ai/prompt.ts` ให้ AI วิเคราะห์หน้าไพ่เพื่อตอบตรงประเด็นคำถามใน `<question>` ชัดเจน ไม่ตอบวกวนหรือกว้างเกินไป
+
+---
+
+### 🗓️ 2026-09-05: ดำเนินการแย่งทราฟฟิกเว็บคู่แข่ง (MyHora, Shitsuren, Yibsee) + ปรับปรุง SacredNavDropdown + สร้างหน้าแลนดิ้งยอดนิยม 2 หน้า (/daily และ /love/1-card) (โดย Antigravity AI)
+
+> **ขอบเขต**: วิเคราะห์จุดอ่อนเว็บคู่แข่ง 3 เจ้า (โฆษณาบังจอ, ระบบสุ่มปลอม, บังคับจ่ายเหรียญ/พร้อมเพย์) แล้วสร้างหน้าดักคีย์เวิร์ดยอดนิยมที่มี Search Volume สูงสุด พร้อมอัปเกรด Navigation Dropdown ให้แสดงฟีเจอร์สำคัญครบถ้วน
+
+1. **ปรับปรุง SacredNavDropdown & TarotArtIcons (`src/components/ui/SacredNavDropdown.tsx`, `TarotArtIcons.tsx`)**:
+   - เพิ่ม Art Icons ใหม่ 3 รูปแบบ: `DailyTarotNavIcon` (The Sun), `LoveTarotNavIcon` (The Lovers), `BirthCardNavIcon` (The High Priestess)
+   - ปรับโครงสร้างเมนู Dropdown ให้เป็นหมวดหมู่พรีเมียม 2 ส่วน:
+     - **พิธีกรรมยอดนิยม & เครื่องมือ**: ไพ่ยิปซีรายวัน (`/daily`), ดูดวงความรัก (`/love/1-card`), คำนวณไพ่ประจำตัว (`/cards/birth-card`)
+     - **คลังความรู้ & ผังพยากรณ์**: ผังการเปิดไพ่ 25 แบบ (`/spreads`), ความหมายไพ่ 78 ใบ (`/cards`), บทความดูดวง 26 เรื่อง (`/blog`), ปรึกษาแม่หมอตัวจริง (`/readers`)
+   - แก้ไขปัญหาผู้ใช้ไม่เห็นฟีเจอร์สำคัญที่อัปเดตใหม่ใน Navigation Bar
+
+2. **สร้างหน้าดักทราฟฟิก "ดูดวงไพ่ยิปซีรายวัน" (`/daily`)**:
+   - หน้า Server Component พร้อม Canonical, Metadata, และ JSON-LD (BreadcrumbList, FAQPage, SoftwareApplication)
+   - Interactive Client Component สับไพ่ด้วย Web Crypto API ป้องกันการล็อกผล 100%
+   - ไพ่ 1 ใบทำนาย 5 มิติครบถ้วน: ภาพรวมประจำวัน, การงาน, การเงิน, ความรัก, และข้อคิดเตือนใจ
+   - ไร้โฆษณาคั่น ไร้ระบบเก็บเงิน โหลดเร็วระดับ Sub-second
+
+3. **สร้างหน้าดักทราฟฟิก "ดูดวงความรัก 1 ใบ" (`/love/1-card`)**:
+   - หน้า Server Component พร้อม Canonical, Metadata, และ JSON-LD Schema
+   - รองรับการเลือกสถานะความสัมพันธ์ 4 มิติ: คนโสด, คนคุยสถานะไม่ชัดเจน, มีแฟน/คู่ครอง, และเพิ่งเลิกรา/คิดถึงคนเก่า
+   - พลิกไพ่ 3D แสดงภาพแท้ 1909 Rider-Waite พร้อมคำทำนายเฉพาะเจาะจงตามสถานะที่เลือก
+   - ลิงก์เชื่อมโยงไปยังผังพยากรณ์ความรักเจาะลึก 5 ใบ (`/spreads/love`), 6 ใบ (`/spreads/love-six`) และห้องปรึกษาแม่หมอ (`/readers`)
+
+4. **เพิ่ม Header & Footer ให้ครบทั้ง 3 หน้า (`src/app/daily/layout.tsx`, `src/app/love/layout.tsx`, `src/app/cards/layout.tsx`)**:
+   - สร้าง Layout ให้ `/daily` และ `/love` โดยใส่ `<SiteHeader />` (Sticky Top-0 สีขาว พร้อมโลโก้, ตัวสลับภาษา, และเมนู Dropdown) และ `<SiteFooter />` (Fat Footer สีเข้ม #171512 พร้อมแถลงการณ์จริยธรรม AI, ลิงก์ภายใน 4 คอลัมน์, และสายด่วน 1323) ครบถ้วนทั้ง 3 หน้า
+
+5. **ปรับปรุง UI ให้เข้ากับธีมวิหาร (Sanctuary Theme) และยกระดับ Workflow ภายใน**:
+   - ปรับพื้นหลังหลักของทั้ง 3 หน้าเป็นสี `#F3F0EA` (Warm Sacred Parchment) พร้อมกล่องการ์ดสีขาวขอบทอง `#D5CEC2`
+   - **หน้า `/daily`**: เพิ่มฟอร์มตั้งจิตอธิษฐานเลือกหมวดโฟกัส (งาน/เงิน/รัก/สติ), ระบบสับไพ่พร้อม Provably Fair Seed, กองไพ่คลี่ให้แตะเลือกใบ (Card Fan), บันทึกผลลงสมุดดูดวงอัตโนมัติ (`saveReading`), และการ์ดเชื่อมโยงเปิดผัง 3 ใบ / ผังเซลติกครอส 10 ใบ
+   - **หน้า `/love/1-card`**: เพิ่มช่องใส่ชื่อตนเองและชื่อคนในใจ, กองไพ่คลี่เลือกใบ, บันทึกประวัติดูดวงอัตโนมัติ, และการ์ดเชื่อมโยงไปยังผังความรัก 5 ใบ (`/spreads/love`), ผัง 6 ใบ (`/spreads/love-six`), และแม่หมอตัวจริง (`/readers`)
+   - **หน้า `/cards/birth-card`**: เพิ่มเสียงคลิกศักดิ์สิทธิ์ (`soundManager`), การ์ดเชื่อมโยงเปิดผังเซลติกครอส 10 ใบด้วยพลังไพ่ประจำตัว, และการ์ดทางลัดไปยัง `/daily`, `/love/1-card` และ `/readers`
+
+6. **เพิ่มบทความบทวิเคราะห์เชิงลึกเพื่อ SEO (Authority Editorial Articles)**:
+   - เพิ่มบทความเชิงวิชาการทาโรต์สากล (800+ คำ) ในหน้า `/daily` และ `/love/1-card` อ้างอิงทฤษฎีจิตวิทยาความพ้องพาน (Synchronicity) ของ Carl Jung, แม่พิมพ์จิตใต้สำนึก (Archetypes), และรหัสสัญลักษณ์ 1909 Rider-Waite Smith
+   - วาง Structured Data ครบถ้วนทั้ง `BreadcrumbList`, `FAQPage`, และ `SoftwareApplication`
+
+7. **SEO, Sitemap & 301 Redirects (`next.config.ts`, `src/app/sitemap.ts`)**:
+   - ลงทะเบียน `/daily` และ `/love/1-card` ใน sitemap (priority 0.95, changeFrequency daily)
+   - เพิ่ม Permanent Redirects (301) รองรับ URL รูปแบบต่างๆ จากคู่แข่ง: `/tarot-daily`, `/daily-tarot`, `/tarot-love`, `/love`, `/love-tarot`
+
+8. **การตรวจสอบคุณภาพ (Verification)**:
+   - `npm run typecheck` ผ่าน 0 errors
+   - `npm run repo:verify` ผ่านครบทั้ง 32 ด่าน (100%)
 
 ### 🗓️ 2026-09-05: ดำเนินการ SEO คลื่นที่ 2, 3 และ 4 — ขยายสารานุกรมไพ่ 7 หน้าใหม่, ผังพยากรณ์ 25 แบบ, 6 หน้ารวมหมวดชีวิต, เครื่องมือไพ่ประจำตัว, และตำแหน่งไพ่ (โดย Antigravity AI)
 

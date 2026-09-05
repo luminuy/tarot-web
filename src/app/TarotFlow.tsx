@@ -551,13 +551,18 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   };
 
   // ทางลัดทำนายด่วน 1 ใบ (ข้ามริชวลสับไพ่และพัดเลือกไพ่ จั่วอัตโนมัติด้วย Provably-Fair)
-  const handleQuickFortuneSelect = async (topic: QuickTopic, userNickname: string) => {
+  const handleQuickFortuneSelect = async (
+    topic: QuickTopic,
+    userNickname: string,
+    userQuestion?: string
+  ) => {
     if (entitlementView?.blocked) {
       openAccessDialog(entitlementView.blockedReason ?? "guest_used");
       return;
     }
 
-    const chosenQuestion = (isEnglish && topic.defaultQuestionEn) ? topic.defaultQuestionEn : topic.defaultQuestion;
+    const defaultQ = (isEnglish && topic.defaultQuestionEn) ? topic.defaultQuestionEn : topic.defaultQuestion;
+    const chosenQuestion = userQuestion?.trim() || defaultQ;
     const quickSpread = SPREADS.find((s) => s.id === "quick") || selectedSpread;
     setSelectedSpread(quickSpread);
     setSelectedCategory(topic.category);
@@ -1030,6 +1035,16 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     setRevealedOrders([]);
     setReadingResult(null);
     setErrorMsg(null);
+    setNickname("");
+    setQuestion("");
+    setSituation("");
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("seertarot_nickname");
+      } catch {
+        // ignore
+      }
+    }
   };
 
   // P1-U1: ย้อนกลับทีละขั้นจากขั้นสับไพ่/เลือกไพ่ (เดิมทางออกเดียวคือ "เริ่มดูดวงใหม่" ที่ล้างทุกอย่าง)
@@ -1375,6 +1390,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       drawnCards={drawnCards}
                       proof={proof}
                       errorMsg={errorMsg}
+                      question={question}
+                      nickname={nickname}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
                           setErrorMsg(null);
@@ -1393,6 +1410,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       drawnCards={drawnCards}
                       proof={proof}
                       errorMsg={errorMsg}
+                      question={question}
+                      nickname={nickname}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
                           setErrorMsg(null);

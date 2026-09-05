@@ -160,11 +160,9 @@ export const QUICK_TOPICS: QuickTopic[] = [
   },
 ];
 
-const NICKNAME_STORAGE_KEY = "seertarot_nickname";
-
 export interface QuickFortunePickerProps {
   currentNickname: string;
-  onSelectTopic: (topic: QuickTopic, nickname: string) => void;
+  onSelectTopic: (topic: QuickTopic, nickname: string, question?: string) => void;
   isLoading?: boolean;
 }
 
@@ -175,53 +173,24 @@ export function QuickFortunePicker({
 }: QuickFortunePickerProps) {
   const { isEnglish } = useLocale();
   const [selectedPendingTopic, setSelectedPendingTopic] = useState<QuickTopic | null>(null);
-  const [inputNickname, setInputNickname] = useState("");
+  const [inputNickname, setInputNickname] = useState(currentNickname || "");
+  const [inputQuestion, setInputQuestion] = useState("");
   const [showNicknameModal, setShowNicknameModal] = useState(false);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
 
-  // ดึงชื่อเล่นจาก localStorage หรือ prop เมื่อโหลดครั้งแรก
+  // ซิงก์ชื่อเล่นกับ currentNickname เมื่อรีเซ็ตหรือเปลี่ยนค่า
   useEffect(() => {
-    if (currentNickname) {
-      setInputNickname(currentNickname);
-      return;
-    }
-    try {
-      const saved = localStorage.getItem(NICKNAME_STORAGE_KEY);
-      if (saved && saved.trim()) {
-        setInputNickname(saved.trim());
-      }
-    } catch {
-      // ignore storage errors
-    }
+    setInputNickname(currentNickname || "");
   }, [currentNickname]);
 
   const handleCardClick = (topic: QuickTopic) => {
     if (isLoading) return;
 
-    // ตรวจสอบชื่อเล่นที่เคยจำไว้
-    let effectiveNickname = inputNickname.trim();
-    if (!effectiveNickname) {
-      try {
-        const saved = localStorage.getItem(NICKNAME_STORAGE_KEY);
-        if (saved && saved.trim()) {
-          effectiveNickname = saved.trim();
-          setInputNickname(effectiveNickname);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    // ถ้ามีชื่อเล่นอยู่แล้ว เข้าสู่การทำนายทันทีในคลิกเดียว
-    if (effectiveNickname) {
-      onSelectTopic(topic, effectiveNickname);
-      return;
-    }
-
-    // ถ้ายังไม่มีชื่อเล่น แสดงกล่องถามชื่อเล่นแบบรวดเร็ว
+    // ต้องแสดงโมดัลถามชื่อและคำถามทุกครั้งเมื่อเริ่มทำนายใหม่ ไม่ข้ามขั้นตอน
     setSelectedPendingTopic(topic);
-    setShowNicknameModal(true);
+    setInputQuestion("");
     setNicknameError(null);
+    setShowNicknameModal(true);
   };
 
   const handleConfirmNickname = (e?: React.FormEvent) => {
@@ -232,15 +201,13 @@ export function QuickFortunePicker({
       return;
     }
 
-    try {
-      localStorage.setItem(NICKNAME_STORAGE_KEY, trimmed);
-    } catch {
-      // ignore
-    }
-
     setShowNicknameModal(false);
     if (selectedPendingTopic) {
-      onSelectTopic(selectedPendingTopic, trimmed);
+      const fallbackQ = isEnglish
+        ? (selectedPendingTopic.defaultQuestionEn || selectedPendingTopic.defaultQuestion)
+        : selectedPendingTopic.defaultQuestion;
+      const effectiveQuestion = inputQuestion.trim() || fallbackQ;
+      onSelectTopic(selectedPendingTopic, trimmed, effectiveQuestion);
       setSelectedPendingTopic(null);
     }
   };
@@ -399,16 +366,24 @@ export function QuickFortunePicker({
       </div>
 
 
-      {/* โมดัลถามชื่อเล่นครั้งแรก (Fast & Sacred Popover) */}
+      {/* โมดัลระบุชื่อเล่นและคำถามสำหรับรอบใหม่ (Fast & Sacred Sacred Popover) */}
       {showNicknameModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#171512]/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-sm rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-[var(--shadow-overlay)] space-y-4 text-left">
+          <div className="w-full max-w-md rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-[var(--shadow-overlay)] space-y-4 text-left">
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] flex items-center gap-1.5">
-                  
-                  <span>{isEnglish ? "Your Name or Pseudonym" : "นามสมมุติของคุณ"}</span>
-                </h3>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {selectedPendingTopic && (
+                    <span className="text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#F6EFE0] text-[#8F5C1A] border-[#E2D4BE]">
+                      {isEnglish
+                        ? (selectedPendingTopic.titleEn || selectedPendingTopic.title)
+                        : selectedPendingTopic.title}
+                    </span>
+                  )}
+                  <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F]">
+                    {isEnglish ? "Your Name & Question" : "ชื่อเล่นและคำถามของคุณ"}
+                  </h3>
+                </div>
                 <button
                   type="button"
                   onClick={() => {
@@ -416,22 +391,31 @@ export function QuickFortunePicker({
                     setSelectedPendingTopic(null);
                   }}
                   className="text-xs text-[#635B4E] hover:text-[#29261F] p-1 rounded-md hover:bg-[#F0ECE1] transition-colors"
+                  aria-label={isEnglish ? "Close" : "ปิด"}
                 >
                   ✕
                 </button>
               </div>
               <p className="text-xs font-serif-th text-[#635B4E] leading-relaxed">
                 {isEnglish
-                  ? "Please share a name to connect with the cards (saved locally for future sessions)"
-                  : "ขอทราบชื่อเล่นเพื่อเชื่อมจิตกับไพ่ (ระบบจะจำไว้ ไม่ต้องกรอกซ้ำในครั้งถัดไป)"}
+                  ? "Please share your name and what you wish to ask so the AI Oracle can connect with your energy and answer directly."
+                  : "ระบุชื่อเล่นและคำถามที่คุณอยากรู้ เพื่อให้แม่หมอ AI เชื่อมจิตและทำนายคำตอบได้ตรงจุดที่สุด"}
               </p>
             </div>
 
-            <form onSubmit={handleConfirmNickname} className="space-y-4">
+            <form onSubmit={handleConfirmNickname} className="space-y-3.5">
+              {/* Field 1: ชื่อเล่น */}
               <div>
+                <label
+                  htmlFor="quick-fortune-nickname"
+                  className="text-xs font-serif-th font-semibold text-[#29261F] block mb-1"
+                >
+                  {isEnglish ? "Your Name or Nickname *" : "ชื่อเล่นของคุณ *"}
+                </label>
                 <input
+                  id="quick-fortune-nickname"
                   type="text"
-                  autoFocus
+                  autoFocus={!inputNickname}
                   value={inputNickname}
                   onChange={(e) => {
                     setInputNickname(e.target.value);
@@ -439,33 +423,83 @@ export function QuickFortunePicker({
                   }}
                   placeholder={isEnglish ? "e.g., Alex, Jordan, Taylor..." : "เช่น บี, น้ำ, เจมส์, วิน..."}
                   maxLength={40}
-                  className="w-full px-3.5 py-2.5 text-sm font-serif-th rounded-xl border border-[#D5CEC2] focus:border-[#A58A5C] focus:outline-none focus:ring-1 focus:ring-[#A58A5C] bg-[#FAF7F2] text-[#29261F]"
+                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-[#D5CEC2] focus:border-[#A58A5C] focus:outline-none focus:ring-1 focus:ring-[#A58A5C] bg-[#FAF7F2] text-[#29261F]"
                 />
                 {nicknameError && (
-                  <p className="text-[11px] font-serif-th text-[#A6392C] mt-1.5">
+                  <p className="text-[11px] font-serif-th text-[#A6392C] mt-1">
                     {nicknameError}
                   </p>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-1">
+              {/* Field 2: คำถามของคุณ */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label
+                    htmlFor="quick-fortune-question"
+                    className="text-xs font-serif-th font-semibold text-[#29261F]"
+                  >
+                    {isEnglish ? "Your Question" : "คำถามที่คุณอยากรู้"}
+                  </label>
+                  {selectedPendingTopic && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInputQuestion(
+                          isEnglish
+                            ? (selectedPendingTopic.defaultQuestionEn || selectedPendingTopic.defaultQuestion)
+                            : selectedPendingTopic.defaultQuestion
+                        );
+                      }}
+                      className="text-[11px] font-serif-th text-[#8F5C1A] hover:text-[#74490F] hover:underline cursor-pointer"
+                    >
+                      {isEnglish ? "Use suggested question" : "ใช้คำถามแนะนำ"}
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  id="quick-fortune-question"
+                  rows={3}
+                  value={inputQuestion}
+                  onChange={(e) => setInputQuestion(e.target.value)}
+                  placeholder={
+                    selectedPendingTopic
+                      ? (isEnglish
+                          ? (selectedPendingTopic.defaultQuestionEn || selectedPendingTopic.defaultQuestion)
+                          : selectedPendingTopic.defaultQuestion)
+                      : (isEnglish ? "Type your question here..." : "พิมพ์คำถามของคุณที่นี่...")
+                  }
+                  maxLength={300}
+                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-[#D5CEC2] focus:border-[#A58A5C] focus:outline-none focus:ring-1 focus:ring-[#A58A5C] bg-[#FAF7F2] text-[#29261F] resize-none"
+                />
+                <div className="flex items-center justify-between text-[11px] font-serif-th text-[#635B4E] mt-1">
+                  <span>
+                    {isEnglish
+                      ? "Leave blank to use the suggested question"
+                      : "หากเว้นว่าง ระบบจะใช้คำถามแนะนำของหัวข้อนี้"}
+                  </span>
+                  <span className="font-mono text-[10px]">{inputQuestion.length}/300</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#D5CEC2]/40">
                 <button
                   type="button"
                   onClick={() => {
                     setShowNicknameModal(false);
                     setSelectedPendingTopic(null);
                   }}
-                  className="px-3.5 py-2 text-xs font-serif-th text-[#635B4E] hover:text-[#29261F] transition-colors"
+                  className="px-3.5 py-2 text-xs font-serif-th text-[#635B4E] hover:text-[#29261F] transition-colors cursor-pointer"
                 >
                   {isEnglish ? "Cancel" : "ยกเลิก"}
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !inputNickname.trim()}
-                  className="px-4 py-2 text-xs font-serif-th font-semibold rounded-xl bg-[#29261F] text-[#FAF7F2] hover:bg-[#3D372E] border border-[#8F5C1A]/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs"
+                  className="px-5 py-2 text-xs font-serif-th font-semibold rounded-xl bg-[#29261F] text-[#FAF7F2] hover:bg-[#3D372E] border border-[#8F5C1A]/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <span>{isEnglish ? "Begin Reading Now" : "เริ่มทำนายทันที"}</span>
-                  
+                  <span aria-hidden="true">➔</span>
                 </button>
               </div>
             </form>
