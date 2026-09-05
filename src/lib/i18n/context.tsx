@@ -50,10 +50,10 @@ function getInitialClientLocale(initialLocale?: Locale): Locale {
       return saved;
     }
 
-    // 4. Browser language fallback
-    if (typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("en")) {
-      return "en";
-    }
+    // หมายเหตุ: ห้ามเดาภาษาจาก navigator.language แล้วสลับเป็นอังกฤษเองเด็ดขาด (INC-00xx)
+    // ผู้ใช้ไทยจำนวนมากตั้งค่าเบราว์เซอร์/ระบบปฏิบัติการเป็น "en-US" อยู่แล้วทั้งที่อ่านไทย
+    // การ fallback ตาม navigator.language ทำให้เว็บสลับเป็นอังกฤษเองโดยผู้ใช้ไม่ได้กด
+    // ค่าเริ่มต้นต้องเป็นภาษาไทยเสมอ จนกว่าผู้ใช้จะเลือกเปลี่ยนเองอย่างชัดเจน (query/cookie/localStorage เท่านั้น)
   } catch {
     // Fallback on any error (e.g. storage disabled in strict private mode)
   }
