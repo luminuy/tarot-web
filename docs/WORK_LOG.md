@@ -35,6 +35,28 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+### 🗓️ 2026-09-06: ตรวจรับงาน SEO คลื่น 2–4 และเขียนแผนส่งต่อปิดหนี้ที่เหลือ (โดย Claude)
+
+> **ขอบเขต**: ตรวจรับอย่างเดียว + เขียนแผน — **ไม่ได้แก้โค้ดใด ๆ**
+
+**ผลตรวจรับคลื่น 2–4 (PR #284) — ผ่านเกณฑ์หลักทั้งหมด**
+- ยิง `curl` โดเมนจริง: `/cards/{major,minor,wands,cups,swords,pentacles,all,birth-card}` + ผังใหม่ 5 ผัง + `/spreads/topic/love` ตอบ **200 ครบทุกตัว** และ `<title>` มีคำว่า "ยิปซี"
+- `/cards/major-00` ยังตอบ 200 — ไม่ชน route เดิม · canonical ทุกหน้าชี้ตัวเอง · sitemap 151 URL
+- สิทธิ์ผังใหม่ตรงตามข้อเสนอในแผน: `family`/`luck`/`study` ฟรี (`credits: 0` · `guestAllowed: true` · อยู่ใน `STANDARD_SPREAD_IDS`) · `love-six`/`monthly-ten` ล็อก
+- `grep "20 ผัง|20 Spreads|20 แบบ" src/` = 0 จุด · [`birth-card.ts`](../src/lib/tarot/birth-card.ts) คืน `undefined` เมื่อหาไพ่ไม่เจอ (กฎเหล็กข้อ 14 ผ่าน)
+- `npm run repo:verify` ผ่าน **32/32 ด่าน**
+
+**หนี้ที่พบและยังไม่ได้แก้ (เขียนเป็นแผนส่งต่อ ไม่ลงมือเองเพื่อไม่ขยายขอบเขต — หลักการข้อ 0.2 ข้อ 7)**
+1. **เอกสารแม่บทยังเป็นเลขเก่า 20 จุดใน 8 ไฟล์** — `CLAUDE.md`, `README.md`, `INDEX.md`, `ARCHITECTURE.md`, `AI_COLLABORATION_GUIDELINES.md`, `LOCAL_SETUP.md`, `WORK_LOG.md` ยังเขียน "24 ด่าน / 20 ผัง / 95 ตำแหน่ง" ทั้งที่ของจริงคือ **32 ด่าน · 25 ผัง · 124 ตำแหน่ง** — AI ตัวถัดไปที่อ่าน md ก่อนทำงานจะได้ตัวเลขผิดทุกครั้ง
+2. **บทนำ 6 หน้าหมวดไพ่ต่ำกว่าเกณฑ์ทั้งหมด** — วัดเฉพาะ `introContentTh.paragraphs` ได้ 209–247 คำ ขณะที่เกณฑ์แผนคลื่น 2 คือ ≥ 300 คำ · สาเหตุรากคือด่าน [`test-seo-wave2.ts:53`](../scripts/qa/test-seo-wave2.ts) ตั้ง threshold ไว้ `>= 700 ตัวอักษร` ซึ่ง ≈ 200 คำเท่านั้น จึงเขียวทั้งที่ยังไม่ถึงเกณฑ์
+3. **`CHECKS.length` = 33 แต่ตัวรันพิมพ์ 32 ด่าน** — ยังหาสาเหตุไม่ได้ ระบุไว้ในแผนให้ทีมถัดไปขุด
+4. **หนี้ตกค้างจากคลื่น 3**: ยังไม่มีใครเดินพิธีกรรมครบขั้นบนผังใหม่ 5 ผัง และยังไม่ได้จับภาพมือถือ 375px/320px ตามเกณฑ์ผ่านของคลื่น 3
+5. **งาน 4.6 (วัดผล GSC)** เริ่มได้ตั้งแต่ 2026-09-13 (7 วันหลัง deploy)
+
+**เอกสารที่จัดทำ**
+- [`docs/plans/HANDOFF_DOCS_TRUTH_2026-09-06.md`](plans/HANDOFF_DOCS_TRUTH_2026-09-06.md) — แผนส่งต่อ 4 งาน 3 PR พร้อม before/after ทุกบรรทัด · **ข้อเสนอหลักคือสร้างด่าน `test-docs-numbers.ts` ที่ import เลขจากของจริง (`CHECKS.length`, `SPREADS.length`) แทนการไล่แก้เอกสารด้วยมือ** เพราะเลขนี้เพี้ยนมาแล้ว 6 รอบใน 6 วัน (21→23→24→27→29→32) ตรงตามหลักการข้อ 0.8 "กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน"
+- ปิดสถานะ [`HANDOFF_SEO_WAVE2-4_2026-09-05.md`](plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md) ว่าลงมือแล้วใน PR #284 พร้อมชี้ต่อไปยังแผนใหม่
+
 ### 🗓️ 2026-09-06: ยกระดับความพรีเมียม "สรุปตรงใจ" สู่การ์ดทองคำศักดิ์สิทธิ์ และแก้ปัญหาปุ่มแชทบนมือถือ (โดย Antigravity AI)
 
 > **ขอบเขตงานตามความต้องการของผู้ใช้**:
