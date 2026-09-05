@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { SPREADS } from "@/data/spreads";
 import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
@@ -68,18 +67,6 @@ export default function SpreadsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        {/* Top Breadcrumb */}
-        <nav
-          aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
-        >
-          <Link href="/" className="hover:text-[#A58A5C] transition-colors">
-            หน้าแรก
-          </Link>
-          <span>/</span>
-          <span className="text-[#29261F] truncate font-bold">คลังผังพยากรณ์</span>
-        </nav>
-
         {/* Hero Header */}
         <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
           <div>

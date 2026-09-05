@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
 import { SITE_ORIGIN } from "@/lib/config/site";
@@ -14,18 +13,6 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <main className="min-h-screen bg-[#F3F0EA] text-[#29261F]">
-      <div className="max-w-3xl mx-auto px-6 pt-6 -mb-6">
-        <nav
-          aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
-        >
-          <Link href="/" className="hover:text-[#A58A5C] transition-colors">
-            หน้าแรก
-          </Link>
-          <span>/</span>
-          <span className="text-[#29261F] truncate font-bold">นโยบายความเป็นส่วนตัว</span>
-        </nav>
-      </div>
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         {/* Header */}
         <div className="text-center space-y-3 pb-6 border-b border-[#D5CEC2]/40">

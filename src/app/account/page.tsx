@@ -16,21 +16,6 @@ export default function AccountPage() {
   return (
     <main className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans selection:bg-[#A58A5C]/20 selection:text-[#29261F]">
       <div className="max-w-3xl mx-auto space-y-6">
-        {/* Top Breadcrumb */}
-        <nav
-          aria-label="Breadcrumb"
-          className="flex items-center justify-between border-b border-[#D5CEC2]/40 pb-4 text-xs font-serif-th text-[#635B4E]"
-        >
-          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap">
-            <Link href="/" className="hover:text-[#A58A5C] transition-colors">
-              หน้าแรก
-            </Link>
-            <span>/</span>
-            <span className="text-[#29261F] truncate font-bold">บัญชีและประวัติ</span>
-          </div>
-          <span className="text-xs font-mono text-[#635B4E] shrink-0">User Sanctuary &amp; Privacy</span>
-        </nav>
-
         <div className="text-center space-y-3 sm:space-y-4 py-4 sm:py-6">
           {/* ต้องมี wrapper ระดับ block คั่น — `.font-mystic-gold` เป็น display:inline-block
               ถ้าวางชิดกับ inline-flex หัวข้อจะไหลไปอยู่บรรทัดเดียวกับป้าย */}
