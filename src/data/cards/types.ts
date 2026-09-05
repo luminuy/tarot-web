@@ -37,12 +37,18 @@ export interface TarotCard {
   keywordsEn?: { upright: string[]; reversed: string[] };
   /** ความหมายแยกตามหมวดคำถาม — ต้องมีครบทั้ง 5 หมวด */
   meanings: Record<Category, Interpretation>;
+  /** ความหมาย 5 หมวดภาษาอังกฤษ (Authentic English 5 Dimensions) */
+  meaningsEn?: Record<Category, Interpretation>;
   /** ธาตุ: ไฟ / น้ำ / ลม / ดิน */
   element: "ไฟ" | "น้ำ" | "ลม" | "ดิน";
   /** ความเชื่อมโยงทางโหราศาสตร์ เช่น "ดาวยูเรนัส", "ราศีสิงห์" */
   astrology: string;
+  /** โหราศาสตร์ภาษาอังกฤษสากล เช่น "Uranus / Element of Air" */
+  astrologyEn?: string;
   /** ความหมายเชิงตัวเลข 1-2 ประโยค */
   numerology: string;
+  /** ความหมายเชิงตัวเลขภาษาอังกฤษสากล */
+  numerologyEn?: string;
   /** แนวโน้มคำตอบสำหรับ spread Yes/No */
   yesNo: YesNo;
   /** ชื่อไฟล์ภาพใน /public/cards เช่น "major-00.jpg" */
