@@ -257,16 +257,19 @@ export function buildReadingMessage(ctx: ReadingContext): string {
       const keywords = d.isReversed
         ? (kwEn?.reversed || card.keywords.reversed)
         : (kwEn?.upright || card.keywords.upright);
+      const meaningEn = card.meaningsEn?.[category] || card.meaningsEn?.general;
       const meaning = d.isReversed
-        ? card.meanings[category]?.reversed || card.meanings.general.reversed
-        : card.meanings[category]?.upright || card.meanings.general.upright;
+        ? (meaningEn?.reversed || card.meanings[category]?.reversed || card.meanings.general.reversed)
+        : (meaningEn?.upright || card.meanings[category]?.upright || card.meanings.general.upright);
       const elemMap: Record<string, string> = { ไฟ: "Fire", น้ำ: "Water", ลม: "Air", ดิน: "Earth" };
       const cardElement = elemMap[card.element] || card.element;
+      const astro = card.astrologyEn || card.astrology;
+      const numero = card.numerologyEn || card.numerology;
       const loreStr = formatCardLoreForPrompt(card.id);
 
       return `• Position ${position.index}: "${posName}" (Signifies: ${posMeaning})
   Drawn Card: ${card.nameEn} — ${orientation}
-  Element: ${cardElement} | Astrology: ${card.astrology} | Numerology: ${card.numerology}
+  Element: ${cardElement} | Astrology: ${astro} | Numerology: ${numero}
   Core Archetypal Energies: ${keywords.join(" · ")}
   Thematic Meaning in ${category}: ${meaning}
 ${loreStr}`;

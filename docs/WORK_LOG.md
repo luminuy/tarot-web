@@ -36,6 +36,31 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: คัมภีร์ความหมายไพ่ 78 ใบ 5 มิติ สองภาษาฉบับสมบูรณ์ (Complete 78-Card English Interpretations & Metadata) — โดย Antigravity AI
+
+- **ยกระดับคลังความรู้สารานุกรมไพ่ 78 ใบสู่มาตรฐานสากลระดับโลก (World-Class 1909 Rider-Waite-Smith Lineage & Jungian Psychology)**:
+  - **โครงสร้างข้อมูลและการจัดเก็บความหมายภาษาอังกฤษ (`src/data/cards/meanings-en/`)**:
+    - สร้างโมดูลความหมายภาษาอังกฤษแยกชุดอย่างเป็นระบบ:
+      - `types.ts`: สัญญากลาง `CardMeaningEn` กำหนดความหมาย 5 มิติ (`general`, `love`, `work`, `money`, `self`) ทั้งหัวตั้ง (Upright) และหัวกลับ (Reversed) พร้อมการระบุโหราศาสตร์ Golden Dawn (`astrology`) และรหัสตัวเลขเชิงจิตวิทยา (`numerology`)
+      - `major.ts`: ไพ่ชุดใหญ่ Major Arcana ครบ 22 ใบ (`major-00` ถึง `major-21`) ความหมายลึกซึ้งระดับ Jungian Archetypes
+      - `wands.ts`: ไพ่ชุดไม้เท้า Minor Arcana Suit of Wands ครบ 14 ใบ (`wands-01` ถึง `wands-14`) ธาตุไฟ เจตจำนงและการงาน
+      - `cups.ts`: ไพ่ชุดถ้วย Minor Arcana Suit of Cups ครบ 14 ใบ (`cups-01` ถึง `cups-14`) ธาตุน้ำ อารมณ์ความรู้สึกและความผูกพัน
+      - `swords.ts`: ไพ่ชุดดาบ Minor Arcana Suit of Swords ครบ 14 ใบ (`swords-01` ถึง `swords-14`) ธาตุลม สติปัญญาและการฝ่าฟันอุปสรรค
+      - `pentacles.ts`: ไพ่ชุดเหรียญ Minor Arcana Suit of Pentacles ครบ 14 ใบ (`pentacles-01` ถึง `pentacles-14`) ธาตุดิน ความมั่นคง การเงิน และกายภาพ
+      - `index.ts`: รวมสารานุกรมเป็น `CARD_MEANINGS_EN: Record<string, CardMeaningEn>`
+  - **การผสานเข้ากับสารานุกรมแกนกลาง (`src/data/cards/types.ts` & `src/data/cards/index.ts`)**:
+    - เพิ่ม `meaningsEn?: Record<Category, Interpretation>`, `astrologyEn?: string`, `numerologyEn?: string` ลงใน `TarotCard`
+    - รวม `CARD_MEANINGS_EN` และ `CARD_KEYWORDS_EN` เข้ากับ `DECK` โดยตรง เพื่อให้ทุกฟังก์ชัน (`cardById`, `cardByIndex`) ส่งต่อความหมายสองภาษาอัตโนมัติแบบ Zero Overhead
+  - **การแสดงผลในหน้าเจาะลึกไพ่รายใบ (`src/components/encyclopedia/CardDetailView.tsx`)**:
+    - แสดงผลความหมาย 5 มิติทั้งหัวตั้ง/หัวกลับ เป็นภาษาอังกฤษอย่างสมบูรณ์แบบเมื่อเปิดโหมดภาษาอังกฤษ (`isEnglish`)
+    - แสดงป้ายโหราศาสตร์ภาษาอังกฤษสากล (`card.astrologyEn`) และคำอธิบายรหัสตัวเลข (`card.numerologyEn`)
+  - **การส่งเสริมคุณภาพคำทำนายของ AI (`src/lib/ai/prompt.ts`)**:
+    - ปรับปรุงการสร้าง System Prompt สำหรับโหมดภาษาอังกฤษ ให้ดึง `card.meaningsEn` แทนคำแปลภาษาไทยเดิม พร้อมระบุ `astrologyEn` และ `numerologyEn` ทำให้คำพยากรณ์ภาษาอังกฤษมีความสละสลวย ถูกต้องตามศาสตร์ลี้ลับดั้งเดิม และมีคุณภาพสูงสุด
+  - **การประกันคุณภาพและการทดสอบอัตโนมัติ (QA & Verification)**:
+    - สร้าง `scripts/qa/test-card-meanings-en.ts` ตรวจสอบความสมบูรณ์ของไพ่ทั้ง 78 ใบ ยืนยันว่ามีข้อความความหมายครบ 5 มิติ ทั้งหัวตั้ง/หัวกลับ รวมถึงโหราศาสตร์และรหัสตัวเลขครบ 100%
+    - ผ่านการตรวจสอบ TypeScript `npm run typecheck` 0 errors
+    - ผ่านการตรวจสอบระบบครบ 27 ด่าน `npm run repo:verify` 100%
+
 ### 🗓️ 2026-09-05: พัฒนาระบบสองภาษาแบบหมดจด 100% (Auth, Entitlement, Account, Modals, History, Deck Rituals) — โดย Antigravity AI
 
 - **ตรวจทานและแปลระบบสองภาษาอย่างละเอียดรอบคอบแบบ Native American English ทั่วทั้ง User-Facing Components**:

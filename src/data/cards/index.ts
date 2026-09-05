@@ -6,6 +6,9 @@ import { SWORDS } from "./swords";
 import type { TarotCard } from "./types";
 import { WANDS } from "./wands";
 
+import { CARD_KEYWORDS_EN } from "./keywords-en";
+import { CARD_MEANINGS_EN } from "./meanings-en";
+
 /**
  * สำรับไพ่ 78 ใบ
  *
@@ -20,14 +23,26 @@ import { WANDS } from "./wands";
  *   50-63 Swords
  *   64-77 Pentacles
  */
-export const DECK: readonly TarotCard[] = Object.freeze([
-  ...MAJOR_A,
-  ...MAJOR_B,
-  ...WANDS,
-  ...CUPS,
-  ...SWORDS,
-  ...PENTACLES,
-]);
+export const DECK: readonly TarotCard[] = Object.freeze(
+  [
+    ...MAJOR_A,
+    ...MAJOR_B,
+    ...WANDS,
+    ...CUPS,
+    ...SWORDS,
+    ...PENTACLES,
+  ].map((card) => {
+    const enData = CARD_MEANINGS_EN[card.id];
+    const enKeywords = CARD_KEYWORDS_EN[card.id];
+    return {
+      ...card,
+      keywordsEn: enKeywords || card.keywordsEn,
+      meaningsEn: enData?.meanings,
+      astrologyEn: enData?.astrology,
+      numerologyEn: enData?.numerology,
+    };
+  })
+);
 
 export const DECK_SIZE = DECK.length;
 

@@ -175,7 +175,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             </span>
             {card.astrology && (
               <span className="px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F]">
-                ✦ {card.astrology}
+                ✦ {isEnglish && card.astrologyEn ? card.astrologyEn : card.astrology}
               </span>
             )}
             {card.yesNo && (
@@ -207,7 +207,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] leading-tight [text-wrap:balance]">
               {isEnglish ? card.nameEn : card.nameTh}
             </h1>
-            <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed pt-1 font-serif-th [text-wrap:pretty]">{card.numerology}</p>
+            <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed pt-1 font-serif-th [text-wrap:pretty]">
+              {isEnglish && card.numerologyEn ? card.numerologyEn : card.numerology}
+            </p>
           </div>
 
           {/* Keywords Ribbon */}
@@ -245,7 +247,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                 className="space-y-3"
               >
                 {categories.map((cat) => {
-                  const interp = card.meanings[cat.id];
+                  const interp = isEnglish && card.meaningsEn ? card.meaningsEn[cat.id] : card.meanings[cat.id];
                   const text = isUpright ? interp?.upright : interp?.reversed;
 
                   return (
