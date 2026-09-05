@@ -110,6 +110,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔎 corpus ค้นหาเชิงความหมาย (ไพ่ 78 + บทความครบ · metadata Vectorize ถูกฟอร์แมต)", cmd: TSX, args: ["scripts/qa/test-search-corpus.ts"] },
   { label: "📊 คุณภาพคำอ่าน AI & Telemetry (Consistency Checker / Karmic Bridge / Golden Set / reading_quality)", cmd: TSX, args: ["scripts/qa/test-reading-quality.ts"] },
   { label: "📈 ระบบวัดผลและติดตามเหตุการณ์ (GA4 / Meta Pixel / Consent Mode v2 / Event Contract)", cmd: TSX, args: ["scripts/qa/test-analytics-integrity.ts"] },
+  { label: "⚡ ระบบทำนายด่วน (Quick Fortune 1 ใบ / 4 หัวข้อยอดนิยม / Provably Fair)", cmd: TSX, args: ["scripts/qa/test-quick-fortune.ts"] },
 ];
 
 /**
