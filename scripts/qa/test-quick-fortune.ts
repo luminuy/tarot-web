@@ -55,7 +55,14 @@ if (quickSpread) {
   check("Spread 'quick' เป็นสิทธิ์ฟรี (credits: 0)", quickSpread.credits === 0);
   check("Spread 'quick' อนุญาตให้ผู้เยี่ยมชมใช้งานได้ (guestAllowed: true)", quickSpread.guestAllowed === true);
   check("Spread 'quick' อยู่ใน STANDARD_SPREAD_IDS", isStandardSpread("quick") && STANDARD_SPREAD_IDS.has("quick"));
+  check("Spread 'quick' กำหนด resultStyle เป็น 'quick'", quickSpread.resultStyle === "quick");
 }
+
+// ตรวจสอบ Regression: ผัง 'daily' และผังอื่นต้องไม่ถูกตั้ง resultStyle เป็น 'quick'
+const dailySpread = SPREADS.find((s) => s.id === "daily");
+check("Spread 'daily' ไม่ถูกตั้ง resultStyle เป็น 'quick' (คงค่าเดิม)", dailySpread?.resultStyle !== "quick");
+const otherQuickSpreads = SPREADS.filter((s) => s.id !== "quick" && s.resultStyle === "quick");
+check("ไม่มีผังอื่นนอกจาก 'quick' ที่ตั้ง resultStyle เป็น 'quick'", otherQuickSpreads.length === 0);
 
 // 3. ตรวจสอบ Server Draw Logic เมื่อไม่ส่ง pickedIndices
 const commitment = createCommitment();

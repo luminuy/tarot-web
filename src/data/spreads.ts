@@ -31,6 +31,8 @@ export interface Spread {
   guestAllowed: boolean;
   /** โหมดตอบ ใช่/ไม่ใช่ — จะให้ AI สรุปคำตอบชัดเจนเพิ่ม */
   yesNoMode?: boolean;
+  /** ใช้กับ UI ผลลัพธ์แบบไหน — ไม่ระบุ = "full" (StreamReader เดิม) */
+  resultStyle?: "quick" | "full";
 }
 
 export const SPREADS: Spread[] = [
@@ -56,6 +58,7 @@ export const SPREADS: Spread[] = [
     defaultCategory: "general",
     credits: 0,
     guestAllowed: true,
+    resultStyle: "quick",
     positions: [{ index: 0, nameTh: "คำตอบต่อเรื่องนี้", meaning: "คำตอบตรงต่อคำถามที่ผู้ถามตั้งจิตถาม", x: 0.5, y: 0.5 }],
   },
   {

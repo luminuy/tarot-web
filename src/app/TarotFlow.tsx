@@ -49,6 +49,10 @@ const SpreadBoard = dynamic(() => import("@/components/spread/SpreadBoard").then
 const StreamReader = dynamic(() => import("@/components/reading/StreamReader").then((m) => m.StreamReader), {
   ssr: false,
 });
+const QuickChatResult = dynamic(
+  () => import("@/components/reading/QuickChatResult").then((m) => m.QuickChatResult),
+  { ssr: false }
+);
 const ShareModal = dynamic(() => import("@/components/reading/ShareModal").then((m) => m.ShareModal), { ssr: false });
 const ReadingHistoryModal = dynamic(
   () => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
@@ -1335,23 +1339,41 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   จอเล็กเรียงบนลงล่าง · จอ lg ขึ้นไปแบ่ง 3:1 */}
               <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 lg:grid-cols-4 lg:items-start">
                 <section aria-label="คำทำนายไพ่ทาโรต์" className="w-full lg:col-span-3">
-                  <StreamReader
-                    readingId={readingId}
-                    persona={selectedPersona}
-                    isStreaming={isStreaming}
-                    reading={readingResult}
-                    activeCardIndex={activeCardIndex}
-                    onSelectCardIndex={setActiveCardIndex}
-                    drawnCards={drawnCards}
-                    proof={proof}
-                    errorMsg={errorMsg}
-                    onRetry={() => {
-                      if (readingId && drawnCards.length > 0) {
-                        setErrorMsg(null);
-                        startAIStreaming(readingId, drawnCards);
-                      }
-                    }}
-                  />
+                  {selectedSpread.resultStyle === "quick" ? (
+                    <QuickChatResult
+                      readingId={readingId}
+                      persona={selectedPersona}
+                      isStreaming={isStreaming}
+                      reading={readingResult}
+                      drawnCards={drawnCards}
+                      proof={proof}
+                      errorMsg={errorMsg}
+                      onRetry={() => {
+                        if (readingId && drawnCards.length > 0) {
+                          setErrorMsg(null);
+                          startAIStreaming(readingId, drawnCards);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <StreamReader
+                      readingId={readingId}
+                      persona={selectedPersona}
+                      isStreaming={isStreaming}
+                      reading={readingResult}
+                      activeCardIndex={activeCardIndex}
+                      onSelectCardIndex={setActiveCardIndex}
+                      drawnCards={drawnCards}
+                      proof={proof}
+                      errorMsg={errorMsg}
+                      onRetry={() => {
+                        if (readingId && drawnCards.length > 0) {
+                          setErrorMsg(null);
+                          startAIStreaming(readingId, drawnCards);
+                        }
+                      }}
+                    />
+                  )}
                 </section>
 
                 {/* การ์ดเข้าห้องแชทกับแม่หมอ — จัดวางแนวตั้งให้พอดีคอลัมน์แคบ กดแล้วไปหน้าแชทเต็มจอ */}
