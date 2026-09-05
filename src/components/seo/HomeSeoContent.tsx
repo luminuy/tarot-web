@@ -14,10 +14,10 @@ const RITUAL_STEPS_TH = [
     stepNum: "๑",
     phase: "ปฐมบท",
     title: "เลือกผังพยากรณ์",
-    subtitle: "20 รูปแบบการจัดวางไพ่",
+    subtitle: "25 รูปแบบการจัดวางไพ่",
     cardImage: "major-00.jpg",
     cardName: "The Fool · ๐",
-    desc: "เลือกรูปแบบการวางไพ่จาก 20 ผังที่ตรงกับคำถาม เช่น ผัง 1 ใบรายวัน, ผัง 3 ใบอดีต-ปัจจุบัน-อนาคต หรือผังเซลติกครอส 10 ใบ",
+    desc: "เลือกรูปแบบการวางไพ่จาก 25 ผังที่ตรงกับคำถาม เช่น ผัง 1 ใบรายวัน, ผัง 3 ใบอดีต-ปัจจุบัน-อนาคต หรือผังเซลติกครอส 10 ใบ",
   },
   {
     stepNum: "๒",
@@ -490,7 +490,7 @@ export function HomeSeoContent() {
               prefetch={false}
               className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
             >
-              {isEnglish ? "Explore All Spreads (20) " : "ดูผังทั้งหมด (20 ผัง) "}
+              {isEnglish ? "Explore All Spreads (25) " : "ดูผังทั้งหมด (25 ผัง) "}
               <span className="group-hover:translate-x-0.5 transition-transform">→</span>
             </Link>
             <span className="text-[#D5CEC2]">|</span>

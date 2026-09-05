@@ -6,7 +6,7 @@ import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 export const metadata: Metadata = {
   title: "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909",
   description:
-    "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 20 แบบ และความหมายไพ่ 78 ใบ โดยแม่หมอแห่งวิหาร SeerTarot",
+    "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 25 แบบ และความหมายไพ่ 78 ใบ โดยแม่หมอแห่งวิหาร SeerTarot",
   keywords: [
     "ดูดวงไพ่ยิปซี",
     "บทความไพ่ทาโรต์",
@@ -35,7 +35,7 @@ export default function BlogPage() {
     "@context": "https://schema.org",
     "@type": "Blog",
     name: "คัมภีร์บทความ & คู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909 | SeerTarot Blog",
-    description: "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 20 แบบ และความหมายไพ่ 78 ใบ",
+    description: "รวมบทความดูดวงไพ่ยิปซี ความรัก การงาน การเงิน ผังพยากรณ์ 25 แบบ และความหมายไพ่ 78 ใบ",
     url: `${SITE_ORIGIN}/blog`,
     inLanguage: "th",
     publisher: {

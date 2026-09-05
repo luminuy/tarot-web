@@ -254,6 +254,46 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             );
           })}
         </div>
+
+        {/* Dedicated Category & Master Table Links for Search Crawlers and Fast Navigation */}
+        <div className="pt-2 flex items-center justify-between flex-wrap gap-2 text-xs font-serif-th border-t border-[#D5CEC2]/40">
+          <span className="text-[#635B4E]">
+            {isEnglish ? "Explore dedicated guides & master table:" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป:"}
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link href="/cards/major" className="text-[#8F5C1A] hover:underline font-bold">
+              {isEnglish ? "Major Arcana (22)" : "ไพ่ชุดใหญ่ (22 ใบ)"}
+            </Link>
+            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
+            <Link href="/cards/minor" className="text-[#8F5C1A] hover:underline font-bold">
+              {isEnglish ? "Minor Arcana (56)" : "ไพ่ชุดเล็ก (56 ใบ)"}
+            </Link>
+            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
+            <Link href="/cards/wands" className="text-[#8F5C1A] hover:underline">
+              {isEnglish ? "Wands" : "ไม้เท้า"}
+            </Link>
+            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
+            <Link href="/cards/cups" className="text-[#8F5C1A] hover:underline">
+              {isEnglish ? "Cups" : "ถ้วย"}
+            </Link>
+            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
+            <Link href="/cards/swords" className="text-[#8F5C1A] hover:underline">
+              {isEnglish ? "Swords" : "ดาบ"}
+            </Link>
+            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
+            <Link href="/cards/pentacles" className="text-[#8F5C1A] hover:underline">
+              {isEnglish ? "Pentacles" : "เหรียญ"}
+            </Link>
+            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
+            <Link href="/cards/all" className="text-[#8F5C1A] hover:underline font-bold">
+              {isEnglish ? "Summary Table (78)" : "ตารางสรุป 78 ใบ"}
+            </Link>
+            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
+            <Link href="/cards/birth-card" className="text-[#8F5C1A] hover:underline font-bold">
+              {isEnglish ? "Birth Card Tool" : "คำนวณไพ่ประจำตัว"}
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* 78 Cards Luxury Masterpiece Grid */}

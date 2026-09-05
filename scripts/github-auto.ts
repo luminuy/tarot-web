@@ -87,7 +87,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🛡️  ไม่มี Agent อื่นล็อคไฟล์ทับ", cmd: "npm", args: ["run", "agent:check"] },
   { label: "🔍 TypeScript Typecheck (0 errors)", cmd: "npm", args: ["run", "typecheck"] },
   { label: "🃏 ไพ่ 78 ใบครบถ้วนสมบูรณ์", cmd: TSX, args: ["scripts/verify-cards.ts"] },
-  { label: "📐 ผังพยากรณ์ 20 แบบพิกัดถูกต้อง", cmd: TSX, args: ["scripts/qa/test-spreads.ts"] },
+  { label: "📐 ผังพยากรณ์ 25 แบบพิกัดถูกต้อง", cmd: TSX, args: ["scripts/qa/test-spreads.ts"] },
   { label: "🚨 ตัวกรองคำถามอันตราย (Safety Guardrails)", cmd: TSX, args: ["scripts/qa/test-safety.ts"] },
   { label: "🎲 ระบบสับไพ่ Provably Fair", cmd: TSX, args: ["scripts/qa/test-shuffle.ts"] },
   { label: "🖼️  การอ้างอิง path ภาพไพ่ถูกต้อง", cmd: TSX, args: ["scripts/qa/test-image-paths.ts"] },
@@ -101,7 +101,7 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🎟 แกนสิทธิ์การเปิดไพ่ (โควตารายสัปดาห์ / โบนัส / กันหักซ้ำ)", cmd: TSX, args: ["scripts/qa/test-entitlement.ts"] },
   { label: "🎫 บัญชีปลดล็อกไม่จำกัด (tarot_tester + allowlist อีเมล · ไม่ให้สิทธิ์แอดมิน)", cmd: TSX, args: ["scripts/qa/test-tester.ts"] },
   { label: "🔐 เซสชันล็อกอิน (tokenVersion · host injection · rate limit ไม่ล็อกเจ้าของบัญชี)", cmd: TSX, args: ["scripts/qa/test-session-guard.ts"] },
-  { label: "💎 ระบบล็อกฟีเจอร์พรีเมียม (ผังใหญ่ 13 แบบ & ปรมาจารย์ลับ 2 ท่าน)", cmd: TSX, args: ["scripts/qa/test-feature-gating.ts"] },
+  { label: "💎 ระบบล็อกฟีเจอร์พรีเมียม (ผังใหญ่ 15 แบบ & ปรมาจารย์ลับ 2 ท่าน)", cmd: TSX, args: ["scripts/qa/test-feature-gating.ts"] },
   { label: "💬 ความยืดหยุ่นของประวัติแชทแม่หมอ (Zod BodySchema & Error Handling)", cmd: TSX, args: ["scripts/qa/test-chat-history-schema.ts"] },
   { label: "🃏 Zero Fabricated Cards Policy (ห้ามกุหรือมโนไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด · ให้โหลดใหม่)", cmd: TSX, args: ["scripts/qa/test-no-fake-card.ts"] },
   { label: "⚡ ระบบ AI สองประสาน (Multi-Provider Failover ด้วย Groq LPU & Gemini)", cmd: TSX, args: ["scripts/qa/test-groq-failover.ts"] },
@@ -113,6 +113,9 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "⚡ ระบบทำนายด่วน (Quick Fortune 1 ใบ / 4 หัวข้อยอดนิยม / Provably Fair)", cmd: TSX, args: ["scripts/qa/test-quick-fortune.ts"] },
   { label: "🖥️ วินัยการใช้ GPU layer ใน CSS (will-change เฉพาะสถานะ active/animating)", cmd: TSX, args: ["scripts/qa/test-will-change.ts"] },
   { label: "🔒 ความปลอดภัยของ Modal Lifecycle & Scroll Lock (deps ไร้ onClose · ป้องกันโฟกัสหลุด)", cmd: TSX, args: ["scripts/qa/test-modal-effect-deps.ts"] },
+  { label: "🃏 สารานุกรมไพ่ยิปซี 7 หน้าใหม่ (SEO Wave 2)", cmd: TSX, args: ["scripts/qa/test-seo-wave2.ts"] },
+  { label: "📐 ผังพยากรณ์ 25 แบบ & 6 หน้ารวมตามหมวดชีวิต (SEO Wave 3)", cmd: TSX, args: ["scripts/qa/test-seo-wave3.ts"] },
+  { label: "🔮 เครื่องมือไพ่ประจำตัว & ตารางตำแหน่ง & SEO แตกต่าง (SEO Wave 4)", cmd: TSX, args: ["scripts/qa/test-seo-wave4.ts"] },
 ];
 
 /**

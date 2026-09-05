@@ -24,6 +24,11 @@ import {
   WeeklySpreadArt,
   MonthlySpreadArt,
   ChakraSpreadArt,
+  LoveSixSpreadArt,
+  MonthlyTenSpreadArt,
+  FamilySpreadArt,
+  LuckSpreadArt,
+  StudySpreadArt,
   SparkleTabIcon,
   HeartTabIcon,
   PentacleTabIcon,
@@ -99,6 +104,16 @@ export const renderSpreadIllustration = (spreadId: string) => {
       return <CelticCrossSpreadArt className="w-full h-40" />;
     case "year-ahead":
       return <TwelveMonthsSpreadArt className="w-full h-40" />;
+    case "love-six":
+      return <LoveSixSpreadArt className="w-full h-40" />;
+    case "monthly-ten":
+      return <MonthlyTenSpreadArt className="w-full h-40" />;
+    case "family":
+      return <FamilySpreadArt className="w-full h-40" />;
+    case "luck":
+      return <LuckSpreadArt className="w-full h-40" />;
+    case "study":
+      return <StudySpreadArt className="w-full h-40" />;
     default:
       return <ThreeCardSpreadArt className="w-full h-40" />;
   }

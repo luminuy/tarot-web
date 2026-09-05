@@ -24,7 +24,7 @@ export const th: Dictionary = {
   nav: {
     brandTitle: "SeerTarot",
     brandTagline: "วิหารพยากรณ์ไพ่ทาโรต์ 1909 Rider-Waite",
-    spreads: "ผังการเปิดไพ่ (20 แบบ)",
+    spreads: "ผังการเปิดไพ่ (25 แบบ)",
     spreadsDesc: "เลือกผังพยากรณ์ที่ตรงกับคำถามในใจคุณ",
     cardMeanings: "ความหมายไพ่ (78 ใบ)",
     cardMeaningsDesc: "สารานุกรมภาพและสัญลักษณ์วิทยา 1909 ดั้งเดิม",
@@ -155,7 +155,7 @@ export const th: Dictionary = {
     drawThisCardInSpread: "ทดลองเปิดไพ่ในผังพยากรณ์",
   },
   spreads: {
-    catalogTitle: "ผังการเปิดไพ่ทาโรต์ (20 Spreads)",
+    catalogTitle: "ผังการเปิดไพ่ทาโรต์ (25 Spreads)",
     catalogSubtitle: "เลือกผังพยากรณ์ที่ตอบโจทย์มิติชีวิต ทั้งความรัก การงาน การตัดสินใจ และการตื่นรู้ภายใน",
     cardsUnit: "{count} ใบ",
     estimatedTime: "ประมาณ {time} นาที",

@@ -177,33 +177,44 @@ export const SpreadDetailClient: React.FC<Props> = ({
       </header>
 
       {/* Diagram + Positions */}
-      <section className="grid gap-8 sm:grid-cols-[minmax(0,240px)_1fr] sm:items-start">
-        <div>
-          <SpreadPositionMap positions={spread.positions} />
-          <p className="mt-2 text-center text-xs text-[#635B4E]">
-            {isEnglish ? `Layout order 1–${spread.positions.length}` : `ลำดับการวางไพ่ 1–${spread.positions.length}`}
-          </p>
-        </div>
-        <div>
-          <h2 className="font-serif-th text-xl font-bold">
-            {isEnglish ? "Positional Meanings & Archetypes" : "ความหมายแต่ละตำแหน่ง"}
-          </h2>
-          <ol className="mt-4 space-y-3">
-            {spread.positions.map((pos, idx) => (
-              <li
-                key={idx}
-                className="flex items-start gap-3 rounded-lg border border-[#D5CEC2] bg-white p-3"
-              >
-                <span className="flex-shrink-0 font-mono text-sm font-bold text-[#A58A5C]">
-                  #{idx + 1}
-                </span>
-                <div className="font-serif-th">
-                  <strong className="text-[#29261F]">{getPositionName(pos, isEnglish)}</strong>{" "}
-                  <span className="leading-relaxed text-[#635B4E]">— {getPositionMeaning(pos, isEnglish)}</span>
-                </div>
-              </li>
-            ))}
-          </ol>
+      <section className="space-y-6">
+        <div className="grid gap-8 sm:grid-cols-[minmax(0,260px)_1fr] sm:items-start">
+          <div>
+            <SpreadPositionMap positions={spread.positions} />
+            <p className="mt-2 text-center text-xs text-[#635B4E]">
+              {isEnglish ? `Layout order 1–${spread.positions.length}` : `ลำดับการวางไพ่ 1–${spread.positions.length}`}
+            </p>
+          </div>
+          <div>
+            <h2 className="font-serif-th text-xl font-bold text-[#29261F]">
+              {isEnglish ? "Positional Roles & Interpretations" : `ตำแหน่งไพ่ทั้ง ${spread.positions.length} ใบและความหมาย`}
+            </h2>
+            <p className="text-xs text-[#7A6F5D] mt-1 font-serif-th">
+              {isEnglish
+                ? "Each card role answers a specific dimension of your inquiry:"
+                : "แต่ละตำแหน่งทำหน้าที่ตอบคำถามเฉพาะมิติเพื่อเชื่อมโยงภาพรวมของคำทำนาย:"}
+            </p>
+            <div className="mt-4 overflow-x-auto rounded-xl border border-[#D5CEC2] bg-white shadow-xs">
+              <table className="w-full text-left text-xs font-serif-th border-collapse">
+                <thead>
+                  <tr className="border-b border-[#D5CEC2] bg-[#FAF8F5] text-[#5E5240]">
+                    <th scope="col" className="py-2.5 px-3 font-mono font-bold w-12 text-center">#</th>
+                    <th scope="col" className="py-2.5 px-3 font-bold w-36 sm:w-44">{isEnglish ? "Position Name" : "ชื่อตำแหน่ง"}</th>
+                    <th scope="col" className="py-2.5 px-3 font-bold">{isEnglish ? "Divinatory Role & Meaning" : "คำถามที่ตำแหน่งนี้ตอบ / บทบาทการตีความ"}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E8E2D8]">
+                  {spread.positions.map((pos, idx) => (
+                    <tr key={idx} className="hover:bg-[#FAF8F5]/60 transition-colors">
+                      <td className="py-2.5 px-3 font-mono font-bold text-[#8F5C1A] text-center">{idx + 1}</td>
+                      <td className="py-2.5 px-3 font-bold text-[#29261F] align-top">{getPositionName(pos, isEnglish)}</td>
+                      <td className="py-2.5 px-3 text-[#5E5240] leading-relaxed align-top">{getPositionMeaning(pos, isEnglish)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -36,6 +36,48 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ดำเนินการ SEO คลื่นที่ 2, 3 และ 4 — ขยายสารานุกรมไพ่ 7 หน้าใหม่, ผังพยากรณ์ 25 แบบ, 6 หน้ารวมหมวดชีวิต, เครื่องมือไพ่ประจำตัว, และตำแหน่งไพ่ (โดย Antigravity AI)
+
+> **ขอบเขต**: ดำเนินการครบทั้ง 3 คลื่นตามคู่มือแม่บท `HANDOFF_SEO_WAVE2-4_2026-09-05.md` อย่างประณีตระดับ World-Class
+> **นโยบายความปลอดภัย**: ทำงานและ commit บนกิ่ง `feat/seo-wave2-4` ในเครื่องเท่านั้น **ยังไม่ได้ push หรือ deploy ตามคำสั่งผู้ใช้**
+
+1. **คลื่นที่ 2 · ขยายสารานุกรม `/cards` เป็น 7 หน้าเฉพาะทาง (Commit `60c3095`)**:
+   - สร้าง 6 หน้าหมวดหมู่ไพ่แบบ Concrete Subdirectories: `/cards/major` (22 ใบ), `/cards/minor` (56 ใบ), `/cards/wands` (14 ใบ), `/cards/cups` (14 ใบ), `/cards/swords` (14 ใบ), `/cards/pentacles` (14 ใบ)
+   - สร้างหน้าตารางสรุป `/cards/all` รวบรวมไพ่ 78 ใบ พร้อมช่องค้นหาและตัวกรองชุดไพ่
+   - เพิ่ม `src/data/cards/group-seo.ts` รวบรวมบทความบรรณาธิการภาษาไทยเนื้อหาเข้มข้น (≥300 คำ) สัญลักษณ์ ประวัติศาสตร์ และไฮไลต์สำคัญ 3 ใบต่อหมวด
+   - สร้างคอมโพเนนต์ `CardGroupView.tsx` รองรับ responsive design, `<CardImage sizes="..." />`, BreadcrumbList และ CollectionPage JSON-LD
+   - สร้าง `CardSpreadLinks.tsx` เชื่อมโยงไพ่ทุกใบกับผังพยากรณ์และบทความที่เกี่ยวข้อง (Internal Link Network)
+   - อัปเดต `sitemap.ts` บันทึก 7 URL ใหม่ และเพิ่มด่านตรวจ Gate 30 (`test-seo-wave2.ts`) ผ่าน 33/33 ด่าน
+
+2. **คลื่นที่ 3 · เพิ่ม 5 ผังพยากรณ์ใหม่ & 6 หน้าหมวดหมู่ตามชีวิต & อัปเดต 25 ผังทั่วระบบ (Commit `5d7ad12` & `9550245`)**:
+   - เพิ่ม 5 ผังพยากรณ์มาตรฐานสากลลงใน `src/data/spreads.ts`:
+     1. `love-six` (ความรักเจาะลึก 6 ใบ · 2 credits · Grand Spread)
+     2. `monthly-ten` (ดวงรายเดือนเจาะลึก 10 ใบ · 3 credits · Grand Spread)
+     3. `family` (บริวารและคนรอบข้าง 5 ใบ · 0 credits · เปิดฟรี / Guest Allowed)
+     4. `luck` (โชคลาภและการเสี่ยงโชค 4 ใบ · 0 credits · เปิดฟรี / Guest Allowed)
+     5. `study` (การเรียนและการสอบ 4 ใบ · 0 credits · เปิดฟรี / Guest Allowed)
+   - วาด Formation ผังพยากรณ์ 5 แบบใหม่ใน `src/components/ui/TarotArtIcons.tsx` ตามกฎข้อ 7 (Pure 1909 RWS Artworks) และข้อ 9 (Horizontal Spread Bounds คุมความกว้างไม่เกิน 150px ไร้การล้น)
+   - อัปเดต Feature Gating ใน `limits.ts` (ผังมาตรฐานเปิดฟรี 10 ผัง, ผังญาณลึก 15 ผัง รวมเป็น 25 ผัง)
+   - กวาดล้างและอัปเดตข้อความ "20 ผัง / 20 Spreads / 20 แบบ" ครบทั้ง 23 จุดใน `src/` เป็น 25 ผัง (ผลการค้นหาเป็น 0 สมบูรณ์)
+   - สร้างระบบ 6 หน้ารวมผังตามหมวดชีวิต (`/spreads/topic/[category]`) สำหรับ `love`, `career`, `money`, `health`, `family`, `study`
+   - เพิ่ม `src/data/spread-topics.ts` บรรจุบทความวิเคราะห์เชิงลึก คำถาม FAQ และคำแนะนำการเลือกผัง
+   - เพิ่มคอมโพเนนต์ `TopicSpreadList.tsx` พร้อมแสดงความหมายตำแหน่งไพ่แบบ Accordion
+   - อัปเดต `sitemap.ts` รวม 6 URL หมวดหมู่ และเพิ่มด่านตรวจ Gate 31 (`test-seo-wave3.ts`) ผ่าน 74/74 ด่าน
+
+3. **คลื่นที่ 4 · งานสร้างความต่างระยะยาว (Commit `894837b`)**:
+   - สร้างระบบคำนวณไพ่ทาโรต์ประจำตัว (Tarot Birth Card) ที่ `/cards/birth-card` พร้อมคอมโพเนนต์ `BirthCardCalculator.tsx`
+   - รองรับการคำนวณทั้งปี พ.ศ. และ ค.ศ. ตามหลักเลขศาสตร์สากล แสดงทั้งไพ่บุคลิกภาพหลัก (Personality Card) และไพ่จิตวิญญาณรอง (Soul Card) พร้อมปุ่มแชร์ผลลัพธ์
+   - ยึดมั่นกฎเหล็กข้อ 14 (Zero Fabricated Cards) หากคำนวณไม่พบจะคืน `undefined` และแจ้งให้ลองใหม่ ห้ามมโนไพ่เด็ดขาด
+   - เพิ่มตารางตำแหน่งไพ่แบบ Semantic `<table>` ใน `/spreads/[id]` ตอบโจทย์คำค้น "ไพ่ยิปซี 10 ใบ ตำแหน่ง" พร้อมขยายชุด SEO keywords
+   - ปรับ `seoTitle` และ `keywords` ของบทความสำหรับผู้เริ่มต้นใน `src/data/articles.ts` เพื่อจับคำค้นยอดนิยม "เรียนไพ่ยิปซีฟรี"
+   - ปรับ Metadata ของหน้า `/readers/page.tsx` เพื่อจับคำค้น "หมอดูไพ่ยิปซี" และ "หมอดูไพ่ยิปซีฟรี"
+   - เพิ่มด่านตรวจ Gate 32 (`test-seo-wave4.ts`) ผ่าน 31/31 ด่าน
+
+4. **สถานะการทดสอบระบบ**:
+   - TypeScript Typecheck: **0 Errors**
+   - `npm run repo:verify`: **ผ่านครบทั้ง 32 ด่าน 100%**
+   - บันทึกการทำงานทั้งหมดเสร็จสมบูรณ์บน local branch `feat/seo-wave2-4` รอคำสั่งอนุญาตจากผู้ใช้ก่อน push/deploy
+
 ### 🗓️ 2026-09-05: ดำเนินการ SEO คลื่นที่ 1 — เติมคีย์เวิร์ด "ไพ่ยิปซี" ทั่วเว็บตามแผนส่งมอบ HANDOFF_SEO_WAVE1 (โดย Antigravity AI)
 
 - **เพิ่มฟิลด์ `seoTitleTh` ใน `interface Spread` และผังทั้ง 20 แบบ (`src/data/spreads.ts`)**:

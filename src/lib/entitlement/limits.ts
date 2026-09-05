@@ -29,7 +29,7 @@ export const SIGNUP_BONUS = 0;
 /** โบนัสชดเชยผู้ใช้เดิมก่อนเปิดระบบสิทธิ์ */
 export const GRANDFATHER_BONUS = 10;
 
-/** ผังมาตรฐาน 1–4 ใบ (7 ผัง) ที่เปิดให้สมาชิกทั่วไปใช้ฟรี */
+/** ผังมาตรฐาน (10 ผัง) ที่เปิดให้สมาชิกทั่วไปและผู้เยี่ยมชมใช้ฟรี เพื่อลด bounce rate ตามแผน SEO */
 export const STANDARD_SPREAD_IDS = new Set([
   "daily",
   "quick",
@@ -38,6 +38,9 @@ export const STANDARD_SPREAD_IDS = new Set([
   "situation-solution",
   "mind-body-spirit",
   "how-they-feel",
+  "family",
+  "luck",
+  "study",
 ]);
 
 export function isStandardSpread(spreadId: string): boolean {

@@ -287,7 +287,7 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     primaryLabel: `เติมรอบเปิดผังนี้ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
     primaryAction: "credits",
     secondaryLabel: "เลือกผังมาตรฐาน 1–4 ใบไปก่อน",
-    reassurance: "รอบที่เติมไว้ไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ครบ 20 ผัง + คุยเจาะลึกไม่จำกัด",
+    reassurance: "รอบที่เติมไว้ไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ครบ 25 ผัง + คุยเจาะลึกไม่จำกัด",
   },
   master_persona: {
     eyebrow: "แม่หมอผู้เชี่ยวชาญพิเศษ",
@@ -411,7 +411,7 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
     primaryLabel: `Top up to unlock (Starts at ฿${CHEAPEST_PACKAGE_THB})`,
     primaryAction: "credits",
     secondaryLabel: "Choose a 1–4 card spread for now",
-    reassurance: "Credits never expire · Unlocks all 20 spreads + unlimited consultation dialogue",
+    reassurance: "Credits never expire · Unlocks all 25 spreads + unlimited consultation dialogue",
   },
   master_persona: {
     eyebrow: "Grand Master Readers",

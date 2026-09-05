@@ -4,16 +4,16 @@ import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
-  title: "ดูดวงไพ่ยิปซี 20 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
+  title: "ดูดวงไพ่ยิปซี 25 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
   description:
-    "รวมผังดูดวงไพ่ยิปซี ไพ่ทาโรต์ 20 แบบ ตั้งแต่ไพ่ 1 ใบ 3 ใบ 5 ใบ ถึงเซลติกครอส 10 ใบ ครบทั้งรายวัน รายเดือน ความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
+    "รวมผังดูดวงไพ่ยิปซี ไพ่ทาโรต์ 25 แบบ ตั้งแต่ไพ่ 1 ใบ 3 ใบ 5 ใบ ถึงเซลติกครอส 10 ใบ ครบทั้งรายวัน รายเดือน ความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
   alternates: {
     canonical: `${SITE_ORIGIN}/spreads`,
   },
   openGraph: {
-    title: "ดูดวงไพ่ยิปซี 20 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
+    title: "ดูดวงไพ่ยิปซี 25 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
     description:
-      "รวมผังดูดวงไพ่ยิปซี ไพ่ทาโรต์ 20 แบบ ตั้งแต่ไพ่ 1 ใบ 3 ใบ 5 ใบ ถึงเซลติกครอส 10 ใบ ครบทั้งรายวัน รายเดือน ความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
+      "รวมผังดูดวงไพ่ยิปซี ไพ่ทาโรต์ 25 แบบ ตั้งแต่ไพ่ 1 ใบ 3 ใบ 5 ใบ ถึงเซลติกครอส 10 ใบ ครบทั้งรายวัน รายเดือน ความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
     url: `${SITE_ORIGIN}/spreads`,
     siteName: "SeerTarot",
     type: "website",
@@ -25,8 +25,8 @@ export default function SpreadsPage() {
   const spreadsJsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "คลัง 20 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม (Spreads Library)",
-    description: "รวบรวม 20 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล ความรัก การงาน การเงิน และผังใหญ่เจาะลึก 10 มิติ",
+    name: "คลัง 25 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม (Spreads Library)",
+    description: "รวบรวม 25 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล ความรัก การงาน การเงิน และผังใหญ่เจาะลึก 10 มิติ",
     url: `${SITE_ORIGIN}/spreads`,
     inLanguage: "th",
     mainEntity: {
@@ -55,7 +55,7 @@ export default function SpreadsPage() {
       {
         "@type": "ListItem",
         position: 2,
-        name: "ผังพยากรณ์ 20 แบบ",
+        name: "ผังพยากรณ์ 25 แบบ",
         item: `${SITE_ORIGIN}/spreads`,
       },
     ],

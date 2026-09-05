@@ -10,7 +10,7 @@ import { SITE_ORIGIN } from "@/lib/config/site";
  * ที่ไม่ได้เปลี่ยนอะไรเลย Google จึงเรียนรู้ว่าสัญญาณ lastModified ของเว็บนี้เชื่อถือไม่ได้
  * แล้วเลิกใช้ไปเลย · อัปเดตค่านี้ด้วยมือเมื่อแก้เนื้อหาโครงสร้างจริง ๆ
  */
-const STRUCTURAL_CONTENT_UPDATED_AT = new Date("2026-09-04T00:00:00+07:00");
+const STRUCTURAL_CONTENT_UPDATED_AT = new Date("2026-09-05T00:00:00+07:00");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_ORIGIN;
@@ -35,6 +35,54 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/cards/major`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/cards/minor`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/cards/wands`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/cards/cups`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/cards/swords`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/cards/pentacles`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/cards/all`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/cards/birth-card`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/blog`,
@@ -73,7 +121,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  // All 20 Spread Guide Pages
+  // All 25 Spread Guide Pages
   const spreadRoutes: MetadataRoute.Sitemap = SPREADS.map((spread) => ({
     url: `${baseUrl}/spreads/${spread.id}`,
     lastModified: now,
@@ -81,5 +129,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...cardRoutes, ...blogRoutes, ...spreadRoutes];
+  // All 6 Topic Spreads Landing Pages
+  const topicRoutes: MetadataRoute.Sitemap = [
+    "love",
+    "career",
+    "money",
+    "health",
+    "family",
+    "study",
+  ].map((slug) => ({
+    url: `${baseUrl}/spreads/topic/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.85,
+  }));
+
+  return [...staticRoutes, ...cardRoutes, ...blogRoutes, ...spreadRoutes, ...topicRoutes];
 }

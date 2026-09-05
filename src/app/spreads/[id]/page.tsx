@@ -43,9 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: [
       `ดูดวงไพ่ยิปซี ${spread.positions.length} ใบ`,
       `ไพ่ยิปซี ${spread.positions.length} ใบ`,
+      `ไพ่ยิปซี ${spread.positions.length} ใบ ตำแหน่ง`,
       `เปิดไพ่ยิปซี ${spread.positions.length} ใบ`,
       `ผัง${spread.nameTh}`,
+      `${spread.nameTh} ตำแหน่งไพ่`,
       `${spread.nameTh} ความหมาย`,
+      `ตำแหน่งไพ่ยิปซี ${spread.nameTh}`,
+      "ความหมายตำแหน่งไพ่ยิปซี",
       "ดูดวงไพ่ยิปซีฟรี",
       "ผังพยากรณ์ไพ่ทาโรต์",
     ],

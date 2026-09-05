@@ -250,7 +250,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             {loading ? "…" : totalReadings.toLocaleString("th-TH")}
           </p>
           <div className="mt-3 flex items-center justify-between text-[11px] text-[#635B4E] border-t border-[#E8E2D8] pt-2.5">
-            <span>ผังพยากรณ์ 20 รูปแบบ</span>
+            <span>ผังพยากรณ์ 25 รูปแบบ</span>
             <button
               type="button"
               onClick={() => onNavigateTab("stats")}

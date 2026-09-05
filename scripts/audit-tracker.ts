@@ -170,7 +170,7 @@ ${mdRows}
 ## 🔒 ข้อมูลความปลอดภัยและการตรวจสอบย้อนกลับ (Security & Traceability)
 1. **Actor Verification**: บันทึกชื่อ, อีเมล, ประเภทผู้ใช้ (AI Agent หรือ Human)
 2. **Co-Authored Provenance**: บันทึกผู้ร่วมสร้างใน Git Commit Header
-3. **Defense Verification**: บันทึกผลการตรวจ Typecheck, Collision Guard, 78 Cards Integrity, 20 Spreads Geometry
+3. **Defense Verification**: บันทึกผลการตรวจ Typecheck, Collision Guard, 78 Cards Integrity, 25 Spreads Geometry
 4. **Cloudflare Deployment Live**: ทุก Event ที่ Merge เข้าสู่ \`main\` จะถูก Deploy ขึ้นสู่ [https://tarot-web.bankjack10452.workers.dev](https://tarot-web.bankjack10452.workers.dev) อัตโนมัติ
 `;
 

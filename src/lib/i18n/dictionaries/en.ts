@@ -24,7 +24,7 @@ export const en: Dictionary = {
   nav: {
     brandTitle: "SeerTarot",
     brandTagline: "1909 Rider-Waite Tarot Sanctuary",
-    spreads: "Tarot Spreads (20 Spreads)",
+    spreads: "Tarot Spreads (25 Spreads)",
     spreadsDesc: "Choose the spread tailored to your inquiry",
     cardMeanings: "Card Meanings (78 Cards)",
     cardMeaningsDesc: "The original 1909 symbolism & archetypal encyclopedia",
@@ -155,7 +155,7 @@ export const en: Dictionary = {
     drawThisCardInSpread: "Practice in a Reading Spread",
   },
   spreads: {
-    catalogTitle: "Tarot Spreads Sanctuary (20 Spreads)",
+    catalogTitle: "Tarot Spreads Sanctuary (25 Spreads)",
     catalogSubtitle: "Select from traditional and modern spreads calibrated for love, purpose, pivotal decisions, and shadow work.",
     cardsUnit: "{count} Cards",
     estimatedTime: "Approx. {time} mins",
