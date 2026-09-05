@@ -31,7 +31,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const spread = getSpread(id);
   if (!spread) return { title: "ไม่พบผังพยากรณ์", robots: { index: false, follow: true } };
 
-  const title = `ผัง${spread.nameTh} — วิธีอ่านไพ่ ${spread.positions.length} ใบ`;
+  const title = spread.seoTitleTh
+    ? `${spread.seoTitleTh} — วิธีอ่านและความหมายทุกตำแหน่ง`
+    : `ผัง${spread.nameTh} — วิธีอ่านไพ่ ${spread.positions.length} ใบ`;
   const description = `${spread.description} เจาะลึกความหมายไพ่ทั้ง ${spread.positions.length} ตำแหน่ง พร้อมวิธีตั้งคำถามและอ่านผลด้วยไพ่ 1909 Rider-Waite`;
   const url = `${SITE_ORIGIN}/spreads/${spread.id}`;
 
@@ -39,11 +41,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     keywords: [
+      `ดูดวงไพ่ยิปซี ${spread.positions.length} ใบ`,
+      `ไพ่ยิปซี ${spread.positions.length} ใบ`,
+      `เปิดไพ่ยิปซี ${spread.positions.length} ใบ`,
       `ผัง${spread.nameTh}`,
       `${spread.nameTh} ความหมาย`,
-      `ดูดวงไพ่ ${spread.positions.length} ใบ`,
+      "ดูดวงไพ่ยิปซีฟรี",
       "ผังพยากรณ์ไพ่ทาโรต์",
-      "ไพ่ทาโรต์ 1909 Rider-Waite",
     ],
     alternates: { canonical: url },
     openGraph: {

@@ -4,15 +4,16 @@ import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
-  title: "คัมภีร์ไพ่ทาโรต์ 78 ใบ · สารานุกรมความหมายไพ่ 1909",
+  title: "ความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบ 78 ใบ (ชุดใหญ่ 22 + ชุดเล็ก 56)",
   description:
-    "รวบรวมความหมายไพ่ทาโรต์ 78 ใบครบถ้วน ทั้ง Major Arcana และ Minor Arcana พร้อมคำแปลไทย 5 หมวด โหราศาสตร์ และธาตุ",
+    "เปิดดูความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบทั้ง 78 ใบ ชุดใหญ่ 22 ใบ และชุดเล็ก 56 ใบ พร้อมคำแปลไทย 5 มิติ ทั้งไพ่หัวตั้งและหัวกลับ โหราศาสตร์ ธาตุ และภาพต้นฉบับ 1909 Rider-Waite",
   alternates: {
     canonical: `${SITE_ORIGIN}/cards`,
   },
   openGraph: {
-    title: "คัมภีร์ไพ่ทาโรต์ 78 ใบ (1909 Rider-Waite-Smith) · SeerTarot",
-    description: "รวบรวมความหมายไพ่ทาโรต์ 78 ใบครบถ้วน พร้อมคำแปลไทย 5 มิติ โหราศาสตร์ และธาตุ",
+    title: "ความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบ 78 ใบ (ชุดใหญ่ 22 + ชุดเล็ก 56)",
+    description:
+      "เปิดดูความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบทั้ง 78 ใบ ชุดใหญ่ 22 ใบ และชุดเล็ก 56 ใบ พร้อมคำแปลไทย 5 มิติ ทั้งไพ่หัวตั้งและหัวกลับ โหราศาสตร์ ธาตุ และภาพต้นฉบับ 1909 Rider-Waite",
     url: `${SITE_ORIGIN}/cards`,
     siteName: "SeerTarot",
     type: "website",

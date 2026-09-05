@@ -23,6 +23,16 @@ export interface Spread {
   id: string;
   nameTh: string;
   nameEn: string;
+  /**
+   * ชื่อสำหรับ SEO เท่านั้น — ใช้ใน <title> และ <h1> ของหน้า /spreads/[id]
+   *
+   * ⚠️ ห้ามนำไปใช้ใน UI เลือกผังเด็ดขาด เพราะทั้ง 20 ผังขึ้นต้นด้วย
+   * "ดูดวงไพ่ยิปซี" เหมือนกันหมด ผู้ใช้จะแยกไม่ออกว่าผังไหนคือผังไหน
+   * UI ทุกจุดต้องใช้ `nameTh` ต่อไป (ดู HANDOFF_SEO_WAVE1_2026-09-05.md)
+   *
+   * ที่มา: คนไทยค้น "ไพ่ยิปซี" มากกว่า "ไพ่ทาโรต์" (Google Autocomplete 8/10)
+   */
+  seoTitleTh?: string;
   /** คำโปรยสั้น ๆ บนหน้าเลือก spread */
   tagline: string;
   taglineEn: string;
@@ -49,6 +59,7 @@ export const SPREADS: Spread[] = [
     id: "daily",
     nameTh: "ดวงรายวัน (ไพ่ 1 ใบ)",
     nameEn: "Daily Tarot Guidance (1 Card)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีรายวัน 1 ใบ ฟรี แม่นๆ",
     tagline: "เช็กพลังงานและข้อคิดประจำวันนี้",
     taglineEn: "Check your energetic compass and daily inspiration",
     description:
@@ -74,6 +85,7 @@ export const SPREADS: Spread[] = [
     id: "quick",
     nameTh: "ถามไวตอบตรง (ไพ่ 1 ใบ)",
     nameEn: "Direct Clarity (1 Card)",
+    seoTitleTh: "เปิดไพ่ยิปซี 1 ใบ ถามไวตอบตรง",
     tagline: "มีเรื่องคาใจ เปิดใบเดียวรู้เรื่อง",
     taglineEn: "Pressing question? A single card for immediate clarity",
     description: "เหมาะสำหรับคนที่มีเรื่องสงสัยเฉพาะเจาะจง อยากได้คำตอบตรงไปตรงมา ชัดเจน ไม่ต้องอ้อมค้อม",
@@ -98,6 +110,7 @@ export const SPREADS: Spread[] = [
     id: "yes-no",
     nameTh: "ใช่หรือไม่ (ไพ่ 3 ใบ)",
     nameEn: "Yes or No (3 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี ใช่หรือไม่ 3 ใบ ฟรี",
     tagline: "ลังเลตัดสินใจไม่ได้ ให้ไพ่ช่วยฟันธง",
     taglineEn: "Facing a dilemma? Let the cards reveal the balance",
     description:
@@ -142,6 +155,7 @@ export const SPREADS: Spread[] = [
     id: "three-card",
     nameTh: "อดีต-ปัจจุบัน-อนาคต (ไพ่ 3 ใบ)",
     nameEn: "Past · Present · Future (3 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี 3 ใบ อดีต ปัจจุบัน อนาคต ฟรี",
     tagline: "มองเห็นที่มา สิ่งที่เป็นอยู่ และแนวโน้มข้างหน้า",
     taglineEn: "Understand origins, present reality, and emerging trajectory",
     description:
@@ -185,6 +199,7 @@ export const SPREADS: Spread[] = [
     id: "situation-solution",
     nameTh: "ปัญหาและทางออก (ไพ่ 3 ใบ)",
     nameEn: "Challenge & Solution (3 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี 3 ใบ ปัญหาและทางออก",
     tagline: "หาทางสว่างและวิธีแก้ปัญหาที่ตรงจุด",
     taglineEn: "Find clarity and actionable resolution to impasse",
     description:
@@ -228,6 +243,7 @@ export const SPREADS: Spread[] = [
     id: "mind-body-spirit",
     nameTh: "กาย-ใจ-จิตวิญญาณ (ไพ่ 3 ใบ)",
     nameEn: "Mind · Body · Spirit (3 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี สุขภาพ กาย ใจ จิตวิญญาณ 3 ใบ",
     tagline: "เช็กความเหนื่อยล้า ฟื้นฟูสมดุลความสุข",
     taglineEn: "Check exhaustion, restore holistic harmony",
     description:
@@ -275,6 +291,7 @@ export const SPREADS: Spread[] = [
     id: "love",
     nameTh: "ดวงความรักสองหัวใจ (ไพ่ 5 ใบ)",
     nameEn: "Two Hearts In-Depth Love Spread (5 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีความรัก 5 ใบ สองหัวใจ ฟรี",
     tagline: "ใจเรา ใจเขา และอนาคตความสัมพันธ์",
     taglineEn: "Your heart, their heart, and relationship outlook",
     description:
@@ -336,6 +353,7 @@ export const SPREADS: Spread[] = [
     id: "how-they-feel",
     nameTh: "ความในใจของเขา (ไพ่ 4 ใบ)",
     nameEn: "How They Truly Feel (4 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีความรัก 4 ใบ เขาคิดยังไงกับเรา",
     tagline: "ส่องความรู้สึกจริงและสิ่งที่เขาคิดกับเรา",
     taglineEn: "Peek into their true intentions and thoughts toward you",
     description:
@@ -388,6 +406,7 @@ export const SPREADS: Spread[] = [
     id: "ex-reconciliation",
     nameTh: "แฟนเก่าจะกลับมาไหม (ไพ่ 4 ใบ)",
     nameEn: "Past Love & Reconciliation (4 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีความรัก 4 ใบ แฟนเก่าจะกลับมาไหม",
     tagline: "เช็กโอกาสคืนดี ถ่านไฟเก่า และคำแนะนำ",
     taglineEn: "Examine reconciliation prospects, rekindled flames, and counsel",
     description:
@@ -440,6 +459,7 @@ export const SPREADS: Spread[] = [
     id: "soulmate",
     nameTh: "ตามหาเนื้อคู่แท้ (ไพ่ 5 ใบ)",
     nameEn: "Soulmate & Divine Counterpart (5 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี เนื้อคู่ 5 ใบ ตามหาคู่แท้",
     tagline: "ส่องลักษณะเนื้อคู่ จุดที่จะได้พบ และวาสนา",
     taglineEn: "Envision your counterpart's energy, meeting circumstances, and fate",
     description:
@@ -505,6 +525,7 @@ export const SPREADS: Spread[] = [
     id: "career",
     nameTh: "ดวงการงาน & ความก้าวหน้า (ไพ่ 5 ใบ)",
     nameEn: "Career Direction & Growth (5 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีการงาน อาชีพ 5 ใบ ฟรี",
     tagline: "งานที่ทำอยู่จะรุ่งไหม โอกาสและความสำเร็จ",
     taglineEn: "Will your work flourish? Opportunities and career milestones",
     description:
@@ -566,6 +587,7 @@ export const SPREADS: Spread[] = [
     id: "money",
     nameTh: "ดวงการเงินและโชคลาภ (ไพ่ 4 ใบ)",
     nameEn: "Financial Flow & Prosperity (4 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีการเงิน โชคลาภ 4 ใบ ฟรี",
     tagline: "เงินไหลไปไหน จะมีโชคไหม ปลดล็อกความมั่งคั่ง",
     taglineEn: "Where does money flow? Prosperity and financial sovereignty",
     description:
@@ -618,6 +640,7 @@ export const SPREADS: Spread[] = [
     id: "career-switch",
     nameTh: "ย้ายงานหรืออยู่ที่เดิม (ไพ่ 5 ใบ)",
     nameEn: "Career Pivot: Stay or Leap (5 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีการงาน 5 ใบ ย้ายงานดีไหม",
     tagline: "เปรียบเทียบผลลัพธ์ถ้าอยู่ที่เดิม vs ถ้าไปที่ใหม่",
     taglineEn: "Compare staying at your current role vs. leaping to the new",
     description:
@@ -679,6 +702,7 @@ export const SPREADS: Spread[] = [
     id: "decision",
     nameTh: "ทางแยกสองทาง: เลือก A หรือ B (ไพ่ 5 ใบ)",
     nameEn: "The Crossroads: Path A vs. Path B (5 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี 5 ใบ เลือกทางไหนดี",
     tagline: "เมื่อต้องเลือกสองตัวเลือก ทางไหนจะพาไปสู่สิ่งที่ดีกว่า",
     taglineEn: "Facing two divergent choices? Discern which leads higher",
     description:
@@ -740,6 +764,7 @@ export const SPREADS: Spread[] = [
     id: "inner-potential",
     nameTh: "ปลดล็อกพลังในตัวคุณ (ไพ่ 4 ใบ)",
     nameEn: "Unlocking Inner Potential (4 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี 4 ใบ ค้นพลังที่ซ่อนในตัวคุณ",
     tagline: "ค้นพบพรสวรรค์ที่ซ่อนอยู่และวิธีก้าวกระโดด",
     taglineEn: "Discover dormant gifts and ignite your quantum breakthrough",
     description:
@@ -796,6 +821,7 @@ export const SPREADS: Spread[] = [
     id: "weekly",
     nameTh: "ดวงรายสัปดาห์ 7 วัน (ไพ่ 7 ใบ)",
     nameEn: "7-Day Weekly Forecast (7 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีรายสัปดาห์ 7 ใบ ฟรี",
     tagline: "ส่องพลังงานจันทร์ถึงอาทิตย์ วางแผนล่วงหน้า",
     taglineEn: "Map energetic tides Monday through Sunday to plan proactively",
     description:
@@ -819,6 +845,7 @@ export const SPREADS: Spread[] = [
     id: "monthly",
     nameTh: "ดวงรายเดือน 4 สัปดาห์ (ไพ่ 4 ใบ)",
     nameEn: "4-Week Monthly Forecast (4 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีรายเดือน 4 ใบ ฟรี แม่นๆ",
     tagline: "มองเห็นภาพรวมตลอดทั้งเดือน วางแผนล่วงหน้า",
     taglineEn: "Gain full-month perspective to master life's pacing",
     description:
@@ -839,6 +866,7 @@ export const SPREADS: Spread[] = [
     id: "chakra",
     nameTh: "สแกนสมดุล 7 จักระ (ไพ่ 7 ใบ)",
     nameEn: "7 Chakras Energy Alignment (7 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี สุขภาพ 7 จักระ 7 ใบ",
     tagline: "ตรวจเช็กจุดอุดตัน ฟื้นฟูพลังงานทั้ง 7 จุด",
     taglineEn: "Diagnose energetic blockages and realign your 7 energy centers",
     description:
@@ -862,6 +890,7 @@ export const SPREADS: Spread[] = [
     id: "celtic-cross",
     nameTh: "ส่องชะตาเจาะลึก 10 มิติ (เซลติกครอส)",
     nameEn: "The Celtic Cross: 10 Dimensions of Destiny (10 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซี 10 ใบ เซลติกครอส ฟรี",
     tagline: "ผัง 10 ใบในตำนาน อ่านละเอียดและแม่นยำที่สุด",
     taglineEn: "The legendary 10-card master spread for utmost depth and precision",
     description:
@@ -888,6 +917,7 @@ export const SPREADS: Spread[] = [
     id: "year-ahead",
     nameTh: "ดวงรายปี 12 เดือน (ไพ่ 12 ใบ)",
     nameEn: "Year Ahead: 12 Astrological Houses (12 Cards)",
+    seoTitleTh: "ดูดวงไพ่ยิปซีรายปี 12 ใบ 12 เดือน",
     tagline: "ส่องจังหวะชีวิต 12 เดือนตลอดปีข้างหน้า",
     taglineEn: "A 12-month panoramic map of your upcoming year",
     description:

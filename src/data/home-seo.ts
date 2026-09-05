@@ -56,6 +56,12 @@ export const HOME_FAQS: HomeFaqItem[] = [
     answer:
       "คำถามปลายเปิดที่เน้นความเข้าใจและการพัฒนา เช่น 'แนวโน้มของสถานการณ์นี้คืออะไร?', 'ฉันควรปรับตัวอย่างไรเพื่อแก้ไขปัญหานี้?', หรือ 'อะไรคือสิ่งที่ฉันกำลังมองข้ามในความสัมพันธ์?' จะให้คำตอบที่ทรงคุณค่าและมีประโยชน์ต่อการใช้ชีวิตมากกว่าคำถามที่คาดหวังเพียงคำตอบว่า ใช่ หรือ ไม่",
   },
+  {
+    id: "faq-yipsi-tarot-difference",
+    question: "ไพ่ยิปซี ไพ่ทาโรต์ และไพ่ทาโร่ คือไพ่ชุดเดียวกันหรือเปล่า?",
+    answer:
+      "ในสังคมไทย คนส่วนใหญ่นิยมเรียกสำรับไพ่พยากรณ์มาตรฐาน 78 ใบว่า 'ไพ่ยิปซี' แต่ในระดับสากลจะเรียกว่า 'ไพ่ทาโรต์' (Tarot) หรือบางท่านสะกดว่า 'ไพ่ทาโร่' ทั้งหมดคือศาสตร์การพยากรณ์เดียวกัน โดยเฉพาะสำรับดั้งเดิม 1909 Rider-Waite-Smith ที่ประกอบด้วยไพ่ชุดใหญ่ 22 ใบ และชุดเล็ก 56 ใบ ซึ่ง SeerTarot นำมาใช้เป็นมาตรฐานในการทำนาย",
+  },
 ];
 
 export const HOME_FAQS_EN: HomeFaqItem[] = [
@@ -94,6 +100,12 @@ export const HOME_FAQS_EN: HomeFaqItem[] = [
     question: "What types of questions work best for tarot consultations?",
     answer:
       "Open-ended questions focused on growth and situational dynamics—such as 'What energies are currently at play in this situation?', 'How can I navigate this challenge constructively?', or 'What blind spot am I overlooking in this relationship?'—yield far deeper, more transformative guidance than simple yes-or-no queries.",
+  },
+  {
+    id: "faq-yipsi-tarot-difference",
+    question: "Are Tarot cards and Gypsy cards (ไพ่ยิปซี) the same deck?",
+    answer:
+      "In Thailand, the authentic 78-card divination deck is widely recognized and searched for under the traditional name 'Gypsy Cards' (ไพ่ยิปซี), whereas internationally it is universally known as the 'Tarot'. Both refer to the same timeless wisdom tradition, rooted in the definitive 1909 Rider-Waite-Smith deck featuring 22 Major Arcana and 56 Minor Arcana used here at SeerTarot.",
   },
 ];
 

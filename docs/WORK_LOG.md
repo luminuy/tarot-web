@@ -36,6 +36,26 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ดำเนินการ SEO คลื่นที่ 1 — เติมคีย์เวิร์ด "ไพ่ยิปซี" ทั่วเว็บตามแผนส่งมอบ HANDOFF_SEO_WAVE1 (โดย Antigravity AI)
+
+- **เพิ่มฟิลด์ `seoTitleTh` ใน `interface Spread` และผังทั้ง 20 แบบ (`src/data/spreads.ts`)**:
+  - คงฟิลด์ `nameTh` ไว้ 100% เพื่อไม่ให้กระทบ UI เลือกผัง, การพยากรณ์, AI Prompts, การแชร์ หรือ schema ใดๆ (230 ตำแหน่งทั่วทั้งแอป)
+  - กำหนด `seoTitleTh` สำหรับทั้ง 20 ผัง โดยใส่คีย์เวิร์ดที่คนไทยค้นจริงตาม Google Autocomplete (เช่น `ดูดวงไพ่ยิปซีรายวัน 1 ใบ ฟรี แม่นๆ`, `ดูดวงไพ่ยิปซี 10 ใบ เซลติกครอส ฟรี`, `ดูดวงไพ่ยิปซีความรัก 5 ใบ สองหัวใจ ฟรี`)
+- **เชื่อมต่อ `seoTitleTh` ในหน้าผังพยากรณ์รายตัว (`src/app/spreads/[id]/`)**:
+  - `page.tsx`: ใช้ `spread.seoTitleTh` ใน `<title>` และปรับชุด `keywords` ให้มีคีย์เวิร์ดไพ่ยิปซียอดนิยม
+  - `SpreadDetailClient.tsx`: ใช้ `spread.seoTitleTh` ใน `<h1>` สำหรับภาษาไทย (ภาษาอังกฤษคงเดิม)
+- **ปรับแต่ง Metadata หน้าแรกและหน้าวิหารพยากรณ์ (`src/app/layout.tsx`, `src/app/TarotFlow.tsx`)**:
+  - `layout.tsx`: เปลี่ยน `title.default`, `openGraph.title`, `twitter.title` เป็น `"ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI"` พร้อมอัปเดต `description` และ `keywords`
+  - `TarotFlow.tsx`: ปรับ `<h1>` ภาษาไทยเป็น `"ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"` และย้าย `"1909 Rider-Waite"` ลงย่อหน้ารอง คงภาษาอังกฤษไว้เหมือนเดิมทุกประการ
+- **ปรับปรุง Metadata หน้ารวมและหน้ารายใบ (`src/app/cards/page.tsx`, `src/app/spreads/page.tsx`, `src/app/cards/[id]/page.tsx`)**:
+  - `/cards`: เปลี่ยนชื่อเป็น `"ความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบ 78 ใบ (ชุดใหญ่ 22 + ชุดเล็ก 56)"`
+  - `/spreads`: เปลี่ยนชื่อเป็น `"ดูดวงไพ่ยิปซี 20 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี"`
+  - `/cards/[id]`: เปลี่ยนชื่อเป็น `"ความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) หัวตั้ง-หัวกลับ"`
+- **เพิ่มคำถามที่พบบ่อย (FAQ) รองรับคำค้นหลายแบบ (`src/data/home-seo.ts`)**:
+  - เพิ่มข้อคำถามชี้แจงความสัมพันธ์ระหว่าง "ไพ่ยิปซี", "ไพ่ทาโรต์", และ "ไพ่ทาโร่" ว่าคือศาสตร์เดียวกันที่อิงสำรับ 1909 Rider-Waite-Smith ทั้งภาษาไทยและอังกฤษ
+- **อัปเดตสารบรรณเอกสาร (`CLAUDE.md`, `docs/INDEX.md`)**:
+  - เพิ่มลิงก์ไปยัง `TRAFFIC_CAPTURE_PLAN_2026-09-05.md` และ `HANDOFF_SEO_WAVE1_2026-09-05.md`
+
 ### 🗓️ 2026-09-05: วิจัยสนามแข่ง SEO ไทยและวางแผนแย่งทราฟฟิกจาก MyHora (เอกสาร 2 ฉบับ · ยังไม่แตะโค้ด) — โดย Claude
 
 > **ขอบเขต**: เจ้าของโปรเจกต์สั่งให้หาข้อมูล SEO จริงและวางแผนดึงทราฟฟิกจากเจ้าตลาด โดยยังไม่ต้องสนใจเรื่องรายได้/ต้นทุน
@@ -65,6 +85,7 @@
 - **สถานะโครงสร้างพื้นฐาน (ตรวจสด)**: Google Search Console เชื่อมแล้ว · `robots.txt` `Allow: /` พร้อมบรรทัด `Sitemap:` ✅ · `sitemap.xml` HTTP 200 มี **130 URL** ครบทุกหน้า ✅ · ไม่มี `noindex` สักหน้า ✅ · `canonical` ครบ ✅ — **ไม่มีอุปสรรคทางเทคนิคขวางการเก็บดัชนี**
 
 - **สิ่งที่ยังตอบไม่ได้ (กฎ 0.2 ข้อ 5)**: ไม่มี DataForSEO/Ahrefs/Keyword Planner ต่อในเซสชันนี้ จึง **ไม่มียอดค้นหาเป็นตัวเลข** — Autocomplete บอกได้แค่ลำดับความนิยม · **ตัวเลข 150,000–300,000 ครั้ง/เดือน ในแผนธุรกิจฉบับเดิมยังไม่มีแหล่งอ้างอิงและยังยืนยันไม่ได้ ไม่ควรนำไปใช้เสนอที่ประชุมจนกว่าจะตรวจสอบ**
+
 
 ### 🗓️ 2026-09-05: ตรวจทานและอัปเดตเอกสารส่งมอบงานแถบ Header ค้างอย่างละเอียด (HANDOFF_HEADER_20260905.md) — โดย Antigravity AI
 
