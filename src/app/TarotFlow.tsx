@@ -1105,71 +1105,31 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               exit="exit"
               className="space-y-10"
             >
-              {/* บล็อกทำนายด่วน 1 ใบ (เพิ่มใหม่บนสุด จบแค่การ์ด 4 ใบ ไม่มีปุ่มคั่นกลาง) */}
+              {/* ไพ่ประจำวัน (รูปที่ 1 นำกลับไว้บนสุดเหมือนเดิม) */}
+              <DailyCardStrip />
+
+              {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) */}
               <QuickFortunePicker
                 currentNickname={nickname}
                 onSelectTopic={handleQuickFortuneSelect}
                 isLoading={loading}
               />
 
-              <DailyCardStrip />
-
               <div className="space-y-10">
-                <div className="text-center space-y-6 relative">
-                    {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
-                    <div
-                      className="h-56 sm:h-72 w-full flex items-center justify-center relative select-none"
-                      style={{ perspective: 1200 }}
-                    >
-                      {/* แสงเทียนนุ่ม ๆ รอบสำรับ — นิ่งสนิท ไม่เต้น ไม่หมุน */}
-                      <div
-                        aria-hidden="true"
-                        className="absolute w-72 h-72 sm:w-[400px] sm:h-[400px] rounded-full -z-10 pointer-events-none blur-2xl bg-radial from-[#A58A5C]/18 via-[#A58A5C]/06 to-transparent"
-                      />
+                <div className="text-center space-y-2.5 sm:space-y-3 pt-2">
+                  <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+                    ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI
+                  </h1>
+                  <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
+                    สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256
+                  </p>
+                  <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
+                    ✦ เลือกผังการเปิดไพ่พยากรณ์
+                  </h2>
+                </div>
 
-                      {/* 3D Realistic 78-Card Stacked Deck Container */}
-                      <div className="relative group cursor-pointer" onClick={() => soundManager.playCardSelectSound()}>
-                        {/* Layer 3: Deep Stack Base (Gold Gilded Edge) */}
-                        <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-xl bg-[#5A3E26] border border-[#D5CEC2]/60 translate-x-[6px] translate-y-[6px] shadow-[var(--shadow-overlay)]" />
-                        {/* Layer 2: Middle Stack Deck */}
-                        <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-xl bg-[#4A3320] border border-[#D5CEC2]/70 translate-x-[3px] translate-y-[3px]" />
-
-                        {/* Layer 1: Top Floating Hero Card */}
-                        <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-xl border-2 border-[#D5CEC2] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
-                          <div className="w-full flex justify-center items-center opacity-90">
-                            <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
-                              ✦ SACRED ORACLE ✦
-                            </span>
-                          </div>
-
-                          {/* Clean Center */}
-                          <div className="my-auto" />
-
-                          <span className="text-xs font-serif-th font-bold text-[#FFFFFF]">
-                            ไพ่ทาโรต์ 1909
-                          </span>
-
-                          {/* Dynamic Gold Sheen Sweep */}
-                          <div className="gold-foil-sheen absolute inset-0 opacity-35 group-hover:opacity-75 transition-opacity duration-500" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2.5 sm:space-y-3 text-center">
-                      <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
-                        ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI
-                      </h1>
-                      <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
-                        สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256
-                      </p>
-                      <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
-                        ✦ เลือกผังการเปิดไพ่พยากรณ์
-                      </h2>
-                    </div>
-                  </div>
-
-                  {/* Spread Selector Grid */}
-                  <SpreadCardSelector
+                {/* Spread Selector Grid */}
+                <SpreadCardSelector
                     selectedSpread={selectedSpread}
                     onSelectSpread={(sp) => {
                       soundManager.playCardSelectSound();

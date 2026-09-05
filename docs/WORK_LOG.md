@@ -36,6 +36,17 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: จัดวางไพ่ประจำวันไว้บนสุดของหน้าแรก และนำ Hero กองไพ่ 3D ออก — โดย Antigravity AI
+
+- **ปรับโครงสร้างเลย์เอาต์หน้าแรก (`SPREAD_SELECT`) ใน `src/app/TarotFlow.tsx` ตามคำขอ**:
+  - ย้าย `<DailyCardStrip />` (ไพ่ประจำวันนี้) กลับขึ้นมาไว้บนสุดของหน้าแรกเหมือนเดิม
+  - วางบล็อก `<QuickFortunePicker />` (ทำนายด่วน 4 การ์ดยอดนิยม) ถัดลงมา
+  - นำ Hero กองไพ่ 3D `✦ SACRED ORACLE ✦` ไพ่ทาโรต์ 1909 ออกทั้งหมดตามคำสั่ง ทำให้หน้าแรกโหลดไว สะอาดตา และโฟกัสกับเนื้อหาทำนายโดยตรง
+  - คงส่วนหัวข้อหลัก "ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI" และกริดเลือกผัง 20 แบบ (`SpreadCardSelector`) ไว้อย่างต่อเนื่อง ไร้รอยต่อ
+- **ผลการทดสอบ**:
+  - TypeScript Typecheck: `0 errors`
+  - QA Test (`scripts/qa/test-quick-fortune.ts`): `42/42 ผ่านสมบูรณ์`
+
 ### 🗓️ 2026-09-05: ยุติการถกเถียง ปรับปรุงเลย์เอาต์บล็อกทำนายด่วนเป็นแบบต่อเติมบนสุด ไร้ปุ่มคั่นกลาง ตามมติข้อ 4.1 — โดย Claude & Antigravity AI
 
 - **ปรับปรุงโครงสร้างเลย์เอาต์หน้าแรก (`SPREAD_SELECT`) ใน `src/app/TarotFlow.tsx` ตามมติสุดท้ายข้อ 4.1**:
