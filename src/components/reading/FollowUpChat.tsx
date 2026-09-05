@@ -8,6 +8,7 @@ import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { requestUpgrade } from "@/lib/entitlement/upgrade-bus";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { TTSReaderButton } from "./TTSReaderButton";
+import { trackEvent } from "@/lib/analytics";
 
 interface Message {
   id: string;
@@ -244,6 +245,12 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
+
+    trackEvent("follow_up_ask", {
+      reading_id: readingId,
+      persona_id: persona.id,
+      question_length: query.length,
+    });
 
     try {
       const validHistory = messages

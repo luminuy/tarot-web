@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
 import { useHasMounted } from "@/lib/motion";
+import { trackEvent } from "@/lib/analytics";
 
 interface CardDetailViewProps {
   card: TarotCard;
@@ -56,6 +57,14 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 }) => {
   const hasMounted = useHasMounted();
   const [orientation, setOrientation] = useState<"upright" | "reversed">("upright");
+
+  useEffect(() => {
+    trackEvent("card_detail_view", {
+      card_id: card.id,
+      card_name: card.nameTh,
+      category: card.element,
+    });
+  }, [card.id, card.nameTh, card.element]);
 
   const isUpright = orientation === "upright";
   const currentKeywords = isUpright ? card.keywords.upright : card.keywords.reversed;

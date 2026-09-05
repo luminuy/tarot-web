@@ -26,14 +26,64 @@
 
 | หน้าเว็บ / ฟีเจอร์ | เส้นทาง (Route / File) | สถานะความพร้อม | สถานะเซิร์ฟเวอร์ | สิ่งที่ทำแล้ว | สิ่งที่สามารถต่อยอดได้ในอนาคต |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
-| **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
+| **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) + GA4 Event Tracking ครบวงจร | เพิ่มโหมดสลับไพ่กลับหัว Manual |
+| **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป + Card View & Search Analytics | เพิ่ม Audio คำอ่านรายใบ |
 | **คลัง 20 ผังพยากรณ์** | `/spreads` & `/spreads/[id]` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง + หน้าคู่มือราย spread 20 หน้า (SEO/SSG · JSON-LD HowTo) | แชร์ผังพยากรณ์แบบรูปภาพ |
-| **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ | เพิ่มฟังก์ชัน Bookmark บทความ |
+| **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
-| **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+| **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 (`NEXT_PUBLIC_GA_ID`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + App Router SPA Pageviews | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
+| **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-05: วางระบบ Google Analytics 4 (GA4) & Meta Pixel สมบูรณ์แบบ ละเอียดครบทุกจุด — โดย Antigravity
+
+- **โครงสร้างและการตั้งค่าตัวแปรสภาพแวดล้อม (Environment & Runtime Config)**:
+  - รองรับ `NEXT_PUBLIC_GA_ID` (`G-XXXXXXXXXX`) และ `NEXT_PUBLIC_META_PIXEL_ID` ผ่านทั้ง Build Time และ Runtime Fallback
+  - สร้าง Runtime Endpoint `src/app/api/config/analytics/route.ts` ที่ดึงค่าจาก Cloudflare Workers runtime env (`GA_MEASUREMENT_ID`, `META_PIXEL_ID`) และ client-side env แบบ zero-latency พร้อม Cache-Control (`max-age=300, stale-while-revalidate=86400`) ช่วยให้ผู้ดูแลระบบอัปเดต ID บน Cloudflare ผ่าน `wrangler secret put` ได้ทันทีโดยไม่ต้อง Build หน้าเว็บใหม่
+  - อัปเดต `.env.example` อธิบายการตั้งค่า `NEXT_PUBLIC_GA_ID` และ `NEXT_PUBLIC_META_PIXEL_ID` ละเอียดระดับโปรดักชัน
+  - อัปเดต `.github/workflows/deploy.yml` ส่งผ่าน `NEXT_PUBLIC_GA_ID` และ `NEXT_PUBLIC_META_PIXEL_ID` เข้าสู่กระบวนการ CI/CD Build & Deploy อัตโนมัติ
+- **ระบบติดตามหน้าเว็บและการปฏิบัติตามมาตรฐาน PDPA / Google Consent Mode v2**:
+  - อัปเกรด `src/components/analytics/AnalyticsTracker.tsx`:
+    - ติดตั้ง Google Consent Mode v2 เป็นค่าเริ่มต้น (`ad_storage: 'denied'`, `ad_user_data: 'denied'`, `ad_personalization: 'denied'`, `analytics_storage: 'granted'`) และเปิดใช้งาน `anonymize_ip: true`
+    - สร้าง `PageViewTracker` ครอบด้วย `<Suspense>` ดักจับการเปลี่ยนหน้าแบบ SPA (Client-side route navigation) ผ่าน `usePathname()` และ `useSearchParams()` อย่างแม่นยำ พร้อมระบบป้องกัน duplicate initial pageview
+    - รองรับการดึง ID อัตโนมัติจาก `/api/config/analytics` กรณีที่ไม่ได้ระบุ `NEXT_PUBLIC_GA_ID` ตอน build
+- **ชุดเครื่องมือส่ง Event ครอบคลุม 20 หมวดหมู่ตาม Event Contract (`src/lib/analytics.ts`)**:
+  - เขียน Validators ตรวจสอบรูปแบบ ID: `isValidGaId()` (`G-[A-Z0-9]{4,15}`) และ `isValidMetaPixelId()` (`\d{9,18}`)
+  - กำหนด Type-Safe Union `TarotAnalyticsEvent` ครอบคลุม 20 เหตุการณ์สำคัญ:
+    1. `tarot_session_start` (เริ่มเปิดไพ่พร้อม spreadId, persona, category)
+    2. `spread_select` (เลือกผังพยากรณ์และหมวดหมู่)
+    3. `persona_select` (เลือกแม่หมอ/สไตล์การทำนาย)
+    4. `tarot_shuffle` (กดปุ่มสับไพ่)
+    5. `tarot_draw` (จับไพ่ขึ้นมา 1 ใบ)
+    6. `card_reveal` (พลิกไพ่ดูความหมายรายใบ)
+    7. `reading_complete` (รับคำทำนายเสร็จสมบูรณ์ บันทึกจำนวนไพ่และโหมด)
+    8. `reading_feedback` (ผู้ใช้ให้คะแนนความแม่นยำ outcome: accurate, neutral, inaccurate)
+    9. `follow_up_ask` (ถามคำถามเจาะลึกเพิ่มเติมกับแม่หมอ)
+    10. `tts_play` (กดฟังเสียงสังเคราะห์คำทำนาย)
+    11. `tts_stop` (หยุดฟังเสียงคำทำนาย)
+    12. `provably_fair_verify` (ตรวจสอบหลักฐานการสับไพ่ SHA-256 Commit-Reveal)
+    13. `reading_share` (แชร์คำทำนายลงโซเชียล)
+    14. `card_detail_view` (เปิดอ่านสารานุกรมไพ่รายใบ 78 ใบ)
+    15. `card_search` (ค้นหาไพ่ในคลัง)
+    16. `blog_read` (อ่านบทความความรู้)
+    17. `upgrade_dialog_open` (เปิดหน้าต่างอัปเกรดสิทธิ์ดูดวง)
+    18. `auth_modal_open` (เปิดหน้าต่างสมัครสมาชิกหรือเข้าสู่ระบบ)
+    19. `consent_update` (ปรับเปลี่ยนการยินยอมคุกกี้ตาม PDPA)
+    20. `reading_save` (บันทึกคำทำนายลงสมุดบันทึกดวงชะตา)
+- **เชื่อมโยงการจับ Event จริงในทุก Touchpoint ของผู้ใช้**:
+  - `src/app/TarotFlow.tsx`: ดักจับ Flow หลักทั้งหมด (เริ่มเซสชัน, เลือกผัง, เลือกแม่หมอ, สับไพ่, จับไพ่, พลิกไพ่, อ่านผลจบ, เปิดหน้าต่างอัปเกรด/ล็อกอิน)
+  - `src/components/reading/TTSReaderButton.tsx`: ดักจับการเล่น/หยุด TTS
+  - `src/components/reading/FollowUpChat.tsx`: ดักจับการถามคำถามต่อ
+  - `src/components/reading/ProvablyFairPanel.tsx`: ดักจับการเปิดดูความโปร่งใส, ก๊อปปี้ Hash, ตรวจสอบผ่าน Third-party
+  - `src/components/history/ReadingHistoryModal.tsx`: ดักจับการให้คะแนนความแม่นยำ (Feedback)
+  - `src/components/encyclopedia/CardDetailView.tsx`: ดักจับการเข้าชมไพ่รายใบ
+  - `src/components/encyclopedia/CardsExplorer.tsx`: ดักจับการค้นหาไพ่ (พร้อมระบบ Debounce 800ms)
+  - `src/app/blog/[slug]/ArticleReadingClient.tsx`: ดักจับการอ่านบทความ
+- **ระบบทดสอบอัตโนมัติ Gate 26 (`scripts/qa/test-analytics-integrity.ts`)**:
+  - สร้างชุดทดสอบ 21 ข้อ ตรวจสอบ ID Validators, SSR Safety (เมื่อไม่มี window), การจำลอง dispatch สู่ `window.dataLayer`, ความถูกต้องของ Consent Mode v2, และ Schema ความถูกต้องของ Event Contract ทั้ง 20 หมวด
+  - เพิ่มเข้าสู่ CI/CD Verification Pipeline 26 ด่านใน `scripts/github-auto.ts` (`npm run repo:verify`) ผ่าน 100%
+
 
 ### 🗓️ 2026-09-04: ยกระดับความฉลาด AI คลื่นที่ 1 — ฐาน (Telemetry, Karmic Bridge, Consistency Checker) — โดย Antigravity
 

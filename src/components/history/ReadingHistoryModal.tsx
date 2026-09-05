@@ -9,6 +9,7 @@ import {
   type ReadingOutcome,
 } from "@/lib/utils/history";
 import { soundManager } from "@/lib/utils/audio";
+import { trackEvent } from "@/lib/analytics";
 
 interface ReadingHistoryModalProps {
   isOpen: boolean;
@@ -88,6 +89,12 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
     e.stopPropagation();
     soundManager.playCardSelectSound();
     updateReadingOutcome(id, outcome);
+    if (outcome !== "PENDING") {
+      trackEvent("reading_feedback", {
+        reading_id: id,
+        outcome,
+      });
+    }
     setReadings(getReadings());
   };
 
