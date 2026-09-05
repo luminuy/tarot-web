@@ -114,7 +114,6 @@ function mapBlockedReason(reason?: string): UpgradeReason | null {
  */
 export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode }) {
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
-  const [viewMode, setViewMode] = useState<"quick" | "full">("quick");
   const motionSafe = useMotionSafe();
 
   // ทิศทางการเปลี่ยนขั้นของ AnimatePresence (+1 = เดินหน้า, -1 = ย้อนกลับ)
@@ -994,7 +993,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     }
     clearFlowState();
     soundManager.playCardSelectSound();
-    setViewMode("quick");
     navigateStep("SPREAD_SELECT");
     setReadingId(null);
     setSessionToken(null);
@@ -1107,37 +1105,17 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               exit="exit"
               className="space-y-10"
             >
-              <DailyCardStrip />
-              {viewMode === "quick" ? (
-                <QuickFortunePicker
-                  currentNickname={nickname}
-                  onSelectTopic={handleQuickFortuneSelect}
-                  onSwitchToFullSpreads={() => {
-                    soundManager.playCardSelectSound();
-                    setViewMode("full");
-                    scrollToSanctuaryTop();
-                  }}
-                  isLoading={loading}
-                />
-              ) : (
-                <div className="space-y-10">
-                  {/* Back to Quick Fortune button */}
-                  <div className="flex justify-start">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        soundManager.playCardSelectSound();
-                        setViewMode("quick");
-                        scrollToSanctuaryTop();
-                      }}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] hover:bg-[#FAF7F2] text-xs font-serif-th font-medium text-[#29261F] transition-all shadow-xs hover:border-[#A58A5C]"
-                    >
-                      <span>←</span>
-                      <span>กลับไปหน้าทำนายด่วน 1 ใบ</span>
-                    </button>
-                  </div>
+              {/* บล็อกทำนายด่วน 1 ใบ (เพิ่มใหม่บนสุด จบแค่การ์ด 4 ใบ ไม่มีปุ่มคั่นกลาง) */}
+              <QuickFortunePicker
+                currentNickname={nickname}
+                onSelectTopic={handleQuickFortuneSelect}
+                isLoading={loading}
+              />
 
-                  <div className="text-center space-y-6 relative">
+              <DailyCardStrip />
+
+              <div className="space-y-10">
+                <div className="text-center space-y-6 relative">
                     {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
                     <div
                       className="h-56 sm:h-72 w-full flex items-center justify-center relative select-none"
@@ -1231,7 +1209,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     }}
                   />
                 </div>
-              )}
             </motion.div>
           )}
 
