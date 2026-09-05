@@ -1333,6 +1333,18 @@ code-splitting ใน `TarotFlow` ทำได้ดีอยู่แล้ว 
   - `npm run cards:related` ➔ **100% Deterministic (Clean git diff)**
   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 26/26 ด่านความปลอดภัย**
 
+### 🗓️ 2026-09-05: วินิจฉัย Header/Footer ทั้งเว็บ + RelatedCards client-only แล้ววางแผนลงมือ 3 PR — โดย Claude
+
+- **ประเภทงาน**: วินิจฉัย + วางแผน (ยังไม่แตะโค้ดจริง)
+- **สิ่งที่พบ**
+  - **ไม่มีคอมโพเนนต์ Header/Footer กลางเลย** — `src/components/` ไม่มีโฟลเดอร์ `layout/` ทุกหน้าประกอบแถบบนเอง เจอ header 5 แบบที่ไม่ตรงกันสักแบบ และ **123 จาก 128 หน้าที่ index ได้ไม่มีโลโก้ให้กดกลับหน้าแรก**
+  - **`<footer>` มีแค่ 2 จุดทั้งเว็บ** — Fat Footer ฝังตายใน `HomeSeoContent.tsx:616` (โผล่เฉพาะหน้าแรกขั้น `SPREAD_SELECT`) กับ footer บางใน `TarotFlow.tsx:1396` · อีก 127 หน้าไม่มีฟุตเตอร์เลย
+  - **`RelatedCards` เป็น client-only** (`useEffect` + `fetch('/api/search?like=')`) ทำให้ **312 ลิงก์ (78 ใบ × 4)** ไม่อยู่ใน HTML ฝั่งเซิร์ฟเวอร์ · ซ้ำยังเรียก Workers AI embedding ทุก pageview และหายทั้ง section ถ้า Vectorize index ว่าง
+- **ผลลัพธ์**: เขียนแผนลงมือให้ทีมถัดไปที่ [`docs/plans/SITE_SHELL_SEO_PLAN.md`](plans/SITE_SHELL_SEO_PLAN.md) — แบ่ง **PR-A** (SiteHeader กลาง), **PR-B** (RelatedCards ฝั่งเซิร์ฟเวอร์ ทำก่อนเพราะผล SEO สูงสุด), **PR-C** (Fat Footer ทุกหน้า ตามตัวเลือก ก ที่เจ้าของเลือก) พร้อมนโยบายรายเส้นทาง เกณฑ์ผ่านรายข้อ กับดัก INC-0067/0073/0075 และแผนถอย
+- **ไฟล์ที่แก้**: `docs/plans/SITE_SHELL_SEO_PLAN.md` (ใหม่), `docs/INDEX.md`, `CLAUDE.md`, `docs/WORK_LOG.md`
+
+---
+
 ### 🗓️ 2026-09-05: วางระบบ Google Analytics 4 (GA4) & Meta Pixel สมบูรณ์แบบ ละเอียดครบทุกจุด — โดย Antigravity
 
 - **โครงสร้างและการตั้งค่าตัวแปรสภาพแวดล้อม (Environment & Runtime Config)**:
