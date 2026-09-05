@@ -18,9 +18,9 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 24/24 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 33/33 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
-- **ผังพยากรณ์**: **20 ผังพยากรณ์ยอดนิยม** (95 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
+- **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
 ### 🧭 ตารางสถานะฟีเจอร์และหน้าเว็บ (Feature Readiness & Roadmap Matrix)
 
@@ -28,13 +28,30 @@
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) + GA4 Event Tracking ครบวงจร | เพิ่มโหมดสลับไพ่กลับหัว Manual |
 | **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป + Card View & Search Analytics | เพิ่ม Audio คำอ่านรายใบ |
-| **คลัง 20 ผังพยากรณ์** | `/spreads` & `/spreads/[id]` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง + หน้าคู่มือราย spread 20 หน้า (SEO/SSG · JSON-LD HowTo) | แชร์ผังพยากรณ์แบบรูปภาพ |
+| **คลัง 25 ผังพยากรณ์** | `/spreads` & `/spreads/[id]` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 25 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง + หน้าคู่มือราย spread 25 หน้า (SEO/SSG · JSON-LD HowTo) | แชร์ผังพยากรณ์แบบรูปภาพ |
 | **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+### 🗓️ 2026-09-06: นำความจริงสู่เอกสารแม่บท (Numeric Truth Guard) & เติมเต็มบทนำสารานุกรมไพ่ 6 หมวด (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_DOCS_TRUTH_2026-09-06.md`):**
+1. **งาน A · สร้างด่านตรวจตัวเลขเอกสารอัตโนมัติ (Numeric Truth Guard)**:
+   - สร้าง [`scripts/qa/test-docs-numbers.ts`](../scripts/qa/test-docs-numbers.ts) อ้างอิงแหล่งความจริงแบบไดนามิก (`CHECKS.length`, `SPREADS.length`, `positions`, `DECK.length`, `ARTICLES.length`, `STANDARD_SPREAD_IDS.size`)
+   - เพิ่มด่านที่ 33 ใน [`scripts/github-auto.ts`](../scripts/github-auto.ts) ตรวจสอบเอกสารแม่บท 11 ไฟล์ ป้องกันปัญหาตัวเลขเพี้ยนซ้ำซากถาวร (Rule 0.8)
+2. **งาน B · กวาดล้างตัวเลขค้างในเอกสารแม่บท 11 ไฟล์**:
+   - ปรับปรุงตัวเลขให้ตรงกับความจริงของระบบ: **33 ด่านตรวจ · 25 ผังพยากรณ์ · 124 ตำแหน่ง**
+   - เอกสารที่อัปเดต: `CLAUDE.md`, `GEMINI.md`, `README.md`, `docs/INDEX.md`, `docs/ARCHITECTURE.md`, `docs/AI_COLLABORATION_GUIDELINES.md`, `docs/KNOWN_ISSUES.md` (เพิ่มบันทึกรอบตรวจ 2026-09-06), `docs/LOCAL_SETUP.md`, `docs/WORK_LOG.md`
+   - ป้องกัน Revisionism โดยคงบันทึกประวัติศาสตร์เดิมไว้ใน `ALLOWLIST`
+3. **งาน C · เติมเต็มบทนำหมวดไพ่ 6 หมวดให้ถึงเกณฑ์จริง (≥ 300 คำ / ≥ 1,050 ตัวอักษรไทย)**:
+   - เพิ่มย่อหน้าที่ 4 ทั้งภาษาไทยและอังกฤษใน [`src/data/cards/group-seo.ts`](../src/data/cards/group-seo.ts) ครบทั้ง 6 หมวด (`major`, `minor`, `wands`, `cups`, `swords`, `pentacles`)
+   - เนื้อหาลึกซึ้ง ครอบคลุมคำถามเฉพาะทาง ภาษาธรรมชาติ ปราศจากอิโมจิการ์ตูน และอ้างอิงไพ่แท้ 1909 Rider-Waite เท่านั้น
+   - ยกระดับ threshold ใน [`scripts/qa/test-seo-wave2.ts`](../scripts/qa/test-seo-wave2.ts) ตรวจนับอักษรไทยจริง `thaiChars >= 1050`
+   - ผ่านการทดสอบครบถ้วนทั้ง 6 หมวด (1,279–1,384 อักษรไทย ≈ 365–395 คำ)
+- **ผลการทดสอบ**: `npm run repo:verify` ผ่านครบสมบูรณ์ทั้ง 33/33 ด่าน 100%
+
 ### 🗓️ 2026-09-06: ตรวจรับงาน SEO คลื่น 2–4 และเขียนแผนส่งต่อปิดหนี้ที่เหลือ (โดย Claude)
 
 > **ขอบเขต**: ตรวจรับอย่างเดียว + เขียนแผน — **ไม่ได้แก้โค้ดใด ๆ**
