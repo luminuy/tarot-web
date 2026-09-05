@@ -11,19 +11,62 @@ import { saveReading } from "@/lib/utils/history";
 
 type DailyFocus = "general" | "work" | "money" | "love" | "mind";
 
-interface FocusTopic {
+interface FocusChamber {
   id: DailyFocus;
-  labelTh: string;
-  labelEn: string;
-  badge: string;
+  roman: string;
+  titleTh: string;
+  titleEn: string;
+  elementTh: string;
+  descTh: string;
+  descEn: string;
 }
 
-const FOCUS_TOPICS: FocusTopic[] = [
-  { id: "general", labelTh: "พลังงานภาพรวม", labelEn: "Overall Energy", badge: "ภาพรวม" },
-  { id: "work", labelTh: "การงาน & การตัดสินใจ", labelEn: "Career & Decisions", badge: "การงาน" },
-  { id: "money", labelTh: "การเงิน & โชคลาภ", labelEn: "Finance & Fortune", badge: "การเงิน" },
-  { id: "love", labelTh: "ความรัก & คนในใจ", labelEn: "Love & Bond", badge: "ความรัก" },
-  { id: "mind", labelTh: "สติปัญญา & จิตวิญญาณ", labelEn: "Mind & Spirit", badge: "จิตวิญญาณ" },
+const FOCUS_CHAMBERS: FocusChamber[] = [
+  {
+    id: "general",
+    roman: "I",
+    titleTh: "มหาภาพรวม",
+    titleEn: "Cosmic Totality",
+    elementTh: "มิติแห่งแสงสว่าง",
+    descTh: "คลื่นพลังงานหลักและเข็มทิศชีวิตประจำวัน",
+    descEn: "Overall energy and spiritual alignment",
+  },
+  {
+    id: "work",
+    roman: "II",
+    titleTh: "การงาน & ภารกิจ",
+    titleEn: "Sovereignty & Career",
+    elementTh: "ธาตุไฟ (Wands)",
+    descTh: "การตัดสินใจ ภาวะผู้นำ และความก้าวหน้า",
+    descEn: "Professional decisions & purposeful action",
+  },
+  {
+    id: "money",
+    roman: "III",
+    titleTh: "การเงิน & โชคลาภ",
+    titleEn: "Vault of Abundance",
+    elementTh: "ธาตุดิน (Pentacles)",
+    descTh: "ความมั่งคั่ง สภาพคล่อง และโชคชะตา",
+    descEn: "Financial liquidity & material harmony",
+  },
+  {
+    id: "love",
+    roman: "IV",
+    titleTh: "ความรัก & สัมพันธภาพ",
+    titleEn: "Heart Sanctuary",
+    elementTh: "ธาตุน้ำ (Cups)",
+    descTh: "ความผูกพัน คนในใจ และความจริงในดวงใจ",
+    descEn: "Emotional resonance & sacred bonds",
+  },
+  {
+    id: "mind",
+    roman: "V",
+    titleTh: "สติปัญญา & จิตวิญญาณ",
+    titleEn: "Inner Temple",
+    elementTh: "ธาตุลม (Swords)",
+    descTh: "ความสงบภายใน สติสัมปชัญญะ และการปล่อยวาง",
+    descEn: "Mental clarity & inner stillness",
+  },
 ];
 
 export function DailyClient() {
@@ -38,7 +81,7 @@ export function DailyClient() {
   const [copied, setCopied] = useState(false);
   const [savedToHistory, setSavedToHistory] = useState(false);
 
-  // วันที่ปัจจุบันแบบไทย
+  // วันที่ปัจจุบันแบบทางการระดับสากล
   const todayDateString = new Intl.DateTimeFormat(isEnglish ? "en-US" : "th-TH", {
     weekday: "long",
     year: "numeric",
@@ -89,7 +132,14 @@ export function DailyClient() {
           spreadId: "daily-one",
           spreadName: isEnglish ? "Daily Tarot (1 Card)" : "ไพ่ยิปซีรายวัน (1 ใบ)",
           question: intentionText.trim() || (isEnglish ? "Daily Energy Reading" : "ดูดวงพลังงานประจำวัน"),
-          category: selectedFocus === "love" ? "love" : selectedFocus === "work" ? "work" : selectedFocus === "money" ? "money" : "general",
+          category:
+            selectedFocus === "love"
+              ? "love"
+              : selectedFocus === "work"
+              ? "work"
+              : selectedFocus === "money"
+              ? "money"
+              : "general",
           personaId: "seer",
           personaName: isEnglish ? "Seer Oracle" : "แม่หมอ AI",
           cards: [
@@ -122,6 +172,7 @@ export function DailyClient() {
 
   const handleShare = () => {
     if (!drawnCard) return;
+    soundManager.playCardSelectSound();
     const textToShare = isEnglish
       ? `My Daily Tarot: ${drawnCard.nameEn} — Free reading at ${window.location.href}`
       : `ไพ่ยิปซีประจำวันของฉัน: ${drawnCard.nameTh} (${drawnCard.nameEn}) — เปิดไพ่ประจำวันฟรีที่ ${window.location.href}`;
@@ -142,8 +193,17 @@ export function DailyClient() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F0EA] text-[#29261F] py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#F3F0EA] text-[#29261F] py-8 sm:py-14 px-4 sm:px-6 font-sans relative overflow-x-clip">
+      {/* Subtle Ethereal Halo Background */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-96 pointer-events-none opacity-40"
+        style={{
+          background: "radial-gradient(ellipse at 50% 0%, rgba(165,138,92,0.18) 0%, transparent 70%)",
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="max-w-4xl mx-auto space-y-10 relative z-10">
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-[#7A6F5D]">
           <ol className="flex items-center gap-2 flex-wrap">
@@ -154,149 +214,190 @@ export function DailyClient() {
             </li>
             <li aria-hidden="true" className="text-[#D5CEC2]">/</li>
             <li className="font-semibold text-[#29261F]" aria-current="page">
-              {isEnglish ? "Daily Tarot" : "ดูดวงไพ่ยิปซีรายวัน"}
+              {isEnglish ? "Daily Celestial Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
             </li>
           </ol>
         </nav>
 
-        {/* Hero Header matching TarotFlow */}
-        <header className="text-center space-y-3 pt-2 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] text-xs font-serif-th font-semibold text-[#8F5C1A] shadow-[var(--shadow-raised)]">
-            <span>{todayDateString}</span>
+        {/* Hero Header (World-Class Editorial Typography) */}
+        <header className="text-center space-y-4 pt-2 max-w-2xl mx-auto">
+          {/* Celestial Chronometer Badge */}
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] shadow-[var(--shadow-raised)]">
+            <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-[#8F5C1A] font-semibold">
+              SACRED DAILY CHRONOMETER
+            </span>
             <span className="text-[#D5CEC2]">·</span>
-            <span>{isEnglish ? "1909 Rider-Waite" : "สำรับ 1909 แท้ 78 ใบ"}</span>
+            <span className="text-xs font-serif-th text-[#5E5240]">{todayDateString}</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal [text-wrap:balance]">
-            {isEnglish ? "Interactive Daily Tarot Oracle" : "ดูดวงไพ่ยิปซีรายวัน นำทางชีวิตวันนี้"}
+          <h1 className="text-3xl sm:text-5xl font-serif-th font-bold text-[#29261F] tracking-tight leading-tight [text-wrap:balance]">
+            {isEnglish ? "The Daily Celestial Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
           </h1>
 
           <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
             {isEnglish
-              ? "Center your awareness, focus on your focus area today, and draw your card with provably fair Web Crypto randomness."
-              : "ตั้งจิตให้สงบ เลือกประเด็นที่ต้องการแนวทางวันนี้ แล้วแตะเปิดไพ่ 1 ใบเพื่อรับข้อคิดเตือนสติและพลังงานนำทางชีวิต"}
+              ? "Align your heart with the 78 archetypes of 1909 Rider-Waite. Choose your elemental chamber, connect through cryptographic randomness, and receive today's illumination."
+              : "น้อมจิตสู่ความสงบ เชื่อมโยงกับแม่พิมพ์จิตวิทยาโบราณ 1909 Rider-Waite เลือกวิหารพลังงานที่คุณต้องการเปิดรับคำแนะนำ แล้วเปิดไพ่ 1 ใบเพื่อรับแสงสว่างนำทางชีวิต"}
           </p>
         </header>
 
-        {/* Sacred Altar Panel (Matching Homepage Altar Cloth & Altar Panel) */}
+        {/* Sacred Altar Panel (Porcelain Luxury Canvas) */}
         <section
           aria-label="Altar card picking area"
-          className="altar-panel rounded-2xl p-5 sm:p-8 space-y-6 relative overflow-hidden"
+          className="rounded-3xl border border-[#D5CEC2] bg-[#FFFFFF] shadow-[var(--shadow-overlay)] p-6 sm:p-10 space-y-8 relative overflow-hidden"
         >
-          {/* Step 1: Intention & Focus Setting */}
+          {/* Step 1: Five Elemental Chambers & Intention */}
           {status === "idle" && (
-            <div className="space-y-6">
-              <div className="space-y-3 max-w-xl mx-auto text-center">
-                <label className="block text-xs uppercase tracking-wider font-serif-th font-semibold text-[#8F5C1A]">
-                  {isEnglish ? "Select Today's Intention Focus" : "1. เลือกเรื่องที่ต้องการเปิดรับพลังงานวันนี้"}
-                </label>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  {FOCUS_TOPICS.map((topic) => {
-                    const isSelected = selectedFocus === topic.id;
+            <div className="space-y-8">
+              {/* Chamber Selector */}
+              <div className="space-y-4">
+                <div className="text-center space-y-1">
+                  <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
+                    STAGE I: CHOOSE YOUR ELEMENTAL CHAMBER
+                  </span>
+                  <h2 className="text-lg sm:text-xl font-serif-th font-bold text-[#29261F]">
+                    เลือกวิหารเจตจำนงที่ต้องการเปิดรับสาร
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                  {FOCUS_CHAMBERS.map((chamber) => {
+                    const isSelected = selectedFocus === chamber.id;
                     return (
                       <button
-                        key={topic.id}
+                        key={chamber.id}
                         type="button"
                         onClick={() => {
                           soundManager.playMenuTapSound();
-                          setSelectedFocus(topic.id);
+                          setSelectedFocus(chamber.id);
                         }}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-serif-th font-semibold transition-all cursor-pointer ${
+                        className={`p-4 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-2 group ${
                           isSelected
-                            ? "bg-[#29261F] text-[#FAF7F2] shadow-[var(--shadow-raised)]"
-                            : "bg-[#FFFFFF] border border-[#D9C8AC] text-[#635B4E] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
+                            ? "border-[#8F5C1A] bg-gradient-to-b from-[#FAF6F0] to-[#FFFFFF] shadow-md ring-2 ring-[#8F5C1A]/20 -translate-y-1"
+                            : "border-[#D5CEC2]/70 bg-[#FAF8F5] hover:border-[#8F5C1A]/50 hover:bg-[#FFFFFF] hover:-translate-y-0.5"
                         }`}
                       >
-                        {isEnglish ? topic.labelEn : topic.labelTh}
+                        <div className="flex items-center justify-between w-full">
+                          <span
+                            className={`font-mono text-xs font-bold ${
+                              isSelected ? "text-[#8F5C1A]" : "text-[#7A6F5D] group-hover:text-[#8F5C1A]"
+                            }`}
+                          >
+                            {chamber.roman}
+                          </span>
+                          <span className="text-[10px] font-serif-th text-[#7A6F5D]">
+                            {chamber.elementTh.split(" ")[0]}
+                          </span>
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="text-sm font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                            {chamber.titleTh}
+                          </div>
+                          <p className="text-[11px] font-serif-th text-[#7A6F5D] leading-tight">
+                            {chamber.descTh}
+                          </p>
+                        </div>
                       </button>
                     );
                   })}
                 </div>
-
-                <div className="pt-2">
-                  <input
-                    type="text"
-                    value={intentionText}
-                    onChange={(e) => setIntentionText(e.target.value)}
-                    placeholder={
-                      isEnglish
-                        ? "Optional: Enter your specific question or thought for today..."
-                        : "ตั้งจิตอธิษฐาน: พิมพ์เรื่องหรือคำถามที่อยู่ในใจวันนี้ (หรือไม่ระบุก็ได้)..."
-                    }
-                    className="w-full rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] px-4 py-2.5 text-xs sm:text-sm font-serif-th text-[#29261F] placeholder-[#A59A88] focus:border-[#8F5C1A] focus:outline-hidden"
-                  />
-                </div>
               </div>
 
-              {/* Central Altar Cloth & Deck Display */}
-              <div className="altar-cloth p-6 sm:p-10 flex flex-col items-center justify-center space-y-6">
-                <div className="cursor-pointer" onClick={handleStartDraw}>
+              {/* Intention Inscription */}
+              <div className="space-y-2 max-w-2xl mx-auto">
+                <label
+                  htmlFor="daily-intention-input"
+                  className="block text-xs font-serif-th font-semibold text-[#4A4338] text-center"
+                >
+                  บันทึกจิตอธิษฐานในวิหาร (ตั้งคำถามหรือปล่อยว่างตามความรู้สึก)
+                </label>
+                <input
+                  id="daily-intention-input"
+                  type="text"
+                  value={intentionText}
+                  onChange={(e) => setIntentionText(e.target.value)}
+                  placeholder="พิมพ์เรื่องราวหรือคำถามที่อยู่ในใจวันนี้..."
+                  className="w-full rounded-2xl border border-[#D5CEC2] bg-[#FAF8F5] px-4 py-3.5 text-xs sm:text-sm font-serif-th text-[#29261F] placeholder-[#A59A88] focus:border-[#8F5C1A] focus:outline-hidden focus:ring-1 focus:ring-[#8F5C1A] transition-colors shadow-inner"
+                />
+              </div>
+
+              {/* Sacred Altar Cloth Stage */}
+              <div className="altar-cloth bg-[#EAE7E0] border border-[#D5CEC2] rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center space-y-6 shadow-inner">
+                {/* 3D Floating Deck Preview */}
+                <div
+                  className="cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95"
+                  onClick={handleStartDraw}
+                >
                   <TarotCard
                     size="lg"
                     isRevealed={false}
                     isHighlighted={true}
-                    positionLabel="ไพ่ประจำวันนี้"
+                    positionLabel="สำรับ 1909 RWS"
                   />
                 </div>
 
-                <div className="space-y-2 text-center">
+                <div className="space-y-3 text-center max-w-md">
                   <button
                     type="button"
                     onClick={handleStartDraw}
-                    className="px-8 py-3 rounded-full bg-[#29261F] text-[#FAF7F2] font-serif-th text-xs sm:text-sm font-bold shadow-[var(--shadow-raised)] hover:bg-[#A58A5C] active:scale-95 transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-10 py-4 rounded-xl bg-[#29261F] text-[#FAF8F5] font-serif-th text-sm font-bold shadow-[var(--shadow-raised)] hover:bg-[#8F5C1A] active:scale-[0.98] transition-all duration-200 cursor-pointer tracking-wide"
                   >
-                    {isEnglish ? "Shuffle 78 Cards & Connect" : "สับไพ่และเลือกไพ่ประจำวัน"}
+                    เริ่มพิธีสับไพ่และเลือกไพ่ประจำวัน
                   </button>
                   <p className="text-[11px] font-serif-th text-[#7A6F5D]">
-                    {isEnglish
-                      ? "Provably Fair Web Crypto RNG · Pure 1909 Rider-Waite Smith"
-                      : "สับไพ่ 78 ใบด้วยอัลกอริทึมเข้ารหัสสุ่มแท้ ไม่มีการล็อกผล 100%"}
+                    ระบบสุ่มรหัสลับ Web Crypto API SHA-256 ปลอดการล็อกผล 100%
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Step 2: Shuffling Animation */}
+          {/* Step 2: Shuffling Chamber */}
           {status === "shuffling" && (
-            <div className="altar-cloth p-12 sm:p-16 flex flex-col items-center justify-center space-y-4">
-              <div className="w-24 h-40 rounded-lg border-2 border-[#8F5C1A] card-back-pattern shadow-[var(--shadow-overlay)] animate-pulse flex items-center justify-center">
-                <span className="text-xs font-serif-th text-[#FFFFFF] tracking-wider uppercase">
-                  {isEnglish ? "Shuffling..." : "กำลังสับไพ่..."}
-                </span>
+            <div className="altar-cloth bg-[#EAE7E0] border border-[#D5CEC2] rounded-2xl p-14 sm:p-20 flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
+              <div className="relative">
+                <div className="w-28 h-44 rounded-xl border-2 border-[#D5CEC2] card-back-pattern shadow-[var(--shadow-overlay)] animate-pulse flex items-center justify-center">
+                  <div className="text-[10px] font-mono tracking-widest uppercase text-white/90">
+                    SHUFFLING
+                  </div>
+                </div>
               </div>
-              <p className="text-xs sm:text-sm font-serif-th text-[#635B4E] animate-pulse">
-                {isEnglish
-                  ? "Aligning your daily energy with the 78 sacred archetypes..."
-                  : "กำลังสับไพ่ 78 ใบเพื่อเชื่อมโยงกระแสพลังงานของคุณ..."}
-              </p>
+              <div className="space-y-1 text-center">
+                <h3 className="text-base font-serif-th font-bold text-[#29261F]">
+                  กำลังจัดเรียงคลื่นพลังงานและสับสำรับไพ่ 1909 Rider-Waite...
+                </h3>
+                <p className="text-xs font-serif-th text-[#7A6F5D]">
+                  น้อมจิตสู่ความสงบและระลึกถึงเรื่องราวที่ต้องการคำตอบ
+                </p>
+              </div>
             </div>
           )}
 
-          {/* Step 3: Card Fan Arc (Manual Self-Reveal) */}
+          {/* Step 3: The 22 Major Arcana Ribbon (Manual Pick) */}
           {status === "picking" && (
-            <div className="altar-cloth p-6 sm:p-8 space-y-6 text-center animate-in fade-in duration-300">
+            <div className="altar-cloth bg-[#EAE7E0] border border-[#D5CEC2] rounded-2xl p-6 sm:p-10 space-y-6 text-center animate-in fade-in duration-300">
               <div className="space-y-1">
-                <span className="text-xs uppercase tracking-wider font-serif-th font-semibold text-[#8F5C1A]">
-                  {isEnglish ? "Step 2: Choose Your Card" : "ขั้นตอนที่ 2: เลือกหยิบไพ่ 1 ใบจากสำรับ"}
+                <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
+                  STAGE II: INTUITIVE CARD SELECTION
                 </span>
+                <h3 className="text-xl sm:text-2xl font-serif-th font-bold text-[#29261F]">
+                  แตะเลือกไพ่ 1 ใบที่ดึงดูดสายตาคุณ
+                </h3>
                 <p className="text-xs sm:text-sm font-serif-th text-[#635B4E]">
-                  {isEnglish
-                    ? "Use your intuition and tap the card that calls to you."
-                    : "ใช้สมาธิสัมผัส แล้วแตะเลือกไพ่ใบที่ดึงดูดใจคุณมากที่สุด"}
+                  ปล่อยให้ปัญญาญาณภายใน (Intuition) เป็นผู้นำทางหัวใจของคุณ
                 </p>
               </div>
 
-              {/* Fanned Arc with Sacred Card Back Pattern */}
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 overflow-x-auto py-6 px-2 no-scrollbar">
-                {[0, 1, 2, 3, 4, 5, 6].map((idx) => (
+              {/* Major Arcana Card Ribbon */}
+              <div className="flex items-center justify-center gap-2 sm:gap-3 overflow-x-auto py-8 px-4 no-scrollbar">
+                {Array.from({ length: 9 }).map((_, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={handlePickFromFan}
-                    className="w-14 h-24 sm:w-20 sm:h-34 rounded-lg card-back-pattern border-2 border-[#D9C8AC] shadow-[var(--shadow-raised)] hover:-translate-y-3 hover:border-[#8F5C1A] hover:ring-2 hover:ring-[#8F5C1A]/40 transition-all duration-200 cursor-pointer flex-shrink-0 flex items-center justify-center group"
+                    className="w-16 h-28 sm:w-24 sm:h-40 rounded-xl card-back-pattern border-2 border-[#D5CEC2] shadow-[var(--shadow-raised)] hover:-translate-y-4 hover:border-[#8F5C1A] hover:ring-2 hover:ring-[#8F5C1A]/40 transition-all duration-300 cursor-pointer flex-shrink-0 flex items-center justify-center group"
                   >
-                    <span className="text-[10px] font-mono text-[#D9C8AC] group-hover:text-white">
+                    <span className="text-[10px] font-mono text-[#D5CEC2] group-hover:text-white transition-colors">
                       #{idx + 1}
                     </span>
                   </button>
@@ -304,26 +405,30 @@ export function DailyClient() {
               </div>
 
               {fairnessHash && (
-                <p className="text-[10px] font-mono text-[#7A6F5D]">
-                  Proof Seed: {fairnessHash}
-                </p>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[10px] font-mono text-[#7A6F5D]">
+                  <span>SHA-256 PROOF:</span>
+                  <span className="font-bold text-[#8F5C1A]">{fairnessHash}</span>
+                </div>
               )}
             </div>
           )}
 
-          {/* Step 4: Ready to Flip */}
+          {/* Step 4: Ready to Reveal */}
           {status === "ready" && drawnCard && (
-            <div className="altar-cloth p-8 sm:p-12 flex flex-col items-center justify-center space-y-6 text-center animate-in fade-in duration-300">
+            <div className="altar-cloth bg-[#EAE7E0] border border-[#D5CEC2] rounded-2xl p-10 sm:p-16 flex flex-col items-center justify-center space-y-6 text-center animate-in fade-in duration-300">
               <div className="space-y-1">
-                <span className="text-xs uppercase tracking-wider font-serif-th font-semibold text-[#8F5C1A]">
-                  {isEnglish ? "Step 3: Reveal Today's Oracle" : "ขั้นตอนที่ 3: แตะเพื่อเปิดคำทำนาย"}
+                <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
+                  STAGE III: THE GRAND REVELATION
                 </span>
+                <h3 className="text-xl sm:text-2xl font-serif-th font-bold text-[#29261F]">
+                  ไพ่ตอบรับเจตจำนงของคุณแล้ว
+                </h3>
                 <p className="text-xs sm:text-sm font-serif-th text-[#635B4E]">
-                  {isEnglish ? "Tap the card to reveal your truth." : "ไพ่ตอบรับสมาธิของคุณแล้ว แตะเพื่อพลิกไพ่ 3D"}
+                  แตะที่ตัวไพ่เพื่อพลิกเฉลยสารพยากรณ์ประจำวันแบบ 3D
                 </p>
               </div>
 
-              <div className="cursor-pointer" onClick={handleRevealCard}>
+              <div className="cursor-pointer py-4" onClick={handleRevealCard}>
                 <TarotCard
                   size="lg"
                   isRevealed={false}
@@ -334,191 +439,215 @@ export function DailyClient() {
             </div>
           )}
 
-          {/* Step 5: Revealed Reading */}
+          {/* Step 5: The Grand Revelation & Oracle Manuscript */}
           {status === "revealed" && drawnCard && (
-            <div className="space-y-8 animate-in fade-in duration-500 text-left">
-              {/* Card Meta & Header Display with TarotCard */}
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b border-[#D9C8AC]/40 pb-6">
-                <div className="flex-shrink-0">
+            <div className="space-y-10 animate-in fade-in duration-500 text-left">
+              {/* Museum Vitrine Stage: The 3D Card Display */}
+              <div className="altar-cloth bg-[#EAE7E0] border border-[#D5CEC2] rounded-2xl p-6 sm:p-10 flex flex-col md:flex-row items-center md:items-start gap-8 shadow-inner">
+                {/* 3D Card Vitrine */}
+                <div className="flex-shrink-0 py-2">
                   <TarotCard
-                    size="md"
+                    size="lg"
                     isRevealed={true}
                     card={drawnCard}
                     imageFull={true}
+                    className="shadow-[var(--shadow-overlay)]"
                   />
                 </div>
 
-                <div className="space-y-3 flex-1 text-center sm:text-left">
-                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                    <span className="px-3 py-1 rounded-full bg-[#EAE7E0] border border-[#D9C8AC] text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                {/* Card Editorial Dossier */}
+                <div className="space-y-4 flex-1 text-center md:text-left">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                    <span className="px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-xs font-serif-th font-semibold text-[#8F5C1A]">
                       {drawnCard.arcana === "major" ? "Major Arcana (ชุดใหญ่)" : "Minor Arcana (ชุดเล็ก)"}
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#D9C8AC] text-xs font-serif-th text-[#635B4E]">
+                    <span className="px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-xs font-serif-th text-[#5E5240]">
                       ธาตุ{drawnCard.element}
                     </span>
                     {savedToHistory && (
-                      <span className="px-3 py-1 rounded-full bg-[#EAF2EC] border border-[#9DC3A6] text-xs font-serif-th text-[#2D6A4F] font-semibold">
-                        บันทึกลงสมุดดูดวงแล้ว
+                      <span className="px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#D5CEC2] text-xs font-serif-th text-[#3A7044] font-semibold">
+                        บันทึกลงสมุดดูดวงเรียบร้อย
                       </span>
                     )}
                   </div>
 
-                  <h2 className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F]">
-                    {drawnCard.nameTh} ({drawnCard.nameEn})
-                  </h2>
-
-                  <p className="text-xs sm:text-sm font-serif-th text-[#8F5C1A] font-semibold">
-                    {drawnCard.keywords.upright.join(" • ")}
-                  </p>
+                  <div className="space-y-1">
+                    <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-tight">
+                      {drawnCard.nameTh} ({drawnCard.nameEn})
+                    </h2>
+                    <p className="text-xs sm:text-sm font-serif-th text-[#8F5C1A] font-semibold tracking-wide">
+                      {drawnCard.keywords.upright.join(" — ")}
+                    </p>
+                  </div>
 
                   <p className="text-xs font-serif-th text-[#7A6F5D]">
-                    {drawnCard.astrology ? `ความเชื่อมโยง: ${drawnCard.astrology}` : ""}
+                    {drawnCard.astrology ? `ความสอดคล้องทางโหราศาสตร์: ${drawnCard.astrology}` : ""}
                   </p>
+
+                  <div className="pt-2">
+                    <Link
+                      href={`/cards/${drawnCard.id}`}
+                      className="text-xs font-serif-th font-bold text-[#8F5C1A] hover:text-[#5E390A] underline underline-offset-4"
+                    >
+                      เปิดคัมภีร์เจาะลึกความหมายไพ่ใบนี้ →
+                    </Link>
+                  </div>
                 </div>
               </div>
 
-              {/* 5-Dimension Synthesized Interpretation (Porcelain Cards) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Pillar 1: General Energy */}
-                <div className="altar-card-porcelain p-5 rounded-xl space-y-1.5 md:col-span-2">
-                  <h3 className="text-xs font-serif-th font-bold uppercase tracking-wider text-[#8F5C1A]">
-                    {isEnglish ? "Daily Core Energy" : "พลังงานหลักประจำวัน"}
+              {/* 5-Dimension Synthesized Interpretation (Illuminated Manuscript) */}
+              <div className="space-y-4">
+                <div className="border-b border-[#E8E2D8] pb-3 text-center sm:text-left">
+                  <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
+                    THE FIVE PILLARS OF DAILY ILLUMINATION
+                  </span>
+                  <h3 className="text-lg sm:text-xl font-serif-th font-bold text-[#29261F]">
+                    ถอดรหัสสารทำนาย 5 มิติประจำวัน
                   </h3>
-                  <p className="text-sm font-serif-th text-[#29261F] leading-relaxed">
-                    {drawnCard.meanings.general.upright}
-                  </p>
                 </div>
 
-                {/* Pillar 2: Career */}
-                <div className="altar-card-porcelain p-5 rounded-xl space-y-1.5">
-                  <h3 className="text-xs font-serif-th font-bold uppercase tracking-wider text-[#8F5C1A]">
-                    {isEnglish ? "Work & Career" : "การงานและการตัดสินใจ"}
-                  </h3>
-                  <p className="text-sm font-serif-th text-[#29261F] leading-relaxed">
-                    {drawnCard.meanings.work.upright}
-                  </p>
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Pillar 1: General Energy */}
+                  <div className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 space-y-2 shadow-xs md:col-span-2">
+                    <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-[#8F5C1A]">
+                      PILLAR I · CORE DAILY ENERGY
+                    </span>
+                    <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                      พลังงานหลักแห่งรุ่งอรุณ
+                    </h4>
+                    <p className="text-sm font-serif-th text-[#3E382E] leading-relaxed">
+                      {drawnCard.meanings.general.upright}
+                    </p>
+                  </div>
 
-                {/* Pillar 3: Money */}
-                <div className="altar-card-porcelain p-5 rounded-xl space-y-1.5">
-                  <h3 className="text-xs font-serif-th font-bold uppercase tracking-wider text-[#8F5C1A]">
-                    {isEnglish ? "Finance & Fortune" : "การเงินและสภาพคล่อง"}
-                  </h3>
-                  <p className="text-sm font-serif-th text-[#29261F] leading-relaxed">
-                    {drawnCard.meanings.money.upright}
-                  </p>
-                </div>
+                  {/* Pillar 2: Career */}
+                  <div className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 space-y-2 shadow-xs">
+                    <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-[#8F5C1A]">
+                      PILLAR II · CAREER & PURPOSE
+                    </span>
+                    <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                      การงาน ภารกิจ และการตัดสินใจ
+                    </h4>
+                    <p className="text-sm font-serif-th text-[#3E382E] leading-relaxed">
+                      {drawnCard.meanings.work.upright}
+                    </p>
+                  </div>
 
-                {/* Pillar 4: Love */}
-                <div className="altar-card-porcelain p-5 rounded-xl space-y-1.5">
-                  <h3 className="text-xs font-serif-th font-bold uppercase tracking-wider text-[#8F5C1A]">
-                    {isEnglish ? "Love & Bond" : "ความรักและความรู้สึก"}
-                  </h3>
-                  <p className="text-sm font-serif-th text-[#29261F] leading-relaxed">
-                    {drawnCard.meanings.love.upright}
-                  </p>
-                </div>
+                  {/* Pillar 3: Money */}
+                  <div className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 space-y-2 shadow-xs">
+                    <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-[#8F5C1A]">
+                      PILLAR III · WEALTH & ABUNDANCE
+                    </span>
+                    <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                      การเงิน สภาพคล่อง และโชคลาภ
+                    </h4>
+                    <p className="text-sm font-serif-th text-[#3E382E] leading-relaxed">
+                      {drawnCard.meanings.money.upright}
+                    </p>
+                  </div>
 
-                {/* Pillar 5: Mindful Caution */}
-                <div className="altar-card-porcelain p-5 rounded-xl space-y-1.5">
-                  <h3 className="text-xs font-serif-th font-bold uppercase tracking-wider text-[#8F5C1A]">
-                    {isEnglish ? "Daily Mindful Reflection" : "ข้อคิดเตือนสติประจำวัน"}
-                  </h3>
-                  <p className="text-sm font-serif-th text-[#29261F] leading-relaxed">
-                    {drawnCard.meanings.self.upright}
-                  </p>
+                  {/* Pillar 4: Love */}
+                  <div className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 space-y-2 shadow-xs">
+                    <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-[#8F5C1A]">
+                      PILLAR IV · HEART & BOND
+                    </span>
+                    <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                      ความรักและสัมพันธภาพ
+                    </h4>
+                    <p className="text-sm font-serif-th text-[#3E382E] leading-relaxed">
+                      {drawnCard.meanings.love.upright}
+                    </p>
+                  </div>
+
+                  {/* Pillar 5: Mindful Caution */}
+                  <div className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 space-y-2 shadow-xs">
+                    <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-[#8F5C1A]">
+                      PILLAR V · MINDFUL REFLECTION
+                    </span>
+                    <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                      คติธรรมเตือนสติและสิ่งพึงระวัง
+                    </h4>
+                    <p className="text-sm font-serif-th text-[#3E382E] leading-relaxed">
+                      {drawnCard.meanings.self.upright}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-6 pt-4 border-t border-[#D9C8AC]/40">
-                <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3">
+              <div className="space-y-8 pt-4 border-t border-[#E8E2D8]">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="px-5 py-2.5 rounded-full border border-[#D9C8AC] bg-white text-[#29261F] text-xs font-serif-th font-semibold hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-colors cursor-pointer shadow-xs"
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] text-[#29261F] text-xs font-serif-th font-bold hover:border-[#8F5C1A] hover:bg-[#FFFFFF] transition-all cursor-pointer shadow-xs"
                   >
-                    {isEnglish ? "Draw Again / Reset" : "สลับเรื่อง / เปิดใหม่อีกครั้ง"}
+                    เลือกเรื่องใหม่ / เปิดไพ่อีกครั้ง
                   </button>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleShare}
-                      className="px-6 py-2.5 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs font-serif-th font-bold hover:bg-[#A58A5C] transition-colors cursor-pointer shadow-xs"
-                    >
-                      {copied
-                        ? isEnglish
-                          ? "Copied to Clipboard!"
-                          : "คัดลอกข้อความแล้ว"
-                        : isEnglish
-                        ? "Share Reading"
-                        : "แชร์ผลทำนายวันนี้"}
-                    </button>
-
-                    <Link
-                      href={`/cards/${drawnCard.id}`}
-                      className="px-5 py-2.5 rounded-full bg-[#EAE7E0] border border-[#D9C8AC] text-[#29261F] text-xs font-serif-th font-semibold hover:bg-[#D5CEC2] transition-colors shadow-xs"
-                    >
-                      {isEnglish ? "Full Card Meaning" : "อ่านความหมายไพ่ใบนี้ฉบับเต็ม"}
-                    </Link>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#29261F] text-[#FAF8F5] text-xs font-serif-th font-bold hover:bg-[#8F5C1A] transition-all cursor-pointer shadow-xs"
+                  >
+                    {copied ? "คัดลอกข้อความคำทำนายแล้ว" : "แชร์ผลทำนายประจำวัน"}
+                  </button>
                 </div>
 
-                {/* Internal Workflow Cards (QuickTopic Style) */}
-                <div className="space-y-3 pt-2">
+                {/* Recommended Next Journeys (Luxury Gradient Cards) */}
+                <div className="space-y-4 pt-2">
                   <div className="text-center sm:text-left space-y-1">
-                    <h3 className="text-sm sm:text-base font-serif-th font-bold text-[#29261F]">
-                      ต้องการคำตอบที่ครอบคลุมและลึกซึ้งยิ่งขึ้น?
-                    </h3>
-                    <p className="text-xs font-serif-th text-[#7A6F5D]">
-                      การเปิดไพ่ 1 ใบให้ข้อคิดประจำวัน หากต้องการวิเคราะห์เรื่องเฉพาะเจาะจง แนะนำผังเหล่านี้:
-                    </p>
+                    <span className="text-[10px] font-mono tracking-wider uppercase text-[#8F5C1A] font-semibold">
+                      RECOMMENDED SACRED JOURNEYS
+                    </span>
+                    <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                      ขั้นตอนการพยากรณ์ชะตาชีวิตขั้นลึกซึ้ง
+                    </h4>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <Link
-                      href="/spreads/topic/love"
-                      className="group p-4 rounded-2xl border border-[#EADFD5] hover:border-[#C48464] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF9] to-[#F7EFE9] transition-all duration-300 hover:-translate-y-0.5 shadow-xs block"
+                      href="/love/1-card"
+                      className="p-4 rounded-2xl border border-[#EADFD5] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF9] to-[#F7EFE9] hover:border-[#C48464] transition-all duration-300 block shadow-xs group"
                     >
-                      <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FBF2EC] text-[#9E4E28] border-[#E8D0C3] inline-block mb-2">
-                        ยอดนิยม
-                      </div>
+                      <span className="text-[10px] font-serif-th font-semibold text-[#8F5C1A] uppercase tracking-wider block mb-1">
+                        LOVE ORACLE
+                      </span>
                       <div className="text-sm font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
-                        ผังดูดวงความรักเจาะลึก
+                        ดูดวงความรัก 1 ใบ
                       </div>
                       <p className="text-xs font-serif-th text-[#635B4E] leading-relaxed mt-1">
-                        ตรวจเช็กใจเขาใจเราและแนวโน้มความสัมพันธ์ 5-6 ใบ
+                        ตรวจเช็กพลังงานหัวใจ 4 สถานะ
                       </p>
                     </Link>
 
                     <Link
                       href="/spreads/celtic-cross"
-                      className="group p-4 rounded-2xl border border-[#E6DEC9] hover:border-[#8F5C1A] bg-gradient-to-br from-[#FFFFFF] via-[#FCFAF5] to-[#F5EEE0] transition-all duration-300 hover:-translate-y-0.5 shadow-xs block"
+                      className="p-4 rounded-2xl border border-[#E6DEC9] bg-gradient-to-br from-[#FFFFFF] via-[#FCFAF5] to-[#F5EEE0] hover:border-[#8F5C1A] transition-all duration-300 block shadow-xs group"
                     >
-                      <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#F6EFE0] text-[#8F5C1A] border-[#E2D4BE] inline-block mb-2">
-                        ผังโบราณ 10 ใบ
-                      </div>
+                      <span className="text-[10px] font-serif-th font-semibold text-[#8F5C1A] uppercase tracking-wider block mb-1">
+                        GRAND SPREAD 10 CARDS
+                      </span>
                       <div className="text-sm font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
-                        ผังเซลติกครอส (Celtic Cross)
+                        ผังโบราณเซลติกครอส
                       </div>
                       <p className="text-xs font-serif-th text-[#635B4E] leading-relaxed mt-1">
-                        วิเคราะห์ภาพรวมชีวิต อดีต ปัจจุบัน อนาคต และจิตใต้สำนึก
+                        ผ่าดวงชะตาชีวิต 10 มิติครบวงจร
                       </p>
                     </Link>
 
                     <Link
-                      href="/readers"
-                      className="group p-4 rounded-2xl border border-[#D5CEC2] hover:border-[#8F5C1A] bg-[#FFFFFF] transition-all duration-300 hover:-translate-y-0.5 shadow-xs block"
+                      href="/cards/birth-card"
+                      className="p-4 rounded-2xl border border-[#EADFD5] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF9] to-[#F7EFE9] hover:border-[#C48464] transition-all duration-300 block shadow-xs group"
                     >
-                      <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#EAE7E0] text-[#5E5240] border-[#D5CEC2] inline-block mb-2">
-                        แม่หมอตัวจริง
-                      </div>
+                      <span className="text-[10px] font-serif-th font-semibold text-[#8F5C1A] uppercase tracking-wider block mb-1">
+                        TAROT NUMEROLOGY
+                      </span>
                       <div className="text-sm font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
-                        ปรึกษานักพยากรณ์มืออาชีพ
+                        คำนวณไพ่ประจำตัว
                       </div>
                       <p className="text-xs font-serif-th text-[#635B4E] leading-relaxed mt-1">
-                        นัดหมายพูดคุยส่วนตัวเพื่อตอบคำถามเฉพาะบุคคล
+                        ค้นหาพิมพ์เขียวจิตวิญญาณจากวันเกิด
                       </p>
                     </Link>
                   </div>
@@ -526,47 +655,6 @@ export function DailyClient() {
               </div>
             </div>
           )}
-        </section>
-
-        {/* Informative Guidance & Educational Questions */}
-        <section className="space-y-6 pt-4 border-t border-[#D9C8AC]/40">
-          <div className="space-y-2 text-center max-w-xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-serif-th font-bold text-[#29261F]">
-              ข้อควรรู้เกี่ยวกับการดูดวงไพ่ยิปซีรายวัน
-            </h2>
-            <p className="text-xs sm:text-sm font-serif-th text-[#7A6F5D]">
-              แนวทางและหลักการเพื่อการเปิดรับพลังงานไพ่ทาโรต์อย่างมีสติ
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="altar-card-porcelain p-5 rounded-2xl space-y-2">
-              <h3 className="text-xs font-serif-th font-bold text-[#8F5C1A] uppercase tracking-wider">
-                1. ควรดูเวลาไหนดีที่สุด?
-              </h3>
-              <p className="text-xs font-serif-th text-[#5C5549] leading-relaxed">
-                ช่วงเวลาเช้าหลังตื่นนอน หรือก่อนเริ่มภารกิจประจำวัน เป็นช่วงที่จิตสงบที่สุด เหมาะสำหรับการตั้งสมาธิและเปิดรับสติเตือนใจ
-              </p>
-            </div>
-
-            <div className="altar-card-porcelain p-5 rounded-2xl space-y-2">
-              <h3 className="text-xs font-serif-th font-bold text-[#8F5C1A] uppercase tracking-wider">
-                2. เปิดซ้ำในวันเดียวกันได้ไหม?
-              </h3>
-              <p className="text-xs font-serif-th text-[#5C5549] leading-relaxed">
-                ไม่แนะนำให้เปิดไพ่รายวันซ้ำหลายรอบในวันเดียวกัน เพราะจะทำให้จิตใจสับสน หากมีคำถามเฉพาะ แนะนำให้ใช้ผัง 3 ใบ หรือผัง 10 ใบ
-              </p>
-            </div>
-
-            <div className="altar-card-porcelain p-5 rounded-2xl space-y-2">
-              <h3 className="text-xs font-serif-th font-bold text-[#8F5C1A] uppercase tracking-wider">
-                3. ความแม่นยำและเจตจำนงเสรี
-              </h3>
-              <p className="text-xs font-serif-th text-[#5C5549] leading-relaxed">
-                ไพ่ทาโรต์เป็นกระจกสะท้อนพลังงานและแนวโน้ม อนาคตที่แท้จริงถูกกำหนดด้วยการกระทำและการตัดสินใจอย่างมีสติของคุณเอง
-              </p>
-            </div>
-          </div>
         </section>
       </div>
     </div>

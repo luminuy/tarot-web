@@ -35,13 +35,27 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
-### 🗓️ 2026-09-06: ปรับปรุง 3 หน้ายอดนิยม (/daily, /love/1-card, /cards/birth-card) เข้ากับธีมหน้าหลัก 100% พร้อม Header/Footer ครบถ้วน, Internal Workflow & SEO (โดย Antigravity AI)
+### 🗓️ 2026-09-06: ยกเครื่องการออกแบบใหม่ทั้งหมดระดับโลก (Complete World-Class Luxury Redesign) สำหรับ /daily, /love/1-card, และ /cards/birth-card (โดย Antigravity AI)
 
 > **ขอบเขต**: 
-> 1. ปรับดีไซน์ของทั้ง 3 หน้า (`/daily`, `/love/1-card`, `/cards/birth-card`) ให้สอดคล้องกับ Sacred Luxury Aesthetic ของหน้าแรก (`/`) แบบ 100%: ใช้โทน Sacred Warm Parchment `#F3F0EA`, `.altar-panel`, `.altar-cloth`, การ์ด 3D สปริงพารัลแลกซ์ `<TarotCard />`, ลวดลายหลังไพ่ `.card-back-pattern` โทน Obsidian & Gold Filigree, และการจัดวาง Altar ขั้นพยากรณ์สมบูรณ์แบบ
-> 2. ติดตั้ง `<SiteHeader />` และ `<SiteFooter />` ครบถ้วนทั้ง 3 หน้า ผ่าน Next.js Route Layouts (`src/app/daily/layout.tsx`, `src/app/love/layout.tsx`, `src/app/cards/layout.tsx`)
-> 3. ออกแบบ Internal Workflow & User Funnel: ตั้งจิตอธิษฐาน ➔ สับไพ่ด้วย Web Crypto API ➔ พัดไพ่จับด้วยตนเอง (Manual Pick) ➔ พลิกไพ่ 3D พร้อมระบบเสียง Sound Manager ➔ คำทำนายสังเคราะห์หลายมิติ ➔ บันทึกประวัติ `saveReading` ลงในสมุดบันทึกดวงชะตา ➔ แนะนำขั้นตอนพยากรณ์ถัดไป (Celtic Cross, Daily, Love, Readers)
-> 4. เสริมแกร่ง SEO ด้วยบทความวิชาการเชิงลึก 800+ คำ (Carl Jung Synchronicity, 1909 RWS Archetypes, Mary K. Greer Tarot Numerology) พร้อม Schema.org Structured Data (`BreadcrumbList`, `FAQPage`, `SoftwareApplication`)
+> 1. ปรับโฉมสุนทรียภาพใหม่ทั้งหมดสู่ระดับ **World-Class Digital Masterpiece** เทียบชั้นมาตรฐานดิจิทัลไฮเอนด์ (Apple, Hermès, Aesop, Kinfolk):
+>    - **Atmospheric Ethereal Lighting**: ติดตั้ง Radial Celestial Aura ด้านบนของทุกหน้า ให้มิติแสงศักดิ์สิทธิ์นวลตา
+>    - **Architectural Porcelain Altar**: ปรับแผงพิธีกรรมเป็น `rounded-3xl` พร้อมเงาลึกซ้อนชั้น `shadow-[var(--shadow-overlay)]` และขอบทองคำแท้ 1px
+>    - **Illuminated Manuscript Layout**: จัดวางคำทำนายด้วยอักษรนำตัวใหญ่ (Drop Cap), คัมภีร์แยกเสาหลักชัดเจน, และการจัดพิมพ์สัดส่วนทองคำ
+> 2. **หน้าไพ่ยิปซีรายวัน (`/daily`)**:
+>    - ออกแบบ *The Sacred Daily Chronometer* แสดงวันที่สากลและสุริยคติไทยแบบนาฬิกาไฮเอนด์
+>    - สร้าง *The Five Elemental Chambers* (`I. มหาภาพรวม`, `II. ภารกิจและการงาน`, `III. ความมั่งคั่งและการเงิน`, `IV. มิติแห่งดวงใจ`, `V. สติปัญญาและจิตวิญญาณ`) ด้วยการ์ดพอร์ซเลนสลักเลขโรมัน
+>    - แท่นสับไพ่ 3D ลอยตัวเหนือผ้าปูโต๊ะพิธีกรรม `.altar-cloth` และริบบิ้นไพ่ชุดใหญ่ 22 ใบแบบโต้ตอบได้
+>    - คัมภีร์คำทำนาย 5 เสาหลักสไตล์นิตยสารวรรณกรรม พร้อมตราประทับบันทึกสมุดดูดวงและแชร์ผล
+> 3. **หน้าดูดวงความรัก 1 ใบ (`/love/1-card`)**:
+>    - ออกแบบ *The Sanctuary of the Heart* พร้อม 4 วิหารแห่งความรู้สึก: `I. ดวงใจแห่งอิสรภาพ (คนโสด)`, `II. ม่านหมอกแห่งความรู้สึก (คนคุย/ไม่ชัดเจน)`, `III. พันธสัญญาแห่งสองดวงจิต (คนมีคู่)`, `IV. วิหารแห่งการเยียวยา (พักใจ/คนเก่า)`
+>    - ช่องจารึกชื่อและเจตจำนงคู่รักสไตล์สมุดบันทึกวิหารพยากรณ์
+>    - วิเคราะห์ความรัก 4 เสาหลัก (สารหลัก, บทวิเคราะห์ตามสถานะ, ทางนำแห่งแสงสว่าง, สัญญาณเตือนใจ)
+> 4. **หน้าคำนวณไพ่ประจำตัว (`/cards/birth-card`)**:
+>    - ออกแบบ *The Astronomical Chronometer & Natal Codex* พร้อมแป้นหมุน วัน, เดือน, ปี พ.ศ./ค.ศ. สไตล์เครื่องมือดาราศาสตร์โบราณ
+>    - แอนิเมชันสรุปผลรวมตัวเลข (Numerical Reduction) แสดงที่มาของตัวเลขไพ่อย่างโปร่งใส
+>    - แท่นจัดแสดงไพ่คู่ขนาน Personality & Soul Card ด้วยการ์ด 3D ขนาดใหญ่ `<TarotCard size="lg" />` เอียงตามองศาเมาส์
+> 5. **บทความวิชาการ 800+ คำ และ FAQ Accordion**: ปรับกล่องบทความทุกหน้าเป็น `rounded-3xl p-6 sm:p-12 shadow-[var(--shadow-raised)]` พร้อม Schema.org ครบชุด
 
 1. **หน้าไพ่ยิปซีรายวัน (`src/app/daily/`)**:
    - สร้าง `layout.tsx` ติดตั้ง Sticky `<SiteHeader />` และ Quiet Luxury `<SiteFooter />`

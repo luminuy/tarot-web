@@ -162,12 +162,17 @@ export default function LoveOneCardPage() {
       {/* High-Authority Editorial Article & Knowledge Base */}
       <div className="bg-[#F3F0EA] pb-16 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <article className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-10 space-y-6 shadow-xs">
-            <h2 className="text-xl sm:text-2xl font-bold font-serif-th text-[#29261F] border-b border-[#E8E2D8] pb-4">
-              ศาสตร์แห่งการดูดวงความรัก 1 ใบ: ถอดรหัสใจและสัญชาตญาณความสัมพันธ์
-            </h2>
+          <article className="rounded-3xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-12 space-y-8 shadow-[var(--shadow-raised)]">
+            <div className="space-y-2 border-b border-[#E8E2D8] pb-4">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
+                THE PSYCHOLOGY OF TAROT IN LOVE & RELATIONSHIPS
+              </span>
+              <h2 className="text-xl sm:text-3xl font-bold font-serif-th text-[#29261F] tracking-tight">
+                ศาสตร์แห่งการดูดวงความรัก 1 ใบ: ถอดรหัสใจและสัญชาตญาณความสัมพันธ์
+              </h2>
+            </div>
 
-            <div className="space-y-4 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
+            <div className="space-y-5 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
               <p>
                 ความรักเป็นหนึ่งในมิติที่ซับซ้อนและเปราะบางที่สุดของจิตใจมนุษย์ เมื่อเราตกอยู่ในห้วงแห่งความรัก
                 ไม่ว่าจะเป็นช่วงเวลาที่หัวใจพองโต หรือช่วงเวลาที่สับสนคลุมเครือ จิตใจมักจะถูกครอบงำด้วยความคาดหวัง
@@ -175,10 +180,10 @@ export default function LoveOneCardPage() {
                 จึงทำหน้าที่เสมือน &quot;จุดพักใจ&quot; ให้คุณได้ถอยออกมาหนึ่งก้าวเพื่อมองสถานการณ์ตามความเป็นจริง
               </p>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
                 เจาะลึก 4 สถานะความสัมพันธ์ผ่านมุมมองไพ่ทาโรต์
               </h3>
-              <ul className="list-disc pl-5 space-y-2 text-[#5E5240]">
+              <ul className="list-disc pl-5 space-y-2.5 text-[#5E5240]">
                 <li>
                   <strong>คนโสด (Single):</strong> ไพ่จะสะท้อนพลังงานดึงดูดและสภาพจิตใจของคุณเป็นหลัก
                   หากคุณพร้อมเปิดรับรักใหม่ ไพ่จะชี้ถึงโอกาสและทิศทาง แต่หากในใจยังมีความกลัวหรือยังรักอิสระ
@@ -198,7 +203,7 @@ export default function LoveOneCardPage() {
                 </li>
               </ul>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
                 ไพ่ชุดใหญ่ vs ไพ่ชุดเล็ก ในเรื่องความรัก
               </h3>
               <p>

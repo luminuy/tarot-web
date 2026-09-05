@@ -168,17 +168,17 @@ export default function BirthCardPage() {
         <BirthCardCalculator />
 
         {/* Editorial Guide Article (Altar Panel) */}
-        <article className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-10 space-y-6 shadow-[var(--shadow-raised)]">
+        <article className="rounded-3xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-12 space-y-8 shadow-[var(--shadow-raised)]">
           <div className="space-y-2 border-b border-[#E8E2D8] pb-4">
             <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
               SACRED ESSENCE & PSYCHOLOGICAL ARCHETYPES
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold font-serif-th text-[#29261F]">
+            <h2 className="text-xl sm:text-3xl font-bold font-serif-th text-[#29261F] tracking-tight">
               ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: พิมพ์เขียวพลังงานและกระจกส่องจิตวิญญาณตลอดชีวิต
             </h2>
           </div>
 
-          <div className="space-y-4 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
+          <div className="space-y-5 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
             <p>
               ในศาสตร์ไพ่ทาโรต์และเลขศาสตร์สากล วันเกิดของมนุษย์แต่ละคนไม่ใช่เรื่องบังเอิญ แต่เป็นหมุดหมายแห่งกาลเวลาที่กำหนดคลื่นความถี่พลังงาน
               (Vibrational Blueprint) และพิมพ์เขียวแห่งจิตวิญญาณ การคำนวณหาไพ่ทาโรต์ประจำตัว (Tarot Birth Card) ได้รับการวางรากฐานทางวิชาการ
@@ -186,7 +186,7 @@ export default function BirthCardPage() {
               และ Angeles Arrien ซึ่งผสานศาสตร์แห่งสัญลักษณ์วิทยาโบราณเข้ากับทฤษฎีแม่พิมพ์จิตวิทยาดั้งเดิม (Archetypes) ของ คาร์ล ยุง (Carl Gustav Jung)
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
               กลไกการคำนวณและมิติแห่งตัวเลข (Digit Reduction & Major Arcana)
             </h3>
             <p>
@@ -200,13 +200,13 @@ export default function BirthCardPage() {
               ส่วนผู้ที่มีผลลัพธ์เป็นตัวเลข 1 ถึง 9 ตั้งแต่แรก จะถือว่ามีพลังงานของไพ่บุคลิกภาพและจิตวิญญาณเป็นหนึ่งเดียวกันอย่างลึกซึ้ง
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
               ความสัมพันธ์ของคู่ไพ่แห่งดวงวิญญาณ (Archetypal Constellations)
             </h3>
             <p>
               คู่ไพ่ประจำตัวช่วยให้เราเข้าใจความขัดแย้งและความสมดุลภายในตนเอง ตัวอย่างเช่น:
             </p>
-            <ul className="list-disc pl-5 space-y-2 text-[#5E5240]">
+            <ul className="list-disc pl-5 space-y-2.5 text-[#5E5240]">
               <li>
                 <strong>The Wheel of Fortune (10) และ The Magician (1):</strong> ผู้ที่ถือครองคู่ไพ่นี้มักเผชิญกับจุดเปลี่ยนและจังหวะชีวิตที่ไม่หยุดนิ่ง
                 แต่มีพรสวรรค์ในการแปรเปลี่ยนวิกฤตให้เป็นโอกาสด้วยสติปัญญาและทักษะรอบด้าน
@@ -253,7 +253,7 @@ export default function BirthCardPage() {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
               วิธีนำพลังงานไพ่ประจำตัวไปปรับใช้เพื่อการพัฒนาตนเอง
             </h3>
             <p>
@@ -276,12 +276,12 @@ export default function BirthCardPage() {
         </article>
 
         {/* FAQs (Altar Panel) */}
-        <section className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-10 space-y-6 shadow-[var(--shadow-raised)]">
+        <section className="rounded-3xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-12 space-y-8 shadow-[var(--shadow-raised)]">
           <div className="space-y-1">
             <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
               QUESTIONS & ANSWERS
             </span>
-            <h2 className="text-lg sm:text-xl font-bold font-serif-th text-[#29261F]">
+            <h2 className="text-xl sm:text-2xl font-bold font-serif-th text-[#29261F] tracking-tight">
               คำถามพบบ่อยเกี่ยวกับไพ่ประจำตัว (Birth Card FAQ)
             </h2>
             <p className="text-xs text-[#7A6F5D] font-serif-th">

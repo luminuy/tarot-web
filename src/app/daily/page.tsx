@@ -141,12 +141,17 @@ export default function DailyTarotPage() {
       {/* High-Authority Editorial Article & Knowledge Base */}
       <div className="bg-[#F3F0EA] pb-16 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <article className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-10 space-y-6 shadow-xs">
-            <h2 className="text-xl sm:text-2xl font-bold font-serif-th text-[#29261F] border-b border-[#E8E2D8] pb-4">
-              ศาสตร์แห่งการเปิดไพ่ยิปซีรายวัน: กระจกส่องจิตและสติสัมปชัญญะ
-            </h2>
+          <article className="rounded-3xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-12 space-y-8 shadow-[var(--shadow-raised)]">
+            <div className="space-y-2 border-b border-[#E8E2D8] pb-4">
+              <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
+                THE PHILOSOPHY OF DAILY TAROT & SYNCHRONICITY
+              </span>
+              <h2 className="text-xl sm:text-3xl font-bold font-serif-th text-[#29261F] tracking-tight">
+                ศาสตร์แห่งการเปิดไพ่ยิปซีรายวัน: กระจกส่องจิตและสติสัมปชัญญะ
+              </h2>
+            </div>
 
-            <div className="space-y-4 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
+            <div className="space-y-5 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
               <p>
                 ในวิถีแห่งทาโรต์ดั้งเดิม การเปิดไพ่ประจำวัน (Daily Tarot Draw) มิใช่การทำนายโชคชะตาแบบงมงาย
                 หากแต่เป็นเครื่องมือทางจิตวิทยาที่ทรงพลังในการสร้าง &quot;สติสัมปชัญญะประจำวัน&quot;
@@ -155,7 +160,7 @@ export default function DailyTarotPage() {
                 และปรากฏการณ์ความพ้องพานของเหตุการณ์ (Synchronicity)
               </p>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
                 วิธีรับพลังงานจากไพ่ประจำวันให้เกิดประโยชน์สูงสุด
               </h3>
               <ul className="list-disc pl-5 space-y-2 text-[#5E5240]">
@@ -174,7 +179,7 @@ export default function DailyTarotPage() {
                 </li>
               </ul>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-2">
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
                 ทำไมต้องใช้ระบบสุ่มแบบ Provably Fair?
               </h3>
               <p>
