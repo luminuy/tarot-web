@@ -54,7 +54,7 @@ async function runAudit(): Promise<SystemAudit> {
   const routeDefinitions = [
     { path: "/", name: "วิหารพยากรณ์หลัก (Main Sanctuary)", isLive: true },
     { path: "/cards", name: "สารานุกรมไพ่ 78 ใบ (Encyclopedia)", isLive: true },
-    { path: "/spreads", name: "คลัง 20 ผังพยากรณ์ (Spreads Library)", isLive: true },
+    { path: "/spreads", name: "คลัง 25 ผังพยากรณ์ (Spreads Library)", isLive: true },
     { path: "/blog", name: "คัมภีร์บทความความรู้ (Wisdom Blog)", isLive: true },
     { path: "/account", name: "บัญชีและประวัติ (Sanctuary Profile)", isLive: true },
     { path: "/privacy", name: "นโยบายความเป็นส่วนตัว (PDPA Policy)", isLive: true },
@@ -104,7 +104,7 @@ function updateWorkLog(audit: SystemAudit) {
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **วิหารพยากรณ์หลัก** | \`/\` | 🟢 **Active / Live** | ${audit.routes.find((r) => r.path === "/")?.status || "HTTP 200"} | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) | เพิ่มโหมดสลับไพ่กลับหัว Manual |
 | **สารานุกรมไพ่ 78 ใบ** | \`/cards\` & \`/cards/[id]\` | 🟢 **Active / Live** | ${audit.routes.find((r) => r.path === "/cards")?.status || "HTTP 200"} | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป | เพิ่ม Audio คำอ่านรายใบ |
-| **คลัง 20 ผังพยากรณ์** | \`/spreads\` | 🟢 **Active / Live** | ${audit.routes.find((r) => r.path === "/spreads")?.status || "HTTP 200"} | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 20 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
+| **คลัง 25 ผังพยากรณ์** | \`/spreads\` | 🟢 **Active / Live** | ${audit.routes.find((r) => r.path === "/spreads")?.status || "HTTP 200"} | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 25 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง | แชร์ผังพยากรณ์แบบรูปภาพ |
 | **คัมภีร์บทความความรู้** | \`/blog\` | 🟢 **Active / Live** | ${audit.routes.find((r) => r.path === "/blog")?.status || "HTTP 200"} | หน้าบทความ 3 บทความหลัก พร้อม UI สวยงาม | ระบบ Dynamic Reader \`/blog/[slug]\` Markdown |
 | **บัญชีและประวัติ** | \`/account\` | 🟢 **Active / Live** | ${audit.routes.find((r) => r.path === "/account")?.status || "HTTP 200"} | จัดการประวัติการดูดวง, ข้อมูลส่วนบุคคล, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **นโยบายความเป็นส่วนตัว** | \`/privacy\` | 🟢 **Active / Live** | ${audit.routes.find((r) => r.path === "/privacy")?.status || "HTTP 200"} | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |

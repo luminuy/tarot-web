@@ -30,15 +30,26 @@ function check(name: string, cond: boolean) {
 function main() {
   console.log("🧪 [QA] ระบบล็อกฟีเจอร์พรีเมียม (ผังใหญ่ & ปรมาจารย์ลับ)\n");
 
-  // ── 1. ผังมาตรฐาน 7 ผัง สำหรับบัญชีฟรี ──
-  check("ผังมาตรฐานมีจำนวนตรงตามตารางเปรียบเทียบ (7 ผัง)", STANDARD_SPREAD_IDS.size === 7);
+  // ── 1. ผังมาตรฐาน 10 ผัง สำหรับบัญชีฟรี ──
+  check("ผังมาตรฐานมีจำนวนตรงตามตารางเปรียบเทียบ (10 ผัง)", STANDARD_SPREAD_IDS.size === 10);
 
-  const standardExpected = ["daily", "quick", "yes-no", "three-card", "situation-solution", "mind-body-spirit", "how-they-feel"];
+  const standardExpected = [
+    "daily",
+    "quick",
+    "yes-no",
+    "three-card",
+    "situation-solution",
+    "mind-body-spirit",
+    "how-they-feel",
+    "family",
+    "luck",
+    "study",
+  ];
   for (const id of standardExpected) {
     check(`ผังมาตรฐาน ${id} เป็น free spread`, isStandardSpread(id));
   }
 
-  // ── 2. ผังใหญ่ 13 ผังต้องถูกล็อกสำหรับบัญชีฟรี ──
+  // ── 2. ผังใหญ่ 15 ผังต้องถูกล็อกสำหรับบัญชีฟรี ──
   const grandExpected = [
     "celtic-cross",
     "year-ahead",
@@ -53,16 +64,18 @@ function main() {
     "monthly",
     "ex-reconciliation",
     "inner-potential",
+    "love-six",
+    "monthly-ten",
   ];
   for (const id of grandExpected) {
     check(`ผังใหญ่ ${id} ถูกล็อกสำหรับบัญชีฟรี`, !isStandardSpread(id));
   }
 
-  // รวมต้องครบ 20 ผังพอดี
-  check("จำนวนผังทั้งหมดในระบบต้องเท่ากับ 20 ผัง", SPREADS.length === 20);
+  // รวมต้องครบ 25 ผังพอดี
+  check("จำนวนผังทั้งหมดในระบบต้องเท่ากับ 25 ผัง", SPREADS.length === 25);
   check(
-    "ผังทั้งหมดต้องถูกแบ่งเป็น Standard (7) + Grand (13) ครบ 20 ผัง",
-    STANDARD_SPREAD_IDS.size + (SPREADS.length - STANDARD_SPREAD_IDS.size) === 20
+    "ผังทั้งหมดต้องถูกแบ่งเป็น Standard (10) + Grand (15) ครบ 25 ผัง",
+    STANDARD_SPREAD_IDS.size + (SPREADS.length - STANDARD_SPREAD_IDS.size) === 25
   );
 
   // ── 3. แม่หมอพื้นฐาน 3 ท่าน vs ปรมาจารย์ลับ 2 ท่าน ──

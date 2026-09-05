@@ -71,6 +71,11 @@ const expectedCounts: Record<string, number> = {
   chakra: 7,
   "celtic-cross": 10,
   "year-ahead": 12,
+  "love-six": 6,
+  "monthly-ten": 10,
+  family: 5,
+  luck: 4,
+  study: 4,
 };
 for (const [id, count] of Object.entries(expectedCounts)) {
   const spread = SPREADS.find((s) => s.id === id);

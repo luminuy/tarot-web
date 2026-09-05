@@ -124,8 +124,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
         </h1>
         <p className="text-xs sm:text-sm md:text-base text-[#635B4E] max-w-2xl mx-auto leading-relaxed font-serif-th">
           {isEnglish
-            ? "Explore depth psychology, Jungian archetypes, archetypal symbolism, and master guides for love, career, and 20 sacred spreads rooted in the authentic 1909 Rider-Waite lineage."
-            : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite จิตวิทยาเชิงลึก ปรัชญา คาร์ล ยุง และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 20 แบบ โดยวิหาร SeerTarot"}
+            ? "Explore depth psychology, Jungian archetypes, archetypal symbolism, and master guides for love, career, and 25 sacred spreads rooted in the authentic 1909 Rider-Waite lineage."
+            : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite จิตวิทยาเชิงลึก ปรัชญา คาร์ล ยุง และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 25 แบบ โดยวิหาร SeerTarot"}
         </p>
       </header>
 

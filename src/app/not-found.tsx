@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 const LINKS = [
   { href: "/", label: "เริ่มดูดวงที่หน้าแรก" },
   { href: "/cards", label: "คัมภีร์ไพ่ 78 ใบ" },
-  { href: "/spreads", label: "ผังพยากรณ์ 20 แบบ" },
+  { href: "/spreads", label: "ผังพยากรณ์ 25 แบบ" },
   { href: "/blog", label: "บทความดูดวง" },
 ];
 

@@ -115,7 +115,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  // All 20 Spread Guide Pages
+  // All 25 Spread Guide Pages
   const spreadRoutes: MetadataRoute.Sitemap = SPREADS.map((spread) => ({
     url: `${baseUrl}/spreads/${spread.id}`,
     lastModified: now,
@@ -123,5 +123,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...cardRoutes, ...blogRoutes, ...spreadRoutes];
+  // All 6 Topic Spreads Landing Pages
+  const topicRoutes: MetadataRoute.Sitemap = [
+    "love",
+    "career",
+    "money",
+    "health",
+    "family",
+    "study",
+  ].map((slug) => ({
+    url: `${baseUrl}/spreads/topic/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.85,
+  }));
+
+  return [...staticRoutes, ...cardRoutes, ...blogRoutes, ...spreadRoutes, ...topicRoutes];
 }
