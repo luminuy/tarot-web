@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0085 · 2026-09-05 16:30 · 🟡 Medium · เติมเต็มคีย์เวิร์ดภาษาอังกฤษสำหรับแคชไพ่ประจำวันทั้งฝั่งเซิร์ฟเวอร์และไคลเอนต์
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ไพ่ประจำวันของวันปัจจุบันที่ถูกแคชไว้ใน KV ก่อนการอัปเดตยังคงไม่มีฟิลด์ keywordsEn ส่งผลให้แถบหน้าแรกอาจแสดงคีย์เวิร์ดภาษาไทย |
+| **สาเหตุราก** | ข้อมูลใน Cloudflare KV มีอายุตามวัน dk ทำให้แคชเดิมที่ถูกบันทึกก่อนเพิ่ม keywordsEn ไม่มีฟิลด์ดังกล่าว และฝั่งไคลเอนต์ไม่ได้อ่าน fallback จาก dictionary |
+| **การแก้ไข** | เพิ่มการ hydrate keywordsEn ให้กับอ็อบเจกต์ที่อ่านจาก KV และให้ DailyCardStrip อ่าน fallback จาก CARD_KEYWORDS_EN ทันที |
+| **🛡️ กฎป้องกันถาวร** | **เมื่อมีการเพิ่มฟิลด์ใหม่ในข้อมูลที่มี cache-layer ต้องมี code-level fallback และ auto-hydration เสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ทดสอบ daily card คืน keywordsEn ครบถ้วน และ repo:verify ผ่านครบ 27 ด่าน |
+| **บันทึกโดย** | Antigravity AI · branch `fix/daily-card-kv-cache-english-keywords` · commit `3c25aa2` |
+
+
 ### INC-0084 · 2026-09-05 16:21 · 🟠 High · ลบกฎแคช /cards/ ซ้ำซ้อนออกจาก next.config.ts ป้องกัน path-to-regexp syntax error
 
 | หัวข้อ | รายละเอียด |
