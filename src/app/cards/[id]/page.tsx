@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { DECK, cardById } from "@/data/cards";
 import { CardDetailView } from "@/components/encyclopedia/CardDetailView";
 import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
+import { CardSpreadLinks } from "@/components/encyclopedia/CardSpreadLinks";
+import { CARD_GROUPS } from "@/data/cards/group-seo";
 import type { Metadata } from "next";
 import { SITE_ORIGIN } from "@/lib/config/site";
 
@@ -85,21 +87,59 @@ export default async function CardDetailPage({ params }: CardPageProps) {
     inLanguage: "th",
   };
 
-  // หน้าไพ่ 78 ใบเป็นชุดหน้าที่ใหญ่ที่สุดและมีโอกาสได้ breadcrumb ใน SERP มากที่สุด
-  // แต่เดิมมีแค่ DefinedTerm ไม่มี BreadcrumbList (ต่างจาก /blog/[slug] และ /spreads/[id])
+  // Breadcrumbs ลำดับชั้นแบบสมบูรณ์: หน้าแรก > คัมภีร์ไพ่ 78 ใบ > [ชุดใหญ่/ชุดเล็ก > ดอก] > ชื่อไพ่
+  const breadcrumbElements = [
+    { "@type": "ListItem", position: 1, name: "หน้าแรก", item: SITE_ORIGIN },
+    { "@type": "ListItem", position: 2, name: "คัมภีร์ไพ่ 78 ใบ", item: `${SITE_ORIGIN}/cards` },
+  ];
+
+  if (card.arcana === "major") {
+    breadcrumbElements.push({
+      "@type": "ListItem",
+      position: 3,
+      name: "ไพ่ชุดใหญ่ (Major Arcana)",
+      item: `${SITE_ORIGIN}/cards/major`,
+    });
+    breadcrumbElements.push({
+      "@type": "ListItem",
+      position: 4,
+      name: card.nameTh,
+      item: `${SITE_ORIGIN}/cards/${card.id}`,
+    });
+  } else {
+    breadcrumbElements.push({
+      "@type": "ListItem",
+      position: 3,
+      name: "ไพ่ชุดเล็ก (Minor Arcana)",
+      item: `${SITE_ORIGIN}/cards/minor`,
+    });
+    if (card.suit && CARD_GROUPS[card.suit]) {
+      breadcrumbElements.push({
+        "@type": "ListItem",
+        position: 4,
+        name: CARD_GROUPS[card.suit].nameTh,
+        item: `${SITE_ORIGIN}/cards/${card.suit}`,
+      });
+      breadcrumbElements.push({
+        "@type": "ListItem",
+        position: 5,
+        name: card.nameTh,
+        item: `${SITE_ORIGIN}/cards/${card.id}`,
+      });
+    } else {
+      breadcrumbElements.push({
+        "@type": "ListItem",
+        position: 4,
+        name: card.nameTh,
+        item: `${SITE_ORIGIN}/cards/${card.id}`,
+      });
+    }
+  }
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "หน้าแรก", item: SITE_ORIGIN },
-      { "@type": "ListItem", position: 2, name: "คัมภีร์ไพ่ 78 ใบ", item: `${SITE_ORIGIN}/cards` },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: card.nameTh,
-        item: `${SITE_ORIGIN}/cards/${card.id}`,
-      },
-    ],
+    itemListElement: breadcrumbElements,
   };
 
   return (
@@ -118,7 +158,12 @@ export default async function CardDetailPage({ params }: CardPageProps) {
         nextCard={nextCard}
         totalCards={DECK.length}
         currentIndex={currentIndex}
-        related={<RelatedCards cardId={card.id} />}
+        related={
+          <>
+            <RelatedCards cardId={card.id} />
+            <CardSpreadLinks card={card} />
+          </>
+        }
       />
     </main>
   );
