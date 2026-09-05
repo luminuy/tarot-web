@@ -147,7 +147,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const entitlement = useEntitlement();
   const entitlementView = describeEntitlement(entitlement);
-  const isPassHolder = Boolean(entitlementView?.isUnlimited || entitlement?.hasPaidCredits);
+  // แอดมินปิดระบบสิทธิ์ทั้งเว็บ (/admin → เปิดระบบสิทธิ์จริง → ปิด) = ไม่มีลิมิตให้ใครเลย
+  // รวมถึงผังใหญ่ + ปรมาจารย์ลับด้วย — ผูก entitlement.enabled เข้ามาไม่งั้นการ์ดจะค้าง "ล็อก"
+  // ทั้งที่หลังบ้านอนุญาตให้เปิดผังใหญ่แล้ว (describeEntitlement คืน null ตอนปิดจึงไม่มี isUnlimited)
+  const isPassHolder = Boolean(
+    entitlementView?.isUnlimited || entitlement?.hasPaidCredits || (entitlement && !entitlement.enabled),
+  );
 
   /**
    * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้

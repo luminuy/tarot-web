@@ -4177,6 +4177,19 @@ metadata, sitemap, robots, allowlist กัน host injection, allowlist กั�
 
 ---
 
+### 🗓️ 2026-09-05: แก้ผังใหญ่/ปรมาจารย์ลับค้างล็อกแม้แอดมินปิดระบบสิทธิ์ (INC-0083)
+
+#### 1. isPassHolder ไม่รับรู้ว่า admin ปิดสวิตช์ entitlement.enforced ทั้งเว็บ
+- **ปัญหาเดิม / สิ่งที่ต้องการ**: เจ้าของโปรเจกต์ต้องการให้คนเข้ามาทดลองเล่นได้โดยไม่ติดลิมิตเลย โดยคุมเปิด/ปิดที่ `/admin → เปิดระบบสิทธิ์จริง` (สวิตช์นี้มีอยู่แล้ว ใช้งานได้ทั้งฝั่ง server) แต่หลังกดปิด การ์ดผังใหญ่ (เช่น Celtic Cross 10 ใบ) และปรมาจารย์ลับใน `SpreadCardSelector`/`PersonaCardSelector` ยังขึ้น "Tap to unlock this spread" ค้างอยู่ ทั้งที่ backend (`reading/start/route.ts`) อนุญาตแล้วเพราะเช็คอยู่ใน `if (isEntitlementEnabled())` เท่านั้น
+- **สาเหตุ**: `isPassHolder` ใน `TarotFlow.tsx` คำนวณจาก `entitlementView?.isUnlimited || entitlement?.hasPaidCredits` เท่านั้น — แต่ `describeEntitlement()` (`copy.ts`) คืน `null` ทันทีเมื่อ `ent.enabled === false` และ `/api/entitlement` คืน `hasPaidCredits: false` เสมอตอนปิดระบบ ทำให้ `isPassHolder` ค้างเป็น `false`
+- **สิ่งที่แก้ไข**: เพิ่มเงื่อนไข `(entitlement && !entitlement.enabled)` เข้าไปใน `isPassHolder` — ตรงกับ pattern เดียวกับที่ `FollowUpChat.tsx` ใช้กับ `isUnlimited` อยู่แล้ว (`!ent.enabled` = ไม่จำกัด)
+- **ไฟล์ที่แก้ไข**:
+  - `src/app/TarotFlow.tsx`
+- **ผลการทดสอบ**: `npm run typecheck` ➔ ผ่าน 0 error · ตรวจ logic ด้วยมือ: `entitlement.enabled=false` → `isPassHolder=true` → การ์ดผังใหญ่/ปรมาจารย์ลับไม่ล็อกอีกต่อไป (ไม่มี ADMIN_PASSWORD ในเครื่อง dev จึงตรวจแบบ end-to-end ผ่านเบราว์เซอร์ไม่ได้ — ต้องยืนยันซ้ำบน production หลัง deploy)
+- **บทเรียนที่บันทึก**: [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) INC-0083 — ต้องเช็ค `entitlement.enabled` คู่กับ `hasPaidCredits`/`role` เสมอเวลาต่อเงื่อนไขปลดล็อกฝั่ง UI
+
+---
+
 ## 📝 วิธีบันทึกงานสำหรับ AI ตัวถัดไป (Template for Next Entry)
 
 เมื่อทำงานเสร็จ ให้คัดลอก Template นี้ไปต่อท้าย:
