@@ -207,105 +207,50 @@ export function QuickFortunePicker({
     }
   };
 
-  // Carousel refs และสถานะการเลื่อน / ลากแบบ Apple Full-Width Carousel
+  // สถานะการเลื่อนและ Carousel สำหรับหน้าจอมือถือ
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
-
-  const isDraggingRef = useRef(false);
-  const startXRef = useRef(0);
-  const scrollLeftRef = useRef(0);
-  const dragDistanceRef = useRef(0);
-
-  const updateScrollStatus = () => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    setCanScrollLeft(scrollLeft > 10);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-  };
-
-  useEffect(() => {
-    updateScrollStatus();
-    const handleResize = () => updateScrollStatus();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const handleScroll = () => {
-    updateScrollStatus();
-  };
-
-  const scroll = (direction: "left" | "right") => {
     const el = carouselRef.current;
     if (!el) return;
-    const scrollAmount = Math.max(el.clientWidth * 0.75, 360);
-    el.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
+    const scrollLeft = el.scrollLeft;
+    const cardWidth = el.querySelector<HTMLElement>("[data-card-index]")?.offsetWidth || 280;
+    const newIndex = Math.round(scrollLeft / (cardWidth + 12));
+    setActiveIndex(Math.max(0, Math.min(newIndex, QUICK_TOPICS.length - 1)));
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const scrollToIndex = (index: number) => {
     const el = carouselRef.current;
     if (!el) return;
-    isDraggingRef.current = true;
-    startXRef.current = e.pageX - el.offsetLeft;
-    scrollLeftRef.current = el.scrollLeft;
-    dragDistanceRef.current = 0;
-    setIsDragging(true);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDraggingRef.current) return;
-    const el = carouselRef.current;
-    if (!el) return;
-    e.preventDefault();
-    const x = e.pageX - el.offsetLeft;
-    const walk = x - startXRef.current;
-    dragDistanceRef.current = Math.abs(walk);
-    el.scrollLeft = scrollLeftRef.current - walk;
-  };
-
-  const handleMouseUp = () => {
-    isDraggingRef.current = false;
-    setIsDragging(false);
-  };
-
-  const handleMouseLeave = () => {
-    isDraggingRef.current = false;
-    setIsDragging(false);
-  };
-
-  const handleCardClickWithDragCheck = (topic: QuickTopic) => {
-    if (dragDistanceRef.current > 8) {
-      return;
+    const cards = el.querySelectorAll<HTMLElement>("[data-card-index]");
+    if (cards[index]) {
+      cards[index].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      setActiveIndex(index);
     }
-    handleCardClick(topic);
   };
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-5 sm:space-y-6 w-full">
       {/* ส่วนหัวแนะนำการทำนายด่วน สไตล์วิหารพยากรณ์ */}
-      <div className="text-center space-y-3.5 max-w-2xl mx-auto px-4">
+      <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
         {/* สัญลักษณ์ดวงดาวประดับ */}
         <div className="flex items-center justify-center gap-2 text-[#A58A5C]/60 text-xs select-none">
           <span>✦</span>
-          <span className="w-10 h-px bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent" />
+          <span className="w-8 sm:w-10 h-px bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent" />
           <span>✧</span>
-          <span className="w-10 h-px bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent" />
+          <span className="w-8 sm:w-10 h-px bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent" />
           <span>✦</span>
         </div>
 
         {/* ป้ายกล่องทองคำเปลว */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-serif-th font-semibold tracking-wide bg-[#FBF8F3] border border-[#D5CEC2] text-[#8F5C1A] shadow-xs">
+        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full text-[11px] font-serif-th font-semibold tracking-wide bg-[#FBF8F3] border border-[#D5CEC2] text-[#8F5C1A] shadow-xs">
           <span>✨</span>
           <span>เปิดไพ่ด่วน 1 ใบ · สรุปความหมายตรงประเด็น</span>
           <span>✨</span>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
           เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้
         </h2>
         <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
@@ -313,46 +258,12 @@ export function QuickFortunePicker({
         </p>
       </div>
 
-      {/* Apple-Style Full-Width Swipe Carousel พร้อมภาพไพ่ 1909 Rider-Waite */}
-      <div className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden py-2 group/carousel">
-        {/* Apple Circular Prev Button */}
-        <button
-          type="button"
-          onClick={() => scroll("left")}
-          disabled={!canScrollLeft}
-          aria-label="หัวข้อก่อนหน้า"
-          className={`hidden sm:flex absolute left-4 md:left-8 lg:left-12 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 hover:bg-white text-[#29261F] border border-[#D5CEC2] shadow-[0_4px_20px_rgba(0,0,0,0.15)] backdrop-blur-sm items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-[#8F5C1A]`}
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        {/* Apple Circular Next Button */}
-        <button
-          type="button"
-          onClick={() => scroll("right")}
-          disabled={!canScrollRight}
-          aria-label="หัวข้อถัดไป"
-          className={`hidden sm:flex absolute right-4 md:right-8 lg:right-12 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 hover:bg-white text-[#29261F] border border-[#D5CEC2] shadow-[0_4px_20px_rgba(0,0,0,0.15)] backdrop-blur-sm items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-[#8F5C1A]`}
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-
-        {/* Horizontal Scroll Track (Edge-to-Edge Full-Bleed) */}
+      {/* การ์ด 4 หัวข้อยอดนิยม (Mobile: Horizontal Swipe / Desktop: 4-Column Grid พอเหมาะกับเว็บ) */}
+      <div className="w-full">
         <div
           ref={carouselRef}
           onScroll={handleScroll}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-          className={`flex overflow-x-auto gap-4 sm:gap-6 pb-6 pt-2 px-4 sm:px-10 md:px-16 lg:px-24 no-scrollbar snap-x snap-mandatory scroll-smooth select-none ${
-            isDragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
-          style={{ WebkitOverflowScrolling: "touch" }}
+          className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-3 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
         >
           {QUICK_TOPICS.map((topic, index) => (
             <div
@@ -360,50 +271,50 @@ export function QuickFortunePicker({
               data-card-index={index}
               role="button"
               tabIndex={0}
-              onClick={() => handleCardClickWithDragCheck(topic)}
+              onClick={() => handleCardClick(topic)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   handleCardClick(topic);
                 }
               }}
-              className={`w-[290px] xs:w-[320px] sm:w-[360px] md:w-[390px] lg:w-[410px] shrink-0 snap-start group relative flex flex-col justify-between p-5 sm:p-6 rounded-2xl sm:rounded-3xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition-all duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer select-none text-left overflow-hidden`}
+              className={`w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition-all duration-300 transform-gpu hover:-translate-y-1 hover:shadow-md cursor-pointer select-none text-left overflow-hidden min-h-[230px] sm:min-h-[240px]`}
             >
-              {/* สัญลักษณ์มุมการ์ดทองคำเปลว (Sacred Corner Accents) */}
-              <div className="absolute top-3 right-3 text-[10px] text-[#A58A5C]/40 group-hover:text-[#A58A5C]/90 transition-colors pointer-events-none select-none">
+              {/* สัญลักษณ์มุมการ์ดทองคำเปลว */}
+              <div className="absolute top-2.5 right-2.5 text-[9px] text-[#A58A5C]/40 group-hover:text-[#A58A5C]/90 transition-colors pointer-events-none select-none">
                 ✦
               </div>
-              <div className="absolute bottom-3 left-3 text-[10px] text-[#A58A5C]/30 group-hover:text-[#A58A5C]/70 transition-colors pointer-events-none select-none">
+              <div className="absolute bottom-2.5 left-2.5 text-[9px] text-[#A58A5C]/30 group-hover:text-[#A58A5C]/70 transition-colors pointer-events-none select-none">
                 ✦
               </div>
 
               {/* ป้ายกำกับด้านบน */}
-              <div className="flex items-center justify-between gap-2 mb-4 relative z-10">
+              <div className="flex items-center justify-between gap-2 mb-3 relative z-10">
                 <span
-                  className={`text-[11px] font-serif-th font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs ${topic.themeColors.badgeBg} ${topic.themeColors.badgeText} ${topic.themeColors.badgeBorder}`}
+                  className={`text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border shadow-2xs ${topic.themeColors.badgeBg} ${topic.themeColors.badgeText} ${topic.themeColors.badgeBorder}`}
                 >
                   {topic.badge}
                 </span>
-                <span className="text-xs font-serif-th text-[#A58A5C] flex items-center gap-1 group-hover:text-[#8F5C1A] transition-colors">
+                <span className="text-[11px] sm:text-xs font-serif-th text-[#A58A5C] flex items-center gap-1 group-hover:text-[#8F5C1A] transition-colors">
                   <span>ไพ่ 1 ใบ</span>
                   <span>✦</span>
                 </span>
               </div>
 
               {/* ส่วนกลาง: ภาพไพ่ 1909 Rider-Waite ในกรอบวิหาร + รายละเอียดหัวข้อ */}
-              <div className="flex items-center gap-4 sm:gap-5 mb-5 relative z-10">
+              <div className="flex items-center gap-3 sm:gap-3.5 mb-3.5 relative z-10">
                 {/* ภาพหน้าไพ่ 1909 Rider-Waite ประจำหัวข้อ */}
                 <div className="relative flex-shrink-0">
                   {/* รัศมีแสงทองนุ่มนวลเบื้องหลัง */}
-                  <div className="absolute -inset-1.5 rounded-xl bg-radial from-[#A58A5C]/25 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute -inset-1 rounded-xl bg-radial from-[#A58A5C]/20 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
                   <div
-                    className="relative w-[58px] h-[92px] sm:w-[68px] sm:h-[108px] rounded-lg sm:rounded-xl overflow-hidden border shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-300 transform-gpu bg-[#FFFFFF]"
+                    className="relative w-[50px] h-[78px] sm:w-[54px] sm:h-[85px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition-all duration-300 transform-gpu bg-[#FFFFFF]"
                     style={{ borderColor: topic.themeColors.cardBorder }}
                   >
                     <CardImage
                       image={topic.cardImage}
                       alt={topic.cardAlt}
-                      sizes="(min-width: 640px) 68px, 58px"
+                      sizes="(min-width: 640px) 54px, 50px"
                       className="w-full h-full object-cover object-center"
                       loading="eager"
                     />
@@ -412,33 +323,60 @@ export function QuickFortunePicker({
                 </div>
 
                 {/* ข้อความและคำอธิบาย */}
-                <div className="flex-1 min-w-0 space-y-1.5">
-                  <div className="text-[10px] sm:text-xs font-serif-th text-[#8F5C1A] tracking-wider font-semibold truncate">
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="text-[10px] sm:text-[11px] font-serif-th text-[#8F5C1A] tracking-wider font-semibold truncate">
                     {topic.elementalGlyph}
                   </div>
-                  <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors duration-200 leading-snug">
+                  <h3 className="text-sm sm:text-base font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors duration-200 leading-snug">
                     {topic.title}
                   </h3>
-                  <p className="text-xs sm:text-sm font-serif-th text-[#635B4E] leading-relaxed line-clamp-2">
+                  <p className="text-[11px] sm:text-xs font-serif-th text-[#635B4E] leading-relaxed line-clamp-2">
                     {topic.tagline}
                   </p>
                 </div>
               </div>
 
               {/* แถบการกระทำด้านล่าง: เชิญชวนเปิดไพ่พร้อมประกายทอง */}
-              <div className="pt-2.5 border-t border-[#D5CEC2]/40 relative z-10">
-                <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-[#F6F2EA]/70 group-hover:bg-[#29261F] text-[#4A3E31] group-hover:text-[#FAF7F2] transition-colors duration-300 shadow-2xs">
-                  <span className="text-xs font-serif-th font-medium">
+              <div className="pt-2 border-t border-[#D5CEC2]/40 relative z-10">
+                <div className="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl bg-[#F6F2EA]/70 group-hover:bg-[#29261F] text-[#4A3E31] group-hover:text-[#FAF7F2] transition-colors duration-300 shadow-2xs">
+                  <span className="text-[11px] sm:text-xs font-serif-th font-medium truncate mr-1">
                     {topic.highlightText}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-xs font-serif-th font-semibold text-[#8F5C1A] group-hover:text-[#E8D5B5] transition-colors">
+                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-serif-th font-semibold text-[#8F5C1A] group-hover:text-[#E8D5B5] transition-colors shrink-0">
                     <span>เริ่มทำนาย</span>
-                    <span className="group-hover:translate-x-1 transition-transform duration-200">➔</span>
+                    <span className="group-hover:translate-x-0.5 transition-transform duration-200">➔</span>
                   </span>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Pagination Pills & Swipe Hint เฉพาะหน้าจอมือถือ */}
+        <div className="flex sm:hidden flex-col items-center justify-center gap-2 pt-1 pb-1">
+          {/* Pagination Pills */}
+          <div className="flex items-center justify-center gap-1.5">
+            {QUICK_TOPICS.map((topic, index) => (
+              <button
+                key={topic.id}
+                type="button"
+                onClick={() => scrollToIndex(index)}
+                aria-label={`ไปยังหัวข้อ ${topic.title}`}
+                className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none ${
+                  activeIndex === index
+                    ? "w-6 bg-[#8F5C1A] shadow-xs"
+                    : "w-1.5 bg-[#D5CEC2] hover:bg-[#A58A5C]/70"
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Swipe hint */}
+          <p className="text-[10px] font-serif-th text-[#A58A5C] flex items-center gap-1 opacity-75">
+            <span>✦</span>
+            <span>ปัดซ้าย-ขวาเพื่อเลือกเรื่อง</span>
+            <span>✦</span>
+          </p>
         </div>
       </div>
 
