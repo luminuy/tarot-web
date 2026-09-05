@@ -75,19 +75,6 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **บันทึกโดย** | Claude · branch `fix/site-header-stacking` · commit `b393cfb` |
 
 
-### INC-0080 · 2026-09-05 10:12 · 🟠 High · คืนชีพ sticky header กลางและกันแผงเมนูถูกเนื้อหาทับ + ถอด breadcrumb ออกจากหน้าดัชนี
-
-| หัวข้อ | รายละเอียด |
-| :--- | :--- |
-| **อาการที่พบ** | หัวเว็บกลางเลิก sticky ทุกหน้าที่ใช้ layout และกดเมนูแล้วแผง dropdown โผล่แค่แถบบางใต้หัวเว็บ ที่เหลือถูกเนื้อหาหน้าทับจนกดเลือกเมนูไม่ได้ |
-| **สาเหตุราก** | กฎ body > *:not(.fixed):not([data-floating]) ใน globals.css specificity (0,2,1) สูงกว่า utility .sticky/.z-50 ของ Tailwind (0,1,0) เดิมหัวเว็บอยู่ใน main จึงไม่โดน พอ PR 248 ย้ายมาเป็นลูกตรงของ body จึงถูกทับเป็น position relative และ z-index 1 เท่ากับ main ที่มาทีหลังใน DOM |
-| **หลักฐาน** | getComputedStyle(header) คืน position relative และ zIndex 1 ทั้งที่คลาสเขียน sticky top-0 z-50 · elementFromPoint กลางแผงเมนูตอบเป็น main |
-| **การแก้ไข** | เพิ่ม :not([data-site-header]) ในกฎ body > * พร้อมคอมเมนต์อธิบายกับดัก และติด data-site-header ให้ header ใน SiteHeader.tsx |
-| **🛡️ กฎป้องกันถาวร** | **ย้าย element มาเป็นลูกโดยตรงของ body เมื่อไหร่ ต้องตรวจ position และ z-index ที่คำนวณจริงด้วย getComputedStyle ก่อนเสมอ อย่าเชื่อคลาส Tailwind ที่เขียนไว้** |
-| **การพิสูจน์ว่าแก้ได้จริง** | หลังแก้ getComputedStyle(header) คืน sticky/50 · เลื่อนหน้าไป 1200px แล้ว headerTop เท่ากับ 0 · เปิดเมนูแล้วเห็นแผงเต็มใบเหนือเนื้อหา · repo:verify ผ่าน 26 ด่าน |
-| **บันทึกโดย** | Claude · branch `fix/site-header-stacking` · commit `b393cfb` |
-
-
 ### INC-0079 · 2026-09-04 21:10 · 🟠 High · resolve pending handoff issues 017-023
 
 | หัวข้อ | รายละเอียด |
