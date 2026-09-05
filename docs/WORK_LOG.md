@@ -36,6 +36,32 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: สร้างหน้าผลลัพธ์ทำนายด่วนแบบสั้น (Quick Chat Result) แยกจากหน้าฝังใหญ่ — โดย Antigravity AI
+
+- **แก้ไขปัญหาคำทำนายยาวเกินไปในโหมดทำนายด่วน 1 ใบตามแผนงาน `docs/plans/QUICK_CHAT_RESULT_PLAN.md` ครบถ้วน 100%**:
+  - **Data Schema (`src/data/spreads.ts`)**:
+    - เพิ่ม field `resultStyle?: "quick" | "full"` บน `interface Spread`
+    - กำหนด `resultStyle: "quick"` ให้กับ spread `id: "quick"` เพียงตัวเดียว โดยไม่กระทบผัง `daily` หรือผัง 20 แบบอื่น
+  - **AI Prompt Engine (`src/lib/ai/prompt.ts`)**:
+    - ปรับ logic คำนวณ `depth` ให้ตรวจสอบ `spread.resultStyle === "quick"` เป็นลำดับแรก
+    - ในโหมดด่วน: คำอ่านรายใบกระชับ 2-3 ประโยคตรงประเด็นที่สุด, บทสรุปกระชับ 2-3 ประโยค, `"connections": ""` (สตริงว่าง), และ `"advice"` จำกัดสูงสุดไม่เกิน 2 ข้อ
+    - ปรับ `ReadingSchema` ใน `src/lib/schema/reading.ts` ให้ `connections` รองรับสตริงว่างสำหรับโหมดด่วนโดยไม่เกิด Zod validation error
+  - **Component แสดงผลใหม่ (`src/components/reading/QuickChatResult.tsx`)**:
+    - ออกแบบ UI เฉพาะสำหรับไพ่ 1 ใบ โดยตัดแท็บ "อ่านรายใบ / สรุปภาพรวม" ที่ซ้ำซ้อนออก
+    - แสดงภาพไพ่ 1909 Rider-Waite แท้ผ่าน `<CardImage />` (Rule 8) พร้อมหัวตั้ง/กลับหัวและคีย์เวิร์ด
+    - แสดงข้อความพยากรณ์และบทสรุปที่สั้น ชัดเจน ตรงประเด็น
+    - เพิ่มปุ่ม CTA ทางลัด **"คุยกับแม่หมอต่อ"** ลิงก์ตรงสู่ `/reading/chat` ทันทีโดยไม่ต้องเลื่อนหน้าจอ
+    - แสดง `<AccuracyRatingWidget />` แบบไม่ยุบเพื่อเก็บคะแนนความพึงพอใจอย่างต่อเนื่อง
+    - รวบรวมฟังก์ชันเสริม (มนตราไพ่, สมดุล 4 ธาตุ, ตรวจสอบ Provably Fair, ปรึกษาแม่หมอตัวจริง) ไว้ใน `<CollapsibleCard>` แบบยุบเก็บ เพื่อความสะอาดตา
+    - มีระบบ Fallback ปลอดภัยตามกฎ Rule 14 (Zero Fabricated Cards) แจ้งเตือนให้กดโหลดใหม่หากข้อมูลสูญหาย
+  - **State Machine Wiring (`src/app/TarotFlow.tsx`)**:
+    - สลับ render ระหว่าง `<QuickChatResult />` และ `<StreamReader />` ตาม `selectedSpread.resultStyle` อย่างไร้รอยต่อ
+    - รักษา State Machine, Session, Entitlement, และ Provably Fair flow เดิม 100% โดยไม่ต้องแยก route
+  - **QA & Verification Suite (`scripts/qa/test-quick-fortune.ts` & `scripts/qa/test-ai-reading-golden.ts`)**:
+    - เพิ่มการทดสอบยืนยัน `resultStyle` บน spread "quick" และป้องกัน regression บนผังอื่นๆ
+    - ผ่านครบ 45/45 การตรวจสอบ Quick Fortune และ 35/35 Golden Prompt Contract
+    - ผ่านครบ 27/27 ด่านใน `npm run repo:verify` สมบูรณ์ 100%
+
 ### 🗓️ 2026-09-05: อัปเกรดการ์ดทำนายด่วน 4 หัวข้อเป็นสไลด์ปัดแนวนอนสไตล์ Apple (Apple-Style Swipe Carousel) — โดย Antigravity AI
 
 - **ยกระดับประสบการณ์ผู้ใช้งานส่วนเปิดไพ่ด่วนใน `src/components/reading/QuickFortunePicker.tsx` ตามคำขอผู้ใช้และภาพอ้างอิง Apple Store**:
