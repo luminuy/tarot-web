@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { DAILY_LIMIT, GUEST_LIMIT } from "@/lib/entitlement/copy";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { useLocale } from "@/lib/i18n";
 
 /**
  * แบนเนอร์ประกาศล่วงหน้า: "ระบบสิทธิ์เปิดไพ่กำลังจะมา" (ENTITLEMENT_PLAN PR F / ข้อ 10)
@@ -16,6 +17,8 @@ import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 const DISMISS_KEY = "tarot_entitlement_announce_dismissed";
 
 export function AnnouncementBanner() {
+  const { locale, isEnglish } = useLocale();
+  const isEn = isEnglish || locale === "en";
   const ent = useEntitlement();
   const [dismissed, setDismissed] = useState(true);
 
@@ -37,11 +40,24 @@ export function AnnouncementBanner() {
   return (
     <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 font-serif-th text-xs text-[#2E211A] sm:text-sm">
       <span className="flex-1">
-        <span className="text-[#8F5C1A]">✦</span> เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
-        <strong>
-          ผู้เยี่ยมชมทดลองฟรี {GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ {DAILY_LIMIT} ครั้ง
-        </strong>
-        {when ? ` เริ่ม ${when}` : ""} — สมัครสมาชิกไว้ก่อนได้รับสิทธิ์เต็มทันที
+        <span className="text-[#8F5C1A]">✦</span>{" "}
+        {isEn ? (
+          <>
+            Upcoming update: Reading limits will soon adjust to{" "}
+            <strong>
+              {GUEST_LIMIT} free trial readings for visitors · {DAILY_LIMIT} free readings daily for members
+            </strong>
+            {when ? ` starting ${when}` : ""} — Create an account now to secure full daily benefits!
+          </>
+        ) : (
+          <>
+            เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
+            <strong>
+              ผู้เยี่ยมชมทดลองฟรี {GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ {DAILY_LIMIT} ครั้ง
+            </strong>
+            {when ? ` เริ่ม ${when}` : ""} — สมัครสมาชิกไว้ก่อนได้รับสิทธิ์เต็มทันที
+          </>
+        )}
       </span>
       <button
         type="button"
@@ -53,7 +69,7 @@ export function AnnouncementBanner() {
           }
           setDismissed(true);
         }}
-        aria-label="ปิดประกาศระบบสิทธิ์"
+        aria-label={isEn ? "Dismiss announcement" : "ปิดประกาศระบบสิทธิ์"}
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#635B4E] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
         ✕

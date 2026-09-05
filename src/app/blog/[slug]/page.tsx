@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllArticles, getArticleBySlug, getRelatedArticles, ARTICLE_SLUG_ALIASES } from "@/data/articles";
@@ -159,23 +158,7 @@ export default async function ArticleDetailPage({ params }: Props) {
       )}
 
       <div className="max-w-4xl mx-auto space-y-8 pb-20">
-        {/* Top Breadcrumb Navigation */}
-        <nav
-          aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
-        >
-          <Link href="/" className="hover:text-[#A58A5C] transition-colors">
-            หน้าแรก
-          </Link>
-          <span>/</span>
-          <Link href="/blog" className="hover:text-[#A58A5C] transition-colors">
-            คัมภีร์บทความ
-          </Link>
-          <span>/</span>
-          <span className="text-[#29261F] truncate font-bold">{article.categoryTh}</span>
-        </nav>
-
-        {/* Client Interactive Reader Component */}
+        {/* Client Interactive Reader Component with dynamic bilingual breadcrumb */}
         <ArticleReadingClient article={article} relatedArticles={related} />
       </div>
     </main>

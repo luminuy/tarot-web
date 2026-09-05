@@ -87,24 +87,7 @@ export default function BlogPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-5xl mx-auto space-y-8 pb-16">
-        {/* Sanctuary Codex Hero Header */}
-        <div className="text-center space-y-3.5 py-6 sm:py-8 max-w-3xl mx-auto">
-          <div className="flex items-center justify-center gap-3">
-            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
-            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
-              ✦ SEERTAROT WISDOM &amp; CODEX ✦
-            </span>
-            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
-          </div>
-          <h1 className="font-serif-th text-2xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] tracking-wide leading-tight py-0.5 [text-wrap:balance]">
-            คัมภีร์บทความและสาระน่ารู้ไพ่ทาโรต์
-          </h1>
-          <p className="text-xs sm:text-base text-[#635B4E] font-serif-th leading-relaxed max-w-2xl mx-auto [text-wrap:balance]">
-            เจาะลึกศาสตร์พยากรณ์ 1909 Rider-Waite ถอดรหัสสัญลักษณ์จิตวิทยาของ Carl Jung เทคนิคเปิดไพ่ความรัก การงาน และคู่มือไพ่ครบ 78 ใบ
-          </p>
-        </div>
-
-        {/* Client Interactive Filter & Search */}
+        {/* Client Interactive Codex Hub & Hero */}
         <BlogIndexClient articles={articles} />
       </div>
     </main>

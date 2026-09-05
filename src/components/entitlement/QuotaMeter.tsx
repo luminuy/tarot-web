@@ -6,6 +6,7 @@ import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { describeEntitlement, formatResetCountdown } from "@/lib/entitlement/copy";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { useLocale } from "@/lib/i18n";
 
 /**
  * ป้ายสิทธิ์บนแถบหัว — บอกตลอดเวลาว่าเปิดไพ่ได้อีกกี่ครั้ง
@@ -15,8 +16,10 @@ import { useEntitlement } from "@/lib/entitlement/use-entitlement";
  * และกดเพื่อเปิดหน้าต่างรายละเอียดสิทธิ์ได้เสมอ
  */
 export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
+  const { locale, isEnglish } = useLocale();
+  const isEn = isEnglish || locale === "en";
   const ent = useEntitlement();
-  const view = describeEntitlement(ent);
+  const view = describeEntitlement(ent, isEn);
   const [countdown, setCountdown] = useState("");
 
   // นับถอยหลังจุดรีเซ็ตแบบสด — อัปเดตนาทีละครั้งก็พอ (ไม่เปลืองเฟรม)
@@ -25,11 +28,11 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
       setCountdown("");
       return;
     }
-    const tick = () => setCountdown(formatResetCountdown(ent.resetAt));
+    const tick = () => setCountdown(formatResetCountdown(ent.resetAt, Date.now(), isEn));
     tick();
     const timer = setInterval(tick, 60_000);
     return () => clearInterval(timer);
-  }, [ent?.resetAt]);
+  }, [ent?.resetAt, isEn]);
 
   // ถ้ายังไม่รู้สิทธิ์ หรือระบบสิทธิ์ปิดอยู่ (view === null) ให้คืน null ทันที
   // ป้องกันอาการ Ghost Slot: ช่องปุ่มโครงกระดูกโผล่มาแวบหนึ่งแล้วหายไป
@@ -39,12 +42,16 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
   const empty = view.tone === "empty";
 
   const title = unlimited
-    ? "บัญชีนี้ใช้ได้ไม่จำกัด (กดเพื่อดูรายละเอียดสิทธิ์)"
-    : `${view.statusLine}${countdown && !empty ? ` · รีเซ็ต${countdown}` : ""} — กดเพื่อดูรายละเอียดสิทธิ์`;
+    ? (isEn ? "Unlimited account access (Click for details)" : "บัญชีนี้ใช้ได้ไม่จำกัด (กดเพื่อดูรายละเอียดสิทธิ์)")
+    : (isEn
+      ? `${view.statusLine}${countdown && !empty ? ` · Resets in ${countdown}` : ""} — Click for details`
+      : `${view.statusLine}${countdown && !empty ? ` · รีเซ็ต${countdown}` : ""} — กดเพื่อดูรายละเอียดสิทธิ์`);
 
   const srLabel = unlimited
-    ? "สิทธิ์ไม่จำกัด"
-    : `สิทธิ์เปิดไพ่: ${view.statusLine}${countdown && empty ? ` รีเซ็ต${countdown}` : ""}`;
+    ? (isEn ? "Unlimited readings" : "สิทธิ์ไม่จำกัด")
+    : (isEn
+      ? `Reading quota: ${view.statusLine}${countdown && empty ? ` Resets in ${countdown}` : ""}`
+      : `สิทธิ์เปิดไพ่: ${view.statusLine}${countdown && empty ? ` รีเซ็ต${countdown}` : ""}`);
 
   return (
     <button
@@ -63,7 +70,7 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
       {unlimited ? (
         <>
           <span className="text-[#8F5C1A]">✦</span>
-          <span className="hidden sm:inline">ไม่จำกัดสิทธิ์</span>
+          <span className="hidden sm:inline">{isEn ? "Unlimited" : "ไม่จำกัดสิทธิ์"}</span>
           <span
             translate="no"
             className="rounded-full bg-[#8F5C1A]/15 px-1.5 py-0.5 font-mono text-[12px] font-bold text-[#8F5C1A]"

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
+import { useLocale } from "@/lib/i18n";
 
 interface ShuffleRitualProps {
   commitment: string;
@@ -11,6 +12,7 @@ interface ShuffleRitualProps {
 }
 
 export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spreadName, onShuffleComplete }) => {
+  const { isEnglish } = useLocale();
   const [shuffling, setShuffling] = useState(false);
   const [shufflePhase, setShufflePhase] = useState<"idle" | "split" | "riffle" | "bridge" | "gather">("idle");
   const entropyRef = useRef<number[]>([]);
@@ -97,7 +99,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.96 }}
             onClick={startShuffle}
-            aria-label="แตะเพื่อเริ่มสับไพ่"
+            aria-label={isEnglish ? "Tap to shuffle tarot deck" : "แตะเพื่อเริ่มสับไพ่"}
             className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#D9C8AC] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
           >
             <div className="w-full flex justify-center items-center opacity-85">
@@ -109,7 +111,9 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             {/* Clean Center */}
             <div className="my-auto" />
 
-            <span className="text-xs font-serif-th font-bold text-[#FFFFFF] tracking-wide">สัมผัสเพื่อสับไพ่</span>
+            <span className="text-xs font-serif-th font-bold text-[#FFFFFF] tracking-wide">
+              {isEnglish ? "Tap to Shuffle Deck" : "สัมผัสเพื่อสับไพ่"}
+            </span>
 
             {/* Dynamic Gold Sheen */}
             <div className="gold-foil-sheen absolute inset-0 opacity-30 group-hover:opacity-60 transition-opacity" />
@@ -214,27 +218,29 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
 
       {/* Sacred Ritual Subtitle & Title */}
       <span className="text-[13px] font-serif-th text-[#2E211A] font-bold bg-[#F3EDE2]/30 px-4 py-1 rounded-full border border-[#D9C8AC] mb-2 inline-block ">
-        ✦ ขั้นตอนสับไพ่ ✦
+        ✦ {isEnglish ? "Sacred Shuffling Ritual" : "ขั้นตอนสับไพ่"} ✦
       </span>
       <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter py-0.5 leading-normal">
-        ตั้งสมาธิและนึกถึงคำถามของคุณ
+        {isEnglish ? "Center Your Mind on Your Inquiry" : "ตั้งสมาธิและนึกถึงคำถามของคุณ"}
       </h2>
       <p className="text-xs sm:text-sm text-[#635B4E] mt-1 max-w-md leading-relaxed">
-        ทำใจให้สบาย แล้วนึกถึงเรื่องที่อยากรู้สำหรับผัง{" "}
-        <span className="text-[#2E211A] font-semibold">"{spreadName}"</span>
+        {isEnglish
+          ? `Breathe deeply and hold your question in gentle awareness for the "${spreadName}".`
+          : `ทำใจให้สบาย แล้วนึกถึงเรื่องที่อยากรู้สำหรับผัง "${spreadName}"`}
       </p>
 
       {/* Commitment Preview for Commit-Reveal Transparency */}
       {commitment && (
         <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[13px] font-mono text-[#635B4E]">
           <span>
-            รหัสยืนยันความโปร่งใส (SHA-256): {commitment.slice(0, 16)}…{commitment.slice(-8)}
+            {isEnglish ? "Transparency Hash (SHA-256): " : "รหัสยืนยันความโปร่งใส (SHA-256): "}
+            {commitment.slice(0, 16)}…{commitment.slice(-8)}
           </span>
           <button
             type="button"
             onClick={() => navigator.clipboard.writeText(commitment)}
-            title="คัดลอกรหัสยืนยันความโปร่งใส"
-            aria-label="คัดลอกรหัสยืนยันความโปร่งใส"
+            title={isEnglish ? "Copy verification commitment" : "คัดลอกรหัสยืนยันความโปร่งใส"}
+            aria-label={isEnglish ? "Copy verification commitment" : "คัดลอกรหัสยืนยันความโปร่งใส"}
             className="text-[#8F5C1A] hover:text-[#2E211A] cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
           >
             ⧉
@@ -251,7 +257,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             className="w-full py-4 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th shadow-[var(--shadow-overlay)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <span>✨</span>
-            <span>แตะเพื่อเริ่มสับไพ่</span>
+            <span>{isEnglish ? "Tap to Shuffle Deck" : "แตะเพื่อเริ่มสับไพ่"}</span>
             <span>✨</span>
           </button>
         ) : (
@@ -265,14 +271,27 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             </div>
             <span className="text-xs text-[#2E211A] font-medium flex items-center justify-center gap-1.5 animate-pulse font-serif-th">
               <span className="w-2 h-2 rounded-full bg-[#8F5C1A]" />
-              {shufflePhase === "split" && "กำลังแบ่งสำรับไพ่..."}
+              {shufflePhase === "split" &&
+                (isEnglish ? "Splitting the deck..." : "กำลังแบ่งสำรับไพ่...")}
               {shufflePhase === "riffle" && (
                 <>
-                  กำลังสับไพ่ทั้ง 78 ใบ (<span ref={progressTextRef}>0</span>%)
+                  {isEnglish ? (
+                    <>
+                      Riffling 78 sacred cards (<span ref={progressTextRef}>0</span>%)
+                    </>
+                  ) : (
+                    <>
+                      กำลังสับไพ่ทั้ง 78 ใบ (<span ref={progressTextRef}>0</span>%)
+                    </>
+                  )}
                 </>
               )}
-              {shufflePhase === "bridge" && "กำลังรวมสำรับไพ่เข้าด้วยกัน..."}
-              {shufflePhase === "gather" && "สับไพ่เรียบร้อย กำลังคลี่ไพ่ให้คุณเลือก..."}
+              {shufflePhase === "bridge" &&
+                (isEnglish ? "Bridging the card stacks..." : "กำลังรวมสำรับไพ่เข้าด้วยกัน...")}
+              {shufflePhase === "gather" &&
+                (isEnglish
+                  ? "Deck gathered. Fanning out for your draw..."
+                  : "สับไพ่เรียบร้อย กำลังคลี่ไพ่ให้คุณเลือก...")}
             </span>
           </div>
         )}

@@ -36,6 +36,35 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: พัฒนาระบบสองภาษาแบบหมดจด 100% (Auth, Entitlement, Account, Modals, History, Deck Rituals) — โดย Antigravity AI
+
+- **ตรวจทานและแปลระบบสองภาษาอย่างละเอียดรอบคอบแบบ Native American English ทั่วทั้ง User-Facing Components**:
+  - **ระบบสมาชิกและการเข้าสู่ระบบ (Authentication & Identity)**:
+    - `src/lib/auth/strength.ts`: เพิ่มพารามิเตอร์ `isEnglish?: boolean` แปลระดับความปลอดภัยของรหัสผ่าน ("Too weak", "Fair", "Strong", "Very Strong ✦")
+    - `src/components/auth/AuthModal.tsx`: แปลหน้าต่างเข้าสู่ระบบ/สมัครสมาชิก 100% (หัวข้อ, รายการสิทธิประโยชน์ 3 ข้อ, Label, Placeholder, ปุ่มส่งฟอร์ม, การเชื่อมต่อ OAuth, และข้อความความปลอดภัย PDPA)
+    - `src/components/auth/UserProfileBadge.tsx`: แปล Dropdown โปรไฟล์ผู้ใช้ (สถานะโควตา, ข้อความเตือนยืนยันอีเมล, สลับรับการแจ้งเตือน, ปุ่มออกจากระบบ)
+  - **ระบบประวัติการเปิดไพ่ (Reading History Archive)**:
+    - `src/components/history/ReadingHistoryModal.tsx`: แปลทุกองค์ประกอบในสมุดบันทึกดวงชะตา (หัวข้อ, สรุปสังเคราะห์ AI รายเดือน, ช่องค้นหา, แท็บกรองผลลัพธ์, การแสดงชื่อไพ่ภาษาอังกฤษพร้อมแท็กไพ่กลับหัว `Reversed`, ตัวแก้ไขบันทึกสะท้อนใจ, คำแนะนำรายข้อ, และเวลา)
+  - **ระบบสิทธิ์และแพ็กเกจเติมรอบ (Entitlements & Sacred Passes)**:
+    - `src/lib/entitlement/packages.ts`: เพิ่ม `CREDIT_PACKAGES_EN`, `getCreditPackages(isEnglish)` และ `getCreditPackageById(id, isEnglish)` ด้วยสำนวน Archetypal Sacred (Key of Destiny, Mystic Intuition, Vault of Fate)
+    - `src/components/entitlement/AccessDialog.tsx`: แปลหน้าต่างจัดการสิทธิ์ครบทุกกรณี (ป้ายสถานะ, เวลารีเซ็ต, สิทธิประโยชน์สมาชิก, ตัวเลือกการรอ vs ซื้อ Pass, การ์ดเปรียบเทียบ 3 แผน, ปุ่มดำเนินการ)
+    - `src/components/entitlement/BuyCreditsModal.tsx`: แปลขั้นตอนชำระเงิน PromptPay QR, รายการแพ็กเกจ, โหมดทดสอบจำลอง, และปุ่มยืนยัน
+    - `src/components/entitlement/EntitlementStatusCard.tsx`: แปลการ์ดสถานะสิทธิ์บนหน้าบัญชี (ระดับบัญชี, โควตารายวัน, โบนัสคงเหลือ, ปุ่มเติมรอบ)
+    - `src/components/entitlement/AnnouncementBanner.tsx`, `PostReadingSignup.tsx`, `QuotaMeter.tsx`: แปลแบนเนอร์ประกาศระบบสิทธิ์, การ์ดชวนสมัครหลังอ่านไพ่, และมิเตอร์โควตาบนแถบหัว
+  - **หน้าบัญชีและการคุ้มครองข้อมูลส่วนบุคคล (Account & PDPA / GDPR)**:
+    - `src/app/account/AccountClient.tsx` & `src/app/account/page.tsx`: แปลงหน้าบัญชีเป็น Client Delegation พร้อมหัวข้อสัจธรรมแห่งความเป็นส่วนตัว (Sacred Sanctuary Profile) และสิทธิอธิปไตยเหนือข้อมูลตามมาตรฐาน PDPA
+    - `src/components/account/ChangePasswordCard.tsx`: แปลฟอร์มเปลี่ยนรหัสผ่าน, ข้อความแจ้งเตือน, และแถบวัดระดับความปลอดภัย
+    - `src/components/ui/DeleteAllDataButton.tsx`: แปลข้อความยืนยันการลบข้อมูลถาวรและปุ่มลบข้อมูล
+  - **ความสอดคล้องกับระเบียบวิศวกรรมระดับโลก (GEMINI.md)**:
+    - กฎข้อ 2: ใช้อิโมจิทองคำเปลว `✦` และ `✨` เท่านั้น ปราศจากอิโมจิการ์ตูนทั่วไป
+    - กฎข้อ 8: ใช้ `<CardImage sizes="..." />` และ Path ที่ถูกต้อง
+    - กฎข้อ 10: Human-First Natural Copywriting ระดับภาษาแม่
+    - กฎข้อ 14: Zero Fabricated Cards Policy ไร้การมโนไพ่ปลอม
+    - โซนผู้ดูแลระบบ (`/admin/*`) คงเป็นภาษาไทย 100% ตามระเบียบ
+- **ผลการทดสอบและการตรวจสอบ**:
+  - TypeScript Typecheck (`npm run typecheck`): `0 errors`
+  - Verification Suite (`npm run repo:verify`): `ผ่านครบถ้วนทั้ง 27/27 ด่านสมบูรณ์ 100%`
+
 ### 🗓️ 2026-09-05: พัฒนาระบบสองภาษาแท้จริงระดับพรีเมียม (Thai & Authentic American English i18n) ทั่วทั้งระบบ — โดย Antigravity AI
 
 - **ยกระดับระบบวิหารพยากรณ์สู่สากลด้วย Authentic American English ในแนวทางจิตวิทยาเชิงลึกและ αρχέτυπα (Carl Jung / Rachel Pollack / Mary K. Greer)**:

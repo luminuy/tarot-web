@@ -74,17 +74,23 @@ export interface EntitlementView {
   blockedReason: UpgradeReason | null;
 }
 
-/** แปลงเวลา ISO เป็นข้อความนับถอยหลังภาษาคน เช่น "อีก 5 ชม. 20 นาที" */
-export function formatResetCountdown(iso: string | null, now: number = Date.now()): string {
+/** แปลงเวลา ISO เป็นข้อความนับถอยหลังภาษาคน เช่น "อีก 5 ชม. 20 นาที" หรือ "in 5h 20m" */
+export function formatResetCountdown(iso: string | null, now: number = Date.now(), isEnglish?: boolean): string {
   if (!iso) return "";
   const target = new Date(iso).getTime();
   if (!Number.isFinite(target)) return "";
   const diff = target - now;
-  if (diff <= 0) return "ได้สิทธิ์ใหม่แล้ว";
+  if (diff <= 0) return isEnglish ? "Quota refreshed" : "ได้สิทธิ์ใหม่แล้ว";
 
   const totalMinutes = Math.ceil(diff / 60_000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
+
+  if (isEnglish) {
+    if (hours >= 1 && minutes > 0) return `in ${hours}h ${minutes}m`;
+    if (hours >= 1) return `in ${hours}h`;
+    return `in ${minutes}m`;
+  }
 
   if (hours >= 1 && minutes > 0) return `อีก ${hours} ชม. ${minutes} นาที`;
   if (hours >= 1) return `อีก ${hours} ชม.`;
@@ -92,7 +98,8 @@ export function formatResetCountdown(iso: string | null, now: number = Date.now(
 }
 
 /** เวลาไทยของจุดรีเซ็ต เช่น "เที่ยงคืนวันนี้ (00:00 น.)" */
-export function resetClockLabel(): string {
+export function resetClockLabel(isEnglish?: boolean): string {
+  if (isEnglish) return "midnight (00:00 UTC+7)";
   return "เที่ยงคืน (00:00 น. เวลาไทย)";
 }
 
@@ -100,7 +107,7 @@ export function resetClockLabel(): string {
  * แปลงสถานะสิทธิ์ดิบจาก server เป็น "สิ่งที่หน้าจอต้องพูด"
  * คืน null เมื่อยังโหลดไม่เสร็จ หรือระบบสิทธิ์ปิดอยู่ (UI ต้องไม่แสดงอะไรเลย)
  */
-export function describeEntitlement(ent: ClientEntitlement | null): EntitlementView | null {
+export function describeEntitlement(ent: ClientEntitlement | null, isEnglish?: boolean): EntitlementView | null {
   if (!ent || !ent.enabled) return null;
 
   const isUnlimited = ent.role === "unlimited";
@@ -109,7 +116,7 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
   const limit = Math.max(1, ent.limit ?? (isGuest ? GUEST_LIMIT : DAILY_LIMIT));
   const bonus = Math.max(0, ent.bonusRemaining ?? 0);
   const used = Math.max(0, Math.min(limit, limit - Math.min(remaining, limit)));
-  const countdown = formatResetCountdown(ent.resetAt);
+  const countdown = formatResetCountdown(ent.resetAt, Date.now(), isEnglish);
 
   if (isUnlimited) {
     return {
@@ -122,8 +129,10 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
       limit,
       used: 0,
       tone: "unlimited",
-      badgeLabel: "ไม่จำกัดสิทธิ์",
-      statusLine: "บัญชีไม่จำกัดสิทธิ์ — เปิดไพ่และคุยต่อได้ไม่จำกัด",
+      badgeLabel: isEnglish ? "VIP Unlimited" : "ไม่จำกัดสิทธิ์",
+      statusLine: isEnglish
+        ? "Unlimited VIP Account — Divination & consultation unrestricted"
+        : "บัญชีไม่จำกัดสิทธิ์ — เปิดไพ่และคุยต่อได้ไม่จำกัด",
       resetLine: "",
       action: "none",
       actionLabel: "",
@@ -144,13 +153,21 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
       limit,
       used,
       tone: hasFree ? "ample" : "empty",
-      badgeLabel: hasFree ? `ทดลองฟรี ${remaining} ครั้ง` : "ใช้สิทธิ์ทดลองครบแล้ว",
+      badgeLabel: hasFree
+        ? (isEnglish ? `${remaining} Free Trial` : `ทดลองฟรี ${remaining} ครั้ง`)
+        : (isEnglish ? "Trial Used" : "ใช้สิทธิ์ทดลองครบแล้ว"),
       statusLine: hasFree
-        ? `คุณมีสิทธิ์เปิดไพ่ทดลองฟรี ${GUEST_LIMIT} ครั้ง โดยยังไม่ต้องสมัครสมาชิก`
-        : `คุณใช้สิทธิ์ทดลองฟรี ${GUEST_LIMIT} ครั้งไปแล้ว — สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อ`,
-      resetLine: hasFree ? "ใช้ได้ทันที ไม่มีวันหมดอายุ" : "",
+        ? (isEnglish
+            ? `You have ${GUEST_LIMIT} complimentary trial reading without registration`
+            : `คุณมีสิทธิ์เปิดไพ่ทดลองฟรี ${GUEST_LIMIT} ครั้ง โดยยังไม่ต้องสมัครสมาชิก`)
+        : (isEnglish
+            ? `You have used your ${GUEST_LIMIT} free trial — sign up to unlock 3 daily readings`
+            : `คุณใช้สิทธิ์ทดลองฟรี ${GUEST_LIMIT} ครั้งไปแล้ว — สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อ`),
+      resetLine: hasFree ? (isEnglish ? "Instant access · Never expires" : "ใช้ได้ทันที ไม่มีวันหมดอายุ") : "",
       action: "signup",
-      actionLabel: hasFree ? "สมัครสมาชิกฟรี" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อ",
+      actionLabel: hasFree
+        ? (isEnglish ? "Create Free Account" : "สมัครสมาชิกฟรี")
+        : (isEnglish ? "Sign Up to Continue" : "สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อ"),
       blocked: !hasFree,
       blockedReason: hasFree ? null : "guest_used",
     };
@@ -160,7 +177,9 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
   const hasQuota = remaining > 0;
   const tone: QuotaTone = !hasQuota ? "empty" : remaining <= 1 ? "low" : "ample";
 
-  const bonusSuffix = bonus > 0 ? ` (+ รอบที่เติมไว้ ${bonus} ครั้ง)` : "";
+  const bonusSuffix = bonus > 0
+    ? (isEnglish ? ` (+ ${bonus} Tarot Pass credits)` : ` (+ รอบที่เติมไว้ ${bonus} ครั้ง)`)
+    : "";
 
   return {
     enabled: true,
@@ -172,17 +191,25 @@ export function describeEntitlement(ent: ClientEntitlement | null): EntitlementV
     limit,
     used: Math.max(0, limit - dailyRemaining),
     tone,
-    badgeLabel: hasQuota ? `เหลือ ${remaining} ครั้ง` : "โควตาวันนี้ครบแล้ว",
+    badgeLabel: hasQuota
+      ? (isEnglish ? `${remaining} left` : `เหลือ ${remaining} ครั้ง`)
+      : (isEnglish ? "Daily quota reached" : "โควตาวันนี้ครบแล้ว"),
     statusLine: hasQuota
-      ? `วันนี้เหลือ ${dailyRemaining} จาก ${DAILY_LIMIT} ครั้ง${bonusSuffix}`
-      : `คุณใช้โควตาฟรีของวันนี้ครบ ${DAILY_LIMIT} ครั้งแล้ว`,
+      ? (isEnglish
+          ? `${dailyRemaining} of ${DAILY_LIMIT} daily readings available${bonusSuffix}`
+          : `วันนี้เหลือ ${dailyRemaining} จาก ${DAILY_LIMIT} ครั้ง${bonusSuffix}`)
+      : (isEnglish
+          ? `You have used all ${DAILY_LIMIT} daily complimentary readings`
+          : `คุณใช้โควตาฟรีของวันนี้ครบ ${DAILY_LIMIT} ครั้งแล้ว`),
     resetLine: countdown
-      ? countdown.startsWith("อีก")
-        ? `โควตาฟรีชุดใหม่ ${countdown}`
-        : countdown
+      ? (isEnglish
+          ? `Refreshes ${countdown}`
+          : countdown.startsWith("อีก")
+            ? `โควตาฟรีชุดใหม่ ${countdown}`
+            : countdown)
       : "",
     action: hasQuota ? "none" : "credits",
-    actionLabel: hasQuota ? "" : "เติมรอบเปิดไพ่",
+    actionLabel: hasQuota ? "" : (isEnglish ? "Top Up Readings" : "เติมรอบเปิดไพ่"),
     blocked: !hasQuota,
     blockedReason: hasQuota ? null : "daily_exhausted",
   };
@@ -324,3 +351,132 @@ export const ACCESS_PLANS: AccessPlan[] = [
     ],
   },
 ];
+
+export const MEMBER_BENEFITS_EN: Array<{ title: string; detail: string }> = [
+  {
+    title: `Free ${DAILY_LIMIT} daily tarot readings`,
+    detail: "Resets every midnight for all classic 1–4 card spreads",
+  },
+  {
+    title: "Follow-up interactive oracle consultation",
+    detail: "Ask in-depth questions following your spread (2 questions per reading)",
+  },
+  {
+    title: "Sync personal reading journal across all devices",
+    detail: "Revisit past readings anytime, even after clearing browser cache",
+  },
+];
+
+export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
+  guest_used: {
+    eyebrow: "Complimentary Trial",
+    title: "You have used your free trial reading",
+    body: `You enjoyed ${GUEST_LIMIT} complimentary reading without registration. Create a free account to unlock ${DAILY_LIMIT} free readings every day.`,
+    primaryLabel: "Create Free Account",
+    primaryAction: "signup",
+    secondaryLabel: "Already a member? Sign In",
+    reassurance: "100% free · No credit card required · Your past reading is preserved",
+  },
+  daily_exhausted: {
+    eyebrow: "Daily Quota",
+    title: `You've used all ${DAILY_LIMIT} daily readings`,
+    body: "Your daily complimentary quota resets at midnight. If you'd like to continue right now, top up Tarot Pass credits to unlock grand spreads and unlimited oracle dialogue.",
+    primaryLabel: "Top Up Readings",
+    primaryAction: "credits",
+    secondaryLabel: "Return tomorrow",
+    reassurance: "Tarot Pass credits never expire · Unlocks Grand 10–12 card spreads & unlimited follow-up dialogue",
+  },
+  members_only: {
+    eyebrow: "Members Only",
+    title: "Sign up to continue dialogue with your reader",
+    body: "In-depth interactive follow-up is reserved for registered members to preserve your conversation history securely.",
+    primaryLabel: "Create Free Account",
+    primaryAction: "signup",
+    secondaryLabel: "Already a member? Sign In",
+    reassurance: `100% free · No credit card required · Enjoy ${DAILY_LIMIT} daily readings`,
+  },
+  explore: {
+    eyebrow: "Entitlement & Quotas",
+    title: "Your Divination Privileges",
+    body: "Review your available readings and explore benefits included with membership and Tarot Pass.",
+    primaryLabel: "Create Free Account",
+    primaryAction: "signup",
+    secondaryLabel: "Close Window",
+    reassurance: "No automatic subscription billing · Delete your account and data anytime",
+  },
+  grand_spread: {
+    eyebrow: "✦ Grand Divination Spread",
+    title: "Grand & Master Spreads (5–12 Cards)",
+    body: "Grand spreads (such as the 10-card Celtic Cross, 12-house Astrological Wheel, and 7 Chakras) provide high-dimensional holistic mapping, available with Tarot Pass credits.",
+    primaryLabel: `Top up to unlock (Starts at ฿${CHEAPEST_PACKAGE_THB})`,
+    primaryAction: "credits",
+    secondaryLabel: "Choose a 1–4 card spread for now",
+    reassurance: "Credits never expire · Unlocks all 20 spreads + unlimited consultation dialogue",
+  },
+  master_persona: {
+    eyebrow: "✦ Grand Master Readers",
+    title: "Specialized Master Diviners",
+    body: "The Master Strategist and Astral Star are two specialized masters of strategic clarity and depth psychology, unlocked with Tarot Pass credits.",
+    primaryLabel: `Top up to consult (Starts at ฿${CHEAPEST_PACKAGE_THB})`,
+    primaryAction: "credits",
+    secondaryLabel: "Choose another reader for now",
+    reassurance: "Credits never expire · Unlimited interactive dialogue",
+  },
+};
+
+export const ACCESS_PLANS_EN: AccessPlan[] = [
+  {
+    id: "guest",
+    name: "Guest Visitor",
+    price: "Free",
+    priceNote: "No registration required",
+    features: [
+      { label: `${GUEST_LIMIT} complimentary trial reading`, included: true },
+      { label: "Complete archetypal interpretation", included: true },
+      { label: "78-card wisdom encyclopedia", included: true },
+      { label: "Follow-up oracle chat (Member required)", included: false },
+      { label: "Sync journal across devices (Member required)", included: false },
+    ],
+  },
+  {
+    id: "member",
+    name: "Sanctuary Member",
+    price: "Free",
+    priceNote: "Sign up via Email, Google, or LINE",
+    highlight: "Recommended",
+    features: [
+      { label: `${DAILY_LIMIT} free daily readings (Standard spreads)`, included: true },
+      { label: "Interactive follow-up chat (2 questions/reading)", included: true },
+      { label: "Sync reading journal across all devices", included: true },
+      { label: "Full PDPA privacy & data deletion control", included: true },
+    ],
+  },
+  {
+    id: "credits",
+    name: "Tarot Pass (Credits)",
+    price: `Starts ฿${CHEAPEST_PACKAGE_THB}`,
+    priceNote: "One-time payment · Never recurring",
+    features: [
+      { label: "Unlock Grand 10–12 card spreads (Celtic Cross)", included: true },
+      { label: "In-depth Timing analysis & Shadow cards", included: true },
+      { label: "Unlimited interactive follow-up dialogue", included: true },
+      { label: "4K Sacred Talisman wallpapers & Golden chart", included: true },
+      { label: "Credits never expire · Not a subscription", included: true },
+    ],
+  },
+];
+
+export function getUpgradeCopy(reason: UpgradeReason, isEnglish?: boolean): UpgradeCopy {
+  if (isEnglish) return UPGRADE_COPY_EN[reason] || UPGRADE_COPY[reason];
+  return UPGRADE_COPY[reason];
+}
+
+export function getMemberBenefits(isEnglish?: boolean): Array<{ title: string; detail: string }> {
+  if (isEnglish) return MEMBER_BENEFITS_EN;
+  return MEMBER_BENEFITS;
+}
+
+export function getAccessPlans(isEnglish?: boolean): AccessPlan[] {
+  if (isEnglish) return ACCESS_PLANS_EN;
+  return ACCESS_PLANS;
+}

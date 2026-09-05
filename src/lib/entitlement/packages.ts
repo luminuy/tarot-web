@@ -48,6 +48,44 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
   },
 ];
 
-export function getCreditPackageById(id: string): CreditPackage | undefined {
-  return CREDIT_PACKAGES.find((p) => p.id === id);
+export const CREDIT_PACKAGES_EN: CreditPackage[] = [
+  {
+    id: "pack_3",
+    name: "Key of Destiny (3 Readings)",
+    tagline: "Unlock grand spreads and deep archetypal inquiries for crucial life decisions.",
+    credits: 3,
+    priceThb: 59,
+    amountSatang: 5900,
+    badge: "Starter",
+  },
+  {
+    id: "pack_10",
+    name: "Mystic Intuition (10 Readings)",
+    tagline: "Explore the Celtic Cross and engage in deep, uninterrupted dialogue with the Oracle.",
+    credits: 10,
+    priceThb: 149,
+    amountSatang: 14900,
+    badge: "✦ Most Popular",
+    isPopular: true,
+  },
+  {
+    id: "pack_30",
+    name: "Vault of Fate (30 Readings)",
+    tagline: "Complete access to all spread dimensions with maximum value. Never expires.",
+    credits: 30,
+    priceThb: 299,
+    amountSatang: 29900,
+    badge: "✨ Best Value",
+    isBestValue: true,
+  },
+];
+
+export function getCreditPackages(isEnglish?: boolean): CreditPackage[] {
+  return isEnglish ? CREDIT_PACKAGES_EN : CREDIT_PACKAGES;
 }
+
+export function getCreditPackageById(id: string, isEnglish?: boolean): CreditPackage | undefined {
+  const packages = getCreditPackages(isEnglish);
+  return packages.find((p) => p.id === id) || CREDIT_PACKAGES.find((p) => p.id === id);
+}
+

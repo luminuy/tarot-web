@@ -6,8 +6,9 @@ import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
 import { CheckMarkIcon } from "@/components/entitlement/EntitlementIcons";
-import { DAILY_LIMIT, MEMBER_BENEFITS } from "@/lib/entitlement/copy";
+import { DAILY_LIMIT, getMemberBenefits } from "@/lib/entitlement/copy";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
+import { useLocale } from "@/lib/i18n";
 
 export interface AuthModalProps {
   isOpen: boolean;
@@ -50,6 +51,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   initialMode = "signin",
   fromEntitlementWall = false,
 }) => {
+  const { locale, isEnglish } = useLocale();
+  const isEn = isEnglish || locale === "en";
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -113,7 +116,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (!isOpen) return null;
 
-  const strength = calculatePasswordStrength(password);
+  const strength = calculatePasswordStrength(password, isEn);
 
   const resetForm = () => {
     setEmail("");
@@ -156,7 +159,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         body: JSON.stringify(payload),
       });
     } catch {
-      throw new Error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่");
+      throw new Error(isEn ? "Cannot connect to server. Please check your internet connection." : "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่");
     }
 
     const data = (await res.json().catch(() => ({}))) as { error?: string; message?: string; user?: unknown };
@@ -172,7 +175,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     // เปิดใช้ Turnstile แต่ผู้ใช้ยังไม่ผ่านกล่องตรวจ → หยุดไว้ก่อน
     if (turnstileToken === "") {
-      setErrorMsg("กรุณายืนยันว่าคุณไม่ใช่บอตก่อนดำเนินการต่อ");
+      setErrorMsg(isEn ? "Please complete the security check to continue" : "กรุณายืนยันว่าคุณไม่ใช่บอตก่อนดำเนินการต่อ");
       return;
     }
 
@@ -189,7 +192,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         await postJson(
           "/api/auth/email/login",
           { email: emailValue, password, turnstileToken: turnstileToken ?? "" },
-          "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+          isEn ? "Incorrect email or password" : "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
         );
         soundManager.playCardSelectSound();
         invalidateSessionCache();
@@ -198,14 +201,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         const data = await postJson(
           "/api/auth/email/signup",
           { email: emailValue, password, name: nameValue, turnstileToken: turnstileToken ?? "" },
-          "ไม่สามารถสร้างบัญชีได้"
+          isEn ? "Unable to create account" : "ไม่สามารถสร้างบัญชีได้"
         );
         soundManager.playCardSelectSound();
         if (data.user) {
           invalidateSessionCache();
           window.location.href = "/?auth_success=1&new_user=1";
         } else {
-          setSuccessMsg(data.message || "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว");
+          setSuccessMsg(data.message || (isEn ? "A verification link has been sent to your email." : "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว"));
         }
       } else if (mode === "forgot") {
         // ต้องเช็ก res.ok ด้วย — ของเดิมโดน 429 แล้วยังขึ้น "ส่งลิงก์ให้แล้ว"
@@ -213,12 +216,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         const data = await postJson(
           "/api/auth/email/forgot",
           { email: emailValue, turnstileToken: turnstileToken ?? "" },
-          "ไม่สามารถส่งลิงก์ตั้งรหัสผ่านใหม่ได้ กรุณาลองใหม่อีกครั้ง"
+          isEn ? "Unable to send password reset link. Please try again." : "ไม่สามารถส่งลิงก์ตั้งรหัสผ่านใหม่ได้ กรุณาลองใหม่อีกครั้ง"
         );
-        setSuccessMsg(data.message || "หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว");
+        setSuccessMsg(data.message || (isEn ? "If an account exists for this email, we have sent a password reset link." : "หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว"));
       }
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setErrorMsg(err instanceof Error ? err.message : (isEn ? "An error occurred. Please try again." : "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"));
     } finally {
       setLoading(false);
     }
@@ -248,7 +251,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            aria-label="ปิดหน้าต่างเข้าสู่ระบบ"
+            aria-label={isEn ? "Close authentication window" : "ปิดหน้าต่างเข้าสู่ระบบ"}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] hover:text-[#A58A5C] hover:border-[#A58A5C] hover:bg-[#FFFFFF] text-xs flex items-center justify-center transition-all cursor-pointer"
           >
             ✕
@@ -272,22 +275,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Header Typography */}
           <div className="space-y-1 text-center mb-5">
             <h3 id="auth-modal-title" className="text-xl sm:text-2xl font-serif-th font-bold text-[#29261F]">
-              {mode === "signin" && "เข้าสู่ระบบ"}
-              {mode === "signup" && "สมัครสมาชิกฟรี"}
-              {mode === "forgot" && "ตั้งรหัสผ่านใหม่ (ลืมรหัสผ่าน)"}
+              {mode === "signin" && (isEn ? "Sign In" : "เข้าสู่ระบบ")}
+              {mode === "signup" && (isEn ? "Create Free Account" : "สมัครสมาชิกฟรี")}
+              {mode === "forgot" && (isEn ? "Reset Password" : "ตั้งรหัสผ่านใหม่ (ลืมรหัสผ่าน)")}
             </h3>
             <p className="text-xs text-[#635B4E] font-serif-th max-w-xs mx-auto leading-relaxed">
               {mode === "signin" &&
-                `เข้าสู่ระบบเพื่อรับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมบันทึกประวัติการดูดวงของคุณ`}
-              {mode === "signup" && `สมัครสมาชิกฟรี ไม่ต้องผูกบัตรเครดิต เปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
-              {mode === "forgot" && "ระบุอีเมลของคุณ เพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย"}
+                (isEn
+                  ? `Sign in to receive ${DAILY_LIMIT} free daily readings and sync your tarot journal`
+                  : `เข้าสู่ระบบเพื่อรับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้ง พร้อมบันทึกประวัติการดูดวงของคุณ`)}
+              {mode === "signup" &&
+                (isEn
+                  ? `Free account with no credit card required. Receive ${DAILY_LIMIT} daily readings & journal sync`
+                  : `สมัครสมาชิกฟรี ไม่ต้องผูกบัตรเครดิต เปิดไพ่ได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`)}
+              {mode === "forgot" &&
+                (isEn
+                  ? "Enter your registered email address to receive a secure password reset link"
+                  : "ระบุอีเมลของคุณ เพื่อรับลิงก์สำหรับตั้งรหัสผ่านใหม่อย่างปลอดภัย")}
             </p>
           </div>
 
           {/* สิ่งที่จะได้รับ — แสดงเมื่อผู้ใช้ถูกพามาจากกำแพงสิทธิ์ จะได้รู้ว่าสมัครไปเพื่ออะไร */}
           {fromEntitlementWall && mode !== "forgot" && (
             <ul className="w-full mb-4 grid gap-1.5 rounded-xl border border-[#D5CEC2] bg-[#EAE7E0] p-3 shadow-xs">
-              {MEMBER_BENEFITS.map((b) => (
+              {getMemberBenefits(isEn).map((b) => (
                 <li key={b.title} className="flex items-start gap-2 text-[13px] font-serif-th text-[#29261F]">
                   <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#A58A5C]" />
                   {b.title}
@@ -307,7 +318,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 }`}
               >
                 <span>✦</span>
-                <span>เข้าสู่ระบบ</span>
+                <span>{isEn ? "Sign In" : "เข้าสู่ระบบ"}</span>
               </button>
 
               <button
@@ -318,7 +329,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 }`}
               >
                 <span>✨</span>
-                <span>สมัครสมาชิก</span>
+                <span>{isEn ? "Register" : "สมัครสมาชิก"}</span>
               </button>
             </div>
           )}
@@ -342,7 +353,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {mode === "signup" && (
               <div className="space-y-1.5 text-left">
                 <label htmlFor="auth-name" className="block text-[13px] font-semibold text-[#29261F] font-serif-th">
-                  ชื่อหรือนามแฝง
+                  {isEn ? "Name or Nickname" : "ชื่อหรือนามแฝง"}
                 </label>
                 <div className="relative flex items-center">
                   <span className="absolute left-3.5 text-[#A58A5C] pointer-events-none">
@@ -355,7 +366,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     autoComplete="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="เช่น ฟ้า, พลอย, บิ๊ก"
+                    placeholder={isEn ? "e.g. Alex, Sarah, Morgan" : "เช่น ฟ้า, พลอย, บิ๊ก"}
                     className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-serif-th placeholder-[#756F66]/50 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
                   />
                 </div>
@@ -364,7 +375,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             <div className="space-y-1.5 text-left">
               <label htmlFor="auth-email" className="block text-[13px] font-semibold text-[#29261F] font-serif-th">
-                ที่อยู่อีเมล
+                {isEn ? "Email Address" : "ที่อยู่อีเมล"}
               </label>
               <div className="relative flex items-center">
                 <span className="absolute left-3.5 text-[#A58A5C] pointer-events-none">
@@ -391,7 +402,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     htmlFor="auth-password"
                     className="block text-[13px] font-semibold text-[#29261F] font-serif-th"
                   >
-                    รหัสผ่าน
+                    {isEn ? "Password" : "รหัสผ่าน"}
                   </label>
                   {mode === "signin" && (
                     <button
@@ -399,7 +410,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onClick={() => switchMode("forgot")}
                       className="text-[13px] text-[#A58A5C] hover:text-[#29261F] hover:underline cursor-pointer font-serif-th font-bold"
                     >
-                      ลืมรหัสผ่าน?
+                      {isEn ? "Forgot password?" : "ลืมรหัสผ่าน?"}
                     </button>
                   )}
                 </div>
@@ -414,16 +425,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     autoComplete={mode === "signup" ? "new-password" : "current-password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={mode === "signup" ? "อย่างน้อย 10 ตัวอักษร" : "••••••••••"}
+                    placeholder={mode === "signup" ? (isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร") : "••••••••••"}
                     className="w-full h-11 pl-9 pr-12 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-serif-th placeholder-[#756F66]/50 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+                    aria-label={showPassword ? (isEn ? "Hide password" : "ซ่อนรหัสผ่าน") : (isEn ? "Show password" : "แสดงรหัสผ่าน")}
                     className="absolute right-3 text-[#635B4E] hover:text-[#29261F] text-xs font-serif-th cursor-pointer px-1 py-0.5 rounded transition-colors"
                   >
-                    {showPassword ? "ซ่อน" : "ดู"}
+                    {showPassword ? (isEn ? "Hide" : "ซ่อน") : (isEn ? "Show" : "ดู")}
                   </button>
                 </div>
 
@@ -450,7 +461,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       })}
                     </div>
                     <div className="flex justify-between items-center text-[13px] font-serif-th text-[#635B4E]">
-                      <span>ความปลอดภัย:</span>
+                      <span>{isEn ? "Strength:" : "ความปลอดภัย:"}</span>
                       <span className={`font-semibold ${strength.colorClass}`}>{strength.label}</span>
                     </div>
                   </div>
@@ -465,7 +476,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {turnstileToken === "" && !loading && (
               <p className="text-xs text-[#635B4E] text-center flex items-center justify-center gap-1.5">
                 <span className="inline-block w-3 h-3 rounded-full border-2 border-[#A58A5C] border-t-transparent animate-spin" />
-                กำลังตรวจสอบความปลอดภัย…
+                {isEn ? "Verifying security…" : "กำลังตรวจสอบความปลอดภัย…"}
               </p>
             )}
 
@@ -477,14 +488,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               className="w-full h-11.5 mt-2 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs sm:text-sm active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
             >
               {loading ? (
-                <span>กำลังดำเนินการ…</span>
+                <span>{isEn ? "Processing…" : "กำลังดำเนินการ…"}</span>
               ) : (
                 <>
                   <span className="text-sm">✦</span>
                   <span>
-                    {mode === "signin" && "เข้าสู่ระบบด้วยอีเมล"}
-                    {mode === "signup" && "ยืนยันการสมัครสมาชิก"}
-                    {mode === "forgot" && "ส่งลิงก์รีเซ็ตรหัสผ่าน"}
+                    {mode === "signin" && (isEn ? "Sign In with Email" : "เข้าสู่ระบบด้วยอีเมล")}
+                    {mode === "signup" && (isEn ? "Confirm Registration" : "ยืนยันการสมัครสมาชิก")}
+                    {mode === "forgot" && (isEn ? "Send Reset Link" : "ส่งลิงก์รีเซ็ตรหัสผ่าน")}
                   </span>
                 </>
               )}
@@ -494,13 +505,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Mode Switcher Return Link for Forgot Password */}
           {mode === "forgot" && (
             <div className="pt-3 text-xs font-serif-th text-[#635B4E]">
-              จำรหัสผ่านได้แล้ว?{" "}
+              {isEn ? "Remembered your password? " : "จำรหัสผ่านได้แล้ว? "}
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
                 className="text-[#A58A5C] hover:underline font-bold cursor-pointer ml-1"
               >
-                กลับไปเข้าสู่ระบบ
+                {isEn ? "Back to Sign In" : "กลับไปเข้าสู่ระบบ"}
               </button>
             </div>
           )}
@@ -508,7 +519,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Sanctuary Divider */}
           <div className="w-full flex items-center my-4">
             <div className="flex-1 border-t border-[#D5CEC2]/40" />
-            <span className="px-3 text-[13px] text-[#635B4E] font-serif-th font-medium">หรือเชื่อมต่อทันทีด้วย</span>
+            <span className="px-3 text-[13px] text-[#635B4E] font-serif-th font-medium">
+              {isEn ? "Or continue with" : "หรือเชื่อมต่อทันทีด้วย"}
+            </span>
             <div className="flex-1 border-t border-[#D5CEC2]/40" />
           </div>
 
@@ -561,7 +574,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Cryptographic Assurance & PDPA Footnote */}
           <div className="mt-5 text-[13px] text-[#635B4E] font-serif-th text-center flex items-center justify-center gap-1 opacity-80">
             <span className="text-[#A58A5C]">✦</span>
-            <span>เข้ารหัสความปลอดภัยระดับสากล · ลบบัญชีและข้อมูลทั้งหมดได้ทุกเมื่อ</span>
+            <span>
+              {isEn
+                ? "End-to-end encrypted · Export or delete your data anytime under PDPA"
+                : "เข้ารหัสความปลอดภัยระดับสากล · ลบบัญชีและข้อมูลทั้งหมดได้ทุกเมื่อ"}
+            </span>
           </div>
         </motion.div>
       </div>

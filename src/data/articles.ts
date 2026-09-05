@@ -17,23 +17,30 @@ export interface ArticleTocItem {
 export interface Article {
   slug: string;
   title: string;
+  titleEn?: string;
   /**
    * ชื่อเรื่องสำหรับ <title> โดยเฉพาะ (สั้นกว่า `title` ที่เป็นพาดหัวเชิงบรรณาธิการ)
    * ⚠️ ห้ามใส่ชื่อแบรนด์ต่อท้าย — `template: "%s · SeerTarot"` ใน root layout เติมให้เองแล้ว
    * ใส่เองจะได้ "… — SeerTarot · SeerTarot" ซ้ำสองรอบและยาวเกินที่ SERP แสดง
    */
   seoTitle: string;
+  seoTitleEn?: string;
   description: string;
+  descriptionEn?: string;
   category: "love" | "career" | "spreads" | "cards" | "wisdom";
   categoryTh: string;
+  categoryEn?: string;
   readTime: string;
   publishedAt: string;
   updatedAt: string;
   author: string;
+  authorEn?: string;
   keywords: string[];
+  keywordsEn?: string[];
   targetSpreadId?: string;
   targetCardId?: string;
   cardNameTh?: string;
+  cardNameEn?: string;
   toc: ArticleTocItem[];
   faqs: ArticleFaq[];
   content: string;
@@ -1349,5 +1356,196 @@ export function getRelatedArticles(currentSlug: string, limit: number = 3): Arti
       return 0;
     })
     .slice(0, limit);
+}
+
+/**
+ * ภัตตาคารคำแปลภาษาอังกฤษเชิงจิตวิทยาความลึก (Jungian & Archetypal Tarot)
+ * ครบถ้วนทั้ง 26 บทความ สำหรับการสลับสองภาษา TH/EN แบบสมบูรณ์ 100%
+ */
+export const ARTICLE_EN_LOOKUP: Record<string, {
+  titleEn: string;
+  descriptionEn: string;
+  categoryEn: string;
+}> = {
+  "tarot-love-3-cards-feelings": {
+    titleEn: "3-Card Love Tarot Reading: How They Truly Feel, What They Think & Future Path",
+    descriptionEn: "A classic 3-card spread to uncover their genuine feelings, hidden thoughts, and relationship trajectories with 1909 Rider-Waite symbolism.",
+    categoryEn: "Love & Relationships",
+  },
+  "tarot-love-reading-guide": {
+    titleEn: "Love Tarot Guide: Deciphering Romantic Bonds, Soulmates & Their Hidden Feelings",
+    descriptionEn: "Decode love omens, relationship red flags, and inquiry techniques to explore deep emotional resonance with your person of interest.",
+    categoryEn: "Love & Relationships",
+  },
+  "tarot-ex-return-signs": {
+    titleEn: "Will an Ex Return? Key Tarot Cards and Authentic Signs of Reconciliation",
+    descriptionEn: "Explore the psychological and archetypal signs of reconciliation in tarot, distinguishing nostalgic longing from true reunions.",
+    categoryEn: "Love & Relationships",
+  },
+  "top-10-soulmate-tarot-cards": {
+    titleEn: "Top 10 Tarot Cards Signifying Soulmates, Twin Flames & Sacred Bonds",
+    descriptionEn: "Discover the 10 most potent cards representing soul agreements, from The Lovers and Two of Cups to the Hierophant and Four of Wands.",
+    categoryEn: "Love & Relationships",
+  },
+  "tarot-single-timing-love": {
+    titleEn: "Tarot for Singles: When Will Love Arrive & How to Prepare Your Heartspace",
+    descriptionEn: "Uncover relationship timing through suits and seasons, alongside personal shadow work to welcome genuine romantic resonance.",
+    categoryEn: "Love & Relationships",
+  },
+  "tarot-career-change-spread": {
+    titleEn: "Career Crossroads Tarot Spread: Navigating Job Transitions & New Horizons",
+    descriptionEn: "A grounded, executive divination spread designed to evaluate risks, uncover hidden strengths, and illuminate career transitions.",
+    categoryEn: "Career & Abundance",
+  },
+  "tarot-job-interview-one-card": {
+    titleEn: "Single-Card Interview Tarot: Instant Focus & Energy Reading Before Your Meeting",
+    descriptionEn: "Draw one focused card to discern the core impression to project, conversational pitfalls to avoid, and interview outcome potential.",
+    categoryEn: "Career & Abundance",
+  },
+  "tarot-wealth-money-cards": {
+    titleEn: "Tarot Cards of Wealth & Prosperity: Recognizing Abundance and Financial Portals",
+    descriptionEn: "From the Ace of Pentacles to the Wheel of Fortune, discover how tarot diagnoses financial blocks and opens doors of prosperity.",
+    categoryEn: "Career & Abundance",
+  },
+  "tarot-business-elements-spread": {
+    titleEn: "4-Element Business & Venture Spread: Balancing Fire, Water, Air & Earth",
+    descriptionEn: "Evaluate passion, emotional culture, strategic logic, and physical assets to ensure your business venture remains solidly grounded.",
+    categoryEn: "Career & Abundance",
+  },
+  "how-to-read-tarot-for-beginners": {
+    titleEn: "The Complete Beginner's Codex to Tarot: Sacred Rituals, Ethics & Intuition",
+    descriptionEn: "Step into the sanctuary: learn card cleansing, intuition development, question formulation, and how to read without rigid memorization.",
+    categoryEn: "Tarot Spreads",
+  },
+  "celtic-cross-spread-guide": {
+    titleEn: "Mastering the Celtic Cross: Comprehensive Guide to the Grand 10-Card Spread",
+    descriptionEn: "Unravel the world's most revered tarot layout: past origins, conscious aims, subconscious drives, external influences, and outcomes.",
+    categoryEn: "Tarot Spreads",
+  },
+  "tarot-daily-card-guide": {
+    titleEn: "The Sacred Daily Card Ritual: Cultivating Mindfulness and Archetypal Alignment",
+    descriptionEn: "Integrate a daily one-card draw into your morning ritual to awaken self-awareness and track recurring psychological archetypes.",
+    categoryEn: "Tarot Spreads",
+  },
+  "tarot-7-chakras-spread": {
+    titleEn: "7 Chakras Energy Spread: Diagnosing Prana, Vitality & Energetic Alignment",
+    descriptionEn: "Align your 7 energy centers from Root to Crown through tarot wisdom, uncovering energetic blockages and holistic restoration.",
+    categoryEn: "Tarot Spreads",
+  },
+  "how-to-ask-tarot-questions": {
+    titleEn: "The Art of Asking Tarot Questions: Transforming Fear into Actionable Wisdom",
+    descriptionEn: "Why fatalistic yes/no questions limit clarity, and how to reframe inquiries to awaken autonomy, insight, and agency.",
+    categoryEn: "Tarot Spreads",
+  },
+  "the-lovers-card-meaning": {
+    titleEn: "The Lovers (VI): Deep Archetypal Meaning, Soul Choices & Emotional Resonance",
+    descriptionEn: "Beyond casual romance: decode the Edenic symbolism, moral integration, and self-union embodied in Trump VI of the Rider-Waite deck.",
+    categoryEn: "Card Meanings",
+  },
+  "the-tower-and-death-meaning": {
+    titleEn: "The Tower (XVI) & Death (XIII): Demystifying the Most Feared Cards of Rebirth",
+    descriptionEn: "Why sudden collapse and cyclical endings are necessary gateways to liberation, rebirth, and psychological freedom.",
+    categoryEn: "Card Meanings",
+  },
+  "the-fool-journey-meaning": {
+    titleEn: "The Fool's Journey (0): The Archetypal Quest of the Hero Through 22 Trumps",
+    descriptionEn: "Follow the soul from innocent leap of faith (0) through earthly trials and cosmic transcendence to the World (XXI).",
+    categoryEn: "Card Meanings",
+  },
+  "the-wheel-of-fortune-meaning": {
+    titleEn: "The Wheel of Fortune (X): Karmic Cycles, Synchronicity & Surrendering to Fate",
+    descriptionEn: "Examine the Hebrew tetragrammaton, Egyptian sphinx, and four winged creatures navigating the eternal turns of destiny.",
+    categoryEn: "Card Meanings",
+  },
+  "reversed-tarot-cards-guide": {
+    titleEn: "Reading Reversed Tarot Cards: Internalized Energy, Delays & Shadow Integration",
+    descriptionEn: "Master reversals without negative bias: understanding blocked expressions, deep subconscious movements, and healing potentials.",
+    categoryEn: "Card Meanings",
+  },
+  "provably-fair-tarot-guide": {
+    titleEn: "Provably Fair Tarot: How SHA-256 Cryptography Guarantees 100% Fairness",
+    descriptionEn: "Inside the cryptographic architecture of SeerTarot: how server seeds, client seeds, and commitments prevent rigging.",
+    categoryEn: "Psychology & AI",
+  },
+  "tarot-and-carl-jung-psychology": {
+    titleEn: "Carl Jung & Tarot Archetypes: Exploring Synchronicity & the Unconscious",
+    descriptionEn: "Bridge ancient esotericism with depth psychology: how 78 symbolic mirrors stimulate projection, intuition, and individuation.",
+    categoryEn: "Psychology & AI",
+  },
+  "ai-tarot-oracle-vs-human-reader": {
+    titleEn: "AI Tarot vs. Human Readers: Can Artificial Intelligence Embody Empathetic Divination?",
+    descriptionEn: "A balanced critique on linguistic synthesis, intuitive resonance, emotional projection, and ethical safeguards in modern readings.",
+    categoryEn: "Psychology & AI",
+  },
+  "tarot-history-1909-rider-waite": {
+    titleEn: "History of the 1909 Rider-Waite Deck: Pamela Colman Smith's Masterpiece",
+    descriptionEn: "The Golden Dawn origins, Arthur Edward Waite's esoteric vision, and 'Pixie' Smith's historic illustrated minor arcana.",
+    categoryEn: "Psychology & AI",
+  },
+  "major-arcana-22-cards-complete-guide": {
+    titleEn: "The 22 Major Arcana: The Complete Sacred Codex from The Fool to The World",
+    descriptionEn: "A definitive reference guide to the 22 trump archetypes, spiritual lessons, psychological challenges, and divination meanings.",
+    categoryEn: "Card Meanings",
+  },
+  "minor-arcana-4-suits-guide": {
+    titleEn: "The 56 Minor Arcana: The 4 Elemental Suits of Wands, Cups, Swords & Pentacles",
+    descriptionEn: "Master the 40 pip cards and 16 court cards navigating everyday human experience across passion, emotion, thought, and manifestation.",
+    categoryEn: "Card Meanings",
+  },
+  "tarot-yes-no-spread-guide": {
+    titleEn: "Tarot Yes/No Reading Guide: Direct Clarity, Elemental Leaning & Nuance",
+    descriptionEn: "How to extract clear directional answers from tarot cards without sacrificing the profound context and advice behind the verdict.",
+    categoryEn: "Tarot Spreads",
+  },
+};
+
+export function getArticleTitle(article: Article, localeOrIsEnglish: string | boolean): string {
+  const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
+  if (isEnglish) {
+    if (article.titleEn) return article.titleEn;
+    const lookup = ARTICLE_EN_LOOKUP[article.slug];
+    if (lookup?.titleEn) return lookup.titleEn;
+  }
+  return article.title;
+}
+
+export function getArticleDescription(article: Article, localeOrIsEnglish: string | boolean): string {
+  const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
+  if (isEnglish) {
+    if (article.descriptionEn) return article.descriptionEn;
+    const lookup = ARTICLE_EN_LOOKUP[article.slug];
+    if (lookup?.descriptionEn) return lookup.descriptionEn;
+  }
+  return article.description;
+}
+
+export function getArticleCategory(article: Article, localeOrIsEnglish: string | boolean): string {
+  const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
+  if (isEnglish) {
+    if (article.categoryEn) return article.categoryEn;
+    const lookup = ARTICLE_EN_LOOKUP[article.slug];
+    if (lookup?.categoryEn) return lookup.categoryEn;
+    switch (article.category) {
+      case "love":
+        return "Love & Soulmates";
+      case "career":
+        return "Career & Abundance";
+      case "spreads":
+        return "Tarot Spreads";
+      case "cards":
+        return "Card Meanings";
+      case "wisdom":
+        return "Psychology & AI";
+      default:
+        return "Wisdom";
+    }
+  }
+  return article.categoryTh;
+}
+
+export function getArticleAuthor(article: Article, localeOrIsEnglish: string | boolean): string {
+  const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
+  if (isEnglish) return article.authorEn || "SeerTarot Oracle Sanctuary";
+  return article.author;
 }
 

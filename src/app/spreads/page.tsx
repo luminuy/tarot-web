@@ -67,22 +67,7 @@ export default function SpreadsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        {/* Hero Header */}
-        <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
-          <div>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs text-[#A58A5C] font-serif-th font-bold shadow-xs">
-              <span>✦</span> 20 ผังการเปิดไพ่มาตรฐานสากล <span>✦</span>
-            </span>
-          </div>
-          <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-[#29261F] tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
-            ผังการเปิดไพ่ทาโรต์ 20 รูปแบบ
-          </h1>
-          <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
-            เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ พร้อมดูตัวอย่างการจัดวางและความหมายของแต่ละตำแหน่ง
-          </p>
-        </div>
-
-        {/* Client Interactive Library */}
+        {/* Client Interactive Library with dynamic bilingual hero header */}
         <SpreadsLibrary spreads={SPREADS} />
       </div>
     </main>
