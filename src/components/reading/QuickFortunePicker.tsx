@@ -384,31 +384,21 @@ export function QuickFortunePicker({
           ))}
         </div>
 
-        {/* Pagination Pills & Swipe Hint เฉพาะหน้าจอมือถือ */}
-        <div className="flex sm:hidden flex-col items-center justify-center gap-2 pt-1 pb-1">
-          {/* Pagination Pills */}
-          <div className="flex items-center justify-center gap-1.5">
-            {QUICK_TOPICS.map((topic, index) => (
-              <button
-                key={topic.id}
-                type="button"
-                onClick={() => scrollToIndex(index)}
-                aria-label={isEnglish ? `Navigate to ${topic.titleEn || topic.title}` : `ไปยังหัวข้อ ${topic.title}`}
-                className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none ${
-                  activeIndex === index
-                    ? "w-6 bg-[#8F5C1A] shadow-xs"
-                    : "w-1.5 bg-[#D5CEC2] hover:bg-[#A58A5C]/70"
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Swipe hint */}
-          <p className="text-[10px] font-serif-th text-[#A58A5C] flex items-center gap-1 opacity-75">
-            <span>✦</span>
-            <span>{isEnglish ? "Swipe left or right to explore topics" : "ปัดซ้าย-ขวาเพื่อเลือกเรื่อง"}</span>
-            <span>✦</span>
-          </p>
+        {/* Pagination Pills เฉพาะหน้าจอมือถือ */}
+        <div className="flex sm:hidden items-center justify-center gap-1.5 pt-1 pb-1">
+          {QUICK_TOPICS.map((topic, index) => (
+            <button
+              key={topic.id}
+              type="button"
+              onClick={() => scrollToIndex(index)}
+              aria-label={isEnglish ? `Navigate to ${topic.titleEn || topic.title}` : `ไปยังหัวข้อ ${topic.title}`}
+              className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none ${
+                activeIndex === index
+                  ? "w-6 bg-[#8F5C1A] shadow-xs"
+                  : "w-1.5 bg-[#D5CEC2] hover:bg-[#A58A5C]/70"
+              }`}
+            />
+          ))}
         </div>
       </div>
 
