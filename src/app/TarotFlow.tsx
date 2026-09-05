@@ -19,6 +19,8 @@ import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
 import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
 import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
@@ -880,49 +882,17 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
       {/* Top Sacred Header — Solid White with Clean Dividing Line */}
-      <header className="w-full border-b border-[#D5CEC2] bg-[#FFFFFF] sticky top-0 z-50 shadow-[var(--shadow-raised)]">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Luxury Brand Logo — P1-U2: กลับหน้าแรก ไม่ล้าง state (ปุ่ม "เริ่มดูดวงใหม่" ทำหน้าที่นั้น) */}
-          <Link
-            href="/"
-            aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
-            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
-          >
-            {/* Seer Brand Logo */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition-all duration-300">
-              <img
-                src="/logo.webp"
-                alt="SeerTarot"
-                width={44}
-                height={44}
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-            </div>
-
-            {/* แถบหัวมี 3 ปุ่มตั้งแต่มี QuotaMeter โผล่บนมือถือ — จอเล็กเหลือแค่ตราไพ่
-                (ชื่อแบรนด์ที่ตัดคำหรือล้นทับปุ่มแย่กว่าการซ่อนชื่อไว้ก่อน) */}
-            <div className="hidden min-w-0 flex-col justify-center sm:flex">
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className="text-[#A58A5C] text-xs">✦</span>
-                <span className="font-serif-th text-sm sm:text-lg font-bold text-[#29261F] tracking-wide leading-snug py-0.5 whitespace-nowrap">
-                  ดูดวงไพ่ทาโรต์
-                </span>
-              </div>
-              <span className="hidden sm:block text-[13px] tracking-[0.22em] text-[#635B4E] font-mono uppercase font-semibold pl-4">
-                1909 RIDER-WAITE TAROT
-              </span>
-            </div>
-          </Link>
-
-          {/* Right Toolbar Controls (UserProfileBadge, Sacred Dropdown & Reset Button) */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
-            <UserProfileBadge
-              onOpenAuthModal={() => openAuth("signin")}
-              onOpenPlans={() => openAccessDialog("explore")}
-              onBuyCredits={() => setIsBuyCreditsOpen(true)}
-            />
-
+      <SiteHeader
+        variant="app"
+        toolbar={
+          <UserProfileBadge
+            onOpenAuthModal={() => openAuth("signin")}
+            onOpenPlans={() => openAccessDialog("explore")}
+            onBuyCredits={() => setIsBuyCreditsOpen(true)}
+          />
+        }
+        nav={
+          <>
             <SacredNavDropdown
               onOpenHistory={() => {
                 soundManager.playCardSelectSound();
@@ -942,9 +912,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 <span>✦</span> เริ่มดูดวงใหม่
               </button>
             )}
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       {/* World-Class Sacred Floating Toast Notification HUD */}
       <AnimatePresence>{toast && <ToastNotification toast={toast} onClose={() => setToast(null)} />}</AnimatePresence>
@@ -1390,25 +1360,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           Rich SEO Editorial Content & Fat Footer (Google Helpful Content & Mobile-First)
           แสดงเฉพาะหน้าเลือกผังพยากรณ์ (SPREAD_SELECT) เพื่อไม่รบกวนสมาธิในพิธีกรรมหน้า 2-5
           ═══════════════════════════════════════════════════════════════ */}
-      {currentStep === "SPREAD_SELECT" ? (
-        seoContent
-      ) : (
-        <footer className="w-full py-6 mt-12 border-t border-[#D5CEC2]/40 text-center text-xs text-[#635B4E] font-serif-th">
-          <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2">
-              <span className="text-[#8F5C1A]">✦</span>
-              <span>SeerTarot · วิหารพยากรณ์ไพ่ทาโรต์ 1909 Rider-Waite ออนไลน์</span>
-            </div>
-            <div className="flex items-center gap-4 text-[11px] text-[#635B4E]">
-              <Link href="/privacy" className="hover:text-[#8F5C1A] transition-colors underline">
-                นโยบายความเป็นส่วนตัว
-              </Link>
-              <span>·</span>
-              <span className="text-[#3A7044] font-medium">สายด่วนสุขภาพจิต 1323</span>
-            </div>
-          </div>
-        </footer>
-      )}
+      {currentStep === "SPREAD_SELECT" ? seoContent : null}
+      <SiteFooter />
     </main>
   );
 }

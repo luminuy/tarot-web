@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { DECK } from "@/data/cards";
 import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
-import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
@@ -69,16 +68,17 @@ export default function CardsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-        {/* Top Breadcrumbs & Dropdown */}
-        <div className="flex items-center justify-between border-b border-[#D5CEC2]/40 pb-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[#29261F] hover:text-[#A58A5C] transition-colors py-2 px-4 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] hover:border-[#A58A5C] font-serif-th shadow-xs"
-          >
-            <span>←</span> กลับหน้าดูดวงหลัก
+        {/* Top Breadcrumb */}
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
+        >
+          <Link href="/" className="hover:text-[#A58A5C] transition-colors">
+            หน้าแรก
           </Link>
-          <SacredNavDropdown />
-        </div>
+          <span>/</span>
+          <span className="text-[#29261F] truncate font-bold">คัมภีร์ไพ่ 78 ใบ</span>
+        </nav>
 
         {/* Hero Header */}
         <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">

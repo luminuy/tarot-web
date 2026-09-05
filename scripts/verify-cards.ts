@@ -1,5 +1,6 @@
 import { DECK } from "../src/data/cards";
 import type { Category, TarotCard } from "../src/data/cards/types";
+import { RELATED_CARDS } from "../src/data/cards/related.generated";
 
 /**
  * ตรวจความสมบูรณ์ของสำรับก่อนขึ้นเว็บจริง
@@ -79,7 +80,17 @@ if (Math.abs(tally.yes - tally.no) > 20) {
   );
 }
 
-console.log(`ตรวจไพ่ ${DECK.length} ใบ · ข้อความความหมายทั้งหมด ${allTexts.size} ข้อความ`);
+// ตรวจแผนที่ไพ่ใกล้เคียง (Rule 14 Zero Fabricated Cards) — ทุก id ต้องมีจริงในสำรับ 78 ใบ
+if (Object.keys(RELATED_CARDS).length !== 78) fail(`RELATED_CARDS ต้องมีครบ 78 คีย์ (พบ ${Object.keys(RELATED_CARDS).length})`);
+for (const [id, refs] of Object.entries(RELATED_CARDS)) {
+  if (!ids.has(id)) fail(`RELATED_CARDS มีคีย์ที่ไม่มีในสำรับ: ${id}`);
+  if (refs.length !== 4) fail(`${id} ต้องมีไพ่ใกล้เคียง 4 ใบพอดี (พบ ${refs.length})`);
+  if (new Set(refs).size !== 4) fail(`${id} มีไพ่ซ้ำในรายการ`);
+  if (refs.includes(id as any)) fail(`${id} อ้างถึงตัวเอง`);
+  for (const r of refs) if (!ids.has(r)) fail(`${id} อ้างไพ่ที่ไม่มีจริง: ${r}`);
+}
+
+console.log(`ตรวจไพ่ ${DECK.length} ใบ · ข้อความความหมายทั้งหมด ${allTexts.size} ข้อความ · แผนที่ไพ่ใกล้เคียง 78×4 ใบ`);
 console.log(`yesNo — ใช่ ${tally.yes} / ไม่ใช่ ${tally.no} / ไม่แน่ ${tally.maybe}`);
 
 if (warnings.length) {

@@ -4,8 +4,6 @@ import { getAllArticles } from "@/data/articles";
 import { BlogIndexClient } from "./BlogIndexClient";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
-import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
-
 export const metadata: Metadata = {
   title: "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909",
   description:
@@ -90,31 +88,17 @@ export default function BlogPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-5xl mx-auto space-y-8 pb-16">
-        {/* Navigation Breadcrumb & Sanctuary Controls */}
-        <div className="flex items-center justify-between border-b border-[#D5CEC2]/40 pb-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs text-[#29261F] hover:text-[#8F5C1A] transition-colors font-serif-th py-2 px-4 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] hover:border-[#8F5C1A] shadow-2xs group"
-          >
-            <span className="text-[#8F5C1A] transition-transform group-hover:-translate-x-0.5">←</span>
-            <span>กลับหน้าดูดวงหลัก</span>
+        {/* Navigation Breadcrumb */}
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
+        >
+          <Link href="/" className="hover:text-[#A58A5C] transition-colors">
+            หน้าแรก
           </Link>
-          <div className="flex items-center gap-2.5">
-            <Link
-              href="/spreads"
-              className="hidden sm:inline-flex items-center gap-1 text-xs font-serif-th text-[#635B4E] hover:text-[#8F5C1A] py-1.5 px-3 rounded-full bg-[#FFFFFF] border border-[#D5CEC2]/60 hover:border-[#8F5C1A] transition-all"
-            >
-              <span>✦</span> ผังพยากรณ์ 20 แบบ
-            </Link>
-            <Link
-              href="/cards"
-              className="hidden sm:inline-flex items-center gap-1 text-xs font-serif-th text-[#635B4E] hover:text-[#8F5C1A] py-1.5 px-3 rounded-full bg-[#FFFFFF] border border-[#D5CEC2]/60 hover:border-[#8F5C1A] transition-all"
-            >
-              <span>✦</span> ความหมายไพ่ 78 ใบ
-            </Link>
-            <SacredNavDropdown />
-          </div>
-        </div>
+          <span>/</span>
+          <span className="text-[#29261F] truncate font-bold">คัมภีร์บทความ</span>
+        </nav>
 
         {/* Sanctuary Codex Hero Header */}
         <div className="text-center space-y-3.5 py-6 sm:py-8 max-w-3xl mx-auto">
