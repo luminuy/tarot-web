@@ -28,6 +28,7 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   return (
     <header
+      data-site-header=""
       data-variant={variant}
       className="w-full border-b border-[#D5CEC2] bg-[#FFFFFF] sticky top-0 z-50 shadow-[var(--shadow-raised)]"
     >

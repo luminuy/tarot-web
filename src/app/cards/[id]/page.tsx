@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DECK, cardById } from "@/data/cards";
 import { CardDetailView } from "@/components/encyclopedia/CardDetailView";
@@ -113,22 +112,6 @@ export default async function CardDetailPage({ params }: CardPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <div className="max-w-5xl mx-auto mb-6">
-        <nav
-          aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
-        >
-          <Link href="/" className="hover:text-[#A58A5C] transition-colors">
-            หน้าแรก
-          </Link>
-          <span>/</span>
-          <Link href="/cards" className="hover:text-[#A58A5C] transition-colors">
-            คัมภีร์ไพ่ 78 ใบ
-          </Link>
-          <span>/</span>
-          <span className="text-[#29261F] truncate font-bold">{card.nameTh}</span>
-        </nav>
-      </div>
       <CardDetailView
         card={card}
         prevCard={prevCard}

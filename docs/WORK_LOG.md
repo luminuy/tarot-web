@@ -36,6 +36,18 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: แก้หัวเว็บกลางไม่ sticky และแผงเมนูถูกเนื้อหาทับ + ถอดแถบ breadcrumb ออกจากหน้าดัชนี — โดย Claude
+
+- **อาการ**: หลัง PR #248 ย้าย `<SiteHeader/>` มาเป็นลูกโดยตรงของ `<body>` หัวเว็บ **เลิก sticky ทุกหน้าที่ใช้ layout** (`/cards`, `/cards/[id]`, `/blog`, `/spreads`, `/privacy`, `/account`) และกดปุ่มเมนูแล้ว **แผง dropdown โผล่มาแค่แถบบาง ๆ ใต้หัวเว็บ** ที่เหลือถูกเนื้อหาหน้าทับ
+- **สาเหตุราก**: กฎใน `src/app/globals.css` `body > *:not(.fixed):not([data-floating]) { position: relative; z-index: 1 }` มี specificity (0,2,1) สูงกว่า utility `.sticky` / `.z-50` ของ Tailwind (0,1,0) เดิมหัวเว็บอยู่ **ใน** `<main>` กฎจึงไม่โดน พอย้ายออกมาเป็นลูกตรงของ `<body>` กฎเลยทับทันที → `position: sticky` กลายเป็น `relative` และ `z-index: 50` กลายเป็น `1` เท่ากับ `<main>` ที่มาทีหลังใน DOM แผงเมนู (z-50 ที่ติดอยู่ใน stacking context ระดับ 1 ของหัวเว็บ) จึงถูกพื้นหลัง `<main>` ทับ
+- **การพิสูจน์**: `getComputedStyle(document.querySelector('header'))` คืน `position: "relative", zIndex: "1"` ทั้งที่คลาสเขียน `sticky top-0 z-50` · `document.elementFromPoint()` กลางแผงเมนูตอบกลับเป็น `<main>` · หลังแก้คืนค่าเป็น `sticky / 50` และเลื่อนหน้าไป 1200px แล้ว `headerTop === 0`
+- **การแก้ไข**: เพิ่ม `:not([data-site-header])` ในกฎนั้น พร้อมคอมเมนต์อธิบายกับดัก และติด `data-site-header` ให้ `<header>` ใน `SiteHeader.tsx`
+- **🛡️ กฎป้องกันถาวร**: **ย้าย element ใดมาเป็นลูกโดยตรงของ `<body>` ต้องตรวจ `position`/`z-index` ที่คำนวณจริงด้วย `getComputedStyle` เสมอ อย่าเชื่อคลาส Tailwind ที่เขียนไว้ — กฎ `body > *` ในโปรเจกต์นี้ specificity สูงกว่า utility ทุกตัว**
+- **งานที่ทำเพิ่มตามคำสั่งเจ้าของ**: ถอดแถบ breadcrumb ที่ PR #248 เพิ่มใหม่ออกจาก `/cards`, `/cards/[id]`, `/blog`, `/spreads`, `/privacy`, `/account` (breadcrumb เดิมของ `/blog/[slug]`, `/spreads/[id]`, `/readers`, `/readers/[id]` ที่ผูกกับ `BreadcrumbList` JSON-LD คงไว้ตามเดิม)
+- **ไฟล์ที่แก้**: `src/app/globals.css`, `src/components/layout/SiteHeader.tsx`, `src/app/cards/page.tsx`, `src/app/cards/[id]/page.tsx`, `src/app/blog/page.tsx`, `src/app/spreads/page.tsx`, `src/app/privacy/page.tsx`, `src/app/account/page.tsx`
+
+---
+
 ### 🗓️ 2026-09-05: วางระบบ Google Ads Conversion Tracking & Remarketing แบบ Native — โดย Antigravity
 
 - **โครงสร้างและการตั้งค่าตัวแปร Google Ads (Environment & Runtime Config)**:

@@ -172,8 +172,18 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* เนื้อหาทุกอย่างต้องอยู่เหนือชั้นลินิน (ยกเว้น fixed portal / floating elements) */
-body > *:not(.fixed):not([data-floating]) {
+/* เนื้อหาทุกอย่างต้องอยู่เหนือชั้นลินิน (ยกเว้น fixed portal / floating elements)
+ *
+ * ⚠️ ต้องยกเว้น `[data-site-header]` ด้วย — ตั้งแต่ย้าย <SiteHeader/> ออกมาเป็นลูกโดยตรง
+ * ของ <body> (เรนเดอร์จาก layout.tsx) กฎนี้จะทับ `sticky top-0 z-50` ของหัวเว็บทันที
+ * เพราะ specificity สูงกว่า utility ของ Tailwind: หัวเว็บกลายเป็น position:relative
+ * (sticky ตายเงียบ) และ z-index:1 เท่ากับ <main> ที่มาทีหลังใน DOM
+ * ผลคือแผงเมนู dropdown ที่อยู่ในหัวเว็บถูกเนื้อหาหน้าทับจนโผล่มาแค่แถบบาง ๆ
+ *
+ * ย้าย element อื่นมาเป็นลูกตรงของ <body> เมื่อไหร่ ให้เช็ก position/z-index ที่คำนวณจริง
+ * ด้วย getComputedStyle ก่อนเสมอ อย่าเชื่อคลาสที่เขียนไว้
+ */
+body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   position: relative;
   z-index: 1;
 }

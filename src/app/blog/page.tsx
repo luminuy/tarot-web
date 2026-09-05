@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { getAllArticles } from "@/data/articles";
 import { BlogIndexClient } from "./BlogIndexClient";
@@ -88,18 +87,6 @@ export default function BlogPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-5xl mx-auto space-y-8 pb-16">
-        {/* Navigation Breadcrumb */}
-        <nav
-          aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#D5CEC2]/40 pb-4 overflow-x-auto whitespace-nowrap"
-        >
-          <Link href="/" className="hover:text-[#A58A5C] transition-colors">
-            หน้าแรก
-          </Link>
-          <span>/</span>
-          <span className="text-[#29261F] truncate font-bold">คัมภีร์บทความ</span>
-        </nav>
-
         {/* Sanctuary Codex Hero Header */}
         <div className="text-center space-y-3.5 py-6 sm:py-8 max-w-3xl mx-auto">
           <div className="flex items-center justify-center gap-3">
