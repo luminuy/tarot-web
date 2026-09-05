@@ -272,23 +272,40 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     }
   };
 
+  const isUserAbort = (err: unknown) => err instanceof DOMException && err.name === "AbortError";
+
   const handleShareToBrand = async (brand: "facebook" | "instagram" | "tiktok" | "twitter" | "threads") => {
     soundManager.playCardSelectSound();
     trackEvent("share_click", { platform: brand, spread_id: spreadName });
-    const shareUrl =
-      brand === "twitter" || brand === "facebook" || brand === "threads"
-        ? await buildShareLink()
-        : typeof window !== "undefined"
-          ? window.location.origin
-          : "https://seertarot.net";
+
+    // ⚠️ ต้องเปิดแท็บเปล่าไว้ "ทันทีแบบ sync" ในนี้ก่อน await ใด ๆ ทั้งสิ้น
+    // เพราะกว่าจะได้ shareUrl ต้องรอ createReadingImageBlob (canvas + preload รูปไพ่) และ fetch อัปโหลดขึ้น R2
+    // ถ้าปล่อยให้ window.open ทำงาน "หลัง await" เบราว์เซอร์ (โดยเฉพาะ Safari) จะตัดสินว่าไม่ได้มาจาก
+    // user gesture โดยตรงอีกต่อไป แล้วบล็อกป็อปอัปเงียบ ๆ (ไม่มี error ให้เห็นเลย) — นี่คือสาเหตุที่ "แชร์กดแล้วไม่ขึ้นอะไร"
+    const needsPopup = brand === "twitter" || brand === "facebook" || brand === "threads";
+    const pendingPopup =
+      needsPopup && typeof window !== "undefined"
+        ? window.open("about:blank", "_blank", "noopener,noreferrer,width=600,height=550")
+        : null;
+    const openOrRedirect = (target: string) => {
+      if (pendingPopup && !pendingPopup.closed) {
+        pendingPopup.location.href = target;
+      } else {
+        window.open(target, "_blank", "noopener,noreferrer,width=600,height=550");
+      }
+    };
+
+    const shareUrl = needsPopup
+      ? await buildShareLink()
+      : typeof window !== "undefined"
+        ? window.location.origin
+        : "https://seertarot.net";
 
     // Twitter / X
     if (brand === "twitter") {
       const tweetText = `✨ ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
-      window.open(
-        `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`,
-        "_blank",
-        "noopener,noreferrer,width=600,height=550"
+      openOrRedirect(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`
       );
       return;
     }
@@ -296,11 +313,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     // Threads
     if (brand === "threads") {
       const threadsText = `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนาย: "${reading?.summary || ""}"\n${shareUrl}`;
-      window.open(
-        `https://www.threads.net/intent/post?text=${encodeURIComponent(threadsText)}`,
-        "_blank",
-        "noopener,noreferrer,width=600,height=550"
-      );
+      openOrRedirect(`https://www.threads.net/intent/post?text=${encodeURIComponent(threadsText)}`);
       return;
     }
 
@@ -312,6 +325,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           const blob = await createReadingImageBlob("story");
           const file = new File([blob], "seertarot-reading.png", { type: "image/png" });
           if (navigator.canShare({ files: [file] })) {
+            pendingPopup?.close(); // ใช้ native share sheet แทน ไม่ต้องใช้แท็บที่จองไว้
             await navigator.share({
               files: [file],
               title: `คำทำนายไพ่ทาโรต์ SeerTarot (${spreadName})`,
@@ -319,22 +333,23 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             });
             return;
           }
-        } catch {
-          // User cancelled or share failed, fallback to web
+        } catch (err) {
+          if (isUserAbort(err)) {
+            // ผู้ใช้กดยกเลิกหน้าต่างแชร์เอง ไม่ใช่ความผิดพลาด ไม่ต้อง fallback ต่อ
+            pendingPopup?.close();
+            return;
+          }
+          // native share ใช้ไม่ได้ด้วยเหตุอื่น ไปต่อ fallback เว็บด้านล่าง
         }
       }
       // Web fallback
       await navigator.clipboard.writeText(shareText).catch(() => {});
       showToast("คัดลอกข้อความแล้ว! กำลังเปิดหน้าแชร์ Facebook...");
-      window.open(
-        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-        "_blank",
-        "noopener,noreferrer,width=600,height=550"
-      );
+      openOrRedirect(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`);
       return;
     }
 
-    // Instagram & TikTok
+    // Instagram & TikTok (ไม่ใช้ window.open เลย — ไม่โดนบล็อกป็อปอัป แต่แก้ปุ่มยกเลิกให้ไม่ขึ้น error)
     if (brand === "instagram" || brand === "tiktok") {
       setIsGenerating(true);
       try {
@@ -365,8 +380,11 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           `บันทึกการ์ดรูปภาพ (9:16) และคัดลอกแคปชันแล้ว! นำไปโพสต์ใน ${brand === "instagram" ? "Instagram" : "TikTok"} ได้ทันที ✦`
         );
       } catch (err) {
-        console.error("Share error", err);
-        showToast("ไม่สามารถเปิดแอปได้ กรุณากดปุ่มบันทึกรูปภาพแทน");
+        if (!isUserAbort(err)) {
+          console.error("Share error", err);
+          showToast("ไม่สามารถเปิดแอปได้ กรุณากดปุ่มบันทึกรูปภาพแทน");
+        }
+        // AbortError = ผู้ใช้กดยกเลิกหน้าต่างแชร์เอง ไม่ใช่ความผิดพลาด ไม่ต้องโชว์ toast
       } finally {
         setIsGenerating(false);
       }
