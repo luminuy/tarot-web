@@ -69,7 +69,7 @@ export function QuotaMeter({ onOpenDetails }: { onOpenDetails: () => void }) {
     >
       {unlimited ? (
         <>
-          <span className="text-[#8F5C1A]">✦</span>
+          
           <span className="hidden sm:inline">{isEn ? "Unlimited" : "ไม่จำกัดสิทธิ์"}</span>
           <span
             translate="no"

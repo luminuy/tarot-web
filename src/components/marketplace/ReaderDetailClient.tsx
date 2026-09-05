@@ -37,7 +37,7 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
           onClick={() => setIsModalOpen(true)}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs sm:text-sm transition-all shrink-0 cursor-pointer"
         >
-          <span>✦ เริ่มต้นขอคำปรึกษา / จองคิว</span>
+          <span>เริ่มต้นขอคำปรึกษา / จองคิว</span>
           <span>→</span>
         </button>
       </div>

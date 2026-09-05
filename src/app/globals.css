@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  ✦ สเปกระบบดีไซน์ Editorial Quiet Luxury (Warm Ivory & Deep Brown)
+  สเปกระบบดีไซน์ Editorial Quiet Luxury (Warm Ivory & Deep Brown)
   8 Core Tokens:
   1. canvas    : #F3F0EA (Warm Ivory — พื้นหน้าเว็บ)
   2. surface   : #FFFFFF (Off-white / Porcelain — พื้นผิวการ์ด, โมดัล)
@@ -56,7 +56,7 @@
   --font-sans-th: var(--font-sarabun), "Sarabun", system-ui, sans-serif;
 
   /*
-   * ✦ อ่านง่ายสำหรับทุกวัย (Legibility Floor)
+   * อ่านง่ายสำหรับทุกวัย (Legibility Floor)
    * คำสั่งเจ้าของโปรเจกต์: "คนมีอายุ สายตาไม่ดีอ่านยากมาก"
    * ยกสเกลตัวอักษรเล็กทั้งชุดขึ้น + เพิ่มระยะบรรทัด ให้ตัวหนังสือคมและโปร่งขึ้น
    * ค่าเดิมของ Tailwind v4: xs 12px · sm 14px · base 16px

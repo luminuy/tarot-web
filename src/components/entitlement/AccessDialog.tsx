@@ -136,7 +136,7 @@ export function AccessDialog({
         {!showCredits && (
           <section className="space-y-3">
             <h3 className="font-serif-th text-sm font-bold text-[#2E211A]">
-              <span className="text-[#8F5C1A]">✦</span>{" "}
+              
               {view?.isMember
                 ? (isEn ? "Your Active Member Benefits" : "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)")
                 : (isEn ? "Benefits of Creating a Free Account" : "สมัครสมาชิกฟรีแล้วได้อะไรบ้าง")}
@@ -204,7 +204,7 @@ export function AccessDialog({
                 >
                   {isSpecial ? (
                     <span className="absolute -top-2.5 right-3 rounded-full bg-[#8F5C1A] px-2 py-0.5 font-serif-th text-[12px] font-bold text-[#FFFFFF] ">
-                      {isEn ? "✦ Highest Level" : "✦ ปลดล็อกขั้นสุด"}
+                      {isEn ? "Highest Level" : "ปลดล็อกขั้นสุด"}
                     </span>
                   ) : plan.highlight ? (
                     <span className="absolute -top-2.5 right-3 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 font-serif-th text-[12px] font-bold text-[#2E211A]">
@@ -248,7 +248,7 @@ export function AccessDialog({
               onClick={handlePrimary}
               className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
-              <span className="mr-1.5">✦</span>
+              
               {copy.primaryLabel}
             </button>
           ) : (
@@ -261,7 +261,7 @@ export function AccessDialog({
               }}
               className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition-all active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
-              <span className="mr-1.5">✦</span>
+              
               {isEn
                 ? `Unlock Sacred Tokens (From ${CHEAPEST_PACKAGE_THB}.-)`
                 : `ปลดล็อกญาณพยากรณ์พิเศษ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`}

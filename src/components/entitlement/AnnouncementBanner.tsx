@@ -40,7 +40,7 @@ export function AnnouncementBanner() {
   return (
     <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 font-serif-th text-xs text-[#2E211A] sm:text-sm">
       <span className="flex-1">
-        <span className="text-[#8F5C1A]">✦</span>{" "}
+        
         {isEn ? (
           <>
             Upcoming update: Reading limits will soon adjust to{" "}

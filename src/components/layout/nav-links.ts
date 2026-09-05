@@ -26,7 +26,7 @@ export interface FooterColumn {
 
 export const FOOTER_COLUMNS = [
   {
-    title: "✦ ผังการเปิดไพ่",
+    title: "ผังการเปิดไพ่",
     links: [
       { label: `คลังผังพยากรณ์ทั้งหมด (${COUNTS.spreads} แบบ)`, href: "/spreads" },
       { label: "ผังเซลติกครอส (Celtic Cross 10 ใบ)", href: "/spreads/celtic-cross" },
@@ -36,7 +36,7 @@ export const FOOTER_COLUMNS = [
     ],
   },
   {
-    title: "✦ สารานุกรมไพ่ 78 ใบ",
+    title: "สารานุกรมไพ่ 78 ใบ",
     links: [
       { label: `คลังความหมายไพ่ครบ ${COUNTS.cards} ใบ`, href: "/cards" },
       { label: "The Fool · การเริ่มต้นและการผจญภัย", href: "/cards/major-00" },
@@ -46,7 +46,7 @@ export const FOOTER_COLUMNS = [
     ],
   },
   {
-    title: "✦ คัมภีร์บทความ",
+    title: "คัมภีร์บทความ",
     links: [
       { label: `คลังบทความทั้งหมด (${COUNTS.articles} บทความ)`, href: "/blog" },
       { label: "วิธีตั้งคำถามไพ่ทาโรต์ให้ชัดเจน", href: "/blog/how-to-ask-tarot-questions" },
@@ -56,7 +56,7 @@ export const FOOTER_COLUMNS = [
     ],
   },
   {
-    title: "✦ ปลอดภัย & โปร่งใส",
+    title: "ปลอดภัย & โปร่งใส",
     items: [
       {
         title: "Provably Fair SHA-256",
@@ -86,7 +86,7 @@ export function getFooterColumns(isEnglish: boolean) {
 
   return [
     {
-      title: "✦ Tarot Spreads",
+      title: "Tarot Spreads",
       links: [
         { label: `All Spread Sanctuaries (${COUNTS.spreads})`, href: "/spreads" },
         { label: "Celtic Cross (10 Cards)", href: "/spreads/celtic-cross" },
@@ -96,7 +96,7 @@ export function getFooterColumns(isEnglish: boolean) {
       ],
     },
     {
-      title: "✦ 78-Card Encyclopedia",
+      title: "78-Card Encyclopedia",
       links: [
         { label: `Complete 78-Card Directory`, href: "/cards" },
         { label: "The Fool · Beginnings & Leaps of Faith", href: "/cards/major-00" },
@@ -106,7 +106,7 @@ export function getFooterColumns(isEnglish: boolean) {
       ],
     },
     {
-      title: "✦ Sanctuary Journal",
+      title: "Sanctuary Journal",
       links: [
         { label: `All Wisdom Articles (${COUNTS.articles})`, href: "/blog" },
         { label: "How to Formulate Clear Tarot Inquiries", href: "/blog/how-to-ask-tarot-questions" },
@@ -116,7 +116,7 @@ export function getFooterColumns(isEnglish: boolean) {
       ],
     },
     {
-      title: "✦ Ethics & Integrity",
+      title: "Ethics & Integrity",
       items: [
         {
           title: "Provably Fair SHA-256",

@@ -54,7 +54,7 @@ export class TextToSpeechManager {
    */
   public cleanTextForSpeech(raw: string): string {
     return raw
-      .replace(/[#*`_~✦✨]/g, "") // เอาเครื่องหมาย Markdown และทองคำเปลวออก
+      .replace(/[#*`_~\u2726\u2728]/g, "") // เอาเครื่องหมาย Markdown และทองคำเปลวออก
       .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // เอา Markdown Link ออก
       .replace(/https?:\/\/\S+/g, "") // เอา URL ออก
       .replace(/\n{2,}/g, " ") // แปลง newline ซ้ำเป็นช่องว่าง

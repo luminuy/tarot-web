@@ -34,7 +34,7 @@ const PERSONA_GREETINGS: Record<string, string> = {
 
 const PERSONA_GREETINGS_EN: Record<string, string> = {
   warm: "Welcome, seeker. Whatever weighs on your heart today, know you are held in sacred space.",
-  playful: "Hey there! Ready to see what magic the cards have in store for you today? Let's dive in! ✨",
+  playful: "Hey there! Ready to see what magic the cards have in store for you today? Let's dive in!",
   direct: "Greetings. The cards cut straight to the core. Are you ready for clear, honest truth?",
   master: "Greetings. Every crossroad carries strategic opportunity. Let us examine the patterns and forge your path.",
   mystic: "Welcome to the sacred sanctuary. The celestial currents and ancient archetypes are whispering your name.",
@@ -109,7 +109,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
   return (
     <div className="space-y-4 w-full">
       <label className="text-xs sm:text-sm font-serif-th font-bold text-[#8F5C1A] tracking-wide flex items-center gap-2 [text-wrap:balance]">
-        <span className="text-[#8F5C1A]">✦</span>{" "}
+        
         {isEnglish
           ? `Select Reader Persona (${PERSONAS.length} Archetypes)`
           : `เลือกสไตล์การทำนายของแม่หมอ (${PERSONAS.length} สไตล์)`}
@@ -176,7 +176,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   </span>
                   {isLocked && (
                     <span className="text-[12px] text-[#8F5C1A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
-                      <span>{isEnglish ? "✦ Master Tier" : "✦ ผู้เชี่ยวชาญพิเศษ"}</span>
+                      <span>{isEnglish ? "Master Tier" : "ผู้เชี่ยวชาญพิเศษ"}</span>
                     </span>
                   )}
                 </div>
@@ -248,10 +248,10 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               {/* Selected Golden Corner Seals */}
               {isSelected && (
                 <>
-                  <div className="absolute top-1.5 left-1.5 text-[12px] text-[#8F5C1A]">✦</div>
-                  <div className="absolute top-1.5 right-1.5 text-[12px] text-[#8F5C1A]">✦</div>
-                  <div className="absolute bottom-1.5 left-1.5 text-[12px] text-[#8F5C1A]">✦</div>
-                  <div className="absolute bottom-1.5 right-1.5 text-[12px] text-[#8F5C1A]">✦</div>
+                  
+                  
+                  
+                  
                 </>
               )}
 

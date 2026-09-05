@@ -150,7 +150,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
               className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#D9C8AC] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
             >
               <div className="w-8 h-8 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A]">
-                ✨
+                ·
               </div>
             </motion.div>
 
@@ -218,7 +218,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
 
       {/* Sacred Ritual Subtitle & Title */}
       <span className="text-[13px] font-serif-th text-[#2E211A] font-bold bg-[#F3EDE2]/30 px-4 py-1 rounded-full border border-[#D9C8AC] mb-2 inline-block ">
-        ✦ {isEnglish ? "Sacred Shuffling Ritual" : "ขั้นตอนสับไพ่"} ✦
+        {isEnglish ? "Sacred Shuffling Ritual" : "ขั้นตอนสับไพ่"}
       </span>
       <h2 className="text-2xl sm:text-3xl font-serif-th font-bold font-mystic-gold filter py-0.5 leading-normal">
         {isEnglish ? "Center Your Mind on Your Inquiry" : "ตั้งสมาธิและนึกถึงคำถามของคุณ"}
@@ -256,9 +256,9 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             onClick={startShuffle}
             className="w-full py-4 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th shadow-[var(--shadow-overlay)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            <span>✨</span>
+            
             <span>{isEnglish ? "Tap to Shuffle Deck" : "แตะเพื่อเริ่มสับไพ่"}</span>
-            <span>✨</span>
+            
           </button>
         ) : (
           <div className="space-y-3">

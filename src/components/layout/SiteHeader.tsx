@@ -57,13 +57,12 @@ export function SiteHeader({
           </div>
 
           <div className="hidden min-w-0 flex-col justify-center sm:flex">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <span className="text-[#A58A5C] text-xs">✦</span>
+            <div className="flex min-w-0 items-center">
               <span className="font-serif-th text-sm sm:text-lg font-bold text-[#29261F] tracking-wide leading-snug py-0.5 whitespace-nowrap">
                 {isEnglish ? "SeerTarot Sanctuary" : "ดูดวงไพ่ทาโรต์"}
               </span>
             </div>
-            <span className="hidden sm:block text-[13px] tracking-[0.22em] text-[#635B4E] font-mono uppercase font-semibold pl-4">
+            <span className="hidden sm:block text-[13px] tracking-[0.22em] text-[#635B4E] font-mono uppercase font-semibold">
               1909 RIDER-WAITE TAROT
             </span>
           </div>

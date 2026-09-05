@@ -74,7 +74,7 @@ export default async function ReadersPage() {
           <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
             <div>
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] text-xs text-[#8F5C1A] font-bold font-serif-th shadow-xs">
-                <span>✦</span> ตลาดรวมแม่หมอตัวจริง (Tarot Marketplace) <span>✦</span>
+                ตลาดรวมแม่หมอตัวจริง (Tarot Marketplace)
               </span>
             </div>
             <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">

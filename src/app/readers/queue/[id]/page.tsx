@@ -168,8 +168,8 @@ export default function CustomerQueuePage() {
 
           {canAccessLine && (
             <div className="text-center py-6 space-y-5 bg-gradient-to-b from-[#162e24]/80 to-[#101e18]/80 p-6 rounded-2xl border border-emerald-500/40">
-              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500/20 border border-emerald-400 text-3xl">
-                ✨
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500/20 border border-emerald-400 text-3xl text-emerald-300 font-bold">
+                ✓
               </div>
 
               <div className="space-y-1.5">
@@ -186,7 +186,7 @@ export default function CustomerQueuePage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#06c755] hover:bg-[#05b34c] text-white font-serif-th font-bold text-sm shadow-[0_0_25px_rgba(6,199,85,0.4)] transition-all"
                 >
-                  <span>✦ เปิดสนทนากับแม่หมอผ่าน LINE</span>
+                  <span>เปิดสนทนากับแม่หมอผ่าน LINE</span>
                   <span>→</span>
                 </a>
               )}
@@ -230,12 +230,12 @@ export default function CustomerQueuePage() {
             {ticket.screening?.category && (
               <div className="flex justify-between text-[#9c93b8]">
                 <span>หมวดหมู่ AI:</span>
-                <span className="text-[#ffd700] font-medium">✦ {ticket.screening.category}</span>
+                <span className="text-[#ffd700] font-medium">{ticket.screening.category}</span>
               </div>
             )}
             <div className="flex justify-between text-[#9c93b8]">
               <span>ค่าบริการ / บูชาครู:</span>
-              <span className="text-emerald-300 font-semibold font-serif-th">✦ 299 บาท (30 นาที)</span>
+              <span className="text-emerald-300 font-semibold font-serif-th">299 บาท (30 นาที)</span>
             </div>
           </div>
 

@@ -137,7 +137,7 @@ function synthesizeBrief(
   }]: "${cleanQ}"`;
 
   if (drawnCardsSummary) {
-    brief += `\n✦ ไพ่ที่ลูกดวงเปิดได้เบื้องต้น: ${drawnCardsSummary}`;
+    brief += `\n• ไพ่ที่ลูกดวงเปิดได้เบื้องต้น: ${drawnCardsSummary}`;
   }
 
   return brief;
@@ -157,8 +157,8 @@ export async function performAIScreening(input: PerformScreeningInput): Promise<
     const isCrisis = safety.flag === "crisis";
     const flags = [safety.flag];
     const brief = isCrisis
-      ? "✦ สัญญาณวิกฤต: คำถามเข้าข่ายทำร้ายตนเองหรือภาวะวิกฤตทางจิตใจ ระบบได้บล็อกและแสดงสายด่วน 1323 เรียบร้อยแล้ว"
-      : `✦ คำถามไม่ผ่านเกณฑ์ความปลอดภัย (${safety.flag}): ${safety.message || "ผิดนโยบายการให้บริการ"}`;
+      ? "• สัญญาณวิกฤต: คำถามเข้าข่ายทำร้ายตนเองหรือภาวะวิกฤตทางจิตใจ ระบบได้บล็อกและแสดงสายด่วน 1323 เรียบร้อยแล้ว"
+      : `• คำถามไม่ผ่านเกณฑ์ความปลอดภัย (${safety.flag}): ${safety.message || "ผิดนโยบายการให้บริการ"}`;
 
     const record: AIScreeningRecord = {
       id,

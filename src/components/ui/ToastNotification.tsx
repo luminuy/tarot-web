@@ -116,7 +116,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
               : "bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A]"
           }`}
         >
-          {isError ? "✦" : "✨"}
+          {isError ? "!" : "✓"}
         </div>
 
         {/* Content text */}

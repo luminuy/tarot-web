@@ -199,7 +199,7 @@ export function getCosmicContext(date: Date = new Date()): CosmicContext {
   const moon = calculateMoonPhase(date);
   const day = calculateDayRuler(date);
 
-  const promptAnchor = `✦ ห้วงเวลาจักรวาลขณะเปิดไพ่: ${day.dayNameTh} ครองโดย${day.planetTh} (ธาตุ${day.element}) | ดิถีพระจันทร์: ${moon.nameTh} สว่าง ${moon.illuminationPercent}%
+  const promptAnchor = `ห้วงเวลาจักรวาลขณะเปิดไพ่: ${day.dayNameTh} ครองโดย${day.planetTh} (ธาตุ${day.element}) | ดิถีพระจันทร์: ${moon.nameTh} สว่าง ${moon.illuminationPercent}%
   คลื่นพลังงานธรรมชาติ: ${day.energyTheme} ผสานกับ ${moon.energyTheme}`;
 
   return {

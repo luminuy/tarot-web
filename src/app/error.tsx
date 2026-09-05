@@ -14,9 +14,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
   return (
     <div className="min-h-screen bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center p-4">
       <div className="max-w-md w-full p-8 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] shadow-[var(--shadow-overlay)] text-center space-y-6">
-        <div className="w-16 h-16 mx-auto rounded-full bg-[#F3EDE2] border border-[#D9C8AC] flex items-center justify-center text-2xl text-[#8F5C1A] font-bold ">
-          ✦
-        </div>
+        <div className="w-16 h-16 mx-auto rounded-full bg-[#F3EDE2] border border-[#D9C8AC] flex items-center justify-center text-2xl text-[#8F5C1A] font-bold font-mono">!</div>
 
         <div className="space-y-2">
           <h2 className="text-xl font-bold font-serif-th text-[#2E211A]">
@@ -34,7 +32,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
             onClick={() => reset()}
             className="flex-1 py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold text-sm font-serif-th active:scale-95 transition-all cursor-pointer"
           >
-            ✦ {isEnglish ? "Try Again" : "ลองใหม่อีกครั้ง"}
+            {isEnglish ? "Try Again" : "ลองใหม่อีกครั้ง"}
           </button>
           <Link
             href="/"

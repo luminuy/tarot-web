@@ -14,17 +14,17 @@ export interface SacredMantra {
 }
 
 const ELEMENT_SYMBOLS: Record<string, string> = {
-  "ไฟ": "✦ ธาตุไฟ · พลังแห่งการสร้างสรรค์",
-  "น้ำ": "✦ ธาตุน้ำ · พลังแห่งปัญญาญาณและหัวใจ",
-  "ลม": "✦ ธาตุลม · พลังแห่งความจริงและความชัดเจน",
-  "ดิน": "✦ ธาตุดิน · พลังแห่งความมั่นคงและอุดมสมบูรณ์",
+  "ไฟ": "ธาตุไฟ · พลังแห่งการสร้างสรรค์",
+  "น้ำ": "ธาตุน้ำ · พลังแห่งปัญญาญาณและหัวใจ",
+  "ลม": "ธาตุลม · พลังแห่งความจริงและความชัดเจน",
+  "ดิน": "ธาตุดิน · พลังแห่งความมั่นคงและอุดมสมบูรณ์",
 };
 
 const ELEMENT_SYMBOLS_EN: Record<string, string> = {
-  "ไฟ": "✦ Fire · Creative Will & Passion",
-  "น้ำ": "✦ Water · Intuition & Emotional Wisdom",
-  "ลม": "✦ Air · Truth & Mental Clarity",
-  "ดิน": "✦ Earth · Grounding & Abundance",
+  "ไฟ": "Fire · Creative Will & Passion",
+  "น้ำ": "Water · Intuition & Emotional Wisdom",
+  "ลม": "Air · Truth & Mental Clarity",
+  "ดิน": "Earth · Grounding & Abundance",
 };
 
 /**
@@ -80,8 +80,8 @@ export function generateSacredMantra(cards: TarotCard[], drawn?: DrawnCard[]): S
 
   // คัดสรร Mantra ตามธาตุและพลังของไพ่
   const element = chosenCard.element || "ลม";
-  const elementSymbol = ELEMENT_SYMBOLS[element] || "✦ พลังจักรวาล";
-  const elementSymbolEn = ELEMENT_SYMBOLS_EN[element] || "✦ Cosmic Alignment";
+  const elementSymbol = ELEMENT_SYMBOLS[element] || "พลังจักรวาล";
+  const elementSymbolEn = ELEMENT_SYMBOLS_EN[element] || "Cosmic Alignment";
 
   let quoteTh = "";
   let affirmationTh = "";

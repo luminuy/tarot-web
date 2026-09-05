@@ -134,7 +134,7 @@ export default function ReadersManager() {
         setFormError(data.error || "บันทึกข้อมูลไม่สำเร็จ");
       } else {
         setIsModalOpen(false);
-        showToast(editingReader ? "อัปเดตข้อมูลแม่หมอแล้ว ✨" : "เพิ่มแม่หมอใหม่เรียบร้อย ✦");
+        showToast(editingReader ? "อัปเดตข้อมูลแม่หมอแล้ว" : "เพิ่มแม่หมอใหม่เรียบร้อย");
         fetchReaders();
       }
     } catch {
@@ -185,7 +185,7 @@ export default function ReadersManager() {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const link = `${origin}/readers/console?id=${r.id}`;
     navigator.clipboard.writeText(link).then(
-      () => showToast("คัดลอกลิงก์แผงควบคุมแม่หมอแล้ว ✦"),
+      () => showToast("คัดลอกลิงก์แผงควบคุมแม่หมอแล้ว"),
       () => alert(`ลิงก์: ${link}`)
     );
   };
@@ -219,7 +219,7 @@ export default function ReadersManager() {
       {/* Top Action Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-bold text-[#29261F]">✦ จัดการแม่หมอตัวจริง (Marketplace)</h2>
+          <h2 className="text-xl font-bold text-[#29261F]">จัดการแม่หมอตัวจริง (Marketplace)</h2>
           <p className="text-xs text-[#635B4E]">
             ควบคุมโปรไฟล์ อนุมัติสถานะ และจัดการแม่หมอในระบบพยากรณ์
           </p>
@@ -320,7 +320,7 @@ export default function ReadersManager() {
                         }`}
                       >
                         {r.status === "approved"
-                          ? "✦ เปิดรับงาน"
+                          ? "เปิดรับงาน"
                           : r.status === "pending"
                             ? "⏳ รออนุมัติ"
                             : "⛔ พักงาน"}
@@ -391,7 +391,7 @@ export default function ReadersManager() {
                     onClick={() => copyConsoleLink(r)}
                     className="flex-1 rounded-lg border border-[#D5CEC2] bg-[#F8F6F2] py-1 text-[#29261F] hover:bg-[#EAE5DC] transition-colors"
                   >
-                    ✦ ลิงก์แผงแม่หมอ
+                    ลิงก์แผงแม่หมอ
                   </button>
                   <button
                     onClick={() => handleDelete(r)}
@@ -410,7 +410,7 @@ export default function ReadersManager() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingReader ? "✦ แก้ไขข้อมูลแม่หมอ" : "✦ เพิ่มแม่หมอใหม่"}
+        title={editingReader ? "แก้ไขข้อมูลแม่หมอ" : "เพิ่มแม่หมอใหม่"}
       >
         <form onSubmit={handleSave} className="space-y-4 pt-2">
           {formError && (

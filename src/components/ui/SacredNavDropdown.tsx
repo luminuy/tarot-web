@@ -108,7 +108,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             sublabel: isEnglish ? "Compare tiers, unlock 12-House spreads & replenish readings" : "เปรียบเทียบสิทธิ์ ปลดล็อกผังใหญ่ 12 ภพ และเติมรอบดูดวง",
             onClick: onOpenPlans,
             Icon: CoinSealIcon,
-            badge: isEnglish ? "✦ Plans" : "✦ สิทธิ์/แพลน",
+            badge: isEnglish ? "Plans" : "สิทธิ์/แพลน",
           },
         ]
       : []),
@@ -169,7 +169,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         {/* Header Title inside Dropdown */}
         <div className="px-3 py-1.5 flex items-center justify-between text-[13px] font-serif-th font-semibold text-[#635B4E] border-b border-[#D5CEC2]/40 pb-2">
           <span className="flex items-center gap-1.5 text-[#A58A5C]">
-            <span>✦</span>
+            
             <span className="font-bold">{isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}</span>
           </span>
           <span className="text-[#29261F] text-[13px] font-mono tracking-wider bg-[#EAE7E0] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-bold">
@@ -277,7 +277,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               }}
               className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-[#FCEEEA] hover:bg-[#FCEEEA] border border-[#D5CEC2] text-[#A6392C] text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer active:scale-98"
             >
-              <span className="text-[#A6392C]">✦</span>
+              
               <span>{isEnglish ? "Start New Reading" : "เริ่มดูดวงใหม่"}</span>
             </button>
           </div>

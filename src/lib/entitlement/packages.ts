@@ -33,7 +33,7 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     credits: 10,
     priceThb: 149,
     amountSatang: 14900,
-    badge: "✦ ยอดนิยม",
+    badge: "ยอดนิยม",
     isPopular: true,
   },
   {
@@ -43,7 +43,7 @@ export const CREDIT_PACKAGES: CreditPackage[] = [
     credits: 30,
     priceThb: 299,
     amountSatang: 29900,
-    badge: "✨ คุ้มค่าที่สุด",
+    badge: "คุ้มค่าที่สุด",
     isBestValue: true,
   },
 ];
@@ -65,7 +65,7 @@ export const CREDIT_PACKAGES_EN: CreditPackage[] = [
     credits: 10,
     priceThb: 149,
     amountSatang: 14900,
-    badge: "✦ Most Popular",
+    badge: "Most Popular",
     isPopular: true,
   },
   {
@@ -75,7 +75,7 @@ export const CREDIT_PACKAGES_EN: CreditPackage[] = [
     credits: 30,
     priceThb: 299,
     amountSatang: 29900,
-    badge: "✨ Best Value",
+    badge: "Best Value",
     isBestValue: true,
   },
 ];

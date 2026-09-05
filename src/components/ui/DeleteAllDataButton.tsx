@@ -10,8 +10,8 @@ export function DeleteAllDataButton() {
 
   const handleDelete = async () => {
     const confirmMessage = isEn
-      ? "✦ Confirm permanent deletion of all data?\n\nThis action will delete:\n• All reading history (both local and cloud)\n• User account details and personal reflection notes\n• All preferences and settings\n\nThis action cannot be undone."
-      : "✦ ยืนยันการลบข้อมูลทั้งหมด?\n\nการดำเนินการนี้จะลบ:\n• ประวัติการเปิดไพ่ทั้งหมด (ทั้งในเครื่องและบนบัญชี)\n• ข้อมูลบัญชีผู้ใช้และบันทึกส่วนตัว\n• การตั้งค่าทั้งหมด\n\nข้อมูลจะไม่สามารถกู้คืนได้";
+      ? "Confirm permanent deletion of all data?\n\nThis action will delete:\n• All reading history (both local and cloud)\n• User account details and personal reflection notes\n• All preferences and settings\n\nThis action cannot be undone."
+      : "ยืนยันการลบข้อมูลทั้งหมด?\n\nการดำเนินการนี้จะลบ:\n• ประวัติการเปิดไพ่ทั้งหมด (ทั้งในเครื่องและบนบัญชี)\n• ข้อมูลบัญชีผู้ใช้และบันทึกส่วนตัว\n• การตั้งค่าทั้งหมด\n\nข้อมูลจะไม่สามารถกู้คืนได้";
 
     const confirmed = window.confirm(confirmMessage);
     if (!confirmed) return;
@@ -35,7 +35,7 @@ export function DeleteAllDataButton() {
       disabled={loading}
       className="px-5 py-2.5 rounded-lg bg-[#A6392C]/80 border border-[#A6392C]/50 text-[#A6392C] text-xs font-bold hover:bg-[#A6392C]/80 transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
     >
-      <span>✦</span>
+      
       <span>
         {loading
           ? (isEn ? "Deleting data..." : "กำลังลบข้อมูล...")

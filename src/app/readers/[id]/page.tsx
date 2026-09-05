@@ -94,7 +94,7 @@ export default async function ReaderDetailPage({
                   {reader.displayName}
                 </h1>
                 <span className="inline-flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold w-fit mx-auto sm:mx-0">
-                  <span>✦</span> แม่หมอตัวจริง (ยืนยันตัวตนแล้ว)
+                  แม่หมอตัวจริง (ยืนยันตัวตนแล้ว)
                 </span>
               </div>
 
@@ -105,7 +105,7 @@ export default async function ReaderDetailPage({
                     key={idx}
                     className="px-3 py-1 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-xs text-[#2E211A] font-medium"
                   >
-                    ✦ {s}
+                    • {s}
                   </span>
                 ))}
               </div>
@@ -115,7 +115,7 @@ export default async function ReaderDetailPage({
           {/* Bio Section */}
           <div className="space-y-3 border-t border-[#E4D8C4]/30 pt-6">
             <h2 className="text-sm font-bold text-[#2E211A] font-serif-th flex items-center gap-2">
-              <span className="text-[#8F5C1A]">✦</span> ประวัติและสไตล์การทำนาย
+              ประวัติและสไตล์การทำนาย
             </h2>
             <div className="bg-[#FFFFFF] rounded-lg p-5 border border-[#E4D8C4] text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th whitespace-pre-line">
               {reader.bio || "พร้อมให้คำปรึกษาและชี้แนะแนวทางชีวิตอย่างลึกซึ้งผ่านศาสตร์ไพ่ทาโรต์"}
@@ -125,7 +125,7 @@ export default async function ReaderDetailPage({
           {/* Consultation Process Steps */}
           <div className="space-y-4 border-t border-[#E4D8C4]/30 pt-6">
             <h2 className="text-sm font-bold text-[#2E211A] font-serif-th flex items-center gap-2">
-              <span className="text-[#8F5C1A]">✨</span> ขั้นตอนการรับคำปรึกษา
+              ขั้นตอนการรับคำปรึกษา
             </h2>
             <div className="grid gap-3 sm:grid-cols-3 text-xs">
               <div className="rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-4 space-y-1.5">

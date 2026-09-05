@@ -57,7 +57,7 @@ export default function TesterLoginPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
       <div className="altar-panel rounded-3xl p-7">
-        <h1 className="font-mystic-gold text-xl font-bold">✦ โหมดผู้ทดสอบ</h1>
+        <h1 className="font-mystic-gold text-xl font-bold">โหมดผู้ทดสอบ</h1>
 
         {state === "in" ? (
           <>

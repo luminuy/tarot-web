@@ -214,7 +214,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             className="space-y-1 py-1"
           >
             <h3 className="text-lg sm:text-2xl font-serif-th font-bold font-mystic-gold flex items-center justify-center gap-2">
-              <span>✨</span> เลือกไพ่ครบ {targetCount} ใบเรียบร้อยแล้ว <span>✨</span>
+              เลือกไพ่ครบ {targetCount} ใบเรียบร้อยแล้ว
             </h3>
             <p className="text-[13px] sm:text-xs text-[#635B4E]">กำลังเตรียมเปิดไพ่และคำทำนายของคุณ...</p>
           </motion.div>
@@ -283,16 +283,14 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                 />
                 <div className="gold-foil-sheen absolute inset-0 opacity-20 pointer-events-none" />
               </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#8F5C1A] border border-[#D9C8AC] flex items-center justify-center text-[12px] text-[#FFFFFF] font-bold">
-                ✦
-              </div>
+              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#8F5C1A] border border-[#D9C8AC]" />
             </div>
 
             {/* Typography & Animated Progress Bar */}
             <div className="space-y-1 flex-1 min-w-[160px]">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13px] text-[#2E211A] font-serif-th font-bold flex items-center gap-1">
-                  <span className="text-[#8F5C1A]">✦</span>
+                  
                   <span>{isEnglish ? "Sacred Card Selection" : "ความคืบหน้าพิธีจับไพ่"}</span>
                 </span>
                 <span className="text-[13px] sm:text-xs font-mono font-bold text-[#2E211A] bg-[#FFFFFF] border border-[#D9C8AC] px-2 py-0.2 rounded-full ">
@@ -318,8 +316,8 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                   {isComplete ? (
                     <span className="text-[#3A7044] font-semibold">
                       {isEnglish
-                        ? "✨ All cards chosen. Revealing sacred prophecies..."
-                        : "✨ เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย"}
+                        ? "All cards chosen. Revealing sacred prophecies..."
+                        : "เลือกไพ่ครบถ้วนแล้ว พร้อมเปิดคำทำนาย"}
                     </span>
                   ) : (
                     <span>
@@ -345,7 +343,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     className="flex-shrink-0 text-[13px] sm:text-[13px] text-[#2E211A] hover:text-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#F3EDE2] border border-[#D9C8AC] hover:border-[#8F5C1A] px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
                     aria-label={isEnglish ? "Auto-draw next card" : "สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"}
                   >
-                    {isEnglish ? "✦ Draw for Me" : "✦ สุ่มเลือกให้ฉัน"}
+                    {isEnglish ? "Draw for Me" : "สุ่มเลือกให้ฉัน"}
                   </button>
                 )}
               </div>

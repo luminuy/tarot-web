@@ -47,15 +47,15 @@ export const QUICK_TOPICS: QuickTopic[] = [
     taglineEn: "Heartspace dynamics, soul connection, partners, or dating clarity",
     defaultQuestion: "ภาพรวมความรักและความสัมพันธ์ตอนนี้เป็นอย่างไร และควรเปิดใจรับมืออย่างไร",
     defaultQuestionEn: "What is the present energy surrounding my love life and relationships, and how should I best navigate my heart?",
-    badge: "✦ ยอดนิยมอันดับ 1",
-    badgeEn: "✦ #1 Most Popular",
+    badge: "ยอดนิยมอันดับ 1",
+    badgeEn: "#1 Most Popular",
     highlightText: "เปิดไพ่ดูดวงความรัก",
     highlightTextEn: "Love Tarot Reading",
     cardImage: "major-06.jpg",
     cardAlt: "ไพ่ The Lovers - ความรักและการผูกพันทางจิตวิญญาณ",
     cardAltEn: "The Lovers - Sacred bond, emotional resonance, and spiritual choice",
-    elementalGlyph: "✦ ธาตุน้ำ · สายใยหัวใจ ✦",
-    elementalGlyphEn: "✦ Water Element · Heartspace Bonds ✦",
+    elementalGlyph: "ธาตุน้ำ · สายใยหัวใจ",
+    elementalGlyphEn: "Water Element · Heartspace Bonds",
     themeColors: {
       border: "border-[#EADFD5]",
       borderHover: "hover:border-[#C48464]",
@@ -77,15 +77,15 @@ export const QUICK_TOPICS: QuickTopic[] = [
     taglineEn: "Professional trajectory, promotions, ventures, and breakthroughs",
     defaultQuestion: "ทิศทางการงานและโปรเจกต์ช่วงนี้จะราบรื่นไหม มีสิ่งใดที่ควรระวังเป็นพิเศษ",
     defaultQuestionEn: "What energies are guiding my career and creative projects right now, and what should I be mindful of?",
-    badge: "✦ ยอดนิยม",
-    badgeEn: "✦ High Impact",
+    badge: "ยอดนิยม",
+    badgeEn: "High Impact",
     highlightText: "เปิดไพ่ดูดวงการงาน",
     highlightTextEn: "Career Tarot Reading",
     cardImage: "major-01.jpg",
     cardAlt: "ไพ่ The Magician - การริเริ่ม ทักษะ และการสร้างสรรค์โอกาส",
     cardAltEn: "The Magician - Conscious manifestation, creative mastery, and willpower",
-    elementalGlyph: "✦ ธาตุไฟ · ศักยภาพ & ลงมือทำ ✦",
-    elementalGlyphEn: "✦ Fire Element · Agency & Action ✦",
+    elementalGlyph: "ธาตุไฟ · ศักยภาพ & ลงมือทำ",
+    elementalGlyphEn: "Fire Element · Agency & Action",
     themeColors: {
       border: "border-[#E6DEC9]",
       borderHover: "hover:border-[#8F5C1A]",
@@ -107,15 +107,15 @@ export const QUICK_TOPICS: QuickTopic[] = [
     taglineEn: "Financial flow, material grounding, investments, and prosperity",
     defaultQuestion: "สภาพคล่องทางการเงินและโชคลาภช่วงนี้เป็นอย่างไร ควรบริหารจัดการอย่างไร",
     defaultQuestionEn: "What is the financial current around me at this time, and how can I best cultivate grounded stability?",
-    badge: "✦ เด่นชัด",
-    badgeEn: "✦ Clear Alignment",
+    badge: "เด่นชัด",
+    badgeEn: "Clear Alignment",
     highlightText: "เปิดไพ่ดูดวงการเงิน",
     highlightTextEn: "Financial Tarot Reading",
     cardImage: "pentacles-01.jpg",
     cardAlt: "ไพ่ Ace of Pentacles - ความอุดมสมบูรณ์และโอกาสทางการเงิน",
     cardAltEn: "Ace of Pentacles - Seeds of material opportunity, security, and prosperity",
-    elementalGlyph: "✦ ธาตุดิน · ความมั่นคง & โชคลาภ ✦",
-    elementalGlyphEn: "✦ Earth Element · Grounding & Wealth ✦",
+    elementalGlyph: "ธาตุดิน · ความมั่นคง & โชคลาภ",
+    elementalGlyphEn: "Earth Element · Grounding & Wealth",
     themeColors: {
       border: "border-[#E6E0CB]",
       borderHover: "hover:border-[#B38728]",
@@ -137,15 +137,15 @@ export const QUICK_TOPICS: QuickTopic[] = [
     taglineEn: "Core atmospheric guidance and mindfulness for today's journey",
     defaultQuestion: "ภาพรวมพลังงานดวงชะตาตอนนี้เป็นอย่างไร มีข้อคิดหรือคำเตือนใดที่ควรใส่ใจ",
     defaultQuestionEn: "What universal message or guiding principle does the cosmos offer for my journey today?",
-    badge: "✦ สมดุล",
-    badgeEn: "✦ Centered",
+    badge: "สมดุล",
+    badgeEn: "Centered",
     highlightText: "เปิดไพ่รับพลังงานวันนี้",
     highlightTextEn: "Daily Guidance Reading",
     cardImage: "major-19.jpg",
     cardAlt: "ไพ่ The Sun - ความสว่างไสว พลังบวก และความจริงแห่งชีวิต",
     cardAltEn: "The Sun - Radiance, vitality, conscious clarity, and authentic joy",
-    elementalGlyph: "✦ นภากาศ · สัจธรรม & พลังบวก ✦",
-    elementalGlyphEn: "✦ Quintessence · Cosmic Illumination ✦",
+    elementalGlyph: "นภากาศ · สัจธรรม & พลังบวก",
+    elementalGlyphEn: "Quintessence · Cosmic Illumination",
     themeColors: {
       border: "border-[#E2DED5]",
       borderHover: "hover:border-[#6B6152]",
@@ -274,13 +274,13 @@ export function QuickFortunePicker({
       <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
         {/* ป้ายกล่องทองคำเปลว */}
         <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full text-[11px] font-serif-th font-semibold tracking-wide bg-[#FBF8F3] border border-[#D5CEC2] text-[#8F5C1A] shadow-xs">
-          <span>✨</span>
+          
           <span>
             {isEnglish
               ? "Rapid Single-Card Reading · Direct & Insightful"
               : "เปิดไพ่ด่วน 1 ใบ · สรุปความหมายตรงประเด็น"}
           </span>
-          <span>✨</span>
+          
         </div>
 
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
@@ -313,12 +313,8 @@ export function QuickFortunePicker({
               className={`w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition-all duration-300 transform-gpu hover:-translate-y-1 hover:shadow-md cursor-pointer select-none text-left overflow-hidden min-h-[368px] sm:min-h-[392px]`}
             >
               {/* สัญลักษณ์มุมการ์ดทองคำเปลว */}
-              <div className="absolute top-2.5 right-2.5 text-[9px] text-[#A58A5C]/40 group-hover:text-[#A58A5C]/90 transition-colors pointer-events-none select-none">
-                ✦
-              </div>
-              <div className="absolute bottom-2.5 left-2.5 text-[9px] text-[#A58A5C]/30 group-hover:text-[#A58A5C]/70 transition-colors pointer-events-none select-none">
-                ✦
-              </div>
+              
+              
 
               {/* ป้ายกำกับด้านบน */}
               <div className="flex items-center justify-between gap-2 mb-3 relative z-10">
@@ -329,7 +325,7 @@ export function QuickFortunePicker({
                 </span>
                 <span className="text-[11px] sm:text-xs font-serif-th text-[#A58A5C] flex items-center gap-1 group-hover:text-[#8F5C1A] transition-colors">
                   <span>{isEnglish ? "1 Card" : "ไพ่ 1 ใบ"}</span>
-                  <span>✦</span>
+                  
                 </span>
               </div>
 
@@ -410,7 +406,7 @@ export function QuickFortunePicker({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] flex items-center gap-1.5">
-                  <span className="text-[#8F5C1A]">✦</span>
+                  
                   <span>{isEnglish ? "Your Name or Pseudonym" : "นามสมมุติของคุณ"}</span>
                 </h3>
                 <button
@@ -469,7 +465,7 @@ export function QuickFortunePicker({
                   className="px-4 py-2 text-xs font-serif-th font-semibold rounded-xl bg-[#29261F] text-[#FAF7F2] hover:bg-[#3D372E] border border-[#8F5C1A]/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs"
                 >
                   <span>{isEnglish ? "Begin Reading Now" : "เริ่มทำนายทันที"}</span>
-                  <span>✨</span>
+                  
                 </button>
               </div>
             </form>

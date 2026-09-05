@@ -281,7 +281,7 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     reassurance: "ไม่มีการเก็บเงินอัตโนมัติ · ยกเลิกหรือลบบัญชีได้ตลอดเวลา",
   },
   grand_spread: {
-    eyebrow: "✦ ผังใหญ่พิเศษ",
+    eyebrow: "ผังใหญ่พิเศษ",
     title: "ผังพยากรณ์เจาะลึกพิเศษ (5–12 ใบ)",
     body: "ผังนี้เป็นผังวิเคราะห์เชิงลึกระดับสูง (เช่น Celtic Cross 10 ใบ, จักรราศี 12 ภพ, 7 จักระ) สำหรับผู้ที่เติมรอบเปิดไพ่พิเศษ เพื่อดูดวงชะตาอย่างครอบคลุมทุกมิติ",
     primaryLabel: `เติมรอบเปิดผังนี้ (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
@@ -290,7 +290,7 @@ export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
     reassurance: "รอบที่เติมไว้ไม่มีวันหมดอายุ · ปลดล็อกผังใหญ่ครบ 20 ผัง + คุยเจาะลึกไม่จำกัด",
   },
   master_persona: {
-    eyebrow: "✦ แม่หมอผู้เชี่ยวชาญพิเศษ",
+    eyebrow: "แม่หมอผู้เชี่ยวชาญพิเศษ",
     title: "แม่หมอวิเคราะห์ดวงเชิงลึกเฉพาะทาง",
     body: "อาจารย์สายฟันธง และ แม่หมอสายพลัง เป็น 2 ท่านผู้เชี่ยวชาญด้านกลยุทธ์ฟันธงและจิตวิทยาเชิงลึก เฉพาะผู้ที่เติมรอบเปิดไพ่พิเศษ",
     primaryLabel: `เติมรอบเพื่อปรึกษา (เริ่ม ${CHEAPEST_PACKAGE_THB}.-)`,
@@ -405,7 +405,7 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
     reassurance: "No automatic subscription billing · Delete your account and data anytime",
   },
   grand_spread: {
-    eyebrow: "✦ Grand Divination Spread",
+    eyebrow: "Grand Divination Spread",
     title: "Grand & Master Spreads (5–12 Cards)",
     body: "Grand spreads (such as the 10-card Celtic Cross, 12-house Astrological Wheel, and 7 Chakras) provide high-dimensional holistic mapping, available with Tarot Pass credits.",
     primaryLabel: `Top up to unlock (Starts at ฿${CHEAPEST_PACKAGE_THB})`,
@@ -414,7 +414,7 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
     reassurance: "Credits never expire · Unlocks all 20 spreads + unlimited consultation dialogue",
   },
   master_persona: {
-    eyebrow: "✦ Grand Master Readers",
+    eyebrow: "Grand Master Readers",
     title: "Specialized Master Diviners",
     body: "The Master Strategist and Astral Star are two specialized masters of strategic clarity and depth psychology, unlocked with Tarot Pass credits.",
     primaryLabel: `Top up to consult (Starts at ฿${CHEAPEST_PACKAGE_THB})`,

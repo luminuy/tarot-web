@@ -60,7 +60,7 @@ export default function MarketingAudience() {
                 download
                 className="inline-flex items-center gap-1.5 rounded-lg border border-[#29261F] bg-[#29261F] px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#1a1814]"
               >
-                ดาวน์โหลด CSV ✦
+                ดาวน์โหลด CSV
               </a>
               <button
                 onClick={load}

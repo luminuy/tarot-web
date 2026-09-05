@@ -172,7 +172,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
       {/* Toast alert */}
       {toastMsg && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-[#D5CEC2] bg-white px-5 py-3 shadow-lg">
-          <span className="text-[#A58A5C]">✦</span>
+          
           <span className="text-sm font-medium text-[#29261F]">{toastMsg}</span>
         </div>
       )}
@@ -182,7 +182,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#D5CEC2] bg-[#FAF8F5] px-3 py-1 text-xs font-semibold text-[#29261F]">
-              <span className="text-[#A58A5C]">✦</span>
+              
               <span>ศูนย์บัญชาการวิหารพยากรณ์ (Command Center)</span>
             </div>
             <h2 className="font-mystic-gold text-2xl sm:text-3xl font-bold tracking-tight text-[#29261F]">
@@ -201,7 +201,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               disabled={loading}
               className="border-[#D5CEC2] bg-[#FAF8F5] text-xs font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition-all"
             >
-              {loading ? "กำลังซิงก์ข้อมูล…" : "✦ รีเฟรชข้อมูลสด"}
+              {loading ? "กำลังซิงก์ข้อมูล…" : "รีเฟรชข้อมูลสด"}
             </Button>
             <a
               href="/"
@@ -209,7 +209,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-xl border border-[#29261F] bg-[#29261F] px-4 py-2 text-xs font-semibold text-white hover:bg-[#171512] transition-all shadow-xs"
             >
-              <span>✦ ดูหน้าเว็บจริง</span>
+              <span>ดูหน้าเว็บจริง</span>
               <span className="text-[11px] opacity-75">↗</span>
             </a>
           </div>
@@ -272,7 +272,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
                   : "bg-amber-50 text-amber-800 border-amber-200"
               }`}
             >
-              {health?.overallStatus === "healthy" ? "✦ ปกติดี 100%" : "ตรวจพบคำเตือน"}
+              {health?.overallStatus === "healthy" ? "ปกติดี 100%" : "ตรวจพบคำเตือน"}
             </span>
           </div>
           <p className="mt-2 text-2xl font-bold font-mono text-[#29261F]">
@@ -321,7 +321,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-bold text-[#29261F] font-mystic-gold flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <span>สัญญาณบริการคลาวด์สด (Cloud Infrastructure Pulse)</span>
               </h3>
               <p className="text-xs text-[#635B4E] mt-0.5">
@@ -397,7 +397,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         {/* Right Col: Quick Actions */}
         <div className="rounded-2xl border border-[#D5CEC2] bg-white p-6 shadow-xs space-y-4">
           <h3 className="text-base font-bold text-[#29261F] font-mystic-gold flex items-center gap-2">
-            <span className="text-[#A58A5C]">✨</span>
+            
             <span>คำสั่งด่วน (Quick Actions)</span>
           </h3>
           <p className="text-xs text-[#635B4E]">ทางลัดสำหรับการดูแลรักษาระบบที่พบบ่อย</p>
@@ -409,7 +409,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition-all cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
-                <span className="text-[#A58A5C] text-sm font-bold">✦</span>
+                
                 <div>
                   <p className="text-xs font-bold text-[#29261F]">แก้ไข Prompt / ไพ่ 78 ใบ</p>
                   <p className="text-[11px] text-[#635B4E]">ปรับปรุงบุคลิกและคำอ่านไพ่ live</p>
@@ -425,7 +425,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition-all cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
-                <span className="text-[#A58A5C] text-sm font-bold">✦</span>
+                
                 <div>
                   <p className="text-xs font-bold text-[#29261F]">
                     {rebuildingIndex ? "กำลังสร้าง Index…" : "รีบิลด์ Search Index (Vectorize)"}
@@ -442,7 +442,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition-all shadow-2xs"
             >
               <div className="flex items-center gap-3">
-                <span className="text-[#A58A5C] text-sm font-bold">✦</span>
+                
                 <div>
                   <p className="text-xs font-bold text-[#29261F]">ส่งออกผู้ยินยอมรับข่าวสาร (CSV)</p>
                   <p className="text-[11px] text-[#635B4E]">ดาวน์โหลดรายชื่อสำหรับส่งแคมเปญ</p>
@@ -457,7 +457,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition-all cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
-                <span className="text-[#A58A5C] text-sm font-bold">✦</span>
+                
                 <div>
                   <p className="text-xs font-bold text-[#29261F]">ตรวจสอบโครงสร้างสิทธิ์ D1</p>
                   <p className="text-[11px] text-[#635B4E]">ตรวจความพร้อมของตารางโควตา</p>
@@ -474,7 +474,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-[#29261F] font-mystic-gold flex items-center gap-2">
-              <span className="text-[#A58A5C]">✦</span>
+              
               <span>บันทึกประวัติกิจกรรมล่าสุด (Audit Activity Log)</span>
             </h3>
             <p className="text-xs text-[#635B4E]">

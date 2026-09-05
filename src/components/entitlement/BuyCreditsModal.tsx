@@ -102,8 +102,8 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
       mutateEntitlement();
       setSuccessMsg(
         isEn
-          ? `Successfully added +${data.grantedCredits} sacred reading passes! ✨`
-          : `เติมรอบเปิดไพ่สำเร็จ +${data.grantedCredits} ครั้งเรียบร้อยแล้ว! ✨`
+          ? `Successfully added +${data.grantedCredits} sacred reading passes!`
+          : `เติมรอบเปิดไพ่สำเร็จ +${data.grantedCredits} ครั้งเรียบร้อยแล้ว!`
       );
       setTimeout(() => {
         setCheckoutData(null);
@@ -131,7 +131,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
     <Modal
       isOpen={isOpen}
       onClose={resetModalState}
-      title={isEn ? "✦ Sacred Reading Passes (Tarot Pass)" : "✦ เติมรอบดูดวง (Tarot Pass)"}
+      title={isEn ? "Sacred Reading Passes (Tarot Pass)" : "เติมรอบดูดวง (Tarot Pass)"}
     >
       <div className="space-y-6 pt-1 text-[#635B4E]">
         {errorMsg && (
@@ -242,7 +242,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               </div>
             ) : (
               <div className="p-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-center space-y-2 ">
-                <div className="text-2xl text-[#8F5C1A]">✦</div>
+                
                 <h4 className="font-serif-th text-sm font-bold text-[#2E211A]">
                   {isEn ? "Payment Gateway Test Simulator" : "ระบบจำลองการชำระเงิน (Test Gateway Simulator)"}
                 </h4>
@@ -263,7 +263,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               >
                 {loading
                   ? (isEn ? "Verifying payment..." : "กำลังตรวจสอบรายการ...")
-                  : (isEn ? "✦ Confirm Payment" : "✦ ยืนยันการชำระเงินแล้ว")}
+                  : (isEn ? "Confirm Payment" : "ยืนยันการชำระเงินแล้ว")}
               </button>
 
               <button

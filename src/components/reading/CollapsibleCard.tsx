@@ -9,7 +9,7 @@ export interface CollapsibleCardProps {
   title: string;
   /** คำอธิบายบรรทัดเดียวใต้หัวข้อ (ไม่บังคับ) */
   hint?: string;
-  /** ไอคอนนำหน้า (ค่าเริ่มต้นเป็นทองคำเปลว ✦) */
+  /** ไอคอนนำหน้า */
   icon?: React.ReactNode;
   /** ป้ายกำกับด้านขวา เช่นจำนวนหรือสถานะ */
   badge?: React.ReactNode;
@@ -25,7 +25,7 @@ export interface CollapsibleCardProps {
 export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
   title,
   hint,
-  icon = "✦",
+  icon = null,
   badge,
   defaultOpen = false,
   children,

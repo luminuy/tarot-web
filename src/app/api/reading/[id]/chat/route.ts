@@ -74,7 +74,7 @@ function generateContextualTarotChatReply(params: {
   if (lang === "en") {
     const cardName = primaryCard?.nameEn || "primary card";
     if (personaId === "playful") {
-      return `Hey! Looking at ${cardName}, don't sweat the small stuff right now. Take a deep breath, trust your intuition, and focus on what brings you joy today! ✨`;
+      return `Hey! Looking at ${cardName}, don't sweat the small stuff right now. Take a deep breath, trust your intuition, and focus on what brings you joy today!`;
     }
     if (personaId === "master") {
       return `Regarding your inquiry through ${cardName}: Strategic discernment is vital here. Separate emotional impulses from tangible facts, and take clear, decisive action over the next 48 hours.`;
@@ -98,7 +98,7 @@ function generateContextualTarotChatReply(params: {
   if (q.includes("แก้") || q.includes("ทำไง") || q.includes("ทางออก") || q.includes("ควรทำ") || q.includes("เริ่มยังไง") || q.includes("ทำตัว")) {
     if (history.length >= 2) {
       if (isPlayful) {
-        return `แกรรร สเต็ปนี้ง่ายมาก! จากไพ่ ${primaryCard?.nameTh || "หลัก"} พักความเครียดไว้ก่อน แล้วเริ่มทำสิ่งเล็กๆ ที่ทำเสร็จได้ใน 10 นาทีนี้เลย รับรองว่าพอเครื่องติดแล้วทุกอย่างจะโฟลว์เอง ลุยยย! ✨`;
+        return `แกรรร สเต็ปนี้ง่ายมาก! จากไพ่ ${primaryCard?.nameTh || "หลัก"} พักความเครียดไว้ก่อน แล้วเริ่มทำสิ่งเล็กๆ ที่ทำเสร็จได้ใน 10 นาทีนี้เลย รับรองว่าพอเครื่องติดแล้วทุกอย่างจะโฟลว์เอง ลุยยย!`;
       }
       if (isMaster) {
         return `สำหรับกลยุทธ์ขั้นต่อไป: ไพ่ ${primaryCard?.nameTh || "หลัก"} ชี้ชัดว่าต้องวางแผน 2 ขั้นตอน: 1) ตัดภาระงานที่ไม่สร้างผลลัพธ์ออกทันที 2) กำหนดเส้นตายการตัดสินใจให้ชัดเจนภายใน 48 ชั่วโมงนี้ครับ`;
@@ -110,7 +110,7 @@ function generateContextualTarotChatReply(params: {
         : `สำหรับทางออกที่แม่หมออยากแนะนำเพิ่มเติมนะคะ ให้คุณเริ่มจากการจัดลำดับความสำคัญก่อน สิ่งไหนเร่งด่วนให้จัดการทีละเรื่อง และอย่าลืมใจดีกับตัวเองด้วยนะ ทุกอย่างกำลังค่อยๆ ดีขึ้นค่ะ`;
     }
     if (isPlayful) {
-      return `โอ๊ยยย เจ้าไพ่ ${primaryCard?.nameTh || "หลัก"} (${record.drawn?.[0]?.isReversed ? "กลับหัว" : "หัวตั้ง"}) ใบนี้มันบอกว่าอย่าเพิ่งนอยด์ไปแก ทางแก้คือเคลียร์ใจตัวเองก่อน อะไรไม่ชัวร์อย่าเพิ่งไปรับปาก ค่อยๆ ก้าวไปทีละก้าว เดี๋ยวก็สวยงาม! ✦`;
+      return `โอ๊ยยย เจ้าไพ่ ${primaryCard?.nameTh || "หลัก"} (${record.drawn?.[0]?.isReversed ? "กลับหัว" : "หัวตั้ง"}) ใบนี้มันบอกว่าอย่าเพิ่งนอยด์ไปแก ทางแก้คือเคลียร์ใจตัวเองก่อน อะไรไม่ชัวร์อย่าเพิ่งไปรับปาก ค่อยๆ ก้าวไปทีละก้าว เดี๋ยวก็สวยงาม!`;
     }
     if (isMaster) {
       return `แนวทางแก้ไขตามหลักการของไพ่ ${primaryCard?.nameTh || "หลัก"}: ต้องวิเคราะห์ต้นเหตุอย่างมีเหตุผล แยกแยะข้อเท็จจริงออกจากอารมณ์ แล้วตั้งเป้าหมายระยะสั้นเพื่อควบคุมสถานการณ์ให้ได้ครับ`;
@@ -125,7 +125,7 @@ function generateContextualTarotChatReply(params: {
   // 2. Love & Relationship ("รัก", "แฟน", "คนคุย", "เขาคิดยังไง", "ความสัมพันธ์")
   if (q.includes("รัก") || q.includes("แฟน") || q.includes("คนคุย") || q.includes("เขา") || q.includes("ใจ")) {
     if (isPlayful) {
-      return `เรื่องความรักนี่ขอเม้าท์เลย! ไพ่ ${primaryCard?.nameTh || "ชุดนี้"} บอกว่าถ้าเขาทำตัวลึกลับหรือไม่ชัดเจน เราก็ต้องสวยและเชิ่ดเข้าไว้ รักตัวเองให้สุดแล้วเสน่ห์จะทำงานเองแก! ✦`;
+      return `เรื่องความรักนี่ขอเม้าท์เลย! ไพ่ ${primaryCard?.nameTh || "ชุดนี้"} บอกว่าถ้าเขาทำตัวลึกลับหรือไม่ชัดเจน เราก็ต้องสวยและเชิ่ดเข้าไว้ รักตัวเองให้สุดแล้วเสน่ห์จะทำงานเองแก!`;
     }
     if (isMaster) {
       return `ในมิติของความสัมพันธ์: ไพ่ ${primaryCard?.nameTh || "ชุดนี้"} บ่งชี้ว่าความชัดเจนคือสิ่งที่ต้องสร้าง ไม่ใช่สิ่งที่ต้องรอ ประเมินความคุ้มค่าทางอารมณ์และตัดสินใจบนพื้นฐานของความเป็นจริงครับ`;
@@ -140,7 +140,7 @@ function generateContextualTarotChatReply(params: {
   // 3. Timing ("เมื่อไหร่", "ตอนไหน", "ช่วงไหน", "กี่วัน", "กี่เดือน")
   if (q.includes("เมื่อไหร่") || q.includes("ตอนไหน") || q.includes("ช่วง") || q.includes("นานไหม")) {
     if (isPlayful) {
-      return `จังหวะเวลานี้ไพ่กระซิบมาว่า ไวสุดคือ 1-2 สัปดาห์นี้เลยแก! แต่ระหว่างนี้ห้ามนอนเฉยๆ นะ ต้องเตรียมตัวให้พร้อมรอรับโชคด้วย! ✨`;
+      return `จังหวะเวลานี้ไพ่กระซิบมาว่า ไวสุดคือ 1-2 สัปดาห์นี้เลยแก! แต่ระหว่างนี้ห้ามนอนเฉยๆ นะ ต้องเตรียมตัวให้พร้อมรอรับโชคด้วย!`;
     }
     if (isMaster) {
       return `จากการคำนวณวงรอบพลังงานไพ่: กรอบเวลาที่เหตุการณ์จะตกผลึกคือช่วง 2-3 สัปดาห์ข้างหน้านี้ โดยจะเริ่มเห็นสัญญาณบวกแรกภายใน 7 วันครับ`;
@@ -169,7 +169,7 @@ function generateContextualTarotChatReply(params: {
 
   // 5. Default contextual response
   if (isPlayful) {
-    return `สำหรับเรื่อง "${userQuestion}" จากหน้าไพ่ ${primaryCard?.nameTh || "ชุดนี้"} สรุปให้ฟังสั้นๆ เลยนะแก: มั่นใจในเสน่ห์และความสามารถของตัวเองเข้าไว้ เส้นทางข้างหน้ามีเรื่องสนุกๆ รออยู่อีกเพียบ! ✦`;
+    return `สำหรับเรื่อง "${userQuestion}" จากหน้าไพ่ ${primaryCard?.nameTh || "ชุดนี้"} สรุปให้ฟังสั้นๆ เลยนะแก: มั่นใจในเสน่ห์และความสามารถของตัวเองเข้าไว้ เส้นทางข้างหน้ามีเรื่องสนุกๆ รออยู่อีกเพียบ!`;
   }
   if (isMaster) {
     return `สำหรับประเด็น "${userQuestion}": เมื่อพิจารณาควบคู่กับไพ่ ${primaryCard?.nameTh || "ชุดนี้"} ขอให้คุณยึดมั่นในวินัยและเป้าหมายหลัก ทิศทางโดยรวมเป็นบวกและกำลังพัฒนาไปในทางที่ถูกต้องครับ`;

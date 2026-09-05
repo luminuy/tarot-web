@@ -94,7 +94,7 @@ function baseLayout(contentHtml: string, title: string): string {
   <div class="wrapper">
     <div class="card">
       <div class="brand">
-        <div class="brand-title">✦ SEERTAROT ✦</div>
+        <div class="brand-title">SEERTAROT</div>
         <div class="brand-sub">วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์</div>
       </div>
       ${contentHtml}
@@ -114,7 +114,7 @@ export function verifyEmailHtml(link: string, name?: string): string {
     <p>${greeting},</p>
     <p>ขอบคุณที่ร่วมเดินทางสู่การพยากรณ์กับเรา เพื่อความปลอดภัยและความสมบูรณ์ของบัญชี กรุณากดปุ่มด้านล่างเพื่อยืนยันที่อยู่อีเมลของคุณ</p>
     <div class="btn-container">
-      <a href="${link}" class="btn">✦ ยืนยันอีเมลทันที</a>
+      <a href="${link}" class="btn">ยืนยันอีเมลทันที</a>
     </div>
     <p>ลิงก์นี้มีอายุการใช้งาน 24 ชั่วโมง</p>
     <div class="fallback">
@@ -132,9 +132,9 @@ export function resetPasswordHtml(link: string, name?: string): string {
     <p>${greeting},</p>
     <p>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชี SeerTarot ของคุณ หากคุณเป็นผู้ส่งคำขอนี้ สามารถตั้งรหัสผ่านใหม่ได้โดยกดปุ่มด้านล่าง</p>
     <div class="btn-container">
-      <a href="${link}" class="btn">✦ ตั้งรหัสผ่านใหม่</a>
+      <a href="${link}" class="btn">ตั้งรหัสผ่านใหม่</a>
     </div>
-    <p style="color: #A6392C; font-size: 13px;">✦ ลิงก์นี้มีความปลอดภัยระดับสูงและมีอายุการใช้งาน 15 นาที</p>
+    <p style="color: #A6392C; font-size: 13px;">ลิงก์นี้มีความปลอดภัยระดับสูงและมีอายุการใช้งาน 15 นาที</p>
     <div class="fallback">
       หากปุ่มด้านบนใช้งานไม่ได้ กรุณาคัดลอกลิงก์นี้ไปเปิดในเบราว์เซอร์:<br>
       <a href="${link}" style="color: #8F5C1A;">${link}</a>

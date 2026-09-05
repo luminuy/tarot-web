@@ -328,7 +328,7 @@ function AdminContent() {
           </button>
 
           <div className="flex items-center gap-3">
-            {/* ✦ Official Brand Logo ✦ */}
+            {/* Official Brand Logo */}
             <div className="w-10 h-10 rounded-full border border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] shadow-2xs">
               <img
                 src="/logo.webp"
@@ -363,7 +363,7 @@ function AdminContent() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] px-3.5 py-1.5 text-xs font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition-all shadow-2xs"
           >
-            <span>✦ เปิดหน้าเว็บจริง</span>
+            <span>เปิดหน้าเว็บจริง</span>
             <span className="text-[11px] text-[#635B4E]">↗</span>
           </a>
           <Button
@@ -409,7 +409,7 @@ function AdminContent() {
                           <TabIcon id={item.id} className="w-4 h-4" />
                         </span>
                         <span className="flex-1 truncate">{item.label}</span>
-                        {isActive && <span className="text-[10px] text-[#A58A5C]">✦</span>}
+                        
                       </button>
                     );
                   })}
@@ -419,7 +419,7 @@ function AdminContent() {
 
             <div className="rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-[11px] text-[#635B4E]">
               <div className="flex items-center gap-1.5 font-semibold text-[#29261F]">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <span>มาตรฐานระบบ</span>
               </div>
               <p className="mt-1 text-[11px] leading-relaxed text-[#635B4E]">
@@ -493,7 +493,7 @@ function AdminContent() {
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D5CEC2] pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[#A58A5C]">✦</span>
+                  
                   <h2 className="text-lg sm:text-xl font-bold text-[#29261F] font-mystic-gold">
                     {activeItem.label}
                   </h2>
@@ -515,7 +515,7 @@ function AdminContent() {
                         : "text-[#635B4E] hover:text-[#29261F]"
                     }`}
                   >
-                    ✦ Cloudflare & D1
+                    Cloudflare & D1
                   </button>
                   <button
                     type="button"
@@ -526,7 +526,7 @@ function AdminContent() {
                         : "text-[#635B4E] hover:text-[#29261F]"
                     }`}
                   >
-                    ✨ ประสิทธิภาพ AI
+                    ประสิทธิภาพ AI
                   </button>
                 </div>
               )}

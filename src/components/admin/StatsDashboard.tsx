@@ -192,7 +192,7 @@ export default function StatsDashboard() {
           className="text-xs text-[#635B4E] hover:text-[#29261F] font-medium"
           disabled={loading}
         >
-          {loading ? "กำลังโหลด…" : "✦ รีเฟรชข้อมูล"}
+          {loading ? "กำลังโหลด…" : "รีเฟรชข้อมูล"}
         </button>
       </div>
 

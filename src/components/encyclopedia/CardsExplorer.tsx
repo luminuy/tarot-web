@@ -130,9 +130,9 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs text-[#A58A5C] font-serif-th font-bold shadow-xs">
-            <span>✦</span>{" "}
+            
             {isEnglish ? "78-CARD TAROT ENCYCLOPEDIA" : "สารานุกรมความหมายไพ่ 78 ใบ"}{" "}
-            <span>✦</span>
+            
           </span>
         </div>
         <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-[#29261F] tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
@@ -150,9 +150,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         {/* Search Bar & Result Stats */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A58A5C] text-sm pointer-events-none">
-              ✦
-            </span>
+            
             <input
               type="text"
               value={searchQuery}
@@ -304,7 +302,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   {/* Bottom Hover Action Overlay */}
                   <div className="absolute inset-x-0 bottom-0 p-2 bg-[#29261F]/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="text-[13px] font-serif-th font-bold text-[#F3F0EA] flex items-center gap-1">
-                      <span>✦</span> {isEnglish ? "View Meaning" : "ดูความหมาย"}
+                       {isEnglish ? "View Meaning" : "ดูความหมาย"}
                     </span>
                   </div>
                 </div>
@@ -334,10 +332,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   </div>
                 </div>
 
-                {/* Subtle Luxury Corner Sparkle */}
-                <div className="absolute top-1 right-1 text-[12px] text-[#635B4E] group-hover:text-[#A58A5C] transition-colors pointer-events-none">
-                  ✦
-                </div>
+                
               </Link>
             );
           })}
@@ -347,7 +342,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       {/* Empty State */}
       {filteredCards.length === 0 && (
         <div className="text-center py-16 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-8 space-y-3 shadow-xs">
-          <div className="text-3xl text-[#A58A5C]">✦</div>
+          <div className="text-sm text-[#A58A5C] font-serif-th">SeerTarot</div>
           <h2 className="font-serif-th text-lg font-bold text-[#29261F]">
             {isEnglish ? `No cards matching "${searchQuery}"` : `ไม่พบไพ่ที่ตรงกับ "${searchQuery}"`}
           </h2>

@@ -28,7 +28,7 @@ export const SITE_ORIGIN = `https://${SITE_DOMAIN}` as const;
  * Next.js **แทนที่** อ็อบเจกต์ openGraph ทั้งก้อน ไม่ได้ผสานทีละฟิลด์
  */
 export const OG_IMAGE_URL = `${SITE_ORIGIN}/og/default.png` as const;
-export const OG_IMAGE_ALT = "SeerTarot ✦ ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite";
+export const OG_IMAGE_ALT = "SeerTarot · ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite";
 
 /** บล็อก `openGraph.images` / `twitter.images` มาตรฐาน ใช้ซ้ำได้ทุกหน้า */
 export const OG_IMAGE_BLOCK = [

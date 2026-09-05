@@ -98,7 +98,7 @@ export function analyzeKarmicBridge(
   const questionDesc = pastReading.question ? `ในเรื่อง "${pastReading.question}"` : "";
 
   narrativeParts.push(
-    `✦ ความจำวิวัฒนาการดวงชะตา (Past Karmic Memory): ผู้ถามเคยมาเปิดไพ่ครั้งล่าสุด${timeDesc} ${questionDesc} และได้ไพ่เด่นคือ ${pastReading.primaryCardName}`.trim()
+    `ความจำวิวัฒนาการดวงชะตา (Past Karmic Memory): ผู้ถามเคยมาเปิดไพ่ครั้งล่าสุด${timeDesc} ${questionDesc} และได้ไพ่เด่นคือ ${pastReading.primaryCardName}`.trim()
   );
 
   if (pastReading.outcome && pastReading.outcome !== "PENDING") {

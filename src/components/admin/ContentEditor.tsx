@@ -96,7 +96,7 @@ export default function ContentEditor() {
         return;
       }
       setDirty(false);
-      setMsg(`บันทึกแล้ว ✨ (${(data.size / 1024).toFixed(1)} KB) — มีผลกับคำอ่านใหม่ภายใน 1 นาที`);
+      setMsg(`บันทึกแล้ว (${(data.size / 1024).toFixed(1)} KB) — มีผลกับคำอ่านใหม่ภายใน 1 นาที`);
     } catch {
       setMsg("เชื่อมต่อไม่ได้");
     } finally {
@@ -454,9 +454,7 @@ function CardTab({
                       <div className="truncate text-[10px] text-[#635B4E]">{c.nameEn}</div>
                     </div>
                     {edited ? (
-                      <span className="shrink-0 text-[#29261F] text-[11px]" title="มีการปรับแต่ง">
-                        ✦
-                      </span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#A58A5C]" title="มีการแก้ไข" />
                     ) : null}
                   </button>
                 </li>
@@ -469,7 +467,7 @@ function CardTab({
       <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
         {!selId ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <span className="text-3xl text-[#D5CEC2] mb-2">✦</span>
+            
             <p className="text-sm font-medium text-[#29261F]">เลือกไพ่จากรายการทางซ้าย</p>
             <p className="text-xs text-[#635B4E] mt-1 max-w-sm">
               คุณสามารถแก้ไขความหมายเฉพาะของไพ่แต่ละใบ ทั้ง 5 ด้าน และค่าผลทำนาย ใช่/ไม่ใช่
@@ -538,7 +536,7 @@ function CardTab({
                 <div key={cat.id} className="flex flex-col gap-2 rounded-xl bg-[#F8F6F2] p-3.5 border border-[#D5CEC2]">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-semibold text-[#29261F]">
-                      ✦ ด้าน{cat.label}
+                      ด้าน{cat.label}
                     </p>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">

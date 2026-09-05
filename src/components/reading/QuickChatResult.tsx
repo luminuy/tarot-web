@@ -119,9 +119,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
               className="anim-page-transition p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div className="flex items-start gap-2.5 text-xs sm:text-sm text-[#2E211A] font-serif-th">
-                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[#D9C8AC] text-[13px] text-[#8F5C1A]">
-                  ✦
-                </span>
+                
                 <span className="leading-relaxed">{errorMsg}</span>
               </div>
               {onRetry && !isQuota && (
@@ -130,7 +128,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                   onClick={onRetry}
                   className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
-                  <span>✦</span>{" "}
+                  
                   {isEnglish
                     ? /reload|not found/i.test(errorMsg)
                       ? "Reload Reading"
@@ -158,7 +156,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
               onClick={onRetry}
               className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
             >
-              <span>✦</span> {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
+              {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
             </button>
           )}
         </div>
@@ -187,7 +185,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                     />
                   ) : (
                     <div className="w-full h-full bg-[#F3EDE2] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#D9C8AC]">
-                      <span className="text-[#8F5C1A] text-xs">✦</span>
+                      
                       <span className="text-xs text-[#635B4E] font-serif-th mt-0.5 leading-normal">
                         {isEnglish ? "Not Found" : "ไม่พบข้อมูล"}
                       </span>
@@ -197,7 +195,8 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
 
                 <div>
                   <span className="text-[13px] text-[#8F5C1A] font-serif-th font-semibold">
-                    ✦ {isEnglish
+                    {
+isEnglish
                         ? `Quick Reading: ${drawnCard?.position.nameEn || drawnCard?.position.nameTh || "Oracle Message"}`
                         : `คำทำนายด่วน: ${drawnCard?.position.nameTh || "สารจากไพ่"}`}
                   </span>
@@ -246,12 +245,12 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 {cardReading?.headline ? (
                   <h4 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold flex items-center gap-1.5">
-                    <span className="text-[#8F5C1A]">✦</span>
+                    
                     <span>{cardReading.headline}</span>
                   </h4>
                 ) : (
                   <h4 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold flex items-center gap-1.5">
-                    <span className="text-[#8F5C1A]">✦</span>
+                    
                     <span>{isEnglish ? "Core Answer & Trajectory" : "คำตอบและแนวโน้ม"}</span>
                   </h4>
                 )}
@@ -319,7 +318,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             {reading?.advice && reading.advice.length > 0 && (
               <div className="pt-3 border-t border-[#D9C8AC]/40 space-y-2">
                 <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-2">
-                  <span className="text-[#8F5C1A]">✦</span> {isEnglish ? "What to Do Now" : "สิ่งที่ควรทำตอนนี้"}
+                   {isEnglish ? "What to Do Now" : "สิ่งที่ควรทำตอนนี้"}
                 </h5>
                 <ul className="space-y-1.5">
                   {reading.advice.slice(0, 2).map((item, idx) => (
@@ -342,8 +341,8 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
               className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[#D9C8AC] bg-[#F3EDE2] hover:bg-[#FFFFFF] p-4 text-left transition-all hover:border-[#8F5C1A] hover:shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] lg:hidden"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-sm shadow-2xs group-hover:scale-105 transition-transform">
-                  ✦
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-sm shadow-2xs group-hover:scale-105 transition-transform font-sans font-bold">
+                  ➔
                 </span>
                 <div>
                   <span className="block font-serif-th text-sm font-bold text-[#2E211A]">
@@ -376,7 +375,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
           <CollapsibleCard
             title={isEnglish ? "In-Depth Insights & Verification" : "รายละเอียดเชิงลึก & ความโปร่งใส"}
             hint={isEnglish ? "Oracle Wisdom · Elemental Balance · Provably Fair Audit" : "คำคมพลังใจ · สมดุลธาตุ · รหัสตรวจสอบ Provably Fair"}
-            icon="✨"
+            
           >
             <div className="space-y-4 pt-1">
               {/* Sacred Oracle Mantra Card */}
@@ -405,7 +404,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-1.5">
-                      <span className="text-[#8F5C1A]">✨</span>{" "}
+                      
                       {isEnglish ? "Consult a Certified Human Master" : "ปรึกษาแม่หมอตัวจริงเพิ่มเติม"}
                     </h5>
                     <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed">
@@ -432,7 +431,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
       {/* AI Disclosure Note */}
       <div className="pt-3 border-t border-[#D9C8AC]/30">
         <p className="text-xs text-[#635B4E] leading-relaxed text-center font-serif-th max-w-2xl mx-auto">
-          <span className="text-[#8F5C1A]">✦</span>{" "}
+          {" "}
           {isEnglish
             ? "This reading is synthesized with AI from your authentic drawn card. Intended for reflection, introspection, and personal guidance."
             : "คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต"}

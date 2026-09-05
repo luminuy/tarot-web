@@ -88,7 +88,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`✦ ขอคำปรึกษากับ ${readerName}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`ขอคำปรึกษากับ ${readerName}`}>
       <form onSubmit={handleSubmit} className="space-y-4 pt-2 font-serif-th">
         {error && (
           <div className="rounded-lg border border-[#D9C8AC] bg-[#FCEEEA] p-3 text-xs text-[#A6392C] ">{error}</div>
@@ -119,7 +119,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
                   : "bg-[#FFFFFF] border-[#D9C8AC] text-[#635B4E] hover:text-[#2E211A]"
               }`}
             >
-              ✦ รับคิวสดทันที
+              รับคิวสดทันที
             </button>
             <button
               type="button"
@@ -130,7 +130,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
                   : "bg-[#FFFFFF] border-[#D9C8AC] text-[#635B4E] hover:text-[#2E211A]"
               }`}
             >
-              ✦ จองคิวล่วงหน้า
+              จองคิวล่วงหน้า
             </button>
           </div>
         )}
@@ -138,7 +138,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         {/* Service Fee Display */}
         <div className="flex items-center justify-between rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-3 text-xs ">
           <div className="flex items-center gap-2">
-            <span className="text-[#8F5C1A] font-bold text-sm">✦ ค่าบริการ / บูชาครู</span>
+            <span className="text-[#8F5C1A] font-bold text-sm">ค่าบริการ / บูชาครู</span>
             <span className="text-[13px] text-[#635B4E]">(30 นาที)</span>
           </div>
           <span className="font-bold text-[#8F5C1A] text-sm">299 บาท</span>
@@ -193,7 +193,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
             ยกเลิก
           </Button>
           <Button type="submit" variant="gold" disabled={submitting || !consent}>
-            {submitting ? "กำลังส่งข้อมูล…" : "✦ ยืนยันการเข้าคิว"}
+            {submitting ? "กำลังส่งข้อมูล…" : "ยืนยันการเข้าคิว"}
           </Button>
         </div>
       </form>

@@ -63,7 +63,7 @@ export function ChangePasswordCard() {
       }
 
       soundManager.playCardSelectSound();
-      setSuccessMsg(isEn ? "Password changed successfully ✦" : "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว ✦");
+      setSuccessMsg(isEn ? "Password changed successfully" : "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -78,7 +78,7 @@ export function ChangePasswordCard() {
   return (
     <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6 space-y-4 text-left">
       <div className="flex items-center gap-2">
-        <span className="text-[#8F5C1A]">✦</span>
+        
         <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
           {hasPassword
             ? (isEn ? "Change Password" : "เปลี่ยนรหัสผ่าน")
@@ -183,7 +183,7 @@ export function ChangePasswordCard() {
         >
           {loading
             ? (isEn ? "Saving..." : "กำลังบันทึก…")
-            : (isEn ? "✦ Save Password" : "✦ บันทึกรหัสผ่าน")}
+            : (isEn ? "Save Password" : "บันทึกรหัสผ่าน")}
         </button>
       </form>
     </div>

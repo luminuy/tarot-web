@@ -39,28 +39,28 @@ const ELEMENT_CONFIG: Record<string, { border: string; glow: string; icon: strin
     ไฟ: {
       border: "#D9C8AC",
       glow: "rgba(143, 92, 26, 0.12)",
-      icon: "✦",
+      icon: "•",
       name: "ธาตุไฟ (Wands)",
       bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
     },
     น้ำ: {
       border: "#D9C8AC",
       glow: "rgba(143, 92, 26, 0.12)",
-      icon: "✦",
+      icon: "•",
       name: "ธาตุน้ำ (Cups)",
       bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
     },
     ลม: {
       border: "#D9C8AC",
       glow: "rgba(143, 92, 26, 0.12)",
-      icon: "✦",
+      icon: "•",
       name: "ธาตุลม (Swords)",
       bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
     },
     ดิน: {
       border: "#D9C8AC",
       glow: "rgba(143, 92, 26, 0.12)",
-      icon: "✦",
+      icon: "•",
       name: "ธาตุดิน (Pentacles)",
       bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
     },
@@ -261,7 +261,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
               />
             ) : (
               <div className="w-full h-full bg-[#FFFFFF] flex items-center justify-center">
-                <span className="text-xs text-[#8F5C1A]">✦</span>
+                
               </div>
             )}
           </div>

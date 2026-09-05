@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 
 /**
- * ✦ TikTok Floating Action Button (FAB)
+ * TikTok Floating Action Button (FAB)
  *
  * แสดงปุ่มลอยมุมขวาล่างสำหรับเชื่อมต่อไปยังบัญชีทางการของแม่หมอ:
  * https://www.tiktok.com/@seerada.tarot
@@ -42,7 +42,7 @@ export function TikTokFloatingButton() {
           aria-hidden="true"
           className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#110E1B]/90 backdrop-blur-md border border-white/15 text-[#F3F0EA] text-xs font-serif-th font-semibold shadow-lg opacity-0 -translate-x-2 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 whitespace-nowrap"
         >
-          <span className="text-[#00F2EA]">✦</span>
+          
           <span>ติดตามแม่หมอ</span>
           <span className="text-white/70">@seerada.tarot</span>
         </span>

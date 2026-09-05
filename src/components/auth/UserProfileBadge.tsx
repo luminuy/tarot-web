@@ -261,7 +261,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 )}
                 <div className="mt-1 flex items-center gap-1.5">
                   <span className="text-[12px] text-[#29261F] bg-[#EAE7E0] border border-[#D5CEC2] px-2 py-0.2 rounded-full inline-flex items-center gap-1">
-                    <span className="text-[#A58A5C]">✦</span>
+                    
                     <span>{getProviderLabel()}</span>
                   </span>
                 </div>
@@ -272,7 +272,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             <div className="p-3 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] space-y-2.5 shadow-xs">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[#A58A5C] text-xs">✦</span>
+                  
                   <span className="text-[13px] font-bold text-[#29261F] tracking-wide">
                     {isEn ? "Tier & Allowances" : "สิทธิ์และแพ็กเกจ"}
                   </span>
@@ -310,7 +310,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   className="w-full py-2 px-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs hover:scale-[1.01] transition-all duration-150 cursor-pointer flex items-center justify-between active:scale-[0.98] shadow-sm"
                 >
                   <span className="flex items-center gap-1.5">
-                    <span>✨</span>
+                    
                     <span>{isEn ? "Add Credits / Upgrade Tier" : "ซื้อรอบเพิ่ม / อัปเกรดญาณ"}</span>
                   </span>
                   <span className="text-[11px] bg-black/20 px-1.5 py-0.5 rounded font-mono font-semibold">
@@ -331,7 +331,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                     }}
                     className="text-[#A58A5C] hover:text-[#29261F] transition-colors cursor-pointer flex items-center gap-1 font-semibold"
                   >
-                    <span>✦</span>
+                    
                     <span>{isEn ? "Compare All Plans" : "เปรียบเทียบทุกแพลน"}</span>
                   </button>
                 )}
@@ -354,7 +354,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <div className="p-2.5 rounded-xl bg-[#FCEEEA] border border-[#D5CEC2] text-[#A6392C] text-[13px] space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold flex items-center gap-1">
-                    <span className="text-[#A6392C]">✦</span>
+                    
                     <span>{isEn ? "Email Not Verified" : "ยังไม่ยืนยันอีเมล"}</span>
                   </span>
                   <button
@@ -372,7 +372,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
             {pendingCount > 0 && (
               <div className="p-2.5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] text-[12px] flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[#A58A5C]">✦</span>
+                  
                   <span>{isEn ? "Pending Outcomes" : "รอติดตามผลคำทำนาย"}</span>
                 </span>
                 <span className="font-bold bg-[#29261F] text-[#F3F0EA] px-2 py-0.5 rounded-full">
@@ -415,7 +415,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 className="w-full text-left p-2.5 rounded-xl text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA] border border-transparent hover:border-[#D5CEC2] transition-colors duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
               >
                 <span className="flex items-center gap-1.5 font-bold">
-                  <span className="text-[#A6392C] group-hover:rotate-12 transition-transform">✦</span>
+                  
                   <span>{isEn ? "Sign Out" : "ออกจากระบบ"}</span>
                 </span>
                 <span className="text-[13px] text-[#A6392C] group-hover:text-[#A6392C] group-hover:translate-x-0.5 transition-all">

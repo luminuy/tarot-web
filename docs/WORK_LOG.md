@@ -36,6 +36,24 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ยกระดับมาตรฐานการออกแบบสู่ Editorial Luxury Minimalist — ลบสัญลักษณ์ดาวและประกายวิบวับ (✦, ✨, ✧) ทั้งเว็บทุกจุดทุกหน้า — โดย Antigravity AI
+
+- **ปรับปรุงอัตลักษณ์และตัวพิมพ์สู่ระดับสากลตามคำสั่งผู้ดูแลระบบ (Clean Luxury Typography & Zero Star/Sparkle Rule)**:
+  - **แก้ไขกฎข้อ 2 ใน `GEMINI.md` ถาวร**:
+    - ห้ามใช้อิโมจิหรือสัญลักษณ์ดาวแฟนซีทุกชนิด (`✦`, `✨`, `✧`) ในหัวข้อ ปุ่มกด ป้ายแท็ก หรือข้อความ UI เด็ดขาด
+    - บังคับใช้ Editorial Luxury Typography ระดับสากล (Apple / New York Times Aesthetic)
+  - **กำจัดสัญลักษณ์ดาวและประกายวิบวับ 565 จุดครอบคลุม 92 ไฟล์ใน `src/` แบบ 100%**:
+    - **Header, Navigation & Metadata**: ปรับชื่อแบรนด์และ Title ให้สะอาดเรียบหรู (`SeerTarot · ...`), ถอด badge ดาวออกจาก SiteHeader, ลบดาวออกจากเมนู Footer ทั้ง 8 คอลัมน์ (`nav-links.ts`)
+    - **Reading Flow & Altar**: นำ `<span>✦</span>` และ `<span>✨</span>` ออกจากปุ่มใน `TarotFlow.tsx`, `StreamReader.tsx`, `QuickFortunePicker.tsx`, `QuickChatResult.tsx`, `ShareModal.tsx`, `FollowUpChat.tsx`, `PersonaCardSelector.tsx`, `OracleMantraCard.tsx`, `ElementalBalanceWidget.tsx`, `ProvablyFairPanel.tsx`, `InteractiveCardFan.tsx`, `ShuffleRitual.tsx`, `DailyCardStrip.tsx`, `IntentionAltarInput.tsx`
+    - **Rating Widget**: ปรับสัญลักษณ์ให้คะแนนความแม่นยำใน `AccuracyRatingWidget.tsx` จาก `✦` เป็นตัวเลขสเกลสากล `1, 2, 3, 4, 5` ที่ชัดเจนและเป็นมืออาชีพ
+    - **Encyclopedia & Spreads**: ลบดาวออกจาก `CardDetailView.tsx`, `CardsExplorer.tsx`, `RelatedCards.tsx`, `TarotEncyclopediaModal.tsx`, `SpreadBoard.tsx`, `SpreadCardSelector.tsx`, `SpreadsLibrary.tsx`, `SpreadDetailClient.tsx`
+    - **Auth, Account & History**: ลบดาวและประกายออกจาก `AuthModal.tsx`, `UserProfileBadge.tsx`, `ReadingHistoryModal.tsx`, `AccessDialog.tsx`, `BuyCreditsModal.tsx`, `EntitlementStatusCard.tsx`, `ChangePasswordCard.tsx`, `AccountClient.tsx`, `packages.ts`, `copy.ts`, `templates.ts`
+    - **SEO, Blog, Marketplace & Admin**: ปรับบทความ บล็อก ระบบแม่หมอ หน้ารีเซ็ตรหัสผ่าน และแผงแอดมินทั้งหมด
+    - **Error & 404 Pages**: เปลี่ยนไอคอนดาวบนหน้า `error.tsx` และ `global-error.tsx` เป็นสัญลักษณ์แจ้งเตือน `!`, หน้า `not-found.tsx` แสดงตัวเลข `404` ด้วย Serif Typography สุดหรู, และหน้าสำเร็จ `reset-password` แสดง `✓`
+  - **ผ่านการตรวจสอบความสมบูรณ์ 100%**:
+    - `npm run typecheck`: 0 Errors
+    - `npm run repo:verify`: ผ่านครบ 27 ด่านสมบูรณ์
+
 ### 🗓️ 2026-09-05: ปรับความกระชับของหน้าต่างเข้าสู่ระบบและสมัครสมาชิก (Clean Auth Modal Layout) — โดย Antigravity AI
 
 - **ลดทอนข้อความส่วนเกินเพื่อเพิ่มความกระชับและรองรับหน้าจอมือถืออย่างสมบูรณ์แบบ (`AuthModal.tsx`)**:

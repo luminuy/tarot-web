@@ -54,16 +54,16 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">2. สิ่งที่เราไม่ทำเด็ดขาด</h2>
           <ul className="space-y-2 text-sm text-[#29261F] list-disc list-inside leading-relaxed font-serif-th">
             <li>
-              ✦ <strong>ไม่เอาข้อมูลคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — ข้อมูลการดูดวงเป็นเรื่องส่วนบุคคล
+              • <strong>ไม่เอาข้อมูลคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — ข้อมูลการดูดวงเป็นเรื่องส่วนบุคคล
             </li>
             <li>
-              ✦ <strong>ไม่ขายหรือส่งต่อข้อมูลส่วนตัวให้บุคคลที่สาม</strong>
+              • <strong>ไม่ขายหรือส่งต่อข้อมูลส่วนตัวให้บุคคลที่สาม</strong>
             </li>
             <li>
-              ✦ <strong>ไม่ติดตามตัวตนข้ามเว็บไซต์ (No cross-site tracking)</strong>
+              • <strong>ไม่ติดตามตัวตนข้ามเว็บไซต์ (No cross-site tracking)</strong>
             </li>
             <li>
-              ✦ <strong>ไม่ส่งอีเมลโฆษณาโดยที่คุณไม่ยินยอม</strong>
+              • <strong>ไม่ส่งอีเมลโฆษณาโดยที่คุณไม่ยินยอม</strong>
             </li>
           </ul>
         </section>
@@ -119,7 +119,7 @@ export default function PrivacyPolicyPage() {
           </h2>
           <div className="text-sm text-[#29261F] leading-relaxed space-y-2 font-serif-th">
             <p>
-              ✦ คำทำนายทั้งหมดในวิหารนี้ <strong>สร้างขึ้นโดยปัญญาประดิษฐ์ (AI)</strong>{" "}
+              • คำทำนายทั้งหมดในวิหารนี้ <strong>สร้างขึ้นโดยปัญญาประดิษฐ์ (AI)</strong>{" "}
               ร่วมกับระบบสุ่มไพ่ทางคณิตศาสตร์ที่ตรวจสอบความโปร่งใสได้ (Provably-Fair)
             </p>
             <p>
@@ -159,7 +159,7 @@ export default function PrivacyPolicyPage() {
               download
               className="px-5 py-2.5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-bold hover:bg-[#F3F0EA] hover:border-[#A58A5C] transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
             >
-              <span>✦</span>
+              
               <span>ดาวน์โหลดข้อมูลของฉัน (Export JSON)</span>
             </a>
             <DeleteAllDataButton />

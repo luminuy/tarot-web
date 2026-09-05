@@ -143,7 +143,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
                       </h3>
                     </div>
                     <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#D5CEC2] text-[13px] text-[#3A7044] font-semibold">
-                      <span>✦</span> แม่หมอตัวจริง (ยืนยันแล้ว)
+                      แม่หมอตัวจริง (ยืนยันแล้ว)
                     </div>
                   </div>
                 </div>
