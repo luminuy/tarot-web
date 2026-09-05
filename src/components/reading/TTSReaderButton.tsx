@@ -70,7 +70,7 @@ export const TTSReaderButton: React.FC<TTSReaderButtonProps> = ({ textToRead, pe
       ) : (
         <>
           <SpeakerTabIcon className="w-4 h-4 text-[#8F5C1A]" />
-          <span>✦ ฟังเสียงอ่านคำทำนาย</span>
+          <span>ฟังเสียงอ่านคำทำนาย</span>
         </>
       )}
     </button>

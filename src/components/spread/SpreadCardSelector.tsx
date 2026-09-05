@@ -328,11 +328,11 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   {isLocked ? (
                     <span className="text-[12px] text-[#635B4E] bg-[#FFFFFF] border border-[#D9C8AC]/60 px-2.5 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1 ">
                       <SealedLockIcon className="w-3 h-3 text-[#8F5C1A]" />
-                      <span>{isEnglish ? "✦ Master Tier" : "✦ ญาณพิเศษ"}</span>
+                      <span>{isEnglish ? "Master Tier" : "ญาณพิเศษ"}</span>
                     </span>
                   ) : isRecommended ? (
                     <span className="text-[12px] text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-                      <span>✦</span> {isEnglish ? "Popular" : "ยอดนิยม"}
+                      {isEnglish ? "Popular" : "ยอดนิยม"}
                     </span>
                   ) : null}
                 </div>
@@ -382,10 +382,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 {/* Selected Golden Corner Seals */}
                 {isSelected && (
                   <>
-                    <div className="absolute top-1.5 left-1.5 text-[12px] text-[#8F5C1A]">✦</div>
-                    <div className="absolute top-1.5 right-1.5 text-[12px] text-[#8F5C1A]">✦</div>
-                    <div className="absolute bottom-1.5 left-1.5 text-[12px] text-[#8F5C1A]">✦</div>
-                    <div className="absolute bottom-1.5 right-1.5 text-[12px] text-[#8F5C1A]">✦</div>
+                    
+                    
+                    
+                    
                   </>
                 )}
 

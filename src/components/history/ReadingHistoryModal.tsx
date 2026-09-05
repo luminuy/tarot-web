@@ -179,9 +179,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#D5CEC2]/40 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full border border-[#D5CEC2] flex items-center justify-center text-xs text-[#A58A5C] bg-[#EAE7E0] font-bold">
-                ✦
-              </div>
+              
               <div>
                 <h3 className="font-serif-th text-sm sm:text-base font-bold text-[#29261F]">
                   {isEn ? "Reading History & Outcome Log" : "ประวัติการดูดวง & บันทึกผลลัพธ์จริง"}
@@ -219,7 +217,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           {readings.length >= 1 && (
             <div className="p-4 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-2.5 text-left">
-                <span className="text-sm text-[#A58A5C]">✨</span>
+                
                 <div>
                   <h4 className="text-xs sm:text-sm font-serif-th font-bold text-[#29261F]">
                     {isEn ? "Monthly AI Synthesis & Insights" : "สรุปภาพรวมดวงประจำเดือนด้วย AI"}
@@ -245,7 +243,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   </>
                 ) : (
                   <>
-                    <span>✨</span>
+                    
                     <span>{isEn ? "Synthesize Month" : "สรุปบทเรียนดวง"}</span>
                   </>
                 )}
@@ -274,7 +272,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   {isEn ? `Dominant: ${monthlySummary.dominantElement}` : `ธาตุ${monthlySummary.dominantElement}เด่น`}
                 </span>
                 <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] truncate">
-                  ✦ {monthlySummary.title}
+                  {monthlySummary.title}
                 </h4>
               </div>
 
@@ -285,7 +283,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               {monthlySummary.lifeLessons && monthlySummary.lifeLessons.length > 0 && (
                 <div className="pt-1 space-y-1">
                   <span className="text-[13px] text-[#A58A5C] font-bold block font-serif-th">
-                    {isEn ? "✦ Key Monthly Lessons:" : "✦ บทเรียนสำคัญในรอบเดือน:"}
+                    {isEn ? "Key Monthly Lessons:" : "บทเรียนสำคัญในรอบเดือน:"}
                   </span>
                   <ul className="space-y-1 text-[13px] text-[#29261F]">
                     {monthlySummary.lifeLessons.map((lesson, idx) => (
@@ -300,7 +298,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
               {monthlySummary.empowermentQuote && (
                 <div className="text-[13px] text-[#A58A5C] pt-1 border-t border-[#D5CEC2]/40 font-serif-th text-center font-bold">
-                  ✨ {monthlySummary.empowermentQuote}
+                  {monthlySummary.empowermentQuote}
                 </div>
               )}
             </motion.div>
@@ -337,8 +335,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   }`}
                 >
                   {isEn
-                    ? `✨ Manifested (${readings.filter((r) => r.outcome === "ACCURATE").length})`
-                    : `✨ เกิดขึ้นจริง (${readings.filter((r) => r.outcome === "ACCURATE").length})`}
+                    ? `Manifested (${readings.filter((r) => r.outcome === "ACCURATE").length})`
+                    : `เกิดขึ้นจริง (${readings.filter((r) => r.outcome === "ACCURATE").length})`}
                 </button>
                 <button
                   type="button"
@@ -350,8 +348,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   }`}
                 >
                   {isEn
-                    ? `✦ Partially (${readings.filter((r) => r.outcome === "PARTIAL").length})`
-                    : `✦ จริงบางส่วน (${readings.filter((r) => r.outcome === "PARTIAL").length})`}
+                    ? `Partially (${readings.filter((r) => r.outcome === "PARTIAL").length})`
+                    : `จริงบางส่วน (${readings.filter((r) => r.outcome === "PARTIAL").length})`}
                 </button>
                 <button
                   type="button"
@@ -384,7 +382,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           <div className="flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar min-h-[220px]">
             {filtered.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-2 opacity-70">
-                <span className="text-3xl text-[#A58A5C]">✦</span>
+                
                 <p className="font-serif-th text-xs text-[#635B4E]">
                   {readings.length === 0
                     ? (isEn
@@ -450,7 +448,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           key={i}
                           className="px-2.5 py-1 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] flex items-center gap-1.5 flex-shrink-0 text-[13px]"
                         >
-                          <span className="text-[#A58A5C]">✦</span>
+                          
                           <span className="font-serif-th text-[#29261F] font-medium">
                             {(isEn && c.cardNameEn) ? c.cardNameEn : c.cardNameTh}
                           </span>
@@ -484,7 +482,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                               : "bg-[#EBF3ED] text-[#3A7044] border border-[#D5CEC2]"
                           }`}
                         >
-                          {isEn ? "✨ Manifested" : "✨ เกิดขึ้นจริง"}
+                          {isEn ? "Manifested" : "เกิดขึ้นจริง"}
                         </button>
 
                         <button
@@ -496,7 +494,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                               : "bg-[#EAE7E0] text-[#A58A5C] border border-[#D5CEC2]"
                           }`}
                         >
-                          {isEn ? "✦ Partially" : "✦ จริงบางส่วน"}
+                          {isEn ? "Partially" : "จริงบางส่วน"}
                         </button>
 
                         <button
@@ -533,7 +531,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         }}
                         className="text-[13px] text-[#A58A5C] hover:text-[#29261F] flex items-center gap-1 font-serif-th cursor-pointer font-bold"
                       >
-                        <span>✦</span>
+                        
                         <span>
                           {isEn
                             ? (item.userNote ? "Edit Note" : "+ Add Reflection")
@@ -546,7 +544,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                     {item.userNote && !isEditingNote && (
                       <div className="p-2.5 rounded-xl bg-[#EAE7E0] border border-[#D5CEC2] text-[13px] text-[#29261F] font-serif-th italic">
                         <span className="font-semibold text-[#A58A5C]">
-                          {isEn ? "✦ Real-Life Manifestation:" : "✦ บันทึกผลจริง:"}
+                          {isEn ? "Real-Life Manifestation:" : "บันทึกผลจริง:"}
                         </span>{" "}
                         {item.userNote}
                       </div>
@@ -598,7 +596,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         {item.advice && item.advice.length > 0 && (
                           <div>
                             <span className="text-[13px] text-[#A58A5C] font-bold block font-serif-th">
-                              {isEn ? "✦ Guidance & Action Steps:" : "✦ คำแนะนำและสิ่งที่ควรทำ:"}
+                              {isEn ? "Guidance & Action Steps:" : "คำแนะนำและสิ่งที่ควรทำ:"}
                             </span>
                             <ul className="list-disc list-inside space-y-0.5 text-[#29261F] text-[13px] pt-1 font-serif-th">
                               {item.advice.map((adv, idx) => (

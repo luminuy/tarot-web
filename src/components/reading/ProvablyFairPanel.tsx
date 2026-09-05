@@ -116,7 +116,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-8 h-8 flex-shrink-0 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#FFFFFF] ">
-            ✦
+            ✓
           </div>
           <div className="min-w-0">
             <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A]">
@@ -168,7 +168,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                 <div className="space-y-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
                   <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
                     <span className="text-[#2E211A] font-serif-th font-bold flex items-center gap-1.5">
-                      <span className="text-[#8F5C1A]">✦</span>{" "}
+                      {" "}
                       {isEnglish ? "Server Randomness Commitment:" : "คำมั่นความสุ่มที่เซิร์ฟเวอร์ผูกมัดไว้ (Commitment):"}
                     </span>
                     <button
@@ -271,7 +271,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                       aria-busy={isVerifying}
                       className="w-full py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs sm:text-sm active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                     >
-                      <span>{isVerifying ? "✦" : "✨"}</span>
+                      
                       <span>
                         {isVerifying
                           ? isEnglish
@@ -304,8 +304,8 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                               </span>
                               <span>
                                 {isEnglish
-                                  ? "✦ This reading is cryptographically verified and 100% fair"
-                                  : "✦ การเปิดไพ่นี้พิสูจน์แล้วว่าโปร่งใสสมบูรณ์แบบ"}
+                                  ? "This reading is cryptographically verified and 100% fair"
+                                  : "การเปิดไพ่นี้พิสูจน์แล้วว่าโปร่งใสสมบูรณ์แบบ"}
                               </span>
                             </div>
                             <ul className="space-y-1 text-xs text-[#3A7044] font-serif-th pl-7">
@@ -364,7 +364,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                             onClick={handleVerify}
                             className="text-[13px] text-[#8F5C1A] hover:text-[#74490F] font-serif-th hover:underline cursor-pointer font-semibold"
                           >
-                            {isEnglish ? "✦ Re-run calculation" : "✦ รันการคำนวณซ้ำอีกครั้ง"}
+                            {isEnglish ? "Re-run calculation" : "รันการคำนวณซ้ำอีกครั้ง"}
                           </button>
                         </div>
                       </motion.div>
@@ -379,7 +379,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                       className="w-full flex items-center justify-between text-left text-xs text-[#2E211A] hover:text-[#8F5C1A] py-1 cursor-pointer font-serif-th"
                     >
                       <span className="flex items-center gap-1.5">
-                        <span className="text-[#8F5C1A]">✦</span>
+                        
                         <span className="font-bold">
                           {isEnglish
                             ? "Independent Offline Verification Guide"

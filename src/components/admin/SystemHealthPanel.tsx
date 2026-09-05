@@ -93,7 +93,7 @@ function CopyBadge({ text }: { text: string }) {
       title="คลิกเพื่อคัดลอก"
     >
       <span className="font-mono truncate max-w-[180px] sm:max-w-xs">{text}</span>
-      <span className="text-[11px] text-[#635B4E]">{copied ? "✦ คัดลอกแล้ว" : "คัดลอก"}</span>
+      <span className="text-[11px] text-[#635B4E]">{copied ? "คัดลอกแล้ว" : "คัดลอก"}</span>
     </button>
   );
 }
@@ -172,7 +172,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
-              <span className="text-[#A58A5C] text-xl">✦</span>
+              
               <h2 className="font-mystic-gold text-lg sm:text-xl font-bold text-[#29261F] tracking-tight">
                 ศูนย์บัญชาการสถานะระบบคลาวด์ (Cloud & Integrations)
               </h2>
@@ -195,7 +195,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
               disabled={loading}
               className="bg-[#29261F] hover:bg-[#171512] text-white font-medium text-xs shadow-xs border-transparent transition-all"
             >
-              {loading ? "กำลังยิงตรวจสัญญาณ…" : "✦ ยิงตรวจสัญญาณสดทั้งหมด"}
+              {loading ? "กำลังยิงตรวจสัญญาณ…" : "ยิงตรวจสัญญาณสดทั้งหมด"}
             </Button>
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <h3 className="font-semibold text-sm text-[#29261F]">โดเมนหลัก & SSL (Domain & Origin)</h3>
               </div>
               <StatusPill ok={data.services.domain.ok} />
@@ -240,7 +240,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <h3 className="font-semibold text-sm text-[#29261F]">Google OAuth (เข้าสู่ระบบด้วยกูเกิล)</h3>
               </div>
               <StatusPill ok={data.services.google.ok} />
@@ -267,7 +267,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <h3 className="font-semibold text-sm text-[#29261F]">LINE Login (เข้าสู่ระบบด้วยไลน์)</h3>
               </div>
               <StatusPill ok={data.services.line.ok} />
@@ -294,7 +294,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <h3 className="font-semibold text-sm text-[#29261F]">Resend Email (ระบบส่งอีเมลธุรกรรม)</h3>
               </div>
               <StatusPill ok={data.services.email.ok} />
@@ -321,7 +321,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <h3 className="font-semibold text-sm text-[#29261F]">Cloudflare D1 (ฐานข้อมูลหลัก)</h3>
               </div>
               <StatusPill ok={data.services.d1.ok} />
@@ -352,7 +352,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <h3 className="font-semibold text-sm text-[#29261F]">Cloudflare KV (Edge Cache & สถิติ)</h3>
               </div>
               <StatusPill ok={data.services.kv.ok} />
@@ -377,7 +377,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <h3 className="font-semibold text-sm text-[#29261F]">ระบบความปลอดภัย & ถอดรหัส (Security)</h3>
               </div>
               <StatusPill ok={data.services.security.ok} />
@@ -406,7 +406,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[#A58A5C]">✦</span>
+                
                 <h3 className="font-semibold text-sm text-[#29261F]">เครื่องยนต์ AI (AI Engine Overview)</h3>
               </div>
               <StatusPill ok={data.services.ai.ok} />
@@ -431,7 +431,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                     onClick={() => onSwitchTab("ai")}
                     className="text-[#A58A5C] hover:text-[#8E754C] text-xs font-semibold underline underline-offset-2 flex items-center gap-1 cursor-pointer"
                   >
-                    <span>✦ ตรวจสอบเชิงลึกรายโมเดล & วัด Latency ในแท็บสุขภาพ AI →</span>
+                    <span>ตรวจสอบเชิงลึกรายโมเดล & วัด Latency ในแท็บสุขภาพ AI →</span>
                   </button>
                 )}
               </div>
@@ -441,7 +441,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           {/* 9. Cloudflare Free Stack */}
           <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-[#A58A5C]">✦</span>
+              
               <h3 className="font-semibold text-sm text-[#29261F]">Cloudflare Free Stack (ส่วนเสริม)</h3>
             </div>
             <div className="space-y-1.5 text-xs text-[#635B4E]">

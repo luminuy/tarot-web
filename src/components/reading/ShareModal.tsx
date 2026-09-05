@@ -48,10 +48,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   const shareText = isEnglish
-    ? `✨ 1909 Rider-Waite Tarot Reading by SeerTarot
-✦ Spread: ${spreadName}
-✦ Sacred Question: "${question || defaultQuestion}"
-✦ Cards Drawn: ${cards
+    ? `1909 Rider-Waite Tarot Reading by SeerTarot
+Spread: ${spreadName}
+Sacred Question: "${question || defaultQuestion}"
+Cards Drawn: ${cards
         .map((c) => {
           const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
           const posName = c.position.nameEn || c.position.nameTh;
@@ -59,19 +59,19 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           return `${posName}: ${cardName}${c.isReversed ? " (Reversed)" : ""}`;
         })
         .join(", ")}
-✦ Oracle Insight from ${personaName}: "${reading?.summary || defaultSummary}"
-✦ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`
-    : `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot
-✦ ผังการวางไพ่: ${spreadName}
-✦ คำถามอธิษฐาน: "${question || "ภาพรวมดวงชะตา"}"
-✦ ไพ่ที่เปิดได้: ${cards
+Oracle Insight from ${personaName}: "${reading?.summary || defaultSummary}"
+Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`
+    : `คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot
+ผังการวางไพ่: ${spreadName}
+คำถามอธิษฐาน: "${question || "ภาพรวมดวงชะตา"}"
+ไพ่ที่เปิดได้: ${cards
         .map((c) => {
           const card = c.card || (c.cardIndex !== undefined ? cardByIndex(c.cardIndex) : null);
           return `${c.position.nameTh}: ${card?.nameTh || "ไพ่"}${c.isReversed ? " (กลับหัว)" : ""}`;
         })
         .join(", ")}
-✦ คำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary || "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ"}"
-✦ สัมผัสวิหารไพ่ทาโรต์ออนไลน์: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`;
+คำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary || "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ"}"
+สัมผัสวิหารไพ่ทาโรต์ออนไลน์: ${typeof window !== "undefined" ? window.location.origin : "https://seertarot.net"}`;
 
   // Direct HD PNG Image Generation using HTML5 Canvas (returns Promise<Blob>)
   const createReadingImageBlob = async (format: "post" | "story" = "story"): Promise<Blob> => {
@@ -105,7 +105,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         ctx.font = "bold 38px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(
-          isEnglish ? "✦ SEERTAROT · SANCTUARY OF ARCHETYPES ✦" : "✦ SEERTAROT · วิหารพยากรณ์ ✦",
+          isEnglish ? "SEERTAROT · SANCTUARY OF ARCHETYPES" : "SEERTAROT · วิหารพยากรณ์",
           width / 2,
           headerY
         );
@@ -223,7 +223,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           ctx.fillText(
             c.isReversed
               ? (isEnglish ? "Reversed ↷" : "กลับหัว ↷")
-              : (isEnglish ? "Upright ✦" : "หัวตั้ง ✦"),
+              : (isEnglish ? "Upright" : "หัวตั้ง"),
             cx + cardW / 2,
             cardY + cardH + 56
           );
@@ -245,7 +245,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         ctx.font = "bold 26px 'Cinzel', 'Noto Serif Thai', serif, sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(
-          isEnglish ? `✦ Oracle Insight from ${personaName} ✦` : `✦ สารพยากรณ์จากแม่หมอ ${persona.nameTh} ✦`,
+          isEnglish ? `Oracle Insight from ${personaName}` : `สารพยากรณ์จากแม่หมอ ${persona.nameTh}`,
           width / 2,
           summaryY + 50
         );
@@ -347,8 +347,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     // Twitter / X
     if (brand === "twitter") {
       const tweetText = isEnglish
-        ? `✨ 1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nOracle insight from ${personaName}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#tarot #oracle #archetypes #SeerTarot`
-        : `✨ ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
+        ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nOracle insight from ${personaName}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#tarot #oracle #archetypes #SeerTarot`
+        : `ดูดวงไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนายจากแม่หมอ ${persona.nameTh}: "${reading?.summary ? reading.summary.slice(0, 90) + "..." : ""}"\n\n#ไพ่ทาโรต์ #ดูดวง #SeerTarot`;
       openOrRedirect(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`
       );
@@ -358,8 +358,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     // Threads
     if (brand === "threads") {
       const threadsText = isEnglish
-        ? `✨ 1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nInsight: "${reading?.summary || ""}"\n${shareUrl}`
-        : `✨ คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนาย: "${reading?.summary || ""}"\n${shareUrl}`;
+        ? `1909 Rider-Waite Tarot Reading by SeerTarot\nSpread: ${spreadName}\nQuestion: "${question || defaultQuestion}"\nInsight: "${reading?.summary || ""}"\n${shareUrl}`
+        : `คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot\nผัง: ${spreadName}\nคำถาม: "${question || "ภาพรวมดวงชะตา"}"\nคำทำนาย: "${reading?.summary || ""}"\n${shareUrl}`;
       openOrRedirect(`https://www.threads.net/intent/post?text=${encodeURIComponent(threadsText)}`);
       return;
     }
@@ -413,8 +413,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           });
           showToast(
             isEnglish
-              ? `Shared to ${brand === "instagram" ? "Instagram" : "TikTok"} ✨`
-              : `เปิดหน้าแชร์ไปยัง ${brand === "instagram" ? "Instagram" : "TikTok"} แล้ว ✨`
+              ? `Shared to ${brand === "instagram" ? "Instagram" : "TikTok"}`
+              : `เปิดหน้าแชร์ไปยัง ${brand === "instagram" ? "Instagram" : "TikTok"} แล้ว`
           );
           return;
         }
@@ -429,8 +429,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         await navigator.clipboard.writeText(shareText).catch(() => {});
         showToast(
           isEnglish
-            ? `Story card saved (9:16) and caption copied! Ready to post to ${brand === "instagram" ? "Instagram" : "TikTok"} ✦`
-            : `บันทึกการ์ดรูปภาพ (9:16) และคัดลอกแคปชันแล้ว! นำไปโพสต์ใน ${brand === "instagram" ? "Instagram" : "TikTok"} ได้ทันที ✦`
+            ? `Story card saved (9:16) and caption copied! Ready to post to ${brand === "instagram" ? "Instagram" : "TikTok"}`
+            : `บันทึกการ์ดรูปภาพ (9:16) และคัดลอกแคปชันแล้ว! นำไปโพสต์ใน ${brand === "instagram" ? "Instagram" : "TikTok"} ได้ทันที`
         );
       } catch (err) {
         if (!isUserAbort(err)) {
@@ -468,7 +468,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           {/* Modal Header */}
           <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/30">
             <div className="flex items-center gap-2">
-              <span className="text-[#8F5C1A] text-sm">✦</span>
+              
               <div>
                 <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
                   {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
@@ -498,7 +498,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               exit={{ opacity: 0, y: -6 }}
               className="p-2.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-center text-xs text-[#2E211A] font-serif-th "
             >
-              <span className="text-[#8F5C1A]">✨ </span>
+              
               {toastMessage}
             </motion.div>
           )}
@@ -509,10 +509,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             className="w-full rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-6 space-y-4 relative overflow-hidden text-center"
           >
             {/* Ornate Corner Accents */}
-            <span className="absolute top-2.5 left-3 text-[#8F5C1A] text-xs select-none">✦</span>
-            <span className="absolute top-2.5 right-3 text-[#8F5C1A] text-xs select-none">✦</span>
-            <span className="absolute bottom-2.5 left-3 text-[#8F5C1A] text-xs select-none">✦</span>
-            <span className="absolute bottom-2.5 right-3 text-[#8F5C1A] text-xs select-none">✦</span>
+            
+            
+            
+            
 
             {/* Background Glow Lights */}
 
@@ -586,7 +586,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                       >
                         {c.isReversed
                           ? (isEnglish ? "Reversed ↷" : "กลับหัว ↷")
-                          : (isEnglish ? "Upright ✦" : "หัวตั้ง ✦")}
+                          : (isEnglish ? "Upright" : "หัวตั้ง")}
                       </span>
                     </div>
                   </div>
@@ -599,8 +599,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#D9C8AC]/30">
                 <span className="text-[13px] sm:text-[13px] text-[#8F5C1A] font-serif-th tracking-wider uppercase block font-bold">
                   {isEnglish
-                    ? `✦ Oracle Insight from ${personaName} ✦`
-                    : `✦ สารพยากรณ์จากแม่หมอ ${persona.nameTh} ✦`}
+                    ? `Oracle Insight from ${personaName}`
+                    : `สารพยากรณ์จากแม่หมอ ${persona.nameTh}`}
                 </span>
                 <p className="font-serif-th text-xs sm:text-[13px] text-[#2E211A] leading-relaxed italic">
                   “{reading.summary}”

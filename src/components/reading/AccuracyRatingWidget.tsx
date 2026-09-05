@@ -11,11 +11,11 @@ interface AccuracyRatingWidgetProps {
 }
 
 const RATING_OPTIONS = [
-  { score: 1, labelTh: "ไม่ตรง", labelEn: "Not resonant", symbol: "✦" },
-  { score: 2, labelTh: "ตรงบ้าง", labelEn: "Somewhat", symbol: "✦✦" },
-  { score: 3, labelTh: "ตรงพอใช้", labelEn: "Fair", symbol: "✦✦✦" },
-  { score: 4, labelTh: "ตรงมาก", labelEn: "Very accurate", symbol: "✦✦✦✦" },
-  { score: 5, labelTh: "ตรงเป๊ะ!", labelEn: "Spot on!", symbol: "✦✦✦✦✦" },
+  { score: 1, labelTh: "ไม่ตรง", labelEn: "Not resonant", symbol: "1" },
+  { score: 2, labelTh: "ตรงบ้าง", labelEn: "Somewhat", symbol: "2" },
+  { score: 3, labelTh: "ตรงพอใช้", labelEn: "Fair", symbol: "3" },
+  { score: 4, labelTh: "ตรงมาก", labelEn: "Very accurate", symbol: "4" },
+  { score: 5, labelTh: "ตรงเป๊ะ!", labelEn: "Spot on!", symbol: "5" },
 ];
 
 /** ประเมินความแม่นยำหลังอ่านไพ่ — ใช้เป็น A/B data สำหรับปรับ prompt */
@@ -83,7 +83,7 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
           transition={SPRING.snappy}
           className="flex items-center justify-center gap-2 py-3 text-xs text-[#2E211A] font-serif-th bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg px-4 my-2 "
         >
-          <span className="text-[#8F5C1A]">✨</span>
+          
           <span>
             {isEnglish ? "Thank you for your resonance feedback! " : "ขอบคุณสำหรับการให้คะแนน! "}
             {selectedScore !== null && (
@@ -102,7 +102,7 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
           className="flex flex-col items-center gap-2.5 py-3 my-2"
         >
           <span className="text-xs text-[#2E211A] font-serif-th font-semibold flex items-center gap-1.5">
-            <span className="text-[#8F5C1A]">✦</span>
+            
             <span>
               {isEnglish
                 ? "Did this reading resonate with your situation?"

@@ -166,7 +166,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
               htmlFor="altar-nickname"
               className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
             >
-              <span className="text-[#8F5C1A]">✦</span> {isEnglish ? "1. Your Name or Pseudonym" : "1. ชื่อเล่นของคุณ"}{" "}
+              {isEnglish ? "1. Your Name or Pseudonym" : "1. ชื่อเล่นของคุณ"}
               <span className="whitespace-nowrap text-[#A6392C] font-mono text-xs">{isEnglish ? "(Required *)" : "(จำเป็น *)"}</span>
             </label>
             <span className="text-[13px] text-[#635B4E] font-mono">{nickname.length}/24</span>
@@ -193,7 +193,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             htmlFor="altar-situation"
             className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
           >
-            <span className="text-[#8F5C1A]">✦</span> {isEnglish ? "2. Brief Context or Situation" : "2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ"}{" "}
+            {isEnglish ? "2. Brief Context or Situation" : "2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ"}
             <span className="whitespace-nowrap text-[13px] text-[#635B4E] font-normal">{isEnglish ? "(Helps ground the reading)" : "(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)"}</span>
           </label>
           <input
@@ -211,7 +211,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
       {/* Quick Situation Selector Chips */}
       <div className="space-y-2">
         <span className="text-[13px] text-[#635B4E] font-serif-th">
-          {isEnglish ? "✦ Or tap a quick situation:" : "✦ หรือแตะเลือกเรื่องราวด่วน:"}
+          {isEnglish ? "Or tap a quick situation:" : "หรือแตะเลือกเรื่องราวด่วน:"}
         </span>
         <div className="flex flex-wrap gap-2">
           {(isEnglish
@@ -251,7 +251,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             htmlFor="altar-question"
             className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
           >
-            <span className="text-[#8F5C1A]">✦</span> {isEnglish ? "3. The Core Question on Your Heart" : "3. คำถามที่คุณอยากรู้มากที่สุด"}{" "}
+            {isEnglish ? "3. The Core Question on Your Heart" : "3. คำถามที่คุณอยากรู้มากที่สุด"}
             <span className="whitespace-nowrap text-[#A6392C] font-mono text-xs">{isEnglish ? "(Required *)" : "(จำเป็น *)"}</span>
           </label>
           <span className="text-[13px] text-[#635B4E] font-mono">{question.length}/300</span>
@@ -281,7 +281,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
       {/* 4 Authentic 1909 Rider-Waite Cards for Quick Question Selection */}
       <div className="space-y-3 pt-2 border-t border-[#D9C8AC]/30">
         <label className="text-xs sm:text-sm font-serif-th font-bold text-[#2E211A] tracking-wide flex items-center gap-2 [text-wrap:balance]">
-          <span className="text-[#8F5C1A]">✦</span>{" "}
+          
           {isEnglish
             ? "Or select a preset question (tap to apply):"
             : "หรือเลือกหัวข้อคำถามสำเร็จรูป (แตะเพื่อใช้งานทันที)"}

@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
             priority
           />
         </div>
-        <h1 className="text-center text-lg font-bold text-[#29261F]">✦ แผงแอดมิน SeerTarot</h1>
+        <h1 className="text-center text-lg font-bold text-[#29261F]">แผงแอดมิน SeerTarot</h1>
         <p className="mt-1 text-center text-xs text-[#635B4E]">
           ใส่รหัสผ่านผู้ดูแลระบบเพื่อเข้าจัดการ
         </p>

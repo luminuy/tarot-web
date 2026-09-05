@@ -47,7 +47,7 @@ export function EntitlementStatusCard() {
   return (
     <div className="space-y-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6">
       <div className="flex items-center gap-2">
-        <span className="text-[#8F5C1A]">✦</span>
+        
         <h2 className="font-serif-th text-base font-bold font-mystic-gold sm:text-lg">
           {isEn ? "My Reading Entitlement" : "สิทธิ์การใช้งานของฉัน"}
         </h2>
@@ -115,7 +115,7 @@ export function EntitlementStatusCard() {
             onClick={() => setBuyOpen(true)}
             className="min-h-[40px] rounded-full border border-[#D9C8AC] bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2 font-serif-th text-xs font-semibold text-[#FFFFFF] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
-            <span className="mr-1.5 text-[#FFFFFF]">✦</span>
+            
             {isEn ? "Get Reading Passes" : "เติมรอบเปิดไพ่"}
           </button>
         )}

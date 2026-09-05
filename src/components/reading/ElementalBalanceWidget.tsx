@@ -26,10 +26,10 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
 
   const dominantPill = isEnglish
     ? breakdown.dominantElement === "สมดุล"
-      ? "✦ Balanced Harmony"
+      ? "Balanced Harmony"
       : `${breakdown.dominantElement === "ไฟ" ? "Fire" : breakdown.dominantElement === "น้ำ" ? "Water" : breakdown.dominantElement === "ลม" ? "Air" : "Earth"} Dominant`
     : breakdown.dominantElement === "สมดุล"
-      ? "✦ สมดุลกลมกลืน"
+      ? "สมดุลกลมกลืน"
       : `ธาตุ${breakdown.dominantElement}เด่น`;
 
   return (
@@ -37,7 +37,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
       {/* Header */}
       <div className="mb-4 flex items-center justify-between border-b border-[#D9C8AC]/30 pb-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-[#8F5C1A]">✦</span>
+          
           <div>
             <h4 className="font-serif-th text-sm font-bold text-[#2E211A] sm:text-base">
               {isEnglish ? "Elemental Balance & Dignities" : "สมดุลพลังงาน 4 ธาตุในผัง (Elemental Dignities)"}
@@ -58,7 +58,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-bold text-[#2E211A]">
-              <span className="text-xs text-[#8F5C1A]">✦</span>{" "}
+              <span className="text-xs text-[#8F5C1A]">•</span> 
               {isEnglish ? "Fire (Passion / Action / Creative Will)" : "ธาตุไฟ (แพชชัน / งาน / แรงผลักดัน)"}
             </span>
             <span className="font-mono font-bold text-[#2E211A]">{breakdown.fire}%</span>
@@ -78,7 +78,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-bold text-[#2E211A]">
-              <span className="text-xs text-[#8F5C1A]">✦</span>{" "}
+              <span className="text-xs text-[#8F5C1A]">•</span> 
               {isEnglish ? "Water (Emotion / Intuition / Depth)" : "ธาตุน้ำ (อารมณ์ / ความรู้สึก / สัญชาตญาณ)"}
             </span>
             <span className="font-mono font-bold text-[#2E211A]">{breakdown.water}%</span>
@@ -98,7 +98,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-bold text-[#2E211A]">
-              <span className="text-xs text-[#8F5C1A]">✦</span>{" "}
+              <span className="text-xs text-[#8F5C1A]">•</span> 
               {isEnglish ? "Air (Logic / Intellect / Truth)" : "ธาตุลม (ตรรกะ / ความคิด / การตัดสินใจ)"}
             </span>
             <span className="font-mono font-bold text-[#2E211A]">{breakdown.air}%</span>
@@ -118,7 +118,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
         <div className="space-y-1">
           <div className="flex justify-between text-xs">
             <span className="flex items-center gap-1.5 font-bold text-[#2E211A]">
-              <span className="text-xs text-[#8F5C1A]">✦</span>{" "}
+              <span className="text-xs text-[#8F5C1A]">•</span> 
               {isEnglish ? "Earth (Stability / Wealth / Manifestation)" : "ธาตุดิน (การเงิน / ทรัพย์สิน / ความมั่นคง)"}
             </span>
             <span className="font-mono font-bold text-[#2E211A]">{breakdown.earth}%</span>
@@ -138,13 +138,13 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
       {/* Dominant & Balancing Advice */}
       <div className="mt-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] ">
         <p className="font-serif-th font-bold text-[#8F5C1A]">
-          ✦ {isEnglish && breakdown.dominantTitleEn ? breakdown.dominantTitleEn : breakdown.dominantTitleTh}:
+          {isEnglish && breakdown.dominantTitleEn ? breakdown.dominantTitleEn : breakdown.dominantTitleTh}:
         </p>
         <p className="mt-1 text-[#2E211A] leading-relaxed font-serif-th">
           {isEnglish && breakdown.dominantInsightEn ? breakdown.dominantInsightEn : breakdown.dominantInsightTh}
         </p>
         <p className="mt-2 text-[#635B4E] font-serif-th">
-          <span className="text-[#8F5C1A]">✨</span>{" "}
+          
           <span className="font-bold text-[#2E211A]">
             {isEnglish ? "Harmonizing Key:" : "วิธีปรับสมดุล:"}
           </span>{" "}

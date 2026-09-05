@@ -321,7 +321,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       if (isVerified) {
         setToast({
           type: "success",
-          title: "ยืนยันอีเมลสำเร็จ ✦",
+          title: "ยืนยันอีเมลสำเร็จ",
           subtitle: `รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้งเรียบร้อยแล้ว`,
           duration: 4500,
         });
@@ -346,7 +346,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
                 setToast({
                   type: "welcome",
-                  title: "ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์ ✦",
+                  title: "ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์",
                   subtitle: `คุณได้รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้งเรียบร้อยแล้ว`,
                   duration: 4800,
                 });
@@ -354,7 +354,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 // ผู้ใช้เดิมเข้าสู่ระบบ (Returning User Login): ไม่แสดงข้อความสิทธิ์ซ้ำซาก ทักทายกระชับ 2.8 วินาทีแล้วจางหาย
                 setToast({
                   type: "success",
-                  title: "เข้าสู่วิหารเรียบร้อย ✦",
+                  title: "เข้าสู่วิหารเรียบร้อย",
                   subtitle: `ยินดีต้อนรับกลับสู่ห้วงชะตา คุณ ${currentUser.name || "ผู้แสวงหาคำตอบ"}`,
                   duration: 2800,
                 });
@@ -363,7 +363,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               import("@/lib/utils/history").then((m) => {
                 m.syncAnonymousHistoryToServer().then(({ merged }) => {
                   if (merged > 0) {
-                    console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ ✦`);
+                    console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ`);
                   }
                 });
               });
@@ -373,7 +373,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       } else if (isPwReset) {
         setToast({
           type: "success",
-          title: "ตั้งรหัสผ่านใหม่เรียบร้อย ✦",
+          title: "ตั้งรหัสผ่านใหม่เรียบร้อย",
           subtitle: "เข้าสู่วิหารศักดิ์สิทธิ์ได้ทันที",
           duration: 3500,
         });
@@ -406,7 +406,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           if (isVerified || isPwReset) {
             m.syncAnonymousHistoryToServer().then(({ merged }) => {
               if (merged > 0) {
-                console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ ✦`);
+                console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ`);
               }
             });
           } else {
@@ -1083,7 +1083,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 onClick={handleReset}
                 className="text-xs text-[#F3F0EA] font-bold bg-[#29261F] hover:bg-[#A58A5C] px-4 py-1.5 sm:py-2 rounded-full transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
               >
-                <span>✦</span> {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
+                {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
               </button>
             )}
           </>
@@ -1110,7 +1110,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 }}
                 className="px-4 py-1.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
               >
-                <span>✦</span> {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
+                {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
               </button>
             )}
           </div>
@@ -1149,7 +1149,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       : "สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256"}
                   </p>
                   <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
-                    ✦ {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
+                    {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
                   </h2>
                 </div>
 
@@ -1277,7 +1277,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       : "bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] active:scale-95 cursor-pointer"
                   }`}
                 >
-                  <span aria-hidden="true">✦</span>
+                  
                   {loading ? (
                     <span className="truncate">{isEnglish ? "Loading..." : "กำลังโหลด..."}</span>
                   ) : (
@@ -1445,7 +1445,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               {/* Bottom Quick Luxury Actions Deck */}
               <div className="p-5 sm:p-6 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-wrap items-center justify-between gap-4 shadow-xs">
                 <div className="flex items-center gap-2 text-xs text-[#635B4E] font-serif-th">
-                  <span className="text-[#A58A5C]">✦</span>
+                  
                   <span>{isEnglish ? "Save or share this tarot reading for future reference" : "บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้"}</span>
                 </div>
 
@@ -1458,7 +1458,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     }}
                     className="py-3 px-5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] font-serif-th text-xs transition-all cursor-pointer flex items-center gap-2 shadow-xs"
                   >
-                    <span className="text-[#A58A5C]">✨</span> {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
+                    {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
                   </button>
 
                   <button
@@ -1466,7 +1466,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     onClick={handleReset}
                     className="py-3 px-6 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
                   >
-                    <span>✦</span> {isEnglish ? "Start Another Reading" : "ดูดวงเรื่องอื่นต่อ"}
+                    {isEnglish ? "Start Another Reading" : "ดูดวงเรื่องอื่นต่อ"}
                   </button>
                 </div>
               </div>

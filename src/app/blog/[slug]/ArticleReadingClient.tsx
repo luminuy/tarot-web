@@ -70,7 +70,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       <header className="space-y-4 text-center sm:text-left">
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs font-mono">
           <span className="px-3 py-1 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#A58A5C] font-bold">
-            ✦ {articleCat}
+            {articleCat}
           </span>
           <span className="text-[#635B4E]">
             {isEnglish ? `⏱ ${readTimeFormatted}` : `⏱ เวลาอ่าน ${article.readTime}`}
@@ -94,7 +94,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {article.toc && article.toc.length > 0 && (
         <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 space-y-3 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
           <div className="flex items-center gap-2 text-xs font-serif-th font-bold text-[#29261F]">
-            <span>✦</span>{" "}
+            
             {isEnglish
               ? "Table of Contents (Wisdom Codex)"
               : "สารบัญคัมภีร์ความรู้ (Table of Contents)"}
@@ -117,7 +117,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
           <div className="space-y-1 text-center sm:text-left">
             <div className="text-[13px] font-mono text-[#A58A5C] font-bold">
-              {isEnglish ? "✦ Explore this card in the 78-Card Encyclopedia" : "✦ สำรวจไพ่ใบนี้ในสารานุกรม 78 ใบ"}
+              {isEnglish ? "Explore this card in the 78-Card Encyclopedia" : "สำรวจไพ่ใบนี้ในสารานุกรม 78 ใบ"}
             </div>
             <div className="font-serif-th font-bold text-base text-[#29261F]">
               {isEnglish
@@ -162,7 +162,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {article.faqs && article.faqs.length > 0 && (
         <section className="space-y-4 pt-6 border-t border-[#D5CEC2]/40">
           <h2 className="flex items-center gap-2 text-sm sm:text-base font-serif-th font-bold text-[#29261F]">
-            <span aria-hidden="true" className="text-[#A58A5C]">✦</span>{" "}
+            
             {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย (FAQ)"}
           </h2>
           {/* ใช้ <details> ของเบราว์เซอร์ เพื่อให้ "คำตอบ" อยู่ใน HTML ตั้งแต่ฝั่งเซิร์ฟเวอร์เสมอ
@@ -175,7 +175,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                 className="group rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] overflow-hidden transition-all shadow-xs"
               >
                 <summary className="w-full flex items-center justify-between p-4 text-left font-serif-th text-xs sm:text-sm font-semibold text-[#29261F] hover:text-[#A58A5C] transition-colors gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                  <span>✦ {faq.question}</span>
+                  <span>{faq.question}</span>
                   <span
                     aria-hidden="true"
                     className="text-[#A58A5C] font-mono text-sm font-bold transition-transform duration-300 group-open:rotate-45"
@@ -195,7 +195,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {/* High-Impact Interactive CTA Box */}
       <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-8 text-center space-y-4 relative overflow-hidden shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#EAE7E0] text-[13px] text-[#A58A5C] font-mono font-bold">
-          <span>✦</span> {isEnglish ? "Interactive Provably-Fair Divination" : "Interactive Provably-Fair Reading"} <span>✦</span>
+          {isEnglish ? "Interactive Provably-Fair Divination" : "Interactive Provably-Fair Reading"}
         </div>
         <h2 className="font-serif-th text-xl sm:text-3xl font-bold text-[#29261F]">
           {isEnglish
@@ -212,7 +212,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             href="/"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold text-sm hover:scale-[1.02] transition-all font-serif-th cursor-pointer shadow-sm"
           >
-            <span>{isEnglish ? "✦ Begin Free Tarot Reading Now" : "✦ เปิดไพ่ทำนายดวงชะตาฟรีทันที"}</span>
+            <span>{isEnglish ? "Begin Free Tarot Reading Now" : "เปิดไพ่ทำนายดวงชะตาฟรีทันที"}</span>
             <span>→</span>
           </Link>
         </div>
@@ -226,7 +226,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             onClick={handleCopyLink}
             className="px-3.5 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
-            <span>✦</span>
+            
             <span>
               {copied
                 ? isEnglish
@@ -249,7 +249,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {relatedArticles.length > 0 && (
         <section className="space-y-4 pt-4">
           <h2 className="font-serif-th text-lg sm:text-xl font-bold text-[#29261F]">
-            {isEnglish ? "✦ Resonant & Related Articles" : "✦ คัมภีร์บทความที่เกี่ยวข้อง"}
+            {isEnglish ? "Resonant & Related Articles" : "คัมภีร์บทความที่เกี่ยวข้อง"}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {relatedArticles.map((rel) => {

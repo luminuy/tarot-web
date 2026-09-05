@@ -310,7 +310,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   mode === "signin" ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
                 }`}
               >
-                <span>✦</span>
+                
                 <span>{isEn ? "Sign In" : "เข้าสู่ระบบ"}</span>
               </button>
 
@@ -321,7 +321,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   mode === "signup" ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
                 }`}
               >
-                <span>✨</span>
+                
                 <span>{isEn ? "Register" : "สมัครสมาชิก"}</span>
               </button>
             </div>
@@ -484,7 +484,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>{isEn ? "Processing…" : "กำลังดำเนินการ…"}</span>
               ) : (
                 <>
-                  <span className="text-sm">✦</span>
+                  
                   <span>
                     {mode === "signin" && (isEn ? "Sign In with Email" : "เข้าสู่ระบบด้วยอีเมล")}
                     {mode === "signup" && (isEn ? "Confirm Registration" : "ยืนยันการสมัครสมาชิก")}

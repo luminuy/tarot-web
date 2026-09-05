@@ -28,10 +28,10 @@ interface Health {
 }
 
 const VERDICT_LABEL: Record<Health["verdict"], string> = {
-  healthy: "✦ ปกติดี — แม่หมอตอบด้วย AI จริงได้",
-  no_api_key: "✦ ยังไม่ได้ตั้งคีย์ AI",
-  ai_daily_cap: "✦ ใช้ครบเพดานรายวันแล้ว",
-  gemini_unavailable: "✦ มีคีย์ แต่เรียก Gemini ไม่สำเร็จ",
+  healthy: "ปกติดี — แม่หมอตอบด้วย AI จริงได้",
+  no_api_key: "ยังไม่ได้ตั้งคีย์ AI",
+  ai_daily_cap: "ใช้ครบเพดานรายวันแล้ว",
+  gemini_unavailable: "มีคีย์ แต่เรียก Gemini ไม่สำเร็จ",
 };
 
 interface QualityStats {
@@ -97,7 +97,7 @@ export default function AiHealthPanel() {
           disabled={loading}
           className="bg-[#29261F] hover:bg-[#171512] text-white font-medium text-xs shadow-xs"
         >
-          {loading ? "กำลังตรวจ…" : "✦ ตรวจอีกครั้ง"}
+          {loading ? "กำลังตรวจ…" : "ตรวจอีกครั้ง"}
         </Button>
       </div>
 
@@ -160,7 +160,7 @@ export default function AiHealthPanel() {
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E8E2D8] pb-3">
               <div>
                 <h3 className="text-sm font-bold text-[#29261F] flex items-center gap-1.5">
-                  <span className="text-[#A58A5C]">✦</span> สถิติคุณภาพและการตอบสนอง AI (Reading Quality Telemetry)
+                  สถิติคุณภาพและการตอบสนอง AI (Reading Quality Telemetry)
                 </h3>
                 <p className="mt-0.5 text-xs text-[#635B4E]">
                   ประมวลผลจากตาราง reading_quality: อัตราความแม่นยำจริง, เวลาหน่วง, อัตราสลับโมเดล และเทียบตามเวอร์ชัน Prompt

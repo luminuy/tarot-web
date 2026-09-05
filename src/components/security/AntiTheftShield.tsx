@@ -24,7 +24,7 @@ export function AntiTheftShield() {
         "background: #4A0E4E; color: #FFF; font-weight: bold; padding: 4px 8px; border-radius: 0 4px 4px 0; border: 1px solid #D4AF37;"
       );
       console.warn(
-        "%c✦ สงวนลิขสิทธิ์ (c) 2026 SeerTarot & Core Contributors\n✦ ภายใต้สัญญาอนุญาต PolyForm Noncommercial 1.0.0 & CC BY-NC-ND 4.0\n❌ ห้ามคัดลอก ดัดแปลง ดูดข้อมูล (Scraping) หรือนำไปใช้ในเชิงพาณิชย์โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร",
+        "%c• สงวนลิขสิทธิ์ (c) 2026 SeerTarot & Core Contributors\n• ภายใต้สัญญาอนุญาต PolyForm Noncommercial 1.0.0 & CC BY-NC-ND 4.0\n❌ ห้ามคัดลอก ดัดแปลง ดูดข้อมูล (Scraping) หรือนำไปใช้ในเชิงพาณิชย์โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร",
         "color: #D4AF37; font-size: 11px; line-height: 1.6;"
       );
     }
@@ -40,7 +40,7 @@ export function AntiTheftShield() {
       const isReadingContainer = anchor?.closest("[data-reading-result]") || anchor?.closest(".prose-oracle");
       if (!isReadingContainer) return;
 
-      const watermark = `\n\n✦ คำทำนายพยากรณ์โดย: ${SITE_NAME_TH}\n✦ เว็บไซต์: ${SITE_ORIGIN}`;
+      const watermark = `\n\nคำทำนายพยากรณ์โดย: ${SITE_NAME_TH}\nเว็บไซต์: ${SITE_ORIGIN}`;
       if (e.clipboardData) {
         e.preventDefault();
         e.clipboardData.setData("text/plain", text + watermark);

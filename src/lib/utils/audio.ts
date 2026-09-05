@@ -153,7 +153,7 @@ class MysticAudioEngine {
     }
   }
 
-  /** ✨ เสียงแตะสัมผัสเบาๆ สไตล์ Apple Haptic สำหรับเมนูและทริกเกอร์ (15ms Zero-Lag Tap — Non-blocking decoupled) */
+  /** เสียงแตะสัมผัสเบาๆ สไตล์ Apple Haptic สำหรับเมนูและทริกเกอร์ (15ms Zero-Lag Tap — Non-blocking decoupled) */
   public playMenuTapSound() {
     if (!this.soundEnabled) return;
     // Decouple audio graph initialization to prevent blocking the UI animation frame

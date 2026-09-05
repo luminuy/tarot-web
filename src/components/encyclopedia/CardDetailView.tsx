@@ -26,28 +26,28 @@ const ELEMENT_CONFIG: Record<string, { border: string; glow: string; text: strin
     glow: "rgba(143, 92, 26, 0.12)",
     text: "text-[#8F5C1A]",
     bg: "bg-[#8F5C1A]/15",
-    icon: "✦",
+    icon: "•",
   },
   น้ำ: {
     border: "border-[#6F5B4A]/40",
     glow: "rgba(143, 92, 26, 0.12)",
     text: "text-[#635B4E]",
     bg: "bg-[#6F5B4A]/15",
-    icon: "✦",
+    icon: "•",
   },
   ลม: {
     border: "border-[#6F5B4A]/40",
     glow: "rgba(143, 92, 26, 0.12)",
     text: "text-[#635B4E]",
     bg: "bg-[#6F5B4A]/15",
-    icon: "✦",
+    icon: "•",
   },
   ดิน: {
     border: "border-[#3A7044]/40",
     glow: "rgba(143, 92, 26, 0.12)",
     text: "text-[#3A7044]",
     bg: "bg-[#3A7044]/15",
-    icon: "✦",
+    icon: "•",
   },
 };
 
@@ -86,11 +86,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   const elem = ELEMENT_CONFIG[card.element] || ELEMENT_CONFIG["ไฟ"];
 
   const categories = [
-    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life Overview & Archetypal Journey", icon: "✦", color: "#8F5C1A" },
-    { id: "love" as const, nameTh: "ความรักและคนในใจ", nameEn: "Love & Relationships", icon: "✦", color: "#A6392C" },
-    { id: "work" as const, nameTh: "การงานและโครงการ", nameEn: "Career & Ambitions", icon: "✦", color: "#6F5B4A" },
+    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life Overview & Archetypal Journey", icon: "•", color: "#8F5C1A" },
+    { id: "love" as const, nameTh: "ความรักและคนในใจ", nameEn: "Love & Relationships", icon: "•", color: "#A6392C" },
+    { id: "work" as const, nameTh: "การงานและโครงการ", nameEn: "Career & Ambitions", icon: "•", color: "#6F5B4A" },
     { id: "money" as const, nameTh: "การเงินและโชคลาภ", nameEn: "Finances & Abundance", icon: "◆", color: "#3A7044" },
-    { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", nameEn: "Psychology & Inner Growth", icon: "✧", color: "#6F5B4A" },
+    { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", nameEn: "Psychology & Inner Growth", icon: "•", color: "#6F5B4A" },
   ];
 
   return (
@@ -155,7 +155,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                 isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
               }`}
             >
-              <span>✦</span> {isEnglish ? "Upright (Standard)" : "ไพ่หัวตั้ง (ปกติ)"}
+              {isEnglish ? "Upright (Standard)" : "ไพ่หัวตั้ง (ปกติ)"}
             </button>
             <button
               type="button"
@@ -175,7 +175,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             </span>
             {card.astrology && (
               <span className="px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F]">
-                ✦ {isEnglish && card.astrologyEn ? card.astrologyEn : card.astrology}
+                {isEnglish && card.astrologyEn ? card.astrologyEn : card.astrology}
               </span>
             )}
             {card.yesNo && (
@@ -215,7 +215,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* Keywords Ribbon */}
           <div className="space-y-2">
             <h2 className="text-[13px] font-mono text-[#A58A5C] uppercase tracking-wider flex items-center gap-1.5 font-bold">
-              <span>✦</span> {isEnglish ? `Symbols & Keywords (${isUpright ? "Upright" : "Reversed"})` : `สัญลักษณ์และคีย์เวิร์ด (${isUpright ? "ไพ่หัวตั้ง" : "ไพ่หัวกลับ"})`}
+              {isEnglish ? `Symbols & Keywords (${isUpright ? "Upright" : "Reversed"})` : `สัญลักษณ์และคีย์เวิร์ด (${isUpright ? "ไพ่หัวตั้ง" : "ไพ่หัวกลับ"})`}
             </h2>
             <div className="flex flex-wrap gap-2">
               {currentKeywords.map((kw, i) => (
@@ -223,7 +223,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   key={i}
                   className="text-xs px-3 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] font-serif-th font-semibold shadow-xs"
                 >
-                  ✦ {kw}
+                  {kw}
                 </span>
               ))}
             </div>
@@ -232,7 +232,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* 5 Categorized Meanings List */}
           <div className="space-y-3.5 pt-2">
             <h2 className="font-serif-th text-base font-bold text-[#29261F] flex items-center gap-2">
-              <span className="text-[#A58A5C]">✦</span> {isEnglish ? `5 Dimensions of Meaning (${isUpright ? "Upright" : "Reversed"})` : `ความหมายและการทำนาย 5 ด้าน (${isUpright ? "หัวตั้ง" : "หัวกลับ"})`}
+              {isEnglish ? `5 Dimensions of Meaning (${isUpright ? "Upright" : "Reversed"})` : `ความหมายและการทำนาย 5 ด้าน (${isUpright ? "หัวตั้ง" : "หัวกลับ"})`}
             </h2>
 
             {/* initial={false} — ความหมายไพ่ 5 ด้านคือเนื้อหาหลักของหน้าไพ่ทั้ง 78 ใบ
@@ -277,7 +277,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               href="/"
               className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition-all flex items-center gap-2 shadow-sm"
             >
-              <span>✦</span> {isEnglish ? "Begin Tarot Reading" : "ไปหน้าดูดวงหลัก"}
+              {isEnglish ? "Begin Tarot Reading" : "ไปหน้าดูดวงหลัก"}
             </Link>
           </div>
         </div>

@@ -16,7 +16,7 @@ export function AccountClient() {
         <div className="text-center space-y-3 sm:space-y-4 py-4 sm:py-6">
           <div>
             <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[13px] text-[#A58A5C] font-bold shadow-xs">
-              <span>✦</span> Sacred Sanctuary Profile <span>✦</span>
+              Sacred Sanctuary Profile
             </span>
           </div>
           <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-[#29261F] leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
@@ -38,7 +38,7 @@ export function AccountClient() {
         {/* Privacy & PDPA Control Card */}
         <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 space-y-4 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
           <div className="flex items-center gap-2">
-            <span className="text-[#A58A5C]">✦</span>
+            
             <h2 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F]">
               {isEn ? "Privacy & Data Sovereign Rights" : "ความเป็นส่วนตัวและการจัดเก็บข้อมูล"}
             </h2>

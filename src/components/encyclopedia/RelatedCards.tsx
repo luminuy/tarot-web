@@ -21,7 +21,7 @@ export function RelatedCards({ cardId }: { cardId: string }) {
   return (
     <section className="pt-8 border-t border-[#D5CEC2]/40">
       <h2 className="font-serif-th text-sm font-bold text-[#8F5C1A] mb-4">
-        {isEnglish ? "✦ Resonant & Harmonious Cards" : "✦ ไพ่ที่พลังงานใกล้เคียง"}
+        {isEnglish ? "Resonant & Harmonious Cards" : "ไพ่ที่พลังงานใกล้เคียง"}
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {cards.map((c) => (

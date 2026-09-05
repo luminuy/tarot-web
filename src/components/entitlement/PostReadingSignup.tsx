@@ -110,7 +110,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
         }}
         className="mt-4 w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
-        <span className="mr-1.5">✦</span>{" "}
+        
         {isEn ? "Create Free Account (Takes under a minute)" : "สมัครสมาชิกฟรี (ใช้เวลาไม่ถึงนาที)"}
       </button>
 

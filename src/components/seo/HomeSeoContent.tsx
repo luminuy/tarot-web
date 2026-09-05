@@ -214,7 +214,7 @@ export function HomeSeoContent() {
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
             <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
-              {isEnglish ? "✦ THE SACRED ORACLE RITUAL ✦" : "✦ ขั้นตอนพิธีกรรมพยากรณ์ ✦"}
+              {isEnglish ? "THE SACRED ORACLE RITUAL" : "ขั้นตอนพิธีกรรมพยากรณ์"}
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
           </div>
@@ -254,7 +254,7 @@ export function HomeSeoContent() {
                 {/* Step Header */}
                 <div className="flex items-center justify-between pb-2.5 border-b border-[#D9C8AC]/40">
                   <span className="text-xs font-serif-th font-bold tracking-wider text-[#8F5C1A] uppercase flex items-center gap-1.5">
-                    <span>✦</span> {isEnglish ? `Step ${step.stepNum}` : `ขั้นที่ ${step.stepNum}`}
+                    {isEnglish ? `Step ${step.stepNum}` : `ขั้นที่ ${step.stepNum}`}
                   </span>
                   <span className="text-[11px] font-serif-th font-medium text-[#635B4E] px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/60 shadow-2xs">
                     {step.phase}
@@ -294,10 +294,10 @@ export function HomeSeoContent() {
 
               {/* Delicate Gold Corner Accents on Hover */}
               <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                <span className="absolute top-2 left-2 text-[10px] text-[#8F5C1A]">✦</span>
-                <span className="absolute top-2 right-2 text-[10px] text-[#8F5C1A]">✦</span>
-                <span className="absolute bottom-2 left-2 text-[10px] text-[#8F5C1A]">✦</span>
-                <span className="absolute bottom-2 right-2 text-[10px] text-[#8F5C1A]">✦</span>
+                
+                
+                
+                
               </div>
             </div>
           ))}
@@ -308,7 +308,7 @@ export function HomeSeoContent() {
       <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
           <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
-          <span className="text-xs text-[#8F5C1A]/60">✦</span>
+          
           <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
@@ -322,7 +322,7 @@ export function HomeSeoContent() {
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
             <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
-              ✦ HERITAGE &amp; INTEGRITY ✦
+              HERITAGE &amp; INTEGRITY
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
           </div>
@@ -364,7 +364,7 @@ export function HomeSeoContent() {
 
               <div className="text-center space-y-1">
                 <span className="text-xs font-serif-th font-bold text-[#8F5C1A] tracking-wider uppercase block">
-                  {isEnglish ? "✦ Pillar I ✦" : "✦ เสาเอกที่ ๑ ✦"}
+                  {isEnglish ? "Pillar I" : "เสาเอกที่ ๑"}
                 </span>
                 <h3 className="text-lg font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
                   {isEnglish ? "Original 1909 Classic Deck" : "สำรับคลาสสิก 1909 ดั้งเดิม"}
@@ -399,7 +399,7 @@ export function HomeSeoContent() {
 
               <div className="text-center space-y-1">
                 <span className="text-xs font-serif-th font-bold text-[#8F5C1A] tracking-wider uppercase block">
-                  {isEnglish ? "✦ Pillar II ✦" : "✦ เสาเอกที่ ๒ ✦"}
+                  {isEnglish ? "Pillar II" : "เสาเอกที่ ๒"}
                 </span>
                 <h3 className="text-lg font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
                   {isEnglish ? "Provably Fair Cryptographic Randomness" : "ระบบสุ่มโปร่งใส Provably Fair"}
@@ -434,7 +434,7 @@ export function HomeSeoContent() {
 
               <div className="text-center space-y-1">
                 <span className="text-xs font-serif-th font-bold text-[#8F5C1A] tracking-wider uppercase block">
-                  {isEnglish ? "✦ Pillar III ✦" : "✦ เสาเอกที่ ๓ ✦"}
+                  {isEnglish ? "Pillar III" : "เสาเอกที่ ๓"}
                 </span>
                 <h3 className="text-lg font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
                   {isEnglish ? "Jungian Psychology & Empathetic AI" : "จิตวิทยาและการพยากรณ์ AI"}
@@ -461,7 +461,7 @@ export function HomeSeoContent() {
       <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
           <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
-          <span className="text-xs text-[#8F5C1A]/60">✦</span>
+          
           <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
@@ -473,7 +473,7 @@ export function HomeSeoContent() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-[#D9C8AC]/50">
           <div className="space-y-2">
             <span className="text-[#8F5C1A] text-xs font-serif-th tracking-widest uppercase block">
-              ✦ SPREADS &amp; CARDS
+              SPREADS &amp; CARDS
             </span>
             <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F] [text-wrap:balance]">
               {isEnglish ? "Featured Tarot Spreads & Classic 78-Card Deck" : "ผังการเปิดไพ่พยากรณ์และสำรับไพ่ 78 ใบยอดนิยม"}
@@ -582,7 +582,7 @@ export function HomeSeoContent() {
         <div className="p-6 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#D9C8AC] shadow-xs space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/40">
             <h3 className="font-serif-th font-bold text-base text-[#29261F] flex items-center gap-2">
-              <span className="text-[#8F5C1A]">✦</span>{" "}
+              
               {isEnglish ? "Major Arcana Highlights" : "ไพ่ชุดใหญ่เมเจอร์ อาร์คานา (Major Arcana Highlights)"}
             </h3>
             <Link
@@ -618,7 +618,7 @@ export function HomeSeoContent() {
       <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
           <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
-          <span className="text-xs text-[#8F5C1A]/60">✦</span>
+          
           <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
@@ -630,7 +630,7 @@ export function HomeSeoContent() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-[#D9C8AC]/50">
           <div className="space-y-2">
             <span className="text-[#8F5C1A] text-xs font-serif-th tracking-widest uppercase block">
-              ✦ WISDOM &amp; ARTICLES
+              WISDOM &amp; ARTICLES
             </span>
             <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F] [text-wrap:balance]">
               {isEnglish ? "Wisdom Codex & Esoteric Articles" : "คัมภีร์บทความและสาระน่ารู้เกี่ยวกับไพ่ทาโรต์"}
@@ -664,7 +664,7 @@ export function HomeSeoContent() {
 
               <div className="space-y-2 min-w-0 flex-1">
                 <span className="text-[11px] font-serif-th font-semibold text-[#8F5C1A] bg-[#FFFFFF] px-3 py-0.5 rounded-full border border-[#D9C8AC]/70 inline-block shadow-2xs">
-                  ✦ {art.category}
+                  {art.category}
                 </span>
                 <h3 className="font-serif-th font-bold text-base sm:text-lg text-[#29261F] group-hover:text-[#8F5C1A] transition-colors line-clamp-2 leading-snug">
                   {art.title}
@@ -685,7 +685,7 @@ export function HomeSeoContent() {
       <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
         <div className="flex items-center gap-3 text-[#D9C8AC]/70">
           <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
-          <span className="text-xs text-[#8F5C1A]/60">✦</span>
+          
           <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
         </div>
       </div>
@@ -698,7 +698,7 @@ export function HomeSeoContent() {
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
             <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
-              ✦ FREQUENTLY ASKED QUESTIONS ✦
+              FREQUENTLY ASKED QUESTIONS
             </span>
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
           </div>
@@ -720,7 +720,7 @@ export function HomeSeoContent() {
             >
               <summary className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-serif-th font-bold text-base text-[#29261F] hover:text-[#8F5C1A] transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center gap-3 sm:gap-3.5">
-                  <span className="text-[#8F5C1A] text-sm transition-transform group-hover:scale-125">✦</span>
+                  
                   <span className="leading-snug">{faq.question}</span>
                 </span>
                 <span

@@ -60,9 +60,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#D9C8AC]/30 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#F3EDE2] font-bold">
-                ✦
-              </div>
+              <div className="w-8 h-8 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#F3EDE2] font-bold">·</div>
               <div>
                 <h3 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold">
                   ความหมายไพ่ทาโรต์ 78 ใบ
@@ -93,10 +91,10 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
               {[
                 { id: "all", label: "ทั้งหมด (78)" },
                 { id: "major", label: "ชุดหลัก Major (22)" },
-                { id: "wands", label: "✦ ไม้เท้า Wands" },
-                { id: "cups", label: "✦ ถ้วย Cups" },
-                { id: "swords", label: "✦ ดาบ Swords" },
-                { id: "pentacles", label: "✦ เหรียญ Pentacles" },
+                { id: "wands", label: "ไม้เท้า Wands" },
+                { id: "cups", label: "ถ้วย Cups" },
+                { id: "swords", label: "ดาบ Swords" },
+                { id: "pentacles", label: "เหรียญ Pentacles" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -117,7 +115,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
 
             <input
               type="text"
-              placeholder="✦ ค้นหาตามชื่อไพ่ (เช่น The Fool, ราชินีถ้วย, ความรัก, การเงิน)..."
+              placeholder="ค้นหาตามชื่อไพ่ (เช่น The Fool, ราชินีถ้วย, ความรัก, การเงิน)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg px-3.5 py-2 text-xs text-[#2E211A] placeholder:text-[#635B4E] focus:outline-none focus:border-[#8F5C1A] "
@@ -161,7 +159,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
               </div>
             ) : (
               <div className="text-center py-12 space-y-3">
-                <div className="text-2xl text-[#8F5C1A]">✦</div>
+                <div className="text-sm text-[#8F5C1A] font-serif-th">SeerTarot</div>
                 <h4 className="font-serif-th text-sm font-bold text-[#2E211A]">
                   ไม่พบไพ่ที่ตรงกับ &ldquo;{search}&rdquo;
                 </h4>
@@ -243,7 +241,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                             : "bg-[#FFFFFF] text-[#635B4E] border border-[#D9C8AC]"
                         }`}
                       >
-                        ✦ หัวตั้ง (Upright)
+                        หัวตั้ง (Upright)
                       </button>
                       <button
                         onClick={() => setViewOrientation("reversed")}
@@ -261,7 +259,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
 
                 {/* Keywords List */}
                 <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
-                  <span className="text-[13px] text-[#8F5C1A] font-bold block">✦ คำสำคัญ (Keywords):</span>
+                  <span className="text-[13px] text-[#8F5C1A] font-bold block">คำสำคัญ (Keywords):</span>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedCard.keywords[viewOrientation].map((kw, i) => (
                       <span

@@ -114,8 +114,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
       <header className="text-center space-y-4 pt-2">
         <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#8F5C1A] uppercase font-serif-th">
           {isEnglish
-            ? "✦ SEERTAROT WISDOM CODEX & ESOTERIC ESSAYS ✦"
-            : "✦ คลังความรู้และคู่มือศาสตร์พยากรณ์ ✦"}
+            ? "SEERTAROT WISDOM CODEX & ESOTERIC ESSAYS"
+            : "คลังความรู้และคู่มือศาสตร์พยากรณ์"}
         </p>
         <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-[#29261F] tracking-tight leading-tight">
           {isEnglish
@@ -172,7 +172,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                     : "bg-[#FFFFFF] border border-[#D5CEC2] text-[#635B4E] hover:border-[#8F5C1A] hover:text-[#8F5C1A] shadow-2xs"
                 }`}
               >
-                {isSelected && <span className="text-[#A58A5C] text-[10px]">✦</span>}
+                
                 <span>
                   {cat.id === "all"
                     ? isEnglish
@@ -218,7 +218,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               <div className="space-y-3.5 flex-1 text-center sm:text-left">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[11px] font-serif-th font-bold text-[#8F5C1A] shadow-2xs">
-                    <span>✦</span> {isEnglish ? "Featured Codex of the Week" : "บทความแนะนำประจำสัปดาห์"}
+                    {isEnglish ? "Featured Codex of the Week" : "บทความแนะนำประจำสัปดาห์"}
                   </span>
                   <span className="text-[11px] font-serif-th text-[#635B4E] px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/60">
                     {featCat}
@@ -235,7 +235,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2">
                   <span className="text-xs text-[#635B4E] font-serif-th flex items-center gap-1.5">
-                    <span className="text-[#8F5C1A]">✦</span>{" "}
+                    
                     {isEnglish ? `Reading time ${readTime}` : `เวลาอ่าน ${readTime}`}
                   </span>
                   <Link
@@ -256,7 +256,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
       <div className="space-y-4">
         <div className="flex items-center justify-between text-xs text-[#635B4E] px-1 font-serif-th">
           <span className="flex items-center gap-1.5">
-            <span className="text-[#8F5C1A]">✦</span>{" "}
+            
             {isEnglish ? `Found ${filtered.length} articles` : `พบบทความ ${filtered.length} เรื่อง`}
           </span>
           {selectedCat !== "all" && (
@@ -271,7 +271,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
         {filtered.length === 0 ? (
           <div className="rounded-2xl border border-[#D9C8AC] bg-[#FFFFFF] p-12 text-center space-y-3 shadow-xs">
-            <p className="text-2xl text-[#8F5C1A]">✦</p>
+            
             <p className="font-serif-th text-sm text-[#29261F]">
               {isEnglish
                 ? `No articles found matching "${searchQuery}"`
@@ -313,7 +313,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                         {artCat}
                       </span>
                       <span className="text-xs font-serif-th text-[#635B4E] flex items-center gap-1">
-                        <span className="text-[#8F5C1A]">✦</span> {readTime}
+                        <span className="text-[#8F5C1A]">•</span> {readTime}
                       </span>
                     </div>
 

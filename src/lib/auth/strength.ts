@@ -59,7 +59,7 @@ export function calculatePasswordStrength(password: string, isEnglish?: boolean)
     default:
       return {
         score: 4,
-        label: isEnglish ? "Very Strong ✦" : "ปลอดภัยสูงมาก ✦",
+        label: isEnglish ? "Very Strong" : "ปลอดภัยสูงมาก",
         colorClass: "text-[#8F5C1A]",
         barColor: "bg-[#3A7044]",
       };

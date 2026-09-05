@@ -230,7 +230,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         {drawnCards.length > 0 &&
           (isAllRevealed ? (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#635B4E] text-xs font-serif-th font-semibold ">
-              <span className="text-[#8F5C1A]">✦</span>
+              
               <span>{isEnglish ? "All Cards Revealed" : "เปิดไพ่ครบแล้ว"}</span>
             </div>
           ) : onRevealAll ? (
@@ -239,7 +239,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               onClick={onRevealAll}
               className="px-3.5 py-1.5 rounded-full text-xs font-serif-th font-bold bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] transition-all cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] active:scale-95"
             >
-              <span>✨</span>
+              
               <span>{isEnglish ? "Reveal All Cards" : "พลิกดูไพ่ทั้งหมด"}</span>
             </button>
           ) : null)}
@@ -309,7 +309,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 
       {/* Helpful Hint */}
       <div className="text-center pt-2 border-t border-[#D9C8AC]/30 text-[13px] text-[#635B4E] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
-        <span className="text-[#8F5C1A]">✦</span>
+        
         <span>
           {useRail
             ? isEnglish

@@ -100,7 +100,7 @@ export default function EntitlementAdmin() {
           body: JSON.stringify(patch),
         });
         if (!res.ok) throw new Error();
-        setMsg("บันทึกแล้ว ✨");
+        setMsg("บันทึกแล้ว");
         load();
       } catch {
         setMsg("บันทึกไม่สำเร็จ");
@@ -115,7 +115,7 @@ export default function EntitlementAdmin() {
     setDbBusy(true);
     const { ok, data } = await ops("init_db");
     setDbReady(ok && !!data.ready);
-    setMsg(ok ? "เตรียมฐานข้อมูลเรียบร้อย ✨" : "เตรียมฐานข้อมูลไม่สำเร็จ");
+    setMsg(ok ? "เตรียมฐานข้อมูลเรียบร้อย" : "เตรียมฐานข้อมูลไม่สำเร็จ");
     setDbBusy(false);
   }, []);
 
@@ -307,7 +307,7 @@ export default function EntitlementAdmin() {
           ))}
         </div>
         <button onClick={load} className="mt-3 text-xs text-[#635B4E] hover:text-[#29261F]">
-          รีเฟรช ✦
+          รีเฟรช
         </button>
       </div>
 

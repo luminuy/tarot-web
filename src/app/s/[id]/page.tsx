@@ -76,7 +76,7 @@ export default async function SharePage({ params }: Props) {
         href="/"
         className="rounded-full bg-[#29261F] px-6 py-2.5 font-serif-th text-sm font-bold text-[#F3F0EA] hover:bg-[#A58A5C]"
       >
-        ✦ เปิดไพ่ที่ SeerTarot
+        เปิดไพ่ที่ SeerTarot
       </Link>
     </main>
   );

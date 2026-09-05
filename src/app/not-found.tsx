@@ -24,9 +24,7 @@ export default function NotFound() {
     <main className="min-h-screen bg-[#F3F0EA] text-[#29261F] flex items-center justify-center px-6 py-20">
       <div className="max-w-lg w-full text-center space-y-8">
         <div className="space-y-4">
-          <span aria-hidden="true" className="block text-3xl text-[#A58A5C]">
-            ✦
-          </span>
+          <span aria-hidden="true" className="block text-4xl font-serif-th font-bold text-[#A58A5C]">404</span>
           <h1 className="text-2xl sm:text-3xl font-bold font-serif-th leading-normal pt-1">
             ไม่พบหน้าที่คุณกำลังตามหา
           </h1>

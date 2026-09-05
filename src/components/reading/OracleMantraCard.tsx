@@ -36,8 +36,8 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
   const handleCopy = async () => {
     const origin = typeof window !== "undefined" ? window.location.origin : SITE_ORIGIN;
     const textToCopy = isEnglish
-      ? `✨ Sacred Oracle Wisdom from ${personaNameTh}\n${quote}\n✦ Guiding Affirmation: "${affirmation}"\n(Resonant Card: ${cardName} - ${powerWord})\nTarot Sanctuary: ${origin}`
-      : `✨ คำคมพลังใจศักดิ์สิทธิ์จาก ${personaNameTh}\n${quote}\n✦ ข้อคิดนำทาง: "${affirmation}"\n(ไพ่สะท้อนพลัง: ${cardName} - ${powerWord})\nดูดวงออนไลน์พรีเมียม: ${origin}`;
+      ? `Sacred Oracle Wisdom from ${personaNameTh}\n${quote}\nGuiding Affirmation: "${affirmation}"\n(Resonant Card: ${cardName} - ${powerWord})\nTarot Sanctuary: ${origin}`
+      : `คำคมพลังใจศักดิ์สิทธิ์จาก ${personaNameTh}\n${quote}\nข้อคิดนำทาง: "${affirmation}"\n(ไพ่สะท้อนพลัง: ${cardName} - ${powerWord})\nดูดวงออนไลน์พรีเมียม: ${origin}`;
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
@@ -58,11 +58,11 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
 
       {/* Card Header Badge */}
       <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 text-xs font-medium text-[#2E211A] ">
-        <span className="text-[#8F5C1A]">✨</span>
+        
         <span className="font-serif-th font-semibold">
           {isEnglish ? "Sacred Oracle Wisdom (Oracle Mantra)" : "คำคมพลังใจศักดิ์สิทธิ์ (Sacred Oracle Mantra)"}
         </span>
-        <span className="text-[#8F5C1A]">✦</span>
+        
       </div>
 
       {/* Main Quote */}
@@ -73,7 +73,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
       {/* Affirmation Box */}
       <div className="my-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] sm:text-sm ">
         <p className="font-serif-th font-bold text-[#8F5C1A]">
-          ✦ {isEnglish ? "Guiding Affirmation:" : "คำประกาศเจตจำนง (Affirmation):"}
+          {isEnglish ? "Guiding Affirmation:" : "คำประกาศเจตจำนง (Affirmation):"}
         </p>
         <p className="mt-1 font-serif-th font-medium text-[#2E211A]">
           {affirmation.replace(/^["“”]|["“”]$/g, "")}
@@ -83,7 +83,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
       {/* Source Meta & Action */}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#D9C8AC]/30 pt-4 text-xs text-[#635B4E]">
         <div className="flex items-center gap-2 text-left">
-          <span className="text-[#8F5C1A] text-xs">✦</span>
+          
           <div>
             <span className="font-serif-th font-semibold text-[#2E211A]">{cardName}</span>
             <span className="ml-1.5 text-[#635B4E] font-mono text-[13px]">({elementSymbol})</span>
@@ -116,7 +116,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="flex items-center gap-1.5 font-serif-th"
               >
-                <span className="text-[#8F5C1A]">✦</span>
+                
                 <span>{isEnglish ? "Copy Wisdom" : "คัดลอกคำคมแชร์ลงสตอรี่"}</span>
               </motion.span>
             )}

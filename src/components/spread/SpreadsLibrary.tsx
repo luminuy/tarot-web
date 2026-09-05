@@ -103,9 +103,9 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs text-[#A58A5C] font-serif-th font-bold shadow-xs">
-            <span>✦</span>{" "}
+            
             {isEnglish ? "20 CLASSIC DIVINATION SPREADS" : "20 ผังการเปิดไพ่มาตรฐานสากล"}{" "}
-            <span>✦</span>
+            
           </span>
         </div>
         <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-[#29261F] tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
@@ -199,7 +199,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                     {!isStandardSpread(spread.id) && (
                       <span className="text-[12px] text-[#A58A5C] bg-[#FFFFFF] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
                         <SealedLockIcon className="w-3 h-3" />
-                        <span>✦ {isEnglish ? "Grand Spread" : "ญาณพิเศษ"}</span>
+                        <span>{isEnglish ? "Grand Spread" : "ญาณพิเศษ"}</span>
                       </span>
                     )}
                   </div>
@@ -234,7 +234,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                     className="w-full text-left text-[13px] font-serif-th text-[#A58A5C] hover:text-[#29261F] flex items-center justify-between py-1.5 border-t border-[#D5CEC2]/40 cursor-pointer transition-colors font-bold"
                   >
                     <span className="flex items-center gap-1.5">
-                      <span>✦</span> {isEnglish ? `View ${spread.positions.length} card positions` : `ดูรายละเอียด ${spread.positions.length} ตำแหน่งไพ่`}
+                       {isEnglish ? `View ${spread.positions.length} card positions` : `ดูรายละเอียด ${spread.positions.length} ตำแหน่งไพ่`}
                     </span>
                     <span className="text-[13px]">{isExpanded ? (isEnglish ? "▲ Collapse" : "▲ ย่อ") : (isEnglish ? "▼ Expand" : "▼ ขยาย")}</span>
                   </button>
@@ -272,7 +272,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   href={`/?spread=${spread.id}`}
                   className="w-full py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
                 >
-                  <span>✦ {isEnglish ? (isStandardSpread(spread.id) ? "Begin Reading with Spread" : "Unlock Grand Spread") : (isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้")}</span>
+                  <span>{isEnglish ? (isStandardSpread(spread.id) ? "Begin Reading with Spread" : "Unlock Grand Spread") : (isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้")}</span>
                 </Link>
                 <Link
                   href={`/spreads/${spread.id}`}

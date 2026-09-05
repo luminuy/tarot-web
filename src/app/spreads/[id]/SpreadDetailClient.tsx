@@ -153,7 +153,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
             {isEnglish ? `Category: ${categoryLabel}` : `หมวด ${categoryLabel}`}
           </span>
           <span className="rounded-full border border-[#D5CEC2] bg-white px-2.5 py-0.5">
-            {standard ? (isEnglish ? "Standard Spread" : "ผังมาตรฐาน") : (isEnglish ? "✦ Grand Spread" : "✦ ญาณพิเศษ")}
+            {standard ? (isEnglish ? "Standard Spread" : "ผังมาตรฐาน") : (isEnglish ? "Grand Spread" : "ญาณพิเศษ")}
           </span>
         </div>
         <h1 className="font-serif-th text-3xl font-bold leading-tight sm:text-4xl [text-wrap:balance]">
@@ -167,7 +167,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
           href={`/?spread=${spread.id}`}
           className="inline-flex items-center gap-1.5 rounded-full bg-[#29261F] px-6 py-3 font-serif-th text-sm font-bold text-[#F3F0EA] transition-all hover:bg-[#A58A5C] active:scale-[0.98]"
         >
-          <span>✦</span>{" "}
+          
           <span>
             {standard
               ? (isEnglish ? "Begin Reading with Spread" : "เริ่มดูดวงด้วยผังนี้")

@@ -70,7 +70,7 @@ export function DailyCardStrip() {
 
       <div className="min-w-0 flex-1 space-y-1">
         <p className="font-serif-th text-xs font-bold text-[#8F5C1A]">
-          ✦ {isEnglish ? "Card of the Day" : "ไพ่ประจำวันนี้"}
+          {isEnglish ? "Card of the Day" : "ไพ่ประจำวันนี้"}
         </p>
         <p className="font-serif-th text-sm font-bold text-[#2E211A]">
           {isEnglish ? (

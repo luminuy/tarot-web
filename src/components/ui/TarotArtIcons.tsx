@@ -404,7 +404,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
 export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`relative w-28 h-28 mx-auto flex items-center justify-center ${className}`}>
     <div className="w-6 h-6 rounded-full border-1.5 border-[#D9C8AC] bg-black/90 flex items-center justify-center text-[12px] text-[#8F5C1A] z-10 font-bold">
-      ✦
+      ·
     </div>
     {Array.from({ length: 12 }).map((_, i) => {
       const angle = (i * 360) / 12 - 90;

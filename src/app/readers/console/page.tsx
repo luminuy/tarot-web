@@ -143,7 +143,7 @@ function ReaderConsoleInner() {
               <div className="flex items-center gap-2 justify-center sm:justify-start">
                 <h1 className="font-serif-th text-xl font-bold text-[#f5deaa]">{reader.displayName}</h1>
                 <span className="text-[13px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-                  ✦ แผงแม่หมอ
+                  แผงแม่หมอ
                 </span>
               </div>
               <p className="text-xs text-[#9c93b8] mt-0.5">LINE: {reader.lineUrl}</p>
@@ -182,7 +182,7 @@ function ReaderConsoleInner() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="font-serif-th font-bold text-lg text-[#f5deaa]">
-              ✦ รายการคิวรอรับคำปรึกษา
+              รายการคิวรอรับคำปรึกษา
             </h2>
             <span className="rounded-full bg-[#e5c07b]/20 px-2.5 py-0.5 text-xs font-bold text-[#ffd700] border border-[#e5c07b]/30">
               {totalWaiting} คิว
@@ -240,7 +240,7 @@ function ReaderConsoleInner() {
                           : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
                       }`}
                     >
-                      {isReady ? "✦ กำลังรอเชื่อมต่อ LINE" : "⏳ กำลังรอคิว"}
+                      {isReady ? "กำลังรอเชื่อมต่อ LINE" : "⏳ กำลังรอคิว"}
                     </span>
                   </div>
 
@@ -249,7 +249,7 @@ function ReaderConsoleInner() {
                     <div className="rounded-2xl bg-[#140e26] border border-[#e5c07b]/20 p-3.5 space-y-2 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="text-[13px] font-bold text-[#ffd700] uppercase tracking-wider">
-                          ✦ สรุปประเด็นโดย AI
+                          สรุปประเด็นโดย AI
                         </span>
                         <div className="flex gap-1.5">
                           <span className="px-1.5 py-0.5 rounded bg-[#2d1f4d] text-[13px] text-[#e5c07b]">
@@ -292,7 +292,7 @@ function ReaderConsoleInner() {
                         disabled={actionLoading === ticket.id}
                         onClick={() => handleTicketAction(ticket.id, "accept")}
                       >
-                        ✦ เรียกคิวนี้ (Ready)
+                        เรียกคิวนี้ (Ready)
                       </Button>
                     ) : (
                       <Button
@@ -302,7 +302,7 @@ function ReaderConsoleInner() {
                         disabled={actionLoading === ticket.id}
                         onClick={() => handleTicketAction(ticket.id, "handoff")}
                       >
-                        ✨ ส่งต่อ LINE แล้ว (เสร็จสิ้น)
+                        ส่งต่อ LINE แล้ว (เสร็จสิ้น)
                       </Button>
                     )}
 

@@ -36,7 +36,7 @@ function ResetPasswordForm() {
             href="/"
             className="inline-block py-2.5 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-semibold text-xs font-serif-th transition-colors"
           >
-            ✦ กลับสู่วิหารหลัก
+            กลับสู่วิหารหลัก
           </Link>
         </div>
       </div>
@@ -158,7 +158,7 @@ function ResetPasswordForm() {
           <span>กำลังบันทึกรหัสผ่านใหม่…</span>
         ) : (
           <>
-            <span>✦</span>
+            
             <span>บันทึกรหัสผ่านใหม่และเข้าสู่ระบบ</span>
           </>
         )}
@@ -171,9 +171,7 @@ export default function ResetPasswordPage() {
   return (
     <main className="min-h-screen bg-[#FAF7F2] text-[#2E211A] flex items-center justify-center p-4">
       <div className="w-full max-w-md rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-6 sm:p-8 relative overflow-hidden text-center space-y-6">
-        <div className="w-14 h-14 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A] flex items-center justify-center text-2xl mx-auto">
-          ✦
-        </div>
+        <div className="w-14 h-14 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A] flex items-center justify-center text-2xl mx-auto font-bold">✓</div>
 
         <div className="space-y-1">
           <h1 className="text-xl sm:text-2xl font-serif-th font-bold font-mystic-gold">ตั้งรหัสผ่านใหม่</h1>
