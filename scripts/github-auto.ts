@@ -111,6 +111,8 @@ const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "📊 คุณภาพคำอ่าน AI & Telemetry (Consistency Checker / Karmic Bridge / Golden Set / reading_quality)", cmd: TSX, args: ["scripts/qa/test-reading-quality.ts"] },
   { label: "📈 ระบบวัดผลและติดตามเหตุการณ์ (GA4 / Meta Pixel / Consent Mode v2 / Event Contract)", cmd: TSX, args: ["scripts/qa/test-analytics-integrity.ts"] },
   { label: "⚡ ระบบทำนายด่วน (Quick Fortune 1 ใบ / 4 หัวข้อยอดนิยม / Provably Fair)", cmd: TSX, args: ["scripts/qa/test-quick-fortune.ts"] },
+  { label: "🖥️ วินัยการใช้ GPU layer ใน CSS (will-change เฉพาะสถานะ active/animating)", cmd: TSX, args: ["scripts/qa/test-will-change.ts"] },
+  { label: "🔒 ความปลอดภัยของ Modal Lifecycle & Scroll Lock (deps ไร้ onClose · ป้องกันโฟกัสหลุด)", cmd: TSX, args: ["scripts/qa/test-modal-effect-deps.ts"] },
 ];
 
 /**

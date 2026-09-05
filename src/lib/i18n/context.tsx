@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useTransition } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, useTransition } from "react";
 import type { Dictionary, Locale } from "./types";
 import { DEFAULT_LOCALE, LOCALE_COOKIE_KEY, SUPPORTED_LOCALES } from "./types";
 import { th } from "./dictionaries/th";
@@ -17,6 +17,10 @@ interface LocaleContextValue {
   t: Dictionary;
   isThai: boolean;
   isEnglish: boolean;
+  /** ภาษาที่ผู้ใช้เพิ่งกดเลือก — มีค่าทันทีที่กด ไม่ต้องรอ React render เสร็จ */
+  pendingLocale: Locale | null;
+  /** React กำลัง render ต้นไม้ภาษาใหม่อยู่หรือไม่ */
+  isSwitchingLocale: boolean;
 }
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
@@ -69,10 +73,16 @@ export function LocaleProvider({
   initialLocale?: Locale;
 }) {
   const [locale, setLocaleState] = useState<Locale>(() => getInitialClientLocale(initialLocale));
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
+  const [pendingLocale, setPendingLocale] = useState<Locale | null>(null);
 
-  const setLocale = (nextLocale: Locale) => {
+  const setLocale = useCallback((nextLocale: Locale) => {
     if (!SUPPORTED_LOCALES.includes(nextLocale)) return;
+
+    // ⚠️ ต้องตั้งค่านี้ "นอก" startTransition เท่านั้น (ISSUE-025)
+    // นี่คือ urgent update ที่ทำให้ปุ่มไฮไลต์ทันทีในเฟรมถัดไป
+    // ผู้ใช้ต้องเห็นว่าระบบรับคำสั่งแล้ว ไม่ใช่รอ 353ms+ แบบไม่มีสัญญาณอะไรเลย
+    setPendingLocale(nextLocale);
 
     startTransition(() => {
       setLocaleState(nextLocale);
@@ -92,7 +102,14 @@ export function LocaleProvider({
     } catch {
       // Ignore storage restrictions
     }
-  };
+  }, []);
+
+  // เคลียร์สถานะรอเมื่อ locale จริงตามมาทันแล้ว
+  useEffect(() => {
+    if (pendingLocale === locale) {
+      setPendingLocale(null);
+    }
+  }, [pendingLocale, locale]);
 
   useEffect(() => {
     // Synchronize HTML lang attribute on mount or change
@@ -101,13 +118,18 @@ export function LocaleProvider({
     }
   }, [locale]);
 
-  const value: LocaleContextValue = {
-    locale,
-    setLocale,
-    t: dictionaries[locale] || th,
-    isThai: locale === "th",
-    isEnglish: locale === "en",
-  };
+  const value = useMemo<LocaleContextValue>(
+    () => ({
+      locale,
+      setLocale,
+      t: dictionaries[locale] || th,
+      isThai: locale === "th",
+      isEnglish: locale === "en",
+      pendingLocale,
+      isSwitchingLocale: isPending,
+    }),
+    [locale, setLocale, pendingLocale, isPending]
+  );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
@@ -122,6 +144,8 @@ export function useLocale(): LocaleContextValue {
       t: th,
       isThai: true,
       isEnglish: false,
+      pendingLocale: null,
+      isSwitchingLocale: false,
     };
   }
   return context;

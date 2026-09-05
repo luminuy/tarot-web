@@ -36,6 +36,27 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: แก้ปัญหาแถบ Header ค้าง, UI Latency ในการสลับภาษา, State Purity, และ Focus Stealing (ISSUE-024 ถึง ISSUE-030) — โดย Antigravity AI
+
+- **แก้ปัญหา Dropdown Layer & Transition Timing (ISSUE-024 & ISSUE-027)**:
+  - ถอด `visibility 160ms` ออกจาก `.dropdown-panel-base` transition เพื่อให้ `visibility: visible` ทำงานทันทีในเฟรมเดียวกันตอนเปิดเมนู แม้เบราว์เซอร์หยุด paint ชั่วขณะ
+  - ย้าย `will-change: opacity, transform` ไปไว้เฉพาะ `.dropdown-panel-entering` คืนหน่วยความจำ GPU ขณะเมนูปิด ไม่จองค้างถาวร
+  - สร้างด่านตรวจอัตโนมัติ `scripts/qa/test-will-change.ts`
+- **แก้ปัญหา Language Switcher Latency & i18n Context (ISSUE-025 & ISSUE-026)**:
+  - เพิ่ม `pendingLocale` สำหรับ urgent update ทำให้ปุ่ม TH/EN ไฮไลต์ทันที < 50ms (จากเดิมรอนาน 353ms+)
+  - เพิ่ม `isSwitchingLocale` และ `aria-busy` พร้อม visual feedback `opacity-70` ใน `LanguageSwitcher.tsx`
+  - ใช้ `useMemo` ครอบ context value และ `useCallback` ครอบ `setLocale` ใน `LocaleProvider` ป้องกัน consumer ทั้งเว็บ re-render
+- **แก้ปัญหา React State Purity & Focus Stealing (ISSUE-028 & ISSUE-029)**:
+  - ย้าย `window.dispatchEvent("tarot:close-menus")` ออกจาก setState functional updater ใน `SacredNavDropdown.tsx` และ `UserProfileBadge.tsx` รักษาความบริสุทธิ์ของ updater function
+  - นำรูปแบบ `onCloseRef` มาใช้ใน `AuthModal.tsx` และถอด `onClose` ออกจาก `useEffect` dependencies ป้องกันการแย่งโฟกัสขณะผู้ใช้กำลังพิมพ์
+  - สร้างด่านตรวจอัตโนมัติ `scripts/qa/test-modal-effect-deps.ts`
+- **แก้ปัญหา Global scroll-padding-top (ISSUE-030)**:
+  - ประกาศ `--site-header-h` (76px มือถือ / 88px เดสก์ท็อป) และตั้ง `scroll-padding-top: var(--site-header-h)` บน `html` ป้องกันเนื้อหา anchor hash จอดมุดใต้หัวเว็บ
+  - ลบ workaround `scroll-mt-24` ใน `FollowUpChat.tsx`
+- **ผ่านการทดสอบสมบูรณ์แบบ 100%**:
+  - `npm run typecheck`: 0 Errors
+  - `npm run repo:verify`: ผ่านครบ 29/29 ด่าน
+
 ### 🗓️ 2026-09-05: ยกระดับมาตรฐานการออกแบบสู่ Editorial Luxury Minimalist — ลบสัญลักษณ์ดาวและประกายวิบวับ (✦, ✨, ✧) ทั้งเว็บทุกจุดทุกหน้า — โดย Antigravity AI
 
 - **ปรับปรุงอัตลักษณ์และตัวพิมพ์สู่ระดับสากลตามคำสั่งผู้ดูแลระบบ (Clean Luxury Typography & Zero Star/Sparkle Rule)**:

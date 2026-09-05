@@ -27,6 +27,10 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   canReset = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const isOpenRef = useRef(isOpen);
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { isEnglish } = useLocale();
 
@@ -70,13 +74,15 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
   const toggleDropdown = () => {
     soundManager.playMenuTapSound();
-    setIsOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        window.dispatchEvent(new CustomEvent("tarot:close-menus", { detail: { except: "sacred-nav" } }));
-      }
-      return next;
-    });
+
+    // ⚠️ ห้ามยิง event / side effect ใด ๆ ข้างใน setState updater (ISSUE-028)
+    // updater ต้องเป็น pure function — React เรียกซ้ำได้หลายครั้ง
+    // อ่านค่าปัจจุบันจาก ref แล้วตัดสินใจตรงนี้แทน
+    const willOpen = !isOpenRef.current;
+    if (willOpen) {
+      window.dispatchEvent(new CustomEvent("tarot:close-menus", { detail: { except: "sacred-nav" } }));
+    }
+    setIsOpen(willOpen);
   };
 
   const navItems = [

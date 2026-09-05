@@ -62,6 +62,19 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0086 · 2026-09-05 20:55 · 🟠 High · แก้ปัญหาแถบ Header ค้าง, UI Latency ในการสลับภาษา, State Purity, และ Focus Stealing (ISSUE-024 ถึง ISSUE-030)
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | 1. กดปุ่มเมนู SacredNav หรือ UserProfile แล้วแผงไม่แสดงขึ้นมา (ค้าง visibility: hidden ทั้งที่ aria-expanded="true") เมื่อเบราว์เซอร์หยุด paint หรือ main thread หน่วง<br>2. กดสลับภาษา TH/EN แล้วปุ่มนิ่งไม่มี visual feedback นาน 353ms+ ทำให้ผู้ใช้รู้สึกว่าเว็บค้าง<br>3. เมนูกดติดบ้างไม่ติดบ้างจากการยิง CustomEvent ใน setState updater<br>4. ขณะพิมพ์ในช่องกรอกของ AuthModal โฟกัสถูกดึงกลับไปที่ปุ่มปิดทุกครั้งที่ parent re-render<br>5. ลิงก์ anchor hash ในหน้าเว็บเลื่อนไปจอดใต้หัวเว็บ sticky header |
+| **ผลกระทบ** | กระทบผู้ใช้งานทุกคนบน production โดยเฉพาะผู้ใช้มือถือและผู้ใช้ที่สลับภาษาหรือเปิดเมนูนำทาง |
+| **สาเหตุราก** | 1. `.dropdown-panel-base` ใส่ `visibility 160ms` ใน transition list ทำให้การแสดงผลผูกกับ animation execution<br>2. `.dropdown-panel-base` จอง `will-change: opacity, transform` ค้างตลอดเวลาแม้ตอนปิดเมนู<br>3. `LocaleProvider` ทิ้ง `isPending` และสร้าง context value object ใหม่ทุก render โดยไม่ memoize<br>4. `window.dispatchEvent` ถูกเรียกใน `setIsOpen((prev) => ...)` functional updater ซึ่งขัดต่อหลัก React pure updater<br>5. `AuthModal` ใส่ `onClose` ใน `useEffect` dependency array ทำให้ cleanup รันและดึง focus ทุกครั้งที่ component แม่ re-render<br>6. ไม่มี `scroll-padding-top` บน `html` ทั้งที่หัวเว็บเป็น sticky top-0 สูง 69-81px |
+| **การแก้ไข** | 1. ปรับ `.dropdown-panel-base` ให้ `visibility: visible` ทำงานทันทีตอนเปิด และหน่วง visibility ตอนปิด<br>2. ย้าย `will-change` ไปไว้เฉพาะ `.dropdown-panel-entering`<br>3. เพิ่ม `pendingLocale` (urgent update) และ `isSwitchingLocale` (`aria-busy`), memoize context value<br>4. ย้าย `window.dispatchEvent` ออกมานอก setState updater ใน handler โดยอิงจาก ref state ล่าสุด<br>5. ใช้ `onCloseRef` ใน `AuthModal` และถอด `onClose` ออกจาก effect dependencies<br>6. กำหนด `--site-header-h` และ `scroll-padding-top: var(--site-header-h)` บน `html` พร้อมถอด workaround `scroll-mt-24`<br>7. เพิ่ม QA test อัตโนมัติ 2 ชุด: `test-will-change.ts` และ `test-modal-effect-deps.ts` ผูกเข้า `repo:verify` (29 ด่าน) |
+| **🛡️ กฎป้องกันถาวร** | **1. ห้ามใส่ visibility ใน transition list ของ base class เพื่อไม่ให้การมองเห็นผูกกับ paint scheduling<br>2. ห้ามตั้ง will-change บน selector คงที่ (ตรวจจับถาวรด้วย test-will-change.ts)<br>3. ห้ามยิง side-effect/dispatchEvent ภายใน setState updater<br>4. Modal scroll-lock effect ต้องใช้ onCloseRef และห้ามมี callback ใน dependency array (ตรวจจับถาวรด้วย test-modal-effect-deps.ts)<br>5. ตั้ง scroll-padding-top ที่ root html เสมอเมื่อมี sticky header** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ผ่านครบทั้ง 29 ด่านของ `npm run repo:verify`, `npm run typecheck` 0 errors, dropdown visibility ทำงานทันที, will-change คืนค่า auto เมื่อปิด, typing ใน AuthModal โฟกัสคงที่สมบูรณ์ |
+| **บันทึกโดย** | Antigravity AI · branch `fix/header-hang-and-ui-latency` |
+
+
 ### INC-0085 · 2026-09-05 16:30 · 🟡 Medium · เติมเต็มคีย์เวิร์ดภาษาอังกฤษสำหรับแคชไพ่ประจำวันทั้งฝั่งเซิร์ฟเวอร์และไคลเอนต์
 
 | หัวข้อ | รายละเอียด |

@@ -72,6 +72,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     if (isOpen) setMode(initialMode);
   }, [isOpen, initialMode]);
 
+  // เก็บ onClose ล่าสุดไว้ใน ref เพื่อไม่ต้องใส่ใน dependency ของ effect ด้านล่าง (ISSUE-029)
+  // ผู้เรียกส่ง arrow function ใหม่ทุกเรนเดอร์ (`onClose={() => ...}`)
+  // ถ้าใส่ไว้ใน deps -> effect เปิด/ปิดใหม่ทุกครั้งที่พ่อเรนเดอร์ และดึงโฟกัสออกจาก input ขณะพิมพ์
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   // Esc ปิด · ล็อกการเลื่อนพื้นหลัง · ขังโฟกัสไว้ในหน้าต่าง (a11y — ของเดิมไม่มีเลย)
   useEffect(() => {
     if (!isOpen) return;
@@ -82,7 +90,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab" || !dialogRef.current) return;
@@ -112,7 +120,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       cancelAnimationFrame(focusTimer);
       restoreFocusRef.current?.focus?.();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
