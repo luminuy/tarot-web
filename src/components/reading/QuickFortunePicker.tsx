@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 
@@ -207,6 +207,114 @@ export function QuickFortunePicker({
     }
   };
 
+  // Carousel refs และสถานะการเลื่อน / ลากแบบ Apple Carousel
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const dragDistanceRef = useRef(0);
+
+  const updateScrollStatus = () => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 10);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+
+    const cards = el.querySelectorAll<HTMLElement>("[data-card-index]");
+    if (cards.length > 0) {
+      const containerLeft = el.getBoundingClientRect().left;
+      let closestIdx = 0;
+      let minDistance = Infinity;
+
+      cards.forEach((card, idx) => {
+        const cardLeft = card.getBoundingClientRect().left;
+        const dist = Math.abs(cardLeft - containerLeft - 16);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIdx = idx;
+        }
+      });
+      setActiveIndex(closestIdx);
+    }
+  };
+
+  useEffect(() => {
+    updateScrollStatus();
+    const handleResize = () => updateScrollStatus();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleScroll = () => {
+    updateScrollStatus();
+  };
+
+  const scroll = (direction: "left" | "right") => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const scrollAmount = Math.max(el.clientWidth * 0.75, 280);
+    el.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  const scrollToIndex = (index: number) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const card = el.querySelector<HTMLElement>(`[data-card-index="${index}"]`);
+    if (card) {
+      const containerLeft = el.getBoundingClientRect().left;
+      const cardLeft = card.getBoundingClientRect().left;
+      const offset = cardLeft - containerLeft + el.scrollLeft - 16;
+      el.scrollTo({ left: offset, behavior: "smooth" });
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - el.offsetLeft;
+    scrollLeftRef.current = el.scrollLeft;
+    dragDistanceRef.current = 0;
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    const el = carouselRef.current;
+    if (!el) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = x - startXRef.current;
+    dragDistanceRef.current = Math.abs(walk);
+    el.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  };
+
+  const handleCardClickWithDragCheck = (topic: QuickTopic) => {
+    if (dragDistanceRef.current > 8) {
+      return;
+    }
+    handleCardClick(topic);
+  };
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       {/* ส่วนหัวแนะนำการทำนายด่วน สไตล์วิหารพยากรณ์ */}
@@ -235,92 +343,160 @@ export function QuickFortunePicker({
         </p>
       </div>
 
-      {/* กริด 4 หัวข้อยอดนิยม (2x2 บน desktop, 1 คอลัมน์บน mobile) พร้อมภาพไพ่ 1909 Rider-Waite ประจำหมวด */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        {QUICK_TOPICS.map((topic) => (
-          <div
-            key={topic.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => handleCardClick(topic)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleCardClick(topic);
-              }
-            }}
-            className={`group relative flex flex-col justify-between p-4.5 sm:p-5.5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition-all duration-300 transform-gpu hover:-translate-y-1 cursor-pointer select-none text-left overflow-hidden`}
-          >
-            {/* สัญลักษณ์มุมการ์ดทองคำเปลว (Sacred Corner Accents) */}
-            <div className="absolute top-2.5 right-2.5 text-[9px] text-[#A58A5C]/40 group-hover:text-[#A58A5C]/90 transition-colors pointer-events-none select-none">
-              ✦
-            </div>
-            <div className="absolute bottom-2.5 left-2.5 text-[9px] text-[#A58A5C]/30 group-hover:text-[#A58A5C]/70 transition-colors pointer-events-none select-none">
-              ✦
-            </div>
+      {/* Apple-Style Horizontal Swipe Carousel พร้อมภาพไพ่ 1909 Rider-Waite */}
+      <div className="relative group/carousel px-1 sm:px-2">
+        {/* Apple Circular Prev Button */}
+        <button
+          type="button"
+          onClick={() => scroll("left")}
+          disabled={!canScrollLeft}
+          aria-label="หัวข้อก่อนหน้า"
+          className={`hidden sm:flex absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/95 hover:bg-white text-[#29261F] border border-[#D5CEC2] shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-xs items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-[#8F5C1A]`}
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
 
-            {/* ป้ายกำกับด้านบน */}
-            <div className="flex items-center justify-between gap-2 mb-3.5 relative z-10">
-              <span
-                className={`text-[11px] font-serif-th font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs ${topic.themeColors.badgeBg} ${topic.themeColors.badgeText} ${topic.themeColors.badgeBorder}`}
-              >
-                {topic.badge}
-              </span>
-              <span className="text-xs font-serif-th text-[#A58A5C] flex items-center gap-1 group-hover:text-[#8F5C1A] transition-colors">
-                <span>ไพ่ 1 ใบ</span>
-                <span>✦</span>
-              </span>
-            </div>
+        {/* Apple Circular Next Button */}
+        <button
+          type="button"
+          onClick={() => scroll("right")}
+          disabled={!canScrollRight}
+          aria-label="หัวข้อถัดไป"
+          className={`hidden sm:flex absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/95 hover:bg-white text-[#29261F] border border-[#D5CEC2] shadow-[0_4px_16px_rgba(0,0,0,0.12)] backdrop-blur-xs items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none focus:outline-none focus:ring-2 focus:ring-[#8F5C1A]`}
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
 
-            {/* ส่วนกลาง: ภาพไพ่ 1909 Rider-Waite ในกรอบวิหาร + รายละเอียดหัวข้อ */}
-            <div className="flex items-center gap-3.5 sm:gap-4 mb-4 relative z-10">
-              {/* ภาพหน้าไพ่ 1909 Rider-Waite ประจำหัวข้อ */}
-              <div className="relative flex-shrink-0">
-                {/* รัศมีแสงทองนุ่มนวลเบื้องหลัง */}
-                <div className="absolute -inset-1 rounded-xl bg-radial from-[#A58A5C]/20 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
-                <div
-                  className="relative w-[54px] h-[86px] sm:w-[62px] sm:h-[98px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition-all duration-300 transform-gpu bg-[#FFFFFF]"
-                  style={{ borderColor: topic.themeColors.cardBorder }}
+        {/* Horizontal Scroll Track */}
+        <div
+          ref={carouselRef}
+          onScroll={handleScroll}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          className={`flex overflow-x-auto gap-3.5 sm:gap-5 pb-4 pt-1 px-3 sm:px-2 no-scrollbar snap-x snap-mandatory scroll-smooth select-none ${
+            isDragging ? "cursor-grabbing" : "cursor-grab"
+          }`}
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {QUICK_TOPICS.map((topic, index) => (
+            <div
+              key={topic.id}
+              data-card-index={index}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleCardClickWithDragCheck(topic)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleCardClick(topic);
+                }
+              }}
+              className={`w-[270px] xs:w-[290px] sm:w-[310px] md:w-[325px] shrink-0 snap-start group relative flex flex-col justify-between p-4.5 sm:p-5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition-all duration-300 transform-gpu hover:-translate-y-1 cursor-pointer select-none text-left overflow-hidden`}
+            >
+              {/* สัญลักษณ์มุมการ์ดทองคำเปลว (Sacred Corner Accents) */}
+              <div className="absolute top-2.5 right-2.5 text-[9px] text-[#A58A5C]/40 group-hover:text-[#A58A5C]/90 transition-colors pointer-events-none select-none">
+                ✦
+              </div>
+              <div className="absolute bottom-2.5 left-2.5 text-[9px] text-[#A58A5C]/30 group-hover:text-[#A58A5C]/70 transition-colors pointer-events-none select-none">
+                ✦
+              </div>
+
+              {/* ป้ายกำกับด้านบน */}
+              <div className="flex items-center justify-between gap-2 mb-3 relative z-10">
+                <span
+                  className={`text-[11px] font-serif-th font-semibold px-2.5 py-0.5 rounded-full border shadow-2xs ${topic.themeColors.badgeBg} ${topic.themeColors.badgeText} ${topic.themeColors.badgeBorder}`}
                 >
-                  <CardImage
-                    image={topic.cardImage}
-                    alt={topic.cardAlt}
-                    sizes="(min-width: 640px) 62px, 54px"
-                    className="w-full h-full object-cover object-center"
-                    loading="eager"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
+                  {topic.badge}
+                </span>
+                <span className="text-xs font-serif-th text-[#A58A5C] flex items-center gap-1 group-hover:text-[#8F5C1A] transition-colors">
+                  <span>ไพ่ 1 ใบ</span>
+                  <span>✦</span>
+                </span>
+              </div>
+
+              {/* ส่วนกลาง: ภาพไพ่ 1909 Rider-Waite ในกรอบวิหาร + รายละเอียดหัวข้อ */}
+              <div className="flex items-center gap-3 sm:gap-3.5 mb-3.5 relative z-10">
+                {/* ภาพหน้าไพ่ 1909 Rider-Waite ประจำหัวข้อ */}
+                <div className="relative flex-shrink-0">
+                  {/* รัศมีแสงทองนุ่มนวลเบื้องหลัง */}
+                  <div className="absolute -inset-1 rounded-xl bg-radial from-[#A58A5C]/20 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div
+                    className="relative w-[52px] h-[82px] sm:w-[58px] sm:h-[92px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition-all duration-300 transform-gpu bg-[#FFFFFF]"
+                    style={{ borderColor: topic.themeColors.cardBorder }}
+                  >
+                    <CardImage
+                      image={topic.cardImage}
+                      alt={topic.cardAlt}
+                      sizes="(min-width: 640px) 58px, 52px"
+                      className="w-full h-full object-cover object-center"
+                      loading="eager"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* ข้อความและคำอธิบาย */}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="text-[10px] sm:text-[11px] font-serif-th text-[#8F5C1A] tracking-wider font-semibold truncate">
+                    {topic.elementalGlyph}
+                  </div>
+                  <h3 className="text-sm sm:text-base font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors duration-200 leading-snug">
+                    {topic.title}
+                  </h3>
+                  <p className="text-[11px] sm:text-xs font-serif-th text-[#635B4E] leading-relaxed line-clamp-2">
+                    {topic.tagline}
+                  </p>
                 </div>
               </div>
 
-              {/* ข้อความและคำอธิบาย */}
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="text-[10px] sm:text-[11px] font-serif-th text-[#8F5C1A] tracking-wider font-semibold">
-                  {topic.elementalGlyph}
+              {/* แถบการกระทำด้านล่าง: เชิญชวนเปิดไพ่พร้อมประกายทอง */}
+              <div className="pt-2 border-t border-[#D5CEC2]/40 relative z-10">
+                <div className="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl bg-[#F6F2EA]/70 group-hover:bg-[#29261F] text-[#4A3E31] group-hover:text-[#FAF7F2] transition-colors duration-300 shadow-2xs">
+                  <span className="text-[11px] sm:text-xs font-serif-th font-medium">
+                    {topic.highlightText}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-serif-th font-semibold text-[#8F5C1A] group-hover:text-[#E8D5B5] transition-colors">
+                    <span>เริ่มทำนาย</span>
+                    <span className="group-hover:translate-x-1 transition-transform duration-200">➔</span>
+                  </span>
                 </div>
-                <h2 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors duration-200 leading-snug">
-                  {topic.title}
-                </h2>
-                <p className="text-xs font-serif-th text-[#635B4E] leading-relaxed line-clamp-2">
-                  {topic.tagline}
-                </p>
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* แถบการกระทำด้านล่าง: เชิญชวนเปิดไพ่พร้อมประกายทอง */}
-            <div className="pt-2 border-t border-[#D5CEC2]/40 relative z-10">
-              <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#F6F2EA]/70 group-hover:bg-[#29261F] text-[#4A3E31] group-hover:text-[#FAF7F2] transition-colors duration-300 shadow-2xs">
-                <span className="text-xs font-serif-th font-medium">
-                  {topic.highlightText}
-                </span>
-                <span className="inline-flex items-center gap-1 text-xs font-serif-th font-semibold text-[#8F5C1A] group-hover:text-[#E8D5B5] transition-colors">
-                  <span>เริ่มทำนาย</span>
-                  <span className="group-hover:translate-x-1 transition-transform duration-200">➔</span>
-                </span>
-              </div>
-            </div>
+        {/* Apple Style Pagination Dots & Swipe Hint */}
+        <div className="flex flex-col items-center justify-center gap-2 pt-2">
+          {/* Pagination Pills */}
+          <div className="flex items-center justify-center gap-1.5">
+            {QUICK_TOPICS.map((topic, index) => (
+              <button
+                key={topic.id}
+                type="button"
+                onClick={() => scrollToIndex(index)}
+                aria-label={`ไปยังหัวข้อ ${topic.title}`}
+                className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 focus:outline-none ${
+                  activeIndex === index
+                    ? "w-6 sm:w-7 bg-[#8F5C1A] shadow-xs"
+                    : "w-1.5 sm:w-2 bg-[#D5CEC2] hover:bg-[#A58A5C]/70"
+                }`}
+              />
+            ))}
           </div>
-        ))}
+
+          {/* Swipe hint for mobile only */}
+          <p className="sm:hidden text-[10px] font-serif-th text-[#A58A5C] flex items-center gap-1 opacity-75">
+            <span>✦</span>
+            <span>ปัดซ้าย-ขวาเพื่อเลือกเรื่อง</span>
+            <span>✦</span>
+          </p>
+        </div>
       </div>
 
 
