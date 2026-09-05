@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0084 · 2026-09-05 16:21 · 🟠 High · ลบกฎแคช /cards/ ซ้ำซ้อนออกจาก next.config.ts ป้องกัน path-to-regexp syntax error
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | คำสั่ง next build บน Cloudflare CI ล้มเหลวด้วย Error parsing route source Pattern cannot start with ? |
+| **สาเหตุราก** | Next.js ใช้ path-to-regexp ซึ่งไม่รองรับ regex non-capturing group (?:...) ใน source path และ static asset ใน /cards/ มี public/_headers จัดการแคช immutable บน edge อยู่แล้ว |
+| **การแก้ไข** | นำกฎแคช /cards/ ออกจาก nextConfig.headers() ใน next.config.ts และใช้ public/_headers เป็นแหล่งความจริงเดียวสำหรับ static assets |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามใส่ path pattern ที่มี regex group ซับซ้อนใน next.config.ts และให้ใช้ public/_headers สำหรับ Cloudflare static assets เสมอ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ทดสอบรัน next.config.ts ผ่านสมบูรณ์ และรัน repo:verify ผ่านครบ 27 ด่าน |
+| **บันทึกโดย** | Antigravity AI · branch `fix/remove-redundant-next-cards-header` · commit `25ac979` |
+
+
 ### INC-0083 · 2026-09-05 16:09 · 🟠 High · แปลคีย์เวิร์ดไพ่ทาโรต์เป็นภาษาอังกฤษและแก้ไขปัญหาการนำทาง /cards/[id]
 
 | หัวข้อ | รายละเอียด |
