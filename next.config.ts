@@ -72,7 +72,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/cards/:path*",
+        // ⚠️ แคชเฉพาะไฟล์ภาพนิ่ง (.jpg, .webp, .png, .svg) ใน /cards/
+        // ห้ามใช้ /cards/:path* เปล่า ๆ เพราะจะไปทับ route หน้าเว็บ /cards และ /cards/[id]
+        // ส่งผลให้เบราว์เซอร์และ CDN แคช HTML/RSC เป็น immutable แล้วนำทาง client-side ล้มเหลว
+        source: "/cards/:path*\\.(?:jpg|jpeg|webp|png|svg)",
         headers: [
           {
             key: "Cache-Control",

@@ -1,4 +1,5 @@
 import type { Category, TarotCard } from "@/data/cards/types";
+import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
 import { getCosmicContext } from "@/lib/ai/cosmic";
 import { analyzeElementalAlchemy } from "@/lib/ai/alchemy";
@@ -252,9 +253,10 @@ export function buildReadingMessage(ctx: ReadingContext): string {
       const posName = position.nameEn || position.nameTh;
       const posMeaning = position.meaningEn || position.meaning;
       const orientation = d.isReversed ? "Reversed" : "Upright";
+      const kwEn = CARD_KEYWORDS_EN[card.id];
       const keywords = d.isReversed
-        ? (("keywordsEn" in card && (card as any).keywordsEn?.reversed) || card.keywords.reversed)
-        : (("keywordsEn" in card && (card as any).keywordsEn?.upright) || card.keywords.upright);
+        ? (kwEn?.reversed || card.keywords.reversed)
+        : (kwEn?.upright || card.keywords.upright);
       const meaning = d.isReversed
         ? card.meanings[category]?.reversed || card.meanings.general.reversed
         : card.meanings[category]?.upright || card.meanings.general.upright;

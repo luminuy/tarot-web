@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import type { TarotCard } from "@/data/cards/types";
+import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
 import { useHasMounted } from "@/lib/motion";
 import { trackEvent } from "@/lib/analytics";
@@ -78,7 +79,10 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   }, [card.id, card.nameTh, card.element]);
 
   const isUpright = orientation === "upright";
-  const currentKeywords = isUpright ? card.keywords.upright : card.keywords.reversed;
+  const kwEn = CARD_KEYWORDS_EN[card.id];
+  const currentKeywords = isEnglish && kwEn
+    ? (isUpright ? kwEn.upright : kwEn.reversed)
+    : (isUpright ? card.keywords.upright : card.keywords.reversed);
   const elem = ELEMENT_CONFIG[card.element] || ELEMENT_CONFIG["ไฟ"];
 
   const categories = [

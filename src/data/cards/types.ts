@@ -33,6 +33,8 @@ export interface TarotCard {
   nameEn: string;
   /** คำสำคัญสั้น ๆ 4-6 คำ ใช้โชว์ใต้ไพ่บน UI */
   keywords: { upright: string[]; reversed: string[] };
+  /** คำสำคัญสั้น ๆ ภาษาอังกฤษ 4-6 คำ */
+  keywordsEn?: { upright: string[]; reversed: string[] };
   /** ความหมายแยกตามหมวดคำถาม — ต้องมีครบทั้ง 5 หมวด */
   meanings: Record<Category, Interpretation>;
   /** ธาตุ: ไฟ / น้ำ / ลม / ดิน */
