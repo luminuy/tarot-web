@@ -28,6 +28,7 @@ export function RelatedCards({ cardId }: { cardId: string }) {
           <Link
             key={c.id}
             href={`/cards/${c.id}`}
+            prefetch={false}
             className="group flex items-center gap-2.5 p-2.5 rounded-xl border border-[#D5CEC2] bg-white hover:border-[#A58A5C] transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
             <div className="w-8 h-12 shrink-0 overflow-hidden rounded border border-[#D5CEC2] bg-[#EAE7E0]">

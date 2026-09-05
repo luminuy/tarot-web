@@ -33,6 +33,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
         <div className="flex flex-col items-center justify-center gap-3.5 border-b border-[#D5CEC2]/20 pb-8 sm:pb-10 pt-2 sm:pt-4 text-center">
           <Link
             href="/"
+            prefetch={false}
             aria-label={isEnglish ? "SeerTarot — Home" : "SeerTarot — หน้าแรก"}
             className="inline-flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
           >
@@ -86,7 +87,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                 <ul className="space-y-2 text-xs font-serif-th text-[#D5CEC2]/80">
                   {col.links.map((link, lIdx) => (
                     <li key={lIdx}>
-                      <Link href={link.href} className="hover:text-[#FAF7F2] transition-colors">
+                      <Link href={link.href} prefetch={false} className="hover:text-[#FAF7F2] transition-colors">
                         {link.label}
                       </Link>
                     </li>
@@ -97,7 +98,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                   {col.items.map((item, iIdx) => (
                     <li key={iIdx} className={iIdx > 1 ? "pt-1" : undefined}>
                       {"href" in item && item.href ? (
-                        <Link href={item.href} className="hover:text-[#FAF7F2] transition-colors">
+                        <Link href={item.href} prefetch={false} className="hover:text-[#FAF7F2] transition-colors">
                           {item.title}
                         </Link>
                       ) : (
@@ -126,7 +127,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           </div>
           <p className="text-center sm:text-right">
             {isEnglish ? "© 2026 SeerTarot · All rights reserved · " : "© 2026 SeerTarot · สงวนลิขสิทธิ์ · "}
-            <Link href="/privacy" className="hover:text-[#FAF7F2] transition-colors underline">
+            <Link href="/privacy" prefetch={false} className="hover:text-[#FAF7F2] transition-colors underline">
               {isEnglish ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
             </Link>
           </p>

@@ -142,6 +142,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="th" className={`${notoSerifThai.variable} ${sarabun.variable}`}>
       <head>
+        <meta charSet="utf-8" />
         {/* เฉพาะ schema ที่เป็นจริงกับ "ทุกหน้า" เท่านั้นที่อยู่ตรงนี้ได้
             WebApplication / FAQPage / HowTo เป็นความจริงเฉพาะหน้าแรก → ย้ายไป src/app/page.tsx */}
         <script

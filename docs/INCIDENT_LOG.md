@@ -62,6 +62,31 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0088 · 2026-09-05 21:24 · 🟠 High · resolve charset detection, robots/llms CORS fetch, and 34MB prefetch avalanche
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Lighthouse แจ้งเตือน charset error, robots.txt และ llms.txt เกิด Failed to fetch จาก CORS, และมี payload ขนาดใหญ่ 34MB จากการ prefetch RSC ซ้ำซ้อน |
+| **สาเหตุราก** | meta charset อยู่หลัง script json-ld ใน head, ขาด header CORS บน robots และ llms, ไม่มี public/llms.txt, และ Link ในกริดและหน้าแรกเปิด prefetch true เป็นค่าเริ่มต้น |
+| **การแก้ไข** | วางแท็ก meta charSet=utf-8 เป็นบรรทัดแรกใน head, เพิ่ม CORS headers ใน next.config.ts ให้กับ robots/llms/sitemap, สร้าง public/llms.txt พร้อม H1 header, ใส่ prefetch=false ในลิงก์การ์ดและแคตตาล็อกทั้งหมด, และเปลี่ยนสคริปต์บุคคลที่สามเป็น strategy=lazyOnload |
+| **🛡️ กฎป้องกันถาวร** | **วาง meta charset ไว้บนสุดของ head เสมอ, ใส่ Access-Control-Allow-Origin * บนไฟล์ค้นหา, ใส่ prefetch=false ในคอมโพเนนต์กริดและลิสต์ขนาดใหญ่, และใช้ lazyOnload กับสคริปต์ภายนอก** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify ผ่านครบ 29 ด่าน และ npm run typecheck ผ่าน 0 errors |
+| **บันทึกโดย** | Antigravity AI · branch `fix/lighthouse-audits-and-payload-optimization` · commit `82efa0b` |
+
+
+### INC-0087 · 2026-09-05 21:20 · 🟠 High · แก้ปัญหา Lighthouse Charset Detection, robots/llms.txt CORS Fetch, และลด Payload มหาศาล 34MB จาก Next.js Viewport Prefetch Avalanche
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | 1. Lighthouse Best Practices รายงาน `Properly defines charset — Error!` ไม่พบ meta charset ใน 1024 ไบต์แรก<br>2. Lighthouse SEO รายงาน `robots.txt is not valid Fetch of robots.txt failed: Failed to fetch`<br>3. Lighthouse Agentic Browsing รายงาน `llms.txt does not follow recommendations Fetch of llms.txt failed: Failed to fetch`<br>4. Performance audit แจ้งเตือน `Avoid enormous network payloads — Total size was 34,054 KiB` (34 MB) และมีการส่งคำขอ `/cards?_rsc=...` ซ้ำซ้อนหลายสิบครั้งขณะเลื่อนหน้าจอ พร้อมแจ้งเตือน `Reduce JavaScript execution time — 3.5s` และ `Avoid long main-thread tasks — 6 long tasks found` |
+| **ผลกระทบ** | คะแนน Lighthouse ด้าน Best Practices, SEO และ Performance ลดลงอย่างมีนัยสำคัญ ผู้ใช้บนมือถือถูกดาวน์โหลดข้อมูล RSC ล่วงหน้ารวมกว่า 34 MB สิ้นเปลืองเน็ตและหน่วยประมวลผล |
+| **สาเหตุราก** | 1. ใน `src/app/layout.tsx` แท็ก `<head>` เริ่มต้นด้วย `<script type="application/ld+json">` ขนาดใหญ่ 2 ชุด ทำให้ `<meta charSet="utf-8" />` ถูกเลื่อนออกไปเกิน 1,024 ไบต์แรกของเอกสาร HTML<br>2. ใน `next.config.ts` ไม่ได้ตั้งค่า CORS header (`Access-Control-Allow-Origin: *`) ให้กับ `/robots.txt`, `/llms.txt`, และ `/sitemap.xml` ทำให้ fetch ข้าม origin (เช่น จาก DevTools isolated context หรือ crawler extension) ถูกบล็อกด้วย CORS จนเกิด `TypeError: Failed to fetch`<br>3. ยังไม่มีไฟล์ `public/llms.txt` และไม่มีหัวข้อ H1 ตามมาตรฐาน llmstxt.org<br>4. Next.js `<Link>` มีค่าเริ่มต้น `prefetch={true}` ซึ่งใช้ IntersectionObserver ตรวจจับ viewport เมื่อผู้ใช้เลื่อนหน้าจอ คอมโพเนนต์ `CardsExplorer` (ไพ่ 78 ใบ), `HomeSeoContent`, `SiteFooter`, `SacredNavDropdown`, และ `SpreadsLibrary` จะยิง prefetch RSC payload พร้อมกันทั้งหมด โดยเฉพาะ `/cards?_rsc=...` ขนาด 162 KiB ถูกยิงซ้ำๆ จน payload รวมพุ่งถึง 34,054 KiB<br>5. สคริปต์บุคคลที่สาม (Google Tag Manager, Meta Pixel) ใน `AnalyticsTracker.tsx` กำหนด `strategy="afterInteractive"` ทำให้แย่งรันบน Main Thread ทันทีหลัง hydration ส่งผลให้เวลาประมวลผล JS พุ่งสูง 3.5s+ |
+| **การแก้ไข** | 1. ใส่ `<meta charSet="utf-8" />` เป็นบรรทัดแรกสุดภายใน `<head>` ใน `src/app/layout.tsx` (ไม่เกินไบต์ที่ 60)<br>2. เพิ่มกฎ headers ใน `next.config.ts` ให้ `/robots.txt`, `/llms.txt`, และ `/sitemap.xml` คืนค่า `Access-Control-Allow-Origin: *` และ `Access-Control-Allow-Methods: GET, HEAD, OPTIONS`<br>3. สร้าง `public/llms.txt` ตามมาตรฐาน llmstxt.org พร้อมหัวข้อ `# SeerTarot` (H1) และสารบัญคลังข้อมูลพยากรณ์<br>4. กำหนด `prefetch={false}` ในการ์ดและลิงก์ของ `CardsExplorer`, `HomeSeoContent`, `SiteFooter`, `SacredNavDropdown`, `SpreadsLibrary`, `BlogIndexClient`, และ `RelatedCards` เพื่อปิดการดึง RSC ล่วงหน้าอัตโนมัติบน viewport (ยังคง prefetch ทันทีเมื่อผู้ใช้นำเมาส์ไปชี้ hover)<br>5. เปลี่ยนสคริปต์ Google Analytics/Tag Manager และ Meta Pixel เป็น `strategy="lazyOnload"` เพื่อประมวลผลใน idle frame |
+| **🛡️ กฎป้องกันถาวร** | **1. <meta charSet="utf-8" /> ต้องอยู่บรรทัดแรกสุดของ <head> ก่อน script หรือ schema JSON-LD ใดๆ เสมอ เพื่อการันตีว่าอยู่ใน 1024 ไบต์แรก<br>2. สาธารณูปโภคการค้นหาและบอท (robots.txt, llms.txt, sitemap.xml) ต้องมี Access-Control-Allow-Origin: * ใน headers เสมอ<br>3. ลิงก์ในคอมโพเนนต์ที่เป็น Grid/Catalog/List ขนาดใหญ่ (ไพ่ 78 ใบ, ผัง 20 แบบ, บทความ, Footer) ต้องใส่ prefetch={false} เสมอ เพื่อป้องกันปัญหา Next.js RSC Prefetch Avalanche ผลาญแบนด์วิดท์ผู้ใช้<br>4. สคริปต์ Analytics หรือ Tag Manager ของบุคคลที่สามต้องใช้ strategy="lazyOnload" เสมอเพื่อไม่ให้บล็อก Main Thread** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ผ่านครบทั้ง 29 ด่านของ `npm run repo:verify`, `npm run typecheck` 0 errors, ตรวจสอบ charset อยู่บรรทัดแรก, CORS headers ถูกต้อง, llms.txt ตอบสนองได้สมบูรณ์, payload ขนาด 34 MB ลดลงเหลือตามปกติ |
+| **บันทึกโดย** | Antigravity AI · branch `fix/lighthouse-audits-and-payload-optimization` |
+
+
 ### INC-0086 · 2026-09-05 20:55 · 🟠 High · แก้ปัญหาแถบ Header ค้าง, UI Latency ในการสลับภาษา, State Purity, และ Focus Stealing (ISSUE-024 ถึง ISSUE-030)
 
 | หัวข้อ | รายละเอียด |

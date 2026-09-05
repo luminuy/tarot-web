@@ -274,6 +274,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               <Link
                 key={card.id}
                 href={`/cards/${card.id}`}
+                prefetch={false}
                 className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#A58A5C] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 shadow-xs"
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}

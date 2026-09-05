@@ -226,7 +226,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 </div>
 
                 <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug">
-                  <Link href={`/blog/${featured.slug}`}>{featTitle}</Link>
+                  <Link href={`/blog/${featured.slug}`} prefetch={false}>{featTitle}</Link>
                 </h2>
 
                 <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed line-clamp-3">
@@ -240,6 +240,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   </span>
                   <Link
                     href={`/blog/${featured.slug}`}
+                    prefetch={false}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#29261F] hover:bg-[#8F5C1A] text-[#F3F0EA] font-semibold text-xs transition-all font-serif-th shadow-sm group/btn"
                   >
                     <span>{isEnglish ? "Read Full Codex" : "อ่านคัมภีร์ฉบับเต็ม"}</span>
@@ -321,7 +322,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                     <div className="flex items-start gap-4">
                       <div className="space-y-2 flex-1 min-w-0">
                         <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug line-clamp-2">
-                          <Link href={`/blog/${article.slug}`}>{artTitle}</Link>
+                          <Link href={`/blog/${article.slug}`} prefetch={false}>{artTitle}</Link>
                         </h3>
                         <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed line-clamp-3">
                           {artDesc}
@@ -354,6 +355,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                     </div>
                     <Link
                       href={`/blog/${article.slug}`}
+                      prefetch={false}
                       className="inline-flex items-center gap-1 text-xs text-[#29261F] group-hover:text-[#8F5C1A] group-hover:translate-x-0.5 transition-all font-serif-th font-bold flex-shrink-0"
                     >
                       <span>{isEnglish ? "Read Codex" : "อ่านต่อ"}</span>
