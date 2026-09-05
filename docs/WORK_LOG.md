@@ -36,6 +36,13 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: วางแผน "หน้าผลลัพธ์ทำนายด่วนแบบสั้น" แยกจากหน้าฝังใหญ่ (ยังไม่ลงมือแก้โค้ด) — โดย Claude
+
+- เจ้าของโปรเจกต์ตรวจหน้าจอจริงของ flow ทำนายด่วนแล้วพบว่าหน้าผลลัพธ์ยังใช้ `StreamReader` ตัวเดียวกับผังใหญ่ (มีแท็บ "อ่านรายใบ/สรุปภาพรวม" + บทสรุปยาว 6-9 ประโยค) ไม่ตรงกับความต้องการ "เร็ว สั้น กระชับ แชทกับแม่หมอได้เลย"
+- วิเคราะห์ต้นตอพบว่า `src/lib/ai/prompt.ts` คุมความยาวคำตอบตาม `cardCount` โดยผังไพ่ยิ่งน้อยใบ (`cardCount <= 2`) ยิ่งถูกสั่งให้ตอบยาวสุด (5-7 ประโยค/ใบ, สรุป 6-9 ประโยค) ซึ่งผิดสมมติฐานสำหรับ flow ทำนายด่วน (ไพ่ 1 ใบ, spread id `"quick"`)
+- เขียนแผนละเอียดไว้ที่ [`docs/plans/QUICK_CHAT_RESULT_PLAN.md`](plans/QUICK_CHAT_RESULT_PLAN.md) ให้ทีมอื่นรับไปทำต่อ: เพิ่ม field `resultStyle` บน `Spread`, แตกกิ่ง `depth` ในพรอมป์เฉพาะ `resultStyle === "quick"` ให้สั้นลงจริง, สร้าง component ใหม่ `QuickChatResult.tsx` (ไม่มีแท็บ ไม่มี "ความเชื่อมโยงของไพ่ทั้งชุด", ฟีเจอร์รองยุบใน `CollapsibleCard`), สลับ render ใน `TarotFlow.tsx` เฉพาะ spread `"quick"` โดยไม่แตะ `daily`/ผังอื่น และไม่แยก route ใหม่ (คง state machine เดิมเพื่อไม่ต้องสร้างระบบ session/entitlement/provably-fair/history ซ้ำ)
+- **ยังไม่แก้ไขโค้ดจริง** — งานถัดไปคือให้ทีมที่รับผิดชอบ `agent:lock` ไฟล์ตามแผนแล้วลงมือตามลำดับใน [ข้อ 6](plans/QUICK_CHAT_RESULT_PLAN.md#6-รายการงาน-แบ่งเป็นก้อนย่อย)
+
 ### 🗓️ 2026-09-05: จัดวางไพ่ประจำวันไว้บนสุดของหน้าแรก และนำ Hero กองไพ่ 3D ออก — โดย Antigravity AI
 
 - **ปรับโครงสร้างเลย์เอาต์หน้าแรก (`SPREAD_SELECT`) ใน `src/app/TarotFlow.tsx` ตามคำขอ**:
