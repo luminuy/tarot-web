@@ -32,6 +32,9 @@
 | [docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md) | แผนกระจายงาน 5 เอเจนท์เฉพาะทาง |
 | [docs/plans/HANDOFF_2026-09-04.md](docs/plans/HANDOFF_2026-09-04.md) | 📦 แผนส่งต่องานค้าง (ISSUE-017 ถึง 023) — ปิดครบแล้ว |
 | [docs/plans/AI_INTELLIGENCE_PLAN.md](docs/plans/AI_INTELLIGENCE_PLAN.md) | 🧠 **แผนแม่บทยกระดับแม่หมอ AI** — เอกสารเดียวจบ (3 ระบบที่ไม่ได้ต่อ + 10 งานแบ่ง 3 คลื่น + เกณฑ์ผ่านรายข้อ) |
+| [docs/plans/HANDOFF_HEADER_20260905.md](docs/plans/HANDOFF_HEADER_20260905.md) | 🧭 แผนแก้ "แถบ header ค้าง" (ISSUE-024 ถึง 030) — ปิดครบแล้วใน PR #277 · #280 |
+| [docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md](docs/plans/TRAFFIC_CAPTURE_PLAN_2026-09-05.md) | 🎯 **แผนแย่งทราฟฟิกจาก MyHora** — SERP จริง + แผนที่ 9 หน้าของคู่แข่ง + ยุทธศาสตร์ 4 คลื่น |
+| [docs/plans/HANDOFF_SEO_WAVE1_2026-09-05.md](docs/plans/HANDOFF_SEO_WAVE1_2026-09-05.md) | 🌊 **แผนส่งต่อ SEO คลื่น 1** — เติมคำ "ไพ่ยิปซี" ทั่วเว็บ · 6 งาน 8 ไฟล์ พร้อม before/after ทุกบรรทัด |
 
 ---
 
