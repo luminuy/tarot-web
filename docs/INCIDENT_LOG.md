@@ -72,6 +72,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **🛡️ กฎป้องกันถาวร** | **ห้ามกำหนด Cache-Control immutable ให้กับ path ที่แชร์ชื่อกับ App Router page route และต้องเพิ่ม unit test ตรวจสอบคีย์เวิร์ดภาษาอังกฤษของไพ่ทาโรต์** |
 | **การพิสูจน์ว่าแก้ได้จริง** | รัน repo:verify ผ่านทั้ง 27 ด่าน และทดสอบการแสดงผลคีย์เวิร์ดภาษาอังกฤษสมบูรณ์ |
 | **บันทึกโดย** | Antigravity AI · branch `fix/english-keywords-and-card-navigation` · commit `fe93d35` |
+### INC-0083 · 2026-09-05 16:08 · 🟡 Medium · ผังใหญ่/ปรมาจารย์ลับค้างล็อกแม้ปิดระบบสิทธิ์จาก /admin
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | แอดมินกดปิด 'เปิดระบบสิทธิ์จริง' ที่ /admin เพื่อให้คนทดลองเล่นไม่ติดลิมิต แต่ผังใหญ่ (เช่น Celtic Cross 10 ใบ) และปรมาจารย์ลับยังขึ้นล็อก 'Tap to unlock this spread' เหมือนเดิม |
+| **ผลกระทบ** | ผู้เยี่ยมชม/สมาชิกเลือกผังใหญ่หรือปรมาจารย์ลับไม่ได้ทั้งที่แอดมินตั้งใจปลดลิมิตทั้งหมดแล้ว ขัดจุดประสงค์ของสวิตช์ entitlement.enforced |
+| **สาเหตุราก** | isPassHolder ใน TarotFlow.tsx คำนวณจาก entitlementView?.isUnlimited กับ entitlement?.hasPaidCredits เท่านั้น แต่ describeEntitlement() คืน null ทันทีเมื่อ ent.enabled=false (ดู copy.ts บรรทัด 111) และ /api/entitlement คืน hasPaidCredits:false เสมอตอนปิดระบบ ทำให้ isPassHolder เป็น false ค้าง แม้เซิร์ฟเวอร์ (reading/start route) จะอนุญาตผังใหญ่แล้วเพราะเช็คอยู่ใน if(isEntitlementEnabled()) เท่านั้น |
+| **การแก้ไข** | เพิ่มเงื่อนไข (entitlement && !entitlement.enabled) เข้าไปใน isPassHolder ที่ TarotFlow.tsx ให้ถือว่าทุกคนเป็น pass holder เมื่อแอดมินปิดระบบสิทธิ์ทั้งเว็บ ตรงกับ pattern เดียวกับที่ FollowUpChat.tsx ใช้กับ isUnlimited อยู่แล้ว |
+| **🛡️ กฎป้องกันถาวร** | **เวลาเพิ่มเงื่อนไขปลดล็อกฝั่ง UI (pass holder / unlimited) ต้องเช็ค entitlement.enabled ควบคู่กับ hasPaidCredits/role เสมอ — ห้ามอาศัย describeEntitlement() อย่างเดียวเพราะมันคืน null ทันทีที่ enabled=false ซึ่งบังตัวแปรอื่นที่ต่อจากมันไปด้วย** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run typecheck ผ่าน · ตรวจโค้ด TarotFlow.tsx: entitlement.enabled=false → isPassHolder=true → isGrand && !isPassHolder=false → การ์ดผังใหญ่ไม่ล็อกอีกต่อไป |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/remove-trial-limits-a45176` · commit `fe93d35` |
 
 
 ### INC-0082 · 2026-09-05 11:23 · 🟡 Medium · resolve 4 missing featured blog articles and harmonize SEO links
