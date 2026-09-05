@@ -36,6 +36,46 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ตรวจวินิจฉัยอาการ "แถบ header ค้าง" และวางแผนส่งต่อ (Header Hang Audit — วิเคราะห์อย่างเดียว ยังไม่แก้โค้ด) — โดย Claude
+
+> **ขอบเขต**: เจ้าของโปรเจกต์แจ้งอาการ "แถบ header ค้าง" และสั่งให้ตรวจอย่างละเอียด
+> **ผลลัพธ์**: เอกสารแผนส่งต่อ + ลงทะเบียน ISSUE-024 ถึง ISSUE-030 · **ยังไม่ได้แก้โค้ดแม้แต่บรรทัดเดียว**
+> **branch**: `claude/header-hang-issue-0c30b9` · **commit ฐาน**: `ba167ee`
+
+- **วิธีตรวจ (กฎ 0.2 ข้อ 1 — วัดก่อนเดา)**:
+  - `npm run dev` **รันไม่ได้ใน worktree นี้** — npm ตาย `EPERM: uv_cwd` จาก sandbox จึงวัดกับ **production `seertarot.net` จริง** ผ่าน DevTools protocol แทน (`getComputedStyle`, `elementFromPoint`, วัด commit latency, ไล่ ancestor overflow chain) ควบคู่กับการอ่านโค้ด
+  - ทดสอบที่ความกว้าง desktop / 375px / 320px และทั้งหน้า `/` (header อยู่ใน `<main>`) และ `/blog` (header เป็นลูกตรงของ `<body>`)
+
+- **✅ ยืนยันว่ายังไม่พัง — กฎป้องกันถาวรของเอเจนต์รุ่นก่อนยังทำงานอยู่ทั้งหมด**:
+  - `getComputedStyle(header)` คืน `position: "sticky"` · `zIndex: "50"` — เลื่อน y = 0→4000 แล้ว `top === 0` ทุกจุด ทั้ง `/` และ `/blog`
+  - `main` เป็น `overflow-x: clip` / `overflow-y: visible` ไม่ใช่ `hidden` → **INC-0067 ยังถูกบังคับใช้อยู่**
+  - `:not([data-site-header])` ยังอยู่ใน `globals.css:186` → **INC-0081 ยังถูกบังคับใช้อยู่**
+  - hit-test แผงเมนู 4 จุด (5%/30%/60%/90%) — `elementFromPoint` ตอบเป็น element ในแผงครบ 4/4 ไม่ถูกเนื้อหาทับ
+  - จอ 320px: `document.documentElement.scrollWidth === 320` ไม่ล้นแนวนอน แผงเมนูสูง 628px < จอ 700px
+  - ไล่ scroll-lock ซ้อนของโมดัลครบทุกคู่ (`AccessDialog` → `BuyCredits` → `Auth`) ทุกเส้นทางเรียก `onClose()` ก่อนเปิดตัวใหม่ และ React รัน cleanup ทั้ง commit ก่อน mount → **`document.body.style.overflow` ไม่รั่ว**
+  - **สรุป: ปัญหารอบนี้ไม่ได้อยู่ที่เลย์เอาต์ แต่อยู่ที่จังหวะเวลาของ CSS transition และ React scheduling**
+
+- **🔴 สิ่งที่พบและลงทะเบียนไว้ใน [`docs/KNOWN_ISSUES.md`](KNOWN_ISSUES.md) (7 รายการ)**:
+  - **ISSUE-024** 🔴 แผงเมนูค้าง `visibility: hidden` ทั้งที่ `aria-expanded="true"` — `globals.css:484-506` ใส่ `visibility` ลงในรายการ `transition` แผงจึงโผล่ได้ต่อเมื่อ transition วิ่งจบ · **ตัดตัวแปรพิสูจน์แล้ว**: ฉีด `transition: none` แล้วแผงกลับมาปกติทันที (hit-test ผ่าน 4/4)
+  - **ISSUE-025** 🔴 กด TH/EN แล้วหัวเว็บนิ่ง — `i18n/context.tsx:72` ใช้ `startTransition` กับ urgent update และ **ทิ้ง `isPending` ทั้งดุ้น** · วัด commit latency ได้ **353 ms** บน desktop
+  - **ISSUE-026** 🟠 `LocaleProvider` ไม่ memo `value` → consumer ทั้งเว็บ re-render ทุกครั้ง (หัวเว็บเรียก `useLocale()` 4 จุด)
+  - **ISSUE-027** 🟠 `will-change` ค้างถาวรบนแผง dropdown ที่ปิดอยู่ — **ละเมิดกฎที่โปรเจกต์เขียนเตือนตัวเองไว้ที่ `globals.css:367` โดยบรรทัด `486` ในไฟล์เดียวกัน ห่างกัน 119 บรรทัด**
+  - **ISSUE-028** 🟠 `window.dispatchEvent` อยู่ใน `setState` updater ซึ่งต้องเป็น pure function (ซ้ำ 2 ไฟล์: `SacredNavDropdown.tsx:71` และ `UserProfileBadge.tsx:80`)
+  - **ISSUE-029** 🟠 `AuthModal.tsx:114` ใช้ deps `[isOpen, onClose]` — **กับดักเดียวกับที่ `Modal.tsx:33-47` เขียนคอมเมนต์เตือนไว้ยาวเหยียดพร้อมชื่ออาการ 3 ข้อ แต่ `AuthModal` ไม่เคยได้รับการแก้**
+  - **ISSUE-030** 🔵 ไม่มี `scroll-padding-top` ทั้งโปรเจกต์ ทั้งที่หัวเว็บ sticky สูง 69-81px (`FollowUpChat.tsx:338` ต้องแปะ `scroll-mt-24` แก้เฉพาะจุดเอง)
+
+- **📦 แผนส่งต่อ: [`docs/plans/HANDOFF_HEADER_2026-09-05.md`](plans/HANDOFF_HEADER_2026-09-05.md)**:
+  - แบ่ง **4 PR** — PR-A (024+027 · `globals.css` ไฟล์เดียว) · PR-B (025+026 · i18n context) · PR-C (028+029 · React correctness) · PR-D (030)
+  - แต่ละข้อมีครบ: อาการ → หลักฐานตัวเลขจริง → สาเหตุราก พร้อม `file:line` → โค้ด before/after เต็ม → เกณฑ์ผ่านที่เป็น snippet รันได้ใน Console → เช็กลิสต์ทดสอบด้วยมือบนมือถือจริง
+  - **สั่งเพิ่มด่านตรวจอัตโนมัติ 2 ตัว** ตามกฎ 0.2 ข้อ 8 (*"กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน"*): `scripts/qa/test-will-change.ts` และ `scripts/qa/test-modal-effect-deps.ts` — ใช้หลัก **Ratchet + ALLOWLIST** ห้ามทำ CI พังทันที (INC-0007)
+  - เพราะ ISSUE-027 และ ISSUE-029 คือกรณีที่ **กฎถูกเขียนเป็นคอมเมนต์ไว้แล้วแต่ยังถูกละเมิด** = พิสูจน์แล้วว่าเขียนเตือนอย่างเดียวไม่พอ
+
+- **🔍 สิ่งที่ยังตอบไม่ได้ (กฎ 0.2 ข้อ 5 — รายงานตามจริง)**:
+  - **ยังยืนยันไม่ได้ว่าอาการที่เจ้าของเจอคือ ISSUE-024 หรือ ISSUE-025** — ทั้งคู่ให้อาการ "ค้าง" เหมือนกันแต่คนละกลไก ต้องถามให้ชัดว่า: กดเมนูแล้วไม่ขึ้น? / กด TH-EN แล้วนิ่ง? / เลื่อนแล้วกระตุก?
+  - **ยังไม่ได้ทดสอบบนอุปกรณ์จริง** และแท็บที่ใช้ทดสอบอยู่ในสถานะ `document.visibilityState === "hidden"` ซึ่งเป็นตัวแปรกวนของ ISSUE-024 โดยตรง
+  - **ยังไม่มีตัวเลข fps จริง** — `PerformanceObserver({entryTypes:['longtask']})` คืนค่าว่างแต่เชื่อถือไม่ได้เพราะแท็บไม่ paint
+  - **iOS Safari + `100dvh`** — แผงเมนูใช้ `max-h-[calc(100dvh-4.5rem)]` ยังไม่ได้ทดสอบบน iOS จริง
+
 ### 🗓️ 2026-09-05: ปรับความกระชับของหน้าต่างเข้าสู่ระบบและสมัครสมาชิก (Clean Auth Modal Layout) — โดย Antigravity AI
 
 - **ลดทอนข้อความส่วนเกินเพื่อเพิ่มความกระชับและรองรับหน้าจอมือถืออย่างสมบูรณ์แบบ (`AuthModal.tsx`)**:

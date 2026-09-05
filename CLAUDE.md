@@ -31,6 +31,7 @@
 | [docs/plans/ENTITLEMENT_PLAN.md](docs/plans/ENTITLEMENT_PLAN.md) | แผนพัฒนาระบบสมาชิกและโควตาเปิดไพ่ |
 | [docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md) | แผนกระจายงาน 5 เอเจนท์เฉพาะทาง |
 | [docs/plans/HANDOFF_2026-09-04.md](docs/plans/HANDOFF_2026-09-04.md) | 📦 แผนส่งต่องานค้าง (ISSUE-017 ถึง 023) — ปิดครบแล้ว |
+| [docs/plans/HANDOFF_HEADER_2026-09-05.md](docs/plans/HANDOFF_HEADER_2026-09-05.md) | 🧭 **แผนแก้ "แถบ header ค้าง"** (ISSUE-024 ถึง 030) — 4 PR พร้อมโค้ด before/after และเกณฑ์ผ่านรายข้อ · **ยังไม่ได้แก้** |
 | [docs/plans/AI_INTELLIGENCE_PLAN.md](docs/plans/AI_INTELLIGENCE_PLAN.md) | 🧠 **แผนแม่บทยกระดับแม่หมอ AI** — เอกสารเดียวจบ (3 ระบบที่ไม่ได้ต่อ + 10 งานแบ่ง 3 คลื่น + เกณฑ์ผ่านรายข้อ) |
 
 ---
