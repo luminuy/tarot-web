@@ -36,6 +36,17 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ปรับการ์ดทำนายด่วนเป็น Full-Width สไตล์ Apple Store และนำจุด Indicator ออกตามคำขอ — โดย Antigravity AI
+
+- **ปรับปรุง `src/components/reading/QuickFortunePicker.tsx` ตามคำขอและภาพอ้างอิง Apple Store**:
+  - **Full-Width Edge-to-Edge Bleed Layout**: ปรับคอนเทนเนอร์ Carousel ให้ขยายเต็มความกว้างหน้าจอแบบ Full-Width (`w-screen relative left-1/2 -translate-x-1/2`) พร้อม Padding ขอบแบบ Responsive (`px-4 sm:px-10 md:px-16 lg:px-24`) ทำให้การ์ดไหลลื่นจรดขอบจอซ้าย-ขวาอย่างสง่างาม ไม่ถูกบีบอยู่ในกรอบจำกัดอีกต่อไป
+  - **Spacious Apple Cards**: ขยายขนาดการ์ดให้อ่านง่าย โปร่ง สบายตาตามสัดส่วน Apple Store (`w-[290px] xs:w-[320px] sm:w-[360px] md:w-[390px] lg:w-[410px]`) พร้อมภาพไพ่ 1909 Rider-Waite ที่คมชัดและขนาดใหญ่ขึ้น
+  - **Floating Circular Navigation Buttons**: ปุ่มวงกลม `<` และ `>` ลอยเด่นที่ขอบซ้าย-ขวาของหน้าจอพร้อมเงาและ Backdrop Blur นุ่มนวล
+  - **นำรูปที่ 3 (จุด Pagination Indicator) ออกทั้งหมด**: ตัดจุดไข่ปลา 4 เม็ดและข้อความแนะนำออกตามคำสั่งผู้ใช้ ทำให้เลย์เอาต์มินิมอล สะอาดตา และเหมือนกับหน้า Apple Store จริง
+- **ผลการทดสอบ**:
+  - TypeScript Typecheck: `0 errors`
+  - QA Test (`scripts/qa/test-quick-fortune.ts`): `45/45 ผ่านสมบูรณ์`
+
 ### 🗓️ 2026-09-05: สร้างหน้าผลลัพธ์ทำนายด่วนแบบสั้น (Quick Chat Result) แยกจากหน้าฝังใหญ่ — โดย Antigravity AI
 
 - **แก้ไขปัญหาคำทำนายยาวเกินไปในโหมดทำนายด่วน 1 ใบตามแผนงาน `docs/plans/QUICK_CHAT_RESULT_PLAN.md` ครบถ้วน 100%**:
