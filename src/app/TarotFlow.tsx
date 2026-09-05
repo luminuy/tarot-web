@@ -660,8 +660,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       scrollToSanctuaryTop();
       navigateStep("READING");
 
-      // เริ่มสตรีมคำทำนาย AI เบื้องหลังทันที
-      startAIStreaming(sessionReadingId, enrichedCards, latestToken);
+      // เริ่มสตรีมคำทำนาย AI เบื้องหลังทันที พร้อมส่งคำถามเต็มจริง ๆ และหมวดหมู่ตรงหัวข้อ ป้องกัน stale closure
+      startAIStreaming(sessionReadingId, enrichedCards, latestToken, {
+        question: topic.defaultQuestion,
+        category: topic.category,
+        spread: quickSpread,
+        nickname: userNickname,
+      });
     } catch (err: any) {
       setErrorMsg(err.message || "เกิดข้อผิดพลาดในการประมวลผลไพ่ด่วน");
     } finally {
@@ -803,7 +808,17 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     return () => readStreamAbortRef.current?.abort();
   }, []);
 
-  const startAIStreaming = async (id: string, cards: DrawnSlotCard[], currentToken?: string | null) => {
+  const startAIStreaming = async (
+    id: string,
+    cards: DrawnSlotCard[],
+    currentToken?: string | null,
+    overrides?: {
+      question?: string;
+      category?: string;
+      spread?: Spread;
+      nickname?: string;
+    }
+  ) => {
     // ยกเลิกรอบก่อนหน้าเสมอ — กันกด "โหลดใหม่อีกครั้ง" รัว ๆ แล้วมีสองสตรีมวิ่งพร้อมกัน
     readStreamAbortRef.current?.abort();
     const abortController = new AbortController();
@@ -892,12 +907,17 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
                 // Auto-save to Reading Journal
                 if (data.reading) {
+                  const effectiveQuestion = overrides?.question?.trim() || question.trim() || "ภาพรวมดวงชะตา";
+                  const effectiveCategory = overrides?.category || selectedCategory;
+                  const effectiveSpread = overrides?.spread || selectedSpread;
+                  const effectiveNickname = (overrides?.nickname ?? nickname).trim() || undefined;
+
                   saveReading({
-                    nickname: nickname.trim() || undefined,
-                    question: question.trim() || "ภาพรวมดวงชะตา",
-                    spreadId: selectedSpread.id,
-                    spreadName: selectedSpread.nameTh,
-                    category: selectedCategory,
+                    nickname: effectiveNickname,
+                    question: effectiveQuestion,
+                    spreadId: effectiveSpread.id,
+                    spreadName: effectiveSpread.nameTh,
+                    category: effectiveCategory,
                     personaId: selectedPersona.id,
                     personaName: selectedPersona.nameTh,
                     cards: cards.map((c) => ({

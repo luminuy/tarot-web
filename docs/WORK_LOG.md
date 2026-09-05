@@ -36,6 +36,25 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ผสานการบันทึกประวัติคำทำนายด่วนเต็มรูปแบบ (Full Question & Category) และขอบเขตห้องแชทตาม PDPA (ข้อ 6.8) — โดย Antigravity
+
+- **การบันทึกประวัติการทำนายด่วน (`src/app/TarotFlow.tsx` & `src/lib/utils/history.ts`)**:
+  - แก้ไขจุดบกพร่องที่เกิดจาก asynchronous state closure ใน React โดยเพิ่มพารามิเตอร์ `overrides` ให้กับฟังก์ชัน `startAIStreaming`
+  - ส่งคำถามเต็มจริง ๆ ที่ auto-fill ไว้ในหัวข้อ (`topic.defaultQuestion` เช่น *"ภาพรวมความรักและความสัมพันธ์ตอนนี้เป็นอย่างไร และควรเปิดใจรับมืออย่างไร"*), `topic.category`, `quickSpread`, และ `userNickname` เข้าสู่กระบวนการบันทึก `saveReading()` โดยตรง
+  - ผลลัพธ์: เมื่อผู้ใช้เปิดดูประวัติย้อนหลังใน Reading Journal (`/account` หรือ `ReadingHistoryModal`) จะเห็นข้อความคำถามเต็มที่ลึกซึ้งและชัดเจนว่าตอนนั้นถามเรื่องอะไร ไม่ใช่แค่ชื่อหัวข้อสั้น ๆ หรือข้อความ fallback ทั่วไป
+- **ขอบเขตห้องแชทกับแม่หมอ (PDPA Privacy Boundary)**:
+  - ยืนยันการคงพฤติกรรมเดิม: ไม่บันทึกประวัติการสนทนาในห้องแชททั้งฝั่ง client และ server เพื่อความปลอดภัยและความเป็นส่วนตัวตาม PDPA 100%
+- **การอัปเดตเอกสารแม่บท (`docs/plans/QUICK_FORTUNE_PLAN.md`)**:
+  - เพิ่มหัวข้อ 6.7 (QA Test & Gate 27) และ 6.8 (Reading Journal & History + Chat Boundary)
+  - อัปเดตสถานะ Acceptance Criteria ครบทุกข้อ รวมถึง Gate 27
+  - อัปเดตรายการไฟล์ที่เกี่ยวข้อง
+- **การทดสอบและการประกันคุณภาพ**:
+  - `npm run typecheck` ➔ **0 Errors**
+  - `npx tsx scripts/qa/test-quick-fortune.ts` ➔ **42/42 ผ่าน**
+  - `npm run repo:verify` ➔ **27/27 ด่านสมบูรณ์**
+
+---
+
 ### 🗓️ 2026-09-05: ยกระดับดีไซน์การ์ดทำนายด่วน (Quick Fortune) สู่ความวิจิตรบรรจงระดับวิหารพยากรณ์ — โดย Antigravity
 
 - **แรงผลักดันและข้อเสนอแนะจากผู้ใช้**:
