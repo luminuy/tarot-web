@@ -309,11 +309,13 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             )}
           </div>
 
-          {/* ⚡ DIRECT FAST-CHAT CTA BUTTON (ทางลัดคุยกับแม่หมอต่อทันที ไม่ต้องเลื่อนยาว) */}
+          {/* ⚡ DIRECT FAST-CHAT CTA BUTTON (ทางลัดคุยกับแม่หมอต่อทันที ไม่ต้องเลื่อนยาว)
+              lg:hidden — จอ ≥lg มีการ์ดแชท sticky ฝั่งขวาอยู่แล้ว (TarotFlow.tsx aside) โชว์ซ้ำกันจะรก
+              จอเล็กกว่า lg การ์ดฝั่งขวาตกไปอยู่ใต้บล็อกนี้ จึงยังต้องมีปุ่มลัดตรงนี้ */}
           {readingId && (
             <Link
               href="/reading/chat"
-              className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[#D9C8AC] bg-[#F3EDE2] hover:bg-[#FFFFFF] p-4 text-left transition-all hover:border-[#8F5C1A] hover:shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+              className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[#D9C8AC] bg-[#F3EDE2] hover:bg-[#FFFFFF] p-4 text-left transition-all hover:border-[#8F5C1A] hover:shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] lg:hidden"
             >
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-sm shadow-2xs group-hover:scale-105 transition-transform">
