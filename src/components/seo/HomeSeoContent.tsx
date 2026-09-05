@@ -487,6 +487,7 @@ export function HomeSeoContent() {
           <div className="flex items-center gap-3">
             <Link
               href="/spreads"
+              prefetch={false}
               className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
             >
               {isEnglish ? "Explore All Spreads (20) " : "ดูผังทั้งหมด (20 ผัง) "}
@@ -495,6 +496,7 @@ export function HomeSeoContent() {
             <span className="text-[#D5CEC2]">|</span>
             <Link
               href="/cards"
+              prefetch={false}
               className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
             >
               {isEnglish ? "Card Codex (78 Cards) " : "คลังไพ่ 78 ใบ "}
@@ -507,6 +509,7 @@ export function HomeSeoContent() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <Link
             href="/spreads/celtic-cross"
+            prefetch={false}
             className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
@@ -531,6 +534,7 @@ export function HomeSeoContent() {
 
           <Link
             href="/spreads/three-card"
+            prefetch={false}
             className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
@@ -555,6 +559,7 @@ export function HomeSeoContent() {
 
           <Link
             href="/spreads/decision"
+            prefetch={false}
             className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
@@ -587,6 +592,7 @@ export function HomeSeoContent() {
             </h3>
             <Link
               href="/cards"
+              prefetch={false}
               className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:underline"
             >
               {isEnglish ? "View All 78 Cards →" : "ดูทั้งหมด 78 ใบ →"}
@@ -597,6 +603,7 @@ export function HomeSeoContent() {
               <Link
                 key={card.id}
                 href={`/cards/${card.id}`}
+                prefetch={false}
                 className="group flex flex-col items-center p-3 sm:p-4 rounded-xl border border-[#D9C8AC]/50 hover:border-[#8F5C1A] bg-[#FAF7F2] hover:bg-[#FFFFFF] transition-all duration-200 shadow-2xs hover:shadow-xs"
               >
                 <div className="w-14 h-21 rounded-md overflow-hidden border border-[#D9C8AC] mb-2.5 shadow-2xs group-hover:scale-105 transition-transform duration-200 bg-[#F3EDE2]">
@@ -643,6 +650,7 @@ export function HomeSeoContent() {
           </div>
           <Link
             href="/blog"
+            prefetch={false}
             className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
           >
             {isEnglish ? `Read All Articles (${COUNTS.articles}) ` : `อ่านบทความทั้งหมด (${COUNTS.articles} เรื่อง) `}
@@ -656,6 +664,7 @@ export function HomeSeoContent() {
             <Link
               key={art.slug}
               href={`/blog/${art.slug}`}
+              prefetch={false}
               className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group flex items-start gap-4 sm:gap-5"
             >
               <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs group-hover:scale-105 duration-300">

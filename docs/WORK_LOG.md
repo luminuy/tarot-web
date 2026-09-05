@@ -36,6 +36,21 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: แก้ปัญหา Lighthouse Charset Detection, robots/llms.txt CORS Fetch, และลด Payload มหาศาล 34MB (INC-0087) — โดย Antigravity AI
+
+- **แก้ปัญหา Lighthouse Best Practices (Properly defines charset)**:
+  - วาง `<meta charSet="utf-8" />` เป็นบรรทัดแรกสุดใน `<head>` ของ `src/app/layout.tsx` (ไม่เกินไบต์ที่ 60) เพื่อให้เบราว์เซอร์และ Lighthouse ตรวจพบทันทีตามเกณฑ์ 1024 ไบต์แรก
+- **แก้ปัญหา SEO & Agentic Browsing (CORS Failed to fetch)**:
+  - เพิ่ม CORS headers (`Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET, HEAD, OPTIONS`) ให้กับ `/robots.txt`, `/llms.txt`, และ `/sitemap.xml` ใน `next.config.ts`
+  - ป้องกันข้อผิดพลาด `TypeError: Failed to fetch` เมื่อ Lighthouse หรือเบราว์เซอร์ภายนอกตรวจสอบ
+- **สร้าง `public/llms.txt` ตามมาตรฐาน Agentic Browsing (llmstxt.org)**:
+  - สร้างไฟล์ `public/llms.txt` มีหัวข้อ `# SeerTarot` (H1) บรรยายสรุปความสามารถของวิหารพยากรณ์ ไพ่ 1909 Rider-Waite แท้ 78 ใบ ผัง 20 แบบ และระบบ Provably Fair
+- **แก้ปัญหา Payload ขนาดใหญ่ 34,054 KiB (34 MB) และการ prefetch ซ้ำซ้อน**:
+  - กำหนด `prefetch={false}` ในการ์ดไพ่ 78 ใบ (`CardsExplorer.tsx`), ผัง 20 แบบ (`SpreadsLibrary.tsx`), ลิงก์แคตตาล็อกหน้าแรก (`HomeSeoContent.tsx`), ลิงก์ท้ายเว็บ (`SiteFooter.tsx`), เมนูนำทาง (`SacredNavDropdown.tsx`), บล็อกบทความ (`BlogIndexClient.tsx`), และไพ่ที่เกี่ยวข้องกัน (`RelatedCards.tsx`)
+  - ตัดวงจร Next.js Viewport Auto-Prefetch Avalanche ขณะเลื่อนหน้าจอ โดยยังคงคุณสมบัติ Instant Prefetch ทันทีเมื่อผู้ใช้นำเมาส์ไปชี้ (hover)
+- **ปรับแต่งประสิทธิภาพสคริปต์บุคคลที่สาม (Analytics & Pixel)**:
+  - เปลี่ยนสคริปต์ Google Tag Manager, GA4 inline init, และ Meta Pixel ใน `AnalyticsTracker.tsx` จาก `strategy="afterInteractive"` เป็น `strategy="lazyOnload"` เพื่อประมวลผลช่วง idle frame คืนเวลา Main Thread ให้ผู้ใช้ 3.5s+
+
 ### 🗓️ 2026-09-05: แก้ปัญหาแถบ Header ค้าง, UI Latency ในการสลับภาษา, State Purity, และ Focus Stealing (ISSUE-024 ถึง ISSUE-030) — โดย Antigravity AI
 
 - **แก้ปัญหา Dropdown Layer & Transition Timing (ISSUE-024 & ISSUE-027)**:

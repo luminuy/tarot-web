@@ -270,12 +270,14 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                 {/* Primary Action Button: Link directly to Altar */}
                 <Link
                   href={`/?spread=${spread.id}`}
+                  prefetch={false}
                   className="w-full py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
                 >
                   <span>{isEnglish ? (isStandardSpread(spread.id) ? "Begin Reading with Spread" : "Unlock Grand Spread") : (isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้")}</span>
                 </Link>
                 <Link
                   href={`/spreads/${spread.id}`}
+                  prefetch={false}
                   className="z-10 -mt-1 text-center text-[13px] font-serif-th text-[#A58A5C] hover:text-[#29261F] transition-colors"
                 >
                   {isEnglish ? "Read Spread Guide →" : "อ่านคู่มือผังนี้ →"}

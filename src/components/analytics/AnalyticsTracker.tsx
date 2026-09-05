@@ -108,9 +108,9 @@ export function AnalyticsTracker() {
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`}
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
-          <Script id="google-analytics-init" strategy="afterInteractive">
+          <Script id="google-analytics-init" strategy="lazyOnload">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
@@ -148,7 +148,7 @@ export function AnalyticsTracker() {
       {/* 🎯 Meta Pixel (Facebook & Instagram)                     */}
       {/* ======================================================== */}
       {metaPixelId && (
-        <Script id="meta-pixel-init" strategy="afterInteractive">
+        <Script id="meta-pixel-init" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?

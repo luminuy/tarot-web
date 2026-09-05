@@ -1,0 +1,29 @@
+# SeerTarot
+
+> SeerTarot is a quiet luxury, provably-fair online tarot reading platform featuring the authentic 1909 Rider-Waite-Smith deck, 20 distinct tarot spreads, and an AI-assisted oracle reading engine.
+
+## Overview
+
+SeerTarot provides authentic tarot divination adhering strictly to the 1909 Rider-Waite-Smith iconography and Pamela Colman Smith's original esoteric symbolism. Every reading operates under a Provably Fair cryptographic mechanism using SHA-256 commitments, allowing users to independently verify shuffle entropy and deck integrity.
+
+## Core Capabilities
+
+- **Interactive Manual Self-Reveal**: Users interact directly with cards on an altar canvas; cards begin face-down and are revealed through tactile user interaction.
+- **Provably Fair Shuffling**: Client seed and server seed cryptographic commitments guarantee non-manipulated deck generation.
+- **20 Archetypal Spreads**: Comprehensive layouts covering single-card daily draws, classic Celtic Cross, 7-Chakra balancing, astrological 12-House divination, and relational crossroads.
+- **78-Card Codex**: Full encyclopedia of all 22 Major Arcana and 56 Minor Arcana with traditional upright/reversed interpretations, elemental correspondences, and astrological mappings.
+- **Bilingual Support**: Comprehensive Thai and English bilingual localization.
+
+## Primary Sections
+
+- [Home](https://seertarot.net/): Main sanctuary and reading portal.
+- [Spreads Codex](https://seertarot.net/spreads): Directory of 20 tarot spreads with detailed dimensional guides.
+- [Cards Encyclopedia](https://seertarot.net/cards): Complete Rider-Waite 78-card codex.
+- [Tarot & Esoteric Journal](https://seertarot.net/blog): In-depth articles on Jungian archetypes, spread interpretations, and tarot history.
+- [Live Readers Marketplace](https://seertarot.net/readers): Verified reader directory for live consultations.
+
+## Technical & Philosophical Guarantees
+
+- **Authenticity**: Zero fabricated cards policy. The 78-card Rider-Waite deck is preserved without arbitrary modern replacements.
+- **Safety First**: Autonomous mental health safeguarding directing users experiencing distress to certified helplines (1323 in Thailand, 988 internationally).
+- **Provable Fairness**: Every session provides cryptographic commit hashes, client nonce, and verifiable shuffle sequences.
