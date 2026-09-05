@@ -27,6 +27,13 @@
 
 | # | ระดับ | หัวข้อย่อ | ไฟล์หลัก | สถานะ |
 | :-- | :-- | :--- | :--- | :-- |
+| **024** | 🟢 Resolved | แผงเมนูค้าง `visibility: hidden` ทั้งที่ React สั่งเปิดแล้ว | `src/app/globals.css` | ✅ **แก้แล้ว** — ถอด `visibility` ออกจาก base transition ให้ `visible` ทันทีตอนเปิด |
+| **025** | 🟢 Resolved | กด TH/EN แล้วหัวเว็บนิ่ง ไม่มี visual feedback (353ms) | `src/lib/i18n/context.tsx`, `src/components/layout/LanguageSwitcher.tsx` | ✅ **แก้แล้ว** — เพิ่ม `pendingLocale` urgent update และ `aria-busy` feedback |
+| **026** | 🟢 Resolved | `LocaleProvider` ไม่ memoize value ทำให้ทั้งเว็บ re-render | `src/lib/i18n/context.tsx` | ✅ **แก้แล้ว** — ครอบ `useMemo` และ `useCallback` |
+| **027** | 🟢 Resolved | `will-change` จอง GPU layer ค้างถาวรบนแผงที่ปิด | `src/app/globals.css` | ✅ **แก้แล้ว** — ย้ายไปไว้เฉพาะ `.dropdown-panel-entering` พร้อมด่านตรวจอัตโนมัติ `test-will-change.ts` |
+| **028** | 🟢 Resolved | `window.dispatchEvent` ยิงใน setState updater ซึ่งต้องเป็น pure function | `src/components/ui/SacredNavDropdown.tsx`, `src/components/auth/UserProfileBadge.tsx` | ✅ **แก้แล้ว** — ย้าย side-effect ออกมานอก updater ผ่าน ref state |
+| **029** | 🟢 Resolved | `AuthModal` มี `onClose` ใน effect dependencies ดึงโฟกัสหลุดขณะพิมพ์ | `src/components/auth/AuthModal.tsx` | ✅ **แก้แล้ว** — ใช้ `onCloseRef` และถอด `onClose` ออกจาก deps พร้อมด่านตรวจ `test-modal-effect-deps.ts` |
+| **030** | 🟢 Resolved | ไม่มี `scroll-padding-top` ทั้งโปรเจกต์ ลิงก์ hash จอดใต้หัวเว็บ | `src/app/globals.css`, `src/components/reading/FollowUpChat.tsx` | ✅ **แก้แล้ว** — ตั้ง `--site-header-h` และ `scroll-padding-top` บน `html` และถอด `scroll-mt-24` |
 | **018** | 🟢 Resolved | ตั๋วคิวแม่หมออ่านได้ด้วย `customerRef` ใน URL (PDPA) | `src/lib/marketplace/customer-ref.ts`, `src/app/api/marketplace/tickets/**` | ✅ **แก้แล้ว** — ย้ายไปเป็น Signed HttpOnly Cookie และส่ง 404 ป้องกัน ID enumeration |
 | **017** | 🟢 Resolved | โควตาเปิดไพ่ถูกใช้ซ้อนได้ถ้ายิงขนาน (Double-Spend) | `src/lib/entitlement/entitlement.ts` | ✅ **แก้แล้ว** — Conditional Atomic INSERT เช็ค `meta.changes > 0` ป้องกันขนาน 100% |
 | **019** | 🟢 Resolved | `robots.txt` ปิดบอตค้นหา AI ทั้งหมด | `src/app/robots.ts` | ✅ **แก้แล้ว** — เปิดให้ AI Search & Live Citation Bots นำทางผู้ใช้เข้าเว็บ |

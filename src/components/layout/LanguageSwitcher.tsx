@@ -8,10 +8,13 @@ interface LanguageSwitcherProps {
 }
 
 export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
-  const { locale, setLocale } = useLocale();
+  const { locale, setLocale, pendingLocale, isSwitchingLocale } = useLocale();
+
+  // ภาษาที่ควรแสดงว่า "เลือกอยู่" — ใช้ค่าที่ผู้ใช้เพิ่งกดถ้ามี (ISSUE-025)
+  const shownLocale = pendingLocale ?? locale;
 
   const handleSelect = (nextLocale: "th" | "en") => {
-    if (nextLocale === locale) return;
+    if (nextLocale === shownLocale) return;
     try {
       soundManager.playMenuTapSound();
     } catch {
@@ -24,15 +27,18 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
     <div
       role="group"
       aria-label="Language selector / สลับภาษา"
-      className={`inline-flex items-center rounded-full bg-[#F3F0EA] border border-[#D5CEC2] p-0.5 select-none shadow-xs ${className}`}
+      aria-busy={isSwitchingLocale}
+      className={`inline-flex items-center rounded-full bg-[#F3F0EA] border border-[#D5CEC2] p-0.5 select-none shadow-xs transition-opacity duration-150 ${
+        isSwitchingLocale ? "opacity-70" : ""
+      } ${className}`}
     >
       <button
         type="button"
         onClick={() => handleSelect("th")}
-        aria-pressed={locale === "th"}
+        aria-pressed={shownLocale === "th"}
         aria-label="เปลี่ยนเป็นภาษาไทย"
         className={`px-2 py-1 rounded-full text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer ${
-          locale === "th"
+          shownLocale === "th"
             ? "bg-[#FFFFFF] text-[#29261F] shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-[#D5CEC2]"
             : "text-[#635B4E] hover:text-[#29261F] border border-transparent"
         }`}
@@ -43,10 +49,10 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
       <button
         type="button"
         onClick={() => handleSelect("en")}
-        aria-pressed={locale === "en"}
+        aria-pressed={shownLocale === "en"}
         aria-label="Switch to American English"
         className={`px-2 py-1 rounded-full text-xs font-mono font-bold transition-all duration-200 cursor-pointer ${
-          locale === "en"
+          shownLocale === "en"
             ? "bg-[#FFFFFF] text-[#29261F] shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-[#D5CEC2]"
             : "text-[#635B4E] hover:text-[#29261F] border border-transparent"
         }`}

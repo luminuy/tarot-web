@@ -335,7 +335,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
     <section
       id={ASK_ORACLE_SECTION_ID}
       aria-labelledby="ask-oracle-title"
-      className={`w-full scroll-mt-24 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col ${heightClass} relative overflow-hidden justify-between`}
+      className={`w-full rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col ${heightClass} relative overflow-hidden justify-between`}
     >
       {/* Background Sacred Geometric Aura */}
 

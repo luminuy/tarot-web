@@ -107,6 +107,16 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-emphasis: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ความสูงจริงของ [data-site-header] — วัดได้ 69px มือถือ / 81px เดสก์ท็อป
+     เผื่อระยะหายใจอีกเล็กน้อยกันตัวอักษรชนขอบล่างของหัวเว็บ (ISSUE-030) */
+  --site-header-h: 76px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --site-header-h: 88px;
+  }
 }
 
 html,
@@ -129,10 +139,16 @@ body {
  * `overflow-x: hidden` บังคับ `overflow-y` เป็น `auto` ทำให้ <body> กลายเป็น scroll
  * container ที่ไม่มีวันเลื่อน (สูงเท่าเนื้อหา) → `position: sticky` ของหัวเว็บพัง
  * หัวเว็บเลื่อนหลุดตามหน้า พอเปิดเมนู dropdown แล้วเลื่อนจึงเห็นแผงกระพริบ (INC-0060 กลับมาซ้ำ)
- * `overflow-x: clip` กันล้นได้เหมือนกันแต่ไม่สร้าง scroll container จึงไม่กระทบ sticky
+ * `overflow-x: clip` กันล้นได้เหมือนกันแต่ไม่สร้าง scroll container จึงไม่กระทบ sticky (INC-0067)
+ *
+ * ⚠️ หัวเว็บเป็น sticky top-0 ทับพื้นที่บนสุดของ viewport อยู่ตลอด (ISSUE-030)
+ * ถ้าไม่ตั้ง scroll-padding-top ทุก anchor #hash และ scrollIntoView({block:'start'})
+ * จะไปจอด "ใต้" หัวเว็บ ผู้ใช้เห็นเป็นหัวเว็บบังเนื้อหา
+ * ห้ามไล่แปะ scroll-mt-* ทีละจุดแทน — นั่นคือรักษาอาการ ไม่ใช่แก้ราก
  */
 html {
   overflow-x: clip;
+  scroll-padding-top: var(--site-header-h);
 }
 
 /*
@@ -480,15 +496,21 @@ html {
   backface-visibility: hidden;
 }
 
-/* World-Class Hardware-Accelerated Dropdown Transitions (Zero Frame-Drop Compositor Layer) */
+/*
+ * ⚠️ ห้ามใส่ `visibility` ลงในรายการ transition ของ .dropdown-panel-base เด็ดขาด (ISSUE-024)
+ * ถ้าใส่ = แผงจะโผล่ได้ก็ต่อเมื่อ transition วิ่งจบ ซึ่งไม่เกิดขึ้นเลยตอนเบราว์เซอร์หยุด paint
+ * (แท็บพักหลังบ้าน / กลับจาก bfcache / main thread ติดยาว) → กดเมนูแล้วไม่ขึ้น
+ *
+ * รูปแบบที่ถูกต้อง:
+ *   ตอนเปิด  → visibility: visible ต้องมีผล "ทันที" ไม่ผ่าน transition
+ *   ตอนปิด   → หน่วง visibility ด้วย transition-delay เท่ากับเวลา fade เพื่อให้เห็นอนิเมชันจางหาย
+ */
 .dropdown-panel-base {
   transform-origin: top right;
-  will-change: opacity, transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
-              transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
-              visibility 160ms;
+              transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dropdown-panel-entering {
@@ -496,6 +518,7 @@ html {
   visibility: visible;
   pointer-events: auto;
   transform: translate3d(0, 0, 0) scale(1);
+  will-change: opacity, transform;
 }
 
 .dropdown-panel-exiting {
@@ -503,6 +526,10 @@ html {
   visibility: hidden;
   pointer-events: none;
   transform: translate3d(0, -6px, 0) scale(0.98);
+  /* หน่วงเฉพาะ visibility ให้ซ่อนหลัง fade จบ — opacity/transform ยังวิ่งปกติ */
+  transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0s linear 160ms;
 }
 
 

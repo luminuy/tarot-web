@@ -21,6 +21,10 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
   const ent = useEntitlement();
   const view = describeEntitlement(ent, isEn);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuOpenRef = useRef(menuOpen);
+  useEffect(() => {
+    menuOpenRef.current = menuOpen;
+  }, [menuOpen]);
   const [pendingCount, setPendingCount] = useState(0);
   const [resendStatus, setResendStatus] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -82,13 +86,15 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
 
   const toggleMenu = () => {
     soundManager.playMenuTapSound();
-    setMenuOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        window.dispatchEvent(new CustomEvent("tarot:close-menus", { detail: { except: "user-badge" } }));
-      }
-      return next;
-    });
+
+    // ⚠️ ห้ามยิง event / side effect ใด ๆ ข้างใน setState updater (ISSUE-028)
+    // updater ต้องเป็น pure function — React เรียกซ้ำได้หลายครั้ง
+    // อ่านค่าปัจจุบันจาก ref แล้วตัดสินใจตรงนี้แทน
+    const willOpen = !menuOpenRef.current;
+    if (willOpen) {
+      window.dispatchEvent(new CustomEvent("tarot:close-menus", { detail: { except: "user-badge" } }));
+    }
+    setMenuOpen(willOpen);
   };
 
   const handleLogout = async () => {
