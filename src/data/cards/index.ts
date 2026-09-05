@@ -38,7 +38,19 @@ const BY_ID = new Map(DECK.map((card) => [card.id, card]));
 
 export function cardById(id?: string | null): TarotCard | undefined {
   if (!id) return undefined;
-  return BY_ID.get(id);
+  const direct = BY_ID.get(id);
+  if (direct) return direct;
+  // กรณีระบุ id เป็นตัวเลข เช่น "1", "6", "21" ให้ fallback หาจาก major หรือ index
+  if (/^\d+$/.test(id)) {
+    const num = parseInt(id, 10);
+    if (num >= 0 && num <= 21) {
+      const pad = String(num).padStart(2, "0");
+      const major = BY_ID.get(`major-${pad}`);
+      if (major) return major;
+    }
+    return cardByIndex(num);
+  }
+  return undefined;
 }
 
 export function cardByIndex(index?: number | null): TarotCard | undefined {

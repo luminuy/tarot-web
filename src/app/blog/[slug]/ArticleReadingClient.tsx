@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Article } from "@/data/articles";
 import { soundManager } from "@/lib/utils/audio";
 import { trackEvent } from "@/lib/analytics";
+import { COUNTS } from "@/components/layout/nav-links";
 
 interface Props {
   article: Article;
@@ -179,7 +180,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           </button>
         </div>
         <Link href="/blog" className="text-[#A58A5C] hover:underline font-bold">
-          ← กลับสู่คัมภีร์ทั้งหมด (24 บทความ)
+          ← กลับสู่คัมภีร์ทั้งหมด ({COUNTS.articles} บทความ)
         </Link>
       </div>
 

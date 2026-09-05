@@ -14,7 +14,7 @@ interface BlogIndexClientProps {
 }
 
 const CATEGORIES = [
-  { id: "all", label: "ทั้งหมด (24 บทความ)" },
+  { id: "all", label: "ทั้งหมด" },
   { id: "love", label: "ความรัก & เนื้อคู่" },
   { id: "career", label: "การงาน & การเงิน" },
   { id: "spreads", label: "ผังการเปิดไพ่" },
@@ -26,6 +26,8 @@ const CATEGORIES = [
  * จับคู่บทความกับภาพหน้าไพ่ 1909 Rider-Waite ประจำบทความอย่างวิจิตร
  */
 const ARTICLE_CARD_MAP: Record<string, string> = {
+  "how-to-read-tarot-for-beginners": "major-01.jpg",
+  "tarot-love-reading-guide": "major-06.jpg",
   "tarot-love-3-cards-feelings": "cups-02.jpg",
   "tarot-ex-return-signs": "cups-06.jpg",
   "top-10-soulmate-tarot-cards": "major-06.jpg",
@@ -130,7 +132,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 }`}
               >
                 {isSelected && <span className="text-[#A58A5C] text-[10px]">✦</span>}
-                <span>{cat.label}</span>
+                <span>{cat.id === "all" ? `ทั้งหมด (${articles.length} บทความ)` : cat.label}</span>
               </button>
             );
           })}

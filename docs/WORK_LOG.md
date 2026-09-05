@@ -36,6 +36,38 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: แก้ไขและยกระดับ 4 บทความแนะนำหน้าแรก และปรับปรุงระบบเชื่อมโยง SEO ครบวงจร — โดย Antigravity
+
+- **แก้ปัญหา 404 Not Found ของการ์ดบทความแนะนำ 4 รายการในหน้าแรก (`HomeSeoContent.tsx` หัวข้อ ✦ WISDOM & ARTICLES)**:
+  - **สร้าง 2 บทความใหม่อย่างประณีต** ลงใน `src/data/articles.ts`:
+    1. `how-to-read-tarot-for-beginners`: "วิธีเปิดไพ่ทาโรต์สำหรับผู้เริ่มต้น: จากการตั้งจิตสู่คำทำนายที่แม่นยำ" (คู่กับไพ่ The Magician `major-01`, มีเนื้อหา 6 หัวข้อ, สารบัญ TOC, และ FAQ 3 ข้อ)
+    2. `tarot-love-reading-guide`: "ไพ่ทาโรต์บอกความรัก: วิธีดูดวงความสัมพันธ์ เนื้อคู่ และความรู้สึกของเขา" (คู่กับไพ่ The Lovers `major-06`, มีเนื้อหา 6 หัวข้อ, สารบัญ TOC, และ FAQ 3 ข้อ)
+  - **เชื่อมโยงอีก 2 บทความเดิมผ่าน Canonical Slugs & 308 Permanent Redirects**:
+    3. `celtic-cross-spread-guide`: อัปเดต slug บนการ์ดหน้าแรกให้ชี้ตรงไปยัง `celtic-cross-spread-guide` พร้อมเขียน 308 Redirect จาก `celtic-cross-spread-deep-dive` ใน `next.config.ts` และเพิ่มเนื้อหาเจาะลึก 10 ตำแหน่ง + กากบาท vs เสาขวา
+    4. `tarot-and-carl-jung-psychology`: อัปเดต slug บนการ์ดหน้าแรกให้ชี้ตรงไปยัง `tarot-and-carl-jung-psychology` พร้อมเขียน 308 Redirect จาก `jungian-psychology-and-tarot` ใน `next.config.ts` และเพิ่มเนื้อหา Archetypes 22 ใบ + Synchronicity
+  - **Slug Alias Resolution & 404 Guard**:
+    - เพิ่ม `ARTICLE_SLUG_ALIASES` ใน `src/data/articles.ts`
+    - ปรับ `getArticleBySlug` และ `getRelatedArticles` ให้ค้นหาผ่าน canonical slug อัตโนมัติ
+    - ปรับ `src/app/blog/[slug]/page.tsx` ให้ `generateStaticParams` รองรับ alias slugs และ redirect อัตโนมัติ
+- **ระบบนับจำนวนบทความแบบ Dynamic อัตโนมัติ (Dynamic Article Count Sync)**:
+  - ปรับการแสดงจำนวนบทความทั้งหมดจากเดิมที่ hardcoded `24 บทความ / 24 เรื่อง` ให้ใช้ `COUNTS.articles` หรือ `${articles.length}` แบบ dynamic ในทุกไฟล์:
+    - `src/components/seo/HomeSeoContent.tsx`: `อ่านบทความทั้งหมด ({COUNTS.articles} เรื่อง)`
+    - `src/app/blog/BlogIndexClient.tsx`: แท็บ "ทั้งหมด ({articles.length} บทความ)"
+    - `src/components/ui/SacredNavDropdown.tsx`: เมนู dropdown แสดง `COUNTS.articles`
+    - `src/app/blog/[slug]/ArticleReadingClient.tsx`: ลิงก์กลับสู่คลังบทความแสดง `COUNTS.articles`
+  - ปัจจุบันคลังบทความรวมเพิ่มเป็น **26 บทความ** ครบถ้วนตรงกันทั้งระบบ
+- **ความสมบูรณ์ของการเชื่อมโยงสารานุกรมไพ่ (`targetCardId`)**:
+  - แก้ไข `targetCardId` ในบทความทั้งหมดให้ใช้ Canonical Card IDs (`major-00`, `major-01`, `major-06`, `pentacles-01`, ฯลฯ)
+  - ปรับปรุง `cardById` ใน `src/data/cards/index.ts` ให้รองรับการค้นหาผ่านตัวเลขดั้งเดิม ป้องกันปัญหา 404 ทุกกรณี
+- **การจับคู่ภาพหน้าไพ่ 1909 RWS ใน Blog Index**:
+  - เพิ่มคู่ภาพหน้าไพ่สำหรับบทความใหม่ใน `ARTICLE_CARD_MAP` ของ `BlogIndexClient.tsx`
+- **การทดสอบและการประกันคุณภาพ**:
+  - `npm run typecheck` ➔ **0 Errors**
+  - `npx tsx scripts/qa/test-search-corpus.ts` ➔ **7/7 ผ่าน (บทความครบ 26 เรื่อง)**
+  - `npm run repo:verify` ➔ **27/27 ด่านสมบูรณ์ 100%**
+
+---
+
 ### 🗓️ 2026-09-05: ผสานการบันทึกประวัติคำทำนายด่วนเต็มรูปแบบ (Full Question & Category) และขอบเขตห้องแชทตาม PDPA (ข้อ 6.8) — โดย Antigravity
 
 - **การบันทึกประวัติการทำนายด่วน (`src/app/TarotFlow.tsx` & `src/lib/utils/history.ts`)**:
