@@ -13,6 +13,7 @@ import type { Reading } from "@/lib/schema/reading";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
+import { QuickFortunePicker, type QuickTopic } from "@/components/reading/QuickFortunePicker";
 import type { RitualStep } from "@/components/ui/RitualStepProgress";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
@@ -113,6 +114,7 @@ function mapBlockedReason(reason?: string): UpgradeReason | null {
  */
 export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode }) {
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
+  const [viewMode, setViewMode] = useState<"quick" | "full">("quick");
   const motionSafe = useMotionSafe();
 
   // ทิศทางการเปลี่ยนขั้นของ AnimatePresence (+1 = เดินหน้า, -1 = ย้อนกลับ)
@@ -537,6 +539,136 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     }
   };
 
+  // ทางลัดทำนายด่วน 1 ใบ (ข้ามริชวลสับไพ่และพัดเลือกไพ่ จั่วอัตโนมัติด้วย Provably-Fair)
+  const handleQuickFortuneSelect = async (topic: QuickTopic, userNickname: string) => {
+    if (entitlementView?.blocked) {
+      openAccessDialog(entitlementView.blockedReason ?? "guest_used");
+      return;
+    }
+
+    const quickSpread = SPREADS.find((s) => s.id === "quick") || selectedSpread;
+    setSelectedSpread(quickSpread);
+    setSelectedCategory(topic.category);
+    setNickname(userNickname);
+    setQuestion(topic.defaultQuestion);
+    setLoading(true);
+    setErrorMsg(null);
+    soundManager.playCardSelectSound();
+
+    try {
+      // 1. เริ่มต้นเซสชันด้วย API
+      const res = await fetch("/api/reading/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          spreadId: quickSpread.id,
+          question: topic.defaultQuestion,
+          personaId: selectedPersona.id,
+          nickname: userNickname,
+          category: topic.category,
+          intake: {},
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const blockedReason = mapBlockedReason(data.reason);
+        if (blockedReason) {
+          refreshEntitlement();
+          openAccessDialog(blockedReason);
+          return;
+        }
+        throw new Error(data.error || "ไม่สามารถเริ่มดูดวงได้");
+      }
+
+      const sessionReadingId = data.readingId || data.id;
+      setReadingId(sessionReadingId);
+      const activeSessionToken = data.sessionToken || "";
+      if (activeSessionToken) setSessionToken(activeSessionToken);
+      setCommitment(data.commitment || "");
+      setClientSeed(data.clientSeed || "");
+
+      trackEvent("tarot_session_start", {
+        spread_id: quickSpread.id,
+        persona_id: selectedPersona.id,
+        category: topic.category,
+        has_situation: false,
+      });
+
+      // 2. จั่วไพ่ใบแรกจากเซิร์ฟเวอร์ทันทีด้วย Provably-Fair SHA-256 (ไม่ต้องเลือกจากพัดไพ่)
+      const shuffleRes = await fetch(`/api/reading/${sessionReadingId}/shuffle`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-reading-token": activeSessionToken,
+        },
+        body: JSON.stringify({
+          sessionToken: activeSessionToken || undefined,
+        }),
+      });
+
+      const shuffleData = await shuffleRes.json().catch(() => ({}));
+      if (!shuffleRes.ok) {
+        if (shuffleRes.status === 410 || shuffleData.code === "SESSION_SEED_LOST") {
+          throw new Error("เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่อีกครั้ง");
+        }
+        throw new Error(shuffleData.error || "ไม่สามารถจัดสำรับไพ่ได้");
+      }
+
+      const latestToken = shuffleData.sessionToken || activeSessionToken;
+      if (latestToken) setSessionToken(latestToken);
+
+      const { cardByIndex } = await import("@/data/cards");
+      if (!shuffleData.drawn || !Array.isArray(shuffleData.drawn) || shuffleData.drawn.length === 0) {
+        throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+      }
+
+      const enrichedCards: DrawnSlotCard[] = shuffleData.drawn.map((d: any) => {
+        if (d.cardIndex === undefined || d.cardIndex === null) {
+          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+        }
+        const fullCard = cardByIndex(d.cardIndex);
+        if (!fullCard) {
+          throw new Error("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+        }
+        const kw = fullCard.keywords;
+        const extractedKeywords = Array.isArray(kw) ? kw : d.isReversed ? (kw?.reversed ?? []) : (kw?.upright ?? []);
+
+        return {
+          order: d.order ?? 0,
+          cardIndex: d.cardIndex,
+          isReversed: !!d.isReversed,
+          position: quickSpread?.positions?.[d.order] || {
+            index: d.order ?? 0,
+            nameTh: "คำตอบต่อเรื่องนี้",
+            meaning: "คำตอบตรงต่อคำถามที่ผู้ถามตั้งจิตถาม",
+          },
+          card: {
+            id: fullCard.id,
+            nameTh: fullCard.nameTh,
+            nameEn: fullCard.nameEn,
+            image: fullCard.image,
+            element: fullCard.element,
+            keywords: extractedKeywords,
+          },
+        };
+      });
+
+      setDrawnCards(enrichedCards);
+      setRevealedOrders([]); // กฎเหล็กข้อ 4: Manual Self-Reveal เริ่มต้นคว่ำหน้าเสมอ ให้ผู้ใช้แตะพลิกเอง
+      setActiveCardIndex(0);
+      scrollToSanctuaryTop();
+      navigateStep("READING");
+
+      // เริ่มสตรีมคำทำนาย AI เบื้องหลังทันที
+      startAIStreaming(sessionReadingId, enrichedCards, latestToken);
+    } catch (err: any) {
+      setErrorMsg(err.message || "เกิดข้อผิดพลาดในการประมวลผลไพ่ด่วน");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Step 2 -> Step 3: Shuffle Animation Finished
   const handleShuffleComplete = (finalClientSeed: string) => {
     if (finalClientSeed) setClientSeed(finalClientSeed);
@@ -842,6 +974,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     }
     clearFlowState();
     soundManager.playCardSelectSound();
+    setViewMode("quick");
     navigateStep("SPREAD_SELECT");
     setReadingId(null);
     setSessionToken(null);
@@ -955,99 +1088,130 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               className="space-y-10"
             >
               <DailyCardStrip />
-              <div className="text-center space-y-6 relative">
-                  {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
-                  <div
-                    className="h-56 sm:h-72 w-full flex items-center justify-center relative select-none"
-                    style={{ perspective: 1200 }}
-                  >
-                    {/* แสงเทียนนุ่ม ๆ รอบสำรับ — นิ่งสนิท ไม่เต้น ไม่หมุน */}
+              {viewMode === "quick" ? (
+                <QuickFortunePicker
+                  currentNickname={nickname}
+                  onSelectTopic={handleQuickFortuneSelect}
+                  onSwitchToFullSpreads={() => {
+                    soundManager.playCardSelectSound();
+                    setViewMode("full");
+                    scrollToSanctuaryTop();
+                  }}
+                  isLoading={loading}
+                />
+              ) : (
+                <div className="space-y-10">
+                  {/* Back to Quick Fortune button */}
+                  <div className="flex justify-start">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundManager.playCardSelectSound();
+                        setViewMode("quick");
+                        scrollToSanctuaryTop();
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] hover:bg-[#FAF7F2] text-xs font-serif-th font-medium text-[#29261F] transition-all shadow-xs hover:border-[#A58A5C]"
+                    >
+                      <span>←</span>
+                      <span>กลับไปหน้าทำนายด่วน 1 ใบ</span>
+                    </button>
+                  </div>
+
+                  <div className="text-center space-y-6 relative">
+                    {/* 3D Floating Tarot Stage with Stacked Deck & Radiant Solar Halo */}
                     <div
-                      aria-hidden="true"
-                      className="absolute w-72 h-72 sm:w-[400px] sm:h-[400px] rounded-full -z-10 pointer-events-none blur-2xl bg-radial from-[#A58A5C]/18 via-[#A58A5C]/06 to-transparent"
-                    />
+                      className="h-56 sm:h-72 w-full flex items-center justify-center relative select-none"
+                      style={{ perspective: 1200 }}
+                    >
+                      {/* แสงเทียนนุ่ม ๆ รอบสำรับ — นิ่งสนิท ไม่เต้น ไม่หมุน */}
+                      <div
+                        aria-hidden="true"
+                        className="absolute w-72 h-72 sm:w-[400px] sm:h-[400px] rounded-full -z-10 pointer-events-none blur-2xl bg-radial from-[#A58A5C]/18 via-[#A58A5C]/06 to-transparent"
+                      />
 
-                    {/* 3D Realistic 78-Card Stacked Deck Container */}
-                    <div className="relative group cursor-pointer" onClick={() => soundManager.playCardSelectSound()}>
-                      {/* Layer 3: Deep Stack Base (Gold Gilded Edge) */}
-                      <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-xl bg-[#5A3E26] border border-[#D5CEC2]/60 translate-x-[6px] translate-y-[6px] shadow-[var(--shadow-overlay)]" />
-                      {/* Layer 2: Middle Stack Deck */}
-                      <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-xl bg-[#4A3320] border border-[#D5CEC2]/70 translate-x-[3px] translate-y-[3px]" />
+                      {/* 3D Realistic 78-Card Stacked Deck Container */}
+                      <div className="relative group cursor-pointer" onClick={() => soundManager.playCardSelectSound()}>
+                        {/* Layer 3: Deep Stack Base (Gold Gilded Edge) */}
+                        <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-xl bg-[#5A3E26] border border-[#D5CEC2]/60 translate-x-[6px] translate-y-[6px] shadow-[var(--shadow-overlay)]" />
+                        {/* Layer 2: Middle Stack Deck */}
+                        <div className="absolute inset-0 w-36 h-54 sm:w-44 sm:h-64 rounded-xl bg-[#4A3320] border border-[#D5CEC2]/70 translate-x-[3px] translate-y-[3px]" />
 
-                      {/* Layer 1: Top Floating Hero Card */}
-                      <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-xl border-2 border-[#D5CEC2] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
-                        <div className="w-full flex justify-center items-center opacity-90">
-                          <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
-                            ✦ SACRED ORACLE ✦
+                        {/* Layer 1: Top Floating Hero Card */}
+                        <div className="w-36 h-54 sm:w-44 sm:h-64 rounded-xl border-2 border-[#D5CEC2] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 relative overflow-hidden anim-tarot-idle gpu-layer transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+                          <div className="w-full flex justify-center items-center opacity-90">
+                            <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
+                              ✦ SACRED ORACLE ✦
+                            </span>
+                          </div>
+
+                          {/* Clean Center */}
+                          <div className="my-auto" />
+
+                          <span className="text-xs font-serif-th font-bold text-[#FFFFFF]">
+                            ไพ่ทาโรต์ 1909
                           </span>
+
+                          {/* Dynamic Gold Sheen Sweep */}
+                          <div className="gold-foil-sheen absolute inset-0 opacity-35 group-hover:opacity-75 transition-opacity duration-500" />
                         </div>
-
-                        {/* Clean Center */}
-                        <div className="my-auto" />
-
-                        <span className="text-xs font-serif-th font-bold text-[#FFFFFF]">
-                          ไพ่ทาโรต์ 1909
-                        </span>
-
-                        {/* Dynamic Gold Sheen Sweep */}
-                        <div className="gold-foil-sheen absolute inset-0 opacity-35 group-hover:opacity-75 transition-opacity duration-500" />
                       </div>
+                    </div>
+
+                    <div className="space-y-2.5 sm:space-y-3 text-center">
+                      <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+                        ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI
+                      </h1>
+                      <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
+                        สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256
+                      </p>
+                      <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
+                        ✦ เลือกผังการเปิดไพ่พยากรณ์
+                      </h2>
                     </div>
                   </div>
 
-                  <div className="space-y-2.5 sm:space-y-3 text-center">
-                    <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
-                      ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI
-                    </h1>
-                    <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
-                      สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256
-                    </p>
-                    <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
-                      ✦ เลือกผังการเปิดไพ่พยากรณ์
-                    </h2>
-                  </div>
-                </div>
-
-                {/* Spread Selector Grid */}
-                <SpreadCardSelector
-                  selectedSpread={selectedSpread}
-                  onSelectSpread={(sp) => {
-                    soundManager.playCardSelectSound();
-                    setSelectedSpread(sp);
-                    trackEvent("spread_select", {
-                      spread_id: sp.id,
-                      spread_name: sp.nameTh,
-                      card_count: sp.positions.length,
-                      category: sp.defaultCategory,
-                    });
-                  }}
-                  isPassHolder={isPassHolder}
-                  proceedLabel={
-                    entitlementView?.blocked
-                      ? entitlementView.blockedReason === "daily_exhausted"
-                        ? "เติมรอบเพื่อเปิดไพ่ต่อ"
-                        : "สมัครสมาชิกฟรีเพื่อเปิดไพ่"
-                      : !isPassHolder && !isStandardSpread(selectedSpread.id)
-                        ? "ปลดล็อกผังนี้เพื่อเปิดไพ่"
-                        : undefined
-                  }
-                  onRequireUpgrade={() => {
-                    openAccessDialog("grand_spread");
-                  }}
-                  onProceed={() => {
-                    if (entitlementView?.blocked) {
-                      openAccessDialog(entitlementView.blockedReason ?? "guest_used");
-                      return;
+                  {/* Spread Selector Grid */}
+                  <SpreadCardSelector
+                    selectedSpread={selectedSpread}
+                    onSelectSpread={(sp) => {
+                      soundManager.playCardSelectSound();
+                      setSelectedSpread(sp);
+                      trackEvent("spread_select", {
+                        spread_id: sp.id,
+                        spread_name: sp.nameTh,
+                        card_count: sp.positions.length,
+                        category: sp.defaultCategory,
+                      });
+                    }}
+                    isPassHolder={isPassHolder}
+                    proceedLabel={
+                      entitlementView?.blocked
+                        ? entitlementView.blockedReason === "daily_exhausted"
+                          ? "เติมรอบเพื่อเปิดไพ่ต่อ"
+                          : "สมัครสมาชิกฟรีเพื่อเปิดไพ่"
+                        : !isPassHolder && !isStandardSpread(selectedSpread.id)
+                          ? "ปลดล็อกผังนี้เพื่อเปิดไพ่"
+                          : undefined
                     }
-                    if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
+                    onRequireUpgrade={() => {
                       openAccessDialog("grand_spread");
-                      return;
-                    }
-                    soundManager.playCardSelectSound();
-                    scrollToSanctuaryTop();
-                    navigateStep("INTENTION_SELECT");
-                  }}
-                />
+                    }}
+                    onProceed={() => {
+                      if (entitlementView?.blocked) {
+                        openAccessDialog(entitlementView.blockedReason ?? "guest_used");
+                        return;
+                      }
+                      if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
+                        openAccessDialog("grand_spread");
+                        return;
+                      }
+                      soundManager.playCardSelectSound();
+                      scrollToSanctuaryTop();
+                      navigateStep("INTENTION_SELECT");
+                    }}
+                  />
+                </div>
+              )}
             </motion.div>
           )}
 

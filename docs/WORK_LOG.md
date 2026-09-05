@@ -47,6 +47,26 @@
 - **ไฟล์ที่แก้**: `src/app/globals.css`, `src/components/layout/SiteHeader.tsx`, `src/app/cards/page.tsx`, `src/app/cards/[id]/page.tsx`, `src/app/blog/page.tsx`, `src/app/spreads/page.tsx`, `src/app/privacy/page.tsx`, `src/app/account/page.tsx`
 
 ---
+### 🗓️ 2026-09-05: พัฒนาระบบ 'ทำนายด่วน (Quick Fortune)' ไพ่ 1 ใบ 4 หัวข้อยอดนิยม สมบูรณ์แบบ — โดย Antigravity
+
+- **คอมโพเนนต์ทำนายด่วน (`src/components/reading/QuickFortunePicker.tsx`)**:
+  - สร้างหน้าเลือก 4 หัวข้อยอดนิยมของคนไทย (ความรัก & ความสัมพันธ์, การงาน & โอกาสใหม่, การเงิน & โชคลาภ, ภาพรวมดวงชะตา & พลังงานวันนี้)
+  - ดีไซน์ Editorial Gold Luxury สอดคล้องกับธีมของเว็บ ใช้สัญลักษณ์ `✦` และ `✨` (Rule 2)
+  - ระบบถามชื่อเล่นแบบเร็ว (Fast Nickname Prompt) ถามครั้งแรกและบันทึกใน `localStorage` (`seertarot_nickname`) ครั้งต่อไปคลิกเดียวเข้าทำนายได้ทันที
+  - ลิงก์สลับไปยังโหมดเลือกผังเต็ม 20 แบบ (`onSwitchToFullSpreads`)
+- **การเชื่อมต่อ State Machine ใน `src/app/TarotFlow.tsx`**:
+  - เพิ่ม state `viewMode: "quick" | "full"` (เริ่มต้นด้วย `"quick"`)
+  - พัฒนา `handleQuickFortuneSelect`:
+    - เรียก `POST /api/reading/start` ด้วย Spread `"quick"` และหมวดหมู่ตรงหัวข้อ
+    - ข้ามริชวลสับไพ่และพัดเลือกไพ่ โดยเรียก `POST /api/reading/${id}/shuffle` ทันทีด้วย `{ sessionToken }` ซึ่งระบบ Provably-Fair SHA-256 จะจั่วไพ่ใบแรกจากสำรับที่สับแล้วให้อัตโนมัติ (Zero Fabricated Cards per Rule 14)
+    - นำทางตรงสู่ขั้น `READING` ในสถานะ **คว่ำหน้า** (`revealedOrders: []`) ให้ผู้ใช้แตะพลิกไพ่ด้วยตนเอง (เคารพกฎ Manual Self-Reveal ตาม Rule 4)
+    - เริ่มสตรีมคำทำนาย AI เบื้องหลังทันที
+  - เพิ่มปุ่ม `← กลับไปหน้าทำนายด่วน 1 ใบ` ในโหมดผังเต็ม
+- **การทดสอบและการประกันคุณภาพ (Quality Gate 27)**:
+  - สร้างชุดทดสอบ `scripts/qa/test-quick-fortune.ts` (ตรวจครบ 42/42 รายการ: ตรวจ 4 หัวข้อ, ความปลอดภัยของคำถาม default, การแมปกับ Spread `quick`, และ Server Draw Logic)
+  - เชื่อมเข้ากับ `scripts/github-auto.ts` ขยายด่านตรวจเป็น 27 ด่านเต็ม
+  - `npm run typecheck` ➔ **0 Errors**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 27/27 ด่านความปลอดภัย**
 
 ### 🗓️ 2026-09-05: วางระบบ Google Ads Conversion Tracking & Remarketing แบบ Native — โดย Antigravity
 
