@@ -478,11 +478,20 @@ isEnglish
 
           {/* Core Summary */}
           {reading?.summary && (
-            <div className="p-5 rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] space-y-2 ">
+            <div className="relative overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF7] to-[#F7EFE1] p-5 shadow-[0_4px_24px_rgba(143,92,26,0.10)] space-y-3">
+              {/* Editorial Luxury Top Gold Accent Bar */}
+              <div
+                aria-hidden="true"
+                className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8F5C1A] via-[#E2C38A] to-[#8F5C1A]"
+              />
+
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <h5 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold flex items-center gap-2">
-                  {isEnglish ? "Executive Summary & Trajectory" : "บทสรุปคำทำนายและแนวโน้ม"}
-                </h5>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8F5C1A]/10 border border-[#8F5C1A]/30 text-[#8F5C1A] font-serif-th font-bold text-xs tracking-wide">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A]" />
+                    {isEnglish ? "Executive Summary & Trajectory" : "สรุปตรงใจและแนวโน้ม"}
+                  </span>
+                </div>
                 <div className="flex items-center gap-2">
                   {reading.yesNoAnswer && (
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#8F5C1A] text-[#FFFFFF]">
@@ -494,10 +503,15 @@ isEnglish
                       reading.advice ? (isEnglish ? "Actionable guidance: " : "คำแนะนำคือ ") + reading.advice.join(", ") : ""
                     }`}
                     personaId={persona.id}
+                    className="text-xs py-1 px-2.5 bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] shadow-xs"
                   />
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed">{reading.summary}</p>
+              <div className="pl-3 sm:pl-4 border-l-2 border-[#8F5C1A]/50">
+                <p className="text-sm sm:text-[15px] font-serif-th text-[#2E211A] font-medium leading-relaxed [text-wrap:pretty]">
+                  {reading.summary}
+                </p>
+              </div>
               {reading.timing && (
                 <p className="text-xs text-[#8F5C1A] pt-1 font-mono font-semibold">
                   {isEnglish ? "Timing: " : "ช่วงเวลา: "}{reading.timing}

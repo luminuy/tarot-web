@@ -326,13 +326,36 @@ isEnglish
                 </p>
               )}
 
-              {/* Core Summary if distinct from card reading */}
+              {/* Core Summary if distinct from card reading - Sacred Oracle Core Insight */}
               {reading?.summary && reading.summary !== cardReading?.reading && (
-                <div className="mt-3 p-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC]/60 text-xs sm:text-sm font-serif-th text-[#2E211A] leading-relaxed">
-                  <span className="font-bold text-[#8F5C1A]">
-                    {isEnglish ? "Core Insight: " : "สรุปตรงใจ: "}
-                  </span>
-                  {reading.summary}
+                <div className="relative mt-4 overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF7] to-[#F7EFE1] p-4 sm:p-5 shadow-[0_4px_24px_rgba(143,92,26,0.10)] transition-all">
+                  {/* Editorial Luxury Top Gold Accent Bar */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8F5C1A] via-[#E2C38A] to-[#8F5C1A]"
+                  />
+
+                  {/* Header with Luxury Badge and Dedicated TTS */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8F5C1A]/10 border border-[#8F5C1A]/30 text-[#8F5C1A] font-serif-th font-bold text-xs tracking-wide">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A]" />
+                        {isEnglish ? "Core Oracle Insight" : "สรุปตรงใจจากแม่หมอ"}
+                      </span>
+                    </div>
+                    <TTSReaderButton
+                      textToRead={`${isEnglish ? "Core Insight: " : "สรุปตรงใจ: "}${reading.summary}`}
+                      personaId={persona.id}
+                      className="text-xs py-1 px-2.5 bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] shadow-xs"
+                    />
+                  </div>
+
+                  {/* High-Impact Insight Body */}
+                  <div className="pl-3 sm:pl-4 border-l-2 border-[#8F5C1A]/50">
+                    <p className="text-sm sm:text-[15px] font-serif-th text-[#2E211A] font-medium leading-relaxed [text-wrap:pretty]">
+                      {reading.summary}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -361,10 +384,10 @@ isEnglish
           {readingId && (
             <Link
               href="/reading/chat"
-              className="group flex w-full items-center justify-between gap-3 rounded-xl border border-[#D9C8AC] bg-[#F3EDE2] hover:bg-[#FFFFFF] p-4 text-left transition-all hover:border-[#8F5C1A] hover:shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] lg:hidden"
+              className="group relative overflow-hidden flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-[#D9C8AC] bg-gradient-to-r from-[#F3EDE2] via-[#FAF7F2] to-[#F3EDE2] hover:bg-[#FFFFFF] p-4 text-left transition-all hover:border-[#8F5C1A] hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] active:scale-[0.99] lg:hidden"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-sm shadow-2xs group-hover:scale-105 transition-transform font-sans font-bold">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-sm shadow-sm group-hover:scale-105 group-hover:bg-[#74490F] transition-all font-sans font-bold">
                   ➔
                 </span>
                 <div>
@@ -380,7 +403,7 @@ isEnglish
                   </span>
                 </div>
               </div>
-              <span className="flex items-center gap-1 font-serif-th text-xs font-bold text-[#8F5C1A] flex-shrink-0 group-hover:translate-x-1 transition-transform">
+              <span className="flex items-center gap-1 font-serif-th text-xs font-bold text-[#8F5C1A] px-2.5 py-1 rounded-full bg-[#8F5C1A]/10 border border-[#8F5C1A]/20 flex-shrink-0 group-hover:translate-x-0.5 transition-transform">
                 <span>{isEnglish ? "Continue Chat" : "คุยต่อ"}</span>
                 <span>➔</span>
               </span>
