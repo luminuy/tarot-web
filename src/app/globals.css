@@ -145,10 +145,17 @@ body {
  * ถ้าไม่ตั้ง scroll-padding-top ทุก anchor #hash และ scrollIntoView({block:'start'})
  * จะไปจอด "ใต้" หัวเว็บ ผู้ใช้เห็นเป็นหัวเว็บบังเนื้อหา
  * ห้ามไล่แปะ scroll-mt-* ทีละจุดแทน — นั่นคือรักษาอาการ ไม่ใช่แก้ราก
+ *
+ * ⚠️ `overscroll-behavior-y: none` — กันหัวเว็บ sticky top-0 "เด้ง" บน iOS Safari
+ * ตอนผู้ใช้ลากหน้าจนสุดบน/ล่าง (rubber-band) iOS จะดึงทั้งเอกสารเลื่อนเกินขอบ
+ * แล้วลาก sticky header ตามลงมาด้วย เกิดช่องว่างเหนือหัวเว็บโชว์พื้นหลัง/เนื้อหา
+ * ตั้งค่านี้ที่ scroll container (root) เพื่อปิด elastic overscroll → ไม่มีช่องว่าง
+ * ผลข้างเคียงที่ยอมรับได้: ปิด pull-to-refresh ของหน้า (เว็บนี้เป็น app-like อยู่แล้ว)
  */
 html {
   overflow-x: clip;
   scroll-padding-top: var(--site-header-h);
+  overscroll-behavior-y: none;
 }
 
 /*
