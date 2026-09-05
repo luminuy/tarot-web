@@ -6,8 +6,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
   getGaMeasurementId,
   getMetaPixelId,
+  getGoogleAdsId,
   isValidGaId,
   isValidMetaPixelId,
+  isValidGoogleAdsId,
   trackPageView,
 } from "@/lib/analytics";
 
@@ -18,9 +20,11 @@ import {
 function PageViewTracker({
   gaId,
   metaPixelId,
+  googleAdsId,
 }: {
   gaId?: string | null;
   metaPixelId?: string | null;
+  googleAdsId?: string | null;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -45,7 +49,7 @@ function PageViewTracker({
 
     lastTrackedUrl.current = currentUrl;
     trackPageView(currentUrl);
-  }, [pathname, searchParams, gaId, metaPixelId]);
+  }, [pathname, searchParams, gaId, metaPixelId, googleAdsId]);
 
   return null;
 }
@@ -53,10 +57,11 @@ function PageViewTracker({
 export function AnalyticsTracker() {
   const [gaId, setGaId] = useState<string | undefined>(() => getGaMeasurementId());
   const [metaPixelId, setMetaPixelId] = useState<string | undefined>(() => getMetaPixelId());
+  const [googleAdsId, setGoogleAdsId] = useState<string | undefined>(() => getGoogleAdsId());
 
   // ดึง configuration จาก runtime endpoint หากยังไม่ได้ตั้งค่าตอน build
   useEffect(() => {
-    if (gaId && metaPixelId) return;
+    if (gaId && metaPixelId && googleAdsId) return;
 
     let isMounted = true;
     fetch("/api/config/analytics")
@@ -69,6 +74,9 @@ export function AnalyticsTracker() {
         if (!metaPixelId && data.metaPixelId && isValidMetaPixelId(data.metaPixelId)) {
           setMetaPixelId(data.metaPixelId);
         }
+        if (!googleAdsId && data.googleAdsId && isValidGoogleAdsId(data.googleAdsId)) {
+          setGoogleAdsId(data.googleAdsId);
+        }
       })
       .catch(() => {
         // เงียบไว้หากเรียกไม่สำเร็จ — analytics เป็น optional
@@ -77,17 +85,29 @@ export function AnalyticsTracker() {
     return () => {
       isMounted = false;
     };
-  }, [gaId, metaPixelId]);
+  }, [gaId, metaPixelId, googleAdsId]);
+
+  // ซิงก์ Google Ads Config เมื่อได้รับ ID มาภายหลัง (Runtime)
+  useEffect(() => {
+    if (typeof window !== "undefined" && typeof window.gtag === "function" && googleAdsId) {
+      window.gtag("config", googleAdsId, {
+        page_path: window.location.pathname,
+        send_page_view: false,
+      });
+    }
+  }, [googleAdsId]);
+
+  const primaryGtagId = gaId || googleAdsId;
 
   return (
     <>
       {/* ======================================================== */}
-      {/* 📊 Google Analytics 4 (GA4)                                */}
+      {/* 📊 Google Tag (GA4 & Google Ads)                         */}
       {/* ======================================================== */}
-      {gaId && (
+      {primaryGtagId && (
         <>
           <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`}
             strategy="afterInteractive"
           />
           <Script id="google-analytics-init" strategy="afterInteractive">
@@ -101,15 +121,28 @@ export function AnalyticsTracker() {
                 'ad_personalization': 'denied'
               });
               gtag('js', new Date());
-              gtag('config', '${gaId}', {
+              ${
+                gaId
+                  ? `gtag('config', '${gaId}', {
                 page_path: window.location.pathname,
                 anonymize_ip: true,
                 send_page_view: true
-              });
+              });`
+                  : ""
+              }
+              ${
+                googleAdsId
+                  ? `gtag('config', '${googleAdsId}', {
+                page_path: window.location.pathname,
+                send_page_view: false
+              });`
+                  : ""
+              }
             `}
           </Script>
         </>
       )}
+
 
       {/* ======================================================== */}
       {/* 🎯 Meta Pixel (Facebook & Instagram)                     */}
@@ -135,8 +168,9 @@ export function AnalyticsTracker() {
       {/* 🧭 Client-Side SPA Route Change Listener                  */}
       {/* ======================================================== */}
       <Suspense fallback={null}>
-        <PageViewTracker gaId={gaId} metaPixelId={metaPixelId} />
+        <PageViewTracker gaId={gaId} metaPixelId={metaPixelId} googleAdsId={googleAdsId} />
       </Suspense>
     </>
+
   );
 }
