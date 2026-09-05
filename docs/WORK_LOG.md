@@ -36,6 +36,24 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ยุติการถกเถียง ปรับปรุงเลย์เอาต์บล็อกทำนายด่วนเป็นแบบต่อเติมบนสุด ไร้ปุ่มคั่นกลาง ตามมติข้อ 4.1 — โดย Claude & Antigravity AI
+
+- **ปรับปรุงโครงสร้างเลย์เอาต์หน้าแรก (`SPREAD_SELECT`) ใน `src/app/TarotFlow.tsx` ตามมติสุดท้ายข้อ 4.1**:
+  - วางบล็อก `QuickFortunePicker` (4 การ์ดยอดนิยม) ไว้ที่บนสุดของหน้า
+  - ตามด้วย `DailyCardStrip` ทันที
+  - ตามด้วย Hero กองไพ่ 3D `✦ SACRED ORACLE ✦` + หัวข้อคำโปรยเดิม
+  - ตามด้วย `SpreadCardSelector` (กริดเลือกผัง 20 แบบเดิม)
+  - นำ `viewMode` state และปุ่ม "กลับไปหน้าทำนายด่วน 1 ใบ" ออกจากระบบ — ไม่มีการซ่อนของเดิม ไม่มี toggle สลับไปมา ทุกอย่างวางต่อเนื่องกันในหน้าเดียว เลื่อนจอลงไปเจอของเดิมได้เลย
+- **ปรับปรุงคอมโพเนนต์ `src/components/reading/QuickFortunePicker.tsx`**:
+  - นำปุ่ม "หรือต้องการพิมพ์คำถามเอง & เลือกผังพยากรณ์แบบเต็ม (20 ผัง)" ออกทั้งหมด — บล็อกทำนายด่วนจบสมบูรณ์ที่การ์ดหัวข้อ 4 ใบ ไม่มีปุ่มหรือ anchor scroll คั่นกลาง
+  - นำ prop `onSwitchToFullSpreads` ออกจาก Type Interface
+  - ปรับแท็กหัวข้อเป็น `h2` ให้เป็นระเบียบตามลำดับ Hierarchy และสอดรับกับ `h1` หลักของหน้า
+- **อัปเดตเอกสารแม่บท `docs/plans/QUICK_FORTUNE_PLAN.md`**:
+  - อัปเดตมติรอบที่ 4 (ข้อ 4.1), ลำดับเหตุการณ์ที่กลับไปกลับมา 4 รอบ, แผนภาพไดอะแกรม, งานย่อย 6.2, Acceptance Criteria (16/16 ครบถ้วน) และทางเลือกที่ตัดออก
+- **ผลการทดสอบ**:
+  - TypeScript Typecheck: `0 errors`
+  - QA Test (`scripts/qa/test-quick-fortune.ts`): `42/42 ผ่านสมบูรณ์`
+
 ### 🗓️ 2026-09-05: แก้ไขและยกระดับ 4 บทความแนะนำหน้าแรก และปรับปรุงระบบเชื่อมโยง SEO ครบวงจร — โดย Antigravity
 
 - **แก้ปัญหา 404 Not Found ของการ์ดบทความแนะนำ 4 รายการในหน้าแรก (`HomeSeoContent.tsx` หัวข้อ ✦ WISDOM & ARTICLES)**:

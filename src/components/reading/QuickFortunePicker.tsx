@@ -128,14 +128,12 @@ const NICKNAME_STORAGE_KEY = "seertarot_nickname";
 export interface QuickFortunePickerProps {
   currentNickname: string;
   onSelectTopic: (topic: QuickTopic, nickname: string) => void;
-  onSwitchToFullSpreads: () => void;
   isLoading?: boolean;
 }
 
 export function QuickFortunePicker({
   currentNickname,
   onSelectTopic,
-  onSwitchToFullSpreads,
   isLoading = false,
 }: QuickFortunePickerProps) {
   const [selectedPendingTopic, setSelectedPendingTopic] = useState<QuickTopic | null>(null);
@@ -229,9 +227,9 @@ export function QuickFortunePicker({
           <span>✨</span>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
           เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้
-        </h1>
+        </h2>
         <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
           แตะเลือก 1 หัวข้อเพื่อเปิดไพ่ทาโรต์ 1909 ทันที พร้อมระบบสลับไพ่โปร่งใสตรวจสอบได้ Provably-Fair SHA-256
         </p>
@@ -325,18 +323,6 @@ export function QuickFortunePicker({
         ))}
       </div>
 
-      {/* ทางเลือกรอง: สลับไปยังผังเต็ม 20 แบบ */}
-      <div className="pt-2 text-center">
-        <button
-          type="button"
-          onClick={onSwitchToFullSpreads}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] hover:bg-[#F3EDE2] text-[#4A3828] text-xs sm:text-sm font-serif-th font-medium transition-all duration-300 shadow-xs hover:border-[#A58A5C] hover:shadow-sm group"
-        >
-          <span className="text-[#8F5C1A]">✦</span>
-          <span>หรือต้องการพิมพ์คำถามเอง &amp; เลือกผังพยากรณ์แบบเต็ม (20 ผัง)</span>
-          <span className="text-[#A58A5C] group-hover:translate-x-0.5 transition-transform duration-200">➔</span>
-        </button>
-      </div>
 
       {/* โมดัลถามชื่อเล่นครั้งแรก (Fast & Sacred Popover) */}
       {showNicknameModal && (
