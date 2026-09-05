@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/TarotArtIcons";
 import { CoinSealIcon } from "@/components/entitlement/EntitlementIcons";
 import { soundManager } from "@/lib/utils/audio";
+import { COUNTS } from "@/components/layout/nav-links";
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
@@ -92,11 +93,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       badge: "78 ใบ",
     },
     {
-      label: "บทความดูดวง & ความรู้ไพ่ (24 เรื่อง)",
+      label: `บทความดูดวง & ความรู้ไพ่ (${COUNTS.articles} เรื่อง)`,
       sublabel: "ความรู้ไพ่ทาโรต์ ความรัก การงาน และผังยอดนิยม",
       href: "/blog",
       Icon: JournalScrollNavIcon,
-      badge: "24 บทความ",
+      badge: `${COUNTS.articles} บทความ`,
     },
     ...(onOpenPlans
       ? [

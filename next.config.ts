@@ -55,6 +55,20 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
+  async redirects() {
+    return [
+      {
+        source: "/blog/celtic-cross-spread-deep-dive",
+        destination: "/blog/celtic-cross-spread-guide",
+        permanent: true,
+      },
+      {
+        source: "/blog/jungian-psychology-and-tarot",
+        destination: "/blog/tarot-and-carl-jung-psychology",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CardImage } from "@/components/card/CardImage";
 import { HOME_FAQS } from "@/data/home-seo";
+import { COUNTS } from "@/components/layout/nav-links";
 
 /**
  * 5 ขั้นตอนพิธีกรรมพยากรณ์ศักดิ์สิทธิ์
@@ -75,7 +76,7 @@ const FEATURED_ARTICLES = [
     cardAlt: "The Lovers - ความรักและสัมพันธ์",
   },
   {
-    slug: "celtic-cross-spread-deep-dive",
+    slug: "celtic-cross-spread-guide",
     title: "ถอดรหัสผังเซลติกครอส (Celtic Cross): ความหมายทั้ง 10 ตำแหน่งแบบเจาะลึก",
     category: "ผังพยากรณ์",
     desc: "ทำความเข้าใจผังพยากรณ์ยอดนิยมตลอดกาล แกะรอยความเชื่อมโยงของไพ่แต่ละตำแหน่งอย่างละเอียด",
@@ -83,7 +84,7 @@ const FEATURED_ARTICLES = [
     cardAlt: "Wheel of Fortune - ผังเซลติกครอส",
   },
   {
-    slug: "jungian-psychology-and-tarot",
+    slug: "tarot-and-carl-jung-psychology",
     title: "จิตวิทยาของ Carl Jung กับไพ่ทาโรต์: สัญลักษณ์ จิตใต้สำนึก และการเติบโต",
     category: "จิตวิทยา & AI",
     desc: "สำรวจความเชื่อมโยงระหว่าง Archetypes ของคาร์ล ยุง กับรหัสสัญลักษณ์บนไพ่ทาโรต์ 1909 Rider-Waite",
@@ -518,7 +519,7 @@ export function HomeSeoContent() {
             href="/blog"
             className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
           >
-            อ่านบทความทั้งหมด (24 เรื่อง) <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+            อ่านบทความทั้งหมด ({COUNTS.articles} เรื่อง) <span className="group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
         </div>
 

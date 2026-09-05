@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0082 · 2026-09-05 11:23 · 🟡 Medium · resolve 4 missing featured blog articles and harmonize SEO links
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หน้าแรกมี 4 การ์ดบทความแนะนำที่คลิกแล้ว 404 Not Found เนื่องจาก slug ไม่ตรงหรือยังไม่มีบทความจริงในระบบ |
+| **สาเหตุราก** | HomeSeoContent ใส่ slug ค้างไว้ 4 ตัวโดยสองตัวแรกยังไม่ได้เขียนบทความจริงใน data/articles และอีกสองตัวใช้ชื่อ slug ไม่ตรงกับ canonical ในฐานข้อมูล |
+| **การแก้ไข** | เขียน 2 บทความใหม่ฉบับสมบูรณ์ ทำระบบ 308 permanent redirect พร้อม fallback alias และปรับการนับจำนวนบทความเป็นแบบไดนามิกทั้งระบบ |
+| **🛡️ กฎป้องกันถาวร** | **เพิ่ม slug alias resolver ใน getArticleBySlug และเพิ่ม automated route check ในการตรวจสอบบทความ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน npm run repo:verify ผ่านครบ 27 ด่าน และทดสอบ slug ทั้ง canonical และ alias คืนค่าบทความถูกต้อง 100% |
+| **บันทึกโดย** | Antigravity AI · branch `fix/featured-articles-seo-content` · commit `c998cc9` |
+
+
 ### INC-0081 · 2026-09-05 10:13 · 🟠 High · คืนชีพ sticky header กลางและกันแผงเมนูถูกเนื้อหาทับ + ถอด breadcrumb ออกจากหน้าดัชนี
 
 | หัวข้อ | รายละเอียด |

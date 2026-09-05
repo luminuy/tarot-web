@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { getAllArticles, getArticleBySlug, getRelatedArticles } from "@/data/articles";
+import { getAllArticles, getArticleBySlug, getRelatedArticles, ARTICLE_SLUG_ALIASES } from "@/data/articles";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 import { ArticleReadingClient } from "./ArticleReadingClient";
 
@@ -11,9 +11,15 @@ interface Props {
 
 export async function generateStaticParams() {
   const articles = getAllArticles();
-  return articles.map((article) => ({
-    slug: article.slug,
-  }));
+  const aliasSlugs = Object.keys(ARTICLE_SLUG_ALIASES);
+  return [
+    ...articles.map((article) => ({
+      slug: article.slug,
+    })),
+    ...aliasSlugs.map((slug) => ({
+      slug,
+    })),
+  ];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -61,6 +67,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticleDetailPage({ params }: Props) {
   const { slug } = await params;
+  if (slug in ARTICLE_SLUG_ALIASES) {
+    redirect(`/blog/${ARTICLE_SLUG_ALIASES[slug]}`);
+  }
   const article = getArticleBySlug(slug);
 
   if (!article) {
