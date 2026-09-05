@@ -36,6 +36,20 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: ปรับขนาดและเลย์เอาต์การ์ดทำนายด่วนให้สมส่วน พอดีกับคอนเทนเนอร์ของเว็บ — โดย Antigravity AI
+
+- **ปรับปรุง `src/components/reading/QuickFortunePicker.tsx` ให้เข้ากับภาพรวมของวิหารพยากรณ์ตามคำขอผู้ใช้และภาพจริง**:
+  - **Contained Responsive Layout**: แก้ปัญหาการ์ดล้นจอและแตกขอบ (`w-screen`) โดยนำการ์ดกลับเข้ามาอยู่ใน Container กลาง `w-full` (ใต้ `max-w-6xl`) เสมอกับ `DailyCardStrip` และ `SpreadCardSelector`
+  - **Desktop 4-Column Balanced Grid**: บนคอมพิวเตอร์จอใหญ่ (`lg:grid-cols-4`) แสดงการ์ด 4 หัวข้อครบถ้วนในแถวเดียวพร้อมกันโดยไม่ต้องเลื่อนหน้าจอ และไม่เกิดปัญหาการ์ดที่ 4 ถูกตัดขอบขวาอีกต่อไป
+  - **Tablet 2-Column Grid**: บนแท็บเล็ต (`sm:grid-cols-2`) จัดวางแบบ 2 คอลัมน์ x 2 แถว สมดุล สบายตา
+  - **Mobile Touch Swipe & Apple Indicators**: บนจอมือถือแสดงแบบแนวนอนเลื่อนปัดนุ่มนวล พร้อมจุดบอกตำแหน่งแบบแคปซูลสไตล์ Apple และคำแนะนำปัดซ้าย-ขวา
+  - **No Button Obscuring Art**: ตัดปุ่มลูกศรวงกลมลอยทับหน้าไพ่ 1909 ออกอย่างถาวร ป้องกันการบดบังภาพหน้าไพ่ The Lovers และ The Sun ตามกฎเหล็ก
+  - **Refined Card Proportions**: ปรับสัดส่วนการ์ดให้กะทัดรัด สวยงาม พอเหมาะกับการจัดวางในวิหารพยากรณ์ พร้อมภาพไพ่ 1909 Rider-Waite ที่คมชัดและป้ายสถานะทองคำเปลว
+- **ผลการทดสอบ**:
+  - TypeScript Typecheck: `0 errors`
+  - QA Test (`scripts/qa/test-quick-fortune.ts`): `45/45 ผ่านสมบูรณ์`
+  - Verification Suite (`npm run repo:verify`): `27/27 ด่านผ่านสมบูรณ์ 100%`
+
 ### 🗓️ 2026-09-05: ปรับการ์ดทำนายด่วนเป็น Full-Width สไตล์ Apple Store และนำจุด Indicator ออกตามคำขอ — โดย Antigravity AI
 
 - **ปรับปรุง `src/components/reading/QuickFortunePicker.tsx` ตามคำขอและภาพอ้างอิง Apple Store**:
