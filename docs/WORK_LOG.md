@@ -36,6 +36,32 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: พัฒนาระบบสองภาษาแท้จริงระดับพรีเมียม (Thai & Authentic American English i18n) ทั่วทั้งระบบ — โดย Antigravity AI
+
+- **ยกระดับระบบวิหารพยากรณ์สู่สากลด้วย Authentic American English ในแนวทางจิตวิทยาเชิงลึกและ αρχέτυπα (Carl Jung / Rachel Pollack / Mary K. Greer)**:
+  - **Core i18n Architecture (`src/lib/i18n/`)**:
+    - วางโครงสร้างสถาปัตยกรรม Type-Safe i18n ด้วย `Dictionary`, `Locale = "th" | "en"`, และพจนานุกรมคำศัพท์ที่สละสลวยทั้งสองภาษา
+    - `LocaleProvider`, `useLocale()`, `useDictionary()` รองรับการจดจำภาษาผ่านคุกกี้ (`seertarot_lang`) และ `localStorage` ทำงานบน Cloudflare Workers Edge-safe อย่างสมบูรณ์แบบโดยไม่มี Hydration mismatch
+  - **Global Header & Navigation**:
+    - สร้าง `LanguageSwitcher.tsx` แบบมินิมอลสีทองคำเปลว `TH | EN` บน SiteHeader
+    - อัปเดต `SiteHeader.tsx`, `SiteFooter.tsx`, `SacredNavDropdown.tsx`, และ `nav-links.ts` ให้รองรับการสลับภาษาแบบเรียลไทม์
+    - อัปเดตนโยบายความปลอดภัยสายด่วนวิกฤตสุขภาพจิต (Thai 1323 และ US Suicide & Crisis Lifeline 988)
+    - รักษาโซนผู้ดูแลระบบ (`/admin/*`) ให้เป็นภาษาไทย 100% ตามข้อกำหนดอย่างเคร่งครัด
+  - **Data Layer & AI Persona Prompt Engine**:
+    - อัปเดต `src/server/store.ts` เพิ่ม field `lang?: "th" | "en"` บน `ReadingRecord`
+    - เพิ่มคลังข้อมูลภาษาอังกฤษระดับมืออาชีพใน `src/data/personas.ts` (ชื่อ, ฉายา, สไตล์, ชีวประวัติ, ตัวอย่างคำทักทาย) และ `src/data/spreads.ts` (ชื่อผัง, คำโปรย, รายละเอียด, ตำแหน่งและความหมายทั้ง 20 ผัง)
+    - ปรับปรุง `src/lib/ai/prompt.ts`, `gemini.ts`, `groq.ts` ให้ Prompt วิเคราะห์จิตวิทยาด้วยสำนวน American English ที่ลุ่มลึก ทรงพลัง และตรงไปตรงมา
+    - ปรับปรุง `src/lib/tarot/elements.ts` และ `src/lib/tarot/mantra.ts` ให้คืนค่าคำวิเคราะห์ 4 ธาตุและมนตราศักดิ์สิทธิ์สองภาษา พร้อมปฏิบัติตาม Rule 14 (Zero Fabricated Cards)
+  - **Reading Flow & Interactive Components**:
+    - `AccuracyRatingWidget.tsx`: แปลงคะแนน Resonance และคำถามประเมินความแม่นยำเป็นภาษาอังกฤษและไทย
+    - `ProvablyFairPanel.tsx`: แปลงขั้นตอนการตรวจสอบทางคณิตศาสตร์ SHA-256 Commit-Reveal, ปุ่มคำนวณซ้ำ, และคู่มือ Independent Audit Payload
+    - `ShareModal.tsx`: รองรับการวาดภาพ Canvas HD (9:16 Story / Post) สองภาษา (Cinzel / Noto Serif Thai), ข้อความแชร์บนโซเชียลมีเดีย 5 แพลตฟอร์ม (X, Threads, Facebook, Instagram, TikTok)
+    - `ReadingChatPage.tsx`: แถบหัวนำทาง, สถานะโหลด, และการ์ด Empty State สองภาษา
+    - `StreamReader.tsx`, `QuickChatResult.tsx`, `FollowUpChat.tsx`, `ElementalBalanceWidget.tsx`, `OracleMantraCard.tsx`, `SpreadsLibrary.tsx`, `CardDetailView.tsx` รองรับการแสดงผลสองภาษาอย่างสมบูรณ์แบบ
+- **ผลการทดสอบและการตรวจสอบ**:
+  - TypeScript Typecheck (`npm run typecheck`): `0 errors`
+  - Verification Suite (`npm run repo:verify`): `ผ่านครบถ้วนทั้ง 27 ด่านสมบูรณ์ 100%`
+
 ### 🗓️ 2026-09-05: ปรับปรุงส่วนหัวทำนายด่วนให้คลีน มินิมอล นำสัญลักษณ์ดวงดาวและข้อความเทคนิคออก — โดย Antigravity AI
 
 - **ปรับปรุง `src/components/reading/QuickFortunePicker.tsx` ตามคำขอผู้ใช้**:

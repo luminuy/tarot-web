@@ -20,6 +20,7 @@ const BodySchema = z.object({
   personaId: z.string().default("warm"),
   nickname: z.string().max(40).optional(),
   category: z.enum(["general", "love", "work", "money", "self"]).optional(),
+  lang: z.enum(["th", "en"]).default("th"),
   intake: z
     .object({
       situation: z.string().max(500).optional(),
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
     .filter(Boolean)
     .join(" ");
 
-  const verdict = checkQuestion(textToScan);
+  const verdict = checkQuestion(textToScan, parsed.data.lang);
   if (verdict.block) {
     recordEvents(["reading_blocked", `safety_flag:${verdict.flag}`]);
     return NextResponse.json({ blocked: true, message: verdict.message }, { status: 200 });
@@ -168,6 +169,7 @@ export async function POST(request: Request) {
     question: question.trim(),
     intake,
     nickname,
+    lang: parsed.data.lang,
     safetyFlag: verdict.flag,
     safetyGuard: verdict.promptGuard,
     commitment,

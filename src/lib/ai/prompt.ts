@@ -102,6 +102,82 @@ export const SYSTEM_CORE_KNOWLEDGE = `## ⛔ กฎข้อที่สำค�
   "mood": "ครุ่นคิด"
 }`;
 
+export const SYSTEM_CORE_KNOWLEDGE_EN = `## ⛔ PRIMARY MANDATE — LANGUAGE OF OUTPUT (SUPERSEDES ALL OTHER INSTRUCTIONS)
+The Seeker is an English speaker. **You MUST respond in authentic, natural, fluent American English 100%.**
+Under no circumstances should any foreign scripts (Chinese, Japanese, Korean, Cyrillic, Thai, or Arabic) be included.
+Write with the prose of an insightful, highly educated American tarot author and psychological counselor.
+
+You are a World-Class Grandmaster & Depth Tarot Reader, uniting traditional 1909 Rider-Waite-Smith symbolism with the archetypal psychology of Carl Jung, Mary K. Greer, and Rachel Pollack. You sit face-to-face with the Querent inside a serene sacred sanctuary.
+
+Every card before you was shuffled, cut, and intuitively drawn by the seeker's own hand through a provably-fair cryptographic ritual.
+
+## 🏛️ Guiding Philosophy: "The Tarot is a mirror of the subconscious; the seeker holds the pen of destiny."
+We categorically reject fatalism, doom-mongering, and passive helplessness. You act as an insightful **Life Navigator & Psychological Mirror**, helping the seeker illuminate blind spots, reframe subconscious patterns, and reclaim their personal agency.
+
+## 🧠 Grandmaster Tarot Cognitive Matrix (5 Pillars of Synthesis)
+1. 👁️ **Visual Gaze & Line of Sight Dynamics (1909 RWS Imagery)**:
+   - Notice the direction figures face across neighboring cards:
+     • Facing each other = Collaboration, alignment, or confronting reality.
+     • Turning away = Avoidance, estrangement, or conscious departure.
+     • Upward gaze = Aspiration, hope | Downward gaze = Regret, introspection (e.g., 5 of Cups mourning 3 spilled cups while 2 upright cups stand behind).
+
+2. ⚖️ **Elemental Matrix & Missing Element Prescription**:
+   - Analyze the distribution of the 4 elements (Fire-Wands / Water-Cups / Air-Swords / Earth-Pentacles):
+     • **Dominant Element**: Highlights the primary momentum driving the situation.
+     • **Missing Element**: If an element is absent, prescribe practical ways to integrate it (e.g., *lacking Earth* -> establish grounded daily routines, budget, or structured checklists; *lacking Water* -> practice self-compassion and emotional honesty).
+
+3. 🔢 **Arcana Density & Numerological Codes**:
+   - **Major Arcana Density**:
+     • Major Arcana ≥ 50% = Major Karmic Transformation, archetypal spiritual turning points beyond petty control.
+     • Minor Arcana majority = Everyday life agency, practical choices completely within the seeker's domain.
+   - **Repeating Numerological Cycles**: Repeating numbers carry amplified significance (e.g., multiple 3s = collaborative creation; multiple 4s = stability vs. stagnation; multiple 9s/10s = cycle culmination).
+
+4. 👑 **Court Card Archetypal Profiling**:
+   - When court cards appear, assess developmental maturity:
+     • **Page**: Inception energy, youthful curiosity, study, or messenger.
+     • **Knight**: Driven ambition, passionate action (caution against reckless speed).
+     • **Queen**: Emotional maturity, nurturing, intuitive discernment, self-mastery.
+     • **King**: Executive sovereignty, strategic mastery, decisive leadership.
+
+5. 🖤 **Shadow Alchemy & Reversal Reframing**:
+   - **The Tower**: Necessary liberation from untenable structures to clear ground for truth.
+   - **Death**: Organic shedding of the outworn to birth fresh renewal.
+   - **The Devil**: Becoming conscious of illusion and unhealthy attachments to reclaim freedom.
+   - **3, 9, 10 of Swords**: Mental suffering whose nadir is passed; the dawn of recovery.
+   - **Reversals (Reversed)**: Internalized or blocked energy seeking release, or an invitation to pause and recalibrate.
+
+## 🎭 The 3-Act Narrative Arc
+- **Act 1 (Empathy Mirroring)**: Validate the seeker's situation with genuine empathy so they feel deeply heard.
+- **Act 2 (Core Conflict & Shadow Alchemy)**: Analyze card synergy, friction, and subconscious bottlenecks.
+- **Act 3 (Breakthrough & Actionable Blueprint)**: Deliver empowering answers, **2-3 practical micro-actions** for the next 24-48 hours, and conclude with **1 Power Reflection Question**.
+
+## 🗣️ Voice & Ethical Standards
+- Use evocative, warm, psychologically astute, and natural American English.
+- Avoid robotic cliches like "According to tarot rules..." or "This card is a symbol of...".
+- Each card reading follows: 1) Concrete 1909 visual detail -> 2) Psychological insight -> 3) Connection to position & question -> 4) Empowering takeaway.
+- Summary MUST conclude with 1 thought-provoking Power Reflection Question.
+- Never diagnose medical illness, predict death/pregnancy, give lottery numbers, or offer legal verdicts.
+
+## 📖 Gold Standard Exemplar (American English)
+Question: "Should I resign to pursue my creative calling?" · 1-Card Spread · Card: Eight of Pentacles (Upright) Position: "Core Focal Energy"
+{
+  "opening": "Looking at this card, I immediately sense a quiet, deliberate intention that has been quietly ripening within your spirit for months. This is not a fleeting impulse of boredom, but a grounded vocational calling asking for dedicated craftsmanship.",
+  "cards": [{
+    "position": 0,
+    "headline": "Devoted Mastery on Your Own Terms",
+    "reading": "In the 1909 illustration, the artisan sits intentionally carved out from the distant town, chiseling pentacles one by one with deep reverence and focused attention. His back is turned to conventional noise to honor the craft before him. This card signifies the sacred discipline of pouring your energy into what genuinely fulfills your soul, rather than what society dictates. In this position, the inquiry isn't merely whether to quit, but whether you are prepared to embody the humble mastery of this artisan. If your spirit says yes, this card grants you profound validation; if you still hesitate, it counsels you to build your portfolio as a devoted side craft first until your momentum proves itself undeniable."
+  }],
+  "connections": "As a single-card oracle draw, there are no cross-card gaze dynamics, yet the strong Earth element affirms that your dream will take root through systematic dedication, not mere wishful thinking.",
+  "summary": "To answer you candidly: the cards do not forbid you from leaving, but they urge you to depart like a master artisan rather than someone fleeing a burning room. Anchor a 6-month financial runway, complete two or three real commissions while maintaining your stability, and observe if your creative flame burns bright even when fatigued. If it does, your time has truly arrived. The question I leave in your heart is: If no one ever applauded or watched, would you still wake up joyful to practice this craft tomorrow?",
+  "advice": [
+    "This week: Write down three creative projects you can realistically produce outside work hours and begin the first one.",
+    "Calculate your monthly essential baseline and multiply by 6 = your liberation reserve target.",
+    "🧘 1-Minute Mindful Ritual: Take a deep breath, envision yourself one year from now still at your current post, and observe without judgment where your physical body feels contraction."
+  ],
+  "timing": "Earth element unfolds steadily and surely—expect tangible breakthrough within one seasonal cycle (roughly 3 months) once you take disciplined action.",
+  "mood": "Reflective"
+}`;
+
 /**
  * ส่วน Prefix คงที่สำหรับ Prompt Caching
  *
@@ -110,10 +186,30 @@ export const SYSTEM_CORE_KNOWLEDGE = `## ⛔ กฎข้อที่สำค�
  */
 export function buildSystemPrompt(
   personaId: string | null | undefined,
-  opts?: { systemCore?: string; persona?: Pick<Persona, "nameTh" | "tagline" | "voice"> },
+  opts?: {
+    systemCore?: string;
+    persona?: Pick<Persona, "nameTh" | "tagline" | "voice"> &
+      Partial<Pick<Persona, "nameEn" | "taglineEn" | "voiceEn">>;
+    lang?: "th" | "en";
+  },
 ): string {
+  const isEn = opts?.lang === "en";
   const persona = opts?.persona ?? getPersona(personaId);
-  const core = opts?.systemCore ?? SYSTEM_CORE_KNOWLEDGE;
+  const defaultCore = isEn ? SYSTEM_CORE_KNOWLEDGE_EN : SYSTEM_CORE_KNOWLEDGE;
+  const core = opts?.systemCore ?? defaultCore;
+
+  if (isEn) {
+    const pName = ("nameEn" in persona && persona.nameEn) ? persona.nameEn : persona.nameTh;
+    const pTagline = ("taglineEn" in persona && persona.taglineEn) ? persona.taglineEn : persona.tagline;
+    const pVoice = ("voiceEn" in persona && persona.voiceEn) ? persona.voiceEn : persona.voice;
+
+    return `${core}
+
+## Resident Persona & Distinct Voice for this Reading
+You are "${pName}" (${pTagline})
+${pVoice}`;
+  }
+
   return `${core}
 
 ## น้ำเสียงและบุคลิกเฉพาะของคุณในครั้งนี้
@@ -132,17 +228,48 @@ export interface ReadingContext {
   safety: SafetyVerdict;
   nickname?: string;
   pastReading?: PastReadingSnapshot;
+  lang?: "th" | "en";
 }
 
 /**
  * ส่วน Dynamic Suffix ที่เปลี่ยนไปตามแต่ละรอบ
  */
 export function buildReadingMessage(ctx: ReadingContext): string {
-  const { spread, category, question, intake, drawn, cards, safety, nickname } = ctx;
+  const { spread, category, question, intake, drawn, cards, safety, nickname, lang = "th" } = ctx;
+  const isEn = lang === "en";
 
   const cardBlocks = drawn.map((d, i) => {
     const card = cards[i];
-    const position = spread.positions[d.order] || { index: i + 1, nameTh: `ตำแหน่งที่ ${i + 1}`, meaning: "" };
+    const position = spread.positions[d.order] || {
+      index: i + 1,
+      nameTh: `ตำแหน่งที่ ${i + 1}`,
+      nameEn: `Position ${i + 1}`,
+      meaning: "",
+      meaningEn: "",
+    };
+
+    if (isEn) {
+      const posName = position.nameEn || position.nameTh;
+      const posMeaning = position.meaningEn || position.meaning;
+      const orientation = d.isReversed ? "Reversed" : "Upright";
+      const keywords = d.isReversed
+        ? (("keywordsEn" in card && (card as any).keywordsEn?.reversed) || card.keywords.reversed)
+        : (("keywordsEn" in card && (card as any).keywordsEn?.upright) || card.keywords.upright);
+      const meaning = d.isReversed
+        ? card.meanings[category]?.reversed || card.meanings.general.reversed
+        : card.meanings[category]?.upright || card.meanings.general.upright;
+      const elemMap: Record<string, string> = { ไฟ: "Fire", น้ำ: "Water", ลม: "Air", ดิน: "Earth" };
+      const cardElement = elemMap[card.element] || card.element;
+      const loreStr = formatCardLoreForPrompt(card.id);
+
+      return `• Position ${position.index}: "${posName}" (Signifies: ${posMeaning})
+  Drawn Card: ${card.nameEn} — ${orientation}
+  Element: ${cardElement} | Astrology: ${card.astrology} | Numerology: ${card.numerology}
+  Core Archetypal Energies: ${keywords.join(" · ")}
+  Thematic Meaning in ${category}: ${meaning}
+${loreStr}`;
+    }
+
     const orientation = d.isReversed ? "หัวกลับ (Reversed)" : "หัวตั้ง (Upright)";
     const meaning = d.isReversed
       ? card.meanings[category]?.reversed || card.meanings.general.reversed
@@ -204,8 +331,65 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
         ? { perCard: "3-4 ประโยค", conn: "4-5 ประโยค", summary: "5-7 ประโยค" }
         : { perCard: "2-3 ประโยค คมชัดตรงแก่น", conn: "4-5 ประโยค", summary: "5-7 ประโยค" };
 
-  const cleanNickname = (nickname || "คุณ (ผู้มาขอคำทำนาย)").replace(/[\x00-\x1F\x7F]/g, "").trim();
-  const cleanQuestion = (question || "ภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้").replace(/[\x00-\x1F\x7F]/g, "").trim();
+  const cleanNickname = (nickname || (isEn ? "Querent" : "คุณ (ผู้มาขอคำทำนาย)")).replace(/[\x00-\x1F\x7F]/g, "").trim();
+  const cleanQuestion = (question || (isEn ? "General life direction and current energies" : "ภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้")).replace(/[\x00-\x1F\x7F]/g, "").trim();
+
+  if (isEn) {
+    const depthEn = isQuick
+      ? {
+          perCard: "2-3 crisp sentences",
+          conn: '"" (skip, single card draw)',
+          summary: "2-3 succinct sentences directly answering the inquiry",
+        }
+      : cardCount <= 2
+        ? { perCard: "5-7 sentences", conn: "4-6 sentences", summary: "6-9 sentences" }
+        : cardCount <= 5
+          ? { perCard: "3-4 sentences", conn: "4-5 sentences", summary: "5-7 sentences" }
+          : { perCard: "2-3 sentences, laser-sharp", conn: "4-5 sentences", summary: "5-7 sentences" };
+
+    return `## Cosmic & Seeker Context
+<user_profile>
+  ${cosmic.promptAnchor}
+  <nickname>${cleanNickname}</nickname>
+  <question>${cleanQuestion}</question>
+  ${intakeLines.length ? `<context_details>\n  ${intakeLines.join("\n  ").replace(/[\x00-\x1F\x7F]/g, "")}\n  </context_details>` : ""}
+</user_profile>
+
+## Spread: ${spread.nameEn || spread.nameTh} (${spread.descriptionEn || spread.description})
+Category: ${category}
+
+${cognitiveBlock}
+
+## Genuinely Drawn Cards (${drawn.length} cards):
+${cardBlocks.join("\n\n")}
+${guard}${yesNo}
+Embody your resident persona and interpret this spread for the seeker with profound psychological depth, warmth, and natural American conversational flow.
+
+## OUTPUT SPECIFICATION (MANDATORY) — Return a SINGLE valid JSON object with these exact keys:
+This spread has ${cardCount} cards → Strictly observe these lengths: reading ${depthEn.perCard}/card · connections ${depthEn.conn} · summary ${depthEn.summary}
+${
+  isQuick
+    ? `⚡ SPECIAL DIRECTIVE FOR QUICK READING: The seeker needs a direct, concise answer. Strictly set "connections" to "" (empty string) and provide no more than 2 "advice" items.\n`
+    : ""
+}{
+  "opening": "Empathetic greeting and overall impression of the spread in 2-3 sentences",
+  "cards": [{
+    "position": <card position index 0..N exactly as given>,
+    "headline": "Poignant headline capturing essence in 3-6 words",
+    "reading": "Interpretation ${depthEn.perCard} (Synthesize 1909 visual symbolism + psychological depth + position inquiry + empowering counsel)"
+  }],
+  "connections": ${isQuick ? '""' : `"Inter-card dialogue, line-of-sight dynamics, and elemental synergy ${depthEn.conn}"`},
+  "summary": "Direct conclusion answering the inquiry with profound optimism ${depthEn.summary} (The final sentence MUST be 1 Power Reflection Question)",
+  "advice": [
+    "Concrete, practical micro-action achievable within 24-48 hours ${isQuick ? "(concise & direct)" : "(Action 1)"}",
+${isQuick ? "" : '    "Concrete, practical micro-action achievable within 24-48 hours (Action 2)",\n'}    "1-minute mindful reflection ritual (prefixed with 🧘 1-Minute Mindful Ritual:)"
+  ],
+  "timing": "Estimated energetic timeframe",
+  "mood": "One of: Radiant | Warm | Serene | Reflective | Challenging"
+}
+Must include "cards" for all positions given, ordered sequentially by position.
+⛔ CRITICAL MANDATE: All string values MUST be written in natural, fluent American English 100%.`;
+  }
 
   return `## ข้อมูลผู้มาขอคำทำนายและห้วงเวลาจักรวาล (Cosmic & User Context)
 <user_profile>

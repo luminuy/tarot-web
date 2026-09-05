@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { getPersona } from "@/data/personas";
 import { loadFlowState, type PersistedFlow } from "@/lib/utils/flow-persistence";
+import { useLocale } from "@/lib/i18n";
 
 /**
  * 💬 หน้าแชทเต็มจอกับแม่หมอ (/reading/chat)
@@ -23,6 +24,7 @@ const FollowUpChat = dynamic(
 );
 
 export default function ReadingChatPage() {
+  const { isEnglish } = useLocale();
   // undefined = ยังไม่อ่าน · null = ไม่มีรอบดูดวงค้างไว้
   const [flow, setFlow] = useState<PersistedFlow | null | undefined>(undefined);
 
@@ -31,6 +33,7 @@ export default function ReadingChatPage() {
   }, []);
 
   const persona = getPersona(flow?.personaId);
+  const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
   const hasSession = !!flow && !!flow.readingId && (flow.drawnCards?.length ?? 0) > 0;
 
   return (
@@ -40,14 +43,14 @@ export default function ReadingChatPage() {
         <div className="mx-auto flex h-full max-w-2xl items-center justify-between gap-3 px-4">
           <Link
             href="/"
-            aria-label="กลับไปหน้าคำทำนาย"
+            aria-label={isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
             className="flex items-center gap-1.5 rounded-lg py-1.5 pr-2 font-serif-th text-xs text-[#29261F] transition-colors hover:text-[#A58A5C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
           >
-            <span aria-hidden="true">←</span> กลับไปหน้าคำทำนาย
+            <span aria-hidden="true">←</span> {isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
           </Link>
           <span className="flex items-center gap-1.5 font-serif-th text-xs font-bold text-[#29261F]">
             <span className="text-[#A58A5C]">✦</span>
-            แชทกับ{persona.nameTh}
+            {isEnglish ? `Chat with ${personaName}` : `แชทกับ${persona.nameTh}`}
           </span>
         </div>
       </header>
@@ -55,7 +58,7 @@ export default function ReadingChatPage() {
       <div className="mx-auto w-full max-w-2xl px-4 py-4">
         {flow === undefined ? (
           <div className="flex h-[60dvh] items-center justify-center font-serif-th text-sm text-[#635B4E]">
-            กำลังเปิดห้องแชท...
+            {isEnglish ? "Opening sanctuary chamber..." : "กำลังเปิดห้องแชท..."}
           </div>
         ) : hasSession ? (
           <FollowUpChat
@@ -77,15 +80,19 @@ export default function ReadingChatPage() {
           />
         ) : (
           <div className="mt-10 space-y-4 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 text-center shadow-xs">
-            <p className="font-serif-th text-sm text-[#29261F]">ยังไม่มีรอบดูดวงที่เปิดค้างไว้</p>
+            <p className="font-serif-th text-sm text-[#29261F]">
+              {isEnglish ? "No active tarot session found" : "ยังไม่มีรอบดูดวงที่เปิดค้างไว้"}
+            </p>
             <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
-              เปิดไพ่และอ่านคำทำนายก่อน แล้วจึงกดปุ่ม “แชทออนไลน์กับแม่หมอ” จากหน้าผลไพ่เพื่อคุยต่อ
+              {isEnglish
+                ? "Please draw your cards and receive your reading first, then click “Chat with Oracle” on the prophecy page to continue."
+                : "เปิดไพ่และอ่านคำทำนายก่อน แล้วจึงกดปุ่ม “แชทออนไลน์กับแม่หมอ” จากหน้าผลไพ่เพื่อคุยต่อ"}
             </p>
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 rounded-full bg-[#29261F] px-6 py-2.5 font-serif-th text-xs font-bold text-[#F3F0EA] transition-all hover:bg-[#A58A5C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
             >
-              <span>✦</span> ไปเปิดไพ่
+              <span>✦</span> {isEnglish ? "Begin Tarot Reading" : "ไปเปิดไพ่"}
             </Link>
           </div>
         )}

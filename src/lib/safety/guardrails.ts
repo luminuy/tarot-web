@@ -83,6 +83,23 @@ export const CRISIS_MESSAGE = `ก่อนจะเปิดไพ่ ขอห
 
 ไพ่จะยังอยู่ตรงนี้ กลับมาเปิดเมื่อไหร่ก็ได้ ตอนนี้ขอให้คุณได้รับการดูแลก่อน`;
 
+export const CRISIS_MESSAGE_EN = `Before we draw any cards, let us pause here for a moment.
+
+What you've shared deeply concerns us, and tarot cards should never be the answer to moments of profound pain or crisis. You are carrying something heavy, and you deserve to be heard by compassionate, trained human professionals right now.
+
+**988 Suicide & Crisis Lifeline**: Call or text **988** (Free, confidential, available 24/7 across the US).
+**Crisis Text Line**: Text **HOME to 741741** to connect with a crisis counselor 24/7.
+**The Trevor Project**: 1-866-488-7386 or text START to 678-678 (24/7 for LGBTQ youth).
+If you are in immediate physical danger, please call **911** or your local emergency services immediately.
+
+If calling feels too difficult right now, please reach out to someone you trust nearby and tell them you need support. Just one sentence is enough.
+
+The cards will be here whenever you are ready to return. For now, please let yourself be cared for.`;
+
+export function getCrisisMessage(lang: "th" | "en" = "th"): string {
+  return lang === "en" ? CRISIS_MESSAGE_EN : CRISIS_MESSAGE;
+}
+
 function matchAny(patterns: RegExp[], text: string): boolean {
   return patterns.some((p) => p.test(text));
 }
@@ -92,12 +109,12 @@ function matchAny(patterns: RegExp[], text: string): boolean {
  * ออกแบบให้ "ระแวงไว้ก่อน" ในกรณีสัญญาณวิกฤต —
  * การเตือนเกินจำเป็นสร้างความรำคาญ แต่การพลาดสักครั้งเดียวเสียหายกว่ามาก
  */
-export function checkQuestion(rawQuestion: string): SafetyVerdict {
+export function checkQuestion(rawQuestion: string, lang: "th" | "en" = "th"): SafetyVerdict {
   const text = rawQuestion.normalize("NFC").trim();
   if (!text) return { flag: "none", block: false };
 
   if (matchAny(CRISIS_PATTERNS, text)) {
-    return { flag: "crisis", block: true, message: CRISIS_MESSAGE };
+    return { flag: "crisis", block: true, message: getCrisisMessage(lang) };
   }
 
   if (matchAny(MEDICAL_PATTERNS, text)) {
@@ -142,3 +159,10 @@ export function checkQuestion(rawQuestion: string): SafetyVerdict {
 /** ข้อความท้ายคำอ่านทุกครั้ง — ต้องแสดงเสมอ ไม่ให้ผู้ใช้เข้าใจผิดว่าคุยกับคนจริง */
 export const AI_DISCLOSURE =
   "คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต ไม่สามารถใช้แทนคำปรึกษาทางการแพทย์ กฎหมาย หรือการเงินได้ การตัดสินใจทุกอย่างยังคงเป็นของคุณเสมอ";
+
+export const AI_DISCLOSURE_EN =
+  "All interpretations are processed using AI from the cards you genuinely drew. They are provided as life guidance, contemplation, and personal reflection, and must never substitute for professional medical, legal, psychiatric, or financial counsel. All life choices remain solely your own.";
+
+export function getAiDisclosure(lang: "th" | "en" = "th"): string {
+  return lang === "en" ? AI_DISCLOSURE_EN : AI_DISCLOSURE;
+}

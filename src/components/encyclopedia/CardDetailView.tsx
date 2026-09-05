@@ -7,6 +7,7 @@ import type { TarotCard } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 import { useHasMounted } from "@/lib/motion";
 import { trackEvent } from "@/lib/analytics";
+import { useLocale } from "@/lib/i18n";
 
 interface CardDetailViewProps {
   card: TarotCard;
@@ -57,6 +58,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   currentIndex,
   related,
 }) => {
+  const { isEnglish } = useLocale();
   const hasMounted = useHasMounted();
   const [orientation, setOrientation] = useState<"upright" | "reversed">("upright");
 
@@ -73,11 +75,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   const elem = ELEMENT_CONFIG[card.element] || ELEMENT_CONFIG["ไฟ"];
 
   const categories = [
-    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", icon: "✦", color: "#8F5C1A" },
-    { id: "love" as const, nameTh: "ความรักและคนในใจ", icon: "✦", color: "#A6392C" },
-    { id: "work" as const, nameTh: "การงานและโครงการ", icon: "✦", color: "#6F5B4A" },
-    { id: "money" as const, nameTh: "การเงินและโชคลาภ", icon: "◆", color: "#3A7044" },
-    { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", icon: "✧", color: "#6F5B4A" },
+    { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life Overview & Archetypal Journey", icon: "✦", color: "#8F5C1A" },
+    { id: "love" as const, nameTh: "ความรักและคนในใจ", nameEn: "Love & Relationships", icon: "✦", color: "#A6392C" },
+    { id: "work" as const, nameTh: "การงานและโครงการ", nameEn: "Career & Ambitions", icon: "✦", color: "#6F5B4A" },
+    { id: "money" as const, nameTh: "การเงินและโชคลาภ", nameEn: "Finances & Abundance", icon: "◆", color: "#3A7044" },
+    { id: "self" as const, nameTh: "จิตวิทยาและการเติบโตภายใน", nameEn: "Psychology & Inner Growth", icon: "✧", color: "#6F5B4A" },
   ];
 
   return (
@@ -85,7 +87,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
       {/* Top Header Bar — Card Counter */}
       <div className="flex items-center justify-end border-b border-[#D5CEC2]/40 pb-4 text-xs font-mono">
         <span className="text-[#635B4E]">
-          ลำดับที่ <strong className="text-[#A58A5C]">{currentIndex + 1}</strong> / {totalCards}
+          {isEnglish ? "Card " : "ลำดับที่ "}<strong className="text-[#A58A5C]">{currentIndex + 1}</strong> / {totalCards}
         </span>
       </div>
 
@@ -142,7 +144,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                 isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
               }`}
             >
-              <span>✦</span> ไพ่หัวตั้ง (ปกติ)
+              <span>✦</span> {isEnglish ? "Upright (Standard)" : "ไพ่หัวตั้ง (ปกติ)"}
             </button>
             <button
               type="button"
@@ -151,7 +153,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                 !isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
               }`}
             >
-              <span>↻</span> ไพ่หัวกลับ
+              <span>↻</span> {isEnglish ? "Reversed" : "ไพ่หัวกลับ"}
             </button>
           </div>
 
@@ -200,7 +202,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* Keywords Ribbon */}
           <div className="space-y-2">
             <h2 className="text-[13px] font-mono text-[#A58A5C] uppercase tracking-wider flex items-center gap-1.5 font-bold">
-              <span>✦</span> สัญลักษณ์และคีย์เวิร์ด ({isUpright ? "ไพ่หัวตั้ง" : "ไพ่หัวกลับ"})
+              <span>✦</span> {isEnglish ? `Symbols & Keywords (${isUpright ? "Upright" : "Reversed"})` : `สัญลักษณ์และคีย์เวิร์ด (${isUpright ? "ไพ่หัวตั้ง" : "ไพ่หัวกลับ"})`}
             </h2>
             <div className="flex flex-wrap gap-2">
               {currentKeywords.map((kw, i) => (
@@ -217,7 +219,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* 5 Categorized Meanings List */}
           <div className="space-y-3.5 pt-2">
             <h2 className="font-serif-th text-base font-bold text-[#29261F] flex items-center gap-2">
-              <span className="text-[#A58A5C]">✦</span> ความหมายและการทำนาย 5 ด้าน ({isUpright ? "หัวตั้ง" : "หัวกลับ"})
+              <span className="text-[#A58A5C]">✦</span> {isEnglish ? `5 Dimensions of Meaning (${isUpright ? "Upright" : "Reversed"})` : `ความหมายและการทำนาย 5 ด้าน (${isUpright ? "หัวตั้ง" : "หัวกลับ"})`}
             </h2>
 
             {/* initial={false} — ความหมายไพ่ 5 ด้านคือเนื้อหาหลักของหน้าไพ่ทั้ง 78 ใบ
@@ -244,10 +246,10 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                         <span style={{ color: cat.color }} className="text-sm">
                           {cat.icon}
                         </span>
-                        <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F]">{cat.nameTh}</h3>
+                        <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F]">{isEnglish ? cat.nameEn : cat.nameTh}</h3>
                       </div>
                       <p className="font-serif-th text-xs sm:text-sm text-[#29261F] leading-relaxed pl-4 border-l-2 border-[#D5CEC2] group-hover:border-[#A58A5C] transition-colors [text-wrap:pretty]">
-                        {text || "กำลังรวบรวมคำแปลมิตินี้"}
+                        {text || (isEnglish ? "Archetypal insight gathering in progress" : "กำลังรวบรวมคำแปลมิตินี้")}
                       </p>
                     </div>
                   );

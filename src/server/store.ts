@@ -18,6 +18,7 @@ export interface ReadingRecord {
   question: string;
   intake: { situation?: string; feeling?: string; hoped?: string };
   nickname?: string;
+  lang?: "th" | "en";
   safetyFlag: SafetyFlag;
   safetyGuard?: string;
 

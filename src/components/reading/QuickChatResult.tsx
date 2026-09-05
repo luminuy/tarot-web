@@ -16,6 +16,7 @@ import { ProvablyFairPanel } from "./ProvablyFairPanel";
 import { CollapsibleCard } from "./CollapsibleCard";
 import { CardImage } from "@/components/card/CardImage";
 import { TTSReaderButton } from "./TTSReaderButton";
+import { useLocale } from "@/lib/i18n";
 
 export interface QuickChatResultProps {
   reading?: Partial<Reading> | null;
@@ -44,6 +45,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
   errorMsg,
   onRetry,
 }) => {
+  const { isEnglish } = useLocale();
   const drawnCard = drawnCards[0];
   const cardData =
     drawnCard?.card ||
@@ -60,6 +62,9 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
     }
   }, [drawnCards]);
 
+  const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
+  const personaTagline = isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline;
+
   return (
     <div className="w-full rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
       {/* Oracle Guide Header & Streaming Status */}
@@ -72,7 +77,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
-              alt={persona.nameTh}
+              alt={personaName}
               className="w-full h-full object-cover object-top filter contrast-[1.05] brightness-[1.02] tarot-hd-card-image"
               sizes="40px"
             />
@@ -80,23 +85,25 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="font-serif-th text-base font-bold font-mystic-gold">{persona.nameTh}</h4>
+              <h4 className="font-serif-th text-base font-bold font-mystic-gold">{personaName}</h4>
               <span className="text-[11px] font-serif-th font-semibold bg-[#F3EDE2] text-[#8F5C1A] border border-[#D9C8AC] px-2 py-0.5 rounded-full">
-                ทำนายด่วน 1 ใบ
+                {isEnglish ? "Quick 1-Card" : "ทำนายด่วน 1 ใบ"}
               </span>
             </div>
-            <p className="text-xs text-[#635B4E] mt-0.5">{persona.tagline}</p>
+            <p className="text-xs text-[#635B4E] mt-0.5">{personaTagline}</p>
           </div>
         </div>
 
         {/* Live Status Pill */}
         {isStreaming ? (
           <span className="text-xs font-semibold bg-[#F3EDE2] text-[#2E211A] border border-[#D9C8AC] px-3.5 py-1.5 rounded-full flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8F5C1A] animate-ping" /> แม่หมอกำลังอ่านคำทำนาย...
+            <span className="w-2.5 h-2.5 rounded-full bg-[#8F5C1A] animate-ping" />{" "}
+            {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
         ) : (
           <span className="text-xs font-semibold bg-[#EBF3ED] text-[#3A7044] border border-[#3A7044]/30 px-3.5 py-1.5 rounded-full flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#3A7044]" /> อ่านคำทำนายครบถ้วนแล้ว
+            <span className="w-2 h-2 rounded-full bg-[#3A7044]" />{" "}
+            {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
           </span>
         )}
       </div>
@@ -104,7 +111,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
       {/* Error / Recovery Banner */}
       {errorMsg &&
         (() => {
-          const isQuota = /สมัครสมาชิก|เติมรอบ|โควตา|สิทธิ์/.test(errorMsg);
+          const isQuota = /สมัครสมาชิก|เติมรอบ|โควตา|สิทธิ์|quota|member/i.test(errorMsg);
           return (
             <div
               role="alert"
@@ -123,7 +130,14 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                   onClick={onRetry}
                   className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
-                  <span>✦</span> {/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่"}
+                  <span>✦</span>{" "}
+                  {isEnglish
+                    ? /reload|not found/i.test(errorMsg)
+                      ? "Reload Reading"
+                      : "Retry Reading"
+                    : /โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg)
+                      ? "โหลดใหม่อีกครั้ง"
+                      : "ลองอ่านใหม่"}
                 </button>
               )}
             </div>
@@ -134,7 +148,9 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
       {!cardData && (
         <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-center space-y-2.5 my-2">
           <p className="text-xs text-[#A6392C] font-serif-th">
-            ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง
+            {isEnglish
+              ? "Card data for this position could not be found. Please reload."
+              : "ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง"}
           </p>
           {onRetry && (
             <button
@@ -142,7 +158,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
               onClick={onRetry}
               className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
             >
-              <span>✦</span> โหลดใหม่อีกครั้ง
+              <span>✦</span> {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
             </button>
           )}
         </div>
@@ -165,29 +181,35 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                   {cardData.image ? (
                     <CardImage
                       image={cardData.image}
-                      alt={cardData.nameTh || "Tarot"}
+                      alt={isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}
                       className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
                       sizes="88px"
                     />
                   ) : (
                     <div className="w-full h-full bg-[#F3EDE2] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#D9C8AC]">
                       <span className="text-[#8F5C1A] text-xs">✦</span>
-                      <span className="text-xs text-[#635B4E] font-serif-th mt-0.5 leading-normal">ไม่พบข้อมูล</span>
+                      <span className="text-xs text-[#635B4E] font-serif-th mt-0.5 leading-normal">
+                        {isEnglish ? "Not Found" : "ไม่พบข้อมูล"}
+                      </span>
                     </div>
                   )}
                 </div>
 
                 <div>
                   <span className="text-[13px] text-[#8F5C1A] font-serif-th font-semibold">
-                    ✦ คำทำนายด่วน: {drawnCard?.position.nameTh || "สารจากไพ่"}
+                    ✦ {isEnglish
+                        ? `Quick Reading: ${drawnCard?.position.nameEn || drawnCard?.position.nameTh || "Oracle Message"}`
+                        : `คำทำนายด่วน: ${drawnCard?.position.nameTh || "สารจากไพ่"}`}
                   </span>
                   <h3 className="font-serif-th text-lg sm:text-xl font-bold text-[#2E211A] mt-0.5">
-                    {cardData.nameTh}{" "}
-                    {cardData.nameEn && (
+                    {isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}{" "}
+                    {!isEnglish && cardData.nameEn && (
                       <span className="text-xs font-mono font-normal text-[#635B4E]">({cardData.nameEn})</span>
                     )}{" "}
                     <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
-                      {drawnCard?.isReversed ? "· ไพ่กลับหัว" : "· ไพ่หัวตั้ง"}
+                      {drawnCard?.isReversed
+                        ? (isEnglish ? "· Reversed" : "· ไพ่กลับหัว")
+                        : (isEnglish ? "· Upright" : "· ไพ่หัวตั้ง")}
                     </span>
                   </h3>
                 </div>
@@ -230,14 +252,14 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 ) : (
                   <h4 className="font-serif-th text-sm sm:text-base font-bold font-mystic-gold flex items-center gap-1.5">
                     <span className="text-[#8F5C1A]">✦</span>
-                    <span>คำตอบและแนวโน้ม</span>
+                    <span>{isEnglish ? "Core Answer & Trajectory" : "คำตอบและแนวโน้ม"}</span>
                   </h4>
                 )}
 
                 {cardReading?.reading && (
                   <TTSReaderButton
                     textToRead={`${cardReading.headline ? cardReading.headline + ". " : ""}${cardReading.reading}. ${
-                      reading?.summary ? "สรุป: " + reading.summary : ""
+                      reading?.summary ? (isEnglish ? "Summary: " : "สรุป: ") + reading.summary : ""
                     }`}
                     personaId={persona.id}
                     className="ml-auto"
@@ -250,7 +272,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 <div
                   className="text-sm sm:text-base text-[#2E211A] leading-relaxed font-serif-th font-normal"
                   aria-live="polite"
-                  aria-label="คำทำนายจากแม่หมอ"
+                  aria-label={isEnglish ? "Oracle reading" : "คำทำนายจากแม่หมอ"}
                 >
                   {isStreaming ? (
                     cardReading.reading.split(" ").map((word, i) => (
@@ -275,15 +297,19 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
               ) : (
                 <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed font-serif-th italic">
                   {isStreaming
-                    ? "แม่หมอกกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำตอบที่สั้นตรงประเด็น..."
-                    : "รอการเปิดม่านพยากรณ์"}
+                    ? (isEnglish
+                        ? "The oracle is attuning to the energetic currents to formulate a clear, direct answer..."
+                        : "แม่หมอกำลังสัมผัสคลื่นพลังงานและเรียบเรียงคำตอบที่สั้นตรงประเด็น...")
+                    : (isEnglish ? "Awaiting oracle revelation" : "รอการเปิดม่านพยากรณ์")}
                 </p>
               )}
 
               {/* Core Summary if distinct from card reading */}
               {reading?.summary && reading.summary !== cardReading?.reading && (
                 <div className="mt-3 p-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC]/60 text-xs sm:text-sm font-serif-th text-[#2E211A] leading-relaxed">
-                  <span className="font-bold text-[#8F5C1A]">สรุปตรงใจ: </span>
+                  <span className="font-bold text-[#8F5C1A]">
+                    {isEnglish ? "Core Insight: " : "สรุปตรงใจ: "}
+                  </span>
                   {reading.summary}
                 </div>
               )}
@@ -293,7 +319,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             {reading?.advice && reading.advice.length > 0 && (
               <div className="pt-3 border-t border-[#D9C8AC]/40 space-y-2">
                 <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-2">
-                  <span className="text-[#8F5C1A]">✦</span> สิ่งที่ควรทำตอนนี้
+                  <span className="text-[#8F5C1A]">✦</span> {isEnglish ? "What to Do Now" : "สิ่งที่ควรทำตอนนี้"}
                 </h5>
                 <ul className="space-y-1.5">
                   {reading.advice.slice(0, 2).map((item, idx) => (
@@ -309,9 +335,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             )}
           </div>
 
-          {/* ⚡ DIRECT FAST-CHAT CTA BUTTON (ทางลัดคุยกับแม่หมอต่อทันที ไม่ต้องเลื่อนยาว)
-              lg:hidden — จอ ≥lg มีการ์ดแชท sticky ฝั่งขวาอยู่แล้ว (TarotFlow.tsx aside) โชว์ซ้ำกันจะรก
-              จอเล็กกว่า lg การ์ดฝั่งขวาตกไปอยู่ใต้บล็อกนี้ จึงยังต้องมีปุ่มลัดตรงนี้ */}
+          {/* ⚡ DIRECT FAST-CHAT CTA BUTTON */}
           {readingId && (
             <Link
               href="/reading/chat"
@@ -323,15 +347,19 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 </span>
                 <div>
                   <span className="block font-serif-th text-sm font-bold text-[#2E211A]">
-                    มีคำถามเรื่องนี้ต่อไหม? แชทกับ{persona.nameTh}ได้ทันที
+                    {isEnglish
+                      ? `Have further inquiries? Converse with ${personaName} now`
+                      : `มีคำถามเรื่องนี้ต่อไหม? แชทกับ${persona.nameTh}ได้ทันที`}
                   </span>
                   <span className="block font-serif-th text-xs text-[#635B4E] mt-0.5">
-                    เปิดห้องแชทพิมพ์ถามข้อสงสัยเพิ่มเติมต่อจากไพ่ใบนี้ได้เลย
+                    {isEnglish
+                      ? "Open interactive chat to explore this card and its implications directly."
+                      : "เปิดห้องแชทพิมพ์ถามข้อสงสัยเพิ่มเติมต่อจากไพ่ใบนี้ได้เลย"}
                   </span>
                 </div>
               </div>
               <span className="flex items-center gap-1 font-serif-th text-xs font-bold text-[#8F5C1A] flex-shrink-0 group-hover:translate-x-1 transition-transform">
-                <span>คุยต่อ</span>
+                <span>{isEnglish ? "Continue Chat" : "คุยต่อ"}</span>
                 <span>➔</span>
               </span>
             </Link>
@@ -346,14 +374,14 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
 
           {/* ── ส่วนรอง: ยุบไว้ใน Accordion เพื่อความกระชับ ผู้ใช้แตะเปิดเองได้ ── */}
           <CollapsibleCard
-            title="รายละเอียดเชิงลึก & ความโปร่งใส"
-            hint="คำคมพลังใจ · สมดุลธาตุ · รหัสตรวจสอบ Provably Fair"
+            title={isEnglish ? "In-Depth Insights & Verification" : "รายละเอียดเชิงลึก & ความโปร่งใส"}
+            hint={isEnglish ? "Oracle Wisdom · Elemental Balance · Provably Fair Audit" : "คำคมพลังใจ · สมดุลธาตุ · รหัสตรวจสอบ Provably Fair"}
             icon="✨"
           >
             <div className="space-y-4 pt-1">
               {/* Sacred Oracle Mantra Card */}
               {allCards.length > 0 && (
-                <OracleMantraCard cards={allCards} drawn={drawnCards} personaNameTh={persona.nameTh} />
+                <OracleMantraCard cards={allCards} drawn={drawnCards} personaNameTh={personaName} />
               )}
 
               {/* Elemental Balance 4-Elements Analysis */}
@@ -377,10 +405,13 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-1.5">
-                      <span className="text-[#8F5C1A]">✨</span> ปรึกษาแม่หมอตัวจริงเพิ่มเติม
+                      <span className="text-[#8F5C1A]">✨</span>{" "}
+                      {isEnglish ? "Consult a Certified Human Master" : "ปรึกษาแม่หมอตัวจริงเพิ่มเติม"}
                     </h5>
                     <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed">
-                      หากต้องการพูดคุยเจาะลึกเฉพาะบุคคล สามารถส่งต่อผลไพ่ใบนี้เพื่อปรึกษาแม่หมอผู้เชี่ยวชาญได้
+                      {isEnglish
+                        ? "If you seek deep personal clarity, forward your drawn card directly for a private session."
+                        : "หากต้องการพูดคุยเจาะลึกเฉพาะบุคคล สามารถส่งต่อผลไพ่ใบนี้เพื่อปรึกษาแม่หมอผู้เชี่ยวชาญได้"}
                     </p>
                   </div>
                   <Link
@@ -388,7 +419,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                     onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
                     className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                   >
-                    <span>ปรึกษาแม่หมอตัวจริง</span>
+                    <span>{isEnglish ? "Consult Human Reader" : "ปรึกษาแม่หมอตัวจริง"}</span>
                     <span>➔</span>
                   </Link>
                 </div>
@@ -401,8 +432,10 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
       {/* AI Disclosure Note */}
       <div className="pt-3 border-t border-[#D9C8AC]/30">
         <p className="text-xs text-[#635B4E] leading-relaxed text-center font-serif-th max-w-2xl mx-auto">
-          <span className="text-[#8F5C1A]">✦</span> คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง
-          จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต
+          <span className="text-[#8F5C1A]">✦</span>{" "}
+          {isEnglish
+            ? "This reading is synthesized with AI from your authentic drawn card. Intended for reflection, introspection, and personal guidance."
+            : "คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต"}
         </p>
       </div>
     </div>

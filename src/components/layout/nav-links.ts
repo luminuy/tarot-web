@@ -80,3 +80,64 @@ export const FOOTER_COLUMNS = [
     ],
   },
 ] as const;
+
+export function getFooterColumns(isEnglish: boolean) {
+  if (!isEnglish) return FOOTER_COLUMNS;
+
+  return [
+    {
+      title: "✦ Tarot Spreads",
+      links: [
+        { label: `All Spread Sanctuaries (${COUNTS.spreads})`, href: "/spreads" },
+        { label: "Celtic Cross (10 Cards)", href: "/spreads/celtic-cross" },
+        { label: "Past · Present · Future (3 Cards)", href: "/spreads/three-card" },
+        { label: "The Decision Crossroads (5 Cards)", href: "/spreads/decision" },
+        { label: "Daily Guidance (1 Card)", href: "/spreads/daily" },
+      ],
+    },
+    {
+      title: "✦ 78-Card Encyclopedia",
+      links: [
+        { label: `Complete 78-Card Directory`, href: "/cards" },
+        { label: "The Fool · Beginnings & Leaps of Faith", href: "/cards/major-00" },
+        { label: "The Magician · Willpower & Creativity", href: "/cards/major-01" },
+        { label: "The High Priestess · Intuition & Silence", href: "/cards/major-02" },
+        { label: "The World · Wholeness & Completion", href: "/cards/major-21" },
+      ],
+    },
+    {
+      title: "✦ Sanctuary Journal",
+      links: [
+        { label: `All Wisdom Articles (${COUNTS.articles})`, href: "/blog" },
+        { label: "How to Formulate Clear Tarot Inquiries", href: "/blog/how-to-ask-tarot-questions" },
+        { label: "3-Card Love Reading: How They Truly Feel", href: "/blog/tarot-love-3-cards-feelings" },
+        { label: "Celtic Cross 10-Position Mastery Guide", href: "/blog/celtic-cross-spread-guide" },
+        { label: "Carl Jung's Archetypal Psychology & Tarot", href: "/blog/tarot-and-carl-jung-psychology" },
+      ],
+    },
+    {
+      title: "✦ Ethics & Integrity",
+      items: [
+        {
+          title: "Provably Fair SHA-256",
+          description: "Verifiable cryptographic randomness",
+          color: "text-[#A58A5C]",
+        },
+        {
+          title: "Privacy Policy & Data Ethics",
+          href: "/privacy",
+        },
+        {
+          title: "988 Suicide & Crisis Lifeline",
+          description: "Free & confidential 24/7 call/text",
+          color: "text-[#3A7044]",
+        },
+        {
+          title: "Emergency Services 911",
+          description: "Immediate emergency assistance 24/7",
+          color: "text-[#A6392C]",
+        },
+      ],
+    },
+  ];
+}

@@ -11,6 +11,7 @@ import {
 import { CoinSealIcon } from "@/components/entitlement/EntitlementIcons";
 import { soundManager } from "@/lib/utils/audio";
 import { COUNTS } from "@/components/layout/nav-links";
+import { useLocale } from "@/lib/i18n";
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
@@ -27,6 +28,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isEnglish } = useLocale();
 
   // Close when receiving close event from another open menu
   useEffect(() => {
@@ -79,43 +81,43 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
   const navItems = [
     {
-      label: "ผังการเปิดไพ่ (20 แบบ)",
-      sublabel: "ความรัก การงาน การเงิน และดวงชะตา",
+      label: isEnglish ? "Tarot Spreads (20 Spreads)" : "ผังการเปิดไพ่ (20 แบบ)",
+      sublabel: isEnglish ? "Love, career, finance & destiny spreads" : "ความรัก การงาน การเงิน และดวงชะตา",
       href: "/spreads",
       Icon: TarotSpreadNavIcon,
-      badge: "20 ผัง",
+      badge: isEnglish ? "20 Spreads" : "20 ผัง",
     },
     {
-      label: "ความหมายไพ่ (78 ใบ)",
-      sublabel: "เปิดดูคำแปลและสัญลักษณ์ 1909 RWS",
+      label: isEnglish ? "Card Meanings (78 Cards)" : "ความหมายไพ่ (78 ใบ)",
+      sublabel: isEnglish ? "1909 Rider-Waite symbolism & meanings" : "เปิดดูคำแปลและสัญลักษณ์ 1909 RWS",
       href: "/cards",
       Icon: TarotDeckNavIcon,
-      badge: "78 ใบ",
+      badge: isEnglish ? "78 Cards" : "78 ใบ",
     },
     {
-      label: `บทความดูดวง & ความรู้ไพ่ (${COUNTS.articles} เรื่อง)`,
-      sublabel: "ความรู้ไพ่ทาโรต์ ความรัก การงาน และผังยอดนิยม",
+      label: isEnglish ? `Sanctuary Journal (${COUNTS.articles})` : `บทความดูดวง & ความรู้ไพ่ (${COUNTS.articles} เรื่อง)`,
+      sublabel: isEnglish ? "Tarot insights, archetypes, love & career guidance" : "ความรู้ไพ่ทาโรต์ ความรัก การงาน และผังยอดนิยม",
       href: "/blog",
       Icon: JournalScrollNavIcon,
-      badge: `${COUNTS.articles} บทความ`,
+      badge: isEnglish ? `${COUNTS.articles} Articles` : `${COUNTS.articles} บทความ`,
     },
     ...(onOpenPlans
       ? [
           {
-            label: "แพ็กเกจเติมรอบ & สิทธิ์ใช้งาน",
-            sublabel: "เปรียบเทียบสิทธิ์ ปลดล็อกผังใหญ่ 12 ภพ และเติมรอบดูดวง",
+            label: isEnglish ? "Passes & Entitlements" : "แพ็กเกจเติมรอบ & สิทธิ์ใช้งาน",
+            sublabel: isEnglish ? "Compare tiers, unlock 12-House spreads & replenish readings" : "เปรียบเทียบสิทธิ์ ปลดล็อกผังใหญ่ 12 ภพ และเติมรอบดูดวง",
             onClick: onOpenPlans,
             Icon: CoinSealIcon,
-            badge: "✦ สิทธิ์/แพลน",
+            badge: isEnglish ? "✦ Plans" : "✦ สิทธิ์/แพลน",
           },
         ]
       : []),
     {
-      label: "ปรึกษาแม่หมอตัวจริง",
-      sublabel: "จองคิววิเคราะห์ดวงเชิงลึกกับนักพยากรณ์",
+      label: isEnglish ? "Consult Live Readers" : "ปรึกษาแม่หมอตัวจริง",
+      sublabel: isEnglish ? "Book in-depth consultations with seasoned readers" : "จองคิววิเคราะห์ดวงเชิงลึกกับนักพยากรณ์",
       href: "/readers",
       Icon: MarketplaceReaderNavIcon,
-      badge: "นักพยากรณ์",
+      badge: isEnglish ? "Live Readers" : "นักพยากรณ์",
     },
   ];
 
@@ -132,8 +134,8 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         }`}
         aria-expanded={isOpen}
         aria-controls="sacred-nav-panel"
-        aria-label="เมนูหลัก"
-        title="เมนูหลัก"
+        aria-label={isEnglish ? "Main navigation menu" : "เมนูหลัก"}
+        title={isEnglish ? "Menu" : "เมนูหลัก"}
       >
         <svg
           viewBox="0 0 24 24"
@@ -155,7 +157,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       <div
         id="sacred-nav-panel"
         role="region"
-        aria-label="เมนูวิหารพยากรณ์"
+        aria-label={isEnglish ? "Sanctuary navigation menu" : "เมนูวิหารพยากรณ์"}
         aria-hidden={!isOpen}
         className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-2.5 sm:p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)] space-y-1.5 no-scrollbar dropdown-panel-base ${
           isOpen ? "dropdown-panel-entering" : "dropdown-panel-exiting"
@@ -168,7 +170,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         <div className="px-3 py-1.5 flex items-center justify-between text-[13px] font-serif-th font-semibold text-[#635B4E] border-b border-[#D5CEC2]/40 pb-2">
           <span className="flex items-center gap-1.5 text-[#A58A5C]">
             <span>✦</span>
-            <span className="font-bold">วิหารพยากรณ์</span>
+            <span className="font-bold">{isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}</span>
           </span>
           <span className="text-[#29261F] text-[13px] font-mono tracking-wider bg-[#EAE7E0] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-bold">
             1909 RWS
@@ -248,14 +250,14 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors">
-                      ประวัติการดูดวง
+                      {isEnglish ? "Reading Journal" : "ประวัติการดูดวง"}
                     </span>
                     <span className="text-[12px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
-                      บันทึก
+                      {isEnglish ? "History" : "บันทึก"}
                     </span>
                   </div>
                   <p className="text-[13px] font-serif-th text-[#635B4E] truncate mt-0.5">
-                    ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้
+                    {isEnglish ? "Revisit your past cards and oracle counsel" : "ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้"}
                   </p>
                 </div>
               </button>
@@ -276,7 +278,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-[#FCEEEA] hover:bg-[#FCEEEA] border border-[#D5CEC2] text-[#A6392C] text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer active:scale-98"
             >
               <span className="text-[#A6392C]">✦</span>
-              <span>เริ่มดูดวงใหม่</span>
+              <span>{isEnglish ? "Start New Reading" : "เริ่มดูดวงใหม่"}</span>
             </button>
           </div>
         )}

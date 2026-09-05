@@ -6,6 +6,7 @@ import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
+import { LocaleProvider } from "@/lib/i18n";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 const notoSerifThai = Noto_Serif_Thai({
@@ -70,6 +71,14 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "google2c921e9d8c8c3a55",
+  },
+  alternates: {
+    canonical: SITE_ORIGIN,
+    languages: {
+      "th-TH": `${SITE_ORIGIN}?lang=th`,
+      "en-US": `${SITE_ORIGIN}?lang=en`,
+      "x-default": SITE_ORIGIN,
+    },
   },
   openGraph: {
     type: "website",
@@ -146,11 +155,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-dvh font-sans antialiased">
         <AppMotionProvider>
-          <AntiTheftShield />
-          <AssetWarmup />
-          <AnalyticsTracker />
-          {children}
-          <TikTokFloatingButton />
+          <LocaleProvider>
+            <AntiTheftShield />
+            <AssetWarmup />
+            <AnalyticsTracker />
+            {children}
+            <TikTokFloatingButton />
+          </LocaleProvider>
         </AppMotionProvider>
       </body>
     </html>

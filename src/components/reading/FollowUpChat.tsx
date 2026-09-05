@@ -9,6 +9,7 @@ import { requestUpgrade } from "@/lib/entitlement/upgrade-bus";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { TTSReaderButton } from "./TTSReaderButton";
 import { trackEvent } from "@/lib/analytics";
+import { useLocale } from "@/lib/i18n";
 
 interface Message {
   id: string;
@@ -39,10 +40,16 @@ interface FollowUpChatProps {
 /** id ของส่วน "คุยต่อกับแม่หมอ" — ใช้เป็นจุดหมายของปุ่มเลื่อนลงมาจากแผงคำทำนาย */
 export const ASK_ORACLE_SECTION_ID = "ask-oracle";
 
-const SUGGESTED_QUESTIONS = [
+const SUGGESTED_QUESTIONS_TH = [
   "ไพ่แนะนำให้ฉันระวังเรื่องอะไรมากที่สุด?",
   "มีอะไรที่ฉันสามารถเริ่มลงมือทำได้เลยในวันพรุ่งนี้?",
   "จังหวะเวลานี้เหมาะกับการตัดสินใจเรื่องนี้หรือยัง?",
+];
+
+const SUGGESTED_QUESTIONS_EN = [
+  "What blind spot or challenge does the tarot advise me to be most mindful of?",
+  "What tangible action can I initiate tomorrow to align with this guidance?",
+  "Is this the optimal timing to make a decisive move regarding this situation?",
 ];
 
 /**
@@ -193,6 +200,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
   readingSnapshot,
   heightClass = "h-[660px] sm:h-[720px]",
 }) => {
+  const { isEnglish } = useLocale();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -207,6 +215,10 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
   const userQuestionsCount = messages.filter((m) => m.sender === "user").length;
   const freeChatLimitReached = !isUnlimited && userQuestionsCount >= 2;
   const chatLogRef = React.useRef<HTMLDivElement>(null);
+
+  const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
+  const personaTagline = isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline;
+  const suggestedQuestions = isEnglish ? SUGGESTED_QUESTIONS_EN : SUGGESTED_QUESTIONS_TH;
 
   React.useEffect(() => {
     if (messages.length === 0 && !loading) return;
@@ -229,6 +241,9 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
 
   const getTimeString = () => {
     const now = new Date();
+    if (isEnglish) {
+      return now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    }
     return now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น.";
   };
 
@@ -259,7 +274,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             !m.isError &&
             m.text !== "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม" &&
             !m.text.includes("การเชื่อมต่อขัดข้อง") &&
-            !m.text.includes("ขออภัยนะ แม่หมอไม่สามารถตอบคำถามนี้ได้ในขณะนี้")
+            !m.text.includes("ขออภัยนะ แม่หมอไม่สามารถตอบคำถามนี้ได้ในขณะนี้") &&
+            !m.text.includes("Connection interrupted")
         )
         .map((m) => ({ sender: m.sender, text: m.text.slice(0, 4000) }));
 
@@ -271,6 +287,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
         },
         body: JSON.stringify({
           message: query,
+          lang: isEnglish ? "en" : "th",
           sessionToken: sessionToken || undefined,
           history: validHistory,
           readingSnapshot: readingSnapshot || {
@@ -293,7 +310,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
         const errMsg: Message = {
           id: (Date.now() + 1).toString(),
           sender: "bot",
-          text: data.error || "ขออภัยนะ แม่หมอไม่สามารถตอบคำถามนี้ได้ในขณะนี้",
+          text: data.error || (isEnglish ? "I apologize, the Oracle cannot process this inquiry right now." : "ขออภัยนะ แม่หมอไม่สามารถตอบคำถามนี้ได้ในขณะนี้"),
           isError: true,
           timestamp: getTimeString(),
         };
@@ -304,7 +321,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
       const errMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "bot",
-        text: "การเชื่อมต่อขัดข้อง ลองใหม่อีกครั้งนะ",
+        text: isEnglish ? "Connection interrupted. Please try again." : "การเชื่อมต่อขัดข้อง ลองใหม่อีกครั้งนะ",
         isError: true,
         timestamp: getTimeString(),
       };
@@ -332,7 +349,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
-              alt={persona.nameTh}
+              alt={personaName}
               className="w-full h-full object-cover object-top filter contrast-[1.05] brightness-[1.02] tarot-hd-card-image"
               sizes="64px"
             />
@@ -344,22 +361,22 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 id="ask-oracle-title"
                 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold truncate"
               >
-                {persona.nameTh}
+                {personaName}
               </h3>
               <span className="flex items-center gap-1 text-[13px] text-[#3A7044] font-sans font-medium px-2 py-0.5 rounded-full bg-[#EBF3ED] border border-[#D9C8AC] shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3A7044] animate-pulse" />
-                ออนไลน์
+                {isEnglish ? "Online" : "ออนไลน์"}
               </span>
             </div>
             <p className="font-serif-th text-xs text-[#635B4E] truncate mt-0.5">
-              {persona.tagline || "เปิดใจคุยได้ทุกเรื่อง ไพ่พร้อมตอบเสมอ"}
+              {personaTagline || (isEnglish ? "Speak freely with an open heart. The cards are ready to answer." : "เปิดใจคุยได้ทุกเรื่อง ไพ่พร้อมตอบเสมอ")}
             </p>
           </div>
         </div>
 
         {/* Status Pill */}
         <span className="hidden sm:inline-flex items-center gap-1 text-[13px] text-[#2E211A] border border-[#D9C8AC] bg-[#F3EDE2]/25 px-3 py-1 rounded-full font-serif-th shrink-0 font-bold">
-          <span>✦</span> ถือสำรับของคุณอยู่
+          <span>✦</span> {isEnglish ? "Holding your spread" : "ถือสำรับของคุณอยู่"}
         </span>
       </div>
 
@@ -370,7 +387,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
           <div className="w-7 h-10 rounded border border-[#D9C8AC] overflow-hidden shrink-0 mt-1 bg-[#F3EDE2]">
             <CardImage
               image={`${persona.cardImage || "major-02.jpg"}`}
-              alt={persona.nameTh}
+              alt={personaName}
               className="w-full h-full object-cover object-top"
               sizes="32px"
             />
@@ -378,11 +395,14 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
           <div className="max-w-[88%] space-y-1">
             <div className="rounded-lg rounded-tl-xs bg-[#FFFFFF] border border-[#D9C8AC] p-3.5 sm:p-4 text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed [text-wrap:pretty]">
               <p>
-                สวัสดีค่ะ ยินดีที่ได้ร่วมเปิดไพ่ด้วยกันนะคะ ✨ มีจุดไหนในคำทำนายที่ยังสงสัย
-                หรืออยากให้แม่หมอช่วยเจาะลึกแนวทางเพิ่มเติม พิมพ์ถามได้ตลอดเลยนะคะ
+                {isEnglish
+                  ? "Greetings. It is an honor to read the cards with you ✨ If any nuance of this spread calls for deeper exploration or personalized clarity, please feel free to ask anytime."
+                  : "สวัสดีค่ะ ยินดีที่ได้ร่วมเปิดไพ่ด้วยกันนะคะ ✨ มีจุดไหนในคำทำนายที่ยังสงสัย หรืออยากให้แม่หมอช่วยเจาะลึกแนวทางเพิ่มเติม พิมพ์ถามได้ตลอดเลยนะคะ"}
               </p>
             </div>
-            <span className="text-[13px] text-[#635B4E] font-serif-th pl-1">แม่หมอพร้อมรับฟังเสมอ</span>
+            <span className="text-[13px] text-[#635B4E] font-serif-th pl-1">
+              {isEnglish ? "The Oracle is always here to listen" : "แม่หมอพร้อมรับฟังเสมอ"}
+            </span>
           </div>
         </div>
 
@@ -390,10 +410,10 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
         {messages.length === 0 && !chatLocked && (
           <div className="pl-9 space-y-2 pt-1">
             <span className="text-[13px] text-[#2E211A] font-serif-th font-semibold flex items-center gap-1">
-              <span className="text-[#8F5C1A]">✦</span> หรือแตะเลือกคำถามยอดนิยม:
+              <span className="text-[#8F5C1A]">✦</span> {isEnglish ? "Or tap a popular inquiry:" : "หรือแตะเลือกคำถามยอดนิยม:"}
             </span>
             <div className="flex flex-col gap-1.5">
-              {SUGGESTED_QUESTIONS.map((q, idx) => (
+              {suggestedQuestions.map((q, idx) => (
                 <button
                   key={idx}
                   type="button"
@@ -436,7 +456,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 >
                   <CardImage
                     image={`${persona.cardImage || "major-02.jpg"}`}
-                    alt={persona.nameTh}
+                    alt={personaName}
                     className="w-full h-full object-cover object-top"
                     sizes="32px"
                   />
@@ -454,13 +474,13 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                   <div className="w-full space-y-2">
                     <ChatMessageRenderer text={msg.text} isError={msg.isError} />
 
-                    {msg.isError && msg.text.includes("ไม่พบสำรับไพ่") && (
+                    {msg.isError && (msg.text.includes("ไม่พบสำรับไพ่") || msg.text.includes("deck")) && (
                       <button
                         type="button"
                         onClick={() => window.location.reload()}
                         className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1.5 text-xs font-semibold text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] cursor-pointer "
                       >
-                        <span>↻</span> รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง
+                        <span>↻</span> {isEnglish ? "Refresh page to reconnect deck" : "รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง"}
                       </button>
                     )}
                   </div>
@@ -476,7 +496,9 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
 
                 {msg.isFallback && (
                   <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E] px-1">
-                    ✦ ตอนนี้แม่หมอตอบจากคลังคำตอบสำรอง ลองถามใหม่อีกครั้งในอีกสักครู่นะคะ
+                    ✦ {isEnglish
+                      ? "The Oracle is presently answering from offline wisdom reserves. Feel free to ask again shortly."
+                      : "ตอนนี้แม่หมอตอบจากคลังคำตอบสำรอง ลองถามใหม่อีกครั้งในอีกสักครู่นะคะ"}
                   </p>
                 )}
               </div>
@@ -494,12 +516,12 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             className="flex items-start gap-2.5"
             role="status"
             aria-live="polite"
-            aria-label={`${persona.nameTh} กำลังพิมพ์ตอบ`}
+            aria-label={isEnglish ? `${personaName} is channeling an answer...` : `${persona.nameTh} กำลังพิมพ์ตอบ`}
           >
             <div className="w-7 h-10 rounded border border-[#D9C8AC] overflow-hidden shrink-0 mt-1 bg-[#F3EDE2]">
               <CardImage
                 image={`${persona.cardImage || "major-02.jpg"}`}
-                alt={persona.nameTh}
+                alt={personaName}
                 className="w-full h-full object-cover object-top"
                 sizes="32px"
               />
@@ -525,7 +547,11 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 ))}
               </span>
               <span className="font-serif-th text-xs text-[#635B4E]">
-                <span>{persona.nameTh} กำลังหยั่งรู้ไพ่และพิมพ์ตอบ...</span>
+                <span>
+                  {isEnglish
+                    ? `${personaName} is communing with the cards...`
+                    : `${persona.nameTh} กำลังหยั่งรู้ไพ่และพิมพ์ตอบ...`}
+                </span>
               </span>
             </div>
           </motion.div>
@@ -543,13 +569,20 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
           >
             <span className="text-[13px] text-[#2E211A] font-serif-th font-semibold shrink-0 flex items-center gap-1">
               <span className="text-[#8F5C1A]">✦</span>
-              <span>ถามต่อด่วน:</span>
+              <span>{isEnglish ? "Quick Follow-Up:" : "ถามต่อด่วน:"}</span>
             </span>
-            {[
-              { label: "สรุปเป็นข้อๆ", query: "ช่วยสรุปคำแนะนำให้ฉันหน่อยเป็นข้อๆ แบบเข้าใจง่าย" },
-              { label: "สิ่งที่ต้องระวัง", query: "สิ่งที่ฉันต้องระวังเป็นพิเศษจากไพ่ชุดนี้คืออะไร?" },
-              { label: "แนวทางก้าวแรก", query: "แนวทางเริ่มต้นก้าวแรกที่ควรทำทันทีคืออะไร?" },
-            ].map((chip, idx) => (
+            {(isEnglish
+              ? [
+                  { label: "Action Checklist", query: "Please synthesize the key advice into clear, concise bullet points." },
+                  { label: "Blind Spots", query: "What hidden obstacle or pitfall should I watch out for based on these cards?" },
+                  { label: "Immediate Step", query: "What is the single most important first step I should take right now?" },
+                ]
+              : [
+                  { label: "สรุปเป็นข้อๆ", query: "ช่วยสรุปคำแนะนำให้ฉันหน่อยเป็นข้อๆ แบบเข้าใจง่าย" },
+                  { label: "สิ่งที่ต้องระวัง", query: "สิ่งที่ฉันต้องระวังเป็นพิเศษจากไพ่ชุดนี้คืออะไร?" },
+                  { label: "แนวทางก้าวแรก", query: "แนวทางเริ่มต้นก้าวแรกที่ควรทำทันทีคืออะไร?" },
+                ]
+            ).map((chip, idx) => (
               <motion.button
                 key={idx}
                 type="button"
@@ -571,9 +604,13 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 <SealedLockIcon className="h-3.5 w-3.5" />
               </span>
               <div className="min-w-0 space-y-0.5">
-                <p className="font-serif-th text-xs font-bold text-[#2E211A] [text-wrap:balance]">ถามต่อจากไพ่ชุดนี้ได้เมื่อเป็นสมาชิก</p>
+                <p className="font-serif-th text-xs font-bold text-[#2E211A] [text-wrap:balance]">
+                  {isEnglish ? "Follow-up consultation is available for members" : "ถามต่อจากไพ่ชุดนี้ได้เมื่อเป็นสมาชิก"}
+                </p>
                 <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
-                  สมัครฟรีเพื่อคุยถามเจาะลึกต่อ เก็บบทสนทนาไว้กับดวงชุดนี้ได้ทุกเครื่อง
+                  {isEnglish
+                    ? "Join free to converse deeper and preserve your reading history across devices."
+                    : "สมัครฟรีเพื่อคุยถามเจาะลึกต่อ เก็บบทสนทนาไว้กับดวงชุดนี้ได้ทุกเครื่อง"}
                 </p>
               </div>
             </div>
@@ -582,7 +619,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
               onClick={() => requestUpgrade("members_only")}
               className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition-all cursor-pointer "
             >
-              ✦ สมัครสมาชิกฟรีเพื่อถามต่อ
+              ✦ {isEnglish ? "Sign Up Free to Continue" : "สมัครสมาชิกฟรีเพื่อถามต่อ"}
             </button>
           </div>
         ) : freeChatLimitReached ? (
@@ -593,10 +630,14 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
               </span>
               <div className="min-w-0 space-y-0.5">
                 <p className="font-serif-th text-xs font-bold text-[#2E211A] [text-wrap:balance]">
-                  ใช้สิทธิ์ถามคำถามต่อยอดฟรีครบ 2 ข้อแล้ว
+                  {isEnglish
+                    ? "Complimentary follow-up inquiries completed (2/2)"
+                    : "ใช้สิทธิ์ถามคำถามต่อยอดฟรีครบ 2 ข้อแล้ว"}
                 </p>
                 <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
-                  เติมรอบดูดวง หรือสมัครสมาชิก เพื่อคุยถามเจาะลึกกับแม่หมอได้ไม่จำกัด
+                  {isEnglish
+                    ? "Refill readings or become a member for unlimited conversational tarot guidance."
+                    : "เติมรอบดูดวง หรือสมัครสมาชิก เพื่อคุยถามเจาะลึกกับแม่หมอได้ไม่จำกัด"}
                 </p>
               </div>
             </div>
@@ -605,7 +646,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
               onClick={() => requestUpgrade("daily_exhausted")}
               className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition-all cursor-pointer "
             >
-              ✦ เติมรอบดูดวงเพื่อถามต่อได้ไม่จำกัด
+              ✦ {isEnglish ? "Unlock Unlimited Consultation" : "เติมรอบดูดวงเพื่อถามต่อได้ไม่จำกัด"}
             </button>
           </div>
         ) : (
@@ -619,11 +660,11 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             <div className="flex items-center gap-2 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] p-1.5 pl-4 focus-within:border-[#D9C8AC] focus-within: transition-all">
               <input
                 type="text"
-                placeholder={`พิมพ์ถาม ${persona.nameTh} ที่นี่...`}
+                placeholder={isEnglish ? `Ask ${personaName} anything about your spread...` : `พิมพ์ถาม ${persona.nameTh} ที่นี่...`}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={loading}
-                aria-label="พิมพ์คำถามถึงแม่หมอ"
+                aria-label={isEnglish ? "Type your inquiry to the Oracle" : "พิมพ์คำถามถึงแม่หมอ"}
                 className="no-focus-ring min-w-0 flex-1 bg-transparent font-serif-th text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/60 border-none outline-none focus:outline-none focus:border-none focus:ring-0 !shadow-none"
               />
               <motion.button
@@ -632,8 +673,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 whileTap={{ scale: 0.92 }}
                 disabled={loading || !input.trim()}
                 className="h-9 w-9 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] flex items-center justify-center font-bold disabled:opacity-40 disabled:scale-100 transition-all shrink-0 cursor-pointer"
-                aria-label="ส่งข้อความ"
-                title="ส่งคำถาม"
+                aria-label={isEnglish ? "Send message" : "ส่งข้อความ"}
+                title={isEnglish ? "Send inquiry" : "ส่งคำถาม"}
               >
                 <span className="text-sm">✦</span>
               </motion.button>
@@ -641,13 +682,17 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
 
             {!isUnlimited && (
               <div className="flex justify-between items-center px-2 text-[13px] text-[#635B4E] font-serif-th">
-                <span>สิทธิ์ถามฟรี: เหลืออีก {Math.max(0, 2 - userQuestionsCount)} ข้อ</span>
+                <span>
+                  {isEnglish
+                    ? `Complimentary inquiries: ${Math.max(0, 2 - userQuestionsCount)} remaining`
+                    : `สิทธิ์ถามฟรี: เหลืออีก ${Math.max(0, 2 - userQuestionsCount)} ข้อ`}
+                </span>
                 <button
                   type="button"
                   onClick={() => requestUpgrade("daily_exhausted")}
                   className="text-[#8F5C1A] hover:underline cursor-pointer font-bold"
                 >
-                  ปลดล็อกไม่จำกัด ✦
+                  {isEnglish ? "Unlock Unlimited ✦" : "ปลดล็อกไม่จำกัด ✦"}
                 </button>
               </div>
             )}

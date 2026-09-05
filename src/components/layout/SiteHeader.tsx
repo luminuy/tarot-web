@@ -1,6 +1,10 @@
+"use client";
+
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useLocale } from "@/lib/i18n";
 
 export interface SiteHeaderProps {
   /**
@@ -17,8 +21,8 @@ export interface SiteHeaderProps {
 }
 
 /**
- * 🏛️ Header กลางของทั้งวิหารพยากรณ์ (Server Component)
- * ยึดการแสดงผล โลโก้ และเมนูแบบสากล Sticky Top-0 เหมือนกันทั้ง 128 หน้า
+ * 🏛️ Header กลางของทั้งวิหารพยากรณ์
+ * ยึดการแสดงผล โลโก้ สลับภาษา และเมนูแบบสากล Sticky Top-0 เหมือนกันทุกหน้า
  */
 export function SiteHeader({
   variant = "content",
@@ -26,6 +30,8 @@ export function SiteHeader({
   toolbar,
   nav,
 }: SiteHeaderProps) {
+  const { isEnglish } = useLocale();
+
   return (
     <header
       data-site-header=""
@@ -36,7 +42,7 @@ export function SiteHeader({
         {/* Luxury Brand Logo & Return to Home */}
         <Link
           href="/"
-          aria-label="ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"
+          aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
           className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
         >
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition-all duration-300">
@@ -54,7 +60,7 @@ export function SiteHeader({
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="text-[#A58A5C] text-xs">✦</span>
               <span className="font-serif-th text-sm sm:text-lg font-bold text-[#29261F] tracking-wide leading-snug py-0.5 whitespace-nowrap">
-                ดูดวงไพ่ทาโรต์
+                {isEnglish ? "SeerTarot Sanctuary" : "ดูดวงไพ่ทาโรต์"}
               </span>
             </div>
             <span className="hidden sm:block text-[13px] tracking-[0.22em] text-[#635B4E] font-mono uppercase font-semibold pl-4">
@@ -63,8 +69,9 @@ export function SiteHeader({
           </div>
         </Link>
 
-        {/* Right Toolbar & Navigation */}
+        {/* Right Toolbar, Language Switcher & Navigation */}
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+          <LanguageSwitcher />
           {toolbar}
           {nav ?? <SacredNavDropdown />}
         </div>
