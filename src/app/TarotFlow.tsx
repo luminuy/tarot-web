@@ -1141,12 +1141,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <div className="space-y-10">
                 <div className="text-center space-y-2.5 sm:space-y-3 pt-2">
                   <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
-                    {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite กับแม่หมอ AI"}
+                    {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
                   </h1>
                   <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
                     {isEnglish
                       ? "Shuffle and select cards from the authentic 78-card deck with provably-fair SHA-256 randomness and archetypal psychological insights."
-                      : "สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256"}
+                      : "สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง จากสำรับ 1909 Rider-Waite แท้ 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256"}
                   </p>
                   <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
                     {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}

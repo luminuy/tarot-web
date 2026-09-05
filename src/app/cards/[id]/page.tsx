@@ -26,8 +26,8 @@ export async function generateMetadata({ params }: CardPageProps): Promise<Metad
     };
   }
 
-  const title = `ความหมายไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`;
-  const description = `เจาะลึกความหมายไพ่ ${card.nameTh} (${card.nameEn}) ทั้งหัวตั้งและหัวกลับ 5 หมวดชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element} ภาพดั้งเดิม 1909`;
+  const title = `ความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) หัวตั้ง-หัวกลับ`;
+  const description = `เจาะลึกความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) ทั้งหัวตั้งและหัวกลับ 5 หมวดชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element} ภาพดั้งเดิม 1909`;
 
   return {
     title,
