@@ -277,6 +277,22 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       CREATE INDEX IF NOT EXISTS idx_rq_version  ON reading_quality(prompt_version, created_at);
       CREATE INDEX IF NOT EXISTS idx_rq_provider ON reading_quality(provider, model);
       CREATE INDEX IF NOT EXISTS idx_rq_persona  ON reading_quality(persona_id, spread_id);
+
+      CREATE TABLE IF NOT EXISTS user_feedback (
+        id              TEXT PRIMARY KEY,
+        rating          INTEGER,
+        category        TEXT NOT NULL,
+        comment         TEXT,
+        reading_id      TEXT,
+        persona_id      TEXT,
+        page_url        TEXT,
+        user_agent      TEXT,
+        created_at      INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_uf_category ON user_feedback(category);
+      CREATE INDEX IF NOT EXISTS idx_uf_reading  ON user_feedback(reading_id);
+      CREATE INDEX IF NOT EXISTS idx_uf_persona  ON user_feedback(persona_id);
+      CREATE INDEX IF NOT EXISTS idx_uf_time     ON user_feedback(created_at);
     `);
 
     // Safe Alter & Index for local SQLite migration
@@ -394,3 +410,5 @@ export async function getAppDB(): Promise<AppDB> {
   cachedDB = await createLocalSQLiteDB();
   return cachedDB;
 }
+
+export const getDB = getAppDB;

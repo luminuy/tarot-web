@@ -36,6 +36,23 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-05: อัปเกรดการ์ดทำนายด่วน 4 หัวข้อเป็นสไลด์ปัดแนวนอนสไตล์ Apple (Apple-Style Swipe Carousel) — โดย Antigravity AI
+
+- **ยกระดับประสบการณ์ผู้ใช้งานส่วนเปิดไพ่ด่วนใน `src/components/reading/QuickFortunePicker.tsx` ตามคำขอผู้ใช้และภาพอ้างอิง Apple Store**:
+  - เปลี่ยนจากการจัดวางแบบ static 2x2 grid เป็น horizontal swipe carousel ที่ลื่นไหล นุ่มนวล และมี momentum scroll เหมือนแอปเปิล
+  - **Touch & Momentum Swipe**: รองรับการปัดนิ้วซ้าย-ขวาบนมือถือพร้อม CSS `snap-x snap-mandatory scroll-smooth no-scrollbar`
+  - **Desktop Mouse Drag-to-Scroll**: เพิ่มเมาส์แดร็กเพื่อเลื่อนการ์ดบนคอมพิวเตอร์พร้อมระบบแยกระยะแดร็ก (`dragDistance > 8px`) ป้องกันการลั่นเลือกไพ่ขณะลากดู
+  - **Apple Circular Navigation Buttons**: ปุ่มวงกลมก่อนหน้า/ถัดไป `<` และ `>` สีขาวโปร่งแสงลอยด้านข้าง พร้อมอนิเมชัน fade in/out อัตโนมัติเมื่อเลื่อนสุดขอบ
+  - **Apple Pagination Indicators**: จุดไข่ปลา 4 เม็ดด้านล่างที่ขยายเป็นทรงกระบอกแคปซูลเมื่อหัวข้อนั้น active และสามารถแตะเพื่อเลื่อนตรงไปยังหัวข้อนั้นได้ทันที
+  - **Card Peek UX**: จัดขนาดการ์ดให้การ์ดถัดไปโผล่มาเล็กน้อยตามมาตรฐาน Apple ช่วยสื่อสารให้ผู้ใช้ทราบทันทีว่าสามารถปัดดูหัวข้ออื่นๆ ได้
+  - คงความสมบูรณ์ของภาพไพ่ 1909 Rider-Waite ผ่าน `<CardImage />`, ป้ายสัญลักษณ์ทองคำเปลว `✦` `✨`, และระบบ Provably-Fair ตามกฎเหล็กทุกประการ
+- **ปรับปรุง `src/lib/platform/db.ts`**:
+  - เพิ่ม alias `export const getDB = getAppDB;` เพื่อรองรับการใช้งานร่วมกับ API endpoints ในอนาคตอย่างไร้รอยต่อ
+- **ผลการทดสอบระบบ**:
+  - TypeScript Typecheck: `0 errors (สมบูรณ์ 100%)`
+  - QA Test (`scripts/qa/test-quick-fortune.ts`): `42/42 ผ่านสมบูรณ์`
+  - Verification Suite (`npm run repo:verify`): `27/27 ด่านผ่านสมบูรณ์ 100%`
+
 ### 🗓️ 2026-09-05: วางแผน "หน้าผลลัพธ์ทำนายด่วนแบบสั้น" แยกจากหน้าฝังใหญ่ (ยังไม่ลงมือแก้โค้ด) — โดย Claude
 
 - เจ้าของโปรเจกต์ตรวจหน้าจอจริงของ flow ทำนายด่วนแล้วพบว่าหน้าผลลัพธ์ยังใช้ `StreamReader` ตัวเดียวกับผังใหญ่ (มีแท็บ "อ่านรายใบ/สรุปภาพรวม" + บทสรุปยาว 6-9 ประโยค) ไม่ตรงกับความต้องการ "เร็ว สั้น กระชับ แชทกับแม่หมอได้เลย"
