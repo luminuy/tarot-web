@@ -221,7 +221,8 @@ export function LoveOneCardClient() {
       <OneCardRitual
         spreadId="love-one"
         spreadName={isEnglish ? "Love Tarot (1 Card)" : "ดูดวงความรัก 1 ใบ"}
-        deckLabel={isEnglish ? `Focus: ${currentStatusObj?.titleEn}` : `สถานะ: ${currentStatusObj?.titleTh}`}
+        deckLabel={isEnglish ? `Status: ${currentStatusObj?.titleEn}` : `สถานะ: ${currentStatusObj?.titleTh}`}
+        drawButtonText={isEnglish ? "Draw Love Card" : "เปิดไพ่ทำนายความรัก"}
         intention={
           partnerName.trim()
             ? isEnglish
@@ -241,7 +242,7 @@ export function LoveOneCardClient() {
                   : "ขั้นตอนที่ 1: เลือกสถานะความรักปัจจุบันของคุณ"}
               </label>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5">
                 {STATUS_OPTIONS.map((opt) => {
                   const isSelected = selectedStatus === opt.id;
                   return (
@@ -252,30 +253,33 @@ export function LoveOneCardClient() {
                         soundManager.playMenuTapSound();
                         setSelectedStatus(opt.id);
                       }}
-                      className={`p-3.5 sm:p-4 rounded-xl text-left border transition-all duration-200 flex flex-col justify-between cursor-pointer ${
+                      className={`p-3.5 sm:p-4 rounded-2xl text-left border transition-all duration-200 flex flex-col justify-between cursor-pointer relative ${
                         isSelected
-                          ? "bg-[#FAF8F5] border-[#8F5C1A] shadow-[var(--shadow-raised)] text-[#171512]"
-                          : "bg-[#FFFFFF] border-[#D9C8AC] hover:border-[#8F5C1A]/60 text-[#635B4E] hover:bg-[#FAF7F2]"
+                          ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-[var(--shadow-raised)] text-[#29261F]"
+                          : "altar-card-porcelain hover:border-[#A58A5C]/60 text-[#635B4E] hover:shadow-xs"
                       }`}
                     >
                       <div>
-                        <div className="font-serif-th font-bold text-xs sm:text-sm text-[#29261F]">
+                        <div className="flex items-center justify-between gap-1.5 mb-2">
+                          <span className="text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FFFFFF] border-[#D5CEC2] text-[#8F5C1A] shadow-2xs">
+                            {isEnglish ? opt.titleEn : opt.titleTh}
+                          </span>
+                          <span
+                            className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors ${
+                              isSelected
+                                ? "border-[#8F5C1A] bg-[#8F5C1A]"
+                                : "border-[#D5CEC2] bg-transparent"
+                            }`}
+                          >
+                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </span>
+                        </div>
+                        <div className="font-serif-th font-bold text-xs sm:text-sm text-[#29261F] mt-1">
                           {isEnglish ? opt.titleEn : opt.titleTh}
                         </div>
-                        <div className="text-[11px] font-sans text-[#7A6F5D] mt-1 leading-snug line-clamp-2">
+                        <p className="text-[11px] font-sans text-[#635B4E] mt-1.5 leading-snug line-clamp-2">
                           {isEnglish ? opt.descEn : opt.descTh}
-                        </div>
-                      </div>
-                      <div className="mt-3 flex items-center justify-end">
-                        <span
-                          className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                            isSelected
-                              ? "border-[#8F5C1A] bg-[#8F5C1A]"
-                              : "border-[#D9C8AC] bg-transparent"
-                          }`}
-                        >
-                          {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                        </span>
+                        </p>
                       </div>
                     </button>
                   );
@@ -286,7 +290,7 @@ export function LoveOneCardClient() {
             {/* Names & Intention Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto pt-1">
               <div>
-                <label className="block text-[11px] font-serif-th text-[#7A6F5D] mb-1">
+                <label className="block text-[11px] font-serif-th text-[#635B4E] mb-1">
                   {isEnglish ? "Your Nickname (Optional)" : "ชื่อเล่นของคุณ (ระบุหรือไม่ก็ได้)"}
                 </label>
                 <input
@@ -294,11 +298,11 @@ export function LoveOneCardClient() {
                   value={yourName}
                   onChange={(e) => setYourName(e.target.value)}
                   placeholder={isEnglish ? "e.g. Alex" : "เช่น แพรว, แบงค์"}
-                  className="w-full rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] px-3.5 py-2 text-xs font-sans text-[#29261F] focus:border-[#8F5C1A] focus:outline-hidden"
+                  className="w-full rounded-xl border border-[#D5CEC2] bg-[#FAF7F2] px-3.5 py-2 text-xs font-sans text-[#29261F] focus:border-[#A58A5C] focus:outline-hidden focus:ring-1 focus:ring-[#A58A5C] transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-serif-th text-[#7A6F5D] mb-1">
+                <label className="block text-[11px] font-serif-th text-[#635B4E] mb-1">
                   {isEnglish ? "Person in Mind (Optional)" : "ชื่อคนในใจ (หรือสิ่งที่กังวล)"}
                 </label>
                 <input
@@ -306,7 +310,7 @@ export function LoveOneCardClient() {
                   value={partnerName}
                   onChange={(e) => setPartnerName(e.target.value)}
                   placeholder={isEnglish ? "e.g. Crush, Ex" : "เช่น คนคุย, คนรักเก่า"}
-                  className="w-full rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] px-3.5 py-2 text-xs font-sans text-[#29261F] focus:border-[#8F5C1A] focus:outline-hidden"
+                  className="w-full rounded-xl border border-[#D5CEC2] bg-[#FAF7F2] px-3.5 py-2 text-xs font-sans text-[#29261F] focus:border-[#A58A5C] focus:outline-hidden focus:ring-1 focus:ring-[#A58A5C] transition-colors"
                 />
               </div>
             </div>

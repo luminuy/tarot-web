@@ -6,6 +6,7 @@ import { DECK } from "@/data/cards";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { useLocale } from "@/lib/i18n";
 import { saveReading } from "@/lib/utils/history";
+import { soundManager } from "@/lib/utils/audio";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 
@@ -136,7 +137,8 @@ export function DailyClient() {
       <OneCardRitual
         spreadId="daily-one"
         spreadName={isEnglish ? "Daily Tarot" : "ไพ่ยิปซีรายวัน"}
-        deckLabel={isEnglish ? currentChamber.titleEn : `วิหาร: ${currentChamber.titleTh}`}
+        deckLabel={isEnglish ? `Chamber: ${currentChamber.titleEn}` : `วิหาร: ${currentChamber.titleTh}`}
+        drawButtonText={isEnglish ? "Draw Today's Card" : "เปิดไพ่รับสารนำทางวันนี้"}
         intention={intentionText}
         isEnglish={isEnglish}
         onRevealed={handleRevealed}
@@ -153,34 +155,45 @@ export function DailyClient() {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {FOCUS_CHAMBERS.map((chamber) => {
                   const isSelected = selectedFocus === chamber.id;
                   return (
                     <button
                       key={chamber.id}
                       type="button"
-                      onClick={() => setSelectedFocus(chamber.id)}
-                      className={`text-left p-4 rounded-xl border transition-all cursor-pointer ${
+                      onClick={() => {
+                        soundManager.playMenuTapSound();
+                        setSelectedFocus(chamber.id);
+                      }}
+                      className={`text-left p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 cursor-pointer relative flex flex-col justify-between ${
                         isSelected
-                          ? "altar-panel-active ring-1 ring-[#A58A5C]"
-                          : "altar-card-porcelain hover:border-[#A58A5C]"
+                          ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-[var(--shadow-raised)]"
+                          : "altar-card-porcelain hover:border-[#A58A5C]/60 hover:shadow-xs"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
-                          {isEnglish ? chamber.elementEn : chamber.elementTh}
-                        </span>
-                        {isSelected && (
-                          <span className="w-2 h-2 rounded-full bg-[#A58A5C]" aria-hidden="true" />
-                        )}
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="text-[11px] font-serif-th font-semibold px-2.5 py-0.5 rounded-full border bg-[#FFFFFF] border-[#D5CEC2] text-[#8F5C1A] shadow-2xs">
+                            {isEnglish ? chamber.elementEn : chamber.elementTh}
+                          </span>
+                          <span
+                            className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors ${
+                              isSelected
+                                ? "border-[#8F5C1A] bg-[#8F5C1A]"
+                                : "border-[#D5CEC2] bg-transparent"
+                            }`}
+                          >
+                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </span>
+                        </div>
+                        <h3 className="font-serif-th font-bold text-sm sm:text-base text-[#29261F]">
+                          {isEnglish ? chamber.titleEn : chamber.titleTh}
+                        </h3>
+                        <p className="text-xs font-sans text-[#635B4E] mt-1.5 leading-relaxed line-clamp-2">
+                          {isEnglish ? chamber.descEn : chamber.descTh}
+                        </p>
                       </div>
-                      <h3 className="font-serif-th font-bold text-sm text-[#29261F]">
-                        {isEnglish ? chamber.titleEn : chamber.titleTh}
-                      </h3>
-                      <p className="text-xs text-[#635B4E] mt-1 line-clamp-2">
-                        {isEnglish ? chamber.descEn : chamber.descTh}
-                      </p>
                     </button>
                   );
                 })}
