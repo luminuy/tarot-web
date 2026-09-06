@@ -28,8 +28,9 @@
 
 | # | ระดับ | หัวข้อย่อ | ไฟล์หลัก | สถานะ |
 | :-- | :-- | :--- | :--- | :-- |
-| **031** | 🟡 Medium | `guestAllowed` ในข้อมูลผังประกาศไว้แต่**ไม่มีโค้ดฝั่งรันไทม์อ่านเลย** — มีผังขัดกันเองอยู่ 5 รายการ | `src/data/spreads.ts`, `src/lib/entitlement/limits.ts` | 🔴 **ยังไม่แก้** — แผนอยู่ที่ [`HANDOFF_QA_SPREADS_2026-09-06.md`](plans/HANDOFF_QA_SPREADS_2026-09-06.md) งาน B |
+| **031** | 🟡 Medium | `guestAllowed` ในข้อมูลผังประกาศไว้แต่**ไม่มีโค้ดฝั่งรันไทม์อ่านเลย** — มีผังขัดกันเองอยู่ 5 รายการ | `src/data/spreads.ts`, `src/lib/entitlement/limits.ts` | 🔴 **ยังไม่แก้** · ⏰ **ระเบิดเวลา** — ไม่มีผลตอนนี้เพราะระบบสิทธิ์ปิดอยู่ช่วงเปิดฟรี 3 เดือน แต่**ต้องแก้ก่อนเปิดธงกลับ** · แผนงาน B |
 | **032** | 🔵 Low | ยังไม่มีใครเดินพิธีกรรมครบขั้นบนผังใหม่ทั้ง 5 และยังไม่จับภาพมือถือ 320/375px | `src/data/spreads.ts`, `src/components/spread/SpreadBoard.tsx` | 🔴 **ยังไม่ตรวจ** — เกณฑ์ผ่านคลื่น 3 ที่ค้างอยู่ · แผนงาน A |
+| **033** | 🟡 Medium | เส้นทาง "แอดมินปิดระบบสิทธิ์" (`entitlement.enforced=false`) **ไม่มีด่านตรวจสักตัว** ทั้งที่เป็นสภาพจริงของ production ช่วงเปิดฟรี 3 เดือน | `scripts/qa/test-entitlement.ts`, `src/lib/entitlement/flag.ts` | 🔴 **ยังไม่แก้** — เคยมีบั๊กจริงในเส้นทางนี้แล้ว (INC-0083) · แผนงาน C.2 |
 | **024** | 🟢 Resolved | แผงเมนูค้าง `visibility: hidden` ทั้งที่ React สั่งเปิดแล้ว | `src/app/globals.css` | ✅ **แก้แล้ว** — ถอด `visibility` ออกจาก base transition ให้ `visible` ทันทีตอนเปิด |
 | **025** | 🟢 Resolved | กด TH/EN แล้วหัวเว็บนิ่ง ไม่มี visual feedback (353ms) | `src/lib/i18n/context.tsx`, `src/components/layout/LanguageSwitcher.tsx` | ✅ **แก้แล้ว** — เพิ่ม `pendingLocale` urgent update และ `aria-busy` feedback |
 | **026** | 🟢 Resolved | `LocaleProvider` ไม่ memoize value ทำให้ทั้งเว็บ re-render | `src/lib/i18n/context.tsx` | ✅ **แก้แล้ว** — ครอบ `useMemo` และ `useCallback` |
