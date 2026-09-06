@@ -69,3 +69,31 @@ export function isOwnHostname(hostname: string): boolean {
     hostname.endsWith(".workers.dev")
   );
 }
+
+/**
+ * 🔗 ตัวช่วยสร้าง Canonical และ Hreflang สำหรับทุกหน้า (SEO Single Source of Truth)
+ * ---------------------------------------------------------------------------
+ * Next.js จะ override อ็อบเจกต์ alternates ทั้งก้อนหากหน้าย่อยระบุ alternates: { canonical }
+ * ทำให้แท็ก hreflang ใน root layout หลุดหายทั้งเว็บ (S-01)
+ * ทุกหน้าจึงต้องใช้ buildAlternates(path) เพื่อคงทั้ง canonical และ hreflang เสมอ
+ */
+export function buildAlternates(path: string = "/") {
+  const normalizedPath =
+    path === "/" || !path
+      ? ""
+      : path.startsWith("/")
+        ? path.replace(/\/+$/, "")
+        : `/${path.replace(/\/+$/, "")}`;
+
+  const canonical = `${SITE_ORIGIN}${normalizedPath}`;
+
+  return {
+    canonical,
+    languages: {
+      "th-TH": `${canonical}?lang=th`,
+      "en-US": `${canonical}?lang=en`,
+      "x-default": canonical,
+    },
+  };
+}
+

@@ -9,7 +9,7 @@ import {
   getSpreadsForTopic,
 } from "@/data/spread-topics";
 import { TopicSpreadList } from "@/components/spread/TopicSpreadList";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${topic.seoTitle} · SeerTarot`,
     description: topic.metaDescription,
-    alternates: { canonical: url },
+    alternates: buildAlternates(`/spreads/topic/${topic.slug}`),
     openGraph: {
       title: `${topic.seoTitle} · SeerTarot`,
       description: topic.metaDescription,

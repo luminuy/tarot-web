@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { ARTICLES } from "@/data/articles";
 import { SPREADS, getSpread } from "@/data/spreads";
 import { isStandardSpread } from "@/lib/entitlement/limits";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 import { SpreadDetailClient } from "./SpreadDetailClient";
 
 interface Props {
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "ดูดวงไพ่ยิปซีฟรี",
       "ผังพยากรณ์ไพ่ทาโรต์",
     ],
-    alternates: { canonical: url },
+    alternates: buildAlternates(`/spreads/${spread.id}`),
     openGraph: {
       title,
       description,

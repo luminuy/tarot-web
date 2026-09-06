@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getAllArticles } from "@/data/articles";
 import { BlogIndexClient } from "./BlogIndexClient";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
   title: "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909",
@@ -15,9 +15,7 @@ export const metadata: Metadata = {
     "ผังเซลติกครอส",
     "วิธีดูดวงด้วยตัวเอง",
   ],
-  alternates: {
-    canonical: `${SITE_ORIGIN}/blog`,
-  },
+  alternates: buildAlternates("/blog"),
   openGraph: {
     title: "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909 · SeerTarot",
     description: "รวมบทความเจาะลึกศาสตร์ไพ่ทาโรต์ ความรัก การงาน และจิตวิทยาพยากรณ์",

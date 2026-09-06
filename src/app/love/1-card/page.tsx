@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LoveOneCardClient } from "./LoveOneCardClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 
 export const metadata: Metadata = {
@@ -18,9 +18,7 @@ export const metadata: Metadata = {
     "ดูดวงความรัก คนรักเก่า",
     "เปิดไพ่ความรักฟรี",
   ],
-  alternates: {
-    canonical: `${SITE_ORIGIN}/love/1-card`,
-  },
+  alternates: buildAlternates("/love/1-card"),
   openGraph: {
     title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบสถานะหัวใจ | SeerTarot",
     description:

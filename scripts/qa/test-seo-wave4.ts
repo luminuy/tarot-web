@@ -127,6 +127,56 @@ for (const file of wave4Files) {
   }
 }
 
+// 7. S-01: All alternates in src/app must use buildAlternates (no raw alternates: {)
+function walkFiles(dir: string): string[] {
+  let results: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results = results.concat(walkFiles(full));
+    } else if (entry.isFile() && (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx"))) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
+const appFiles = walkFiles(path.join(process.cwd(), "src/app"));
+let rawAlternatesCount = 0;
+for (const file of appFiles) {
+  const content = fs.readFileSync(file, "utf-8");
+  const lines = content.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith("//") || line.startsWith("*")) continue;
+    if (/alternates\s*:\s*\{/.test(line)) {
+      console.error(`❌ พบ raw alternates: { ใน ${file}:${i + 1} — ต้องใช้ buildAlternates(path) เท่านั้น`);
+      rawAlternatesCount++;
+    }
+  }
+}
+assert(
+  rawAlternatesCount === 0,
+  "ห้ามเขียน alternates: { เองใน src/app (ต้องใช้ buildAlternates จาก site.ts เพื่อคง hreflang)",
+);
+
+// 8. S-03: /account/layout.tsx must declare robots noindex
+const accountLayoutPath = path.join(process.cwd(), "src/app/account/layout.tsx");
+const accountLayoutContent = fs.readFileSync(accountLayoutPath, "utf-8");
+assert(
+  accountLayoutContent.includes("robots:") && accountLayoutContent.includes("index: false"),
+  "src/app/account/layout.tsx ต้องประกาศ robots: { index: false } (S-03)",
+);
+
+// 9. S-04: /tarot must be redirected in next.config.ts and src/app/tarot must not exist
+const tarotPageExists = fs.existsSync(path.join(process.cwd(), "src/app/tarot"));
+assert(!tarotPageExists, "src/app/tarot ต้องถูกลบออก (ย้ายไป redirects ใน next.config.ts แทน)");
+const nextConfigContent = fs.readFileSync(path.join(process.cwd(), "next.config.ts"), "utf-8");
+assert(
+  nextConfigContent.includes('source: "/tarot"') && nextConfigContent.includes('destination: "/"'),
+  "next.config.ts ต้องมี redirect จาก /tarot ไปที่ / แบบ permanent (S-04)",
+);
+
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);
 
 if (failed > 0) {

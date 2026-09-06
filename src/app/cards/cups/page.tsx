@@ -2,16 +2,14 @@ import type { Metadata } from "next";
 import { DECK_SUMMARY } from "@/data/cards";
 import { CARD_GROUPS } from "@/data/cards/group-seo";
 import { CardGroupView } from "@/components/encyclopedia/CardGroupView";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 const group = CARD_GROUPS.cups;
 
 export const metadata: Metadata = {
   title: group.seoTitleTh,
   description: group.descriptionTh,
-  alternates: {
-    canonical: `${SITE_ORIGIN}/cards/cups`,
-  },
+  alternates: buildAlternates("/cards/cups"),
   openGraph: {
     title: group.seoTitleTh,
     description: group.descriptionTh,

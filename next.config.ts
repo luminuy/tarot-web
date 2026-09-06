@@ -92,6 +92,11 @@ const nextConfig: NextConfig = {
         destination: "/love/1-card",
         permanent: true,
       },
+      {
+        source: "/tarot",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
   async headers() {

@@ -5,7 +5,7 @@ import { getReaderLiveAvailability } from "@/lib/marketplace/queue.repo";
 import { ReaderDetailClient } from "@/components/marketplace/ReaderDetailClient";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: `${reader.displayName} · ปรึกษาแม่หมอตัวจริง`,
     description: reader.bio || `ปรึกษาดวงชะตากับ ${reader.displayName} ผ่านศาสตร์ไพ่ทาโรต์`,
-    alternates: { canonical: `${SITE_ORIGIN}/readers/${reader.id}` },
+    alternates: buildAlternates(`/readers/${reader.id}`),
   };
 }
 

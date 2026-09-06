@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getShareBucket } from "@/lib/platform/cf";
 
 export const runtime = "nodejs";
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: "/" },
+    alternates: buildAlternates("/"),
     robots: { index: false, follow: true },
     openGraph: {
       type: "article",

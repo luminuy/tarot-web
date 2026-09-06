@@ -36,6 +36,28 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: PR 5 — รวมพลัง SEO Wave 4: Hreflang Alternates (S-01), Robots Noindex (S-03), Tarot 308 Redirect (S-04) (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ S-01, S-03, S-04):**
+1. **S-01: รวมศูนย์การสร้าง Canonical และ Hreflang ด้วย `buildAlternates`**:
+   - สร้างฟังก์ชันกลาง `buildAlternates(path)` ใน [`src/lib/config/site.ts`](../src/lib/config/site.ts)
+   - ฟังก์ชันนี้สร้าง Object `alternates` ที่มีทั้ง `canonical`, `languages: { 'th-TH': '?lang=th', 'en-US': '?lang=en', 'x-default': canonical }` ครบถ้วนตามมาตรฐาน Google Search Central
+   - แก้ปัญหาสำคัญ: เดิมแต่ละเพจประกาศ `alternates: { canonical: ... }` เอง ทำให้ Next.js Metadata API ลบล้างค่า `languages` ของ root layout ออกทั้งหมด ส่งผลให้ Google บอทมองไม่เห็น hreflang ใดๆ เลย
+   - แทนที่การประกาศ raw alternates ในทุกหน้า (23 ไฟล์) ด้วย `buildAlternates(...)`
+   - ตรวจสอบ build artifact จริง: พบ `<link rel="canonical">` และ `<link rel="alternate" hreflang="...">` ครบทั้ง 4 แท็กบนทุกหน้า 100%
+2. **S-03: ป้องกัน Google Index หน้า Private Account**:
+   - เพิ่ม metadata `robots: { index: false, follow: false }` ใน [`src/app/account/layout.tsx`](../src/app/account/layout.tsx)
+   - ป้องกันข้อมูลส่วนบุคคลและหน้าที่ต้องล็อกอินรั่วไหลขึ้น Search Index
+3. **S-04: เปลี่ยนเส้นทางถาวร (308 Permanent Redirect) สำหรับ `/tarot`**:
+   - เพิ่ม rule ใน `redirects()` ของ [`next.config.ts`](../next.config.ts): `{ source: '/tarot', destination: '/', permanent: true }`
+   - ลบไฟล์ซ้ำซ้อน [`src/app/tarot/page.tsx`](../src/app/tarot/page.tsx) ออกอย่างสมบูรณ์
+4. **Automated Verification & Gates (Rule 0.8)**:
+   - เพิ่มชุดตรวจสอบอัตโนมัติใน Gate 32 ([`scripts/qa/test-seo-wave4.ts`](../scripts/qa/test-seo-wave4.ts)):
+     - Check 7: ห้ามเขียน raw `alternates: {` ใน `src/app` ทุกหน้า (ต้องใช้ `buildAlternates`)
+     - Check 8: ตรวจสอบ `src/app/account/layout.tsx` ว่าต้องมี `robots: { index: false }`
+     - Check 9: ตรวจสอบว่าไม่มีไฟล์ `src/app/tarot/page.tsx` และมี 308 redirect ใน `next.config.ts`
+   - ผ่านการทดสอบครบ 35/35 รายการ
+
 ### 🗓️ 2026-09-06: PR 4 — ปรับปรุง Asset Pipeline ภาพไพ่ WebP (P-04) และเปลี่ยนชื่อโฟลเดอร์ w512b/w768b เพื่อล้างแคช Cloudflare (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ P-04):**

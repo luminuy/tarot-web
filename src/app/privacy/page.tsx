@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates } from "@/lib/config/site";
 
 export const metadata: Metadata = {
   title: "นโยบายความเป็นส่วนตัวและ PDPA",
   description: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
   // ⚠️ ทุกหน้าต้องประกาศ canonical ของตัวเอง — Next.js สืบทอด metadata จาก layout แม่
   // หน้านี้อยู่ใน sitemap แต่เคยประกาศ canonical ชี้กลับหน้าแรก = ขัดกันเองจนไม่ถูก index
-  alternates: { canonical: `${SITE_ORIGIN}/privacy` },
+  alternates: buildAlternates("/privacy"),
 };
 
 export default function PrivacyPolicyPage() {

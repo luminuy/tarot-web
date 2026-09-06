@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { BirthCardCalculator } from "@/components/encyclopedia/BirthCardCalculator";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
   title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) — ค้นหาไพ่ประจำวันเกิดฟรี",
@@ -17,9 +17,7 @@ export const metadata: Metadata = {
     "ดูดวงไพ่ยิปซีวันเกิด",
     "ค้นหาไพ่ทาโรต์ประจำตัว",
   ],
-  alternates: {
-    canonical: `${SITE_ORIGIN}/cards/birth-card`,
-  },
+  alternates: buildAlternates("/cards/birth-card"),
   openGraph: {
     title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) · SeerTarot",
     description:
