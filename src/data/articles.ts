@@ -4,6 +4,8 @@
  * ครอบคลุม 5 หมวดหมู่หลัก: ความรัก, การงาน, ผังพยากรณ์, ความหมายไพ่, และจิตวิทยา/AI
  */
 
+import { ARTICLES_EN } from "./i18n/articles-en.generated";
+
 export interface ArticleFaq {
   question: string;
   answer: string;
@@ -42,11 +44,20 @@ export interface Article {
   cardNameTh?: string;
   cardNameEn?: string;
   toc: ArticleTocItem[];
+  tocEn?: ArticleTocItem[];
   faqs: ArticleFaq[];
+  faqsEn?: ArticleFaq[];
   content: string;
+  contentEn?: string;
 }
 
-export const ARTICLES: Article[] = [
+/** สรุปข้อมูลบทความตัดฟิลด์เนื้อหาหนัก (content/faqs/toc) เพื่อส่งให้หน้ารวม /blog โดยไม่เปลืองงบน้ำหนัก */
+export type ArticleSummary = Omit<
+  Article,
+  "content" | "contentEn" | "toc" | "tocEn" | "faqs" | "faqsEn"
+>;
+
+const RAW_ARTICLES: Article[] = [
   // =========================================================================
   // หมวดที่ 1: ความรัก & ความสัมพันธ์ (Love & Relationships)
   // =========================================================================
@@ -1322,6 +1333,15 @@ Waite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** �
   }
 ];
 
+export const ARTICLES: Article[] = RAW_ARTICLES.map((article) => {
+  const en = ARTICLES_EN[article.slug];
+  if (!en) return article;
+  return {
+    ...article,
+    ...en,
+  };
+});
+
 // =========================================================================
 // Helper Functions สำหรับดึงข้อมูลบทความ
 // =========================================================================
@@ -1499,53 +1519,17 @@ export const ARTICLE_EN_LOOKUP: Record<string, {
   },
 };
 
-export function getArticleTitle(article: Article, localeOrIsEnglish: string | boolean): string {
-  const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
-  if (isEnglish) {
-    if (article.titleEn) return article.titleEn;
-    const lookup = ARTICLE_EN_LOOKUP[article.slug];
-    if (lookup?.titleEn) return lookup.titleEn;
-  }
-  return article.title;
+export function getArticleSummaries(): ArticleSummary[] {
+  return ARTICLES.map(
+    ({ content: _c, contentEn: _ce, toc: _t, tocEn: _te, faqs: _f, faqsEn: _fe, ...summary }) =>
+      summary,
+  );
 }
 
-export function getArticleDescription(article: Article, localeOrIsEnglish: string | boolean): string {
-  const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
-  if (isEnglish) {
-    if (article.descriptionEn) return article.descriptionEn;
-    const lookup = ARTICLE_EN_LOOKUP[article.slug];
-    if (lookup?.descriptionEn) return lookup.descriptionEn;
-  }
-  return article.description;
-}
-
-export function getArticleCategory(article: Article, localeOrIsEnglish: string | boolean): string {
-  const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
-  if (isEnglish) {
-    if (article.categoryEn) return article.categoryEn;
-    const lookup = ARTICLE_EN_LOOKUP[article.slug];
-    if (lookup?.categoryEn) return lookup.categoryEn;
-    switch (article.category) {
-      case "love":
-        return "Love & Soulmates";
-      case "career":
-        return "Career & Abundance";
-      case "spreads":
-        return "Tarot Spreads";
-      case "cards":
-        return "Card Meanings";
-      case "wisdom":
-        return "Psychology & AI";
-      default:
-        return "Wisdom";
-    }
-  }
-  return article.categoryTh;
-}
-
-export function getArticleAuthor(article: Article, localeOrIsEnglish: string | boolean): string {
-  const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
-  if (isEnglish) return article.authorEn || "SeerTarot Oracle Sanctuary";
-  return article.author;
-}
+export {
+  getArticleTitle,
+  getArticleDescription,
+  getArticleCategory,
+  getArticleAuthor,
+} from "./article-helpers";
 

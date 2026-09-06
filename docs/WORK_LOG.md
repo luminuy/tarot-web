@@ -35,6 +35,41 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🌐 ปลดล็อกเส้นทางภาษาอังกฤษ 33 หน้า (26 บทความ + 6 หมวดผังพยากรณ์ + บล็อกหลัก) พร้อมระบบนำเข้าและตรวจงานแปล 100% (Task #2)
+
+**เป้าหมาย:** บรรลุ Task #2 จากแผนแม่บท `MASTER_PLAN_2026-09-06.md` / `HANDOFF_EN_TRANSLATION_2026-09-06.md` เพื่อสร้างเนื้อหาภาษาอังกฤษคุณภาพสิ่งพิมพ์ระดับสากล และเปิดใช้งาน 33 เส้นทางภาษาอังกฤษใหม่
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **งานแปลระดับสากล 318 หน่วย (100% Completion)**:
+   - แปลเนื้อหาบทความ 26 บทความ และหมวดหมู่ผังพยากรณ์ 6 หมวด รวม 318 หน่วยใน `docs/i18n/pending-en.json` ครบถ้วน
+   - ผ่านเกณฑ์ความปลอดภัยทุกหน่วย: ไร้อักขระภาษาไทยปนเปื้อน 100%, หัวข้อ `##` และ `###` เท่ากับต้นฉบับเป๊ะ, ลิงก์ภายในปลอดภัย, ไร้อิโมจิดวงดาว (Rule 2) และไร้ไพ่ปลอม (Rule 14)
+2. **ระบบนำเข้าและตรวจงานแปลอัตโนมัติ (`scripts/i18n-import.ts`)**:
+   - เพิ่มคำสั่ง `npm run i18n:import` และ `npm run i18n:verify` ใน `package.json`
+   - คอมไพล์คำแปลออกเป็น TypeScript data artifacts:
+     - `src/data/i18n/articles-en.generated.ts` (140 KB)
+     - `src/data/i18n/spread-topics-en.generated.ts` (14 KB)
+3. **การแยกโมดูลเพื่อ Tree-Shaking และควบคุมงบประมาณบันเดิล (`src/data/article-helpers.ts`)**:
+   - สกัดฟังก์ชันตัวช่วย (`getArticleTitle`, `getArticleDescription`, `getArticleCategory`, `getArticleAuthor`) ออกมาเป็นโมดูลขนาดเบา
+   - ป้องกันไม่ให้ Client Components (`BlogIndexClient.tsx`, `ArticleReadingClient.tsx`) ดึงไฟล์ฐานข้อมูลบทความขนาด 300+ KB เข้าสู่เบราว์เซอร์
+   - ส่งผลให้บันเดิล JS (gzip) ของหน้า `/blog` อยู่ที่ **314 KB** (ผ่านงบประมาณ ≤ 325 KB) และ HTML อยู่ที่ **35 KB** (ผ่านงบ ≤ 65 KB)
+4. **สถาปัตยกรรมหน้าเว็บร่วม (Shared Page Architecture)**:
+   - สร้างโมดูลหน้าเว็บแชร์ข้ามภาษาใน `src/app/_shared/pages/`:
+     - `blog-index.tsx`: รองรับทั้ง `/blog` และ `/en/blog` พร้อม Bilingual Schema.org Blog JSON-LD
+     - `blog-detail.tsx`: รองรับทั้ง `/blog/[slug]` และ `/en/blog/[slug]` พร้อม Article/FAQ Schema.org
+     - `spread-topic.tsx`: รองรับทั้ง `/spreads/topic/[category]` และ `/en/spreads/topic/[category]` พร้อม CollectionPage Schema.org
+   - ปรับปรุงคอมโพเนนต์ให้รองรับ 2 ภาษาเต็มรูปแบบ: `TopicSpreadList.tsx`, `BlogIndexClient.tsx`, `ArticleReadingClient.tsx`
+5. **การเปิดใช้งาน 33 เส้นทางภาษาอังกฤษใหม่ (Prerendered SSG)**:
+   - รวมหน้าทั้งหมดที่ Prerender ในระบบเพิ่มขึ้นจาก 331 หน้า เป็น **364 หน้า**
+   - อัปเดต `src/lib/i18n/paths.ts` เพิ่ม `"/blog"` ใน `EN_TWIN_ROUTES` และ `"/blog/"` ใน `EN_TWIN_DYNAMIC_PREFIXES`
+   - เชื่อมโยง hreflang แบบ 2 ทิศทางสมบูรณ์แบบ (`th` ↔ `en`)
+6. **อัปเดตด่านตรวจและเครื่องมือทดสอบ**:
+   - ปรับปรุง `scripts/qa/test-en-routing.ts` (Gate 34) ให้ครอบคลุมเส้นทาง Blog และ Spread Topics ตรวจ Heading Parity และตรวจสอบการใช้ `LocaleLink`
+   - ปรับปรุง `scripts/qa/test-bundle-budget.ts` (Gate 33) ให้ตรวจสอบ App Router build paths ภายใต้ route groups `(th)` และ `(en)`
+7. **ผลการตรวจ 35 ด่าน (`npm run repo:verify`)**:
+   - `npm run typecheck` ➔ 0 errors
+   - `npm run test:budget` ➔ ผ่าน 100%
+   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 35/35 ด่าน 100% Green!**
+
 ### 🗓️ 2026-09-06: ⚡ ปรับประสิทธิภาพความเร็ว Bundle Weight, GPU Composite Shadows, CSS View Transitions และระบบค้นหา Semantic Search
 
 **เป้าหมาย:** ทำเว็บให้ "สมูทและไว" ระดับโลกตามแผนแม่บท `HANDOFF_SMOOTH_FAST_20260906.md` และ `HANDOFF_SEMANTIC_SEARCH_20260906.md`

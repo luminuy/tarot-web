@@ -89,9 +89,11 @@ export const BUDGETS: RouteBudget[] = [
 ];
 
 function ensureBuildExists(): void {
-  const sample = path.join(ROOT, ".next/server/app/page.js");
-  if (!fs.existsSync(sample)) {
-    console.log("📦 ไม่พบไฟล์ผลลัพธ์ build (.next/server/app/page.js) — กำลังรัน npm run build...");
+  const sampleTh = path.join(ROOT, ".next/server/app/(th)/page.js");
+  const sampleRoot = path.join(ROOT, ".next/server/app/page.js");
+  const buildManifest = path.join(ROOT, ".next/build-manifest.json");
+  if (!fs.existsSync(sampleTh) && !fs.existsSync(sampleRoot) && !fs.existsSync(buildManifest)) {
+    console.log("📦 ไม่พบไฟล์ผลลัพธ์ build — กำลังรัน npm run build...");
     execSync("npm run build", { cwd: ROOT, stdio: "inherit" });
   }
   const buildIdPath = path.join(ROOT, ".next/BUILD_ID");

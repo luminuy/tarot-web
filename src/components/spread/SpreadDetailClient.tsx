@@ -12,7 +12,7 @@ import {
   getPositionMeaning,
 } from "@/data/spreads";
 import type { Article } from "@/data/articles";
-import { getArticleTitle } from "@/data/articles";
+import { getArticleTitle } from "@/data/article-helpers";
 import { SpreadPositionMap } from "@/components/spread/SpreadPositionMap";
 import { useLocale } from "@/lib/i18n";
 

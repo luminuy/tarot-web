@@ -5,6 +5,10 @@ import { recordIncident, type Severity } from "./incident-log";
 import { syncWorkLog } from "./sync-worklog";
 import { ownedAndForeignLocks } from "./agent-guard";
 
+if (!process.env.GIT_CONFIG_GLOBAL) {
+  process.env.GIT_CONFIG_GLOBAL = "/dev/null";
+}
+
 function run(cmd: string): string {
   try {
     return execSync(cmd, { encoding: "utf-8", stdio: "pipe" }).trim();

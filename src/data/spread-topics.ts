@@ -1,19 +1,28 @@
 import { SPREADS, type Spread } from "@/data/spreads";
+import { SPREAD_TOPICS_EN } from "./i18n/spread-topics-en.generated";
 
 export interface SpreadTopic {
   slug: "love" | "career" | "money" | "health" | "family" | "study";
   nameTh: string;
+  nameEn?: string;
   titleTh: string;
+  titleEn?: string;
   seoTitle: string;
+  seoTitleEn?: string;
   metaDescription: string;
+  metaDescriptionEn?: string;
   heading: string;
+  headingEn?: string;
   tagline: string;
+  taglineEn?: string;
   editorialIntro: string[];
+  editorialIntroEn?: string[];
   spreadIds: string[];
   faqs: Array<{ question: string; answer: string }>;
+  faqsEn?: Array<{ question: string; answer: string }>;
 }
 
-export const SPREAD_TOPICS: Record<string, SpreadTopic> = {
+const RAW_SPREAD_TOPICS: Record<string, SpreadTopic> = {
   love: {
     slug: "love",
     nameTh: "ความรักและความสัมพันธ์",
@@ -188,6 +197,13 @@ export const SPREAD_TOPICS: Record<string, SpreadTopic> = {
     ],
   },
 };
+
+export const SPREAD_TOPICS: Record<string, SpreadTopic> = Object.fromEntries(
+  Object.entries(RAW_SPREAD_TOPICS).map(([key, topic]) => {
+    const en = SPREAD_TOPICS_EN[key];
+    return [key, en ? { ...topic, ...en } : topic];
+  })
+);
 
 export function getAllTopicSlugs(): string[] {
   return Object.keys(SPREAD_TOPICS);

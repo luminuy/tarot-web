@@ -22,6 +22,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+if (!process.env.GIT_CONFIG_GLOBAL) {
+  process.env.GIT_CONFIG_GLOBAL = "/dev/null";
+}
+
 // ============================================================================
 // Utilities
 // ============================================================================

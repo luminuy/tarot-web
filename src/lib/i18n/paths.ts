@@ -26,10 +26,11 @@ export const EN_TWIN_ROUTES = [
   "/spreads",
   "/daily",
   "/love/1-card",
+  "/blog",
 ] as const;
 
 /** เส้นทางที่มีพารามิเตอร์ — ลูกทุกใบใต้ prefix นี้มีฝาแฝดครบ */
-const EN_TWIN_DYNAMIC_PREFIXES = ["/cards/", "/spreads/"] as const;
+const EN_TWIN_DYNAMIC_PREFIXES = ["/cards/", "/spreads/", "/blog/"] as const;
 
 /**
  * เส้นทางที่อยู่ใต้ prefix ข้างบนก็จริง แต่ **ไม่มี** ฝาแฝด — ต้องยกเว้นเป็นรายตัว
@@ -38,12 +39,11 @@ const EN_TWIN_DYNAMIC_PREFIXES = ["/cards/", "/spreads/"] as const;
  * การเปิดหน้าอังกฤษที่มีแต่โครงแต่เนื้อเป็นไทย = thin content ซึ่ง **แย่กว่าไม่มีหน้าเลย**
  *
  * - `/cards/birth-card` — บทความประกอบเครื่องคำนวณยาวกว่า 800 คำ ยังไม่ได้แปล
- * - `/spreads/topic/*` — `editorialIntro` + `faqs` ของทั้ง 6 หมวดยังเป็นไทยล้วน
  */
 const EN_TWIN_EXCEPTIONS: string[] = ["/cards/birth-card"];
 
 /** prefix ที่ต้องยกเว้นทั้งกิ่ง (ลูกทุกใบไม่มีฝาแฝด) */
-const EN_TWIN_EXCEPTION_PREFIXES = ["/spreads/topic"] as const;
+const EN_TWIN_EXCEPTION_PREFIXES: readonly string[] = [];
 
 /** ตัด query/hash และ `/` ท้ายออก เหลือเฉพาะ pathname สำหรับเทียบ */
 function pathnameOf(href: string): string {

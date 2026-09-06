@@ -5,16 +5,16 @@ import {
   buildBlogDetailMetadata,
   BlogDetailBody,
   type BlogDetailPageProps,
-} from "../../../_shared/pages/blog-detail";
+} from "../../../../_shared/pages/blog-detail";
 
 export function generateStaticParams() {
-  return blogDetailStaticParams("th");
+  return blogDetailStaticParams("en");
 }
 
 export function generateMetadata(props: BlogDetailPageProps): Promise<Metadata> {
-  return buildBlogDetailMetadata(props, "th");
+  return buildBlogDetailMetadata(props, "en");
 }
 
 export default function Page(props: BlogDetailPageProps) {
-  return <BlogDetailBody {...props} locale="th" />;
+  return <BlogDetailBody {...props} locale="en" />;
 }
