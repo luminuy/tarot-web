@@ -1,0 +1,2298 @@
+{
+  "$schema": "หน่วยละ 1 ข้อความ — เติมคำแปลลงช่อง `en` เท่านั้น ห้ามแก้ `id` / `th` / `target`",
+  "generatedFrom": "npm run i18n:export",
+  "totalUnits": 318,
+  "totalSourceChars": 53088,
+  "units": [
+    {
+      "id": "article:tarot-love-3-cards-feelings:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ยิปซีความรัก 3 ใบ: เขารู้สึกอย่างไรกับเรา คิดยังไง และอนาคตจะเป็นอย่างไร",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "วิธีเปิดไพ่ยิปซีความรัก 3 ใบ เช็คความรู้สึกจริงของเขา สิ่งที่เขาคิด และแนวโน้มความสัมพันธ์ในอนาคต พร้อมคำแนะนำเจาะลึก 1909 Rider-Waite",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ทำไมผังไพ่ 3 ใบถึงตอบโจทย์เรื่องความรักได้ดีที่สุด",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:toc:positions",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ตำแหน่งความหมายของไพ่ 3 ใบในเรื่องความรัก",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:toc:top-love-cards",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ไพ่บอกสัญญาณความรักที่พบบ่อย",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:toc:how-to-interpret",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "เคล็ดลับการอ่านและเชื่อมโยงพลังงานไพ่",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:toc:faq",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].tocEn[4].title",
+      "kind": "heading",
+      "th": "คำถามที่พบบ่อย (FAQ)",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "เปิดไพ่ 3 ใบดูความรัก สามารถดูให้คนอื่นได้ไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ได้ค่ะ แต่ต้องตั้งจิตนึกถึงบุคคลนั้นด้วยเจตนาที่บริสุทธิ์ โดยไพ่จะสะท้อนคลื่นพลังงานระหว่างคุณกับเขาออกมา",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:faq:1:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ถ้าได้ไพ่ดูน่ากลัว เช่น The Tower หรือ Death แปลว่าจะเลิกกันทันทีไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:faq:1:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ไม่เสมอไปค่ะ ไพ่ The Tower หรือ Death มักหมายถึงการสิ้นสุดของพฤติกรรมเดิมๆ หรือการเคลียร์ความขัดแย้งที่อัดอั้น เพื่อนำไปสู่การปรับความเข้าใจในรูปแบบใหม่",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-3-cards-feelings:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-3-cards-feelings\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ทำไมผังไพ่ 3 ใบถึงตอบโจทย์เรื่องความรักได้ดีที่สุด\n\nในศาสตร์แห่งการพยากรณ์ไพ่ทาโรต์ (ไพ่ยิปซี) ความรักเป็นมิติที่พลังงานเปลี่ยนแปลงได้รวดเร็วและละเอียดอ่อนที่สุด การเปิดไพ่แบบ **3 ใบ (Three-Card Spread)** เป็นผังพยากรณ์ที่คลาสสิกและทรงพลัง เพราะช่วยจำกัดกรอบคำตอบให้กระชับ ชัดเจน และตรงประเด็น โดยไม่ทำให้ผู้ถามสับสนจากความซับซ้อนของไพ่จำนวนมาก\n\nผังนี้ช่วยให้คุณมองเห็นภาพรวมของความสัมพันธ์ได้ครบทั้ง 3 มิติสำคัญ ได้แก่ **ความรู้สึกในใจของเขา**, **สถานการณ์ปัจจุบันระหว่างกัน**, และ **ทิศทางความเป็นไปได้ในอนาคต**\n\n---\n\n## ตำแหน่งความหมายของไพ่ 3 ใบในเรื่องความรัก\n\nเมื่อคุณตั้งจิตถามถึงคนในใจ ให้จัดวางความหมายของไพ่ทั้ง 3 ใบดังนี้:\n\n1. **ใบที่ 1 (ซ้ายมือ) — จิตใต้สำนึกและความรู้สึกของเขา**: สิ่งที่เขาคิด ความปรารถนาที่ซ่อนอยู่ หรือสิ่งที่เขาอาจไม่ได้พูดออกมาตรงๆ\n2. **ใบที่ 2 (ตรงกลาง) — พลังงานปัจจุบันและความสัมพันธ์**: สภาวะความสัมพันธ์ในตอนนี้ อุปสรรคเฉพาะหน้า หรือบรรยากาศระหว่างคุณกับเขา\n3. **ใบที่ 3 (ขวามือ) — แนวโน้มและบทสรุป**: ทิศทางที่ความสัมพันธ์จะดำเนินไปหากพลังงานปัจจุบันยังคงอยู่ พร้อมคำแนะนำจากไพ่\n\n---\n\n## ไพ่บอกสัญญาณความรักที่พบบ่อย\n\n- **The Lovers**: ความผูกพันลึกซึ้ง เคมีตรงกัน หรือการต้องตัดสินใจเลือกเส้นทางหัวใจ\n- **Two of Cups**: ความรักที่ลงตัว การแลกเปลี่ยนความรู้สึกที่บริสุทธิ์และการเปิดใจ\n- **The Moon**: ความกังวล ความไม่แน่ใจ หรือมีความลับบางอย่างที่ยังไม่ถูกเปิดเผย\n- **Knight of Cups**: การเข้ามาของข้อความหวานๆ คำขอโทษ หรือการเริ่มต้นจีบอย่างอบอุ่น\n\n---\n\n## เคล็ดลับการอ่านและเชื่อมโยงพลังงานไพ่\n\nกุญแจสำคัญของการดูดวงความรัก คือ **\"การมองภาพรวมแบบร้อยเรื่องราว\"** อย่าอ่านไพ่แต่ละใบแยกกันเดี่ยวๆ แต่ให้ดูว่าไพ่ใบที่ 1 ส่งผลต่อใบที่ 2 และนำไปสู่ใบที่ 3 อย่างไร หากคุณพร้อมที่จะรับรู้ความจริง ให้ตั้งสมาธิแล้วเปิดไพ่ด้วยตัวคุณเอง\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ไพ่ทาโรต์บอกความรัก: วิธีดูดวงความสัมพันธ์ เนื้อคู่ และความรู้สึกของเขา",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ถอดรหัสไพ่บอกรัก ไพ่เตือนภัยความสัมพันธ์ และวิธีถามไพ่เรื่องความรักให้ได้คำตอบที่แท้จริง พร้อมเทคนิควิเคราะห์ความรู้สึกของเขาอย่างลึกซึ้ง",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:toc:essence",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "1. แก่นแท้ของความรักในมุมมองไพ่ทาโรต์",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:toc:questions",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "2. วิธีตั้งคำถามเรื่องความรักให้ได้คำตอบที่แท้จริง",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:toc:green-flags",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "3. ถอดรหัสกลุ่มไพ่บอกรักและสัญญาณความสัมพันธ์สุกงอม",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:toc:red-flags",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "4. กลุ่มไพ่เตือนภัย (Red Flags) และการรักษาเยียวยาใจ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:toc:mind-reading",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].tocEn[4].title",
+      "kind": "heading",
+      "th": "5. เทคนิคเจาะลึก: เขารู้สึกอย่างไรกับเรากันแน่?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:toc:soulmates",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].tocEn[5].title",
+      "kind": "heading",
+      "th": "6. ไพ่บอกเนื้อคู่ (Soulmate & Twin Flame) มีจริงไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "เปิดไพ่ดูความรัก แล้วได้ไพ่ The Lovers แปลว่าเขาคือเนื้อคู่แน่นอนใช่ไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไพ่ The Lovers แสดงถึงแรงดึงดูดทางจิตวิญญาณที่รุนแรงและความผูกพันลึกซึ้งค่ะ แต่ในอีกมิติหนึ่งคือไพ่แห่ง 'การเลือก' (The Choice) หมายความว่าความสัมพันธ์จะพัฒนาได้ ต้องอาศัยการตัดสินใจที่ซื่อสัตย์ต่อหัวใจของทั้งสองฝ่ายด้วยค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:faq:1:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ถ้าเปิดได้ไพ่ที่มีภาพบุคคลซ้ำซ้อน หมายถึงมีมือที่สามเสมอไปหรือไม่?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:faq:1:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ไม่เสมอไปค่ะ ไพ่อย่าง Three of Cups มักหมายถึงกลุ่มเพื่อน การสังสรรค์ หรือสังคมรอบตัว ส่วนไพ่ Two of Swords อาจหมายถึงความลังเลในใจของผู้ถามเอง ต้องดูไพ่แวดล้อมและตำแหน่งในผังประกอบเสมอค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:faq:2:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].faqsEn[2].question",
+      "kind": "faq-q",
+      "th": "ควรดูดวงความรักบ่อยแค่ไหน?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:faq:2:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].faqsEn[2].answer",
+      "kind": "faq-a",
+      "th": "แนะนำให้ดูเมื่อสถานการณ์ระหว่างคุณกับเขามีความเปลี่ยนแปลงชัดเจน หรือเมื่อคุณต้องการคำแนะนำในการปรับทัศนคติค่ะ การดูถี่เกินไปในวันเดียวจะทำให้จิตใจฟุ้งซ่านและขาดความมั่นใจในตนเอง",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-love-reading-guide:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-love-reading-guide\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## 1. แก่นแท้ของความรักในมุมมองไพ่ทาโรต์\n\nในศาสตร์ไพ่ทาโรต์ 1909 Rider-Waite ความรักไม่ใช่เรื่องของความบังเอิญหรือพรหมลิขิตที่นิ่งเฉย แต่คือ **\"การสะท้อนพลังงานระหว่างจิตวิญญาณสองดวง\"**\n\nเมื่อคุณเปิดไพ่ถามถึงความรัก ไพ่จะไม่เพียงแค่บอกว่า *เขารักเราไหม* หรือ *จะได้คบกันหรือไม่* แต่จะช่วยเปิดเผยสิ่งที่อยู่ลึกลงไปในจิตใต้สำนึก ได้แก่:\n- ความคาดหวังที่ไม่ได้พูดออกมา\n- บาดแผลทางอารมณ์จากอดีตที่ยังไม่ได้รับการเยียวยา\n- ศักยภาพสูงสุดที่ความสัมพันธ์นี้สามารถเติบโตไปได้\n\n---\n\n## 2. วิธีตั้งคำถามเรื่องความรักให้ได้คำตอบที่แท้จริง\n\nความผิดพลาดอันดับหนึ่งของการดูดวงความรักคือการตั้งคำถามที่เป็นการผลักความรับผิดชอบ เช่น *\"เมื่อไหร่เขาจะทักมา?\"* หรือ *\"เขาจะทิ้งฉันไหม?\"* คำถามเหล่านี้มักนำไปสู่ความวิตกกังวล\n\n**ลองเปลี่ยนมาใช้คำถามที่เสริมสร้างพลังใจ (Empowering Questions):**\n- *\"อะไรคือความรู้สึกที่แท้จริงของเขาระหว่างเราในตอนนี้?\"*\n- *\"อุปสรรคสำคัญที่ทำให้ความสัมพันธ์ยังไม่ก้าวหน้าคืออะไร และฉันช่วยแก้ไขได้อย่างไร?\"*\n- *\"หากฉันต้องการดึงดูดความรักที่มั่นคงและจริงใจ ฉันควรปรับพลังงานด้านใดในตนเอง?\"*\n\n---\n\n## 3. ถอดรหัสกลุ่มไพ่บอกรักและสัญญาณความสัมพันธ์สุกงอม\n\nเมื่อไพ่กลุ่มนี้ปรากฏขึ้นในตำแหน่งความรู้สึกหรืออนาคต บ่งชี้ถึงพลังงานความรักที่บริสุทธิ์และมั่นคง:\n\n- **The Lovers (เมเจอร์ 6)**: แรงดึงดูดทางจิตวิญญาณ ความเข้าใจอย่างลึกซึ้ง และการตัดสินใจเลือกเดินเคียงข้างกัน\n- **Two of Cups**: ไพ่แห่งการสบตาและความผูกพันที่เท่าเทียม ต่างฝ่ายต่างมอบความรู้สึกดีๆ ให้แก่กันอย่างจริงใจ\n- **Four of Wands**: การสร้างครอบครัว การหมั้นหมาย งานวิวาห์ หรือความสุขที่อบอุ่นและมั่นคง\n- **Ten of Cups**: ความสมบูรณ์แบบทางอารมณ์ ความรักที่ได้รับการยอมรับจากครอบครัวและความสงบสุขในหัวใจ\n- **The Sun (เมเจอร์ 19)**: ความชัดเจน ความจริงใจ ไร้ความลับต่อกัน ความสัมพันธ์ที่สว่างไสวและเต็มไปด้วยรอยยิ้ม\n\n---\n\n## 4. กลุ่มไพ่เตือนภัย (Red Flags) และการรักษาเยียวยาใจ\n\nหากคุณเปิดได้ไพ่กลุ่มนี้ อย่าเพิ่งหมดหวัง ไพ่ไม่ได้บอกว่าทุกอย่างพังทลาย แต่กำลังเตือนให้คุณ **\"หันกลับมารักและปกป้องจิตใจตนเอง\"**:\n\n- **The Devil (เมเจอร์ 15)**: ความลุ่มหลง ความสัมพันธ์ที่เป็นพิษ (Toxic Relationship) การยึดติดทางอารมณ์หรือแรงขับทางเพศที่ขาดความเข้าใจ\n- **Three of Swords**: บาดแผลทางใจ การผิดหวัง หรือการต้องรับฟังความจริงที่เจ็บปวดเพื่อก้าวต่อไป\n- **Seven of Swords**: ความไม่โปร่งใส การซ่อนเร้นความจริง หรือมีบางอย่างที่กำลังถูกปกปิด\n- **The Moon (เมเจอร์ 18)**: ความไม่ชัดเจน ความหวาดระแวง หรือภาพลวงตาที่ทำให้คุณมองไม่เห็นความจริง\n\n---\n\n## 5. เทคนิคเจาะลึก: เขารู้สึกอย่างไรกับเรากันแน่?\n\nเพื่อเช็คความรู้สึกของเขาอย่างแม่นยำ แนะนำให้ใช้ **ผังไพ่ 3 ใบสำหรับความรู้สึก**:\n\n1. **ใบที่ 1 (สิ่งที่เขาคิดในสมอง - Head)**: มุมมอง ความคิดเชิงเหตุผล และการประเมินความสัมพันธ์ในชีวิตจริง\n2. **ใบที่ 2 (สิ่งที่เขารู้สึกในหัวใจ - Heart)**: ความรู้สึกแท้จริง ความปรารถนา และอารมณ์ที่ซ่อนอยู่ลึกๆ\n3. **ใบที่ 3 (การกระทำที่เขาจะแสดงออก - Action)**: สิ่งที่เขาพร้อมจะทำหรือท่าทีที่เขาจะปฏิบัติต่อคุณในระยะอันใกล้\n\nการแยกแยะระหว่าง **ความคิด (Head)** กับ **หัวใจ (Heart)** จะช่วยให้คุณเข้าใจว่า ทำไมบางครั้งเขาดูเฉยชาภายนอกแต่ในใจอาจมีความกังวล หรือในทางกลับกัน ทำไมเขาพูดจาดีแต่ยังไม่ยอมขยับความสัมพันธ์\n\n---\n\n## 6. ไพ่บอกเนื้อคู่ (Soulmate & Twin Flame) มีจริงไหม?\n\nในภาษาสัญลักษณ์ 1909 Rider-Waite ไพ่ **The Lovers**, **The World**, และ **Two of Cups** มักถูกเรียกว่าไพ่คู่แท้ อย่างไรก็ตาม นิยามของคำว่า \"เนื้อคู่\" ในทางจิตวิญญาณไม่ได้หมายถึงคนที่ไม่มีวันทะเลาะกัน แต่คือ **\"บุคคลที่เข้ามาเป็นกระจกสะท้อนให้เราได้เรียนรู้ เติบโต และค้นพบตัวตนที่งดงามที่สุด\"**\n\nไม่ว่าไพ่จะออกมาเป็นอย่างไร จำไว้เสมอว่า คุณคือผู้ถือหางเสือของชีวิตคู่ ความรักที่แท้จริงเริ่มต้นจากการที่คุณมอบความรัก เคารพ และให้เกียรติตัวเองก่อนเสมอ\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ทาโรต์: แฟนเก่าจะกลับมาไหม? ส่อง 5 สัญญาณไพ่บอกการรีเทิร์นและการเริ่มต้นใหม่",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เช็คดวงความรัก แฟนเก่าคิดถึงเราไหม จะมีโอกาสกลับมาคืนดีกันหรือไม่ ผ่าน 5 สัญญาณไพ่ทาโรต์ 1909 และแนวทางการมูฟออนอย่างมีความสุข",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "คำถามคาใจ: ทำไมเราถึงยังตัดเขาไม่ขาด",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:toc:signs",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "5 ไพ่ทาโรต์ที่บ่งบอกว่าแฟนเก่ามีโอกาสกลับมา",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:toc:move-on-cards",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ไพ่ที่เตือนว่าควรปล่อยวางและก้าวต่อ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:toc:advice",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "คำแนะนำจากแม่หมอเมื่อเปิดได้ไพ่แฟนเก่า",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:toc:faq",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].tocEn[4].title",
+      "kind": "heading",
+      "th": "คำถามที่พบบ่อย (FAQ)",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ถ้าเปิดได้ไพ่ Judgement แปลว่าเขากำลังจะทักมาใช่ไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "Judgement คือไพ่แห่งการฟื้นคืนชีพและการตัดสินใจครั้งสำคัญ มีโอกาสสูงมากที่จะมีการติดต่อกลับมาเพื่อเคลียร์เรื่องราวในอดีตค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:faq:1:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ควรเปิดไพ่ถามเรื่องแฟนเก่าบ่อยแค่ไหน?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:faq:1:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ควรถามเมื่อสถานการณ์มีการเปลี่ยนแปลงจริง หรือเว้นระยะอย่างน้อย 1-2 สัปดาห์ เพื่อให้พลังงานได้เคลื่อนตัวค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-ex-return-signs:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-ex-return-signs\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## คำถามคาใจ: ทำไมเราถึงยังตัดเขาไม่ขาด\n\nหนึ่งในคำถามยอดฮิตตลอดกาลในวิหารพยากรณ์คือ **\"แฟนเก่าจะกลับมาไหม?\"** ความเจ็บปวดจากการจากลาและคำถามที่ยังค้างคาใจ มักทำให้พลังงานจิตใต้สำนึกของเราผูกติดอยู่กับคนในอดีต ไพ่ทาโรต์ไม่ได้ทำหน้าที่แค่บอกอนาคต แต่ยังช่วยส่องสว่างให้เห็นว่า *เขายังนึกถึงคุณอยู่หรือไม่* และ *การกลับมานั้นจะเป็นผลดีต่อชีวิตคุณจริงหรือเปล่า*\n\n---\n\n## 5 ไพ่ทาโรต์ที่บ่งบอกว่าแฟนเก่ามีโอกาสกลับมา\n\n1. **Judgement (การฟื้นคืนชีพ)**: สัญญาณอันดับ 1 ของการรีเทิร์น เรื่องราวในอดีตที่คิดว่าจบไปแล้วจะถูกหยิบยกขึ้นมาคุยใหม่ มีการปรับความเข้าใจและให้อภัย\n2. **Six of Cups (ความทรงจำวัยเยาว์)**: เขาหวนนึกถึงวันวานอันแสนอบอุ่น ความผูกพันเก่าๆ กำลังดึงดูดให้เขากลับมาหาคุณ\n3. **The Wheel of Fortune (กงล้อโชคชะตา)**: โชคชะตากำลังหมุนวนพาคนสองคนกลับมาเจอกันในจังหวะเวลาที่ถูกต้อง\n4. **Two of Cups (การคืนดีและประสานรอยร้าว)**: การกลับมาพร้อมหัวใจที่เปิดกว้างและพร้อมจะเริ่มต้นความสัมพันธ์ใหม่อีกครั้ง\n5. **Page of Cups (ข้อความทักทาย)**: การส่งข้อความทักมาแบบเขินๆ การส่องสตอรี่ หรือการส่งสัญญาณเบาๆ ว่ายังแคร์\n\n---\n\n## ไพ่ที่เตือนว่าควรปล่อยวางและก้าวต่อ\n\nหากเปิดได้ไพ่กลุ่มนี้ ไพ่กำลังบอกให้คุณรักตัวเองและเดินไปข้างหน้า:\n- **Eight of Cups**: ถึงเวลาต้องหันหลังให้สิ่งที่พังแล้ว เพื่อไปหาความสุขที่แท้จริง\n- **Three of Swords**: บาดแผลยังสดใหม่ การกลับมาอาจนำไปสู่ความเจ็บปวดซ้ำรอยเดิม\n- **Ten of Swords**: ทุกอย่างจบลงอย่างสมบูรณ์แล้ว ฟ้าหลังฝนกำลังรอคุณอยู่\n\n---\n\n## คำแนะนำจากแม่หมอเมื่อเปิดได้ไพ่แฟนเก่า\n\nจำไว้เสมอว่า ไพ่ทาโรต์คือเครื่องมือสะท้อนพลังงาน หากเขากลับมาแต่ปัญหาเดิมยังไม่ถูกแก้ไข ความสัมพันธ์ก็อาจจบลงแบบเดิม จงใช้สติเป็นที่ตั้ง และเลือกสิ่งที่ดีที่สุดสำหรับหัวใจของคุณเอง\n",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:title",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "10 ไพ่ทาโรต์บอกรักแท้ & เนื้อคู่: เปิดได้ใบไหนแปลว่าคนที่ใช่กำลังจะเข้ามา",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:description",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เช็ค 10 สุดยอดไพ่ยิปซีความรัก บ่งบอกถึงเนื้อคู่ คู่แท้ พรหมลิขิต และความสุขสมหวังในชีวิตคู่ พร้อมวิธีดูสัญญาณความรัก 1909 RWS",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "พลังงานแห่งเนื้อคู่ในสำรับ 1909 Rider-Waite",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:toc:top-10",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "10 สุดยอดไพ่บอกสัญญาณคู่แท้",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:toc:how-to-spot",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "วิธีสังเกตลักษณะเนื้อคู่จากหน้าไพ่",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:toc:conclusion",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "บทสรุปและแนวทางดึงดูดรักแท้",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:toc:faq",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].tocEn[4].title",
+      "kind": "heading",
+      "th": "คำถามที่พบบ่อย (FAQ)",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "เปิดได้ The Lovers ใบเดียว การันตีว่าคือเนื้อคู่ 100% เลยไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "The Lovers บ่งบอกถึงแรงดึงดูดและเคมีที่ตรงกันอย่างลึกซึ้ง แต่อย่าลืมดูไพ่แวดล้อมด้วย เพราะ The Lovers ยังหมายถึง 'ทางเลือก' ที่ต้องตัดสินใจด้วยความซื่อสัตย์ค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:top-10-soulmate-tarot-cards:content",
+      "target": "src/data/articles.ts → ARTICLES[\"top-10-soulmate-tarot-cards\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## พลังงานแห่งเนื้อคู่ในสำรับ 1909 Rider-Waite\n\nในสำรับไพ่ 78 ใบ มีไพ่กลุ่มพิเศษที่บรรจุพลังงานแห่ง **\"คู่แท้\" (Soulmate)** และ **\"ความรักระดับจิตวิญญาณ\" (Twin Flame)** ไพ่เหล่านี้ไม่ได้หมายถึงแค่คนรักที่หล่อหรือสวย แต่หมายถึงคนที่จะเข้ามาเติมเต็ม เติบโตไปด้วยกัน และร่วมสร้างความสุขในระยะยาว\n\n---\n\n## 10 สุดยอดไพ่บอกสัญญาณคู่แท้\n\n1. **The Lovers (คู่รักแห่งสรวงสวรรค์)**: พรจากเทวทูตราฟาเอล ความผูกพันที่เชื่อมโยงระดับจิตวิญญาณ\n2. **Two of Cups (ถ้วยคู่แห่งสัญญา)**: ความเข้าใจซึ่งกันและกันอย่างสมดุล ให้เกียรติและเคารพในตัวตนของกันและกัน\n3. **The Sun (แสงอาทิตย์แห่งความเบิกบาน)**: ความรักที่เปิดเผย บริสุทธิ์ ไม่มีเงื่อนงำ และนำพาความสุขความเจริญมาให้\n4. **Ten of Cups (ครอบครัวสุขสันต์)**: จุดสูงสุดของชีวิตคู่ การแต่งงาน มีบ้าน และครอบครัวที่อบอุ่น\n5. **The Hierophant (คู่แท้ตามประเพณี)**: ความสัมพันธ์ที่ถูกต้อง ได้รับการยอมรับจากผู้ใหญ่และการสมรสอย่างเป็นทางการ\n6. **Four of Wands (การเฉลิมฉลองและลงหลักปักฐาน)**: การสร้างรากฐานที่มั่นคง การย้ายมาอยู่ด้วยกัน หรือการหมั้นหมาย\n7. **The Star (ความหวังและการเยียวยา)**: คนรักที่เข้ามาเยียวยาหัวใจหลังจากผ่านช่วงเวลาที่มืดมน\n8. **Ace of Cups (ต้นกำเนิดแห่งความรัก)**: การเริ่มต้นตกหลุมรักที่เปี่ยมล้นไปด้วยอารมณ์ความรู้สึกอันบริสุทธิ์\n9. **King & Queen of Cups (คู่บุญคู่บารมี)**: คนสองคนที่มีวุฒิภาวะทางอารมณ์สูง เข้าใจและประคับประคองกันได้อย่างดี\n10. **The World (ความสมบูรณ์แบบ)**: วงจรชีวิตที่สมบูรณ์ การพบเจอคนที่ตามหามาทั้งชีวิต\n\n---\n\n## วิธีสังเกตลักษณะเนื้อคู่จากหน้าไพ่\n\n- **ชุดถ้วย (Cups)**: เนื้อคู่จะเป็นคนอบอุ่น ใจดี อ่อนโยน เข้าใจความรู้สึกเก่ง\n- **ชุดไม้เท้า (Wands)**: เนื้อคู่จะเป็นคนกระตือรือร้น มีไฟ ขยันทำงาน และเป็นผู้นำ\n- **ชุดดาบ (Swords)**: เนื้อคู่จะเป็นคนฉลาด พูดจาตรงไปตรงมา มีเหตุผลและรักความยุติธรรม\n- **ชุดเหรียญ (Pentacles)**: เนื้อคู่จะเป็นคนมั่นคง สุขุม รักสงบ วางแผนการเงินและการใช้ชีวิตเก่ง\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงคนโสด: เมื่อไหร่จะมีความรัก? เจาะลึกจังหวะดวงความรักด้วยไพ่ทาโรต์ 1909",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "คนโสดเตรียมตัว! วิธีดูดวงไพ่ยิปซีเช็คจังหวะเวลาความรัก เมื่อไหร่คนที่ใช่จะเข้ามา พร้อมวิธีเปิดไพ่สะท้อนเสน่ห์และอุปสรรคความโสด",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "โสดเพราะยังไม่ถึงเวลา หรือเพราะปิดกั้นตัวเอง?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:toc:timing-cards",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ไพ่ที่บอกช่วงเวลาความรักกำลังเข้ามา",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:toc:blockage-cards",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ไพ่ที่เตือนถึงอุปสรรคที่ทำให้ยังโสด",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:toc:how-to-open",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "วิธีเปิดไพ่สำรวจดวงคนโสด",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ถ้าเปิดได้ไพ่ The Hermit แปลว่าจะต้องโสดตลอดไปไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไม่ใช่ค่ะ The Hermit หมายถึงช่วงเวลานี้เป็นเวลาทองของการค้นหาตัวเอง พัฒนาจิตวิญญาณ และรักตัวเองให้เต็มที่ เมื่อคุณสมบูรณ์พร้อมจากภายใน คนที่ใช่จะดึงดูดเข้ามาเองค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-single-timing-love:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-single-timing-love\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## โสดเพราะยังไม่ถึงเวลา หรือเพราะปิดกั้นตัวเอง?\n\nความโสดไม่ใช่เรื่องเลวร้าย แต่บ่อยครั้งที่เราอาจสงสัยว่า *ทำไมคนที่ถูกใจถึงยังไม่เข้ามาสักที?* ไพ่ทาโรต์สามารถช่วยวิเคราะห์ได้ว่า สิ่งที่ขวางกั้นคุณอยู่คือ **จังหวะดวงชะตา (Timing)** หรือเป็น **กำแพงในใจ (Subconscious Blockage)** ที่คุณสร้างขึ้นโดยไม่รู้ตัว\n\n---\n\n## ไพ่ที่บอกช่วงเวลาความรักกำลังเข้ามา\n\n- **Knight of Wands / Knight of Cups**: มีคนเข้ามาแบบรวดเร็ว หรือมีคนเข้ามาจีบในระยะเวลา 1-3 เดือนนี้\n- **The Wheel of Fortune**: จังหวะฟ้าเปิดในเร็ววัน การเปลี่ยนแปลงที่มาแบบไม่คาดฝัน\n- **The Sun**: ภายใน 3-6 เดือน ความรักสดใสจะเฉิดฉายเข้ามาในชีวิต\n\n---\n\n## ไพ่ที่เตือนถึงอุปสรรคที่ทำให้ยังโสด\n\n- **The Hermit**: คุณยังชอบความสันโดษ หรือยังไม่พร้อมเปิดพื้นที่ให้ใครเข้ามาแชร์ชีวิต\n- **Nine of Swords**: ความคิดมาก ความกังวล และความกลัวว่าจะเจ็บปวดซ้ำรอยเดิม\n- **Four of Cups**: มีคนพยายามเข้ามาคุย แต่คุณยังรู้สึกว่ายังไม่ใช่ หรือยังปิดใจมองข้ามโอกาส\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงการงาน ไพ่ยิปซี: ควรเปลี่ยนงานหรืออยู่ที่เดิม? วิธีเปิดไพ่ทางแยก 4 ใบช่วยตัดสินใจ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "สับสนเรื่องงาน? วิธีใช้ไพ่ทาโรต์ผังทางแยก 4 ใบ เปรียบเทียบข้อดี-ข้อเสียระหว่างการอยู่ที่เดิมกับการย้ายงานใหม่ ช่วยคุณตัดสินใจอย่างมั่นใจ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ภาวะทางแยก: เมื่อการตัดสินใจเรื่องงานส่งผลต่ออนาคต",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:toc:spread-layout",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "โครงสร้างผังทางแยก 4 ใบ (Two Paths Spread)",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:toc:interpretation",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "วิธีแปลผลไพ่ฝั่งที่เดิม vs ฝั่งงานใหม่",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:toc:actionable-tips",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "ข้อควรระวังในการตัดสินใจเรื่องการงาน",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ถ้าไพ่ออกมาสูสีกันทั้งสองทาง ควรตัดสินใจอย่างไร?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ให้ดูไพ่ใบสรุปและสัญลักษณ์ของธาตุ หากธาตุไม้เท้า (Wands) เด่น แปลว่าการเติบโตอยู่ที่ความท้าทาย หากธาตุเหรียญ (Pentacles) เด่น ให้เน้นความมั่นคงทางการเงินเป็นหลักค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-career-change-spread:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-career-change-spread\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ภาวะทางแยก: เมื่อการตัดสินใจเรื่องงานส่งผลต่ออนาคต\n\nการตัดสินใจว่าจะ **\"อยู่ที่ทำงานเดิม\"** หรือ **\"ก้าวออกไปสู่งานใหม่\"** เป็นหนึ่งในการตัดสินใจที่สร้างความเครียดมากที่สุด การใช้ **ผังทางแยก 4 ใบ (Two Paths Spread)** จะช่วยจำลองภาพผลลัพธ์ของทั้งสองทางเลือกอย่างเป็นกลางและรอบด้าน\n\n---\n\n## โครงสร้างผังทางแยก 4 ใบ (Two Paths Spread)\n\n1. **ใบที่ 1 — สถานการณ์งานปัจจุบันของคุณ**: จุดยืน ปัญหาที่แท้จริง และพลังงานที่คุณมีอยู่ตอนนี้\n2. **ใบที่ 2 — ผลลัพธ์หากเลือกอยู่ที่เดิม**: โอกาสเติบโต ความเสี่ยง และสภาพแวดล้อมหากคุณตัดสินใจไม่ย้าย\n3. **ใบที่ 3 — ผลลัพธ์หากเลือกย้ายงานใหม่**: ความท้าทาย ผลตอบแทน และบรรยากาศในที่ทำงานแห่งใหม่\n4. **ใบที่ 4 — คำแนะนำสูงสุดจากไพ่ (Core Advice)**: สิ่งที่คุณควรคำนึงถึงที่สุดก่อนตัดสินใจ\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "สัมภาษณ์งานจะได้ไหม? ผ่านโปรหรือไม่? ดูดวงไพ่ทาโรต์ 1 ใบ เช็คผลแบบตรงไปตรงมา",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "วิธีเปิดไพ่ทาโรต์ 1 ใบ เช็คผลการสัมภาษณ์งาน ผลการพิจารณาเลื่อนขั้น และความสำเร็จในหน้าที่การงาน แม่นยำ ตรงไปตรงมา",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ความแน่นอนในคำถามเดียว: พลังแห่งไพ่ 1 ใบ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:toc:yes-cards",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ไพ่สัญญาณเขียว (ได้งานชัวร์ 100%)",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:toc:wait-cards",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ไพ่สัญญาณเหลือง (รอผล/ต้องพยายามเพิ่ม)",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:toc:no-cards",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "ไพ่สัญญาณแดง (อาจยังไม่ใช่จังหวะของเรา)",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "เปิดไพ่ 1 ใบแล้วได้ไพ่กลางๆ ทำอย่างไรดี?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ให้เปิดไพ่ใบที่ 2 เพิ่มอีก 1 ใบเพื่อเป็น 'ไพ่ขยายความ' (Clarifier) จะช่วยชี้ชัดเจตนาของไพ่ใบแรกได้ดียิ่งขึ้นค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-job-interview-one-card:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-job-interview-one-card\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ความแน่นอนในคำถามเดียว: พลังแห่งไพ่ 1 ใบ\n\nสำหรับคำถามที่ต้องการคำตอบประเภท **ใช่หรือไม่ (Yes/No)** หรือต้องการเช็คผลลัพธ์เฉพาะหน้า เช่น *\"สัมภาษณ์งานรอบนี้จะผ่านไหม?\"* หรือ *\"จะได้เลื่อนตำแหน่งปีนี้หรือไม่?\"* การเปิดไพ่เพียง **1 ใบ (One Card Oracle)** จะให้พลังงานที่คมกริบที่สุด\n\n---\n\n## ไพ่สัญญาณเขียว (ได้งานชัวร์ 100%)\n\n- **The World**: สำเร็จสมบูรณ์ ได้เซ็นสัญญา ได้งานในฝัน\n- **The Sun**: ได้รับข่าวดีอย่างเปิดเผย โดดเด่นเหนือผู้สมัครคนอื่น\n- **Three of Wands / Six of Wands**: การได้รับชัยชนะ ได้รับการติดต่อตอบรับให้เริ่มงาน\n- **Ace of Pentacles**: ได้รับข้อเสนอเงินเดือนและสวัสดิการที่น่าพึงพอใจ\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-wealth-money-cards:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-wealth-money-cards\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงการเงิน & โชคลาภ: 7 ไพ่ยิปซีมหาเศรษฐี ชี้ช่องทางรวยและปลดหนี้",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-wealth-money-cards:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-wealth-money-cards\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เจาะลึก 7 ไพ่ทาโรต์แห่งความมั่งคั่ง ทรัพย์สิน และโชคลาภ เปิดได้ใบไหนแปลว่าการเงินกำลังจะพุ่ง ปลดหนี้ได้สำเร็จ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-wealth-money-cards:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-wealth-money-cards\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ศาสตร์แห่งธาตุดิน: พลังงานความมั่งคั่งในไพ่ทาโรต์",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-wealth-money-cards:toc:top-7-cards",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-wealth-money-cards\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "7 ไพ่การเงินยอดเยี่ยมที่สุด",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-wealth-money-cards:toc:how-to-manifest",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-wealth-money-cards\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "การดึงดูดพลังงานความมั่งคั่งผ่านหน้าไพ่",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-wealth-money-cards:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-wealth-money-cards\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ชุดเหรียญ (Pentacles) ออกมาเยอะ แปลว่าจะมีเงินเสมอไปไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-wealth-money-cards:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-wealth-money-cards\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "โดยทั่วไปใช่ค่ะ แต่ต้องระวังไพ่เช่น 5 of Pentacles (ความขัดสน) หรือ 4 of Pentacles (การหวงแหนจนตึงเครียด) ด้วยค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-wealth-money-cards:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-wealth-money-cards\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ศาสตร์แห่งธาตุดิน: พลังงานความมั่งคั่งในไพ่ทาโรต์\n\nในสำรับ 1909 Rider-Waite ไพ่ **ชุดเหรียญ (Pentacles)** เป็นตัวแทนของ **ธาตุดิน** ซึ่งควบคุมเรื่องวัตถุ ทรัพย์สิน เงินสด อสังหาริมทรัพย์ และผลลัพธ์ที่จับต้องได้จริงในโลกทางกายภาพ\n\n---\n\n## 7 ไพ่การเงินยอดเยี่ยมที่สุด\n\n1. **Ace of Pentacles (เหรียญทองคำจากฟากฟ้า)**: โอกาสทางการเงินก้อนใหม่ ได้เงินตกเบิก หรือโชคลาภลอย\n2. **Ten of Pentacles (มรดกและความมั่งคั่งสมบูรณ์)**: ความร่ำรวยที่สืบทอด ความมั่นคงระดับครอบครัว\n3. **Nine of Pentacles (เศรษฐีนีผู้สุขสบาย)**: การมีอิสรภาพทางการเงิน ใช้ชีวิตอย่างหรูหราจากน้ำพักน้ำแรง\n4. **The Wheel of Fortune (กงล้อพลิกดวงชะตา)**: การพลิกฟื้นจากติดลบสู่ผลกำไร จังหวะการลงทุนที่งอกเงย\n5. **The Empress (ความอุดมสมบูรณ์พูนสุข)**: เงินทองไหลมาเทมา การเก็บเกี่ยวผลประโยชน์จากธุรกิจ\n6. **King of Pentacles (เจ้าสัวผู้ชำนาญการเงิน)**: การบริหารเงินที่เฉียบขาด การลงทุนระยะยาวที่ผลิดอกออกผล\n7. **Four of Wands (รากฐานมั่นคง)**: การซื้อบ้าน ซื้อที่ดิน หรือการมีทรัพย์สินถาวร\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-business-elements-spread:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-business-elements-spread\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "เริ่มธุรกิจใหม่จะรอดไหม? วิธีใช้ไพ่ทาโรต์ประเมินความเสี่ยงและจุดบอดก่อนลงทุน",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-business-elements-spread:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-business-elements-spread\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เจ้าของธุรกิจควรรู้! วิธีเปิดไพ่ทาโรต์ผังสี่ธาตุ (Four Elements) วิเคราะห์ตลาด การเงิน ทีมงาน และกลยุทธ์ ป้องกันการขาดทุน",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-business-elements-spread:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-business-elements-spread\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ไพ่ทาโรต์ในฐานะเครื่องมือวิเคราะห์กลยุทธ์ธุรกิจ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-business-elements-spread:toc:4-elements",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-business-elements-spread\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "การวิเคราะห์ 4 ธาตุธุรกิจ: ดิน น้ำ ลม ไฟ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-business-elements-spread:toc:case-study",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-business-elements-spread\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ตัวอย่างการอ่านไพ่ธุรกิจ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-business-elements-spread:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-business-elements-spread\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ธุรกิจมีพาร์ทเนอร์หลายคน สามารถเปิดไพ่ดูความซื่อสัตย์ของหุ้นส่วนได้ไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-business-elements-spread:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-business-elements-spread\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ได้ค่ะ ให้ตั้งคำถามเจาะจงไปที่ความสัมพันธ์และเป้าหมายของหุ้นส่วน ไพ่กลุ่มดาบและถ้วยจะสะท้อนความจริงใจออกมาอย่างชัดเจนค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-business-elements-spread:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-business-elements-spread\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ไพ่ทาโรต์ในฐานะเครื่องมือวิเคราะห์กลยุทธ์ธุรกิจ\n\nนักธุรกิจชั้นนำทั่วโลกหลายคนใช้ไพ่ทาโรต์เป็น **\"กระจกสะท้อนความคิด (Brainstorming Mirror)\"** เพื่อค้นหาจุดบอด (Blind Spots) ที่แผนธุรกิจแบบเดิมอาจมองข้ามไป\n\n---\n\n## การวิเคราะห์ 4 ธาตุธุรกิจ: ดิน น้ำ ลม ไฟ\n\n1. **ธาตุไฟ (Wands) — ไฟและแรงผลักดัน**: แพชชั่น ความเร็วในการรุกตลาด นวัตกรรม และพลังของทีมงาน\n2. **ธาตุน้ำ (Cups) — ความพึงพอใจของลูกค้า**: การบริการ ลูกค้าสัมพันธ์ และภาพลักษณ์แบรนด์ในใจผู้บริโภค\n3. **ธาตุลม (Swords) — กลยุทธ์และการสื่อสาร**: แผนการตลาด กฎหมาย สัญญา ข้อตกลง และการแก้ปัญหาเฉพาะหน้า\n4. **ธาตุดิน (Pentacles) — กระแสเงินสดและต้นทุน**: สภาพคล่อง กำไร-ขาดทุน และความคุ้มค่าของการลงทุน\n",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:title",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "วิธีเปิดไพ่ทาโรต์สำหรับผู้เริ่มต้น: จากการตั้งจิตสู่คำทำนายที่แม่นยำ",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:description",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "คู่มือฉบับสมบูรณ์สำหรับการดูดวงไพ่ทาโรต์ด้วยตัวเอง วิธีตั้งจิตอธิษฐาน สับไพ่ เลือกผัง และการอ่านไพ่แบบไม่งมงายตามหลัก 1909 Rider-Waite",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:toc:mindset",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "1. ทัศนคติที่ถูกต้อง: ไพ่ทาโรต์คือกระจกเงาสะท้อนจิตใต้สำนึก",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:toc:preparation",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "2. การเตรียมตัวและตั้งจิตอธิษฐานก่อนเปิดไพ่",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:toc:shuffling",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "3. วิธีสับไพ่และหยิบไพ่ด้วยตนเองอย่างโปร่งใส",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:toc:spread-choice",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "4. การเลือกผังพยากรณ์ที่เหมาะกับคำถามของผู้เริ่มต้น",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:toc:reading-secrets",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].tocEn[4].title",
+      "kind": "heading",
+      "th": "5. ศิลปะการอ่านไพ่ 3 มิติ: สัญลักษณ์ ธาตุ และเรื่องราว",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:toc:common-pitfalls",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].tocEn[5].title",
+      "kind": "heading",
+      "th": "6. ข้อผิดพลาดที่มือใหม่มักเจอ และวิธีแก้ไข",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "จำเป็นต้องมีเซนส์แรงหรือสัมผัสพิเศษถึงจะอ่านไพ่ทาโรต์ได้ไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไม่จำเป็นเลยค่ะ ไพ่ทาโรต์ชุด 1909 Rider-Waite ถูกออกแบบบนพื้นฐานสัญลักษณ์สากล (Universal Archetypes) ทุกคนสามารถฝึกฝน เชื่อมโยงกับสัญชาตญาณ และอ่านไพ่ได้อย่างแม่นยำด้วยการสังเกตและฝึกฝนสมาธิค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:faq:1:q",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ถ้าเปิดได้ไพ่ที่มีความหมายน่ากลัว ควรทำอย่างไร?",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:faq:1:a",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "อย่าเพิ่งตื่นตระหนกค่ะ ไพ่ทาโรต์ไม่มีใบไหนที่เป็นลบแท้จริง ไพ่อย่าง The Tower, Death หรือ Ten of Swords มักเตือนสติให้เราปล่อยวางสิ่งที่ไม่ก่อประโยชน์ เพื่อเปิดพื้นที่รับโอกาสใหม่ๆ ที่กำลังเข้ามาค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:faq:2:q",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].faqsEn[2].question",
+      "kind": "faq-q",
+      "th": "มือใหม่ควรอ่านไพ่หัวกลับ (Reversed Cards) หรือไม่?",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:faq:2:a",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].faqsEn[2].answer",
+      "kind": "faq-a",
+      "th": "ในช่วงแรก แนะนำให้อ่านไพ่หัวตั้ง (Upright) ให้คล่องแคล่วและเข้าใจมิติความหมายลึกซึ้งก่อนค่ะ เมื่อมั่นใจในสัญลักษณ์และตำแหน่งแล้ว ค่อยเริ่มศึกษาไพ่หัวกลับในลำดับถัดไป",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-read-tarot-for-beginners:content",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-read-tarot-for-beginners\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## 1. ทัศนคติที่ถูกต้อง: ไพ่ทาโรต์คือกระจกเงาสะท้อนจิตใต้สำนึก\n\nหลายคนเริ่มต้นศึกษาไพ่ทาโรต์ด้วยความเชื่อว่าไพ่คือเครื่องมือทำนายอนาคตที่ถูกกำหนดไว้ล่วงหน้าอย่างตายตัว แต่ในความเป็นจริงตามหลักจิตวิทยาของ **Carl Gustav Jung** ไพ่ทาโรต์คือ **\"กระจกสะท้อนสภาวะจิตใต้สำนึก\" (Mirror of the Subconscious)**\n\nภาพวาดบนหน้าไพ่ชุด **1909 Rider-Waite-Smith** บรรจุรหัสสัญลักษณ์ แม่แบบทางจิตวิทยา (Archetypes) และพลังงานธรรมชาติที่จะช่วยดึงความจริง ความหวัง ความกลัว และศักยภาพที่ซ่อนอยู่ภายในตัวคุณออกมาให้เห็นชัดเจน การอ่านไพ่ที่ดีจึงไม่ใช่การนั่งรอโชคชะตา แต่คือการเข้าใจตนเองเพื่อตัดสินใจเลือกทางเดินชีวิตด้วยสติและเจตจำนงที่แข็งแกร่ง\n\n---\n\n## 2. การเตรียมตัวและตั้งจิตอธิษฐานก่อนเปิดไพ่\n\nความแม่นยำในการเปิดไพ่เริ่มต้นจาก **\"ความสงบของจิตใจ\"** ก่อนจะแตะสำรับไพ่ แนะนำให้ปฏิบัติดังนี้:\n\n1. **หาสถานที่เงียบสงบ**: วางสมาร์ตโฟนในโหมดห้ามรบกวน นั่งในท่าที่สบาย และผ่อนคลายกล้ามเนื้อ\n2. **ปรับลมหายใจ**: สูดหายใจเข้าลึกๆ ทางจมูก 3 ครั้ง เพื่อดึงจิตกลับมาอยู่กับปัจจุบันขณะ\n3. **ตั้งจิตคำถามให้คมชัด**: คำถามที่ได้คำตอบทรงพลังที่สุดคือคำถามปลายเปิดที่เน้นบทเรียนและแนวทางแก้ไข เช่น *\"สถานการณ์นี้ต้องการบอกอะไรฉัน?\"* หรือ *\"ฉันควรพัฒนาตนเองอย่างไรเพื่อก้าวผ่านปัญหานี้?\"*\n\n---\n\n## 3. วิธีสับไพ่และหยิบไพ่ด้วยตนเองอย่างโปร่งใส\n\nในวิหารพยากรณ์ **SeerTarot** เรายึดมั่นในหลักการ **Provably Fair (ตรวจสอบได้ 100%)** ซึ่งหมายความว่าทุกใบที่คุณเปิด ไม่ได้ถูกเสกขึ้นมาหรือดัดแปลงโดยระบบ แต่มาจาก:\n\n- **การล็อกลำดับสำรับ (Commitment Hash)**: ระบบเข้ารหัสสำรับไพ่ด้วย SHA-256 ตั้งแต่วินาทีแรกที่คุณเริ่มสับ\n- **การเลือกหยิบด้วยมือคุณเอง (Manual Self-Reveal)**: แตะเลือกไพ่ทีละใบจากสำรับคลี่โค้ง และแตะพลิกหน้าไพ่ 3D ด้วยตนเองเพื่อเชื่อมต่อคลื่นพลังงาน\n- **ไม่มีการบังคับหรือเดาผล**: ไพ่ทุกใบที่ปรากฏคือผลลัพธ์ของเวลาและจิตใต้สำนึกของคุณอย่างแท้จริง\n\n---\n\n## 4. การเลือกผังพยากรณ์ที่เหมาะกับคำถามของผู้เริ่มต้น\n\nสำหรับผู้ที่เพิ่งเริ่มต้นศึกษา ไม่ควรเริ่มด้วยผังขนาดใหญ่ เช่น เซลติกครอส (10 ใบ) เพราะอาจทำให้ข้อมูลล้นและสับสน แนะนำให้เลือกผังต่อไปนี้:\n\n- **ผัง 1 ใบ (Daily Guidance)**: เหมาะสำหรับการเช็คพลังงานประจำวัน หรือถามคำถามเร่งด่วนที่ต้องการคำแนะนำตรงไปตรงมา\n- **ผัง 3 ใบ (อดีต-ปัจจุบัน-อนาคต)**: ผังยอดนิยมตลอดกาล ช่วยให้เห็นไทม์ไลน์และลำดับเหตุการณ์ได้อย่างสมดุล\n- **ผัง 3 ใบ (ปัญหา-คำแนะนำ-ผลลัพธ์)**: เหมาะสำหรับสถานการณ์ติดขัดที่ต้องการทางออกเชิงปฏิบัติการ\n\n---\n\n## 5. ศิลปะการอ่านไพ่ 3 มิติ: สัญลักษณ์ ธาตุ และเรื่องราว\n\nเมื่อเปิดหน้าไพ่ขึ้นมา อย่าเพิ่งรีบเปิดดูคู่มือคำแปลทันที แต่ให้ใช้ **เทคนิคการอ่าน 3 มิติ**:\n\n1. **มิติที่ 1: ความรู้สึกแรกและสายตาในภาพ**: ลองสังเกตว่าสายตาของตัวละครบนหน้าไพ่มองไปทางไหน มีสีหน้าอย่างไร และองค์ประกอบอะไรในภาพที่ดึงดูดสายตาคุณเป็นสิ่งแรก\n2. **มิติที่ 2: ธาตุทั้งสี่ (The Four Elements)**:\n   - **ไม้เท้า (Wands - ธาตุไฟ)**: พลังงาน ความกระตือรือร้น งาน และความคิดสร้างสรรค์\n   - **ถ้วย (Cups - ธาตุน้ำ)**: อารมณ์ ความรัก ความสัมพันธ์ และจิตใจ\n   - **ดาบ (Swords - ธาตุลม)**: ความคิด สติปัญญา การสื่อสาร และความขัดแย้ง\n   - **เหรียญ (Pentacles - ธาตุดิน)**: การเงิน ความมั่นคงทางกายภาพ ร่างกาย และผลลัพธ์ที่เป็นรูปธรรม\n3. **มิติที่ 3: การร้อยเรื่องราวระหว่างใบ**: เชื่อมโยงไพ่แต่ละใบในผังให้เป็นเนื้อเรื่องเดียวกัน ไพ่ใบก่อนหน้าส่งพลังงานอย่างไรให้ไพ่ใบถัดไป\n\n---\n\n## 6. ข้อผิดพลาดที่มือใหม่มักเจอ และวิธีแก้ไข\n\n- **การเปิดไพ่ซ้ำเมื่อได้คำตอบไม่ถูกใจ**: จะทำให้พลังงานรวนและเกิดความวิตกกังวลมากขึ้น หากสงสัยให้รอเวลาอย่างน้อย 24 ชั่วโมงหรือเปลี่ยนมุมมองคำถาม\n- **การจำความหมายแบบท่องจำคำต่อคำ**: ไพ่แต่ละใบมีความหมายได้หลายสิบมิติ ให้ฝึกเชื่อมโยงกับบริบทของคำถามแทนการท่องจำ\n- **ลืมมองหาพลังบวกในไพ่เตือน**: ไพ่ทุกใบมีทางออกซ่อนอยู่เสมอ แม้ในไพ่ที่ดูท้าทายที่สุด\n",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:title",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ผังเซลติกครอส (Celtic Cross 10 ใบ): ตำนานผังพยากรณ์ที่แม่นยำที่สุด พร้อมวิธีอ่านทีละตำแหน่ง",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:description",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "คู่มือฉบับสมบูรณ์ของผังเซลติกครอส 10 ใบ (Celtic Cross Spread) ไขความลับตำแหน่งกากบาทและเสาพลังงาน ทำนายดวงชะตาทุกมิติ",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:toc:history",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ประวัติและความศักดิ์สิทธิ์ของผังเซลติกครอส",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:toc:10-positions",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ความหมายเจาะลึก 10 ตำแหน่งในผัง",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:toc:cross-vs-staff",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ความสัมพันธ์ระหว่าง กากบาท (Cross) และ เสาขวา (Staff)",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:toc:pro-tips",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "เทคนิคการสังเกตไพ่เด่นในเซลติกครอส",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ผังเซลติกครอสเหมาะกับคำถามแบบไหนที่สุด?",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "เหมาะกับคำถามใหญ่ในชีวิต เช่น ดวงชะตาภาพรวม 6 เดือนข้างหน้า ปัญหาชีวิตที่ซับซ้อนหลายมิติ หรือการค้นหาทางออกของชีวิตค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:faq:1:q",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "หากไพ่ตำแหน่งที่ 10 (บทสรุป) ออกมาไม่เป็นที่พอใจ แปลว่าแก้อะไรไม่ได้แล้วใช่ไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:faq:1:a",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ไม่ใช่ค่ะ ตำแหน่งที่ 10 สะท้อน 'แนวโน้มปลายทางหากสถานการณ์และพฤติกรรมปัจจุบันยังดำเนินต่อไปเหมือนเดิม' ไพ่ตำแหน่งที่ 5 (เป้าหมาย) และตำแหน่งที่ 7 (ตัวตนของคุณ) สามารถนำมาใช้ปรับเปลี่ยนผลลัพธ์ได้เสมอค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:celtic-cross-spread-guide:content",
+      "target": "src/data/articles.ts → ARTICLES[\"celtic-cross-spread-guide\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ประวัติและความศักดิ์สิทธิ์ของผังเซลติกครอส\n\n**ผังเซลติกครอส (Celtic Cross)** คิดค้นและบันทึกไว้โดย Arthur Edward Waite ในปี 1909 เป็นผังพยากรณ์ที่ได้รับการยกย่องว่า **\"ครบถ้วน สมดุล และลึกซึ้งที่สุด\"** ในประวัติศาสตร์ไพ่ทาโรต์\n\nผังนี้จำลองโครงสร้างเรขาคณิตศักดิ์สิทธิ์ แบ่งออกเป็นสองส่วนหลัก คือ **\"วงล้อกากบาทแห่งชะตา (The Central Cross)\"** ทางซ้ายมือ 6 ใบ และ **\"เสาค้ำจุนพลังงาน (The Staff / Pillar)\"** ทางขวามือ 4 ใบ\n\n---\n\n## ความหมายเจาะลึก 10 ตำแหน่งในผัง\n\n- **ตำแหน่งที่ 1 (ใจกลาง)**: สถานการณ์ปัจจุบันและแก่นของคำถาม\n- **ตำแหน่งที่ 2 (ไพ่ขวาง)**: อุปสรรคเฉพาะหน้าหรือสิ่งที่เข้ามาท้าทาย\n- **ตำแหน่งที่ 3 (เบื้องล่าง)**: รากฐานของปัญหาและจิตใต้สำนึก\n- **ตำแหน่งที่ 4 (เบื้องหลัง)**: อดีตที่เพิ่งผ่านพ้นและยังส่งผลถึงปัจจุบัน\n- **ตำแหน่งที่ 5 (เบื้องบน)**: สิ่งที่คุณคาดหวังหรือศักยภาพสูงสุดที่เป็นไปได้\n- **ตำแหน่งที่ 6 (เบื้องหน้า)**: อนาคตอันใกล้ (1-3 เดือนข้างหน้า)\n- **ตำแหน่งที่ 7 (ล่างสุดเสาขวา)**: ตัวตน ทัศนคติ และพลังงานของผู้ถาม\n- **ตำแหน่งที่ 8 (กลางเสาขวา)**: สภาพแวดล้อม อิทธิพลจากคนรอบข้าง\n- **ตำแหน่งที่ 9 (บนเสาขวา)**: ความหวัง ความกลัวลึกๆ ในใจ\n- **ตำแหน่งที่ 10 (ยอดเสาขวา)**: บทสรุปสุดท้ายและผลลัพธ์ปลายทาง\n\n---\n\n## ความสัมพันธ์ระหว่าง กากบาท (Cross) และ เสาขวา (Staff)\n\nหนึ่งในเคล็ดลับของนักพยากรณ์ชั้นครู คือการเปรียบเทียบระหว่าง **\"สิ่งที่เกิดขึ้นภายนอก\"** กับ **\"สภาวะภายในใจ\"**:\n\n1. **กากบาทกลาง (ตำแหน่ง 1-6)**: แสดงถึงโลกภายนอก เหตุการณ์จริง ปัจจัยแวดล้อม และไทม์ไลน์เวลา\n2. **เสาขวา (ตำแหน่ง 7-10)**: แสดงถึงโลกภายใน ทัศนคติ ความหวัง ความกลัว และบทสรุปที่ถูกกำหนดโดยการกระทำของคุณเอง\n\nหากไพ่ในกากบาทกลางดูท้าทาย แต่เสาขวา (ตำแหน่ง 7 และ 9) เต็มไปด้วยไพ่พลังบวก เช่น The Sun หรือ Strength แปลว่าคุณมีศักยภาพภายในล้นเหลือที่จะพลิกสถานการณ์ได้อย่างแน่นอน\n\n---\n\n## เทคนิคการสังเกตไพ่เด่นในเซลติกครอส\n\n- **นับจำนวน Major Arcana**: หากมีไพ่เมเจอร์เกิน 4 ใบขึ้นไปในผัง แสดงว่าเรื่องนี้เป็นจุดเปลี่ยนครั้งสำคัญของชีวิต (Karmic Turning Point)\n- **สังเกตชุดไพ่ที่ครองเสียงข้างมาก (Dominant Suit)**:\n  - ถ้วยเยอะ: เรื่องอารมณ์และความสัมพันธ์เป็นตัวขับเคลื่อนหลัก\n  - ดาบเยอะ: ความคิด ความเครียด และการตัดสินใจเป็นประเด็นสำคัญ\n  - ไม้เท้าเยอะ: เกี่ยวข้องกับการงาน โปรเจกต์ หรือพลังการลงมือทำ\n  - เหรียญเยอะ: โฟกัสเรื่องเงิน ทรัพย์สิน หรือสุขภาพกายภาพ\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-daily-card-guide:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-daily-card-guide\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "วิธีดูดวงไพ่ยิปซีรายวัน: เปิดไพ่ 1 ใบ เช็คพลังงานและคำแนะนำประจำวันอย่างไรให้ได้ผลจริง",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-daily-card-guide:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-daily-card-guide\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เริ่มต้นเช้าวันใหม่อย่างมีสติ ด้วยการดูดวงไพ่ยิปซีรายวัน 1 ใบ (Daily Tarot) วิธีตั้งจิตรับคำแนะนำและข้อควรระวังในแต่ละวัน",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-daily-card-guide:toc:benefits",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-daily-card-guide\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ข้อดีของการเปิดไพ่ประจำวันในทุกเช้า",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-daily-card-guide:toc:how-to",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-daily-card-guide\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "3 ขั้นตอนการเปิดไพ่รายวันให้ได้สติและปัญญา",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-daily-card-guide:toc:journaling",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-daily-card-guide\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "การบันทึกสมุดดวงเพื่อพัฒนาตนเอง",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-daily-card-guide:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-daily-card-guide\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ควรเปิดไพ่รายวันเวลาไหนดีที่สุด?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-daily-card-guide:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-daily-card-guide\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ช่วงเช้าหลังตื่นนอน หรือก่อนเริ่มทำงาน เป็นช่วงเวลาที่จิตใจสงบนิ่งที่สุดค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-daily-card-guide:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-daily-card-guide\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ข้อดีของการเปิดไพ่ประจำวันในทุกเช้า\n\nการเปิดไพ่รายวันไม่ใช่การงมงายรอโชคชะตา แต่คือ **\"Daily Mindfulness\"** หรือการฝึกเจริญสติ เพื่อดูว่าวันนี้คลื่นพลังงานของเรารอบตัวเป็นอย่างไร และมีสิ่งใดที่เราควรระมัดระวังหรือโฟกัสเป็นพิเศษ\n\n---\n\n## 3 ขั้นตอนการเปิดไพ่รายวันให้ได้สติและปัญญา\n\n1. **สูดหายใจลึกๆ 3 ครั้ง**: ผ่อนคลายร่างกายและตัดความฟุ้งซ่านออกไป\n2. **ตั้งจิตคำถามสั้นๆ**: *\"วันนี้จักรวาลต้องการบอกอะไรกับฉัน?\"* หรือ *\"ฉันควรระวังเรื่องใดในวันนี้?\"*\n3. **เปิดไพ่และรับสาร**: อ่านความหมายและน้อมนำคำแนะนำไปปรับใช้ในการทำงานและการพบปะผู้คน\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-7-chakras-spread:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-7-chakras-spread\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ผัง 7 จักระ (Chakra Spread): ตรวจเช็คสมดุลพลังงาน กาย-ใจ-จิตวิญญาณ ด้วยไพ่ 7 ใบ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-7-chakras-spread:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-7-chakras-spread\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เช็คพลังงานตกค้างและจุดติดขัดในร่างกายและจิตวิญญาณ ผ่านผังไพ่ 7 จักระ พร้อมแนวทางการปรับสมดุลและฟื้นฟูพลังงานชีวิต",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-7-chakras-spread:toc:intro",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-7-chakras-spread\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ความเชื่อมโยงระหว่าง 7 จักระและไพ่ทาโรต์",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-7-chakras-spread:toc:7-chakras",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-7-chakras-spread\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ความหมายของไพ่ในแต่ละจักระ 1-7",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-7-chakras-spread:toc:healing",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-7-chakras-spread\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "แนวทางการบำบัดเมื่อพบจักระติดขัด",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-7-chakras-spread:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-7-chakras-spread\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ถ้าไพ่ในจักระหัวใจ (Heart Chakra) ได้ไพ่ดาบ แปลว่าอะไร?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-7-chakras-spread:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-7-chakras-spread\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "หมายถึงมีบาดแผลทางอารมณ์ในอดีตที่ยังไม่ได้รับการปลดปล่อย ควรฝึกให้อภัยและรักตัวเองเพิ่มขึ้นค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-7-chakras-spread:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-7-chakras-spread\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ความเชื่อมโยงระหว่าง 7 จักระและไพ่ทาโรต์\n\nศาสตร์จักระจากตะวันออกและไพ่ทาโรต์จากตะวันตก สามารถผสานกันได้อย่างลงตัวผ่าน **ผัง 7 จักระ** เพื่อสแกนสุขภาพจิตใจและพลังงานชีวิตตั้งแต่โคนเสาจรดยอดกระหม่อม\n\n---\n\n## ความหมายของไพ่ในแต่ละจักระ 1-7\n\n1. **มูลธารจักระ (Root Chakra)**: ความมั่นคง ความปลอดภัย การเงิน และความอยู่รอด\n2. **สวาธิษฐานจักระ (Sacral Chakra)**: ความคิดสร้างสรรค์ อารมณ์ความรู้สึก และพลังทางเพศ\n3. **มณีปุระจักระ (Solar Plexus Chakra)**: ความมั่นใจในตนเอง พลังอำนาจ และความมุ่งมั่น\n4. **อนาหตะจักระ (Heart Chakra)**: ความรัก ความเมตตา และการเยียวยาจิตใจ\n5. **วิสุทธิจักระ (Throat Chakra)**: การสื่อสาร ความจริงใจ และการแสดงออก\n6. **อาชญาจักระ (Third Eye Chakra)**: สัญชาตญาณ ญาณหยั่งรู้ และสติปัญญา\n7. **สหัสราระจักระ (Crown Chakra)**: การเชื่อมต่อกับจิตวิญญาณสากลและจักรวาล\n",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-ask-tarot-questions:title",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-ask-tarot-questions\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "วิธีตั้งคำถามกับไพ่ทาโรต์ให้ได้คำตอบแม่นยำ: หลีกเลี่ยงคำถามปิด แล้วชีวิตจะเปลี่ยน",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-ask-tarot-questions:description",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-ask-tarot-questions\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เทคนิคการตั้งคำถามกับไพ่ทาโรต์ เปลี่ยนจากคำถามปิดที่ไร้ทางออก เป็นคำถามเปิดที่มอบพลังและกลยุทธ์สร้างอนาคตด้วยตัวคุณเอง",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-ask-tarot-questions:toc:wrong-vs-right",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-ask-tarot-questions\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "เปรียบเทียบ: คำถามปิด vs คำถามเปิดที่ทรงพลัง",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-ask-tarot-questions:toc:templates",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-ask-tarot-questions\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "โครงสร้างประโยคคำถามยอดเยี่ยมในแต่ละหมวด",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-ask-tarot-questions:toc:mindset",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-ask-tarot-questions\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "การวางจิตก่อนเปิดไพ่",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-ask-tarot-questions:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-ask-tarot-questions\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ถามว่า 'เขาจะกลับมาไหม' ผิดไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-ask-tarot-questions:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-ask-tarot-questions\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไม่ผิดค่ะ แต่ถ้าเปลี่ยนเป็น 'ฉันควรทำอย่างไรเพื่อปรับความเข้าใจกับเขา หรือควรวางใจอย่างไร' จะได้คำแนะนำที่ทรงพลังและนำไปปฏิบัติได้จริงกว่าค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:how-to-ask-tarot-questions:content",
+      "target": "src/data/articles.ts → ARTICLES[\"how-to-ask-tarot-questions\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## เปรียบเทียบ: คำถามปิด vs คำถามเปิดที่ทรงพลัง\n\nคำถามที่แย่ที่สุดในการดูดวงคือคำถามที่ผลักความรับผิดชอบทั้งหมดให้โชคชะตา เช่น *\"ฉันจะรวยไหม?\"* หรือ *\"เขาจะทิ้งฉันไหม?\"*\n\nเมื่อคุณเปลี่ยนเป็นคำถามเชิงรุก (Empowering Questions) เช่น:\n- ❌ *\"ฉันจะสอบติดไหม?\"* ➔  **\"ฉันควรเน้นอ่านหนังสือวิชาไหน และมีจุดบอดอะไรที่ต้องระวังในการสอบ?\"**\n- ❌ *\"เขาจริงใจไหม?\"* ➔  **\"ความรู้สึกที่แท้จริงของเขาต่อฉันคืออะไร และฉันควรวางตัวอย่างไร?\"**\n\nคุณจะได้รับคำพยากรณ์ที่ไม่ได้มีแค่คำทำนาย แต่มี **\"แผนการและกลยุทธ์\"** ในการนำชีวิตไปสู่ความสำเร็จ\n",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:title",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ไพ่ The Lovers (คู่รัก): ความหมายเรื่องความรัก เนื้อคู่ และทางแยกแห่งการตัดสินใจ",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:description",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เจาะลึกความหมายไพ่หมายเลข 6 The Lovers ถอดรหัสสัญลักษณ์อดัมกับอีฟ เทวทูตราฟาเอล ความรักแท้ และทางเลือกสำคัญของชีวิต",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:toc:symbols",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ถอดรหัสสัญลักษณ์บนหน้าไพ่ 1909",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:toc:love-meaning",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ความหมายด้านความรักและความสัมพันธ์",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:toc:career-meaning",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ความหมายด้านการงานและการเงิน",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:toc:reversed-meaning",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "ความหมายเมื่อไพ่ปรากฏในตำแหน่งกลับหัว",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "The Lovers หมายถึงรักสามเส้าเสมอไปไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไม่เสมอไปค่ะ แต่เนื่องจากไพ่นี้มีแก่นเรื่อง 'ทางเลือก' หากมีไพ่ดาบหรือไพ่ปีศาจ (The Devil) อยู่เคียงข้าง อาจบ่งบอกถึงภาวะรักสามเส้าได้ค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:the-lovers-card-meaning:content",
+      "target": "src/data/articles.ts → ARTICLES[\"the-lovers-card-meaning\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ถอดรหัสสัญลักษณ์บนหน้าไพ่ 1909\n\nบนหน้าไพ่ **The Lovers (หมายเลข 6)** ปรากฏภาพของชายหญิงเปลือยเปล่าในสวนเอเดน (อดัมและอีฟ) ด้านบนมี **เทวทูตราฟาเอล** กางปีกสีม่วงประทานพร ด้านหลังของหญิงสาวคือ **ต้นไม้แห่งความรู้ (Tree of Knowledge)** ที่มีงูพันอยู่ และด้านหลังของชายหนุ่มคือ **ต้นไม้แห่งชีวิต (Tree of Life)** ที่มีเปลวไฟ 12 ดวง\n\nไพ่ใบนี้จึงไม่ได้หมายถึงแค่กามารมณ์ แต่คือ **การรวมตัวกันของจิตรู้สำนึก (Conscious) และจิตใต้สำนึก (Subconscious)** โดยมีจิตวิญญาณเบื้องบนคอยชี้นำ\n\n---\n\n## ความหมายด้านความรักและความสัมพันธ์\n\n- **คนโสด**: กำลังจะได้พบคนที่ดึงดูดกันอย่างรุนแรง มีเคมีตรงกัน และมีโอกาสพัฒนาสู่ความสัมพันธ์จริงจัง\n- **คนมีคู่**: ความสัมพันธ์หวานชื่น เข้าใจกันอย่างลึกซึ้ง หรืออยู่ในช่วงที่ต้องร่วมมือกันตัดสินใจครั้งสำคัญในชีวิตคู่\n",
+      "en": ""
+    },
+    {
+      "id": "article:the-tower-and-death-meaning:title",
+      "target": "src/data/articles.ts → ARTICLES[\"the-tower-and-death-meaning\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ไพ่ The Tower (หอคอยฟ้าผ่า) & Death: ไพ่ที่คนกลัวที่สุด แท้จริงกำลังบอกอะไรคุณ",
+      "en": ""
+    },
+    {
+      "id": "article:the-tower-and-death-meaning:description",
+      "target": "src/data/articles.ts → ARTICLES[\"the-tower-and-death-meaning\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ไขข้อข้องใจไพ่ที่น่ากลัวที่สุดในสำรับทาโรต์ The Tower และ Death ทำไมการพังทลายและการจบลง จึงเป็นของขวัญที่ดีที่สุดของชีวิต",
+      "en": ""
+    },
+    {
+      "id": "article:the-tower-and-death-meaning:toc:death-myth",
+      "target": "src/data/articles.ts → ARTICLES[\"the-tower-and-death-meaning\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ไพ่ Death: การตายของสิ่งเก่าเพื่อการกำเนิดใหม่",
+      "en": ""
+    },
+    {
+      "id": "article:the-tower-and-death-meaning:toc:tower-myth",
+      "target": "src/data/articles.ts → ARTICLES[\"the-tower-and-death-meaning\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ไพ่ The Tower: ฟ้าผ่าทลายหอคอยแห่งภาพลวงตา",
+      "en": ""
+    },
+    {
+      "id": "article:the-tower-and-death-meaning:toc:how-to-cope",
+      "target": "src/data/articles.ts → ARTICLES[\"the-tower-and-death-meaning\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "วิธีรับมือเมื่อเปิดได้ไพ่ 2 ใบนี้",
+      "en": ""
+    },
+    {
+      "id": "article:the-tower-and-death-meaning:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"the-tower-and-death-meaning\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "เปิดได้ไพ่ Death แปลว่าจะต้องมีคนตายจริงไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:the-tower-and-death-meaning:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"the-tower-and-death-meaning\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "แทบไม่เคยหมายถึงการเสียชีวิตทางกายภาพเลยค่ะ ในศาสตร์ไพ่ทาโรต์ Death คือการจบลงของวัฏจักรเดิม เช่น ลาออกจากงาน ย้ายบ้าน หรือจบความสัมพันธ์ที่เป็นพิษค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:the-tower-and-death-meaning:content",
+      "target": "src/data/articles.ts → ARTICLES[\"the-tower-and-death-meaning\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ไพ่ Death: การตายของสิ่งเก่าเพื่อการกำเนิดใหม่\n\nไพ่ **Death (หมายเลข 13)** คือตัวแทนของฤดูกาลและการเปลี่ยนแปลงที่ไม่อาจหลีกเลี่ยงได้ เช่นเดียวกับใบไม้ที่ร่วงหล่นในฤดูหนาวเพื่อให้ดอกไม้ผลิบานในฤดูใบไม้ผลิ การสิ้นสุดของสิ่งหนึ่งคือเงื่อนไขเดียวที่จะทำให้สิ่งใหม่ที่ดีกว่าเข้ามาได้\n\n---\n\n## ไพ่ The Tower: ฟ้าผ่าทลายหอคอยแห่งภาพลวงตา\n\nไพ่ **The Tower (หมายเลข 16)** แสดงภาพหอคอยที่ถูกสร้างขึ้นบนยอดเขาสูงด้วยอัตตา (Ego) และความเชื่อที่ผิด เมื่อสายฟ้าแห่งสัจธรรมผ่าลงมา โครงสร้างที่ไม่มั่นคงจึงพังทลายลง แม้จะสร้างความตกใจในตอนแรก แต่นี่คือโอกาสที่คุณจะได้สร้างชีวิตใหม่บนรากฐานที่แท้จริง\n",
+      "en": ""
+    },
+    {
+      "id": "article:the-fool-journey-meaning:title",
+      "target": "src/data/articles.ts → ARTICLES[\"the-fool-journey-meaning\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ไพ่ The Fool (คนโง่เขลาหรือผู้กล้า?): จุดเริ่มต้นของชีวิต และก้าวแรกสู่ความสำเร็จ",
+      "en": ""
+    },
+    {
+      "id": "article:the-fool-journey-meaning:description",
+      "target": "src/data/articles.ts → ARTICLES[\"the-fool-journey-meaning\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เจาะลึกไพ่หมายเลข 0 The Fool สัญลักษณ์ของความไร้เดียงสา ความกล้าหาญ การกระโดดข้ามหน้าผาแห่งความกลัว และการเดินทางของจิตวิญญาณ",
+      "en": ""
+    },
+    {
+      "id": "article:the-fool-journey-meaning:toc:archetype",
+      "target": "src/data/articles.ts → ARTICLES[\"the-fool-journey-meaning\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "จิตวิญญาณแห่ง The Fool: ผู้กล้าไร้เดียงสา",
+      "en": ""
+    },
+    {
+      "id": "article:the-fool-journey-meaning:toc:symbols",
+      "target": "src/data/articles.ts → ARTICLES[\"the-fool-journey-meaning\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ความหมายของสุนัขสีขาว ดอกกุหลาบ และหน้าผา",
+      "en": ""
+    },
+    {
+      "id": "article:the-fool-journey-meaning:toc:readings",
+      "target": "src/data/articles.ts → ARTICLES[\"the-fool-journey-meaning\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "การตีความในเรื่องความรัก การงาน และชีวิต",
+      "en": ""
+    },
+    {
+      "id": "article:the-fool-journey-meaning:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"the-fool-journey-meaning\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "เปิดได้ The Fool ในเรื่องการเงิน ดีไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:the-fool-journey-meaning:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"the-fool-journey-meaning\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "หมายถึงมีโอกาสใหม่ๆ เข้ามา แต่อาจต้องระวังความประมาทหรือการใช้จ่ายตามอารมณ์ชั่ววูบค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:the-fool-journey-meaning:content",
+      "target": "src/data/articles.ts → ARTICLES[\"the-fool-journey-meaning\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## จิตวิญญาณแห่ง The Fool: ผู้กล้าไร้เดียงสา\n\nไพ่ **The Fool (หมายเลข 0)** ไม่ได้หมายถึงคนโง่ แต่หมายถึง **\"ผู้เริ่มต้นที่ปราศจากอคติ\"** เขาพร้อมที่จะก้าวเดินไปข้างหน้าด้วยความไว้วางใจในจักรวาล แม้ว่าเบื้องหน้าจะเป็นหน้าผาสูงชันก็ตาม\n\nสุนัขสีขาวที่กระโดดเคียงข้างคือสัญชาตญาณที่คอยเตือนภัย ดอกกุหลาบสีขาวในมือคือความบริสุทธิ์ของเจตนา และย่ามใบเล็กคือบทเรียนที่สะสมมา\n",
+      "en": ""
+    },
+    {
+      "id": "article:the-wheel-of-fortune-meaning:title",
+      "target": "src/data/articles.ts → ARTICLES[\"the-wheel-of-fortune-meaning\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ไพ่ The Wheel of Fortune: กงล้อแห่งโชคชะตา จังหวะฟ้าเปิด และการเปลี่ยนแปลงครั้งใหญ่",
+      "en": ""
+    },
+    {
+      "id": "article:the-wheel-of-fortune-meaning:description",
+      "target": "src/data/articles.ts → ARTICLES[\"the-wheel-of-fortune-meaning\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ถอดรหัสไพ่หมายเลข 10 The Wheel of Fortune เมื่อจังหวะดวงดาวและจักรวาลหมุนเปลี่ยน การพลิกฟื้นจากร้ายกลายเป็นดี และโชคลาภที่ไม่คาดฝัน",
+      "en": ""
+    },
+    {
+      "id": "article:the-wheel-of-fortune-meaning:toc:esoteric-symbols",
+      "target": "src/data/articles.ts → ARTICLES[\"the-wheel-of-fortune-meaning\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "สัญลักษณ์ลึกลับ: สฟิงซ์ อนูบิส และสัตว์ศักดิ์สิทธิ์ทั้ง 4",
+      "en": ""
+    },
+    {
+      "id": "article:the-wheel-of-fortune-meaning:toc:timing-shifts",
+      "target": "src/data/articles.ts → ARTICLES[\"the-wheel-of-fortune-meaning\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "จังหวะเวลาแห่งโชคชะตา: เมื่อไหร่ที่ไพ่ใบนี้ทำงาน",
+      "en": ""
+    },
+    {
+      "id": "article:the-wheel-of-fortune-meaning:toc:fortune-aspects",
+      "target": "src/data/articles.ts → ARTICLES[\"the-wheel-of-fortune-meaning\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "การทำนายในด้านความรัก การงาน และการเงิน",
+      "en": ""
+    },
+    {
+      "id": "article:the-wheel-of-fortune-meaning:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"the-wheel-of-fortune-meaning\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ถ้าชีวิตกำลังแย่แล้วเปิดได้ The Wheel of Fortune แปลว่าอะไร?",
+      "en": ""
+    },
+    {
+      "id": "article:the-wheel-of-fortune-meaning:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"the-wheel-of-fortune-meaning\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ยินดีด้วยค่ะ! กงล้อที่อยู่จุดต่ำสุดกำลังจะหมุนขึ้นสู่จุดสูงสุด เรื่องร้ายๆ กำลังจะสิ้นสุดลงและมีข่าวดีเข้ามาค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:the-wheel-of-fortune-meaning:content",
+      "target": "src/data/articles.ts → ARTICLES[\"the-wheel-of-fortune-meaning\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## สัญลักษณ์ลึกลับ: สฟิงซ์ อนูบิส และสัตว์ศักดิ์สิทธิ์ทั้ง 4\n\nไพ่ **The Wheel of Fortune (หมายเลข 10)** บรรจุความรู้แห่งศาสตร์คับบาลาห์ (Kabbalah) และโหราศาสตร์ไว้อย่างสมบูรณ์ บนกงล้อมีอักษร **T-A-R-O** (หมุนสลับเป็น ROTA = วงล้อ, TAROT = ไพ่ทาโรต์, และ TORA = พระคัมภีร์)\n\nไพ่ใบนี้ย้ำเตือนเราว่า **\"ไม่มีสิ่งใดยืนยงคงที่\"** ความสุขและความทุกข์หมุนเวียนเปลี่ยนผ่าน สิ่งสำคัญคือการมีสติอยู่ ณ จุดศูนย์กลางของวงล้อ\n",
+      "en": ""
+    },
+    {
+      "id": "article:reversed-tarot-cards-guide:title",
+      "target": "src/data/articles.ts → ARTICLES[\"reversed-tarot-cards-guide\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ไพ่กลับหัว (Reversed Tarot Cards): ควรอ่านอย่างไร? ร้ายจริงไหม หรือเป็นแค่พลังงานแฝง",
+      "en": ""
+    },
+    {
+      "id": "article:reversed-tarot-cards-guide:description",
+      "target": "src/data/articles.ts → ARTICLES[\"reversed-tarot-cards-guide\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เข้าใจศาสตร์แห่งไพ่กลับหัว (Reversed Cards) อย่างถูกต้อง ไม่ได้แปลว่าโชคร้าย แต่คือพลังงานภายใน ความล่าช้า และโอกาสในการทบทวนตนเอง",
+      "en": ""
+    },
+    {
+      "id": "article:reversed-tarot-cards-guide:toc:what-is-reversed",
+      "target": "src/data/articles.ts → ARTICLES[\"reversed-tarot-cards-guide\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ไพ่กลับหัวคืออะไร เกิดขึ้นได้อย่างไร",
+      "en": ""
+    },
+    {
+      "id": "article:reversed-tarot-cards-guide:toc:3-ways-to-read",
+      "target": "src/data/articles.ts → ARTICLES[\"reversed-tarot-cards-guide\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "3 วิธีอ่านไพ่กลับหัวระดับมืออาชีพ",
+      "en": ""
+    },
+    {
+      "id": "article:reversed-tarot-cards-guide:toc:should-beginners-use",
+      "target": "src/data/articles.ts → ARTICLES[\"reversed-tarot-cards-guide\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "มือใหม่ควรเปิดใช้โหมดไพ่กลับหัวหรือไม่",
+      "en": ""
+    },
+    {
+      "id": "article:reversed-tarot-cards-guide:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"reversed-tarot-cards-guide\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ไพ่ดีๆ เช่น The Sun พอกลับหัวแล้วกลายเป็นร้ายเลยไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:reversed-tarot-cards-guide:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"reversed-tarot-cards-guide\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "The Sun กลับหัวยังคงเป็นไพ่ที่ดีค่ะ แต่หมายถึงความสุขที่อาจมาช้ากว่ากำหนด หรือเรายังมองไม่เห็นคุณค่าของสิ่งดีๆ ที่มีอยู่รอบตัวค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:reversed-tarot-cards-guide:content",
+      "target": "src/data/articles.ts → ARTICLES[\"reversed-tarot-cards-guide\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ไพ่กลับหัวคืออะไร เกิดขึ้นได้อย่างไร\n\nในการสับไพ่จริง ไพ่อาจมีการหมุน 180 องศา ทำให้เมื่อเปิดออกมาหัวไพ่ชี้ลงด้านล่าง หลายคนกลัวไพ่กลับหัวเพราะคิดว่าคือ \"ลางร้าย\" แต่ในความจริงแล้ว **ไพ่กลับหัวคือมิติความลึกซึ้งที่เพิ่มขึ้นเป็นสองเท่า**\n\n---\n\n## 3 วิธีอ่านไพ่กลับหัวระดับมืออาชีพ\n\n1. **พลังงานถูกปิดกั้น (Blocked Energy)**: พลังงานของไพ่อยู่ตรงนั้น แต่มีอุปสรรคขัดขวางไม่ให้แสดงออกอย่างเต็มที่\n2. **พลังงานภายใน (Internalized Energy)**: สภาวะที่เกิดขึ้นภายในจิตใจ แต่คนภายนอกยังมองไม่เห็น\n3. **การเตือนสติเรื่องความสุดโต่ง (Excess or Deficiency)**: การทำสิ่งนั้นมากเกินไปหรือน้อยเกินไปจนเสียสมดุล\n",
+      "en": ""
+    },
+    {
+      "id": "article:provably-fair-tarot-guide:title",
+      "target": "src/data/articles.ts → ARTICLES[\"provably-fair-tarot-guide\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงออนไลน์แบบ Provably-Fair: นวัตกรรมการสับไพ่ SHA-256 ที่การันตีความโปร่งใส 100%",
+      "en": ""
+    },
+    {
+      "id": "article:provably-fair-tarot-guide:description",
+      "target": "src/data/articles.ts → ARTICLES[\"provably-fair-tarot-guide\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เจาะลึกระบบสับไพ่แบบ Provably-Fair บน SeerTarot การผสานคณิตศาสตร์การเข้ารหัสลับ SHA-256 เพื่อการันตีว่าผลไพ่ไม่ถูกล็อกหรือดัดแปลง 100%",
+      "en": ""
+    },
+    {
+      "id": "article:provably-fair-tarot-guide:toc:the-problem",
+      "target": "src/data/articles.ts → ARTICLES[\"provably-fair-tarot-guide\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ปัญหาของเว็บดูดวงออนไลน์แบบเก่า: ล็อกผลหรือไม่?",
+      "en": ""
+    },
+    {
+      "id": "article:provably-fair-tarot-guide:toc:how-it-works",
+      "target": "src/data/articles.ts → ARTICLES[\"provably-fair-tarot-guide\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "กลไก Commit-Reveal และ SHA-256 บน SeerTarot",
+      "en": ""
+    },
+    {
+      "id": "article:provably-fair-tarot-guide:toc:how-to-verify",
+      "target": "src/data/articles.ts → ARTICLES[\"provably-fair-tarot-guide\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "วิธีตรวจสอบความโปร่งใสด้วยตัวคุณเอง",
+      "en": ""
+    },
+    {
+      "id": "article:provably-fair-tarot-guide:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"provably-fair-tarot-guide\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ทำไม SeerTarot ถึงเป็นเว็บแรกที่ใช้ระบบ Provably-Fair?",
+      "en": ""
+    },
+    {
+      "id": "article:provably-fair-tarot-guide:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"provably-fair-tarot-guide\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "เพราะเราเชื่อมั่นว่าความศักดิ์สิทธิ์และการทำนายที่แท้จริง ต้องตั้งอยู่บนความบริสุทธิ์ใจและความโปร่งใสทางคณิตศาสตร์ที่ตรวจสอบได้ 100% ค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:provably-fair-tarot-guide:content",
+      "target": "src/data/articles.ts → ARTICLES[\"provably-fair-tarot-guide\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ปัญหาของเว็บดูดวงออนไลน์แบบเก่า: ล็อกผลหรือไม่?\n\nผู้ใช้หลายคนมักสงสัยว่า *\"เว็บดูดวงออนไลน์แอบล็อกไพ่เพื่อเชียร์ให้ซื้อของขลังหรือไม่?\"* หรือ *\"คอมพิวเตอร์สุ่มไพ่แบบมโนขึ้นมาเองหรือเปล่า?\"*\n\nที่ **SeerTarot (seertarot.net)** เราได้นำสถาปัตยกรรม **Provably-Fair Cryptography** มาใช้เป็นมาตรฐานสากล:\n\n1. **Server Seed & Commitment**: ก่อนที่คุณจะกดสับไพ่ ระบบจะสร้างรหัสลับการจัดเรียงสำรับ 78 ใบ และล็อกด้วย Hash SHA-256 ส่งให้เบราว์เซอร์ของคุณทันที\n2. **Client Seed & Interaction**: คุณเป็นผู้เลือกไพ่ด้วยตนเองผ่านหน้าจอ 3D\n3. **Verification**: เมื่ออ่านผลจบ ระบบจะเปิดเผย Server Secret เพื่อให้คุณนำไป Re-hash ตรวจสอบได้ว่าลำดับไพ่ไม่มีการเปลี่ยนแปลงแม้แต่ใบเดียว\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ไพ่ทาโรต์กับจิตวิทยา Carl Jung: ทำไมสัญลักษณ์บนหน้าไพ่ถึงดึงความจริงจากจิตใต้สำนึกได้",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ค้นพบความลับทางจิตวิทยาเบื้องหลังไพ่ทาโรต์ ทฤษฎีจิตไร้สำนึกร่วม (Collective Unconscious), แม่แบบจิตวิทยา (Archetypes), และปรากฏการณ์ความพ้องพาน (Synchronicity)",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:toc:jung-view",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "Carl Jung มองไพ่ทาโรต์อย่างไร",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:toc:archetypes",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "แม่แบบจิตวิทยา (Archetypes) ในไพ่ชุดใหญ่ 22 ใบ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:toc:synchronicity",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ความพ้องพาน (Synchronicity): ทำไมไพ่ที่หยิบได้ถึงตรงกับชีวิตจริง",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "การดูดวงไพ่ทาโรต์จัดเป็นการบำบัดทางจิตวิทยาได้ไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ในปัจจุบัน นักจิตบำบัดหลายท่านในยุโรปและอเมริกาใช้ไพ่ทาโรต์เป็นเครื่องมือในกระบวนการ Expressive Arts Therapy เพื่อช่วยให้ผู้รับคำปรึกษาเข้าถึงอารมณ์ที่ซ่อนอยู่ได้ง่ายขึ้นค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:faq:1:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ไพ่ The High Priestess สะท้อน Archetype อะไรตามทฤษฎีของ Jung?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:faq:1:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "สะท้อนแม่แบบ 'The Anima' และ 'The Intuitive Sage' — ปัญญาญาณลึกซึ้ง ความหยั่งรู้จากโลกภายใน และความเงียบสงบที่เข้าใจความจริงโดยไม่ต้องใช้คำพูดค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-and-carl-jung-psychology:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-and-carl-jung-psychology\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## Carl Jung มองไพ่ทาโรต์อย่างไร\n\n**คาร์ล กุสตาฟ ยุง (Carl Gustav Jung)** จิตแพทย์ชื่อดังระดับโลก ค้นพบว่า สัญลักษณ์บนหน้าไพ่ทาโรต์คือภาพแทนของ **\"จิตไร้สำนึกร่วมของมนุษยชาติ\" (Collective Unconscious)**\n\nเมื่อเรามองภาพสัญลักษณ์บนหน้าไพ่ จิตใต้สำนึกของเราจะฉายภาพ (Project) ความกลัว ความหวัง และทางออกที่ซ่อนอยู่ภายในจิตใจออกมาเป็นคำตอบได้อย่างมหัศจรรย์ ไพ่ทาโรต์จึงไม่ใช่เวทมนตร์ลึกลับที่ไม่มีเหตุผล แต่เป็นเครื่องมือถอดรหัสจิตวิทยาเชิงลึกที่แม่นยำ\n\n---\n\n## แม่แบบจิตวิทยา (Archetypes) ในไพ่ชุดใหญ่ 22 ใบ\n\nไพ่ชุดใหญ่ **Major Arcana 22 ใบ** สะท้อนการเดินทางของจิตวิญญาณมนุษย์ (The Fool's Journey) ผ่านแม่แบบจิตวิทยาหลัก:\n\n- **The Fool (คนเขลา)**: แม่แบบผู้แสวงหา (The Seeker / Innocent) ผู้เริ่มต้นด้วยใจบริสุทธิ์\n- **The Magician (ผู้วิเศษ)**: แม่แบบผู้สร้างสรรค์ (The Creator / Willpower) การผสานเจตจำนงเข้ากับทรัพยากร\n- **The High Priestess (นักบวชหญิง)**: แม่แบบปัญญาญาณภายใน (The Anima / Intuition) ความรู้แจ้งที่เกิดจากความสงบ\n- **The Empress & The Emperor**: แม่แบบแห่งความเป็นแม่ (The Great Mother) ผู้โอบอุ้ม และความเป็นพ่อ (The Father) ผู้สร้างระเบียบกฎเกณฑ์\n- **The Shadow (เงาในจิตใจ)**: ปรากฏเด่นชัดในไพ่ **The Devil** สะท้อนกิเลส ความกลัว หรือสิ่งที่เราปฏิเสธในตัวเอง\n\n---\n\n## ความพ้องพาน (Synchronicity): ทำไมไพ่ที่หยิบได้ถึงตรงกับชีวิตจริง\n\nยุงได้บัญญัติทฤษฎี **ความพ้องพาน (Synchronicity)** หมายถึง *\"ปรากฏการณ์ที่เหตุการณ์ภายนอกเกิดขึ้นสอดคล้องกับสภาวะจิตใจภายใน โดยไม่มีความสัมพันธ์เชิงเหตุและผลทางกายภาพ\"*\n\nเมื่อคุณตั้งจิตเป็นสมาธิ คลื่นจิตใต้สำนึกจะดึงดูดให้คุณหยิบไพ่ที่มีภาพสัญลักษณ์ตรงกับสภาวะชีวิต ณ ขณะนั้น การดูดวงจึงเป็นการสร้างบทสนทนาระหว่างจิตสำนึกกับจิตใต้สำนึก เพื่อช่วยให้คุณค้นพบหนทางแก้ไขปัญหาด้วยตนเอง\n",
+      "en": ""
+    },
+    {
+      "id": "article:ai-tarot-oracle-vs-human-reader:title",
+      "target": "src/data/articles.ts → ARTICLES[\"ai-tarot-oracle-vs-human-reader\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงกับแม่หมอ AI vs หมอดูมนุษย์: ข้อดี ข้อจำกัด และมิติใหม่แห่งการฮีลใจตลอด 24 ชั่วโมง",
+      "en": ""
+    },
+    {
+      "id": "article:ai-tarot-oracle-vs-human-reader:description",
+      "target": "src/data/articles.ts → ARTICLES[\"ai-tarot-oracle-vs-human-reader\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เปรียบเทียบการดูดวงด้วย AI กับหมอดูมนุษย์ ความเป็นส่วนตัว ความแม่นยำทางสถิติ และการไม่มีอคติส่วนบุคคล ทางเลือกใหม่แห่งการเยียวยาจิตใจ 24/7",
+      "en": ""
+    },
+    {
+      "id": "article:ai-tarot-oracle-vs-human-reader:toc:comparison",
+      "target": "src/data/articles.ts → ARTICLES[\"ai-tarot-oracle-vs-human-reader\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ตารางเปรียบเทียบ: แม่หมอ AI vs หมอดูมนุษย์",
+      "en": ""
+    },
+    {
+      "id": "article:ai-tarot-oracle-vs-human-reader:toc:ai-strengths",
+      "target": "src/data/articles.ts → ARTICLES[\"ai-tarot-oracle-vs-human-reader\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "จุดเด่นที่ทำให้คนรุ่นใหม่หันมาดูดวงกับ AI",
+      "en": ""
+    },
+    {
+      "id": "article:ai-tarot-oracle-vs-human-reader:toc:future",
+      "target": "src/data/articles.ts → ARTICLES[\"ai-tarot-oracle-vs-human-reader\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "อนาคตของศาสตร์พยากรณ์ในยุคดิจิทัล",
+      "en": ""
+    },
+    {
+      "id": "article:ai-tarot-oracle-vs-human-reader:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"ai-tarot-oracle-vs-human-reader\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "แม่หมอ AI รู้จักไพ่ทั้ง 78 ใบอย่างลึกซึ้งจริงไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:ai-tarot-oracle-vs-human-reader:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"ai-tarot-oracle-vs-human-reader\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ใช่ค่ะ ระบบ AI บน SeerTarot ได้รับการฝึกฝนด้วยคลังความรู้ตำราทาโรต์ 1909 RWS ดั้งเดิม ผสานโหราศาสตร์ ธาตุ และจิตวิทยาพยากรณ์ ทำให้สามารถวิเคราะห์บริบทได้ตรงประเด็นและปราศจากอคติส่วนตัวค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:ai-tarot-oracle-vs-human-reader:content",
+      "target": "src/data/articles.ts → ARTICLES[\"ai-tarot-oracle-vs-human-reader\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ตารางเปรียบเทียบ: แม่หมอ AI vs หมอดูมนุษย์\n\n| มิติการเปรียบเทียบ | แม่หมอ AI (SeerTarot) | หมอดูมนุษย์ทั่วไป |\n|---|---|---|\n| **ความพร้อมในการให้บริการ** | พร้อมรับฟัง 24 ชั่วโมง ทุกที่ทุกเวลา | ต้องนัดหมายล่วงหน้าตามเวลา |\n| **ความเป็นส่วนตัว (Privacy)** | ปลอดภัยสูงสุด ไม่มีใครรู้ความลับของคุณ | อาจรู้สึกเกร็งหรือไม่กล้าเล่าความจริงทั้งหมด |\n| **ความปราศจากอคติ (No Bias)** | แปลความตามหน้าไพ่และบริบทอย่างเป็นกลาง | อาจมีอารมณ์ส่วนตัวหรือความเชื่อเฉพาะบุคคลปน |\n| **ความต่อเนื่องในการถามต่อ** | พิมพ์แชทเจาะลึกได้ทันทีไม่จำกัด | มีจำกัดเวลาตามรอบค่าบริการ |\n\n---\n\n## จุดเด่นที่ทำให้คนรุ่นใหม่หันมาดูดวงกับ AI\n\nแม่หมอ AI บน SeerTarot ไม่ได้มาเพื่อแทนที่หมอดูมนุษย์ แต่เป็น **\"เพื่อนคู่คิดและพื้นที่ปลอดภัย (Safe Space)\"** ที่คุณสามารถแวะเข้ามาพูดคุย ขอคำปรึกษา และจัดระเบียบความคิดได้ทุกเมื่อที่ต้องการความสบายใจ\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-history-1909-rider-waite:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-history-1909-rider-waite\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ต้นกำเนิดไพ่ทาโรต์ 1909 Rider-Waite-Smith: สำรับไพ่ที่ทรงอิทธิพลที่สุดในโลก",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-history-1909-rider-waite:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-history-1909-rider-waite\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เรื่องราวประวัติศาสตร์ของ Arthur Edward Waite และศิลปินหญิง Pamela Colman Smith ผู้ปฏิวัติศาสตร์ไพ่ทาโรต์จนกลายเป็นมาตรฐานระดับโลก",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-history-1909-rider-waite:toc:origin",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-history-1909-rider-waite\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "จุดเริ่มต้นในสมาคมลับ Golden Dawn",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-history-1909-rider-waite:toc:pamela-art",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-history-1909-rider-waite\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "Pamela Colman Smith: อัจฉริยะหญิงผู้อยู่เบื้องหลังภาพวาด 78 ใบ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-history-1909-rider-waite:toc:why-1909-matters",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-history-1909-rider-waite\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ทำไม SeerTarot ถึงยึดมั่นในภาพดั้งเดิม 1909",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-history-1909-rider-waite:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-history-1909-rider-waite\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ทำไมไพ่ 1909 Rider-Waite ถึงได้รับความนิยมสูงสุดในโลก?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-history-1909-rider-waite:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-history-1909-rider-waite\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "เพราะเป็นสำรับแรกในประวัติศาสตร์ที่วาดภาพสื่อความหมายลงบนไพ่ชุดเล็ก (Minor Arcana) ครบทุกใบ ทำให้ผู้อ่านสามารถเชื่อมโยงอารมณ์และเรื่องราวได้ลึกซึ้งที่สุดค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-history-1909-rider-waite:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-history-1909-rider-waite\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## จุดเริ่มต้นในสมาคมลับ Golden Dawn\n\nในกรุงลอนดอนปลายศตวรรษที่ 19 สมาคมเร้นลับ **Hermetic Order of the Golden Dawn** ได้รวบรวมปรมาจารย์ด้านรหัสยะศาสตร์ คับบาลาห์ โหราศาสตร์ และการเล่นแร่แปรธาตุ โดยมี **Arthur Edward Waite** เป็นผู้นำในการสังเคราะห์องค์ความรู้ทั้งหมดลงในไพ่ 78 ใบ\n\n---\n\n## Pamela Colman Smith: อัจฉริยะหญิงผู้อยู่เบื้องหลังภาพวาด 78 ใบ\n\nWaite ได้ร่วมงานกับ **Pamela Colman Smith (Pixie)** ศิลปินหญิงผู้มีญาณหยั่งรู้ทางศิลปะ เธอใช้เวลาเพียง 6 เดือนในการวาดภาพลายเส้นและลงสีน้ำให้กับไพ่ทั้ง 78 ใบ ซึ่งผลงานชิ้นนี้ได้กลายเป็นแม่แบบของไพ่ทาโรต์ทั่วโลกมาจนถึงปัจจุบัน\n",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:title",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "สรุปความหมายไพ่ชุดใหญ่ Major Arcana 22 ใบ: เส้นทางแห่งจิตวิญญาณ The Fool's Journey",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:description",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "คัมภีร์สรุปความหมายไพ่ทาโรต์ชุดใหญ่ 22 ใบ ตั้งแต่ The Fool ถึง The World ถอดรหัสบทเรียนชีวิตและจิตวิญญาณมนุษย์",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:toc:3-phases",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "3 ขั้นตอนการเดินทางของชีวิตใน Major Arcana",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:toc:cards-0-7",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ระยะที่ 1 (0-7): ตัวตนและโลกภายนอก",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:toc:cards-8-14",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ระยะที่ 2 (8-14): การค้นหาตัวตนและการทดสอบจิตใจ",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:toc:cards-15-21",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "ระยะที่ 3 (15-21): การตรัสรู้และการหลุดพ้น",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "เปิดได้ไพ่ Major Arcana หลายใบในรอบเดียว หมายถึงอะไร?",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "หมายถึงคุณกำลังอยู่ในช่วงการเปลี่ยนแปลงครั้งใหญ่ (Major Life Event) หรือเหตุการณ์สำคัญระดับเปลี่ยนทิศทางชีวิตค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:major-arcana-22-cards-complete-guide:content",
+      "target": "src/data/articles.ts → ARTICLES[\"major-arcana-22-cards-complete-guide\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## 3 ขั้นตอนการเดินทางของชีวิตใน Major Arcana\n\nไพ่ชุดใหญ่ **22 ใบ (Major Arcana)** เปรียบเสมือนแผนที่นำทางชีวิตของมนุษย์ทุกคน:\n\n1. **ระยะที่ 1: การสร้างตัวตนในโลกทางกายภาพ (The Material World - ใบที่ 0 ถึง 7)**\n   - The Fool (0) ➔ The Magician (1) ➔ The High Priestess (2) ➔ The Empress (3) ➔ The Emperor (4) ➔ The Hierophant (5) ➔ The Lovers (6) ➔ The Chariot (7)\n\n2. **ระยะที่ 2: การเผชิญหน้ากับกฎแห่งกรรมและจิตใจ (The Inner Journey - ใบที่ 8 ถึง 14)**\n   - Strength (8) ➔ The Hermit (9) ➔ Wheel of Fortune (10) ➔ Justice (11) ➔ The Hanged Man (12) ➔ Death (13) ➔ Temperance (14)\n\n3. **ระยะที่ 3: การเผชิญเงามืดและการเข้าถึงความสุขอันแท้จริง (Spiritual Enlightenment - ใบที่ 15 ถึง 21)**\n   - The Devil (15) ➔ The Tower (16) ➔ The Star (17) ➔ The Moon (18) ➔ The Sun (19) ➔ Judgement (20) ➔ The World (21)\n",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:title",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ไขรหัสไพ่ชุดเล็ก Minor Arcana 56 ใบ: 4 ธาตุ ดิน น้ำ ลม ไฟ กับชีวิตประจำวัน",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:description",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "เข้าใจไพ่ทาโรต์ชุดเล็ก 56 ใบ ผ่านหลักการ 4 ธาตุ ถ้วย ไม้เท้า ดาบ เหรียญ สะท้อนเรื่องราวความรัก การงาน อารมณ์ และเงินทองในชีวิตประจำวัน",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:toc:4-suits-overview",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "ภาพรวม 4 ธาตุแห่งชีวิต",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:toc:wands-fire",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "ชุดไม้เท้า (Wands) — ธาตุไฟแห่งความมุ่งมั่นและการงาน",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:toc:cups-water",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "ชุดถ้วย (Cups) — ธาตุน้ำแห่งความรักและอารมณ์",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:toc:swords-air",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].tocEn[3].title",
+      "kind": "heading",
+      "th": "ชุดดาบ (Swords) — ธาตุลมแห่งความคิดและอุปสรรค",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:toc:pentacles-earth",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].tocEn[4].title",
+      "kind": "heading",
+      "th": "ชุดเหรียญ (Pentacles) — ธาตุดินแห่งเงินตราและความมั่นคง",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ไพ่ชุดเล็ก Minor Arcana ด้อยกว่าไพ่ชุดใหญ่ Major Arcana หรือไม่?",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไม่เลยค่ะ ไพ่ชุดเล็กสะท้อนเหตุการณ์ในชีวิตประจำวัน คนรอบข้าง และรายละเอียดปลีกย่อยที่ทำให้คำทำนายมีความคมชัดและตรงจุดที่สุดค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:minor-arcana-4-suits-guide:content",
+      "target": "src/data/articles.ts → ARTICLES[\"minor-arcana-4-suits-guide\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## ภาพรวม 4 ธาตุแห่งชีวิต\n\nหากไพ่ชุดใหญ่คือ **\"บทเรียนแห่งโชคชะตา\"** ไพ่ชุดเล็ก 56 ใบก็คือ **\"การกระทำและการตัดสินใจในแต่ละวัน\"** แบ่งออกเป็น 4 ชุดตาม 4 ธาตุธรรมชาติ:\n\n- **ไม้เท้า (Wands - ธาตุไฟ)**: การลงมือทำ ความคิดริเริ่ม งาน โครงการ และไฟในใจ\n- **ถ้วย (Cups - ธาตุน้ำ)**: อารมณ์ ความรัก ความผูกพัน สัญชาตญาณ และความสัมพันธ์\n- **ดาบ (Swords - ธาตุลม)**: สติปัญญา การสื่อสาร ความขัดแย้ง และการตัดสินใจ\n- **เหรียญ (Pentacles - ธาตุดิน)**: เงินทอง ทรัพย์สิน ร่างกาย และความมั่นคงในโลกวัตถุ\n",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-yes-no-spread-guide:title",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-yes-no-spread-guide\"].titleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ยิปซี ใช่ หรือ ไม่ (Yes/No Tarot): เทคนิคฟันธงคำตอบให้แม่นยำ 100%",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-yes-no-spread-guide:description",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-yes-no-spread-guide\"].descriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "วิธีเปิดไพ่ทาโรต์แบบ ใช่หรือไม่ (Yes/No Oracle) วิเคราะห์พลังงานบวกและลบของไพ่แต่ละใบ ช่วยให้คุณฟันธงคำตอบได้อย่างมั่นใจ ไร้ความลังเล",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-yes-no-spread-guide:toc:when-to-use",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-yes-no-spread-guide\"].tocEn[0].title",
+      "kind": "heading",
+      "th": "เมื่อไหร่ที่ควรใช้การดูดวงแบบ Yes/No",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-yes-no-spread-guide:toc:card-classifications",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-yes-no-spread-guide\"].tocEn[1].title",
+      "kind": "heading",
+      "th": "การจำแนกไพ่: กลุ่มใช่ (Yes), ไม่ใช่ (No), และเป็นกลาง (Maybe)",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-yes-no-spread-guide:toc:rules",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-yes-no-spread-guide\"].tocEn[2].title",
+      "kind": "heading",
+      "th": "กฎเหล็ก 3 ข้อในการเปิดไพ่ Yes/No",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-yes-no-spread-guide:faq:0:q",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-yes-no-spread-guide\"].faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ถ้าเปิดได้คำตอบที่ไม่ถูกใจ ถามซ้ำได้ไหม?",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-yes-no-spread-guide:faq:0:a",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-yes-no-spread-guide\"].faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไม่ควรถามซ้ำทันทีค่ะ เพราะจะทำให้พลังงานรวนและเกิดความสับสน ควรเว้นระยะเวลาและลงมือปฏิบัติก่อนค่ะ",
+      "en": ""
+    },
+    {
+      "id": "article:tarot-yes-no-spread-guide:content",
+      "target": "src/data/articles.ts → ARTICLES[\"tarot-yes-no-spread-guide\"].contentEn",
+      "kind": "markdown",
+      "th": "\n## เมื่อไหร่ที่ควรใช้การดูดวงแบบ Yes/No\n\nการเปิดไพ่แบบ **ใช่ หรือ ไม่ (Yes/No Tarot)** เหมาะกับสถานการณ์ที่ต้องการการตัดสินใจเฉพาะหน้า เช่น:\n- *\"ควรซื้อของชิ้นนี้ตอนนี้ไหม?\"*\n- *\"เขาจะมาตามนัดวันนี้หรือไม่?\"*\n- *\"การเดินทางครั้งนี้จะราบรื่นไหม?\"*\n\n---\n\n## กฎเหล็ก 3 ข้อในการเปิดไพ่ Yes/No\n\n1. **ถามครั้งเดียวต่อหนึ่งเรื่อง**: ไพ่ใบแรกสะท้อนพลังงานที่บริสุทธิ์ที่สุด\n2. **คำถามต้องชัดเจน ไม่กำกวม**: หลีกเลี่ยงคำถามที่มีสองเงื่อนไขในประโยคเดียว\n3. **ยอมรับคำตอบและใช้สติ**: ไพ่ให้แนวโน้ม แต่การกระทำของคุณคือผู้กำหนดผลลัพธ์สุดท้าย\n",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:seoTitle",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.seoTitleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ยิปซี ความรัก — รวม 5 ผังเจาะลึกคนโสด คนคุย แฟนเก่า คนมีคู่ ฟรี",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:metaDescription",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.metaDescriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "รวมผังดูดวงไพ่ยิปซีความรัก 5 ผังยอดนิยม ส่องความในใจของเขา แฟนเก่าจะกลับมาไหม ตามหาเนื้อคู่แท้ และผังความสัมพันธ์ 5-6 ใบ แม่นยำ ชัดเจน ตรวจสอบความโปร่งใสได้จริง",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:title",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.titleEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี ความรัก",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:heading",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.headingEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี ความรัก & ความสัมพันธ์",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:tagline",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.taglineEn",
+      "kind": "tagline",
+      "th": "คลี่คลายเงื่อนปมหัวใจ ส่องความรู้สึกจริง และมองเห็นทิศทางความรักด้วยความเข้าใจ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:intro:0",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.editorialIntroEn[0]",
+      "kind": "prose",
+      "th": "ความรักเป็นมิติที่มีความอ่อนไหวและลึกซึ้งที่สุดในชีวิตมนุษย์ หลายครั้งที่เราสงสัยในความรู้สึกของอีกฝ่าย กังวลกับความเงียบ หรือสับสนว่าเส้นทางความสัมพันธ์ควรเดินต่อไปข้างหน้าหรือหยุดพัก ไพ่ทาโรต์ 1909 Rider-Waite ทำหน้าที่เป็นกระจกสะท้อนคลื่นใต้น้ำทางอารมณ์และเจตนาที่แท้จริง ไม่ใช่การตัดสินอย่างตายตัว แต่คือการนำความกระจ่างชัดมาสู่หัวใจของคุณ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:intro:1",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.editorialIntroEn[1]",
+      "kind": "prose",
+      "th": "ในหมวดความรักนี้ วิหาร SeerTarot ได้คัดสรร 5 ผังพยากรณ์เฉพาะทางที่ตอบโจทย์ทุกสถานการณ์ความสัมพันธ์ ตั้งแต่การส่องความในใจ (4 ใบ) การประเมินโอกาสคืนดีกับแฟนเก่า (4 ใบ) การค้นหาพลังงานเนื้อคู่แท้ (5 ใบ) ไปจนถึงผังความสัมพันธ์สองหัวใจ (5 ใบ) และผังเจาะลึกรักซับซ้อน 6 มิติ (6 ใบ)",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:intro:2",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.editorialIntroEn[2]",
+      "kind": "prose",
+      "th": "คำแนะนำในการเปิดไพ่ความรัก: หายใจเข้าลึกๆ ผ่อนคลายความวิตกกังวล ตั้งจิตถึงบุคคลหรือสถานการณ์ที่ต้องการถามด้วยใจที่เปิดกว้างและพร้อมรับความจริง เพื่อให้สุ้มเสียงแห่งไพ่ส่งสารชี้นำได้อย่างบริสุทธิ์ที่สุด",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:faq:0:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ดูดวงไพ่ยิปซีความรัก ควรถามคำถามแบบไหนให้ได้คำตอบชัดเจนที่สุด?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:faq:0:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ควรถามคำถามปลายเปิดที่เน้นความเข้าใจและการกระทำ เช่น 'ทัศนคติของเขาต่อความสัมพันธ์ตอนนี้เป็นอย่างไร', 'อะไรคืออุปสรรคระหว่างเรา', หรือ 'ฉันควรปฏิบัติตัวอย่างไรเพื่อพัฒนาความสัมพันธ์' หลีกเลี่ยงคำถามที่บีบให้ตอบเพียง ใช่/ไม่ใช่ เพราะไพ่ทาโรต์จะให้รายละเอียดมิติอารมณ์และคำแนะนำได้ดีกว่ามาก",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:faq:1:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ถ้าได้ไพ่ที่มีภาพดูน่ากลัว เช่น The Tower หรือ 3 of Swords หมายถึงต้องเลิกกันเสมอไปหรือไม่?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:faq:1:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ไม่เสมอไป ไพ่หน้ายากในเรื่องความรักมักหมายถึงการทลายความคาดหวังภาพลวงตา (The Tower) หรือการเปิดแผลใจเพื่อให้เกิดการเยียวยาพูดคุยกันตรงๆ (3 of Swords) ไพ่เตือนเพื่อให้เรามีสติและรับมือกับปัญหาได้อย่างมีวุฒิภาวะ ไม่ได้หมายถึงจุดจบเสมอไป",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:faq:2:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.faqsEn[2].question",
+      "kind": "faq-q",
+      "th": "สามารถดูดวงความรักซ้ำคำถามเดิมได้บ่อยแค่ไหน?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:love:faq:2:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.love.faqsEn[2].answer",
+      "kind": "faq-a",
+      "th": "ไม่ควรเปิดไพ่ซ้ำคำถามเดิมในทันทีหรือถี่เกินไป ควรรออย่างน้อย 2-4 สัปดาห์ หรือรอจนกว่าสถานการณ์จะมีการกระทำและการเปลี่ยนแปลงเกิดขึ้นจริง เพื่อให้พลังงานและปัจจัยแวดล้อมได้หมุนเวียน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:seoTitle",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.seoTitleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ยิปซี การงาน — ผังเจาะลึกหน้าที่การงาน ย้ายงาน และทางแยกตัดสินใจ ฟรี",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:metaDescription",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.metaDescriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ดูดวงไพ่ยิปซีการงาน 3 ผังตรงประเด็น วิเคราะห์สถานการณ์งานปัจจุบัน โอกาสเลื่อนขั้น ย้ายงานหรืออยู่ที่เดิม และผังตัดสินใจทางแยก A หรือ B แม่นยำ วางกลยุทธ์ก้าวหน้า",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:title",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.titleEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี การงาน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:heading",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.headingEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี การงาน & เส้นทางอาชีพ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:tagline",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.taglineEn",
+      "kind": "tagline",
+      "th": "วิเคราะห์จุดแข็ง โอกาสก้าวหน้า และกลยุทธ์รับมือการเปลี่ยนแปลงในที่ทำงาน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:intro:0",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.editorialIntroEn[0]",
+      "kind": "prose",
+      "th": "เส้นทางอาชีพและการทำงานคือสนามแห่งการสร้างคุณค่าและเติบโต แต่บ่อยครั้งเราต้องเผชิญกับทางตัน บรรยากาศกดดัน หรือความไม่แน่นอนว่าจะอยู่ต่อหรือก้าวออกไปแสวงหาโอกาสใหม่ สัญลักษณ์ดั้งเดิม 1909 Rider-Waite โดยเฉพาะไพ่ชุดเหรียญ (Pentacles) และไม้เท้า (Wands) ให้ภาพสะท้อนที่เป็นรูปธรรมอย่างยิ่งเกี่ยวกับทรัพยากร ความทะเยอทะยาน และสภาพแวดล้อมทางธุรกิจ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:intro:1",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.editorialIntroEn[1]",
+      "kind": "prose",
+      "th": "เราเตรียม 3 ผังการงานที่ทรงพลังไว้ให้คุณ: ผังการงานและความก้าวหน้า (5 ใบ) สำหรับประเมินภาพรวมรอบด้าน, ผังย้ายงานหรืออยู่ที่เดิม (5 ใบ) สำหรับเปรียบเทียบผลลัพธ์สองทางเลือกอย่างเป็นกลาง, และผังทางแยกการตัดสินใจ (5 ใบ) ที่ช่วยให้คุณมองเห็นจุดบอดและผลกระทบระยะยาวก่อนลงมือตัดสินใจครั้งสำคัญ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:intro:2",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.editorialIntroEn[2]",
+      "kind": "prose",
+      "th": "กลยุทธ์การอ่านไพ่การงาน: มองไพ่ทุกใบในฐานะ 'ที่ปรึกษาเชิงยุทธศาสตร์' มากกว่าโชคชะตาที่เปลี่ยนแปลงไม่ได้ ใช้คำทำนายเป็นเข็มทิศในการปรับแผนงาน พัฒนาทักษะ และเจรจาต่อรองอย่างชาญฉลาด",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:faq:0:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "อยากรู้ว่าควรลาออก ย้ายงาน หรืออยู่ที่เดิม ผังไหนตอบคำถามนี้ได้ดีที่สุด?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:faq:0:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "แนะนำผัง 'ย้ายงานหรืออยู่ที่เดิม (5 ใบ)' เพราะถูกออกแบบมาเพื่อเปรียบเทียบข้อดี-ข้อเสียของทั้งสองทางเลือก ทั้งด้านความก้าวหน้า รายได้ และความสบายใจ ช่วยให้เห็นผลลัพธ์ปลายทางก่อนตัดสินใจ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:faq:1:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ไพ่ทาโรต์บอกได้ไหมว่าจะได้งานใหม่เมื่อไหร่?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:career:faq:1:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.career.faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ไพ่ทาโรต์สามารถบอกช่วงจังหวะเวลา (Timing) ได้จากความเร็วของธาตุ เช่น ไม้เท้าและดาบสื่อถึงการตอบรับที่รวดเร็ว ส่วนเหรียญจะสื่อถึงกระบวนการที่มั่นคงแต่ต้องใช้เวลาพิจารณาตามขั้นตอน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:seoTitle",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.seoTitleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ยิปซี การเงิน — วิเคราะห์กระแสเงิน โชคลาภ และการเสี่ยงโชค ฟรี",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:metaDescription",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.metaDescriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ดูดวงไพ่ยิปซีการเงินและโชคลาภ 2 ผังมาตรฐาน ตรวจสอบสภาพคล่อง ปลดหนี้ วางแผนลงทุน และเปิดทิศทางโชคลาภด้วยไพ่ 1909 Rider-Waite แม่นยำ โปร่งใส ปลอดภัย",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:title",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.titleEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี การเงิน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:heading",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.headingEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี การเงิน & โชคลาภ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:tagline",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.taglineEn",
+      "kind": "tagline",
+      "th": "ตรวจสภาพคล่อง จัดการความเสี่ยง และมองเห็นจังหวะโอกาสทางการเงิน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:intro:0",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.editorialIntroEn[0]",
+      "kind": "prose",
+      "th": "กระแสการเงินและทรัพย์สินมีความเชื่อมโยงอย่างใกล้ชิดกับความรู้สึกปลอดภัยและคุณค่าในตนเอง ไพ่ชุดเหรียญ (Suit of Pentacles) ในสำรับ Rider-Waite คือครูผู้ยิ่งใหญ่ที่สอนเรื่องการบริหารทรัพยากร ความเพียร และการสร้างความมั่งคั่งที่ยั่งยืน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:intro:1",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.editorialIntroEn[1]",
+      "kind": "prose",
+      "th": "ในหมวดการเงินนี้ คุณสามารถเลือกเปิด 'ผังดวงการเงินและโชคลาภ (4 ใบ)' เพื่อตรวจสอบรายรับ รายจ่าย รูรั่วไหล และแนวโน้มสภาพคล่อง หรือเลือก 'ผังดวงโชคลาภและการเสี่ยงโชค (4 ใบ)' เพื่อประเมินจังหวะการลงทุนและการเสี่ยงโชคอย่างมีสติและไม่ประมาท",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:intro:2",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.editorialIntroEn[2]",
+      "kind": "prose",
+      "th": "หลักการใช้ไพ่พยากรณ์การเงิน: ไพ่ไม่ได้มีไว้เพื่อชวนให้โลภหรือเล่นพนันอย่างไร้สติ แต่ทำหน้าที่เตือนถึงความเสี่ยงที่ซ่อนอยู่ และกระตุ้นให้คุณลงมือสร้างระบบการเงินที่มั่นคงด้วยตัวคุณเอง",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:faq:0:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ดูดวงไพ่ยิปซีการเงิน สามารถบอกเลขเด็ดหรือผลรางวัลได้ไหม?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:faq:0:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไพ่ทาโรต์ไม่ได้ถูกสร้างขึ้นมาเพื่อคำนวณตัวเลขตรงๆ แต่สามารถบอก 'พลังงานโชคลาภ' 'ทิศทางโอกาส' และ 'คำเตือนเรื่องความเสี่ยง' เพื่อให้คุณไม่สูญเสียทรัพย์ไปกับความประมาท",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:faq:1:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ไพ่ชุดไหนในสำรับ 78 ใบที่บ่งบอกถึงการเงินที่ดีที่สุด?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:money:faq:1:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.money.faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ไพ่ชุดเหรียญ โดยเฉพาะ Ace of Pentacles (โอกาสทองทางการเงิน), 9 of Pentacles (ความมั่งคั่งพึ่งพาตนเอง), และ 10 of Pentacles (ความสมบูรณ์พูนสุขระดับครอบครัวและมรดก)",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:seoTitle",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.seoTitleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ยิปซี สุขภาพ — สแกนสมดุลกาย ใจ จิตวิญญาณ และ 7 จักระ ฟรี",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:metaDescription",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.metaDescriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ดูดวงไพ่ยิปซีสุขภาพ สแกนสมดุลพลังงาน กาย-ใจ-จิตวิญญาณ 3 ใบ และผัง 7 จักระ เจาะลึกระดับอารมณ์ความเครียดและพลังชีวิต ข้อควรระวังและการฟื้นฟูจิตใจ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:title",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.titleEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี สุขภาพ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:heading",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.headingEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี สุขภาพ & พลังงานชีวิต",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:tagline",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.taglineEn",
+      "kind": "tagline",
+      "th": "สแกนสมดุล กาย ใจ จิตวิญญาณ คืนความสงบและพลังบวกสู่ตัวคุณ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:intro:0",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.editorialIntroEn[0]",
+      "kind": "prose",
+      "th": "สุขภาพที่แท้จริงคือความกลมกลืนระหว่างร่างกาย ความคิด และจิตวิญญาณ ไพ่ทาโรต์ทำหน้าที่สะท้อนสัญญาณเตือนเบื้องต้นจากจิตใต้สำนึก ความตึงเครียดสะสม และพลังชีวิตที่ติดขัดก่อนที่จะปรากฏเป็นอาการทางกาย",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:intro:1",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.editorialIntroEn[1]",
+      "kind": "prose",
+      "th": "เรามี 2 ผังพยากรณ์ที่ออกแบบมาเพื่อการฟื้นฟู: ผัง กาย-ใจ-จิตวิญญาณ (3 ใบ) สำหรับเช็กสมดุลประจำวันอย่างรวดเร็ว และ ผังสแกนสมดุล 7 จักระ (7 ใบ) ที่ไล่เรียงตั้งแต่ Root Chakra ไปจนถึง Crown Chakra เพื่อค้นหาว่าจุดพลังงานใดในชีวิตกำลังต้องการการเยียวยา",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:intro:2",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.editorialIntroEn[2]",
+      "kind": "prose",
+      "th": "คำเตือนสำคัญ: การดูดวงไพ่ยิปซีไม่สามารถทดแทนการตรวจวินิจฉัยและรักษาโดยแพทย์แผนปัจจุบันได้ หากมีอาการเจ็บป่วยทางกายหรือปัญหาสุขภาพจิต โปรดปรึกษาแพทย์ผู้เชี่ยวชาญหรือโทรสายด่วนสุขภาพจิต 1323 ทันที",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:faq:0:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "การดูดวงสุขภาพด้วยไพ่ยิปซี ช่วยเรื่องอะไรได้บ้าง?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:faq:0:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ช่วยสะท้อนต้นตอของความเครียด สภาพจิตใจ สมาธิ และพฤติกรรมในชีวิตประจำวันที่ส่งผลต่อพลังงาน เพื่อให้คุณปรับเปลี่ยนวิถีชีวิต พักผ่อน และดูแลจิตใจได้อย่างตรงจุด",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:faq:1:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ถ้าไพ่เตือนเรื่องสุขภาพ ควรรู้สึกกลัวหรือไม่?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:health:faq:1:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.health.faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ไม่ต้องกลัว ไพ่ทาโรต์เป็นสัญญาณเตือนล่วงหน้าเพื่อให้คุณใส่ใจตัวเองมากขึ้น เช่น เตือนให้พักผ่อน งดทำงานหักโหม หรือไปตรวจสุขภาพประจำปีเพื่อความสบายใจ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:seoTitle",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.seoTitleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ยิปซี ครอบครัว — ผังบริวาร คนรอบข้าง และความสัมพันธ์ในบ้าน ฟรี",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:metaDescription",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.metaDescriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ดูดวงไพ่ยิปซีครอบครัวและบริวาร 5 ใบ ทำความเข้าใจพลังงานในบ้าน ความสัมพันธ์ระหว่างคนในครอบครัว บุตรหลาน เพื่อนร่วมงาน และวิธีประสานรอยร้าว",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:title",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.titleEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี ครอบครัว",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:heading",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.headingEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี ครอบครัว & บริวาร",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:tagline",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.taglineEn",
+      "kind": "tagline",
+      "th": "สร้างความเข้าใจ ประสานความสัมพันธ์ และคืนความอบอุ่นสู่ครอบครัว",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:intro:0",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.editorialIntroEn[0]",
+      "kind": "prose",
+      "th": "ครอบครัวคือรากฐานของชีวิต แต่ก็มักเป็นพื้นที่ที่มีความคาดหวัง ปมความขัดแย้ง และช่องว่างระหว่างวัยเกิดขึ้นได้ง่ายที่สุด ไพ่ทาโรต์ช่วยให้เราถอยออกมามองความสัมพันธ์ในบ้านอย่างเป็นกลาง เข้าใจมุมมองและเจตนาของบุคคลรอบข้างโดยไม่ใช้อารมณ์ตัดสิน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:intro:1",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.editorialIntroEn[1]",
+      "kind": "prose",
+      "th": "ผังบริวารและคนรอบข้าง (5 ใบ) เป็นผังเฉพาะที่เปิดให้คุณใช้งานได้ฟรี ครอบคลุมทั้งบทบาทของคุณ บรรยากาศรวมในบ้าน ปัญหาที่ยังคั่งค้าง และคำแนะนำในการสื่อสารเพื่อสร้างความผูกพันที่มั่นคง",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:intro:2",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.editorialIntroEn[2]",
+      "kind": "prose",
+      "th": "หัวใจสำคัญของการเปิดไพ่ครอบครัว: เปิดใจรับฟังและใช้เมตตาธรรมเป็นที่ตั้ง ไพ่จะช่วยสะท้อนว่ามีสิ่งใดที่คุณสามารถทำได้เพื่อเป็นสะพานเชื่อมโยงความรักความเข้าใจกลับคืนมา",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:faq:0:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ผังครอบครัวและบริวารสามารถใช้ดูกับเพื่อนร่วมงานหรือลูกน้องได้ไหม?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:faq:0:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ได้แน่นอน คำว่า 'บริวาร' ครอบคลุมทั้งคนในบ้าน ลูกน้อง ทีมงาน และคนใกล้ชิดในวงสังคมของคุณ ผังนี้ช่วยสะท้อนความไว้วางใจและการสนับสนุนระหว่างกันได้อย่างยอดเยี่ยม",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:faq:1:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ถ้าในบ้านกำลังมีปัญหาขัดแย้ง ไพ่ช่วยอย่างไร?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:family:faq:1:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.family.faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "ไพ่จะชี้ให้เห็นว่าอะไรคือ 'ปมซ่อนเร้น' ที่ทั้งสองฝ่ายอาจไม่ได้พูดออกมาตรงๆ พร้อมให้คำแนะนำว่าฝ่ายใดควรเริ่มเปิดการเจรจา และควรปรับท่าทีอย่างไรเพื่อลดความตึงเครียด",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:seoTitle",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.seoTitleEn",
+      "kind": "seo-title",
+      "maxChars": 60,
+      "th": "ดูดวงไพ่ยิปซี การเรียน — ผังเจาะลึกการสอบ การศึกษาต่อ และสมาธิ ฟรี",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:metaDescription",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.metaDescriptionEn",
+      "kind": "meta-description",
+      "maxChars": 155,
+      "th": "ดูดวงไพ่ยิปซีการเรียนและการสอบ 4 ใบ ตรวจความพร้อม สมาธิ โอกาสสอบผ่าน แข่งขันชิงทุน ศึกษาต่อ และแนวทางพัฒนาศักยภาพการเรียนรู้ ฟรี ไม่เสียค่าใช้จ่าย",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:title",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.titleEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี การเรียน",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:heading",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.headingEn",
+      "kind": "heading",
+      "th": "ดูดวงไพ่ยิปซี การเรียน & การสอบ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:tagline",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.taglineEn",
+      "kind": "tagline",
+      "th": "เตรียมความพร้อม เสริมความมั่นใจ และค้นพบแนวทางสู่ความสำเร็จทางการศึกษา",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:intro:0",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.editorialIntroEn[0]",
+      "kind": "prose",
+      "th": "ช่วงเวลาแห่งการเรียน การเตรียมสอบ หรือการคัดเลือกเข้าสถาบันการศึกษา มักมาพร้อมกับความกดดันและความไม่มั่นใจ ไพ่ทาโรต์ 1909 Rider-Waite เป็นเครื่องมือสำรวจสมาธิ ความพร้อม และจุดบอดที่คุณอาจมองข้ามไปในระหว่างการอ่านหนังสือ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:intro:1",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.editorialIntroEn[1]",
+      "kind": "prose",
+      "th": "ผังดวงการเรียนและการสอบ (4 ใบ) เปิดให้ใช้งานฟรีสำหรับนักเรียน นักศึกษา และผู้ที่กำลังสอบวัดระดับหรือสอบแข่งขัน ชี้ชัดทั้งระดับความพร้อม จุดแข็ง อุปสรรค และแนวโน้มผลการสอบ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:intro:2",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.editorialIntroEn[2]",
+      "kind": "prose",
+      "th": "ข้อคิดในการดูดวงการเรียน: ไพ่ไม่ได้อ่านหนังสือแทนคุณ แต่ไพ่จะบอกว่าคุณพร้อมแค่ไหน และต้องเติมเต็มตรงไหน ความพยายามและความมีวินัยของคุณยังคงเป็นปัจจัยชี้ขาดความสำเร็จเสมอ",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:faq:0:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.faqsEn[0].question",
+      "kind": "faq-q",
+      "th": "ถ้าผลไพ่ออกมาบอกว่ามีโอกาสสอบติด เราจะไม่อ่านหนังสือได้ไหม?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:faq:0:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.faqsEn[0].answer",
+      "kind": "faq-a",
+      "th": "ไม่ได้เด็ดขาด ไพ่สะท้อนผลลัพธ์บนพื้นฐานของความขยันและวินัยที่คุณกำลังทำอยู่ หากคุณหยุดพยายาม พลังงานและผลลัพธ์ก็จะเปลี่ยนไปตามการกระทำทันที",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:faq:1:q",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.faqsEn[1].question",
+      "kind": "faq-q",
+      "th": "ควรเปิดไพ่ดูดวงการเรียนช่วงไหนดีที่สุด?",
+      "en": ""
+    },
+    {
+      "id": "spread-topic:study:faq:1:a",
+      "target": "src/data/spread-topics.ts → SPREAD_TOPICS.study.faqsEn[1].answer",
+      "kind": "faq-a",
+      "th": "แนะนำให้เปิดก่อนวันสอบ 1-2 สัปดาห์ เพื่อให้เห็นจุดที่ยังต้องทบทวนเพิ่ม หรือเปิดก่อนเริ่มวางแผนการอ่านหนังสือเพื่อจัดลำดับความสำคัญของเนื้อหา",
+      "en": ""
+    }
+  ]
+}
