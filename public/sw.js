@@ -8,7 +8,7 @@
  * 5. Cache Invalidation: กำจัดแคชเวอร์ชันเก่าอัตโนมัติเมื่อมีการอัปเดตเวอร์ชัน
  */
 
-const CACHE_VERSION = "v1.0.0";
+const CACHE_VERSION = "v-b77d8e2";
 const STATIC_CACHE_NAME = `seertarot-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE_NAME = `seertarot-runtime-${CACHE_VERSION}`;
 

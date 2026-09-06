@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0096 · 2026-09-06 20:12 · 🟡 Medium · automate Service Worker cache versioning on deployment
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | hardcoded CACHE_VERSION in sw.js prevented updated static precache assets such as /offline.html and icons from invalidating on client devices |
+| **สาเหตุราก** | CACHE_VERSION in public/sw.js was hardcoded to a static string and was not updated automatically during build or deployment |
+| **การแก้ไข** | create scripts/bump-sw-version.ts to tie CACHE_VERSION to git commit SHA or timestamp and integrate into build:worker and deploy scripts in package.json |
+| **🛡️ กฎป้องกันถาวร** | **automate Service Worker cache version invalidation via CI build pipeline so static shell assets are always invalidated without manual intervention** |
+| **บันทึกโดย** | Antigravity AI · branch `fix/m05-sw-cache-versioning` · commit `b77d8e2` |
+
+
 ### INC-0095 · 2026-09-06 20:05 · 🟠 High · add origin fallback for ImageKit and clarify NEXT_PUBLIC env configuration
 
 | หัวข้อ | รายละเอียด |
