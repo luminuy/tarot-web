@@ -35,6 +35,23 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-06: เขียนแผนรอบ 2 — ตัดขั้นสับ/เลือกไพ่ 3 หน้า one-card ให้เร็วแบบเปิดไพ่ด่วน (โดย Claude)
+
+> **ขอบเขต**: เขียนแผนอย่างเดียว — ไม่แก้โค้ด client/page (แตะแค่เอกสาร: WORK_LOG, INDEX, CLAUDE.md)
+
+**ที่มา**: หลัง PR #293 ปรับโฉม 3 หน้าตามแผน v1 เจ้าของรีวิวแล้วสั่งรอบ 2 ว่า _"ปรับให้สไตล์คล้ายเปิดไพ่ด่วน ไม่ต้องมีขั้นตอนยุ่งยาก ไพ่ใบเดียวต้องการความเร็ว ไม่ต้องมีขั้นตอนเลือกไพ่"_
+
+**ปัญหาที่เหลือ**: `OneCardRitual.tsx` (สร้างใน #293) ยังมี **5 สเตป** — idle → `ShuffleRitual` (สับ 2.2s) → `InteractiveCardFan` (พัดไพ่ 78 ใบให้แตะเลือก) → ready → revealed · และการ์ดคว่ำตอน idle มี `positionLabel` ถูกตัดครึ่ง (`"วิหาร: มหาภาพ..."`, `"สถานะ: คน..."`)
+
+**แผน** = [`docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md`](plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md) (เขียนทับ v1 เดิม)
+- ยุบ `OneCardRitual` เป็น **2 จังหวะ**: เลือกหัวข้อ → กด "เปิดไพ่" → จั่วทันที (window.crypto คงเดิม ไม่มีสับ/พัด) → ไพ่คว่ำหน้า → แตะพลิก 1 ที (คงกฎ 4) → อ่านผล static
+- ลบ import `ShuffleRitual`/`InteractiveCardFan` ใน `OneCardRitual` · ลบการ์ดคว่ำ + label ตอน idle
+- จูน `headerSlot` ของ daily/love ให้การ์ดหัวข้อ/สถานะเป็นทรงเดียวกับ `QuickFortunePicker`
+- ~2–3 ชม. · 1 PR · แตะ `OneCardRitual.tsx` + 2 ไฟล์ client
+
+**สถานะ**: 🟡 รอทีมถัดไปลงมือ
+
 ### 🗓️ 2026-09-06: ปิดช่องโหว่ guestAllowed และ QA ผังใหม่ 5 ผัง (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_QA_SPREADS_2026-09-06.md`):**

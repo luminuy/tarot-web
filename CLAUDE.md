@@ -38,6 +38,7 @@
 | [docs/plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md](docs/plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md) | 🌊 **แผนส่งต่อ SEO คลื่น 2–4** — ยึด `/cards` · ลอกหมวดหมู่ MyHora · งานระยะยาว + วัดผล GSC (ลงมือแล้วใน PR #284) |
 | [docs/plans/HANDOFF_DOCS_TRUTH_2026-09-06.md](docs/plans/HANDOFF_DOCS_TRUTH_2026-09-06.md) | 🧾 **แผนปิดหนี้หลังคลื่น 2–4** — ด่านตรวจเลขในเอกสารอัตโนมัติ · กวาดเลขค้าง 20 จุด · เติมบทนำให้ถึง 300 คำ · วัดผล GSC |
 | [docs/plans/HANDOFF_OMNI_YESNO_2026-09-06.md](docs/plans/HANDOFF_OMNI_YESNO_2026-09-06.md) | 🎯 **แผนส่งต่อ 3 งานจากบทวิเคราะห์คู่แข่งภายนอก** — เซกชัน "ใช่หรือไม่" 78 หน้า · Omnichannel 6 ช่อง (TikTok/FB/IG/LINE OA/Threads/X) · Daily Digest (พร้อมเกณฑ์ผ่าน + วิธีวัดผล) |
+| [docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md](docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md) | ✦ **แผนตัดขั้นตอน 3 หน้า one-card** (`/daily` · `/love/1-card` · birth-card) — รอบ 2 หลัง PR #293: ยุบ `OneCardRitual` จาก 5 สเตป → 2 จังหวะ (จั่วทันที ไม่มีสับ ไม่มีพัดไพ่) ให้เร็วแบบ "เปิดไพ่ด่วน" ตามคำสั่งเจ้าของ |
 
 ---
 
