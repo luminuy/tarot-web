@@ -36,8 +36,12 @@ export async function GET() {
     }
 
     try {
+      // อ่านผ่านแคชอายุ 30 วินาที — หน้าเว็บยิงเส้นนี้ทุก ~30 วิและทุกครั้งที่สลับหน้า
+      // การเทียบ token_version (เพิกถอนเซสชัน) ทำไปแล้วด้านบนและไม่ได้ถูกแคชที่นี่
+      // ดูขอบเขตการใช้งานใน `src/lib/auth/user-cache.ts`
       const { getUserById } = await import("@/lib/users/users.repo");
-      const dbUser = await getUserById(user.id);
+      const { getCachedUser } = await import("@/lib/auth/user-cache");
+      const dbUser = await getCachedUser(user.id, getUserById);
       if (!dbUser) return anonymous(true);
 
       return NextResponse.json(

@@ -36,6 +36,50 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: หมวด 2 ครบ 4 ข้อ — ลดการเขียน KV ต่อการเปิดไพ่ ~7 → ~2 ครั้ง (โดย Claude Opus 5)
+
+**ที่มา:** เจ้าของสั่งลุยหมวด 2 (ข้อ 12–15 แก้โค้ด) ต่อจากเฟส 1 · บริการภายนอกไว้ทีหลัง
+คอขวดจริงตามคู่มือคือโควตาเขียน KV ฟรี **1,000 ครั้ง/วัน**
+
+**บัญชีการเขียน KV ต่อการเปิดไพ่ 1 ครั้งของผู้เยี่ยมชม**
+
+| แหล่ง | ก่อน | หลัง |
+| :--- | :---: | :---: |
+| โควตา AI รายวัน (`recordAiCall`) | 1 | ~0 (สะสมแล้ว flush) |
+| โควตาเปิดไพ่ต่อ IP | 1 | ~0 |
+| โควตาผู้เยี่ยมชม (IP + ซับเน็ต) | 2 | ~0 |
+| `persistReading` (start / shuffle / read) | 3 | 2 |
+| **รวม** | **~7** | **~2** |
+
+**ข้อ 12 — `src/lib/platform/kv-counter.ts` (ใหม่):** ตัวนับ KV แบบสะสมใน isolate แล้ว
+flush รวมทีเดียวผ่าน `waitUntil` debounce 20 วินาที (ยืมแพตเทิร์นจาก `src/lib/stats/record.ts`)
+`ai-budget.ts` เปลี่ยนมาใช้ทั้งหมด · `readCounter()` บวก delta ที่ยังค้างใน buffer กลับเข้าไป
+ด้วย การบังคับโควตาภายใน isolate เดียวกันจึงยังตรงทันที (คนกดรัวจากเครื่องเดียวยังโดนตัด)
+
+**ข้อ 13 — ตัด `persistReading` ที่ไม่มีใครอ่าน:** จุดท้ายสุดใน `read/route.ts`
+(บันทึกผลตอน COMPLETED) เขียน KV ทุกครั้ง ทั้งที่ `loadReadingFromKV` ถูกเรียกแค่ใน
+shuffle กับ read ซึ่งเกิดไปก่อนหน้านั้นแล้ว — ไม่มีโค้ดไหนอ่านเรกคอร์ดหลังอ่านจบเลย
+**คงไว้ 2 จุด (start / shuffle) โดยตั้งใจ** เพราะเป็นตาข่ายกู้คืนตอน isolate เย็น
+ถ้าจะลดเหลือ 1 ต้องพึ่ง `x-reading-token` อย่างเดียว ซึ่งแลกความเสี่ยงกับกฎข้อ 14
+(ห้ามกุไพ่) ไม่คุ้ม
+
+**ข้อ 14 — `src/lib/auth/user-cache.ts` (ใหม่):** แคชโปรไฟล์ 30 วินาทีให้ `/api/auth/me`
+ซึ่งหน้าเว็บยิงทุก ~30 วิและทุกครั้งที่สลับหน้า · **ไม่แคชสถานะเพิกถอนเซสชัน**
+(`getRevocationState` ยังเทียบ `token_version` ตามเดิม) การล็อกเอาต์ทุกอุปกรณ์จึงยังมีผลทันที
+เส้นที่แก้โปรไฟล์ (เปลี่ยนรหัสผ่าน / รีเซ็ต / ยืนยันอีเมล / ความยินยอมการตลาด)
+เรียก `invalidateUserCache()` ให้แล้ว
+
+**ข้อ 15 — D1 batching:** ใช้กับ `bulkImportJournal()` ซึ่งเดิมวน `await insertJournal()`
+ทีละแถวได้ถึง **200 รอบต่อการนำเข้า 1 ครั้ง** → รวมเป็น `db.batch()` ชุดละ 50 คำสั่ง
+ปลอดภัยเพราะทุกคำสั่งเป็น INSERT อิสระที่มี `ON CONFLICT DO NOTHING` อยู่แล้ว
+มี fallback เขียนทีละแถวถ้า DB stub ไม่มี `batch()`
+**ไม่แตะ `consumeReading()`** — คำสั่งชั้นถัดไปขึ้นกับผลของชั้นก่อน (daily → bonus)
+รวมเป็น batch จะเปลี่ยนความหมายของโควตา
+
+**ยังไม่ทำ:** หมวด 3 (บริการภายนอก ข้อ 16–28) ตามที่เจ้าของสั่งให้ไว้ทีหลัง
+
+---
+
 ### 🗓️ 2026-09-06: 🔥 กู้ SSG ทั้งเว็บ — prerender 0 → 167 หน้า (INC-0091) (โดย Claude Opus 5)
 
 **ที่มา:** เจ้าของสั่ง "รีดประสิทธิภาพสูงสุด" หลังพบว่าเฟส 1 (Cloudflare Cache Rules)

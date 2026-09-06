@@ -23,6 +23,8 @@ export async function POST(request: Request) {
     }
 
     await setMarketingConsent(user.id, parsed.data.marketing);
+    // ล้างแคชโปรไฟล์ของ isolate นี้ทันที ไม่งั้น /api/auth/me อาจตอบค่าเดิมได้อีก 30 วิ
+    (await import("@/lib/auth/user-cache")).invalidateUserCache(user.id);
     return NextResponse.json({ success: true, marketing: parsed.data.marketing });
   } catch (error) {
     console.error("[Marketing Consent API Error]:", error);

@@ -68,6 +68,8 @@ export async function POST(request: Request) {
     // แฮชและบันทึกรหัสผ่านใหม่ (เพิ่ม token_version อัตโนมัติเพื่อเตะ session เก่าบนเครื่องอื่นออก)
     const newHash = await hashPassword(newPassword);
     await setPasswordHash(user.id, newHash);
+    // ล้างแคชโปรไฟล์ของ isolate นี้ทันที ไม่งั้น /api/auth/me อาจตอบข้อมูลเก่าได้อีก 30 วิ
+    (await import("@/lib/auth/user-cache")).invalidateUserCache(user.id);
     // เตะเซสชันเก่าทันที ไม่ต้องรอแคช token_version หมดอายุเอง
     invalidateTokenVersionCache(user.id);
 

@@ -144,23 +144,91 @@ export async function insertJournal(
 /**
  * นำเข้าประวัติดูดวงจากเครื่อง (localStorage) ขึ้นเซิร์ฟเวอร์แบบ Batch
  */
+const IMPORT_MAX_ITEMS = 200;
+/** จำนวนคำสั่งต่อ 1 batch — เผื่อเพดานขนาด payload ของ D1 ไว้ */
+const IMPORT_BATCH_SIZE = 50;
+
 export async function bulkImportJournal(
   userId: string,
   items: SavedReadingItem[]
 ): Promise<{ merged: number; skipped: number }> {
-  let merged = 0;
-  let skipped = 0;
+  const slice = items.slice(0, IMPORT_MAX_ITEMS);
+  if (slice.length === 0) return { merged: 0, skipped: 0 };
 
-  for (const item of items.slice(0, 200)) {
+  const db = await getAppDB();
+
+  // รวมคำสั่งเป็นชุดเดียวด้วย `db.batch()` แทนการ await ทีละแถว
+  // ---------------------------------------------------------------------------
+  // ของเดิมวน `await insertJournal()` ทีละรายการ = ยิง D1 ได้ถึง 200 รอบต่อการนำเข้า
+  // 1 ครั้ง (แต่ละรอบมี network roundtrip ของตัวเอง) ผู้ใช้ที่มีประวัติเยอะจึงรอนาน
+  // และเปลืองโควตา D1 โดยไม่จำเป็น
+  //
+  // ปลอดภัยที่จะรวมเพราะทุกคำสั่งเป็น INSERT อิสระที่มี `ON CONFLICT DO NOTHING`
+  // อยู่แล้ว — รายการซ้ำจึงไม่ throw และไม่ทำให้ทั้ง batch ล้ม
+  // (ต่างจาก `consumeReading()` ที่คำสั่งชั้นถัดไปขึ้นกับผลของชั้นก่อน จึงรวมไม่ได้)
+  const statements = slice.map((item) => {
+    const id = item.id?.startsWith("rj_") ? item.id : `rj_${crypto.randomUUID()}`;
+    const createdAt = item.date ? new Date(item.date).getTime() : Date.now();
+    return db
+      .prepare(
+        `INSERT INTO reading_journal (
+           id, user_id, content_hash, question, nickname, spread_id, spread_name,
+           category, persona_id, persona_name, cards_json, summary, advice_json,
+           timing, outcome, user_note, created_at
+         )
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(user_id, content_hash) DO NOTHING`
+      )
+      .bind(
+        id,
+        userId,
+        computeContentHash(item.question, item.cards),
+        item.question,
+        item.nickname || null,
+        item.spreadId,
+        item.spreadName,
+        item.category,
+        item.personaId,
+        item.personaName,
+        JSON.stringify(item.cards || []),
+        item.summary || "",
+        JSON.stringify(item.advice || []),
+        item.timing || null,
+        item.outcome || "PENDING",
+        item.userNote || null,
+        createdAt
+      );
+  });
+
+  // สภาพแวดล้อมทดสอบบางตัวใช้ DB stub ที่ไม่มี `batch()` — ถอยไปเขียนทีละแถวให้ทำงานได้เหมือนเดิม
+  if (typeof db.batch !== "function") {
+    let merged = 0;
+    let skipped = 0;
+    for (const item of slice) {
+      try {
+        await insertJournal(userId, item);
+        merged++;
+      } catch {
+        skipped++;
+      }
+    }
+    return { merged, skipped };
+  }
+
+  let merged = 0;
+  for (let i = 0; i < statements.length; i += IMPORT_BATCH_SIZE) {
+    const chunk = statements.slice(i, i + IMPORT_BATCH_SIZE);
     try {
-      await insertJournal(userId, item);
-      merged++;
+      const results = (await db.batch(chunk)) as Array<{ meta?: { changes?: number } }>;
+      for (const r of results) {
+        if ((r?.meta?.changes ?? 0) > 0) merged++;
+      }
     } catch {
-      skipped++;
+      // ทั้งชุดล้ม (เช่น ตารางหาย) — นับเป็น skipped ทั้งชุด ไม่ให้ทั้งคำขอพัง
     }
   }
 
-  return { merged, skipped };
+  return { merged, skipped: slice.length - merged };
 }
 
 /**
