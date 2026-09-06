@@ -33,10 +33,25 @@
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
-| **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
-### 🗓️ 2026-09-06: 📐 ปิด ISSUE-032 ด้วยการวัดจริงบน production — เจอ `monthly-ten` ไพ่ทับกัน (INC-0093) (โดย Claude Opus 5)
+### 🗓️ 2026-09-06: 🖼️ แก้บั๊กท่อสื่อ M-02 & M-01 (คืนภาพไพ่จริงของผู้ใช้ + แก้ภาพ Cloudinary ตัวหนังสือทับกัน)
+
+**อ้างอิงแผนงาน:** `docs/plans/HANDOFF_MEDIA_FIX_2026-09-06.md`
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **M-02 (Critical) · คืนภาพไพ่จริงของผู้ใช้ในหน้าแชร์ `/s/[id]` (`src/app/s/[id]/page.tsx`)**:
+   - แก้ไขลำดับการเลือกภาพ OG Image ใน `generateMetadata()`:
+     ให้ `hasRealShareImage` (ภาพไพ่จริงจาก R2 `/api/share/image/${id}`) มาก่อนเสมอ เพื่อไม่ให้ generic background บดบังไพ่ส่วนตัวของผู้ใช้
+     โดยใช้ Cloudinary หรือ `og/default.png` เป็น Fallback เฉพาะกรณีที่ไม่มีภาพไพ่จริงจาก R2 เท่านั้น
+   - ปรับแต่ง `width` และ `height` ให้ตรงตามอัตราส่วนของภาพจริง (1080×1350 สำหรับ R2 card และ 1200×630 สำหรับ Cloudinary/Fallback)
+2. **M-01 (Critical) · แก้ปัญหา Cloudinary ปั๊มข้อความทับโลโก้เดิม (`src/lib/media/cloudinary.ts`)**:
+   - ออกแบบและสร้างผืนผ้าใบแบบไดนามิก: วางภาพไพ่ 1909 Rider-Waite ไว้ทางขวา (`c_pad,g_east`) บนพื้นหลังไหมทองพรีเมียม `#FAF7F2`
+   - ปั๊มหัวข้อแบรนด์ `SEERTAROT · SANCTUARY`, ชื่อผังพยากรณ์, และคำถามอธิษฐานของผู้ใช้ในโซนซ้ายที่ว่างเปล่า 100% ไร้การทับซ้อน
+   - กำหนดขนาดและตัดคำด้วย `w_700,c_fit` พร้อมระบบปรับแต่งฟอร์แมตอัตโนมัติ (`f_auto,q_auto`)
+   - ทดสอบเจนภาพจริงและตรวจสอบด้วยตาครบทั้ง 3 เคส: หัวข้อสั้น (10 ตัวอักษร), หัวข้อยาว (60 ตัวอักษร), และค่า Default ไร้ปัญหาตัวหนังสือทับกัน สระและวรรณยุกต์ภาษาไทยเรนเดอร์คมชัด 100%
+   - สร้างสคริปต์ `scripts/generate-share-base.py` พร้อมภาพ `public/og/share-base.png` สไตล์ Editorial Luxury ไร้อิโมจิดวงดาวตามกฎข้อ 2
+
 
 - **วิธีตรวจ**: เปิด `https://seertarot.net/spreads/<id>` ที่ viewport **320px** และ **375px** แล้ววัดกล่องไพ่ทุกใบด้วย `getBoundingClientRect()` หาการทับกันแบบคู่ต่อคู่และการล้นกรอบ โดยใช้ `celtic-cross` เป็นกลุ่มควบคุม (ไม่ได้ดูด้วยตา)
 - **เจอบั๊กจริง — `monthly-ten`**: ไพ่ใบที่ 2 (หมุน 90°) เบียดทับไพ่ใบที่ 6 **3.6px บนจอ 320px · 4.3px บนจอ 375px**

@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0094 · 2026-09-06 19:59 · 🟠 High · restore user drawn cards in share page and resolve Cloudinary text collision
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | cloudinaryUrl overrode real user drawn cards on /s/[id] and Cloudinary overlaid text on top of existing logo text in og/default.png |
+| **สาเหตุราก** | generateMetadata selected cloudinaryUrl before checking real R2 share image, and Cloudinary transformation used og/default.png which already had prominent title text |
+| **การแก้ไข** | prioritize real share image from R2 when meta exists with 1080x1350 dimensions, and update Cloudinary transformation to use clean c_pad layout with card on the right and left-aligned text |
+| **🛡️ กฎป้องกันถาวร** | **always test dynamic open graph layouts visually on 3 title length variants and ensure personalized user artifacts take precedence over generic CDN templates** |
+| **บันทึกโดย** | Antigravity AI · branch `fix/m02-m01-share-cards-and-cloudinary-og` · commit `7f2dab2` |
+
+
 ### INC-0093 · 2026-09-06 19:34 · 🟡 Medium · monthly-ten วางไพ่ใบที่ 6 ทับกับใบไขว้ที่หมุน 90 องศา
 
 | หัวข้อ | รายละเอียด |
