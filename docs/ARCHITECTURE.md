@@ -61,9 +61,9 @@ graph TD
 
 ---
 
-## 4. 20 ผังพยากรณ์ยอดนิยม (Golden Ratio 20 Spreads Architecture)
+## 4. 25 ผังพยากรณ์ยอดนิยม (Golden Ratio 25 Spreads Architecture)
 
-ระบบรองรับผังการเปิดไพ่ 20 แบบ ครอบคลุม 4 หมวดหมู่ จัดวางด้วยสัดส่วนทองคำแบบ **Zero-Clipping Unified Altar Canvas**:
+ระบบรองรับผังการเปิดไพ่ 25 แบบ ครอบคลุม 4 หมวดหมู่ จัดวางด้วยสัดส่วนทองคำแบบ **Zero-Clipping Unified Altar Canvas**:
 
 1. **ผัง 1 ใบ**: ไพ่ประจำวัน (Daily Card), คำแนะนำด่วน (Quick Oracle), ใช่หรือไม่ (Yes/No Single)
 2. **ผัง 2 ใบ**: ทางแยกสองทาง (Two Paths), ความรักสองหัวใจ (Two Hearts)
@@ -120,20 +120,20 @@ src/
 │   │   ├── [id]/read/route.ts       # สตรีมคำอ่านผ่าน Server-Sent Events (SSE)
 │   │   └── [id]/chat/route.ts       # ถามคุยต่อยอดตามบริบทไพ่และ 5 บุคลิก
 │   ├── cards/                       # สารานุกรมไพ่ 78 ใบ (/cards และ /cards/[id])
-│   ├── spreads/                     # คลังผังพยากรณ์ 20 แบบ
+│   ├── spreads/                     # คลังผังพยากรณ์ 25 แบบ
 │   ├── blog/, privacy/, account/    # หน้าเนื้อหา นโยบาย PDPA และจัดการบัญชี
 │   ├── page.tsx                     # วิหารพยากรณ์หลัก (5-Step Ritual Flow)
 │   └── globals.css                  # Obsidian Velvet & Gold Design System + GPU Classes
 ├── components/
 │   ├── card/                        # TarotCard 3D, CardImage (WebP/AVIF), CardZoomModal
 │   ├── deck/                        # InteractiveCardFan (78 ใบ), ShuffleRitual
-│   ├── spread/                      # SpreadBoard, SpreadCardSelector (20 ผัง)
+│   ├── spread/                      # SpreadBoard, SpreadCardSelector (25 ผัง)
 │   ├── reading/                     # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector
 │   ├── history/, encyclopedia/      # ReadingHistoryModal, TarotEncyclopediaModal
 │   └── ui/                          # MysticAltarCanvas, TarotArtIcons, RitualStepProgress
 ├── data/
 │   ├── cards/                       # ข้อมูลไพ่ 78 ใบ (780 ข้อความความหมาย 5 มิติ)
-│   ├── spreads.ts                   # ข้อมูล 20 ผังพยากรณ์และ 95 ตำแหน่ง
+│   ├── spreads.ts                   # ข้อมูล 25 ผังพยากรณ์และ 124 ตำแหน่ง
 │   └── personas.ts                  # แม่หมอ 5 บุคลิก (warm, playful, direct, master, mystic)
 ├── lib/
 │   ├── ai/                          # Gemini SSE Streaming & Structured Output Parser
