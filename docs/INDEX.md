@@ -19,6 +19,7 @@ docs/
 │   ├── ARCHITECTURE.md                  # สถาปัตยกรรมระบบ Edge, Provably Fair, Data Flow, แผนที่ Env Vars
 │   ├── LOCAL_SETUP.md                   # คู่มือติดตั้งและเริ่มรัน Development Server ในเครื่อง
 │   ├── CLOUDFLARE_DEPLOYMENT_GUIDE.md   # คู่มือนำระบบขึ้น Cloudflare Workers & Custom Domain
+│   ├── CLOUDFLARE_OPTIMIZATION_GUIDE.md # คู่มือแม่บทลดภาระ Cloudflare และสเกลระบบสู่ระดับมหาชน (60 มหาโซลูชันระดับตำนาน)
 │   ├── ADMIN_PANEL.md                   # คู่มือแผงควบคุมแอดมินและการมอนิเตอร์สถานะระบบ
 │   ├── PENDING_SETUP.md                 # เช็กลิสต์ความพร้อมบริการภายนอก (เสร็จสมบูรณ์ 100%)
 │   └── AUDIT_LOG.md                     # บันทึกประวัติกิจกรรมและ Audit Trail
