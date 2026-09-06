@@ -62,6 +62,7 @@ docs/
         ├── SITE_SHELL_SEO_PLAN.md       # 🏛️ แผน Header/Footer กลางทั้งเว็บ + RelatedCards ฝั่งเซิร์ฟเวอร์ (PR A-C)
         ├── HANDOFF_MEDIA_FIX_2026-09-06.md   # 🖼️ แผนแก้ท่อสื่อหลัง PR #319–325 (ภาพแชร์ Cloudinary พัง + ImageKit ไม่มีทางถอย)
         ├── HANDOFF_SMOOTH_FAST_2026-09-06.md  # ✦ แผนทำเว็บสมูท+ไวระดับโลก (บันเดิล · แอนิเมชัน · เปลี่ยนหน้า)
+        ├── HANDOFF_SEMANTIC_SEARCH_2026-09-06.md # 🔎 แผนต่อ UI ค้นหาเชิงความหมาย (Vectorize + Workers AI ที่กำพร้าอยู่)
         └── BACKLOG.md                   # คลังรายการงานที่ทำเสร็จแล้วย้อนหลัง
 ```
 
