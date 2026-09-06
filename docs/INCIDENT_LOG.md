@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0092 · 2026-09-06 14:20 · 🟡 Medium · Upstash Redis ไม่ถูกเรียกเลยสักคำสั่ง เพราะ secret มีเครื่องหมายคำพูดครอบ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ตั้ง secret UPSTASH_REDIS_REST_URL/TOKEN บน Worker ครบ (เห็นในหน้า Cloudflare Settings) deploy ใหม่หลายรอบ แต่ Upstash Data Browser ว่างเปล่าและ COMMANDS = 0 ตลอด · ไม่มี error ปรากฏที่ใดเลยเพราะ redis.ts ออกแบบให้ห้าม throw |
+| **สาเหตุราก** | คอนโซล Upstash แสดงค่าเป็นบรรทัดสไตล์ .env คือ UPSTASH_REDIS_REST_URL="https://xxxx.upstash.io" เมื่อคัดลอกมาวางใน wrangler secret put ค่าที่ถูกเก็บจึงมีเครื่องหมายคำพูดครอบติดไปด้วย ทำให้ new URL() ใน fetch โยน TypeError: Invalid URL ทุกครั้ง และเพราะ command() จับ error แล้วคืน null เงียบ ๆ ตามดีไซน์ จึงไม่มีสัญญาณผิดพลาดให้เห็นเลย ระบบถอยไปใช้ KV เหมือนไม่ได้ตั้งค่าอะไร |
+| **การแก้ไข** | เพิ่ม normalizeSecret() ใน src/lib/platform/redis.ts ตัดเครื่องหมายคำพูดครอบ (ทั้ง double และ single รวมถึงซ้อนหลายชั้น) และ validate ด้วย new URL() ตอน resolveConfig ถ้าไม่ผ่านถือว่าไม่ได้เปิดใช้ตั้งแต่แรก จะได้ถอยไป KV ทันทีแทนการยิงแล้วล้มเงียบทุกคำขอ |
+| **🛡️ กฎป้องกันถาวร** | **ห้ามถอด normalizeSecret ออก เขียนเหตุผลกำกับไว้ในหัวฟังก์ชันแล้ว · บทเรียนกว้างกว่านั้น: โมดูลที่ออกแบบให้ห้าม throw ต้องมีทางให้ตรวจสถานะจากภายนอกได้ ไม่งั้นความผิดพลาดจะเงียบสนิทจนต้องสร้าง probe ชั่วคราวมาไล่หา** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/redis-quote-fix` · commit `60e3907` |
+
+
 ### INC-0091 · 2026-09-06 12:48 · 🟠 High · root layout เรียก getServerLocale() ทำให้ทั้งเว็บเป็น dynamic — prerender ได้ 0 หน้า
 
 | หัวข้อ | รายละเอียด |
