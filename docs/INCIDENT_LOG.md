@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0091 · 2026-09-06 12:48 · 🟠 High · root layout เรียก getServerLocale() ทำให้ทั้งเว็บเป็น dynamic — prerender ได้ 0 หน้า
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ทุกหน้าตอบ cache-control: private, no-cache, no-store · ไม่มี header cf-cache-status · Cache Rule ที่ตั้งบน Cloudflare ไม่มีผลกับหน้า HTML เลย · Worker boot Next runtime เต็มรูปแบบทุกคำขอ · npm run build รายงาน static 3 route / dynamic 92 route ทั้งที่ /cards/[id] /blog/[slug] /spreads/[id] มี generateStaticParams() อยู่แล้ว |
+| **สาเหตุราก** | S-02 (PR #306) ใส่ getServerLocale() ซึ่งเรียก headers() และ cookies() ไว้ใน src/app/layout.tsx ซึ่งเป็น root layout ที่ครอบทุกหน้า การแตะ dynamic API ที่ root layout ทำให้ Next.js ถือว่าทุก route เป็น dynamic ทั้งเว็บ prerender ไม่ได้แม้แต่หน้าเดียว ทำให้ enableCacheInterception ของ OpenNext ไม่มีหน้า prerender ให้ seed ลง KV |
+| **การแก้ไข** | ถอด getServerLocale() ออกจาก root layout และ page.tsx ใช้ <html lang=th> คงที่ · ให้ LocaleProvider ฝั่ง client ตรวจภาษาหลัง mount (query lang → cookie → localStorage) และจำ ?lang= ลง cookie ให้เอง · ลบ src/proxy.ts ที่ฉีด x-locale ซึ่งไม่มีใครอ่านแล้ว · ผลลัพธ์ prerender 167 หน้า |
+| **🛡️ กฎป้องกันถาวร** | **กลับด้านด่าน S-02/P-03 ใน scripts/qa/test-seo-wave4.ts ให้บังคับตรงข้าม: root layout ห้ามเรียก getServerLocale/headers/cookies · ห้ามมี src/proxy.ts หรือ src/middleware.ts · src/lib/i18n/server.ts ห้าม import next/headers · หน้าแรกต้องไม่เรียก getServerLocale** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/restore-ssg-edge-cache` · commit `a864775` |
+
+
 ### INC-0090 · 2026-09-06 07:29 · 🟠 High · bind guestAllowed in SPREADS to runtime isStandardSpread and verify new spreads
 
 | หัวข้อ | รายละเอียด |

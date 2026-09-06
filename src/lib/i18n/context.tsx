@@ -72,7 +72,12 @@ export function LocaleProvider({
   children: React.ReactNode;
   initialLocale?: Locale;
 }) {
-  const [locale, setLocaleState] = useState<Locale>(() => getInitialClientLocale(initialLocale));
+  // ⚠️ ต้องเริ่มที่ค่าเดียวกับที่ฝั่งเซิร์ฟเวอร์ prerender ไว้เสมอ (ไทย) ห้ามตรวจ cookie
+  // ตั้งแต่ initializer เด็ดขาด — เพราะ root layout เป็น static แล้ว (ดูหมายเหตุใน
+  // `src/app/layout.tsx`) HTML ที่ส่งมาจึงเป็นภาษาไทยเสมอ ถ้า client render รอบแรก
+  // ออกมาเป็นอังกฤษจะเกิด hydration mismatch ทั้งหน้า
+  // การตรวจภาษาจริงย้ายไปทำใน useEffect ด้านล่าง (หลัง mount) แทน
+  const [locale, setLocaleState] = useState<Locale>(initialLocale ?? DEFAULT_LOCALE);
   const [isPending, startTransition] = useTransition();
   const [pendingLocale, setPendingLocale] = useState<Locale | null>(null);
 
@@ -103,6 +108,35 @@ export function LocaleProvider({
     } catch {
       // Ignore storage restrictions
     }
+  }, []);
+
+  // ตรวจภาษาที่ผู้ใช้เลือกไว้ "หลัง mount" (query `?lang=` → cookie → localStorage)
+  // แล้วค่อยสลับ — รอบแรกจึงตรงกับ HTML ที่ prerender มาเสมอ ไม่เกิด hydration mismatch
+  // ผู้ใช้ภาษาอังกฤษจะเห็นไทยแวบหนึ่งก่อนสลับ ซึ่งเป็นราคาที่จ่ายเพื่อให้ทั้งเว็บเป็น
+  // static prerender ได้ (แลกมากับการที่ทุกหน้าแคชที่ edge ได้จริง)
+  useEffect(() => {
+    if (initialLocale) return;
+    const detected = getInitialClientLocale();
+    if (detected !== locale) {
+      setLocaleState(detected);
+    }
+
+    // จำภาษาที่มากับ `?lang=` ลง cookie/localStorage ให้ด้วย
+    // เดิมงานนี้เป็นของ `src/proxy.ts` (middleware) ซึ่งถูกถอดออกแล้ว เพราะมันทำให้
+    // ทุกหน้าเสียโอกาส prerender และไม่มีใครอ่าน header `x-locale` ที่มันฉีดอีกต่อไป
+    // ถ้าไม่จำไว้ ผู้ใช้ที่เข้ามาด้วย `?lang=en` จะกลับเป็นไทยทันทีที่กดไปหน้าถัดไป
+    try {
+      const queryLang = new URLSearchParams(window.location.search).get("lang");
+      if (queryLang === "th" || queryLang === "en") {
+        document.cookie = `${LOCALE_COOKIE_KEY}=${queryLang}; path=/; max-age=31536000; SameSite=Lax`;
+        document.cookie = `locale=${queryLang}; path=/; max-age=31536000; SameSite=Lax`;
+        localStorage.setItem(LOCALE_COOKIE_KEY, queryLang);
+      }
+    } catch {
+      // เบราว์เซอร์บล็อกที่เก็บข้อมูล (โหมดส่วนตัวแบบเข้ม) — ข้ามไป ไม่ใช่เรื่องคอขาดบาดตาย
+    }
+    // ตั้งใจให้รันครั้งเดียวตอน mount — ไม่ผูกกับ locale เพื่อไม่ให้ย้อนค่าที่ผู้ใช้เพิ่งกดเลือก
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // เคลียร์สถานะรอเมื่อ locale จริงตามมาทันแล้ว

@@ -177,58 +177,71 @@ assert(
   "next.config.ts ต้องมี redirect จาก /tarot ไปที่ / แบบ permanent (S-04)",
 );
 
-// 10. S-02: Root layout must bind server locale and pass initialLocale
+/**
+ * ตัดคอมเมนต์ออกก่อนตรวจ — ด่านด้านล่างห้าม "โค้ด" บางอย่าง แต่ไฟล์เหล่านั้นมีคอมเมนต์
+ * อธิบายว่าทำไมถึงห้าม (ซึ่งต้องเอ่ยชื่อฟังก์ชันที่ห้าม) ถ้าเทียบสตริงดิบจะจับคอมเมนต์เอง
+ */
+function stripComments(code: string): string {
+  return code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+}
+
+// 10. PERF: root layout ต้อง "ไม่" แตะ dynamic API (กลับด้านจากด่าน S-02 เดิม)
+// ---------------------------------------------------------------------------
+// เดิมด่านนี้บังคับให้ root layout เรียก `getServerLocale()` แล้วส่ง `initialLocale`
+// ให้ LocaleProvider (S-02 · PR #306) ซึ่งกลายเป็นต้นเหตุปัญหาประสิทธิภาพที่หนักที่สุด:
+// การแตะ `headers()`/`cookies()` ใน root layout ทำให้ **ทุก route ในเว็บเป็น dynamic**
+// วัดจริง 2026-09-06: prerender ได้ 0 หน้า · Next ตอบ no-store ทุกหน้า ·
+// `enableCacheInterception` ของ OpenNext ไม่มีอะไรให้เสิร์ฟ · Worker boot เต็มทุกคำขอ
+// หลังแก้: prerender ได้ 167 หน้า
+// ด่านนี้จึงถูกกลับด้านเพื่อ "ล็อกไม่ให้ของเดิมกลับมา"
 const layoutPath = path.join(process.cwd(), "src/app/layout.tsx");
-const layoutContent = fs.readFileSync(layoutPath, "utf-8");
+const layoutContent = stripComments(fs.readFileSync(layoutPath, "utf-8"));
 assert(
-  layoutContent.includes("getServerLocale()") &&
-  layoutContent.includes("<html lang={locale}") &&
-  layoutContent.includes("initialLocale={locale}"),
-  "src/app/layout.tsx ต้องเรียก getServerLocale() และส่ง initialLocale ให้ LocaleProvider (S-02)",
+  !layoutContent.includes("getServerLocale()") &&
+  !layoutContent.includes("await headers()") &&
+  !layoutContent.includes("await cookies()"),
+  "src/app/layout.tsx ห้ามเรียก getServerLocale()/headers()/cookies() — จะทำให้ทุกหน้าเป็น dynamic ทั้งเว็บ (PERF)",
+);
+assert(
+  layoutContent.includes('<html lang="th"'),
+  "src/app/layout.tsx ต้องใช้ <html lang=\"th\"> แบบคงที่ (ภาษาสลับฝั่ง client โดย LocaleProvider)",
 );
 
 // 11. P-03: HomeSeoContent must be a Server Component (no 'use client')
+// ยังคงเดิม — เนื้อหา SEO 800+ บรรทัดต้องไม่ถูกส่งไปเป็น JS ให้เบราว์เซอร์
 const homeSeoPath = path.join(process.cwd(), "src/components/seo/HomeSeoContent.tsx");
 const homeSeoContent = fs.readFileSync(homeSeoPath, "utf-8");
 assert(
   !homeSeoContent.includes('"use client"') && !homeSeoContent.includes("'use client'"),
   "src/components/seo/HomeSeoContent.tsx ต้องเป็น Server Component (ห้ามมี 'use client') (P-03)",
 );
+
+// 12. PERF: ต้องไม่มี middleware/proxy ที่รันทุกคำขอหน้าเว็บ
+// เดิมด่านนี้บังคับให้ "ต้องมี" src/proxy.ts (S-02) — ถอดออกแล้วเพราะไม่มีใครอ่าน
+// header `x-locale` ที่มันฉีดอีกต่อไป (ภาษาย้ายไปตัดสินฝั่ง client) เหลือไว้ = จ่าย
+// ค่ารันโค้ดบน Worker ทุกคำขอหน้าเว็บฟรี ๆ
 assert(
-  homeSeoContent.includes("isEnglish"),
-  "HomeSeoContent ต้องรับ isEnglish prop สำหรับเลือกภาษาตอนเรนเดอร์ฝั่งเซิร์ฟเวอร์",
+  !fs.existsSync(path.join(process.cwd(), "src/proxy.ts")) &&
+  !fs.existsSync(path.join(process.cwd(), "src/middleware.ts")),
+  "ห้ามมี src/proxy.ts หรือ src/middleware.ts — รันทุกคำขอบน Worker โดยไม่มีใครใช้ผลลัพธ์ (PERF)",
 );
 
-// 12. S-02: Next.js 16 Proxy exists and handles lang query param & cookies
-const proxyPath = path.join(process.cwd(), "src/proxy.ts");
-assert(fs.existsSync(proxyPath), "ต้องมี src/proxy.ts สำหรับ Next.js 16 (S-02)");
-if (fs.existsSync(proxyPath)) {
-  const proxyContent = fs.readFileSync(proxyPath, "utf-8");
-  assert(
-    proxyContent.includes('searchParams.get("lang")') &&
-    proxyContent.includes("x-locale") &&
-    proxyContent.includes("LOCALE_COOKIE_KEY"),
-    "src/proxy.ts ต้องจัดการดักจับ query ?lang= และฉีด x-locale พร้อมตั้ง Cookie (S-02)",
-  );
-}
-
-// 13. S-02: getServerLocale in server.ts checks x-locale and cookieStore
+// 13. PERF: server.ts ต้องไม่มี getServerLocale ที่อ่าน headers()/cookies() อีก
 const serverI18nPath = path.join(process.cwd(), "src/lib/i18n/server.ts");
-const serverI18nContent = fs.readFileSync(serverI18nPath, "utf-8");
+const serverI18nContent = stripComments(fs.readFileSync(serverI18nPath, "utf-8"));
 assert(
-  serverI18nContent.includes("x-locale") &&
-  serverI18nContent.includes("headers()") &&
-  serverI18nContent.includes("cookies()"),
-  "src/lib/i18n/server.ts ต้องตรวจสอบทั้ง header x-locale และ cookies (S-02)",
+  !serverI18nContent.includes("getServerLocale") &&
+  !serverI18nContent.includes('from "next/headers"'),
+  "src/lib/i18n/server.ts ห้าม import next/headers หรือมี getServerLocale อีก (PERF)",
 );
 
-// 14. P-03: src/app/page.tsx must pass isEnglish into HomeSeoContent
+// 14. PERF: หน้าแรกต้องเป็น static prerender — ห้ามดึง locale จากเซิร์ฟเวอร์
 const homePagePath = path.join(process.cwd(), "src/app/page.tsx");
-const homePageContent = fs.readFileSync(homePagePath, "utf-8");
+const homePageContent = stripComments(fs.readFileSync(homePagePath, "utf-8"));
 assert(
-  homePageContent.includes("HomeSeoContent isEnglish={isEnglish}") &&
-  homePageContent.includes("getServerLocale()"),
-  "src/app/page.tsx ต้องดึง getServerLocale() และส่ง isEnglish ให้ HomeSeoContent (P-03)",
+  !homePageContent.includes("getServerLocale()") &&
+  homePageContent.includes("<HomeSeoContent />"),
+  "src/app/page.tsx ห้ามเรียก getServerLocale() — หน้าแรกต้อง prerender ได้ (PERF)",
 );
 
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);

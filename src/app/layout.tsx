@@ -7,7 +7,6 @@ import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { LocaleProvider } from "@/lib/i18n";
-import { getServerLocale } from "@/lib/i18n/server";
 import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 const notoSerifThai = Noto_Serif_Thai({
@@ -133,11 +132,24 @@ const webSiteJsonLd = {
   inLanguage: "th",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const locale = await getServerLocale();
-
+/**
+ * ⚠️ ห้ามเรียก `headers()` / `cookies()` (เช่น `getServerLocale()`) ใน layout นี้เด็ดขาด
+ * -------------------------------------------------------------------------------
+ * root layout ครอบทุกหน้าในเว็บ การแตะ dynamic API ที่นี่ทำให้ **ทุก route กลายเป็น
+ * ƒ Dynamic ทั้งเว็บ** — วัดจริงเมื่อ 2026-09-06: static 3 route · dynamic 92 route
+ * ทั้งที่ `/cards/[id]`, `/blog/[slug]`, `/spreads/[id]` มี `generateStaticParams()` อยู่แล้ว
+ *
+ * ผลที่ตามมาคือ Next ตอบ `cache-control: private, no-cache, no-store` ทุกหน้า
+ * → `enableCacheInterception` ของ OpenNext ไม่มีหน้า prerender ให้ seed ลง KV เลย
+ * → Worker ต้อง boot Next runtime เต็มรูปแบบทุกคำขอ (ต้นเหตุที่เฟส 1 ลด Worker ไม่ได้จริง)
+ *
+ * ภาษาจึงถูกตัดสินฝั่ง client แทน: `LocaleProvider` อ่านลำดับ query `?lang=` → cookie →
+ * localStorage เองหลัง mount และอัปเดต `document.documentElement.lang` ให้ด้วย
+ * ค่า `lang="th"` ที่นี่เป็นค่าเริ่มต้นของ HTML ที่ prerender ไว้ (ภาษาหลักของเว็บ)
+ */
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={locale} className={`${notoSerifThai.variable} ${sarabun.variable}`}>
+    <html lang="th" className={`${notoSerifThai.variable} ${sarabun.variable}`}>
       <head>
         <meta charSet="utf-8" />
         {/* เฉพาะ schema ที่เป็นจริงกับ "ทุกหน้า" เท่านั้นที่อยู่ตรงนี้ได้
@@ -153,7 +165,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-dvh font-sans antialiased">
         <AppMotionProvider>
-          <LocaleProvider initialLocale={locale}>
+          <LocaleProvider>
             <AntiTheftShield />
             <AssetWarmup />
             <AnalyticsTracker />

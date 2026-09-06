@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import TarotFlow from "./TarotFlow";
 import { HomeSeoContent } from "@/components/seo/HomeSeoContent";
-import { getServerLocale } from "@/lib/i18n/server";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
@@ -58,9 +57,16 @@ const webAppJsonLd = {
  */
 const heroCardSrcSet = getCardWebpSrcSet("major-19.jpg");
 
-export default async function Page() {
-  const locale = await getServerLocale();
-  const isEnglish = locale === "en";
+/**
+ * ⚠️ หน้านี้ต้องเป็น static prerender เท่านั้น — ห้ามเรียก `getServerLocale()` หรือ dynamic API อื่น
+ * (เหตุผลเต็มอยู่ใน `src/app/layout.tsx`) เนื้อหา SEO ใต้ fold จึงเรนเดอร์เป็นภาษาไทยเสมอ
+ * ซึ่งตรงกับกลยุทธ์ SEO ของเว็บ (คีย์เวิร์ดไทยล้วน) ส่วน UI ที่เหลือยังสลับภาษาได้ตามปกติ
+ * ผ่าน `LocaleProvider` ฝั่ง client
+ *
+ * ถ้าวันหน้าต้องการ SEO ภาษาอังกฤษจริงจัง ให้ทำ routing แยกเส้นทาง (`/en/...`) แล้ว
+ * prerender สองภาษา — ห้ามกลับไปอ่าน locale จากเซิร์ฟเวอร์ในหน้านี้อีก
+ */
+export default function Page() {
 
   return (
     <>
@@ -84,7 +90,7 @@ export default async function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
       />
-      <TarotFlow seoContent={<HomeSeoContent isEnglish={isEnglish} />} />
+      <TarotFlow seoContent={<HomeSeoContent />} />
     </>
   );
 }
