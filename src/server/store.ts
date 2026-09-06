@@ -107,7 +107,7 @@ const READING_KV_TTL_SEC = 7200; // 2 hours (ตรงกับ Session Token & 
  * ไม่ได้ตั้ง = เขียน KV เหมือนเดิมทุกอย่าง
  */
 export async function persistReading(record: ReadingRecord): Promise<void> {
-  if (isRedisEnabled()) {
+  if (await isRedisEnabled()) {
     const ok = await redisSetJSON(KEY.reading(record.id), record, READING_KV_TTL_SEC);
     if (ok) return;
     // Redis ล่ม → ถอยไปเขียน KV ต่อ ห้ามปล่อยให้เซสชันหาย
@@ -122,7 +122,7 @@ export async function persistReading(record: ReadingRecord): Promise<void> {
 }
 
 export async function loadReadingFromKV(id: string): Promise<ReadingRecord | null> {
-  if (isRedisEnabled()) {
+  if (await isRedisEnabled()) {
     const fromRedis = await redisGetJSON<ReadingRecord>(KEY.reading(id));
     if (fromRedis) return fromRedis;
     // ไม่เจอใน Redis → ลอง KV ต่อ (ครอบคลุมเซสชันที่เกิดก่อนเปิดใช้ Upstash)

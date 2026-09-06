@@ -29,16 +29,50 @@ interface RedisConfig {
   token: string;
 }
 
-function config(): RedisConfig | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
-  if (!url || !token) return null;
-  return { url: url.replace(/\/+$/, ""), token };
+/**
+ * ⚠️ ห้ามอ่าน `process.env` ตรง ๆ อย่างเดียวเด็ดขาด (บทเรียนจากรอบแรก)
+ * ---------------------------------------------------------------------------
+ * ตอนแรกไฟล์นี้อ่าน `process.env.UPSTASH_*` อย่างเดียว ผลคือถึงจะตั้ง secret บน Worker
+ * ครบทั้งสองตัวแล้ว (ยืนยันในหน้า Cloudflare → Workers → tarot-web → Settings)
+ * และ deploy ใหม่แล้ว **Redis ก็ยังไม่ถูกเรียกเลยสักคำสั่ง** (Upstash Data Browser ว่างเปล่า)
+ *
+ * บน OpenNext/Workers ทางที่ "รับประกันว่าเห็น secret เสมอ" คือ env object ที่มากับ
+ * `getCloudflareContext()` — ซึ่งเป็นวิธีเดียวกับที่ repo นี้ใช้ดึง KV / D1 / R2 / AI
+ * อยู่แล้ว (ดู `safelyGetCloudflareContext()` ใน `src/lib/platform/cf.ts`)
+ * ส่วน `process.env` เก็บไว้เป็นทางถอยสำหรับ `npm run dev` และชุดทดสอบ
+ */
+let cached: RedisConfig | null = null;
+let resolved = false;
+
+async function resolveConfig(): Promise<RedisConfig | null> {
+  if (resolved) return cached;
+
+  let url = "";
+  let token = "";
+
+  try {
+    const { safelyGetCloudflareContext } = await import("@/lib/platform/cf");
+    const ctx = await safelyGetCloudflareContext();
+    const env = (ctx?.env ?? {}) as Record<string, unknown>;
+    url = typeof env.UPSTASH_REDIS_REST_URL === "string" ? env.UPSTASH_REDIS_REST_URL : "";
+    token = typeof env.UPSTASH_REDIS_REST_TOKEN === "string" ? env.UPSTASH_REDIS_REST_TOKEN : "";
+  } catch {
+    // รันนอก Workers (dev / test) — ตกไปใช้ process.env ด้านล่าง
+  }
+
+  if (!url || !token) {
+    url = process.env.UPSTASH_REDIS_REST_URL?.trim() || "";
+    token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim() || "";
+  }
+
+  cached = url && token ? { url: url.trim().replace(/\/+$/, ""), token: token.trim() } : null;
+  resolved = true;
+  return cached;
 }
 
 /** เปิดใช้ Upstash อยู่หรือไม่ (มีครบทั้ง url + token) */
-export function isRedisEnabled(): boolean {
-  return config() !== null;
+export async function isRedisEnabled(): Promise<boolean> {
+  return (await resolveConfig()) !== null;
 }
 
 /** timeout กันคำสั่งค้างจนลาก request ทั้งเส้นให้ช้าตาม */
@@ -49,7 +83,7 @@ const TIMEOUT_MS = 2_000;
  * รูปแบบ: POST <url> body = ["SET", "key", "value", "EX", "60"]
  */
 async function command<T>(args: (string | number)[]): Promise<T | null> {
-  const cfg = config();
+  const cfg = await resolveConfig();
   if (!cfg) return null;
 
   const controller = new AbortController();
@@ -128,6 +162,6 @@ export async function redisGetJSON<T>(key: string): Promise<T | null> {
 
 /** ตรวจว่าต่อ Upstash ได้จริงไหม — ใช้ในหน้า /admin (Cloud Health) */
 export async function redisPing(): Promise<boolean> {
-  if (!isRedisEnabled()) return false;
+  if (!(await isRedisEnabled())) return false;
   return (await command<string>(["PING"])) === "PONG";
 }
