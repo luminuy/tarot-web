@@ -36,6 +36,39 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: รอบตรวจใหญ่ประสิทธิภาพ · โค้ดตาย · SEO — เขียนแผนพร้อมตัวเลขวัดจริง (โดย Claude Opus 5)
+
+> **ขอบเขต**: ตรวจและเขียนแผนอย่างเดียว — ไม่แก้โค้ดที่รันจริง (แตะแค่ `docs/plans/*`, `docs/WORK_LOG.md`, `CLAUDE.md`)
+
+**สิ่งที่ทำ**: ตรวจทั้งคลัง 362 ไฟล์ / 60,644 บรรทัด ด้วย `tsc --noEmit`, `next build`, การไล่ import graph,
+การชั่งน้ำหนัก chunk แบบ gzip รายหน้า และการเทียบขนาดไฟล์ภาพจริงกับที่เอกสารอ้างไว้
+
+**สิ่งที่พบ (มีหลักฐานวัดจริงทุกข้อ)**
+
+| รหัส | เรื่อง | ตัวเลข |
+| :-- | :--- | :--- |
+| P-01 | `nav-links.ts` ลาก `DECK` + `ARTICLES` + `SPREADS` เข้าบันเดิลทุกหน้า เพื่อนับเลข 3 ตัว | ทดลองแก้แล้ว build ซ้ำ: `/` 472→316 KB · `/cards` 427→254 KB · `/blog` 427→252 KB (gzip) |
+| P-02 | `/cards` serialize สำรับเต็มลง RSC payload ทั้งที่หน้านั้นใช้แค่ 10 ฟิลด์ | payload 148 KB → 8 KB gzip ถ้าตัดฟิลด์ที่ไม่ใช้ |
+| P-03 | ภาพย่อ `w768` หนักเฉลี่ย 355 KB — **มากกว่าไฟล์ `.jpg` ต้นฉบับ (278 KB)** | เอกสารในสคริปต์เขียนว่า "~38KB" คลาดเคลื่อน 9 เท่า |
+| S-01 | `hreflang` ไม่ปรากฏในหน้าใดเลย เพราะทุกหน้าเขียนทับ `alternates` ทั้งก้อน | `grep hreflang .next/server/app/index.html` = ว่างเปล่า |
+| S-02 | `?lang=en` เสิร์ฟ HTML ภาษาไทย · `LocaleProvider` ไม่เคยได้รับ `initialLocale` | `grep -rn initialLocale src` = ไม่มีจุดใดส่งค่า |
+| D-01 | โมดูลที่ไม่มีใคร import 4 ไฟล์ (321 บรรทัด) | `lib/audio/tts.ts` · `QuotaMeter.tsx` · `lib/i18n/server.ts` · `SiteShell.tsx` |
+| D-03 | `npm run lint` พังมาตลอด (Next 16 ถอด `next lint` ออกแล้ว) | คลังนี้ไม่มี linter ทำงานอยู่เลย |
+
+**สิ่งที่ตรวจแล้วไม่พบปัญหา** (บันทึกไว้กัน Agent ตัวถัดไปตรวจซ้ำ): typecheck 0 error · build สำเร็จ ·
+`robots.ts` และ `sitemap.ts` เขียนถูกหลักแล้ว · JSON-LD วางถูกที่ · ไม่มี memory leak จาก event listener/timer ·
+ไม่มีช่อง XSS ใน `dangerouslySetInnerHTML` · cache header ของภาพและ `_next/static` ถูกต้อง ·
+code-splitting ใน `TarotFlow` ทำได้ดีอยู่แล้ว (15 dynamic import)
+
+**แผน** = [`docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md`](plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md)
+แบ่งลงมือเป็น 7 PR โดยเริ่มจากการ**สร้างด่านวัดน้ำหนักหน้าเว็บก่อน** แล้วค่อยแก้ —
+เพราะบทเรียนของคลังนี้คือ "กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน"
+และ P-01 โตเงียบ ๆ มาถึง 126 KB ได้ก็เพราะไม่เคยมีใครวัด
+
+**ยังไม่ได้ทำ**: ทั้ง 7 PR ในแผน — รอเจ้าของโปรเจกต์สั่งเริ่ม
+
+---
+
 ### 🗓️ 2026-09-06: เขียนแผนรอบ 2 — ตัดขั้นสับ/เลือกไพ่ 3 หน้า one-card ให้เร็วแบบเปิดไพ่ด่วน (โดย Claude)
 
 > **ขอบเขต**: เขียนแผนอย่างเดียว — ไม่แก้โค้ด client/page (แตะแค่เอกสาร: WORK_LOG, INDEX, CLAUDE.md)
