@@ -36,6 +36,22 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🧾 สะสาง PR ค้าง 2 ตัว + ทำเอกสาร QA ให้ตรงความจริง (โดย Claude Opus 5)
+
+- **สิ่งที่ทำ**: เคลียร์ PR เปิดค้าง 2 ตัวที่ merge ไม่ได้เพราะชนกับ `main`
+  - **PR #297** (`สรุปตรงใจจากแม่หมอ` ขึ้นนำหน้าผลทำนายด่วน) — rebase บน `origin/main` ผ่านฉลุยไม่มี conflict · `repo:verify` 34/34 · force-push แล้ว auto-merge เข้า main เรียบร้อย
+  - **PR #294** (แผน QA ผังใหม่ + ISSUE-031/032/033) — ตรวจแล้วพบว่า **เนื้อหาถูก merge ไปแล้วเกือบทั้งหมด** ผ่าน PR #295 และคอมมิตอื่น ทำให้สาขานี้ **เก่ากว่า `main`** (ถ้า merge จะย้อนคืนเลข `34 ด่าน` เป็น `33` และลบโค้ดใน `test-docs-numbers.ts` กับ `github-auto.ts` ทิ้ง) จึงปิด PR แล้วยกเฉพาะเนื้อหาที่ยังเป็นจริงมาลง `main` แทน
+- **เอกสารที่แก้ให้ตรงความจริง**:
+  - `docs/KNOWN_ISSUES.md` — เพิ่ม **ISSUE-032** (ผังใหม่ 5 ผังยังไม่เคยถูกเดินพิธีกรรมจริง ยังไม่จับภาพมือถือ 320/375px) ซึ่งเป็นข้อเดียวจากสามข้อที่ยังค้างจริง
+  - `docs/plans/HANDOFF_QA_SPREADS_2026-09-06.md` — ปิดงาน **B** (`guestAllowed` ผูกกับรันไทม์แล้วใน PR #295) · ปิดงาน **C.2** (`test-entitlement.ts` หัวข้อ 10 ครอบเส้นทาง "ธงปิด" แล้ว) · แก้เลขด่าน `33` → `34`
+- **สิ่งที่ตรวจแล้วว่าไม่ใช่ปัญหาแล้ว**:
+  - ~~ISSUE-031~~ `guestAllowed` ไม่มีผลบังคับ → แก้แล้วใน PR #295 (`STANDARD_SPREAD_IDS` อ่านจาก `SPREADS.guestAllowed` เป็นแหล่งความจริงเดียว)
+  - ~~ISSUE-033~~ เส้นทาง "แอดมินปิดระบบสิทธิ์" ไม่มีด่านตรวจ → แก้แล้ว `scripts/qa/test-entitlement.ts:285-297`
+- **ผลตรวจ**: `npm run repo:verify` ➔ ✅ **34/34 ด่าน**
+- **สิ่งที่ยังค้าง**: ISSUE-032 เป็นงาน QA ด้วยมือ ต้องเปิดเบราว์เซอร์จริงที่ 320/375px — จุดเสี่ยงสุดคือ `monthly-ten` (ช่องว่างคอลัมน์แคบกว่า `celtic-cross` 23%)
+
+---
+
 ### 🗓️ 2026-09-06: 🚀 เปิดใช้งาน Cloudinary Production (`xtgpasdc`) สำหรับ Dynamic OpenGraph Cards
 
 **เป้าหมาย:** บันทึกและเปิดใช้งาน Cloud Name `xtgpasdc` จากบัญชี Cloudinary จริงของผู้ใช้ เพื่อเปิดใช้ระบบเจนภาพแชร์โซเชียลไดนามิกความเร็วสูงระดับโลก 100%
