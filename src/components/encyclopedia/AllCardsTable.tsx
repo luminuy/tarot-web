@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { DECK } from "@/data/cards";
+import type { CardSummary } from "@/data/cards";
 import { CardImage } from "@/components/card/CardImage";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { useLocale } from "@/lib/i18n";
@@ -38,13 +38,17 @@ const ELEMENT_EN: Record<string, string> = {
   ดิน: "Earth",
 };
 
-export const AllCardsTable: React.FC = () => {
+interface AllCardsTableProps {
+  cards: readonly CardSummary[];
+}
+
+export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
   const { isEnglish } = useLocale();
   const [activeSuit, setActiveSuit] = useState<string>("all");
   const [query, setQuery] = useState<string>("");
 
   const filteredCards = useMemo(() => {
-    return DECK.filter((card) => {
+    return cards.filter((card) => {
       // Suit filter
       if (activeSuit === "major" && card.arcana !== "major") return false;
       if (activeSuit === "wands" && card.suit !== "wands") return false;

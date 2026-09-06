@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DECK } from "@/data/cards";
+import { DECK_SUMMARY } from "@/data/cards";
 import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
@@ -31,8 +31,8 @@ export default function CardsPage() {
     inLanguage: "th",
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: DECK.length,
-      itemListElement: DECK.map((card, index) => ({
+      numberOfItems: DECK_SUMMARY.length,
+      itemListElement: DECK_SUMMARY.map((card, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: `${card.nameTh} (${card.nameEn})`,
@@ -69,7 +69,7 @@ export default function CardsPage() {
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Client Interactive Explorer with dynamic bilingual hero header */}
-        <CardsExplorer cards={DECK} />
+        <CardsExplorer cards={DECK_SUMMARY} />
       </div>
     </main>
   );

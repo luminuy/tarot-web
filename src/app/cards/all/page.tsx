@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DECK_SUMMARY } from "@/data/cards";
 import { AllCardsTable } from "@/components/encyclopedia/AllCardsTable";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
@@ -131,7 +132,7 @@ export default function AllCardsSummaryPage() {
         </header>
 
         {/* Interactive Master Table */}
-        <AllCardsTable />
+        <AllCardsTable cards={DECK_SUMMARY} />
       </div>
     </main>
   );

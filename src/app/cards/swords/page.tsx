@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DECK } from "@/data/cards";
+import { DECK_SUMMARY } from "@/data/cards";
 import { CARD_GROUPS } from "@/data/cards/group-seo";
 import { CardGroupView } from "@/components/encyclopedia/CardGroupView";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default function SwordsPage() {
-  const cards = DECK.filter((c) => c.suit === "swords");
+  const cards = DECK_SUMMARY.filter((c) => c.suit === "swords");
 
   return (
     <main className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans relative overflow-x-clip">

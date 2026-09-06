@@ -47,7 +47,7 @@ export const BUDGETS: RouteBudget[] = [
     route: "/cards",
     htmlRelativePath: ".next/server/app/cards.html",
     maxJsGzipKb: 270, // PR 2 Ratchet (Actual: 254 KB) -> PR 7 Target: <= 220 KB
-    maxHtmlGzipKb: 190, // PR 1 Baseline (Current: 174 KB) -> PR 3 Target: <= 45 KB
+    maxHtmlGzipKb: 45, // PR 3 Ratchet (Actual: 34 KB, dropped from 174 KB)
   },
   {
     route: "/cards/major-00",
@@ -70,7 +70,7 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/love/1-card",
     htmlRelativePath: ".next/server/app/love/1-card.html",
-    maxJsGzipKb: 410, // PR 2 Ratchet (Actual: 393 KB)
+    maxJsGzipKb: 410, // PR 2 Ratchet (Actual: 394 KB)
     maxHtmlGzipKb: 30, // Current: 18 KB
   },
   {
@@ -82,8 +82,8 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/cards/all",
     htmlRelativePath: ".next/server/app/cards/all.html",
-    maxJsGzipKb: 350, // PR 2 Ratchet (Actual: 336 KB)
-    maxHtmlGzipKb: 35, // Current: 28 KB
+    maxJsGzipKb: 230, // PR 3 Ratchet (Actual: 210 KB, dropped from 336 KB)
+    maxHtmlGzipKb: 45, // PR 3 (Actual: 36 KB)
   },
 ];
 
