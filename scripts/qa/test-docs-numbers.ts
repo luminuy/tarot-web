@@ -45,11 +45,13 @@ const RULES: Rule[] = [
   { name: "สัดส่วนด่าน (N/N gates)", re: /(\d+)\/(\d+)\s*(?:ด่าน|verification gates)/g, expected: TRUTH.gates },
   {
     name: "จำนวนผัง (N ผัง)",
-    re: /(?<!ไพ่\s)(?<!ใหม่\s)(?<!ฟรี\s)(?<!ล็อก\s)(?<!เพิ่ม\s)(?<!ทั้ง\s)(?<!เปิด\s)(?<!เลือก\s)(?<!มี\s)(?<!อีก\s)(\d+)\s*ผัง/g,
+    // (?<!\d) กันไม่ให้ match เริ่มกลางตัวเลข — เดิม "ทั้ง 25 ผัง" ถูก lookbehind ตัดที่เลข 25
+    // แล้วเครื่องมือไปเริ่มใหม่ที่ "5" ทำให้อ่านเป็น "5 ผัง" และแจ้งเตือนผิด (งาน D)
+    re: /(?<!\d)(?<!ไพ่\s)(?<!ใหม่\s)(?<!ฟรี\s)(?<!ล็อก\s)(?<!เพิ่ม\s)(?<!ทั้ง\s)(?<!เปิด\s)(?<!เลือก\s)(?<!มี\s)(?<!อีก\s)(\d+)\s*ผัง/g,
     expected: TRUTH.spreads,
   },
-  { name: "จำนวนผัง (ผัง N แบบ)", re: /ผัง(?:การเปิดไพ่|พยากรณ์)?\s*(\d+)\s*แบบ/g, expected: TRUTH.spreads },
-  { name: "จำนวนผัง (N Spreads)", re: /(\d+)\s*Spreads/g, expected: TRUTH.spreads },
+  { name: "จำนวนผัง (ผัง N แบบ)", re: /ผัง(?:การเปิดไพ่|พยากรณ์)?\s*(?<!\d)(\d+)\s*แบบ/g, expected: TRUTH.spreads },
+  { name: "จำนวนผัง (N Spreads)", re: /(?<!\d)(\d+)\s*Spreads/g, expected: TRUTH.spreads },
   { name: "จำนวนตำแหน่ง", re: /(?<!ทศนิยม\s*)(\d+)\s*ตำแหน่ง(?:พยากรณ์)?/g, expected: TRUTH.positions },
 ];
 

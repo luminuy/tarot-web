@@ -1082,7 +1082,9 @@ export const SPREADS: Spread[] = [
         nameEn: "6. Near Future Shift",
         meaning: "การเปลี่ยนแปลงหรือข่าวสารใหม่ๆ ในช่วงครึ่งหลังของเดือน",
         meaningEn: "New developments and energy arriving in the latter half of the month",
-        x: 0.5,
+        // 0.5 → 0.53: ผังนี้เลื่อนแกนไขว้จาก celtic-cross 0.32 → 0.35 แต่เดิมลืมเลื่อนใบนี้ตาม
+        // ทำให้ใบที่ 2 ซึ่งหมุน 90° (กว้าง 19.5%) เบียดใบนี้ 0.0125 (ISSUE-032)
+        x: 0.53,
         y: 0.5,
       },
       {
