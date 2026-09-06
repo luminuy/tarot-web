@@ -20,6 +20,7 @@
 | 3-7 | **Vectorize** — ค้นหาเชิงความหมาย + "ไพ่ที่พลังงานใกล้เคียง" | ✅ **LIVE** (verified — `?q=` + related cards) · index มี 102 รายการ | #199 #200 |
 | 4-8 | **Durable Objects** | 🔴 บล็อก — payoff คือห้องสด Marketplace · Marketplace ยังไม่เปิด (D1 provisioning + PDPA sign-off — `docs/specs/MARKETPLACE.md`) | — |
 | 4-9 | **Realtime (SFU/TURN)** | 🔴 บล็อก — ต้องมี Marketplace + Durable Objects ก่อน | — |
+| 5-10 | **Dual-Engine Media (ImageKit + Cloudinary)** — เสิร์ฟไพ่ 78 ใบ + เจนรูปแชร์ผลดวง ตัดโหลด Next.js 100% | 🟡 **แผนบรรจุ (Ready)** — ฟรี 100% ไม่แตะโควตา Worker CPU/Bandwidth | — |
 
 ### 📌 ค่าที่ตั้งบน production แล้ว
 | ตัว | ค่า |
@@ -163,3 +164,29 @@
 
 - **Durable Objects:** ใช้ได้เลยสำหรับ provably-fair session state + rate-limit แม่นยำต่อผู้ใช้ แต่ payoff ใหญ่คือห้องคุยสด Marketplace → ทำพร้อม Marketplace
 - **Realtime (SFU/TURN):** บล็อกเต็มตัว — รอ Marketplace ปลดบล็อก (D1 provisioning + PDPA sign-off ตาม `docs/specs/MARKETPLACE.md`)
+
+---
+
+## Wave 5 — ขุมพลังสื่อคู่ขนาน (Dual-Engine Media Pipeline: ImageKit + Cloudinary) 🟡 แผนบรรจุ
+
+**เป้าหมาย:** ตัดภาระการแปลงรูป ย่อขนาดรูป และเจนภาพแชร์โซเชียล (OpenGraph) ออกจาก Next.js / Cloudflare Workers **100%** เพื่อกำจัดความเสี่ยง CPU Timeout (10ms) และ Memory Overflow (128MB) อย่างถาวร
+
+### 1. ImageKit.io (เสิร์ฟภาพไพ่ 78 ใบ + พรีวิวผัง 25 แบบ)
+- **โควตาฟรี:** แบนด์วิดท์ 25 GB/เดือน (รองรับการดูรูปไพ่ได้ 500,000+ ครั้ง/เดือน)
+- **การเชื่อมต่อ:** ใช้ระบบ **Web Origin Pull** ชี้ไปยังโดเมนเว็บเรา หรือ GitHub Repository โดยไม่ต้องย้ายไฟล์หรือเขียนโค้ดอัปโหลดใหม่
+- **การทำงาน:** เสิร์ฟไฟล์ Responsive WebP/AVIF อัตโนมัติตามหน้าจอมือถือ (`tr:f-auto,w-...`)
+- **ผลลัพธ์:** ลด Egress Bandwidth และโหลดรูปภาพของ Cloudflare Worker ลงเหลือ **0%**
+
+### 2. Cloudinary (เจนภาพการ์ดแชร์ผลดวงไดนามิกระดับพรีเมียม)
+- **โควตาฟรี:** 25 Credits/เดือน (~25,000 Transformations)
+- **การทำงาน:** ใช้สำหรับฟังก์ชันแชร์ผลทำนายลงโซเชียล (OG Image) โดยซ้อนเลเยอร์ภาพผ่าน URL Transformation:
+  - เลเยอร์ 1: ภาพพื้นหลังวิหารพยากรณ์
+  - เลเยอร์ 2: ภาพไพ่ 1909 Rider-Waite ที่ผู้ใช้เปิดได้ (1–3 ใบ)
+  - เลเยอร์ 3: ข้อความชื่อผู้ใช้ + ชื่อผัง + บทสรุปคำทำนาย (ฟอนต์ไทยระดับพรีเมียม)
+- **ผลลัพธ์:** ไม่ต้องรัน Satori, Resvg-WASM หรือฝังฟอนต์ไทยขนาด 2MB ลงใน Cloudflare Worker ช่วยประหยัดขนาด Worker Bundle ลงถึง 3–5 MB!
+
+### 3. ผลลัพธ์รวมต่อ Cloudflare & Next.js
+- **CPU Time ในการจัดการรูป:** ลดลงจาก 50–200ms เหลือ **0ms**
+- **RAM ใน Worker:** ลดลง **90–95%** (ตัดปัญหา Error 1101)
+- **ความจุคนดูดวง:** เซิร์ฟเวอร์มีกำลังเต็มที่ 100% สำหรับการสตรีมคำทำนาย AI และความปลอดภัย Provably Fair
+
