@@ -93,3 +93,37 @@ jobs:
           NEXT_PUBLIC_GOOGLE_ADS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_ID || vars.NEXT_PUBLIC_GOOGLE_ADS_ID || '' }}
           NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || vars.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || '' }}
 
+
+      # ── ล้างแคช Edge หลัง deploy (จำเป็นตั้งแต่เปิด Cache Rules เฟส 1) ──────────
+      # Cache Rule `[phase1]` ตั้ง edge TTL หน้า SSG ไว้ 7 วัน ถ้าไม่ purge หลังปล่อยเวอร์ชันใหม่
+      # ผู้ใช้จะยังเห็นหน้าเดิมค้างอยู่นานถึง 7 วัน (ของใหม่ขึ้นแล้วแต่ไม่มีใครเห็น)
+      #
+      # ⚠️ ขั้นนี้วางไว้ "หลัง" deploy เสมอ — ถ้า token ขาดสิทธิ์ "Zone · Cache Purge · Purge"
+      #    โค้ดใหม่จะขึ้น production เรียบร้อยแล้ว เหลือแค่ job ขึ้นสีแดงเตือนให้ไปเติมสิทธิ์
+      #    (เลือกให้ fail ดัง ๆ ดีกว่าปล่อยผ่านเงียบ ๆ แล้วเว็บค้างของเก่าโดยไม่มีใครรู้ — INC กันไว้ก่อน)
+      - name: 🧹 Purge Cloudflare Edge Cache
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_ZONE_ID" ]; then
+            echo "::error::ไม่พบ secret CLOUDFLARE_ZONE_ID — เพิ่มที่ Settings ➔ Secrets ➔ Actions"
+            echo "::error::หา zone id ได้ที่ Cloudflare Dashboard ➔ seertarot.net ➔ Overview (คอลัมน์ขวา)"
+            exit 1
+          fi
+
+          RESPONSE=$(curl -sS -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}')
+
+          echo "$RESPONSE"
+
+          if echo "$RESPONSE" | grep -q '"success":true'; then
+            echo "✅ ล้างแคช Edge สำเร็จ — ผู้ใช้จะเห็นเวอร์ชันใหม่ทันที"
+          else
+            echo "::error::ล้างแคชไม่สำเร็จ — โค้ดใหม่ขึ้น production แล้ว แต่ Edge ยังเสิร์ฟของเก่าอยู่"
+            echo "::error::เติมสิทธิ์ 'Zone · Cache Purge · Purge' ให้ CLOUDFLARE_API_TOKEN แล้ว re-run job นี้"
+            exit 1
+          fi
