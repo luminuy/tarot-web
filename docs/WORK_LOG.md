@@ -36,6 +36,44 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: เฟส 1 Cloudflare Edge Hardening — สคริปต์ตั้งค่าอัตโนมัติ + purge แคชตอน deploy (โดย Claude Opus 5)
+
+**ที่มา:** เจ้าของโปรเจกต์สั่งลงมือเฟส 1 จาก [`docs/CLOUDFLARE_OPTIMIZATION_GUIDE.md`](CLOUDFLARE_OPTIMIZATION_GUIDE.md)
+(6 ขั้นตอนบน Cloudflare Dashboard) — แปลงเป็นสคริปต์แทนการกดมือ เพื่อให้รันซ้ำได้และตรวจย้อนหลังได้จาก git
+
+**สิ่งที่ทำ:**
+- เพิ่ม [`scripts/cloudflare-phase1.ts`](../scripts/cloudflare-phase1.ts) + npm script `cf:phase1`
+  ตั้งค่าผ่าน Cloudflare API v4 ครบ: Cache Rules (หน้า SSG + static assets), Block AI Scrapers,
+  Bot Fight Mode, WAF บล็อก URL ขยะ/เครื่องมือสคริปต์, Rate Limiting เส้นเปิดไพ่,
+  Smart Tiered Cache, HTTP/3 + 0-RTT + Early Hints
+- idempotent ด้วย marker `[phase1]` ในช่อง description — รันซ้ำ = แทนที่กฎเดิมของเรา
+  และ **ไม่แตะกฎที่คนอื่นสร้างไว้** · มี `--dry-run` · รายงานผลรายข้อพร้อมบอกว่าขาดสิทธิ์อะไร
+- เพิ่มขั้น `🧹 Purge Cloudflare Edge Cache` ใน [`deploy.yml`](../.github/workflows/deploy.yml)
+
+**2 บั๊กที่กันไว้ได้ก่อนขึ้น production (ถ้าทำตามคู่มือตรง ๆ จะพัง):**
+1. **แคชข้ามภาษา** — `src/proxy.ts` เลือกภาษาจาก Cookie `seertarot_lang` แล้วฉีด `x-locale`
+   ให้ Server Components · แคชหน้า HTML แบบไม่สนใจ Cookie = คนเลือกอังกฤษได้หน้าไทยจากแคช
+   ➔ กฎแคชหน้า HTML จึงมีเงื่อนไข `not http.cookie contains "seertarot_lang"`
+2. **เว็บค้างของเก่า 7 วันหลัง deploy** — pipeline เดิมไม่มีขั้น purge แคชเลย พอตั้ง edge TTL 7 วัน
+   ผู้ใช้จะไม่เห็นเวอร์ชันใหม่ ➔ เพิ่มขั้น purge ไว้หลัง deploy (fail ดัง ๆ ถ้า token ขาดสิทธิ์)
+
+**เกร็ดจากคู่มือที่ต้องแก้:** Cloudflare Custom Pages บนแพ็กเกจ Free ไม่ครอบคลุม 404 ของ origin
+(roadmap ข้อ 4) ➔ ใช้ WAF block rule ตัด `wp-login` / `*.php` / `/.env` แทน ได้เป้าหมายเดียวกัน
+
+**⚠️ ยังไม่ได้ apply จริง — ต้องมี 2 อย่างจากเจ้าของโปรเจกต์:**
+1. **Cloudflare API Token** ที่มีสิทธิ์ zone-level (token ใน CI ตอนนี้เป็นสาย Workers/D1/R2 เท่านั้น)
+   ➔ สร้างแล้ว `export CLOUDFLARE_API_TOKEN=... && npm run cf:phase1`
+2. **GitHub Secret `CLOUDFLARE_ZONE_ID`** (ขั้น purge ใน deploy.yml จะแดงถ้าไม่มี)
+
+สคริปต์ทดสอบ plumbing กับ API จริงแล้ว (ยิงด้วย token ปลอม → ได้ error code 6003 กลับมา
+และแสดงผลถูกต้อง) แต่ **payload ของแต่ละกฎยังไม่ได้ยืนยันกับ Cloudflare จริง** เพราะไม่มี token
+➔ รัน `--dry-run` ก่อนเสมอ แล้วดูสรุปรายข้อ
+
+**ค้างต่อ:** Zaraz (ย้าย GA4/Meta Pixel — ต้องแยก PR), Hotlink Protection (ข้ามไว้ กันชน ImageKit เฟส 3),
+R2 Lifecycle (ข้อ 11 — ตั้งใน R2 Settings)
+
+---
+
 ### 🗓️ 2026-09-06: PR 7 — D-02 Public APIs Audit, D-05 Tailwind Theme Shadows, และ Gate 34 Performance Budget Ratchet (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ D-02, D-05, Gate 34):**
