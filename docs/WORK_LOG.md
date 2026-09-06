@@ -36,6 +36,26 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🖼️ สถาปัตยกรรมสื่อคู่ขนาน (Dual-Engine Media Pipeline: ImageKit + Cloudinary)
+
+**เป้าหมาย:** สร้างโครงสร้างพื้นฐานรองรับ ImageKit CDN (เสิร์ฟภาพไพ่ 78 ใบ) และ Cloudinary (เจนภาพแชร์ดวง OpenGraph ไดนามิก) แบบ Zero-Breakage Graceful Fallback เพื่อลดภาระ Cloudflare Workers Egress & CPU Limit 100%
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **CSP Allowlist (`next.config.ts`)**:
+   - เพิ่ม `https://ik.imagekit.io` และ `https://res.cloudinary.com` ลงใน `connect-src` (ในขณะที่ `img-src` มี `https:` รองรับอยู่แล้ว) เพื่อป้องกันเบราว์เซอร์บล็อกการโหลดสื่อหรือ metadata
+2. **ImageKit Card Asset CDN Integration (`src/lib/tarot/card-image.ts`)**:
+   - เพิ่ม `getImageKitEndpoint()` ดึงค่าจาก `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT`
+   - เพิ่มฟังก์ชัน `extractCardBaseName()` สกัดชื่อฐานไฟล์ไพ่
+   - อัปเดต `getCardImageSrc()`, `getCardWebpSrcSet()`, และ `getCardWebpVariantSrc()` ให้ต่อ prefix ImageKit อัตโนมัติเมื่อมีการตั้งค่า
+   - **Zero-Breakage Fallback**: หากยังไม่ได้กำหนดตัวแปร ระบบจะคงพาธ `/cards/...` เดิมไว้ 100%
+   - ผ่านการทดสอบ Gate 7 (`test-image-paths.ts`) อย่างสมบูรณ์แบบโดยไม่มี path violations
+3. **Cloudinary Dynamic OpenGraph Composition Engine (`src/lib/media/cloudinary.ts`)**:
+   - สร้างโมดูล `src/lib/media/cloudinary.ts` พร้อมฟังก์ชัน `getCloudinaryCloudName()`, `isCloudinaryEnabled()`, และ `buildCloudinaryShareImageUrl()`
+   - สร้าง Transformation URL สำหรับภาพแชร์ขนาด 1200x630 พร้อมปรับแต่งคุณภาพอัตโนมัติ (`f_auto,q_auto`)
+   - ถอยกลับไปใช้ Client Canvas / Fallback อัตโนมัติหากยังไม่ได้ตั้งค่า `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
+4. **การทดสอบความสมบูรณ์ 34 ด่าน**:
+   - ผ่าน `npm run repo:verify` ครบทั้ง 34 ด่านอย่างสมบูรณ์แบบ
+
 ### 🗓️ 2026-09-06: ⚡ เปิดใช้ 3 เทคนิคเร่งความเร็วฝั่ง Client (Speed Boosters) & ระบบ PWA / Service Worker (Zero Bundle Overhead)
 
 **เป้าหมาย:** ยกระดับความเร็วฝั่งผู้ใช้ (Client-side Speed) สู่ระดับสูงสุดตาม 3 เทคนิคหลัก และเปิดใช้งาน Progressive Web App (PWA) Offline-Ready
