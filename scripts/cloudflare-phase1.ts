@@ -28,8 +28,22 @@
  *        เกือบทั้งหมด (ผู้เข้าชมครั้งแรก) — ส่วนคนที่เลือกภาษาไว้แล้วยังวิ่งผ่าน Worker ตามปกติ
  *   2) `?lang=th|en` ต้อง "คงอยู่" ใน cache key ไม่งั้นสองภาษาจะปนกัน
  *      ➔ เราตัดเฉพาะพารามิเตอร์โฆษณา/โซเชียล (utm_*, fbclid, gclid, ...) ตามเจตนาข้อ 2 ในคู่มือ
+ *      ⚠️ แต่บนแพ็กเกจ Free ทำไม่ได้จริง (custom cache key = Enterprise) ดูหมายเหตุใน taskCacheRules()
  *   3) Edge TTL 7 วัน = หลัง deploy เวอร์ชันใหม่ ผู้ใช้จะยังเห็นของเก่าจนกว่าแคชจะหมดอายุ
- *      ➔ ต้องมีขั้น purge cache ใน `.github/workflows/deploy.yml` (เพิ่มมาพร้อมกันใน PR นี้)
+ *      ➔ ต้องมีขั้น purge cache ใน `.github/workflows/deploy.yml` (เพิ่มแล้วใน PR #308)
+ *
+ * 🚨 สิ่งที่ค้นพบหลังลงมือจริงบน production (2026-09-06) — อ่านก่อนคาดหวังผล:
+ *    **Cache Rules แคชหน้า HTML ของเราไม่ได้** เพราะทั้งเว็บเสิร์ฟผ่าน Cloudflare Worker
+ *    (OpenNext) — ชั้นแคชของ CDN อยู่ "หลัง" Worker ไม่ใช่ "หน้า" Worker
+ *    ผลตรวจจริงหลังตั้งค่าครบ:
+ *      • `/_next/static/*` และภาพไพ่ `.webp` ➔ `cf-cache-status: HIT` ✅ (กฎ assets ได้ผล)
+ *      • `/`, `/cards`, `/blog`               ➔ ไม่มี header `cf-cache-status` เลย ❌
+ *        และ origin ส่ง `cache-control: private, no-cache, no-store` กลับมาทุกครั้ง
+ *    ➔ แปลว่า Worker ยังถูกปลุกทุกคำขอหน้า HTML · ตัวเลข "ลด Worker 85–90%" ในคู่มือ
+ *      **ยังไม่เกิดขึ้นจากเฟส 1** ของที่ลดได้จริงคือแบนด์วิดท์/คำขอของไฟล์ static เท่านั้น
+ *    ➔ ทางแก้จริงอยู่ที่โค้ด (เฟส 2): ทำให้หน้า SSG ส่ง Cache-Control ที่แคชได้
+ *      และ/หรือพึ่ง cache interception ของ OpenNext (`NEXT_INC_CACHE_KV` ที่ตั้งไว้แล้ว)
+ *      ต้นตอที่ทำให้ทุกหน้ากลายเป็น dynamic คือ `src/proxy.ts` ที่รันบนทุก page route
  */
 
 const API_BASE = "https://api.cloudflare.com/client/v4";
@@ -264,13 +278,25 @@ async function resolveZone(): Promise<boolean> {
 
 // ── ข้อ 1 + 2: Cache Rules + ตัดพารามิเตอร์โฆษณาออกจาก cache key ──────────────
 async function taskCacheRules() {
+  // ⚠️ ห้ามใช้ operator `matches` (regex) — แพ็กเกจ Free ตอบกลับ
+  //    "not entitled: the use of operator Matches is not allowed, a Business plan
+  //     or a WAF Advanced plan is required" (เจอจริงตอน deploy 2026-09-06)
+  //    จึงต้องไล่ ends_with ทีละนามสกุลแทน
+  const ASSET_EXTENSIONS = [
+    ".webp", ".avif", ".png", ".jpg", ".jpeg",
+    ".svg", ".ico", ".woff2", ".css", ".js",
+  ];
+  const assetExtExpr = ASSET_EXTENSIONS.map(
+    (ext) => `or ends_with(http.request.uri.path, "${ext}")`,
+  ).join(" ");
+
   const assetsExpr = [
     '(http.request.method eq "GET")',
     "and (",
     'starts_with(http.request.uri.path, "/_next/static/")',
     'or starts_with(http.request.uri.path, "/og/")',
     'or starts_with(http.request.uri.path, "/fonts/")',
-    'or http.request.uri.path matches "\\\\.(webp|avif|png|jpg|jpeg|svg|ico|woff2|css|js)$"',
+    assetExtExpr,
     ")",
   ].join(" ");
 
@@ -286,8 +312,20 @@ async function taskCacheRules() {
     ")",
     'and not http.cookie contains "seertarot_lang"',
     'and not http.cookie contains "locale="',
+    // กันไม่ให้ทับกับกฎ assets ด้านบน (เช่น /cards/w128/major-09.webp เข้าได้ทั้งสองกฎ)
+    // ทำให้สองกฎไม่ทับกันเลย ลำดับการประเมินจึงไม่มีผล
+    ...ASSET_EXTENSIONS.map(
+      (ext) => `and not ends_with(http.request.uri.path, "${ext}")`,
+    ),
   ].join(" ");
 
+  // ⚠️ `custom_key.query_string.exclude` (ตัด utm/fbclid ออกจาก cache key) เป็นฟีเจอร์
+  //    ของแพ็กเกจ Enterprise — บน Free ช่อง "All query string parameters except:"
+  //    ใน Dashboard จะเป็นสีเทากดไม่ได้ (ยืนยันด้วยตาเมื่อ 2026-09-06)
+  //    ➔ บน Free ทำได้แค่ ignore_query_strings_order (= สวิตช์ "Sort query string")
+  //      แปลว่าลิงก์ที่มี ?fbclid= / ?utm_* จะยังไม่ HIT แคช (ข้อ 2 ในคู่มือทำได้ไม่ครบ)
+  //    ห้ามแก้ด้วยการเปิด "Ignore query string" เด็ดขาด — จะทำให้ ?lang=en หายจาก
+  //    cache key แล้วผู้ใช้ภาษาอังกฤษได้หน้าไทยจากแคช (ดูหมายเหตุข้อ 1 หัวไฟล์)
   const cacheKey = {
     ignore_query_strings_order: true,
     custom_key: {
@@ -441,17 +479,24 @@ async function taskWaf() {
 
 // ── ข้อ 6: Rate Limiting เส้นเปิดไพ่ ────────────────────────────────────────
 async function taskRateLimit() {
+  // ไม่ใช้ `matches` (Free ไม่รองรับ — ดูหมายเหตุในกฎ assets)
   const expression =
-    `(http.request.uri.path matches "^/api/reading/[^/]+/(read|chat)$") ` +
+    `(starts_with(http.request.uri.path, "/api/reading/") ` +
+    `and (ends_with(http.request.uri.path, "/read") ` +
+    `or ends_with(http.request.uri.path, "/chat"))) ` +
     `or (http.request.uri.path eq "/api/reading/start")`;
 
   // แพ็กเกจ Free จำกัดทั้งจำนวนกฎ (1 กฎ) และค่า period/mitigation_timeout ที่ใช้ได้
   // จึงไล่ลองจากค่าที่ตรงคู่มือที่สุดลงไปจนกว่าจะมีชุดที่ API ยอมรับ
+  // ⚠️ แพ็กเกจ Free: dropdown ใน Dashboard มีให้เลือกแค่ "10 seconds" ทั้ง Period และ
+  //    Duration และจำกัด 1 กฎเท่านั้น (ยืนยันด้วยตาเมื่อ 2026-09-06)
+  //    ➔ "20 ครั้ง/10 นาที" ตามคู่มือทำไม่ได้บน Free · ค่าที่ใช้จริงคือ 20 ครั้ง/10 วินาที
+  //      ซึ่งยังกันการกดรัวแบบสคริปต์ได้ แต่ไม่กันคนกดดูดวงถี่ ๆ ตลอดวัน
+  //    ไม่ลดต่ำกว่า 20 เพราะผู้ใช้มือถือไทยจำนวนมากออกเน็ตผ่าน CGNAT IP เดียวกัน
   const ladder = [
     { period: 600, requests_per_period: 20, mitigation_timeout: 600 },
-    { period: 60, requests_per_period: 20, mitigation_timeout: 600 },
     { period: 60, requests_per_period: 20, mitigation_timeout: 60 },
-    { period: 10, requests_per_period: 5, mitigation_timeout: 10 },
+    { period: 10, requests_per_period: 20, mitigation_timeout: 10 },
   ];
 
   let last = "";
