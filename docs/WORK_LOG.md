@@ -36,6 +36,34 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: แก้ Upstash ไม่ทำงาน — อ่าน secret ผิดทางบน Workers (โดย Claude Opus 5)
+
+**อาการ:** ตั้ง secret `UPSTASH_REDIS_REST_URL` + `_TOKEN` บน Worker ครบแล้ว
+(ยืนยันด้วยตาในหน้า Cloudflare → Workers → tarot-web → Settings ว่ามีทั้งสองแถว)
+deploy ใหม่แล้วด้วย แต่ยิง `POST /api/reading/start` บน production แล้ว
+**Upstash Data Browser ยังว่างเปล่า · COMMANDS = 0** = Redis ไม่ถูกเรียกเลยสักคำสั่ง
+
+**สิ่งที่ตัดออกไปแล้วระหว่างไล่หา:**
+- โค้ด Redis อยู่ใน main จริง (PR #312) ✓
+- deploy หลัง merge สำเร็จ ✓ และสั่ง deploy ซ้ำหลังใส่ secret แล้วก็ยังไม่ขึ้น ✓
+- `process.env.UPSTASH_REDIS_REST_URL` **ไม่ถูก inline** ตอน build (ยังเป็น runtime lookup) ✓
+- secret อยู่บน Worker ถูกตัวจริง ✓
+
+**สาเหตุ:** `redis.ts` อ่าน `process.env` อย่างเดียว ซึ่งบน OpenNext/Workers ไม่การันตี
+ว่าจะเห็น secret · ทางที่ repo นี้ใช้กับ binding อื่นทุกตัว (KV / D1 / R2 / AI) คือ env object
+ที่มากับ `getCloudflareContext()` ผ่าน `safelyGetCloudflareContext()` ใน `src/lib/platform/cf.ts`
+
+**แก้:** `resolveConfig()` อ่านจาก Cloudflare context ก่อน แล้วค่อย fallback `process.env`
+(สำหรับ `npm run dev` และชุดทดสอบ) · แคชผลไว้หลัง resolve ครั้งแรก
+`isRedisEnabled()` กลายเป็น async ตามไปด้วย ผู้เรียกทั้ง 3 จุดปรับแล้ว
+`bumpCounter()` ยังเป็น sync สำหรับผู้เรียกเหมือนเดิม — ย้ายการเช็กเข้าไปในงานเบื้องหลัง
+ที่ผูกกับ `waitUntil` อยู่แล้ว
+
+**⚠️ ยังไม่ยืนยันว่าหายจริง** — ต้องรอ deploy รอบนี้แล้วยิงทดสอบซ้ำ
+ถ้า Data Browser ยังว่างอีกแสดงว่าเป็นเรื่อง bundling ของ OpenNext ต้องขุดต่อ
+
+---
+
 ### 🗓️ 2026-09-06: หมวด 3 — Upstash Redis adapter (ข้อ 16) + ตรวจหมวด 3 ทีละข้อ (โดย Claude Opus 5)
 
 **ที่มา:** เจ้าของสั่ง "ลุย" หมวด 3 (บริการภายนอก ข้อ 16–28) ต่อจากหมวด 2

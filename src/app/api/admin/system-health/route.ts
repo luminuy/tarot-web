@@ -207,11 +207,12 @@ export async function GET(request: Request) {
   ]);
 
   // Upstash Redis — ที่พักตัวนับ/เซสชันแทน KV (ข้อ 16 ในคู่มือ) · ไม่ตั้ง = ใช้ KV เหมือนเดิม
+  const upstashConfigured = await isRedisEnabled();
   const upstashHealth = {
-    enabled: isRedisEnabled(),
+    enabled: upstashConfigured,
     urlSet: Boolean(process.env.UPSTASH_REDIS_REST_URL),
     tokenSet: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN),
-    reachable: isRedisEnabled() ? await redisPing() : false,
+    reachable: upstashConfigured ? await redisPing() : false,
   };
 
   const cloudflareStackHealth = {
