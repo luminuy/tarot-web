@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DECK_SUMMARY } from "@/data/cards";
 import { AllCardsTable } from "@/components/encyclopedia/AllCardsTable";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
   title: "ความหมายไพ่ยิปซี 78 ใบ ทั้งหมด สรุปครบทุกใบ ตารางเดียวจบ",
   description:
     "ตารางสรุปความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบทั้ง 78 ใบ ทั้งชุดใหญ่ 22 ใบ และชุดเล็ก 56 ใบ 4 ดอก พร้อมชื่อไทย-อังกฤษ ธาตุ และคำสำคัญหัวตั้ง-กลับหัว ดูทีเดียวจบ 1909 Rider-Waite",
-  alternates: {
-    canonical: `${SITE_ORIGIN}/cards/all`,
-  },
+  alternates: buildAlternates("/cards/all"),
   openGraph: {
     title: "ความหมายไพ่ยิปซี 78 ใบ ทั้งหมด สรุปครบทุกใบ ตารางเดียวจบ",
     description:

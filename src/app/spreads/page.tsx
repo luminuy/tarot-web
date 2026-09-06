@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { SPREADS } from "@/data/spreads";
 import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
   title: "ดูดวงไพ่ยิปซี 25 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
   description:
     "รวมผังดูดวงไพ่ยิปซี ไพ่ทาโรต์ 25 แบบ ตั้งแต่ไพ่ 1 ใบ 3 ใบ 5 ใบ ถึงเซลติกครอส 10 ใบ ครบทั้งรายวัน รายเดือน ความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
-  alternates: {
-    canonical: `${SITE_ORIGIN}/spreads`,
-  },
+  alternates: buildAlternates("/spreads"),
   openGraph: {
     title: "ดูดวงไพ่ยิปซี 25 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
     description:

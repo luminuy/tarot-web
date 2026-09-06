@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllArticles, getArticleBySlug, getRelatedArticles, ARTICLE_SLUG_ALIASES } from "@/data/articles";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 import { ArticleReadingClient } from "./ArticleReadingClient";
 
 interface Props {
@@ -41,9 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: article.seoTitle,
     description: article.description,
     keywords: article.keywords,
-    alternates: {
-      canonical: url,
-    },
+    alternates: buildAlternates(`/blog/${article.slug}`),
     openGraph: {
       title: article.title,
       description: article.description,

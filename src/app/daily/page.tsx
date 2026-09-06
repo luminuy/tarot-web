@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DailyClient } from "./DailyClient";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 
@@ -17,9 +17,7 @@ export const metadata: Metadata = {
     "เปิดไพ่รายวันฟรี",
     "ดูดวงแม่นๆ วันนี้",
   ],
-  alternates: {
-    canonical: `${SITE_ORIGIN}/daily`,
-  },
+  alternates: buildAlternates("/daily"),
   openGraph: {
     title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางชีวิตวันนี้ | SeerTarot",
     description:

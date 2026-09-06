@@ -7,7 +7,7 @@ import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { LocaleProvider } from "@/lib/i18n";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 const notoSerifThai = Noto_Serif_Thai({
   subsets: ["thai", "latin"],
@@ -73,14 +73,7 @@ export const metadata: Metadata = {
   verification: {
     google: "google2c921e9d8c8c3a55",
   },
-  alternates: {
-    canonical: SITE_ORIGIN,
-    languages: {
-      "th-TH": `${SITE_ORIGIN}?lang=th`,
-      "en-US": `${SITE_ORIGIN}?lang=en`,
-      "x-default": SITE_ORIGIN,
-    },
-  },
+  alternates: buildAlternates("/"),
   openGraph: {
     type: "website",
     locale: "th_TH",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import TarotFlow from "./TarotFlow";
 import { HomeSeoContent } from "@/components/seo/HomeSeoContent";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 
@@ -13,10 +13,10 @@ import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
  *
  * 1. **canonical ของหน้าแรก** — เดิม `alternates.canonical: "/"` ถูกวางไว้ที่ root layout
  *    Next.js สืบทอด metadata ลงทุกเส้นทางที่ไม่ได้ประกาศทับ ทำให้ /privacy /readers
- *    /account /reading/chat ทั้งหมดประกาศ canonical ชี้กลับหน้าแรก
- *    = บอก Google ว่าหน้าเหล่านั้นเป็นสำเนาของหน้าแรก ไม่ต้อง index (ยืนยันด้วย curl แล้ว)
+ *    และเส้นทางอื่น ๆ มี canonical ชี้กลับเข้าหน้าแรกทั้งหมด (หายนะด้าน SEO)
+ *    ย้ายมาที่นี่ทำให้ canonical "/" มีผลกับหน้าแรกเท่านั้น
  *
- * 2. **JSON-LD ที่เป็นความจริงเฉพาะหน้าแรก** — WebApplication / FAQPage / HowTo
+ * 2. **JSON-LD เฉพาะหน้าแรก** — FAQPage 5 ข้อ และ HowTo 5 ขั้นตอน
  *    เคยถูกยิงจาก root layout ลงทุกหน้ารวมถึง /cards/major-00 และ /blog/*
  *    ซึ่งไม่มีคำถาม-คำตอบชุดนั้นอยู่บนหน้าจริง (schema ไม่ตรงเนื้อหา = โดนลดความน่าเชื่อถือ)
  *    และยังซ้อนกับ FAQPage/HowTo ของหน้า blog กับ spreads ที่ประกาศของตัวเองอยู่แล้ว
@@ -25,7 +25,7 @@ import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
  *    จึงไม่ถูกส่งไปเป็น JavaScript ให้เบราว์เซอร์ hydrate อีกต่อไป
  */
 export const metadata: Metadata = {
-  alternates: { canonical: "/" },
+  alternates: buildAlternates("/"),
 };
 
 const faqJsonLd = generateFaqJsonLd();

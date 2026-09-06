@@ -3,7 +3,7 @@ import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marke
 import { ReadersDirectory } from "@/components/readers/ReadersDirectory";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "หมอดูไพ่ยิปซี ปรึกษาแม่หมอตัวจริงและเปิดไพ่พยากรณ์สด",
   description:
     "รวมหมอดูไพ่ยิปซีและแม่หมอผู้เชี่ยวชาญศาสตร์ไพ่ทาโรต์ 1909 ปรึกษาดูดวงความรัก การงาน การเงิน พร้อมระบบดูดวงไพ่ยิปซีฟรีด้วยแม่หมอ AI ตรวจสอบได้จริง",
-  alternates: { canonical: `${SITE_ORIGIN}/readers` },
+  alternates: buildAlternates("/readers"),
   openGraph: {
     title: "หมอดูไพ่ยิปซี ปรึกษาแม่หมอตัวจริง · SeerTarot",
     description: "รวมหมอดูไพ่ยิปซีและแม่หมอผู้เชี่ยวชาญศาสตร์ไพ่ทาโรต์ 1909 ปรึกษาดูดวงความรัก การงาน การเงิน",

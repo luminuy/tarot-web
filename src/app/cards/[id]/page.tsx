@@ -5,7 +5,7 @@ import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
 import { CardSpreadLinks } from "@/components/encyclopedia/CardSpreadLinks";
 import { CARD_GROUPS } from "@/data/cards/group-seo";
 import type { Metadata } from "next";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 
 interface CardPageProps {
   params: Promise<{ id: string }>;
@@ -57,9 +57,7 @@ export async function generateMetadata({ params }: CardPageProps): Promise<Metad
         },
       ],
     },
-    alternates: {
-      canonical: `${SITE_ORIGIN}/cards/${card.id}`,
-    },
+    alternates: buildAlternates(`/cards/${card.id}`),
   };
 }
 
