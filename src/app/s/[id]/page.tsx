@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getShareBucket } from "@/lib/platform/cf";
+import { buildCloudinaryShareImageUrl, isCloudinaryEnabled } from "@/lib/media/cloudinary";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,12 +30,16 @@ async function readMeta(id: string): Promise<{ title: string; spread: string } |
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const meta = await readMeta(id);
-  const imageUrl = ID_RE.test(id) ? `${SITE_ORIGIN}/api/share/image/${id}` : `${SITE_ORIGIN}/cards/major-01.jpg`;
 
   const title = meta?.title || "คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot";
   const description = meta?.spread
     ? `ผัง ${meta.spread} · เปิดไพ่และรับคำทำนายของคุณเองที่ SeerTarot`
     : "เปิดไพ่ทาโรต์ 1909 Rider-Waite ด้วยตัวคุณเอง พร้อมคำทำนายจากแม่หมอ AI และระบบสับไพ่โปร่งใส Provably-Fair";
+
+  const cloudinaryUrl = isCloudinaryEnabled()
+    ? buildCloudinaryShareImageUrl({ title, spreadName: meta?.spread })
+    : null;
+  const imageUrl = cloudinaryUrl || (ID_RE.test(id) ? `${SITE_ORIGIN}/api/share/image/${id}` : `${SITE_ORIGIN}/cards/major-01.jpg`);
 
   return {
     title,
@@ -46,7 +51,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url: `${SITE_ORIGIN}/`,
-      images: [{ url: imageUrl, width: 1080, height: 1350, alt: title }],
+      images: [
+        {
+          url: imageUrl,
+          width: cloudinaryUrl ? 1200 : 1080,
+          height: cloudinaryUrl ? 630 : 1350,
+          alt: title,
+        },
+      ],
     },
     twitter: { card: "summary_large_image", title, description, images: [imageUrl] },
   };

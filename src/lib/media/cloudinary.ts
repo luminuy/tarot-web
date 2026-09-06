@@ -41,7 +41,8 @@ export function buildCloudinaryShareImageUrl(params: CloudinaryShareCardParams):
   // Transformation Pipeline:
   // 1. ขนาดมาตรฐาน OpenGraph 1200x630 พร้อมพื้นหลังโทนไหมทองพรีเมียม
   // 2. ปั๊มข้อความหัวข้อและชื่อผัง
-  // 3. ปรับแต่งคุณภาพอัตโนมัติ (f_auto,q_auto)
+  // 3. ปรับแต่งคุณภาพและฟอร์แมตอัตโนมัติ (f_auto,q_auto)
+  // ใช้ image/fetch ร่วมกับภาพตั้งต้น https://seertarot.net/og/default.png ทำให้ใช้งานได้ทันที 100% โดยไม่ต้องอัปโหลดภาพเองล่วงหน้า
   const transforms = [
     "w_1200,h_630,c_fill,b_rgb:FAF7F2",
     `l_text:Arial_28_bold:${safeSpread},co_rgb:8F5C1A,g_north_west,x_80,y_80`,
@@ -49,5 +50,6 @@ export function buildCloudinaryShareImageUrl(params: CloudinaryShareCardParams):
     "f_auto,q_auto",
   ];
 
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${transforms.join("/")}/seertarot/og-base.png`;
+  return `https://res.cloudinary.com/${cloudName}/image/fetch/${transforms.join("/")}/https://seertarot.net/og/default.png`;
 }
+
