@@ -23,6 +23,8 @@ export async function GET(request: Request) {
     }
 
     await markEmailVerified(result.userId);
+    // ล้างแคชโปรไฟล์ของ isolate นี้ทันที ไม่งั้น /api/auth/me อาจตอบข้อมูลเก่าได้อีก 30 วิ
+    (await import("@/lib/auth/user-cache")).invalidateUserCache(result.userId);
 
     const user = await getUserById(result.userId);
     const redirectUrl = `${origin}/?verified=1`;

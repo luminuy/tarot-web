@@ -62,6 +62,8 @@ export async function POST(request: Request) {
     // Hash & Save (bumps token_version automatically)
     const newHash = await hashPassword(password);
     await setPasswordHash(user.id, newHash);
+    // ล้างแคชโปรไฟล์ของ isolate นี้ทันที ไม่งั้น /api/auth/me อาจตอบข้อมูลเก่าได้อีก 30 วิ
+    (await import("@/lib/auth/user-cache")).invalidateUserCache(user.id);
     // เตะเซสชันเก่าทุกอุปกรณ์ทันที (จุดประสงค์หลักของการรีเซ็ตรหัสผ่าน)
     invalidateTokenVersionCache(user.id);
     await invalidateUserTokens(user.id, "reset");

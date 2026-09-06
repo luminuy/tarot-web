@@ -285,11 +285,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               await refundIfConsumed();
             }
 
-            const updated = updateReading(id, { status: "COMPLETED", result: event.reading });
-            if (updated) {
-              const { persistReading } = await import("@/server/store");
-              await persistReading(updated);
-            }
+            // อัปเดตสถานะใน memory พอ — ตั้งใจ "ไม่" เขียน KV ตรงนี้
+            // ---------------------------------------------------------------
+            // ของเดิมเรียก `persistReading(updated)` ที่จุดนี้ = เขียน KV อีก 1 ครั้ง
+            // ต่อการเปิดไพ่ทุกครั้ง ทั้งที่ **ไม่มีโค้ดไหนอ่านเรกคอร์ดหลังอ่านจบเลย**
+            // (`loadReadingFromKV` ถูกเรียกแค่ใน shuffle กับ read ซึ่งเกิดก่อนหน้านี้ไปแล้ว
+            //  ส่วนผลคำทำนายถูกสตรีมให้ client ตรง ๆ และ client บันทึกลงสมุดบันทึกเอง)
+            // เพดาน KV ฟรีคือ 1,000 เขียน/วัน จึงต้องไม่จ่ายค่าเขียนให้ข้อมูลที่ไม่มีใครอ่าน
+            updateReading(id, { status: "COMPLETED", result: event.reading });
             recordEvents([
               "reading_completed",
               `ai_call:${providerUsed}`,
