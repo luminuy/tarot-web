@@ -27,16 +27,44 @@ export const CARD_IMAGE_VARIANTS = [
 const CARDS_ROOT = "/cards/";
 
 /**
+ * ดึง URL Endpoint ของ ImageKit CDN จาก Environment Variable
+ * หากไม่ได้ตั้งค่า จะคืนค่าสตริงว่าง เพื่อให้ระบบถอยไปใช้ Path ภายในเครื่อง (Zero Breaking Change)
+ */
+export function getImageKitEndpoint(): string {
+  const endpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || "";
+  return endpoint.trim().replace(/^["']+|["']+$/g, "").replace(/\/+$/, "");
+}
+
+/**
  * แปลงชื่อไฟล์ดิบจากฐานข้อมูลไพ่ (เช่น `"major-00.jpg"`) ให้เป็น path เต็มจาก root เสมอ
  * รองรับกรณีข้อมูลใส่ path เต็มมาแล้ว (`"/cards/major-00.jpg"`) และกรณีมีแต่ `id`
+ * หากเปิดใช้ ImageKit CDN จะต่อ prefix อัตโนมัติเพื่อลดภาระ Cloudflare Egress Bandwidth
  */
 export function getCardImageSrc(
   image?: string | null,
   fallbackId?: string | null,
 ): string | null {
-  if (image) return image.startsWith("/") ? image : `${CARDS_ROOT}${image}`;
-  if (fallbackId) return `${CARDS_ROOT}${fallbackId}.jpg`;
-  return null;
+  const endpoint = getImageKitEndpoint();
+  let localPath: string | null = null;
+
+  if (image) {
+    localPath = image.startsWith("/") ? image : `${CARDS_ROOT}${image}`;
+  } else if (fallbackId) {
+    localPath = `${CARDS_ROOT}${fallbackId}.jpg`;
+  }
+
+  if (!localPath) return null;
+  return endpoint ? `${endpoint}${localPath}` : localPath;
+}
+
+/**
+ * สกัดชื่อฐานของไฟล์ไพ่ เช่น `"major-00"` จาก path หรือชื่อไฟล์
+ */
+function extractCardBaseName(image?: string | null, fallbackId?: string | null): string | null {
+  const raw = image || (fallbackId ? `${fallbackId}.jpg` : "");
+  if (!raw) return null;
+  const match = /([^/]+)\.jpe?g$/i.exec(raw);
+  return match ? match[1] : null;
 }
 
 /**
@@ -47,16 +75,14 @@ export function getCardWebpSrcSet(
   image?: string | null,
   fallbackId?: string | null,
 ): string | null {
-  const src = getCardImageSrc(image, fallbackId);
-  if (!src) return null;
+  const name = extractCardBaseName(image, fallbackId);
+  if (!name) return null;
 
-  // รับเฉพาะภาพไพ่ต้นฉบับที่วางอยู่ใน /cards/ ชั้นบนสุดเท่านั้น
-  const match = /^\/cards\/([^/]+)\.jpe?g$/i.exec(src);
-  if (!match) return null;
+  const endpoint = getImageKitEndpoint();
+  const base = endpoint ? `${endpoint}${CARDS_ROOT}` : CARDS_ROOT;
 
-  const name = match[1];
   return CARD_IMAGE_VARIANTS.map(
-    (v) => `${CARDS_ROOT}${v.dir}/${name}.webp ${v.width}w`,
+    (v) => `${base}${v.dir}/${name}.webp ${v.width}w`,
   ).join(", ");
 }
 
@@ -68,11 +94,13 @@ export function getCardWebpVariantSrc(
   variant: "w64" | "w128" | "w256" | "w512b" | "w768b" = "w128",
   fallbackId?: string | null,
 ): string | null {
-  const src = getCardImageSrc(image, fallbackId);
-  if (!src) return null;
+  const name = extractCardBaseName(image, fallbackId);
+  const endpoint = getImageKitEndpoint();
+  const base = endpoint ? `${endpoint}${CARDS_ROOT}` : CARDS_ROOT;
 
-  const match = /^\/cards\/([^/]+)\.jpe?g$/i.exec(src);
-  if (!match) return src;
+  if (!name) {
+    return getCardImageSrc(image, fallbackId);
+  }
 
-  return `${CARDS_ROOT}${variant}/${match[1]}.webp`;
+  return `${base}${variant}/${name}.webp`;
 }
