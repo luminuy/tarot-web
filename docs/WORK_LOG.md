@@ -36,6 +36,22 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🚀 เปิดใช้งาน ImageKit Web Origin Pull CDN บน Production (`seertarotweb`)
+
+**เป้าหมาย:** เปิดใช้งาน ImageKit CDN สำหรับเสิร์ฟภาพไพ่ 78 ใบทั้งหมดจาก Edge CDN โหนดกรุงเทพฯ (BKK) เพื่อลด Egress Bandwidth และ CPU/RAM ของ Cloudflare Workers ลงสู่ 0% ตามแผนใน `CLOUDFLARE_OPTIMIZATION_GUIDE.md`
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **ตั้งค่า ImageKit Web Origin Pull**:
+   - บัญชี ImageKit ID: `seertarotweb`
+   - เชื่อมต่อ Web Origin ชี้ตรงไปยัง `https://seertarot.net`
+   - URL Endpoint: `https://ik.imagekit.io/seertarotweb`
+   - ทดสอบดึงภาพจริง (`/cards/major-00.jpg` และ `/cards/w128/major-00.webp`) ➔ ตอบกลับ `HTTP 200 OK` แคชที่โหนดกรุงเทพฯ (`BKK50-P1`) ด้วย `Cache-Control: max-age=31536000` (1 ปีเต็ม)
+2. **ผูกตัวแปรสภาพแวดล้อมระดับ Production**:
+   - `wrangler.jsonc`: เพิ่ม `"NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT": "https://ik.imagekit.io/seertarotweb"` ใน `vars`
+   - `.github/workflows/deploy.yml`: ส่ง `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` ในขั้นตอน Build & Deploy
+3. **ตรวจสอบความสมบูรณ์ 34 ด่าน**:
+   - ผ่าน `npm run repo:verify` ครบ 34/34 ด่าน ไร้ข้อผิดพลาด
+
 ### 🗓️ 2026-09-06: 🖼️ สถาปัตยกรรมสื่อคู่ขนาน (Dual-Engine Media Pipeline: ImageKit + Cloudinary)
 
 **เป้าหมาย:** สร้างโครงสร้างพื้นฐานรองรับ ImageKit CDN (เสิร์ฟภาพไพ่ 78 ใบ) และ Cloudinary (เจนภาพแชร์ดวง OpenGraph ไดนามิก) แบบ Zero-Breakage Graceful Fallback เพื่อลดภาระ Cloudflare Workers Egress & CPU Limit 100%

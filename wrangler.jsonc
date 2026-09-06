@@ -64,7 +64,8 @@
   ],
 
   "vars": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT": "https://ik.imagekit.io/seertarotweb"
   }
 
   // ── Secrets สำหรับ OAuth & Session Security ───────────────────────────────────
