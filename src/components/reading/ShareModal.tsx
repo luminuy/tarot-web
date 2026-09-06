@@ -463,7 +463,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-xl rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-4 sm:p-6 shadow-[var(--shadow-overlay)] space-y-4 my-auto relative text-[#2E211A]"
+          className="w-full max-w-xl rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-4 sm:p-6 shadow-overlay space-y-4 my-auto relative text-[#2E211A]"
         >
           {/* Modal Header */}
           <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/30">

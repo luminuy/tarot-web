@@ -41,13 +41,19 @@ export async function getServerLocale(): Promise<Locale> {
 }
 
 /**
- * ดึง Dictionary สำหรับ Server Components
+ * @public (D-02)
+ * ดึง Dictionary สำหรับ Server Components โดย resolve ภาษาจาก request context
  */
 export async function getServerDictionary(): Promise<Dictionary> {
   const locale = await getServerLocale();
   return dictionaries[locale] || th;
 }
 
+/**
+ * @public (D-02)
+ * Synchronous dictionary lookup by explicit locale code (th | en)
+ */
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale] || th;
 }
+

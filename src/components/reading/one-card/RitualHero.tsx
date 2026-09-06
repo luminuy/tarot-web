@@ -59,7 +59,7 @@ export function RitualHero({
       {/* Hero Header */}
       <header className="text-center space-y-3 pt-2 max-w-2xl mx-auto">
         {/* Sacred Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] shadow-[var(--shadow-raised)]">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] shadow-raised">
           <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
             {badgeText}
           </span>

@@ -82,7 +82,11 @@ export const ReadingSchema = z.object({
 export type CardReading = z.infer<typeof CardReadingSchema>;
 export type Reading = z.infer<typeof ReadingSchema>;
 
-/** โครงคำตอบสำหรับการถามต่อยอดหลังเปิดไพ่แล้ว — สั้นกว่า ไม่ต้องอ่านรายใบซ้ำ */
+/**
+ * @public (D-02)
+ * โครงคำตอบสำหรับการถามต่อยอดหลังเปิดไพ่แล้ว — สั้นกว่า ไม่ต้องอ่านรายใบซ้ำ
+ * Exported schema used by AI follow-up chat endpoints and stream parsers.
+ */
 export const FollowUpSchema = z.object({
   answer: z
     .string()
@@ -92,3 +96,4 @@ export const FollowUpSchema = z.object({
     .array(z.number().int().min(0))
     .describe("index ของตำแหน่งไพ่ที่ใช้ตอบคำถามนี้ เพื่อให้หน้าเว็บไฮไลต์ไพ่ใบนั้นได้"),
 });
+

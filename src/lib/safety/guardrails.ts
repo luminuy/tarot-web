@@ -163,6 +163,12 @@ export const AI_DISCLOSURE =
 export const AI_DISCLOSURE_EN =
   "All interpretations are processed using AI from the cards you genuinely drew. They are provided as life guidance, contemplation, and personal reflection, and must never substitute for professional medical, legal, psychiatric, or financial counsel. All life choices remain solely your own.";
 
+/**
+ * @public (D-02)
+ * Localized AI disclosure message helper.
+ * Exported for standard disclaimer presentation in reading results and footer cards.
+ */
 export function getAiDisclosure(lang: "th" | "en" = "th"): string {
   return lang === "en" ? AI_DISCLOSURE_EN : AI_DISCLOSURE;
 }
+

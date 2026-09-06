@@ -36,7 +36,7 @@ export function SiteHeader({
     <header
       data-site-header=""
       data-variant={variant}
-      className="w-full border-b border-[#D5CEC2] bg-[#FFFFFF] sticky top-0 z-50 shadow-[var(--shadow-raised)]"
+      className="w-full border-b border-[#D5CEC2] bg-[#FFFFFF] sticky top-0 z-50 shadow-raised"
     >
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Luxury Brand Logo & Return to Home */}

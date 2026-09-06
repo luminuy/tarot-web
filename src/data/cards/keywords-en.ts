@@ -345,7 +345,8 @@ export const CARD_KEYWORDS_EN: Record<string, CardKeywordsEn> = {
 };
 
 /**
- * Helper to safely resolve keywords for any card in either English or Thai.
+ * @public (D-02) Helper สำหรับดึงคำสำคัญของไพ่ตามภาษา (English / Thai fallback)
+ * ตั้งใจเก็บไว้สำหรับคอมโพเนนต์และการค้นหาคำสำคัญหลายภาษาในอนาคต
  */
 export function getCardKeywords(
   cardId: string,

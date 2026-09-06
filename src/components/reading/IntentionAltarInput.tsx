@@ -315,7 +315,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 }}
                 className={`rounded-lg border transition-all duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                   isActive
-                    ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-[var(--shadow-overlay)]"
+                    ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-overlay"
                     : "bg-[#F3EDE2] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
                 }`}
                 style={{ minHeight: "260px" }}

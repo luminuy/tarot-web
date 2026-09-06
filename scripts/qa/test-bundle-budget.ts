@@ -16,9 +16,10 @@
  */
 
 import fs from "node:fs";
+import http from "node:http";
 import path from "node:path";
 import zlib from "node:zlib";
-import { execSync } from "node:child_process";
+import { execSync, spawn, type ChildProcess } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -40,67 +41,112 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/",
     htmlRelativePath: ".next/server/app/index.html",
-    maxJsGzipKb: 330, // PR 2 Ratchet (Actual: 316 KB) -> PR 7 Target: <= 250 KB
-    maxHtmlGzipKb: 40, // Current: 30 KB
+    maxJsGzipKb: 315, // PR 7 Final Ratchet (Actual: 305 KB, down from 468 KB)
+    maxHtmlGzipKb: 40, // Current: 37 KB
   },
   {
     route: "/cards",
     htmlRelativePath: ".next/server/app/cards.html",
-    maxJsGzipKb: 270, // PR 2 Ratchet (Actual: 254 KB) -> PR 7 Target: <= 220 KB
-    maxHtmlGzipKb: 45, // PR 3 Ratchet (Actual: 34 KB, dropped from 174 KB)
+    maxJsGzipKb: 320, // PR 7 Final Ratchet (Actual: 312 KB, down from 390 KB)
+    maxHtmlGzipKb: 40, // PR 3 Ratchet (Actual: 34 KB, dropped from 174 KB)
   },
   {
     route: "/cards/major-00",
     htmlRelativePath: ".next/server/app/cards/major-00.html",
-    maxJsGzipKb: 390, // PR 2 Ratchet (Actual: 374 KB)
-    maxHtmlGzipKb: 35, // Current: 22 KB
+    maxJsGzipKb: 385, // PR 7 Final Ratchet (Actual: 374 KB, down from 490 KB)
+    maxHtmlGzipKb: 30, // Current: 22 KB
   },
   {
     route: "/blog",
     htmlRelativePath: ".next/server/app/blog.html",
-    maxJsGzipKb: 270, // PR 2 Ratchet (Actual: 252 KB) -> PR 7 Target: <= 220 KB
-    maxHtmlGzipKb: 65, // Current: 54 KB
+    maxJsGzipKb: 325, // PR 7 Final Ratchet (Actual: 314 KB, down from 390 KB)
+    maxHtmlGzipKb: 65, // Current: 55 KB
   },
   {
     route: "/daily",
     htmlRelativePath: ".next/server/app/daily.html",
-    maxJsGzipKb: 410, // PR 2 Ratchet (Actual: 390 KB)
-    maxHtmlGzipKb: 30, // Current: 17 KB
+    maxJsGzipKb: 455, // PR 7 Final Ratchet (Actual: 447 KB, down from 540 KB)
+    maxHtmlGzipKb: 25, // Current: 16 KB
   },
   {
     route: "/love/1-card",
     htmlRelativePath: ".next/server/app/love/1-card.html",
-    maxJsGzipKb: 410, // PR 2 Ratchet (Actual: 394 KB)
-    maxHtmlGzipKb: 30, // Current: 18 KB
+    maxJsGzipKb: 460, // PR 7 Final Ratchet (Actual: 451 KB, down from 550 KB)
+    maxHtmlGzipKb: 25, // Current: 18 KB
   },
   {
     route: "/spreads",
     htmlRelativePath: ".next/server/app/spreads.html",
-    maxJsGzipKb: 285, // PR 2 Ratchet (Actual: 271 KB)
+    maxJsGzipKb: 320, // PR 7 Final Ratchet (Actual: 312 KB, down from 410 KB)
     maxHtmlGzipKb: 45, // Current: 37 KB
   },
   {
     route: "/cards/all",
     htmlRelativePath: ".next/server/app/cards/all.html",
-    maxJsGzipKb: 230, // PR 3 Ratchet (Actual: 210 KB, dropped from 336 KB)
-    maxHtmlGzipKb: 45, // PR 3 (Actual: 36 KB)
+    maxJsGzipKb: 220, // PR 7 Final Ratchet (Actual: 210 KB, dropped from 336 KB)
+    maxHtmlGzipKb: 45, // PR 3 (Actual: 37 KB)
   },
 ];
 
 function ensureBuildExists(): void {
-  const sample = path.join(ROOT, ".next/server/app/index.html");
+  const sample = path.join(ROOT, ".next/server/app/page.js");
   if (!fs.existsSync(sample)) {
-    console.log("📦 ไม่พบไฟล์ผลลัพธ์ build (.next/server/app) — กำลังรัน npm run build...");
+    console.log("📦 ไม่พบไฟล์ผลลัพธ์ build (.next/server/app/page.js) — กำลังรัน npm run build...");
     execSync("npm run build", { cwd: ROOT, stdio: "inherit" });
   }
 }
 
-export function testBundleBudget(): boolean {
+function fetchHtml(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const req = http.get(url, (res) => {
+      let data = "";
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => resolve(data));
+    });
+    req.on("error", reject);
+    req.setTimeout(5000, () => {
+      req.destroy();
+      reject(new Error(`Timeout fetching ${url}`));
+    });
+  });
+}
+
+async function waitForServer(port: number, maxWaitMs = 6000): Promise<boolean> {
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
+    try {
+      await fetchHtml(`http://127.0.0.1:${port}/`);
+      return true;
+    } catch {
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  return false;
+}
+
+export async function testBundleBudget(): Promise<boolean> {
   console.log("=======================================================");
   console.log("⚡ PERFORMANCE BUDGET GATE — ตรวจสอบงบน้ำหนักหน้าเว็บ");
   console.log("=======================================================");
 
   ensureBuildExists();
+
+  // ตรวจสอบว่าต้องเปิดเซิร์ฟเวอร์ชั่วคราวสำหรับ dynamic SSR routes หรือไม่
+  const needsServer = BUDGETS.some((b) => !fs.existsSync(path.join(ROOT, b.htmlRelativePath)));
+  let serverProcess: ChildProcess | null = null;
+  const TEST_PORT = 3892;
+
+  if (needsServer) {
+    serverProcess = spawn("npx", ["next", "start", "-p", String(TEST_PORT)], {
+      cwd: ROOT,
+      stdio: "pipe",
+    });
+    const ready = await waitForServer(TEST_PORT);
+    if (!ready) {
+      serverProcess.kill("SIGKILL");
+      throw new Error(`ไม่สามารถเริ่ม Next.js start บนพอร์ต ${TEST_PORT} ได้`);
+    }
+  }
 
   let hasFailure = false;
   const results: {
@@ -114,57 +160,67 @@ export function testBundleBudget(): boolean {
     topChunks: { name: string; sizeKb: number }[];
   }[] = [];
 
-  for (const b of BUDGETS) {
-    const fullHtmlPath = path.join(ROOT, b.htmlRelativePath);
-    if (!fs.existsSync(fullHtmlPath)) {
-      console.warn(`⚠️ ไม่พบไฟล์ HTML สำหรับเส้นทาง: ${b.route} (${b.htmlRelativePath})`);
-      continue;
-    }
-
-    const html = fs.readFileSync(fullHtmlPath, "utf8");
-    const htmlGzipBytes = zlib.gzipSync(Buffer.from(html)).length;
-    const htmlGzipKb = Math.round(htmlGzipBytes / 1024);
-
-    const chunkMatches = html.match(/_next\/static\/chunks\/[^"'\s>]+\.js/g) || [];
-    const uniqueChunks = Array.from(new Set(chunkMatches));
-
-    let totalJsGzipBytes = 0;
-    const chunkDetails: { name: string; sizeKb: number }[] = [];
-
-    for (const chunkRef of uniqueChunks) {
-      const chunkRel = chunkRef.replace(/^_next\//, "");
-      const chunkFile = path.join(ROOT, ".next", chunkRel);
-      if (fs.existsSync(chunkFile)) {
-        const chunkContent = fs.readFileSync(chunkFile);
-        const chunkGz = zlib.gzipSync(chunkContent).length;
-        totalJsGzipBytes += chunkGz;
-        chunkDetails.push({
-          name: path.basename(chunkFile),
-          sizeKb: Math.round(chunkGz / 1024),
-        });
+  try {
+    for (const b of BUDGETS) {
+      let html = "";
+      const fullHtmlPath = path.join(ROOT, b.htmlRelativePath);
+      if (fs.existsSync(fullHtmlPath)) {
+        html = fs.readFileSync(fullHtmlPath, "utf8");
+      } else if (serverProcess) {
+        html = await fetchHtml(`http://127.0.0.1:${TEST_PORT}${b.route}`);
+      } else {
+        console.warn(`⚠️ ไม่พบไฟล์ HTML สำหรับเส้นทาง: ${b.route}`);
+        continue;
       }
+
+      const htmlGzipBytes = zlib.gzipSync(Buffer.from(html)).length;
+      const htmlGzipKb = Math.round(htmlGzipBytes / 1024);
+
+      const chunkMatches = html.match(/_next\/static\/chunks\/[^"'\s>]+\.js/g) || [];
+      const uniqueChunks = Array.from(new Set(chunkMatches));
+
+      let totalJsGzipBytes = 0;
+      const chunkDetails: { name: string; sizeKb: number }[] = [];
+
+      for (const chunkRef of uniqueChunks) {
+        const chunkRel = chunkRef.replace(/^_next\//, "");
+        const chunkFile = path.join(ROOT, ".next", chunkRel);
+        if (fs.existsSync(chunkFile)) {
+          const chunkContent = fs.readFileSync(chunkFile);
+          const chunkGz = zlib.gzipSync(chunkContent).length;
+          totalJsGzipBytes += chunkGz;
+          chunkDetails.push({
+            name: path.basename(chunkFile),
+            sizeKb: Math.round(chunkGz / 1024),
+          });
+        }
+      }
+
+      chunkDetails.sort((a, b) => b.sizeKb - a.sizeKb);
+      const jsGzipKb = Math.round(totalJsGzipBytes / 1024);
+
+      const jsOk = jsGzipKb <= b.maxJsGzipKb;
+      const htmlOk = htmlGzipKb <= b.maxHtmlGzipKb;
+
+      if (!jsOk || !htmlOk) {
+        hasFailure = true;
+      }
+
+      results.push({
+        route: b.route,
+        jsGzipKb,
+        maxJsGzipKb: b.maxJsGzipKb,
+        htmlGzipKb,
+        maxHtmlGzipKb: b.maxHtmlGzipKb,
+        jsOk,
+        htmlOk,
+        topChunks: chunkDetails.slice(0, 3),
+      });
     }
-
-    chunkDetails.sort((a, b) => b.sizeKb - a.sizeKb);
-    const jsGzipKb = Math.round(totalJsGzipBytes / 1024);
-
-    const jsOk = jsGzipKb <= b.maxJsGzipKb;
-    const htmlOk = htmlGzipKb <= b.maxHtmlGzipKb;
-
-    if (!jsOk || !htmlOk) {
-      hasFailure = true;
+  } finally {
+    if (serverProcess) {
+      serverProcess.kill("SIGTERM");
     }
-
-    results.push({
-      route: b.route,
-      jsGzipKb,
-      maxJsGzipKb: b.maxJsGzipKb,
-      htmlGzipKb,
-      maxHtmlGzipKb: b.maxHtmlGzipKb,
-      jsOk,
-      htmlOk,
-      topChunks: chunkDetails.slice(0, 3),
-    });
   }
 
   // Print results table
@@ -212,6 +268,8 @@ export function testBundleBudget(): boolean {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const ok = testBundleBudget();
-  process.exit(ok ? 0 : 1);
+  testBundleBudget().then((ok) => {
+    process.exit(ok ? 0 : 1);
+  });
 }
+

@@ -36,7 +36,40 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: PR 7 — D-02 Public APIs Audit, D-05 Tailwind Theme Shadows, และ Gate 34 Performance Budget Ratchet (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ D-02, D-05, Gate 34):**
+1. **D-02: ตรวจสอบและกำกับความรับผิดชอบของ 13 Public APIs**:
+   - เพิ่ม JSDoc `@public (D-02)` กำกับเจตนาและขอบเขตการใช้งานอย่างชัดเจนครบทั้ง 13 ตัวใน 9 ไฟล์ ป้องกันการถูกลบเป็น dead code ในอนาคต:
+     - `getCardKeywords` ใน [`src/data/cards/keywords-en.ts`](../src/data/cards/keywords-en.ts)
+     - `getPersonaName`, `getPersonaTagline` ใน [`src/data/personas.ts`](../src/data/personas.ts)
+     - `anthropicBaseUrl` ใน [`src/lib/ai/gateway.ts`](../src/lib/ai/gateway.ts)
+     - `OG_IMAGE_BLOCK` ใน [`src/lib/config/site.ts`](../src/lib/config/site.ts)
+     - `useDictionary` ใน [`src/lib/i18n/context.tsx`](../src/lib/i18n/context.tsx)
+     - `getServerDictionary`, `getDictionary` ใน [`src/lib/i18n/server.ts`](../src/lib/i18n/server.ts)
+     - `setReaderStatus`, `recordAdminAudit` ใน [`src/lib/marketplace/readers.repo.ts`](../src/lib/marketplace/readers.repo.ts)
+     - `kvIncr` ใน [`src/lib/platform/kv-store.ts`](../src/lib/platform/kv-store.ts)
+     - `getAiDisclosure` ใน [`src/lib/safety/guardrails.ts`](../src/lib/safety/guardrails.ts)
+     - `FollowUpSchema` ใน [`src/lib/schema/reading.ts`](../src/lib/schema/reading.ts)
+2. **D-05: แก้ไข Tailwind v4 CSS Theme Shadow Warning**:
+   - ย้ายการประกาศ `--shadow-raised` และ `--shadow-overlay` เข้าสู่บล็อก `@theme` ใน [`src/app/globals.css`](../src/app/globals.css) เพื่อให้ Tailwind v4 รู้จักเป็น theme tokens มาตรฐาน
+   - แทนที่ arbitrary class strings (`shadow-[var(--shadow-raised)]`, `shadow-[var(--shadow-overlay)]`) ใน 21 คอมโพเนนต์ทั่วทั้งโปรเจกต์ด้วย Tailwind utilities `shadow-raised` และ `shadow-overlay`
+   - กำจัดคำเตือน CSS build optimizer `Unexpected token Delim('*')` ได้ 100% ทำให้ขั้นตอน Next.js CSS compilation สะอาดหมดจด
+3. **Gate 34: ปรับปรุงเครื่องมือวัดและขัน Ratchet Budget ขั้นสุดท้าย (Performance Budget Gate)**:
+   - อัปเกรด [`scripts/qa/test-bundle-budget.ts`](../scripts/qa/test-bundle-budget.ts) ให้รองรับการวัดทั้ง Static HTML บนดิสก์และ Live SSR Server ชั่วคราวบน ephemeral port เพื่อรองรับสถาปัตยกรรม Dynamic Server Locale (S-02)
+   - ปรับเพดานงบประมาณ (Ratchet) ทั้ง 8 เส้นทางสำคัญลงสู่ระดับเป้าหมายสุดท้าย ล็อกผลสำเร็จของการทำ P-01, P-02, P-03 ไว้อย่างถาวร:
+     - `/`: JS ≤ 315 KB (วัดจริง: 305 KB, ลดลงจาก 468 KB), HTML ≤ 40 KB (วัดจริง: 37 KB)
+     - `/cards`: JS ≤ 320 KB (วัดจริง: 312 KB, ลดลงจาก 390 KB), HTML ≤ 40 KB (วัดจริง: 34 KB, ลดลงจาก 174 KB)
+     - `/cards/major-00`: JS ≤ 385 KB (วัดจริง: 374 KB, ลดลงจาก 490 KB), HTML ≤ 30 KB (วัดจริง: 22 KB)
+     - `/blog`: JS ≤ 325 KB (วัดจริง: 314 KB, ลดลงจาก 390 KB), HTML ≤ 65 KB (วัดจริง: 55 KB)
+     - `/daily`: JS ≤ 455 KB (วัดจริง: 447 KB, ลดลงจาก 540 KB), HTML ≤ 25 KB (วัดจริง: 16 KB)
+     - `/love/1-card`: JS ≤ 460 KB (วัดจริง: 451 KB, ลดลงจาก 550 KB), HTML ≤ 25 KB (วัดจริง: 18 KB)
+     - `/spreads`: JS ≤ 320 KB (วัดจริง: 312 KB, ลดลงจาก 410 KB), HTML ≤ 45 KB (วัดจริง: 37 KB)
+     - `/cards/all`: JS ≤ 220 KB (วัดจริง: 210 KB, ลดลงจาก 336 KB), HTML ≤ 45 KB (วัดจริง: 37 KB)
+   - ผ่านการทดสอบ `test-bundle-budget.ts` ครบ 8/8 เส้นทาง และผ่าน `repo:verify` ครบทั้ง 34 ด่าน 100%
+
 ### 🗓️ 2026-09-06: PR 6 — Server Locale Resolution (S-02) และย้าย HomeSeoContent เป็น Server Component (P-03) (โดย Antigravity AI)
+
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ S-02, P-03):**
 1. **S-02: เชื่อมต่อ Server Locale และ Next.js 16 Proxy (`src/proxy.ts` / `src/lib/i18n/server.ts`)**:

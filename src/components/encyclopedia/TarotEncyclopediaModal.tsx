@@ -55,7 +55,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 20 }}
-          className="w-full max-w-4xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-5 sm:p-7 shadow-[var(--shadow-overlay)] flex flex-col relative space-y-4 overflow-hidden"
+          className="w-full max-w-4xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-5 sm:p-7 shadow-overlay flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#D9C8AC]/30 pb-3">
@@ -189,7 +189,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="w-full max-w-2xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-7 shadow-[var(--shadow-overlay)] flex flex-col relative space-y-4 overflow-y-auto text-[#2E211A]"
+                className="w-full max-w-2xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-7 shadow-overlay flex flex-col relative space-y-4 overflow-y-auto text-[#2E211A]"
               >
                 <button
                   type="button"

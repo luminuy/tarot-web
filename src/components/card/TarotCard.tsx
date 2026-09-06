@@ -185,7 +185,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         {/* 1. ด้านหลังไพ่ (Sacred Card Back - Obsidian & Gold Filigree) */}
         {/* ========================================================= */}
         <div
-          className={`card-face absolute inset-0 rounded-lg overflow-hidden shadow-[var(--shadow-overlay)] border-2 border-[#D9C8AC]/60 card-back-pattern flex flex-col items-center justify-between p-3 transition-opacity duration-300 ${
+          className={`card-face absolute inset-0 rounded-lg overflow-hidden shadow-overlay border-2 border-[#D9C8AC]/60 card-back-pattern flex flex-col items-center justify-between p-3 transition-opacity duration-300 ${
             isRevealed ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
           style={{

@@ -153,7 +153,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         <div
           className={`relative transition-all duration-300 rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] ${
             isCurrentReading
-              ? "ring-4 ring-[#8F5C1A] ring-offset-2 ring-offset-[#F3EDE2] shadow-[var(--shadow-overlay)] scale-105"
+              ? "ring-4 ring-[#8F5C1A] ring-offset-2 ring-offset-[#F3EDE2] shadow-overlay scale-105"
               : "hover:scale-105"
           }`}
         >

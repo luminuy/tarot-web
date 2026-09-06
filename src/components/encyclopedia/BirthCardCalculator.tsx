@@ -249,7 +249,7 @@ export function BirthCardCalculator() {
 
         <button
           type="submit"
-          className="w-full py-3 px-6 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs sm:text-sm font-serif-th font-bold hover:bg-[#A58A5C] transition-all duration-200 cursor-pointer shadow-[var(--shadow-raised)] active:scale-95 tracking-wide"
+          className="w-full py-3 px-6 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs sm:text-sm font-serif-th font-bold hover:bg-[#A58A5C] transition-all duration-200 cursor-pointer shadow-raised active:scale-95 tracking-wide"
         >
           {isEnglish ? "Calculate Your Birth Card" : "คำนวณไพ่ประจำตัวของคุณ"}
         </button>
@@ -304,7 +304,7 @@ export function BirthCardCalculator() {
                     card={result.primaryCard}
                     isRevealed={true}
                     size="lg"
-                    className="shadow-[var(--shadow-overlay)]"
+                    className="shadow-overlay"
                   />
                 </div>
 
@@ -349,7 +349,7 @@ export function BirthCardCalculator() {
                       card={result.secondaryCard}
                       isRevealed={true}
                       size="lg"
-                      className="shadow-[var(--shadow-overlay)]"
+                      className="shadow-overlay"
                     />
                   </div>
 

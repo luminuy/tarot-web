@@ -225,7 +225,9 @@ export async function updateReader(id: string, input: UpdateReaderInput): Promis
 }
 
 /**
+ * @public (D-02)
  * ปรับเปลี่ยนสถานะแม่หมอ (เช่น approve, suspend, pending)
+ * Used by admin management API and moderation workflows.
  */
 export async function setReaderStatus(id: string, status: ReaderStatus): Promise<boolean> {
   const db = await getAppDB();
@@ -258,7 +260,9 @@ export async function deleteReader(id: string): Promise<boolean> {
 }
 
 /**
+ * @public (D-02)
  * บันทึก Audit Log สำหรับแอดมิน
+ * Used by admin security tracking and sensitive action logs.
  */
 export async function recordAdminAudit(actor: string, action: string, detail?: string): Promise<void> {
   try {
@@ -271,3 +275,4 @@ export async function recordAdminAudit(actor: string, action: string, detail?: s
     console.error("[RecordAdminAudit Error]", err);
   }
 }
+
