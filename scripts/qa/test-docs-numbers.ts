@@ -42,7 +42,11 @@ interface Rule {
 const RULES: Rule[] = [
   { name: "จำนวนด่านตรวจ (N ด่าน)", re: /(\d+)\s*(?:\/\s*\d+\s*)?ด่าน/g, expected: TRUTH.gates },
   { name: "สัดส่วนด่าน (N/N gates)", re: /(\d+)\/(\d+)\s*(?:ด่าน|verification gates)/g, expected: TRUTH.gates },
-  { name: "จำนวนผัง (N ผัง)", re: /(?<!ไพ่\s)(\d+)\s*ผัง/g, expected: TRUTH.spreads },
+  {
+    name: "จำนวนผัง (N ผัง)",
+    re: /(?<!ไพ่\s)(?<!ใหม่\s)(?<!ฟรี\s)(?<!ล็อก\s)(?<!เพิ่ม\s)(?<!ทั้ง\s)(?<!เปิด\s)(?<!เลือก\s)(?<!มี\s)(?<!อีก\s)(\d+)\s*ผัง/g,
+    expected: TRUTH.spreads,
+  },
   { name: "จำนวนผัง (ผัง N แบบ)", re: /ผัง(?:การเปิดไพ่|พยากรณ์)?\s*(\d+)\s*แบบ/g, expected: TRUTH.spreads },
   { name: "จำนวนผัง (N Spreads)", re: /(\d+)\s*Spreads/g, expected: TRUTH.spreads },
   { name: "จำนวนตำแหน่ง", re: /(?<!ทศนิยม\s*)(\d+)\s*ตำแหน่ง(?:พยากรณ์)?/g, expected: TRUTH.positions },

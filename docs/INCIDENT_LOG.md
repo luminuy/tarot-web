@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0090 · 2026-09-06 07:29 · 🟠 High · bind guestAllowed in SPREADS to runtime isStandardSpread and verify new spreads
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ฟิลด์ guestAllowed ใน SPREADS ถูกประกาศไว้แต่ไม่มีผลบังคับจริงที่รันไทม์ และผังมาตรฐานบางตัวมีค่า guestAllowed: false ขัดกับ STANDARD_SPREAD_IDS |
+| **สาเหตุราก** | STANDARD_SPREAD_IDS ถูกฮาร์ดโค้ดเป็น Set แยกต่างหากใน limits.ts แทนที่จะดึงจาก SPREADS และไม่ได้มี automated test ตรวจสอบ parity ระหว่างสองแหล่งข้อมูล |
+| **การแก้ไข** | เปลี่ยน STANDARD_SPREAD_IDS ให้ derive จาก SPREADS โดยกรองเฉพาะ s.guestAllowed แทน Set ที่ฮาร์ดโค้ด และปรับค่า guestAllowed ใน spreads.ts ให้ตรงกับสถานะจริงของผังทั้ง 25 แบบ |
+| **🛡️ กฎป้องกันถาวร** | **ผูก STANDARD_SPREAD_IDS จาก SPREADS.filter(s => s.guestAllowed).map(s => s.id) เป็น Single Source of Truth และเพิ่ม Check 5 ใน test-feature-gating.ts ตรวจ parity ทุกผัง** |
+| **การพิสูจน์ว่าแก้ได้จริง** | test-feature-gating.ts ผ่าน 66/66 ข้อ และ repo:verify ผ่านครบ 33 ด่าน |
+| **บันทึกโดย** | Antigravity AI · branch `feat/qa-spreads-and-guest-allowed` · commit `e9aa4d2` |
+
+
 ### INC-0089 · 2026-09-06 06:34 · 🟡 Medium · ปิด elastic overscroll ที่ root กันหัวเว็บ sticky เด้งบนมือถือ
 
 | หัวข้อ | รายละเอียด |

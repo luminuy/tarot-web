@@ -35,6 +35,28 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+### 🗓️ 2026-09-06: ปิดช่องโหว่ guestAllowed และ QA ผังใหม่ 5 ผัง (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_QA_SPREADS_2026-09-06.md`):**
+1. **Task B: ปิดช่องโหว่ `guestAllowed` ขัดแย้งกับรันไทม์ (ISSUE-031 / INC-0084)**:
+   - ผูก `STANDARD_SPREAD_IDS` ใน `src/lib/entitlement/limits.ts` ให้ดึงจาก `SPREADS.filter((s) => s.guestAllowed).map((s) => s.id)` โดยตรง ให้ `SPREADS` เป็น Single Source of Truth ตามบทเรียน INC-0005
+   - ปรับ `guestAllowed` ใน `src/data/spreads.ts` ให้ตรงกับความจริงของระบบ (10 ผังมาตรฐาน: `daily`, `quick`, `yes-no`, `three-card`, `situation-solution`, `mind-body-spirit`, `how-they-feel`, `family`, `luck`, `study` มี `guestAllowed: true`; อีก 15 ผังใหญ่เป็น `guestAllowed: false`)
+   - เพิ่ม Check 5 ใน `scripts/qa/test-feature-gating.ts` ยืนยันว่าทุกผังมี `s.guestAllowed === isStandardSpread(s.id)` ป้องกันไม่ให้เกิดการขัดกันเองอีก
+2. **Task A: ตรวจสอบผังใหม่ 5 ผัง (`family`, `luck`, `study`, `love-six`, `monthly-ten`)**:
+   - ปรับพิกัดไพ่ใบที่ 6 ใน `monthly-ten` จาก `x: 0.55` เป็น `x: 0.5` เพื่อให้มีระยะห่าง 0.22 จากคอลัมน์ขวา (`x: 0.72`) เท่ากับผัง `celtic-cross` ป้องกันไพ่ซ้อนทับล้นกรอบบนจอแคบ (INC-0058 prevention)
+   - ตรวจสอบ `SpreadPositionMap.tsx` ยืนยันว่า counter-rotate บนไพ่ใบที่หมุน 90° (`rotate: 90`) ทำงานถูกต้อง เลข 2 ตั้งตรง (INC-0070)
+   - ยืนยันว่า `SpreadBoard.tsx` ใช้ Unified Rail สำหรับผังที่มี 6 ใบขึ้นไป (`love-six`, `monthly-ten`) และ Unified Canvas สำหรับผังที่มี < 6 ใบ (`family`, `luck`, `study`) ป้องกัน horizontal page overflow ทุกขนาดหน้าจอ
+3. **Task C: ตรวจสอบเส้นทางธงปิด (Free Period / INC-0083 Prevention)**:
+   - เพิ่มด่านทดสอบ Check 10 ใน `scripts/qa/test-entitlement.ts` จำลองกรณีแอดมินปิดระบบสิทธิ์ผ่าน KV (`app:flag:entitlement.enforced = false`) เพื่อยืนยันว่า `isEntitlementEnabled` คืนค่า false และ UI ถือว่า `isPassHolder = true` ทุกผังเปิดได้โดยไม่มีตราล็อกค้าง
+4. **Task D: ลด False Positive ใน `test-docs-numbers.ts`**:
+   - เพิ่ม negative lookbehind สำหรับคำขยายบอกชุดย่อย (`(?<!ใหม่\s)(?<!ฟรี\s)(?<!ล็อก\s)(?<!เพิ่ม\s)(?<!ทั้ง\s)(?<!เปิด\s)(?<!เลือก\s)(?<!มี\s)(?<!อีก\s)`) ทำให้ด่านตรวจยอดรวมไม่บล็อกข้อความบรรยายภาษาไทยธรรมชาติอย่าง "ผังใหม่ 5 ผัง" หรือ "ผังฟรี 3 ผัง"
+5. **การทดสอบและเกณฑ์คุณภาพ**:
+   - `test-feature-gating.ts` ➔ ผ่านครบ 66/66 ข้อ
+   - `test-entitlement.ts` ➔ ผ่านครบ 67/67 ข้อ
+   - `test-seo-wave3.ts` ➔ ผ่านครบ 74/74 ด่าน
+   - `test-docs-numbers.ts` ➔ ผ่านครบ 100%
+   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 33 ด่าน 100%**
+
 ### 🗓️ 2026-09-06: ปรับโฉม 3 หน้า (/daily, /love/1-card, /cards/birth-card) เข้าสู่ธีม Editorial Quiet Luxury (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md`):**
