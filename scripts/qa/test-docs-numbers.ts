@@ -18,6 +18,7 @@ import { SPREADS } from "../../src/data/spreads";
 import { DECK } from "../../src/data/cards";
 import { ARTICLES } from "../../src/data/articles";
 import { STANDARD_SPREAD_IDS } from "../../src/lib/entitlement/limits";
+import { COUNTS } from "../../src/components/layout/nav-links";
 import { CHECKS } from "../github-auto";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -176,6 +177,18 @@ function checkDocs() {
     console.error(`\n💡 วิธีแก้: อัปเดตตัวเลขในเอกสารให้ตรงกับ codebase หรือใส่ใน ALLOWLIST หากเป็นบันทึกประวัติ\n`);
     process.exit(1);
   }
+
+  // -------------------------------------------------------------
+  // ตรวจสอบ P-01: COUNTS ใน nav-links.ts ต้องตรงกับ dataset เสมอ
+  // -------------------------------------------------------------
+  if (COUNTS.cards !== DECK.length || COUNTS.articles !== ARTICLES.length || COUNTS.spreads !== SPREADS.length) {
+    console.error(`❌ COUNTS ใน nav-links.ts ไม่ตรงกับ dataset จริง:`);
+    console.error(`  - cards: พบ ${COUNTS.cards} (ควรเป็น ${DECK.length})`);
+    console.error(`  - articles: พบ ${COUNTS.articles} (ควรเป็น ${ARTICLES.length})`);
+    console.error(`  - spreads: พบ ${COUNTS.spreads} (ควรเป็น ${SPREADS.length})`);
+    process.exit(1);
+  }
+  console.log(`✅ COUNTS ใน nav-links.ts ตรงกับ dataset จริง (${COUNTS.cards} ไพ่ / ${COUNTS.articles} บทความ / ${COUNTS.spreads} ผัง)`);
 
   console.log(`✅ เอกสารทั้งหมด ${TARGET_FILES.length} ไฟล์ สอดคล้องกับความจริงของระบบ 100%\n`);
 }

@@ -9,7 +9,6 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "log:sync": "tsx scripts/sync-worklog.ts",
     "build:worker": "opennextjs-cloudflare build",

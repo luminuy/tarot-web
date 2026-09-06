@@ -1,9 +1,10 @@
 import { DECK, cardById } from "../../src/data/cards";
 import type { Category } from "../../src/data/cards/types";
+import { fileURLToPath } from "node:url";
 
 const CATEGORIES: Category[] = ["general", "love", "work", "money", "self"];
 
-function runQa() {
+export function runQa() {
   console.log("🧪 Starting QA verification for 78 Tarot Cards English Meanings...");
 
   if (DECK.length !== 78) {
@@ -86,4 +87,7 @@ function runQa() {
   console.log(`   - Card lookup helpers tested and verified.`);
 }
 
-runQa();
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  runQa();
+}
+

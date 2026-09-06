@@ -36,6 +36,37 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: PR 2 — ปลดระวาง Datasets ใน nav-links, ลบโค้ดตาย 3 โมดูล, และ Ratchet งบ JS ลง ~150 KB (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ P-01, D-01, D-03, D-04):**
+1. **P-01: ตัดการ import ก้อนข้อมูลขนาดใหญ่ใน `nav-links.ts`**:
+   - ปรับ `COUNTS` ใน [`src/components/layout/nav-links.ts`](../src/components/layout/nav-links.ts) ให้ใช้ตัวเลขคงที่ (`cards: 78`, `articles: 26`, `spreads: 25`) แทนการ import `DECK` (~900 KB), `ARTICLES` (~157 KB), และ `SPREADS` (~85 KB)
+   - เพิ่มการตรวจสอบความสอดคล้องใน [`scripts/qa/test-docs-numbers.ts`](../scripts/qa/test-docs-numbers.ts) เพื่อให้แน่ใจว่า `COUNTS` ตรงกับขนาดจริงของ dataset เสมอ
+2. **D-01: ลบโค้ดตายที่ไม่มีการอ้างอิง 3 โมดูล (283 บรรทัด)**:
+   - ลบ `src/lib/audio/tts.ts` (161 บรรทัด - ถูกแทนที่ด้วย `TTSReaderButton` + `lib/utils/audio.ts`)
+   - ลบ `src/components/entitlement/QuotaMeter.tsx` (99 บรรทัด - ถูกแทนที่ด้วย `QuotaPips` / `EntitlementStatusCard`)
+   - ลบ `src/components/layout/SiteShell.tsx` (23 บรรทัด - แต่ละหน้าประกอบ Header/Footer เองสมบูรณ์แล้ว)
+   - (เก็บ `src/lib/i18n/server.ts` ไว้ใช้งานใน PR 6 สำหรับ Server-side Locale Resolution)
+3. **D-03: ลบคำสั่ง `npm run lint` ที่พังเงียบใน Next.js 16 ออกจาก `package.json`**:
+   - ป้องกันคำสั่งลวงที่ไม่สามารถรันได้จริง โดยใช้ `npm run typecheck` เป็นเครื่องมือหลัก
+4. **D-04: เชื่อมโยงเทสต์ภาษาอังกฤษ `test-card-meanings-en.ts` เข้าสู่ Gate 3 (`verify-cards.ts`)**:
+   - ส่งผลให้ด่าน "🃏 ไพ่ 78 ใบครบถ้วนสมบูรณ์" ตรวจสอบทั้งความหมายภาษาไทยและภาษาอังกฤษ (meaningsEn, astrologyEn, keywordsEn) พร้อมกันในทุกรอบ
+5. **Ratchet งบประมาณน้ำหนัก JS ใน `test-bundle-budget.ts` (Gate 34)**:
+   - ผลการวัดจริงหลัง build ลดลงอย่างมหาศาลทุกหน้า:
+     - `/`: 472 KB ➔ **316 KB** gzip (-156 KB, -33%)
+     - `/cards`: 427 KB ➔ **254 KB** gzip (-173 KB, -41%)
+     - `/cards/major-00`: 420 KB ➔ **374 KB** gzip (-46 KB)
+     - `/blog`: 427 KB ➔ **252 KB** gzip (-175 KB, -41%)
+     - `/daily`: 437 KB ➔ **390 KB** gzip (-47 KB)
+     - `/love/1-card`: 440 KB ➔ **393 KB** gzip (-47 KB)
+     - `/spreads`: 432 KB ➔ **271 KB** gzip (-161 KB, -37%)
+     - `/cards/all`: 383 KB ➔ **336 KB** gzip (-47 KB)
+   - ปรับเพดานงบ `maxJsGzipKb` ใน `scripts/qa/test-bundle-budget.ts` ลงเพื่อล็อกผลงานนี้ถาวร
+6. **การตรวจสอบและเกณฑ์คุณภาพ**:
+   - `npm run typecheck` ➔ 0 errors
+   - `npx tsx scripts/qa/test-bundle-budget.ts` ➔ ผ่านครบ 8 เส้นทาง
+   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 34 ด่าน 100%**
+
 ### 🗓️ 2026-09-06: PR 1 — สถาปนาด่านที่ 34: งบน้ำหนักหน้าเว็บ (Performance Budget Gate) (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ G-01):**

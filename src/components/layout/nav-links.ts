@@ -1,12 +1,12 @@
-import { DECK } from "@/data/cards";
-import { ARTICLES } from "@/data/articles";
-import { SPREADS } from "@/data/spreads";
-
+// หมายเหตุ (P-01): ใช้ตัวเลขคงที่แทนการ import DECK (900KB), ARTICLES (157KB), SPREADS (85KB)
+// เพื่อไม่ให้ดึงข้อมูลก้อนใหญ่เข้า client bundle ของทุกหน้า (SiteFooter / SacredNavDropdown)
+// มีด่าน scripts/qa/test-docs-numbers.ts คอยตรวจยืนยันว่าตัวเลขตรงกับ dataset จริงเสมอ
 export const COUNTS = {
-  cards: DECK.length,        // 78
-  articles: ARTICLES.length, // 24
-  spreads: SPREADS.length,   // 20
+  cards: 78,
+  articles: 26,
+  spreads: 25,
 } as const;
+
 
 export interface NavLinkItem {
   label: string;
