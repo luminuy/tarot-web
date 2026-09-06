@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 33/33 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 34/34 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -35,6 +35,21 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-06: PR 1 — สถาปนาด่านที่ 34: งบน้ำหนักหน้าเว็บ (Performance Budget Gate) (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ G-01):**
+1. **สร้างด่านตรวจน้ำหนักหน้าเว็บอัตโนมัติ (Performance Budget Gate)**:
+   - สร้าง [`scripts/qa/test-bundle-budget.ts`](../scripts/qa/test-bundle-budget.ts) วัดขนาด gzip จริงของ JS chunks และ HTML ใน 8 เส้นทางสำคัญ (`/`, `/cards`, `/cards/major-00`, `/blog`, `/daily`, `/love/1-card`, `/spreads`, `/cards/all`)
+   - กำหนดเพดานงบประมาณแบบ Ratchet เริ่มต้นที่ระดับ Baseline ปัจจุบัน (เพื่อให้มีเครื่องมือกำกับและวัดผลก่อนเริ่มตัดโค้ดใน PR 2–7)
+   - เพิ่มคำสั่ง `"test:budget": "tsx scripts/qa/test-bundle-budget.ts"` ใน `package.json`
+2. **ผูกเข้าสู่ Verification Suite กลาง (Gate 34)**:
+   - เพิ่มด่านที่ 34 ใน `scripts/github-auto.ts` (`CHECKS`)
+   - อัปเดตตัวเลขอ้างอิงด่านตรวจในเอกสารแม่บท 11 ไฟล์ให้ตรงกับ `CHECKS.length = 34` ผ่านการตรวจของ `test-docs-numbers.ts` สมบูรณ์ 100%
+3. **การทดสอบและเกณฑ์คุณภาพ**:
+   - `test-bundle-budget.ts` ➔ ผ่านครบทั้ง 8 เส้นทาง
+   - `test-docs-numbers.ts` ➔ ผ่าน 100%
+   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 34 ด่าน 100%**
 
 ### 🗓️ 2026-09-06: รอบตรวจใหญ่ประสิทธิภาพ · โค้ดตาย · SEO — เขียนแผนพร้อมตัวเลขวัดจริง (โดย Claude Opus 5)
 

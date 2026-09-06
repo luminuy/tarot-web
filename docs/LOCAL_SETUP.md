@@ -98,14 +98,14 @@ PORT=3001 npm run dev
 
 | คำสั่ง | วัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 33 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably Fair, Agent Lock ฯลฯ) |
+| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 34 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably Fair, Agent Lock ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Typecheck อย่างเดียว (ต้องได้ 0 errors เสมอ) |
 | `npm run cards:variants` | สร้างรูปภาพไพ่ WebP หลายขนาด (`w128`, `w256`, `w512`, `w1024`) อัตโนมัติ (รันเมื่อมีการเพิ่มภาพใหม่ใน `/public/cards/`) |
 | `npm run agent:status` | ตรวจสอบสถานะการล็อคไฟล์ของ AI Agent เพื่อป้องกันการแก้ไขชนกัน |
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงาน `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` |
 | `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จ |
 | `npm run commit` | บันทึก Commit ผ่านระบบ Git Author Guard |
-| `npm run pr:auto` | ตรวจ 33 ด่าน ➔ Push ➔ สร้าง PR ➔ Auto-Merge ➔ Deploy อัตโนมัติ |
+| `npm run pr:auto` | ตรวจ 34 ด่าน ➔ Push ➔ สร้าง PR ➔ Auto-Merge ➔ Deploy อัตโนมัติ |
 | `npm run git:tidy` | เก็บกวาด Branch ที่ถูก Merge ไปแล้วออกจากเครื่องและ Remote |
 
 ---
