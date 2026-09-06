@@ -1,5 +1,6 @@
 import { getWaitUntil } from "@/lib/platform/cf";
 import { kvGetJSON, kvPutJSON } from "@/lib/platform/kv-store";
+import { isRedisEnabled, redisGetCount, redisIncrBy } from "@/lib/platform/redis";
 
 /**
  * 🔢 ตัวนับบน KV แบบสะสมใน isolate ก่อนค่อยเขียนรวมทีเดียว (Buffered KV Counter)
@@ -70,6 +71,14 @@ function pendingOf(key: string): number {
  * ทำให้การบังคับโควตาภายใน isolate เดียวกันยังตรงทันที
  */
 export async function readCounter(key: string): Promise<number> {
+  // เปิด Upstash อยู่ → อ่านสดทุกครั้ง ไม่ต้อง memo และไม่มี delta ค้าง
+  // เพราะ `bumpCounter()` เขียนเข้า Redis แบบ atomic ทันที (ดูหมายเหตุด้านล่าง)
+  if (isRedisEnabled()) {
+    const live = await redisGetCount(key);
+    if (live !== null) return live;
+    // Redis ล่ม → ถอยไปอ่าน KV ตามเดิม (ค่าอาจเก่ากว่าแต่ดีกว่าปล่อยผ่านฟรี)
+  }
+
   const cache = readCache();
   const cached = cache.get(key);
 
@@ -89,6 +98,38 @@ export async function readCounter(key: string): Promise<number> {
  */
 export function bumpCounter(key: string, ttlSec: number, amount = 1): void {
   if (!key || amount === 0) return;
+
+  // ── ทางที่ดีกว่า: Upstash Redis `INCRBY` แบบ atomic ──────────────────────────
+  // ไม่ต้อง debounce เลยเพราะโควตาฟรี 10,000 คำสั่ง/วัน (เทียบ KV ที่เขียนได้ 1,000)
+  // และ atomic แปลว่าสอง isolate ที่เขียนพร้อมกันไม่ทับกันเหมือน read-modify-write บน KV
+  // → ตัวนับกลายเป็น "แม่นจริงข้าม edge" ไม่ใช่แค่ประหยัดโควตา
+  if (isRedisEnabled()) {
+    // ⚠️ ต้องผูกกับ `waitUntil` เสมอ — promise ที่ลอยอยู่หลังส่ง response แล้ว
+    // Cloudflare Workers มีสิทธิ์ตัดทิ้งกลางคัน ตัวนับจะหายเงียบ ๆ
+    const task = (async () => {
+      const ok = await redisIncrBy(key, amount, ttlSec);
+      if (ok === null) {
+        // Redis ล่มกลางทาง — ทิ้งลง buffer ของ KV แทน จะได้ไม่นับหาย
+        bufferBump(key, ttlSec, amount);
+      }
+    })();
+
+    void (async () => {
+      try {
+        (await getWaitUntil())(task);
+      } catch {
+        // ไม่มี waitUntil (unit test / dev) — ปล่อยให้ task วิ่งเองตามปกติ
+        void task;
+      }
+    })();
+    return;
+  }
+
+  bufferBump(key, ttlSec, amount);
+}
+
+/** สะสม delta ลง buffer ของ KV แล้วนัด flush (เส้นทางเดิมเมื่อไม่มี Upstash) */
+function bufferBump(key: string, ttlSec: number, amount: number): void {
   const buf = buffer();
   const cur = buf.get(key);
   buf.set(key, {

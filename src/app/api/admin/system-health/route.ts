@@ -199,13 +199,23 @@ export async function GET(request: Request) {
   // 9. Cloudflare Free Stack (ส่วนเสริม — ไม่นับเป็น critical · ไม่ตั้ง = ระบบเดิมทำงานปกติ)
   const { isAiGatewayEnabled } = await import("@/lib/ai/gateway");
   const { isTurnstileConfigured } = await import("@/lib/security/turnstile");
+  const { isRedisEnabled, redisPing } = await import("@/lib/platform/redis");
   const { getAiBinding, getVectorizeBinding } = await import("@/lib/platform/cf");
   const [workersAiBinding, vectorizeBinding] = await Promise.all([
     getAiBinding(),
     getVectorizeBinding(),
   ]);
 
+  // Upstash Redis — ที่พักตัวนับ/เซสชันแทน KV (ข้อ 16 ในคู่มือ) · ไม่ตั้ง = ใช้ KV เหมือนเดิม
+  const upstashHealth = {
+    enabled: isRedisEnabled(),
+    urlSet: Boolean(process.env.UPSTASH_REDIS_REST_URL),
+    tokenSet: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN),
+    reachable: isRedisEnabled() ? await redisPing() : false,
+  };
+
   const cloudflareStackHealth = {
+    upstashRedis: upstashHealth,
     aiGateway: {
       enabled: isAiGatewayEnabled(),
       accountIdSet: Boolean(process.env.CF_AI_GATEWAY_ACCOUNT_ID),
