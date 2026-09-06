@@ -483,10 +483,10 @@
 >
 > | # | บริการ | สถานะจริง |
 > | :---: | :--- | :--- |
-> | **16** | **Upstash Redis** | 🟡 **โค้ดพร้อมแล้ว รอ token** — `src/lib/platform/redis.ts` + ต่อเข้า `kv-counter` และ `store.ts` แล้ว · เปิดใช้ด้วยการตั้ง `UPSTASH_REDIS_REST_URL/TOKEN` เท่านั้น |
+> | **16** | **Upstash Redis** | 🟢 **LIVE** — ตั้ง Secret บน Worker เรียบร้อย (`UPSTASH_REDIS_REST_URL/TOKEN`) ทำ Atomic Counting & Session Offload ปลดล็อกความจุ 3,000 คน/วัน |
 > | 17 | Turso | ⛔ **ไม่ควรทำ** — ซ้ำซ้อนกับ Cloudflare D1 ที่ใช้อยู่ (มี schema/migration/ด่านทดสอบผูกอยู่แล้ว) การมีสอง SQL store คือหนี้ ไม่ใช่กำไร |
 > | **18** | **ImageKit** | 🟢 **LIVE** — ผูก Web Origin `https://seertarot.net` เรียบร้อย (Endpoint: `https://ik.imagekit.io/seertarotweb`) ทดสอบ Edge Cache BKK 200 OK |
-> | 19 | Cloudinary | 🔴 ต้องสมัครบัญชี |
+> | **19** | **Cloudinary** | 🟢 **LIVE** — เชื่อมต่อ Cloud Name `xtgpasdc` เสิร์ฟภาพแชร์ดวง OG 1200x630 ไดนามิก (0ms CPU บน Worker) |
 > | 20 | Statically CDN | ⛔ **ไม่คุ้ม** — ไฟล์ static ที่เสิร์ฟผ่าน Workers Assets **ฟรีและไม่จำกัดจำนวนคำขอ** อยู่แล้ว และตอนนี้ `cf-cache-status: HIT` ด้วย · การย้ายไป CDN ภายนอกคือเพิ่มจุดพังให้ภาพหลักของเว็บโดยไม่ได้อะไรกลับมา |
 > | **21** | MiniSearch / FlexSearch | ✅ **บรรลุเป้าหมายแล้ว** — `CardsExplorer.tsx` ค้นหาไพ่ 78 ใบด้วย `filter()` ในเครื่องผู้ใช้อยู่แล้ว (0 คำขอ) ไม่ต้องเพิ่มไลบรารี |
 > | 22 | Pagefind | ⚪ ยังไม่จำเป็น — บล็อกมี 20 บทความ ค้นหาในหน้าเว็บก็พอ |
