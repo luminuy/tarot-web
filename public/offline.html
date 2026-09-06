@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ออฟไลน์ · SeerTarot Sanctuary</title>
+  <style>
+    :root {
+      --bg: #FAF7F2;
+      --card-bg: #FFFFFF;
+      --text: #29261F;
+      --muted: #635B4E;
+      --gold: #8F5C1A;
+      --gold-light: #A58A5C;
+      --border: #D5CEC2;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Sarabun", "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .offline-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 440px;
+      width: 100%;
+      padding: 40px 28px;
+      box-shadow: 0 4px 20px rgba(41, 38, 31, 0.05);
+    }
+    .brand {
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .status-symbol {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: #F3EFE6;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+    }
+    .status-symbol svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: #FFFFFF;
+      border: none;
+    }
+    .btn-primary:hover {
+      background: #734812;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: #F3EFE6;
+      border-color: var(--gold-light);
+    }
+    .footer-note {
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <main class="offline-card">
+    <div class="brand">SeerTarot Sanctuary</div>
+    <div class="status-symbol" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+      </svg>
+    </div>
+    <h1>ไม่สามารถเชื่อมต่อสัญญาณได้ในขณะนี้</h1>
+    <p>
+      อุปกรณ์ของคุณกำลังอยู่ในโหมดออฟไลน์ ข้อมูลบางส่วนและภาพไพ่ที่เคยเปิดชมจะยังถูกเก็บไว้ในเครื่อง เมื่อต่ออินเทอร์เน็ตแล้วระบบจะกลับมาทำงานอัตโนมัติ
+    </p>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="window.location.reload()">
+        ลองโหลดใหม่อีกครั้ง
+      </button>
+      <a class="btn btn-secondary" href="/">
+        กลับสู่หน้าแรก
+      </a>
+    </div>
+    <div class="footer-note">
+      1909 Rider-Waite-Smith · Provably-Fair Sanctuary
+    </div>
+  </main>
+</body>
+</html>

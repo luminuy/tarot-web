@@ -14,7 +14,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://generativelanguage.googleapis.com https://challenges.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://www.facebook.com",
+      "connect-src 'self' https://generativelanguage.googleapis.com https://api.groq.com https://challenges.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://www.facebook.com",
       "frame-src 'self' https://challenges.cloudflare.com",
       "base-uri 'none'",
       "frame-ancestors 'none'",

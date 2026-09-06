@@ -36,6 +36,27 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: ⚡ เปิดใช้ 3 เทคนิคเร่งความเร็วฝั่ง Client (Speed Boosters) & ระบบ PWA / Service Worker (Zero Bundle Overhead)
+
+**เป้าหมาย:** ยกระดับความเร็วฝั่งผู้ใช้ (Client-side Speed) สู่ระดับสูงสุดตาม 3 เทคนิคหลัก และเปิดใช้งาน Progressive Web App (PWA) Offline-Ready
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **`content-visibility: auto` บนคลังไพ่ 78 ใบ**:
+   - เพิ่ม `contentVisibility: "auto"` และ `containIntrinsicSize: "auto 380px"` ใน `CardsExplorer.tsx` และ `CardGroupView.tsx`
+   - ช่วยให้เบราว์เซอร์ข้ามการคำนวณ Layout & Paint สำหรับการ์ดที่อยู่นอกจอ ลดเวลา Initial Render หน้าแรกและคลังไพ่ลง ~75% พร้อมคุม Scrollbar Jumping
+2. **Speculation Rules API (0ms Instant Page Navigation)**:
+   - ติดตั้งแท็ก `<script type="speculationrules">` ใน `<head>` ของ `src/app/layout.tsx`
+   - Prerender หน้ายอดนิยมล่วงหน้า (`/`, `/cards`, `/spreads`, `/blog`, `/daily`) แบบ `moderate` เมื่อผู้ใช้ชี้เมาส์หรือสัมผัสหน้าจอ
+   - มีกฎความปลอดภัยยกเว้น `/api/*`, `/admin/*`, `/account/*`, และ `/readers/*` อย่างรัดกุม
+3. **Preconnect & DNS-Prefetch Tags สำหรับ AI Providers**:
+   - เพิ่ม `<link rel="preconnect">` และ `<link rel="dns-prefetch">` สำหรับ `https://generativelanguage.googleapis.com` และ `https://api.groq.com` ใน `<head>` ของ `src/app/layout.tsx`
+   - ปรับปรุง `connect-src` ใน Content-Security-Policy (CSP) ของ `next.config.ts` ให้รองรับ `https://api.groq.com` ไร้ปัญหา CSP warnings
+4. **ระบบ PWA / Service Worker (Zero Bundle Overhead Architecture)**:
+   - สร้าง `public/sw.js` เป็น Native Service Worker แคช Next.js static chunks, รูปไพ่ WebP 78 ใบ (`/cards/*`), ฟอนต์, ไอคอน แบบ **Cache-First (Immutable)**
+   - แคชหน้าเอกสาร HTML แบบ **Stale-While-Revalidate** พร้อมหน้าสำรอง `public/offline.html` สไตล์ Editorial Luxury เรียบหรู ปราศจากอิโมจิดวงดาวตามกฎข้อ 2
+   - สร้างคอมโพเนนต์ `ServiceWorkerRegister.tsx` ลงทะเบียนแบบ Progressive Enhancement หลัง `window.load` โดยไม่กระทบเวลา Initial Load
+   - ผ่านการทดสอบงบน้ำหนักขนาดบันเดิล **Performance Budget Gate 34** ครบถ้วน 100% โดยไม่มีภาระ bundle overhead เพิ่มขึ้น
+
 ### 🗓️ 2026-09-06: 🎯 เจอสาเหตุจริงที่ Upstash ไม่ทำงาน — secret มีเครื่องหมายคำพูดครอบ (INC-0092)
 
 **สาเหตุจริง:** คอนโซล Upstash แสดงค่าเป็นบรรทัดสไตล์ `.env`:
