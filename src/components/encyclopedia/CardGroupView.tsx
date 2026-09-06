@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+// ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { CardSummary } from "@/data/cards";
 import type { CardGroupInfo } from "@/data/cards/group-seo";
 import { CardImage } from "@/components/card/CardImage";
@@ -65,7 +66,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
       itemListElement: cards.map((card, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        name: `${card.nameTh} (${card.nameEn})`,
+        name: isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`,
         url: `${SITE_ORIGIN}/cards/${card.id}`,
         image: `${SITE_ORIGIN}/cards/${card.image}`,
       })),
@@ -241,7 +242,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                   <CardImage
                     image={card.image}
                     cardId={card.id}
-                    alt={`ไพ่ ${card.nameTh} (${card.nameEn})`}
+                    alt={isEnglish ? `${card.nameEn} tarot card` : `ไพ่ ${card.nameTh} (${card.nameEn})`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 tarot-hd-card-image"
                     sizes="(min-width: 1024px) 160px, (min-width: 768px) 170px, (min-width: 640px) 190px, 45vw"
                   />
@@ -269,7 +270,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                 {/* Card Info */}
                 <div className="text-center space-y-1">
                   <span className="text-[11px] font-mono text-[#635B4E] block truncate">
-                    {isEnglish ? card.nameTh : card.nameEn}
+                    {isEnglish ? "" : card.nameEn}
                   </span>
                   <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors truncate">
                     {isEnglish ? card.nameEn : card.nameTh}

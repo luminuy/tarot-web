@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
+// ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion, AnimatePresence } from "motion/react";
 import type { CardSummary } from "@/data/cards";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
@@ -326,7 +327,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   <CardImage
                     image={card.image}
                     cardId={card.id}
-                    alt={`ไพ่ ${card.nameTh} (${card.nameEn})`}
+                    alt={isEnglish ? `${card.nameEn} tarot card` : `ไพ่ ${card.nameTh} (${card.nameEn})`}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 tarot-hd-card-image"
                     sizes="(min-width: 1024px) 160px, (min-width: 768px) 170px, (min-width: 640px) 190px, 45vw"
                   />
@@ -354,7 +355,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                 {/* Card Title & English Subtitle */}
                 <div className="text-center space-y-1 z-10">
-                  <span className="text-[13px] font-mono text-[#635B4E] block truncate">{isEnglish ? card.nameTh : card.nameEn}</span>
+                  {/* บรรทัดรองของหน้าอังกฤษไม่แสดงชื่อไทย — เป็นภาษาที่ผู้อ่านไม่ได้ขอและเจือจางสัญญาณภาษาของหน้า */}
+                  {!isEnglish && (
+                    <span className="text-[13px] font-mono text-[#635B4E] block truncate">{card.nameEn}</span>
+                  )}
                   {/* ชื่อไพ่แต่ละใบคือหัวข้อระดับที่สองของหน้า /cards (h1 = ชื่อหน้า) */}
                   <h2 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors truncate">
                     {isEnglish ? card.nameEn : card.nameTh}

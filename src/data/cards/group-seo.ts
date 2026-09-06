@@ -11,6 +11,10 @@ export interface CardGroupInfo {
   nameEn: string;
   seoTitleTh: string;
   descriptionTh: string;
+  /** หัวข้อ SEO ฉบับภาษาอังกฤษ — ใช้กับหน้าฝาแฝด `/en/cards/<group>` */
+  seoTitleEn: string;
+  /** คำบรรยาย SEO ฉบับภาษาอังกฤษ — ใช้กับหน้าฝาแฝด `/en/cards/<group>` */
+  descriptionEn: string;
   elementTh?: string;
   elementEn?: string;
   cardCount: number;
@@ -35,6 +39,9 @@ export const CARD_GROUPS: Record<CardGroupInfo["id"], CardGroupInfo> = {
     seoTitleTh: "ความหมายไพ่ยิปซี ชุดใหญ่ 22 ใบ (Major Arcana) ครบทุกใบ",
     descriptionTh:
       "เจาะลึกความหมายไพ่ยิปซีชุดใหญ่ 22 ใบ (Major Arcana) ครบทุกใบ ตั้งแต่ The Fool ถึง The World ถอดรหัสการเดินทางของดวงวิญญาณ บทเรียนชีวิต และความหมายหัวตั้ง-หัวกลับ ฉบับดั้งเดิม 1909 Rider-Waite",
+    seoTitleEn: "Major Arcana Meanings: All 22 Tarot Cards Explained",
+    descriptionEn:
+      "Every Major Arcana card explained in depth, from The Fool to The World — upright and reversed meanings, archetypal symbolism, and the soul's journey, drawn from the original 1909 Rider-Waite-Smith deck.",
     cardCount: 22,
     heroTaglineTh: "บทเรียนชีวิตและบททดสอบสำคัญของดวงวิญญาณ 22 ด่าน",
     heroTaglineEn: "The Soul's Archetypal Journey of 22 Cosmic Gateways",
@@ -91,6 +98,9 @@ export const CARD_GROUPS: Record<CardGroupInfo["id"], CardGroupInfo> = {
     seoTitleTh: "ความหมายไพ่ยิปซี ชุดเล็ก 56 ใบ (Minor Arcana) 4 ดอก",
     descriptionTh:
       "รวมความหมายไพ่ยิปซีชุดเล็ก 56 ใบ (Minor Arcana) ครบทั้ง 4 ดอก ไม้เท้า ถ้วย ดาบ เหรียญ สะท้อนเหตุการณ์ การตัดสินใจ และผู้คนในชีวิตประจำวัน พร้อมคำแปลหัวตั้ง-กลับหัว 1909 Rider-Waite",
+    seoTitleEn: "Minor Arcana Meanings: All 56 Tarot Cards Explained",
+    descriptionEn:
+      "All 56 Minor Arcana cards explained — the 40 pip cards and 16 court cards across Wands, Cups, Swords, and Pentacles, with upright and reversed meanings for everyday questions. Original 1909 Rider-Waite-Smith art.",
     cardCount: 56,
     heroTaglineTh: "ภาพสะท้อนชีวิตประจำวัน อารมณ์ ความคิด และการกระทำของมนุษย์",
     heroTaglineEn: "The Everyday Symphony of Mind, Heart, Will, and World",
@@ -147,6 +157,9 @@ export const CARD_GROUPS: Record<CardGroupInfo["id"], CardGroupInfo> = {
     seoTitleTh: "ความหมายไพ่ยิปซี ดอกไม้เท้า 14 ใบ (Wands) ธาตุไฟ",
     descriptionTh:
       "เจาะลึกความหมายไพ่ยิปซีดอกไม้เท้าครบ 14 ใบ (Suit of Wands) ตัวแทนแห่งธาตุไฟ พลังงาน ความมุ่งมั่น การงาน การเติบโต และแรงบันดาลใจ ทั้งหัวตั้งและกลับหัว 1909 Rider-Waite",
+    seoTitleEn: "Suit of Wands Meanings: All 14 Cards (Element of Fire)",
+    descriptionEn:
+      "Every card in the Suit of Wands explained — the element of Fire governing passion, ambition, willpower, and creative drive. Upright and reversed meanings for all 14 cards, from Ace to King. 1909 Rider-Waite-Smith.",
     elementTh: "ไฟ",
     elementEn: "Fire",
     cardCount: 14,
@@ -205,6 +218,9 @@ export const CARD_GROUPS: Record<CardGroupInfo["id"], CardGroupInfo> = {
     seoTitleTh: "ความหมายไพ่ยิปซี ดอกถ้วย 14 ใบ (Cups) ธาตุน้ำ",
     descriptionTh:
       "เจาะลึกความหมายไพ่ยิปซีดอกถ้วยครบ 14 ใบ (Suit of Cups) ตัวแทนแห่งธาตุน้ำ ความรัก อารมณ์ ความรู้สึก ความสัมพันธ์ และสัญชาตญาณ ทั้งหัวตั้งและกลับหัว 1909 Rider-Waite",
+    seoTitleEn: "Suit of Cups Meanings: All 14 Cards (Element of Water)",
+    descriptionEn:
+      "Every card in the Suit of Cups explained — the element of Water governing love, emotion, intuition, and deep connection. Upright and reversed meanings for all 14 cards, from Ace to King. 1909 Rider-Waite-Smith.",
     elementTh: "น้ำ",
     elementEn: "Water",
     cardCount: 14,
@@ -263,6 +279,9 @@ export const CARD_GROUPS: Record<CardGroupInfo["id"], CardGroupInfo> = {
     seoTitleTh: "ความหมายไพ่ยิปซี ดอกดาบ 14 ใบ (Swords) ธาตุลม",
     descriptionTh:
       "เจาะลึกความหมายไพ่ยิปซีดอกดาบครบ 14 ใบ (Suit of Swords) ตัวแทนแห่งธาตุลม ความคิด สติปัญญา การตัดสินใจ ความจริง และอุปสรรคชีวิต ทั้งหัวตั้งและกลับหัว 1909 Rider-Waite",
+    seoTitleEn: "Suit of Swords Meanings: All 14 Cards (Element of Air)",
+    descriptionEn:
+      "Every card in the Suit of Swords explained — the element of Air governing intellect, truth, conflict, and hard decisions. Upright and reversed meanings for all 14 cards, from Ace to King. 1909 Rider-Waite-Smith.",
     elementTh: "ลม",
     elementEn: "Air",
     cardCount: 14,
@@ -321,6 +340,9 @@ export const CARD_GROUPS: Record<CardGroupInfo["id"], CardGroupInfo> = {
     seoTitleTh: "ความหมายไพ่ยิปซี ดอกเหรียญ 14 ใบ (Pentacles) ธาตุดิน",
     descriptionTh:
       "เจาะลึกความหมายไพ่ยิปซีดอกเหรียญครบ 14 ใบ (Suit of Pentacles) ตัวแทนแห่งธาตุดิน การเงิน โชคลาภ ธุรกิจ ความมั่นคง และผลสัมฤทธิ์ในโลกความเป็นจริง ทั้งหัวตั้งและกลับหัว 1909 Rider-Waite",
+    seoTitleEn: "Suit of Pentacles Meanings: All 14 Cards (Element of Earth)",
+    descriptionEn:
+      "Every card in the Suit of Pentacles explained — the element of Earth governing money, work, health, and material stability. Upright and reversed meanings for all 14 cards, from Ace to King. 1909 Rider-Waite-Smith.",
     elementTh: "ดิน",
     elementEn: "Earth",
     cardCount: 14,

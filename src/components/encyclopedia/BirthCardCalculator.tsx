@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import Link from "next/link";
+// ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { TarotCard } from "@/components/card/TarotCard";
 import { calculateBirthCard, type BirthCardResult } from "@/lib/tarot/birth-card";
 import { soundManager } from "@/lib/utils/audio";

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
+// ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { CardSummary } from "@/data/cards";
 import { CardImage } from "@/components/card/CardImage";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
@@ -173,7 +174,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                         <CardImage
                           image={card.image}
                           cardId={card.id}
-                          alt={card.nameTh}
+                          alt={isEnglish ? card.nameEn : card.nameTh}
                           className="w-full h-full object-cover"
                           sizes="36px"
                         />
@@ -190,7 +191,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                           {isEnglish ? card.nameEn : card.nameTh}
                         </span>
                         <span className="text-[11px] font-mono text-[#635B4E] block">
-                          {isEnglish ? card.nameTh : card.nameEn}
+                          {isEnglish ? "" : card.nameEn}
                         </span>
                       </Link>
                     </td>

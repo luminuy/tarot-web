@@ -1,14 +1,29 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
+
 import { useLocale } from "@/lib/i18n";
+import { hasEnglishTwin, stripLocalePrefix } from "@/lib/i18n/paths";
 import { soundManager } from "@/lib/utils/audio";
 
 interface LanguageSwitcherProps {
   className?: string;
 }
 
+/**
+ * 🌐 ปุ่มสลับภาษา — ต้อง "พาไปยัง URL ฝาแฝด" ไม่ใช่แค่สลับ state ในหน่วยความจำ
+ * ---------------------------------------------------------------------------
+ * ตั้งแต่แยกเส้นทางเป็น `/` (ไทย) และ `/en/...` (อังกฤษ) การเปลี่ยนแค่ state
+ * จะทำให้เนื้อหาไม่ตรงกับ URL ที่ผู้ใช้ยืนอยู่ · canonical ของหน้าจะขัดกับสิ่งที่เห็น
+ * และปุ่มย้อนกลับของเบราว์เซอร์จะพาไปผิดที่
+ *
+ * หน้าที่ยังไม่มีฝาแฝด (เช่น `/blog`) จะกลับไปใช้กลไกเดิม (สลับด้วย cookie ฝั่ง client)
+ * ซึ่งดีกว่าพาผู้ใช้ไปชน 404
+ */
 export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
   const { locale, setLocale, pendingLocale, isSwitchingLocale } = useLocale();
+  const router = useRouter();
+  const pathname = usePathname() || "/";
 
   // ภาษาที่ควรแสดงว่า "เลือกอยู่" — ใช้ค่าที่ผู้ใช้เพิ่งกดถ้ามี (ISSUE-025)
   const shownLocale = pendingLocale ?? locale;
@@ -20,7 +35,15 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
     } catch {
       // Audio optional
     }
+    // เขียน cookie เสมอ เพื่อให้หน้าที่ไม่มีฝาแฝดจำภาษาที่เลือกไว้ได้
     setLocale(nextLocale);
+
+    const basePath = stripLocalePrefix(pathname);
+    if (!hasEnglishTwin(basePath)) return;
+
+    const target =
+      nextLocale === "en" ? (basePath === "/" ? "/en" : `/en${basePath}`) : basePath;
+    if (target !== pathname) router.push(target);
   };
 
   return (

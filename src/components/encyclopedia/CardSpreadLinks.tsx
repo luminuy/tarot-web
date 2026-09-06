@@ -2,9 +2,16 @@ import Link from "next/link";
 import type { TarotCard } from "@/data/cards/types";
 import { SPREADS } from "@/data/spreads";
 import { ARTICLES } from "@/data/articles";
+import { localeHref } from "@/lib/i18n/paths";
+import type { Locale } from "@/lib/i18n/types";
 
+/**
+ * ⚠️ Server Component โดยตั้งใจ — ลิงก์ภายในกว่า 300 เส้นจึงอยู่ใน HTML ตั้งแต่ไบต์แรก
+ * จึงใช้ `LocaleLink` (client) ไม่ได้ ต้องรับ `locale` มาแล้วเรียก `localeHref()` เอง
+ */
 interface CardSpreadLinksProps {
   card: TarotCard;
+  locale?: Locale;
 }
 
 function getCardPrimaryCategory(card: TarotCard): { spreadCat: string; articleCat: string } {
@@ -23,7 +30,9 @@ function getCardPrimaryCategory(card: TarotCard): { spreadCat: string; articleCa
   return { spreadCat: "self", articleCat: "cards" };
 }
 
-export function CardSpreadLinks({ card }: CardSpreadLinksProps) {
+export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
+  const isEnglish = locale === "en";
+  const href = (path: string) => localeHref(path, locale);
   const { spreadCat, articleCat } = getCardPrimaryCategory(card);
 
   // 1. Spreads related to this card's theme or classic general spreads
@@ -48,16 +57,19 @@ export function CardSpreadLinks({ card }: CardSpreadLinksProps) {
   return (
     <div className="space-y-8 pt-8 border-t border-[#D5CEC2]/40">
       {/* Spread Links */}
-      <section aria-label="ผังพยากรณ์ที่แนะนำสำหรับไพ่ใบนี้" className="space-y-4">
+      <section
+        aria-label={isEnglish ? "Spreads recommended for this card" : "ผังพยากรณ์ที่แนะนำสำหรับไพ่ใบนี้"}
+        className="space-y-4"
+      >
         <div className="flex items-center justify-between">
           <h2 className="font-serif-th text-sm font-bold text-[#8F5C1A]">
-            เปิดไพ่ใบนี้ในผังพยากรณ์จริง
+            {isEnglish ? "Draw this card in a real spread" : "เปิดไพ่ใบนี้ในผังพยากรณ์จริง"}
           </h2>
           <Link
-            href="/spreads"
+            href={href("/spreads")}
             className="text-xs font-serif-th text-[#635B4E] hover:text-[#8F5C1A] transition-colors"
           >
-            ดูผังทั้งหมด →
+            {isEnglish ? "All spreads →" : "ดูผังทั้งหมด →"}
           </Link>
         </div>
 
@@ -65,23 +77,23 @@ export function CardSpreadLinks({ card }: CardSpreadLinksProps) {
           {targetSpreads.map((spread) => (
             <Link
               key={spread.id}
-              href={`/spreads/${spread.id}`}
+              href={href(`/spreads/${spread.id}`)}
               className="p-3.5 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-colors flex flex-col justify-between group shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
             >
               <div>
                 <span className="text-[11px] font-mono font-bold text-[#8F5C1A] block mb-1">
-                  {spread.positions.length} ใบ · {spread.defaultCategory}
+                  {spread.positions.length} {isEnglish ? "cards" : "ใบ"} · {spread.defaultCategory}
                 </span>
                 <span className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors block">
-                  {spread.nameTh}
+                  {isEnglish ? spread.nameEn : spread.nameTh}
                 </span>
                 <p className="font-serif-th text-[11px] text-[#635B4E] mt-1 line-clamp-2">
-                  {spread.tagline}
+                  {isEnglish ? spread.taglineEn : spread.tagline}
                 </p>
               </div>
               <div className="pt-2 mt-2 border-t border-[#D5CEC2]/40 text-right">
                 <span className="text-[11px] font-serif-th text-[#8F5C1A] group-hover:underline">
-                  เริ่มเปิดไพ่ผังนี้ →
+                  {isEnglish ? "Start this spread →" : "เริ่มเปิดไพ่ผังนี้ →"}
                 </span>
               </div>
             </Link>
@@ -90,7 +102,9 @@ export function CardSpreadLinks({ card }: CardSpreadLinksProps) {
       </section>
 
       {/* Related Blog Articles */}
-      {relatedArticles.length > 0 && (
+      {/* คลังบทความยังไม่มีฉบับอังกฤษ (`content` เป็นไทยล้วนทั้ง 26 บท) จึงซ่อนทั้งบล็อก
+          บนหน้า `/en/**` — ปล่อยไว้จะเป็นการโยนภาษาไทยใส่ผู้อ่านอังกฤษและพาออกนอกต้นไม้ภาษา */}
+      {!isEnglish && relatedArticles.length > 0 && (
         <section aria-label="บทความคู่มือที่เกี่ยวข้อง" className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-serif-th text-sm font-bold text-[#8F5C1A]">

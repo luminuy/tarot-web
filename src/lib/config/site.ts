@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/types";
+
 /**
  * 🌐 โดเมนหลักของเว็บ — แหล่งความจริงเดียว (Single Source of Truth)
  * ---------------------------------------------------------------------------
@@ -81,24 +83,55 @@ export function isOwnHostname(hostname: string): boolean {
  * Next.js จะ override อ็อบเจกต์ alternates ทั้งก้อนหากหน้าย่อยระบุ alternates: { canonical }
  * ทำให้แท็ก hreflang ใน root layout หลุดหายทั้งเว็บ (S-01)
  * ทุกหน้าจึงต้องใช้ buildAlternates(path) เพื่อคงทั้ง canonical และ hreflang เสมอ
+ *
+ * ⚠️ **กฎเหล็กของ hreflang: ห้ามประกาศฝาแฝดที่ไม่มีอยู่จริงเด็ดขาด**
+ * -------------------------------------------------------------------------
+ * Google กำหนดว่าปลายทางของ `hreflang` ต้องเป็น URL ที่ canonical ชี้หาตัวเอง
+ * ของเดิมเคยประกาศ `en-US` ชี้ไป `?lang=en` ซึ่งเป็นหน้า SSG ชุดเดียวกับฉบับไทย
+ * และ self-canonical กลับมาที่ URL สะอาด → **Google ทิ้งคำประกาศ hreflang ทั้งชุด**
+ * ไม่ใช่แค่ตัวที่ผิด เท่ากับเว็บไม่มีตัวตนในผลค้นหาภาษาอังกฤษเลยสักหน้า
+ *
+ * ค่าเริ่มต้นของ `englishTwin` จึงเป็น `false` — หน้าไหนมีฝาแฝด `/en/...` จริง
+ * ต้อง **เปิดเองอย่างจงใจ** ไม่ใช่ได้มาฟรีแล้วลืมปิดตอนไม่มี
  */
-export function buildAlternates(path: string = "/") {
-  const normalizedPath =
-    path === "/" || !path
-      ? ""
-      : path.startsWith("/")
-        ? path.replace(/\/+$/, "")
-        : `/${path.replace(/\/+$/, "")}`;
+export interface AlternatesOptions {
+  /** ภาษาของหน้าที่กำลังสร้าง metadata อยู่ — ตัดสินว่า canonical ชี้ไปที่ `/` หรือ `/en` */
+  locale?: Locale;
+  /** หน้านี้มีฝาแฝดภาษาอังกฤษที่ prerender ไว้จริงหรือไม่ (ค่าเริ่มต้น: ไม่มี) */
+  englishTwin?: boolean;
+}
 
-  const canonical = `${SITE_ORIGIN}${normalizedPath}`;
+/** เติม `/` นำหน้าและตัด `/` ท้ายทิ้ง — `"/"` และค่าว่างกลายเป็นสตริงว่าง */
+function normalizeRoutePath(path: string): string {
+  if (!path || path === "/") return "";
+  const withSlash = path.startsWith("/") ? path : `/${path}`;
+  return withSlash.replace(/\/+$/, "");
+}
+
+/** URL ของหน้าเดียวกันในแต่ละภาษา — ไทยอยู่ราก อังกฤษอยู่ใต้ `/en` */
+export function localizedUrl(path: string, locale: Locale): string {
+  const normalized = normalizeRoutePath(path);
+  return locale === "en" ? `${SITE_ORIGIN}/en${normalized}` : `${SITE_ORIGIN}${normalized}`;
+}
+
+export function buildAlternates(path: string = "/", options: AlternatesOptions = {}) {
+  const { locale = "th", englishTwin = false } = options;
+
+  const thaiUrl = localizedUrl(path, "th");
+  const englishUrl = localizedUrl(path, "en");
+  const canonical = locale === "en" ? englishUrl : thaiUrl;
+
+  // หน้าที่ไม่มีฝาแฝดอังกฤษ ประกาศแค่ภาษาเดียว — ไม่ต้องมี hreflang ให้ Google สับสน
+  if (!englishTwin) {
+    return { canonical };
+  }
 
   return {
     canonical,
     languages: {
-      "th-TH": `${canonical}?lang=th`,
-      "en-US": `${canonical}?lang=en`,
-      "x-default": canonical,
+      "th-TH": thaiUrl,
+      "en-US": englishUrl,
+      "x-default": thaiUrl,
     },
   };
 }
-

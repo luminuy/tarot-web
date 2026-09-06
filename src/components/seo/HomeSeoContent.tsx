@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { localeHref } from "@/lib/i18n/paths";
 import { CardImage } from "@/components/card/CardImage";
 import { getHomeFaqs } from "@/data/home-seo";
 import { COUNTS } from "@/components/layout/nav-links";
@@ -194,6 +195,8 @@ const MAJOR_HIGHLIGHTS = [
 ];
 
 export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
+  // Server Component — ใช้ `LocaleLink` (client) ไม่ได้ จึงแปลงลิงก์เองด้วย `localeHref`
+  const href = (path: string) => localeHref(path, isEnglish ? "en" : "th");
   const ritualSteps = isEnglish ? RITUAL_STEPS_EN : RITUAL_STEPS_TH;
   const featuredArticles = isEnglish ? FEATURED_ARTICLES_EN : FEATURED_ARTICLES_TH;
   const homeFaqs = getHomeFaqs(isEnglish);
@@ -481,7 +484,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              href="/spreads"
+              href={href("/spreads")}
               prefetch={false}
               className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
             >
@@ -490,7 +493,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             </Link>
             <span className="text-[#D5CEC2]">|</span>
             <Link
-              href="/cards"
+              href={href("/cards")}
               prefetch={false}
               className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
             >
@@ -503,7 +506,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         {/* Featured Spreads Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <Link
-            href="/spreads/celtic-cross"
+            href={href("/spreads/celtic-cross")}
             prefetch={false}
             className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
@@ -528,7 +531,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </Link>
 
           <Link
-            href="/spreads/three-card"
+            href={href("/spreads/three-card")}
             prefetch={false}
             className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
@@ -553,7 +556,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </Link>
 
           <Link
-            href="/spreads/decision"
+            href={href("/spreads/decision")}
             prefetch={false}
             className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
@@ -586,7 +589,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               {isEnglish ? "Major Arcana Highlights" : "ไพ่ชุดใหญ่เมเจอร์ อาร์คานา (Major Arcana Highlights)"}
             </h3>
             <Link
-              href="/cards"
+              href={href("/cards")}
               prefetch={false}
               className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:underline"
             >
