@@ -36,6 +36,29 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: PR 4 — ปรับปรุง Asset Pipeline ภาพไพ่ WebP (P-04) และเปลี่ยนชื่อโฟลเดอร์ w512b/w768b เพื่อล้างแคช Cloudflare (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ P-04):**
+1. **P-04: แก้ไขปัญหาขนาดไฟล์ภาพ WebP บวมเกินภาพต้นฉบับ JPEG**:
+   - ตรวจพบสาเหตุเดิม: `runRemasterPass` ใส่ Pillow unsharp mask ก่อนบีบอัด ทำให้เกิดความถี่สูงในภาพ ส่งผลให้ WebP `w768` เดิมบวมถึงเฉลี่ย 355 KB (หนักกว่าต้นฉบับ JPEG 278 KB)
+   - ปรับปรุง [`scripts/generate-card-variants.ts`](../scripts/generate-card-variants.ts):
+     - ปิดการ remaster unsharp mask สำหรับภาพขนาดใหญ่ (`w512b`, `w768b`) โดยใช้ภาพต้นฉบับโดยตรง (`useRemaster: false`) แต่ยังคงเปิดใช้กับภาพพรีวิวขนาดเล็ก (`w64`, `w128`, `w256`)
+     - ปรับระดับคุณภาพ: `w512b: q78`, `w768b: q72` (คงความคมชัดสูงสุดบนจอ Retina 2×/3× โดยไม่สร้าง noise)
+     - เพิ่มการตรวจสอบเพดานขนาดอัตโนมัติ (Size Ceiling Assertion): หากไฟล์ `.webp` ใดมีขนาดใหญ่กว่าไฟล์ `.jpg` ต้นฉบับ ระบบจะ throw error และยกเลิกการสร้างทันที
+2. **Cloudflare Cache Invalidation (Immutable Headers Protection)**:
+   - เนื่องจาก `public/_headers` กำหนด `Cache-Control: public, max-age=31536000, immutable` สำหรับ `/cards/*` การอัปเดตภาพต้องเปลี่ยนชื่อโฟลเดอร์เพื่อไม่ให้ผู้ใช้ติดแคชเก่า 1 ปี
+   - เปลี่ยนชื่อโฟลเดอร์จาก `w512` ➔ `w512b` และ `w768` ➔ `w768b`
+   - อัปเดต `CARD_IMAGE_VARIANTS` และ `getCardWebpVariantSrc` ใน [`src/lib/tarot/card-image.ts`](../src/lib/tarot/card-image.ts)
+   - ลบโฟลเดอร์เดิม `public/cards/w512` และ `public/cards/w768` ออกอย่างสมบูรณ์
+   - สร้างภาพชุดใหม่ 390 ใบ (รวม 5 ขนาด) ด้วย `npm run cards:variants -- --force`
+   - อัปเดต OpenGraph image path ใน `src/app/daily/page.tsx` และ `src/app/love/1-card/page.tsx` จาก `w512` ➔ `w512b`
+3. **ผลลัพธ์การวัดจริง (Measured Results)**:
+   - `w768b`: ขนาดรวมลดจาก 26.94 MB เหลือ **10.54 MB** (เฉลี่ย 138.4 KB/ใบ — ลดลง **61%**)
+   - `w512b`: ขนาดรวมลดจาก 12.80 MB เหลือ **7.00 MB** (เฉลี่ย 91.9 KB/ใบ — ลดลง **45%**)
+   - **จำนวนไฟล์ที่ใหญ่กว่า JPEG ต้นฉบับ: 0 ไฟล์ (100% เล็กกว่าต้นฉบับ)**
+   - ขนาดรวมภาพย่อทั้ง 390 ใบ: **21.02 MB** (ลดลงจากเดิมที่เกิน 45 MB)
+   - ผ่านการทดสอบ [`scripts/qa/test-image-paths.ts`](../scripts/qa/test-image-paths.ts) และครบ 34/34 ด่านของ `npm run repo:verify`
+
 ### 🗓️ 2026-09-06: PR 3 — ปรับโครงสร้าง CardSummary และตัด Payload หน้ารวมไพ่ 8 หน้า (ลด HTML /cards ลง 80.5%) (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ P-02):**

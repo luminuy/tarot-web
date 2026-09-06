@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${SITE_ORIGIN}/cards/w512/major-19.webp`,
+        url: `${SITE_ORIGIN}/cards/w512b/major-19.webp`,
         width: 512,
         height: 878,
         alt: "The Sun - ดูดวงไพ่ยิปซีรายวัน",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางชีวิตวันนี้ | SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบเช็กพลังงานประจำวัน ทั้งการงาน การเงิน ความรัก และข้อควรระวัง ฟรีทุกวัน",
-    images: [`${SITE_ORIGIN}/cards/w512/major-19.webp`],
+    images: [`${SITE_ORIGIN}/cards/w512b/major-19.webp`],
   },
 };
 
