@@ -7,6 +7,7 @@ import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { LocaleProvider } from "@/lib/i18n";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 const notoSerifThai = Noto_Serif_Thai({
@@ -152,6 +153,54 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="th" className={`${notoSerifThai.variable} ${sarabun.variable}`}>
       <head>
         <meta charSet="utf-8" />
+        {/* Preconnect & DNS-Prefetch ไปยัง AI Providers เพื่อลด Network Latency ทันที */}
+        <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
+        <link rel="preconnect" href="https://api.groq.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.groq.com" />
+
+        {/* Speculation Rules API — Prerender หน้ายอดนิยมล่วงหน้าเมื่อ hover/touch (0ms transition) */}
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              prerender: [
+                {
+                  source: "list",
+                  urls: ["/", "/cards", "/spreads", "/blog", "/daily"],
+                  eagerness: "moderate",
+                },
+                {
+                  where: {
+                    and: [
+                      { href_matches: "/*" },
+                      { not: { href_matches: "/api/*" } },
+                      { not: { href_matches: "/admin/*" } },
+                      { not: { href_matches: "/account/*" } },
+                      { not: { href_matches: "/readers/console*" } },
+                      { not: { href_matches: "/readers/queue/*" } },
+                    ],
+                  },
+                  eagerness: "conservative",
+                },
+              ],
+              prefetch: [
+                {
+                  where: {
+                    and: [
+                      { href_matches: "/*" },
+                      { not: { href_matches: "/api/*" } },
+                      { not: { href_matches: "/admin/*" } },
+                      { not: { href_matches: "/account/*" } },
+                    ],
+                  },
+                  eagerness: "moderate",
+                },
+              ],
+            }),
+          }}
+        />
+
         {/* เฉพาะ schema ที่เป็นจริงกับ "ทุกหน้า" เท่านั้นที่อยู่ตรงนี้ได้
             WebApplication / FAQPage / HowTo เป็นความจริงเฉพาะหน้าแรก → ย้ายไป src/app/page.tsx */}
         <script
@@ -168,6 +217,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LocaleProvider>
             <AntiTheftShield />
             <AssetWarmup />
+            <ServiceWorkerRegister />
             <AnalyticsTracker />
             {children}
             <TikTokFloatingButton />

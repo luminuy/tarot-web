@@ -230,6 +230,10 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                 key={card.id}
                 href={`/cards/${card.id}`}
                 prefetch={false}
+                style={{
+                  contentVisibility: "auto",
+                  containIntrinsicSize: "auto 380px",
+                }}
                 className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#A58A5C] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
               >
                 {/* Card Artwork */}
