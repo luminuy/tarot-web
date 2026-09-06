@@ -5,7 +5,7 @@
 > ส่วนที่เหลือของเอกสารนั้น (`/daily`, `/love/1-card`, FAQPage, Social Export, Provably Fair, Journal)
 > **ทำเสร็จไปแล้วใน PR #284–#288** — อย่าทำซ้ำ
 > **โค้ดอ้างอิง**: `main` ที่ commit `17a4937` — ถ้าเลขบรรทัดเลื่อน ให้ค้นด้วยสตริงที่ยกมาแทน
-> **ขนาดงานรวม**: ~12–14 ชม. · **3 PR แยกกัน** · ห้ามรวมเป็น PR เดียว
+> **ขนาดงานรวม**: ~13–16 ชม. · **3 PR แยกกัน** · ห้ามรวมเป็น PR เดียว
 
 ---
 
@@ -39,7 +39,7 @@ npm run pr:auto -- "<title>" --body-file <path>
 | # | งาน | ทำไม | เวลา | ความเสี่ยง | ขึ้นกับใคร |
 | :-: | :--- | :--- | :-: | :-: | :--- |
 | **A** | เซกชัน "ใช่หรือไม่" ใน 78 หน้าไพ่ | ข้อมูล `yesNo` **มีครบทั้ง 78 ใบอยู่แล้ว** แต่ไม่เคยโผล่บน UI สักที่ — ได้ 78 หน้า × คีย์เวิร์ดใหม่ โดยไม่ต้องเขียนเนื้อหาใหม่ | 4 ชม. | 🟢 ต่ำ | ไม่มี — **ทำก่อนได้เลย** |
-| **B** | Omnichannel (LINE OA / FB / YouTube) | Yibsee ดึงทราฟฟิกทางนี้ เราไม่มีช่องทางนอก Google เลย · `sameAs` มีแค่ลิงก์ GitHub | 2 ชม. (โค้ด) | 🟡 กลาง | **เจ้าของต้องเปิดบัญชีก่อน** |
+| **B** | Omnichannel 6 ช่อง (TikTok · FB · IG · LINE OA · Threads · X) | ปุ่มแชร์ออก **มีอยู่แล้ว 5 ช่อง** แต่ทุกโพสต์เป็นทางตัน — ไม่มีบัญชีให้ตาม ไม่มี handle ในแคปชัน ไม่มี UTM ให้วัด | 3–4 ชม. (โค้ด) | 🟡 กลาง | **เจ้าของต้องเปิด 6 บัญชีก่อน** |
 | **C** | Daily Digest (อีเมล + LINE Push) | Retention loop ที่หายไป · `marketing_consent` + Resend + LINE user id **มีพร้อมแล้ว** ขาดแค่ตัวจับเวลา | 6–8 ชม. | 🔴 สูง (PDPA + ส่งออกนอก) | ต้องจบงาน B ก่อน (ใช้ LINE token ร่วมกัน) |
 
 ---
@@ -223,50 +223,103 @@ npm run build             # SSG ต้องสร้างครบ 78 หน�
 ---
 ---
 
-# 🅱️ งาน B — Omnichannel (LINE OA · Facebook · YouTube)
+# 🅱️ งาน B — Omnichannel 6 ช่องทาง (TikTok · Facebook · Instagram · LINE OA · Threads · X)
 
-**PR เดียว · 4 ไฟล์ · โค้ดล้วน ไม่มี migration**
+**PR เดียว · 6 ไฟล์ · โค้ดล้วน ไม่มี migration**
 
-## B.0 สภาพปัจจุบัน
+## B.0 สภาพปัจจุบัน — ครึ่งหนึ่งทำไว้แล้ว อีกครึ่งหายไปทั้งดุ้น
+
+### ✅ ฝั่ง "ผู้ใช้แชร์ออก" เสร็จแล้ว 5 จาก 6 ช่อง
+
+[`ShareModal.tsx:322`](../../src/components/reading/ShareModal.tsx) มีปุ่มแชร์ครบ **facebook · instagram · tiktok · twitter (X) · threads**
+พร้อมภาพ 9:16 (1080×1920) สำหรับ Story/TikTok, ภาพ 4:5 (1080×1350) สำหรับฟีด, R2 `SHARE_BUCKET` + หน้า `/s/[id]` ที่มี OG image
+และ `trackEvent("share_click", { platform })` ยิงเข้า GA4 อยู่แล้ว
+
+**ขาดช่องเดียว: LINE** — ทั้งที่เป็นแอปแชตที่คนไทยใช้มากที่สุด และเป็นช่องที่คนส่งดวงให้เพื่อนกันจริง ๆ
+
+### ❌ ฝั่ง "บัญชีแบรนด์" ยังไม่มีอะไรเลยสักอย่าง
 
 ```ts
 // src/app/layout.tsx:128
 sameAs: ["https://github.com/luminuy/tarot-web"],
 ```
 
-ลิงก์โซเชียลที่ผู้ใช้กดได้ = **0 จุดทั้งเว็บ** ([`SiteFooter.tsx`](../../src/components/layout/SiteFooter.tsx) มีแต่ลิงก์ภายใน)
-แปลว่าทราฟฟิกทั้งหมดพึ่ง Google ช่องทางเดียว ถ้าโดนปรับอันดับคือดับสนิท
+| สิ่งที่ตรวจ | ผล |
+| :--- | :--- |
+| ลิงก์โซเชียลที่ผู้ใช้กดได้ทั้งเว็บ | **0 จุด** ([`SiteFooter.tsx`](../../src/components/layout/SiteFooter.tsx) มีแต่ลิงก์ภายใน) |
+| `sameAs` ใน Organization JSON-LD | มีแต่ลิงก์ GitHub — Google ผูก Knowledge Panel กับบัญชีเราไม่ได้ |
+| `twitter.site` / `twitter.creator` | **ไม่มี** ([`layout.tsx:100`](../../src/app/layout.tsx) มีแต่ card/title/description) |
+| UTM ในลิงก์ที่แชร์ออก | `grep -rn "utm_" src/` → **0 บรรทัด** — วัดไม่ได้เลยว่าคนกลับมาจากช่องไหน |
+| @handle ในแคปชันที่ระบบเขียนให้ | **ไม่มี** — คนเห็นโพสต์แล้วตามบัญชีเราต่อไม่ได้ |
+
+> 🔑 **ข้อสรุปที่เปลี่ยนขอบเขตงานนี้**
+> เราสร้างเครื่องมือให้ผู้ใช้ยิงคอนเทนต์ออกไป 5 แพลตฟอร์มเรียบร้อยแล้ว
+> **แต่ทุกโพสต์เป็นทางตัน** — ไม่มีบัญชีให้ตาม ไม่มี handle ในแคปชัน ไม่มี UTM ให้วัด
+> งาน B คือ **ปิดวงจรที่สร้างค้างไว้** ไม่ใช่เริ่มจากศูนย์
 
 ## B.1 ⚠️ สิ่งที่ AI ทำแทนไม่ได้ — เจ้าของต้องทำเอง
 
-**ต้องทำ 3 อย่างนี้ก่อน ไม่งั้นงานโค้ดจะได้ลิงก์ตาย:**
+**เปิด 6 บัญชีนี้ก่อน ไม่งั้นงานโค้ดจะได้ลิงก์ตาย** (ช่องไหนยังไม่พร้อม ปล่อยว่างไว้ได้ ระบบซ่อนให้เอง)
 
-1. เปิด **LINE Official Account** ที่ [manager.line.biz](https://manager.line.biz) → ได้ Basic ID (`@xxxxxxx`)
-2. เปิด **Facebook Page** และ **YouTube Channel** → ได้ URL จริง
-3. ใน LINE Developers Console → สร้าง channel แบบ **Messaging API แยกต่างหาก** → ได้ `LINE_MESSAGING_TOKEN`
+| # | ช่องทาง | เปิดที่ไหน | ได้อะไรมา | บทบาทในแผน |
+| :-: | :--- | :--- | :--- | :--- |
+| 1 | **TikTok** | tiktok.com/business | `@handle` | 🔴 **ตัวดึงคนใหม่หลัก** — คอนเทนต์ดูดวงคลิปสั้นคือสนามที่คนไทยดูมากที่สุด และภาพ 9:16 เราทำได้อยู่แล้ว |
+| 2 | **Facebook Page** | facebook.com/pages/create | Page URL | ฐานผู้ใช้อายุ 30+ ที่ยังเป็นกลุ่มจ่ายเงินดูดวง · ปุ่มแชร์ FB มีอยู่แล้ว |
+| 3 | **Instagram** | บัญชี Professional ผูกกับ Page | `@handle` | รับต่อจากภาพ Story 9:16 ที่ระบบสร้างให้อยู่แล้ว |
+| 4 | **LINE Official Account** | [manager.line.biz](https://manager.line.biz) | Basic ID `@xxxxxxx` | 🔴 **ตัวเก็บคนกลับ** — เป็นทางเดียวที่ push หาผู้ใช้ได้โดยไม่ผ่านอัลกอริทึม · ป้อนงาน C ต่อ |
+| 5 | **Threads** | threads.net (ผูกกับ IG) | `@handle` | ปุ่มแชร์มีอยู่แล้ว · คอนเทนต์ข้อความสั้นต้นทุนต่ำสุด |
+| 6 | **X** | x.com | `@handle` | ปุ่มแชร์มีอยู่แล้ว · ต้องใช้ handle เติม `twitter.site` ให้การ์ดพรีวิวสมบูรณ์ |
+
+**เพิ่มอีก 1 อย่างสำหรับงาน C**: ใน LINE Developers Console สร้าง channel แบบ **Messaging API แยกต่างหาก** → ได้ `LINE_MESSAGING_TOKEN`
 
 > 🔴 **ห้ามใช้ `LINE_CHANNEL_ID` / `LINE_CHANNEL_SECRET` เดิมซ้ำ** — คู่นั้นเป็น **LINE Login** ([`wrangler.jsonc`](../../wrangler.jsonc) ระบุไว้) คนละ channel type กับ Messaging API เอามาใช้ปนกันจะพัง auth ที่ใช้งานอยู่จริง
 
 ## B.2 ไฟล์ที่ต้องแก้
 
-### 🆕 `src/lib/config/social.ts`
+### 🆕 ไฟล์ใหม่ — `src/lib/config/social.ts`
 
 ```ts
 /**
- * ช่องทางโซเชียลของแบรนด์ — แหล่งความจริงเดียว
- * ทุกที่ที่ต้องใช้ลิงก์โซเชียล (footer, JSON-LD sameAs, OG) ต้องอ่านจากที่นี่
- * ⚠️ ช่องที่ยังไม่เปิดบัญชี ให้ปล่อย url เป็น "" → ระบบจะซ่อนให้เอง ไม่เรนเดอร์ลิงก์ตาย
+ * ช่องทางโซเชียลของแบรนด์ — แหล่งความจริงเดียวของทั้งระบบ
+ * ทุกที่ที่ต้องใช้ลิงก์/handle (footer, JSON-LD sameAs, twitter card, แคปชันแชร์)
+ * ต้องอ่านจากที่นี่ ห้าม hardcode ซ้ำที่อื่น
+ * ⚠️ ช่องที่ยังไม่เปิดบัญชี ปล่อย env ว่างไว้ → ระบบซ่อนให้เอง ไม่เรนเดอร์ลิงก์ตาย
  */
 export const SOCIAL_CHANNELS = [
-  { key: "line",     labelTh: "LINE Official",  labelEn: "LINE Official",  url: process.env.NEXT_PUBLIC_LINE_OA_URL  ?? "" },
-  { key: "facebook", labelTh: "เฟซบุ๊กเพจ",      labelEn: "Facebook Page",  url: process.env.NEXT_PUBLIC_FB_PAGE_URL  ?? "" },
-  { key: "youtube",  labelTh: "ยูทูบ",           labelEn: "YouTube",        url: process.env.NEXT_PUBLIC_YOUTUBE_URL  ?? "" },
+  { key: "tiktok",    labelTh: "ติ๊กต็อก",       labelEn: "TikTok",    url: process.env.NEXT_PUBLIC_TIKTOK_URL    ?? "", handle: process.env.NEXT_PUBLIC_TIKTOK_HANDLE    ?? "" },
+  { key: "facebook",  labelTh: "เฟซบุ๊กเพจ",     labelEn: "Facebook",  url: process.env.NEXT_PUBLIC_FB_PAGE_URL   ?? "", handle: "" },
+  { key: "instagram", labelTh: "อินสตาแกรม",     labelEn: "Instagram", url: process.env.NEXT_PUBLIC_IG_URL        ?? "", handle: process.env.NEXT_PUBLIC_IG_HANDLE        ?? "" },
+  { key: "line",      labelTh: "LINE Official",  labelEn: "LINE",      url: process.env.NEXT_PUBLIC_LINE_OA_URL   ?? "", handle: process.env.NEXT_PUBLIC_LINE_OA_ID       ?? "" },
+  { key: "threads",   labelTh: "เธรดส์",         labelEn: "Threads",   url: process.env.NEXT_PUBLIC_THREADS_URL   ?? "", handle: process.env.NEXT_PUBLIC_THREADS_HANDLE   ?? "" },
+  { key: "x",         labelTh: "X",              labelEn: "X",         url: process.env.NEXT_PUBLIC_X_URL         ?? "", handle: process.env.NEXT_PUBLIC_X_HANDLE         ?? "" },
 ] as const;
 
+export type SocialKey = (typeof SOCIAL_CHANNELS)[number]["key"];
+
 export const ACTIVE_SOCIAL = SOCIAL_CHANNELS.filter((c) => c.url.length > 0);
+
+/** หา handle ของช่องหนึ่งเพื่อเอาไปต่อท้ายแคปชัน — ไม่มีบัญชีก็คืนค่าว่าง */
+export function socialHandle(key: SocialKey): string {
+  return SOCIAL_CHANNELS.find((c) => c.key === key)?.handle ?? "";
+}
+
+/** ต่อ UTM ให้ลิงก์ที่แชร์ออก เพื่อให้ GA4 แยกได้ว่าคนกลับมาจากช่องไหน */
+export function withUtm(url: string, source: SocialKey | "digest", medium = "social"): string {
+  try {
+    const u = new URL(url);
+    u.searchParams.set("utm_source", source);
+    u.searchParams.set("utm_medium", medium);
+    u.searchParams.set("utm_campaign", "user_share");
+    return u.toString();
+  } catch {
+    return url;   // ลิงก์ไม่ถูกรูป → คืนของเดิม ห้ามพัง flow แชร์
+  }
+}
 ```
 
-### ✏️ `src/app/layout.tsx:128`
+### ✏️ `src/app/layout.tsx` — 2 จุด
+
+**จุดที่ 1 · บรรทัด 128 (`sameAs`)**
 
 ```
 ก่อน : sameAs: ["https://github.com/luminuy/tarot-web"],
@@ -275,28 +328,86 @@ export const ACTIVE_SOCIAL = SOCIAL_CHANNELS.filter((c) => c.url.length > 0);
 
 เหตุผล: `sameAs` คือช่องที่ Google ใช้ผูก Knowledge Panel เข้ากับบัญชีโซเชียล — เป็นสัญญาณ E-E-A-T ที่คู่แข่งทุกเจ้าใน SERP มี แต่เราไม่มี
 
+**จุดที่ 2 · บล็อก `twitter:` บรรทัด 100–105**
+
+```ts
+  twitter: {
+    card: "summary_large_image",
+    site: socialHandle("x") || undefined,      // ← เพิ่ม
+    creator: socialHandle("x") || undefined,   // ← เพิ่ม
+    title: "...",   // คงเดิม
+    ...
+  },
+```
+
+`|| undefined` สำคัญ — ถ้ายังไม่มีบัญชี ต้องไม่ปล่อย `<meta name="twitter:site" content="">` ออกไป
+
 ### ✏️ `src/components/layout/SiteFooter.tsx`
 
-แทรกแถวไอคอน/ลิงก์ **ระหว่าง** บล็อก "Brand & Mission" (จบราวบรรทัด 58) กับ "AI Disclosure Card"
+แทรกแถวช่องทาง **ระหว่าง** บล็อก "Brand & Mission" (จบราวบรรทัด 58) กับ "AI Disclosure Card"
 
-- ต้อง `{ACTIVE_SOCIAL.length > 0 && (...)}` — ไม่มีบัญชี = ไม่เรนเดอร์อะไรเลย
-- ใช้ `<a target="_blank" rel="noopener noreferrer">` และมี `aria-label` ทุกเส้น
-- ห้ามใช้อิโมจิเป็นไอคอน (กฎข้อ 2) → ใช้ inline SVG หรือข้อความล้วนสไตล์ `font-mono text-[#D5CEC2]/80`
+- ต้องครอบด้วย `{ACTIVE_SOCIAL.length > 0 && (...)}` — ไม่มีบัญชีสักช่อง = ไม่เรนเดอร์อะไรเลย
+- `<a target="_blank" rel="noopener noreferrer">` + `aria-label` ทุกเส้น
+- **ห้ามใช้อิโมจิเป็นไอคอน** (กฎเหล็กข้อ 2) → ใช้ inline SVG โมโนโครมสีเดียว `fill="currentColor"` คุมด้วย `text-[#D5CEC2]/70 hover:text-[#FAF7F2]` ให้กลมกลืนกับพาเลต Quiet Luxury
+- 6 ไอคอนในแถวเดียว มือถือต้อง `flex-wrap` ไม่ล้นขอบ (กฎเหล็กข้อ 3 · Zero-Clipping)
 
 ### ✏️ `src/components/layout/nav-links.ts`
 
-เพิ่มลิงก์ LINE OA เข้าไปในคอลัมน์ "ปลอดภัย & โปร่งใส" (บรรทัด ~59) ด้วยคำว่า **"ทักแม่หมอทาง LINE"** — จุดนี้อยู่ทุกหน้าของเว็บ = ตัวดัน follower ที่ต้นทุนศูนย์
+เพิ่มลิงก์ LINE OA ในคอลัมน์ "ปลอดภัย & โปร่งใส" (บรรทัด ~59) ด้วยคำว่า **"ทักแม่หมอทาง LINE"**
+จุดนี้อยู่ทุกหน้าของเว็บ = ตัวดัน follower ที่ต้นทุนศูนย์
+
+### ✏️ `src/components/reading/ShareModal.tsx` — 3 จุด (จุดสำคัญที่สุดของงาน B)
+
+**จุดที่ 1 · เพิ่ม LINE เป็นปุ่มแชร์ที่ 6**
+
+```ts
+// ขยาย union ที่บรรทัด 322
+const handleShareToBrand = async (brand: "facebook" | "instagram" | "tiktok" | "twitter" | "threads" | "line")
+```
+
+LINE ใช้ **intent URL แบบ sync ล้วน** ไม่ต้องรอ `await` ก่อนเปิดหน้าต่าง จึงไปอยู่กลุ่มเดียวกับ `needsPopup`:
+
+```ts
+if (brand === "line") {
+  openOrRedirect(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(lineText)}`);
+  return;
+}
+```
+
+> ⚠️ อ่านคอมเมนต์ที่บรรทัด 325 ให้จบก่อนแก้ — **ต้องเปิดแท็บเปล่าแบบ sync ก่อน `await` ใด ๆ** ไม่งั้นเบราว์เซอร์บล็อกป็อปอัป นี่เป็นบทเรียนที่แก้มาแล้ว อย่าทำพัง
+
+ปุ่มที่ 6 ใน UI (ต่อจากบรรทัด 681) ต้องเรนเดอร์เฉพาะเมื่อ **ไม่ใช่มือถือที่รองรับ native share** เหมือนปุ่มอื่น และ layout ปุ่มต้องยังไม่ล้นกรอบบนจอ 375px
+
+**จุดที่ 2 · ใส่ @handle ลงในแคปชันทุกช่อง**
+
+ตอนนี้แคปชันจบด้วยแฮชแท็กเฉย ๆ (`#ไพ่ทาโรต์ #ดูดวง #SeerTarot`) คนอ่านตามบัญชีเราต่อไม่ได้
+→ ต่อท้ายด้วย `socialHandle(brand)` เมื่อมีค่า เช่น `\n\nดูดวงเพิ่มที่ @seertarot`
+**ห้ามใส่ข้อความค้างไว้เมื่อยังไม่มีบัญชี** — `socialHandle()` คืนค่าว่างแล้วต้องไม่เหลือช่องว่างหรือ `@` โดด ๆ
+
+**จุดที่ 3 · ห่อลิงก์แชร์ด้วย UTM**
+
+`buildShareLink()` (บรรทัด 296) คืน URL ดิบ → ให้ผู้เรียกห่อด้วย `withUtm(url, brand)` ก่อนส่งเข้า intent
+ผลลัพธ์: GA4 → Traffic acquisition แยกได้ว่าคนกลับมาจาก TikTok หรือ LINE กี่คน **ซึ่งตอนนี้วัดไม่ได้เลย**
 
 ### ✏️ `docs/PENDING_SETUP.md`
 
-เติมตาราง env ใหม่ 4 ตัว: `NEXT_PUBLIC_LINE_OA_URL` · `NEXT_PUBLIC_FB_PAGE_URL` · `NEXT_PUBLIC_YOUTUBE_URL` · `LINE_MESSAGING_TOKEN` (ตัวสุดท้ายเป็น secret ห้ามขึ้นต้น `NEXT_PUBLIC_`)
+เติมตาราง env ใหม่ 11 ตัว (ทั้งหมดเป็น public ยกเว้นตัวสุดท้าย):
+
+`NEXT_PUBLIC_TIKTOK_URL` · `NEXT_PUBLIC_TIKTOK_HANDLE` · `NEXT_PUBLIC_FB_PAGE_URL` · `NEXT_PUBLIC_IG_URL` · `NEXT_PUBLIC_IG_HANDLE` · `NEXT_PUBLIC_LINE_OA_URL` · `NEXT_PUBLIC_LINE_OA_ID` · `NEXT_PUBLIC_THREADS_URL` · `NEXT_PUBLIC_THREADS_HANDLE` · `NEXT_PUBLIC_X_URL` · `NEXT_PUBLIC_X_HANDLE`
+
+➕ `LINE_MESSAGING_TOKEN` — **secret ห้ามขึ้นต้น `NEXT_PUBLIC_`** (ใช้ในงาน C)
 
 ## B.3 เกณฑ์ผ่านงาน B
 
-- [ ] ไม่ตั้ง env เลย → build ผ่าน, footer ไม่มีแถวโซเชียล, `sameAs` เหลือ GitHub ตัวเดียว **ไม่มี error**
-- [ ] ตั้งครบ 3 ตัว → footer โผล่ 3 ลิงก์ · `view-source` เห็น URL ทั้ง 3 ใน `sameAs`
+- [ ] **ไม่ตั้ง env เลย** → build ผ่าน · footer ไม่มีแถวช่องทาง · `sameAs` เหลือ GitHub ตัวเดียว · ไม่มี `<meta name="twitter:site" content="">` · **ไม่มี error**
+- [ ] ตั้งครบ 6 ช่อง → footer โผล่ 6 ลิงก์ · `view-source` เห็น URL ทั้ง 6 ใน `sameAs`
+- [ ] ปุ่มแชร์ LINE เปิด `social-plugins.line.me` ได้จริง **ไม่โดนเบราว์เซอร์บล็อกป็อปอัป** (ทดสอบทั้ง Safari iOS และ Chrome desktop)
+- [ ] ลิงก์ที่แชร์ออกทุกช่องมี `utm_source` ตรงกับช่องนั้น
+- [ ] แชร์ตอนยังไม่ตั้ง handle → แคปชัน**ไม่มี** `@` โดด ๆ หรือบรรทัดว่างค้าง
+- [ ] จอ 375px → แถวปุ่มแชร์ 6 ปุ่มและแถวไอคอน footer 6 อัน **ไม่ล้นกรอบ ไม่มีสกรอลล์แนวนอน** (กฎเหล็กข้อ 3)
+- [ ] `grep -rn "✅\|❌\|❤️" src/lib/config/social.ts src/components/layout/SiteFooter.tsx` → **0 บรรทัด**
 - [ ] `npm run repo:verify` ผ่านครบทุกด่าน
-- [ ] Lighthouse Accessibility ไม่ตก (ทุกลิงก์มี `aria-label`)
+- [ ] Lighthouse Accessibility ไม่ตก (ลิงก์ไอคอนล้วนต้องมี `aria-label`)
 
 ---
 ---
@@ -426,6 +537,8 @@ npm run repo:verify           # ต้องผ่านครบทุกด่
 | กลับค่า `yesNo` เองตอนไพ่หัวกลับ | กฎเหล็กข้อ 14 — เป็นการกุข้อมูลที่ไม่มีในสำรับ |
 | ใส่อิโมจิการ์ตูนใน UI | กฎเหล็กข้อ 2 — ใช้ได้แค่ `✦` `✨` |
 | ใช้ `LINE_CHANNEL_SECRET` เดิมกับ Messaging API | คนละ channel type จะพัง LINE Login ที่ใช้งานอยู่ |
+| `await` ก่อนเปิดแท็บในปุ่มแชร์ LINE | เบราว์เซอร์บล็อกป็อปอัป — แพตเทิร์นนี้แก้มาแล้วใน `ShareModal.tsx:325` |
+| ปล่อย `@` โดด ๆ ในแคปชันเมื่อยังไม่มีบัญชี | ผู้ใช้แชร์ออกไปแล้วดูไม่มืออาชีพ · `socialHandle()` คืนค่าว่างต้องตัดทั้งบรรทัด |
 | เขียน `<img src="/cards/...">` เอง | กฎเหล็กข้อ 8 — ต้องผ่าน `<CardImage />` |
 | ใส่ `cache:` ใน `actions/setup-node` | auto-detect pnpm แล้ว CI พังทั้งเรโป |
 | `push` แล้วจบ | กฎเหล็กข้อ 13 — ไม่เปิด PR = ไม่มี CI ไม่มี deploy |
@@ -440,7 +553,8 @@ npm run repo:verify           # ต้องผ่านครบทุกด่
 | :--- | :--- | :--- | :--- |
 | A | impressions + ตำแหน่งเฉลี่ยของ query ที่มีคำว่า "ใช่หรือไม่" / "yes or no" | GSC → Performance → Query filter | +14 และ +28 วัน |
 | A | จำนวนหน้า `/cards/*` ที่ถูก index | GSC → Pages | +28 วัน |
-| B | ผู้ใช้ที่มาจาก LINE / Facebook / YouTube | GA4 → Traffic acquisition | +30 วัน |
+| B | ผู้ใช้ที่กลับมาจากแต่ละช่อง แยกด้วย `utm_source` (tiktok / facebook / instagram / line / threads / x) | GA4 → Traffic acquisition | +30 วัน |
+| B | จำนวนครั้งที่กดปุ่มแชร์แยกรายช่อง (เทียบก่อน/หลังเพิ่ม LINE) | GA4 → event `share_click` (มีอยู่แล้ว) | +14 วัน |
 | C | อัตราเปิดอีเมล · จำนวนคนกดยกเลิก · ผู้ใช้ที่กลับมาเปิดไพ่ภายใน 24 ชม. หลังได้ digest | Resend dashboard + `digest_log` | +30 วัน |
 
 > เกณฑ์ที่ถือว่า "ล้มเหลว ให้ถอย": งาน C ถ้าอัตรายกเลิก > 5% ใน 30 วันแรก ให้ปิดฟีเจอร์แล้วทบทวนเนื้อหาอีเมลใหม่ อย่าดันต่อ
