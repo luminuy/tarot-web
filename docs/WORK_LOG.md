@@ -36,6 +36,21 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🚀 เปิดใช้งาน Cloudinary Production (`xtgpasdc`) สำหรับ Dynamic OpenGraph Cards
+
+**เป้าหมาย:** บันทึกและเปิดใช้งาน Cloud Name `xtgpasdc` จากบัญชี Cloudinary จริงของผู้ใช้ เพื่อเปิดใช้ระบบเจนภาพแชร์โซเชียลไดนามิกความเร็วสูงระดับโลก 100%
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **ทดสอบยิงภาพจริง (Live Verification)**:
+   - ทดสอบ Transformation และ Remote URL Fetching จากบัญชี `xtgpasdc`:
+     `https://res.cloudinary.com/xtgpasdc/image/fetch/.../https://seertarot.net/og/default.png`
+   - ได้รับผลลัพธ์ `HTTP/2 200 OK` (554ms, ขนาด 83KB, ปั๊มข้อความภาษาไทยคมชัดระดับ HD)
+2. **ผูกตัวแปรสภาพแวดล้อมระดับ Production**:
+   - `wrangler.jsonc`: เพิ่ม `"NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "xtgpasdc"` ใน `vars`
+   - `.github/workflows/deploy.yml`: ส่ง `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` สู่ขั้นตอน Build & Deploy
+   - `.env.local`: ตั้งค่าสำหรับ Local Development เรียบร้อย
+
+
 ### 🗓️ 2026-09-06: 🎨 เชื่อมต่อ Cloudinary Dynamic OG Pipeline สู่หน้าแชร์ผลดวง (/s/[id]) & อัปเดต .env.example
 
 **เป้าหมาย:** เชื่อมระบบสร้างภาพ OpenGraph ไดนามิกของ Cloudinary เข้ากับหน้าแชร์ผลดวง `/s/[id]` และจัดทำคู่มือใน `.env.example` เพื่อให้เมื่อใส่ `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` ระบบจะเสิร์ฟภาพการ์ดแชร์ดวงอัตโนมัติ 0ms CPU บน Worker

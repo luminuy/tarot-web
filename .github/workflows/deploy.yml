@@ -93,6 +93,8 @@ jobs:
           NEXT_PUBLIC_GOOGLE_ADS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_ID || vars.NEXT_PUBLIC_GOOGLE_ADS_ID || '' }}
           NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || vars.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL || '' }}
           NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || 'https://ik.imagekit.io/seertarotweb' }}
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'xtgpasdc' }}
+
 
 
       # ── ล้างแคช Edge หลัง deploy (จำเป็นตั้งแต่เปิด Cache Rules เฟส 1) ──────────
