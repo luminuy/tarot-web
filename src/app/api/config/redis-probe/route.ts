@@ -32,6 +32,41 @@ export async function GET() {
   const { isRedisEnabled, redisPing } = await import("@/lib/platform/redis");
   const enabled = await isRedisEnabled();
 
+  // ยิง PING แบบดิบ ๆ เพื่อดูว่าล้มที่ขั้นไหน (สถานะ HTTP / error ของ Upstash / exception)
+  let rawStatus = -1;
+  let rawBody = "";
+  let rawError: string | null = null;
+  let urlHost = "";
+  let urlScheme = "";
+
+  try {
+    const rawUrl = (process.env.UPSTASH_REDIS_REST_URL ?? "").trim();
+    const rawToken = (process.env.UPSTASH_REDIS_REST_TOKEN ?? "").trim();
+    if (rawUrl) {
+      try {
+        const u = new URL(rawUrl);
+        urlHost = u.host;
+        urlScheme = u.protocol;
+      } catch {
+        urlScheme = "INVALID_URL";
+      }
+    }
+
+    const res = await fetch(rawUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${rawToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(["PING"]),
+    });
+    rawStatus = res.status;
+    // ตัดให้สั้น — ข้อความ error ของ Upstash ไม่มี secret อยู่ในนั้น
+    rawBody = (await res.text()).slice(0, 200);
+  } catch (err) {
+    rawError = err instanceof Error ? `${err.name}: ${err.message}`.slice(0, 200) : "unknown";
+  }
+
   return NextResponse.json(
     {
       ctxUrlSet,
@@ -42,6 +77,11 @@ export async function GET() {
       procTokenSet: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN),
       enabled,
       ping: enabled ? await redisPing() : false,
+      urlScheme,
+      urlHost,
+      rawStatus,
+      rawBody,
+      rawError,
     },
     { headers: { "Cache-Control": "no-store" } },
   );
