@@ -35,6 +35,18 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🖼️ แก้ไข Next.js SSR Build Error: เติม "use client" ให้ CardImage.tsx
+
+**เป้าหมาย:** แก้ไขปัญหาการ Pre-render static pages ในขั้นตอน Next.js Production Build ที่ล้มเหลวด้วยข้อผิดพลาด `Event handlers cannot be passed to Client Component props` (เกิดจาก `<img onError={handleImgError} />` ภายในคอมโพเนนต์ `CardImage` ที่ถูกเรียกใช้จาก Server Component)
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **เติม directive `"use client";` ที่บรรทัดแรกของ `src/components/card/CardImage.tsx`**:
+   - ทำให้ `CardImage` ทำงานเป็น Client Component ที่ปลอดภัยเมื่อถูก Render จาก Server Components
+   - รองรับ Event Handler `onError` สำหรับการ Fallback รูปภาพจาก Cloudinary/ImageKit กลับสู่ Local Storage ได้อย่างสมบูรณ์
+2. **การทดสอบและตรวจสอบคุณภาพ**:
+   - รัน `npm run build` สำเร็จ 100% สามารถสร้าง Static Pages ได้ครบทั้ง 216/216 หน้า
+   - รัน `npm run repo:verify` ผ่านครบทั้ง 34/34 ด่าน
+
 ### 🗓️ 2026-09-06: 🚀 ปลดล็อคขั้นตอนชื่อเล่น (Optional Nickname) & เพิ่มความลื่นไหลโฟลการดูดวง
 
 **เป้าหมาย:** ลดแรงเสียดทาน (Friction) ในขั้นตอนที่ 2 (ตั้งคำถาม & เลือกแม่หมอ) โดยเปลี่ยนชื่อเล่นเป็นแบบไม่บังคับ (Optional) เพื่อให้ผู้ใช้สามารถก้าวสู่ขั้นตอนสับไพ่ได้ทันทีเมื่อมีคำถาม ลด Drop-off Rate อย่างมีนัยสำคัญ

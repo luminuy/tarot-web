@@ -1,3 +1,5 @@
+"use client";
+
 import type { CSSProperties } from "react";
 
 import { getCardImageSrc, getCardWebpSrcSet } from "@/lib/tarot/card-image";

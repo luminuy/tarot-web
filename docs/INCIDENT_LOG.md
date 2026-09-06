@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0097 · 2026-09-06 20:31 · 🟠 High · add use client directive to CardImage for SSR build compatibility
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Next.js production build failed prerendering static pages due to Event handlers cannot be passed to Client Component props in CardImage |
+| **สาเหตุราก** | CardImage component added onError handler for image fallback but lacked the use client directive, causing React 19 RSC to reject event handlers during SSR |
+| **การแก้ไข** | Added the 'use client' directive at line 1 of src/components/card/CardImage.tsx so React 19 treats it as a client component and permits onError handlers during SSR |
+| **🛡️ กฎป้องกันถาวร** | **Ensure all components utilizing event handlers like onError or DOM manipulation declare use client directive** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run build succeeded and prerendered 216/216 pages; npm run repo:verify passed all 34 gates |
+| **บันทึกโดย** | Antigravity · branch `fix/card-image-use-client` · commit `274e376` |
+
+
 ### INC-0096 · 2026-09-06 20:12 · 🟡 Medium · automate Service Worker cache versioning on deployment
 
 | หัวข้อ | รายละเอียด |
