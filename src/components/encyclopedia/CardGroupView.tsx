@@ -3,7 +3,7 @@
 import React from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import type { CardSummary } from "@/data/cards";
+import type { CardSummary } from "@/data/cards/summary";
 import type { CardGroupInfo } from "@/data/cards/group-seo";
 import { CardImage } from "@/components/card/CardImage";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";

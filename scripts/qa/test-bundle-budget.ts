@@ -53,26 +53,26 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/cards/major-00",
     htmlRelativePath: ".next/server/app/cards/major-00.html",
-    maxJsGzipKb: 385, // PR 7 Final Ratchet (Actual: 374 KB, down from 490 KB)
-    maxHtmlGzipKb: 30, // Current: 22 KB
+    maxJsGzipKb: 280, // F-01 Ratchet (Actual: 257 KB, down from 385 KB)
+    maxHtmlGzipKb: 30, // Current: 23 KB
   },
   {
     route: "/blog",
     htmlRelativePath: ".next/server/app/blog.html",
-    maxJsGzipKb: 325, // PR 7 Final Ratchet (Actual: 314 KB, down from 390 KB)
+    maxJsGzipKb: 325, // PR 7 Final Ratchet (Actual: 315 KB, down from 390 KB)
     maxHtmlGzipKb: 65, // Current: 55 KB
   },
   {
     route: "/daily",
     htmlRelativePath: ".next/server/app/daily.html",
-    maxJsGzipKb: 455, // PR 7 Final Ratchet (Actual: 447 KB, down from 540 KB)
-    maxHtmlGzipKb: 25, // Current: 16 KB
+    maxJsGzipKb: 350, // F-03 Ratchet (Actual: 332 KB, down from 455 KB)
+    maxHtmlGzipKb: 25, // Current: 18 KB
   },
   {
     route: "/love/1-card",
     htmlRelativePath: ".next/server/app/love/1-card.html",
-    maxJsGzipKb: 460, // PR 7 Final Ratchet (Actual: 451 KB, down from 550 KB)
-    maxHtmlGzipKb: 25, // Current: 18 KB
+    maxJsGzipKb: 350, // F-03 Ratchet (Actual: 335 KB, down from 460 KB)
+    maxHtmlGzipKb: 25, // Current: 19 KB
   },
   {
     route: "/spreads",
@@ -94,6 +94,10 @@ function ensureBuildExists(): void {
     console.log("📦 ไม่พบไฟล์ผลลัพธ์ build (.next/server/app/page.js) — กำลังรัน npm run build...");
     execSync("npm run build", { cwd: ROOT, stdio: "inherit" });
   }
+  const buildIdPath = path.join(ROOT, ".next/BUILD_ID");
+  if (!fs.existsSync(buildIdPath) && fs.existsSync(path.join(ROOT, ".next"))) {
+    fs.writeFileSync(buildIdPath, "production", "utf-8");
+  }
 }
 
 function fetchHtml(url: string): Promise<string> {
@@ -111,7 +115,7 @@ function fetchHtml(url: string): Promise<string> {
   });
 }
 
-async function waitForServer(port: number, maxWaitMs = 6000): Promise<boolean> {
+async function waitForServer(port: number, maxWaitMs = 12000): Promise<boolean> {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     try {
@@ -137,7 +141,7 @@ export async function testBundleBudget(): Promise<boolean> {
   const TEST_PORT = 3892;
 
   if (needsServer) {
-    serverProcess = spawn("npx", ["next", "start", "-p", String(TEST_PORT)], {
+    serverProcess = spawn("npx", ["next", "start", "-p", String(TEST_PORT), "-H", "127.0.0.1"], {
       cwd: ROOT,
       stdio: "pipe",
     });

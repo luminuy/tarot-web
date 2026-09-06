@@ -86,32 +86,40 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
               </h3>
               {"links" in col && col.links ? (
                 <ul className="space-y-2 text-xs font-serif-th text-[#D5CEC2]/80">
-                  {col.links.map((link, lIdx) => (
-                    <li key={lIdx}>
-                      <Link href={link.href} prefetch={false} className="hover:text-[#FAF7F2] transition-colors">
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
+                  {col.links.map((link, lIdx) => {
+                    const isPrimary = ["/", "/cards", "/spreads", "/blog", "/daily"].includes(link.href);
+                    return (
+                      <li key={lIdx}>
+                        <Link href={link.href} prefetch={isPrimary} className="hover:text-[#FAF7F2] transition-colors">
+                          {link.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : "items" in col && col.items ? (
                 <ul className="space-y-2 text-xs font-serif-th text-[#D5CEC2]/80">
-                  {col.items.map((item, iIdx) => (
-                    <li key={iIdx} className={iIdx > 1 ? "pt-1" : undefined}>
-                      {"href" in item && item.href ? (
-                        <Link href={item.href} prefetch={false} className="hover:text-[#FAF7F2] transition-colors">
-                          {item.title}
-                        </Link>
-                      ) : (
-                        <>
-                          <span className={`${"color" in item ? item.color : "text-[#A58A5C]"} font-semibold`}>{item.title}</span>
-                          {"description" in item && item.description && (
-                            <p className="text-[11px] text-[#D5CEC2]/60">{item.description}</p>
-                          )}
-                        </>
-                      )}
-                    </li>
-                  ))}
+                  {col.items.map((item, iIdx) => {
+                    const hasHref = "href" in item && Boolean(item.href);
+                    const href = hasHref ? (item as any).href : "";
+                    const isPrimary = ["/", "/cards", "/spreads", "/blog", "/daily"].includes(href);
+                    return (
+                      <li key={iIdx} className={iIdx > 1 ? "pt-1" : undefined}>
+                        {hasHref ? (
+                          <Link href={href} prefetch={isPrimary} className="hover:text-[#FAF7F2] transition-colors">
+                            {item.title}
+                          </Link>
+                        ) : (
+                          <>
+                            <span className={`${"color" in item ? item.color : "text-[#A58A5C]"} font-semibold`}>{item.title}</span>
+                            {"description" in item && item.description && (
+                              <p className="text-[11px] text-[#D5CEC2]/60">{item.description}</p>
+                            )}
+                          </>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : null}
             </div>

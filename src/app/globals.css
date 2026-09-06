@@ -571,5 +571,19 @@ input.no-focus-ring:focus-visible {
   padding-top: max(1rem, env(safe-area-inset-top));
 }
 
+/* N-01: CSS View Transitions for smooth cross-document page navigation */
+@view-transition {
+  navigation: auto;
+}
 
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}

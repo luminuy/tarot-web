@@ -280,14 +280,19 @@ isEnglish
 
               {/* Keywords */}
               {(() => {
-                const keywords =
-                  cardData.keywords && Array.isArray(cardData.keywords)
-                    ? cardData.keywords
-                    : cardData.keywords && typeof cardData.keywords === "object"
-                      ? drawnCard?.isReversed
-                        ? (cardData.keywords as any).reversed
-                        : (cardData.keywords as any).upright
-                      : [];
+                const enKws = (cardData as any)?.keywordsEn;
+                const thKws = cardData?.keywords;
+                let keywords: string[] = [];
+
+                if (isEnglish && enKws) {
+                  keywords = drawnCard?.isReversed ? enKws.reversed : enKws.upright;
+                } else if (thKws && Array.isArray(thKws)) {
+                  keywords = thKws;
+                } else if (thKws && typeof thKws === "object") {
+                  keywords = drawnCard?.isReversed
+                    ? (thKws as any).reversed
+                    : (thKws as any).upright;
+                }
 
                 return keywords && keywords.length > 0 ? (
                   <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-auto">

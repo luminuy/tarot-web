@@ -35,6 +35,42 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: ⚡ ปรับประสิทธิภาพความเร็ว Bundle Weight, GPU Composite Shadows, CSS View Transitions และระบบค้นหา Semantic Search
+
+**เป้าหมาย:** ทำเว็บให้ "สมูทและไว" ระดับโลกตามแผนแม่บท `HANDOFF_SMOOTH_FAST_20260906.md` และ `HANDOFF_SEMANTIC_SEARCH_20260906.md`
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **F-01: ดึง Metadata ย่อ `CARD_SUMMARIES` (`src/data/cards/summary.ts`)**:
+   - สร้างไฟล์สรุปข้อมูลไพ่ขนาดเล็ก 43 KB (เทียบกับ `DECK` เต็ม 896 KB)
+   - ตัดการ import `DECK` ออกจาก Client Components และ Category Pages ทั้งหมด (`/cards`, `/cards/all`, `/cards/major`, `/cards/minor`, `/cards/wands`, `/cards/cups`, `/cards/swords`, `/cards/pentacles`, `TarotCard.tsx`, `RelatedCards.tsx`, `ShareModal.tsx`)
+2. **F-03: Dynamic Deck Loading ใน `OneCardRitual.tsx` สำหรับ `/daily` & `/love/1-card`**:
+   - ปรับ `OneCardRitual.tsx` ให้ใช้ `getDeck()` dynamic import พร้อม `requestIdleCallback` prefetch
+   - ลดขนาดบันเดิล JS (gzip) ของหน้า `/daily` ลงจาก 458 KB เหลือ **332 KB** (−126 KB)
+   - ลดขนาดบันเดิล JS (gzip) ของหน้า `/love/1-card` ลงจาก 461 KB เหลือ **335 KB** (−126 KB)
+   - หน้า `/cards/major-00` ลดลงเหลือ **257 KB** (เดิม 374 KB)
+3. **S-01: GPU Composite Opacity Shadow Layer (`TarotCard.tsx`)**:
+   - เลิกแอนิเมต `boxShadow` บนตัวการ์ดโดยตรง ให้ใช้ `boxShadow` คงที่
+   - เพิ่มเลเยอร์เงาแยก `<div aria-hidden />` ที่แอนิเมตเฉพาะ `opacity` บน GPU พร้อม `willChange: isHovered || isHighlighted ? "opacity" : undefined` ตามกฎ Cloudflare ข้อ 55 และด่านที่ 29
+4. **S-02: เปิดใช้ `content-visibility: auto` และ `contain-intrinsic-size`**:
+   - กำหนดบนการ์ดใน `CardsExplorer.tsx`, `CardGroupView.tsx` และแถวใน `AllCardsTable.tsx` เพื่อข้ามการ layout/paint องค์ประกอบที่อยู่นอกจอ
+5. **N-01: CSS View Transitions ข้ามหน้าแบบไร้รอยต่อ (`globals.css`)**:
+   - เพิ่ม `@view-transition { navigation: auto; }` พร้อมแอนิเมชัน cross-fade/slide อย่างนุ่มนวล 220ms
+   - เคารพ `prefers-reduced-motion: reduce` 100%
+6. **N-02: เปิดใช้ `prefetch={true}` บนลิงก์หลักในฟุตเตอร์ (`SiteFooter.tsx`)**:
+   - โหลดข้อมูลหน้าหลักล่วงหน้า (`/`, `/cards`, `/spreads`, `/blog`, `/daily`) ทำให้คลิกเปลี่ยนหน้าได้ทันที 0ms delay
+7. **Q-01, Q-02, U-01: ระบบแคชและจำกัดความถี่ Semantic Search (`/api/search`)**:
+   - สร้างระบบแคชผลค้นหา Upstash Redis 24 ชั่วโมง (`src/lib/search/search-cache.ts`)
+   - จำกัดความถี่ตาม IP (40 ครั้ง/วัน) และ Cap รวมของระบบ (1500 ครั้ง/วัน)
+   - สร้าง `SemanticSearchPanel.tsx` ค้นหาความรู้สึกที่เชื่อมต่อกับ `CardsExplorer.tsx` แบบ Luxury Editorial Typography ตามกฎข้อ 2, ข้อ 8, และข้อ 14
+8. **G-01: Ratchet งบประมาณบันเดิลลงอย่างเข้มงวด (`scripts/qa/test-bundle-budget.ts`)**:
+   - ปรับลดงบ `/cards/major-00` จาก 385 KB ➔ **280 KB**
+   - ปรับลดงบ `/daily` จาก 455 KB ➔ **350 KB**
+   - ปรับลดงบ `/love/1-card` จาก 460 KB ➔ **350 KB**
+   - ผ่านการทดสอบงบประมาณทุกเส้นทาง 100%
+9. **การตรวจสอบคุณภาพ 34 ด่าน**:
+   - `npm run typecheck` ➔ 0 errors
+   - `npm run repo:verify` ➔ 34/34 ด่านผ่านฉลุย
+
 ### 🗓️ 2026-09-06: 🖼️ แก้ไข Next.js SSR Build Error: เติม "use client" ให้ CardImage.tsx
 
 **เป้าหมาย:** แก้ไขปัญหาการ Pre-render static pages ในขั้นตอน Next.js Production Build ที่ล้มเหลวด้วยข้อผิดพลาด `Event handlers cannot be passed to Client Component props` (เกิดจาก `<img onError={handleImgError} />` ภายในคอมโพเนนต์ `CardImage` ที่ถูกเรียกใช้จาก Server Component)

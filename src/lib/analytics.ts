@@ -213,6 +213,14 @@ export type TarotAnalyticsEvent =
       };
     }
   | {
+      name: "semantic_search";
+      params: {
+        query?: string;
+        query_len?: number;
+        results_count?: number;
+      };
+    }
+  | {
       name: "blog_read";
       params: {
         slug: string;

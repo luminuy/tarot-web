@@ -259,8 +259,9 @@ class MysticAudioEngine {
     const cleanText = text.replace(/[*#_`]/g, "").trim();
     if (!cleanText) return false;
 
+    const hasThai = /[\u0E00-\u0E7F]/.test(cleanText);
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = "th-TH";
+    utterance.lang = hasThai ? "th-TH" : "en-US";
 
     // ปรับจูน Pitch & Rate ตาม Persona
     let rate = 0.95;
@@ -297,9 +298,16 @@ class MysticAudioEngine {
     utterance.pitch = pitch;
 
     const voices = window.speechSynthesis.getVoices();
-    const thaiVoice = voices.find((v) => v.lang === "th-TH" || v.lang.startsWith("th"));
-    if (thaiVoice) {
-      utterance.voice = thaiVoice;
+    if (hasThai) {
+      const thaiVoice = voices.find((v) => v.lang === "th-TH" || v.lang.startsWith("th"));
+      if (thaiVoice) {
+        utterance.voice = thaiVoice;
+      }
+    } else {
+      const enVoice = voices.find((v) => v.lang === "en-US" || v.lang.startsWith("en"));
+      if (enVoice) {
+        utterance.voice = enVoice;
+      }
     }
 
     if (onEnd) utterance.onend = onEnd;

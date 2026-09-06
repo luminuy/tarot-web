@@ -3,9 +3,10 @@
 import React, { useState, useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { SPRING } from "@/lib/motion";
-import { cardById, cardByIndex } from "@/data/cards";
+import { cardSummaryById, cardSummaryByIndex } from "@/data/cards/summary";
 import { CardImage } from "@/components/card/CardImage";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
+import { useLocale } from "@/lib/i18n";
 
 export interface TarotCardProps {
   card?: {
@@ -93,6 +94,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
   imageFull = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const { isEnglish } = useLocale();
 
   const effectiveImageSizes = imageSizes ?? DEFAULT_IMAGE_SIZES[size] ?? "120px";
 
@@ -108,14 +110,17 @@ export const TarotCard: React.FC<TarotCardProps> = ({
 
   // Safely resolve the card object even if nested or only id/index is provided
   const rawCard = (card as any)?.card || card;
+  const resolved = rawCard?.id
+    ? cardSummaryById(rawCard.id)
+    : rawCard?.cardIndex !== undefined
+      ? cardSummaryByIndex(rawCard.cardIndex)
+      : undefined;
   const effectiveCard =
-    rawCard?.image && rawCard?.nameTh
+    rawCard?.image && (rawCard?.nameTh || rawCard?.name)
       ? rawCard
-      : rawCard?.id
-        ? cardById(rawCard.id) || rawCard
-        : rawCard?.cardIndex !== undefined
-          ? cardByIndex(rawCard.cardIndex) || rawCard
-          : rawCard;
+      : resolved
+        ? { ...resolved, nameTh: resolved.nameTh || resolved.name }
+        : rawCard;
 
   const elem = effectiveCard?.element
     ? ELEMENT_CONFIG[effectiveCard.element] || ELEMENT_CONFIG["ไฟ"]
@@ -191,9 +196,20 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
-            boxShadow: isHighlighted || isHovered ? "var(--shadow-overlay)" : "var(--shadow-raised)",
+            boxShadow: "var(--shadow-raised)",
           }}
         >
+          {/* S-01: GPU composite shadow layer — แอนิเมตเฉพาะ opacity ไม่ทำให้เกิด repaint */}
+          <div
+            aria-hidden
+            className="absolute inset-0 rounded-lg pointer-events-none transition-opacity duration-200"
+            style={{
+              boxShadow: "var(--shadow-overlay)",
+              opacity: isHighlighted || isHovered ? 1 : 0,
+              willChange: isHovered || isHighlighted ? "opacity" : undefined,
+            }}
+          />
+
           {/* Top Frame Gold Header */}
           <div className="w-full flex justify-center items-center opacity-85 z-10">
             <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
@@ -215,7 +231,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
                 className="px-2.5 py-1 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] z-20 flex items-center gap-1 text-[12px] text-[#2E211A] font-serif-th font-bold"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A] animate-ping" />
-                <span>แตะเพื่อเปิด</span>
+                <span>{isEnglish ? "Tap to reveal" : "แตะเพื่อเปิด"}</span>
               </motion.div>
             )}
           </div>
@@ -245,16 +261,26 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             borderColor: elem.border,
-            boxShadow: isHighlighted || isHovered ? "var(--shadow-overlay)" : "var(--shadow-raised)",
+            boxShadow: "var(--shadow-raised)",
           }}
         >
+          {/* S-01: GPU composite shadow layer — แอนิเมตเฉพาะ opacity ไม่ทำให้เกิด repaint */}
+          <div
+            aria-hidden
+            className="absolute inset-0 rounded-lg pointer-events-none transition-opacity duration-200"
+            style={{
+              boxShadow: "var(--shadow-overlay)",
+              opacity: isHighlighted || isHovered ? 1 : 0,
+              willChange: isHovered || isHighlighted ? "opacity" : undefined,
+            }}
+          />
           {/* Full Authentic 1909 Rider-Waite Card Face */}
           <div className={`w-full h-full relative overflow-hidden ${isReversed ? "rotate-180" : ""}`}>
             {imageSrc ? (
               <CardImage
                 image={effectiveCard?.image}
                 cardId={effectiveCard?.id}
-                alt={effectiveCard?.nameTh || "Tarot"}
+                alt={(isEnglish ? effectiveCard?.nameEn : effectiveCard?.nameTh) || effectiveCard?.nameTh || "Tarot"}
                 className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
                 sizes={effectiveImageSizes}
                 full={imageFull}
@@ -270,7 +296,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {isReversed && (
             <div className="absolute top-2 left-2 z-20 pointer-events-none">
               <span className="text-[12px] font-bold font-serif-th bg-[#2E211A]/90 text-[#FFFFFF] border border-[#D9C8AC]/80 px-2 py-0.5 rounded-full ">
-                กลับหัว
+                {isEnglish ? "Reversed" : "กลับหัว"}
               </span>
             </div>
           )}

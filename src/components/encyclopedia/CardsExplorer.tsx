@@ -3,8 +3,9 @@
 import React, { useState, useMemo, useEffect } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
-import type { CardSummary } from "@/data/cards";
+import type { CardSummary } from "@/data/cards/summary";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
 import { trackEvent } from "@/lib/analytics";
@@ -73,10 +74,16 @@ const ELEMENT_EN: Record<string, string> = {
   ดิน: "Earth",
 };
 
+const SemanticSearchPanel = dynamic(
+  () => import("./SemanticSearchPanel").then((m) => m.SemanticSearchPanel),
+  { ssr: false, loading: () => null },
+);
+
 export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   const { isEnglish } = useLocale();
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [showSemanticSearch, setShowSemanticSearch] = useState<boolean>(false);
 
   const filteredCards = useMemo(() => {
     return cards.filter((card) => {
@@ -95,9 +102,9 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       const q = searchQuery.toLowerCase().trim();
       const nameTh = card.nameTh.toLowerCase();
       const nameEn = card.nameEn.toLowerCase();
-      const element = card.element?.toLowerCase() || "";
-      const elementEn = (ELEMENT_EN[card.element] || "").toLowerCase();
-      const astro = card.astrology?.toLowerCase() || "";
+      const element = card.element ? card.element.toLowerCase() : "";
+      const elementEn = (card.element && ELEMENT_EN[card.element] ? ELEMENT_EN[card.element] : "").toLowerCase();
+      const astro = card.astrology ? card.astrology.toLowerCase() : "";
       const keywords = [...card.keywords.upright, ...card.keywords.reversed].join(" ").toLowerCase();
       const kwEnObj = CARD_KEYWORDS_EN[card.id];
       const keywordsEn = kwEnObj ? [...kwEnObj.upright, ...kwEnObj.reversed].join(" ").toLowerCase() : "";
@@ -162,8 +169,12 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#635B4E] hover:text-[#29261F] text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                onClick={() => {
+                  setSearchQuery("");
+                  setShowSemanticSearch(false);
+                }}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#635B4E] hover:text-[#29261F] text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors cursor-pointer"
+                aria-label={isEnglish ? "Clear search" : "ล้างคำค้นหา"}
               >
                 ✕
               </button>
@@ -187,6 +198,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 type="button"
                 onClick={() => {
                   setSearchQuery("");
+                  setShowSemanticSearch(false);
                   setActiveFilter("all");
                 }}
                 className="text-[13px] text-[#A58A5C] hover:underline cursor-pointer font-bold font-serif-th"
@@ -196,6 +208,40 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             )}
           </div>
         </div>
+
+        {/* Semantic Search Prompt / Toggle Button */}
+        {searchQuery.trim().length >= 4 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-[#D5CEC2]/40">
+            <button
+              type="button"
+              onClick={() => setShowSemanticSearch((prev) => !prev)}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-serif-th font-bold transition-all cursor-pointer ${
+                showSemanticSearch
+                  ? "border-[#8F5C1A] bg-[#8F5C1A] text-white shadow-2xs"
+                  : filteredCards.length < 3 && searchQuery.trim().length >= 6
+                    ? "border-[#8F5C1A] bg-[#FAF7F2] text-[#8F5C1A] shadow-xs"
+                    : "border-[#D5CEC2] bg-white text-[#635B4E] hover:text-[#29261F] hover:border-[#8F5C1A]"
+              }`}
+            >
+              <span>
+                {showSemanticSearch
+                  ? isEnglish
+                    ? "Hide Semantic Results"
+                    : "ซ่อนผลค้นหาด้วยความรู้สึก"
+                  : isEnglish
+                    ? "Search by Feeling Instead"
+                    : "ค้นหาด้วยความรู้สึกแทน"}
+              </span>
+            </button>
+            {filteredCards.length < 3 && searchQuery.trim().length >= 6 && !showSemanticSearch && (
+              <span className="text-[11px] font-serif-th text-[#8F5C1A]">
+                {isEnglish
+                  ? "Few exact word matches. Try semantic search."
+                  : "พบน้อยกว่า 3 ใบ แนะนำให้ลองค้นหาด้วยความรู้สึก"}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Suit & Arcana Filter Tabs */}
         <div
@@ -297,6 +343,14 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         </div>
       </div>
 
+      {/* Semantic Feelings Search Panel */}
+      {showSemanticSearch && searchQuery.trim().length >= 2 && (
+        <SemanticSearchPanel
+          query={searchQuery}
+          onClose={() => setShowSemanticSearch(false)}
+        />
+      )}
+
       {/* 78 Cards Luxury Masterpiece Grid */}
       {/* initial={false} — เรนเดอร์แรก (ฝั่งเซิร์ฟเวอร์) ต้องออกมาที่ opacity 1
           การสลับหมวดหลัง mount ยังมีอนิเมชันครบเหมือนเดิม */}
@@ -310,7 +364,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5"
         >
           {filteredCards.map((card) => {
-            const elemStyle = ELEMENT_STYLES[card.element] || ELEMENT_STYLES["ไฟ"];
+            const elemStyle = (card.element && ELEMENT_STYLES[card.element]) || ELEMENT_STYLES["ไฟ"];
             return (
               <Link
                 key={card.id}
@@ -341,7 +395,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     <span
                       className={`text-[12px] font-mono px-1.5 py-0.5 rounded border ${elemStyle.border} ${elemStyle.bg} ${elemStyle.text} font-bold`}
                     >
-                      {isEnglish ? ELEMENT_EN[card.element] || card.element : card.element}
+                      {isEnglish ? (card.element && ELEMENT_EN[card.element]) || card.element : card.element}
                     </span>
                   </div>
 

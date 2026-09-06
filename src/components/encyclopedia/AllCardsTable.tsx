@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import type { CardSummary } from "@/data/cards";
+import type { CardSummary } from "@/data/cards/summary";
 import { CardImage } from "@/components/card/CardImage";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { useLocale } from "@/lib/i18n";
@@ -158,6 +158,10 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                 return (
                   <tr
                     key={card.id}
+                    style={{
+                      contentVisibility: "auto",
+                      containIntrinsicSize: "auto 60px",
+                    }}
                     className="hover:bg-[#FAF7F2]/70 transition-colors group"
                   >
                     {/* Index */}

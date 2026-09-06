@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import { execSync } from "node:child_process";
 import { buildSearchCorpus } from "../../src/lib/search/vectorize";
 import { DECK } from "../../src/data/cards";
 import { ARTICLES } from "../../src/data/articles";
@@ -46,6 +48,14 @@ ok(new Set(corpus.map((d) => d.id)).size === corpus.length, "id ไม่ซ้�
 ok(
   corpus.every((d) => Object.values(d.metadata).every((v) => typeof v === "string")),
   "metadata เป็น string ล้วน (Vectorize รองรับ)",
+);
+
+// G-01: ด่านกันกำพร้าซ้ำรอย — ถ้ามี /api/search ต้องมีโค้ดฝั่งหน้าเว็บเรียกจริง
+const hasRoute = fs.existsSync("src/app/api/search/route.ts");
+const callers = execSync(`grep -rl "/api/search" src --include='*.tsx' || true`).toString().trim();
+ok(
+  !hasRoute || callers.length > 0,
+  `/api/search มีโค้ดฝั่งหน้าเว็บเรียกจริงอย่างน้อย 1 ที่ (${callers.split("\n").filter(Boolean).length} ไฟล์)`,
 );
 
 console.log(`\n${pass}/${pass + fail} ผ่าน`);
