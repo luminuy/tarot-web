@@ -62,6 +62,14 @@
 **บทเรียนกว้างกว่านั้น (INC-0092):** โมดูลที่ออกแบบให้ "ห้าม throw" ต้องมีทางให้ตรวจ
 สถานะจากภายนอกได้ ไม่งั้นความผิดพลาดจะเงียบสนิทจนต้องสร้าง probe มาไล่หา
 
+**✅ ยืนยันแล้วบน production (2026-09-06):** หลัง deploy ยิง `POST /api/reading/start`
+แล้วเปิด Upstash Data Browser เห็นคีย์ `app:reading:cb40567b-…` ของจริง
+เนื้อในตรงกับคำขอทดสอบทุกฟิลด์ (`question`, `spreadId: daily`, `status: DRAWING`,
+`commitment`, `serverSeed`) และ **TTL แสดง 1h 59m** = `READING_KV_TTL_SEC` (2 ชม.)
+ถูกส่งไปกับคำสั่ง `SET ... EX` อย่างถูกต้อง
+➔ เซสชันเปิดไพ่ย้ายจาก Cloudflare KV ไปอยู่บน Upstash เรียบร้อย
+➔ ตัวนับโควตาจะวิ่งผ่าน `INCRBY` แบบ atomic ตั้งแต่การเปิดไพ่ครั้งถัดไป
+
 **เกร็ด:** probe ครั้งแรกยิงด้วย `curl` แล้วโดน WAF rule `[phase1] block script tools on /api`
 ของเราเองบล็อก — ยืนยันโดยบังเอิญว่ากฎเฟส 1 ทำงานจริงบน production
 
