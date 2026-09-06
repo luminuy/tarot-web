@@ -36,6 +36,37 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🎯 เจอสาเหตุจริงที่ Upstash ไม่ทำงาน — secret มีเครื่องหมายคำพูดครอบ (INC-0092)
+
+**สาเหตุจริง:** คอนโซล Upstash แสดงค่าเป็นบรรทัดสไตล์ `.env`:
+`UPSTASH_REDIS_REST_URL="https://xxxx.upstash.io"` เมื่อคัดลอกมาวางใน
+`wrangler secret put` ค่าที่ถูกเก็บจึง **มีเครื่องหมายคำพูดครอบติดไปด้วย**
+→ `new URL()` ใน `fetch` โยน `TypeError: Invalid URL` ทุกครั้ง
+→ `command()` จับ error แล้วคืน `null` เงียบ ๆ ตามดีไซน์ "ห้าม throw"
+→ ระบบถอยไปใช้ KV เหมือนไม่ได้ตั้งค่าอะไรเลย **โดยไม่มี error ให้เห็นที่ไหน**
+
+**วิธีที่ใช้ไล่หา:** สร้าง `/api/config/redis-probe` ชั่วคราว 2 รอบ (ลบทิ้งแล้วใน PR นี้)
+- รอบ 1 ตอบ `enabled: true` แต่ `ping: false` → ตัดเรื่อง env และ bundling ออกได้
+- รอบ 2 ตอบ `rawError: TypeError: Invalid URL: "https://handy-goose-95508.upstash.io"`
+  → เห็นเครื่องหมายคำพูดในข้อความ error ชัดเจน
+
+**⚠️ ต้องแก้ความเข้าใจผิดของรอบก่อน:** ที่บันทึกไว้ว่า "process.env มองไม่เห็น secret"
+**ไม่จริง** — probe ยืนยันว่า `procUrlSet: true` และ `procTokenSet: true`
+การเปลี่ยนไปอ่านผ่าน `getCloudflareContext()` (PR #313) จึงไม่ได้แก้อาการนี้
+แต่ยังเก็บไว้เพราะเป็นวิธีที่ตรงกับ binding อื่นทั้งหมดของ repo
+
+**แก้:** เพิ่ม `normalizeSecret()` ตัดเครื่องหมายคำพูดครอบ (ทั้ง `"` `'` และซ้อนหลายชั้น)
++ validate ด้วย `new URL()` ตอน `resolveConfig()` ถ้าไม่ผ่านถือว่าไม่ได้เปิดใช้ตั้งแต่แรก
+จะได้ถอยไป KV ทันทีแทนการยิงแล้วล้มเงียบทุกคำขอ · ทดสอบ logic 6 เคสผ่านหมด
+
+**บทเรียนกว้างกว่านั้น (INC-0092):** โมดูลที่ออกแบบให้ "ห้าม throw" ต้องมีทางให้ตรวจ
+สถานะจากภายนอกได้ ไม่งั้นความผิดพลาดจะเงียบสนิทจนต้องสร้าง probe มาไล่หา
+
+**เกร็ด:** probe ครั้งแรกยิงด้วย `curl` แล้วโดน WAF rule `[phase1] block script tools on /api`
+ของเราเองบล็อก — ยืนยันโดยบังเอิญว่ากฎเฟส 1 ทำงานจริงบน production
+
+---
+
 ### 🗓️ 2026-09-06: แก้ Upstash ไม่ทำงาน — อ่าน secret ผิดทางบน Workers (โดย Claude Opus 5)
 
 **อาการ:** ตั้ง secret `UPSTASH_REDIS_REST_URL` + `_TOKEN` บน Worker ครบแล้ว

@@ -44,6 +44,27 @@ interface RedisConfig {
 let cached: RedisConfig | null = null;
 let resolved = false;
 
+/**
+ * ล้างค่าที่คัดลอกมาจากคอนโซล Upstash ให้ใช้ได้จริง
+ * ---------------------------------------------------------------------------
+ * 🐛 บทเรียนจริง (2026-09-06): คอนโซล Upstash แสดงค่าเป็นบรรทัดสไตล์ไฟล์ .env
+ *      UPSTASH_REDIS_REST_URL="https://xxxx.upstash.io"
+ * ถ้าคัดลอกทั้งบรรทัดหรือคัดรวมเครื่องหมายคำพูด แล้ววางเข้า `wrangler secret put`
+ * ค่าที่ถูกเก็บจะมี `"` ครอบติดไปด้วย ผลคือ `new URL()` โยน
+ * `TypeError: Invalid URL` ทุกครั้ง — และเพราะไฟล์นี้ "ห้าม throw" ทุกอย่างเลยเงียบสนิท
+ * Redis ไม่เคยถูกเรียกสำเร็จเลยสักคำสั่ง โดยไม่มี error ให้เห็นที่ไหน
+ *
+ * กว่าจะเจอต้องไล่ตัดสาเหตุผ่าน probe ชั่วคราว 2 รอบ (env มองเห็นไหม → HTTP ล้มยังไง)
+ * จึงต้องล้างค่าตรงนี้ถาวร ห้ามถอดออก
+ */
+function normalizeSecret(raw: string): string {
+  return raw
+    .trim()
+    // ตัดเครื่องหมายคำพูดที่ครอบมา (ทั้ง " และ ') รวมถึงกรณีซ้อนกันหลายชั้น
+    .replace(/^["']+|["']+$/g, "")
+    .trim();
+}
+
 async function resolveConfig(): Promise<RedisConfig | null> {
   if (resolved) return cached;
 
@@ -61,11 +82,24 @@ async function resolveConfig(): Promise<RedisConfig | null> {
   }
 
   if (!url || !token) {
-    url = process.env.UPSTASH_REDIS_REST_URL?.trim() || "";
-    token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim() || "";
+    url = process.env.UPSTASH_REDIS_REST_URL ?? "";
+    token = process.env.UPSTASH_REDIS_REST_TOKEN ?? "";
   }
 
-  cached = url && token ? { url: url.trim().replace(/\/+$/, ""), token: token.trim() } : null;
+  const cleanUrl = normalizeSecret(url).replace(/\/+$/, "");
+  const cleanToken = normalizeSecret(token);
+
+  // ต้องเป็น URL ที่ `fetch()` ใช้ได้จริง ไม่งั้นถือว่าไม่ได้เปิดใช้ (จะได้ถอยไป KV ตั้งแต่แรก
+  // แทนที่จะพยายามยิงแล้วล้มเงียบ ๆ ทุกคำขอ)
+  let usable = false;
+  try {
+    const u = new URL(cleanUrl);
+    usable = u.protocol === "https:" || u.protocol === "http:";
+  } catch {
+    usable = false;
+  }
+
+  cached = usable && cleanToken ? { url: cleanUrl, token: cleanToken } : null;
   resolved = true;
   return cached;
 }
