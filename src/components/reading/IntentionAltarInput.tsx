@@ -112,10 +112,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
     onQuestionChange(isEnglish ? (seal.promptSeedEn || seal.promptSeed) : seal.promptSeed);
   };
 
-  const [touchedNickname, setTouchedNickname] = React.useState(false);
   const [touchedQuestion, setTouchedQuestion] = React.useState(false);
-
-  const isNicknameEmpty = touchedNickname && !nickname.trim();
   const isQuestionEmpty = touchedQuestion && !question.trim();
 
   return (
@@ -167,7 +164,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
               className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
             >
               {isEnglish ? "1. Your Name or Pseudonym" : "1. ชื่อเล่นของคุณ"}
-              <span className="whitespace-nowrap text-[#A6392C] font-mono text-xs">{isEnglish ? "(Required *)" : "(จำเป็น *)"}</span>
+              <span className="whitespace-nowrap text-[#635B4E] font-serif-th text-xs font-normal">{isEnglish ? "(Optional)" : "(ไม่บังคับ)"}</span>
             </label>
             <span className="text-[13px] text-[#635B4E] font-mono">{nickname.length}/24</span>
           </div>
@@ -176,14 +173,9 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             type="text"
             maxLength={24}
             value={nickname}
-            onBlur={() => setTouchedNickname(true)}
             onChange={(e) => onNicknameChange(e.target.value)}
-            placeholder={isEnglish ? "e.g., Alex, Jordan, Taylor, Casey" : "เช่น ฟ้า, บิ๊ก, พลอย, เมย์"}
-            className={`w-full bg-[#FFFFFF] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all duration-200 ${
-              isNicknameEmpty
-                ? "border border-[#A6392C] focus:border-[#A6392C] focus:ring-1 focus:ring-[#A6392C]"
-                : "border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
-            }`}
+            placeholder={isEnglish ? "e.g., Alex, Jordan (or leave blank)" : "เช่น ฟ้า, บิ๊ก, พลอย (เว้นว่างได้)"}
+            className="w-full bg-[#FFFFFF] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all duration-200 border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
           />
         </div>
 

@@ -289,6 +289,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         const match = getSpread(spreadParam);
         if (match) setSelectedSpread(match);
       }
+      try {
+        const remembered = typeof window !== "undefined" ? localStorage.getItem("seertarot_nickname") : null;
+        if (remembered) setNickname(remembered);
+      } catch {}
     }
 
     // Auto-sync anonymous history to server upon login or app mount & handle Auth query toasts
@@ -485,17 +489,18 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       return;
     }
 
-    const trimmedNickname = nickname.trim();
+    const effectiveNickname = nickname.trim() || (isEnglish ? "Seeker" : "คุณ");
     const trimmedQuestion = question.trim();
-
-    if (!trimmedNickname) {
-      setErrorMsg(isEnglish ? "Please enter your name before beginning." : "กรุณากรอกชื่อเล่นของคุณก่อนเริ่มดูดวง");
-      return;
-    }
 
     if (!trimmedQuestion) {
       setErrorMsg(isEnglish ? "Please enter your question before beginning." : "กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง");
       return;
+    }
+
+    if (typeof window !== "undefined" && nickname.trim()) {
+      try {
+        localStorage.setItem("seertarot_nickname", nickname.trim());
+      } catch {}
     }
 
     setLoading(true);
@@ -510,7 +515,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           spreadId: selectedSpread.id,
           question: trimmedQuestion,
           personaId: selectedPersona.id,
-          nickname: trimmedNickname,
+          nickname: effectiveNickname,
           category: selectedCategory,
           intake: { situation: situation.trim() || undefined },
           lang: locale,
@@ -1284,10 +1289,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 <button
                   type="button"
                   onClick={handleStartSession}
-                  disabled={loading || !nickname.trim() || !question.trim()}
+                  disabled={loading || !question.trim()}
                   aria-label={isEnglish ? "Next: Shuffle and select cards yourself" : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}
                   className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-full text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shadow-sm ${
-                    !nickname.trim() || !question.trim()
+                    !question.trim()
                       ? "bg-[#EAE7E0] text-[#635B4E] border border-[#D5CEC2] cursor-not-allowed"
                       : "bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] active:scale-95 cursor-pointer"
                   }`}

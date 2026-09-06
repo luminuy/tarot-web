@@ -35,6 +35,23 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🚀 ปลดล็อคขั้นตอนชื่อเล่น (Optional Nickname) & เพิ่มความลื่นไหลโฟลการดูดวง
+
+**เป้าหมาย:** ลดแรงเสียดทาน (Friction) ในขั้นตอนที่ 2 (ตั้งคำถาม & เลือกแม่หมอ) โดยเปลี่ยนชื่อเล่นเป็นแบบไม่บังคับ (Optional) เพื่อให้ผู้ใช้สามารถก้าวสู่ขั้นตอนสับไพ่ได้ทันทีเมื่อมีคำถาม ลด Drop-off Rate อย่างมีนัยสำคัญ
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **ปลดล็อคเงื่อนไข Disabled ของปุ่ม (`src/app/TarotFlow.tsx`)**:
+   - ปรับปุ่ม "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง" ให้ตรวจสอบเฉพาะ `loading || !question.trim()` ไม่ล็อคปุ่มค้างเมื่อไม่ได้พิมพ์ชื่อเล่น
+   - ในฟังก์ชัน `handleStartSession`: กำหนด Fallback อัตโนมัติ `effectiveNickname = nickname.trim() || (isEnglish ? "Seeker" : "คุณ")` ส่งต่อให้แม่หมอ AI อ่านคำทำนายได้อย่างราบรื่น
+   - เพิ่มระบบจดจำชื่อเล่นเดิมลงใน `localStorage` (`seertarot_nickname`) เมื่อผู้ใช้เคยกรอกไว้ เพื่อเติมให้อัตโนมัติในครั้งถัดไปที่เข้ามาดูดวง
+2. **ปรับแต่ง UI ป้ายกำกับและช่องกรอก (`src/components/reading/IntentionAltarInput.tsx`)**:
+   - เปลี่ยนป้ายกำกับจาก `(จำเป็น *)` เป็น `(ไม่บังคับ)` สไตล์ Quiet Luxury
+   - ถอดคำเตือนกรอบสีแดง (`isNicknameEmpty`) ออก เพื่อไม่ให้รบกวนสมาธิผู้ใช้
+   - อัปเดตข้อความ Placeholder: `"เช่น ฟ้า, บิ๊ก, พลอย (เว้นว่างได้)"`
+3. **การตรวจสอบคุณภาพ 34 ด่าน**:
+   - ผ่าน `npm run typecheck` (0 errors)
+   - ผ่าน `npm run repo:verify` ครบ 34/34 ด่าน ไร้ข้อผิดพลาด
+
 ### 🗓️ 2026-09-06: 🖼️ แก้บั๊กท่อสื่อ M-02 & M-01 (คืนภาพไพ่จริงของผู้ใช้ + แก้ภาพ Cloudinary ตัวหนังสือทับกัน)
 
 **อ้างอิงแผนงาน:** `docs/plans/HANDOFF_MEDIA_FIX_2026-09-06.md`
