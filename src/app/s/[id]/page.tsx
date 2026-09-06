@@ -39,7 +39,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cloudinaryUrl = isCloudinaryEnabled()
     ? buildCloudinaryShareImageUrl({ title, spreadName: meta?.spread })
     : null;
-  const imageUrl = cloudinaryUrl || (ID_RE.test(id) ? `${SITE_ORIGIN}/api/share/image/${id}` : `${SITE_ORIGIN}/cards/major-01.jpg`);
+
+  // M-02: ภาพไพ่จริงที่ผู้ใช้เปิดได้ (R2) ต้องมาก่อนเสมอ เพื่อไม่ให้ generic image บดบังไพ่ส่วนตัวของผู้ใช้
+  const hasRealShareImage = ID_RE.test(id) && Boolean(meta);
+  const imageUrl = hasRealShareImage
+    ? `${SITE_ORIGIN}/api/share/image/${id}`
+    : (cloudinaryUrl ?? `${SITE_ORIGIN}/og/default.png`);
 
   return {
     title,
@@ -54,8 +59,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [
         {
           url: imageUrl,
-          width: cloudinaryUrl ? 1200 : 1080,
-          height: cloudinaryUrl ? 630 : 1350,
+          width: hasRealShareImage ? 1080 : 1200,
+          height: hasRealShareImage ? 1350 : 630,
           alt: title,
         },
       ],
