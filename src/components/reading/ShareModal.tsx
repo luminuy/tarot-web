@@ -158,10 +158,21 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
                 res(null);
                 return;
               }
+              let fellBack = false;
               const img = new Image();
               img.crossOrigin = "anonymous";
               img.onload = () => res(img);
-              img.onerror = () => res(null);
+              img.onerror = () => {
+                if (!fellBack) {
+                  fellBack = true;
+                  const localSrc = getCardImageSrc(cardObj?.image, cardObj?.id, { forceLocal: true });
+                  if (localSrc && img.src !== localSrc) {
+                    img.src = localSrc;
+                    return;
+                  }
+                }
+                res(null);
+              };
               img.src = imgSrc;
             });
           })

@@ -36,6 +36,17 @@ export function getImageKitEndpoint(): string {
 }
 
 /**
+ * Options สำหรับการดึง Path ของภาพไพ่
+ */
+export interface CardImageSrcOptions {
+  /**
+   * บังคับให้ใช้ local path จาก Origin เสมอ (ไม่ใช้ CDN เช่น ImageKit)
+   * ใช้สำหรับ fallback ฝั่ง Client เมื่อ CDN ไม่ตอบสนอง หรือการ Export ภาพ
+   */
+  forceLocal?: boolean;
+}
+
+/**
  * แปลงชื่อไฟล์ดิบจากฐานข้อมูลไพ่ (เช่น `"major-00.jpg"`) ให้เป็น path เต็มจาก root เสมอ
  * รองรับกรณีข้อมูลใส่ path เต็มมาแล้ว (`"/cards/major-00.jpg"`) และกรณีมีแต่ `id`
  * หากเปิดใช้ ImageKit CDN จะต่อ prefix อัตโนมัติเพื่อลดภาระ Cloudflare Egress Bandwidth
@@ -43,8 +54,9 @@ export function getImageKitEndpoint(): string {
 export function getCardImageSrc(
   image?: string | null,
   fallbackId?: string | null,
+  options?: CardImageSrcOptions,
 ): string | null {
-  const endpoint = getImageKitEndpoint();
+  const endpoint = options?.forceLocal ? "" : getImageKitEndpoint();
   let localPath: string | null = null;
 
   if (image) {
@@ -74,11 +86,12 @@ function extractCardBaseName(image?: string | null, fallbackId?: string | null):
 export function getCardWebpSrcSet(
   image?: string | null,
   fallbackId?: string | null,
+  options?: CardImageSrcOptions,
 ): string | null {
   const name = extractCardBaseName(image, fallbackId);
   if (!name) return null;
 
-  const endpoint = getImageKitEndpoint();
+  const endpoint = options?.forceLocal ? "" : getImageKitEndpoint();
   const base = endpoint ? `${endpoint}${CARDS_ROOT}` : CARDS_ROOT;
 
   return CARD_IMAGE_VARIANTS.map(
@@ -93,13 +106,14 @@ export function getCardWebpVariantSrc(
   image?: string | null,
   variant: "w64" | "w128" | "w256" | "w512b" | "w768b" = "w128",
   fallbackId?: string | null,
+  options?: CardImageSrcOptions,
 ): string | null {
   const name = extractCardBaseName(image, fallbackId);
-  const endpoint = getImageKitEndpoint();
+  const endpoint = options?.forceLocal ? "" : getImageKitEndpoint();
   const base = endpoint ? `${endpoint}${CARDS_ROOT}` : CARDS_ROOT;
 
   if (!name) {
-    return getCardImageSrc(image, fallbackId);
+    return getCardImageSrc(image, fallbackId, options);
   }
 
   return `${base}${variant}/${name}.webp`;

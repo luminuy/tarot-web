@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0095 · 2026-09-06 20:05 · 🟠 High · add origin fallback for ImageKit and clarify NEXT_PUBLIC env configuration
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | hardcoded ImageKit default in deploy.yml risked sitewide card breakage if CDN quota was exhausted without origin fallback, and .env.example misled developers to use wrangler secret put for NEXT_PUBLIC vars |
+| **สาเหตุราก** | deploy.yml hardcoded ImageKit endpoint when secret was missing and CardImage lacked onError fallback to local origin, while .env.example suggested runtime secrets for build-time inline variables |
+| **การแก้ไข** | remove hardcoded CDN defaults from deploy.yml, add forceLocal option in card-image.ts with automatic client onError fallback in CardImage and ShareModal, and update .env.example with correct build-time instructions |
+| **🛡️ กฎป้องกันถาวร** | **never hardcode third-party CDN endpoints in deployment workflows without automatic origin fallbacks, and clearly document Next.js build-time inlining for all NEXT_PUBLIC variables** |
+| **บันทึกโดย** | Antigravity AI · branch `fix/m03-m04-imagekit-fallback-and-env-docs` · commit `1830854` |
+
+
 ### INC-0094 · 2026-09-06 19:59 · 🟠 High · restore user drawn cards in share page and resolve Cloudinary text collision
 
 | หัวข้อ | รายละเอียด |
