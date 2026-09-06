@@ -1,53 +1,25 @@
-import { cookies, headers } from "next/headers";
 import type { Dictionary, Locale } from "./types";
-import { DEFAULT_LOCALE, LOCALE_COOKIE_KEY } from "./types";
 import { th } from "./dictionaries/th";
 import { en } from "./dictionaries/en";
 
+/**
+ * 🌐 พจนานุกรมฝั่งเซิร์ฟเวอร์ (lookup ด้วย locale ที่ระบุมาตรง ๆ เท่านั้น)
+ * ---------------------------------------------------------------------------
+ * ⚠️ ไฟล์นี้เคยมี `getServerLocale()` / `getServerDictionary()` ที่อ่าน `headers()`
+ * และ `cookies()` เพื่อเดาภาษาจากคำขอ — **ถอดออกแล้วเมื่อ 2026-09-06 ห้ามเอากลับมา**
+ *
+ * เหตุผล: มันถูกเรียกใน `src/app/layout.tsx` (root layout) การแตะ dynamic API ที่นั่น
+ * ทำให้ **ทุก route ในเว็บกลายเป็น dynamic** — วัดจริงตอนบิลด์: prerender ได้ 0 หน้า
+ * และ Next ตอบ `cache-control: private, no-cache, no-store` ทุกหน้า จน edge cache
+ * และ `enableCacheInterception` ของ OpenNext ไม่มีอะไรให้เสิร์ฟเลย
+ * หลังถอดออก: prerender ได้ 167 หน้า
+ *
+ * การเลือกภาษาเป็นหน้าที่ของ `LocaleProvider` ฝั่ง client (`src/lib/i18n/context.tsx`)
+ */
 const dictionaries: Record<Locale, Dictionary> = {
   th,
   en,
 };
-
-/**
- * ดึงภาษาสำหรับ Server Components จาก Header (x-locale จาก middleware) หรือ Cookie
- */
-export async function getServerLocale(): Promise<Locale> {
-  // 1. ลองอ่านจาก Header x-locale ที่ middleware ฉีดเข้ามา (ครอบคลุมทั้ง ?lang= และ cookie)
-  try {
-    const headerStore = await headers();
-    const xLocale = headerStore.get("x-locale");
-    if (xLocale === "th" || xLocale === "en") {
-      return xLocale;
-    }
-  } catch {
-    // กรณีที่เรียกนอก Server Request Lifecycle (เช่น static build prerender)
-  }
-
-  // 2. ลองอ่านจาก CookieStore โดยตรง
-  try {
-    const cookieStore = await cookies();
-    const langCookie =
-      cookieStore.get(LOCALE_COOKIE_KEY)?.value ||
-      cookieStore.get("locale")?.value;
-    if (langCookie === "th" || langCookie === "en") {
-      return langCookie;
-    }
-  } catch {
-    // กรณีที่เรียกนอก Server Request Lifecycle
-  }
-
-  return DEFAULT_LOCALE;
-}
-
-/**
- * @public (D-02)
- * ดึง Dictionary สำหรับ Server Components โดย resolve ภาษาจาก request context
- */
-export async function getServerDictionary(): Promise<Dictionary> {
-  const locale = await getServerLocale();
-  return dictionaries[locale] || th;
-}
 
 /**
  * @public (D-02)
@@ -56,4 +28,3 @@ export async function getServerDictionary(): Promise<Dictionary> {
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale] || th;
 }
-

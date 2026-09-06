@@ -36,6 +36,57 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🔥 กู้ SSG ทั้งเว็บ — prerender 0 → 167 หน้า (INC-0091) (โดย Claude Opus 5)
+
+**ที่มา:** เจ้าของสั่ง "รีดประสิทธิภาพสูงสุด" หลังพบว่าเฟส 1 (Cloudflare Cache Rules)
+แคชหน้า HTML ไม่ได้เลย จึงไล่หาต้นตอที่โค้ดแทนที่จะโทษ Cloudflare
+
+**ต้นตอ (INC-0091):** `src/app/layout.tsx` (root layout) เรียก `getServerLocale()`
+ซึ่งอ่าน `headers()` + `cookies()` — การแตะ dynamic API ที่ root layout ทำให้
+**ทุก route ในเว็บกลายเป็น dynamic** เข้ามาพร้อมงาน S-02 (PR #306)
+
+| ตัวชี้วัด | ก่อน | หลัง |
+| :--- | :---: | :---: |
+| หน้า prerender ตอน build | **0** | **167** |
+| หน้าเว็บที่เป็น ƒ Dynamic (ไม่นับ /api) | **32** | **4** |
+| `/` (หน้าแรก) | ƒ Dynamic | ○ Static |
+| middleware ที่รันทุกคำขอ | มี (`src/proxy.ts`) | ไม่มี |
+
+4 หน้าที่ยังเป็น dynamic คือ `/readers`, `/readers/[id]`, `/readers/queue/[id]`, `/s/[id]`
+ซึ่งต้องดึงข้อมูลรายคำขอจริง ๆ (marketplace + ลิงก์แชร์) — ถูกต้องแล้ว
+
+**สิ่งที่แก้:**
+- `src/app/layout.tsx` — ใช้ `<html lang="th">` คงที่ · ตัด `getServerLocale()` ทิ้ง
+- `src/app/page.tsx` — ตัด `getServerLocale()` · `HomeSeoContent` เรนเดอร์ไทยเสมอ
+- `src/lib/i18n/context.tsx` — เริ่มที่ค่าเดียวกับที่ prerender ไว้ (ไทย) แล้วตรวจภาษาจริง
+  ใน `useEffect` หลัง mount เพื่อกัน hydration mismatch · และจำ `?lang=` ลง cookie ให้เอง
+  (งานที่ `proxy.ts` เคยทำ)
+- **ลบ `src/proxy.ts`** — ฉีด header `x-locale` ที่ไม่มีใครอ่านแล้ว เหลือไว้ = จ่ายค่ารันโค้ด
+  บน Worker ทุกคำขอหน้าเว็บฟรี ๆ
+- `src/lib/i18n/server.ts` — ตัด `getServerLocale`/`getServerDictionary` ที่กลายเป็นโค้ดตาย
+
+**กฎป้องกันถาวร (กลับด้านด่านเดิม):** ด่าน S-02/P-03 ใน `scripts/qa/test-seo-wave4.ts`
+เดิม *บังคับ* ให้มีสถาปัตยกรรมที่เป็นต้นเหตุ — กลับด้านเป็นห้ามแทน:
+root layout ห้ามเรียก `getServerLocale`/`headers`/`cookies` · ห้ามมี `src/proxy.ts`
+หรือ `src/middleware.ts` · `i18n/server.ts` ห้าม import `next/headers` · หน้าแรกห้ามเรียก
+`getServerLocale` (ด่านตัดคอมเมนต์ออกก่อนตรวจ จึงเขียนอธิบายเหตุผลในไฟล์ได้)
+
+**⚠️ ผลข้างเคียงที่ยอมรับ:** บล็อกเนื้อหา SEO ใต้ fold ของหน้าแรก (`HomeSeoContent`)
+เรนเดอร์เป็น**ภาษาไทยเสมอ** แม้ผู้ใช้เลือกอังกฤษ (UI ส่วนที่เหลือยังสลับปกติ)
+และ `?lang=en` จะได้ HTML ไทยจากแคช แล้วค่อยสลับฝั่ง client
+➔ hreflang `en-US` ที่ชี้ไป `?lang=en` จึงยังไม่ใช่หน้าอังกฤษจริงในสายตา Googlebot
+➔ ถ้าจะเอา SEO อังกฤษจริงจัง ต้องทำ routing แยกเส้นทาง (`/en/...`) แล้ว prerender สองภาษา
+  (กลยุทธ์ปัจจุบันเป็นคีย์เวิร์ดไทยล้วน จึงยังไม่เร่ง)
+
+**Cloudflare เพิ่มเติม:** เปิด **Crawler Hints** (บอกเสิร์ชเอนจินเมื่อเนื้อหาเปลี่ยน
+ลดการไล่คลานเปล่า) · **ไม่เปิด Always Online** เพราะต้องแชร์เนื้อหาเว็บให้ Internet Archive
+เป็นการตัดสินใจเรื่องข้อมูล ไม่ใช่เรื่องประสิทธิภาพ — ปล่อยให้เจ้าของตัดสิน
+
+**ยังต้องยืนยันหลัง deploy:** header `x-opennext-cache: HIT` บนหน้า SSG
+(cache interception จะมีหน้า prerender ให้ seed ลง KV แล้ว)
+
+---
+
 ### 🗓️ 2026-09-06: เฟส 1 — ตั้งค่าจริงบน Cloudflare production เสร็จ + สิ่งที่คู่มือคาดผิด (โดย Claude Opus 5)
 
 **ที่มา:** เจ้าของโปรเจกต์อนุญาตให้เข้า Cloudflare Dashboard เอง (ผ่าน Claude in Chrome)
