@@ -7,6 +7,7 @@ import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { LocaleProvider } from "@/lib/i18n";
+import { getServerLocale } from "@/lib/i18n/server";
 import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 const notoSerifThai = Noto_Serif_Thai({
@@ -132,9 +133,11 @@ const webSiteJsonLd = {
   inLanguage: "th",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getServerLocale();
+
   return (
-    <html lang="th" className={`${notoSerifThai.variable} ${sarabun.variable}`}>
+    <html lang={locale} className={`${notoSerifThai.variable} ${sarabun.variable}`}>
       <head>
         <meta charSet="utf-8" />
         {/* เฉพาะ schema ที่เป็นจริงกับ "ทุกหน้า" เท่านั้นที่อยู่ตรงนี้ได้
@@ -150,7 +153,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-dvh font-sans antialiased">
         <AppMotionProvider>
-          <LocaleProvider>
+          <LocaleProvider initialLocale={locale}>
             <AntiTheftShield />
             <AssetWarmup />
             <AnalyticsTracker />

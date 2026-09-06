@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import TarotFlow from "./TarotFlow";
 import { HomeSeoContent } from "@/components/seo/HomeSeoContent";
+import { getServerLocale } from "@/lib/i18n/server";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
@@ -57,7 +58,10 @@ const webAppJsonLd = {
  */
 const heroCardSrcSet = getCardWebpSrcSet("major-19.jpg");
 
-export default function Page() {
+export default async function Page() {
+  const locale = await getServerLocale();
+  const isEnglish = locale === "en";
+
   return (
     <>
       <link
@@ -80,7 +84,7 @@ export default function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
       />
-      <TarotFlow seoContent={<HomeSeoContent />} />
+      <TarotFlow seoContent={<HomeSeoContent isEnglish={isEnglish} />} />
     </>
   );
 }

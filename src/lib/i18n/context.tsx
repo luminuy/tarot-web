@@ -91,6 +91,7 @@ export function LocaleProvider({
     try {
       // 1. Write Cookie (1 year duration, Lax)
       document.cookie = `${LOCALE_COOKIE_KEY}=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `locale=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
 
       // 2. Write LocalStorage
       localStorage.setItem(LOCALE_COOKIE_KEY, nextLocale);
