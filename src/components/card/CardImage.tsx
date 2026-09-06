@@ -54,6 +54,25 @@ export function CardImage({
   const src = getCardImageSrc(image, cardId);
   if (!src) return null;
 
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const el = e.currentTarget;
+    if (!el.dataset.fellBack) {
+      el.dataset.fellBack = "1";
+      const fallback = getCardImageSrc(image, cardId, { forceLocal: true });
+      if (fallback && el.src !== fallback) {
+        // ถอด <source> ใน parent <picture> ออกด้วยเพื่อไม่ให้เบราว์เซอร์พยายามโหลด webp ที่ล้มซ้ำ
+        const parent = el.parentElement;
+        if (parent && parent.tagName.toLowerCase() === "picture") {
+          const sources = parent.querySelectorAll("source");
+          sources.forEach((s) => s.remove());
+        }
+        el.src = fallback;
+        return;
+      }
+    }
+    onError?.();
+  };
+
   const img = (
     <img
       src={src}
@@ -66,7 +85,7 @@ export function CardImage({
       decoding={decoding}
       fetchPriority={fetchPriority}
       draggable={draggable}
-      onError={onError}
+      onError={handleImgError}
     />
   );
 
