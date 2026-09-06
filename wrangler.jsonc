@@ -65,7 +65,8 @@
 
   "vars": {
     "NODE_ENV": "production",
-    "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT": "https://ik.imagekit.io/seertarotweb"
+    "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT": "https://ik.imagekit.io/seertarotweb",
+    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "xtgpasdc"
   }
 
   // ── Secrets สำหรับ OAuth & Session Security ───────────────────────────────────
