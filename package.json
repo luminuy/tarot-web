@@ -18,6 +18,7 @@
     "verify:cards": "tsx scripts/verify-cards.ts",
     "verify:parity": "tsx scripts/verify-shuffle-parity.ts",
     "test:journal": "tsx scripts/qa/test-journal-sync.ts",
+    "test:budget": "tsx scripts/qa/test-bundle-budget.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "cards:variants": "tsx scripts/generate-card-variants.ts",
     "cards:related": "tsx scripts/generate-related-cards.ts",
