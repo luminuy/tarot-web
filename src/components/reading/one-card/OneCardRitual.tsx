@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { DECK } from "@/data/cards";
@@ -10,21 +9,12 @@ import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
 import { stepVariants } from "@/lib/motion";
 
-const ShuffleRitual = dynamic(
-  () => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual),
-  { ssr: false }
-);
-
-const InteractiveCardFan = dynamic(
-  () => import("@/components/deck/InteractiveCardFan").then((m) => m.InteractiveCardFan),
-  { ssr: false }
-);
-
 export interface OneCardRitualProps {
   spreadId: string;
   spreadName: string;
   deckLabel: string;
   intention?: string;
+  drawButtonText?: string;
   onRevealed: (card: TarotCardType) => void;
   renderReading: (card: TarotCardType) => React.ReactNode;
   recommendations?: React.ReactNode;
@@ -37,7 +27,8 @@ export function OneCardRitual({
   spreadId: _spreadId,
   spreadName,
   deckLabel,
-  intention = "",
+  intention: _intention = "",
+  drawButtonText,
   onRevealed,
   renderReading,
   recommendations,
@@ -46,18 +37,14 @@ export function OneCardRitual({
   isEnglish = false,
 }: OneCardRitualProps) {
   const [, startTransition] = useTransition();
-  const [status, setStatus] = useState<"idle" | "shuffling" | "picking" | "ready" | "revealed">("idle");
+  const [status, setStatus] = useState<"idle" | "ready" | "revealed">("idle");
   const [drawnCard, setDrawnCard] = useState<TarotCardType | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // เริ่มต้นขั้นตอนสับไพ่
-  const handleStart = () => {
-    soundManager.playShuffleSound();
-    setStatus("shuffling");
-  };
+  // จังหวะที่ 1 ➔ จังหวะที่ 2: สุ่มไพ่ทันทีด้วย Web Crypto API โดยไม่ผ่านหน้าจอสับหรือพัดไพ่
+  const handleDraw = () => {
+    soundManager.playCardSelectSound();
 
-  // เมื่อสับไพ่ใน ShuffleRitual เสร็จสิ้น
-  const handleShuffleComplete = (_clientSeed: string) => {
     const randomBuffer = new Uint32Array(2);
     if (typeof window !== "undefined" && window.crypto) {
       window.crypto.getRandomValues(randomBuffer);
@@ -68,21 +55,15 @@ export function OneCardRitual({
     const cardIndex = randomBuffer[0] % DECK.length;
     const card = DECK[cardIndex];
 
-    // Rule 14: ห้ามกุไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด
+    // Rule 14: Zero Fabricated Cards Policy — ห้ามกุไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด
     if (!card) {
       throw new Error("ไม่พบข้อมูลไพ่ กรุณาโหลดใหม่อีกครั้ง");
     }
 
     startTransition(() => {
       setDrawnCard(card);
-      setStatus("picking");
+      setStatus("ready");
     });
-  };
-
-  // เมื่อผู้ใช้เลือกไพ่จากพัดไพ่ 78 ใบ
-  const handlePickCard = (_fanIndex: number) => {
-    soundManager.playCardSelectSound();
-    setStatus("ready");
   };
 
   // เมื่อผู้ใช้แตะพลิกไพ่ 3D
@@ -130,7 +111,7 @@ export function OneCardRitual({
   return (
     <div className="altar-panel rounded-2xl p-5 sm:p-8 space-y-8">
       <AnimatePresence mode="wait">
-        {/* Step 1: Idle — Header Slot & Altar Deck Stage */}
+        {/* จังหวะที่ 1: เลือกหัวข้อ/สถานะ ➔ กดปุ่มเปิดไพ่ */}
         {status === "idle" && (
           <motion.div
             key="idle"
@@ -143,94 +124,24 @@ export function OneCardRitual({
           >
             {headerSlot}
 
-            <div className="altar-cloth p-6 sm:p-10 flex flex-col items-center justify-center space-y-6 text-center shadow-inner">
-              <div
-                className="cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95"
-                onClick={handleStart}
+            <div className="pt-2 flex flex-col items-center justify-center space-y-3 text-center">
+              <button
+                type="button"
+                onClick={handleDraw}
+                className="w-full sm:w-auto px-10 py-3.5 sm:py-4 rounded-full bg-[#29261F] text-[#FAF7F2] font-serif-th text-sm sm:text-base font-bold shadow-[var(--shadow-raised)] hover:bg-[#A58A5C] active:scale-[0.98] transition-all cursor-pointer tracking-wide flex items-center justify-center gap-2"
               >
-                <TarotCard
-                  size="lg"
-                  isRevealed={false}
-                  isHighlighted={true}
-                  positionLabel={deckLabel}
-                />
-              </div>
-
-              <div className="space-y-3 max-w-md">
-                <button
-                  type="button"
-                  onClick={handleStart}
-                  className="w-full sm:w-auto px-8 sm:px-10 py-3.5 sm:py-4 rounded-full bg-[#29261F] text-[#FAF7F2] font-serif-th text-sm font-bold shadow-[var(--shadow-raised)] hover:bg-[#A58A5C] active:scale-[0.98] transition-all cursor-pointer tracking-wide"
-                >
-                  {isEnglish ? "Begin Shuffling & Selection" : "เริ่มพิธีสับไพ่และเลือกไพ่"}
-                </button>
-                <p className="text-xs text-[#635B4E]">
-                  {isEnglish
-                    ? "Cryptographic Web Crypto API randomness · Provably Fair"
-                    : "ระบบสุ่มรหัสลับ Web Crypto API ปราศจากการล็อกผล 100%"}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Step 2: Shuffling — Authentic Interactive Ritual */}
-        {status === "shuffling" && (
-          <motion.div
-            key="shuffling"
-            custom={1}
-            variants={stepVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="altar-cloth p-6 sm:p-10 flex flex-col items-center justify-center space-y-6 text-center"
-          >
-            <ShuffleRitual
-              commitment={intention || spreadName}
-              spreadName={spreadName}
-              onShuffleComplete={handleShuffleComplete}
-            />
-          </motion.div>
-        )}
-
-        {/* Step 3: Picking — 78-Card Arc Fan Geometry */}
-        {status === "picking" && (
-          <motion.div
-            key="picking"
-            custom={1}
-            variants={stepVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="altar-cloth p-4 sm:p-8 space-y-4 text-center"
-          >
-            <div className="space-y-1">
-              <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
-                {isEnglish ? "Phase: Intuitive Selection" : "ขั้นตอน: เลือกไพ่ด้วยปัญญาญาณ"}
-              </span>
-              <h3 className="text-lg sm:text-xl font-serif-th font-bold text-[#29261F]">
-                {isEnglish ? "Choose 1 Card Calling to You" : "แตะเลือกไพ่ 1 ใบที่เรียกหาคุณ"}
-              </h3>
+                <span>{drawButtonText || (isEnglish ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}</span>
+              </button>
               <p className="text-xs text-[#635B4E]">
                 {isEnglish
-                  ? "Allow your inner intuition to guide your hand across the 78 cards"
-                  : "ปล่อยให้สัญชาตญาณและความสงบภายในเป็นผู้นำทางหัวใจของคุณ"}
+                  ? "Cryptographic Web Crypto API randomness · Provably Fair"
+                  : "ระบบสุ่มรหัสลับ Web Crypto API ปราศจากการล็อกผล 100%"}
               </p>
-            </div>
-
-            <div className="py-2">
-              <InteractiveCardFan
-                totalCards={78}
-                pickedIndices={[]}
-                targetCount={1}
-                currentPositionName={deckLabel}
-                onPickCard={handlePickCard}
-              />
             </div>
           </motion.div>
         )}
 
-        {/* Step 4: Ready to Reveal */}
+        {/* จังหวะที่ 2 (ขั้นแรก): ไพ่คว่ำหน้าบนแท่นบูชา ➔ ผู้ใช้แตะพลิกไพ่ 1 ครั้ง (คงกฎข้อ 4) */}
         {status === "ready" && drawnCard && (
           <motion.div
             key="ready"
@@ -239,33 +150,47 @@ export function OneCardRitual({
             initial="enter"
             animate="center"
             exit="exit"
-            className="altar-cloth p-8 sm:p-12 flex flex-col items-center justify-center space-y-5 text-center"
+            className="altar-cloth p-8 sm:p-12 flex flex-col items-center justify-center space-y-6 text-center shadow-inner"
           >
-            <div className="space-y-1">
-              <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
-                {isEnglish ? "Phase: Sacred Revelation" : "ขั้นตอน: เปิดเผยสารพยากรณ์"}
-              </span>
-              <h3 className="text-lg sm:text-xl font-serif-th font-bold text-[#29261F]">
-                {isEnglish ? "Your Card Awaits" : "ไพ่ตอบรับเจตจำนงของคุณแล้ว"}
+            {/* ป้ายระบุบริบท/สถานะเต็มความยาว ไม่ถูกตัดขอบ (แก้ปัญหา label ถูกตัดครึ่ง) */}
+            <div className="space-y-2 max-w-lg mx-auto">
+              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs sm:text-sm font-serif-th font-semibold text-[#8F5C1A] shadow-2xs">
+                <span>{deckLabel}</span>
+              </div>
+              <h3 className="text-lg sm:text-2xl font-serif-th font-bold text-[#29261F] tracking-tight">
+                {isEnglish ? "Your Sacred Card Awaits" : "ไพ่ตอบรับเจตจำนงของคุณแล้ว"}
               </h3>
-              <p className="text-xs text-[#635B4E]">
+              <p className="text-xs sm:text-sm text-[#635B4E]">
                 {isEnglish
                   ? "Tap the card to reveal your oracle message in full 3D"
                   : "แตะที่ตัวไพ่เพื่อพลิกเฉลยสารพยากรณ์แบบ 3D"}
               </p>
             </div>
 
+            {/* ไพ่ 3D คว่ำหน้า รอผู้ใช้แตะพลิก */}
             <div
-              className="cursor-pointer py-3 transition-transform duration-300 hover:scale-105 active:scale-95"
+              role="button"
+              tabIndex={0}
+              aria-label={isEnglish ? "Tap to reveal card" : "แตะเพื่อพลิกไพ่"}
+              className="cursor-pointer py-2 transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] rounded-xl"
               onClick={handleReveal}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleReveal();
+                }
+              }}
             >
               <TarotCard
                 size="lg"
                 isRevealed={false}
                 isHighlighted={true}
-                positionLabel={isEnglish ? "Tap to reveal" : "แตะเพื่อพลิกไพ่"}
               />
             </div>
+
+            <p className="text-xs text-[#A58A5C] font-serif-th font-semibold tracking-wide">
+              {isEnglish ? "Touch card above to reveal" : "แตะที่ตัวไพ่ด้านบนเพื่อเปิดเผยคำทำนาย"}
+            </p>
           </motion.div>
         )}
 
