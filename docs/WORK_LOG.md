@@ -36,6 +36,33 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: PR 3 — ปรับโครงสร้าง CardSummary และตัด Payload หน้ารวมไพ่ 8 หน้า (ลด HTML /cards ลง 80.5%) (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ P-02):**
+1. **P-02: สร้างโครงสร้าง `CardSummary` และ `DECK_SUMMARY`**:
+   - ประกาศ `CardSummary` (10 ฟิลด์ที่ใช้จริง: `id`, `arcana`, `suit`, `number`, `nameTh`, `nameEn`, `keywords`, `element`, `astrology`, `image`) ใน [`src/data/cards/index.ts`](../src/data/cards/index.ts)
+   - ไม่แตะต้องฟิลด์หรือข้อมูลของหน้ารายละเอียด `/cards/[id]` (ยังคงใช้ `DECK` ตัวเต็มและ `cardById` ตามกฎเหล็กข้อ 14 Zero Fabricated Cards)
+2. **ปรับปรุงคอมโพเนนต์แคตตาล็อกไพ่ทั้ง 3 ตัว**:
+   - [`src/components/encyclopedia/CardsExplorer.tsx`](../src/components/encyclopedia/CardsExplorer.tsx): เปลี่ยน props เป็น `readonly CardSummary[]`
+   - [`src/components/encyclopedia/CardGroupView.tsx`](../src/components/encyclopedia/CardGroupView.tsx): เปลี่ยน props เป็น `readonly CardSummary[]`
+   - [`src/components/encyclopedia/AllCardsTable.tsx`](../src/components/encyclopedia/AllCardsTable.tsx): ถอดการ import `DECK` ฝั่ง client ออก แล้วรับ `cards: readonly CardSummary[]` ผ่าน props จาก Server Component แทน
+3. **ปรับปรุง Server Component Pages ทั้ง 8 เส้นทาง**:
+   - `/cards` (`src/app/cards/page.tsx`): ส่ง `DECK_SUMMARY` ลง `<CardsExplorer />` และ CollectionPage JSON-LD
+   - `/cards/all` (`src/app/cards/all/page.tsx`): ส่ง `DECK_SUMMARY` ลง `<AllCardsTable />`
+   - `/cards/major` (`src/app/cards/major/page.tsx`): กรองเฉพาะ `DECK_SUMMARY`
+   - `/cards/minor` (`src/app/cards/minor/page.tsx`): กรองเฉพาะ `DECK_SUMMARY`
+   - `/cards/cups`, `/cards/wands`, `/cards/swords`, `/cards/pentacles`: กรองเฉพาะ `DECK_SUMMARY`
+4. **ผลลัพธ์การวัดจริงและ Ratchet Budget (Gate 34)**:
+   - `/cards` HTML gzip: ลดจาก 174 KB เหลือ **34 KB** (**ลดลง 80.5%!**)
+   - `/cards/all` JS gzip: ลดจาก 336 KB เหลือ **210 KB** (ลดลง 126 KB เนื่องจาก client chunk ไม่รวม DECK อีกต่อไป)
+   - ปรับงบประมาณใน [`scripts/qa/test-bundle-budget.ts`](../scripts/qa/test-bundle-budget.ts):
+     - `/cards`: `maxHtmlGzipKb` ขันลงจาก 190 KB เหลือ **45 KB**
+     - `/cards/all`: `maxJsGzipKb` ขันลงจาก 350 KB เหลือ **230 KB**
+5. **การตรวจสอบและเกณฑ์คุณภาพ**:
+   - `npm run typecheck` ➔ 0 errors
+   - `npx tsx scripts/qa/test-bundle-budget.ts` ➔ ผ่านครบ 8 เส้นทาง 100%
+   - `npm run repo:verify` ➔ ผ่านครบทั้ง 34 ด่าน 100%
+
 ### 🗓️ 2026-09-06: PR 2 — ปลดระวาง Datasets ใน nav-links, ลบโค้ดตาย 3 โมดูล, และ Ratchet งบ JS ลง ~150 KB (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ P-01, D-01, D-03, D-04):**

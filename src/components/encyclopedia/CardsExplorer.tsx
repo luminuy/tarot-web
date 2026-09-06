@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import type { TarotCard } from "@/data/cards/types";
+import type { CardSummary } from "@/data/cards";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
 import { trackEvent } from "@/lib/analytics";
@@ -18,7 +18,7 @@ import {
   WaterElementIcon,
 } from "@/components/ui/TarotArtIcons";
 interface CardsExplorerProps {
-  cards: readonly TarotCard[];
+  cards: readonly CardSummary[];
 }
 
 const SUIT_TABS = [

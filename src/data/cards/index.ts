@@ -49,6 +49,31 @@ export const DECK_SIZE = DECK.length;
 export const ALL_CARDS = DECK;
 export const TOTAL_CARDS = DECK_SIZE;
 
+/**
+ * โครงสร้างย่อสำหรับหน้ารวมไพ่และแคตตาล็อก (P-02)
+ * ตัดฟิลด์ความหมายยาว (meanings / meaningsEn ฯลฯ) เพื่อลดขนาด RSC payload จาก 148KB เหลือ 8KB gzip
+ * ⚠️ กฎเหล็กข้อ 14: เป็นการส่งเฉพาะฟิลด์ที่ใช้ ไม่ใช่สร้างไพ่ใหม่ หน้ารายละเอียด /cards/[id] ยังใช้ DECK เต็ม
+ */
+export type CardSummary = Pick<
+  TarotCard,
+  "id" | "arcana" | "suit" | "number" | "nameTh" | "nameEn" | "keywords" | "element" | "astrology" | "image"
+>;
+
+export const DECK_SUMMARY: readonly CardSummary[] = Object.freeze(
+  DECK.map(({ id, arcana, suit, number, nameTh, nameEn, keywords, element, astrology, image }) => ({
+    id,
+    arcana,
+    suit,
+    number,
+    nameTh,
+    nameEn,
+    keywords,
+    element,
+    astrology,
+    image,
+  }))
+);
+
 const BY_ID = new Map(DECK.map((card) => [card.id, card]));
 
 export function cardById(id?: string | null): TarotCard | undefined {

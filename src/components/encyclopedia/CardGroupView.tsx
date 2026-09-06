@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import type { TarotCard } from "@/data/cards/types";
+import type { CardSummary } from "@/data/cards";
 import type { CardGroupInfo } from "@/data/cards/group-seo";
 import { CardImage } from "@/components/card/CardImage";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
@@ -19,7 +19,7 @@ import {
 
 interface CardGroupViewProps {
   groupInfo: CardGroupInfo;
-  cards: readonly TarotCard[];
+  cards: readonly CardSummary[];
 }
 
 const NAV_TABS = [
