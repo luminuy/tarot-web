@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${SITE_ORIGIN}/cards/w512/major-06.webp`,
+        url: `${SITE_ORIGIN}/cards/w512b/major-06.webp`,
         width: 512,
         height: 878,
         alt: "The Lovers - ดูดวงความรัก 1 ใบ",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบสถานะหัวใจ | SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบตอบคำถามหัวใจ แม่นยำทุกสถานะ โสด/มีคนคุย/มีแฟน/คนเก่า ฟรี 100%",
-    images: [`${SITE_ORIGIN}/cards/w512/major-06.webp`],
+    images: [`${SITE_ORIGIN}/cards/w512b/major-06.webp`],
   },
 };
 

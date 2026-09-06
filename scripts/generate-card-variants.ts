@@ -25,15 +25,15 @@ const REMASTER_CACHE_DIR = path.join(process.cwd(), "scratch", "remaster_temp");
 const VARIANTS = [
   // w64 — ภาพพรีวิวผังขนาดจิ๋ว (18-32px) เช่น เซลติกครอส, ผัง 12 เดือน, ผังจักระ, ไอคอน Footer
   // ขนาดไฟล์เพียง ~1.8–2.2KB ช่วยลด LCP และ Payload หน้าแรกบนมือถือลง 95%
-  { dir: "w64", width: 64, quality: 72 },
+  { dir: "w64", width: 64, quality: 72, useRemaster: true },
   // w128 — ขนาดสำหรับพรีวิวการ์ด 36-68px บีบอัดระดับ PageSpeed 100 (~5KB แทน 13KB เดิม)
-  { dir: "w128", width: 128, quality: 75 },
+  { dir: "w128", width: 128, quality: 75, useRemaster: true },
   // w256 — สำหรับการ์ดขนาดกลาง 80-128px (~10KB)
-  { dir: "w256", width: 256, quality: 78 },
-  // w512 — สำหรับผังวางไพ่, สารานุกรมไพ่ 78 ใบ (~22KB)
-  { dir: "w512", width: 512, quality: 82 },
-  // w768 — ภาพใบใหญ่บนจอ 2x–3x (ผังวางไพ่, พรีวิว, สารานุกรม) ให้คมชัดไม่เบลอ (~38KB)
-  { dir: "w768", width: 768, quality: 85 },
+  { dir: "w256", width: 256, quality: 78, useRemaster: true },
+  // w512b — สำหรับผังวางไพ่, สารานุกรมไพ่ 78 ใบ (~50–65KB) ข้าม unsharp mask เพื่อไม่เพิ่มความถี่สูง
+  { dir: "w512b", width: 512, quality: 78, useRemaster: false },
+  // w768b — ภาพใบใหญ่บนจอ 2x–3x (ผังวางไพ่, พรีวิว, สารานุกรม) ให้คมชัดไม่เบลอ (~90–120KB) ข้าม unsharp mask
+  { dir: "w768b", width: 768, quality: 72, useRemaster: false },
 ] as const;
 
 function ensureCwebp(): void {
@@ -91,7 +91,10 @@ function main(): void {
     for (const file of sources) {
       const rawInPath = path.join(SOURCE_DIR, file);
       const remasteredInPath = path.join(REMASTER_CACHE_DIR, file);
-      const inPath = hasRemaster && fs.existsSync(remasteredInPath) ? remasteredInPath : rawInPath;
+      const inPath =
+        variant.useRemaster && hasRemaster && fs.existsSync(remasteredInPath)
+          ? remasteredInPath
+          : rawInPath;
       const outPath = path.join(outDir, file.replace(/\.jpg$/i, ".webp"));
 
       // ข้ามถ้าไฟล์ย่อใหม่กว่าต้นฉบับอยู่แล้ว (idempotent — รันซ้ำได้ไม่เปลืองเวลา) เว้นแต่สั่ง --force
@@ -100,7 +103,7 @@ function main(): void {
         !forceRebuild &&
         fs.existsSync(outPath) &&
         fs.statSync(outPath).mtimeMs >= fs.statSync(rawInPath).mtimeMs &&
-        (!hasRemaster || fs.statSync(outPath).mtimeMs >= fs.statSync(remasteredInPath).mtimeMs)
+        (!variant.useRemaster || !hasRemaster || fs.statSync(outPath).mtimeMs >= fs.statSync(remasteredInPath).mtimeMs)
       ) {
         skipped++;
         totalBytes += fs.statSync(outPath).size;
@@ -117,8 +120,16 @@ function main(): void {
         "-o", outPath,
       ]);
 
+      const webpSize = fs.statSync(outPath).size;
+      const rawJpgSize = fs.statSync(rawInPath).size;
+      if (webpSize > rawJpgSize) {
+        throw new Error(
+          `❌ WebP variant (${outPath}: ${webpSize}B) is LARGER than original JPEG (${rawInPath}: ${rawJpgSize}B)!`,
+        );
+      }
+
       created++;
-      totalBytes += fs.statSync(outPath).size;
+      totalBytes += webpSize;
     }
 
     console.log(`✅ ${variant.dir.padEnd(5)} (กว้าง ${variant.width}px, q${variant.quality}) — เสร็จสมบูรณ์`);
