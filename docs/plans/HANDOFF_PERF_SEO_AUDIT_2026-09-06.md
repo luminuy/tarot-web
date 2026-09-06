@@ -301,6 +301,18 @@ const locale = await getServerLocale();          // อ่านจาก cookie
 **เกณฑ์ผ่าน** — `curl -H 'Cookie: locale=en' https://seertarot.net/ | grep '<html lang'` ต้องได้ `en`
 · ไม่มี hydration warning ใน console เมื่อสลับภาษา
 
+### S-05 · SEO ภาษาอังกฤษยังไม่มีตัวตนจริง → แยกเป็นแผนของตัวเอง 🟠
+
+หลัง INC-0091 (กู้ SSG) `hreflang="en-US"` ยังชี้ไป `?lang=en` ซึ่งเสิร์ฟ HTML ภาษาไทย
+และ self-canonical กลับมาที่ URL สะอาด → **Google ทิ้งคำประกาศ hreflang ทั้งชุด**
+
+งานนี้ใหญ่เกินกว่าจะเป็นหัวข้อย่อยในแผนนี้ (แตะโครงสร้าง `src/app/` ทั้งหมด)
+จึงแยกไปเป็นแผนของตัวเอง: [`HANDOFF_EN_ROUTING_2026-09-06.md`](HANDOFF_EN_ROUTING_2026-09-06.md)
+
+> ⚠️ **ลำดับสำคัญ** — แผนนั้นเพิ่มหน้า prerender อีก 122 หน้า
+> ดังนั้น P-02 (ตัดฟิลด์ที่ไม่ใช้ออกจาก RSC payload) ต้องเสร็จก่อนเสมอ
+> ไม่งั้นน้ำหนักหน้าเว็บที่เพิ่งลดไปจะถูกคูณสอง
+
 ### S-03 · `/account` ขาด `robots: noindex` 🔵
 
 ทุกหน้าส่วนตัวอื่น (`/admin` `/tester` `/reset-password` `/readers/console` `/readers/queue`)
