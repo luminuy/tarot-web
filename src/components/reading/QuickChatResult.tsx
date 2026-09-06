@@ -55,6 +55,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
     drawnCard?.card ||
     (drawnCard && drawnCard.cardIndex !== undefined ? cardByIndex(drawnCard.cardIndex) : undefined);
   const cardReading = reading?.cards?.[0];
+  const showCoreSummary = !!reading?.summary && reading.summary !== cardReading?.reading;
 
   const allCards = useMemo(() => {
     try {
@@ -184,6 +185,46 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
               </div>
               <p className="text-sm sm:text-base font-serif-th text-[#2E211A] font-medium leading-relaxed italic">
                 “{question}”
+              </p>
+            </div>
+          )}
+
+          {/* ★ อ่านก่อนใคร: สรุปตรงใจจากแม่หมอ — ยกขึ้นมานำหน้าทุกหัวข้อ ให้เด่นชัดที่สุด */}
+          {showCoreSummary && (
+            <div className="anim-page-transition relative overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF7] to-[#F7EFE1] p-5 sm:p-6 shadow-[0_6px_28px_rgba(143,92,26,0.14)]">
+              {/* Editorial Luxury Top Gold Accent Bar */}
+              <div
+                aria-hidden="true"
+                className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#8F5C1A] via-[#E2C38A] to-[#8F5C1A]"
+              />
+
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="space-y-1.5">
+                  <span className="block text-[11px] font-serif-th font-bold uppercase tracking-[0.18em] text-[#8F5C1A]/80">
+                    {isEnglish ? "Read this first" : "อ่านสรุปนี้ก่อน"}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8F5C1A]/10 border border-[#8F5C1A]/30 text-[#8F5C1A] font-serif-th font-bold text-sm tracking-wide">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A]" />
+                    {isEnglish ? "Core Oracle Insight" : "สรุปตรงใจจากแม่หมอ"}
+                  </span>
+                </div>
+                <TTSReaderButton
+                  textToRead={`${isEnglish ? "Core Insight: " : "สรุปตรงใจ: "}${reading!.summary}`}
+                  personaId={persona.id}
+                  className="flex-shrink-0 text-xs py-1 px-2.5 bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] shadow-xs"
+                />
+              </div>
+
+              <div className="pl-3 sm:pl-4 border-l-2 border-[#8F5C1A]/50">
+                <p className="text-[15px] sm:text-lg font-serif-th text-[#2E211A] font-medium leading-relaxed [text-wrap:pretty]">
+                  {reading!.summary}
+                </p>
+              </div>
+
+              <p className="mt-3 text-[11px] font-serif-th text-[#8F5C1A]/70">
+                {isEnglish
+                  ? "Full card interpretation and guidance follow below."
+                  : "รายละเอียดไพ่และคำแนะนำแบบเต็มอยู่ด้านล่างนี้"}
               </p>
             </div>
           )}
@@ -326,38 +367,6 @@ isEnglish
                 </p>
               )}
 
-              {/* Core Summary if distinct from card reading - Sacred Oracle Core Insight */}
-              {reading?.summary && reading.summary !== cardReading?.reading && (
-                <div className="relative mt-4 overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF7] to-[#F7EFE1] p-4 sm:p-5 shadow-[0_4px_24px_rgba(143,92,26,0.10)] transition-all">
-                  {/* Editorial Luxury Top Gold Accent Bar */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8F5C1A] via-[#E2C38A] to-[#8F5C1A]"
-                  />
-
-                  {/* Header with Luxury Badge and Dedicated TTS */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8F5C1A]/10 border border-[#8F5C1A]/30 text-[#8F5C1A] font-serif-th font-bold text-xs tracking-wide">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A]" />
-                        {isEnglish ? "Core Oracle Insight" : "สรุปตรงใจจากแม่หมอ"}
-                      </span>
-                    </div>
-                    <TTSReaderButton
-                      textToRead={`${isEnglish ? "Core Insight: " : "สรุปตรงใจ: "}${reading.summary}`}
-                      personaId={persona.id}
-                      className="text-xs py-1 px-2.5 bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] shadow-xs"
-                    />
-                  </div>
-
-                  {/* High-Impact Insight Body */}
-                  <div className="pl-3 sm:pl-4 border-l-2 border-[#8F5C1A]/50">
-                    <p className="text-sm sm:text-[15px] font-serif-th text-[#2E211A] font-medium leading-relaxed [text-wrap:pretty]">
-                      {reading.summary}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Actionable Advice (ไม่เกิน 2 ข้อ) */}
