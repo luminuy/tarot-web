@@ -158,6 +158,36 @@
    - สร้างคอมโพเนนต์ `ServiceWorkerRegister.tsx` ลงทะเบียนแบบ Progressive Enhancement หลัง `window.load` โดยไม่กระทบเวลา Initial Load
    - ผ่านการทดสอบงบน้ำหนักขนาดบันเดิล **Performance Budget Gate 34** ครบถ้วน 100% โดยไม่มีภาระ bundle overhead เพิ่มขึ้น
 
+### 🗓️ 2026-09-06: ตรวจงานอีกทีม (PR #319–325) อย่างละเอียด + ทำแผนส่งต่อ (โดย Claude Opus 5)
+
+**ที่มา:** เจ้าของสั่งตรวจงานที่อีกทีมทำต่อ (ImageKit / Cloudinary / PWA / client speed boosters)
+อย่างละเอียด แล้วทำแผนให้ทีมถัดไปแก้
+
+**ผลตรวจ — ผ่านเกือบทั้งหมด:**
+- `repo:verify` 34/34 · build prerender **167 routes** · หน้าเว็บ dynamic เหลือ 5 · ไม่มี middleware
+- **ImageKit ถูกต้อง 100%** — `<picture>` 80 ตัวมี `srcset` ครบ 5 variant + `sizes` ตามกฎข้อ 8 ·
+  ทุก variant ตอบ 200 · ภาพไพ่ออกจาก Cloudflare หมด (อ้าง ImageKit 480 ครั้ง · origin 0 ครั้ง)
+- **PWA ปลอดภัย** — `/api/`, `/admin`, `/account`, console, queue = network-only · HTML = network-first
+- **Speculation Rules ไม่กินโควตา** — `/daily` ไม่มี auto-fetch · `/api/reading/start` เรียกจาก
+  `TarotFlow` ที่ผู้ใช้กดเท่านั้น
+- งาน SSG/Upstash ไม่ถูกแตะ · `proxy.ts`/`getServerLocale` ไม่กลับมา (ด่าน INC-0091 ยังคุมอยู่)
+- เฟส 1 Cloudflare ยังทำงานครบ (WAF 403 · `cf-cache-status: HIT` · `h3` · `x-opennext-cache: HIT`)
+
+**🔴 เจอบั๊กที่ผู้ใช้เห็นจริง 1 ตัว:** ภาพแชร์ Cloudinary ปั๊มข้อความทับข้อความที่มีอยู่แล้วใน
+`og/default.png` จนอ่านไม่ออกทั้งคู่ (ยืนยันด้วยการเจนภาพจริงแล้วเปิดดู — ไม่ใช่เดา
+เพราะ URL ที่พังก็ตอบ HTTP 200 เหมือนกัน) ซ้ำร้าย `cloudinaryUrl` ถูกวางไว้**ก่อน**
+`/api/share/image/<id>` ใน `src/app/s/[id]/page.tsx:41` ทำให้ผู้ใช้ไม่เห็นไพ่จริงของตัวเองอีกเลย
+
+**ผลลัพธ์:** เขียนแผนส่งต่อที่ [`docs/plans/HANDOFF_MEDIA_FIX_2026-09-06.md`](plans/HANDOFF_MEDIA_FIX_2026-09-06.md)
+— 6 งาน (M-01 ถึง M-06) พร้อมหลักฐานที่วัดจริง คำสั่งทำซ้ำ โค้ด before/after เกณฑ์ผ่านรายข้อ
+และตาราง "ตรวจแล้วไม่พบปัญหา" เพื่อไม่ให้ทีมถัดไปเสียเวลาตรวจซ้ำ
+
+**กับดักที่บันทึกไว้ให้ด้วย:** `.env.example` สอนตั้ง `NEXT_PUBLIC_*` ผ่าน `wrangler secret put`
+ซึ่งผิด (inline ตอน build) — เป็นกับดักเดียวกับ INC-0092 · `CACHE_VERSION` ใน `sw.js` ฮาร์ดโค้ด ·
+ImageKit ไม่มีทางถอยกลับ origin · `/api/search` ยังกำพร้า (ต้องให้เจ้าของตัดสินก่อนลบ)
+
+---
+
 ### 🗓️ 2026-09-06: 🎯 เจอสาเหตุจริงที่ Upstash ไม่ทำงาน — secret มีเครื่องหมายคำพูดครอบ (INC-0092)
 
 **สาเหตุจริง:** คอนโซล Upstash แสดงค่าเป็นบรรทัดสไตล์ `.env`:
