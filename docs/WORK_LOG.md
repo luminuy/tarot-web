@@ -35,6 +35,30 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+### 🗓️ 2026-09-06: ปรับโฉม 3 หน้า (/daily, /love/1-card, /cards/birth-card) เข้าสู่ธีม Editorial Quiet Luxury (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md`):**
+1. **สร้าง Shared Primitives สไตล์ Quiet Luxury**:
+   - [`src/components/reading/one-card/RitualHero.tsx`](../src/components/reading/one-card/RitualHero.tsx): Hero มาตรฐานพรีเมียม หัวข้อ font-serif-th, tagline สองบรรทัดสมดุล, breadcrumbs และ gold pill badge
+   - [`src/components/reading/one-card/OneCardRitual.tsx`](../src/components/reading/one-card/OneCardRitual.tsx): State Machine สำหรับการสับไพ่และจับไพ่ 1 ใบ พร้อม Unified Altar Canvas, 3D ShuffleRitual, InteractiveCardFan แบบสัดส่วนโค้งคณิตศาสตร์ไร้ clipping (Zero-Clipping Rule 3) และ 3D TarotCard พลิกไพ่ด้วยตนเอง (Rule 4)
+   - [`src/components/seo/SeoArticleShell.tsx`](../src/components/seo/SeoArticleShell.tsx): คอนเทนเนอร์ Editorial บทความทรงคุณค่าสไตล์ Quiet Luxury พร้อมแอคคอร์เดียน FAQ แบบ interactive และลิงก์เชื่อมโยงภายใน (Internal Navigation Links)
+2. **ปรับโฉมหน้า `/daily` (Daily Tarot Oracle)**:
+   - ปรับปรุง [`src/app/daily/DailyClient.tsx`](../src/app/daily/DailyClient.tsx) และ [`src/app/daily/page.tsx`](../src/app/daily/page.tsx) เข้าสู่ระบบ Single Canvas Background
+   - ห้องพลังงาน 5 มิติ (5 Focus Chambers) ดีไซน์แบบ Minimal Luxury, Porcelain Cards 5 มิติ และคำแนะนำผังลึกซึ้ง
+   - เก็บรักษาตรรกะความสุ่ม Web Crypto API และระบบบันทึกประวัติการดูดวงอย่างสมบูรณ์
+3. **ปรับโฉมหน้า `/love/1-card` (Love Tarot 1 Card)**:
+   - ปรับปรุง [`src/app/love/1-card/LoveOneCardClient.tsx`](../src/app/love/1-card/LoveOneCardClient.tsx) และ [`src/app/love/1-card/page.tsx`](../src/app/love/1-card/page.tsx)
+   - เชื่อมต่อตัวเลือก 4 สถานะความรัก (Single, Situationship, Committed, Ex/Healing) และช่องระบุชื่อใน headerSlot
+   - ปรับใช้วงพัด InteractiveCardFan และ 3D TarotCard พลิกไพ่ด้วยตนเอง
+   - คงตรรกะ `getContextualLoveAdvice` ครบทั้ง 4 สถานะและ 3 ทิศทางชะตา พร้อมรองรับสองภาษา (TH / EN)
+4. **ปรับโฉมหน้า `/cards/birth-card` (Tarot Birth Card Calculator)**:
+   - ปรับปรุง [`src/components/encyclopedia/BirthCardCalculator.tsx`](../src/components/encyclopedia/BirthCardCalculator.tsx) และ [`src/app/cards/birth-card/page.tsx`](../src/app/cards/birth-card/page.tsx)
+   - รองรับสองภาษา (TH / EN) ด้วย `useLocale()`, ปรับใช้วิตรีนคู่ Porcelain Card สำหรับไพ่บุคลิกภาพ (Personality Card) และไพ่จิตวิญญาณ (Soul Card)
+   - ปลดป้าย Badge ภาษาอังกฤษตัวพิมพ์ใหญ่แบบ Monospace ตามหลัก Human-First Copywriting (Rule 10) และใช้สี Palette ทองคำแท้ ไร้การตัดขอบ
+5. **การทดสอบและเกณฑ์คุณภาพ**:
+   - `npm run typecheck` ➔ **0 errors**
+   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 33 ด่าน 100%**
+
 ### 🗓️ 2026-09-06: นำความจริงสู่เอกสารแม่บท (Numeric Truth Guard) & เติมเต็มบทนำสารานุกรมไพ่ 6 หมวด (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_DOCS_TRUTH_2026-09-06.md`):**

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { DailyClient } from "./DailyClient";
 import { SITE_ORIGIN } from "@/lib/config/site";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
+import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 
 export const metadata: Metadata = {
   title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางชีวิตวันนี้ (เปิดฟรีทุกวัน) | SeerTarot",
@@ -112,6 +112,28 @@ const softwareApplicationJsonLd = {
 
 const heroCardSrcSet = getCardWebpSrcSet("major-19.jpg");
 
+const DAILY_FAQS = [
+  {
+    q: "ดูดวงไพ่ยิปซีรายวันควรดูช่วงเวลาไหนดีที่สุด?",
+    a: "แนะนำให้เปิดไพ่รายวันในช่วงเช้าหลังตื่นนอน หรือก่อนเริ่มทำภารกิจของวัน ทำจิตใจให้สงบ มีสมาธิ เพื่อให้ไพ่สะท้อนพลังงานและให้ข้อคิดเตือนใจสำหรับวันนั้นได้อย่างมีประสิทธิภาพสูงสุด",
+  },
+  {
+    q: "สามารถเปิดไพ่ยิปซีรายวันซ้ำในวันเดียวกันได้หรือไม่?",
+    a: "ไม่แนะนำให้เปิดซ้ำหลายรอบในวันเดียวกัน การเปิดไพ่รายวันมีพลังแม่นยำสูงสุดเมื่อเปิดวันละ 1 ครั้งตามสมาธิแรก หากมีคำถามเฉพาะเจาะจงในเรื่องอื่น แนะนำให้ใช้ผังพยากรณ์ 3 ใบ หรือผังเซลติกครอส 10 ใบแทน",
+  },
+  {
+    q: "คำทำนายไพ่ยิปซีรายวันครอบคลุมเรื่องใดบ้าง?",
+    a: "ผลทำนายไพ่รายวันของ SeerTarot ครอบคลุม 5 มิติสำคัญ ได้แก่ พลังงานภาพรวมประจำวัน, ทิศทางการงาน, สภาพคล่องการเงิน, ความรักความสัมพันธ์, และข้อคิดเตือนใจในการดำเนินชีวิต",
+  },
+];
+
+const DAILY_LINKS = [
+  { href: "/cards", label: "สารานุกรมไพ่ 78 ใบ" },
+  { href: "/love/1-card", label: "ดูดวงความรัก 1 ใบ" },
+  { href: "/cards/birth-card", label: "คำนวณไพ่ประจำตัว" },
+  { href: "/spreads", label: "ผังพยากรณ์ 25 แบบ" },
+];
+
 export default function DailyTarotPage() {
   return (
     <>
@@ -136,81 +158,55 @@ export default function DailyTarotPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
       />
 
-      <DailyClient />
+      <main className="min-h-screen bg-[#F3F0EA] py-6 sm:py-10 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <DailyClient />
 
-      {/* High-Authority Editorial Article & Knowledge Base */}
-      <div className="bg-[#F3F0EA] pb-16 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          <article className="rounded-3xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-12 space-y-8 shadow-[var(--shadow-raised)]">
-            <div className="space-y-2 border-b border-[#E8E2D8] pb-4">
-              <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
-                THE PHILOSOPHY OF DAILY TAROT & SYNCHRONICITY
-              </span>
-              <h2 className="text-xl sm:text-3xl font-bold font-serif-th text-[#29261F] tracking-tight">
-                ศาสตร์แห่งการเปิดไพ่ยิปซีรายวัน: กระจกส่องจิตและสติสัมปชัญญะ
-              </h2>
-            </div>
+          <SeoArticleShell
+            eyebrow="ทำความเข้าใจไพ่ยิปซีรายวัน"
+            title="ศาสตร์แห่งการเปิดไพ่ยิปซีรายวัน: กระจกส่องจิตและสติสัมปชัญญะ"
+            faqs={DAILY_FAQS}
+            links={DAILY_LINKS}
+          >
+            <p>
+              ในวิถีแห่งทาโรต์ดั้งเดิม การเปิดไพ่ประจำวัน (Daily Tarot Draw) มิใช่การทำนายโชคชะตาแบบงมงาย
+              หากแต่เป็นเครื่องมือทางจิตวิทยาที่ทรงพลังในการสร้าง &quot;สติสัมปชัญญะประจำวัน&quot;
+              ตามทฤษฎีจิตวิทยาวิเคราะห์ของ คาร์ล กุสตาฟ ยุง (Carl Gustav Jung) ไพ่ทาโรต์ทำหน้าที่เป็นตัวสะท้อน
+              ภาพสัญลักษณ์ต้นแบบ (Archetypes) จากจิตไร้สำนึกร่วม (Collective Unconscious)
+              และปรากฏการณ์ความพ้องพานของเหตุการณ์ (Synchronicity)
+            </p>
 
-            <div className="space-y-5 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
-              <p>
-                ในวิถีแห่งทาโรต์ดั้งเดิม การเปิดไพ่ประจำวัน (Daily Tarot Draw) มิใช่การทำนายโชคชะตาแบบงมงาย
-                หากแต่เป็นเครื่องมือทางจิตวิทยาที่ทรงพลังในการสร้าง &quot;สติสัมปชัญญะประจำวัน&quot;
-                ตามทฤษฎีจิตวิทยาวิเคราะห์ของ คาร์ล กุสตาฟ ยุง (Carl Gustav Jung) ไพ่ทาโรต์ทำหน้าที่เป็นตัวสะท้อน
-                ภาพสัญลักษณ์ต้นแบบ (Archetypes) จากจิตไร้สำนึกร่วม (Collective Unconscious)
-                และปรากฏการณ์ความพ้องพานของเหตุการณ์ (Synchronicity)
-              </p>
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] pt-2">
+              วิธีรับพลังงานจากไพ่ประจำวันให้เกิดประโยชน์สูงสุด
+            </h3>
+            <ul className="list-disc pl-5 space-y-2 text-[#635B4E]">
+              <li>
+                <strong className="text-[#29261F]">การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึกๆ
+                สังเกตอารมณ์ความรู้สึกปัจจุบัน แล้วจึงแตะเลือกไพ่ด้วยสมาธิที่นิ่งสงบ
+              </li>
+              <li>
+                <strong className="text-[#29261F]">พิจารณาสัญลักษณ์ในภาพ 1909 Rider-Waite:</strong> สำรับดั้งเดิมของ อาเธอร์ เอ็ดเวิร์ด เวท
+                และ พาเมลา คอลแมน สมิธ เต็มไปด้วยรหัสสัญลักษณ์ลึกซึ้ง เช่น สีสัน ธาตุประจำไพ่ และท่วงท่าของตัวละคร
+                ซึ่งมักสื่อความหมายตรงกับสถานการณ์ที่คุณกำลังจะเผชิญ
+              </li>
+              <li>
+                <strong className="text-[#29261F]">การทบทวนเมื่อสิ้นสุดวัน (Evening Reflection):</strong> ก่อนนอน ลองหวนนึกถึงไพ่ที่เปิดได้ในตอนเช้า
+                เทียบกับเหตุการณ์จริงที่เกิดขึ้น เพื่อฝึกฝนสัญชาตญาณและการตระหนักรู้ในตนเอง
+              </li>
+            </ul>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
-                วิธีรับพลังงานจากไพ่ประจำวันให้เกิดประโยชน์สูงสุด
-              </h3>
-              <ul className="list-disc pl-5 space-y-2 text-[#5E5240]">
-                <li>
-                  <strong>การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึกๆ
-                  สังเกตอารมณ์ความรู้สึกปัจจุบัน แล้วจึงแตะเลือกไพ่ด้วยสมาธิที่นิ่งสงบ
-                </li>
-                <li>
-                  <strong>พิจารณาสัญลักษณ์ในภาพ 1909 Rider-Waite:</strong> สำรับดั้งเดิมของ อาเธอร์ เอ็ดเวิร์ด เวท
-                  และ พาเมลา คอลแมน สมิธ เต็มไปด้วยรหัสสัญลักษณ์ลึกซึ้ง เช่น สีสัน ธาตุประจำไพ่ และท่วงท่าของตัวละคร
-                  ซึ่งมักสื่อความหมายตรงกับสถานการณ์ที่คุณกำลังจะเผชิญ
-                </li>
-                <li>
-                  <strong>การทบทวนเมื่อสิ้นสุดวัน (Evening Reflection):</strong> ก่อนนอน ลองหวนนึกถึงไพ่ที่เปิดได้ในตอนเช้า
-                  เทียบกับเหตุการณ์จริงที่เกิดขึ้น เพื่อฝึกฝนสัญชาตญาณและการตระหนักรู้ในตนเอง
-                </li>
-              </ul>
-
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
-                ทำไมต้องใช้ระบบสุ่มแบบ Provably Fair?
-              </h3>
-              <p>
-                ที่ SeerTarot เรายึดมั่นในความซื่อตรงและความโปร่งใสสูงสุด ทุกครั้งที่คุณกดสับไพ่
-                ระบบจะเรียกใช้ Web Crypto API ในการสร้างเลขสุ่มตามหลักการเข้ารหัสสากล
-                ไม่มีการล็อกผล ไม่มีการแอบแฝงโฆษณา และไม่มีการกุไพ่ใบใดขึ้นมาเองเด็ดขาด
-                เพื่อให้คุณมั่นใจได้ว่าคำทำนายทุกใบมาจากสมาธิและกระแสจิตของคุณอย่างแท้จริง
-              </p>
-            </div>
-
-            {/* Internal Navigation Links */}
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-serif-th text-[#7A6F5D] pt-6 border-t border-[#E8E2D8]">
-              <Link href="/cards" className="hover:text-[#29261F] underline underline-offset-4">
-                สารานุกรมไพ่ 78 ใบ
-              </Link>
-              <span className="text-[#D5CEC2]">·</span>
-              <Link href="/love/1-card" className="hover:text-[#29261F] underline underline-offset-4">
-                ดูดวงความรัก 1 ใบ
-              </Link>
-              <span className="text-[#D5CEC2]">·</span>
-              <Link href="/cards/birth-card" className="hover:text-[#29261F] underline underline-offset-4">
-                คำนวณไพ่ประจำตัว
-              </Link>
-              <span className="text-[#D5CEC2]">·</span>
-              <Link href="/spreads" className="hover:text-[#29261F] underline underline-offset-4">
-                ผังพยากรณ์ 25 แบบ
-              </Link>
-            </div>
-          </article>
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] pt-2">
+              ทำไมต้องใช้ระบบสุ่มแบบ Provably Fair?
+            </h3>
+            <p>
+              ที่ SeerTarot เรายึดมั่นในความซื่อตรงและความโปร่งใสสูงสุด ทุกครั้งที่คุณกดสับไพ่
+              ระบบจะเรียกใช้ Web Crypto API ในการสร้างเลขสุ่มตามหลักการเข้ารหัสสากล
+              ไม่มีการล็อกผล ไม่มีการแอบแฝงโฆษณา และไม่มีการกุไพ่ใบใดขึ้นมาเองเด็ดขาด
+              เพื่อให้คุณมั่นใจได้ว่าคำทำนายทุกใบมาจากสมาธิและกระแสจิตของคุณอย่างแท้จริง
+            </p>
+          </SeoArticleShell>
         </div>
-      </div>
+      </main>
     </>
   );
 }
