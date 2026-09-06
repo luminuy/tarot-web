@@ -56,6 +56,7 @@ docs/
         ├── HANDOFF_SEO_WAVE1_2026-09-05.md     # 🌊 แผนส่งต่อ SEO คลื่น 1 — เติมคำ "ไพ่ยิปซี" ทั่วเว็บ
         ├── HANDOFF_SEO_WAVE2-4_2026-09-05.md   # 🌊 แผนส่งต่อ SEO คลื่น 2–4 — /cards, หมวดหมู่ MyHora, งานระยะยาว
         ├── HANDOFF_DOCS_TRUTH_2026-09-06.md    # 🧾 แผนปิดหนี้หลังคลื่น 2–4 — ด่านตรวจเลขเอกสาร + บทนำ 300 คำ + วัดผล GSC
+        ├── HANDOFF_THEME_THREE_PAGES_2026-09-06.md  # ✦ แผนรื้อธีม 3 หน้า (/daily, /love/1-card, /cards/birth-card) ให้กลับเข้า Editorial Quiet Luxury
         └── BACKLOG.md                   # คลังรายการงานที่ทำเสร็จแล้วย้อนหลัง
 ```
 

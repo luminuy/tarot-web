@@ -35,7 +35,29 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
-### 🗓️ 2026-09-06: ตรวจรับงาน SEO คลื่น 2–4 และเขียนแผนส่งต่อปิดหนี้ที่เหลือ (โดย Claude)
+
+### 🗓️ 2026-09-06: เขียนแผนส่งต่อรื้อธีม 3 หน้า (/daily, /love/1-card, /cards/birth-card) — โดย Claude
+
+> **ขอบเขต**: เขียนแผนอย่างเดียว — **ไม่ได้แก้โค้ด client/page ใด ๆ** (แตะแค่เอกสาร: WORK_LOG, INDEX, CLAUDE.md)
+
+**ที่มา**: เจ้าของโปรเจกต์รีวิว 3 หน้าที่สร้างในคลื่น SEO 2–4 แล้วสั่งว่า _"ไม่สวยเลยทั้งสามหน้า ไม่เข้ากับธีมที่เราทำมา ไม่เหมือนที่เราทำมาก่อนหน้านี้"_ → ให้อีกทีมลงมือ
+
+**ปัญหาที่วัดจากโค้ดจริง** (สรุป — รายละเอียด before/after อยู่ในแผน)
+1. ไม่ใช้ `@theme` tokens / คลาส `.altar-*` เลย · ประดิษฐ์เฉดใหม่ `#7A6F5D`/`#4A4338`/`#5E5240` ที่ไม่มีในพาเลตต์
+2. `rounded-3xl` + `p-6 sm:p-12` + `space-y-10` + h1 `text-5xl` — เกินสเกลระบบ · บอดี้เป็น serif หนาแทน Sarabun
+3. ป้าย mono อังกฤษยัดทั่ว (`SACRED DAILY CHRONOMETER`, `STAGE I`, `THE FIVE PILLARS`, `NATAL CHRONOMETER & NUMEROLOGY CODEX`) — ผิดกฎเหล็กข้อ 10
+4. ริทวลจับไพ่เป็นของปลอม — `Array.from({length:9})` เป็นปุ่มเปล่า + `setTimeout` ชัฟเฟิล + hash มั่ว แทนที่จะใช้ `ShuffleRitual` / `InteractiveCardFan` ที่หน้าแรกใช้จริง
+5. ไม่มี `motion/react` · พื้นหลังทาซ้อน 2 ชั้นใน `page.tsx` · `/daily` มี `overflow-hidden` ในบล็อกที่มีไพ่ (เสี่ยงกฎ 3)
+6. `birth-card` (calculator + page) ไทยล้วน ทั้งที่เว็บ 2 ภาษา
+
+**แผน** = [`docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md`](plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md)
+- เฟส 1: สร้าง `OneCardRitual` + `RitualHero` + `SeoArticleShell` (ใช้ร่วม daily/love)
+- เฟส 2–4: รื้อทีละหน้า คงเนื้อหาคำทำนาย/SEO/JSON-LD/ตรรกะสุ่มไพ่ · เปลี่ยนแค่เปลือก
+- ~6–8 ชม. · 1 PR หลัก (birth-card i18n อาจแยก PR 2)
+
+**สถานะ**: 🟡 รอทีมถัดไปลงมือ
+
+
 
 > **ขอบเขต**: ตรวจรับอย่างเดียว + เขียนแผน — **ไม่ได้แก้โค้ดใด ๆ**
 

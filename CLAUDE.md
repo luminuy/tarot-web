@@ -37,6 +37,7 @@
 | [docs/plans/HANDOFF_SEO_WAVE1_2026-09-05.md](docs/plans/HANDOFF_SEO_WAVE1_2026-09-05.md) | 🌊 **แผนส่งต่อ SEO คลื่น 1** — เติมคำ "ไพ่ยิปซี" ทั่วเว็บ · 6 งาน 8 ไฟล์ พร้อม before/after ทุกบรรทัด |
 | [docs/plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md](docs/plans/HANDOFF_SEO_WAVE2-4_2026-09-05.md) | 🌊 **แผนส่งต่อ SEO คลื่น 2–4** — ยึด `/cards` · ลอกหมวดหมู่ MyHora · งานระยะยาว + วัดผล GSC (ลงมือแล้วใน PR #284) |
 | [docs/plans/HANDOFF_DOCS_TRUTH_2026-09-06.md](docs/plans/HANDOFF_DOCS_TRUTH_2026-09-06.md) | 🧾 **แผนปิดหนี้หลังคลื่น 2–4** — ด่านตรวจเลขในเอกสารอัตโนมัติ · กวาดเลขค้าง 20 จุด · เติมบทนำให้ถึง 300 คำ · วัดผล GSC |
+| [docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md](docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md) | ✦ **แผนรื้อธีม 3 หน้า** — `/daily` · `/love/1-card` · `/cards/birth-card` (สร้างในคลื่น 2–4) หลุดธีม Editorial Quiet Luxury · ใช้ริทวลปลอมแทน `ShuffleRitual`/`InteractiveCardFan` · ป้าย mono อังกฤษ · birth-card ไทยล้วน — before/after ครบทุกจุด |
 
 ---
 
