@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0098 · 2026-09-06 22:26 · 🟡 Medium · unify CardSummary type export to prevent build mismatch
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Type mismatch between index.ts and summary.ts CardSummary caused CI failure on other branches |
+| **สาเหตุราก** | CardSummary was redefined in summary.ts with required name property instead of matching index.ts |
+| **การแก้ไข** | Unify CardSummary type export by having index.ts directly re-export CardSummary from summary.ts and making name property optional |
+| **🛡️ กฎป้องกันถาวร** | **Import and re-export CardSummary directly from summary.ts to enforce single source of truth** |
+| **บันทึกโดย** | Antigravity AI · branch `fix/unify-card-summary-type` · commit `57c8eec` |
+
+
 ### INC-0097 · 2026-09-06 20:31 · 🟠 High · add use client directive to CardImage for SSR build compatibility
 
 | หัวข้อ | รายละเอียด |

@@ -4,7 +4,7 @@
 
 export interface CardSummary {
   id: string;
-  name: string;
+  name?: string;
   nameTh: string;
   nameEn: string;
   image: string;
