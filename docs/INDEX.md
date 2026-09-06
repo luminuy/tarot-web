@@ -59,6 +59,7 @@ docs/
         ├── HANDOFF_DOCS_TRUTH_2026-09-06.md    # 🧾 แผนปิดหนี้หลังคลื่น 2–4 — ด่านตรวจเลขเอกสาร + บทนำ 300 คำ + วัดผล GSC
         ├── HANDOFF_OMNI_YESNO_2026-09-06.md    # 🎯 แผนส่งต่อ 3 งานจากบทวิเคราะห์คู่แข่งภายนอก — Yes/No 78 หน้า + Omnichannel 6 ช่อง + Daily Digest
         ├── HANDOFF_THEME_THREE_PAGES_2026-09-06.md  # ✦ แผนตัดขั้นตอน 3 หน้า one-card ให้เร็วแบบเปิดไพ่ด่วน (รอบ 2 หลัง PR #293 — ยุบ OneCardRitual 5 สเตป → 2 จังหวะ)
+        ├── SITE_SHELL_SEO_PLAN.md       # 🏛️ แผน Header/Footer กลางทั้งเว็บ + RelatedCards ฝั่งเซิร์ฟเวอร์ (PR A-C)
         └── BACKLOG.md                   # คลังรายการงานที่ทำเสร็จแล้วย้อนหลัง
 ```
 

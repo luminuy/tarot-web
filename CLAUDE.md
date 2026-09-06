@@ -40,6 +40,7 @@
 | [docs/plans/HANDOFF_OMNI_YESNO_2026-09-06.md](docs/plans/HANDOFF_OMNI_YESNO_2026-09-06.md) | 🎯 **แผนส่งต่อ 3 งานจากบทวิเคราะห์คู่แข่งภายนอก** — เซกชัน "ใช่หรือไม่" 78 หน้า · Omnichannel 6 ช่อง (TikTok/FB/IG/LINE OA/Threads/X) · Daily Digest (พร้อมเกณฑ์ผ่าน + วิธีวัดผล) |
 | [docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md](docs/plans/HANDOFF_THEME_THREE_PAGES_2026-09-06.md) | ✦ **แผนตัดขั้นตอน 3 หน้า one-card** (`/daily` · `/love/1-card` · birth-card) — รอบ 2 หลัง PR #293: ยุบ `OneCardRitual` จาก 5 สเตป → 2 จังหวะ (จั่วทันที ไม่มีสับ ไม่มีพัดไพ่) ให้เร็วแบบ "เปิดไพ่ด่วน" ตามคำสั่งเจ้าของ |
 | [docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md](docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md) | ⚡ **แผนยกเครื่องประสิทธิภาพ · โค้ดตาย · SEO** — รอบตรวจใหญ่ 2026-09-06: บันเดิล JS ทุกหน้าหนัก 420–472 KB (gzip) · `/cards` ส่ง HTML 896 KB · ภาพย่อ `w768` หนักกว่าไฟล์ต้นฉบับ · `hreflang` หายทั้งเว็บ · โมดูลกำพร้า 4 ไฟล์ (มีตัวเลขวัดจริง + ลำดับลงมือ 7 PR) |
+| [docs/plans/SITE_SHELL_SEO_PLAN.md](docs/plans/SITE_SHELL_SEO_PLAN.md) | 🏛️ **แผน Site Shell + SEO** — Header/Footer กลางทั้งเว็บ + RelatedCards ฝั่งเซิร์ฟเวอร์ 312 ลิงก์ (PR A-C) |
 
 ---
 
