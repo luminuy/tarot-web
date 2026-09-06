@@ -1,6 +1,7 @@
 import { DECK } from "../src/data/cards";
 import type { Category, TarotCard } from "../src/data/cards/types";
 import { RELATED_CARDS } from "../src/data/cards/related.generated";
+import { runQa as verifyEnglishMeanings } from "./qa/test-card-meanings-en";
 
 /**
  * ตรวจความสมบูรณ์ของสำรับก่อนขึ้นเว็บจริง
@@ -89,6 +90,9 @@ for (const [id, refs] of Object.entries(RELATED_CARDS)) {
   if (refs.includes(id as any)) fail(`${id} อ้างถึงตัวเอง`);
   for (const r of refs) if (!ids.has(r)) fail(`${id} อ้างไพ่ที่ไม่มีจริง: ${r}`);
 }
+
+// ตรวจสอบความสมบูรณ์ของความหมายภาษาอังกฤษ 78 ใบ (meaningsEn, astrologyEn, keywordsEn)
+verifyEnglishMeanings();
 
 console.log(`ตรวจไพ่ ${DECK.length} ใบ · ข้อความความหมายทั้งหมด ${allTexts.size} ข้อความ · แผนที่ไพ่ใกล้เคียง 78×4 ใบ`);
 console.log(`yesNo — ใช่ ${tally.yes} / ไม่ใช่ ${tally.no} / ไม่แน่ ${tally.maybe}`);

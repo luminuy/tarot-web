@@ -40,49 +40,49 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/",
     htmlRelativePath: ".next/server/app/index.html",
-    maxJsGzipKb: 500, // PR 1 Baseline (Current: 472 KB) -> PR 2 Target: <= 330 KB -> PR 7: <= 250 KB
+    maxJsGzipKb: 330, // PR 2 Ratchet (Actual: 316 KB) -> PR 7 Target: <= 250 KB
     maxHtmlGzipKb: 40, // Current: 30 KB
   },
   {
     route: "/cards",
     htmlRelativePath: ".next/server/app/cards.html",
-    maxJsGzipKb: 450, // PR 1 Baseline (Current: 427 KB) -> PR 2 Target: <= 270 KB -> PR 7: <= 220 KB
+    maxJsGzipKb: 270, // PR 2 Ratchet (Actual: 254 KB) -> PR 7 Target: <= 220 KB
     maxHtmlGzipKb: 190, // PR 1 Baseline (Current: 174 KB) -> PR 3 Target: <= 45 KB
   },
   {
     route: "/cards/major-00",
     htmlRelativePath: ".next/server/app/cards/major-00.html",
-    maxJsGzipKb: 450, // Current: 420 KB -> PR 2: <= 270 KB
+    maxJsGzipKb: 390, // PR 2 Ratchet (Actual: 374 KB)
     maxHtmlGzipKb: 35, // Current: 22 KB
   },
   {
     route: "/blog",
     htmlRelativePath: ".next/server/app/blog.html",
-    maxJsGzipKb: 450, // Current: 427 KB -> PR 2: <= 270 KB
+    maxJsGzipKb: 270, // PR 2 Ratchet (Actual: 252 KB) -> PR 7 Target: <= 220 KB
     maxHtmlGzipKb: 65, // Current: 54 KB
   },
   {
     route: "/daily",
     htmlRelativePath: ".next/server/app/daily.html",
-    maxJsGzipKb: 460, // Current: 437 KB -> PR 2: <= 290 KB
+    maxJsGzipKb: 410, // PR 2 Ratchet (Actual: 390 KB)
     maxHtmlGzipKb: 30, // Current: 17 KB
   },
   {
     route: "/love/1-card",
     htmlRelativePath: ".next/server/app/love/1-card.html",
-    maxJsGzipKb: 460, // Current: 440 KB -> PR 2: <= 290 KB
+    maxJsGzipKb: 410, // PR 2 Ratchet (Actual: 393 KB)
     maxHtmlGzipKb: 30, // Current: 18 KB
   },
   {
     route: "/spreads",
     htmlRelativePath: ".next/server/app/spreads.html",
-    maxJsGzipKb: 450, // Current: 432 KB -> PR 2: <= 280 KB
+    maxJsGzipKb: 285, // PR 2 Ratchet (Actual: 271 KB)
     maxHtmlGzipKb: 45, // Current: 37 KB
   },
   {
     route: "/cards/all",
     htmlRelativePath: ".next/server/app/cards/all.html",
-    maxJsGzipKb: 400, // Current: 383 KB -> PR 2: <= 250 KB
+    maxJsGzipKb: 350, // PR 2 Ratchet (Actual: 336 KB)
     maxHtmlGzipKb: 35, // Current: 28 KB
   },
 ];
