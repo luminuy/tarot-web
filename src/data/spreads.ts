@@ -119,7 +119,7 @@ export const SPREADS: Spread[] = [
       "Examines a decisive inquiry with an overarching Yes/No tendency, underlying catalyst, and blind spots to heed.",
     defaultCategory: "general",
     credits: 1,
-    guestAllowed: false,
+    guestAllowed: true,
     yesNoMode: true,
     positions: [
       {
@@ -164,7 +164,7 @@ export const SPREADS: Spread[] = [
       "The classic timeless three-card layout tracing the arc of your situation through time.",
     defaultCategory: "general",
     credits: 1,
-    guestAllowed: false,
+    guestAllowed: true,
     positions: [
       {
         index: 0,
@@ -208,7 +208,7 @@ export const SPREADS: Spread[] = [
       "Ideal for moments of stagnation. Illuminates the true nature of the problem and the best path forward.",
     defaultCategory: "general",
     credits: 1,
-    guestAllowed: false,
+    guestAllowed: true,
     positions: [
       {
         index: 0,
@@ -252,7 +252,7 @@ export const SPREADS: Spread[] = [
       "Explore physical vitality, emotional currents, and what your deeper soul seeks to reclaim peace.",
     defaultCategory: "general",
     credits: 1,
-    guestAllowed: false,
+    guestAllowed: true,
     positions: [
       {
         index: 0,
@@ -362,7 +362,7 @@ export const SPREADS: Spread[] = [
       "For those wondering what they truly think, whether their actions match their feelings, and their next move.",
     defaultCategory: "love",
     credits: 2,
-    guestAllowed: false,
+    guestAllowed: true,
     positions: [
       {
         index: 0,
@@ -1082,7 +1082,7 @@ export const SPREADS: Spread[] = [
         nameEn: "6. Near Future Shift",
         meaning: "การเปลี่ยนแปลงหรือข่าวสารใหม่ๆ ในช่วงครึ่งหลังของเดือน",
         meaningEn: "New developments and energy arriving in the latter half of the month",
-        x: 0.55,
+        x: 0.5,
         y: 0.5,
       },
       {

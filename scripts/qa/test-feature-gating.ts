@@ -98,6 +98,14 @@ function main() {
   check("master_persona มี primaryAction เป็น credits", masterCopy?.primaryAction === "credits");
   check("master_persona มีข้อความเริ่ม 59.-", masterCopy?.primaryLabel.includes("59.-") || masterCopy?.primaryLabel.includes("เริ่ม"));
 
+  // ── 5. ความสอดคล้องของ guestAllowed กับ isStandardSpread (ป้องกัน ISSUE-031) ──
+  for (const s of SPREADS) {
+    check(
+      `ผัง '${s.id}': guestAllowed (${s.guestAllowed}) ต้องตรงกับ isStandardSpread (${isStandardSpread(s.id)})`,
+      s.guestAllowed === isStandardSpread(s.id)
+    );
+  }
+
   console.log(`\nสรุป: ผ่าน ${pass} ข้อ, ล้มเหลว ${fail} ข้อ\n`);
   if (fail > 0) process.exit(1);
 }

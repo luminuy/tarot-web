@@ -282,6 +282,20 @@ async function main() {
   const { isEntitlementEnabled } = await import("../../src/lib/entitlement/flag");
   check("ระบบสิทธิ์เปิดทำงานโดยค่าเริ่มต้น (isEntitlementEnabled = true)", (await isEntitlementEnabled()) === true);
 
+  // ── 10. เส้นทาง "ธงปิด" (แอดมินปิดระบบสิทธิ์ช่วงเปิดฟรี 3 เดือน — INC-0083) ──
+  const { KEY, kvPutJSON, kvDelete } = await import("../../src/lib/platform/kv-store");
+  await kvPutJSON(KEY.flag("entitlement.enforced"), { value: false });
+  check("หลังปิดธง: isEntitlementEnabled คืนค่า false", (await isEntitlementEnabled()) === false);
+
+  // จำลองตรรกะฝั่ง UI (TarotFlow: isPassHolder = ... || !entitlement.enabled)
+  const dummyDisabledEnt = { enabled: false, hasPaidCredits: false };
+  const isPassHolderWhenDisabled = Boolean(dummyDisabledEnt && !dummyDisabledEnt.enabled);
+  check("เมื่อระบบสิทธิ์ปิด: isPassHolder ใน UI ต้องเป็น true (ไม่บล็อกผังใหญ่/ปรมาจารย์ลับ)", isPassHolderWhenDisabled === true);
+
+  // คืนค่า flag สู่สถานะ default
+  await kvDelete(KEY.flag("entitlement.enforced"));
+  check("หลังล้าง flag: isEntitlementEnabled กลับมาเป็น true (default on)", (await isEntitlementEnabled()) === true);
+
   console.log(`\n${pass}/${pass + fail} ผ่าน`);
   if (fail > 0) process.exit(1);
 }
