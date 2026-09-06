@@ -36,6 +36,56 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: เฟส 1 — ตั้งค่าจริงบน Cloudflare production เสร็จ + สิ่งที่คู่มือคาดผิด (โดย Claude Opus 5)
+
+**ที่มา:** เจ้าของโปรเจกต์อนุญาตให้เข้า Cloudflare Dashboard เอง (ผ่าน Claude in Chrome)
+จึงลงมือกดตั้งค่าเฟส 1 ทั้งหมดบนโซน `seertarot.net` (แพ็กเกจ **Free**) แทนการรอ API token
+
+**Zone ID:** `1b8fb07340a374c4efb88bdbb97adc6d` (เพิ่มเป็น GitHub Secret `CLOUDFLARE_ZONE_ID` แล้ว)
+
+**ตั้งค่าสำเร็จ (ยืนยันด้วย curl จริง):**
+- Cache Rule `[phase1] static assets` edge 1 ปี ➔ `cf-cache-status: HIT` ที่ `/_next/static/*` และภาพไพ่
+- Cache Rule `[phase1] SSG pages` edge 7 วัน (เงื่อนไข: ไม่มี cookie ภาษา)
+- AI bot policy: **Training = Block** · Search + Agent ยัง Allow (รักษา SEO + การถูกอ้างใน AI search)
+- Bot Fight Mode เปิด · Smart Tiered Cache เปิด · 0-RTT เปิด · Early Hints เปิด (ยืนยัน `HTTP/2 103`)
+- WAF 2 กฎ ➔ ยืนยัน `403` ที่ `/wp-login.php` และ `/.env` (มี event เข้าแล้ว)
+- Rate limiting 1 กฎ 20 ครั้ง/10 วินาที ต่อ IP บนเส้นเปิดไพ่
+
+**🚨 ข้อค้นพบสำคัญ — คู่มือคาดผิด: Cache Rule แคชหน้า HTML ของเราไม่ได้**
+ทั้งเว็บเสิร์ฟผ่าน Worker (OpenNext) ชั้นแคช CDN อยู่ **หลัง** Worker ไม่ใช่หน้า Worker
+ผลตรวจ: `/`, `/cards`, `/blog` **ไม่มี header `cf-cache-status` เลย** และ origin ส่ง
+`cache-control: private, no-cache, no-store` ทุกครั้ง ➔ **Worker ยังถูกปลุกทุกคำขอหน้า HTML**
+ตัวเลข "ลด Worker 85–90% โดยไม่ต้องแก้โค้ด" ในคู่มือ **ไม่เกิดขึ้นจริงจากเฟส 1**
+ของที่ลดได้จริงคือแบนด์วิดท์/คำขอไฟล์ static เท่านั้น
+➔ ต้นตอน่าจะเป็น `src/proxy.ts` ที่รันบนทุก page route ทำให้ Next ถือว่าทุกหน้าเป็น dynamic
+➔ **งานจริงย้ายไปเฟส 2 (แก้โค้ด)**: ทำให้หน้า SSG ส่ง Cache-Control ที่แคชได้ / ใช้ cache
+  interception ของ OpenNext (`NEXT_INC_CACHE_KV` ที่ตั้งไว้ใน `wrangler.jsonc` อยู่แล้ว)
+
+**ข้อจำกัดแพ็กเกจ Free ที่เจอ (แก้ในสคริปต์แล้ว):**
+1. **operator `matches` (regex) ใช้ไม่ได้** — "a Business plan or a WAF Advanced plan is required"
+   ➔ เปลี่ยนไปใช้ `ends_with` ทีละนามสกุลทั้งกฎ assets และกฎ rate limit
+2. **custom cache key (ตัด utm/fbclid) = Enterprise** — ช่องเป็นสีเทากดไม่ได้
+   ➔ ข้อ 2 ในคู่มือ (Ignore Query String) **ทำได้ไม่ครบ** เปิดได้แค่ Sort query string
+   ⛔ ห้ามเปิด "Ignore query string" เด็ดขาด — จะทำให้ `?lang=en` หายจาก cache key
+      แล้วผู้ใช้ภาษาอังกฤษได้หน้าไทยจากแคช
+3. **Rate limiting: dropdown มีแค่ "10 seconds"** ทั้ง Period และ Duration + จำกัด 1 กฎ
+   ➔ "20 ครั้ง/10 นาที" ตามคู่มือทำไม่ได้ · ใช้จริง 20 ครั้ง/10 วินาที
+4. **Custom Pages ไม่ครอบคลุม 404 ของ origin** ➔ ใช้ WAF block rule แทน (ตามที่วางไว้ใน PR #308)
+
+**หนี้ที่ปิดระหว่างทาง:** PR #308 ทำให้ deploy บน main แดง 2 รอบ เพราะขั้น purge หา
+`CLOUDFLARE_ZONE_ID` ไม่เจอ (พฤติกรรมที่ตั้งใจออกแบบ — fail ดัง ๆ หลัง deploy สำเร็จ)
+➔ เติม secret แล้ว และเติมสิทธิ์ **Zone · Cache Purge · Purge** (จำกัดเฉพาะโซน seertarot.net)
+  ให้ token `tarot-web deploy` ➔ deploy กลับมาเขียว purge ตอบ `{"success":true}`
+
+**ตัดสินใจที่ควรรู้:** Cloudflare ตั้งค่าเริ่มต้นว่า "mixed-purpose crawlers จะถูกบล็อก 15 ก.ย."
+(บอทที่ใช้ทั้ง index ค้นหาและเทรน AI) — เว็บนี้อยู่ได้ด้วยทราฟฟิกค้นหา จึงเปลี่ยนเป็น
+**"continue to be allowed"** เพื่อกันการ index หลุด · ถ้าต้องการกันเนื้อหาถูกดูดมากกว่านี้ ค่อยกลับไปสลับ
+
+**ค้างต่อ:** Zaraz (ต้องแก้โค้ด analytics แยก PR) · Hotlink Protection (กันชน ImageKit เฟส 3) ·
+R2 Lifecycle (ข้อ 11) · **และงานหลักคือเฟส 2 ที่จะทำให้หน้า HTML แคชได้จริง**
+
+---
+
 ### 🗓️ 2026-09-06: เฟส 1 Cloudflare Edge Hardening — สคริปต์ตั้งค่าอัตโนมัติ + purge แคชตอน deploy (โดย Claude Opus 5)
 
 **ที่มา:** เจ้าของโปรเจกต์สั่งลงมือเฟส 1 จาก [`docs/CLOUDFLARE_OPTIMIZATION_GUIDE.md`](CLOUDFLARE_OPTIMIZATION_GUIDE.md)

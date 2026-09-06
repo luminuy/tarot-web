@@ -406,50 +406,64 @@
 6. ไปที่ **Speed ➔ Optimization** ➔ เปิด **HTTP/3 (QUIC)**, **Early Hints** และ **Zaraz**
 *👉 **ผลลัพธ์: ลดทราฟฟิกและคำขอที่วิ่งเข้า Worker ทันที 85–90% โดยไม่ต้องแก้โค้ดสักบรรทัด***
 
-> ### ✅ สถานะเฟส 1: ลงมือแล้ว — ทำเป็นสคริปต์อัตโนมัติ (2026-09-06)
+> ### 🟡 สถานะเฟส 1: ตั้งค่าจริงบน production แล้ว (2026-09-06) — ได้ไม่ครบตามคู่มือ
 >
-> เฟส 1 ทั้งหมดถูกแปลงเป็นสคริปต์ [`scripts/cloudflare-phase1.ts`](../scripts/cloudflare-phase1.ts)
-> แทนการไล่กดเองใน Dashboard — รันซ้ำได้ไม่จำกัด (idempotent) และตรวจสอบย้อนหลังได้จาก git
+> ตั้งค่าครบทุกข้อบน Cloudflare Dashboard ของโซน `seertarot.net` (แพ็กเกจ **Free**) แล้ว
+> Zone ID = `1b8fb07340a374c4efb88bdbb97adc6d` (เพิ่มเป็น GitHub Secret `CLOUDFLARE_ZONE_ID` แล้ว)
+>
+> | ข้อ | รายการ | สถานะจริง | หมายเหตุ |
+> | :---: | :--- | :---: | :--- |
+> | 1 | Cache Rule `[phase1] static assets` (edge 1 ปี) | 🟢 Active | ยืนยัน `cf-cache-status: HIT` ที่ `/_next/static/*` และภาพไพ่ `.webp` |
+> | 1 | Cache Rule `[phase1] SSG pages` (edge 7 วัน) | 🟡 Active แต่ไม่มีผล | ดู "ข้อค้นพบใหญ่" ด้านล่าง |
+> | 2 | Ignore tracking query string | 🔴 ทำไม่ได้บน Free | ช่อง "All query string parameters except:" เป็นสีเทา (Enterprise เท่านั้น) · เปิดได้แค่ **Sort query string** |
+> | 3 | Block AI scrapers | 🟢 Training = **Block** | Search + Agent ยัง **Allow** เพื่อรักษา SEO และการถูกอ้างอิงใน AI search |
+> | 4 | Bot Fight Mode | 🟢 เปิดแล้ว | |
+> | 5 | WAF บล็อก URL ขยะ + เครื่องมือสคริปต์ | 🟢 Active 2 กฎ | ยืนยัน `403` ที่ `/wp-login.php` และ `/.env` · มี event เข้าแล้ว |
+> | 6 | Rate Limiting เส้นเปิดไพ่ | 🟡 Active 20 ครั้ง/**10 วินาที** | Free มี dropdown ให้เลือกแค่ 10 วินาที — "20 ครั้ง/10 นาที" ตามคู่มือทำไม่ได้ |
+> | 7 | Smart Tiered Cache | 🟢 Active | Topology = Smart |
+> | 9 | HTTP/3 (QUIC) | 🟢 เปิดอยู่ก่อนแล้ว | ยืนยัน `alt-svc: h3=":443"` |
+> | 9 | 0-RTT Connection Resumption | 🟢 เพิ่งเปิด | |
+> | 10 | Early Hints (HTTP 103) | 🟢 เพิ่งเปิด | ยืนยัน `HTTP/2 103` ตอบกลับมาจริง |
+> | 8 | Hotlink Protection | ⏭️ ข้ามตั้งใจ | จะขวาง ImageKit Web Origin Pull ในเฟส 3 |
+> | — | Zaraz | ⏭️ ยังไม่ทำ | ต้องย้าย GA4/Meta Pixel + ถอด `<script>` ฝั่ง client = แก้โค้ด แยก PR |
+>
+> #### 🚨 ข้อค้นพบใหญ่: Cache Rule แคชหน้า HTML ของเราไม่ได้
+>
+> ทั้งเว็บเสิร์ฟผ่าน Cloudflare Worker (OpenNext) — **ชั้นแคชของ CDN อยู่หลัง Worker ไม่ใช่หน้า Worker**
+> ผลตรวจจริงหลังตั้งค่าครบทุกข้อ:
+>
+> ```
+> /_next/static/…js   ➔ cf-cache-status: HIT   ✅
+> /cards/w128/*.webp  ➔ cf-cache-status: HIT   ✅
+> /  ·  /cards  ·  /blog ➔ ไม่มี header cf-cache-status เลย  ❌
+>                          cache-control: private, no-cache, no-store, max-age=0
+> ```
+>
+> **แปลว่า Worker ยังถูกปลุกทุกคำขอหน้า HTML** ตัวเลข "ลด Worker 85–90% ทันทีโดยไม่ต้องแก้โค้ด"
+> ในคู่มือ **ไม่เกิดขึ้นจริงจากเฟส 1** สิ่งที่ลดได้จริงคือแบนด์วิดท์และคำขอของไฟล์ static เท่านั้น
+>
+> ต้นตอ: origin ส่ง `cache-control: private, no-cache, no-store` กลับมาทุกหน้า ซึ่งน่าจะมาจาก
+> [`src/proxy.ts`](../src/proxy.ts) ที่รันบนทุก page route ทำให้ Next ถือว่าทุกหน้าเป็น dynamic
+>
+> ➔ **งานจริงย้ายไปเฟส 2 (แก้โค้ด)**: ทำให้หน้า SSG ส่ง Cache-Control ที่แคชได้ และ/หรือใช้
+> cache interception ของ OpenNext (`NEXT_INC_CACHE_KV` ที่ตั้งไว้ใน `wrangler.jsonc` อยู่แล้ว)
+>
+> #### สคริปต์รันซ้ำได้
+>
+> [`scripts/cloudflare-phase1.ts`](../scripts/cloudflare-phase1.ts) ตั้งค่าทั้งหมดนี้ผ่าน API v4
+> (ปรับให้ตรงข้อจำกัด Free แล้ว: ไม่ใช้ operator `matches`, rate limit 10 วินาที)
 >
 > ```bash
 > export CLOUDFLARE_API_TOKEN=<token>
-> npm run cf:phase1 -- --dry-run   # ดูก่อนว่าจะเปลี่ยนอะไร
-> npm run cf:phase1                # ลงมือจริง
+> npm run cf:phase1 -- --dry-run
 > ```
 >
-> **สิทธิ์ที่ token ต้องมี:** Zone·Read · Zone Settings·Edit · Cache Rules·Edit · Cache Settings·Edit ·
-> Firewall Services·Edit · Bot Management·Edit · **Cache Purge·Purge** (ตัวสุดท้ายใช้ในขั้น deploy)
->
-> #### ⚠️ 3 จุดที่สคริปต์ "ไม่ทำตามคู่มือเป๊ะ ๆ" เพราะทำตามแล้วเว็บพัง
->
-> | จุด | ที่คู่มือเขียนไว้ | ปัญหาจริงที่เจอตอนลงมือ | สิ่งที่สคริปต์ทำแทน |
-> | :--- | :--- | :--- | :--- |
-> | **ข้อ 1 · แคชหน้า SSG** | แคชทุกหน้า SSG ที่ Edge | [`src/proxy.ts`](../src/proxy.ts) อ่าน Cookie `seertarot_lang` แล้วฉีด header `x-locale` ให้ Server Components → **แคชแบบไม่สนใจ Cookie = คนเลือกอังกฤษได้หน้าไทยจากแคช** | แคชเฉพาะคำขอที่ **ยังไม่มี Cookie ภาษา** (= ทราฟฟิกจาก Google เกือบทั้งหมด) ส่วนคนที่เลือกภาษาไว้แล้ววิ่งผ่าน Worker ตามเดิม |
-> | **ข้อ 2 · Ignore Query String** | ตัด query string ทิ้งทั้งหมด | ตัดทิ้งหมด = `?lang=en` หายไปด้วย สองภาษาปนกันในแคชเดียว | ตัดเฉพาะ 22 พารามิเตอร์โฆษณา/โซเชียล (`utm_*`, `fbclid`, `gclid`, `ttclid`, ...) และคง `lang` ไว้ใน cache key |
-> | **ข้อ 4 · Custom Error Page 404/429** | ตั้งหน้า 404/429 ที่ Edge | Cloudflare Custom Pages บนแพ็กเกจ Free **ไม่ครอบคลุม 404 ของ origin** (ครอบคลุมเฉพาะหน้า WAF block / 5xx / IP block) | ใช้ **WAF block rule** ตัด URL สแกนช่องโหว่ (`wp-login`, `*.php`, `/.env`, `/.git`) ทิ้งที่ Edge — ได้เป้าหมายเดียวกันคือ "ไม่ปลุก Worker" และฟรีจริง |
->
-> #### 🧹 หนี้ที่ต้องปิดพร้อมกัน: purge แคชตอน deploy
->
-> Cache Rule ตั้ง edge TTL หน้า SSG ไว้ 7 วัน แต่ [`deploy.yml`](../.github/workflows/deploy.yml) เดิม
-> **ไม่มีขั้นล้างแคชเลย** → deploy เวอร์ชันใหม่ขึ้นไปแล้วผู้ใช้จะยังเห็นของเก่าค้างได้นานถึง 7 วัน
-> จึงเพิ่มขั้น `🧹 Purge Cloudflare Edge Cache` ไว้ **หลัง** ขั้น deploy (ถ้า purge ล้ม โค้ดขึ้นแล้ว
-> เหลือแค่ job แดงเตือนให้ไปเติมสิทธิ์ — ดังกว่าปล่อยเงียบแล้วเว็บค้างของเก่า)
-> ต้องเพิ่ม GitHub Secret **`CLOUDFLARE_ZONE_ID`** ด้วย
->
-> #### ยังต้องกดเองใน Dashboard
->
-> - **Zaraz (roadmap ข้อ 6)** — ย้าย GA4 / Meta Pixel เข้า Zaraz แล้วค่อยถอด `<script>` ฝั่ง client
->   ในเฟส 2 (แตะโค้ด analytics ต้องแยก PR เพื่อไม่ให้ conversion tracking หายเงียบ)
-> - **Hotlink Protection (ข้อ 8)** — สคริปต์ข้ามไว้ตั้งใจ เพราะจะไปขวาง ImageKit Web Origin Pull
->   ในเฟส 3 · เปิดได้ด้วย `npm run cf:phase1 -- --hotlink` ถ้าตัดสินใจไม่ใช้ ImageKit
-> - **R2 Lifecycle (ข้อ 11)** — ตั้งใน R2 ➔ `seertarot-share` ➔ Settings (API แยกคนละชุด)
->
-> #### วิธีตรวจว่าได้ผลจริง
+> #### วิธีตรวจซ้ำ
 >
 > ```bash
-> curl -sI https://seertarot.net/cards | grep -i 'cf-cache-status'      # ครั้งที่ 2 ต้องได้ HIT
-> curl -sI 'https://seertarot.net/cards?fbclid=abc' | grep -i 'cf-cache-status'  # ต้อง HIT เหมือนกัน
-> curl -s -o /dev/null -w '%{http_code}\n' https://seertarot.net/wp-login.php   # ต้องได้ 403
+> curl -sI https://seertarot.net/_next/static/chunks/webpack-*.js | grep -i cf-cache-status  # ต้อง HIT
+> curl -s -o /dev/null -w '%{http_code}\n' https://seertarot.net/wp-login.php               # ต้อง 403
+> curl -sI https://seertarot.net/ | grep -i alt-svc                                          # ต้องมี h3
 > ```
 
 ### เฟส 2: Code Tightening & Client Superchargers (แก้โค้ดภายในโปรเจกต์)
