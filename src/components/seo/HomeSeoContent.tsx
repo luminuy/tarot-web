@@ -1,10 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import { CardImage } from "@/components/card/CardImage";
 import { getHomeFaqs } from "@/data/home-seo";
 import { COUNTS } from "@/components/layout/nav-links";
-import { useLocale } from "@/lib/i18n";
 
 /**
  * 5 ขั้นตอนพิธีกรรมพยากรณ์ศักดิ์สิทธิ์ (Thai)
@@ -196,9 +193,7 @@ const MAJOR_HIGHLIGHTS = [
   { id: "major-21", nameTh: "เดอะเวิลด์", nameEn: "The World", num: "21", img: "major-21.jpg" },
 ];
 
-export function HomeSeoContent() {
-  const { isEnglish } = useLocale();
-
+export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   const ritualSteps = isEnglish ? RITUAL_STEPS_EN : RITUAL_STEPS_TH;
   const featuredArticles = isEnglish ? FEATURED_ARTICLES_EN : FEATURED_ARTICLES_TH;
   const homeFaqs = getHomeFaqs(isEnglish);

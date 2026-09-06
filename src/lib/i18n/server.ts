@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import type { Dictionary, Locale } from "./types";
 import { DEFAULT_LOCALE, LOCALE_COOKIE_KEY } from "./types";
 import { th } from "./dictionaries/th";
@@ -10,18 +10,33 @@ const dictionaries: Record<Locale, Dictionary> = {
 };
 
 /**
- * ดึงภาษาสำหรับ Server Components จาก Cookie
+ * ดึงภาษาสำหรับ Server Components จาก Header (x-locale จาก middleware) หรือ Cookie
  */
 export async function getServerLocale(): Promise<Locale> {
+  // 1. ลองอ่านจาก Header x-locale ที่ middleware ฉีดเข้ามา (ครอบคลุมทั้ง ?lang= และ cookie)
+  try {
+    const headerStore = await headers();
+    const xLocale = headerStore.get("x-locale");
+    if (xLocale === "th" || xLocale === "en") {
+      return xLocale;
+    }
+  } catch {
+    // กรณีที่เรียกนอก Server Request Lifecycle (เช่น static build prerender)
+  }
+
+  // 2. ลองอ่านจาก CookieStore โดยตรง
   try {
     const cookieStore = await cookies();
-    const langCookie = cookieStore.get(LOCALE_COOKIE_KEY)?.value;
+    const langCookie =
+      cookieStore.get(LOCALE_COOKIE_KEY)?.value ||
+      cookieStore.get("locale")?.value;
     if (langCookie === "th" || langCookie === "en") {
       return langCookie;
     }
   } catch {
     // กรณีที่เรียกนอก Server Request Lifecycle
   }
+
   return DEFAULT_LOCALE;
 }
 

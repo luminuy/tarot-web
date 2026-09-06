@@ -36,6 +36,36 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: PR 6 — Server Locale Resolution (S-02) และย้าย HomeSeoContent เป็น Server Component (P-03) (โดย Antigravity AI)
+
+**งานที่ทำเสร็จสมบูรณ์ (ตามแผน `docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md` ข้อ S-02, P-03):**
+1. **S-02: เชื่อมต่อ Server Locale และ Next.js 16 Proxy (`src/proxy.ts` / `src/lib/i18n/server.ts`)**:
+   - ปรับปรุง `getServerLocale()` ใน [`src/lib/i18n/server.ts`](../src/lib/i18n/server.ts) ให้รองรับการอ่าน header `x-locale` และ Cookie ทั้ง `seertarot_lang` และ `locale` อย่างปลอดภัย พร้อม `try/catch` ครอบคลุมบริบท Static Build Prerender
+   - สร้าง [`src/proxy.ts`](../src/proxy.ts) ตามมาตรฐานใหม่ของ Next.js 16 (แทนที่ convention `middleware` เดิมที่ถูก deprecate):
+     - ตรวจจับ query parameter `?lang=en` หรือ `?lang=th`
+     - ฉีด header `x-locale` สู่ Server Components (`layout.tsx` / `page.tsx`) ให้เสิร์ฟภาษาที่ถูกต้องตั้งแต่ไบต์แรก
+     - ตั้งค่า Cookie `seertarot_lang` และ `locale` อัตโนมัติ (อายุ 1 ปี, SameSite=Lax)
+     - ตรวจจับ Cookie สำหรับคำขอปกติที่ไม่มี query parameter
+   - ปรับปรุง [`src/app/layout.tsx`](../src/app/layout.tsx):
+     - ดึง `const locale = await getServerLocale();`
+     - ผูกค่าเข้า `<html lang={locale}>` และส่ง `initialLocale={locale}` เข้า `<LocaleProvider>`
+     - แก้ปัญหาสำคัญ: กำจัด Hydration Mismatch และทำให้ Googlebot ได้รับภาษาอังกฤษจริงเมื่อเข้าผ่าน alternate URL `?lang=en`
+   - ปรับปรุง [`src/lib/i18n/context.tsx`](../src/lib/i18n/context.tsx):
+     - บันทึก Cookie ทั้ง `seertarot_lang` และ `locale` พร้อมกันเมื่อผู้ใช้สลับภาษาผ่าน UI
+2. **P-03: ย้าย `HomeSeoContent` เป็น Server Component**:
+   - ถอด `"use client"` และ hook `useLocale()` ออกจาก [`src/components/seo/HomeSeoContent.tsx`](../src/components/seo/HomeSeoContent.tsx)
+   - ปรับให้รับ `isEnglish?: boolean` เป็น prop เพื่อเรนเดอร์เนื้อหาภาษาที่ถูกต้องบนเซิร์ฟเวอร์
+   - ปรับปรุง [`src/app/page.tsx`](../src/app/page.tsx) ให้ดึง `getServerLocale()` และส่ง `isEnglish` ให้ `<HomeSeoContent isEnglish={isEnglish} />`
+   - ตัดโค้ดบทความ SEO 752 บรรทัด (ทั้งเวอร์ชันไทยและอังกฤษ) ออกจาก Client JavaScript Bundle ของหน้าแรกโดยสมบูรณ์
+3. **Automated Verification & Gates (Rule 0.8)**:
+   - เพิ่มการตรวจสอบอัตโนมัติใน Gate 32 ([`scripts/qa/test-seo-wave4.ts`](../scripts/qa/test-seo-wave4.ts)):
+     - Check 10: `src/app/layout.tsx` ต้องเรียก `getServerLocale()` และส่ง `initialLocale`
+     - Check 11: `src/components/seo/HomeSeoContent.tsx` ต้องเป็น Server Component (ไม่มี `"use client"`) และรับ `isEnglish`
+     - Check 12: `src/proxy.ts` ต้องจัดการดักจับ query `?lang=` และฉีด `x-locale` พร้อมตั้ง Cookie
+     - Check 13: `src/lib/i18n/server.ts` ต้องตรวจสอบทั้ง header `x-locale` และ cookies
+     - Check 14: `src/app/page.tsx` ต้องดึง `getServerLocale()` และส่ง `isEnglish` ให้ `HomeSeoContent`
+   - ผ่านการทดสอบครบ 42/42 รายการ
+
 ### 🗓️ 2026-09-06: จัดทำคู่มือแม่บทสเกลระบบ 60 มหาโซลูชัน และบรรจุแผนขุมพลังสื่อคู่ขนาน (ImageKit + Cloudinary) (โดย Antigravity AI)
 
 **งานที่ทำเสร็จสมบูรณ์:**

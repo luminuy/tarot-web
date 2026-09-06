@@ -177,6 +177,60 @@ assert(
   "next.config.ts ต้องมี redirect จาก /tarot ไปที่ / แบบ permanent (S-04)",
 );
 
+// 10. S-02: Root layout must bind server locale and pass initialLocale
+const layoutPath = path.join(process.cwd(), "src/app/layout.tsx");
+const layoutContent = fs.readFileSync(layoutPath, "utf-8");
+assert(
+  layoutContent.includes("getServerLocale()") &&
+  layoutContent.includes("<html lang={locale}") &&
+  layoutContent.includes("initialLocale={locale}"),
+  "src/app/layout.tsx ต้องเรียก getServerLocale() และส่ง initialLocale ให้ LocaleProvider (S-02)",
+);
+
+// 11. P-03: HomeSeoContent must be a Server Component (no 'use client')
+const homeSeoPath = path.join(process.cwd(), "src/components/seo/HomeSeoContent.tsx");
+const homeSeoContent = fs.readFileSync(homeSeoPath, "utf-8");
+assert(
+  !homeSeoContent.includes('"use client"') && !homeSeoContent.includes("'use client'"),
+  "src/components/seo/HomeSeoContent.tsx ต้องเป็น Server Component (ห้ามมี 'use client') (P-03)",
+);
+assert(
+  homeSeoContent.includes("isEnglish"),
+  "HomeSeoContent ต้องรับ isEnglish prop สำหรับเลือกภาษาตอนเรนเดอร์ฝั่งเซิร์ฟเวอร์",
+);
+
+// 12. S-02: Next.js 16 Proxy exists and handles lang query param & cookies
+const proxyPath = path.join(process.cwd(), "src/proxy.ts");
+assert(fs.existsSync(proxyPath), "ต้องมี src/proxy.ts สำหรับ Next.js 16 (S-02)");
+if (fs.existsSync(proxyPath)) {
+  const proxyContent = fs.readFileSync(proxyPath, "utf-8");
+  assert(
+    proxyContent.includes('searchParams.get("lang")') &&
+    proxyContent.includes("x-locale") &&
+    proxyContent.includes("LOCALE_COOKIE_KEY"),
+    "src/proxy.ts ต้องจัดการดักจับ query ?lang= และฉีด x-locale พร้อมตั้ง Cookie (S-02)",
+  );
+}
+
+// 13. S-02: getServerLocale in server.ts checks x-locale and cookieStore
+const serverI18nPath = path.join(process.cwd(), "src/lib/i18n/server.ts");
+const serverI18nContent = fs.readFileSync(serverI18nPath, "utf-8");
+assert(
+  serverI18nContent.includes("x-locale") &&
+  serverI18nContent.includes("headers()") &&
+  serverI18nContent.includes("cookies()"),
+  "src/lib/i18n/server.ts ต้องตรวจสอบทั้ง header x-locale และ cookies (S-02)",
+);
+
+// 14. P-03: src/app/page.tsx must pass isEnglish into HomeSeoContent
+const homePagePath = path.join(process.cwd(), "src/app/page.tsx");
+const homePageContent = fs.readFileSync(homePagePath, "utf-8");
+assert(
+  homePageContent.includes("HomeSeoContent isEnglish={isEnglish}") &&
+  homePageContent.includes("getServerLocale()"),
+  "src/app/page.tsx ต้องดึง getServerLocale() และส่ง isEnglish ให้ HomeSeoContent (P-03)",
+);
+
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);
 
 if (failed > 0) {
