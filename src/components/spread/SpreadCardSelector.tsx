@@ -328,10 +328,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 }}
                 className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition-all duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/card ${
                   isSelected
-                    ? "bg-[#FFFFFF] border-2 border-[#D9C8AC] ring-4 ring-[#8F5C1A]/20 shadow-[var(--shadow-overlay)]"
+                    ? "bg-[#FFFFFF] border-2 border-[#D9C8AC] ring-4 ring-[#8F5C1A]/20 shadow-overlay"
                     : isLocked
                       ? "bg-[#FFFFFF]/90 border border-[#D9C8AC]/50 hover:border-[#8F5C1A] hover:bg-[#FAF7F2] opacity-90 hover:opacity-100"
-                      : "bg-[#FFFFFF] border border-[#D9C8AC]/50 hover:border-[#8F5C1A] hover:shadow-[var(--shadow-overlay)]"
+                      : "bg-[#FFFFFF] border border-[#D9C8AC]/50 hover:border-[#8F5C1A] hover:shadow-overlay"
                 }`}
                 style={{ minHeight: "320px" }}
               >
@@ -444,7 +444,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#D9C8AC]/50 shadow-[var(--shadow-overlay)]"
+          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#D9C8AC]/50 shadow-overlay"
         >
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}

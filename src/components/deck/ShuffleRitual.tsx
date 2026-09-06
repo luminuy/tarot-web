@@ -100,7 +100,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             whileTap={{ scale: 0.96 }}
             onClick={startShuffle}
             aria-label={isEnglish ? "Tap to shuffle tarot deck" : "แตะเพื่อเริ่มสับไพ่"}
-            className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#D9C8AC] card-back-pattern shadow-[var(--shadow-overlay)] flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
+            className="anim-tarot-idle w-36 h-54 sm:w-44 sm:h-64 rounded-lg border-2 border-[#D9C8AC] card-back-pattern shadow-overlay flex flex-col items-center justify-between p-4 cursor-pointer overflow-hidden group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
           >
             <div className="w-full flex justify-center items-center opacity-85">
               <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.2em] uppercase font-bold">
@@ -147,7 +147,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
                 rotateY: shufflePhase === "split" ? 25 : 0,
               }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#D9C8AC] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
+              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#D9C8AC] card-back-pattern absolute shadow-overlay flex items-center justify-center"
             >
               <div className="w-8 h-8 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A]">
                 ·
@@ -177,7 +177,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
                 rotateY: shufflePhase === "split" ? -25 : 0,
               }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#D9C8AC] card-back-pattern absolute shadow-[var(--shadow-overlay)] flex items-center justify-center"
+              className="w-32 h-48 sm:w-36 sm:h-54 rounded-lg border-2 border-[#D9C8AC] card-back-pattern absolute shadow-overlay flex items-center justify-center"
             />
 
             {/* Center Weaving Cascade Cards */}
@@ -192,7 +192,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
                     opacity: 1,
                   }}
                   transition={{ duration: 1.4, ease: "easeInOut" }}
-                  className="w-30 h-44 rounded-lg border border-[#D9C8AC] card-back-pattern absolute z-20 shadow-[var(--shadow-overlay)] opacity-95"
+                  className="w-30 h-44 rounded-lg border border-[#D9C8AC] card-back-pattern absolute z-20 shadow-overlay opacity-95"
                 />
                 <motion.div
                   initial={{ y: 0, rotateZ: 0, scale: 1, opacity: 0 }}
@@ -203,7 +203,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
                     opacity: 1,
                   }}
                   transition={{ duration: 1.4, ease: "easeInOut", delay: 0.05 }}
-                  className="w-30 h-44 rounded-lg border border-[#D9C8AC] card-back-pattern absolute z-20 shadow-[var(--shadow-overlay)] opacity-90"
+                  className="w-30 h-44 rounded-lg border border-[#D9C8AC] card-back-pattern absolute z-20 shadow-overlay opacity-90"
                 />
               </>
             )}
@@ -254,7 +254,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
           <button
             type="button"
             onClick={startShuffle}
-            className="w-full py-4 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th shadow-[var(--shadow-overlay)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-4 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th shadow-overlay hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             
             <span>{isEnglish ? "Tap to Shuffle Deck" : "แตะเพื่อเริ่มสับไพ่"}</span>

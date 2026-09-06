@@ -168,7 +168,7 @@ export function DailyClient() {
                       }}
                       className={`text-left p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 cursor-pointer relative flex flex-col justify-between ${
                         isSelected
-                          ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-[var(--shadow-raised)]"
+                          ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-raised"
                           : "altar-card-porcelain hover:border-[#A58A5C]/60 hover:shadow-xs"
                       }`}
                     >

@@ -126,10 +126,21 @@ export function getPersona(id: string | null | undefined): Persona {
   return (id && PERSONA_BY_ID.get(id)) || DEFAULT_PERSONA;
 }
 
+/**
+ * @public (D-02)
+ * Helper to get the localized name of a persona.
+ * Used across client/server reading components and UI cards.
+ */
 export function getPersonaName(persona: Persona, isEnglish: boolean): string {
   return isEnglish ? persona.nameEn : persona.nameTh;
 }
 
+/**
+ * @public (D-02)
+ * Helper to get the localized tagline of a persona.
+ * Used across client/server reading components and UI cards.
+ */
 export function getPersonaTagline(persona: Persona, isEnglish: boolean): string {
   return isEnglish ? persona.taglineEn : persona.tagline;
 }
+

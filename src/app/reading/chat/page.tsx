@@ -39,7 +39,7 @@ export default function ReadingChatPage() {
   return (
     <main className="min-h-[100dvh] bg-[#F3F0EA] text-[#29261F]">
       {/* แถบหัวบาง ๆ — ปุ่มกลับไปหน้าคำทำนาย + ชื่อแม่หมอ */}
-      <header className="sticky top-0 z-40 h-14 w-full border-b border-[#D5CEC2] bg-[#FFFFFF] shadow-[var(--shadow-raised)]">
+      <header className="sticky top-0 z-40 h-14 w-full border-b border-[#D5CEC2] bg-[#FFFFFF] shadow-raised">
         <div className="mx-auto flex h-full max-w-2xl items-center justify-between gap-3 px-4">
           <Link
             href="/"

@@ -255,7 +255,7 @@ export function LoveOneCardClient() {
                       }}
                       className={`p-3.5 sm:p-4 rounded-2xl text-left border transition-all duration-200 flex flex-col justify-between cursor-pointer relative ${
                         isSelected
-                          ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-[var(--shadow-raised)] text-[#29261F]"
+                          ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-raised text-[#29261F]"
                           : "altar-card-porcelain hover:border-[#A58A5C]/60 text-[#635B4E] hover:shadow-xs"
                       }`}
                     >

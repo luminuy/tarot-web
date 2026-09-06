@@ -68,7 +68,7 @@ export default async function SharePage({ params }: Props) {
         <img
           src={`/api/share/image/${id}`}
           alt="การ์ดคำทำนายไพ่ทาโรต์"
-          className="max-h-[60vh] w-auto rounded-xl border border-[#D5CEC2] shadow-[var(--shadow-raised)]"
+          className="max-h-[60vh] w-auto rounded-xl border border-[#D5CEC2] shadow-raised"
         />
       )}
       <p className="font-serif-th text-sm text-[#635B4E]">กำลังพาไปเปิดไพ่ของคุณเอง…</p>

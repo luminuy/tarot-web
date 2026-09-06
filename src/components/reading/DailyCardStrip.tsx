@@ -56,7 +56,7 @@ export function DailyCardStrip() {
     <Link
       href={`/cards/${daily.cardId}`}
       prefetch={false}
-      className="group mx-auto mb-6 flex max-w-2xl items-center gap-4 rounded-lg border border-[#D9C8AC] bg-white px-4 py-3 shadow-[var(--shadow-raised)] transition-colors hover:border-[#8F5C1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+      className="group mx-auto mb-6 flex max-w-2xl items-center gap-4 rounded-lg border border-[#D9C8AC] bg-white px-4 py-3 shadow-raised transition-colors hover:border-[#8F5C1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
     >
       <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-[#D9C8AC] bg-[#F3EDE2] shadow-xs">
