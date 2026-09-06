@@ -124,9 +124,9 @@ export async function SpreadDetailBody({
     ? CATEGORY_EN[spread.defaultCategory] ?? spread.defaultCategory
     : CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
 
-  // คลังบทความยังไม่มีฉบับอังกฤษ จึงไม่ส่งไปแสดงบนหน้า `/en/**` (กันภาษาไทยหลุดและกันพาออกนอกต้นไม้ภาษา)
+  // คลังบทความฉบับอังกฤษแสดงเฉพาะบทความที่มี contentEn แล้ว
   const relatedArticles = isEnglish
-    ? []
+    ? ARTICLES.filter((a) => a.targetSpreadId === spread.id && Boolean(a.contentEn)).slice(0, 6)
     : ARTICLES.filter((a) => a.targetSpreadId === spread.id).slice(0, 6);
 
   const otherSpreads = SPREADS.filter(

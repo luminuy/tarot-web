@@ -35,6 +35,41 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🌐 ปลดล็อกเส้นทางภาษาอังกฤษ 33 หน้า (26 บทความ + 6 หมวดผังพยากรณ์ + บล็อกหลัก) พร้อมระบบนำเข้าและตรวจงานแปล 100% (Task #2)
+
+**เป้าหมาย:** บรรลุ Task #2 จากแผนแม่บท `MASTER_PLAN_2026-09-06.md` / `HANDOFF_EN_TRANSLATION_2026-09-06.md` เพื่อสร้างเนื้อหาภาษาอังกฤษคุณภาพสิ่งพิมพ์ระดับสากล และเปิดใช้งาน 33 เส้นทางภาษาอังกฤษใหม่
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **งานแปลระดับสากล 318 หน่วย (100% Completion)**:
+   - แปลเนื้อหาบทความ 26 บทความ และหมวดหมู่ผังพยากรณ์ 6 หมวด รวม 318 หน่วยใน `docs/i18n/pending-en.json` ครบถ้วน
+   - ผ่านเกณฑ์ความปลอดภัยทุกหน่วย: ไร้อักขระภาษาไทยปนเปื้อน 100%, หัวข้อ `##` และ `###` เท่ากับต้นฉบับเป๊ะ, ลิงก์ภายในปลอดภัย, ไร้อิโมจิดวงดาว (Rule 2) และไร้ไพ่ปลอม (Rule 14)
+2. **ระบบนำเข้าและตรวจงานแปลอัตโนมัติ (`scripts/i18n-import.ts`)**:
+   - เพิ่มคำสั่ง `npm run i18n:import` และ `npm run i18n:verify` ใน `package.json`
+   - คอมไพล์คำแปลออกเป็น TypeScript data artifacts:
+     - `src/data/i18n/articles-en.generated.ts` (140 KB)
+     - `src/data/i18n/spread-topics-en.generated.ts` (14 KB)
+3. **การแยกโมดูลเพื่อ Tree-Shaking และควบคุมงบประมาณบันเดิล (`src/data/article-helpers.ts`)**:
+   - สกัดฟังก์ชันตัวช่วย (`getArticleTitle`, `getArticleDescription`, `getArticleCategory`, `getArticleAuthor`) ออกมาเป็นโมดูลขนาดเบา
+   - ป้องกันไม่ให้ Client Components (`BlogIndexClient.tsx`, `ArticleReadingClient.tsx`) ดึงไฟล์ฐานข้อมูลบทความขนาด 300+ KB เข้าสู่เบราว์เซอร์
+   - ส่งผลให้บันเดิล JS (gzip) ของหน้า `/blog` อยู่ที่ **314 KB** (ผ่านงบประมาณ ≤ 325 KB) และ HTML อยู่ที่ **35 KB** (ผ่านงบ ≤ 65 KB)
+4. **สถาปัตยกรรมหน้าเว็บร่วม (Shared Page Architecture)**:
+   - สร้างโมดูลหน้าเว็บแชร์ข้ามภาษาใน `src/app/_shared/pages/`:
+     - `blog-index.tsx`: รองรับทั้ง `/blog` และ `/en/blog` พร้อม Bilingual Schema.org Blog JSON-LD
+     - `blog-detail.tsx`: รองรับทั้ง `/blog/[slug]` และ `/en/blog/[slug]` พร้อม Article/FAQ Schema.org
+     - `spread-topic.tsx`: รองรับทั้ง `/spreads/topic/[category]` และ `/en/spreads/topic/[category]` พร้อม CollectionPage Schema.org
+   - ปรับปรุงคอมโพเนนต์ให้รองรับ 2 ภาษาเต็มรูปแบบ: `TopicSpreadList.tsx`, `BlogIndexClient.tsx`, `ArticleReadingClient.tsx`
+5. **การเปิดใช้งาน 33 เส้นทางภาษาอังกฤษใหม่ (Prerendered SSG)**:
+   - รวมหน้าทั้งหมดที่ Prerender ในระบบเพิ่มขึ้นจาก 331 หน้า เป็น **364 หน้า**
+   - อัปเดต `src/lib/i18n/paths.ts` เพิ่ม `"/blog"` ใน `EN_TWIN_ROUTES` และ `"/blog/"` ใน `EN_TWIN_DYNAMIC_PREFIXES`
+   - เชื่อมโยง hreflang แบบ 2 ทิศทางสมบูรณ์แบบ (`th` ↔ `en`)
+6. **อัปเดตด่านตรวจและเครื่องมือทดสอบ**:
+   - ปรับปรุง `scripts/qa/test-en-routing.ts` (Gate 34) ให้ครอบคลุมเส้นทาง Blog และ Spread Topics ตรวจ Heading Parity และตรวจสอบการใช้ `LocaleLink`
+   - ปรับปรุง `scripts/qa/test-bundle-budget.ts` (Gate 33) ให้ตรวจสอบ App Router build paths ภายใต้ route groups `(th)` และ `(en)`
+7. **ผลการตรวจ 35 ด่าน (`npm run repo:verify`)**:
+   - `npm run typecheck` ➔ 0 errors
+   - `npm run test:budget` ➔ ผ่าน 100%
+   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 35/35 ด่าน 100% Green!**
+
 ### 🗓️ 2026-09-06: ⚡ ปรับประสิทธิภาพความเร็ว Bundle Weight, GPU Composite Shadows, CSS View Transitions และระบบค้นหา Semantic Search
 
 **เป้าหมาย:** ทำเว็บให้ "สมูทและไว" ระดับโลกตามแผนแม่บท `HANDOFF_SMOOTH_FAST_20260906.md` และ `HANDOFF_SEMANTIC_SEARCH_20260906.md`
@@ -488,6 +523,52 @@ shuffle กับ read ซึ่งเกิดไปก่อนหน้าน
 รวมเป็น batch จะเปลี่ยนความหมายของโควตา
 
 **ยังไม่ทำ:** หมวด 3 (บริการภายนอก ข้อ 16–28) ตามที่เจ้าของสั่งให้ไว้ทีหลัง
+
+---
+
+### 🗓️ 2026-09-06: แผนส่งงานทีมแปล + แผนแม่บทรวมทุกงานที่ค้าง (โดย Claude Opus 5)
+
+> **ขอบเขต**: เอกสาร + เครื่องมือส่งออกงานแปล — ไม่แตะโค้ดหน้าเว็บเลย
+
+**ที่มา**: เจ้าของสั่ง _"เดี๋ยวให้อีกทีมแปล ทำแผนมาได้เลย รวมแผนทั้งหมดส่งมา"_
+
+**สิ่งที่ส่งมอบ**
+
+1. [`docs/plans/HANDOFF_EN_TRANSLATION_2026-09-06.md`](plans/HANDOFF_EN_TRANSLATION_2026-09-06.md)
+   แผนส่งงานให้ทีมแปลโดยที่ทีมแปล **ไม่ต้องเปิดโค้ดเลยสักไฟล์**
+   - อภิธานศัพท์บังคับ 15 คู่ (ไพ่ยิปซี → tarot · หัวกลับ → reversed · แม่หมอ → AI tarot reader ฯลฯ)
+   - กติกา: หัวข้อ SEO **ห้ามแปลตรงตัว** ต้องเขียนใหม่ตามคำที่คนอังกฤษค้นจริง
+     ส่วนเนื้อบทความต้องคงสาระและโครง Markdown ครบทุกตัวอักษร
+   - เพดานความยาว: `seo-title` ≤ 60 · `meta-description` ≤ 155 อักขระ
+   - แบ่งส่งเป็น 5 ล็อตตามลำดับผลตอบแทน (เริ่มที่บทความความหมายไพ่ซึ่งต่อยอด `/en/cards/**` ที่เปิดแล้ว)
+   - เกณฑ์รับงาน 8 ข้อ + งานฝั่งพัฒนา 5 ข้อหลังคำแปลกลับมา (D-1 ถึง D-5)
+
+2. **เครื่องมือส่งออกงานแปล** — `scripts/i18n-export.ts` + `npm run i18n:export` / `i18n:status`
+   สร้าง [`docs/i18n/pending-en.json`](i18n/pending-en.json) ที่ส่งให้ทีมแปลได้ทันที
+   ทีมแปลเติมเฉพาะช่อง `en` · ช่อง `id` เป็นกุญแจจับคู่กลับเข้าโครงข้อมูลตอน import
+
+   | ชนิด | หน่วย | อักขระ |
+   | :--- | --: | --: |
+   | เนื้อบทความ (markdown) | 26 | 28,181 |
+   | คำตอบ FAQ | 47 | 7,124 |
+   | หัวข้อย่อย/สารบัญ | 110 | 4,213 |
+   | meta description | 32 | 4,184 |
+   | บทนำหมวดผัง | 18 | 4,047 |
+   | SEO title | 32 | 2,473 |
+   | คำถาม FAQ | 47 | 2,467 |
+   | tagline | 6 | 399 |
+   | **รวม** | **318** | **53,088 ≈ 8,848 คำ** |
+
+3. [`docs/plans/MASTER_PLAN_2026-09-06.md`](plans/MASTER_PLAN_2026-09-06.md)
+   แผนแม่บทรวมทุกงานที่ค้าง — **9 งาน** ในตารางเดียว พร้อมคอลัมน์ "ใคร/ขนาด/สถานะ"
+   ตารางงานที่ปิดแล้ว (กันทำซ้ำ) · เส้นทางเดินทีละสัปดาห์ · ตัวเลขวัดผลรอบหน้า
+   และแยก **3 เรื่องที่รอเจ้าของตัดสินใจเท่านั้น** ออกมาให้ชัด:
+   นโยบายโควตา guest · PDPA sign-off ของ Marketplace · จะลงทุนค่าแปลอังกฤษแค่ไหน
+
+**ข้อเสนอที่บันทึกไว้**: 115 หน้าอังกฤษออนไลน์แล้ว แนะนำให้ **วัด Search Console 4–6 สัปดาห์ก่อน**
+ค่อยตัดสินใจจ่ายค่าแปล — จะได้ตัดสินใจบนข้อมูลจริงแทนการเดา
+
+**ยังไม่ได้ทำ**: งานแปลเอง (เป็นของทีมแปล) และงานฝั่งพัฒนา D-1 ถึง D-4 ที่ต้องรอคำแปลกลับมาก่อน
 
 ---
 

@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { Article } from "@/data/articles";
 import {
   getArticleTitle,
   getArticleDescription,
   getArticleCategory,
   getArticleAuthor,
-} from "@/data/articles";
+} from "@/data/article-helpers";
 import { soundManager } from "@/lib/utils/audio";
 import { trackEvent } from "@/lib/analytics";
 import { COUNTS } from "@/components/layout/nav-links";
@@ -47,6 +47,10 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
   const readTimeFormatted = isEnglish
     ? article.readTime.replace("นาที", "min read")
     : article.readTime;
+
+  const effectiveContent = isEnglish && article.contentEn ? article.contentEn : article.content;
+  const effectiveToc = isEnglish && article.tocEn && article.tocEn.length > 0 ? article.tocEn : article.toc;
+  const effectiveFaqs = isEnglish && article.faqsEn && article.faqsEn.length > 0 ? article.faqsEn : article.faqs;
 
   return (
     <div className="space-y-10">
@@ -91,7 +95,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       </header>
 
       {/* Table of Contents (TOC) */}
-      {article.toc && article.toc.length > 0 && (
+      {effectiveToc && effectiveToc.length > 0 && (
         <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 space-y-3 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
           <div className="flex items-center gap-2 text-xs font-serif-th font-bold text-[#29261F]">
             
@@ -100,7 +104,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
               : "สารบัญคัมภีร์ความรู้ (Table of Contents)"}
           </div>
           <ul className="space-y-2 text-xs sm:text-sm font-serif-th text-[#29261F]">
-            {article.toc.map((item, idx) => (
+            {effectiveToc.map((item, idx) => (
               <li key={item.id} className="flex items-start gap-2">
                 <span className="text-[#A58A5C] font-mono text-xs font-bold">{idx + 1}.</span>
                 <a href={`#${item.id}`} className="hover:text-[#A58A5C] hover:underline transition-colors">
@@ -143,7 +147,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       <article className="prose prose-stone max-w-none font-serif-th text-xs sm:text-sm leading-relaxed text-[#29261F] space-y-6">
         <div
           dangerouslySetInnerHTML={{
-            __html: article.content
+            __html: effectiveContent
               .replace(
                 /## (.*?)\n/g,
                 '<h2 class="text-lg sm:text-2xl font-bold text-[#29261F] mt-8 mb-4 border-b border-[#D5CEC2]/40 pb-2">$1</h2>'
@@ -159,7 +163,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       </article>
 
       {/* FAQ Section with Accordion */}
-      {article.faqs && article.faqs.length > 0 && (
+      {effectiveFaqs && effectiveFaqs.length > 0 && (
         <section className="space-y-4 pt-6 border-t border-[#D5CEC2]/40">
           <h2 className="flex items-center gap-2 text-sm sm:text-base font-serif-th font-bold text-[#29261F]">
             
@@ -169,7 +173,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
               หน้านี้ประกาศ FAQPage JSON-LD ที่มีทั้งคำถามและคำตอบไว้ ถ้าคำตอบโผล่เฉพาะตอนคลิก
               จะกลายเป็น structured data ที่อ้างถึงข้อความซึ่งไม่มีอยู่บนหน้า */}
           <div className="space-y-3">
-            {article.faqs.map((faq, idx) => (
+            {effectiveFaqs.map((faq, idx) => (
               <details
                 key={idx}
                 className="group rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] overflow-hidden transition-all shadow-xs"

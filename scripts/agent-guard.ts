@@ -3,6 +3,10 @@ import { execSync } from "child_process";
 import { join } from "path";
 import { fileURLToPath } from "url";
 
+if (!process.env.GIT_CONFIG_GLOBAL) {
+  process.env.GIT_CONFIG_GLOBAL = "/dev/null";
+}
+
 const ROOT_DIR = process.cwd();
 const LOCKS_FILE = join(ROOT_DIR, ".ai-locks.json");
 

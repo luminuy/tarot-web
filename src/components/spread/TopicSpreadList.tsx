@@ -7,12 +7,14 @@ import type { Spread, SpreadPosition } from "@/data/spreads";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { renderSpreadIllustration } from "@/components/spread/SpreadCardSelector";
+import { useLocale } from "@/lib/i18n";
 
 interface TopicSpreadListProps {
   spreads: Spread[];
 }
 
 export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
+  const { isEnglish } = useLocale();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
@@ -33,16 +35,16 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
             {/* Badges */}
             <div className="flex items-center justify-between z-10">
               <span className="text-xs font-mono font-bold text-[#29261F] bg-[#EAE7E0] px-3 py-1 rounded-full border border-[#D5CEC2]">
-                {spread.positions.length} ใบ
+                {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
               </span>
               {!isStandard ? (
                 <span className="text-xs text-[#A58A5C] bg-[#FAF8F5] border border-[#D5CEC2] px-2.5 py-0.5 rounded-full font-serif-th font-semibold flex items-center gap-1">
                   <SealedLockIcon className="w-3 h-3" />
-                  <span>ผังญาณลึก</span>
+                  <span>{isEnglish ? "Deep Vision" : "ผังญาณลึก"}</span>
                 </span>
               ) : (
                 <span className="text-xs text-[#5E5240] bg-[#FAF8F5] border border-[#E8E2D8] px-2.5 py-0.5 rounded-full font-serif-th">
-                  เปิดฟรี
+                  {isEnglish ? "Free" : "เปิดฟรี"}
                 </span>
               )}
             </div>
@@ -55,13 +57,13 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
             {/* Title & Description */}
             <div className="space-y-2 z-10 pt-2 border-t border-[#E8E2D8]">
               <h2 className="font-serif-th text-lg font-bold text-[#29261F] leading-snug">
-                {spread.nameTh}
+                {isEnglish ? (spread.nameEn || spread.nameTh) : spread.nameTh}
               </h2>
               <p className="text-xs font-serif-th text-[#7A6F5D] leading-relaxed line-clamp-1">
-                {spread.tagline}
+                {isEnglish ? (spread.taglineEn || spread.tagline) : spread.tagline}
               </p>
               <p className="text-xs font-serif-th text-[#4A4338] leading-relaxed line-clamp-3">
-                {spread.description}
+                {isEnglish ? (spread.descriptionEn || spread.description) : spread.description}
               </p>
             </div>
 
@@ -73,8 +75,8 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
                 className="w-full text-left text-xs font-serif-th text-[#8F5C1A] hover:text-[#5E390A] flex items-center justify-between py-1 font-semibold cursor-pointer transition-colors"
                 aria-expanded={isExpanded}
               >
-                <span>ความหมาย {spread.positions.length} ตำแหน่งไพ่</span>
-                <span className="text-[11px]">{isExpanded ? "▲ ย่อ" : "▼ ขยาย"}</span>
+                <span>{isEnglish ? `${spread.positions.length} Card Positions` : `ความหมาย ${spread.positions.length} ตำแหน่งไพ่`}</span>
+                <span className="text-[11px]">{isExpanded ? (isEnglish ? "▲ Hide" : "▲ ย่อ") : (isEnglish ? "▼ Details" : "▼ ขยาย")}</span>
               </button>
 
               {isExpanded && (
@@ -86,11 +88,11 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
                       </span>
                       <div>
                         <span className="font-serif-th font-bold text-[#29261F]">
-                          {pos.nameTh}
+                          {isEnglish ? (pos.nameEn || pos.nameTh) : pos.nameTh}
                         </span>
                         <span className="mx-1 text-[#D5CEC2]">·</span>
                         <span className="font-serif-th text-[11px] text-[#7A6F5D]">
-                          {pos.meaning}
+                          {isEnglish ? (pos.meaningEn || pos.meaning) : pos.meaning}
                         </span>
                       </div>
                     </div>
@@ -105,13 +107,13 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
                 href={`/?spread=${spread.id}`}
                 className="w-full py-2 px-3 text-xs font-serif-th font-bold text-center rounded-lg bg-[#29261F] text-[#FAF8F5] hover:bg-[#3D382E] transition-colors"
               >
-                เริ่มเปิดไพ่
+                {isEnglish ? "Begin Reading" : "เริ่มเปิดไพ่"}
               </Link>
               <Link
                 href={`/spreads/${spread.id}`}
                 className="w-full py-2 px-3 text-xs font-serif-th font-semibold text-center rounded-lg border border-[#D5CEC2] text-[#4A4338] hover:bg-[#FAF8F5] transition-colors"
               >
-                รายละเอียดผัง
+                {isEnglish ? "Spread Details" : "รายละเอียดผัง"}
               </Link>
             </div>
           </div>

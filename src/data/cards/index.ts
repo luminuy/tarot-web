@@ -54,10 +54,8 @@ export const TOTAL_CARDS = DECK_SIZE;
  * ตัดฟิลด์ความหมายยาว (meanings / meaningsEn ฯลฯ) เพื่อลดขนาด RSC payload จาก 148KB เหลือ 8KB gzip
  * ⚠️ กฎเหล็กข้อ 14: เป็นการส่งเฉพาะฟิลด์ที่ใช้ ไม่ใช่สร้างไพ่ใหม่ หน้ารายละเอียด /cards/[id] ยังใช้ DECK เต็ม
  */
-export type CardSummary = Pick<
-  TarotCard,
-  "id" | "arcana" | "suit" | "number" | "nameTh" | "nameEn" | "keywords" | "element" | "astrology" | "image"
->;
+import type { CardSummary } from "./summary";
+export type { CardSummary };
 
 export const DECK_SUMMARY: readonly CardSummary[] = Object.freeze(
   DECK.map(({ id, arcana, suit, number, nameTh, nameEn, keywords, element, astrology, image }) => ({

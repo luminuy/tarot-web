@@ -16,6 +16,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 import sitemap from "../../src/app/sitemap";
+import { ARTICLES } from "../../src/data/articles";
+import { SPREAD_TOPICS } from "../../src/data/spread-topics";
 import { buildAlternates, SITE_ORIGIN } from "../../src/lib/config/site";
 import { EN_TWIN_ROUTES, hasEnglishTwin, localeHref } from "../../src/lib/i18n/paths";
 
@@ -92,7 +94,7 @@ for (const route of EN_TWIN_ROUTES) {
   );
 }
 
-for (const dynamicRoute of ["cards/[id]", "spreads/[id]"]) {
+for (const dynamicRoute of ["cards/[id]", "spreads/[id]", "blog/[slug]", "spreads/topic/[category]"]) {
   check(
     `มีหน้าอังกฤษของเส้นทางไดนามิก /en/${dynamicRoute}`,
     fs.existsSync(path.join(ROOT, EN_APP, dynamicRoute, "page.tsx")),
@@ -102,7 +104,7 @@ for (const dynamicRoute of ["cards/[id]", "spreads/[id]"]) {
 // ── 3. หน้าที่ยัง "ไม่มี" ฝาแฝด ต้องไม่ถูกประกาศว่ามี ─────────────────────
 // เนื้อหาบรรณาธิการของหน้าเหล่านี้ยังเป็นภาษาไทยล้วน — เปิดหน้าอังกฤษตอนนี้
 // = thin content ซึ่งแย่กว่าไม่มีหน้าเลย
-for (const withoutTwin of ["/blog", "/blog/how-to-ask-tarot-questions", "/privacy", "/spreads/topic/love", "/cards/birth-card", "/account"]) {
+for (const withoutTwin of ["/privacy", "/cards/birth-card", "/account"]) {
   check(`${withoutTwin} ต้องไม่ประกาศว่ามีฝาแฝดอังกฤษ`, !hasEnglishTwin(withoutTwin));
   check(`ลิงก์ ${withoutTwin} ในหน้าอังกฤษต้องไม่ถูกเติม /en`, localeHref(withoutTwin, "en") === withoutTwin);
   const rel = withoutTwin === "/" ? "" : withoutTwin;
@@ -110,6 +112,12 @@ for (const withoutTwin of ["/blog", "/blog/how-to-ask-tarot-questions", "/privac
     `ต้องไม่มีไฟล์หน้าอังกฤษของ ${withoutTwin} หลงเหลืออยู่`,
     !fs.existsSync(path.join(ROOT, EN_APP, rel, "page.tsx")),
   );
+}
+
+// หน้าที่ "มี" ฝาแฝดใหม่ ต้องประกาศครบ
+for (const withTwin of ["/blog", "/blog/how-to-ask-tarot-questions", "/spreads/topic/love"]) {
+  check(`${withTwin} ประกาศว่ามีฝาแฝดอังกฤษ`, hasEnglishTwin(withTwin));
+  check(`ลิงก์ ${withTwin} ในหน้าอังกฤษถูกเติม /en`, localeHref(withTwin, "en") === `/en${withTwin}`);
 }
 
 // ── 4. hreflang ต้องไม่โกหก ────────────────────────────────────────────────
@@ -123,7 +131,7 @@ check(
   "buildAlternates ไม่ใช้ ?lang= ในค่า hreflang อีกแล้ว",
   !JSON.stringify(twinAlternates).includes("?lang="),
 );
-const soloAlternates = buildAlternates("/blog", { locale: "th" });
+const soloAlternates = buildAlternates("/privacy", { locale: "th" });
 check(
   "หน้าที่ไม่มีฝาแฝด ต้องไม่มี languages เลย (ไม่ประกาศสิ่งที่ไม่มีจริง)",
   !("languages" in soloAlternates),
@@ -200,6 +208,9 @@ const MUST_USE_LOCALE_LINK = [
   "src/components/spread/SpreadsLibrary.tsx",
   "src/components/spread/SpreadDetailClient.tsx",
   "src/components/home/TarotFlow.tsx",
+  "src/app/(th)/blog/BlogIndexClient.tsx",
+  "src/app/(th)/blog/[slug]/ArticleReadingClient.tsx",
+  "src/components/spread/TopicSpreadList.tsx",
 ];
 for (const file of MUST_USE_LOCALE_LINK) {
   const source = fs.readFileSync(path.join(ROOT, file), "utf-8");
@@ -207,6 +218,59 @@ for (const file of MUST_USE_LOCALE_LINK) {
     `${file} ใช้ LocaleLink แทน next/link ตรง ๆ`,
     source.includes("@/components/ui/LocaleLink") && !source.includes('import Link from "next/link"'),
   );
+}
+
+// ── 7. ตรวจสอบคุณภาพคำแปลบทความและหมวดผัง (D-4) ───────────────────────────
+const thaiCharRegex = /[\u0E00-\u0E7F]/;
+
+for (const article of ARTICLES) {
+  if (article.contentEn) {
+    check(
+      `บทความ ${article.slug} มี contentEn และประกาศฝาแฝดอังกฤษ`,
+      hasEnglishTwin(`/blog/${article.slug}`),
+    );
+    const thH2Count = (article.content.match(/## /g) || []).length;
+    const enH2Count = (article.contentEn.match(/## /g) || []).length;
+    check(
+      `บทความ ${article.slug} มีจำนวนหัวข้อ ## เท่ากัน (${thH2Count} หัวข้อ)`,
+      thH2Count === enH2Count,
+      `th: ${thH2Count}, en: ${enH2Count}`,
+    );
+    check(
+      `บทความ ${article.slug} contentEn ไม่มีอักขระไทย`,
+      !thaiCharRegex.test(article.contentEn),
+    );
+    if (article.titleEn) {
+      check(
+        `บทความ ${article.slug} titleEn ไม่มีอักขระไทย`,
+        !thaiCharRegex.test(article.titleEn),
+      );
+    }
+  } else {
+    check(
+      `บทความ ${article.slug} ยังไม่มี contentEn ต้องไม่มีฝาแฝด`,
+      !hasEnglishTwin(`/blog/${article.slug}`),
+    );
+  }
+}
+
+for (const topic of Object.values(SPREAD_TOPICS)) {
+  check(
+    `หมวดผัง ${topic.slug} ประกาศฝาแฝดอังกฤษ`,
+    hasEnglishTwin(`/spreads/topic/${topic.slug}`),
+  );
+  if (topic.nameEn) {
+    check(
+      `หมวดผัง ${topic.slug} nameEn ไม่มีอักขระไทย`,
+      !thaiCharRegex.test(topic.nameEn),
+    );
+  }
+  if (topic.editorialIntroEn) {
+    check(
+      `หมวดผัง ${topic.slug} editorialIntroEn ไม่มีอักขระไทย`,
+      !thaiCharRegex.test(topic.editorialIntroEn.join(" ")),
+    );
+  }
 }
 
 console.log("");

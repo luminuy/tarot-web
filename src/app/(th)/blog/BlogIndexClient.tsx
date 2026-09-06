@@ -1,22 +1,22 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion } from "motion/react";
 import { useHasMounted } from "@/lib/motion";
-import type { Article } from "@/data/articles";
+import type { Article, ArticleSummary } from "@/data/articles";
 import {
   getArticleTitle,
   getArticleDescription,
   getArticleCategory,
-} from "@/data/articles";
+} from "@/data/article-helpers";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
 import { SearchTabIcon } from "@/components/ui/TarotArtIcons";
 import { useLocale } from "@/lib/i18n";
 
 interface BlogIndexClientProps {
-  articles: Article[];
+  articles: ArticleSummary[];
 }
 
 const CATEGORIES = [
@@ -60,7 +60,7 @@ const ARTICLE_CARD_MAP: Record<string, string> = {
   "tarot-yes-no-spread-guide": "swords-01.jpg",
 };
 
-function getArticleCardArt(article: Article): { image: string; alt: string } {
+function getArticleCardArt(article: Article | ArticleSummary): { image: string; alt: string } {
   const image =
     ARTICLE_CARD_MAP[article.slug] ||
     (article.category === "love"
