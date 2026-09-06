@@ -36,6 +36,23 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: 🎨 เชื่อมต่อ Cloudinary Dynamic OG Pipeline สู่หน้าแชร์ผลดวง (/s/[id]) & อัปเดต .env.example
+
+**เป้าหมาย:** เชื่อมระบบสร้างภาพ OpenGraph ไดนามิกของ Cloudinary เข้ากับหน้าแชร์ผลดวง `/s/[id]` และจัดทำคู่มือใน `.env.example` เพื่อให้เมื่อใส่ `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` ระบบจะเสิร์ฟภาพการ์ดแชร์ดวงอัตโนมัติ 0ms CPU บน Worker
+
+**สิ่งที่ดำเนินการสำเร็จ:**
+1. **Cloudinary Remote Fetch URL Transformation (`src/lib/media/cloudinary.ts`)**:
+   - ปรับปรุง `buildCloudinaryShareImageUrl()` ให้ใช้ `image/fetch` ร่วมกับภาพต้นฉบับ `https://seertarot.net/og/default.png`
+   - ปั๊มข้อความชื่อผังพยากรณ์และหัวข้อคำทำนายภาษาไทยลงบนภาพ พร้อมระบบ Optimize คุณภาพอัตโนมัติ (`f_auto,q_auto`)
+   - ทำให้ผู้ใช้สามารถใช้งานได้ทันที 100% หลังใส่ Cloud Name โดยไม่ต้องเสียเวลาอัปโหลดภาพเทมเพลตเอง
+2. **Dynamic Social Metadata Integration (`src/app/s/[id]/page.tsx`)**:
+   - เชื่อมต่อ `buildCloudinaryShareImageUrl` ในฟังก์ชัน `generateMetadata()` ของหน้า `/s/[id]`
+   - เมื่อตรวจพบ `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` สแครปเปอร์ของ Facebook, X (Twitter), Threads, LINE จะดึงภาพจาก Cloudinary CDN โดยตรง ตัดภาระ CPU บน Cloudflare Workers ให้เหลือ 0ms
+   - มีระบบ Fallback ไปยัง R2 Image URL เดิมอัตโนมัติ 100% หากไม่ได้ตั้งค่า Cloudinary
+3. **อัปเดตเอกสารโครงสร้างแวดล้อม (`.env.example`)**:
+   - เพิ่มคำอธิบายการตั้งค่า `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` และ `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` ครบถ้วน
+
+
 ### 🗓️ 2026-09-06: 🚀 เปิดใช้งาน ImageKit Web Origin Pull CDN บน Production (`seertarotweb`)
 
 **เป้าหมาย:** เปิดใช้งาน ImageKit CDN สำหรับเสิร์ฟภาพไพ่ 78 ใบทั้งหมดจาก Edge CDN โหนดกรุงเทพฯ (BKK) เพื่อลด Egress Bandwidth และ CPU/RAM ของ Cloudflare Workers ลงสู่ 0% ตามแผนใน `CLOUDFLARE_OPTIMIZATION_GUIDE.md`
