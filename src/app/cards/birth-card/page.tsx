@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { BirthCardCalculator } from "@/components/encyclopedia/BirthCardCalculator";
+import { RitualHero } from "@/components/reading/one-card/RitualHero";
+import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 export const metadata: Metadata = {
@@ -39,24 +40,20 @@ export const metadata: Metadata = {
 
 const BIRTH_CARD_FAQS = [
   {
-    question: "ไพ่ทาโรต์ประจำตัว (Birth Card) คืออะไร?",
-    answer:
-      "ไพ่ทาโรต์ประจำตัวคือไพ่ชุดใหญ่ (Major Arcana) ที่คำนวณจากผลรวมของวัน เดือน และปีเกิดของคุณ ทำหน้าที่เป็นแม่พิมพ์ต้นแบบทางจิตวิทยา (Jungian Archetype) และกระจกสะท้อนบทเรียนชีวิต แก่นแท้ของจิตวิญญาณ และพรสวรรค์ที่ติดตัวคุณมาตั้งแต่กำเนิด",
+    q: "ไพ่ทาโรต์ประจำตัว (Birth Card) คืออะไร?",
+    a: "ไพ่ทาโรต์ประจำตัวคือไพ่ชุดใหญ่ (Major Arcana) ที่คำนวณจากผลรวมของวัน เดือน และปีเกิดของคุณ ทำหน้าที่เป็นแม่พิมพ์ต้นแบบทางจิตวิทยา (Jungian Archetype) และกระจกสะท้อนบทเรียนชีวิต แก่นแท้ของจิตวิญญาณ และพรสวรรค์ที่ติดตัวคุณมาตั้งแต่กำเนิด",
   },
   {
-    question: "ไพ่บุคลิกภาพ (Personality Card) กับ ไพ่จิตวิญญาณ (Soul Card) ต่างกันอย่างไร?",
-    answer:
-      "ไพ่บุคลิกภาพ (Personality Card) สะท้อนวิธีที่คุณปฏิสัมพันธ์กับโลกภายนอก พฤติกรรมที่ผู้คนมองเห็น และวิธีที่คุณรับมือกับชีวิตประจำวัน ส่วนไพ่จิตวิญญาณ (Soul Card) สะท้อนความปรารถนาลึกๆ เจตจำนงแห่งจิตวิญญาณ และการเติบโตทางปัญญาตลอดช่วงชีวิต",
+    q: "ไพ่บุคลิกภาพ (Personality Card) กับ ไพ่จิตวิญญาณ (Soul Card) ต่างกันอย่างไร?",
+    a: "ไพ่บุคลิกภาพ (Personality Card) สะท้อนวิธีที่คุณปฏิสัมพันธ์กับโลกภายนอก พฤติกรรมที่ผู้คนมองเห็น และวิธีที่คุณรับมือกับชีวิตประจำวัน ส่วนไพ่จิตวิญญาณ (Soul Card) สะท้อนความปรารถนาลึกๆ เจตจำนงแห่งจิตวิญญาณ และการเติบโตทางปัญญาตลอดช่วงชีวิต",
   },
   {
-    question: "หากคำนวณแล้วได้ไพ่ใบเดียว หมายความว่าอย่างไร?",
-    answer:
-      "หากผลลัพธ์เป็นเลขโดดหลักเดียว (1-9) ไพ่ใบนั้นจะทำหน้าที่เป็นทั้งไพ่บุคลิกภาพและไพ่จิตวิญญาณในใบเดียวกัน ซึ่งหมายความว่าการแสดงออกภายนอกกับเจตนาภายในของคุณมีความเป็นอันหนึ่งอันเดียวกันอย่างลึกซึ้ง",
+    q: "หากคำนวณแล้วได้ไพ่ใบเดียว หมายความว่าอย่างไร?",
+    a: "หากผลลัพธ์เป็นเลขโดดหลักเดียว (1-9) ไพ่ใบนั้นจะทำหน้าที่เป็นทั้งไพ่บุคลิกภาพและไพ่จิตวิญญาณในใบเดียวกัน ซึ่งหมายความว่าการแสดงออกภายนอกกับเจตนาภายในของคุณมีความเป็นอันหนึ่งอันเดียวกันอย่างลึกซึ้ง",
   },
   {
-    question: "ไพ่ประจำตัวเปลี่ยนตามปีหรือตามวัยหรือไม่?",
-    answer:
-      "ไพ่ประจำตัว (Birth Card) มาจากวันเกิดของคุณจึงไม่มีวันเปลี่ยนแปลงไปตลอดชีวิต แต่ในแต่ละปี คุณจะมี 'ไพ่ประจำปี' (Year Card) ที่เปลี่ยนไปตามรอบปีเกิด ซึ่งใช้ดูแนวโน้มบทเรียนชีวิตในแต่ละขวบปีได้",
+    q: "ไพ่ประจำตัวเปลี่ยนตามปีหรือตามวัยหรือไม่?",
+    a: "ไพ่ประจำตัว (Birth Card) มาจากวันเกิดของคุณจึงไม่มีวันเปลี่ยนแปลงไปตลอดชีวิต แต่ในแต่ละปี คุณจะมี 'ไพ่ประจำปี' (Year Card) ที่เปลี่ยนไปตามรอบปีเกิด ซึ่งใช้ดูแนวโน้มบทเรียนชีวิตในแต่ละขวบปีได้",
   },
 ];
 
@@ -104,16 +101,22 @@ export default function BirthCardPage() {
     "@type": "FAQPage",
     mainEntity: BIRTH_CARD_FAQS.map((faq) => ({
       "@type": "Question",
-      name: faq.question,
+      name: faq.q,
       acceptedAnswer: {
         "@type": "Answer",
-        text: faq.answer,
+        text: faq.a,
       },
     })),
   };
 
+  const breadcrumbs = [
+    { label: "หน้าแรก", href: "/" },
+    { label: "สารานุกรมไพ่ 78 ใบ", href: "/cards" },
+    { label: "คำนวณไพ่ประจำตัว" },
+  ];
+
   return (
-    <main className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main className="min-h-screen bg-[#F3F0EA] text-[#29261F] py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
@@ -128,57 +131,32 @@ export default function BirthCardPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      <div className="max-w-4xl mx-auto space-y-10 py-6">
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-[#7A6F5D]">
-          <ol className="flex items-center gap-2 flex-wrap">
-            <li>
-              <Link href="/" className="hover:text-[#29261F] transition-colors">
-                หน้าแรก
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-[#D5CEC2]">/</li>
-            <li>
-              <Link href="/cards" className="hover:text-[#29261F] transition-colors">
-                สารานุกรมไพ่ 78 ใบ
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-[#D5CEC2]">/</li>
-            <li className="font-semibold text-[#29261F]" aria-current="page">
-              คำนวณไพ่ประจำตัว (Birth Card)
-            </li>
-          </ol>
-        </nav>
-
-        {/* Hero Header */}
-        <header className="text-center space-y-4 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs text-[#8F5C1A] font-serif-th font-semibold shadow-xs">
-            ศาสตร์เลขศาสตร์ทาโรต์สากล (Tarot Numerology)
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-bold font-serif-th text-[#29261F] tracking-tight leading-tight">
-            คำนวณไพ่ทาโรต์ประจำตัว
-          </h1>
-          <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed font-serif-th">
-            ค้นพบแม่พิมพ์จิตวิทยา (Archetype) และเจตนารมณ์แห่งจิตวิญญาณที่ซ่อนอยู่ในวันเกิดของคุณ
-            ด้วยสำรับไพ่ดั้งเดิม 1909 Rider-Waite
-          </p>
-        </header>
+      <div className="max-w-4xl mx-auto space-y-10">
+        {/* Ritual Hero */}
+        <RitualHero
+          breadcrumbs={breadcrumbs}
+          badgeText="เลขศาสตร์ทาโรต์สากล"
+          title="คำนวณไพ่ทาโรต์ประจำตัว"
+          tagline="ค้นพบแม่พิมพ์จิตวิทยา (Archetype) และเจตนารมณ์แห่งจิตวิญญาณที่ซ่อนอยู่ในวันเกิดของคุณ ด้วยสำรับไพ่ดั้งเดิม 1909 Rider-Waite"
+        />
 
         {/* Interactive Calculator Component */}
         <BirthCardCalculator />
 
-        {/* Editorial Guide Article (Altar Panel) */}
-        <article className="rounded-3xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-12 space-y-8 shadow-[var(--shadow-raised)]">
-          <div className="space-y-2 border-b border-[#E8E2D8] pb-4">
-            <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
-              SACRED ESSENCE & PSYCHOLOGICAL ARCHETYPES
-            </span>
-            <h2 className="text-xl sm:text-3xl font-bold font-serif-th text-[#29261F] tracking-tight">
-              ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: พิมพ์เขียวพลังงานและกระจกส่องจิตวิญญาณตลอดชีวิต
-            </h2>
-          </div>
-
-          <div className="space-y-5 text-xs sm:text-sm text-[#4A4338] font-serif-th leading-relaxed">
+        {/* Editorial Guide Article */}
+        <SeoArticleShell
+          eyebrow="ถอดรหัสจิตวิทยา"
+          title="ศาสตร์แห่งไพ่ทาโรต์ประจำตัว: พิมพ์เขียวพลังงานและกระจกส่องจิตวิญญาณตลอดชีวิต"
+          faqs={BIRTH_CARD_FAQS}
+          links={[
+            { label: "สารานุกรมไพ่ 78 ใบ", href: "/cards" },
+            { label: "ดูดวงไพ่ยิปซีรายวัน", href: "/daily" },
+            { label: "ดูดวงความรัก 1 ใบ", href: "/love/1-card" },
+            { label: "ผังพยากรณ์ 25 แบบ", href: "/spreads" },
+            { label: "เริ่มดูดวงที่หน้าแรก", href: "/" },
+          ]}
+        >
+          <div className="space-y-4 text-xs sm:text-sm text-[#4A4338] font-sans leading-relaxed">
             <p>
               ในศาสตร์ไพ่ทาโรต์และเลขศาสตร์สากล วันเกิดของมนุษย์แต่ละคนไม่ใช่เรื่องบังเอิญ แต่เป็นหมุดหมายแห่งกาลเวลาที่กำหนดคลื่นความถี่พลังงาน
               (Vibrational Blueprint) และพิมพ์เขียวแห่งจิตวิญญาณ การคำนวณหาไพ่ทาโรต์ประจำตัว (Tarot Birth Card) ได้รับการวางรากฐานทางวิชาการ
@@ -206,7 +184,7 @@ export default function BirthCardPage() {
             <p>
               คู่ไพ่ประจำตัวช่วยให้เราเข้าใจความขัดแย้งและความสมดุลภายในตนเอง ตัวอย่างเช่น:
             </p>
-            <ul className="list-disc pl-5 space-y-2.5 text-[#5E5240]">
+            <ul className="list-disc pl-5 space-y-2 text-[#5E5240]">
               <li>
                 <strong>The Wheel of Fortune (10) และ The Magician (1):</strong> ผู้ที่ถือครองคู่ไพ่นี้มักเผชิญกับจุดเปลี่ยนและจังหวะชีวิตที่ไม่หยุดนิ่ง
                 แต่มีพรสวรรค์ในการแปรเปลี่ยนวิกฤตให้เป็นโอกาสด้วยสติปัญญาและทักษะรอบด้าน
@@ -273,59 +251,8 @@ export default function BirthCardPage() {
               </li>
             </ol>
           </div>
-        </article>
-
-        {/* FAQs (Altar Panel) */}
-        <section className="rounded-3xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-12 space-y-8 shadow-[var(--shadow-raised)]">
-          <div className="space-y-1">
-            <span className="text-[11px] font-mono tracking-widest uppercase text-[#8F5C1A] font-semibold">
-              QUESTIONS & ANSWERS
-            </span>
-            <h2 className="text-xl sm:text-2xl font-bold font-serif-th text-[#29261F] tracking-tight">
-              คำถามพบบ่อยเกี่ยวกับไพ่ประจำตัว (Birth Card FAQ)
-            </h2>
-            <p className="text-xs text-[#7A6F5D] font-serif-th">
-              ความรู้ความเข้าใจเกี่ยวกับเลขศาสตร์และพลังงานไพ่ทาโรต์
-            </p>
-          </div>
-          <div className="divide-y divide-[#E8E2D8] space-y-4 pt-2">
-            {BIRTH_CARD_FAQS.map((faq, index) => (
-              <div key={index} className="pt-4 first:pt-0 space-y-1.5">
-                <h3 className="font-serif-th text-sm sm:text-base font-bold text-[#29261F]">
-                  {faq.question}
-                </h3>
-                <p className="font-serif-th text-xs sm:text-sm text-[#5E5240] leading-relaxed">
-                  {faq.answer}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Navigation & Internal Links */}
-        <div className="flex items-center justify-center gap-4 text-xs font-serif-th text-[#7A6F5D] pt-4">
-          <Link href="/cards" className="hover:text-[#29261F] underline underline-offset-4">
-            สารานุกรมไพ่ 78 ใบ
-          </Link>
-          <span className="text-[#D5CEC2]">·</span>
-          <Link href="/daily" className="hover:text-[#29261F] underline underline-offset-4">
-            ดูดวงรายวัน 1 ใบ
-          </Link>
-          <span className="text-[#D5CEC2]">·</span>
-          <Link href="/love/1-card" className="hover:text-[#29261F] underline underline-offset-4">
-            ดูดวงความรัก 1 ใบ
-          </Link>
-          <span className="text-[#D5CEC2]">·</span>
-          <Link href="/spreads" className="hover:text-[#29261F] underline underline-offset-4">
-            ผังพยากรณ์ 25 แบบ
-          </Link>
-          <span className="text-[#D5CEC2]">·</span>
-          <Link href="/" className="hover:text-[#29261F] underline underline-offset-4">
-            เริ่มดูดวงที่หน้าแรก
-          </Link>
-        </div>
+        </SeoArticleShell>
       </div>
     </main>
   );
 }
-
