@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { DECK } from "@/data/cards";
+import { CARD_SUMMARIES } from "@/data/cards/summary";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { useLocale } from "@/lib/i18n";
 import { saveReading } from "@/lib/utils/history";
@@ -88,7 +88,7 @@ export function DailyClient() {
 
   const handleRevealed = (card: TarotCardType) => {
     try {
-      const cardIdx = DECK.findIndex((c) => c.id === card.id);
+      const cardIdx = CARD_SUMMARIES.findIndex((c) => c.id === card.id);
       saveReading({
         spreadId: "daily-one",
         spreadName: isEnglish ? "Daily Tarot Reading" : "ดูดวงไพ่ยิปซีรายวัน",

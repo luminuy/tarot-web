@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { DECK } from "@/data/cards";
+import { CARD_SUMMARIES } from "@/data/cards/summary";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
@@ -136,7 +136,7 @@ export function LoveOneCardClient() {
   const handleRevealed = (card: TarotCardType) => {
     try {
       const statusObj = STATUS_OPTIONS.find((s) => s.id === selectedStatus);
-      const cardIdx = DECK.findIndex((c) => c.id === card.id);
+      const cardIdx = CARD_SUMMARIES.findIndex((c) => c.id === card.id);
       saveReading({
         spreadId: "love-one",
         spreadName: isEnglish ? "Love Tarot (1 Card)" : "ดูดวงความรัก 1 ใบ",

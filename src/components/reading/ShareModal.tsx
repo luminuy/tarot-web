@@ -8,7 +8,7 @@ import type { Reading } from "@/lib/schema/reading";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
-import { cardByIndex } from "@/data/cards";
+import { cardSummaryByIndex as cardByIndex } from "@/data/cards/summary";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 

@@ -3,11 +3,26 @@
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { DECK } from "@/data/cards";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
 import { stepVariants } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n";
+
+let deckPromise: Promise<typeof import("@/data/cards")> | null = null;
+function getDeck() {
+  if (!deckPromise) {
+    deckPromise = import("@/data/cards");
+  }
+  return deckPromise;
+}
+
+const elementEnMap: Record<string, string> = {
+  "ไฟ": "Fire",
+  "น้ำ": "Water",
+  "ลม": "Air",
+  "ดิน": "Earth",
+};
 
 export interface OneCardRitualProps {
   spreadId: string;
@@ -36,13 +51,30 @@ export function OneCardRitual({
   headerSlot,
   isEnglish = false,
 }: OneCardRitualProps) {
+  const { isEnglish: localeIsEnglish } = useLocale();
+  const isEn = isEnglish || localeIsEnglish;
   const [, startTransition] = useTransition();
   const [status, setStatus] = useState<"idle" | "ready" | "revealed">("idle");
   const [drawnCard, setDrawnCard] = useState<TarotCardType | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Prefetch deck chunk in idle time so clicking draw is instantaneous
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => {
+          getDeck();
+        });
+      } else {
+        setTimeout(() => {
+          getDeck();
+        }, 800);
+      }
+    }
+  }, []);
+
   // จังหวะที่ 1 ➔ จังหวะที่ 2: สุ่มไพ่ทันทีด้วย Web Crypto API โดยไม่ผ่านหน้าจอสับหรือพัดไพ่
-  const handleDraw = () => {
+  const handleDraw = async () => {
     soundManager.playCardSelectSound();
 
     const randomBuffer = new Uint32Array(2);
@@ -52,6 +84,7 @@ export function OneCardRitual({
       randomBuffer[0] = Math.floor(Math.random() * 1000000);
     }
 
+    const { DECK } = await getDeck();
     const cardIndex = randomBuffer[0] % DECK.length;
     const card = DECK[cardIndex];
 
@@ -86,10 +119,10 @@ export function OneCardRitual({
   // แชร์ผลการทำนาย
   const handleShare = () => {
     if (!drawnCard) return;
-    const shareTitle = isEnglish
+    const shareTitle = isEn
       ? `${spreadName}: ${drawnCard.nameEn}`
       : `${spreadName}: ไพ่ ${drawnCard.nameTh} (${drawnCard.nameEn})`;
-    const shareText = isEnglish
+    const shareText = isEn
       ? `My tarot reading: ${drawnCard.nameEn} — Free reading at ${typeof window !== "undefined" ? window.location.href : ""}`
       : `ผลดูดวงไพ่ 1 ใบ: ไพ่ ${drawnCard.nameTh} (${drawnCard.nameEn}) — เปิดไพ่ทำนายฟรีที่ ${typeof window !== "undefined" ? window.location.href : ""}`;
 
@@ -130,10 +163,10 @@ export function OneCardRitual({
                 onClick={handleDraw}
                 className="w-full sm:w-auto px-10 py-3.5 sm:py-4 rounded-full bg-[#29261F] text-[#FAF7F2] font-serif-th text-sm sm:text-base font-bold shadow-raised hover:bg-[#A58A5C] active:scale-[0.98] transition-all cursor-pointer tracking-wide flex items-center justify-center gap-2"
               >
-                <span>{drawButtonText || (isEnglish ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}</span>
+                <span>{drawButtonText || (isEn ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}</span>
               </button>
               <p className="text-xs text-[#635B4E]">
-                {isEnglish
+                {isEn
                   ? "Cryptographic Web Crypto API randomness · Provably Fair"
                   : "ระบบสุ่มรหัสลับ Web Crypto API ปราศจากการล็อกผล 100%"}
               </p>
@@ -158,10 +191,10 @@ export function OneCardRitual({
                 <span>{deckLabel}</span>
               </div>
               <h3 className="text-lg sm:text-2xl font-serif-th font-bold text-[#29261F] tracking-tight">
-                {isEnglish ? "Your Sacred Card Awaits" : "ไพ่ตอบรับเจตจำนงของคุณแล้ว"}
+                {isEn ? "Your Sacred Card Awaits" : "ไพ่ตอบรับเจตจำนงของคุณแล้ว"}
               </h3>
               <p className="text-xs sm:text-sm text-[#635B4E]">
-                {isEnglish
+                {isEn
                   ? "Tap the card to reveal your oracle message in full 3D"
                   : "แตะที่ตัวไพ่เพื่อพลิกเฉลยสารพยากรณ์แบบ 3D"}
               </p>
@@ -171,7 +204,7 @@ export function OneCardRitual({
             <div
               role="button"
               tabIndex={0}
-              aria-label={isEnglish ? "Tap to reveal card" : "แตะเพื่อพลิกไพ่"}
+              aria-label={isEn ? "Tap to reveal card" : "แตะเพื่อพลิกไพ่"}
               className="cursor-pointer py-2 transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] rounded-xl"
               onClick={handleReveal}
               onKeyDown={(e) => {
@@ -222,31 +255,33 @@ export function OneCardRitual({
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                   <span className="px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-xs font-serif-th font-semibold text-[#8F5C1A]">
                     {drawnCard.arcana === "major"
-                      ? isEnglish
+                      ? isEn
                         ? "Major Arcana"
                         : "Major Arcana (ชุดใหญ่)"
-                      : isEnglish
+                      : isEn
                       ? "Minor Arcana"
                       : "Minor Arcana (ชุดเล็ก)"}
                   </span>
                   <span className="px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-xs font-serif-th text-[#635B4E]">
-                    {isEnglish ? `Element: ${drawnCard.element}` : `ธาตุ${drawnCard.element}`}
+                    {isEn ? `Element: ${elementEnMap[drawnCard.element] || drawnCard.element}` : `ธาตุ${drawnCard.element}`}
                   </span>
                 </div>
 
                 <div className="space-y-1">
                   <h2 className="text-xl sm:text-3xl font-serif-th font-bold text-[#29261F] tracking-tight">
-                    {drawnCard.nameTh} {drawnCard.nameEn && `(${drawnCard.nameEn})`}
+                    {isEn ? (drawnCard.nameEn || drawnCard.nameTh) : `${drawnCard.nameTh} ${drawnCard.nameEn ? `(${drawnCard.nameEn})` : ""}`}
                   </h2>
                   <p className="text-xs sm:text-sm font-serif-th text-[#8F5C1A] font-semibold tracking-wide">
-                    {drawnCard.keywords?.upright?.join(" — ")}
+                    {isEn
+                      ? (drawnCard.keywordsEn?.upright || drawnCard.keywords?.upright)?.slice(0, 4).join(" — ")
+                      : drawnCard.keywords?.upright?.join(" — ")}
                   </p>
                 </div>
 
                 {drawnCard.astrology && (
                   <p className="text-xs text-[#635B4E]">
-                    {isEnglish
-                      ? `Astrological Correspondence: ${drawnCard.astrology}`
+                    {isEn
+                      ? `Astrological Correspondence: ${drawnCard.astrologyEn || drawnCard.astrology}`
                       : `ความสอดคล้องทางโหราศาสตร์: ${drawnCard.astrology}`}
                   </p>
                 )}
@@ -256,7 +291,7 @@ export function OneCardRitual({
                     href={`/cards/${drawnCard.id}`}
                     className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#29261F] underline underline-offset-4 transition-colors"
                   >
-                    {isEnglish
+                    {isEn
                       ? "Explore full symbolism and card meaning →"
                       : "เปิดคัมภีร์เจาะลึกความหมายไพ่ใบนี้ →"}
                   </Link>
@@ -274,7 +309,7 @@ export function OneCardRitual({
                 onClick={handleRestart}
                 className="w-full sm:w-auto px-6 py-3 rounded-full border border-[#D5CEC2] bg-[#FAF7F2] hover:bg-[#FFFFFF] text-xs sm:text-sm font-serif-th font-semibold text-[#29261F] shadow-raised transition-all cursor-pointer"
               >
-                {isEnglish ? "← Draw Another Reading" : "← เริ่มเปิดไพ่อีกครั้ง"}
+                {isEn ? "← Draw Another Reading" : "← เริ่มเปิดไพ่อีกครั้ง"}
               </button>
 
               <button
@@ -283,10 +318,10 @@ export function OneCardRitual({
                 className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-xs sm:text-sm font-serif-th font-semibold text-[#FAF7F2] shadow-raised transition-all cursor-pointer"
               >
                 {copied
-                  ? isEnglish
+                  ? isEn
                     ? "Copied to Clipboard!"
                     : "คัดลอกข้อความแล้ว"
-                  : isEnglish
+                  : isEn
                   ? "Share Reading"
                   : "แชร์ผลทำนาย"}
               </button>
