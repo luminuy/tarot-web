@@ -36,6 +36,48 @@
 | **ระบบวิเคราะห์และวัดผล** | `AnalyticsTracker.tsx` & `/api/config/analytics` | 🟢 **Active / Live** | Ready | GA4 + Google Ads (`AW-XXXXXXXXX`) & Meta Pixel + Runtime Config Endpoint + Google Consent Mode v2 + 20 Typed Events + Direct Conversion Telemetry | แดชบอร์ดสรุป Conversion Funnel ใน /admin |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-06: หมวด 3 — Upstash Redis adapter (ข้อ 16) + ตรวจหมวด 3 ทีละข้อ (โดย Claude Opus 5)
+
+**ที่มา:** เจ้าของสั่ง "ลุย" หมวด 3 (บริการภายนอก ข้อ 16–28) ต่อจากหมวด 2
+
+**ความจริงของหมวด 3 หลังตรวจทีละข้อ:** ทำได้จริงแค่ข้อเดียว ที่เหลือแบ่งเป็น
+"ต้องสมัครบัญชี (AI ทำแทนไม่ได้)" 6 ข้อ · "ทำไปแล้ว/ไม่ต้องทำ" 3 ข้อ · "ซ้ำซ้อน ไม่ควรทำ" 3 ข้อ
+รายละเอียดครบอยู่ในตารางที่เพิ่มไว้ใน [`CLOUDFLARE_OPTIMIZATION_GUIDE.md`](CLOUDFLARE_OPTIMIZATION_GUIDE.md)
+
+- **ข้อ 21 (MiniSearch)** — บรรลุเป้าหมายแล้ว `CardsExplorer.tsx` ค้นหาไพ่ 78 ใบ
+  ด้วย `filter()` ในเครื่องผู้ใช้อยู่ก่อนแล้ว ไม่ต้องเพิ่มไลบรารี
+- **ข้อ 25 (GH Actions pre-bake)** — ไม่ต้องทำ ไพ่ประจำวัน deterministic จากวันที่
+  ไม่ได้เรียก AI เลย จึงไม่มีโทเค็นให้ประหยัด
+- **ข้อ 17 / 20 / 24** — ซ้ำซ้อนกับของที่มีอยู่ (D1 / Workers Assets / failover ในโค้ด)
+  ข้อ 20 ยิ่งเป็นการเพิ่มจุดพังให้ภาพหลักของเว็บโดยไม่ได้อะไรกลับมา
+
+**ข้อ 16 Upstash Redis — ลงมือแล้ว (โค้ดพร้อม รอ token):**
+- เพิ่ม [`src/lib/platform/redis.ts`](../src/lib/platform/redis.ts) — ไคลเอนต์ REST
+  (Workers ต่อ TCP ไม่ได้) · timeout 2 วิ · **ทุกฟังก์ชันไม่ throw** คืน `null` เมื่อล้มเหลว
+- `kv-counter.ts` — ใช้ `INCRBY` แบบ **atomic** เมื่อเปิด Upstash · Redis ล่มกลางทาง
+  จะทิ้ง delta ลง buffer ของ KV ต่อให้ · ผูกกับ `waitUntil` เสมอ (promise ลอยหลังส่ง
+  response แล้ว Workers ตัดทิ้งได้)
+- `server/store.ts` — `persistReading`/`loadReadingFromKV` วิ่งผ่าน Redis เมื่อเปิดใช้
+  ถ้าเขียน Redis ไม่สำเร็จ **ถอยไปเขียน KV เสมอ** ห้ามปล่อยให้เซสชันหาย
+  (หายแล้วผู้ใช้เจอ 404 กลางคัน = ผิดเจตนากฎข้อ 14)
+- `/admin` Cloud Health เพิ่มการ์ด `upstashRedis` (enabled / urlSet / tokenSet / reachable)
+- `.env.example` เพิ่ม `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` พร้อมวิธีตั้ง
+
+**ได้อะไรมากกว่าประหยัดโควตา:** `INCRBY` เป็น atomic — ต่างจาก read-modify-write บน KV
+ที่สอง isolate เขียนพร้อมกันแล้วทับกันได้ (นับขาด) และ KV ยัง eventually-consistent (~60 วิ)
+เปิด Upstash แล้ว **โควตาต่อ IP/ซับเน็ตจะแม่นจริงข้าม edge** ไม่ใช่แค่เขียนได้เยอะขึ้น
+
+**⚠️ ยังไม่เปิดใช้** — ต้องให้เจ้าของสมัคร https://upstash.com (ฟรี ไม่ต้องผูกบัตร)
+แล้วรัน `npx wrangler secret put UPSTASH_REDIS_REST_URL` และ `..._TOKEN`
+ไม่ตั้ง = ระบบใช้ KV เหมือนเดิมทุกอย่าง (ไม่พัง)
+
+**🔎 เจอระหว่างตรวจ:** `/api/search` (Vectorize + Workers AI) **ไม่มีโค้ดฝั่งหน้าเว็บเรียกเลย**
+แต่ยังเปิดรับคำขออยู่ ทุกคำขอที่หลุดเข้ามาเผาโควตา Workers AI โดยไม่มีผู้ใช้จริงได้ประโยชน์
+**ยังไม่ลบ** เพราะด่านที่ 24 ใน `repo:verify` คุ้มครองฟีเจอร์นี้อยู่ (ตั้งใจเก็บไว้ใช้ต่อ)
+➔ เจ้าของต้องตัดสินใจว่าจะต่อ UI เข้ากับมัน หรือปิดทิ้งพร้อมด่านที่ 24
+
+---
+
 ### 🗓️ 2026-09-06: หมวด 2 ครบ 4 ข้อ — ลดการเขียน KV ต่อการเปิดไพ่ ~7 → ~2 ครั้ง (โดย Claude Opus 5)
 
 **ที่มา:** เจ้าของสั่งลุยหมวด 2 (ข้อ 12–15 แก้โค้ด) ต่อจากเฟส 1 · บริการภายนอกไว้ทีหลัง

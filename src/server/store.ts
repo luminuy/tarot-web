@@ -3,6 +3,7 @@ import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { Reading } from "@/lib/schema/reading";
 import type { SafetyFlag } from "@/lib/safety/guardrails";
 import { kvGetJSON, kvPutJSON, KEY } from "@/lib/platform/kv-store";
+import { isRedisEnabled, redisGetJSON, redisSetJSON } from "@/lib/platform/redis";
 
 /**
  * ที่เก็บสถานะการเปิดไพ่ระหว่างขั้นตอน (High-Resilience Edge-Ready Session Store)
@@ -97,7 +98,22 @@ export function updateReading(id: string, patch: Partial<ReadingRecord>): Readin
 
 const READING_KV_TTL_SEC = 7200; // 2 hours (ตรงกับ Session Token & Memory TTL)
 
+/**
+ * เก็บสถานะการเปิดไพ่ไว้ให้ isolate อื่นกู้คืนได้
+ *
+ * ถ้าตั้ง Upstash ไว้ (`UPSTASH_REDIS_REST_*`) จะเขียนลง Redis แทน Cloudflare KV
+ * — เซสชันเปิดไพ่คือ "ข้อมูลชั่วคราวอายุ 2 ชั่วโมง" ซึ่งเป็นงานที่ Redis ถนัดกว่า
+ * และช่วยปลดคอขวดโควตาเขียน KV ฟรี 1,000 ครั้ง/วัน (ข้อ 16 ในคู่มือ)
+ * ไม่ได้ตั้ง = เขียน KV เหมือนเดิมทุกอย่าง
+ */
 export async function persistReading(record: ReadingRecord): Promise<void> {
+  if (isRedisEnabled()) {
+    const ok = await redisSetJSON(KEY.reading(record.id), record, READING_KV_TTL_SEC);
+    if (ok) return;
+    // Redis ล่ม → ถอยไปเขียน KV ต่อ ห้ามปล่อยให้เซสชันหาย
+    // (ถ้าหาย ผู้ใช้จะเจอ 404 กลางคันตอนกดเปิดไพ่ ซึ่งผิดเจตนากฎข้อ 14)
+  }
+
   try {
     await kvPutJSON(KEY.reading(record.id), record, { expirationTtl: READING_KV_TTL_SEC });
   } catch {
@@ -106,6 +122,12 @@ export async function persistReading(record: ReadingRecord): Promise<void> {
 }
 
 export async function loadReadingFromKV(id: string): Promise<ReadingRecord | null> {
+  if (isRedisEnabled()) {
+    const fromRedis = await redisGetJSON<ReadingRecord>(KEY.reading(id));
+    if (fromRedis) return fromRedis;
+    // ไม่เจอใน Redis → ลอง KV ต่อ (ครอบคลุมเซสชันที่เกิดก่อนเปิดใช้ Upstash)
+  }
+
   try {
     return await kvGetJSON<ReadingRecord>(KEY.reading(id));
   } catch {
