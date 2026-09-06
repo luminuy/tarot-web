@@ -84,8 +84,8 @@ for (const topicKey of expectedTopics) {
 }
 
 // 5. Check Page Files Exist
-const topicPagePath = path.join(process.cwd(), "src/app/spreads/topic/[category]/page.tsx");
-assert(fs.existsSync(topicPagePath), `ต้องมีหน้า src/app/spreads/topic/[category]/page.tsx`);
+const topicPagePath = path.join(process.cwd(), "src/app/(th)/spreads/topic/[category]/page.tsx");
+assert(fs.existsSync(topicPagePath), `ต้องมีหน้า src/app/(th)/spreads/topic/[category]/page.tsx`);
 const topicListCompPath = path.join(process.cwd(), "src/components/spread/TopicSpreadList.tsx");
 assert(fs.existsSync(topicListCompPath), `ต้องมีคอมโพเนนต์ src/components/spread/TopicSpreadList.tsx`);
 
@@ -132,7 +132,7 @@ assert(
 // 8. Rule 2: Zero Sparkle / Star Emojis in New Files
 const newFiles = [
   "src/data/spread-topics.ts",
-  "src/app/spreads/topic/[category]/page.tsx",
+  "src/app/(th)/spreads/topic/[category]/page.tsx",
   "src/components/spread/TopicSpreadList.tsx",
 ];
 for (const file of newFiles) {

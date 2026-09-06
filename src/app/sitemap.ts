@@ -2,7 +2,8 @@ import { MetadataRoute } from "next";
 import { DECK } from "@/data/cards";
 import { ARTICLES } from "@/data/articles";
 import { SPREADS } from "@/data/spreads";
-import { SITE_ORIGIN } from "@/lib/config/site";
+import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
+import { hasEnglishTwin } from "@/lib/i18n/paths";
 
 /**
  * วันแก้ไขล่าสุดของหน้าที่เนื้อหาไม่ได้เปลี่ยนตามการ deploy
@@ -156,5 +157,39 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.85,
   }));
 
-  return [...staticRoutes, ...cardRoutes, ...blogRoutes, ...spreadRoutes, ...topicRoutes];
+  const thaiRoutes = [...staticRoutes, ...cardRoutes, ...blogRoutes, ...spreadRoutes, ...topicRoutes];
+
+  return withEnglishTwins(thaiRoutes);
+}
+
+/**
+ * 🌐 เติมฝาแฝดภาษาอังกฤษและคู่ `alternates.languages` ให้ทุกรายการที่มีฝาแฝดจริง
+ * ---------------------------------------------------------------------------
+ * กฎของ Google: คำประกาศ hreflang ต้องชี้กันไป-กลับครบทั้งสองทาง ขาดข้างเดียว
+ * Google จะทิ้งทั้งคู่ · ที่นี่จึงสร้างจากแหล่งความจริงเดียว (`hasEnglishTwin`)
+ * ซึ่งเป็นตัวเดียวกับที่ `LocaleLink` และ `buildAlternates` ใช้ — เพิ่มหน้าอังกฤษใหม่
+ * ที่เดียวแล้วได้ครบทั้ง sitemap, hreflang และลิงก์ภายใน
+ *
+ * หน้าที่ไม่มีฝาแฝด (เช่น `/blog/*`) จะไม่ถูกแตะเลย และไม่มี `alternates` ติดไปด้วย
+ */
+function withEnglishTwins(routes: MetadataRoute.Sitemap): MetadataRoute.Sitemap {
+  const output: MetadataRoute.Sitemap = [];
+
+  for (const route of routes) {
+    const path = route.url.replace(SITE_ORIGIN, "") || "/";
+
+    if (!hasEnglishTwin(path)) {
+      output.push(route);
+      continue;
+    }
+
+    const thaiUrl = localizedUrl(path, "th");
+    const englishUrl = localizedUrl(path, "en");
+    const languages = { "th-TH": thaiUrl, "en-US": englishUrl, "x-default": thaiUrl };
+
+    output.push({ ...route, url: thaiUrl, alternates: { languages } });
+    output.push({ ...route, url: englishUrl, alternates: { languages } });
+  }
+
+  return output;
 }

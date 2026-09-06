@@ -1,5 +1,20 @@
 "use client";
 
+/**
+ * ⚠️ ต้องเป็น Client Component — ห้ามถอด `"use client"` ออก
+ * ---------------------------------------------------------------------------
+ * `<img onError={handleImgError}>` ข้างล่างคือ event handler จริงที่ต้องทำงานบนเบราว์เซอร์
+ * (ระบบถอยกลับไปใช้ไฟล์ในเครื่องเมื่อ CDN ล่ม) ถ้าไฟล์นี้ไม่มี directive มันจะกลายเป็น
+ * Server Component เมื่อถูกเรียกจากหน้า server แล้วเกิด 2 ปัญหา:
+ *
+ * 1. handler ถูก "เขียนทิ้ง" ไปเฉย ๆ — ภาพที่โหลดไม่ขึ้นจะไม่มีตัวสำรองให้เลย
+ * 2. ถ้า element นั้นถูกส่งข้ามเส้นแบ่งไปเป็น prop ของ Client Component
+ *    (เช่น `<TarotFlow seoContent={<HomeSeoContent />} />` ในหน้าแรก)
+ *    การ build จะล้มทันทีด้วย "Event handlers cannot be passed to Client Component props"
+ *
+ * ข้อ 2 เคยหลบอยู่ได้เพราะโครงไฟล์เดิมบังเอิญทำให้โมดูลนี้ตกไปอยู่ฝั่ง client
+ * พอย้ายโครง `src/app/` เข้ากลุ่มเส้นทาง `(th)`/`(en)` มันก็โผล่ขึ้นมาทันที
+ */
 import type { CSSProperties } from "react";
 
 import { getCardImageSrc, getCardWebpSrcSet } from "@/lib/tarot/card-image";

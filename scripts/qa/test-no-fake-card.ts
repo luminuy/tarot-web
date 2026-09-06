@@ -104,9 +104,9 @@ function main() {
   // ⚠️ ต้อง fail ถ้าหาไฟล์ไม่เจอ ห้ามใช้ `if (fs.existsSync) {...}` เงียบ ๆ
   // ไม่งั้นวันที่มีคนเปลี่ยนชื่อ/ย้ายไฟล์ ด่านนี้จะ "หายไปเฉย ๆ" แทนที่จะเตือน
   // (เคยเกิดจริงตอนแยก app/page.tsx ออกเป็น server shell + app/TarotFlow.tsx)
-  const flowPath = path.join(rootDir, "app/TarotFlow.tsx");
+  const flowPath = path.join(rootDir, "components/home/TarotFlow.tsx");
   if (!fs.existsSync(flowPath)) {
-    check("หาไฟล์พิธีกรรมดูดวง (app/TarotFlow.tsx) เจอ", false);
+    check("หาไฟล์พิธีกรรมดูดวง (components/home/TarotFlow.tsx) เจอ", false);
   } else {
     const pageSrc = fs.readFileSync(flowPath, "utf-8");
     check("TarotFlow.tsx ไม่มี cardIndex ?? 0", !pageSrc.includes("cardIndex ?? 0"));

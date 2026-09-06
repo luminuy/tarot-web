@@ -67,17 +67,27 @@ function getInitialClientLocale(initialLocale?: Locale): Locale {
 
 export function LocaleProvider({
   children,
-  initialLocale,
+  forcedLocale,
 }: {
   children: React.ReactNode;
-  initialLocale?: Locale;
+  /**
+   * ภาษาที่ถูก "ตรึง" ด้วยเส้นทาง URL — ส่งมาจาก root layout ของกลุ่ม `(en)` เท่านั้น
+   *
+   * ⚠️ ต้องเป็นค่าคงที่ที่เขียนตรง ๆ ในโค้ดเสมอ (`"en"`) ห้ามคำนวณจากคำขอเด็ดขาด
+   * ถ้าค่านี้มาจาก `headers()`/`cookies()` เมื่อไร ทุกหน้าจะกลายเป็น dynamic ทันที (INC-0091)
+   *
+   * เมื่อถูกตรึง: ไม่ตรวจ cookie/localStorage/`?lang=` เลย และการกดปุ่มสลับภาษา
+   * จะ **ไม่เปลี่ยน state ในหน้านี้** — `LanguageSwitcher` มีหน้าที่พาไปยัง URL ฝาแฝดแทน
+   */
+  forcedLocale?: Locale;
 }) {
   // ⚠️ ต้องเริ่มที่ค่าเดียวกับที่ฝั่งเซิร์ฟเวอร์ prerender ไว้เสมอ (ไทย) ห้ามตรวจ cookie
   // ตั้งแต่ initializer เด็ดขาด — เพราะ root layout เป็น static แล้ว (ดูหมายเหตุใน
   // `src/app/layout.tsx`) HTML ที่ส่งมาจึงเป็นภาษาไทยเสมอ ถ้า client render รอบแรก
   // ออกมาเป็นอังกฤษจะเกิด hydration mismatch ทั้งหน้า
   // การตรวจภาษาจริงย้ายไปทำใน useEffect ด้านล่าง (หลัง mount) แทน
-  const [locale, setLocaleState] = useState<Locale>(initialLocale ?? DEFAULT_LOCALE);
+  const [detectedLocale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+  const locale: Locale = forcedLocale ?? detectedLocale;
   const [isPending, startTransition] = useTransition();
   const [pendingLocale, setPendingLocale] = useState<Locale | null>(null);
 
@@ -89,9 +99,13 @@ export function LocaleProvider({
     // ผู้ใช้ต้องเห็นว่าระบบรับคำสั่งแล้ว ไม่ใช่รอ 353ms+ แบบไม่มีสัญญาณอะไรเลย
     setPendingLocale(nextLocale);
 
-    startTransition(() => {
-      setLocaleState(nextLocale);
-    });
+    // เมื่อภาษาถูกตรึงด้วย URL (`/en/**`) การเปลี่ยน state ที่นี่จะทำให้เนื้อหาไม่ตรงกับ
+    // เส้นทางที่ผู้ใช้ยืนอยู่ · หน้าที่พาไปยัง URL ฝาแฝดเป็นของ `LanguageSwitcher`
+    if (!forcedLocale) {
+      startTransition(() => {
+        setLocaleState(nextLocale);
+      });
+    }
 
     try {
       // 1. Write Cookie (1 year duration, Lax)
@@ -108,14 +122,14 @@ export function LocaleProvider({
     } catch {
       // Ignore storage restrictions
     }
-  }, []);
+  }, [forcedLocale]);
 
   // ตรวจภาษาที่ผู้ใช้เลือกไว้ "หลัง mount" (query `?lang=` → cookie → localStorage)
   // แล้วค่อยสลับ — รอบแรกจึงตรงกับ HTML ที่ prerender มาเสมอ ไม่เกิด hydration mismatch
   // ผู้ใช้ภาษาอังกฤษจะเห็นไทยแวบหนึ่งก่อนสลับ ซึ่งเป็นราคาที่จ่ายเพื่อให้ทั้งเว็บเป็น
   // static prerender ได้ (แลกมากับการที่ทุกหน้าแคชที่ edge ได้จริง)
   useEffect(() => {
-    if (initialLocale) return;
+    if (forcedLocale) return;
     const detected = getInitialClientLocale();
     if (detected !== locale) {
       setLocaleState(detected);

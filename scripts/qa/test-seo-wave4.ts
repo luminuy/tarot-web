@@ -59,7 +59,7 @@ assert(calculateBirthCard(15, 13, 1995) === undefined, "เดือน 13 ต�
 assert(calculateBirthCard(15, 8, 1500) === undefined, "ปีนอกช่วงต้องคืน undefined (ห้ามกุไพ่ปลอม)");
 
 // 3. Birth Card Page & Sitemap
-const birthCardPagePath = path.join(process.cwd(), "src/app/cards/birth-card/page.tsx");
+const birthCardPagePath = path.join(process.cwd(), "src/app/(th)/cards/birth-card/page.tsx");
 assert(fs.existsSync(birthCardPagePath), "ต้องมีหน้า src/app/cards/birth-card/page.tsx");
 
 const calcCompPath = path.join(process.cwd(), "src/components/encyclopedia/BirthCardCalculator.tsx");
@@ -80,18 +80,23 @@ assert(
 );
 
 // 4. Spread Positions Semantic Table (Wave 4.1)
-const spreadDetailPath = path.join(process.cwd(), "src/app/spreads/[id]/SpreadDetailClient.tsx");
+const spreadDetailPath = path.join(process.cwd(), "src/components/spread/SpreadDetailClient.tsx");
 const spreadDetailContent = fs.readFileSync(spreadDetailPath, "utf-8");
 assert(
   spreadDetailContent.includes("<table") && spreadDetailContent.includes("คำถามที่ตำแหน่งนี้ตอบ"),
   "SpreadDetailClient.tsx ต้องมี semantic table สำหรับตำแหน่งไพ่",
 );
 
-const spreadPagePath = path.join(process.cwd(), "src/app/spreads/[id]/page.tsx");
+// metadata ของหน้าผังย้ายไปอยู่ในโมดูลที่ใช้ร่วมกันสองภาษาแล้ว (`_shared/pages/spread-detail.tsx`)
+const spreadPagePath = path.join(process.cwd(), "src/app/_shared/pages/spread-detail.tsx");
 const spreadPageContent = fs.readFileSync(spreadPagePath, "utf-8");
 assert(
   spreadPageContent.includes("ตำแหน่งไพ่"),
-  "spreads/[id]/page.tsx ต้องมี keyword ตำแหน่งไพ่ สำหรับ SEO",
+  "_shared/pages/spread-detail.tsx ต้องมี keyword ตำแหน่งไพ่ สำหรับ SEO ฝั่งไทย",
+);
+assert(
+  spreadPageContent.includes("tarot spread positions"),
+  "_shared/pages/spread-detail.tsx ต้องมี keyword ฝั่งอังกฤษของหน้าผังด้วย",
 );
 
 // 5. Blog & Readers SEO Copy (Wave 4.3 & 4.4)
@@ -105,7 +110,7 @@ assert(
   "บทความสำหรับผู้เริ่มต้นต้องมี 'เรียนไพ่ยิปซีฟรี' ใน keywords",
 );
 
-const readersPagePath = path.join(process.cwd(), "src/app/readers/page.tsx");
+const readersPagePath = path.join(process.cwd(), "src/app/(th)/readers/page.tsx");
 const readersContent = fs.readFileSync(readersPagePath, "utf-8");
 assert(
   readersContent.includes("หมอดูไพ่ยิปซี"),
@@ -116,7 +121,7 @@ assert(
 const wave4Files = [
   "src/lib/tarot/birth-card.ts",
   "src/components/encyclopedia/BirthCardCalculator.tsx",
-  "src/app/cards/birth-card/page.tsx",
+  "src/app/(th)/cards/birth-card/page.tsx",
 ];
 for (const file of wave4Files) {
   const filePath = path.join(process.cwd(), file);
@@ -141,7 +146,11 @@ function walkFiles(dir: string): string[] {
   return results;
 }
 
-const appFiles = walkFiles(path.join(process.cwd(), "src/app"));
+// `src/app/sitemap.ts` ใช้ฟิลด์ `alternates.languages` ของ MetadataRoute.Sitemap
+// ซึ่งเป็นคนละเรื่องกับ `metadata.alternates` ของหน้า — และมันสร้างคู่ hreflang
+// จาก `hasEnglishTwin()` ซึ่งเป็นแหล่งความจริงเดียวกับ buildAlternates อยู่แล้ว
+const SITEMAP_EXEMPT = path.join(process.cwd(), "src/app/sitemap.ts");
+const appFiles = walkFiles(path.join(process.cwd(), "src/app")).filter((f) => f !== SITEMAP_EXEMPT);
 let rawAlternatesCount = 0;
 for (const file of appFiles) {
   const content = fs.readFileSync(file, "utf-8");
@@ -161,7 +170,7 @@ assert(
 );
 
 // 8. S-03: /account/layout.tsx must declare robots noindex
-const accountLayoutPath = path.join(process.cwd(), "src/app/account/layout.tsx");
+const accountLayoutPath = path.join(process.cwd(), "src/app/(th)/account/layout.tsx");
 const accountLayoutContent = fs.readFileSync(accountLayoutPath, "utf-8");
 assert(
   accountLayoutContent.includes("robots:") && accountLayoutContent.includes("index: false"),
@@ -169,7 +178,7 @@ assert(
 );
 
 // 9. S-04: /tarot must be redirected in next.config.ts and src/app/tarot must not exist
-const tarotPageExists = fs.existsSync(path.join(process.cwd(), "src/app/tarot"));
+const tarotPageExists = fs.existsSync(path.join(process.cwd(), "src/app/(th)/tarot"));
 assert(!tarotPageExists, "src/app/tarot ต้องถูกลบออก (ย้ายไป redirects ใน next.config.ts แทน)");
 const nextConfigContent = fs.readFileSync(path.join(process.cwd(), "next.config.ts"), "utf-8");
 assert(
@@ -194,17 +203,33 @@ function stripComments(code: string): string {
 // `enableCacheInterception` ของ OpenNext ไม่มีอะไรให้เสิร์ฟ · Worker boot เต็มทุกคำขอ
 // หลังแก้: prerender ได้ 167 หน้า
 // ด่านนี้จึงถูกกลับด้านเพื่อ "ล็อกไม่ให้ของเดิมกลับมา"
-const layoutPath = path.join(process.cwd(), "src/app/layout.tsx");
-const layoutContent = stripComments(fs.readFileSync(layoutPath, "utf-8"));
+// อัปเดต 2026-09-06: root layout ถูกแยกเป็นสองรากตามกลุ่มเส้นทาง `(th)` และ `(en)`
+// เพื่อให้หน้า `/en/**` ได้ `<html lang="en">` ใน HTML ดิบ โดยยัง prerender ได้ทั้งหมด
+// โครง `<html>` จริงอยู่ที่ `src/app/_shared/RootHtml.tsx` — ตรวจทั้งสามไฟล์
+const ROOT_HTML_FILES = [
+  "src/app/(th)/layout.tsx",
+  "src/app/(en)/layout.tsx",
+  "src/app/_shared/RootHtml.tsx",
+];
+for (const relPath of ROOT_HTML_FILES) {
+  const content = stripComments(fs.readFileSync(path.join(process.cwd(), relPath), "utf-8"));
+  assert(
+    !content.includes("getServerLocale()") &&
+    !content.includes("await headers()") &&
+    !content.includes("await cookies()"),
+    `${relPath} ห้ามเรียก getServerLocale()/headers()/cookies() — จะทำให้ทุกหน้าเป็น dynamic ทั้งเว็บ (PERF)`,
+  );
+}
 assert(
-  !layoutContent.includes("getServerLocale()") &&
-  !layoutContent.includes("await headers()") &&
-  !layoutContent.includes("await cookies()"),
-  "src/app/layout.tsx ห้ามเรียก getServerLocale()/headers()/cookies() — จะทำให้ทุกหน้าเป็น dynamic ทั้งเว็บ (PERF)",
+  !fs.existsSync(path.join(process.cwd(), "src/app/layout.tsx")),
+  "ต้องไม่มี src/app/layout.tsx เดี่ยว ๆ อีก — root layout อยู่ในกลุ่มเส้นทาง (th)/(en) เท่านั้น",
+);
+const rootHtmlContent = stripComments(
+  fs.readFileSync(path.join(process.cwd(), "src/app/_shared/RootHtml.tsx"), "utf-8"),
 );
 assert(
-  layoutContent.includes('<html lang="th"'),
-  "src/app/layout.tsx ต้องใช้ <html lang=\"th\"> แบบคงที่ (ภาษาสลับฝั่ง client โดย LocaleProvider)",
+  rootHtmlContent.includes("<html lang={locale}"),
+  'RootHtml ต้องใช้ <html lang={locale}> โดย locale มาจากเส้นทางที่เขียนตรง ๆ ใน layout ของแต่ละกลุ่ม',
 );
 
 // 11. P-03: HomeSeoContent must be a Server Component (no 'use client')
@@ -236,12 +261,20 @@ assert(
 );
 
 // 14. PERF: หน้าแรกต้องเป็น static prerender — ห้ามดึง locale จากเซิร์ฟเวอร์
-const homePagePath = path.join(process.cwd(), "src/app/page.tsx");
+const homePagePath = path.join(process.cwd(), "src/app/(th)/page.tsx");
 const homePageContent = stripComments(fs.readFileSync(homePagePath, "utf-8"));
+const homeBodyContent = stripComments(
+  fs.readFileSync(path.join(process.cwd(), "src/app/_shared/pages/home.tsx"), "utf-8"),
+);
 assert(
   !homePageContent.includes("getServerLocale()") &&
-  homePageContent.includes("<HomeSeoContent />"),
-  "src/app/page.tsx ห้ามเรียก getServerLocale() — หน้าแรกต้อง prerender ได้ (PERF)",
+  !homeBodyContent.includes("getServerLocale()") &&
+  homeBodyContent.includes("<HomeSeoContent isEnglish={isEnglish} />"),
+  "หน้าแรกห้ามเรียก getServerLocale() — ต้อง prerender ได้ และรับภาษาจากเส้นทางเท่านั้น (PERF)",
+);
+assert(
+  homePageContent.includes('HomePageBody locale="th"'),
+  'src/app/(th)/page.tsx ต้องส่ง locale="th" เป็นค่าคงที่',
 );
 
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);

@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 34/34 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 35/35 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -93,7 +93,7 @@
   - **ISSUE-034** ไพ่ใบ 7–10 ของ `celtic-cross` และ `monthly-ten` ซ้อนกันแนวตั้ง 11.1px (~20%) — มีมาแต่เดิมทั้งคู่ ต้องให้เจ้าของเคาะว่าเป็นดีไซน์หรือบั๊ก
   - **ISSUE-035** CSP บล็อก `static.cloudflareinsights.com` ทุกการโหลดหน้า → **Cloudflare Web Analytics ไม่เก็บข้อมูลเลย** (GA4 ยังทำงานปกติ)
 - **ปิดงาน D ของแผนด้วย**: ด่าน `test-docs-numbers.ts` เคยอ่าน `ทั้ง 25 ผัง` เป็น `5 ผัง` เพราะ lookbehind ตัดที่เลขหน้าแล้ว regex ไปเริ่มใหม่กลางตัวเลข — เติม `(?<!\d)` กันไว้แล้วทั้ง 3 รูปแบบ
-- **ผลตรวจ**: `npm run repo:verify` ➔ ✅ **34/34 ด่าน**
+- **ผลตรวจ**: `npm run repo:verify` ➔ ✅ **35/35 ด่าน**
 
 ---
 
@@ -101,14 +101,14 @@
 
 - **สิ่งที่ทำ**: เคลียร์ PR เปิดค้าง 2 ตัวที่ merge ไม่ได้เพราะชนกับ `main`
   - **PR #297** (`สรุปตรงใจจากแม่หมอ` ขึ้นนำหน้าผลทำนายด่วน) — rebase บน `origin/main` ผ่านฉลุยไม่มี conflict · `repo:verify` 34/34 · force-push แล้ว auto-merge เข้า main เรียบร้อย
-  - **PR #294** (แผน QA ผังใหม่ + ISSUE-031/032/033) — ตรวจแล้วพบว่า **เนื้อหาถูก merge ไปแล้วเกือบทั้งหมด** ผ่าน PR #295 และคอมมิตอื่น ทำให้สาขานี้ **เก่ากว่า `main`** (ถ้า merge จะย้อนคืนเลข `34 ด่าน` เป็น `33` และลบโค้ดใน `test-docs-numbers.ts` กับ `github-auto.ts` ทิ้ง) จึงปิด PR แล้วยกเฉพาะเนื้อหาที่ยังเป็นจริงมาลง `main` แทน
+  - **PR #294** (แผน QA ผังใหม่ + ISSUE-031/032/033) — ตรวจแล้วพบว่า **เนื้อหาถูก merge ไปแล้วเกือบทั้งหมด** ผ่าน PR #295 และคอมมิตอื่น ทำให้สาขานี้ **เก่ากว่า `main`** (ถ้า merge จะย้อนคืนเลข `35 ด่าน` เป็น `33` และลบโค้ดใน `test-docs-numbers.ts` กับ `github-auto.ts` ทิ้ง) จึงปิด PR แล้วยกเฉพาะเนื้อหาที่ยังเป็นจริงมาลง `main` แทน
 - **เอกสารที่แก้ให้ตรงความจริง**:
   - `docs/KNOWN_ISSUES.md` — เพิ่ม **ISSUE-032** (ผังใหม่ 5 ผังยังไม่เคยถูกเดินพิธีกรรมจริง ยังไม่จับภาพมือถือ 320/375px) ซึ่งเป็นข้อเดียวจากสามข้อที่ยังค้างจริง
   - `docs/plans/HANDOFF_QA_SPREADS_2026-09-06.md` — ปิดงาน **B** (`guestAllowed` ผูกกับรันไทม์แล้วใน PR #295) · ปิดงาน **C.2** (`test-entitlement.ts` หัวข้อ 10 ครอบเส้นทาง "ธงปิด" แล้ว) · แก้เลขด่าน `33` → `34`
 - **สิ่งที่ตรวจแล้วว่าไม่ใช่ปัญหาแล้ว**:
   - ~~ISSUE-031~~ `guestAllowed` ไม่มีผลบังคับ → แก้แล้วใน PR #295 (`STANDARD_SPREAD_IDS` อ่านจาก `SPREADS.guestAllowed` เป็นแหล่งความจริงเดียว)
   - ~~ISSUE-033~~ เส้นทาง "แอดมินปิดระบบสิทธิ์" ไม่มีด่านตรวจ → แก้แล้ว `scripts/qa/test-entitlement.ts:285-297`
-- **ผลตรวจ**: `npm run repo:verify` ➔ ✅ **34/34 ด่าน**
+- **ผลตรวจ**: `npm run repo:verify` ➔ ✅ **35/35 ด่าน**
 - **สิ่งที่ยังค้าง**: ISSUE-032 เป็นงาน QA ด้วยมือ ต้องเปิดเบราว์เซอร์จริงที่ 320/375px — จุดเสี่ยงสุดคือ `monthly-ten` (ช่องว่างคอลัมน์แคบกว่า `celtic-cross` 23%)
 
 ---
@@ -158,8 +158,8 @@
 2. **ผูกตัวแปรสภาพแวดล้อมระดับ Production**:
    - `wrangler.jsonc`: เพิ่ม `"NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT": "https://ik.imagekit.io/seertarotweb"` ใน `vars`
    - `.github/workflows/deploy.yml`: ส่ง `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` ในขั้นตอน Build & Deploy
-3. **ตรวจสอบความสมบูรณ์ 34 ด่าน**:
-   - ผ่าน `npm run repo:verify` ครบ 34/34 ด่าน ไร้ข้อผิดพลาด
+3. **ตรวจสอบความสมบูรณ์ 35 ด่าน**:
+   - ผ่าน `npm run repo:verify` ครบ 35/35 ด่าน ไร้ข้อผิดพลาด
 
 ### 🗓️ 2026-09-06: 🖼️ สถาปัตยกรรมสื่อคู่ขนาน (Dual-Engine Media Pipeline: ImageKit + Cloudinary)
 
@@ -178,8 +178,8 @@
    - สร้างโมดูล `src/lib/media/cloudinary.ts` พร้อมฟังก์ชัน `getCloudinaryCloudName()`, `isCloudinaryEnabled()`, และ `buildCloudinaryShareImageUrl()`
    - สร้าง Transformation URL สำหรับภาพแชร์ขนาด 1200x630 พร้อมปรับแต่งคุณภาพอัตโนมัติ (`f_auto,q_auto`)
    - ถอยกลับไปใช้ Client Canvas / Fallback อัตโนมัติหากยังไม่ได้ตั้งค่า `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
-4. **การทดสอบความสมบูรณ์ 34 ด่าน**:
-   - ผ่าน `npm run repo:verify` ครบทั้ง 34 ด่านอย่างสมบูรณ์แบบ
+4. **การทดสอบความสมบูรณ์ 35 ด่าน**:
+   - ผ่าน `npm run repo:verify` ครบทั้ง 35 ด่านอย่างสมบูรณ์แบบ
 
 ### 🗓️ 2026-09-06: ⚡ เปิดใช้ 3 เทคนิคเร่งความเร็วฝั่ง Client (Speed Boosters) & ระบบ PWA / Service Worker (Zero Bundle Overhead)
 
@@ -455,6 +455,106 @@ shuffle กับ read ซึ่งเกิดไปก่อนหน้าน
 
 ---
 
+### 🗓️ 2026-09-06: เปิด SEO ภาษาอังกฤษจริง — ต้นไม้ `/en` แบบ prerender 115 หน้า (โดย Claude Opus 5)
+
+**ที่มา**: เจ้าของสั่ง _"ทำทั้งหมดเลย"_ ต่อจากแผน [`HANDOFF_EN_ROUTING_2026-09-06.md`](plans/HANDOFF_EN_ROUTING_2026-09-06.md)
+
+**สถาปัตยกรรมที่ลง**: Route Group สองราก — `src/app/(th)/**` และ `src/app/(en)/en/**`
+ภาษามาจาก **path segment ที่เขียนตรง ๆ ตอน build** ไม่ใช่จาก request
+จึงได้ทั้ง SEO สองภาษา **และ** SSG 100% พร้อมกัน โดยไม่ละเมิดกฎ INC-0091 สักข้อ
+
+| ตัวชี้วัด | ก่อน | หลัง |
+| :--- | :---: | :---: |
+| หน้า prerender ตอน build | 216 | **331** |
+| หน้าภาษาอังกฤษที่ Google เข้าถึงได้ | **0** | **115** |
+| `<html lang="en">` ใน HTML ดิบของหน้า EN | ไม่มี | **มี** |
+| hreflang ที่ชี้ไปยัง URL ที่มีอยู่จริง | 0% (ชี้ `?lang=en` ทั้งหมด) | **100%** |
+| ภาษาไทยหลงในหน้าอังกฤษ (`/en/cards`) | 14.3% | **0.0%** |
+| URL ภาษาไทยที่ต้องย้าย/redirect | — | **0 เส้น** |
+
+**สิ่งที่ทำ**
+- `src/app/(th)/` · `src/app/(en)/` — root layout สองราก · โครง `<html>` ใช้ร่วมกันที่ `_shared/RootHtml.tsx`
+  (route group ไม่ปรากฏใน URL — เส้นทางไทยเดิมไม่ขยับแม้แต่เส้นเดียว)
+- `_shared/pages/*` — เนื้อหน้าที่ใช้ร่วมสองภาษา 7 โมดูล (home · cards-index · cards-all
+  · card-group · card-detail · spreads-index · spread-detail) รับ `locale` เป็นค่าคงที่
+- `LocaleProvider` รับ prop `forcedLocale` — ตรึงภาษาตาม URL ในต้นไม้ `/en`
+  ทำให้สาขา `isEnglish` ที่มีอยู่แล้วใน 25+ ไฟล์ทำงานทันทีโดยไม่ต้องแก้คอมโพเนนต์
+- `src/lib/i18n/paths.ts` + `LocaleLink` — แหล่งความจริงเดียวว่าหน้าไหนมีฝาแฝด
+  และลิงก์ภายในทุกเส้นอยู่ในต้นไม้ภาษาเดียวกัน (สลับใน 12 คอมโพเนนต์)
+- `buildAlternates(path, { locale, englishTwin })` — `englishTwin` **ค่าเริ่มต้นเป็น false**
+  หน้าที่ไม่มีฝาแฝดจึงไม่ประกาศ hreflang ที่ไม่มีอยู่จริงโดยอัตโนมัติ
+- `sitemap.ts` — เติม 115 URL อังกฤษพร้อมคู่ `alternates.languages` ชี้กันไป-กลับครบ
+- `LanguageSwitcher` — กดแล้ว **นำทางไปยัง URL ฝาแฝด** ไม่ใช่แค่สลับ state
+- เขียนบทความ SEO อังกฤษใหม่ให้ `/en/daily` และ `/en/love/1-card` (ไม่ใช่แปลตรงตัว)
+  และเติม `seoTitleEn`/`descriptionEn` ให้หมวดไพ่ทั้ง 6 หมวด
+
+**บั๊กที่เจอระหว่างทาง (มีมาก่อน แต่โผล่ตอนย้ายโครง)**
+`src/components/card/CardImage.tsx` ผูก `onError` ไว้กับ `<img>` แต่ไม่มี `"use client"`
+โครงไฟล์เดิมบังเอิญทำให้มันตกไปอยู่ฝั่ง client พอย้ายเข้ากลุ่มเส้นทาง build ก็ล้มทันทีด้วย
+_"Event handlers cannot be passed to Client Component props"_ · แก้ด้วยการประกาศ
+`"use client"` ให้ถูกต้อง — ผลพลอยได้คือระบบถอยภาพไปใช้ไฟล์ในเครื่องกลับมาทำงานจริง
+บนหน้าที่เรนเดอร์ฝั่งเซิร์ฟเวอร์ (เดิมถูกเขียนทิ้งเงียบ ๆ)
+
+**ด่านที่ 35 ใหม่**: [`scripts/qa/test-en-routing.ts`](../scripts/qa/test-en-routing.ts) —
+ตรวจว่าทุกเส้นทางที่ประกาศว่ามีฝาแฝดมีไฟล์อยู่จริง · hreflang ไม่มี `?lang=` ·
+ทั้งสองฝั่งประกาศ `englishTwin: true` ครบ · sitemap ชี้กันไป-กลับ · หน้าที่ยังไม่แปล
+ต้องไม่ถูกประกาศว่ามีฝาแฝด · และลิงก์ภายในใช้ `LocaleLink` ทุกจุด
+(ด่านนี้จับบั๊กจริงระหว่างทำ: `/en/daily` ประกาศคู่แต่ `/daily` ฝั่งไทยลืมเปิด)
+
+**ยังไม่ทำ (ขั้น C)**: แปลเนื้อบทความ 26 บทแล้วค่อยเปิด `/en/blog`
+· เช่นเดียวกับ `/en/spreads/topic/*` และ `/en/cards/birth-card`
+
+---
+
+### 🗓️ 2026-09-06: วางแผนเปิด SEO ภาษาอังกฤษจริง — เส้นทางแยก `/en/...` (โดย Claude Opus 5)
+
+> **ขอบเขต**: เขียนแผนอย่างเดียว — ไม่แก้โค้ดที่รันจริง (แตะแค่ `docs/plans/*`, `docs/WORK_LOG.md`, `CLAUDE.md`)
+
+**ที่มา**: เจ้าของโปรเจกต์ชี้ไปที่ "ผลข้างเคียงที่ยอมรับ" ที่เราเขียนไว้เองในหัวข้อ INC-0091
+(ด้านล่างของหน้านี้) แล้วสั่งว่า _"วางแผนรวมแก้อันนี้ไปด้วย"_
+
+**ปัญหาที่ยืนยันแล้ว**: `buildAlternates()` ประกาศ `hreflang="en-US"` ชี้ไป `?lang=en`
+แต่หน้านั้นเป็น SSG ที่เสิร์ฟ HTML ชุดเดียวกับฉบับไทย และ self-canonical กลับมาที่ URL สะอาด
+ตามกฎของ Google ปลายทาง `hreflang` ต้อง canonical หาตัวเอง — เมื่อไม่ใช่
+**Google จะทิ้งคำประกาศ hreflang ทั้งชุด** ไม่ใช่แค่ตัวที่ผิด
+สรุปคือตอนนี้เราบอก Google ว่ามีฉบับอังกฤษทั้งที่ไม่มีจริง และไม่มีตัวตนในผลค้นหาอังกฤษเลยสักหน้า
+
+**สิ่งที่ค้นพบเพิ่ม (วัดจริง — ข่าวดี)**: งานแปลเสร็จไปเกือบหมดแล้ว ขาดแค่ "เส้นทาง"
+
+| แหล่งเนื้อหา | ความครบของ EN |
+| :--- | :--- |
+| ไพ่ 78 ใบ — `meaningsEn` / `keywordsEn` / `astrologyEn` / `numerologyEn` | **78/78 ครบทั้ง 4 ฟิลด์** |
+| ผังพยากรณ์ — ชื่อ/คำโปรย/คำอธิบาย + ทุกช่องวางไพ่ | **25/25** |
+| พจนานุกรม UI `dictionaries/en.ts` | **162/162 คีย์ ตรงกับไทย 100%** |
+| คอมโพเนนต์ที่มีสาขา `isEnglish` แล้ว | 25+ ไฟล์ |
+| **เนื้อบทความเต็ม (`content`)** | **0/26 — ไทยล้วน ไม่มี `contentEn`** |
+
+**แผน** = [`docs/plans/HANDOFF_EN_ROUTING_2026-09-06.md`](plans/HANDOFF_EN_ROUTING_2026-09-06.md)
+
+- **ขั้น A (ทำได้ทันที)**: ถอด `en-US` ออกจาก `buildAlternates()` — หยุดส่งสัญญาณเท็จให้ Google
+  ก่อน เพราะของเดิมไม่เคยทำงานอยู่แล้ว การถอดออกจึงไม่เสียอะไรเลย
+- **ขั้น B (3 PR)**: Route Group สองราก — `src/app/(th)/**` (URL เดิมไม่ขยับ เพราะ route group
+  ไม่ปรากฏใน URL) + `src/app/(en)/en/**` ที่ได้ `<html lang="en">` ตั้งแต่ไบต์แรก
+  ภาษามาจาก **path segment ตอน build** ไม่ใช่จาก request จึงยัง prerender ได้ 100%
+  และ**ไม่ละเมิดกฎ INC-0091** (ห้าม middleware · ห้าม dynamic API ใน root layout)
+  กลไก: `LocaleProvider` รับ prop `forcedLocale` → สาขา `isEnglish` ที่มีอยู่แล้วทำงานทันที
+  โดยไม่ต้องแก้คอมโพเนนต์สักตัว · เพิ่ม 122 หน้า (prerender 216 → ~338)
+- **ขั้น C**: แปลเนื้อบทความ 26 บท แล้วค่อยเปิด `/en/blog` เฉพาะบทที่แปลแล้ว
+
+**ตัดออกจากขอบเขตโดยตั้งใจ**: `/en/blog` (เนื้อไทยล้วน = thin content ถ้าเปิดตอนนี้)
+· `/en/privacy` (ข้อความ PDPA ต้องให้ฝ่ายกฎหมายรับรองก่อน) · หน้า dynamic และหน้าที่ปิด index อยู่แล้ว
+
+**ทำไมไม่เลือก `app/[lang]/...`**: จะบังคับให้ไทยกลายเป็น `/th/...` ต้อง redirect หน้าที่ติดอันดับแล้ว
+216 หน้า เสี่ยงเสียอันดับที่สร้างมา — ส่วน route group ไม่ปรากฏใน URL จึงปลอดภัย 100%
+
+**ข้อเสนอเชิงกลยุทธ์**: ทำขั้น A ทันที · ขั้น B ให้เริ่มเฉพาะ `/en/cards/**` (81 หน้า) ก่อน
+แล้ววัดผล Search Console 4–6 สัปดาห์ค่อยขยาย — ตลาดคำค้นอังกฤษแข่งดุกว่าไทยมาก
+แต่ต้นทุนของเราต่ำผิดปกติเพราะงานแปลเสร็จแล้ว
+
+**ยังไม่ได้ทำ**: ทั้งขั้น A, B, C — รอเจ้าของสั่งเริ่ม
+
+---
+
 ### 🗓️ 2026-09-06: 🔥 กู้ SSG ทั้งเว็บ — prerender 0 → 167 หน้า (INC-0091) (โดย Claude Opus 5)
 
 **ที่มา:** เจ้าของสั่ง "รีดประสิทธิภาพสูงสุด" หลังพบว่าเฟส 1 (Cloudflare Cache Rules)
@@ -495,7 +595,7 @@ root layout ห้ามเรียก `getServerLocale`/`headers`/`cookies` ·
 และ `?lang=en` จะได้ HTML ไทยจากแคช แล้วค่อยสลับฝั่ง client
 ➔ hreflang `en-US` ที่ชี้ไป `?lang=en` จึงยังไม่ใช่หน้าอังกฤษจริงในสายตา Googlebot
 ➔ ถ้าจะเอา SEO อังกฤษจริงจัง ต้องทำ routing แยกเส้นทาง (`/en/...`) แล้ว prerender สองภาษา
-  (กลยุทธ์ปัจจุบันเป็นคีย์เวิร์ดไทยล้วน จึงยังไม่เร่ง)
+  **➔ วางแผนแก้แล้วเมื่อ 2026-09-06 ตามคำสั่งเจ้าของ: [`docs/plans/HANDOFF_EN_ROUTING_2026-09-06.md`](plans/HANDOFF_EN_ROUTING_2026-09-06.md)**
 
 **Cloudflare เพิ่มเติม:** เปิด **Crawler Hints** (บอกเสิร์ชเอนจินเมื่อเนื้อหาเปลี่ยน
 ลดการไล่คลานเปล่า) · **ไม่เปิด Always Online** เพราะต้องแชร์เนื้อหาเว็บให้ Internet Archive
@@ -624,7 +724,7 @@ R2 Lifecycle (ข้อ 11 — ตั้งใน R2 Settings)
      - `/love/1-card`: JS ≤ 460 KB (วัดจริง: 451 KB, ลดลงจาก 550 KB), HTML ≤ 25 KB (วัดจริง: 18 KB)
      - `/spreads`: JS ≤ 320 KB (วัดจริง: 312 KB, ลดลงจาก 410 KB), HTML ≤ 45 KB (วัดจริง: 37 KB)
      - `/cards/all`: JS ≤ 220 KB (วัดจริง: 210 KB, ลดลงจาก 336 KB), HTML ≤ 45 KB (วัดจริง: 37 KB)
-   - ผ่านการทดสอบ `test-bundle-budget.ts` ครบ 8/8 เส้นทาง และผ่าน `repo:verify` ครบทั้ง 34 ด่าน 100%
+   - ผ่านการทดสอบ `test-bundle-budget.ts` ครบ 8/8 เส้นทาง และผ่าน `repo:verify` ครบทั้ง 35 ด่าน 100%
 
 ### 🗓️ 2026-09-06: PR 6 — Server Locale Resolution (S-02) และย้าย HomeSeoContent เป็น Server Component (P-03) (โดย Antigravity AI)
 
@@ -719,7 +819,7 @@ R2 Lifecycle (ข้อ 11 — ตั้งใน R2 Settings)
    - `w512b`: ขนาดรวมลดจาก 12.80 MB เหลือ **7.00 MB** (เฉลี่ย 91.9 KB/ใบ — ลดลง **45%**)
    - **จำนวนไฟล์ที่ใหญ่กว่า JPEG ต้นฉบับ: 0 ไฟล์ (100% เล็กกว่าต้นฉบับ)**
    - ขนาดรวมภาพย่อทั้ง 390 ใบ: **21.02 MB** (ลดลงจากเดิมที่เกิน 45 MB)
-   - ผ่านการทดสอบ [`scripts/qa/test-image-paths.ts`](../scripts/qa/test-image-paths.ts) และครบ 34/34 ด่านของ `npm run repo:verify`
+   - ผ่านการทดสอบ [`scripts/qa/test-image-paths.ts`](../scripts/qa/test-image-paths.ts) และครบ 35/35 ด่านของ `npm run repo:verify`
 
 ### 🗓️ 2026-09-06: PR 3 — ปรับโครงสร้าง CardSummary และตัด Payload หน้ารวมไพ่ 8 หน้า (ลด HTML /cards ลง 80.5%) (โดย Antigravity AI)
 
@@ -746,7 +846,7 @@ R2 Lifecycle (ข้อ 11 — ตั้งใน R2 Settings)
 5. **การตรวจสอบและเกณฑ์คุณภาพ**:
    - `npm run typecheck` ➔ 0 errors
    - `npx tsx scripts/qa/test-bundle-budget.ts` ➔ ผ่านครบ 8 เส้นทาง 100%
-   - `npm run repo:verify` ➔ ผ่านครบทั้ง 34 ด่าน 100%
+   - `npm run repo:verify` ➔ ผ่านครบทั้ง 35 ด่าน 100%
 
 ### 🗓️ 2026-09-06: PR 2 — ปลดระวาง Datasets ใน nav-links, ลบโค้ดตาย 3 โมดูล, และ Ratchet งบ JS ลง ~150 KB (โดย Antigravity AI)
 
@@ -777,7 +877,7 @@ R2 Lifecycle (ข้อ 11 — ตั้งใน R2 Settings)
 6. **การตรวจสอบและเกณฑ์คุณภาพ**:
    - `npm run typecheck` ➔ 0 errors
    - `npx tsx scripts/qa/test-bundle-budget.ts` ➔ ผ่านครบ 8 เส้นทาง
-   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 34 ด่าน 100%**
+   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 35 ด่าน 100%**
 
 ### 🗓️ 2026-09-06: PR 1 — สถาปนาด่านที่ 34: งบน้ำหนักหน้าเว็บ (Performance Budget Gate) (โดย Antigravity AI)
 
@@ -792,7 +892,7 @@ R2 Lifecycle (ข้อ 11 — ตั้งใน R2 Settings)
 3. **การทดสอบและเกณฑ์คุณภาพ**:
    - `test-bundle-budget.ts` ➔ ผ่านครบทั้ง 8 เส้นทาง
    - `test-docs-numbers.ts` ➔ ผ่าน 100%
-   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 34 ด่าน 100%**
+   - `npm run repo:verify` ➔ **ผ่านครบทั้ง 35 ด่าน 100%**
 
 ### 🗓️ 2026-09-06: รอบตรวจใหญ่ประสิทธิภาพ · โค้ดตาย · SEO — เขียนแผนพร้อมตัวเลขวัดจริง (โดย Claude Opus 5)
 

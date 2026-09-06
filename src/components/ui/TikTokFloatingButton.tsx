@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "@/lib/i18n";
 import { usePathname } from "next/navigation";
 
 /**
@@ -14,6 +15,7 @@ import { usePathname } from "next/navigation";
  * - Accessible: aria-label, rel="noopener noreferrer", focus-visible ring
  */
 export function TikTokFloatingButton() {
+  const { isEnglish } = useLocale();
   const pathname = usePathname();
   // ซ่อนบนหน้าแอดมิน และหน้าห้องแชท/ผลพยากรณ์ (/reading/chat ฯลฯ) เพื่อไม่ให้ลอยบังปุ่มส่งข้อความหรือแผงสนทนาบนมือถือ
   if (pathname?.startsWith("/admin") || pathname?.startsWith("/reading")) return null;
@@ -21,7 +23,7 @@ export function TikTokFloatingButton() {
   return (
     <aside
       data-floating="true"
-      aria-label="ช่องทางติดตาม TikTok"
+      aria-label={isEnglish ? "Follow us on TikTok" : "ช่องทางติดตาม TikTok"}
       className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-30 select-none print:hidden pointer-events-auto"
       style={{
         position: "fixed",
@@ -34,8 +36,8 @@ export function TikTokFloatingButton() {
         href="https://www.tiktok.com/@seerada.tarot"
         target="_blank"
         rel="noopener noreferrer"
-        title="ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"
-        aria-label="ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"
+        title={isEnglish ? "Follow Seerada on TikTok (@seerada.tarot)" : "ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"}
+        aria-label={isEnglish ? "Follow Seerada on TikTok (@seerada.tarot)" : "ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"}
         className="group flex items-center gap-2.5 rounded-full p-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F2EA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
       >
         {/* Tooltip Pill บน Desktop (จะเลื่อนโผล่มาเมื่อ Hover) */}
@@ -44,7 +46,7 @@ export function TikTokFloatingButton() {
           className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#110E1B]/90 backdrop-blur-md border border-white/15 text-[#F3F0EA] text-xs font-serif-th font-semibold shadow-lg opacity-0 -translate-x-2 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 whitespace-nowrap"
         >
           
-          <span>ติดตามแม่หมอ</span>
+          <span>{isEnglish ? "Follow Seerada" : "ติดตามแม่หมอ"}</span>
           <span className="text-white/70">@seerada.tarot</span>
         </span>
 

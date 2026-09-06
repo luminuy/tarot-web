@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
+// ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion, AnimatePresence } from "motion/react";
 import {
   type Spread,
