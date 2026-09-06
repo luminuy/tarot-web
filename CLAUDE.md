@@ -42,6 +42,7 @@
 | [docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md](docs/plans/HANDOFF_PERF_SEO_AUDIT_2026-09-06.md) | ⚡ **แผนยกเครื่องประสิทธิภาพ · โค้ดตาย · SEO** — รอบตรวจใหญ่ 2026-09-06: บันเดิล JS ทุกหน้าหนัก 420–472 KB (gzip) · `/cards` ส่ง HTML 896 KB · ภาพย่อ `w768` หนักกว่าไฟล์ต้นฉบับ · `hreflang` หายทั้งเว็บ · โมดูลกำพร้า 4 ไฟล์ (มีตัวเลขวัดจริง + ลำดับลงมือ 7 PR) |
 | [docs/plans/SITE_SHELL_SEO_PLAN.md](docs/plans/SITE_SHELL_SEO_PLAN.md) | 🏛️ **แผน Site Shell + SEO** — Header/Footer กลางทั้งเว็บ + RelatedCards ฝั่งเซิร์ฟเวอร์ 312 ลิงก์ (PR A-C) |
 | [docs/plans/HANDOFF_MEDIA_FIX_2026-09-06.md](docs/plans/HANDOFF_MEDIA_FIX_2026-09-06.md) | 🖼️ **แผนแก้ท่อสื่อหลัง PR #319–325** — ภาพแชร์ Cloudinary ตัวหนังสือทับกัน (M-01) · Cloudinary แย่งที่ภาพไพ่จริงของผู้ใช้ (M-02) · ImageKit เป็นจุดพังเดี่ยว (M-03) + กับดัก `.env.example` / `sw.js` / `/api/search` |
+| [docs/plans/HANDOFF_SMOOTH_FAST_2026-09-06.md](docs/plans/HANDOFF_SMOOTH_FAST_2026-09-06.md) | ✦ **แผนทำเว็บให้สมูทและไวระดับโลก** — JS ต่อหน้า 211–452 KB gzip (เกินเกณฑ์ 1.2–2.7 เท่า) · สำรับไพ่ 896 KB ยังอยู่ในบันเดิลไคลเอนต์ · `boxShadow` แอนิเมตบนไพ่ 80 ใบ · `content-visibility` เขียนไว้แต่ไม่ได้ใช้ · ยังไม่มี View Transition (9 งาน แบ่ง 4 คลื่น) |
 
 ---
 
