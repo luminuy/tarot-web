@@ -127,6 +127,46 @@ if (command === "status") {
   process.exit(0);
 }
 
+// ── กันคำแปลที่ทำไปแล้วหายจากการรันซ้ำ (บทเรียน INC จาก PR #339) ──────────────
+// เดิม export เขียนทับไฟล์ทิ้งทั้งดุ้นแบบไม่เตือน — รันครั้งเดียวคำแปลที่ทีมส่งกลับมา
+// หายเกลี้ยงทุกช่อง ทั้งที่ไฟล์เดียวกันนี้คือที่เก็บงานแปลจริง
+// ตอนนี้จะอ่านคำแปลเดิมมาผสมกลับให้อัตโนมัติ และแจ้งว่ามีหน่วยไหนตกหล่นบ้าง
+type PendingUnit = { id: string; en?: string };
+
+function carryOverExistingTranslations(nextUnits: PendingUnit[]): {
+  carried: number;
+  orphaned: string[];
+} {
+  if (!fs.existsSync(OUT_FILE)) return { carried: 0, orphaned: [] };
+
+  let previous: { units?: PendingUnit[] };
+  try {
+    previous = JSON.parse(fs.readFileSync(OUT_FILE, "utf-8"));
+  } catch {
+    console.warn("⚠️  อ่านไฟล์เดิมไม่ได้ (JSON เสีย) — ข้ามการกู้คำแปลเดิม");
+    return { carried: 0, orphaned: [] };
+  }
+
+  const done = new Map<string, string>();
+  for (const unit of previous.units ?? []) {
+    if (unit.en?.trim()) done.set(unit.id, unit.en);
+  }
+  if (done.size === 0) return { carried: 0, orphaned: [] };
+
+  let carried = 0;
+  for (const unit of nextUnits) {
+    const existing = done.get(unit.id);
+    if (existing) {
+      unit.en = existing;
+      carried++;
+      done.delete(unit.id);
+    }
+  }
+  return { carried, orphaned: [...done.keys()] };
+}
+
+const { carried, orphaned } = carryOverExistingTranslations(units as PendingUnit[]);
+
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.writeFileSync(
   OUT_FILE,
@@ -145,4 +185,13 @@ fs.writeFileSync(
 );
 
 console.log(`\n✅ เขียนไฟล์แล้ว: ${path.relative(process.cwd(), OUT_FILE)}`);
+if (carried > 0) {
+  console.log(`   ♻️  กู้คำแปลเดิมกลับมาให้แล้ว ${carried} หน่วย (ไม่ต้องแปลซ้ำ)`);
+}
+if (orphaned.length > 0) {
+  console.log(`   ⚠️  มีคำแปลเดิม ${orphaned.length} หน่วยที่ไม่มี id ตรงกับข้อความปัจจุบันแล้ว`);
+  console.log("      (ต้นฉบับไทยถูกแก้หรือถูกลบ) — ตรวจก่อน commit ว่าตั้งใจให้หาย:");
+  for (const id of orphaned.slice(0, 10)) console.log(`        · ${id}`);
+  if (orphaned.length > 10) console.log(`        · ...อีก ${orphaned.length - 10} หน่วย`);
+}
 console.log("   ส่งไฟล์นี้ให้ทีมแปลได้เลย — เติมเฉพาะช่อง `en` แล้วส่งกลับ\n");
