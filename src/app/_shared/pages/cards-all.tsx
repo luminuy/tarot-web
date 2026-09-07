@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { AllCardsTable } from "@/components/encyclopedia/AllCardsTable";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import { localeHref } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -58,11 +59,25 @@ const COPY = {
 
 export function buildCardsAllMetadata(locale: Locale): Metadata {
   const copy = COPY[locale];
+  const isEnglish = locale === "en";
+  const ogImages = buildPageOgImage({
+    title: isEnglish ? "All 78 Tarot Cards Meanings" : "ความหมายไพ่ยิปซี 78 ใบ ทั้งหมด",
+    eyebrow: isEnglish ? "QUICK REFERENCE TABLE" : "ตารางสรุป 78 ใบ จบในหน้าเดียว",
+    cardImage: "major-00.jpg",
+    alt: copy.title,
+  });
+
   return {
     title: copy.title,
     description: copy.description,
     alternates: buildAlternates(PATH, { locale, englishTwin: true }),
-    openGraph: buildOpenGraph(locale, { title: copy.title, description: copy.description, path: PATH }),
+    openGraph: buildOpenGraph(locale, { title: copy.title, description: copy.description, path: PATH, images: ogImages }),
+    twitter: {
+      card: "summary_large_image",
+      title: copy.title,
+      description: copy.description,
+      images: [ogImages[0].url],
+    },
   };
 }
 

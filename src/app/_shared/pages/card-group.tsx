@@ -4,6 +4,8 @@ import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { CARD_GROUPS, type CardGroupInfo } from "@/data/cards/group-seo";
 import { CardGroupView } from "@/components/encyclopedia/CardGroupView";
 import { buildAlternates } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
+import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildOpenGraph } from "../seo";
@@ -20,11 +22,24 @@ export function buildCardGroupMetadata(groupId: GroupId, locale: Locale): Metada
   const description = locale === "en" ? group.descriptionEn : group.descriptionTh;
   const path = `/cards/${groupId}`;
 
+  const ogImages = buildPageOgImage({
+    title: locale === "en" ? group.nameEn : group.nameTh,
+    eyebrow: locale === "en" ? "TAROT CARD SUIT & ARCANA" : "หมวดหมู่ไพ่ทาโรต์",
+    cardImage: getCategoryCardImage(groupId),
+    alt: title,
+  });
+
   return {
     title,
     description,
     alternates: buildAlternates(path, { locale, englishTwin: true }),
-    openGraph: buildOpenGraph(locale, { title, description, path }),
+    openGraph: buildOpenGraph(locale, { title, description, path, images: ogImages }),
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImages[0].url],
+    },
   };
 }
 

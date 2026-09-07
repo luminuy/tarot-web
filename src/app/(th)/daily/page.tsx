@@ -3,6 +3,14 @@ import { DailyClient } from "@/components/daily/DailyClient";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
+import { buildPageOgImage } from "@/lib/media/og-image";
+
+const dailyOgImages = buildPageOgImage({
+  title: "ดูดวงไพ่ยิปซีรายวัน",
+  eyebrow: "ไพ่นำทางประจำวัน",
+  cardImage: "major-19.jpg",
+  alt: "ดูดวงไพ่ยิปซีรายวัน 1909 Rider-Waite",
+});
 
 export const metadata: Metadata = {
   title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางชีวิตวันนี้ (เปิดฟรีทุกวัน) | SeerTarot",
@@ -26,21 +34,14 @@ export const metadata: Metadata = {
     siteName: "SeerTarot",
     locale: "th_TH",
     type: "website",
-    images: [
-      {
-        url: `${SITE_ORIGIN}/cards/w512b/major-19.webp`,
-        width: 512,
-        height: 878,
-        alt: "The Sun - ดูดวงไพ่ยิปซีรายวัน",
-      },
-    ],
+    images: dailyOgImages,
   },
   twitter: {
     card: "summary_large_image",
     title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางชีวิตวันนี้ | SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบเช็กพลังงานประจำวัน ทั้งการงาน การเงิน ความรัก และข้อควรระวัง ฟรีทุกวัน",
-    images: [`${SITE_ORIGIN}/cards/w512b/major-19.webp`],
+    images: [dailyOgImages[0].url],
   },
 };
 

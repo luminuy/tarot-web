@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import TarotFlow from "@/components/home/TarotFlow";
 import { HomeSeoContent } from "@/components/seo/HomeSeoContent";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
@@ -18,8 +19,37 @@ import type { Locale } from "@/lib/i18n/types";
  * ที่เขียนไว้ในโค้ดตอน build เท่านั้น ไม่งั้นทุกหน้าจะกลายเป็น dynamic (INC-0091)
  */
 export function buildHomeMetadata(locale: Locale): Metadata {
+  const isEnglish = locale === "en";
+  const title = isEnglish
+    ? "Free Online Tarot Readings with AI Reader · SeerTarot"
+    : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI";
+  const description = isEnglish
+    ? "Free online 1909 Rider-Waite tarot readings. Shuffle and draw cards yourself, with an AI tarot reader and provably fair SHA-256 randomness."
+    : "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair";
+
+  const ogImages = buildPageOgImage({
+    title: isEnglish ? "Online Rider-Waite Tarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์ 1909",
+    eyebrow: isEnglish ? "SACRED ORACLE TAROT" : "เปิดไพ่กับแม่หมอ AI",
+    cardImage: "major-19.jpg",
+    alt: title,
+  });
+
   return {
     alternates: buildAlternates("/", { locale, englishTwin: true }),
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: isEnglish ? "en_US" : "th_TH",
+      siteName: "SeerTarot",
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImages[0].url],
+    },
   };
 }
 

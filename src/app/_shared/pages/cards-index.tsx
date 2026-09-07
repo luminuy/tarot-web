@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
 import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
@@ -32,11 +33,25 @@ const COPY = {
 
 export function buildCardsIndexMetadata(locale: Locale): Metadata {
   const copy = COPY[locale];
+  const isEnglish = locale === "en";
+  const ogImages = buildPageOgImage({
+    title: isEnglish ? "Tarot Card Meanings: All 78 Cards" : "ความหมายไพ่ยิปซี ครบ 78 ใบ",
+    eyebrow: isEnglish ? "TAROT ENCYCLOPEDIA" : "คัมภีร์ไพ่ทาโรต์ 1909",
+    cardImage: "major-00.jpg",
+    alt: copy.title,
+  });
+
   return {
     title: copy.title,
     description: copy.description,
     alternates: buildAlternates(PATH, { locale, englishTwin: true }),
-    openGraph: buildOpenGraph(locale, { title: copy.title, description: copy.description, path: PATH }),
+    openGraph: buildOpenGraph(locale, { title: copy.title, description: copy.description, path: PATH, images: ogImages }),
+    twitter: {
+      card: "summary_large_image",
+      title: copy.title,
+      description: copy.description,
+      images: [ogImages[0].url],
+    },
   };
 }
 

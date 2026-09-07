@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getArticleSummaries } from "@/data/articles";
 import { BlogIndexClient } from "../../(th)/blog/BlogIndexClient";
-import { buildAlternates, localizedUrl, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 
@@ -47,11 +48,18 @@ export function buildBlogIndexMetadata(locale: Locale): Metadata {
   const copy = COPY[locale];
   const isEnglish = locale === "en";
   const ogTitle = isEnglish
-    ? "Tarot Wisdom Codex & Editorial Guides · SeerTarot"
-    : "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี ทาโรต์ 1909 · SeerTarot";
+    ? "Tarot Wisdom Codex & Editorial Guides"
+    : "คัมภีร์บทความและคู่มือดูดวงไพ่ยิปซี 1909";
   const ogDesc = isEnglish
     ? "Explore depth psychology, archetypal symbolism, and master guides for love, career, and 25 spreads."
     : "รวมบทความเจาะลึกศาสตร์ไพ่ทาโรต์ ความรัก การงาน และจิตวิทยาพยากรณ์";
+
+  const ogImages = buildPageOgImage({
+    title: ogTitle,
+    eyebrow: isEnglish ? "TAROT CODEX & GUIDES" : "สารานุกรมและบทความ",
+    cardImage: "major-09.jpg",
+    alt: copy.title,
+  });
 
   return {
     title: copy.title,
@@ -65,7 +73,13 @@ export function buildBlogIndexMetadata(locale: Locale): Metadata {
       siteName: "SeerTarot",
       type: "website",
       locale: isEnglish ? "en_US" : "th_TH",
-      images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: ogDesc,
+      images: [ogImages[0].url],
     },
   };
 }

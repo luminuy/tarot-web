@@ -8,7 +8,9 @@ import {
   getArticleTitle,
   getArticleDescription,
 } from "@/data/articles";
-import { buildAlternates, localizedUrl, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, localizedUrl, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
+import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { ArticleReadingClient } from "../../(th)/blog/[slug]/ArticleReadingClient";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
@@ -53,6 +55,13 @@ export async function buildBlogDetailMetadata(
   const articleDesc = getArticleDescription(article, locale);
   const englishTwin = Boolean(article.contentEn);
 
+  const ogImages = buildPageOgImage({
+    title: articleTitle,
+    eyebrow: isEnglish ? "TAROT WISDOM & GUIDE" : "บทความไพ่ทาโรต์",
+    cardImage: getCategoryCardImage(article.category),
+    alt: articleTitle,
+  });
+
   return {
     title,
     description,
@@ -68,13 +77,13 @@ export async function buildBlogDetailMetadata(
       publishedTime: article.publishedAt,
       modifiedTime: article.updatedAt,
       authors: [article.author],
-      images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title: articleTitle,
       description: articleDesc,
-      images: [OG_IMAGE_URL],
+      images: [ogImages[0].url],
     },
   };
 }

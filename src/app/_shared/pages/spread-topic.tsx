@@ -9,7 +9,9 @@ import {
   getSpreadsForTopic,
 } from "@/data/spread-topics";
 import { TopicSpreadList } from "@/components/spread/TopicSpreadList";
-import { buildAlternates, localizedUrl, OG_IMAGE_ALT, OG_IMAGE_URL } from "@/lib/config/site";
+import { buildAlternates, localizedUrl } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
+import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 
@@ -39,6 +41,14 @@ export async function buildSpreadTopicMetadata(
   const title = isEnglish && topic.seoTitleEn ? topic.seoTitleEn : topic.seoTitle;
   const description = isEnglish && topic.metaDescriptionEn ? topic.metaDescriptionEn : topic.metaDescription;
 
+  const topicTitle = isEnglish ? (topic.titleEn || topic.titleTh) : topic.titleTh;
+  const ogImages = buildPageOgImage({
+    title: topicTitle,
+    eyebrow: isEnglish ? "LIFE THEME SPREADS" : "ผังพยากรณ์ตามหมวดชีวิต",
+    cardImage: getCategoryCardImage(topic.slug),
+    alt: title,
+  });
+
   return {
     title,
     description,
@@ -50,13 +60,13 @@ export async function buildSpreadTopicMetadata(
       siteName: "SeerTarot",
       type: "website",
       locale: isEnglish ? "en_US" : "th_TH",
-      images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+      images: ogImages,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [OG_IMAGE_URL],
+      images: [ogImages[0].url],
     },
   };
 }

@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 
 import { DailyClient } from "@/components/daily/DailyClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
-import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../../../_shared/seo";
+import { buildPageOgImage } from "@/lib/media/og-image";
 
 /**
  * 🌅 ไพ่ประจำวันฉบับภาษาอังกฤษ (`/en/daily`)
@@ -21,6 +22,13 @@ const TITLE = "Free Daily Tarot Card: Your Guidance for Today";
 const DESCRIPTION =
   "Pull one tarot card for today and read what it means for your work, money, love, and state of mind — drawn from the full 78-card 1909 Rider-Waite deck, shuffled by you, provably fair, with no ads.";
 
+const dailyOgImages = buildPageOgImage({
+  title: "Free Daily Tarot Card",
+  eyebrow: "DAILY GUIDANCE",
+  cardImage: "major-19.jpg",
+  alt: "Daily tarot card 1909 Rider-Waite",
+});
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
@@ -34,21 +42,13 @@ export const metadata: Metadata = {
   ],
   alternates: buildAlternates(PATH, { locale: "en", englishTwin: true }),
   openGraph: {
-    ...buildOpenGraph("en", { title: TITLE, description: DESCRIPTION, path: PATH }),
-    images: [
-      {
-        url: `${SITE_ORIGIN}/cards/w512b/major-19.webp`,
-        width: 512,
-        height: 878,
-        alt: "The Sun — daily tarot card",
-      },
-    ],
+    ...buildOpenGraph("en", { title: TITLE, description: DESCRIPTION, path: PATH, images: dailyOgImages }),
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: [`${SITE_ORIGIN}/cards/w512b/major-19.webp`],
+    images: [dailyOgImages[0].url],
   },
 };
 

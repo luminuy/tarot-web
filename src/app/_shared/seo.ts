@@ -1,13 +1,20 @@
 import { localizedUrl, OG_IMAGE_ALT, OG_IMAGE_URL } from "@/lib/config/site";
 import type { Locale } from "@/lib/i18n/types";
 
+export interface OpenGraphOptions {
+  title: string;
+  description: string;
+  path: string;
+  images?: Array<{ url: string; width: number; height: number; alt?: string }>;
+}
+
 /**
  * ตัวช่วย metadata ที่ใช้ร่วมกันทั้งสองภาษา — กันไม่ให้ OG/breadcrumb ของหน้าอังกฤษ
  * เผลอชี้กลับไปยัง URL ฝั่งไทย (ข้อผิดพลาดที่เกิดง่ายที่สุดตอนทำเว็บสองภาษา)
  */
 export function buildOpenGraph(
   locale: Locale,
-  { title, description, path }: { title: string; description: string; path: string },
+  { title, description, path, images }: OpenGraphOptions,
 ) {
   return {
     title,
@@ -16,7 +23,7 @@ export function buildOpenGraph(
     siteName: "SeerTarot",
     type: "website" as const,
     locale: locale === "en" ? "en_US" : "th_TH",
-    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+    images: images ?? [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
   };
 }
 

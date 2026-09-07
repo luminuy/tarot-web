@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
-import { buildAlternates } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
+
+const privacyOgImages = buildPageOgImage({
+  title: "นโยบายความเป็นส่วนตัวและ PDPA",
+  eyebrow: "ความปลอดภัยและสิทธิข้อมูล",
+  cardImage: "major-11.jpg",
+  alt: "นโยบายความเป็นส่วนตัวและ PDPA SeerTarot",
+});
 
 export const metadata: Metadata = {
   title: "นโยบายความเป็นส่วนตัวและ PDPA",
@@ -8,6 +16,20 @@ export const metadata: Metadata = {
   // ⚠️ ทุกหน้าต้องประกาศ canonical ของตัวเอง — Next.js สืบทอด metadata จาก layout แม่
   // หน้านี้อยู่ใน sitemap แต่เคยประกาศ canonical ชี้กลับหน้าแรก = ขัดกันเองจนไม่ถูก index
   alternates: buildAlternates("/privacy"),
+  openGraph: {
+    title: "นโยบายความเป็นส่วนตัวและ PDPA · SeerTarot",
+    description: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
+    url: `${SITE_ORIGIN}/privacy`,
+    siteName: "SeerTarot",
+    type: "website",
+    images: privacyOgImages,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "นโยบายความเป็นส่วนตัวและ PDPA · SeerTarot",
+    description: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
+    images: [privacyOgImages[0].url],
+  },
 };
 
 export default function PrivacyPolicyPage() {

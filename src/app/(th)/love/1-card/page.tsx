@@ -3,6 +3,14 @@ import { LoveOneCardClient } from "@/components/love/LoveOneCardClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
+import { buildPageOgImage } from "@/lib/media/og-image";
+
+const loveOgImages = buildPageOgImage({
+  title: "ดูดวงความรัก 1 ใบ",
+  eyebrow: "ไขคำตอบสถานะหัวใจ",
+  cardImage: "major-06.jpg",
+  alt: "ดูดวงความรัก 1 ใบ 1909 Rider-Waite",
+});
 
 export const metadata: Metadata = {
   title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบสถานะหัวใจ (เปิดฟรี) | SeerTarot",
@@ -27,21 +35,14 @@ export const metadata: Metadata = {
     siteName: "SeerTarot",
     locale: "th_TH",
     type: "website",
-    images: [
-      {
-        url: `${SITE_ORIGIN}/cards/w512b/major-06.webp`,
-        width: 512,
-        height: 878,
-        alt: "The Lovers - ดูดวงความรัก 1 ใบ",
-      },
-    ],
+    images: loveOgImages,
   },
   twitter: {
     card: "summary_large_image",
     title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบสถานะหัวใจ | SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบตอบคำถามหัวใจ แม่นยำทุกสถานะ โสด/มีคนคุย/มีแฟน/คนเก่า ฟรี 100%",
-    images: [`${SITE_ORIGIN}/cards/w512b/major-06.webp`],
+    images: [loveOgImages[0].url],
   },
 };
 

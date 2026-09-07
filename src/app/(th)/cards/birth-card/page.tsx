@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { BirthCardCalculator } from "@/components/encyclopedia/BirthCardCalculator";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
-import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import { DECK } from "@/data/cards";
 import type { BirthCardItem } from "@/lib/tarot/birth-card";
 
@@ -22,6 +23,13 @@ const MAJOR_CARDS: BirthCardItem[] = DECK.filter((c) => c.arcana === "major").ma
   keywords: c.keywords,
   keywordsEn: c.keywordsEn,
 }));
+
+const birthCardOgImages = buildPageOgImage({
+  title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card)",
+  eyebrow: "ค้นหาไพ่ประจำวันเกิด",
+  cardImage: "major-10.jpg",
+  alt: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) 1909 Rider-Waite",
+});
 
 export const metadata: Metadata = {
   title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) — ค้นหาไพ่ประจำวันเกิดฟรี",
@@ -44,14 +52,14 @@ export const metadata: Metadata = {
     url: `${SITE_ORIGIN}/cards/birth-card`,
     siteName: "SeerTarot",
     type: "website",
-    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+    images: birthCardOgImages,
   },
   twitter: {
     card: "summary_large_image",
     title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) · SeerTarot",
     description:
       "ค้นหาไพ่ทาโรต์ประจำตัว (Birth Card) จากวันเดือนปีเกิดของคุณ ตามหลักเลขศาสตร์ 1909 Rider-Waite",
-    images: [OG_IMAGE_URL],
+    images: [birthCardOgImages[0].url],
   },
 };
 
