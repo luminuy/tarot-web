@@ -138,6 +138,25 @@ jobs:
               body: body
             });
 
+  # ─────────────────────────────────────────────────────────────────────────
+  # ⚠️ ต้องเป็น job แยก ห้ามย้ายกลับไปรวมกับ pr-verification เด็ดขาด
+  # ตั้งแต่ 2026-09-07 `🧪 Automated Verification & Quality Audit` เป็น
+  # **required status check** ของ branch protection บน main
+  # ถ้าขั้นตอน merge อยู่ใน job เดียวกัน มันจะสั่ง merge ตอนที่ตัวเองยัง in_progress
+  # GitHub จึงปฏิเสธด้วย "Required status check ... is expected" -> core.setFailed
+  # -> ด่านกลายเป็น FAILURE -> PR merge ไม่ได้ตลอดกาล (deadlock ที่เกิดจริงกับ PR #355)
+  # แยกเป็น job ที่ `needs: pr-verification` ด่านจึงจบเขียวก่อน แล้วค่อย merge ได้
+  # ─────────────────────────────────────────────────────────────────────────
+  auto-merge:
+    name: 🔀 Auto-Merge & Deploy Dispatch
+    runs-on: ubuntu-latest
+    needs: pr-verification
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
       - name: 🔀 Auto-Merge Verified PR into main
         uses: actions/github-script@v8
         with:
@@ -150,31 +169,42 @@ jobs:
             }
 
             // Perform automated squash merge
+            // ⚠️ ลองซ้ำได้ 5 ครั้ง ห่างกัน 10 วิ — หลังจาก job ตรวจจบ GitHub ใช้เวลาสักครู่
+            // กว่าจะบันทึกผล required status check ให้ mergeable_state อัปเดตตาม
+            // ถ้ายิง merge จังหวะนั้นพอดีจะโดนปฏิเสธด้วย "Required status check ... is expected"
+            // ทั้งที่ด่านผ่านแล้ว
             let merged = false;
-            try {
-              const mergeRes = await github.rest.pulls.merge({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number,
-                merge_method: 'squash',
-                commit_title: `${pr.title} (#${pr.number})`
-              });
-              merged = mergeRes.data.merged;
-              console.log('✨ Auto-Merge Successful:', mergeRes.data.message);
-            } catch (err) {
-              console.log('ℹ️ Checking PR status:', err.message);
-              const prCheck = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number
-              });
-              if (prCheck.data.merged) {
-                merged = true;
-                console.log('✨ PR is already MERGED!');
-              } else {
-                core.setFailed(`Auto-merge failed: ${err.message}`);
-                return;
+            let lastErr = null;
+            for (let attempt = 1; attempt <= 5 && !merged; attempt++) {
+              try {
+                const mergeRes = await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  merge_method: 'squash',
+                  commit_title: `${pr.title} (#${pr.number})`
+                });
+                merged = mergeRes.data.merged;
+                console.log('✨ Auto-Merge Successful:', mergeRes.data.message);
+              } catch (err) {
+                lastErr = err;
+                console.log(`ℹ️ ครั้งที่ ${attempt}/5 ยัง merge ไม่ได้:`, err.message);
+                const prCheck = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number
+                });
+                if (prCheck.data.merged) {
+                  merged = true;
+                  console.log('✨ PR is already MERGED!');
+                } else if (attempt < 5) {
+                  await new Promise((r) => setTimeout(r, 10000));
+                }
               }
+            }
+            if (!merged) {
+              core.setFailed(`Auto-merge failed: ${lastErr ? lastErr.message : 'unknown'}`);
+              return;
             }
 
             if (!merged) return;
