@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   };
 
   // 2. Google OAuth
-  const googleClientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const googleHealth = {
     configured: Boolean(googleClientId && googleClientSecret),
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   };
 
   // 3. LINE Login
-  const lineChannelId = process.env.LINE_CHANNEL_ID || process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
+  const lineChannelId = process.env.LINE_CHANNEL_ID;
   const lineChannelSecret = process.env.LINE_CHANNEL_SECRET;
   const lineHealth = {
     configured: Boolean(lineChannelId && lineChannelSecret),

@@ -29,6 +29,3 @@ export const DECK_TH: readonly TarotCard[] = Object.freeze([
   ...PENTACLES,
 ]);
 
-export function cardThByIndex(index: number): TarotCard | undefined {
-  return DECK_TH[index];
-}

@@ -48,16 +48,6 @@ export const DEFAULT_CLOUDINARY_CLOUD_NAME = "xtgpasdc" as const;
 export const OG_IMAGE_URL = `${SITE_ORIGIN}/og/default.png` as const;
 export const OG_IMAGE_ALT = "SeerTarot · ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite";
 
-/**
- * @public (D-02)
- * บล็อก `openGraph.images` / `twitter.images` มาตรฐาน ใช้ซ้ำได้ทุกหน้า
- * Exported for standard OG image block metadata across static and dynamic pages.
- */
-export const OG_IMAGE_BLOCK = [
-  { url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT },
-] as const;
-
-
 /** ชื่อเว็บสำหรับข้อความ/ลายน้ำ/ไฟล์ส่งออกข้อมูล */
 export const SITE_NAME_TH = "วิหารพยากรณ์ไพ่ทาโรต์";
 

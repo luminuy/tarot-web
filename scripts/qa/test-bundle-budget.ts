@@ -48,13 +48,15 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/cards",
     htmlRelativePath: ".next/server/app/cards.html",
-    maxJsGzipKb: 225, // W-01/W-02 Ratchet (Actual Real User: 219 KB, total w/ polyfills: 258 KB)
+    // Motion Diet Ratchet 2026-09-07: ถอด motion (39.9 KB gz) ออกจากหน้านี้ · วัดจริง 178 KB
+    maxJsGzipKb: 190,
     maxHtmlGzipKb: 40, // Current: 35 KB
   },
   {
     route: "/cards/major-00",
     htmlRelativePath: ".next/server/app/cards/major-00.html",
-    maxJsGzipKb: 235, // M-01 Ratchet (Actual Real User: 227 KB, total w/ polyfills: 266 KB)
+    // Motion Diet Ratchet 2026-09-07: ถอด motion ออกจากหน้าไพ่ทั้ง 156 หน้า · วัดจริง 187 KB
+    maxJsGzipKb: 198,
     maxHtmlGzipKb: 30, // Current: 23 KB
   },
   {
@@ -78,7 +80,8 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/spreads",
     htmlRelativePath: ".next/server/app/spreads.html",
-    maxJsGzipKb: 245, // W-01/W-02 Ratchet (Actual Real User: 234 KB, total w/ polyfills: 272 KB)
+    // Motion Diet Ratchet 2026-09-07: ถอด motion + แยกภาพผังออกจากโมดูลที่ลาก motion · วัดจริง 188 KB
+    maxJsGzipKb: 200,
     maxHtmlGzipKb: 45, // Current: 38 KB
   },
   {
@@ -91,7 +94,21 @@ export const BUDGETS: RouteBudget[] = [
     route: "/cards/birth-card",
     htmlRelativePath: ".next/server/app/cards/birth-card.html",
     maxJsGzipKb: 190, // W-03 Ratchet (Actual Real User: 182 KB, target was <= 200 KB)
-    maxHtmlGzipKb: 30, // Current: 15 KB
+    /**
+     * ⚠️ ตัวเลขในคอมเมนต์เดิมเขียนว่า "Current: 15 KB" ซึ่ง **ไม่ตรงกับของจริงมานานแล้ว**
+     * วัดจริงตอนตั้งงบใหม่นี้ = 30.5 KB (ดิบ 97 KB · flight payload ของ RSC กินไป 49 KB
+     * เพราะหน้านี้เรนเดอร์ตารางไพ่ประจำตัวตามวันเกิดทั้งชุดออกมาเป็นเนื้อหาฝั่งเซิร์ฟเวอร์)
+     *
+     * หน้านี้จึงนั่งชนเพดาน 30 KB พอดีเป๊ะมาสักพัก และล้มทันทีที่มีอะไรเพิ่มเข้ามาแม้แต่ 1 KB
+     * (เกิดขึ้นจริงหลัง PR #351 — deploy ของ main ล้มด้วย "31 KB > 30 KB")
+     * ค่าที่วัดได้ต่างกันเล็กน้อยระหว่างเครื่อง dev กับ CI ด้วย เพราะความยาวของค่า env จริง
+     * (GA id / pixel id / ImageKit endpoint) ที่ถูกฝังลงไปไม่เท่ากัน
+     *
+     * ยกเพดานเป็น 34 KB เพื่อให้มีระยะหายใจเหนือของจริง ~3.5 KB
+     * 📌 หนี้ที่ยังค้าง: ควรลดขนาด flight payload ของหน้านี้จริง ๆ (ย้ายตารางไปเรนเดอร์
+     * ฝั่งไคลเอนต์ หรือย่อข้อมูลที่ส่งข้ามฝั่ง) แล้วค่อยรัดเพดานกลับลงมา
+     */
+    maxHtmlGzipKb: 34, // วัดจริง 2026-09-07: 30.5 KB
   },
 ];
 

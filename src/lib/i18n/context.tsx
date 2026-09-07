@@ -200,12 +200,3 @@ export function useLocale(): LocaleContextValue {
   return context;
 }
 
-/**
- * @public (D-02)
- * Hook to retrieve the current dictionary directly.
- * Convenient shorthand for `useLocale().t` for client components.
- */
-export function useDictionary(): Dictionary {
-  return useLocale().t;
-}
-

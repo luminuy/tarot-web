@@ -217,11 +217,18 @@ async function runTests() {
     bannerSrc.includes("useEffect(") && bannerSrc.includes("readConsent()"),
   );
 
+  // แบนเนอร์อยู่ใต้ AnalyticsTracker ซึ่ง RootHtml ติดตั้งไว้ทุกหน้าอยู่แล้ว
+  // (วางไว้ที่ RootHtml ตรง ๆ ไม่ได้ เพราะเป็น server component การอ้างถึง
+  //  client component จากที่นั่นต้องถูก serialize ลง flight payload ของทุกหน้า
+  //  จน /cards/birth-card ซึ่งชนเพดานงบ HTML พอดีอยู่แล้วล้นออกไป)
   const rootSrc = readFileSync(
     resolve(import.meta.dirname, "../../src/app/_shared/RootHtml.tsx"),
     "utf-8",
   );
-  check("แบนเนอร์ถูกติดตั้งจริงในทุกหน้า", rootSrc.includes("<ConsentBanner />"));
+  check(
+    "แบนเนอร์ถูกติดตั้งจริงในทุกหน้า (ผ่าน AnalyticsTracker)",
+    trackerSrc.includes("<ConsentBanner />") && rootSrc.includes("<AnalyticsTracker />"),
+  );
 
   console.log("\n📋 4. Event Contract Completeness");
   const sampleEvents: TarotAnalyticsEvent[] = [

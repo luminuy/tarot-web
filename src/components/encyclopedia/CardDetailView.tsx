@@ -3,12 +3,10 @@
 import React, { useState, useEffect } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { motion, AnimatePresence } from "motion/react";
-import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import type { TarotCard } from "@/data/cards/types";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
-import { useHasMounted } from "@/lib/motion";
+import { useHasMounted } from "@/lib/use-has-mounted";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 
@@ -96,7 +94,6 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   ];
 
   return (
-    <AppMotionProvider>
       <div className="space-y-8 w-full max-w-5xl mx-auto relative z-10">
       {/* Top Header Bar — Card Counter */}
       <div className="flex items-center justify-end border-b border-[#D5CEC2]/40 pb-4 text-xs font-mono">
@@ -111,16 +108,17 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         <div className="md:col-span-5 lg:col-span-4 flex flex-col items-center space-y-5">
           {/* 3D Sacred Card Container */}
           <div className="relative group">
-            <motion.div
-              initial={hasMounted ? { opacity: 0, scale: 0.95 } : false}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative w-64 sm:w-72 aspect-[7/12] rounded-xl overflow-hidden border-2 border-[#D5CEC2] p-1.5 bg-[#FFFFFF] shadow-[0_10px_30px_rgba(42,38,31,0.08)]"
+            {/* ใส่คลาสอนิเมชันเฉพาะหลัง mount — เรนเดอร์แรกฝั่งเซิร์ฟเวอร์ต้องออกมา
+                ที่สถานะปลายทางเสมอ ไม่งั้นภาพไพ่ซึ่งเป็น LCP ของหน้าถูกส่งไปแบบ opacity 0 */}
+            <div
+              className={`relative w-64 sm:w-72 aspect-[7/12] rounded-xl overflow-hidden border-2 border-[#D5CEC2] p-1.5 bg-[#FFFFFF] shadow-[0_10px_30px_rgba(42,38,31,0.08)]${
+                hasMounted ? " anim-pop-in" : ""
+              }`}
             >
               <div className="relative w-full h-full rounded-lg overflow-hidden bg-[#EAE7E0]">
-                <motion.div
-                  animate={{ rotate: isUpright ? 0 : 180 }}
-                  transition={{ type: "spring", stiffness: 220, damping: 22 }}
-                  className="w-full h-full"
+                <div
+                  data-reversed={!isUpright}
+                  className="w-full h-full card-orientation-flip"
                 >
                   <CardImage
                     image={card.image}
@@ -133,7 +131,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     loading="eager"
                     fetchPriority="high"
                   />
-                </motion.div>
+                </div>
                 <div className="gold-foil-sheen absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity pointer-events-none" />
 
                 {/* Top Floating Badge */}
@@ -148,7 +146,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   </span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Upright / Reversed Orientation Switcher */}
@@ -242,14 +240,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
 
             {/* initial={false} — ความหมายไพ่ 5 ด้านคือเนื้อหาหลักของหน้าไพ่ทั้ง 78 ใบ
                 ต้องอยู่ใน HTML แบบมองเห็นได้ · การสลับหัวตั้ง/หัวกลับยังมีอนิเมชันครบ */}
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
+            <div
                 key={orientation}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-3"
+                className="space-y-3 anim-swap-rise-sm"
               >
                 {categories.map((cat) => {
                   const interp = isEnglish && card.meaningsEn ? card.meaningsEn[cat.id] : card.meanings[cat.id];
@@ -272,8 +265,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     </div>
                   );
                 })}
-              </motion.div>
-            </AnimatePresence>
+            </div>
           </div>
 
           {/* Action Button: Start Tarot Ritual with this Card */}
@@ -348,6 +340,5 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         )}
       </div>
     </div>
-  </AppMotionProvider>
   );
 };

@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { AssetWarmup } from "@/components/performance/AssetWarmup";
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
-import { ConsentBanner } from "@/components/analytics/ConsentBanner";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { LocaleProvider } from "@/lib/i18n";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
@@ -145,7 +144,6 @@ export function RootHtml({
           <AnalyticsTracker />
           {children}
           <TikTokFloatingButton />
-          <ConsentBanner />
         </LocaleProvider>
       </body>
     </html>

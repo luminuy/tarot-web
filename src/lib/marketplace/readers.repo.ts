@@ -225,22 +225,6 @@ export async function updateReader(id: string, input: UpdateReaderInput): Promis
 }
 
 /**
- * @public (D-02)
- * ปรับเปลี่ยนสถานะแม่หมอ (เช่น approve, suspend, pending)
- * Used by admin management API and moderation workflows.
- */
-export async function setReaderStatus(id: string, status: ReaderStatus): Promise<boolean> {
-  const db = await getAppDB();
-  const now = Date.now();
-  const res = await db
-    .prepare("UPDATE readers SET status = ?, updated_at = ? WHERE id = ?")
-    .bind(status, now, id)
-    .run();
-
-  return (res.meta?.changes ?? 0) > 0;
-}
-
-/**
  * ลบแม่หมอออกจากระบบ พร้อมเก็บกวาดข้อมูลคิวและการเงินที่เกี่ยวข้อง
  */
 export async function deleteReader(id: string): Promise<boolean> {
@@ -257,22 +241,5 @@ export async function deleteReader(id: string): Promise<boolean> {
 
   const res = await db.prepare("DELETE FROM readers WHERE id = ?").bind(id).run();
   return (res.meta?.changes ?? 0) > 0;
-}
-
-/**
- * @public (D-02)
- * บันทึก Audit Log สำหรับแอดมิน
- * Used by admin security tracking and sensitive action logs.
- */
-export async function recordAdminAudit(actor: string, action: string, detail?: string): Promise<void> {
-  try {
-    const db = await getAppDB();
-    await db
-      .prepare("INSERT INTO admin_audit (ts, actor, action, detail) VALUES (?, ?, ?, ?)")
-      .bind(Date.now(), actor, action, detail || null)
-      .run();
-  } catch (err) {
-    console.error("[RecordAdminAudit Error]", err);
-  }
 }
 

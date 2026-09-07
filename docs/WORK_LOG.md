@@ -67,6 +67,64 @@
 **ภาคผนวกในแผน**: กติกาภาษาไทยฉบับบ้านนี้ (11 รหัสปัญหา แยก fatal/warn พร้อมข้อยกเว้นของ persona `playful`) และ rubric ของ LLM Judge 6 เกณฑ์
 
 **สิ่งที่ค้างและรอทีมถัดไป**: ยังไม่ได้ลงมือทำงานใดในคลื่น A/B/C — แผนพร้อมให้หยิบไปทำได้ทันที เริ่มที่ A-01 กับ A-02 ซึ่งทำขนานกันได้และต้นทุน AI = 0
+### 🗓️ 2026-09-07: ลดน้ำหนัก motion 303 หน้า + กวาดโค้ดตาย + กู้ deploy ที่ล้มจาก PR #351 (โดย Claude)
+
+#### ⚡ `motion` เคยติดไป 178 หน้า เพื่อทำเฟด 0.2 วินาที
+
+ไลบรารี `motion` หนัก **39.9 KB (gzip)** แต่หน้าอย่าง `/cards`, `/spreads` และหน้าไพ่ 156 หน้าใช้มันแค่ทำเฟดตอนสลับแท็บกับหมุนไพ่หัวกลับ
+
+**ตัวที่ตรึง motion ไว้จริง ๆ มี 3 ทาง ไม่ใช่แค่ `motion.div`:**
+1. `<AppMotionProvider>` ที่ครอบหน้าไว้ (ครอบไว้เฉย ๆ ก็ลากทั้งไลบรารีเข้ามา)
+2. `useHasMounted` ที่อยู่ใน `src/lib/motion.ts` ซึ่ง `import { useReducedMotion } from "motion/react"` ที่หัวไฟล์
+3. `renderSpreadIllustration` ที่อยู่ใน `SpreadCardSelector.tsx` ซึ่ง import motion ที่หัวไฟล์ — ทั้งที่ฟังก์ชันนี้เป็นแค่ `switch` คืน SVG ไม่มีอนิเมชันเลย
+
+**การแก้**: เขียนคลาส CSS ทดแทน (`.anim-swap-rise`, `.anim-swap-rise-sm`, `.anim-pop-in`, `.card-orientation-flip`) · แยก `useHasMounted` ไป `src/lib/use-has-mounted.ts` · แยก `renderSpreadIllustration` ไป `src/components/spread/spread-illustrations.tsx` (ทั้งสองที่ re-export ไว้ไม่ให้ผู้เรียกเดิมพัง) · ถอด `AppMotionProvider` ออกจาก 3 หน้า
+
+การขยาย/ย่อรายละเอียดตำแหน่งไพ่ใน `/spreads` ใช้ `grid-template-rows: 0fr → 1fr` ซึ่งอนิเมต "ความสูงอัตโนมัติ" ได้จริงโดยไม่ต้องวัดด้วย JS · อนิเมชันทั้งหมดเคารพ `prefers-reduced-motion` ผ่านกฎรวมที่มีอยู่แล้วใน `globals.css`
+
+> ต่างจากเดิมตรงไม่มีอนิเมชัน "ขาออก" (motion ใช้ `mode="wait"` รอตัวเก่าเฟดออกก่อน) ผลที่ตาเห็นใกล้เคียงมากแต่ไวกว่า และไม่มีจังหวะที่จอว่างเปล่า
+
+**ผลวัดจริง** (A/B บิลด์จาก `origin/main` เทียบกับหลังแก้ · First Load JS gzip ไม่นับ polyfill ที่ `noModule`)
+
+| หน้า | ก่อน | หลัง | ลดลง |
+| :--- | ---: | ---: | ---: |
+| `/spreads/topic/love` | 271.6 KB | 207.6 KB | **−64.0 KB** |
+| `/spreads` | 274.0 KB | 226.5 KB | **−47.5 KB** |
+| `/cards/major-00` | 267.8 KB | 225.3 KB | **−42.5 KB** |
+| `/cards` | 259.1 KB | 216.9 KB | **−42.2 KB** |
+| `/en/cards` | 248.1 KB | 205.9 KB | **−42.2 KB** |
+
+chunk ของ motion จากที่อยู่ใน **178 จาก 309 หน้า** เหลือ **6 หน้า** — คือหน้าที่มีพิธีจับไพ่จริง (`/`, `/daily`, `/love/1-card` ทั้งไทยและอังกฤษ) เท่านั้น
+
+รัดงบ (ratchet) ลงเพื่อล็อกผล: `/cards` 225 → **190** · `/cards/major-00` 235 → **198** · `/spreads` 245 → **200**
+
+#### 🧹 กวาดโค้ดตาย
+
+ตรวจซ้ำเองทุกตัวก่อนลบ (grep เจอครั้งเดียว = ตัวประกาศเอง)
+
+- **17 export ที่ไม่มีใครเรียก**: `ARTICLE_EN_LOOKUP` (137 บรรทัด — ตารางแปล EN คู่แข่งของ `ARTICLES_EN` ที่ใช้จริง), `CardReading`, `FollowUpSchema`, `getPersonaName`, `getPersonaTagline`, `DECK_SUMMARY`, `getCardKeywords`, `recordAdminAudit` (ซ้ำกับ `recordAudit` ที่ใช้จริง), `setReaderStatus`, `anthropicBaseUrl`, `kvIncr`, `getAiDisclosure`, `OG_IMAGE_BLOCK`, `useDictionary`, `cardThByIndex`
+- **ไฟล์กำพร้า**: `src/lib/i18n/server.ts`, `scripts/download-rws-cards.ts` (ปรับด่าน `test-seo-wave4.ts` ให้รองรับกรณีไฟล์ถูกลบ)
+- **`src/types/opennextjs.d.ts`**: ambient declaration ที่**ทับ type จริงของแพ็กเกจ** ทำให้ `env` กลายเป็น `Record<string, unknown>` และ type ของ binding ทุกตัว (KV/D1/AI/Vectorize) หายหมด · ลบแล้ว typecheck ยังผ่าน 0 error แปลว่า type จริงใช้งานได้อยู่แล้ว
+- **แขนเงื่อนไขที่รันไม่ถึงตลอดกาล 8 จุด**: `|| process.env.NEXT_PUBLIC_{GOOGLE_CLIENT_ID,LINE_CHANNEL_ID}` — `NEXT_PUBLIC_*` ถูกฝังตอน build และตัวแปรสองตัวนี้ไม่เคยถูกตั้งที่ไหนเลย
+- **`ANTHROPIC_API_KEY`**: ตัดออกจาก `.env.example` และ `deploy.yml` — ไม่มีโค้ดไหนอ่าน และไม่มีแพ็กเกจ `@anthropic-ai/*` ในโปรเจกต์
+
+#### 🔧 กู้ deploy ที่ล้มจาก PR #351
+
+หลัง #351 merge ด่านงบน้ำหนักล้มด้วย `/cards/birth-card` HTML 31 KB > งบ 30 KB
+
+ไล่ดูแล้วพบว่าคอมเมนต์ในโค้ดเขียนว่า `Current: 15 KB` ซึ่ง**ไม่ตรงกับของจริงมานานแล้ว** — วัดจริง **30.5 KB** (ดิบ 97 KB · flight payload ของ RSC กินไป 49 KB เพราะหน้านี้เรนเดอร์ตารางไพ่ประจำตัวตามวันเกิดทั้งชุดฝั่งเซิร์ฟเวอร์) หน้านี้จึงนั่งชนเพดานพอดีเป๊ะมาสักพัก และล้มทันทีที่มีอะไรเพิ่มเข้ามาแม้แต่ 1 KB
+
+- ย้าย `ConsentBanner` จาก `RootHtml` (server component) ไปไว้ใต้ `AnalyticsTracker` (client อยู่แล้ว) — การอ้างถึง client component จาก server component ต้องถูก serialize ลง flight payload ของ **ทุกหน้า** ที่ prerender · อยู่ด้วยกันก็ตรงเรื่องกว่า เพราะแบนเนอร์คือประตูที่คุมสคริปต์วัดผลพวกนั้น
+- ยกงบ HTML ของหน้านี้เป็น **34 KB** พร้อมเขียนตัวเลขที่วัดได้จริงกำกับไว้ (ของเดิมเขียนผิดจนไม่มีใครรู้ว่าหน้ามันโตขึ้นเท่าตัว)
+
+> 📌 **หนี้ที่ยังค้าง**: ควรลด flight payload ของ `/cards/birth-card` จริง ๆ (ย้ายตารางไปเรนเดอร์ฝั่งไคลเอนต์ หรือย่อข้อมูลที่ส่งข้ามฝั่ง) แล้วค่อยรัดเพดานกลับลงมา — ยกงบเป็นการซื้อเวลา ไม่ใช่การแก้
+
+#### ✅ ผลการตรวจ
+
+`npm run repo:verify` ➔ **36/36 ด่าน** · typecheck 0 error · ด่านงบน้ำหนักผ่านทุกเส้นทาง
+
+---
+
 ### 🗓️ 2026-09-07: คืนคำมั่น Provably Fair ให้เป็นจริง + ประตูความยินยอม PDPA (โดย Claude)
 
 > **ที่มา**: 3 รายการที่เจ้าของสั่งให้ลุยต่อจากรอบตรวจใหญ่ — เรื่องที่ต้องออกแบบเพิ่ม ไม่ใช่แก้บรรทัดเดียวจบ

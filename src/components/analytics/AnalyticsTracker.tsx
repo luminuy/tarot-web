@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef, Suspense } from "react";
+
+import { ConsentBanner } from "@/components/analytics/ConsentBanner";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -198,6 +200,12 @@ export function AnalyticsTracker() {
       <Suspense fallback={null}>
         <PageViewTracker gaId={gaId} metaPixelId={metaPixelId} googleAdsId={googleAdsId} />
       </Suspense>
+
+      {/* ประตูความยินยอมที่คุมสคริปต์ด้านบนทั้งหมด — วางไว้ที่นี่แทนที่จะไปแขวนใน
+          RootHtml เพราะ RootHtml เป็น server component การอ้างถึง client component
+          จากที่นั่นต้องถูก serialize ลง flight payload ของทุกหน้าที่ prerender
+          (ทำให้ /cards/birth-card ซึ่งชนเพดานงบ HTML พอดีอยู่แล้วล้นออกไป 1 KB) */}
+      <ConsentBanner />
     </>
 
   );
