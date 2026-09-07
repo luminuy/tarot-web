@@ -5,9 +5,12 @@
  * โดยการซ้อนเลเยอร์ผ่าน Cloudinary URL Transformation:
  *  - ไม่ต้องรัน Satori, Resvg-WASM หรือ Canvas หนักๆ บน Cloudflare Workers
  *  - ตัดภาระ CPU (0ms) และประหยัดหน่วยความจำ (RAM < 1MB)
- *  - หากไม่ได้ตั้งค่า NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ระบบจะคืนค่า null
- *    เพื่อให้แอปถอยไปใช้ระบบ Client Canvas + R2 เดิมอัตโนมัติ (Zero Breaking Change)
+ *  - cloud name มีค่าเริ่มต้นฝังไว้ที่ `DEFAULT_CLOUDINARY_CLOUD_NAME` (src/lib/config/site.ts)
+ *    จึงทำงานได้ทั้งตอน dev, CI และ production โดยไม่ต้องพึ่ง env ที่อาจลืมตั้ง
+ *    ตั้ง `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` เพื่อ override ได้ตามเดิม
  */
+
+import { DEFAULT_CLOUDINARY_CLOUD_NAME } from "@/lib/config/site";
 
 export interface CloudinaryShareCardParams {
   title?: string;
@@ -16,8 +19,11 @@ export interface CloudinaryShareCardParams {
 }
 
 export function getCloudinaryCloudName(): string {
-  const name = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
-  return name.trim().replace(/^["']+|["']+$/g, "");
+  const raw = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
+  const name = raw.trim().replace(/^["']+|["']+$/g, "");
+  // ถ้า env ไม่ถูกส่งเข้ามาตอน build (เช่นขั้น verify ใน CI) ให้ใช้ค่าเริ่มต้นที่ฝังไว้
+  // แทนการคืนค่าว่างแล้วปล่อยให้ทั้งเว็บถอยไปภาพแชร์ใบเดียวกันเงียบ ๆ
+  return name || DEFAULT_CLOUDINARY_CLOUD_NAME;
 }
 
 export function isCloudinaryEnabled(): boolean {
@@ -53,7 +59,7 @@ export function encodeOverlayText(raw: string, maxChars: number): string {
 
 /**
  * สร้าง URL ภาพแชร์ผลทำนายขนาด 1200x630 ผ่าน Cloudinary URL Transformation
- * คืนค่า null หากไม่ได้กำหนด NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+ * คืนค่า null เมื่อ cloud name ว่างเท่านั้น (ปัจจุบันมีค่าเริ่มต้นฝังไว้ จึงไม่เกิดในทางปฏิบัติ)
  */
 export function buildCloudinaryShareImageUrl(params: CloudinaryShareCardParams): string | null {
   const cloudName = getCloudinaryCloudName();

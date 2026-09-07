@@ -10,10 +10,19 @@ class MysticAudioEngine {
   private soundEnabled = true;
 
   constructor() {
+    // ⚠️ ต้องมี try/catch — `soundManager` ถูกสร้างตอน import ระดับโมดูล
+    // เบราว์เซอร์ที่บล็อกที่เก็บข้อมูลเว็บไซต์ (Safari "Block all cookies",
+    // Firefox private mode เข้ม, iframe ที่ไม่ให้สิทธิ์) จะ throw SecurityError ตรงนี้
+    // แล้วโมดูลประเมินไม่จบ → ทุกหน้าที่ import soundManager (TarotFlow, ShareModal,
+    // ReadingHistoryModal, AuthModal, AdminOverview) จอขาวโดยไม่มี error UI ให้เห็น
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("tarot_sound_enabled");
-      if (saved !== null) {
-        this.soundEnabled = saved === "true";
+      try {
+        const saved = localStorage.getItem("tarot_sound_enabled");
+        if (saved !== null) {
+          this.soundEnabled = saved === "true";
+        }
+      } catch {
+        // เข้าถึงที่เก็บข้อมูลไม่ได้ → ใช้ค่าเริ่มต้น (เปิดเสียง) ไปก่อน
       }
     }
   }

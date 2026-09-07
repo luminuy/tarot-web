@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { getSessionUser } from "@/lib/auth/session";
+import { isAiCapReached, recordAiCall } from "@/lib/security/ai-budget";
 
 export const runtime = "nodejs";
 
@@ -32,6 +35,29 @@ const RequestSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // ⚠️ เส้นทางนี้เรียกโมเดลจริงด้วย GEMINI_API_KEY ของเรา — เดิมเปิดโล่ง
+    // ไม่เช็ก origin ไม่เช็กล็อกอิน และไม่นับเข้าเพดาน AI รายวันเลย
+    // ใครก็ POST ข้อความอะไรก็ได้เข้ามาเป็น "ประวัติการเปิดไพ่" ปลอม ๆ แล้วได้ LLM ฟรี
+    // (ข้อความในนั้นถูกต่อเข้าพรอมต์ตรง ๆ จึงเป็นช่อง prompt injection ด้วย)
+    if (!isRequestAuthorizedOrigin(request)) {
+      return NextResponse.json({ error: "คำขอไม่ถูกต้อง" }, { status: 403 });
+    }
+
+    const user = await getSessionUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "กรุณาเข้าสู่ระบบก่อนขอสรุปบทเรียนดวงประจำเดือน" },
+        { status: 401 }
+      );
+    }
+
+    if (await isAiCapReached("member")) {
+      return NextResponse.json(
+        { error: "ระบบสรุปบทเรียนดวงถึงเพดานการใช้งานของวันนี้แล้ว กรุณาลองใหม่พรุ่งนี้" },
+        { status: 429 }
+      );
+    }
+
     const clientIp = getClientIdentifier(request);
     const limit = checkRateLimit(`monthly_journal:${clientIp}`, {
       maxRequests: 10,
@@ -145,6 +171,7 @@ ${historyText}
       );
       let r: Response;
       try {
+        void recordAiCall(1);
         r = await fetch(
           geminiEndpoint(model, "generateContent"),
           {

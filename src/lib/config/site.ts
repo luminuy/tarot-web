@@ -29,6 +29,22 @@ export const SITE_ORIGIN = `https://${SITE_DOMAIN}` as const;
  * ทุกหน้าที่ประกาศ `openGraph` ของตัวเองต้องใส่ `images` ด้วยเสมอ —
  * Next.js **แทนที่** อ็อบเจกต์ openGraph ทั้งก้อน ไม่ได้ผสานทีละฟิลด์
  */
+/**
+ * ☁️ ชื่อคลาวด์ Cloudinary — ค่าเริ่มต้นที่ฝังไว้ในโค้ด (ไม่ใช่ความลับ)
+ * ---------------------------------------------------------------------------
+ * ⚠️ บทเรียน INC (ภาพแชร์ 299 หน้าตายเงียบ):
+ * `NEXT_PUBLIC_*` ถูกฝังตอน `next build` เท่านั้น ค่าใน `wrangler.jsonc` เป็น var
+ * ของ Worker ตอน **runtime** จึงไม่ถึงขั้น build เลย · ผลคือ CI build โดยไม่มีค่านี้
+ * แล้ว `buildCloudinaryShareImageUrl()` คืน null → ทุกหน้าถอยไป `og/default.png`
+ * เหมือนกันหมด 309 หน้า ทั้ง ๆ ที่ระบบประกอบภาพทำงานได้สมบูรณ์
+ *
+ * cloud name ไม่ใช่ความลับ — มันโผล่อยู่ใน URL ภาพทุกใบที่ส่งให้เบราว์เซอร์อยู่แล้ว
+ * (`https://res.cloudinary.com/<cloud name>/...`) และถูก commit ไว้ใน `wrangler.jsonc`
+ * มาก่อนแล้ว · ฝังเป็นค่าเริ่มต้นตรงนี้เพื่อไม่ให้ระบบภาพแชร์ตายเงียบอีกเมื่อลืมตั้ง env
+ * ที่ใดที่หนึ่ง · ยัง override ด้วย `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` ได้ตามเดิม
+ */
+export const DEFAULT_CLOUDINARY_CLOUD_NAME = "xtgpasdc" as const;
+
 export const OG_IMAGE_URL = `${SITE_ORIGIN}/og/default.png` as const;
 export const OG_IMAGE_ALT = "SeerTarot · ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite";
 

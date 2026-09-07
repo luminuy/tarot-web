@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getDB } from "@/lib/platform/db";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export const runtime = "nodejs";
 
@@ -80,6 +81,12 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
+  // ⚠️ ต้องเป็นแอดมินเท่านั้น — แถวที่คืนมามี `comment` ที่ผู้ใช้เขียนถึงคำทำนายของตัวเอง
+  // บวก `reading_id` / `page_url` ที่ผูกกลับไปหาเซสชันได้ · ก่อนหน้านี้เปิดสาธารณะ
+  // ใครก็ยิง GET /api/feedback แล้วดูดข้อเสนอแนะ 50 รายการล่าสุดได้ทั้งหมด
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const db = await getDB();
     if (!db) {

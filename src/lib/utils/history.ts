@@ -39,6 +39,36 @@ const STORAGE_KEY = "tarot_reading_journal_v1";
 /**
  * ดึงรายการประวัติจาก LocalStorage (Synchronous & Offline-First)
  */
+/**
+ * เขียน/ลบข้อมูลใน localStorage แบบไม่ทำให้ผู้เรียกพัง
+ *
+ * ⚠️ `localStorage.setItem` โยน error ได้จริงสองกรณี: พื้นที่เต็ม (QuotaExceededError)
+ * และเบราว์เซอร์บล็อกที่เก็บข้อมูลเว็บไซต์ (SecurityError) · เดิมเขียนตรง ๆ ไม่มี try
+ * ทำให้ `deleteReading()` / `updateReadingOutcome()` โยน error ทะลุออกจาก onClick
+ * ของ ReadingHistoryModal จนโมดัลถูก error boundary ถอดทิ้งทั้งอัน
+ * และใน TarotFlow error จาก `saveReading` ไปตกใน catch ของสตรีม
+ * ทำให้ `trackEvent("reading_complete")` ไม่ถูกยิง — ยอดดูดวงสำเร็จหายเงียบ ๆ
+ */
+function writeStorage(value: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    localStorage.setItem(STORAGE_KEY, value);
+    return true;
+  } catch (err) {
+    console.warn("[Journal] เขียนประวัติลงเครื่องไม่สำเร็จ:", err);
+    return false;
+  }
+}
+
+function clearStorage(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (err) {
+    console.warn("[Journal] ล้างประวัติในเครื่องไม่สำเร็จ:", err);
+  }
+}
+
 export function getReadings(): SavedReadingItem[] {
   if (typeof window === "undefined") return [];
   try {
@@ -63,7 +93,7 @@ export async function fetchServerReadings(): Promise<SavedReadingItem[]> {
     }
     const data = (await res.json()) as { readings?: SavedReadingItem[] };
     if (data.readings && Array.isArray(data.readings)) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.readings.slice(0, 50)));
+      writeStorage(JSON.stringify(data.readings.slice(0, 50)));
       return data.readings;
     }
   } catch (err) {
@@ -98,7 +128,7 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
   if (!isDuplicate) {
     const updated = [newItem, ...current].slice(0, 50);
     if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      writeStorage(JSON.stringify(updated));
     }
 
     // Dual-Mode Sync to server (Non-blocking)
@@ -122,7 +152,7 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
           const idx = list.findIndex((r) => r.id === newItem.id);
           if (idx === -1) return;
           list[idx] = { ...list[idx], id: serverId };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+          writeStorage(JSON.stringify(list));
         })
         .catch(() => {
           // Silently ignore 401 for anonymous users
@@ -155,7 +185,7 @@ export function updateReadingOutcome(
   });
 
   if (typeof window !== "undefined") {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    writeStorage(JSON.stringify(updated));
 
     // Dual-Mode Sync to server
     fetch(`/api/journal/${encodeURIComponent(id)}`, {
@@ -199,7 +229,7 @@ export function deleteReading(id: string): void {
   const current = getReadings();
   const filtered = current.filter((r) => r.id !== id);
   if (typeof window !== "undefined") {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    writeStorage(JSON.stringify(filtered));
 
     // Dual-Mode Sync to server
     fetch(`/api/journal/${encodeURIComponent(id)}`, {
@@ -213,7 +243,7 @@ export function deleteReading(id: string): void {
  */
 export function clearAllReadings(): void {
   if (typeof window !== "undefined") {
-    localStorage.removeItem(STORAGE_KEY);
+    clearStorage();
 
     // Dual-Mode Sync to server
     fetch("/api/journal", {

@@ -35,6 +35,69 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-07: รอบตรวจใหญ่ บั๊ก · ประสิทธิภาพ · SEO — แก้ 18 จุด (โดย Claude)
+
+> **ขอบเขต**: ตรวจทั้งเว็บด้วยเอเจนต์เฉพาะทาง 6 ตัวขนานกัน (แกนอ่านไพ่ · ความปลอดภัย 61 API · ประสิทธิภาพ/บันเดิล · SEO เทคนิค · โค้ดตาย · พื้นผิวแอปที่เหลือ) แล้วลงมือแก้เฉพาะรายการที่ยืนยันได้จริงและเสี่ยงต่ำ
+
+#### 🔴 P0 — ของเสียที่กระทบ production ทันที
+
+| # | อาการ | สาเหตุราก | ที่แก้ |
+| :-- | :--- | :--- | :--- |
+| 1 | **ภาพแชร์ 299 หน้าเป็นภาพเดียวกันหมด** และ **deploy ขึ้น production ไม่ได้ตั้งแต่ PR #348** (main แดงค้าง ด่าน OG ล้มทุกครั้ง) | `NEXT_PUBLIC_*` ถูกฝังตอน `next build` เท่านั้น · ค่าใน `wrangler.jsonc` เป็น var ตอน **runtime** จึงไม่ถึงขั้น build · ขั้น `repo:verify` ใน CI ไม่มี `env:` เลย · `buildCloudinaryShareImageUrl()` จึงคืน `null` แล้วทุกหน้าถอยไป `og/default.png` เงียบ ๆ | `src/lib/config/site.ts` · `src/lib/media/cloudinary.ts` · `.github/workflows/{deploy,pr}.yml` |
+| 2 | เบราว์เซอร์ที่บล็อกที่เก็บข้อมูลเว็บไซต์ (Safari "Block all cookies", Firefox private เข้ม) **จอขาวทั้งหน้า** ไม่มี error UI | `soundManager` ถูกสร้างตอน import ระดับโมดูล และ constructor เรียก `localStorage.getItem` โดยไม่มี try → โมดูลประเมินไม่จบ | `src/lib/utils/audio.ts` |
+
+**พิสูจน์ข้อ 1**: บิลด์ใหม่แบบไม่มี env → `og:image` ที่ไม่ซ้ำกันเพิ่มจาก **1 → 299 ค่า** · 7 หน้าที่ยังใช้ภาพกลางคือหน้า `noindex` ล้วน · ยิง URL ที่ประกอบได้จริงกลับมา HTTP 200 ภาพ 1200×630 ตัวอักษรไทยเรนเดอร์ครบ ไม่ทับกัน
+
+#### 🃏 กฎเหล็กข้อ 14 — อุดรูรั่วที่ยังเหลือ 2 จุด
+
+- **`DailyClient.tsx`**: เดิมเขียน `cardIndex: cardIdx >= 0 ? cardIdx : 0` — ถ้าหาไพ่ใน `CARD_SUMMARIES` ไม่เจอจะบันทึกเป็นไพ่ลำดับ 0 = **The Fool** ทั้งในสมุดบันทึก ในชิปประวัติ และใน `content_hash` ฝั่งเซิร์ฟเวอร์ ทั้งที่ผู้ใช้ไม่เคยจั่วใบนั้น → เปลี่ยนเป็นข้ามการบันทึกและ log error
+- **`gemini.ts`**: ฝั่ง Groq `continue` ไปโมเดลถัดไปเมื่อด่านความสอดคล้องล้มระดับ fatal แต่ฝั่ง Gemini บันทึก stat แล้ว `yield` ต่อ → คำอ่านที่อ้างถึงไพ่ที่ไม่ได้จั่ว (`FOREIGN_CARD`) ถูกสตรีม แสดงผล หักสิทธิ์ และบันทึกลงสมุดบันทึก → เปลี่ยนเป็นถอยไปคำอ่านสำรองที่ประกอบจากไพ่ที่จั่วจริง
+
+#### 🔐 ความปลอดภัย
+
+| ระดับ | รายการ | ที่แก้ |
+| :-- | :--- | :--- |
+| High | `GET /api/feedback` **เปิดสาธารณะ** — ใครก็ดูดข้อเสนอแนะ 50 รายการล่าสุดพร้อม `comment`, `reading_id`, `page_url` ได้ | `src/app/api/feedback/route.ts` |
+| High | `/api/journal/monthly-summary` ไม่เช็ก origin ไม่เช็กล็อกอิน ไม่นับเพดาน AI = **พร็อกซี Gemini ฟรี** ด้วยคีย์ของเรา และข้อความในบอดี้ต่อเข้าพรอมต์ตรง ๆ (prompt injection) | `src/app/api/journal/monthly-summary/route.ts` |
+| Medium | `consumeToken()` เป็น check-then-act → คำขอสองอันพร้อมกันใช้ token รีเซ็ตรหัสผ่านใบเดียวกันได้ทั้งคู่ | `src/lib/auth/auth-tokens.repo.ts` (เปลี่ยนเป็น `UPDATE … RETURNING` คำสั่งเดียว) |
+| Medium | session token ของแม่หมอรับจาก `?token=` → ติด log Cloudflare, `Referer`, ประวัติเบราว์เซอร์ | `src/lib/auth/reader-auth.ts` |
+| Medium | `/api/entitlement/checkout` ประกอบ origin จาก `url.host` เอง ซึ่งเป็นค่าที่กลายเป็น `return_uri` หลังจ่ายเงิน | `src/app/api/entitlement/checkout/route.ts` (ใช้ `resolveAppOrigin`) |
+
+#### 🐛 บั๊กพฤติกรรม
+
+- **ผู้ใช้ถูกล็อกไม่ให้เปิดไพ่ถาวร**: `read/route.ts` ไม่คืน concurrency slot ตอนปฏิเสธด้วยโควตารายวัน → `concurrent` ค้างที่ 1 ตลอดอายุ isolate พอวันรุ่งขึ้นโควตารีเซ็ต ผู้ใช้ยังโดน 429 "คุณกำลังเปิดไพ่อยู่แล้ว" ทุกครั้ง (`performLazyCleanup` เก็บกวาดไม่ได้เพราะต้องการ `concurrent <= 0`)
+- **กด "เริ่มดูดวงใหม่" แล้วถูกลากกลับไปหน้าสรุปของรอบที่ทิ้งไป**: `handleReset` ไม่ยกเลิกสตรีมที่ค้าง เฟรม `done` ที่มาทีหลังไป `setReadingResult` + `navigateStep("SUMMARY")` + บันทึกลงสมุดบันทึกด้วยคำถาม/ชื่อเล่นของรอบใหม่ที่ว่างเปล่า
+- **ประวัติที่ลบไปแล้วโผล่กลับมา**: `ReadingHistoryModal` ยิง `fetchServerReadings()` ตอนเปิด ถ้าผู้ใช้กดลบระหว่างนั้น คำตอบเก่าที่กลับมาทีหลังจะ `setReadings` ทับ **และ** เขียนรายการที่ลบกลับลง `localStorage` → เพิ่มตัวนับรุ่น ทิ้งคำตอบที่ล้าสมัย
+- **`ChunkLoadError` หลัง deploy ขณะผู้ใช้เปิดเว็บค้างอยู่**: `sw.js` เรียก `skipWaiting()` ตอน install → `activate` ลบแคชเวอร์ชันเก่าแล้ว `clients.claim()` ยึดหน้าที่ยังอ้างอิง chunk ชื่อเก่า → ปล่อยให้ตัวใหม่รอเป็น waiting worker + เพิ่ม `controllerchange` guard ที่ฝั่งไคลเอนต์
+- **GA4 นับ pageview เกินจริงเท่าตัว**: `trackPageView` เรียก `gtag("config", …)` (ซึ่งส่ง page_view ให้เองอยู่แล้ว) แล้วตามด้วย `event page_view` → หน้าแรกนับ 1 ครั้ง แต่การเปลี่ยนหน้าแบบ SPA นับ 2 ครั้ง ตัวเลข session/bounce จึงเพี้ยน
+- **`deleteReading` / `updateReadingOutcome` ทำโมดัลพังทั้งอัน**: `localStorage.setItem` ไม่มี try/catch (โยนได้จริงทั้ง QuotaExceededError และ SecurityError) → เพิ่มตัวช่วย `writeStorage`/`clearStorage`
+- **runtime cache ของ SW โตไม่จำกัด** เก็บ HTML ทุกหน้าที่ผู้ใช้เดินผ่าน (เว็บมี ~299 หน้า) พอโควตาเต็มเบราว์เซอร์ล้างทั้งถังรวมถึง `/offline.html` → จำกัดไว้ 30 หน้าแบบตัดเก่าสุดออกก่อน
+- `console.log` ของ Journal Sync 2 จุดหลุดขึ้น console ผู้ใช้จริง → ครอบด้วย `NODE_ENV !== "production"`
+
+#### ⚡ ประสิทธิภาพ
+
+- **หน้าไพ่ 156 หน้า (78 TH + 78 EN) โหลดภาพ LCP เกินจำเป็น 194 KB**: `CardDetailView` ส่ง prop `full` ซึ่งทำให้ `CardImage` ข้าม `<picture>` + `<source type="image/webp">` ไปใช้ JPEG เต็ม **279 KB** ทั้งที่กรอบจริงกว้างแค่ `w-64 sm:w-72` (256/288 CSS px) · `sizes` ก็ประกาศ 400/600px เกินจริงไปอีกขั้น → ถอด `full` ออก แก้ `sizes` เป็น 288/256px และใส่ `fetchPriority="high"` · WebP ที่เลือกได้คือ **85.5 KB** (`w512b`)
+- **`/cards` ผู้สมัคร LCP ถูกเลื่อนไปหนึ่งรอบเครือข่าย**: ทั้ง 78 ใบเป็น `loading="lazy"` → 6 ใบแรก (แถวแรกของกริด) เป็น `eager` และใบแรกได้ `fetchPriority="high"`
+
+#### ✅ ผลการตรวจหลังแก้
+
+- `npm run repo:verify` ➔ **ผ่านครบ 36/36 ด่าน** (ก่อนแก้ล้ม 1 ด่าน · main แดงมาตั้งแต่ PR #348)
+- `npm run typecheck` ➔ 0 errors
+- SEO ตรวจจาก HTML ที่บิลด์จริง 309 ไฟล์: hreflang 296 ปลายทาง **ไม่มีอันไหนชี้ 404** · sitemap 299 URL ไม่มีลิงก์เสีย และไม่มีหน้า noindex หลุดเข้าไป · canonical ครบทุกหน้าจริง · title ไม่ซ้ำ 306/309 (ที่ซ้ำคือคู่ slug เก่าที่ canonical ชี้ถูกแล้ว + หน้าแอดมินที่ noindex)
+
+#### 📌 ที่ยังไม่ได้แก้ในรอบนี้ (ยืนยันแล้วว่ามีจริง แต่ต้องออกแบบเพิ่ม)
+
+| เรื่อง | ทำไมถึงยังไม่แตะ |
+| :--- | :--- |
+| `motion` 39.8 KB gzip ติดไป **178 จาก 309 หน้า** เพื่อทำเฟด 0.2 วิ สามจุด (`CardsExplorer`, `SpreadsLibrary`, `CardDetailView`) | ต้องเขียน CSS keyframes ทดแทนแล้วไล่ทดสอบภาพเคลื่อนไหวทุกหน้า — งานก้อนใหญ่แยก PR |
+| `clientSeed` ถูกสุ่มฝั่งเซิร์ฟเวอร์เมื่อไคลเอนต์ไม่ส่งมา (เส้นทางทำนายด่วน 1 ใบ) ทำให้คุณสมบัติ commit-reveal หายไปสำหรับ flow นั้น | กระทบสัญญา provably-fair ต้องให้เจ้าของเคาะก่อนว่าจะบังคับส่ง seed (400 ถ้าไม่มี) หรือย้ายไปตั้งที่ `/start` |
+| `/api/reading/[id]/chat` ยอมรับ `readingSnapshot.drawn` จากบอดี้เมื่อหา record ไม่เจอ แล้วประทับ `commitment: ""` | ต้องออกแบบทางถอยใหม่ให้ไม่พังผู้ใช้ที่เซสชันหมดอายุจริง |
+| rate limit ทั้งหมดเป็น Map ในหน่วยความจำต่อ isolate (รวม `admin_login` 5 ครั้ง/15 นาที) | ต้องย้ายไปใช้ `src/lib/security/auth-ratelimit.ts` ที่ backed ด้วย KV — แยก PR |
+| `analytics_storage: 'granted'` เป็นค่าเริ่มต้นและไม่มี UI ขอความยินยอมเลย (ประเด็น PDPA) | ต้องสร้างคอมโพเนนต์ consent ใหม่ + ให้เจ้าของเคาะข้อความ |
+| โค้ดตาย ~404 บรรทัด (17 export ที่ไม่มีใครเรียก + `src/lib/i18n/server.ts` + `scripts/download-rws-cards.ts`) และ `src/types/opennextjs.d.ts` ที่ทับ type จริงของแพ็กเกจจนเสีย type ของ binding ทุกตัว | เป็นงานทำความสะอาด ไม่ควรปนกับ PR แก้บั๊ก |
+
+---
+
 ### 🗓️ 2026-09-07: ปฏิบัติการยกเครื่องภาพแชร์ทั้งเว็บ 299 หน้า (OG Image Overhaul: OG-01 ถึง OG-06) สำเร็จสมบูรณ์ 100% (โดย Antigravity AI)
 
 > **ขอบเขต**: ดำเนินการตามแผนแม่บท [`docs/plans/HANDOFF_OG_IMAGES_2026-09-07.md`](plans/HANDOFF_OG_IMAGES_2026-09-07.md) อย่างละเอียดทุกมิติ ยกระดับภาพ Social Share (OpenGraph/Twitter) ครบทุก 299 หน้าที่ prerender ใน sitemap.xml เป็นสัดส่วน 1.91:1 (1200×630) ระดับพรีเมียม สวยงาม คมชัด พร้อมตราสินค้าและศิลปะไพ่ 1909 ประจำหมวด

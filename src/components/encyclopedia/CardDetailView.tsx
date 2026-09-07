@@ -127,9 +127,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     cardId={card.id}
                     alt={`ภาพหน้าไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`}
                     className="w-full h-full object-cover tarot-card-enhance tarot-hd-card-image"
-                    sizes="(min-width: 640px) 600px, 400px"
+                    /* กรอบจริงคือ w-64 / sm:w-72 = 256 / 288 CSS px — เดิมประกาศ 400/600px
+                       ทำให้เบราว์เซอร์เลือกไฟล์ใหญ่เกินความจำเป็นไปหนึ่งขั้น */
+                    sizes="(min-width: 640px) 288px, 256px"
                     loading="eager"
-                    full
+                    fetchPriority="high"
                   />
                 </motion.div>
                 <div className="gold-foil-sheen absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity pointer-events-none" />

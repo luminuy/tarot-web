@@ -21,13 +21,32 @@ const PRECACHE_URLS = [
   "/manifest.webmanifest",
 ];
 
+// เพดานจำนวนหน้า HTML ที่เก็บไว้ในแคชระหว่างใช้งาน (ตัดแบบเก่าสุดออกก่อน)
+const RUNTIME_CACHE_LIMIT = 30;
+
+async function trimCache(cache, maxEntries) {
+  try {
+    const keys = await cache.keys();
+    if (keys.length <= maxEntries) return;
+    // cache.keys() คืนรายการตามลำดับที่ถูกใส่เข้าไป — ตัดหัวแถวคือตัวที่เก่าที่สุด
+    await Promise.all(
+      keys.slice(0, keys.length - maxEntries).map((key) => cache.delete(key))
+    );
+  } catch {
+    // ถ้าเก็บกวาดไม่สำเร็จก็ไม่ควรทำให้คำขอที่กำลังเสิร์ฟอยู่พัง
+  }
+}
+
 // ติดตั้ง Service Worker และโหลด Precache สำคัญ
+// ⚠️ ห้ามเรียก self.skipWaiting() ตรงนี้เด็ดขาด
+// ถ้า skip ทันทีตอน install → activate ทำงานต่อทันที ลบแคช `seertarot-static-<เวอร์ชันเก่า>`
+// ทิ้ง แล้ว clients.claim() ยึดหน้าที่ผู้ใช้เปิดค้างอยู่ · แต่เอกสารหน้านั้นยังอ้างอิง
+// `/_next/static/chunks/*.js` ชื่อเก่าซึ่งตอนนี้หายไปทั้งจากแคชและจาก origin
+// พอผู้ใช้กดเปิดโมดัลที่โหลดแบบ dynamic (ประวัติ, เติมโควตา, แผงแอดมิน) จะได้ ChunkLoadError
+// ปล่อยให้ตัวใหม่รอเป็น waiting worker แล้วขึ้นทำงานตอนโหลดหน้าครั้งถัดไปแทน
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(STATIC_CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
+    caches.open(STATIC_CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
   );
 });
 
@@ -120,8 +139,12 @@ self.addEventListener("fetch", (event) => {
         .then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             const responseToCache = networkResponse.clone();
-            caches.open(RUNTIME_CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
+            caches.open(RUNTIME_CACHE_NAME).then(async (cache) => {
+              await cache.put(request, responseToCache);
+              // เว็บมีหน้า prerender ~299 หน้า ถ้าเก็บทุกหน้าที่ผู้ใช้เดินผ่านโดยไม่จำกัด
+              // โควตาที่เก็บข้อมูลของ origin จะเต็ม แล้วเบราว์เซอร์ล้าง **ทั้งถัง** ทิ้ง
+              // รวมถึง /offline.html ที่ precache ไว้ — หน้าสำรองตอนออฟไลน์จึงเงียบหายไปเฉย ๆ
+              await trimCache(cache, RUNTIME_CACHE_LIMIT);
             });
           }
           return networkResponse;

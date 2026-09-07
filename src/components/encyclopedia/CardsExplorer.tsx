@@ -365,8 +365,11 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
           transition={{ duration: 0.2 }}
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5"
         >
-          {filteredCards.map((card) => {
+          {filteredCards.map((card, idx) => {
             const elemStyle = (card.element && ELEMENT_STYLES[card.element]) || ELEMENT_STYLES["ไฟ"];
+            // แถวแรกของกริดคือผู้สมัคร LCP ของหน้านี้ — ถ้าปล่อย lazy ทั้ง 78 ใบ
+            // เบราว์เซอร์จะรู้จักภาพแรกก็ต่อเมื่อจัดเลย์เอาต์เสร็จแล้ว เสียไปหนึ่งรอบเครือข่ายเต็ม ๆ
+            const isAboveFold = idx < 6;
             return (
               <Link
                 key={card.id}
@@ -386,6 +389,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     alt={isEnglish ? `${card.nameEn} tarot card` : `ไพ่ ${card.nameTh} (${card.nameEn})`}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 tarot-hd-card-image"
                     sizes="(min-width: 1024px) 160px, (min-width: 768px) 170px, (min-width: 640px) 190px, 45vw"
+                    loading={isAboveFold ? "eager" : "lazy"}
+                    fetchPriority={idx === 0 ? "high" : undefined}
                   />
                   <div className="gold-foil-sheen absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity pointer-events-none" />
 

@@ -4,6 +4,7 @@ import { getCreditPackageById } from "@/lib/entitlement/packages";
 import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
 import { createPaymentRecord } from "@/lib/marketplace/payments.repo";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
+import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
 
@@ -37,8 +38,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "แพ็กเกจที่เลือกไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const url = new URL(request.url);
-    const origin = process.env.APP_ORIGIN || `${url.protocol}//${url.host}`;
+    // ⚠️ ห้ามประกอบ origin จาก `url.host` เอง — ค่านี้กลายเป็น `return_uri` ที่ผู้ใช้
+    // ถูกส่งกลับมาหลังจ่ายเงิน · `resolveAppOrigin` เป็นแหล่งความจริงเดียวที่กัน
+    // Host/X-Forwarded-Host ปลอมไว้แล้ว (ดูคอมเมนต์ใน src/lib/security/app-origin.ts)
+    const origin = resolveAppOrigin(request);
     const orderId = `ord_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 
     // สร้างรายการชำระเงินผ่าน Gateway (Omise หรือ Simulator)
