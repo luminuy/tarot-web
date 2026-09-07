@@ -20,6 +20,7 @@
 | [docs/INCIDENT_LOG.md](docs/INCIDENT_LOG.md) | บทเรียนความผิดพลาด (INC-0001 เป็นต้นไป) — อ่านก่อนเสมอ |
 | [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | บั๊กค้าง/สถานะระบบ (อัปเดตล่าสุด 2026-09-02) |
 | [docs/WORK_LOG.md](docs/WORK_LOG.md) | ประวัติงานที่ทำ — **ต้องอัปเดตทุกครั้ง** |
+| [docs/SEO_INDEXING_LOG.md](docs/SEO_INDEXING_LOG.md) | ทะเบียนส่ง URL เข้า Google Search Console — **ต้องจดทุกครั้งที่ส่ง** ไม่งั้นรอบหน้าจะยิงซ้ำเปลืองโควตา |
 | [docs/AI_COLLABORATION_GUIDELINES.md](docs/AI_COLLABORATION_GUIDELINES.md) | กฎการทำงานร่วมกัน, แบ่ง Domain, ดีไซน์ |
 | [docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md](docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md) | ขั้นตอน deploy ขึ้น Cloudflare Workers & Custom Domain |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | สถาปัตยกรรมระดับองค์กร + Provably Fair Flow |

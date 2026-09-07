@@ -13,6 +13,7 @@ docs/
 │   ├── AI_COLLABORATION_GUIDELINES.md   # กฎเหล็ก AI, การแบ่ง Domain, 14 Golden Design Rules
 │   ├── INCIDENT_LOG.md                  # บันทึกบทเรียนความผิดพลาด (Blameless Post-Mortem)
 │   ├── KNOWN_ISSUES.md                  # ดัชนีสถานะบั๊กค้างและข้อจำกัดระบบ
+│   ├── SEO_INDEXING_LOG.md              # ทะเบียนส่ง URL เข้า Google Search Console (กันส่งซ้ำ/เปลืองโควตา)
 │   └── WORK_LOG.md                      # บันทึกประวัติการพัฒนาและสถานะส่งต่องาน (Live Handoff)
 │
 ├── 🏛️ สถาปัตยกรรมและคู่มือระบบ (Architecture & System Manuals)
