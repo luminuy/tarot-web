@@ -77,9 +77,25 @@ PR นี้ทำสิ่งนั้น: ตัดของที่ไม่
 หลักฐาน: PR #352 merge เวลา `15:23:53` แต่ด่านตรวจเพิ่งจบเวลา `15:25:19` — **merge ก่อนผลตรวจออก 86 วินาที**
 นี่คือเหตุผลที่ PR #351 ซึ่งตกด่านเดียวกัน ยังหลุดเข้า `main` ได้
 
-**ทางแก้ถาวร** (ต้องทำที่ GitHub Settings — AI ทำแทนไม่ได้): เปิด branch protection บน `main` แล้วตั้ง
-`🧪 Automated Verification & Quality Audit` เป็น **required status check**
-ถ้าไม่ทำข้อนี้ PR ที่ตกด่านจะหลุดเข้า `main` ได้อีกทุกครั้ง และ deploy จะค้างซ้ำแบบเดิม
+#### ✅ แก้แล้ว 2026-09-07 (เจ้าของโปรเจกต์อนุมัติให้ตั้งให้)
+
+เปิด branch protection บน `main` เรียบร้อย ตรวจแล้วอ่านค่ากลับได้จริง:
+
+| ค่า | ที่ตั้งไว้ | เหตุผล |
+| :--- | :--- | :--- |
+| `required_status_checks.contexts` | `["🧪 Automated Verification & Quality Audit"]` | ชื่อ job ใน `.github/workflows/pr.yml:24` — auto-merge จะรอด่านนี้ผ่านก่อนเสมอ |
+| `strict` | `false` | ถ้าเปิดจะบังคับ rebase ให้ทัน `main` ทุกครั้งก่อน merge — หลาย agent ทำงานขนานกันจะ rebase วนไม่จบ |
+| `enforce_admins` | `false` | เหลือช่องทางฉุกเฉินให้เจ้าของ force-merge ได้ · auto-merge ยังรอด่านตามปกติเพราะ required check ไม่สนใจสิทธิ์ |
+| `required_pull_request_reviews` | `null` | ถ้าบังคับ review จะทำให้ auto-merge ค้างถาวร (ทำงานคนเดียวกับ AI) |
+| `allow_force_pushes` · `allow_deletions` | `false` | กัน `main` ถูกเขียนทับหรือถูกลบ |
+
+**ตรวจก่อนตั้งว่าไม่ไปพังอะไร**: ไม่มี workflow ไหน push commit เข้า `main` โดยตรง — `auto-release.yml` ยิงแค่ tag/release ผ่าน `softprops/action-gh-release` ซึ่งไม่อยู่ใต้ branch protection
+
+> ⚠️ **ผลข้างเคียงที่ต้องรู้**: `pr.yml` มี `if: github.event.pull_request.draft == false`
+> **PR ที่เป็น draft จะไม่รันด่านนี้** ➔ required check ไม่ปรากฏ ➔ merge ไม่ได้จนกว่าจะกด Ready for review
+> (เป็นพฤติกรรมที่ถูกต้อง แต่ถ้าเจอ PR ค้างโดยไม่มีด่านให้ดู ให้เช็กก่อนว่ามันเป็น draft อยู่หรือเปล่า)
+
+**คำสั่งอ่านค่ากลับ**: `gh api repos/luminuy/tarot-web/branches/main/protection`
 
 ---
 
