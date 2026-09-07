@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion, AnimatePresence } from "motion/react";
+import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import type { TarotCard } from "@/data/cards/types";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
@@ -95,7 +96,8 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   ];
 
   return (
-    <div className="space-y-8 w-full max-w-5xl mx-auto relative z-10">
+    <AppMotionProvider>
+      <div className="space-y-8 w-full max-w-5xl mx-auto relative z-10">
       {/* Top Header Bar — Card Counter */}
       <div className="flex items-center justify-end border-b border-[#D5CEC2]/40 pb-4 text-xs font-mono">
         <span className="text-[#635B4E]">
@@ -344,5 +346,6 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         )}
       </div>
     </div>
+  </AppMotionProvider>
   );
 };

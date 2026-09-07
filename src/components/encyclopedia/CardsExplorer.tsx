@@ -5,6 +5,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "motion/react";
+import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import type { CardSummary } from "@/data/cards/summary";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
@@ -133,7 +134,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   }, [searchQuery, filteredCards.length]);
 
   return (
-    <div className="space-y-8 relative z-10">
+    <AppMotionProvider>
+      <div className="space-y-8 relative z-10">
       {/* Dynamic Bilingual Hero Header */}
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
@@ -466,6 +468,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
           </button>
         </div>
       )}
-    </div>
+      </div>
+    </AppMotionProvider>
   );
 };

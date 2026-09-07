@@ -205,7 +205,6 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         ) : (
           <Link
             href={item.href || "#"}
-            prefetch={false}
             onClick={() => {
               soundManager.playMenuTapSound();
               setIsOpen(false);

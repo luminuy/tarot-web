@@ -1,12 +1,21 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import dynamic from "next/dynamic";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { TarotCard } from "@/components/card/TarotCard";
-import { calculateBirthCard, type BirthCardResult } from "@/lib/tarot/birth-card";
+import { calculateBirthCard, type BirthCardResult, type BirthCardItem } from "@/lib/tarot/birth-card";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
+
+const TarotCard = dynamic(
+  () => import("@/components/card/TarotCard").then((mod) => mod.TarotCard),
+  {
+    loading: () => (
+      <div className="w-[140px] h-[238px] rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] animate-pulse" />
+    ),
+  },
+);
 
 const MONTHS = [
   { value: 1, nameTh: "มกราคม", nameEn: "January" },
@@ -23,7 +32,11 @@ const MONTHS = [
   { value: 12, nameTh: "ธันวาคม", nameEn: "December" },
 ];
 
-export function BirthCardCalculator() {
+export interface BirthCardCalculatorProps {
+  majorCards?: readonly BirthCardItem[];
+}
+
+export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {}) {
   const { isEnglish } = useLocale();
   const [, startTransition] = useTransition();
 
@@ -49,13 +62,13 @@ export function BirthCardCalculator() {
         setMonth(qm);
         setYearInput(qy.toString());
         setEra(qera);
-        const res = calculateBirthCard(qd, qm, qy, qera === "be");
+        const res = calculateBirthCard(qd, qm, qy, qera === "be", majorCards);
         if (res) {
           setResult(res);
         }
       }
     }
-  }, []);
+  }, [majorCards]);
 
   const handleCalculate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -85,7 +98,7 @@ export function BirthCardCalculator() {
       return;
     }
 
-    const calcResult = calculateBirthCard(day, month, parsedYear, isBe);
+    const calcResult = calculateBirthCard(day, month, parsedYear, isBe, majorCards);
 
     if (!calcResult) {
       setErrorMsg(
@@ -325,8 +338,8 @@ export function BirthCardCalculator() {
                     {isEnglish && result.primaryCard.numerologyEn
                       ? result.primaryCard.numerologyEn
                       : result.primaryCard.numerology ||
-                        result.primaryCard.meanings.self?.upright ||
-                        result.primaryCard.meanings.general.upright}
+                        result.primaryCard.meanings?.self?.upright ||
+                        result.primaryCard.meanings?.general?.upright}
                   </p>
                 </div>
 
@@ -370,8 +383,8 @@ export function BirthCardCalculator() {
                       {isEnglish && result.secondaryCard.numerologyEn
                         ? result.secondaryCard.numerologyEn
                         : result.secondaryCard.numerology ||
-                          result.secondaryCard.meanings.self?.upright ||
-                          result.secondaryCard.meanings.general.upright}
+                          result.secondaryCard.meanings?.self?.upright ||
+                          result.secondaryCard.meanings?.general?.upright}
                     </p>
                   </div>
 

@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
+import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
@@ -155,7 +156,8 @@ export function OneCardRitual({
   };
 
   return (
-    <div className="altar-panel rounded-2xl p-5 sm:p-8 space-y-8">
+    <AppMotionProvider>
+      <div className="altar-panel rounded-2xl p-5 sm:p-8 space-y-8">
       <AnimatePresence mode="wait">
         {/* จังหวะที่ 1: เลือกหัวข้อ/สถานะ ➔ กดปุ่มเปิดไพ่ */}
         {status === "idle" && (
@@ -349,6 +351,7 @@ export function OneCardRitual({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </AppMotionProvider>
   );
 }

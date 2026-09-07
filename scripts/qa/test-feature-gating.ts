@@ -33,6 +33,11 @@ function main() {
   // ── 1. ผังมาตรฐาน 10 ผัง สำหรับบัญชีฟรี ──
   check("ผังมาตรฐานมีจำนวนตรงตามตารางเปรียบเทียบ (10 ผัง)", STANDARD_SPREAD_IDS.size === 10);
 
+  // ตรวจสอบว่า STANDARD_SPREAD_IDS ตรงกับ guestAllowed ใน SPREADS เสมอ (INC-0005)
+  const expectedGuestIds = SPREADS.filter((s) => s.guestAllowed).map((s) => s.id).sort().join(",");
+  const actualStandardIds = [...STANDARD_SPREAD_IDS].sort().join(",");
+  check("STANDARD_SPREAD_IDS ตรงกับ guestAllowed ใน SPREADS เสมอ (INC-0005)", actualStandardIds === expectedGuestIds);
+
   const standardExpected = [
     "daily",
     "quick",

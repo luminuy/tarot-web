@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { AssetWarmup } from "@/components/performance/AssetWarmup";
-import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
@@ -138,16 +137,14 @@ export function RootHtml({
         />
       </head>
       <body className="min-h-dvh font-sans antialiased">
-        <AppMotionProvider>
-          <LocaleProvider forcedLocale={pinLocale ? locale : undefined}>
-            <AntiTheftShield />
-            <AssetWarmup />
-            <ServiceWorkerRegister />
-            <AnalyticsTracker />
-            {children}
-            <TikTokFloatingButton />
-          </LocaleProvider>
-        </AppMotionProvider>
+        <LocaleProvider forcedLocale={pinLocale ? locale : undefined}>
+          <AntiTheftShield />
+          <AssetWarmup />
+          <ServiceWorkerRegister />
+          <AnalyticsTracker />
+          {children}
+          <TikTokFloatingButton />
+        </LocaleProvider>
       </body>
     </html>
   );

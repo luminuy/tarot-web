@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion, AnimatePresence } from "motion/react";
+import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import {
   type Spread,
   getSpreadName,
@@ -99,7 +100,8 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <AppMotionProvider>
+      <div className="space-y-6">
       {/* Dynamic Bilingual Hero Header */}
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
@@ -288,6 +290,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
           })}
         </motion.div>
       </AnimatePresence>
-    </div>
+      </div>
+    </AppMotionProvider>
   );
 };
