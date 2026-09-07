@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { DECK_SUMMARY } from "@/data/cards";
+import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { AllCardsTable } from "@/components/encyclopedia/AllCardsTable";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { localeHref } from "@/lib/i18n/paths";
@@ -138,7 +138,7 @@ export function CardsAllBody({ locale }: { locale: Locale }) {
         </header>
 
         {/* Interactive Master Table */}
-        <AllCardsTable cards={DECK_SUMMARY} />
+        <AllCardsTable cards={CARD_SUMMARIES} />
       </div>
     </main>
   );

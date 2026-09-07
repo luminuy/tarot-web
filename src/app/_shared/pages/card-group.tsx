@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { DECK_SUMMARY } from "@/data/cards";
+import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { CARD_GROUPS, type CardGroupInfo } from "@/data/cards/group-seo";
 import { CardGroupView } from "@/components/encyclopedia/CardGroupView";
 import { buildAlternates } from "@/lib/config/site";
@@ -31,9 +31,9 @@ export function buildCardGroupMetadata(groupId: GroupId, locale: Locale): Metada
 /** ไพ่ที่อยู่ในหมวดนั้น — `major`/`minor` กรองด้วย arcana ส่วน 4 ดอกกรองด้วย suit */
 function cardsInGroup(groupId: GroupId) {
   if (groupId === "major" || groupId === "minor") {
-    return DECK_SUMMARY.filter((card) => card.arcana === groupId);
+    return CARD_SUMMARIES.filter((card) => card.arcana === groupId);
   }
-  return DECK_SUMMARY.filter((card) => card.suit === groupId);
+  return CARD_SUMMARIES.filter((card) => card.suit === groupId);
 }
 
 export function CardGroupBody({ groupId }: { groupId: GroupId; locale: Locale }) {

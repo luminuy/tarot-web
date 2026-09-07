@@ -69,6 +69,20 @@
    - `npm run typecheck` ➔ 0 errors
    - `npm run test:budget` ➔ ผ่าน 100%
    - `npm run repo:verify` ➔ **ผ่านครบทั้ง 35/35 ด่าน 100% Green!**
+### 🗓️ 2026-09-06: 🚑 กู้ main ที่พังอยู่ 2 ชั้น — typecheck + คำทำนายอังกฤษ 126 KB หลุดเข้าบันเดิลหน้าไทย (โดย Claude Opus 5)
+
+- **อาการ**: PR #339 (เอกสารล้วน ไม่แตะ `src/` เลย) ขึ้นกากบาทแดง · ตรวจแล้วพบว่า **`main` เองพัง** ทำให้ทุก PR ที่เปิดค้างล้มตามหมด และ pre-push hook ก็บล็อกไม่ให้ push อะไรได้เลย
+- **ชั้นที่ 1 · typecheck 3 error**: มี `CardSummary` สองตัวชนกัน — ตัวใน `data/cards/index.ts` (`Pick<TarotCard,…>`) ไม่มีฟิลด์ `name` แต่ตัวใน `data/cards/summary.ts` บังคับต้องมี · หน้าเพจ 3 ไฟล์ส่ง `DECK_SUMMARY` เข้าคอมโพเนนต์ที่ประกาศรับ type จาก `summary.ts`
+  - **แก้**: `card-group.tsx` · `cards-all.tsx` · `cards-index.tsx` เปลี่ยนไปใช้ `CARD_SUMMARIES` จาก `@/data/cards/summary` โดยตรง — ตรง type และ**ไม่ลาก `DECK` เต็มเข้าบันเดิล**ตามเจตนาเดิมของ #302/#338
+- **ชั้นที่ 2 · บันเดิลเกินงบ 3 หน้า**: `/cards/major-00` 374/280 · `/daily` 448/350 · `/love/1-card` 452/350 — ทั้งสามพุ่งขึ้น **+116 KB เท่ากันเป๊ะ**
+  - **ต้นเหตุ**: `DECK` ใน `data/cards/index.ts` ผสม `CARD_MEANINGS_EN` (≈126 KB gzip) เข้าไปในไพ่ทุกใบตั้งแต่ตอนสร้างสำรับ ทำให้ client ที่ import `@/data/cards` **ได้คำทำนายภาษาอังกฤษติดไปด้วยเสมอ แม้อยู่บนหน้าไทยที่ไม่ได้ใช้เลย**
+  - **หลักฐาน**: chunk `1637-*.js` ถูกอ้างเป็น `<script src>` จริงในหน้าเหล่านี้ (ไม่ใช่แค่ preload) · เนื้อในเป็นคำทำนาย 5 มิติภาษาอังกฤษล้วน · `/daily` ไม่ได้เรียก `meaningsEn` สักบรรทัด
+  - **แก้**: เพิ่ม `data/cards/deck-th.ts` (สำรับไทยล้วน) + `data/cards/en-enrich.ts` (เติมอังกฤษ แยก chunk) แล้วให้ `OneCardRitual` โหลดสำรับไทย และเติมอังกฤษ**เฉพาะตอน locale เป็น EN**
+  - **ผลวัดจริง**: `/cards/major-00` 374 → **266** · `/daily` 448 → **333** · `/love/1-card` 452 → **336** (กลับมาใกล้ค่าตอนตั้งงบเดิม 257/332/335)
+- **ด่านกันซ้ำ**: `scripts/verify-cards.ts` ตรวจว่า `DECK_TH` เรียงตรงกับ `DECK` ทุก index และ `enrichCardEn()` ให้ผลเท่ากับ `DECK` ทุกฟิลด์ — **ถ้าลำดับหลุด cardIndex ในฐานข้อมูลจะชี้ไพ่คนละใบ หลักฐาน Provably Fair ย้อนหลังพังทั้งระบบ**
+- **ผลตรวจ**: `npm run repo:verify` ➔ ✅ **35/35 ด่าน**
+
+---
 
 ### 🗓️ 2026-09-06: ⚡ ปรับประสิทธิภาพความเร็ว Bundle Weight, GPU Composite Shadows, CSS View Transitions และระบบค้นหา Semantic Search
 
