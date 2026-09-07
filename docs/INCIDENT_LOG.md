@@ -71,6 +71,15 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **การแก้ไข** | Unify CardSummary type export by having index.ts directly re-export CardSummary from summary.ts and making name property optional |
 | **🛡️ กฎป้องกันถาวร** | **Import and re-export CardSummary directly from summary.ts to enforce single source of truth** |
 | **บันทึกโดย** | Antigravity AI · branch `fix/unify-card-summary-type` · commit `57c8eec` |
+### INC-0098 · 2026-09-06 22:52 · 🟠 High · main พังค้างจากคำทำนายอังกฤษ 126 KB หลุดเข้าบันเดิลหน้าไทย และ CardSummary สองตัวชนกัน
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | PR ที่ไม่ได้แตะ src เลยขึ้นกากบาทแดง เพราะ main เองล้มทั้ง typecheck 3 error และด่านงบบันเดิล 3 หน้า (/cards/major-00 374/280, /daily 448/350, /love/1-card 452/350) และ pre-push hook บล็อกไม่ให้ push แก้ได้ |
+| **สาเหตุราก** | หนึ่ง มี CardSummary สองนิยามชนกัน ตัวใน index.ts ไม่มีฟิลด์ name แต่ตัวใน summary.ts บังคับต้องมี สอง DECK ใน index.ts ผสม CARD_MEANINGS_EN ประมาณ 126 KB gzip เข้าไปในไพ่ทุกใบตั้งแต่ตอนสร้างสำรับ ทำให้ client ที่ import at data/cards ได้คำทำนายอังกฤษติดไปด้วยเสมอ แม้อยู่บนหน้าไทยที่ไม่ได้เรียกใช้เลย |
+| **การแก้ไข** | หน้าเพจ 3 ไฟล์เปลี่ยนไปใช้ CARD_SUMMARIES จาก data/cards/summary โดยตรง และเพิ่ม deck-th.ts สำรับไทยล้วน กับ en-enrich.ts ที่เติมอังกฤษแยก chunk แล้วให้ OneCardRitual โหลดสำรับไทย เติมอังกฤษเฉพาะตอน locale เป็น EN |
+| **🛡️ กฎป้องกันถาวร** | **เพิ่มด่านใน scripts/verify-cards.ts ตรวจว่า DECK_TH เรียงตรงกับ DECK ทุก index และ enrichCardEn ให้ผลเท่ากับ DECK ทุกฟิลด์ กันลำดับสำรับหลุดซึ่งจะทำให้ cardIndex ในฐานข้อมูลชี้ไพ่คนละใบและพิสูจน์ Provably Fair ย้อนหลังไม่ได้** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/fix-cardsummary-typecheck` · commit `57c8eec` |
 
 
 ### INC-0097 · 2026-09-06 20:31 · 🟠 High · add use client directive to CardImage for SSR build compatibility

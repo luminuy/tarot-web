@@ -1,3 +1,5 @@
+import { DECK_TH } from "../src/data/cards/deck-th";
+import { enrichCardEn } from "../src/data/cards/en-enrich";
 import { DECK } from "../src/data/cards";
 import type { Category, TarotCard } from "../src/data/cards/types";
 import { RELATED_CARDS } from "../src/data/cards/related.generated";
@@ -93,6 +95,35 @@ for (const [id, refs] of Object.entries(RELATED_CARDS)) {
 
 // ตรวจสอบความสมบูรณ์ของความหมายภาษาอังกฤษ 78 ใบ (meaningsEn, astrologyEn, keywordsEn)
 verifyEnglishMeanings();
+
+// ── สำรับไทยล้วน (deck-th) ต้องเรียงตรงกับ DECK เป๊ะ ๆ ──────────────────────
+// `DECK_TH` ถูกแยกออกมาให้ฝั่ง client จั่วไพ่โดยไม่ต้องลากคำทำนายอังกฤษ (~126 KB gzip)
+// ถ้าสองสำรับเรียงไม่ตรงกัน cardIndex ที่เก็บไว้ในฐานข้อมูลจะชี้ไปคนละใบ
+// = หลักฐาน Provably Fair ย้อนหลังพังทั้งระบบ จึงต้องมีด่านตรวจตายตัว
+function verifyThaiDeckParity() {
+  if (DECK_TH.length !== DECK.length) {
+    errors.push(`DECK_TH มี ${DECK_TH.length} ใบ แต่ DECK มี ${DECK.length} ใบ — ต้องเท่ากัน`);
+    return;
+  }
+  for (let i = 0; i < DECK.length; i++) {
+    if (DECK_TH[i]!.id !== DECK[i]!.id) {
+      errors.push(`ลำดับไพ่ไม่ตรงกันที่ index ${i}: DECK_TH="${DECK_TH[i]!.id}" แต่ DECK="${DECK[i]!.id}"`);
+    }
+  }
+  // เติมอังกฤษแล้วต้องได้ผลเหมือน DECK ทุกฟิลด์ที่เกี่ยวข้อง
+  for (let i = 0; i < DECK.length; i++) {
+    const enriched = enrichCardEn(DECK_TH[i]!);
+    const full = DECK[i]!;
+    if (JSON.stringify(enriched.meaningsEn) !== JSON.stringify(full.meaningsEn)) {
+      errors.push(`enrichCardEn ให้ meaningsEn ไม่ตรงกับ DECK ที่ไพ่ "${full.id}"`);
+    }
+    if (enriched.astrologyEn !== full.astrologyEn || enriched.numerologyEn !== full.numerologyEn) {
+      errors.push(`enrichCardEn ให้ astrologyEn/numerologyEn ไม่ตรงกับ DECK ที่ไพ่ "${full.id}"`);
+    }
+  }
+}
+
+verifyThaiDeckParity();
 
 console.log(`ตรวจไพ่ ${DECK.length} ใบ · ข้อความความหมายทั้งหมด ${allTexts.size} ข้อความ · แผนที่ไพ่ใกล้เคียง 78×4 ใบ`);
 console.log(`yesNo — ใช่ ${tally.yes} / ไม่ใช่ ${tally.no} / ไม่แน่ ${tally.maybe}`);

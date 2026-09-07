@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { DECK_SUMMARY } from "@/data/cards";
+import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
 import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import type { Locale } from "@/lib/i18n/types";
@@ -52,8 +52,8 @@ export function CardsIndexBody({ locale }: { locale: Locale }) {
     inLanguage: locale,
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: DECK_SUMMARY.length,
-      itemListElement: DECK_SUMMARY.map((card, index) => ({
+      numberOfItems: CARD_SUMMARIES.length,
+      itemListElement: CARD_SUMMARIES.map((card, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: locale === "en" ? card.nameEn : `${card.nameTh} (${card.nameEn})`,
@@ -76,7 +76,7 @@ export function CardsIndexBody({ locale }: { locale: Locale }) {
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Client Interactive Explorer with dynamic bilingual hero header */}
-        <CardsExplorer cards={DECK_SUMMARY} />
+        <CardsExplorer cards={CARD_SUMMARIES} />
       </div>
     </main>
   );

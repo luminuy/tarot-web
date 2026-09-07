@@ -9,12 +9,22 @@ import { soundManager } from "@/lib/utils/audio";
 import { stepVariants } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n";
 
-let deckPromise: Promise<typeof import("@/data/cards")> | null = null;
+// โหลดสำรับ "ไทยล้วน" — ไม่ลากคำทำนายอังกฤษ (≈126 KB gzip) เข้าบันเดิลหน้าไทย
+let deckPromise: Promise<typeof import("@/data/cards/deck-th")> | null = null;
 function getDeck() {
   if (!deckPromise) {
-    deckPromise = import("@/data/cards");
+    deckPromise = import("@/data/cards/deck-th");
   }
   return deckPromise;
+}
+
+// เนื้อหาอังกฤษแยก chunk ต่างหาก โหลดเฉพาะตอน locale เป็น EN
+let enrichPromise: Promise<typeof import("@/data/cards/en-enrich")> | null = null;
+function getEnEnricher() {
+  if (!enrichPromise) {
+    enrichPromise = import("@/data/cards/en-enrich");
+  }
+  return enrichPromise;
 }
 
 const elementEnMap: Record<string, string> = {
@@ -84,14 +94,17 @@ export function OneCardRitual({
       randomBuffer[0] = Math.floor(Math.random() * 1000000);
     }
 
-    const { DECK } = await getDeck();
-    const cardIndex = randomBuffer[0] % DECK.length;
-    const card = DECK[cardIndex];
+    const { DECK_TH } = await getDeck();
+    const cardIndex = randomBuffer[0] % DECK_TH.length;
+    const baseCard = DECK_TH[cardIndex];
 
     // Rule 14: Zero Fabricated Cards Policy — ห้ามกุไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด
-    if (!card) {
+    if (!baseCard) {
       throw new Error("ไม่พบข้อมูลไพ่ กรุณาโหลดใหม่อีกครั้ง");
     }
+
+    // เติมเนื้อหาอังกฤษเฉพาะตอนอยู่บนหน้า EN — หน้าไทยไม่ต้องจ่ายน้ำหนักก้อนนี้
+    const card = isEn ? (await getEnEnricher()).enrichCardEn(baseCard) : baseCard;
 
     startTransition(() => {
       setDrawnCard(card);
