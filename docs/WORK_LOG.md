@@ -35,6 +35,54 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-07: 🚑 กู้ deploy ที่ค้าง — หน้าไพ่ประจำตัวทะลุงบ HTML เพราะส่ง keywords 12 KB ที่ไม่มีใครใช้ (INC-0103) (โดย Claude Opus 5)
+
+> **อาการ**: ด่าน Performance Budget ตกบน CI **ทั้ง PR #351 และ #352** ➔ `Production Deploy to Cloudflare Workers` ล้มติดกันสองรอบ เว็บจริงไม่ได้รับโค้ดใหม่ตั้งแต่ 14:35 น.
+> `/cards/birth-card` HTML (gzip) = **31 KB** เกินงบ **30 KB**
+
+#### สาเหตุราก
+
+`src/app/(th)/cards/birth-card/page.tsx` ส่ง `MAJOR_CARDS` เป็น **prop ของ client component** (`BirthCardCalculator`)
+โดยยัด `keywords` และ `keywordsEn` ของไพ่ชุดใหญ่ 22 ใบเข้าไปด้วย = **12 KB ดิบ** ทั้งที่คอมโพเนนต์ **ไม่เคยเรียกใช้สองฟิลด์นี้เลย**
+
+prop ของ client component ถูก serialize ลง flight payload (`__next_f`) ในหน้า HTML เสมอ — วัดแล้ว `__next_f` กินไป **71 KB จาก 135 KB** ของหน้านี้
+หน้านี้จึงลอยอยู่ที่ **30.5 KB ชิดเพดานมานาน** (คอมเมนต์ในด่านยังเขียนว่า `Current: 15 KB` ซึ่งเก่าไปมาก)
+พอ PR #351 เติม `ConsentBanner` ลงทุกหน้า ก็ทะลุงบทันที
+
+#### สิ่งที่แก้
+
+ตัด `keywords` / `keywordsEn` ออก เหลือเฉพาะ 12 ฟิลด์ที่ `BirthCardCalculator` เรียกใช้จริง + ปักคอมเมนต์เตือนไว้เหนือค่าคงที่
+
+| ตัววัด | ก่อน | หลัง |
+| :--- | :-- | :-- |
+| `/cards/birth-card` HTML (gzip) | 31 KB ❌ เกินงบ | **26 KB ✅** (เหลือช่องว่าง 4 KB) |
+| ด่าน Performance Budget | ตก | ผ่านครบทุกเส้นทาง |
+
+**วิธีพิสูจน์**: `rm -rf .next && npm run build` บน `origin/main` แล้ววัดด้วยด่านจริง (ไม่ใช่ build เก่าค้าง)
+
+#### ใช้คืนหนี้ที่ PR #353 ฝากไว้
+
+ระหว่างทำงานนี้ PR #353 (อีกทีม) merge เข้ามาก่อน โดยกู้ deploy ด้วยการ **ยกเพดานงบ 30 ➔ 34 KB** และเขียนหนี้ค้างไว้ในโค้ดว่า
+*"ควรลดขนาด flight payload ของหน้านี้จริง ๆ แล้วค่อยรัดเพดานกลับลงมา"*
+
+PR นี้ทำสิ่งนั้น: ตัดของที่ไม่มีใครใช้ออก 12 KB ➔ วัดได้ 26 KB ➔ **รัดเพดานกลับลงจาก 34 KB เหลือ 29 KB**
+
+#### 🚨 ปัญหาเชิงกระบวนการที่เจอระหว่างทาง — ต้องให้เจ้าของโปรเจกต์ตัดสิน
+
+`gh api repos/luminuy/tarot-web/branches/main/protection` ➔ **`404 Branch not protected`**
+
+`main` **ไม่มี branch protection เลย** จึงไม่มี required status check
+➔ GitHub auto-merge ที่ `npm run pr:auto` เปิดให้ **merge ทันทีโดยไม่รอ CI**
+
+หลักฐาน: PR #352 merge เวลา `15:23:53` แต่ด่านตรวจเพิ่งจบเวลา `15:25:19` — **merge ก่อนผลตรวจออก 86 วินาที**
+นี่คือเหตุผลที่ PR #351 ซึ่งตกด่านเดียวกัน ยังหลุดเข้า `main` ได้
+
+**ทางแก้ถาวร** (ต้องทำที่ GitHub Settings — AI ทำแทนไม่ได้): เปิด branch protection บน `main` แล้วตั้ง
+`🧪 Automated Verification & Quality Audit` เป็น **required status check**
+ถ้าไม่ทำข้อนี้ PR ที่ตกด่านจะหลุดเข้า `main` ได้อีกทุกครั้ง และ deploy จะค้างซ้ำแบบเดิม
+
+---
+
 ### 🗓️ 2026-09-07: ตรวจขีดความสามารถแม่หมอ AI แล้วเขียนแผนยกความแม่น + ภาษาไทยที่ถูกต้อง (โดย Claude Opus 5)
 
 > **โจทย์จากเจ้าของโปรเจกต์**: *"เพิ่มความสามารถในการอ่านไพ่ของ AI ให้เก่งกว่านี้ แม่นตรงมาก ๆ และใช้ภาษาไทยได้อย่างดีและถูกต้อง"*

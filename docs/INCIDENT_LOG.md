@@ -76,6 +76,19 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 
 
 ### INC-0102 · 2026-09-07 22:00 · 🔴 Critical · คืนคำมั่น Provably Fair ให้เป็นจริง + ประตูความยินยอม PDPA + ย้ายเพดานเดารหัสผ่านแอดมินขึ้น KV
+### INC-0103 · 2026-09-07 22:38 · 🟠 High · กู้ deploy ที่ค้าง — หน้าไพ่ประจำตัวส่ง keywords 12 KB ที่ไม่มีใครใช้ลง flight payload จนทะลุงบ HTML
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ด่าน Performance Budget ตกบน CI ทั้ง PR #351 และ #352 (/cards/birth-card HTML gzip 31 KB > งบ 30 KB) ทำให้ Production Deploy to Cloudflare Workers ล้มติดกันสองรอบ เว็บจริงไม่ได้รับโค้ดใหม่ |
+| **สาเหตุราก** | หน้า /cards/birth-card ส่ง MAJOR_CARDS เป็น prop ให้ client component โดยยัด keywords และ keywordsEn ของไพ่ชุดใหญ่ 22 ใบ (12 KB ดิบ) เข้าไปด้วย ทั้งที่ BirthCardCalculator ไม่เคยเรียกใช้สองฟิลด์นี้เลย prop ของ client component ถูก serialize ลง flight payload เสมอ หน้านี้จึงลอยอยู่ที่ 30.5 KB ชิดเพดานมานาน พอ PR #351 เติม ConsentBanner ลงทุกหน้าก็ทะลุงบทันที |
+| **การแก้ไข** | ตัดฟิลด์ keywords และ keywordsEn ออกจาก MAJOR_CARDS ใน src/app/(th)/cards/birth-card/page.tsx เหลือเฉพาะ 12 ฟิลด์ที่ BirthCardCalculator เรียกใช้จริง (id, arcana, suit, number, nameTh, nameEn, image, element, astrology, astrologyEn, numerology, numerologyEn) พร้อมปักคอมเมนต์เตือนไว้เหนือค่าคงที่ว่าก้อนนี้ลง flight payload ของทุกหน้า |
+| **🛡️ กฎป้องกันถาวร** | **ก่อนส่ง object ใด ๆ เป็น prop ให้ client component ต้องตัดเหลือเฉพาะฟิลด์ที่คอมโพเนนต์เรียกใช้จริง เพราะทุกไบต์ถูก serialize ลง flight payload ของหน้านั้นเสมอ และห้ามเพิ่มฟิลด์กลับเข้ามาโดยไม่วัดงบซ้ำด้วยด่าน Performance Budget** |
+| **การพิสูจน์ว่าแก้ได้จริง** | build ใหม่บน origin/main ที่รวม #351 แล้ววัดจริง: /cards/birth-card HTML gzip 31 KB -> 26 KB เหลือช่องว่างใต้งบ 4 KB และด่าน Performance Budget ผ่านครบทุกเส้นทาง |
+| **บันทึกโดย** | Claude · branch `claude/fix-birth-card-budget` · commit `dbb7184` |
+
+
+### INC-0102 · 2026-09-07 22:00 · 🟡 Medium · คืนคำมั่น Provably Fair ให้เป็นจริง + ประตูความยินยอม PDPA + ย้ายเพดานเดารหัสผ่านแอดมินขึ้น KV
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
