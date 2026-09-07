@@ -30,6 +30,7 @@
 | [docs/specs/ENTITLEMENT_ABUSE_MODEL.md](docs/specs/ENTITLEMENT_ABUSE_MODEL.md) | ระบบกันโกงสิทธิ์ฟรี — threat model |
 | [docs/plans/ENTITLEMENT_PLAN.md](docs/plans/ENTITLEMENT_PLAN.md) | แผนพัฒนาระบบสมาชิกและโควตาเปิดไพ่ |
 | [docs/plans/MASTER_PLAN_2026-09-06.md](docs/plans/MASTER_PLAN_2026-09-06.md) | 🗺️ **แผนแม่บทรวม — เริ่มอ่านที่นี่** · ทุกงานที่ค้างอยู่ในตารางเดียว (ใคร · ขนาด · สถานะ · ติดอะไร) พร้อมลิงก์ไปแผนย่อยทุกฉบับ และ 3 เรื่องที่รอเจ้าของเคาะ |
+| [docs/plans/HANDOFF_BUNDLE_DIET_2026-09-07.md](docs/plans/HANDOFF_BUNDLE_DIET_2026-09-07.md) | ⚡ **แผนส่งต่อ — ลดน้ำหนัก JS รอบสุดท้าย** · เหลือของหนัก 3 ก้อน (motion 40KB · ข้อมูลผัง 17KB · พจนานุกรม 4KB) ทุกก้อนเป็นบั๊กแบบ P-01 · พร้อมข้อค้นพบว่าตัวเลขเดิมสูงเกินจริง 39KB เพราะนับ polyfills ที่ `noModule` |
 | [docs/plans/HANDOFF_EN_TRANSLATION_2026-09-06.md](docs/plans/HANDOFF_EN_TRANSLATION_2026-09-06.md) | 🌏 **แผนส่งงานแปลไทย → อังกฤษ (ขั้น C)** — 318 หน่วยข้อความ · 8,848 คำ · อภิธานศัพท์บังคับ · เพดานความยาว · เกณฑ์รับงาน · ไฟล์ส่งทีมแปลสร้างด้วย `npm run i18n:export` |
 | [docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md) | แผนกระจายงาน 5 เอเจนท์เฉพาะทาง |
 | [docs/plans/HANDOFF_2026-09-04.md](docs/plans/HANDOFF_2026-09-04.md) | 📦 แผนส่งต่องานค้าง (ISSUE-017 ถึง 023) — ปิดครบแล้ว |
