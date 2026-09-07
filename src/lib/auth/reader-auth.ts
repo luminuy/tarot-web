@@ -87,14 +87,16 @@ export async function requireReader(request?: Request): Promise<ReaderAuthResult
     }
   }
 
-  // 2. Check query params or headers if request provided
+  // 2. อ่าน readerId จาก query และ token จาก Authorization header
   if (request) {
     const url = new URL(request.url);
-    const queryToken = url.searchParams.get("token");
+    // ⚠️ ห้ามรับ session token จาก query string — URL ถูกเก็บลง log ของ Cloudflare,
+    // ติดไปกับ header `Referer` ไปยังเว็บอื่น, ค้างในประวัติเบราว์เซอร์ และติดไปด้วย
+    // ทุกครั้งที่แม่หมอก๊อปลิงก์ส่งให้ใคร · credential อายุ 24 ชม. ไม่ควรอยู่ในที่แบบนั้น
+    // รับจากคุกกี้ หรือ `Authorization: Bearer` เท่านั้น
     const queryReaderId = url.searchParams.get("readerId") || url.searchParams.get("id");
     const authHeader = request.headers.get("authorization");
 
-    if (queryToken) token = queryToken;
     if (queryReaderId) readerIdParam = queryReaderId;
     if (authHeader?.startsWith("Bearer ")) {
       token = authHeader.slice(7).trim();

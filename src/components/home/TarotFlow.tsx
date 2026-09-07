@@ -369,7 +369,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               import("@/lib/utils/history").then((m) => {
                 m.syncAnonymousHistoryToServer().then(({ merged }) => {
                   if (merged > 0) {
-                    console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ`);
+                    if (process.env.NODE_ENV !== "production") {
+                      console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ`);
+                    }
                   }
                 });
               });
@@ -412,7 +414,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           if (isVerified || isPwReset) {
             m.syncAnonymousHistoryToServer().then(({ merged }) => {
               if (merged > 0) {
-                console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ`);
+                if (process.env.NODE_ENV !== "production") {
+                      console.log(`[Journal Sync] ซิงก์ประวัติ ${merged} รายการเข้าสู่บัญชีสำเร็จ`);
+                    }
               }
             });
           } else {
@@ -1026,6 +1030,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     ) {
       return;
     }
+    // ⚠️ ต้องตัดสตรีมที่ยังค้างอยู่ก่อนล้าง state ทั้งหมด
+    // ไม่งั้นเฟรม `done` ที่มาถึงทีหลังจะ setReadingResult + navigateStep("SUMMARY")
+    // แล้วลากผู้ใช้กลับไปหน้าสรุปของรอบที่เพิ่งทิ้งไป พร้อมบันทึกลงสมุดบันทึก
+    // ด้วยคำถาม/ชื่อเล่นของรอบใหม่ที่ว่างเปล่า
+    readStreamAbortRef.current?.abort();
     clearFlowState();
     soundManager.playCardSelectSound();
     navigateStep("SPREAD_SELECT");

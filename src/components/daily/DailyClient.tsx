@@ -89,6 +89,15 @@ export function DailyClient() {
   const handleRevealed = (card: TarotCardType) => {
     try {
       const cardIdx = CARD_SUMMARIES.findIndex((c) => c.id === card.id);
+      // 🃏 กฎเหล็กข้อ 14 — ห้ามกุไพ่แทนใบที่หาไม่เจอเด็ดขาด
+      // เดิมเขียน `cardIndex: cardIdx >= 0 ? cardIdx : 0` ซึ่งแปลว่าถ้า id ของไพ่
+      // ไม่ตรงกับ CARD_SUMMARIES (เช่นข้อมูลสองฝั่งเลื่อนกัน) ระบบจะบันทึกเป็น
+      // ไพ่ลำดับ 0 = The Fool ทั้งในสมุดบันทึก ในชิปประวัติ และใน content_hash ฝั่งเซิร์ฟเวอร์
+      // ทั้งที่ผู้ใช้ไม่เคยจั่วใบนั้น — ไม่บันทึกเลยดีกว่าบันทึกไพ่ผิดใบ
+      if (cardIdx < 0) {
+        console.error("[Daily] หาไพ่ใน CARD_SUMMARIES ไม่เจอ — ข้ามการบันทึก:", card.id);
+        return;
+      }
       saveReading({
         spreadId: "daily-one",
         spreadName: isEnglish ? "Daily Tarot Reading" : "ดูดวงไพ่ยิปซีรายวัน",
@@ -100,7 +109,7 @@ export function DailyClient() {
           {
             order: 1,
             positionName: isEnglish ? currentChamber.titleEn : currentChamber.titleTh,
-            cardIndex: cardIdx >= 0 ? cardIdx : 0,
+            cardIndex: cardIdx,
             cardNameTh: card.nameTh,
             cardNameEn: card.nameEn,
             isReversed: false,

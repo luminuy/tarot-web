@@ -371,6 +371,20 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         }
       }
 
+      // 🃏 กฎเหล็กข้อ 14 — ห้ามส่งคำอ่านที่ตกด่านระดับ fatal ออกไปเด็ดขาด
+      // FOREIGN_CARD (พูดถึงไพ่ที่ไม่ได้อยู่ในสำรับที่จั่วรอบนี้) เป็น fatal
+      // ฝั่ง Groq `continue` ไปโมเดลถัดไปอยู่แล้ว แต่ฝั่ง Gemini เดิมบันทึก stat ทิ้งไว้
+      // แล้ว yield ต่อ → คำอ่านที่มโนไพ่ถูกสตรีม แสดงผล หักสิทธิ์ และบันทึกลงสมุดบันทึก
+      // Gemini ไม่มีโมเดลสำรองถัดไป จึงถอยไปคำอ่านสำรองที่ประกอบจากไพ่ที่จั่วจริงเท่านั้น
+      if (consistency.fatal) {
+        const fatalIssue = consistency.issues.find((i) => i.fatal);
+        console.warn(
+          `[Gemini Reading ${activeModel}] ⚠️ ความสอดคล้องล้มเหลว (Fatal): ${fatalIssue?.code} - ${fatalIssue?.message} — ถอยไปคำอ่านสำรอง`,
+        );
+        yield* streamMockGeminiReading(ctx);
+        return;
+      }
+
       yield { type: "done", reading: readingData, usage, model: activeModel, consistencyOk: consistency.ok };
     }
   } catch (error) {

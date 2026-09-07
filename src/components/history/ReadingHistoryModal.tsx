@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   getReadings,
@@ -66,14 +66,22 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
   const [monthlySummary, setMonthlySummary] = useState<MonthlySummaryResult | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
 
+  // ⚠️ ต้องมีตัวนับรุ่น — `fetchServerReadings()` ที่ยิงไปตอนเปิดโมดัลใช้เวลาเดินทาง
+  // ถ้าระหว่างนั้นผู้ใช้กด "ลบทั้งหมด" หรือลบทีละรายการ คำตอบเก่าที่กลับมาทีหลัง
+  // จะ setReadings ทับ **และ** เขียนรายการที่เพิ่งลบกลับลง localStorage
+  // (fetchServerReadings เขียน STORAGE_KEY เอง) ผู้ใช้จึงเห็นประวัติที่ลบไปแล้วโผล่กลับมา
+  const mutationRef = useRef(0);
+
   useEffect(() => {
     if (isOpen) {
       setReadings(getReadings());
       setMonthlySummary(null);
       setSummaryError(null);
       // Dual-mode server sync refresh
+      const generation = mutationRef.current;
       import("@/lib/utils/history").then((m) => {
         m.fetchServerReadings().then((serverItems) => {
+          if (generation !== mutationRef.current) return; // ผู้ใช้แก้ไขรายการไปแล้ว — ทิ้งคำตอบนี้
           if (serverItems && serverItems.length > 0) {
             setReadings(serverItems);
           }
@@ -86,6 +94,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
+    mutationRef.current += 1;
     deleteReading(id);
     setReadings(getReadings());
     soundManager.playCardSelectSound();
@@ -96,6 +105,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
       ? "Are you sure you want to clear your entire reading history?"
       : "คุณต้องการล้างประวัติการดูดวงทั้งหมดใช่หรือไม่?";
     if (window.confirm(confirmMsg)) {
+      mutationRef.current += 1;
       clearAllReadings();
       setReadings([]);
       soundManager.playCardSelectSound();
@@ -105,6 +115,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
   const handleSetOutcome = (e: React.MouseEvent, id: string, outcome: ReadingOutcome) => {
     e.stopPropagation();
     soundManager.playCardSelectSound();
+    mutationRef.current += 1;
     updateReadingOutcome(id, outcome);
     if (outcome !== "PENDING") {
       trackEvent("reading_feedback", {

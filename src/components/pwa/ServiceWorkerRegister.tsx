@@ -30,6 +30,17 @@ export function ServiceWorkerRegister() {
       return;
     }
 
+    // ถ้ามี Service Worker ตัวใหม่ยึดหน้านี้ระหว่างที่ผู้ใช้กำลังใช้งาน (เช่นมีใครส่ง
+    // SKIP_WAITING เข้ามา) เอกสารที่เปิดค้างจะอ้างอิงไฟล์ chunk ชื่อเก่าที่หายไปแล้ว
+    // ต้องโหลดหน้าใหม่หนึ่งครั้งให้ HTML กับไฟล์ static กลับมาเป็นเวอร์ชันเดียวกัน
+    let reloading = false;
+    const onControllerChange = () => {
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
+    };
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+
     const registerSW = () => {
       navigator.serviceWorker
         .register("/sw.js", { scope: "/" })
@@ -62,6 +73,11 @@ export function ServiceWorkerRegister() {
     } else {
       window.addEventListener("load", registerSW, { once: true });
     }
+
+    return () => {
+      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+      window.removeEventListener("load", registerSW);
+    };
   }, []);
 
   return null;

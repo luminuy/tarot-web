@@ -89,32 +89,28 @@ export async function consumeToken(
   const tokenHash = hashToken(rawToken);
   const now = Date.now();
 
-  const row = await db
+  // ⚠️ ต้องเป็นคำสั่งเดียว (compare-and-set) ห้ามแยก SELECT แล้วค่อย UPDATE
+  // ถ้าแยก คำขอสองอันที่มาถึงพร้อมกันจะอ่านเจอ used_at = NULL ทั้งคู่แล้วผ่านทั้งคู่
+  // ซึ่งทำลายคุณสมบัติ "ใช้ได้ครั้งเดียว" ของลิงก์รีเซ็ตรหัสผ่าน / ยืนยันอีเมล
+  // `RETURNING` ทำให้เงื่อนไขหมดอายุ + ยังไม่ถูกใช้ ถูกตรวจและปิดในจังหวะเดียวกัน
+  const claimed = await db
     .prepare(
-      `SELECT id, user_id, expires_at, used_at
-       FROM auth_tokens
-       WHERE token_hash = ? AND kind = ?
-       LIMIT 1`
+      `UPDATE auth_tokens
+          SET used_at = ?
+        WHERE token_hash = ?
+          AND kind = ?
+          AND used_at IS NULL
+          AND expires_at >= ?
+       RETURNING user_id`
     )
-    .bind(tokenHash, kind)
-    .first<{ id: string; user_id: string; expires_at: number; used_at: number | null }>();
+    .bind(now, tokenHash, kind, now)
+    .first<{ user_id: string }>();
 
-  if (!row) {
+  if (!claimed) {
     return null;
   }
 
-  // Token หมดอายุหรือถูกใช้ไปแล้ว
-  if (row.used_at !== null || row.expires_at < now) {
-    return null;
-  }
-
-  // ทำเครื่องหมายว่า Token ถูกใช้งานแล้วทันที
-  await db
-    .prepare(`UPDATE auth_tokens SET used_at = ? WHERE id = ?`)
-    .bind(now, row.id)
-    .run();
-
-  return { userId: row.user_id };
+  return { userId: claimed.user_id };
 }
 
 /**

@@ -348,14 +348,10 @@ export function trackPageView(pagePath: string, pageTitle?: string) {
 
     // 1. GA4
     if (typeof window.gtag === "function") {
-      const gaId = getGaMeasurementId();
-      if (gaId) {
-        window.gtag("config", gaId, {
-          page_path: pagePath,
-          page_location: url,
-          page_title: title,
-        });
-      }
+      // ⚠️ ห้ามเรียก gtag("config", …) ซ้ำตรงนี้ — GA4 ส่ง page_view ให้เองทุกครั้งที่ config
+      // (send_page_view ไม่ได้ถูกปิด) พอตามด้วย event page_view ข้างล่างจึงนับเป็น 2 ครั้ง
+      // ต่อการเปลี่ยนหน้าแบบ SPA หนึ่งครั้ง ในขณะที่หน้าแรกที่โหลดเข้ามานับครั้งเดียว
+      // ตัวเลข pageview / session / bounce จึงเพี้ยนและไม่สอดคล้องกันเองด้วย
       window.gtag("event", "page_view", {
         page_path: pagePath,
         page_location: url,

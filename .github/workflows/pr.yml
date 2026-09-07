@@ -51,18 +51,26 @@ jobs:
       - name: 🧪 Verification Suite (6 ด่าน)
         id: verify
         run: pnpm run repo:verify
+        # ⚠️ ต้องมีที่นี่ด้วย ไม่ใช่แค่ตอน deploy — `repo:verify` มีด่านที่ build เว็บเองเมื่อยังไม่มี
+        # `.next/` (test-en-routing.ts) แล้วด่านภาพแชร์ (test-og-images.ts) ก็อ่านผลนั้นต่อ
+        # `NEXT_PUBLIC_*` ถูกฝังตอน build เท่านั้น ถ้าขั้นนี้ build โดยไม่มีค่าเดียวกับตอน deploy
+        # CI จะไปตรวจอาร์ติแฟกต์คนละก้อนกับที่ขึ้น production
+        # (เกิดขึ้นจริงหลัง PR #348 — deploy ของ main ล้มด้วย "พบ 1 ค่า")
         env:
-          # ⚠️ ต้องมีที่นี่ด้วย ไม่ใช่แค่ตอน deploy — `repo:verify` มีด่านที่ build เว็บเองเมื่อยังไม่มี
-          # `.next/` (test-en-routing.ts) แล้วด่านภาพแชร์ (test-og-images.ts) ก็อ่านผลนั้นต่อ
-          # ถ้าไม่มีตัวแปรนี้ ทุกหน้าจะถอยไป `og/default.png` ใบเดียวกันหมด ด่าน
-          # "ภาพแชร์ต้องไม่ซ้ำกัน ≥ 290 ค่า" จึงล้มทันที และบล็อก deploy ทั้งสาย
-          # (เกิดขึ้นจริงหลัง PR #348 — deploy ของ main ล้มด้วย "พบ 1 ค่า")
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
+          NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
+          NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '' }}
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
 
       - name: ⚡ Test Build Worker & Next.js Bundle
         id: build_check
         run: pnpm run build
+        # build ทดสอบต้องใช้ env ชุดเดียวกับตอน deploy จะได้เจอปัญหาตั้งแต่ตอนยังเป็น PR
+        # ไม่ใช่ไปโผล่ตอน deploy ขึ้น production แล้ว (บทเรียนจาก PR #348)
         env:
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
+          NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
+          NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '' }}
           NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
 
       - name: 🏷️ Auto-Label PR Based on Modified Files

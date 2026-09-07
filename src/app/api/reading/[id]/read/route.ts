@@ -85,6 +85,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { checkPerIpReadQuota } = await import("@/lib/security/ai-budget");
     const quota = await checkPerIpReadQuota(clientIp);
     if (!quota.allowed) {
+      // ⚠️ ต้องคืน slot ก่อน return ทุกครั้ง — `maxConcurrent: 1` ถูกจองไปแล้วตั้งแต่ checkRateLimit
+      // ถ้าไม่คืน `concurrent` จะค้างที่ 1 ตลอดอายุ isolate · พอโควตารีเซ็ตวันรุ่งขึ้น
+      // ผู้ใช้คนนั้นจะโดน 429 "คุณกำลังเปิดไพ่อยู่แล้ว" ทุกครั้งจนกว่า isolate จะถูกรีไซเคิล
+      // (performLazyCleanup ก็เก็บกวาดไม่ได้ เพราะเงื่อนไขต้องการ concurrent <= 0)
+      limit.releaseConcurrency();
       return createRateLimitResponse(3600, "คุณเปิดไพ่ครบโควตาสูงสุดของวันนี้แล้ว พักผ่อนแล้วกลับมาใหม่พรุ่งนี้นะ");
     }
   }
