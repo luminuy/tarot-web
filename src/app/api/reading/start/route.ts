@@ -6,11 +6,11 @@ import { getSpread } from "@/data/spreads";
 import { checkQuestion, CRISIS_MESSAGE } from "@/lib/safety/guardrails";
 import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { createCommitment } from "@/lib/tarot/shuffle";
 import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { DAILY_LIMIT, GUEST_LIMIT, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
+import { createCommitment, normalizeClientSeed } from "@/lib/tarot/shuffle";
 
 export const runtime = "nodejs";
 
@@ -21,6 +21,10 @@ const BodySchema = z.object({
   nickname: z.string().max(40).optional(),
   category: z.enum(["general", "love", "work", "money", "self"]).optional(),
   lang: z.enum(["th", "en"]).default("th"),
+  // เมล็ดสุ่มที่ไคลเอนต์สร้างเองด้วย crypto.getRandomValues — หัวใจของ provably-fair
+  // ผูกไว้กับ record ตั้งแต่ /start เพื่อให้ตรึงก่อนการจั่วทุกกรณี และกันกรณีที่คำขอ
+  // /shuffle สองอันมาพร้อมกันแล้วได้เมล็ดคนละตัวจนจั่วได้ไพ่คนละชุด
+  clientSeed: z.string().min(1).max(4096).optional(),
   intake: z
     .object({
       situation: z.string().max(500).optional(),
@@ -174,6 +178,7 @@ export async function POST(request: Request) {
     safetyGuard: verdict.promptGuard,
     commitment,
     serverSeed,
+    clientSeed: parsed.data.clientSeed ? normalizeClientSeed(parsed.data.clientSeed) : undefined,
     createdAt: Date.now(),
   };
 
@@ -195,6 +200,7 @@ export async function POST(request: Request) {
     id,
     readingId: id,
     commitment,
+    clientSeed: record.clientSeed,
     sessionToken,
     spread: {
       id: spread.id,

@@ -127,7 +127,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
   }
 
-  const clientSeed = record.clientSeed ?? normalizeClientSeed(parsed.data.clientSeed);
+  // 🎲 หลัก provably-fair: เมล็ดของผู้ใช้ต้องมาจากผู้ใช้เท่านั้น
+  // เดิมบรรทัดนี้ตกไป `normalizeClientSeed(undefined)` ซึ่งสุ่มให้เองฝั่งเซิร์ฟเวอร์
+  // ทำให้เซิร์ฟเวอร์คุมทั้งสองเมล็ด → ไล่สุ่มจนได้ผลที่ต้องการแล้วยังโชว์ commitment
+  // ที่ตรวจผ่านได้ · ตอนนี้ถ้าไม่มีเมล็ดทั้งใน record และใน body ให้ปฏิเสธไปเลย
+  // (แนวเดียวกับกฎข้อ 14 — ขอให้โหลดใหม่ ดีกว่าแอบทำอะไรที่ผู้ใช้ตรวจสอบไม่ได้)
+  let clientSeed = record.clientSeed;
+  if (!clientSeed) {
+    const supplied = parsed.data.clientSeed;
+    if (typeof supplied !== "string" || supplied.length === 0) {
+      return NextResponse.json(
+        {
+          error: "เซสชันนี้ไม่มีเมล็ดสุ่มของคุณ กรุณาโหลดหน้าใหม่แล้วเริ่มดูดวงอีกครั้ง",
+          code: "CLIENT_SEED_REQUIRED",
+        },
+        { status: 400 }
+      );
+    }
+    // เซสชันเก่าที่เริ่มก่อน /start จะผูกเมล็ดให้ ยังรับได้จาก body
+    // (`updateReading` ด้านล่างจะตรึงเมล็ดลง record ให้เอง คำขอซ้ำจึงได้ผลเดิม)
+    clientSeed = normalizeClientSeed(supplied);
+  }
   const pickedIndices = parsed.data.pickedIndices;
 
   let drawn: import("@/lib/tarot/shuffle").DrawnCard[];

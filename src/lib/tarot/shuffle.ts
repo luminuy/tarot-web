@@ -161,7 +161,27 @@ export function drawCards(params: {
  * ไม่ได้ต้องการความปลอดภัยเชิงเข้ารหัส — แค่ต้องการให้ผู้ใช้มีส่วนร่วม
  * ในการกำหนดผล เพื่อให้เซิร์ฟเวอร์ฝ่ายเดียวกำหนดผลล่วงหน้าไม่ได้
  */
-export function normalizeClientSeed(raw: unknown): string {
-  const text = typeof raw === "string" && raw.length > 0 ? raw : randomBytes(16).toString("hex");
-  return sha256(text.slice(0, 4096)).toString("hex");
+/**
+ * แปลง seed ดิบจากผู้ใช้ให้เป็นเลขฐานสิบหก 64 ตัวแบบคงที่
+ *
+ * ⚠️ เดิมฟังก์ชันนี้ "สุ่มให้เอง" เมื่อได้ค่าว่างหรือ null ซึ่งทำลายหลัก provably-fair
+ * ทั้งระบบโดยไม่มีใครรู้ — ฝั่งไคลเอนต์ส่ง `clientSeed` เป็นสตริงว่างมาตลอด
+ * (state ตั้งต้นเป็น `""` และ `/start` ไม่เคยคืนค่านี้กลับมา) ทางถอยจึงทำงานทุกครั้ง
+ * ผลคือ **เซิร์ฟเวอร์เป็นผู้เลือกทั้งสองเมล็ด** จะไล่สุ่ม clientSeed จนได้ผลที่ต้องการ
+ * แล้วยังโชว์ commitment ที่ตรวจแล้วผ่านก็ได้ · คำมั่น "ตรวจสอบได้ว่าเราเลือกไพ่ให้คุณไม่ได้"
+ * จึงเป็นโมฆะทั้งเว็บ ไม่ใช่แค่เส้นทางทำนายด่วน
+ *
+ * ตอนนี้บังคับให้ผู้เรียกส่งสตริงที่ไม่ว่างมาเสมอ · ถ้าต้องการเมล็ดสุ่มจริง ๆ
+ * (สคริปต์ทดสอบ) ให้เรียก `generateClientSeed()` อย่างชัดแจ้ง
+ */
+export function normalizeClientSeed(raw: string): string {
+  if (typeof raw !== "string" || raw.length === 0) {
+    throw new Error("clientSeed ต้องเป็นสตริงที่ไม่ว่าง — ห้ามให้เซิร์ฟเวอร์สุ่มแทนผู้ใช้");
+  }
+  return sha256(raw.slice(0, 4096)).toString("hex");
+}
+
+/** สร้างเมล็ดสุ่มอย่างชัดแจ้ง — ใช้ในสคริปต์ทดสอบเท่านั้น ห้ามใช้แทนเมล็ดของผู้ใช้จริง */
+export function generateClientSeed(): string {
+  return normalizeClientSeed(randomBytes(32).toString("hex"));
 }
