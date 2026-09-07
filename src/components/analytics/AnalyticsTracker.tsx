@@ -114,12 +114,23 @@ export function AnalyticsTracker() {
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
+              /* ⚠️ ค่าเริ่มต้นต้องเป็น denied เสมอ (PDPA) — เดิมตั้ง granted ไว้
+                 ทำให้ GA4 วางคุกกี้ _ga ตั้งแต่เฟรมแรกโดยไม่เคยถามผู้ใช้เลย
+                 จะเปลี่ยนเป็น granted ก็ต่อเมื่อผู้ใช้กดยอมรับที่แบนเนอร์เท่านั้น */
               gtag('consent', 'default', {
-                'analytics_storage': 'granted',
+                'analytics_storage': 'denied',
                 'ad_storage': 'denied',
                 'ad_user_data': 'denied',
                 'ad_personalization': 'denied'
               });
+              try {
+                if (localStorage.getItem('seertarot_analytics_consent_v1') === 'granted') {
+                  gtag('consent', 'update', { 'analytics_storage': 'granted' });
+                }
+              } catch (e) {}
+              /* การเปลี่ยนใจระหว่างเซสชันจัดการโดย setAnalyticsConsent() ใน src/lib/analytics.ts
+                 ที่แบนเนอร์เรียกตอนผู้ใช้กด — ตรงนี้ทำหน้าที่แค่กู้สถานะของผู้ที่เคยเลือกไว้แล้ว
+                 ให้ทันก่อน React hydrate เท่านั้น */
               gtag('js', new Date());
               ${
                 gaId
@@ -150,16 +161,33 @@ export function AnalyticsTracker() {
       {metaPixelId && (
         <Script id="meta-pixel-init" strategy="lazyOnload">
           {`
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${metaPixelId}');
-            fbq('track', 'PageView');
+            /* ⚠️ ต้องกั้นตั้งแต่ "ตัวโหลด" ไม่ใช่แค่ fbq('init')
+               ลำพังการดึง fbevents.js จาก connect.facebook.net ก็ส่ง IP และ Referer
+               ของผู้ใช้ไปให้ Meta แล้ว ซึ่งเป็นการส่งข้อมูลออกนอกเว็บก่อนได้รับความยินยอม
+               (ต่างจาก GA4 ที่มี Consent Mode v2 รองรับ โหลดแท็กไว้ก่อนได้เพราะมันเคารพ
+               สถานะ denied เอง ไม่วางคุกกี้และไม่ส่งตัวระบุตัวตน) */
+            function seertarotInitPixel() {
+              if (window.__seertarotPixelReady) return;
+              window.__seertarotPixelReady = true;
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '${metaPixelId}');
+              fbq('track', 'PageView');
+            }
+            try {
+              if (localStorage.getItem('seertarot_analytics_consent_v1') === 'granted') {
+                seertarotInitPixel();
+              }
+            } catch (e) {}
+            window.addEventListener('seertarot:consent-changed', function (ev) {
+              if (ev.detail === 'granted') seertarotInitPixel();
+            });
           `}
         </Script>
       )}

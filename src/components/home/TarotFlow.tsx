@@ -119,6 +119,23 @@ function mapBlockedReason(reason?: string): UpgradeReason | null {
  * เพื่อให้เนื้อหา SEO ยาว 800+ บรรทัดไม่ถูกลากเข้ามาอยู่ใน bundle ฝั่งไคลเอนต์
  * (ไฟล์นี้เป็น "use client" — อะไรที่ import เข้ามาตรง ๆ จะกลายเป็นโค้ดฝั่งไคลเอนต์ทั้งหมด)
  */
+/**
+ * 🎲 สร้างเมล็ดสุ่มของผู้ใช้เองในเบราว์เซอร์ ด้วย crypto.getRandomValues
+ *
+ * นี่คือครึ่งหนึ่งของคำมั่น provably-fair — เซิร์ฟเวอร์ผูกมัดตัวเองด้วย commitment
+ * ของ serverSeed ก่อน แล้วผลการจั่วเกิดจาก serverSeed + เมล็ดของผู้ใช้
+ * เซิร์ฟเวอร์จึงเลือกไพ่ให้ใครไม่ได้ เพราะไม่รู้เมล็ดฝั่งนี้ตอนที่ผูกมัดไปแล้ว
+ *
+ * ⚠️ ห้ามปล่อยให้ค่านี้ว่างแล้วให้เซิร์ฟเวอร์สุ่มแทนเด็ดขาด (บทเรียน: ทั้งเว็บเคยเป็นแบบนั้น
+ * เพราะ state ตั้งต้นเป็น "" และ /start ไม่เคยคืน clientSeed กลับมา ทางถอยฝั่งเซิร์ฟเวอร์
+ * จึงทำงานทุกครั้งโดยไม่มีใครสังเกต)
+ */
+function createClientSeed(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode }) {
   const { locale, isEnglish } = useLocale();
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
@@ -514,6 +531,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     soundManager.playCardSelectSound();
 
     try {
+      const freshSeed = createClientSeed();
+      setClientSeed(freshSeed);
       const res = await fetch("/api/reading/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -525,6 +544,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           category: selectedCategory,
           intake: { situation: situation.trim() || undefined },
           lang: locale,
+          clientSeed: freshSeed,
         }),
       });
 
@@ -544,7 +564,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       setReadingId(sessionReadingId);
       if (data.sessionToken) setSessionToken(data.sessionToken);
       setCommitment(data.commitment || "");
-      setClientSeed(data.clientSeed || "");
+      setClientSeed(data.clientSeed || freshSeed);
 
       trackEvent("tarot_session_start", {
         spread_id: selectedSpread.id,
@@ -584,6 +604,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     soundManager.playCardSelectSound();
 
     try {
+      const freshSeed = createClientSeed();
+      setClientSeed(freshSeed);
       // 1. เริ่มต้นเซสชันด้วย API
       const res = await fetch("/api/reading/start", {
         method: "POST",
@@ -596,6 +618,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           category: topic.category,
           intake: {},
           lang: locale,
+          clientSeed: freshSeed,
         }),
       });
 
@@ -615,7 +638,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       const activeSessionToken = data.sessionToken || "";
       if (activeSessionToken) setSessionToken(activeSessionToken);
       setCommitment(data.commitment || "");
-      setClientSeed(data.clientSeed || "");
+      setClientSeed(data.clientSeed || freshSeed);
 
       trackEvent("tarot_session_start", {
         spread_id: quickSpread.id,
@@ -632,6 +655,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           "x-reading-token": activeSessionToken,
         },
         body: JSON.stringify({
+          clientSeed: freshSeed,
           sessionToken: activeSessionToken || undefined,
         }),
       });

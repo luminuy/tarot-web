@@ -10,7 +10,8 @@ import {
   verifyAdminPassword,
 } from "@/lib/auth/admin-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { recordAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
@@ -28,15 +29,12 @@ export async function POST(request: Request) {
     );
   }
 
-  // กัน brute-force: 5 ครั้ง / 15 นาที ต่อ IP
-  const clientIp = getClientIdentifier(request);
-  const limit = checkRateLimit(`admin_login:${clientIp}`, {
-    maxRequests: 5,
-    windowSeconds: 15 * 60,
-  });
+  // กัน brute-force ต่อ IP ด้วยถังที่อยู่บน KV — ทุก isolate/colo เห็นค่าเดียวกัน
+  // (ของเดิมเป็น Map ในหน่วยความจำ เพดานจึงคูณตามจำนวน isolate และรีเซ็ตเมื่อ isolate ถูกรีไซเคิล)
+  const limit = await checkAuthRateLimit(request, "admin_login");
   if (!limit.allowed) {
     return createRateLimitResponse(
-      limit.retryAfterSeconds,
+      limit.retryAfterSec ?? 900,
       "ลองเข้าระบบถี่เกินไป รอสักครู่แล้วลองใหม่",
     );
   }

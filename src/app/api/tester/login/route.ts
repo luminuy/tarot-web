@@ -10,7 +10,8 @@ import {
   verifyTesterPassword,
 } from "@/lib/auth/tester-auth";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
-import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { recordEvent } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
@@ -32,15 +33,11 @@ export async function POST(request: Request) {
     );
   }
 
-  // กัน brute-force: 5 ครั้ง / 15 นาที ต่อ IP
-  const clientIp = getClientIdentifier(request);
-  const limit = checkRateLimit(`tester_login:${clientIp}`, {
-    maxRequests: 5,
-    windowSeconds: 15 * 60,
-  });
+  // กัน brute-force ต่อ IP ด้วยถังบน KV (เหตุผลเดียวกับ /api/admin/login)
+  const limit = await checkAuthRateLimit(request, "tester_login");
   if (!limit.allowed) {
     return createRateLimitResponse(
-      limit.retryAfterSeconds,
+      limit.retryAfterSec ?? 900,
       "ลองเข้าระบบถี่เกินไป รอสักครู่แล้วลองใหม่",
     );
   }
