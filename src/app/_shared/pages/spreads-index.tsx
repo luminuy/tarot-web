@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SPREADS } from "@/data/spreads";
 import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
@@ -32,11 +33,25 @@ const COPY = {
 
 export function buildSpreadsIndexMetadata(locale: Locale): Metadata {
   const copy = COPY[locale];
+  const isEnglish = locale === "en";
+  const ogImages = buildPageOgImage({
+    title: isEnglish ? "Tarot Spreads Library: 25 Classic Layouts" : "ผังการเปิดไพ่ทาโรต์ 25 แบบ",
+    eyebrow: isEnglish ? "SPREADS DIRECTORY" : "คู่มือผังพยากรณ์",
+    cardImage: "major-01.jpg",
+    alt: copy.title,
+  });
+
   return {
     title: copy.title,
     description: copy.description,
     alternates: buildAlternates(PATH, { locale, englishTwin: true }),
-    openGraph: buildOpenGraph(locale, { title: copy.title, description: copy.description, path: PATH }),
+    openGraph: buildOpenGraph(locale, { title: copy.title, description: copy.description, path: PATH, images: ogImages }),
+    twitter: {
+      card: "summary_large_image",
+      title: copy.title,
+      description: copy.description,
+      images: [ogImages[0].url],
+    },
   };
 }
 

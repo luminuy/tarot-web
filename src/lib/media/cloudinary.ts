@@ -25,6 +25,33 @@ export function isCloudinaryEnabled(): boolean {
 }
 
 /**
+ * ตัดทอนข้อความให้สุภาพ ไม่ขาดกลางคำ และลงท้ายด้วย … หากถูกตัด
+ */
+export function truncateForOverlay(raw: string, maxChars: number): string {
+  const text = raw.trim();
+  if (text.length <= maxChars) return text;
+  const cut = text.slice(0, maxChars);
+  const lastSpace = cut.lastIndexOf(" ");
+  // ภาษาไทยไม่เว้นวรรคระหว่างคำ — ถ้าหาช่องว่างที่เหมาะไม่เจอ (>60% ของความยาว) ให้ตัดตรงแล้วเติม …
+  const body = lastSpace > maxChars * 0.6 ? cut.slice(0, lastSpace) : cut;
+  return `${body.trimEnd()}…`;
+}
+
+/**
+ * เข้ารหัสข้อความสำหรับ `l_text:` ของ Cloudinary
+ *
+ * ⚠️ ต้องเข้ารหัส `,` และ `/` **สองชั้น** — Cloudinary ถอด percent-encoding
+ * ชั้นแรกออกก่อนแยกพารามิเตอร์ ถ้าส่ง `%2C` ไปตรง ๆ มันจะเห็นเป็นจุลภาคจริง
+ * แล้วตอบ HTTP 400 ทั้งใบโดยไม่มีข้อความบอกสาเหตุ
+ * (พิสูจน์แล้ว: หัวข้อ "ไพ่ทาโรต์ความรัก, อ่านยังไง?" = 400 · หลังแก้ = 200)
+ */
+export function encodeOverlayText(raw: string, maxChars: number): string {
+  return encodeURIComponent(truncateForOverlay(raw, maxChars))
+    .replace(/%2C/g, "%252C")
+    .replace(/%2F/g, "%252F");
+}
+
+/**
  * สร้าง URL ภาพแชร์ผลทำนายขนาด 1200x630 ผ่าน Cloudinary URL Transformation
  * คืนค่า null หากไม่ได้กำหนด NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
  */
@@ -34,9 +61,9 @@ export function buildCloudinaryShareImageUrl(params: CloudinaryShareCardParams):
 
   const { title = "คำทำนายไพ่ยิปซี", spreadName = "ผังพยากรณ์", cardImageNames = [] } = params;
 
-  // เข้ารหัสข้อความภาษาไทยสำหรับ URL Transformation
-  const safeTitle = encodeURIComponent(title.slice(0, 60));
-  const safeSpread = encodeURIComponent(spreadName.slice(0, 40));
+  // เข้ารหัสข้อความภาษาไทยสำหรับ URL Transformation (แก้บั๊ก OG-01 & OG-06)
+  const safeTitle = encodeOverlayText(title, 60);
+  const safeSpread = encodeOverlayText(spreadName, 40);
   const brand = encodeURIComponent("SEERTAROT · SANCTUARY");
   const foot = encodeURIComponent("PROVABLY-FAIR SHA-256 · SEERTAROT.NET");
 

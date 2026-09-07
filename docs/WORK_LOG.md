@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 35/35 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 36/36 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -34,6 +34,21 @@
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-07: ปฏิบัติการยกเครื่องภาพแชร์ทั้งเว็บ 299 หน้า (OG Image Overhaul: OG-01 ถึง OG-06) สำเร็จสมบูรณ์ 100% (โดย Antigravity AI)
+
+> **ขอบเขต**: ดำเนินการตามแผนแม่บท [`docs/plans/HANDOFF_OG_IMAGES_2026-09-07.md`](plans/HANDOFF_OG_IMAGES_2026-09-07.md) อย่างละเอียดทุกมิติ ยกระดับภาพ Social Share (OpenGraph/Twitter) ครบทุก 299 หน้าที่ prerender ใน sitemap.xml เป็นสัดส่วน 1.91:1 (1200×630) ระดับพรีเมียม สวยงาม คมชัด พร้อมตราสินค้าและศิลปะไพ่ 1909 ประจำหมวด
+
+#### 🏆 สรุปผลลัพธ์การดำเนินงาน:
+- **OG-01 (Cloudinary 400 Prevention)**: แก้ไข `src/lib/media/cloudinary.ts` โดยทำ Double Percent-Encoding (`%252C`, `%252F`) ใน `encodeOverlayText` ทำให้หัวข้อที่มี `,` หรือ `/` ได้ HTTP 200 อย่างเสถียร
+- **OG-06 (Editorial Title Truncation)**: เพิ่มฟังก์ชัน `truncateForOverlay` ตัดข้อความตามคำอย่างเป็นธรรมชาติ พร้อมต่อท้ายด้วย `…` แทนการตัดห้วน
+- **OG-05 (Centralized OG Engine & Gate 36)**: สร้าง `src/lib/media/og-image.ts` ฟังก์ชัน `buildPageOgImage` เป็น Single Source of Truth และสร้าง `scripts/qa/test-og-images.ts` (Gate 36) ตรวจสอบความถูกต้อง 100%
+- **OG-02 (Card Detail 156 Pages)**: ปรับปรุง `src/app/_shared/pages/card-detail.tsx` ให้ใช้ `buildPageOgImage` สัดส่วน 1200×630 ระบุชื่อไพ่ชัดเจน เลิกใช้ภาพแนวตั้ง 825×1429
+- **OG-03 (Vertical WebP 4 Pages)**: ปรับปรุง `/daily`, `/love/1-card` ทั้งสองภาษา (TH/EN) ให้ได้ภาพ 1200×630 ถูกต้อง
+- **OG-04 (Remaining 139 Pages Unique OG Art)**: สร้าง `src/lib/media/og-card-art.ts` แมปไพ่ประจำหมวดเนื้อหา เลิกใช้ `og/default.png` ซ้ำกัน ทำให้มี **299 Unique OG Image URLs** ทั่วทั้งเว็บ
+- **Gate 36 Integration & Docs Numeric Truth**: บรรจุ Gate 36 เข้าสู่ `scripts/github-auto.ts` พร้อมอัปเดตตัวเลข 36 ด่านครบทั้ง 11 ไฟล์เอกสาร ผ่าน `npm run repo:verify` 36/36 ด่าน 100% Green!
+
+---
 
 ### 🗓️ 2026-09-07: สำรวจขีดความสามารถเรื่องภาพ + เขียนแผนยกเครื่องภาพแชร์ทั้งเว็บ 299 หน้า (โดย Claude Opus 5)
 

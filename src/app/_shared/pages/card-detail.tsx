@@ -7,6 +7,7 @@ import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
 import { CardSpreadLinks } from "@/components/encyclopedia/CardSpreadLinks";
 import { CARD_GROUPS } from "@/data/cards/group-seo";
 import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb, type Crumb } from "../seo";
@@ -64,6 +65,15 @@ export async function buildCardDetailMetadata(
         "ไพ่ทาโรต์ 1909 Rider-Waite",
       ];
 
+  const ogImages = buildPageOgImage({
+    title: isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`,
+    eyebrow: isEnglish ? "TAROT CARD MEANINGS" : "คัมภีร์ไพ่ทาโรต์",
+    cardImage: card.image,
+    alt: isEnglish
+      ? `${card.nameEn} from the 1909 Rider-Waite tarot deck`
+      : `ภาพหน้าไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`,
+  });
+
   return {
     title,
     description,
@@ -74,16 +84,13 @@ export async function buildCardDetailMetadata(
       type: "article",
       url: localizedUrl(path, locale),
       locale: isEnglish ? "en_US" : "th_TH",
-      images: [
-        {
-          url: `/cards/${card.image}`,
-          width: 300,
-          height: 520,
-          alt: isEnglish
-            ? `${card.nameEn} from the 1909 Rider-Waite tarot deck`
-            : `ภาพหน้าไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`,
-        },
-      ],
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImages[0].url],
     },
     alternates: buildAlternates(path, { locale, englishTwin: true }),
   };

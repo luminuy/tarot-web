@@ -3,10 +3,18 @@ import { listPublicApprovedReaders, type PublicReaderProfile } from "@/lib/marke
 import { ReadersDirectory } from "@/components/readers/ReadersDirectory";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+const readersOgImages = buildPageOgImage({
+  title: "ปรึกษาแม่หมอตัวจริง",
+  eyebrow: "สารบบแม่หมอไพ่ยิปซี",
+  cardImage: "major-02.jpg",
+  alt: "ปรึกษาแม่หมอตัวจริงและเปิดไพ่พยากรณ์สด 1909 Rider-Waite",
+});
 
 export const metadata: Metadata = {
   title: "หมอดูไพ่ยิปซี ปรึกษาแม่หมอตัวจริงและเปิดไพ่พยากรณ์สด",
@@ -19,7 +27,13 @@ export const metadata: Metadata = {
     url: `${SITE_ORIGIN}/readers`,
     siteName: "SeerTarot",
     type: "website",
-    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+    images: readersOgImages,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "หมอดูไพ่ยิปซี ปรึกษาแม่หมอตัวจริง · SeerTarot",
+    description: "รวมหมอดูไพ่ยิปซีและแม่หมอผู้เชี่ยวชาญศาสตร์ไพ่ทาโรต์ 1909 ปรึกษาดูดวงความรัก การงาน การเงิน",
+    images: [readersOgImages[0].url],
   },
 };
 

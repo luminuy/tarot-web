@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 
 import { LoveOneCardClient } from "@/components/love/LoveOneCardClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
-import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
+import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../../../../_shared/seo";
+import { buildPageOgImage } from "@/lib/media/og-image";
 
 /**
  * 💗 ดูดวงความรัก 1 ใบ ฉบับภาษาอังกฤษ (`/en/love/1-card`)
@@ -18,6 +19,13 @@ const PATH = "/love/1-card";
 const TITLE = "One-Card Love Tarot Reading: A Straight Answer About Your Heart";
 const DESCRIPTION =
   "Pull one card about your love life and get a direct read — whether you are single, talking to someone undefined, in a relationship, or still thinking about an ex. Full 78-card Rider-Waite deck, shuffled by you, free and ad-free.";
+
+const loveOgImages = buildPageOgImage({
+  title: "One-Card Love Tarot Reading",
+  eyebrow: "HEART & RELATIONSHIP",
+  cardImage: "major-06.jpg",
+  alt: "One-card love tarot reading 1909 Rider-Waite",
+});
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -32,21 +40,13 @@ export const metadata: Metadata = {
   ],
   alternates: buildAlternates(PATH, { locale: "en", englishTwin: true }),
   openGraph: {
-    ...buildOpenGraph("en", { title: TITLE, description: DESCRIPTION, path: PATH }),
-    images: [
-      {
-        url: `${SITE_ORIGIN}/cards/w512b/major-06.webp`,
-        width: 512,
-        height: 878,
-        alt: "The Lovers — one-card love tarot reading",
-      },
-    ],
+    ...buildOpenGraph("en", { title: TITLE, description: DESCRIPTION, path: PATH, images: loveOgImages }),
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: [`${SITE_ORIGIN}/cards/w512b/major-06.webp`],
+    images: [loveOgImages[0].url],
   },
 };
 

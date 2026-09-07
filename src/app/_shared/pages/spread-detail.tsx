@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { ARTICLES } from "@/data/articles";
 import { SPREADS, getSpread } from "@/data/spreads";
 import { isStandardSpread } from "@/lib/entitlement/limits";
-import { buildAlternates, localizedUrl, OG_IMAGE_ALT, OG_IMAGE_URL } from "@/lib/config/site";
+import { buildAlternates, localizedUrl } from "@/lib/config/site";
+import { buildPageOgImage } from "@/lib/media/og-image";
+import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import { SpreadDetailClient } from "@/components/spread/SpreadDetailClient";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -91,6 +93,13 @@ export async function buildSpreadDetailMetadata(
         "ผังพยากรณ์ไพ่ทาโรต์",
       ];
 
+  const ogImages = buildPageOgImage({
+    title: isEnglish ? spread.nameEn : spread.nameTh,
+    eyebrow: isEnglish ? `${cardCount}-CARD SPREAD` : `ผังพยากรณ์ ${cardCount} ใบ`,
+    cardImage: getCategoryCardImage(spread.defaultCategory),
+    alt: isEnglish ? `${spread.nameEn} Tarot Spread` : `ผังพยากรณ์ ${spread.nameTh}`,
+  });
+
   return {
     title,
     description,
@@ -103,9 +112,14 @@ export async function buildSpreadDetailMetadata(
       siteName: "SeerTarot",
       type: "article",
       locale: isEnglish ? "en_US" : "th_TH",
-      images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+      images: ogImages,
     },
-    twitter: { card: "summary_large_image", title, description, images: [OG_IMAGE_URL] },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImages[0].url],
+    },
   };
 }
 
