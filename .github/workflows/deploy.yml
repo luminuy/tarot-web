@@ -42,6 +42,13 @@ jobs:
       # เพิ่มด่านตรวจใหม่ที่นั่นที่เดียว ทั้ง hooks / PR / Deploy จะตรวจเหมือนกันหมด
       - name: 🧪 Verification Suite (6 ด่าน)
         run: pnpm run repo:verify
+        env:
+          # ⚠️ ต้องมีที่นี่ด้วย ไม่ใช่แค่ตอน deploy — `repo:verify` มีด่านที่ build เว็บเองเมื่อยังไม่มี
+          # `.next/` (test-en-routing.ts) แล้วด่านภาพแชร์ (test-og-images.ts) ก็อ่านผลนั้นต่อ
+          # ถ้าไม่มีตัวแปรนี้ ทุกหน้าจะถอยไป `og/default.png` ใบเดียวกันหมด ด่าน
+          # "ภาพแชร์ต้องไม่ซ้ำกัน ≥ 290 ค่า" จึงล้มทันที และบล็อก deploy ทั้งสาย
+          # (เกิดขึ้นจริงหลัง PR #348 — deploy ของ main ล้มด้วย "พบ 1 ค่า")
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
 
   deploy:
     name: ⚡ Deploy to Cloudflare Workers

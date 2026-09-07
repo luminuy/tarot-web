@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0100 · 2026-09-07 16:15 · 🟠 High · กู้สายพาน deploy ที่ค้าง — ส่งตัวแปร Cloudinary ให้ด่านตรวจ และให้ด่านภาพแชร์ถอยอย่างสุภาพ
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | PR #348 ถูก merge ทั้งที่ด่านตรวจล้ม และ Production Deploy ของ main ล้มตามด้วย AssertionError: จำนวนภาพแชร์เฉพาะหน้าต้องไม่ต่ำกว่า 290 ค่า (พบ 1) เว็บจริงจึงยังไม่ได้รับภาพแชร์ชุดใหม่เลยแม้โค้ดจะอยู่บน main แล้ว |
+| **สาเหตุราก** | deploy.yml และ pr.yml ส่ง NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ให้เฉพาะสเต็ป build/deploy แต่ไม่ได้ส่งให้สเต็ป repo:verify ซึ่ง build เว็บเองผ่าน test-en-routing.ts เมื่อยังไม่มี .next/ · NEXT_PUBLIC_ ถูก inline ตอน build เท่านั้น ทุกหน้าจึงถอยไป og/default.png ใบเดียวกันหมด แล้วด่านความหลากหลายของภาพแชร์ก็ assert ล้ม |
+| **การแก้ไข** | เพิ่ม env NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME เข้าสเต็ป Verification Suite ทั้งใน pr.yml และ deploy.yml รวมถึงสเต็ป build ของ pr.yml และแก้ scripts/qa/test-og-images.ts ให้ตรวจก่อนว่า build นั้นมีภาพจาก res.cloudinary.com หรือไม่ ถ้าไม่มีให้ข้ามด่านความหลากหลายพร้อมพิมพ์เหตุผล แทนที่จะ assert ล้ม |
+| **🛡️ กฎป้องกันถาวร** | **ด่านที่พึ่งค่าจาก NEXT_PUBLIC_ ต้องไม่ assert แบบแข็งเมื่อค่านั้นหายไป เพราะการถอยไปภาพสำรองเป็นทางถอยที่ออกแบบไว้ตั้งใจ ไม่ใช่การถอยหลัง · และทุกสเต็ปใน workflow ที่ build เว็บต้องได้รับตัวแปร NEXT_PUBLIC ครบ ไม่ใช่แค่สเต็ปที่ชื่อว่า build (ย้ำบทเรียน INC-0092)** |
+| **บันทึกโดย** | Claude · branch `claude/help-continue-03fb6f` · commit `0e009c2` |
+
+
 ### INC-0099 · 2026-09-07 11:43 · 🟠 High · i18n:export เขียนทับคำแปลที่ทำเสร็จแล้วทิ้งทั้งไฟล์โดยไม่เตือน
 
 | หัวข้อ | รายละเอียด |

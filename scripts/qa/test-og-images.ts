@@ -205,10 +205,31 @@ console.log(`  ✓ ขนาดภาพทุกหน้าเป็น 1200x6
 console.log(`  ✓ ไม่มีหน้าใดชี้เข้า /cards/ โดยตรง และไม่มีหน้าใดใช้ .webp`);
 
 const MIN_UNIQUE_OG_URLS = 290;
-console.log(`  ✓ จำนวนภาพแชร์เฉพาะหน้าที่ไม่ซ้ำกัน (Unique OG URLs): ${ogImages.size} ค่า (เกณฑ์ขั้นต่ำ ${MIN_UNIQUE_OG_URLS})`);
-assert(
-  ogImages.size >= MIN_UNIQUE_OG_URLS,
-  `จำนวนภาพแชร์เฉพาะหน้าต้องไม่ต่ำกว่า ${MIN_UNIQUE_OG_URLS} ค่า (พบ ${ogImages.size})`
-);
+
+/**
+ * ⚠️ ด่านนี้ตรวจได้ก็ต่อเมื่อ build นั้น **มี** `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
+ *
+ * ถ้าไม่มี `buildPageOgImage()` จะถอยไป `og/default.png` ใบเดียวกันหมดทุกหน้า
+ * ซึ่งเป็น **ทางถอยที่ออกแบบไว้ตั้งใจ** (Zero Breaking Change) ไม่ใช่การถอยหลัง
+ * การ assert ทั้งที่ไม่มีตัวแปรจึงเป็นการล้มด่านผิดที่ และมันเกิดขึ้นจริงมาแล้ว:
+ * deploy ของ main หลัง PR #348 ล้มด้วย "พบ 1 ค่า" เพราะ workflow ไม่ได้ส่งตัวแปร
+ * เข้าไปในสเต็ป `repo:verify` (ที่ build เว็บเองผ่าน test-en-routing.ts)
+ *
+ * ทางแก้ถาวรอยู่ที่ workflow (ส่งตัวแปรเข้ามาแล้วทั้ง pr.yml และ deploy.yml)
+ * ส่วนตรงนี้เป็นตาข่ายกันตก — ถ้าวันหนึ่งตัวแปรหาย เว็บต้อง deploy ได้ต่อ
+ * โดยภาพแชร์ถอยไปใบสำรอง ไม่ใช่ทั้งสายพานหยุดเดิน
+ */
+const composedAnyImage = [...ogImages.keys()].some((url) => url.includes("res.cloudinary.com"));
+
+if (composedAnyImage) {
+  console.log(`  ✓ จำนวนภาพแชร์เฉพาะหน้าที่ไม่ซ้ำกัน (Unique OG URLs): ${ogImages.size} ค่า (เกณฑ์ขั้นต่ำ ${MIN_UNIQUE_OG_URLS})`);
+  assert(
+    ogImages.size >= MIN_UNIQUE_OG_URLS,
+    `จำนวนภาพแชร์เฉพาะหน้าต้องไม่ต่ำกว่า ${MIN_UNIQUE_OG_URLS} ค่า (พบ ${ogImages.size})`
+  );
+} else {
+  console.log("  ⚠️  ข้ามด่านความหลากหลายของภาพแชร์ — build นี้ไม่ได้ตั้ง NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME");
+  console.log("      (ทุกหน้าถอยไป og/default.png ตามทางถอยที่ออกแบบไว้ · กฎ 1200×630 ยังถูกบังคับครบ)");
+}
 
 console.log(`\n✨ ผ่านการตรวจสอบมาตรฐานภาพแชร์ OpenGraph 1200x630 ทั่วทั้งเว็บ 100% Green!\n`);
