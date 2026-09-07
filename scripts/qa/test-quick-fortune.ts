@@ -2,7 +2,7 @@ import { QUICK_TOPICS } from "../../src/components/reading/QuickFortunePicker";
 import { SPREADS } from "../../src/data/spreads";
 import { STANDARD_SPREAD_IDS, isStandardSpread } from "../../src/lib/entitlement/limits";
 import { checkQuestion } from "../../src/lib/safety/guardrails";
-import { drawCards, createCommitment, normalizeClientSeed } from "../../src/lib/tarot/shuffle";
+import { drawCards, createCommitment, generateClientSeed } from "../../src/lib/tarot/shuffle";
 
 let pass = 0;
 let fail = 0;
@@ -66,7 +66,7 @@ check("ไม่มีผังอื่นนอกจาก 'quick' ที่�
 
 // 3. ตรวจสอบ Server Draw Logic เมื่อไม่ส่ง pickedIndices
 const commitment = createCommitment();
-const clientSeed = normalizeClientSeed(null);
+const clientSeed = generateClientSeed();
 const drawnAuto = drawCards({
   serverSeed: commitment.serverSeed,
   clientSeed,

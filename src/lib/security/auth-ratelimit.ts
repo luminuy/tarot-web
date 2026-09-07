@@ -32,7 +32,14 @@ function hashKey(value: string): string {
   return createHash("sha256").update(value).digest("hex").slice(0, 16);
 }
 
-export type AuthRateLimitAction = "login" | "signup" | "forgot" | "resend" | "reset";
+export type AuthRateLimitAction =
+  | "login"
+  | "signup"
+  | "forgot"
+  | "resend"
+  | "reset"
+  | "admin_login"
+  | "tester_login";
 
 interface AuthRateLimitConfig {
   /** เพดานต่อ IP — ต้องกว้างกว่าต่อบัญชี เพราะมือถือไทยแชร์ IP กัน (CGNAT) ทั้งเสา */
@@ -57,6 +64,16 @@ const ACTION_CONFIGS: Record<AuthRateLimitAction, AuthRateLimitConfig> = {
   forgot: { ipMax: 15, pairMax: 5, idMax: 10, windowSec: 30 * 60 },
   resend: { ipMax: 15, pairMax: 5, idMax: 10, windowSec: 30 * 60 },
   reset: { ipMax: 20, pairMax: 5, idMax: 20, windowSec: 30 * 60 },
+  /**
+   * ⚠️ ทางเข้าแอดมินมีปัจจัยเดียวคือ ADMIN_PASSWORD และไม่มีระบบล็อกบัญชี
+   * เดิมใช้ตัวจำกัดที่เก็บใน Map ของหน่วยความจำ ซึ่งบน Workers แต่ละ isolate
+   * มีสำเนาของตัวเอง เพดาน "5 ครั้ง/15 นาที" จึงกลายเป็น 5 คูณจำนวน isolate
+   * และรีเซ็ตทุกครั้งที่ isolate ถูกรีไซเคิล — การเดารหัสผ่านแบบกระจายจึงได้
+   * โควตามากกว่าที่ตัวเลขบอกไว้มาก · ย้ายมาใช้ถังที่อยู่บน KV ซึ่งทุก isolate
+   * ทุก colo เห็นค่าเดียวกัน · ไม่มี identifier (ไม่มีชื่อผู้ใช้) จึงนับต่อ IP ล้วน
+   */
+  admin_login: { ipMax: 8, pairMax: 8, idMax: 8, windowSec: 15 * 60 },
+  tester_login: { ipMax: 12, pairMax: 12, idMax: 12, windowSec: 15 * 60 },
 };
 
 interface ScopedKey {

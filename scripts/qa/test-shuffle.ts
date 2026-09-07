@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { createCommitment, drawCards, normalizeClientSeed, verifyCommitment } from "../../src/lib/tarot/shuffle";
 
 /**
@@ -137,6 +140,71 @@ const maxDeviation = Math.max(
 check(
   `การสุ่มกระจายทั่วสำรับ ไม่เอนเอียงไปใบใดใบหนึ่ง (เบี่ยงเบนสูงสุด ${maxDeviation} จากค่าเฉลี่ย ${expectedPerCard})`,
   maxDeviation < expectedPerCard * 3,
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. 🎲 เมล็ดของผู้ใช้ต้องมาจากผู้ใช้เท่านั้น — ห้ามเซิร์ฟเวอร์สุ่มแทน
+//
+// บทเรียน: `normalizeClientSeed()` เคยสุ่มให้เองเมื่อได้ค่าว่าง/null และฝั่งไคลเอนต์
+// ส่งสตริงว่างมาตลอด (state ตั้งต้น "" และ /start ไม่เคยคืน clientSeed กลับมา)
+// ทางถอยจึงทำงาน **ทุกครั้ง** ผลคือเซิร์ฟเวอร์คุมทั้งสองเมล็ด จะไล่สุ่มจนได้ผลที่ต้องการ
+// แล้วยังโชว์ commitment ที่ตรวจผ่านก็ได้ — คำมั่น provably-fair เป็นโมฆะทั้งเว็บ
+// ด่านนี้ตรึงไว้ทั้งฝั่งฟังก์ชัน ฝั่ง route และฝั่ง UI
+// ─────────────────────────────────────────────────────────────────────────────
+function throws(fn: () => unknown): boolean {
+  try {
+    fn();
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+check(
+  "normalizeClientSeed ปฏิเสธสตริงว่าง (ไม่สุ่มให้เอง)",
+  throws(() => normalizeClientSeed("")),
+);
+check(
+  "normalizeClientSeed ปฏิเสธค่า null/undefined (ไม่สุ่มให้เอง)",
+  throws(() => normalizeClientSeed(null as unknown as string)) &&
+    throws(() => normalizeClientSeed(undefined as unknown as string)),
+);
+
+const shuffleRouteSrc = readFileSync(
+  resolve(import.meta.dirname, "../../src/app/api/reading/[id]/shuffle/route.ts"),
+  "utf-8",
+);
+check(
+  "route /shuffle ปฏิเสธคำขอที่ไม่มีเมล็ดของผู้ใช้ (CLIENT_SEED_REQUIRED)",
+  shuffleRouteSrc.includes("CLIENT_SEED_REQUIRED"),
+);
+check(
+  "route /shuffle ไม่มีทางถอยที่สุ่มเมล็ดแทนผู้ใช้",
+  !/normalizeClientSeed\(\s*parsed\.data\.clientSeed\s*\)\s*;/.test(shuffleRouteSrc) &&
+    !shuffleRouteSrc.includes("record.clientSeed ?? normalizeClientSeed"),
+);
+
+const startRouteSrc = readFileSync(
+  resolve(import.meta.dirname, "../../src/app/api/reading/start/route.ts"),
+  "utf-8",
+);
+check(
+  "route /start รับ clientSeed จากไคลเอนต์แล้วผูกไว้กับเซสชัน",
+  /clientSeed:\s*z\.string\(\)/.test(startRouteSrc) &&
+    startRouteSrc.includes("normalizeClientSeed(parsed.data.clientSeed)"),
+);
+
+const flowSrc = readFileSync(
+  resolve(import.meta.dirname, "../../src/components/home/TarotFlow.tsx"),
+  "utf-8",
+);
+check(
+  "ไคลเอนต์สุ่มเมล็ดเองด้วย crypto.getRandomValues",
+  flowSrc.includes("crypto.getRandomValues") && flowSrc.includes("function createClientSeed"),
+);
+check(
+  "ทุกเส้นทางที่เริ่มเซสชันส่ง clientSeed ไปกับคำขอ (รวมทำนายด่วน)",
+  (flowSrc.match(/clientSeed: freshSeed/g) ?? []).length >= 3,
 );
 
 console.log(`\n${pass}/${pass + fail} ผ่าน`);

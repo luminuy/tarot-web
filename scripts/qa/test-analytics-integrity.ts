@@ -13,6 +13,9 @@
  * รันด้วย: npx tsx scripts/qa/test-analytics-integrity.ts
  */
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import {
   isValidGaId,
   isValidMetaPixelId,
@@ -158,6 +161,68 @@ async function runTests() {
   // ─────────────────────────────────────────────────────────────────
   // 4. Event Types Coverage Check
   // ─────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────
+  // 🔐 5. ความยินยอมตาม PDPA — ต้องไม่เก็บอะไรก่อนผู้ใช้อนุญาต
+  //
+  // บทเรียน: เดิมตั้ง `analytics_storage: 'granted'` เป็นค่าเริ่มต้น และยิง
+  // Meta Pixel PageView ตั้งแต่เฟรมแรก โดยไม่มี UI ขอความยินยอมอยู่ในเว็บเลย
+  // ผู้ใช้หลักเป็นคนไทยซึ่งอยู่ภายใต้ พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล
+  // ─────────────────────────────────────────────────────────────────
+  console.log("\n🔐 5. PDPA Consent Gating");
+
+  const trackerSrc = readFileSync(
+    resolve(import.meta.dirname, "../../src/components/analytics/AnalyticsTracker.tsx"),
+    "utf-8",
+  );
+  // ตรวจเฉพาะในบล็อก `gtag('consent', 'default', {...})` เท่านั้น
+  // (คำว่า 'granted' ยังต้องมีอยู่ในโค้ดกู้สถานะของผู้ที่เคยกดยินยอมไว้แล้ว)
+  const defaultStart = trackerSrc.indexOf("gtag('consent', 'default'");
+  const defaultBlock = trackerSrc.slice(
+    defaultStart,
+    trackerSrc.indexOf("});", defaultStart),
+  );
+  check(
+    "consent default ตั้ง analytics_storage เป็น denied",
+    /'analytics_storage':\s*'denied'/.test(defaultBlock) &&
+      !/'analytics_storage':\s*'granted'/.test(defaultBlock),
+  );
+  check(
+    "ค่าโฆษณาทั้งสามยังคงเป็น denied",
+    ["'ad_storage': 'denied'", "'ad_user_data': 'denied'", "'ad_personalization': 'denied'"].every(
+      (t) => trackerSrc.includes(t),
+    ),
+  );
+  check(
+    "กู้สถานะที่ผู้ใช้เคยเลือกไว้ก่อน React hydrate",
+    trackerSrc.includes("seertarot_analytics_consent_v1"),
+  );
+  // ตัว URL ของสคริปต์ (ไม่ใช่ชื่อโดเมนในคอมเมนต์) ต้องอยู่ **ข้างใน** ฟังก์ชันที่ถูกกั้น
+  const pixelLoaderUrl = "'https://connect.facebook.net/en_US/fbevents.js'";
+  check(
+    "Meta Pixel ถูกกั้นตั้งแต่ตัวโหลด ไม่ใช่แค่ fbq('init')",
+    trackerSrc.includes("function seertarotInitPixel") &&
+      trackerSrc.indexOf(pixelLoaderUrl) > trackerSrc.indexOf("function seertarotInitPixel"),
+  );
+
+  const bannerSrc = readFileSync(
+    resolve(import.meta.dirname, "../../src/components/analytics/ConsentBanner.tsx"),
+    "utf-8",
+  );
+  check(
+    "แบนเนอร์ขอความยินยอมมีทั้งปุ่มยินยอมและปุ่มปฏิเสธ",
+    bannerSrc.includes('decide("granted")') && bannerSrc.includes('decide("denied")'),
+  );
+  check(
+    "แบนเนอร์อ่านสถานะหลัง mount เท่านั้น (กัน hydration mismatch)",
+    bannerSrc.includes("useEffect(") && bannerSrc.includes("readConsent()"),
+  );
+
+  const rootSrc = readFileSync(
+    resolve(import.meta.dirname, "../../src/app/_shared/RootHtml.tsx"),
+    "utf-8",
+  );
+  check("แบนเนอร์ถูกติดตั้งจริงในทุกหน้า", rootSrc.includes("<ConsentBanner />"));
+
   console.log("\n📋 4. Event Contract Completeness");
   const sampleEvents: TarotAnalyticsEvent[] = [
     { name: "page_view", params: { page_path: "/" } },
