@@ -4,7 +4,16 @@ import { SPREAD_TOPICS_EN } from "./i18n/spread-topics-en.generated";
 export interface SpreadTopic {
   slug: "love" | "career" | "money" | "health" | "family" | "study";
   nameTh: string;
-  nameEn?: string;
+  /**
+   * ชื่อหมวดฉบับภาษาอังกฤษ — ใช้เป็นป้ายนำทางในหน้า `/en/spreads/topic/*`
+   *
+   * ⚠️ ต้องอยู่ที่นี่ ไม่ใช่ในไฟล์คำแปลที่ generate — เพราะเป็นคู่กับ `nameTh`
+   * ซึ่งเป็นข้อมูลต้นทางของคลัง ไม่ใช่เนื้อหาบรรณาธิการที่ส่งให้ทีมแปล
+   *
+   * ถ้าขาดฟิลด์นี้ หน้าอังกฤษจะถอยไปแสดง `nameTh` ทำให้มีภาษาไทยหลุด
+   * ไปอยู่ในหน้าอังกฤษ (วัดได้จริง 8.7–14.7% ของข้อความทั้งหน้า)
+   */
+  nameEn: string;
   titleTh: string;
   titleEn?: string;
   seoTitle: string;
@@ -26,6 +35,7 @@ const RAW_SPREAD_TOPICS: Record<string, SpreadTopic> = {
   love: {
     slug: "love",
     nameTh: "ความรักและความสัมพันธ์",
+    nameEn: "Love & Relationships",
     titleTh: "ดูดวงไพ่ยิปซี ความรัก",
     seoTitle: "ดูดวงไพ่ยิปซี ความรัก — รวม 5 ผังเจาะลึกคนโสด คนคุย แฟนเก่า คนมีคู่ ฟรี",
     metaDescription:
@@ -59,6 +69,7 @@ const RAW_SPREAD_TOPICS: Record<string, SpreadTopic> = {
   career: {
     slug: "career",
     nameTh: "การงานและเส้นทางอาชีพ",
+    nameEn: "Career & Vocation",
     titleTh: "ดูดวงไพ่ยิปซี การงาน",
     seoTitle: "ดูดวงไพ่ยิปซี การงาน — ผังเจาะลึกหน้าที่การงาน ย้ายงาน และทางแยกตัดสินใจ ฟรี",
     metaDescription:
@@ -87,6 +98,7 @@ const RAW_SPREAD_TOPICS: Record<string, SpreadTopic> = {
   money: {
     slug: "money",
     nameTh: "การเงินและโชคลาภ",
+    nameEn: "Money & Fortune",
     titleTh: "ดูดวงไพ่ยิปซี การเงิน",
     seoTitle: "ดูดวงไพ่ยิปซี การเงิน — วิเคราะห์กระแสเงิน โชคลาภ และการเสี่ยงโชค ฟรี",
     metaDescription:
@@ -115,6 +127,7 @@ const RAW_SPREAD_TOPICS: Record<string, SpreadTopic> = {
   health: {
     slug: "health",
     nameTh: "สุขภาพกายใจและพลังงาน",
+    nameEn: "Health & Wellbeing",
     titleTh: "ดูดวงไพ่ยิปซี สุขภาพ",
     seoTitle: "ดูดวงไพ่ยิปซี สุขภาพ — สแกนสมดุลกาย ใจ จิตวิญญาณ และ 7 จักระ ฟรี",
     metaDescription:
@@ -143,6 +156,7 @@ const RAW_SPREAD_TOPICS: Record<string, SpreadTopic> = {
   family: {
     slug: "family",
     nameTh: "ครอบครัวและบริวาร",
+    nameEn: "Family & Home",
     titleTh: "ดูดวงไพ่ยิปซี ครอบครัว",
     seoTitle: "ดูดวงไพ่ยิปซี ครอบครัว — ผังบริวาร คนรอบข้าง และความสัมพันธ์ในบ้าน ฟรี",
     metaDescription:
@@ -171,6 +185,7 @@ const RAW_SPREAD_TOPICS: Record<string, SpreadTopic> = {
   study: {
     slug: "study",
     nameTh: "การเรียนและการสอบ",
+    nameEn: "Study & Exams",
     titleTh: "ดูดวงไพ่ยิปซี การเรียน",
     seoTitle: "ดูดวงไพ่ยิปซี การเรียน — ผังเจาะลึกการสอบ การศึกษาต่อ และสมาธิ ฟรี",
     metaDescription:

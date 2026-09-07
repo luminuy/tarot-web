@@ -14,6 +14,8 @@ import path from "node:path";
 
 import { ARTICLES } from "../src/data/articles";
 import { SPREAD_TOPICS } from "../src/data/spread-topics";
+import { ARTICLES_EN } from "../src/data/i18n/articles-en.generated";
+import { SPREAD_TOPICS_EN } from "../src/data/i18n/spread-topics-en.generated";
 
 const OUT_DIR = path.join(process.cwd(), "docs", "i18n");
 const OUT_FILE = path.join(OUT_DIR, "pending-en.json");
@@ -122,7 +124,31 @@ for (const [kind, entry] of [...byKind.entries()].sort((a, b) => b[1].chars - a[
 }
 
 if (command === "status") {
-  console.log("\n(โหมด status — ยังไม่มีฟิลด์ *En ในโครงข้อมูล จึงถือว่าค้างทั้งหมด)");
+  /**
+   * ⚠️ ต้องรายงาน "ความจริง" เท่านั้น
+   * ของเดิมพิมพ์ตายตัวว่า "ยังไม่มีฟิลด์ *En จึงถือว่าค้างทั้งหมด" ซึ่งกลายเป็นคำโกหก
+   * ทันทีที่คำแปลชุดแรกเข้ามา (2026-09-07: แปลครบ 26/26 บทความแล้ว แต่ status ยังบอกว่า 0%)
+   * รายงานที่ผิดแบบนี้อันตรายกว่าไม่มีรายงาน เพราะทำให้ตัดสินใจจ้างแปลซ้ำได้
+   */
+  const articleDone = ARTICLES.filter((article) => Boolean(ARTICLES_EN[article.slug]?.contentEn)).length;
+  const topicDone = Object.keys(SPREAD_TOPICS).filter(
+    (slug) => Boolean(SPREAD_TOPICS_EN[slug]?.editorialIntroEn?.length),
+  ).length;
+  const topicTotal = Object.keys(SPREAD_TOPICS).length;
+
+  const pct = (done: number, total: number) => `${done}/${total} (${Math.round((100 * done) / total)}%)`;
+
+  console.log("\n── ความคืบหน้างานแปล ─────────────────────────────────");
+  console.log(`  บทความ (contentEn)          : ${pct(articleDone, ARTICLES.length)}`);
+  console.log(`  หมวดผัง (editorialIntroEn)  : ${pct(topicDone, topicTotal)}`);
+
+  const pendingArticles = ARTICLES.filter((article) => !ARTICLES_EN[article.slug]?.contentEn).map((a) => a.slug);
+  if (pendingArticles.length > 0) {
+    console.log(`\n  บทความที่ยังค้าง ${pendingArticles.length} บท:`);
+    for (const slug of pendingArticles) console.log(`    - ${slug}`);
+  } else {
+    console.log("\n  ✅ บทความแปลครบทุกบทแล้ว");
+  }
   console.log("");
   process.exit(0);
 }
