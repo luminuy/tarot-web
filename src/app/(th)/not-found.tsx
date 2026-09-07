@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 /**
  * หน้า 404 ของเว็บ
@@ -35,13 +34,13 @@ export default function NotFound() {
 
         <nav aria-label="ทางลัดกลับเข้าเว็บ" className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
           {LINKS.map((link) => (
-            <Link
+            <a
               key={link.href}
               href={link.href}
               className="px-5 py-2.5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-sm font-serif-th shadow-xs transition-colors hover:text-[#8F5C1A] hover:border-[#A58A5C]"
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
 

@@ -36,55 +36,62 @@ export interface RouteBudget {
 /**
  * งบประมาณน้ำหนักหน้าเว็บ (Ratchet Budget)
  * ⚠️ ปรับลดลงได้อย่างเดียว ห้ามปรับขึ้นโดยไม่มีเหตุผลกำกับ
+ * เกณฑ์ตัดสินใช้ขนาด JS ที่ผู้ใช้จริงโหลด (ไม่นับ polyfills ที่ติด noModule)
  */
 export const BUDGETS: RouteBudget[] = [
   {
     route: "/",
     htmlRelativePath: ".next/server/app/index.html",
-    maxJsGzipKb: 315, // PR 7 Final Ratchet (Actual: 305 KB, down from 468 KB)
-    maxHtmlGzipKb: 40, // Current: 37 KB
+    maxJsGzipKb: 275, // M-01 Ratchet (Actual Real User: 268 KB, total w/ polyfills: 306 KB)
+    maxHtmlGzipKb: 40, // Current: 38 KB
   },
   {
     route: "/cards",
     htmlRelativePath: ".next/server/app/cards.html",
-    maxJsGzipKb: 320, // PR 7 Final Ratchet (Actual: 312 KB, down from 390 KB)
-    maxHtmlGzipKb: 40, // PR 3 Ratchet (Actual: 34 KB, dropped from 174 KB)
+    maxJsGzipKb: 225, // W-01/W-02 Ratchet (Actual Real User: 219 KB, total w/ polyfills: 258 KB)
+    maxHtmlGzipKb: 40, // Current: 35 KB
   },
   {
     route: "/cards/major-00",
     htmlRelativePath: ".next/server/app/cards/major-00.html",
-    maxJsGzipKb: 280, // F-01 Ratchet (Actual: 257 KB, down from 385 KB)
+    maxJsGzipKb: 235, // M-01 Ratchet (Actual Real User: 227 KB, total w/ polyfills: 266 KB)
     maxHtmlGzipKb: 30, // Current: 23 KB
   },
   {
     route: "/blog",
     htmlRelativePath: ".next/server/app/blog.html",
-    maxJsGzipKb: 325, // PR 7 Final Ratchet (Actual: 315 KB, down from 390 KB)
-    maxHtmlGzipKb: 65, // Current: 55 KB
+    maxJsGzipKb: 180, // W-01/W-02 Ratchet (Actual Real User: 171 KB, total w/ polyfills: 210 KB)
+    maxHtmlGzipKb: 65, // Current: 35 KB
   },
   {
     route: "/daily",
     htmlRelativePath: ".next/server/app/daily.html",
-    maxJsGzipKb: 350, // F-03 Ratchet (Actual: 332 KB, down from 455 KB)
+    maxJsGzipKb: 240, // W-01/W-02 Ratchet (Actual Real User: 231 KB, total w/ polyfills: 270 KB)
     maxHtmlGzipKb: 25, // Current: 18 KB
   },
   {
     route: "/love/1-card",
     htmlRelativePath: ".next/server/app/love/1-card.html",
-    maxJsGzipKb: 350, // F-03 Ratchet (Actual: 335 KB, down from 460 KB)
+    maxJsGzipKb: 245, // W-01/W-02 Ratchet (Actual Real User: 234 KB, total w/ polyfills: 273 KB)
     maxHtmlGzipKb: 25, // Current: 19 KB
   },
   {
     route: "/spreads",
     htmlRelativePath: ".next/server/app/spreads.html",
-    maxJsGzipKb: 320, // PR 7 Final Ratchet (Actual: 312 KB, down from 410 KB)
-    maxHtmlGzipKb: 45, // Current: 37 KB
+    maxJsGzipKb: 245, // W-01/W-02 Ratchet (Actual Real User: 234 KB, total w/ polyfills: 272 KB)
+    maxHtmlGzipKb: 45, // Current: 38 KB
   },
   {
     route: "/cards/all",
     htmlRelativePath: ".next/server/app/cards/all.html",
-    maxJsGzipKb: 220, // PR 7 Final Ratchet (Actual: 210 KB, dropped from 336 KB)
-    maxHtmlGzipKb: 45, // PR 3 (Actual: 37 KB)
+    maxJsGzipKb: 178, // W-01/W-02 Ratchet (Actual Real User: 173 KB, total w/ polyfills: 212 KB)
+    maxHtmlGzipKb: 45, // Current: 38 KB
+  },
+  {
+    route: "/cards/birth-card",
+    htmlRelativePath: ".next/server/app/cards/birth-card.html",
+    maxJsGzipKb: 190, // W-03 Ratchet (Actual Real User: 182 KB, target was <= 200 KB)
+    maxHtmlGzipKb: 30, // Current: 15 KB
   },
 ];
 
@@ -158,6 +165,7 @@ export async function testBundleBudget(): Promise<boolean> {
   const results: {
     route: string;
     jsGzipKb: number;
+    totalJsGzipKb: number;
     maxJsGzipKb: number;
     htmlGzipKb: number;
     maxHtmlGzipKb: number;
@@ -185,8 +193,9 @@ export async function testBundleBudget(): Promise<boolean> {
       const chunkMatches = html.match(/_next\/static\/chunks\/[^"'\s>]+\.js/g) || [];
       const uniqueChunks = Array.from(new Set(chunkMatches));
 
+      let realJsGzipBytes = 0;
       let totalJsGzipBytes = 0;
-      const chunkDetails: { name: string; sizeKb: number }[] = [];
+      const chunkDetails: { name: string; sizeKb: number; isPolyfill: boolean }[] = [];
 
       for (const chunkRef of uniqueChunks) {
         const chunkRel = chunkRef.replace(/^_next\//, "");
@@ -194,16 +203,22 @@ export async function testBundleBudget(): Promise<boolean> {
         if (fs.existsSync(chunkFile)) {
           const chunkContent = fs.readFileSync(chunkFile);
           const chunkGz = zlib.gzipSync(chunkContent).length;
+          const isPolyfill = path.basename(chunkFile).startsWith("polyfills");
           totalJsGzipBytes += chunkGz;
+          if (!isPolyfill) {
+            realJsGzipBytes += chunkGz;
+          }
           chunkDetails.push({
             name: path.basename(chunkFile),
             sizeKb: Math.round(chunkGz / 1024),
+            isPolyfill,
           });
         }
       }
 
       chunkDetails.sort((a, b) => b.sizeKb - a.sizeKb);
-      const jsGzipKb = Math.round(totalJsGzipBytes / 1024);
+      const jsGzipKb = Math.round(realJsGzipBytes / 1024);
+      const totalJsGzipKb = Math.round(totalJsGzipBytes / 1024);
 
       const jsOk = jsGzipKb <= b.maxJsGzipKb;
       const htmlOk = htmlGzipKb <= b.maxHtmlGzipKb;
@@ -215,12 +230,13 @@ export async function testBundleBudget(): Promise<boolean> {
       results.push({
         route: b.route,
         jsGzipKb,
+        totalJsGzipKb,
         maxJsGzipKb: b.maxJsGzipKb,
         htmlGzipKb,
         maxHtmlGzipKb: b.maxHtmlGzipKb,
         jsOk,
         htmlOk,
-        topChunks: chunkDetails.slice(0, 3),
+        topChunks: chunkDetails.filter((c) => !c.isPolyfill).slice(0, 3),
       });
     }
   } finally {
@@ -231,28 +247,28 @@ export async function testBundleBudget(): Promise<boolean> {
 
   // Print results table
   console.log(
-    "เส้นทาง".padEnd(18) +
-      "JS (gzip)".padEnd(16) +
+    "เส้นทาง".padEnd(16) +
+      "JS จริง (รวม polyfill)".padEnd(26) +
       "งบ JS".padEnd(12) +
-      "HTML (gzip)".padEnd(16) +
+      "HTML (gzip)".padEnd(14) +
       "งบ HTML".padEnd(12) +
       "สถานะ",
   );
-  console.log("-".repeat(80));
+  console.log("-".repeat(88));
 
   for (const r of results) {
-    const jsText = `${r.jsGzipKb} KB`.padEnd(16);
+    const jsText = `${r.jsGzipKb} KB (${r.totalJsGzipKb} KB)`.padEnd(26);
     const maxJsText = `≤ ${r.maxJsGzipKb} KB`.padEnd(12);
-    const htmlText = `${r.htmlGzipKb} KB`.padEnd(16);
+    const htmlText = `${r.htmlGzipKb} KB`.padEnd(14);
     const maxHtmlText = `≤ ${r.maxHtmlGzipKb} KB`.padEnd(12);
     const status = r.jsOk && r.htmlOk ? "✅ ผ่าน" : "❌ เกินงบ";
 
     console.log(
-      r.route.padEnd(18) + jsText + maxJsText + htmlText + maxHtmlText + status,
+      r.route.padEnd(16) + jsText + maxJsText + htmlText + maxHtmlText + status,
     );
 
     if (!r.jsOk) {
-      console.log(`  ❌ JS เกินงบ (${r.jsGzipKb} KB > ${r.maxJsGzipKb} KB)! Chunks ใหญ่สุด 3 อันดับ:`);
+      console.log(`  ❌ JS เกินงบ (${r.jsGzipKb} KB ผู้ใช้จริง > ${r.maxJsGzipKb} KB)! Chunks ใหญ่สุด 3 อันดับ:`);
       for (const c of r.topChunks) {
         console.log(`     • ${c.name}: ~${c.sizeKb} KB (gzip)`);
       }

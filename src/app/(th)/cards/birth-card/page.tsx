@@ -3,6 +3,25 @@ import { BirthCardCalculator } from "@/components/encyclopedia/BirthCardCalculat
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { DECK } from "@/data/cards";
+import type { BirthCardItem } from "@/lib/tarot/birth-card";
+
+const MAJOR_CARDS: BirthCardItem[] = DECK.filter((c) => c.arcana === "major").map((c) => ({
+  id: c.id,
+  arcana: c.arcana,
+  suit: c.suit,
+  number: c.number,
+  nameTh: c.nameTh,
+  nameEn: c.nameEn,
+  image: c.image,
+  element: c.element,
+  astrology: c.astrology,
+  astrologyEn: c.astrologyEn,
+  numerology: c.numerology,
+  numerologyEn: c.numerologyEn,
+  keywords: c.keywords,
+  keywordsEn: c.keywordsEn,
+}));
 
 export const metadata: Metadata = {
   title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) — ค้นหาไพ่ประจำวันเกิดฟรี",
@@ -139,7 +158,7 @@ export default function BirthCardPage() {
         />
 
         {/* Interactive Calculator Component */}
-        <BirthCardCalculator />
+        <BirthCardCalculator majorCards={MAJOR_CARDS} />
 
         {/* Editorial Guide Article */}
         <SeoArticleShell

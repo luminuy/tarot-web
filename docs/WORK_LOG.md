@@ -35,6 +35,58 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-07: ปฏิบัติการลดน้ำหนัก JS บันเดิลรอบใหญ่ (Grand Bundle Diet M-01, W-01, W-02, W-03, W-04) สำเร็จครบทุกด่าน (โดย Antigravity AI)
+
+> **ขอบเขต**: ดำเนินการตามแผนแม่บท [`docs/plans/HANDOFF_BUNDLE_DIET_2026-09-07.md`](plans/HANDOFF_BUNDLE_DIET_2026-09-07.md) อย่างละเอียดทุกมิติ ปลดภาระ JS ส่วนเกินขนานใหญ่บนทุกหน้าเว็บ
+
+#### 🏆 สรุปผลลัพธ์การลดน้ำหนัก (Real User JS Gzip วัดจริงหลัง Build):
+| เส้นทาง | ก่อนทำ | เป้าหมายในแผน | **ผลลัพธ์ที่ทำได้จริง** | ผลต่างเทียบเป้าหมาย |
+| :--- | :---: | :---: | :---: | :---: |
+| **`/blog`** | 275 KB | ≤ 215 KB | **171 KB** | 🎉 **ลดลง 104 KB** (ต่ำกว่าเป้า 44 KB!) |
+| **`/cards/birth-card`** | 357 KB | ≤ 200 KB | **182 KB** | 🎉 **ลดลง 175 KB** (ต่ำกว่าเป้า 18 KB!) |
+| **`/cards`** | 277 KB | ≤ 220 KB | **219 KB** | ✅ ผ่านเกณฑ์เป้าหมาย |
+| **`/daily`** | 294 KB | ≤ 240 KB | **231 KB** | ✅ ผ่านเกณฑ์เป้าหมาย |
+| **`/love/1-card`** | 297 KB | ≤ 245 KB | **234 KB** | ✅ ผ่านเกณฑ์เป้าหมาย |
+| **`/spreads`** | 276 KB | ≤ 245 KB | **234 KB** | ✅ ผ่านเกณฑ์เป้าหมาย |
+| **`/cards/all`** | 212 KB | ≤ 178 KB | **173 KB** | ✅ ผ่านเกณฑ์เป้าหมาย |
+
+---
+
+#### 🛠️ รายละเอียดการดำเนินงานทีละ Phase:
+
+1. **Phase 1 (M-01: ด่านวัดงบน้ำหนักผู้ใช้จริง & Ratchet Budget)**:
+   - ปรับปรุง [`scripts/qa/test-bundle-budget.ts`](../scripts/qa/test-bundle-budget.ts) ให้แยกวัด `realJsGzipKb` (ไม่นับ polyfills ที่มี `noModule` ซึ่งเบราว์เซอร์ยุคใหม่ไม่โหลด) และรายงานสองค่าอย่างโปร่งใส
+   - ขันเกลียวงบประมาณทุกเส้นทางลงมาเป็น Ratchet (ปรับลดได้อย่างเดียว) ป้องกันการถดถอยในอนาคต
+
+2. **Phase 2 (W-02: ตัดข้อมูลผัง 85 KB ออกจาก `limits.ts`)**:
+   - สร้าง [`src/data/spreads/standard-ids.generated.ts`](../src/data/spreads/standard-ids.generated.ts) เพื่อรวบรวม standard spread IDs โดยไม่ import `SPREADS`
+   - ปรับ [`src/lib/entitlement/limits.ts`](../src/lib/entitlement/limits.ts) ให้อ่านจาก `STANDARD_SPREAD_IDS`
+   - เพิ่มการยืนยัน Single Source of Truth (INC-0005) ใน [`scripts/qa/test-feature-gating.ts`](../scripts/qa/test-feature-gating.ts) รับรองความสอดคล้องกับ `SPREADS.guestAllowed` 100%
+
+3. **Phase 3 (W-01: ถอด Motion ออกจาก Root และแก้ Layout Poisoning)**:
+   - นำ `<AppMotionProvider>` ออกจาก [`src/app/_shared/RootHtml.tsx`](../src/app/_shared/RootHtml.tsx) และย้ายไปครอบเฉพาะคอมโพเนนต์ที่จำเป็นจริง ๆ (`Modal`, `TarotFlow`, `OneCardRitual`, `SpreadsLibrary`, `CardsExplorer`, `CardDetailView`)
+   - ปลด `motion.article` ออกจาก [`src/app/(th)/blog/BlogIndexClient.tsx`](../src/app/(th)/blog/BlogIndexClient.tsx)
+   - **ค้นพบและแก้ไขสถาปัตยกรรมสำคัญ**: Next.js App Router ผูก client chunk ของหน้าแรกและ layout เข้ากับ `(th)/not-found.tsx` เมื่อใช้ `next/link` — ได้เปลี่ยนเป็น `<a>` ใน `not-found.tsx` ส่งผลให้ client chunk และ `motion` ไม่รั่วไหลไปยังหน้าเนื้อหาอีกต่อไป
+
+4. **Phase 4 (W-03: ปลดสำรับไพ่ 83 KB ออกจาก `/cards/birth-card`)**:
+   - ปลด `import { DECK }` ออกจาก [`src/lib/tarot/birth-card.ts`](../src/lib/tarot/birth-card.ts) โดยให้ฟังก์ชัน `calculateBirthCard` รองรับการรับ `cards` อาร์เรย์ หรือใช้ `cardSummaryById` เป็น fallback แบบ zero-bundle
+   - ส่ง lean `MAJOR_CARDS` (22 ใบชุดใหญ่ ~10.2 KB) ผ่าน Server Component ใน [`src/app/(th)/cards/birth-card/page.tsx`](../src/app/(th)/cards/birth-card/page.tsx) เข้าสู่ [`src/components/encyclopedia/BirthCardCalculator.tsx`](../src/components/encyclopedia/BirthCardCalculator.tsx)
+   - ใช้ `next/dynamic` สำหรับ `<TarotCard />` ในหน้า birth card
+   - ยืนยันความถูกต้องของผลลัพธ์คำนวณไพ่ประจำตัว 12 วันเกิดเทียบก่อน/หลังตรงกัน 100% และคงกฎเหล็กข้อ 14 (Zero Fabricated Cards) คืน `undefined` หากข้อมูลไม่สมบูรณ์
+   - เพิ่มเส้นทาง `/cards/birth-card` เข้าสู่ Performance Budget Gate (≤ 190 KB, วัดจริง 182 KB)
+
+5. **Phase 5 (W-04: Prefetch Optimization สำหรับ High-Intent Links)**:
+   - ปลด `prefetch={false}` ในจุดสำคัญเพื่อให้โหลดหน้าแบบฉับพลัน:
+     - เมนูหลัก [`src/components/ui/SacredNavDropdown.tsx`](../src/components/ui/SacredNavDropdown.tsx)
+     - ไพ่พลังงานสอดคล้อง [`src/components/encyclopedia/RelatedCards.tsx`](../src/components/encyclopedia/RelatedCards.tsx)
+     - ไพ่ประจำวัน [`src/components/reading/DailyCardStrip.tsx`](../src/components/reading/DailyCardStrip.tsx)
+     - บทความเด่นประจำบล็อก [`src/app/(th)/blog/BlogIndexClient.tsx`](../src/app/(th)/blog/BlogIndexClient.tsx)
+   - คง `prefetch={false}` สำหรับส่วนฟุตเตอร์และตารางไพ่ 78 ใบ เพื่อป้องกัน prefetch avalanche (INC-0088)
+
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 35/35 ด่าน (สมบูรณ์ 100%)**
+
+---
+
 ### 🗓️ 2026-09-07: แผนส่งต่องานลดน้ำหนัก JS รอบสุดท้าย + พบว่าตัวเลขงบเดิมสูงเกินจริง 39 KB (โดย Claude Opus 5)
 
 > **ขอบเขต**: วัดผลและเขียนแผนส่งต่อ — ไม่แก้โค้ดหน้าเว็บ

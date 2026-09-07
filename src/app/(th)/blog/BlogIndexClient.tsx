@@ -2,8 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { motion } from "motion/react";
-import { useHasMounted } from "@/lib/motion";
 import type { Article, ArticleSummary } from "@/data/articles";
 import {
   getArticleTitle,
@@ -78,8 +76,6 @@ function getArticleCardArt(article: Article | ArticleSummary): { image: string; 
 
 export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) => {
   const { isEnglish, locale } = useLocale();
-  // การ์ดบทความทั้ง 24 ใบเคยถูกส่งออกจากเซิร์ฟเวอร์เป็น opacity:0 ทั้งหมด
-  const hasMounted = useHasMounted();
   const [selectedCat, setSelectedCat] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -226,7 +222,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 </div>
 
                 <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug">
-                  <Link href={`/blog/${featured.slug}`} prefetch={false}>{featTitle}</Link>
+                  <Link href={`/blog/${featured.slug}`}>{featTitle}</Link>
                 </h2>
 
                 <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed line-clamp-3">
@@ -240,7 +236,6 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   </span>
                   <Link
                     href={`/blog/${featured.slug}`}
-                    prefetch={false}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#29261F] hover:bg-[#8F5C1A] text-[#F3F0EA] font-semibold text-xs transition-all font-serif-th shadow-sm group/btn"
                   >
                     <span>{isEnglish ? "Read Full Codex" : "อ่านคัมภีร์ฉบับเต็ม"}</span>
@@ -290,7 +285,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filtered.map((article, idx) => {
+            {filtered.map((article) => {
               const cardArt = getArticleCardArt(article);
               const artTitle = getArticleTitle(article, locale);
               const artDesc = getArticleDescription(article, locale);
@@ -300,11 +295,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 : article.readTime;
 
               return (
-                <motion.article
+                <article
                   key={article.slug}
-                  initial={hasMounted ? { opacity: 0, y: 12 } : false}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25, delay: Math.min(idx * 0.03, 0.25) }}
                   className="rounded-2xl border border-[#D9C8AC] bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-[#8F5C1A] transition-all duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
                 >
                   <div className="space-y-3.5">
@@ -365,7 +357,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                       <span>→</span>
                     </Link>
                   </div>
-                </motion.article>
+                </article>
               );
             })}
           </div>

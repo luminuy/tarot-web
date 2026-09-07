@@ -29,15 +29,9 @@ export const SIGNUP_BONUS = 0;
 /** โบนัสชดเชยผู้ใช้เดิมก่อนเปิดระบบสิทธิ์ */
 export const GRANDFATHER_BONUS = 10;
 
-import { SPREADS } from "@/data/spreads";
+import { STANDARD_SPREAD_IDS } from "@/data/spreads/standard-ids.generated";
 
-/**
- * ผังมาตรฐาน (10 ผัง) ที่เปิดให้สมาชิกทั่วไปและผู้เยี่ยมชมใช้ฟรี เพื่อลด bounce rate ตามแผน SEO
- * อ้างอิงจาก guestAllowed ใน SPREADS เป็น Single Source of Truth (บทเรียน INC-0005)
- */
-export const STANDARD_SPREAD_IDS: ReadonlySet<string> = new Set(
-  SPREADS.filter((s) => s.guestAllowed).map((s) => s.id)
-);
+export { STANDARD_SPREAD_IDS };
 
 export function isStandardSpread(spreadId: string): boolean {
   return STANDARD_SPREAD_IDS.has(spreadId);

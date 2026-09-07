@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { stepVariants, useMotionSafe } from "@/lib/motion";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
@@ -1072,7 +1073,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   // dropdown แล้วเลื่อน แผงที่ composite อยู่ (เงา + ไล่สี) ถูกวาดใหม่ทุกเฟรม → กระพริบ
   // overflow-x: clip กันล้นแนวนอนได้เหมือนเดิมแต่ไม่สร้าง scroll container จึง sticky ทำงานปกติ
   return (
-    <main className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
+    <AppMotionProvider>
+      <main className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
@@ -1560,5 +1562,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {currentStep === "SPREAD_SELECT" ? seoContent : null}
       <SiteFooter />
     </main>
+  </AppMotionProvider>
   );
 }
