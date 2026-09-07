@@ -7,6 +7,16 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { DECK } from "@/data/cards";
 import type { BirthCardItem } from "@/lib/tarot/birth-card";
 
+/**
+ * ⚠️ ส่งเฉพาะฟิลด์ที่ `BirthCardCalculator` ใช้จริงเท่านั้น
+ * ------------------------------------------------------------------
+ * ก้อนนี้เป็น prop ของ client component ➔ ถูก serialize ลง flight payload (`__next_f`)
+ * ในหน้า HTML ทุกครั้ง ทุกไบต์ที่ใส่เกินมาคือน้ำหนักที่ผู้ใช้ต้องดาวน์โหลดฟรี ๆ
+ *
+ * `keywords` / `keywordsEn` (รวม 12 KB ดิบ สำหรับไพ่ชุดใหญ่ 22 ใบ) **ไม่มีที่ไหนในคอมโพเนนต์เรียกใช้เลย**
+ * เคยทำให้หน้านี้ทะลุงบ HTML (31 KB > 30 KB) จนด่าน Performance Budget ตกและ deploy ค้าง
+ * ➔ ถ้าจะเพิ่มฟิลด์กลับเข้ามา ต้องมีที่เรียกใช้จริงก่อน แล้ววัดงบซ้ำด้วย `npm run test:budget`
+ */
 const MAJOR_CARDS: BirthCardItem[] = DECK.filter((c) => c.arcana === "major").map((c) => ({
   id: c.id,
   arcana: c.arcana,
@@ -20,8 +30,6 @@ const MAJOR_CARDS: BirthCardItem[] = DECK.filter((c) => c.arcana === "major").ma
   astrologyEn: c.astrologyEn,
   numerology: c.numerology,
   numerologyEn: c.numerologyEn,
-  keywords: c.keywords,
-  keywordsEn: c.keywordsEn,
 }));
 
 const birthCardOgImages = buildPageOgImage({
