@@ -97,6 +97,25 @@ PR นี้ทำสิ่งนั้น: ตัดของที่ไม่
 
 **คำสั่งอ่านค่ากลับ**: `gh api repos/luminuy/tarot-web/branches/main/protection`
 
+#### 🪤 กับดักที่เจอทันทีหลังเปิด — deadlock ของ auto-merge (แก้แล้วใน PR เดียวกัน)
+
+พอตั้ง `🧪 Automated Verification & Quality Audit` เป็น required check แล้ว **PR #355 ค้างทันที** ด้วยข้อความ
+
+```
+##[error]Auto-merge failed: Required status check "🧪 Automated Verification & Quality Audit" is expected
+```
+
+**สาเหตุ**: `pr.yml` วางขั้นตอน `🔀 Auto-Merge Verified PR into main` ไว้เป็น **step สุดท้ายของ job ที่เป็นด่านนั้นเอง**
+job จึงสั่ง merge ตอนที่ตัวเองยัง `in_progress` ➔ GitHub ปฏิเสธเพราะ required check ยังไม่จบ ➔ `core.setFailed` ➔ ด่านกลายเป็น FAILURE ➔ **PR merge ไม่ได้ตลอดกาล**
+
+**สิ่งที่แก้**
+1. แยกขั้นตอน merge/deploy/ลบ branch ออกเป็น job ใหม่ `auto-merge` ที่ `needs: pr-verification`
+   ➔ ด่านจบเขียวก่อน แล้ว job ถัดไปค่อย merge (ปักคอมเมนต์เตือนไว้ในไฟล์ว่าห้ามย้ายกลับไปรวมกัน)
+2. ใส่ลูปลองซ้ำ 5 ครั้ง ห่างกัน 10 วินาที รอบการ merge — หลัง job แรกจบ GitHub ใช้เวลาสักครู่กว่าจะบันทึกผล required check ให้ `mergeable_state` อัปเดตตาม
+
+> 📌 บทเรียน: **การตั้ง job ใดเป็น required status check จะทำให้ job นั้น merge ตัวเองไม่ได้อีกต่อไป**
+> ถ้าไปเจอ workflow ที่ merge ตัวเองอยู่ในด่านที่จะตั้งเป็น required ต้องแยก job ก่อนเสมอ
+
 ---
 
 ### 🗓️ 2026-09-07: ตรวจขีดความสามารถแม่หมอ AI แล้วเขียนแผนยกความแม่น + ภาษาไทยที่ถูกต้อง (โดย Claude Opus 5)
