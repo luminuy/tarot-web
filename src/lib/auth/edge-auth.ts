@@ -196,7 +196,7 @@ export async function verifyUserSession(token: string): Promise<UserProfile | nu
 }
 
 export function getGoogleOAuthUrl(redirectUri: string, state: string): string {
-  const clientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  const clientId = process.env.GOOGLE_CLIENT_ID || "";
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
@@ -210,7 +210,7 @@ export function getGoogleOAuthUrl(redirectUri: string, state: string): string {
 }
 
 export function getLineOAuthUrl(redirectUri: string, state: string): string {
-  const channelId = process.env.LINE_CHANNEL_ID || process.env.NEXT_PUBLIC_LINE_CHANNEL_ID || "";
+  const channelId = process.env.LINE_CHANNEL_ID || "";
   const params = new URLSearchParams({
     response_type: "code",
     client_id: channelId,

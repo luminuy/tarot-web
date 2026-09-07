@@ -87,14 +87,3 @@ export function groqChatCompletionsEndpoint(): string {
     : "https://api.groq.com/openai/v1/chat/completions";
 }
 
-/**
- * @public (D-02)
- * baseURL สำหรับ Anthropic SDK (`new Anthropic({ baseURL })`)
- * คืน `undefined` เมื่อไม่ได้เปิด gateway → SDK ใช้ค่า default (api.anthropic.com)
- * Reserved for Anthropic provider integration via Cloudflare AI Gateway.
- */
-export function anthropicBaseUrl(): string | undefined {
-  const base = gatewayBase();
-  return base ? `${base}/anthropic` : undefined;
-}
-

@@ -21,8 +21,8 @@ export async function GET(
   // ไม่งั้นผู้ใช้จะถูกเด้งไปเจอหน้า error ของ Google/LINE แทนที่จะได้คำอธิบายเป็นภาษาไทย
   const configured =
     provider === "google"
-      ? Boolean(process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
-      : Boolean(process.env.LINE_CHANNEL_ID || process.env.NEXT_PUBLIC_LINE_CHANNEL_ID);
+      ? Boolean(process.env.GOOGLE_CLIENT_ID)
+      : Boolean(process.env.LINE_CHANNEL_ID);
 
   if (!configured) {
     return NextResponse.redirect(`${origin}/?auth_error=provider_unavailable`);

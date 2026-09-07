@@ -6,7 +6,7 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { Spread, SpreadPosition } from "@/data/spreads";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
-import { renderSpreadIllustration } from "@/components/spread/SpreadCardSelector";
+import { renderSpreadIllustration } from "@/components/spread/spread-illustrations";
 import { useLocale } from "@/lib/i18n";
 
 interface TopicSpreadListProps {

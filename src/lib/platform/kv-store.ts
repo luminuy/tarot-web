@@ -88,21 +88,6 @@ export async function kvDelete(key: string): Promise<void> {
   memo.delete(key);
 }
 
-/**
- * @public (D-02)
- * เพิ่มค่าตัวนับแบบ atomic-best-effort (KV ไม่มี atomic increment จริง —
- * read-modify-write; ยอมรับ race เล็กน้อยสำหรับสถิติเชิงสังเกต ไม่ใช่ตัวเลขบัญชี)
- * Exported for statistical tracking counters across platform endpoints.
- */
-export async function kvIncr(key: string, by = 1): Promise<void> {
-
-  const kv = await getAppKV();
-  const current = Number((await kv.get(key)) ?? 0);
-  const next = Number.isFinite(current) ? current + by : by;
-  await kv.put(key, String(next));
-  memo.delete(key);
-}
-
 /** อ่านทุก key ภายใต้ prefix (จัดการ pagination ให้) */
 export async function kvListKeys(prefix: string, max = 1000): Promise<string[]> {
   const kv = await getAppKV();

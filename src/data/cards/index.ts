@@ -57,21 +57,6 @@ export const TOTAL_CARDS = DECK_SIZE;
 import type { CardSummary } from "./summary";
 export type { CardSummary };
 
-export const DECK_SUMMARY: readonly CardSummary[] = Object.freeze(
-  DECK.map(({ id, arcana, suit, number, nameTh, nameEn, keywords, element, astrology, image }) => ({
-    id,
-    arcana,
-    suit,
-    number,
-    nameTh,
-    nameEn,
-    keywords,
-    element,
-    astrology,
-    image,
-  }))
-);
-
 const BY_ID = new Map(DECK.map((card) => [card.id, card]));
 
 export function cardById(id?: string | null): TarotCard | undefined {

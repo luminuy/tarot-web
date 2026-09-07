@@ -3,8 +3,6 @@
 import React, { useState, useMemo } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { motion, AnimatePresence } from "motion/react";
-import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import {
   type Spread,
   getSpreadName,
@@ -13,7 +11,7 @@ import {
   getPositionName,
   getPositionMeaning,
 } from "@/data/spreads";
-import { renderSpreadIllustration } from "@/components/spread/SpreadCardSelector";
+import { renderSpreadIllustration } from "@/components/spread/spread-illustrations";
 import {
   SparkleTabIcon,
   HeartTabIcon,
@@ -100,7 +98,6 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
   };
 
   return (
-    <AppMotionProvider>
       <div className="space-y-6">
       {/* Dynamic Bilingual Hero Header */}
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
@@ -172,18 +169,14 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       </div>
 
       {/* 25 Spreads Grid */}
-      {/* initial={false} — กริดผังคือเนื้อหาหลักของหน้า ต้องมองเห็นได้ใน HTML ฝั่งเซิร์ฟเวอร์ */}
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
+      {/* `key` เปลี่ยน → React remount → คลาส CSS เล่นเฟดขึ้นใหม่
+          เรนเดอร์แรกออกมาที่สถานะปลายทางเสมอ กริดผังคือเนื้อหาหลักของหน้า */}
+        <div
           key={activeCategory}
           role="tabpanel"
           id={`library-panel-${activeCategory}`}
           aria-labelledby={`library-tab-${activeCategory}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 anim-swap-rise-sm"
         >
           {filteredSpreads.map((spread) => {
             const isExpanded = expandedSpreadId === spread.id;
@@ -242,15 +235,17 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                     <span className="text-[13px]">{isExpanded ? (isEnglish ? "▲ Collapse" : "▲ ย่อ") : (isEnglish ? "▼ Expand" : "▼ ขยาย")}</span>
                   </button>
 
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="space-y-1.5 pt-1 overflow-hidden"
-                      >
+                  {/* ย่อ/ขยายด้วย grid-template-rows 0fr → 1fr — วิธี CSS ล้วนที่
+                      อนิเมต "ความสูงอัตโนมัติ" ได้จริง โดยไม่ต้องวัดความสูงด้วย JS */}
+                  <div
+                    className="grid transition-[grid-template-rows,opacity] duration-200 ease-out"
+                    style={{
+                      gridTemplateRows: isExpanded ? "1fr" : "0fr",
+                      opacity: isExpanded ? 1 : 0,
+                    }}
+                    aria-hidden={!isExpanded}
+                  >
+                      <div className="space-y-1.5 pt-1 overflow-hidden">
                         {spread.positions.map((pos, idx) => (
                           <div
                             key={idx}
@@ -265,9 +260,8 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                             </div>
                           </div>
                         ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                      </div>
+                  </div>
                 </div>
 
                 {/* Primary Action Button: Link directly to Altar */}
@@ -288,9 +282,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               </div>
             );
           })}
-        </motion.div>
-      </AnimatePresence>
+        </div>
       </div>
-    </AppMotionProvider>
   );
 };

@@ -4,8 +4,6 @@ import React, { useState, useMemo, useEffect } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "motion/react";
-import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import type { CardSummary } from "@/data/cards/summary";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
@@ -134,7 +132,6 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
   }, [searchQuery, filteredCards.length]);
 
   return (
-    <AppMotionProvider>
       <div className="space-y-8 relative z-10">
       {/* Dynamic Bilingual Hero Header */}
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
@@ -354,17 +351,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       )}
 
       {/* 78 Cards Luxury Masterpiece Grid */}
-      {/* initial={false} — เรนเดอร์แรก (ฝั่งเซิร์ฟเวอร์) ต้องออกมาที่ opacity 1
-          การสลับหมวดหลัง mount ยังมีอนิเมชันครบเหมือนเดิม */}
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={activeFilter}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -15 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5"
-        >
+      {/* `key` เปลี่ยน → React remount → คลาส .anim-swap-rise เล่นเฟดขึ้นใหม่ทุกครั้ง
+          (เดิมใช้ AnimatePresence ซึ่งลาก motion 39.8 KB เข้ามาทั้งก้อนเพื่ออนิเมชัน 0.2 วิ) */}
+      <div key={activeFilter} className="anim-swap-rise">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5">
           {filteredCards.map((card, idx) => {
             const elemStyle = (card.element && ELEMENT_STYLES[card.element]) || ELEMENT_STYLES["ไฟ"];
             // แถวแรกของกริดคือผู้สมัคร LCP ของหน้านี้ — ถ้าปล่อย lazy ทั้ง 78 ใบ
@@ -446,8 +436,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               </Link>
             );
           })}
-        </motion.div>
-      </AnimatePresence>
+        </div>
+      </div>
 
       {/* Empty State */}
       {filteredCards.length === 0 && (
@@ -474,6 +464,5 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         </div>
       )}
       </div>
-    </AppMotionProvider>
   );
 };

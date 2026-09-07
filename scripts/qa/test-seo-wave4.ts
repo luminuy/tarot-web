@@ -252,13 +252,16 @@ assert(
 );
 
 // 13. PERF: server.ts ต้องไม่มี getServerLocale ที่อ่าน headers()/cookies() อีก
+// ไฟล์นี้ถูกลบทิ้งแล้ว (ไม่มีใคร import เลยตั้งแต่ S-02 ขึ้น) — ถ้ายังอยู่ต้องสะอาดตามเดิม
 const serverI18nPath = path.join(process.cwd(), "src/lib/i18n/server.ts");
-const serverI18nContent = stripComments(fs.readFileSync(serverI18nPath, "utf-8"));
-assert(
-  !serverI18nContent.includes("getServerLocale") &&
-  !serverI18nContent.includes('from "next/headers"'),
-  "src/lib/i18n/server.ts ห้าม import next/headers หรือมี getServerLocale อีก (PERF)",
-);
+if (fs.existsSync(serverI18nPath)) {
+  const serverI18nContent = stripComments(fs.readFileSync(serverI18nPath, "utf-8"));
+  assert(
+    !serverI18nContent.includes("getServerLocale") &&
+    !serverI18nContent.includes('from "next/headers"'),
+    "src/lib/i18n/server.ts ห้าม import next/headers หรือมี getServerLocale อีก (PERF)",
+  );
+}
 
 // 14. PERF: หน้าแรกต้องเป็น static prerender — ห้ามดึง locale จากเซิร์ฟเวอร์
 const homePagePath = path.join(process.cwd(), "src/app/(th)/page.tsx");

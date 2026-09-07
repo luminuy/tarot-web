@@ -64,7 +64,7 @@ export async function GET(
     let isNewUser = false;
 
     if (oauthProvider === "google") {
-      const clientId = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+      const clientId = process.env.GOOGLE_CLIENT_ID || "";
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
       if (!clientId || !clientSecret) return fail(origin, "provider_unavailable");
 
@@ -110,7 +110,7 @@ export async function GET(
         createdAt: new Date().toISOString(),
       };
     } else {
-      const channelId = process.env.LINE_CHANNEL_ID || process.env.NEXT_PUBLIC_LINE_CHANNEL_ID || "";
+      const channelId = process.env.LINE_CHANNEL_ID || "";
       const channelSecret = process.env.LINE_CHANNEL_SECRET || "";
       if (!channelId || !channelSecret) return fail(origin, "provider_unavailable");
 

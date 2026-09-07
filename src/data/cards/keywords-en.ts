@@ -343,22 +343,3 @@ export const CARD_KEYWORDS_EN: Record<string, CardKeywordsEn> = {
     reversed: ["Materialistic", "Over-controlling", "Stubborn", "Judging by Output Alone"],
   },
 };
-
-/**
- * @public (D-02) Helper สำหรับดึงคำสำคัญของไพ่ตามภาษา (English / Thai fallback)
- * ตั้งใจเก็บไว้สำหรับคอมโพเนนต์และการค้นหาคำสำคัญหลายภาษาในอนาคต
- */
-export function getCardKeywords(
-  cardId: string,
-  fallbackThai: { upright: string[]; reversed: string[] },
-  isEnglish: boolean,
-  isUpright = true
-): string[] {
-  if (isEnglish) {
-    const en = CARD_KEYWORDS_EN[cardId];
-    if (en) {
-      return isUpright ? en.upright : en.reversed;
-    }
-  }
-  return isUpright ? fallbackThai.upright : fallbackThai.reversed;
-}

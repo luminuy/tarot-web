@@ -4,31 +4,6 @@ import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { SPREADS, type Spread } from "@/data/spreads";
 import {
-  DailySpreadArt,
-  QuickSpreadArt,
-  YesNoSpreadArt,
-  ThreeCardSpreadArt,
-  LoveSpreadArt,
-  CareerSpreadArt,
-  MoneySpreadArt,
-  DecisionSpreadArt,
-  CelticCrossSpreadArt,
-  TwelveMonthsSpreadArt,
-  SituationSolutionSpreadArt,
-  MindBodySpiritSpreadArt,
-  HowTheyFeelSpreadArt,
-  ExReconciliationSpreadArt,
-  SoulmateSpreadArt,
-  CareerSwitchSpreadArt,
-  InnerPotentialSpreadArt,
-  WeeklySpreadArt,
-  MonthlySpreadArt,
-  ChakraSpreadArt,
-  LoveSixSpreadArt,
-  MonthlyTenSpreadArt,
-  FamilySpreadArt,
-  LuckSpreadArt,
-  StudySpreadArt,
   SparkleTabIcon,
   HeartTabIcon,
   PentacleTabIcon,
@@ -62,62 +37,10 @@ interface CategoryTab {
   count: number;
 }
 
-export const renderSpreadIllustration = (spreadId: string) => {
-  switch (spreadId) {
-    case "daily":
-      return <DailySpreadArt className="w-full h-40" />;
-    case "quick":
-      return <QuickSpreadArt className="w-full h-40" />;
-    case "yes-no":
-      return <YesNoSpreadArt className="w-full h-40" />;
-    case "three-card":
-      return <ThreeCardSpreadArt className="w-full h-40" />;
-    case "situation-solution":
-      return <SituationSolutionSpreadArt className="w-full h-40" />;
-    case "mind-body-spirit":
-      return <MindBodySpiritSpreadArt className="w-full h-40" />;
-    case "love":
-      return <LoveSpreadArt className="w-full h-40" />;
-    case "how-they-feel":
-      return <HowTheyFeelSpreadArt className="w-full h-40" />;
-    case "ex-reconciliation":
-      return <ExReconciliationSpreadArt className="w-full h-40" />;
-    case "soulmate":
-      return <SoulmateSpreadArt className="w-full h-40" />;
-    case "career":
-      return <CareerSpreadArt className="w-full h-40" />;
-    case "money":
-      return <MoneySpreadArt className="w-full h-40" />;
-    case "career-switch":
-      return <CareerSwitchSpreadArt className="w-full h-40" />;
-    case "decision":
-      return <DecisionSpreadArt className="w-full h-40" />;
-    case "inner-potential":
-      return <InnerPotentialSpreadArt className="w-full h-40" />;
-    case "weekly":
-      return <WeeklySpreadArt className="w-full h-40" />;
-    case "monthly":
-      return <MonthlySpreadArt className="w-full h-40" />;
-    case "chakra":
-      return <ChakraSpreadArt className="w-full h-40" />;
-    case "celtic-cross":
-      return <CelticCrossSpreadArt className="w-full h-40" />;
-    case "year-ahead":
-      return <TwelveMonthsSpreadArt className="w-full h-40" />;
-    case "love-six":
-      return <LoveSixSpreadArt className="w-full h-40" />;
-    case "monthly-ten":
-      return <MonthlyTenSpreadArt className="w-full h-40" />;
-    case "family":
-      return <FamilySpreadArt className="w-full h-40" />;
-    case "luck":
-      return <LuckSpreadArt className="w-full h-40" />;
-    case "study":
-      return <StudySpreadArt className="w-full h-40" />;
-    default:
-      return <ThreeCardSpreadArt className="w-full h-40" />;
-  }
-};
+import { renderSpreadIllustration } from "@/components/spread/spread-illustrations";
+
+// re-export ไว้เพื่อไม่ให้ผู้เรียกเดิมพัง (ตัวจริงอยู่ที่ spread-illustrations.tsx)
+export { renderSpreadIllustration };
 
 import { useLocale } from "@/lib/i18n";
 
