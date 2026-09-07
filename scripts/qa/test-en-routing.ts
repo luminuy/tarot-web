@@ -12,6 +12,7 @@
  * รันด้วย: npx tsx scripts/qa/test-en-routing.ts
  */
 
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -271,6 +272,67 @@ for (const topic of Object.values(SPREAD_TOPICS)) {
       !thaiCharRegex.test(topic.editorialIntroEn.join(" ")),
     );
   }
+}
+
+// ── 7. หน้าอังกฤษต้องไม่มีภาษาไทยหลุดปน ────────────────────────────────────
+// บทเรียนจริง 2026-09-07: หลังเปิด `/en/blog` และ `/en/spreads/topic/*` พบภาษาไทย
+// หลุดไปอยู่ในหน้าอังกฤษถึง **79 หน้า** (สูงสุด 14.7% ของข้อความทั้งหน้า)
+// สาเหตุคนละจุดกันหมด — ป้ายคีย์เวิร์ดที่มีแต่ไทย · ชื่อหมวดที่ไม่มี `nameEn` ·
+// ชื่อไพ่ไทยที่โชว์เป็นบรรทัดรอง — พิสูจน์ว่า "ตรวจจากโค้ด" อย่างเดียวจับไม่ได้
+// ต้องวัดจาก HTML ที่ build ออกมาจริงเท่านั้น
+//
+// เกณฑ์ 1.5% เผื่อไว้ให้ชื่อไพ่ไทยที่แสดงเป็น alternateName บนหน้ารายละเอียดไพ่
+// ซึ่งเป็นข้อมูลอ้างอิงสองภาษาที่ตั้งใจให้มี ไม่ใช่การแปลตกหล่น
+const MAX_THAI_RATIO_PERCENT = 1.5;
+
+function ensureBuildExists(): void {
+  const buildManifest = path.join(ROOT, ".next/build-manifest.json");
+  if (!fs.existsSync(buildManifest)) {
+    console.log("\n📦 ไม่พบไฟล์ผลลัพธ์ build — กำลังรัน npm run build...");
+    execSync("npm run build", { cwd: ROOT, stdio: "inherit" });
+  }
+}
+
+function collectHtml(dir: string, acc: string[]): string[] {
+  if (!fs.existsSync(dir)) return acc;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) collectHtml(full, acc);
+    else if (entry.name.endsWith(".html")) acc.push(full);
+  }
+  return acc;
+}
+
+/** สัดส่วนอักขระไทยในเนื้อหาที่ผู้อ่านเห็นจริง (ตัด <script> และแท็กออกก่อน) */
+function thaiRatioPercent(htmlFile: string): number {
+  const html = fs.readFileSync(htmlFile, "utf-8");
+  const withoutScripts = html.replace(/<script[\s\S]*?<\/script>/g, "");
+  const text = withoutScripts.replace(/<[^>]+>/g, " ");
+  const thai = (text.match(/[\u0E00-\u0E7F]/g) ?? []).length;
+  const visible = (text.match(/\S/g) ?? []).length;
+  return visible === 0 ? 0 : (100 * thai) / visible;
+}
+
+ensureBuildExists();
+
+const englishHtml = collectHtml(path.join(ROOT, ".next/server/app/en"), []);
+const englishRoot = path.join(ROOT, ".next/server/app/en.html");
+if (fs.existsSync(englishRoot)) englishHtml.push(englishRoot);
+
+check("build มีหน้าอังกฤษให้ตรวจ (อย่างน้อย 100 หน้า)", englishHtml.length >= 100, `พบ ${englishHtml.length}`);
+
+const leaking = englishHtml
+  .map((file) => ({ file: path.relative(path.join(ROOT, ".next/server/app"), file), ratio: thaiRatioPercent(file) }))
+  .filter((entry) => entry.ratio > MAX_THAI_RATIO_PERCENT)
+  .sort((a, b) => b.ratio - a.ratio);
+
+check(
+  `ไม่มีหน้าอังกฤษที่มีภาษาไทยเกิน ${MAX_THAI_RATIO_PERCENT}% ของเนื้อหา`,
+  leaking.length === 0,
+  leaking.length ? `${leaking.length} หน้า · หนักสุด ${leaking[0].file} ${leaking[0].ratio.toFixed(1)}%` : undefined,
+);
+for (const entry of leaking.slice(0, 10)) {
+  console.log(`      ↳ ${entry.file} — ${entry.ratio.toFixed(1)}%`);
 }
 
 console.log("");

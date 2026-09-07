@@ -45,9 +45,13 @@ export function RelatedCards({ cardId }: { cardId: string }) {
               <span className="font-serif-th text-xs font-bold text-[#29261F] group-hover:text-[#A58A5C] block truncate">
                 {isEnglish ? c.nameEn : c.nameTh}
               </span>
-              <span className="font-serif-th text-[11px] text-[#635B4E] block truncate">
-                {isEnglish ? c.nameTh : c.nameEn}
-              </span>
+              {/* หน้าอังกฤษไม่แสดงชื่อไทยเป็นบรรทัดรอง — เป็นภาษาที่ผู้อ่านไม่ได้ขอ
+                  และเจือจางสัญญาณภาษาของหน้า (เหมือนที่ทำใน CardsExplorer / AllCardsTable) */}
+              {!isEnglish && (
+                <span className="font-serif-th text-[11px] text-[#635B4E] block truncate">
+                  {c.nameEn}
+                </span>
+              )}
             </div>
           </Link>
         ))}

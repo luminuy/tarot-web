@@ -343,15 +343,18 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
                   {/* Footer: Tags & Read More */}
                   <div className="pt-3 border-t border-[#D9C8AC]/30 flex items-center justify-between gap-2 text-xs">
+                    {/* ป้ายคีย์เวิร์ดมีเฉพาะภาษาไทย (`keywords` ไม่มีคู่ EN) — ซ่อนบนหน้า `/en/blog`
+                        ไม่งั้นจะมีข้อความไทยหลุดไปเป็น 11% ของทั้งหน้าในฉบับภาษาอังกฤษ */}
                     <div className="flex flex-wrap gap-1.5">
-                      {article.keywords.slice(0, 2).map((kw) => (
-                        <span
-                          key={kw}
-                          className="text-[11px] text-[#635B4E] font-serif-th bg-[#FFFFFF] px-2.5 py-0.5 rounded-full border border-[#D9C8AC]/60"
-                        >
-                          #{kw}
-                        </span>
-                      ))}
+                      {!isEnglish &&
+                        article.keywords.slice(0, 2).map((kw) => (
+                          <span
+                            key={kw}
+                            className="text-[11px] text-[#635B4E] font-serif-th bg-[#FFFFFF] px-2.5 py-0.5 rounded-full border border-[#D9C8AC]/60"
+                          >
+                            #{kw}
+                          </span>
+                        ))}
                     </div>
                     <Link
                       href={`/blog/${article.slug}`}
