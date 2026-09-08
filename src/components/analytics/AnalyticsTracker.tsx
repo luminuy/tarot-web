@@ -112,11 +112,21 @@ export function AnalyticsTracker() {
   const [metaPixelId, setMetaPixelId] = useState<string | undefined>(() => getMetaPixelId());
   const [googleAdsId, setGoogleAdsId] = useState<string | undefined>(() => getGoogleAdsId());
 
-  // ดึง configuration จาก runtime endpoint หากยังไม่ได้ตั้งค่าตอน build
+  // ดึง configuration จาก runtime endpoint เฉพาะตอนที่ "ไม่มีรหัสสักตัวเดียว" ติดมากับ build
   // ⚠️ dependency ต้องว่างเสมอ — ใส่ id ทั้งสามเป็น dependency เมื่อไร จะกลับไปยิงซ้ำ
   //    ทุกครั้งที่ setState สำเร็จ (บทเรียนเดิม: 2 คำขอต่อการโหลดหนึ่งหน้า)
+  //
+  // ⚠️ เงื่อนไขเดิมคือ `gaId && metaPixelId && googleAdsId` ซึ่งเป็นเท็จตลอดกาลบน production
+  //    เพราะเว็บนี้ตั้งแค่ GA4 (Meta Pixel / Google Ads ยังไม่ได้ใช้ และอาจไม่ได้ใช้อีกนาน)
+  //    ผลคือทุกแท็บที่เปิดเว็บยังยิง `/api/config/analytics` ปลุก Worker อีก 1 คำขอเสมอ
+  //    ทั้งที่รหัส GA4 inline มากับบันเดิลตั้งแต่ตอน build แล้ว (NEXT_PUBLIC_GA_ID ใน deploy.yml)
+  //    เปลี่ยนเป็น `||` = ถ้ามีรหัสใดติดมากับ build ถือว่าตั้งค่าผ่านทางที่เป็นทางการแล้ว ไม่ต้องถามซ้ำ
+  //
+  // 📌 ผลข้างเคียงที่ยอมรับ: ถ้าวันหน้าจะเพิ่ม Meta Pixel / Google Ads ต้องตั้งเป็น
+  //    NEXT_PUBLIC_* ตอน build (GitHub Actions) เหมือน GA4 — ตั้งด้วย `wrangler secret`
+  //    อย่างเดียวจะไม่ถูกหยิบมาใช้ เพราะเส้น runtime นี้จะไม่ถูกยิงอีกแล้ว
   useEffect(() => {
-    if (gaId && metaPixelId && googleAdsId) return;
+    if (gaId || metaPixelId || googleAdsId) return;
 
     let isMounted = true;
     loadRuntimeAnalyticsConfig().then((data) => {
