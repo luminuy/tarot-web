@@ -377,23 +377,30 @@ async function taskCacheRules() {
 
 // ── ข้อ 3 + 4: นโยบายบอต AI + Bot Fight Mode ────────────────────────────────
 /**
- * 🚨 ห้ามเปิด `ai_bots_protection: "block"` เด็ดขาด — บทเรียน INC-0105
+ * ⚠️ อย่าเชื่อผลทดสอบบอตที่ยิงด้วย user-agent ปลอม — บทเรียน INC-0105
  *
- * สวิตช์ "Block AI Scrapers and Crawlers" ของ Cloudflare บล็อกบอต AI **ทั้งก้อน**
- * ไม่ได้แยกระหว่าง "บอตเก็บไปเทรนโมเดล" กับ "บอตค้นหาที่อ้างอิงลิงก์กลับมาหาเรา"
+ * เคยมีการสรุปผิดว่า `ai_bots_protection: "block"` ไปบล็อกบอตค้นหา AI ที่เราตั้งใจเปิดให้คลาน
+ * เพราะยิง curl ด้วย UA ของ `OAI-SearchBot` / `Claude-SearchBot` / `PerplexityBot` แล้วได้ 403
  *
- * ตรวจ production เมื่อ 2026-09-08 หลังเคยรัน `cf:phase1` ไปแล้ว:
- *   OAI-SearchBot · Claude-SearchBot · PerplexityBot ➔ **403 "Your request was blocked."**
- *   Googlebot · AhrefsBot                            ➔ 200
- * ขณะที่ `src/app/robots.ts` เขียนเชิญบอตสามตัวแรกเข้ามาคลานอย่างชัดเจน
- * (การตัดสินใจของเจ้าของโปรเจกต์เมื่อ 2026-09-04: ยอมให้คลานเพื่อแลกทราฟฟิกจาก AI search)
- * ➔ เท่ากับ robots.txt เชิญไว้หน้าบ้าน แต่ Cloudflare ปิดประตูอยู่หลังบ้าน เงียบ ๆ มาหลายวัน
+ * ความจริงที่ตรวจจาก Cloudflare Dashboard เมื่อ 2026-09-08:
+ *   • AI Crawl Control ➔ Claude-SearchBot โอน **4.22 MB · 230 คำขอสำเร็จ** ใน 24 ชม.
+ *     = บอตตัวจริงที่ Cloudflare "รับรองแล้ว" คลานเข้ามาได้ปกติ ไม่เคยถูกบล็อก
+ *   • ช่อง Unsuccessful ของ OAI-SearchBot/PerplexityBot/GPTBot = 3/2/2 ครั้ง
+ *     ซึ่งตรงกับจำนวนครั้งที่เรายิงทดสอบด้วย UA ปลอมเองพอดี
+ *   • เอกสาร Cloudflare ระบุว่าการบล็อก crawler จะ **สร้าง WAF custom rule** เสมอ —
+ *     แต่โซนนี้มี custom rule แค่ 2 ข้อของ [phase1] ไม่มีข้อไหนแตะบอต AI เลย
  *
- * นโยบายที่ถูกต้องสำหรับบ้านนี้ = **บล็อกเฉพาะบอตเทรนโมเดลด้วยชื่อ user-agent**
- * (กฎ WAF ใน taskWaf) แล้วปล่อยบอตค้นหาผ่าน — รายชื่อต้องตรงกับ `src/app/robots.ts` เสมอ
+ * ➔ 403 ที่เห็นคือ Cloudflare บล็อก "คำขอที่อ้างตัวเป็นบอต AI จาก IP ที่ไม่ได้รับรอง"
+ *   ซึ่งเป็นพฤติกรรมที่ถูกต้อง ไม่ใช่บั๊ก · จึง **คง `block` ไว้ตามเดิม**
  *
- * `crawler_protection` ยังเปิดไว้ได้ เพราะมันแค่แทรกสัญญาณ `ai-train=no`
- * ลงหัว robots.txt ให้เอง (ไม่ได้ 403 ใคร) ซึ่งตรงกับนโยบายเราอยู่แล้ว
+ * 🔬 วิธีตรวจที่เชื่อได้ (ห้ามใช้ curl + UA ปลอมตัดสินอีก):
+ *   Dashboard ➔ AI Crawl Control ➔ Security ➔ ดูคอลัมน์ Bytes Transferred / Allowed ของบอตนั้น
+ *   ถ้ามีไบต์ไหลจริงและ Allowed > 0 = บอตตัวจริงเข้าได้
+ *
+ * 📌 Cloudflare ประกาศเลิกใช้สวิตช์นี้ 15 กันยายน 2026 — กฎ WAF ตามชื่อ user-agent ใน taskWaf
+ *   จึงเป็นตัวบังคับใช้ระยะยาว (รายชื่อต้องตรงกับ `src/app/robots.ts` เสมอ · ด่านที่ 37 คอยตรวจให้)
+ *
+ * `crawler_protection` เปิดไว้เพราะแทรกสัญญาณ `ai-train=no` ลงหัว robots.txt ให้เอง (ไม่ได้ 403 ใคร)
  */
 async function taskBots() {
   if (DRY_RUN) {
@@ -401,13 +408,13 @@ async function taskBots() {
       "3+4",
       "นโยบายบอต AI + Bot Fight Mode",
       "OK",
-      "[dry-run] ai_bots_protection=disabled (บล็อกบอตเทรนด้วย WAF แทน) · fight_mode=on",
+      "[dry-run] ai_bots_protection=block · crawler_protection=enabled · fight_mode=on",
     );
     return;
   }
 
   const r = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
-    ai_bots_protection: "disabled",
+    ai_bots_protection: "block",
     crawler_protection: "enabled",
     fight_mode: true,
   });
@@ -417,21 +424,21 @@ async function taskBots() {
       "3+4",
       "นโยบายบอต AI + Bot Fight Mode",
       "OK",
-      "ai_bots_protection=disabled (บอตค้นหา AI เข้าได้ · บอตเทรนถูกบล็อกที่ WAF) · fight_mode=on",
+      "ai_bots_protection=block (บอตตัวจริงที่รับรองแล้วยังเข้าได้) · crawler_protection=enabled · fight_mode=on",
     );
     return;
   }
 
   // บางบัญชีต้องส่งทีละฟิลด์ — ลองแยกยิงเพื่อให้ได้อย่างน้อยหนึ่งอย่าง
   const ai = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
-    ai_bots_protection: "disabled",
+    ai_bots_protection: "block",
   });
   const fight = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
     fight_mode: true,
   });
 
   const parts = [
-    ai.success ? "ปลดบล็อกบอตค้นหา AI ✔" : `ปลดบล็อกบอตค้นหา AI ✘ (${errText(ai)})`,
+    ai.success ? "Block AI Scrapers ✔" : `Block AI Scrapers ✘ (${errText(ai)})`,
     fight.success ? "Bot Fight Mode ✔" : `Bot Fight Mode ✘ (${errText(fight)})`,
   ];
 

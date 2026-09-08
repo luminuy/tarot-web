@@ -6,17 +6,20 @@
  *   1. `src/app/robots.ts`            — ขอความร่วมมือ (บอตจะเชื่อหรือไม่ก็ได้)
  *   2. `scripts/cloudflare-phase1.ts` — บังคับจริงที่ขอบ Cloudflare (403 ทันที)
  *
- * ตรวจ production เมื่อ 2026-09-08 พบว่าสองที่นี้ขัดกันเงียบ ๆ มาหลายวัน:
- * `robots.ts` เชิญ `OAI-SearchBot` · `Claude-SearchBot` · `PerplexityBot` เข้ามาคลาน
- * (การตัดสินใจของเจ้าของโปรเจกต์ 2026-09-04 — ยอมให้คลานเพื่อแลกทราฟฟิกจาก AI search)
- * แต่ `cf:phase1` เปิดสวิตช์เหมาโหล `ai_bots_protection: "block"` ของ Cloudflare
- * ซึ่งบล็อกบอต AI ทั้งก้อนโดยไม่แยกบอตค้นหาออกจากบอตเทรนโมเดล ➔ ทั้งสามตัวได้ 403
+ * Cloudflare ประกาศเลิกใช้สวิตช์ `ai_bots_protection` วันที่ 15 กันยายน 2026 — หลังจากนั้น
+ * กฎ WAF ตามชื่อ user-agent จะเป็นตัวบังคับใช้เพียงตัวเดียว ถ้าสองที่นี้หลุดกันเมื่อไร
+ * นโยบายที่เจ้าของตัดสินใจไว้จะหายไปเงียบ ๆ โดยไม่มีอะไรเตือน
  *
  * **บทเรียน: นโยบายที่เขียนไว้สองที่ ถ้าไม่มีเครื่องตรวจ มันจะขัดกันเองเสมอ**
  *
+ * 🔬 บทเรียนซ้อน (INC-0105): เคยสรุปผิดว่าบอตค้นหา AI ถูกบล็อก เพราะยิง curl ด้วย UA ปลอม
+ *    แล้วได้ 403 — ความจริงคือ Cloudflare บล็อก "คำขอที่อ้างตัวเป็นบอต AI จาก IP ที่ไม่ได้รับรอง"
+ *    ส่วนบอตตัวจริงเข้าได้ปกติ (Claude-SearchBot โอน 4.22 MB · 230 คำขอสำเร็จ ใน 24 ชม.)
+ *    ➔ ห้ามใช้ curl + UA ปลอมตัดสินว่าบอตถูกบล็อก · ให้ดู AI Crawl Control ➔ Security แทน
+ *
  * ────────────────────────────────────────────────────────────────
  * กฎที่ตรวจ:
- *  1. ห้ามมี `ai_bots_protection: "block"` ในสคริปต์ตั้งค่า Cloudflare (สวิตช์เหมาโหล)
+ *  1. `ai_bots_protection` ต้องเป็น `"block"` (ห้ามปิด — เป็นด่านที่กันบอตปลอมและบอตเทรนโมเดล)
  *  2. บอตเทรนโมเดลทุกตัวที่ `robots.ts` สั่ง disallow ต้องถูกบล็อกที่ WAF ด้วย
  *     (ยกเว้นโทเคนที่ใช้ได้เฉพาะใน robots.txt ซึ่งไม่มี user-agent จริงให้บล็อก)
  *  3. บอตค้นหา AI ที่เราตั้งใจเปิดให้คลาน ต้องไม่โผล่ในรายการบล็อกของ WAF
@@ -103,8 +106,8 @@ function run(): void {
 
   const errors: string[] = [];
 
-  // ── กฎ 1: ห้ามใช้สวิตช์เหมาโหลของ Cloudflare ────────────────────────────
-  // ตรวจเฉพาะ "โค้ดที่รันจริง" — คอมเมนต์เตือนในไฟล์นั้นอ้างชื่อสวิตช์นี้อยู่แล้วโดยตั้งใจ
+  // ── กฎ 1: ห้ามปิดสวิตช์กันบอต AI ของ Cloudflare ─────────────────────────
+  // ตรวจเฉพาะ "โค้ดที่รันจริง" — คอมเมนต์ในไฟล์นั้นอ้างชื่อสวิตช์นี้อยู่แล้วโดยตั้งใจ
   const cfCodeOnly = cfSource
     .split("\n")
     .filter((line) => {
@@ -113,12 +116,25 @@ function run(): void {
     })
     .join("\n");
 
-  if (/ai_bots_protection:\s*"block"/.test(cfCodeOnly)) {
+  const aiSettings = [...cfCodeOnly.matchAll(/ai_bots_protection:\s*"([^"]+)"/g)].map(
+    (m) => m[1],
+  );
+
+  if (aiSettings.length === 0) {
     errors.push(
-      'พบ `ai_bots_protection: "block"` ใน scripts/cloudflare-phase1.ts\n' +
-        "    สวิตช์นี้บล็อกบอต AI ทั้งก้อน รวมบอตค้นหาที่เราตั้งใจเปิดให้คลาน (INC-0105)\n" +
-        '    💡 ใช้ "disabled" แล้วบล็อกบอตเทรนโมเดลด้วยชื่อ user-agent ในกฎ WAF แทน',
+      "ไม่พบการตั้ง `ai_bots_protection` ใน scripts/cloudflare-phase1.ts\n" +
+        '    💡 ต้องตั้งเป็น "block" — เป็นด่านที่กันคำขอปลอมที่อ้างตัวเป็นบอต AI',
     );
+  }
+
+  for (const value of aiSettings) {
+    if (value !== "block") {
+      errors.push(
+        `\`ai_bots_protection\` ถูกตั้งเป็น "${value}" ใน scripts/cloudflare-phase1.ts\n` +
+          "    ปิดสวิตช์นี้ = เปิดทางให้ใครก็ได้ปลอม UA เป็นบอต AI เข้ามาคลาน (INC-0105)\n" +
+          '    💡 ต้องเป็น "block" — บอตตัวจริงที่ Cloudflare รับรองแล้วยังเข้าได้ตามปกติ',
+      );
+    }
   }
 
   const robotsDisallowed = readRobotsDisallowedAgents(robotsSource);

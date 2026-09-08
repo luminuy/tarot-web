@@ -52,7 +52,7 @@
 
 ---
 
-## 2. ปรับให้เข้ากับของเราจริง — เราทำไปแล้วเกือบหมด (และทำผิดไป 1 ข้อ)
+## 2. ปรับให้เข้ากับของเราจริง — เราทำไปแล้วเกือบหมด
 
 โปรเจกต์นี้มีสคริปต์ [`scripts/cloudflare-phase1.ts`](../../scripts/cloudflare-phase1.ts) (`npm run cf:phase1`)
 ที่ตั้งค่า Cloudflare ผ่าน API v4 อยู่แล้วตั้งแต่ PR #308 — ข้อเสนอส่วนใหญ่จึง **ไม่ใช่คำถามว่า "ควรทำไหม"
@@ -66,54 +66,37 @@
 | บล็อกเครื่องมือสคริปต์ | ✅ ทำแล้ว — `curl` · `python-requests` · `scrapy` ฯลฯ ถูกบล็อกเฉพาะบน `/api/` (ยกเว้น webhook รับเงิน) |
 | Cache Rules / Tiered Cache | ✅ ทำแล้ว — และสคริปต์เองบันทึกไว้ตั้งแต่ 2026-09-06 ว่า **แคชหน้า HTML ไม่ได้** เพราะ Worker อยู่หน้า cache |
 | บล็อกสแกนเนอร์ SEO | ❌ **ยังไม่ได้ทำ** — ยิงจริง `AhrefsBot` ยังได้ **200** |
-| Block AI Scrapers | 🚨 **ทำไปแล้ว และเป็นการทำผิด — ดูหัวข้อ 2.1** |
+| Block AI Scrapers | ✅ เปิดอยู่ และ **ทำงานถูกต้อง** — บล็อกบอตเทรนโมเดลกับคำขอที่ปลอม UA ส่วนบอตค้นหา AI ตัวจริงเข้าได้ปกติ (เคยสรุปผิดว่าบล็อกหมด ดูหัวข้อ 2.1) |
 
-### 2.1 🚨 ของจริงที่พบ: robots.txt เชิญเข้าบ้าน แต่ Cloudflare ปิดประตูใส่ (INC-0105)
+### 2.1 ✅ ตรวจซ้ำแล้ว: บอตค้นหา AI ไม่เคยถูกบล็อก (แก้ข้อสรุปผิด — INC-0105)
 
-ยิงทดสอบ `https://seertarot.net/cards` ด้วย user-agent ของบอตแต่ละตัว:
+เอกสารฉบับแรกเขียนว่า Cloudflare บล็อก `OAI-SearchBot` · `Claude-SearchBot` · `PerplexityBot`
+โดยอ้างผล `curl` ที่ได้ 403 — **ข้อสรุปนั้นผิด** เข้าไปดู Cloudflare Dashboard จริงแล้วพบว่า:
 
-| บอต | ผลจริง | ควรเป็น |
-|---|---|---|
-| `OAI-SearchBot` (ChatGPT Search) | 🔴 **403 Your request was blocked.** | 200 |
-| `Claude-SearchBot` | 🔴 **403** | 200 |
-| `PerplexityBot` | 🔴 **403** | 200 |
-| `GPTBot` (เทรนโมเดล) | ✅ 403 | 403 |
-| `Googlebot` | ✅ 200 | 200 |
-| `AhrefsBot` | 🟠 **200** | 403 |
+| หลักฐานจาก Dashboard | ความหมาย |
+|---|---|
+| AI Crawl Control ➔ **Claude-SearchBot: 4.22 MB · Allowed 230** ใน 24 ชม. | บอตตัวจริงคลานเข้ามาได้ปกติ ไม่เคยถูกบล็อก |
+| ช่อง Unsuccessful ของ OAI-SearchBot / PerplexityBot / GPTBot = **3 / 2 / 2** | ตรงกับจำนวนครั้งที่เรายิงทดสอบด้วย UA ปลอมเองพอดี |
+| Security rules ➔ **Custom rules 2/5** มีแค่ `[phase1] block junk scan paths` และ `[phase1] block script tools on /api` | เอกสาร Cloudflare ระบุว่าการบล็อก crawler ต้องสร้าง WAF custom rule เสมอ — ไม่มีข้อไหนแตะบอต AI เลย |
+| เอกสาร Cloudflare: *"Unsuccessful requests may come from any rule or response error"* | ช่องนี้ไม่ได้แปลว่าถูกบล็อก |
 
-`src/app/robots.ts` เขียนเชิญบอตสามตัวแรกเข้ามาคลานไว้ชัดเจน พร้อมคอมเมนต์ยาวว่าเป็น
-**การตัดสินใจของเจ้าของโปรเจกต์เมื่อ 2026-09-04** ("ทราฟฟิกจาก AI search สำคัญกว่าการหวงเนื้อหา")
-แต่ `cf:phase1` เปิดสวิตช์ `ai_bots_protection: "block"` ซึ่งบล็อกบอต AI **ทั้งก้อน**
-ไม่แยกบอตค้นหาออกจากบอตเทรนโมเดล ➔ **เว็บหายจากผลค้นหาของ ChatGPT / Claude / Perplexity เงียบ ๆ**
-ทั้งที่เอกสารทุกฉบับของเราเขียนว่าเปิดให้เข้า
+**ความจริง**: Cloudflare ยืนยันตัวตนบอตจาก **IP** ไม่ใช่ชื่อ user-agent — 403 ที่เจอคือการบล็อก
+"คำขอที่อ้างตัวเป็นบอต AI จาก IP ที่ไม่ได้รับรอง" ซึ่งเป็นพฤติกรรมที่ถูกต้อง **ไม่มีอะไรเสียหาย**
 
-> ⚠️ ข้อควรระวังในการอ่านผลนี้: การยิงทดสอบใช้ user-agent ปลอมจาก IP ที่ Cloudflare ไม่รับรอง
-> ผลจึงยืนยันได้แน่ชัดว่า "คำขอที่อ้างตัวเป็นบอตค้นหา AI ถูกบล็อก" แต่ยังไม่ 100% ว่าบอตตัวจริง
-> จาก IP ที่รับรองแล้วโดนด้วย · **วิธียืนยันขาด**: Cloudflare Dashboard ➔ Security ➔ Events
-> กรองด้วย user-agent `OAI-SearchBot` ย้อน 30 วัน ถ้าเห็นแถว Block = โดนจริง
+> 🛡️ **กฎถาวรจาก INC-0105**: ห้ามสรุปว่าบอตถูกบล็อกจากการยิง `curl` ด้วย UA ปลอม
+> ให้ดู **AI Crawl Control ➔ Security ➔ Bytes Transferred / Allowed** ของบอตตัวนั้นเสมอ
 
-**แก้แล้วใน PR นี้** (เป็นการแก้ที่โค้ด ยังไม่ได้ยิงขึ้น production — ดูหัวข้อ 2.2):
-- `ai_bots_protection` → `"disabled"` เลิกใช้สวิตช์เหมาโหล
-- บล็อกบอตเทรนโมเดลด้วยชื่อ user-agent ในกฎ WAF แทน (รายชื่อตรงกับ `robots.ts`)
-- เติมสแกนเนอร์ SEO ที่ยังหลุดอยู่: `AhrefsBot` `SemrushBot` `PetalBot` `MJ12bot` `DotBot` `DataForSeoBot` `BLEXBot` `SeekportBot`
-- เพิ่ม **ด่านที่ 37** `scripts/qa/test-bot-policy.ts` เข้า `repo:verify` — ตรวจว่านโยบายสองชั้นพูดตรงกันเสมอ
-  และห้ามเผลอบล็อก `facebookexternalhit` / `twitterbot` / `LINE` (ภาพพรีวิวตอนแชร์จะกลายเป็นกล่องเปล่าทั้งเว็บ)
+### 2.2 สิ่งที่ยังเป็นข้อค้นพบจริงและทำไปแล้ว
 
-### 2.2 ⏭️ ขั้นตอนเดียวที่เหลือ — ต้องให้เจ้าของรันเอง
-
-โค้ดแก้แล้วแต่ **Cloudflare ยังบล็อกอยู่จนกว่าจะยิงค่าใหม่ขึ้นไป** (ต้องใช้ API token ที่ผมไม่มี):
-
-```bash
-export CLOUDFLARE_API_TOKEN=<token ที่มีสิทธิ์ตามตารางหัวไฟล์ cloudflare-phase1.ts>
-npm run cf:phase1 -- --dry-run   # ดูก่อนว่าจะเปลี่ยนอะไร
-npm run cf:phase1                # ลงมือจริง
-```
-
-ตรวจผลหลังรัน (ควรได้ 200 สามตัวแรก · 403 สองตัวหลัง):
-
-```bash
-for ua in OAI-SearchBot Claude-SearchBot PerplexityBot GPTBot AhrefsBot; do echo -n "$ua "; curl -sS -o /dev/null -w "%{http_code}\n" -A "Mozilla/5.0 (compatible; $ua/1.0)" https://seertarot.net/cards; done
-```
+- ✅ **สแกนเนอร์ SEO ไม่เคยถูกบล็อกจริง** (custom rules มีแค่ 2 ข้อ) ➔ เพิ่มกฎ WAF บล็อก
+  `AhrefsBot` `SemrushBot` `PetalBot` `MJ12bot` `DotBot` `DataForSeoBot` `BLEXBot` `SeekportBot`
+- ✅ **เตรียมรับการเลิกใช้สวิตช์ `ai_bots_protection` วันที่ 15 ก.ย. 2026** ➔ ใส่รายชื่อบอตเทรนโมเดล
+  (ตรงกับ `robots.ts`) ลงกฎ WAF ไว้เป็นตัวบังคับใช้ระยะยาว
+- ✅ **ด่านที่ 37** `scripts/qa/test-bot-policy.ts` — บังคับให้ `ai_bots_protection` เป็น `"block"` เสมอ ·
+  รายชื่อสองที่ต้องตรงกัน · ห้าม `Googlebot` / `Applebot` / `facebookexternalhit` / `twitterbot` / `LINE`
+  หลุดเข้าไปในรายการบล็อก (ภาพพรีวิวตอนแชร์จะกลายเป็นกล่องเปล่าทั้งเว็บ)
+- ⏭️ ค่าใหม่จะมีผลเมื่อรัน `npm run cf:phase1` พร้อม `CLOUDFLARE_API_TOKEN` — **ยังไม่ได้รัน**
+  ค่าบน production จึงยังเป็นของเดิมที่ทำงานถูกอยู่แล้ว (ไม่เร่งด่วน)
 
 ---
 
@@ -139,3 +122,8 @@ curl -sSI https://seertarot.net/.env | head -1
 ```
 
 จำนวนคำขอต่อการเปิดหน้าจริง: เปิด DevTools → Network → กรอง `Fetch/XHR` → โหลดหน้าใหม่ ต้องเห็นเส้น `/api/*` **0 เส้น** สำหรับผู้ชมที่ไม่เคยล็อกอิน
+
+> ⛔ **ห้ามใช้ `curl -A "<ชื่อบอต>"` ตัดสินว่าบอตถูกบล็อกหรือไม่** (บทเรียน INC-0105)
+> Cloudflare ยืนยันตัวตนบอตจาก IP ไม่ใช่ชื่อ user-agent — คำขอปลอมจากเครื่องเราจะได้ 403 เสมอ
+> ทั้งที่บอตตัวจริงเข้าได้ปกติ · ให้ดูที่ **Dashboard ➔ AI Crawl Control ➔ Security**
+> คอลัมน์ Bytes Transferred / Allowed ของบอตตัวนั้นแทน
