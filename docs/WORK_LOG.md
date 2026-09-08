@@ -35,6 +35,27 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-08: 🔒 ปิดข้อ 7–8 ของข้อเสนอ Cloudflare (Crawler Hints · SSL Full Strict) โดย Claude Opus 5
+
+เข้าไปตรวจและตั้งค่าในแดชบอร์ดโดยตรง (ผ่าน Claude in Chrome) — เหลือแค่ 2 ข้อสุดท้ายของข้อเสนอ 12 ข้อ
+
+| ข้อ | ผลตรวจ | ทำอะไร |
+|---|---|---|
+| 7 · Crawler Hints | **เปิดอยู่แล้ว** (`aria-checked=true` ที่ Caching ➔ Configuration) | ไม่ต้องแตะ |
+| 8 · SSL/TLS | เดิม **Automatic SSL/TLS** ที่กำลังรันโหมด `Full` — ไม่ใช่ `Flexible` จึงไม่เคยมีความเสี่ยง redirect loop ตามที่ข้อเสนออ้าง | เปลี่ยนเป็น **Full (Strict)** แล้ว |
+| 6 · Smart Tiered Cache (ตรวจซ้ำ) | **Active** · Smart Tiered Cache ถูกเลือกอยู่ | ยืนยันแล้ว |
+
+ยิงตรวจหลังเปลี่ยนโหมด SSL: `/` · `www.seertarot.net` · `/cards` ตอบ **200 ครบทั้งสามเส้น**
+
+> 📌 เว็บนี้เสิร์ฟผ่าน Cloudflare Worker ล้วน (เส้น `*seertarot.net/*`) คำขอจึงไม่เคยวิ่งถึง origin จริง
+> ระเบียน A ที่ proxied อยู่ (13.248.243.5 · 76.223.105.230) เป็น IP ที่ผู้รับจดโดเมนตั้งค้างไว้
+> `Full (Strict)` จึงปลอดภัยกับเว็บนี้ · ถ้าวันหน้าเพิ่ม origin จริงต้องมีใบรับรองที่เชื่อถือได้ ไม่งั้นจะได้ 526
+
+**สรุปข้อเสนอ 12 ข้อ**: ทำแล้ว 7 ข้อ (2·3·5·6·7·8 + ข้อ 4 ครึ่งเดียว) · ตัดทิ้ง 5 ข้อ (1·9·10·11·12)
+เหลืองานเดียวคือรัน `npm run cf:phase1` เพื่อเพิ่มกฎบล็อกสแกนเนอร์ SEO ให้ข้อ 4 ครบ (ไม่เร่งด่วน)
+
+---
+
 ### 🗓️ 2026-09-08 (รอบแก้): ✅ ตรวจซ้ำแล้วบอตค้นหา AI ไม่เคยถูกบล็อก — แก้ข้อสรุปผิดของรอบก่อน (INC-0105 · โดย Claude Opus 5)
 
 รายการก่อนหน้า (ด้านล่างนี้) สรุปว่า Cloudflare บล็อก `OAI-SearchBot` · `Claude-SearchBot` ·
