@@ -35,6 +35,35 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-08: 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" + ตัดคำขอที่เหลือ 2 → 1 (โดย Claude Opus 5)
+
+#### 1. `/api/config/analytics` ยังปลุก Worker ทุกแท็บ ทั้งที่รหัส GA4 inline มากับบันเดิลแล้ว
+
+PR #356 รวมเส้นนี้ให้เหลือ "ครั้งเดียวต่อแท็บ" ก็จริง แต่ยังยิงอยู่ดี เพราะเงื่อนไขข้ามการยิงเขียนไว้ว่า
+`gaId && metaPixelId && googleAdsId` — เว็บนี้ตั้งแค่ GA4 (Meta Pixel / Google Ads ยังไม่ได้ใช้)
+เงื่อนไขจึงเป็นเท็จตลอดกาลบน production ทั้งที่ `NEXT_PUBLIC_GA_ID` ถูก inline เข้าบันเดิลตั้งแต่ตอน build
+(ตั้งใน `deploy.yml`) แก้เป็น `||` = มีรหัสใดติดมากับ build ก็ถือว่าตั้งค่าครบแล้ว ไม่ต้องถาม runtime ซ้ำ
+
+ผล: ผู้ชมที่ไม่เคยล็อกอินเปิดหน้า = **1 คำขอที่ปลุก Worker** (HTML อย่างเดียว) จากเดิม 2
+
+> ⚠️ ผลข้างเคียงที่ยอมรับ: ถ้าจะเพิ่ม Meta Pixel / Google Ads ต้องตั้งเป็น `NEXT_PUBLIC_*`
+> ตอน build เหมือน GA4 — ตั้งด้วย `wrangler secret` อย่างเดียวจะไม่ถูกหยิบมาใช้อีกแล้ว
+
+#### 2. ตรวจข้อเสนอ 12 ข้อจากผู้ช่วย AI ตัวอื่น — ทำจริงแค่ 4 ข้อ ห้ามทำ 5 ข้อ
+
+วัดจาก production จริงแล้วพบว่าครึ่งตารางตั้งอยู่บนความเข้าใจผิดเรื่องลำดับการทำงานของ Cloudflare
+(`WAF → Worker → Cache`) — อะไรที่อยู่หลัง Worker ไม่ลดค่าบิลสักคำขอ สรุปเต็มอยู่ใน
+[`docs/plans/HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md`](plans/HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md)
+
+- ❌ **Custom Domain / ImageKit / ย้ายไป Pages / Hotlink Protection** — ไฟล์ static ฟรีและไม่ปลุก Worker อยู่แล้ว (`cf-cache-status: HIT`)
+- ⛔ **"Block AI Scrapers"** — สวิตช์นี้บล็อก `OAI-SearchBot` `Claude-SearchBot` `PerplexityBot` ด้วย
+  ขัดกับการตัดสินใจของเจ้าของเมื่อ 2026-09-04 ใน `src/app/robots.ts` ที่ตั้งใจเปิดให้บอตกลุ่มนี้คลาน
+- ✅ **ทำจริง 4 ข้อ**: ตัดเส้น analytics (ข้อนี้), rate limit เฉพาะ `/api/reading/*` · `/api/search` · `/api/share/image/*`,
+  Bot Fight Mode ตัวธรรมดา, บล็อก `AhrefsBot`/`SemrushBot`/`PetalBot`
+- 📌 ค่าใช้จ่ายจริงตอนนี้ **$1.42/เดือน** — ยังไม่ใช่เหตุผลให้รื้อสถาปัตยกรรม
+
+---
+
 ### 🗓️ 2026-09-08: ✂️ ลดจำนวน request ที่ปลุก Worker ต่อการเปิดหน้าหนึ่งครั้ง 7 → 2 (โดย Claude Opus 5)
 
 #### 1. เปิดหน้าเดียวยิง `/api/*` 6 เส้น ทั้งที่ผู้ชมยังไม่เคยล็อกอิน

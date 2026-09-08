@@ -66,6 +66,7 @@ docs/
         ├── HANDOFF_SMOOTH_FAST_2026-09-06.md  # ✦ แผนทำเว็บสมูท+ไวระดับโลก (บันเดิล · แอนิเมชัน · เปลี่ยนหน้า)
         ├── HANDOFF_SEMANTIC_SEARCH_2026-09-06.md # 🔎 แผนต่อ UI ค้นหาเชิงความหมาย (Vectorize + Workers AI ที่กำพร้าอยู่)
         ├── HANDOFF_OG_IMAGES_2026-09-07.md   # 🖼️ แผนยกเครื่องภาพแชร์ 299 หน้า (Cloudinary ที่ใช้อยู่จุดเดียว + บั๊ก 400 จากอักขระ , /)
+        ├── HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md # 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" (ทำจริง 4 ห้ามทำ 5 · กับดัก Block AI Scrapers)
         └── BACKLOG.md                   # คลังรายการงานที่ทำเสร็จแล้วย้อนหลัง
 ```
 
