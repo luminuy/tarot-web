@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 37/37 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 38/38 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -34,6 +34,42 @@
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-08: 🔥 เจอต้นตอคำขอ 1.11M/วัน — ลูป segment prefetch ในเว็บเราเอง ไม่ใช่บอต (INC-0106 · โดย Claude Opus 5)
+
+ตามหาต้นตอ spike ตามที่เจ้าของสั่ง แล้วพบว่า **99% ของทราฟฟิกทั้งเว็บเป็นคำขอที่เว็บเรายิงใส่ตัวเอง**
+
+**หลักฐานที่นำไปสู่คำตอบ**
+
+| ขั้น | สิ่งที่เห็น |
+|---|---|
+| Cloudflare HTTP Traffic 24 ชม. | 1.12M คำขอ · **uncached 1.11M** · แคชได้แค่ 7.62k |
+| Top country | **ไทย 1,090,045** จาก 1.12M (US 15k · CA 12k) |
+| รูปกราฟ | พุ่งเฉพาะช่วงคนตื่น (เที่ยง–ห้าทุ่ม สูงสุด 309k/ชม.) **เงียบสนิทตี 3–9 โมง** |
+| เปิดเว็บจริงแล้วนับในเบราว์เซอร์ | **3,874 คำขอใน 10 วินาที** จากแท็บเดียวที่เปิดทิ้งไว้เฉย ๆ = **~180 คำขอ/วินาที** |
+| URL ที่วน | `/` · `/daily` · `/love/1-card` · `/cards/birth-card` (ลิงก์ที่ยังเปิด prefetch) |
+| header ของคำขอ | `Next-Router-Segment-Prefetch: /_tree` |
+
+**สาเหตุราก**: Next 16 ใช้ **Client Segment Cache** — ลิงก์ที่เปิด prefetch จะยิงถาม "ผังเส้นทาง"
+ด้วย header ข้างบน แต่ `open-next.config.ts` ตั้ง `enableCacheInterception: true` ซึ่งตอบจาก KV
+ตั้งแต่ก่อนถึง Next runtime จึง **ไม่เคยเห็น header นั้น** และคืนเพย์โหลดเต็มหน้าชุดเดิมกลับไปทุกครั้ง
+
+> พิสูจน์ที่เซิร์ฟเวอร์: ยิง `/daily` แบบ **มี** และ **ไม่มี** header segment prefetch
+> ได้ไฟล์ขนาด **29,432 ไบต์เท่ากันเป๊ะ** — เซิร์ฟเวอร์ไม่สนใจสิ่งที่ไคลเอนต์ขอเลย
+
+ไคลเอนต์หาผังที่ขอไม่เจอ → ไม่บันทึกลงแคช → วนถามใหม่ทันที **ไม่มีเงื่อนไขหยุด**
+
+**แก้**: `enableCacheInterception: false` (คำขอวิ่งผ่าน Next runtime ที่ตอบ segment prefetch ได้ถูก ·
+KV incremental cache ยังทำงานเหมือนเดิม) + ปิด prefetch ที่เมนูหลักและ footer ซึ่งทุกหน้ามีร่วมกัน
+
+**กันซ้ำ**: **ด่านที่ 38** `scripts/qa/test-prefetch-loop.ts` บังคับ `enableCacheInterception: false`
+และห้ามเขียน `prefetch={true}` ตรง ๆ
+
+> 🛡️ **กฎถาวร**: เห็นตัวเลขคำขอผิดปกติ **ให้เปิดเว็บตัวเองแล้วนับคำขอในเบราว์เซอร์ก่อนเสมอ**
+> ก่อนจะไปโทษบอตหรือไปปรับตั้งค่า CDN — รอบนี้เสียเวลาไล่ปรับ Cloudflare อยู่หลายรอบ
+> ทั้งที่ต้นตออยู่ในโค้ดตัวเองและใช้เวลาพิสูจน์แค่ 10 วินาที
+
+---
 
 ### 🗓️ 2026-09-08: 🛡️ เพิ่มกฎ WAF บล็อกบอตเทรนโมเดล + สแกนเนอร์ SEO — ปิดข้อเสนอ Cloudflare ครบทุกข้อที่ควรทำ (โดย Claude Opus 5)
 

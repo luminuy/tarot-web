@@ -87,10 +87,9 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
               {"links" in col && col.links ? (
                 <ul className="space-y-2 text-xs font-serif-th text-[#D5CEC2]/80">
                   {col.links.map((link, lIdx) => {
-                    const isPrimary = ["/", "/cards", "/spreads", "/blog", "/daily"].includes(link.href);
                     return (
                       <li key={lIdx}>
-                        <Link href={link.href} prefetch={isPrimary} className="hover:text-[#FAF7F2] transition-colors">
+                        <Link href={link.href} prefetch={false} className="hover:text-[#FAF7F2] transition-colors">
                           {link.label}
                         </Link>
                       </li>
@@ -102,11 +101,10 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                   {col.items.map((item, iIdx) => {
                     const hasHref = "href" in item && Boolean(item.href);
                     const href = hasHref ? (item as any).href : "";
-                    const isPrimary = ["/", "/cards", "/spreads", "/blog", "/daily"].includes(href);
                     return (
                       <li key={iIdx} className={iIdx > 1 ? "pt-1" : undefined}>
                         {hasHref ? (
-                          <Link href={href} prefetch={isPrimary} className="hover:text-[#FAF7F2] transition-colors">
+                          <Link href={href} prefetch={false} className="hover:text-[#FAF7F2] transition-colors">
                             {item.title}
                           </Link>
                         ) : (
