@@ -35,6 +35,42 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-08: ✂️ ลดจำนวน request ที่ปลุก Worker ต่อการเปิดหน้าหนึ่งครั้ง 7 → 2 (โดย Claude Opus 5)
+
+#### 1. เปิดหน้าเดียวยิง `/api/*` 6 เส้น ทั้งที่ผู้ชมยังไม่เคยล็อกอิน
+- **ปัญหาเดิม / สิ่งที่ต้องการ**: เจ้าของโปรเจกต์เห็นแดชบอร์ด Cloudflare ขึ้น **1.4M requests** และค่าใช้จ่าย $1.42 (Workers Standard $1.20 + CPU ms $0.22) จึงให้ตรวจว่าอะไรกินคำขอ
+- **สิ่งที่วัดได้จริงบน production (2026-09-08)**: ไฟล์ static (`/cards/*`, `/_next/static/*`) เสิร์ฟจาก asset server ไม่ปลุก Worker เลย (ยืนยันจากหัวข้อตอบที่ไม่มี CSP header) — ตัวที่ปลุก Worker คือ **หน้า HTML 1 + `/api/*` อีก 6 เส้นต่อการโหลดหนึ่งครั้ง**:
+  `/api/config/analytics` (ยิงซ้ำ 2 ครั้ง) · `/api/auth/me` · `/api/entitlement` · `/api/daily-card` · `/api/journal` (ได้ 401 เปล่า ๆ)
+  และ `/api/config/analytics` ยังยิงใหม่ทุกครั้งที่เปลี่ยนหน้าแบบ SPA ด้วย
+- **สาเหตุรายข้อ**:
+  1. `AnalyticsTracker` ผูก effect กับ `[gaId, metaPixelId, googleAdsId]` และผ่านด่านออกเฉพาะเมื่อครบทั้งสาม — เว็บนี้ตั้งแค่ GA4 เงื่อนไขจึงเป็นเท็จตลอดกาล กลายเป็นวน fetch → setState → fetch
+  2. คุกกี้เซสชันเป็น `httpOnly` หน้าเว็บจึงมองไม่เห็น ต้องยิง `/api/auth/me` ถามทุกครั้งแม้ผู้ชมจะไม่เคยล็อกอิน (คนที่มาจาก Google คือกลุ่มนี้เกือบทั้งหมด)
+  3. `fetchServerReadings()` ยิง `/api/journal` ตั้งแต่เปิดหน้าแรกโดยไม่ดูก่อนว่าล็อกอินหรือยัง → 401 ทิ้งฟรีหนึ่งคำขอต่อหนึ่งวิว
+  4. `useEntitlement` แคชแค่ระดับโมดูล ซึ่งหายทุกครั้งที่โหลดหน้าใหม่ → ยิงซ้ำทุกหน้าทั้งที่คำตอบเหมือนเดิม
+- **สิ่งที่แก้ไข**:
+  - เพิ่มคุกกี้ "ใบ้" `tarot_has_session` (ไม่ใช่ httpOnly · ไม่ให้สิทธิ์อะไรทั้งสิ้น) ตั้ง/ลบคู่กับคุกกี้เซสชันใน `setAuthCookie()` / `clearAuthCookie()` ที่เดียว และย้ำ/ล้างจาก `/api/auth/me` เพื่อให้บัญชีที่ล็อกอินค้างไว้ก่อนหน้านี้ได้รับไปโดยไม่หลุดออกจากระบบ
+  - `fetchSessionUser()` ข้ามการยิงเมื่อ "รู้แน่แล้วว่ายังไม่ล็อกอิน" (ไม่มีคุกกี้ใบ้ **และ** เคยถามไปแล้วในแท็บนี้)
+  - `fetchServerReadings()` ถามสถานะเซสชัน (ซึ่งมีแคชอยู่แล้ว) ก่อน แล้วคืนประวัติในเครื่องทันทีถ้ายังไม่ล็อกอิน
+  - `useEntitlement` เก็บภาพสิทธิ์ล่าสุดไว้ใน sessionStorage อายุ 5 นาที ผูกกับสถานะล็อกอิน (เปลี่ยนสถานะ = ถามใหม่ทันที)
+  - `AnalyticsTracker` โหลดค่าตั้งครั้งเดียวต่อแท็บ (singleton + sessionStorage) และ effect ใช้ dependency ว่าง
+  - แยกชื่อคุกกี้ออกเป็น `src/lib/auth/cookie-names.ts` ที่ไม่พึ่งอะไรเลย ฝั่งหน้าเว็บจึงใช้ร่วมได้โดยไม่ลากโค้ด HMAC เข้าบันเดิลไคลเอนต์
+- **ผลที่คาด**: ผู้ชมที่ไม่ได้ล็อกอิน (ทราฟฟิกส่วนใหญ่) เหลือ **หน้า HTML 1 + `/api/daily-card` 1** ต่อการเข้าครั้งแรก และ **0 คำขอ `/api/*`** สำหรับหน้าถัด ๆ ไปในแท็บเดียวกัน — ลดจาก 7 เหลือ ~2 ในการเข้าครั้งแรก และลด CPU ms ตามไปด้วย (ทุกเส้นที่ตัดออกเป็น `runtime = "nodejs"`)
+- **ไฟล์ที่แก้ไข**:
+  - `src/lib/auth/cookie-names.ts` (ใหม่)
+  - `src/lib/auth/session-hint.ts` (ใหม่)
+  - `src/lib/auth/edge-auth.ts`
+  - `src/lib/auth/session.ts`
+  - `src/lib/auth/use-session.ts`
+  - `src/app/api/auth/me/route.ts`
+  - `src/lib/entitlement/use-entitlement.ts`
+  - `src/lib/utils/history.ts`
+  - `src/components/analytics/AnalyticsTracker.tsx`
+- **ผลการทดสอบ**: `npm run repo:verify` ➔ ✅ ผ่านครบ 36/36 ด่าน · `npm run typecheck` ➔ 0 error
+  ⚠️ ตรวจซ้ำด้วยเบราว์เซอร์บนเครื่องไม่ได้ (`npm run dev` ในเวิร์กทรีล้มด้วย `EPERM uv_cwd` เพราะพาธมีอักษรไทย) — **ต้องยืนยันบน production หลัง deploy** ว่าโหลดหน้าแรกเหลือ `/api/daily-card` เส้นเดียว และหน้าที่สองไม่มี `/api/*` เลย
+- **บทเรียนที่บันทึก**: [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) INC-0104
+
+---
+
 ### 🗓️ 2026-09-07: 🚑 กู้ deploy ที่ค้าง — หน้าไพ่ประจำตัวทะลุงบ HTML เพราะส่ง keywords 12 KB ที่ไม่มีใครใช้ (INC-0103) (โดย Claude Opus 5)
 
 > **อาการ**: ด่าน Performance Budget ตกบน CI **ทั้ง PR #351 และ #352** ➔ `Production Deploy to Cloudflare Workers` ล้มติดกันสองรอบ เว็บจริงไม่ได้รับโค้ดใหม่ตั้งแต่ 14:35 น.

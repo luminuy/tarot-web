@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0104 · 2026-09-08 09:38 · 🟠 High · เปิดหน้าเดียวปลุก Worker 7 ครั้ง — คำขอบวมจากเส้น /api ที่ยิงเผื่อทุกวิว
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | แดชบอร์ด Cloudflare ขึ้น 1.4M requests และเริ่มมีค่าใช้จ่าย CPU ms ทั้งที่เว็บเป็น SSG ล้วน วัดจริงพบว่าโหลดหน้าเดียวยิง /api/config/analytics 2 ครั้ง + /api/auth/me + /api/entitlement + /api/daily-card + /api/journal(401) รวม 6 คำขอต่อ 1 หน้า และ /api/config/analytics ยังยิงใหม่ทุกครั้งที่เปลี่ยนหน้าแบบ SPA |
+| **สาเหตุราก** | หน้าเว็บไม่มีทางรู้ว่าผู้ชมล็อกอินหรือยัง เพราะคุกกี้เซสชันเป็น httpOnly จึงยิงถามเซิร์ฟเวอร์เผื่อไว้ทุกครั้ง (auth/me · journal · entitlement) แม้ผู้ชมเกือบทั้งหมดจะไม่เคยล็อกอิน ส่วน AnalyticsTracker ผูก effect กับ [gaId, metaPixelId, googleAdsId] แต่เว็บตั้งแค่ GA4 เงื่อนไขออกจึงเป็นเท็จตลอดกาล กลายเป็นวน fetch -> setState -> fetch |
+| **การแก้ไข** | เพิ่มคุกกี้ใบ้ tarot_has_session (ไม่ใช่ httpOnly ไม่ให้สิทธิ์ใด ๆ) ตั้ง/ลบคู่กับคุกกี้เซสชันที่ setAuthCookie/clearAuthCookie จุดเดียว + จำใน sessionStorage ว่าถามแล้วยังไม่ล็อกอิน แล้วให้ fetchSessionUser / fetchServerReadings / useEntitlement ข้ามการยิงเมื่อรู้แน่ว่ายังไม่ล็อกอิน ส่วน AnalyticsTracker โหลดค่าครั้งเดียวต่อแท็บด้วย singleton + sessionStorage และ effect ใช้ dependency ว่าง |
+| **🛡️ กฎป้องกันถาวร** | **ก่อนใส่ fetch ใด ๆ ที่ระดับ layout หรือคอมโพเนนต์ที่อยู่ทุกหน้า ต้องตอบให้ได้ก่อนว่าผู้ชมที่ไม่ล็อกอินได้ประโยชน์อะไร ถ้าไม่ได้ต้องมีทางรู้แบบไม่ต้องยิงเซิร์ฟเวอร์ (คุกกี้ใบ้ / sessionStorage) และห้ามใส่ค่าที่ setState เขียนเองเป็น dependency ของ effect ที่ยิง fetch** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/request-high-f1711c` · commit `9a4a8c8` |
+
+
 ### INC-0103 · 2026-09-07 22:23 · 🟠 High · ถอด motion ออกจาก 303 หน้า + กวาดโค้ดตาย + กู้ deploy ที่ล้มจากงบ HTML ของหน้าไพ่ประจำตัว
 
 | หัวข้อ | รายละเอียด |

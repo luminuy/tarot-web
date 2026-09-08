@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import {
+  forgetAnonymousMark,
+  isKnownAnonymous,
+  markAnonymousChecked,
+} from "@/lib/auth/session-hint";
+
 /**
  * แหล่งเดียวของ "ใครกำลังใช้เว็บอยู่" ฝั่งหน้าเว็บ
  * ---------------------------------------------------------------------------
@@ -35,6 +41,8 @@ const listeners = new Set<(user: SessionUser | null) => void>();
 export function invalidateSessionCache(): void {
   cached = null;
   inflight = null;
+  // เครื่องหมาย "ยังไม่ล็อกอิน" ต้องหายไปด้วย ไม่งั้นหน้าที่โหลดหลังล็อกอินจะข้ามการถาม
+  forgetAnonymousMark();
 }
 
 /** อัปเดตข้อมูลผู้ใช้ในแคชแบบไม่ต้องยิง API ใหม่ (หลังบันทึกค่าที่ผู้ใช้เพิ่งเปลี่ยน) */
@@ -50,12 +58,21 @@ export async function fetchSessionUser(opts?: { force?: boolean }): Promise<Sess
   if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.user;
   if (inflight) return inflight;
 
+  // รู้อยู่แล้วว่าแท็บนี้ยังไม่ล็อกอิน — ตอบได้เลยโดยไม่ต้องรบกวนเซิร์ฟเวอร์
+  // (ผู้ชมส่วนใหญ่ของเว็บเป็นกลุ่มนี้ และเปิดหลายหน้าต่อหนึ่งครั้งที่เข้ามา)
+  if (isKnownAnonymous()) {
+    cached = { user: null, at: Date.now() };
+    return null;
+  }
+
   inflight = (async () => {
     try {
       const res = await fetch("/api/auth/me", { credentials: "same-origin" });
       if (!res.ok) return null;
       const data = await res.json().catch(() => null);
       const user = (data?.user as SessionUser | undefined) ?? null;
+      if (user) forgetAnonymousMark();
+      else markAnonymousChecked();
       cached = { user, at: Date.now() };
       listeners.forEach((fn) => fn(user));
       return user;

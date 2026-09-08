@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
 import type { NextResponse } from "next/server";
 
-import { AUTH_COOKIE_NAME, verifyUserSession, type UserProfile } from "@/lib/auth/edge-auth";
+import {
+  AUTH_COOKIE_NAME,
+  AUTH_HINT_COOKIE_NAME,
+  verifyUserSession,
+  type UserProfile,
+} from "@/lib/auth/edge-auth";
 
 /**
  * จุดตรวจเซสชันสมาชิก "จุดเดียวของระบบ" (Single Source of Truth)
@@ -31,9 +36,28 @@ export function authCookieOptions() {
   };
 }
 
-/** แนบคุกกี้เซสชันลง response */
+/**
+ * คุณสมบัติคุกกี้ใบ้ — เหมือนคุกกี้เซสชันทุกอย่าง **ยกเว้น** `httpOnly`
+ * เพราะหน้าเว็บต้องอ่านเองได้ (ดูเหตุผลเต็มที่ `AUTH_HINT_COOKIE_NAME`)
+ */
+function hintCookieOptions() {
+  return { ...authCookieOptions(), httpOnly: false };
+}
+
+/** แนบคุกกี้เซสชันลง response (พร้อมคุกกี้ใบ้ให้หน้าเว็บรู้ว่ามีเซสชันแล้ว) */
 export function setAuthCookie(response: NextResponse, token: string): void {
   response.cookies.set(AUTH_COOKIE_NAME, token, authCookieOptions());
+  setAuthHintCookie(response);
+}
+
+/** ย้ำคุกกี้ใบ้อย่างเดียว (ใช้กับ response ที่ยืนยันแล้วว่ามีเซสชันจริง) */
+export function setAuthHintCookie(response: NextResponse): void {
+  response.cookies.set(AUTH_HINT_COOKIE_NAME, "1", hintCookieOptions());
+}
+
+/** ลบคุกกี้ใบ้อย่างเดียว — ใช้ตอนพบว่าไม่มีเซสชันแล้ว แต่ไม่ต้องแตะคุกกี้เซสชัน */
+export function clearAuthHintCookie(response: NextResponse): void {
+  response.cookies.set(AUTH_HINT_COOKIE_NAME, "", { ...hintCookieOptions(), maxAge: 0 });
 }
 
 /**
@@ -43,6 +67,7 @@ export function setAuthCookie(response: NextResponse, token: string): void {
  */
 export function clearAuthCookie(response: NextResponse): void {
   response.cookies.set(AUTH_COOKIE_NAME, "", { ...authCookieOptions(), maxAge: 0 });
+  clearAuthHintCookie(response);
 }
 
 /* ── แคช token_version ระดับ isolate — กัน D1 โดนยิงซ้ำทุก request ───────────── */

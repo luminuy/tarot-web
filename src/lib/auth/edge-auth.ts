@@ -8,7 +8,8 @@ export interface UserProfile {
   tokenVersion?: number;
 }
 
-export const AUTH_COOKIE_NAME = "tarot_auth_session";
+// ชื่อคุกกี้อยู่ในโมดูลที่ไม่พึ่งอะไรเลย เพื่อให้ฝั่งหน้าเว็บใช้ร่วมได้โดยไม่ลากโค้ด HMAC ตามไป
+export { AUTH_COOKIE_NAME, AUTH_HINT_COOKIE_NAME } from "@/lib/auth/cookie-names";
 const KNOWN_INSECURE_SECRETS = new Set([
   "tarot-sacred-auth-sanctuary-secret-2026",
   "secret",
