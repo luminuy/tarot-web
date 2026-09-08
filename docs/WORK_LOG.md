@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 36/36 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 37/37 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -34,6 +34,38 @@
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-08: 🚨 robots.txt เชิญบอตค้นหา AI เข้ามา แต่ Cloudflare ปิดประตูใส่ 403 (INC-0105 · โดย Claude Opus 5)
+
+ตอนปรับข้อเสนอ 12 ข้อให้เข้ากับของจริง พบว่าโปรเจกต์มี `npm run cf:phase1` ตั้งค่า Cloudflare ผ่าน API
+อยู่แล้วตั้งแต่ PR #308 — ข้อเสนอส่วนใหญ่จึงทำไปแล้ว **แต่มีข้อหนึ่งทำผิดและกำลังกินทราฟฟิกอยู่เงียบ ๆ**
+
+ยิงทดสอบ `https://seertarot.net/cards` ด้วย user-agent จริงของแต่ละบอต:
+
+| บอต | ผลจริง | ควรเป็น |
+|---|---|---|
+| `OAI-SearchBot` · `Claude-SearchBot` · `PerplexityBot` | 🔴 **403** | 200 |
+| `GPTBot` (เทรนโมเดล) | ✅ 403 | 403 |
+| `Googlebot` | ✅ 200 | 200 |
+| `AhrefsBot` | 🟠 **200** | 403 |
+
+ต้นเหตุ: `cf:phase1` เปิดสวิตช์เหมาโหล `ai_bots_protection: "block"` ซึ่งบล็อกบอต AI ทั้งก้อน
+ไม่แยกบอตค้นหา (อ้างอิงลิงก์กลับมาหาเรา) ออกจากบอตเทรนโมเดล — ขัดกับ `src/app/robots.ts`
+ที่เจ้าของตัดสินใจเมื่อ 2026-09-04 ว่าเปิดให้บอตค้นหา AI คลานได้
+
+**แก้แล้ว**: `ai_bots_protection: "disabled"` + บล็อกบอตเทรนโมเดลด้วยชื่อ user-agent ในกฎ WAF
+(รายชื่อตรงกับ `robots.ts`) + เติมสแกนเนอร์ SEO ที่ยังหลุด (`AhrefsBot` `SemrushBot` `PetalBot`
+`MJ12bot` `DotBot` `DataForSeoBot` `BLEXBot` `SeekportBot`)
+
+**กันซ้ำ**: เพิ่ม **ด่านที่ 37** `scripts/qa/test-bot-policy.ts` เข้า `repo:verify` — ตรวจว่านโยบายบอต
+สองชั้น (`robots.ts` ↔ กฎ WAF) พูดตรงกันเสมอ และห้ามเผลอบล็อก `facebookexternalhit` / `twitterbot` /
+`LINE` / `Googlebot` (ภาพพรีวิวตอนแชร์และทราฟฟิกจะหายทั้งเว็บ)
+
+> ⏭️ **ยังไม่จบ**: โค้ดแก้แล้วแต่ Cloudflare ยังบล็อกอยู่จนกว่าจะรัน `npm run cf:phase1`
+> พร้อม `CLOUDFLARE_API_TOKEN` — ต้องให้เจ้าของรันเอง (ดูขั้นตอนใน
+> [แผนตรวจข้อเสนอ](plans/HANDOFF_CF_REQUEST_REVIEW_2026-09-08.md) หัวข้อ 2.2)
+
+---
 
 ### 🗓️ 2026-09-08: 🔍 ตรวจข้อเสนอ 12 ข้อ "ลด Request บน Cloudflare" + ตัดคำขอที่เหลือ 2 → 1 (โดย Claude Opus 5)
 

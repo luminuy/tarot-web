@@ -375,15 +375,39 @@ async function taskCacheRules() {
   );
 }
 
-// ── ข้อ 3 + 4: Block AI Scrapers + Bot Fight Mode ───────────────────────────
+// ── ข้อ 3 + 4: นโยบายบอต AI + Bot Fight Mode ────────────────────────────────
+/**
+ * 🚨 ห้ามเปิด `ai_bots_protection: "block"` เด็ดขาด — บทเรียน INC-0105
+ *
+ * สวิตช์ "Block AI Scrapers and Crawlers" ของ Cloudflare บล็อกบอต AI **ทั้งก้อน**
+ * ไม่ได้แยกระหว่าง "บอตเก็บไปเทรนโมเดล" กับ "บอตค้นหาที่อ้างอิงลิงก์กลับมาหาเรา"
+ *
+ * ตรวจ production เมื่อ 2026-09-08 หลังเคยรัน `cf:phase1` ไปแล้ว:
+ *   OAI-SearchBot · Claude-SearchBot · PerplexityBot ➔ **403 "Your request was blocked."**
+ *   Googlebot · AhrefsBot                            ➔ 200
+ * ขณะที่ `src/app/robots.ts` เขียนเชิญบอตสามตัวแรกเข้ามาคลานอย่างชัดเจน
+ * (การตัดสินใจของเจ้าของโปรเจกต์เมื่อ 2026-09-04: ยอมให้คลานเพื่อแลกทราฟฟิกจาก AI search)
+ * ➔ เท่ากับ robots.txt เชิญไว้หน้าบ้าน แต่ Cloudflare ปิดประตูอยู่หลังบ้าน เงียบ ๆ มาหลายวัน
+ *
+ * นโยบายที่ถูกต้องสำหรับบ้านนี้ = **บล็อกเฉพาะบอตเทรนโมเดลด้วยชื่อ user-agent**
+ * (กฎ WAF ใน taskWaf) แล้วปล่อยบอตค้นหาผ่าน — รายชื่อต้องตรงกับ `src/app/robots.ts` เสมอ
+ *
+ * `crawler_protection` ยังเปิดไว้ได้ เพราะมันแค่แทรกสัญญาณ `ai-train=no`
+ * ลงหัว robots.txt ให้เอง (ไม่ได้ 403 ใคร) ซึ่งตรงกับนโยบายเราอยู่แล้ว
+ */
 async function taskBots() {
   if (DRY_RUN) {
-    record("3+4", "Block AI Scrapers + Bot Fight Mode", "OK", "[dry-run] จะเปิดทั้งสองสวิตช์");
+    record(
+      "3+4",
+      "นโยบายบอต AI + Bot Fight Mode",
+      "OK",
+      "[dry-run] ai_bots_protection=disabled (บล็อกบอตเทรนด้วย WAF แทน) · fight_mode=on",
+    );
     return;
   }
 
   const r = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
-    ai_bots_protection: "block",
+    ai_bots_protection: "disabled",
     crawler_protection: "enabled",
     fight_mode: true,
   });
@@ -391,29 +415,29 @@ async function taskBots() {
   if (r.success) {
     record(
       "3+4",
-      "Block AI Scrapers + Bot Fight Mode",
+      "นโยบายบอต AI + Bot Fight Mode",
       "OK",
-      "ai_bots_protection=block · crawler_protection=enabled · fight_mode=on",
+      "ai_bots_protection=disabled (บอตค้นหา AI เข้าได้ · บอตเทรนถูกบล็อกที่ WAF) · fight_mode=on",
     );
     return;
   }
 
   // บางบัญชีต้องส่งทีละฟิลด์ — ลองแยกยิงเพื่อให้ได้อย่างน้อยหนึ่งอย่าง
   const ai = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
-    ai_bots_protection: "block",
+    ai_bots_protection: "disabled",
   });
   const fight = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
     fight_mode: true,
   });
 
   const parts = [
-    ai.success ? "Block AI Scrapers ✔" : `Block AI Scrapers ✘ (${errText(ai)})`,
+    ai.success ? "ปลดบล็อกบอตค้นหา AI ✔" : `ปลดบล็อกบอตค้นหา AI ✘ (${errText(ai)})`,
     fight.success ? "Bot Fight Mode ✔" : `Bot Fight Mode ✘ (${errText(fight)})`,
   ];
 
   record(
     "3+4",
-    "Block AI Scrapers + Bot Fight Mode",
+    "นโยบายบอต AI + Bot Fight Mode",
     ai.success || fight.success ? "OK" : "FAIL",
     parts.join(" · "),
   );
@@ -457,10 +481,54 @@ async function taskWaf() {
     'or http.user_agent eq ""',
   ].join(" ");
 
+  /**
+   * บอต "เก็บไปเทรนโมเดล" + เครื่องมือสแกน SEO — บล็อกด้วยชื่อ user-agent แทนสวิตช์เหมาโหลของ
+   * Cloudflare (ดูเหตุผลยาว ๆ ใน taskBots · INC-0105)
+   *
+   * ⚠️ รายชื่อกลุ่มบนต้องตรงกับบล็อก `disallow: ["/"]` ใน `src/app/robots.ts` เสมอ
+   *    แก้ที่ไหนต้องแก้อีกที่ทันที ไม่งั้นนโยบายสองชั้นจะขัดกันเองอีกรอบ
+   *
+   * ⛔ ห้ามเติมชื่อเหล่านี้เข้าไปเด็ดขาด (เป็นบอตที่เราต้องการ):
+   *    • บอตค้นหา AI ที่อ้างอิงลิงก์กลับ — oai-searchbot · chatgpt-user · claude-searchbot ·
+   *      claude-user · perplexitybot
+   *    • เครื่องมือค้นหา — googlebot · bingbot · applebot (ตัวธรรมดา ไม่ใช่ -Extended)
+   *    • ตัวดึงภาพพรีวิวตอนแชร์ — facebookexternalhit · twitterbot · linkedinbot ·
+   *      line-* · discordbot · slackbot  ➔ บล็อกแล้วภาพแชร์ทั้งเว็บจะกลายเป็นกล่องเปล่า
+   *
+   * 📌 `Google-Extended` และ `Applebot-Extended` ไม่มีอยู่ในรูปแบบ user-agent จริง
+   *    (เป็น "โทเคน" สำหรับ robots.txt เท่านั้น) จึงบล็อกที่ WAF ไม่ได้ — คุมที่ robots.ts พอ
+   *    และห้ามใส่คำว่า `applebot` ลงที่นี่ เพราะจะไปโดน Applebot ตัวธรรมดาของ Siri/Spotlight ด้วย
+   */
+  const trainingAndScraperUa = [
+    // — เก็บไปเทรนโมเดล (ตรงกับ robots.ts) —
+    'lower(http.user_agent) contains "gptbot"',
+    'or lower(http.user_agent) contains "claudebot"',
+    'or lower(http.user_agent) contains "ccbot"',
+    'or lower(http.user_agent) contains "bytespider"',
+    'or lower(http.user_agent) contains "amazonbot"',
+    'or lower(http.user_agent) contains "meta-externalagent"',
+    'or lower(http.user_agent) contains "diffbot"',
+    // — เครื่องมือสแกน SEO ของคู่แข่ง: คลานหนักมาก ไม่เคยส่งผู้ใช้กลับมาสักคน —
+    //   (ตรวจ production 2026-09-08: AhrefsBot ยังได้ 200 อยู่ = ยังไม่เคยถูกบล็อก)
+    'or lower(http.user_agent) contains "ahrefsbot"',
+    'or lower(http.user_agent) contains "semrushbot"',
+    'or lower(http.user_agent) contains "petalbot"',
+    'or lower(http.user_agent) contains "mj12bot"',
+    'or lower(http.user_agent) contains "dotbot"',
+    'or lower(http.user_agent) contains "dataforseobot"',
+    'or lower(http.user_agent) contains "blexbot"',
+    'or lower(http.user_agent) contains "seekportbot"',
+  ].join(" ");
+
   const rules: Rule[] = [
     {
       description: `${MARKER} บล็อก URL ขยะ/สแกนช่องโหว่ (wp-*, .php, .env) ก่อนปลุก Worker`,
       expression: `(${junkPaths})`,
+      action: "block",
+    },
+    {
+      description: `${MARKER} บล็อกบอตเทรนโมเดล + สแกนเนอร์ SEO (ปล่อยบอตค้นหา AI ผ่าน)`,
+      expression: `(${trainingAndScraperUa})`,
       action: "block",
     },
     {
@@ -474,7 +542,12 @@ async function taskWaf() {
   ];
 
   const r = await upsertRuleset("http_request_firewall_custom", rules);
-  record("5", "WAF บล็อก URL ขยะ + เครื่องมือสคริปต์ที่ /api/", r.ok ? "OK" : "FAIL", r.detail);
+  record(
+    "5",
+    "WAF บล็อก URL ขยะ + บอตเทรน/สแกนเนอร์ SEO + เครื่องมือสคริปต์ที่ /api/",
+    r.ok ? "OK" : "FAIL",
+    r.detail,
+  );
 }
 
 // ── ข้อ 6: Rate Limiting เส้นเปิดไพ่ ────────────────────────────────────────

@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0105 · 2026-09-08 10:31 · 🟠 High · robots.txt เชิญบอตค้นหา AI เข้ามา แต่ Cloudflare ปิดประตูใส่ (403) มาหลายวันโดยไม่มีใครรู้
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ยิงทดสอบ production 2026-09-08: OAI-SearchBot · Claude-SearchBot · PerplexityBot ได้ 403 'Your request was blocked.' ขณะที่ Googlebot และ AhrefsBot ได้ 200 — ทั้งที่ src/app/robots.ts เชิญบอตสามตัวนี้เข้ามาคลานอย่างชัดเจนตามการตัดสินใจของเจ้าของเมื่อ 2026-09-04 ผลคือเว็บหายจากผลค้นหาของ ChatGPT/Claude/Perplexity เงียบ ๆ |
+| **สาเหตุราก** | scripts/cloudflare-phase1.ts เปิดสวิตช์เหมาโหล ai_bots_protection: 'block' ของ Cloudflare ซึ่งบล็อกบอต AI ทั้งก้อนโดยไม่แยก 'บอตเก็บไปเทรนโมเดล' ออกจาก 'บอตค้นหาที่อ้างอิงลิงก์กลับ' — นโยบายบอตของเว็บนี้ถูกเขียนไว้สองที่ที่ไม่รู้จักกัน (robots.ts ขอความร่วมมือ · cf:phase1 บังคับจริงที่ขอบ) พอที่หนึ่งเปลี่ยน อีกที่ไม่มีอะไรเตือน |
+| **การแก้ไข** | เปลี่ยนเป็น ai_bots_protection: 'disabled' แล้วบล็อกเฉพาะบอตเทรนโมเดลด้วยชื่อ user-agent ในกฎ WAF (ตรงกับรายชื่อใน robots.ts) พร้อมเติมสแกนเนอร์ SEO (AhrefsBot/SemrushBot/PetalBot ฯลฯ) ที่ยังได้ 200 อยู่เข้าไปด้วย |
+| **🛡️ กฎป้องกันถาวร** | **เพิ่มด่านที่ 37 scripts/qa/test-bot-policy.ts เข้า repo:verify — ตรวจว่า (1) ไม่มี ai_bots_protection: 'block' ในโค้ดที่รันจริง (2) บอตเทรนโมเดลทุกตัวใน robots.ts ถูกบล็อกที่ WAF ด้วย (3) บอตค้นหา AI และตัวดึงภาพพรีวิวตอนแชร์ (facebookexternalhit/twitterbot/LINE) ต้องไม่โผล่ในรายการบล็อก** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/reduce-excessive-requests-759db3` · commit `c189462` |
+
+
 ### INC-0104 · 2026-09-08 09:38 · 🟠 High · เปิดหน้าเดียวปลุก Worker 7 ครั้ง — คำขอบวมจากเส้น /api ที่ยิงเผื่อทุกวิว
 
 | หัวข้อ | รายละเอียด |

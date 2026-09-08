@@ -123,6 +123,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "⚡ งบน้ำหนักหน้าเว็บและขนาดบันเดิล (Performance Budget Gate)", cmd: TSX, args: ["scripts/qa/test-bundle-budget.ts"] },
   { label: "🌐 เส้นทางสองภาษา /en (ไฟล์จริง · hreflang ไม่โกหก · sitemap ชี้กันครบ)", cmd: TSX, args: ["scripts/qa/test-en-routing.ts"] },
   { label: "🖼️  มาตรฐานภาพแชร์ OpenGraph 1200x630 ทั่วเว็บ", cmd: TSX, args: ["scripts/qa/test-og-images.ts"] },
+  { label: "🤖 นโยบายบอตสองชั้นพูดตรงกัน (robots.ts ↔ กฎ WAF · บอตค้นหา AI ต้องเข้าได้)", cmd: TSX, args: ["scripts/qa/test-bot-policy.ts"] },
   { label: "📚 ตัวเลขในเอกสารแม่บทตรงกับของจริง (ด่าน/ผัง/ตำแหน่ง/ไพ่)", cmd: TSX, args: ["scripts/qa/test-docs-numbers.ts"] },
 ];
 
