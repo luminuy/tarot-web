@@ -52,16 +52,68 @@
 
 ---
 
-## 2. สรุป: ทำ 4 ข้อพอ
+## 2. ปรับให้เข้ากับของเราจริง — เราทำไปแล้วเกือบหมด (และทำผิดไป 1 ข้อ)
 
-| ลำดับ | ทำอะไร | ที่ไหน | ผลต่อค่าบิล |
-|---|---|---|---|
-| 1 | ตัด `/api/config/analytics` ออกจากทุกการเปิดแท็บ | **โค้ด (ทำแล้วใน PR นี้)** | 2 → 1 คำขอ/แท็บ · ~**-25% ถึง -50%** |
-| 2 | Rate limit เฉพาะเส้นแพง: `/api/reading/*`, `/api/search`, `/api/share/image/*` ที่ 20 req/นาที/IP | WAF → Rate limiting rules | กันบอตยิงเส้นที่เปลือง CPU/AI quota |
-| 3 | Bot Fight Mode (ตัวธรรมดา ไม่ใช่ Block AI Scrapers) | Security → Bots | ตัดบอตขยะก่อนถึง Worker |
-| 4 | Custom rule บล็อก `AhrefsBot` `SemrushBot` `PetalBot` `DotBot` `MJ12bot` | WAF → Custom rules | ตัดคำขอที่ไม่มีวันสร้างรายได้ |
+โปรเจกต์นี้มีสคริปต์ [`scripts/cloudflare-phase1.ts`](../../scripts/cloudflare-phase1.ts) (`npm run cf:phase1`)
+ที่ตั้งค่า Cloudflare ผ่าน API v4 อยู่แล้วตั้งแต่ PR #308 — ข้อเสนอส่วนใหญ่จึง **ไม่ใช่คำถามว่า "ควรทำไหม"
+แต่คือ "ทำไปแล้ว ผลเป็นยังไง"** ตรวจ production เมื่อ 2026-09-08 ได้ผลดังนี้:
 
-**ห้ามทำ**: ข้อ 1 (Custom Domain), ข้อ 2 ครึ่ง "Block AI Scrapers", ข้อ 9, 10, 11 · **ตัวเลือกฟรีไม่มีผลข้างเคียง**: ข้อ 6, 7, 8
+| ข้อเสนอ | สถานะจริงของเรา |
+|---|---|
+| Rate limiting | ✅ ทำแล้ว — 20 ครั้ง/10 วินาที บนเส้น `/api/reading/*/read` · `/chat` · `/start` (แพ็กเกจ Free เลือก period ได้แค่ 10 วินาที และตั้งได้กฎเดียว) |
+| Bot Fight Mode | ✅ เปิดแล้ว (`fight_mode: true`) |
+| บล็อก URL ขยะ | ✅ ทำแล้ว — `wp-*` · `.php` · `.env` · `.git` · `phpmyadmin` ตอบ 403 จาก Cloudflare (ยิงยืนยันแล้ว) |
+| บล็อกเครื่องมือสคริปต์ | ✅ ทำแล้ว — `curl` · `python-requests` · `scrapy` ฯลฯ ถูกบล็อกเฉพาะบน `/api/` (ยกเว้น webhook รับเงิน) |
+| Cache Rules / Tiered Cache | ✅ ทำแล้ว — และสคริปต์เองบันทึกไว้ตั้งแต่ 2026-09-06 ว่า **แคชหน้า HTML ไม่ได้** เพราะ Worker อยู่หน้า cache |
+| บล็อกสแกนเนอร์ SEO | ❌ **ยังไม่ได้ทำ** — ยิงจริง `AhrefsBot` ยังได้ **200** |
+| Block AI Scrapers | 🚨 **ทำไปแล้ว และเป็นการทำผิด — ดูหัวข้อ 2.1** |
+
+### 2.1 🚨 ของจริงที่พบ: robots.txt เชิญเข้าบ้าน แต่ Cloudflare ปิดประตูใส่ (INC-0105)
+
+ยิงทดสอบ `https://seertarot.net/cards` ด้วย user-agent ของบอตแต่ละตัว:
+
+| บอต | ผลจริง | ควรเป็น |
+|---|---|---|
+| `OAI-SearchBot` (ChatGPT Search) | 🔴 **403 Your request was blocked.** | 200 |
+| `Claude-SearchBot` | 🔴 **403** | 200 |
+| `PerplexityBot` | 🔴 **403** | 200 |
+| `GPTBot` (เทรนโมเดล) | ✅ 403 | 403 |
+| `Googlebot` | ✅ 200 | 200 |
+| `AhrefsBot` | 🟠 **200** | 403 |
+
+`src/app/robots.ts` เขียนเชิญบอตสามตัวแรกเข้ามาคลานไว้ชัดเจน พร้อมคอมเมนต์ยาวว่าเป็น
+**การตัดสินใจของเจ้าของโปรเจกต์เมื่อ 2026-09-04** ("ทราฟฟิกจาก AI search สำคัญกว่าการหวงเนื้อหา")
+แต่ `cf:phase1` เปิดสวิตช์ `ai_bots_protection: "block"` ซึ่งบล็อกบอต AI **ทั้งก้อน**
+ไม่แยกบอตค้นหาออกจากบอตเทรนโมเดล ➔ **เว็บหายจากผลค้นหาของ ChatGPT / Claude / Perplexity เงียบ ๆ**
+ทั้งที่เอกสารทุกฉบับของเราเขียนว่าเปิดให้เข้า
+
+> ⚠️ ข้อควรระวังในการอ่านผลนี้: การยิงทดสอบใช้ user-agent ปลอมจาก IP ที่ Cloudflare ไม่รับรอง
+> ผลจึงยืนยันได้แน่ชัดว่า "คำขอที่อ้างตัวเป็นบอตค้นหา AI ถูกบล็อก" แต่ยังไม่ 100% ว่าบอตตัวจริง
+> จาก IP ที่รับรองแล้วโดนด้วย · **วิธียืนยันขาด**: Cloudflare Dashboard ➔ Security ➔ Events
+> กรองด้วย user-agent `OAI-SearchBot` ย้อน 30 วัน ถ้าเห็นแถว Block = โดนจริง
+
+**แก้แล้วใน PR นี้** (เป็นการแก้ที่โค้ด ยังไม่ได้ยิงขึ้น production — ดูหัวข้อ 2.2):
+- `ai_bots_protection` → `"disabled"` เลิกใช้สวิตช์เหมาโหล
+- บล็อกบอตเทรนโมเดลด้วยชื่อ user-agent ในกฎ WAF แทน (รายชื่อตรงกับ `robots.ts`)
+- เติมสแกนเนอร์ SEO ที่ยังหลุดอยู่: `AhrefsBot` `SemrushBot` `PetalBot` `MJ12bot` `DotBot` `DataForSeoBot` `BLEXBot` `SeekportBot`
+- เพิ่ม **ด่านที่ 37** `scripts/qa/test-bot-policy.ts` เข้า `repo:verify` — ตรวจว่านโยบายสองชั้นพูดตรงกันเสมอ
+  และห้ามเผลอบล็อก `facebookexternalhit` / `twitterbot` / `LINE` (ภาพพรีวิวตอนแชร์จะกลายเป็นกล่องเปล่าทั้งเว็บ)
+
+### 2.2 ⏭️ ขั้นตอนเดียวที่เหลือ — ต้องให้เจ้าของรันเอง
+
+โค้ดแก้แล้วแต่ **Cloudflare ยังบล็อกอยู่จนกว่าจะยิงค่าใหม่ขึ้นไป** (ต้องใช้ API token ที่ผมไม่มี):
+
+```bash
+export CLOUDFLARE_API_TOKEN=<token ที่มีสิทธิ์ตามตารางหัวไฟล์ cloudflare-phase1.ts>
+npm run cf:phase1 -- --dry-run   # ดูก่อนว่าจะเปลี่ยนอะไร
+npm run cf:phase1                # ลงมือจริง
+```
+
+ตรวจผลหลังรัน (ควรได้ 200 สามตัวแรก · 403 สองตัวหลัง):
+
+```bash
+for ua in OAI-SearchBot Claude-SearchBot PerplexityBot GPTBot AhrefsBot; do echo -n "$ua "; curl -sS -o /dev/null -w "%{http_code}\n" -A "Mozilla/5.0 (compatible; $ua/1.0)" https://seertarot.net/cards; done
+```
 
 ---
 

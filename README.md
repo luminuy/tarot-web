@@ -48,7 +48,7 @@
 ## 🛠️ คำสั่งสำหรับพัฒนาและตรวจสอบระบบ (Development Protocol)
 
 ```bash
-# ✅ รัน Verification Suite ทั้ง 36 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)
+# ✅ รัน Verification Suite ทั้ง 37 ด่านในคำสั่งเดียว (ใช้ตัวนี้เป็นหลัก)
 #    Collision Guard · Typecheck · ไพ่ 78 ใบ · ผัง 25 แบบ · Safety Guardrails · Provably Fair · D1 Sync · Entitlement · Failover ฯลฯ
 npm run repo:verify
 
@@ -93,10 +93,10 @@ npm run dev
 1. **วัดก่อนเดา (Evidence over Assumption)** — สรุปสาเหตุจากหลักฐานจริงเท่านั้น ไม่ใช่จากการอ่านโค้ด
 2. **หาสาเหตุราก ไม่ใช่ดับอาการ (Root Cause, not Symptom)** — ต้องตอบให้ได้ว่า "ทำไมถึงเกิดขึ้นได้ตั้งแต่แรก"
 3. **แก้อาการแรกแล้วต้องรันซ้ำ (One Bug May Mask Another)** — error หนึ่งมักบัง error อีกตัวไว้
-4. **พิสูจน์ว่าแก้ได้จริง (Verify, don't assume)** — ทดสอบทั้งเส้นทางที่สำเร็จและที่ล้มเหลว (36/36 verification gates)
+4. **พิสูจน์ว่าแก้ได้จริง (Verify, don't assume)** — ทดสอบทั้งเส้นทางที่สำเร็จและที่ล้มเหลว (37/37 verification gates)
 5. **รายงานตามจริง (Report Honestly)** แม้ผลจะไม่สวย
 6. **แก้เรื่องเดียวต่อหนึ่ง commit และบันทึกบทเรียนเสมอ** — ระบบบล็อก commit ที่ไม่ระบุ `--cause` และ `--prevention`
-7. **ทำงานให้สะอาดและจบสมบูรณ์ 100% (Zero Leftovers)** — ตรวจ 36 ด่าน ➔ Commit ➔ Push ➔ Auto-Merge ➔ Tidy ห้ามทิ้งภาระให้ผู้อื่นตามแก้
+7. **ทำงานให้สะอาดและจบสมบูรณ์ 100% (Zero Leftovers)** — ตรวจ 37 ด่าน ➔ Commit ➔ Push ➔ Auto-Merge ➔ Tidy ห้ามทิ้งภาระให้ผู้อื่นตามแก้
 
 ```bash
 # commit ประเภทแก้บั๊ก ต้องบันทึกบทเรียนเสมอ (ระบบเขียนลง INCIDENT_LOG.md ให้เอง)
