@@ -15,6 +15,57 @@ import {
   trackPageView,
 } from "@/lib/analytics";
 
+interface RuntimeAnalyticsConfig {
+  gaId?: string | null;
+  metaPixelId?: string | null;
+  googleAdsId?: string | null;
+}
+
+const RUNTIME_CONFIG_KEY = "tarot_analytics_config";
+
+/**
+ * โหลดรหัสเครื่องมือวัดผลจาก `/api/config/analytics` **ครั้งเดียวต่อการเข้าเว็บหนึ่งครั้ง**
+ * ---------------------------------------------------------------------------
+ * เดิม effect ด้านล่างผูกกับ `[gaId, metaPixelId, googleAdsId]` และผ่านด่านออกเฉพาะเมื่อ
+ * ครบทั้งสามค่า — แต่เว็บนี้ตั้งแค่ GA4 (Meta Pixel / Google Ads ยังไม่ได้ใช้) เงื่อนไขนั้น
+ * จึงเป็นเท็จตลอดกาล ผลคือยิงเส้นนี้ซ้ำ 2 ครั้งทุกครั้งที่โหลดหน้า และยิงอีกทุกครั้งที่
+ * เปลี่ยนหน้า ทั้งที่ค่าที่ได้เหมือนเดิมทุกรอบ (วัดจริงบน production 2026-09-08)
+ *
+ * ที่นี่รวมเป็นคำขอเดียวต่อแท็บ แล้วจำคำตอบไว้ใน sessionStorage — ยังรองรับการตั้งค่า
+ * ตอน runtime ด้วย `wrangler secret` เหมือนเดิม (แค่ต้องเปิดแท็บใหม่ถึงจะเห็นค่าใหม่)
+ */
+let runtimeConfigPromise: Promise<RuntimeAnalyticsConfig | null> | null = null;
+
+function loadRuntimeAnalyticsConfig(): Promise<RuntimeAnalyticsConfig | null> {
+  if (runtimeConfigPromise) return runtimeConfigPromise;
+
+  try {
+    const cached = window.sessionStorage.getItem(RUNTIME_CONFIG_KEY);
+    if (cached) {
+      runtimeConfigPromise = Promise.resolve(JSON.parse(cached) as RuntimeAnalyticsConfig);
+      return runtimeConfigPromise;
+    }
+  } catch {
+    // อ่าน sessionStorage ไม่ได้ (โหมดส่วนตัว) — ยิงถามตามปกติ
+  }
+
+  runtimeConfigPromise = fetch("/api/config/analytics")
+    .then((res) => (res.ok ? (res.json() as Promise<RuntimeAnalyticsConfig>) : null))
+    .then((data) => {
+      if (data) {
+        try {
+          window.sessionStorage.setItem(RUNTIME_CONFIG_KEY, JSON.stringify(data));
+        } catch {
+          // เขียนไม่ได้ก็ยังมีแคชระดับโมดูลคุมไม่ให้ยิงซ้ำในหน้านี้อยู่ดี
+        }
+      }
+      return data;
+    })
+    .catch(() => null);
+
+  return runtimeConfigPromise;
+}
+
 /**
  * ติดตาม PageView สำหรับ Single Page Application (SPA)
  * เมื่อมีการเปลี่ยนหน้าใน Next.js App Router (เช่น / -> /spreads -> /cards -> /blog)
@@ -62,32 +113,28 @@ export function AnalyticsTracker() {
   const [googleAdsId, setGoogleAdsId] = useState<string | undefined>(() => getGoogleAdsId());
 
   // ดึง configuration จาก runtime endpoint หากยังไม่ได้ตั้งค่าตอน build
+  // ⚠️ dependency ต้องว่างเสมอ — ใส่ id ทั้งสามเป็น dependency เมื่อไร จะกลับไปยิงซ้ำ
+  //    ทุกครั้งที่ setState สำเร็จ (บทเรียนเดิม: 2 คำขอต่อการโหลดหนึ่งหน้า)
   useEffect(() => {
     if (gaId && metaPixelId && googleAdsId) return;
 
     let isMounted = true;
-    fetch("/api/config/analytics")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!isMounted || !data) return;
-        if (!gaId && data.gaId && isValidGaId(data.gaId)) {
-          setGaId(data.gaId);
-        }
-        if (!metaPixelId && data.metaPixelId && isValidMetaPixelId(data.metaPixelId)) {
-          setMetaPixelId(data.metaPixelId);
-        }
-        if (!googleAdsId && data.googleAdsId && isValidGoogleAdsId(data.googleAdsId)) {
-          setGoogleAdsId(data.googleAdsId);
-        }
-      })
-      .catch(() => {
-        // เงียบไว้หากเรียกไม่สำเร็จ — analytics เป็น optional
-      });
+    loadRuntimeAnalyticsConfig().then((data) => {
+      if (!isMounted || !data) return;
+      if (data.gaId && isValidGaId(data.gaId)) setGaId((prev) => prev ?? data.gaId!);
+      if (data.metaPixelId && isValidMetaPixelId(data.metaPixelId)) {
+        setMetaPixelId((prev) => prev ?? data.metaPixelId!);
+      }
+      if (data.googleAdsId && isValidGoogleAdsId(data.googleAdsId)) {
+        setGoogleAdsId((prev) => prev ?? data.googleAdsId!);
+      }
+    });
 
     return () => {
       isMounted = false;
     };
-  }, [gaId, metaPixelId, googleAdsId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ซิงก์ Google Ads Config เมื่อได้รับ ID มาภายหลัง (Runtime)
   useEffect(() => {

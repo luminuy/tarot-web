@@ -86,6 +86,13 @@ export function getReadings(): SavedReadingItem[] {
  */
 export async function fetchServerReadings(): Promise<SavedReadingItem[]> {
   if (typeof window === "undefined") return [];
+  // ประวัติฝั่งเซิร์ฟเวอร์มีเฉพาะของสมาชิก — ผู้ชมที่ยังไม่ล็อกอินเคยยิงเส้นนี้ทุกครั้งที่
+  // เปิดหน้าแรกแล้วได้ 401 กลับมาเปล่า ๆ (คำขอที่ปลุก Worker ทิ้งฟรี ๆ หนึ่งครั้งต่อหนึ่งวิว)
+  // `fetchSessionUser()` มีแคช/รวมคำขอซ้ำอยู่แล้ว จึงไม่ได้เพิ่มคำขอใหม่ให้สมาชิก
+  const { fetchSessionUser } = await import("@/lib/auth/use-session");
+  const viewer = await fetchSessionUser();
+  if (!viewer) return getReadings();
+
   try {
     const res = await fetch("/api/journal", { cache: "no-store" });
     if (!res.ok) {
