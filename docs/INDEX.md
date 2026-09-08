@@ -99,11 +99,11 @@ docs/
 
 | คำสั่ง | หน้าที่และวัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **ตรวจครบทั้ง 37 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
+| `npm run repo:verify` | **ตรวจครบทั้ง 38 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Types (ต้องผ่าน 0 Errors) |
 | `npm run agent:status` | ตรวจสอบว่ามี Agent ตัวไหนกำลังทำงานหรือล็อคไฟล์อยู่หรือไม่ |
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงานป้องกันการชนกันของ AI หลายตัว |
 | `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จสมบูรณ์ |
-| `npm run pr:auto` | ตรวจครบ 37 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
+| `npm run pr:auto` | ตรวจครบ 38 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
 | `npm run git:tidy` | เก็บกวาดกิ่งงานที่ Merge ไปแล้วทั้งในเครื่องและบน Remote ตามกฎ Zero Leftovers |
 | `npm run dev` | รันเซิร์ฟเวอร์จำลองสำหรับพัฒนา (Next.js Local Server) |

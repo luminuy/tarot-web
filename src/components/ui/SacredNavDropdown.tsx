@@ -205,6 +205,12 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         ) : (
           <Link
             href={item.href || "#"}
+            // ⛔ ห้ามเปิด prefetch — บทเรียน INC-0106
+            // Next 16 ใช้ Client Segment Cache: ลิงก์ที่ prefetch จะยิงถาม "ผังเส้นทาง"
+            // (header `Next-Router-Segment-Prefetch: /_tree`) แต่ฝั่งเซิร์ฟเวอร์ของเรา
+            // ตอบเป็นเพย์โหลดเต็มหน้าเหมือนเดิมทุกครั้ง ไคลเอนต์จึงหาสิ่งที่ขอไม่เจอ
+            // แล้ววนถามใหม่ไม่มีที่สิ้นสุด — วัดจริงบน production ได้ ~180 คำขอ/วินาที ต่อ 1 แท็บ
+            prefetch={false}
             onClick={() => {
               soundManager.playMenuTapSound();
               setIsOpen(false);
