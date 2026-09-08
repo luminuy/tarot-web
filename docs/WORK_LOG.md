@@ -35,6 +35,28 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-08: 🛡️ เพิ่มกฎ WAF บล็อกบอตเทรนโมเดล + สแกนเนอร์ SEO — ปิดข้อเสนอ Cloudflare ครบทุกข้อที่ควรทำ (โดย Claude Opus 5)
+
+สร้างกฎที่ 3 ในแดชบอร์ดโดยตรง (แทนการรัน `cf:phase1` ซึ่งต้องใช้ `CLOUDFLARE_API_TOKEN`)
+ตั้งชื่อกฎให้ตรงกับที่สคริปต์จะสร้างเป๊ะ ๆ เพื่อให้รัน `cf:phase1` ทับทีหลังได้แบบ idempotent:
+
+> `[phase1] บล็อกบอตเทรนโมเดล + สแกนเนอร์ SEO (ปล่อยบอตค้นหา AI ผ่าน)` · Action: **Block** · Status: **Active**
+
+**Custom rules: 2/5 ➔ 3/5**
+
+ผลยิงตรวจหลัง Deploy (`https://seertarot.net/cards`):
+
+| user-agent | ผล | ถูกต้อง |
+|---|---|---|
+| `AhrefsBot` · `SemrushBot` · `PetalBot` · `GPTBot` | **403** | ✅ บล็อกตามเจตนา |
+| `Googlebot` · `bingbot` | **200** | ✅ ทราฟฟิกหลักไม่กระทบ |
+| `facebookexternalhit` · `Twitterbot` · `LINE` | **200** | ✅ ภาพพรีวิวตอนแชร์ยังทำงาน |
+| เบราว์เซอร์ปกติ (Chrome) | **200** | ✅ ผู้ใช้จริงไม่กระทบ |
+
+**สรุปข้อเสนอ 12 ข้อ — จบแล้ว**: ทำครบ 7 ข้อ (2·3·4·5·6·7·8) · ตัดทิ้งอย่างมีเหตุผล 5 ข้อ (1·9·10·11·12)
+
+---
+
 ### 🗓️ 2026-09-08: 🔒 ปิดข้อ 7–8 ของข้อเสนอ Cloudflare (Crawler Hints · SSL Full Strict) โดย Claude Opus 5
 
 เข้าไปตรวจและตั้งค่าในแดชบอร์ดโดยตรง (ผ่าน Claude in Chrome) — เหลือแค่ 2 ข้อสุดท้ายของข้อเสนอ 12 ข้อ

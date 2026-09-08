@@ -65,7 +65,7 @@
 | บล็อก URL ขยะ | ✅ ทำแล้ว — `wp-*` · `.php` · `.env` · `.git` · `phpmyadmin` ตอบ 403 จาก Cloudflare (ยิงยืนยันแล้ว) |
 | บล็อกเครื่องมือสคริปต์ | ✅ ทำแล้ว — `curl` · `python-requests` · `scrapy` ฯลฯ ถูกบล็อกเฉพาะบน `/api/` (ยกเว้น webhook รับเงิน) |
 | Cache Rules / Tiered Cache | ✅ ทำแล้ว — และสคริปต์เองบันทึกไว้ตั้งแต่ 2026-09-06 ว่า **แคชหน้า HTML ไม่ได้** เพราะ Worker อยู่หน้า cache |
-| บล็อกสแกนเนอร์ SEO | ❌ **ยังไม่ได้ทำ** — ยิงจริง `AhrefsBot` ยังได้ **200** |
+| บล็อกสแกนเนอร์ SEO | ✅ **ทำแล้ว 2026-09-08** — เพิ่มกฎ WAF ข้อที่ 3 `[phase1] บล็อกบอตเทรนโมเดล + สแกนเนอร์ SEO` (Custom rules 3/5 · Active) · ยิงตรวจแล้ว `AhrefsBot` `SemrushBot` `PetalBot` `GPTBot` = **403** ส่วน `Googlebot` `bingbot` `facebookexternalhit` `Twitterbot` `LINE` และเบราว์เซอร์ปกติ = **200** |
 | Block AI Scrapers | ✅ เปิดอยู่ และ **ทำงานถูกต้อง** — บล็อกบอตเทรนโมเดลกับคำขอที่ปลอม UA ส่วนบอตค้นหา AI ตัวจริงเข้าได้ปกติ (เคยสรุปผิดว่าบล็อกหมด ดูหัวข้อ 2.1) |
 | Smart Tiered Cache | ✅ **Active** — Tiered Cache Topology = Active · Smart Tiered Cache ถูกเลือกอยู่ (ยืนยันในแดชบอร์ด 2026-09-08) |
 | Crawler Hints | ✅ **เปิดอยู่แล้ว** — ตรวจ `aria-checked=true` ที่ Caching ➔ Configuration (2026-09-08) ไม่ต้องแตะอะไร |
