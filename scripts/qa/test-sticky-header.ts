@@ -174,37 +174,63 @@ if (/(?:^|\n)\s*(?:html|body|html\s*,\s*body)\s*\{[^}]*overflow(?:-x)?:\s*hidden
 }
 
 // ───────────────────────────────────────────────────────────────
-// 4.5 ตรวจ "CSS ที่ย่อแล้วจริง" ไม่ใช่แค่ source (บทเรียน INC-0108)
+// 4.5 ตรวจ "CSS ที่ build ออกมาจริง" ไม่ใช่แค่ source (บทเรียน INC-0108)
 //
 // รอบแรกของการแก้เขียน translate3d(0,0,0) ไว้ถูกต้องใน source และด่านนี้ก็ผ่าน
 // แต่ Lightning CSS ยุบมันเหลือ translate(0,0) ตอน build → ของที่ขึ้น production
 // เป็น transform 2 มิติที่ไม่บังคับเลเยอร์ GPU เลย = แก้ไปแล้วเหมือนไม่ได้แก้
 //
 // **บทเรียน: ด่านที่ตรวจแค่ source พิสูจน์ไม่ได้ว่าผู้ใช้ได้ของที่เราตั้งใจส่ง**
-// จึงต้องเอากฎจริงไปวิ่งผ่านตัวย่อตัวเดียวกับที่ build ใช้ แล้วดูผลลัพธ์
+//
+// ⚠️ ห้าม import `lightningcss` มาย่อเองเด็ดขาด — มันเป็น transitive dependency
+// ของ `@tailwindcss/postcss` ไม่ได้ประกาศใน package.json  npm (flat node_modules)
+// หาเจอ แต่ CI ใช้ pnpm ที่กันการเข้าถึงแพ็กเกจที่ไม่ได้ประกาศ typecheck จึงล้มทันที
+// (เกิดขึ้นจริงใน PR #368 — ล้มต่อกัน 3 ด่าน) อ่านไฟล์ที่ build ออกมาแทน ไม่ต้องพึ่งอะไรเลย
 // ───────────────────────────────────────────────────────────────
-if (headerRule) {
-  const THREE_D = /translateZ\(|translate3d\(|matrix3d\(|perspective\(|rotate[XY]\(/;
-  try {
-    // ใช้ type จริงของ lightningcss เอง — อย่า cast ทับ (code เป็น Uint8Array ไม่ใช่ Buffer)
-    const { transform } = await import("lightningcss");
-    const minified = transform({
-      filename: "sticky-header-probe.css",
-      code: Buffer.from(`[data-site-header]{${headerRule[1]}}`),
-      minify: true,
-    }).code.toString();
+const THREE_D = /translateZ\(|translate3d\(|matrix3d\(|perspective\(|rotate[XY]\(/;
+const builtCssDir = path.join(ROOT, ".next/static/css");
 
-    if (!THREE_D.test(minified)) {
-      failures.push(
-        `globals.css: หลังย่อด้วย Lightning CSS แล้ว \`[data-site-header]\` ไม่เหลือ transform 3 มิติเลย ` +
-          `จึงไม่ได้เลเยอร์ compositor บน production (ได้: "${minified}") — ใช้ \`translateZ(0)\` (INC-0108)`,
-      );
+if (fs.existsSync(builtCssDir)) {
+  const builtRules: string[] = [];
+  for (const name of fs.readdirSync(builtCssDir)) {
+    if (!name.endsWith(".css")) continue;
+    const built = fs.readFileSync(path.join(builtCssDir, name), "utf-8");
+    // ตัวย่อ CSS เขียน pseudo-element เป็น `:before` แบบโคลอนเดียว (ไวยากรณ์ CSS2 ที่ยังใช้ได้)
+    // ต้องรับทั้ง `::before` และ `:before` ไม่งั้นจับโล่ไม่เจอทั้งที่มีอยู่จริง
+    for (const m of built.matchAll(/\[data-site-header\](?!\))(::?before)?\s*\{([^}]*)\}/g)) {
+      builtRules.push(`${m[1] ? "before" : ""}|${m[2]}`);
     }
-  } catch {
-    // lightningcss มาแบบ transitive dependency ของ @tailwindcss/postcss
-    // ถ้าหาไม่เจอให้ข้ามด่านย่อยนี้ ไม่ทำให้ CI ล้มทั้งชุด (หลัก Ratchet · INC-0007)
-    console.warn("   ⚠️  ข้ามการตรวจ CSS ที่ย่อแล้ว — โหลด lightningcss ไม่ได้ในสภาพแวดล้อมนี้");
   }
+
+  // ⚠️ ต้องตรวจ "ทุก" กฎที่เจอ ไม่ใช่แค่ตัวแรก — บันเดิล CSS ถูกแยกหลายไฟล์และกฎเดียวกัน
+  // โผล่ซ้ำในหลายไฟล์ ถ้าใช้ find() ไฟล์ที่ยังดีจะบังไฟล์ที่พังไว้จนด่านผ่านทั้งที่ผู้ใช้บางหน้าได้ของพัง
+  const baseRules = builtRules.filter((r) => r.startsWith("|"));
+  const shieldRule = builtRules.find((r) => r.startsWith("before|"));
+
+  if (baseRules.length === 0) {
+    failures.push(
+      "CSS ที่ build แล้ว: ไม่พบกฎ `[data-site-header]` ใน .next/static/css เลย — กฎหายไประหว่าง build (INC-0108)",
+    );
+  }
+  for (const rule of baseRules) {
+    if (!THREE_D.test(rule)) {
+      failures.push(
+        `CSS ที่ build แล้ว: \`[data-site-header]\` ไม่เหลือ transform 3 มิติ จึงไม่ได้เลเยอร์ compositor บน production ` +
+          `(ได้: "${rule.slice(1)}") — ตัวย่อ CSS ยุบ translate3d(0,0,0) เป็น 2D ให้ใช้ translateZ(0) (INC-0108)`,
+      );
+      break;
+    }
+  }
+
+  if (!shieldRule) {
+    failures.push(
+      "CSS ที่ build แล้ว: ไม่พบโล่ `[data-site-header]::before` — ช่องว่างเหนือหัวเว็บจะกลับมาทันที (INC-0108)",
+    );
+  }
+} else {
+  // ด่านนี้อยู่ท้ายสุดของ repo:verify ซึ่งด่านก่อนหน้า build ไว้ให้แล้วเสมอ
+  // ถ้ารันเดี่ยว ๆ ตอนยังไม่เคย build ก็ข้ามไป กฎ static ด้านบนคุมไว้อยู่แล้ว (หลัก Ratchet · INC-0007)
+  console.warn("   ⚠️  ยังไม่มี .next/static/css — ข้ามการตรวจ CSS ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)");
 }
 
 // ───────────────────────────────────────────────────────────────
