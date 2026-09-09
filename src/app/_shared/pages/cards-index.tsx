@@ -12,18 +12,18 @@ const PATH = "/cards";
 
 const COPY = {
   th: {
-    title: "ความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบ 78 ใบ (ชุดใหญ่ 22 + ชุดเล็ก 56)",
+    title: "ความหมายไพ่ยิปซี ทาโรต์ ครบ 78 ใบ (ใหญ่ 22 + เล็ก 56)",
     description:
-      "เปิดดูความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบทั้ง 78 ใบ ชุดใหญ่ 22 ใบ และชุดเล็ก 56 ใบ พร้อมคำแปลไทย 5 มิติ ทั้งไพ่หัวตั้งและหัวกลับ โหราศาสตร์ ธาตุ และภาพต้นฉบับ 1909 Rider-Waite",
+      "เปิดดูความหมายไพ่ยิปซีครบ 78 ใบ ชุดใหญ่ 22 และชุดเล็ก 56 ใบ พร้อมคำแปลไทย 5 มิติ ทั้งหัวตั้งและหัวกลับ โหราศาสตร์ ธาตุ และภาพต้นฉบับ 1909",
     collectionName: "คัมภีร์ไพ่ทาโรต์ 78 ใบ (1909 Rider-Waite-Smith)",
     collectionDescription:
       "สารานุกรมความหมายไพ่ทาโรต์ครบ 78 ใบ ทั้ง Major Arcana และ Minor Arcana พร้อมคำแปลภาษาไทย 5 มิติ",
     crumb: "สารานุกรมไพ่ 78 ใบ",
   },
   en: {
-    title: "Tarot Card Meanings: All 78 Cards (22 Major + 56 Minor Arcana)",
+    title: "Tarot Card Meanings: All 78 Cards, Major & Minor",
     description:
-      "Browse every one of the 78 tarot card meanings — 22 Major Arcana and 56 Minor Arcana — with upright and reversed readings across five life areas, plus astrology, element, and the original 1909 Rider-Waite artwork.",
+      "All 78 tarot card meanings — 22 Major and 56 Minor Arcana — upright and reversed across five life areas, with astrology, element, and 1909 art.",
     collectionName: "The Complete 78-Card Tarot Encyclopedia (1909 Rider-Waite-Smith)",
     collectionDescription:
       "A complete reference for all 78 tarot cards, Major and Minor Arcana alike, with upright and reversed meanings across five life areas.",

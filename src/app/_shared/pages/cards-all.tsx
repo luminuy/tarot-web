@@ -16,7 +16,7 @@ const COPY = {
   th: {
     title: "ความหมายไพ่ยิปซี 78 ใบ ทั้งหมด สรุปครบทุกใบ ตารางเดียวจบ",
     description:
-      "ตารางสรุปความหมายไพ่ยิปซี ไพ่ทาโรต์ ครบทั้ง 78 ใบ ทั้งชุดใหญ่ 22 ใบ และชุดเล็ก 56 ใบ 4 ดอก พร้อมชื่อไทย-อังกฤษ ธาตุ และคำสำคัญหัวตั้ง-กลับหัว ดูทีเดียวจบ 1909 Rider-Waite",
+      "ตารางสรุปความหมายไพ่ยิปซีครบ 78 ใบ ชุดใหญ่ 22 และชุดเล็ก 56 ใบ พร้อมชื่อไทย-อังกฤษ ธาตุ และคำสำคัญหัวตั้ง-กลับหัว ดูทีเดียวจบ",
     collectionName: "ตารางสรุปความหมายไพ่ยิปซี 78 ใบ ทั้งหมด ตารางเดียวจบ",
     collectionDescription:
       "คลังข้อมูลความหมายไพ่ทาโรต์ครบทั้ง 78 ใบ ทั้งชุดใหญ่และชุดเล็ก สรุปคำสำคัญหัวตั้งและหัวกลับพร้อมธาตุประจำไพ่",
@@ -37,7 +37,7 @@ const COPY = {
   en: {
     title: "All 78 Tarot Cards: Complete Meanings in One Table",
     description:
-      "A single reference table for all 78 tarot cards — 22 Major Arcana and 56 Minor Arcana across the four suits — with English and Thai names, elements, and upright and reversed keywords. Original 1909 Rider-Waite.",
+      "One reference table for all 78 tarot cards — 22 Major and 56 Minor Arcana — with names, elements, and upright and reversed keywords.",
     collectionName: "All 78 Tarot Card Meanings in One Table",
     collectionDescription:
       "A complete quick-reference table of all 78 tarot cards, Major and Minor Arcana, with upright and reversed keywords and each card's element.",

@@ -63,6 +63,45 @@
 - `npm run repo:verify` ➔ ✅ ผ่าน **40/40 ด่าน**
 - ทดสอบด่านด้วยการทำให้พังจริง: `git stash` โค้ดที่แก้แล้วรันด่านใหม่ซ้ำ ➔ ❌ ตกทันที **18 จุด**
   ครอบคลุมข้อความไทยทุกบรรทัดที่เห็นในภาพหน้าจอทั้งสองใบ (รวมชิป "ชัยชนะ … ข่าวดี" ครบทั้ง 5 คำ)
+### 🗓️ 2026-09-09 (รอบ 9): 📏 title/description ยาวเกินจน Google ตัด — ทั้งเว็บ 309 หน้า (+ ด่านที่ 40)
+
+> **ที่มา**: ตรวจ production จริงหลัง deploy รอบก่อน (คลาน 299 URL ใน sitemap + เปิดด้วย Chromium มือถือ)
+> เจอว่า **title เกินเพดาน 226 หน้า · description เกิน 180 หน้า** — เจ้าของสั่งให้แก้ข้อนี้ก่อน
+
+**อาการหนักสุด** — หน้าผังอังกฤษ 25 หน้า
+
+```
+เดิม  title (118 ตัว): The Celtic Cross: 10 Dimensions of Destiny (10 Cards) Tarot Spread: 10-Card Layout & Position Meanings · SeerTarot
+ใหม่  title  (40 ตัว): The Celtic Cross Tarot Spread (10 Cards)
+เดิม  desc  (326 ตัว) → ใหม่ 144 ตัว
+```
+
+**สาเหตุราก** — `spread.nameEn` มี `(10 Cards)` อยู่ในชื่อแล้ว แต่เทมเพลตต่อท้าย
+`Tarot Spread: 10-Card Layout…` เข้าไปอีก บอกจำนวนไพ่ซ้ำสองรอบ · และ**ไม่มีใครวัดความยาว
+ผลลัพธ์สุดท้ายเลยสักที่** ทั้งที่ layout ยังเติมท้าย ` · SeerTarot` ให้อีก 12 ตัวอักษร
+
+**เจอของแถมระหว่างทาง** — `/daily` กับ `/love/1-card` เขียน `| SeerTarot` ไว้ในโค้ดเอง
+พอ layout เติมท้ายให้อีก จึงได้ **แบรนด์โผล่สองรอบ**: `… | SeerTarot · SeerTarot`
+
+| ไฟล์ | สิ่งที่เปลี่ยน |
+| :--- | :--- |
+| `src/lib/config/meta-length.ts` | **ใหม่** — เพดานกลาง + `pickTitle()` (ไล่จากชื่อครบสุดไปสั้นสุด เลือกตัวแรกที่พอดี) + `clampDescription()` + `stripCardCount()` |
+| `src/app/_shared/pages/spread-detail.tsx` · `card-detail.tsx` | สร้าง title/desc ผ่านตัวช่วยกลาง ไม่ต่อสตริงเองแล้วเดาความยาว |
+| `cards-index.tsx` · `cards-all.tsx` · `spreads-index.tsx` · `blog-detail.tsx` | ย่อคำโปรยให้อยู่ในเพดาน |
+| `src/data/spread-topics.ts` · `articles.ts` · `cards/group-seo.ts` | ย่อหัวข้อ 6 + 2 รายการ และคำโปรยหมวดไพ่ 12 ชุด |
+| `layout.tsx` ทั้งสองภาษา · `daily` · `love/1-card` · `birth-card` | ย่อ + ถอด `| SeerTarot` ที่เขียนซ้ำมือ |
+| `scripts/qa/test-meta-length.ts` | **ด่านที่ 40** — อ่าน HTML ที่ build ออกมาจริงทั้ง 309 ไฟล์ วัด title (ไม่นับท้ายแบรนด์ที่ถูกตัดได้) ≤ 60 · description ≤ 160 · จับแบรนด์ซ้ำสองรอบ |
+
+**เกณฑ์ที่ใช้** — title ของหน้าเอง ≤ 60 ตัวอักษร (ท้ายแบรนด์ที่ layout เติมให้ถูกตัดใน SERP ได้
+ไม่เสียหาย เพราะคำค้นอยู่ต้นประโยค) · description ≤ 155 (ผ่อนได้ถึง 160)
+
+**ผลลัพธ์** — 309 หน้า: title ยาวสุด **60** · description ยาวสุด **160** · แบรนด์ซ้ำ 0 · ไม่มีหน้าไหนขาด metadata
+(ยกเว้น `_global-error.html` ของ Next เองที่ขึ้นทะเบียนไว้พร้อมเหตุผล)
+
+**ตรวจแล้ว**: `npm run repo:verify` ผ่าน **40/40 ด่าน** · `typecheck` 0 errors ·
+ทดสอบด่านใหม่ด้วยการทำให้พังจริง 3 เคส (title ยาว · desc ยาว · แบรนด์ซ้ำ) จับได้ครบ 3
+
+---
 
 ### 🗓️ 2026-09-09 (รอบ 8): 🧾 ด่านเดียวกันตรวจ "ฟุตเตอร์" ควบคู่หัวเว็บทุกหน้า
 

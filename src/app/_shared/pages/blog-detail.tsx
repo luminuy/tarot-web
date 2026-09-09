@@ -43,7 +43,7 @@ export async function buildBlogDetailMetadata(
 
   if (!article) {
     return {
-      title: locale === "en" ? "Article Not Found | SeerTarot" : "ไม่พบบทความ | SeerTarot",
+      title: locale === "en" ? "Article Not Found" : "ไม่พบบทความ",
     };
   }
 

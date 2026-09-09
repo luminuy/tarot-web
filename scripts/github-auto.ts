@@ -125,6 +125,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🖼️  มาตรฐานภาพแชร์ OpenGraph 1200x630 ทั่วเว็บ", cmd: TSX, args: ["scripts/qa/test-og-images.ts"] },
   { label: "🤖 นโยบายบอตสองชั้นพูดตรงกัน (robots.ts ↔ กฎ WAF · บอตค้นหา AI ต้องเข้าได้)", cmd: TSX, args: ["scripts/qa/test-bot-policy.ts"] },
   { label: "🔁 กันลูป prefetch ยิงคำขอไม่รู้จบ (cache interception ปิด · segment prefetch ทำงาน)", cmd: TSX, args: ["scripts/qa/test-prefetch-loop.ts"] },
+  { label: "📏 ความยาว title / description ทุกหน้าอยู่ในเพดาน SERP", cmd: TSX, args: ["scripts/qa/test-meta-length.ts"] },
   { label: "📚 ตัวเลขในเอกสารแม่บทตรงกับของจริง (ด่าน/ผัง/ตำแหน่ง/ไพ่)", cmd: TSX, args: ["scripts/qa/test-docs-numbers.ts"] },
   { label: "🧭 หัวเว็บอยู่นิ่งตอนเลื่อน & ทุกหน้าทั้งเว็บมีหัวเว็บ+ฟุตเตอร์ครบ (เลเยอร์ compositor · safe-area · ไม่มี scroll container ครอบ · 404 ทั้งสองไฟล์)", cmd: TSX, args: ["scripts/qa/test-sticky-header.ts"] },
   { label: "🌐 โหมดอังกฤษไม่มีภาษาไทยหลุด (เรนเดอร์จริงจอสับไพ่/จับไพ่/ผลคำอ่าน · คำสำคัญไพ่ 78 ใบครบสองภาษา)", cmd: TSX, args: ["scripts/qa/test-en-thai-leak.tsx"] },

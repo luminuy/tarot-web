@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ARTICLES } from "@/data/articles";
 import { SPREADS, getSpread } from "@/data/spreads";
 import { isStandardSpread } from "@/lib/entitlement/limits";
+import { clampDescription, headline, pickTitle, stripCardCount } from "@/lib/config/meta-length";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
@@ -60,15 +61,32 @@ export async function buildSpreadDetailMetadata(
   const path = `/spreads/${spread.id}`;
   const cardCount = spread.positions.length;
 
+  // ชื่อผังอังกฤษหลายอันมี "(10 Cards)" ติดมาในชื่ออยู่แล้ว ถ้าต่อ "10-Card Layout" ท้ายอีก
+  // จะได้ title ยาว 118 ตัวอักษรและบอกจำนวนไพ่ซ้ำสองรอบ — เรียงจากยาวสุดไปสั้นสุด
+  // แล้วให้ pickTitle เลือกตัวแรกที่ยังพอดีเพดาน (ดู src/lib/config/meta-length.ts)
+  const nameEnShort = stripCardCount(spread.nameEn);
   const title = isEnglish
-    ? `${spread.nameEn} Tarot Spread: ${cardCount}-Card Layout & Position Meanings`
-    : spread.seoTitleTh
-      ? `${spread.seoTitleTh} — วิธีอ่านและความหมายทุกตำแหน่ง`
-      : `ผัง${spread.nameTh} — วิธีอ่านไพ่ ${cardCount} ใบ`;
+    ? pickTitle([
+        `${nameEnShort} Tarot Spread (${cardCount} Cards)`,
+        `${headline(nameEnShort)} Tarot Spread (${cardCount} Cards)`,
+        `${headline(nameEnShort)} Tarot Spread`,
+      ])
+    : pickTitle(
+        spread.seoTitleTh
+          ? [
+              `${spread.seoTitleTh} — วิธีอ่านทุกตำแหน่ง`,
+              spread.seoTitleTh,
+              `ผัง${spread.nameTh} ${cardCount} ใบ`,
+            ]
+          : [`ผัง${spread.nameTh} — วิธีอ่านไพ่ ${cardCount} ใบ`, `ผัง${spread.nameTh} ${cardCount} ใบ`],
+      );
 
   const description = isEnglish
-    ? `${spread.descriptionEn} Learn what each of the ${cardCount} positions means, how to frame your question, and how to read the layout with the 1909 Rider-Waite deck.`
-    : `${spread.description} เจาะลึกความหมายไพ่ทั้ง ${cardCount} ตำแหน่ง พร้อมวิธีตั้งคำถามและอ่านผลด้วยไพ่ 1909 Rider-Waite`;
+    ? clampDescription(
+        spread.descriptionEn,
+        `What each of the ${cardCount} positions means and how to read it.`,
+      )
+    : clampDescription(spread.description, `พร้อมความหมายครบทั้ง ${cardCount} ตำแหน่ง`);
 
   const keywords = isEnglish
     ? [

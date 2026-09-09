@@ -17,11 +17,11 @@ import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
   title: {
-    default: "Free Online Tarot Reading · Shuffle & Draw With an AI Tarot Reader",
+    default: "Free Online Tarot Reading With an AI Tarot Reader",
     template: "%s · SeerTarot",
   },
   description:
-    "Free online tarot reading with the original 1909 Rider-Waite-Smith deck. Shuffle and draw all 78 cards yourself, then get a live card-by-card interpretation from an AI tarot reader. 25 spreads, provably fair with SHA-256.",
+    "Free online tarot reading with the original 1909 Rider-Waite deck. Shuffle and draw all 78 cards yourself, then read a live AI interpretation.",
   keywords: [
     "free tarot reading",
     "online tarot",
