@@ -38,7 +38,7 @@ import {
   isMasterPersona,
 } from "@/lib/entitlement/copy";
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
-import { refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
+import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
 
 // Dynamic Code-Splitting for 60% smaller initial JS bundle
@@ -204,6 +204,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
   const openAuth = (mode: "signin" | "signup" = "signin", fromWall = false) => {
     trackEvent("auth_modal_open", { mode, source: fromWall ? "wall" : "direct" });
+    void ensureEntitlement();
     setAuthMode(mode);
     setAuthFromWall(fromWall);
     setIsAuthOpen(true);
@@ -515,9 +516,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
   // Step 1 -> Step 2: Start Reading Session
   const handleStartSession = async () => {
+    /**
+     * ⚠️ ต้องถามสิทธิ์ให้ได้คำตอบ "ก่อน" ตัดสินใจเสมอ
+     *
+     * ผู้ชมที่ยังไม่ล็อกอินจะไม่ถูกถามสิทธิ์ตั้งแต่ตอนเปิดหน้า (เพื่อประหยัดคำขอ — ดู
+     * `use-entitlement.ts`) ค่าที่ hook ถืออยู่จึงอาจยังเป็น `null` ตรงนี้
+     * ถ้าข้ามไปเลยโดยไม่ถาม ผู้ใช้จะถูกพาเข้าขั้นตอนเปิดไพ่แล้วไปเจอ 403 กลางทาง
+     */
+    const currentEntitlement = entitlement ?? (await ensureEntitlement());
+    const currentView = describeEntitlement(currentEntitlement);
+
     // สิทธิ์หมดตั้งแต่ยังไม่ยิง API — อธิบายด้วยหน้าต่างเดียว ไม่ต้องมีแถบแดงซ้อน
-    if (entitlementView?.blocked) {
-      openAccessDialog(entitlementView.blockedReason ?? GUEST_BLOCK_REASON);
+    if (currentView?.blocked) {
+      openAccessDialog(currentView.blockedReason ?? GUEST_BLOCK_REASON);
       return;
     }
 
@@ -1233,6 +1244,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     selectedSpread={selectedSpread}
                     onSelectSpread={(sp) => {
                       soundManager.playCardSelectSound();
+                      // ผู้ใช้เริ่มลงมือจริงแล้ว — อุ่นสิทธิ์ไว้เลย จะได้ไม่ต้องรอตอนกด "เริ่มดูดวง"
+                      void ensureEntitlement();
                       setSelectedSpread(sp);
                       trackEvent("spread_select", {
                         spread_id: sp.id,

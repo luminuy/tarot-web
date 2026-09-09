@@ -188,11 +188,22 @@ function main() {
     chatSrc.includes("enforced || isSignInRequired(viewer)")
   );
 
-  const entitlementApi = readSrc("src/app/api/entitlement/route.ts");
+  // ตรรกะสิทธิ์ย้ายไปอยู่ที่ `snapshot.ts` แล้ว (ใช้ร่วมกันระหว่าง /api/entitlement กับ
+  // /api/bootstrap) — ต้องตรวจที่ต้นทางจริง ไม่ใช่ที่ไฟล์ route ที่เหลือแค่เปลือก
+  const entitlementSnapshot = readSrc("src/lib/entitlement/snapshot.ts");
   check(
-    "GET /api/entitlement: คืนกำแพงสมัครสมาชิกให้ผู้เยี่ยมชมแม้ธงโควตาปิด",
-    entitlementApi.includes("isSignInRequired(guestViewer)")
+    "ภาพสิทธิ์: คืนกำแพงสมัครสมาชิกให้ผู้เยี่ยมชมแม้ธงโควตาปิด",
+    entitlementSnapshot.includes("isSignInRequired(guestViewer)")
   );
+
+  // ทั้งสองเส้นต้องเรียกก้อนเดียวกัน ห้ามใครแอบเขียนตรรกะสิทธิ์ซ้ำในไฟล์ route
+  for (const route of ["src/app/api/entitlement/route.ts", "src/app/api/bootstrap/route.ts"]) {
+    const src = readSrc(route);
+    check(
+      `${route}: ใช้ getEntitlementSnapshot() ก้อนเดียวกัน ไม่เขียนตรรกะสิทธิ์ซ้ำ`,
+      src.includes("getEntitlementSnapshot") && !src.includes("isSignInRequired")
+    );
+  }
 
   // ── 5. ความสอดคล้องของ guestAllowed กับ isStandardSpread (ป้องกัน ISSUE-031) ──
   for (const s of SPREADS) {

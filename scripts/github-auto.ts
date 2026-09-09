@@ -129,6 +129,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "📚 ตัวเลขในเอกสารแม่บทตรงกับของจริง (ด่าน/ผัง/ตำแหน่ง/ไพ่)", cmd: TSX, args: ["scripts/qa/test-docs-numbers.ts"] },
   { label: "🧭 หัวเว็บอยู่นิ่งตอนเลื่อน & ทุกหน้าทั้งเว็บมีหัวเว็บ+ฟุตเตอร์ครบ (เลเยอร์ compositor · safe-area · ไม่มี scroll container ครอบ · 404 ทั้งสองไฟล์)", cmd: TSX, args: ["scripts/qa/test-sticky-header.ts"] },
   { label: "🌐 โหมดอังกฤษไม่มีภาษาไทยหลุด (เรนเดอร์จริง 41 จอทั่วเว็บ · คำสำคัญไพ่ 78 ใบครบสองภาษา)", cmd: TSX, args: ["scripts/qa/test-en-thai-leak.tsx"] },
+  { label: "⚡ งบคำขอต่อการเปิดหน้า (ผู้ชมที่ไม่ล็อกอินต้องไม่ยิง /api/* เลย · ล็อกอินแล้วใช้ /api/bootstrap เส้นเดียว)", cmd: TSX, args: ["scripts/qa/test-request-budget.ts"] },
 ];
 
 /**
