@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from "react";
 
 import { ConsentBanner } from "@/components/analytics/ConsentBanner";
+import { isMeasurableHostname } from "@/lib/config/site";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -108,6 +109,21 @@ function PageViewTracker({
 }
 
 export function AnalyticsTracker() {
+  /**
+   * 🌐 ยิงแท็กเฉพาะบนโดเมนจริงเท่านั้น
+   * -------------------------------------------------------------------------
+   * `tarot-web.bankjack10452.workers.dev` (โดเมน preview ของ Cloudflare) เป็นสำเนา
+   * ของเว็บที่ตอบ 200 และยิงแท็ก GA4 ตัวเดียวกัน — Google จึงนับเป็นอีกโดเมนหนึ่งและขึ้น
+   * "ตรวจพบโดเมนเพิ่มเติมสำหรับการกำหนดค่า" ในหน้าวินิจฉัยแท็ก (ตรวจจริง 2026-09-09)
+   *
+   * ต้องอ่านหลัง mount เพราะหน้าเว็บ prerender ไว้ — host รู้ได้ที่เบราว์เซอร์เท่านั้น
+   * ไม่ใช่ตอน build (ห้ามเรียก `headers()` ใน RootHtml เด็ดขาด ดู INC-0091)
+   */
+  const [isMeasurableHost, setIsMeasurableHost] = useState(false);
+  useEffect(() => {
+    setIsMeasurableHost(isMeasurableHostname(window.location.hostname));
+  }, []);
+
   const [gaId, setGaId] = useState<string | undefined>(() => getGaMeasurementId());
   const [metaPixelId, setMetaPixelId] = useState<string | undefined>(() => getMetaPixelId());
   const [googleAdsId, setGoogleAdsId] = useState<string | undefined>(() => getGoogleAdsId());
@@ -156,7 +172,7 @@ export function AnalyticsTracker() {
     }
   }, [googleAdsId]);
 
-  const primaryGtagId = gaId || googleAdsId;
+  const primaryGtagId = isMeasurableHost ? gaId || googleAdsId : undefined;
 
   return (
     <>
@@ -182,11 +198,23 @@ export function AnalyticsTracker() {
                 'ad_user_data': 'denied',
                 'ad_personalization': 'denied'
               });
+              /* ⚠️ ต้องอ่าน "ทั้งสองแหล่ง" เสมอ — localStorage อย่างเดียวไม่พอ
+                 window.__seertarotConsent คือสิ่งที่ setAnalyticsConsent() เพิ่งตั้งไว้
+                 ในหน้านี้ ครอบคลุมผู้ใช้ที่กดยินยอม "ก่อน" สคริปต์นี้จะมาถึง (lazyOnload)
+                 และเบราว์เซอร์โหมดส่วนตัวที่เขียน localStorage ไม่ได้
+                 ถ้าตัดออก การกดยินยอมจะถูก consent default ด้านบนทับจนเป็น denied ทั้งหมด */
               try {
-                if (localStorage.getItem('seertarot_analytics_consent_v1') === 'granted') {
+                var seertarotChoice = window.__seertarotConsent;
+                if (!seertarotChoice) {
+                  seertarotChoice = localStorage.getItem('seertarot_analytics_consent_v1');
+                }
+                if (seertarotChoice === 'granted') {
                   gtag('consent', 'update', { 'analytics_storage': 'granted' });
                 }
               } catch (e) {}
+              /* ตัดพารามิเตอร์ระบุตัวตนออกจากคำขอโฆษณาเมื่อยังไม่ได้รับความยินยอม
+                 — ข้อบังคับของ Consent Mode v2 ที่หน้าวินิจฉัยแท็กตรวจหา */
+              gtag('set', 'ads_data_redaction', true);
               /* การเปลี่ยนใจระหว่างเซสชันจัดการโดย setAnalyticsConsent() ใน src/lib/analytics.ts
                  ที่แบนเนอร์เรียกตอนผู้ใช้กด — ตรงนี้ทำหน้าที่แค่กู้สถานะของผู้ที่เคยเลือกไว้แล้ว
                  ให้ทันก่อน React hydrate เท่านั้น */
@@ -195,7 +223,6 @@ export function AnalyticsTracker() {
                 gaId
                   ? `gtag('config', '${gaId}', {
                 page_path: window.location.pathname,
-                anonymize_ip: true,
                 send_page_view: true
               });`
                   : ""
@@ -217,7 +244,7 @@ export function AnalyticsTracker() {
       {/* ======================================================== */}
       {/* 🎯 Meta Pixel (Facebook & Instagram)                     */}
       {/* ======================================================== */}
-      {metaPixelId && (
+      {isMeasurableHost && metaPixelId && (
         <Script id="meta-pixel-init" strategy="lazyOnload">
           {`
             /* ⚠️ ต้องกั้นตั้งแต่ "ตัวโหลด" ไม่ใช่แค่ fbq('init')
