@@ -7,6 +7,7 @@ import { getReading, updateReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvents, recordEvent } from "@/lib/stats/record";
 import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
+import { SIGN_IN_GATE_MESSAGE, SIGN_IN_GATE_REASON, isSignInRequired } from "@/lib/entitlement/signin-gate";
 
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
@@ -109,10 +110,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let memberUserId: string | null = null;
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
-    if (await isEntitlementEnabled()) {
-      const { getViewer } = await import("@/lib/entitlement/viewer");
+    const { getViewer } = await import("@/lib/entitlement/viewer");
+    const [enforced, viewer] = await Promise.all([isEntitlementEnabled(), getViewer(request)]);
+
+    // ── ด่านล็อกอิน — อยู่ "นอก" ธงระบบสิทธิ์โดยตั้งใจ (ดู lib/entitlement/signin-gate.ts) ──
+    // ตาข่ายกันการยิง /read ตรงโดยข้าม /start · ธงโควตาถูกปิดค้างได้ แต่ด่านนี้ต้องไม่หาย
+    if (isSignInRequired(viewer)) {
+      limit.releaseConcurrency();
+      recordEvent("entitlement_blocked_signin");
+      return Response.json({ error: SIGN_IN_GATE_MESSAGE, reason: SIGN_IN_GATE_REASON }, { status: 403 });
+    }
+
+    if (enforced) {
       const { consumeReading } = await import("@/lib/entitlement/entitlement");
-      const viewer = await getViewer(request);
       capTier = viewer.kind;
       if (viewer.kind === "member") {
         memberUserId = viewer.userId;

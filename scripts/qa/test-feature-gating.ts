@@ -4,6 +4,9 @@
  * รันด้วย: npx tsx scripts/qa/test-feature-gating.ts
  */
 
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { SPREADS } from "../../src/data/spreads";
 import { PERSONAS } from "../../src/data/personas";
 import {
@@ -15,6 +18,10 @@ import {
   REQUIRE_SIGNUP_TO_READ,
 } from "../../src/lib/entitlement/limits";
 import { UPGRADE_COPY, UPGRADE_COPY_EN, describeEntitlement } from "../../src/lib/entitlement/copy";
+import { isSignInRequired, SIGN_IN_GATE_REASON } from "../../src/lib/entitlement/signin-gate";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const readSrc = (rel: string) => fs.readFileSync(path.join(ROOT, rel), "utf-8");
 
 let pass = 0;
 let fail = 0;
@@ -134,6 +141,58 @@ function main() {
   check("ผู้เยี่ยมชม: ปุ่มหลักคือชวนสมัครสมาชิก", guestView?.action === "signup");
   check("ผู้เยี่ยมชม: ไม่มีจุดไฟโควตาหลอกตา (limit = 0)", guestView?.limit === 0);
   check("REQUIRE_SIGNUP_TO_READ ตรงกับสถานะกำแพงจริง", REQUIRE_SIGNUP_TO_READ === (guestView?.blockedReason === "signup_required"));
+
+  // ── 4.6 ด่านล็อกอินต้องอยู่ "นอก" ธงระบบสิทธิ์ (INC-0111) ──
+  // ธง `entitlement.enforced` บน production เคยถูกปิดค้างไว้ ทำให้ด่านสิทธิ์ทั้งก้อนถูกข้าม
+  // ใครก็เปิดไพ่ได้ไม่จำกัดโดยไม่ต้องสมัครสมาชิก · ด่านนี้กันไม่ให้ใครย้ายมันกลับเข้าไปในธงอีก
+  check("isSignInRequired: ผู้เยี่ยมชม → true", isSignInRequired({ kind: "guest" }) === true);
+  check("isSignInRequired: สมาชิก → false", isSignInRequired({ kind: "member" }) === false);
+  check("SIGN_IN_GATE_REASON = signup_required", SIGN_IN_GATE_REASON === "signup_required");
+
+  const GATED_ROUTES = [
+    "src/app/api/reading/start/route.ts",
+    "src/app/api/reading/[id]/read/route.ts",
+    "src/app/api/reading/[id]/chat/route.ts",
+  ];
+  for (const rel of GATED_ROUTES) {
+    const src = readSrc(rel);
+    check(`${rel}: เรียก isSignInRequired()`, src.includes("isSignInRequired("));
+    // รูปแบบเดิมที่เป็นต้นเหตุ — ครอบทุกด่านไว้ใต้ธงทั้งก้อน ห้ามกลับมาอีก
+    check(
+      `${rel}: ไม่ครอบด่านทั้งก้อนด้วย if (await isEntitlementEnabled())`,
+      !src.includes("if (await isEntitlementEnabled())")
+    );
+  }
+
+  for (const rel of GATED_ROUTES.slice(0, 2)) {
+    const src = readSrc(rel);
+    // ต้องเป็นเงื่อนไขเดี่ยว ๆ ห้ามมีธงมาร่วมตัดสิน (เคยพลาดมาแล้วว่าแค่ "อยู่ก่อน" ไม่พอ —
+    // เขียน `if (enforced && isSignInRequired(viewer))` ก็ยังอยู่ก่อน แต่ด่านตายสนิทเมื่อธงปิด)
+    check(
+      `${rel}: ด่านล็อกอินเป็นเงื่อนไขเดี่ยว ไม่มีธงมาร่วม`,
+      src.includes("if (isSignInRequired(viewer)) {")
+    );
+    check(
+      `${rel}: ด่านล็อกอินอยู่ก่อนบล็อกโควตา if (enforced)`,
+      src.indexOf("if (isSignInRequired(viewer)) {") < src.indexOf("if (enforced)")
+    );
+    check(
+      `${rel}: ไม่มี enforced มาผูกกับด่านล็อกอิน`,
+      !/enforced\s*&&\s*isSignInRequired/.test(src) && !/isSignInRequired\([^)]*\)\s*&&\s*enforced/.test(src)
+    );
+  }
+
+  const chatSrc = readSrc("src/app/api/reading/[id]/chat/route.ts");
+  check(
+    "chat route: กั้นเฉพาะสมาชิกแม้ธงโควตาปิด (enforced || isSignInRequired)",
+    chatSrc.includes("enforced || isSignInRequired(viewer)")
+  );
+
+  const entitlementApi = readSrc("src/app/api/entitlement/route.ts");
+  check(
+    "GET /api/entitlement: คืนกำแพงสมัครสมาชิกให้ผู้เยี่ยมชมแม้ธงโควตาปิด",
+    entitlementApi.includes("isSignInRequired(guestViewer)")
+  );
 
   // ── 5. ความสอดคล้องของ guestAllowed กับ isStandardSpread (ป้องกัน ISSUE-031) ──
   for (const s of SPREADS) {

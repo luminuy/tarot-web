@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0111 · 2026-09-09 12:30 · 🟠 High · แก้แล้วแต่ยังเล่นได้โดยไม่ล็อกอิน — ด่านล็อกอินถูกครอบใต้ธงที่ปิดค้างบน production
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หลัง deploy นโยบายสมัครก่อนเล่นแล้ว เจ้าของยังกดเปิดไพ่บน seertarot.net ได้โดยไม่ต้องล็อกอิน · ยิง POST /api/reading/start แบบไม่มีคุกกี้ได้ HTTP 200 และ GET /api/entitlement ตอบ enabled:false |
+| **สาเหตุราก** | ด่านสิทธิ์ทุกด่านใน 3 route ถูกครอบไว้ใต้ if (await isEntitlementEnabled()) ทั้งก้อน ซึ่งเป็นสวิตช์ฉุกเฉินของการนับโควตา และบน production ธง KV app:flag:entitlement.enforced ถูกตั้งเป็น false ค้างไว้ โปรแกรมจึงข้ามด่านทั้งหมดไม่เคยเดินไปถึงบรรทัดที่อ่านค่า GUEST_LIMIT เลย |
+| **การแก้ไข** | แยกด่านล็อกอินออกมาเป็น lib/entitlement/signin-gate.ts แล้วเรียก isSignInRequired(viewer) ก่อนบล็อกโควตาในทุก route · chat ใช้ enforced หรือ isSignInRequired · GET /api/entitlement คืนกำแพง signup_required ให้ผู้เยี่ยมชมแม้ธงปิด |
+| **🛡️ กฎป้องกันถาวร** | **นโยบายผลิตภัณฑ์ห้ามอยู่ใต้สวิตช์ฉุกเฉินของระบบนับโควตาเด็ดขาด และเพิ่มด่าน QA ใน test-feature-gating ที่ตรวจว่าทั้ง 3 route เรียก isSignInRequired เป็นเงื่อนไขเดี่ยวไม่มีธงมาร่วม อยู่ก่อน if (enforced) และไม่มี if (await isEntitlementEnabled()) ครอบทั้งก้อนอีก** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ทดสอบด่านด้วยการทำให้พังจริง เปลี่ยนเป็น enforced && isSignInRequired แล้วด่านตก 2 ข้อทันที · repo:verify ผ่าน 39/39 · typecheck 0 errors |
+| **บันทึกโดย** | Claude Code · branch `claude/free-play-login-requirement-zvz0ov` · commit `6f88c5f` |
+
+
 ### INC-0110 · 2026-09-09 11:33 · 🟠 High · หน้าอังกฤษ 115 หน้าไม่มีหัวเว็บและไม่มีฟุตเตอร์เลย
 
 | หัวข้อ | รายละเอียด |
