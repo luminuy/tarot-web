@@ -126,9 +126,21 @@ if (!headerRule) {
 } else {
   const body = headerRule[1];
   // ต้องเป็น `transform:` มาตรฐาน ไม่ใช่แค่ `-webkit-transform:` (Safari รุ่นใหม่อ่านตัวมาตรฐาน)
-  if (!/(?:^|\n)\s*transform:\s*translate3d\(\s*0\s*,\s*0\s*,\s*0\s*\)/.test(body)) {
+  const transformDecl = body.match(/(?:^|\n)\s*transform:\s*([^;]+);/);
+  if (!transformDecl) {
     failures.push(
-      "globals.css: `[data-site-header]` ต้องมี `transform: translate3d(0, 0, 0)` — ไม่งั้นบน iOS หัวเว็บถูกวาดใหม่ทุกเฟรมแล้วตามหลังการเลื่อน (INC-0107)",
+      "globals.css: `[data-site-header]` ต้องมี `transform:` ที่บังคับเลเยอร์ compositor — ไม่งั้นบน iOS หัวเว็บถูกวาดใหม่ทุกเฟรมแล้วตามหลังการเลื่อน (INC-0107)",
+    );
+  } else if (/translate3d\(\s*0\s*,\s*0\s*,\s*0(?:px)?\s*\)/.test(transformDecl[1])) {
+    // INC-0108 — กับดักที่ทำให้การแก้รอบแรกไร้ผลบน production ทั้งที่ source ถูกต้อง
+    failures.push(
+      "globals.css: `[data-site-header]` ห้ามใช้ `translate3d(0, 0, 0)` — Lightning CSS ยุบเหลือ `translate(0,0)` ซึ่งเป็น 2D และไม่บังคับเลเยอร์ GPU ให้ใช้ `translateZ(0)` แทน (INC-0108)",
+    );
+  }
+
+  if (!/(?:^|\n)\s*\[data-site-header\]::before\s*\{/.test(css)) {
+    failures.push(
+      "globals.css: ต้องมีโล่ `[data-site-header]::before` ที่ยืดพื้นหลังขึ้นไปเหนือหัวเว็บ — กันเนื้อหาโผล่ในช่องว่างตอน Safari ย่อแถบเครื่องมือ / rubber-band / เธรดหลักตัน (INC-0108)",
     );
   }
   if (!/padding-top:\s*env\(safe-area-inset-top/.test(body)) {
@@ -159,6 +171,40 @@ if (/(?:^|\n)\s*(?:html|body|html\s*,\s*body)\s*\{[^}]*overflow(?:-x)?:\s*hidden
   failures.push(
     "globals.css: ห้ามตั้ง `overflow: hidden` / `overflow-x: hidden` ที่ `html` หรือ `body` — บังคับ overflow-y เป็น auto ทำให้ sticky ของหัวเว็บตาย (INC-0060 / INC-0067)",
   );
+}
+
+// ───────────────────────────────────────────────────────────────
+// 4.5 ตรวจ "CSS ที่ย่อแล้วจริง" ไม่ใช่แค่ source (บทเรียน INC-0108)
+//
+// รอบแรกของการแก้เขียน translate3d(0,0,0) ไว้ถูกต้องใน source และด่านนี้ก็ผ่าน
+// แต่ Lightning CSS ยุบมันเหลือ translate(0,0) ตอน build → ของที่ขึ้น production
+// เป็น transform 2 มิติที่ไม่บังคับเลเยอร์ GPU เลย = แก้ไปแล้วเหมือนไม่ได้แก้
+//
+// **บทเรียน: ด่านที่ตรวจแค่ source พิสูจน์ไม่ได้ว่าผู้ใช้ได้ของที่เราตั้งใจส่ง**
+// จึงต้องเอากฎจริงไปวิ่งผ่านตัวย่อตัวเดียวกับที่ build ใช้ แล้วดูผลลัพธ์
+// ───────────────────────────────────────────────────────────────
+if (headerRule) {
+  const THREE_D = /translateZ\(|translate3d\(|matrix3d\(|perspective\(|rotate[XY]\(/;
+  try {
+    // ใช้ type จริงของ lightningcss เอง — อย่า cast ทับ (code เป็น Uint8Array ไม่ใช่ Buffer)
+    const { transform } = await import("lightningcss");
+    const minified = transform({
+      filename: "sticky-header-probe.css",
+      code: Buffer.from(`[data-site-header]{${headerRule[1]}}`),
+      minify: true,
+    }).code.toString();
+
+    if (!THREE_D.test(minified)) {
+      failures.push(
+        `globals.css: หลังย่อด้วย Lightning CSS แล้ว \`[data-site-header]\` ไม่เหลือ transform 3 มิติเลย ` +
+          `จึงไม่ได้เลเยอร์ compositor บน production (ได้: "${minified}") — ใช้ \`translateZ(0)\` (INC-0108)`,
+      );
+    }
+  } catch {
+    // lightningcss มาแบบ transitive dependency ของ @tailwindcss/postcss
+    // ถ้าหาไม่เจอให้ข้ามด่านย่อยนี้ ไม่ทำให้ CI ล้มทั้งชุด (หลัก Ratchet · INC-0007)
+    console.warn("   ⚠️  ข้ามการตรวจ CSS ที่ย่อแล้ว — โหลด lightningcss ไม่ได้ในสภาพแวดล้อมนี้");
+  }
 }
 
 // ───────────────────────────────────────────────────────────────
@@ -207,4 +253,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log("✅ ด่านหัวเว็บ sticky ผ่านครบ 6 ข้อ (ป้าย · เลเยอร์ compositor · safe-area · body > * · overflow · ไม่มี fixed ซ้อน)");
+console.log("✅ ด่านหัวเว็บ sticky ผ่านครบ (ป้าย · เลเยอร์ compositor ที่รอดการย่อ CSS · โล่กันเนื้อหาโผล่ · safe-area · body > * · overflow · ไม่มี fixed ซ้อน · ไม่มี scroll container ครอบ)");
