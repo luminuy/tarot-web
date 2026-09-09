@@ -35,6 +35,75 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-09 (รอบ 7): 🧭 กวาดหน้าที่ "ไม่มีหัวเว็บ" ให้ครบทั้งเว็บ + ปิดช่อง 404 ดีฟอลต์ของ Next (INC-0112)
+
+> **คำสั่งเจ้าของ**: "ไปเพิ่มหน้าที่ไม่มีหัวเว็บให้ครบ" — ต่อจากรอบที่แล้วที่แก้ไปเฉพาะหน้าอังกฤษ (INC-0110)
+
+**วิธีหาว่าหน้าไหนยังไม่มีหัวเว็บ** — ไม่เดาจาก source แต่ build จริงแล้วสแกน HTML ทั้ง 309 ไฟล์
+
+```
+$ find .next/server/app -name "*.html" | xargs grep -L 'data-site-header="'
+_global-error.html · _not-found.html · admin.html · admin/login.html
+readers/console.html · reading/chat.html · reset-password.html · tester.html
+(+ /readers/queue/[id] และ /s/[id] ที่เป็น dynamic จึงไม่มีไฟล์ให้สแกน)
+```
+
+**สิ่งที่พบระหว่างทาง (ใหญ่กว่าที่คิด)** — วัดจาก production build ด้วย Chromium
+
+```
+$ curl -s localhost:3113/zzz-unknown | grep "This page could not be found"
+พบ   ← หน้า 404 ดีฟอลต์ของ Next ภาษาอังกฤษล้วน ไม่มีแบรนด์ ไม่มีหัวเว็บ ไม่มีลิงก์กลับเข้าเว็บ
+```
+
+โปรเจกต์มีหน้า 404 ภาษาไทยอยู่แล้วที่ `src/app/(th)/not-found.tsx` แต่มันทำงานเฉพาะตอน
+`notFound()` ถูกเรียกจากหน้าในกลุ่ม `(th)` เท่านั้น · URL ที่ไม่ตรง route ไหนเลย (พิมพ์ผิด ·
+ลิงก์เก่าใน SERP) ตกไปหน้าดีฟอลต์ของ Next ทั้งหมด เพราะ root layout ของเว็บนี้มีสองตัว
+และอยู่ใน route group ทั้งคู่ Next จึงหา root not-found ไม่เจอถ้าไม่มีไฟล์วางไว้นอกกลุ่ม
+
+**สิ่งที่ทำ**
+
+| # | ไฟล์ | สิ่งที่แก้ |
+| :-- | :--- | :--- |
+| 1 | `src/app/_shared/pages/not-found.tsx` (ใหม่) | ย้ายเนื้อหน้า 404 มาไว้ที่เดียว พร้อม `<SiteHeader />` + `<SiteFooter />` |
+| 2 | `src/app/not-found.tsx` (ใหม่) | หน้า 404 ของ URL ที่ไม่ตรง route ไหนเลย — อยู่นอก route group จึงต้องหยิบ `globals.css` · ตัวแปรฟอนต์ · `LocaleProvider` มาเอง |
+| 3 | `src/app/(th)/not-found.tsx` | เรียกเนื้อร่วมจากข้อ 1 (เดิมไม่มีหัวเว็บและไม่มีฟุตเตอร์) |
+| 4 | `src/app/(th)/reset-password/layout.tsx` | เพิ่มหัวเว็บ/ฟุตเตอร์ — ผู้ใช้เข้าจากลิงก์ในอีเมล ถ้าลิงก์หมดอายุจะไปไหนต่อไม่ได้เลย |
+| 5 | `src/app/(th)/readers/queue/layout.tsx` | เพิ่มหัวเว็บ/ฟุตเตอร์ — หน้าของ "ลูกค้า" ที่เปิดค้างไว้รอคิวแม่หมอ |
+| 6 | `scripts/qa/test-sticky-header.ts` | ขยายด่านที่ 39 ให้ตรวจ **ทุกหน้าทั้งเว็บ** ไม่ใช่เฉพาะ `/en` |
+
+**หน้าที่ตั้งใจไม่มีหัวเว็บ (ขึ้นทะเบียนไว้ในด่านพร้อมเหตุผลรายข้อ)**
+`/admin` · `/admin/login` · `/tester` · `/readers/console` (แผงหลังบ้าน ธีมคนละชุด noindex) ·
+`/reading/chat` (มีแถบหัวบางของตัวเองพร้อมปุ่มกลับ) · `/s/[id]` (พาไปหน้าแรกใน 1 วินาที) ·
+`_global-error` (อยู่นอก root layout จึงไม่มี LocaleProvider ให้หัวเว็บใช้)
+
+**ผลหลังแก้** — วัดด้วย Chromium headless บน production build
+
+```
+/zzz-unknown        → HTTP 404 · header=1 · footer=1 · ไทยครบ
+/en/zzz             → HTTP 404 · header=1 · footer=1
+/cards/<ไม่มีจริง>  → HTTP 404 · header=1 (ไม่ซ้อนสองอัน)
+/reset-password     → header=1 · /readers/queue/<id> → header=1
+/ · /cards · /en · /en/cards · /spreads · /privacy · /daily → header=1 spacer=1 ทุกหน้า
+```
+
+**ทดสอบด่านด้วยการทำให้พังจริง 5 เคส จับได้ครบ 5**
+ลบ `<SiteHeader />` ออกจาก layout ของ `/cards` (จับได้ 10 หน้า) · ลบแอตทริบิวต์ออกจาก HTML ที่ build แล้ว ·
+ใส่รายการยกเว้นที่ชี้ไปหน้าที่ไม่มีอยู่จริง · ลบ `<SiteHeader />` ออกจาก `TarotFlow` (หน้าแรกได้หัวเว็บทางอ้อม) ·
+ซ่อน `src/app/not-found.tsx`
+
+> ⚠️ **กับดักที่เจอตอนเขียนด่าน**: เวอร์ชันแรกตาม `import` ทุกเส้นแบบไล่ลึก ทำให้ด่าน "ผ่าน"
+> ทั้งที่ลบหัวเว็บออกจาก layout ของ `/cards` จริง ๆ เพราะไปเจอคำว่า `SiteHeader` ในโมดูลที่หน้านั้น
+> import มาแต่ไม่เคยเรนเดอร์ — แก้เป็นตามเฉพาะคอมโพเนนต์ที่ถูกเรนเดอร์จริงในเจเอสเอ็กซ์
+>
+> ⚠️ **กับดักที่สอง**: รอบแรกให้ `src/app/not-found.tsx` เรนเดอร์ `RootHtml` (ซึ่งมี `<html>`) ตามที่คู่มือ
+> Next บอกไว้เรื่อง multiple root layouts — เปิดดู HTML ที่ build ออกมาจริงแล้วพบ `<html>` ซ้อนอยู่ใน
+> `<body>` เพราะ Next ครอบเปลือกของมันเองให้ชั้นนี้อยู่แล้ว เบราว์เซอร์กู้หน้าให้ดูปกติจนแทบไม่มีใครจับได้
+> แต่ `<head>` ชั้นในถูกทิ้งทั้งก้อน · แก้เป็นเรนเดอร์เฉพาะเนื้อ แล้วหยิบ globals.css/ฟอนต์/LocaleProvider มาเอง
+
+**ผลตรวจ**: `npm run repo:verify` ➔ ✅ 39/39 · `npm run typecheck` ➔ ✅ 0 errors
+
+---
+
 ### 🗓️ 2026-09-09 (รอบ 6): 🚨 แก้แล้วแต่ยังเล่นได้อยู่ — ธงระบบสิทธิ์ถูกปิดค้างบน production (INC-0111)
 
 > **เจ้าของรายงานพร้อมภาพหน้าจอ**: หลัง deploy รอบ 5 แล้ว ยังกดเปิดไพ่ได้โดยไม่ต้องล็อกอิน
