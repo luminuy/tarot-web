@@ -8,7 +8,7 @@
  *
  * ไฟล์นี้เป็นฟังก์ชันบริสุทธิ์ล้วน ไม่แตะ DOM ไม่แตะ network
  * ทุกหน้า **ต้อง** สร้าง title ผ่าน `pickTitle()` และ description ผ่าน `clampDescription()`
- * ด่านที่ 40 (`scripts/qa/test-meta-length.ts`) วัดจาก HTML ที่ build ออกมาจริงทุกหน้า
+ * ด่านที่ 41 (`scripts/qa/test-meta-length.ts`) วัดจาก HTML ที่ build ออกมาจริงทุกหน้า
  */
 
 /** ท้าย title ที่ `template: "%s · SeerTarot"` ใน layout เติมให้เองทุกหน้า */
