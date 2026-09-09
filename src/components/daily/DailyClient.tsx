@@ -175,7 +175,7 @@ export function DailyClient() {
                         soundManager.playMenuTapSound();
                         setSelectedFocus(chamber.id);
                       }}
-                      className={`text-left p-4 sm:p-4.5 rounded-2xl border transition-all duration-200 cursor-pointer relative flex flex-col justify-between ${
+                      className={`text-left p-4 sm:p-4.5 rounded-2xl border transition duration-200 cursor-pointer relative flex flex-col justify-between ${
                         isSelected
                           ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-raised"
                           : "altar-card-porcelain hover:border-[#A58A5C]/60 hover:shadow-xs"
@@ -322,7 +322,7 @@ export function DailyClient() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Link
                 href="/love/1-card"
-                className="altar-card-porcelain rounded-xl p-4 block text-left transition-all"
+                className="altar-card-porcelain rounded-xl p-4 block text-left transition"
               >
                 <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
                   {isEnglish ? "Love Tarot" : "ความรัก"}
@@ -339,7 +339,7 @@ export function DailyClient() {
 
               <Link
                 href="/cards/birth-card"
-                className="altar-card-porcelain rounded-xl p-4 block text-left transition-all"
+                className="altar-card-porcelain rounded-xl p-4 block text-left transition"
               >
                 <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
                   {isEnglish ? "Numerology" : "เลขศาสตร์"}
@@ -356,7 +356,7 @@ export function DailyClient() {
 
               <Link
                 href="/spreads"
-                className="altar-card-porcelain rounded-xl p-4 block text-left transition-all"
+                className="altar-card-porcelain rounded-xl p-4 block text-left transition"
               >
                 <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
                   {isEnglish ? "Spreads" : "ผังพยากรณ์"}

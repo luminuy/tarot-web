@@ -192,7 +192,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
               <Link
                 key={tab.id}
                 href={tab.href}
-                className={`p-2.5 rounded-xl border text-center transition-all duration-200 flex flex-col items-center justify-center gap-1 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
+                className={`p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-1 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
                   isActive
                     ? "border-2 border-[#A58A5C] bg-[#FFFFFF] shadow-xs"
                     : "border border-[#D5CEC2] bg-[#FAF7F2] hover:border-[#A58A5C] hover:bg-[#FFFFFF]"
@@ -235,7 +235,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                   contentVisibility: "auto",
                   containIntrinsicSize: "auto 380px",
                 }}
-                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#A58A5C] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#A58A5C] transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
               >
                 {/* Card Artwork */}
                 <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-[#D5CEC2] bg-[#EAE7E0] mb-2.5">

@@ -138,7 +138,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 ? "Search articles, card meanings, love, career, or spreads..."
                 : "ค้นหาบทความ ความหมายไพ่ ความรัก การงาน หรือผังพยากรณ์..."
             }
-            className="w-full bg-[#FFFFFF] border border-[#D5CEC2] rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-[#29261F] placeholder:text-[#635B4E]/70 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A] shadow-[0_2px_8px_rgba(41,38,31,0.03)] transition-all font-serif-th"
+            className="w-full bg-[#FFFFFF] border border-[#D5CEC2] rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-[#29261F] placeholder:text-[#635B4E]/70 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A] shadow-[0_2px_8px_rgba(41,38,31,0.03)] transition font-serif-th"
           />
           <SearchTabIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8F5C1A]" />
           {searchQuery && (
@@ -162,7 +162,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   soundManager.playMenuTapSound();
                   setSelectedCat(cat.id);
                 }}
-                className={`rounded-full px-4 py-1.5 text-xs font-serif-th font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`rounded-full px-4 py-1.5 text-xs font-serif-th font-semibold transition cursor-pointer flex items-center gap-1.5 ${
                   isSelected
                     ? "bg-[#29261F] text-[#F3F0EA] border border-[#29261F] shadow-xs"
                     : "bg-[#FFFFFF] border border-[#D5CEC2] text-[#635B4E] hover:border-[#8F5C1A] hover:text-[#8F5C1A] shadow-2xs"
@@ -195,13 +195,13 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
           : featured.readTime;
 
         return (
-          <div className="rounded-2xl border border-[#D9C8AC] bg-gradient-to-br from-[#FFFFFF] via-[#FAF7F2] to-[#F5EFE4] p-6 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(41,38,31,0.05)] relative overflow-hidden group hover:border-[#8F5C1A] transition-all duration-300">
+          <div className="rounded-2xl border border-[#D9C8AC] bg-gradient-to-br from-[#FFFFFF] via-[#FAF7F2] to-[#F5EFE4] p-6 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(41,38,31,0.05)] relative overflow-hidden group hover:border-[#8F5C1A] transition duration-300">
             {/* Subtle Ambient Gold Hairline */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-[#8F5C1A]/40 to-transparent pointer-events-none" />
 
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 relative z-10">
               {/* 1909 Rider-Waite Card Art Showcase */}
-              <div className="w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-[#D9C8AC] shadow-md group-hover:scale-105 group-hover:border-[#8F5C1A] transition-all duration-300 bg-[#F3EDE2] flex-shrink-0 relative">
+              <div className="w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-[#D9C8AC] shadow-md group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2] flex-shrink-0 relative">
                 <CardImage
                   image={featArt.image}
                   alt={featArt.alt}
@@ -236,7 +236,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   </span>
                   <Link
                     href={`/blog/${featured.slug}`}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#29261F] hover:bg-[#8F5C1A] text-[#F3F0EA] font-semibold text-xs transition-all font-serif-th shadow-sm group/btn"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#29261F] hover:bg-[#8F5C1A] text-[#F3F0EA] font-semibold text-xs transition font-serif-th shadow-sm group/btn"
                   >
                     <span>{isEnglish ? "Read Full Codex" : "อ่านคัมภีร์ฉบับเต็ม"}</span>
                     <span className="transition-transform group-hover/btn:translate-x-0.5">→</span>
@@ -297,7 +297,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               return (
                 <article
                   key={article.slug}
-                  className="rounded-2xl border border-[#D9C8AC] bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-[#8F5C1A] transition-all duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
+                  className="rounded-2xl border border-[#D9C8AC] bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-[#8F5C1A] transition duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
                 >
                   <div className="space-y-3.5">
                     {/* Header: Category & Read Time */}
@@ -322,7 +322,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                       </div>
 
                       {/* 1909 Card Miniature */}
-                      <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-xs group-hover:scale-105 group-hover:border-[#8F5C1A] transition-all duration-300 bg-[#F3EDE2] flex-shrink-0 relative">
+                      <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-xs group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2] flex-shrink-0 relative">
                         <CardImage
                           image={cardArt.image}
                           alt={cardArt.alt}
@@ -351,7 +351,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                     <Link
                       href={`/blog/${article.slug}`}
                       prefetch={false}
-                      className="inline-flex items-center gap-1 text-xs text-[#29261F] group-hover:text-[#8F5C1A] group-hover:translate-x-0.5 transition-all font-serif-th font-bold flex-shrink-0"
+                      className="inline-flex items-center gap-1 text-xs text-[#29261F] group-hover:text-[#8F5C1A] group-hover:translate-x-0.5 transition font-serif-th font-bold flex-shrink-0"
                     >
                       <span>{isEnglish ? "Read Codex" : "อ่านต่อ"}</span>
                       <span>→</span>

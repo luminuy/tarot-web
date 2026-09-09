@@ -40,7 +40,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
         aria-modal="true"
         aria-label={isEnglish ? `Zoom card ${card.nameEn || card.nameTh}` : `ซูมดูไพ่ ${card.nameTh} (${card.nameEn})`}
         onClick={onClose}
-        className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-[#2E211A]/50 backdrop-blur-[3px] cursor-zoom-out"
+        className="fixed inset-0 z-60 flex items-center justify-center p-4 modal-scrim cursor-zoom-out"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.85, y: 30 }}
@@ -54,7 +54,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label={isEnglish ? "Close card zoom view" : "ปิดหน้าต่างซูมไพ่"}
-            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
             ✕
           </button>
@@ -103,7 +103,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           <button
             type="button"
             onClick={() => setFlipped(!flipped)}
-            className="w-full py-2.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-xs font-serif-th font-semibold text-[#2E211A] hover:bg-[#F3EDE2] transition-all cursor-pointer "
+            className="w-full py-2.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-xs font-serif-th font-semibold text-[#2E211A] hover:bg-[#F3EDE2] transition cursor-pointer "
           >
             {isEnglish ? "Flip Card / View Back" : "พลิกดูหน้าไพ่ / หลังไพ่"}
           </button>

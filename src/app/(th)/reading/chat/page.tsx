@@ -98,7 +98,7 @@ export default function ReadingChatPage() {
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#29261F] px-6 py-2.5 font-serif-th text-xs font-bold text-[#F3F0EA] transition-all hover:bg-[#A58A5C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#29261F] px-6 py-2.5 font-serif-th text-xs font-bold text-[#F3F0EA] transition hover:bg-[#A58A5C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
             >
               {isEnglish ? "Begin Tarot Reading" : "ไปเปิดไพ่"}
             </Link>

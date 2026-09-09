@@ -193,7 +193,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
               size="sm"
               onClick={probe}
               disabled={loading}
-              className="bg-[#29261F] hover:bg-[#171512] text-white font-medium text-xs shadow-xs border-transparent transition-all"
+              className="bg-[#29261F] hover:bg-[#171512] text-white font-medium text-xs shadow-xs border-transparent transition"
             >
               {loading ? "กำลังยิงตรวจสัญญาณ…" : "ยิงตรวจสัญญาณสดทั้งหมด"}
             </Button>
@@ -482,7 +482,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                       type="button"
                       onClick={rebuildSearchIndex}
                       disabled={rebuild.busy}
-                      className="rounded-lg border border-[#D5CEC2] bg-[#FAF8F5] px-2.5 py-1 text-[11px] font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] disabled:opacity-50 cursor-pointer transition-all shadow-2xs"
+                      className="rounded-lg border border-[#D5CEC2] bg-[#FAF8F5] px-2.5 py-1 text-[11px] font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] disabled:opacity-50 cursor-pointer transition shadow-2xs"
                     >
                       {rebuild.busy ? "กำลัง index…" : "สร้าง index ใหม่"}
                     </button>

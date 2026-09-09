@@ -72,7 +72,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
   return (
     <section
       aria-label={isEnglish ? "Semantic feelings search results" : "ผลลัพธ์การค้นหาด้วยความรู้สึก"}
-      className="rounded-2xl border border-[#A58A5C]/40 bg-[#FAF7F2] p-5 sm:p-7 space-y-6 shadow-md transition-all duration-300"
+      className="rounded-2xl border border-[#A58A5C]/40 bg-[#FAF7F2] p-5 sm:p-7 space-y-6 shadow-md transition duration-300"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-4 border-b border-[#D5CEC2]/60 pb-4">
@@ -167,7 +167,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
             const keywords = card.keywords.upright.slice(0, 2).join(", ");
 
             const content = (
-              <div className="flex items-center gap-3.5 p-3 rounded-xl border border-[#D5CEC2] bg-white hover:border-[#A58A5C] transition-all duration-200 shadow-xs group h-full">
+              <div className="flex items-center gap-3.5 p-3 rounded-xl border border-[#D5CEC2] bg-white hover:border-[#A58A5C] transition duration-200 shadow-xs group h-full">
                 {/* 1909 Rider-Waite Authentic Artwork */}
                 <div className="w-12 h-20 shrink-0 overflow-hidden rounded-lg border border-[#D5CEC2] bg-[#EAE7E0] relative">
                   <CardImage

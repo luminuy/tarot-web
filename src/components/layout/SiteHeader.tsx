@@ -101,7 +101,7 @@ export function SiteHeader({
             aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
             className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
           >
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition-all duration-300">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition duration-300">
               <img
                 src="/logo.webp"
                 alt="SeerTarot"

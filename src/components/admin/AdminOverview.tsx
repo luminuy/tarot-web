@@ -199,7 +199,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               size="sm"
               onClick={loadData}
               disabled={loading}
-              className="border-[#D5CEC2] bg-[#FAF8F5] text-xs font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition-all"
+              className="border-[#D5CEC2] bg-[#FAF8F5] text-xs font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition"
             >
               {loading ? "กำลังซิงก์ข้อมูล…" : "รีเฟรชข้อมูลสด"}
             </Button>
@@ -207,7 +207,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#29261F] bg-[#29261F] px-4 py-2 text-xs font-semibold text-white hover:bg-[#171512] transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#29261F] bg-[#29261F] px-4 py-2 text-xs font-semibold text-white hover:bg-[#171512] transition shadow-xs"
             >
               <span>ดูหน้าเว็บจริง</span>
               <span className="text-[11px] opacity-75">↗</span>
@@ -219,7 +219,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
       {/* Primary KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Total Users */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition-all">
+        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#635B4E]">สมาชิกทั้งหมดใน D1</span>
             <span className="rounded-full bg-[#FAF8F5] px-2 py-0.5 text-[11px] font-mono text-[#29261F] border border-[#D5CEC2]">
@@ -239,7 +239,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         </div>
 
         {/* KPI 2: Total Readings */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition-all">
+        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#635B4E]">การเปิดไพ่สะสม</span>
             <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-mono text-emerald-700 border border-emerald-200 font-semibold">
@@ -262,7 +262,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         </div>
 
         {/* KPI 3: System Health */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition-all">
+        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#635B4E]">สถานะระบบคลาวด์</span>
             <span
@@ -291,7 +291,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         </div>
 
         {/* KPI 4: Security & Safety */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition-all">
+        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[#635B4E]">ความปลอดภัย & โควตา</span>
             <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-mono text-rose-700 border border-rose-200 font-semibold">
@@ -406,7 +406,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             <button
               type="button"
               onClick={() => onNavigateTab("content")}
-              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition-all cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 
@@ -422,7 +422,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               type="button"
               onClick={handleRebuildIndex}
               disabled={rebuildingIndex}
-              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition-all cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 
@@ -439,7 +439,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             <a
               href="/api/admin/marketing?format=csv"
               download
-              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition-all shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 
@@ -454,7 +454,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             <button
               type="button"
               onClick={() => onNavigateTab("entitlement")}
-              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition-all cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 

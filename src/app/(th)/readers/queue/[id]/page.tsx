@@ -184,7 +184,7 @@ export default function CustomerQueuePage() {
                   href={reader.lineUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#06c755] hover:bg-[#05b34c] text-white font-serif-th font-bold text-sm shadow-[0_0_25px_rgba(6,199,85,0.4)] transition-all"
+                  className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[#06c755] hover:bg-[#05b34c] text-white font-serif-th font-bold text-sm shadow-[0_0_25px_rgba(6,199,85,0.4)] transition"
                 >
                   <span>เปิดสนทนากับแม่หมอผ่าน LINE</span>
                   <span>→</span>

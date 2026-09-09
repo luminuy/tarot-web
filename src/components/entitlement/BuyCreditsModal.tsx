@@ -166,7 +166,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                     type="button"
                     aria-pressed={isSelected}
                     onClick={() => setSelectedPkgId(pkg.id)}
-                    className={`rounded-lg p-4 border transition-all duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+                    className={`rounded-lg p-4 border transition duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                       isSelected
                         ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/70 scale-[1.02]"
                         : "bg-[#FFFFFF] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#F3EDE2]"
@@ -199,7 +199,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               type="button"
               disabled={loading}
               onClick={handleStartCheckout}
-              className="w-full py-3.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th text-sm active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span>{isEn ? "Preparing transaction..." : "กำลังเตรียมรายการ..."}</span>
@@ -259,7 +259,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                 type="button"
                 disabled={loading}
                 onClick={handleConfirmPayment}
-                className="w-full py-3.5 rounded-lg bg-[#3A7044] hover:bg-[#3A7044] text-white font-bold font-serif-th text-sm active:scale-[0.98] transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-lg bg-[#3A7044] hover:bg-[#3A7044] text-white font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer"
               >
                 {loading
                   ? (isEn ? "Verifying payment..." : "กำลังตรวจสอบรายการ...")

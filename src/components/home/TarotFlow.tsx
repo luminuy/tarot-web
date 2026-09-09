@@ -1167,7 +1167,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-[#F3F0EA] font-bold bg-[#29261F] hover:bg-[#A58A5C] px-4 py-1.5 sm:py-2 rounded-full transition-all cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
+                className="text-xs text-[#F3F0EA] font-bold bg-[#29261F] hover:bg-[#A58A5C] px-4 py-1.5 sm:py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
               >
                 {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
               </button>
@@ -1194,7 +1194,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-4 py-1.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs transition-all cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
+                className="px-4 py-1.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs transition cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
               >
                 {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
               </button>
@@ -1502,7 +1502,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       href="/reading/chat"
                       onClick={() => soundManager.playCardSelectSound()}
                       aria-label={isEnglish ? `Chat online with ${selectedPersona.nameEn || selectedPersona.nameTh}` : `แชทออนไลน์กับ${selectedPersona.nameTh}`}
-                      className="group flex flex-col gap-3 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 shadow-xs transition-all hover:border-[#A58A5C] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
+                      className="group flex flex-col gap-3 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 shadow-xs transition hover:border-[#A58A5C] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
                     >
                       <span className="flex items-center justify-between gap-2">
                         <span className="relative flex h-14 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#D5CEC2] bg-[#F3EDE2]">
@@ -1548,7 +1548,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       soundManager.playCardSelectSound();
                       setIsShareOpen(true);
                     }}
-                    className="py-3 px-5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] font-serif-th text-xs transition-all cursor-pointer flex items-center gap-2 shadow-xs"
+                    className="py-3 px-5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] font-serif-th text-xs transition cursor-pointer flex items-center gap-2 shadow-xs"
                   >
                     {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
                   </button>
@@ -1556,7 +1556,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="py-3 px-6 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    className="py-3 px-6 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs active:scale-95 transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                   >
                     {isEnglish ? "Start Another Reading" : "ดูดวงเรื่องอื่นต่อ"}
                   </button>

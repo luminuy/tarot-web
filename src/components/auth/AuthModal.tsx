@@ -238,7 +238,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2E211A]/50 backdrop-blur-[3px]"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-modal-title"
@@ -260,7 +260,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label={isEn ? "Close authentication window" : "ปิดหน้าต่างเข้าสู่ระบบ"}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] hover:text-[#A58A5C] hover:border-[#A58A5C] hover:bg-[#FFFFFF] text-xs flex items-center justify-center transition-all cursor-pointer"
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] hover:text-[#A58A5C] hover:border-[#A58A5C] hover:bg-[#FFFFFF] text-xs flex items-center justify-center transition cursor-pointer"
           >
             ✕
           </button>
@@ -268,7 +268,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Seer Brand Logo Frame */}
           <div className="relative mb-3.5 group select-none">
             {/* Circular Seer Brand Logo */}
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition-all duration-300 shadow-xs">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition duration-300 shadow-xs">
               <img
                 src="/logo.webp"
                 alt="SeerTarot"
@@ -314,7 +314,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
-                className={`py-2 rounded-full text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                   mode === "signin" ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
                 }`}
               >
@@ -325,7 +325,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => switchMode("signup")}
-                className={`py-2 rounded-full text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                   mode === "signup" ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
                 }`}
               >
@@ -368,7 +368,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={isEn ? "e.g. Alex, Sarah, Morgan" : "เช่น ฟ้า, พลอย, บิ๊ก"}
-                    className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-serif-th placeholder-[#756F66]/50 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
+                    className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-serif-th placeholder-[#756F66]/50 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition"
                   />
                 </div>
               </div>
@@ -391,7 +391,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-serif-th placeholder-[#756F66]/50 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
+                  className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-serif-th placeholder-[#756F66]/50 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition"
                 />
               </div>
             </div>
@@ -427,7 +427,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={mode === "signup" ? (isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร") : "••••••••••"}
-                    className="w-full h-11 pl-9 pr-12 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-serif-th placeholder-[#756F66]/50 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
+                    className="w-full h-11 pl-9 pr-12 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-serif-th placeholder-[#756F66]/50 focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition"
                   />
                   <button
                     type="button"
@@ -448,7 +448,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         return (
                           <div
                             key={step}
-                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                            className={`h-1.5 rounded-full transition duration-300 ${
                               active
                                 ? strength.score <= 1
                                   ? "bg-[#A6392C]"
@@ -486,7 +486,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="submit"
               disabled={loading || turnstileToken === ""}
               aria-busy={loading}
-              className="w-full h-11.5 mt-2 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs sm:text-sm active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
+              className="w-full h-11.5 mt-2 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs sm:text-sm active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
             >
               {loading ? (
                 <span>{isEn ? "Processing…" : "กำลังดำเนินการ…"}</span>
@@ -532,7 +532,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={handleLoginGoogle}
-              className="py-2.5 px-3.5 rounded-full bg-[#FFFFFF] hover:bg-[#EAE7E0] border border-[#D5CEC2] hover:border-[#A58A5C] text-[#29261F] font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
+              className="py-2.5 px-3.5 rounded-full bg-[#FFFFFF] hover:bg-[#EAE7E0] border border-[#D5CEC2] hover:border-[#A58A5C] text-[#29261F] font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
             >
               <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 border border-[#D5CEC2]">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
@@ -561,7 +561,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={handleLoginLine}
-              className="py-2.5 px-3.5 rounded-full bg-[#FFFFFF] hover:bg-[#F0FFF4] border border-[#06C755]/40 hover:border-[#06C755] text-[#3A7044] font-serif-th font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
+              className="py-2.5 px-3.5 rounded-full bg-[#FFFFFF] hover:bg-[#F0FFF4] border border-[#06C755]/40 hover:border-[#06C755] text-[#3A7044] font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
             >
               <div className="w-5 h-5 rounded-full bg-[#06C755] flex items-center justify-center flex-shrink-0 text-white">
                 <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">

@@ -77,7 +77,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
           <button
             type="button"
             onClick={() => setSelectedSpecialty("all")}
-            className={`px-3.5 py-1 rounded-full text-xs font-serif-th transition-all duration-200 cursor-pointer ${
+            className={`px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
               selectedSpecialty === "all"
                 ? "bg-[#29261F] text-[#F3F0EA] font-bold shadow-xs"
                 : "bg-[#EAE7E0] text-[#29261F] border border-[#D5CEC2] hover:border-[#A58A5C]"
@@ -90,7 +90,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               key={spec}
               type="button"
               onClick={() => setSelectedSpecialty(spec)}
-              className={`px-3.5 py-1 rounded-full text-xs font-serif-th transition-all duration-200 cursor-pointer ${
+              className={`px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
                 selectedSpecialty === spec
                   ? "bg-[#29261F] text-[#F3F0EA] font-bold shadow-xs"
                   : "bg-[#EAE7E0] text-[#29261F] border border-[#D5CEC2] hover:border-[#A58A5C]"
@@ -123,7 +123,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
           {filtered.map((reader) => (
             <div
               key={reader.id}
-              className="bg-[#FFFFFF] border border-[#D5CEC2] rounded-xl p-5 flex flex-col justify-between hover:border-[#A58A5C] transition-all duration-300 group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
+              className="bg-[#FFFFFF] border border-[#D5CEC2] rounded-xl p-5 flex flex-col justify-between hover:border-[#A58A5C] transition duration-300 group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
             >
               <div className="space-y-4">
                 {/* Header: Avatar + Name */}
@@ -170,7 +170,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               <div className="pt-5 border-t border-[#D5CEC2]/40 mt-4">
                 <Link
                   href={`/readers/${reader.id}`}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] text-xs font-serif-th font-bold transition-all shadow-sm"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] text-xs font-serif-th font-bold transition shadow-sm"
                 >
                   <span>ดูโปรไฟล์ &amp; จองคิว</span>
                   <span>→</span>

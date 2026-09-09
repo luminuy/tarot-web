@@ -151,7 +151,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       >
         {/* Card Container with Active Glow */}
         <div
-          className={`relative transition-all duration-300 rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] ${
+          className={`relative transition duration-300 rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] ${
             isCurrentReading
               ? "ring-4 ring-[#8F5C1A] ring-offset-2 ring-offset-[#F3EDE2] shadow-overlay scale-105"
               : "hover:scale-105"
@@ -164,7 +164,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
                 e.stopPropagation();
                 onZoomCard(drawn);
               }}
-              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] text-[#2E211A] hover:text-[#8F5C1A] transition-all duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
+              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] text-[#2E211A] hover:text-[#8F5C1A] transition duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
               title={isEnglish ? "Zoom 3D High-Definition Card" : "ซูมดูไพ่ 3D ความละเอียดสูง"}
             >
               <ExpandTabIcon className="w-3 h-3 text-[#8F5C1A] group-hover:text-[#74490F] transition-colors" />
@@ -237,7 +237,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             <button
               type="button"
               onClick={onRevealAll}
-              className="px-3.5 py-1.5 rounded-full text-xs font-serif-th font-bold bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] transition-all cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] active:scale-95"
+              className="px-3.5 py-1.5 rounded-full text-xs font-serif-th font-bold bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] transition cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] active:scale-95"
             >
               
               <span>{isEnglish ? "Reveal All Cards" : "พลิกดูไพ่ทั้งหมด"}</span>
@@ -282,7 +282,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(-1)}
             disabled={!canScrollLeft}
             aria-label={isEnglish ? "Scroll left" : "เลื่อนดูไพ่ทางซ้าย"}
-            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[#2E211A] transition-all hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[#2E211A] transition hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
               canScrollLeft ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -293,7 +293,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(1)}
             disabled={!canScrollRight}
             aria-label={isEnglish ? "Scroll right" : "เลื่อนดูไพ่ทางขวา"}
-            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[#2E211A] transition-all hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[#2E211A] transition hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
               canScrollRight ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >

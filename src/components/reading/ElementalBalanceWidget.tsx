@@ -33,7 +33,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
       : `ธาตุ${breakdown.dominantElement}เด่น`;
 
   return (
-    <div className="my-6 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-5 transition-all duration-300">
+    <div className="my-6 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-5 transition duration-300">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between border-b border-[#D9C8AC]/30 pb-3">
         <div className="flex items-center gap-2">

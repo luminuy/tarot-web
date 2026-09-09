@@ -183,7 +183,7 @@ export async function SpreadTopicBody({
               <Link
                 key={t.slug}
                 href={`/spreads/topic/${t.slug}`}
-                className={`px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap transition-all ${
+                className={`px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap transition ${
                   isActive
                     ? "bg-[#29261F] text-[#FAF8F5] shadow-xs"
                     : "bg-[#FFFFFF] border border-[#D5CEC2] text-[#4A4338] hover:border-[#A58A5C]"
@@ -281,7 +281,7 @@ export async function SpreadTopicBody({
                 <Link
                   key={t.slug}
                   href={`/spreads/topic/${t.slug}`}
-                  className="p-3 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] hover:border-[#A58A5C] text-center transition-all group"
+                  className="p-3 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] hover:border-[#A58A5C] text-center transition group"
                 >
                   <div className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A]">
                     {tName}

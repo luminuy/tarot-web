@@ -129,7 +129,7 @@ const ChatMessageRenderer = React.memo<{ text: string; isError?: boolean }>(({ t
                 stiffness: 360,
                 damping: 25,
               }}
-              className="rounded-lg p-3.5 sm:p-4 bg-[#FFFFFF] border border-[#D9C8AC] space-y-1.5 transition-all duration-300 hover:border-[#8F5C1A]"
+              className="rounded-lg p-3.5 sm:p-4 bg-[#FFFFFF] border border-[#D9C8AC] space-y-1.5 transition duration-300 hover:border-[#8F5C1A]"
             >
               <div className="flex items-center gap-2 text-[#8F5C1A] font-bold text-xs sm:text-sm font-serif-th">
                 
@@ -158,7 +158,7 @@ const ChatMessageRenderer = React.memo<{ text: string; isError?: boolean }>(({ t
                 stiffness: 360,
                 damping: 25,
               }}
-              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300"
+              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300"
             >
               <span className="w-5 h-5 rounded-full bg-[#8F5C1A] text-[#FFFFFF] flex items-center justify-center text-[13px] font-bold shrink-0 mt-0.5 ">
                 {stepNum}
@@ -418,10 +418,10 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => sendMessage(q)}
-                  className="text-left font-serif-th text-xs text-[#2E211A] hover:text-[#8F5C1A] p-2.5 rounded-lg bg-[#F3EDE2] hover:bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all cursor-pointer flex items-center justify-between group "
+                  className="text-left font-serif-th text-xs text-[#2E211A] hover:text-[#8F5C1A] p-2.5 rounded-lg bg-[#F3EDE2] hover:bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] transition cursor-pointer flex items-center justify-between group "
                 >
                   <span>"{q}"</span>
-                  <span className="text-[#8F5C1A] text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all font-sans">
+                  <span className="text-[#8F5C1A] text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition font-sans">
                     ➔
                   </span>
                 </button>
@@ -529,21 +529,18 @@ isEnglish
             </div>
             <div className="rounded-lg rounded-tl-xs border border-[#D9C8AC] bg-[#FFFFFF] px-4 py-3 flex items-center gap-3">
               <span className="flex items-center gap-1.5" aria-hidden="true">
+                {/*
+                  * ⚠️ ห้ามเปลี่ยนกลับไปใช้ลูป `repeat: Infinity` ของ motion
+                  * จุดนี้ขึ้นตอน "แม่หมอกำลังพิมพ์ตอบ" ซึ่งเป็นวินาทีที่เธรดหลักยุ่งที่สุด
+                  * ของทั้งเว็บอยู่แล้ว (กำลังถอดสตรีมข้อความ + แทรก DOM ทีละก้อน)
+                  * เอาลูปที่คำนวณทุกเฟรมบนเธรดหลักไปวางทับพอดี = คำตอบไหลออกมาแบบกระตุก
+                  * `.anim-typing-dot` เป็น CSS keyframes (transform + opacity) วิ่งบน compositor
+                  */}
                 {[0, 1, 2].map((i) => (
-                  <motion.span
+                  <span
                     key={i}
-                    className="block h-2 w-2 rounded-full bg-[#8F5C1A]"
-                    animate={{
-                      y: [0, -7, 0],
-                      scale: [0.85, 1.3, 0.85],
-                      opacity: [0.45, 1, 0.45],
-                    }}
-                    transition={{
-                      duration: 0.95,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: i * 0.16,
-                    }}
+                    className="anim-typing-dot block h-2 w-2 rounded-full bg-[#8F5C1A]"
+                    style={{ "--dot-index": i } as React.CSSProperties}
                   />
                 ))}
               </span>
@@ -590,7 +587,7 @@ isEnglish
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => sendMessage(chip.query)}
-                className="text-[13px] text-[#2E211A] bg-[#F3EDE2] hover:bg-[#FFFFFF] hover:text-[#8F5C1A] border border-[#D9C8AC] hover:border-[#8F5C1A] rounded-full px-3.5 py-1.5 transition-all cursor-pointer font-serif-th active:scale-95"
+                className="text-[13px] text-[#2E211A] bg-[#F3EDE2] hover:bg-[#FFFFFF] hover:text-[#8F5C1A] border border-[#D9C8AC] hover:border-[#8F5C1A] rounded-full px-3.5 py-1.5 transition cursor-pointer font-serif-th active:scale-95"
               >
                 "{chip.label}"
               </motion.button>
@@ -618,7 +615,7 @@ isEnglish
             <button
               type="button"
               onClick={() => requestUpgrade("members_only")}
-              className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition-all cursor-pointer "
+              className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition cursor-pointer "
             >
               {isEnglish ? "Sign Up Free to Continue" : "สมัครสมาชิกฟรีเพื่อถามต่อ"}
             </button>
@@ -645,7 +642,7 @@ isEnglish
             <button
               type="button"
               onClick={() => requestUpgrade("daily_exhausted")}
-              className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition-all cursor-pointer "
+              className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#FFFFFF] transition cursor-pointer "
             >
               {isEnglish ? "Unlock Unlimited Consultation" : "เติมรอบดูดวงเพื่อถามต่อได้ไม่จำกัด"}
             </button>
@@ -658,7 +655,7 @@ isEnglish
             }}
             className="space-y-1.5"
           >
-            <div className="flex items-center gap-2 rounded-full border-2 border-[#D9C8AC] bg-[#FFFFFF] p-1.5 pl-4 sm:pl-5 shadow-[0_2px_12px_rgba(41,38,31,0.06)] focus-within:border-[#8F5C1A] focus-within:ring-2 focus-within:ring-[#8F5C1A]/20 transition-all">
+            <div className="flex items-center gap-2 rounded-full border-2 border-[#D9C8AC] bg-[#FFFFFF] p-1.5 pl-4 sm:pl-5 shadow-[0_2px_12px_rgba(41,38,31,0.06)] focus-within:border-[#8F5C1A] focus-within:ring-2 focus-within:ring-[#8F5C1A]/20 transition">
               <input
                 type="text"
                 placeholder={isEnglish ? `Ask ${personaName} anything about your spread...` : `พิมพ์ถาม ${persona.nameTh} ที่นี่...`}
@@ -673,7 +670,7 @@ isEnglish
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.92 }}
                 disabled={loading || !input.trim()}
-                className={`h-9 w-9 sm:h-10 sm:w-10 rounded-full flex items-center justify-center font-bold transition-all shrink-0 ${
+                className={`h-9 w-9 sm:h-10 sm:w-10 rounded-full flex items-center justify-center font-bold transition shrink-0 ${
                   input.trim() && !loading
                     ? "bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] shadow-[0_2px_8px_rgba(143,92,26,0.35)] cursor-pointer active:scale-95"
                     : "bg-[#EAE4D9] text-[#A59A88] cursor-not-allowed opacity-70"

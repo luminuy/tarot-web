@@ -176,7 +176,7 @@ export default function StatsDashboard() {
               key={d}
               type="button"
               onClick={() => setDays(d)}
-              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
+              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${
                 days === d
                   ? "bg-[#29261F] text-white shadow-xs"
                   : "border border-[#D5CEC2] bg-[#FAF8F5] text-[#635B4E] hover:bg-white hover:text-[#29261F]"

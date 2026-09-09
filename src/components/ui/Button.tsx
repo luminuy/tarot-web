@@ -11,7 +11,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className = "", variant = "gold", size = "md", isLoading, disabled, ...props }, ref) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-semibold transition-all duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] active:scale-[0.97] touch-manipulation cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
+      "inline-flex items-center justify-center font-semibold transition duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] active:scale-[0.97] touch-manipulation cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
 
     const sizeStyles = {
       sm: "px-3 py-1.5 text-xs rounded gap-1.5",

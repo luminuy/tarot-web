@@ -249,7 +249,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     handleCardClick();
                   }
                 }}
-                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition-all duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/card ${
+                className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/card ${
                   isSelected
                     ? "bg-[#FFFFFF] border-2 border-[#D9C8AC] ring-4 ring-[#8F5C1A]/20 shadow-overlay"
                     : isLocked
@@ -298,7 +298,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
                   {/* ตราผนึกญาณพิเศษ */}
                   {isLocked && (
-                    <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/card:border-[#D9C8AC] transition-all duration-300">
+                    <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/card:border-[#D9C8AC] transition duration-300">
                       <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
                       <span className="text-[13px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
                         {isEnglish ? "Tap to unlock this spread" : "แตะเพื่อปลดล็อกผังนี้"}
@@ -349,7 +349,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 onSelectSpread(spread);
                 scrollToCard(idx);
               }}
-              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+              className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 cursor-pointer ${
                 isCurrentActive
                   ? "w-7 bg-[#8F5C1A]"
                   : isSelected
@@ -367,7 +367,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-[#FFFFFF]/90 backdrop-blur-xl border border-[#D9C8AC]/50 shadow-overlay"
+          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC]/50 shadow-overlay"
         >
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}
@@ -419,7 +419,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           <button
             type="button"
             onClick={onProceed}
-            className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-white font-bold font-serif-th text-sm sm:text-base active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
+            className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-white font-bold font-serif-th text-sm sm:text-base active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2 whitespace-nowrap group"
           >
             <span>{proceedLabel ?? (isEnglish ? "Next: Set Intention & Choose Reader" : "ถัดไป: ตั้งคำถามและเลือกแม่หมอ")}</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>

@@ -136,7 +136,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           </div>
           <Link
             href={`/cards/${article.targetCardId}`}
-            className="shrink-0 px-4 py-2 rounded-full border border-[#D5CEC2] bg-[#EAE7E0] hover:bg-[#FFFFFF] text-[#29261F] hover:text-[#A58A5C] text-xs font-serif-th font-bold transition-all shadow-xs"
+            className="shrink-0 px-4 py-2 rounded-full border border-[#D5CEC2] bg-[#EAE7E0] hover:bg-[#FFFFFF] text-[#29261F] hover:text-[#A58A5C] text-xs font-serif-th font-bold transition shadow-xs"
           >
             {isEnglish ? "View 78-Card Details →" : "เปิดดูรายละเอียดไพ่ 78 ใบ →"}
           </Link>
@@ -176,7 +176,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             {effectiveFaqs.map((faq, idx) => (
               <details
                 key={idx}
-                className="group rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] overflow-hidden transition-all shadow-xs"
+                className="group rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] overflow-hidden transition shadow-xs"
               >
                 <summary className="w-full flex items-center justify-between p-4 text-left font-serif-th text-xs sm:text-sm font-semibold text-[#29261F] hover:text-[#A58A5C] transition-colors gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                   <span>{faq.question}</span>
@@ -214,7 +214,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         <div className="pt-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold text-sm hover:scale-[1.02] transition-all font-serif-th cursor-pointer shadow-sm"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold text-sm hover:scale-[1.02] transition font-serif-th cursor-pointer shadow-sm"
           >
             <span>{isEnglish ? "Begin Free Tarot Reading Now" : "เปิดไพ่ทำนายดวงชะตาฟรีทันที"}</span>
             <span>→</span>
@@ -267,7 +267,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                 <Link
                   key={rel.slug}
                   href={`/blog/${rel.slug}`}
-                  className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 space-y-2 hover:border-[#A58A5C] transition-all group flex flex-col justify-between shadow-[0_10px_30px_rgba(42,38,31,0.04)]"
+                  className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 space-y-2 hover:border-[#A58A5C] transition group flex flex-col justify-between shadow-[0_10px_30px_rgba(42,38,31,0.04)]"
                 >
                   <div className="space-y-1.5">
                     <div className="text-[13px] font-mono text-[#A58A5C] font-bold">{relCat}</div>

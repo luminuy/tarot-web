@@ -23,7 +23,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold text-sm font-serif-th active:scale-95 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="w-full py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold text-sm font-serif-th active:scale-95 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
           >
             ลองใหม่อีกครั้ง
           </button>

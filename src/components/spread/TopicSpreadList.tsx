@@ -30,7 +30,7 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
         return (
           <div
             key={spread.id}
-            className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 flex flex-col justify-between space-y-4 hover:border-[#A58A5C] transition-all duration-300 relative overflow-hidden shadow-xs hover:shadow-md"
+            className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 flex flex-col justify-between space-y-4 hover:border-[#A58A5C] transition duration-300 relative overflow-hidden shadow-xs hover:shadow-md"
           >
             {/* Badges */}
             <div className="flex items-center justify-between z-10">

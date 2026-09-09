@@ -113,7 +113,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
             <button
               type="button"
               onClick={() => setKind("walkup")}
-              className={`rounded-lg py-2 text-xs font-semibold border transition-all cursor-pointer ${
+              className={`rounded-lg py-2 text-xs font-semibold border transition cursor-pointer ${
                 kind === "walkup"
                   ? "bg-[#8F5C1A] border-[#D9C8AC] text-[#FFFFFF]"
                   : "bg-[#FFFFFF] border-[#D9C8AC] text-[#635B4E] hover:text-[#2E211A]"
@@ -124,7 +124,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
             <button
               type="button"
               onClick={() => setKind("booking")}
-              className={`rounded-lg py-2 text-xs font-semibold border transition-all cursor-pointer ${
+              className={`rounded-lg py-2 text-xs font-semibold border transition cursor-pointer ${
                 kind === "booking"
                   ? "bg-[#8F5C1A] border-[#D9C8AC] text-[#FFFFFF]"
                   : "bg-[#FFFFFF] border-[#D9C8AC] text-[#635B4E] hover:text-[#2E211A]"

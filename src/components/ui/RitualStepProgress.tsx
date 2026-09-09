@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { motion } from "motion/react";
 
 export type RitualStep = "SPREAD_SELECT" | "INTENTION_SELECT" | "SHUFFLE" | "PICK_CARDS" | "READING" | "SUMMARY";
 
@@ -35,13 +34,24 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
         {/* Background Connecting Rail */}
         <div className="absolute left-0 top-[14px] sm:top-4 w-full h-[1px] bg-[#D9C8AC] z-0" aria-hidden="true" />
 
-        {/* Active Golden Progress Rail */}
-        <motion.div
-          className="absolute left-0 top-[14px] sm:top-4 h-[2px] bg-[#8F5C1A] z-0"
+        {/*
+          * Active Golden Progress Rail
+          *
+          * ⚠️ ห้ามกลับไปอนิเมต `width` (ของเดิมใช้ motion อนิเมตเป็น %)
+          * `width` เป็นคุณสมบัติที่ทำให้เบราว์เซอร์ต้องคำนวณ layout ใหม่ทุกเฟรม
+          * ส่วน `transform: scaleX()` เบราว์เซอร์ยกไปให้ compositor ทำ ไม่แตะ layout เลย
+          * ผลที่ตาเห็นเหมือนกันเป๊ะเพราะแถบนี้สูง 2px สีทึบสีเดียว การยืดจึงไม่ทำให้อะไรบิดเบี้ยว
+          *
+          * ได้ของแถมคือคอมโพเนนต์นี้เลิกพึ่ง `motion` ทั้งไฟล์ — แถบความคืบหน้าโผล่อยู่
+          * ตลอดพิธีดูดวง แต่มันทำแค่ "ยืดแถบเดียว" ซึ่ง CSS transition ทำได้อยู่แล้ว
+          *
+          * เรนเดอร์แรกฝั่งเซิร์ฟเวอร์ได้ค่า transform ปลายทางไปด้วยกับ inline style
+          * จึงไม่มีจังหวะกระพริบตอน hydrate (เทียบเท่า `initial={false}` ของเดิม)
+          */}
+        <div
+          className="absolute left-0 top-[14px] sm:top-4 h-[2px] w-full origin-left bg-[#8F5C1A] z-0 transition-transform duration-400 ease-standard"
           aria-hidden="true"
-          initial={false}
-          animate={{ width: `${(currentIndex / (STEPS.length - 1)) * 100}%` }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          style={{ transform: `scaleX(${currentIndex / (STEPS.length - 1)})` }}
         />
 
         {/* Step Nodes */}
@@ -54,7 +64,7 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
 
           const dot = (
             <span
-              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[13px] sm:text-xs font-mono font-bold transition-all duration-300 ${
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[13px] sm:text-xs font-mono font-bold transition duration-300 ${
                 isActive
                   ? "bg-[#8F5C1A] border-2 border-[#8F5C1A] text-white ring-4 ring-[rgba(143,92,26,0.15)]"
                   : isPassed

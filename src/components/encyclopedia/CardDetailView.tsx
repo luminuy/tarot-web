@@ -158,7 +158,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             <button
               type="button"
               onClick={() => setOrientation("upright")}
-              className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5 ${
                 isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
               }`}
             >
@@ -167,7 +167,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             <button
               type="button"
               onClick={() => setOrientation("reversed")}
-              className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5 ${
                 !isUpright ? "bg-[#29261F] text-[#F3F0EA] shadow-xs" : "text-[#635B4E] hover:text-[#29261F]"
               }`}
             >
@@ -259,7 +259,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   return (
                     <div
                       key={cat.id}
-                      className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 space-y-2 hover:border-[#A58A5C] transition-all group shadow-xs"
+                      className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 space-y-2 hover:border-[#A58A5C] transition group shadow-xs"
                     >
                       <div className="flex items-center gap-2">
                         <span style={{ color: cat.color }} className="text-sm">
@@ -280,7 +280,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           <div className="pt-4 flex items-center gap-4 flex-wrap">
             <Link
               href="/"
-              className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition-all flex items-center gap-2 shadow-sm"
+              className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition flex items-center gap-2 shadow-sm"
             >
               {isEnglish ? "Begin Tarot Reading" : "ไปหน้าดูดวงหลัก"}
             </Link>
@@ -296,7 +296,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         {prevCard ? (
           <Link
             href={`/cards/${prevCard.id}`}
-            className="flex items-center gap-3 p-3.5 rounded-xl border border-[#D5CEC2] hover:border-[#A58A5C] bg-[#FFFFFF] hover:bg-[#EAE7E0] transition-all group max-w-[48%] shadow-xs"
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-[#D5CEC2] hover:border-[#A58A5C] bg-[#FFFFFF] hover:bg-[#EAE7E0] transition group max-w-[48%] shadow-xs"
           >
             <div className="w-9 h-14 rounded-lg overflow-hidden border border-[#D5CEC2] flex-shrink-0 bg-[#EAE7E0]">
               <CardImage
@@ -323,7 +323,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
         {nextCard ? (
           <Link
             href={`/cards/${nextCard.id}`}
-            className="flex items-center gap-3 p-3.5 rounded-xl border border-[#D5CEC2] hover:border-[#A58A5C] bg-[#FFFFFF] hover:bg-[#EAE7E0] transition-all group max-w-[48%] text-right shadow-xs"
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-[#D5CEC2] hover:border-[#A58A5C] bg-[#FFFFFF] hover:bg-[#EAE7E0] transition group max-w-[48%] text-right shadow-xs"
           >
             <div className="text-right overflow-hidden">
               <span className="text-[13px] font-mono text-[#635B4E] block">

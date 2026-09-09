@@ -175,7 +175,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={nickname}
             onChange={(e) => onNicknameChange(e.target.value)}
             placeholder={isEnglish ? "e.g., Alex, Jordan (or leave blank)" : "เช่น ฟ้า, บิ๊ก, พลอย (เว้นว่างได้)"}
-            className="w-full bg-[#FFFFFF] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all duration-200 border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
+            className="w-full bg-[#FFFFFF] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition duration-200 border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
           />
         </div>
 
@@ -195,7 +195,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={situation}
             onChange={(e) => onSituationChange(e.target.value)}
             placeholder={isEnglish ? "e.g., Navigating relationship friction / Awaiting job interview results" : "เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"}
-            className="w-full bg-[#FFFFFF] border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all"
+            className="w-full bg-[#FFFFFF] border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition"
           />
         </div>
       </div>
@@ -224,7 +224,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
               key={sit}
               type="button"
               onClick={() => onSituationChange(sit)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-serif-th transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-serif-th transition cursor-pointer ${
                 situation === sit
                   ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
                   : "bg-[#F3EDE2] text-[#2E211A] hover:bg-[#FFFFFF]/30 border border-[#D9C8AC]"
@@ -261,7 +261,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 ? "Type the inquiry you wish the cards to illuminate, e.g., What is the trajectory of this relationship and how should I best guard my peace? / Will this career move align with my long-term purpose?..."
                 : "พิมพ์คำถามที่คุณอยากให้ไพ่ช่วยชี้ทาง เช่น ความสัมพันธ์กับเขาจะมีทิศทางอย่างไร / งานใหม่ที่กำลังจะย้ายไปจะดีไหม..."
             }
-            className={`w-full bg-[#FFFFFF] rounded-lg p-4 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition-all duration-200 leading-relaxed resize-none ${
+            className={`w-full bg-[#FFFFFF] rounded-lg p-4 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition duration-200 leading-relaxed resize-none ${
               isQuestionEmpty
                 ? "border border-[#A6392C] focus:border-[#A6392C] focus:ring-2 focus:ring-[#A6392C]/30"
                 : "border border-[#D9C8AC] group-hover:border-[#8F5C1A] focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/30"
@@ -305,7 +305,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                     handleSelectSeal(seal);
                   }
                 }}
-                className={`rounded-lg border transition-all duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+                className={`rounded-lg border transition duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                   isActive
                     ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-overlay"
                     : "bg-[#F3EDE2] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"

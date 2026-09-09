@@ -216,7 +216,7 @@ function ReaderConsoleInner() {
               return (
                 <div
                   key={ticket.id}
-                  className={`altar-panel rounded-3xl p-5 space-y-4 border transition-all ${
+                  className={`altar-panel rounded-3xl p-5 space-y-4 border transition ${
                     isReady
                       ? "border-emerald-500/50 bg-gradient-to-b from-[#12241c] to-[#0e1713]"
                       : "border-[#e5c07b]/30 hover:border-[#ffd700]/50"

@@ -163,7 +163,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isEnglish ? "Search by card name, keyword, zodiac, or element..." : "ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."}
-              className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] placeholder-[#756F66]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition-all"
+              className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] placeholder-[#756F66]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition"
             />
             {searchQuery && (
               <button
@@ -214,7 +214,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             <button
               type="button"
               onClick={() => setShowSemanticSearch((prev) => !prev)}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-serif-th font-bold transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-serif-th font-bold transition cursor-pointer ${
                 showSemanticSearch
                   ? "border-[#8F5C1A] bg-[#8F5C1A] text-white shadow-2xs"
                   : filteredCards.length < 3 && searchQuery.trim().length >= 6
@@ -270,7 +270,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     nextTab?.focus();
                   }
                 }}
-                className={`p-3 rounded-xl border text-left transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
+                className={`p-3 rounded-xl border text-left transition duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
                   isActive
                     ? "border-2 border-[#A58A5C] bg-[#FFFFFF] shadow-xs"
                     : "border border-[#D5CEC2] bg-[#EAE7E0] hover:border-[#A58A5C] hover:bg-[#FFFFFF]"
@@ -369,7 +369,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   contentVisibility: "auto",
                   containIntrinsicSize: "auto 380px",
                 }}
-                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#A58A5C] transition-all duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 shadow-xs"
+                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#A58A5C] transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 shadow-xs"
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
                 <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-[#D5CEC2] bg-[#EAE7E0] mb-3">
@@ -457,7 +457,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               setSearchQuery("");
               setActiveFilter("all");
             }}
-            className="px-6 py-2 rounded-full text-xs font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition-all cursor-pointer shadow-xs"
+            className="px-6 py-2 rounded-full text-xs font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition cursor-pointer shadow-xs"
           >
             {isEnglish ? "Clear All Filters" : "ล้างตัวกรองทั้งหมด"}
           </button>

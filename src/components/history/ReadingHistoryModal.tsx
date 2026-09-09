@@ -179,7 +179,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
         role="dialog"
         aria-modal="true"
         aria-label={isEn ? "Tarot Reading Journal" : "สมุดบันทึกดวงชะตา"}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#171512]/60 backdrop-blur-xs"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
@@ -208,7 +208,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-[13px] text-[#A6392C] hover:text-[#A6392C] border border-[#D5CEC2] bg-[#FCEEEA] px-3 py-1 rounded-full transition-all cursor-pointer font-serif-th"
+                  className="text-[13px] text-[#A6392C] hover:text-[#A6392C] border border-[#D5CEC2] bg-[#FCEEEA] px-3 py-1 rounded-full transition cursor-pointer font-serif-th"
                 >
                   {isEn ? "Clear All" : "ลบทั้งหมด"}
                 </button>
@@ -217,7 +217,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 type="button"
                 onClick={onClose}
                 aria-label={isEn ? "Close reading history" : "ปิดประวัติการดูดวง"}
-                className="w-9 h-9 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] hover:bg-[#29261F] hover:text-[#F3F0EA] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
+                className="w-9 h-9 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] hover:bg-[#29261F] hover:text-[#F3F0EA] text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
               >
                 ✕
               </button>
@@ -245,7 +245,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 type="button"
                 disabled={isGeneratingSummary}
                 onClick={handleGenerateMonthlySummary}
-                className="w-full sm:w-auto px-4 py-2 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 flex-shrink-0 shadow-xs"
+                className="w-full sm:w-auto px-4 py-2 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 flex-shrink-0 shadow-xs"
               >
                 {isGeneratingSummary ? (
                   <>
@@ -328,7 +328,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("ALL")}
-                  className={`px-3.5 py-1 rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ALL"
                       ? "bg-[#29261F] text-[#F3F0EA] font-bold shadow-xs"
                       : "bg-[#EAE7E0] text-[#635B4E] hover:text-[#29261F] border border-[#D5CEC2]"
@@ -339,7 +339,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("ACCURATE")}
-                  className={`px-3.5 py-1 rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ACCURATE"
                       ? "bg-[#3A7044] text-white font-bold"
                       : "bg-[#EBF3ED] text-[#3A7044] border border-[#D5CEC2]"
@@ -352,7 +352,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("PARTIAL")}
-                  className={`px-3.5 py-1 rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PARTIAL"
                       ? "bg-[#A58A5C] text-white font-bold"
                       : "bg-[#EAE7E0] text-[#A58A5C] border border-[#D5CEC2]"
@@ -365,7 +365,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("PENDING")}
-                  className={`px-3.5 py-1 rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PENDING"
                       ? "bg-[#29261F] text-[#F3F0EA] font-bold"
                       : "bg-[#FFFFFF] text-[#635B4E] hover:text-[#29261F] border border-[#D5CEC2]"
@@ -419,7 +419,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   <div
                     key={item.id}
                     onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                    className="p-4 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] hover:border-[#A58A5C] transition-all cursor-pointer space-y-2.5 shadow-xs"
+                    className="p-4 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] hover:border-[#A58A5C] transition cursor-pointer space-y-2.5 shadow-xs"
                   >
                     {/* Top Row: Spread & Date */}
                     <div className="flex items-center justify-between text-[13px]">
@@ -487,7 +487,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "ACCURATE")}
-                          className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                          className={`px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "ACCURATE"
                               ? "bg-[#3A7044] text-white font-bold"
                               : "bg-[#EBF3ED] text-[#3A7044] border border-[#D5CEC2]"
@@ -499,7 +499,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "PARTIAL")}
-                          className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                          className={`px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "PARTIAL"
                               ? "bg-[#A58A5C] text-white font-bold"
                               : "bg-[#EAE7E0] text-[#A58A5C] border border-[#D5CEC2]"
@@ -511,7 +511,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "PENDING")}
-                          className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                          className={`px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "PENDING"
                               ? "bg-[#29261F] text-[#F3F0EA] font-bold"
                               : "bg-[#FFFFFF] text-[#635B4E] border border-[#D5CEC2]"
@@ -523,7 +523,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "NOT_HAPPENED")}
-                          className={`px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                          className={`px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "NOT_HAPPENED"
                               ? "bg-[#A6392C] text-white font-bold"
                               : "bg-[#FCEEEA] text-[#A6392C] border border-[#D5CEC2]"
