@@ -8,6 +8,7 @@ import { CardSpreadLinks } from "@/components/encyclopedia/CardSpreadLinks";
 import { CARD_GROUPS } from "@/data/cards/group-seo";
 import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
+import { clampDescription, pickTitle } from "@/lib/config/meta-length";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb, type Crumb } from "../seo";
@@ -38,13 +39,29 @@ export async function buildCardDetailMetadata(
   const path = `/cards/${card.id}`;
   const isEnglish = locale === "en";
 
+  // ชื่อไพ่บางใบยาว (เช่น "Seven of Pentacles" / "ราชินีแห่งเหรียญ") ถ้าต่อท้ายเต็มสูตรทุกใบ
+  // title จะทะลุเพดานที่ Google แสดงได้ — เรียงจากครบสุดไปสั้นสุดให้ pickTitle เลือกเอง
   const title = isEnglish
-    ? `${card.nameEn} Tarot Card Meaning: Upright & Reversed`
-    : `ความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) หัวตั้ง-หัวกลับ`;
+    ? pickTitle([
+        `${card.nameEn} Tarot Card Meaning: Upright & Reversed`,
+        `${card.nameEn} Meaning: Upright & Reversed`,
+        `${card.nameEn} Tarot Card Meaning`,
+      ])
+    : pickTitle([
+        `ความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) หัวตั้ง-หัวกลับ`,
+        `ความหมายไพ่ยิปซี ${card.nameTh} หัวตั้ง-หัวกลับ`,
+        `ความหมายไพ่ ${card.nameTh} (${card.nameEn})`,
+      ]);
 
   const description = isEnglish
-    ? `What ${card.nameEn} means upright and reversed, across love, work, money, self, and general readings — with its ${card.astrologyEn ?? card.astrology} correspondence, element, and the original 1909 Rider-Waite artwork.`
-    : `เจาะลึกความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) ทั้งหัวตั้งและหัวกลับ 5 หมวดชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element} ภาพดั้งเดิม 1909`;
+    ? clampDescription(
+        `What ${card.nameEn} means upright and reversed — across love, work, money, and self, with its ${card.astrologyEn ?? card.astrology} correspondence.`,
+        "Original 1909 Rider-Waite artwork.",
+      )
+    : clampDescription(
+        `เจาะลึกความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) ทั้งหัวตั้งและหัวกลับ 5 หมวดชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element}`,
+        "ภาพดั้งเดิม 1909",
+      );
 
   const keywords = isEnglish
     ? [

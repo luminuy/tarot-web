@@ -15,7 +15,7 @@ const COPY = {
   th: {
     title: "ดูดวงไพ่ยิปซี 25 ผัง — 1, 3, 5, 10 ใบ ครบทุกแบบ ฟรี",
     description:
-      "รวมผังดูดวงไพ่ยิปซี ไพ่ทาโรต์ 25 แบบ ตั้งแต่ไพ่ 1 ใบ 3 ใบ 5 ใบ ถึงเซลติกครอส 10 ใบ ครบทั้งรายวัน รายเดือน ความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
+      "รวมผังดูดวงไพ่ยิปซี 25 แบบ ตั้งแต่ไพ่ 1 ใบ ถึงเซลติกครอส 10 ใบ ทั้งความรัก การงาน การเงิน พร้อมภาพจัดวางจริงและความหมายทุกตำแหน่ง",
     collectionName: "คลัง 25 ผังพยากรณ์ไพ่ทาโรต์ยอดนิยม (Spreads Library)",
     collectionDescription:
       "รวบรวม 25 ผังพยากรณ์ไพ่ทาโรต์มาตรฐานสากล ความรัก การงาน การเงิน และผังใหญ่เจาะลึก 10 มิติ",
@@ -27,7 +27,7 @@ const COPY = {
   en: {
     title: "25 Tarot Spreads: 1, 3, 5 & 10-Card Layouts (Free)",
     description:
-      "Every tarot spread in one place — 25 layouts from a single daily card to the 10-card Celtic Cross, covering love, career, money, and life direction, each with the real card positions and what every position means.",
+      "25 tarot spreads in one place — from a single daily card to the 10-card Celtic Cross, each with real card positions and what they mean.",
     collectionName: "The Tarot Spreads Library — 25 Classic Layouts",
     collectionDescription:
       "A library of 25 standard tarot spreads for love, career, money, and deep life readings, including the full 10-position Celtic Cross.",

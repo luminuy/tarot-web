@@ -20,7 +20,7 @@ const PATH = "/daily";
 
 const TITLE = "Free Daily Tarot Card: Your Guidance for Today";
 const DESCRIPTION =
-  "Pull one tarot card for today and read what it means for your work, money, love, and state of mind — drawn from the full 78-card 1909 Rider-Waite deck, shuffled by you, provably fair, with no ads.";
+  "Pull one tarot card for today and read what it means for your work, money, love, and state of mind — from the full 1909 Rider-Waite deck.";
 
 const dailyOgImages = buildPageOgImage({
   title: "Free Daily Tarot Card",

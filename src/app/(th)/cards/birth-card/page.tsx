@@ -40,7 +40,7 @@ const birthCardOgImages = buildPageOgImage({
 });
 
 export const metadata: Metadata = {
-  title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) — ค้นหาไพ่ประจำวันเกิดฟรี",
+  title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) จากวันเกิด ฟรี",
   description:
     "ค้นหาไพ่ทาโรต์ประจำตัว (Birth Card) จากวันเดือนปีเกิดของคุณ คำนวณตามหลักเลขศาสตร์สากล 1909 Rider-Waite พร้อมคำทำนายบุคลิกภาพ จิตวิญญาณ และแนวทางพัฒนาตนเอง ฟรี",
   keywords: [

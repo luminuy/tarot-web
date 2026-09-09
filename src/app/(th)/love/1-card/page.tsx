@@ -13,9 +13,10 @@ const loveOgImages = buildPageOgImage({
 });
 
 export const metadata: Metadata = {
-  title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบสถานะหัวใจ (เปิดฟรี) | SeerTarot",
+  // layout เติมท้าย " · SeerTarot" ให้เองอยู่แล้ว — เขียน "| SeerTarot" เองอีกจะซ้ำสองรอบ
+  title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบหัวใจ",
   description:
-    "ดูดวงความรัก 1 ใบ ไพ่ยิปซีทาโรต์แท้ Rider-Waite 78 ใบ ไขทุกข้อสงสัยหัวใจ ทั้งคนโสด คนคุยสถานะไม่ชัดเจน มีคู่ หรือเพิ่งเลิกรา ไร้โฆษณา ไม่ต้องจ่ายเหรียญ สับไพ่ด้วยตนเอง",
+    "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแท้ Rider-Waite 78 ใบ ไขทุกข้อสงสัยหัวใจ ทั้งคนโสด คนคุยสถานะไม่ชัด มีคู่ หรือเพิ่งเลิกรา สับไพ่ด้วยตนเอง",
   keywords: [
     "ดูดวงความรัก 1 ใบ",
     "ดูดวงความรัก",
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
   ],
   alternates: buildAlternates("/love/1-card", { locale: "th", englishTwin: true }),
   openGraph: {
-    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบสถานะหัวใจ | SeerTarot",
+    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบหัวใจ · SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบตอบคำถามหัวใจ แม่นยำทุกสถานะ: โสดสนิท มีคนคุย มีคนรัก หรือคิดถึงคนเก่า ไร้โฆษณาคั่น",
     url: `${SITE_ORIGIN}/love/1-card`,
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบสถานะหัวใจ | SeerTarot",
+    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบหัวใจ · SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบตอบคำถามหัวใจ แม่นยำทุกสถานะ โสด/มีคนคุย/มีแฟน/คนเก่า ฟรี 100%",
     images: [loveOgImages[0].url],

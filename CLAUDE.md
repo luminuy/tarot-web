@@ -71,7 +71,7 @@
 10. **Human-First Copywriting**: ภาษาไทยธรรมชาติ เข้าใจง่าย ห้ามศัพท์หุ่นยนต์แข็งทื่อ
 11. **Multi-Agent Collision Guard**: เช็ก `npm run agent:status` + ล็อคด้วย `agent:lock` ก่อนแก้ ปลดล็อคด้วย `agent:unlock` เมื่อเสร็จ
 12. **One Branch per Milestone**: ห้ามแตกกิ่งค้าง ต้อง rebase บน `origin/main` เสมอ จบงานต้องรัน `pr:auto` ➔ `git:tidy` ให้ครบ
-13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 40 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
+13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 41 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
     > ⛔ **`push` แล้วจบ = งานยังไม่เสร็จ** — automation ทั้งชุดเริ่มทำงาน**เมื่อ PR ถูกเปิดเท่านั้น** (ISSUE-005)
     > push เฉย ๆ ไม่มี CI ไม่มี merge ไม่มี deploy งานจะค้างบน branch เงียบ ๆ จนกว่าเจ้าของจะมากดปุ่มเอง
     >
@@ -98,7 +98,7 @@
 - `npm run agent:status` — ดูสถานะ Agent ที่ทำงานอยู่
 - `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` — ล็อคไฟล์ก่อนแก้
 - `npm run agent:unlock -- --agent <ชื่อ>` — ปลดล็อคเมื่อเสร็จ
-- `npm run repo:verify` — ตรวจครบทั้ง 40 ด่าน (ใช้หลัก)
+- `npm run repo:verify` — ตรวจครบทั้ง 41 ด่าน (ใช้หลัก)
 - `npm run typecheck` — typecheck อย่างเดียว
 - `npm run log:sync` — ซิงก์สถานะ/บันทึกงาน (บังคับ)
 - `npm run cards:variants` — สร้างภาพไพ่ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)

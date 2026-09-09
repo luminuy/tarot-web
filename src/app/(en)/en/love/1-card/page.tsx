@@ -16,9 +16,9 @@ import { buildPageOgImage } from "@/lib/media/og-image";
  */
 const PATH = "/love/1-card";
 
-const TITLE = "One-Card Love Tarot Reading: A Straight Answer About Your Heart";
+const TITLE = "One-Card Love Tarot: A Straight Answer";
 const DESCRIPTION =
-  "Pull one card about your love life and get a direct read — whether you are single, talking to someone undefined, in a relationship, or still thinking about an ex. Full 78-card Rider-Waite deck, shuffled by you, free and ad-free.";
+  "Pull one card about your love life and get a direct read — single, talking to someone, in a relationship, or still thinking about an ex.";
 
 const loveOgImages = buildPageOgImage({
   title: "One-Card Love Tarot Reading",

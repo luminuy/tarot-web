@@ -13,9 +13,10 @@ const dailyOgImages = buildPageOgImage({
 });
 
 export const metadata: Metadata = {
-  title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางชีวิตวันนี้ (เปิดฟรีทุกวัน) | SeerTarot",
+  // layout เติมท้าย " · SeerTarot" ให้เองอยู่แล้ว — เขียน "| SeerTarot" เองอีกจะซ้ำสองรอบ
+  title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางวันนี้ ฟรี",
   description:
-    "ดูดวงไพ่ยิปซีรายวันแม่นๆ เปิดไพ่ 1 ใบทำนายพลังงานประจำวัน ทั้งการงาน การเงิน ความรัก และข้อคิดเตือนสติ ด้วยไพ่ 1909 Rider-Waite แท้ 78 ใบ ไร้โฆษณากวนใจ สับไพ่โปร่งใสตรวจสอบได้",
+    "ดูดวงไพ่ยิปซีรายวันแม่นๆ เปิดไพ่ 1 ใบทำนายพลังงานประจำวัน ทั้งการงาน การเงิน ความรัก และข้อคิดเตือนสติ ด้วยไพ่ 1909 Rider-Waite แท้ 78 ใบ ไร้โฆษณา",
   keywords: [
     "ดูดวงไพ่ยิปซีรายวัน",
     "ไพ่ยิปซีรายวัน",
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   ],
   alternates: buildAlternates("/daily", { locale: "th", englishTwin: true }),
   openGraph: {
-    title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางชีวิตวันนี้ | SeerTarot",
+    title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางวันนี้ · SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบเช็กพลังงานประจำวัน ทั้งการงาน การเงิน ความรัก และข้อควรระวัง ด้วยสำรับ 1909 Rider-Waite แท้",
     url: `${SITE_ORIGIN}/daily`,
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางชีวิตวันนี้ | SeerTarot",
+    title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางวันนี้ · SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบเช็กพลังงานประจำวัน ทั้งการงาน การเงิน ความรัก และข้อควรระวัง ฟรีทุกวัน",
     images: [dailyOgImages[0].url],

@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 40/40 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 41/41 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -95,9 +95,48 @@
 กับ "สาขาไทยของ ternary ที่มีสาขาอังกฤษอยู่ห่างไปหลายบรรทัด" — ลองแล้วได้ false positive 8 จุดรวด)
 
 **พิสูจน์ว่าแก้ได้จริง**
-- `npm run repo:verify` ➔ ✅ ผ่าน **40/40 ด่าน**
+- `npm run repo:verify` ➔ ✅ ผ่าน **40/41 ด่าน**
 - ทดสอบด่านด้วยการทำให้พังจริง: `git stash` โค้ดที่แก้แล้วรันด่านใหม่ซ้ำ ➔ ❌ ตกทันที **18 จุด**
   ครอบคลุมข้อความไทยทุกบรรทัดที่เห็นในภาพหน้าจอทั้งสองใบ (รวมชิป "ชัยชนะ … ข่าวดี" ครบทั้ง 5 คำ)
+### 🗓️ 2026-09-09 (รอบ 9): 📏 title/description ยาวเกินจน Google ตัด — ทั้งเว็บ 309 หน้า (+ ด่านที่ 41)
+
+> **ที่มา**: ตรวจ production จริงหลัง deploy รอบก่อน (คลาน 299 URL ใน sitemap + เปิดด้วย Chromium มือถือ)
+> เจอว่า **title เกินเพดาน 226 หน้า · description เกิน 180 หน้า** — เจ้าของสั่งให้แก้ข้อนี้ก่อน
+
+**อาการหนักสุด** — หน้าผังอังกฤษ 25 หน้า
+
+```
+เดิม  title (118 ตัว): The Celtic Cross: 10 Dimensions of Destiny (10 Cards) Tarot Spread: 10-Card Layout & Position Meanings · SeerTarot
+ใหม่  title  (40 ตัว): The Celtic Cross Tarot Spread (10 Cards)
+เดิม  desc  (326 ตัว) → ใหม่ 144 ตัว
+```
+
+**สาเหตุราก** — `spread.nameEn` มี `(10 Cards)` อยู่ในชื่อแล้ว แต่เทมเพลตต่อท้าย
+`Tarot Spread: 10-Card Layout…` เข้าไปอีก บอกจำนวนไพ่ซ้ำสองรอบ · และ**ไม่มีใครวัดความยาว
+ผลลัพธ์สุดท้ายเลยสักที่** ทั้งที่ layout ยังเติมท้าย ` · SeerTarot` ให้อีก 12 ตัวอักษร
+
+**เจอของแถมระหว่างทาง** — `/daily` กับ `/love/1-card` เขียน `| SeerTarot` ไว้ในโค้ดเอง
+พอ layout เติมท้ายให้อีก จึงได้ **แบรนด์โผล่สองรอบ**: `… | SeerTarot · SeerTarot`
+
+| ไฟล์ | สิ่งที่เปลี่ยน |
+| :--- | :--- |
+| `src/lib/config/meta-length.ts` | **ใหม่** — เพดานกลาง + `pickTitle()` (ไล่จากชื่อครบสุดไปสั้นสุด เลือกตัวแรกที่พอดี) + `clampDescription()` + `stripCardCount()` |
+| `src/app/_shared/pages/spread-detail.tsx` · `card-detail.tsx` | สร้าง title/desc ผ่านตัวช่วยกลาง ไม่ต่อสตริงเองแล้วเดาความยาว |
+| `cards-index.tsx` · `cards-all.tsx` · `spreads-index.tsx` · `blog-detail.tsx` | ย่อคำโปรยให้อยู่ในเพดาน |
+| `src/data/spread-topics.ts` · `articles.ts` · `cards/group-seo.ts` | ย่อหัวข้อ 6 + 2 รายการ และคำโปรยหมวดไพ่ 12 ชุด |
+| `layout.tsx` ทั้งสองภาษา · `daily` · `love/1-card` · `birth-card` | ย่อ + ถอด `| SeerTarot` ที่เขียนซ้ำมือ |
+| `scripts/qa/test-meta-length.ts` | **ด่านที่ 41** — อ่าน HTML ที่ build ออกมาจริงทั้ง 309 ไฟล์ วัด title (ไม่นับท้ายแบรนด์ที่ถูกตัดได้) ≤ 60 · description ≤ 160 · จับแบรนด์ซ้ำสองรอบ |
+
+**เกณฑ์ที่ใช้** — title ของหน้าเอง ≤ 60 ตัวอักษร (ท้ายแบรนด์ที่ layout เติมให้ถูกตัดใน SERP ได้
+ไม่เสียหาย เพราะคำค้นอยู่ต้นประโยค) · description ≤ 155 (ผ่อนได้ถึง 160)
+
+**ผลลัพธ์** — 309 หน้า: title ยาวสุด **60** · description ยาวสุด **160** · แบรนด์ซ้ำ 0 · ไม่มีหน้าไหนขาด metadata
+(ยกเว้น `_global-error.html` ของ Next เองที่ขึ้นทะเบียนไว้พร้อมเหตุผล)
+
+**ตรวจแล้ว**: `npm run repo:verify` ผ่าน **41/41 ด่าน** · `typecheck` 0 errors ·
+ทดสอบด่านใหม่ด้วยการทำให้พังจริง 3 เคส (title ยาว · desc ยาว · แบรนด์ซ้ำ) จับได้ครบ 3
+
+---
 
 ### 🗓️ 2026-09-09 (รอบ 8): 🧾 ด่านเดียวกันตรวจ "ฟุตเตอร์" ควบคู่หัวเว็บทุกหน้า
 
@@ -146,7 +185,7 @@
 ถ้อยคำใน `copy.ts` และด่านตรวจที่อ้างถึง `signup_required` ยังอยู่ครบ ไม่มีอะไรกำพร้า
 การตัดสินสิทธิ์ฝั่งเซิร์ฟเวอร์ไม่ขยับสักบรรทัด — เปลี่ยนแค่ "ผู้ใช้เห็นอะไรตอนโดนกั้น"
 
-**ตรวจแล้ว**: `npm run repo:verify` ผ่าน 40/40 ด่าน · `npm run typecheck` 0 errors
+**ตรวจแล้ว**: `npm run repo:verify` ผ่าน 40/41 ด่าน · `npm run typecheck` 0 errors
 
 ---
 
@@ -296,7 +335,7 @@ HTTP 200   ← ไม่ล็อกอินก็เริ่มเปิด�
 - `npm run typecheck` ➔ 0 errors
 - `npx tsx scripts/qa/test-feature-gating.ts` ➔ ผ่าน 76/76 (เพิ่มใหม่ 9 ข้อ)
 - `npx tsx scripts/qa/test-entitlement.ts` ➔ ผ่าน 71/71 (เพิ่มใหม่ 4 ข้อ)
-- `npm run repo:verify` ➔ **ผ่านครบ 40/40 ด่าน**
+- `npm run repo:verify` ➔ **ผ่านครบ 40/41 ด่าน**
 
 > 🧰 **กับดักตอนรันเทสต์ในเครื่อง**: ด่านสิทธิ์จะตก 5 ข้อ (double-spend รายวัน/โบนัส) ถ้ารันซ้ำ
 > โดยไม่ล้างฐานทดสอบก่อน เพราะบล็อก 7b ใช้ `reading_id` ตายตัว (`r_setup_1`, `r_setup_2`)
@@ -527,7 +566,7 @@ document scroller บน iOS) · เธรดหลักตัน ทุกก�
 **ผู้รับช่วง/เจ้าของต้องทดสอบบน iPhone จริงหลัง deploy**: เลื่อนขึ้นลงเร็ว ๆ ที่ `/` แล้วดูว่าหัวเว็บยังมีแถบเนื้อหาแวบเหนือมันอีกไหม
 ถ้ายังมี = ยังไม่จบ ต้องหาสาเหตุเพิ่ม **ห้ามปิดเคสด้วยการเดา**
 
-**ผลตรวจ**: `npm run repo:verify` ➔ ✅ 40/40 ด่าน · `npm run typecheck` ➔ ✅ 0 errors
+**ผลตรวจ**: `npm run repo:verify` ➔ ✅ 40/41 ด่าน · `npm run typecheck` ➔ ✅ 0 errors
 ### 🗓️ 2026-09-09 (รอบเย็น): 🚨 Google ไม่เคยคลานหน้าไทย 127 หน้าเลยสักครั้ง + แก้หน้ากำพร้าที่ต้นเหตุ (โดย Claude Opus 5)
 
 **ที่มา**: เจ้าของส่งออกไฟล์ `CoverageDrilldown` จาก GSC มาให้วิเคราะห์ แล้วสั่งว่า
