@@ -141,7 +141,7 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
             {groupInfo.elementTh && (
               <>
                 <span className="w-1 h-1 rounded-full bg-[#A58A5C]" />
-                <span>ธาตุ{isEnglish ? groupInfo.elementEn : groupInfo.elementTh}</span>
+                <span>{isEnglish ? `${groupInfo.elementEn} Element` : `ธาตุ${groupInfo.elementTh}`}</span>
               </>
             )}
           </div>

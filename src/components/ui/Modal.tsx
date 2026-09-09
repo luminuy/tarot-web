@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { SPRING, TWEEN, useMotionSafe } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export const Modal: React.FC<ModalProps> = ({
   className = "",
   showCloseButton = true,
 }) => {
+  const { isEnglish } = useLocale();
   const isMotionSafe = useMotionSafe();
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
@@ -162,7 +164,7 @@ export const Modal: React.FC<ModalProps> = ({
                     <button
                       type="button"
                       onClick={onClose}
-                      aria-label="ปิดหน้าต่าง"
+                      aria-label={isEnglish ? "Close dialog" : "ปิดหน้าต่าง"}
                       className="w-11 h-11 flex items-center justify-center rounded bg-[#F3EDE2] border border-[#D9C8AC] text-[#635B4E] hover:text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[rgba(143,92,26,0.08)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] cursor-pointer"
                     >
                       ✕

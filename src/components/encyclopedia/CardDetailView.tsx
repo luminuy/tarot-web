@@ -123,7 +123,11 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                   <CardImage
                     image={card.image}
                     cardId={card.id}
-                    alt={`ภาพหน้าไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`}
+                    alt={
+                      isEnglish
+                        ? `${card.nameEn} tarot card face \u2014 1909 Rider-Waite`
+                        : `ภาพหน้าไพ่ ${card.nameTh} (${card.nameEn}) 1909 Rider-Waite`
+                    }
                     className="w-full h-full object-cover tarot-card-enhance tarot-hd-card-image"
                     /* กรอบจริงคือ w-64 / sm:w-72 = 256 / 288 CSS px — เดิมประกาศ 400/600px
                        ทำให้เบราว์เซอร์เลือกไฟล์ใหญ่เกินความจำเป็นไปหนึ่งขั้น */
@@ -204,8 +208,12 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               <span className="px-2.5 py-0.5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] font-semibold uppercase text-[#29261F]">
                 {card.arcana === "major" ? "Major Arcana" : `${card.suit} Suit`}
               </span>
-              <span className="text-[#635B4E]">|</span>
-              <span className="text-[#29261F] font-sans tracking-wide">{isEnglish ? card.nameTh : card.nameEn}</span>
+              {!isEnglish && card.nameEn && (
+                <>
+                  <span className="text-[#635B4E]">|</span>
+                  <span className="text-[#29261F] font-sans tracking-wide">{card.nameEn}</span>
+                </>
+              )}
             </div>
             <h1 className="font-serif-th text-3xl sm:text-4xl lg:text-5xl font-bold text-[#29261F] leading-tight [text-wrap:balance]">
               {isEnglish ? card.nameEn : card.nameTh}

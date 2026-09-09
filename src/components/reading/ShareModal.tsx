@@ -575,7 +575,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
                       <CardImage
                         image={c.card?.image}
                         cardId={c.card?.id}
-                        alt={c.card?.nameTh || "Tarot"}
+                        alt={(isEnglish ? c.card?.nameEn : c.card?.nameTh) || c.card?.nameEn || "Tarot"}
                         className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
                         sizes={isSingle ? "256px" : "128px"}
                       />

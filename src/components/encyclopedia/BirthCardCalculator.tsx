@@ -228,7 +228,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                       : "text-[#7A6F5D] hover:text-[#29261F]"
                   }`}
                 >
-                  พ.ศ.
+                  {isEnglish ? "BE" : "พ.ศ."}
                 </button>
                 <span className="text-[#D5CEC2]">/</span>
                 <button
@@ -240,7 +240,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                       : "text-[#7A6F5D] hover:text-[#29261F]"
                   }`}
                 >
-                  ค.ศ.
+                  {isEnglish ? "CE" : "ค.ศ."}
                 </button>
               </div>
             </div>
