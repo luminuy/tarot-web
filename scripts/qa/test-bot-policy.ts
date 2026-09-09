@@ -2,9 +2,16 @@
  * QA — ยามเฝ้านโยบายบอตสองชั้นให้พูดตรงกัน (Bot Policy Parity Guard)
  *
  * ⚠️ ทำไมต้องมีไฟล์นี้ — บทเรียน INC-0105
- * เว็บนี้ประกาศนโยบายบอตไว้ **สองที่** ที่ไม่รู้จักกัน:
+ * เว็บนี้ประกาศนโยบายบอตไว้ **สามที่** ที่ไม่รู้จักกัน:
  *   1. `src/app/robots.ts`            — ขอความร่วมมือ (บอตจะเชื่อหรือไม่ก็ได้)
  *   2. `scripts/cloudflare-phase1.ts` — บังคับจริงที่ขอบ Cloudflare (403 ทันที)
+ *   3. **Cloudflare Managed Content** — Cloudflare แทรกบล็อกของตัวเองไว้ "หัวไฟล์"
+ *      robots.txt บน production โดยที่ไม่มีอะไรในรีโปนี้รู้เห็นด้วยเลย
+ *      (ตั้งจาก dashboard เท่านั้น · ปัจจุบันประกาศ `Content-Signal: ai-train=no`
+ *      แล้วสั่ง `Disallow: /` ให้บอตเทรนโมเดล 9 ตัว ซึ่ง "บังเอิญ" ตรงกับเจตนาเรา)
+ *      ⚠️ ถ้า Cloudflare (หรือเจ้าของ) เปลี่ยนนโยบายชั้นนี้เมื่อไร แล้วเผลอปิดบอต
+ *      **ค้นหา** AI ที่เราตั้งใจเปิดไว้ ทราฟฟิกจะหายไปเงียบ ๆ โดยไม่มีอะไรเตือน
+ *      ➔ กฎ 5 ด้านล่างจึงยิงอ่าน robots.txt ตัวจริงบน production มาตรวจซ้ำ
  *
  * Cloudflare ประกาศเลิกใช้สวิตช์ `ai_bots_protection` วันที่ 15 กันยายน 2026 — หลังจากนั้น
  * กฎ WAF ตามชื่อ user-agent จะเป็นตัวบังคับใช้เพียงตัวเดียว ถ้าสองที่นี้หลุดกันเมื่อไร
@@ -24,12 +31,16 @@
  *     (ยกเว้นโทเคนที่ใช้ได้เฉพาะใน robots.txt ซึ่งไม่มี user-agent จริงให้บล็อก)
  *  3. บอตค้นหา AI ที่เราตั้งใจเปิดให้คลาน ต้องไม่โผล่ในรายการบล็อกของ WAF
  *  4. บอตของเครื่องมือค้นหาและตัวดึงภาพพรีวิวตอนแชร์ ต้องไม่โผล่ในรายการบล็อกของ WAF
+ *  5. robots.txt ตัวจริงบน production (หลัง Cloudflare แทรกบล็อกของตัวเองแล้ว)
+ *     ต้องไม่สั่ง `Disallow: /` กับบอตที่เราตั้งใจเปิด และต้องยังปิดหน้าส่วนตัวไว้ครบ
+ *     — ข้ามอัตโนมัติเมื่อยิงเน็ตไม่ได้ (เครื่อง dev ออฟไลน์) แต่ใน CI จะตรวจจริงเสมอ
  *
  * รันด้วย: npx tsx scripts/qa/test-bot-policy.ts
  */
 
 import fs from "node:fs";
 import path from "node:path";
+import { SITE_ORIGIN } from "../../src/lib/config/site";
 
 const ROBOTS_FILE = path.join(process.cwd(), "src/app/robots.ts");
 const CF_FILE = path.join(process.cwd(), "scripts/cloudflare-phase1.ts");
@@ -100,7 +111,126 @@ function readWafBlockedAgents(source: string): string[] {
   return [...block.matchAll(/contains "([^"]+)"/g)].map((m) => m[1].toLowerCase());
 }
 
-function run(): void {
+/**
+ * แยก robots.txt ตัวจริงออกเป็น "กลุ่ม" ตาม RFC 9309
+ * — บรรทัด `User-agent:` ที่ติดกันหลายบรรทัดนับเป็นกลุ่มเดียวกัน
+ * — กฎ (`Allow` / `Disallow`) หลังจากนั้นเป็นของทุก user-agent ในกลุ่มนั้น
+ * — บรรทัดคอมเมนต์และบรรทัดว่างไม่ตัดกลุ่ม (กลุ่มจบเมื่อเจอ `User-agent:` ตัวใหม่หลังมีกฎแล้ว)
+ */
+function parseRobotsGroups(text: string): { agents: string[]; disallow: string[]; allow: string[] }[] {
+  const groups: { agents: string[]; disallow: string[]; allow: string[] }[] = [];
+  let current: { agents: string[]; disallow: string[]; allow: string[] } | null = null;
+
+  for (const rawLine of text.split("\n")) {
+    const line = rawLine.replace(/#.*$/, "").trim();
+    if (!line) continue;
+    const sep = line.indexOf(":");
+    if (sep === -1) continue;
+    const field = line.slice(0, sep).trim().toLowerCase();
+    const value = line.slice(sep + 1).trim();
+
+    if (field === "user-agent") {
+      // มีกฎแล้วค่อยเจอ user-agent ใหม่ = ขึ้นกลุ่มใหม่
+      if (!current || current.disallow.length > 0 || current.allow.length > 0) {
+        current = { agents: [], disallow: [], allow: [] };
+        groups.push(current);
+      }
+      current.agents.push(value.toLowerCase());
+    } else if (field === "disallow" && current) {
+      current.disallow.push(value);
+    } else if (field === "allow" && current) {
+      current.allow.push(value);
+    }
+  }
+  return groups;
+}
+
+/** ดึง robots.txt จาก production — คืน null เมื่อยิงไม่ได้ (ออฟไลน์) ไม่ใช่ความผิดของนโยบาย */
+async function fetchLiveRobots(): Promise<string | null> {
+  const url = `${SITE_ORIGIN}/robots.txt`;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.text();
+    } catch (e) {
+      if (attempt === 2) {
+        console.log(`  ⏭️  ข้ามกฎ 5: ยิง ${url} ไม่ได้ (${(e as Error).message}) — ถือว่าออฟไลน์ ไม่ใช่นโยบายผิด`);
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * กฎ 5 — ตรวจ robots.txt ตัวจริงบน production (ชั้นที่รีโปนี้มองไม่เห็น)
+ * คืนรายการข้อผิดพลาด · อาร์เรย์ว่าง = ผ่าน (หรือข้ามเพราะออฟไลน์)
+ */
+async function checkLiveRobots(privatePathsFromCode: string[]): Promise<string[]> {
+  const text = await fetchLiveRobots();
+  if (text === null) return [];
+
+  const groups = parseRobotsGroups(text);
+  const errors: string[] = [];
+
+  const blocksEverything = (g: { disallow: string[] }) => g.disallow.includes("/");
+
+  // 5a. บอตที่เราตั้งใจเปิด ห้ามเจอ `Disallow: /` ในกลุ่มที่ระบุชื่อมันตรง ๆ
+  for (const wanted of MUST_NOT_BLOCK) {
+    const named = groups.filter((g) => g.agents.includes(wanted));
+    if (named.some(blocksEverything)) {
+      errors.push(
+        `robots.txt บน production สั่ง "Disallow: /" กับ "${wanted}" ซึ่งเราตั้งใจเปิดให้คลาน\n` +
+          "    ชั้นนี้ไม่ได้มาจากรีโป — มาจาก Cloudflare ➔ Manage Robots / Managed Content\n" +
+          "    💡 แก้ที่ Cloudflare dashboard (หรือเอาชื่อนี้ออกจาก MUST_NOT_BLOCK ถ้าเปลี่ยนนโยบายจริง)",
+      );
+    }
+  }
+
+  // 5b. กลุ่ม `*` ห้ามปิดทั้งเว็บ — พลาดตรงนี้ = หายจาก Google ทั้งเว็บ
+  const starGroups = groups.filter((g) => g.agents.includes("*"));
+  if (starGroups.length === 0) {
+    errors.push('robots.txt บน production ไม่มีกลุ่ม "User-agent: *" เลย');
+  }
+  if (starGroups.some(blocksEverything)) {
+    errors.push(
+      'robots.txt บน production สั่ง "Disallow: /" ในกลุ่ม "User-agent: *" — ทั้งเว็บจะหลุดจากทุกเครื่องมือค้นหา',
+    );
+  }
+
+  // 5c. หน้าส่วนตัวต้องยังถูกปิดอยู่ (รวมทุกกลุ่ม `*` เข้าด้วยกันตามที่บอตทำจริง)
+  const starDisallow = new Set(starGroups.flatMap((g) => g.disallow));
+  for (const p of privatePathsFromCode) {
+    if (!starDisallow.has(p)) {
+      errors.push(
+        `robots.txt บน production ไม่ได้ปิด "${p}" ในกลุ่ม "User-agent: *" ทั้งที่ robots.ts สั่งปิดไว้\n` +
+          "    💡 อาจแปลว่า deploy ล่าสุดยังไม่ขึ้น หรือ Cloudflare เขียนทับไฟล์ทั้งก้อน",
+      );
+    }
+  }
+
+  // 5d. แจ้งให้รู้ (ไม่ตก): กลุ่ม `*` ซ้ำกันเกินหนึ่ง = Cloudflare แทรกของตัวเองเข้ามา
+  if (starGroups.length > 1) {
+    console.log(
+      `  ℹ️  robots.txt บน production มีกลุ่ม "User-agent: *" ${starGroups.length} ชุด ` +
+        "(ของ Cloudflare Managed Content + ของเรา) — บอตจะรวมกฎทั้งสองชุดเข้าด้วยกันตาม RFC 9309 " +
+        "จึงไม่เสียหาย แต่ถ้าอยากให้ไฟล์สะอาดต้องปิด Managed Content ที่ Cloudflare",
+    );
+  }
+
+  return errors;
+}
+
+/** อ่านรายการหน้าส่วนตัวจาก robots.ts เพื่อเทียบกับไฟล์จริงบน production */
+function readPrivatePaths(source: string): string[] {
+  const start = source.indexOf("const PRIVATE_PATHS = [");
+  if (start === -1) return [];
+  const end = source.indexOf("]", start);
+  return [...source.slice(start, end).matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+}
+
+async function run(): Promise<void> {
   const robotsSource = fs.readFileSync(ROBOTS_FILE, "utf-8");
   const cfSource = fs.readFileSync(CF_FILE, "utf-8");
 
@@ -163,15 +293,18 @@ function run(): void {
     }
   }
 
+  // ── กฎ 5: robots.txt ตัวจริงบน production (ชั้น Cloudflare Managed Content) ──
+  errors.push(...(await checkLiveRobots(readPrivatePaths(robotsSource))));
+
   if (errors.length > 0) {
-    console.error("❌ นโยบายบอตสองชั้นขัดกันเอง (robots.ts กับกฎ Cloudflare พูดคนละอย่าง):");
+    console.error("❌ นโยบายบอตสามชั้นขัดกันเอง (robots.ts · กฎ Cloudflare · robots.txt จริงบน production):");
     for (const e of errors) console.error(`  - ${e}\n`);
     process.exit(1);
   }
 
   console.log(
     `✅ ผ่านทุกเกณฑ์: robots.ts (ห้าม ${robotsDisallowed.length} ตัว) กับกฎ WAF (บล็อก ${wafBlocked.length} ตัว) ` +
-      "พูดตรงกัน · บอตค้นหา AI และตัวดึงภาพแชร์ยังเข้าได้ครบ\n",
+      "พูดตรงกัน · บอตค้นหา AI และตัวดึงภาพแชร์ยังเข้าได้ครบ (ตรวจ robots.txt จริงบน production แล้ว)\n",
   );
   process.exit(0);
 }

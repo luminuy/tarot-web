@@ -62,6 +62,19 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0115 · 2026-09-09 16:21 · 🟡 Medium · ตรวจ production 4 ข้อ: CSP บล็อก Web Analytics · www ไม่ redirect · Meta Pixel ไม่มีค่า · robots.txt มีชั้นที่รีโปมองไม่เห็น
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | รายงานตรวจ production ชี้ 4 เรื่อง หนึ่ง www.seertarot.net ตอบ 200 ไม่ redirect เนื้อหาเดียวกันอยู่สองโฮสต์ สอง Meta Pixel ไม่ทำงาน fbq เป็น undefined ไม่มีสคริปต์ facebook ในหน้าเลย สาม Cloudflare Web Analytics ไม่เก็บข้อมูลเพราะ CSP ไม่มี static.cloudflareinsights.com สี่ robots.txt ถูก Cloudflare Managed Content แทรกบล็อกของตัวเองไว้หัวไฟล์ ทำให้มีกลุ่ม User-agent ดอกจัน 2 ชุดและประกาศบอต AI ซ้ำสองรอบ โดยไม่มีด่านไหนในรีโปรู้จักชั้นนี้เลย |
+| **ผลกระทบ** | SEO กระจายน้ำหนักไปสองโฮสต์ · วัดผลโฆษณา Facebook ไม่ได้เลย · Cloudflare Web Analytics ที่เปิดใช้อยู่ไม่มีข้อมูลสักหน้า · ถ้า Cloudflare เปลี่ยนนโยบายชั้น Managed Content แล้วเผลอปิดบอตค้นหา AI ที่เจ้าของตั้งใจเปิด ทราฟฟิกจะหายเงียบโดยไม่มีอะไรเตือน |
+| **สาเหตุราก** | แต่ละข้อคนละสาเหตุ ข้อ www เพราะไม่เคยมีกฎ redirect ทั้งฝั่งโค้ดและฝั่ง Cloudflare พึ่ง canonical อย่างเดียวซึ่งเป็นแค่คำแนะนำไม่ใช่คำสั่ง ข้อ CSP เพราะ Cloudflare แทรก beacon ให้เองแต่ไม่มีใครเติมโฮสต์นั้นเข้า allowlist ตอนเขียน CSP ข้อ Meta Pixel ท่อในโค้ดต่อครบอยู่แล้วทั้ง build-time และ runtime ที่ขาดคือค่าของ secret ซึ่งค่าว่างจะถูกฝังเป็นสตริงว่างตอน build อย่างเงียบสนิทไม่มีอะไรเตือน ข้อ robots.txt เพราะด่าน test-bot-policy เทียบแค่สองชั้นคือ robots.ts กับกฎ WAF แต่ชั้นที่สามคือ Managed Content ตั้งจาก dashboard เท่านั้น ไม่มีอะไรในรีโปมองเห็น |
+| **การแก้ไข** | หนึ่ง เพิ่มกฎ redirect www ไป apex ด้วย statusCode 301 ไว้บนสุดของ redirects ใน next.config.ts พร้อมยืนยันจาก routes-manifest.json ที่ build ออกมาจริง สอง เติม static.cloudflareinsights.com เข้า script-src และเติม cloudflareinsights.com เข้า connect-src ด้วย เพราะ beacon ยิงผลกลับเป็น POST ถ้าเปิดแต่ script-src จะโหลดผ่านแต่ส่งข้อมูลไม่ออก สาม เพิ่มขั้นเตือนใน deploy.yml ที่บอกว่าค่าวัดผลตัวไหนยังว่างพร้อมวิธีตั้ง โดยตั้งใจให้เตือนไม่ให้ล้ม เพราะเป็น secret ที่มีแต่เจ้าของตั้งได้ และแก้ PENDING_SETUP ที่เขียนว่าครบ 100 เปอร์เซ็นต์ทั้งที่ไม่จริง สี่ ขยาย test-bot-policy ให้ยิงอ่าน robots.txt ตัวจริงบน production เป็นกฎที่ห้า |
+| **🛡️ กฎป้องกันถาวร** | **เอกสารห้ามเขียนว่าตั้งค่าครบ 100 เปอร์เซ็นต์ถ้าไม่ได้ยิงตรวจของจริง การเขียนเกินจริงทำให้ไม่มีใครไปตรวจซ้ำ · นโยบายที่ตั้งได้จาก dashboard ภายนอกต้องมีด่านยิงอ่านของจริงมาเทียบเสมอ ไม่งั้นรีโปจะไม่มีวันรู้ว่ามันเปลี่ยน · แก้ CSP ให้บริการที่มีการยิงข้อมูลกลับ ต้องเปิดทั้ง script-src และ connect-src คู่กันเสมอ · ค่า NEXT_PUBLIC ที่ว่างต้องมีเสียงเตือนตอน deploy ห้ามฝังสตริงว่างเงียบ ๆ** |
+| **การพิสูจน์ว่าแก้ได้จริง** | repo:verify ผ่าน 41/41 · ยืนยันกฎ redirect จาก .next/routes-manifest.json ว่าได้ statusCode 301 จริง · พิสูจน์กฎที่ห้าด้วยการใส่ gptbot ลง MUST_NOT_BLOCK ชั่วคราว ด่านตกทันทีพร้อมชี้ว่ามาจากชั้น Cloudflare ไม่ใช่รีโป · ยิง production ยืนยันครบทั้ง CSP header robots.txt และ HTML หน้าแรก 274 KB ที่ไม่มีสคริปต์วัดผลเลย |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/thai-language-leak-english-mode-woad88` · commit `04a15ef` |
+
+
 ### INC-0114 · 2026-09-09 16:00 · 🟡 Medium · รอบสอง: ขยายด่าน EN ครอบทั้งเว็บ 41 จอ แล้วเจอคำไทยหลุดเพิ่มอีก 7 จุด
 
 | หัวข้อ | รายละเอียด |
