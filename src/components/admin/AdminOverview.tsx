@@ -8,8 +8,16 @@ interface HealthData {
   passedCount: number;
   totalCount: number;
   summary: string;
+  warnings?: string[];
   checkedAt: string;
   services: {
+    entitlement?: {
+      enforced: boolean | null;
+      requireSignupToRead: boolean;
+      dailyLimit: number;
+      guestLimit: number;
+      ok: boolean;
+    };
     d1: {
       pingOk: boolean;
       latencyMs: number;
@@ -174,6 +182,40 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-[#D5CEC2] bg-white px-5 py-3 shadow-lg">
           
           <span className="text-sm font-medium text-[#29261F]">{toastMsg}</span>
+        </div>
+      )}
+
+      {/*
+        * ⚠️ แถบเตือนเงื่อนไขที่ "มองข้ามไม่ได้" (ISSUE-038)
+        *
+        * สวิตช์ระบบสิทธิ์เปิดไพ่เคยถูกปิดค้างไว้บน production เป็นเวลานานโดยไม่มีใครรู้
+        * เพราะสถานะของมันซ่อนอยู่ในแท็บ "สิทธิ์เปิดไพ่" ที่ต้องกดเข้าไปดูเองเท่านั้น
+        * ส่วนหน้าแรกที่เจ้าของเปิดดูทุกวันกลับเงียบสนิท
+        *
+        * บทเรียน: สถานะที่ "ปิดอยู่แล้วเสียรายได้ทุกวัน" ต้องเด้งมาหาคน
+        * ไม่ใช่รอให้คนไปหามัน · ปุ่มพาไปแท็บที่แก้ได้ทันทีในคลิกเดียว
+        */}
+      {health?.warnings && health.warnings.length > 0 && (
+        <div className="anim-swap-rise-sm rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 shadow-xs">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-amber-900">✦ ต้องดำเนินการ</p>
+              <ul className="space-y-1 text-xs leading-relaxed text-amber-900">
+                {health.warnings.map((w) => (
+                  <li key={w}>• {w}</li>
+                ))}
+              </ul>
+            </div>
+            {health.services?.entitlement?.enforced !== true && (
+              <Button
+                size="sm"
+                onClick={() => onNavigateTab("entitlement")}
+                className="shrink-0 border-transparent bg-amber-900 text-xs font-semibold text-white hover:bg-amber-950 transition"
+              >
+                ไปที่แท็บสิทธิ์เปิดไพ่
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

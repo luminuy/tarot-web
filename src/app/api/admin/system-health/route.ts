@@ -235,6 +235,42 @@ export async function GET(request: Request) {
     },
   };
 
+  /*
+   * 10. สวิตช์ระบบสิทธิ์เปิดไพ่ (ISSUE-038)
+   *
+   * ⚠️ ทำไมต้องมาโผล่ในหน้าตรวจสุขภาพ ไม่ใช่แค่ในแท็บ "สิทธิ์เปิดไพ่"
+   * ธง `entitlement.enforced` ถูกตั้งเป็น `false` ค้างอยู่บน production เป็นเวลานาน
+   * โดยไม่มีใครรู้ เพราะสถานะของมันซ่อนอยู่ในแท็บที่ต้องกดเข้าไปดูเองเท่านั้น
+   * หน้าแรกของแผงแอดมินที่เปิดทุกวันกลับไม่ได้บอกอะไรเลยสักคำ
+   *
+   * ตราบใดที่ธงปิด: โควตาสมาชิกไม่ถูกบังคับ · ผังใหญ่ทุกผังและปรมาจารย์ลับ 2 ท่านไม่ถูกล็อก
+   * = รายได้รั่วเงียบ ๆ ทุกวัน · เงื่อนไขแบบนี้ต้อง "มองข้ามไม่ได้" ไม่ใช่ "หาเจอถ้าตั้งใจหา"
+   *
+   * ไม่นับรวมใน `criticalSystems` เพราะการปิดธงเป็น "การตัดสินใจของเจ้าของ" ได้เหมือนกัน
+   * ไม่ใช่บริการล่ม — แต่ต้องขึ้นเป็นคำเตือนเด่นบนหน้าแรกเสมอ
+   */
+  const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
+  const { REQUIRE_SIGNUP_TO_READ, DAILY_LIMIT, GUEST_LIMIT } = await import(
+    "@/lib/entitlement/limits"
+  );
+  const entitlementEnforced = await isEntitlementEnabled().catch(() => null);
+  const entitlementHealth = {
+    enforced: entitlementEnforced,
+    requireSignupToRead: REQUIRE_SIGNUP_TO_READ,
+    dailyLimit: DAILY_LIMIT,
+    guestLimit: GUEST_LIMIT,
+    ok: entitlementEnforced === true,
+  };
+
+  const warnings: string[] = [];
+  if (entitlementEnforced === false) {
+    warnings.push(
+      "สวิตช์ระบบสิทธิ์เปิดไพ่ถูกปิดอยู่ — โควตาสมาชิกไม่ถูกบังคับ ผังใหญ่และปรมาจารย์ลับไม่ถูกล็อก",
+    );
+  } else if (entitlementEnforced === null) {
+    warnings.push("อ่านสถานะสวิตช์ระบบสิทธิ์ไม่สำเร็จ (KV ตอบไม่ได้) — ตรวจแท็บสิทธิ์เปิดไพ่ด้วยตัวเอง");
+  }
+
   // Overall System Status Assessment
   const criticalSystems = [
     domainHealth.ok,
@@ -267,6 +303,7 @@ export async function GET(request: Request) {
     passedCount,
     totalCount,
     summary,
+    warnings,
     checkedAt,
     services: {
       domain: domainHealth,
@@ -277,6 +314,7 @@ export async function GET(request: Request) {
       kv: kvHealth,
       security: securityHealth,
       ai: aiHealth,
+      entitlement: entitlementHealth,
       cloudflareStack: cloudflareStackHealth,
     },
   });

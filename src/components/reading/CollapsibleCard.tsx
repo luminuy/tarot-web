@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useId, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { DUR, EASE } from "@/lib/motion";
 
 export interface CollapsibleCardProps {
   /** หัวข้อสั้น ๆ ที่แสดงบนแถบให้กด */
@@ -64,21 +62,24 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
         </span>
       </button>
 
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            id={panelId}
-            key="content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: DUR.base, ease: EASE.out }}
-            className="overflow-hidden"
-          >
-            <div className="border-t border-[#D9C8AC]/30 px-3 pb-3 pt-1 [&>*]:!my-0">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/*
+        * ⚠️ ห้ามกลับไปอนิเมต `height: "auto"` ด้วย motion
+        * การไล่ค่า height บังคับให้เบราว์เซอร์คำนวณ layout ใหม่ "ทุกเฟรม"
+        * และไม่ใช่แค่กล่องนี้ — ทุกอย่างที่อยู่ใต้มันบนหน้าต้องขยับตามไปด้วย
+        * แถบยุบ/ขยายเปิดครั้งเดียว = ~60 รอบ layout ซ้อนกันใน 240ms
+        *
+        * `.anim-swap-rise-sm` ให้กล่องกางเต็มความสูงทันที (layout รอบเดียว)
+        * แล้วเลื่อนเนื้อหาขึ้นมา + จางเข้าด้วย transform/opacity ซึ่ง compositor ทำเอง
+        * ตาเห็นใกล้เคียงของเดิมมากแต่ไวกว่า — แลกกับไม่มีอนิเมชันขาออก
+        * ซึ่งเป็นข้อแลกเปลี่ยนชุดเดียวกับที่บ้านนี้ตัดสินใจไว้แล้วใน INC-0103
+        */}
+      {open && (
+        <div id={panelId} className="overflow-hidden">
+          <div className="anim-swap-rise-sm border-t border-[#D9C8AC]/30 px-3 pb-3 pt-1 [&>*]:!my-0">
+            {children}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

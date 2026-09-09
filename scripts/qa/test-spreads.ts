@@ -1,5 +1,12 @@
 import { SPREADS } from "../../src/data/spreads";
 import { DECK_SIZE } from "../../src/data/cards";
+import {
+  mapLayout,
+  boxOf,
+  MAP_CARD_W_MIN,
+  MAP_MIN_COLUMN_PX,
+  MAP_CARD_MIN_PX,
+} from "../../src/lib/tarot/spread-map-geometry";
 
 /**
  * QA — ตรวจความสมบูรณ์ของทุก spread
@@ -89,54 +96,63 @@ for (const [id, count] of Object.entries(expectedCounts)) {
 
 
 // ──────────────────────────────────────────────────────────────────────────────
-// ด่านกันไพ่ไขว้เบียดคอลัมน์ข้างเคียง (บทเรียน ISSUE-032)
+// ด่านกันไพ่ทับกันในแผนผัง SEO (บทเรียน ISSUE-032 · ISSUE-034)
 //
-// `SpreadPositionMap.tsx` วาดไพ่ด้วย width 13% ของกรอบ · aspect-ratio 2/3
-// และจัดกึ่งกลางด้วย translate(-50%, -50%)
-// ใบที่ `rotate: 90` สลับด้าน กล่องครอบจึงกว้าง 19.5% แทน 13% — กว้างขึ้น 50%
-// ความสูงกรอบคือ 78% ของความกว้าง พิกัด y จึงคูณ 0.78 เมื่อเทียบหน่วยเดียวกับ x
+// ⚠️ รุ่นก่อนหน้าของด่านนี้มีช่องโหว่ 2 ข้อที่ทำให้ ISSUE-034 หลุดมาได้:
 //
-// ใบไขว้คือใบเดียวที่กว้างผิดจากพวก จึงเป็นใบที่เบียดคอลัมน์ข้างเคียงได้โดยไม่มีใครเห็น
-// `monthly-ten` หลุดด่านนี้มาแล้ว: ลอกพิกัดจาก celtic-cross แล้วเลื่อนแกนไขว้
-// 0.32 → 0.35 แต่ลืมเลื่อนใบที่ 6 ตาม ระยะปลอดภัยเดิม 0.0175 จึงกลายเป็นทับกัน
-// 0.0125 (วัดจริงบน production = 3.6px บนจอ 320px · 4.3px บนจอ 375px)
-const CARD_W = 0.13; // width: 13%
-const CARD_H = CARD_W * 1.5; // aspect-ratio: 2 / 3
-const Y_SCALE = 0.78; // ความสูงกรอบ = 78% ของความกว้าง
-
-function boxOf(pos: { x: number; y: number; rotate?: number }) {
-  const rotated = pos.rotate === 90 || pos.rotate === 270;
-  const halfW = (rotated ? CARD_H : CARD_W) / 2;
-  const halfH = (rotated ? CARD_W : CARD_H) / 2;
-  const cy = pos.y * Y_SCALE;
-  return { left: pos.x - halfW, right: pos.x + halfW, top: cy - halfH, bottom: cy + halfH };
-}
-
+//   1. **คัดลอกตัวเลขมาเขียนไว้เอง** (`CARD_W = 0.13`, `Y_SCALE = 0.78`)
+//      แทนที่จะอ่านจากที่เดียวกับคอมโพเนนต์ที่วาดจริง
+//      ด่านจึงรับรอง "ผังในจินตนาการ" ไม่ใช่ผังที่ผู้ใช้เห็น
+//
+//   2. **ตรวจเฉพาะใบไขว้** (`rotate: 90`) เทียบกับใบอื่น
+//      ไพ่ธรรมดาที่วางเรียงลงมาในคอลัมน์เดียวกันจึงทับกันได้โดยไม่มีใครเห็น
+//      ซึ่งเป็นเคสที่เกิดจริงใน 4 ผัง: chakra (ทับ 48–52%) · year-ahead (24–44%) ·
+//      celtic-cross และ monthly-ten (20%)
+//
+// รอบนี้ตรวจ **ทุกคู่** ด้วยเรขาคณิตชุดเดียวกับที่ `SpreadPositionMap.tsx` ใช้วาดจริง
+// (`@/lib/tarot/spread-map-geometry`) จึงไม่มีทางเลื่อนออกจากกันได้อีก
 for (const spread of SPREADS) {
   const label = `spread "${spread.id}"`;
+  const layout = mapLayout(spread.positions);
+
+  // การ์ดต้องไม่เล็กจน `min-width: 26px` เข้ามาแทนที่ความกว้างที่คำนวณไว้
+  // ถ้าเกิดขึ้น การ์ดจะกว้างกว่าที่เรขาคณิตคิด แล้วกลับมาทับกันโดยด่านนี้มองไม่เห็น
+  check(
+    `${label}: การ์ดไม่เล็กกว่าพื้น min-width (${(layout.cardW * MAP_MIN_COLUMN_PX).toFixed(1)}px บนคอลัมน์ ${MAP_MIN_COLUMN_PX}px)`,
+    layout.cardW >= MAP_CARD_W_MIN - 1e-9 &&
+      layout.cardW * MAP_MIN_COLUMN_PX >= MAP_CARD_MIN_PX - 1e-9,
+  );
 
   for (const pos of spread.positions) {
-    const box = boxOf(pos);
+    const box = boxOf(pos, layout);
 
-    // ไพ่ทุกใบต้องอยู่ในกรอบ ไม่ล้นซ้าย-ขวา
+    // ไพ่ทุกใบต้องอยู่ในกรอบ ไม่ล้นซ้าย-ขวา-บน-ล่าง
     check(
       `${label} ตำแหน่ง ${pos.index}: ไม่ล้นกรอบแนวนอน (${box.left.toFixed(3)}..${box.right.toFixed(3)})`,
-      box.left >= 0 && box.right <= 1,
+      box.left >= -1e-9 && box.right <= 1 + 1e-9,
     );
+    check(
+      `${label} ตำแหน่ง ${pos.index}: ไม่ล้นกรอบแนวตั้ง (${box.top.toFixed(3)}..${box.bottom.toFixed(3)} ในกรอบสูง ${layout.boxHeight.toFixed(3)})`,
+      box.top >= -1e-9 && box.bottom <= layout.boxHeight + 1e-9,
+    );
+  }
 
-    if (pos.rotate !== 90 && pos.rotate !== 270) continue;
+  // ไพ่ทุกคู่ต้องไม่ทับกัน ยกเว้นคู่ที่วางพิกัดเดียวกันซึ่งคือคู่ไขว้ที่ตั้งใจ
+  for (let i = 0; i < spread.positions.length; i++) {
+    for (let j = i + 1; j < spread.positions.length; j++) {
+      const a = spread.positions[i];
+      const b = spread.positions[j];
+      if (a.x === b.x && a.y === b.y) continue;
 
-    // ใบไขว้ต้องไม่ทับใบอื่น ยกเว้นใบที่วางพิกัดเดียวกันซึ่งคือคู่ไขว้ที่ตั้งใจ
-    for (const other of spread.positions) {
-      if (other.index === pos.index) continue;
-      if (other.x === pos.x && other.y === pos.y) continue;
+      const A = boxOf(a, layout);
+      const B = boxOf(b, layout);
+      const overlapX = Math.min(A.right, B.right) - Math.max(A.left, B.left);
+      const overlapY = Math.min(A.bottom, B.bottom) - Math.max(A.top, B.top);
+      const deep = Math.min(overlapX, overlapY);
 
-      const b = boxOf(other);
-      const overlapX = Math.min(box.right, b.right) - Math.max(box.left, b.left);
-      const overlapY = Math.min(box.bottom, b.bottom) - Math.max(box.top, b.top);
       check(
-        `${label}: ใบไขว้ ${pos.index} ไม่เบียดใบ ${other.index} (ระยะแนวนอน ${(-overlapX).toFixed(4)})`,
-        overlapX <= 0 || overlapY <= 0,
+        `${label}: ใบ ${a.index + 1} ไม่ทับใบ ${b.index + 1} (ซ้อนลึก ${deep > 0 ? deep.toFixed(4) : "0"})`,
+        overlapX <= 1e-9 || overlapY <= 1e-9,
       );
     }
   }

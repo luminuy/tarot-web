@@ -38,6 +38,12 @@
  *     ใช้ `scaleX`/`scaleY` แทน width/height · ใช้ชั้นเงาซ้อนที่อนิเมต opacity แทน boxShadow
  *     `height: "auto"` ของแถบยุบ/ขยายได้รับผ่อนผันไว้ใน ALLOWLIST (ดูเหตุผลข้างล่าง)
  *
+ *  7. ห้าม `<AnimatePresence mode="wait">` ที่ไม่มี `exit` อยู่ข้างในเลยสักตัว
+ *     `mode="wait"` มีหน้าที่เดียวคือ "รอตัวเก่าเล่นอนิเมชันขาออกให้จบก่อนค่อยเข้าตัวใหม่"
+ *     ถ้าไม่มีขาออก มันจึงไม่ได้ทำอะไรเลย นอกจากแบกความเสี่ยงมาเปล่า ๆ —
+ *     `AnimatePresence mode="wait"` คือสาเหตุรากของ INC-0015 ที่ทำให้พิธีดูดวงค้างตายทั้งขั้น
+ *     (exit-transition deadlock กับ motion@13 + React 19.2)
+ *
  *  6. โทเคนจังหวะกลางต้องยังผูกอยู่ — `--default-transition-duration` และ
  *     `--default-transition-timing-function` ต้องถูกประกาศใน globals.css
  *     ถ้าใครลบทิ้ง ทุกจุดที่เขียน `transition` เฉย ๆ จะเด้งกลับไปใช้ค่าเริ่มต้นของ Tailwind
@@ -66,25 +72,7 @@ interface Violation {
  * รายการผ่อนผันแบบ Ratchet
  * ทุกรายการต้องมีเหตุผลที่ "วัดมาแล้ว" หรืออธิบายได้ว่าทำไมทางที่ถูกกว่าใช้ไม่ได้
  */
-const ALLOWLIST: { file: string; needle: string; reason: string }[] = [
-  {
-    file: "src/components/reading/CollapsibleCard.tsx",
-    needle: "height",
-    reason:
-      "แถบยุบ/ขยาย — ทางเลือกที่ไม่แตะ layout (grid-template-rows 0fr→1fr) ต้องคาเนื้อหาไว้ใน DOM ตลอด " +
-      "ซึ่งแลกน้ำหนัก DOM ตอนเปิดหน้ากับความสมูทของคลิกเดียว 240ms — ไม่คุ้ม จึงคงไว้",
-  },
-  {
-    file: "src/components/reading/ProvablyFairPanel.tsx",
-    needle: "height",
-    reason: "แถบยุบ/ขยาย — เหตุผลเดียวกับ CollapsibleCard",
-  },
-  {
-    file: "src/components/history/ReadingHistoryModal.tsx",
-    needle: "height",
-    reason: "แถบยุบ/ขยาย — เหตุผลเดียวกับ CollapsibleCard",
-  },
-];
+const ALLOWLIST: { file: string; needle: string; reason: string }[] = [];
 
 /** คุณสมบัติที่ห้ามให้ motion อนิเมต (บังคับ layout หรือ paint ใหม่ทั้งกล่อง) */
 const FORBIDDEN_MOTION_PROPS = [
@@ -190,6 +178,35 @@ function checkTsx(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 7 — `<AnimatePresence mode="wait">` ต้องมี `exit` อยู่ข้างในอย่างน้อยหนึ่งตัว
+ * ตรวจจากบล็อกจริง (ตั้งแต่แท็กเปิดถึง `</AnimatePresence>` ที่ใกล้ที่สุด)
+ */
+function checkWaitWithoutExit(violations: Violation[]): void {
+  for (const file of walk(SRC, [".tsx"])) {
+    const r = rel(file);
+    const text = fs.readFileSync(file, "utf-8");
+    const lines = text.split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+      if (isCommentLine(lines[i])) continue;
+      if (!/<AnimatePresence[^>]*mode=["']wait["']/.test(lines[i])) continue;
+
+      const closeAt = lines.findIndex((l, k) => k > i && l.includes("</AnimatePresence>"));
+      const block = lines.slice(i, closeAt === -1 ? lines.length : closeAt + 1).join("\n");
+      if (/\bexit=/.test(block)) continue;
+
+      violations.push({
+        rule: "7 · mode=\"wait\" ที่ไม่มี exit (INC-0015)",
+        file: r,
+        line: i + 1,
+        code: lines[i].trim().slice(0, 160),
+        hint: 'ไม่มีอนิเมชันขาออก `mode="wait"` จึงไม่ได้ทำอะไรเลย นอกจากเสี่ยง exit-transition deadlock — ถอด AnimatePresence ออกแล้วใช้คลาส `.anim-swap-rise-sm` แทน',
+      });
+    }
+  }
+}
+
 function checkCss(violations: Violation[]): void {
   for (const file of walk(SRC, [".css"])) {
     const r = rel(file);
@@ -256,6 +273,7 @@ function run(): void {
 
   const violations: Violation[] = [];
   checkTsx(violations);
+  checkWaitWithoutExit(violations);
   checkCss(violations);
   checkTokens(violations);
 
@@ -274,7 +292,7 @@ function run(): void {
   }
 
   console.log(
-    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · โทเคนจังหวะกลางยังผูกอยู่\n"
+    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · โทเคนจังหวะกลางยังผูกอยู่\n"
   );
   process.exit(0);
 }
