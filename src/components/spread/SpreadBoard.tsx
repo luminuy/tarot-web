@@ -2,8 +2,8 @@
 
 import React from "react";
 import { motion } from "motion/react";
-import type { Spread, SpreadPosition } from "@/data/spreads";
-import { getSpreadName, getPositionName } from "@/data/spreads";
+import type { Spread, SpreadPosition } from "@/data/spreads-helpers";
+import { getSpreadName, getPositionName } from "@/data/spreads-helpers";
 import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
