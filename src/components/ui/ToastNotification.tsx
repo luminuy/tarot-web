@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
+import { useLocale } from "@/lib/i18n";
 
 export interface ToastData {
   id?: string;
@@ -17,6 +18,7 @@ export interface ToastNotificationProps {
 }
 
 export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onClose }) => {
+  const { isEnglish } = useLocale();
   const [isPaused, setIsPaused] = useState(false);
   const duration = toast?.duration ?? 4500;
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -141,7 +143,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         <button
           type="button"
           onClick={onClose}
-          aria-label="ปิดการแจ้งเตือน"
+          aria-label={isEnglish ? "Dismiss notification" : "ปิดการแจ้งเตือน"}
           className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer shrink-0 ${
             isError
               ? "text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA]"
