@@ -18,6 +18,10 @@ export function QuotaPips({
   tone: QuotaTone;
   size?: "sm" | "md";
 }) {
+  // เพดาน 0 = ยังไม่มีสิทธิ์ให้นับ (ยุค "สมัครก่อนเล่น") — วาดจุดไฟไม่ได้เพราะจะสื่อว่า
+  // เคยมีสิทธิ์แล้วใช้หมด ทั้งที่ผู้ใช้ยังไม่เคยได้เปิดไพ่เลย
+  if (limit <= 0) return null;
+
   const total = Math.max(1, Math.min(limit, 6));
   const lit = Math.max(0, Math.min(total, remaining));
   const dot = size === "sm" ? "h-1.5 w-1.5" : "h-2 w-2";

@@ -35,6 +35,54 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-09 (รอบ 5): 🔐 เล่นฟรีเหมือนเดิม แต่ต้องสมัครสมาชิก/เข้าสู่ระบบก่อนเปิดไพ่
+
+> **คำสั่งเจ้าของโปรเจกต์**: _"ตอนนี้เราเปิดฟรีแต่คนเข้ามาเล่นอย่างเดียวไม่สมัครสมาชิก ถ้าเราเปิดให้เล่นฟรีเหมือนเดิม แต่ต้องลงชื่อเข้าใช้เราก่อน สมัครสมาชิกก่อน คือถ้าอยากใช้ฟรีต้องสมัครสมาชิก"_
+
+**สิ่งที่เปลี่ยน (นโยบาย)**: `GUEST_LIMIT` จาก `1` → **`0`** ที่ `src/lib/entitlement/limits.ts` ที่เดียว
+ทุกอย่างที่เหลือ (ถ้อยคำ · เหตุผลกำแพง · ด่าน QA) อ่านค่าจากที่นั่นทั้งหมด
+**สิทธิ์สมาชิกไม่ลดลงแม้แต่นิดเดียว** — ยังฟรีวันละ 3 ครั้งเท่าเดิม
+
+**หลักที่ยึด 3 ข้อ**
+
+1. **กั้นตั้งแต่ขั้น 1 เหมือนเดิม** (ENTITLEMENT_PLAN ข้อ 1) — ห้ามปล่อยให้จับไพ่ครบแล้วค่อยเจอกำแพง
+2. **ถ้อยคำต้องพูดความจริง** — คนที่ยังไม่เคยเปิดไพ่ ต้องไม่โดนบอกว่า "ใช้สิทธิ์ทดลองครบแล้ว"
+   จึงเพิ่มเหตุผลใหม่ `signup_required` แยกจาก `guest_used` (บทเรียนตรงกับ INC-0062 ที่ผู้ใช้อ่านแล้วงงตัวเลข)
+3. **เนื้อหาที่ไม่ใช่การเปิดไพ่ยังฟรีและไม่ต้องล็อกอิน** — สารานุกรมไพ่ 78 ใบ · คลังผัง · บทความ ·
+   ไพ่ประจำวันฝั่งเบราว์เซอร์ (ไม่ได้แตะเลย เพราะเป็นทั้งคุณค่าและทราฟฟิก SEO ของเว็บ)
+
+**ไฟล์ที่แก้ (13 ไฟล์)**
+
+| ไฟล์ | สิ่งที่ทำ |
+| :--- | :--- |
+| `src/lib/entitlement/limits.ts` | `GUEST_LIMIT = 0` + เพิ่ม `REQUIRE_SIGNUP_TO_READ` และ `GUEST_BLOCK_REASON` (อนุมานจาก `GUEST_LIMIT` ห้ามตั้งซ้ำ) |
+| `src/lib/entitlement/entitlement.ts` | `reason` ของผู้เยี่ยมชมเปลี่ยนเป็น `GUEST_BLOCK_REASON` + ขยาย union เป็น `signup_required` |
+| `src/lib/entitlement/copy.ts` | สาขาใหม่ของผู้เยี่ยมชมในยุคสมัครก่อนเล่น (`limit = 0` จริง ไม่ดันเป็น 1) · `UPGRADE_COPY.signup_required` ไทย/อังกฤษ · ตารางเทียบสิทธิ์แถวผู้เยี่ยมชม |
+| `src/components/entitlement/QuotaPips.tsx` | เพดาน 0 → ไม่วาดจุดไฟ (เดิมจะโชว์จุดมืดหลอกว่าเคยมีสิทธิ์แล้วใช้หมด) |
+| `src/components/entitlement/PostReadingSignup.tsx` | ไม่พาดหัวว่า "ใช้สิทธิ์ทดลองครบแล้ว" เมื่อบังคับสมัครก่อนเล่น |
+| `src/components/entitlement/AnnouncementBanner.tsx` · `src/components/admin/EntitlementAdmin.tsx` | ข้อความประกาศ/แผงแอดมินสะท้อนนโยบายใหม่ |
+| `src/components/home/TarotFlow.tsx` | รู้จัก `signup_required` และใช้ `GUEST_BLOCK_REASON` แทนค่าตายตัว |
+| `src/app/api/reading/start/route.ts` · `src/app/api/reading/[id]/read/route.ts` | ข้อความและ `reason` ฝั่งเซิร์ฟเวอร์ (เซิร์ฟเวอร์ยังเป็นผู้ตัดสินสิทธิ์เสมอ) |
+| `src/lib/stats/entitlement-events.ts` | เพิ่ม `signup_required` เข้า allowlist ของ funnel metric |
+| `src/data/home-seo.ts` | FAQ "มีค่าใช้จ่ายหรือไม่" ไทย/อังกฤษ บอกตรง ๆ ว่าต้องสมัครฟรีก่อนเปิดไพ่ |
+| `scripts/qa/test-entitlement.ts` · `scripts/qa/test-feature-gating.ts` | ด่านกันการเปิดสิทธิ์ผู้ไม่ล็อกอินกลับมาเงียบ ๆ + ตรวจถ้อยคำไม่โกหก (จำนวนด่านยังเป็น 39 เท่าเดิม) |
+
+**การพิสูจน์**
+
+- `npm run typecheck` ➔ 0 errors
+- `npx tsx scripts/qa/test-feature-gating.ts` ➔ ผ่าน 76/76 (เพิ่มใหม่ 9 ข้อ)
+- `npx tsx scripts/qa/test-entitlement.ts` ➔ ผ่าน 71/71 (เพิ่มใหม่ 4 ข้อ)
+- `npm run repo:verify` ➔ **ผ่านครบ 39/39 ด่าน**
+
+> 🧰 **กับดักตอนรันเทสต์ในเครื่อง**: ด่านสิทธิ์จะตก 5 ข้อ (double-spend รายวัน/โบนัส) ถ้ารันซ้ำ
+> โดยไม่ล้างฐานทดสอบก่อน เพราะบล็อก 7b ใช้ `reading_id` ตายตัว (`r_setup_1`, `r_setup_2`)
+> ซึ่งชน UNIQUE กับแถวของรอบก่อน — ไม่ใช่บั๊กของโค้ด · ล้างด้วย `rm -f .dev-marketplace.db*` แล้วรันใหม่ผ่านครบ
+> (ยืนยันแล้วว่าตกเหมือนกันเป๊ะบนโค้ดก่อนแก้)
+
+**วิธีย้อนกลับ**: ตั้ง `GUEST_LIMIT = 1` ที่ `limits.ts` — ถ้อยคำ เหตุผล และ UI กลับไปเป็นชุด "ทดลองฟรี 1 ครั้ง" อัตโนมัติทั้งเว็บ
+
+---
+
 ### 🗓️ 2026-09-09 (รอบ 4): 🌐 หน้าอังกฤษ 115 หน้าไม่มีหัวเว็บและไม่มีฟุตเตอร์เลย (INC-0110)
 
 > **ขอบเขต**: เพิ่ม section layout 5 ไฟล์ใต้ `src/app/(en)/en/` + เสริมด่านที่ 34 `test-en-routing.ts` (จำนวนด่านยังเป็น 39)

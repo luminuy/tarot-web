@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
-import { DAILY_LIMIT, GUEST_LIMIT } from "@/lib/entitlement/limits";
+import { DAILY_LIMIT, GUEST_LIMIT, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
 
 interface State {
   enabled: boolean;
@@ -255,7 +255,10 @@ export default function EntitlementAdmin() {
         <p className="mt-3 rounded-xl border border-[#D5CEC2] bg-[#F8F6F2] p-3 text-xs text-[#635B4E]">
           ตัวอย่างแบนเนอร์:{" "}
           <span className="text-[#29261F] font-semibold">
-            เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น ผู้เยี่ยมชม {GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ {DAILY_LIMIT} ครั้ง
+            เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
+            {REQUIRE_SIGNUP_TO_READ
+              ? `สมัครสมาชิกฟรีก่อนเปิดไพ่ · สมาชิกฟรีวันละ ${DAILY_LIMIT} ครั้ง`
+              : `ผู้เยี่ยมชม ${GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
             {s.announceResetDate?.trim() ? ` เริ่ม ${s.announceResetDate.trim()}` : ""}
           </span>
         </p>
@@ -267,7 +270,10 @@ export default function EntitlementAdmin() {
           <div>
             <h3 className="text-sm font-semibold text-[#29261F]">4 · เปิดระบบสิทธิ์จริง</h3>
             <p className="mt-1 text-xs text-[#635B4E]">
-              เปิด = ผู้เยี่ยมชม {GUEST_LIMIT} ครั้ง · สมาชิกวันละ {DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก
+              เปิด ={" "}
+              {REQUIRE_SIGNUP_TO_READ
+                ? `ผู้เยี่ยมชมต้องสมัครสมาชิกก่อนเปิดไพ่ · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`
+                : `ผู้เยี่ยมชม ${GUEST_LIMIT} ครั้ง · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`}
               <br />
               <strong className="text-rose-700">
                 ⚠️ ทำข้อ 1–3 ให้ครบและรอประกาศ ≥ 7 วันก่อน — จะลดสิทธิ์ผู้ใช้เดิมทันที

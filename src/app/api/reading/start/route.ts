@@ -9,7 +9,7 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
-import { DAILY_LIMIT, GUEST_LIMIT, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
+import { DAILY_LIMIT, GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
 import { createCommitment, normalizeClientSeed } from "@/lib/tarot/shuffle";
 
 export const runtime = "nodejs";
@@ -112,9 +112,11 @@ export async function POST(request: Request) {
           {
             error:
               ent.kind === "guest"
-                ? `คุณใช้สิทธิ์ดูดวงฟรี ${GUEST_LIMIT} ครั้งแล้ว สมัครสมาชิกเพื่อรับสิทธิ์เปิดไพ่วันละ ${DAILY_LIMIT} ครั้งฟรี`
+                ? REQUIRE_SIGNUP_TO_READ
+                  ? `สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ แล้วดูดวงได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`
+                  : `คุณใช้สิทธิ์ดูดวงฟรีครบแล้ว สมัครสมาชิกเพื่อรับสิทธิ์เปิดไพ่วันละ ${DAILY_LIMIT} ครั้งฟรี`
                 : `คุณใช้โควตาดูดวงครบ ${DAILY_LIMIT} ครั้งของวันนี้แล้ว กลับมาเปิดใหม่ได้ในวันพรุ่งนี้เวลา 00:00 น. หรือเติมรอบเพื่อดูต่อทันที`,
-            reason: ent.reason ?? (ent.kind === "guest" ? "guest_used" : "daily_exhausted"),
+            reason: ent.reason ?? (ent.kind === "guest" ? GUEST_BLOCK_REASON : "daily_exhausted"),
             resetAt: ent.resetAt,
           },
           { status: 403 },

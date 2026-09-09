@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { DAILY_LIMIT, GUEST_LIMIT } from "@/lib/entitlement/copy";
+import { DAILY_LIMIT, GUEST_LIMIT, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/copy";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
 
@@ -45,7 +45,9 @@ export function AnnouncementBanner() {
           <>
             Upcoming update: Reading limits will soon adjust to{" "}
             <strong>
-              {GUEST_LIMIT} free trial readings for visitors · {DAILY_LIMIT} free readings daily for members
+              {REQUIRE_SIGNUP_TO_READ
+                ? `a free account before drawing · ${DAILY_LIMIT} free readings daily for members`
+                : `${GUEST_LIMIT} free trial readings for visitors · ${DAILY_LIMIT} free readings daily for members`}
             </strong>
             {when ? ` starting ${when}` : ""} — Create an account now to secure full daily benefits!
           </>
@@ -53,7 +55,9 @@ export function AnnouncementBanner() {
           <>
             เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
             <strong>
-              ผู้เยี่ยมชมทดลองฟรี {GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ {DAILY_LIMIT} ครั้ง
+              {REQUIRE_SIGNUP_TO_READ
+                ? `สมัครสมาชิกฟรีก่อนเปิดไพ่ · สมาชิกฟรีวันละ ${DAILY_LIMIT} ครั้ง`
+                : `ผู้เยี่ยมชมทดลองฟรี ${GUEST_LIMIT} ครั้ง · สมาชิกฟรีวันละ ${DAILY_LIMIT} ครั้ง`}
             </strong>
             {when ? ` เริ่ม ${when}` : ""} — สมัครสมาชิกไว้ก่อนได้รับสิทธิ์เต็มทันที
           </>

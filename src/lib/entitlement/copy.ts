@@ -12,7 +12,9 @@
 import type { ClientEntitlement } from "@/lib/entitlement/use-entitlement";
 import {
   DAILY_LIMIT,
+  GUEST_BLOCK_REASON,
   GUEST_LIMIT,
+  REQUIRE_SIGNUP_TO_READ,
   SIGNUP_BONUS,
   STANDARD_SPREAD_IDS,
   isStandardSpread,
@@ -26,7 +28,9 @@ export const CHEAPEST_PACKAGE_THB = Math.min(...CREDIT_PACKAGES.map((p) => p.pri
 
 export {
   DAILY_LIMIT,
+  GUEST_BLOCK_REASON,
   GUEST_LIMIT,
+  REQUIRE_SIGNUP_TO_READ,
   SIGNUP_BONUS,
   STANDARD_SPREAD_IDS,
   isStandardSpread,
@@ -36,7 +40,8 @@ export {
 
 /** เหตุผลที่ทำให้ผู้ใช้เจอกำแพงสิทธิ์ — ใช้เลือกถ้อยคำและปุ่มให้ตรงสถานการณ์ */
 export type UpgradeReason =
-  | "guest_used" // ผู้เยี่ยมชมใช้สิทธิ์ทดลองฟรีครบแล้ว
+  | "signup_required" // ยังไม่ได้เข้าสู่ระบบ — ต้องสมัครสมาชิกฟรีก่อนถึงเปิดไพ่ได้
+  | "guest_used" // ผู้เยี่ยมชมใช้สิทธิ์ทดลองฟรีครบแล้ว (ใช้เมื่อเปิดสิทธิ์ทดลองกลับมาเท่านั้น)
   | "daily_exhausted" // สมาชิกใช้โควตารายวันครบแล้ว
   | "members_only" // ฟีเจอร์เฉพาะสมาชิก (แชทถามต่อ)
   | "grand_spread" // ผังใหญ่ 5–12 ใบสำหรับผู้ถือญาณพยากรณ์พิเศษ
@@ -113,7 +118,10 @@ export function describeEntitlement(ent: ClientEntitlement | null, isEnglish?: b
   const isUnlimited = ent.role === "unlimited";
   const isGuest = ent.kind === "guest";
   const remaining = Math.max(0, ent.remaining ?? 0);
-  const limit = Math.max(1, ent.limit ?? (isGuest ? GUEST_LIMIT : DAILY_LIMIT));
+  // ผู้เยี่ยมชมยุค "สมัครก่อนเล่น" มีเพดาน 0 จริง ๆ — ห้ามดันขึ้นเป็น 1 เพราะจะวาดจุดไฟหลอกว่า
+  // เคยมีสิทธิ์แล้วใช้ไป ทั้งที่ยังไม่เคยได้เล่นเลยสักครั้ง
+  const rawLimit = ent.limit ?? (isGuest ? GUEST_LIMIT : DAILY_LIMIT);
+  const limit = isGuest ? Math.max(0, rawLimit) : Math.max(1, rawLimit);
   const bonus = Math.max(0, ent.bonusRemaining ?? 0);
   const used = Math.max(0, Math.min(limit, limit - Math.min(remaining, limit)));
   const countdown = formatResetCountdown(ent.resetAt, Date.now(), isEnglish);
@@ -143,6 +151,32 @@ export function describeEntitlement(ent: ClientEntitlement | null, isEnglish?: b
 
   if (isGuest) {
     const hasFree = remaining > 0;
+
+    // ── ยุค "สมัครก่อนเล่น" (GUEST_LIMIT = 0) ──────────────────────────────
+    // คนที่เห็นข้อความนี้ยังไม่เคยเปิดไพ่เลยสักครั้ง ห้ามพูดว่า "ใช้สิทธิ์ทดลองครบแล้ว"
+    if (REQUIRE_SIGNUP_TO_READ) {
+      return {
+        enabled: true,
+        isAdmin: false,
+        isUnlimited: false,
+        isGuest: true,
+        isMember: false,
+        remaining: 0,
+        limit: 0,
+        used: 0,
+        tone: "empty",
+        badgeLabel: isEnglish ? "Sign in to read" : "เข้าสู่ระบบเพื่อเปิดไพ่",
+        statusLine: isEnglish
+          ? `Create a free account to unlock ${DAILY_LIMIT} tarot readings every day`
+          : `สมัครสมาชิกฟรีเพื่อเปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`,
+        resetLine: isEnglish ? "Free forever · No credit card" : "สมัครฟรี ไม่ต้องผูกบัตร",
+        action: "signup",
+        actionLabel: isEnglish ? "Create Free Account" : "สมัครสมาชิกฟรี",
+        blocked: true,
+        blockedReason: "signup_required",
+      };
+    }
+
     return {
       enabled: true,
       isAdmin: false,
@@ -244,6 +278,15 @@ export interface UpgradeCopy {
 }
 
 export const UPGRADE_COPY: Record<UpgradeReason, UpgradeCopy> = {
+  signup_required: {
+    eyebrow: "สมัครสมาชิกฟรี",
+    title: "สมัครสมาชิกฟรีก่อน แล้วเปิดไพ่ได้เลย",
+    body: `การเปิดไพ่ยังฟรีเหมือนเดิมทุกอย่าง เพียงแค่ขอให้เข้าสู่ระบบก่อน เพื่อผูกคำทำนายไว้กับบัญชีของคุณ สมัครแล้วเปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`,
+    primaryLabel: "สมัครสมาชิกฟรี",
+    primaryAction: "signup",
+    secondaryLabel: "มีบัญชีอยู่แล้ว เข้าสู่ระบบ",
+    reassurance: "สมัครฟรี ไม่ต้องผูกบัตร ใช้เวลาไม่ถึงนาที · ความหมายไพ่ 78 ใบและคลังผังยังอ่านได้โดยไม่ต้องสมัคร",
+  },
   guest_used: {
     eyebrow: "สิทธิ์ทดลองฟรี",
     title: "คุณใช้สิทธิ์ทดลองฟรีครบแล้ว",
@@ -315,11 +358,13 @@ export const ACCESS_PLANS: AccessPlan[] = [
     id: "guest",
     name: "ผู้เยี่ยมชม",
     price: "ฟรี",
-    priceNote: "ไม่ต้องสมัคร",
+    priceNote: REQUIRE_SIGNUP_TO_READ ? "อ่านเนื้อหาได้โดยไม่ต้องสมัคร" : "ไม่ต้องสมัคร",
     features: [
-      { label: `เปิดไพ่ทดลอง ${GUEST_LIMIT} ครั้ง`, included: true },
-      { label: "อ่านคำทำนายเต็มทุกองก์", included: true },
+      REQUIRE_SIGNUP_TO_READ
+        ? { label: "เปิดไพ่กับแม่หมอ AI (ต้องสมัครสมาชิกฟรีก่อน)", included: false }
+        : { label: `เปิดไพ่ทดลอง ${GUEST_LIMIT} ครั้ง`, included: true },
       { label: "คลังความหมายไพ่ 78 ใบ", included: true },
+      { label: "คลังผังและบทความทาโรต์ทั้งเว็บ", included: true },
       { label: "คุยถามแม่หมอต่อ (ต้องเป็นสมาชิก)", included: false },
       { label: "เก็บประวัติข้ามอุปกรณ์ (ต้องเป็นสมาชิก)", included: false },
     ],
@@ -368,6 +413,15 @@ export const MEMBER_BENEFITS_EN: Array<{ title: string; detail: string }> = [
 ];
 
 export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
+  signup_required: {
+    eyebrow: "Free Membership",
+    title: "Create a free account to draw your cards",
+    body: `Readings remain completely free — we simply ask you to sign in first so every reading stays tied to your own account. Members draw ${DAILY_LIMIT} readings every day.`,
+    primaryLabel: "Create Free Account",
+    primaryAction: "signup",
+    secondaryLabel: "Already a member? Sign In",
+    reassurance: "100% free · No credit card · Under a minute — the 78-card encyclopedia stays open to everyone",
+  },
   guest_used: {
     eyebrow: "Complimentary Trial",
     title: "You have used your free trial reading",
@@ -429,11 +483,13 @@ export const ACCESS_PLANS_EN: AccessPlan[] = [
     id: "guest",
     name: "Guest Visitor",
     price: "Free",
-    priceNote: "No registration required",
+    priceNote: REQUIRE_SIGNUP_TO_READ ? "Browse freely, no account needed" : "No registration required",
     features: [
-      { label: `${GUEST_LIMIT} complimentary trial reading`, included: true },
-      { label: "Complete archetypal interpretation", included: true },
+      REQUIRE_SIGNUP_TO_READ
+        ? { label: "AI tarot readings (free account required)", included: false }
+        : { label: `${GUEST_LIMIT} complimentary trial reading`, included: true },
       { label: "78-card wisdom encyclopedia", included: true },
+      { label: "Full spread library & tarot articles", included: true },
       { label: "Follow-up oracle chat (Member required)", included: false },
       { label: "Sync journal across devices (Member required)", included: false },
     ],

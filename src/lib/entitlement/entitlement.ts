@@ -1,7 +1,7 @@
 import { getAppDB } from "@/lib/platform/db";
 import { nextResetAt, weekKey } from "@/lib/entitlement/week";
 import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading, todayDateKey } from "@/lib/entitlement/daily";
-import { DAILY_LIMIT, GUEST_LIMIT, SIGNUP_BONUS } from "@/lib/entitlement/limits";
+import { DAILY_LIMIT, GUEST_BLOCK_REASON, GUEST_LIMIT, SIGNUP_BONUS } from "@/lib/entitlement/limits";
 import { recordEvent } from "@/lib/stats/record";
 
 /**
@@ -79,12 +79,14 @@ function onDbFailure(where: string, e: unknown): boolean {
  * แกนสิทธิ์การเปิดไพ่ — แหล่งความจริงเดียว (ENTITLEMENT_PLAN ข้อ 5)
  * ห้ามคำนวณสิทธิ์ที่อื่น · ห้ามคำนวณฝั่งเบราว์เซอร์
  *
- * ผู้เยี่ยมชม (ยังไม่สมัคร): 1 ครั้ง เท่านั้น (ไม่ว่าจะเปิดผังใด)
+ * ผู้เยี่ยมชม (ยังไม่สมัคร): `GUEST_LIMIT` ครั้ง — ตอนนี้ตั้งเป็น 0 = ต้องสมัคร/เข้าสู่ระบบก่อน
  * สมาชิก (สมัครแล้ว):       3 ครั้ง/วัน (ไม่ว่าจะเปิดผังใด รีเซ็ตเที่ยงคืนเวลาไทย) + โบนัสก้อน (ไม่หมดอายุ)
  */
 
 export {
   DAILY_LIMIT,
+  GUEST_BLOCK_REASON,
+  REQUIRE_SIGNUP_TO_READ,
   WEEKLY_LIMIT,
   GUEST_LIMIT,
   SIGNUP_BONUS,
@@ -120,7 +122,7 @@ export interface Entitlement {
   dailyFreeAvailable: boolean;
   /** จำนวนวันที่เปิดไพ่ประจำวันต่อเนื่อง */
   dailyStreak: number;
-  reason?: "guest_used" | "daily_exhausted" | "weekly_exhausted" | "members_only";
+  reason?: "signup_required" | "guest_used" | "daily_exhausted" | "weekly_exhausted" | "members_only";
   kind: "guest" | "member";
 }
 
@@ -193,7 +195,8 @@ export async function getEntitlement(v: Viewer): Promise<Entitlement> {
       resetAt: null,
       dailyFreeAvailable,
       dailyStreak,
-      reason: remaining > 0 ? undefined : "guest_used",
+      // `signup_required` เมื่อเว็บบังคับสมัครก่อนเล่น · `guest_used` เมื่อเคยมีสิทธิ์ทดลองแล้วใช้ครบ
+      reason: remaining > 0 ? undefined : GUEST_BLOCK_REASON,
     };
   }
 

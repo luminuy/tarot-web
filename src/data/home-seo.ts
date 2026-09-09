@@ -24,7 +24,7 @@ export const HOME_FAQS: HomeFaqItem[] = [
     id: "faq-free-reading",
     question: "ดูดวงไพ่ทาโรต์ออนไลน์ที่ SeerTarot มีค่าใช้จ่ายหรือไม่?",
     answer:
-      "คุณสามารถดูดวงไพ่ทาโรต์ออนไลน์ได้ฟรี โดยมีโควตาเปิดไพ่ประจำวันให้ทุกคนได้ใช้งานโดยไม่มีค่าใช้จ่าย และหากต้องการเปิดผังพยากรณ์ขนาดใหญ่พิเศษหรือปรึกษาเจาะลึกเพิ่มเติม สามารถเลือกปลดล็อกโควตาหรือสมัครสมาชิกตามความต้องการได้",
+      "ดูดวงไพ่ทาโรต์ที่ SeerTarot ฟรีทั้งหมด เพียงสมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ (สมัครด้วยอีเมล Google หรือ LINE ไม่ต้องผูกบัตร) จากนั้นจะได้โควตาเปิดไพ่ฟรีทุกวัน คุยถามแม่หมอต่อได้ และเก็บประวัติคำทำนายไว้ดูย้อนหลังได้ทุกเครื่อง ส่วนความหมายไพ่ 78 ใบ คลังผัง และบทความทั้งหมด อ่านได้ฟรีโดยไม่ต้องสมัคร หากต้องการเปิดผังพยากรณ์ขนาดใหญ่พิเศษหรือปรึกษาเจาะลึกเพิ่มเติม จึงค่อยเลือกเติมรอบเปิดไพ่ตามต้องการ",
   },
   {
     id: "faq-accuracy",
@@ -69,7 +69,7 @@ export const HOME_FAQS_EN: HomeFaqItem[] = [
     id: "faq-free-reading",
     question: "Is online tarot divination on SeerTarot free of charge?",
     answer:
-      "Yes, you can consult the tarot for free. We provide daily card reading allocations for everyone at no cost. For expansive grand spreads or in-depth counseling sessions, quota unlocks and premium options are available according to your needs.",
+      "Yes — readings are free. Simply create a free account or sign in before drawing (email, Google, or LINE; no credit card required) and you receive a free daily reading allowance, follow-up questions with your reader, and a reading journal synced across devices. The 78-card encyclopedia, spread library, and articles stay open to everyone without an account. For expansive grand spreads or in-depth counseling sessions, quota unlocks are available according to your needs.",
   },
   {
     id: "faq-accuracy",

@@ -6,6 +6,7 @@ import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getReading, updateReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvents, recordEvent } from "@/lib/stats/record";
+import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
 
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
@@ -121,7 +122,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         limit.releaseConcurrency();
         recordEvent("entitlement_blocked_read");
         return Response.json(
-          { error: "สิทธิ์เปิดไพ่ของคุณหมดแล้ว", reason: viewer.kind === "guest" ? "guest_used" : "daily_exhausted" },
+          {
+            error:
+              viewer.kind === "guest" && REQUIRE_SIGNUP_TO_READ
+                ? "สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อน แล้วเปิดไพ่ได้เลย"
+                : "สิทธิ์เปิดไพ่ของคุณหมดแล้ว",
+            reason: viewer.kind === "guest" ? GUEST_BLOCK_REASON : "daily_exhausted",
+          },
           { status: 403 },
         );
       }

@@ -11,8 +11,10 @@ import {
   isStandardSpread,
   MASTER_PERSONA_IDS,
   isMasterPersona,
+  GUEST_BLOCK_REASON,
+  REQUIRE_SIGNUP_TO_READ,
 } from "../../src/lib/entitlement/limits";
-import { UPGRADE_COPY } from "../../src/lib/entitlement/copy";
+import { UPGRADE_COPY, UPGRADE_COPY_EN, describeEntitlement } from "../../src/lib/entitlement/copy";
 
 let pass = 0;
 let fail = 0;
@@ -102,6 +104,36 @@ function main() {
   check("มี copy สำหรับ master_persona", Boolean(masterCopy));
   check("master_persona มี primaryAction เป็น credits", masterCopy?.primaryAction === "credits");
   check("master_persona มีข้อความเริ่ม 59.-", masterCopy?.primaryLabel.includes("59.-") || masterCopy?.primaryLabel.includes("เริ่ม"));
+
+  // ── 4.5 กำแพง "สมัครก่อนเล่น" ต้องพูดความจริงกับคนที่ยังไม่เคยเปิดไพ่ ──
+  check("GUEST_BLOCK_REASON = signup_required เมื่อบังคับสมัครก่อนเล่น", GUEST_BLOCK_REASON === "signup_required");
+
+  const signupCopy = UPGRADE_COPY.signup_required;
+  const signupCopyEn = UPGRADE_COPY_EN.signup_required;
+  check("มี copy สำหรับ signup_required ทั้งไทยและอังกฤษ", Boolean(signupCopy) && Boolean(signupCopyEn));
+  check("signup_required มี primaryAction เป็น signup", signupCopy?.primaryAction === "signup");
+  check(
+    "signup_required ต้องไม่พูดว่า 'ใช้สิทธิ์ทดลองครบแล้ว' (คนยังไม่เคยเล่น)",
+    !`${signupCopy?.title} ${signupCopy?.body}`.includes("ครบแล้ว")
+  );
+
+  // ผู้เยี่ยมชมที่เพิ่งเข้าเว็บ (server คืน remaining = 0, limit = 0) ต้องถูกกั้นด้วยเหตุผลที่ถูกต้อง
+  const guestView = describeEntitlement({
+    enabled: true,
+    canStartReading: false,
+    canChat: false,
+    remaining: 0,
+    limit: 0,
+    weeklyRemaining: 0,
+    bonusRemaining: 0,
+    resetAt: null,
+    kind: "guest",
+  });
+  check("ผู้เยี่ยมชม: blocked = true", guestView?.blocked === true);
+  check("ผู้เยี่ยมชม: blockedReason = signup_required", guestView?.blockedReason === "signup_required");
+  check("ผู้เยี่ยมชม: ปุ่มหลักคือชวนสมัครสมาชิก", guestView?.action === "signup");
+  check("ผู้เยี่ยมชม: ไม่มีจุดไฟโควตาหลอกตา (limit = 0)", guestView?.limit === 0);
+  check("REQUIRE_SIGNUP_TO_READ ตรงกับสถานะกำแพงจริง", REQUIRE_SIGNUP_TO_READ === (guestView?.blockedReason === "signup_required"));
 
   // ── 5. ความสอดคล้องของ guestAllowed กับ isStandardSpread (ป้องกัน ISSUE-031) ──
   for (const s of SPREADS) {
