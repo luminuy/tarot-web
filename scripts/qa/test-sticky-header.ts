@@ -30,8 +30,8 @@
  *     ในข้อ 2 ทำให้หัวเว็บกลายเป็น containing block ของลูกหลานที่เป็น fixed (แผงเมนูจะยึดผิดที่)
  *  6. ไฟล์ที่เรนเดอร์ `<SiteHeader` ห้ามครอบมันด้วย element ที่เป็น scroll container
  *     (`overflow-hidden` / `overflow-auto` / `overflow-y-*`) — `overflow-x-clip` เท่านั้นที่อนุญาต
- *  7. **ทุกหน้าของทั้งเว็บต้องมีหัวเว็บจริง** ทั้งใน HTML ที่ build ออกมาและในโครง source
- *     ยกเว้นเฉพาะรายการใน `INTENTIONALLY_HEADERLESS` ที่ต้องเขียนเหตุผลกำกับ (INC-0112)
+ *  7. **ทุกหน้าของทั้งเว็บต้องมีหัวเว็บและฟุตเตอร์จริง** ทั้งใน HTML ที่ build ออกมาและในโครง source
+ *     ยกเว้นเฉพาะรายการใน `INTENTIONALLY_BARE` ที่ต้องเขียนเหตุผลกำกับ (INC-0110 · INC-0112)
  *
  * รันด้วย: npx tsx scripts/qa/test-sticky-header.ts
  */
@@ -334,7 +334,7 @@ for (const file of listTsxFiles(path.join(ROOT, "src"))) {
 }
 
 // ───────────────────────────────────────────────────────────────
-// 7. ทุกหน้าของเว็บต้อง "มีหัวเว็บจริง" — ยกเว้นรายการที่ตั้งใจไม่มีเท่านั้น (INC-0112)
+// 7. ทุกหน้าของเว็บต้อง "มีหัวเว็บและฟุตเตอร์จริง" — ยกเว้นรายการที่ตั้งใจไม่มีเท่านั้น (INC-0112)
 //
 // INC-0110 จับได้ว่าหน้าอังกฤษ 115 หน้าไม่มีหัวเว็บ แล้วปิดเคสด้วยด่านที่ตรวจ
 // **เฉพาะ `.next/server/app/en/**`** ฝั่งไทยจึงยังไม่มีใครตรวจเลยสักหน้า
@@ -342,19 +342,25 @@ for (const file of listTsxFiles(path.join(ROOT, "src"))) {
 //
 // บทเรียน: ด่านที่ตรวจ "เฉพาะที่ที่เคยพัง" คือด่านที่ปล่อยของแบบเดียวกันหลุดในที่อื่น
 // ด่านนี้จึงตรวจ **ทุกหน้าของทั้งเว็บ** สองชั้น:
-//   7.1 ชั้น artifact — HTML ที่ build ออกมาจริงทุกไฟล์ต้องมีแอตทริบิวต์ `data-site-header="`
+//   7.1 ชั้น artifact — HTML ที่ build ออกมาจริงทุกไฟล์ต้องมีแอตทริบิวต์ `data-site-header="` และแท็ก `<footer`
 //       (โครง layout ที่หายไปอ่านจาก page.tsx มองไม่เห็น — นั่นคือต้นเหตุของ INC-0110)
 //   7.2 ชั้น source — หน้าที่เป็น dynamic ไม่มี HTML ให้ตรวจตอน build (`/readers/[id]`,
 //       `/readers/queue/[id]`, `/s/[id]`) จึงต้องไล่จาก page.tsx ขึ้นไปตาม layout แม่
 //       และตามการ import ลึกไม่เกิน 3 ชั้น (หน้าแรกได้หัวเว็บผ่าน HomePageBody ➔ TarotFlow)
+//
+// ฟุตเตอร์ถูกตรวจคู่กับหัวเว็บเสมอ เพราะทั้งสองอย่างหายไปพร้อมกันทุกครั้งที่ layout หาย
+// (INC-0110 หายทั้งคู่ 115 หน้า) การตรวจแค่หัวเว็บคือการเฝ้าประตูหน้าแล้วเปิดประตูหลังทิ้งไว้
 //
 // ⚠️ ต้องจับ **แอตทริบิวต์** `data-site-header="` เท่านั้น ห้าม includes("data-site-header")
 // เฉย ๆ — สตริงนั้นตรงกับ `data-site-header-spacer=""` และกฎ CSS ที่ inline มาในหน้าด้วย
 // ด่านจะผ่านทั้งที่หัวเว็บหายไปจริง (บทเรียนตอนทดสอบด่านของ INC-0110)
 // ───────────────────────────────────────────────────────────────
 
-/** หน้าที่ "ตั้งใจ" ไม่มีหัวเว็บกลาง — เพิ่มรายการใหม่ได้ แต่ต้องเขียนเหตุผลกำกับเสมอ */
-const INTENTIONALLY_HEADERLESS: { route: string; reason: string }[] = [
+/**
+ * หน้าที่ "ตั้งใจ" ไม่มีทั้งหัวเว็บกลางและฟุตเตอร์กลาง
+ * เพิ่มรายการใหม่ได้ แต่ต้องเขียนเหตุผลกำกับเสมอ (และรายการนั้นต้องชี้ไปหน้าที่มีอยู่จริง)
+ */
+const INTENTIONALLY_BARE: { route: string; reason: string }[] = [
   { route: "admin", reason: "แผงแอดมิน — ธีมและเมนูคนละชุดกับหน้าเว็บสาธารณะ (noindex)" },
   { route: "admin/login", reason: "หน้าเข้าสู่ระบบของแผงแอดมิน (noindex)" },
   { route: "tester", reason: "โหมดผู้ทดสอบภายใน — ธีมมืดคนละชุด (noindex)" },
@@ -369,7 +375,7 @@ const INTENTIONALLY_HEADERLESS: { route: string; reason: string }[] = [
     reason: "อยู่นอก root layout จึงไม่มี LocaleProvider ให้ SiteHeader ใช้ (Next บังคับให้เรนเดอร์ <html> ของตัวเอง)",
   },
 ];
-const HEADERLESS_ROUTES = new Set(INTENTIONALLY_HEADERLESS.map((x) => x.route));
+const BARE_ROUTES = new Set(INTENTIONALLY_BARE.map((x) => x.route));
 
 /** `src/app/(th)/readers/queue/[id]/page.tsx` ➔ `readers/queue/[id]` (route group ไม่นับเป็น path) */
 function routeIdFromPageFile(file: string): string {
@@ -433,14 +439,20 @@ function localImports(source: string, fromFile: string): Map<string, string> {
 }
 
 /**
- * ไฟล์นี้เรนเดอร์ <SiteHeader /> เองหรือไม่ — ถ้าไม่ ให้ตามเฉพาะคอมโพเนนต์ที่มัน
- * **เรนเดอร์จริงในเจเอสเอ็กซ์** ลึกไม่เกิน 3 ชั้น (หน้าแรก: page ➔ HomePageBody ➔ TarotFlow)
+ * ไฟล์นี้เรนเดอร์คอมโพเนนต์ที่ระบุ (`<SiteHeader` / `<SiteFooter`) เองหรือไม่ — ถ้าไม่
+ * ให้ตามเฉพาะคอมโพเนนต์ที่มัน **เรนเดอร์จริงในเจเอสเอ็กซ์** ลึกไม่เกิน 3 ชั้น
+ * (หน้าแรก: page ➔ HomePageBody ➔ TarotFlow)
  *
  * ⚠️ ห้ามตามทุก import ที่เจอ — ตอนทดสอบด่านรอบนี้เคยเขียนแบบนั้นแล้วด่าน "ผ่าน"
  * ทั้งที่ลบ <SiteHeader /> ออกจาก layout ของ /cards จริง ๆ เพราะหน้าไปเจอคำว่า
  * SiteHeader ในโมดูลที่มัน import มาแต่ไม่เคยเรนเดอร์เลย = ใบผ่านฟรีให้ของที่พัง
  */
-function rendersHeader(file: string, depth: number, visited: Map<string, number>): boolean {
+function rendersComponent(
+  file: string,
+  tag: "SiteHeader" | "SiteFooter",
+  depth: number,
+  visited: Map<string, number>,
+): boolean {
   if (depth > MAX_IMPORT_DEPTH) return false;
   const seenAt = visited.get(file);
   // เคยไปถึงไฟล์นี้ที่ระดับตื้นกว่าแล้ว = เดินซ้ำไม่ได้อะไรเพิ่ม แต่ถ้ารอบนี้ตื้นกว่าต้องเดินใหม่
@@ -448,14 +460,17 @@ function rendersHeader(file: string, depth: number, visited: Map<string, number>
   visited.set(file, depth);
 
   const source = fs.readFileSync(file, "utf-8");
-  if (source.includes("<SiteHeader")) return true;
+  if (source.includes(`<${tag}`)) return true;
 
   for (const [name, target] of localImports(source, file)) {
     const rendered = new RegExp(`<${name}[\\s/>]`).test(source);
-    if (rendered && rendersHeader(target, depth + 1, visited)) return true;
+    if (rendered && rendersComponent(target, tag, depth + 1, visited)) return true;
   }
   return false;
 }
+
+const rendersHeader = (file: string) => rendersComponent(file, "SiteHeader", 0, new Map());
+const rendersFooter = (file: string) => rendersComponent(file, "SiteFooter", 0, new Map());
 
 const pageFiles = listTsxFiles(path.join(ROOT, "src/app")).filter((f) => path.basename(f) === "page.tsx");
 const sourceRoutes = new Set(pageFiles.map(routeIdFromPageFile));
@@ -463,12 +478,16 @@ const sourceRoutes = new Set(pageFiles.map(routeIdFromPageFile));
 // 7.1 ชั้น source — ครอบคลุมหน้า dynamic ที่ไม่มี HTML ให้ตรวจตอน build
 for (const file of pageFiles) {
   const route = routeIdFromPageFile(file);
-  if (HEADERLESS_ROUTES.has(route)) continue;
+  if (BARE_ROUTES.has(route)) continue;
   const chain = [file, ...ancestorLayouts(file)];
-  if (!chain.some((f) => rendersHeader(f, 0, new Map()))) {
+  const missing = [
+    chain.some(rendersHeader) ? null : "<SiteHeader />",
+    chain.some(rendersFooter) ? null : "<SiteFooter />",
+  ].filter(Boolean);
+  if (missing.length > 0) {
     failures.push(
-      `/${route} — ไม่มี <SiteHeader /> ทั้งในหน้าเองและใน layout ชั้นใดเลย ` +
-        `(ถ้าตั้งใจไม่มีจริง ให้เพิ่มลง INTENTIONALLY_HEADERLESS พร้อมเหตุผล) — INC-0112`,
+      `/${route} — ไม่มี ${missing.join(" และ ")} ทั้งในหน้าเองและใน layout ชั้นใดเลย ` +
+        `(ถ้าตั้งใจไม่มีจริง ให้เพิ่มลง INTENTIONALLY_BARE พร้อมเหตุผล) — INC-0110 · INC-0112`,
     );
   }
 }
@@ -487,10 +506,11 @@ if (fs.existsSync(appBuildDir)) {
   walk(appBuildDir);
 
   const headerless: string[] = [];
+  const footerless: string[] = [];
   let scanned = 0;
   for (const file of htmlFiles) {
     const route = path.relative(appBuildDir, file).split(path.sep).join("/").replace(/\.html$/, "");
-    if (HEADERLESS_ROUTES.has(route)) continue;
+    if (BARE_ROUTES.has(route)) continue;
     const html = fs.readFileSync(file, "utf-8");
     // ข้ามไฟล์ที่ไม่ใช่ "หน้าจริงที่ prerender สำเร็จ" — สังเกตจาก `id="__next_error__"`
     // ซึ่ง Next ใช้กับสองกรณี: หน้าที่ redirect (NEXT_REDIRECT ตาม `redirects` ใน next.config)
@@ -500,12 +520,22 @@ if (fs.existsSync(appBuildDir)) {
     if (html.includes('id="__next_error__"')) continue;
     scanned += 1;
     if (!html.includes('data-site-header="')) headerless.push(`/${route}`);
+    // ฟุตเตอร์กลางเป็น <footer> เพียงตัวเดียวของหน้า จึงจับด้วยแท็กตรง ๆ ได้
+    if (!html.includes("<footer")) footerless.push(`/${route}`);
   }
 
   if (headerless.length > 0) {
     failures.push(
       `HTML ที่ build แล้ว: ${headerless.length} หน้าไม่มีแอตทริบิวต์ \`data-site-header="\` — ` +
         `${headerless.slice(0, 5).join(", ")}${headerless.length > 5 ? " …" : ""} (INC-0110 · INC-0112)`,
+    );
+  }
+
+  if (footerless.length > 0) {
+    failures.push(
+      `HTML ที่ build แล้ว: ${footerless.length} หน้าไม่มี \`<footer\` — ` +
+        `${footerless.slice(0, 5).join(", ")}${footerless.length > 5 ? " …" : ""} ` +
+        `(ผู้ใช้ที่มาจากผลค้นหาจะไม่มีลิงก์ภายในให้เดินต่อเลย — INC-0110)`,
     );
   }
   // กันด่าน "ผ่านเพราะไม่มีอะไรให้ตรวจ" — เว็บนี้มีหน้าที่ prerender ได้หลายร้อยหน้า
@@ -515,7 +545,7 @@ if (fs.existsSync(appBuildDir)) {
     );
   }
 } else {
-  console.warn("   ⚠️  ยังไม่มี .next/server/app — ข้ามการตรวจหัวเว็บใน HTML ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)");
+  console.warn("   ⚠️  ยังไม่มี .next/server/app — ข้ามการตรวจหัวเว็บ/ฟุตเตอร์ใน HTML ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)");
 }
 
 // 7.4 หน้า 404 ทั้งสองไฟล์ต้องมีอยู่จริงและต้องมีหัวเว็บ
@@ -533,19 +563,23 @@ for (const rel of ["src/app/not-found.tsx", "src/app/(th)/not-found.tsx"]) {
     );
     continue;
   }
-  if (!rendersHeader(full, 0, new Map())) {
-    failures.push(`${rel} — หน้า 404 ต้องมี <SiteHeader /> เหมือนหน้าอื่นทั้งเว็บ (INC-0112)`);
+  const missing404 = [
+    rendersHeader(full) ? null : "<SiteHeader />",
+    rendersFooter(full) ? null : "<SiteFooter />",
+  ].filter(Boolean);
+  if (missing404.length > 0) {
+    failures.push(`${rel} — หน้า 404 ต้องมี ${missing404.join(" และ ")} เหมือนหน้าอื่นทั้งเว็บ (INC-0112)`);
   }
 }
 
 // 7.3 กันรายการยกเว้นค้าง — ทุกข้อในลิสต์ต้องชี้ไปยังหน้าที่มีอยู่จริง
-for (const item of INTENTIONALLY_HEADERLESS) {
+for (const item of INTENTIONALLY_BARE) {
   const specialExists =
     (item.route === "_global-error" && fs.existsSync(path.join(ROOT, "src/app/global-error.tsx"))) ||
     (item.route === "_not-found" && fs.existsSync(path.join(ROOT, "src/app/(th)/not-found.tsx")));
   if (!sourceRoutes.has(item.route) && !specialExists) {
     failures.push(
-      `INTENTIONALLY_HEADERLESS มีรายการค้าง: "${item.route}" ไม่มีหน้านั้นในโปรเจกต์แล้ว — ลบออกจากลิสต์ ` +
+      `INTENTIONALLY_BARE มีรายการค้าง: "${item.route}" ไม่มีหน้านั้นในโปรเจกต์แล้ว — ลบออกจากลิสต์ ` +
         `(ไม่งั้นวันหนึ่งมีหน้าชื่อเดิมกลับมา แล้วมันจะได้ใบผ่านฟรีโดยไม่มีใครรู้)`,
     );
   }
@@ -562,5 +596,5 @@ if (failures.length > 0) {
 }
 
 console.log(
-  "✅ ด่านหัวเว็บผ่านครบ (ป้าย · fixed top-0 เต็มกว้าง ไม่ใช่ sticky · ตัวกันที่ · เลเยอร์ compositor ที่รอดการย่อ CSS · โล่กันเนื้อหาโผล่ · safe-area · body > * · overflow · ไม่มี fixed ซ้อนในลูกหลาน · ไม่มี scroll container ครอบ · ทุกหน้าทั้งเว็บมีหัวเว็บจริง)",
+  "✅ ด่านหัวเว็บผ่านครบ (ป้าย · fixed top-0 เต็มกว้าง ไม่ใช่ sticky · ตัวกันที่ · เลเยอร์ compositor ที่รอดการย่อ CSS · โล่กันเนื้อหาโผล่ · safe-area · body > * · overflow · ไม่มี fixed ซ้อนในลูกหลาน · ไม่มี scroll container ครอบ · ทุกหน้าทั้งเว็บมีหัวเว็บและฟุตเตอร์จริง)",
 );
