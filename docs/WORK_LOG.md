@@ -35,6 +35,57 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-09 (รอบ 4): 🌐 หน้าอังกฤษ 115 หน้าไม่มีหัวเว็บและไม่มีฟุตเตอร์เลย (INC-0110)
+
+> **ขอบเขต**: เพิ่ม section layout 5 ไฟล์ใต้ `src/app/(en)/en/` + เสริมด่านที่ 34 `test-en-routing.ts` (จำนวนด่านยังเป็น 39)
+
+**ที่มา**: ระหว่างตรวจรับงาน INC-0109 พบว่า `/en/cards` ไม่มี `[data-site-header]` เลย
+เจ้าของสั่ง _"แก้เลย"_ — พอไล่ทั้งต้นไม้พบว่าไม่ใช่หน้าเดียว แต่**ทุกหน้าอังกฤษยกเว้น `/en`**
+
+**วัดจาก production จริงก่อนแก้** (`curl` นับ `data-site-header` และ `<footer`):
+
+| URL | HTTP | หัวเว็บ | ฟุตเตอร์ |
+| :--- | :-: | :-: | :-: |
+| `/en` | 200 | ✅ 1 | ✅ 1 |
+| `/en/cards` · `/en/cards/all` · `/en/cards/major` · `/en/cards/major-00` | 200 | ❌ 0 | ❌ 0 |
+| `/en/spreads` · `/en/spreads/celtic-cross` · `/en/spreads/topic/love` | 200 | ❌ 0 | ❌ 0 |
+| `/en/daily` · `/en/love/1-card` · `/en/blog` | 200 | ❌ 0 | ❌ 0 |
+
+**สาเหตุราก**: ต้นไม้ `(en)` กับ `(th)` เป็น **root layout คนละตัว** ไม่ได้ใช้ layout ร่วมกันแม้แต่ชั้นเดียว
+ฝั่งไทยแขวนหัวเว็บ/ฟุตเตอร์ไว้ที่ `layout.tsx` ของแต่ละหมวด (`(th)/cards/layout.tsx` ฯลฯ)
+ตอนสร้างต้นไม้อังกฤษ (PR #340 ชุด HANDOFF_EN_ROUTING) ก๊อปมาแต่ `page.tsx`
+`/en` รอดมาได้เพราะมันคือ `TarotFlow` ซึ่งเรนเดอร์ `<SiteHeader />` ไว้ในตัวเอง
+จึงเป็นหน้าเดียวที่มีหัวเว็บ และเป็นหน้าเดียวที่ทุกคนเปิดดูตอนตรวจงาน
+
+**ทำไมด่านตรวจเดิมจับไม่ได้**: `test-en-routing.ts` ตรวจครบทุกอย่าง — ไฟล์ `page.tsx` มีจริง ·
+`hreflang` ชี้กันถูก · `sitemap` มีคู่ครบ · ลิงก์ภายในไม่หลุดภาษา · ไม่มีภาษาไทยปน —
+แต่ไม่มีข้อไหนถามว่า "หน้านี้มีหัวเว็บไหม" เพราะฝั่งไทยได้มาฟรีจาก layout จนไม่มีใครนึกถึง
+
+**สิ่งที่ทำ**: เพิ่ม `layout.tsx` 5 ไฟล์ให้ตรงกับฝั่งไทย — `en/cards` · `en/spreads` · `en/daily` · `en/love` · `en/blog`
+⚠️ **ห้ามยกไปไว้ที่ `(en)/en/layout.tsx`** เด็ดขาด — ชั้นนั้นครอบ `/en` ซึ่งมีหัวเว็บของตัวเองแล้ว จะได้หัวเว็บซ้อนสองอัน
+
+**ผลการตรวจ (production build)**:
+
+- `npm run repo:verify` ➔ ✅ **39/39** · `npm run typecheck` ➔ ✅ 0 errors
+- นับใน HTML ที่ build ออกมา: ทุกหน้าอังกฤษได้ `header=1 footer=1` **เท่ากับฝั่งไทยเป๊ะ** ไม่มีหน้าไหนซ้อนสองอัน
+- เปิดด้วย Chromium mobile: หัวเว็บ `position: fixed` · `top = 0` · ตัวกันที่ 69/69 ทุกหน้า
+- ลิงก์ในหัวเว็บอยู่ในต้นไม้อังกฤษครบ (`/en` `/en/daily` `/en/love/1-card` `/en/spreads` `/en/cards` `/en/blog`) · ไม่มีอักษรไทยหลุดในหัวเว็บ
+- **ทดสอบด่านด้วยการทำให้พังจริง 3 เคส — จับได้ครบ 3**: ลบ layout ทิ้ง · มีไฟล์แต่ไม่มี `<SiteFooter />` · ลบ `data-site-header=""` ออกจาก HTML ที่ build แล้ว
+
+**🛡️ กฎป้องกันถาวร** (เสริมด่านที่ 34):
+1. ทุกหมวดไทยที่มี `layout.tsx` เรนเดอร์ `<SiteHeader />` **ถ้าหมวดนั้นมีหน้าอังกฤษอยู่จริง** ต้องมี layout ฝั่งอังกฤษที่ให้ทั้ง `<SiteHeader />` และ `<SiteFooter />`
+2. **HTML ที่ build ออกมาจริงทุกหน้าอังกฤษต้องมีแอตทริบิวต์ `data-site-header="`** — ตรวจ artifact ไม่ใช่ source เพราะ "โครง layout ที่หายไป" อ่านจาก `page.tsx` มองไม่เห็นเลย
+
+> 📌 บทเรียนวิธีเขียนด่าน: เกือบพลาดเพราะเขียน `includes("data-site-header")` เฉย ๆ
+> ซึ่งไปตรงกับ `data-site-header-spacer=""` และกฎ CSS ที่ inline มาในหน้า ด่านจึงผ่านทั้งที่หัวเว็บหายจริง
+> ต้องจับ **แอตทริบิวต์พร้อมเครื่องหมาย `="`** เสมอ (จับได้ตอนทดสอบด่านด้วยการทำให้พังจริง)
+
+**ยังค้าง (ไม่ใช่บั๊กของรอบนี้)**: ลิงก์ `/cards/birth-card` และ `/readers` ในหัวเว็บอังกฤษยังพาไปหน้าไทย
+เพราะยังไม่มีฝาแฝดอังกฤษ (`hasEnglishTwin` ปล่อยไว้ตามที่ออกแบบไว้) — birth-card มีแผนแยกอยู่แล้วที่
+[`HANDOFF_EN_BIRTH_CARD_2026-09-09.md`](plans/HANDOFF_EN_BIRTH_CARD_2026-09-09.md)
+
+---
+
 ### 🗓️ 2026-09-09 (รอบ 3 · ปิดเคส): 🧭 หัวเว็บยัง "สั่น" ตอนเลื่อน — ต้นเหตุคือ `position: sticky` เอง (INC-0109)
 
 > **ขอบเขต**: `src/components/layout/SiteHeader.tsx` · `src/app/globals.css` · `src/app/(th)/reading/chat/page.tsx` · เสริมด่านที่ 39 (จำนวนด่านยังเป็น 39)
