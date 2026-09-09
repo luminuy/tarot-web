@@ -110,16 +110,21 @@
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-emphasis: cubic-bezier(0.2, 0, 0, 1);
 
-  /* ความสูงจริงของ [data-site-header] — วัดได้ 69px มือถือ / 81px เดสก์ท็อป
-     เผื่อระยะหายใจอีกเล็กน้อยกันตัวอักษรชนขอบล่างของหัวเว็บ (ISSUE-030)
+  /* ความสูงจริงของ [data-site-header] — วัดจริงด้วย Chromium ได้ 69px มือถือ / 82px เดสก์ท็อป
      ต้องบวก safe-area-inset-top ด้วย เพราะหัวเว็บกันพื้นที่ใต้ status bar ไว้เองแล้ว
-     ตอนเปิดจากไอคอนหน้าจอโฮม (display: standalone) — ในเบราว์เซอร์ปกติค่านี้ = 0 */
-  --site-header-h: calc(76px + env(safe-area-inset-top, 0px));
+     ตอนเปิดจากไอคอนหน้าจอโฮม (display: standalone) — ในเบราว์เซอร์ปกติค่านี้ = 0
+
+     ⚠️ ตั้งแต่ INC-0109 ค่านี้ต้องเป็น "ความสูงจริงเป๊ะ ๆ" ห้ามเผื่อระยะหายใจปนมาอีก
+     เพราะหัวเว็บเป็น `position: fixed` แล้ว และ `[data-site-header-spacer]` กันที่
+     ด้วยค่านี้โดยตรง — เผื่อเกิน = เห็นเป็นช่องว่างใต้หัวเว็บทุกหน้า / ขาด = หัวเว็บทับเนื้อหา
+     ระยะหายใจของ anchor ย้ายไปบวกที่ `scroll-padding-top` แทนแล้ว
+     SiteHeader.tsx ยังวัดของจริงด้วย ResizeObserver แล้วเขียนทับค่านี้ให้อีกชั้น */
+  --site-header-h: calc(69px + env(safe-area-inset-top, 0px));
 }
 
 @media (min-width: 640px) {
   :root {
-    --site-header-h: calc(88px + env(safe-area-inset-top, 0px));
+    --site-header-h: calc(82px + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -158,7 +163,7 @@ body {
  */
 html {
   overflow-x: clip;
-  scroll-padding-top: var(--site-header-h);
+  scroll-padding-top: calc(var(--site-header-h) + 12px);
   overscroll-behavior-y: none;
 }
 
@@ -216,30 +221,35 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
 }
 
 /*
- * 🧭 หัวเว็บ sticky ต้องมี "เลเยอร์ compositor ของตัวเอง" (INC-0107)
+ * 🧭 หัวเว็บต้อง "ตรึง" จริง ไม่ใช่ "เลื่อนตามแล้วค่อยหยุด" (INC-0109)
  * ---------------------------------------------------------------------------
- * บน iOS Safari การเลื่อนหน้าวิ่งอยู่บนเธรด compositor แต่ `position: sticky`
- * จะถูก compositor ตรึงให้เองได้ก็ต่อเมื่อมันอยู่บนเลเยอร์แยกของมันเอง
- * ถ้ายังอยู่เลเยอร์เดียวกับเนื้อหาที่กำลังเลื่อน เบราว์เซอร์ต้องวาดหัวเว็บใหม่ทุกเฟรม
- * บนเธรดหลัก พอเธรดหลักตามไม่ทัน หัวเว็บจะ "ตามหลัง" ตำแหน่งสกรอลล์อยู่ไม่กี่พิกเซล
- * ผู้ใช้เห็นเป็นหัวเว็บสั่น/ขยับ และมีแถบเนื้อหาแวบขึ้นมาเหนือหัวเว็บระหว่างเลื่อน
+ * รอบนี้เปลี่ยนวิธีจัดตำแหน่งจาก `position: sticky` เป็น `position: fixed`
+ * (คลาสอยู่ที่ SiteHeader.tsx — ที่นี่คุมเฉพาะเลเยอร์ · safe-area · โล่)
  *
- * `translateZ(0)` บนตัว sticky **เอง** ไม่กระทบตำแหน่ง sticky เลย
- * (เฉพาะ transform ของ *บรรพบุรุษ* เท่านั้นที่ทำให้ sticky ยึดผิดกล่อง)
- * วัดจริงด้วย Chromium mobile 390px: rect.top === 0 ครบ 74 จุดตลอดหน้าแรก 11,064px
+ * ทำไมสองรอบก่อนหน้าไม่หาย:
+ *   INC-0107 บังคับเลเยอร์ compositor → ถูกตัวย่อ CSS กินทิ้ง ไม่เคยถึงผู้ใช้
+ *   INC-0108 แก้ให้เลเยอร์ติดจริง + เพิ่มโล่ → ช่องว่างหาย แต่ "อาการสั่น" ยังอยู่
+ * เพราะทั้งสองรอบแก้ที่ *เลเยอร์* ส่วนต้นเหตุจริงอยู่ที่ *จุดอ้างอิงตำแหน่ง*:
+ * `sticky` ต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ซึ่งบน iOS Safari
+ * ขอบบนของมันขยับเองระหว่างเลื่อน (แถบ URL ย่อ/ขยาย · rubber-band) คนละจังหวะกับ
+ * visual viewport ที่ตาเห็น ค่าที่ได้จึงแกว่ง = หัวเว็บสั่น
+ * `fixed` ไม่มีการคำนวณนั้น เบราว์เซอร์ตรึงเลเยอร์กับ viewport ให้บนเธรด compositor
+ * (Blink บอกเหตุผลตรง ๆ ว่า `FixedPosition` + `AffectedByOuterViewportBoundsDelta`)
  *
- * 🚨 ห้ามเขียน `translate3d(0, 0, 0)` เด็ดขาด (INC-0108)
- * Lightning CSS (ตัวย่อ CSS ของ Tailwind v4) มองว่าแกน z เป็น 0 จึงยุบเหลือ `translate(0,0)`
- * ซึ่งเป็น transform 2 มิติ **ไม่บังคับเลเยอร์ GPU** การแก้จึงถูกกินหายไปทั้งดุ้นตอน build
- * (ยืนยันจาก production: `transform:translate(0)` · และรัน lightningcss ตรง ๆ ได้ผลเดียวกัน)
- * `translateZ(0)` เป็นรูปแบบเดียวที่รอดการย่อและยังเป็น 3D — ด่านที่ 39 บังคับเรื่องนี้ไว้แล้ว
+ * ⚠️ `fixed` หลุดจาก flow → ต้องมี `[data-site-header-spacer]` กันที่เสมอ (ดูบล็อกถัดไป)
+ *
+ * `translateZ(0)` ยังต้องอยู่ — ให้หัวเว็บมีเลเยอร์ของตัวเอง เนื้อหาที่เลื่อนอยู่ข้างหลัง
+ * จึงไม่ลากให้หัวเว็บถูกวาดใหม่ทุกเฟรม
+ * 🚨 ห้ามเขียน `translate3d(0, 0, 0)` เด็ดขาด (INC-0108) — Lightning CSS (ตัวย่อ CSS
+ * ของ Tailwind v4) เห็นแกน z เป็น 0 จึงยุบเหลือ `translate(0,0)` ที่เป็น 2D และ
+ * ไม่บังคับเลเยอร์ GPU  `translateZ(0)` เป็นรูปแบบเดียวที่รอดการย่อ — ด่านที่ 39 บังคับไว้
  *
  * ⚠️ ห้ามใส่ `position: fixed` ให้ลูกหลานที่อยู่ในหัวเว็บ — transform ตรงนี้ทำให้
  * หัวเว็บกลายเป็น containing block ของมัน แผงเมนูทั้งหมดจึงต้องเป็น `absolute` เท่านั้น
  * (ปัจจุบัน SacredNavDropdown / UserProfileBadge เป็น absolute ทั้งคู่ — ตรวจก่อนเปลี่ยน)
  *
  * ⚠️ `will-change` ห้ามใช้ตรงนี้ (INC-0056 + ด่าน test-will-change) เพราะจองเลเยอร์ค้าง
- * ตลอด session — `translate3d` ให้ผลเลเยอร์แยกเหมือนกันโดยไม่ประกาศ hint ถาวร
+ * ตลอด session — `translateZ(0)` ให้ผลเลเยอร์แยกเหมือนกันโดยไม่ประกาศ hint ถาวร
  *
  * `padding-top: env(safe-area-inset-top)` — manifest ตั้ง `display: standalone`
  * และ viewport ตั้ง `viewportFit: "cover"` เมื่อเปิดจากไอคอนหน้าจอโฮมบน iOS
@@ -252,6 +262,22 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   padding-top: env(safe-area-inset-top, 0px);
+}
+
+/*
+ * 📏 ตัวกันที่ของหัวเว็บ (INC-0109)
+ * ---------------------------------------------------------------------------
+ * หัวเว็บเป็น `fixed` จึงไม่กินพื้นที่ใน flow อีกต่อไป ถ้าไม่มีบล็อกนี้
+ * เนื้อหาบรรทัดแรกของ *ทุกหน้า* จะถูกหัวเว็บทับทันที
+ *
+ * `<div data-site-header-spacer>` ถูกเรนเดอร์คู่กับ <header> ใน SiteHeader.tsx เสมอ
+ * ห้ามลบ ห้ามใส่เนื้อหาข้างใน และห้ามให้มันมี border/box-shadow
+ * ค่าความสูงมาจาก `--site-header-h` ตัวเดียวกับที่ `scroll-padding-top` ใช้
+ * และ SiteHeader.tsx เขียนทับด้วยค่าที่วัดจริงจาก ResizeObserver อีกชั้น
+ */
+[data-site-header-spacer] {
+  height: var(--site-header-h);
+  flex: none;
 }
 
 /*

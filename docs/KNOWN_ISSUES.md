@@ -18,9 +18,9 @@
 
 | หัวข้อ | ค่า |
 | :--- | :--- |
-| **วันที่** | 2026-09-09 (รอบตรวจรับงาน: หัวเว็บ sticky ไม่อยู่นิ่งตอนเลื่อนบนมือถือ — ISSUE-036) |
-| **commit ฐาน** | `main` — Production Live (`df15d8d`) |
-| **วิธีตรวจ** | `npm run repo:verify` (39/39 ด่าน) + วัดตำแหน่งหัวเว็บด้วย Chromium mobile 390px ตลอดหน้าแรก + A/B ภาพหน้าจอตอนจำลองหัวเว็บตามหลังสกรอลล์ 25px + ตรวจ CSS ที่ย่อแล้วด้วย Lightning CSS |
+| **วันที่** | 2026-09-09 (รอบตรวจรับงาน รอบ 3: หัวเว็บยังสั่นตอนเลื่อนบนมือถือ — ISSUE-036 · INC-0109) |
+| **commit ฐาน** | `main` — Production Live (`edda543`) |
+| **วิธีตรวจ** | `npm run repo:verify` (39/39 ด่าน) + วัดตำแหน่งหัวเว็บด้วย Chromium mobile 390px ตลอดทุกหน้า **บน production build** (ไม่ใช่ dev) + เทียบความสูงตัวกันที่กับหัวเว็บ + สแกนเนื้อหาที่ถูกหัวเว็บทับ + `LayerTree.compositingReasons` ผ่าน CDP + ทดสอบด่านด้วยการทำให้พังจริง 6 เคส |
 | **ผลสรุป** | ✅ **ISSUE-001 ถึง ISSUE-030 ปิดครบสมบูรณ์ 100%** · ตรวจสอบ 39 ด่าน ผ่าน 39/39 |
 | **รอบก่อนหน้า (ประวัติ)** | 2026-09-06 · `npm run repo:verify` (38/38 ด่าน) · SEO Wave 2–4 + ความจริงเชิงตัวเลขในเอกสาร<br>2026-09-04 · dev server + `npm run repo:verify` (24/24 ด่าน) · ตรวจสอบ 24 ด่าน ผ่าน 24/24 |
 
@@ -28,7 +28,7 @@
 
 | # | ระดับ | หัวข้อย่อ | ไฟล์หลัก | สถานะ |
 | :-- | :-- | :--- | :--- | :-- |
-| **036** | 🟢 Resolved | หัวเว็บ sticky ขยับ/สั่นตอนเลื่อนหน้าจอบนมือถือ มีแถบเนื้อหาแวบเหนือหัวเว็บ | `src/app/globals.css`, `scripts/qa/test-sticky-header.ts` | ✅ **แก้แล้ว (2 รอบ)** — รอบ 1 บังคับเลเยอร์ compositor + `safe-area-inset-top` (INC-0107) · รอบ 2 พบว่า Lightning CSS ยุบ `translate3d(0,0,0)` เหลือ 2D ทำให้รอบแรกไร้ผล จึงเปลี่ยนเป็น `translateZ(0)` + เพิ่มโล่ `::before` และให้ด่านตรวจ CSS ที่ย่อแล้วจริง (INC-0108) |
+| **036** | 🟢 Resolved | หัวเว็บขยับ/สั่นตอนเลื่อนหน้าจอบนมือถือ มีแถบเนื้อหาแวบเหนือหัวเว็บ | `src/components/layout/SiteHeader.tsx`, `src/app/globals.css`, `scripts/qa/test-sticky-header.ts` | ✅ **แก้แล้ว (3 รอบ · ปิดเคส)** — รอบ 1 บังคับเลเยอร์ compositor + `safe-area-inset-top` (INC-0107) · รอบ 2 พบว่า Lightning CSS ยุบ `translate3d(0,0,0)` เหลือ 2D ทำให้รอบแรกไร้ผล จึงเปลี่ยนเป็น `translateZ(0)` + เพิ่มโล่ `::before` ➔ ช่องว่างหาย แต่ยังสั่น (INC-0108) · **รอบ 3 พบว่าต้นเหตุคือ `position: sticky` เอง** ซึ่งต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ที่ iOS Safari ขยับเองระหว่างเลื่อน จึงเปลี่ยนเป็น `position: fixed` + `[data-site-header-spacer]` (INC-0109) |
 | **032** | 🟢 Resolved | `monthly-ten` วางไพ่ใบที่ 6 ทับกับใบไขว้ที่หมุน 90° | `src/data/spreads.ts`, `scripts/qa/test-spreads.ts` | ✅ **แก้แล้ว** — เลื่อนใบที่ 6 จาก `x: 0.5` → `0.53` และเพิ่มด่านตรวจใบไขว้เบียดคอลัมน์ |
 | **034** | 🔵 Low | ไพ่ใบที่ 7–10 ของ `celtic-cross` และ `monthly-ten` ซ้อนกันแนวตั้ง ~20% ในแผนผัง SEO | `src/components/spread/SpreadPositionMap.tsx` | 🟡 **ยังไม่แก้** — มีมาแต่เดิมทั้งสองผัง ต้องให้เจ้าของเคาะว่าเป็นดีไซน์หรือบั๊ก |
 | **035** | 🟡 Medium | CSP บล็อก Cloudflare Web Analytics beacon ทุกครั้งที่โหลดหน้า | `next.config.ts` / middleware CSP | 🔴 **ยังไม่แก้** — `static.cloudflareinsights.com` ไม่อยู่ใน `script-src` ทำให้ Web Analytics ไม่เก็บข้อมูลเลย |
