@@ -80,6 +80,44 @@ for (const [group, locale] of [["(th)", '"th"'], ["(en)", '"en"']] as const) {
   );
 }
 
+// ── 1b. ทุกหมวดอังกฤษที่มีอยู่จริง ต้องมี section layout ของตัวเอง ────────
+// บทเรียนจริง 2026-09-09 (INC-0110): ต้นไม้ `(en)` กับ `(th)` เป็น root layout คนละตัว
+// ไม่ได้ใช้ layout ร่วมกันแม้แต่ชั้นเดียว ฝั่งไทยแขวนหัวเว็บ/ฟุตเตอร์ไว้ที่ layout ของ
+// แต่ละหมวด (`(th)/cards/layout.tsx` ฯลฯ) ตอนสร้างต้นไม้อังกฤษก๊อปแต่ `page.tsx` มา
+// หน้าอังกฤษ 115 หน้าจึงไม่มีหัวเว็บและไม่มีฟุตเตอร์เลย — เข้าเว็บมาแล้วไปไหนต่อไม่ได้
+// และไม่มีลิงก์ภายในให้บอตเดินต่อสักเส้น
+//
+// ⚠️ ห้ามแก้ด้วยการยกไปไว้ที่ `(en)/en/layout.tsx` — ชั้นนั้นครอบหน้าแรก `/en`
+// ซึ่งเรนเดอร์ <SiteHeader /> เองอยู่แล้วผ่าน TarotFlow จะได้หัวเว็บซ้อนสองอัน
+const thSectionLayouts = fs
+  .readdirSync(path.join(ROOT, TH_APP), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .filter((name) => fs.existsSync(path.join(ROOT, TH_APP, name, "layout.tsx")))
+  .filter((name) =>
+    fs.readFileSync(path.join(ROOT, TH_APP, name, "layout.tsx"), "utf-8").includes("<SiteHeader"),
+  );
+
+// ตรวจเฉพาะหมวดที่ "มีหน้าอังกฤษอยู่จริง" — หมวดที่ยังไม่มีฝาแฝด (เช่น /privacy) ไม่บังคับ
+const enSectionsNeedingLayout = thSectionLayouts.filter((name) =>
+  fs.existsSync(path.join(ROOT, EN_APP, name)),
+);
+
+for (const name of enSectionsNeedingLayout) {
+  const file = path.join(ROOT, EN_APP, name, "layout.tsx");
+  const source = fs.existsSync(file) ? fs.readFileSync(file, "utf-8") : "";
+  check(
+    `/en/${name} มี section layout ที่ให้หัวเว็บ + ฟุตเตอร์ (คู่แฝดของ (th)/${name}/layout.tsx)`,
+    source.includes("<SiteHeader") && source.includes("<SiteFooter"),
+    source ? "มีไฟล์แต่ไม่ได้เรนเดอร์ <SiteHeader /> + <SiteFooter />" : `ไม่มีไฟล์ ${EN_APP}/${name}/layout.tsx`,
+  );
+}
+check(
+  "หมวดอังกฤษที่ต้องมี layout ถูกตรวจครบ (ไม่ใช่ 0 หมวด)",
+  enSectionsNeedingLayout.length > 0,
+  `พบ ${enSectionsNeedingLayout.length} หมวด`,
+);
+
 // ── 2. ทุกเส้นทางที่ประกาศว่ามีฝาแฝด ต้องมีไฟล์ page.tsx จริง ──────────────
 for (const route of EN_TWIN_ROUTES) {
   const rel = route === "/" ? "" : route;
@@ -320,6 +358,22 @@ const englishRoot = path.join(ROOT, ".next/server/app/en.html");
 if (fs.existsSync(englishRoot)) englishHtml.push(englishRoot);
 
 check("build มีหน้าอังกฤษให้ตรวจ (อย่างน้อย 100 หน้า)", englishHtml.length >= 100, `พบ ${englishHtml.length}`);
+
+// ทุกหน้าอังกฤษที่ build ออกมาต้องมีหัวเว็บจริงใน HTML ดิบ (INC-0110)
+// ตรวจ artifact ไม่ใช่ source — เพราะบั๊กรอบนี้เกิดจาก "โครง layout ที่หายไป"
+// ซึ่งอ่านจาก page.tsx อย่างเดียวมองไม่เห็นเลย
+// ⚠️ ต้องจับ **แอตทริบิวต์** `data-site-header="` เท่านั้น ห้ามใช้ includes("data-site-header")
+// เฉย ๆ — สตริงนั้นไปตรงกับ `data-site-header-spacer=""` และกฎ CSS ที่ inline มาในหน้าด้วย
+// ด่านจึงผ่านทั้งที่หัวเว็บหายไปจริง (พลาดมาแล้วตอนทดสอบด่านรอบนี้)
+const headerless = englishHtml
+  .filter((file) => !fs.readFileSync(file, "utf-8").includes('data-site-header="'))
+  .map((file) => path.relative(path.join(ROOT, ".next/server/app"), file));
+
+check(
+  "ทุกหน้าอังกฤษที่ build ออกมามีหัวเว็บอยู่ใน HTML ดิบ",
+  headerless.length === 0,
+  headerless.length ? `${headerless.length} หน้าไม่มีหัวเว็บ · เช่น ${headerless.slice(0, 3).join(", ")}` : undefined,
+);
 
 const leaking = englishHtml
   .map((file) => ({ file: path.relative(path.join(ROOT, ".next/server/app"), file), ratio: thaiRatioPercent(file) }))
