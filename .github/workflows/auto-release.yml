@@ -37,7 +37,7 @@ jobs:
             
             - **Live Production URL**: [https://tarot-web.bankjack10452.workers.dev](https://tarot-web.bankjack10452.workers.dev)
             - **Edge Network Target**: Cloudflare Workers (Bangkok BKK Edge)
-            - **Verified Features**: 78 Cards Encyclopedia, 20 Spreads, Real-time AI SSE Streaming, Provably-Fair SHA-256 Shuffling.
+            - **Verified Features**: 78 Cards Encyclopedia, 25 Spreads, Real-time AI SSE Streaming, Provably-Fair SHA-256 Shuffling.
             
             ### 📜 Changelog
             ${{ steps.tag_version.outputs.changelog }}
