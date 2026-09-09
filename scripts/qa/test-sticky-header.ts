@@ -2,24 +2,32 @@
  * QA — ยามเฝ้าหัวเว็บ sticky (Sticky Site Header Guard)
  *
  * ⚠️ ทำไมต้องมีไฟล์นี้
- * "หัวเว็บไม่อยู่นิ่ง" กลับมาแล้ว 4 รอบด้วยสาเหตุคนละตัวทุกรอบ:
+ * "หัวเว็บไม่อยู่นิ่ง" กลับมาแล้ว 5 รอบด้วยสาเหตุคนละตัวทุกรอบ:
  *   INC-0060/0067 — `overflow-x: hidden` บนบรรพบุรุษ ทำให้เกิด scroll container → sticky ตาย
  *   INC-0081      — กฎ `body > *` ทับ position/z-index ของหัวเว็บ
- *   INC-0107      — หัวเว็บไม่มีเลเยอร์ compositor ของตัวเอง บน iOS จึงถูกวาดใหม่ทุกเฟรม
- *                   แล้วตามหลังตำแหน่งสกรอลล์ เห็นเป็นหัวเว็บสั่นและมีเนื้อหาแวบเหนือหัวเว็บ
+ *   INC-0107      — หัวเว็บไม่มีเลเยอร์ compositor ของตัวเอง (แต่ถูกตัวย่อ CSS กินทิ้ง)
+ *   INC-0108      — เลเยอร์ติดจริงแล้ว + เพิ่มโล่ ➔ ช่องว่างเหนือหัวเว็บหาย แต่ "สั่น" ยังอยู่
+ *   INC-0109      — ต้นเหตุจริงของอาการสั่นคือ `position: sticky` เอง ไม่ใช่เลเยอร์
+ *                   sticky ต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ซึ่งบน
+ *                   iOS Safari ขอบบนของมันขยับเองระหว่างเลื่อน (แถบ URL ย่อ/ขยาย ·
+ *                   rubber-band) ค่าที่ได้จึงแกว่ง ➔ เปลี่ยนเป็น `position: fixed` + ตัวกันที่
  *
- * ทั้งสามรอบก่อนหน้าปิดเคสด้วย "คอมเมนต์เตือน" ในไฟล์เดียวกับที่ถูกละเมิด
+ * ทุกรอบก่อนหน้าปิดเคสด้วย "คอมเมนต์เตือน" ในไฟล์เดียวกับที่ถูกละเมิด
  * บทเรียน (หลักการข้อ 0.8): กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน
  *
  * ────────────────────────────────────────────────────────────────
- * กฎที่ตรวจ (6 ข้อ):
- *  1. `<header>` ของ SiteHeader ต้องมี `data-site-header` + `sticky` + `top-0` + z-index
- *  2. globals.css ต้องมีบล็อก `[data-site-header]` ที่บังคับเลเยอร์ compositor ด้วย translate3d
+ * กฎที่ตรวจ (8 ข้อ):
+ *  1. `<header>` ของ SiteHeader ต้องมี `data-site-header` + `fixed` + `top-0` + กางเต็มกว้าง
+ *     + z-index — และ **ห้ามกลับไปใช้ `sticky`** (INC-0109)
+ *  2. globals.css ต้องมีบล็อก `[data-site-header]` ที่บังคับเลเยอร์ compositor ด้วย translateZ(0)
  *     และกันพื้นที่ใต้ status bar ด้วย env(safe-area-inset-top)
+ *  2.5 ต้องมีตัวกันที่: SiteHeader.tsx เรนเดอร์ `data-site-header-spacer` และ globals.css
+ *     ตั้งความสูงให้มันจาก `--site-header-h` (ไม่มี = หัวเว็บทับเนื้อหาบรรทัดแรกทุกหน้า)
  *  3. กฎ `body > *` ต้องยกเว้น `[data-site-header]` เสมอ (INC-0081)
  *  4. `html` ต้องเป็น `overflow-x: clip` และห้ามมี `overflow-x: hidden` ที่ html/body (INC-0067)
- *  5. ห้ามมี `position: fixed` ในต้นไม้ของหัวเว็บ — เพราะ transform ในข้อ 2 ทำให้หัวเว็บ
- *     กลายเป็น containing block ของลูกหลานที่เป็น fixed (แผงเมนูจะยึดผิดที่ทันที)
+ *  4.5 CSS ที่ build ออกมาจริงต้องยังมี transform 3 มิติ · โล่ ::before · และตัวกันที่ (INC-0108)
+ *  5. ห้ามมี `position: fixed` ในต้นไม้ของหัวเว็บ (ยกเว้นตัว <header> เอง) — เพราะ transform
+ *     ในข้อ 2 ทำให้หัวเว็บกลายเป็น containing block ของลูกหลานที่เป็น fixed (แผงเมนูจะยึดผิดที่)
  *  6. ไฟล์ที่เรนเดอร์ `<SiteHeader` ห้ามครอบมันด้วย element ที่เป็น scroll container
  *     (`overflow-hidden` / `overflow-auto` / `overflow-y-*`) — `overflow-x-clip` เท่านั้นที่อนุญาต
  *
@@ -95,7 +103,7 @@ function hasClassToken(classValue: string, token: string): boolean {
 }
 
 // ───────────────────────────────────────────────────────────────
-// 1. SiteHeader ต้องยัง sticky top-0 และติดป้าย data-site-header
+// 1. SiteHeader ต้องเป็น fixed top-0 กางเต็มกว้าง และติดป้าย data-site-header
 // ───────────────────────────────────────────────────────────────
 const headerSource = read(SITE_HEADER);
 if (!headerSource.includes("data-site-header")) {
@@ -104,13 +112,40 @@ if (!headerSource.includes("data-site-header")) {
   );
 }
 const headerClass = classNameChunks(headerSource)[0]?.value ?? "";
-for (const token of ["sticky", "top-0"]) {
+for (const token of ["fixed", "top-0"]) {
   if (!hasClassToken(headerClass, token)) {
     failures.push(`SiteHeader.tsx: <header> ต้องมีคลาส \`${token}\` (พบ: "${headerClass}")`);
   }
 }
+// `fixed` ไม่กางเต็มกว้างให้เอง — ต้องมี inset-x-0 (หรือ left-0 + right-0) ไม่งั้นหัวเว็บหดตามเนื้อหา
+const spansFullWidth =
+  hasClassToken(headerClass, "inset-x-0") ||
+  (hasClassToken(headerClass, "left-0") && hasClassToken(headerClass, "right-0"));
+if (!spansFullWidth) {
+  failures.push(
+    `SiteHeader.tsx: <header> ที่เป็น \`fixed\` ต้องมี \`inset-x-0\` (หรือ \`left-0\` + \`right-0\`) ` +
+      `ไม่งั้นแถบจะหดตามความกว้างของเนื้อหาแทนที่จะเต็มจอ (พบ: "${headerClass}")`,
+  );
+}
+// 🚨 INC-0109 — ห้ามย้อนกลับไป sticky เด็ดขาด นี่คือต้นเหตุของอาการ "หัวเว็บสั่นตอนเลื่อน"
+if (hasClassToken(headerClass, "sticky")) {
+  failures.push(
+    "SiteHeader.tsx: <header> ห้ามใช้ `sticky` — sticky ต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ " +
+      "layout viewport ซึ่งบน iOS Safari ขยับเองระหว่างเลื่อน (แถบ URL ย่อ/ขยาย · rubber-band) " +
+      "ค่าที่ได้จึงแกว่งจนหัวเว็บสั่น ใช้ `fixed` + `[data-site-header-spacer]` แทน (INC-0109)",
+  );
+}
 if (!/\bz-\d+\b/.test(headerClass)) {
   failures.push("SiteHeader.tsx: <header> ต้องกำหนด z-index (เช่น `z-50`) ไม่งั้นเนื้อหาหน้าจะทับ");
+}
+// ตัวกันที่ต้องถูกเรนเดอร์คู่กันเสมอ ไม่งั้นหัวเว็บที่หลุด flow จะทับเนื้อหาบรรทัดแรกทุกหน้า
+// ⚠️ ต้องจับ "แอตทริบิวต์ใน JSX" (มี `=` ตาม) ไม่ใช่แค่ชื่อที่โผล่ในคอมเมนต์หัวไฟล์
+// (พลาดมาแล้วตอนทดสอบด่าน: ลบ <div> ออกแล้วด่านยังผ่าน เพราะไปเจอชื่อในคอมเมนต์)
+if (!/data-site-header-spacer\s*=/.test(headerSource)) {
+  failures.push(
+    "SiteHeader.tsx: หาย `<div data-site-header-spacer>` — หัวเว็บเป็น `fixed` จึงไม่กินพื้นที่ใน flow " +
+      "ถ้าไม่มีตัวกันที่ เนื้อหาบรรทัดแรกของทุกหน้าจะถูกหัวเว็บทับ (INC-0109)",
+  );
 }
 
 // ───────────────────────────────────────────────────────────────
@@ -155,6 +190,19 @@ if (!headerRule) {
   }
 }
 
+// ตัวกันที่ต้องมีความสูงจริงจาก --site-header-h (ไม่งั้นสูง 0 = เหมือนไม่มี)
+const spacerRule = css.match(/\[data-site-header-spacer\]\s*\{([^}]*)\}/);
+if (!spacerRule) {
+  failures.push(
+    "globals.css: ไม่มีบล็อก `[data-site-header-spacer] { ... }` — หัวเว็บเป็น `fixed` ต้องมีตัวกันที่ (INC-0109)",
+  );
+} else if (!/height:\s*var\(--site-header-h\)/.test(spacerRule[1])) {
+  failures.push(
+    "globals.css: `[data-site-header-spacer]` ต้องตั้ง `height: var(--site-header-h)` " +
+      "เพื่อให้ความสูงตัวกันที่ · scroll-padding-top · และค่าที่ ResizeObserver เขียนทับ เป็นค่าเดียวกันเสมอ (INC-0109)",
+  );
+}
+
 if (!/body\s*>\s*\*[^{]*:not\(\[data-site-header\]\)/.test(css)) {
   failures.push(
     "globals.css: กฎ `body > *` ต้องยกเว้น `:not([data-site-header])` ไม่งั้นมันจะทับ position/z-index ของหัวเว็บ (INC-0081)",
@@ -190,6 +238,8 @@ if (/(?:^|\n)\s*(?:html|body|html\s*,\s*body)\s*\{[^}]*overflow(?:-x)?:\s*hidden
 const THREE_D = /translateZ\(|translate3d\(|matrix3d\(|perspective\(|rotate[XY]\(/;
 const builtCssDir = path.join(ROOT, ".next/static/css");
 
+let builtSpacerFound = false;
+
 if (fs.existsSync(builtCssDir)) {
   const builtRules: string[] = [];
   for (const name of fs.readdirSync(builtCssDir)) {
@@ -200,6 +250,7 @@ if (fs.existsSync(builtCssDir)) {
     for (const m of built.matchAll(/\[data-site-header\](?!\))(::?before)?\s*\{([^}]*)\}/g)) {
       builtRules.push(`${m[1] ? "before" : ""}|${m[2]}`);
     }
+    if (/\[data-site-header-spacer\][^{]*\{[^}]*height:/.test(built)) builtSpacerFound = true;
   }
 
   // ⚠️ ต้องตรวจ "ทุก" กฎที่เจอ ไม่ใช่แค่ตัวแรก — บันเดิล CSS ถูกแยกหลายไฟล์และกฎเดียวกัน
@@ -227,6 +278,13 @@ if (fs.existsSync(builtCssDir)) {
       "CSS ที่ build แล้ว: ไม่พบโล่ `[data-site-header]::before` — ช่องว่างเหนือหัวเว็บจะกลับมาทันที (INC-0108)",
     );
   }
+
+  if (!builtSpacerFound) {
+    failures.push(
+      "CSS ที่ build แล้ว: ไม่พบ `[data-site-header-spacer]` ที่มี `height` — ตัวกันที่หายไประหว่าง build " +
+        "หัวเว็บ `fixed` จะทับเนื้อหาบรรทัดแรกทุกหน้าบน production (INC-0109)",
+    );
+  }
 } else {
   // ด่านนี้อยู่ท้ายสุดของ repo:verify ซึ่งด่านก่อนหน้า build ไว้ให้แล้วเสมอ
   // ถ้ารันเดี่ยว ๆ ตอนยังไม่เคย build ก็ข้ามไป กฎ static ด้านบนคุมไว้อยู่แล้ว (หลัก Ratchet · INC-0007)
@@ -238,7 +296,11 @@ if (fs.existsSync(builtCssDir)) {
 // ───────────────────────────────────────────────────────────────
 for (const rel of HEADER_SUBTREE) {
   const source = read(rel);
-  for (const chunk of classNameChunks(source)) {
+  const chunks = classNameChunks(source);
+  for (const chunk of chunks) {
+    // ยกเว้นตัว <header> เอง — มันคือ element ที่ *ต้อง* เป็น fixed (ข้อ 1 บังคับไว้แล้ว)
+    // ตัว header เป็น className ตัวแรกของ SiteHeader.tsx เสมอ (ตัวกันที่ไม่มี className)
+    if (rel === "src/components/layout/SiteHeader.tsx" && chunk === chunks[0]) continue;
     if (hasClassToken(chunk.value, "fixed")) {
       failures.push(
         `${rel}:${chunk.line} — ห้ามใช้ \`fixed\` ในต้นไม้หัวเว็บ: หัวเว็บมี transform จึงเป็น containing block ให้ลูกหลานที่เป็น fixed ทำให้แผงยึดผิดตำแหน่ง (ใช้ \`absolute\` แทน)`,
@@ -279,4 +341,6 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log("✅ ด่านหัวเว็บ sticky ผ่านครบ (ป้าย · เลเยอร์ compositor ที่รอดการย่อ CSS · โล่กันเนื้อหาโผล่ · safe-area · body > * · overflow · ไม่มี fixed ซ้อน · ไม่มี scroll container ครอบ)");
+console.log(
+  "✅ ด่านหัวเว็บผ่านครบ (ป้าย · fixed top-0 เต็มกว้าง ไม่ใช่ sticky · ตัวกันที่ · เลเยอร์ compositor ที่รอดการย่อ CSS · โล่กันเนื้อหาโผล่ · safe-area · body > * · overflow · ไม่มี fixed ซ้อนในลูกหลาน · ไม่มี scroll container ครอบ)",
+);

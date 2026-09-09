@@ -38,8 +38,16 @@ export default function ReadingChatPage() {
 
   return (
     <main className="min-h-[100dvh] bg-[#F3F0EA] text-[#29261F]">
-      {/* แถบหัวบาง ๆ — ปุ่มกลับไปหน้าคำทำนาย + ชื่อแม่หมอ */}
-      <header className="sticky top-0 z-40 h-14 w-full border-b border-[#D5CEC2] bg-[#FFFFFF] shadow-raised">
+      {/* ตัวกันที่ของแถบหัวที่เป็น `fixed` — สูงเท่า h-14 ของ <header> เป๊ะ ห้ามลบ (INC-0109) */}
+      <div aria-hidden="true" className="h-14" />
+
+      {/*
+        แถบหัวบาง ๆ — ปุ่มกลับไปหน้าคำทำนาย + ชื่อแม่หมอ
+        ใช้ `fixed` ไม่ใช่ `sticky` ด้วยเหตุผลเดียวกับ SiteHeader (INC-0109):
+        sticky ต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ซึ่งบน iOS Safari
+        ขยับเองระหว่างเลื่อน (แถบ URL ย่อ/ขยาย · rubber-band) ค่าที่ได้จึงแกว่งจนแถบสั่น
+      */}
+      <header className="fixed top-0 inset-x-0 z-40 h-14 w-full border-b border-[#D5CEC2] bg-[#FFFFFF] shadow-raised">
         <div className="mx-auto flex h-full max-w-2xl items-center justify-between gap-3 px-4">
           <Link
             href="/"
