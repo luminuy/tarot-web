@@ -42,8 +42,27 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/",
     htmlRelativePath: ".next/server/app/index.html",
-    maxJsGzipKb: 271, // รัดตามผลถอด motion ออกจาก TarotCard (วัดจริง 267 KB · รวม polyfill 306 KB)
-    maxHtmlGzipKb: 40, // Current: 38 KB
+    /*
+     * Motion Shell Diet 2026-09-09: ถอด `motion` ออกจาก **เปลือก** ของหน้าแรกทั้งหมด
+     * (`TarotFlow` · `SpreadCardSelector` · `ToastNotification` · `lib/motion`)
+     * ไลบรารีย้ายไปอยู่หลัง `next/dynamic` ครบทุกตัวผ่าน `withMotionScope()`
+     * วัดจริง 267 → **227 KB** (−40 KB) · รวม polyfill 306 → 266 KB
+     */
+    maxJsGzipKb: 232,
+    maxHtmlGzipKb: 40, // Current: 39 KB
+  },
+  {
+    /*
+     * หน้าแรกภาษาอังกฤษ — เนื้อเดียวกับ `/` เป๊ะ ๆ (ใช้ `HomePageBody` ตัวเดียวกัน)
+     *
+     * ⚠️ เพิ่มเข้ามาเพราะ **ไม่เคยมีด่านคุมเลย** ทั้งที่หนักเท่า `/` ทุกไบต์
+     * และเป็นหนึ่งในสองหน้าที่หนักที่สุดของเว็บมาตลอด · ถ้าคุมแต่ `/` การถอยหลัง
+     * ฝั่งอังกฤษจะหลุดออก production ไปเงียบ ๆ โดยไม่มีด่านไหนเห็น
+     */
+    route: "/en",
+    htmlRelativePath: ".next/server/app/en.html",
+    maxJsGzipKb: 232,
+    maxHtmlGzipKb: 40,
   },
   {
     route: "/cards",

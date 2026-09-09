@@ -1015,3 +1015,105 @@ input.no-focus-ring:focus-visible {
     navigation: none;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════════════════
+   ✦ ส่วนเติมของชุดโมชั่น CSS — สำหรับเปลือกหน้าแรกที่เพิ่งเลิกใช้ `motion`
+   ─────────────────────────────────────────────────────────────────────────
+   บล็อกนี้ **ต่อยอด** จากชุดที่มีอยู่แล้วด้านบน (`.anim-step-in` · `.anim-swap-rise*`)
+   ไม่ได้สร้างคีย์เฟรมชุดใหม่ซ้ำซ้อน — เพิ่มเฉพาะสองอย่างที่ของเดิมยังไม่มี:
+     1. ทิศ "ย้อนกลับ" ของการเปลี่ยนขั้นพิธีกรรม
+     2. สวิตช์ปิดคีย์เฟรมสำหรับ "เรนเดอร์แรก"
+
+   ที่มา: `TarotFlow` · `SpreadCardSelector` · `ToastNotification` เป็นสามไฟล์สุดท้าย
+   ที่ยัง `import` จาก `motion/react` แบบ static ในเปลือกหน้าแรก ทำให้ไลบรารี 40 KB
+   (gzip · chunk `6928-*`) ติดอยู่ในบันเดิล **ตั้งต้น** ของ `/` และ `/en` ทั้งที่แอนิเมชัน
+   หนักจริงอยู่หลัง `next/dynamic` หมดแล้ว · ทั้งสามใช้แค่ fade + เลื่อน ซึ่ง CSS ทำได้ดีกว่า
+   (คีย์เฟรมที่แตะแค่ transform/opacity วิ่งบน compositor ไม่แย่งเธรดหลักกับงาน hydrate)
+
+   ⚠️ ห้ามเขียน translate3d ที่แกน z เป็น 0 (INC-0108 · กฎข้อ 4 ของด่าน motion-quality)
+   ⚠️ ไม่ต้องเขียน @media (prefers-reduced-motion) ซ้ำ — กฎรวมด้านบนของไฟล์นี้
+      ย่อทุก animation-duration เหลือ 0.01ms ให้แล้ว
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ── ขั้นพิธีกรรมที่ "ย้อนกลับ" — เลื่อนเข้ามาจากทางซ้ายแทน ────────────────
+   คู่กับ `.anim-step-in` (เดินหน้า) ที่ประกาศไว้ด้านบน · เลือกทิศด้วย `data-dir` */
+@keyframes stepInBack {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.anim-step-in[data-dir="back"] {
+  animation-name: stepInBack;
+}
+
+/* ── หมายเหตุ: "เรนเดอร์แรกต้องไม่เล่นคีย์เฟรม" ทำที่ฝั่ง React ไม่ใช่ที่นี่ ──
+   เคยลองทำเป็นคลาส/แอตทริบิวต์ที่ CSS ปิดอนิเมชันแล้ว **ใช้ไม่ได้**:
+   พอค่าแอตทริบิวต์เปลี่ยนตอน re-render รอบแรกหลัง hydrate เบราว์เซอร์เห็น
+   animation-name เปลี่ยนจาก none เป็นของจริง จึงเริ่มเล่นคีย์เฟรมทันทีทั้งที่
+   ผู้ใช้ไม่ได้แตะอะไรเลย · ทางที่ถูกคือ **ไม่ใส่คลาสอนิเมชันเลย** จนกว่าผู้ใช้จะกดจริง
+   (ดู `hasNavigatedStep` ใน TarotFlow.tsx · `hasSwappedTab` ใน SpreadCardSelector.tsx) */
+
+/* ── แถบแจ้งเตือน (Toast) ─────────────────────────────────────────────────
+   กล่องถูกจัดกลางด้วย left:50% + -translate-x-1/2 ของ Tailwind
+   คีย์เฟรมจึงต้องพา translate(-50%, …) ไปด้วยทุกเฟรม ไม่งั้นกล่องจะวาปไปทางซ้าย
+   ตั้งแต่เฟรมแรก เพราะ animation ทับค่า transform ของคลาสเดิมทั้งก้อน */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -10px) scale(0.97);
+  }
+}
+
+.anim-toast-in {
+  animation: toastIn 0.18s var(--ease-out) both;
+}
+
+.anim-toast-out {
+  animation: toastOut 0.12s var(--ease-in) both;
+}
+
+/* ── แถบนับถอยหลังของ Toast ─────────────────────────────────────────────
+   scaleX แทน width — width บังคับคำนวณ layout ใหม่ทุกเฟรมตลอด 4-5 วินาที
+   ส่วน transform วิ่งบน compositor ล้วน (กล่องแม่มี overflow-hidden อยู่แล้ว)
+
+   `animation-play-state` ทำให้การหยุดตอนเอาเมาส์ไปวางเป็นงานของเบราว์เซอร์ล้วน ๆ
+   ของเดิมสั่งหยุดด้วย `animate={{ scaleX: isPaused ? undefined : 0 }}` ซึ่งอาศัย
+   พฤติกรรม "ข้ามคีย์ที่เป็น undefined" ของ motion — ได้ผลโดยบังเอิญ ไม่ใช่โดยสัญญา */
+@keyframes toastCountdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.anim-toast-countdown {
+  transform-origin: left;
+  animation: toastCountdown var(--toast-duration, 4.5s) linear both;
+}
+
+.anim-toast-countdown[data-paused="true"] {
+  animation-play-state: paused;
+}
