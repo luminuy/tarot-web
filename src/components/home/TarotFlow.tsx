@@ -103,6 +103,14 @@ function StepBackButton({ onClick, label }: { onClick: () => void; label?: strin
 const STEP_ORDER: RitualStep[] = ["SPREAD_SELECT", "INTENTION_SELECT", "SHUFFLE", "PICK_CARDS", "READING", "SUMMARY"];
 
 /**
+ * เหตุผลที่ต้องการแค่ "เข้าสู่ระบบ" ไม่ใช่เรื่องโควตาหรือสิทธิ์พิเศษ
+ * กรณีนี้ไม่ต้องอธิบายอะไรทั้งนั้น — พาไปหน้าเข้าสู่ระบบเลย
+ */
+function isSignInOnlyReason(reason: UpgradeReason): boolean {
+  return reason === "signup_required" || reason === "guest_used";
+}
+
+/**
  * แปลง `reason` ที่ API ส่งกลับมาเป็นเหตุผลของกำแพงสิทธิ์ฝั่ง UI
  * คืน null ถ้าไม่ใช่เรื่องสิทธิ์ (เช่น AI ล่ม) — กรณีนั้นให้แสดง error ตามปกติ
  */
@@ -179,9 +187,18 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
    * ทางเข้าเดียวของกำแพงสิทธิ์ — ทุกจุดที่ผู้ใช้ถูกกั้นต้องเรียกผ่านนี้
    * ห้ามเปิด AuthModal หรือ BuyCreditsModal ตรง ๆ พร้อมกับขึ้นแถบ error อีก
    * (ของเดิมทำสองอย่างพร้อมกัน ผู้ใช้เลยเจอข้อความซ้อนกันสองชั้น)
+   *
+   * ⚠️ ข้อยกเว้นเดียว: คนที่ "แค่ยังไม่ได้เข้าสู่ระบบ" ให้เด้งหน้าเข้าสู่ระบบไปเลย
+   * ไม่ต้องมีหน้าต่างชวนสมัครมาคั่นก่อน (คำสั่งเจ้าของโปรเจกต์ 2026-09-09)
+   * เพราะหน้าต่างนั้นอธิบายยาวทั้งที่ผู้ใช้ต้องกดต่อไปหน้าเดิมอยู่ดี
    */
   const openAccessDialog = (reason: UpgradeReason) => {
     trackEvent("upgrade_dialog_open", { reason });
+    if (isSignInOnlyReason(reason)) {
+      // ไปหน้าเข้าสู่ระบบตรง ๆ (ไม่ส่ง fromWall เพื่อไม่ให้มีรายการสิทธิ์มาอธิบายซ้ำอีกชั้น)
+      openAuth("signin", false);
+      return;
+    }
     setAccessReason(reason);
   };
 
