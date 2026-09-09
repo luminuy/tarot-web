@@ -75,16 +75,60 @@ function writeStoredEntitlement(value: ClientEntitlement | null): void {
   }
 }
 
+/**
+ * ขอสิทธิ์ล่าสุดจากเซิร์ฟเวอร์
+ *
+ * ใช้ `/api/bootstrap` เป็นหลักเพราะคำขอเดียวได้ทั้ง "ใครใช้อยู่" และ "สิทธิ์เท่าไร"
+ * แล้วเติมผู้ใช้เข้าแคชเซสชันให้ด้วย — หน้าเว็บจึงไม่ต้องยิง `/api/auth/me` อีกเส้น
+ * (ของเดิมยิงสองเส้นทุกครั้งที่เปิดหน้า = ปลุก Worker สองครั้ง)
+ */
 async function fetchEntitlement(): Promise<ClientEntitlement | null> {
   try {
-    const res = await fetch("/api/entitlement", { cache: "no-store" });
+    const res = await fetch("/api/bootstrap", { cache: "no-store" });
     if (!res.ok) return null;
-    const data = (await res.json()) as ClientEntitlement;
-    writeStoredEntitlement(data);
-    return data;
+    const data = (await res.json()) as {
+      user?: unknown;
+      entitlement?: ClientEntitlement;
+    };
+    const ent = (data?.entitlement ?? null) as ClientEntitlement | null;
+    if (!ent) return null;
+
+    // เติมผู้ใช้เข้าแคชเซสชันด้วย — โหลดแบบ dynamic กันวงจร import ระหว่างสองโมดูล
+    try {
+      const { seedSessionUser } = await import("@/lib/auth/use-session");
+      seedSessionUser((data.user ?? null) as never);
+    } catch {
+      // เติมไม่สำเร็จก็แค่ทำให้ `/api/auth/me` ถูกยิงตามปกติ ไม่กระทบความถูกต้อง
+    }
+
+    writeStoredEntitlement(ent);
+    return ent;
   } catch {
     return null;
   }
+}
+
+/**
+ * ขอสิทธิ์ "เมื่อถึงเวลาที่ต้องใช้จริง" — สำหรับผู้ชมที่ยังไม่ล็อกอิน
+ *
+ * ผู้ชมจาก Google ส่วนใหญ่เข้ามาอ่านหน้าเดียวแล้วออกโดยไม่กดอะไรเลย การยิงถามสิทธิ์
+ * ตั้งแต่ตอนเปิดหน้าจึงเป็นคำขอที่เสียเปล่าเกือบทั้งหมด · ให้เรียกตัวนี้ตอนผู้ใช้เริ่ม
+ * ลงมือจริง (เลือกผัง / กดเปิดไพ่ / เปิดหน้าต่างเข้าสู่ระบบ) แทน
+ *
+ * ⚠️ ต้องเรียก **ก่อน** พาผู้ใช้เข้าสู่ขั้นตอนเปิดไพ่เสมอ ไม่งั้น UI จะเชียร์ให้กดเปิดไพ่
+ * แล้วไปเจอ 403 กลางทาง (เหตุผลเดียวกับที่ `snapshot.ts` เขียนกำกับไว้)
+ */
+export async function ensureEntitlement(): Promise<ClientEntitlement | null> {
+  if (cache) return cache;
+  if (!inflight) {
+    inflight = fetchEntitlement().then((e) => {
+      cache = e;
+      inflight = null;
+      listeners.forEach((fn) => fn(e));
+      return e;
+    });
+  }
+  return inflight;
 }
 
 export async function refreshEntitlement(): Promise<void> {
@@ -105,14 +149,13 @@ export function useEntitlement(): ClientEntitlement | null {
     }
     if (cache) {
       setState(cache);
-    } else if (!inflight) {
-      inflight = fetchEntitlement().then((e) => {
-        cache = e;
-        inflight = null;
-        listeners.forEach((fn) => fn(e));
-        return e;
-      });
+    } else if (hasSessionHint()) {
+      // ล็อกอินอยู่ → ต้องรู้สิทธิ์ตั้งแต่เปิดหน้า ไม่งั้นผังพรีเมียมจะขึ้น "ล็อก" ค้างให้คนจ่ายเงินเห็น
+      void ensureEntitlement();
     }
+    // ยังไม่ล็อกอิน → ไม่ยิงอะไรเลยตอนเปิดหน้า
+    // ค่า `null` ทำให้ผังพรีเมียมแสดงเป็น "ล็อก" อยู่แล้ว ซึ่งตรงกับสิทธิ์จริงของผู้เยี่ยมชม
+    // แล้วค่อยเรียก `ensureEntitlement()` ตอนผู้ใช้ลงมือจริง
     return () => {
       listeners.delete(setState);
     };
