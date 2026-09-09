@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { CheckMarkIcon, SparkSealIcon } from "@/components/entitlement/EntitlementIcons";
-import { DAILY_LIMIT, getMemberBenefits, describeEntitlement } from "@/lib/entitlement/copy";
+import { DAILY_LIMIT, REQUIRE_SIGNUP_TO_READ, getMemberBenefits, describeEntitlement } from "@/lib/entitlement/copy";
 import { trackEntitlementEvent } from "@/lib/entitlement/track";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
@@ -43,7 +43,8 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
 
   if (!show || dismissed || !view) return null;
 
-  const usedUpTrial = view.remaining === 0;
+  // ยุค "สมัครก่อนเล่น" ผู้เยี่ยมชมไม่มีสิทธิ์ทดลองให้ใช้หมดตั้งแต่ต้น — ห้ามพาดหัวว่าใช้ครบแล้ว
+  const usedUpTrial = view.remaining === 0 && !REQUIRE_SIGNUP_TO_READ;
 
   const dismiss = () => {
     try {

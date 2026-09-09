@@ -5,7 +5,7 @@
  * ห้ามใส่ PII หรือค่าอิสระจากผู้ใช้ลงในชื่อ metric เด็ดขาด (กฎเดียวกับ `recordEvent`)
  */
 
-const REASONS = ["guest_used", "daily_exhausted", "members_only", "explore"] as const;
+const REASONS = ["signup_required", "guest_used", "daily_exhausted", "members_only", "explore"] as const;
 
 const DIALOG_STAGES = ["shown", "primary", "secondary"] as const;
 
@@ -16,6 +16,7 @@ const FLAT_EVENTS = [
   "signup_card_dismissed",
   "free_trial_notice_shown",
   "quota_meter_opened",
+  "gate_blocked_shown:signup_required",
   "gate_blocked_shown:guest_used",
   "gate_blocked_shown:daily_exhausted",
 ] as const;

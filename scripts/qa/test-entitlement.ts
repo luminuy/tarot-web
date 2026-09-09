@@ -14,6 +14,7 @@ import {
   purgeEntitlementData,
   DAILY_LIMIT,
   GUEST_LIMIT,
+  REQUIRE_SIGNUP_TO_READ,
   SIGNUP_BONUS,
   type Viewer,
 } from "../../src/lib/entitlement/entitlement";
@@ -43,16 +44,23 @@ async function main() {
   check("weekKey: คืนวันจันทร์ต้นสัปดาห์", mon === "2026-08-31");
   check("nextResetAt: เป็น ISO string อนาคต", new Date(nextResetAt()).getTime() > Date.now());
 
-  // ── 2. ผู้เยี่ยมชม ──
+  // ── 2. ผู้เยี่ยมชม — นโยบาย "เล่นฟรีได้ แต่ต้องสมัครสมาชิกก่อน" (2026-09-09) ──
+  // ด่านนี้คือตัวกันไม่ให้ใครเผลอเปิดสิทธิ์ทดลองแบบไม่ล็อกอินกลับมาเงียบ ๆ
+  check("นโยบายสมัครก่อนเล่น: GUEST_LIMIT = 0", GUEST_LIMIT === 0);
+  check("นโยบายสมัครก่อนเล่น: REQUIRE_SIGNUP_TO_READ = true", REQUIRE_SIGNUP_TO_READ === true);
+
   const guestFresh: Viewer = { kind: "guest", gid: "g1", guestUsed: 0 };
   const guestUsed: Viewer = { kind: "guest", gid: "g1", guestUsed: 1 };
   const eg1 = await getEntitlement(guestFresh);
-  check("guest ใหม่: canStartReading = true, remaining = 1", eg1.canStartReading && eg1.remaining === GUEST_LIMIT);
+  check("guest ใหม่: canStartReading = false (ต้องสมัครก่อน)", eg1.canStartReading === false);
+  check("guest ใหม่: remaining = 0", eg1.remaining === 0);
+  // ถ้อยคำคนละเรื่องกัน — คนที่ยังไม่เคยเล่นต้องไม่โดนบอกว่า "ใช้สิทธิ์ทดลองครบแล้ว"
+  check("guest ใหม่: reason = signup_required (ไม่ใช่ guest_used)", eg1.reason === "signup_required");
   check("guest ใหม่: canChat = false", eg1.canChat === false);
   const eg2 = await getEntitlement(guestUsed);
-  check("guest ใช้หมด: canStartReading = false, reason = guest_used", !eg2.canStartReading && eg2.reason === "guest_used");
-  check("consumeReading(guest ใหม่) = true", (await consumeReading(guestFresh, "r_g_1")) === true);
-  check("consumeReading(guest ใช้หมด) = false", (await consumeReading(guestUsed, "r_g_2")) === false);
+  check("guest ที่มีคุกกี้เก่า: ยังถูกกั้นด้วย signup_required", !eg2.canStartReading && eg2.reason === "signup_required");
+  check("consumeReading(guest ใหม่) = false (หักสิทธิ์ให้ผู้ไม่ล็อกอินไม่ได้)", (await consumeReading(guestFresh, "r_g_1")) === false);
+  check("consumeReading(guest คุกกี้เก่า) = false", (await consumeReading(guestUsed, "r_g_2")) === false);
 
   // ── 3. สมาชิก — ตั้งผู้ใช้ทดสอบ ──
   const uid = `test_ent_${Date.now()}`;

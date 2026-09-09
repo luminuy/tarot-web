@@ -31,6 +31,7 @@ import { ToastNotification, type ToastData } from "@/components/ui/ToastNotifica
 import { trackEvent } from "@/lib/analytics";
 import {
   DAILY_LIMIT,
+  GUEST_BLOCK_REASON,
   describeEntitlement,
   type UpgradeReason,
   isStandardSpread,
@@ -106,6 +107,7 @@ const STEP_ORDER: RitualStep[] = ["SPREAD_SELECT", "INTENTION_SELECT", "SHUFFLE"
  * คืน null ถ้าไม่ใช่เรื่องสิทธิ์ (เช่น AI ล่ม) — กรณีนั้นให้แสดง error ตามปกติ
  */
 function mapBlockedReason(reason?: string): UpgradeReason | null {
+  if (reason === "signup_required") return "signup_required";
   if (reason === "guest_used") return "guest_used";
   if (reason === "daily_exhausted" || reason === "weekly_exhausted") return "daily_exhausted";
   if (reason === "members_only") return "members_only";
@@ -498,7 +500,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const handleStartSession = async () => {
     // สิทธิ์หมดตั้งแต่ยังไม่ยิง API — อธิบายด้วยหน้าต่างเดียว ไม่ต้องมีแถบแดงซ้อน
     if (entitlementView?.blocked) {
-      openAccessDialog(entitlementView.blockedReason ?? "guest_used");
+      openAccessDialog(entitlementView.blockedReason ?? GUEST_BLOCK_REASON);
       return;
     }
 
@@ -588,7 +590,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     userQuestion?: string
   ) => {
     if (entitlementView?.blocked) {
-      openAccessDialog(entitlementView.blockedReason ?? "guest_used");
+      openAccessDialog(entitlementView.blockedReason ?? GUEST_BLOCK_REASON);
       return;
     }
 
@@ -1237,7 +1239,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     }}
                     onProceed={() => {
                       if (entitlementView?.blocked) {
-                        openAccessDialog(entitlementView.blockedReason ?? "guest_used");
+                        openAccessDialog(entitlementView.blockedReason ?? GUEST_BLOCK_REASON);
                         return;
                       }
                       if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
