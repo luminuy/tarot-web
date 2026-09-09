@@ -294,7 +294,7 @@ export default function ReadersManager() {
           {filteredReaders.map((r) => (
             <div
               key={r.id}
-              className="altar-panel flex flex-col justify-between rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs transition-all hover:border-[#29261F]/40"
+              className="altar-panel flex flex-col justify-between rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs transition hover:border-[#29261F]/40"
             >
               <div>
                 {/* Header */}

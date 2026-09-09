@@ -466,7 +466,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
         aria-modal="true"
         aria-label={isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2E211A]/50 backdrop-blur-[3px] overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim overflow-y-auto"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -495,7 +495,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               type="button"
               onClick={onClose}
               aria-label={isEnglish ? "Close share dialog" : "ปิดหน้าต่างแชร์ผลคำทำนาย"}
-              className="w-10 h-10 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+              className="w-10 h-10 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
             >
               ✕
             </button>
@@ -634,7 +634,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               title={isEnglish ? "Share to Facebook" : "แชร์ไปยัง Facebook"}
               aria-label={isEnglish ? "Share to Facebook" : "แชร์ไปยัง Facebook"}
               onClick={() => handleShareToBrand("facebook")}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -649,7 +649,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               onClick={() => handleShareToBrand("instagram")}
               disabled={isGenerating}
               aria-busy={isGenerating}
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-[#8F5C1A] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0 ${isGenerating ? "opacity-50 cursor-wait animate-pulse" : ""}`}
+              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-[#8F5C1A] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0 ${isGenerating ? "opacity-50 cursor-wait animate-pulse" : ""}`}
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
@@ -664,7 +664,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               onClick={() => handleShareToBrand("tiktok")}
               disabled={isGenerating}
               aria-busy={isGenerating}
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0 ${isGenerating ? "opacity-50 cursor-wait animate-pulse" : ""}`}
+              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0 ${isGenerating ? "opacity-50 cursor-wait animate-pulse" : ""}`}
             >
               <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
@@ -677,7 +677,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               title={isEnglish ? "Share to X (Twitter)" : "แชร์ไปยัง X (Twitter)"}
               aria-label={isEnglish ? "Share to X (Twitter)" : "แชร์ไปยัง X (Twitter)"}
               onClick={() => handleShareToBrand("twitter")}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0"
             >
               <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -690,7 +690,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               title={isEnglish ? "Share to Threads" : "แชร์ไปยัง Threads"}
               aria-label={isEnglish ? "Share to Threads" : "แชร์ไปยัง Threads"}
               onClick={() => handleShareToBrand("threads")}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#000000] border border-white/20 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 192 192" fill="currentColor">
                 <path d="M141.537 88.9883C140.71 88.5919 139.87 88.2104 139.019 87.8451C137.537 60.5382 122.616 44.905 97.5619 44.745C97.4484 44.7443 97.3355 44.7443 97.222 44.7443C82.2364 44.7443 69.7731 51.1409 62.102 62.7807L75.881 72.2328C81.6116 63.5383 90.6052 61.6848 97.2286 61.6848C97.3051 61.6848 97.3819 61.6848 97.4576 61.6855C105.707 61.7381 111.932 64.1366 115.961 68.814C118.893 72.2193 120.854 76.925 121.825 82.8638C114.511 81.6207 106.601 81.2385 98.145 81.7233C74.3247 83.0954 59.0111 96.9879 60.0396 116.292C60.5615 126.084 65.4397 134.508 73.775 140.011C80.8224 144.663 89.899 146.938 99.3323 146.423C111.79 145.74 121.563 140.987 128.381 132.296C133.559 125.696 136.834 117.143 138.28 106.366C144.217 109.949 148.617 114.664 151.047 120.332C155.179 129.967 155.42 145.8 142.501 158.708C131.182 170.016 117.576 174.908 97.0135 175.059C74.2042 174.89 56.9538 167.575 45.7381 153.317C35.2355 139.966 29.8077 120.682 29.6052 96C29.8077 71.3178 35.2355 52.0336 45.7381 38.6827C56.9538 24.4249 74.2039 17.11 97.0132 16.9405C119.988 17.1113 137.539 24.4614 149.184 38.788C154.894 45.8136 159.199 54.6488 162.037 64.9503L178.184 60.6422C174.744 47.9622 169.331 37.0357 161.965 27.974C147.036 9.60668 125.202 0.195148 97.0695 0H96.9569C68.8816 0.19447 47.2921 9.6418 32.7883 28.0793C19.8819 44.4864 13.2244 67.3157 13.0007 95.9325L13 96L13.0007 96.0675C13.2244 124.684 19.8819 147.514 32.7883 163.921C47.2921 182.358 68.8816 191.806 96.9569 192H97.0695C122.03 191.827 139.624 185.292 154.118 170.811C173.081 151.866 172.51 128.119 166.26 113.541C161.776 103.087 153.227 94.5962 141.537 88.9883ZM98.4405 129.507C88.0005 130.095 77.1544 125.409 76.6196 115.372C76.2232 107.93 81.9158 99.626 99.0812 98.6368C101.047 98.5234 102.976 98.468 104.871 98.468C111.106 98.468 116.939 99.0737 122.242 100.233C120.264 124.935 108.662 128.946 98.4405 129.507Z" />

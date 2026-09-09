@@ -159,7 +159,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   handlePersonaClick();
                 }
               }}
-              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition-all duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/persona ${
+              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/persona ${
                 isSelected
                   ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-overlay"
                   : isLocked
@@ -195,7 +195,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
 
                 {/* ตราผนึกปรมาจารย์ลับ — ป้ายแคปซูลหรูหราใต้ภาพไพ่ (ไม่ปิดทับหน้าไพ่เด็ดขาด) */}
                 {isLocked && (
-                  <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/persona:border-[#8F5C1A] transition-all duration-300 shadow-xs">
+                  <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/persona:border-[#8F5C1A] transition duration-300 shadow-xs">
                     <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
                     <span className="text-[13px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
                       {isEnglish ? "Tap to unlock" : "แตะเพื่อปลดล็อก"}
@@ -225,7 +225,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                         : (PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ");
                       soundManager.speakProphecy(greeting, p.id);
                     }}
-                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F3EDE2]/40 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F3EDE2]/40 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                     title={
                       isLocked
                         ? (isEnglish ? `Unlock voice greeting of ${p.nameEn || p.nameTh}` : `ปลดล็อกเสียงทักทายของ ${p.nameTh}`)
@@ -276,7 +276,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                 onSelectPersona(p);
                 scrollToCard(idx);
               }}
-              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+              className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 cursor-pointer ${
                 isCurrentActive
                   ? "w-7 bg-[#8F5C1A]"
                   : isSelected

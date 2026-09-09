@@ -121,7 +121,7 @@ function ResetPasswordForm() {
           <div className="pt-1.5 space-y-1">
             <div className="w-full h-1.5 bg-[#F3EDE2]/30 rounded-full overflow-hidden">
               <div
-                className={`h-full ${strength.barColor} transition-all duration-300`}
+                className={`h-full ${strength.barColor} transition duration-300`}
                 style={{ width: `${(strength.score / 4) * 100}%` }}
               />
             </div>
@@ -152,7 +152,7 @@ function ResetPasswordForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full h-11 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-semibold font-serif-th text-sm transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 mt-2"
+        className="w-full h-11 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-semibold font-serif-th text-sm transition cursor-pointer flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50 mt-2"
       >
         {loading ? (
           <span>กำลังบันทึกรหัสผ่านใหม่…</span>

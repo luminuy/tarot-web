@@ -253,7 +253,7 @@ export function LoveOneCardClient() {
                         soundManager.playMenuTapSound();
                         setSelectedStatus(opt.id);
                       }}
-                      className={`p-3.5 sm:p-4 rounded-2xl text-left border transition-all duration-200 flex flex-col justify-between cursor-pointer relative ${
+                      className={`p-3.5 sm:p-4 rounded-2xl text-left border transition duration-200 flex flex-col justify-between cursor-pointer relative ${
                         isSelected
                           ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-raised text-[#29261F]"
                           : "altar-card-porcelain hover:border-[#A58A5C]/60 text-[#635B4E] hover:shadow-xs"
@@ -432,7 +432,7 @@ export function LoveOneCardClient() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Link
                 href="/spreads/love"
-                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition-all duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition duration-300 hover:-translate-y-0.5 shadow-xs block"
               >
                 <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FBF2EC] text-[#9E4E28] border-[#E8D0C3] inline-block mb-2">
                   5 Cards
@@ -449,7 +449,7 @@ export function LoveOneCardClient() {
 
               <Link
                 href="/spreads/love-six"
-                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition-all duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition duration-300 hover:-translate-y-0.5 shadow-xs block"
               >
                 <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FBF2EC] text-[#9E4E28] border-[#E8D0C3] inline-block mb-2">
                   6 Cards
@@ -466,7 +466,7 @@ export function LoveOneCardClient() {
 
               <Link
                 href="/readers"
-                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition-all duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition duration-300 hover:-translate-y-0.5 shadow-xs block"
               >
                 <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#EAE7E0] text-[#5E5240] border-[#D5CEC2] inline-block mb-2">
                   Personal Readers

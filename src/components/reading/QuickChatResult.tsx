@@ -133,7 +133,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
                   
                   {isEnglish
@@ -161,7 +161,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             <button
               type="button"
               onClick={onRetry}
-              className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
             >
               {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
             </button>
@@ -394,10 +394,10 @@ isEnglish
           {readingId && (
             <Link
               href="/reading/chat"
-              className="group relative overflow-hidden flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-[#D9C8AC] bg-gradient-to-r from-[#F3EDE2] via-[#FAF7F2] to-[#F3EDE2] hover:bg-[#FFFFFF] p-4 text-left transition-all hover:border-[#8F5C1A] hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] active:scale-[0.99] lg:hidden"
+              className="group relative overflow-hidden flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-[#D9C8AC] bg-gradient-to-r from-[#F3EDE2] via-[#FAF7F2] to-[#F3EDE2] hover:bg-[#FFFFFF] p-4 text-left transition hover:border-[#8F5C1A] hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] active:scale-[0.99] lg:hidden"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-sm shadow-sm group-hover:scale-105 group-hover:bg-[#74490F] transition-all font-sans font-bold">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-sm shadow-sm group-hover:scale-105 group-hover:bg-[#74490F] transition font-sans font-bold">
                   ➔
                 </span>
                 <div>
@@ -472,7 +472,7 @@ isEnglish
                   <Link
                     href="/readers"
                     onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
-                    className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                    className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap"
                   >
                     <span>{isEnglish ? "Consult Human Reader" : "ปรึกษาแม่หมอตัวจริง"}</span>
                     <span>➔</span>

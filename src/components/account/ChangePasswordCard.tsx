@@ -150,7 +150,7 @@ export function ChangePasswordCard() {
             <div className="pt-1.5 space-y-1">
               <div className="w-full h-1.5 bg-[#F3EDE2]/30 rounded-full overflow-hidden">
                 <div
-                  className={`h-full ${strength.barColor} transition-all duration-300`}
+                  className={`h-full ${strength.barColor} transition duration-300`}
                   style={{ width: `${(strength.score / 4) * 100}%` }}
                 />
               </div>
@@ -179,7 +179,7 @@ export function ChangePasswordCard() {
         <button
           type="submit"
           disabled={loading}
-          className="py-2.5 px-5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-semibold font-serif-th text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
+          className="py-2.5 px-5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-semibold font-serif-th text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
         >
           {loading
             ? (isEn ? "Saving..." : "กำลังบันทึก…")

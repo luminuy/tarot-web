@@ -177,7 +177,7 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleDraw}
-                className="w-full sm:w-auto px-10 py-3.5 sm:py-4 rounded-full bg-[#29261F] text-[#FAF7F2] font-serif-th text-sm sm:text-base font-bold shadow-raised hover:bg-[#A58A5C] active:scale-[0.98] transition-all cursor-pointer tracking-wide flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-3.5 sm:py-4 rounded-full bg-[#29261F] text-[#FAF7F2] font-serif-th text-sm sm:text-base font-bold shadow-raised hover:bg-[#A58A5C] active:scale-[0.98] transition cursor-pointer tracking-wide flex items-center justify-center gap-2"
               >
                 <span>{drawButtonText || (isEn ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}</span>
               </button>
@@ -329,7 +329,7 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleRestart}
-                className="w-full sm:w-auto px-6 py-3 rounded-full border border-[#D5CEC2] bg-[#FAF7F2] hover:bg-[#FFFFFF] text-xs sm:text-sm font-serif-th font-semibold text-[#29261F] shadow-raised transition-all cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 rounded-full border border-[#D5CEC2] bg-[#FAF7F2] hover:bg-[#FFFFFF] text-xs sm:text-sm font-serif-th font-semibold text-[#29261F] shadow-raised transition cursor-pointer"
               >
                 {isEn ? "← Draw Another Reading" : "← เริ่มเปิดไพ่อีกครั้ง"}
               </button>
@@ -337,7 +337,7 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleShare}
-                className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-xs sm:text-sm font-serif-th font-semibold text-[#FAF7F2] shadow-raised transition-all cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-xs sm:text-sm font-serif-th font-semibold text-[#FAF7F2] shadow-raised transition cursor-pointer"
               >
                 {copied
                   ? isEn

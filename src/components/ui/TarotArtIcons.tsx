@@ -52,7 +52,7 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
 
   return (
     <div
-      className={`relative rounded-lg overflow-hidden border transition-all duration-300 flex-shrink-0 select-none ${className} ${
+      className={`relative rounded-lg overflow-hidden border transition duration-300 flex-shrink-0 select-none ${className} ${
         highlight
           ? "ring-1.5 ring-[#8F5C1A] ring-offset-1 ring-offset-[#FFFFFF] z-10 scale-[1.04]"
           : "hover:border-[#8F5C1A]"
@@ -583,7 +583,7 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
       {[{ card: "14", highlight: true }, { card: "17" }, { card: "19" }].map((item, idx) => (
         <div
           key={idx}
-          className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 transition-all ${
+          className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 transition ${
             item.highlight ? "border-2 border-[#D9C8AC] scale-105 z-10" : "border border-[#D9C8AC]/40 shadow opacity-90"
           }`}
         >
@@ -632,7 +632,7 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
         {chakras.slice(0, 4).map((chk) => (
           <div
             key={chk.num}
-            className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 border transition-all ${
+            className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 border transition ${
               chk.highlight ? "border-2 border-[#3A7044] scale-105 z-10" : ""
             }`}
             style={{ borderColor: chk.highlight ? "#8F5C1A" : chk.color }}

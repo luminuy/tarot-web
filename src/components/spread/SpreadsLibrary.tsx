@@ -148,7 +148,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   nextTab?.focus();
                 }
               }}
-              className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
+              className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
                 isActive
                   ? "bg-[#29261F] text-[#F3F0EA] shadow-sm"
                   : "bg-[#EAE7E0] text-[#29261F] hover:text-[#A58A5C] border border-[#D5CEC2] hover:border-[#A58A5C]"
@@ -184,7 +184,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
             return (
               <div
                 key={spread.id}
-                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#A58A5C] transition-all duration-300 relative overflow-hidden group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
+                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#A58A5C] transition duration-300 relative overflow-hidden group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
               >
                 {/* Header Tag */}
                 <div className="flex items-center justify-between z-10">
@@ -268,7 +268,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                 <Link
                   href={`/?spread=${spread.id}`}
                   prefetch={false}
-                  className="w-full py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
+                  className="w-full py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
                 >
                   <span>{isEnglish ? (isStandardSpread(spread.id) ? "Begin Reading with Spread" : "Unlock Grand Spread") : (isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้")}</span>
                 </Link>

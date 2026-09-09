@@ -1,6 +1,23 @@
 @import "tailwindcss";
 
 /*
+ * 🔍 ขอบเขตที่ Tailwind ใช้ "สแกนหาชื่อคลาส" (Source Detection)
+ * ---------------------------------------------------------------------------
+ * Tailwind v4 ไล่สแกนทั้งโปรเจกต์โดยอัตโนมัติ และมันไม่ได้แยกแยะว่าข้อความที่เจอ
+ * เป็นคลาสจริงในโค้ด หรือเป็นแค่ "ชื่อคลาสที่ถูกเอ่ยถึงในคอมเมนต์/เอกสาร"
+ *
+ * ผลคือทุกครั้งที่เอกสารในโฟลเดอร์ `docs/` หรือคอมเมนต์ในสคริปต์ `scripts/`
+ * พูดถึงคลาสสักตัว (เช่นกฎที่เขียนว่า "ห้ามใช้ transition-all" หรือ "ห้ามใช้ backdrop-blur")
+ * Tailwind จะสร้าง CSS ของคลาสนั้นแถมมาให้ทันที ทั้งที่ไม่มีหน้าไหนในเว็บใช้มันเลย
+ * — ตรวจจริงแล้วพบว่ากฎที่เขียนไว้เพื่อ "ห้ามใช้" กลับเป็นตัวสร้างคลาสนั้นขึ้นมาเสียเอง
+ *
+ * ตัดสองโฟลเดอร์นี้ออกจากการสแกน — โค้ดที่เรนเดอร์จริงอยู่ใน `src/` ทั้งหมด
+ * ⚠️ ห้ามตัด `src/` ส่วนไหนออกเด็ดขาด คลาสจะหายจาก production แบบเงียบ ๆ
+ */
+@source not "../../docs";
+@source not "../../scripts";
+
+/*
   สเปกระบบดีไซน์ Editorial Quiet Luxury (Warm Ivory & Deep Brown)
   8 Core Tokens:
   1. canvas    : #F3F0EA (Warm Ivory — พื้นหน้าเว็บ)
@@ -90,6 +107,22 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-emphasis: cubic-bezier(0.2, 0, 0, 1);
+
+  /*
+   * ✦ ค่าเริ่มต้นของ `transition-*` ทั้งเว็บ (Tailwind v4 Default Transition)
+   * ---------------------------------------------------------------------------
+   * Tailwind ตั้งมาให้ 150ms + cubic-bezier(0.4,0,0.2,1) ซึ่ง "ไม่ใช่" โทเคนของบ้านนี้
+   * ทุกจุดที่เขียน `transition` เฉย ๆ โดยไม่ใส่ `duration-*` จึงวิ่งด้วยจังหวะคนละชุด
+   * กับที่ `src/lib/motion.ts` ใช้ → ตาเห็นเป็นความไม่สม่ำเสมอเล็ก ๆ กระจายทั้งเว็บ
+   *
+   * ผูกค่าเริ่มต้นเข้ากับโทเคนตรงนี้ที่เดียว = ทุกปุ่ม ทุกการ์ด ทุกลิงก์ใช้จังหวะเดียวกัน
+   * โดยไม่ต้องไล่เติม `duration-*` ทีละจุด (และไม่เพิ่มขนาด CSS แม้แต่ไบต์เดียว)
+   *
+   * 180ms คือช่วงที่ตายังเห็นว่า "ไหล" แต่ไม่รู้สึกว่าปุ่มตอบสนองช้า
+   * (ต่ำกว่า 120ms ตาจับไม่ทันเหมือนกระพริบ · เกิน 250ms เริ่มรู้สึกหน่วงตอนกดรัว)
+   */
+  --default-transition-duration: 180ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Shadows (Tailwind v4 Theme Tokens) */
   --shadow-raised: 0 1px 3px rgba(41, 38, 31, 0.04), 0 6px 16px -2px rgba(41, 38, 31, 0.06);
@@ -347,7 +380,19 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   background: #FFFFFF;
   border: 1px solid #D5CEC2;
   box-shadow: var(--shadow-raised);
-  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  /*
+   * ⚠️ ห้ามเขียน `transition: all` เด็ดขาด (ของเดิมเขียนไว้แบบนั้น)
+   * `all` ครอบคลุมคุณสมบัติเชิง layout ทุกตัวที่บังเอิญเปลี่ยนพร้อมกัน
+   * (padding · border-width · ขนาดกล่องตอนหน้าจอเปลี่ยนช่วง responsive)
+   * แล้วบังคับให้เบราว์เซอร์คำนวณ layout ใหม่ทุกเฟรมตลอด 200ms โดยไม่มีใครตั้งใจ
+   * และคลาสนี้ถูกใช้ซ้ำ 16 จุด — หน้า `/daily` ใบเดียวมี 11 กล่อง
+   *
+   * ระบุ 3 ตัวที่ hover เปลี่ยนจริง ๆ ตรง ๆ แทน (ดูกฎ :hover ด้านล่าง)
+   * ด่าน `scripts/qa/test-motion-quality.ts` กันไม่ให้ `all` กลับมาอีก
+   */
+  transition-property: border-color, box-shadow, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .altar-card-porcelain:hover {
@@ -453,13 +498,33 @@ html {
   scrollbar-color: #6F5B4A #F3EDE2;
 }
 
+/*
+ * ♿ เคารพ prefers-reduced-motion อย่างครบวงจร
+ * ---------------------------------------------------------------------------
+ * ของเดิมตัดแค่ "ระยะเวลา" ซึ่งยังเหลือช่องโหว่ 3 ทางที่ผู้ใช้กลุ่มนี้ยังเห็นการเคลื่อนไหว:
+ *   1. `animation-delay` / `transition-delay` — จุดที่ทำ stagger ไว้ (เช่น จุดพิมพ์ตอบ 3 จุด
+ *      หน่วงกันจุดละ 160ms) ยังหน่วงเท่าเดิม กลายเป็น "กระตุกทีละจุด" แทนที่จะนิ่งสนิท
+ *   2. `scroll-behavior: smooth` — ไม่ถูกแตะเลย หน้าจึงยัง "ไหล" ตอนกดลิงก์ #anchor
+ *      หรือ scrollIntoView ซึ่งเป็นการเคลื่อนไหวเต็มจอที่กระตุ้นอาการเวียนหัวมากที่สุด
+ *   3. `view-transition` ของการเปลี่ยนหน้า — ปิดไว้แล้วที่ท้ายไฟล์ (`navigation: none`)
+ *
+ * ⚠️ ห้ามใช้ `animation: none !important` แทน — จะฆ่า animation ที่ทำหน้าที่สื่อ "สถานะ"
+ * (สปินเนอร์กำลังโหลด) จนผู้ใช้ไม่รู้ว่าระบบยังทำงานอยู่ · ย่อให้สั้นจนมองไม่เห็นคือคำตอบที่ถูก
+ */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -549,13 +614,6 @@ html {
    * ความสูงจะเด้งไปมา → คำนวณ layout ใหม่ทั้งกริดซ้ำ ๆ (เจอ long task 268ms ตอนเลื่อนหน้าไพ่)
    */
   contain-intrinsic-size: auto 350px;
-}
-
-.gpu-accelerated {
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 /* ป้องกัน iOS Safari และเบราว์เซอร์มือถือไม่ให้ Auto-Zoom เมื่อผู้ใช้แตะพิมพ์ */
@@ -671,7 +729,78 @@ html {
   }
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   ✦ ชุดโมชั่นที่ "วนไม่รู้จบ" — ต้องเป็น CSS เท่านั้น ห้ามใช้ motion เด็ดขาด
+   ─────────────────────────────────────────────────────────────────────────────
+   ทำไม: `<motion.div animate={{ scale: [...] }} transition={{ repeat: Infinity }}>`
+   สั่งให้ไลบรารีคำนวณค่าใหม่ "ทุกเฟรมบนเธรดหลัก" ตลอดเวลาที่ element อยู่บนจอ
+   แล้วเขียนกลับลง inline style → เธรดหลักไม่เคยว่าง
+
+   ผลกระทบจริงที่วัดได้: ป้าย "แตะเพื่อเปิด" อยู่บนไพ่ *ทุกใบที่ยังคว่ำหน้า*
+   ผังใหญ่อย่าง celtic-cross มี 10 ใบ = ลูป 10 ตัววิ่งพร้อมกันตั้งแต่วินาทีแรก
+   ทับกับจังหวะที่ผู้ใช้กำลังเลื่อนหน้าและคำทำนายกำลังสตรีมเข้ามาพอดี
+
+   CSS keyframes ที่แตะเฉพาะ `transform` / `opacity` เบราว์เซอร์ยกไปให้ compositor
+   ทำเองทั้งหมด เธรดหลักไม่รู้เรื่องด้วยซ้ำ — จำนวนไพ่จึงไม่มีผลกับเฟรมเรตอีกต่อไป
+   และทั้งชุดถูกปิดอัตโนมัติเมื่อผู้ใช้เปิด prefers-reduced-motion ด้วยกฎรวมด้านบน */
+
+/* ป้าย "แตะเพื่อเปิด" บนหลังไพ่ — เดิมเป็นลูป motion ต่อไพ่หนึ่งใบ */
+.anim-badge-pulse {
+  animation: badgePulse 2.2s var(--ease-standard) infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(0.95);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* จุดกระพริบ "แม่หมอกำลังพิมพ์" 3 จุด — เดิมเป็นลูป motion 3 ตัว
+   หน่วงจังหวะด้วย `--dot-index` ที่ผู้เรียกส่งมา (0 · 1 · 2) */
+.anim-typing-dot {
+  animation: typingDot 0.95s var(--ease-standard) infinite;
+  animation-delay: calc(var(--dot-index, 0) * 0.16s);
+}
+
+@keyframes typingDot {
+  0%, 100% {
+    transform: translateY(0) scale(0.85);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(-7px) scale(1.3);
+    opacity: 1;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ✦ ฉากหลังโมดัล (Modal Scrim) — พื้นทึบล้วน ห้ามมี backdrop-filter
+   ─────────────────────────────────────────────────────────────────────────────
+   🚨 นี่คือกฎป้องกันถาวรจาก INC-0056 ที่เคยวัดผลจริงแล้ว:
+   "ห้ามใช้ backdrop-blur กับพื้นที่ใหญ่ที่มีของลอยทับหรือมีอนิเมชันวิ่งอยู่
+    (หัวเว็บ sticky · ฉากหลังโมดัล · การ์ดเต็มจอ) ให้ใช้พื้นหลังทึบแทน"
+   ตอนนั้นวัดได้ว่าปิด backdrop-filter แล้ว fps เด้งจาก 30 → 58 ทันที
+
+   เหตุผลเชิงกลไก: `backdrop-filter` บังคับให้เบราว์เซอร์ "อ่านภาพทุกอย่างที่อยู่ข้างหลัง
+   เต็มจอ → เบลอ → วาดทับ" ใหม่ทุกเฟรม ตราบใดที่ยังมีอะไรขยับอยู่ข้างหน้า
+   ซึ่งฉากหลังโมดัลคือกรณีที่แย่ที่สุดเพราะพื้นที่ = ทั้งหน้าจอ และตอนเปิด/ปิด
+   ตัวโมดัลก็กำลังเลื่อน+จางอยู่พอดี = เบลอทั้งจอใหม่ทุกเฟรมตลอดอนิเมชัน
+
+   ชดเชยด้วยการเพิ่มความทึบของสีแทน (0.50 → 0.62) ตาเห็นว่า "เนื้อหาข้างหลังถอยไป"
+   ได้ผลเท่ากัน แต่เป็นการวาดสีทับชั้นเดียวซึ่ง compositor ทำได้ฟรี ๆ
+
+   ⚠️ ด่าน `scripts/qa/test-motion-quality.ts` บล็อกการเติม backdrop-blur
+   กลับเข้ามาที่ฉากเต็มจอโดยอัตโนมัติ */
+.modal-scrim {
+  background-color: rgba(46, 33, 26, 0.62);
+}
+
 .gpu-layer {
+  /* 🚨 ต้องเป็น `translateZ(0)` เท่านั้น ห้าม `translate3d(0,0,0)` (INC-0108)
+     Lightning CSS เห็นแกน z เป็น 0 แล้วยุบเหลือ transform 2D ที่ไม่บังคับเลเยอร์ GPU */
   transform: translateZ(0);
   backface-visibility: hidden;
 }
@@ -697,7 +826,13 @@ html {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translate3d(0, 0, 0) scale(1);
+  /* 🚨 เคยเขียนเป็น `translate3d(0, 0, 0) scale(1)` ซึ่งผิดกฎ INC-0108
+     Lightning CSS เห็นแกน z เป็น 0 แล้วยุบเหลือ transform 2D อยู่ดี ตัวเลเยอร์ GPU
+     ที่ตั้งใจบังคับจึงไม่เคยเกิดขึ้นจริง · ของที่ทำหน้าที่นั้นได้จริงคือ `will-change`
+     บรรทัดถัดไป ซึ่งมีผลเฉพาะตอนแผงกำลังเปิด (ไม่จองเลเยอร์ค้าง — ด่าน test-will-change)
+     เขียนรายการ transform ให้ "ชุดฟังก์ชันตรงกัน" กับตอนปิด เบราว์เซอร์จึงไล่ค่าทีละฟังก์ชันได้
+     ไม่ต้องถอยไปคำนวณผ่าน matrix ซึ่งทำให้ขอบตัวอักษรสั่นระหว่างทาง */
+  transform: translateY(0) scale(1);
   will-change: opacity, transform;
 }
 
@@ -705,7 +840,7 @@ html {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translate3d(0, -6px, 0) scale(0.98);
+  transform: translateY(-6px) scale(0.98);
   /* หน่วงเฉพาะ visibility ให้ซ่อนหลัง fade จบ — opacity/transform ยังวิ่งปกติ */
   transition: opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
               transform 160ms cubic-bezier(0.16, 1, 0.3, 1),

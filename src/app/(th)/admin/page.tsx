@@ -309,7 +309,7 @@ function AdminContent() {
   return (
     <div className="min-h-screen bg-[#F8F6F2] text-[#29261F]">
       {/* ─── Top Executive Bar ──────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[#D5CEC2] bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:px-8 shadow-2xs">
+      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[#D5CEC2] bg-white px-4 sm:px-6 lg:px-8 shadow-2xs">
         <div className="flex items-center gap-3">
           {/* Mobile hamburger button */}
           <button
@@ -361,7 +361,7 @@ function AdminContent() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] px-3.5 py-1.5 text-xs font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition-all shadow-2xs"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] px-3.5 py-1.5 text-xs font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition shadow-2xs"
           >
             <span>เปิดหน้าเว็บจริง</span>
             <span className="text-[11px] text-[#635B4E]">↗</span>
@@ -395,7 +395,7 @@ function AdminContent() {
                         key={item.id}
                         type="button"
                         onClick={() => selectTab(item.id)}
-                        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition-all ${
+                        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition ${
                           isActive
                             ? "bg-[#F3F0EA] text-[#29261F] font-semibold border border-[#D5CEC2] shadow-2xs"
                             : "text-[#635B4E] hover:bg-[#FAF8F5] hover:text-[#29261F]"

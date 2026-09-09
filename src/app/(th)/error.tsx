@@ -30,13 +30,13 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <button
             onClick={() => reset()}
-            className="flex-1 py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold text-sm font-serif-th active:scale-95 transition-all cursor-pointer"
+            className="flex-1 py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold text-sm font-serif-th active:scale-95 transition cursor-pointer"
           >
             {isEnglish ? "Try Again" : "ลองใหม่อีกครั้ง"}
           </button>
           <Link
             href="/"
-            className="flex-1 py-3 px-4 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] font-bold text-sm font-serif-th hover:bg-[#FFFFFF] transition-all text-center flex items-center justify-center "
+            className="flex-1 py-3 px-4 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] font-bold text-sm font-serif-th hover:bg-[#FFFFFF] transition text-center flex items-center justify-center "
           >
             {isEnglish ? "Return to Sanctuary" : "กลับหน้าหลัก"}
           </Link>

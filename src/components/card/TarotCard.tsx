@@ -74,6 +74,27 @@ const SIZE_MAP = {
   responsive: "w-full aspect-[1/1.7] max-w-[200px]",
 };
 
+/**
+ * ✦ อุปกรณ์นี้มี "ตัวชี้ที่แม่นยำ" (เมาส์ / trackpad) หรือไม่
+ *
+ * เอฟเฟกต์เอียงไพ่ตามเมาส์ (parallax) มีความหมายเฉพาะกับเมาส์เท่านั้น
+ * แต่บนมือถือ เบราว์เซอร์ยัง "สังเคราะห์" เหตุการณ์ mousemove ตามหลังการแตะทุกครั้ง
+ * ตัวจับจึงยังทำงานอยู่ดี แล้วสั่งสปริง 4 ตัวต่อไพ่หนึ่งใบให้วิ่ง — ผู้ใช้ไม่ได้อะไรเลย
+ * นอกจากเฟรมที่หายไป (ผู้ชมเว็บนี้ 85% เป็นมือถือ)
+ *
+ * ⚠️ ต้องอ่านค่า "ตอนผู้ใช้ขยับเมาส์" เท่านั้น ห้ามอ่านระหว่างเรนเดอร์
+ * `matchMedia` ให้คำตอบคนละอย่างระหว่างเซิร์ฟเวอร์กับเบราว์เซอร์ = hydration mismatch
+ * ซึ่งเป็นบทเรียนที่จ่ายราคาไปแล้วใน INC-0053 (useReducedMotion ตอน SSR)
+ */
+let finePointerCache: boolean | null = null;
+function hasFinePointer(): boolean {
+  if (finePointerCache !== null) return finePointerCache;
+  finePointerCache = typeof window !== "undefined" && typeof window.matchMedia === "function"
+    ? window.matchMedia("(pointer: fine)").matches
+    : false;
+  return finePointerCache;
+}
+
 const DEFAULT_IMAGE_SIZES: Record<string, string> = {
   sm: "160px",
   md: "(min-width: 640px) 280px, 200px",
@@ -105,8 +126,15 @@ export const TarotCard: React.FC<TarotCardProps> = ({
   const springConfig = { damping: 25, stiffness: 280 };
   const smoothRotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [14, -14]), springConfig);
   const smoothRotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-14, 14]), springConfig);
-  const glintX = useSpring(useTransform(mouseX, [-0.5, 0.5], [0, 100]), springConfig);
-  const glintY = useSpring(useTransform(mouseY, [-0.5, 0.5], [0, 100]), springConfig);
+  /*
+   * ⚠️ เคยมีสปริง `glintX` / `glintY` อีกสองตัวตรงนี้ ป้อนตำแหน่งประกายทองในชั้นแสงข้างล่าง
+   * แต่ค่ามันถูกอ่านด้วย `.get()` "ระหว่างเรนเดอร์" ซึ่งทำสองอย่างพร้อมกัน:
+   *   1. ผิดหลัก React (อ่านค่าที่เปลี่ยนนอกวงจรเรนเดอร์ระหว่างเรนเดอร์ — INC-0053)
+   *   2. ไม่ทำงานจริง — ค่าที่อ่านได้จะอัปเดตก็ต่อเมื่อคอมโพเนนต์เรนเดอร์ใหม่ ซึ่งการขยับ
+   *      เมาส์ไม่ได้สั่งให้เรนเดอร์ใหม่เลย ประกายจึงค้างที่กึ่งกลาง (50%) ตลอดมา
+   * = จ่ายค่าสปริง 2 ตัวต่อไพ่ 1 ใบ เพื่อภาพนิ่ง · ถอดออกแล้วเขียนค่า 50% ตรง ๆ
+   * หน้าตาที่ผู้ใช้เห็นเหมือนเดิมเป๊ะทุกพิกเซล
+   */
 
   // Safely resolve the card object even if nested or only id/index is provided
   const rawCard = (card as any)?.card || card;
@@ -135,6 +163,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
   const rectRef = useRef<DOMRect | null>(null);
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!hasFinePointer()) return;
     rectRef.current = e.currentTarget.getBoundingClientRect();
     setIsHovered(true);
   };
@@ -225,14 +254,18 @@ export const TarotCard: React.FC<TarotCardProps> = ({
               </span>
             )}
             {!isRevealed && (
-              <motion.div
-                animate={{ scale: [0.95, 1.05, 0.95] }}
-                transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-                className="px-2.5 py-1 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] z-20 flex items-center gap-1 text-[12px] text-[#2E211A] font-serif-th font-bold"
-              >
+              /*
+               * ⚠️ ห้ามเปลี่ยนกลับไปใช้ `<motion.div animate={{ scale: [...] }} repeat: Infinity>`
+               * ป้ายนี้อยู่บนไพ่ "ทุกใบที่ยังคว่ำหน้า" — ผังใหญ่มีพร้อมกันได้ถึง 10 ใบ
+               * ลูปของ motion คำนวณบนเธรดหลักทุกเฟรมตลอดเวลา = เธรดหลักไม่เคยว่าง
+               * ทับกับจังหวะที่ผู้ใช้เลื่อนหน้าและคำทำนายกำลังสตรีมเข้ามาพอดี
+               * `.anim-badge-pulse` เป็น CSS keyframes ที่แตะเฉพาะ transform → compositor ทำเอง
+               * จำนวนไพ่บนจอจึงไม่มีผลกับเฟรมเรตอีกต่อไป (ดู globals.css)
+               */
+              <div className="anim-badge-pulse px-2.5 py-1 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] z-20 flex items-center gap-1 text-[12px] text-[#2E211A] font-serif-th font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A] animate-ping" />
                 <span>{isEnglish ? "Tap to reveal" : "แตะเพื่อเปิด"}</span>
-              </motion.div>
+              </div>
             )}
           </div>
 
@@ -242,10 +275,11 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           </div>
 
           {/* Ethereal Dynamic Gold Foil Glint Reflection */}
-          <motion.div
+          <div
             className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-60 transition-opacity duration-500"
             style={{
-              background: `radial-gradient(circle at ${glintX.get()}% ${glintY.get()}%, rgba(205,159,91,0.3) 0%, rgba(214,180,141,0.1) 40%, transparent 70%)`,
+              background:
+                "radial-gradient(circle at 50% 50%, rgba(205,159,91,0.3) 0%, rgba(214,180,141,0.1) 40%, transparent 70%)",
             }}
           />
         </div>
@@ -302,10 +336,11 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           )}
 
           {/* Specular Light Dynamic Sweep Layer */}
-          <motion.div
+          <div
             className="absolute inset-0 pointer-events-none opacity-25 group-hover:opacity-50 transition-opacity z-20"
             style={{
-              background: `linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.2) ${glintX.get()}%, transparent 100%)`,
+              background:
+                "linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)",
             }}
           />
         </div>

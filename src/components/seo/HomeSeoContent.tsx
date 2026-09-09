@@ -246,7 +246,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           {ritualSteps.map((step) => (
             <div
               key={step.stepNum}
-              className="rounded-2xl bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] border border-[#D9C8AC] hover:border-[#8F5C1A] p-5 lg:p-4 xl:p-5 shadow-[0_2px_8px_rgba(41,38,31,0.04)] hover:shadow-[0_8px_24px_rgba(143,92,26,0.10)] transition-all duration-300 group flex flex-col justify-between relative overflow-hidden select-none"
+              className="rounded-2xl bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] border border-[#D9C8AC] hover:border-[#8F5C1A] p-5 lg:p-4 xl:p-5 shadow-[0_2px_8px_rgba(41,38,31,0.04)] hover:shadow-[0_8px_24px_rgba(143,92,26,0.10)] transition duration-300 group flex flex-col justify-between relative overflow-hidden select-none"
             >
               <div className="space-y-3.5">
                 {/* Step Header */}
@@ -261,7 +261,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
 
                 {/* 1909 Rider-Waite Card Art */}
                 <div className="py-1 flex flex-col items-center">
-                  <div className="w-16 h-24 sm:w-18 sm:h-27 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md group-hover:scale-105 group-hover:border-[#8F5C1A] transition-all duration-300 bg-[#F3EDE2]">
+                  <div className="w-16 h-24 sm:w-18 sm:h-27 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2]">
                     <CardImage
                       image={step.cardImage}
                       alt={step.cardName}
@@ -349,13 +349,13 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         {/* 3 Pillars of Wisdom */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Pillar 1: 1909 Historic Heritage */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition-all duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition duration-300 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition-all duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
                   <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition-all duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
                   <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
@@ -384,13 +384,13 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </div>
 
           {/* Pillar 2: Provably Fair Cryptographic Randomness */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition-all duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition duration-300 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition-all duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
                   <CardImage image="major-10.jpg" alt="Wheel of Fortune" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition-all duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
                   <CardImage image="major-11.jpg" alt="Justice" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
@@ -419,13 +419,13 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           </div>
 
           {/* Pillar 3: Jungian Psychology & Empathetic AI */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition-all duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition duration-300 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition-all duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
                   <CardImage image="major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition-all duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
                   <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
@@ -508,7 +508,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/celtic-cross")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
@@ -533,7 +533,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/three-card")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
@@ -558,7 +558,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/decision")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
@@ -602,7 +602,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                 key={card.id}
                 href={`/cards/${card.id}`}
                 prefetch={false}
-                className="group flex flex-col items-center p-3 sm:p-4 rounded-xl border border-[#D9C8AC]/50 hover:border-[#8F5C1A] bg-[#FAF7F2] hover:bg-[#FFFFFF] transition-all duration-200 shadow-2xs hover:shadow-xs"
+                className="group flex flex-col items-center p-3 sm:p-4 rounded-xl border border-[#D9C8AC]/50 hover:border-[#8F5C1A] bg-[#FAF7F2] hover:bg-[#FFFFFF] transition duration-200 shadow-2xs hover:shadow-xs"
               >
                 <div className="w-14 h-21 rounded-md overflow-hidden border border-[#D9C8AC] mb-2.5 shadow-2xs group-hover:scale-105 transition-transform duration-200 bg-[#F3EDE2]">
                   <CardImage image={card.img} alt={card.nameEn} className="w-full h-full object-cover" sizes="56px" />
@@ -663,7 +663,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               key={art.slug}
               href={`/blog/${art.slug}`}
               prefetch={false}
-              className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition-all duration-300 shadow-xs hover:shadow-md group flex items-start gap-4 sm:gap-5"
+              className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group flex items-start gap-4 sm:gap-5"
             >
               <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs group-hover:scale-105 duration-300">
                 <CardImage image={art.cardImage} alt={art.cardAlt} className="w-full h-full object-cover" sizes="64px" />
@@ -723,7 +723,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           {homeFaqs.map((faq) => (
             <details
               key={faq.id}
-              className="group rounded-2xl border bg-[#FFFFFF] border-[#D9C8AC]/80 transition-all duration-300 overflow-hidden open:border-[#8F5C1A] open:shadow-sm hover:border-[#8F5C1A] hover:shadow-2xs"
+              className="group rounded-2xl border bg-[#FFFFFF] border-[#D9C8AC]/80 transition duration-300 overflow-hidden open:border-[#8F5C1A] open:shadow-sm hover:border-[#8F5C1A] hover:shadow-2xs"
             >
               <summary className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-serif-th font-bold text-base text-[#29261F] hover:text-[#8F5C1A] transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center gap-3 sm:gap-3.5">

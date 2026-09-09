@@ -179,7 +179,7 @@ export default function PrivacyPolicyPage() {
             <a
               href="/api/account/export"
               download
-              className="px-5 py-2.5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-bold hover:bg-[#F3F0EA] hover:border-[#A58A5C] transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+              className="px-5 py-2.5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-bold hover:bg-[#F3F0EA] hover:border-[#A58A5C] transition cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
             >
               
               <span>ดาวน์โหลดข้อมูลของฉัน (Export JSON)</span>
@@ -192,7 +192,7 @@ export default function PrivacyPolicyPage() {
         <div className="text-center pt-6 font-serif-th">
           <a
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold text-sm transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold text-sm transition shadow-sm"
           >
             ← กลับสู่วิหารทาโรต์
           </a>

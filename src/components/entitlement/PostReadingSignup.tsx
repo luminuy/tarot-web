@@ -109,7 +109,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
           trackEntitlementEvent("signup_card_clicked");
           onOpenAuth();
         }}
-        className="mt-4 w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition-all hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+        className="mt-4 w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
       >
         
         {isEn ? "Create Free Account (Takes under a minute)" : "สมัครสมาชิกฟรี (ใช้เวลาไม่ถึงนาที)"}

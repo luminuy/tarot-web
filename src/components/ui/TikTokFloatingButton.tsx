@@ -38,12 +38,12 @@ export function TikTokFloatingButton() {
         rel="noopener noreferrer"
         title={isEnglish ? "Follow Seerada on TikTok (@seerada.tarot)" : "ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"}
         aria-label={isEnglish ? "Follow Seerada on TikTok (@seerada.tarot)" : "ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"}
-        className="group flex items-center gap-2.5 rounded-full p-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F2EA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
+        className="group flex items-center gap-2.5 rounded-full p-1 transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F2EA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2]"
       >
         {/* Tooltip Pill บน Desktop (จะเลื่อนโผล่มาเมื่อ Hover) */}
         <span
           aria-hidden="true"
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#110E1B]/90 backdrop-blur-md border border-white/15 text-[#F3F0EA] text-xs font-serif-th font-semibold shadow-lg opacity-0 -translate-x-2 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 whitespace-nowrap"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#110E1B] border border-white/15 text-[#F3F0EA] text-xs font-serif-th font-semibold shadow-lg opacity-0 -translate-x-2 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition duration-300 whitespace-nowrap"
         >
           
           <span>{isEnglish ? "Follow Seerada" : "ติดตามแม่หมอ"}</span>
@@ -51,7 +51,7 @@ export function TikTokFloatingButton() {
         </span>
 
         {/* ปุ่มวงกลมหลักสีดำพรีเมียม พร้อมเงาลึกและเส้นขอบ */}
-        <div className="relative w-[52px] h-[52px] sm:w-14 sm:h-14 rounded-full bg-[#050507] border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.5)] group-hover:shadow-[0_10px_30px_rgba(0,242,234,0.3)] group-hover:border-[#00F2EA]/60 group-hover:scale-108 active:scale-95 transition-all duration-300 flex items-center justify-center shrink-0">
+        <div className="relative w-[52px] h-[52px] sm:w-14 sm:h-14 rounded-full bg-[#050507] border border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.5)] group-hover:shadow-[0_10px_30px_rgba(0,242,234,0.3)] group-hover:border-[#00F2EA]/60 group-hover:scale-108 active:scale-95 transition duration-300 flex items-center justify-center shrink-0">
           {/* Subtle Outer Ambient Glow */}
           <div
             aria-hidden="true"

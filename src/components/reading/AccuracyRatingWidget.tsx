@@ -117,7 +117,7 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
                   key={score}
                   type="button"
                   onClick={() => handleRate(score)}
-                  className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-all cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                  className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                   title={label}
                   aria-label={isEnglish ? `Rating: ${label}` : `ให้คะแนนระดับ: ${label}`}
                 >

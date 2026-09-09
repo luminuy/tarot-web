@@ -313,7 +313,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                     setMenuOpen(false);
                     onBuyCredits();
                   }}
-                  className="w-full py-2 px-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs hover:scale-[1.01] transition-all duration-150 cursor-pointer flex items-center justify-between active:scale-[0.98] shadow-sm"
+                  className="w-full py-2 px-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs hover:scale-[1.01] transition duration-150 cursor-pointer flex items-center justify-between active:scale-[0.98] shadow-sm"
                 >
                   <span className="flex items-center gap-1.5">
                     
@@ -424,7 +424,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                   
                   <span>{isEn ? "Sign Out" : "ออกจากระบบ"}</span>
                 </span>
-                <span className="text-[13px] text-[#A6392C] group-hover:text-[#A6392C] group-hover:translate-x-0.5 transition-all">
+                <span className="text-[13px] text-[#A6392C] group-hover:text-[#A6392C] group-hover:translate-x-0.5 transition">
                   →
                 </span>
               </button>

@@ -263,7 +263,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
         <button
           type="submit"
-          className="w-full py-3 px-6 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs sm:text-sm font-serif-th font-bold hover:bg-[#A58A5C] transition-all duration-200 cursor-pointer shadow-raised active:scale-95 tracking-wide"
+          className="w-full py-3 px-6 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs sm:text-sm font-serif-th font-bold hover:bg-[#A58A5C] transition duration-200 cursor-pointer shadow-raised active:scale-95 tracking-wide"
         >
           {isEnglish ? "Calculate Your Birth Card" : "คำนวณไพ่ประจำตัวของคุณ"}
         </button>
@@ -405,7 +405,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               <button
                 type="button"
                 onClick={handleShare}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-[#D9C8AC] bg-white hover:border-[#8F5C1A] text-xs font-serif-th font-bold text-[#29261F] transition-all cursor-pointer shadow-xs"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-[#D9C8AC] bg-white hover:border-[#8F5C1A] text-xs font-serif-th font-bold text-[#29261F] transition cursor-pointer shadow-xs"
               >
                 <span>
                   {copied
@@ -420,7 +420,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
               <Link
                 href="/spreads/celtic-cross"
-                className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs font-serif-th font-bold text-center hover:bg-[#A58A5C] transition-all shadow-xs"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs font-serif-th font-bold text-center hover:bg-[#A58A5C] transition shadow-xs"
               >
                 {isEnglish ? "10-Card Celtic Cross Life Reading" : "เปิดผังเซลติกครอส 10 ใบ พยากรณ์ชะตาชีวิต"}
               </Link>
@@ -437,7 +437,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Link
                   href="/daily"
-                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition-all duration-300 group block shadow-xs"
+                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition duration-300 group block shadow-xs"
                 >
                   <div className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
                     {isEnglish ? "Daily Tarot Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
@@ -449,7 +449,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
                 <Link
                   href="/love/1-card"
-                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition-all duration-300 group block shadow-xs"
+                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition duration-300 group block shadow-xs"
                 >
                   <div className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
                     {isEnglish ? "Love Tarot 1 Card" : "ดูดวงความรัก 1 ใบ"}
@@ -461,7 +461,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
                 <Link
                   href="/readers"
-                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition-all duration-300 group block shadow-xs"
+                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition duration-300 group block shadow-xs"
                 >
                   <div className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
                     {isEnglish ? "Personal Readers" : "ปรึกษาแม่หมอตัวจริง"}

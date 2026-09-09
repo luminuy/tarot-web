@@ -166,7 +166,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
         </p>
         <Link
           href={`/?spread=${spread.id}`}
-          className="inline-flex items-center gap-1.5 rounded-full bg-[#29261F] px-6 py-3 font-serif-th text-sm font-bold text-[#F3F0EA] transition-all hover:bg-[#A58A5C] active:scale-[0.98]"
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#29261F] px-6 py-3 font-serif-th text-sm font-bold text-[#F3F0EA] transition hover:bg-[#A58A5C] active:scale-[0.98]"
         >
           
           <span>

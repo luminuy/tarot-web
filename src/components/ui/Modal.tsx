@@ -134,7 +134,7 @@ export const Modal: React.FC<ModalProps> = ({
               exit={{ opacity: 0 }}
               transition={TWEEN.fast}
               onClick={onClose}
-              className="fixed inset-0 bg-[#2E211A]/50 backdrop-blur-[3px]"
+              className="fixed inset-0 modal-scrim"
             />
 
             {/* Modal Dialog Card */}

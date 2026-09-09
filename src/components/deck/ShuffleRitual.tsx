@@ -254,7 +254,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
           <button
             type="button"
             onClick={startShuffle}
-            className="w-full py-4 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th shadow-overlay hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-4 px-6 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th shadow-overlay hover:scale-105 active:scale-95 transition cursor-pointer flex items-center justify-center gap-2"
           >
             
             <span>{isEnglish ? "Tap to Shuffle Deck" : "แตะเพื่อเริ่มสับไพ่"}</span>

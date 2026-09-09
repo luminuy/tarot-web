@@ -96,7 +96,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
   return (
     <section
       aria-label={isEnglish ? "Provably-Fair Cryptographic Transparency Verification" : "ตรวจสอบความโปร่งใส Provably-Fair"}
-      className="my-4 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] transition-all overflow-hidden"
+      className="my-4 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] transition overflow-hidden"
     >
       {/* Header — แตะเพื่อยุบ/ขยาย (เริ่มต้นยุบไว้ ไม่ให้หน้ายาว) */}
       <button
@@ -269,7 +269,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                       onClick={handleVerify}
                       disabled={isVerifying}
                       aria-busy={isVerifying}
-                      className="w-full py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs sm:text-sm active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                      className="w-full py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs sm:text-sm active:scale-[0.99] transition cursor-pointer flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
                     >
                       
                       <span>

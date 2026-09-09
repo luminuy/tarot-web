@@ -277,7 +277,7 @@ export function QuickFortunePicker({
                   handleCardClick(topic);
                 }
               }}
-              className={`w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition-all duration-300 transform-gpu hover:-translate-y-1 hover:shadow-md cursor-pointer select-none text-left overflow-hidden min-h-[368px] sm:min-h-[392px]`}
+              className={`w-[82vw] max-w-[280px] shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink group relative flex flex-col justify-between p-4 sm:p-4.5 rounded-2xl border ${topic.themeColors.border} ${topic.themeColors.borderHover} ${topic.themeColors.bgGradient} ${topic.themeColors.glow} transition duration-300 transform-gpu hover:-translate-y-1 hover:shadow-md cursor-pointer select-none text-left overflow-hidden min-h-[368px] sm:min-h-[392px]`}
             >
               {/* สัญลักษณ์มุมการ์ดทองคำเปลว */}
               
@@ -303,7 +303,7 @@ export function QuickFortunePicker({
                   {/* รัศมีแสงทองนุ่มนวลเบื้องหลัง */}
                   <div className="absolute -inset-1.5 rounded-xl bg-radial from-[#A58A5C]/20 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
                   <div
-                    className="relative w-[92px] h-[152px] sm:w-[104px] sm:h-[172px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition-all duration-300 transform-gpu bg-[#FFFFFF]"
+                    className="relative w-[92px] h-[152px] sm:w-[104px] sm:h-[172px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition duration-300 transform-gpu bg-[#FFFFFF]"
                     style={{ borderColor: topic.themeColors.cardBorder }}
                   >
                     <CardImage
@@ -355,7 +355,7 @@ export function QuickFortunePicker({
               type="button"
               onClick={() => scrollToIndex(index)}
               aria-label={isEnglish ? `Navigate to ${topic.titleEn || topic.title}` : `ไปยังหัวข้อ ${topic.title}`}
-              className={`h-1.5 rounded-full transition-all duration-300 focus:outline-none ${
+              className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 focus:outline-none ${
                 activeIndex === index
                   ? "w-6 bg-[#8F5C1A] shadow-xs"
                   : "w-1.5 bg-[#D5CEC2] hover:bg-[#A58A5C]/70"
@@ -368,7 +368,7 @@ export function QuickFortunePicker({
 
       {/* โมดัลระบุชื่อเล่นและคำถามสำหรับรอบใหม่ (Fast & Sacred Sacred Popover) */}
       {showNicknameModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#171512]/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim animate-in fade-in duration-200">
           <div className="w-full max-w-md rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">

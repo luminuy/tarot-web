@@ -150,7 +150,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-selected={activeTab === "card"}
           aria-controls="chamber-panel-card"
           onClick={() => setActiveTab("card")}
-          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
             activeTab === "card"
               ? "bg-[#8F5C1A] text-[#FFFFFF]"
               : "bg-[#F3EDE2] text-[#2E211A] hover:text-[#8F5C1A] border border-[#D9C8AC]"
@@ -169,7 +169,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-selected={activeTab === "summary"}
           aria-controls="chamber-panel-summary"
           onClick={() => setActiveTab("summary")}
-          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
             activeTab === "summary"
               ? "bg-[#8F5C1A] text-[#FFFFFF]"
               : "bg-[#F3EDE2] text-[#2E211A] hover:text-[#8F5C1A] border border-[#D9C8AC]"
@@ -184,7 +184,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {readingId && (
         <Link
           href="/reading/chat"
-          className="group flex w-full items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] px-4 py-3 text-left transition-all hover:border-[#8F5C1A] hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="group flex w-full items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] px-4 py-3 text-left transition hover:border-[#8F5C1A] hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
         >
           <span className="min-w-0">
             <span className="block font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm [text-wrap:balance]">
@@ -220,7 +220,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
                   {isEnglish ? (/reload|not found/i.test(errorMsg) ? "Reload Reading" : "Retry Reading") : (/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่")}
                 </button>
@@ -241,7 +241,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 type="button"
                 aria-pressed={activeCardIndex === d.order}
                 onClick={() => onSelectCardIndex(d.order)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold transition-all cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold transition cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
                   activeCardIndex === d.order
                     ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
                     : "bg-[#F3EDE2] text-[#2E211A] hover:bg-[#FFFFFF] border border-[#D9C8AC]"
@@ -367,7 +367,7 @@ isEnglish
                   <button
                     type="button"
                     onClick={onRetry}
-                    className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition-all inline-flex items-center gap-1.5"
+                    className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
                   >
                     {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
                   </button>
@@ -433,7 +433,7 @@ isEnglish
                 type="button"
                 onClick={() => onSelectCardIndex(Math.max(0, activeCardIndex - 1))}
                 disabled={activeCardIndex === 0}
-                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
+                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
                   activeCardIndex > 0
                     ? "border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] hover:bg-[#FAF7F2] hover:border-[#8F5C1A] cursor-pointer"
                     : "border-transparent text-[#635B4E] cursor-not-allowed"
@@ -446,7 +446,7 @@ isEnglish
                 type="button"
                 onClick={() => onSelectCardIndex(Math.min(totalCards - 1, activeCardIndex + 1))}
                 disabled={activeCardIndex === totalCards - 1}
-                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
+                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
                   activeCardIndex < totalCards - 1
                     ? "border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] hover:bg-[#FAF7F2] hover:border-[#8F5C1A] cursor-pointer"
                     : "border-transparent text-[#635B4E] cursor-not-allowed"
@@ -596,7 +596,7 @@ isEnglish
               <Link
                 href="/readers"
                 onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
-                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap"
               >
                 <span>{isEnglish ? "Consult Human Reader" : "ปรึกษาแม่หมอตัวจริง"}</span>
                 <span>➔</span>

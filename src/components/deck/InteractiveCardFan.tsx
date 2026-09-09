@@ -70,7 +70,7 @@ const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicke
       className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group focus-visible:outline-none"
       style={{ zIndex: tierIdx * 40 + posInTier, originY: 1 }}
     >
-      <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-lg sm:rounded-lg border-2 card-back-pattern flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition-all duration-200 border-[#D9C8AC] group-hover:border-[#8F5C1A] group-hover:ring-2 group-hover:ring-[#8F5C1A]/60 group-focus-visible:border-[#D9C8AC] group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] bg-[#382518]">
+      <div className="w-[46px] h-[78px] sm:w-[66px] sm:h-[112px] md:w-[74px] md:h-[124px] rounded-lg sm:rounded-lg border-2 card-back-pattern flex flex-col items-center justify-between p-1 sm:p-1.5 relative overflow-hidden transition duration-200 border-[#D9C8AC] group-hover:border-[#8F5C1A] group-hover:ring-2 group-hover:ring-[#8F5C1A]/60 group-focus-visible:border-[#D9C8AC] group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] bg-[#382518]">
         <div className="w-full flex items-center justify-end text-[12px] sm:text-[12px] text-[#8F5C1A]/90">
           <span className="font-mono opacity-80">#{cardIdx + 1}</span>
         </div>
@@ -353,7 +353,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     type="button"
                     onClick={handleAutoPick}
                     disabled={disabled}
-                    className="flex-shrink-0 text-[13px] sm:text-[13px] text-[#2E211A] hover:text-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#F3EDE2] border border-[#D9C8AC] hover:border-[#8F5C1A] px-2.5 py-0.5 rounded-lg transition-all cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
+                    className="flex-shrink-0 text-[13px] sm:text-[13px] text-[#2E211A] hover:text-[#8F5C1A] bg-[#FFFFFF] hover:bg-[#F3EDE2] border border-[#D9C8AC] hover:border-[#8F5C1A] px-2.5 py-0.5 rounded-lg transition cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
                     aria-label={isEnglish ? "Auto-draw next card" : "สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"}
                   >
                     {isEnglish ? "Draw for Me" : "สุ่มเลือกให้ฉัน"}
@@ -373,7 +373,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                 <motion.div
                   key={idx}
                   whileHover={{ scale: 1.04 }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[13px] sm:text-xs transition-all duration-300 font-serif-th whitespace-nowrap select-none ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[13px] sm:text-xs transition duration-300 font-serif-th whitespace-nowrap select-none ${
                     isFilled
                       ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold border border-[#D9C8AC]"
                       : isCurrent
