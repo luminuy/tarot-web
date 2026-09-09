@@ -60,6 +60,16 @@
  *     ถ้าใครลบทิ้ง ทุกจุดที่เขียน `transition` เฉย ๆ จะเด้งกลับไปใช้ค่าเริ่มต้นของ Tailwind
  *     (150ms + easing คนละตัว) แล้วเว็บจะกลับไป "จังหวะไม่เท่ากัน" เงียบ ๆ โดยไม่มีใครรู้
  *
+ *  9. คีย์เฟรมของ element ที่จัดกลางด้วยยูทิลิตี้ `translate-*` ของ Tailwind
+ *     ห้ามมี `transform: translate…(%)` ซ้ำเข้าไปอีก
+ *
+ *     🚨 กับดักที่หลุดขึ้น production จริง — INC-0123 (แถบแจ้งเตือนไปนอนคร่อมขอบซ้ายจอ):
+ *     Tailwind v4 คอมไพล์ `-translate-x-1/2` เป็นคุณสมบัติเดี่ยว `translate:` **ไม่ใช่** `transform:`
+ *     ซึ่งตามสเปกเบราว์เซอร์คิด `translate → rotate → scale → transform` แล้วคูณต่อกัน
+ *     ไม่ใช่ทับกันแบบสมัย v3 · คีย์เฟรมที่พา -50% ไปด้วย "เพื่อกันกล่องวาป" จึงกลายเป็น
+ *     -100% กล่องเลื่อนไปครึ่งตัวเอง และเพราะ fill-mode เป็น `both` มันค้างผิดที่ถาวร
+ *     ให้คีย์เฟรมขยับแค่แกน Y / scale / opacity ปล่อยการจัดกลางเป็นหน้าที่ของคลาส
+ *
  * 🔒 หลักการ Ratchet: จุดละเมิดเก่าใส่ ALLOWLIST ได้ แต่ห้ามเพิ่มรายการใหม่
  *
  * รันด้วย: npx tsx scripts/qa/test-motion-quality.ts
@@ -303,6 +313,78 @@ function checkCss(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 9 — คีย์เฟรมห้ามจัดกลางซ้ำกับยูทิลิตี้ `translate-*` ของ Tailwind
+ *
+ * ตรวจแบบไขว้ระหว่างสองฝั่ง เพราะฝั่งเดียวพิสูจน์อะไรไม่ได้เลย:
+ *   ฝั่ง CSS  — `.anim-xxx` ผูกกับ `@keyframes` ชื่อไหน และคีย์เฟรมนั้นมี translate เป็น % ไหม
+ *   ฝั่ง TSX  — element ที่ใส่ `.anim-xxx` นั้นใส่ `-translate-x-1/2` (หรือพี่น้อง) ด้วยหรือเปล่า
+ * เจอครบทั้งสองฝั่งเมื่อไหร่ = ระยะจะถูกคูณสองแน่นอน (translate + transform คนละคุณสมบัติกัน)
+ */
+function checkKeyframeCenteringConflict(violations: Violation[]): void {
+  // ── ฝั่ง CSS ────────────────────────────────────────────────────────────
+  /** ชื่อคีย์เฟรม → มี translate ที่เป็นเปอร์เซ็นต์อยู่ใน transform ไหม */
+  const keyframeShiftsByPercent = new Map<string, string>();
+  /** ชื่อคลาส (ไม่มีจุดนำหน้า) → รายชื่อคีย์เฟรมที่มันเรียกใช้ */
+  const classAnimations = new Map<string, string[]>();
+
+  for (const file of walk(SRC, [".css"])) {
+    const css = fs.readFileSync(file, "utf-8");
+
+    for (const m of css.matchAll(/@keyframes\s+([\w-]+)\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g)) {
+      const [, name, body] = m;
+      for (const decl of body.matchAll(/transform\s*:([^;}]*)/g)) {
+        const hit = decl[1].match(/translate[XY]?\(\s*-?[\d.]+%/);
+        if (hit) keyframeShiftsByPercent.set(name, hit[0]);
+      }
+    }
+
+    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const [, selector, body] = m;
+      const decl = body.match(/animation(?:-name)?\s*:([^;}]*)/);
+      if (!decl) continue;
+      const names = decl[1].split(/[\s,]+/).filter(Boolean);
+      for (const cls of selector.matchAll(/\.([\w-]+)/g)) {
+        classAnimations.set(cls[1], [...(classAnimations.get(cls[1]) ?? []), ...names]);
+      }
+    }
+  }
+
+  // ── ฝั่ง TSX ────────────────────────────────────────────────────────────
+  const TAILWIND_TRANSLATE = /(^|[\s"'`{])-?translate-[xy]-[\w./[\]%-]+/;
+
+  for (const file of walk(SRC, [".tsx"])) {
+    const r = rel(file);
+    const lines = fs.readFileSync(file, "utf-8").split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+      if (isCommentLine(lines[i])) continue;
+
+      for (const hit of lines[i].matchAll(/\b(anim-[\w-]+)\b/g)) {
+        const cls = hit[1];
+        const animations = classAnimations.get(cls);
+        if (!animations) continue;
+
+        const guilty = animations.find((n) => keyframeShiftsByPercent.has(n));
+        if (!guilty) continue;
+
+        // className ของกล่องเดียวกันมักกินหลายบรรทัด — มองรอบ ๆ จุดที่เจอคลาสอนิเมชัน
+        const window = lines.slice(Math.max(0, i - 8), Math.min(lines.length, i + 9)).join("\n");
+        if (!TAILWIND_TRANSLATE.test(window)) continue;
+        if (isAllowed(r, cls)) continue;
+
+        violations.push({
+          rule: "9 · คีย์เฟรมจัดกลางซ้ำกับ translate ของ Tailwind",
+          file: r,
+          line: i + 1,
+          code: `${cls} → @keyframes ${guilty} { transform: … ${keyframeShiftsByPercent.get(guilty)}… }`,
+          hint: `Tailwind v4 คอมไพล์ \`translate-*\` เป็นคุณสมบัติ \`translate:\` ซึ่งเบราว์เซอร์คูณต่อกับ \`transform:\` ของคีย์เฟรม (ไม่ได้ทับกันแบบ v3) ระยะจึงกลายเป็นสองเท่าและค้างถาวรเพราะ fill-mode \`both\` — เอา translate ที่เป็น % ออกจาก @keyframes ${guilty} ให้เหลือแค่แกน Y / scale / opacity`,
+        });
+      }
+    }
+  }
+}
+
 /** กฎ 6 — โทเคนจังหวะกลางต้องยังอยู่ */
 function checkTokens(violations: Violation[]): void {
   const file = path.join(SRC, "app", "globals.css");
@@ -329,6 +411,7 @@ function run(): void {
   checkWaitWithoutExit(violations);
   checkUnregisteredTransformVars(violations);
   checkCss(violations);
+  checkKeyframeCenteringConflict(violations);
   checkTokens(violations);
 
   if (violations.length > 0) {
@@ -346,7 +429,7 @@ function run(): void {
   }
 
   console.log(
-    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · โทเคนจังหวะกลางยังผูกอยู่\n"
+    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
   );
   process.exit(0);
 }
