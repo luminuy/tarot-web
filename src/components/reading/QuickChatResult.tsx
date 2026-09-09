@@ -17,6 +17,7 @@ import { CollapsibleCard } from "./CollapsibleCard";
 import { CardImage } from "@/components/card/CardImage";
 import { TTSReaderButton } from "./TTSReaderButton";
 import { useLocale } from "@/lib/i18n";
+import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
 
 export interface QuickChatResultProps {
   reading?: Partial<Reading> | null;
@@ -51,9 +52,10 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
 }) => {
   const { isEnglish } = useLocale();
   const drawnCard = drawnCards[0];
+  // ไพ่เต็มจากสำรับมาก่อน (มีฟิลด์ภาษาอังกฤษครบ) แล้วค่อยตกมาที่ก้อนย่อจากเซสชัน
   const cardData =
-    drawnCard?.card ||
-    (drawnCard && drawnCard.cardIndex !== undefined ? cardByIndex(drawnCard.cardIndex) : undefined);
+    (drawnCard && drawnCard.cardIndex !== undefined ? cardByIndex(drawnCard.cardIndex) : undefined) ||
+    drawnCard?.card;
   const cardReading = reading?.cards?.[0];
   const showCoreSummary = !!reading?.summary && reading.summary !== cardReading?.reading;
 
@@ -280,21 +282,15 @@ isEnglish
 
               {/* Keywords */}
               {(() => {
-                const enKws = (cardData as any)?.keywordsEn;
-                const thKws = cardData?.keywords;
-                let keywords: string[] = [];
+                const keywords = resolveDisplayKeywords({
+                  cardId: cardData?.id,
+                  keywords: cardData?.keywords,
+                  keywordsEn: (cardData as any)?.keywordsEn,
+                  isReversed: drawnCard?.isReversed,
+                  isEnglish,
+                });
 
-                if (isEnglish && enKws) {
-                  keywords = drawnCard?.isReversed ? enKws.reversed : enKws.upright;
-                } else if (thKws && Array.isArray(thKws)) {
-                  keywords = thKws;
-                } else if (thKws && typeof thKws === "object") {
-                  keywords = drawnCard?.isReversed
-                    ? (thKws as any).reversed
-                    : (thKws as any).upright;
-                }
-
-                return keywords && keywords.length > 0 ? (
+                return keywords.length > 0 ? (
                   <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-auto">
                     {keywords.slice(0, 3).map((kw: string, idx: number) => (
                       <span

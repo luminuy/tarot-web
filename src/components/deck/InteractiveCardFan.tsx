@@ -87,11 +87,14 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
   totalCards = TOTAL_CARDS,
   pickedIndices,
   targetCount,
-  currentPositionName = "ตำแหน่งถัดไป",
+  currentPositionName,
   onPickCard,
   disabled = false,
 }) => {
   const { isEnglish } = useLocale();
+  // ป้ายชื่อตำแหน่งสำรอง: ต้องเลือกภาษาตอนเรนเดอร์ ไม่ใช่ค่า default ของพารามิเตอร์
+  // (ค่า default เป็นภาษาไทยตายตัว ทำให้โหมด EN เห็นคำไทยหลุดมา)
+  const positionLabel = currentPositionName || (isEnglish ? "Next Position" : "ตำแหน่งถัดไป");
   const stageRef = useRef<HTMLDivElement>(null);
   const fanRef = useRef<HTMLDivElement>(null);
   const [fanFit, setFanFit] = useState({ scale: 1, trimY: 0 });
@@ -194,17 +197,21 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             <div className="inline-flex items-center gap-2 bg-[#FFFFFF] border border-[#D9C8AC] px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full ">
               <span className="w-2 h-2 rounded-full bg-[#8F5C1A] animate-ping" />
               <span className="text-[13px] sm:text-xs font-serif-th font-bold text-[#2E211A]">
-                เลือกไพ่ใบที่ {pickedIndices.length + 1} จากทั้งหมด {targetCount} ใบ
+                {isEnglish
+                  ? `Choosing card ${pickedIndices.length + 1} of ${targetCount}`
+                  : `เลือกไพ่ใบที่ ${pickedIndices.length + 1} จากทั้งหมด ${targetCount} ใบ`}
               </span>
             </div>
 
             {/* Position Heading with Inline Non-Breaking Quotes */}
             <h3 className="text-lg sm:text-3xl font-serif-th font-bold font-mystic-gold tracking-wide drop-shadow leading-snug py-0.5 px-2">
-              เลือกไพ่สำหรับ{" "}
-              <span className="text-[#8F5C1A] inline-block font-bold">&ldquo;{currentPositionName}&rdquo;</span>
+              {isEnglish ? "Choose a card for" : "เลือกไพ่สำหรับ"}{" "}
+              <span className="text-[#8F5C1A] inline-block font-bold">&ldquo;{positionLabel}&rdquo;</span>
             </h3>
             <p className="text-[13px] sm:text-xs text-[#635B4E] max-w-xl mx-auto leading-normal">
-              แตะเลือกไพ่ใบที่คุณรู้สึกถูกชะตา หรือกดปุ่ม &ldquo;สุ่มเลือกให้ฉัน&rdquo; ด้านล่าง
+              {isEnglish
+                ? "Tap the card you feel drawn to, or press \u201cDraw for Me\u201d below."
+                : "แตะเลือกไพ่ใบที่คุณรู้สึกถูกชะตา หรือกดปุ่ม \u201cสุ่มเลือกให้ฉัน\u201d ด้านล่าง"}
             </p>
           </motion.div>
         ) : (
@@ -214,9 +221,15 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
             className="space-y-1 py-1"
           >
             <h3 className="text-lg sm:text-2xl font-serif-th font-bold font-mystic-gold flex items-center justify-center gap-2">
-              เลือกไพ่ครบ {targetCount} ใบเรียบร้อยแล้ว
+              {isEnglish
+                ? `All ${targetCount} cards have been chosen`
+                : `เลือกไพ่ครบ ${targetCount} ใบเรียบร้อยแล้ว`}
             </h3>
-            <p className="text-[13px] sm:text-xs text-[#635B4E]">กำลังเตรียมเปิดไพ่และคำทำนายของคุณ...</p>
+            <p className="text-[13px] sm:text-xs text-[#635B4E]">
+              {isEnglish
+                ? "Preparing your cards and reading..."
+                : "กำลังเตรียมเปิดไพ่และคำทำนายของคุณ..."}
+            </p>
           </motion.div>
         )}
       </div>
@@ -323,11 +336,11 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     <span>
                       {isEnglish ? (
                         <>
-                          Drawing for <strong className="text-[#2E211A]">&ldquo;{currentPositionName}&rdquo;</strong>
+                          Drawing for <strong className="text-[#2E211A]">&ldquo;{positionLabel}&rdquo;</strong>
                         </>
                       ) : (
                         <>
-                          กำลังเลือกใบสำหรับ <strong className="text-[#2E211A]">&ldquo;{currentPositionName}&rdquo;</strong>
+                          กำลังเลือกใบสำหรับ <strong className="text-[#2E211A]">&ldquo;{positionLabel}&rdquo;</strong>
                         </>
                       )}
                     </span>
