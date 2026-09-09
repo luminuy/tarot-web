@@ -73,6 +73,26 @@ const nextConfig: NextConfig = {
        *    แต่ต้องใช้สิทธิ์ dashboard ของเจ้าของ — กฎนี้จึงทำหน้าที่แทนไปก่อนและอยู่ร่วมกันได้
        *    ถ้าวันหนึ่งตั้ง Redirect Rule แล้ว คำขอจะถูกเด้งตั้งแต่ขอบ กฎนี้จะไม่ถูกเรียกเอง
        */
+      /**
+       * 🐞 หน้าแรกของ www ต้องมีกฎของตัวเอง — `/:path*` ครอบไม่ถึง (วัดจริง 2026-09-09)
+       *
+       *   $ curl -sI https://www.seertarot.net/
+       *   location: https://seertarot.net/:path*      ← ตัวอักษรดิบ ไม่ถูกแทนค่า → 404
+       *   $ curl -sI https://www.seertarot.net/cards
+       *   location: https://seertarot.net/cards        ← path ที่มีค่าจริงถูกต้องอยู่แล้ว
+       *
+       * เมื่อ catch-all ที่เป็น optional จับได้ "ว่างเปล่า" Next.js ไม่ได้ลบโทเคน `:path*`
+       * ออกจาก destination ที่เป็น URL เต็ม — หน้าแรกซึ่งเป็น URL ที่คนแปะลิงก์มามากที่สุด
+       * จึงเด้งไปหน้า 404 มาตั้งแต่วันที่วางกฎ www
+       *
+       * ⚠️ ต้องอยู่ **เหนือ** กฎ `/:path*` ด้านล่าง เพราะ Next.js หยุดที่กฎแรกที่ตรง
+       */
+      {
+        source: "/",
+        has: [{ type: "host", value: "www.seertarot.net" }],
+        destination: "https://seertarot.net/",
+        statusCode: 301,
+      },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.seertarot.net" }],

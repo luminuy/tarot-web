@@ -146,6 +146,10 @@ async function runTests() {
   const gtagConsent = capturedGtag.find((e) => e.command === "consent" && e.action === "update");
   check("setAnalyticsConsent updates gtag consent to granted", gtagConsent?.params?.analytics_storage === "granted");
   check("ad_storage remains denied for privacy", gtagConsent?.params?.ad_storage === "denied");
+  check(
+    "setAnalyticsConsent จำสถานะไว้บน window ให้สคริปต์ที่มาทีหลังกู้ต่อ",
+    (global as any).window.__seertarotConsent === "granted",
+  );
 
   // Test Google Ads conversion dispatch
   trackGoogleAdsConversion("AW-1234567890/AbCdEfGh123", { value: 150, currency: "THB" });
@@ -153,6 +157,30 @@ async function runTests() {
   check("trackGoogleAdsConversion fires gtag conversion", Boolean(gtagConversion));
   check("gtag conversion send_to matches target", gtagConversion?.params?.send_to === "AW-1234567890/AbCdEfGh123");
   check("gtag conversion value and currency match", gtagConversion?.params?.value === 150 && gtagConversion?.params?.currency === "THB");
+
+  // ─────────────────────────────────────────────────────────────────
+  // 🚨 ความยินยอมต้องไม่หายเมื่อ gtag.js ยังมาไม่ถึง
+  //
+  // บทเรียน (การวินิจฉัยแท็ก Google 2026-09-09 · "อัตราความยินยอม 0%"):
+  // สคริปต์ gtag เป็น `lazyOnload` จึงมาหลัง `window.load` แต่แบนเนอร์โผล่ตั้งแต่
+  // hydrate เสร็จ — เดิม setAnalyticsConsent() ออกจากฟังก์ชันเงียบ ๆ ถ้าไม่มี
+  // `window.gtag` การกด "ยินยอม" ของผู้ใช้จึงหายไปทั้งดุ้น
+  // ─────────────────────────────────────────────────────────────────
+  console.log("\n⏱️ 3b. Consent ก่อน gtag.js โหลดเสร็จ (dataLayer queue)");
+  const earlyDataLayer: any[] = [];
+  (global as any).window = {
+    location: { href: "https://seertarot.net/", pathname: "/" },
+    dataLayer: earlyDataLayer,
+    // ⚠️ ตั้งใจไม่มี gtag — จำลองจังหวะก่อน lazyOnload ทำงาน
+  };
+
+  setAnalyticsConsent(true);
+
+  const queued = earlyDataLayer[0];
+  check("มีของถูกต่อคิวลง dataLayer แม้ยังไม่มี window.gtag", earlyDataLayer.length === 1);
+  check("คิวใช้รูปแบบ arguments ตามที่ gtag.js คาดหวัง", queued?.[0] === "consent" && queued?.[1] === "update");
+  check("ค่าที่ต่อคิวคือ analytics_storage: granted", queued?.[2]?.analytics_storage === "granted");
+  check("ค่าโฆษณาที่ต่อคิวยังเป็น denied", queued?.[2]?.ad_storage === "denied");
 
   // Cleanup mock
   delete (global as any).window;
@@ -195,6 +223,40 @@ async function runTests() {
   check(
     "กู้สถานะที่ผู้ใช้เคยเลือกไว้ก่อน React hydrate",
     trackerSrc.includes("seertarot_analytics_consent_v1"),
+  );
+  check(
+    "สคริปต์ init กู้สถานะจาก window.__seertarotConsent ด้วย (กันการกดยินยอมหายตอน lazyOnload)",
+    trackerSrc.includes("window.__seertarotConsent"),
+  );
+  check(
+    "ตั้ง ads_data_redaction ตาม Consent Mode v2",
+    trackerSrc.includes("'ads_data_redaction'"),
+  );
+  check(
+    "ไม่มี anonymize_ip หลงเหลือ (พารามิเตอร์ของ Universal Analytics ที่ GA4 ไม่ใช้แล้ว)",
+    !trackerSrc.includes("anonymize_ip"),
+  );
+  check(
+    "แท็กยิงเฉพาะโดเมนจริง — กัน *.workers.dev โผล่ในรายงานและในหน้าวินิจฉัยแท็ก",
+    trackerSrc.includes("isMeasurableHostname") && trackerSrc.includes("isMeasurableHost &&"),
+  );
+
+  const analyticsSrc = readFileSync(
+    resolve(import.meta.dirname, "../../src/lib/analytics.ts"),
+    "utf-8",
+  );
+  // ตัดคอมเมนต์ออกก่อน เพราะคำเตือน "ห้ามใส่กลับมา" เขียนรูปแบบเดิมไว้ในคอมเมนต์
+  const analyticsCode = analyticsSrc.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*/g, "");
+  const consentBody = analyticsCode.slice(
+    analyticsCode.indexOf("export function setAnalyticsConsent"),
+  );
+  check(
+    "setAnalyticsConsent ห้ามออกจากฟังก์ชันเพราะไม่มี window.gtag",
+    !/typeof window\.gtag !== "function"[^\n]*return/.test(consentBody),
+  );
+  check(
+    "setAnalyticsConsent ต่อคิวลง dataLayer เมื่อ gtag.js ยังไม่มา",
+    /window\.dataLayer = window\.dataLayer \|\| \[\]/.test(consentBody),
   );
   // ตัว URL ของสคริปต์ (ไม่ใช่ชื่อโดเมนในคอมเมนต์) ต้องอยู่ **ข้างใน** ฟังก์ชันที่ถูกกั้น
   const pixelLoaderUrl = "'https://connect.facebook.net/en_US/fbevents.js'";

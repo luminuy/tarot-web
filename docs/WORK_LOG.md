@@ -35,6 +35,90 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-09 (รอบ 18): 📊 หน้าวินิจฉัยแท็ก Google ขึ้น "คุณภาพแท็ก: ด่วน" 2 ข้อ
+
+> **คำสั่งเจ้าของ**: ส่งภาพหน้าจอ Google Tag Manager มาถามว่า "ผิดพลาดอะไร" แล้วสั่ง "แก้"
+
+**สิ่งที่ Google รายงาน** (tagmanager.google.com › การวินิจฉัยแท็ก · แท็ก `G-LT8YMJNT2R` / `GT-MJWKTP85`)
+
+| ระดับ | หัวข้อ | คำอธิบายของ Google |
+| :--- | :--- | :--- |
+| 🔴 | ยืนยันการตั้งค่าโหมดความยินยอมเนื่องจากตรวจพบอัตราความยินยอม 0% | สัญญาณความยินยอมทั้ง 100% ถูกทำเครื่องหมายเป็นถูกปฏิเสธ ซึ่งอาจบ่งชี้ว่าไม่สอดคล้องกับตัวเลือกที่ได้รับจากผู้ใช้ |
+| 🟠 | ตรวจพบโดเมนเพิ่มเติมสำหรับการกำหนดค่า | อาจกระทบความคงทนของแท็กและการวัด Conversion |
+
+โดเมนที่ Google ตรวจพบเอง 3 รายการ: `seertarot.net` · `www.seertarot.net` · `tarot-web.bankjack10452.workers.dev`
+
+#### เจอสาเหตุอะไรบ้าง (3 จุด · ข้อ 3 เจอระหว่างตรวจ ไม่ได้อยู่ในรายงานของ Google)
+
+**1. การกด "ยินยอม" ของผู้ใช้หายไปเงียบ ๆ → อัตราความยินยอม 0%**
+
+`src/lib/analytics.ts` · `setAnalyticsConsent()` เดิมขึ้นต้นด้วย
+
+```ts
+if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+```
+
+แต่ `window.gtag` ถูกนิยามโดยสคริปต์ `google-analytics-init` ซึ่งเป็น `strategy="lazyOnload"`
+จึงทำงาน **หลัง** `window.load` + idle frame · ส่วน `ConsentBanner` โผล่ตั้งแต่ React hydrate เสร็จ
+
+ผู้ใช้ที่กด "ยินยอม" ในช่วงคาบเกี่ยวนั้น (กรณีปกติบนมือถือเน็ตช้า) ตกเข้าเงื่อนไขนี้แล้ว
+**การกดหายไปทั้งดุ้น** ไม่มีสัญญาณใดถึง Google เลย — และถ้าเบราว์เซอร์อยู่โหมดส่วนตัว
+`writeConsent()` ก็เขียน `localStorage` ไม่ลงด้วย ทางกู้สถานะทางที่สองจึงขาดตามไปอีก
+
+**2. `*.workers.dev` ยิงแท็กตัวเดียวกับโดเมนจริง → ตรวจพบโดเมนเพิ่มเติม**
+
+```
+$ curl -sI https://tarot-web.bankjack10452.workers.dev/
+HTTP/2 200            ← สำเนาเว็บเต็ม ๆ robots.txt ก็ Allow: /
+```
+
+โดเมน preview ของ Cloudflare เสิร์ฟเว็บทั้งเว็บและยิง GA4 ตัวเดียวกัน
+ทุกครั้งที่มีคนไล่ตรวจงานหลัง deploy ทราฟฟิกจึงปนเข้ารายงานจริง
+
+**3. 🐞 หน้าแรกของ `www` เด้งไป 404 (เจอระหว่างตรวจ · ไม่มีในรายงาน Google)**
+
+```
+$ curl -sI https://www.seertarot.net/
+location: https://seertarot.net/:path*     ← ตัวอักษรดิบ ไม่ถูกแทนค่า
+$ curl -s -o /dev/null -w "%{http_code}" https://seertarot.net/:path*
+404
+$ curl -sI https://www.seertarot.net/cards
+location: https://seertarot.net/cards      ← path ที่มีค่าจริงถูกต้องอยู่แล้ว
+```
+
+กฎ `source: "/:path*"` ใน `next.config.ts` เมื่อ catch-all แบบ optional จับได้ "ว่างเปล่า"
+Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก destination ที่เป็น URL เต็ม
+**หน้าแรกซึ่งเป็น URL ที่คนแปะลิงก์มามากที่สุด จึงเด้งเข้า 404 มาตั้งแต่วันที่วางกฎ www**
+
+#### แก้อะไรไป
+
+| ไฟล์ | สิ่งที่แก้ |
+| :--- | :--- |
+| `src/lib/analytics.ts` | `setAnalyticsConsent()` ไม่ออกจากฟังก์ชันเพราะไม่มี `window.gtag` อีกแล้ว — push ลง `dataLayer` ตรง ๆ ด้วยรูปแบบ `arguments` (dataLayer เป็นคิวตามการออกแบบของ gtag.js ของที่ต่อไว้ก่อนจะถูกเล่นย้อนให้เอง) + จำสถานะไว้ที่ `window.__seertarotConsent` |
+| `src/components/analytics/AnalyticsTracker.tsx` | สคริปต์ init กู้สถานะจาก `window.__seertarotConsent` **ก่อน** แล้วค่อยถอยไป `localStorage` (ครอบคลุมโหมดส่วนตัว) · เพิ่ม `ads_data_redaction` ตาม Consent Mode v2 · ตัด `anonymize_ip` ที่เป็นของ Universal Analytics ทิ้ง · ยิงแท็กเฉพาะโดเมนจริง |
+| `src/lib/config/site.ts` | เพิ่ม `isMeasurableHostname()` — แคบกว่า `isOwnHostname()` โดยตั้งใจ รับเฉพาะ `SITE_DOMAIN` |
+| `next.config.ts` | เพิ่มกฎ `source: "/"` สำหรับ `www` แยกต่างหาก วางเหนือกฎ `/:path*` |
+| `scripts/qa/test-analytics-integrity.ts` | +7 ด่าน · ด่านสำคัญที่สุดคือจำลอง `window` ที่ **ไม่มี** `gtag` แล้วยืนยันว่ายังมีของต่อคิวลง `dataLayer` ครบ |
+
+#### ผลตรวจ
+
+- `npm run repo:verify` ➔ ✅ ผ่านครบ 43/43 ด่าน
+- `npx tsx scripts/qa/test-analytics-integrity.ts` ➔ ✅ 48/48 (เดิม 41)
+- `npm run build` ➔ ✅ ผ่าน
+
+#### ⚠️ ค้างอยู่ที่เจ้าของ (ทำในโค้ดไม่ได้ ต้องกดในคอนโซล)
+
+1. **เพิ่มโดเมนใน "โดเมนของฉัน"** ที่หน้า *การวินิจฉัยแท็ก › โดเมนที่ได้รับการตรวจสอบ* —
+   ตอนนี้ช่อง "โดเมนของฉัน" ยังว่าง (`ไม่ได้เพิ่มโดเมน`) มีแต่รายการที่ระบบตรวจพบเอง
+   ให้ใส่ `seertarot.net` แล้วกดปิดแจ้งเตือน (🔕) ที่ `tarot-web.bankjack10452.workers.dev`
+2. **สัญญาณโฆษณายังเป็น `denied` ถาวรตามนโยบาย** — `ad_storage` / `ad_user_data` /
+   `ad_personalization` ไม่เคยถูกเปิดแม้ผู้ใช้กดยินยอม (เป็นการตัดสินใจเชิงนโยบาย PDPA
+   และมีด่านตรวจล็อกไว้) ถ้าวันหนึ่งจะยิง Google Ads จริง ต้องให้เจ้าของเคาะก่อนว่าจะผูก
+   สัญญาณโฆษณาเข้ากับปุ่ม "ยินยอม" ด้วยหรือไม่ — **ห้าม AI เปลี่ยนเอง**
+3. ตัวเลขอัตราความยินยอมในหน้าวินิจฉัยขยับช้า (Google เก็บสะสมหลายวัน) อย่าเพิ่งสรุปว่าไม่หาย
+
+---
+
 ### 🗓️ 2026-09-09 (รอบ 17): 📦 ข้อมูลผัง 85 KB รั่วเข้าบันเดิลของ 54 หน้าที่ไม่ได้ใช้มัน (INC-0121)
 
 > **คำสั่งเจ้าของ**: "สามารถลดขนาดไฟล์อีกได้ไหม ที่ไม่เสียประสิทธิภาพ"

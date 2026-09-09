@@ -13,6 +13,8 @@ declare global {
       params?: Record<string, unknown>
     ) => void;
     dataLayer?: unknown[];
+    /** สถานะความยินยอมล่าสุดของเซสชันนี้ — ดู `setAnalyticsConsent()` */
+    __seertarotConsent?: "granted" | "denied";
     fbq?: (
       action: string,
       eventName: string,
@@ -372,16 +374,48 @@ export function trackPageView(pagePath: string, pageTitle?: string) {
 
 /**
  * ตั้งค่า Google Consent Mode v2 (PDPA-Compliant)
+ * ---------------------------------------------------------------------------
+ * ⚠️ ห้ามใส่ `typeof window.gtag !== "function"` กลับมาเป็นเงื่อนไขออกเด็ดขาด (INC · 2026-09-09)
+ *
+ * `window.gtag` ถูกนิยามโดยสคริปต์ `google-analytics-init` ซึ่งเป็น `strategy="lazyOnload"`
+ * จึงทำงาน **หลัง** `window.load` + idle frame — ส่วนแบนเนอร์ขอความยินยอมโผล่ตั้งแต่ React
+ * hydrate เสร็จ ผู้ใช้ที่กด "ยินยอม" เร็วกว่านั้น (ซึ่งคือกรณีปกติบนมือถือที่โหลดช้า)
+ * จะตกเข้าเงื่อนไขนี้แล้ว **เงียบหายไปทั้งการกด** ไม่มีสัญญาณใดถึง Google เลย
+ *
+ * ผลที่วัดได้จริง: Google Tag Diagnostics ขึ้น "ตรวจพบอัตราความยินยอม 0%" —
+ * สัญญาณ 100% เป็น denied ทั้งที่ผู้ใช้กดยินยอมไปแล้ว
+ *
+ * ที่ถูกคือ push ลง `dataLayer` ตรง ๆ เพราะ `dataLayer` เป็น **คิว** ตามการออกแบบของ gtag.js
+ * ของที่ push ไว้ก่อนไลบรารีมาถึงจะถูกเล่นย้อนตามลำดับให้เองเมื่อโหลดเสร็จ
  */
 export function setAnalyticsConsent(granted: boolean) {
-  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+  if (typeof window === "undefined") return;
 
   const state = granted ? "granted" : "denied";
-  window.gtag("consent", "update", {
+  const payload = {
     analytics_storage: state,
     ad_storage: "denied", // Privacy-first: ไม่เปิด ad storage
     ad_user_data: "denied",
     ad_personalization: "denied",
-  });
+  };
+
+  // จำไว้บน window ด้วย — สคริปต์ init ที่มาถึงทีหลังจะอ่านค่านี้ไปกู้สถานะต่อ
+  // จำเป็นสำหรับเบราว์เซอร์ที่บล็อก localStorage (โหมดส่วนตัว) ซึ่ง `writeConsent()`
+  // เขียนไม่ลง — ถ้าไม่มีบรรทัดนี้ การกดยินยอมจะหายไปทั้งเซสชัน
+  window.__seertarotConsent = state;
+
+  if (typeof window.gtag === "function") {
+    window.gtag("consent", "update", payload);
+    return;
+  }
+
+  // gtag.js ยังไม่มา — ต่อคิวเองด้วยรูปแบบ `arguments` เดียวกับที่ gtag.js คาดหวัง
+  // (ต้องเป็นอ็อบเจกต์ `arguments` จริง ไม่ใช่อาร์เรย์ ไลบรารีถึงจะตีความถูก)
+  window.dataLayer = window.dataLayer || [];
+  function queueGtag(this: unknown, ..._args: unknown[]) {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer!.push(arguments);
+  }
+  queueGtag("consent", "update", payload);
 }
 

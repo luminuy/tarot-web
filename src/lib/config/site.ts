@@ -84,6 +84,23 @@ export function isOwnHostname(hostname: string): boolean {
 }
 
 /**
+ * 📊 true เฉพาะ "โดเมนจริงที่เผยแพร่" เท่านั้น — ใช้กั้นเครื่องมือวัดผล (GA4 / Pixel)
+ * ---------------------------------------------------------------------------
+ * ต่างจาก `isOwnHostname()` ที่ตั้งใจให้กว้าง (allowlist กันปลอม host) — ตัวนี้ต้องแคบที่สุด
+ *
+ * บทเรียน (การวินิจฉัยแท็ก Google 2026-09-09): `tarot-web.bankjack10452.workers.dev`
+ * เป็นสำเนาของเว็บที่ตอบ 200 และยิงแท็ก GA4 ตัวเดียวกันกับโดเมนจริง Google จึงขึ้น
+ * "ตรวจพบโดเมนเพิ่มเติมสำหรับการกำหนดค่า" และเตือนว่ากระทบความคงทนของแท็กกับการวัด Conversion
+ * (ยังไม่นับว่าทราฟฟิกตอนตรวจงานหลัง deploy ปนเข้ารายงานจริงทุกครั้ง)
+ *
+ * ⚠️ `www.` ไม่นับเป็นโดเมนวัดผล เพราะถูก 301 ไปโดเมนหลักตั้งแต่ที่ `next.config.ts` แล้ว
+ *    ถ้าวันหนึ่ง www ยิงแท็กได้ แปลว่ากฎ redirect พัง — ให้ไปแก้ที่ redirect ไม่ใช่ที่นี่
+ */
+export function isMeasurableHostname(hostname: string): boolean {
+  return hostname === SITE_DOMAIN;
+}
+
+/**
  * 🔗 ตัวช่วยสร้าง Canonical และ Hreflang สำหรับทุกหน้า (SEO Single Source of Truth)
  * ---------------------------------------------------------------------------
  * Next.js จะ override อ็อบเจกต์ alternates ทั้งก้อนหากหน้าย่อยระบุ alternates: { canonical }
