@@ -9,6 +9,7 @@ import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
 import { stepVariants } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n";
+import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
 
 // โหลดสำรับ "ไทยล้วน" — ไม่ลากคำทำนายอังกฤษ (≈126 KB gzip) เข้าบันเดิลหน้าไทย
 let deckPromise: Promise<typeof import("@/data/cards/deck-th")> | null = null;
@@ -288,7 +289,13 @@ export function OneCardRitual({
                   </h2>
                   <p className="text-xs sm:text-sm font-serif-th text-[#8F5C1A] font-semibold tracking-wide">
                     {isEn
-                      ? (drawnCard.keywordsEn?.upright || drawnCard.keywords?.upright)?.slice(0, 4).join(" — ")
+                      ? resolveDisplayKeywords({
+                          cardId: drawnCard.id,
+                          keywordsEn: drawnCard.keywordsEn,
+                          isEnglish: true,
+                        })
+                          .slice(0, 4)
+                          .join(" — ")
                       : drawnCard.keywords?.upright?.join(" — ")}
                   </p>
                 </div>

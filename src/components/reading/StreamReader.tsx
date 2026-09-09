@@ -17,6 +17,7 @@ import { CollapsibleCard } from "./CollapsibleCard";
 import { CardImage } from "@/components/card/CardImage";
 import { TTSReaderButton } from "./TTSReaderButton";
 import { useLocale } from "@/lib/i18n";
+import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
 
 interface StreamReaderProps {
   reading?: Partial<Reading> | null;
@@ -59,9 +60,12 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   // (ของเดิมเหลือ state + handler ค้างไว้ที่นี่โดยไม่มีปุ่มไหนเรียกใช้)
 
   const activeDrawnCard = drawnCards.find((d) => d.order === activeCardIndex);
+  // ไพ่เต็มจากสำรับมาก่อนเสมอ (มีฟิลด์ภาษาอังกฤษครบ) แล้วค่อยตกมาที่ก้อนย่อจากเซสชัน
+  // ของเดิมสลับลำดับกัน ทำให้โหมด EN ได้ก้อนย่อที่มีแต่ภาษาไทย — ตรงกับ `allCards` ด้านล่างแล้ว
   const cardData =
-    activeDrawnCard?.card ||
-    (activeDrawnCard && activeDrawnCard.cardIndex !== undefined ? cardByIndex(activeDrawnCard.cardIndex) : undefined);
+    (activeDrawnCard && activeDrawnCard.cardIndex !== undefined
+      ? cardByIndex(activeDrawnCard.cardIndex)
+      : undefined) || activeDrawnCard?.card;
   const activeCardReading = reading?.cards?.find((c) => c.position === activeCardIndex);
 
   const allCards = useMemo(() => {
@@ -326,21 +330,15 @@ isEnglish
 
             {/* Keywords */}
             {(() => {
-              const enKws = (cardData as any)?.keywordsEn;
-              const thKws = cardData?.keywords;
-              let keywords: string[] = [];
+              const keywords = resolveDisplayKeywords({
+                cardId: cardData?.id,
+                keywords: cardData?.keywords,
+                keywordsEn: (cardData as any)?.keywordsEn,
+                isReversed: activeDrawnCard?.isReversed,
+                isEnglish,
+              });
 
-              if (isEnglish && enKws) {
-                keywords = activeDrawnCard?.isReversed ? enKws.reversed : enKws.upright;
-              } else if (thKws && Array.isArray(thKws)) {
-                keywords = thKws;
-              } else if (thKws && typeof thKws === "object") {
-                keywords = activeDrawnCard?.isReversed
-                  ? (thKws as any).reversed
-                  : (thKws as any).upright;
-              }
-
-              return keywords && keywords.length > 0 ? (
+              return keywords.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">
                     {isEnglish ? "Key Themes:" : "ความหมายหลัก:"}
