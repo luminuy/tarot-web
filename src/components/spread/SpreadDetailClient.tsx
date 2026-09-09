@@ -3,14 +3,14 @@
 import React from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import type { Spread } from "@/data/spreads";
+import type { Spread } from "@/data/spreads-helpers";
 import {
   getSpreadName,
   getSpreadTagline,
   getSpreadDescription,
   getPositionName,
   getPositionMeaning,
-} from "@/data/spreads";
+} from "@/data/spreads-helpers";
 import type { Article } from "@/data/articles";
 import { getArticleTitle } from "@/data/article-helpers";
 import { SpreadPositionMap } from "@/components/spread/SpreadPositionMap";

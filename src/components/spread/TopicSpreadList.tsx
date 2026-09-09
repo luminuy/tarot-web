@@ -3,7 +3,7 @@
 import { useState } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import type { Spread, SpreadPosition } from "@/data/spreads";
+import type { Spread, SpreadPosition } from "@/data/spreads-helpers";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { renderSpreadIllustration } from "@/components/spread/spread-illustrations";

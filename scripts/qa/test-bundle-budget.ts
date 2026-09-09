@@ -80,9 +80,23 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/spreads",
     htmlRelativePath: ".next/server/app/spreads.html",
-    // Motion Diet Ratchet 2026-09-07: ถอด motion + แยกภาพผังออกจากโมดูลที่ลาก motion · วัดจริง 188 KB
-    maxJsGzipKb: 200,
-    maxHtmlGzipKb: 45, // Current: 38 KB
+    // รัดหลังแยกฟังก์ชันช่วยออกจากข้อมูลผัง 85 KB (วัดจริง 171 KB · เดิม 188 KB)
+    maxJsGzipKb: 175,
+    maxHtmlGzipKb: 45, // Current: 42 KB
+  },
+  {
+    /*
+     * หน้าคู่มือผังรายผัง — ตัวแทนของ 54 หน้า (`/spreads/*` และ `/en/spreads/*`)
+     *
+     * ⚠️ เพิ่มเข้ามาเพราะ **ไม่เคยมีด่านคุมกลุ่มนี้เลย** ทั้งที่เป็นกลุ่มหน้าที่ใหญ่ที่สุด
+     * รองจากหน้าไพ่รายใบ · ข้อมูลผังทั้ง 85 KB เคยรั่วเข้าบันเดิลของทั้ง 54 หน้านี้
+     * (17.2 KB gzip ต่อหน้า) โดยไม่มีใครเห็น เพราะด่านวัดแต่ `/spreads` ซึ่งเป็นหน้ารวม
+     * คนละเส้นทางกับหน้ารายผัง
+     */
+    route: "/spreads/celtic-cross",
+    htmlRelativePath: ".next/server/app/spreads/celtic-cross.html",
+    maxJsGzipKb: 175,
+    maxHtmlGzipKb: 30,
   },
   {
     route: "/cards/all",

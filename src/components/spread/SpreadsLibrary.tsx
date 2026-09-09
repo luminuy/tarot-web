@@ -10,7 +10,7 @@ import {
   getSpreadDescription,
   getPositionName,
   getPositionMeaning,
-} from "@/data/spreads";
+} from "@/data/spreads-helpers";
 import { renderSpreadIllustration } from "@/components/spread/spread-illustrations";
 import {
   SparkleTabIcon,
