@@ -42,7 +42,7 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/",
     htmlRelativePath: ".next/server/app/index.html",
-    maxJsGzipKb: 275, // M-01 Ratchet (Actual Real User: 268 KB, total w/ polyfills: 306 KB)
+    maxJsGzipKb: 271, // รัดตามผลถอด motion ออกจาก TarotCard (วัดจริง 267 KB · รวม polyfill 306 KB)
     maxHtmlGzipKb: 40, // Current: 38 KB
   },
   {
@@ -68,13 +68,13 @@ export const BUDGETS: RouteBudget[] = [
   {
     route: "/daily",
     htmlRelativePath: ".next/server/app/daily.html",
-    maxJsGzipKb: 240, // W-01/W-02 Ratchet (Actual Real User: 231 KB, total w/ polyfills: 270 KB)
+    maxJsGzipKb: 198, // รัดหลังถอด motion ออกจากไพ่+พิธีไพ่ใบเดียว (วัดจริง 194 KB · รวม polyfill 232 KB)
     maxHtmlGzipKb: 25, // Current: 18 KB
   },
   {
     route: "/love/1-card",
     htmlRelativePath: ".next/server/app/love/1-card.html",
-    maxJsGzipKb: 245, // W-01/W-02 Ratchet (Actual Real User: 234 KB, total w/ polyfills: 273 KB)
+    maxJsGzipKb: 201, // รัดหลังถอด motion ออกจากไพ่+พิธีไพ่ใบเดียว (วัดจริง 197 KB · รวม polyfill 236 KB)
     maxHtmlGzipKb: 25, // Current: 19 KB
   },
   {

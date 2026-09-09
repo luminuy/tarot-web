@@ -2,12 +2,9 @@
 
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "motion/react";
-import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
-import { stepVariants } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n";
 import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
 
@@ -157,20 +154,10 @@ export function OneCardRitual({
   };
 
   return (
-    <AppMotionProvider>
-      <div className="altar-panel rounded-2xl p-5 sm:p-8 space-y-8">
-      <AnimatePresence mode="wait">
+    <div className="altar-panel rounded-2xl p-5 sm:p-8 space-y-8">
         {/* จังหวะที่ 1: เลือกหัวข้อ/สถานะ ➔ กดปุ่มเปิดไพ่ */}
         {status === "idle" && (
-          <motion.div
-            key="idle"
-            custom={1}
-            variants={stepVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="space-y-6"
-          >
+          <div key="idle" className="anim-step-in space-y-6">
             {headerSlot}
 
             <div className="pt-2 flex flex-col items-center justify-center space-y-3 text-center">
@@ -187,20 +174,12 @@ export function OneCardRitual({
                   : "ระบบสุ่มรหัสลับ Web Crypto API ปราศจากการล็อกผล 100%"}
               </p>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* จังหวะที่ 2 (ขั้นแรก): ไพ่คว่ำหน้าบนแท่นบูชา ➔ ผู้ใช้แตะพลิกไพ่ 1 ครั้ง (คงกฎข้อ 4) */}
         {status === "ready" && drawnCard && (
-          <motion.div
-            key="ready"
-            custom={1}
-            variants={stepVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="altar-cloth p-8 sm:p-12 flex flex-col items-center justify-center space-y-6 text-center shadow-inner"
-          >
+          <div key="ready" className="anim-step-in altar-cloth p-8 sm:p-12 flex flex-col items-center justify-center space-y-6 text-center shadow-inner">
             {/* ป้ายระบุบริบท/สถานะเต็มความยาว ไม่ถูกตัดขอบ (แก้ปัญหา label ถูกตัดครึ่ง) */}
             <div className="space-y-2 max-w-lg mx-auto">
               <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs sm:text-sm font-serif-th font-semibold text-[#8F5C1A] shadow-2xs">
@@ -240,20 +219,12 @@ export function OneCardRitual({
             <p className="text-xs text-[#A58A5C] font-serif-th font-semibold tracking-wide">
               {isEnglish ? "Touch card above to reveal" : "แตะที่ตัวไพ่ด้านบนเพื่อเปิดเผยคำทำนาย"}
             </p>
-          </motion.div>
+          </div>
         )}
 
         {/* Step 5: Revealed — 3D Card Vitrine & Readings */}
         {status === "revealed" && drawnCard && (
-          <motion.div
-            key="revealed"
-            custom={1}
-            variants={stepVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="space-y-8 text-left"
-          >
+          <div key="revealed" className="anim-step-in space-y-8 text-left">
             {/* Museum Vitrine Stage: The 3D Card Display */}
             <div className="altar-cloth p-5 sm:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 shadow-inner">
               <div className="flex-shrink-0 py-1">
@@ -355,10 +326,8 @@ export function OneCardRitual({
                 {recommendations}
               </div>
             )}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
-      </div>
-    </AppMotionProvider>
+    </div>
   );
 }
