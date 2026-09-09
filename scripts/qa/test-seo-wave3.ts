@@ -144,6 +144,30 @@ for (const file of newFiles) {
   }
 }
 
+// 9. หน้าฮับ /spreads ต้องมีลิงก์ครบ 25 ผังใน HTML ฝั่งเซิร์ฟเวอร์ (กันหน้ากำพร้ากลับมา)
+//
+// บทเรียนจริง (GSC 2026-09-04): `SpreadsLibrary` เป็น client component ที่เปิดมาด้วยแท็บ
+// "ยอดนิยมแนะนำ" ➔ HTML ที่เซิร์ฟเวอร์ส่งออกมีลิงก์ผังแค่ 7 จาก 25 เส้น
+// ผลคือผัง 21 จาก 25 หน้าติดสถานะ "พบแล้ว - ยังไม่ได้จัดทำดัชนี" แบบ **ไม่เคยถูกคลานเลย**
+// และ 4 หน้า (`weekly` · `monthly` · `monthly-ten` · `year-ahead`) ไม่มีลิงก์ภายในจากหน้าไทยหน้าไหนเลย
+//
+// ด่านนี้บังคับให้สารบัญฝั่งเซิร์ฟเวอร์ใน `spreads-index.tsx` อยู่ครบเสมอ
+const spreadsIndexPath = path.join(process.cwd(), "src/app/_shared/pages/spreads-index.tsx");
+const spreadsIndexSource = fs.readFileSync(spreadsIndexPath, "utf-8");
+
+assert(
+  !/^"use client"/m.test(spreadsIndexSource),
+  "หน้าฮับ /spreads ต้องเป็น server component (ห้ามมี \"use client\") ลิงก์ถึงจะอยู่ใน HTML ดิบ",
+);
+assert(
+  /SPREADS\.map\([\s\S]*?<a[\s\S]*?localeHref\(`\/spreads\/\$\{spread\.id\}`/.test(spreadsIndexSource),
+  "หน้าฮับ /spreads ต้องเรนเดอร์ <a href> ของผังครบทุกใบจาก SPREADS ฝั่งเซิร์ฟเวอร์",
+);
+assert(
+  /<nav[\s\S]*?aria-label=/.test(spreadsIndexSource),
+  "สารบัญผังฝั่งเซิร์ฟเวอร์ต้องอยู่ใน <nav> พร้อม aria-label (เข้าถึงได้ + สื่อความหมายกับบอต)",
+);
+
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);
 
 if (failed > 0) {
