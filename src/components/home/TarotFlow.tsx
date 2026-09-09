@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
-import { stepVariants, useMotionSafe } from "@/lib/motion";
+import { withMotionScope } from "@/components/providers/with-motion-scope";
+import { useOnceOpen } from "@/lib/use-once-open";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import dynamic from "next/dynamic";
 import { SPREADS, getSpread, type Spread } from "@/data/spreads";
 import { PERSONAS, getPersona, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
@@ -41,50 +39,31 @@ import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
 
-// Dynamic Code-Splitting for 60% smaller initial JS bundle
-const ShuffleRitual = dynamic(() => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual), {
-  ssr: false,
-});
-const InteractiveCardFan = dynamic(
-  () => import("@/components/deck/InteractiveCardFan").then((m) => m.InteractiveCardFan),
-  { ssr: false }
-);
-const SpreadBoard = dynamic(() => import("@/components/spread/SpreadBoard").then((m) => m.SpreadBoard), { ssr: false });
-const StreamReader = dynamic(() => import("@/components/reading/StreamReader").then((m) => m.StreamReader), {
-  ssr: false,
-});
-const QuickChatResult = dynamic(
-  () => import("@/components/reading/QuickChatResult").then((m) => m.QuickChatResult),
-  { ssr: false }
-);
-const ShareModal = dynamic(() => import("@/components/reading/ShareModal").then((m) => m.ShareModal), { ssr: false });
-const ReadingHistoryModal = dynamic(
-  () => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal),
-  { ssr: false }
-);
-const TarotEncyclopediaModal = dynamic(
-  () => import("@/components/encyclopedia/TarotEncyclopediaModal").then((m) => m.TarotEncyclopediaModal),
-  { ssr: false }
-);
-const AuthModal = dynamic(() => import("@/components/auth/AuthModal").then((m) => m.AuthModal), { ssr: false });
-const CardZoomModal = dynamic(() => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal), {
-  ssr: false,
-});
-const BuyCreditsModal = dynamic(
-  () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
-  { ssr: false }
-);
-const AccessDialog = dynamic(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog), {
-  ssr: false,
-});
-const PersonaCardSelector = dynamic(
-  () => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector),
-  { ssr: false }
-);
-const IntentionAltarInput = dynamic(
-  () => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput),
-  { ssr: false }
-);
+/**
+ * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
+ *
+ * ทุกตัวในรายการนี้ใช้ `motion` ข้างใน จึงห่อด้วย `withMotionScope()` ซึ่งพา
+ * `MotionConfig` (reducedMotion="user") ไปอยู่ใน chunk เดียวกันกับตัวมันเอง
+ * แทนการครอบทั้งต้นไม้ด้วย `<AppMotionProvider>` เหมือนเดิม
+ *
+ * ⚠️ ห้าม `import` อะไรจาก `motion/react` ในไฟล์นี้เด็ดขาด แม้แต่ type
+ *    ไฟล์นี้คือเปลือกของหน้าแรก บรรทัดเดียวก็ลากไลบรารี 40 KB เข้าบันเดิลตั้งต้นทันที
+ *    (ด่าน `test-bundle-budget` ตรวจไว้แล้วว่า `/` ต้องไม่โหลด chunk ของ motion)
+ */
+const ShuffleRitual = withMotionScope(() => import("@/components/deck/ShuffleRitual").then((m) => m.ShuffleRitual));
+const InteractiveCardFan = withMotionScope(() => import("@/components/deck/InteractiveCardFan").then((m) => m.InteractiveCardFan));
+const SpreadBoard = withMotionScope(() => import("@/components/spread/SpreadBoard").then((m) => m.SpreadBoard));
+const StreamReader = withMotionScope(() => import("@/components/reading/StreamReader").then((m) => m.StreamReader));
+const QuickChatResult = withMotionScope(() => import("@/components/reading/QuickChatResult").then((m) => m.QuickChatResult));
+const ShareModal = withMotionScope(() => import("@/components/reading/ShareModal").then((m) => m.ShareModal));
+const ReadingHistoryModal = withMotionScope(() => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal));
+const TarotEncyclopediaModal = withMotionScope(() => import("@/components/encyclopedia/TarotEncyclopediaModal").then((m) => m.TarotEncyclopediaModal));
+const AuthModal = withMotionScope(() => import("@/components/auth/AuthModal").then((m) => m.AuthModal));
+const CardZoomModal = withMotionScope(() => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal));
+const BuyCreditsModal = withMotionScope(() => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal));
+const AccessDialog = withMotionScope(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog));
+const PersonaCardSelector = withMotionScope(() => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector));
+const IntentionAltarInput = withMotionScope(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput));
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {
@@ -149,16 +128,31 @@ function createClientSeed(): string {
 export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode }) {
   const { locale, isEnglish } = useLocale();
   const [currentStep, setCurrentStep] = useState<RitualStep>("SPREAD_SELECT");
-  const motionSafe = useMotionSafe();
 
-  // ทิศทางการเปลี่ยนขั้นของ AnimatePresence (+1 = เดินหน้า, -1 = ย้อนกลับ)
+  // ทิศทางการเปลี่ยนขั้น (+1 = เดินหน้า, -1 = ย้อนกลับ) → เลือกคีย์เฟรมผ่าน `data-dir`
   // ⚠️ ต้องเป็น state ไม่ใช่ ref — ref ที่ถูกอ่านระหว่างเรนเดอร์ทำให้ HTML ฝั่งเซิร์ฟเวอร์
   // กับฝั่งเบราว์เซอร์ไม่ตรงกันจนเกิด hydration mismatch (ISSUE-008)
   const [stepDirection, setStepDirection] = useState(1);
+
+  /**
+   * เล่นคีย์เฟรมขาเข้าเฉพาะเมื่อ **ผู้ใช้เปลี่ยนขั้นเอง** เท่านั้น
+   * เรนเดอร์แรกต้องนิ่งสนิท เพราะหน้าแรกถูก prerender ไว้ เนื้อหาหลักจึงต้องพร้อมอ่าน
+   * ตั้งแต่เฟรมแรก ไม่ใช่โผล่มาจาก opacity:0 (ทำหน้าที่แทน `initial={false}` ของเดิม)
+   *
+   * ⚠️ ห้ามใช้ ref แบบ "เรนเดอร์แรกหรือเปล่า" มาตัดสิน — เคยลองแล้วพัง:
+   * ref ที่พลิกค่าใน effect ทำให้แอตทริบิวต์เปลี่ยนตอน re-render รอบแรกหลัง hydrate
+   * (ซึ่งเกิดแน่ ๆ จากการโหลดสิทธิ์การใช้งาน) · CSS เห็น animation-name เปลี่ยนจาก none
+   * เป็นของจริง จึง **เริ่มเล่นคีย์เฟรมทันที** ทั้งที่ผู้ใช้ไม่ได้แตะอะไร — หน้าแรกจะเลื่อน
+   * เข้ามาเองหนึ่งครั้งหลังโหลดเสร็จ ซึ่งคือ "อาการวาป" ที่เจ้าของสั่งห้ามไว้พอดี
+   *
+   * state ที่ตั้งจากการกดของผู้ใช้ไม่มีปัญหานี้ เพราะเปลี่ยนพร้อมกับ `key` ในเรนเดอร์เดียวกัน
+   */
+  const [hasNavigatedStep, setHasNavigatedStep] = useState(false);
   const navigateStep = (next: RitualStep) => {
     const curIdx = STEP_ORDER.indexOf(currentStep);
     const nxtIdx = STEP_ORDER.indexOf(next);
     setStepDirection(nxtIdx >= curIdx ? 1 : -1);
+    setHasNavigatedStep(true);
     setCurrentStep(next);
   };
 
@@ -1135,8 +1129,22 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   // container ทำให้ position: sticky ของ <header> ข้างในพัง หัวเว็บเลื่อนหลุดตามหน้า พอเปิดเมนู
   // dropdown แล้วเลื่อน แผงที่ composite อยู่ (เงา + ไล่สี) ถูกวาดใหม่ทุกเฟรม → กระพริบ
   // overflow-x: clip กันล้นแนวนอนได้เหมือนเดิมแต่ไม่สร้าง scroll container จึง sticky ทำงานปกติ
+  /**
+   * 🪟 หน้าต่างซ้อนทั้ง 7 บาน — mount ตอนถูกเปิดครั้งแรกเท่านั้น
+   *
+   * ต้องเรียกฮุกตรงนี้ (ไม่ใช่คาไว้ใน JSX) เพื่อให้ลำดับการเรียกฮุกคงที่และอ่านง่าย
+   * ตามกฎของ React · รายละเอียดว่าทำไมต้อง "เปิดแล้วค้าง" อยู่ใน use-once-open.ts
+   */
+  const shareModalMounted = useOnceOpen(isShareOpen);
+  const historyModalMounted = useOnceOpen(isHistoryOpen);
+  const authModalMounted = useOnceOpen(isAuthOpen);
+  const buyCreditsModalMounted = useOnceOpen(isBuyCreditsOpen);
+  const accessDialogMounted = useOnceOpen(accessReason !== null);
+  const encyclopediaModalMounted = useOnceOpen(isEncyclopediaOpen);
+  const cardZoomModalMounted = useOnceOpen(!!zoomedCard);
+
   return (
-    <AppMotionProvider>
+    <>
       <main className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
@@ -1177,7 +1185,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       />
 
       {/* World-Class Sacred Floating Toast Notification HUD */}
-      <AnimatePresence>{toast && <ToastNotification toast={toast} onClose={() => setToast(null)} />}</AnimatePresence>
+      {/* ไม่ต้องมี <AnimatePresence> แล้ว — ToastNotification เล่นคีย์เฟรมขาออกเองแล้วค่อย
+          เรียก onClose เมื่อจบ (ดูหัวไฟล์ ToastNotification.tsx) */}
+      {toast && <ToastNotification toast={toast} onClose={() => setToast(null)} />}
 
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
@@ -1202,16 +1212,25 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           </div>
         )}
 
-        {/* ── Directional Step Transitions (P1-M1) ─────────────────────── */}
-        <AnimatePresence mode="wait" initial={false} custom={stepDirection}>
+        {/* ── Directional Step Transitions (P1-M1) ─────────────────────────
+            เดิมใช้ประตูสลับขั้นแบบ "รอตัวเก่าออกให้จบก่อน" ของไลบรารี `motion`
+            ตอนนี้เป็นคีย์เฟรม CSS (`.anim-step-in` ใน globals.css) ซึ่งได้ทั้งเล็กลงและลื่นขึ้น:
+
+              • เล็กลง — เปลือกหน้าแรกไม่ต้องลากไลบรารี 40 KB (gzip) มาทำ fade + เลื่อน 40px
+              • ลื่นขึ้น — คีย์เฟรมที่แตะแค่ transform/opacity วิ่งบน compositor
+                ส่วน motion คำนวณค่าใหม่บนเธรดหลักทุกเฟรม ซึ่งชนกับงาน hydrate ของหน้าแรกพอดี
+              • ไวขึ้น — ของเดิมรอขาออก 0.14s ให้จบก่อนแล้วค่อยเข้า 0.28s (รวม 0.42s ต่อการกด
+                หนึ่งครั้ง) · ตอนนี้เข้าอย่างเดียว 0.28s และตัดความเสี่ยง deadlock ของ INC-0015 ทิ้งไปด้วย
+
+            `key` บน wrapper คือหัวใจ — React ถอดขั้นเก่าแล้วสร้างขั้นใหม่ คีย์เฟรมจึงเล่นซ้ำ
+            ทุกครั้งที่เปลี่ยนขั้น โดยไม่ต้องมีไลบรารีคอยคุม lifecycle ให้ */}
+        <div
+          key={currentStep}
+          className={hasNavigatedStep ? "anim-step-in" : undefined}
+          data-dir={stepDirection < 0 ? "back" : "forward"}
+        >
           {currentStep === "SPREAD_SELECT" && (
-            <motion.div
-              key="spread-select"
-              custom={motionSafe ? stepDirection : 0}
-              variants={stepVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+            <div
               className="space-y-10"
             >
               {/* ไพ่ประจำวัน (รูปที่ 1 นำกลับไว้บนสุดเหมือนเดิม) */}
@@ -1282,18 +1301,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     }}
                   />
                 </div>
-            </motion.div>
+            </div>
           )}
 
           {/* STEP 2: INTENTION & PRAYER */}
           {currentStep === "INTENTION_SELECT" && (
-            <motion.div
-              key="intention"
-              custom={motionSafe ? stepDirection : 0}
-              variants={stepVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+            <div
               className="space-y-10"
             >
               <div className="text-center space-y-2 sm:space-y-2.5">
@@ -1377,18 +1390,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   <span aria-hidden="true">→</span>
                 </button>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* STEP 3: SHUFFLE RITUAL */}
           {currentStep === "SHUFFLE" && (
-            <motion.div
-              key="shuffle"
-              custom={motionSafe ? stepDirection : 0}
-              variants={stepVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+            <div
               className="space-y-6"
             >
               <ShuffleRitual
@@ -1397,18 +1404,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 onShuffleComplete={handleShuffleComplete}
               />
               <StepBackButton onClick={handleStepBack} label={isEnglish ? "Back" : "ย้อนกลับ"} />
-            </motion.div>
+            </div>
           )}
 
           {/* STEP 4: INTERACTIVE CARD PICKING */}
           {currentStep === "PICK_CARDS" && (
-            <motion.div
-              key="picking"
-              custom={motionSafe ? stepDirection : 0}
-              variants={stepVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+            <div
               className="space-y-3.5 sm:space-y-6"
             >
               <InteractiveCardFan
@@ -1423,18 +1424,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 disabled={loading}
               />
               <StepBackButton onClick={handleStepBack} label={isEnglish ? "Back" : "ย้อนกลับ"} />
-            </motion.div>
+            </div>
           )}
 
           {/* STEP 5 & 6: DUAL-PANE SACRED SANCTUARY */}
           {(currentStep === "READING" || currentStep === "SUMMARY") && (
-            <motion.div
-              key="reading-summary"
-              custom={motionSafe ? stepDirection : 0}
-              variants={stepVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+            <div
               className="space-y-10"
             >
               {/* HERO ROW: Centered 3D Sacred Spread Altar (รูปที่ 2: ผังไพ่อันเดียวตรงกลางสง่างาม) */}
@@ -1566,12 +1561,21 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               {currentStep === "SUMMARY" && !isStreaming && (
                 <PostReadingSignup onOpenAuth={() => openAuth("signup", true)} />
               )}
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
       </div>
 
-      {/* Global Modals & Drawers */}
+      {/* Global Modals & Drawers
+          ─────────────────────────────────────────────────────────────────────
+          ทุกบานห่อด้วย `useOnceOpen()` — ยังไม่เคยถูกเปิด ก็ยังไม่ต้อง mount
+          เพราะการ mount ทั้งที่ `isOpen={false}` สั่งให้ `next/dynamic` โหลด chunk
+          ของหน้าต่างนั้น (พร้อมไลบรารี `motion` 40 KB) ทันทีที่ hydrate เสร็จ
+          ทั้งที่ผู้ใช้ส่วนใหญ่เปิดหน้าแรกมาแล้วไม่ได้กดอะไรสักบาน
+
+          เปิดครั้งแรกแล้วค้างไว้ตลอด ไม่ถอดออกตอนปิด — อนิเมชันขาออกที่อยู่ข้างใน
+          `Modal.tsx` จะได้มีโอกาสเล่นจนจบ (ดูเหตุผลเต็มในหัวไฟล์ use-once-open.ts) */}
+      {shareModalMounted && (
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
@@ -1581,9 +1585,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         cards={drawnCards}
         reading={readingResult}
       />
+      )}
 
-      <ReadingHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
+      {historyModalMounted && (
+        <ReadingHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
+      )}
 
+      {authModalMounted && (
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => {
@@ -1593,15 +1601,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         initialMode={authMode}
         fromEntitlementWall={authFromWall}
       />
+      )}
 
+      {buyCreditsModalMounted && (
       <BuyCreditsModal
         isOpen={isBuyCreditsOpen}
         onClose={() => setIsBuyCreditsOpen(false)}
         user={currentUser}
         onRequireAuth={() => openAuth("signup", true)}
       />
+      )}
 
       {/* หน้าต่างสิทธิ์การใช้งาน — จุดเดียวที่อธิบายเรื่องสิทธิ์ทั้งหมด */}
+      {accessDialogMounted && (
       <AccessDialog
         reason={accessReason}
         onClose={() => setAccessReason(null)}
@@ -1609,9 +1621,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         onSignin={() => openAuth("signin", true)}
         onBuyCredits={() => setIsBuyCreditsOpen(true)}
       />
+      )}
 
-      <TarotEncyclopediaModal isOpen={isEncyclopediaOpen} onClose={() => setIsEncyclopediaOpen(false)} />
+      {encyclopediaModalMounted && (
+        <TarotEncyclopediaModal isOpen={isEncyclopediaOpen} onClose={() => setIsEncyclopediaOpen(false)} />
+      )}
 
+      {cardZoomModalMounted && (
       <CardZoomModal
         card={zoomedCard ? (zoomedCard.card as any) : null}
         positionName={isEnglish ? (zoomedCard?.position.nameEn || zoomedCard?.position.nameTh) : zoomedCard?.position.nameTh}
@@ -1619,6 +1635,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         isOpen={!!zoomedCard}
         onClose={() => setZoomedCard(null)}
       />
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════
           Rich SEO Editorial Content & Fat Footer (Google Helpful Content & Mobile-First)
@@ -1627,6 +1644,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {currentStep === "SPREAD_SELECT" ? seoContent : null}
       <SiteFooter />
     </main>
-  </AppMotionProvider>
+  </>
   );
 }

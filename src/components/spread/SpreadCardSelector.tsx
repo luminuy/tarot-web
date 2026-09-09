@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { SPREADS, type Spread } from "@/data/spreads";
 import {
   SparkleTabIcon,
@@ -89,6 +88,20 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   }, [activeCategory]);
 
   const carouselRef = React.useRef<HTMLDivElement>(null);
+
+  /**
+   * เล่นคีย์เฟรมขาเข้าเฉพาะเมื่อ **ผู้ใช้สลับแท็บเอง** เท่านั้น
+   * (ทำหน้าที่แทน `initial={false}` ของ AnimatePresence ที่ถอดออกไป)
+   *
+   * ⚠️ ห้ามใช้ ref แบบ "เรนเดอร์แรกหรือเปล่า" มาตัดสิน — เคยลองแล้วพัง:
+   * ref พลิกค่าใน effect ทำให้ `data-first` เปลี่ยน true → false ตอน re-render รอบแรก
+   * หลัง hydrate (ซึ่งเกิดแน่ ๆ จากการโหลดสิทธิ์การใช้งาน) · CSS เห็น animation-name
+   * เปลี่ยนจาก none เป็นของจริง จึง **เริ่มเล่นคีย์เฟรมทันที** ทั้งที่ผู้ใช้ไม่ได้แตะอะไรเลย
+   * ผังทั้งแผงจึงเลื่อนขึ้นเองหนึ่งครั้งหลังหน้าโหลดเสร็จ
+   *
+   * state ที่ตั้งจากการกดของผู้ใช้ไม่มีปัญหานี้ เพราะเปลี่ยนพร้อมกับ `key` ในเรนเดอร์เดียวกัน
+   */
+  const [hasSwappedTab, setHasSwappedTab] = useState(false);
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
 
   // Sync scroll position with active dot indicator on mobile
@@ -161,13 +174,17 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               aria-selected={isActive}
               tabIndex={isActive ? 0 : -1}
               type="button"
-              onClick={() => setActiveCategory(cat.id)}
+              onClick={() => {
+                setHasSwappedTab(true);
+                setActiveCategory(cat.id);
+              }}
               onKeyDown={(e) => {
                 let nextIdx = -1;
                 if (e.key === "ArrowRight") nextIdx = (catIdx + 1) % categories.length;
                 else if (e.key === "ArrowLeft") nextIdx = (catIdx - 1 + categories.length) % categories.length;
                 if (nextIdx !== -1) {
                   e.preventDefault();
+                  setHasSwappedTab(true);
                   setActiveCategory(categories[nextIdx].id);
                   const nextTab = document.getElementById(`spread-tab-${categories[nextIdx].id}`);
                   nextTab?.focus();
@@ -194,24 +211,24 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
       </div>
 
       {/* World-Class Responsive Tarot Cards (Mobile Horizontal Swipe / Desktop Grid) */}
-      {/* initial={false} — เรนเดอร์แรก (ฝั่งเซิร์ฟเวอร์) ต้องออกมาที่สถานะพร้อมอ่านเสมอ
+      {/* คลาสอนิเมชันจะถูกใส่ก็ต่อเมื่อผู้ใช้สลับแท็บเองแล้วเท่านั้น (`hasSwappedTab`)
+          เรนเดอร์แรก (ฝั่งเซิร์ฟเวอร์) ต้องออกมาที่สถานะพร้อมอ่านเสมอ
           ไม่ใช่ opacity:0 เพราะ (1) ผู้ใช้ที่เปิด prefers-reduced-motion จะได้ HTML ไม่ตรงกับฝั่ง
           เซิร์ฟเวอร์จนเกิด hydration mismatch (ISSUE-008) และ (2) เนื้อหาหลักของหน้าแรก
-          ไม่ควรถูกส่งออกไปแบบมองไม่เห็นสำหรับบอทค้นหา · การสลับแท็บยังมีอนิเมชันครบเหมือนเดิม */}
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={activeCategory}
-          role="tabpanel"
-          id={`spread-panel-${activeCategory}`}
-          aria-labelledby={`spread-tab-${activeCategory}`}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.22 }}
-          ref={carouselRef}
-          onScroll={handleCarouselScroll}
-          className="flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible"
-        >
+          ไม่ควรถูกส่งออกไปแบบมองไม่เห็นสำหรับบอทค้นหา · การสลับแท็บยังมีอนิเมชันครบเหมือนเดิม
+          (เทียบเท่า `initial={false}` ของ AnimatePresence ที่ใช้อยู่เดิม)
+
+          `key={activeCategory}` ทำให้ React ถอดของเก่าแล้วสร้างใหม่ คีย์เฟรมจึงเล่นซ้ำทุกครั้ง
+          ที่สลับแท็บ โดยไม่ต้องมีไลบรารีคอยคุม lifecycle ให้ */}
+      <div
+        key={activeCategory}
+        role="tabpanel"
+        id={`spread-panel-${activeCategory}`}
+        aria-labelledby={`spread-tab-${activeCategory}`}
+        ref={carouselRef}
+        onScroll={handleCarouselScroll}
+        className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible`}
+      >
           {filteredSpreads.map((spread, idx) => {
             const isSelected = selectedSpread.id === spread.id;
             const isRecommended = spread.id === "three-card";
@@ -332,8 +349,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               </div>
             );
           })}
-        </motion.div>
-      </AnimatePresence>
+      </div>
 
       {/* Interactive Mobile Carousel Navigation Pills */}
       <div className="flex sm:hidden items-center justify-center gap-1.5 pt-0.5 pb-1">
@@ -364,11 +380,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
 
       {/* Selected Spread In-Focus Action Bar */}
       {onProceed && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC]/50 shadow-overlay"
-        >
+        <div className="anim-swap-rise-sm pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC]/50 shadow-overlay">
           <div className="flex items-center gap-3.5">
             {/* Real 1909 Rider-Waite Spread Card Emblem */}
             <div className="w-9 h-14 sm:w-10 sm:h-15 rounded-lg border-2 border-[#D9C8AC] overflow-hidden bg-[#FFFFFF] relative flex-shrink-0">
@@ -424,7 +436,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             <span>{proceedLabel ?? (isEnglish ? "Next: Set Intention & Choose Reader" : "ถัดไป: ตั้งคำถามและเลือกแม่หมอ")}</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
-        </motion.div>
+        </div>
       )}
     </div>
   );

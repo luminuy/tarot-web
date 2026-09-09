@@ -1,5 +1,4 @@
 import type { Transition, Variants } from "motion/react";
-import { useReducedMotion } from "motion/react";
 
 /**
  * 🔮 Motion Token System — วิหารทาโรต์ออราเคิล
@@ -65,9 +64,13 @@ export const stepVariants: Variants = {
 export { useHasMounted } from "@/lib/use-has-mounted";
 
 /**
- * Helper hook to detect if user has requested reduced motion
+ * ♿ ตัวตรวจว่าผู้ใช้ขอลดการเคลื่อนไหวหรือไม่
+ *
+ * ⚠️ ตัวจริงย้ายไป `@/lib/use-motion-safe` แล้ว และ **ห้ามย้ายกลับมา**
+ * ของเดิมเรียก `useReducedMotion()` ของ `motion` ซึ่งเป็น import แบบ runtime
+ * ทำให้ไฟล์นี้ (ที่มีแต่ค่าคงที่กับ type) ลากไลบรารี 40 KB เข้าบันเดิลของทุกไฟล์ที่ import มัน
+ * รวมถึงเปลือกหน้าแรก · re-export ไว้ตรงนี้เพื่อไม่ให้ผู้เรียกเดิมพัง
+ *
+ * 📌 ไฟล์นี้ต้องเหลือแต่ `import type` จาก `motion/react` เท่านั้น (type ถูกลบทิ้งตอน build)
  */
-export function useMotionSafe(): boolean {
-  const shouldReduceMotion = useReducedMotion();
-  return !shouldReduceMotion;
-}
+export { useMotionSafe } from "@/lib/use-motion-safe";
