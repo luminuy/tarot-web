@@ -1060,28 +1060,34 @@ input.no-focus-ring:focus-visible {
    (ดู `hasNavigatedStep` ใน TarotFlow.tsx · `hasSwappedTab` ใน SpreadCardSelector.tsx) */
 
 /* ── แถบแจ้งเตือน (Toast) ─────────────────────────────────────────────────
-   กล่องถูกจัดกลางด้วย left:50% + -translate-x-1/2 ของ Tailwind
-   คีย์เฟรมจึงต้องพา translate(-50%, …) ไปด้วยทุกเฟรม ไม่งั้นกล่องจะวาปไปทางซ้าย
-   ตั้งแต่เฟรมแรก เพราะ animation ทับค่า transform ของคลาสเดิมทั้งก้อน */
+   กล่องถูกจัดกลางด้วย `left-1/2 -translate-x-1/2` ของ Tailwind
+
+   ⛔ ห้ามใส่ translate(-50%, …) ในคีย์เฟรมนี้เด็ดขาด (INC-0123)
+   Tailwind v4 ไม่ได้คอมไพล์ `-translate-x-1/2` เป็น `transform` อีกต่อไปแล้ว
+   แต่เป็นคุณสมบัติเดี่ยว `translate: -50% var(--tw-translate-y)` ซึ่งเบราว์เซอร์
+   คิด **ก่อน** `transform` แล้วคูณต่อกัน (ลำดับตามสเปก: translate → rotate → scale → transform)
+   ถ้าคีย์เฟรมพา -50% ไปด้วยอีก ผลรวมจะกลายเป็น -100% กล่องเลยไปนอนคร่อมขอบซ้ายจอ
+   และเพราะ fill-mode เป็น `both` มันจะค้างผิดที่อย่างนั้นตลอด ไม่ใช่แค่ตอนเล่นคีย์เฟรม
+   คีย์เฟรมจึงต้องขยับ **แกน Y กับ scale เท่านั้น** ปล่อยการจัดกลางให้ `translate` ของคลาส */
 @keyframes toastIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -16px) scale(0.96);
+    transform: translateY(-16px) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
 @keyframes toastOut {
   from {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: translateY(0) scale(1);
   }
   to {
     opacity: 0;
-    transform: translate(-50%, -10px) scale(0.97);
+    transform: translateY(-10px) scale(0.97);
   }
 }
 
