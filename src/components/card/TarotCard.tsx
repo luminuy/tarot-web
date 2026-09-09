@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { SPRING } from "@/lib/motion";
 import { cardSummaryById, cardSummaryByIndex } from "@/data/cards/summary";
 import { CardImage } from "@/components/card/CardImage";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
@@ -119,13 +117,18 @@ export const TarotCard: React.FC<TarotCardProps> = ({
 
   const effectiveImageSizes = imageSizes ?? DEFAULT_IMAGE_SIZES[size] ?? "120px";
 
-  // Smooth Interactive 3D Parallax Spring Physics
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { damping: 25, stiffness: 280 };
-  const smoothRotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [14, -14]), springConfig);
-  const smoothRotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-14, 14]), springConfig);
+  /*
+   * ✦ เอียงไพ่ตามเมาส์ — เขียนลง CSS custom property ตรง ๆ ไม่ผ่าน React
+   *
+   * ของเดิมใช้ `useSpring` 2 ตัวต่อไพ่ 1 ใบ ให้ไลบรารีคำนวณค่าใหม่ทุกเฟรมบนเธรดหลัก
+   * ทั้งที่ผลลัพธ์สุดท้ายคือ "เขียนตัวเลขลง transform" ซึ่งเขียนเองได้ในบรรทัดเดียว
+   * ส่วนหน้าที่ "กลบการกระตุกระหว่างเฟรม" ที่สปริงเคยทำ ตอนนี้เป็นของ
+   * `transition: transform 120ms` บนคลาส `.card-tilt` (ดู globals.css) ซึ่ง compositor ทำเอง
+   *
+   * ⚠️ ห้ามเก็บค่านี้ลง React state เด็ดขาด — mousemove ยิงถี่หลายสิบครั้งต่อวินาที
+   * การ setState ทุกครั้งจะบังคับให้ทั้งคอมโพเนนต์เรนเดอร์ใหม่ตามไปด้วย
+   */
+  const tiltRef = useRef<HTMLDivElement>(null);
   /*
    * ⚠️ เคยมีสปริง `glintX` / `glintY` อีกสองตัวตรงนี้ ป้อนตำแหน่งประกายทองในชั้นแสงข้างล่าง
    * แต่ค่ามันถูกอ่านด้วย `.get()` "ระหว่างเรนเดอร์" ซึ่งทำสองอย่างพร้อมกัน:
@@ -168,17 +171,25 @@ export const TarotCard: React.FC<TarotCardProps> = ({
     setIsHovered(true);
   };
 
+  const setTilt = (rx: number, ry: number) => {
+    const el = tiltRef.current;
+    if (!el) return;
+    el.style.setProperty("--card-rx", `${rx}deg`);
+    el.style.setProperty("--card-ry", `${ry}deg`);
+  };
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = rectRef.current;
     if (!rect || rect.width === 0 || rect.height === 0) return;
-    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
-    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    // ช่วงเดียวกับของเดิมเป๊ะ: แกน x เอียง +14..-14 องศา · แกน y เอียง -14..+14
+    setTilt(py * -28, px * 28);
   };
 
   const handleMouseLeave = () => {
     rectRef.current = null;
-    mouseX.set(0);
-    mouseY.set(0);
+    setTilt(0, 0);
     setIsHovered(false);
   };
 
@@ -195,25 +206,21 @@ export const TarotCard: React.FC<TarotCardProps> = ({
       }`}
       style={{ perspective: 1800 }}
     >
-      <motion.div
-        className="w-full h-full relative card-inner rounded-lg"
-        animate={{
-          rotateY: isRevealed ? 180 : 0,
-          scale: isHighlighted ? 1.08 : isHovered ? 1.05 : 1,
-          y: isHighlighted ? -10 : isHovered ? -5 : 0,
-          z: isRevealed && isHighlighted ? 20 : 0,
-        }}
-        style={{
-          rotateX: smoothRotateX,
-          rotateY: isRevealed ? 180 : smoothRotateY,
-          transformStyle: "preserve-3d",
-        }}
-        transition={{
-          rotateY: SPRING.card,
-          scale: SPRING.snappy,
-          y: SPRING.follow,
-          z: SPRING.card,
-        }}
+      {/*
+        * สามชั้นนี้แทน `<motion.div>` ชั้นเดียวของเดิม — เหตุผลที่ต้องแยกชั้น
+        * (transform มี transition ได้จังหวะเดียว แต่ต้องการสามจังหวะ) อธิบายไว้ที่ globals.css
+        * ค่าทั้งหมดส่งผ่าน custom property จึงไม่มี JS วิ่งต่อเฟรมแม้แต่ตัวเดียว
+        */}
+      <div
+        className="w-full h-full relative card-lift rounded-lg"
+        data-lift={
+          isHighlighted ? (isRevealed ? "high-deep" : "high") : isHovered ? "hover" : "none"
+        }
+      >
+      <div ref={tiltRef} className="w-full h-full relative card-tilt rounded-lg">
+      <div
+        className="w-full h-full relative card-inner card-flip rounded-lg"
+        data-revealed={isRevealed ? "true" : "false"}
       >
         {/* ========================================================= */}
         {/* 1. ด้านหลังไพ่ (Sacred Card Back - Obsidian & Gold Filigree) */}
@@ -344,7 +351,9 @@ export const TarotCard: React.FC<TarotCardProps> = ({
             }}
           />
         </div>
-      </motion.div>
+      </div>
+      </div>
+      </div>
     </div>
   );
 };

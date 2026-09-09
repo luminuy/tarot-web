@@ -44,6 +44,17 @@
  *     `AnimatePresence mode="wait"` คือสาเหตุรากของ INC-0015 ที่ทำให้พิธีดูดวงค้างตายทั้งขั้น
  *     (exit-transition deadlock กับ motion@13 + React 19.2)
  *
+ *  8. `transform` ที่ประกอบจาก custom property และมี `transition` อยู่ด้วย
+ *     ตัวแปรทุกตัวที่ใช้ต้องประกาศด้วย `@property` เสมอ
+ *
+ *     🚨 กับดักที่เกือบหลุดขึ้น production จริงในรอบนี้:
+ *     custom property ที่ไม่ได้ประกาศ `@property` เบราว์เซอร์ถือเป็น "ข้อความที่เอาไปแทนที่"
+ *     ไม่ใช่ค่าที่ไล่ระดับได้ · พอค่ามันเปลี่ยน คุณสมบัติที่อ้างถึงมันจะถูกคำนวณใหม่ทันที
+ *     **โดยไม่ผ่าน transition** — ไพ่จึงกระโดดพลิกแทนที่จะค่อย ๆ หมุน
+ *     ทั้งที่โค้ดอ่านแล้วถูกทุกบรรทัดและ `transition-duration` ก็อ่านค่าได้ 0.55s จริง
+ *     จับได้เพราะเก็บตัวอย่าง `transform` ทุกเฟรมด้วย Chromium เท่านั้น
+ *     (ดูด้วยตาเปล่าหรือเชื่อว่าตั้ง duration แล้วต้องทำงาน = ปล่อยผ่าน)
+ *
  *  6. โทเคนจังหวะกลางต้องยังผูกอยู่ — `--default-transition-duration` และ
  *     `--default-transition-timing-function` ต้องถูกประกาศใน globals.css
  *     ถ้าใครลบทิ้ง ทุกจุดที่เขียน `transition` เฉย ๆ จะเด้งกลับไปใช้ค่าเริ่มต้นของ Tailwind
@@ -207,6 +218,48 @@ function checkWaitWithoutExit(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 8 — ตัวแปรที่ถูกใช้ใน `transform` ของ rule ที่มี `transition` ต้องประกาศ `@property`
+ * ไม่งั้น transition จะไม่ทำงานเลยแบบเงียบ ๆ (ดูคำอธิบายกับดักที่หัวไฟล์)
+ */
+function checkUnregisteredTransformVars(violations: Violation[]): void {
+  for (const file of walk(SRC, [".css"])) {
+    const r = rel(file);
+    const css = fs.readFileSync(file, "utf-8");
+    const registered = new Set(
+      [...css.matchAll(/@property\s+(--[\w-]+)/g)].map((m) => m[1]),
+    );
+
+    // แยกเป็นบล็อก selector { ... } แบบหยาบ ๆ พอสำหรับไฟล์ CSS ที่เขียนด้วยมือ
+    const blockRe = /([^{}]+)\{([^{}]*)\}/g;
+    let m: RegExpExecArray | null;
+    while ((m = blockRe.exec(css)) !== null) {
+      const [, selector, body] = m;
+      if (!/\btransition\b/.test(body)) continue;
+
+      const transformDecl = body.match(/(^|;)\s*transform\s*:([^;]*)/);
+      if (!transformDecl) continue;
+
+      // transition ต้องครอบคลุม transform จริง (หรือเป็น shorthand ที่ระบุ transform)
+      const coversTransform = /transition(-property)?\s*:[^;]*\b(transform|all)\b/.test(body);
+      if (!coversTransform) continue;
+
+      for (const v of transformDecl[2].matchAll(/var\(\s*(--[\w-]+)/g)) {
+        const name = v[1];
+        if (registered.has(name)) continue;
+        const line = css.slice(0, m.index).split("\n").length;
+        violations.push({
+          rule: "8 · ตัวแปรใน transform ไม่ได้ประกาศ @property",
+          file: r,
+          line,
+          code: `${selector.trim().slice(0, 60)} { transform: … ${name} … }`,
+          hint: `ประกาศ \`@property ${name} { syntax: "<angle>"; inherits: false; initial-value: 0deg; }\` (ปรับ syntax ตามชนิดค่า) ไม่งั้น transition จะไม่ทำงานเลยแบบเงียบ ๆ`,
+        });
+      }
+    }
+  }
+}
+
 function checkCss(violations: Violation[]): void {
   for (const file of walk(SRC, [".css"])) {
     const r = rel(file);
@@ -274,6 +327,7 @@ function run(): void {
   const violations: Violation[] = [];
   checkTsx(violations);
   checkWaitWithoutExit(violations);
+  checkUnregisteredTransformVars(violations);
   checkCss(violations);
   checkTokens(violations);
 
