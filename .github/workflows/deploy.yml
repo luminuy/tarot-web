@@ -86,39 +86,42 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      # ── รายงานค่าวัดผลที่ยังไม่ได้ตั้ง (ไม่ทำให้ deploy ล้ม) ──────────────────
-      # ที่มา: Meta Pixel ไม่ทำงานบน production มานาน โดยไม่มีอะไรบอกเลยสักที่
-      # เพราะ `NEXT_PUBLIC_*` ที่ว่างจะถูกฝังเป็นสตริงว่างตอน build อย่างเงียบสนิท
-      # แล้วโค้ดก็ตกไปใช้ `/api/config/analytics` ตอน runtime ต่อ — พังแบบไม่มีเสียง
+      # ── รายงานค่าวัดผลที่ "ใช้งานอยู่" แต่ยังไม่ได้ตั้ง (ไม่ทำให้ deploy ล้ม) ──────
+      # ⚠️ ตรวจเฉพาะตัวที่ประกาศว่า "ใช้อยู่" เท่านั้น — ตัวที่ตั้งใจยังไม่ใช้ (Meta Pixel /
+      #    Google Ads) ต้องไม่ขึ้นเตือน ไม่งั้นทุก deploy จะมีคำเตือนค้างถาวรจนไม่มีใครอ่าน
+      #    ตรงกับที่ `AnalyticsTracker.tsx` เขียนไว้ว่า "เว็บนี้ตั้งแค่ GA4"
       #
-      # ⚠️ ตั้งใจให้ "เตือน" ไม่ให้ "ล้ม" — ค่าพวกนี้เป็น secret ที่มีแต่เจ้าของตั้งได้
-      #    ถ้าปล่อยให้ deploy ล้ม เว็บจะขึ้นไม่ได้เลยเพราะเรื่องที่ไม่เกี่ยวกับโค้ด
-      - name: 📊 ตรวจว่าตั้งค่าวัดผลครบไหม (เตือนอย่างเดียว ไม่ทำให้ล้ม)
+      # 📌 วันไหนเริ่มใช้ Meta Pixel / Google Ads จริง ให้ย้ายชื่อจาก UNUSED มาไว้ที่ IN_USE
+      #    **และต้องตั้งเป็น secret/variable ของ GitHub เท่านั้น** — ตั้งด้วย `wrangler secret`
+      #    อย่างเดียวจะไม่ถูกหยิบมาใช้ เพราะเมื่อ `NEXT_PUBLIC_GA_ID` ติดมากับ build แล้ว
+      #    `AnalyticsTracker` จะไม่ยิง `/api/config/analytics` อีกเลย (เงื่อนไข `||` ตัดตั้งแต่ต้น)
+      - name: 📊 ตรวจว่าตั้งค่าวัดผลที่ใช้อยู่ครบไหม (เตือนอย่างเดียว ไม่ทำให้ล้ม)
         env:
           NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
-          NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
-          NEXT_PUBLIC_GOOGLE_ADS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_ID || vars.NEXT_PUBLIC_GOOGLE_ADS_ID || '' }}
         run: |
+          IN_USE="NEXT_PUBLIC_GA_ID"
+          UNUSED="NEXT_PUBLIC_META_PIXEL_ID NEXT_PUBLIC_GOOGLE_ADS_ID"
+
           missing=""
-          for name in NEXT_PUBLIC_GA_ID NEXT_PUBLIC_META_PIXEL_ID NEXT_PUBLIC_GOOGLE_ADS_ID; do
+          for name in $IN_USE; do
             if [ -z "${!name}" ]; then missing="$missing $name"; fi
           done
+
           if [ -n "$missing" ]; then
-            echo "::warning title=ค่าวัดผลยังไม่ได้ตั้งใน GitHub::ค่าที่ยังว่าง:$missing"
+            echo "::warning title=ค่าวัดผลที่ใช้อยู่ยังไม่ได้ตั้ง::ค่าที่ยังว่าง:$missing"
             {
-              echo "### ⚠️ ค่าวัดผลที่ยังไม่ได้ตั้งใน GitHub"
+              echo "### ⚠️ ค่าวัดผลที่ใช้อยู่แต่ยังไม่ได้ตั้งใน GitHub"
               echo ""
               for name in $missing; do echo "- \`$name\`"; done
               echo ""
               echo "ค่าเหล่านี้ถูกฝังตอน build เท่านั้น ปล่อยว่างไว้ = สคริปต์วัดผลไม่ถูกใส่ลงหน้าเว็บตั้งแต่ต้น"
-              echo "ตั้งได้ที่ **Settings ➔ Secrets and variables ➔ Actions** (ใส่เป็น secret หรือ variable ก็ได้)"
-              echo ""
-              echo "> หมายเหตุ: เว็บยังมีทางสำรองอ่านค่าตอน runtime จาก \`/api/config/analytics\`"
-              echo "> ซึ่งอ่าน env ของ Cloudflare Worker — ถ้าตั้งไว้ฝั่ง Worker แล้วตัวนั้นจะทำงานแทน"
+              echo "ตั้งที่ **Settings ➔ Secrets and variables ➔ Actions** (ใส่เป็น secret หรือ variable ก็ได้)"
             } >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "✅ ตั้งค่าวัดผลครบทุกตัว"
+            echo "✅ ค่าวัดผลที่ใช้อยู่ตั้งครบแล้ว ($IN_USE)"
           fi
+
+          echo "ℹ️  ยังไม่ได้ใช้งานโดยตั้งใจ (ไม่ถือว่าขาด):$UNUSED"
 
       # `pnpm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
       # ขั้น deploy จะ populateCache: seed หน้า SSG ทั้งหมดลง KV ก่อน `wrangler deploy`
