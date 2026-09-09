@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 38/38 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 39/39 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -35,6 +35,52 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-09: 🧭 แก้หัวเว็บ sticky "ขยับ/ไม่อยู่นิ่ง" ตอนเลื่อนหน้าจอบนมือถือ (ISSUE-036 · INC-0107)
+
+> **ขอบเขต**: `src/app/globals.css` (CSS อย่างเดียว ไม่แตะ `.tsx` สักไฟล์) + ด่านตรวจอัตโนมัติใหม่ 1 ด่าน
+
+**ที่มา**: เจ้าของส่งภาพหน้าจอ iPhone พร้อมข้อความ _"Header ขยับ ตอนเลื่อนหน้าจอ และไม่อยู่นิ่ง ตอนเลื่อนหน้าจอในมือถือ"_
+ในภาพเห็นแถบเนื้อหา (แถวชื่อไพ่ของ `HomeSeoContent`) แวบขึ้นมาอยู่ **เหนือ** หัวเว็บประมาณ 5pt
+ทั้งที่หัวเว็บเป็น `sticky top-0` ซึ่งควรปิดขอบบนจอสนิท
+
+**สิ่งที่วัดก่อนแก้ (ไม่เดา)** — Chromium mobile 390×844 · DPR 3 · หน้าแรก `/` สูง 11,018px:
+
+| ตรวจอะไร | ผลที่วัดได้ | สรุป |
+| :--- | :--- | :-: |
+| `getComputedStyle(header)` | `position: sticky` · `top: 0px` · `z-index: 50` | ✅ |
+| `rect.top` ที่ 41 จุดตั้งแต่ y=0 ถึงท้ายหน้า | `0` ทุกจุด | ✅ |
+| ancestor chain | `main` = `overflow-x: clip` / `overflow-y: visible` · ไม่มี `transform`/`filter`/`contain` เลย | ✅ ไม่ใช่บั๊กเลย์เอาต์ |
+
+**สรุปสาเหตุ**: **ไม่ใช่ปัญหาเลย์เอาต์** (เลย์เอาต์ถูกต้องทุกจุด วัดยืนยันแล้ว) แต่เป็น
+**ปัญหาการวาดภาพฝั่ง iOS**: การเลื่อนหน้าบน iOS Safari วิ่งบนเธรด compositor
+แต่ `position: sticky` จะถูก compositor ตรึงให้เองได้ก็ต่อเมื่อมันมี **เลเยอร์ของตัวเอง**
+หัวเว็บนี้ไม่มีอะไรบังคับให้แยกเลเยอร์เลย จึงถูกวาดใหม่ทุกเฟรมบนเธรดหลัก
+พอเธรดหลักตามไม่ทัน หัวเว็บก็ตามหลังตำแหน่งสกรอลล์ไม่กี่พิกเซล = "สั่น/ขยับ" และเปิดช่องให้เนื้อหาแวบเหนือหัวเว็บ
+
+**การแก้ไข** (`src/app/globals.css`):
+1. เพิ่มบล็อก `[data-site-header]` ที่บังคับเลเยอร์ compositor ด้วย `transform: translate3d(0,0,0)` + `backface-visibility: hidden`
+   — ใช้ `translate3d` **ไม่ใช่ `will-change`** เพราะ `will-change` จองเลเยอร์ GPU ค้างตลอด session (INC-0056 + ด่าน `test-will-change`)
+   — `transform` บนตัว sticky **เอง** ไม่กระทบตำแหน่ง sticky (เฉพาะ transform ของ *บรรพบุรุษ* เท่านั้นที่ทำให้ยึดผิดกล่อง) — วัดยืนยันแล้ว
+2. เพิ่ม `padding-top: env(safe-area-inset-top, 0px)` — manifest ตั้ง `display: standalone` และ viewport ตั้ง `viewportFit: "cover"`
+   เมื่อเปิดจากไอคอนหน้าจอโฮมบน iOS พื้นที่ใต้ status bar จะเป็นของหน้าเว็บ ถ้าไม่กันไว้ `top: 0` จะพาหัวเว็บไปนอนใต้ status bar
+3. อัปเดต `--site-header-h` เป็น `calc(76px + env(safe-area-inset-top, 0px))` (มือถือ) / `calc(88px + …)` (≥640px)
+   เพื่อให้ `scroll-padding-top` ของ ISSUE-030 ยังจอด anchor ได้ถูกที่
+
+**ด่านตรวจอัตโนมัติใหม่ — `scripts/qa/test-sticky-header.ts` (ด่านที่ 39)**:
+"หัวเว็บไม่อยู่นิ่ง" กลับมาแล้ว 4 รอบด้วยสาเหตุคนละตัว (INC-0060 · INC-0067 · INC-0081 · INC-0107)
+และทุกรอบปิดเคสด้วย "คอมเมนต์เตือน" ในไฟล์เดียวกับที่ถูกละเมิด รอบนี้จึงเปลี่ยนเป็นด่านตรวจ 6 ข้อ:
+ป้าย `data-site-header` + `sticky top-0` + z-index · บล็อก compositor + safe-area · `body > *` ต้องยกเว้นหัวเว็บ ·
+`html` ต้องเป็น `overflow-x: clip` และห้าม `overflow-x: hidden` ที่ html/body · ห้าม `position: fixed` ในต้นไม้หัวเว็บ ·
+ห้ามครอบ `<SiteHeader>` ด้วย scroll container
+ทดสอบด่านด้วยการทำให้พังจริง 2 เคส (ถอด `translate3d` · ถอด `:not([data-site-header])`) — ด่านจับได้ทั้งคู่
+
+**⚠️ ข้อจำกัดของการตรวจรอบนี้ (รายงานตามจริง)**: คอนเทนเนอร์นี้มีแต่ Chromium บน Linux
+**ยืนยันบน iOS Safari จริงไม่ได้** สิ่งที่พิสูจน์ได้คือ (ก) เลย์เอาต์ถูกต้องอยู่แล้วทุกจุด
+(ข) การเพิ่ม `translate3d` ไม่ทำให้ sticky พัง (`rect.top === 0` ครบ 74 จุดตลอดหน้าแรก 11,064px)
+**ผู้รับช่วง/เจ้าของต้องทดสอบบน iPhone จริงหลัง deploy**: เลื่อนขึ้นลงเร็ว ๆ ที่ `/` แล้วดูว่าหัวเว็บยังมีแถบเนื้อหาแวบเหนือมันอีกไหม
+ถ้ายังมี = ยังไม่จบ ต้องหาสาเหตุเพิ่ม **ห้ามปิดเคสด้วยการเดา**
+
+**ผลตรวจ**: `npm run repo:verify` ➔ ✅ 39/39 ด่าน · `npm run typecheck` ➔ ✅ 0 errors
 ### 🗓️ 2026-09-09: 🎂 เขียนแผนเปิดหน้าอังกฤษ `/en/cards/birth-card` (ก้อนสุดท้ายที่ยัง 404) โดย Claude Opus 5
 
 > **ขอบเขต**: เอกสารล้วน — ไม่แตะโค้ดหน้าเว็บ

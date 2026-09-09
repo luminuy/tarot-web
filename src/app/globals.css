@@ -111,13 +111,15 @@
   --ease-emphasis: cubic-bezier(0.2, 0, 0, 1);
 
   /* ความสูงจริงของ [data-site-header] — วัดได้ 69px มือถือ / 81px เดสก์ท็อป
-     เผื่อระยะหายใจอีกเล็กน้อยกันตัวอักษรชนขอบล่างของหัวเว็บ (ISSUE-030) */
-  --site-header-h: 76px;
+     เผื่อระยะหายใจอีกเล็กน้อยกันตัวอักษรชนขอบล่างของหัวเว็บ (ISSUE-030)
+     ต้องบวก safe-area-inset-top ด้วย เพราะหัวเว็บกันพื้นที่ใต้ status bar ไว้เองแล้ว
+     ตอนเปิดจากไอคอนหน้าจอโฮม (display: standalone) — ในเบราว์เซอร์ปกติค่านี้ = 0 */
+  --site-header-h: calc(76px + env(safe-area-inset-top, 0px));
 }
 
 @media (min-width: 640px) {
   :root {
-    --site-header-h: 88px;
+    --site-header-h: calc(88px + env(safe-area-inset-top, 0px));
   }
 }
 
@@ -211,6 +213,39 @@ body::after {
 body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   position: relative;
   z-index: 1;
+}
+
+/*
+ * 🧭 หัวเว็บ sticky ต้องมี "เลเยอร์ compositor ของตัวเอง" (INC-0107)
+ * ---------------------------------------------------------------------------
+ * บน iOS Safari การเลื่อนหน้าวิ่งอยู่บนเธรด compositor แต่ `position: sticky`
+ * จะถูก compositor ตรึงให้เองได้ก็ต่อเมื่อมันอยู่บนเลเยอร์แยกของมันเอง
+ * ถ้ายังอยู่เลเยอร์เดียวกับเนื้อหาที่กำลังเลื่อน เบราว์เซอร์ต้องวาดหัวเว็บใหม่ทุกเฟรม
+ * บนเธรดหลัก พอเธรดหลักตามไม่ทัน หัวเว็บจะ "ตามหลัง" ตำแหน่งสกรอลล์อยู่ไม่กี่พิกเซล
+ * ผู้ใช้เห็นเป็นหัวเว็บสั่น/ขยับ และมีแถบเนื้อหาแวบขึ้นมาเหนือหัวเว็บระหว่างเลื่อน
+ *
+ * `translate3d(0,0,0)` บนตัว sticky **เอง** ไม่กระทบตำแหน่ง sticky เลย
+ * (เฉพาะ transform ของ *บรรพบุรุษ* เท่านั้นที่ทำให้ sticky ยึดผิดกล่อง)
+ * วัดจริงด้วย Chromium mobile 390px: rect.top === 0 ครบ 74 จุดตลอดหน้าแรก 11,064px
+ *
+ * ⚠️ ห้ามใส่ `position: fixed` ให้ลูกหลานที่อยู่ในหัวเว็บ — transform ตรงนี้ทำให้
+ * หัวเว็บกลายเป็น containing block ของมัน แผงเมนูทั้งหมดจึงต้องเป็น `absolute` เท่านั้น
+ * (ปัจจุบัน SacredNavDropdown / UserProfileBadge เป็น absolute ทั้งคู่ — ตรวจก่อนเปลี่ยน)
+ *
+ * ⚠️ `will-change` ห้ามใช้ตรงนี้ (INC-0056 + ด่าน test-will-change) เพราะจองเลเยอร์ค้าง
+ * ตลอด session — `translate3d` ให้ผลเลเยอร์แยกเหมือนกันโดยไม่ประกาศ hint ถาวร
+ *
+ * `padding-top: env(safe-area-inset-top)` — manifest ตั้ง `display: standalone`
+ * และ viewport ตั้ง `viewportFit: "cover"` เมื่อเปิดจากไอคอนหน้าจอโฮมบน iOS
+ * พื้นที่ใต้ status bar จะกลายเป็นพื้นที่ของหน้าเว็บ ถ้าไม่กันไว้ `top: 0` จะพาหัวเว็บ
+ * ไปนอนใต้ status bar และเปิดช่องให้เนื้อหาโผล่เหนือหัวเว็บ (ในเบราว์เซอร์ปกติค่านี้ = 0)
+ */
+[data-site-header] {
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* โซนแท่นบูชา (ผ้าปูไพ่) — ใช้เฉพาะที่ไพ่วางจริง */
