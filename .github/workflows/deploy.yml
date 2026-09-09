@@ -86,6 +86,40 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      # ── รายงานค่าวัดผลที่ยังไม่ได้ตั้ง (ไม่ทำให้ deploy ล้ม) ──────────────────
+      # ที่มา: Meta Pixel ไม่ทำงานบน production มานาน โดยไม่มีอะไรบอกเลยสักที่
+      # เพราะ `NEXT_PUBLIC_*` ที่ว่างจะถูกฝังเป็นสตริงว่างตอน build อย่างเงียบสนิท
+      # แล้วโค้ดก็ตกไปใช้ `/api/config/analytics` ตอน runtime ต่อ — พังแบบไม่มีเสียง
+      #
+      # ⚠️ ตั้งใจให้ "เตือน" ไม่ให้ "ล้ม" — ค่าพวกนี้เป็น secret ที่มีแต่เจ้าของตั้งได้
+      #    ถ้าปล่อยให้ deploy ล้ม เว็บจะขึ้นไม่ได้เลยเพราะเรื่องที่ไม่เกี่ยวกับโค้ด
+      - name: 📊 ตรวจว่าตั้งค่าวัดผลครบไหม (เตือนอย่างเดียว ไม่ทำให้ล้ม)
+        env:
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
+          NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
+          NEXT_PUBLIC_GOOGLE_ADS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_ID || vars.NEXT_PUBLIC_GOOGLE_ADS_ID || '' }}
+        run: |
+          missing=""
+          for name in NEXT_PUBLIC_GA_ID NEXT_PUBLIC_META_PIXEL_ID NEXT_PUBLIC_GOOGLE_ADS_ID; do
+            if [ -z "${!name}" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::warning title=ค่าวัดผลยังไม่ได้ตั้งใน GitHub::ค่าที่ยังว่าง:$missing"
+            {
+              echo "### ⚠️ ค่าวัดผลที่ยังไม่ได้ตั้งใน GitHub"
+              echo ""
+              for name in $missing; do echo "- \`$name\`"; done
+              echo ""
+              echo "ค่าเหล่านี้ถูกฝังตอน build เท่านั้น ปล่อยว่างไว้ = สคริปต์วัดผลไม่ถูกใส่ลงหน้าเว็บตั้งแต่ต้น"
+              echo "ตั้งได้ที่ **Settings ➔ Secrets and variables ➔ Actions** (ใส่เป็น secret หรือ variable ก็ได้)"
+              echo ""
+              echo "> หมายเหตุ: เว็บยังมีทางสำรองอ่านค่าตอน runtime จาก \`/api/config/analytics\`"
+              echo "> ซึ่งอ่าน env ของ Cloudflare Worker — ถ้าตั้งไว้ฝั่ง Worker แล้วตัวนั้นจะทำงานแทน"
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "✅ ตั้งค่าวัดผลครบทุกตัว"
+          fi
+
       # `pnpm run deploy` = opennextjs-cloudflare build && opennextjs-cloudflare deploy
       # ขั้น deploy จะ populateCache: seed หน้า SSG ทั้งหมดลง KV ก่อน `wrangler deploy`
       # ⚠️ CLOUDFLARE_API_TOKEN ต้องมี Workers Scripts:Edit + Workers KV Storage:Edit

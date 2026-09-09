@@ -34,7 +34,9 @@
 | **032** | 🟢 Resolved | `monthly-ten` วางไพ่ใบที่ 6 ทับกับใบไขว้ที่หมุน 90° | `src/data/spreads.ts`, `scripts/qa/test-spreads.ts` | ✅ **แก้แล้ว** — เลื่อนใบที่ 6 จาก `x: 0.5` → `0.53` และเพิ่มด่านตรวจใบไขว้เบียดคอลัมน์ |
 | **034** | 🔵 Low | ไพ่ใบที่ 7–10 ของ `celtic-cross` และ `monthly-ten` ซ้อนกันแนวตั้ง ~20% ในแผนผัง SEO | `src/components/spread/SpreadPositionMap.tsx` | 🟡 **ยังไม่แก้** — มีมาแต่เดิมทั้งสองผัง ต้องให้เจ้าของเคาะว่าเป็นดีไซน์หรือบั๊ก |
 | **038** | 🔴 High | **ธง `entitlement.enforced` บน production ถูกตั้งเป็น `false` ค้างไว้** — ระบบสิทธิ์ทั้งชุดไม่ทำงาน | KV `app:flag:entitlement.enforced` · `/admin` แท็บ "สิทธิ์เปิดไพ่" | 🟠 **รอเจ้าของกดเปิด (ต้องใช้สิทธิ์แอดมิน · AI ทำแทนไม่ได้)** — ด่านล็อกอินถูกย้ายออกมานอกธงแล้ว (INC-0111) จึงบังคับ "ต้องสมัครก่อนเปิดไพ่" ได้แม้ธงปิด · แต่ตราบใดที่ธงยังปิด **โควตาสมาชิก 3 ครั้ง/วันไม่ถูกบังคับ · ผังใหญ่ทั้งหมดและปรมาจารย์ลับ 2 ท่านไม่ถูกล็อก** · ตรวจได้ด้วย `curl -s https://seertarot.net/api/entitlement` (ถ้าขึ้น `"enabled":false` แปลว่ายังปิดอยู่) |
-| **035** | 🟡 Medium | CSP บล็อก Cloudflare Web Analytics beacon ทุกครั้งที่โหลดหน้า | `next.config.ts` / middleware CSP | 🔴 **ยังไม่แก้** — `static.cloudflareinsights.com` ไม่อยู่ใน `script-src` ทำให้ Web Analytics ไม่เก็บข้อมูลเลย |
+| **035** | 🟢 Resolved | CSP บล็อก Cloudflare Web Analytics beacon ทุกครั้งที่โหลดหน้า | `next.config.ts` | ✅ **แก้แล้ว** — เติม `https://static.cloudflareinsights.com` เข้า `script-src` และเติม `https://cloudflareinsights.com` เข้า `connect-src` ด้วย (beacon ยิงผลกลับด้วย POST ถ้าเปิดแต่ `script-src` สคริปต์จะโหลดผ่านแต่ส่งข้อมูลไม่ออก = ดูเหมือนแก้แล้วแต่ยังไม่มีข้อมูล) |
+| **040** | 🟡 Medium | `www.seertarot.net` ตอบ 200 ไม่ redirect — เนื้อหาเดียวกันอยู่สองโฮสต์ | `next.config.ts` | ✅ **แก้แล้ว** — เพิ่มกฎ 301 `www` ➔ apex ไว้บนสุดของ `redirects()` · ทางที่ถูกกว่าคือ Redirect Rule ที่ Cloudflare (เด้งที่ขอบ ไม่ปลุก Worker) แต่ต้องใช้สิทธิ์ dashboard ของเจ้าของ ทั้งสองอย่างอยู่ร่วมกันได้ |
+| **041** | 🟠 High | Meta Pixel ไม่ทำงานบน production — `fbq` เป็น `undefined` ไม่มีสคริปต์ facebook ในหน้าเลย | GitHub Secrets · Cloudflare Worker env | 🟠 **รอเจ้าของตั้งค่า (AI ทำแทนไม่ได้)** — ท่อในโค้ดต่อครบแล้วทั้ง build-time (`deploy.yml` · `pr.yml` อ่านจาก secrets/vars) และ runtime (`/api/config/analytics` อ่าน env ของ Worker) **ที่ขาดคือ "ค่า" ของ `NEXT_PUBLIC_META_PIXEL_ID` เท่านั้น** · ยืนยันจาก HTML จริงบน production 274 KB ไม่มีทั้ง `connect.facebook.net` และ `googletagmanager` (GA4 ที่ใช้ได้อยู่มาจากทางสำรอง runtime ฝั่ง Worker) · เพิ่มขั้นเตือนใน `deploy.yml` แล้วว่าค่าไหนยังว่าง จะได้ไม่เงียบอีก |
 | **024** | 🟢 Resolved | แผงเมนูค้าง `visibility: hidden` ทั้งที่ React สั่งเปิดแล้ว | `src/app/globals.css` | ✅ **แก้แล้ว** — ถอด `visibility` ออกจาก base transition ให้ `visible` ทันทีตอนเปิด |
 | **025** | 🟢 Resolved | กด TH/EN แล้วหัวเว็บนิ่ง ไม่มี visual feedback (353ms) | `src/lib/i18n/context.tsx`, `src/components/layout/LanguageSwitcher.tsx` | ✅ **แก้แล้ว** — เพิ่ม `pendingLocale` urgent update และ `aria-busy` feedback |
 | **026** | 🟢 Resolved | `LocaleProvider` ไม่ memoize value ทำให้ทั้งเว็บ re-render | `src/lib/i18n/context.tsx` | ✅ **แก้แล้ว** — ครอบ `useMemo` และ `useCallback` |
@@ -155,13 +157,15 @@
 | **ขอบเขต** | **มีมาแต่เดิมทั้งสองผัง ไม่ใช่ของใหม่** — `celtic-cross` เป็นแบบนี้มานาน |
 | **ต้องให้เจ้าของเคาะ** | ถ้าเป็นดีไซน์เรียงซ้อนตั้งใจ = ปิดเคส · ถ้าไม่ใช่ ต้องเพิ่มความสูงกรอบ (ปรับ `78%` ใน `SpreadPositionMap.tsx`) ซึ่งกระทบทุกผัง |
 
-### ISSUE-035 · CSP บล็อก Cloudflare Web Analytics ทั้งเว็บ
+### ISSUE-035 · CSP บล็อก Cloudflare Web Analytics ทั้งเว็บ — ✅ ปิดเคสแล้ว 2026-09-09
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
+| **สถานะ** | ✅ **แก้แล้ว** — เติมทั้ง `script-src` และ `connect-src` ใน `next.config.ts` |
 | **อาการ** | ทุกครั้งที่โหลดหน้าบน production คอนโซลขึ้น `Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/...' violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://connect.facebook.net"` |
 | **ผลกระทบ** | Cloudflare แทรก beacon ให้อัตโนมัติ แต่ CSP ของเราบล็อกทิ้ง → **Cloudflare Web Analytics ไม่ได้เก็บข้อมูลอะไรเลย** ทั้งที่บริการเปิดอยู่ |
-| **ทางแก้** | เติม `https://static.cloudflareinsights.com` เข้า `script-src` หรือปิด Web Analytics ที่ฝั่ง Cloudflare ไปเลยถ้าไม่ได้ใช้ (GA4 ทำงานปกติอยู่แล้ว) |
+| **ทางแก้** | เติม `https://static.cloudflareinsights.com` เข้า `script-src` หรือปิด Web Analytics ที่ฝั่ง Cloudflare ไปเลยถ้าไม่ได้ใช้ |
+| **สิ่งที่เกือบพลาด** | แก้แต่ `script-src` อย่างเดียวไม่พอ — beacon ยิงผลกลับเป็น **POST** ไป `cloudflareinsights.com` ถ้า `connect-src` ไม่เปิดด้วย สคริปต์จะโหลดผ่าน (คอนโซลเงียบ) แต่ข้อมูลไม่เคยถึงปลายทาง กลายเป็น "แก้แล้วแต่ยังไม่มีข้อมูล" ที่หาสาเหตุยากกว่าเดิม |
 
 ---
 
