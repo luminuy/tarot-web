@@ -16,6 +16,7 @@ import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { sanitizeTarotText, stripThinkingTags } from "@/lib/ai/language";
+import { MEMBERS_ONLY_CHAT_MESSAGE, isSignInRequired } from "@/lib/entitlement/signin-gate";
 
 export const runtime = "nodejs";
 
@@ -195,19 +196,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // ── การคุยต่อกับแม่หมอ = สมาชิกเท่านั้น (ENTITLEMENT_PLAN ข้อ 4) · ไม่กินโควตาเปิดไพ่ ──
   if (!privileged) {
     const { isEntitlementEnabled } = await import("@/lib/entitlement/flag");
-    if (await isEntitlementEnabled()) {
-      const { getViewer } = await import("@/lib/entitlement/viewer");
-      const viewer = await getViewer(request);
-      if (viewer.kind !== "member") {
-        recordEvent("entitlement_blocked_chat");
-        return NextResponse.json(
-          {
-            error: "สมัครสมาชิกเพื่อถามแม่หมอต่อ และเก็บดวงไว้ดูย้อนหลังได้ทุกเครื่อง",
-            reason: "members_only",
-          },
-          { status: 403 },
-        );
-      }
+    const { getViewer } = await import("@/lib/entitlement/viewer");
+    const [enforced, viewer] = await Promise.all([isEntitlementEnabled(), getViewer(request)]);
+    // ด่านล็อกอินอยู่นอกธงโควตา (`isSignInRequired`) — ธงถูกปิดค้างได้ แต่ "เฉพาะสมาชิก" ต้องไม่หาย
+    if ((enforced || isSignInRequired(viewer)) && viewer.kind !== "member") {
+      recordEvent("entitlement_blocked_chat");
+      return NextResponse.json(
+        { error: MEMBERS_ONLY_CHAT_MESSAGE, reason: "members_only" },
+        { status: 403 },
+      );
     }
   }
 
