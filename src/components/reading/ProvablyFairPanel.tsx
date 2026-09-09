@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { verifyReading, type VerificationResult } from "@/lib/tarot/verify-client";
-import { SPRING } from "@/lib/motion";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 
@@ -151,18 +149,20 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
         </div>
       </button>
 
-      <AnimatePresence initial={false}>
-        {isPanelOpen && (
-          <motion.div
-            key="pf-body"
-            id="provably-fair-body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={SPRING.snappy}
-            className="overflow-hidden"
-          >
-            <div className="border-t border-[#D9C8AC]/30 p-5 sm:p-6 space-y-4">
+      {/*
+        * ⚠️ ห้ามกลับไปอนิเมต `height: "auto"` ด้วย motion
+        * การไล่ค่า height บังคับให้เบราว์เซอร์คำนวณ layout ใหม่ "ทุกเฟรม"
+        * และไม่ใช่แค่กล่องนี้ — ทุกอย่างที่อยู่ใต้มันบนหน้าต้องขยับตามไปด้วย
+        * แถบยุบ/ขยายเปิดครั้งเดียว = ~60 รอบ layout ซ้อนกันใน 240ms
+        *
+        * `.anim-swap-rise-sm` ให้กล่องกางเต็มความสูงทันที (layout รอบเดียว)
+        * แล้วเลื่อนเนื้อหาขึ้นมา + จางเข้าด้วย transform/opacity ซึ่ง compositor ทำเอง
+        * ตาเห็นใกล้เคียงของเดิมมากแต่ไวกว่า — แลกกับไม่มีอนิเมชันขาออก
+        * ซึ่งเป็นข้อแลกเปลี่ยนชุดเดียวกับที่บ้านนี้ตัดสินใจไว้แล้วใน INC-0103
+        */}
+      {isPanelOpen && (
+        <div id="provably-fair-body" className="overflow-hidden">
+          <div className="anim-swap-rise-sm border-t border-[#D9C8AC]/30 p-5 sm:p-6 space-y-4">
               {/* State 1: Before Reveal (No serverSeed yet) */}
               {!isRevealed && (
                 <div className="space-y-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
@@ -285,15 +285,18 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                   )}
 
                   {/* Verification Results Panel */}
-                  <AnimatePresence mode="wait">
-                    {result && (
-                      <motion.div
-                        key="verify-result"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={SPRING.snappy}
+                  {/*
+                    * ⚠️ เดิมเป็น `<AnimatePresence mode="wait">` ที่ **ไม่มี `exit` เลยสักตัว**
+                    * `mode="wait"` มีหน้าที่เดียวคือ "รอตัวเก่าเล่นอนิเมชันขาออกให้จบก่อน"
+                    * เมื่อไม่มีขาออก มันจึงไม่ได้ทำอะไรเลย นอกจากแบกความเสี่ยงเดิมมาด้วย —
+                    * `AnimatePresence mode="wait"` คือสาเหตุรากของ INC-0015 ที่ทำให้พิธีดูดวง
+                    * ค้างตายทั้งขั้นตอน (exit-transition deadlock กับ motion@13 + React 19.2)
+                    * ผลลัพธ์การตรวจสอบก็เป็นกล่องที่โผล่มาครั้งเดียวแล้วอยู่ยาว ไม่มีการสลับไปมา
+                    */}
+                  {result && (
+                      <div
                         aria-live="polite"
-                        className="space-y-3"
+                        className="anim-swap-rise-sm space-y-3"
                       >
                         {result.commitmentOk && result.drawMatches ? (
                           /* Success Box */
@@ -367,9 +370,8 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                             {isEnglish ? "Re-run calculation" : "รันการคำนวณซ้ำอีกครั้ง"}
                           </button>
                         </div>
-                      </motion.div>
+                      </div>
                     )}
-                  </AnimatePresence>
 
                   {/* Independent Verification Accordion */}
                   <div className="pt-2 border-t border-[#D9C8AC]/30">
@@ -398,11 +400,8 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     </button>
 
                     {showIndependentGuide && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-3 text-xs "
+                      <div
+                        className="anim-swap-rise-sm mt-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-3 text-xs "
                       >
                         <p className="text-[#635B4E] font-serif-th leading-relaxed">
                           {isEnglish
@@ -428,15 +427,14 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                                 : "คัดลอก JSON"}
                           </button>
                         </div>
-                      </motion.div>
+                      </div>
                     )}
                   </div>
                 </div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </section>
   );
 };

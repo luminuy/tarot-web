@@ -599,11 +599,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
                     {/* Expanded Advice & Details */}
                     {isExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        className="pt-2 border-t border-[#D5CEC2]/40 space-y-2 text-xs"
-                      >
+                      <div className="anim-swap-rise-sm pt-2 border-t border-[#D5CEC2]/40 space-y-2 text-xs">
                         {item.advice && item.advice.length > 0 && (
                           <div>
                             <span className="text-[13px] text-[#A58A5C] font-bold block font-serif-th">
@@ -622,7 +618,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                             <span className="text-[#29261F] font-bold">{item.timing}</span>
                           </div>
                         )}
-                      </motion.div>
+                      </div>
                     )}
                   </div>
                 );
