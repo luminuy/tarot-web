@@ -16,7 +16,7 @@
  * บทเรียน (หลักการข้อ 0.8): กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน
  *
  * ────────────────────────────────────────────────────────────────
- * กฎที่ตรวจ (8 ข้อ):
+ * กฎที่ตรวจ (9 ข้อ):
  *  1. `<header>` ของ SiteHeader ต้องมี `data-site-header` + `fixed` + `top-0` + กางเต็มกว้าง
  *     + z-index — และ **ห้ามกลับไปใช้ `sticky`** (INC-0109)
  *  2. globals.css ต้องมีบล็อก `[data-site-header]` ที่บังคับเลเยอร์ compositor ด้วย translateZ(0)
@@ -30,6 +30,8 @@
  *     ในข้อ 2 ทำให้หัวเว็บกลายเป็น containing block ของลูกหลานที่เป็น fixed (แผงเมนูจะยึดผิดที่)
  *  6. ไฟล์ที่เรนเดอร์ `<SiteHeader` ห้ามครอบมันด้วย element ที่เป็น scroll container
  *     (`overflow-hidden` / `overflow-auto` / `overflow-y-*`) — `overflow-x-clip` เท่านั้นที่อนุญาต
+ *  7. **ทุกหน้าของทั้งเว็บต้องมีหัวเว็บจริง** ทั้งใน HTML ที่ build ออกมาและในโครง source
+ *     ยกเว้นเฉพาะรายการใน `INTENTIONALLY_HEADERLESS` ที่ต้องเขียนเหตุผลกำกับ (INC-0112)
  *
  * รันด้วย: npx tsx scripts/qa/test-sticky-header.ts
  */
@@ -332,6 +334,224 @@ for (const file of listTsxFiles(path.join(ROOT, "src"))) {
 }
 
 // ───────────────────────────────────────────────────────────────
+// 7. ทุกหน้าของเว็บต้อง "มีหัวเว็บจริง" — ยกเว้นรายการที่ตั้งใจไม่มีเท่านั้น (INC-0112)
+//
+// INC-0110 จับได้ว่าหน้าอังกฤษ 115 หน้าไม่มีหัวเว็บ แล้วปิดเคสด้วยด่านที่ตรวจ
+// **เฉพาะ `.next/server/app/en/**`** ฝั่งไทยจึงยังไม่มีใครตรวจเลยสักหน้า
+// พอไล่ดูจริงก็พบอีก 3 หน้าที่หายไปเงียบ ๆ (404 · ตั้งรหัสผ่านใหม่ · สถานะคิวของลูกค้า)
+//
+// บทเรียน: ด่านที่ตรวจ "เฉพาะที่ที่เคยพัง" คือด่านที่ปล่อยของแบบเดียวกันหลุดในที่อื่น
+// ด่านนี้จึงตรวจ **ทุกหน้าของทั้งเว็บ** สองชั้น:
+//   7.1 ชั้น artifact — HTML ที่ build ออกมาจริงทุกไฟล์ต้องมีแอตทริบิวต์ `data-site-header="`
+//       (โครง layout ที่หายไปอ่านจาก page.tsx มองไม่เห็น — นั่นคือต้นเหตุของ INC-0110)
+//   7.2 ชั้น source — หน้าที่เป็น dynamic ไม่มี HTML ให้ตรวจตอน build (`/readers/[id]`,
+//       `/readers/queue/[id]`, `/s/[id]`) จึงต้องไล่จาก page.tsx ขึ้นไปตาม layout แม่
+//       และตามการ import ลึกไม่เกิน 3 ชั้น (หน้าแรกได้หัวเว็บผ่าน HomePageBody ➔ TarotFlow)
+//
+// ⚠️ ต้องจับ **แอตทริบิวต์** `data-site-header="` เท่านั้น ห้าม includes("data-site-header")
+// เฉย ๆ — สตริงนั้นตรงกับ `data-site-header-spacer=""` และกฎ CSS ที่ inline มาในหน้าด้วย
+// ด่านจะผ่านทั้งที่หัวเว็บหายไปจริง (บทเรียนตอนทดสอบด่านของ INC-0110)
+// ───────────────────────────────────────────────────────────────
+
+/** หน้าที่ "ตั้งใจ" ไม่มีหัวเว็บกลาง — เพิ่มรายการใหม่ได้ แต่ต้องเขียนเหตุผลกำกับเสมอ */
+const INTENTIONALLY_HEADERLESS: { route: string; reason: string }[] = [
+  { route: "admin", reason: "แผงแอดมิน — ธีมและเมนูคนละชุดกับหน้าเว็บสาธารณะ (noindex)" },
+  { route: "admin/login", reason: "หน้าเข้าสู่ระบบของแผงแอดมิน (noindex)" },
+  { route: "tester", reason: "โหมดผู้ทดสอบภายใน — ธีมมืดคนละชุด (noindex)" },
+  { route: "readers/console", reason: "แผงทำงานหลังบ้านของแม่หมอ มีแถบของตัวเอง (noindex)" },
+  {
+    route: "reading/chat",
+    reason: "ห้องแชท — มีแถบหัวบางของตัวเองพร้อมปุ่มกลับหน้าคำทำนาย (INC-0109) หัวเว็บเต็มจะกินพื้นที่จอสนทนา",
+  },
+  { route: "s/[id]", reason: "หน้ารับลิงก์แชร์ที่พาไปหน้าแรกภายใน 1 วินาที (noindex) หัวเว็บจะแวบขึ้นมาแล้วหายทันที" },
+  {
+    route: "_global-error",
+    reason: "อยู่นอก root layout จึงไม่มี LocaleProvider ให้ SiteHeader ใช้ (Next บังคับให้เรนเดอร์ <html> ของตัวเอง)",
+  },
+];
+const HEADERLESS_ROUTES = new Set(INTENTIONALLY_HEADERLESS.map((x) => x.route));
+
+/** `src/app/(th)/readers/queue/[id]/page.tsx` ➔ `readers/queue/[id]` (route group ไม่นับเป็น path) */
+function routeIdFromPageFile(file: string): string {
+  const rel = path.relative(path.join(ROOT, "src/app"), file).split(path.sep).join("/");
+  return rel
+    .split("/")
+    .slice(0, -1)
+    .filter((seg) => !(seg.startsWith("(") && seg.endsWith(")")))
+    .join("/");
+}
+
+/** layout.tsx ทุกชั้นตั้งแต่โฟลเดอร์ของหน้าขึ้นไปจนถึง src/app */
+function ancestorLayouts(pageFile: string): string[] {
+  const appDir = path.join(ROOT, "src/app");
+  const out: string[] = [];
+  let dir = path.dirname(pageFile);
+  for (;;) {
+    const candidate = path.join(dir, "layout.tsx");
+    if (fs.existsSync(candidate)) out.push(candidate);
+    if (dir === appDir) break;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return out;
+}
+
+function resolveLocalImport(spec: string, fromFile: string): string | null {
+  let base: string;
+  if (spec.startsWith("@/")) base = path.join(ROOT, "src", spec.slice(2));
+  else if (spec.startsWith(".")) base = path.resolve(path.dirname(fromFile), spec);
+  else return null; // แพ็กเกจภายนอก — ไม่ต้องตาม
+  for (const candidate of [base, `${base}.tsx`, `${base}.ts`, path.join(base, "index.tsx"), path.join(base, "index.ts")]) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate;
+  }
+  return null;
+}
+
+const MAX_IMPORT_DEPTH = 3;
+
+/** ชื่อคอมโพเนนต์ที่ไฟล์นี้ import เข้ามาแบบ local ➔ path จริงของไฟล์นั้น */
+function localImports(source: string, fromFile: string): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const m of source.matchAll(/import\s+([^;]+?)\s+from\s+"([^"]+)"/g)) {
+    const target = resolveLocalImport(m[2], fromFile);
+    if (!target) continue;
+    const clause = m[1];
+    // `import Default from "..."` — ชื่อ default อยู่หน้าสุดก่อนเครื่องหมาย {
+    const defaultName = clause.match(/^\s*(?:type\s+)?([A-Za-z_$][\w$]*)\s*(?:,|$)/);
+    if (defaultName) out.set(defaultName[1], target);
+    // `import { A, B as C } from "..."`
+    const named = clause.match(/\{([^}]*)\}/);
+    if (named) {
+      for (const piece of named[1].split(",")) {
+        const alias = piece.trim().split(/\s+as\s+/).pop()?.replace(/^type\s+/, "").trim();
+        if (alias) out.set(alias, target);
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * ไฟล์นี้เรนเดอร์ <SiteHeader /> เองหรือไม่ — ถ้าไม่ ให้ตามเฉพาะคอมโพเนนต์ที่มัน
+ * **เรนเดอร์จริงในเจเอสเอ็กซ์** ลึกไม่เกิน 3 ชั้น (หน้าแรก: page ➔ HomePageBody ➔ TarotFlow)
+ *
+ * ⚠️ ห้ามตามทุก import ที่เจอ — ตอนทดสอบด่านรอบนี้เคยเขียนแบบนั้นแล้วด่าน "ผ่าน"
+ * ทั้งที่ลบ <SiteHeader /> ออกจาก layout ของ /cards จริง ๆ เพราะหน้าไปเจอคำว่า
+ * SiteHeader ในโมดูลที่มัน import มาแต่ไม่เคยเรนเดอร์เลย = ใบผ่านฟรีให้ของที่พัง
+ */
+function rendersHeader(file: string, depth: number, visited: Map<string, number>): boolean {
+  if (depth > MAX_IMPORT_DEPTH) return false;
+  const seenAt = visited.get(file);
+  // เคยไปถึงไฟล์นี้ที่ระดับตื้นกว่าแล้ว = เดินซ้ำไม่ได้อะไรเพิ่ม แต่ถ้ารอบนี้ตื้นกว่าต้องเดินใหม่
+  if (seenAt !== undefined && seenAt <= depth) return false;
+  visited.set(file, depth);
+
+  const source = fs.readFileSync(file, "utf-8");
+  if (source.includes("<SiteHeader")) return true;
+
+  for (const [name, target] of localImports(source, file)) {
+    const rendered = new RegExp(`<${name}[\\s/>]`).test(source);
+    if (rendered && rendersHeader(target, depth + 1, visited)) return true;
+  }
+  return false;
+}
+
+const pageFiles = listTsxFiles(path.join(ROOT, "src/app")).filter((f) => path.basename(f) === "page.tsx");
+const sourceRoutes = new Set(pageFiles.map(routeIdFromPageFile));
+
+// 7.1 ชั้น source — ครอบคลุมหน้า dynamic ที่ไม่มี HTML ให้ตรวจตอน build
+for (const file of pageFiles) {
+  const route = routeIdFromPageFile(file);
+  if (HEADERLESS_ROUTES.has(route)) continue;
+  const chain = [file, ...ancestorLayouts(file)];
+  if (!chain.some((f) => rendersHeader(f, 0, new Map()))) {
+    failures.push(
+      `/${route} — ไม่มี <SiteHeader /> ทั้งในหน้าเองและใน layout ชั้นใดเลย ` +
+        `(ถ้าตั้งใจไม่มีจริง ให้เพิ่มลง INTENTIONALLY_HEADERLESS พร้อมเหตุผล) — INC-0112`,
+    );
+  }
+}
+
+// 7.2 ชั้น artifact — HTML ที่ build ออกมาจริง (ครอบคลุมทั้งไทยและอังกฤษ)
+const appBuildDir = path.join(ROOT, ".next/server/app");
+if (fs.existsSync(appBuildDir)) {
+  const htmlFiles: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith(".html")) htmlFiles.push(full);
+    }
+  };
+  walk(appBuildDir);
+
+  const headerless: string[] = [];
+  let scanned = 0;
+  for (const file of htmlFiles) {
+    const route = path.relative(appBuildDir, file).split(path.sep).join("/").replace(/\.html$/, "");
+    if (HEADERLESS_ROUTES.has(route)) continue;
+    const html = fs.readFileSync(file, "utf-8");
+    // ข้ามไฟล์ที่ไม่ใช่ "หน้าจริงที่ prerender สำเร็จ" — สังเกตจาก `id="__next_error__"`
+    // ซึ่ง Next ใช้กับสองกรณี: หน้าที่ redirect (NEXT_REDIRECT ตาม `redirects` ใน next.config)
+    // และเปลือกของ `notFound()` ที่ `next start` เขียนลง .next/server/app ตอนมีคนขอ URL ที่ไม่มีจริง
+    // ทั้งสองแบบไม่มีเนื้อหาใน HTML เลย (เรนเดอร์ฝั่งไคลเอนต์จาก RSC payload) จึงตรวจอะไรไม่ได้
+    // และเปลือกแบบหลังไม่ได้มาจาก build ด้วยซ้ำ — ตรวจมันคือการฟ้องหน้าที่ไม่มีอยู่จริง
+    if (html.includes('id="__next_error__"')) continue;
+    scanned += 1;
+    if (!html.includes('data-site-header="')) headerless.push(`/${route}`);
+  }
+
+  if (headerless.length > 0) {
+    failures.push(
+      `HTML ที่ build แล้ว: ${headerless.length} หน้าไม่มีแอตทริบิวต์ \`data-site-header="\` — ` +
+        `${headerless.slice(0, 5).join(", ")}${headerless.length > 5 ? " …" : ""} (INC-0110 · INC-0112)`,
+    );
+  }
+  // กันด่าน "ผ่านเพราะไม่มีอะไรให้ตรวจ" — เว็บนี้มีหน้าที่ prerender ได้หลายร้อยหน้า
+  if (scanned < 200) {
+    failures.push(
+      `HTML ที่ build แล้ว: ตรวจได้แค่ ${scanned} หน้า (คาดว่าต้องเกิน 200) — build ไม่ครบหรือเส้นทางเปลี่ยน ด่านนี้จึงพิสูจน์อะไรไม่ได้`,
+    );
+  }
+} else {
+  console.warn("   ⚠️  ยังไม่มี .next/server/app — ข้ามการตรวจหัวเว็บใน HTML ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)");
+}
+
+// 7.4 หน้า 404 ทั้งสองไฟล์ต้องมีอยู่จริงและต้องมีหัวเว็บ
+//
+// เว็บนี้มี root layout สองตัวและอยู่ใน route group ทั้งคู่ (`(th)` · `(en)`)
+// Next จึงหา "root not-found" ไม่เจอถ้าไม่มีไฟล์วางไว้นอกกลุ่มที่ `src/app/not-found.tsx`
+// ผลที่วัดได้จริงก่อนแก้: `/zzz-unknown` และ `/en/zzz` ได้หน้า 404 ดีฟอลต์ของ Next
+// ("This page could not be found.") ภาษาอังกฤษล้วน ไม่มีแบรนด์ ไม่มีหัวเว็บ ไม่มีลิงก์กลับ
+// ทั้งที่โปรเจกต์มีหน้า 404 ภาษาไทยสวย ๆ อยู่แล้วใน `(th)/not-found.tsx` (INC-0112)
+for (const rel of ["src/app/not-found.tsx", "src/app/(th)/not-found.tsx"]) {
+  const full = path.join(ROOT, rel);
+  if (!fs.existsSync(full)) {
+    failures.push(
+      `${rel} หายไป — ${rel.includes("(th)") ? "`notFound()` ในต้นไม้ไทยจะตกไปหน้า 404 ดีฟอลต์ของ Next" : "URL ที่ไม่ตรง route ไหนเลยจะตกไปหน้า 404 ดีฟอลต์ของ Next"} (INC-0112)`,
+    );
+    continue;
+  }
+  if (!rendersHeader(full, 0, new Map())) {
+    failures.push(`${rel} — หน้า 404 ต้องมี <SiteHeader /> เหมือนหน้าอื่นทั้งเว็บ (INC-0112)`);
+  }
+}
+
+// 7.3 กันรายการยกเว้นค้าง — ทุกข้อในลิสต์ต้องชี้ไปยังหน้าที่มีอยู่จริง
+for (const item of INTENTIONALLY_HEADERLESS) {
+  const specialExists =
+    (item.route === "_global-error" && fs.existsSync(path.join(ROOT, "src/app/global-error.tsx"))) ||
+    (item.route === "_not-found" && fs.existsSync(path.join(ROOT, "src/app/(th)/not-found.tsx")));
+  if (!sourceRoutes.has(item.route) && !specialExists) {
+    failures.push(
+      `INTENTIONALLY_HEADERLESS มีรายการค้าง: "${item.route}" ไม่มีหน้านั้นในโปรเจกต์แล้ว — ลบออกจากลิสต์ ` +
+        `(ไม่งั้นวันหนึ่งมีหน้าชื่อเดิมกลับมา แล้วมันจะได้ใบผ่านฟรีโดยไม่มีใครรู้)`,
+    );
+  }
+}
+
+// ───────────────────────────────────────────────────────────────
 if (failures.length > 0) {
   console.error("\n❌ ด่านหัวเว็บ sticky ไม่ผ่าน:\n");
   for (const f of failures) console.error(`   • ${f}`);
@@ -342,5 +562,5 @@ if (failures.length > 0) {
 }
 
 console.log(
-  "✅ ด่านหัวเว็บผ่านครบ (ป้าย · fixed top-0 เต็มกว้าง ไม่ใช่ sticky · ตัวกันที่ · เลเยอร์ compositor ที่รอดการย่อ CSS · โล่กันเนื้อหาโผล่ · safe-area · body > * · overflow · ไม่มี fixed ซ้อนในลูกหลาน · ไม่มี scroll container ครอบ)",
+  "✅ ด่านหัวเว็บผ่านครบ (ป้าย · fixed top-0 เต็มกว้าง ไม่ใช่ sticky · ตัวกันที่ · เลเยอร์ compositor ที่รอดการย่อ CSS · โล่กันเนื้อหาโผล่ · safe-area · body > * · overflow · ไม่มี fixed ซ้อนในลูกหลาน · ไม่มี scroll container ครอบ · ทุกหน้าทั้งเว็บมีหัวเว็บจริง)",
 );
