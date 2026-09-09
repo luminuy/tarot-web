@@ -46,9 +46,15 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # ชุดตรวจกลาง 6 ด่าน (Collision, Typecheck, ไพ่ 78 ใบ, ผัง 20 แบบ, Safety Guardrails, Provably-Fair Shuffle)
-      # นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts — แหล่งความจริงเดียวร่วมกับ git hooks และ npm run commit
-      - name: 🧪 Verification Suite (6 ด่าน)
+      # ชุดตรวจกลางทั้งหมด — นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts ที่เดียว
+      # (แหล่งความจริงเดียวร่วมกับ git hooks และ npm run commit · เพิ่มด่านใหม่ให้ไปเพิ่มที่นั่น)
+      #
+      # ⚠️ ห้ามเขียนจำนวนด่านหรือจำนวนผังลงในชื่อขั้นตอนและคอมเมนต์ตรงนี้อีก
+      # ของเดิมเขียนตัวเลขไว้ตั้งแต่ยุคแรกสุดของโปรเจกต์ แล้วไม่มีใครตามแก้เลย
+      # ตลอดหลายสิบด่านที่เพิ่มเข้ามาทีหลัง — ตัวเลขที่ไม่มีเครื่องตรวจจะเพี้ยนเสมอ
+      # ตอนนี้ด่าน test-docs-numbers ส่องไฟล์ workflow ด้วยแล้ว แต่ทางที่ปลอดภัยกว่า
+      # คือไม่เขียนตัวเลขลงที่นี่ตั้งแต่แรก เพราะแหล่งความจริงอยู่ที่ CHECKS อยู่แล้ว
+      - name: 🧪 Verification Suite
         id: verify
         run: pnpm run repo:verify
         # ⚠️ ต้องมีที่นี่ด้วย ไม่ใช่แค่ตอน deploy — `repo:verify` มีด่านที่ build เว็บเองเมื่อยังไม่มี
@@ -126,7 +132,7 @@ jobs:
             | 🛡️ **AI Agent Collision Guard** | ✅ ผ่าน | ไม่พบการชนกันของไฟล์หรือ Lock ที่ใช้งานอยู่ |
             | 🔍 **TypeScript Strict Typecheck** | ✅ ผ่าน | 0 Errors (ความปลอดภัย Type 100%) |
             | 🃏 **78 Rider-Waite Cards Integrity** | ✅ ผ่าน | ครบ 78 ใบ (780 ข้อความความหมาย 5 มิติ) |
-            | 📐 **20 Spreads Geometry Calibration** | ✅ ผ่าน | 541/541 Assertions (ผังสัดส่วนทองคำ) |
+            | 📐 **25 Spreads Geometry Calibration** | ✅ ผ่าน | ทุกตำแหน่งไม่ทับกัน (ผังสัดส่วนทองคำ) |
             | ⚡ **Next.js & OpenNext Bundle Build** | ✅ ผ่าน | พร้อม Deploy สู่ Cloudflare Workers ทันที |
             
             ✨ **ระบบตรวจสอบและอนุมัติให้อัตโนมัติ (Auto-Verified & Auto-Merged)** 🚀`;
