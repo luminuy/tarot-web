@@ -22,6 +22,11 @@
  *  1. `open-next.config.ts` ต้องตั้ง `enableCacheInterception: false`
  *  2. ห้ามเขียน `prefetch={true}` ตรง ๆ ที่ไหนในโค้ด (ค่า default ของ Next ก็ prefetch อยู่แล้ว
  *     การเขียนย้ำแปลว่าตั้งใจเปิด ซึ่งควรอธิบายเหตุผลก่อน ไม่ใช่ใส่ผ่าน ๆ)
+ *  3. Speculation Rules ต้องอยู่ในเพดานที่ตกลงกันไว้ (รอบสองของ INC-0106)
+ *     ปิด prefetch ฝั่ง Next ครบทุกจุดแล้วยัง **ไม่พอ** — `<script type="speculationrules">`
+ *     เป็นคำสั่งที่ยิงถึงเบราว์เซอร์ตรง ๆ ไม่สนใจ `prefetch={false}` ของ Next เลย
+ *     ตรวจโดย **เรียกฟังก์ชันจริง** ที่หน้าเว็บใช้ แล้วดูโครงสร้างที่ได้ ไม่ใช่สแกนซอร์ส
+ *     ด้วย regex (บทเรียน INC-0114)
  *
  * 🔬 วิธีตรวจซ้ำด้วยมือ (เปิดหน้าแรกทิ้งไว้แล้วรันใน DevTools Console):
  *   let n=0; const of=fetch; window.fetch=(...a)=>{if(String(a[0]).includes('_rsc'))n++;return of(...a)};
@@ -58,7 +63,7 @@ function findTsxFiles(dir: string): string[] {
   return out;
 }
 
-function run(): void {
+async function run(): Promise<void> {
   const errors: string[] = [];
 
   // ── กฎ 1: cache interception ต้องปิด ────────────────────────────────────
@@ -93,6 +98,87 @@ function run(): void {
     }
   }
 
+  // ── กฎ 3: Speculation Rules ต้องอยู่ในเพดาน (รันฟังก์ชันจริง ไม่ใช่สแกนซอร์ส) ──
+  const { buildSpeculationRules, MAX_PRERENDER_LIST_URLS, SPECULATION_EXCLUDED_PATHS } =
+    await import("../../src/app/_shared/speculation-rules");
+
+  for (const isEnglish of [false, true]) {
+    const label = isEnglish ? "อังกฤษ" : "ไทย";
+    const rules = buildSpeculationRules(isEnglish) as unknown as Record<string, unknown[]>;
+
+    for (const [kind, list] of Object.entries(rules)) {
+      for (const raw of list) {
+        const rule = raw as {
+          source?: string;
+          urls?: string[];
+          where?: { and?: unknown[] };
+          eagerness?: string;
+        };
+        const isDocumentRule = rule.where !== undefined;
+        const where = `${kind} (${label}${isDocumentRule ? " · กฎครอบทั้งเว็บ" : " · รายการปิด"})`;
+
+        if (rule.eagerness === "eager") {
+          errors.push(
+            `${where} ตั้ง eagerness เป็น \`eager\`\n` +
+              "    💡 `eager` = ยิงทันทีที่เจอลิงก์ในหน้า โดยผู้ใช้ยังไม่ได้ทำอะไรเลย ห้ามใช้ทุกกรณี",
+          );
+        }
+
+        // prerender = โหลด **และรัน JS ของทั้งหน้า** (หน้าที่ถูกอุ่นจะยิง /api/bootstrap ของมันเองด้วย)
+        // จึงยอมให้ได้เฉพาะรายการปิดที่นับหัวได้เท่านั้น
+        if (kind === "prerender" && isDocumentRule) {
+          errors.push(
+            `${where} เป็นกฎแบบ document (\`where\`) — ต้นทุนไม่มีเพดาน\n` +
+              "    prerender ไม่ได้แค่ดึง HTML แต่รัน JS ของทั้งหน้าด้วย ครอบ `/*` เมื่อไรคือคำขอบานทันที\n" +
+              '    💡 ใช้ `source: "list"` ระบุหน้าที่คุ้มค่าเท่านั้น',
+          );
+        }
+
+        if (isDocumentRule && rule.eagerness !== "conservative") {
+          errors.push(
+            `${where} ตั้ง eagerness เป็น \`${rule.eagerness}\`\n` +
+              "    กฎครอบทั้งเว็บที่ไม่ใช่ conservative = ยิงคำขอตอนเมาส์แค่ \"ชี้\" ผ่านลิงก์\n" +
+              "    หน้าแรกมีลิงก์ภายใน 40 เส้น เพดานของ Chrome คือ 50 เส้น/หน้า\n" +
+              "    → เลื่อนอ่านเฉย ๆ ก็ยิงได้หลักสิบคำขอ ทั้งที่คลิกจริงเส้นเดียว (INC-0106 รอบสอง)\n" +
+              '    💡 ต้องเป็น "conservative" (ยิงตอนกดลงไปแล้ว)',
+          );
+        }
+
+        if (rule.urls && rule.urls.length > MAX_PRERENDER_LIST_URLS) {
+          errors.push(
+            `${where} มี ${rule.urls.length} หน้า เกินเพดาน ${MAX_PRERENDER_LIST_URLS}\n` +
+              "    💡 รายการยิ่งยาว ต้นทุนต่อการเปิดหน้ายิ่งบวม — คัดเฉพาะหน้าที่คนไปต่อจริง",
+          );
+        }
+
+        if (isDocumentRule) {
+          const guarded = JSON.stringify(rule.where);
+          for (const path of SPECULATION_EXCLUDED_PATHS) {
+            if (!guarded.includes(path)) {
+              errors.push(
+                `${where} ไม่ได้กัน \`${path}\` ออกจากการอุ่นล่วงหน้า\n` +
+                  "    💡 เส้นไดนามิก/ต้องล็อกอิน อุ่นไปก็ใช้ไม่ได้ เปลืองคำขอเปล่า",
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // กฎ 3ข: ห้ามมีใครเขียนออบเจ็กต์ speculationrules ดิบ ๆ ข้ามโมดูลกลางไป
+  // (ถ้าข้ามได้ กฎทั้งหมดข้างบนจะกลายเป็นด่านหลอกทันที)
+  for (const file of findTsxFiles(SRC)) {
+    const source = codeOnly(fs.readFileSync(file, "utf-8"));
+    if (source.includes("speculationrules") && !source.includes("buildSpeculationRules")) {
+      const rel = path.relative(process.cwd(), file);
+      errors.push(
+        `${rel} เขียนกฎ speculationrules เองโดยไม่ผ่าน buildSpeculationRules()\n` +
+          "    💡 ต้องเรียกจาก src/app/_shared/speculation-rules.ts เท่านั้น ไม่งั้นด่านนี้มองไม่เห็น",
+      );
+    }
+  }
+
   if (errors.length > 0) {
     console.error("❌ พบความเสี่ยงที่จะเกิดลูป prefetch ยิงคำขอไม่รู้จบ:");
     for (const e of errors) console.error(`  - ${e}\n`);
@@ -101,9 +187,12 @@ function run(): void {
 
   console.log(
     "✅ ผ่านทุกเกณฑ์: cache interception ปิดอยู่ (segment prefetch ของ Next 16 ทำงานได้) " +
-      "· ไม่มีจุดใดบังคับเปิด prefetch\n",
+      "· ไม่มีจุดใดบังคับเปิด prefetch · Speculation Rules อยู่ในเพดาน\n",
   );
   process.exit(0);
 }
 
-run();
+run().catch((error) => {
+  console.error("❌ ด่าน prefetch loop รันไม่สำเร็จ:", error);
+  process.exit(1);
+});
