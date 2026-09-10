@@ -369,7 +369,7 @@ export function QuickFortunePicker({
       {/* โมดัลระบุชื่อเล่นและคำถามสำหรับรอบใหม่ (Fast & Sacred Sacred Popover) */}
       {showNicknameModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left">
+          <div className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">

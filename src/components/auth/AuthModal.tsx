@@ -253,17 +253,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           ref={dialogRef}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] p-6 sm:p-8 shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col items-center relative overflow-hidden text-[#29261F]"
+          className="w-full max-w-md max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col relative overflow-hidden text-[#29261F]"
         >
           {/* Close button with high-contrast luxury border */}
           <button
             type="button"
             onClick={onClose}
             aria-label={isEn ? "Close authentication window" : "ปิดหน้าต่างเข้าสู่ระบบ"}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] hover:text-[#A58A5C] hover:border-[#A58A5C] hover:bg-[#FFFFFF] text-xs flex items-center justify-center transition cursor-pointer"
+            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-[#29261F] hover:text-[#A58A5C] hover:border-[#A58A5C] hover:bg-[#FFFFFF] text-xs flex items-center justify-center transition cursor-pointer"
           >
             ✕
           </button>
+
+          {/* ชั้นเนื้อหาที่เลื่อนได้ — `min-h-0` จำเป็นเพราะ flex item ปกติหดต่ำกว่าเนื้อหาไม่ได้ (INC: ล็อกอินตกขอบจอ) */}
+          <div className="flex flex-col items-center min-h-0 overflow-y-auto overscroll-contain p-6 sm:p-8">
 
           {/* Seer Brand Logo Frame */}
           <div className="relative mb-3.5 group select-none">
@@ -570,6 +573,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
               <span className="group-hover:text-[#06C755] transition-colors">LINE</span>
             </button>
+          </div>
+
           </div>
         </motion.div>
       </div>

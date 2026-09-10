@@ -117,6 +117,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "⚡ ระบบทำนายด่วน (Quick Fortune 1 ใบ / 4 หัวข้อยอดนิยม / Provably Fair)", cmd: TSX, args: ["scripts/qa/test-quick-fortune.ts"] },
   { label: "🖥️ วินัยการใช้ GPU layer ใน CSS (will-change เฉพาะสถานะ active/animating)", cmd: TSX, args: ["scripts/qa/test-will-change.ts"] },
   { label: "🔒 ความปลอดภัยของ Modal Lifecycle & Scroll Lock (deps ไร้ onClose · ป้องกันโฟกัสหลุด)", cmd: TSX, args: ["scripts/qa/test-modal-effect-deps.ts"] },
+  { label: "🪟 หน้าต่างลอยไม่ตกขอบจอ (เพดานความสูงผูกกับจอ + ชั้นเลื่อนได้ · ขอบบนต้องเข้าถึงได้เสมอ)", cmd: TSX, args: ["scripts/qa/test-modal-viewport-fit.ts"] },
   { label: "🃏 สารานุกรมไพ่ยิปซี 7 หน้าใหม่ (SEO Wave 2)", cmd: TSX, args: ["scripts/qa/test-seo-wave2.ts"] },
   { label: "📐 ผังพยากรณ์ 25 แบบ & 6 หน้ารวมตามหมวดชีวิต (SEO Wave 3)", cmd: TSX, args: ["scripts/qa/test-seo-wave3.ts"] },
   { label: "🔮 เครื่องมือไพ่ประจำตัว & ตารางตำแหน่ง & SEO แตกต่าง (SEO Wave 4)", cmd: TSX, args: ["scripts/qa/test-seo-wave4.ts"] },
