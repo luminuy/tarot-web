@@ -10,6 +10,7 @@ import { SITE_ORIGIN } from "@/lib/config/site";
 import type { Locale } from "@/lib/i18n/types";
 
 import { fontVariables } from "./fonts";
+import { buildSpeculationRules } from "./speculation-rules";
 
 /**
  * 🏛️ โครง `<html>` ของทั้งเว็บ — ใช้ร่วมกันโดย root layout ทั้งสองภาษา
@@ -80,48 +81,13 @@ export function RootHtml({
         <link rel="preconnect" href="https://api.groq.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.groq.com" />
 
-        {/* Speculation Rules API — Prerender หน้ายอดนิยมล่วงหน้าเมื่อ hover/touch (0ms transition)
-            รายการนำร่องต้องเป็นหน้าของภาษาเดียวกันเท่านั้น ไม่งั้นจะอุ่นหน้าที่ผู้ใช้ไม่ได้จะไป */}
+        {/* Speculation Rules API — อุ่นหน้าล่วงหน้าในเบราว์เซอร์
+            ⚠️ กฎอยู่ที่ ./speculation-rules.ts ห้ามเขียนออบเจ็กต์ดิบตรงนี้ (ด่านที่ 38 บังคับ)
+            ชั้นนี้ไม่สนใจ `prefetch={false}` ของ Next เลย จึงเป็นจุดที่คำขอรั่วได้เงียบที่สุด */}
         <script
           type="speculationrules"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              prerender: [
-                {
-                  source: "list",
-                  urls: isEnglish
-                    ? ["/en", "/en/cards", "/en/spreads", "/en/daily"]
-                    : ["/", "/cards", "/spreads", "/blog", "/daily"],
-                  eagerness: "moderate",
-                },
-                {
-                  where: {
-                    and: [
-                      { href_matches: "/*" },
-                      { not: { href_matches: "/api/*" } },
-                      { not: { href_matches: "/admin/*" } },
-                      { not: { href_matches: "/account/*" } },
-                      { not: { href_matches: "/readers/console*" } },
-                      { not: { href_matches: "/readers/queue/*" } },
-                    ],
-                  },
-                  eagerness: "conservative",
-                },
-              ],
-              prefetch: [
-                {
-                  where: {
-                    and: [
-                      { href_matches: "/*" },
-                      { not: { href_matches: "/api/*" } },
-                      { not: { href_matches: "/admin/*" } },
-                      { not: { href_matches: "/account/*" } },
-                    ],
-                  },
-                  eagerness: "moderate",
-                },
-              ],
-            }),
+            __html: JSON.stringify(buildSpeculationRules(isEnglish)),
           }}
         />
 
