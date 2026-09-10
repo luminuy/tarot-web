@@ -89,7 +89,7 @@ npm run agent:lock -- --agent <ชื่อคุณ> --domain <หมวด> --
 
 # 3. แก้งาน — วัดก่อนเดา หาสาเหตุราก พิสูจน์ผลจริง
 
-# 4. ตรวจครบทั้ง 43 ด่าน
+# 4. ตรวจครบทั้ง 44 ด่าน
 npm run repo:verify
 
 # 5. commit (ถ้าเป็น fix ต้องมี --cause และ --prevention)
@@ -102,7 +102,7 @@ npm run commit -- --agent <ชื่อคุณ> --type <feat|fix|perf|refactor
 npm run agent:unlock -- --agent <ชื่อคุณ>
 npm run log:sync
 
-# 7. เปิด PR (ระบบจะตรวจครบ 43 ด่านซ้ำ + merge + deploy ให้เอง)
+# 7. เปิด PR (ระบบจะตรวจครบ 44 ด่านซ้ำ + merge + deploy ให้เอง)
 #    ⚠️ ขั้นนี้ "ห้ามข้าม" — ดู INC-0015 ด้านล่าง
 #    ใส่ --wait เพื่อให้รอจน merge เสร็จ แล้วสลับกลับ main + ลบ branch ให้อัตโนมัติ
 npm run pr:auto -- "<title>" --body-file <path> --wait
@@ -171,7 +171,7 @@ npm run git:tidy
    - `public/_headers` ตั้ง `Cache-Control: max-age=31536000, immutable` ให้ `/cards/*` ไว้แล้ว **ถ้าจำเป็นต้องเปลี่ยนไฟล์ภาพจริงๆ ต้องเปลี่ยนชื่อไฟล์หรือชื่อโฟลเดอร์ด้วยเสมอ** ไม่งั้นคนที่เคยเข้าเว็บจะยังเห็นภาพเก่าไปอีก 1 ปี
    - ℹ️ ภาพเก็บบน **Cloudflare Workers Static Assets** ซึ่งเป็น edge CDN อยู่แล้วและไม่คิดเงินต่อ request — **ไม่ต้องย้ายไป Cloudflare Images หรือ R2** (มีแต่จะเพิ่มค่าใช้จ่าย/latency) ส่วน Image Transformations (`/cdn-cgi/image/`) ใช้ได้เฉพาะเมื่อมี custom domain เท่านั้น
 13. **🚀 Auto-Merge Workflow Enforcement (เปิด PR เสมอ)**:
-   - เมื่อเปิด PR ให้ใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจครบ 43 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers จบในคำสั่งเดียว
+   - เมื่อเปิด PR ให้ใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจครบ 44 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers จบในคำสั่งเดียว
    - ห้าม push branch ทิ้งไว้โดยไม่เปิด PR
 14. **🃏 Zero Fabricated Cards Policy (ห้ามกุไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด)**:
    - ในทุกขั้นตอนการสับไพ่, เลือกไพ่, กู้คืนเซสชัน, สตรีมคำทำนาย, และแชทถามตอบ **ห้ามเขียนโค้ด fallback มโนหรือกุไพ่ใบใดใบหนึ่งในสำรับ 78 ใบขึ้นมาเองเด็ดขาด** (ไม่ว่าจะ The Fool, The Magician หรือใบใดๆ ทั้งสิ้น)
@@ -250,7 +250,7 @@ npm run git:tidy
 ก่อนและหลังแก้ไขโค้ดทุกครั้ง AI **ต้องรันคำสั่งเหล่านี้เพื่อตรวจสอบความถูกต้อง**:
 
 ```bash
-# ✅ คำสั่งเดียวจบ — ตรวจครบทั้ง 43 ด่านในรอบเดียว
+# ✅ คำสั่งเดียวจบ — ตรวจครบทั้ง 44 ด่านในรอบเดียว
 #    (Collision Guard, Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Safety Guardrails, Provably-Fair Shuffle, D1 Sync, Entitlement, Groq Failover ฯลฯ)
 #    ถ้าไม่ผ่าน จะบอกครบทุกด่านที่พังพร้อมข้อความ error เต็ม ไม่ต้องแก้ทีละรอบ
 npm run repo:verify

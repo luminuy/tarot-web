@@ -47,7 +47,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.85, y: 30 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-sm rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-6 shadow-overlay flex flex-col items-center text-center space-y-4 relative cursor-default"
+          className="w-full max-w-sm max-h-[calc(100dvh-2rem)] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] shadow-overlay flex flex-col relative cursor-default overflow-hidden"
         >
           {/* Close Button */}
           <button
@@ -58,6 +58,9 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           >
             ✕
           </button>
+
+          {/* ชั้นเนื้อหาที่เลื่อนได้ — ไพ่ใบใหญ่ 353–408px ทำให้แผงสูงเกินจอเตี้ยจนตกขอบ (`min-h-0` จำเป็นสำหรับ flex item) */}
+          <div className="flex flex-col items-center text-center space-y-4 min-h-0 overflow-y-auto overscroll-contain p-6">
 
           {/* Position Name Tag */}
           {positionName && (
@@ -107,6 +110,8 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           >
             {isEnglish ? "Flip Card / View Back" : "พลิกดูหน้าไพ่ / หลังไพ่"}
           </button>
+
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>
