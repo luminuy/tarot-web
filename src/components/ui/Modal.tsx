@@ -151,7 +151,7 @@ export const Modal: React.FC<ModalProps> = ({
               animate={isMotionSafe ? { opacity: 1, y: 0 } : { opacity: 1 }}
               exit={isMotionSafe ? { opacity: 0, y: 10 } : { opacity: 0 }}
               transition={isMotionSafe ? SPRING.modal : TWEEN.fast}
-              className={`relative z-10 w-full ${maxWidthClass} max-h-[90vh] flex flex-col bg-white border border-[#D9C8AC] rounded-lg shadow-overlay text-[#2E211A] overflow-hidden focus:outline-none ${className}`}
+              className={`relative z-10 w-full ${maxWidthClass} max-h-[90svh] flex flex-col bg-white border border-[#D9C8AC] rounded-lg shadow-overlay text-[#2E211A] overflow-hidden focus:outline-none ${className}`}
             >
               {/* Header */}
               {(title || showCloseButton) && (

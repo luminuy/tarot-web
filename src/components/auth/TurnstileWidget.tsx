@@ -64,8 +64,13 @@ export function TurnstileWidget({ onToken, resetKey, isEn = false }: TurnstileWi
           containerRef.current.innerHTML = "";
           widgetIdRef.current = window.turnstile.render(containerRef.current, {
             sitekey: key,
-            size: "flexible",
-            theme: "auto",
+            // ⚠️ ห้ามใช้ "flexible" (INC-0128) — โหมดนั้นวัดความกว้างของกล่องแม่เองแล้วจัดขนาดใหม่
+            // พอกล่องแม่เป็นชั้นที่เลื่อนได้และความกว้างขยับ (แถบเลื่อน/คีย์บอร์ดมือถือ)
+            // widget จะวาดใหม่ซ้ำ ๆ เห็นเป็นอาการกระพริบ · "normal" คือ 300x65 คงที่ พอดีกับแผงกว้าง 448px
+            size: "normal",
+            // ⚠️ ห้ามใช้ "auto" (INC-0128) — เครื่องที่ตั้งโหมดมืดจะได้กล่องสีเข้มมาแปะกลางแผงสีขาว
+            // แล้วสลับสีตอนโหลดเสร็จ เห็นเป็นแถบดำแวบหนึ่ง · เว็บนี้เป็นธีมสว่างล้วนอยู่แล้ว
+            theme: "light",
             callback: (token: string) => onTokenRef.current(token),
             "expired-callback": () => onTokenRef.current(""),
             "error-callback": () => onTokenRef.current(""),
@@ -95,7 +100,8 @@ export function TurnstileWidget({ onToken, resetKey, isEn = false }: TurnstileWi
   return (
     <div
       ref={containerRef}
-      className="min-h-[65px]"
+      // "normal" กว้าง 300px คงที่ — จัดกึ่งกลางเองไม่งั้นกล่องจะไปชิดซ้ายแผง
+      className="min-h-[65px] flex justify-center"
       aria-label={isEn ? "Verify that you are not a bot" : "ตรวจสอบว่าคุณไม่ใช่บอต"}
     />
   );

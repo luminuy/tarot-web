@@ -486,6 +486,69 @@ function checkPhantomAnimateClasses(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 11 — แผงของหน้าต่างลอยห้ามอนิเมต `scale` (INC-0128)
+ *
+ * `ui/Modal.tsx` เขียนเตือนไว้ตั้งแต่ต้นว่า "ไม่ใช้ scale กับการ์ดโมดัลใบใหญ่ — การย่อ/ขยาย
+ * บังคับให้เบราว์เซอร์วาดตัวอักษรทั้งใบใหม่ทุกเฟรม (re-raster)" แต่ไม่มีเครื่องตรวจ
+ * หน้าต่างลอย 5 บานจึงยังใส่ `scale` กันครบทุกบาน · บนมือถือที่ CPU ช้ากว่าเดสก์ท็อป 4–6 เท่า
+ * อาการที่เจ้าของเห็นคือ "เปิดแล้วกระพริบ"
+ *
+ * ทางที่ถูก: เลื่อนขึ้น (`y`) + จาง (`opacity`) ให้ผลทางสายตาใกล้เคียงกันแต่เบากว่ามาก
+ */
+function checkModalScale(violations: Violation[]): void {
+  for (const file of walk(SRC, [".tsx"])) {
+    const text = fs.readFileSync(file, "utf-8");
+    if (!text.includes("modal-scrim")) continue; // ตรวจเฉพาะไฟล์ที่มีหน้าต่างลอยจริง
+    const r = rel(file);
+    const lines = text.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (isCommentLine(line)) continue;
+      if (!/\bscale:\s*0?\.\d|\bscale:\s*0\.\d/.test(line)) continue;
+      if (isAllowed(r, "scale")) continue;
+      violations.push({
+        rule: "11 · แผงหน้าต่างลอยอนิเมต scale (INC-0128)",
+        file: r,
+        line: i + 1,
+        code: line.trim().slice(0, 160),
+        hint: "scale บังคับ re-raster ตัวอักษรทั้งแผงทุกเฟรม — บนมือถือเห็นเป็นอาการกระพริบ · ใช้ `y` + `opacity` แทน",
+      });
+    }
+  }
+}
+
+/**
+ * กฎ 12 — เพดานความสูงของหน้าต่างลอยต้องใช้ `svh` เท่านั้น (INC-0128)
+ *
+ * `vh` = ความสูงตอนแถบ URL ซ่อน (แผงจึงล้นจอตอนแถบโผล่)
+ * `dvh` = เปลี่ยนค่าตลอดเวลาที่แถบ URL ของมือถือเลื่อนเข้าออก ➔ แผงรีโฟลว์ตามทุกครั้ง
+ *         ผู้ใช้เห็นเป็นอาการ "กระพริบ" ระหว่างเลื่อน
+ * `svh` = ความสูงที่เล็กที่สุด (แถบ URL โผล่) · ค่าคงที่ ไม่ขยับตามแถบ = ไม่มีรีโฟลว์
+ */
+function checkModalViewportUnit(violations: Violation[]): void {
+  for (const file of walk(SRC, [".tsx"])) {
+    const text = fs.readFileSync(file, "utf-8");
+    if (!text.includes("modal-scrim")) continue;
+    const r = rel(file);
+    const lines = text.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (isCommentLine(line)) continue;
+      const m = /max-h-\[[^\]]*?\d((?:d|l)?vh)[^\]]*?\]/.exec(line);
+      if (!m) continue;
+      if (isAllowed(r, m[1])) continue;
+      violations.push({
+        rule: "12 · เพดานความสูงหน้าต่างลอยไม่ได้ใช้ svh (INC-0128)",
+        file: r,
+        line: i + 1,
+        code: line.trim().slice(0, 160),
+        hint: `"${m[1]}" ขยับตามแถบ URL ของมือถือ ทำให้แผงรีโฟลว์กลางคัน — เปลี่ยนเป็น svh`,
+      });
+    }
+  }
+}
+
 function run(): void {
   console.log("🔍 ตรวจคุณภาพโมชั่นทั้งเว็บ (Motion Quality Guard)...\n");
 
@@ -494,6 +557,8 @@ function run(): void {
   checkWaitWithoutExit(violations);
   checkExitKilledByEarlyReturn(violations);
   checkPhantomAnimateClasses(violations);
+  checkModalScale(violations);
+  checkModalViewportUnit(violations);
   checkUnregisteredTransformVars(violations);
   checkCss(violations);
   checkKeyframeCenteringConflict(violations);
@@ -514,7 +579,7 @@ function run(): void {
   }
 
   console.log(
-    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
+    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · แผงหน้าต่างลอยไม่อนิเมต scale และใช้ svh · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
   );
   process.exit(0);
 }

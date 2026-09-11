@@ -61,10 +61,16 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 20 }}
-          className="w-full max-w-4xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-5 sm:p-7 shadow-overlay flex flex-col relative space-y-4 overflow-hidden"
+          /*
+           * ⚠️ **ห้ามใส่ `scale` ให้แผงโมดัลใบใหญ่** (INC-0128 · กฎเดียวกับที่ `ui/Modal.tsx` เขียนเตือนไว้)
+           * การย่อ/ขยายบังคับให้เบราว์เซอร์ raster ตัวอักษรทั้งใบใหม่ทุกเฟรม
+           * บนมือถือ (CPU ช้ากว่าเดสก์ท็อปหลายเท่า) เห็นเป็นอาการ "กระพริบ/กระตุก" ตอนเปิด
+           * เลื่อนขึ้น + จาง ให้ผลทางสายตาใกล้เคียงกันแต่เบากว่ามาก
+           */
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 12 }}
+          className="w-full max-w-4xl max-h-[90svh] rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-5 sm:p-7 shadow-overlay flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#D9C8AC]/30 pb-3">
@@ -203,10 +209,10 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
               className="fixed inset-0 z-60 flex items-center justify-center p-3 modal-scrim"
             >
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="w-full max-w-2xl max-h-[90vh] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-7 shadow-overlay flex flex-col relative space-y-4 overflow-y-auto text-[#2E211A]"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                className="w-full max-w-2xl max-h-[90svh] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-7 shadow-overlay flex flex-col relative space-y-4 overflow-y-auto text-[#2E211A]"
               >
                 <button
                   type="button"

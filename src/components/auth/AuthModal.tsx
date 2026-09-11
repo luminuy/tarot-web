@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { invalidateSessionCache } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
@@ -66,6 +65,50 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
+  /*
+   * ✦ ขาเข้า/ขาออกของหน้าต่างนี้ทำด้วย **CSS keyframes ล้วน** ไม่ใช้ `motion` (INC-0128)
+   *
+   * ทำไมถึงรื้อออก — เจ้าของแจ้งว่า "เปิดในมือถือกระพริบมาก":
+   *   1. `motion` คือ chunk 40 KB gzip ที่ต้องโหลด+คอมไพล์ให้เสร็จก่อนหน้าต่างจะโผล่ได้
+   *      บนมือถือที่ CPU ช้ากว่าเดสก์ท็อป 4–6 เท่า ช่วงนี้คือ "แตะแล้วจอนิ่งไปครึ่งวินาที
+   *      แล้วค่อยเด้งพรึ่บ" — วัดได้ว่ามีเฟรมยาว 150–180ms คาอยู่ตรงนั้น
+   *   2. อนิเมชันฝั่ง JS ต้องจอง/คืนเลเยอร์ compositor เองทุกครั้ง จังหวะจอง-คืนนี่เอง
+   *      ที่เห็นเป็นแสงวาบบนมือถือบางรุ่น · CSS keyframes ที่แตะแค่ opacity/transform
+   *      เบราว์เซอร์ยกให้ compositor ทำตั้งแต่ต้นจนจบ ไม่มีจังหวะสลับ
+   *   3. ได้ของแถม: chunk ของหน้าต่างเข้าสู่ระบบเหลือแค่โค้ดตัวเอง ไม่ลาก `motion` มาด้วย
+   *
+   * ⚠️ ห้ามเปลี่ยนกลับไปใช้ `motion` ที่ไฟล์นี้ · ถ้าจะแก้จังหวะ ให้แก้ที่คีย์เฟรมใน globals.css
+   * ⚠️ `closeDelayMs` ต้องเท่ากับความยาวของ `.anim-scrim-out` / `.anim-modal-sink` เสมอ
+   *    ถ้าไม่เท่า หน้าต่างจะหายวับก่อนอนิเมชันจบ (บทเรียนเดิม INC-0126 ในรูปแบบใหม่)
+   */
+  const closeDelayMs = 170;
+  const [isMounted, setIsMounted] = useState(isOpen);
+  const [isClosing, setIsClosing] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+      }
+      setIsClosing(false);
+      setIsMounted(true);
+      return;
+    }
+    if (!isMounted || closeTimerRef.current) return;
+    setIsClosing(true);
+    closeTimerRef.current = setTimeout(() => {
+      setIsMounted(false);
+      setIsClosing(false);
+      closeTimerRef.current = null;
+    }, closeDelayMs);
+  }, [isOpen, isMounted]);
+
+  useEffect(() => () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+  }, []);
+
   // เปิดหน้าต่างครั้งใหม่ต้องเคารพโหมดที่ผู้เรียกส่งมา
   // (มาจากกำแพงสิทธิ์ = ควรเปิดแท็บ "สมัครสมาชิก" ให้เลย ไม่ใช่ให้ผู้ใช้หาเอง)
   useEffect(() => {
@@ -82,7 +125,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // Esc ปิด · ล็อกการเลื่อนพื้นหลัง · ขังโฟกัสไว้ในหน้าต่าง (a11y — ของเดิมไม่มีเลย)
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isMounted) return;
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -120,7 +163,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       cancelAnimationFrame(focusTimer);
       restoreFocusRef.current?.focus?.();
     };
-  }, [isOpen]);
+  }, [isMounted]);
 
   const strength = calculatePasswordStrength(password, isEn);
 
@@ -233,44 +276,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  /*
-   * ⚠️ **ห้ามเขียน `if (!isOpen) return null` ไว้เหนือ `AnimatePresence` เด็ดขาด**
-   * (บทเรียนรอบ "หน้าต่างเข้าสู่ระบบไม่สมูท")
-   * ถ้าคืน `null` ก่อน ตัว `AnimatePresence` จะหายไปพร้อมลูกในเฟรมเดียวกัน
-   * มันจึงไม่มีอะไรให้ "ค้างไว้เล่นขาออก" — `exit` ที่เขียนไว้ข้างล่างไม่เคยทำงานสักครั้ง
-   * หน้าต่างจึงดับหายวับตอนปิด ทั้งที่โค้ดอ่านแล้วเหมือนมีอนิเมชันครบ
-   * เงื่อนไขต้องอยู่ **ข้างใน** `AnimatePresence` เท่านั้น
-   *
-   * ฉากหลัง (scrim) ก็ต้องไล่ opacity ไปด้วยกัน — ของเดิมเป็น `<div>` เปล่า
-   * จึงทาสีทึบลงทั้งจอในเฟรมเดียวแล้วค่อยมีแผงขาวค่อย ๆ ลอยขึ้นตามทีหลัง
-   * (opacity/transform เท่านั้น ไม่มีคุณสมบัติเชิง layout — ตามด่าน test-motion-quality)
-   */
-  return (
-    <AnimatePresence>
-      {isOpen && (
-      <motion.div
-        key="auth-modal-scrim"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="auth-modal-title"
-      >
-        {/* Backdrop click to close */}
-        <div className="absolute inset-0" onClick={onClose} />
+  if (!isMounted) return null;
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 10 }}
-          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          ref={dialogRef}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col relative overflow-hidden text-[#29261F]"
-        >
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim gpu-layer ${
+        isClosing ? "anim-scrim-out" : "anim-scrim-in"
+      }`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-modal-title"
+    >
+      {/* Backdrop click to close */}
+      <div className="absolute inset-0" onClick={onClose} />
+
+      <div
+        ref={dialogRef}
+        onClick={(e) => e.stopPropagation()}
+        className={`w-full max-w-md max-h-[calc(100svh-1.5rem)] sm:max-h-[calc(100svh-2rem)] rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col relative overflow-hidden text-[#29261F] ${
+          isClosing ? "anim-modal-sink" : "anim-modal-rise"
+        }`}
+      >
           {/* Close button with high-contrast luxury border */}
           <button
             type="button"
@@ -600,9 +626,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           </div>
-        </motion.div>
-      </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };
