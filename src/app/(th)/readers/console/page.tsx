@@ -134,7 +134,7 @@ function ReaderConsoleInner() {
             <div className="h-16 w-16 rounded-full border-2 border-[#ffd700]/60 bg-[#21163b] overflow-hidden flex items-center justify-center text-2xl font-bold text-[#ffd700] shrink-0">
               {reader.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={reader.avatarUrl} alt={reader.displayName} className="h-full w-full object-cover" />
+                <img src={reader.avatarUrl} alt="" /* ภาพประกอบล้วน — <h1> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
               ) : (
                 reader.displayName.charAt(0)
               )}

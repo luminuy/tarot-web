@@ -376,7 +376,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   <CardImage
                     image={card.image}
                     cardId={card.id}
-                    alt={isEnglish ? `${card.nameEn} tarot card` : `ไพ่ ${card.nameTh} (${card.nameEn})`}
+                    /* ภาพประกอบล้วน — <h2> ใต้ภาพในลิงก์เดียวกันพิมพ์ชื่อไพ่อยู่แล้ว ลิงก์จึงมีชื่อเรียกครบ (INC-0125) */
+                    alt=""
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 tarot-hd-card-image"
                     sizes="(min-width: 1024px) 152px, (min-width: 768px) 136px, (min-width: 640px) 156px, 38vw"
                     loading={isAboveFold ? "eager" : "lazy"}

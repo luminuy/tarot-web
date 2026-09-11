@@ -1521,7 +1521,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                         <span className="relative flex h-14 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#D5CEC2] bg-[#F3EDE2]">
                           <CardImage
                             image={selectedPersona.cardImage}
-                            alt={isEnglish ? (selectedPersona.nameEn || selectedPersona.nameTh) : selectedPersona.nameTh}
+                            /* ภาพประกอบล้วน — <Link> มี aria-label และตัวหนังสือข้างในบอกชื่อแม่หมออยู่แล้ว (INC-0125) */
+                            alt=""
                             className="h-full w-full object-cover object-top"
                             sizes="44px"
                           />

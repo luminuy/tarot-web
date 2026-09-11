@@ -116,7 +116,6 @@ const FEATURED_ARTICLES_TH = [
     category: "เทคนิคเปิดไพ่",
     desc: "คู่มือฉบับสมบูรณ์สำหรับการดูดวงไพ่ทาโรต์ด้วยตัวเอง วิธีตั้งจิตอธิษฐาน และการอ่านไพ่แบบไม่งมงาย",
     cardImage: "major-01.jpg",
-    cardAlt: "The Magician - เทคนิคเปิดไพ่",
   },
   {
     slug: "tarot-love-reading-guide",
@@ -124,7 +123,6 @@ const FEATURED_ARTICLES_TH = [
     category: "ความรัก & สัมพันธ์",
     desc: "ถอดรหัสไพ่บอกรัก ไพ่เตือนภัยความสัมพันธ์ และวิธีถามไพ่เรื่องความรักให้ได้คำตอบที่แท้จริง",
     cardImage: "major-06.jpg",
-    cardAlt: "The Lovers - ความรักและสัมพันธ์",
   },
   {
     slug: "celtic-cross-spread-guide",
@@ -132,7 +130,6 @@ const FEATURED_ARTICLES_TH = [
     category: "ผังพยากรณ์",
     desc: "ทำความเข้าใจผังพยากรณ์ยอดนิยมตลอดกาล แกะรอยความเชื่อมโยงของไพ่แต่ละตำแหน่งอย่างละเอียด",
     cardImage: "major-10.jpg",
-    cardAlt: "Wheel of Fortune - ผังเซลติกครอส",
   },
   {
     slug: "tarot-and-carl-jung-psychology",
@@ -140,7 +137,6 @@ const FEATURED_ARTICLES_TH = [
     category: "จิตวิทยา & AI",
     desc: "สำรวจความเชื่อมโยงระหว่าง Archetypes ของคาร์ล ยุง กับรหัสสัญลักษณ์บนไพ่ทาโรต์ 1909 Rider-Waite",
     cardImage: "major-09.jpg",
-    cardAlt: "The Hermit - จิตวิทยาของ Carl Jung",
   },
 ];
 
@@ -154,7 +150,6 @@ const FEATURED_ARTICLES_EN = [
     category: "Divination Technique",
     desc: "A comprehensive guide to reading tarot for yourself, cultivating sacred focus, and interpreting cards without superstition.",
     cardImage: "major-01.jpg",
-    cardAlt: "The Magician - Divination Technique",
   },
   {
     slug: "tarot-love-reading-guide",
@@ -162,7 +157,6 @@ const FEATURED_ARTICLES_EN = [
     category: "Love & Relationships",
     desc: "Decode affection cues, relationship hazard signs, and how to frame love inquiries for genuine insight.",
     cardImage: "major-06.jpg",
-    cardAlt: "The Lovers - Love & Relationships",
   },
   {
     slug: "celtic-cross-spread-guide",
@@ -170,7 +164,6 @@ const FEATURED_ARTICLES_EN = [
     category: "Tarot Spreads",
     desc: "Understand history's most renowned spread, tracing relational dynamics between each position with precision.",
     cardImage: "major-10.jpg",
-    cardAlt: "Wheel of Fortune - Celtic Cross",
   },
   {
     slug: "tarot-and-carl-jung-psychology",
@@ -178,7 +171,6 @@ const FEATURED_ARTICLES_EN = [
     category: "Psychology & AI",
     desc: "Explore the profound connection between Jungian archetypes and the esoteric symbols of the 1909 Rider-Waite deck.",
     cardImage: "major-09.jpg",
-    cardAlt: "The Hermit - Jungian Psychology",
   },
 ];
 
@@ -671,7 +663,8 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group flex items-start gap-4 sm:gap-5"
             >
               <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs group-hover:scale-105 duration-300">
-                <CardImage image={art.cardImage} alt={art.cardAlt} className="w-full h-full object-cover" sizes="64px" />
+                {/* ภาพประกอบล้วน — ป้ายหมวดหมู่และ <h3> ในลิงก์เดียวกันบอกเรื่องบทความอยู่แล้ว (INC-0125) */}
+                <CardImage image={art.cardImage} alt="" className="w-full h-full object-cover" sizes="64px" />
               </div>
 
               <div className="space-y-2 min-w-0 flex-1">

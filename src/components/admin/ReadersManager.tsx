@@ -303,7 +303,7 @@ export default function ReadersManager() {
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#D5CEC2] bg-[#F8F6F2] text-lg font-bold text-[#29261F] overflow-hidden">
                       {r.avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={r.avatarUrl} alt={r.displayName} className="h-full w-full object-cover" />
+                        <img src={r.avatarUrl} alt="" /* ภาพประกอบล้วน — <h3> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
                       ) : (
                         r.displayName.charAt(0)
                       )}

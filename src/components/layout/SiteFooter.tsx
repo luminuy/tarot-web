@@ -62,7 +62,8 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           <div className="w-9 h-13 sm:w-10 sm:h-15 rounded-lg overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
             <CardImage
               image="major-02.jpg"
-              alt={isEnglish ? "The High Priestess - Reading Notice" : "The High Priestess - ข้อควรทราบเกี่ยวกับการทำนาย"}
+              /* ภาพประกอบล้วน — <h3> ข้างภาพพิมพ์หัวข้อเดียวกันอยู่แล้ว (INC-0125) */
+              alt=""
               className="w-full h-full object-cover"
               sizes="40px"
             />

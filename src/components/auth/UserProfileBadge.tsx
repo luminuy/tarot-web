@@ -256,7 +256,8 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               {user.avatar ? (
                 <img
                   src={user.avatar}
-                  alt={user.name}
+                  /* ภาพประกอบล้วน — <span> ข้าง ๆ พิมพ์ชื่อผู้ใช้อยู่แล้ว (INC-0125) */
+                  alt=""
                   className="w-11 h-11 rounded-full object-cover ring-1.5 ring-[#A58A5C] flex-shrink-0"
                 />
               ) : (
