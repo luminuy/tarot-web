@@ -51,6 +51,23 @@ export const OG_IMAGE_ALT = "SeerTarot · ดูดวงไพ่ทาโร�
 /** ชื่อเว็บสำหรับข้อความ/ลายน้ำ/ไฟล์ส่งออกข้อมูล */
 export const SITE_NAME_TH = "วิหารพยากรณ์ไพ่ทาโรต์";
 
+/**
+ * 🔗 โปรไฟล์ทางการของแบรนด์บนแพลตฟอร์มอื่น — แหล่งความจริงเดียว
+ *
+ * ใช้ 2 ที่: ปุ่มลอย TikTok (`TikTokFloatingButton`) และ `Organization.sameAs`
+ * ใน JSON-LD ที่ `RootHtml.tsx` — **ต้องเป็นค่าเดียวกันเสมอ**
+ *
+ * ⚠️ `sameAs` คือช่องที่ Google กับเครื่องมือ AI ใช้ยืนยันว่า "เว็บนี้กับบัญชีนั้นคือเจ้าเดียวกัน"
+ * ถ้าใส่ URL ที่ไม่มีจริงหรือไม่ใช่ของเรา จะกลายเป็นสัญญาณตัวตนที่ผิด แย่กว่าไม่ใส่
+ * ➔ เพิ่มได้เฉพาะบัญชีที่ **เปิดสาธารณะจริงและเป็นของโปรเจกต์นี้** เท่านั้น
+ *
+ * ยังขาดอีกหลายช่องตามแผน Omnichannel (Facebook · Instagram · LINE OA · Threads · X)
+ * เติมเมื่อเจ้าของยืนยัน URL จริงแล้วเท่านั้น ห้ามเดา
+ */
+export const BRAND_SOCIAL_PROFILES = [
+  "https://www.tiktok.com/@seerada.tarot",
+] as const;
+
 /** อีเมลผู้ส่งเริ่มต้น (ทับได้ด้วย env `EMAIL_FROM` เมื่อ verify โดเมนกับผู้ให้บริการอีเมลแล้ว) */
 export const DEFAULT_EMAIL_FROM = `แม่หมอทาโรต์ <noreply@${SITE_DOMAIN}>`;
 
