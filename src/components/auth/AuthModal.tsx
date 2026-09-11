@@ -122,8 +122,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const strength = calculatePasswordStrength(password, isEn);
 
   const resetForm = () => {
@@ -235,9 +233,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  /*
+   * ⚠️ **ห้ามเขียน `if (!isOpen) return null` ไว้เหนือ `AnimatePresence` เด็ดขาด**
+   * (บทเรียนรอบ "หน้าต่างเข้าสู่ระบบไม่สมูท")
+   * ถ้าคืน `null` ก่อน ตัว `AnimatePresence` จะหายไปพร้อมลูกในเฟรมเดียวกัน
+   * มันจึงไม่มีอะไรให้ "ค้างไว้เล่นขาออก" — `exit` ที่เขียนไว้ข้างล่างไม่เคยทำงานสักครั้ง
+   * หน้าต่างจึงดับหายวับตอนปิด ทั้งที่โค้ดอ่านแล้วเหมือนมีอนิเมชันครบ
+   * เงื่อนไขต้องอยู่ **ข้างใน** `AnimatePresence` เท่านั้น
+   *
+   * ฉากหลัง (scrim) ก็ต้องไล่ opacity ไปด้วยกัน — ของเดิมเป็น `<div>` เปล่า
+   * จึงทาสีทึบลงทั้งจอในเฟรมเดียวแล้วค่อยมีแผงขาวค่อย ๆ ลอยขึ้นตามทีหลัง
+   * (opacity/transform เท่านั้น ไม่มีคุณสมบัติเชิง layout — ตามด่าน test-motion-quality)
+   */
   return (
     <AnimatePresence>
-      <div
+      {isOpen && (
+      <motion.div
+        key="auth-modal-scrim"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
         role="dialog"
         aria-modal="true"
@@ -249,7 +265,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 16 }}
+          exit={{ opacity: 0, scale: 0.96, y: 10 }}
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           ref={dialogRef}
           onClick={(e) => e.stopPropagation()}
@@ -474,14 +490,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
 
             {/* ด่านกันบอท (แสดงเฉพาะเมื่อตั้งค่า Turnstile ครบ) */}
-            <TurnstileWidget onToken={setTurnstileToken} resetKey={mode} />
+            <TurnstileWidget onToken={setTurnstileToken} resetKey={mode} isEn={isEn} />
 
-            {/* กำลังตรวจ Turnstile อยู่ — บอกผู้ใช้ว่าปุ่มกดไม่ได้เพราะอะไร */}
-            {turnstileToken === "" && !loading && (
-              <p className="text-xs text-[#635B4E] text-center flex items-center justify-center gap-1.5">
-                <span className="inline-block w-3 h-3 rounded-full border-2 border-[#A58A5C] border-t-transparent animate-spin" />
-                {isEn ? "Verifying security…" : "กำลังตรวจสอบความปลอดภัย…"}
-              </p>
+            {/* กำลังตรวจ Turnstile อยู่ — บอกผู้ใช้ว่าปุ่มกดไม่ได้เพราะอะไร
+                ⚠️ ห่อด้วยกล่องที่จองความสูงไว้ เพราะบรรทัดนี้หายไปเองตอนผู้ใช้ผ่านด่าน
+                ถ้าไม่จองที่ ปุ่ม "เข้าสู่ระบบ" จะเลื่อนขึ้นราว 11px พอดีจังหวะที่คนกำลังจะกด
+                กล่องนี้มีเฉพาะตอนด่านเปิดจริง (`turnstileToken !== null`) จึงไม่เหลือที่ว่างลอย ๆ
+                ให้คนที่ด่านปิด */}
+            {turnstileToken !== null && (
+              <div className="min-h-[18px]">
+                {turnstileToken === "" && !loading && (
+                  <p className="text-xs text-[#635B4E] text-center flex items-center justify-center gap-1.5">
+                    <span className="inline-block w-3 h-3 rounded-full border-2 border-[#A58A5C] border-t-transparent animate-spin" />
+                    {isEn ? "Verifying security…" : "กำลังตรวจสอบความปลอดภัย…"}
+                  </p>
+                )}
+              </div>
             )}
 
             {/* Primary Submit Button */}
@@ -577,7 +601,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           </div>
         </motion.div>
-      </div>
+      </motion.div>
+      )}
     </AnimatePresence>
   );
 };

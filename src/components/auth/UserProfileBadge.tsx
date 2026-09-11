@@ -10,11 +10,13 @@ import { useLocale } from "@/lib/i18n";
 
 export interface UserProfileBadgeProps {
   onOpenAuthModal: () => void;
+  /** อุ่นเครื่อง chunk ของหน้าต่างเข้าสู่ระบบตั้งแต่เมาส์/โฟกัสแตะปุ่ม (ยังไม่ต้องกด) */
+  onPrefetchAuth?: () => void;
   onOpenPlans?: () => void;
   onBuyCredits?: () => void;
 }
 
-export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthModal, onOpenPlans, onBuyCredits }) => {
+export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthModal, onPrefetchAuth, onOpenPlans, onBuyCredits }) => {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
   const { user, loading } = useSessionUser();
@@ -162,6 +164,8 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
     return (
       <button
         type="button"
+        onPointerEnter={onPrefetchAuth}
+        onFocus={onPrefetchAuth}
         onClick={() => {
           soundManager.playMenuTapSound();
           onOpenAuthModal();

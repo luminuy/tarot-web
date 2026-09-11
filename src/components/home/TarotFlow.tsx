@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { withMotionScope } from "@/components/providers/with-motion-scope";
+import { prefetchMotionScope, withMotionScope } from "@/components/providers/with-motion-scope";
 import { useOnceOpen } from "@/lib/use-once-open";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
@@ -20,6 +20,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";
 import { saveFlowState, loadFlowState, clearFlowState } from "@/lib/utils/flow-persistence";
 import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
+import { prefetchTurnstile } from "@/lib/auth/turnstile";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
@@ -58,7 +59,10 @@ const QuickChatResult = withMotionScope(() => import("@/components/reading/Quick
 const ShareModal = withMotionScope(() => import("@/components/reading/ShareModal").then((m) => m.ShareModal));
 const ReadingHistoryModal = withMotionScope(() => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal));
 const TarotEncyclopediaModal = withMotionScope(() => import("@/components/encyclopedia/TarotEncyclopediaModal").then((m) => m.TarotEncyclopediaModal));
-const AuthModal = withMotionScope(() => import("@/components/auth/AuthModal").then((m) => m.AuthModal));
+// หน้าต่างเข้าสู่ระบบเก็บตัวโหลดไว้เป็นชื่อ เพื่อ "อุ่นเครื่อง" ล่วงหน้าได้ตอนผู้ใช้แตะปุ่ม
+// (ดู `prefetchAuth` ข้างล่าง — ถ้าเริ่มโหลดตอนกดจริง จะเงียบไปครึ่งวินาทีก่อนหน้าต่างเด้ง)
+const loadAuthModal = () => import("@/components/auth/AuthModal").then((m) => m.AuthModal);
+const AuthModal = withMotionScope(loadAuthModal);
 const CardZoomModal = withMotionScope(() => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal));
 const BuyCreditsModal = withMotionScope(() => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal));
 const AccessDialog = withMotionScope(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog));
@@ -196,8 +200,21 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     setAccessReason(reason);
   };
 
+  /**
+   * อุ่นเครื่องหน้าต่างเข้าสู่ระบบ — เรียกได้บ่อยเท่าไรก็ได้ (ผลถูกแคชทั้งแท็บ)
+   * ของสองอย่างที่ต้องมาถึงก่อนหน้าต่างจะนิ่ง: chunk ของตัวหน้าต่าง (+`motion`)
+   * และ config ของด่านกันบอท · ยิงขนานกันตั้งแต่ผู้ใช้แตะปุ่ม ไม่ต้องรอต่อคิวกัน
+   */
+  const prefetchAuth = () => {
+    prefetchMotionScope(loadAuthModal);
+    prefetchTurnstile();
+  };
+
   const openAuth = (mode: "signin" | "signup" = "signin", fromWall = false) => {
     trackEvent("auth_modal_open", { mode, source: fromWall ? "wall" : "direct" });
+    // ด่านกันบอทอยู่กลางฟอร์ม ถ้าเพิ่งเริ่มขอ config ตอนหน้าต่างเรนเดอร์เสร็จ
+    // กล่องจะโผล่ทีหลังแล้วดันปุ่มขยับ — ขอไว้ตั้งแต่วินาทีที่กด
+    prefetchTurnstile();
     void ensureEntitlement();
     setAuthMode(mode);
     setAuthFromWall(fromWall);
@@ -1155,6 +1172,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         toolbar={
           <UserProfileBadge
             onOpenAuthModal={() => openAuth("signin")}
+            onPrefetchAuth={prefetchAuth}
             onOpenPlans={() => openAccessDialog("explore")}
             onBuyCredits={() => setIsBuyCreditsOpen(true)}
           />
