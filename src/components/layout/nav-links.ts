@@ -70,12 +70,13 @@ export const FOOTER_COLUMNS = [
       {
         title: "สายด่วนสุขภาพจิต 1323",
         description: "ปรึกษาผู้เชี่ยวชาญโทรฟรี 24 ชม.",
-        color: "text-[#3A7044]",
+        // ⚠️ ต้องเป็นคู่สี `-on-dark` เท่านั้น — ฟุตเตอร์พื้น #171512 (INC-0130 · กฎเหล็กข้อ 6)
+        color: "text-ok-on-dark",
       },
       {
         title: "เหตุฉุกเฉิน 1669",
         description: "แจ้งเหตุเจ็บป่วยฉุกเฉิน 24 ชม.",
-        color: "text-[#A6392C]",
+        color: "text-err-on-dark",
       },
     ],
   },
@@ -130,12 +131,12 @@ export function getFooterColumns(isEnglish: boolean) {
         {
           title: "988 Suicide & Crisis Lifeline",
           description: "Free & confidential 24/7 call/text",
-          color: "text-[#3A7044]",
+          color: "text-ok-on-dark",
         },
         {
           title: "Emergency Services 911",
           description: "Immediate emergency assistance 24/7",
-          color: "text-[#A6392C]",
+          color: "text-err-on-dark",
         },
       ],
     },

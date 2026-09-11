@@ -276,11 +276,17 @@ export function QuickFortunePicker({
           
         </div>
 
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
+        {/*
+          * ⚠️ ต้องเป็น `<p>` ไม่ใช่ `<h2>` (INC-0130)
+          * บล็อกนี้อยู่ **เหนือ** `<h1>` ของหน้าแรก ถ้าเป็นหัวข้อจริงจะกลายเป็น
+          * "h2 มาก่อน h1" ซึ่งพังทั้งโครงเอกสารของ screen reader และ outline ที่ Google อ่าน
+          * ข้อความนี้ทำหน้าที่เกริ่นนำ ไม่ใช่หัวข้อของส่วน — สไตล์เดิมทุกพิกเซล
+          */}
+        <p className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
           {isEnglish
             ? "Choose the area calling for clarity today"
             : "เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้"}
-        </h2>
+        </p>
       </div>
 
       {/* การ์ด 4 หัวข้อยอดนิยม (Mobile: Horizontal Swipe / Desktop: 4-Column Grid พอเหมาะกับเว็บ) */}
@@ -296,6 +302,9 @@ export function QuickFortunePicker({
               data-card-index={index}
               role="button"
               tabIndex={0}
+              // ตั้งชื่อให้การ์ดตรง ๆ — ของเดิมไม่มี ชื่อจึงถูกประกอบจากข้อความทุกชิ้นในใบ
+              // (ป้าย · ธาตุ · หัวข้อ · คำโปรย · จำนวนไพ่ · ปุ่ม) อ่านออกมายาวจนจับใจความไม่ได้
+              aria-label={isEnglish ? (topic.titleEn || topic.title) : topic.title}
               onClick={() => handleCardClick(topic)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -348,9 +357,12 @@ export function QuickFortunePicker({
                   <div className="text-[10px] sm:text-[11px] font-serif-th text-[#8F5C1A] tracking-wider font-semibold truncate">
                     {isEnglish ? (topic.elementalGlyphEn || topic.elementalGlyph) : topic.elementalGlyph}
                   </div>
-                  <h3 className="text-sm sm:text-base font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors duration-200 leading-snug">
+                  {/* `<p>` ไม่ใช่ `<h3>` ด้วยเหตุผลเดียวกับข้างบน
+                      ชื่อที่ screen reader อ่านมาจาก `aria-label` ของการ์ดทั้งใบ (เพิ่มไว้แล้วด้านบน)
+                      จึงไม่เสียข้อมูลอะไรจากการเปลี่ยนแท็ก */}
+                  <p className="text-sm sm:text-base font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors duration-200 leading-snug">
                     {isEnglish ? (topic.titleEn || topic.title) : topic.title}
-                  </h3>
+                  </p>
                   <p className="text-[11px] sm:text-xs font-serif-th text-[#635B4E] leading-relaxed line-clamp-2">
                     {isEnglish ? (topic.taglineEn || topic.tagline) : topic.tagline}
                   </p>
