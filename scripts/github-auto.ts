@@ -135,6 +135,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🌐 โหมดอังกฤษไม่มีภาษาไทยหลุด (เรนเดอร์จริง 41 จอทั่วเว็บ · คำสำคัญไพ่ 78 ใบครบสองภาษา)", cmd: TSX, args: ["scripts/qa/test-en-thai-leak.tsx"] },
   { label: "⚡ งบคำขอต่อการเปิดหน้า (ผู้ชมที่ไม่ล็อกอินต้องไม่ยิง /api/* เลย · ล็อกอินแล้วใช้ /api/bootstrap เส้นเดียว)", cmd: TSX, args: ["scripts/qa/test-request-budget.ts"] },
   { label: "✦ คุณภาพโมชั่นทั้งเว็บ (ไม่มี transition-all · ไม่มี backdrop-filter · ลูปไม่รู้จบต้องเป็น CSS · โทเคนจังหวะกลางผูกอยู่)", cmd: TSX, args: ["scripts/qa/test-motion-quality.ts"] },
+  { label: "♿ a11y ระดับวิกฤตของหน้าแรก (สายด่วน 1323/1669 อ่านออกบนพื้นมืด · หัวเว็บ/ฟุตเตอร์นอก <main> · หัวข้อแรกเป็น h1)", cmd: TSX, args: ["scripts/qa/test-a11y-critical.ts"] },
 ];
 
 /**

@@ -1229,12 +1229,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const encyclopediaModalMounted = useOnceOpen(isEncyclopediaOpen);
   const cardZoomModalMounted = useOnceOpen(!!zoomedCard);
 
+  /*
+   * ⚠️ `<SiteHeader>` และ `<SiteFooter>` ต้องอยู่ **นอก** `<main>` เสมอ (INC-0130)
+   *
+   * ตามสเปก HTML-AAM: `<header>` ที่เป็นลูกหลานของ `<main>` **ไม่ได้ role `banner`**
+   * และ `<footer>` ก็ **ไม่ได้ role `contentinfo`** · ของเดิมครอบไว้ข้างในทั้งคู่
+   * หน้าแรกจึงเหลือ landmark แค่ `main` อันเดียว — ผู้ใช้ screen reader กระโดดไปเมนู
+   * หรือท้ายเว็บไม่ได้เลยบนหน้าที่สำคัญที่สุดของเว็บ (ยืนยันจาก accessibility tree ของ production)
+   *
+   * เส้นทางอื่นทั้งเว็บทำถูกอยู่แล้วผ่าน layout (ดู `src/app/(th)/cards/layout.tsx`)
+   * หน้าแรกเป็นที่เดียวที่หลุด เพราะประกอบร่างเองในคอมโพเนนต์นี้
+   */
   return (
     <>
-      <main className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
-      {/* Hardware Anchor for Immediate Viewport Alignment */}
-      <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
-
       {/* Top Sacred Header — Solid White with Clean Dividing Line */}
       <SiteHeader
         variant="app"
@@ -1270,6 +1277,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           </>
         }
       />
+
+      <main className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
+      {/* Hardware Anchor for Immediate Viewport Alignment */}
+      <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
       {/* World-Class Sacred Floating Toast Notification HUD */}
       {/* ไม่ต้องมี <AnimatePresence> แล้ว — ToastNotification เล่นคีย์เฟรมขาออกเองแล้วค่อย
@@ -1758,8 +1769,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           แสดงเฉพาะหน้าเลือกผังพยากรณ์ (SPREAD_SELECT) เพื่อไม่รบกวนสมาธิในพิธีกรรมหน้า 2-5
           ═══════════════════════════════════════════════════════════════ */}
       {currentStep === "SPREAD_SELECT" ? seoContent : null}
-      <SiteFooter />
     </main>
+
+      <SiteFooter />
   </>
   );
 }
