@@ -226,7 +226,10 @@ export function DailyClient() {
                           >
                             <CardImage
                               image={chamber.cardImage}
-                              alt={isEnglish ? chamber.cardNameEn : chamber.cardNameTh}
+                              /* ภาพประกอบล้วน — บรรทัด `chamber.cardNameEn` ใต้หัวข้อบอกชื่อไพ่ให้อยู่แล้ว
+                                 ถ้าใส่ alt ซ้ำ screen reader จะอ่านชื่อไพ่สองรอบต่อการ์ดหนึ่งใบ
+                                 ปุ่มยังมีชื่อเรียก (accessible name) จากตัวหนังสือข้างในครบถ้วน */
+                              alt=""
                               className="w-full h-full object-cover"
                               sizes="48px"
                             />
