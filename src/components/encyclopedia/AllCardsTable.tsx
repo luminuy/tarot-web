@@ -173,12 +173,20 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                     <td className="py-2.5 px-2 sm:px-3 text-center">
                       <Link
                         href={`/cards/${card.id}`}
+                        /*
+                         * ⚠️ ลิงก์นี้มี "ภาพย่อ" เป็นเนื้อหาชิ้นเดียว ไม่มีตัวหนังสือเลย
+                         * ชื่อเรียก (accessible name) จึงต้องมาจาก aria-label ตรงนี้เท่านั้น
+                         * ห้ามถอด aria-label ออกแล้วปล่อยให้ภาพข้างในเป็น alt="" พร้อมกัน
+                         * เพราะลิงก์จะกลายเป็นลิงก์ไร้ชื่อ ผิด WCAG 2.4.4 (บทเรียน INC-0125)
+                         */
+                        aria-label={isEnglish ? card.nameEn : card.nameTh}
                         className="inline-block w-9 h-15 rounded overflow-hidden border border-[#D5CEC2] bg-[#EAE7E0] hover:border-[#8F5C1A] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
                       >
                         <CardImage
                           image={card.image}
                           cardId={card.id}
-                          alt={isEnglish ? card.nameEn : card.nameTh}
+                          /* ชื่อไพ่ย้ายไปอยู่ที่ aria-label ของ <Link> ด้านบนแล้ว ไม่ใส่ซ้ำที่นี่ */
+                          alt=""
                           className="w-full h-full object-cover"
                           sizes="36px"
                         />

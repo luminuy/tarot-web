@@ -124,7 +124,8 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         <div className="w-10 h-15 rounded-lg border-2 border-[#D9C8AC] overflow-hidden flex-shrink-0 bg-[#FFFFFF]">
           <CardImage
             image={persona?.cardImage || "major-02.jpg"}
-            alt={isEnglish ? (persona?.nameEn || persona?.nameTh || "Tarot Reader") : (persona?.nameTh || "แม่หมอ")}
+            /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ข้างภาพพิมพ์ชื่อแม่หมออยู่แล้ว */
+            alt=""
             className="w-full h-full object-cover object-top contrast-[1.05] tarot-hd-card-image"
             sizes="40px"
           />
@@ -327,7 +328,8 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                   <div className="w-18 h-28 sm:w-20 sm:h-30 rounded-lg border border-[#D9C8AC] overflow-hidden ">
                     <CardImage
                       image={seal.image}
-                      alt={isEnglish ? (seal.titleEn || seal.title) : seal.title}
+                      /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h4> ใต้ภาพพิมพ์ชื่อชุดเดียวกันอยู่แล้ว */
+                      alt=""
                       className="w-full h-full object-cover object-top tarot-hd-card-image"
                       sizes="112px"
                     />

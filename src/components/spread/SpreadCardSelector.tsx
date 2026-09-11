@@ -404,7 +404,8 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                                   ? "major-02.jpg"
                                   : "major-17.jpg"
                 }`}
-                alt={isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
+                /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — แถบสรุปข้างภาพพิมพ์ชื่อผังที่เลือกอยู่แล้ว */
+                alt=""
                 className="w-full h-full object-cover object-top tarot-hd-card-image"
                 sizes="72px"
               />

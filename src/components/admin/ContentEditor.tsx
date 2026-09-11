@@ -485,7 +485,8 @@ function CardTab({
               <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-lg border border-[#D5CEC2] bg-white shadow-xs">
                 <CardImage
                   cardId={detail.id}
-                  alt={detail.nameTh}
+                  /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ข้างภาพพิมพ์ชื่อไพ่อยู่แล้ว */
+                  alt=""
                   sizes="64px"
                   className="h-full w-full object-cover"
                 />
