@@ -94,30 +94,8 @@ interface Violation {
  * ทุกรายการต้องมีเหตุผลที่ "วัดมาแล้ว" หรืออธิบายได้ว่าทำไมทางที่ถูกกว่าใช้ไม่ได้
  */
 const ALLOWLIST: { file: string; needle: string; reason: string }[] = [
-  // ── กฎ 9 · หนี้เดิมที่รู้ตัวแล้ว (INC-0126) ────────────────────────────────
-  // สี่บานนี้เขียน `if (!isOpen) return null` ไว้เหนือ `AnimatePresence` เหมือนกันหมด
-  // อนิเมชันขาออกของทุกบานจึงไม่เคยเล่น (วัดที่ AuthModal ก่อนแก้: อยู่ใน DOM 41ms · opacity ขั้นเดียว)
-  // ปลดออกทีละบานเมื่อแก้ — ห้ามเพิ่มรายการใหม่เข้ามาแทน
-  {
-    file: "src/components/reading/ShareModal.tsx",
-    needle: "if (!isOpen) return null;",
-    reason: "หนี้เดิม INC-0126 — ขาออกไม่เล่น รอรอบเก็บกวาดหน้าต่างลอยที่เหลือ",
-  },
-  {
-    file: "src/components/history/ReadingHistoryModal.tsx",
-    needle: "if (!isOpen) return null;",
-    reason: "หนี้เดิม INC-0126 — ขาออกไม่เล่น รอรอบเก็บกวาดหน้าต่างลอยที่เหลือ",
-  },
-  {
-    file: "src/components/encyclopedia/TarotEncyclopediaModal.tsx",
-    needle: "if (!isOpen) return null;",
-    reason: "หนี้เดิม INC-0126 — ขาออกไม่เล่น รอรอบเก็บกวาดหน้าต่างลอยที่เหลือ",
-  },
-  {
-    file: "src/components/card/CardZoomModal.tsx",
-    needle: "if (!isOpen || !card) return null;",
-    reason: "หนี้เดิม INC-0126 — ขาออกไม่เล่น และต้องแยกเงื่อนไข !card ออกจาก !isOpen ตอนแก้",
-  },
+  // ว่างเปล่าคือสถานะที่ถูกต้อง — หนี้ของกฎ 9 (หน้าต่างลอย 4 บานที่ขาออกไม่เล่น)
+  // ถูกเก็บกวาดครบแล้วในรอบเดียวกับ INC-0126 · ห้ามเพิ่มรายการใหม่โดยไม่มีตัวเลขที่วัดมาแล้วกำกับ
 ];
 
 /** คุณสมบัติที่ห้ามให้ motion อนิเมต (บังคับ layout หรือ paint ใหม่ทั้งกล่อง) */
@@ -470,6 +448,44 @@ function checkExitKilledByEarlyReturn(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 10 — ห้ามใช้คลาสของ `tailwindcss-animate` (INC-0126 รอบเก็บกวาด)
+ *
+ * 🚨 โปรเจกต์นี้**ไม่ได้ติดตั้งปลั๊กอินตัวนั้น** คลาสอย่าง `animate-in fade-in duration-200`
+ * จึงไม่ผลิต CSS ออกมาสักบรรทัด — ไม่มีอนิเมชันเกิดขึ้นจริงแม้แต่เฟรมเดียว
+ * แต่โค้ดอ่านแล้วเหมือนมีครบ คนอ่านต่อจึงไม่มีทางรู้ว่าของที่เห็นเด้งพรึ่บคือบั๊ก
+ * พบตอนตรวจรอบนี้ 3 จุด (หน้าต่างชื่อเล่นของไพ่ด่วน · แผงผลไพ่ประจำตัว · เมนูมือถือแอดมิน)
+ *
+ * ทางที่ถูก: ใช้คลาส `.anim-*` ใน `globals.css` ซึ่งเป็น CSS keyframes จริงและถูกปิดอัตโนมัติ
+ * เมื่อผู้ใช้เปิด `prefers-reduced-motion`
+ */
+function checkPhantomAnimateClasses(violations: Violation[]): void {
+  const PHANTOM_RE = /\b(animate-in|animate-out|fade-in|fade-out|zoom-in|zoom-out|slide-in-from|slide-out-to)\b/;
+
+  for (const file of walk(SRC, [".tsx"])) {
+    const r = rel(file);
+    const lines = fs.readFileSync(file, "utf-8").split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (isCommentLine(line)) continue;
+      // สนใจเฉพาะที่อยู่ในรายชื่อคลาสจริง ๆ — `cursor-zoom-out` ของ Tailwind แท้ต้องไม่โดนจับ
+      const classAttr = /class(Name)?=/.test(line) || /^\s*["'`].*["'`],?\s*$/.test(line);
+      if (!classAttr) continue;
+      const m = PHANTOM_RE.exec(line.replace(/cursor-zoom-(in|out)/g, ""));
+      if (!m) continue;
+      if (isAllowed(r, m[0])) continue;
+
+      violations.push({
+        rule: "10 · คลาสผีของ tailwindcss-animate ที่ไม่ได้ติดตั้ง (INC-0126)",
+        file: r,
+        line: i + 1,
+        code: line.trim().slice(0, 160),
+        hint: `"${m[0]}" ไม่ผลิต CSS ออกมาเลยเพราะไม่มีปลั๊กอินตัวนั้นในโปรเจกต์ — ใช้คลาส .anim-* ใน globals.css แทน`,
+      });
+    }
+  }
+}
+
 function run(): void {
   console.log("🔍 ตรวจคุณภาพโมชั่นทั้งเว็บ (Motion Quality Guard)...\n");
 
@@ -477,6 +493,7 @@ function run(): void {
   checkTsx(violations);
   checkWaitWithoutExit(violations);
   checkExitKilledByEarlyReturn(violations);
+  checkPhantomAnimateClasses(violations);
   checkUnregisteredTransformVars(violations);
   checkCss(violations);
   checkKeyframeCenteringConflict(violations);
@@ -497,7 +514,7 @@ function run(): void {
   }
 
   console.log(
-    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
+    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
   );
   process.exit(0);
 }

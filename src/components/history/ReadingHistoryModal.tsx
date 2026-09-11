@@ -90,8 +90,6 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     mutationRef.current += 1;
@@ -175,7 +173,16 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
   return (
     <AnimatePresence>
-      <div
+      {/* ⚠️ เงื่อนไข `isOpen` ต้องอยู่ **ข้างใน** `AnimatePresence` เท่านั้น (INC-0126 · กฎข้อ 9 ของด่าน test-motion-quality)
+          ถ้าเขียน `if (!isOpen) return null` ไว้ข้างบน ตัว AnimatePresence จะหายไปพร้อมลูกในเฟรมเดียวกัน
+          `exit` ที่เขียนไว้ข้างล่างจึงไม่มีวันทำงาน — หน้าต่างดับหายวับแทนที่จะค่อย ๆ จางไป */}
+      {isOpen && (
+      <motion.div
+        key="history-modal-scrim"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
         role="dialog"
         aria-modal="true"
         aria-label={isEn ? "Tarot Reading Journal" : "สมุดบันทึกดวงชะตา"}
@@ -626,7 +633,8 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
             )}
           </div>
         </motion.div>
-      </div>
+      </motion.div>
+      )}
     </AnimatePresence>
   );
 };

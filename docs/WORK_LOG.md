@@ -65,6 +65,70 @@
   - แก้: `CLAUDE.md` · `docs/INDEX.md`
 - **ผลการทดสอบ**: `npm run repo:verify` ➔ ✅ ผ่านครบ 46/46 ด่าน · รัน `npm run ai:judge -- --dry-run --limit 3` จริงเพื่อยืนยันผลที่เขียนลงชีท · รันแบบไม่มีคีย์จริงเพื่อยืนยันว่าข้อความที่ชีทอ้างถึงตรงกับของจริง
 - **สิ่งที่ค้างอยู่ / ต้องทำต่อ**: รอทีมที่มีคีย์รัน baseline แล้ว commit `scripts/qa/reports/judge-20260911-1-*.json` กลับเข้า `main` — **คลื่น B ทั้งชุดยังเริ่มไม่ได้จนกว่าจะมีไฟล์นั้น**
+### 🗓️ 2026-09-11 (รอบ 34): ✦ เก็บกวาดหน้าต่างลอย**ทั้งเว็บ**ให้สมูทครบทุกบาน + เจอคลาสอนิเมชันผี 3 จุด
+
+> **คำสั่งเจ้าของ**: "แก้ต่อเลย แก้ให้หมดทุกจุด" (ต่อจากรอบ 31 ที่แก้เฉพาะหน้าต่างเข้าสู่ระบบ · rebase ทับ `main` ใหม่หลัง #405–#407 merge)
+
+#### 1. ปิดหนี้ ISSUE-044 — หน้าต่างลอยอีก 4 บานที่ขาออกไม่เคยเล่น
+แก้แบบเดียวกับ `AuthModal`: ย้ายเงื่อนไข `isOpen` เข้าไป**ข้างใน** `AnimatePresence`
+และเปลี่ยนฉากหลังจาก `<div>` เปล่าเป็น `motion.div` ที่ไล่ opacity 0.18s
+
+| ไฟล์ | หมายเหตุ |
+| :--- | :--- |
+| `ShareModal.tsx` | ตรงไปตรงมา |
+| `ReadingHistoryModal.tsx` | ตรงไปตรงมา |
+| `TarotEncyclopediaModal.tsx` | **มีสองชั้น** — ชั้นนอก + ชั้นรายละเอียดไพ่ที่เป็น `{selectedCard && ...}` เปล่า ๆ ไม่มี `AnimatePresence` ของตัวเองเลย จึงเพิ่มให้ด้วย |
+| `CardZoomModal.tsx` | ต้องแยก `!card` ออกจาก `!isOpen` — เงื่อนไขเดิมปนกันในบรรทัดเดียว · ตอนปิด `zoomedCard` กลายเป็น `null` พร้อมกัน แต่ `AnimatePresence` เก็บ element เดิมไว้เล่นขาออกให้เอง |
+
+จากนั้น **ล้าง `ALLOWLIST` ของกฎข้อ 9 จนว่างเปล่า** — ไม่เหลือหนี้ค้างสักบาน
+
+#### 2. เจอของแถมระหว่างกวาด — คลาสอนิเมชันผี 3 จุด (INC-0127)
+`animate-in fade-in duration-200` เป็นคลาสของปลั๊กอิน **`tailwindcss-animate` ที่โปรเจกต์นี้ไม่ได้ติดตั้ง**
+Tailwind จึงไม่ผลิต CSS ให้สักบรรทัด — **ไม่มีอนิเมชันเกิดขึ้นจริงเลยแม้แต่เฟรมเดียว** ทั้งที่โค้ดอ่านแล้วเหมือนมีครบ
+(ยืนยันด้วยการ `grep` หา `animate-in` / `fade-in` ในไฟล์ CSS ที่ `build` ออกมาจริง → **ไม่พบเลย**)
+
+- `QuickFortunePicker.tsx` (หน้าต่างชื่อเล่นของ**ไพ่ด่วน** — ทางที่เจ้าของเดินตอนเจอปัญหารอบ 31)
+- `BirthCardCalculator.tsx` (แผงผลไพ่ประจำตัว)
+- `admin/page.tsx` (เมนูมือถือของแอดมิน)
+
+⚠️ `QuickFortunePicker` **ห้ามแตะ `motion` เด็ดขาด** — ถูก `import` แบบ static จาก `TarotFlow`
+บรรทัดเดียวจะลากไลบรารี 40 KB กลับเข้าบันเดิลตั้งต้นของ `/` ทันที · จึงทำด้วย CSS keyframes ล้วน
+(`anim-scrim-in` · `anim-scrim-out` · `anim-modal-rise` · `anim-drop-in` ใน `globals.css`)
+พร้อมสถานะ `isNicknameClosing` + ไทม์เมอร์ 160ms ที่ล้อความยาวของคีย์เฟรมให้ขาออกได้เล่นจริง
+
+#### 3. วัดของจริงหลังแก้ (Chromium + production build · เก็บตัวอย่างทุกเฟรม)
+
+| หน้าต่าง | opacity เฟรมแรก | ขั้น opacity ขาเข้า | ขาออกอยู่ใน DOM | ขั้น opacity ขาออก |
+| :--- | :-- | :-- | :-- | :-- |
+| `AuthModal` | 0 | 12 | **261ms** | 12 |
+| `ReadingHistoryModal` | 0 | 12 | **264ms** | 13 |
+| หน้าต่างชื่อเล่นของไพ่ด่วน | 0 | 12 | **172ms** | 10 |
+
+(ก่อนแก้ทุกบานคือ **1 ขั้น · 41ms** = ไม่มีอนิเมชันทั้งขาเข้าและขาออก)
+
+⚠️ **ที่ยังวัดสดไม่ได้**: `ShareModal` · `CardZoomModal` · ชั้นรายละเอียดไพ่ของสารานุกรม —
+สามจุดนี้เปิดได้ต่อเมื่อมีคำทำนายจริงจาก AI เท่านั้น เครื่อง dev ไม่มีคีย์จึงเดินไปไม่ถึง
+ยืนยันด้วย `typecheck` + ด่านกฎข้อ 9 + โครงสร้างที่เหมือนกันเป๊ะกับสามบานที่วัดแล้วแทน
+
+#### 4. เพิ่มกฎข้อ 10 ลงด่าน `test-motion-quality.ts` (ยังนับ 46 ด่านเท่าเดิม)
+ห้ามใช้ชื่อคลาสของ `tailwindcss-animate` ทุกตัวในไฟล์ `.tsx` — ทดสอบด้วยการทำให้พังจริงแล้ว
+(ใส่คลาสเดิมกลับเข้าไป ➔ ด่านตกพร้อมชี้บรรทัดถูกต้อง ➔ ถอดออก ➔ ผ่าน)
+
+- **ไฟล์ที่แก้ไข**:
+  - `src/components/reading/ShareModal.tsx`
+  - `src/components/history/ReadingHistoryModal.tsx`
+  - `src/components/encyclopedia/TarotEncyclopediaModal.tsx`
+  - `src/components/card/CardZoomModal.tsx`
+  - `src/components/reading/QuickFortunePicker.tsx`
+  - `src/components/encyclopedia/BirthCardCalculator.tsx`
+  - `src/app/(th)/admin/page.tsx`
+  - `src/app/globals.css`
+  - `scripts/qa/test-motion-quality.ts`
+- **ผลการทดสอบ**: `npm run typecheck` ➔ 0 error · `npm run repo:verify` ➔ **ผ่านครบ 46/46 ด่าน**
+- **สิ่งที่เจอเพิ่มแต่ยังไม่ได้แตะ (ISSUE-045)**: `TarotEncyclopediaModal` **เปิดไม่ได้เลยทั้งเว็บ** —
+  `setIsEncyclopediaOpen(true)` ไม่ถูกเรียกจากที่ไหนสักจุดเดียว (ค่าคงเป็น `false` ตลอด)
+  หน้าที่ของมันซ้ำกับหน้า `/cards` ที่เป็นของจริงอยู่แล้ว · เป็นการ**ลบฟีเจอร์** จึงต้องให้เจ้าของเคาะก่อน
+- **บทเรียนที่บันทึก**: [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) INC-0127
 
 ---
 

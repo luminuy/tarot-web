@@ -36,8 +36,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  if (!isOpen) return null;
-
   const personaName = isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh;
   const defaultQuestion = isEnglish ? "General Life & Archetypal Overview" : "ภาพรวมดวงชะตา";
   const defaultSummary = isEnglish ? "Trust your inner wisdom and proceed with mindful intention." : "จงเชื่อมั่นในตนเองและก้าวต่อไปอย่างมีสติ";
@@ -461,7 +459,16 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
 
   return (
     <AnimatePresence>
-      <div
+      {/* ⚠️ เงื่อนไข `isOpen` ต้องอยู่ **ข้างใน** `AnimatePresence` เท่านั้น (INC-0126 · กฎข้อ 9 ของด่าน test-motion-quality)
+          ถ้าเขียน `if (!isOpen) return null` ไว้ข้างบน ตัว AnimatePresence จะหายไปพร้อมลูกในเฟรมเดียวกัน
+          `exit` ที่เขียนไว้ข้างล่างจึงไม่มีวันทำงาน — หน้าต่างดับหายวับแทนที่จะค่อย ๆ จางไป */}
+      {isOpen && (
+      <motion.div
+        key="share-modal-scrim"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
         role="dialog"
         aria-modal="true"
         aria-label={isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
@@ -699,7 +706,8 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             </button>
           </div>
         </motion.div>
-      </div>
+      </motion.div>
+      )}
     </AnimatePresence>
   );
 };

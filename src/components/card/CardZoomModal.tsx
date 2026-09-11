@@ -31,11 +31,20 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
   const { isEnglish } = useLocale();
   const [flipped, setFlipped] = useState(true);
 
-  if (!isOpen || !card) return null;
-
   return (
     <AnimatePresence>
-      <div
+      {/* ⚠️ เงื่อนไข `isOpen` ต้องอยู่ **ข้างใน** `AnimatePresence` เท่านั้น (INC-0126 · กฎข้อ 9 ของด่าน test-motion-quality)
+          ถ้าเขียน `if (!isOpen) return null` ไว้ข้างบน ตัว AnimatePresence จะหายไปพร้อมลูกในเฟรมเดียวกัน
+          `exit` ที่เขียนไว้ข้างล่างจึงไม่มีวันทำงาน — หน้าต่างดับหายวับแทนที่จะค่อย ๆ จางไป
+          ⚠️ `card` ต้องเช็กแยกจาก `isOpen` ตรงนี้ด้วย เพราะแผงข้างในอ่านค่าจากไพ่โดยตรง
+             (ตอนปิด `zoomedCard` กลายเป็น null พร้อมกัน — AnimatePresence เก็บ element เดิมไว้เล่นขาออกให้เอง) */}
+      {isOpen && card && (
+      <motion.div
+        key="card-zoom-scrim"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
         role="dialog"
         aria-modal="true"
         aria-label={isEnglish ? `Zoom card ${card.nameEn || card.nameTh}` : `ซูมดูไพ่ ${card.nameTh} (${card.nameEn})`}
@@ -113,7 +122,8 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
 
           </div>
         </motion.div>
-      </div>
+      </motion.div>
+      )}
     </AnimatePresence>
   );
 };
