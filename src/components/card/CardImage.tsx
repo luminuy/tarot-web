@@ -17,7 +17,7 @@
  */
 import type { CSSProperties } from "react";
 
-import { getCardImageSrc, getCardWebpSrcSet } from "@/lib/tarot/card-image";
+import { getCardAvifSrcSet, getCardImageSrc, getCardWebpSrcSet } from "@/lib/tarot/card-image";
 
 interface CardImageProps {
   /** ชื่อไฟล์ดิบจากฐานข้อมูลไพ่ เช่น `"major-00.jpg"` หรือ path เต็ม `"/cards/major-00.jpg"` */
@@ -111,8 +111,19 @@ export function CardImage({
   const webpSrcSet = getCardWebpSrcSet(image, cardId);
   if (!webpSrcSet) return img;
 
+  /*
+   * ลำดับของ <source> คือลำดับความสำคัญ — เบราว์เซอร์หยิบอันแรกที่มันรองรับ
+   * AVIF ต้องมาก่อน WebP เสมอ · เครื่องที่ไม่รองรับ AVIF จะข้ามไปหยิบ WebP เอง
+   * และถ้าไม่ได้ตั้งค่า ImageKit ค่านี้เป็น null ทุกอย่างกลับไปเหมือนเดิมเป๊ะ
+   *
+   * ⚠️ `<picture>` ไม่ถอยให้อัตโนมัติเมื่อ <source> โหลดไม่สำเร็จ —
+   *    ตัวกันคือ `handleImgError` ข้างบนที่ถอด <source> ทิ้งทั้งหมดแล้วชี้ไปไฟล์ในเครื่อง
+   */
+  const avifSrcSet = getCardAvifSrcSet(image, cardId);
+
   return (
     <picture className="contents">
+      {avifSrcSet && <source type="image/avif" srcSet={avifSrcSet} sizes={sizes} />}
       <source type="image/webp" srcSet={webpSrcSet} sizes={sizes} />
       {img}
     </picture>

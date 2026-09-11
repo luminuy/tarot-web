@@ -134,6 +134,57 @@ export function getCardWebpSrcSet(
 }
 
 /**
+ * คุณภาพ AVIF ที่เลือกใช้ — **วัดของจริงก่อนตั้งค่า อย่าเดา**
+ *
+ * วัดด้วยไพ่ 4 ใบที่ขนาด w512b เทียบกับ WebP ที่ใช้อยู่จริง (PSNR เทียบภาพต้นฉบับย่อ):
+ *   | รูปแบบ        | ขนาดรวม 4 ใบ | PSNR เฉลี่ย |
+ *   | WebP (ปัจจุบัน) | 408.7 KB     | 30.03 dB   |
+ *   | AVIF q60      | 220.2 KB     | 29.76 dB   |  ← เบาลง 46% แต่คมน้อยกว่านิดหน่อย
+ *   | **AVIF q65**  | **279.8 KB** | **30.89 dB** | ← เบาลง 32% และ **คมกว่า** ของเดิม
+ *
+ * เลือก q65 เพราะเป็นจุดเดียวที่ "เล็กลงจริง" โดยไม่แลกกับความคมของภาพไพ่
+ * (คำสั่งเจ้าของโปรเจกต์ 2026-09-11 หลังดูภาพเทียบซูม 200%)
+ *
+ * ⚠️ ห้ามลด q ลงกว่านี้โดยไม่วัดใหม่ — ภาพชุดนี้เป็นลายเส้นละเอียดของปี 1909
+ *    การไล่ระดับสีน้อยแต่ความถี่สูงเยอะ ตัวเลขจากภาพถ่ายทั่วไปใช้แทนกันไม่ได้
+ */
+const IMAGEKIT_AVIF_QUALITY = 65;
+
+/**
+ * สร้าง `srcSet` ของภาพ AVIF สำหรับ `<source type="image/avif">`
+ *
+ * ✦ **ไม่มีไฟล์ .avif ในรีโปเลยสักไฟล์** — ImageKit แปลงให้ตอนร้องขอแล้วแคชไว้ที่ CDN ของเขาเอง
+ *   (78 ใบ × 6 ขนาด = 468 การแปลง แปลงครั้งเดียวจบ) จึงไม่เพิ่มขนาดรีโปและไม่ต้องแก้
+ *   `npm run cards:variants` เลย · ถ้าไม่ได้ตั้งค่า ImageKit ฟังก์ชันนี้คืน `null`
+ *   แล้ว `<picture>` จะเหลือแต่ WebP เหมือนเดิมทุกประการ
+ *
+ * ⚠️ ต้องแปลงจาก **ไฟล์ .jpg ต้นฉบับ** เท่านั้น ห้ามชี้ไปที่ `.webp` ที่ย่อไว้แล้ว
+ *    การบีบทับของที่บีบมาแล้วได้ภาพแย่ลงและเล็กลงแค่ 11% (วัดจริง 87.5 KB → 77.8 KB)
+ *    ส่วนการแปลงจากต้นฉบับได้ 32% พร้อมคุณภาพที่ดีกว่า
+ *
+ * ⚠️ จุลภาคใน `tr=` ต้องเข้ารหัสเป็น `%2C` เสมอ
+ *    เพราะค่านี้อยู่ใน `srcSet` ซึ่ง **แยกรายการด้วยจุลภาค** — ใส่จุลภาคดิบเมื่อไหร่
+ *    รายการจะถูกตัดผิดตำแหน่งทันที (กับดักเดียวกับที่ `IMAGEKIT_NO_TRANSFORM` เตือนไว้)
+ */
+export function getCardAvifSrcSet(
+  image?: string | null,
+  fallbackId?: string | null,
+  options?: CardImageSrcOptions,
+): string | null {
+  const name = extractCardBaseName(image, fallbackId);
+  if (!name) return null;
+
+  // AVIF มีอยู่ในรูปแบบ "แปลงตอนร้องขอ" ของ ImageKit เท่านั้น — ไม่มีไฟล์จริงในเครื่อง
+  const endpoint = options?.forceLocal ? "" : getImageKitEndpoint();
+  if (!endpoint) return null;
+
+  return CARD_IMAGE_VARIANTS.map(
+    (v) =>
+      `${endpoint}${CARDS_ROOT}${name}.jpg?tr=w-${v.width}%2Cf-avif%2Cq-${IMAGEKIT_AVIF_QUALITY} ${v.width}w`,
+  ).join(", ");
+}
+
+/**
  * ดึง URL ของภาพ WebP ขนาดย่อที่ระบุ (เช่น "w128") ผ่าน Single Source of Truth
  */
 export function getCardWebpVariantSrc(
