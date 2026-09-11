@@ -264,7 +264,8 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                   <div className="w-16 h-24 sm:w-18 sm:h-27 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2]">
                     <CardImage
                       image={step.cardImage}
-                      alt={step.cardName}
+                      /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — span ใต้ภาพพิมพ์ step.cardName อยู่แล้ว */
+                      alt=""
                       className="w-full h-full object-cover"
                       sizes="72px"
                     />
@@ -512,7 +513,8 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
-                <CardImage image="major-10.jpg" alt="Celtic Cross Spread" className="w-full h-full object-cover" sizes="48px" />
+                {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
+                <CardImage image="major-10.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
               <div>
                 <span className="text-[11px] font-mono uppercase tracking-wider text-[#8F5C1A] font-bold block">
@@ -537,7 +539,8 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
-                <CardImage image="major-17.jpg" alt="Three Card Spread" className="w-full h-full object-cover" sizes="48px" />
+                {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
+                <CardImage image="major-17.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
               <div>
                 <span className="text-[11px] font-mono uppercase tracking-wider text-[#8F5C1A] font-bold block">
@@ -562,7 +565,8 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
-                <CardImage image="major-07.jpg" alt="Decision Spread" className="w-full h-full object-cover" sizes="48px" />
+                {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
+                <CardImage image="major-07.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
               <div>
                 <span className="text-[11px] font-mono uppercase tracking-wider text-[#8F5C1A] font-bold block">
@@ -605,7 +609,8 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                 className="group flex flex-col items-center p-3 sm:p-4 rounded-xl border border-[#D9C8AC]/50 hover:border-[#8F5C1A] bg-[#FAF7F2] hover:bg-[#FFFFFF] transition duration-200 shadow-2xs hover:shadow-xs"
               >
                 <div className="w-14 h-21 rounded-md overflow-hidden border border-[#D9C8AC] mb-2.5 shadow-2xs group-hover:scale-105 transition-transform duration-200 bg-[#F3EDE2]">
-                  <CardImage image={card.img} alt={card.nameEn} className="w-full h-full object-cover" sizes="56px" />
+                  {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ใต้ภาพพิมพ์ชื่อไพ่อยู่แล้วทั้งสองภาษา */}
+                  <CardImage image={card.img} alt="" className="w-full h-full object-cover" sizes="56px" />
                 </div>
                 <span className="text-xs font-serif-th font-bold text-[#29261F] text-center line-clamp-1">
                   {isEnglish ? card.nameEn : card.nameTh}

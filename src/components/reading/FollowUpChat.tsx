@@ -349,7 +349,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
-              alt={personaName}
+              /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — หัวแชทบอกชื่อแม่หมออยู่แล้ว ถ้าใส่ซ้ำทุกฟองแชทจะถูกอ่านชื่อก่อนทุกข้อความ */
+              alt=""
               className="w-full h-full object-cover object-top filter contrast-[1.05] brightness-[1.02] tarot-hd-card-image"
               sizes="64px"
             />
@@ -387,7 +388,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
           <div className="w-7 h-10 rounded border border-[#D9C8AC] overflow-hidden shrink-0 mt-1 bg-[#F3EDE2]">
             <CardImage
               image={`${persona.cardImage || "major-02.jpg"}`}
-              alt={personaName}
+              /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — หัวแชทบอกชื่อแม่หมออยู่แล้ว ถ้าใส่ซ้ำทุกฟองแชทจะถูกอ่านชื่อก่อนทุกข้อความ */
+              alt=""
               className="w-full h-full object-cover object-top"
               sizes="32px"
             />
@@ -456,7 +458,8 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                 >
                   <CardImage
                     image={`${persona.cardImage || "major-02.jpg"}`}
-                    alt={personaName}
+                    /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — หัวแชทบอกชื่อแม่หมออยู่แล้ว ถ้าใส่ซ้ำทุกฟองแชทจะถูกอ่านชื่อก่อนทุกข้อความ */
+                    alt=""
                     className="w-full h-full object-cover object-top"
                     sizes="32px"
                   />
@@ -522,7 +525,8 @@ isEnglish
             <div className="w-7 h-10 rounded border border-[#D9C8AC] overflow-hidden shrink-0 mt-1 bg-[#F3EDE2]">
               <CardImage
                 image={`${persona.cardImage || "major-02.jpg"}`}
-                alt={personaName}
+                /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — หัวแชทบอกชื่อแม่หมออยู่แล้ว ถ้าใส่ซ้ำทุกฟองแชทจะถูกอ่านชื่อก่อนทุกข้อความ */
+                alt=""
                 className="w-full h-full object-cover object-top"
                 sizes="32px"
               />

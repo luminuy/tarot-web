@@ -84,7 +84,8 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
           >
             <CardImage
               image={`${persona.cardImage || (persona.id === "direct" ? "major-11.jpg" : persona.id === "mystic" ? "major-17.jpg" : "major-02.jpg")}`}
-              alt={personaName}
+              /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h4> ข้างภาพพิมพ์ชื่อแม่หมออยู่แล้ว */
+              alt=""
               className="w-full h-full object-cover object-top filter contrast-[1.05] brightness-[1.02] tarot-hd-card-image"
               sizes="40px"
             />
@@ -245,7 +246,8 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                   {cardData.image ? (
                     <CardImage
                       image={cardData.image}
-                      alt={isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}
+                      /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ข้างภาพพิมพ์ชื่อไพ่ใบเดียวกันอยู่แล้ว */
+                      alt=""
                       className="w-full h-full object-cover object-center tarot-card-enhance tarot-hd-card-image"
                       sizes="88px"
                     />
