@@ -20,6 +20,16 @@ export const CARD_IMAGE_VARIANTS = [
   { dir: "w64", width: 64 },
   { dir: "w128", width: 128 },
   { dir: "w256", width: 256 },
+  /*
+   * w320 — ตัวเชื่อมช่องว่าง 256→512 ที่เคยทำให้กริดไพ่กินแบนด์วิดท์เกินจริง
+   *
+   * วัดจากหน้า /cards จริง: ไพ่แสดงที่ 130–151 CSS px ทุกเบรกพอยต์
+   * จอ DPR 2 (มือถือส่วนใหญ่) จึงต้องการ 261–301 px — เกิน 256 อยู่นิดเดียว
+   * เมื่อไม่มีขั้นกลาง เบราว์เซอร์ต้องกระโดดไป w512b (101 KB) ทั้งที่ใช้จริงไม่ถึงครึ่ง
+   * w320 (~45 KB) ครอบคลุมช่วง 261–301 ได้ครบ → ลดลง 55% ต่อใบโดยตาเปล่าไม่เห็นต่าง
+   * (จอ DPR 3 ต้องการ ~410 px จะยังเลือก w512b ตามเดิม ซึ่งถูกต้องแล้ว)
+   */
+  { dir: "w320", width: 320 },
   { dir: "w512b", width: 512 },
   { dir: "w768b", width: 768 },
 ] as const;
@@ -104,7 +114,7 @@ export function getCardWebpSrcSet(
  */
 export function getCardWebpVariantSrc(
   image?: string | null,
-  variant: "w64" | "w128" | "w256" | "w512b" | "w768b" = "w128",
+  variant: "w64" | "w128" | "w256" | "w320" | "w512b" | "w768b" = "w128",
   fallbackId?: string | null,
   options?: CardImageSrcOptions,
 ): string | null {
