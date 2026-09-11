@@ -111,6 +111,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
+      /* หน้าความน่าเชื่อถือ — Google มองหา "ใครรับผิดชอบเว็บนี้" เป็นสัญญาณหลัก
+         ในเว็บที่ให้คำแนะนำเกี่ยวกับชีวิต จึงให้ priority สูงกว่าหน้านโยบาย */
+      url: `${baseUrl}/about`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
       url: `${baseUrl}/privacy`,
       lastModified: now,
       changeFrequency: "monthly",

@@ -6,7 +6,7 @@ import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { LocaleProvider } from "@/lib/i18n";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
-import { BRAND_SOCIAL_PROFILES, SITE_ORIGIN } from "@/lib/config/site";
+import { BRAND_SOCIAL_PROFILES, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import type { Locale } from "@/lib/i18n/types";
 
 import { fontVariables } from "./fonts";
@@ -60,6 +60,16 @@ export function RootHtml({
        เดิมมีแต่ลิงก์ repo บน GitHub ซึ่งไม่ได้บอกตัวตนของแบรนด์เลย
        เติมโปรไฟล์โซเชียลจริงจาก `BRAND_SOCIAL_PROFILES` (แหล่งความจริงเดียวกับปุ่มลอย TikTok) */
     sameAs: [...BRAND_SOCIAL_PROFILES, "https://github.com/luminuy/tarot-web"],
+    /* ช่องทางติดต่อที่ใช้ได้จริง — Quality Rater Guidelines มองหา "ติดต่อใครได้"
+       เป็นสัญญาณความน่าเชื่อถือหลักของเว็บที่ให้คำแนะนำเกี่ยวกับชีวิต
+       ⚠️ ใส่ได้เฉพาะช่องทางที่ตรวจแล้วว่าส่งถึงจริง ห้ามใส่ที่อยู่/เบอร์ที่ไม่มีอยู่จริง */
+    email: DEFAULT_SUPPORT_EMAIL,
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      email: DEFAULT_SUPPORT_EMAIL,
+      availableLanguage: ["th", "en"],
+    },
     description: isEnglish
       ? "A premium online 1909 Rider-Waite-Smith tarot sanctuary with a provably fair SHA-256 shuffle and an AI tarot reader."
       : "วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ระดับพรีเมียม 1909 Rider-Waite-Smith พร้อมระบบสุ่มที่พิสูจน์ความยุติธรรมได้ (Provably Fair) และแม่หมอ AI",
