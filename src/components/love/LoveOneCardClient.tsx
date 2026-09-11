@@ -301,7 +301,10 @@ export function LoveOneCardClient() {
                         >
                           <CardImage
                             image={opt.cardImage}
-                            alt={isEnglish ? opt.cardNameEn : opt.cardNameTh}
+                            /* ภาพประกอบล้วน — ชิปเหนือภาพบอกชื่อไพ่ใบเดียวกันอยู่แล้ว
+                               ถ้าใส่ alt ซ้ำ screen reader จะอ่านชื่อไพ่สองรอบต่อการ์ดหนึ่งใบ
+                               ปุ่มยังมีชื่อเรียก (accessible name) จากตัวหนังสือข้างในครบถ้วน */
+                            alt=""
                             className="w-full h-full object-cover"
                             sizes="48px"
                           />
