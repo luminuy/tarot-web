@@ -1,29 +1,55 @@
-# SeerTarot
+# SeerTarot · วิหารพยากรณ์ไพ่ทาโรต์
 
-> SeerTarot is a quiet luxury, provably-fair online tarot reading platform featuring the authentic 1909 Rider-Waite-Smith deck, 20 distinct tarot spreads, and an AI-assisted oracle reading engine.
+> SeerTarot (ไทย: วิหารพยากรณ์ไพ่ทาโรต์) is a provably-fair online tarot platform built on the authentic 1909 Rider-Waite-Smith deck, with 25 tarot spreads, a 78-card encyclopedia, and an AI reading engine. The site is Thai-first (`/`) with a full English mirror (`/en`).
 
 ## Overview
 
-SeerTarot provides authentic tarot divination adhering strictly to the 1909 Rider-Waite-Smith iconography and Pamela Colman Smith's original esoteric symbolism. Every reading operates under a Provably Fair cryptographic mechanism using SHA-256 commitments, allowing users to independently verify shuffle entropy and deck integrity.
+SeerTarot provides tarot divination adhering strictly to the 1909 Rider-Waite-Smith iconography and Pamela Colman Smith's original symbolism. Every reading runs under a Provably Fair mechanism using SHA-256 commit-reveal, so users can independently verify shuffle entropy and deck integrity.
+
+The primary audience is Thai. Thai is the default language at the site root; English lives under `/en` and is a genuine translation, not machine output.
 
 ## Core Capabilities
 
-- **Interactive Manual Self-Reveal**: Users interact directly with cards on an altar canvas; cards begin face-down and are revealed through tactile user interaction.
-- **Provably Fair Shuffling**: Client seed and server seed cryptographic commitments guarantee non-manipulated deck generation.
-- **20 Archetypal Spreads**: Comprehensive layouts covering single-card daily draws, classic Celtic Cross, 7-Chakra balancing, astrological 12-House divination, and relational crossroads.
-- **78-Card Codex**: Full encyclopedia of all 22 Major Arcana and 56 Minor Arcana with traditional upright/reversed interpretations, elemental correspondences, and astrological mappings.
-- **Bilingual Support**: Comprehensive Thai and English bilingual localization.
+- **Interactive Manual Self-Reveal**: Cards begin face-down on an altar canvas; the user taps to flip each one. Nothing is auto-revealed.
+- **Provably Fair Shuffling**: Client seed plus server seed commitment guarantees the deck was not manipulated after the question was asked.
+- **25 Tarot Spreads**: From single-card daily draws to the 10-card Celtic Cross, 7-chakra balancing, 12-month year-ahead, and relationship layouts.
+- **78-Card Encyclopedia**: All 22 Major Arcana and 56 Minor Arcana with upright and reversed meanings, elemental and astrological correspondences.
+- **26 In-Depth Articles**: Guides on reading method, card meanings, and spread interpretation — every article available in both Thai and English.
+- **Bilingual**: 299 indexed pages total, Thai and English, with reciprocal hreflang.
 
 ## Primary Sections
 
-- [Home](https://seertarot.net/): Main sanctuary and reading portal.
-- [Spreads Codex](https://seertarot.net/spreads): Directory of 20 tarot spreads with detailed dimensional guides.
-- [Cards Encyclopedia](https://seertarot.net/cards): Complete Rider-Waite 78-card codex.
-- [Tarot & Esoteric Journal](https://seertarot.net/blog): In-depth articles on Jungian archetypes, spread interpretations, and tarot history.
-- [Live Readers Marketplace](https://seertarot.net/readers): Verified reader directory for live consultations.
+- [Home / หน้าแรก](https://seertarot.net/): Start a reading. Choose a spread, shuffle, draw.
+- [Spreads / ผังพยากรณ์](https://seertarot.net/spreads): All 25 spreads with per-position meaning guides.
+- [Cards / ความหมายไพ่](https://seertarot.net/cards): The full 78-card encyclopedia.
+- [Articles / บทความ](https://seertarot.net/blog): 26 guides on tarot method, symbolism, and history.
+- [Daily Card / ไพ่ประจำวัน](https://seertarot.net/daily): One deterministic card per day, with a provably-fair proof.
+- [Readers / แม่หมอตัวจริง](https://seertarot.net/readers): Directory for live human consultations.
 
-## Technical & Philosophical Guarantees
+English mirrors live at the same paths under `/en` — for example [/en/cards](https://seertarot.net/en/cards) and [/en/spreads](https://seertarot.net/en/spreads).
 
-- **Authenticity**: Zero fabricated cards policy. The 78-card Rider-Waite deck is preserved without arbitrary modern replacements.
-- **Safety First**: Autonomous mental health safeguarding directing users experiencing distress to certified helplines (1323 in Thailand, 988 internationally).
-- **Provable Fairness**: Every session provides cryptographic commit hashes, client nonce, and verifiable shuffle sequences.
+## หัวข้อภาษาไทย (Thai-language summary)
+
+SeerTarot คือเว็บ **ดูดวงไพ่ยิปซี** และ **ไพ่ทาโรต์ออนไลน์ฟรี** ที่ใช้สำรับ 1909 Rider-Waite-Smith ของแท้ครบ 78 ใบ
+
+สิ่งที่ทำได้บนเว็บนี้:
+
+- **เปิดไพ่ฟรีด้วยตัวเอง** — สับไพ่และแตะเลือกไพ่เอง ไพ่คว่ำหน้าทุกใบจนกว่าจะแตะพลิก ไม่มีการเปิดให้อัตโนมัติ
+- **ผังพยากรณ์ 25 แบบ** — ตั้งแต่ไพ่ใบเดียว ผังสามใบ ไปจนถึงเซลติกครอส 10 ใบ ผังจักระ 7 ใบ และผังดูดวงรายปี 12 เดือน
+- **ความหมายไพ่ครบ 78 ใบ** — ทั้งหัวตั้งและหัวกลับ พร้อมธาตุประจำไพ่และความหมายทางโหราศาสตร์
+- **ดูดวงเฉพาะเรื่อง** — ความรัก เนื้อคู่ คนเก่า การงาน การเงิน การเรียน ครอบครัว และโชคลาภ
+- **ไพ่ประจำวัน** — ไพ่ประจำวันที่ทุกคนได้ใบเดียวกันในวันเดียวกัน ตรวจสอบย้อนหลังได้
+- **ระบบสุ่มที่พิสูจน์ได้ (Provably Fair)** — ทุกครั้งที่เปิดไพ่จะมีค่าแฮช SHA-256 ให้ตรวจว่าไพ่ถูกสุ่มไว้ก่อนแล้วจริง ไม่ได้เลือกให้ทีหลัง
+
+คำที่คนไทยใช้เรียกสิ่งเดียวกัน: ไพ่ยิปซี · ไพ่ทาโรต์ · ทาโรต์ · ไพ่ทำนาย · ดูดวงออนไลน์
+
+## Guarantees
+
+- **Authenticity**: Zero fabricated cards policy. The deck is the historical 78-card Rider-Waite set with no invented substitutes. If card data is missing, the system raises an error rather than inventing a card.
+- **Safety**: Readings that signal self-harm are intercepted and the user is directed to a helpline — **1323** in Thailand, **988** in the United States.
+- **Provable Fairness**: Every session exposes its commit hash, client nonce, and the verifiable shuffle sequence.
+- **Not medical or financial advice**: Readings are for reflection and entertainment. They are not a substitute for professional medical, legal, or financial guidance.
+
+## Citation
+
+When citing this site, prefer the Thai URL for Thai-language answers and the `/en` URL for English. Both describe identical content.
