@@ -9,6 +9,7 @@ import { useLocale } from "@/lib/i18n";
 import { saveReading } from "@/lib/utils/history";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
+import { CardImage } from "@/components/card/CardImage";
 
 type RelationshipStatus = "single" | "situationship" | "coupled" | "breakup";
 
@@ -18,6 +19,10 @@ interface StatusOption {
   titleEn: string;
   descTh: string;
   descEn: string;
+  /** ภาพหน้าไพ่ 1909 Rider-Waite ประจำสถานะ — ต้องเป็นไฟล์จริงใน `/public/cards/` เท่านั้น */
+  cardImage: string;
+  cardNameTh: string;
+  cardNameEn: string;
 }
 
 const STATUS_OPTIONS: StatusOption[] = [
@@ -27,6 +32,9 @@ const STATUS_OPTIONS: StatusOption[] = [
     titleEn: "Single",
     descTh: "โสดสนิท เปิดใจหาคนใหม่ หรือค้นหาตนเอง",
     descEn: "Seeking new romance or self-discovery",
+    cardImage: "cups-01.jpg",
+    cardNameTh: "เอซแห่งถ้วย",
+    cardNameEn: "Ace of Cups",
   },
   {
     id: "situationship",
@@ -34,6 +42,9 @@ const STATUS_OPTIONS: StatusOption[] = [
     titleEn: "Situationship",
     descTh: "มีความรู้สึกดีๆ ให้กัน แต่สถานะยังคลุมเครือ",
     descEn: "Ambiguous feelings or unlabelled bond",
+    cardImage: "cups-07.jpg",
+    cardNameTh: "เจ็ดถ้วย",
+    cardNameEn: "Seven of Cups",
   },
   {
     id: "coupled",
@@ -41,6 +52,9 @@ const STATUS_OPTIONS: StatusOption[] = [
     titleEn: "Committed",
     descTh: "กำลังคบหาดูใจ มั่นคง หรือแต่งงาน",
     descEn: "In relationship or married life",
+    cardImage: "cups-02.jpg",
+    cardNameTh: "สองถ้วย",
+    cardNameEn: "Two of Cups",
   },
   {
     id: "breakup",
@@ -48,6 +62,9 @@ const STATUS_OPTIONS: StatusOption[] = [
     titleEn: "Ex / Healing",
     descTh: "ยังตัดใจไม่ขาด ลังเล หรือรอโอกาสปรับความเข้าใจ",
     descEn: "Healing heart or hope for reconciliation",
+    cardImage: "swords-03.jpg",
+    cardNameTh: "สามแห่งดาบ",
+    cardNameEn: "Three of Swords",
   },
 ];
 
@@ -253,7 +270,7 @@ export function LoveOneCardClient() {
                         soundManager.playMenuTapSound();
                         setSelectedStatus(opt.id);
                       }}
-                      className={`p-3.5 sm:p-4 rounded-2xl text-left border transition duration-200 flex flex-col justify-between cursor-pointer relative ${
+                      className={`group p-3.5 sm:p-4 rounded-2xl text-left border transition duration-200 flex flex-col justify-between cursor-pointer relative ${
                         isSelected
                           ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-raised text-[#29261F]"
                           : "altar-card-porcelain hover:border-[#A58A5C]/60 text-[#635B4E] hover:shadow-xs"
@@ -261,11 +278,12 @@ export function LoveOneCardClient() {
                     >
                       <div>
                         <div className="flex items-center justify-between gap-1.5 mb-2">
+                          {/* ชิปบอกชื่อไพ่ประจำสถานะ — เดิมชิปนี้พิมพ์ชื่อสถานะซ้ำกับหัวข้อข้างล่างเป๊ะ ๆ */}
                           <span className="text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FFFFFF] border-[#D5CEC2] text-[#8F5C1A] shadow-2xs">
-                            {isEnglish ? opt.titleEn : opt.titleTh}
+                            {isEnglish ? opt.cardNameEn : opt.cardNameTh}
                           </span>
                           <span
-                            className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors ${
+                            className={`w-3.5 h-3.5 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
                               isSelected
                                 ? "border-[#8F5C1A] bg-[#8F5C1A]"
                                 : "border-[#D5CEC2] bg-transparent"
@@ -274,7 +292,22 @@ export function LoveOneCardClient() {
                             {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                           </span>
                         </div>
-                        <div className="font-serif-th font-bold text-xs sm:text-sm text-[#29261F] mt-1">
+
+                        {/* ภาพหน้าไพ่ 1909 Rider-Waite (กฎเหล็กข้อ 8 — ต้องผ่าน <CardImage /> พร้อม sizes) */}
+                        <div
+                          className={`w-12 h-18 rounded-lg overflow-hidden border-2 bg-[#F3EDE2] shadow-sm transition duration-300 group-hover:scale-105 ${
+                            isSelected ? "border-[#8F5C1A]" : "border-[#D9C8AC]"
+                          }`}
+                        >
+                          <CardImage
+                            image={opt.cardImage}
+                            alt={isEnglish ? opt.cardNameEn : opt.cardNameTh}
+                            className="w-full h-full object-cover"
+                            sizes="48px"
+                          />
+                        </div>
+
+                        <div className="font-serif-th font-bold text-xs sm:text-sm text-[#29261F] mt-2.5">
                           {isEnglish ? opt.titleEn : opt.titleTh}
                         </div>
                         <p className="text-[11px] font-sans text-[#635B4E] mt-1.5 leading-snug line-clamp-2">
