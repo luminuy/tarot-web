@@ -14,6 +14,7 @@ import {
 } from "@/lib/ai/language";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { checkReadingConsistency } from "@/lib/ai/consistency";
+import { enforceThaiQuality } from "@/lib/ai/thai-quality";
 import { recordEvent } from "@/lib/stats/record";
 /**
  * ตัวเชื่อมกับ Google Gemini API (Ultra-Low Latency Streaming)
@@ -341,7 +342,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         })),
         connections: loose.connections || "ไพ่ทุกใบสะท้อนถึงการเปลี่ยนแปลงที่กำลังดำเนินไป",
         summary: loose.summary || "จงเชื่อมั่นในสัญชาตญาณและก้าวต่อไปอย่างมีสติ",
-        advice: ["ตั้งสติและลงมือทำสิ่งที่ทำได้จริง", "เปิดรับโอกาสใหม่ๆ"],
+        advice: ["ตั้งสติและลงมือทำสิ่งที่ทำได้จริง", "เปิดรับโอกาสใหม่ ๆ"],
         timing: "ภายใน 1-3 เดือนนี้",
         mood: "ครุ่นคิด",
         yesNoAnswer: ctx.spread.yesNoMode ? "ยังไม่แน่" : null,
@@ -385,7 +386,27 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         return;
       }
 
-      yield { type: "done", reading: readingData, usage, model: activeModel, consistencyOk: consistency.ok };
+      // ✍️ ด่านภาษาไทย (HANDOFF_AI_ACCURACY_THAI B-01) — แก้เงียบ ๆ ไม่ถอยไปคำอ่านสำรอง
+      const thai = enforceThaiQuality(readingData, { personaId: ctx.personaId });
+      readingData = thai.reading;
+      if (thai.fixCount > 0) {
+        recordEvent("ai_thai_fix");
+        recordEvent(`ai_thai_fix:${activeModel}`);
+      }
+      for (const code of thai.issueCodes) {
+        recordEvent(`ai_thai_issue:${code.toLowerCase()}`);
+      }
+
+      yield {
+        type: "done",
+        reading: readingData,
+        usage,
+        model: activeModel,
+        consistencyOk: consistency.ok,
+        thaiScore: thai.score,
+        thaiIssueCodes: thai.issueCodes,
+        thaiFixCount: thai.fixCount,
+      };
     }
   } catch (error) {
     console.error("Gemini stream failed:", error);
@@ -452,7 +473,7 @@ export async function* streamMockGeminiReading(ctx: ReadingContext): AsyncGenera
   const dominantElement = Object.entries(elementCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "ดิน";
   let connections = "";
   if (majorCount >= Math.ceil(ctx.drawn.length / 2)) {
-    connections = `ไพ่ชุดนี้มีไพ่ชุดใหญ่ (Major Arcana) ปรากฏขึ้นถึง ${majorCount} ใบ ชี้ว่าเรื่องนี้เป็นจุดเปลี่ยนสำคัญของชีวิตที่จักรวาลกำลังจัดสรร ไม่ใช่เรื่องบังเอิญเล็กๆ น้อยๆ`;
+    connections = `ไพ่ชุดนี้มีไพ่ชุดใหญ่ (Major Arcana) ปรากฏขึ้นถึง ${majorCount} ใบ ชี้ว่าเรื่องนี้เป็นจุดเปลี่ยนสำคัญของชีวิตที่จักรวาลกำลังจัดสรร ไม่ใช่เรื่องบังเอิญเล็ก ๆ น้อย ๆ`;
   } else {
     connections = `พลังงานธาตุ${dominantElement}ปรากฏเด่นชัดในผังนี้ ส่งพลังเชื่อมโยงให้เห็นว่า ความพยายามและการลงมือทำทีละก้าวของคุณจะนำพาผลลัพธ์ที่จับต้องได้มาให้`;
   }
@@ -493,7 +514,7 @@ export async function* streamMockGeminiReading(ctx: ReadingContext): AsyncGenera
     connections,
     summary,
     advice: adviceList,
-    timing: dominantElement === "ไฟ" ? "ภายใน 1-2 สัปดาห์นี้" : dominantElement === "น้ำ" ? "ภายใน 1 เดือนนี้" : dominantElement === "ลม" ? "เร็วๆ นี้ภายในไม่กี่วัน" : "ภายใน 1-3 เดือนนี้",
+    timing: dominantElement === "ไฟ" ? "ภายใน 1-2 สัปดาห์นี้" : dominantElement === "น้ำ" ? "ภายใน 1 เดือนนี้" : dominantElement === "ลม" ? "เร็ว ๆ นี้ภายในไม่กี่วัน" : "ภายใน 1-3 เดือนนี้",
     mood: majorCount > 1 ? "ท้าทาย" : "อบอุ่น",
     yesNoAnswer: null,
   };

@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 44/44 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 46/46 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -35,6 +35,56 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-11 (รอบ 27): 🧠 ยกระดับแม่หมอ AI — คลื่น A ครบ + เสียบด่านภาษาไทยเข้าท่อจริง (B-01)
+
+> **คำสั่งเจ้าของ**: "ตอนนี้ ai เราถือว่าอยู่ระดับไหน" ➔ "งั้นจัดการ เพิ่มความสามารถให้เก่งไปเลย"
+
+**ระดับก่อนรอบนี้**: 3/5 — prompt engineering แน่นแล้ว (7 โมดูลวิเคราะห์ · ด่านความสอดคล้อง · failover 2 ค่าย)
+แต่ **พิสูจน์ไม่ได้ว่าแม่นขึ้นหรือแย่ลง** และ **ไม่มีด่านตรวจภาษาไทยเลยสักด่าน**
+ลงมือตามแผน [`HANDOFF_AI_ACCURACY_THAI_2026-09-07.md`](plans/HANDOFF_AI_ACCURACY_THAI_2026-09-07.md) คลื่น A ทั้ง 3 งาน + B-01
+
+#### 1. A-01 · เครื่องตรวจภาษาไทย (Thai Quality Linter) — ของใหม่ทั้งชิ้น
+
+- **ปัญหาเดิม**: `src/lib/ai/language.ts` เป็นด่าน **"ไม่ใช่ภาษาต่างด้าว"** (กันอักษรจีน/ญี่ปุ่น/เกาหลี) ซึ่งคนละเรื่องกับ **"ภาษาไทยถูกต้อง"** คำอ่านที่เขียน `นะค่ะ` `เเสงสว่าง` `ค่อยๆ` `พลังงาน energy` ผ่านทุกด่านเดิมแบบสบาย ๆ
+- **สิ่งที่ทำ**: สร้าง `src/lib/ai/thai-quality.ts` ตรวจด้วย regex ล้วน **ต้นทุน AI = 0** ตามปรัชญาเดียวกับ `consistency.ts`
+  - 5 รหัสระดับ fatal: `DOUBLE_SARA_E` · `PARTICLE_MISMATCH` · `DUP_DIACRITIC` · `ORPHAN_DIACRITIC` · `INVISIBLE_CHAR`
+  - 6 รหัสระดับ warn: `MAIYAMOK_SPACING` · `LATIN_LEAK` · `ROBOT_PHRASE` · `BARNUM_PHRASE` · `REPETITIVE_NGRAM` · `WORD_SPLIT_SPACE`
+  - `polishThai()` แก้เฉพาะกลุ่มที่ปลอดภัย 100% · `checkThaiQuality()` ให้คะแนน 0-100
+  - allowlist ชื่อไพ่ 1909 ครบ 78 ใบ (`The Star` `Eight of Pentacles` ไม่ตก `LATIN_LEAK`) · persona `playful` ผ่อนกฎ `DUP_DIACRITIC` ให้ (`แกรรร` `โอ๊ยยย` เป็นน้ำเสียงที่ตั้งใจ)
+- **ผลวัดจริง**: `polishThai()` ใช้เวลา **0.029 ms** ต่อข้อความ 2,000 ตัวอักษร (เพดานที่ตั้งไว้คือ 1 ms) — วิ่งบนสตรีมสดได้สบาย
+
+#### 2. A-03 · ล้างภาษาไทยของ prompt และ persona เอง + ทำให้ด่าน hash ตกได้จริง
+
+- **สิ่งที่เจอเมื่อเอาด่านใหม่ยิงใส่ตัวเอง**: `เรา`เขียนไม้ยมกไม่เว้นวรรค **17 จุด** กระจายใน 9 ไฟล์ (`prompt.ts` · `personas.ts` · `gaze.ts` · `gemini.ts` · `intent.ts` · `karmic.ts` · `numerology.ts` · `ritual.ts` · `memory.ts`) — โมเดลลอกสไตล์จาก prompt โดยตรง เราเขียนไม่นิ่ง มันก็เขียนไม่นิ่ง แก้ครบทุกจุดแล้ว
+- **เติมบล็อกมาตรฐานการเขียนภาษาไทย 5 บรรทัดใน `SYSTEM_CORE_KNOWLEDGE`** (ค่ะ/คะ · ไม้ยมก · สระ แ · ห้ามทับศัพท์ · ห้ามวลีกำกวม)
+- 🔴 **ซ่อมด่านหลอก (ช่องว่าง G-10)**: `test-reading-quality.ts:260` เดิมคำนวณ hash ของ `SYSTEM_CORE_KNOWLEDGE` แล้วเช็กแค่ `hash.length === 8` ➔ **ตกไม่ได้เลย** ตอนนี้ปักหมุด `PROMPT_CORE_HASH` คู่กับ `PROMPT_VERSION` ใน `prompt-version.ts` แล้ว **ทดสอบแล้วว่าตกจริง**: แก้ prompt 1 ตัวอักษรโดยไม่ขึ้นเวอร์ชัน ➔ `repo:verify` ตกทันทีพร้อมบอก hash ใหม่ที่ต้องปักหมุด
+- `PROMPT_VERSION` ขึ้นเป็น `20260911-1`
+
+#### 3. A-02 · Golden Runner + LLM Judge — ปิดคอลัมน์ `judge_score` ที่ว่างมาตั้งแต่ PR #245
+
+- **สิ่งที่ทำ**: `scripts/qa/run-golden-judge.ts` + `npm run ai:judge` ยิง Golden Set 30 เคสเข้าเส้นทางเดียวกับ production (`streamGroqReading`) ➔ ตรวจด้วยโค้ด (`consistency` + `thai-quality`) ➔ ส่งให้ **Gemini** ตัดสินตาม rubric 6 เกณฑ์ ➔ เขียนรายงาน `scripts/qa/reports/judge-<version>-<timestamp>.json` · `--compare <version>` บอกได้ว่า **เกณฑ์ไหนดีขึ้น เกณฑ์ไหนแย่ลง** ทีละเกณฑ์
+- ผู้ตัดสินเป็นคนละตระกูลกับผู้ผลิตเสมอ (Gemini ตัดสินงานของ Groq/Qwen) กัน self-preference bias
+- ไม่มีคีย์ ➔ ออกอย่างสุภาพพร้อมบอกว่าต้องตั้งตัวแปรอะไร (ไม่ throw) · **ไม่ผูกเข้า CI และไม่แตะเพดาน AI ของ production**
+- 🐛 **เจอบั๊กใน Golden Set ระหว่างทาง**: 6 ใน 30 เคสใช้ `category: "finance"` ซึ่งเป็น **id ของชิปใน UI** ไม่ใช่ค่า `Category` จริง (`money`) ➔ `card.meanings["finance"]` เป็น `undefined` แล้วตกไปใช้ความหมายหมวด `general` เงียบ ๆ **เคสการเงินทั้ง 6 จึงไม่เคยทดสอบหมวดการเงินเลย** แก้ fixture แล้วพร้อมด่านกันซ้ำ
+
+#### 4. B-01 · เสียบด่านภาษาไทยเข้าท่อจริง + เก็บสถิติ
+
+- `sanitizeTarotText()` เรียก `polishThai()` ต่อท้าย ➔ **ทุกเส้นทางได้ประโยชน์ทันที** (คำอ่าน · แชท · สตรีมสด) — โมเดลเขียน `นะค่ะ` ผู้ใช้เห็น `นะคะ`
+- `groq.ts` / `gemini.ts` เรียก `enforceThaiQuality()` หลังด่านความสอดคล้อง ➔ **แก้เงียบ ๆ ไม่ failover** (ภาคผนวก A.4: failover แลกด้วยเวลาที่ผู้ใช้นั่งรออยู่จริง ส่วนความผิดกลุ่มนี้ regex แก้ได้ถูก 100%) แล้วเก็บสถิติ `ai_thai_fix` / `ai_thai_issue:<code>` แทน
+- `migrations/0011_reading_thai_quality.sql` เพิ่ม `thai_score` · `thai_issue_codes` · `thai_fix_count` (พร้อม DDL คู่ใน `createLocalSQLiteDB()` และ `safeExec` ALTER สำหรับฐานข้อมูลเครื่องที่สร้างไว้ก่อน)
+- `/admin` แท็บ `ai` มีการ์ด **"คุณภาพภาษาไทยของคำอ่าน"** (คะแนนเฉลี่ย · จุดที่ขัดให้อัตโนมัติต่อคำอ่าน · ปัญหาที่เจอบ่อย) — ใช้แท็บเดิม ไม่สร้างแท็บใหม่
+
+- **ไฟล์ที่แก้ไข**:
+  - ใหม่: `src/lib/ai/thai-quality.ts` · `scripts/qa/test-thai-quality.ts` · `scripts/qa/run-golden-judge.ts` · `migrations/0011_reading_thai_quality.sql`
+  - แก้: `src/lib/ai/language.ts` · `groq.ts` · `gemini.ts` · `types.ts` · `prompt.ts` · `prompt-version.ts` · `quality.repo.ts` · `karmic.ts` · `intent.ts` · `ritual.ts` · `numerology.ts` · `gaze.ts` · `memory.ts` · `src/data/personas.ts` · `src/lib/platform/db.ts` · `src/app/api/reading/[id]/read/route.ts` · `src/components/admin/AiHealthPanel.tsx` · `scripts/qa/test-reading-quality.ts` · `scripts/qa/fixtures/golden-readings.json` · `scripts/github-auto.ts` · `package.json`
+- **ผลการทดสอบ**: `npm run repo:verify` ➔ ✅ ผ่านครบ **46/46 ด่าน** (เพิ่ม 2 ด่านใหม่: ด่านภาษาไทย 45 ข้อ · ซ้อมแห้ง Golden Set 30 เคส)
+- **สิ่งที่ค้างอยู่ / ต้องทำต่อ**:
+  - 🔑 **ยังไม่ได้รัน `npm run ai:judge` กับโมเดลจริง** เพราะเครื่องที่ทำงานรอบนี้ไม่มี `GROQ_API_KEY` / `GEMINI_API_KEY` ของนักพัฒนา — เจ้าของรันเองได้ด้วย `npm run ai:judge -- --limit 3` เพื่อเก็บ **baseline ของ `20260911-1`** ไว้เทียบรอบหน้า
+  - คลื่น B ที่เหลือ (B-02 คลังตัวอย่าง 8 ชิ้น · B-03 `visualAnchor` · B-04 ถามกลับก่อนสับไพ่) **ตั้งใจยังไม่ทำในรอบนี้** เพราะทั้งสามข้อเปลี่ยนพฤติกรรมที่โมเดลผลิตออกมา และกติกาของแผนระบุว่า *"ทุก PR ในคลื่น B ต้องแนบผล `ai:judge` เทียบก่อน/หลัง ไม่มีผลเทียบ = ไม่ merge"* ➔ ต้องมี baseline ก่อน
+  - เฝ้า `thai_score` และ `avgThaiFixes` ใน `/admin` ราว 1 สัปดาห์ — ถ้าโมเดลตัวไหนต้องขัดเกิน 5 จุดต่อคำอ่าน = ภาษาไทยแย่จริง ให้ลดชั้นใน `WORKING_GROQ_MODELS`
+
+---
+
 ### 🗓️ 2026-09-11 (รอบ 26): 🖼️ หน้า `/daily` ขั้นที่ 1 ไม่มีรูปไพ่ ต่างจากหน้าอื่นทั้งเว็บ
 
 > **คำถามเจ้าของ**: "ทำไมตรงไม่เป็นรูปไพ่แบบในหน้าอื่น" (เทียบกับการ์ด 4 หัวข้อยอดนิยมหน้าแรก และแถบ 5 ขั้นตอนพิธีกรรม)
@@ -48,7 +98,7 @@
 - **ไฟล์ที่แก้ไข**:
   - `src/components/daily/DailyClient.tsx`
 - **ผลการทดสอบ**:
-  - `npm run repo:verify` ➔ ✅ ผ่านครบ 44/44 ด่าน (รวมด่าน `การอ้างอิง path ภาพไพ่ถูกต้อง` และ `โหมดอังกฤษไม่มีภาษาไทยหลุด`)
+  - `npm run repo:verify` ➔ ✅ ผ่านครบ 46/46 ด่าน (รวมด่าน `การอ้างอิง path ภาพไพ่ถูกต้อง` และ `โหมดอังกฤษไม่มีภาษาไทยหลุด`)
   - เปิดด้วย Chromium headless บน dev server 3 ความกว้าง (1280 · 768 · 390) — ภาพขึ้นครบทั้ง 5 ใบทุกขนาดจอ เบราว์เซอร์เลือกไฟล์ `w128` (48px × DPR2 = 96px) ถูกขนาดตามกฎ INC ของ prop `sizes` ไม่ดูดไฟล์ใหญ่เกินจริง
 - **สิ่งที่ค้างอยู่ / ต้องทำต่อ**: หน้า `/love/1-card` มีการ์ดเลือก "สถานะความรัก" 4 ใบ (`STATUS_OPTIONS` ใน `LoveOneCardClient.tsx`) ที่เป็นตัวหนังสือล้วนด้วยรูปแบบเดียวกันเป๊ะ — ยังไม่ได้แตะในรอบนี้เพราะเจ้าของถามถึงหน้า `/daily` เท่านั้น ถ้าต้องการให้เหมือนกันทั้งเว็บ ทำซ้ำวิธีเดียวกันได้ทันที
 
@@ -446,7 +496,7 @@ $ ไล่ chunk ทุกก้อนที่แต่ละหน้าอ�
 | เปิดครั้งที่ 2 | **38 ms · โหลด chunk เพิ่ม 0 ไฟล์** (mount ค้างไว้แล้ว) |
 | console errors | ไม่มีเลย |
 
-- `npm run repo:verify` ➔ ✅ ผ่านครบ 44/44 ด่าน
+- `npm run repo:verify` ➔ ✅ ผ่านครบ 46/46 ด่าน
 - `npm run build` ➔ ✅ ผ่าน
 
 #### ⚖️ ข้อแลกเปลี่ยนที่ตัดสินใจแล้ว (บันทึกไว้กันถามซ้ำ)
@@ -529,7 +579,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 
 #### ผลตรวจ
 
-- `npm run repo:verify` ➔ ✅ ผ่านครบ 44/44 ด่าน
+- `npm run repo:verify` ➔ ✅ ผ่านครบ 46/46 ด่าน
 - `npx tsx scripts/qa/test-analytics-integrity.ts` ➔ ✅ 48/48 (เดิม 41)
 - `npm run build` ➔ ✅ ผ่าน
 
@@ -599,7 +649,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 > ต้องไปแตะเฟรมเวิร์ก ซึ่งแลกความเสี่ยงสูงกับผลไม่กี่ KB — **ไม่คุ้ม**
 > `polyfills` 39.4 KB เสิร์ฟด้วย `noModule` เบราว์เซอร์ยุคใหม่ไม่โหลดอยู่แล้ว (ด่านงบแยกตัวเลขนี้ออกให้ดูอยู่)
 
-**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ **44/44 ด่าน** · `npm run typecheck` ➔ ✅ 0 errors ·
+**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ **46/46 ด่าน** · `npm run typecheck` ➔ ✅ 0 errors ·
 `npm run test:budget` ➔ ✅ ผ่านทุกเส้นทางหลังรัดงบและเพิ่มเส้นทางใหม่แล้ว
 
 ---
@@ -670,7 +720,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 (แต่แกน x ยังเอียงอยู่) · เวอร์ชันใหม่แยกชั้นเอียงออกจากชั้นพลิก ไพ่ที่หงายแล้วจึงเอียงตามเมาส์
 ได้ทั้งสองแกนเหมือนตอนคว่ำ — สม่ำเสมอกว่าเดิม
 
-**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ **44/44 ด่าน** (รวมด่านที่เรนเดอร์จริง 41 จอ) ·
+**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ **46/46 ด่าน** (รวมด่านที่เรนเดอร์จริง 41 จอ) ·
 `npm run typecheck` ➔ ✅ 0 errors · `npm run test:budget` ➔ ✅ ผ่านทุกเส้นทางหลังรัดงบแล้ว ·
 เดินหน้า `/daily` ด้วย Chromium บน production build ไม่มี JS error · อนิเมชันค้างบนจอ 0 ตัว
 
@@ -690,8 +740,8 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 | ไฟล์ | เขียนไว้ | ของจริง |
 | :--- | :--- | :--- |
 | `pr.yml` (รายงานใน PR) | `20 Spreads` · `541/541 Assertions` | 25 ผัง · 1,295 |
-| `pr.yml` (ชื่อขั้นตอน) | `Verification Suite (6 ด่าน)` | 44 ด่าน |
-| `pr.yml` (คอมเมนต์) | `ชุดตรวจกลาง 6 ด่าน ... ผัง 20 แบบ` | 44 ด่าน · 25 ผัง |
+| `pr.yml` (ชื่อขั้นตอน) | `Verification Suite (6 ด่าน)` | 46 ด่าน |
+| `pr.yml` (คอมเมนต์) | `ชุดตรวจกลาง 6 ด่าน ... ผัง 20 แบบ` | 46 ด่าน · 25 ผัง |
 | `auto-release.yml` (release note) | `78 Cards Encyclopedia, 20 Spreads` | 25 ผัง |
 
 ตัวเลข `6 ด่าน` ค้างมาตั้งแต่ยุคแรกสุดของโปรเจกต์ ไม่มีใครตามแก้เลยตลอด 37 ด่านที่เพิ่มทีหลัง
@@ -704,7 +754,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 **เกร็ดระหว่างทาง** — คอมเมนต์อธิบายที่ผมเขียนเองอ้างเลขเก่าตรง ๆ แล้วโดนด่านจับซะเอง
 เขียนใหม่ให้เล่าเรื่องโดยไม่พิมพ์รูปแบบตัวเลขที่ด่านตรวจ — ด่านทำงานถูกต้องแล้ว
 
-**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ 44/44 ด่าน · ทดสอบด่านด้วยการใส่เลขผิดกลับเข้า workflow แล้วจับได้จริง
+**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ 46/46 ด่าน · ทดสอบด่านด้วยการใส่เลขผิดกลับเข้า workflow แล้วจับได้จริง
 
 ---
 
@@ -779,7 +829,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 - ด่าน `test-spreads.ts` — เขียนใหม่ให้ตรวจทุกคู่ด้วยโมดูลเรขาคณิตเดียวกับที่วาดจริง
 - **ทดสอบด่านด้วยการทำให้พังจริงอีก 3 เคส** (ย้อนเรขาคณิตกลับเป็นแบบเดิม → จับได้ครบ 20 คู่ · ถอด `exit` ออกจาก `mode="wait"` ที่ถูกต้องอยู่ · ใส่ `height` กลับเข้า accordion)
 
-**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ **44/44 ด่าน** · `npm run typecheck` ➔ ✅ 0 errors ·
+**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ **46/46 ด่าน** · `npm run typecheck` ➔ ✅ 0 errors ·
 `npm run test:budget` ➔ ✅ ผ่านทุกเส้นทาง · เปิดแผนผัง 5 แบบด้วย Chromium บน production build
 แล้ววัดกล่องจริงทุกใบ (ทับกัน 0 · ล้นกรอบ 0 · เหลือเฉพาะคู่ไขว้ที่ตั้งใจ)
 
@@ -831,7 +881,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 | element ที่คำนวณ `backdrop-filter` | 10 จุดในโค้ด | **0** | ตรวจด้วย Chromium จริง |
 | ลูปอนิเมชันบนเธรดหลัก | 1 ต่อไพ่คว่ำหน้า 1 ใบ + 3 จุดพิมพ์ | **0** | ย้ายไป compositor ทั้งหมด |
 
-**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ **44/44 ด่าน** · `npm run typecheck` ➔ ✅ 0 errors ·
+**ตรวจแล้ว**: `npm run repo:verify` ➔ ✅ **46/46 ด่าน** · `npm run typecheck` ➔ ✅ 0 errors ·
 `npm run test:budget` ➔ ✅ ผ่านทุกเส้นทาง · เปิดด้วย Chromium headless บน **production build**
 5 หน้า (`/` · `/cards` · `/daily` · `/spreads` · `/cards/major-00`) ทั้งโหมดปกติและโหมดลดการเคลื่อนไหว
 พร้อมด่านกันผลลวง (ถ้า stylesheet โหลดไม่ติด ผลตรวจจะถูกทิ้ง ไม่นับว่าผ่าน)
@@ -886,7 +936,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 (ไม่ใช้ regex สแกนซอร์ส — บทเรียน INC-0114)
 
 **พิสูจน์ว่าแก้ได้จริง**
-- `npm run repo:verify` ➔ ✅ ผ่าน **44/44 ด่าน**
+- `npm run repo:verify` ➔ ✅ ผ่าน **46/46 ด่าน**
 - ทดสอบด่านด้วยการทำให้พังจริง: ย้อน `session-hint.ts` กลับแบบเดิม ➔ ❌ ตกทันที *"ผู้ชมที่ไม่ล็อกอินยังยิง 1 คำขอตอนเปิดหน้า: /api/auth/me"*
 
 ### 🗓️ 2026-09-09 (รอบ 11): 🔧 ปิดงานตรวจ production 4 ข้อ (INC-0115)
@@ -945,7 +995,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 ซึ่ง **ตรงกับเจตนาเราพอดี** ส่วนบอต **ค้นหา** AI (OAI-SearchBot · Claude-SearchBot · PerplexityBot ฯลฯ) ยังผ่านครบ
 
 **พิสูจน์ว่าแก้ได้จริง**
-- `npm run repo:verify` ➔ ✅ ผ่าน **44/44 ด่าน**
+- `npm run repo:verify` ➔ ✅ ผ่าน **46/46 ด่าน**
 - ทดสอบกฎ 5 ด้วยการทำให้พังจริง: ใส่ `gptbot` ลง `MUST_NOT_BLOCK` ชั่วคราว ➔ ❌ ด่านตกทันที พร้อมชี้ว่ามาจากชั้น Cloudflare ไม่ใช่รีโป
 
 ### 🗓️ 2026-09-09 (รอบ 10): 🌐 ขยายด่าน EN ครอบทั้งเว็บ 41 จอ — เจอเพิ่มอีก 7 จุด (INC-0114)
@@ -1046,7 +1096,7 @@ Next.js ไม่ได้ลบโทเคน `:path*` ออกจาก dest
 **ผลลัพธ์** — 309 หน้า: title ยาวสุด **60** · description ยาวสุด **160** · แบรนด์ซ้ำ 0 · ไม่มีหน้าไหนขาด metadata
 (ยกเว้น `_global-error.html` ของ Next เองที่ขึ้นทะเบียนไว้พร้อมเหตุผล)
 
-**ตรวจแล้ว**: `npm run repo:verify` ผ่าน **44/44 ด่าน** · `typecheck` 0 errors ·
+**ตรวจแล้ว**: `npm run repo:verify` ผ่าน **46/46 ด่าน** · `typecheck` 0 errors ·
 ทดสอบด่านใหม่ด้วยการทำให้พังจริง 3 เคส (title ยาว · desc ยาว · แบรนด์ซ้ำ) จับได้ครบ 3
 
 ---

@@ -20,6 +20,12 @@ export interface ReadingQualityRecord {
   consistencyOk?: boolean | null;
   judgeScore?: number | null;
   outcome?: string | null;
+  /** คะแนนภาษาไทย 0-100 หลังขัดคำผิดแล้ว (B-01) */
+  thaiScore?: number | null;
+  /** รหัสปัญหาภาษาไทยที่ยังเหลือ คั่นด้วย "," */
+  thaiIssueCodes?: string[] | null;
+  /** จำนวนจุดที่ระบบขัดให้อัตโนมัติก่อนถึงผู้ใช้ */
+  thaiFixCount?: number | null;
   createdAt?: number;
 }
 
@@ -33,6 +39,12 @@ export interface QualitySummary {
   notHappenedRate: number;
   avgElapsedMs: number;
   failoverRate: number;
+  /** คะแนนภาษาไทยเฉลี่ย (เฉพาะคำอ่านที่มีค่า) */
+  avgThaiScore: number;
+  /** จำนวนจุดที่ต้องขัดเฉลี่ยต่อคำอ่าน — > 5 แปลว่าโมเดลนั้นภาษาไทยแย่จริง */
+  avgThaiFixes: number;
+  /** นับรหัสปัญหาภาษาไทยที่เจอบ่อยที่สุด */
+  thaiIssueCounts: Record<string, number>;
   byVersion: Record<string, { total: number; accurate: number; rate: number }>;
   byProvider: Record<string, { total: number; accurate: number; rate: number }>;
   byPersona: Record<string, { total: number; accurate: number; rate: number }>;
@@ -52,8 +64,9 @@ export async function recordReadingQuality(record: ReadingQualityRecord): Promis
         `INSERT OR REPLACE INTO reading_quality (
           reading_id, provider, model, persona_id, spread_id, card_count,
           category, prompt_version, elapsed_ms, output_tokens, had_failover,
-          consistency_ok, judge_score, outcome, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          consistency_ok, judge_score, outcome, created_at,
+          thai_score, thai_issue_codes, thai_fix_count
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         record.readingId,
@@ -71,6 +84,9 @@ export async function recordReadingQuality(record: ReadingQualityRecord): Promis
         record.judgeScore ?? null,
         record.outcome ?? null,
         now,
+        record.thaiScore ?? null,
+        record.thaiIssueCodes && record.thaiIssueCodes.length > 0 ? record.thaiIssueCodes.join(",") : null,
+        record.thaiFixCount ?? null,
       )
       .run();
   } catch (err) {
@@ -107,6 +123,9 @@ export async function getQualityStats(limit = 1000): Promise<QualitySummary> {
     notHappenedRate: 0,
     avgElapsedMs: 0,
     failoverRate: 0,
+    avgThaiScore: 0,
+    avgThaiFixes: 0,
+    thaiIssueCounts: {},
     byVersion: {},
     byProvider: {},
     byPersona: {},
@@ -118,7 +137,8 @@ export async function getQualityStats(limit = 1000): Promise<QualitySummary> {
     const { results } = await db
       .prepare(
         `SELECT reading_id, provider, model, persona_id, prompt_version,
-                elapsed_ms, had_failover, consistency_ok, judge_score, outcome, created_at
+                elapsed_ms, had_failover, consistency_ok, judge_score, outcome, created_at,
+                thai_score, thai_issue_codes, thai_fix_count
          FROM reading_quality
          ORDER BY created_at DESC
          LIMIT ?`,
@@ -135,6 +155,11 @@ export async function getQualityStats(limit = 1000): Promise<QualitySummary> {
     let accurate = 0;
     let partial = 0;
     let notHappened = 0;
+    let thaiScoreSum = 0;
+    let thaiScoreCount = 0;
+    let thaiFixSum = 0;
+    let thaiFixCount = 0;
+    const thaiIssueCounts: Record<string, number> = {};
 
     const byVersion: Record<string, { total: number; accurate: number; rate: number }> = {};
     const byProvider: Record<string, { total: number; accurate: number; rate: number }> = {};
@@ -146,6 +171,21 @@ export async function getQualityStats(limit = 1000): Promise<QualitySummary> {
         elapsedCount++;
       }
       if (r.had_failover === 1) failoverCount++;
+
+      if (typeof r.thai_score === "number") {
+        thaiScoreSum += r.thai_score;
+        thaiScoreCount++;
+      }
+      if (typeof r.thai_fix_count === "number") {
+        thaiFixSum += r.thai_fix_count;
+        thaiFixCount++;
+      }
+      if (typeof r.thai_issue_codes === "string" && r.thai_issue_codes) {
+        for (const code of r.thai_issue_codes.split(",")) {
+          if (!code) continue;
+          thaiIssueCounts[code] = (thaiIssueCounts[code] ?? 0) + 1;
+        }
+      }
 
       const isRated = r.outcome && r.outcome !== "PENDING";
       const isAccurate = r.outcome === "ACCURATE";
@@ -195,6 +235,9 @@ export async function getQualityStats(limit = 1000): Promise<QualitySummary> {
       notHappenedRate: ratedCount > 0 ? Math.round((notHappened / ratedCount) * 100) : 0,
       avgElapsedMs: elapsedCount > 0 ? Math.round(totalElapsed / elapsedCount) : 0,
       failoverRate: results.length > 0 ? Math.round((failoverCount / results.length) * 100) : 0,
+      avgThaiScore: thaiScoreCount > 0 ? Math.round(thaiScoreSum / thaiScoreCount) : 0,
+      avgThaiFixes: thaiFixCount > 0 ? Math.round((thaiFixSum / thaiFixCount) * 10) / 10 : 0,
+      thaiIssueCounts,
       byVersion,
       byProvider,
       byPersona,

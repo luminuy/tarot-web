@@ -18,7 +18,7 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { DECK, cardById } from "../../src/data/cards";
 import { getSpread } from "../../src/data/spreads";
-import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
+import { PROMPT_VERSION, PROMPT_CORE_HASH } from "../../src/lib/ai/prompt-version";
 import { SYSTEM_CORE_KNOWLEDGE } from "../../src/lib/ai/prompt";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 import { analyzeKarmicBridge, type PastReadingSnapshot } from "../../src/lib/ai/karmic";
@@ -257,8 +257,15 @@ async function runTests() {
     `got "${PROMPT_VERSION}"`
   );
 
-  const coreHash = createHash("sha256").update(SYSTEM_CORE_KNOWLEDGE).digest("hex").slice(0, 8);
-  check("SYSTEM_CORE_KNOWLEDGE has valid hash", coreHash.length === 8, `hash: ${coreHash}`);
+  // 🔒 ด่านจริง (ไม่ใช่ด่านหลอก): hash ของ SYSTEM_CORE_KNOWLEDGE ต้องตรงกับที่ปักหมุดไว้
+  // ของเดิมเช็กแค่ `coreHash.length === 8` ซึ่งตกไม่ได้เลย ➔ ใครแก้ prompt โดยลืมขึ้น
+  // PROMPT_VERSION สถิติก่อน/หลังใน reading_quality จะปนกันเงียบ ๆ (ช่องว่าง G-10)
+  const coreHash = createHash("sha256").update(SYSTEM_CORE_KNOWLEDGE).digest("hex").slice(0, 16);
+  check(
+    "SYSTEM_CORE_KNOWLEDGE hash ตรงกับที่ปักหมุดคู่กับ PROMPT_VERSION",
+    coreHash === PROMPT_CORE_HASH,
+    `prompt เปลี่ยนแล้วแต่ยังไม่ได้ขึ้นเวอร์ชัน — ขึ้น PROMPT_VERSION แล้วปักหมุด PROMPT_CORE_HASH = "${coreHash}" ใน src/lib/ai/prompt-version.ts`
+  );
 
   // ─────────────────────────────────────────────────────────────────
   // 5. Reading Quality Telemetry Database Repository (W1.1)
@@ -279,6 +286,9 @@ async function runTests() {
     outputTokens: 640,
     hadFailover: false,
     consistencyOk: true,
+    thaiScore: 85,
+    thaiIssueCodes: ["LATIN_LEAK"],
+    thaiFixCount: 3,
   });
 
   const updatedOutcome = await updateQualityOutcome(testReadingId, "ACCURATE");
@@ -288,6 +298,15 @@ async function runTests() {
   check("getQualityStats returns valid summary object", stats && typeof stats.totalReadings === "number");
   check("getQualityStats includes byVersion aggregation", Boolean(stats.byVersion && stats.byVersion[PROMPT_VERSION]));
   check("getQualityStats includes byProvider aggregation", Boolean(stats.byProvider && stats.byProvider["groq"]));
+
+  // ✍️ คุณภาพภาษาไทย (B-01) — ถ้าคอลัมน์ไม่ถูกเขียนจริง ค่าพวกนี้จะเป็น 0 ทั้งแถบ
+  check("reading_quality เก็บ thai_score ได้จริง", stats.avgThaiScore > 0, `avgThaiScore=${stats.avgThaiScore}`);
+  check("reading_quality เก็บจำนวนจุดที่ขัดอัตโนมัติได้จริง", stats.avgThaiFixes > 0, `avgThaiFixes=${stats.avgThaiFixes}`);
+  check(
+    "getQualityStats นับรหัสปัญหาภาษาไทยได้",
+    Boolean(stats.thaiIssueCounts && stats.thaiIssueCounts["LATIN_LEAK"]),
+    JSON.stringify(stats.thaiIssueCounts)
+  );
 
   // ─────────────────────────────────────────────────────────────────
   // Summary
