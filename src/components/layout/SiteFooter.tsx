@@ -134,6 +134,20 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           </div>
           <p className="text-center sm:text-right">
             {isEnglish ? "© 2026 SeerTarot · All rights reserved · " : "© 2026 SeerTarot · สงวนลิขสิทธิ์ · "}
+            {/* ลิงก์ "เกี่ยวกับเรา/ติดต่อ" ต้องอยู่ทุกหน้า — เป็นสัญญาณความน่าเชื่อถือที่ Google
+                มองหาโดยตรง และเป็นเส้นทางให้บอทเดินไปเจอหน้าทั้งสอง (ยังเป็นหน้าไทยล้วน) */}
+            {!isEnglish && (
+              <>
+                <Link href="/about" prefetch={false} className="hover:text-[#FAF7F2] transition-colors underline">
+                  เกี่ยวกับเรา
+                </Link>
+                {" · "}
+                <Link href="/contact" prefetch={false} className="hover:text-[#FAF7F2] transition-colors underline">
+                  ติดต่อเรา
+                </Link>
+                {" · "}
+              </>
+            )}
             <Link href="/privacy" prefetch={false} className="hover:text-[#FAF7F2] transition-colors underline">
               {isEnglish ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
             </Link>
