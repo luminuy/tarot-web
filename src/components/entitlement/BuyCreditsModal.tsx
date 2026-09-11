@@ -34,6 +34,59 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [redeemCode, setRedeemCode] = useState("");
+  const [redeemLoading, setRedeemLoading] = useState(false);
+  const [redeemError, setRedeemError] = useState<string | null>(null);
+  const [redeemSuccess, setRedeemSuccess] = useState<string | null>(null);
+
+  const handleRedeemCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      if (onRequireAuth) {
+        onClose();
+        onRequireAuth();
+      } else {
+        setRedeemError(
+          isEn
+            ? "You must sign in before redeeming a code."
+            : "กรุณาเข้าสู่ระบบก่อนแลกรับสิทธิ์",
+        );
+      }
+      return;
+    }
+
+    const code = redeemCode.trim();
+    if (!code) return;
+
+    setRedeemLoading(true);
+    setRedeemError(null);
+    setRedeemSuccess(null);
+
+    try {
+      const res = await fetch("/api/entitlement/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRedeemError(data.error || (isEn ? "Failed to redeem code" : "ไม่สามารถแลกรับสิทธิ์ได้"));
+      } else {
+        setRedeemSuccess(data.message || (isEn ? "Redeemed successfully" : "แลกรับสิทธิ์สำเร็จ"));
+        setRedeemCode("");
+        mutateEntitlement();
+      }
+    } catch {
+      setRedeemError(
+        isEn
+          ? "Network error. Please try again."
+          : "เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง",
+      );
+    } finally {
+      setRedeemLoading(false);
+    }
+  };
+
   const handleStartCheckout = async () => {
     // เติมรอบต้องผูกกับบัญชี — ถ้ายังไม่ได้เข้าสู่ระบบ ให้บอกตรง ๆ ตรงนี้
     if (!user) {
@@ -214,7 +267,51 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                 </>
               )}
             </button>
+
+            {/* Redeem Code Section */}
+            <div className="pt-2 border-t border-[#D9C8AC]/40">
+              <form onSubmit={handleRedeemCode} className="space-y-2 p-3 rounded-xl bg-[#F9F6F0] border border-[#D9C8AC]/60">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-serif-th font-semibold text-[#4A3B2C]">
+                    {isEn ? "Redeem Code (Tarot Pass)" : "รหัสแลกสิทธิ์ (Redeem Code)"}
+                  </label>
+                </div>
+
+                  {redeemError && (
+                    <div className="p-2 rounded bg-[#C43D3D]/10 text-[#C43D3D] text-xs font-serif-th">
+                      {redeemError}
+                    </div>
+                  )}
+
+                  {redeemSuccess && (
+                    <div className="p-2.5 rounded bg-[#3A7044]/10 text-[#3A7044] text-xs font-serif-th font-semibold">
+                      {redeemSuccess}
+                    </div>
+                  )}
+
+                  {!redeemSuccess && (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={redeemCode}
+                        onChange={(e) => setRedeemCode(e.target.value)}
+                        placeholder={isEn ? "e.g. VIP3-TAROT-2026" : "เช่น VIP3-TAROT-2026"}
+                        disabled={redeemLoading}
+                        className="flex-1 px-3 py-2 text-xs uppercase font-mono tracking-wider rounded-lg bg-white border border-[#D9C8AC] text-[#2E211A] focus:outline-none focus:border-[#8F5C1A]"
+                      />
+                      <button
+                        type="submit"
+                        disabled={redeemLoading || !redeemCode.trim()}
+                        className="px-4 py-2 text-xs font-bold font-serif-th rounded-lg bg-[#8F5C1A] hover:bg-[#74490F] disabled:opacity-50 text-white cursor-pointer transition"
+                      >
+                        {redeemLoading ? (isEn ? "Checking..." : "กำลังตรวจ...") : (isEn ? "Redeem" : "แลกสิทธิ์")}
+                      </button>
+                    </div>
+                  )}
+                </form>
+            </div>
           </>
+
         ) : (
           /* Payment Screen */
           <div className="text-center space-y-4">

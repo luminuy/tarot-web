@@ -330,6 +330,23 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 </button>
               )}
 
+              {/* Direct Redeem Link */}
+              {onBuyCredits && (
+                <div className="text-center pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundManager.playMenuTapSound();
+                      setMenuOpen(false);
+                      onBuyCredits();
+                    }}
+                    className="text-[11px] text-[#8F5C1A] hover:text-[#29261F] underline underline-offset-2 transition-colors cursor-pointer font-serif-th"
+                  >
+                    {isEn ? "Have a redeem code? Enter here" : "มีรหัสแลกสิทธิ์? กดใส่รหัสที่นี่"}
+                  </button>
+                </div>
+              )}
+
               {/* Secondary Navigation: Compare Plans & Account Hub */}
               <div className="flex items-center justify-between pt-1 border-t border-[#D5CEC2]/40 text-[12px]">
                 {onOpenPlans && (
