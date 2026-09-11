@@ -37,6 +37,29 @@ export const CARD_IMAGE_VARIANTS = [
 const CARDS_ROOT = "/cards/";
 
 /**
+ * บอก ImageKit ว่า "ส่งไฟล์ต้นฉบับกลับมาเฉย ๆ ห้ามแปลงอะไรทั้งนั้น"
+ *
+ * ⚠️ ใช้กับ **URL ของไฟล์ .webp เท่านั้น** ห้ามเอาไปใส่ path `.jpg`
+ * ------------------------------------------------------------------
+ * ไฟล์ย่อใน `w64/ … w768b/` ถูกบีบด้วย `cwebp` มาแล้วอย่างตั้งใจ
+ * แต่ ImageKit เปิด `f-auto` ไว้ตามค่าเริ่มต้น → ถ้าไคลเอนต์ **ไม่ส่ง**
+ * `Accept: image/webp` มันจะ **แปลง WebP ของเราเป็น JPEG แล้วไฟล์บวมขึ้น**
+ * (วัดจริง: `w320` 45 KB → 68 KB · `w512b` 101 KB → 150 KB)
+ *
+ * เบราว์เซอร์คนจริงไม่โดน เพราะส่ง `Accept` ครบและเข้าทาง
+ * `<source type="image/webp">` อยู่แล้ว — แต่ครอว์เลอร์กับบอตพรีวิวลิงก์
+ * ที่ส่ง Accept แบบ "รับทุกชนิด" (ดอกจันทับดอกจัน) โดนเต็ม ๆ ทุกใบ
+ * เปลืองทั้งแบนด์วิดท์ ImageKit และโควตาคลานของบอต
+ *
+ * `orig-true` คืนไฟล์เดิม **ตรงทุกไบต์** (ยืนยันด้วย SHA-256 ตรงกับไฟล์ในเครื่อง)
+ *
+ * ⚠️ ห้ามเปลี่ยนเป็นพารามิเตอร์ที่มีจุลภาค เช่น `tr=w-320,q-75`
+ *    เพราะค่านี้ถูกต่อท้าย URL ที่อยู่ใน `srcSet` ซึ่ง **แยกรายการด้วยจุลภาค**
+ *    ใส่จุลภาคเมื่อไหร่ srcSet จะถูกตัดผิดตำแหน่งทันที
+ */
+const IMAGEKIT_NO_TRANSFORM = "?tr=orig-true";
+
+/**
  * ดึง URL Endpoint ของ ImageKit CDN จาก Environment Variable
  * หากไม่ได้ตั้งค่า จะคืนค่าสตริงว่าง เพื่อให้ระบบถอยไปใช้ Path ภายในเครื่อง (Zero Breaking Change)
  */
@@ -103,9 +126,10 @@ export function getCardWebpSrcSet(
 
   const endpoint = options?.forceLocal ? "" : getImageKitEndpoint();
   const base = endpoint ? `${endpoint}${CARDS_ROOT}` : CARDS_ROOT;
+  const suffix = endpoint ? IMAGEKIT_NO_TRANSFORM : "";
 
   return CARD_IMAGE_VARIANTS.map(
-    (v) => `${base}${v.dir}/${name}.webp ${v.width}w`,
+    (v) => `${base}${v.dir}/${name}.webp${suffix} ${v.width}w`,
   ).join(", ");
 }
 
@@ -126,5 +150,5 @@ export function getCardWebpVariantSrc(
     return getCardImageSrc(image, fallbackId, options);
   }
 
-  return `${base}${variant}/${name}.webp`;
+  return `${base}${variant}/${name}.webp${endpoint ? IMAGEKIT_NO_TRANSFORM : ""}`;
 }
