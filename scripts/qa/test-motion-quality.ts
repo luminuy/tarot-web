@@ -93,7 +93,32 @@ interface Violation {
  * รายการผ่อนผันแบบ Ratchet
  * ทุกรายการต้องมีเหตุผลที่ "วัดมาแล้ว" หรืออธิบายได้ว่าทำไมทางที่ถูกกว่าใช้ไม่ได้
  */
-const ALLOWLIST: { file: string; needle: string; reason: string }[] = [];
+const ALLOWLIST: { file: string; needle: string; reason: string }[] = [
+  // ── กฎ 9 · หนี้เดิมที่รู้ตัวแล้ว (INC-0126) ────────────────────────────────
+  // สี่บานนี้เขียน `if (!isOpen) return null` ไว้เหนือ `AnimatePresence` เหมือนกันหมด
+  // อนิเมชันขาออกของทุกบานจึงไม่เคยเล่น (วัดที่ AuthModal ก่อนแก้: อยู่ใน DOM 41ms · opacity ขั้นเดียว)
+  // ปลดออกทีละบานเมื่อแก้ — ห้ามเพิ่มรายการใหม่เข้ามาแทน
+  {
+    file: "src/components/reading/ShareModal.tsx",
+    needle: "if (!isOpen) return null;",
+    reason: "หนี้เดิม INC-0126 — ขาออกไม่เล่น รอรอบเก็บกวาดหน้าต่างลอยที่เหลือ",
+  },
+  {
+    file: "src/components/history/ReadingHistoryModal.tsx",
+    needle: "if (!isOpen) return null;",
+    reason: "หนี้เดิม INC-0126 — ขาออกไม่เล่น รอรอบเก็บกวาดหน้าต่างลอยที่เหลือ",
+  },
+  {
+    file: "src/components/encyclopedia/TarotEncyclopediaModal.tsx",
+    needle: "if (!isOpen) return null;",
+    reason: "หนี้เดิม INC-0126 — ขาออกไม่เล่น รอรอบเก็บกวาดหน้าต่างลอยที่เหลือ",
+  },
+  {
+    file: "src/components/card/CardZoomModal.tsx",
+    needle: "if (!isOpen || !card) return null;",
+    reason: "หนี้เดิม INC-0126 — ขาออกไม่เล่น และต้องแยกเงื่อนไข !card ออกจาก !isOpen ตอนแก้",
+  },
+];
 
 /** คุณสมบัติที่ห้ามให้ motion อนิเมต (บังคับ layout หรือ paint ใหม่ทั้งกล่อง) */
 const FORBIDDEN_MOTION_PROPS = [
@@ -403,12 +428,55 @@ function checkTokens(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 9 — ห้าม `if (!isOpen) return null` อยู่**เหนือ** `AnimatePresence` (INC-0126)
+ *
+ * 🚨 นี่คือบั๊กที่อ่านโค้ดแล้วมองไม่เห็น: `exit={{...}}` เขียนไว้ครบทุกบรรทัด ดูเหมือนทำงาน
+ * แต่พอสถานะปิด คอมโพเนนต์คืน `null` ทั้งก้อน → `AnimatePresence` หายไปพร้อมลูกในเฟรมเดียวกัน
+ * มันจึงไม่มีอะไรค้างไว้เล่นขาออก · หน้าต่างดับหายวับแทนที่จะค่อย ๆ จางไป
+ * วัดจริงที่ `AuthModal` ก่อนแก้: หลังกดปิด อยู่ใน DOM แค่ 41ms และ opacity มีค่าเดียว
+ * (หลังแก้: 270ms · 12 ขั้น)
+ *
+ * ทางที่ถูก: ย้ายเงื่อนไขเข้าไป**ข้างใน** — `<AnimatePresence>{isOpen && (...)}</AnimatePresence>`
+ */
+function checkExitKilledByEarlyReturn(violations: Violation[]): void {
+  // เงื่อนไขที่สื่อถึง "สถานะเปิด/ปิดของหน้าต่าง" เท่านั้น — `if (!mantra) return null` ของการ์ดย่อยไม่เกี่ยว
+  const OPEN_STATE_RE = /\b(isOpen|isVisible|isShown|isMounted)\b/;
+
+  for (const file of walk(SRC, [".tsx"])) {
+    const r = rel(file);
+    const lines = fs.readFileSync(file, "utf-8").split("\n");
+
+    const presenceAt = lines.findIndex((l) => !isCommentLine(l) && l.includes("<AnimatePresence"));
+    if (presenceAt === -1) continue;
+
+    for (let i = 0; i < presenceAt; i++) {
+      const line = lines[i];
+      if (isCommentLine(line)) continue;
+      const m = /^\s*if\s*\((.+)\)\s*return null;/.exec(line);
+      if (!m || !OPEN_STATE_RE.test(m[1])) continue;
+
+      const code = line.trim();
+      if (isAllowed(r, code)) continue;
+
+      violations.push({
+        rule: "9 · return null เหนือ AnimatePresence ฆ่าอนิเมชันขาออก (INC-0126)",
+        file: r,
+        line: i + 1,
+        code: code.slice(0, 160),
+        hint: "คืน null ทั้งก้อน = AnimatePresence หายไปพร้อมลูก · exit ที่เขียนไว้ไม่เคยทำงาน — ย้ายเงื่อนไขเข้าไปข้างใน `<AnimatePresence>{isOpen && (...)}</AnimatePresence>`",
+      });
+    }
+  }
+}
+
 function run(): void {
   console.log("🔍 ตรวจคุณภาพโมชั่นทั้งเว็บ (Motion Quality Guard)...\n");
 
   const violations: Violation[] = [];
   checkTsx(violations);
   checkWaitWithoutExit(violations);
+  checkExitKilledByEarlyReturn(violations);
   checkUnregisteredTransformVars(violations);
   checkCss(violations);
   checkKeyframeCenteringConflict(violations);
@@ -429,7 +497,7 @@ function run(): void {
   }
 
   console.log(
-    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
+    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
   );
   process.exit(0);
 }
