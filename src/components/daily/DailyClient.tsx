@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
+import { CardImage } from "@/components/card/CardImage";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { useLocale } from "@/lib/i18n";
 import { saveReading } from "@/lib/utils/history";
@@ -20,6 +21,10 @@ interface FocusChamber {
   elementEn: string;
   descTh: string;
   descEn: string;
+  /** ภาพหน้าไพ่ 1909 Rider-Waite ประจำวิหาร — ต้องเป็นไฟล์จริงใน `/public/cards/` เท่านั้น */
+  cardImage: string;
+  cardNameTh: string;
+  cardNameEn: string;
 }
 
 const FOCUS_CHAMBERS: FocusChamber[] = [
@@ -31,6 +36,9 @@ const FOCUS_CHAMBERS: FocusChamber[] = [
     elementEn: "General Dimension",
     descTh: "คลื่นพลังงานหลักและเข็มทิศชีวิตประจำวัน",
     descEn: "Overall energy and spiritual alignment",
+    cardImage: "major-19.jpg",
+    cardNameTh: "ดวงอาทิตย์",
+    cardNameEn: "The Sun",
   },
   {
     id: "work",
@@ -40,6 +48,9 @@ const FOCUS_CHAMBERS: FocusChamber[] = [
     elementEn: "Fire Element (Wands)",
     descTh: "การตัดสินใจ ภาวะผู้นำ และความก้าวหน้า",
     descEn: "Professional decisions and purposeful action",
+    cardImage: "wands-01.jpg",
+    cardNameTh: "เอซไม้เท้า",
+    cardNameEn: "Ace of Wands",
   },
   {
     id: "money",
@@ -49,6 +60,9 @@ const FOCUS_CHAMBERS: FocusChamber[] = [
     elementEn: "Earth Element (Pentacles)",
     descTh: "ความมั่งคั่ง สภาพคล่อง และโชคชะตา",
     descEn: "Financial liquidity and material harmony",
+    cardImage: "pentacles-01.jpg",
+    cardNameTh: "เอซแห่งเหรียญ",
+    cardNameEn: "Ace of Pentacles",
   },
   {
     id: "love",
@@ -58,6 +72,9 @@ const FOCUS_CHAMBERS: FocusChamber[] = [
     elementEn: "Water Element (Cups)",
     descTh: "ความผูกพัน คนในใจ และความจริงในดวงใจ",
     descEn: "Emotional resonance and sacred bonds",
+    cardImage: "cups-01.jpg",
+    cardNameTh: "เอซแห่งถ้วย",
+    cardNameEn: "Ace of Cups",
   },
   {
     id: "mind",
@@ -67,6 +84,9 @@ const FOCUS_CHAMBERS: FocusChamber[] = [
     elementEn: "Air Element (Swords)",
     descTh: "ความสงบภายใน สติสัมปชัญญะ และการปล่อยวาง",
     descEn: "Mental clarity and inner stillness",
+    cardImage: "swords-01.jpg",
+    cardNameTh: "เอซแห่งดาบ",
+    cardNameEn: "Ace of Swords",
   },
 ];
 
@@ -175,7 +195,7 @@ export function DailyClient() {
                         soundManager.playMenuTapSound();
                         setSelectedFocus(chamber.id);
                       }}
-                      className={`text-left p-4 sm:p-4.5 rounded-2xl border transition duration-200 cursor-pointer relative flex flex-col justify-between ${
+                      className={`group text-left p-4 sm:p-4.5 rounded-2xl border transition duration-200 cursor-pointer relative flex flex-col justify-between ${
                         isSelected
                           ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-raised"
                           : "altar-card-porcelain hover:border-[#A58A5C]/60 hover:shadow-xs"
@@ -196,12 +216,34 @@ export function DailyClient() {
                             {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                           </span>
                         </div>
-                        <h3 className="font-serif-th font-bold text-sm sm:text-base text-[#29261F]">
-                          {isEnglish ? chamber.titleEn : chamber.titleTh}
-                        </h3>
-                        <p className="text-xs font-sans text-[#635B4E] mt-1.5 leading-relaxed line-clamp-2">
-                          {isEnglish ? chamber.descEn : chamber.descTh}
-                        </p>
+
+                        <div className="flex items-start gap-3">
+                          {/* ภาพหน้าไพ่ 1909 Rider-Waite ประจำวิหาร (กฎเหล็กข้อ 8 — ต้องผ่าน <CardImage /> พร้อม sizes) */}
+                          <div
+                            className={`shrink-0 w-12 h-18 rounded-lg overflow-hidden border-2 bg-[#F3EDE2] shadow-sm transition duration-300 group-hover:scale-105 ${
+                              isSelected ? "border-[#8F5C1A]" : "border-[#D9C8AC]"
+                            }`}
+                          >
+                            <CardImage
+                              image={chamber.cardImage}
+                              alt={isEnglish ? chamber.cardNameEn : chamber.cardNameTh}
+                              className="w-full h-full object-cover"
+                              sizes="48px"
+                            />
+                          </div>
+
+                          <div className="min-w-0">
+                            <h3 className="font-serif-th font-bold text-sm sm:text-base text-[#29261F]">
+                              {isEnglish ? chamber.titleEn : chamber.titleTh}
+                            </h3>
+                            <span className="block text-[11px] font-mono text-[#8F5C1A] font-semibold mt-0.5">
+                              {chamber.cardNameEn}
+                            </span>
+                            <p className="text-xs font-sans text-[#635B4E] mt-1.5 leading-relaxed line-clamp-2">
+                              {isEnglish ? chamber.descEn : chamber.descTh}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </button>
                   );
