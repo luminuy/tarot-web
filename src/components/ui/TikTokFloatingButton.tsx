@@ -1,19 +1,26 @@
 "use client";
 
 import { useLocale } from "@/lib/i18n";
+import { BRAND_SOCIAL_PROFILES } from "@/lib/config/site";
 import { usePathname } from "next/navigation";
 
 /**
  * TikTok Floating Action Button (FAB)
  *
- * แสดงปุ่มลอยมุมขวาล่างสำหรับเชื่อมต่อไปยังบัญชีทางการของแม่หมอ:
- * https://www.tiktok.com/@seerada.tarot
+ * แสดงปุ่มลอยมุมขวาล่างสำหรับเชื่อมต่อไปยังบัญชีทางการของแม่หมอ
+ *
+ * ⚠️ URL มาจาก `BRAND_SOCIAL_PROFILES` ใน `lib/config/site.ts` ที่เดียว
+ * เพราะค่าเดียวกันนี้ถูกใช้เป็น `Organization.sameAs` ใน JSON-LD ด้วย
+ * ถ้าแยกกันเขียนสองที่ วันหนึ่งจะหลุดกันแล้วสัญญาณตัวตนที่ส่งให้ Google จะผิด
  *
  * - ใช้โลโก้แท้ทางการของ TikTok (3-Layer Chromatic Vector: Cyan #00F2EA / Red #FF004F / White #FFFFFF)
  * - รองรับทั้ง Desktop และ Mobile พร้อม Safe Area Inset สำหรับ iPhone
  * - มี Tooltip ขยายทางซ้ายอย่างนุ่มนวลเมื่อ Hover บนหน้าจอคอม
  * - Accessible: aria-label, rel="noopener noreferrer", focus-visible ring
  */
+const TIKTOK_PROFILE_URL =
+  BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com")) ?? BRAND_SOCIAL_PROFILES[0];
+
 export function TikTokFloatingButton() {
   const { isEnglish } = useLocale();
   const pathname = usePathname();
@@ -33,7 +40,7 @@ export function TikTokFloatingButton() {
       }}
     >
       <a
-        href="https://www.tiktok.com/@seerada.tarot"
+        href={TIKTOK_PROFILE_URL}
         target="_blank"
         rel="noopener noreferrer"
         title={isEnglish ? "Follow Seerada on TikTok (@seerada.tarot)" : "ติดตามแม่หมอ Seerada บน TikTok (@seerada.tarot)"}
