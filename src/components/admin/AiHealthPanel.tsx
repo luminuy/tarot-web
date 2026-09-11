@@ -44,6 +44,9 @@ interface QualityStats {
   notHappenedRate: number;
   avgElapsedMs: number;
   failoverRate: number;
+  avgThaiScore: number;
+  avgThaiFixes: number;
+  thaiIssueCounts: Record<string, number>;
   byVersion: Record<string, { total: number; accurate: number; rate: number }>;
   byProvider: Record<string, { total: number; accurate: number; rate: number }>;
   byPersona: Record<string, { total: number; accurate: number; rate: number }>;
@@ -214,6 +217,49 @@ export default function AiHealthPanel() {
                     <p className="mt-0.5 text-[10px] text-[#756F66]">
                       ไม่เกิดจริง {quality.notHappenedRate}%
                     </p>
+                  </div>
+                </div>
+
+                {/* ✍️ คุณภาพภาษาไทย (HANDOFF_AI_ACCURACY_THAI B-01) */}
+                <div className="rounded-xl border border-[#E8E2D8] p-3">
+                  <p className="text-xs font-semibold text-[#29261F] mb-2">
+                    คุณภาพภาษาไทยของคำอ่าน (Thai Quality Guard)
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="rounded-lg border border-[#E8E2D8] bg-[#FAF8F5] p-2.5 text-center">
+                      <p className="text-[11px] font-medium text-[#635B4E]">คะแนนภาษาไทยเฉลี่ย</p>
+                      <p className="mt-1 text-xl font-bold text-[#29261F]">
+                        {quality.avgThaiScore > 0 ? `${quality.avgThaiScore}/100` : "—"}
+                      </p>
+                      <p className="mt-0.5 text-[10px] text-[#756F66]">100 = ไม่พบที่ผิดเลย</p>
+                    </div>
+
+                    <div className="rounded-lg border border-[#E8E2D8] bg-[#FAF8F5] p-2.5 text-center">
+                      <p className="text-[11px] font-medium text-[#635B4E]">จุดที่ขัดให้อัตโนมัติ</p>
+                      <p className="mt-1 text-xl font-bold text-[#29261F]">{quality.avgThaiFixes}</p>
+                      <p className="mt-0.5 text-[10px] text-[#756F66]">
+                        เฉลี่ยต่อคำอ่าน · เกิน 5 = ควรลดชั้นโมเดล
+                      </p>
+                    </div>
+
+                    <div className="col-span-2 sm:col-span-1 rounded-lg border border-[#E8E2D8] bg-[#FAF8F5] p-2.5">
+                      <p className="text-[11px] font-medium text-[#635B4E] text-center">ปัญหาที่เจอบ่อย</p>
+                      {Object.keys(quality.thaiIssueCounts).length > 0 ? (
+                        <div className="mt-1 space-y-0.5">
+                          {Object.entries(quality.thaiIssueCounts)
+                            .sort((a, b) => b[1] - a[1])
+                            .slice(0, 4)
+                            .map(([code, count]) => (
+                              <div key={code} className="flex items-center justify-between text-[10px]">
+                                <span className="font-mono text-[#29261F]">{code}</span>
+                                <span className="text-[#635B4E]">{count}</span>
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-center text-[10px] text-[#756F66]">ยังไม่พบปัญหา</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 

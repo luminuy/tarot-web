@@ -17,7 +17,19 @@ export type ReadingEvent =
   | { type: "card"; position: number; headline: string; reading: string }
   | { type: "connections"; text: string }
   | { type: "summary"; text: string }
-  | { type: "done"; reading: Reading; usage: UsageInfo; model?: string; consistencyOk?: boolean }
+  | {
+      type: "done";
+      reading: Reading;
+      usage: UsageInfo;
+      model?: string;
+      consistencyOk?: boolean;
+      /** คะแนนภาษาไทย 0-100 จาก `checkThaiQuality()` หลังขัดคำผิดแล้ว (B-01) */
+      thaiScore?: number;
+      /** รหัสปัญหาภาษาไทยที่ยังเหลือหลังขัด — เก็บเป็นสถิติว่าโมเดลไหนไทยแย่จริง */
+      thaiIssueCodes?: string[];
+      /** จำนวนจุดที่ถูกแก้อัตโนมัติเงียบ ๆ ก่อนส่งถึงผู้ใช้ */
+      thaiFixCount?: number;
+    }
   | { type: "error"; message: string };
 
 export interface UsageInfo {

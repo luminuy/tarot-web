@@ -28,6 +28,7 @@ import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/co
 import { ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
 import { checkReadingConsistency } from "@/lib/ai/consistency";
+import { enforceThaiQuality } from "@/lib/ai/thai-quality";
 
 /**
  * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)
@@ -496,12 +497,33 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
           continue; // สลับไปโมเดลถัดไป หรือตกไปหา Gemini
         }
 
+        // ✍️ ด่านภาษาไทย (HANDOFF_AI_ACCURACY_THAI B-01)
+        // แก้คำผิดที่แก้ได้เงียบ ๆ แทนการ failover — failover แลกด้วยเวลาที่ผู้ใช้นั่งรออยู่จริง
+        const thai = enforceThaiQuality(readingData, { personaId: ctx.personaId });
+        readingData = thai.reading;
+        if (thai.fixCount > 0) {
+          recordEvent("ai_thai_fix");
+          recordEvent(`ai_thai_fix:${model}`);
+        }
+        for (const code of thai.issueCodes) {
+          recordEvent(`ai_thai_issue:${code.toLowerCase()}`);
+        }
+
         if (usage.inputTokens === 0) {
           usage.inputTokens = Math.round((systemInstruction.length + userMessage.length) / 3.5);
           usage.outputTokens = Math.round(cleanJson.length / 3.5);
         }
 
-        yield { type: "done", reading: readingData, usage, model, consistencyOk: consistency.ok };
+        yield {
+          type: "done",
+          reading: readingData,
+          usage,
+          model,
+          consistencyOk: consistency.ok,
+          thaiScore: thai.score,
+          thaiIssueCodes: thai.issueCodes,
+          thaiFixCount: thai.fixCount,
+        };
         return; // ทำงานสำเร็จสมบูรณ์!
       } else {
         recordEvent("ai_schema_fail:groq");

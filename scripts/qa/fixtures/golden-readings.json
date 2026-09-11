@@ -33,7 +33,7 @@
   },
   {
     "id": "gold-003",
-    "category": "finance",
+    "category": "money",
     "spreadId": "three-card",
     "question": "การเงินในอีก 3 เดือนข้างหน้าจะเป็นอย่างไร",
     "cardIds": [
@@ -117,7 +117,7 @@
   },
   {
     "id": "gold-008",
-    "category": "finance",
+    "category": "money",
     "spreadId": "money",
     "question": "ควรลงทุนในธุรกิจนี้ตอนนี้หรือไม่",
     "cardIds": [
@@ -211,7 +211,7 @@
   },
   {
     "id": "gold-013",
-    "category": "finance",
+    "category": "money",
     "spreadId": "three-card",
     "question": "หนี้สินและสภาพคล่องจะคลี่คลายเมื่อไหร่",
     "cardIds": [
@@ -323,7 +323,7 @@
   },
   {
     "id": "gold-019",
-    "category": "finance",
+    "category": "money",
     "spreadId": "quick",
     "question": "โชคลาภและการเงินประจำวัน",
     "cardIds": [
@@ -415,7 +415,7 @@
   },
   {
     "id": "gold-024",
-    "category": "finance",
+    "category": "money",
     "spreadId": "yes-no",
     "question": "จะกู้เงินผ่านหรือไม่",
     "cardIds": [
@@ -471,7 +471,7 @@
   },
   {
     "id": "gold-028",
-    "category": "finance",
+    "category": "money",
     "spreadId": "money",
     "question": "จะได้รับเงินที่รอคอยอยู่ไหม",
     "cardIds": [

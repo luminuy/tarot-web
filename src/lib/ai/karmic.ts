@@ -106,7 +106,7 @@ export function analyzeKarmicBridge(
   }
 
   if (pastReading.recentPrimaryCards && pastReading.recentPrimaryCards.length > 0) {
-    narrativeParts.push(`• ไพ่เด่นในอดีตครั้งอื่นๆ: ${pastReading.recentPrimaryCards.join(", ")}`);
+    narrativeParts.push(`• ไพ่เด่นในอดีตครั้งอื่น ๆ: ${pastReading.recentPrimaryCards.join(", ")}`);
   }
 
   if (transitionInsight) {

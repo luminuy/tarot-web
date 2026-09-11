@@ -7,7 +7,7 @@ import type { PastReadingSnapshot } from "@/lib/ai/karmic";
  *  1. prompt ไม่ยาวเกินจำเป็น รักษา latency และความเร็ว
  *  2. ลดความเสี่ยงข้อมูลส่วนบุคคลหลุดออกนอกระบบ (PDPA-compliant)
  *  3. ดึงเฉพาะแก่นที่แม่หมอต้องรู้: "เคยได้ไพ่อะไร ถามอะไร แล้วผลลัพธ์เป็นอย่างไร"
- * ⚠️ ผู้เยี่ยมชมไม่มีประวัติ หรือเกิดข้อผิดพลาดใดๆ → คืน undefined อย่างปลอดภัย ห้าม throw
+ * ⚠️ ผู้เยี่ยมชมไม่มีประวัติ หรือเกิดข้อผิดพลาดใด ๆ → คืน undefined อย่างปลอดภัย ห้าม throw
  */
 export async function loadKarmicMemory(
   userId: string | null | undefined,

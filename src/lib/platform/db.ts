@@ -272,7 +272,10 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
         consistency_ok  INTEGER,
         judge_score     INTEGER,
         outcome         TEXT,
-        created_at      INTEGER NOT NULL
+        created_at      INTEGER NOT NULL,
+        thai_score        INTEGER,
+        thai_issue_codes  TEXT,
+        thai_fix_count    INTEGER
       );
       CREATE INDEX IF NOT EXISTS idx_rq_version  ON reading_quality(prompt_version, created_at);
       CREATE INDEX IF NOT EXISTS idx_rq_provider ON reading_quality(provider, model);
@@ -308,6 +311,11 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
     safeExec("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0");
     safeExec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users(email_lower) WHERE email_lower IS NOT NULL");
+    // ✍️ คอลัมน์คุณภาพภาษาไทย (migrations/0011) — ฐานข้อมูลเครื่องที่สร้างไว้ก่อนหน้านี้
+    // ผ่าน CREATE TABLE IF NOT EXISTS จะไม่ได้คอลัมน์ใหม่ ถ้าไม่ ALTER ตรงนี้เทสต์จะพังแบบงง ๆ
+    safeExec("ALTER TABLE reading_quality ADD COLUMN thai_score INTEGER");
+    safeExec("ALTER TABLE reading_quality ADD COLUMN thai_issue_codes TEXT");
+    safeExec("ALTER TABLE reading_quality ADD COLUMN thai_fix_count INTEGER");
 
 
     const adapter: AppDB = {

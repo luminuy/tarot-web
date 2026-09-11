@@ -341,6 +341,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               outputTokens: event.usage?.outputTokens ?? 0,
               hadFailover: providerUsed === "gemini" && Boolean(process.env.GROQ_API_KEY),
               consistencyOk: event.consistencyOk ?? true,
+              thaiScore: event.thaiScore ?? null,
+              thaiIssueCodes: event.thaiIssueCodes ?? null,
+              thaiFixCount: event.thaiFixCount ?? null,
             }).catch(() => {});
 
             // เฉลย serverSeed ตอนนี้ — ผู้ใช้ตรวจย้อนหลังได้ว่าไพ่ไม่ได้ถูกเลือกทีหลัง
