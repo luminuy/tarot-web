@@ -39,24 +39,14 @@ import { geminiEndpoint, aiGatewayHeaders } from "../../src/lib/ai/gateway";
 import type { ReadingContext } from "../../src/lib/ai/prompt";
 import type { Reading } from "../../src/lib/schema/reading";
 import type { Category } from "../../src/data/cards/types";
+import { RUBRIC, buildComparison } from "./judge-compare";
+import type { RubricKey, CaseResult, JudgeReport } from "./judge-compare";
 
 const REPORT_DIR = path.join(process.cwd(), "scripts/qa/reports");
 const FIXTURE = path.join(process.cwd(), "scripts/qa/fixtures/golden-readings.json");
 
 /** โมเดลผู้ตัดสิน — คนละตระกูลกับผู้ผลิตคำอ่านเสมอ */
 const JUDGE_MODEL = "gemini-3.6-flash";
-
-/** ภาคผนวก B — เกณฑ์ให้คะแนน 1-5 ทั้ง 6 ข้อ */
-const RUBRIC = [
-  { key: "onQuestion", label: "ตอบตรงคำถาม" },
-  { key: "cardGrounded", label: "ยึดกับภาพไพ่ 1909 จริง" },
-  { key: "actionable", label: "ลงมือทำได้จริง" },
-  { key: "personaFit", label: "ตรงบุคลิกแม่หมอ" },
-  { key: "notVague", label: "ไม่กำกวม (ไม่ใช่ Barnum)" },
-  { key: "thaiNatural", label: "ภาษาไทยถูกต้องและเป็นธรรมชาติ" },
-] as const;
-
-type RubricKey = (typeof RUBRIC)[number]["key"];
 
 interface GoldenCase {
   id: string;
@@ -66,37 +56,6 @@ interface GoldenCase {
   cardIds: string[];
   reversed: boolean[];
   personaId?: string;
-}
-
-interface CaseResult {
-  id: string;
-  category: string;
-  spreadId: string;
-  personaId: string;
-  model: string | null;
-  elapsedMs: number;
-  ok: boolean;
-  error?: string;
-  consistencyIssues: string[];
-  thaiScore: number;
-  thaiIssues: string[];
-  judge: Partial<Record<RubricKey, number>> & { average?: number; comment?: string };
-}
-
-interface JudgeReport {
-  promptVersion: string;
-  judgeModel: string;
-  startedAt: string;
-  cases: CaseResult[];
-  summary: {
-    total: number;
-    succeeded: number;
-    avgThaiScore: number;
-    avgElapsedMs: number;
-    consistencyIssueRate: number;
-    rubric: Record<RubricKey, number>;
-    overall: number;
-  };
 }
 
 function arg(name: string): string | undefined {
@@ -317,24 +276,7 @@ function latestReportFor(version: string): JudgeReport | null {
 }
 
 function printComparison(current: JudgeReport, previous: JudgeReport) {
-  console.log(`\n📊 เทียบ ${previous.promptVersion} → ${current.promptVersion}`);
-  console.log("─".repeat(70));
-  for (const r of RUBRIC) {
-    const before = previous.summary.rubric[r.key] ?? 0;
-    const after = current.summary.rubric[r.key] ?? 0;
-    const delta = Math.round((after - before) * 100) / 100;
-    const mark = delta > 0.05 ? "🟢 ดีขึ้น" : delta < -0.05 ? "🔴 แย่ลง" : "⚪ เท่าเดิม";
-    console.log(
-      `  ${r.label.padEnd(32)} ${before.toFixed(2)} → ${after.toFixed(2)}  (${delta >= 0 ? "+" : ""}${delta})  ${mark}`
-    );
-  }
-  const thaiDelta = current.summary.avgThaiScore - previous.summary.avgThaiScore;
-  console.log(
-    `  ${"คะแนนภาษาไทยจากโค้ด (0-100)".padEnd(32)} ${previous.summary.avgThaiScore} → ${current.summary.avgThaiScore}  (${
-      thaiDelta >= 0 ? "+" : ""
-    }${thaiDelta})`
-  );
-  console.log("\n⚠️ judge คือตัวชี้วัดรอง — ถ้า judge บอกดีขึ้นแต่ ACCURATE จากคนจริงลดลง ให้เชื่อคนจริงและย้อนกลับทันที");
+  for (const line of buildComparison(current, previous)) console.log(line);
 }
 
 /**
@@ -440,6 +382,10 @@ async function main() {
   console.log("─".repeat(70));
 
   fs.mkdirSync(REPORT_DIR, { recursive: true });
+  // ⚠️ จับเวลาเริ่มไว้ครั้งเดียวตรงนี้ เดิมเรียก new Date() ตอนเขียนไฟล์ทุกครั้ง
+  // ทำให้ `startedAt` กลายเป็น "เวลาที่เขียนไฟล์ล่าสุด" ซึ่งห่างจาก timestamp
+  // ในชื่อไฟล์เป็นชั่วโมงเมื่อรันครบ 30 เคส (เจอจริงใน baseline 20260911-1)
+  const runStartedAt = new Date().toISOString();
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const outPath = path.join(REPORT_DIR, `judge-${PROMPT_VERSION}-${stamp}.json`);
 
@@ -476,7 +422,7 @@ async function main() {
     const currentReport: JudgeReport = {
       promptVersion: PROMPT_VERSION,
       judgeModel: judgeKey ? JUDGE_MODEL : "none",
-      startedAt: new Date().toISOString(),
+      startedAt: runStartedAt,
       cases: results,
       summary: summarize(results),
     };
@@ -486,7 +432,7 @@ async function main() {
   const report: JudgeReport = {
     promptVersion: PROMPT_VERSION,
     judgeModel: judgeKey ? JUDGE_MODEL : "none",
-    startedAt: new Date().toISOString(),
+    startedAt: runStartedAt,
     cases: results,
     summary: summarize(results),
   };

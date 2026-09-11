@@ -113,6 +113,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🌅 ไพ่ประจำวันของทุกคน (deterministic + กระจายทั่วสำรับ + provably-fair proof)", cmd: TSX, args: ["scripts/qa/test-daily-card.ts"] },
   { label: "🔎 corpus ค้นหาเชิงความหมาย (ไพ่ 78 + บทความครบ · metadata Vectorize ถูกฟอร์แมต)", cmd: TSX, args: ["scripts/qa/test-search-corpus.ts"] },
   { label: "📊 คุณภาพคำอ่าน AI & Telemetry (Consistency Checker / Karmic Bridge / Golden Set / reading_quality)", cmd: TSX, args: ["scripts/qa/test-reading-quality.ts"] },
+  { label: "🧑‍⚖️ เวอร์ชัน prompt มีผลวัด ai:judge รองรับ (ขึ้นเวอร์ชันแล้วต้องมีรายงาน)", cmd: TSX, args: ["scripts/qa/test-judge-baseline.ts"] },
   { label: "✍️ ภาษาไทยของแม่หมอ (ค่ะ/คะ · ไม้ยมก · สระ แ · กันผลบวกลวง · prompt กับ persona ต้องสะอาด)", cmd: TSX, args: ["scripts/qa/test-thai-quality.ts"] },
   { label: "🧑‍⚖️ Golden Set พร้อมยิงเข้าโมเดลจริง (ซ้อมแห้ง ไม่มีต้นทุน AI · หมวด/ผัง/ไพ่ต้องตรงกัน)", cmd: TSX, args: ["scripts/qa/run-golden-judge.ts", "--dry-run"] },
   { label: "📈 ระบบวัดผลและติดตามเหตุการณ์ (GA4 / Meta Pixel / Consent Mode v2 / Event Contract)", cmd: TSX, args: ["scripts/qa/test-analytics-integrity.ts"] },
