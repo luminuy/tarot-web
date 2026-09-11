@@ -32,6 +32,10 @@ export interface CaseResult {
   spreadId: string;
   personaId: string;
   model: string | null;
+  /** ผู้ให้บริการที่ผลิตคำอ่านจริง — ไม่มีค่าในรายงานที่สร้างก่อน ISSUE-046 */
+  provider?: "groq" | "gemini";
+  /** ร่องรอยของผู้ให้บริการที่ล้มก่อนหน้า (ไว้ดูว่าทำไมถึงตกไป Gemini) */
+  providerNotes?: string[];
   elapsedMs: number;
   ok: boolean;
   error?: string;
@@ -49,6 +53,12 @@ export interface JudgeReport {
   summary: {
     total: number;
     succeeded: number;
+    /**
+     * จำนวนเคสที่ **ผู้ตัดสินให้คะแนนจริง** — ค่า rubric ทุกตัวเฉลี่ยจากตัวเลขนี้ ไม่ใช่จาก `total`
+     * (baseline `20260911-1`: total 30 · succeeded 16 · judged 9 ➔ `onQuestion 4.44` มาจาก 9 เคส
+     *  ถ้าไม่พิมพ์เลขนี้กำกับ คนอ่านรายงานจะเข้าใจว่าเฉลี่ยจาก 30 เคส — ISSUE-046)
+     */
+    judged?: number;
     avgThaiScore: number;
     avgElapsedMs: number;
     consistencyIssueRate: number;

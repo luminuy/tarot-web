@@ -54,7 +54,7 @@ function pass(msg: string) {
 interface ReportShape {
   promptVersion?: string;
   cases?: unknown[];
-  summary?: { total?: number; succeeded?: number };
+  summary?: { total?: number; succeeded?: number; judged?: number };
 }
 
 function reportsFor(version: string): string[] {
@@ -151,6 +151,41 @@ if (mine.length === 0) {
   } else {
     pass(`${newest}: สำเร็จ ${ok}/${total} เคส (${pct}%)`);
   }
+
+  // ── ความครอบคลุมของ "ผู้ตัดสิน" คนละตัวกับความครอบคลุมของ "คำอ่าน" ──
+  // baseline 20260911-1 มี succeeded 16 แต่ judged แค่ 9 ➔ ค่า rubric ที่เอาไปโชว์
+  // (onQuestion 4.44) มาจาก 9 เคส ไม่ใช่ 30 · ถ้าไม่เตือน คนอ่านจะเข้าใจผิดทุกครั้ง
+  const judged = data.summary?.judged;
+  if (typeof judged !== "number") {
+    warn(
+      `${newest}: รายงานนี้ไม่มีเลข "judged" — สร้างก่อน ISSUE-046 จึงบอกไม่ได้ว่าค่า rubric เฉลี่ยจากกี่เคส`
+    );
+  } else if (ok > 0 && judged < ok) {
+    warn(
+      `${newest}: ผู้ตัดสินให้คะแนนจริงแค่ ${judged}/${ok} เคสที่ได้คำอ่าน — ค่า rubric ทุกตัวเฉลี่ยจาก ${judged} เคสเท่านั้น\n` +
+        `      ➔ อย่านำไปอ้างว่าเป็นคะแนนของทั้งชุด ${total} เคส`
+    );
+  } else {
+    pass(`${newest}: ผู้ตัดสินให้คะแนนครบ ${judged}/${ok} เคสที่ได้คำอ่าน`);
+  }
+}
+
+// ── 3.5 เครื่องมือวัดต้องเดินเส้นทางเดียวกับ production ──
+// ถ้าตัววัดยิงแค่ Groq แต่เว็บจริงมี failover ไป Gemini ตัวเลขที่ได้จะเป็นของคนละระบบ
+// และจะขึ้นว่า "ล้มเหลว 14/30" ทั้งที่ผู้ใช้จริงได้คำอ่านครบ (ISSUE-046)
+console.log("\n   ตรวจว่าเครื่องมือวัดเดินเส้นทางเดียวกับ production:");
+const runnerSrc = fs.readFileSync(path.join(process.cwd(), "scripts/qa/run-golden-judge.ts"), "utf-8");
+if (!runnerSrc.includes("streamGeminiReading")) {
+  fail(
+    "run-golden-judge.ts ไม่มี failover ไป Gemini — production มี 2 ชั้น (Groq ➔ Gemini) ตัววัดต้องมีเท่ากัน"
+  );
+} else {
+  pass("run-golden-judge.ts มี failover ไป Gemini ครบเหมือน /api/reading/[id]/read");
+}
+if (!runnerSrc.includes("judged: judgedCount")) {
+  fail("run-golden-judge.ts ไม่ได้บันทึกจำนวนเคสที่ผู้ตัดสินให้คะแนน (summary.judged)");
+} else {
+  pass("run-golden-judge.ts บันทึก summary.judged ให้ตรวจย้อนได้");
 }
 
 // ── 4. ตรรกะเทียบก่อน/หลัง ต้องไม่ตัดสินข้ามชุดเคส ──

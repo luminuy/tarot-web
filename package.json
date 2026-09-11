@@ -25,7 +25,7 @@
     "test:journal": "tsx scripts/qa/test-journal-sync.ts",
     "test:budget": "tsx scripts/qa/test-bundle-budget.ts",
     "test:thai": "tsx scripts/qa/test-thai-quality.ts",
-    "ai:judge": "tsx scripts/qa/run-golden-judge.ts",
+    "ai:judge": "tsx --tsconfig tsconfig.scripts.json scripts/qa/run-golden-judge.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "cards:variants": "tsx scripts/generate-card-variants.ts",
     "cards:related": "tsx scripts/generate-related-cards.ts",

@@ -35,6 +35,39 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-11 (รอบ 41): 🧑‍⚖️ เครื่องมือวัดคุณภาพ AI วัดคนละระบบกับที่ deploy อยู่ (INC-0130)
+
+**ที่มา**: เจ้าของโปรเจกต์ถามว่าคะแนน `notVague 4.67` และ `onQuestion 4.44` ยกระดับได้อีกไหม
+ตรวจรายงาน `judge-20260911-1` แล้วพบว่า **ตัวเลขเองยังเชื่อไม่ได้ก่อน**
+
+**สิ่งที่พบ**
+- รายงานรัน 30 เคส · สำเร็จ 16 · แต่ **ผู้ตัดสินให้คะแนนจริงแค่ 9 เคส** — ค่า rubric ทุกตัวเฉลี่ยจาก 9 เคสนี้
+  (`onQuestion` = 4 5 5 5 5 2 4 5 5 ➔ เคสเดียวที่ได้ 2 ลากค่าเฉลี่ยจาก 4.75 เหลือ 4.44)
+- 14 เคสที่ "ล้มเหลว" ไม่ได้ล้มเพราะคำอ่านพัง แต่เพราะ `run-golden-judge.ts` เรียก `streamGroqReading`
+  ตัวเดียวจบ ขณะที่ `/api/reading/[id]/read` มี failover 2 ชั้น (Groq ➔ Gemini)
+  ➔ **ผู้ใช้จริงได้คำอ่านครบทุกเคส แต่เครื่องมือวัดรายงานว่าล้มเหลวเกือบครึ่ง**
+
+**สิ่งที่แก้ในรอบนี้ (PR นี้ — ไม่แตะ prompt จึงไม่ต้องขึ้น `PROMPT_VERSION`)**
+| # | สิ่งที่ทำ | ไฟล์ |
+|---|---|---|
+| 1 | ให้เครื่องมือวัดเดิน failover เหมือน production ครบ 2 ชั้น + บันทึก `provider` และ `providerNotes` รายเคส | `scripts/qa/run-golden-judge.ts` |
+| 2 | เพิ่ม `summary.judged` — บอกตรง ๆ ว่าค่า rubric เฉลี่ยจากกี่เคส | `scripts/qa/run-golden-judge.ts` · `scripts/qa/judge-compare.ts` |
+| 3 | ด่าน `test-judge-baseline` ตรวจจากซอร์สจริงว่าเครื่องมือวัดมี failover ครบ และเตือนเมื่อ `judged < succeeded` | `scripts/qa/test-judge-baseline.ts` |
+| 4 | `tsconfig.scripts.json` + สตับ `server-only` — ให้ `tsx` รัน `gemini.ts` ได้โดย**ไม่ต้องถอดด่าน `server-only` ออกจากแอปจริง** | `tsconfig.scripts.json` · `scripts/qa/stubs/server-only.ts` |
+| 5 | ขยายพจนานุกรม Barnum จาก 8 ➔ 25 วลี และลดเพดานผ่อนจาก 2 ➔ 1 วลี | `src/lib/ai/thai-quality.ts` |
+| 6 | เทสต์ใหม่ 4 ข้อคุมเกณฑ์ Barnum ใหม่ (รวมข้อกันผลบวกลวง) | `scripts/qa/test-thai-quality.ts` |
+
+**ผลตรวจ**: `npm run repo:verify` ➔ ✅ ผ่านครบ 47/47 ด่าน · `test-thai-quality` 58 ข้อผ่านหมด
+ตัวอย่างมาตรฐานทั้ง 8 ชุดยังได้ภาษาไทย 100/100 เท่าเดิม (เกณฑ์ Barnum ใหม่ไม่จับผิดของดี)
+
+**⏭️ งานค้างที่ต่อจากรอบนี้ (อยู่ใน PR แยก — รอคีย์นักพัฒนา)**
+- แก้ `onQuestion` ที่ต้นตอจริง: โหมดฟันธงผูกกับ **ผัง** (`spread.yesNoMode` ซึ่งทั้งเว็บมีผังเดียว)
+  แทนที่จะผูกกับ **คำถาม** ➔ คนถาม "คนเก่าจะติดต่อกลับมาไหม" บนผังอื่นไม่เคยได้คำสั่งให้ฟันธงเลย
+- ส่วนนั้นแตะ `SYSTEM_CORE_KNOWLEDGE` จึงต้องขึ้น `PROMPT_VERSION` ซึ่งด่าน `test-judge-baseline`
+  บังคับให้แนบรายงาน `npm run ai:judge -- --compare 20260911-2` มาด้วย — ต้องรันจากเครื่องที่มีคีย์
+
+---
+
 ### 🗓️ 2026-09-11 (รอบ 39): 🔑 `.env.example` ไม่มี `GROQ_API_KEY` ทั้งที่เป็นคีย์บังคับของ `ai:judge`
 
 > **คำสั่งเจ้าของ**: "ทำเลย" (ต่อจากคำถาม "`npm run ai:judge -- --compare 20260911-1` ทำไง")
