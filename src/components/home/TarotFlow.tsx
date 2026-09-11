@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { prefetchMotionScope, withMotionScope } from "@/components/providers/with-motion-scope";
+import dynamic from "next/dynamic";
+import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { useOnceOpen } from "@/lib/use-once-open";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
@@ -59,10 +60,14 @@ const QuickChatResult = withMotionScope(() => import("@/components/reading/Quick
 const ShareModal = withMotionScope(() => import("@/components/reading/ShareModal").then((m) => m.ShareModal));
 const ReadingHistoryModal = withMotionScope(() => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal));
 const TarotEncyclopediaModal = withMotionScope(() => import("@/components/encyclopedia/TarotEncyclopediaModal").then((m) => m.TarotEncyclopediaModal));
-// หน้าต่างเข้าสู่ระบบเก็บตัวโหลดไว้เป็นชื่อ เพื่อ "อุ่นเครื่อง" ล่วงหน้าได้ตอนผู้ใช้แตะปุ่ม
-// (ดู `prefetchAuth` ข้างล่าง — ถ้าเริ่มโหลดตอนกดจริง จะเงียบไปครึ่งวินาทีก่อนหน้าต่างเด้ง)
+/**
+ * หน้าต่างเข้าสู่ระบบ — **ไม่ห่อด้วย `withMotionScope()`** โดยตั้งใจ (INC-0128)
+ * ตัวมันทำอนิเมชันด้วย CSS keyframes ล้วนแล้ว จึงไม่ต้องลาก `motion` (40 KB gzip) มาด้วย
+ * chunk ที่ต้องโหลดตอนกดปุ่มจึงเหลือแค่โค้ดของหน้าต่างเอง — สำคัญมากบนมือถือ
+ * เก็บตัวโหลดไว้เป็นชื่อเพื่อ "อุ่นเครื่อง" ล่วงหน้าได้ (ดู `prefetchAuth` ข้างล่าง)
+ */
 const loadAuthModal = () => import("@/components/auth/AuthModal").then((m) => m.AuthModal);
-const AuthModal = withMotionScope(loadAuthModal);
+const AuthModal = dynamic(loadAuthModal, { ssr: false });
 const CardZoomModal = withMotionScope(() => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal));
 const BuyCreditsModal = withMotionScope(() => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal));
 const AccessDialog = withMotionScope(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog));
@@ -207,7 +212,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
    * และ config ของด่านกันบอท · ยิงขนานกันตั้งแต่ผู้ใช้แตะปุ่ม ไม่ต้องรอต่อคิวกัน
    */
   const prefetchAuth = () => {
-    prefetchMotionScope(loadAuthModal);
+    if (typeof window !== "undefined") {
+      void loadAuthModal().catch(() => {
+        /* noop — ของเสริม ล้มแล้วปล่อยให้ตอนเปิดจริงโหลดใหม่ */
+      });
+    }
     prefetchTurnstile();
   };
 

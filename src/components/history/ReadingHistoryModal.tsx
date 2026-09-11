@@ -189,10 +189,16 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 20 }}
-          className="w-full max-w-2xl max-h-[88vh] rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] p-5 sm:p-7 shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col relative space-y-4 overflow-hidden"
+          /*
+           * ⚠️ **ห้ามใส่ `scale` ให้แผงโมดัลใบใหญ่** (INC-0128 · กฎเดียวกับที่ `ui/Modal.tsx` เขียนเตือนไว้)
+           * การย่อ/ขยายบังคับให้เบราว์เซอร์ raster ตัวอักษรทั้งใบใหม่ทุกเฟรม
+           * บนมือถือ (CPU ช้ากว่าเดสก์ท็อปหลายเท่า) เห็นเป็นอาการ "กระพริบ/กระตุก" ตอนเปิด
+           * เลื่อนขึ้น + จาง ให้ผลทางสายตาใกล้เคียงกันแต่เบากว่ามาก
+           */
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 12 }}
+          className="w-full max-w-2xl max-h-[88svh] rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] p-5 sm:p-7 shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#D5CEC2]/40 pb-3">

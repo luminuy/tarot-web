@@ -244,7 +244,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
         role="region"
         aria-label={isEn ? `Account details for ${user.name}` : `ข้อมูลบัญชี ${user.name}`}
         aria-hidden={!menuOpen}
-        className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100dvh-4.5rem)] space-y-2 font-serif-th text-xs no-scrollbar dropdown-panel-base ${
+        className={`absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100svh-4.5rem)] space-y-2 font-serif-th text-xs no-scrollbar dropdown-panel-base ${
           menuOpen ? "dropdown-panel-entering" : "dropdown-panel-exiting"
         }`}
       >

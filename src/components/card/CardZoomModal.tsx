@@ -52,11 +52,17 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
         className="fixed inset-0 z-60 flex items-center justify-center p-4 modal-scrim cursor-zoom-out"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.85, y: 30 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.85, y: 30 }}
+          /*
+           * ⚠️ **ห้ามใส่ `scale` ให้แผงโมดัลใบใหญ่** (INC-0128 · กฎเดียวกับที่ `ui/Modal.tsx` เขียนเตือนไว้)
+           * การย่อ/ขยายบังคับให้เบราว์เซอร์ raster ตัวอักษรทั้งใบใหม่ทุกเฟรม
+           * บนมือถือ (CPU ช้ากว่าเดสก์ท็อปหลายเท่า) เห็นเป็นอาการ "กระพริบ/กระตุก" ตอนเปิด
+           * เลื่อนขึ้น + จาง ให้ผลทางสายตาใกล้เคียงกันแต่เบากว่ามาก
+           */
+          initial={{ opacity: 0, y: 22 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 16 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-sm max-h-[calc(100dvh-2rem)] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] shadow-overlay flex flex-col relative cursor-default overflow-hidden"
+          className="w-full max-w-sm max-h-[calc(100svh-2rem)] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] shadow-overlay flex flex-col relative cursor-default overflow-hidden"
         >
           {/* Close Button */}
           <button

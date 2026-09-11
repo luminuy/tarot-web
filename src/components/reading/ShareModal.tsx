@@ -476,9 +476,15 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim overflow-y-auto"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          /*
+           * ⚠️ **ห้ามใส่ `scale` ให้แผงโมดัลใบใหญ่** (INC-0128 · กฎเดียวกับที่ `ui/Modal.tsx` เขียนเตือนไว้)
+           * การย่อ/ขยายบังคับให้เบราว์เซอร์ raster ตัวอักษรทั้งใบใหม่ทุกเฟรม
+           * บนมือถือ (CPU ช้ากว่าเดสก์ท็อปหลายเท่า) เห็นเป็นอาการ "กระพริบ/กระตุก" ตอนเปิด
+           * เลื่อนขึ้น + จาง ให้ผลทางสายตาใกล้เคียงกันแต่เบากว่ามาก
+           */
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
           className="w-full max-w-xl rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-4 sm:p-6 shadow-overlay space-y-4 my-auto relative text-[#2E211A]"

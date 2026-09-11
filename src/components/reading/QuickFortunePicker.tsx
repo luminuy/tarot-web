@@ -399,7 +399,7 @@ export function QuickFortunePicker({
             isNicknameClosing ? "anim-scrim-out" : "anim-scrim-in"
           }`}
         >
-          <div className={`w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
+          <div className={`w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
             isNicknameClosing ? "" : " anim-modal-rise"
           }`}>
             <div className="space-y-1.5">
