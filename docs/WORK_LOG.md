@@ -35,6 +35,32 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-11 (รอบ 42): 🎟️ ระบบรหัสแลกสิทธิ์เปิดฟีเจอร์พรีเมียมได้ทุกอย่าง 3 ครั้ง (Redeem Code System)
+
+> **คำขอของผู้ใช้**: "สร้างรหัส ให้เปิดได้ทุกอย่างในเว็บ เเค่สามครั้งหน่อย" พร้อมตั้งค่า API keys Gemini และ Groq
+
+#### รายละเอียดการพัฒนาและผลลัพธ์
+1. **รหัสแลกสิทธิ์ที่เปิดใช้งานทันที**:
+   - `VIP3-TAROT-2026` (โควตา 3 เครดิตพรีเมียม)
+   - `SEER3PASS` (โควตา 3 เครดิตพรีเมียม)
+2. **กลไกการปลดล็อกพรีเมียม (Entitlement Architecture)**:
+   - บันทึกการเติมเครดิตด้วยเหตุผล `purchase_redeem_<CODE>` ทำให้ระบบตรวจจับว่าเป็นเครดิตประเภท `purchase`
+   - ปลดล็อก `hasPaidCredits = true` ทันที สามารถเปิดผังพยากรณ์ระดับสูง (Grand Spreads เช่น Celtic Cross, Year Ahead) และแม่หมอระดับปรมาจารย์ลับ (Master Personas) ได้ทั้งหมด
+   - โควตาพรีเมียมจะถูกตัดเมื่อใช้งานจริงจนครบ 3 ครั้ง และระบบจะกลับสู่สถานะปกติอย่างปลอดภัย
+   - ป้องกันการใช้รหัสเดิมซ้ำต่อบัญชี (One redemption per user per code)
+3. **ไฟล์ที่พัฒนาและเชื่อมต่อ**:
+   - `migrations/0012_redeem_codes.sql`: ตาราง `redeem_codes` และ `redeem_redemptions` พร้อม Seed ข้อมูลสำหรับ Cloudflare D1
+   - `src/lib/platform/db.ts`: เพิ่ม Schema และ Seed สำหรับ Local SQLite (`local.db`)
+   - `src/lib/entitlement/redeem.ts`: ตรรกะการตรวจสอบรหัสและการแลกสิทธิ์
+   - `src/app/api/entitlement/redeem/route.ts`: Endpoint `POST /api/entitlement/redeem`
+   - `src/components/entitlement/BuyCreditsModal.tsx`: ช่องกรอกรหัสแลกสิทธิ์ดีไซน์หรู ไร้อิโมจิแฟนซี พร้อมแสดงผลลัพธ์ชัดเจน
+   - `src/components/entitlement/AccessDialog.tsx`: เชื่อมปุ่ม "ใช้รหัสแลกสิทธิ์" จากหน้าต่างแจ้งเตือนสิทธิ์พรีเมียม
+   - `scripts/qa/test-redeem-code.ts`: การทดสอบครอบคลุม 26 ขั้นตอน ผ่าน 100%
+4. **การตรวจสอบคุณภาพ (Verification)**:
+   - `npm run typecheck`: 0 Errors ผ่าน 100%
+   - `npx tsx scripts/qa/test-redeem-code.ts`: 26/26 ผ่านทั้งหมด
+   - `npm run repo:verify`: ผ่านครบ 48/48 ด่าน
+
 ### 🗓️ 2026-09-11 (รอบ 41): ♿ ปิด P0 ทั้ง 3 ข้อจากผลตรวจ UX/UI — สายด่วนวิกฤตอ่านไม่ออก · หน้าแรกไม่มี landmark · h1 มาลำดับที่ 6
 
 > **คำสั่งเจ้าของ**: "แก้เลยทั้งคู่" (หลังเห็นผลตรวจ UX/UI ใน PR #414)
@@ -82,10 +108,34 @@
   (ยังอยู่ใน PR #414 ที่ยังไม่ merge ตอนเขียนบันทึกนี้ — ไม่ลิงก์ไว้เพื่อไม่ให้เป็นลิงก์เสียถ้า PR นั้นไม่เข้า)
   (skip link · `<nav>` landmark · พื้นที่กด 44px · Esc/focus trap 5 หน้าต่าง · label ช่องกรอก 17 จุด ฯลฯ)
 - **บทเรียนที่บันทึก**: [`docs/INCIDENT_LOG.md`](INCIDENT_LOG.md) INC-0130
+### 🗓️ 2026-09-11 (รอบ 40): 🎟️ พัฒนาระบบรหัสแลกสิทธิ์ (Redeem Code) ปลดล็อกทุกฟีเจอร์ 3 ครั้ง (`VIP3-TAROT-2026` / `SEER3PASS`)
+
+> **คำสั่งเจ้าของ**: "สร้างรหัส ให้เปิดได้ทุกอย่างในเว็บ เเค่สามครั้งหน่อย" ➔ เลือกแนวทาง "สร้างระบบโค้ดแลกสิทธิ์ (Redeem Code) บนหน้าเว็บ"
+
+- **สิ่งที่พัฒนา**:
+  1. **Database Schema**: เพิ่มตาราง `redeem_codes` และ `redeem_redemptions` ใน `migrations/0012_redeem_codes.sql` พร้อมอัปเดต Local SQLite Adapter ใน `src/lib/platform/db.ts`
+  2. **Entitlement Integration**: บริการ `redeemCodeForUser` ใน `src/lib/entitlement/redeem.ts` มอบเครดิตผ่าน `grantBonus(userId, 3, 'purchase_redeem_' + code)` ซึ่งทำให้ผู้ใช้มีสถานะ `hasPaidCredits = true` ทันที ปลดล็อกผังใหญ่ทุกผัง (Celtic Cross, Year Ahead, Chakra, Tree of Life ฯลฯ) และ 2 ปรมาจารย์ลับ (Master, Mystic) ได้เต็มรูปแบบจำนวน 3 ครั้ง
+  3. **Backend API**: `POST /api/entitlement/redeem` รับ `{ code }` ตรวจสอบความถูกต้อง สิทธิ์ และป้องกันการแลกซ้ำ
+  4. **Frontend UI**: เพิ่มกล่องกรอกรหัสแลกสิทธิ์ใน `BuyCreditsModal.tsx` พร้อมปุ่มแลกรับสิทธิ์และการรีเฟรชโควตาทันทีด้วย `mutateEntitlement()`, เพิ่มลิงก์ทางลัดเข้าสู่หน้าแลกสิทธิ์ใน `AccessDialog.tsx`
+  5. **Automated Tests**: ด่านทดสอบ `scripts/qa/test-redeem-code.ts` ผ่าน 26/26 การทดสอบ ครอบคลุมการแลก, ป้องกันการแลกซ้ำ, และการนับถอยหลังสิทธิ์พรีเมียม 3 ครั้ง
+- **รหัสที่สร้างไว้พร้อมใช้งาน**: `VIP3-TAROT-2026` และ `SEER3PASS`
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - `migrations/0012_redeem_codes.sql` [NEW]
+  - `src/lib/entitlement/redeem.ts` [NEW]
+  - `src/app/api/entitlement/redeem/route.ts` [NEW]
+  - `scripts/qa/test-redeem-code.ts` [NEW]
+  - `src/lib/platform/db.ts`
+  - `src/components/entitlement/BuyCreditsModal.tsx`
+  - `src/components/entitlement/AccessDialog.tsx`
+- **ผลการทดสอบ**:
+  - `npx tsx scripts/qa/test-redeem-code.ts` ➔ ผ่าน 26/26 ข้อ 100%
+  - `npm run typecheck` ➔ 0 Errors
+  - `npm run repo:verify` ➔ ผ่านครบ 47/47 ด่าน
 
 ---
 
 ### 🗓️ 2026-09-11 (รอบ 39): 🔑 `.env.example` ไม่มี `GROQ_API_KEY` ทั้งที่เป็นคีย์บังคับของ `ai:judge`
+
 
 > **คำสั่งเจ้าของ**: "ทำเลย" (ต่อจากคำถาม "`npm run ai:judge -- --compare 20260911-1` ทำไง")
 

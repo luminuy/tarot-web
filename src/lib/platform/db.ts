@@ -292,10 +292,27 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
         user_agent      TEXT,
         created_at      INTEGER NOT NULL
       );
-      CREATE INDEX IF NOT EXISTS idx_uf_category ON user_feedback(category);
-      CREATE INDEX IF NOT EXISTS idx_uf_reading  ON user_feedback(reading_id);
-      CREATE INDEX IF NOT EXISTS idx_uf_persona  ON user_feedback(persona_id);
-      CREATE INDEX IF NOT EXISTS idx_uf_time     ON user_feedback(created_at);
+      CREATE TABLE IF NOT EXISTS redeem_codes (
+        code           TEXT PRIMARY KEY,
+        title          TEXT NOT NULL,
+        credits        INTEGER NOT NULL DEFAULT 3,
+        max_uses       INTEGER NOT NULL DEFAULT -1,
+        used_count     INTEGER NOT NULL DEFAULT 0,
+        reason_prefix  TEXT NOT NULL DEFAULT 'purchase_redeem',
+        expires_at     INTEGER,
+        is_active      INTEGER NOT NULL DEFAULT 1,
+        created_at     INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS redeem_redemptions (
+        id             TEXT PRIMARY KEY,
+        code           TEXT NOT NULL REFERENCES redeem_codes(code),
+        user_id        TEXT NOT NULL REFERENCES users(id),
+        credits        INTEGER NOT NULL,
+        redeemed_at    INTEGER NOT NULL
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_rdm_code_user ON redeem_redemptions(code, user_id);
+      CREATE INDEX IF NOT EXISTS idx_rdm_user ON redeem_redemptions(user_id);
     `);
 
     // Safe Alter & Index for local SQLite migration
@@ -316,6 +333,12 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_score INTEGER");
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_issue_codes TEXT");
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_fix_count INTEGER");
+    safeExec(`
+      INSERT OR IGNORE INTO redeem_codes (code, title, credits, max_uses, used_count, reason_prefix, expires_at, is_active, created_at)
+      VALUES 
+        ('VIP3-TAROT-2026', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, -1, 0, 'purchase_redeem', NULL, 1, 1726000000000),
+        ('SEER3PASS', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, -1, 0, 'purchase_redeem', NULL, 1, 1726000000000)
+    `);
 
 
     const adapter: AppDB = {

@@ -279,6 +279,19 @@ export function AccessDialog({
           <p className="pt-1 text-center font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
             {copy.reassurance}
           </p>
+
+          <div className="text-center pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onBuyCredits();
+              }}
+              className="text-xs text-[#8F5C1A] hover:text-[#74490F] font-serif-th underline underline-offset-4 cursor-pointer"
+            >
+              {isEn ? "Have a redeem code? Click here" : "มีรหัสแลกสิทธิ์ใช่ไหม? กดที่นี่เพื่อแลกรับสิทธิ์"}
+            </button>
+          </div>
         </div>
       </div>
     </Modal>
