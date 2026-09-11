@@ -115,19 +115,33 @@ export async function BlogDetailBody({
   const articleDesc = isEnglish && article.descriptionEn ? article.descriptionEn : article.description;
   const effectiveFaqs = isEnglish && article.faqsEn && article.faqsEn.length > 0 ? article.faqsEn : article.faqs;
 
+  /* ภาพของ Article ต้องเป็นภาพ "เฉพาะบทความนั้น" ตัวเดียวกับ `og:image`
+     เดิมชี้ `OG_IMAGE_URL` (og/default.png) เหมือนกันหมดทั้ง 52 บทความ
+     ทำให้ Google Discover / article rich result ได้ภาพโหลเดียวซ้ำกันทุกใบ
+     ขณะที่ `og:image` เป็นภาพเฉพาะเรื่องอยู่แล้ว → สองช่องทางขัดกันเอง */
+  const articleImage =
+    buildPageOgImage({
+      title: articleHeadline,
+      eyebrow: isEnglish ? "TAROT WISDOM & GUIDE" : "บทความไพ่ทาโรต์",
+      cardImage: getCategoryCardImage(article.category),
+      alt: articleHeadline,
+    })[0]?.url ?? OG_IMAGE_URL;
+
   const jsonLdArticle = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: articleHeadline,
     description: articleDesc,
-    image: [OG_IMAGE_URL],
+    image: [articleImage],
     datePublished: article.publishedAt,
     dateModified: article.updatedAt,
     inLanguage: locale,
+    /* ผู้เขียนต้องเป็น `Person` ที่มีชื่อจริงของบ้านนี้ (E-E-A-T)
+       เดิมใส่เป็น `Organization` ทับชื่อผู้เขียนที่มีอยู่แล้วใน `article.author` */
     author: {
-      "@type": "Organization",
-      name: "SeerTarot Sanctuary",
-      url: SITE_ORIGIN,
+      "@type": "Person",
+      name: isEnglish && article.authorEn ? article.authorEn : article.author,
+      url: localizedUrl("/", locale),
     },
     publisher: {
       "@type": "Organization",
