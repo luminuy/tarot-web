@@ -68,6 +68,7 @@ const BuyCreditsModal = withMotionScope(() => import("@/components/entitlement/B
 const AccessDialog = withMotionScope(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog));
 const PersonaCardSelector = withMotionScope(() => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector));
 const IntentionAltarInput = withMotionScope(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput));
+const ClarificationCard = withMotionScope(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard));
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {
@@ -246,6 +247,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const [question, setQuestion] = useState("");
   const [nickname, setNickname] = useState("");
   const [situation, setSituation] = useState("");
+  // Clarification state (B-04)
+  const [clarificationPrompt, setClarificationPrompt] = useState<{
+    question: string;
+    reason?: string;
+  } | null>(null);
+  const [clarificationAnswer, setClarificationAnswer] = useState<string>("");
+  const [hasAttemptedClarify, setHasAttemptedClarify] = useState<boolean>(false);
+
+  const handleQuestionChange = (newQ: string) => {
+    setQuestion(newQ);
+    if (clarificationPrompt) setClarificationPrompt(null);
+    if (hasAttemptedClarify) setHasAttemptedClarify(false);
+  };
 
   // Reading session state
   const [readingId, setReadingId] = useState<string | null>(null);
@@ -525,8 +539,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     proof,
   ]);
 
-  // Step 1 -> Step 2: Start Reading Session
-  const handleStartSession = async () => {
+  const executeStartSession = async (finalSituation?: string) => {
     /**
      * ⚠️ ต้องถามสิทธิ์ให้ได้คำตอบ "ก่อน" ตัดสินใจเสมอ
      *
@@ -574,6 +587,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     try {
       const freshSeed = createClientSeed();
       setClientSeed(freshSeed);
+      const effectiveSituation = (finalSituation !== undefined ? finalSituation : situation).trim();
       const res = await fetch("/api/reading/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -583,7 +597,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           personaId: selectedPersona.id,
           nickname: effectiveNickname,
           category: selectedCategory,
-          intake: { situation: situation.trim() || undefined },
+          intake: { situation: effectiveSituation || undefined },
           lang: locale,
           clientSeed: freshSeed,
         }),
@@ -611,7 +625,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         spread_id: selectedSpread.id,
         persona_id: selectedPersona.id,
         category: selectedCategory,
-        has_situation: Boolean(situation.trim()),
+        has_situation: Boolean(effectiveSituation),
       });
 
       navigateStep("SHUFFLE");
@@ -620,6 +634,52 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     } finally {
       setLoading(false);
     }
+  };
+
+  // Step 1 -> Step 2: Start Reading Session with Clarification Question Guard (B-04)
+  const handleStartSession = async () => {
+    const trimmedQuestion = question.trim();
+    if (!trimmedQuestion) {
+      setErrorMsg(isEnglish ? "Please enter your question before beginning." : "กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง");
+      return;
+    }
+
+    // B-04: ถามกลับ 1 คำถามก่อนสับไพ่ หากคำถามสั้นหรือต้องการบริบทเพิ่มเติม (ข้ามได้เสมอ / Timeout 2.5s)
+    if (!hasAttemptedClarify && !situation.trim() && trimmedQuestion.length < 50) {
+      setLoading(true);
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 2500);
+        const clarifyRes = await fetch("/api/reading/clarify", {
+          method: "POST",
+          signal: ctrl.signal,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: trimmedQuestion,
+            category: selectedCategory,
+            personaId: selectedPersona.id,
+            nickname: nickname.trim() || undefined,
+            lang: locale,
+          }),
+        }).catch(() => null);
+        clearTimeout(tid);
+
+        if (clarifyRes && clarifyRes.ok) {
+          const clarifyData = await clarifyRes.json().catch(() => null);
+          if (clarifyData?.needsClarification && clarifyData?.question) {
+            setClarificationPrompt({ question: clarifyData.question, reason: clarifyData.reason });
+            setHasAttemptedClarify(true);
+            setLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // เงียบตามสเปก fail-safe
+      }
+    }
+
+    setHasAttemptedClarify(true);
+    await executeStartSession();
   };
 
   // ทางลัดทำนายด่วน 1 ใบ (ข้ามริชวลสับไพ่และพัดเลือกไพ่ จั่วอัตโนมัติด้วย Provably-Fair)
@@ -1358,7 +1418,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               {/* Input Form */}
               <IntentionAltarInput
                 question={question}
-                onQuestionChange={setQuestion}
+                onQuestionChange={handleQuestionChange}
                 nickname={nickname}
                 onNicknameChange={setNickname}
                 situation={situation}
@@ -1368,8 +1428,35 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 persona={selectedPersona}
               />
 
+              {/* Clarification Card (B-04) */}
+              {clarificationPrompt && (
+                <ClarificationCard
+                  question={clarificationPrompt.question}
+                  answer={clarificationAnswer}
+                  onAnswerChange={setClarificationAnswer}
+                  persona={selectedPersona}
+                  loading={loading}
+                  onSkip={() => {
+                    setClarificationPrompt(null);
+                    void executeStartSession();
+                  }}
+                  onSubmit={() => {
+                    const ans = clarificationAnswer.trim();
+                    const combined = ans
+                      ? (situation.trim() ? `${situation.trim()}\n(ข้อมูลเพิ่มเติม: ${ans})` : ans)
+                      : situation;
+                    if (ans) {
+                      setSituation(combined);
+                    }
+                    setClarificationPrompt(null);
+                    void executeStartSession(combined);
+                  }}
+                />
+              )}
+
               {/* Action Bar */}
-              <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3 shadow-xs">
+              {!clarificationPrompt && (
+                <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3 shadow-xs">
                 <button
                   type="button"
                   onClick={() => {
@@ -1408,6 +1495,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   <span aria-hidden="true">→</span>
                 </button>
               </div>
+              )}
             </div>
           )}
 

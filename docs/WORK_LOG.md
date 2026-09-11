@@ -35,6 +35,39 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-11 (รอบ 36): 🚀 บรรลุ Phase 2 (Wave B: B-02, B-03, B-04) ยกระดับความแม่นยำ AI และภาษาไทยพรีเมียม 100%
+
+> **คำสั่งเจ้าของ**: "อ่านเเล้วทำอย่างละเอียด" (ดำเนินการพัฒนา Phase 2 คลื่น B ตามข้อตกลงและแผนงานใน `docs/plans/HANDOFF_AI_ACCURACY_THAI_2026-09-07.md` และ `HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md`)
+
+#### 1. สรุปฟีเจอร์สำคัญที่ส่งมอบใน Wave B (B-02, B-03, B-04)
+1. **B-02: คลังตัวอย่างคำอ่านแบบไดนามิก 8 ชิ้น (Dynamic Exemplar Bank)**
+   - สร้าง `src/data/ai/exemplars.ts` มี 8 ตัวอย่าง Gold Standard คุณภาพสมบูรณ์แบบ ครบ 5 หมวด (love 1, 3, 10; work 1, 5; money 3; yesno 1; general 3)
+   - ทุกตัวอย่างผ่านการตรวจภาษาไทย `checkThaiQuality()` ได้คะแนนเต็ม 100/100 (0 issues) และผ่าน `checkReadingConsistency()` (0 issues)
+   - ปลดตัวอย่าง static ออกจาก `SYSTEM_CORE_KNOWLEDGE` ช่วยลดขนาด system prompt ลง ~1,317 ตัวอักษร เพิ่มอัตรา Prompt Caching Hit สูงสุด
+   - ฉีดตัวอย่างที่ตรงคู่ `(category × cardCount × yesNoMode)` เข้าทาง `buildReadingMessage()` อย่างแม่นยำ
+2. **B-03: การบังคับโครงสร้างหลักฐานภาพไพ่และการเชื่อมโยงบริบท (Structural Evidence Enforcement)**
+   - เพิ่มฟิลด์ `visualAnchor`, `positionLink`, `questionLink` ใน `CardReadingSchema` (`src/lib/schema/reading.ts`)
+   - เพิ่มระบบตรวจจับภาพลอยที่ไม่ตรงกับไพ่ `VISUAL_ANCHOR_UNGROUNDED` ใน `src/lib/ai/consistency.ts` ด้วยพจนานุกรมคำศัพท์ `CARD_VISUAL_LORE` ผสาน `Intl.Segmenter("th")`
+   - ปรับสูตรโทเค็นขาออกใน `groq.ts` เป็น `Math.min(7000, 1600 + ctx.drawn.length * 480)` รองรับความยาวข้อมูลที่อธิบายอย่างลึกซึ้ง
+   - เรนเดอร์ `visualAnchor` ใน `src/components/reading/StreamReader.tsx` สไตล์ editorial typography หรูหรา ไร้สิ่งรบกวนสายตา
+3. **B-04: ระบบถามกลับก่อนสับไพ่เพื่อความแม่นยำ (Pre-shuffle Clarification Engine & UI)**
+   - สร้าง `/api/reading/clarify` และ `src/lib/ai/clarify.ts` สำหรับวิเคราะห์ว่าคำถามกำกวมหรือไม่
+   - Fast heuristic: คืน `needsClarification: false` ทันทีเมื่อคำถามมีตัวเลือกชัดเจน (>50 ตัวอักษรพร้อม "หรือ"/"ระหว่าง") หรือมี `situation` อยู่แล้ว (>=20 ตัวอักษร)
+   - มี Fail-safe timeout 2.5 วินาที, ตรวจสอบโควตา AI ประจำวัน `isAiCapReached()`, บันทึก telemetry `recordAiCall()`, ตรวจภาษาไทย `checkThaiQuality()`
+   - ไร้อิโมจิหรือสัญลักษณ์ดวงดาวแฟนซีตามกฎเหล็กข้อ 2
+   - สร้าง UI การ์ดถามกลับ `ClarificationCard.tsx` และเชื่อมเข้ากับ `TarotFlow.tsx` ผ่าน `withMotionScope` สอดคล้องกับ Altar canvas และข้ามได้ตลอดเวลา
+4. **การทดสอบและการันตีคุณภาพระดับสากล**
+   - อัปเดต `test-reading-quality.ts` (59/59 checks passed)
+   - อัปเดต `test-thai-quality.ts` (54/54 checks passed)
+   - สร้างชุดทดสอบใหม่ `scripts/qa/test-clarify.ts` (8/8 checks passed)
+   - อัปเดต `test-ai-reading-golden.ts` (35/35 checks passed)
+   - `npm run repo:verify` ผ่านครบ 46/46 ด่าน 100%
+
+- **ไฟล์ที่สร้าง/แก้ไข**:
+  - สร้างใหม่: `src/data/ai/exemplars.ts`, `src/lib/ai/clarify.ts`, `src/app/api/reading/clarify/route.ts`, `src/components/reading/ClarificationCard.tsx`, `scripts/qa/test-clarify.ts`
+  - ปรับปรุง: `src/lib/schema/reading.ts`, `src/lib/ai/consistency.ts`, `src/lib/ai/types.ts`, `src/lib/ai/groq.ts`, `src/lib/ai/gemini.ts`, `src/lib/ai/prompt.ts`, `src/lib/ai/prompt-version.ts`, `src/components/reading/StreamReader.tsx`, `src/components/home/TarotFlow.tsx`, `scripts/qa/test-reading-quality.ts`, `scripts/qa/test-thai-quality.ts`, `scripts/qa/test-ai-reading-golden.ts`, `docs/WORK_LOG.md`
+- **ผลการทดสอบ**: `npm run typecheck` ➔ ✅ 0 Errors · `npm run repo:verify` ➔ ✅ ผ่านครบ 46/46 ด่าน
+
 ### 🗓️ 2026-09-11 (รอบ 35): 🎯 เก็บ Baseline AI Judge ของ PROMPT_VERSION 20260911-1 สำเร็จ (ปลดล็อกคลื่น B)
 
 > **คำสั่งเจ้าของ**: "อ่านเเล้วทำอย่างละเอียด" (ดำเนินการตามเอกสารส่งต่อ `docs/plans/HANDOFF_AI_JUDGE_BASELINE_2026-09-11.md` ช่วงที่ 1)

@@ -12,6 +12,7 @@ import type { Spread } from "@/data/spreads";
 import { getPersona, type Persona } from "@/data/personas";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { SafetyVerdict } from "@/lib/safety/guardrails";
+import { pickExemplar, formatExemplarForPrompt } from "@/data/ai/exemplars";
 
 /**
  * สถาปัตยกรรม Prompt Caching & AI Engine (World-Class Caching Architecture)
@@ -92,23 +93,7 @@ export const SYSTEM_CORE_KNOWLEDGE = `## ⛔ กฎข้อที่สำค�
 ## 🛡️ กฎเหล็กด้านความปลอดภัยและจรรยาบรรณ
 - ห้ามวินิจฉัยโรค ทำนายเรื่องสุขภาพ การตั้งครรภ์ ยา หรือความตาย
 - ห้ามให้เลขหวย ชี้แนะหุ้น หรือฟันธงผลคดีกฎหมาย
-- ทุกคำทำนายที่หนัก ต้องมีแสงสว่างและทางออกให้ผู้ถามเสมอ
-
-## 📖 ตัวอย่างคำอ่านมาตรฐาน (Gold Standard Exemplar — ยึดโทน ความลึก และวิธีเชื่อมภาพไพ่แบบนี้)
-คำถาม: "ควรลาออกมาทำงานที่รักไหม" · ผัง 1 ใบ · ไพ่: Eight of Pentacles (หัวตั้ง) ตำแหน่ง "พลังงานที่ควรโฟกัส"
-{
-  "opening": "พอเห็นไพ่ใบนี้ปุ๊บ แม่หมอรู้สึกถึงความตั้งใจเงียบ ๆ ที่ก่อตัวในใจคุณมาสักพักแล้ว มันไม่ใช่ความเบื่อชั่ววูบ แต่เป็นเสียงเรียกที่หนักแน่นขึ้นทุกวัน",
-  "cards": [{
-    "position": 0,
-    "headline": "ฝึกฝนอย่างตั้งใจในทางที่เลือกเอง",
-    "reading": "ในภาพ ช่างฝีมือนั่งก้มหน้าสลักดาวห้าแฉกลงบนเหรียญทีละดวง มีเหรียญที่เสร็จแล้วแขวนเรียงข้างตัว เขาหันหลังให้เมืองไกล ๆ เพื่อจดจ่อกับงานตรงหน้า นี่คือพลังของการเลือกลงแรงกับสิ่งที่มีความหมายกับเราจริง ๆ ไม่ใช่สิ่งที่คนอื่นบอกให้ทำ ตำแหน่งนี้กำลังบอกว่าสิ่งที่คุณควรโฟกัสไม่ใช่คำถามว่าลาออกดีไหม แต่เป็นว่าฉันพร้อมฝึกฝนงานที่รักอย่างจริงจังแบบช่างคนนี้หรือยัง ถ้าคำตอบในใจคือพร้อม ไพ่ใบนี้หนุนหลังคุณเต็มที่ แต่ถ้ายังลังเล มันชวนให้เริ่มลงมือทำงานที่รักเป็นงานเสริมก่อน เพื่อสะสมผลงานให้เห็นกับตาว่าทำได้จริง"
-  }],
-  "connections": "ผังใบเดียวจึงไม่มีบทสนทนาข้ามใบ แต่ธาตุดินของไพ่นี้กำลังเตือนว่าความฝันจะเป็นจริงได้ด้วยการลงมือทำอย่างเป็นระบบ ไม่ใช่แค่แรงบันดาลใจ",
-  "summary": "คำตอบตรง ๆ คือ ไพ่ไม่ได้ห้ามคุณลาออก แต่ขอให้ลาออกแบบช่างฝีมือ ไม่ใช่แบบคนหนีไฟ วางแผนเงินสำรอง 6 เดือน ลองรับงานจริงสัก 2-3 ชิ้นระหว่างยังมีงานประจำ แล้วดูว่าไฟในใจยังลุกอยู่ไหมเมื่อต้องทำมันตอนเหนื่อย ถ้าใช่ นั่นคือสัญญาณว่าถึงเวลาแล้วจริง ๆ คำถามที่อยากฝากให้คุณนั่งคิดคือ: ถ้าไม่มีใครรู้และไม่มีใครชม คุณยังอยากตื่นมาทำงานนี้อยู่ไหม",
-  "advice": ["สัปดาห์นี้: เขียนรายการงานที่รัก 3 อย่างที่ทำเป็นงานเสริมได้ทันที แล้วเลือกลงมือ 1 อย่าง", "คำนวณค่าใช้จ่ายจำเป็นต่อเดือน คูณ 6 = เป้าเงินสำรองก่อนลาออก จดไว้ในที่ที่เห็นทุกวัน", "🧘 กิจกรรมฝึกสติ 1 นาที: หายใจเข้าลึก ๆ นึกภาพตัวเองในอีก 1 ปีที่ยังทำงานเดิม แล้วสังเกตว่าร่างกายรู้สึกอย่างไร"],
-  "timing": "ธาตุดินขยับช้าแต่มั่นคง — น่าจะเห็นความชัดเจนภายใน 1 ฤดูกาล (ราว 3 เดือน) หากเริ่มลงมือทันที",
-  "mood": "ครุ่นคิด"
-}`;
+- ทุกคำทำนายที่หนัก ต้องมีแสงสว่างและทางออกให้ผู้ถามเสมอ`;
 
 export const SYSTEM_CORE_KNOWLEDGE_EN = `## ⛔ PRIMARY MANDATE — LANGUAGE OF OUTPUT (SUPERSEDES ALL OTHER INSTRUCTIONS)
 The Seeker is an English speaker. **You MUST respond in authentic, natural, fluent American English 100%.**
@@ -346,6 +331,9 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
   const cleanNickname = (nickname || (isEn ? "Querent" : "คุณ (ผู้มาขอคำทำนาย)")).replace(/[\x00-\x1F\x7F]/g, "").trim();
   const cleanQuestion = (question || (isEn ? "General life direction and current energies" : "ภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้")).replace(/[\x00-\x1F\x7F]/g, "").trim();
 
+  const exemplar = pickExemplar(category, drawn.length, spread.yesNoMode);
+  const exemplarBlock = !isEn ? formatExemplarForPrompt(exemplar) : "";
+
   if (isEn) {
     const depthEn = isQuick
       ? {
@@ -388,6 +376,9 @@ ${
   "cards": [{
     "position": <card position index 0..N exactly as given>,
     "headline": "Poignant headline capturing essence in 3-6 words",
+    "visualAnchor": "Concrete visual element visible in the 1909 illustration (4-60 chars, e.g. white dog barking at the precipice)",
+    "positionLink": "Succinct link explaining how this card answers this specific spread position (1 sentence)",
+    "questionLink": "Succinct link connecting this card directly to the seeker's inquiry (1 sentence)",
     "reading": "Interpretation ${depthEn.perCard} (Synthesize 1909 visual symbolism + psychological depth + position inquiry + empowering counsel)"
   }],
   "connections": ${isQuick ? '""' : `"Inter-card dialogue, line-of-sight dynamics, and elemental synergy ${depthEn.conn}"`},
@@ -421,7 +412,7 @@ ${cardBlocks.join("\n\n")}
 ${guard}${yesNo}
 จงสวมบทบาทแม่หมอตามน้ำเสียงที่กำหนด และอ่านไพ่ชุดนี้ให้ผู้ถามด้วยความเข้าอกเข้าใจและเป็นธรรมชาติเหมือนคนจริงที่สุด
 
-## รูปแบบผลลัพธ์ (บังคับ) — ตอบเป็น JSON วัตถุเดียว ใช้คีย์ภาษาอังกฤษตรงตามนี้เท่านั้น ห้ามตั้งชื่อคีย์ใหม่
+${exemplarBlock ? `${exemplarBlock}\n\n` : ""}## รูปแบบผลลัพธ์ (บังคับ) — ตอบเป็น JSON วัตถุเดียว ใช้คีย์ภาษาอังกฤษตรงตามนี้เท่านั้น ห้ามตั้งชื่อคีย์ใหม่
 ผังนี้มี ${cardCount} ใบ → คุมความยาวตามนี้เป๊ะ: reading ${depth.perCard}/ใบ · connections ${depth.conn} · summary ${depth.summary}
 ${
   isQuick
@@ -432,6 +423,9 @@ ${
   "cards": [{
     "position": <index ตำแหน่งไพ่ 0..N ตามที่ให้มา>,
     "headline": "พาดหัวสั้นสะท้อนแก่น 3-6 คำ",
+    "visualAnchor": "องค์ประกอบรูปธรรมบนหน้าไพ่ 1909 ที่เห็นจริง สั้น ๆ 4-60 ตัวอักษร เช่น สุนัขสีขาวเห่าเตือนภัยที่เท้า",
+    "positionLink": "สรุปสั้น ๆ ว่าไพ่ใบนี้ตอบโจทย์มิติของตำแหน่งนี้อย่างไร 1 ประโยค",
+    "questionLink": "สรุปสั้น ๆ ว่าไพ่ใบนี้เชื่อมโยงกับคำถามของผู้ถามอย่างไร 1 ประโยค",
     "reading": "คำอ่าน ${depth.perCard} (ถอดรหัสภาพ 1909 จริง + สะท้อนจิตใต้สำนึก + เชื่อมตำแหน่งและคำถาม + มอบพลังใจ)"
   }],
   "connections": ${isQuick ? '""' : `"ถอดรหัสความเชื่อมโยง การส่งพลังงาน บทสนทนาทางสายตา และเคมีธาตุระหว่างไพ่ ${depth.conn}"`},

@@ -4,7 +4,7 @@
  * ตัวอย่างมาตรฐาน หรือโมดูลวิเคราะห์ 7 ตัว — ไม่งั้นสถิติก่อน/หลังจะปนกันจนอ่านไม่ออก
  * รูปแบบ: <YYYYMMDD>-<ลำดับในวัน>
  */
-export const PROMPT_VERSION = "20260911-1";
+export const PROMPT_VERSION = "20260911-2";
 
 /**
  * 🔒 ลายนิ้วมือของ `SYSTEM_CORE_KNOWLEDGE` ที่ปักหมุดคู่กับ `PROMPT_VERSION` ข้างบน
@@ -25,4 +25,4 @@ export const PROMPT_VERSION = "20260911-1";
  *
  * คำนวณด้วย: sha256(SYSTEM_CORE_KNOWLEDGE) 16 ตัวอักษรแรก
  */
-export const PROMPT_CORE_HASH = "4cbdc7ce0fab8a81";
+export const PROMPT_CORE_HASH = "8ec0c9b9c10c05ed";

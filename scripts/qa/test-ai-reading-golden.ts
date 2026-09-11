@@ -79,9 +79,10 @@ async function main() {
   );
   check('read/route.ts นับสถิติ ai_groq_failover', readRouteSrc.includes('recordEvent("ai_groq_failover")'));
 
-  // 4. Gold Standard Exemplar ฝังใน system core
-  check("system core มี Gold Standard Exemplar", SYSTEM_CORE_KNOWLEDGE.includes("Gold Standard Exemplar"));
-  check("exemplar อ้าง Eight of Pentacles", SYSTEM_CORE_KNOWLEDGE.includes("Eight of Pentacles"));
+  // 4. Gold Standard Exemplar ฝังใน user message ตามบริบท (B-02 ย้ายออกจาก system core เพื่อ prompt caching)
+  const workMsg1 = buildReadingMessage({ ...ctxFor("daily"), category: "work" });
+  check("user message มี Gold Standard Exemplar", workMsg1.includes("Gold Standard Exemplar"));
+  check("exemplar อ้าง Eight of Pentacles", workMsg1.includes("Eight of Pentacles"));
   check(
     "system core บังคับปิดท้ายด้วย Power Reflection Question",
     SYSTEM_CORE_KNOWLEDGE.includes("Power Reflection Question"),
