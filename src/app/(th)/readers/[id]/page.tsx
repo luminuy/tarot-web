@@ -80,7 +80,8 @@ export default async function ReaderDetailPage({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={reader.avatarUrl}
-                  alt={reader.displayName}
+                  /* ภาพประกอบล้วน — <h1> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */
+                  alt=""
                   className="h-full w-full object-cover"
                 />
               ) : (

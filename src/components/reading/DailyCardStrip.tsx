@@ -61,7 +61,8 @@ export function DailyCardStrip() {
       <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-[#D9C8AC] bg-[#F3EDE2] shadow-xs">
         <CardImage
           image={daily.image}
-          alt={isEnglish ? `${daily.nameEn} — Card of the Day` : `${daily.nameTh} — ไพ่ประจำวันนี้`}
+          /* ภาพประกอบล้วน — ตัวหนังสือในลิงก์เดียวกันบอก "ไพ่ประจำวันนี้" และชื่อไพ่อยู่แล้ว (INC-0125) */
+          alt=""
           className="h-full w-full object-cover"
           sizes="36px"
         />

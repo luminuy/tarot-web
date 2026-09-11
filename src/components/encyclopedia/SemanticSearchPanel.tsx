@@ -173,7 +173,8 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
                   <CardImage
                     image={card.image}
                     cardId={card.id}
-                    alt={`${card.nameTh} (${card.nameEn})`}
+                    /* ภาพประกอบล้วน — <h3> ข้างภาพพิมพ์ชื่อไพ่อยู่แล้ว ปุ่ม/ลิงก์จึงมีชื่อเรียกครบ (INC-0125) */
+                    alt=""
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 tarot-hd-card-image"
                     sizes="48px"
                   />

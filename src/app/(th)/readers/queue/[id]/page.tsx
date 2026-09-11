@@ -116,7 +116,7 @@ export default function CustomerQueuePage() {
             <div className="h-14 w-14 shrink-0 rounded-full border-2 border-[#ffd700]/50 bg-[#21163b] overflow-hidden flex items-center justify-center text-xl font-bold text-[#ffd700]">
               {reader.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={reader.avatarUrl} alt={reader.displayName} className="h-full w-full object-cover" />
+                <img src={reader.avatarUrl} alt="" /* ภาพประกอบล้วน — <h2> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
               ) : (
                 reader.displayName.charAt(0)
               )}

@@ -58,7 +58,9 @@ const ARTICLE_CARD_MAP: Record<string, string> = {
   "tarot-yes-no-spread-guide": "swords-01.jpg",
 };
 
-function getArticleCardArt(article: Article | ArticleSummary): { image: string; alt: string } {
+/* คืนเฉพาะชื่อไฟล์ภาพ — ไม่คืน alt เพราะภาพไพ่ประจำบทความเป็นภาพประกอบล้วน
+   หัวข้อบทความที่พิมพ์อยู่ข้าง ๆ ทำหน้าที่บอกชื่อให้แล้ว (INC-0125) */
+function getArticleCardArt(article: Article | ArticleSummary): { image: string } {
   const image =
     ARTICLE_CARD_MAP[article.slug] ||
     (article.category === "love"
@@ -71,7 +73,7 @@ function getArticleCardArt(article: Article | ArticleSummary): { image: string; 
             ? "major-01.jpg"
             : "major-09.jpg");
 
-  return { image, alt: article.title };
+  return { image };
 }
 
 export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) => {
@@ -204,7 +206,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               <div className="w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-[#D9C8AC] shadow-md group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2] flex-shrink-0 relative">
                 <CardImage
                   image={featArt.image}
-                  alt={featArt.alt}
+                  alt=""
                   className="w-full h-full object-cover"
                   sizes="112px"
                 />
@@ -325,7 +327,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                       <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-xs group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2] flex-shrink-0 relative">
                         <CardImage
                           image={cardArt.image}
-                          alt={cardArt.alt}
+                          alt=""
                           className="w-full h-full object-cover"
                           sizes="64px"
                         />
