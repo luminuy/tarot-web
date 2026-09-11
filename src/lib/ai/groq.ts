@@ -273,7 +273,7 @@ export async function probeGroqHealth(apiKey?: string): Promise<GroqProbeResult[
  * ------------------------------------------------------------------
  * - โมเดล: qwen3.8-27b → qwen3.6-27b → gpt-oss-120b (Qwen ภาษาไทยสวย · 120b reasoning ลึก ไม่หลุดจีน)
  * - `reasoning_format: "hidden"` — แยกโทเค็นความคิดออกจาก content (สำคัญมากกับ reasoning model)
- * - `max_tokens` ปรับตามจำนวนไพ่ (1,600 + 340/ใบ) กันคำอ่านโดนตัดกลาง
+ * - `max_tokens` ปรับตามจำนวนไพ่ (1,600 + 480/ใบ) กันคำอ่านโดนตัดกลาง
  * - Foreign Script Circuit Breaker: อักษรต่างด้าวใน content สะสม ≥ 14 ตัว → สลับโมเดล + นับสถิติ
  * - sanitizeTarotText() ทำความสะอาด real-time · stripForeignScriptDeep() กวาดรอบสุดท้าย
  * - สำเร็จตาม ReadingSchema หรือปล่อยให้ route caller สลับไป Gemini
@@ -303,8 +303,8 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
     "openai/gpt-oss-120b",
   ] as const;
 
-  // เพดานผลลัพธ์: ฐาน 1,600 + 340/ใบ (ผัง 10 ใบ ≈ 5,000) — กันคำอ่านโดนตัดกลางจนต้อง failover
-  const maxReadingTokens = Math.min(6000, 1600 + ctx.drawn.length * 340);
+  // เพดานผลลัพธ์: ฐาน 1,600 + 480/ใบ (ผัง 10 ใบ ≈ 6,400) — รองรับ visualAnchor, positionLink, questionLink กันคำอ่านโดนตัดกลาง
+  const maxReadingTokens = Math.min(7000, 1600 + ctx.drawn.length * 480);
 
   for (const model of readingModels) {
     let jsonAccumulator = "";
@@ -417,6 +417,7 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
                   type: "card",
                   position: card.position,
                   headline: sanitizeTarotText(card.headline),
+                  visualAnchor: (card as any).visualAnchor ? sanitizeTarotText((card as any).visualAnchor) : undefined,
                   reading: sanitizeTarotText(card.reading),
                 };
               }

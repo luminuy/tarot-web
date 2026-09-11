@@ -42,6 +42,9 @@ const READING_JSON_SCHEMA = {
         properties: {
           position: { type: "integer" },
           headline: { type: "string" },
+          visualAnchor: { type: "string" },
+          positionLink: { type: "string" },
+          questionLink: { type: "string" },
           reading: { type: "string" },
         },
         required: ["position", "headline", "reading"],
@@ -298,6 +301,7 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
                   type: "card",
                   position: card.position,
                   headline: thaiOnly(card.headline, `card[${card.position}].headline`),
+                  visualAnchor: (card as any).visualAnchor ? thaiOnly((card as any).visualAnchor, `card[${card.position}].visualAnchor`) : undefined,
                   reading: thaiOnly(card.reading, `card[${card.position}].reading`),
                 };
               }

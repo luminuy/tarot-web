@@ -391,6 +391,11 @@ isEnglish
                   />
                 )}
               </div>
+              {activeCardReading?.visualAnchor && (
+                <p className="text-[11px] sm:text-xs text-[#8C7A6B] font-serif-th italic tracking-wide">
+                  {isEnglish ? "Card Visual: " : "ภาพบนหน้าไพ่: "}{activeCardReading.visualAnchor}
+                </p>
+              )}
 
               {/* P1-M3: Word-by-word oracle streaming animation */}
               {activeCardReading?.reading ? (

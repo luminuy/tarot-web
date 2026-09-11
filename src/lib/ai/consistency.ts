@@ -15,6 +15,7 @@
  */
 
 import { DECK, type TarotCard } from "@/data/cards";
+import { CARD_VISUAL_LORE } from "@/data/cards/visual-lore";
 import type { Reading } from "@/lib/schema/reading";
 import type { PastReadingSnapshot } from "@/lib/ai/karmic";
 
@@ -26,7 +27,8 @@ export interface ConsistencyIssue {
     | "YESNO_CONTRADICTION"
     | "ADVICE_MISSING_MINDFUL"
     | "CARD_READING_TOO_SHORT"
-    | "CARD_READING_TOO_LONG";
+    | "CARD_READING_TOO_LONG"
+    | "VISUAL_ANCHOR_UNGROUNDED";
   message: string;
   fatal: boolean;
 }
@@ -286,6 +288,49 @@ export function checkReadingConsistency(
         message: `คำอ่านตำแหน่งที่ ${c.position} ยาวผิดปกติ (${c.reading.length} ตัวอักษร)`,
         fatal: false,
       });
+    }
+  }
+
+  // ── 6. ตรวจสอบหลักฐานภาพหน้าไพ่ (VISUAL_ANCHOR_UNGROUNDED - Task B-03) ──
+  // เทียบแบบหลวมด้วย Intl.Segmenter("th") และนับคำร่วม >= 1 คำที่ยาว >= 3 ตัวอักษร
+  const segmenter = new Intl.Segmenter("th", { granularity: "word" });
+  const VISUAL_STOP_WORDS = new Set([
+    "ภาพ", "ในภาพ", "หน้าไพ่", "ของ", "และ", "หรือ", "โดย", "ที่",
+    "นี้", "นั้น", "เป็น", "อยู่", "เห็น", "ด้าน", "ข้าง", "หลัง",
+    "เบื้อง", "ตรง", "ช่วง", "ตอน", "อย่าง", "แห่ง", "ตาม", "มี",
+    "รูป", "ปรากฏ", "สะท้อน", "สื่อ", "แสดง", "ไพ่",
+  ]);
+
+  for (const c of reading.cards || []) {
+    if (typeof c.visualAnchor === "string" && c.visualAnchor.trim().length > 0) {
+      const card = drawnCards[c.position];
+      if (card && CARD_VISUAL_LORE[card.id]) {
+        const lore = CARD_VISUAL_LORE[card.id];
+        const targetText = `${lore.scene1909} ${lore.symbols.join(" ")}`.toLowerCase();
+
+        let hasSharedWord = false;
+        let wordCount = 0;
+        for (const seg of segmenter.segment(c.visualAnchor)) {
+          if (seg.isWordLike) {
+            const w = seg.segment.trim().toLowerCase();
+            if (w.length >= 3 && !VISUAL_STOP_WORDS.has(w)) {
+              wordCount++;
+              if (targetText.includes(w)) {
+                hasSharedWord = true;
+                break;
+              }
+            }
+          }
+        }
+
+        if (wordCount > 0 && !hasSharedWord) {
+          issues.push({
+            code: "VISUAL_ANCHOR_UNGROUNDED",
+            message: `visualAnchor ในตำแหน่งที่ ${c.position} ("${c.visualAnchor}") ไม่สอดคล้องกับองค์ประกอบหน้าไพ่ ${card.nameTh} (${card.nameEn})`,
+            fatal: false, // warn only as per spec
+          });
+        }
+      }
     }
   }
 

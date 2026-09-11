@@ -14,7 +14,7 @@ import type { Reading } from "@/lib/schema/reading";
  */
 export type ReadingEvent =
   | { type: "opening"; text: string }
-  | { type: "card"; position: number; headline: string; reading: string }
+  | { type: "card"; position: number; headline: string; visualAnchor?: string; reading: string }
   | { type: "connections"; text: string }
   | { type: "summary"; text: string }
   | {

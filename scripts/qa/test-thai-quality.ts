@@ -22,6 +22,7 @@ import { SYSTEM_CORE_KNOWLEDGE } from "../../src/lib/ai/prompt";
 import { PERSONAS } from "../../src/data/personas";
 import { generateMindfulMicroRitual } from "../../src/lib/ai/ritual";
 import { diagnoseQuestionEnergy } from "../../src/lib/ai/intent";
+import { EXEMPLARS } from "../../src/data/ai/exemplars";
 
 let passed = 0;
 let failed = 0;
@@ -226,6 +227,20 @@ async function main() {
     intentIssues.length === 0,
     intentIssues.map((i) => i.code).join(",")
   );
+
+  // ─────────────────────────────────────────────────────────────────
+  // 8. คลังตัวอย่างคำอ่าน 8 ชิ้น (B-02 Exemplar Bank)
+  // ─────────────────────────────────────────────────────────────────
+  console.log("\n📚 8. คลังตัวอย่างคำอ่าน 8 ชิ้น (B-02 Exemplar Bank)");
+  check("มีตัวอย่างครบ 8 ชิ้น", EXEMPLARS.length === 8, `พบ ${EXEMPLARS.length} ชิ้น`);
+  for (const ex of EXEMPLARS) {
+    const res = checkThaiQualityDeep(ex.reading);
+    check(
+      `ตัวอย่าง "${ex.id}" (${ex.category} · ${ex.cardCount} ใบ) ภาษาไทย 100/100 (0 issues)`,
+      res.score === 100 && res.issues.length === 0,
+      res.issues.map((i) => `${i.code}:${i.sample ?? ""}`).join(" · ")
+    );
+  }
 
   // ─────────────────────────────────────────────────────────────────
   console.log("\n" + "═".repeat(70));

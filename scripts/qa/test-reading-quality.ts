@@ -24,6 +24,9 @@ import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 import { analyzeKarmicBridge, type PastReadingSnapshot } from "../../src/lib/ai/karmic";
 import { recordReadingQuality, updateQualityOutcome, getQualityStats } from "../../src/lib/ai/quality.repo";
 import type { Reading } from "../../src/lib/schema/reading";
+import { EXEMPLARS, pickExemplar } from "../../src/data/ai/exemplars";
+import { checkThaiQualityDeep } from "../../src/lib/ai/thai-quality";
+import { evaluateClarification } from "../../src/lib/ai/clarify";
 
 let passed = 0;
 let failed = 0;
@@ -199,6 +202,41 @@ async function runTests() {
     missingMindfulResult.issues.some((i) => i.code === "ADVICE_MISSING_MINDFUL")
   );
 
+  // Test 2.7: Visual Anchor Grounding (B-03)
+  const groundedResult = checkReadingConsistency(
+    {
+      ...perfectReading,
+      cards: [
+        {
+          ...perfectReading.cards[0],
+          visualAnchor: "สุนัขสีขาวเห่าเตือนภัยที่เท้า",
+        },
+      ],
+    },
+    [foolCard]
+  );
+  check(
+    "Grounded visualAnchor passes without VISUAL_ANCHOR_UNGROUNDED",
+    !groundedResult.issues.some((i) => i.code === "VISUAL_ANCHOR_UNGROUNDED")
+  );
+
+  const ungroundedResult = checkReadingConsistency(
+    {
+      ...perfectReading,
+      cards: [
+        {
+          ...perfectReading.cards[0],
+          visualAnchor: "ยูนิคอร์นสีชมพูบินได้ข้ามภูเขาไฟ",
+        },
+      ],
+    },
+    [foolCard]
+  );
+  check(
+    "Ungrounded visualAnchor flags VISUAL_ANCHOR_UNGROUNDED as warn issue",
+    ungroundedResult.issues.some((i) => i.code === "VISUAL_ANCHOR_UNGROUNDED")
+  );
+
   // ─────────────────────────────────────────────────────────────────
   // 3. Cross-Session Karmic Bridge (W1.2)
   // ─────────────────────────────────────────────────────────────────
@@ -307,6 +345,85 @@ async function runTests() {
     Boolean(stats.thaiIssueCounts && stats.thaiIssueCounts["LATIN_LEAK"]),
     JSON.stringify(stats.thaiIssueCounts)
   );
+
+  // ─────────────────────────────────────────────────────────────────
+  // 6. Dynamic Exemplar Bank & Routing (B-02)
+  // ─────────────────────────────────────────────────────────────────
+  console.log("\n📚 6. Dynamic Exemplar Bank & Routing (B-02)");
+  check("EXEMPLARS has exactly 8 exemplars", EXEMPLARS.length === 8, `got ${EXEMPLARS.length}`);
+
+  for (const ex of EXEMPLARS) {
+    const drawn = ex.cardIds.map((id) => ({
+      ...cardById(id)!,
+      isReversed: false,
+    }));
+    const consistencyRes = checkReadingConsistency(ex.reading, drawn, {
+      yesNoMode: ex.id === "yesno-1",
+    });
+    check(
+      `exemplar "${ex.id}" passes consistency with 0 issues`,
+      consistencyRes.issues.length === 0,
+      consistencyRes.issues.map((i) => `${i.code}:${i.message}`).join(", ")
+    );
+
+    const thaiRes = checkThaiQualityDeep(ex.reading);
+    check(
+      `exemplar "${ex.id}" passes Thai quality with score 100 (0 issues)`,
+      thaiRes.score === 100 && thaiRes.issues.length === 0,
+      thaiRes.issues.map((i) => `${i.code}:${i.sample ?? ""}`).join(", ")
+    );
+  }
+
+  // Routing checks
+  check("pickExemplar('love', 1, false) -> love-1", pickExemplar("love", 1, false).id === "love-1");
+  check("pickExemplar('love', 3, false) -> love-3", pickExemplar("love", 3, false).id === "love-3");
+  check("pickExemplar('love', 10, false) -> love-10", pickExemplar("love", 10, false).id === "love-10");
+  check("pickExemplar('work', 1, false) -> work-1", pickExemplar("work", 1, false).id === "work-1");
+  check("pickExemplar('work', 5, false) -> work-5", pickExemplar("work", 5, false).id === "work-5");
+  check("pickExemplar('money', 3, false) -> money-3", pickExemplar("money", 3, false).id === "money-3");
+  check("pickExemplar('general', 1, true) -> yesno-1", pickExemplar("general", 1, true).id === "yesno-1");
+  check("pickExemplar('general', 3, false) -> general-3", pickExemplar("general", 3, false).id === "general-3");
+
+  // Fallbacks: unknown count or category never throws
+  const fallbackCount = pickExemplar("love", 7, false);
+  check("pickExemplar fallback for cardCount 7 returns love exemplar", fallbackCount.category === "love");
+  const fallbackCat = pickExemplar("spiritual" as any, 4, false);
+  check("pickExemplar fallback for unknown category returns valid exemplar", Boolean(fallbackCat && fallbackCat.id));
+
+  // ─────────────────────────────────────────────────────────────────
+  // 7. AI Clarification Question Engine (B-04)
+  // ─────────────────────────────────────────────────────────────────
+  console.log("\n🔮 7. AI Clarification Question Engine (B-04)");
+
+  const clearDetailedQ = "ควรย้ายไปทำงานบริษัท A ที่เสนอเงินเดือนสูงกว่า 20% แต่ต้องย้ายจังหวัดไหม หรืออยู่ที่เดิมดีกว่า";
+  const clearRes = await evaluateClarification({
+    question: clearDetailedQ,
+    category: "work",
+  });
+  check(
+    "คำถามที่มีตัวเลือกและบริบทชัดเจน ไม่ต้องถามเพิ่ม (needsClarification: false)",
+    clearRes.needsClarification === false
+  );
+
+  const emptyQRes = await evaluateClarification({
+    question: "   ",
+  });
+  check("คำถามว่างเปล่า คืน needsClarification: false", emptyQRes.needsClarification === false);
+
+  const existingSitRes = await evaluateClarification({
+    question: "เขาจะกลับมาไหม",
+    situation: "เราคบกันมา 3 ปี เลิกรากันได้ประมาณ 2 เดือนแล้วเพราะระยะทางห่างไกล",
+  });
+  check(
+    "มีบริบท situation ละเอียดแล้ว ไม่ต้องถามเพิ่ม",
+    existingSitRes.needsClarification === false
+  );
+
+  const fallbackQRes = await evaluateClarification({
+    question: "เขาจะกลับมาไหม",
+    category: "love",
+  });
+  check("กรณีไม่มี API key คืนค่าสุภาพ ไม่โยน Error", typeof fallbackQRes.needsClarification === "boolean");
 
   // ─────────────────────────────────────────────────────────────────
   // Summary
