@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0127 · 2026-09-11 17:05 · 🟡 Medium · คลาสอนิเมชันผีของ tailwindcss-animate ที่ไม่ได้ติดตั้ง ทำให้หน้าต่างและแผง 3 จุดเด้งพรึ่บโดยไม่มีใครรู้
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | หน้าต่างชื่อเล่นของไพ่ด่วน แผงผลไพ่ประจำตัว และเมนูมือถือของแอดมิน โผล่มาแบบตัดภาพทันทีไม่มีอนิเมชันสักเฟรม ทั้งที่โค้ดเขียน animate-in fade-in duration-200 และ duration-500 กำกับไว้ชัดเจน อ่านแล้วเหมือนมีอนิเมชันครบทุกจุด |
+| **สาเหตุราก** | คลาส animate-in fade-in slide-in-from-top เป็นของปลั๊กอิน tailwindcss-animate ซึ่งโปรเจกต์นี้ไม่เคยติดตั้ง ไม่มีทั้งใน package.json และไม่มีการ import ใน globals.css Tailwind จึงไม่ผลิต CSS ให้สักบรรทัด คลาสเหล่านี้กลายเป็นชื่อคลาสเปล่าที่ไม่มีกฎรองรับ ยืนยันด้วยการ grep หา animate-in และ fade-in ในไฟล์ CSS ที่ build ออกมาจริงแล้วไม่พบเลย |
+| **การแก้ไข** | เพิ่มคลาส CSS keyframes จริงใน globals.css คือ anim-scrim-in anim-scrim-out anim-modal-rise และ anim-drop-in แล้วเปลี่ยนทั้งสามจุดมาใช้ของจริง โดยเฉพาะ QuickFortunePicker ที่ห้ามแตะ motion เพราะถูก import แบบ static จาก TarotFlow จึงทำขาออกด้วยสถานะ isNicknameClosing คู่กับไทม์เมอร์ 160ms ที่ล้อความยาวของ anim-scrim-out |
+| **🛡️ กฎป้องกันถาวร** | **เพิ่มกฎข้อ 10 ลงด่าน scripts/qa/test-motion-quality.ts ห้ามใช้ชื่อคลาสของ tailwindcss-animate ทุกตัวคือ animate-in animate-out fade-in fade-out zoom-in zoom-out slide-in-from slide-out-to ในไฟล์ tsx เพราะไม่มีปลั๊กอินตัวนั้นในโปรเจกต์ ต้องใช้คลาส anim ที่ประกาศไว้จริงใน globals.css เท่านั้น ทดสอบด่านด้วยการทำให้พังจริงแล้ว และกฎทั่วไปคือเวลาก๊อปคลาสอนิเมชันจากที่อื่นมาใช้ ต้องยืนยันว่ามีกฎ CSS รองรับจริงในไฟล์ที่ build ออกมา ไม่ใช่เชื่อว่าชื่อคลาสที่คุ้นตาจะทำงานเอง** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/jolly-faraday-b28l8z` · commit `0925a0b` |
+
+
 ### INC-0126 · 2026-09-11 16:39 · 🟡 Medium · หน้าต่างเข้าสู่ระบบเด้งกระตุก — exit ไม่เคยเล่นเพราะ return null อยู่เหนือ AnimatePresence และกล่องกันบอทไม่จองที่
 
 | หัวข้อ | รายละเอียด |

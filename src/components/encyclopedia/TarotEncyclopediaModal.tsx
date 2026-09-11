@@ -22,8 +22,6 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
   );
   const [viewOrientation, setViewOrientation] = useState<"upright" | "reversed">("upright");
 
-  if (!isOpen) return null;
-
   const handleSelectCard = (card: TarotCard) => {
     setSelectedCard(card);
     soundManager.playCardSelectSound();
@@ -50,7 +48,18 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim">
+      {/* ⚠️ เงื่อนไข `isOpen` ต้องอยู่ **ข้างใน** `AnimatePresence` เท่านั้น (INC-0126 · กฎข้อ 9 ของด่าน test-motion-quality)
+          ถ้าเขียน `if (!isOpen) return null` ไว้ข้างบน ตัว AnimatePresence จะหายไปพร้อมลูกในเฟรมเดียวกัน
+          `exit` ที่เขียนไว้ข้างล่างจึงไม่มีวันทำงาน — หน้าต่างดับหายวับแทนที่จะค่อย ๆ จางไป */}
+      {isOpen && (
+      <motion.div
+        key="encyclopedia-modal-scrim"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -177,9 +186,17 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
             )}
           </div>
 
-          {/* Selected Card Deep Wisdom Detail Modal Layer */}
+          {/* Selected Card Deep Wisdom Detail Modal Layer
+              ⚠️ ต้องมี `AnimatePresence` ของตัวเองครอบไว้ (INC-0126) — ของเดิมเป็น `{selectedCard && ...}`
+              เปล่า ๆ `exit` ของแผงข้างในจึงไม่เคยเล่น และฉากหลังชั้นที่สองก็ทาทึบทันทีในเฟรมเดียว */}
+          <AnimatePresence>
           {selectedCard && (
-            <div
+            <motion.div
+              key="card-detail-scrim"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
               role="dialog"
               aria-modal="true"
               aria-label={`ความหมายไพ่ ${selectedCard.nameTh}`}
@@ -301,10 +318,12 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                   </div>
                 </div>
               </motion.div>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </motion.div>
-      </div>
+      </motion.div>
+      )}
     </AnimatePresence>
   );
 };

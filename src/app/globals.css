@@ -690,6 +690,76 @@ html {
   }
 }
 
+/* ───────────────────────────────────────────────────────────────────────────
+   หน้าต่างลอยที่ "ห้ามแตะ motion" — ใช้กับ QuickFortunePicker เท่านั้น
+
+   ⚠️ `QuickFortunePicker` ถูก `import` แบบ static จาก `TarotFlow` (เปลือกหน้าแรก)
+   บรรทัดเดียวที่ดึง `motion/react` เข้าไฟล์นั้นจะลากไลบรารี 40 KB กลับเข้าบันเดิลตั้งต้น
+   ของ `/` ทันที (ด่าน `test-bundle-budget` ตรวจไว้แล้ว) · หน้าต่างในไฟล์นั้นจึงต้อง
+   ใช้ CSS keyframes ล้วน ๆ แบบด้านล่างนี้ ไม่ใช่ `AnimatePresence`
+
+   🚨 ของเดิมเขียน `animate-in fade-in duration-200` ซึ่งเป็นคลาสของ `tailwindcss-animate`
+   ที่โปรเจกต์นี้**ไม่ได้ติดตั้ง** — จึงไม่มีอนิเมชันเกิดขึ้นจริงสักเฟรม หน้าต่างเด้งพรึ่บ
+   ทั้งที่โค้ดอ่านแล้วเหมือนมี (INC-0126 รอบเก็บกวาด)
+   ─────────────────────────────────────────────────────────────────────────── */
+.anim-scrim-in {
+  animation: scrimIn 0.18s var(--ease-out) both;
+}
+
+.anim-scrim-out {
+  animation: scrimOut 0.16s var(--ease-out) both;
+}
+
+@keyframes scrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scrimOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* แผงที่ห้อยลงมาจากขอบบน (เมนูมือถือของแอดมิน) — มาจากด้านบน ไม่ใช่ด้านล่าง */
+.anim-drop-in {
+  animation: dropIn 0.2s var(--ease-out) both;
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* แผงของหน้าต่าง — ลอยขึ้นเล็กน้อยพร้อมจาง (transform/opacity ล้วน ไม่แตะ layout) */
+.anim-modal-rise {
+  animation: modalRise 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes modalRise {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* พลิกไพ่หัวตั้ง/หัวกลับ — เดิมใช้ spring ของ motion (stiffness 220, damping 22)
    cubic-bezier ตัวนี้ให้จังหวะเด้งเล็กน้อยตอนจบใกล้เคียงของเดิม */
 .card-orientation-flip {

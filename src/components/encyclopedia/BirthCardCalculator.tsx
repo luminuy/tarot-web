@@ -271,7 +271,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
       {/* Result Presentation */}
       {result && (
-        <div className="altar-panel rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
+        <div className="altar-panel rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto space-y-8 anim-swap-rise">
           {/* Header & Arithmetic Trail */}
           <div className="text-center space-y-2.5 border-b border-[#D9C8AC]/40 pb-6">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D9C8AC] bg-[#FAF8F5] text-xs font-sans font-semibold text-[#8F5C1A]">

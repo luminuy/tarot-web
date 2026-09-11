@@ -431,7 +431,7 @@ function AdminContent() {
 
         {/* ─── Mobile Drawer Menu ──────────────────────────────────── */}
         {mobileMenuOpen && (
-          <div className="border-b border-[#D5CEC2] bg-white p-4 lg:hidden animate-in fade-in slide-in-from-top duration-200">
+          <div className="border-b border-[#D5CEC2] bg-white p-4 lg:hidden anim-drop-in">
             <div className="space-y-4">
               {NAV_SECTIONS.map((section) => (
                 <div key={section.group} className="space-y-1">

@@ -176,7 +176,28 @@ export function QuickFortunePicker({
   const [inputNickname, setInputNickname] = useState(currentNickname || "");
   const [inputQuestion, setInputQuestion] = useState("");
   const [showNicknameModal, setShowNicknameModal] = useState(false);
+  // จังหวะขาออกของหน้าต่าง — ต้องค้างไว้ให้อนิเมชันเล่นจบก่อนค่อยถอดออกจากต้นไม้
+  // (ไฟล์นี้ใช้ `AnimatePresence` ไม่ได้ ดูเหตุผลที่ .anim-scrim-in ใน globals.css)
+  const [isNicknameClosing, setIsNicknameClosing] = useState(false);
+  const nicknameCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
+
+  // กันไทม์เมอร์ค้างเมื่อคอมโพเนนต์ถูกถอดกลางคัน
+  useEffect(() => () => {
+    if (nicknameCloseTimer.current) clearTimeout(nicknameCloseTimer.current);
+  }, []);
+
+  /** ปิดหน้าต่างแบบมีขาออก — ใช้กับปุ่มยกเลิก/ปิดทุกจุด (ปุ่มยืนยันปิดทันทีเพราะจอเปลี่ยนไปพิธีอ่านไพ่ต่อเลย) */
+  const closeNicknameModal = () => {
+    if (nicknameCloseTimer.current) return; // กดรัวแล้วอย่าตั้งไทม์เมอร์ซ้อน
+    setIsNicknameClosing(true);
+    nicknameCloseTimer.current = setTimeout(() => {
+      setShowNicknameModal(false);
+      setIsNicknameClosing(false);
+      setSelectedPendingTopic(null);
+      nicknameCloseTimer.current = null;
+    }, 160); // ต้องเท่ากับ .anim-scrim-out ใน globals.css
+  };
 
   // ซิงก์ชื่อเล่นกับ currentNickname เมื่อรีเซ็ตหรือเปลี่ยนค่า
   useEffect(() => {
@@ -190,6 +211,11 @@ export function QuickFortunePicker({
     setSelectedPendingTopic(topic);
     setInputQuestion("");
     setNicknameError(null);
+    if (nicknameCloseTimer.current) {
+      clearTimeout(nicknameCloseTimer.current);
+      nicknameCloseTimer.current = null;
+    }
+    setIsNicknameClosing(false);
     setShowNicknameModal(true);
   };
 
@@ -368,8 +394,14 @@ export function QuickFortunePicker({
 
       {/* โมดัลระบุชื่อเล่นและคำถามสำหรับรอบใหม่ (Fast & Sacred Sacred Popover) */}
       {showNicknameModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim animate-in fade-in duration-200">
-          <div className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left">
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim ${
+            isNicknameClosing ? "anim-scrim-out" : "anim-scrim-in"
+          }`}
+        >
+          <div className={`w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
+            isNicknameClosing ? "" : " anim-modal-rise"
+          }`}>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -386,10 +418,7 @@ export function QuickFortunePicker({
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowNicknameModal(false);
-                    setSelectedPendingTopic(null);
-                  }}
+                  onClick={closeNicknameModal}
                   className="text-xs text-[#635B4E] hover:text-[#29261F] p-1 rounded-md hover:bg-[#F0ECE1] transition-colors"
                   aria-label={isEnglish ? "Close" : "ปิด"}
                 >
@@ -485,10 +514,7 @@ export function QuickFortunePicker({
               <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#D5CEC2]/40">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowNicknameModal(false);
-                    setSelectedPendingTopic(null);
-                  }}
+                  onClick={closeNicknameModal}
                   className="px-3.5 py-2 text-xs font-serif-th text-[#635B4E] hover:text-[#29261F] transition-colors cursor-pointer"
                 >
                   {isEnglish ? "Cancel" : "ยกเลิก"}
