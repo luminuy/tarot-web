@@ -378,7 +378,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     cardId={card.id}
                     alt={isEnglish ? `${card.nameEn} tarot card` : `ไพ่ ${card.nameTh} (${card.nameEn})`}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 tarot-hd-card-image"
-                    sizes="(min-width: 1024px) 160px, (min-width: 768px) 170px, (min-width: 640px) 190px, 45vw"
+                    sizes="(min-width: 1024px) 152px, (min-width: 768px) 136px, (min-width: 640px) 156px, 38vw"
                     loading={isAboveFold ? "eager" : "lazy"}
                     fetchPriority={idx === 0 ? "high" : undefined}
                   />
