@@ -1,0 +1,541 @@
+{
+  "promptVersion": "20260911-1",
+  "judgeModel": "gemini-3.6-flash",
+  "startedAt": "2026-09-11T11:38:27.780Z",
+  "cases": [
+    {
+      "id": "gold-001",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 3024,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายโดยรวมตอบตรงคำถามและอ้างอิงภาพไพ่ 1909 ได้ถูกต้องชัดเจน มีข้อแนะนำที่ทำตามได้ทันที แม้ในบางตำแหน่งจะเน้นสภาวะอารมณ์ของผู้ถามมากกว่าตัวเขาไปบ้าง",
+        "onQuestion": 4,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.67
+      }
+    },
+    {
+      "id": "gold-002",
+      "category": "work",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2904,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {}
+    },
+    {
+      "id": "gold-003",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2685,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {}
+    },
+    {
+      "id": "gold-004",
+      "category": "self",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2642,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำอ่านอธิบายรายละเอียดภาพไพ่ RWS 1909 ได้ตรงตามจริงและครบถ้วนมาก คำแนะนำมีความเป็นรูปธรรม นำไปปฏิบัติในชีวิตประจำวันได้ทันที และใช้ภาษาไทยได้อย่างสละสลวยเป็นธรรมชาติ",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      }
+    },
+    {
+      "id": "gold-005",
+      "category": "general",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2704,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบตรงคำถามเรื่องอุปสรรคและโอกาสได้อย่างชัดเจน อ้างอิงภาพไพ่ RWS 1909 ได้ถูกต้องครบถ้วน และให้ข้อคิดกับคำแนะนำที่นำไปปฏิบัติได้จริงทันที",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      }
+    },
+    {
+      "id": "gold-006",
+      "category": "love",
+      "spreadId": "love",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 3380,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำอ่านตอบคำถามได้ชัดเจน อ้างอิงองค์ประกอบบนภาพไพ่ 1909 ได้ถูกต้องแม่นยำ พร้อมคำแนะนำที่นำไปปฏิบัติได้จริงและภาษาไทยมีความลื่นไหลสละสลวย",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      }
+    },
+    {
+      "id": "gold-007",
+      "category": "work",
+      "spreadId": "career",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2925,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {}
+    },
+    {
+      "id": "gold-008",
+      "category": "money",
+      "spreadId": "money",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 3469,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 90,
+      "thaiIssues": [
+        "LATIN_LEAK",
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบตรงคำถามชัดเจน มีคำตอบ สรุป และคำแนะนำที่นำไปปฏิบัติตามได้จริงภายใน 48 ชั่วโมง อีกทั้งยังอ้างอิงรายละเอียดภาพบนหน้าไพ่ RWS 1909 ได้อย่างแม่นยำและใช้ภาษาไทยได้สละสลวยมาก",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      }
+    },
+    {
+      "id": "gold-009",
+      "category": "self",
+      "spreadId": "chakra",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 448,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-010",
+      "category": "love",
+      "spreadId": "soulmate",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 457,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-011",
+      "category": "general",
+      "spreadId": "decision",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 7348,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-012",
+      "category": "work",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2154,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {}
+    },
+    {
+      "id": "gold-013",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 763,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-014",
+      "category": "love",
+      "spreadId": "ex-reconciliation",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 12196,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "การอธิบายภาพบนไพ่ RWS 1909 มีความชัดเจนตรงตามจริง และคำแนะนำสามารถทำตามได้จริงในเวลากำหนด อย่างไรก็ตาม คำอ่านหลบเลี่ยงการตอบคำถามหลักว่าคนเก่าจะติดต่อกลับมาหรือไม่",
+        "onQuestion": 2,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.33
+      }
+    },
+    {
+      "id": "gold-015",
+      "category": "self",
+      "spreadId": "mind-body-spirit",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 8195,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-016",
+      "category": "general",
+      "spreadId": "weekly",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 428,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-017",
+      "category": "work",
+      "spreadId": "career-switch",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 7340,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-018",
+      "category": "love",
+      "spreadId": "how-they-feel",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 470,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-019",
+      "category": "money",
+      "spreadId": "quick",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 7886,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 100,
+      "thaiIssues": [],
+      "judge": {}
+    },
+    {
+      "id": "gold-020",
+      "category": "self",
+      "spreadId": "inner-potential",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 6921,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-021",
+      "category": "general",
+      "spreadId": "celtic-cross",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 494,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-022",
+      "category": "work",
+      "spreadId": "situation-solution",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 5941,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-023",
+      "category": "love",
+      "spreadId": "yes-no",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 12555,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 90,
+      "thaiIssues": [
+        "LATIN_LEAK",
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {}
+    },
+    {
+      "id": "gold-024",
+      "category": "money",
+      "spreadId": "yes-no",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 5456,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำอ่านตอบตรงประเด็นการกู้เงินและมีคำแนะนำที่นำไปปฏิบัติได้จริงและวัดผลได้ชัดเจน มีการอ้างอิงภาพไพ่และใช้ภาษาไทยที่สละสลวย อบอุ่นเป็นธรรมชาติ",
+        "onQuestion": 4,
+        "cardGrounded": 4,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 4,
+        "thaiNatural": 5,
+        "average": 4.5
+      }
+    },
+    {
+      "id": "gold-025",
+      "category": "self",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2637,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำอ่านตอบตรงคำถามเรื่องการรับมือกับความเครียดได้เป็นอย่างดี อ้างอิงสัญลักษณ์บนหน้าไพ่ The Hanged Man (1909) ได้อย่างแม่นยำ และมีแนวทางปฏิบัติที่ชัดเจนนำไปทำได้จริงทันที",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      }
+    },
+    {
+      "id": "gold-026",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 710,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-027",
+      "category": "work",
+      "spreadId": "daily",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 4566,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายทำได้ยอดเยี่ยมมาก ตอบตรงคำถามเรื่องการเจรจาธุรกิจในบ่ายวันนี้อย่างชัดเจน มีการอ้างอิงภาพบนไพ่ไม้เท้า 6 อย่างแม่นยำ และให้คำแนะนำที่นำไปปฏิบัติจริงได้ทันทีก่อนการประชุม",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      }
+    },
+    {
+      "id": "gold-028",
+      "category": "money",
+      "spreadId": "money",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 404,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-029",
+      "category": "general",
+      "spreadId": "weekly",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 430,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-030",
+      "category": "self",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 5598,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 90,
+      "thaiIssues": [
+        "LATIN_LEAK",
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {}
+    }
+  ],
+  "summary": {
+    "total": 30,
+    "succeeded": 16,
+    "avgThaiScore": 94,
+    "avgElapsedMs": 4799,
+    "consistencyIssueRate": 0,
+    "rubric": {
+      "onQuestion": 4.44,
+      "cardGrounded": 4.89,
+      "actionable": 5,
+      "personaFit": 5,
+      "notVague": 4.67,
+      "thaiNatural": 5
+    },
+    "overall": 4.83
+  }
+}

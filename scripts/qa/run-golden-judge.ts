@@ -372,7 +372,30 @@ function dryRun(cases: GoldenCase[]): number {
   return broken;
 }
 
+function loadEnvIfPresent() {
+  for (const file of [".env", ".env.local"]) {
+    const p = path.join(process.cwd(), file);
+    if (!fs.existsSync(p)) continue;
+    const lines = fs.readFileSync(p, "utf-8").split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      let val = trimmed.slice(eq + 1).trim();
+      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        val = val.slice(1, -1);
+      }
+      if (!process.env[key]) {
+        process.env[key] = val;
+      }
+    }
+  }
+}
+
 async function main() {
+  loadEnvIfPresent();
   const groqKey = process.env.GROQ_API_KEY;
   const judgeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || null;
 
@@ -402,6 +425,7 @@ async function main() {
 
   const limit = Number(arg("limit") ?? 0);
   const compareWith = arg("compare");
+  const delayArg = Number(arg("delay") ?? 50000);
 
   const golden: GoldenCase[] = JSON.parse(fs.readFileSync(FIXTURE, "utf-8"));
   const cases = limit > 0 ? golden.slice(0, limit) : golden;
@@ -410,12 +434,32 @@ async function main() {
   console.log(`   prompt version : ${PROMPT_VERSION}`);
   console.log(`   จำนวนเคส        : ${cases.length} / ${golden.length}`);
   console.log(`   ผู้ตัดสิน        : ${judgeKey ? JUDGE_MODEL : "— (ไม่มีคีย์)"}`);
+  if (delayArg > 0) {
+    console.log(`   คูลดาวน์ rate limit : ${Math.round(delayArg / 1000)}s ระหว่างเคส`);
+  }
   console.log("─".repeat(70));
+
+  fs.mkdirSync(REPORT_DIR, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const outPath = path.join(REPORT_DIR, `judge-${PROMPT_VERSION}-${stamp}.json`);
 
   const results: CaseResult[] = [];
   for (const [i, gold] of cases.entries()) {
+    if (i > 0 && delayArg > 0) {
+      process.stdout.write(`⏳ รอคูลดาวน์ ${Math.round(delayArg / 1000)}s ... `);
+      await new Promise((r) => setTimeout(r, delayArg));
+    }
     process.stdout.write(`  [${i + 1}/${cases.length}] ${gold.id} (${gold.category}/${gold.spreadId}) ... `);
-    const result = await runCase(gold, judgeKey);
+    let result = await runCase(gold, judgeKey);
+
+    let retries = 0;
+    while (!result.ok && retries < 3) {
+      retries++;
+      process.stdout.write(`⚠️ ลองใหม่รอบที่ ${retries} (รอ 35s) ... `);
+      await new Promise((r) => setTimeout(r, 35000));
+      result = await runCase(gold, judgeKey);
+    }
+
     results.push(result);
     if (!result.ok) {
       console.log(`❌ ${result.error}`);
@@ -427,6 +471,16 @@ async function main() {
         }`
       );
     }
+
+    // เขียนไฟล์รายงานความคืบหน้าระหว่างรัน
+    const currentReport: JudgeReport = {
+      promptVersion: PROMPT_VERSION,
+      judgeModel: judgeKey ? JUDGE_MODEL : "none",
+      startedAt: new Date().toISOString(),
+      cases: results,
+      summary: summarize(results),
+    };
+    fs.writeFileSync(outPath, JSON.stringify(currentReport, null, 2), "utf-8");
   }
 
   const report: JudgeReport = {
@@ -436,10 +490,6 @@ async function main() {
     cases: results,
     summary: summarize(results),
   };
-
-  fs.mkdirSync(REPORT_DIR, { recursive: true });
-  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const outPath = path.join(REPORT_DIR, `judge-${PROMPT_VERSION}-${stamp}.json`);
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2), "utf-8");
 
   console.log("\n" + "═".repeat(70));
