@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { DECK, type TarotCard } from "@/data/cards";
 import { TarotCard as TarotCardComponent } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
 interface TarotEncyclopediaModalProps {
   isOpen: boolean;
@@ -21,6 +22,35 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
     "general"
   );
   const [viewOrientation, setViewOrientation] = useState<"upright" | "reversed">("upright");
+  const listPanelRef = useRef<HTMLDivElement>(null);
+  const detailPanelRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * 🪟 หน้าต่างซ้อนสองชั้น — ต้องจัดลำดับ Esc ให้ถูก (UX-08)
+   * ---------------------------------------------------------------------------
+   * เดิมแผงรายการไพ่ไม่มีแม้แต่ `role="dialog"` ส่วนแผงรายละเอียดประกาศ
+   * `aria-modal="true"` ไว้ทั้งที่ไม่ได้กักโฟกัสจริง ทั้งคู่ปิดด้วย Esc ไม่ได้เลย
+   *
+   * ⚠️ ทั้งสองชั้นฟัง keydown ที่ `window` เหมือนกัน ถ้าปล่อยให้ทำงานอิสระ
+   * กด Esc ครั้งเดียวจะปิดทั้งสองชั้นพร้อมกัน ซึ่งไม่ใช่สิ่งที่ผู้ใช้คาดหวัง
+   * (คาดว่ากดครั้งแรกปิดรายละเอียด กลับมาที่รายการ · กดอีกครั้งถึงปิดทั้งหมด)
+   *
+   * แก้ด้วยการให้ชั้นนอก "ไม่ทำอะไร" ถ้าชั้นในยังเปิดอยู่ — อ่านค่า `selectedCard`
+   * สด ๆ ได้เพราะ hook เก็บ onClose ล่าสุดไว้ใน ref และอัปเดตทุกเรนเดอร์
+   */
+  useDialogBehavior(
+    isOpen,
+    () => {
+      if (selectedCard) return; // ให้ชั้นในจัดการก่อน
+      onClose();
+    },
+    listPanelRef
+  );
+
+  // ชั้นใน — ไม่ต้องล็อกสกรอลล์ซ้ำ ชั้นนอกล็อกไว้ให้แล้ว
+  useDialogBehavior(Boolean(selectedCard), () => setSelectedCard(null), detailPanelRef, {
+    lockScroll: false,
+  });
 
   const handleSelectCard = (card: TarotCard) => {
     setSelectedCard(card);
@@ -58,6 +88,9 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="สารานุกรมความหมายไพ่ทาโรต์"
         className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
       >
         <motion.div
@@ -70,6 +103,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
+          ref={listPanelRef}
           className="w-full max-w-4xl max-h-[90svh] rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-5 sm:p-7 shadow-overlay flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
@@ -114,6 +148,8 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                 <button
                   key={tab.id}
                   role="tab"
+                  id={`encyclopedia-tab-${tab.id}`}
+                  aria-controls="encyclopedia-panel"
                   aria-selected={filter === tab.id}
                   type="button"
                   onClick={() => setFilter(tab.id as SuitFilter)}
@@ -129,6 +165,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
             </div>
 
             <input
+              aria-label="ค้นหาไพ่ตามชื่อหรือความหมาย"
               type="text"
               placeholder="ค้นหาตามชื่อไพ่ (เช่น The Fool, ราชินีถ้วย, ความรัก, การเงิน)..."
               value={search}
@@ -138,7 +175,16 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
           </div>
 
           {/* Content Area: Grid of Cards */}
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1 no-scrollbar min-h-[300px]">
+          {/*
+            🔗 ปลายทางของแท็บด้านบน (UX-11) — แผงนี้มีใบเดียวและเปลี่ยนเนื้อหาตามแท็บ
+            จึงใช้ `id` คงที่ แล้วให้ `aria-labelledby` ชี้ไปที่แท็บที่ active อยู่ตอนนั้น
+          */}
+          <div
+            role="tabpanel"
+            id="encyclopedia-panel"
+            aria-labelledby={`encyclopedia-tab-${filter}`}
+            className="flex-1 overflow-y-auto space-y-4 pr-1 no-scrollbar min-h-[300px]"
+          >
             {filteredCards.length > 0 ? (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                 {filteredCards.map((c) => (
@@ -212,6 +258,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 12 }}
+                ref={detailPanelRef}
                 className="w-full max-w-2xl max-h-[90svh] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-7 shadow-overlay flex flex-col relative space-y-4 overflow-y-auto text-[#2E211A]"
               >
                 <button

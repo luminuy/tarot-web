@@ -171,6 +171,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               key={cat.id}
               role="tab"
               id={`spread-tab-${cat.id}`}
+              aria-controls={`spread-panel-${cat.id}`}
               aria-selected={isActive}
               tabIndex={isActive ? 0 : -1}
               type="button"

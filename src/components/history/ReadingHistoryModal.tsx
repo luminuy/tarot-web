@@ -11,6 +11,7 @@ import {
 import { soundManager } from "@/lib/utils/audio";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
 interface ReadingHistoryModalProps {
   isOpen: boolean;
@@ -54,6 +55,13 @@ const CATEGORY_MAP_EN: Record<string, string> = {
 export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen, onClose }) => {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * 🪟 เดิมประกาศ `aria-modal="true"` ไว้ทั้งที่ไม่ได้กักโฟกัสจริง (UX-08)
+   * ปิดด้วย Esc ไม่ได้ · หน้าหลังฉากยังเลื่อนได้ · ปิดแล้วโฟกัสไม่กลับที่เดิม
+   */
+  useDialogBehavior(isOpen, onClose, panelRef);
   const [readings, setReadings] = useState<SavedReadingItem[]>([]);
   const [search, setSearch] = useState("");
   const [outcomeFilter, setOutcomeFilter] = useState<"ALL" | ReadingOutcome>("ALL");
@@ -198,6 +206,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
+          ref={panelRef}
           className="w-full max-w-2xl max-h-[88svh] rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] p-5 sm:p-7 shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
@@ -392,6 +401,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
               <div className="relative">
                 <input
+              aria-label={isEn ? "Search your reading journal" : "ค้นหาในสมุดบันทึกดวงชะตา"}
                   type="text"
                   placeholder={isEn ? "Search questions, spreads, cards, or notes..." : "ค้นหาตามคำถาม, ผัง, ชื่อไพ่ หรือบันทึกโน้ต..."}
                   value={search}
@@ -581,6 +591,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         onClick={(e) => e.stopPropagation()}
                       >
                         <textarea
+                        aria-label={isEn ? "Your note for this reading" : "บันทึกของคุณสำหรับคำทำนายนี้"}
                           rows={2}
                           value={noteDraft}
                           onChange={(e) => setNoteDraft(e.target.value)}

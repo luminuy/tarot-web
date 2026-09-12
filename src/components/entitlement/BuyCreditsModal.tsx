@@ -292,6 +292,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                   {!redeemSuccess && (
                     <div className="flex gap-2">
                       <input
+                aria-label={isEn ? "Redeem code" : "รหัสแลกสิทธิ์"}
                         type="text"
                         value={redeemCode}
                         onChange={(e) => setRedeemCode(e.target.value)}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { calculatePasswordStrength } from "@/lib/auth/strength";
 import { useSessionUser } from "@/lib/auth/use-session";
 import { soundManager } from "@/lib/utils/audio";
@@ -10,6 +10,15 @@ export function ChangePasswordCard() {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
   const { user, refresh } = useSessionUser();
+  /*
+   * 🏷️ ทั้งสามช่องมี <label> ที่ตาเห็นอยู่แล้ว แต่ไม่มี htmlFor ผูกกับ input เลย (UX-10)
+   * สำหรับ screen reader จึงเป็น "ช่องรหัสผ่านไร้ชื่อ" สามช่องติดกัน แยกไม่ออกว่าอันไหนคืออันไหน
+   * ⚠️ placeholder ไม่ใช่ label — มันหายไปทันทีที่เริ่มพิมพ์ และ screen reader หลายตัวไม่อ่านเลย
+   */
+  const oldPwId = useId();
+  const newPwId = useId();
+  const confirmPwId = useId();
+
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -111,10 +120,11 @@ export function ChangePasswordCard() {
       <form onSubmit={handleSubmit} className="space-y-3 pt-2">
         {hasPassword && (
           <div className="space-y-1">
-            <label className="block text-xs text-[#2E211A] font-serif-th font-semibold">
+            <label htmlFor={oldPwId} className="block text-xs text-[#2E211A] font-serif-th font-semibold">
               {isEn ? "Current Password" : "รหัสผ่านเดิม"}
             </label>
             <input
+              id={oldPwId}
               type={showPassword ? "text" : "password"}
               required
               value={oldPassword}
@@ -127,7 +137,7 @@ export function ChangePasswordCard() {
 
         <div className="space-y-1">
           <div className="flex justify-between items-center">
-            <label className="block text-xs text-[#2E211A] font-serif-th font-semibold">
+            <label htmlFor={newPwId} className="block text-xs text-[#2E211A] font-serif-th font-semibold">
               {isEn ? "New Password" : "รหัสผ่านใหม่"}
             </label>
             <button
@@ -139,6 +149,7 @@ export function ChangePasswordCard() {
             </button>
           </div>
           <input
+            id={newPwId}
             type={showPassword ? "text" : "password"}
             required
             value={newPassword}
@@ -163,10 +174,11 @@ export function ChangePasswordCard() {
         </div>
 
         <div className="space-y-1">
-          <label className="block text-xs text-[#2E211A] font-serif-th font-semibold">
+          <label htmlFor={confirmPwId} className="block text-xs text-[#2E211A] font-serif-th font-semibold">
             {isEn ? "Confirm New Password" : "ยืนยันรหัสผ่านใหม่อีกครั้ง"}
           </label>
           <input
+            id={confirmPwId}
             type={showPassword ? "text" : "password"}
             required
             value={confirmPassword}

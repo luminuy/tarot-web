@@ -145,9 +145,9 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         </div>
 
         <Field label="ชื่อเล่นของคุณ (Nickname) *">
-          {(id) => (
+          {(field) => (
             <Input
-              id={id}
+              {...field}
               required
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
@@ -158,9 +158,9 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         </Field>
 
         <Field label="เรื่องหรือคำถามที่ต้องการปรึกษา *">
-          {(id) => (
+          {(field) => (
             <Textarea
-              id={id}
+              {...field}
               required
               rows={3}
               value={question}

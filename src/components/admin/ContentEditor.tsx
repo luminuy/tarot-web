@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useId, useCallback, useEffect, useMemo, useState } from "react";
 
 import { CardImage } from "@/components/card/CardImage";
 import { Button } from "@/components/ui/Button";
@@ -216,6 +216,9 @@ function PersonaTab({
   doc: Doc;
   patch: (fn: (d: Doc) => Doc) => void;
 }) {
+  /* 🏷️ <label> มีอยู่แล้วแต่ไม่ได้ผูกด้วย htmlFor (UX-10) */
+  const readerSelectId = useId();
+
   const [sel, setSel] = useState(personas[0].id);
   const p = personas.find((x) => x.id === sel)!;
   const o = doc.personas?.[sel] ?? {};
@@ -234,8 +237,9 @@ function PersonaTab({
   return (
     <div className="altar-panel flex flex-col gap-4 rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
       <div>
-        <label className="mb-1 block text-xs font-semibold text-[#635B4E]">เลือกแม่หมอ</label>
+        <label htmlFor={readerSelectId} className="mb-1 block text-xs font-semibold text-[#635B4E]">เลือกแม่หมอ</label>
         <select
+          id={readerSelectId}
           value={sel}
           onChange={(e) => setSel(e.target.value)}
           className="w-full max-w-xs rounded-xl border border-[#D5CEC2] bg-white px-3 py-2 text-sm text-[#29261F] focus:border-[#29261F] focus:outline-none"
@@ -249,10 +253,10 @@ function PersonaTab({
       </div>
 
       <Field label="ชื่อที่แสดงในคำอ่าน (nameTh)">
-        {(id) => (
+        {(field) => (
           <div className="flex items-center gap-2">
             <Input
-              id={id}
+              {...field}
               value={o.nameTh ?? ""}
               placeholder={p.nameTh}
               onChange={(e) => setField("nameTh", e.target.value)}
@@ -263,10 +267,10 @@ function PersonaTab({
       </Field>
 
       <Field label="คำโปรย (tagline)">
-        {(id) => (
+        {(field) => (
           <div className="flex items-center gap-2">
             <Input
-              id={id}
+              {...field}
               value={o.tagline ?? ""}
               placeholder={p.tagline}
               onChange={(e) => setField("tagline", e.target.value)}
@@ -277,10 +281,10 @@ function PersonaTab({
       </Field>
 
       <Field label="น้ำเสียง / บุคลิก (voice) — ต่อท้าย prompt กลาง">
-        {(id) => (
+        {(field) => (
           <>
             <Textarea
-              id={id}
+              {...field}
               rows={12}
               value={o.voice ?? ""}
               placeholder={p.voice}
@@ -508,6 +512,7 @@ function CardTab({
                   <label className="flex items-center gap-2 text-xs text-[#29261F]">
                     คำตอบ Yes/No:
                     <select
+          aria-label="ผลใช่/ไม่ใช่ของไพ่ใบนี้"
                       value={o.yesNo ?? "default"}
                       onChange={(e) => setYesNo(e.target.value)}
                       className="rounded-lg border border-[#D5CEC2] bg-white px-2.5 py-1 text-xs text-[#29261F] focus:outline-none focus:border-[#29261F]"

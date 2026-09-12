@@ -10,6 +10,7 @@ import { CardImage } from "@/components/card/CardImage";
 import { getCardImageSrc } from "@/lib/tarot/card-image";
 import { cardSummaryByIndex as cardByIndex } from "@/data/cards/summary";
 import { trackEvent } from "@/lib/analytics";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { useLocale } from "@/lib/i18n";
 
 interface ShareModalProps {
@@ -33,6 +34,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 }) => {
   const { isEnglish } = useLocale();
   const cardRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * 🪟 เดิมประกาศ `aria-modal="true"` ไว้ทั้งที่ไม่ได้กักโฟกัสจริง (UX-08)
+   * ปิดด้วย Esc ไม่ได้ · หน้าหลังฉากยังเลื่อนได้ · ปิดแล้วโฟกัสไม่กลับที่เดิม
+   */
+  useDialogBehavior(isOpen, onClose, panelRef);
   const [isGenerating, setIsGenerating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -486,6 +494,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
+          ref={panelRef}
           onClick={(e) => e.stopPropagation()}
           className="w-full max-w-xl rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-4 sm:p-6 shadow-overlay space-y-4 my-auto relative text-[#2E211A]"
         >
