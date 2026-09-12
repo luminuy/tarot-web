@@ -26,6 +26,12 @@ import {
   purgeEntitlementData,
   DAILY_LIMIT,
 } from "../../src/lib/entitlement/entitlement";
+import {
+  createRedeemCode,
+  listRedeemCodes,
+  listRedemptions,
+  updateRedeemCode,
+} from "../../src/lib/entitlement/redeem-admin.repo";
 import { getAppDB } from "../../src/lib/platform/db";
 
 type AppDB = Awaited<ReturnType<typeof getAppDB>>;
@@ -113,7 +119,8 @@ export async function runRedeemTests(): Promise<{ passed: number; total: number 
   assert(redeemKindOf(GIFT_REASON_PREFIX) === "gift", "prefix gift_* ➔ gift");
   assert(normalizeReasonPrefix("  Purchase_Redeem ") === "purchase_redeem", "ตัดช่องว่าง/ตัวพิมพ์ใหญ่ก่อนตัดสิน");
   assert(normalizeReasonPrefix("") === GIFT_REASON_PREFIX, "prefix ว่าง ➔ ตกไปทาง gift (สิทธิ์น้อยสุด)");
-  assert(normalizeReasonPrefix("promo!!2026") === "gift_promo2026", "prefix แปลก ๆ ➔ บังคับเป็น gift_");
+  assert(normalizeReasonPrefix("promo!!2026") === "promo2026", "prefix promo_* ผ่านตามเดิม (ชื่อที่แผงแอดมินใช้)");
+  assert(normalizeReasonPrefix("weird!!thing") === "gift_weirdthing", "prefix แปลกที่ไม่รู้จัก ➔ บังคับเป็น gift_");
   assert(
     redeemKindOf(normalizeReasonPrefix("PURCHASE_ ANYTHING")) === "premium",
     "prefix purchase_ ที่มีอักขระแปลกยังคงเป็น premium หลังล้าง",
@@ -214,9 +221,73 @@ export async function runRedeemTests(): Promise<{ passed: number; total: number 
   assert(offRes.ok === false, "รหัสที่ถูกปิดแลกไม่ได้");
   if (!offRes.ok) assert(offRes.error.includes("ปิดใช้งาน"), "ข้อความ error บอกว่าถูกปิดใช้งาน");
 
+  // ── 9. ชั้นออกรหัสของแอดมิน (redeem-admin.repo) ──
+  // กติกาสำคัญ: ทุกใบต้องมีเพดานจำนวนคนและวันหมดอายุ — ห้ามมี "ไม่จำกัด" อีก (INC-0134)
+  const adminCode = `ADMIN-QA-${stamp}`;
+  const futureExp = Date.now() + 7 * DAY_MS;
+
+  const rejectUnlimited = await createRedeemCode({
+    code: `${adminCode}-U`,
+    title: "QA ไม่จำกัดคน",
+    credits: 1,
+    kind: "quota",
+    maxUses: -1,
+    expiresAt: futureExp,
+  }).then(() => null).catch((e: Error) => e);
+  assert(rejectUnlimited instanceof Error, "แอดมินสร้างรหัส 'ไม่จำกัดคน' (max_uses = -1) ไม่ได้");
+
+  const rejectNoExpiry = await createRedeemCode({
+    code: `${adminCode}-N`,
+    title: "QA ไม่มีวันหมดอายุ",
+    credits: 1,
+    kind: "quota",
+    maxUses: 10,
+    expiresAt: null,
+  }).then(() => null).catch((e: Error) => e);
+  assert(rejectNoExpiry instanceof Error, "แอดมินสร้างรหัสที่ไม่มีวันหมดอายุไม่ได้");
+
+  const created = await createRedeemCode({
+    code: adminCode,
+    title: "QA แคมเปญทดสอบ",
+    credits: 2,
+    kind: "quota",
+    maxUses: 5,
+    expiresAt: futureExp,
+  });
+  assert(created.code === adminCode.toUpperCase(), "สร้างรหัสผ่านชั้นแอดมินสำเร็จ (เก็บเป็นตัวพิมพ์ใหญ่)");
+  assert(created.reasonPrefix === "promo_redeem", "ชนิด quota ➔ reason_prefix = promo_redeem");
+
+  // รหัสที่ออกจากแผงแอดมินแบบ quota ต้องไม่ปลดพรีเมียมเมื่อผู้ใช้แลกจริง
+  const promoUser = `usr_promo_${stamp}`;
+  await makeUser(db, promoUser);
+  const promoRes = await redeemCodeForUser(promoUser, adminCode);
+  assert(promoRes.ok === true, "ผู้ใช้แลกรหัสที่แอดมินออกให้ได้");
+  if (promoRes.ok) assert(promoRes.kind === "gift", "รหัส promo_redeem ถูกจัดเป็นชนิด gift");
+  const promoEnt = await getEntitlement({ kind: "member", userId: promoUser });
+  assert(promoEnt.bonusRemaining === 2, "ได้รอบเปิดไพ่ 2 ครั้งจากรหัสแอดมิน");
+  assert(promoEnt.hasPaidCredits === false, "รหัส promo_redeem **ไม่** ปลดฟีเจอร์พรีเมียม");
+
+  // ยอดผู้แลกต้องอ่านกลับมาได้ (หน้าจอ "ดูคนที่แลก")
+  const redemptions = await listRedemptions(adminCode);
+  assert(redemptions.length === 1 && redemptions[0].userId === promoUser, "listRedemptions คืนผู้แลกถูกคน");
+  const listed = (await listRedeemCodes()).find((c) => c.code === adminCode.toUpperCase());
+  assert(listed?.actualRedeemedCount === 1, "รายการรหัสรายงานยอดแลกจริง 1 ครั้ง");
+
+  // แก้ชื่อแคมเปญได้ แต่แก้ย้อนกลับไปเป็นไม่จำกัด/ไม่มีวันหมดอายุไม่ได้
+  const renamed = await updateRedeemCode(adminCode, { title: "QA เปลี่ยนชื่อแล้ว" });
+  assert(renamed.title === "QA เปลี่ยนชื่อแล้ว", "แก้ชื่อแคมเปญได้");
+  const rejectBackToUnlimited = await updateRedeemCode(adminCode, { maxUses: -1 })
+    .then(() => null)
+    .catch((e: Error) => e);
+  assert(rejectBackToUnlimited instanceof Error, "แก้เพดานกลับไปเป็น -1 ไม่ได้");
+  const rejectClearExpiry = await updateRedeemCode(adminCode, { expiresAt: null })
+    .then(() => null)
+    .catch((e: Error) => e);
+  assert(rejectClearExpiry instanceof Error, "ลบวันหมดอายุออกไม่ได้");
+
   // ── เก็บกวาด ──
-  for (const id of [giftUser, secondUser, lateUser, ...racers]) await dropUser(db, id);
-  for (const c of [giftCode, raceCode, expiredCode, offCode]) await dropCode(db, c);
+  for (const id of [giftUser, secondUser, lateUser, promoUser, ...racers]) await dropUser(db, id);
+  for (const c of [giftCode, raceCode, expiredCode, offCode, adminCode.toUpperCase()]) await dropCode(db, c);
 
   return { passed, total };
 }

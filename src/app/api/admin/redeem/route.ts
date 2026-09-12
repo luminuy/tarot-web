@@ -28,21 +28,21 @@ const CreateRedeemSchema = z.object({
     .min(1, "จำนวนสิทธิ์ขั้นต่ำคือ 1 ครั้ง")
     .max(100, "จำนวนสิทธิ์สูงสุดคือ 100 ครั้ง"),
   kind: z.enum(["premium", "quota"] as const),
+  // ⚠️ INC-0134: ไม่มีตัวเลือก "ไม่จำกัดคน" และ "ไม่มีวันหมดอายุ" อีกต่อไป
+  // รหัสที่ไม่มีเพดานคือรหัสที่หลุดแล้วดับไม่ได้ · ชั้น repo ก็ปฏิเสธซ้ำอีกชั้น
   maxUses: z
     .number()
     .int()
-    .min(-1, "จำนวนครั้งที่แลกต้องเป็น -1 หรือ 1-100,000")
-    .max(100000, "จำนวนครั้งที่แลกต้องไม่เกิน 100,000")
-    .optional()
-    .default(-1),
-  expiresAt: z.number().nullable().optional(),
+    .min(1, "ต้องระบุเพดานจำนวนคนแลกอย่างน้อย 1")
+    .max(100000, "จำนวนครั้งที่แลกต้องไม่เกิน 100,000"),
+  expiresAt: z.number().int().positive("ต้องระบุวันหมดอายุ"),
 });
 
 const UpdateRedeemSchema = z.object({
   code: z.string().trim().min(1, "กรุณาระบุรหัสที่ต้องการแก้ไข"),
   title: z.string().trim().min(1).max(100).optional(),
-  maxUses: z.number().int().min(-1).max(100000).optional(),
-  expiresAt: z.number().nullable().optional(),
+  maxUses: z.number().int().min(1).max(100000).optional(),
+  expiresAt: z.number().int().positive().optional(),
   isActive: z.boolean().optional(),
 });
 

@@ -34,7 +34,10 @@ export function normalizeReasonPrefix(raw: string): string {
   const cleaned = (raw ?? "").trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
   if (!cleaned) return GIFT_REASON_PREFIX;
   if (cleaned.startsWith("purchase_")) return cleaned;
-  return cleaned.startsWith("gift") ? cleaned : `gift_${cleaned}`;
+  // `promo_*` คือชื่อที่แผงแอดมินใช้ออกรหัสแจก (redeem-admin.repo.ts) — ปล่อยผ่านตามเดิม
+  // ไม่งั้น reason จะกลายเป็น `gift_promo_redeem_<CODE>` ซึ่งสืบกลับยากโดยไม่ได้อะไรเพิ่ม
+  if (cleaned.startsWith("promo") || cleaned.startsWith("gift")) return cleaned;
+  return `gift_${cleaned}`;
 }
 
 export interface RedeemCodeInfo {
