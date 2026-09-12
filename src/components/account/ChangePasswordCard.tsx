@@ -191,7 +191,7 @@ export function ChangePasswordCard() {
         <button
           type="submit"
           disabled={loading}
-          className="py-2.5 px-5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-semibold font-serif-th text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
+          className="tap-overlay-y py-2.5 px-5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-semibold font-serif-th text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
         >
           {loading
             ? (isEn ? "Saving..." : "กำลังบันทึก…")

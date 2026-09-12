@@ -121,7 +121,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveSuit(tab.id)}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-serif-th font-bold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer ${
+                className={`tap-overlay-y px-3 py-1.5 rounded-xl border text-xs font-serif-th font-bold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer ${
                   isActive
                     ? "border-gold-ink bg-ink text-canvas"
                     : "border-line bg-surface-warm text-muted hover:bg-surface hover:text-ink"

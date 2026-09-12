@@ -56,7 +56,7 @@ export const TTSReaderButton: React.FC<TTSReaderButtonProps> = ({ textToRead, pe
           ? isEnglish ? "Stop reading" : "หยุดเสียงอ่านคำทำนาย"
           : isEnglish ? "Listen to reading" : "ฟังเสียงอ่านคำทำนาย"
       }
-      className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-serif-th font-semibold transition duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+      className={`tap-overlay-y inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-serif-th font-semibold transition duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
         isSpeaking
           ? "bg-gold-ink border-line-warm text-surface"
           : "bg-surface border-line-warm text-ink-deep hover:border-gold-ink hover:bg-surface-warm"

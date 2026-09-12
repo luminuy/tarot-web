@@ -122,7 +122,7 @@ export default function ContentEditor() {
             <button
               key={id}
               onClick={() => setSub(id)}
-              className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+              className={`tap-overlay-y rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
                 sub === id
                   ? "border-ink bg-ink text-white shadow-xs"
                   : "border-line bg-white text-muted hover:bg-[#F2EFE9] hover:text-ink"
@@ -405,7 +405,7 @@ function CardTab({
                 key={opt.id}
                 type="button"
                 onClick={() => setSuitFilter(opt.id)}
-                className={`rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
+                className={`tap-overlay-y rounded-lg px-2 py-1 text-[11px] font-medium transition-colors ${
                   active
                     ? "bg-ink text-white shadow-xs"
                     : "border border-line bg-white text-muted hover:bg-[#F2EFE9] hover:text-ink"
@@ -447,7 +447,7 @@ function CardTab({
                   <button
                     type="button"
                     onClick={() => setSelId(c.id)}
-                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
+                    className={`tap-overlay-y flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
                       isSelected
                         ? "border border-ink bg-[#F2EFE9] font-medium text-ink"
                         : "text-ink hover:bg-surface-pale"

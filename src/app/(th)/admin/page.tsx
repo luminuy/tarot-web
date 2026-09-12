@@ -343,7 +343,7 @@ function AdminContent() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface-mist text-ink lg:hidden hover:bg-white transition-colors"
+            className="tap-overlay-y flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface-mist text-ink lg:hidden hover:bg-white transition-colors"
             aria-label="เปิดเมนูนำทาง"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -423,7 +423,7 @@ function AdminContent() {
                         key={item.id}
                         type="button"
                         onClick={() => selectTab(item.id)}
-                        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition ${
+                        className={`tap-overlay-y group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition ${
                           isActive
                             ? "bg-canvas text-ink font-semibold border border-line shadow-2xs"
                             : "text-muted hover:bg-surface-mist hover:text-ink"
@@ -484,7 +484,7 @@ function AdminContent() {
                           key={item.id}
                           type="button"
                           onClick={() => selectTab(item.id)}
-                          className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
+                          className={`tap-overlay-y flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
                             isActive
                               ? "bg-ink text-white font-semibold"
                               : "bg-surface-mist text-ink border border-line hover:bg-white"
@@ -516,7 +516,7 @@ function AdminContent() {
                 key={item.id}
                 type="button"
                 onClick={() => selectTab(item.id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors ${
+                className={`tap-overlay-y flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors ${
                   isActive
                     ? "bg-ink text-white font-semibold shadow-xs"
                     : "border border-line bg-surface-mist text-muted hover:text-ink"
@@ -564,7 +564,7 @@ function AdminContent() {
                   <button
                     type="button"
                     onClick={() => setHealthSubTab("system")}
-                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
+                    className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
                       healthSubTab === "system"
                         ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                         : "text-muted hover:text-ink"
@@ -575,7 +575,7 @@ function AdminContent() {
                   <button
                     type="button"
                     onClick={() => setHealthSubTab("ai")}
-                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
+                    className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
                       healthSubTab === "ai"
                         ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                         : "text-muted hover:text-ink"

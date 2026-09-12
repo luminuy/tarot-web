@@ -436,7 +436,7 @@ export function LoveOneCardClient() {
               <button
                 type="button"
                 onClick={() => handleShare(card)}
-                className="px-5 py-2 rounded-full bg-ink hover:bg-gold text-surface-warm text-xs font-serif-th font-bold transition-colors cursor-pointer shadow-xs"
+                className="tap-overlay-y px-5 py-2 rounded-full bg-ink hover:bg-gold text-surface-warm text-xs font-serif-th font-bold transition-colors cursor-pointer shadow-xs"
               >
                 {copied
                   ? isEnglish

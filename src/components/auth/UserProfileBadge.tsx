@@ -318,7 +318,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                     setMenuOpen(false);
                     onBuyCredits();
                   }}
-                  className="w-full py-2 px-3 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs hover:scale-[1.01] transition duration-150 cursor-pointer flex items-center justify-between active:scale-[0.98] shadow-sm"
+                  className="tap-overlay-y w-full py-2 px-3 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs hover:scale-[1.01] transition duration-150 cursor-pointer flex items-center justify-between active:scale-[0.98] shadow-sm"
                 >
                   <span className="flex items-center gap-1.5">
                     
@@ -440,7 +440,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full text-left p-2.5 rounded-xl text-err hover:text-err hover:bg-err-wash border border-transparent hover:border-line transition-colors duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
+                className="tap-overlay-y w-full text-left p-2.5 rounded-xl text-err hover:text-err hover:bg-err-wash border border-transparent hover:border-line transition-colors duration-150 cursor-pointer flex items-center justify-between group active:scale-98"
               >
                 <span className="flex items-center gap-1.5 font-bold">
                   

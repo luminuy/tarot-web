@@ -76,7 +76,7 @@ export default function TesterLoginPage() {
                 type="button"
                 onClick={logout}
                 disabled={loading}
-                className="w-full rounded-xl border border-[#e5c07b]/30 px-4 py-2.5 text-center text-sm text-[#cfc8e2] hover:bg-[#191230] transition-colors disabled:opacity-50"
+                className="tap-overlay-y w-full rounded-xl border border-[#e5c07b]/30 px-4 py-2.5 text-center text-sm text-[#cfc8e2] hover:bg-[#191230] transition-colors disabled:opacity-50"
               >
                 ออกจากโหมดผู้ทดสอบ
               </button>

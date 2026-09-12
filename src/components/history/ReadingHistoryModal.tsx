@@ -230,7 +230,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="text-[13px] text-err hover:text-err border border-line bg-err-wash px-3 py-1 rounded-full transition cursor-pointer font-serif-th"
+                  className="tap-overlay-y text-[13px] text-err hover:text-err border border-line bg-err-wash px-3 py-1 rounded-full transition cursor-pointer font-serif-th"
                 >
                   {isEn ? "Clear All" : "ลบทั้งหมด"}
                 </button>
@@ -239,7 +239,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 type="button"
                 onClick={onClose}
                 aria-label={isEn ? "Close reading history" : "ปิดประวัติการดูดวง"}
-                className="w-9 h-9 rounded-full bg-inset border border-line text-ink hover:bg-ink hover:text-canvas text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+                className="tap-overlay-y w-9 h-9 rounded-full bg-inset border border-line text-ink hover:bg-ink hover:text-canvas text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
               >
                 ✕
               </button>
@@ -267,7 +267,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 type="button"
                 disabled={isGeneratingSummary}
                 onClick={handleGenerateMonthlySummary}
-                className="w-full sm:w-auto px-4 py-2 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 flex-shrink-0 shadow-xs"
+                className="tap-overlay-y w-full sm:w-auto px-4 py-2 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 flex-shrink-0 shadow-xs"
               >
                 {isGeneratingSummary ? (
                   <>
@@ -294,7 +294,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               <button
                 type="button"
                 onClick={() => setMonthlySummary(null)}
-                className="absolute top-3 right-3 text-muted hover:text-ink text-xs p-1 cursor-pointer"
+                className="tap-overlay-y absolute top-3 right-3 text-muted hover:text-ink text-xs p-1 cursor-pointer"
                 title={isEn ? "Close summary" : "ปิดสรุป"}
               >
                 ✕
@@ -350,7 +350,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("ALL")}
-                  className={`px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
+                  className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ALL"
                       ? "bg-ink text-canvas font-bold shadow-xs"
                       : "bg-inset text-muted hover:text-ink border border-line"
@@ -361,7 +361,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("ACCURATE")}
-                  className={`px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
+                  className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ACCURATE"
                       ? "bg-ok text-white font-bold"
                       : "bg-[#EBF3ED] text-ok border border-line"
@@ -374,7 +374,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("PARTIAL")}
-                  className={`px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
+                  className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PARTIAL"
                       ? "bg-gold text-white font-bold"
                       : "bg-inset text-gold border border-line"
@@ -387,7 +387,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 <button
                   type="button"
                   onClick={() => setOutcomeFilter("PENDING")}
-                  className={`px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
+                  className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PENDING"
                       ? "bg-ink text-canvas font-bold"
                       : "bg-surface text-muted hover:text-ink border border-line"
@@ -463,7 +463,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleDelete(e, item.id)}
-                          className="text-err hover:text-err p-1 text-xs transition-colors cursor-pointer"
+                          className="tap-overlay-y text-err hover:text-err p-1 text-xs transition-colors cursor-pointer"
                           title={isEn ? "Delete entry" : "ลบบันทึกนี้"}
                           aria-label={isEn ? "Delete entry" : "ลบบันทึกนี้"}
                         >
@@ -510,7 +510,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "ACCURATE")}
-                          className={`px-2.5 py-0.5 rounded-full transition cursor-pointer ${
+                          className={`tap-overlay-y px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "ACCURATE"
                               ? "bg-ok text-white font-bold"
                               : "bg-[#EBF3ED] text-ok border border-line"
@@ -522,7 +522,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "PARTIAL")}
-                          className={`px-2.5 py-0.5 rounded-full transition cursor-pointer ${
+                          className={`tap-overlay-y px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "PARTIAL"
                               ? "bg-gold text-white font-bold"
                               : "bg-inset text-gold border border-line"
@@ -534,7 +534,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "PENDING")}
-                          className={`px-2.5 py-0.5 rounded-full transition cursor-pointer ${
+                          className={`tap-overlay-y px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "PENDING"
                               ? "bg-ink text-canvas font-bold"
                               : "bg-surface text-muted border border-line"
@@ -546,7 +546,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         <button
                           type="button"
                           onClick={(e) => handleSetOutcome(e, item.id, "NOT_HAPPENED")}
-                          className={`px-2.5 py-0.5 rounded-full transition cursor-pointer ${
+                          className={`tap-overlay-y px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "NOT_HAPPENED"
                               ? "bg-err text-white font-bold"
                               : "bg-err-wash text-err border border-line"
@@ -606,14 +606,14 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           <button
                             type="button"
                             onClick={() => setEditingNoteId(null)}
-                            className="px-3 py-1 rounded-full text-muted hover:text-ink cursor-pointer font-serif-th"
+                            className="tap-overlay-y px-3 py-1 rounded-full text-muted hover:text-ink cursor-pointer font-serif-th"
                           >
                             {isEn ? "Cancel" : "ยกเลิก"}
                           </button>
                           <button
                             type="button"
                             onClick={(e) => handleSaveNote(e, item.id, item.outcome)}
-                            className="px-4 py-1 rounded-full bg-ink hover:bg-gold text-canvas font-bold font-serif-th cursor-pointer shadow-xs"
+                            className="tap-overlay-y px-4 py-1 rounded-full bg-ink hover:bg-gold text-canvas font-bold font-serif-th cursor-pointer shadow-xs"
                           >
                             {isEn ? "Save Reflection" : "บันทึกโน้ต"}
                           </button>

@@ -236,7 +236,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                   nextTab?.focus();
                 }
               }}
-              className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+              className={`tap-overlay-y px-3.5 sm:px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
                 isActive
                   ? "bg-gold-ink text-surface border border-gold-ink"
                   : "bg-surface text-ink-deep hover:text-gold-ink border border-line-warm/50 hover:border-gold-ink hover:bg-surface-warm"
