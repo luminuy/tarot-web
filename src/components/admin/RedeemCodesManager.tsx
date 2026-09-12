@@ -20,6 +20,13 @@ function timestampToISO(ts: number | null): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date(ts));
 }
 
+/** วันหมดอายุเริ่มต้นของรหัสใหม่ — 30 วันนับจากวันนี้ (เวลาไทย) */
+function defaultExpiryISO(days = 30): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(
+    new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+  );
+}
+
 function isoToEndOfDayEpoch(iso: string): number {
   const [y, m, d] = iso.split("-").map(Number);
   // 23:59:59 +07:00 => 16:59:59 UTC
@@ -69,20 +76,18 @@ export default function RedeemCodesManager() {
   const [createTitle, setCreateTitle] = useState("");
   const [createCredits, setCreateCredits] = useState(3);
   const [createKind, setCreateKind] = useState<RedeemReasonKind>("premium");
-  const [createIsUnlimited, setCreateIsUnlimited] = useState(true);
+  // ⚠️ INC-0134: ไม่มีตัวเลือก "ไม่จำกัดคน" / "ไม่มีวันหมดอายุ" อีกต่อไป
+  // รหัสที่ดับไม่ได้คือรหัสที่หลุดแล้วแจกสิทธิ์ต่อไปเรื่อย ๆ — ทุกใบต้องมีเพดานและวันตาย
   const [createMaxUses, setCreateMaxUses] = useState(100);
-  const [createHasExpiry, setCreateHasExpiry] = useState(false);
-  const [createExpiryDate, setCreateExpiryDate] = useState(todayISO());
+  const [createExpiryDate, setCreateExpiryDate] = useState(defaultExpiryISO());
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
   // Edit Modal State
   const [editingCode, setEditingCode] = useState<RedeemCodeRow | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [editIsUnlimited, setEditIsUnlimited] = useState(true);
   const [editMaxUses, setEditMaxUses] = useState(100);
-  const [editHasExpiry, setEditHasExpiry] = useState(false);
-  const [editExpiryDate, setEditExpiryDate] = useState(todayISO());
+  const [editExpiryDate, setEditExpiryDate] = useState(defaultExpiryISO());
   const [editIsActive, setEditIsActive] = useState(true);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -134,10 +139,8 @@ export default function RedeemCodesManager() {
     setCreateTitle("");
     setCreateCredits(3);
     setCreateKind("premium");
-    setCreateIsUnlimited(true);
     setCreateMaxUses(100);
-    setCreateHasExpiry(false);
-    setCreateExpiryDate(todayISO());
+    setCreateExpiryDate(defaultExpiryISO());
     setCreateError(null);
     setIsCreateOpen(true);
   };
@@ -152,8 +155,8 @@ export default function RedeemCodesManager() {
       title: createTitle.trim(),
       credits: Number(createCredits),
       kind: createKind,
-      maxUses: createIsUnlimited ? -1 : Number(createMaxUses),
-      expiresAt: createHasExpiry ? isoToEndOfDayEpoch(createExpiryDate) : null,
+      maxUses: Number(createMaxUses),
+      expiresAt: isoToEndOfDayEpoch(createExpiryDate),
     };
 
     try {
@@ -181,10 +184,10 @@ export default function RedeemCodesManager() {
   const openEditModal = (c: RedeemCodeRow) => {
     setEditingCode(c);
     setEditTitle(c.title);
-    setEditIsUnlimited(c.maxUses === -1);
+    // แถวยุคเก่าอาจยังเป็น -1 หรือไม่มีวันหมดอายุ — เติมค่าที่ผ่านกติกาใหม่ให้ทันที
+    // แอดมินกดบันทึกครั้งเดียวก็เท่ากับรัดเพดานรหัสเก่าไปในตัว
     setEditMaxUses(c.maxUses === -1 ? 100 : c.maxUses);
-    setEditHasExpiry(c.expiresAt !== null);
-    setEditExpiryDate(c.expiresAt ? timestampToISO(c.expiresAt) : todayISO());
+    setEditExpiryDate(c.expiresAt ? timestampToISO(c.expiresAt) : defaultExpiryISO());
     setEditIsActive(c.isActive);
     setEditError(null);
   };
@@ -198,8 +201,8 @@ export default function RedeemCodesManager() {
     const payload = {
       code: editingCode.code,
       title: editTitle.trim(),
-      maxUses: editIsUnlimited ? -1 : Number(editMaxUses),
-      expiresAt: editHasExpiry ? isoToEndOfDayEpoch(editExpiryDate) : null,
+      maxUses: Number(editMaxUses),
+      expiresAt: isoToEndOfDayEpoch(editExpiryDate),
       isActive: editIsActive,
     };
 
@@ -792,61 +795,38 @@ export default function RedeemCodesManager() {
             </div>
           </div>
 
-          {/* Max Uses */}
+          {/* Max Uses — บังคับใส่เสมอ (INC-0134) */}
           <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-ink">เพดานจำนวนคนแลก</span>
-              <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={createIsUnlimited}
-                  onChange={(e) => setCreateIsUnlimited(e.target.checked)}
-                  className="rounded border-line"
-                />
-                ไม่จำกัดจำนวนคนแลก
-              </label>
-            </div>
-            {!createIsUnlimited && (
-              <Input
-                type="number"
-                min={1}
-                max={100000}
-                value={createMaxUses}
-                onChange={(e) => setCreateMaxUses(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                placeholder="ระบุจำนวนคนแลกสูงสุด"
-                className="text-xs"
-              />
-            )}
+            <span className="text-xs font-semibold text-ink">เพดานจำนวนคนแลก</span>
+            <Input
+              type="number"
+              required
+              min={1}
+              max={100000}
+              value={createMaxUses}
+              onChange={(e) => setCreateMaxUses(Math.max(1, parseInt(e.target.value, 10) || 1))}
+              placeholder="ระบุจำนวนคนแลกสูงสุด"
+              className="text-xs"
+            />
+            <p className="text-[11px] text-muted">
+              รหัสที่ไม่มีเพดานคือรหัสที่หลุดแล้วแจกสิทธิ์ต่อไปเรื่อย ๆ จึงต้องใส่ทุกใบ
+            </p>
           </div>
 
-          {/* Expiry Date */}
+          {/* Expiry Date — บังคับใส่เสมอ (INC-0134) */}
           <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</span>
-              <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={!createHasExpiry}
-                  onChange={(e) => setCreateHasExpiry(!e.target.checked)}
-                  className="rounded border-line"
-                />
-                ไม่มีวันหมดอายุ
-              </label>
-            </div>
-            {createHasExpiry && (
-              <div>
-                <input
-                  type="date"
-                  min={todayISO()}
-                  value={createExpiryDate}
-                  onChange={(e) => setCreateExpiryDate(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
-                />
-                <p className="mt-1 text-[11px] text-muted">
-                  จะหมดอายุ ณ เวลา 23:59:59 ของวันที่เลือกตามเวลาประเทศไทย
-                </p>
-              </div>
-            )}
+            <span className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</span>
+            <input
+              type="date"
+              required
+              min={todayISO()}
+              value={createExpiryDate}
+              onChange={(e) => setCreateExpiryDate(e.target.value)}
+              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
+            />
+            <p className="text-[11px] text-muted">
+              หมดอายุ ณ 23:59:59 ของวันที่เลือก (ค่าเริ่มต้น 30 วันนับจากวันนี้)
+            </p>
           </div>
 
           {/* Submit Buttons */}
@@ -911,54 +891,33 @@ export default function RedeemCodesManager() {
               )}
             </Field>
 
-            {/* Max Uses */}
+            {/* Max Uses — บังคับใส่เสมอ (INC-0134) */}
             <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-ink">เพดานจำนวนคนแลก</span>
-                <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={editIsUnlimited}
-                    onChange={(e) => setEditIsUnlimited(e.target.checked)}
-                    className="rounded border-line"
-                  />
-                  ไม่จำกัดจำนวนคนแลก
-                </label>
-              </div>
-              {!editIsUnlimited && (
-                <Input
-                  type="number"
-                  min={Math.max(1, editingCode.usedCount)}
-                  max={100000}
-                  value={editMaxUses}
-                  onChange={(e) => setEditMaxUses(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                  className="text-xs"
-                />
-              )}
+              <span className="text-xs font-semibold text-ink">เพดานจำนวนคนแลก</span>
+              <Input
+                type="number"
+                required
+                min={Math.max(1, editingCode.usedCount)}
+                max={100000}
+                value={editMaxUses}
+                onChange={(e) => setEditMaxUses(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                className="text-xs"
+              />
             </div>
 
-            {/* Expiry Date */}
+            {/* Expiry Date — บังคับใส่เสมอ (INC-0134) */}
             <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</span>
-                <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={!editHasExpiry}
-                    onChange={(e) => setEditHasExpiry(!e.target.checked)}
-                    className="rounded border-line"
-                  />
-                  ไม่มีวันหมดอายุ
-                </label>
-              </div>
-              {editHasExpiry && (
-                <input
-                  type="date"
-                  value={editExpiryDate}
-                  onChange={(e) => setEditExpiryDate(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
-                />
-              )}
+              <span className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</span>
+              <input
+                type="date"
+                required
+                value={editExpiryDate}
+                onChange={(e) => setEditExpiryDate(e.target.value)}
+                className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
+              />
+              <p className="text-[11px] text-muted">
+                รหัสเก่าที่ยังไม่มีวันหมดอายุ กดบันทึกครั้งเดียวก็ได้วันตายทันที
+              </p>
             </div>
 
             {/* Is Active */}

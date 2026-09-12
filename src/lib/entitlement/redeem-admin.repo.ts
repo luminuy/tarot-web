@@ -117,13 +117,20 @@ export async function createRedeemCode(input: CreateRedeemCodeInput): Promise<Re
     throw new Error("จำนวนสิทธิ์ต้องอยู่ระหว่าง 1 ถึง 100 ครั้ง");
   }
 
-  const maxUses = input.maxUses === undefined ? -1 : Math.floor(input.maxUses);
-  if (maxUses !== -1 && (maxUses < 1 || maxUses > 100000)) {
-    throw new Error("จำนวนครั้งที่ให้แลกต้องเป็น -1 (ไม่จำกัด) หรืออยู่ระหว่าง 1 ถึง 100,000");
+  // ⚠️ INC-0134: รหัสที่ "ไม่จำกัดจำนวนคนแลก" คือรหัสที่หลุดแล้วหลุดเลย
+  // ของเดิมสองใบที่ seed ไว้ในรีโปตั้ง max_uses = -1 ไว้ ใครอ่านซอร์สเจอก็แลกได้ทุกคน
+  // ชั้นนี้จึง **ไม่รับ -1 อีกต่อไป** — ทุกใบต้องมีเพดานและวันหมดอายุเสมอ
+  // (แถวเก่าที่ยังเป็น -1 อ่านได้ตามปกติ แค่สร้าง/แก้ให้เป็น -1 ไม่ได้แล้ว)
+  const maxUses = input.maxUses === undefined ? 0 : Math.floor(input.maxUses);
+  if (maxUses < 1 || maxUses > 100000) {
+    throw new Error("ต้องระบุเพดานจำนวนคนแลกระหว่าง 1 ถึง 100,000 (ไม่อนุญาตให้ไม่จำกัด)");
   }
 
   const reasonPrefix = input.kind === "premium" ? "purchase_redeem" : "promo_redeem";
-  const expiresAt = input.expiresAt ? Math.floor(input.expiresAt) : null;
+  const expiresAt = input.expiresAt ? Math.floor(input.expiresAt) : 0;
+  if (!expiresAt || expiresAt <= Date.now()) {
+    throw new Error("ต้องระบุวันหมดอายุที่เป็นอนาคต (ไม่อนุญาตให้ไม่มีวันหมดอายุ)");
+  }
   const now = Date.now();
 
   const db = await getAppDB();
@@ -194,15 +201,20 @@ export async function updateRedeemCode(
   let nextMaxUses = Number(current.max_uses);
   if (patch.maxUses !== undefined) {
     const mu = Math.floor(patch.maxUses);
-    if (mu !== -1 && (mu < 1 || mu > 100000)) {
-      throw new Error("จำนวนครั้งที่ให้แลกต้องเป็น -1 (ไม่จำกัด) หรืออยู่ระหว่าง 1 ถึง 100,000");
+    // ห้ามแก้ย้อนกลับไปเป็น "ไม่จำกัด" ด้วยเหตุผลเดียวกับตอนสร้าง (INC-0134)
+    if (mu < 1 || mu > 100000) {
+      throw new Error("เพดานจำนวนคนแลกต้องอยู่ระหว่าง 1 ถึง 100,000 (ไม่อนุญาตให้ไม่จำกัด)");
     }
     nextMaxUses = mu;
   }
 
   let nextExpiresAt = current.expires_at ? Number(current.expires_at) : null;
   if (patch.expiresAt !== undefined) {
-    nextExpiresAt = patch.expiresAt ? Math.floor(patch.expiresAt) : null;
+    const exp = patch.expiresAt ? Math.floor(patch.expiresAt) : 0;
+    if (!exp) {
+      throw new Error("ลบวันหมดอายุออกไม่ได้ — ระบุวันใหม่แทนถ้าต้องการยืดอายุรหัส");
+    }
+    nextExpiresAt = exp;
   }
 
   let nextIsActive = Boolean(current.is_active);
