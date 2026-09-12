@@ -44,9 +44,14 @@ import { useLocale } from "@/lib/i18n";
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
  *
- * ทุกตัวในรายการนี้ใช้ `motion` ข้างใน จึงห่อด้วย `withMotionScope()` ซึ่งพา
+ * ตัวที่ใช้ `motion` ข้างในจริงเท่านั้นที่ห่อด้วย `withMotionScope()` ซึ่งพา
  * `MotionConfig` (reducedMotion="user") ไปอยู่ใน chunk เดียวกันกับตัวมันเอง
  * แทนการครอบทั้งต้นไม้ด้วย `<AppMotionProvider>` เหมือนเดิม
+ *
+ * ⚠️ **ตัวที่ไม่ได้ใช้ `motion` ห้ามห่อเด็ดขาด** (INC-0137) — การห่อจะพ่วงไลบรารี 40 KB
+ *    (รวมสองก้อน 68.7 KB) ไว้ใน chunk เดียวกัน ผู้ใช้ที่กดเปิดจึงต้องรอโหลด+คอมไพล์
+ *    ของที่ไม่มีใครเรียกใช้ บนมือถือเห็นเป็น "แตะแล้วจอนิ่ง แล้วเด้งขึ้นมาแบบกระพริบ"
+ *    ด่านกฎ 13 ใน `scripts/qa/test-motion-quality.ts` ตรวจข้อนี้ให้อัตโนมัติแล้ว
  *
  * ⚠️ ห้าม `import` อะไรจาก `motion/react` ในไฟล์นี้เด็ดขาด แม้แต่ type
  *    ไฟล์นี้คือเปลือกของหน้าแรก บรรทัดเดียวก็ลากไลบรารี 40 KB เข้าบันเดิลตั้งต้นทันที
@@ -69,11 +74,18 @@ const TarotEncyclopediaModal = withMotionScope(() => import("@/components/encycl
 const loadAuthModal = () => import("@/components/auth/AuthModal").then((m) => m.AuthModal);
 const AuthModal = dynamic(loadAuthModal, { ssr: false });
 const CardZoomModal = withMotionScope(() => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal));
-const BuyCreditsModal = withMotionScope(() => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal));
-const AccessDialog = withMotionScope(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog));
+/**
+ * กำแพงสิทธิ์กับหน้าซื้อเครดิต — **ไม่ห่อด้วย `withMotionScope()`** โดยตั้งใจ (INC-0137)
+ * ทั้งสองบานไม่ได้ `import` อะไรจาก `motion/react` เลยสักบรรทัด (ใช้ `ui/Modal` ที่เป็น
+ * CSS keyframes ล้วนแล้ว) การห่อจึงเป็นการลาก `motion` 40 KB มาคาทางเปิดเปล่า ๆ
+ * ทั้งที่นี่คือปุ่มแรกที่ผู้ใช้ยังไม่สมัครสมาชิกกดต่อจากป๊อปอัพเลือกผัง
+ */
+const BuyCreditsModal = dynamic(() => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal), { ssr: false });
+const AccessDialog = dynamic(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog), { ssr: false });
 const PersonaCardSelector = withMotionScope(() => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector));
 const IntentionAltarInput = withMotionScope(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput));
-const ClarificationCard = withMotionScope(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard));
+/* ไพ่ไขข้อข้องใจ — ไม่ใช้ `motion` เลย จึงไม่ต้องห่อ `withMotionScope()` (INC-0137) */
+const ClarificationCard = dynamic(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard), { ssr: false });
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {

@@ -70,6 +70,9 @@
  *     -100% กล่องเลื่อนไปครึ่งตัวเอง และเพราะ fill-mode เป็น `both` มันค้างผิดที่ถาวร
  *     ให้คีย์เฟรมขยับแค่แกน Y / scale / opacity ปล่อยการจัดกลางเป็นหน้าที่ของคลาส
  *
+ * 13. `withMotionScope()` ต้องห่อเฉพาะคอมโพเนนต์ที่ใช้ `motion` จริง (INC-0137)
+ *     ห่อตัวที่ไม่ได้ใช้ = ลากไลบรารี 40 KB มาคาทางเปิด ผู้ใช้แตะแล้วต้องรอโหลดของที่ไม่มีใครเรียก
+ *
  * 🔒 หลักการ Ratchet: จุดละเมิดเก่าใส่ ALLOWLIST ได้ แต่ห้ามเพิ่มรายการใหม่
  *
  * รันด้วย: npx tsx scripts/qa/test-motion-quality.ts
@@ -549,6 +552,71 @@ function checkModalViewportUnit(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 13 — `withMotionScope()` ต้องห่อเฉพาะคอมโพเนนต์ที่ใช้ `motion` จริง (INC-0137)
+ *
+ * `withMotionScope()` มีหน้าที่เดียว: พา `MotionConfig` ไปอยู่ใน chunk เดียวกันกับ
+ * คอมโพเนนต์ที่ใช้ `motion` · ผลข้างเคียงคือมัน `import("motion/react")` ทุกครั้ง
+ * ถ้าห่อตัวที่ไม่ได้ใช้ `motion` เลย ผู้ใช้ที่กดเปิดจะต้องรอดาวน์โหลด + คอมไพล์
+ * ไลบรารี 40 KB gzip (รวมสองก้อน 68.7 KB) ให้จบก่อนเห็นอะไรสักพิกเซล
+ * บนมือถือที่ CPU ช้ากว่าเดสก์ท็อป 4–6 เท่า อาการคือ
+ * **"แตะแล้วจอนิ่งไปครู่หนึ่ง แล้วเด้งขึ้นมาแบบกระพริบ"**
+ *
+ * เกิดจริงแล้ว 2 รอบ: INC-0128 (หน้าต่างเข้าสู่ระบบ) และ INC-0137 (ป๊อปอัพเลือกผัง
+ * ที่ PR #442 ห่อทับ `ui/Modal` ซึ่งไม่ได้ใช้ `motion` แล้ว) — กฎเขียนไว้ในเอกสาร
+ * ทั้งสองรอบแต่ไม่มีเครื่องตรวจ จึงถูกละเมิดซ้ำ
+ *
+ * วิธีตรวจ: ไล่ทุกจุดที่เรียก `withMotionScope(() => import("@/…"))` แล้วเปิดไฟล์
+ * ปลายทาง · ถ้าตัวมันเองและ `@/` ที่มัน import มาโดยตรง (ลึกหนึ่งชั้น — พอสำหรับ
+ * หน้าต่างลอยที่ยืม `ui/Modal`) ไม่มีใคร import `motion/react` เลย = ห่อเปล่า
+ */
+function resolveLocalImport(spec: string): string | null {
+  if (!spec.startsWith("@/")) return null;
+  const base = path.join(SRC, spec.slice(2));
+  for (const ext of [".tsx", ".ts", "/index.tsx", "/index.ts"]) {
+    if (fs.existsSync(base + ext)) return base + ext;
+  }
+  return null;
+}
+
+function usesMotion(file: string, depth: number): boolean {
+  if (!fs.existsSync(file)) return false;
+  const text = fs.readFileSync(file, "utf-8");
+  if (/from\s+"motion\/react"/.test(text)) return true;
+  if (depth <= 0) return false;
+  for (const m of text.matchAll(/from\s+"(@\/[^"]+)"/g)) {
+    const resolved = resolveLocalImport(m[1]);
+    if (resolved && usesMotion(resolved, depth - 1)) return true;
+  }
+  return false;
+}
+
+function checkPointlessMotionScope(violations: Violation[]): void {
+  for (const file of walk(SRC, [".tsx"])) {
+    const text = fs.readFileSync(file, "utf-8");
+    if (!text.includes("withMotionScope(")) continue;
+    const r = rel(file);
+    const lines = text.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (isCommentLine(line)) continue;
+      const m = /withMotionScope\(\s*(?:\(\)\s*=>\s*)?import\("(@\/[^"]+)"\)/.exec(line);
+      if (!m) continue;
+      const target = resolveLocalImport(m[1]);
+      if (!target) continue;
+      if (usesMotion(target, 1)) continue;
+      if (isAllowed(r, m[1])) continue;
+      violations.push({
+        rule: "13 · withMotionScope() ห่อคอมโพเนนต์ที่ไม่ได้ใช้ motion (INC-0137)",
+        file: r,
+        line: i + 1,
+        code: line.trim().slice(0, 160),
+        hint: `"${m[1]}" ไม่ได้ import อะไรจาก motion/react เลย — การห่อลากไลบรารี 40 KB มาคาทางเปิดเปล่า ๆ · ใช้ dynamic(..., { ssr: false }) ธรรมดาแทน`,
+      });
+    }
+  }
+}
+
 function run(): void {
   console.log("🔍 ตรวจคุณภาพโมชั่นทั้งเว็บ (Motion Quality Guard)...\n");
 
@@ -559,6 +627,7 @@ function run(): void {
   checkPhantomAnimateClasses(violations);
   checkModalScale(violations);
   checkModalViewportUnit(violations);
+  checkPointlessMotionScope(violations);
   checkUnregisteredTransformVars(violations);
   checkCss(violations);
   checkKeyframeCenteringConflict(violations);
@@ -579,7 +648,7 @@ function run(): void {
   }
 
   console.log(
-    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · แผงหน้าต่างลอยไม่อนิเมต scale และใช้ svh · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
+    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · แผงหน้าต่างลอยไม่อนิเมต scale และใช้ svh · ไม่มี withMotionScope() ห่อของที่ไม่ได้ใช้ motion · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
   );
   process.exit(0);
 }
