@@ -1211,7 +1211,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     }
   };
 
-  // overflow-x-clip (ไม่ใช่ overflow-hidden) — overflow-hidden ทำให้ <main> กลายเป็น scroll
+  // overflow-x-clip (ไม่ใช่ overflow-hidden) — overflow-hidden ทำให้ <main id="main-content" tabIndex={-1}> กลายเป็น scroll
   // container ทำให้ position: sticky ของ <header> ข้างในพัง หัวเว็บเลื่อนหลุดตามหน้า พอเปิดเมนู
   // dropdown แล้วเลื่อน แผงที่ composite อยู่ (เงา + ไล่สี) ถูกวาดใหม่ทุกเฟรม → กระพริบ
   // overflow-x: clip กันล้นแนวนอนได้เหมือนเดิมแต่ไม่สร้าง scroll container จึง sticky ทำงานปกติ
@@ -1230,9 +1230,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const cardZoomModalMounted = useOnceOpen(!!zoomedCard);
 
   /*
-   * ⚠️ `<SiteHeader>` และ `<SiteFooter>` ต้องอยู่ **นอก** `<main>` เสมอ (INC-0130)
+   * ⚠️ `<SiteHeader>` และ `<SiteFooter>` ต้องอยู่ **นอก** `<main id="main-content" tabIndex={-1}>` เสมอ (INC-0130)
    *
-   * ตามสเปก HTML-AAM: `<header>` ที่เป็นลูกหลานของ `<main>` **ไม่ได้ role `banner`**
+   * ตามสเปก HTML-AAM: `<header>` ที่เป็นลูกหลานของ `<main id="main-content" tabIndex={-1}>` **ไม่ได้ role `banner`**
    * และ `<footer>` ก็ **ไม่ได้ role `contentinfo`** · ของเดิมครอบไว้ข้างในทั้งคู่
    * หน้าแรกจึงเหลือ landmark แค่ `main` อันเดียว — ผู้ใช้ screen reader กระโดดไปเมนู
    * หรือท้ายเว็บไม่ได้เลยบนหน้าที่สำคัญที่สุดของเว็บ (ยืนยันจาก accessibility tree ของ production)
@@ -1278,7 +1278,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         }
       />
 
-      <main className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 

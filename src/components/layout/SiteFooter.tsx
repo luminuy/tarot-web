@@ -78,10 +78,22 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           </div>
         </div>
 
-        {/* 4-Column Internal Links Grid */}
+        {/*
+          🧭 แต่ละคอลัมน์ต้องเป็น <nav> ของตัวเอง (UX-05)
+          ---------------------------------------------------------------------
+          ลิงก์ภายในท้ายเว็บคือทางเดินต่อของผู้ใช้ที่มาจากผลค้นหา แต่เดิมเป็น <div>
+          เปล่า ๆ ผู้ใช้ screen reader จึงกระโดดมาที่นี่ด้วยคำสั่ง navigation ไม่ได้
+
+          ⚠️ ต้องตั้งชื่อ `aria-label` ให้ **ไม่ซ้ำกัน** ทุกอัน — landmark ชื่อซ้ำกันหลายอัน
+          ในหน้าเดียวทำให้รายการ landmark ของ screen reader อ่านแล้วแยกไม่ออกว่าอันไหนคืออันไหน
+          ใช้ `col.title` ซึ่งเป็นหัวข้อคอลัมน์ที่ไม่ซ้ำกันอยู่แล้วเป็นชื่อ
+
+          ⚠️ คอลัมน์สุดท้ายเป็น "สายด่วน/คำเตือน" ที่บางรายการไม่มีลิงก์เลย
+          ถึงอย่างนั้นก็ยังควรเป็น nav เพราะรายการที่มีลิงก์ปนอยู่ด้วย
+        */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {footerColumns.map((col, idx) => (
-            <div key={idx} className="space-y-3">
+            <nav key={idx} aria-label={col.title} className="space-y-3">
               <h3 className="font-serif-th font-bold text-sm text-[#FAF7F2] tracking-wider uppercase border-b border-[#D5CEC2]/20 pb-2">
                 {col.title}
               </h3>
@@ -121,7 +133,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                   })}
                 </ul>
               ) : null}
-            </div>
+            </nav>
           ))}
         </div>
 

@@ -230,7 +230,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       <button
         type="button"
         onClick={toggleDropdown}
-        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border transition-colors duration-150 cursor-pointer select-none shadow-xs ${
+        className={`tap-overlay w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border transition-colors duration-150 cursor-pointer select-none shadow-xs ${
           isOpen
             ? "bg-[#EAE7E0] border-[#D5CEC2] text-[#29261F]"
             : "bg-[#FFFFFF] text-[#29261F] hover:text-[#A58A5C] border-[#D5CEC2] hover:border-[#A58A5C]"
@@ -257,9 +257,14 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       </button>
 
       {/* World-Class Warm Milk Cream Floating Sanctuary Menu — Hardware-Accelerated Zero-Stutter Layer */}
-      <div
+      {/*
+        🧭 ต้องเป็น <nav> ไม่ใช่ <div role="region"> (UX-05)
+        แผงนี้คือเมนูหลักของทั้งเว็บ แต่เดิมประกาศเป็น region ทำให้ผู้ใช้ screen reader
+        กระโดดมาที่เมนูด้วยคำสั่ง "ไปยัง navigation" ไม่ได้เลยสักหน้า
+        วัดจริงบน production แล้วพบว่าหน้า / · /cards · /blog · /cards/[id] มี <nav> = 0 อัน
+      */}
+      <nav
         id="sacred-nav-panel"
-        role="region"
         aria-label={isEnglish ? "Sanctuary navigation menu" : "เมนูวิหารพยากรณ์"}
         aria-hidden={!isOpen}
         className={`absolute right-0 top-full mt-2 w-72 sm:w-84 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-2.5 sm:p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100svh-4.5rem)] space-y-1 no-scrollbar dropdown-panel-base ${
@@ -351,7 +356,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             </button>
           </div>
         )}
-      </div>
+      </nav>
     </div>
   );
 };

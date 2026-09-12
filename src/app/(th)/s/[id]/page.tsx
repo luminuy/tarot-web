@@ -78,7 +78,7 @@ export default async function SharePage({ params }: Props) {
   const valid = ID_RE.test(id);
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-[#F3F0EA] px-6 text-center text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-[#F3F0EA] px-6 text-center text-[#29261F]">
       <meta httpEquiv="refresh" content="1; url=/" />
       {valid && (
         // eslint-disable-next-line @next/next/no-img-element
