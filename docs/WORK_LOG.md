@@ -36,14 +36,34 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
-### 🗓️ 2026-09-12 (รอบ 51): 🧪 สคริปต์ทดสอบโมเดลฟรีของ OpenRouter ก่อนพิจารณาเพิ่มเป็น provider ที่ 3
+### 🗓️ 2026-09-12 (รอบ 51): 🧪 ทดสอบโมเดลฟรีของ OpenRouter จริง — เจอแค่ 1/6 ผ่านคำอ่านไพ่เต็มรูปแบบ
 
-> เจ้าของถามว่าเพิ่ม AI จาก openrouter.ai ได้ไหม — ตอบได้ (OpenAI-compatible API เหมือน Groq) แต่ยังไม่ต่อเข้าโค้ด production เพราะยังไม่มีการวัดจริงว่าโมเดลฟรีตัวไหนใช้ได้ (บทเรียน INC-0053: ห้ามเดา)
+> เจ้าของถามว่าเพิ่ม AI จาก openrouter.ai ได้ไหม — ตอบได้ (OpenAI-compatible API เหมือน Groq) แต่ยังไม่ต่อเข้าโค้ด production เพราะยังไม่มีการวัดจริงว่าโมเดลฟรีตัวไหนใช้ได้ (บทเรียน INC-0053: ห้ามเดา) เจ้าของให้คีย์ทดสอบจริงมา (`seertarot`) จึงยิงทดสอบครบ 3 ชั้น
 
-- เพิ่ม `scripts/qa/probe-openrouter.ts` (`npm run ai:probe-openrouter`): ดึงลิสต์โมเดลฟรีจริงจาก `GET /api/v1/models` (`pricing.prompt === "0"`) แทนการ hardcode ชื่อโมเดล เพราะ OpenRouter เพิ่ม/ถอดโมเดลฟรีบ่อย แล้วยิงคำถามไทยทดสอบทีละตัว วัด latency + เช็กอักษรต่างด้าวหลุดด้วย `hasForeignScript()`
-- ดึงลิสต์จริงวันนี้พบ **22 ตัวฟรี** จาก 445 ตัว (`google/gemma-4-31b-it:free`, `nvidia/nemotron-3-super-120b-a12b:free` ฯลฯ) — ส่วนใหญ่เป็นค่ายเล็ก/ทดลองไม่มีประวัติ
-- รันด้วยมือเท่านั้น ต้องมี `OPENROUTER_API_KEY` ของนักพัฒนาเอง (session นี้ไม่มีคีย์ให้ยิงทดสอบจริง) — **ไม่ผูกเข้า CI / repo:verify** เหมือน `ai:judge`
-- **ค้างไว้**: ยังไม่มีคีย์ทดสอบจริง จึงยังไม่รู้ว่าโมเดลฟรีตัวไหนผ่านเกณฑ์ภาษาไทย/ความเร็ว ➔ รอผู้มีคีย์รันสคริปต์นี้แล้วรายงานผล ก่อนจะตัดสินใจต่อเข้าเป็น Tier 3 ใน failover chain (`groq.ts` → `gemini.ts` → OpenRouter?)
+#### ชั้น 1 — `scripts/qa/probe-openrouter.ts` (`npm run ai:probe-openrouter`)
+
+ดึงลิสต์โมเดลฟรีจริงจาก `GET /api/v1/models` (`pricing.prompt === "0"`) แทนการ hardcode ชื่อโมเดล แล้วยิงคำถามไทยสั้น 1 ครั้ง/ตัว วันนี้พบ **22 ตัวฟรี** จาก 445 ตัว — รอบแรกผ่านแค่ 1/20 เพราะบัญชี OpenRouter เปิด **Zero Data Retention (ZDR)** ไว้ที่ `openrouter.ai/settings/privacy` (สวิตช์ "All other models") กรอง endpoint ฟรีเกือบทั้งหมดทิ้งไปเงียบ ๆ — ปิดสวิตช์นั้นแล้วผ่านเพิ่มเป็น 9/20 แต่ 3 ตัวเป็น false positive: `nvidia/nemotron-3.5-lightning:free` ตอบอังกฤษทั้งที่สั่งไทย (regex `hasForeignScript()` จับ CJK/อาหรับ/ฯลฯ ไม่จับละติน), `nvidia/nemotron-3.5-content-safety:free` เป็นโมเดลตรวจเนื้อหาอันตราย ไม่ใช่แชท, `openrouter/free` เป็น auto-router สลับโมเดลใต้ไม่คงที่ ตัดทิ้งทั้ง 3
+
+#### ชั้น 2 — `scripts/qa/probe-openrouter-deep.ts` ทดสอบ 6 ผู้รอดรอบแรกด้วยคำอ่านไพ่เต็มรูปแบบจริง
+
+ยิงคำถามสั้น x3 (เช็ก `englishLeakRatio` เพิ่มจาก `hasForeignScript()`) + คำอ่านไพ่เต็มรูปแบบ x1 ด้วย `buildSystemPrompt`/`buildReadingMessage` จริง (golden case เดียวกับ `ai:judge`) ผ่าน `ReadingSchema` → `checkReadingConsistency()` → `enforceThaiQuality()` — **ผลลัพธ์: ผ่านคำอ่านไพ่เต็มรูปแบบแค่ 1/6**
+
+| โมเดล | คำถามสั้น x3 | คำอ่านไพ่เต็มรูปแบบ |
+|---|---|---|
+| `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` | 2/3 (1 ครั้งว่างเปล่า) | ✅ consistency=true · thaiScore=95 · englishLeak=8% · 677ms |
+| `cohere/north-mini-code:free` | 3/3 | ❌ 200 แต่ไม่มีข้อความตอบกลับ |
+| `nex-agi/nex-n2.5-pro:free` | 3/3 | ❌ 200 แต่ไม่มีข้อความตอบกลับ |
+| `nex-agi/nex-n2.5-mini:free` | 3/3 | ❌ 200 แต่ไม่มีข้อความตอบกลับ |
+| `inclusionai/ling-3.0-flash-vl:free` | 3/3 | ❌ HTTP 400 — ไม่รองรับ `response_format: json_object` (`"does not support feature: structured-outputs"`) |
+| `nvidia/nemotron-3-super-120b-a12b:free` | 3/3 | ❌ JSON.parse ล้มเหลว |
+
+**บทเรียนสำคัญ**: คำถามสั้นผ่าน ≠ ใช้งานจริงได้ — พอเจอ prompt ยาวขึ้น + บังคับ JSON mode (เงื่อนไขจริงของ production) โมเดลส่วนใหญ่ล้มทันที (ตอบว่างเปล่า / ไม่รองรับ structured output / JSON พัง) ต้องทดสอบด้วยเงื่อนไขจริงเสมอ ไม่ใช่แค่คำถามเดโม
+
+รายงานเต็มอยู่ที่ `scripts/qa/reports/openrouter-deep-probe-1789200239545.json`
+
+#### สถานะ / ค้างไว้
+
+`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` เป็นผู้สมัครเดียวที่รอด แต่ตัวอย่างยังมีแค่ 1 ครั้ง (short probe ก็เจอ empty response 1/3 ครั้งแล้ว) — **ยังไม่ล็อกเข้า production** ต้องยิงคำอ่านไพ่เต็มรูปแบบซ้ำอีกอย่างน้อย 3 รอบ (มาตรฐานเดียวกับที่ล็อก `WORKING_GEMINI_MODELS`) ก่อนพิจารณาต่อเข้าเป็น Tier 3 ใน failover chain (`groq.ts` → `gemini.ts` → OpenRouter?) — โมเดลนี้เป็นค่ายเล็กไม่มีประวัติเหมือนที่เตือนไว้รอบก่อน ต้องระวังเรื่องความเสถียรระยะยาวด้วย
 
 ---
 

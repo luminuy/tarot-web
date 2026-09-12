@@ -1,0 +1,261 @@
+{
+  "generatedAt": "2026-09-12T07:56:49.835Z",
+  "goldenCase": "gold-001",
+  "models": {
+    "cohere/north-mini-code:free": {
+      "short": {
+        "runs": [
+          {
+            "ok": true,
+            "content": "The Fool แสดงถึงจุดเริ่มต้นใหม่ การเริ่มต้นอย่างกล้าหาญ และการเดินทางที่เต็มไปด้วยความเป็นไปได้ โดยมีทั้งความสดใส ความไว้วางใจที่ไร้เดียงสา และการเสี่ยงทายอย่างกล้าหาญในสิ่งที่ไม่รู้จัก",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 275,
+            "englishLeakRatio": 0.03932584269662921,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "The Fool แสดงถึงการเริ่มต้นใหม่ การผจญภัย และความพร้อมที่จะกระโดดสู่สิ่งที่ไม่รู้จักโดยมีความเสี่ยงต่ำหรือไม่มีความเสี่ยงใดๆ",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 182,
+            "englishLeakRatio": 0.058333333333333334,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "The Fool แสดงถึงจุดเริ่มต้นใหม่ การผจญภัย และการเชื่อในสัญชาตญาณของตน ถือเป็นการเริ่มต้นอย่างบริสุทธิ์และพร้อมรับความเสี่ยงใด ๆ ก็ตาม",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 178,
+            "englishLeakRatio": 0.05555555555555555,
+            "hasForeignScript": false
+          }
+        ],
+        "passCount": 3,
+        "avgElapsedMs": 212
+      },
+      "full": {
+        "ok": false,
+        "stage": "http",
+        "error": "200 แต่ไม่มีข้อความตอบกลับ",
+        "elapsedMs": 260
+      }
+    },
+    "nex-agi/nex-n2.5-pro:free": {
+      "short": {
+        "runs": [
+          {
+            "ok": true,
+            "content": "ไพ่เดอะฟูลสื่อถึงการเริ่มต้นใหม่ ความบริสุทธิ์ การผจภัย และกล้าก้าวไปข้างหน้าด้วยศรัทธา  \nแต่ก็เตือนให้ระวังความประมาทหรือการตัดสินใจโดยไม่คิดให้ดีพอ",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 1652,
+            "englishLeakRatio": 0,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "ไพ่ทาโรต์ The Fool สื่อถึงการเริ่มต้นใหม่ ความกล้า เสรีภาพ และการเดินหน้าด้วยใจเปิดกว้างโดยไม่กลัวความไม่แน่นอน  \nแต่ก็เตือนให้ระวังความประมาทหรือการตัดสินใจโดยไม่ไตร่ตรองให้ดี",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 496,
+            "englishLeakRatio": 0.041916167664670656,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "The Fool สื่อถึงการเริ่มต้นใหม่ ความกล้า เสรีภาพ และการเดินหน้าอย่างไร้เดียงสา เชื่อมั่นในเส้นทางของตน  \nแต่ก็เตือนให้ระวังความผลีผลาม ไม่คิดแผน และไม่เห็นอันตรายข้างหน้าครับ",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 2108,
+            "englishLeakRatio": 0.04294478527607362,
+            "hasForeignScript": false
+          }
+        ],
+        "passCount": 3,
+        "avgElapsedMs": 1419
+      },
+      "full": {
+        "ok": false,
+        "stage": "http",
+        "error": "200 แต่ไม่มีข้อความตอบกลับ",
+        "elapsedMs": 1319
+      }
+    },
+    "nex-agi/nex-n2.5-mini:free": {
+      "short": {
+        "runs": [
+          {
+            "ok": true,
+            "content": "The Fool สื่อถึง การเริ่มต้นใหม่ ความกล้าหาญ การไร้เดียงสา และการอยู่ในช่วงทางที่ยังไม่รู้สิ่งต่อไปเป็นอะไร แต่เป็นโอกาสให้เรียนรู้และเติบโต | เชิงบวกคือความผาดุ้มใจและเริ่มต้นด้วยใจฟรี เชิงลบคือการส่อเสียงเริ่มต้นโดยไม่มีแผนหรือตัดสินใจง่ายเกินไป",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 616,
+            "englishLeakRatio": 0.029661016949152543,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "ไพ่ทาโรต์ The Fool สื่อถึง การเริ่มต้นใหม่ ความกล้าเสี่ยง และความอิสระ โดยมักบอกให้เปิดใจเรียนรู้สิ่งแปลกใหม่  \nแต่ควรระวังเรื่องขาดการวางแผนและตัดสินใจตามอารมณ์มากเกินไป",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 380,
+            "englishLeakRatio": 0.04375,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "The Fool สื่อถึงการเริ่มต้นใหม่ การกล้าผจญภัย และวางใจในเส้นทางชีวิตแบบอิสระ โดยอาจเตือนให้ใจบางแต่ไม่วิ่งหนือการไตร่ตรอง",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 376,
+            "englishLeakRatio": 0.0603448275862069,
+            "hasForeignScript": false
+          }
+        ],
+        "passCount": 3,
+        "avgElapsedMs": 457
+      },
+      "full": {
+        "ok": false,
+        "stage": "http",
+        "error": "200 แต่ไม่มีข้อความตอบกลับ",
+        "elapsedMs": 770
+      }
+    },
+    "inclusionai/ling-3.0-flash-vl:free": {
+      "short": {
+        "runs": [
+          {
+            "ok": true,
+            "content": "ไพ่ทาโรต์ The Fool สื่อถึงการเริ่มต้นใหม่ ความบริสุทธิ์ใจ และความกล้าที่จะก้าวเข้าสู่สิ่งไม่รู้ด้วยความมั่นใจและมองโลกในแง่ดี",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 538,
+            "englishLeakRatio": 0.058333333333333334,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "ไพ่ทาโรต์ The Fool สื่อถึงการเริ่มต้นใหม่ ความบริสุทธิ์ และการก้าวเข้าสู่สิ่งที่ไม่รู้จักด้วยความกล้าหาญ บ่งบอกถึงศักยภาพอันไร้ขีดจำกัดและจิตวิญญาณที่เป็นอิสระ.",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 513,
+            "englishLeakRatio": 0.0457516339869281,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "ไพ่ทาโรต์ The Fool สื่อถึงการเริ่มต้นใหม่ ความบริสุทธิ์ และความกล้าหาญก้าวเข้าสู่สิ่งที่ไม่รู้จักด้วยความมั่นใจและมองโลกในแง่ดี",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 949,
+            "englishLeakRatio": 0.05737704918032787,
+            "hasForeignScript": false
+          }
+        ],
+        "passCount": 3,
+        "avgElapsedMs": 667
+      },
+      "full": {
+        "ok": false,
+        "stage": "http",
+        "error": "{\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\\"code\\\":400, \\\"reason\\\":\\\"INVALID_REQUEST_BODY\\\", \\\"message\\\":\\\"model: inclusionai/ling-3.0-flash-vl does not support feature: structured-outputs\\\", \\\"metadata\\\":{}}\",\"provider_name\":\"Novita\",\"is_byok\":false}},\"user_id\":\"u",
+        "elapsedMs": 131
+      }
+    },
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {
+      "short": {
+        "runs": [
+          {
+            "ok": false,
+            "content": "",
+            "status": 200,
+            "error": "200 แต่ไม่มีข้อความตอบกลับ",
+            "elapsedMs": 290,
+            "englishLeakRatio": 0,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "เดอะโฟล์ สื่อถึงการเริ่มต้นใหม่ ความกล้าหาญและความบริสุทธิ์ของผู้ที่พร้อมจะก้าวเข้าสู่เส้นทางที่ยังไม่รู้ผลลัพธ์. มันเป็นการเตือนให้เปิดรับโอกาสและเชื่อมั่นในสัญชาตินั้น.",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 235,
+            "englishLeakRatio": 0,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "The Fool แสดงถึงการเริ่มต้นใหม่ ความตื่นเต้นและความไม่แน่นอนของชีวิต  \nมันเตือนให้เปิดรับโอกาสและรักษาความเชื่อในตัวเอง",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 244,
+            "englishLeakRatio": 0.061946902654867256,
+            "hasForeignScript": false
+          }
+        ],
+        "passCount": 2,
+        "avgElapsedMs": 240
+      },
+      "full": {
+        "ok": true,
+        "stage": "done",
+        "elapsedMs": 677,
+        "consistencyOk": true,
+        "consistencyFatal": false,
+        "consistencyIssues": [],
+        "thaiScore": 95,
+        "thaiIssueCodes": [
+          "REPETITIVE_NGRAM"
+        ],
+        "englishLeakRatio": 0.08,
+        "openingPreview": "เมื่อพิจารณาไพ่ทั้งสามใบ แม่หมอมองเห็นสายสัมพันธ์ที่มีจุดเริ่มต้นงดงาม แต่กำลังอ"
+      }
+    },
+    "nvidia/nemotron-3-super-120b-a12b:free": {
+      "short": {
+        "runs": [
+          {
+            "ok": true,
+            "content": "ไพ่ The Fool หมายถึงการเริ่มต้นใหม่ ความบริสุทธิ์ใจ และการกล้าเสี่ยงโดยไม่กลัวผลลัพธ์.",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 285,
+            "englishLeakRatio": 0.0875,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "ไพ่ทาโรต์ The Fool สื่อถึงการเริ่มต้นใหม่ ความบริสุทธิ์ และความกล้าที่จะก้าวออกไปโดยไม่กลัวความเสี่ยง. มันย",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 221,
+            "englishLeakRatio": 0.07,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "ไพ่ทาโรต์ The Fool หมายถึงการเริ่มต้นใหม่ ความบริสุ",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 236,
+            "englishLeakRatio": 0.14893617021276595,
+            "hasForeignScript": false
+          }
+        ],
+        "passCount": 3,
+        "avgElapsedMs": 247
+      },
+      "full": {
+        "ok": false,
+        "stage": "json_parse",
+        "error": "JSON.parse ล้มเหลว",
+        "elapsedMs": 441,
+        "raw": "We need to output JSON with required fields. Need to ensure Thai only, no foreign characters. Provide opening, cards for positions 0,1,2, connections, summary, advice (3 items), timing, mood.\n\nWe must follow the tone: warm, empathetic, like a kind tarot reader.\n\nWe must incorporate the details from "
+      }
+    }
+  }
+}
