@@ -1,4 +1,7 @@
-import { checkQuestion } from "../../src/lib/safety/guardrails";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+
+import { CRISIS_MESSAGE, CRISIS_MESSAGE_EN, checkQuestion, getCrisisHotlines } from "../../src/lib/safety/guardrails";
 import { mayNeedDeepCrisisCheck } from "../../src/lib/safety/ai-classifier";
 
 /**
@@ -84,5 +87,91 @@ for (const c of deepCases) {
   }
 }
 
-console.log(`\nรวม ${pass}/${cases.length + deepCases.length} ผ่าน`);
+// ── ชั้นสุดท้าย: ข้อความสายด่วน "ถึงตาผู้ใช้จริง" ──────────────────────────────
+// บทเรียนของจริง: ด่านคัดกรองทำงานถูกต้องทุกชั้น บันทึกธง crisis ขึ้นแผงแอดมินด้วย
+// แต่ฝั่งไคลเอนต์เช็กแค่ `if (!res.ok)` ส่วน `/api/reading/start` คืน **200** พร้อม
+// `{ blocked: true, message }` ข้อความสายด่วนจึงถูกทิ้งเงียบทุกครั้ง
+// และผู้ใช้ที่ส่งสัญญาณวิกฤตถูกพาไปหน้าสับไพ่ที่ไม่มีเซสชันแทนที่จะเห็นเบอร์ 1323
+// ด่านนี้จึงตรวจ "ปลายทาง" ไม่ใช่แค่ตัวคัดกรอง
+console.log("\n── ปลายทาง: ทุกจุดที่เรียก /api/reading/start ต้องรองรับ blocked ──");
+
+let uiPass = 0;
+let uiTotal = 0;
+
+function walk(dir: string): string[] {
+  const out: string[] = [];
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) out.push(...walk(full));
+    else if (/\.(ts|tsx)$/.test(name)) out.push(full);
+  }
+  return out;
+}
+
+function assertUi(label: string, ok: boolean, detail = "") {
+  uiTotal++;
+  if (ok) {
+    uiPass++;
+    console.log(`✅ ${label}`);
+  } else {
+    fail++;
+    console.log(`❌ ${label}${detail ? ` — ${detail}` : ""}`);
+  }
+}
+
+/** นับเฉพาะการ "ยิง fetch จริง" ไม่นับที่อยู่ในคอมเมนต์หรือข้อความ */
+const startCalls = (src: string) => src.match(/fetch\(\s*["'`]\/api\/reading\/start/g) || [];
+
+const callers = walk("src").filter(
+  (f) => !f.includes(`src${"/"}app${"/"}api${"/"}`) && startCalls(readFileSync(f, "utf-8")).length > 0,
+);
+
+assertUi("พบไฟล์ฝั่งผู้ใช้ที่เรียก /api/reading/start", callers.length > 0, "ไม่พบเลย — ตรวจ path หรือชื่อ endpoint");
+
+for (const file of callers) {
+  const src = readFileSync(file, "utf-8");
+  // นับจำนวนครั้งที่เรียก endpoint แล้วเทียบกับจำนวนจุดที่เช็ก blocked
+  const callCount = startCalls(src).length;
+  const guardCount = (src.match(/\.blocked\b/g) || []).filter(Boolean).length;
+  assertUi(
+    `${file} — เช็ก blocked ครบทุกจุดที่เรียก start (${callCount} จุด)`,
+    guardCount >= callCount,
+    `เจอจุดเช็ก .blocked เพียง ${guardCount} ครั้ง`,
+  );
+}
+
+// หน้าต่างสายด่วนต้องมีอยู่จริงและมีปุ่มโทรออกได้
+const crisisNotice = "src/components/safety/CrisisNotice.tsx";
+const noticeSrc = (() => {
+  try {
+    return readFileSync(crisisNotice, "utf-8");
+  } catch {
+    return "";
+  }
+})();
+assertUi(`มีหน้าต่างแสดงข้อความวิกฤต (${crisisNotice})`, noticeSrc.length > 0);
+assertUi("หน้าต่างวิกฤตมีปุ่มโทรออก (tel:)", noticeSrc.includes("tel:"));
+assertUi(
+  "TarotFlow เรียกใช้หน้าต่างวิกฤตจริง",
+  readFileSync("src/components/home/TarotFlow.tsx", "utf-8").includes("CrisisNotice"),
+);
+
+// เบอร์สายด่วนบนปุ่มต้องตรงกับเบอร์ในข้อความ — กันวันที่แก้ที่เดียวแล้วอีกที่ค้างเบอร์เก่า
+for (const [lang, message] of [
+  ["th", CRISIS_MESSAGE],
+  ["en", CRISIS_MESSAGE_EN],
+] as const) {
+  const digitsOnly = message.replace(/[^0-9]/g, "");
+  for (const line of getCrisisHotlines(lang)) {
+    // ยอมให้ข้อความเขียนเบอร์โดยไม่มีรหัสประเทศนำหน้า (1-866-... ↔ 866-...)
+    const forms = [line.tel, line.tel.replace(/^1/, "")];
+    assertUi(
+      `[${lang}] เบอร์ ${line.tel} (${line.label}) ปรากฏในข้อความวิกฤตด้วย`,
+      forms.some((n) => digitsOnly.includes(n)),
+      "เบอร์บนปุ่มกับในข้อความไม่ตรงกัน",
+    );
+  }
+}
+
+console.log(`\nรวม ${pass + uiPass}/${cases.length + deepCases.length + uiTotal} ผ่าน`);
 if (fail > 0) process.exit(1);
