@@ -36,6 +36,17 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-12 (รอบ 51): 🧪 สคริปต์ทดสอบโมเดลฟรีของ OpenRouter ก่อนพิจารณาเพิ่มเป็น provider ที่ 3
+
+> เจ้าของถามว่าเพิ่ม AI จาก openrouter.ai ได้ไหม — ตอบได้ (OpenAI-compatible API เหมือน Groq) แต่ยังไม่ต่อเข้าโค้ด production เพราะยังไม่มีการวัดจริงว่าโมเดลฟรีตัวไหนใช้ได้ (บทเรียน INC-0053: ห้ามเดา)
+
+- เพิ่ม `scripts/qa/probe-openrouter.ts` (`npm run ai:probe-openrouter`): ดึงลิสต์โมเดลฟรีจริงจาก `GET /api/v1/models` (`pricing.prompt === "0"`) แทนการ hardcode ชื่อโมเดล เพราะ OpenRouter เพิ่ม/ถอดโมเดลฟรีบ่อย แล้วยิงคำถามไทยทดสอบทีละตัว วัด latency + เช็กอักษรต่างด้าวหลุดด้วย `hasForeignScript()`
+- ดึงลิสต์จริงวันนี้พบ **22 ตัวฟรี** จาก 445 ตัว (`google/gemma-4-31b-it:free`, `nvidia/nemotron-3-super-120b-a12b:free` ฯลฯ) — ส่วนใหญ่เป็นค่ายเล็ก/ทดลองไม่มีประวัติ
+- รันด้วยมือเท่านั้น ต้องมี `OPENROUTER_API_KEY` ของนักพัฒนาเอง (session นี้ไม่มีคีย์ให้ยิงทดสอบจริง) — **ไม่ผูกเข้า CI / repo:verify** เหมือน `ai:judge`
+- **ค้างไว้**: ยังไม่มีคีย์ทดสอบจริง จึงยังไม่รู้ว่าโมเดลฟรีตัวไหนผ่านเกณฑ์ภาษาไทย/ความเร็ว ➔ รอผู้มีคีย์รันสคริปต์นี้แล้วรายงานผล ก่อนจะตัดสินใจต่อเข้าเป็น Tier 3 ใน failover chain (`groq.ts` → `gemini.ts` → OpenRouter?)
+
+---
+
 ### 🗓️ 2026-09-12 (รอบ 50): 🏁 ปิดงานผลตรวจ UX/UI ครบ 20/20 — อัปเดตเอกสารส่งต่อให้ตรงความจริง
 
 - ปิดครบทั้ง 20 ข้อผ่าน 7 PR: #416 (P0) · #422 · #423 · #427 · #429 · #431 · #436
