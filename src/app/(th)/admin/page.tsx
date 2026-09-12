@@ -39,6 +39,10 @@ const MarketingAudience = dynamic(() => import("@/components/admin/MarketingAudi
   ssr: false,
   loading: () => <AdminLoading label="กำลังโหลดระบบข่าวสาร…" />,
 });
+const RedeemCodesManager = dynamic(() => import("@/components/admin/RedeemCodesManager"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดระบบรหัสแลกสิทธิ์…" />,
+});
 
 function AdminLoading({ label }: { label: string }) {
   return (
@@ -55,6 +59,7 @@ export type TabId =
   | "health"
   | "content"
   | "entitlement"
+  | "redeem"
   | "readers"
   | "marketing";
 
@@ -72,52 +77,64 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    group: "ภาพรวมและข้อมูล",
+    group: "สถิติและรายงาน",
     items: [
       {
         id: "overview",
-        label: "ภาพรวมระบบ",
-        description: "ศูนย์บัญชาการสถานะรวม, สถิติสด, และบันทึกประวัติการกระทำ",
+        label: "ภาพรวมวิหาร",
+        description: "ศูนย์สรุปสถานะรวมของวิหาร สถิติสดประจำวัน และบันทึกประวัติกิจกรรม",
       },
       {
         id: "stats",
-        label: "สถิติการใช้งาน",
-        description: "กราฟและตัวเลขการเปิดไพ่ อัตราความนิยมของหมวดหมู่และไพ่",
+        label: "สถิติการใช้งานรายวัน",
+        badge: "ใหม่",
+        description: "สถิติวันต่อวัน กราฟแนวโน้ม ปริมาณเปิดไพ่ และการส่งออกรายงาน CSV",
       },
     ],
   },
   {
-    group: "ระบบและโครงสร้าง",
+    group: "บริการและสมาชิก",
     items: [
       {
-        id: "health",
-        label: "สุขภาพระบบ & AI",
-        description: "ตรวจสอบการเชื่อมต่อ Cloudflare D1, KV, Vectorize, และโมเดล AI",
+        id: "redeem",
+        label: "รหัสของขวัญ & สิทธิ์พิเศษ",
+        description: "สร้างโค้ดโปรโมชั่น สุ่มรหัส กำหนดโควตา และตรวจสอบประวัติการแลก",
       },
       {
-        id: "entitlement",
-        label: "สิทธิ์ & โควตา",
-        description: "ควบคุมสวิตช์ระบบสิทธิ์, โควตาเปิดไพ่ฟรี, และโครงสร้างฐานข้อมูล D1",
-      },
-    ],
-  },
-  {
-    group: "เนื้อหาและการบริการ",
-    items: [
-      {
-        id: "content",
-        label: "เนื้อหา & ไพ่ 78 ใบ",
-        description: "แก้ไข System Prompt, เสียงแม่หมอ 6 สไตล์, และความหมายไพ่ทั้ง 78 ใบ",
+        id: "marketing",
+        label: "รายชื่อสมาชิก & ข่าวสาร",
+        description: "รายชื่อสมาชิกที่ยินยอมรับข่าวสาร และการส่งออกรายชื่อผู้รับข้อมูล",
       },
       {
         id: "readers",
         label: "หมอดูพาร์ทเนอร์",
-        description: "จัดการโปรไฟล์ ตรวจสอบคุณสมบัติ และรายการจองคิวแม่หมอ",
+        description: "จัดการคิวงาน ตรวจสอบคุณสมบัติ และโปรไฟล์แม่หมอตัวจริง",
+      },
+    ],
+  },
+  {
+    group: "ปรับแต่งเนื้อหาและไพ่",
+    items: [
+      {
+        id: "content",
+        label: "แม่หมอ & ไพ่ 78 ใบ",
+        description: "แก้ไขข้อความต้อนรับ บุคลิกแม่หมอ 6 สไตล์ และความหมายไพ่ 78 ใบ",
       },
       {
-        id: "marketing",
-        label: "ข่าวสาร & สมาชิก",
-        description: "รายชื่อผู้ยินยอมรับข่าวสาร สมาชิก และการส่งออกข้อมูล CSV",
+        id: "entitlement",
+        label: "สิทธิ์ & โควตาการเปิดไพ่",
+        description: "กำหนดโควตาฟรีรายวัน ควบคุมสวิตช์จำกัดสิทธิ์ และตรวจสอบความพร้อม",
+      },
+    ],
+  },
+  {
+    group: "ห้องช่างและระบบคลาวด์",
+    items: [
+      {
+        id: "health",
+        label: "ตรวจสุขภาพระบบ & AI",
+        badge: "ขั้นสูง",
+        description: "สัญญาณสด Cloudflare D1, KV, Google/LINE Login, และเอนจิน AI",
       },
     ],
   },
@@ -181,6 +198,17 @@ function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string 
           />
         </svg>
       );
+    case "redeem":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+          />
+        </svg>
+      );
     case "readers":
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -230,7 +258,7 @@ function AdminContent() {
       setActiveTab("health");
       setHealthSubTab("ai");
     } else if (
-      ["overview", "stats", "health", "content", "readers", "entitlement", "marketing"].includes(
+      ["overview", "stats", "health", "content", "readers", "entitlement", "redeem", "marketing"].includes(
         rawTab,
       )
     ) {
@@ -265,7 +293,7 @@ function AdminContent() {
         resolvedTab = "health";
         setHealthSubTab("ai");
       } else if (
-        ["overview", "stats", "health", "content", "readers", "entitlement", "marketing"].includes(
+        ["overview", "stats", "health", "content", "readers", "entitlement", "redeem", "marketing"].includes(
           tabId,
         )
       ) {
@@ -377,8 +405,8 @@ function AdminContent() {
         </div>
       </header>
 
-      {/* ─── Main Admin Workspace ──────────────────────────────────── */}
-      <div className="mx-auto flex max-w-7xl flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
+      {/* ─── Main Admin Workspace (Full Width & Responsive) ────────── */}
+      <div className="flex w-full flex-col lg:flex-row min-h-[calc(100vh-4rem)]">
         {/* ─── Desktop Sidebar ────────────────────────────────────── */}
         <aside className="hidden w-64 shrink-0 border-r border-line bg-white p-4 lg:block">
           <div className="sticky top-20 space-y-6">
@@ -409,7 +437,17 @@ function AdminContent() {
                           <TabIcon id={item.id} className="w-4 h-4" />
                         </span>
                         <span className="flex-1 truncate">{item.label}</span>
-                        
+                        {item.badge && (
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[9px] font-medium transition-colors ${
+                              isActive
+                                ? "bg-ink text-white"
+                                : "bg-canvas text-muted border border-line"
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -453,7 +491,12 @@ function AdminContent() {
                           }`}
                         >
                           <TabIcon id={item.id} className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate">{item.label}</span>
+                          <span className="truncate flex-1">{item.label}</span>
+                          {item.badge && (
+                            <span className="rounded-full bg-white/20 px-1.5 py-0.2 text-[8px] font-bold">
+                              {item.badge}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
@@ -561,6 +604,8 @@ function AdminContent() {
             {activeTab === "readers" && <ReadersManager />}
 
             {activeTab === "entitlement" && <EntitlementAdmin />}
+
+            {activeTab === "redeem" && <RedeemCodesManager />}
 
             {activeTab === "marketing" && <MarketingAudience />}
           </div>

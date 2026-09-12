@@ -31,6 +31,7 @@
 | **คลัง 25 ผังพยากรณ์** | `/spreads` & `/spreads/[id]` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 25 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง + หน้าคู่มือราย spread 25 หน้า (SEO/SSG · JSON-LD HowTo) | แชร์ผังพยากรณ์แบบรูปภาพ |
 | **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
+| **จัดการรหัสแลกสิทธิ์** | `/admin?tab=redeem` | 🟢 **Active / Live** | Dev Server Ready | แดชบอร์ดจัดการรหัสสิทธิ์เต็มรูปแบบ, ค้นหา/กรอง, สุ่มรหัส `SEER-XXXX-XXXX`, ตรวจดูประวัติคนแลก, ปิดการใช้งานทันที | ส่งออกรายงาน CSV |
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
@@ -70,6 +71,61 @@ Request too large for model `openai/gpt-oss-120b` ... (TPM): Limit 8000, Request
   - PR #430 (รายงาน 2/3 เคส) ยังเปิดอยู่ — merge ได้ในฐานะหลักฐานของ 429 แต่ยังไม่ใช่ baseline ที่ใช้เทียบได้ · ด่านที่ 48 จะยังเตือนต่อเพราะครอบคลุม 67% ต่ำกว่าเกณฑ์ 80%
 
 ---
+### 🗓️ 2026-09-12 (รอบ 46): 🏛️ ปรับปรุงหน้าแอดมินมาตรฐานสากล + ระบบสถิติรายวันวันต่อวัน (Day-by-Day Detailed Analytics)
+
+> **ภารกิจ**: ปรับปรุงหน้าแอดมิน (`/admin`) ให้ได้มาตรฐานระดับโลก เรียบหรูทางการ (Editorial Luxury) ปราศจากอิโมจิและสัญลักษณ์ดวงดาวแฟนซี จัดหมวดหมู่ใหม่ 4 กลุ่มภารกิจตามบทบาทการทำงานจริงของมนุษย์เพื่อรองรับแอดมินที่ไม่เชี่ยวชาญคอมพิวเตอร์ และสร้างระบบสถิติการใช้งานรายวัน (Day-by-Day Usage Statistics & Trends) อย่างละเอียด เข้าใจง่าย
+
+#### สิ่งที่ดำเนินการแล้วเสร็จ:
+1. **ระบบสถิติการใช้งานรายวันวันต่อวัน (`DailyStatsTable.tsx`)**:
+   - สร้างคอมโพเนนต์ `src/components/admin/DailyStatsTable.tsx` เชื่อมต่อกับข้อมูลรายวัน (`daily`) ใน KV
+   - การเปรียบเทียบวันต่อวัน (Day-over-Day KPI Comparison Cards: วันนี้ vs เมื่อวาน) สำหรับยอดเริ่มเปิดไพ่, อ่านจบสมบูรณ์, และแชทถามต่อ
+   - กราฟแท่งแนวโน้มรายวันแบบ Pure CSS/SVG ที่คมชัด โหลดไว สไตล์ Minimal Luxury (สีทองคำ `#A58A5C`) พร้อม Tooltip สรุปตัวเลขเมื่อชี้หรือแตะ
+   - ตารางแจกแจงวันต่อวันแบบละเอียด (Day-by-Day Detailed Log) แสดงวันที่ไทย, ยอดเริ่ม, ยอดจบ, แชท, หมวดยอดนิยม, ผังยอดนิยม, และปัญหา
+   - ระบบคลี่ดูข้อมูลย่อย (Expand Row) แสดงสัดส่วนหมวดคำถาม (Progress bar), แม่หมอที่ถูกเลือก, ผังที่ได้รับความนิยม, และธงความปลอดภัยของวันนั้น
+   - ระบบส่งออกรายงานสถิติเป็นไฟล์ CSV พร้อม UTF-8 BOM สำหรับเปิดใน Microsoft Excel และ Google Sheets ได้ทันทีโดยภาษาไทยไม่เพี้ยน
+   - บทวิเคราะห์สรุปภาพรวมภาษาคน (Plain-Thai Insights) สรุปยอดรวม, ค่าเฉลี่ยต่อวัน, วันที่มีผู้ใช้งานสูงสุด, และหมวดที่คนสนใจมากที่สุด
+2. **การจัดหมวดหมู่ใหม่ 4 กลุ่มภารกิจ (Human-First Navigation IA)**:
+   - ปรับโครงสร้างเมนูทั้งบน Desktop Sidebar และ Mobile Quick Navigation ใน `src/app/(th)/admin/page.tsx`:
+     1. **สถิติและรายงาน**: ภาพรวมวิหาร (`overview`), สถิติการใช้งานรายวัน (`stats` ติดแท็ก "ใหม่")
+     2. **บริการและสมาชิก**: รหัสของขวัญ & สิทธิ์พิเศษ (`redeem`), รายชื่อสมาชิก & ข่าวสาร (`marketing`), หมอดูพาร์ทเนอร์ (`readers`)
+     3. **ปรับแต่งเนื้อหาและไพ่**: แม่หมอ & ไพ่ 78 ใบ (`content`), สิทธิ์ & โควตาการเปิดไพ่ (`entitlement`)
+     4. **ห้องช่างและระบบคลาวด์**: ตรวจสุขภาพระบบ & AI (`health` ติดแท็ก "ขั้นสูง")
+3. **การออกแบบความหรูหราระดับสากล (Editorial Luxury Design & Zero Sparkles)**:
+   - ถอดสัญลักษณ์ดาวแฟนซี (✦) ใน `AdminOverview.tsx` ออกตามกฎข้อที่ 2 ของ `GEMINI.md`
+   - ปรับปรุงการ์ดคำสั่งด่วน (Quick Actions) ในหน้าภาพรวม ให้มีทางลัดตรงไปยังสถิติรายวัน พร้อมคำอธิบายภาษาไทยที่เป็นมิตร
+4. **สถาปัตยกรรมเต็มจอไร้การเลื่อนแนวนอน (Full-Width Zero-Scroll Fluid Responsive Architecture)**:
+   - ปลดล็อกกรอบจำกัดความกว้าง `max-w-7xl` (1280px) ใน `src/app/(th)/admin/page.tsx` เปลี่ยนเป็น `w-full` เต็มพื้นที่จอ เพื่อใช้พื้นที่หน้าจอเดสก์ท็อปและแล็ปท็อปอย่างเต็มประสิทธิภาพ ปราศจากขอบขาวว่างเปล่าซ้ายขวา
+   - ขจัดแถบเลื่อนแนวนอน (Zero Horizontal Scroll): นำ `overflow-x-auto` และ `min-w` ที่ฝืนขนาดออก ทั้งใน `RedeemCodesManager.tsx` และ `DailyStatsTable.tsx` โดยบนจอเดสก์ท็อป/แท็บเล็ต ตารางจะขยายกว้างเต็ม 100% พอดีจอพอดีหน้าต่างเบราว์เซอร์
+   - ปรับใช้ระบบ Hybrid Responsive: บนหน้าจอมือถือ (`md:hidden`) สลับไปแสดงผลเป็น Card List แนวนอนที่จัดวางข้อมูลครบถ้วน สวยงาม สัมผัสง่าย ไม่ล้นขอบจอแม้แต่พิกเซลเดียว
+   - ปรับพาเลตสีทั้งหมดในคอมโพเนนต์แอดมินให้ใช้โทเคนระบบ (`text-ink`, `text-muted`, `border-line`, `bg-canvas`, `bg-ink`, `text-gold-ink`) ผ่านด่านทดสอบ `test-palette-drift.ts` สมบูรณ์ 100% (287 จุด ต่ำกว่าเพดาน 288 จุด)
+   - ผลการทดสอบ: ผ่านครบทั้ง 49/49 ด่าน (Typecheck 0 errors, Quality Verification 100%)
+
+### 🗓️ 2026-09-12 (รอบ 45): 🎟️ ระบบ Admin Redeem Code Manager เต็มรูปแบบ (/admin?tab=redeem)
+
+> **ภารกิจ**: ต่อยอดงานที่เหลือจาก `HANDOFF_ADMIN_REDEEM_2026-09-12.md` ให้เสร็จสมบูรณ์ 100% ครอบคลุม 15 เกณฑ์รับงาน และ 4 ข้อห้ามทางความปลอดภัย
+
+#### สิ่งที่ดำเนินการแล้วเสร็จ:
+1. **แยกแท็บเฉพาะในหน้าแอดมิน (`/admin?tab=redeem`)**:
+   - เพิ่ม `RedeemCodesManager.tsx` ใน `src/components/admin/`
+   - เชื่อมแท็บ `redeem` เข้ากับ `/admin` รองรับ URL deep-link `?tab=redeem`
+   - รองรับ Responsive บนหน้าจอมือถือความกว้าง 390px ตารางไม่ล้นขอบจอ
+2. **ระบบสุ่มและออกรหัสใหม่ (Auto-Generate & Safe Creation)**:
+   - ปุ่มสุ่มรหัสสร้างแพทเทิร์น `SEER-XXXX-XXXX` (ตัดตัวอ่านสับสน: `0 O 1 I L`)
+   - บังคับเลือกชนิดสิทธิ์ด้วยปุ่มเลือก 2 ตัว (พรีเมียม / โควตาเปล่า) พร้อมคำอธิบาย
+   - แปลงวันหมดอายุเป็น epoch ms ที่เวลา `23:59:59 +07:00` อัตโนมัติ
+3. **ชั้น Repository และ REST Endpoints เฉพาะ**:
+   - `src/lib/entitlement/redeem-admin.repo.ts`: ดึงรายการ, ค้นหา, กรองสถานะ, อัปเดต และดึงประวัติการแลก
+   - `GET/POST/PATCH /api/admin/redeem`: รองรับการจัดการรหัสพร้อมการตรวจสอบสิทธิ์แอดมิน
+   - `GET /api/admin/redeem/[code]/redemptions`: ดูรายการประวัติผู้แลกแบบ pagination
+4. **ปฏิบัติตาม 4 ข้อห้ามทางความปลอดภัยอย่างเคร่งครัด**:
+   - ไม่มีปุ่มลบรหัสเด็ดขาด (ใช้สลับ `is_active` แทน)
+   - ห้ามแก้ไข `code` หรือ `credits` หากรหัสดังกล่าวถูกแลกไปแล้ว (`used_count > 0`)
+   - ห้ามลบประวัติการแลกรับสิทธิ์เด็ดขาด
+   - Zero PII ใน Audit Log (`recordAudit` บันทึกเฉพาะข้อมูลรหัสและจำนวน ไม่บันทึกข้อมูลส่วนบุคคล)
+5. **การทดสอบและการตรวจสอบคุณภาพ**:
+   - `test-redeem-code.ts` ทดสอบครบ 45 ข้อ ผ่าน 100%
+   - `test-entitlement.ts` ทดสอบครบ 114 ข้อ ผ่าน 100%
+   - `npm run repo:verify` ผ่านครบทั้ง 48/48 ด่าน (สมบูรณ์ 100%)
 
 ### 🗓️ 2026-09-12 (รอบ 44): 🎟️ แยกโค้ดแจกออกจากโค้ดขาย + ปิดช่องรหัสแลกได้ไม่จำกัดคน (INC-0134)
 
@@ -136,6 +192,40 @@ Request too large for model `openai/gpt-oss-120b` ... (TPM): Limit 8000, Request
 - **สิ่งที่ค้างอยู่ / ต้องทำต่อ**: ไม่มี
 
 ---
+### 🗓️ 2026-09-12 (รอบ 46): 🎟️ พัฒนาระบบ Admin Redeem Code Manager ครบวงจร (Wave A, B, C)
+
+> **คำสั่งเจ้าของโปรเจกต์**: "ไปอ่านเเล้วแก้อย่างละเอียดที่สุด" ตามเอกสารส่งมอบงาน `docs/plans/HANDOFF_ADMIN_REDEEM_2026-09-12.md`
+
+#### สิ่งที่ทำสำเร็จ 100% ตามข้อตกลง 15 ข้อ (Acceptance Criteria)
+1. **Wave A — ปิดช่องโหว่ความปลอดภัยและความถูกต้อง (R-01 to R-03)**:
+   - ติดตั้ง Rate Limiter สำหรับ Action `"redeem"` ใน `src/lib/security/auth-ratelimit.ts` (จำกัด 20 ครั้ง/IP, 10 ครั้ง/คู่ไอดี ต่อ 1 ชั่วโมง) พร้อมบันทึก event `"redeem_blocked_ratelimit"`
+   - ปรับปรุง `src/lib/entitlement/redeem.ts` ใช้ Atomic Conditional `UPDATE` ป้องกัน Race Condition บน `max_uses` และ `expires_at`
+   - เพิ่ม Compensating Rollback กลไกคืนค่า `used_count` และลบแถว `redeem_redemptions` หาก `grantBonus` ล้มเหลว ป้องกันบั๊กถูกตีตราว่าแลกแล้วแต่ไม่ได้สิทธิ์
+   - เพิ่ม `scripts/qa/test-redeem-code.ts` เข้าเป็น Gate ลำดับที่ 49 ใน `scripts/github-auto.ts` พร้อมอัปเดตตัวเลขอ้างอิงในเอกสารแม่บททั้งหมด ผ่านการทดสอบ 36/36 ข้อ
+2. **Wave B — คลังข้อมูลและ REST API ฝั่งแอดมิน (R-04 to R-05)**:
+   - สร้าง `src/lib/entitlement/redeem-admin.repo.ts` (`listRedeemCodes`, `createRedeemCode`, `updateRedeemCode`, `listRedemptions`) รองรับการกรองสถานะ ค้นหา และตรวจสอบค่าตาม business rules
+   - สร้าง `src/app/api/admin/redeem/route.ts` (`GET`, `POST`, `PATCH`) และ `src/app/api/admin/redeem/[code]/redemptions/route.ts` (`GET`) ป้องกันด้วย `requireAdmin()`, Zod validation, และ Audit Logging บน KV โดยไม่เก็บ PII
+3. **Wave C — ส่วนติดต่อผู้ดูแลระบบ (Admin UI) และการเชื่อมต่อระบบ (R-06 to R-07)**:
+   - พัฒนาคอมโพเนนต์ `src/components/admin/RedeemCodesManager.tsx` พร้อมกล่องสรุปภาพรวม (Metrics Cards), ตัวกรอง/ค้นหา, ระบบสลับเปิดปิดสถานะทันที, โมดอลสร้างรหัสพร้อมปุ่มสุ่มรหัส `SEER-XXXX-XXXX`, โมดอลแก้ไขรหัส, และโมดอลประวัติการแลก
+   - รองรับ Responsive บนหน้าจอมือถือ (390px) ตามมาตรฐานความหรูหรา Editorial Luxury และกฎห้ามใช้อิโมจิ/สัญลักษณ์ดวงดาวแฟนซี
+   - เชื่อมต่อแท็บ "รหัสแลกสิทธิ์" เข้าสู่ `src/app/(th)/admin/page.tsx` ครบทั้ง 6 จุด (Dynamic import, TabId union, NAV_SECTIONS, TabIcon SVG, includes checks, และ render block)
+   - ปฏิบัติตาม 4 ข้อห้ามเคร่งครัด: ไม่มีปุ่มลบรหัส (ใช้ toggle is_active), ห้ามแก้ code และ credits หากมีผู้แลกแล้ว, ห้ามลบประวัติการแลก, และไม่บันทึก PII
+
+- **ไฟล์ที่สร้างใหม่**:
+  - `src/lib/entitlement/redeem-admin.repo.ts`
+  - `src/app/api/admin/redeem/route.ts`
+  - `src/app/api/admin/redeem/[code]/redemptions/route.ts`
+  - `src/components/admin/RedeemCodesManager.tsx`
+- **ไฟล์ที่แก้ไข**:
+  - `src/lib/security/auth-ratelimit.ts`
+  - `src/app/api/entitlement/redeem/route.ts`
+  - `src/lib/entitlement/redeem.ts`
+  - `scripts/qa/test-redeem-code.ts`
+  - `scripts/github-auto.ts`
+  - `src/app/(th)/admin/page.tsx`
+  - `docs/ADMIN_PANEL.md`
+  - `docs/WORK_LOG.md`
+  - `CLAUDE.md`, `GEMINI.md`, `README.md`, `docs/INDEX.md`, `docs/AI_COLLABORATION_GUIDELINES.md`, `docs/LOCAL_SETUP.md`
 
 ### 🗓️ 2026-09-12 (รอบ 45): 🎟️ ตรวจระบบรหัสแลกสิทธิ์ + วางแผนหน้าจัดการรหัสให้แอดมิน (เอกสารล้วน ไม่แตะโค้ด)
 
