@@ -1,0 +1,69 @@
+{
+  "generatedAt": "2026-09-12T08:13:14.389Z",
+  "goldenCases": [
+    "gold-004",
+    "gold-006",
+    "gold-021"
+  ],
+  "models": {
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {
+      "short": {
+        "runs": [
+          {
+            "ok": true,
+            "content": "ไพ่ The Fool สื่อถึงการเริ่มต้นใหม่และการเดินทางที่ไม่รู้ผลลัพธ์  \nซึ่งเตือนให้ต้องเปิดรับความไม่แน่นอนและก้าวเข้าสู่สิ่งใหม่ด้วยใจที่อิสระ",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 422,
+            "englishLeakRatio": 0.05263157894736842,
+            "hasForeignScript": false
+          },
+          {
+            "ok": false,
+            "content": "",
+            "status": 200,
+            "error": "200 แต่ไม่มีข้อความตอบกลับ",
+            "elapsedMs": 269,
+            "englishLeakRatio": 0,
+            "hasForeignScript": false
+          },
+          {
+            "ok": true,
+            "content": "The Fool แสดงถึงความบริสุทธิ์ ความไม่รู้และการเริ่มต้นใหม่ด้วยความกล้าหาญและความเปิดรับโชคชะตา.",
+            "status": 200,
+            "error": null,
+            "elapsedMs": 231,
+            "englishLeakRatio": 0.07692307692307693,
+            "hasForeignScript": false
+          }
+        ],
+        "passCount": 2,
+        "avgElapsedMs": 327
+      },
+      "full": [
+        {
+          "caseId": "gold-004",
+          "ok": false,
+          "stage": "json_parse",
+          "error": "JSON.parse ล้มเหลว",
+          "elapsedMs": 460,
+          "raw": "We need to produce JSON with Thai language only. Must follow constraints: no Chinese characters, no foreign scripts except English for card names (The Sun). But we must write Thai for everything else. Ensure no Chinese characters, no English except card names. Also need to respect the format: \"cards"
+        },
+        {
+          "caseId": "gold-006",
+          "ok": false,
+          "stage": "http",
+          "error": "200 แต่ไม่มีข้อความตอบกลับ",
+          "elapsedMs": 752
+        },
+        {
+          "caseId": "gold-021",
+          "ok": false,
+          "stage": "http",
+          "error": "200 แต่ไม่มีข้อความตอบกลับ",
+          "elapsedMs": 712
+        }
+      ]
+    }
+  }
+}
