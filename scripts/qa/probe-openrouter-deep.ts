@@ -25,7 +25,9 @@
  *
  * วิธีรัน:
  *   export OPENROUTER_API_KEY=sk-or-...
- *   npx tsx scripts/qa/probe-openrouter-deep.ts
+ *   npx tsx scripts/qa/probe-openrouter-deep.ts                              # 6 ผู้สมัคร เคสเดียว
+ *   npx tsx scripts/qa/probe-openrouter-deep.ts --models <id> --full-runs 3  # ยืนยันซ้ำเฉพาะผู้รอด
+ *   npx tsx scripts/qa/probe-openrouter-deep.ts --models <id> --full-runs 3 --cases gold-001,gold-004,gold-007
  */
 
 import fs from "node:fs";
@@ -260,6 +262,11 @@ async function testFullReading(apiKey: string, model: string, ctx: ReadingContex
   };
 }
 
+function arg(name: string): string | undefined {
+  const i = process.argv.indexOf(`--${name}`);
+  return i >= 0 ? process.argv[i + 1] : undefined;
+}
+
 async function main() {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -267,19 +274,32 @@ async function main() {
     process.exit(1);
   }
 
+  // --models a,b,c จำกัดเฉพาะบางตัว (ใช้ตอนยืนยันซ้ำผู้รอดรอบก่อน ไม่ต้องยิงทั้ง 6 ใหม่)
+  const modelsArg = arg("models");
+  const models = modelsArg ? modelsArg.split(",").map((m) => m.trim()) : CANDIDATE_MODELS;
+
+  // --full-runs N ยิงคำอ่านไพ่เต็มรูปแบบ N ครั้ง/โมเดล คนละ golden case กัน
+  // (มาตรฐานเดียวกับที่ล็อก WORKING_GEMINI_MODELS — 1 ครั้งเชื่อไม่ได้)
+  const fullRuns = Math.max(1, parseInt(arg("full-runs") || "1", 10) || 1);
+
   const golds: GoldenCase[] = JSON.parse(fs.readFileSync(FIXTURE, "utf-8"));
-  const gold = golds.find((g) => g.id === "gold-001") ?? golds[0];
-  const ctx = buildContext(gold);
-  if (!ctx) {
-    console.error("❌ สร้าง ReadingContext จาก golden fixture ไม่สำเร็จ");
-    process.exit(1);
-  }
+  const caseIds = arg("cases")?.split(",").map((s) => s.trim());
+  const casesPool = caseIds
+    ? golds.filter((g) => caseIds.includes(g.id))
+    : golds.filter((g) => ["gold-001", "gold-002", "gold-003"].includes(g.id));
+  const selectedCases = Array.from({ length: fullRuns }, (_, i) => casesPool[i % casesPool.length] ?? golds[0]);
 
-  console.log(`🧪 ทดสอบเชิงลึก ${CANDIDATE_MODELS.length} โมเดล — เคสอ้างอิง: ${gold.id} (${gold.question})\n`);
+  console.log(
+    `🧪 ทดสอบเชิงลึก ${models.length} โมเดล — คำอ่านไพ่เต็มรูปแบบ ${fullRuns} รอบ/โมเดล เคส: ${selectedCases.map((c) => c.id).join(", ")}\n`,
+  );
 
-  const report: Record<string, unknown> = { generatedAt: new Date().toISOString(), goldenCase: gold.id, models: {} };
+  const report: Record<string, unknown> = {
+    generatedAt: new Date().toISOString(),
+    goldenCases: selectedCases.map((c) => c.id),
+    models: {},
+  };
 
-  for (const model of CANDIDATE_MODELS) {
+  for (const model of models) {
     console.log(`── ${model} ──`);
 
     process.stdout.write("  A) คำถามสั้น x3 ... ");
@@ -290,25 +310,36 @@ async function main() {
       console.log(`     รอบ ${i + 1}: ${flag} (${r.elapsedMs}ms)`);
     }
 
-    process.stdout.write("  B) คำอ่านไพ่เต็มรูปแบบ x1 ... ");
-    const fullResult = await testFullReading(apiKey, model, ctx);
-    if (!fullResult.ok) {
-      console.log(`❌ ล้มเหลวที่ขั้น "${fullResult.stage}": ${fullResult.error}`);
-    } else {
-      const verdict =
-        fullResult.consistencyOk && !fullResult.consistencyFatal && fullResult.englishLeakRatio < 0.3
-          ? "✅"
-          : "⚠️";
-      console.log(
-        `${verdict} consistency=${fullResult.consistencyOk} thaiScore=${fullResult.thaiScore} englishLeak=${fullResult.englishLeakRatio} (${fullResult.elapsedMs}ms)`,
-      );
-      console.log(`     เปิดเรื่อง: "${fullResult.openingPreview}"`);
-      if (fullResult.consistencyIssues.length) {
-        console.log(`     ปัญหาความสอดคล้อง: ${fullResult.consistencyIssues.join(", ")}`);
+    console.log(`  B) คำอ่านไพ่เต็มรูปแบบ x${fullRuns} ...`);
+    const fullResults = [];
+    for (const [i, gold] of selectedCases.entries()) {
+      const ctx = buildContext(gold);
+      if (!ctx) {
+        console.log(`     รอบ ${i + 1} (${gold.id}): ❌ สร้าง ReadingContext ไม่สำเร็จ`);
+        continue;
+      }
+      const fullResult = await testFullReading(apiKey, model, ctx);
+      fullResults.push({ caseId: gold.id, ...fullResult });
+      if (!fullResult.ok) {
+        console.log(`     รอบ ${i + 1} (${gold.id}): ❌ ล้มเหลวที่ขั้น "${fullResult.stage}": ${fullResult.error}`);
+      } else {
+        const verdict =
+          fullResult.consistencyOk && !fullResult.consistencyFatal && fullResult.englishLeakRatio < 0.3
+            ? "✅"
+            : "⚠️";
+        console.log(
+          `     รอบ ${i + 1} (${gold.id}): ${verdict} consistency=${fullResult.consistencyOk} thaiScore=${fullResult.thaiScore} englishLeak=${fullResult.englishLeakRatio} (${fullResult.elapsedMs}ms)`,
+        );
+        console.log(`        เปิดเรื่อง: "${fullResult.openingPreview}"`);
+        if (fullResult.consistencyIssues.length) {
+          console.log(`        ปัญหาความสอดคล้อง: ${fullResult.consistencyIssues.join(", ")}`);
+        }
       }
     }
+    const fullPassCount = fullResults.filter((r) => r.ok && r.consistencyOk && !r.consistencyFatal && r.englishLeakRatio < 0.3).length;
+    console.log(`  ➔ สรุป: คำอ่านไพ่เต็มรูปแบบผ่าน ${fullPassCount}/${fullResults.length}`);
 
-    (report.models as Record<string, unknown>)[model] = { short: shortResult, full: fullResult };
+    (report.models as Record<string, unknown>)[model] = { short: shortResult, full: fullResults };
     console.log("");
   }
 
