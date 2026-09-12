@@ -280,7 +280,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim gpu-layer ${
+      className={`fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-3 sm:p-4 modal-scrim gpu-layer ${
         isClosing ? "anim-scrim-out" : "anim-scrim-in"
       }`}
       role="dialog"

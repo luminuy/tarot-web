@@ -446,7 +446,7 @@ export function QuickFortunePicker({
           role="dialog"
           aria-modal="true"
           aria-label={isEnglish ? "Set your name and question" : "ระบุชื่อเล่นและคำถามของคุณ"}
-          className={`fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim ${
+          className={`fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4 modal-scrim ${
             isNicknameClosing ? "anim-scrim-out" : "anim-scrim-in"
           }`}
         >

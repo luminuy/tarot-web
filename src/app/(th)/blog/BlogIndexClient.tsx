@@ -132,7 +132,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
         {/* Search Input — Soft Porcelain with Taupe border and Gold Accent */}
         <div className="relative max-w-xl mx-auto">
           <input
-              aria-label="ค้นหาบทความ"
+              aria-label={isEnglish ? "Search articles" : "ค้นหาบทความ"}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

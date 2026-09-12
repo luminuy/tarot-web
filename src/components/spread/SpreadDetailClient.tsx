@@ -181,7 +181,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
       <section className="space-y-6">
         <div className="grid gap-8 sm:grid-cols-[minmax(0,260px)_1fr] sm:items-start">
           <div>
-            <SpreadPositionMap positions={spread.positions} />
+            <SpreadPositionMap positions={spread.positions} isEnglish={isEnglish} />
             <p className="mt-2 text-center text-xs text-muted">
               {isEnglish ? `Layout order 1–${spread.positions.length}` : `ลำดับการวางไพ่ 1–${spread.positions.length}`}
             </p>

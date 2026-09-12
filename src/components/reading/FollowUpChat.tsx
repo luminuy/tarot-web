@@ -673,7 +673,21 @@ isEnglish
                 type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.92 }}
-                disabled={loading || !input.trim()}
+                /*
+                 * 🚦 แยกสองกรณีของการ "กดไม่ได้" ออกจากกัน (UX-16)
+                 * ---------------------------------------------------------
+                 * `disabled` จริง ใช้เฉพาะตอน "กำลังส่งอยู่" เพื่อกันกดซ้ำ
+                 *
+                 * ส่วนตอน "ยังไม่ได้พิมพ์อะไร" ใช้ `aria-disabled` แทน เพราะ
+                 * `disabled` จริงจะถอดปุ่มออกจากลำดับ Tab ทั้งหมด ผู้ใช้ screen reader
+                 * จึงไม่มีทางรู้ด้วยซ้ำว่ามีปุ่มส่งอยู่ตรงนี้ — เดิมทั้งโค้ดเบสมี
+                 * `aria-disabled` แค่จุดเดียวเทียบกับ `disabled` 46 จุด
+                 *
+                 * ⚠️ `aria-disabled` ไม่ได้กันการกดให้เอง ต้องกันในตัว handler ด้วย
+                 * (`handleSubmit` เช็ก `!input.trim()` อยู่แล้ว)
+                 */
+                disabled={loading}
+                aria-disabled={!input.trim() || loading}
                 className={`h-9 w-9 sm:h-10 sm:w-10 rounded-full flex items-center justify-center font-bold transition shrink-0 ${
                   input.trim() && !loading
                     ? "bg-gold-ink hover:bg-gold-ink-deep text-surface shadow-[0_2px_8px_rgba(143,92,26,0.35)] cursor-pointer active:scale-95"

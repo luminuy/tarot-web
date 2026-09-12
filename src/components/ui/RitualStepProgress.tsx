@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLocale } from "@/lib/i18n";
 
 export type RitualStep = "SPREAD_SELECT" | "INTENTION_SELECT" | "SHUFFLE" | "PICK_CARDS" | "READING" | "SUMMARY";
 
@@ -9,12 +10,16 @@ interface RitualStepProgressProps {
   onStepClick?: (step: RitualStep) => void;
 }
 
-const STEPS: { id: RitualStep; title: string; num: number }[] = [
-  { id: "SPREAD_SELECT", title: "เลือกผัง", num: 1 },
-  { id: "INTENTION_SELECT", title: "ตั้งคำถาม", num: 2 },
-  { id: "SHUFFLE", title: "สับไพ่", num: 3 },
-  { id: "PICK_CARDS", title: "เลือกไพ่", num: 4 },
-  { id: "READING", title: "คำทำนาย", num: 5 },
+/*
+ * ⚠️ ทุกข้อความในคอมโพเนนต์นี้ต้องมีคู่ภาษาอังกฤษเสมอ (UX-17)
+ * มันถูกใช้ในเส้นทาง /en ด้วย — ของเดิมมีแต่ไทยทั้ง title และ aria-label
+ */
+const STEPS: { id: RitualStep; title: string; titleEn: string; num: number }[] = [
+  { id: "SPREAD_SELECT", title: "เลือกผัง", titleEn: "Choose Spread", num: 1 },
+  { id: "INTENTION_SELECT", title: "ตั้งคำถาม", titleEn: "Set Intention", num: 2 },
+  { id: "SHUFFLE", title: "สับไพ่", titleEn: "Shuffle", num: 3 },
+  { id: "PICK_CARDS", title: "เลือกไพ่", titleEn: "Pick Cards", num: 4 },
+  { id: "READING", title: "คำทำนาย", titleEn: "Reading", num: 5 },
 ];
 
 const getStepIndex = (step: RitualStep) => {
@@ -26,10 +31,11 @@ const getStepIndex = (step: RitualStep) => {
 };
 
 export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentStep, onStepClick }) => {
+  const { isEnglish } = useLocale();
   const currentIndex = getStepIndex(currentStep);
 
   return (
-    <nav aria-label="ความคืบหน้าการดูดวง" className="w-full max-w-2xl mx-auto mb-10 px-2 select-none">
+    <nav aria-label={isEnglish ? "Reading ritual progress" : "ความคืบหน้าการดูดวง"} className="w-full max-w-2xl mx-auto mb-10 px-2 select-none">
       <ol className="flex items-center justify-between relative list-none">
         {/* Background Connecting Rail */}
         <div className="absolute left-0 top-[14px] sm:top-4 w-full h-[1px] bg-line-warm z-0" aria-hidden="true" />
@@ -87,7 +93,7 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
                 isActive ? "font-bold text-ink-deep" : "text-muted"
               }`}
             >
-              {step.title}
+              {isEnglish ? step.titleEn : step.title}
             </span>
           );
 
@@ -101,7 +107,11 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
                 <button
                   type="button"
                   onClick={() => onStepClick?.(step.id)}
-                  aria-label={`ย้อนกลับไปขั้นที่ ${step.num}: ${step.title}`}
+                  aria-label={
+                    isEnglish
+                      ? `Back to step ${step.num}: ${step.titleEn}`
+                      : `ย้อนกลับไปขั้นที่ ${step.num}: ${step.title}`
+                  }
                   className="flex flex-col items-center cursor-pointer group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] hover:scale-110 transition-transform"
                 >
                   {dot}

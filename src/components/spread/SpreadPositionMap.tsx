@@ -11,7 +11,18 @@ import { mapLayout, MAP_CARD_ASPECT, MAP_CARD_MIN_PX } from "@/lib/tarot/spread-
  * ISSUE-034 เกิดขึ้นเพราะค่าชุดนี้เคยอยู่สองที่แล้วเลื่อนออกจากกันเงียบ ๆ
  * ด่าน `scripts/qa/test-spreads.ts` ตรวจว่าไม่มีไพ่คู่ไหนทับกันโดยใช้โมดูลเดียวกันนี้
  */
-export function SpreadPositionMap({ positions }: { positions: SpreadPosition[] }) {
+/*
+ * ⚠️ ไฟล์นี้เป็น server component โดยเจตนา (ไม่มี "use client") จึงใช้ hook `useLocale` ไม่ได้
+ * ภาษาจึงต้องรับมาเป็น prop จากผู้เรียกแทน — ของเดิม `aria-label` เป็นไทยล้วน
+ * ทำให้หน้า /en/spreads/[id] มีชื่อภาพเป็นภาษาไทย (UX-17)
+ */
+export function SpreadPositionMap({
+  positions,
+  isEnglish = false,
+}: {
+  positions: SpreadPosition[];
+  isEnglish?: boolean;
+}) {
   const layout = mapLayout(positions);
 
   return (
@@ -19,7 +30,11 @@ export function SpreadPositionMap({ positions }: { positions: SpreadPosition[] }
       className="relative w-full rounded-xl border border-line bg-inset"
       style={{ paddingBottom: `${(layout.boxHeight * 100).toFixed(2)}%` }}
       role="img"
-      aria-label={`แผนผังการวางไพ่ ${positions.length} ตำแหน่ง`}
+      aria-label={
+        isEnglish
+          ? `Card layout diagram with ${positions.length} positions`
+          : `แผนผังการวางไพ่ ${positions.length} ตำแหน่ง`
+      }
     >
       {positions.map((pos, idx) => (
         <div

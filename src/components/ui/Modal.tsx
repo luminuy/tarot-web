@@ -59,8 +59,8 @@ export const Modal: React.FC<ModalProps> = ({
           <div
             role="dialog"
             aria-modal="true"
-            aria-label={typeof title === "string" ? title : "หน้าต่างรายละเอียด"}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto overscroll-contain"
+            aria-label={typeof title === "string" ? title : isEnglish ? "Details dialog" : "หน้าต่างรายละเอียด"}
+            className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4 sm:p-6 overflow-y-auto overscroll-contain"
           >
             {/* Backdrop Scrim */}
             <motion.div

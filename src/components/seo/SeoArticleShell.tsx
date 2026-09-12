@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n";
 
 export interface SeoFaqItem {
   q: string;
@@ -30,6 +31,7 @@ export function SeoArticleShell({
   links,
   className = "",
 }: SeoArticleShellProps) {
+  const { isEnglish } = useLocale();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const toggleFaq = (idx: number) => {
@@ -58,8 +60,14 @@ export function SeoArticleShell({
       {/* FAQ Accordion Section if provided */}
       {faqs && faqs.length > 0 && (
         <div className="pt-6 border-t border-line space-y-4">
+          {/*
+            ⚠️ หัวข้อนี้เคยฮาร์ดโค้ดภาษาไทยไว้ ทำให้หน้า /en/daily และ /en/love/1-card
+            มีคำว่า "คำถามที่พบบ่อย (FAQ)" โผล่กลางหน้าอังกฤษ (UX-17)
+            ด่านกันไทยรั่วสองตัวที่มีอยู่จับไม่ได้ เพราะตัวหนึ่งใช้เกณฑ์ "สัดส่วนเกิน 1.5%
+            ของหน้า" ซึ่งหัวข้อบรรทัดเดียวคิดเป็น ~0.1% และอีกตัวตรวจเฉพาะคอมโพเนนต์ในลิสต์
+          */}
           <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink">
-            คำถามที่พบบ่อย (FAQ)
+            {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อย (FAQ)"}
           </h3>
           <div className="divide-y divide-line rounded-xl border border-line bg-surface-warm overflow-hidden">
             {faqs.map((faq, idx) => {

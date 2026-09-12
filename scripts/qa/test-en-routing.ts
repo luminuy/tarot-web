@@ -323,6 +323,55 @@ for (const topic of Object.values(SPREAD_TOPICS)) {
 // ซึ่งเป็นข้อมูลอ้างอิงสองภาษาที่ตั้งใจให้มี ไม่ใช่การแปลตกหล่น
 const MAX_THAI_RATIO_PERCENT = 1.5;
 
+// ── 7b. รูรั่วของเกณฑ์ "สัดส่วน" ที่ทำให้ด่านนี้ตกไม่ได้ (UX-17) ──────────────
+// บทเรียนจริง 2026-09-12: คำว่า "คำถามที่พบบ่อย (FAQ)" โผล่กลางหน้า /en/daily
+// และ /en/love/1-card อยู่หลายวัน ขณะที่ด่านนี้ผ่านเขียวตลอด
+//
+// เหตุผลคือเกณฑ์เป็น **สัดส่วนต่อทั้งหน้า** — หัวข้อไทยหนึ่งบรรทัดบนหน้าอังกฤษยาว ๆ
+// คิดเป็นราว 0.1% เท่านั้น จึงไม่มีทางแตะเพดาน 1.5% ไม่ว่าจะรั่วกี่จุดก็ตาม
+// เกณฑ์สัดส่วนจับได้แค่ "หน้าที่ยังไม่ได้แปลทั้งหน้า" ซึ่งเป็นปัญหาคนละแบบกัน
+//
+// จึงเพิ่มเกณฑ์ที่สองแบบ allowlist: คำไทยที่ยาวพอจะเป็น "ข้อความ" จริง ๆ
+// ต้องอยู่ในรายการที่ขึ้นทะเบียนไว้เท่านั้น ถ้าไม่อยู่ = ตกทันทีแม้จะยาวบรรทัดเดียว
+//
+// ⚠️ เวลาจะเพิ่มรายการใหม่ ต้องเขียนเหตุผลกำกับเสมอว่าทำไมคำไทยนั้น "ต้องมี"
+// ในหน้าอังกฤษ ห้ามเติมเพื่อให้ด่านผ่านเฉย ๆ
+const INTENTIONAL_THAI_ON_EN: { text: string; reason: string }[] = [
+  { text: "ไพ่ยิปซี", reason: "คำไทยที่บทความอังกฤษอธิบายความหมายให้ผู้อ่านต่างชาติโดยตั้งใจ" },
+  { text: "สลับภาษา", reason: "ป้ายปุ่มสลับภาษา เขียนคู่กันสองภาษาเป็นดีไซน์ตั้งใจ" },
+  { text: "ทาโรต์", reason: "คำทับศัพท์ไทยที่บทความอังกฤษยกมาอธิบายคู่กับคำอังกฤษ" },
+];
+
+/** คำไทยที่ "ยาวพอจะเป็นข้อความจริง" — สั้นกว่านี้มักเป็นเศษอักขระในชื่อไฟล์/สคริปต์ */
+const THAI_PHRASE_MIN_CHARS = 4;
+
+/**
+ * ดึงวลีไทยที่ยังไม่ได้ขึ้นทะเบียนออกมาจากหน้าอังกฤษหนึ่งหน้า
+ * ตรวจทั้งเนื้อความและแอตทริบิวต์ที่ผู้ใช้ "ได้ยิน" (aria-label · alt · title · placeholder)
+ * เพราะ `aria-label` ภาษาไทยบนหน้าอังกฤษคือรอยรั่วที่ผู้ใช้ screen reader เจอเต็ม ๆ
+ * แต่เกณฑ์สัดส่วนเดิมมองไม่เห็นเลยสักตัว
+ */
+function unregisteredThaiPhrases(htmlFile: string): string[] {
+  const html = fs.readFileSync(htmlFile, "utf-8");
+  const withoutScripts = html.replace(/<script[\s\S]*?<\/script>/g, "");
+
+  const attrValues = [...withoutScripts.matchAll(/(?:aria-label|alt|title|placeholder)="([^"]*)"/g)].map(
+    (m) => m[1],
+  );
+  const bodyText = withoutScripts.replace(/<[^>]+>/g, " ");
+
+  const phrases = new Set<string>();
+  for (const chunk of [bodyText, ...attrValues]) {
+    for (const m of chunk.matchAll(/[\u0E00-\u0E7F][\u0E00-\u0E7F\s]*/g)) {
+      const phrase = m[0].trim();
+      if (phrase.replace(/\s/g, "").length < THAI_PHRASE_MIN_CHARS) continue;
+      if (INTENTIONAL_THAI_ON_EN.some((entry) => phrase.includes(entry.text))) continue;
+      phrases.add(phrase.slice(0, 60));
+    }
+  }
+  return [...phrases];
+}
+
 function ensureBuildExists(): void {
   const buildManifest = path.join(ROOT, ".next/build-manifest.json");
   if (!fs.existsSync(buildManifest)) {
@@ -387,6 +436,25 @@ check(
 );
 for (const entry of leaking.slice(0, 10)) {
   console.log(`      ↳ ${entry.file} — ${entry.ratio.toFixed(1)}%`);
+}
+
+// เกณฑ์ที่สอง — จับวลีไทยแม้จะมีจุดเดียวในหน้า (รูรั่วของเกณฑ์สัดส่วน · UX-17)
+const phraseLeaks = englishHtml
+  .map((file) => ({
+    file: path.relative(path.join(ROOT, ".next/server/app"), file),
+    phrases: unregisteredThaiPhrases(file),
+  }))
+  .filter((entry) => entry.phrases.length > 0);
+
+check(
+  "ไม่มีวลีภาษาไทยที่ไม่ได้ขึ้นทะเบียนในหน้าอังกฤษ (รวม aria-label · alt · title · placeholder)",
+  phraseLeaks.length === 0,
+  phraseLeaks.length
+    ? `${phraseLeaks.length} หน้า · เช่น ${phraseLeaks[0].file} → "${phraseLeaks[0].phrases[0]}"`
+    : undefined,
+);
+for (const entry of phraseLeaks.slice(0, 10)) {
+  console.log(`      ↳ ${entry.file} — ${entry.phrases.slice(0, 3).map((p) => `"${p}"`).join(", ")}`);
 }
 
 console.log("");
