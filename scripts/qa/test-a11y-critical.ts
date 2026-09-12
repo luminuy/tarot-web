@@ -182,49 +182,129 @@ for (const file of walkTsx(path.join(ROOT, "src"))) {
   }
 }
 
-// ── กฎ 4 · ตรวจ HTML ที่ build จริง (ถ้ามี) ────────────────────────────────
-const indexHtmlPath = path.join(ROOT, ".next/server/app/index.html");
-if (!fs.existsSync(indexHtmlPath)) {
+// ── กฎ 4 · ตรวจ HTML ที่ build จริง — **ทุกหน้า ไม่ใช่แค่หน้าแรก** ─────────
+/*
+ * 📈 ขยายขอบเขตจากหน้าแรกอย่างเดียว → ทั้งเว็บ
+ * ---------------------------------------------------------------------------
+ * ตอนเขียนด่านนี้รอบแรก (PR #416) ตรวจแค่ `.next/server/app/index.html`
+ * เพราะบั๊กสามข้อที่เพิ่งแก้อยู่บนหน้าแรกทั้งหมด
+ *
+ * แต่ผลคือ **อีกกว่า 300 หน้าที่เหลือไม่มีด่านตรวจ landmark หรือลำดับหัวข้อเลย**
+ * ซึ่งเป็นช่องว่างแบบเดียวกับที่ทำให้สามข้อนั้นหลุดมาได้ตั้งแต่แรก
+ *
+ * ⚠️ **ต้องกรองหน้าที่ React สตรีมออกก่อนเสมอ** (บทเรียนเดียวกับด่าน INC-0136 ข้อ 7.2)
+ * หน้าที่สตรีมเขียนเนื้อหาจริงไว้ใน `<div hidden id="S:n">` ท้ายไฟล์ แล้วให้สคริปต์
+ * `$RC` ย้ายเข้าที่ตอนรัน — **ลำดับไบต์ในไฟล์จึงไม่ใช่ลำดับที่ผู้ใช้เห็น**
+ * ถ้าไม่กรองจะได้ false positive มหาศาลทันที
+ *
+ * ⚠️ หน้าที่มี `<h1>` มากกว่าหนึ่งอันไม่ได้ผิดเสมอไปถ้ามันเป็นหน้าที่ประกอบจาก
+ * หลาย template — แต่ในเว็บนี้ทุกหน้าเป็นเอกสารเดี่ยว จึงบังคับ h1 เดียวได้
+ */
+const APP_DIR = path.join(ROOT, ".next/server/app");
+
+function collectHtml(dir: string, acc: string[] = []): string[] {
+  if (!fs.existsSync(dir)) return acc;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) collectHtml(full, acc);
+    else if (entry.name.endsWith(".html")) acc.push(full);
+  }
+  return acc;
+}
+
+/** หน้าที่ React สตรีม — ลำดับไบต์ไม่ใช่ลำดับที่ผู้ใช้เห็น จึงตรวจลำดับไม่ได้ */
+function isStreamed(html: string): boolean {
+  return html.includes('<div hidden id="S:') || html.includes("$RC(");
+}
+
+/**
+ * หน้าที่เป็น "ตัวส่งต่อ" (redirect stub) — ไม่ใช่หน้าเนื้อหาจริง
+ *
+ * Next.js สร้างไฟล์ HTML ให้ทุก slug สำรองใน `ARTICLE_SLUG_ALIASES` โดยข้างในมีแค่
+ * `<meta http-equiv="refresh">` ชี้ไปหน้าจริง + เปลือกเว็บ (หัวเว็บ/ฟุตเตอร์)
+ * มันจึง **ไม่มี `<h1>` โดยชอบธรรม** เพราะไม่มีเนื้อหาให้ตั้งหัวข้อ
+ *
+ * ⚠️ อย่าไปบังคับให้มี h1 — นั่นคือการแก้ด่านให้ตรงกับความเข้าใจผิด
+ * ผู้ใช้อยู่กับหน้านี้ไม่ถึงวินาทีแล้วถูกพาไปหน้าจริงซึ่งมี h1 ครบอยู่แล้ว
+ */
+function isRedirectStub(html: string): boolean {
+  return html.includes('http-equiv="refresh"');
+}
+
+const htmlFiles = collectHtml(APP_DIR);
+
+if (htmlFiles.length === 0) {
   /*
    * 🔴 ไม่มีไฟล์ build = **ตก** ไม่ใช่ "ข้าม"
    * ---------------------------------------------------------------------------
    * เดิมจุดนี้แค่ push ข้อความเตือนลง notes แล้วปล่อยผ่าน ผลคือบนเครื่องที่ยังไม่เคย
-   * build ด่านนี้พิมพ์ "✅ ผ่าน" ทั้งที่ **ไม่ได้ตรวจกฎ 3 ใน 4 ข้อเลย** (ลำดับหัวข้อ ·
-   * h1 เดี่ยว · header/footer อยู่นอก <main>) — กฎพวกนี้ตรวจจาก HTML ที่เรนเดอร์จริง
-   * เท่านั้น เพราะโครง JSX อ่านแล้วไม่รู้ว่าสุดท้าย DOM ออกมาหน้าตาแบบไหน
-   *
-   * ด่านที่ผ่านได้ทั้งที่ไม่ได้ตรวจ คือด่านหลอกแบบเดียวกับช่องว่าง G-10
-   * ใน `repo:verify` ไม่มีทางเจอเคสนี้อยู่แล้ว เพราะด่านงบบันเดิล (ลำดับที่ 37)
-   * สั่ง `npm run build` ให้เองเมื่อไม่พบไฟล์ผลลัพธ์ และด่านนี้อยู่ลำดับสุดท้าย
-   * ที่เจอคือตอนรันด่านนี้เดี่ยว ๆ บน checkout ใหม่ ซึ่งควรบอกให้ชัดว่าต้อง build ก่อน
+   * build ด่านนี้พิมพ์ "✅ ผ่าน" ทั้งที่ **ไม่ได้ตรวจกฎ 3 ใน 4 ข้อเลย**
+   * ด่านที่ผ่านได้ทั้งที่ไม่ได้ตรวจ คือด่านหลอก
    */
-  console.error("♿ ตรวจ a11y ระดับวิกฤตของหน้าแรก\n");
-  console.error("❌ ไม่พบ .next/server/app/index.html — ตรวจ HTML ที่เรนเดอร์จริงไม่ได้\n");
+  console.error("♿ ตรวจ a11y ระดับวิกฤตทั้งเว็บ\n");
+  console.error("❌ ไม่พบ HTML ใน .next/server/app — ตรวจ HTML ที่เรนเดอร์จริงไม่ได้\n");
   console.error("   กฎ 3 ข้อนี้ตรวจจาก HTML จริงเท่านั้น จึงยังไม่ได้ตรวจเลย:");
   console.error("     • หัวข้อแรกของหน้าเป็น h1 และไม่ข้ามลำดับ");
-  console.error("     • หน้าแรกมี <h1> หนึ่งเดียว");
+  console.error("     • แต่ละหน้ามี <h1> หนึ่งเดียว");
   console.error("     • <header> / <footer> อยู่นอก <main>");
   console.error("\n   ➔ รัน `npm run build` ก่อน แล้วรันด่านนี้ใหม่");
   console.error("   ➔ หรือรัน `npm run repo:verify` ซึ่ง build ให้เองอยู่แล้ว\n");
   process.exit(1);
-} else {
-  const html = fs.readFileSync(indexHtmlPath, "utf-8");
+}
+
+let checkedPages = 0;
+let orderFreeChecked = 0;
+let skippedStreamed = 0;
+const pageProblems: string[] = [];
+
+for (const file of htmlFiles) {
+  const html = fs.readFileSync(file, "utf-8");
+  const rel = path.relative(APP_DIR, file).split(path.sep).join("/");
+
+  if (isRedirectStub(html)) {
+    skippedStreamed++;
+    continue;
+  }
+
+  /*
+   * 📊 หน้าที่ React สตรีม — ตรวจได้บางกฎ ไม่ใช่ตรวจไม่ได้เลย
+   * ---------------------------------------------------------------------------
+   * ตอนแรกข้ามหน้าสตรีมทั้งก้อน ผลคือตรวจได้แค่ 18 จาก 311 หน้า — **ตาบอด 94%**
+   *
+   * ความจริงคือ "ลำดับไบต์เชื่อไม่ได้" ไม่ได้แปลว่า "ทุกกฎเชื่อไม่ได้"
+   * กฎที่ **ไม่ขึ้นกับลำดับ** ยังตรวจได้ปกติ เพราะไม่ว่า `$RC` จะย้ายชิ้นส่วนไปไว้ไหน
+   * จำนวน `<h1>` ในเอกสารก็เท่าเดิม:
+   *
+   *   ✅ ตรวจได้ทุกหน้า  — จำนวน `<h1>` ต้องมีหนึ่งเดียว
+   *   ❌ ตรวจได้เฉพาะหน้าที่ไม่สตรีม — หัวข้อแรกเป็น h1 · ไม่ข้ามลำดับ · header/footer นอก main
+   *
+   * ⚠️ อย่าเผลอเอากฎที่ขึ้นกับลำดับมาใส่ในบล็อกนี้ จะได้ false positive ทันที
+   */
+  const h1All = (html.match(/<h1[\s>]/g) ?? []).length;
+  if (h1All !== 1) {
+    pageProblems.push(`${rel}: มี <h1> ${h1All} อัน — ต้องมีหนึ่งเดียวเท่านั้น`);
+  }
+  orderFreeChecked++;
+
+  if (isStreamed(html)) {
+    skippedStreamed++;
+    continue;
+  }
+  checkedPages++;
 
   const headings = [...html.matchAll(/<(h[1-6])[^>]*>/g)].map((m) => Number(m[1][1]));
-  if (headings.length === 0) {
-    problems.push("หน้าแรกไม่มีหัวข้อสักอัน");
-  } else {
+  if (headings.length > 0) {
     if (headings[0] !== 1) {
-      problems.push(`หน้าแรก: หัวข้อแรกของหน้าเป็น h${headings[0]} ไม่ใช่ h1 — โครงเอกสารพังทั้ง a11y และ SEO`);
+      pageProblems.push(`${rel}: หัวข้อแรกของหน้าเป็น h${headings[0]} ไม่ใช่ h1 — โครงเอกสารพังทั้ง a11y และ SEO`);
     }
     for (let i = 1; i < headings.length; i++) {
       if (headings[i] - headings[i - 1] > 1) {
-        problems.push(`หน้าแรก: ข้ามลำดับหัวข้อจาก h${headings[i - 1]} ไป h${headings[i]}`);
+        pageProblems.push(`${rel}: ข้ามลำดับหัวข้อจาก h${headings[i - 1]} ไป h${headings[i]}`);
         break;
       }
     }
     const h1Count = headings.filter((h) => h === 1).length;
-    if (h1Count !== 1) problems.push(`หน้าแรกมี <h1> ${h1Count} อัน — ต้องมีหนึ่งเดียวเท่านั้น`);
+    if (h1Count !== 1) pageProblems.push(`${rel}: มี <h1> ${h1Count} อัน — ต้องมีหนึ่งเดียวเท่านั้น`);
   }
 
   const mOpen = html.indexOf("<main");
@@ -232,12 +312,24 @@ if (!fs.existsSync(indexHtmlPath)) {
   for (const tag of ["<header", "<footer"]) {
     const at = html.indexOf(tag);
     if (at !== -1 && mOpen !== -1 && mClose !== -1 && at > mOpen && at < mClose) {
-      problems.push(`HTML หน้าแรก: ${tag}> อยู่ใน <main> — landmark หายไปจริงตอนเรนเดอร์`);
+      pageProblems.push(`${rel}: ${tag}> อยู่ใน <main> — landmark หายไปจริงตอนเรนเดอร์`);
     }
   }
 }
 
-console.log("♿ ตรวจ a11y ระดับวิกฤตของหน้าแรก (สายด่วน · landmark · ลำดับหัวข้อ · หน้าต่างลอยนอก <main>)...\n");
+// จำกัดจำนวนที่พิมพ์ แต่รายงานยอดจริงเสมอ
+if (pageProblems.length) {
+  problems.push(
+    `HTML ที่ build แล้วมีปัญหา ${pageProblems.length} จุด (ตรวจ h1 เดี่ยว ${orderFreeChecked} หน้า · ตรวจลำดับ+landmark ${checkedPages} หน้า):\n` +
+      pageProblems.slice(0, 12).map((p) => `      • ${p}`).join("\n"),
+  );
+} else {
+  notes.push(
+    `HTML ที่ build แล้วผ่าน — ตรวจ "h1 เดี่ยว" ครบ ${orderFreeChecked} หน้า · ตรวจ "ลำดับหัวข้อ + landmark" ได้ ${checkedPages} หน้า (อีก ${skippedStreamed} หน้าสตรีมหรือเป็นตัวส่งต่อ ลำดับไบต์จึงเชื่อไม่ได้)`,
+  );
+}
+
+console.log("♿ ตรวจ a11y ระดับวิกฤตทั้งเว็บ (สายด่วน · landmark · ลำดับหัวข้อ · หน้าต่างลอยนอก <main>)...\n");
 for (const n of notes) console.log(`   ${n}`);
 
 if (problems.length > 0) {

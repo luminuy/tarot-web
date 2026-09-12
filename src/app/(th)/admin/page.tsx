@@ -531,6 +531,18 @@ function AdminContent() {
 
         {/* ─── Tab Content Workspace ──────────────────────────────── */}
         <main id="main-content" tabIndex={-1} className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+          {/*
+            ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ — มันคือ "ชื่อของหน้า" ที่ screen reader
+            ใช้บอกผู้ใช้ว่าตอนนี้อยู่หน้าไหน และเป็นรากของสารบัญหัวข้อทั้งหน้า
+            หน้านี้เคยมีแต่ <h2> ของชื่อแท็บ ไม่มี <h1> เลยสักอัน
+            (ตรวจเจอตอนขยายด่าน a11y ให้ครอบทั้งเว็บ ไม่ใช่แค่หน้าแรก)
+
+            ใช้ `sr-only` เพราะดีไซน์ตั้งใจให้ชื่อแท็บเป็นตัวเด่นบนจอ —
+            h1 ทำหน้าที่เป็น "ชื่อหน้า" ให้ screen reader ส่วน h2 ยังเป็นชื่อแท็บตามเดิม
+            ⚠️ ห้ามลบ — ด่าน `test-a11y-critical` ตรวจทั้ง 309 หน้าแล้ว
+          */}
+          <h1 className="sr-only">แผงควบคุมผู้ดูแลระบบ</h1>
+
           {/* Header Description Banner */}
           {activeItem && (
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-4">
@@ -619,10 +631,28 @@ export default function AdminHome() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface-pale text-sm text-muted">
+        <>
+        {/*
+          ⚠️ fallback ของ Suspense คือ **HTML ที่ถูก prerender ออกมาจริง**
+          ไม่ใช่แค่ของชั่วคราวที่ผู้ใช้เห็นเสี้ยววินาที — มันคือสิ่งที่บอตค้นหาและ
+          ผู้ใช้เห็นตอน first paint จึงต้องมีโครงครบเหมือนหน้าจริง: <main> + <h1>
+
+          ตรวจเจอตอนขยายด่าน a11y ให้ครอบทั้งเว็บ: หน้านี้มี <h1> ศูนย์อันใน HTML ที่ build
+          เพราะเนื้อหาจริงอยู่หลัง Suspense ส่วนที่ prerender คือ fallback นี้เท่านั้น
+          ⚠️ ห้ามลบ h1 — ด่าน `test-a11y-critical` ตรวจทั้ง 309 หน้าแล้ว
+        */}
+        <main
+          id="main-content"
+          tabIndex={-1}
+          role="status"
+          aria-busy="true"
+          className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface-pale text-sm text-muted"
+        >
+          <h1 className="sr-only">แผงควบคุมผู้ดูแลระบบ</h1>
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
           <p className="font-sans">กำลังเตรียมแผงควบคุมระบบ…</p>
-        </div>
+        </main>
+        </>
       }
     >
       <AdminContent />
