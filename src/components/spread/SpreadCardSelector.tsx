@@ -13,17 +13,38 @@ import { CardImage } from "@/components/card/CardImage";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { soundManager } from "@/lib/utils/audio";
-import { withMotionScope, prefetchMotionScope } from "@/components/providers/with-motion-scope";
+import dynamic from "next/dynamic";
 
 /**
  * `SpreadCardSelector` เป็น static import ตรงเข้า `TarotFlow` (ไม่ได้อยู่หลัง
- * `next/dynamic` เหมือนหน้าต่างลอยอื่น ๆ เพราะเป็นจอแรกที่ผู้ใช้เห็น) — ถ้า import
- * `Modal` แบบ static ตรง ๆ จะลาก `motion/react` (40 KB gzip) กลับเข้าบันเดิลตั้งต้น
- * ของ `/` ทั้งที่ `withMotionScope()` ถอดออกไปแล้วตามคอมเมนต์ในไฟล์นั้น (วัดจริง: งบ JS
- * ของ `/` พุ่งจาก 229 KB เป็น 292 KB ตอนลืมข้อนี้) — ต้องผ่าน `withMotionScope()` เสมอ
+ * `next/dynamic` เหมือนหน้าต่างลอยอื่น ๆ เพราะเป็นจอแรกที่ผู้ใช้เห็น) — ป๊อปอัพจึงยัง
+ * ต้องอยู่หลัง `next/dynamic` เพื่อไม่ให้โค้ดของมันติดไปในบันเดิลตั้งต้นของ `/`
+ *
+ * ⚠️ **ห้ามห่อด้วย `withMotionScope()`** (INC-0128 · INC-0137)
+ * `withMotionScope()` พ่วง `motion` (40 KB gzip · รวมสองก้อน 68.7 KB) ไว้ใน chunk เดียวกัน
+ * ของที่ผู้ใช้ "แตะแล้วต้องเห็นทันที" จึงต้องรอดาวน์โหลด+คอมไพล์ไลบรารีให้จบก่อน
+ * บนมือถืออาการคือ **แตะการ์ดแล้วจอนิ่งไปครู่หนึ่ง แล้วป๊อปอัพเด้งขึ้นมาแบบกระพริบ**
+ * — ตรงกับที่เจ้าของโปรเจกต์แจ้งเข้ามาเป๊ะ ๆ
+ *
+ * ตั้งแต่ `ui/Modal.tsx` เปลี่ยนไปใช้ CSS keyframes ล้วนแล้ว มันไม่ import `motion`
+ * อีกต่อไป `next/dynamic` ธรรมดาจึงพอ และ chunk เหลือแค่โค้ดของหน้าต่างเอง
+ * (ด่านกฎ 13 ใน `scripts/qa/test-motion-quality.ts` คุมข้อนี้อยู่)
  */
 const loadModal = () => import("@/components/ui/Modal").then((m) => m.Modal);
-const Modal = withMotionScope(loadModal);
+const Modal = dynamic(loadModal, { ssr: false });
+
+/**
+ * อุ่นเครื่อง chunk ของป๊อปอัพล่วงหน้าตอนผู้ใช้ "ส่อแวว" ว่าจะกด (ชี้เมาส์ / โฟกัส / แตะ)
+ * พอกดจริงของอยู่ในแคชแล้ว อนิเมชันขาเข้าจึงได้เล่นครบจังหวะแทนที่จะเด้งพรึ่บ
+ *
+ * ⚠️ ห้ามเรียกตอนหน้าโหลด — เท่ากับลาก chunk กลับเข้าเส้นทางโหลดแรก
+ */
+const prefetchModal = (): void => {
+  if (typeof window === "undefined") return;
+  void loadModal().catch(() => {
+    /* noop — ของเสริม ล้มแล้วปล่อยให้ตอนเปิดจริงโหลดใหม่ */
+  });
+};
 
 interface SpreadCardSelectorProps {
   selectedSpread: Spread;
@@ -149,8 +170,18 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
    */
   const [showStartModal, setShowStartModal] = useState(false);
 
-  // Sync scroll position with active dot indicator on mobile
+  /*
+   * Sync scroll position with active dot indicator on mobile
+   *
+   * ⚠️ หยุดทำงานทันทีที่ป๊อปอัพเปิดอยู่ (INC-0137)
+   * ตอนแตะการ์ด เราสั่งเลื่อนแบบ `smooth` พร้อมกับเปิดป๊อปอัพในจังหวะเดียวกัน
+   * แรงเลื่อนนั้นวิ่งต่ออีกราว 300–500 ms ทับกับอนิเมชันขาเข้าของป๊อปอัพพอดี
+   * และยิง `onScroll` รัวเป็นสิบครั้ง ➔ `setActiveScrollIndex` ➔ เรนเดอร์ใหม่ทั้งแผง
+   * ➔ `isCardVisibleOrNear` พลิกไปมาจน `<CardImage />` ถูกถอด/ใส่กลางอนิเมชัน
+   * ผู้ใช้เห็นเป็นอาการ "กระพริบ" ของฉากหลังและป๊อปอัพกระตุกตามไปด้วย
+   */
   const handleCarouselScroll = () => {
+    if (showStartModal) return;
     if (!carouselRef.current) return;
     const { scrollLeft, clientWidth } = carouselRef.current;
     const cardWidth = Math.min(clientWidth * 0.82, 310) + 16; // 82vw or max 310px + gap
@@ -160,12 +191,16 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
     }
   };
 
-  const scrollToCard = (index: number) => {
+  /**
+   * @param instant เลื่อนแบบตัดภาพทันทีแทนการไหล — ใช้ตอนที่กำลังจะมีป๊อปอัพมาบังจออยู่แล้ว
+   *   แรงเลื่อนแบบ `smooth` ที่ยังวิ่งค้างอยู่ใต้ฉากหลังคือหนึ่งในต้นตอของอาการกระพริบ (INC-0137)
+   */
+  const scrollToCard = (index: number, instant = false) => {
     if (!carouselRef.current) return;
     const children = carouselRef.current.children;
     if (children && children[index]) {
       (children[index] as HTMLElement).scrollIntoView({
-        behavior: "smooth",
+        behavior: instant ? "auto" : "smooth",
         inline: "center",
         block: "nearest",
       });
@@ -288,7 +323,9 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 return;
               }
               onSelectSpread(spread);
-              scrollToCard(idx);
+              // ป๊อปอัพกำลังจะมาบังจอ — เลื่อนการ์ดให้เข้าที่แบบตัดภาพทันที
+              // ไม่ปล่อยแรงเลื่อนแบบไหลไปทับอนิเมชันขาเข้าของป๊อปอัพ (INC-0137)
+              scrollToCard(idx, Boolean(onProceed));
               if (onProceed) setShowStartModal(true);
             };
 
@@ -316,10 +353,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                 /* ผู้ใช้ส่อแวว (เมาส์ชี้/โฟกัส) ว่าจะกดการ์ดนี้ — อุ่นเครื่อง chunk ของ
                    ป๊อปอัพล่วงหน้า กันอาการ "กดแล้วเงียบ แล้วเด้งพรึ่บ" ตอนโหลด motion ครั้งแรก */
                 onPointerEnter={() => {
-                  if (!isLocked && onProceed) prefetchMotionScope(loadModal);
+                  if (!isLocked && onProceed) prefetchModal();
                 }}
                 onFocus={() => {
-                  if (!isLocked && onProceed) prefetchMotionScope(loadModal);
+                  if (!isLocked && onProceed) prefetchModal();
                 }}
                 className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/card ${
                   isSelected
