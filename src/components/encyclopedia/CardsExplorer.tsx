@@ -215,7 +215,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             <button
               type="button"
               onClick={() => setShowSemanticSearch((prev) => !prev)}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-serif-th font-bold transition cursor-pointer ${
+              className={`tap-overlay-y inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-serif-th font-bold transition cursor-pointer ${
                 showSemanticSearch
                   ? "border-gold-ink bg-gold-ink text-white shadow-2xs"
                   : filteredCards.length < 3 && searchQuery.trim().length >= 6
@@ -472,7 +472,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               setSearchQuery("");
               setActiveFilter("all");
             }}
-            className="px-6 py-2 rounded-full text-xs font-serif-th font-bold bg-ink hover:bg-gold text-canvas transition cursor-pointer shadow-xs"
+            className="tap-overlay-y px-6 py-2 rounded-full text-xs font-serif-th font-bold bg-ink hover:bg-gold text-canvas transition cursor-pointer shadow-xs"
           >
             {isEnglish ? "Clear All Filters" : "ล้างตัวกรองทั้งหมด"}
           </button>

@@ -165,7 +165,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   soundManager.playMenuTapSound();
                   setSelectedCat(cat.id);
                 }}
-                className={`rounded-full px-4 py-1.5 text-xs font-serif-th font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                className={`tap-overlay-y rounded-full px-4 py-1.5 text-xs font-serif-th font-semibold transition cursor-pointer flex items-center gap-1.5 ${
                   isSelected
                     ? "bg-ink text-canvas border border-ink shadow-xs"
                     : "bg-surface border border-line text-muted hover:border-gold-ink hover:text-gold-ink shadow-2xs"

@@ -151,7 +151,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-selected={activeTab === "card"}
           aria-controls="chamber-panel-card"
           onClick={() => setActiveTab("card")}
-          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+          className={`tap-overlay-y px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
             activeTab === "card"
               ? "bg-gold-ink text-surface"
               : "bg-inset-warm text-ink-deep hover:text-gold-ink border border-line-warm"
@@ -170,7 +170,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-selected={activeTab === "summary"}
           aria-controls="chamber-panel-summary"
           onClick={() => setActiveTab("summary")}
-          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+          className={`tap-overlay-y px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
             activeTab === "summary"
               ? "bg-gold-ink text-surface"
               : "bg-inset-warm text-ink-deep hover:text-gold-ink border border-line-warm"
@@ -221,7 +221,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+                  className="tap-overlay-y self-end sm:self-auto px-5 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
                   {isEnglish ? (/reload|not found/i.test(errorMsg) ? "Reload Reading" : "Retry Reading") : (/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่")}
                 </button>
@@ -242,7 +242,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 type="button"
                 aria-pressed={activeCardIndex === d.order}
                 onClick={() => onSelectCardIndex(d.order)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold transition cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                className={`tap-overlay-y px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold transition cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
                   activeCardIndex === d.order
                     ? "bg-gold-ink text-surface font-bold"
                     : "bg-inset-warm text-ink-deep hover:bg-surface border border-line-warm"
@@ -369,7 +369,7 @@ isEnglish
                   <button
                     type="button"
                     onClick={onRetry}
-                    className="px-4 py-1.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
+                    className="tap-overlay-y px-4 py-1.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
                   >
                     {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
                   </button>
@@ -440,7 +440,7 @@ isEnglish
                 type="button"
                 onClick={() => onSelectCardIndex(Math.max(0, activeCardIndex - 1))}
                 disabled={activeCardIndex === 0}
-                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
+                className={`tap-overlay-y px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
                   activeCardIndex > 0
                     ? "border-line-warm bg-surface text-ink-deep hover:bg-surface-warm hover:border-gold-ink cursor-pointer"
                     : "border-transparent text-muted cursor-not-allowed"
@@ -453,7 +453,7 @@ isEnglish
                 type="button"
                 onClick={() => onSelectCardIndex(Math.min(totalCards - 1, activeCardIndex + 1))}
                 disabled={activeCardIndex === totalCards - 1}
-                className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
+                className={`tap-overlay-y px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
                   activeCardIndex < totalCards - 1
                     ? "border-line-warm bg-surface text-ink-deep hover:bg-surface-warm hover:border-gold-ink cursor-pointer"
                     : "border-transparent text-muted cursor-not-allowed"

@@ -410,7 +410,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
             <button
               type="button"
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-2 rounded-xl border border-ink bg-ink px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-dark transition-colors cursor-pointer"
+              className="tap-overlay-y inline-flex items-center gap-2 rounded-xl border border-ink bg-ink px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-dark transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -576,7 +576,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                       <button
                         type="button"
                         onClick={() => setExpandedDate(isExpanded ? null : row.date)}
-                        className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition cursor-pointer shrink-0 ${
+                        className={`tap-overlay-y rounded-lg border px-2.5 py-1 text-[11px] font-medium transition cursor-pointer shrink-0 ${
                           isExpanded
                             ? "border-ink bg-ink text-white"
                             : "border-line bg-white text-ink hover:bg-canvas"
@@ -690,7 +690,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                           <button
                             type="button"
                             onClick={() => setExpandedDate(isExpanded ? null : row.date)}
-                            className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-medium transition cursor-pointer whitespace-nowrap ${
+                            className={`tap-overlay-y inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-medium transition cursor-pointer whitespace-nowrap ${
                               isExpanded
                                 ? "border-ink bg-ink text-white"
                                 : "border-line bg-white text-ink hover:bg-canvas hover:border-gold"
