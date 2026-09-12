@@ -53,19 +53,24 @@ Local dev: ใส่ `ADMIN_PASSWORD=...` ใน `.env.local`
 
 ---
 
-## สถิติ (M2)
+## สถิติและการวิเคราะห์รายวัน (Daily Analytics & Stats)
 
 | ไฟล์ | หน้าที่ |
 | :-- | :-- |
 | `src/lib/stats/record.ts` | `recordEvent()` — buffer ระดับ isolate + flush debounce 20 วิ ผ่าน `waitUntil` |
 | `src/lib/stats/read.ts` | `getStats(days)` — force-flush ก่อนอ่าน + รวม daily/all-time |
-| `src/components/admin/StatsDashboard.tsx` | UI การ์ด + bar list (ไม่มี chart lib) |
-| `GET /api/admin/stats?days=` | คืน `{ stats, audit }` (guard requireAdmin) |
+| `src/components/admin/DailyStatsTable.tsx` | UI ตารางสถิติวันต่อวัน (Day-by-Day Detailed Table), กราฟแนวโน้ม, คลี่ดูข้อมูลย่อย, และส่งออกรายงาน CSV |
+| `src/components/admin/StatsDashboard.tsx` | แดชบอร์ดสถิติ 3 มุมมอง: สถิติรายวัน (Day-by-Day) / สรุปหมวดหมู่ & แม่หมอ / เมตริก AI และเทคนิค |
+| `GET /api/admin/stats?days=` | คืน `{ stats, audit, aiCapToday, aiDailyCap }` (guard requireAdmin) |
 
 - KV keys: `app:stat:day:<YYYY-MM-DD>` (TTL 400 วัน) + `app:stat:all`
-- เขียน KV แบบ debounce เพราะ free plan จำกัด ~1,000 writes/วัน — ยอมสูญเสีย < 20 วิ/isolate ถ้า worker recycle
-- metric ที่นับ: `reading_started/completed/failed/blocked`, `spread:*`, `persona:*`, `category:*`, `safety_flag:*`, `ai_call:gemini`, `ai_error:gemini`, `ai_latency_ms`, `ai_tokens_in/out`, `chat_message`, `chat_blocked`
+- การจัดหมวดหมู่ 4 กลุ่มตามภารกิจจริงของมนุษย์ (Human-First Navigation):
+  1. **สถิติและรายงาน**: ภาพรวมวิหาร (Overview), สถิติการใช้งานรายวัน (Daily Statistics)
+  2. **บริการและสมาชิก**: รหัสของขวัญ & สิทธิ์พิเศษ (Redeem Codes), รายชื่อสมาชิก (Members), หมอดูพาร์ทเนอร์ (Readers)
+  3. **ปรับแต่งเนื้อหาและไพ่**: แม่หมอ & ไพ่ 78 ใบ (Content Editor), สิทธิ์ & โควตาการเปิดไพ่ (Quota)
+  4. **ห้องช่างและระบบคลาวด์**: ตรวจสุขภาพระบบ & AI (Cloud & AI Diagnostics — ติดป้าย "ขั้นสูง")
 - **ทุก metric เป็น enum/count ล้วน — ไม่มี PII**
+- รองรับการส่งออกรายงาน CSV พร้อม UTF-8 BOM สำหรับเปิดใน Microsoft Excel และ Google Sheets ได้ทันทีโดยภาษาไทยไม่เพี้ยน
 
 ## แก้เนื้อหา live (M3)
 

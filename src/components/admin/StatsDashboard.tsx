@@ -98,8 +98,11 @@ function BarList({
   );
 }
 
+import DailyStatsTable from "@/components/admin/DailyStatsTable";
+
 export default function StatsDashboard() {
-  const [days, setDays] = useState(30);
+  const [days, setDays] = useState(14);
+  const [subView, setSubView] = useState<"daily" | "summary" | "tech">("daily");
   const [data, setData] = useState<{
     stats: StatsSnapshot;
     audit: AuditEntry[];
@@ -169,14 +172,17 @@ export default function StatsDashboard() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-1.5">
-          {[7, 30, 90].map((d) => (
+      {/* ─── Top Control Bar: Range Selector & Sub-Tabs ──────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#D5CEC2] pb-4">
+        {/* Days Filter Pills */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-xs font-semibold text-[#635B4E] mr-1">ช่วงเวลา:</span>
+          {[7, 14, 30, 90].map((d) => (
             <button
               key={d}
               type="button"
               onClick={() => setDays(d)}
-              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${
+              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition cursor-pointer ${
                 days === d
                   ? "bg-ink text-white shadow-xs"
                   : "border border-line bg-surface-mist text-muted hover:bg-white hover:text-ink"
@@ -185,70 +191,136 @@ export default function StatsDashboard() {
               {d} วัน
             </button>
           ))}
+        {/* Sub-view switcher */}
+        <div className="flex items-center gap-1 rounded-xl border border-line bg-surface-mist p-1 text-xs">
+          <button
+            type="button"
+            onClick={() => setSubView("daily")}
+            className={`rounded-lg px-3 py-1 text-xs font-medium transition cursor-pointer ${
+              subView === "daily"
+                ? "bg-white text-ink shadow-2xs font-semibold border border-line"
+                : "text-muted hover:text-ink"
+            }`}
+          >
+            สถิติรายวัน (Day-by-Day)
+          </button>
+          <button
+            type="button"
+            onClick={() => setSubView("summary")}
+            className={`rounded-lg px-3 py-1 text-xs font-medium transition cursor-pointer ${
+              subView === "summary"
+                ? "bg-white text-ink shadow-2xs font-semibold border border-line"
+                : "text-muted hover:text-ink"
+            }`}
+          >
+            หมวดหมู่ & แม่หมอยอดนิยม
+          </button>
+          <button
+            type="button"
+            onClick={() => setSubView("tech")}
+            className={`rounded-lg px-3 py-1 text-xs font-medium transition cursor-pointer ${
+              subView === "tech"
+                ? "bg-white text-ink shadow-2xs font-semibold border border-line"
+                : "text-muted hover:text-ink"
+            }`}
+          >
+            เทคนิค & AI
+          </button>
+          <button
+            type="button"
+            onClick={() => load(days)}
+            className="rounded-lg px-2.5 py-1 text-xs text-muted hover:text-ink ml-1 transition cursor-pointer"
+            disabled={loading}
+            title="รีเฟรชข้อมูลสด"
+          >
+            {loading ? "…" : "↻"}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => load(days)}
-          className="text-xs text-muted hover:text-ink font-medium"
-          disabled={loading}
-        >
-          {loading ? "กำลังโหลด…" : "รีเฟรชข้อมูล"}
-        </button>
       </div>
 
       {err ? <p className="text-sm text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-xl">{err}</p> : null}
 
-      {view ? (
+      {/* ─── Range KPI Cards ────────────────────────────────────────── */}
+      {view && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard label={`เริ่มดูดวง (${days} วัน)`} value={n(view.started)} />
+          <StatCard label="อ่านจบสมบูรณ์" value={n(view.completed)} sub={`${view.completionRate} ของที่เริ่ม`} />
+          <StatCard label="แชทถามต่อ" value={n(view.chat)} sub="ข้อความคำถาม" />
+          <StatCard label="ถูกบล็อก / สิทธิ์เต็ม" value={`${n(view.blocked)} ครั้ง`} sub="ระบบความปลอดภัย" />
+        </div>
+      )}
+
+      {/* ─── Active Sub-Tab Views ──────────────────────────────────── */}
+      {data && view ? (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard label={`เริ่มดูดวง (${days} วัน)`} value={n(view.started)} />
-            <StatCard label="อ่านจบสมบูรณ์" value={n(view.completed)} sub={`${view.completionRate} ของที่เริ่ม`} />
-            <StatCard label="ล้มเหลว / ถูกบล็อก" value={`${n(view.failed)} / ${n(view.blocked)}`} />
-            <StatCard label="แชทถามต่อ" value={n(view.chat)} />
-            <StatCard
-              label="โควตา AI วันนี้ (Cap)"
-              value={`${n(data?.aiCapToday ?? 0)} / ${n(data?.aiDailyCap ?? 2000)}`}
-              sub={view.aiCapHit > 0 ? `เต็มโควตา ${n(view.aiCapHit)} ครั้ง` : "ใช้งานปกติ"}
-            />
-            <StatCard
-              label="เรียก AI (Groq / Gemini)"
-              value={`${n(view.groqCalls)} / ${n(view.geminiCalls)}`}
-              sub={`Groq ${view.groqShare} · ผิดพลาด ${n(view.aiErrors)} ครั้ง`}
-            />
-            <StatCard
-              label="Groq เอนจิน — สุขภาพ"
-              value={`${n(view.groqFailover)} failover`}
-              sub={`ตัดวงจรอักษรแปลก ${n(view.foreignTrips)} · schema fail ${n(view.schemaFails)}`}
-            />
-            <StatCard label="เวลาเฉลี่ย/คำอ่าน" value={view.avgLatency} />
-            <StatCard label="Token รวม" value={n(view.tokens)} sub="in + out" />
-          </div>
+          {/* Sub-tab 1: Day-by-Day Detailed Statistics (Primary requested feature) */}
+          {subView === "daily" && (
+            <DailyStatsTable daily={data.stats.daily} rangeDays={days} />
+          )}
 
-          <div className="grid gap-3 lg:grid-cols-2">
-            <BarList title="ผังที่ถูกเลือก" rows={view.spreads} nameMap={SPREAD_NAME} />
-            <BarList title="บุคลิกแม่หมอ" rows={view.personas} nameMap={PERSONA_NAME} />
-            <BarList title="หมวดคำถาม" rows={view.categories} nameMap={CATEGORY_NAME} />
-            <BarList title="ธงความปลอดภัยที่ตรวจพบ" rows={view.flags} nameMap={FLAG_NAME} />
-          </div>
+          {/* Sub-tab 2: Categories, Spreads, Personas & Flags */}
+          {subView === "summary" && (
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-line bg-surface-mist p-4 text-xs text-muted">
+                <p className="font-semibold text-ink">สรุปความนิยมในรอบ {days} วัน</p>
+                <p className="mt-0.5">
+                  ความถี่ของแต่ละตัวเลือกที่ผู้ใช้งานเลือกเปิดไพ่ ปรึกษาแม่หมอ และสัดส่วนหมวดหมู่
+                </p>
+              </div>
+              <div className="grid gap-3 lg:grid-cols-2">
+                <BarList title="ผังที่ถูกเลือก" rows={view.spreads} nameMap={SPREAD_NAME} />
+                <BarList title="บุคลิกแม่หมอ" rows={view.personas} nameMap={PERSONA_NAME} />
+                <BarList title="หมวดคำถาม" rows={view.categories} nameMap={CATEGORY_NAME} />
+                <BarList title="ธงความปลอดภัยที่ตรวจพบ" rows={view.flags} nameMap={FLAG_NAME} />
+              </div>
+            </div>
+          )}
 
-          <div className="rounded-2xl border border-line bg-white p-5 shadow-xs">
-            <h3 className="font-mystic-gold text-sm font-bold text-ink">บันทึกการเข้าแอดมิน (ล่าสุด)</h3>
-            <ul className="mt-3 flex flex-col gap-2 text-xs">
-              {data!.audit.length === 0 ? (
-                <li className="text-muted">ยังไม่มีบันทึก</li>
-              ) : (
-                data!.audit.slice(0, 20).map((a, i) => (
-                  <li key={i} className="flex justify-between gap-3 border-b border-line-soft pb-1.5 last:border-0 last:pb-0">
-                    <span className="text-ink font-mono">{a.action}</span>
-                    <span className="tabular-nums text-muted">{new Date(a.ts).toLocaleString("th-TH")}</span>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
+          {/* Sub-tab 3: Technical AI Metrics & Access Audit Log */}
+          {subView === "tech" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <StatCard
+                  label="โควตา AI วันนี้ (Cap)"
+                  value={`${n(data.aiCapToday ?? 0)} / ${n(data.aiDailyCap ?? 2000)}`}
+                  sub={view.aiCapHit > 0 ? `เต็มโควตา ${n(view.aiCapHit)} ครั้ง` : "ใช้งานปกติ"}
+                />
+                <StatCard
+                  label="เรียก AI (Groq / Gemini)"
+                  value={`${n(view.groqCalls)} / ${n(view.geminiCalls)}`}
+                  sub={`Groq ${view.groqShare} · ผิดพลาด ${n(view.aiErrors)} ครั้ง`}
+                />
+                <StatCard
+                  label="Groq เอนจิน — สุขภาพ"
+                  value={`${n(view.groqFailover)} failover`}
+                  sub={`ตัดวงจรอักษรแปลก ${n(view.foreignTrips)} · schema fail ${n(view.schemaFails)}`}
+                />
+                <StatCard label="เวลาเฉลี่ย/คำอ่าน" value={view.avgLatency} sub={`Token รวม: ${n(view.tokens)}`} />
+              </div>
+
+              <div className="rounded-2xl border border-line bg-white p-5 shadow-xs">
+                <h3 className="font-mystic-gold text-sm font-bold text-ink">บันทึกการเข้าแอดมิน (ล่าสุด)</h3>
+                <ul className="mt-3 flex flex-col gap-2 text-xs">
+                  {data.audit.length === 0 ? (
+                    <li className="text-muted">ยังไม่มีบันทึก</li>
+                  ) : (
+                    data.audit.slice(0, 20).map((a, i) => (
+                      <li key={i} className="flex justify-between gap-3 border-b border-line-soft pb-1.5 last:border-0 last:pb-0">
+                        <span className="text-ink font-mono">{a.action}</span>
+                        <span className="tabular-nums text-muted">{new Date(a.ts).toLocaleString("th-TH")}</span>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            </div>
+          )}
         </>
       ) : loading ? (
-        <p className="text-sm text-muted">กำลังโหลดสถิติ…</p>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gold border-t-transparent mb-3" />
+          <p className="text-xs text-muted">กำลังประมวลผลสถิติการใช้งาน…</p>
+        </div>
       ) : null}
     </div>
   );
