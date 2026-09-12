@@ -35,6 +35,17 @@ const ROOT = process.cwd();
 const problems: string[] = [];
 const notes: string[] = [];
 
+
+/** ไล่ไฟล์ .tsx ทั้งโฟลเดอร์ */
+function walkTsx(dir: string, out: string[] = []): string[] {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkTsx(full, out);
+    else if (entry.name.endsWith(".tsx")) out.push(full);
+  }
+  return out;
+}
+
 /** ความสว่างสัมพัทธ์ตามสูตร WCAG 2.1 */
 function relativeLuminance(hex: string): number {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
@@ -123,6 +134,54 @@ if (mainOpen === -1 || mainClose === -1) {
   }
 }
 
+// ── กฎ 3.5 · หน้าต่างลอยต้องไม่อยู่ใน <main> (INC-0131) ────────────────────
+/*
+ * 🚨 บั๊กที่มองไม่เห็นจากการอ่านโค้ด และ z-index เท่าไหร่ก็แก้ไม่ได้
+ *
+ * `globals.css` บังคับ `position: relative; z-index: 1` ให้ลูกตรงของ `<body>` ทุกตัว
+ * `<main>` จึงกลายเป็น **stacking context** · หน้าต่างลอยที่เรนเดอร์อยู่ข้างในมัน
+ * ต่อให้เขียน `z-50` ก็ยังอยู่ใต้หัวเว็บที่เป็น `fixed z-50` ระดับ `<body>` เสมอ
+ *
+ * อาการจริงที่เจ้าของถ่ายมา: ฉากหลังโมดัลคลุมทั้งจอ แต่หัวเว็บลอยทับอยู่ข้างบนไม่โดนหรี่
+ * และบนมือถือจอเตี้ย หัวเว็บบังขอบบนของแผงจนโลโก้กับปุ่มปิดหาย กดปิดไม่ได้
+ */
+const MODAL_COMPONENTS = [
+  "AuthModal",
+  "ShareModal",
+  "CardZoomModal",
+  "ReadingHistoryModal",
+  "TarotEncyclopediaModal",
+  "BuyCreditsModal",
+  "AccessDialog",
+  "BookQueueModal",
+];
+
+for (const file of walkTsx(path.join(ROOT, "src"))) {
+  const raw = fs.readFileSync(file, "utf-8");
+  if (!raw.includes("<main")) continue;
+  const text = raw
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+  const open = text.indexOf("<main");
+  const close = text.indexOf("</main>");
+  if (open === -1 || close === -1 || close < open) continue;
+  const inside = text.slice(open, close);
+  const rel = path.relative(ROOT, file).split(path.sep).join("/");
+  for (const name of MODAL_COMPONENTS) {
+    if (new RegExp(`<${name}[\\s/>]`).test(inside)) {
+      problems.push(
+        `${rel}: <${name}> เรนเดอร์อยู่ใน <main> — <main> เป็น stacking context (z-index:1) ` +
+          "หน้าต่างลอยจึงไม่มีวันขึ้นเหนือหัวเว็บ `fixed z-50` ได้ ต้องย้ายออกไปนอก <main>",
+      );
+    }
+  }
+  if (/className="[^"]*\bmodal-scrim\b/.test(inside)) {
+    problems.push(
+      `${rel}: มี element ที่ใช้คลาส modal-scrim อยู่ใน <main> — ต้องย้ายออกไปนอก <main> (ดูเหตุผลในด่านนี้)`,
+    );
+  }
+}
+
 // ── กฎ 4 · ตรวจ HTML ที่ build จริง (ถ้ามี) ────────────────────────────────
 const indexHtmlPath = path.join(ROOT, ".next/server/app/index.html");
 if (!fs.existsSync(indexHtmlPath)) {
@@ -157,7 +216,7 @@ if (!fs.existsSync(indexHtmlPath)) {
   }
 }
 
-console.log("♿ ตรวจ a11y ระดับวิกฤตของหน้าแรก (สายด่วน · landmark · ลำดับหัวข้อ)...\n");
+console.log("♿ ตรวจ a11y ระดับวิกฤตของหน้าแรก (สายด่วน · landmark · ลำดับหัวข้อ · หน้าต่างลอยนอก <main>)...\n");
 for (const n of notes) console.log(`   ${n}`);
 
 if (problems.length > 0) {
@@ -167,5 +226,5 @@ if (problems.length > 0) {
   process.exit(1);
 }
 
-console.log("\n✅ ผ่าน: สายด่วนวิกฤตอ่านออกบนพื้นมืด · หัวเว็บ/ฟุตเตอร์อยู่นอก <main> · หัวข้อแรกเป็น h1 และไม่ข้ามลำดับ\n");
+console.log("\n✅ ผ่าน: สายด่วนวิกฤตอ่านออกบนพื้นมืด · หัวเว็บ/ฟุตเตอร์/หน้าต่างลอยอยู่นอก <main> · หัวข้อแรกเป็น h1 และไม่ข้ามลำดับ\n");
 process.exit(0);
