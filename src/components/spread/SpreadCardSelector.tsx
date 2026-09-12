@@ -13,7 +13,17 @@ import { CardImage } from "@/components/card/CardImage";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { soundManager } from "@/lib/utils/audio";
-import { Modal } from "@/components/ui/Modal";
+import { withMotionScope, prefetchMotionScope } from "@/components/providers/with-motion-scope";
+
+/**
+ * `SpreadCardSelector` เป็น static import ตรงเข้า `TarotFlow` (ไม่ได้อยู่หลัง
+ * `next/dynamic` เหมือนหน้าต่างลอยอื่น ๆ เพราะเป็นจอแรกที่ผู้ใช้เห็น) — ถ้า import
+ * `Modal` แบบ static ตรง ๆ จะลาก `motion/react` (40 KB gzip) กลับเข้าบันเดิลตั้งต้น
+ * ของ `/` ทั้งที่ `withMotionScope()` ถอดออกไปแล้วตามคอมเมนต์ในไฟล์นั้น (วัดจริง: งบ JS
+ * ของ `/` พุ่งจาก 229 KB เป็น 292 KB ตอนลืมข้อนี้) — ต้องผ่าน `withMotionScope()` เสมอ
+ */
+const loadModal = () => import("@/components/ui/Modal").then((m) => m.Modal);
+const Modal = withMotionScope(loadModal);
 
 interface SpreadCardSelectorProps {
   selectedSpread: Spread;
@@ -302,6 +312,14 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     e.preventDefault();
                     handleCardClick();
                   }
+                }}
+                /* ผู้ใช้ส่อแวว (เมาส์ชี้/โฟกัส) ว่าจะกดการ์ดนี้ — อุ่นเครื่อง chunk ของ
+                   ป๊อปอัพล่วงหน้า กันอาการ "กดแล้วเงียบ แล้วเด้งพรึ่บ" ตอนโหลด motion ครั้งแรก */
+                onPointerEnter={() => {
+                  if (!isLocked && onProceed) prefetchMotionScope(loadModal);
+                }}
+                onFocus={() => {
+                  if (!isLocked && onProceed) prefetchMotionScope(loadModal);
                 }}
                 className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/card ${
                   isSelected

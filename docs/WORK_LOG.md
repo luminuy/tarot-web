@@ -44,8 +44,14 @@
 - ใช้ `Modal` + `useDialogBehavior` ที่มีอยู่แล้วของบ้านนี้ (Esc · focus trap · scroll lock · คืนโฟกัส) ไม่เขียนหน้าต่างลอยใหม่ตั้งแต่ศูนย์ — ผ่านด่าน `test-modal-effect-deps` และ `test-modal-viewport-fit` โดยไม่ต้องแก้อะไรเพิ่ม
 - แถบสรุป "ผังที่เลือกไว้ + ปุ่มถัดไป" เดิมยังอยู่ครบ (เผื่อผู้ใช้ปิดป๊อปอัพแล้วอยากกดจากจุดเดิม) — ดึงโค้ดแมปภาพไพ่ประจำผังออกมาเป็นฟังก์ชัน `getSpreadEmblemImage()` ใช้ร่วมกันทั้งแถบสรุปและป๊อปอัพใหม่ (กันโค้ดซ้ำ)
 - จุดที่**ไม่แตะ**: การกดจุดนำทาง carousel มือถือ (pagination pills) ยังคงแค่เลื่อนโฟกัส ไม่เปิดป๊อปอัพ — เพราะเป็นปุ่มเลื่อนดูใบอื่น ไม่ใช่การตั้งใจเลือกแบบกดที่ตัวการ์ด
-- **ผลการทดสอบ**: `npm run typecheck` ➔ ✅ 0 Errors · `test-modal-effect-deps` / `test-modal-viewport-fit` / `test-motion-quality` / `test-palette-drift` / `test-tap-target` / `test-spreads` / `test-quick-fortune` / `test-docs-numbers` / `test-a11y-critical` ➔ ✅ ผ่านทั้งหมด
-- **หมายเหตุ**: `test-bundle-budget` (`/` และ `/en` เกินงบ JS 291 KB > 232 KB) เป็นของเดิมอยู่ก่อนแล้ว — ยืนยันด้วยการ `git stash` แล้วรันซ้ำ ได้ตัวเลขเท่ากันเป๊ะทั้งก่อน/หลังแก้ ไม่ใช่ของที่ PR นี้ทำให้เพิ่ม (`Modal`/`motion` ถูกบันเดิลอยู่แล้วจากจุดอื่นในหน้าแรก) — ไม่ได้อยู่ในสโคปงานนี้ ปล่อยให้ทีมที่ทำ `HANDOFF_BUNDLE_DIET` จัดการต่อ
+
+#### ⚠️ พลาดรอบแรก: import `Modal` แบบ static ลากบันเดิลหน้าแรกพุ่งจาก 229 → 292 KB
+
+ตอนแรก `import { Modal } from "@/components/ui/Modal"` ตรง ๆ ใน `SpreadCardSelector.tsx` — ตรวจ `repo:verify` ด้วย `npm` ในเครื่องตอนนั้นไม่จับ เพราะ**ก่อนแก้ก็ตกด่าน `test-bundle-budget` อยู่แล้วภายใต้ `npm`** (291 KB) จึงเข้าใจผิดว่าเป็นหนี้เดิม ยืนยันด้วย `git stash` แล้วดูตัวเลขเท่ากันก่อน/หลังแก้ — แต่ `npm` กับ `pnpm` (ตัวที่ CI ใช้จริง) ได้ผล bundling **คนละขนาด** จาก dependency tree เดียวกัน ตอน push ขึ้นจริง ด่านนี้เขียวอยู่ก่อนบน `main` (229 KB) แต่แดงทันทีบน PR นี้ (292 KB) — ต้องรัน `pnpm install` + `pnpm run test:budget` เทียบกับ `git worktree` ของ commit ฐานถึงจะเห็นว่าเป็นของที่ PR นี้ทำเพิ่มจริง ไม่ใช่หนี้เดิม
+- **สาเหตุจริง**: `SpreadCardSelector` เป็น static import ตรงเข้า `TarotFlow` (จอแรกที่ผู้ใช้เห็น ไม่ได้อยู่หลัง `next/dynamic` เหมือนหน้าต่างลอยอื่น) ส่วน `Modal.tsx` import `motion/react` ตรง ๆ — พอ import ตรงจึงลาก `motion` (40 KB gzip) กลับเข้าบันเดิลตั้งต้นของ `/` ทั้งที่ `docs/plans/HANDOFF_SMOOTH_FAST_2026-09-06.md`/`with-motion-scope.tsx` ถอดออกไปแล้วโดยเจตนา
+- **แก้**: เปลี่ยนเป็น `const Modal = withMotionScope(() => import("@/components/ui/Modal").then((m) => m.Modal));` (ตัวช่วยเดียวกับที่ `TarotFlow` ใช้ห่อ `AccessDialog`/`ShareModal` ฯลฯ) + เพิ่ม `prefetchMotionScope()` ตอนเมาส์ชี้/โฟกัสการ์ด กันอาการ "กดแล้วเงียบ แล้วเด้งพรึ่บ" ตอนโหลด chunk ครั้งแรก (ป๊อปอัพนี้พิเศษกว่าโมดัลอื่นตรงที่เด้งจากคลิกแรกทันที ไม่มีจังหวะรอเหมือน `AccessDialog`)
+- **บทเรียน**: ตรวจ perf ด่านที่ไวต่อ dependency tree (bundle size) **ต้องรันด้วย `pnpm` เท่านั้น** ให้ตรงกับ CI ห้ามเชื่อผล `npm` เด็ดขาด — ถ้าจะพิสูจน์ว่า "ของเดิมก็เป็นอยู่แล้ว" ต้องเทียบกับ commit ฐานภายใต้ package manager เดียวกับ CI เสมอ (ใช้ `git worktree` เทียบได้โดยไม่ต้องสลับ branch ของจริง)
+- **ผลการทดสอบหลังแก้**: `pnpm run typecheck` ➔ ✅ 0 Errors · `pnpm run repo:verify` ➔ ✅ **ผ่านครบทั้ง 50/50 ด่านจริง** (รวม `test-bundle-budget`: `/` และ `/en` กลับมา 229 KB ≤ 232 KB เท่ากับก่อน PR เป๊ะ)
 
 ---
 
