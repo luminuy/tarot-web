@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { DailyClient } from "@/components/daily/DailyClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
-import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../../../_shared/seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -78,8 +77,6 @@ const DAILY_LINKS_EN = [
   { href: "/en", label: "Start a full reading" },
 ];
 
-const heroCardSrcSet = getCardWebpSrcSet("major-19.jpg");
-
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -108,14 +105,6 @@ const breadcrumbJsonLd = buildBreadcrumbJsonLd("en", [
 export default function Page() {
   return (
     <>
-      <link
-        rel="preload"
-        as="image"
-        type="image/webp"
-        fetchPriority="high"
-        imageSrcSet={heroCardSrcSet ?? undefined}
-        imageSizes="120px"
-      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script

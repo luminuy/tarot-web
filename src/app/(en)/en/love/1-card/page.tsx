@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { LoveOneCardClient } from "@/components/love/LoveOneCardClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
-import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../../../../_shared/seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -76,8 +75,6 @@ const LOVE_LINKS_EN = [
   { href: "/en/daily", label: "Daily tarot card" },
 ];
 
-const heroCardSrcSet = getCardWebpSrcSet("major-06.jpg");
-
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
@@ -107,14 +104,6 @@ const breadcrumbJsonLd = buildBreadcrumbJsonLd("en", [
 export default function Page() {
   return (
     <>
-      <link
-        rel="preload"
-        as="image"
-        type="image/webp"
-        fetchPriority="high"
-        imageSrcSet={heroCardSrcSet ?? undefined}
-        imageSizes="120px"
-      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script
