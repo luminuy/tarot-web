@@ -134,7 +134,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+                  className="tap-overlay-y self-end sm:self-auto px-5 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
                   
                   {isEnglish
@@ -162,7 +162,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             <button
               type="button"
               onClick={onRetry}
-              className="px-4 py-1.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
+              className="tap-overlay-y px-4 py-1.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
             >
               {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
             </button>

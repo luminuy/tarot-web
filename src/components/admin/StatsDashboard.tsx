@@ -179,7 +179,7 @@ export default function StatsDashboard() {
           <button
             type="button"
             onClick={() => setSubView("daily")}
-            className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+            className={`tap-overlay-y rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
               subView === "daily"
                 ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                 : "text-muted hover:text-ink"
@@ -190,7 +190,7 @@ export default function StatsDashboard() {
           <button
             type="button"
             onClick={() => setSubView("summary")}
-            className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+            className={`tap-overlay-y rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
               subView === "summary"
                 ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                 : "text-muted hover:text-ink"
@@ -201,7 +201,7 @@ export default function StatsDashboard() {
           <button
             type="button"
             onClick={() => setSubView("tech")}
-            className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+            className={`tap-overlay-y rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
               subView === "tech"
                 ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                 : "text-muted hover:text-ink"
@@ -220,7 +220,7 @@ export default function StatsDashboard() {
                 key={d}
                 type="button"
                 onClick={() => setDays(d)}
-                className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer ${
+                className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer ${
                   days === d
                     ? "bg-ink text-white shadow-xs"
                     : "border border-line bg-white text-muted hover:bg-canvas hover:text-ink"
@@ -234,7 +234,7 @@ export default function StatsDashboard() {
           <button
             type="button"
             onClick={() => load(days)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
+            className="tap-overlay-y inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
             disabled={loading}
             title="รีเฟรชข้อมูลล่าสุด"
           >

@@ -356,7 +356,7 @@ export default function RedeemCodesManager() {
         <div className="flex flex-wrap gap-1.5 text-xs">
           <button
             onClick={() => setFilter("all")}
-            className={`px-3 py-1.5 rounded-lg border transition-colors ${
+            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "all"
                 ? "bg-ink text-white border-ink"
                 : "bg-white text-muted border-line hover:bg-canvas"
@@ -366,7 +366,7 @@ export default function RedeemCodesManager() {
           </button>
           <button
             onClick={() => setFilter("active")}
-            className={`px-3 py-1.5 rounded-lg border transition-colors ${
+            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "active"
                 ? "bg-emerald-800 text-white border-emerald-800"
                 : "bg-white text-muted border-line hover:bg-canvas"
@@ -376,7 +376,7 @@ export default function RedeemCodesManager() {
           </button>
           <button
             onClick={() => setFilter("inactive")}
-            className={`px-3 py-1.5 rounded-lg border transition-colors ${
+            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "inactive"
                 ? "bg-muted text-white border-muted"
                 : "bg-white text-muted border-line hover:bg-canvas"
@@ -386,7 +386,7 @@ export default function RedeemCodesManager() {
           </button>
           <button
             onClick={() => setFilter("expired")}
-            className={`px-3 py-1.5 rounded-lg border transition-colors ${
+            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "expired"
                 ? "bg-amber-800 text-white border-amber-800"
                 : "bg-white text-muted border-line hover:bg-canvas"
@@ -396,7 +396,7 @@ export default function RedeemCodesManager() {
           </button>
           <button
             onClick={() => setFilter("depleted")}
-            className={`px-3 py-1.5 rounded-lg border transition-colors ${
+            className={`tap-overlay-y px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "depleted"
                 ? "bg-rose-800 text-white border-rose-800"
                 : "bg-white text-muted border-line hover:bg-canvas"
@@ -445,7 +445,7 @@ export default function RedeemCodesManager() {
                         type="button"
                         onClick={() => copyToClipboard(c.code)}
                         title="คัดลอกรหัส"
-                        className="text-gold-ink hover:text-gold-ink p-1 transition-colors"
+                        className="tap-overlay-y text-gold-ink hover:text-gold-ink p-1 transition-colors"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path
@@ -512,7 +512,7 @@ export default function RedeemCodesManager() {
                       <button
                         type="button"
                         onClick={() => handleToggleActive(c)}
-                        className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors shrink-0 ${
+                        className={`tap-overlay-y rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors shrink-0 ${
                           c.isActive
                             ? "border-line bg-white text-stone-700 hover:bg-canvas"
                             : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
@@ -523,14 +523,14 @@ export default function RedeemCodesManager() {
                       <button
                         type="button"
                         onClick={() => openRedemptionsModal(c.code)}
-                        className="rounded-lg border border-line bg-canvas px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-inset transition-colors shrink-0"
+                        className="tap-overlay-y rounded-lg border border-line bg-canvas px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-inset transition-colors shrink-0"
                       >
                         คนแลก ({c.actualRedeemedCount})
                       </button>
                       <button
                         type="button"
                         onClick={() => openEditModal(c)}
-                        className="rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors shrink-0"
+                        className="tap-overlay-y rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors shrink-0"
                       >
                         แก้ไข
                       </button>
@@ -571,7 +571,7 @@ export default function RedeemCodesManager() {
                             type="button"
                             onClick={() => copyToClipboard(c.code)}
                             title="คัดลอกรหัส"
-                            className="text-gold-ink hover:text-gold-ink transition-colors p-1"
+                            className="tap-overlay-y text-gold-ink hover:text-gold-ink transition-colors p-1"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path
@@ -653,7 +653,7 @@ export default function RedeemCodesManager() {
                             type="button"
                             onClick={() => handleToggleActive(c)}
                             title={c.isActive ? "กดเพื่อปิดใช้งานทันที" : "กดเพื่อเปิดใช้งาน"}
-                            className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors whitespace-nowrap shrink-0 ${
+                            className={`tap-overlay-y rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors whitespace-nowrap shrink-0 ${
                               c.isActive
                                 ? "border-line bg-white text-stone-700 hover:bg-canvas"
                                 : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
@@ -665,7 +665,7 @@ export default function RedeemCodesManager() {
                           <button
                             type="button"
                             onClick={() => openRedemptionsModal(c.code)}
-                            className="rounded-lg border border-line bg-canvas px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-inset transition-colors whitespace-nowrap shrink-0"
+                            className="tap-overlay-y rounded-lg border border-line bg-canvas px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-inset transition-colors whitespace-nowrap shrink-0"
                           >
                             คนแลก ({c.actualRedeemedCount})
                           </button>
@@ -673,7 +673,7 @@ export default function RedeemCodesManager() {
                           <button
                             type="button"
                             onClick={() => openEditModal(c)}
-                            className="rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors whitespace-nowrap shrink-0"
+                            className="tap-overlay-y rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors whitespace-nowrap shrink-0"
                           >
                             แก้ไข
                           </button>

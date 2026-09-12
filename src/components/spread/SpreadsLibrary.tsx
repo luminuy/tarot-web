@@ -149,7 +149,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   nextTab?.focus();
                 }
               }}
-              className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+              className={`tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
                 isActive
                   ? "bg-ink text-canvas shadow-sm"
                   : "bg-inset text-ink hover:text-gold border border-line hover:border-gold"
@@ -228,7 +228,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   <button
                     type="button"
                     onClick={() => toggleExpand(spread.id)}
-                    className="w-full text-left text-[13px] font-serif-th text-gold-ink hover:text-ink flex items-center justify-between py-1.5 border-t border-line/40 cursor-pointer transition-colors font-bold"
+                    className="tap-overlay-y w-full text-left text-[13px] font-serif-th text-gold-ink hover:text-ink flex items-center justify-between py-1.5 border-t border-line/40 cursor-pointer transition-colors font-bold"
                   >
                     <span className="flex items-center gap-1.5">
                        {isEnglish ? `View ${spread.positions.length} card positions` : `ดูรายละเอียด ${spread.positions.length} ตำแหน่งไพ่`}

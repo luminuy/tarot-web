@@ -137,6 +137,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "✦ คุณภาพโมชั่นทั้งเว็บ (ไม่มี transition-all · ไม่มี backdrop-filter · ลูปไม่รู้จบต้องเป็น CSS · โทเคนจังหวะกลางผูกอยู่)", cmd: TSX, args: ["scripts/qa/test-motion-quality.ts"] },
   { label: "♿ a11y ระดับวิกฤตของหน้าแรก (สายด่วน 1323/1669 อ่านออกบนพื้นมืด · หัวเว็บ/ฟุตเตอร์นอก <main> · หัวข้อแรกเป็น h1)", cmd: TSX, args: ["scripts/qa/test-a11y-critical.ts"] },
   { label: "🎨 พาเลตยังเป็นชุดเดียว (สีฮาร์ดโค้ดไม่เพิ่ม · ไม่มีสีที่ถอดไปแล้วกลับมา · gold ห้ามเป็นตัวอักษรเล็ก)", cmd: TSX, args: ["scripts/qa/test-palette-drift.ts"] },
+  { label: "🎯 พื้นที่กดขั้นต่ำ (ปุ่มเล็กกว่าเกณฑ์ต้องไม่เพิ่มขึ้น · หัวเว็บต้องใช้ tap-overlay เท่านั้น)", cmd: TSX, args: ["scripts/qa/test-tap-target.ts"] },
 ];
 
 /**

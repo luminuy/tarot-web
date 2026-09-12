@@ -158,7 +158,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             <button
               type="button"
               onClick={() => setOrientation("upright")}
-              className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`tap-overlay-y flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5 ${
                 isUpright ? "bg-ink text-canvas shadow-xs" : "text-muted hover:text-ink"
               }`}
             >
@@ -167,7 +167,7 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             <button
               type="button"
               onClick={() => setOrientation("reversed")}
-              className={`flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`tap-overlay-y flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5 ${
                 !isUpright ? "bg-ink text-canvas shadow-xs" : "text-muted hover:text-ink"
               }`}
             >
