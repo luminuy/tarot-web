@@ -33,7 +33,7 @@ export function DeleteAllDataButton() {
       type="button"
       onClick={handleDelete}
       disabled={loading}
-      className="px-5 py-2.5 rounded-lg bg-err/80 border border-err/50 text-err text-xs font-bold hover:bg-err/80 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+      className="tap-overlay-y px-5 py-2.5 rounded-lg bg-err/80 border border-err/50 text-err text-xs font-bold hover:bg-err/80 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
     >
       
       <span>

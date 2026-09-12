@@ -365,7 +365,7 @@ export function LoveOneCardClient() {
               <span className="px-3 py-1 rounded-full bg-inset border border-line-warm text-xs font-serif-th font-semibold text-gold-ink">
                 {isEnglish ? `Status: ${currentStatusObj?.titleEn}` : `สถานะ: ${currentStatusObj?.titleTh}`}
               </span>
-              <span className="px-3 py-1 rounded-full bg-surface-mist border border-line-warm text-xs font-sans font-medium text-muted">
+              <span className="px-3 py-1 rounded-full bg-surface-warm border border-line-warm text-xs font-sans font-medium text-muted">
                 {card.arcana === "major" ? "Major Arcana" : "Minor Arcana"} · ธาตุ{card.element}
               </span>
               {savedToHistory && (
@@ -436,7 +436,7 @@ export function LoveOneCardClient() {
               <button
                 type="button"
                 onClick={() => handleShare(card)}
-                className="px-5 py-2 rounded-full bg-ink hover:bg-gold text-surface-warm text-xs font-serif-th font-bold transition-colors cursor-pointer shadow-xs"
+                className="tap-overlay-y px-5 py-2 rounded-full bg-ink hover:bg-gold text-surface-warm text-xs font-serif-th font-bold transition-colors cursor-pointer shadow-xs"
               >
                 {copied
                   ? isEnglish

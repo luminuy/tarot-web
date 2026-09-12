@@ -317,7 +317,7 @@ function AdminContent() {
 
   if (authState !== "ready") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface-pale text-sm text-muted">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface-warm text-sm text-muted">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
         <p className="font-sans">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ…</p>
       </div>
@@ -335,7 +335,7 @@ function AdminContent() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-pale text-ink">
+    <div className="min-h-screen bg-surface-warm text-ink">
       {/* ─── Top Executive Bar ──────────────────────────────────────── */}
       <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-line bg-white px-4 sm:px-6 lg:px-8 shadow-2xs">
         <div className="flex items-center gap-3">
@@ -343,7 +343,7 @@ function AdminContent() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface-mist text-ink lg:hidden hover:bg-white transition-colors"
+            className="tap-overlay-y flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface-warm text-ink lg:hidden hover:bg-white transition-colors"
             aria-label="เปิดเมนูนำทาง"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -389,7 +389,7 @@ function AdminContent() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface-mist px-3.5 py-1.5 text-xs font-medium text-ink hover:bg-white hover:border-gold transition shadow-2xs"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface-warm px-3.5 py-1.5 text-xs font-medium text-ink hover:bg-white hover:border-gold transition shadow-2xs"
           >
             <span>เปิดหน้าเว็บจริง</span>
             <span className="text-[11px] text-muted">↗</span>
@@ -423,10 +423,10 @@ function AdminContent() {
                         key={item.id}
                         type="button"
                         onClick={() => selectTab(item.id)}
-                        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition ${
+                        className={`tap-overlay-y group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-xs font-medium transition ${
                           isActive
                             ? "bg-canvas text-ink font-semibold border border-line shadow-2xs"
-                            : "text-muted hover:bg-surface-mist hover:text-ink"
+                            : "text-muted hover:bg-surface-warm hover:text-ink"
                         }`}
                       >
                         <span
@@ -455,7 +455,7 @@ function AdminContent() {
               </div>
             ))}
 
-            <div className="rounded-xl border border-line bg-surface-mist p-3 text-[11px] text-muted">
+            <div className="rounded-xl border border-line bg-surface-warm p-3 text-[11px] text-muted">
               <div className="flex items-center gap-1.5 font-semibold text-ink">
                 
                 <span>มาตรฐานระบบ</span>
@@ -484,10 +484,10 @@ function AdminContent() {
                           key={item.id}
                           type="button"
                           onClick={() => selectTab(item.id)}
-                          className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
+                          className={`tap-overlay-y flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
                             isActive
                               ? "bg-ink text-white font-semibold"
-                              : "bg-surface-mist text-ink border border-line hover:bg-white"
+                              : "bg-surface-warm text-ink border border-line hover:bg-white"
                           }`}
                         >
                           <TabIcon id={item.id} className="w-3.5 h-3.5 shrink-0" />
@@ -516,10 +516,10 @@ function AdminContent() {
                 key={item.id}
                 type="button"
                 onClick={() => selectTab(item.id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors ${
+                className={`tap-overlay-y flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors ${
                   isActive
                     ? "bg-ink text-white font-semibold shadow-xs"
-                    : "border border-line bg-surface-mist text-muted hover:text-ink"
+                    : "border border-line bg-surface-warm text-muted hover:text-ink"
                 }`}
               >
                 <TabIcon id={item.id} className="w-3 h-3" />
@@ -560,11 +560,11 @@ function AdminContent() {
 
               {/* Special Sub-navigation when on "health" tab */}
               {activeTab === "health" && (
-                <div className="flex items-center gap-1 rounded-xl border border-line bg-surface-mist p-1 text-xs">
+                <div className="flex items-center gap-1 rounded-xl border border-line bg-surface-warm p-1 text-xs">
                   <button
                     type="button"
                     onClick={() => setHealthSubTab("system")}
-                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
+                    className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
                       healthSubTab === "system"
                         ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                         : "text-muted hover:text-ink"
@@ -575,7 +575,7 @@ function AdminContent() {
                   <button
                     type="button"
                     onClick={() => setHealthSubTab("ai")}
-                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
+                    className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-medium transition-colors ${
                       healthSubTab === "ai"
                         ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                         : "text-muted hover:text-ink"
@@ -646,7 +646,7 @@ export default function AdminHome() {
           tabIndex={-1}
           role="status"
           aria-busy="true"
-          className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface-pale text-sm text-muted"
+          className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface-warm text-sm text-muted"
         >
           <h1 className="sr-only">แผงควบคุมผู้ดูแลระบบ</h1>
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />

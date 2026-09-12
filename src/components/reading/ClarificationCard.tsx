@@ -27,7 +27,7 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
   const { isEnglish } = useLocale();
 
   return (
-    <div className="w-full max-w-2xl mx-auto rounded-xl border border-line-warm bg-surface-mist p-5 sm:p-7 space-y-4 shadow-xs">
+    <div className="w-full max-w-2xl mx-auto rounded-xl border border-line-warm bg-surface-warm p-5 sm:p-7 space-y-4 shadow-xs">
       <div className="flex items-start gap-3.5">
         <div className="w-10 h-15 rounded-lg border-2 border-line-warm overflow-hidden flex-shrink-0 bg-surface">
           <CardImage

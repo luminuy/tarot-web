@@ -44,9 +44,14 @@ import { useLocale } from "@/lib/i18n";
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
  *
- * ทุกตัวในรายการนี้ใช้ `motion` ข้างใน จึงห่อด้วย `withMotionScope()` ซึ่งพา
+ * ตัวที่ใช้ `motion` ข้างในจริงเท่านั้นที่ห่อด้วย `withMotionScope()` ซึ่งพา
  * `MotionConfig` (reducedMotion="user") ไปอยู่ใน chunk เดียวกันกับตัวมันเอง
  * แทนการครอบทั้งต้นไม้ด้วย `<AppMotionProvider>` เหมือนเดิม
+ *
+ * ⚠️ **ตัวที่ไม่ได้ใช้ `motion` ห้ามห่อเด็ดขาด** (INC-0137) — การห่อจะพ่วงไลบรารี 40 KB
+ *    (รวมสองก้อน 68.7 KB) ไว้ใน chunk เดียวกัน ผู้ใช้ที่กดเปิดจึงต้องรอโหลด+คอมไพล์
+ *    ของที่ไม่มีใครเรียกใช้ บนมือถือเห็นเป็น "แตะแล้วจอนิ่ง แล้วเด้งขึ้นมาแบบกระพริบ"
+ *    ด่านกฎ 13 ใน `scripts/qa/test-motion-quality.ts` ตรวจข้อนี้ให้อัตโนมัติแล้ว
  *
  * ⚠️ ห้าม `import` อะไรจาก `motion/react` ในไฟล์นี้เด็ดขาด แม้แต่ type
  *    ไฟล์นี้คือเปลือกของหน้าแรก บรรทัดเดียวก็ลากไลบรารี 40 KB เข้าบันเดิลตั้งต้นทันที
@@ -69,12 +74,20 @@ const TarotEncyclopediaModal = withMotionScope(() => import("@/components/encycl
 const loadAuthModal = () => import("@/components/auth/AuthModal").then((m) => m.AuthModal);
 const AuthModal = dynamic(loadAuthModal, { ssr: false });
 const CardZoomModal = withMotionScope(() => import("@/components/card/CardZoomModal").then((m) => m.CardZoomModal));
-const BuyCreditsModal = withMotionScope(() => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal));
-const AccessDialog = withMotionScope(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog));
+/**
+ * กำแพงสิทธิ์กับหน้าซื้อเครดิต — **ไม่ห่อด้วย `withMotionScope()`** โดยตั้งใจ (INC-0137)
+ * ทั้งสองบานไม่ได้ `import` อะไรจาก `motion/react` เลยสักบรรทัด (ใช้ `ui/Modal` ที่เป็น
+ * CSS keyframes ล้วนแล้ว) การห่อจึงเป็นการลาก `motion` 40 KB มาคาทางเปิดเปล่า ๆ
+ * ทั้งที่นี่คือปุ่มแรกที่ผู้ใช้ยังไม่สมัครสมาชิกกดต่อจากป๊อปอัพเลือกผัง
+ */
+const BuyCreditsModal = dynamic(() => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal), { ssr: false });
+const AccessDialog = dynamic(() => import("@/components/entitlement/AccessDialog").then((m) => m.AccessDialog), { ssr: false });
 const PersonaCardSelector = withMotionScope(() => import("@/components/reading/PersonaCardSelector").then((m) => m.PersonaCardSelector));
 const IntentionAltarInput = withMotionScope(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput));
-const ClarificationCard = withMotionScope(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard));
-const CrisisNotice = withMotionScope(() => import("@/components/safety/CrisisNotice").then((m) => m.CrisisNotice));
+/* ไพ่ไขข้อข้องใจ — ไม่ใช้ `motion` เลย จึงไม่ต้องห่อ `withMotionScope()` (INC-0137) */
+const ClarificationCard = dynamic(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard), { ssr: false });
+/* หน้าต่างสายด่วน — ใช้ `Modal` ซึ่งห่อ AppMotionProvider ให้ในตัวแล้ว จึงไม่ต้องห่อซ้ำเหมือน AccessDialog */
+const CrisisNotice = dynamic(() => import("@/components/safety/CrisisNotice").then((m) => m.CrisisNotice), { ssr: false });
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {
@@ -82,7 +95,7 @@ function StepBackButton({ onClick, label }: { onClick: () => void; label?: strin
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-lg bg-surface border border-line-warm text-xs font-serif-th text-ink-deep hover:bg-surface-warm hover:border-gold-ink transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
+      className="tap-overlay-y mx-auto flex items-center gap-1.5 py-2 px-4 rounded-lg bg-surface border border-line-warm text-xs font-serif-th text-ink-deep hover:bg-surface-warm hover:border-gold-ink transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
     >
       <span aria-hidden="true">←</span> {label || "ย้อนกลับ"}
     </button>
@@ -1291,7 +1304,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-canvas font-bold bg-ink hover:bg-gold px-4 py-1.5 sm:py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
+                className="tap-overlay-y text-xs text-canvas font-bold bg-ink hover:bg-gold px-4 py-1.5 sm:py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
               >
                 {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
               </button>
@@ -1329,7 +1342,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-4 py-1.5 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs transition cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
+                className="tap-overlay-y px-4 py-1.5 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs transition cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
               >
                 {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
               </button>

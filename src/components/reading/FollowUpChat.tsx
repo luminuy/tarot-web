@@ -420,7 +420,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => sendMessage(q)}
-                  className="text-left font-serif-th text-xs text-ink-deep hover:text-gold-ink p-2.5 rounded-lg bg-inset-warm hover:bg-surface border border-line-warm hover:border-gold-ink transition cursor-pointer flex items-center justify-between group "
+                  className="tap-overlay-y text-left font-serif-th text-xs text-ink-deep hover:text-gold-ink p-2.5 rounded-lg bg-inset-warm hover:bg-surface border border-line-warm hover:border-gold-ink transition cursor-pointer flex items-center justify-between group "
                 >
                   <span>"{q}"</span>
                   <span className="text-gold-ink text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition font-sans">
@@ -481,7 +481,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                       <button
                         type="button"
                         onClick={() => window.location.reload()}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-line-warm bg-surface px-3 py-1.5 text-xs font-semibold text-ink-deep hover:border-gold-ink hover:bg-surface-warm cursor-pointer "
+                        className="tap-overlay-y mt-3 inline-flex items-center gap-1.5 rounded-lg border border-line-warm bg-surface px-3 py-1.5 text-xs font-semibold text-ink-deep hover:border-gold-ink hover:bg-surface-warm cursor-pointer "
                       >
                         <span>↻</span> {isEnglish ? "Refresh page to reconnect deck" : "รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง"}
                       </button>
@@ -619,7 +619,7 @@ isEnglish
             <button
               type="button"
               onClick={() => requestUpgrade("members_only")}
-              className="w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-4 py-2.5 font-serif-th text-xs font-bold text-surface transition cursor-pointer "
+              className="tap-overlay-y w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-4 py-2.5 font-serif-th text-xs font-bold text-surface transition cursor-pointer "
             >
               {isEnglish ? "Sign Up Free to Continue" : "สมัครสมาชิกฟรีเพื่อถามต่อ"}
             </button>
@@ -646,7 +646,7 @@ isEnglish
             <button
               type="button"
               onClick={() => requestUpgrade("daily_exhausted")}
-              className="w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-4 py-2.5 font-serif-th text-xs font-bold text-surface transition cursor-pointer "
+              className="tap-overlay-y w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-4 py-2.5 font-serif-th text-xs font-bold text-surface transition cursor-pointer "
             >
               {isEnglish ? "Unlock Unlimited Consultation" : "เติมรอบดูดวงเพื่อถามต่อได้ไม่จำกัด"}
             </button>

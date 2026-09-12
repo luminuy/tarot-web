@@ -252,7 +252,7 @@ export default function EntitlementAdmin() {
             {s.announce ? "ประกาศเปิดอยู่ — กดเพื่อปิด" : "ประกาศปิดอยู่ — กดเพื่อเปิด"}
           </Button>
         </div>
-        <p className="mt-3 rounded-xl border border-line bg-surface-pale p-3 text-xs text-muted">
+        <p className="mt-3 rounded-xl border border-line bg-surface-warm p-3 text-xs text-muted">
           ตัวอย่างแบนเนอร์:{" "}
           <span className="text-ink font-semibold">
             เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
@@ -319,7 +319,7 @@ export default function EntitlementAdmin() {
         <h3 className="text-sm font-semibold text-ink">สถิติระบบสิทธิ์ (7 วันล่าสุด)</h3>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {Object.entries(METRIC_LABEL).map(([k, label]) => (
-            <div key={k} className="rounded-xl border border-line bg-surface-pale p-3">
+            <div key={k} className="rounded-xl border border-line bg-surface-warm p-3">
               <p className="text-[13px] text-muted">{label}</p>
               <p className="mt-0.5 text-lg font-bold text-ink">
                 {(s.metrics[k] ?? 0).toLocaleString("th-TH")}
@@ -348,7 +348,7 @@ export default function EntitlementAdmin() {
                 className={`rounded-xl p-3 border ${
                   bad
                     ? "bg-rose-50 border-rose-200"
-                    : "bg-surface-pale border-line"
+                    : "bg-surface-warm border-line"
                 }`}
               >
                 <p className="text-[13px] text-muted">{label}</p>

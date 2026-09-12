@@ -74,7 +74,7 @@ export function AnnouncementBanner() {
           setDismissed(true);
         }}
         aria-label={isEn ? "Dismiss announcement" : "ปิดประกาศระบบสิทธิ์"}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-inset-warm hover:text-ink-deep cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+        className="tap-overlay-y flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-inset-warm hover:text-ink-deep cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       >
         ✕
       </button>

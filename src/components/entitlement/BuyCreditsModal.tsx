@@ -309,7 +309,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                       <button
                         type="submit"
                         disabled={redeemLoading || !redeemCode.trim()}
-                        className="px-4 py-2 text-xs font-bold font-serif-th rounded-lg bg-gold-ink hover:bg-gold-ink-deep disabled:opacity-50 text-white cursor-pointer transition"
+                        className="tap-overlay-y px-4 py-2 text-xs font-bold font-serif-th rounded-lg bg-gold-ink hover:bg-gold-ink-deep disabled:opacity-50 text-white cursor-pointer transition"
                       >
                         {redeemLoading ? (isEn ? "Checking..." : "กำลังตรวจ...") : (isEn ? "Redeem" : "แลกสิทธิ์")}
                       </button>
@@ -373,7 +373,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               <button
                 type="button"
                 onClick={() => setCheckoutData(null)}
-                className="text-xs text-muted hover:text-ink-deep py-1 cursor-pointer font-serif-th"
+                className="tap-overlay-y text-xs text-muted hover:text-ink-deep py-1 cursor-pointer font-serif-th"
               >
                 {isEn ? "← Choose Different Package" : "← เปลี่ยนแพ็กเกจ"}
               </button>

@@ -241,7 +241,7 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
             onClick={() => navigator.clipboard.writeText(commitment)}
             title={isEnglish ? "Copy verification commitment" : "คัดลอกรหัสยืนยันความโปร่งใส"}
             aria-label={isEnglish ? "Copy verification commitment" : "คัดลอกรหัสยืนยันความโปร่งใส"}
-            className="text-gold-ink hover:text-ink-deep cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+            className="tap-overlay-y text-gold-ink hover:text-ink-deep cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
           >
             ⧉
           </button>

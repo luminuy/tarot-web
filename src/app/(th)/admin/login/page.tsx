@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
       <div className="altar-panel rounded-3xl border border-line bg-white p-7 shadow-xs">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-pale shadow-xs">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-warm shadow-xs">
           <Image
             src="/logo.webp"
             alt="SeerTarot Logo"
