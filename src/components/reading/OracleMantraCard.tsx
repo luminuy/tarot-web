@@ -94,7 +94,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
           type="button"
           onClick={handleCopy}
           aria-label={isEnglish ? "Copy wisdom to clipboard" : "คัดลอกคำคมแชร์ลงสตอรี่"}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line-warm bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-deep hover:border-gold-ink hover:bg-surface-warm hover:text-gold-ink transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+          className="tap-overlay-y inline-flex items-center gap-1.5 rounded-lg border border-line-warm bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-deep hover:border-gold-ink hover:bg-surface-warm hover:text-gold-ink transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
         >
           <AnimatePresence mode="wait">
             {copied ? (

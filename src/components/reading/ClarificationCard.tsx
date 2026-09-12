@@ -84,7 +84,7 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
               type="button"
               onClick={onSkip}
               disabled={loading}
-              className="py-2 px-3.5 sm:px-4 rounded-full border border-line bg-inset text-xs font-serif-th text-ink hover:border-gold-ink hover:text-gold-ink transition-colors cursor-pointer disabled:opacity-50"
+              className="tap-overlay-y py-2 px-3.5 sm:px-4 rounded-full border border-line bg-inset text-xs font-serif-th text-ink hover:border-gold-ink hover:text-gold-ink transition-colors cursor-pointer disabled:opacity-50"
             >
               {isEnglish ? "Skip" : "ข้ามคำถามนี้"}
             </button>
@@ -93,7 +93,7 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
               type="button"
               onClick={onSubmit}
               disabled={loading}
-              className="py-2 px-4 sm:px-5 rounded-full bg-ink hover:bg-gold-ink text-canvas text-xs sm:text-sm font-bold font-serif-th transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+              className="tap-overlay-y py-2 px-4 sm:px-5 rounded-full bg-ink hover:bg-gold-ink text-canvas text-xs sm:text-sm font-bold font-serif-th transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             >
               {loading
                 ? isEnglish

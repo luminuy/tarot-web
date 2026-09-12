@@ -228,7 +228,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           <span>{isEnglish ? "Share this codex:" : "แชร์คัมภีร์นี้:"}</span>
           <button
             onClick={handleCopyLink}
-            className="px-3.5 py-1.5 rounded-full border border-line bg-surface text-ink hover:border-gold hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+            className="tap-overlay-y px-3.5 py-1.5 rounded-full border border-line bg-surface text-ink hover:border-gold hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
             
             <span>
