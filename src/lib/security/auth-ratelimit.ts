@@ -39,7 +39,8 @@ export type AuthRateLimitAction =
   | "resend"
   | "reset"
   | "admin_login"
-  | "tester_login";
+  | "tester_login"
+  | "redeem";
 
 interface AuthRateLimitConfig {
   /** เพดานต่อ IP — ต้องกว้างกว่าต่อบัญชี เพราะมือถือไทยแชร์ IP กัน (CGNAT) ทั้งเสา */
@@ -74,6 +75,12 @@ const ACTION_CONFIGS: Record<AuthRateLimitAction, AuthRateLimitConfig> = {
    */
   admin_login: { ipMax: 8, pairMax: 8, idMax: 8, windowSec: 15 * 60 },
   tester_login: { ipMax: 12, pairMax: 12, idMax: 12, windowSec: 15 * 60 },
+  /**
+   * 🎟 การไล่เดารหัสแลกสิทธิ์ — เดาถูกใบเดียวได้รอบเปิดไพ่ฟรี (หรือสิทธิ์พรีเมียมถ้าเป็นรหัส VIP)
+   * ผู้ยิงต้องล็อกอินก่อน จึงนับ identifier เป็น userId ได้ · ตั้งกว้างพอสำหรับคนพิมพ์ผิดจริง ๆ
+   * แต่แคบพอที่การไล่เดาจะไม่คุ้ม (รหัสสุ่มจากแผงแอดมินมีพื้นที่ 31^8 ตัวอักษร)
+   */
+  redeem: { ipMax: 20, pairMax: 10, idMax: 10, windowSec: 60 * 60 },
 };
 
 interface ScopedKey {

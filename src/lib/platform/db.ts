@@ -333,11 +333,20 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_score INTEGER");
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_issue_codes TEXT");
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_fix_count INTEGER");
+    // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
+    // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
+    // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์
     safeExec(`
       INSERT OR IGNORE INTO redeem_codes (code, title, credits, max_uses, used_count, reason_prefix, expires_at, is_active, created_at)
       VALUES 
-        ('VIP3-TAROT-2026', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, -1, 0, 'purchase_redeem', NULL, 1, 1726000000000),
-        ('SEER3PASS', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, -1, 0, 'purchase_redeem', NULL, 1, 1726000000000)
+        ('VIP3-TAROT-2026', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, 50, 0, 'purchase_redeem', 1798736399000, 1, 1726000000000),
+        ('SEER3PASS', 'สิทธิ์ญาณพยากรณ์พิเศษ 3 ครั้ง (เปิดได้ทุกผังและปรมาจารย์ลับ)', 3, 50, 0, 'purchase_redeem', 1798736399000, 1, 1726000000000)
+    `);
+    // เครื่องที่มี local.db อยู่ก่อนแล้วจะไม่โดน INSERT OR IGNORE ด้านบน — ต้องรัดเพดานย้อนหลังให้ด้วย
+    safeExec(`
+      UPDATE redeem_codes
+         SET max_uses = 50, expires_at = 1798736399000
+       WHERE code IN ('VIP3-TAROT-2026', 'SEER3PASS') AND max_uses = -1
     `);
 
 

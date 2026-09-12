@@ -14,6 +14,29 @@ interface State {
   metrics: Record<string, number>;
 }
 
+/** รหัสแลกสิทธิ์หนึ่งใบตามที่ /api/admin/entitlement/codes ส่งกลับมา */
+interface RedeemCodeView {
+  code: string;
+  title: string;
+  credits: number;
+  maxUses: number;
+  usedCount: number;
+  kind: "gift" | "premium";
+  expiresAt: number | null;
+  isActive: boolean;
+  createdAt: number;
+}
+
+function formatThaiDate(ms: number | null): string {
+  if (!ms) return "ไม่มีวันหมดอายุ";
+  return new Intl.DateTimeFormat("th-TH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Bangkok",
+  }).format(new Date(ms));
+}
+
 /** วันนี้ในรูปแบบ YYYY-MM-DD ตามเวลาไทย (ใช้เป็นค่าเริ่มต้น/เพดานของ date picker) */
 function todayISO(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date());
@@ -73,6 +96,16 @@ export default function EntitlementAdmin() {
   // ตัวช่วยเลือกวันสำหรับแบนเนอร์ประกาศ — เก็บ ISO ไว้ในเครื่องเท่านั้น (ฝั่ง server เก็บเป็นข้อความไทย)
   const [announceISO, setAnnounceISO] = useState("");
 
+  // ── รหัสแลกสิทธิ์ ──
+  const [codes, setCodes] = useState<RedeemCodeView[] | null>(null);
+  const [codeBusy, setCodeBusy] = useState(false);
+  const [codeMsg, setCodeMsg] = useState("");
+  const [newKind, setNewKind] = useState<"gift" | "premium">("gift");
+  const [newTitle, setNewTitle] = useState("");
+  const [newCredits, setNewCredits] = useState("3");
+  const [newMaxUses, setNewMaxUses] = useState("50");
+  const [newDays, setNewDays] = useState("30");
+
   const load = useCallback(() => {
     fetch("/api/admin/entitlement")
       .then((r) => r.json())
@@ -84,10 +117,75 @@ export default function EntitlementAdmin() {
     ops("check_db").then(({ data }) => setDbReady(!!data.ready));
   }, [gfDate]);
 
+  const loadCodes = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/entitlement/codes");
+      const data = await res.json();
+      setCodes(Array.isArray(data.codes) ? data.codes : []);
+    } catch {
+      setCodeMsg("โหลดรายการรหัสไม่สำเร็จ");
+    }
+  }, []);
+
   useEffect(() => {
     load();
+    loadCodes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const createCode = useCallback(async () => {
+    const credits = Number(newCredits);
+    const maxUses = Number(newMaxUses);
+    const expiresInDays = Number(newDays);
+    if (!newTitle.trim()) {
+      setCodeMsg("ใส่ชื่อแคมเปญก่อน จะได้รู้ทีหลังว่าแจกไปกับงานไหน");
+      return;
+    }
+    if (!Number.isInteger(credits) || !Number.isInteger(maxUses) || !Number.isInteger(expiresInDays)) {
+      setCodeMsg("จำนวนรอบ · เพดานคน · อายุรหัส ต้องเป็นจำนวนเต็ม");
+      return;
+    }
+    setCodeBusy(true);
+    setCodeMsg("");
+    try {
+      const res = await fetch("/api/admin/entitlement/codes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: newKind, title: newTitle.trim(), credits, maxUses, expiresInDays }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? "");
+      setCodeMsg(`สร้างรหัสแล้ว: ${data.code.code} — คัดลอกไปแจกได้เลย`);
+      setNewTitle("");
+      await loadCodes();
+    } catch (err) {
+      setCodeMsg(err instanceof Error && err.message ? err.message : "สร้างรหัสไม่สำเร็จ");
+    } finally {
+      setCodeBusy(false);
+    }
+  }, [loadCodes, newCredits, newDays, newKind, newMaxUses, newTitle]);
+
+  const patchCode = useCallback(
+    async (code: string, patch: { isActive?: boolean; maxUses?: number; expiresInDays?: number }) => {
+      setCodeBusy(true);
+      setCodeMsg("");
+      try {
+        const res = await fetch("/api/admin/entitlement/codes", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, ...patch }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error ?? "");
+        await loadCodes();
+      } catch (err) {
+        setCodeMsg(err instanceof Error && err.message ? err.message : "แก้รหัสไม่สำเร็จ");
+      } finally {
+        setCodeBusy(false);
+      }
+    },
+    [loadCodes],
+  );
 
   const save = useCallback(
     async (patch: Partial<State>) => {
@@ -296,6 +394,130 @@ export default function EntitlementAdmin() {
           >
             {s.enabled ? "เปิดอยู่ — กดเพื่อปิด" : "ปิดอยู่ — กดเพื่อเปิด"}
           </Button>
+        </div>
+      </div>
+
+      {/* ── รหัสแลกสิทธิ์ (โค้ดแจก / โค้ด VIP) ── */}
+      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-[#29261F]">5 · รหัสแลกสิทธิ์</h3>
+        <p className="mt-1 mb-3 text-xs text-[#635B4E]">
+          <strong>โค้ดแจก</strong> = เพิ่มรอบเปิดไพ่เฉย ๆ ·{" "}
+          <strong>โค้ด VIP</strong> = นับเป็นเครดิตที่ซื้อ ปลดผังใหญ่ + ปรมาจารย์ลับด้วย
+          <br />
+          ระบบสุ่มรหัสให้ทุกครั้ง และบังคับใส่เพดานจำนวนคนกับวันหมดอายุเสมอ —
+          อย่าเอารหัสจริงไปเขียนไว้ในโค้ด
+        </p>
+
+        <div className="flex flex-wrap items-end gap-3">
+          <Field label="ชนิด">
+            {(field) => (
+              <select
+                {...field}
+                value={newKind}
+                onChange={(e) => setNewKind(e.target.value === "premium" ? "premium" : "gift")}
+                className="h-10 rounded-xl border border-[#D5CEC2] bg-white px-3 text-sm text-[#29261F]"
+              >
+                <option value="gift">โค้ดแจก (รอบเปิดไพ่)</option>
+                <option value="premium">โค้ด VIP (ปลดพรีเมียม)</option>
+              </select>
+            )}
+          </Field>
+          <Field label="ชื่อแคมเปญ">
+            {(field) => (
+              <Input
+                {...field}
+                value={newTitle}
+                placeholder="เช่น แจกวันเปิดเพจ"
+                onChange={(e) => setNewTitle(e.target.value)}
+              />
+            )}
+          </Field>
+          <Field label="รอบต่อคน">
+            {(field) => (
+              <Input {...field} type="number" min={1} max={100} value={newCredits} onChange={(e) => setNewCredits(e.target.value)} />
+            )}
+          </Field>
+          <Field label="เพดานจำนวนคน">
+            {(field) => (
+              <Input {...field} type="number" min={1} max={10000} value={newMaxUses} onChange={(e) => setNewMaxUses(e.target.value)} />
+            )}
+          </Field>
+          <Field label="อายุรหัส (วัน)">
+            {(field) => (
+              <Input {...field} type="number" min={1} max={365} value={newDays} onChange={(e) => setNewDays(e.target.value)} />
+            )}
+          </Field>
+          <Button size="sm" variant="gold" isLoading={codeBusy} onClick={createCode}>
+            สร้างรหัส
+          </Button>
+        </div>
+        {codeMsg ? <p className="mt-3 text-xs font-medium text-[#29261F]">{codeMsg}</p> : null}
+
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left text-xs">
+            <thead className="text-[#8F5C1A]">
+              <tr>
+                <th className="py-2 pr-3 font-semibold">รหัส</th>
+                <th className="py-2 pr-3 font-semibold">ชนิด</th>
+                <th className="py-2 pr-3 font-semibold">รอบ</th>
+                <th className="py-2 pr-3 font-semibold">แลกไป</th>
+                <th className="py-2 pr-3 font-semibold">หมดอายุ</th>
+                <th className="py-2 font-semibold">สถานะ</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#29261F]">
+              {codes === null ? (
+                <tr>
+                  <td colSpan={6} className="py-3 text-[#635B4E]">
+                    กำลังโหลด…
+                  </td>
+                </tr>
+              ) : codes.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-3 text-[#635B4E]">
+                    ยังไม่มีรหัสในระบบ
+                  </td>
+                </tr>
+              ) : (
+                codes.map((c) => {
+                  const exhausted = c.maxUses !== -1 && c.usedCount >= c.maxUses;
+                  const expired = !!c.expiresAt && c.expiresAt <= Date.now();
+                  return (
+                    <tr key={c.code} className="border-t border-[#EDE8E0]">
+                      <td className="py-2 pr-3 font-mono font-semibold">{c.code}</td>
+                      <td className="py-2 pr-3">{c.kind === "premium" ? "VIP" : "แจก"}</td>
+                      <td className="py-2 pr-3">{c.credits}</td>
+                      <td className="py-2 pr-3">
+                        {c.usedCount}/{c.maxUses === -1 ? "ไม่จำกัด" : c.maxUses}
+                      </td>
+                      <td className="py-2 pr-3">{formatThaiDate(c.expiresAt)}</td>
+                      <td className="py-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={
+                              c.isActive && !exhausted && !expired
+                                ? "rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-800"
+                                : "rounded border border-[#D5CEC2] bg-[#F8F6F2] px-1.5 py-0.5 font-semibold text-[#635B4E]"
+                            }
+                          >
+                            {!c.isActive ? "ปิดแล้ว" : expired ? "หมดอายุ" : exhausted ? "แลกครบ" : "ใช้ได้"}
+                          </span>
+                          <button
+                            type="button"
+                            disabled={codeBusy}
+                            onClick={() => patchCode(c.code, { isActive: !c.isActive })}
+                            className="text-[11px] text-[#635B4E] underline hover:text-[#29261F] disabled:opacity-50"
+                          >
+                            {c.isActive ? "ปิดรหัส" : "เปิดรหัส"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
