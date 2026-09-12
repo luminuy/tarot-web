@@ -69,19 +69,40 @@ export function buildComparison(current: JudgeReport, previous: JudgeReport): st
   out.push(`\n📊 เทียบ ${previous.promptVersion} → ${current.promptVersion}`);
   out.push("─".repeat(70));
 
-  const prevOk = new Map(previous.cases.filter((c) => c.ok).map((c) => [c.id, c]));
-  const currOk = new Map(current.cases.filter((c) => c.ok).map((c) => [c.id, c]));
+  /*
+   * ⚠️ "สำเร็จ" ไม่ได้แปลว่า "มีคะแนน judge"
+   * -------------------------------------------------------------------------
+   * เคสที่ `ok: true` คือคำอ่านออกมาครบ แต่ **ผู้ตัดสินอาจล้มแยกต่างหาก**
+   * (คีย์หมดโควตา · rate limit ของ Gemini · ตอบกลับผิดรูป) แล้วได้ `judge: {}`
+   * baseline `20260911-1` เป็นแบบนั้นจริง 7 จาก 16 เคสที่สำเร็จ
+   * ถ้านับเคสพวกนี้เข้ามาเทียบ ค่าเฉลี่ยฝั่งนั้นจะกลายเป็น 0 แล้วรายงานว่า
+   * "0.00 → 5.00 🟢 ดีขึ้น" ทั้งที่ไม่เคยมีใครให้คะแนนมาก่อน — ผลลวงเต็ม ๆ
+   * ➔ เทียบเฉพาะเคสที่ **มีคะแนน judge จริงทั้งสองรอบ** เท่านั้น
+   */
+  const scored = (c: CaseResult) =>
+    c.ok && RUBRIC.some((r) => typeof c.judge[r.key] === "number");
+  const prevOk = new Map(previous.cases.filter(scored).map((c) => [c.id, c]));
+  const currOk = new Map(current.cases.filter(scored).map((c) => [c.id, c]));
   const shared = [...currOk.keys()].filter((id) => prevOk.has(id));
+
+  const unscored = (r: JudgeReport) => r.cases.filter((c) => c.ok && !scored(c)).length;
 
   const cov = (r: JudgeReport) => `${r.summary.succeeded}/${r.summary.total}`;
   out.push(
     `  ความครอบคลุม   ${previous.promptVersion}: ${cov(previous)} เคส → ${current.promptVersion}: ${cov(current)} เคส`
   );
-  out.push(`  เคสที่สำเร็จทั้งสองรอบ (ใช้เทียบจริง): ${shared.length} เคส`);
+  const uPrev = unscored(previous);
+  const uCurr = unscored(current);
+  if (uPrev > 0 || uCurr > 0) {
+    out.push(
+      `  ⚠️ สำเร็จแต่ผู้ตัดสินไม่ได้ให้คะแนน: ${previous.promptVersion} ${uPrev} เคส · ${current.promptVersion} ${uCurr} เคส (ไม่นับเข้าการเทียบ)`
+    );
+  }
+  out.push(`  เคสที่มีคะแนน judge ทั้งสองรอบ (ใช้เทียบจริง): ${shared.length} เคส`);
   out.push("─".repeat(70));
 
   if (shared.length === 0) {
-    out.push("\n❌ ไม่มีเคสที่สำเร็จทั้งสองรอบเลย — เทียบไม่ได้");
+    out.push("\n❌ ไม่มีเคสที่มีคะแนน judge ทั้งสองรอบเลย — เทียบไม่ได้");
     out.push("   ➔ รันซ้ำให้ได้ชุดเคสที่ทับกันก่อน แล้วค่อยตัดสินว่าดีขึ้นหรือแย่ลง");
     return out;
   }
@@ -112,7 +133,8 @@ export function buildComparison(current: JudgeReport, previous: JudgeReport): st
   const biggest = Math.max(previous.summary.total, current.summary.total);
   if (shared.length < biggest * SHARED_CASE_WARN_RATIO) {
     out.push(`\n🟡 เคสที่ทับกันมีแค่ ${shared.length} จาก ${biggest} — ตัวเลขข้างบนยังตัดสินแทนทั้งชุดไม่ได้`);
-    out.push("   ➔ หาสาเหตุที่เคสล้มก่อน (ส่วนใหญ่คือคำอ่านถูกตัดกลางเพราะโทเค็นไม่พอ) แล้วรันใหม่");
+    out.push("   ➔ หาสาเหตุที่เคสล้มก่อนแล้วรันใหม่ — ที่เจอจริงคือ Groq ตอบ 429");
+    out.push("     (`Request too large ... OTPM/TPM Limit`) เพราะ max_tokens ที่ขอต่อครั้งเกินเพดานต่อนาทีของ tier");
   }
 
   out.push("\n⚠️ judge คือตัวชี้วัดรอง — ถ้า judge บอกดีขึ้นแต่ ACCURATE จากคนจริงลดลง ให้เชื่อคนจริงและย้อนกลับทันที");
