@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { LoveOneCardClient } from "@/components/love/LoveOneCardClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
-import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 import { buildPageOgImage } from "@/lib/media/og-image";
 
 const loveOgImages = buildPageOgImage({
@@ -131,19 +130,9 @@ const softwareApplicationJsonLd = {
   ],
 };
 
-const heroCardSrcSet = getCardWebpSrcSet("major-06.jpg");
-
 export default function LoveOneCardPage() {
   return (
     <>
-      <link
-        rel="preload"
-        as="image"
-        type="image/webp"
-        fetchPriority="high"
-        imageSrcSet={heroCardSrcSet ?? undefined}
-        imageSizes="120px"
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}

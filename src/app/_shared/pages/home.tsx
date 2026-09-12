@@ -5,7 +5,6 @@ import { HomeSeoContent } from "@/components/seo/HomeSeoContent";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
-import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
 
 /**
@@ -53,14 +52,6 @@ export function buildHomeMetadata(locale: Locale): Metadata {
   };
 }
 
-/**
- * พรีโหลดภาพไพ่ LCP ของหน้าแรก
- * ⚠️ ต้องเป็น `imageSrcSet` + `imageSizes` ไม่ใช่ `href` ของขนาดเดียว
- * ของเดิมพรีโหลดไฟล์ w128 ตายตัว ซึ่งตรงเฉพาะจอ DPR 1 · มือถือ (DPR 2 ขึ้นไป)
- * เบราว์เซอร์เลือก w256 ตาม srcSet จริง ไฟล์ที่พรีโหลดมาจึงถูกทิ้งแล้วโหลดใหม่
- */
-const heroCardSrcSet = getCardWebpSrcSet("major-19.jpg");
-
 function buildWebAppJsonLd(locale: Locale) {
   const isEnglish = locale === "en";
   return {
@@ -87,14 +78,6 @@ export function HomePageBody({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <link
-        rel="preload"
-        as="image"
-        type="image/webp"
-        fetchPriority="high"
-        imageSrcSet={heroCardSrcSet ?? undefined}
-        imageSizes="68px"
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebAppJsonLd(locale)) }}

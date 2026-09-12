@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DailyClient } from "@/components/daily/DailyClient";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
-import { getCardWebpSrcSet } from "@/lib/tarot/card-image";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
 
@@ -110,8 +109,6 @@ const softwareApplicationJsonLd = {
   },
 };
 
-const heroCardSrcSet = getCardWebpSrcSet("major-19.jpg");
-
 const DAILY_FAQS = [
   {
     q: "ดูดวงไพ่ยิปซีรายวันควรดูช่วงเวลาไหนดีที่สุด?",
@@ -137,14 +134,6 @@ const DAILY_LINKS = [
 export default function DailyTarotPage() {
   return (
     <>
-      <link
-        rel="preload"
-        as="image"
-        type="image/webp"
-        fetchPriority="high"
-        imageSrcSet={heroCardSrcSet ?? undefined}
-        imageSizes="120px"
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
