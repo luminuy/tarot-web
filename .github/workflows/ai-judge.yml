@@ -1,0 +1,183 @@
+name: 🧑‍⚖️ AI Judge — วัดคุณภาพคำอ่าน (กดรันเอง)
+run-name: "🧑‍⚖️ [By: ${{ github.actor }}] ai:judge เทียบกับ ${{ inputs.compare || '(ไม่เทียบ)' }}"
+
+# ⚠️ **กดรันเองเท่านั้น — ห้ามเพิ่ม trigger อื่นเด็ดขาด**
+# ------------------------------------------------------------------------------
+# หัวไฟล์ `scripts/qa/run-golden-judge.ts` เขียนกติกาไว้ว่า "ห้ามผูกเข้า CI"
+# ซึ่งเจตนาคือ **ห้ามให้มันรันอัตโนมัติทุก PR** เพราะยิงเข้าโมเดลจริงด้วยคีย์ที่จ่ายเงินเอง
+# workflow นี้จึงมีแต่ `workflow_dispatch` — ไม่มี `push` ไม่มี `pull_request` ไม่มี `schedule`
+# คนกดปุ่ม Run เท่านั้นถึงจะเกิดค่าใช้จ่าย เหมือนรันจากเครื่องตัวเองทุกประการ
+#
+# ⛔ ถ้าวันหนึ่งมีคนจะเพิ่ม `on: push` หรือ `on: schedule` ที่นี่ — **นั่นคือการละเมิดกติกา**
+#    ต้นทุนจะวิ่งเองโดยไม่มีใครกด และเพดาน AI ของ production จะโดนกระทบ
+#
+# ทำไมถึงรันบน GitHub แทนเครื่องตัวเอง: `GROQ_API_KEY` / `GEMINI_API_KEY` อยู่ใน
+# repository secrets อยู่แล้ว (deploy.yml ใช้อยู่) จึงไม่ต้องส่งคีย์ให้ใครหรือตั้งค่าในเครื่องใหม่
+
+on:
+  workflow_dispatch:
+    inputs:
+      compare:
+        description: "เทียบกับ PROMPT_VERSION ไหน (เว้นว่าง = ไม่เทียบ)"
+        required: false
+        default: "20260911-1"
+      limit:
+        description: "จำนวนเคส (0 หรือเว้นว่าง = ครบ 30 เคส · ใส่ 3 เพื่อลองเร็ว ๆ)"
+        required: false
+        default: "0"
+      delay:
+        description: "คูลดาวน์ระหว่างเคส (มิลลิวินาที) กัน rate limit"
+        required: false
+        default: "50000"
+
+concurrency:
+  group: ai-judge
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  judge:
+    name: 🧑‍⚖️ ยิง Golden Set เข้าโมเดลจริงแล้วเก็บรายงาน
+    runs-on: ubuntu-latest
+    # 30 เคส × คูลดาวน์ 50 วินาที + เวลาโมเดล + retry ➔ เผื่อไว้ให้พอ
+    timeout-minutes: 120
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v5
+
+      - name: ⚡ Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          # ⚠️ ต้องปิดไว้เสมอ — repo นี้ไม่มี `pnpm-lock.yaml` ถ้าเปิดแคชจะล้มทันที
+          # ด้วย "Dependencies lock file is not found" (บทเรียนเดียวกับ deploy.yml)
+          package-manager-cache: false
+
+      - name: 📦 Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: 🔑 ตรวจว่ามีคีย์ครบก่อนเสียเงิน
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GROQ_API_KEY" ]; then
+            echo "::error::ไม่มี GROQ_API_KEY ใน repository secrets — สคริปต์นี้บังคับต้องมี (ผู้ผลิตคำอ่าน)"
+            exit 1
+          fi
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::warning::ไม่มี GEMINI_API_KEY — จะได้แค่คะแนนจากโค้ด ไม่มีคะแนน judge"
+          fi
+
+      - name: 🧪 ซ้อมแห้งก่อน (ไม่เรียกโมเดล ต้นทุน 0)
+        run: pnpm run ai:judge -- --dry-run
+
+      - name: 🧑‍⚖️ ยิงจริงแล้วเก็บรายงาน
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CF_AI_GATEWAY_ACCOUNT_ID: ${{ secrets.CF_AI_GATEWAY_ACCOUNT_ID }}
+          CF_AI_GATEWAY_ID: ${{ secrets.CF_AI_GATEWAY_ID }}
+          CF_AI_GATEWAY_TOKEN: ${{ secrets.CF_AI_GATEWAY_TOKEN }}
+          # ⚠️ ห้ามยัด ${{ inputs.* }} ลงในสคริปต์เชลล์ตรง ๆ — ส่งผ่าน env เสมอ
+          # ไม่งั้นค่าที่ผู้กดปุ่มพิมพ์มาจะกลายเป็นคำสั่งเชลล์ (script injection)
+          JUDGE_COMPARE: ${{ inputs.compare }}
+          JUDGE_LIMIT: ${{ inputs.limit }}
+          JUDGE_DELAY: ${{ inputs.delay }}
+        run: |
+          set -o pipefail
+
+          # รับเฉพาะรูปแบบที่คาดหวัง ค่าอื่นถือว่าพิมพ์ผิดแล้วหยุดทันที
+          DELAY="${JUDGE_DELAY:-50000}"
+          case "$DELAY" in ''|*[!0-9]*) echo "::error::delay ต้องเป็นตัวเลขล้วน (ได้มา: $DELAY)"; exit 1;; esac
+          ARGS="--delay $DELAY"
+
+          LIMIT="${JUDGE_LIMIT:-0}"
+          case "$LIMIT" in ''|*[!0-9]*) echo "::error::limit ต้องเป็นตัวเลขล้วน (ได้มา: $LIMIT)"; exit 1;; esac
+          if [ "$LIMIT" != "0" ]; then ARGS="$ARGS --limit $LIMIT"; fi
+
+          if [ -n "$JUDGE_COMPARE" ]; then
+            case "$JUDGE_COMPARE" in
+              *[!0-9-]*) echo "::error::compare ต้องเป็นรูปแบบ PROMPT_VERSION เช่น 20260911-1 (ได้มา: $JUDGE_COMPARE)"; exit 1;;
+            esac
+            ARGS="$ARGS --compare $JUDGE_COMPARE"
+          fi
+
+          echo "รันด้วย: pnpm run ai:judge -- $ARGS"
+          pnpm run ai:judge -- $ARGS 2>&1 | tee judge-output.txt
+
+      - name: 📊 สรุปผลขึ้นหน้า workflow (อ่านได้เลยไม่ต้องโหลดไฟล์)
+        if: always()
+        run: |
+          {
+            echo "## 🧑‍⚖️ ผล ai:judge"
+            echo ""
+            echo '```'
+            # เอาเฉพาะท้ายผลลัพธ์ซึ่งเป็นส่วนสรุป + ตารางเทียบ
+            tail -n 45 judge-output.txt 2>/dev/null || echo "(ไม่มีผลลัพธ์ — งานล้มก่อนถึงขั้นสรุป)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📎 แนบไฟล์รายงานไว้ให้โหลด (เผื่อขั้นเปิด PR ล้ม)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: judge-report
+          path: |
+            scripts/qa/reports/judge-*.json
+            judge-output.txt
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: 🔀 เปิด PR เอาไฟล์รายงานเข้า main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JUDGE_COMPARE: ${{ inputs.compare }}
+          JUDGE_LIMIT: ${{ inputs.limit }}
+          RUN_ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          rm -f judge-output.txt
+          if [ -z "$(git status --porcelain scripts/qa/reports)" ]; then
+            echo "::warning::ไม่มีไฟล์รายงานใหม่ — ข้ามการเปิด PR"
+            exit 0
+          fi
+
+          BRANCH="ci/ai-judge-$(date -u +%Y%m%d-%H%M%S)"
+          COMPARED="${JUDGE_COMPARE:-(ไม่เทียบ)}"
+          CASES="${JUDGE_LIMIT:-ครบทั้งชุด}"
+          if [ "$CASES" = "0" ]; then CASES="ครบทั้งชุด"; fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add scripts/qa/reports
+          # ใช้ -m สองครั้งแทนการฝังขึ้นบรรทัดใหม่ในสตริง
+          # (ขึ้นบรรทัดใหม่กลางสตริงจะทำให้ YAML block scalar พัง เพราะบรรทัดถัดไปไม่มีย่อหน้า)
+          git commit \
+            -m "chore(ai): เก็บผลวัด ai:judge จาก workflow กดรันเอง" \
+            -m "รันโดย ${RUN_ACTOR} · เทียบกับ ${COMPARED} · ${CASES}" \
+            -m "ดูสรุปผลได้ที่ ${RUN_URL}"
+          git push -u origin "$BRANCH"
+
+          PR_BODY=$(printf '%s\n' \
+            "รายงานผล \`ai:judge\` ที่ได้จาก workflow **กดรันเอง**" \
+            "" \
+            "- เทียบกับ: \`${COMPARED}\`" \
+            "- จำนวนเคส: ${CASES}" \
+            "- รันโดย: @${RUN_ACTOR}" \
+            "- สรุปผลแบบอ่านง่าย: [workflow run นี้](${RUN_URL})" \
+            "" \
+            "> ⚠️ อ่านบรรทัด \`เคสที่สำเร็จทั้งสองรอบ (ใช้เทียบจริง)\` ก่อนดูลูกศรขึ้น/ลง" \
+            "> ถ้าขึ้นเตือน 🟡 ว่าเคสทับกันน้อย แปลว่ายังสรุปไม่ได้ ต้องไล่หาสาเหตุที่เคสล้มก่อน")
+
+          gh pr create \
+            --title "chore(ai): เก็บผลวัด ai:judge (รันโดย ${RUN_ACTOR})" \
+            --body "$PR_BODY" \
+            --base main --head "$BRANCH"
