@@ -441,8 +441,8 @@ function AdminContent() {
                           <span
                             className={`rounded-full px-2 py-0.5 text-[9px] font-medium transition-colors ${
                               isActive
-                                ? "bg-[#29261F] text-white"
-                                : "bg-[#FAF8F5] text-[#756F66] border border-[#D5CEC2]"
+                                ? "bg-ink text-white"
+                                : "bg-canvas text-muted border border-line"
                             }`}
                           >
                             {item.badge}

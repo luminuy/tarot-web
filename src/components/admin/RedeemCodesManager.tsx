@@ -305,18 +305,18 @@ export default function RedeemCodesManager() {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-[#29261F] px-4 py-2.5 text-xs text-white shadow-lg border border-[#A58A5C]/40">
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-ink px-4 py-2.5 text-xs text-white shadow-lg border border-gold/40">
           {toastMessage}
         </div>
       )}
 
       {/* Header & Stats Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5DFD5] pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-5">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-[#29261F]">
+          <h2 className="text-xl font-bold tracking-tight text-ink">
             ระบบจัดการรหัสแลกสิทธิ์
           </h2>
-          <p className="mt-1 text-xs text-[#635B4E]">
+          <p className="mt-1 text-xs text-muted">
             สร้างและควบคุมรหัสของขวัญ กำหนดโควตา วันหมดอายุ และตรวจสอบการแลกรับสิทธิ์
           </p>
         </div>
@@ -329,17 +329,17 @@ export default function RedeemCodesManager() {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-[#E5DFD5] bg-white p-4 shadow-sm">
-          <p className="text-xs text-[#635B4E]">รหัสทั้งหมดในระบบ</p>
-          <p className="mt-1 text-2xl font-bold text-[#29261F]">{summary.total}</p>
+        <div className="rounded-xl border border-line bg-white p-4 shadow-sm">
+          <p className="text-xs text-muted">รหัสทั้งหมดในระบบ</p>
+          <p className="mt-1 text-2xl font-bold text-ink">{summary.total}</p>
         </div>
-        <div className="rounded-xl border border-[#E5DFD5] bg-white p-4 shadow-sm">
-          <p className="text-xs text-[#635B4E]">รหัสที่พร้อมใช้งาน</p>
+        <div className="rounded-xl border border-line bg-white p-4 shadow-sm">
+          <p className="text-xs text-muted">รหัสที่พร้อมใช้งาน</p>
           <p className="mt-1 text-2xl font-bold text-emerald-700">{summary.active}</p>
         </div>
-        <div className="rounded-xl border border-[#E5DFD5] bg-white p-4 shadow-sm">
-          <p className="text-xs text-[#635B4E]">ยอดแลกรับสิทธิ์รวม</p>
-          <p className="mt-1 text-2xl font-bold text-[#A58A5C]">{summary.totalRedemptions} ครั้ง</p>
+        <div className="rounded-xl border border-line bg-white p-4 shadow-sm">
+          <p className="text-xs text-muted">ยอดแลกรับสิทธิ์รวม</p>
+          <p className="mt-1 text-2xl font-bold text-gold-ink">{summary.totalRedemptions} ครั้ง</p>
         </div>
       </div>
 
@@ -358,8 +358,8 @@ export default function RedeemCodesManager() {
             onClick={() => setFilter("all")}
             className={`px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "all"
-                ? "bg-[#29261F] text-white border-[#29261F]"
-                : "bg-white text-[#635B4E] border-[#E5DFD5] hover:bg-[#F2EFE9]"
+                ? "bg-ink text-white border-ink"
+                : "bg-white text-muted border-line hover:bg-canvas"
             }`}
           >
             ทั้งหมด ({codes.length})
@@ -369,7 +369,7 @@ export default function RedeemCodesManager() {
             className={`px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "active"
                 ? "bg-emerald-800 text-white border-emerald-800"
-                : "bg-white text-[#635B4E] border-[#E5DFD5] hover:bg-[#F2EFE9]"
+                : "bg-white text-muted border-line hover:bg-canvas"
             }`}
           >
             เปิดใช้งาน
@@ -378,8 +378,8 @@ export default function RedeemCodesManager() {
             onClick={() => setFilter("inactive")}
             className={`px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "inactive"
-                ? "bg-[#635B4E] text-white border-[#635B4E]"
-                : "bg-white text-[#635B4E] border-[#E5DFD5] hover:bg-[#F2EFE9]"
+                ? "bg-muted text-white border-muted"
+                : "bg-white text-muted border-line hover:bg-canvas"
             }`}
           >
             ปิดใช้งาน
@@ -389,7 +389,7 @@ export default function RedeemCodesManager() {
             className={`px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "expired"
                 ? "bg-amber-800 text-white border-amber-800"
-                : "bg-white text-[#635B4E] border-[#E5DFD5] hover:bg-[#F2EFE9]"
+                : "bg-white text-muted border-line hover:bg-canvas"
             }`}
           >
             หมดอายุ
@@ -399,7 +399,7 @@ export default function RedeemCodesManager() {
             className={`px-3 py-1.5 rounded-lg border transition-colors ${
               filter === "depleted"
                 ? "bg-rose-800 text-white border-rose-800"
-                : "bg-white text-[#635B4E] border-[#E5DFD5] hover:bg-[#F2EFE9]"
+                : "bg-white text-muted border-line hover:bg-canvas"
             }`}
           >
             สิทธิ์เต็ม
@@ -410,8 +410,8 @@ export default function RedeemCodesManager() {
       {/* Main Table / List View */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-[#A58A5C] border-t-transparent mb-3" />
-          <p className="text-xs text-[#635B4E]">กำลังโหลดรายการรหัสแลกสิทธิ์…</p>
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-gold border-t-transparent mb-3" />
+          <p className="text-xs text-muted">กำลังโหลดรายการรหัสแลกสิทธิ์…</p>
         </div>
       ) : error ? (
         <div className="rounded-xl border border-rose-200 bg-rose-50 p-6 text-center text-xs text-rose-800">
@@ -421,7 +421,7 @@ export default function RedeemCodesManager() {
           </Button>
         </div>
       ) : filteredCodes.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[#D5CEC2] bg-[#F8F6F2] p-10 text-center text-xs text-[#635B4E]">
+        <div className="rounded-xl border border-dashed border-line bg-canvas p-10 text-center text-xs text-muted">
           {search ? "ไม่พบรหัสที่ตรงกับคำค้นหา" : "ยังไม่มีรหัสแลกสิทธิ์ในหมวดหมู่นี้"}
         </div>
       ) : (
@@ -435,17 +435,17 @@ export default function RedeemCodesManager() {
               return (
                 <div
                   key={c.code}
-                  className="rounded-xl border border-[#E5DFD5] bg-white p-4 shadow-2xs space-y-3"
+                  className="rounded-xl border border-line bg-white p-4 shadow-2xs space-y-3"
                 >
                   {/* Top: Code & Status */}
-                  <div className="flex items-center justify-between gap-2 border-b border-[#E5DFD5]/60 pb-2.5">
-                    <div className="flex items-center gap-1.5 font-mono font-bold text-sm text-[#29261F]">
+                  <div className="flex items-center justify-between gap-2 border-b border-line/60 pb-2.5">
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-sm text-ink">
                       <span className="select-all tracking-wide">{c.code}</span>
                       <button
                         type="button"
                         onClick={() => copyToClipboard(c.code)}
                         title="คัดลอกรหัส"
-                        className="text-[#A58A5C] hover:text-[#7A6338] p-1 transition-colors"
+                        className="text-gold-ink hover:text-gold-ink p-1 transition-colors"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path
@@ -479,25 +479,25 @@ export default function RedeemCodesManager() {
                   </div>
 
                   {/* Title */}
-                  <p className="text-xs font-semibold text-[#29261F] leading-snug">
+                  <p className="text-xs font-semibold text-ink leading-snug">
                     {c.title}
                   </p>
 
                   {/* Details Grid */}
-                  <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#FAF8F5] p-2.5 text-[11px]">
+                  <div className="grid grid-cols-3 gap-2 rounded-lg bg-canvas p-2.5 text-[11px]">
                     <div>
-                      <span className="text-[#635B4E] block text-[10px]">สิทธิ์ที่ได้รับ</span>
-                      <span className="font-semibold text-[#29261F]">{c.credits} ครั้ง</span>
+                      <span className="text-muted block text-[10px]">สิทธิ์ที่ได้รับ</span>
+                      <span className="font-semibold text-ink">{c.credits} ครั้ง</span>
                     </div>
                     <div>
-                      <span className="text-[#635B4E] block text-[10px]">ชนิดสิทธิ์</span>
-                      <span className="font-medium text-[#29261F]">
+                      <span className="text-muted block text-[10px]">ชนิดสิทธิ์</span>
+                      <span className="font-medium text-ink">
                         {c.reasonPrefix === "purchase_redeem" ? "พรีเมียม" : "โควตาทั่วไป"}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[#635B4E] block text-[10px]">ยอดใช้ / เพดาน</span>
-                      <span className="font-medium text-[#29261F]">
+                      <span className="text-muted block text-[10px]">ยอดใช้ / เพดาน</span>
+                      <span className="font-medium text-ink">
                         {c.usedCount} / {c.maxUses === -1 ? "ไม่จำกัด" : c.maxUses}
                       </span>
                     </div>
@@ -505,7 +505,7 @@ export default function RedeemCodesManager() {
 
                   {/* Expiry & Actions Row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1 text-xs">
-                    <span className="text-[11px] text-[#635B4E]">
+                    <span className="text-[11px] text-muted">
                       หมดอายุ: {formatTimestampThai(c.expiresAt)}
                     </span>
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -514,7 +514,7 @@ export default function RedeemCodesManager() {
                         onClick={() => handleToggleActive(c)}
                         className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors shrink-0 ${
                           c.isActive
-                            ? "border-[#D5CEC2] bg-white text-stone-700 hover:bg-[#F2EFE9]"
+                            ? "border-line bg-white text-stone-700 hover:bg-canvas"
                             : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                         }`}
                       >
@@ -523,14 +523,14 @@ export default function RedeemCodesManager() {
                       <button
                         type="button"
                         onClick={() => openRedemptionsModal(c.code)}
-                        className="rounded-lg border border-[#D5CEC2] bg-[#F8F6F2] px-2.5 py-1 text-[11px] font-medium text-[#29261F] hover:bg-[#EAE5DC] transition-colors shrink-0"
+                        className="rounded-lg border border-line bg-canvas px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-inset transition-colors shrink-0"
                       >
                         คนแลก ({c.actualRedeemedCount})
                       </button>
                       <button
                         type="button"
                         onClick={() => openEditModal(c)}
-                        className="rounded-lg border border-[#D5CEC2] bg-white px-2.5 py-1 text-[11px] font-medium text-[#29261F] hover:bg-[#F2EFE9] transition-colors shrink-0"
+                        className="rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors shrink-0"
                       >
                         แก้ไข
                       </button>
@@ -542,10 +542,10 @@ export default function RedeemCodesManager() {
           </div>
 
           {/* Desktop & Tablet Full-Width Responsive Table (Zero Scroll, Fits Entire Page) */}
-          <div className="hidden md:block w-full overflow-hidden rounded-xl border border-[#E5DFD5] bg-white shadow-sm">
+          <div className="hidden md:block w-full overflow-hidden rounded-xl border border-line bg-white shadow-sm">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-[#E5DFD5] bg-[#F8F6F2] font-semibold text-[#635B4E]">
+                <tr className="border-b border-line bg-canvas font-semibold text-muted">
                   <th className="py-3.5 px-4 whitespace-nowrap">รหัสแลกสิทธิ์</th>
                   <th className="py-3.5 px-4">ชื่อแคมเปญ</th>
                   <th className="py-3.5 px-3 text-center whitespace-nowrap">สิทธิ์ / ครั้ง</th>
@@ -556,22 +556,22 @@ export default function RedeemCodesManager() {
                   <th className="py-3.5 px-4 text-right whitespace-nowrap">การจัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5DFD5]">
+              <tbody className="divide-y divide-line">
                 {filteredCodes.map((c) => {
                   const isExpired = c.expiresAt !== null && now > c.expiresAt;
                   const isDepleted = c.maxUses !== -1 && c.usedCount >= c.maxUses;
 
                   return (
-                    <tr key={c.code} className="hover:bg-[#FAF8F5] transition-colors">
+                    <tr key={c.code} className="hover:bg-canvas transition-colors">
                       {/* Code */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-[#29261F] whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-mono font-bold text-ink whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <span className="tracking-wide select-all">{c.code}</span>
                           <button
                             type="button"
                             onClick={() => copyToClipboard(c.code)}
                             title="คัดลอกรหัส"
-                            className="text-[#A58A5C] hover:text-[#7A6338] transition-colors p-1"
+                            className="text-gold-ink hover:text-gold-ink transition-colors p-1"
                           >
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path
@@ -586,19 +586,19 @@ export default function RedeemCodesManager() {
                       </td>
 
                       {/* Title */}
-                      <td className="py-3.5 px-4 text-[#29261F] font-medium leading-relaxed">
+                      <td className="py-3.5 px-4 text-ink font-medium leading-relaxed">
                         {c.title}
                       </td>
 
                       {/* Credits */}
-                      <td className="py-3.5 px-3 text-center font-semibold text-[#29261F] whitespace-nowrap">
+                      <td className="py-3.5 px-3 text-center font-semibold text-ink whitespace-nowrap">
                         {c.credits} ครั้ง
                       </td>
 
                       {/* Kind */}
                       <td className="py-3.5 px-3 text-center whitespace-nowrap">
                         {c.reasonPrefix === "purchase_redeem" ? (
-                          <span className="inline-flex items-center rounded-md border border-[#D5CEC2] bg-[#F8F6F2] px-2.5 py-1 text-[11px] font-semibold text-[#8C6D3B] whitespace-nowrap">
+                          <span className="inline-flex items-center rounded-md border border-line bg-canvas px-2.5 py-1 text-[11px] font-semibold text-gold-ink whitespace-nowrap">
                             พรีเมียม
                           </span>
                         ) : (
@@ -610,18 +610,18 @@ export default function RedeemCodesManager() {
 
                       {/* Usage */}
                       <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                        <span className="font-medium text-[#29261F]">
+                        <span className="font-medium text-ink">
                           {c.usedCount} / {c.maxUses === -1 ? "ไม่จำกัด" : c.maxUses}
                         </span>
                         {c.actualRedeemedCount !== c.usedCount && (
-                          <div className="text-[10px] text-[#A58A5C]">
+                          <div className="text-[10px] text-gold-ink">
                             ประวัติ: {c.actualRedeemedCount}
                           </div>
                         )}
                       </td>
 
                       {/* Expires */}
-                      <td className="py-3.5 px-4 text-[#635B4E] whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-muted whitespace-nowrap">
                         {formatTimestampThai(c.expiresAt)}
                       </td>
 
@@ -655,7 +655,7 @@ export default function RedeemCodesManager() {
                             title={c.isActive ? "กดเพื่อปิดใช้งานทันที" : "กดเพื่อเปิดใช้งาน"}
                             className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors whitespace-nowrap shrink-0 ${
                               c.isActive
-                                ? "border-[#D5CEC2] bg-white text-stone-700 hover:bg-[#F2EFE9]"
+                                ? "border-line bg-white text-stone-700 hover:bg-canvas"
                                 : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
                             }`}
                           >
@@ -665,7 +665,7 @@ export default function RedeemCodesManager() {
                           <button
                             type="button"
                             onClick={() => openRedemptionsModal(c.code)}
-                            className="rounded-lg border border-[#D5CEC2] bg-[#F8F6F2] px-2.5 py-1 text-[11px] font-medium text-[#29261F] hover:bg-[#EAE5DC] transition-colors whitespace-nowrap shrink-0"
+                            className="rounded-lg border border-line bg-canvas px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-inset transition-colors whitespace-nowrap shrink-0"
                           >
                             คนแลก ({c.actualRedeemedCount})
                           </button>
@@ -673,7 +673,7 @@ export default function RedeemCodesManager() {
                           <button
                             type="button"
                             onClick={() => openEditModal(c)}
-                            className="rounded-lg border border-[#D5CEC2] bg-white px-2.5 py-1 text-[11px] font-medium text-[#29261F] hover:bg-[#F2EFE9] transition-colors whitespace-nowrap shrink-0"
+                            className="rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-canvas transition-colors whitespace-nowrap shrink-0"
                           >
                             แก้ไข
                           </button>
@@ -756,7 +756,7 @@ export default function RedeemCodesManager() {
 
           {/* Kind Selection (Buttons) */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-[#29261F]">
+            <label className="block text-xs font-semibold text-ink">
               ชนิดสิทธิ์ที่มอบให้ *
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -765,12 +765,12 @@ export default function RedeemCodesManager() {
                 onClick={() => setCreateKind("premium")}
                 className={`flex flex-col text-left p-3 rounded-xl border transition ${
                   createKind === "premium"
-                    ? "border-[#A58A5C] bg-[#F8F6F2] ring-1 ring-[#A58A5C]"
-                    : "border-[#E5DFD5] bg-white hover:bg-[#FAF8F5]"
+                    ? "border-gold bg-canvas ring-1 ring-gold"
+                    : "border-line bg-white hover:bg-canvas"
                 }`}
               >
-                <span className="text-xs font-bold text-[#8C6D3B]">สิทธิ์พรีเมียม</span>
-                <span className="mt-1 text-[11px] leading-relaxed text-[#635B4E]">
+                <span className="text-xs font-bold text-gold-ink">สิทธิ์พรีเมียม</span>
+                <span className="mt-1 text-[11px] leading-relaxed text-muted">
                   ปลดล็อกผังใหญ่ 15 แบบ และปรมาจารย์ลับ 2 ท่าน (purchase_redeem)
                 </span>
               </button>
@@ -780,12 +780,12 @@ export default function RedeemCodesManager() {
                 onClick={() => setCreateKind("quota")}
                 className={`flex flex-col text-left p-3 rounded-xl border transition ${
                   createKind === "quota"
-                    ? "border-[#A58A5C] bg-[#F8F6F2] ring-1 ring-[#A58A5C]"
-                    : "border-[#E5DFD5] bg-white hover:bg-[#FAF8F5]"
+                    ? "border-gold bg-canvas ring-1 ring-gold"
+                    : "border-line bg-white hover:bg-canvas"
                 }`}
               >
                 <span className="text-xs font-bold text-stone-800">โควตาธรรมดา</span>
-                <span className="mt-1 text-[11px] leading-relaxed text-[#635B4E]">
+                <span className="mt-1 text-[11px] leading-relaxed text-muted">
                   เพิ่มจำนวนครั้งเปิดไพ่ทั่วไป แต่ไม่ปลดล็อกฟีเจอร์พรีเมียม (promo_redeem)
                 </span>
               </button>
@@ -793,15 +793,15 @@ export default function RedeemCodesManager() {
           </div>
 
           {/* Max Uses */}
-          <div className="space-y-2 rounded-xl border border-[#E5DFD5] bg-[#F8F6F2] p-3">
+          <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#29261F]">เพดานจำนวนคนแลก</span>
-              <label className="flex items-center gap-1.5 text-xs text-[#635B4E] cursor-pointer">
+              <span className="text-xs font-semibold text-ink">เพดานจำนวนคนแลก</span>
+              <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
                 <input
                   type="checkbox"
                   checked={createIsUnlimited}
                   onChange={(e) => setCreateIsUnlimited(e.target.checked)}
-                  className="rounded border-[#D5CEC2]"
+                  className="rounded border-line"
                 />
                 ไม่จำกัดจำนวนคนแลก
               </label>
@@ -820,15 +820,15 @@ export default function RedeemCodesManager() {
           </div>
 
           {/* Expiry Date */}
-          <div className="space-y-2 rounded-xl border border-[#E5DFD5] bg-[#F8F6F2] p-3">
+          <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[#29261F]">วันหมดอายุ (เวลาไทย)</span>
-              <label className="flex items-center gap-1.5 text-xs text-[#635B4E] cursor-pointer">
+              <span className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</span>
+              <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
                 <input
                   type="checkbox"
                   checked={!createHasExpiry}
                   onChange={(e) => setCreateHasExpiry(!e.target.checked)}
-                  className="rounded border-[#D5CEC2]"
+                  className="rounded border-line"
                 />
                 ไม่มีวันหมดอายุ
               </label>
@@ -840,9 +840,9 @@ export default function RedeemCodesManager() {
                   min={todayISO()}
                   value={createExpiryDate}
                   onChange={(e) => setCreateExpiryDate(e.target.value)}
-                  className="w-full rounded-xl border border-[#D5CEC2] bg-white px-3 py-2 text-xs text-[#29261F] focus:border-[#A58A5C] focus:outline-none"
+                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
                 />
-                <p className="mt-1 text-[11px] text-[#635B4E]">
+                <p className="mt-1 text-[11px] text-muted">
                   จะหมดอายุ ณ เวลา 23:59:59 ของวันที่เลือกตามเวลาประเทศไทย
                 </p>
               </div>
@@ -882,19 +882,19 @@ export default function RedeemCodesManager() {
             )}
 
             {/* Readonly info */}
-            <div className="grid grid-cols-2 gap-3 rounded-xl border border-[#E5DFD5] bg-[#F8F6F2] p-3 text-xs">
+            <div className="grid grid-cols-2 gap-3 rounded-xl border border-line bg-canvas p-3 text-xs">
               <div>
-                <span className="text-[#635B4E] block">รหัสแลกสิทธิ์:</span>
-                <span className="font-mono font-bold text-[#29261F]">{editingCode.code}</span>
+                <span className="text-muted block">รหัสแลกสิทธิ์:</span>
+                <span className="font-mono font-bold text-ink">{editingCode.code}</span>
               </div>
               <div>
-                <span className="text-[#635B4E] block">สิทธิ์ที่ได้รับ:</span>
-                <span className="font-semibold text-[#29261F]">
+                <span className="text-muted block">สิทธิ์ที่ได้รับ:</span>
+                <span className="font-semibold text-ink">
                   {editingCode.credits} ครั้ง (
                   {editingCode.reasonPrefix === "purchase_redeem" ? "พรีเมียม" : "โควตาธรรมดา"})
                 </span>
               </div>
-              <p className="col-span-2 text-[10px] text-[#8C6D3B]">
+              <p className="col-span-2 text-[10px] text-gold-ink">
                 หมายเหตุ: เพื่อความถูกต้องของประวัติบัญชี ระบบไม่อนุญาตให้แก้ไขรหัสหรือจำนวนสิทธิ์ที่มอบให้
               </p>
             </div>
@@ -912,15 +912,15 @@ export default function RedeemCodesManager() {
             </Field>
 
             {/* Max Uses */}
-            <div className="space-y-2 rounded-xl border border-[#E5DFD5] bg-[#F8F6F2] p-3">
+            <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#29261F]">เพดานจำนวนคนแลก</span>
-                <label className="flex items-center gap-1.5 text-xs text-[#635B4E] cursor-pointer">
+                <span className="text-xs font-semibold text-ink">เพดานจำนวนคนแลก</span>
+                <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
                   <input
                     type="checkbox"
                     checked={editIsUnlimited}
                     onChange={(e) => setEditIsUnlimited(e.target.checked)}
-                    className="rounded border-[#D5CEC2]"
+                    className="rounded border-line"
                   />
                   ไม่จำกัดจำนวนคนแลก
                 </label>
@@ -938,15 +938,15 @@ export default function RedeemCodesManager() {
             </div>
 
             {/* Expiry Date */}
-            <div className="space-y-2 rounded-xl border border-[#E5DFD5] bg-[#F8F6F2] p-3">
+            <div className="space-y-2 rounded-xl border border-line bg-canvas p-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#29261F]">วันหมดอายุ (เวลาไทย)</span>
-                <label className="flex items-center gap-1.5 text-xs text-[#635B4E] cursor-pointer">
+                <span className="text-xs font-semibold text-ink">วันหมดอายุ (เวลาไทย)</span>
+                <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
                   <input
                     type="checkbox"
                     checked={!editHasExpiry}
                     onChange={(e) => setEditHasExpiry(!e.target.checked)}
-                    className="rounded border-[#D5CEC2]"
+                    className="rounded border-line"
                   />
                   ไม่มีวันหมดอายุ
                 </label>
@@ -956,18 +956,18 @@ export default function RedeemCodesManager() {
                   type="date"
                   value={editExpiryDate}
                   onChange={(e) => setEditExpiryDate(e.target.value)}
-                  className="w-full rounded-xl border border-[#D5CEC2] bg-white px-3 py-2 text-xs text-[#29261F] focus:border-[#A58A5C] focus:outline-none"
+                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
                 />
               )}
             </div>
 
             {/* Is Active */}
-            <label className="flex items-center gap-2 text-xs font-semibold text-[#29261F] cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-semibold text-ink cursor-pointer">
               <input
                 type="checkbox"
                 checked={editIsActive}
                 onChange={(e) => setEditIsActive(e.target.checked)}
-                className="rounded border-[#D5CEC2]"
+                className="rounded border-line"
               />
               เปิดใช้งานรหัสนี้
             </label>
@@ -1000,37 +1000,37 @@ export default function RedeemCodesManager() {
         <div className="space-y-4 pt-2">
           {loadingRedemptions ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#A58A5C] border-t-transparent mb-2" />
-              <p className="text-xs text-[#635B4E]">กำลังโหลดประวัติการแลก…</p>
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-gold border-t-transparent mb-2" />
+              <p className="text-xs text-muted">กำลังโหลดประวัติการแลก…</p>
             </div>
           ) : redemptionsError ? (
             <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-800 text-center">
               {redemptionsError}
             </div>
           ) : redemptions.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#D5CEC2] bg-[#F8F6F2] p-8 text-center text-xs text-[#635B4E]">
+            <div className="rounded-xl border border-dashed border-line bg-canvas p-8 text-center text-xs text-muted">
               ยังไม่มีผู้ใช้แลกรับสิทธิ์จากรหัสนี้
             </div>
           ) : (
-            <div className="max-h-[380px] overflow-y-auto rounded-xl border border-[#E5DFD5] bg-white">
+            <div className="max-h-[380px] overflow-y-auto rounded-xl border border-line bg-white">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-[#E5DFD5] bg-[#F8F6F2] text-[#635B4E] sticky top-0">
+                  <tr className="border-b border-line bg-canvas text-muted sticky top-0">
                     <th className="py-2.5 px-3">ลำดับ</th>
                     <th className="py-2.5 px-3">รหัสผู้ใช้ (User ID)</th>
                     <th className="py-2.5 px-3 text-center">สิทธิ์ที่ได้รับ</th>
                     <th className="py-2.5 px-3 text-right">วันเวลาที่แลก</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E5DFD5]">
+                <tbody className="divide-y divide-line">
                   {redemptions.map((r, idx) => (
-                    <tr key={r.id} className="hover:bg-[#FAF8F5]">
-                      <td className="py-2.5 px-3 text-[#635B4E] font-mono">{idx + 1}</td>
-                      <td className="py-2.5 px-3 font-mono text-[#29261F]">{r.userId}</td>
-                      <td className="py-2.5 px-3 text-center font-semibold text-[#29261F]">
+                    <tr key={r.id} className="hover:bg-canvas">
+                      <td className="py-2.5 px-3 text-muted font-mono">{idx + 1}</td>
+                      <td className="py-2.5 px-3 font-mono text-ink">{r.userId}</td>
+                      <td className="py-2.5 px-3 text-center font-semibold text-ink">
                         {r.credits} ครั้ง
                       </td>
-                      <td className="py-2.5 px-3 text-right text-[#635B4E]">
+                      <td className="py-2.5 px-3 text-right text-muted">
                         {formatFullTimeThai(r.redeemedAt)}
                       </td>
                     </tr>

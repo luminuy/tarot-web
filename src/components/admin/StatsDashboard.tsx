@@ -173,10 +173,10 @@ export default function StatsDashboard() {
   return (
     <div className="flex flex-col gap-5">
       {/* ─── Top Control Bar: Range Selector & Sub-Tabs ──────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#D5CEC2] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
         {/* Days Filter Pills */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-xs font-semibold text-[#635B4E] mr-1">ช่วงเวลา:</span>
+          <span className="text-xs font-semibold text-muted mr-1">ช่วงเวลา:</span>
           {[7, 14, 30, 90].map((d) => (
             <button
               key={d}
@@ -191,6 +191,8 @@ export default function StatsDashboard() {
               {d} วัน
             </button>
           ))}
+        </div>
+
         {/* Sub-view switcher */}
         <div className="flex items-center gap-1 rounded-xl border border-line bg-surface-mist p-1 text-xs">
           <button

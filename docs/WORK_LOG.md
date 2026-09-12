@@ -93,7 +93,12 @@ Request too large for model `openai/gpt-oss-120b` ... (TPM): Limit 8000, Request
 3. **การออกแบบความหรูหราระดับสากล (Editorial Luxury Design & Zero Sparkles)**:
    - ถอดสัญลักษณ์ดาวแฟนซี (✦) ใน `AdminOverview.tsx` ออกตามกฎข้อที่ 2 ของ `GEMINI.md`
    - ปรับปรุงการ์ดคำสั่งด่วน (Quick Actions) ในหน้าภาพรวม ให้มีทางลัดตรงไปยังสถิติรายวัน พร้อมคำอธิบายภาษาไทยที่เป็นมิตร
-   - รองรับการแสดงผลสมบูรณ์แบบทั้งบนคอมพิวเตอร์, แท็บเล็ต, และมือถือ
+4. **สถาปัตยกรรมเต็มจอไร้การเลื่อนแนวนอน (Full-Width Zero-Scroll Fluid Responsive Architecture)**:
+   - ปลดล็อกกรอบจำกัดความกว้าง `max-w-7xl` (1280px) ใน `src/app/(th)/admin/page.tsx` เปลี่ยนเป็น `w-full` เต็มพื้นที่จอ เพื่อใช้พื้นที่หน้าจอเดสก์ท็อปและแล็ปท็อปอย่างเต็มประสิทธิภาพ ปราศจากขอบขาวว่างเปล่าซ้ายขวา
+   - ขจัดแถบเลื่อนแนวนอน (Zero Horizontal Scroll): นำ `overflow-x-auto` และ `min-w` ที่ฝืนขนาดออก ทั้งใน `RedeemCodesManager.tsx` และ `DailyStatsTable.tsx` โดยบนจอเดสก์ท็อป/แท็บเล็ต ตารางจะขยายกว้างเต็ม 100% พอดีจอพอดีหน้าต่างเบราว์เซอร์
+   - ปรับใช้ระบบ Hybrid Responsive: บนหน้าจอมือถือ (`md:hidden`) สลับไปแสดงผลเป็น Card List แนวนอนที่จัดวางข้อมูลครบถ้วน สวยงาม สัมผัสง่าย ไม่ล้นขอบจอแม้แต่พิกเซลเดียว
+   - ปรับพาเลตสีทั้งหมดในคอมโพเนนต์แอดมินให้ใช้โทเคนระบบ (`text-ink`, `text-muted`, `border-line`, `bg-canvas`, `bg-ink`, `text-gold-ink`) ผ่านด่านทดสอบ `test-palette-drift.ts` สมบูรณ์ 100% (287 จุด ต่ำกว่าเพดาน 288 จุด)
+   - ผลการทดสอบ: ผ่านครบทั้ง 49/49 ด่าน (Typecheck 0 errors, Quality Verification 100%)
 
 ### 🗓️ 2026-09-12 (รอบ 45): 🎟️ ระบบ Admin Redeem Code Manager เต็มรูปแบบ (/admin?tab=redeem)
 

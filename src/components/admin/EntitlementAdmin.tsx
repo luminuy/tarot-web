@@ -483,7 +483,7 @@ export default function EntitlementAdmin() {
                   const exhausted = c.maxUses !== -1 && c.usedCount >= c.maxUses;
                   const expired = !!c.expiresAt && c.expiresAt <= Date.now();
                   return (
-                    <tr key={c.code} className="border-t border-[#EDE8E0]">
+                    <tr key={c.code} className="border-t border-line">
                       <td className="py-2 pr-3 font-mono font-semibold">{c.code}</td>
                       <td className="py-2 pr-3">{c.kind === "premium" ? "VIP" : "แจก"}</td>
                       <td className="py-2 pr-3">{c.credits}</td>
