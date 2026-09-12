@@ -1702,6 +1702,22 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
           เปิดครั้งแรกแล้วค้างไว้ตลอด ไม่ถอดออกตอนปิด — อนิเมชันขาออกที่อยู่ข้างใน
           `Modal.tsx` จะได้มีโอกาสเล่นจนจบ (ดูเหตุผลเต็มในหัวไฟล์ use-once-open.ts) */}
+    </main>
+
+      <SiteFooter />
+
+      {/*
+        * ⚠️ หน้าต่างลอยทุกบานต้องอยู่ **นอก** `<main>` เสมอ (INC-0131)
+        *
+        * `globals.css` บังคับ `position: relative; z-index: 1` ให้ลูกตรงของ `<body>` ทุกตัว
+        * `<main>` จึงเป็น **stacking context** · อะไรที่อยู่ข้างในมัน ต่อให้เขียน `z-50`
+        * ก็ไม่มีวันขึ้นเหนือหัวเว็บที่เป็น `fixed z-50` และอยู่ระดับ `<body>` ได้เลย
+        * ผลคือฉากหลังโมดัลคลุมทั้งจอจริงแต่ **หัวเว็บลอยทับอยู่ข้างบน** ไม่โดนหรี่
+        * และขอบบนของแผง (โลโก้ + ปุ่มปิด) ถูกหัวเว็บบังจนกดไม่ได้บนจอมือถือเตี้ย ๆ
+        *
+        * ⚠️ ห้ามย้ายกลับเข้าไปใน `<main>` และห้ามแก้ด้วยการดัน z-index ให้สูงขึ้น —
+        *    ตราบใดที่ยังอยู่ใน stacking context ของ `<main>` ตัวเลข z เท่าไหร่ก็ไม่มีผล
+        */}
       {shareModalMounted && (
       <ShareModal
         isOpen={isShareOpen}
@@ -1769,9 +1785,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           แสดงเฉพาะหน้าเลือกผังพยากรณ์ (SPREAD_SELECT) เพื่อไม่รบกวนสมาธิในพิธีกรรมหน้า 2-5
           ═══════════════════════════════════════════════════════════════ */}
       {currentStep === "SPREAD_SELECT" ? seoContent : null}
-    </main>
-
-      <SiteFooter />
   </>
   );
 }
