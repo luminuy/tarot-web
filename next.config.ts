@@ -58,6 +58,11 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
+  webpack: (config) => {
+    config.output = config.output || {};
+    config.output.hashFunction = "sha256";
+    return config;
+  },
   async redirects() {
     return [
       /**

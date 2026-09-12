@@ -280,154 +280,173 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
 
   return (
     <div className="space-y-6">
-      {/* ─── 1. Human-First Insights Box ───────────────────────────── */}
-      {insights && (
-        <div className="rounded-2xl border border-line bg-canvas p-5 shadow-xs">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-gold-ink">
-                  บทวิเคราะห์สรุปแนวโน้ม (Executive Summary)
-                </span>
-              </div>
+      {/* ─── ชั้นที่ 1: สถานะวันนี้ (ภาพรวมด่วนประจำวัน) ──────────────── */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-bold text-ink font-mystic-gold">
+              สถิติประจำวันนี้ ({formatThaiDate(todayISO).label})
+            </h3>
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+              ข้อมูลสดวันนี้
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Card 1: Today vs Yesterday */}
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted">ยอดเปิดไพ่วันนี้</span>
+              <span className="rounded-full bg-canvas px-2 py-0.5 text-[10px] font-semibold text-ink border border-line">
+                วันนี้
+              </span>
+            </div>
+            <p className="mt-1 text-2xl font-bold font-mono text-ink">
+              {dayOverDay.todayStarted.toLocaleString("th-TH")}
+            </p>
+            <div className="mt-2 flex items-center gap-1.5 text-xs">
+              {dayOverDay.yestStarted > 0 ? (
+                <>
+                  <span
+                    className={`font-semibold ${
+                      dayOverDay.startedDiffPct >= 0 ? "text-emerald-700" : "text-rose-700"
+                    }`}
+                  >
+                    {dayOverDay.startedDiffPct >= 0 ? `+${dayOverDay.startedDiffPct}%` : `${dayOverDay.startedDiffPct}%`}
+                  </span>
+                  <span className="text-muted">
+                    เทียบกับเมื่อวาน ({dayOverDay.yestStarted.toLocaleString("th-TH")})
+                  </span>
+                </>
+              ) : (
+                <span className="text-muted">เมื่อวาน: {dayOverDay.yestStarted.toLocaleString("th-TH")} ครั้ง</span>
+              )}
+            </div>
+          </div>
+
+          {/* Card 2: Completion Rate Today */}
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted">อ่านจบสมบูรณ์</span>
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+                สำเร็จ
+              </span>
+            </div>
+            <p className="mt-1 text-2xl font-bold font-mono text-ink">
+              {dayOverDay.todayCompleted.toLocaleString("th-TH")}
+            </p>
+            <p className="mt-2 text-xs text-muted">
+              คิดเป็น <strong className="text-ink">{dayOverDay.todayCompletionRate}</strong> ของรอบที่เริ่ม
+            </p>
+          </div>
+
+          {/* Card 3: Chat Messages Today */}
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted">แชทถามต่อกับแม่หมอ</span>
+              <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 border border-sky-200">
+                ข้อความ
+              </span>
+            </div>
+            <p className="mt-1 text-2xl font-bold font-mono text-ink">
+              {dayOverDay.todayChat.toLocaleString("th-TH")}
+            </p>
+            <p className="mt-2 text-xs text-muted">
+              เมื่อวาน: <strong className="text-ink">{dayOverDay.yestChat.toLocaleString("th-TH")}</strong> ข้อความ
+            </p>
+          </div>
+
+          {/* Card 4: Top Topic Today */}
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted">เรื่องยอดนิยมวันนี้</span>
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 border border-amber-200">
+                อันดับ 1
+              </span>
+            </div>
+            <p className="mt-1 text-xl font-bold text-ink truncate">
+              {todayRow?.topCategory ? todayRow.topCategory.name : "ยังไม่มีข้อมูล"}
+            </p>
+            <p className="mt-2 text-xs text-muted">
+              {todayRow?.topCategory
+                ? `มีผู้ถามเรื่องนี้ ${todayRow.topCategory.pct} ของวันนี้`
+                : "รอผู้ใช้งานในวันนี้"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── ชั้นที่ 2: สรุปภาพรวมและแนวโน้มช่วงเวลา ──────────────────── */}
+      <div className="rounded-2xl border border-line bg-white p-5 shadow-xs space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gold-ink">
+                สรุปภาพรวมในรอบ {rangeDays} วันล่าสุด
+              </span>
+            </div>
+            {insights && (
               <p className="text-xs sm:text-sm text-ink leading-relaxed">
                 ในช่วง {rangeDays} วันที่ผ่านมา มีการเปิดไพ่รวมทั้งหมด{" "}
                 <strong className="font-semibold text-ink">
                   {insights.totalStarted.toLocaleString("th-TH")} ครั้ง
                 </strong>{" "}
-                (เฉลี่ยวันละ {insights.avgPerDay.toLocaleString("th-TH")} ครั้ง) โดยวันที่มีการใช้งานสูงสุดคือ{" "}
-                <strong className="font-semibold text-ink">{insights.peakDate}</strong> (
-                {insights.peakCount.toLocaleString("th-TH")} ครั้ง) และเรื่องที่ผู้คนให้ความสนใจถามมากที่สุดคือ{" "}
-                <strong className="font-semibold text-ink">{insights.topCategory}</strong>
+                (เฉลี่ยวันละ {insights.avgPerDay.toLocaleString("th-TH")} ครั้ง)
+                {insights.totalStarted > 0 ? (
+                  <>
+                    {" "}โดยวันที่มีการใช้งานสูงสุดคือ{" "}
+                    <strong className="font-semibold text-ink">{insights.peakDate}</strong> (
+                    {insights.peakCount.toLocaleString("th-TH")} ครั้ง) และเรื่องที่ผู้คนให้ความสนใจถามมากที่สุดคือ{" "}
+                    <strong className="font-semibold text-ink">{insights.topCategory}</strong>
+                  </>
+                ) : (
+                  <> — ระบบสถิติพร้อมบันทึกข้อมูลอย่างละเอียดทันทีที่มีผู้ใช้เปิดไพ่</>
+                )}
               </p>
-            </div>
-            <div className="shrink-0">
-              <button
-                type="button"
-                onClick={handleExportCSV}
-                className="inline-flex items-center gap-2 rounded-xl border border-ink bg-ink px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-dark transition-colors cursor-pointer"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.8}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-                <span>ดาวน์โหลดรายงาน (CSV / Excel)</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── 2. Day-over-Day Comparison Cards ────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Card 1: Today vs Yesterday */}
-        <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">ยอดเปิดไพ่วันนี้</span>
-            <span className="rounded-full bg-canvas px-2 py-0.5 text-[10px] font-semibold text-ink border border-line">
-              วันนี้
-            </span>
-          </div>
-          <p className="mt-1 text-2xl font-bold font-mono text-ink">
-            {dayOverDay.todayStarted.toLocaleString("th-TH")}
-          </p>
-          <div className="mt-2 flex items-center gap-1.5 text-xs">
-            {dayOverDay.yestStarted > 0 ? (
-              <>
-                <span
-                  className={`font-semibold ${
-                    dayOverDay.startedDiffPct >= 0 ? "text-emerald-700" : "text-rose-700"
-                  }`}
-                >
-                  {dayOverDay.startedDiffPct >= 0 ? `+${dayOverDay.startedDiffPct}%` : `${dayOverDay.startedDiffPct}%`}
-                </span>
-                <span className="text-muted">
-                  เทียบกับเมื่อวาน ({dayOverDay.yestStarted.toLocaleString("th-TH")})
-                </span>
-              </>
-            ) : (
-              <span className="text-muted">เมื่อวาน: {dayOverDay.yestStarted.toLocaleString("th-TH")} ครั้ง</span>
             )}
           </div>
+          <div className="shrink-0">
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              className="inline-flex items-center gap-2 rounded-xl border border-ink bg-ink px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-dark transition-colors cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.8}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              <span>ดาวน์โหลดรายงาน (CSV / Excel)</span>
+            </button>
+          </div>
         </div>
 
-        {/* Card 2: Completion Rate Today */}
-        <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+        {/* กราฟแนวโน้มรายวัน */}
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">อ่านจบสมบูรณ์วันนี้</span>
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
-              สำเร็จ
-            </span>
-          </div>
-          <p className="mt-1 text-2xl font-bold font-mono text-ink">
-            {dayOverDay.todayCompleted.toLocaleString("th-TH")}
-          </p>
-          <p className="mt-2 text-xs text-muted">
-            คิดเป็น <strong className="text-ink">{dayOverDay.todayCompletionRate}</strong> ของรอบที่เริ่มทั้งหมด
-          </p>
-        </div>
-
-        {/* Card 3: Chat Messages Today */}
-        <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">แชทถามต่อกับแม่หมอ</span>
-            <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 border border-sky-200">
-              ข้อความ
-            </span>
-          </div>
-          <p className="mt-1 text-2xl font-bold font-mono text-ink">
-            {dayOverDay.todayChat.toLocaleString("th-TH")}
-          </p>
-          <p className="mt-2 text-xs text-muted">
-            เมื่อวาน: <strong className="text-ink">{dayOverDay.yestChat.toLocaleString("th-TH")}</strong> ข้อความ
-          </p>
-        </div>
-
-        {/* Card 4: Top Topic Today */}
-        <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted">หมวดยอดนิยมวันนี้</span>
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 border border-amber-200">
-              อันดับ 1
-            </span>
-          </div>
-          <p className="mt-1 text-xl font-bold text-ink truncate">
-            {todayRow?.topCategory ? todayRow.topCategory.name : "ยังไม่มีข้อมูล"}
-          </p>
-          <p className="mt-2 text-xs text-muted">
-            {todayRow?.topCategory
-              ? `มีผู้ถามเรื่องนี้ ${todayRow.topCategory.pct} ของวันนี้`
-              : "รอผู้ใช้งานในวันนี้"}
-          </p>
-        </div>
-      </div>
-
-      {/* ─── 3. Visual Volume Chart (Interactive Bar Overview) ─────── */}
-      <div className="rounded-2xl border border-line bg-white p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-ink font-mystic-gold">
-              กราฟแนวโน้มปริมาณการเปิดไพ่รายวัน
-            </h3>
-            <p className="text-xs text-muted mt-0.5">
-              แสดงการกระจายตัวของจำนวนการเปิดไพ่ในแต่ละวัน (แตะหรือชี้ที่แท่งเพื่อดูสรุป)
-            </p>
-          </div>
-          <div className="hidden sm:flex items-center gap-3 text-xs text-muted">
-            <div className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded-xs bg-gold" />
-              <span>เปิดไพ่จบสมบูรณ์</span>
+            <div>
+              <h4 className="text-sm font-bold text-ink font-mystic-gold">
+                กราฟแนวโน้มปริมาณการเปิดไพ่รายวัน
+              </h4>
+              <p className="text-xs text-muted mt-0.5">
+                แสดงการกระจายตัวของจำนวนการเปิดไพ่ในแต่ละวัน (แตะหรือชี้ที่แท่งเพื่อดูสรุป)
+              </p>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded-xs bg-line" />
-              <span>เริ่มเปิดไพ่</span>
+            <div className="hidden sm:flex items-center gap-3 text-xs text-muted">
+              <div className="flex items-center gap-1.5">
+                <span className="h-3 w-3 rounded-xs bg-gold" />
+                <span>เปิดไพ่จบสมบูรณ์</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-3 w-3 rounded-xs bg-line" />
+                <span>เริ่มเปิดไพ่</span>
+              </div>
             </div>
           </div>
-        </div>
 
         {chartRows.length === 0 ? (
           <p className="text-xs text-muted py-8 text-center">ยังไม่มีข้อมูลสถิติรายวัน</p>
@@ -479,17 +498,18 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
             </div>
           </div>
         )}
+        </div>
       </div>
 
-      {/* ─── 4. Detailed Day-by-Day Table ───────────────────────────── */}
+      {/* ─── ชั้นที่ 3: ตารางบันทึกข้อมูลย้อนหลังรายวัน ──────────────── */}
       <div className="rounded-2xl border border-line bg-white p-5 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
           <div>
             <h3 className="text-sm font-bold text-ink font-mystic-gold">
-              ตารางแจกแจงสถิติวันต่อวัน (Day-by-Day Detailed Log)
+              ตารางบันทึกข้อมูลย้อนหลังรายวัน
             </h3>
             <p className="text-xs text-muted mt-0.5">
-              บันทึกกิจกรรมย้อนหลังรายวัน สามารถคลิกดูรายละเอียดเชิงลึกของแต่ละวันได้
+              บันทึกกิจกรรมย้อนหลังรายวัน แตะหรือคลิกที่แถวเพื่อดูรายละเอียดเจาะลึกของแต่ละวัน
             </p>
           </div>
           <div className="text-xs text-muted">

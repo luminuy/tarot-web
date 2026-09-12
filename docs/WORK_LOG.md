@@ -36,6 +36,28 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-12 (รอบ 48): 🎟️ ยกระดับระบบจัดการรหัสแลกสิทธิ์ (Admin Redeem Code Manager) และสถิติรายวัน (PR #433 MERGED)
+
+> **คำสั่งเจ้าของ**: "เอาขึ้นเลย" ➔ ดำเนินการผ่าน 49 ด่าน, Auto-Merge PR #433 สู่ `main` (`f8cba18`), และ Deploy สู่ Cloudflare Workers
+
+**รายละเอียดและผลงานที่ส่งมอบ 100%:**
+1. **ระบบจัดการรหัสแลกสิทธิ์เต็มรูปแบบ (`/admin?tab=redeem`)**:
+   - คอมโพเนนต์ `RedeemCodesManager.tsx`: สุ่มรหัส `SEER-XXXX-XXXX`, กำหนดสิทธิ์/อายุ/จำนวนครั้ง/จำกัดต่อคน, ปิดการใช้งานทันที (Revoke)
+   - โมดัลตรวจสอบประวัติการแลกรายคน (`RedemptionsModal`) ป้องกันการรั่วไหลของ PII
+   - D1 Hardening Migration `0013_redeem_code_hardening.sql` และ Backend Repo `redeem-admin.repo.ts`
+   - APIs: `/api/admin/redeem` และ `/api/admin/redeem/[code]/redemptions` ปลอดภัยตาม Enterprise RBAC
+2. **ระบบสถิติการใช้งานรายวัน (`DailyStatsTable.tsx`)**:
+   - แสดงตัวเลขสถิติแยกตามวัน พร้อมแถบความคืบหน้าและการคำนวณอัตราความสำเร็จ
+   - รองรับการ Export รายงานสถิติออกมาเป็นไฟล์ CSV
+3. **Design System & Palette Compliance**:
+   - ปรับแต่งสีและโทเคนทั้งหมดให้สอดคล้องกับพาเลตพรีเมียม ไร้การฮาร์ดโค้ดสีแปลกปลอม ผ่าน Palette Drift Guard
+4. **ความสมบูรณ์ในการตรวจสอบและการส่งมอบ**:
+   - ผ่านเกณฑ์ทดสอบครบทั้ง **49/49 ด่าน** (`npm run repo:verify`)
+   - ผสานเข้ากิ่งหลักผ่าน **PR #433** (`f8cba18`) ด้วยระบบ Auto-Merge
+   - จัดการลบ branch `claude/admin-redeem-full` เรียบร้อยด้วย `npm run git:tidy`
+
+---
+
 ### 🗓️ 2026-09-12 (รอบ 47): 🧑‍⚖️ กดรัน `ai:judge` จริงครั้งแรก — เจอสาเหตุจริงของเคสล้ม และบั๊กในเครื่องมือวัดเอง (INC-0135)
 
 > **คำสั่งเจ้าของ**: "กดไป" ➔ ยิง workflow ด้วย `limit=3` เทียบกับ `20260911-1`
@@ -98,6 +120,11 @@ Request too large for model `openai/gpt-oss-120b` ... (TPM): Limit 8000, Request
    - ขจัดแถบเลื่อนแนวนอน (Zero Horizontal Scroll): นำ `overflow-x-auto` และ `min-w` ที่ฝืนขนาดออก ทั้งใน `RedeemCodesManager.tsx` และ `DailyStatsTable.tsx` โดยบนจอเดสก์ท็อป/แท็บเล็ต ตารางจะขยายกว้างเต็ม 100% พอดีจอพอดีหน้าต่างเบราว์เซอร์
    - ปรับใช้ระบบ Hybrid Responsive: บนหน้าจอมือถือ (`md:hidden`) สลับไปแสดงผลเป็น Card List แนวนอนที่จัดวางข้อมูลครบถ้วน สวยงาม สัมผัสง่าย ไม่ล้นขอบจอแม้แต่พิกเซลเดียว
    - ปรับพาเลตสีทั้งหมดในคอมโพเนนต์แอดมินให้ใช้โทเคนระบบ (`text-ink`, `text-muted`, `border-line`, `bg-canvas`, `bg-ink`, `text-gold-ink`) ผ่านด่านทดสอบ `test-palette-drift.ts` สมบูรณ์ 100% (287 จุด ต่ำกว่าเพดาน 288 จุด)
+5. **การยกระดับแถบควบคุมสถิติระดับผู้บริหาร (Executive Two-Level Dashboard Control Toolbar)**:
+   - ปรับปรุงแถบควบคุมสถิติใน `StatsDashboard.tsx` จากเดิมที่เป็นแถบปุ่มเม็ด (Pill strip) แออัดซ้อนกัน ให้เป็นระบบควบคุม 2 ชั้นที่เข้าใจง่ายที่สุดสำหรับแอดมินทั่วไป:
+     1. การ์ดเลือก 3 มุมมองหลักขนาดใหญ่ พร้อมป้าย [แนะนำ] และคำอธิบายภาษาไทยสั้นๆ ชัดเจน
+     2. แถบเลือกช่วงเวลาย้อนหลัง (7 วัน, 14 วัน, 30 วัน, 90 วัน) แยกอิสระ พร้อมปุ่ม [ ↻ โหลดข้อมูลล่าสุด ]
+   - ขัดเกลาบทวิเคราะห์สรุปแนวโน้ม (Executive Summary) ใน `DailyStatsTable.tsx` กรณีที่ยังไม่มียอดเปิดไพ่ ให้แจ้งสถานะพร้อมทำงานอย่างสุภาพและเป็นมิตร
    - ผลการทดสอบ: ผ่านครบทั้ง 49/49 ด่าน (Typecheck 0 errors, Quality Verification 100%)
 
 ### 🗓️ 2026-09-12 (รอบ 45): 🎟️ ระบบ Admin Redeem Code Manager เต็มรูปแบบ (/admin?tab=redeem)
