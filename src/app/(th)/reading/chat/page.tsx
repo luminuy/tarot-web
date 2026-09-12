@@ -37,31 +37,53 @@ export default function ReadingChatPage() {
   const hasSession = !!flow && !!flow.readingId && (flow.drawnCards?.length ?? 0) > 0;
 
   return (
+    <>
+    {/*
+      ⚠️ <header> ต้องอยู่ **นอก** <main> เสมอ (INC-0130 · เหมือนที่ TarotFlow ทำ)
+      ตามสเปก HTML-AAM: <header> ที่เป็นลูกหลานของ <main> จะ **ไม่ได้ role `banner`**
+      ผู้ใช้ screen reader จึงกระโดดมาที่แถบหัวของห้องแชทไม่ได้เลย
+      ⚠️ ห้ามย้ายกลับเข้าไป — ด่าน `test-a11y-critical` ตรวจ HTML ที่ build จริงทั้งเว็บแล้ว
+    */}
+    {/*
+      แถบหัวบาง ๆ — ปุ่มกลับไปหน้าคำทำนาย + ชื่อแม่หมอ
+      ใช้ `fixed` ไม่ใช่ `sticky` ด้วยเหตุผลเดียวกับ SiteHeader (INC-0109):
+      sticky ต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ซึ่งบน iOS Safari
+      ขยับเองระหว่างเลื่อน (แถบ URL ย่อ/ขยาย · rubber-band) ค่าที่ได้จึงแกว่งจนแถบสั่น
+    */}
+    <header className="fixed top-0 inset-x-0 z-40 h-14 w-full border-b border-line bg-surface shadow-raised">
+      <div className="mx-auto flex h-full max-w-2xl items-center justify-between gap-3 px-4">
+        <Link
+          href="/"
+          aria-label={isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
+          className="flex items-center gap-1.5 rounded-lg py-1.5 pr-2 font-serif-th text-xs text-ink transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+        >
+          <span aria-hidden="true">←</span> {isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
+        </Link>
+        <span className="flex items-center gap-1.5 font-serif-th text-xs font-bold text-ink">
+          
+          {isEnglish ? `Chat with ${personaName}` : `แชทกับ${persona.nameTh}`}
+        </span>
+      </div>
+    </header>
+
     <main id="main-content" tabIndex={-1} className="min-h-[100dvh] bg-canvas text-ink">
-      {/* ตัวกันที่ของแถบหัวที่เป็น `fixed` — สูงเท่า h-14 ของ <header> เป๊ะ ห้ามลบ (INC-0109) */}
+      {/*
+        ตัวกันที่ของแถบหัวที่เป็น `fixed` — สูงเท่า h-14 ของ <header> เป๊ะ ห้ามลบ (INC-0109)
+        ⚠️ ต้องอยู่ **ใน** <main> ไม่ใช่ข้างนอก เพราะ <main> มี `min-h-[100dvh]` อยู่แล้ว
+        ถ้าวางไว้ข้างนอกหน้าจะสูงเกินไป 56px แล้วเกิดแถบว่างท้ายหน้า
+      */}
       <div aria-hidden="true" className="h-14" />
 
+
       {/*
-        แถบหัวบาง ๆ — ปุ่มกลับไปหน้าคำทำนาย + ชื่อแม่หมอ
-        ใช้ `fixed` ไม่ใช่ `sticky` ด้วยเหตุผลเดียวกับ SiteHeader (INC-0109):
-        sticky ต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ซึ่งบน iOS Safari
-        ขยับเองระหว่างเลื่อน (แถบ URL ย่อ/ขยาย · rubber-band) ค่าที่ได้จึงแกว่งจนแถบสั่น
+        ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ — มันคือ "ชื่อของหน้า" ที่ screen reader
+        ใช้บอกผู้ใช้ว่าตอนนี้อยู่หน้าไหน และเป็นรากของสารบัญหัวข้อทั้งหน้า
+        หน้านี้เคยมี <h1> ศูนย์อัน (ตรวจเจอตอนขยายด่าน a11y ให้ครอบทั้งเว็บ)
+        ⚠️ ห้ามลบ แม้จะมองไม่เห็นบนจอ — ด่าน `test-a11y-critical` ตรวจทั้ง 309 หน้าแล้ว
       */}
-      <header className="fixed top-0 inset-x-0 z-40 h-14 w-full border-b border-line bg-surface shadow-raised">
-        <div className="mx-auto flex h-full max-w-2xl items-center justify-between gap-3 px-4">
-          <Link
-            href="/"
-            aria-label={isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
-            className="flex items-center gap-1.5 rounded-lg py-1.5 pr-2 font-serif-th text-xs text-ink transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-          >
-            <span aria-hidden="true">←</span> {isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
-          </Link>
-          <span className="flex items-center gap-1.5 font-serif-th text-xs font-bold text-ink">
-            
-            {isEnglish ? `Chat with ${personaName}` : `แชทกับ${persona.nameTh}`}
-          </span>
-        </div>
-      </header>
+      <h1 className="sr-only">
+        {isEnglish ? `Chat with ${personaName}` : `แชทกับ${persona.nameTh}`}
+      </h1>
 
       <div className="mx-auto w-full max-w-2xl px-3 sm:px-4 py-2 sm:py-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
         {flow === undefined ? (
@@ -106,5 +128,6 @@ export default function ReadingChatPage() {
         )}
       </div>
     </main>
+    </>
   );
 }

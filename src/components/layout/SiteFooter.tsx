@@ -69,9 +69,23 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
             />
           </div>
           <div className="space-y-1 min-w-0">
-            <h3 className="text-[13px] font-bold text-gold-on-dark uppercase tracking-wider font-serif-th">
+            {/*
+              ⚠️ ต้องไม่เป็น <h3> (หรือหัวข้อระดับใด ๆ)
+              -----------------------------------------------------------------
+              ป้ายในฟุตเตอร์ไม่ใช่ "หัวข้อของเอกสาร" แต่เป็นชื่อของกลุ่มเนื้อหา
+              ตอนที่มันเป็น <h3> มันไปโผล่ในสารบัญหัวข้อของ **ทุกหน้าทั้งเว็บ**
+              แล้วทำให้ลำดับข้ามจาก h1 ไป h3 ทันที (ไม่มี h2 คั่น) บนหน้าที่มี
+              หัวข้อน้อย เช่น 404 · ตั้งรหัสผ่านใหม่
+
+              ฟุตเตอร์มี role `contentinfo` อยู่แล้ว และกลุ่มลิงก์แต่ละคอลัมน์
+              มีชื่อผ่าน `aria-label` ของ <nav> อยู่แล้ว การเป็นหัวข้ออีกชั้น
+              จึงซ้ำซ้อนและทำลายโครงเอกสารเปล่า ๆ
+
+              ⚠️ ห้ามเปลี่ยนกลับเป็น <h*> — ด่าน `test-a11y-critical` ตรวจทั้งเว็บแล้ว
+            */}
+            <div className="text-[13px] font-bold text-gold-on-dark uppercase tracking-wider font-serif-th">
               {isEnglish ? "Ethical Reading Notice & AI Disclosure" : "ข้อควรทราบเกี่ยวกับการทำนาย"}
-            </h3>
+            </div>
             <p className="text-[13px] text-line leading-[1.7] font-serif-th">
               {t.footer.ethicalDisclaimer}
             </p>
@@ -94,9 +108,10 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {footerColumns.map((col, idx) => (
             <nav key={idx} aria-label={col.title} className="space-y-3">
-              <h3 className="font-serif-th font-bold text-sm text-surface-warm tracking-wider uppercase border-b border-line/20 pb-2">
+              {/* ⚠️ ห้ามเป็น <h*> — เหตุผลเดียวกับป้าย "ข้อควรทราบ" ด้านบน */}
+              <div className="font-serif-th font-bold text-sm text-surface-warm tracking-wider uppercase border-b border-line/20 pb-2">
                 {col.title}
-              </h3>
+              </div>
               {"links" in col && col.links ? (
                 <ul className="space-y-2 text-xs font-serif-th text-line/80">
                   {col.links.map((link, lIdx) => {

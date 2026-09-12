@@ -102,6 +102,13 @@ function ReaderConsoleInner() {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
+          {/*
+        ⚠️ ทุกหน้าต้องมี <h1> หนึ่งอันเสมอ — มันคือ "ชื่อของหน้า" ที่ screen reader
+        ใช้บอกผู้ใช้ว่าตอนนี้อยู่หน้าไหน และเป็นรากของสารบัญหัวข้อทั้งหน้า
+        หน้านี้เคยมี <h1> ศูนย์อัน (ตรวจเจอตอนขยายด่าน a11y ให้ครอบทั้งเว็บ)
+        ⚠️ ห้ามลบ แม้จะมองไม่เห็นบนจอ — ด่าน `test-a11y-critical` ตรวจทั้ง 309 หน้าแล้ว
+      */}
+          <h1 className="sr-only">แผงควบคุมแม่หมอ</h1>
           <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
           <p className="text-xs text-muted">กำลังเชื่อมต่อแผงควบคุมแม่หมอ…</p>
         </div>
@@ -113,6 +120,7 @@ function ReaderConsoleInner() {
     return (
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40">
+          <h1 className="sr-only">แผงควบคุมแม่หมอ</h1>
           <h2 className="text-base font-bold text-err">ไม่สามารถเข้าใช้งานได้</h2>
           <p className="text-xs text-muted">{error || "โปรดใช้ลิงก์เข้าสู่ระบบเฉพาะบุคคลจากผู้ดูแลระบบ"}</p>
           <Link href="/" className="inline-block text-xs text-gold-ink underline">
@@ -330,8 +338,24 @@ export default function ReaderConsolePage() {
   return (
     <Suspense
       fallback={
-        <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          role="status"
+          aria-busy="true"
+          className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4"
+        >
+        {/*
+          ⚠️ fallback ของ Suspense คือ **HTML ที่ถูก prerender ออกมาจริง**
+          ไม่ใช่แค่ของชั่วคราวที่ผู้ใช้เห็นเสี้ยววินาที — มันคือสิ่งที่บอตค้นหาและ
+          ผู้ใช้เห็นตอน first paint จึงต้องมีโครงครบเหมือนหน้าจริง: <main> + <h1>
+
+          ตรวจเจอตอนขยายด่าน a11y ให้ครอบทั้งเว็บ: หน้านี้มี <h1> ศูนย์อันใน HTML ที่ build
+          เพราะเนื้อหาจริงอยู่หลัง Suspense ส่วนที่ prerender คือ fallback นี้เท่านั้น
+          ⚠️ ห้ามลบ h1 — ด่าน `test-a11y-critical` ตรวจทั้ง 309 หน้าแล้ว
+        */}
           <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
+            <h1 className="sr-only">แผงควบคุมแม่หมอ</h1>
             <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
             <p className="text-xs text-muted">กำลังโหลดแผงควบคุมแม่หมอ…</p>
           </div>
