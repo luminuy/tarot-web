@@ -198,7 +198,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               setIsOpen(false);
               item.onClick?.();
             }}
-            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left"
+            className="tap-overlay-y w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left"
           >
             {content}
           </button>
@@ -317,7 +317,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                   setIsOpen(false);
                   onOpenHistory();
                 }}
-                className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left"
+                className="tap-overlay-y w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left"
               >
                 <div className="w-9 h-9 rounded-lg bg-inset border border-line flex items-center justify-center text-gold group-hover:text-ink group-hover:border-gold transition-colors duration-150 flex-shrink-0 mt-0.5">
                   <JournalScrollNavIcon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
@@ -349,7 +349,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                 setIsOpen(false);
                 onReset();
               }}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-err-wash hover:bg-err-wash border border-line text-err text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer active:scale-98"
+              className="tap-overlay-y w-full flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-err-wash hover:bg-err-wash border border-line text-err text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer active:scale-98"
             >
               
               <span>{isEnglish ? "Start New Reading" : "เริ่มดูดวงใหม่"}</span>

@@ -225,7 +225,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
               key={sit}
               type="button"
               onClick={() => onSituationChange(sit)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-serif-th transition cursor-pointer ${
+              className={`tap-overlay-y px-3 py-1.5 rounded-lg text-xs font-serif-th transition cursor-pointer ${
                 situation === sit
                   ? "bg-gold-ink text-surface font-bold"
                   : "bg-inset-warm text-ink-deep hover:bg-surface/30 border border-line-warm"

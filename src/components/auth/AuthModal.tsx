@@ -302,7 +302,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label={isEn ? "Close authentication window" : "ปิดหน้าต่างเข้าสู่ระบบ"}
-            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-inset border border-line text-ink hover:text-gold-ink hover:border-gold hover:bg-surface text-xs flex items-center justify-center transition cursor-pointer"
+            className="tap-overlay-y absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-inset border border-line text-ink hover:text-gold-ink hover:border-gold hover:bg-surface text-xs flex items-center justify-center transition cursor-pointer"
           >
             ✕
           </button>
@@ -359,7 +359,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
-                className={`py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`tap-overlay-y py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                   mode === "signin" ? "bg-ink text-canvas shadow-xs" : "text-muted hover:text-ink"
                 }`}
               >
@@ -370,7 +370,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => switchMode("signup")}
-                className={`py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+                className={`tap-overlay-y py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                   mode === "signup" ? "bg-ink text-canvas shadow-xs" : "text-muted hover:text-ink"
                 }`}
               >
@@ -478,7 +478,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? (isEn ? "Hide password" : "ซ่อนรหัสผ่าน") : (isEn ? "Show password" : "แสดงรหัสผ่าน")}
-                    className="absolute right-3 text-muted hover:text-ink text-xs font-serif-th cursor-pointer px-1 py-0.5 rounded transition-colors"
+                    className="tap-overlay-y absolute right-3 text-muted hover:text-ink text-xs font-serif-th cursor-pointer px-1 py-0.5 rounded transition-colors"
                   >
                     {showPassword ? (isEn ? "Hide" : "ซ่อน") : (isEn ? "Show" : "ดู")}
                   </button>
@@ -585,7 +585,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={handleLoginGoogle}
-              className="py-2.5 px-3.5 rounded-full bg-surface hover:bg-inset border border-line hover:border-gold text-ink font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
+              className="tap-overlay-y py-2.5 px-3.5 rounded-full bg-surface hover:bg-inset border border-line hover:border-gold text-ink font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
             >
               <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 border border-line">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
@@ -614,7 +614,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={handleLoginLine}
-              className="py-2.5 px-3.5 rounded-full bg-surface hover:bg-[#F0FFF4] border border-[#06C755]/40 hover:border-[#06C755] text-ok font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
+              className="tap-overlay-y py-2.5 px-3.5 rounded-full bg-surface hover:bg-[#F0FFF4] border border-[#06C755]/40 hover:border-[#06C755] text-ok font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
             >
               <div className="w-5 h-5 rounded-full bg-[#06C755] flex items-center justify-center flex-shrink-0 text-white">
                 <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">

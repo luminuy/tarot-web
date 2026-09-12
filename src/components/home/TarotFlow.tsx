@@ -81,7 +81,7 @@ function StepBackButton({ onClick, label }: { onClick: () => void; label?: strin
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-lg bg-surface border border-line-warm text-xs font-serif-th text-ink-deep hover:bg-surface-warm hover:border-gold-ink transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
+      className="tap-overlay-y mx-auto flex items-center gap-1.5 py-2 px-4 rounded-lg bg-surface border border-line-warm text-xs font-serif-th text-ink-deep hover:bg-surface-warm hover:border-gold-ink transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
     >
       <span aria-hidden="true">←</span> {label || "ย้อนกลับ"}
     </button>
@@ -1269,7 +1269,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-canvas font-bold bg-ink hover:bg-gold px-4 py-1.5 sm:py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
+                className="tap-overlay-y text-xs text-canvas font-bold bg-ink hover:bg-gold px-4 py-1.5 sm:py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
               >
                 {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
               </button>
@@ -1302,7 +1302,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-4 py-1.5 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs transition cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
+                className="tap-overlay-y px-4 py-1.5 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs transition cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
               >
                 {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
               </button>

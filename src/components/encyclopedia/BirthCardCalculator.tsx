@@ -222,7 +222,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 <button
                   type="button"
                   onClick={() => setEra("be")}
-                  className={`px-2 py-0.5 rounded transition-colors ${
+                  className={`tap-overlay-y px-2 py-0.5 rounded transition-colors ${
                     era === "be"
                       ? "bg-ink text-surface-mist font-bold"
                       : "text-[#7A6F5D] hover:text-ink"
@@ -234,7 +234,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 <button
                   type="button"
                   onClick={() => setEra("ce")}
-                  className={`px-2 py-0.5 rounded transition-colors ${
+                  className={`tap-overlay-y px-2 py-0.5 rounded transition-colors ${
                     era === "ce"
                       ? "bg-ink text-surface-mist font-bold"
                       : "text-[#7A6F5D] hover:text-ink"
@@ -405,7 +405,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               <button
                 type="button"
                 onClick={handleShare}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-line-warm bg-white hover:border-gold-ink text-xs font-serif-th font-bold text-ink transition cursor-pointer shadow-xs"
+                className="tap-overlay-y w-full sm:w-auto px-6 py-2.5 rounded-full border border-line-warm bg-white hover:border-gold-ink text-xs font-serif-th font-bold text-ink transition cursor-pointer shadow-xs"
               >
                 <span>
                   {copied

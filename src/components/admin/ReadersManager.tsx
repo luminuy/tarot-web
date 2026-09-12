@@ -241,7 +241,7 @@ export default function ReadersManager() {
             <button
               key={tab.id}
               onClick={() => setStatusFilter(tab.id)}
-              className={`rounded-full px-3 py-1.5 font-medium transition-colors ${
+              className={`tap-overlay-y rounded-full px-3 py-1.5 font-medium transition-colors ${
                 statusFilter === tab.id
                   ? "bg-ink text-white shadow-xs"
                   : "border border-line bg-white text-muted hover:bg-[#F2EFE9] hover:text-ink"
@@ -365,7 +365,7 @@ export default function ReadersManager() {
                   {r.status !== "approved" && (
                     <button
                       onClick={() => handleQuickStatus(r.id, "approved")}
-                      className="flex-1 rounded-lg border border-emerald-200 bg-emerald-50 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100 transition-colors"
+                      className="tap-overlay-y flex-1 rounded-lg border border-emerald-200 bg-emerald-50 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100 transition-colors"
                     >
                       อนุมัติ
                     </button>
@@ -373,14 +373,14 @@ export default function ReadersManager() {
                   {r.status !== "suspended" && (
                     <button
                       onClick={() => handleQuickStatus(r.id, "suspended")}
-                      className="flex-1 rounded-lg border border-rose-200 bg-rose-50 py-1.5 text-xs font-medium text-rose-800 hover:bg-rose-100 transition-colors"
+                      className="tap-overlay-y flex-1 rounded-lg border border-rose-200 bg-rose-50 py-1.5 text-xs font-medium text-rose-800 hover:bg-rose-100 transition-colors"
                     >
                       พักงาน
                     </button>
                   )}
                   <button
                     onClick={() => openEditModal(r)}
-                    className="flex-1 rounded-lg border border-line bg-white py-1.5 text-xs font-medium text-ink hover:bg-[#F2EFE9] transition-colors"
+                    className="tap-overlay-y flex-1 rounded-lg border border-line bg-white py-1.5 text-xs font-medium text-ink hover:bg-[#F2EFE9] transition-colors"
                   >
                     แก้ไข
                   </button>
@@ -389,13 +389,13 @@ export default function ReadersManager() {
                 <div className="flex gap-2 text-[13px]">
                   <button
                     onClick={() => copyConsoleLink(r)}
-                    className="flex-1 rounded-lg border border-line bg-surface-pale py-1 text-ink hover:bg-[#EAE5DC] transition-colors"
+                    className="tap-overlay-y flex-1 rounded-lg border border-line bg-surface-pale py-1 text-ink hover:bg-[#EAE5DC] transition-colors"
                   >
                     ลิงก์แผงแม่หมอ
                   </button>
                   <button
                     onClick={() => handleDelete(r)}
-                    className="px-2.5 py-1 text-rose-700 hover:text-rose-900 transition-colors"
+                    className="tap-overlay-y px-2.5 py-1 text-rose-700 hover:text-rose-900 transition-colors"
                   >
                     ลบ
                   </button>

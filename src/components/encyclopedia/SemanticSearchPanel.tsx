@@ -97,7 +97,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
             type="button"
             onClick={() => fetchResults(query)}
             disabled={state === "loading"}
-            className="text-xs font-serif-th font-bold text-gold-ink hover:text-ink px-3 py-1.5 rounded-lg border border-line bg-white hover:border-gold transition-colors cursor-pointer disabled:opacity-50"
+            className="tap-overlay-y text-xs font-serif-th font-bold text-gold-ink hover:text-ink px-3 py-1.5 rounded-lg border border-line bg-white hover:border-gold transition-colors cursor-pointer disabled:opacity-50"
           >
             {isEnglish ? "Search Again" : "ค้นหาใหม่"}
           </button>
@@ -105,7 +105,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
             <button
               type="button"
               onClick={onClose}
-              className="text-xs font-mono text-muted hover:text-ink p-1.5 rounded-lg border border-transparent hover:border-line transition-colors cursor-pointer"
+              className="tap-overlay-y text-xs font-mono text-muted hover:text-ink p-1.5 rounded-lg border border-transparent hover:border-line transition-colors cursor-pointer"
               aria-label={isEnglish ? "Close semantic results" : "ปิดผลการค้นหาด้วยความรู้สึก"}
             >
               ✕

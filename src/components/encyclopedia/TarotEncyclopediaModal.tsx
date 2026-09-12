@@ -153,7 +153,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                   aria-selected={filter === tab.id}
                   type="button"
                   onClick={() => setFilter(tab.id as SuitFilter)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold whitespace-nowrap transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                  className={`tap-overlay-y px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold whitespace-nowrap transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
                     filter === tab.id
                       ? "bg-gold-ink text-surface font-bold"
                       : "bg-surface text-muted hover:text-ink-deep border border-line-warm"
@@ -230,7 +230,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                     setSearch("");
                     setFilter("all");
                   }}
-                  className="px-4 py-1.5 rounded-full text-xs font-serif-th font-bold bg-gold-ink hover:bg-gold-ink-deep text-surface transition cursor-pointer "
+                  className="tap-overlay-y px-4 py-1.5 rounded-full text-xs font-serif-th font-bold bg-gold-ink hover:bg-gold-ink-deep text-surface transition cursor-pointer "
                 >
                   ล้างการค้นหา
                 </button>
@@ -305,7 +305,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                     <div className="flex items-center gap-2 pt-2">
                       <button
                         onClick={() => setViewOrientation("upright")}
-                        className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition cursor-pointer ${
+                        className={`tap-overlay-y px-3 py-1 rounded-lg text-xs font-mono font-semibold transition cursor-pointer ${
                           viewOrientation === "upright"
                             ? "bg-[#EBF3ED] text-ok border border-line-warm"
                             : "bg-surface text-muted border border-line-warm"
@@ -315,7 +315,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                       </button>
                       <button
                         onClick={() => setViewOrientation("reversed")}
-                        className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold transition cursor-pointer ${
+                        className={`tap-overlay-y px-3 py-1 rounded-lg text-xs font-mono font-semibold transition cursor-pointer ${
                           viewOrientation === "reversed"
                             ? "bg-err-wash text-err border border-line-warm"
                             : "bg-surface text-muted border border-line-warm"
@@ -355,7 +355,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
                       <button
                         key={cat.id}
                         onClick={() => setActiveMeaningCategory(cat.id as typeof activeMeaningCategory)}
-                        className={`px-3 py-1 rounded-lg text-xs font-serif-th font-semibold transition cursor-pointer whitespace-nowrap ${
+                        className={`tap-overlay-y px-3 py-1 rounded-lg text-xs font-serif-th font-semibold transition cursor-pointer whitespace-nowrap ${
                           activeMeaningCategory === cat.id
                             ? "bg-gold-ink text-surface font-bold"
                             : "bg-surface text-muted hover:text-ink-deep border border-line-warm"

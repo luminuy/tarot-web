@@ -378,7 +378,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     <button
                       type="button"
                       onClick={() => setShowIndependentGuide((prev) => !prev)}
-                      className="w-full flex items-center justify-between text-left text-xs text-ink-deep hover:text-gold-ink py-1 cursor-pointer font-serif-th"
+                      className="tap-overlay-y w-full flex items-center justify-between text-left text-xs text-ink-deep hover:text-gold-ink py-1 cursor-pointer font-serif-th"
                     >
                       <span className="flex items-center gap-1.5">
                         
@@ -416,7 +416,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           <button
                             type="button"
                             onClick={() => handleCopy(verificationPayloadJson, "payload")}
-                            className="absolute top-2 right-2 px-2.5 py-1 rounded bg-inset-warm border border-line-warm text-ink-deep text-[13px] font-serif-th hover:bg-surface hover:border-gold-ink cursor-pointer "
+                            className="tap-overlay-y absolute top-2 right-2 px-2.5 py-1 rounded bg-inset-warm border border-line-warm text-ink-deep text-[13px] font-serif-th hover:bg-surface hover:border-gold-ink cursor-pointer "
                           >
                             {copiedKey === "payload"
                               ? isEnglish

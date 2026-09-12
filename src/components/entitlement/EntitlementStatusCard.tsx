@@ -113,7 +113,7 @@ export function EntitlementStatusCard() {
           <button
             type="button"
             onClick={() => setBuyOpen(true)}
-            className="min-h-[40px] rounded-full border border-line-warm bg-gold-ink hover:bg-gold-ink-deep px-4 py-2 font-serif-th text-xs font-semibold text-surface transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+            className="tap-overlay-y min-h-[40px] rounded-full border border-line-warm bg-gold-ink hover:bg-gold-ink-deep px-4 py-2 font-serif-th text-xs font-semibold text-surface transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
             
             {isEn ? "Get Reading Passes" : "เติมรอบเปิดไพ่"}

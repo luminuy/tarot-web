@@ -78,7 +78,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
           <button
             type="button"
             onClick={() => setSelectedSpecialty("all")}
-            className={`px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
+            className={`tap-overlay-y px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
               selectedSpecialty === "all"
                 ? "bg-ink text-canvas font-bold shadow-xs"
                 : "bg-inset text-ink border border-line hover:border-gold"
@@ -91,7 +91,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               key={spec}
               type="button"
               onClick={() => setSelectedSpecialty(spec)}
-              className={`px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
+              className={`tap-overlay-y px-3.5 py-1 rounded-full text-xs font-serif-th transition duration-200 cursor-pointer ${
                 selectedSpecialty === spec
                   ? "bg-ink text-canvas font-bold shadow-xs"
                   : "bg-inset text-ink border border-line hover:border-gold"
@@ -114,7 +114,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
               setSearch("");
               setSelectedSpecialty("all");
             }}
-            className="mt-3 px-5 py-2 rounded-full bg-ink hover:bg-gold text-xs text-canvas transition-colors cursor-pointer font-bold font-serif-th shadow-sm"
+            className="tap-overlay-y mt-3 px-5 py-2 rounded-full bg-ink hover:bg-gold text-xs text-canvas transition-colors cursor-pointer font-bold font-serif-th shadow-sm"
           >
             ล้างตัวกรองทั้งหมด
           </button>

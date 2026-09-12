@@ -473,7 +473,7 @@ export function QuickFortunePicker({
                 <button
                   type="button"
                   onClick={closeNicknameModal}
-                  className="text-xs text-muted hover:text-ink p-1 rounded-md hover:bg-[#F0ECE1] transition-colors"
+                  className="tap-overlay-y text-xs text-muted hover:text-ink p-1 rounded-md hover:bg-[#F0ECE1] transition-colors"
                   aria-label={isEnglish ? "Close" : "ปิด"}
                 >
                   ✕
@@ -569,14 +569,14 @@ export function QuickFortunePicker({
                 <button
                   type="button"
                   onClick={closeNicknameModal}
-                  className="px-3.5 py-2 text-xs font-serif-th text-muted hover:text-ink transition-colors cursor-pointer"
+                  className="tap-overlay-y px-3.5 py-2 text-xs font-serif-th text-muted hover:text-ink transition-colors cursor-pointer"
                 >
                   {isEnglish ? "Cancel" : "ยกเลิก"}
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !inputNickname.trim()}
-                  className="px-5 py-2 text-xs font-serif-th font-semibold rounded-xl bg-ink text-surface-warm hover:bg-[#3D372E] border border-gold-ink/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="tap-overlay-y px-5 py-2 text-xs font-serif-th font-semibold rounded-xl bg-ink text-surface-warm hover:bg-[#3D372E] border border-gold-ink/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <span>{isEnglish ? "Begin Reading Now" : "เริ่มทำนายทันที"}</span>
                   <span aria-hidden="true">➔</span>

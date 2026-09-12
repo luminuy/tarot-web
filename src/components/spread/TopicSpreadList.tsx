@@ -72,7 +72,7 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
               <button
                 type="button"
                 onClick={() => toggleExpand(spread.id)}
-                className="w-full text-left text-xs font-serif-th text-gold-ink hover:text-[#5E390A] flex items-center justify-between py-1 font-semibold cursor-pointer transition-colors"
+                className="tap-overlay-y w-full text-left text-xs font-serif-th text-gold-ink hover:text-[#5E390A] flex items-center justify-between py-1 font-semibold cursor-pointer transition-colors"
                 aria-expanded={isExpanded}
               >
                 <span>{isEnglish ? `${spread.positions.length} Card Positions` : `ความหมาย ${spread.positions.length} ตำแหน่งไพ่`}</span>

@@ -131,7 +131,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           <button
             type="button"
             onClick={() => setFlipped(!flipped)}
-            className="w-full py-2.5 rounded-lg bg-surface border border-line-warm text-xs font-serif-th font-semibold text-ink-deep hover:bg-inset-warm transition cursor-pointer "
+            className="tap-overlay-y w-full py-2.5 rounded-lg bg-surface border border-line-warm text-xs font-serif-th font-semibold text-ink-deep hover:bg-inset-warm transition cursor-pointer "
           >
             {isEnglish ? "Flip Card / View Back" : "พลิกดูหน้าไพ่ / หลังไพ่"}
           </button>

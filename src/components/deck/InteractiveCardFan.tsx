@@ -416,7 +416,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                     type="button"
                     onClick={handleAutoPick}
                     disabled={disabled}
-                    className="flex-shrink-0 text-[13px] sm:text-[13px] text-ink-deep hover:text-gold-ink bg-surface hover:bg-inset-warm border border-line-warm hover:border-gold-ink px-2.5 py-0.5 rounded-lg transition cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+                    className="tap-overlay-y flex-shrink-0 text-[13px] sm:text-[13px] text-ink-deep hover:text-gold-ink bg-surface hover:bg-inset-warm border border-line-warm hover:border-gold-ink px-2.5 py-0.5 rounded-lg transition cursor-pointer font-serif-th focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
                     aria-label={isEnglish ? "Auto-draw next card" : "สุ่มเลือกไพ่ใบถัดไปอัตโนมัติ"}
                   >
                     {isEnglish ? "Draw for Me" : "สุ่มเลือกให้ฉัน"}

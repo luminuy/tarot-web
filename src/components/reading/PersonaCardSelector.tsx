@@ -225,7 +225,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                         : (PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ");
                       soundManager.speakProphecy(greeting, p.id);
                     }}
-                    className="p-1.5 rounded-full text-xs text-gold-ink hover:text-ink-deep hover:bg-inset-warm/40 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                    className="tap-overlay-y p-1.5 rounded-full text-xs text-gold-ink hover:text-ink-deep hover:bg-inset-warm/40 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
                     title={
                       isLocked
                         ? (isEnglish ? `Unlock voice greeting of ${p.nameEn || p.nameTh}` : `ปลดล็อกเสียงทักทายของ ${p.nameTh}`)
