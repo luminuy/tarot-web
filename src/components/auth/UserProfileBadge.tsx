@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { invalidateSessionCache, patchSessionUser, useSessionUser } from "@/lib/auth/use-session";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
-import { describeEntitlement, CHEAPEST_PACKAGE_THB } from "@/lib/entitlement/copy";
+import { describeEntitlement, CHEAPEST_PACKAGE_THB, DAILY_LIMIT, READINGS_EN } from "@/lib/entitlement/copy";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 
@@ -303,8 +303,8 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 ) : (
                   <p>
                     {isEn
-                      ? `${view?.limit ?? 3} free daily readings${ent?.bonusRemaining ? ` · +${ent.bonusRemaining} bonus credits` : ""}`
-                      : `เปิดฟรีวันละ ${view?.limit ?? 3} ครั้ง${ent?.bonusRemaining ? ` · ญาณพิเศษสะสม +${ent.bonusRemaining} ครั้ง` : ""}`}
+                      ? `${view?.limit ?? DAILY_LIMIT} free daily ${READINGS_EN}${ent?.bonusRemaining ? ` · +${ent.bonusRemaining} bonus credits` : ""}`
+                      : `เปิดฟรีวันละ ${view?.limit ?? DAILY_LIMIT} ครั้ง${ent?.bonusRemaining ? ` · ญาณพิเศษสะสม +${ent.bonusRemaining} ครั้ง` : ""}`}
                   </p>
                 )}
               </div>

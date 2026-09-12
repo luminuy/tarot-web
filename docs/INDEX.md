@@ -45,7 +45,7 @@ docs/
         ├── PROVABLY_FAIR_PLAN.md        # แผนระบบสับไพ่ที่ตรวจสอบความยุติธรรมได้ (PR 1-4)
         ├── RETENTION_PLAN.md            # แผนระบบบันทึกดวงและฐานข้อมูลผู้ใช้ D1 (PR 0-4)
         ├── UX_PERF_PLAN.md              # แผนเพิ่มความเร็ว 60fps และลดขนาดภาพไพ่ (PR 1-4)
-        ├── ENTITLEMENT_PLAN.md          # แผนระบบสิทธิ์ดูดวงฟรี 1 ครั้ง และสมาชิกวันละ 3 ครั้ง
+        ├── ENTITLEMENT_PLAN.md          # แผนระบบสิทธิ์เปิดไพ่ — ต้องสมัครก่อนเล่น · สมาชิกวันละ 1 ครั้ง
         ├── AGENTS_TASK_PLAN.md          # แผนกระจายงาน 5 AI Agents เฉพาะทาง
         ├── CLOUDFLARE_FREE_STACK.md     # แผนใช้บริการฟรี CF ต่อยอด (AI Gateway/Turnstile/KV/R2/Vectorize/DO) 4 Wave
         ├── AUDIT_2026-09-01.md          # รายงานการตรวจสุขภาพระบบประจำวันที่ 1 ก.ย. 2569

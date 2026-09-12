@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { CheckMarkIcon, SparkSealIcon } from "@/components/entitlement/EntitlementIcons";
-import { DAILY_LIMIT, REQUIRE_SIGNUP_TO_READ, getMemberBenefits, describeEntitlement } from "@/lib/entitlement/copy";
+import { DAILY_LIMIT, READINGS_EN, REQUIRE_SIGNUP_TO_READ, getMemberBenefits, describeEntitlement } from "@/lib/entitlement/copy";
 import { trackEntitlementEvent } from "@/lib/entitlement/track";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
@@ -76,10 +76,10 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
             <p className="font-serif-th text-sm leading-relaxed text-[#635B4E]">
               {usedUpTrial
                 ? (isEn
-                  ? `Create a free account to continue with ${DAILY_LIMIT} daily readings, explore deep oracle inquiries, and preserve your reading history across all devices.`
+                  ? `Create a free account to continue with ${DAILY_LIMIT} daily ${READINGS_EN}, explore deep oracle inquiries, and preserve your reading history across all devices.`
                   : `สมัครสมาชิกฟรีเพื่อเปิดไพ่ต่อวันละ ${DAILY_LIMIT} ครั้ง คุยถามแม่หมอต่อจากไพ่ชุดนี้ และเก็บคำทำนายไว้ดูย้อนหลังได้ทุกเครื่อง`)
                 : (isEn
-                  ? `Create a free account — get ${DAILY_LIMIT} readings daily, ask follow-up questions to the oracle, and save your readings across all devices.`
+                  ? `Create a free account — get ${DAILY_LIMIT} ${READINGS_EN} daily, ask follow-up questions to the oracle, and save your readings across all devices.`
                   : `สมัครสมาชิกฟรี — เปิดไพ่วันละ ${DAILY_LIMIT} ครั้ง คุยถามแม่หมอต่อได้ และเก็บประวัติดูดวงไว้ทุกเครื่อง`)}
             </p>
           </div>
