@@ -293,18 +293,65 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
     persona,
     lang: ctx.lang,
   });
-  const userMessage = buildReadingMessage(ctx);
 
-  // Qwen 2 ตัวก่อน (ภาษาไทยสวยสุด) → gpt-oss-120b (reasoning ลึก ไม่มีปัญหาจีนหลุด)
-  // เป็นตาข่ายสุดท้ายก่อนตกไป Gemini
-  const readingModels = [
-    "qwen/qwen3.8-27b",
-    "qwen/qwen3.6-27b",
+  /*
+   * 🔄 หมุนลำดับ Qwen สองตัวแบบ 50/50 — เพดาน TPM ของ Groq **แยกรายโมเดล**
+   * ---------------------------------------------------------------------------
+   * เดิมทุกคำขอเริ่มที่ `qwen3.8-27b` เสมอ แล้วค่อยไล่ลงเมื่อล้ม = failover ล้วน
+   * ผลคือ qwen3.8 โดนถลุงโควตาต่อนาทีอยู่ตัวเดียว ส่วนตัวอื่นนั่งว่าง
+   * พอทราฟฟิกมาพร้อมกันจึงโดน 429 ทั้งที่โควตารวมยังเหลือ
+   *
+   * หมุนเฉพาะ **ในกลุ่ม Qwen ที่ภาษาไทยดีเท่ากัน** จึงไม่ขัดกฎ "Qwen มาก่อน"
+   * ที่ล็อกไว้ในคอมเมนต์ของ WORKING_GROQ_MODELS — ผู้ใช้ยังได้ Qwen เป็นตัวแรกเสมอ
+   *
+   * ใช้สุ่มแทนตัวนับ เพราะบน Cloudflare Workers แต่ละ isolate มีตัวนับของตัวเอง
+   * ตัวนับจะเริ่มที่ 0 ทุก isolate = ไม่กระจายจริง
+   *
+   * ⚠️ ไม่กระทบ Provably Fair แม้แต่น้อย — ตรงนี้เลือกแค่ "ใครเป็นคนเขียนข้อความ"
+   *    ไม่ได้แตะการสับไพ่หรือการเลือกไพ่ซึ่งอยู่คนละเส้นทางโดยสิ้นเชิง
+   */
+  const readingModels = (
+    Math.random() < 0.5
+      ? ["qwen/qwen3.8-27b", "qwen/qwen3.6-27b"]
+      : ["qwen/qwen3.6-27b", "qwen/qwen3.8-27b"]
+  ).concat([
     "openai/gpt-oss-120b",
-  ] as const;
+    // เติม gpt-oss-20b ท้ายแถว — เดิมอยู่ใน WORKING_GROQ_MODELS (ใช้กับแชท)
+    // แต่ไม่เคยถูกใช้กับคำอ่านเลย ทั้งที่มีโควตา TPM/RPD ของตัวเองเต็ม ๆ
+    "openai/gpt-oss-20b",
+  ]);
+
+  /*
+   * 📏 ประเมินโทเค็นก่อนยิง แล้วตัดของเสริมถ้าจะชนเพดาน TPM
+   * ---------------------------------------------------------------------------
+   * Groq ปฏิเสธทั้งคำขอด้วย 429 `Request too large ... (TPM): Limit 8000`
+   * โดยนับ **prompt + max_tokens รวมกันต่อคำขอเดียว** ไม่ใช่งบสะสมต่อนาที
+   * ➔ รอให้นานแค่ไหนก็ไม่ช่วย ต้องทำให้คำขอเล็กลงเท่านั้น
+   *
+   * วัดจริงจากเลขที่ Groq แจ้งกลับมาเอง (เคส 3 ใบ Requested 8,247 · max_tokens 3,040
+   * ➔ prompt = 5,207 โทเค็น จากข้อความ 17,742 ตัวอักษร) ได้อัตรา ~3.41 ตัวอักษร/โทเค็น
+   * สูตรนี้ทำนายเคส 3 ใบได้ตรงเป๊ะกับที่ Groq นับจริง
+   *
+   * ของที่ยอมตัดเป็นอย่างแรกคือ "ตัวอย่างคำอ่านมาตรฐาน" (B-02 · ~900 โทเค็น)
+   * เพราะเป็นตัวช่วยด้านสไตล์ ไม่ใช่ข้อมูลไพ่ — ตัดแล้วคำอ่านยังถูกต้องครบถ้วน
+   * ดีกว่าปล่อยให้โดน 429 แล้วตกไปโมเดลสำรองทั้งดุ้น
+   */
+  const CHARS_PER_TOKEN = 3.41;
+  const GROQ_TPM_LIMIT = 8000;
+  const estTokens = (text: string) => Math.ceil(text.length / CHARS_PER_TOKEN);
 
   // เพดานผลลัพธ์: ฐาน 1,600 + 480/ใบ (ผัง 10 ใบ ≈ 6,400) — รองรับ visualAnchor, positionLink, questionLink กันคำอ่านโดนตัดกลาง
   const maxReadingTokens = Math.min(7000, 1600 + ctx.drawn.length * 480);
+
+  let userMessage = buildReadingMessage(ctx);
+  if (estTokens(systemInstruction) + estTokens(userMessage) + maxReadingTokens > GROQ_TPM_LIMIT) {
+    const trimmed = buildReadingMessage(ctx, { omitExemplar: true });
+    const fitsNow =
+      estTokens(systemInstruction) + estTokens(trimmed) + maxReadingTokens <= GROQ_TPM_LIMIT;
+    userMessage = trimmed;
+    // เก็บสถิติไว้ดูใน /admin ว่าต้องตัดบ่อยแค่ไหน และตัดแล้วยังไม่พอกี่ครั้ง
+    recordEvent(fitsNow ? "ai_prompt_trimmed" : "ai_prompt_over_tpm");
+  }
 
   for (const model of readingModels) {
     let jsonAccumulator = "";

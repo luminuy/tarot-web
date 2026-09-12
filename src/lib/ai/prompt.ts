@@ -227,7 +227,19 @@ export interface ReadingContext {
 /**
  * ส่วน Dynamic Suffix ที่เปลี่ยนไปตามแต่ละรอบ
  */
-export function buildReadingMessage(ctx: ReadingContext): string {
+/**
+ * ตัวเลือกลดขนาด prompt เมื่อชนเพดาน TPM ของผู้ให้บริการ
+ *
+ * ⚠️ **ห้ามเปิดใช้พร่ำเพรื่อ** — ทุกอย่างที่ตัดคือข้อมูลที่โมเดลเคยได้
+ * ใช้เฉพาะตอนที่ทางเลือกคือ "ตัดของเสริมแล้วได้คำอ่านจาก Groq"
+ * กับ "ไม่ตัดแล้วโดน 429 ตกไปโมเดลสำรองทั้งดุ้น" เท่านั้น
+ */
+export interface ReadingMessageOptions {
+  /** ตัดตัวอย่างคำอ่านมาตรฐาน (B-02) ออก — ประหยัดราว 900 โทเค็น */
+  omitExemplar?: boolean;
+}
+
+export function buildReadingMessage(ctx: ReadingContext, options?: ReadingMessageOptions): string {
   const { spread, category, question, intake, drawn, cards, safety, nickname, lang = "th" } = ctx;
   const isEn = lang === "en";
 
@@ -332,7 +344,7 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
   const cleanQuestion = (question || (isEn ? "General life direction and current energies" : "ภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้")).replace(/[\x00-\x1F\x7F]/g, "").trim();
 
   const exemplar = pickExemplar(category, drawn.length, spread.yesNoMode);
-  const exemplarBlock = !isEn ? formatExemplarForPrompt(exemplar) : "";
+  const exemplarBlock = !isEn && !options?.omitExemplar ? formatExemplarForPrompt(exemplar) : "";
 
   if (isEn) {
     const depthEn = isQuick
