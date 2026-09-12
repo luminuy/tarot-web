@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth/session";
 import { redeemCodeForUser } from "@/lib/entitlement/redeem";
 import { getEntitlementSnapshot } from "@/lib/entitlement/snapshot";
+import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
+import { recordEvent } from "@/lib/stats/record";
+import { createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -24,6 +27,18 @@ export async function POST(request: Request) {
   const code = (body.code ?? "").trim();
   if (!code) {
     return NextResponse.json({ error: "กรุณาระบุรหัสแลกสิทธิ์" }, { status: 400 });
+  }
+
+  // 🎟 กันไล่เดารหัส — เส้นนี้เคยยิงได้รัวไม่จำกัด ขอแค่ล็อกอิน
+  // เดาถูกใบเดียว = ได้รอบเปิดไพ่ฟรี (หรือสิทธิ์พรีเมียมถ้าเป็นรหัส VIP) และไม่มีใครรู้ตัว
+  // ใช้ถังบน KV ตัวเดียวกับด่านกันเดารหัสผ่าน — อย่าเขียนตัวจำกัดใหม่เอง (ดู auth-ratelimit.ts)
+  const limit = await checkAuthRateLimit(request, "redeem", sessionUser.id);
+  if (!limit.allowed) {
+    recordEvent("redeem_blocked_ratelimit");
+    return createRateLimitResponse(
+      limit.retryAfterSec ?? 3600,
+      "ลองแลกรหัสถี่เกินไป รอสักครู่แล้วลองใหม่",
+    );
   }
 
   const result = await redeemCodeForUser(sessionUser.id, code);

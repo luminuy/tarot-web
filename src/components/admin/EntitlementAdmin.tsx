@@ -410,9 +410,9 @@ export default function EntitlementAdmin() {
 
         <div className="flex flex-wrap items-end gap-3">
           <Field label="ชนิด">
-            {(id) => (
+            {(field) => (
               <select
-                id={id}
+                {...field}
                 value={newKind}
                 onChange={(e) => setNewKind(e.target.value === "premium" ? "premium" : "gift")}
                 className="h-10 rounded-xl border border-[#D5CEC2] bg-white px-3 text-sm text-[#29261F]"
@@ -423,9 +423,9 @@ export default function EntitlementAdmin() {
             )}
           </Field>
           <Field label="ชื่อแคมเปญ">
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 value={newTitle}
                 placeholder="เช่น แจกวันเปิดเพจ"
                 onChange={(e) => setNewTitle(e.target.value)}
@@ -433,18 +433,18 @@ export default function EntitlementAdmin() {
             )}
           </Field>
           <Field label="รอบต่อคน">
-            {(id) => (
-              <Input id={id} type="number" min={1} max={100} value={newCredits} onChange={(e) => setNewCredits(e.target.value)} />
+            {(field) => (
+              <Input {...field} type="number" min={1} max={100} value={newCredits} onChange={(e) => setNewCredits(e.target.value)} />
             )}
           </Field>
           <Field label="เพดานจำนวนคน">
-            {(id) => (
-              <Input id={id} type="number" min={1} max={10000} value={newMaxUses} onChange={(e) => setNewMaxUses(e.target.value)} />
+            {(field) => (
+              <Input {...field} type="number" min={1} max={10000} value={newMaxUses} onChange={(e) => setNewMaxUses(e.target.value)} />
             )}
           </Field>
           <Field label="อายุรหัส (วัน)">
-            {(id) => (
-              <Input id={id} type="number" min={1} max={365} value={newDays} onChange={(e) => setNewDays(e.target.value)} />
+            {(field) => (
+              <Input {...field} type="number" min={1} max={365} value={newDays} onChange={(e) => setNewDays(e.target.value)} />
             )}
           </Field>
           <Button size="sm" variant="gold" isLoading={codeBusy} onClick={createCode}>

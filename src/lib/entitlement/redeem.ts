@@ -203,6 +203,26 @@ export async function redeemCodeForUser(userId: string, codeInput: string): Prom
     const reason = `${codeInfo.reasonPrefix}_${code}`;
     await grantBonus(userId, codeInfo.credits, reason);
 
+    // ⚠️ `grantBonus()` กลืน error ทุกชนิดแล้ว return เงียบ ๆ (ดู entitlement.ts)
+    // ถ้าไม่ยืนยันตรงนี้ ผู้ใช้จะถูกตีตราว่า "แลกไปแล้ว" ทั้งที่ไม่ได้รอบสักหน่วย
+    // และเพราะ UNIQUE(code, user_id) เขาจะแลกรหัสใบนั้นไม่ได้อีกตลอดชีพ — ห้ามตอบ ok
+    const granted = await db
+      .prepare(`SELECT granted FROM user_bonus WHERE user_id = ? AND reason = ? LIMIT 1`)
+      .bind(userId, reason)
+      .first<{ granted: number }>()
+      .catch(() => null);
+
+    if (!granted) {
+      await db
+        .prepare(`DELETE FROM redeem_redemptions WHERE id = ?`)
+        .bind(redemptionId)
+        .run()
+        .catch((e: unknown) => console.error("[Redeem] ย้อนแถวการแลกไม่สำเร็จ:", e));
+      await releaseClaim();
+      console.error("[Redeem] เขียนเครดิตไม่สำเร็จ — ย้อนการแลกทั้งหมดแล้ว", { userId, code });
+      return { ok: false, error: "ระบบบันทึกสิทธิ์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" };
+    }
+
     return {
       ok: true,
       code: codeInfo.code,
