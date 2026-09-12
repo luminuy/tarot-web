@@ -23,6 +23,6 @@ export async function isEntitlementEnabled(): Promise<boolean> {
   if (raw === false || (raw && typeof raw === "object" && (raw.value === false || raw.enabled === false))) {
     return false;
   }
-  // Default is TRUE (Entitlement enforcement active for guest 1 reading & member 3 readings/day)
+  // Default is TRUE (Entitlement enforcement active — ตัวเลขจริงอ่านจาก GUEST_LIMIT / DAILY_LIMIT)
   return true;
 }

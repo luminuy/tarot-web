@@ -15,6 +15,7 @@ import {
 import {
   CHEAPEST_PACKAGE_THB,
   DAILY_LIMIT,
+  READINGS_EN,
   describeEntitlement,
   formatResetCountdown,
   getAccessPlans,
@@ -167,7 +168,7 @@ export function AccessDialog({
               </span>
               <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
                 {isEn
-                  ? `Completely free. Return after midnight for ${DAILY_LIMIT} fresh readings${countdown ? ` (${countdown})` : ""}.`
+                  ? `Completely free. Return after midnight for ${DAILY_LIMIT} fresh ${READINGS_EN}${countdown ? ` (${countdown})` : ""}.`
                   : `ไม่ต้องจ่ายอะไร กลับมาหลังเที่ยงคืนแล้วเปิดไพ่ได้อีก ${DAILY_LIMIT} ครั้ง${countdown ? ` (${countdown})` : ""}`}
               </p>
             </div>

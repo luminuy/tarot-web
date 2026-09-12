@@ -14,6 +14,7 @@ import {
   DAILY_LIMIT,
   GUEST_BLOCK_REASON,
   GUEST_LIMIT,
+  READINGS_EN,
   REQUIRE_SIGNUP_TO_READ,
   SIGNUP_BONUS,
   STANDARD_SPREAD_IDS,
@@ -30,6 +31,7 @@ export {
   DAILY_LIMIT,
   GUEST_BLOCK_REASON,
   GUEST_LIMIT,
+  READINGS_EN,
   REQUIRE_SIGNUP_TO_READ,
   SIGNUP_BONUS,
   STANDARD_SPREAD_IDS,
@@ -66,7 +68,7 @@ export interface EntitlementView {
   tone: QuotaTone;
   /** ข้อความสั้นสำหรับป้ายบนแถบหัว เช่น "ทดลองฟรี 1 ครั้ง" */
   badgeLabel: string;
-  /** ข้อความบรรยายเต็มประโยค เช่น "เหลือ 2 จาก 3 ครั้งของวันนี้" */
+  /** ข้อความบรรยายเต็มประโยค เช่น "วันนี้เหลือ 1 จาก 1 ครั้ง" */
   statusLine: string;
   /** ข้อความบอกเวลารีเซ็ต (ว่างถ้าไม่มี) */
   resetLine: string;
@@ -167,7 +169,7 @@ export function describeEntitlement(ent: ClientEntitlement | null, isEnglish?: b
         tone: "empty",
         badgeLabel: isEnglish ? "Sign in to read" : "เข้าสู่ระบบเพื่อเปิดไพ่",
         statusLine: isEnglish
-          ? `Create a free account to unlock ${DAILY_LIMIT} tarot readings every day`
+          ? `Create a free account to unlock ${DAILY_LIMIT} tarot ${READINGS_EN} every day`
           : `สมัครสมาชิกฟรีเพื่อเปิดไพ่ได้วันละ ${DAILY_LIMIT} ครั้ง`,
         resetLine: isEnglish ? "Free forever · No credit card" : "สมัครฟรี ไม่ต้องผูกบัตร",
         action: "signup",
@@ -230,10 +232,10 @@ export function describeEntitlement(ent: ClientEntitlement | null, isEnglish?: b
       : (isEnglish ? "Daily quota reached" : "โควตาวันนี้ครบแล้ว"),
     statusLine: hasQuota
       ? (isEnglish
-          ? `${dailyRemaining} of ${DAILY_LIMIT} daily readings available${bonusSuffix}`
+          ? `${dailyRemaining} of ${DAILY_LIMIT} daily ${READINGS_EN} available${bonusSuffix}`
           : `วันนี้เหลือ ${dailyRemaining} จาก ${DAILY_LIMIT} ครั้ง${bonusSuffix}`)
       : (isEnglish
-          ? `You have used all ${DAILY_LIMIT} daily complimentary readings`
+          ? `You have used all ${DAILY_LIMIT} daily complimentary ${READINGS_EN}`
           : `คุณใช้โควตาฟรีของวันนี้ครบ ${DAILY_LIMIT} ครั้งแล้ว`),
     resetLine: countdown
       ? (isEnglish
@@ -399,7 +401,7 @@ export const ACCESS_PLANS: AccessPlan[] = [
 
 export const MEMBER_BENEFITS_EN: Array<{ title: string; detail: string }> = [
   {
-    title: `Free ${DAILY_LIMIT} daily tarot readings`,
+    title: `Free ${DAILY_LIMIT} daily tarot ${READINGS_EN}`,
     detail: "Resets every midnight for all classic 1–4 card spreads",
   },
   {
@@ -416,7 +418,7 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
   signup_required: {
     eyebrow: "Free Membership",
     title: "Create a free account to draw your cards",
-    body: `Readings remain completely free — we simply ask you to sign in first so every reading stays tied to your own account. Members draw ${DAILY_LIMIT} readings every day.`,
+    body: `Readings remain completely free — we simply ask you to sign in first so every reading stays tied to your own account. Members draw ${DAILY_LIMIT} ${READINGS_EN} every day.`,
     primaryLabel: "Create Free Account",
     primaryAction: "signup",
     secondaryLabel: "Already a member? Sign In",
@@ -425,7 +427,7 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
   guest_used: {
     eyebrow: "Complimentary Trial",
     title: "You have used your free trial reading",
-    body: `You enjoyed ${GUEST_LIMIT} complimentary reading without registration. Create a free account to unlock ${DAILY_LIMIT} free readings every day.`,
+    body: `You enjoyed ${GUEST_LIMIT} complimentary reading without registration. Create a free account to unlock ${DAILY_LIMIT} free ${READINGS_EN} every day.`,
     primaryLabel: "Create Free Account",
     primaryAction: "signup",
     secondaryLabel: "Already a member? Sign In",
@@ -433,7 +435,7 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
   },
   daily_exhausted: {
     eyebrow: "Daily Quota",
-    title: `You've used all ${DAILY_LIMIT} daily readings`,
+    title: `You've used all ${DAILY_LIMIT} daily ${READINGS_EN}`,
     body: "Your daily complimentary quota resets at midnight. If you'd like to continue right now, top up Tarot Pass credits to unlock grand spreads and unlimited oracle dialogue.",
     primaryLabel: "Top Up Readings",
     primaryAction: "credits",
@@ -447,7 +449,7 @@ export const UPGRADE_COPY_EN: Record<UpgradeReason, UpgradeCopy> = {
     primaryLabel: "Create Free Account",
     primaryAction: "signup",
     secondaryLabel: "Already a member? Sign In",
-    reassurance: `100% free · No credit card required · Enjoy ${DAILY_LIMIT} daily readings`,
+    reassurance: `100% free · No credit card required · Enjoy ${DAILY_LIMIT} daily ${READINGS_EN}`,
   },
   explore: {
     eyebrow: "Entitlement & Quotas",
@@ -501,7 +503,7 @@ export const ACCESS_PLANS_EN: AccessPlan[] = [
     priceNote: "Sign up via Email, Google, or LINE",
     highlight: "Recommended",
     features: [
-      { label: `${DAILY_LIMIT} free daily readings (Standard spreads)`, included: true },
+      { label: `${DAILY_LIMIT} free daily ${READINGS_EN} (Standard spreads)`, included: true },
       { label: "Interactive follow-up chat (2 questions/reading)", included: true },
       { label: "Sync reading journal across all devices", included: true },
       { label: "Full PDPA privacy & data deletion control", included: true },

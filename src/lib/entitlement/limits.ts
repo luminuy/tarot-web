@@ -34,8 +34,21 @@ export const REQUIRE_SIGNUP_TO_READ = GUEST_LIMIT <= 0;
  */
 export const GUEST_BLOCK_REASON = REQUIRE_SIGNUP_TO_READ ? "signup_required" : "guest_used";
 
-/** สมาชิก: เปิดไพ่ได้กี่ครั้งต่อวัน (รีเซ็ตเที่ยงคืนเวลาไทย) */
-export const DAILY_LIMIT = 3;
+/**
+ * สมาชิก: เปิดไพ่ได้กี่ครั้งต่อวัน (รีเซ็ตเที่ยงคืนเวลาไทย)
+ *
+ * ⚠️ **1 ครั้ง/วัน** ตามคำสั่งเจ้าของโปรเจกต์ (2026-09-12) — เดิม 3 ครั้ง/วัน
+ * ถ้อยคำทุกจุดทั้งไทยและอังกฤษดึงเลขจากค่านี้ที่เดียว จึงเปลี่ยนกลับได้ด้วยการแก้บรรทัดเดียว
+ * (ถ้าเปลี่ยนกลับเป็นเลขมากกว่า 1 คำนาม `READINGS_EN` ด้านล่างจะกลายเป็นพหูพจน์ให้เอง)
+ */
+export const DAILY_LIMIT = 1;
+
+/**
+ * คำนาม "reading(s)" ฝั่งอังกฤษที่ผันตาม `DAILY_LIMIT` — ห้ามพิมพ์ `readings` ติดกับตัวเลขเอง
+ * เหตุผล: พอโควตาเหลือ 1 ข้อความอังกฤษจะกลายเป็น "1 readings" ซึ่งผิดหลักภาษา
+ * (กฎเหล็กข้อ 10 Human-First Copywriting — ภาษาอังกฤษก็ต้องอ่านแล้วเป็นธรรมชาติเหมือนกัน)
+ */
+export const READINGS_EN = DAILY_LIMIT === 1 ? "reading" : "readings";
 
 /** compatibility alias — โค้ดเก่าบางจุดยังเรียกชื่อนี้ */
 export const WEEKLY_LIMIT = DAILY_LIMIT;

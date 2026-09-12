@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { DAILY_LIMIT, GUEST_LIMIT, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/copy";
+import { DAILY_LIMIT, GUEST_LIMIT, READINGS_EN, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/copy";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
 
@@ -46,8 +46,8 @@ export function AnnouncementBanner() {
             Upcoming update: Reading limits will soon adjust to{" "}
             <strong>
               {REQUIRE_SIGNUP_TO_READ
-                ? `a free account before drawing · ${DAILY_LIMIT} free readings daily for members`
-                : `${GUEST_LIMIT} free trial readings for visitors · ${DAILY_LIMIT} free readings daily for members`}
+                ? `a free account before drawing · ${DAILY_LIMIT} free ${READINGS_EN} daily for members`
+                : `${GUEST_LIMIT} free trial readings for visitors · ${DAILY_LIMIT} free ${READINGS_EN} daily for members`}
             </strong>
             {when ? ` starting ${when}` : ""} — Create an account now to secure full daily benefits!
           </>
