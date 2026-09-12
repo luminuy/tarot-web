@@ -111,7 +111,7 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] py-6 sm:py-10 px-4 sm:px-6">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
           <LoveOneCardClient />
 
@@ -128,29 +128,29 @@ export default function Page() {
               answer that with real precision.
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
               Four situations, four different readings
             </h3>
-            <ul className="list-disc pl-5 space-y-2 text-[#635B4E]">
+            <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
-                <strong className="text-[#29261F]">Single.</strong> The card speaks to what you are carrying into the
+                <strong className="text-ink">Single.</strong> The card speaks to what you are carrying into the
                 next connection, and what would need to shift for it to land differently than the last one.
               </li>
               <li>
-                <strong className="text-[#29261F]">Talking to someone, undefined.</strong> The most common and the most
+                <strong className="text-ink">Talking to someone, undefined.</strong> The most common and the most
                 painful. Here the card reads the momentum: whether the ambiguity is a stage or a destination.
               </li>
               <li>
-                <strong className="text-[#29261F]">In a relationship.</strong> The reading turns toward maintenance
+                <strong className="text-ink">In a relationship.</strong> The reading turns toward maintenance
                 rather than prediction — what is being under-tended, and what a good week would actually look like.
               </li>
               <li>
-                <strong className="text-[#29261F]">Thinking about an ex.</strong> Two threads get separated: what still
+                <strong className="text-ink">Thinking about an ex.</strong> Two threads get separated: what still
                 needs healing regardless of them, and whether the connection has any live current left.
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
               Why one card, and why it is honest
             </h3>
             <p>

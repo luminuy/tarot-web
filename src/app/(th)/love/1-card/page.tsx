@@ -146,7 +146,7 @@ export default function LoveOneCardPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F] py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
         <div className="max-w-4xl mx-auto space-y-12">
           <LoveOneCardClient />
 
@@ -186,7 +186,7 @@ export default function LoveOneCardPage() {
                 จึงทำหน้าที่เสมือนจุดพักใจให้คุณได้ถอยออกมาหนึ่งก้าวเพื่อมองสถานการณ์ตามความเป็นจริง
               </p>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
                 เจาะลึก 4 สถานะความสัมพันธ์ผ่านมุมมองไพ่ทาโรต์
               </h3>
               <ul className="list-disc pl-5 space-y-2.5 text-[#5E5240]">
@@ -209,7 +209,7 @@ export default function LoveOneCardPage() {
                 </li>
               </ul>
 
-              <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
+              <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
                 ไพ่ชุดใหญ่ vs ไพ่ชุดเล็ก ในเรื่องความรัก
               </h3>
               <p>

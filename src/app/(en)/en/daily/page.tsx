@@ -112,7 +112,7 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] py-6 sm:py-10 px-4 sm:px-6">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
           <DailyClient />
 
@@ -129,29 +129,29 @@ export default function Page() {
               psychological language — the image does not cause the day, it gives you a vocabulary for reading it.
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
               How to get something real out of a one-card pull
             </h3>
-            <ul className="list-disc pl-5 space-y-2 text-[#635B4E]">
+            <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
-                <strong className="text-[#29261F]">Draw before the day starts.</strong> Take one slow breath, notice the
+                <strong className="text-ink">Draw before the day starts.</strong> Take one slow breath, notice the
                 mood you are actually in rather than the one you would prefer, and then pull. A card drawn at 7am can
                 change how you handle 3pm; a card drawn at 11pm can only explain it.
               </li>
               <li>
-                <strong className="text-[#29261F]">Read the picture, not just the keyword.</strong> Pamela Colman
+                <strong className="text-ink">Read the picture, not just the keyword.</strong> Pamela Colman
                 Smith&apos;s illustrations carry the meaning in colour, posture, and where the figure is looking. Notice
                 what the character is doing before you reach for a definition — the detail that catches your eye is
                 usually the one worth sitting with.
               </li>
               <li>
-                <strong className="text-[#29261F]">Look back at night.</strong> Before sleep, compare the card to what
+                <strong className="text-ink">Look back at night.</strong> Before sleep, compare the card to what
                 actually happened. Done for a month, this is the single fastest way to build real intuition, because you
                 are training against outcomes instead of memorising lists.
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
               Why the shuffle is provably fair
             </h3>
             <p>

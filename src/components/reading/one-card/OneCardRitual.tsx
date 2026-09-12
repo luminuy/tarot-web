@@ -164,11 +164,11 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleDraw}
-                className="w-full sm:w-auto px-10 py-3.5 sm:py-4 rounded-full bg-[#29261F] text-[#FAF7F2] font-serif-th text-sm sm:text-base font-bold shadow-raised hover:bg-[#A58A5C] active:scale-[0.98] transition cursor-pointer tracking-wide flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-3.5 sm:py-4 rounded-full bg-ink text-surface-warm font-serif-th text-sm sm:text-base font-bold shadow-raised hover:bg-gold active:scale-[0.98] transition cursor-pointer tracking-wide flex items-center justify-center gap-2"
               >
                 <span>{drawButtonText || (isEn ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}</span>
               </button>
-              <p className="text-xs text-[#635B4E]">
+              <p className="text-xs text-muted">
                 {isEn
                   ? "Cryptographic Web Crypto API randomness · Provably Fair"
                   : "ระบบสุ่มรหัสลับ Web Crypto API ปราศจากการล็อกผล 100%"}
@@ -182,13 +182,13 @@ export function OneCardRitual({
           <div key="ready" className="anim-step-in altar-cloth p-8 sm:p-12 flex flex-col items-center justify-center space-y-6 text-center shadow-inner">
             {/* ป้ายระบุบริบท/สถานะเต็มความยาว ไม่ถูกตัดขอบ (แก้ปัญหา label ถูกตัดครึ่ง) */}
             <div className="space-y-2 max-w-lg mx-auto">
-              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs sm:text-sm font-serif-th font-semibold text-[#8F5C1A] shadow-2xs">
+              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-line bg-surface text-xs sm:text-sm font-serif-th font-semibold text-gold-ink shadow-2xs">
                 <span>{deckLabel}</span>
               </div>
-              <h3 className="text-lg sm:text-2xl font-serif-th font-bold text-[#29261F] tracking-tight">
+              <h3 className="text-lg sm:text-2xl font-serif-th font-bold text-ink tracking-tight">
                 {isEn ? "Your Sacred Card Awaits" : "ไพ่ตอบรับเจตจำนงของคุณแล้ว"}
               </h3>
-              <p className="text-xs sm:text-sm text-[#635B4E]">
+              <p className="text-xs sm:text-sm text-muted">
                 {isEn
                   ? "Tap the card to reveal your oracle message in full 3D"
                   : "แตะที่ตัวไพ่เพื่อพลิกเฉลยสารพยากรณ์แบบ 3D"}
@@ -200,7 +200,7 @@ export function OneCardRitual({
               role="button"
               tabIndex={0}
               aria-label={isEn ? "Tap to reveal card" : "แตะเพื่อพลิกไพ่"}
-              className="cursor-pointer py-2 transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] rounded-xl"
+              className="cursor-pointer py-2 transition-transform duration-300 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink rounded-xl"
               onClick={handleReveal}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -216,7 +216,7 @@ export function OneCardRitual({
               />
             </div>
 
-            <p className="text-xs text-[#A58A5C] font-serif-th font-semibold tracking-wide">
+            <p className="text-xs text-gold-ink font-serif-th font-semibold tracking-wide">
               {isEnglish ? "Touch card above to reveal" : "แตะที่ตัวไพ่ด้านบนเพื่อเปิดเผยคำทำนาย"}
             </p>
           </div>
@@ -240,7 +240,7 @@ export function OneCardRitual({
               {/* Card Editorial Dossier */}
               <div className="space-y-3 flex-1 text-center md:text-left">
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                  <span className="px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                  <span className="px-3 py-1 rounded-full bg-surface border border-line text-xs font-serif-th font-semibold text-gold-ink">
                     {drawnCard.arcana === "major"
                       ? isEn
                         ? "Major Arcana"
@@ -249,16 +249,16 @@ export function OneCardRitual({
                       ? "Minor Arcana"
                       : "Minor Arcana (ชุดเล็ก)"}
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-xs font-serif-th text-[#635B4E]">
+                  <span className="px-3 py-1 rounded-full bg-surface border border-line text-xs font-serif-th text-muted">
                     {isEn ? `Element: ${elementEnMap[drawnCard.element] || drawnCard.element}` : `ธาตุ${drawnCard.element}`}
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <h2 className="text-xl sm:text-3xl font-serif-th font-bold text-[#29261F] tracking-tight">
+                  <h2 className="text-xl sm:text-3xl font-serif-th font-bold text-ink tracking-tight">
                     {isEn ? (drawnCard.nameEn || drawnCard.nameTh) : `${drawnCard.nameTh} ${drawnCard.nameEn ? `(${drawnCard.nameEn})` : ""}`}
                   </h2>
-                  <p className="text-xs sm:text-sm font-serif-th text-[#8F5C1A] font-semibold tracking-wide">
+                  <p className="text-xs sm:text-sm font-serif-th text-gold-ink font-semibold tracking-wide">
                     {isEn
                       ? resolveDisplayKeywords({
                           cardId: drawnCard.id,
@@ -272,7 +272,7 @@ export function OneCardRitual({
                 </div>
 
                 {drawnCard.astrology && (
-                  <p className="text-xs text-[#635B4E]">
+                  <p className="text-xs text-muted">
                     {isEn
                       ? `Astrological Correspondence: ${drawnCard.astrologyEn || drawnCard.astrology}`
                       : `ความสอดคล้องทางโหราศาสตร์: ${drawnCard.astrology}`}
@@ -282,7 +282,7 @@ export function OneCardRitual({
                 <div className="pt-1">
                   <Link
                     href={`/cards/${drawnCard.id}`}
-                    className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#29261F] underline underline-offset-4 transition-colors"
+                    className="text-xs font-serif-th font-semibold text-gold-ink hover:text-ink underline underline-offset-4 transition-colors"
                   >
                     {isEn
                       ? "Explore full symbolism and card meaning →"
@@ -296,11 +296,11 @@ export function OneCardRitual({
             {renderReading(drawnCard)}
 
             {/* Action Bar (Share & Restart) */}
-            <div className="pt-4 border-t border-[#D5CEC2] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-4 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">
               <button
                 type="button"
                 onClick={handleRestart}
-                className="w-full sm:w-auto px-6 py-3 rounded-full border border-[#D5CEC2] bg-[#FAF7F2] hover:bg-[#FFFFFF] text-xs sm:text-sm font-serif-th font-semibold text-[#29261F] shadow-raised transition cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 rounded-full border border-line bg-surface-warm hover:bg-surface text-xs sm:text-sm font-serif-th font-semibold text-ink shadow-raised transition cursor-pointer"
               >
                 {isEn ? "← Draw Another Reading" : "← เริ่มเปิดไพ่อีกครั้ง"}
               </button>
@@ -308,7 +308,7 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleShare}
-                className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-xs sm:text-sm font-serif-th font-semibold text-[#FAF7F2] shadow-raised transition cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 rounded-full bg-ink hover:bg-gold text-xs sm:text-sm font-serif-th font-semibold text-surface-warm shadow-raised transition cursor-pointer"
               >
                 {copied
                   ? isEn
@@ -322,7 +322,7 @@ export function OneCardRitual({
 
             {/* Recommendations Section */}
             {recommendations && (
-              <div className="pt-6 border-t border-[#D5CEC2]">
+              <div className="pt-6 border-t border-line">
                 {recommendations}
               </div>
             )}

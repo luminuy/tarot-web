@@ -72,20 +72,20 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
   return (
     <section
       aria-label={isEnglish ? "Semantic feelings search results" : "ผลลัพธ์การค้นหาด้วยความรู้สึก"}
-      className="rounded-2xl border border-[#A58A5C]/40 bg-[#FAF7F2] p-5 sm:p-7 space-y-6 shadow-md transition duration-300"
+      className="rounded-2xl border border-gold/40 bg-surface-warm p-5 sm:p-7 space-y-6 shadow-md transition duration-300"
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 border-b border-[#D5CEC2]/60 pb-4">
+      <div className="flex items-start justify-between gap-4 border-b border-line/60 pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-serif-th font-semibold px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#8F5C1A] shadow-2xs">
+            <span className="text-xs font-serif-th font-semibold px-2.5 py-0.5 rounded-full bg-surface border border-line text-gold-ink shadow-2xs">
               {isEnglish ? "Semantic Wisdom Search" : "ค้นหาด้วยความรู้สึกและเจตจำนง"}
             </span>
           </div>
-          <h2 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F]">
+          <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink">
             {isEnglish ? "Cards Resonating with Your Feelings" : "ไพ่ที่ตรงกับความรู้สึกของคุณ"}
           </h2>
-          <p className="text-xs text-[#635B4E] font-serif-th">
+          <p className="text-xs text-muted font-serif-th">
             {isEnglish
               ? `Showing deep archetypal resonance for "${query.trim()}"`
               : `วิเคราะห์คลื่นพลังงานเชิงลึกจากสำรับ 1909 Rider-Waite สำหรับคำว่า "${query.trim()}"`}
@@ -97,7 +97,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
             type="button"
             onClick={() => fetchResults(query)}
             disabled={state === "loading"}
-            className="text-xs font-serif-th font-bold text-[#8F5C1A] hover:text-[#29261F] px-3 py-1.5 rounded-lg border border-[#D5CEC2] bg-white hover:border-[#A58A5C] transition-colors cursor-pointer disabled:opacity-50"
+            className="text-xs font-serif-th font-bold text-gold-ink hover:text-ink px-3 py-1.5 rounded-lg border border-line bg-white hover:border-gold transition-colors cursor-pointer disabled:opacity-50"
           >
             {isEnglish ? "Search Again" : "ค้นหาใหม่"}
           </button>
@@ -105,7 +105,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
             <button
               type="button"
               onClick={onClose}
-              className="text-xs font-mono text-[#635B4E] hover:text-[#29261F] p-1.5 rounded-lg border border-transparent hover:border-[#D5CEC2] transition-colors cursor-pointer"
+              className="text-xs font-mono text-muted hover:text-ink p-1.5 rounded-lg border border-transparent hover:border-line transition-colors cursor-pointer"
               aria-label={isEnglish ? "Close semantic results" : "ปิดผลการค้นหาด้วยความรู้สึก"}
             >
               ✕
@@ -120,13 +120,13 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
           {[1, 2, 3, 4].map((n) => (
             <div
               key={n}
-              className="rounded-xl border border-[#D5CEC2]/60 bg-white/70 p-3.5 flex items-center gap-3 animate-pulse"
+              className="rounded-xl border border-line/60 bg-white/70 p-3.5 flex items-center gap-3 animate-pulse"
             >
-              <div className="w-12 h-18 rounded bg-[#EAE7E0] shrink-0" />
+              <div className="w-12 h-18 rounded bg-inset shrink-0" />
               <div className="space-y-2 flex-1">
-                <div className="h-3.5 bg-[#EAE7E0] rounded w-3/4" />
-                <div className="h-3 bg-[#EAE7E0] rounded w-1/2" />
-                <div className="h-2.5 bg-[#EAE7E0] rounded w-2/3" />
+                <div className="h-3.5 bg-inset rounded w-3/4" />
+                <div className="h-3 bg-inset rounded w-1/2" />
+                <div className="h-2.5 bg-inset rounded w-2/3" />
               </div>
             </div>
           ))}
@@ -135,8 +135,8 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
 
       {/* Error / Degraded State */}
       {(state === "error" || isDegraded) && (
-        <div className="p-4 rounded-xl border border-[#D5CEC2] bg-white text-center space-y-2">
-          <p className="text-xs sm:text-sm font-serif-th text-[#635B4E]">
+        <div className="p-4 rounded-xl border border-line bg-white text-center space-y-2">
+          <p className="text-xs sm:text-sm font-serif-th text-muted">
             {isDegraded
               ? isEnglish
                 ? "Daily AI search quota reached. Falling back to title and keyword matching."
@@ -150,8 +150,8 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
 
       {/* Done & Empty State */}
       {state === "done" && validCards.length === 0 && (
-        <div className="p-6 rounded-xl border border-[#D5CEC2] bg-white text-center space-y-2">
-          <p className="text-xs sm:text-sm font-serif-th text-[#635B4E]">
+        <div className="p-6 rounded-xl border border-line bg-white text-center space-y-2">
+          <p className="text-xs sm:text-sm font-serif-th text-muted">
             {isEnglish
               ? "No archetype directly matches this expression. Try describing your situation or emotional state with different words."
               : "ไม่พบไพ่ที่ตรงกับคำบรรยายนี้โดยตรง ลองระบุสถานการณ์หรือความรู้สึกของคุณด้วยคำอื่น"}
@@ -167,9 +167,9 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
             const keywords = card.keywords.upright.slice(0, 2).join(", ");
 
             const content = (
-              <div className="flex items-center gap-3.5 p-3 rounded-xl border border-[#D5CEC2] bg-white hover:border-[#A58A5C] transition duration-200 shadow-xs group h-full">
+              <div className="flex items-center gap-3.5 p-3 rounded-xl border border-line bg-white hover:border-gold transition duration-200 shadow-xs group h-full">
                 {/* 1909 Rider-Waite Authentic Artwork */}
-                <div className="w-12 h-20 shrink-0 overflow-hidden rounded-lg border border-[#D5CEC2] bg-[#EAE7E0] relative">
+                <div className="w-12 h-20 shrink-0 overflow-hidden rounded-lg border border-line bg-inset relative">
                   <CardImage
                     image={card.image}
                     cardId={card.id}
@@ -183,23 +183,23 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
                 {/* Card Information */}
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex items-center justify-between gap-1.5">
-                    <span className="text-[11px] font-mono font-bold text-[#8F5C1A] bg-[#8F5C1A]/10 px-2 py-0.5 rounded-full">
+                    <span className="text-[11px] font-mono font-bold text-gold-ink bg-gold-ink/10 px-2 py-0.5 rounded-full">
                       {isEnglish ? `${matchPercent}% match` : `ตรง ${matchPercent}%`}
                     </span>
-                    <span className="text-[11px] font-mono text-[#635B4E] uppercase">
+                    <span className="text-[11px] font-mono text-muted uppercase">
                       {card.arcana === "major" ? "Major" : card.suit}
                     </span>
                   </div>
 
-                  <h3 className="font-serif-th text-sm font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors truncate">
+                  <h3 className="font-serif-th text-sm font-bold text-ink group-hover:text-gold-ink transition-colors truncate">
                     {isEnglish ? card.nameEn : card.nameTh}
                   </h3>
-                  <p className="text-[11px] font-mono text-[#635B4E] truncate">
+                  <p className="text-[11px] font-mono text-muted truncate">
                     {isEnglish ? card.nameTh : card.nameEn}
                   </p>
 
                   {keywords && (
-                    <p className="text-[11px] font-serif-th text-[#635B4E]/80 truncate pt-0.5">
+                    <p className="text-[11px] font-serif-th text-muted/80 truncate pt-0.5">
                       {keywords}
                     </p>
                   )}
@@ -213,7 +213,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
                   key={card.id}
                   type="button"
                   onClick={() => onPick(card.id)}
-                  className="text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] rounded-xl"
+                  className="text-left w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink rounded-xl"
                 >
                   {content}
                 </button>
@@ -225,7 +225,7 @@ export function SemanticSearchPanel({ query, onClose, onPick }: SemanticSearchPa
                 key={card.id}
                 href={`/cards/${card.id}`}
                 prefetch={false}
-                className="block text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] rounded-xl"
+                className="block text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink rounded-xl"
               >
                 {content}
               </Link>

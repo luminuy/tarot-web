@@ -56,26 +56,26 @@ export const TTSReaderButton: React.FC<TTSReaderButtonProps> = ({ textToRead, pe
           ? isEnglish ? "Stop reading" : "หยุดเสียงอ่านคำทำนาย"
           : isEnglish ? "Listen to reading" : "ฟังเสียงอ่านคำทำนาย"
       }
-      className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-serif-th font-semibold transition duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+      className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-serif-th font-semibold transition duration-300 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
         isSpeaking
-          ? "bg-[#8F5C1A] border-[#D9C8AC] text-[#FFFFFF]"
-          : "bg-[#FFFFFF] border-[#D9C8AC] text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
+          ? "bg-gold-ink border-line-warm text-surface"
+          : "bg-surface border-line-warm text-ink-deep hover:border-gold-ink hover:bg-surface-warm"
       } ${className}`}
     >
       {isSpeaking ? (
         <>
           {/* Animated sound wave bars */}
           <div className="flex items-center gap-0.5 h-3">
-            <span className="w-0.5 bg-[#FFFFFF] rounded-full animate-[pulse_0.6s_ease-in-out_infinite] h-3" />
-            <span className="w-0.5 bg-[#FFFFFF] rounded-full animate-[pulse_0.4s_ease-in-out_infinite_0.2s] h-2" />
-            <span className="w-0.5 bg-[#FFFFFF] rounded-full animate-[pulse_0.7s_ease-in-out_infinite_0.4s] h-3.5" />
-            <span className="w-0.5 bg-[#FFFFFF] rounded-full animate-[pulse_0.5s_ease-in-out_infinite_0.1s] h-2" />
+            <span className="w-0.5 bg-surface rounded-full animate-[pulse_0.6s_ease-in-out_infinite] h-3" />
+            <span className="w-0.5 bg-surface rounded-full animate-[pulse_0.4s_ease-in-out_infinite_0.2s] h-2" />
+            <span className="w-0.5 bg-surface rounded-full animate-[pulse_0.7s_ease-in-out_infinite_0.4s] h-3.5" />
+            <span className="w-0.5 bg-surface rounded-full animate-[pulse_0.5s_ease-in-out_infinite_0.1s] h-2" />
           </div>
           <span>{isEnglish ? "Reading... (click to stop)" : "กำลังอ่าน... (กดเพื่อหยุด)"}</span>
         </>
       ) : (
         <>
-          <SpeakerTabIcon className="w-4 h-4 text-[#8F5C1A]" />
+          <SpeakerTabIcon className="w-4 h-4 text-gold-ink" />
           <span>{isEnglish ? "Listen to reading" : "ฟังเสียงอ่านคำทำนาย"}</span>
         </>
       )}

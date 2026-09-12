@@ -12,7 +12,7 @@ const TarotCard = dynamic(
   () => import("@/components/card/TarotCard").then((mod) => mod.TarotCard),
   {
     loading: () => (
-      <div className="w-[140px] h-[238px] rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] animate-pulse" />
+      <div className="w-[140px] h-[238px] rounded-xl border border-line-warm bg-surface-mist animate-pulse" />
     ),
   },
 );
@@ -159,10 +159,10 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
         className="altar-panel rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6"
       >
         <div className="text-center space-y-1.5">
-          <span className="text-xs uppercase tracking-wider font-serif-th font-semibold text-[#8F5C1A]">
+          <span className="text-xs uppercase tracking-wider font-serif-th font-semibold text-gold-ink">
             {isEnglish ? "Natal Numerology Oracle" : "เลขศาสตร์วันเกิด"}
           </span>
-          <h2 className="font-serif-th text-xl sm:text-2xl font-bold text-[#29261F]">
+          <h2 className="font-serif-th text-xl sm:text-2xl font-bold text-ink">
             {isEnglish ? "Enter Your Date of Birth" : "ใส่วันเดือนปีเกิดของคุณ"}
           </h2>
           <p className="font-sans text-xs sm:text-sm text-[#7A6F5D]">
@@ -176,14 +176,14 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {/* Day */}
           <div className="space-y-1">
-            <label htmlFor="birth-day" className="block text-xs font-serif-th font-semibold text-[#29261F]">
+            <label htmlFor="birth-day" className="block text-xs font-serif-th font-semibold text-ink">
               {isEnglish ? "Day" : "วันที่เกิด"}
             </label>
             <select
               id="birth-day"
               value={day}
               onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
-              className="w-full rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] px-3.5 py-2.5 text-xs sm:text-sm font-sans text-[#29261F] focus:border-[#8F5C1A] focus:outline-hidden transition-colors"
+              className="w-full rounded-xl border border-line-warm bg-surface-mist px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
                 <option key={d} value={d}>
@@ -195,14 +195,14 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
           {/* Month */}
           <div className="space-y-1">
-            <label htmlFor="birth-month" className="block text-xs font-serif-th font-semibold text-[#29261F]">
+            <label htmlFor="birth-month" className="block text-xs font-serif-th font-semibold text-ink">
               {isEnglish ? "Month" : "เดือนเกิด"}
             </label>
             <select
               id="birth-month"
               value={month}
               onChange={(e) => setMonth(Number.parseInt(e.target.value, 10))}
-              className="w-full rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] px-3.5 py-2.5 text-xs sm:text-sm font-sans text-[#29261F] focus:border-[#8F5C1A] focus:outline-hidden transition-colors"
+              className="w-full rounded-xl border border-line-warm bg-surface-mist px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {MONTHS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -215,7 +215,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
           {/* Year */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label htmlFor="birth-year" className="block text-xs font-serif-th font-semibold text-[#29261F]">
+              <label htmlFor="birth-year" className="block text-xs font-serif-th font-semibold text-ink">
                 {isEnglish ? "Year" : "ปีเกิด"}
               </label>
               <div className="flex items-center gap-1 text-[11px] font-sans">
@@ -224,20 +224,20 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   onClick={() => setEra("be")}
                   className={`px-2 py-0.5 rounded transition-colors ${
                     era === "be"
-                      ? "bg-[#29261F] text-[#FAF8F5] font-bold"
-                      : "text-[#7A6F5D] hover:text-[#29261F]"
+                      ? "bg-ink text-surface-mist font-bold"
+                      : "text-[#7A6F5D] hover:text-ink"
                   }`}
                 >
                   {isEnglish ? "BE" : "พ.ศ."}
                 </button>
-                <span className="text-[#D5CEC2]">/</span>
+                <span className="text-line">/</span>
                 <button
                   type="button"
                   onClick={() => setEra("ce")}
                   className={`px-2 py-0.5 rounded transition-colors ${
                     era === "ce"
-                      ? "bg-[#29261F] text-[#FAF8F5] font-bold"
-                      : "text-[#7A6F5D] hover:text-[#29261F]"
+                      ? "bg-ink text-surface-mist font-bold"
+                      : "text-[#7A6F5D] hover:text-ink"
                   }`}
                 >
                   {isEnglish ? "CE" : "ค.ศ."}
@@ -250,7 +250,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               value={yearInput}
               onChange={(e) => setYearInput(e.target.value)}
               placeholder={era === "be" ? "2540" : "1997"}
-              className="w-full rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] px-3.5 py-2.5 text-xs sm:text-sm font-sans text-[#29261F] focus:border-[#8F5C1A] focus:outline-hidden transition-colors"
+              className="w-full rounded-xl border border-line-warm bg-surface-mist px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             />
           </div>
         </div>
@@ -263,7 +263,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
         <button
           type="submit"
-          className="w-full py-3 px-6 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs sm:text-sm font-serif-th font-bold hover:bg-[#A58A5C] transition duration-200 cursor-pointer shadow-raised active:scale-95 tracking-wide"
+          className="w-full py-3 px-6 rounded-full bg-ink text-surface-warm text-xs sm:text-sm font-serif-th font-bold hover:bg-gold transition duration-200 cursor-pointer shadow-raised active:scale-95 tracking-wide"
         >
           {isEnglish ? "Calculate Your Birth Card" : "คำนวณไพ่ประจำตัวของคุณ"}
         </button>
@@ -273,15 +273,15 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
       {result && (
         <div className="altar-panel rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto space-y-8 anim-swap-rise">
           {/* Header & Arithmetic Trail */}
-          <div className="text-center space-y-2.5 border-b border-[#D9C8AC]/40 pb-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#D9C8AC] bg-[#FAF8F5] text-xs font-sans font-semibold text-[#8F5C1A]">
+          <div className="text-center space-y-2.5 border-b border-line-warm/40 pb-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-line-warm bg-surface-mist text-xs font-sans font-semibold text-gold-ink">
               <span>{isEnglish ? "Birth Date:" : "วันเกิด:"}</span>
               <span>
                 {result.day} {isEnglish ? MONTHS[result.month - 1].nameEn : MONTHS[result.month - 1].nameTh} {result.yearBe} (ค.ศ. {result.yearCe})
               </span>
             </div>
 
-            <h3 className="text-2xl sm:text-3xl font-bold font-serif-th text-[#29261F]">
+            <h3 className="text-2xl sm:text-3xl font-bold font-serif-th text-ink">
               {isEnglish
                 ? `Your Birth Card is ${result.primaryCard.nameEn}`
                 : `ไพ่ประจำตัวของคุณคือ ${result.primaryCard.nameTh}`}
@@ -292,7 +292,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             </p>
 
             <div className="pt-1">
-              <span className="inline-block px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#D9C8AC] text-[11px] font-sans text-[#7A6F5D]">
+              <span className="inline-block px-3 py-1 rounded-full bg-surface-mist border border-line-warm text-[11px] font-sans text-[#7A6F5D]">
                 {isEnglish
                   ? `Numerological Sum: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → Card #${result.primaryNumber}`
                   : `ผลรวมเลขศาสตร์: ${result.day} + ${result.month} + ${result.yearCe} = ${result.calculatedSum} → ไพ่หมายเลข ${result.primaryNumber}`}
@@ -309,7 +309,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             >
               {/* Primary Card (Personality Card) */}
               <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-4 flex flex-col items-center text-center shadow-xs">
-                <span className="px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#D9C8AC] text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="px-3 py-1 rounded-full bg-surface-mist border border-line-warm text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Personality Card" : "ไพ่บุคลิกภาพ & พลังงานหลัก"}
                 </span>
 
@@ -323,7 +323,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 </div>
 
                 <div className="space-y-1 w-full text-center">
-                  <div className="text-lg sm:text-xl font-bold font-serif-th text-[#29261F]">
+                  <div className="text-lg sm:text-xl font-bold font-serif-th text-ink">
                     {result.primaryCard.nameTh} ({result.primaryCard.nameEn})
                   </div>
                   <div className="text-xs font-sans text-[#7A6F5D]">
@@ -333,7 +333,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   </div>
                 </div>
 
-                <div className="text-xs sm:text-sm font-sans text-[#29261F] leading-relaxed text-left pt-3 border-t border-[#D9C8AC]/40 w-full space-y-2">
+                <div className="text-xs sm:text-sm font-sans text-ink leading-relaxed text-left pt-3 border-t border-line-warm/40 w-full space-y-2">
                   <p>
                     {isEnglish && result.primaryCard.numerologyEn
                       ? result.primaryCard.numerologyEn
@@ -345,7 +345,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
                 <Link
                   href={`/cards/${result.primaryCard.id}`}
-                  className="text-xs font-serif-th font-bold text-[#8F5C1A] hover:underline mt-auto pt-2"
+                  className="text-xs font-serif-th font-bold text-gold-ink hover:underline mt-auto pt-2"
                 >
                   {isEnglish ? "Read Full Card Guide →" : "อ่านคัมภีร์เจาะลึกไพ่ใบนี้ →"}
                 </Link>
@@ -354,7 +354,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               {/* Secondary Card (Soul Card) */}
               {result.secondaryCard && (
                 <div className="altar-card-porcelain rounded-xl p-5 sm:p-6 space-y-4 flex flex-col items-center text-center shadow-xs">
-                  <span className="px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#D9C8AC] text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                  <span className="px-3 py-1 rounded-full bg-surface-mist border border-line-warm text-xs font-serif-th font-semibold text-gold-ink">
                     {isEnglish ? "Soul Card" : "ไพ่จิตวิญญาณ & เจตนารมณ์ลึก"}
                   </span>
 
@@ -368,7 +368,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                   </div>
 
                   <div className="space-y-1 w-full text-center">
-                    <div className="text-lg sm:text-xl font-bold font-serif-th text-[#29261F]">
+                    <div className="text-lg sm:text-xl font-bold font-serif-th text-ink">
                       {result.secondaryCard.nameTh} ({result.secondaryCard.nameEn})
                     </div>
                     <div className="text-xs font-sans text-[#7A6F5D]">
@@ -378,7 +378,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                     </div>
                   </div>
 
-                  <div className="text-xs sm:text-sm font-sans text-[#29261F] leading-relaxed text-left pt-3 border-t border-[#D9C8AC]/40 w-full space-y-2">
+                  <div className="text-xs sm:text-sm font-sans text-ink leading-relaxed text-left pt-3 border-t border-line-warm/40 w-full space-y-2">
                     <p>
                       {isEnglish && result.secondaryCard.numerologyEn
                         ? result.secondaryCard.numerologyEn
@@ -390,7 +390,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
                   <Link
                     href={`/cards/${result.secondaryCard.id}`}
-                    className="text-xs font-serif-th font-bold text-[#8F5C1A] hover:underline mt-auto pt-2"
+                    className="text-xs font-serif-th font-bold text-gold-ink hover:underline mt-auto pt-2"
                   >
                     {isEnglish ? "Read Full Card Guide →" : "อ่านคัมภีร์เจาะลึกไพ่ใบนี้ →"}
                   </Link>
@@ -400,12 +400,12 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
           </div>
 
           {/* Action & Next Steps Bar */}
-          <div className="space-y-6 pt-2 border-t border-[#D9C8AC]/40">
+          <div className="space-y-6 pt-2 border-t border-line-warm/40">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={handleShare}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-[#D9C8AC] bg-white hover:border-[#8F5C1A] text-xs font-serif-th font-bold text-[#29261F] transition cursor-pointer shadow-xs"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-line-warm bg-white hover:border-gold-ink text-xs font-serif-th font-bold text-ink transition cursor-pointer shadow-xs"
               >
                 <span>
                   {copied
@@ -420,16 +420,16 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
               <Link
                 href="/spreads/celtic-cross"
-                className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-[#29261F] text-[#FAF7F2] text-xs font-serif-th font-bold text-center hover:bg-[#A58A5C] transition shadow-xs"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-ink text-surface-warm text-xs font-serif-th font-bold text-center hover:bg-gold transition shadow-xs"
               >
                 {isEnglish ? "10-Card Celtic Cross Life Reading" : "เปิดผังเซลติกครอส 10 ใบ พยากรณ์ชะตาชีวิต"}
               </Link>
             </div>
 
             {/* Recommended Next Readings */}
-            <div className="pt-4 border-t border-[#D9C8AC]/40 space-y-3">
+            <div className="pt-4 border-t border-line-warm/40 space-y-3">
               <div className="text-center sm:text-left space-y-1">
-                <h4 className="text-sm sm:text-base font-serif-th font-bold text-[#29261F]">
+                <h4 className="text-sm sm:text-base font-serif-th font-bold text-ink">
                   {isEnglish ? "Recommended Next Readings" : "ขั้นตอนพยากรณ์ชะตาถัดไปที่แนะนำ"}
                 </h4>
               </div>
@@ -437,9 +437,9 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Link
                   href="/daily"
-                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition duration-300 group block shadow-xs"
+                  className="p-4 rounded-xl border border-line-warm bg-surface hover:border-gold-ink text-center transition duration-300 group block shadow-xs"
                 >
-                  <div className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                  <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Daily Tarot Oracle" : "ดูดวงไพ่ยิปซีรายวัน"}
                   </div>
                   <p className="text-[11px] font-sans text-[#7A6F5D] mt-1">
@@ -449,9 +449,9 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
                 <Link
                   href="/love/1-card"
-                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition duration-300 group block shadow-xs"
+                  className="p-4 rounded-xl border border-line-warm bg-surface hover:border-gold-ink text-center transition duration-300 group block shadow-xs"
                 >
-                  <div className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                  <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Love Tarot 1 Card" : "ดูดวงความรัก 1 ใบ"}
                   </div>
                   <p className="text-[11px] font-sans text-[#7A6F5D] mt-1">
@@ -461,9 +461,9 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
                 <Link
                   href="/readers"
-                  className="p-4 rounded-xl border border-[#D9C8AC] bg-[#FFFFFF] hover:border-[#8F5C1A] text-center transition duration-300 group block shadow-xs"
+                  className="p-4 rounded-xl border border-line-warm bg-surface hover:border-gold-ink text-center transition duration-300 group block shadow-xs"
                 >
-                  <div className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                  <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                     {isEnglish ? "Personal Readers" : "ปรึกษาแม่หมอตัวจริง"}
                   </div>
                   <p className="text-[11px] font-sans text-[#7A6F5D] mt-1">

@@ -172,7 +172,7 @@ export async function CardDetailBody({
   const breadcrumbJsonLd = buildBreadcrumbJsonLd(locale, buildCardCrumbs(card, locale));
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#FAF7F2] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-surface-warm text-ink-deep p-4 sm:p-8 font-sans relative overflow-x-clip">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(cardJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <CardDetailView

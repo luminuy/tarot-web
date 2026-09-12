@@ -242,20 +242,20 @@ export default function EntitlementAdmin() {
     [gfDate, load],
   );
 
-  if (!s) return <p className="text-sm text-[#635B4E]">กำลังโหลด…</p>;
+  if (!s) return <p className="text-sm text-muted">กำลังโหลด…</p>;
 
   return (
     <div className="flex flex-col gap-5">
-      {msg ? <p className="text-xs text-[#635B4E]">{msg}</p> : null}
+      {msg ? <p className="text-xs text-muted">{msg}</p> : null}
 
       {/* ── สถานะฐานข้อมูล ── */}
-      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
+      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-sm font-semibold text-[#29261F]">
+            <h3 className="text-sm font-semibold text-ink">
               1 · เตรียมฐานข้อมูล{" "}
               {dbReady === null ? (
-                <span className="text-[#635B4E] text-xs font-normal">(กำลังตรวจ…)</span>
+                <span className="text-muted text-xs font-normal">(กำลังตรวจ…)</span>
               ) : dbReady ? (
                 <span className="inline-flex items-center rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
                   ✓ พร้อม
@@ -266,7 +266,7 @@ export default function EntitlementAdmin() {
                 </span>
               )}
             </h3>
-            <p className="mt-1 text-xs text-[#635B4E]">
+            <p className="mt-1 text-xs text-muted">
               สร้างตารางเก็บโควตา (ทำครั้งเดียว · กดซ้ำได้ ปลอดภัย)
             </p>
           </div>
@@ -277,9 +277,9 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── โบนัสเปลี่ยนผ่าน ── */}
-      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
-        <h3 className="text-sm font-semibold text-[#29261F]">2 · โบนัสเปลี่ยนผ่านผู้ใช้เดิม (10 ครั้ง)</h3>
-        <p className="mt-1 mb-3 text-xs text-[#635B4E]">
+      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-ink">2 · โบนัสเปลี่ยนผ่านผู้ใช้เดิม (10 ครั้ง)</h3>
+        <p className="mt-1 mb-3 text-xs text-muted">
           ทำครั้งเดียวก่อนเปิดระบบ — ผู้ใช้ที่สมัคร <strong>ก่อน</strong> วันตัด จะได้โบนัส 10 ครั้ง (ไม่หมดอายุ) · กดซ้ำได้
         </p>
         <div className="flex flex-wrap items-end gap-3">
@@ -304,13 +304,13 @@ export default function EntitlementAdmin() {
             ให้โบนัส
           </Button>
         </div>
-        {gfResult ? <p className="mt-3 text-xs text-[#29261F] font-medium">{gfResult}</p> : null}
+        {gfResult ? <p className="mt-3 text-xs text-ink font-medium">{gfResult}</p> : null}
       </div>
 
       {/* ── แบนเนอร์ประกาศล่วงหน้า ── */}
-      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
-        <h3 className="text-sm font-semibold text-[#29261F]">3 · แบนเนอร์ประกาศล่วงหน้า</h3>
-        <p className="mt-1 mb-3 text-xs text-[#635B4E]">
+      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-ink">3 · แบนเนอร์ประกาศล่วงหน้า</h3>
+        <p className="mt-1 mb-3 text-xs text-muted">
           แสดงบนหน้าแรกเมื่อระบบยังปิด — เปิดล่วงหน้าอย่างน้อย <strong>7 วัน</strong> ก่อนเปิดระบบจริง
         </p>
         <div className="flex flex-wrap items-end gap-3">
@@ -350,9 +350,9 @@ export default function EntitlementAdmin() {
             {s.announce ? "ประกาศเปิดอยู่ — กดเพื่อปิด" : "ประกาศปิดอยู่ — กดเพื่อเปิด"}
           </Button>
         </div>
-        <p className="mt-3 rounded-xl border border-[#D5CEC2] bg-[#F8F6F2] p-3 text-xs text-[#635B4E]">
+        <p className="mt-3 rounded-xl border border-line bg-surface-pale p-3 text-xs text-muted">
           ตัวอย่างแบนเนอร์:{" "}
-          <span className="text-[#29261F] font-semibold">
+          <span className="text-ink font-semibold">
             เร็ว ๆ นี้ การเปิดไพ่จะปรับเป็น{" "}
             {REQUIRE_SIGNUP_TO_READ
               ? `สมัครสมาชิกฟรีก่อนเปิดไพ่ · สมาชิกฟรีวันละ ${DAILY_LIMIT} ครั้ง`
@@ -366,8 +366,8 @@ export default function EntitlementAdmin() {
       <div className="altar-panel rounded-2xl border border-rose-300 bg-white p-5 shadow-xs">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-sm font-semibold text-[#29261F]">4 · เปิดระบบสิทธิ์จริง</h3>
-            <p className="mt-1 text-xs text-[#635B4E]">
+            <h3 className="text-sm font-semibold text-ink">4 · เปิดระบบสิทธิ์จริง</h3>
+            <p className="mt-1 text-xs text-muted">
               เปิด ={" "}
               {REQUIRE_SIGNUP_TO_READ
                 ? `ผู้เยี่ยมชมต้องสมัครสมาชิกก่อนเปิดไพ่ · สมาชิกวันละ ${DAILY_LIMIT} ครั้ง · แชทเฉพาะสมาชิก`
@@ -398,9 +398,9 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── รหัสแลกสิทธิ์ (โค้ดแจก / โค้ด VIP) ── */}
-      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
-        <h3 className="text-sm font-semibold text-[#29261F]">5 · รหัสแลกสิทธิ์</h3>
-        <p className="mt-1 mb-3 text-xs text-[#635B4E]">
+      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-ink">5 · รหัสแลกสิทธิ์</h3>
+        <p className="mt-1 mb-3 text-xs text-muted">
           <strong>โค้ดแจก</strong> = เพิ่มรอบเปิดไพ่เฉย ๆ ·{" "}
           <strong>โค้ด VIP</strong> = นับเป็นเครดิตที่ซื้อ ปลดผังใหญ่ + ปรมาจารย์ลับด้วย
           <br />
@@ -415,7 +415,7 @@ export default function EntitlementAdmin() {
                 {...field}
                 value={newKind}
                 onChange={(e) => setNewKind(e.target.value === "premium" ? "premium" : "gift")}
-                className="h-10 rounded-xl border border-[#D5CEC2] bg-white px-3 text-sm text-[#29261F]"
+                className="h-10 rounded-xl border border-line bg-white px-3 text-sm text-ink"
               >
                 <option value="gift">โค้ดแจก (รอบเปิดไพ่)</option>
                 <option value="premium">โค้ด VIP (ปลดพรีเมียม)</option>
@@ -451,11 +451,11 @@ export default function EntitlementAdmin() {
             สร้างรหัส
           </Button>
         </div>
-        {codeMsg ? <p className="mt-3 text-xs font-medium text-[#29261F]">{codeMsg}</p> : null}
+        {codeMsg ? <p className="mt-3 text-xs font-medium text-ink">{codeMsg}</p> : null}
 
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[560px] text-left text-xs">
-            <thead className="text-[#8F5C1A]">
+            <thead className="text-gold-ink">
               <tr>
                 <th className="py-2 pr-3 font-semibold">รหัส</th>
                 <th className="py-2 pr-3 font-semibold">ชนิด</th>
@@ -465,16 +465,16 @@ export default function EntitlementAdmin() {
                 <th className="py-2 font-semibold">สถานะ</th>
               </tr>
             </thead>
-            <tbody className="text-[#29261F]">
+            <tbody className="text-ink">
               {codes === null ? (
                 <tr>
-                  <td colSpan={6} className="py-3 text-[#635B4E]">
+                  <td colSpan={6} className="py-3 text-muted">
                     กำลังโหลด…
                   </td>
                 </tr>
               ) : codes.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-3 text-[#635B4E]">
+                  <td colSpan={6} className="py-3 text-muted">
                     ยังไม่มีรหัสในระบบ
                   </td>
                 </tr>
@@ -497,7 +497,7 @@ export default function EntitlementAdmin() {
                             className={
                               c.isActive && !exhausted && !expired
                                 ? "rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-800"
-                                : "rounded border border-[#D5CEC2] bg-[#F8F6F2] px-1.5 py-0.5 font-semibold text-[#635B4E]"
+                                : "rounded border border-line bg-surface-pale px-1.5 py-0.5 font-semibold text-muted"
                             }
                           >
                             {!c.isActive ? "ปิดแล้ว" : expired ? "หมดอายุ" : exhausted ? "แลกครบ" : "ใช้ได้"}
@@ -506,7 +506,7 @@ export default function EntitlementAdmin() {
                             type="button"
                             disabled={codeBusy}
                             onClick={() => patchCode(c.code, { isActive: !c.isActive })}
-                            className="text-[11px] text-[#635B4E] underline hover:text-[#29261F] disabled:opacity-50"
+                            className="text-[11px] text-muted underline hover:text-ink disabled:opacity-50"
                           >
                             {c.isActive ? "ปิดรหัส" : "เปิดรหัส"}
                           </button>
@@ -522,27 +522,27 @@ export default function EntitlementAdmin() {
       </div>
 
       {/* ── Metric เฝ้าดู 48 ชม.แรก ── */}
-      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
-        <h3 className="text-sm font-semibold text-[#29261F]">สถิติระบบสิทธิ์ (7 วันล่าสุด)</h3>
+      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-ink">สถิติระบบสิทธิ์ (7 วันล่าสุด)</h3>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {Object.entries(METRIC_LABEL).map(([k, label]) => (
-            <div key={k} className="rounded-xl border border-[#D5CEC2] bg-[#F8F6F2] p-3">
-              <p className="text-[13px] text-[#635B4E]">{label}</p>
-              <p className="mt-0.5 text-lg font-bold text-[#29261F]">
+            <div key={k} className="rounded-xl border border-line bg-surface-pale p-3">
+              <p className="text-[13px] text-muted">{label}</p>
+              <p className="mt-0.5 text-lg font-bold text-ink">
                 {(s.metrics[k] ?? 0).toLocaleString("th-TH")}
               </p>
             </div>
           ))}
         </div>
-        <button onClick={load} className="mt-3 text-xs text-[#635B4E] hover:text-[#29261F]">
+        <button onClick={load} className="mt-3 text-xs text-muted hover:text-ink">
           รีเฟรช
         </button>
       </div>
 
       {/* ── สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด) ── */}
-      <div className="altar-panel rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
-        <h3 className="text-sm font-semibold text-[#29261F]">สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด)</h3>
-        <p className="mt-1 text-xs text-[#635B4E]">
+      <div className="altar-panel rounded-2xl border border-line bg-white p-5 shadow-xs">
+        <h3 className="text-sm font-semibold text-ink">สุขภาพฐานข้อมูลสิทธิ์ (7 วันล่าสุด)</h3>
+        <p className="mt-1 text-xs text-muted">
           ทุกค่าควรเป็น <strong>0</strong> — ถ้าไม่ใช่ แปลว่าโควตาอาจไม่ถูกบังคับจริงในช่วงนั้น
         </p>
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -555,14 +555,14 @@ export default function EntitlementAdmin() {
                 className={`rounded-xl p-3 border ${
                   bad
                     ? "bg-rose-50 border-rose-200"
-                    : "bg-[#F8F6F2] border-[#D5CEC2]"
+                    : "bg-surface-pale border-line"
                 }`}
               >
-                <p className="text-[13px] text-[#635B4E]">{label}</p>
+                <p className="text-[13px] text-muted">{label}</p>
                 <p className={`mt-0.5 text-lg font-bold ${bad ? "text-rose-700" : "text-emerald-700"}`}>
                   {value.toLocaleString("th-TH")}
                 </p>
-                <p className="mt-1 text-[11px] leading-snug text-[#635B4E]">{hint}</p>
+                <p className="mt-1 text-[11px] leading-snug text-muted">{hint}</p>
               </div>
             );
           })}

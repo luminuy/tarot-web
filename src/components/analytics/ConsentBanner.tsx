@@ -39,12 +39,12 @@ export function ConsentBanner() {
     <div
       role="region"
       aria-label={isEnglish ? "Cookie and analytics consent" : "การขอความยินยอมเก็บสถิติการใช้งาน"}
-      className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 sm:bottom-4 sm:max-w-sm z-100 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] shadow-[0_10px_30px_rgba(42,38,31,0.14)] p-4"
+      className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 sm:bottom-4 sm:max-w-sm z-100 rounded-xl border border-line bg-surface shadow-[0_10px_30px_rgba(42,38,31,0.14)] p-4"
     >
-      <p className="text-[13px] font-bold text-[#8F5C1A] mb-1.5">
+      <p className="text-[13px] font-bold text-gold-ink mb-1.5">
         {isEnglish ? "✦ Before we begin" : "✦ ก่อนเริ่มดูดวง"}
       </p>
-      <p className="text-[13px] leading-relaxed text-[#29261F]">
+      <p className="text-[13px] leading-relaxed text-ink">
         {isEnglish
           ? "We'd like to collect anonymous usage statistics to improve the site. Your questions and readings are never sent to analytics."
           : "เราขอเก็บสถิติการใช้งานแบบไม่ระบุตัวตน เพื่อนำไปปรับปรุงเว็บให้ดีขึ้น คำถามและคำทำนายของคุณไม่ถูกส่งเข้าระบบสถิติแน่นอน"}
@@ -53,21 +53,21 @@ export function ConsentBanner() {
         <button
           type="button"
           onClick={() => decide("granted")}
-          className="tap-target flex-1 min-w-[120px] rounded-lg bg-[#29261F] px-3 py-2 text-[13px] font-bold text-[#F3F0EA] hover:bg-[#3D382F] transition-colors"
+          className="tap-target flex-1 min-w-[120px] rounded-lg bg-ink px-3 py-2 text-[13px] font-bold text-canvas hover:bg-[#3D382F] transition-colors"
         >
           {isEnglish ? "Allow" : "ยินยอม"}
         </button>
         <button
           type="button"
           onClick={() => decide("denied")}
-          className="tap-target flex-1 min-w-[120px] rounded-lg border border-[#D5CEC2] px-3 py-2 text-[13px] font-bold text-[#29261F] hover:border-[#A58A5C] transition-colors"
+          className="tap-target flex-1 min-w-[120px] rounded-lg border border-line px-3 py-2 text-[13px] font-bold text-ink hover:border-gold transition-colors"
         >
           {isEnglish ? "Only what's needed" : "เฉพาะที่จำเป็น"}
         </button>
       </div>
       <Link
         href={isEnglish ? "/privacy" : "/privacy"}
-        className="tap-overlay-y mt-2.5 inline-block text-[12px] text-[#635B4E] underline underline-offset-2 hover:text-[#8F5C1A]"
+        className="tap-overlay-y mt-2.5 inline-block text-[12px] text-muted underline underline-offset-2 hover:text-gold-ink"
       >
         {isEnglish ? "Read our privacy policy" : "อ่านนโยบายความเป็นส่วนตัว"}
       </Link>

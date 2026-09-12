@@ -171,19 +171,19 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
     const content = (
       <>
-        <div className="w-8.5 h-8.5 rounded-lg bg-[#EAE7E0] border border-[#D5CEC2] flex items-center justify-center text-[#A58A5C] group-hover:text-[#29261F] group-hover:border-[#A58A5C] transition-colors duration-150 flex-shrink-0 mt-0.5">
+        <div className="w-8.5 h-8.5 rounded-lg bg-inset border border-line flex items-center justify-center text-gold group-hover:text-ink group-hover:border-gold transition-colors duration-150 flex-shrink-0 mt-0.5">
           <Icon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors">
+            <span className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
               {item.label}
             </span>
-            <span className="text-[11px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
+            <span className="text-[11px] font-serif-th text-ink bg-inset px-2 py-0.5 rounded-full border border-line">
               {item.badge}
             </span>
           </div>
-          <p className="text-[12px] font-serif-th text-[#635B4E] truncate mt-0.5">{item.sublabel}</p>
+          <p className="text-[12px] font-serif-th text-muted truncate mt-0.5">{item.sublabel}</p>
         </div>
       </>
     );
@@ -198,7 +198,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               setIsOpen(false);
               item.onClick?.();
             }}
-            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-[#EAE7E0]/60 border border-transparent hover:border-[#D5CEC2]/60 transition-colors duration-150 group cursor-pointer text-left"
+            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left"
           >
             {content}
           </button>
@@ -215,7 +215,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               soundManager.playMenuTapSound();
               setIsOpen(false);
             }}
-            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-[#EAE7E0]/60 border border-transparent hover:border-[#D5CEC2]/60 transition-colors duration-150 group cursor-pointer"
+            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer"
           >
             {content}
           </Link>
@@ -232,8 +232,8 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         onClick={toggleDropdown}
         className={`tap-overlay w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border transition-colors duration-150 cursor-pointer select-none shadow-xs ${
           isOpen
-            ? "bg-[#EAE7E0] border-[#D5CEC2] text-[#29261F]"
-            : "bg-[#FFFFFF] text-[#29261F] hover:text-[#A58A5C] border-[#D5CEC2] hover:border-[#A58A5C]"
+            ? "bg-inset border-line text-ink"
+            : "bg-surface text-ink hover:text-gold border-line hover:border-gold"
         }`}
         aria-expanded={isOpen}
         aria-controls="sacred-nav-panel"
@@ -267,26 +267,26 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         id="sacred-nav-panel"
         aria-label={isEnglish ? "Sanctuary navigation menu" : "เมนูวิหารพยากรณ์"}
         aria-hidden={!isOpen}
-        className={`absolute right-0 top-full mt-2 w-72 sm:w-84 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-2.5 sm:p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100svh-4.5rem)] space-y-1 no-scrollbar dropdown-panel-base ${
+        className={`absolute right-0 top-full mt-2 w-72 sm:w-84 rounded-xl bg-surface border border-line shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-2.5 sm:p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100svh-4.5rem)] space-y-1 no-scrollbar dropdown-panel-base ${
           isOpen ? "dropdown-panel-entering" : "dropdown-panel-exiting"
         }`}
       >
         {/* Ambient Top Foil Glow */}
-        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#A58A5C]/35 to-transparent -mt-0.5 mb-1.5" />
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-gold/35 to-transparent -mt-0.5 mb-1.5" />
 
         {/* Header Title inside Dropdown */}
-        <div className="px-3 py-1 flex items-center justify-between text-[13px] font-serif-th font-semibold text-[#635B4E] border-b border-[#D5CEC2]/40 pb-1.5">
-          <span className="flex items-center gap-1.5 text-[#A58A5C]">
+        <div className="px-3 py-1 flex items-center justify-between text-[13px] font-serif-th font-semibold text-muted border-b border-line/40 pb-1.5">
+          <span className="flex items-center gap-1.5 text-gold">
             <span className="font-bold">{isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}</span>
           </span>
-          <span className="text-[#29261F] text-[12px] font-mono tracking-wider bg-[#EAE7E0] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-bold">
+          <span className="text-ink text-[12px] font-mono tracking-wider bg-inset border border-line px-2 py-0.5 rounded-full font-bold">
             1909 RWS
           </span>
         </div>
 
         {/* Section 1: พิธีกรรมยอดนิยม */}
         <div className="pt-1">
-          <div className="px-2 py-1 text-[11px] font-serif-th font-bold text-[#8F5C1A] uppercase tracking-wider">
+          <div className="px-2 py-1 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
             {isEnglish ? "Featured Rituals & Tools" : "พิธีกรรมยอดนิยม & เครื่องมือ"}
           </div>
           <div className="space-y-0.5">
@@ -295,11 +295,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         </div>
 
         {/* Divider */}
-        <div className="h-[1px] w-full bg-[#D5CEC2]/40 my-1" />
+        <div className="h-[1px] w-full bg-line/40 my-1" />
 
         {/* Section 2: คลังความรู้ & ผังพยากรณ์ */}
         <div>
-          <div className="px-2 py-1 text-[11px] font-serif-th font-bold text-[#8F5C1A] uppercase tracking-wider">
+          <div className="px-2 py-1 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
             {isEnglish ? "Knowledge & Spreads" : "คลังความรู้ & ผังพยากรณ์"}
           </div>
           <div className="space-y-0.5">
@@ -317,21 +317,21 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                   setIsOpen(false);
                   onOpenHistory();
                 }}
-                className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#EAE7E0]/60 border border-transparent hover:border-[#D5CEC2]/60 transition-colors duration-150 group cursor-pointer text-left"
+                className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left"
               >
-                <div className="w-9 h-9 rounded-lg bg-[#EAE7E0] border border-[#D5CEC2] flex items-center justify-center text-[#A58A5C] group-hover:text-[#29261F] group-hover:border-[#A58A5C] transition-colors duration-150 flex-shrink-0 mt-0.5">
+                <div className="w-9 h-9 rounded-lg bg-inset border border-line flex items-center justify-center text-gold group-hover:text-ink group-hover:border-gold transition-colors duration-150 flex-shrink-0 mt-0.5">
                   <JournalScrollNavIcon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors">
+                    <span className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                       {isEnglish ? "Reading Journal" : "ประวัติการดูดวง"}
                     </span>
-                    <span className="text-[12px] font-serif-th text-[#29261F] bg-[#EAE7E0] px-2 py-0.5 rounded-full border border-[#D5CEC2]">
+                    <span className="text-[12px] font-serif-th text-ink bg-inset px-2 py-0.5 rounded-full border border-line">
                       {isEnglish ? "History" : "บันทึก"}
                     </span>
                   </div>
-                  <p className="text-[13px] font-serif-th text-[#635B4E] truncate mt-0.5">
+                  <p className="text-[13px] font-serif-th text-muted truncate mt-0.5">
                     {isEnglish ? "Revisit your past cards and oracle counsel" : "ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้"}
                   </p>
                 </div>
@@ -341,7 +341,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
         {/* Reset Sanctuary Session Option */}
         {canReset && onReset && (
-          <div className="pt-1 border-t border-[#D5CEC2]/40">
+          <div className="pt-1 border-t border-line/40">
             <button
               type="button"
               onClick={() => {
@@ -349,7 +349,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                 setIsOpen(false);
                 onReset();
               }}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-[#FCEEEA] hover:bg-[#FCEEEA] border border-[#D5CEC2] text-[#A6392C] text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer active:scale-98"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-err-wash hover:bg-err-wash border border-line text-err text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer active:scale-98"
             >
               
               <span>{isEnglish ? "Start New Reading" : "เริ่มดูดวงใหม่"}</span>

@@ -94,7 +94,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
   return (
     <section
       aria-label={isEnglish ? "Provably-Fair Cryptographic Transparency Verification" : "ตรวจสอบความโปร่งใส Provably-Fair"}
-      className="my-4 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] transition overflow-hidden"
+      className="my-4 rounded-lg border border-line-warm bg-inset-warm transition overflow-hidden"
     >
       {/* Header — แตะเพื่อยุบ/ขยาย (เริ่มต้นยุบไว้ ไม่ให้หน้ายาว) */}
       <button
@@ -110,19 +110,19 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
             return next;
           });
         }}
-        className="flex w-full items-center justify-between gap-2 p-4 sm:p-5 text-left transition-colors hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+        className="flex w-full items-center justify-between gap-2 p-4 sm:p-5 text-left transition-colors hover:bg-surface cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 flex-shrink-0 rounded-full border border-[#D9C8AC] flex items-center justify-center text-xs text-[#8F5C1A] bg-[#FFFFFF] ">
+          <div className="w-8 h-8 flex-shrink-0 rounded-full border border-line-warm flex items-center justify-center text-xs text-gold-ink bg-surface ">
             ✓
           </div>
           <div className="min-w-0">
-            <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A]">
+            <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep">
               {isEnglish
                 ? "Mathematical Transparency (Provably-Fair Verification)"
                 : "ความโปร่งใสทางคณิตศาสตร์ (Provably-Fair Verification)"}
             </h4>
-            <p className="text-[13px] text-[#635B4E] font-serif-th">
+            <p className="text-[13px] text-muted font-serif-th">
               {isPanelOpen
                 ? isEnglish
                   ? "Cryptographically verifiable: cards are predetermined by seeds with zero post-selection bias."
@@ -135,11 +135,11 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="hidden sm:inline-block rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-2.5 py-0.5 text-[13px] font-mono font-bold text-[#2E211A]">
+          <span className="hidden sm:inline-block rounded-full border border-line-warm bg-surface px-2.5 py-0.5 text-[13px] font-mono font-bold text-ink-deep">
             SHA-256 Commit-Reveal
           </span>
           <span
-            className={`font-mono text-xs text-[#635B4E] transition-transform duration-200 ${
+            className={`font-mono text-xs text-muted transition-transform duration-200 ${
               isPanelOpen ? "rotate-180" : ""
             }`}
             aria-hidden
@@ -162,19 +162,19 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
         */}
       {isPanelOpen && (
         <div id="provably-fair-body" className="overflow-hidden">
-          <div className="anim-swap-rise-sm border-t border-[#D9C8AC]/30 p-5 sm:p-6 space-y-4">
+          <div className="anim-swap-rise-sm border-t border-line-warm/30 p-5 sm:p-6 space-y-4">
               {/* State 1: Before Reveal (No serverSeed yet) */}
               {!isRevealed && (
-                <div className="space-y-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] ">
+                <div className="space-y-3 p-4 rounded-lg bg-surface border border-line-warm ">
                   <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
-                    <span className="text-[#2E211A] font-serif-th font-bold flex items-center gap-1.5">
+                    <span className="text-ink-deep font-serif-th font-bold flex items-center gap-1.5">
                       {" "}
                       {isEnglish ? "Server Randomness Commitment:" : "คำมั่นความสุ่มที่เซิร์ฟเวอร์ผูกมัดไว้ (Commitment):"}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleCopy(effectiveCommitment, "comm_pre")}
-                      className="text-[13px] text-[#8F5C1A] hover:underline cursor-pointer font-mono font-semibold"
+                      className="text-[13px] text-gold-ink hover:underline cursor-pointer font-mono font-semibold"
                     >
                       {copiedKey === "comm_pre"
                         ? isEnglish
@@ -185,19 +185,19 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           : "คัดลอก Hash"}
                     </button>
                   </div>
-                  <p className="font-mono text-[13px] text-[#2E211A] break-all bg-[#FFFFFF] p-2.5 rounded-lg border border-[#D9C8AC] select-all ">
+                  <p className="font-mono text-[13px] text-ink-deep break-all bg-surface p-2.5 rounded-lg border border-line-warm select-all ">
                     {effectiveCommitment || (isEnglish ? "Generating randomness commitment…" : "กำลังสร้างคำมั่นความสุ่ม…")}
                   </p>
-                  <p className="text-[13px] text-[#635B4E] font-serif-th leading-relaxed">
+                  <p className="text-[13px] text-muted font-serif-th leading-relaxed">
                     {isEnglish ? (
                       <>
                         The server committed to this deck order prior to your shuffle. The{" "}
-                        <code className="text-[#8F5C1A] font-bold">serverSeed</code> will be disclosed once the reading finishes so you can audit independently.
+                        <code className="text-gold-ink font-bold">serverSeed</code> will be disclosed once the reading finishes so you can audit independently.
                       </>
                     ) : (
                       <>
                         เซิร์ฟเวอร์ผูกมัดกับผลไพ่นี้แล้วตั้งแต่ก่อนคุณสับไพ่ — ค่า{" "}
-                        <code className="text-[#8F5C1A] font-bold">serverSeed</code> จะถูกเฉลยหลังอ่านไพ่เสร็จสมบูรณ์
+                        <code className="text-gold-ink font-bold">serverSeed</code> จะถูกเฉลยหลังอ่านไพ่เสร็จสมบูรณ์
                         ให้คุณตรวจย้อนหลังได้
                       </>
                     )}
@@ -211,54 +211,54 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                   {/* Seeds Display Grid */}
                   <div className="grid grid-cols-1 gap-2.5 text-xs font-mono">
                     {/* Commitment */}
-                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
+                    <div className="p-3 rounded-lg bg-surface border border-line-warm space-y-1 ">
                       <div className="flex items-center justify-between text-[13px]">
-                        <span className="text-[#635B4E] font-serif-th">
+                        <span className="text-muted font-serif-th">
                           {isEnglish ? "1. Original Randomness Commitment:" : "1. คำมั่นความสุ่มดั้งเดิม (Commitment):"}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleCopy(effectiveCommitment, "comm")}
-                          className="text-[13px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
+                          className="text-[13px] text-gold-ink font-bold hover:underline cursor-pointer"
                         >
                           {copiedKey === "comm" ? (isEnglish ? "✓ Copied" : "✓ คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
                         </button>
                       </div>
-                      <p className="text-[13px] text-[#2E211A] break-all select-all font-mono">{effectiveCommitment}</p>
+                      <p className="text-[13px] text-ink-deep break-all select-all font-mono">{effectiveCommitment}</p>
                     </div>
 
                     {/* Server Seed */}
-                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
+                    <div className="p-3 rounded-lg bg-surface border border-line-warm space-y-1 ">
                       <div className="flex items-center justify-between text-[13px]">
-                        <span className="text-[#635B4E] font-serif-th">
+                        <span className="text-muted font-serif-th">
                           {isEnglish ? "2. Revealed Server Seed:" : "2. ซี้ดของเซิร์ฟเวอร์ที่เฉลย (Server Seed):"}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleCopy(serverSeed || "", "server")}
-                          className="text-[13px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
+                          className="text-[13px] text-gold-ink font-bold hover:underline cursor-pointer"
                         >
                           {copiedKey === "server" ? (isEnglish ? "✓ Copied" : "✓ คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
                         </button>
                       </div>
-                      <p className="text-[13px] text-[#2E211A] break-all select-all font-mono">{serverSeed}</p>
+                      <p className="text-[13px] text-ink-deep break-all select-all font-mono">{serverSeed}</p>
                     </div>
 
                     {/* Client Seed */}
-                    <div className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1 ">
+                    <div className="p-3 rounded-lg bg-surface border border-line-warm space-y-1 ">
                       <div className="flex items-center justify-between text-[13px]">
-                        <span className="text-[#635B4E] font-serif-th">
+                        <span className="text-muted font-serif-th">
                           {isEnglish ? "3. Your Entropy from Hand Movement (Client Seed):" : "3. ซี้ดของคุณจากการขยับมือ (Client Seed):"}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleCopy(clientSeed || "", "client")}
-                          className="text-[13px] text-[#8F5C1A] font-bold hover:underline cursor-pointer"
+                          className="text-[13px] text-gold-ink font-bold hover:underline cursor-pointer"
                         >
                           {copiedKey === "client" ? (isEnglish ? "✓ Copied" : "✓ คัดลอกแล้ว") : isEnglish ? "Copy" : "คัดลอก"}
                         </button>
                       </div>
-                      <p className="text-[13px] text-[#2E211A] break-all select-all font-mono">{clientSeed}</p>
+                      <p className="text-[13px] text-ink-deep break-all select-all font-mono">{clientSeed}</p>
                     </div>
                   </div>
 
@@ -269,7 +269,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                       onClick={handleVerify}
                       disabled={isVerifying}
                       aria-busy={isVerifying}
-                      className="w-full py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs sm:text-sm active:scale-[0.99] transition cursor-pointer flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                      className="w-full py-3 px-4 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-serif-th font-bold text-xs sm:text-sm active:scale-[0.99] transition cursor-pointer flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
                     >
                       
                       <span>
@@ -300,9 +300,9 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                       >
                         {result.commitmentOk && result.drawMatches ? (
                           /* Success Box */
-                          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-[#3A7044]/50 space-y-2 ">
-                            <div className="flex items-center gap-2 text-[#3A7044] font-serif-th font-bold text-xs sm:text-sm">
-                              <span className="w-5 h-5 rounded-full bg-[#EBF3ED] text-[#3A7044] flex items-center justify-center text-xs">
+                          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-ok/50 space-y-2 ">
+                            <div className="flex items-center gap-2 text-ok font-serif-th font-bold text-xs sm:text-sm">
+                              <span className="w-5 h-5 rounded-full bg-[#EBF3ED] text-ok flex items-center justify-center text-xs">
                                 ✓
                               </span>
                               <span>
@@ -311,7 +311,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                                   : "การเปิดไพ่นี้พิสูจน์แล้วว่าโปร่งใสสมบูรณ์แบบ"}
                               </span>
                             </div>
-                            <ul className="space-y-1 text-xs text-[#3A7044] font-serif-th pl-7">
+                            <ul className="space-y-1 text-xs text-ok font-serif-th pl-7">
                               <li className="flex items-center gap-1.5">
                                 <span>✓</span>
                                 <span>
@@ -340,9 +340,9 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           </div>
                         ) : (
                           /* Mismatch Warning Box */
-                          <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] space-y-2 ">
-                            <div className="flex items-center gap-2 text-[#A6392C] font-serif-th font-bold text-xs sm:text-sm">
-                              <span className="w-5 h-5 rounded-full bg-[#FCEEEA] text-[#A6392C] flex items-center justify-center text-xs">
+                          <div className="p-4 rounded-lg bg-err-wash border border-line-warm space-y-2 ">
+                            <div className="flex items-center gap-2 text-err font-serif-th font-bold text-xs sm:text-sm">
+                              <span className="w-5 h-5 rounded-full bg-err-wash text-err flex items-center justify-center text-xs">
                                 ✕
                               </span>
                               <span>
@@ -351,7 +351,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                                   : "พบข้อแตกต่างในการตรวจสอบความสอดคล้อง"}
                               </span>
                             </div>
-                            <p className="text-xs text-[#A6392C] pl-7 font-serif-th">
+                            <p className="text-xs text-err pl-7 font-serif-th">
                               {result.mismatchDetail ||
                                 (isEnglish
                                   ? "Commitment or card drawing does not match recorded state."
@@ -365,7 +365,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           <button
                             type="button"
                             onClick={handleVerify}
-                            className="text-[13px] text-[#8F5C1A] hover:text-[#74490F] font-serif-th hover:underline cursor-pointer font-semibold"
+                            className="text-[13px] text-gold-ink hover:text-gold-ink-deep font-serif-th hover:underline cursor-pointer font-semibold"
                           >
                             {isEnglish ? "Re-run calculation" : "รันการคำนวณซ้ำอีกครั้ง"}
                           </button>
@@ -374,11 +374,11 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                     )}
 
                   {/* Independent Verification Accordion */}
-                  <div className="pt-2 border-t border-[#D9C8AC]/30">
+                  <div className="pt-2 border-t border-line-warm/30">
                     <button
                       type="button"
                       onClick={() => setShowIndependentGuide((prev) => !prev)}
-                      className="w-full flex items-center justify-between text-left text-xs text-[#2E211A] hover:text-[#8F5C1A] py-1 cursor-pointer font-serif-th"
+                      className="w-full flex items-center justify-between text-left text-xs text-ink-deep hover:text-gold-ink py-1 cursor-pointer font-serif-th"
                     >
                       <span className="flex items-center gap-1.5">
                         
@@ -401,22 +401,22 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
 
                     {showIndependentGuide && (
                       <div
-                        className="anim-swap-rise-sm mt-3 p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-3 text-xs "
+                        className="anim-swap-rise-sm mt-3 p-4 rounded-lg bg-surface border border-line-warm space-y-3 text-xs "
                       >
-                        <p className="text-[#635B4E] font-serif-th leading-relaxed">
+                        <p className="text-muted font-serif-th leading-relaxed">
                           {isEnglish
                             ? "You can copy this JSON audit payload and verify it using Node.js, Python, or any third-party tool to confirm the deterministic mathematical outcome without relying on our web interface:"
                             : "คุณสามารถคัดลอกชุดข้อมูล JSON นี้ไปรันผ่าน Node.js, Python หรือเครื่องมือภายนอกใด ๆ เพื่อยืนยันว่าผลลัพธ์มาจากสูตรคณิตศาสตร์จริง โดยไม่ต้องพึ่งพาหน้าเว็บของเรา:"}
                         </p>
 
                         <div className="relative">
-                          <pre className="p-3 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-[13px] text-[#2E211A] font-mono overflow-x-auto max-h-48 ">
+                          <pre className="p-3 rounded-lg bg-surface border border-line-warm text-[13px] text-ink-deep font-mono overflow-x-auto max-h-48 ">
                             {verificationPayloadJson}
                           </pre>
                           <button
                             type="button"
                             onClick={() => handleCopy(verificationPayloadJson, "payload")}
-                            className="absolute top-2 right-2 px-2.5 py-1 rounded bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-[13px] font-serif-th hover:bg-[#FFFFFF] hover:border-[#8F5C1A] cursor-pointer "
+                            className="absolute top-2 right-2 px-2.5 py-1 rounded bg-inset-warm border border-line-warm text-ink-deep text-[13px] font-serif-th hover:bg-surface hover:border-gold-ink cursor-pointer "
                           >
                             {copiedKey === "payload"
                               ? isEnglish

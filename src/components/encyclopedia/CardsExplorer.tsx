@@ -41,27 +41,27 @@ const SUIT_TABS = [
 
 const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string; glow: string }> = {
   ไฟ: {
-    bg: "bg-[#8F5C1A]/10",
-    text: "text-[#8F5C1A]",
-    border: "border-[#8F5C1A]/30",
+    bg: "bg-gold-ink/10",
+    text: "text-gold-ink",
+    border: "border-gold-ink/30",
     glow: "rgba(143, 92, 26, 0.12)",
   },
   น้ำ: {
-    bg: "bg-[#6F5B4A]/10",
-    text: "text-[#635B4E]",
-    border: "border-[#6F5B4A]/30",
+    bg: "bg-ink-soft/10",
+    text: "text-muted",
+    border: "border-ink-soft/30",
     glow: "rgba(143, 92, 26, 0.12)",
   },
   ลม: {
-    bg: "bg-[#6F5B4A]/10",
-    text: "text-[#635B4E]",
-    border: "border-[#6F5B4A]/30",
+    bg: "bg-ink-soft/10",
+    text: "text-muted",
+    border: "border-ink-soft/30",
     glow: "rgba(143, 92, 26, 0.12)",
   },
   ดิน: {
-    bg: "bg-[#3A7044]/10",
-    text: "text-[#3A7044]",
-    border: "border-[#3A7044]/30",
+    bg: "bg-ok/10",
+    text: "text-ok",
+    border: "border-ok/30",
     glow: "rgba(143, 92, 26, 0.12)",
   },
 };
@@ -136,16 +136,16 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       {/* Dynamic Bilingual Hero Header */}
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs text-[#A58A5C] font-serif-th font-bold shadow-xs">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-line bg-surface text-xs text-gold-ink font-serif-th font-bold shadow-xs">
             
             {isEnglish ? "78-CARD TAROT ENCYCLOPEDIA" : "สารานุกรมความหมายไพ่ 78 ใบ"}{" "}
             
           </span>
         </div>
-        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-[#29261F] tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
+        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
           {isEnglish ? "The Complete 78 Tarot Cards & Meanings" : "ความหมายไพ่ทาโรต์ทั้ง 78 ใบ"}
         </h1>
-        <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
+        <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
           {isEnglish
             ? "Explore depth psychological, archetypal, and practical divinatory meanings across love, career, and finances in the 1909 Rider-Waite lineage."
             : "ค้นหาความหมายและคำทำนายของไพ่ทาโรต์ 78 ใบ ครบทุกมิติความรัก การงาน และการเงิน"}
@@ -153,7 +153,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       </div>
 
       {/* Sacred Search & Filter Dashboard */}
-      <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-6 space-y-5 shadow-xs">
+      <div className="rounded-xl border border-line bg-surface p-4 sm:p-6 space-y-5 shadow-xs">
         {/* Search Bar & Result Stats */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-xl">
@@ -164,7 +164,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isEnglish ? "Search by card name, keyword, zodiac, or element..." : "ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."}
-              className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] placeholder-[#756F66]/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-[#A58A5C] focus:ring-1 focus:ring-[#A58A5C] transition"
+              className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-line bg-surface text-ink placeholder-muted/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
             />
             {searchQuery && (
               <button
@@ -173,7 +173,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   setSearchQuery("");
                   setShowSemanticSearch(false);
                 }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#635B4E] hover:text-[#29261F] text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink text-xs bg-black/5 hover:bg-black/10 w-6 h-6 rounded-full flex items-center justify-center transition-colors cursor-pointer"
                 aria-label={isEnglish ? "Clear search" : "ล้างคำค้นหา"}
               >
                 ✕
@@ -181,15 +181,15 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             )}
           </div>
 
-          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-[#635B4E]">
+          <div className="flex items-center justify-between md:justify-end gap-3 text-xs font-mono text-muted">
             <span>
               {isEnglish ? (
                 <>
-                  Found <strong className="text-[#A58A5C] text-sm font-bold">{filteredCards.length}</strong> of {cards.length} cards
+                  Found <strong className="text-gold-ink text-sm font-bold">{filteredCards.length}</strong> of {cards.length} cards
                 </>
               ) : (
                 <>
-                  ค้นพบ <strong className="text-[#A58A5C] text-sm font-bold">{filteredCards.length}</strong> จาก {cards.length} ใบ
+                  ค้นพบ <strong className="text-gold-ink text-sm font-bold">{filteredCards.length}</strong> จาก {cards.length} ใบ
                 </>
               )}
             </span>
@@ -201,7 +201,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   setShowSemanticSearch(false);
                   setActiveFilter("all");
                 }}
-                className="text-[13px] text-[#A58A5C] hover:underline cursor-pointer font-bold font-serif-th"
+                className="text-[13px] text-gold-ink hover:underline cursor-pointer font-bold font-serif-th"
               >
                 {isEnglish ? "Clear Search" : "ล้างคำค้นหา"}
               </button>
@@ -211,16 +211,16 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
         {/* Semantic Search Prompt / Toggle Button */}
         {searchQuery.trim().length >= 4 && (
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-[#D5CEC2]/40">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-line/40">
             <button
               type="button"
               onClick={() => setShowSemanticSearch((prev) => !prev)}
               className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-serif-th font-bold transition cursor-pointer ${
                 showSemanticSearch
-                  ? "border-[#8F5C1A] bg-[#8F5C1A] text-white shadow-2xs"
+                  ? "border-gold-ink bg-gold-ink text-white shadow-2xs"
                   : filteredCards.length < 3 && searchQuery.trim().length >= 6
-                    ? "border-[#8F5C1A] bg-[#FAF7F2] text-[#8F5C1A] shadow-xs"
-                    : "border-[#D5CEC2] bg-white text-[#635B4E] hover:text-[#29261F] hover:border-[#8F5C1A]"
+                    ? "border-gold-ink bg-surface-warm text-gold-ink shadow-xs"
+                    : "border-line bg-white text-muted hover:text-ink hover:border-gold-ink"
               }`}
             >
               <span>
@@ -234,7 +234,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               </span>
             </button>
             {filteredCards.length < 3 && searchQuery.trim().length >= 6 && !showSemanticSearch && (
-              <span className="text-[11px] font-serif-th text-[#8F5C1A]">
+              <span className="text-[11px] font-serif-th text-gold-ink">
                 {isEnglish
                   ? "Few exact word matches. Try semantic search."
                   : "พบน้อยกว่า 3 ใบ แนะนำให้ลองค้นหาด้วยความรู้สึก"}
@@ -272,17 +272,17 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                     nextTab?.focus();
                   }
                 }}
-                className={`p-3 rounded-xl border text-left transition duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
+                className={`p-3 rounded-xl border text-left transition duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden group select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
                   isActive
-                    ? "border-2 border-[#A58A5C] bg-[#FFFFFF] shadow-xs"
-                    : "border border-[#D5CEC2] bg-[#EAE7E0] hover:border-[#A58A5C] hover:bg-[#FFFFFF]"
+                    ? "border-2 border-gold bg-surface shadow-xs"
+                    : "border border-line bg-inset hover:border-gold hover:bg-surface"
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-1">
-                  <tab.Icon className="w-4 h-4 text-[#A58A5C]" />
+                  <tab.Icon className="w-4 h-4 text-gold" />
                   <span
                     className={`text-[13px] font-mono px-2 py-0.5 rounded-full font-bold ${
-                      isActive ? "bg-[#29261F] text-[#F3F0EA]" : "bg-black/5 text-[#635B4E] group-hover:text-[#29261F]"
+                      isActive ? "bg-ink text-canvas" : "bg-black/5 text-muted group-hover:text-ink"
                     }`}
                   >
                     {tab.count}
@@ -291,12 +291,12 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 <div>
                   <span
                     className={`block font-serif-th text-xs font-bold leading-tight ${
-                      isActive ? "text-[#A58A5C]" : "text-[#29261F] group-hover:text-[#A58A5C]"
+                      isActive ? "text-gold" : "text-ink group-hover:text-gold"
                     }`}
                   >
                     {isEnglish ? tab.labelEn : tab.labelTh}
                   </span>
-                  <p className="text-[13px] text-[#635B4E] truncate mt-0.5">{isEnglish ? tab.descEn : tab.descTh}</p>
+                  <p className="text-[13px] text-muted truncate mt-0.5">{isEnglish ? tab.descEn : tab.descTh}</p>
                 </div>
               </button>
             );
@@ -304,40 +304,40 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
         </div>
 
         {/* Dedicated Category & Master Table Links for Search Crawlers and Fast Navigation */}
-        <div className="pt-2 flex items-center justify-between flex-wrap gap-2 text-xs font-serif-th border-t border-[#D5CEC2]/40">
-          <span className="text-[#635B4E]">
+        <div className="pt-2 flex items-center justify-between flex-wrap gap-2 text-xs font-serif-th border-t border-line/40">
+          <span className="text-muted">
             {isEnglish ? "Explore dedicated guides & master table:" : "อ่านคู่มือเจาะลึกแต่ละหมวดและตารางสรุป:"}
           </span>
           <div className="flex flex-wrap items-center gap-2">
-            <Link href="/cards/major" className="text-[#8F5C1A] hover:underline font-bold">
+            <Link href="/cards/major" className="text-gold-ink hover:underline font-bold">
               {isEnglish ? "Major Arcana (22)" : "ไพ่ชุดใหญ่ (22 ใบ)"}
             </Link>
-            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
-            <Link href="/cards/minor" className="text-[#8F5C1A] hover:underline font-bold">
+            <span className="text-line" aria-hidden="true">·</span>
+            <Link href="/cards/minor" className="text-gold-ink hover:underline font-bold">
               {isEnglish ? "Minor Arcana (56)" : "ไพ่ชุดเล็ก (56 ใบ)"}
             </Link>
-            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
-            <Link href="/cards/wands" className="text-[#8F5C1A] hover:underline">
+            <span className="text-line" aria-hidden="true">·</span>
+            <Link href="/cards/wands" className="text-gold-ink hover:underline">
               {isEnglish ? "Wands" : "ไม้เท้า"}
             </Link>
-            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
-            <Link href="/cards/cups" className="text-[#8F5C1A] hover:underline">
+            <span className="text-line" aria-hidden="true">·</span>
+            <Link href="/cards/cups" className="text-gold-ink hover:underline">
               {isEnglish ? "Cups" : "ถ้วย"}
             </Link>
-            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
-            <Link href="/cards/swords" className="text-[#8F5C1A] hover:underline">
+            <span className="text-line" aria-hidden="true">·</span>
+            <Link href="/cards/swords" className="text-gold-ink hover:underline">
               {isEnglish ? "Swords" : "ดาบ"}
             </Link>
-            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
-            <Link href="/cards/pentacles" className="text-[#8F5C1A] hover:underline">
+            <span className="text-line" aria-hidden="true">·</span>
+            <Link href="/cards/pentacles" className="text-gold-ink hover:underline">
               {isEnglish ? "Pentacles" : "เหรียญ"}
             </Link>
-            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
-            <Link href="/cards/all" className="text-[#8F5C1A] hover:underline font-bold">
+            <span className="text-line" aria-hidden="true">·</span>
+            <Link href="/cards/all" className="text-gold-ink hover:underline font-bold">
               {isEnglish ? "Summary Table (78)" : "ตารางสรุป 78 ใบ"}
             </Link>
-            <span className="text-[#D5CEC2]" aria-hidden="true">·</span>
-            <Link href="/cards/birth-card" className="text-[#8F5C1A] hover:underline font-bold">
+            <span className="text-line" aria-hidden="true">·</span>
+            <Link href="/cards/birth-card" className="text-gold-ink hover:underline font-bold">
               {isEnglish ? "Birth Card Tool" : "คำนวณไพ่ประจำตัว"}
             </Link>
           </div>
@@ -383,10 +383,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   contentVisibility: "auto",
                   containIntrinsicSize: "auto 380px",
                 }}
-                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-3 flex flex-col justify-between hover:border-[#A58A5C] transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 shadow-xs"
+                className="rounded-xl border border-line bg-surface p-3 flex flex-col justify-between hover:border-gold transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 shadow-xs"
               >
                 {/* Card Artwork Showcase (1909 Authentic Rider-Waite-Smith) */}
-                <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-[#D5CEC2] bg-[#EAE7E0] mb-3">
+                <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-line bg-inset mb-3">
                   <CardImage
                     image={card.image}
                     cardId={card.id}
@@ -401,7 +401,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
                   {/* Top Badge: Number & Arcana */}
                   <div className="absolute top-1.5 left-1.5 right-1.5 flex items-center justify-between pointer-events-none">
-                    <span className="text-[12px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#29261F] text-[#F3F0EA] border border-[#D5CEC2]">
+                    <span className="text-[12px] font-mono font-bold px-1.5 py-0.5 rounded bg-ink text-canvas border border-line">
                       {card.arcana === "major" ? `#${card.number}` : card.suit?.toUpperCase().slice(0, 1)}
                     </span>
                     <span
@@ -412,8 +412,8 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                   </div>
 
                   {/* Bottom Hover Action Overlay */}
-                  <div className="absolute inset-x-0 bottom-0 p-2 bg-[#29261F]/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-[13px] font-serif-th font-bold text-[#F3F0EA] flex items-center gap-1">
+                  <div className="absolute inset-x-0 bottom-0 p-2 bg-ink/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-[13px] font-serif-th font-bold text-canvas flex items-center gap-1">
                        {isEnglish ? "View Meaning" : "ดูความหมาย"}
                     </span>
                   </div>
@@ -423,10 +423,10 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 <div className="text-center space-y-1 z-10">
                   {/* บรรทัดรองของหน้าอังกฤษไม่แสดงชื่อไทย — เป็นภาษาที่ผู้อ่านไม่ได้ขอและเจือจางสัญญาณภาษาของหน้า */}
                   {!isEnglish && (
-                    <span className="text-[13px] font-mono text-[#635B4E] block truncate">{card.nameEn}</span>
+                    <span className="text-[13px] font-mono text-muted block truncate">{card.nameEn}</span>
                   )}
                   {/* ชื่อไพ่แต่ละใบคือหัวข้อระดับที่สองของหน้า /cards (h1 = ชื่อหน้า) */}
-                  <h2 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#A58A5C] transition-colors truncate">
+                  <h2 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors truncate">
                     {isEnglish ? card.nameEn : card.nameTh}
                   </h2>
 
@@ -438,7 +438,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                       return displayKws.map((kw, i) => (
                         <span
                           key={i}
-                          className="text-[12px] font-serif-th px-2 py-0.5 rounded-full bg-[#EAE7E0] text-[#29261F] border border-[#D5CEC2] truncate max-w-full"
+                          className="text-[12px] font-serif-th px-2 py-0.5 rounded-full bg-inset text-ink border border-line truncate max-w-full"
                         >
                           {kw}
                         </span>
@@ -456,12 +456,12 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
 
       {/* Empty State */}
       {filteredCards.length === 0 && (
-        <div className="text-center py-16 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-8 space-y-3 shadow-xs">
-          <div className="text-sm text-[#A58A5C] font-serif-th">SeerTarot</div>
-          <h2 className="font-serif-th text-lg font-bold text-[#29261F]">
+        <div className="text-center py-16 rounded-xl border border-line bg-surface p-8 space-y-3 shadow-xs">
+          <div className="text-sm text-gold-ink font-serif-th">SeerTarot</div>
+          <h2 className="font-serif-th text-lg font-bold text-ink">
             {isEnglish ? `No cards matching "${searchQuery}"` : `ไม่พบไพ่ที่ตรงกับ "${searchQuery}"`}
           </h2>
-          <p className="text-xs text-[#635B4E] max-w-md mx-auto font-serif-th">
+          <p className="text-xs text-muted max-w-md mx-auto font-serif-th">
             {isEnglish
               ? 'Try searching by another term such as "Love", "The Sun", "Jupiter", or "Fire".'
               : 'ลองค้นหาด้วยชื่ออื่น เช่น "ความรัก", "The Sun", "ดาวพฤหัสบดี" หรือ "ธาตุไฟ"'}
@@ -472,7 +472,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               setSearchQuery("");
               setActiveFilter("all");
             }}
-            className="px-6 py-2 rounded-full text-xs font-serif-th font-bold bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] transition cursor-pointer shadow-xs"
+            className="px-6 py-2 rounded-full text-xs font-serif-th font-bold bg-ink hover:bg-gold text-canvas transition cursor-pointer shadow-xs"
           >
             {isEnglish ? "Clear All Filters" : "ล้างตัวกรองทั้งหมด"}
           </button>

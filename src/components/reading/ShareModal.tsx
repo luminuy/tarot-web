@@ -496,17 +496,17 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           transition={{ duration: 0.22, ease: "easeOut" }}
           ref={panelRef}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-xl rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] p-4 sm:p-6 shadow-overlay space-y-4 my-auto relative text-[#2E211A]"
+          className="w-full max-w-xl rounded-lg bg-surface border border-line-warm p-4 sm:p-6 shadow-overlay space-y-4 my-auto relative text-ink-deep"
         >
           {/* Modal Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/30">
+          <div className="flex items-center justify-between pb-3 border-b border-line-warm/30">
             <div className="flex items-center gap-2">
               
               <div>
                 <h3 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
                   {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
                 </h3>
-                <p className="text-[13px] text-[#635B4E] font-serif-th">
+                <p className="text-[13px] text-muted font-serif-th">
                   {isEnglish
                     ? "Save HD visual card or share directly to social channels"
                     : "บันทึกรูปภาพพรีเมียมหรือแชร์ตรงสู่โซเชียลมีเดีย"}
@@ -517,7 +517,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               type="button"
               onClick={onClose}
               aria-label={isEnglish ? "Close share dialog" : "ปิดหน้าต่างแชร์ผลคำทำนาย"}
-              className="w-10 h-10 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+              className="w-10 h-10 rounded-full bg-inset-warm border border-line-warm text-ink-deep hover:bg-gold-ink hover:text-surface text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             >
               ✕
             </button>
@@ -529,7 +529,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="p-2.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-center text-xs text-[#2E211A] font-serif-th "
+              className="p-2.5 rounded-lg bg-surface border border-line-warm text-center text-xs text-ink-deep font-serif-th "
             >
               
               {toastMessage}
@@ -539,7 +539,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           {/* Social Share Preview Card (Redesigned Layout) */}
           <div
             ref={cardRef}
-            className="w-full rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] p-5 sm:p-6 space-y-4 relative overflow-hidden text-center"
+            className="w-full rounded-lg bg-surface border-2 border-line-warm p-5 sm:p-6 space-y-4 relative overflow-hidden text-center"
           >
             {/* Ornate Corner Accents */}
             
@@ -552,14 +552,14 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             {/* 1. Brand & Spread Title */}
             <div className="space-y-1 relative z-10">
               <div className="flex items-center justify-center gap-2">
-                <span className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-[#6F5B4A]" />
-                <span className="text-[13px] sm:text-xs font-serif-th tracking-[0.2em] uppercase text-[#8F5C1A] font-bold">
+                <span className="h-px w-6 sm:w-10 bg-gradient-to-r from-transparent to-ink-soft" />
+                <span className="text-[13px] sm:text-xs font-serif-th tracking-[0.2em] uppercase text-gold-ink font-bold">
                   {isEnglish ? "SEERTAROT · SANCTUARY" : "SEERTAROT · วิหารพยากรณ์"}
                 </span>
-                <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-[#6F5B4A]" />
+                <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-ink-soft" />
               </div>
-              <div className="inline-block px-3 py-0.5 rounded-full bg-[#F3EDE2] border border-[#D9C8AC]">
-                <span className="text-[13px] sm:text-xs text-[#2E211A] font-serif-th font-semibold">
+              <div className="inline-block px-3 py-0.5 rounded-full bg-inset-warm border border-line-warm">
+                <span className="text-[13px] sm:text-xs text-ink-deep font-serif-th font-semibold">
                   {isEnglish ? `Spread: ${spreadName}` : `ผัง: ${spreadName}`}
                 </span>
               </div>
@@ -568,7 +568,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
             {/* 2. Querent's Sacred Inquiry (คำถาม) */}
             {question && (
               <div className="max-w-md mx-auto py-0.5 px-3 relative z-10">
-                <p className="font-serif-th text-xs sm:text-sm text-[#2E211A] italic leading-relaxed">“{question}”</p>
+                <p className="font-serif-th text-xs sm:text-sm text-ink-deep italic leading-relaxed">“{question}”</p>
               </div>
             )}
 
@@ -584,13 +584,13 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
                     }`}
                   >
                     {/* Position Name */}
-                    <span className="text-[13px] sm:text-xs text-[#8F5C1A] font-serif-th tracking-wide block font-bold whitespace-nowrap">
+                    <span className="text-[13px] sm:text-xs text-gold-ink font-serif-th tracking-wide block font-bold whitespace-nowrap">
                       {isEnglish ? (c.position.nameEn || c.position.nameTh) : c.position.nameTh}
                     </span>
 
                     {/* Card Frame */}
                     <div
-                      className={`w-full rounded-lg overflow-hidden relative border-2 border-[#D9C8AC] bg-[#F3EDE2] ${
+                      className={`w-full rounded-lg overflow-hidden relative border-2 border-line-warm bg-inset-warm ${
                         isSingle ? "h-48 sm:h-60" : "h-32 sm:h-38"
                       } ${c.isReversed ? "rotate-180" : ""}`}
                     >
@@ -606,7 +606,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
 
                     {/* Card Title & State */}
                     <div className="space-y-0.5">
-                      <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] leading-tight">
+                      <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep leading-tight">
                         {isEnglish
                           ? (c.card?.nameEn || c.card?.nameTh || `Card ${i + 1}`)
                           : (c.card?.nameTh || `ใบที่ ${i + 1}`)}
@@ -614,8 +614,8 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
                       <span
                         className={`text-[12px] px-2 py-0.5 rounded-full font-serif-th inline-block font-semibold ${
                           c.isReversed
-                            ? "bg-[#FCEEEA] text-[#A6392C] border border-[#D9C8AC]"
-                            : "bg-[#EBF3ED] text-[#3A7044] border border-[#D9C8AC]"
+                            ? "bg-err-wash text-err border border-line-warm"
+                            : "bg-[#EBF3ED] text-ok border border-line-warm"
                         }`}
                       >
                         {c.isReversed
@@ -630,27 +630,27 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
 
             {/* 4. Oracle Prophecy / Interpretation */}
             {reading?.summary && (
-              <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-[#D9C8AC]/30">
-                <span className="text-[13px] sm:text-[13px] text-[#8F5C1A] font-serif-th tracking-wider uppercase block font-bold">
+              <div className="max-w-lg mx-auto pt-2.5 pb-1 px-3 relative z-10 space-y-1 border-t border-line-warm/30">
+                <span className="text-[13px] sm:text-[13px] text-gold-ink font-serif-th tracking-wider uppercase block font-bold">
                   {isEnglish
                     ? `Oracle Insight from ${personaName}`
                     : `สารพยากรณ์จากแม่หมอ ${persona.nameTh}`}
                 </span>
-                <p className="font-serif-th text-xs sm:text-[13px] text-[#2E211A] leading-relaxed italic">
+                <p className="font-serif-th text-xs sm:text-[13px] text-ink-deep leading-relaxed italic">
                   “{reading.summary}”
                 </p>
               </div>
             )}
 
             {/* 5. Footer Watermark */}
-            <div className="pt-2 border-t border-[#D9C8AC]/20 relative z-10 flex items-center justify-between px-2 text-[12px] text-[#635B4E] font-mono tracking-widest uppercase font-bold">
+            <div className="pt-2 border-t border-line-warm/20 relative z-10 flex items-center justify-between px-2 text-[12px] text-muted font-mono tracking-widest uppercase font-bold">
               <span>PROVABLY-FAIR SHA-256</span>
               <span>SEERTAROT.NET</span>
             </div>
           </div>
 
           {/* Social Sharing Control Bar (5 Official Brand Icons, Perfectly Centered, Zero Clipping) */}
-          <div className="py-3 px-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex items-center justify-center gap-3.5 sm:gap-6 ">
+          <div className="py-3 px-4 rounded-lg bg-surface border border-line-warm flex items-center justify-center gap-3.5 sm:gap-6 ">
             {/* Facebook (#1877F2) */}
             <button
               type="button"
@@ -672,7 +672,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               onClick={() => handleShareToBrand("instagram")}
               disabled={isGenerating}
               aria-busy={isGenerating}
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-[#8F5C1A] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0 ${isGenerating ? "opacity-50 cursor-wait animate-pulse" : ""}`}
+              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-gold-ink via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition cursor-pointer shrink-0 ${isGenerating ? "opacity-50 cursor-wait animate-pulse" : ""}`}
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />

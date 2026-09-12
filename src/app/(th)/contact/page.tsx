@@ -82,26 +82,26 @@ export default function ContactPage() {
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdContact) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }} />
 
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
-        <div className="text-center space-y-3 pb-6 border-b border-[#D5CEC2]/40">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#29261F] font-serif-th">ติดต่อเรา</h1>
-          <p className="text-xs text-[#635B4E]">เราอ่านทุกข้อความที่ส่งเข้ามา</p>
+        <div className="text-center space-y-3 pb-6 border-b border-line/40">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th">ติดต่อเรา</h1>
+          <p className="text-xs text-muted">เราอ่านทุกข้อความที่ส่งเข้ามา</p>
         </div>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">อีเมล</h2>
-          <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 space-y-2">
+          <h2 className="text-lg font-bold text-gold font-serif-th">อีเมล</h2>
+          <div className="rounded-xl border border-line bg-surface p-4 space-y-2">
             <a
               href={`mailto:${DEFAULT_SUPPORT_EMAIL}`}
-              className="text-base text-[#8F5C1A] underline hover:text-[#A58A5C] font-serif-th break-all"
+              className="text-base text-gold-ink underline hover:text-gold-ink-deep font-serif-th break-all"
             >
               {DEFAULT_SUPPORT_EMAIL}
             </a>
-            <p className="text-xs text-[#635B4E] font-serif-th">
+            <p className="text-xs text-muted font-serif-th">
               ช่องทางหลัก · ตอบกลับภายใน 1–3 วันทำการ
             </p>
           </div>
@@ -109,24 +109,24 @@ export default function ContactPage() {
 
         {TIKTOK_URL && (
           <section className="space-y-3">
-            <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">ติดตามเรา</h2>
-            <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 space-y-2">
+            <h2 className="text-lg font-bold text-gold font-serif-th">ติดตามเรา</h2>
+            <div className="rounded-xl border border-line bg-surface p-4 space-y-2">
               <a
                 href={TIKTOK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-base text-[#8F5C1A] underline hover:text-[#A58A5C] font-serif-th break-all"
+                className="text-base text-gold-ink underline hover:text-gold-ink-deep font-serif-th break-all"
               >
                 TikTok · @seerada.tarot
               </a>
-              <p className="text-xs text-[#635B4E] font-serif-th">คลิปสั้นเรื่องความหมายไพ่และวิธีอ่านผัง</p>
+              <p className="text-xs text-muted font-serif-th">คลิปสั้นเรื่องความหมายไพ่และวิธีอ่านผัง</p>
             </div>
           </section>
         )}
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">เรื่องที่เขียนมาได้</h2>
-          <ul className="space-y-2 text-sm text-[#29261F] list-disc list-inside leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">เรื่องที่เขียนมาได้</h2>
+          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>แจ้งปัญหาการใช้งาน</strong> — ไพ่ไม่ขึ้น คำทำนายค้าง เข้าสู่ระบบไม่ได้ ฯลฯ
               ถ้าแนบภาพหน้าจอมาด้วยจะช่วยเราได้มาก
@@ -137,7 +137,7 @@ export default function ContactPage() {
             </li>
             <li>
               <strong>ขอลบข้อมูลส่วนตัว</strong> — ทำเองได้ทันทีจากหน้า{" "}
-              <Link href="/privacy" prefetch={false} className="text-[#8F5C1A] underline hover:text-[#A58A5C]">
+              <Link href="/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold">
                 นโยบายความเป็นส่วนตัว
               </Link>{" "}
               หรือเขียนมาให้เราจัดการให้
@@ -149,26 +149,26 @@ export default function ContactPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">เรื่องที่ตอบให้ไม่ได้</h2>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">เรื่องที่ตอบให้ไม่ได้</h2>
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราไม่รับทำนายดวงทางอีเมล ไม่รับแก้กรรม และไม่ให้คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน
             ถ้าอยากเปิดไพ่ เชิญที่{" "}
-            <Link href="/" prefetch={false} className="text-[#8F5C1A] underline hover:text-[#A58A5C]">
+            <Link href="/" prefetch={false} className="text-gold-ink underline hover:text-gold">
               หน้าแรก
             </Link>{" "}
             ได้เลย ฟรีและไม่ต้องรอ
           </p>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             หากคุณกำลังเผชิญภาวะวิกฤตทางใจ กรุณาโทร <strong>สายด่วนสุขภาพจิต 1323</strong> (ฟรี ตลอด 24 ชั่วโมง)
             ซึ่งมีผู้เชี่ยวชาญจริงรออยู่ปลายสาย — เราไม่สามารถช่วยเรื่องนี้ทางอีเมลได้ทันท่วงที
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">อยากรู้จักเราก่อน</h2>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">อยากรู้จักเราก่อน</h2>
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             อ่านได้ที่หน้า{" "}
-            <Link href="/about" prefetch={false} className="text-[#8F5C1A] underline hover:text-[#A58A5C]">
+            <Link href="/about" prefetch={false} className="text-gold-ink underline hover:text-gold">
               เกี่ยวกับเรา
             </Link>{" "}
             ซึ่งอธิบายว่าคำทำนายสร้างขึ้นอย่างไร และระบบสุ่มไพ่ของเราตรวจสอบได้จริงแบบไหน

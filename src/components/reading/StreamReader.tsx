@@ -81,15 +81,15 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
   const totalCards = drawnCards.length;
 
   return (
-    <div className="w-full rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
+    <div className="w-full rounded-lg border border-line-warm bg-surface p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
       {/* Background Sacred Geometric Aura */}
 
       {/* Oracle Guide Header & Streaming Status */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#D9C8AC]/30">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-line-warm/30">
         <div className="flex items-center gap-3.5">
           {/* Authentic 1909 Tarot Card Persona Avatar */}
           <div
-            className="w-10 h-15 rounded-lg border-2 overflow-hidden bg-[#F3EDE2] relative flex-shrink-0"
+            className="w-10 h-15 rounded-lg border-2 overflow-hidden bg-inset-warm relative flex-shrink-0"
             style={{ borderColor: "#D9C8AC" }}
           >
             <CardImage
@@ -105,17 +105,17 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <div className="flex items-center gap-2">
               <h4 className="font-serif-th text-base font-bold font-mystic-gold">{isEnglish ? (persona.nameEn || persona.nameTh) : persona.nameTh}</h4>
             </div>
-            <p className="text-xs text-[#635B4E] mt-0.5">{isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline}</p>
+            <p className="text-xs text-muted mt-0.5">{isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline}</p>
           </div>
         </div>
 
         {/* Live Status Pill */}
         {isStreaming ? (
-          <span className="text-xs font-semibold bg-[#F3EDE2] text-[#2E211A] border border-[#D9C8AC] px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8F5C1A] animate-ping" /> {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
+          <span className="text-xs font-semibold bg-inset-warm text-ink-deep border border-line-warm px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
+            <span className="w-2.5 h-2.5 rounded-full bg-gold-ink animate-ping" /> {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
         ) : (
-          <span className="text-xs font-semibold bg-[#EBF3ED] text-[#3A7044] border border-[#3A7044]/30 px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
+          <span className="text-xs font-semibold bg-[#EBF3ED] text-ok border border-ok/30 px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
             <span className="w-2 h-2 rounded-full bg-[#EBF3ED]" /> {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
           </span>
         )}
@@ -123,16 +123,16 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
 
       {/* Querent Sacred Question Banner */}
       {question && (
-        <div className="anim-page-transition p-4 rounded-xl bg-[#FAF7F2] border border-[#D9C8AC] space-y-1.5 shadow-2xs">
-          <div className="flex items-center justify-between text-xs text-[#8F5C1A] font-serif-th font-semibold">
+        <div className="anim-page-transition p-4 rounded-xl bg-surface-warm border border-line-warm space-y-1.5 shadow-2xs">
+          <div className="flex items-center justify-between text-xs text-gold-ink font-serif-th font-semibold">
             <span>{isEnglish ? "Your Sacred Question" : "คำถามที่คุณตั้งจิตถาม"}</span>
             {nickname && (
-              <span className="text-[#635B4E] font-normal">
+              <span className="text-muted font-normal">
                 {isEnglish ? `Querent: ${nickname}` : `ผู้รับคำทำนาย: ${nickname}`}
               </span>
             )}
           </div>
-          <p className="text-sm sm:text-base font-serif-th text-[#2E211A] font-medium leading-relaxed italic">
+          <p className="text-sm sm:text-base font-serif-th text-ink-deep font-medium leading-relaxed italic">
             “{question}”
           </p>
         </div>
@@ -142,7 +142,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       <div
         role="tablist"
         aria-label={isEnglish ? "Tarot interpretation sections" : "ส่วนแสดงผลคำทำนาย"}
-        className="flex items-center gap-2 border-b border-[#D9C8AC]/30 pb-2 overflow-x-auto no-scrollbar"
+        className="flex items-center gap-2 border-b border-line-warm/30 pb-2 overflow-x-auto no-scrollbar"
       >
         <button
           type="button"
@@ -151,10 +151,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-selected={activeTab === "card"}
           aria-controls="chamber-panel-card"
           onClick={() => setActiveTab("card")}
-          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
             activeTab === "card"
-              ? "bg-[#8F5C1A] text-[#FFFFFF]"
-              : "bg-[#F3EDE2] text-[#2E211A] hover:text-[#8F5C1A] border border-[#D9C8AC]"
+              ? "bg-gold-ink text-surface"
+              : "bg-inset-warm text-ink-deep hover:text-gold-ink border border-line-warm"
           }`}
         >
           
@@ -170,10 +170,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           aria-selected={activeTab === "summary"}
           aria-controls="chamber-panel-summary"
           onClick={() => setActiveTab("summary")}
-          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+          className={`px-4 py-2 rounded-lg text-xs font-serif-th font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
             activeTab === "summary"
-              ? "bg-[#8F5C1A] text-[#FFFFFF]"
-              : "bg-[#F3EDE2] text-[#2E211A] hover:text-[#8F5C1A] border border-[#D9C8AC]"
+              ? "bg-gold-ink text-surface"
+              : "bg-inset-warm text-ink-deep hover:text-gold-ink border border-line-warm"
           }`}
         >
           
@@ -185,19 +185,19 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       {readingId && (
         <Link
           href="/reading/chat"
-          className="group flex w-full items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] px-4 py-3 text-left transition hover:border-[#8F5C1A] hover:bg-[#FFFFFF] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="group flex w-full items-center justify-between gap-3 rounded-lg border border-line-warm bg-inset-warm px-4 py-3 text-left transition hover:border-gold-ink hover:bg-surface cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
         >
           <span className="min-w-0">
-            <span className="block font-serif-th text-xs font-bold text-[#2E211A] sm:text-sm [text-wrap:balance]">
+            <span className="block font-serif-th text-xs font-bold text-ink-deep sm:text-sm [text-wrap:balance]">
               {isEnglish ? "Have more questions for your reader?" : "มีอะไรอยากถามแม่หมอต่อไหม"}
             </span>
-            <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
+            <span className="mt-0.5 block font-serif-th text-[13px] leading-relaxed text-muted [text-wrap:pretty]">
               {isEnglish
                 ? "Open full-screen interactive consultation to delve deeper into these drawn cards."
                 : "เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อกับแม่หมอได้ทันที"}
             </span>
           </span>
-          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[#D9C8AC] text-[#8F5C1A] transition-transform group-hover:translate-x-0.5">
+          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-line-warm text-gold-ink transition-transform group-hover:translate-x-0.5">
             →
           </span>
         </Link>
@@ -211,9 +211,9 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
             <div
               role="alert"
               aria-live="assertive"
-              className="anim-page-transition p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex flex-col sm:flex-row sm:items-center justify-between gap-3 "
+              className="anim-page-transition p-4 rounded-lg bg-surface border border-line-warm flex flex-col sm:flex-row sm:items-center justify-between gap-3 "
             >
-              <div className="flex items-start gap-2.5 text-xs sm:text-sm text-[#2E211A] font-serif-th">
+              <div className="flex items-start gap-2.5 text-xs sm:text-sm text-ink-deep font-serif-th">
                 
                 <span className="leading-relaxed">{errorMsg}</span>
               </div>
@@ -221,7 +221,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
                   {isEnglish ? (/reload|not found/i.test(errorMsg) ? "Reload Reading" : "Retry Reading") : (/โหลดใหม่อีกครั้ง|ไม่พบข้อมูล/.test(errorMsg) ? "โหลดใหม่อีกครั้ง" : "ลองอ่านใหม่")}
                 </button>
@@ -242,10 +242,10 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 type="button"
                 aria-pressed={activeCardIndex === d.order}
                 onClick={() => onSelectCardIndex(d.order)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold transition cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-serif-th font-semibold transition cursor-pointer flex max-w-full items-center gap-1.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
                   activeCardIndex === d.order
-                    ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                    : "bg-[#F3EDE2] text-[#2E211A] hover:bg-[#FFFFFF] border border-[#D9C8AC]"
+                    ? "bg-gold-ink text-surface font-bold"
+                    : "bg-inset-warm text-ink-deep hover:bg-surface border border-line-warm"
                 }`}
               >
                 <span className="whitespace-nowrap">{isEnglish ? `Card ${i + 1}` : `ใบที่ ${i + 1}`}</span>
@@ -264,14 +264,14 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           {/* Active Card Interpretation Showcase */}
           <div
             key={activeCardIndex}
-            className="anim-page-transition p-5 sm:p-6 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-4"
+            className="anim-page-transition p-5 sm:p-6 rounded-lg bg-surface border border-line-warm space-y-4"
           >
             {/* Position & Card Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#D9C8AC]/30">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-line-warm/30">
               <div className="flex items-center gap-3.5">
                 {/* Real 1909 Rider-Waite Thumbnail */}
                 <div
-                  className={`w-14 h-[95px] rounded-lg overflow-hidden border border-[#D9C8AC] flex-shrink-0 ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}
+                  className={`w-14 h-[95px] rounded-lg overflow-hidden border border-line-warm flex-shrink-0 ${activeDrawnCard?.isReversed ? "rotate-180" : ""}`}
                 >
                   {cardData?.image ? (
                     <CardImage
@@ -282,9 +282,9 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                       sizes="88px"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#F3EDE2] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#D9C8AC]">
+                    <div className="w-full h-full bg-inset-warm flex flex-col items-center justify-center text-center p-1 border border-dashed border-line-warm">
                       
-                      <span className="text-xs text-[#635B4E] font-serif-th mt-0.5 leading-normal">
+                      <span className="text-xs text-muted font-serif-th mt-0.5 leading-normal">
                         {isEnglish ? "Not Found" : "ไม่พบข้อมูล"}
                       </span>
                     </div>
@@ -292,27 +292,27 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
                 </div>
 
                 <div>
-                  <span className="text-[13px] text-[#8F5C1A] font-serif-th font-semibold">
+                  <span className="text-[13px] text-gold-ink font-serif-th font-semibold">
                     {
 isEnglish
                         ? `Position ${activeCardIndex + 1}: ${activeDrawnCard?.position.nameEn || activeDrawnCard?.position.nameTh || "Energy Point"}`
                         : `ตำแหน่งที่ ${activeCardIndex + 1}: ${activeDrawnCard?.position.nameTh || "ตำแหน่งพลังงาน"}`}
                   </span>
-                  <h4 className="font-serif-th text-lg sm:text-xl font-bold text-[#2E211A] mt-0.5">
+                  <h4 className="font-serif-th text-lg sm:text-xl font-bold text-ink-deep mt-0.5">
                     {cardData ? (
                       <>
                         {isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}{" "}
                         {!isEnglish && cardData.nameEn && (
-                          <span className="text-xs font-mono font-normal text-[#635B4E]">({cardData.nameEn})</span>
+                          <span className="text-xs font-mono font-normal text-muted">({cardData.nameEn})</span>
                         )}{" "}
-                        <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                        <span className="text-xs font-serif-th font-semibold text-gold-ink">
                           {activeDrawnCard?.isReversed
                             ? (isEnglish ? "· Reversed" : "· ไพ่กลับหัว")
                             : (isEnglish ? "· Upright" : "· ไพ่หัวตั้ง")}
                         </span>
                       </>
                     ) : (
-                      <span className="text-[#A6392C] text-sm font-normal">
+                      <span className="text-err text-sm font-normal">
                         {isEnglish ? "Card data not found (Please reload)" : "ไม่พบข้อมูลไพ่ (กรุณากดโหลดใหม่อีกครั้ง)"}
                       </span>
                     )}
@@ -322,7 +322,7 @@ isEnglish
 
               {/* Elemental & Meaning Tag */}
               {(activeDrawnCard?.position.meaningEn || activeDrawnCard?.position.meaning) && (
-                <span className="text-[13px] text-[#2E211A] bg-[#F3EDE2]/25 border border-[#D9C8AC] px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
+                <span className="text-[13px] text-ink-deep bg-inset-warm/25 border border-line-warm px-2.5 py-1 rounded-full font-serif-th self-start sm:self-auto">
                   {isEnglish
                     ? (activeDrawnCard.position.meaningEn || activeDrawnCard.position.meaning)
                     : (activeDrawnCard.position.meaning || activeDrawnCard.position.meaningEn)}
@@ -342,13 +342,13 @@ isEnglish
 
               return keywords.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">
+                  <span className="text-[13px] text-muted font-serif-th font-semibold">
                     {isEnglish ? "Key Themes:" : "ความหมายหลัก:"}
                   </span>
                   {keywords.map((kw: string, idx: number) => (
                     <span
                       key={idx}
-                      className="text-[13px] text-[#2E211A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded"
+                      className="text-[13px] text-ink-deep bg-inset-warm border border-line-warm px-2 py-0.5 rounded"
                     >
                       {kw}
                     </span>
@@ -359,8 +359,8 @@ isEnglish
 
             {/* If card data could not be found, show reload prompt instead of fake reading */}
             {!cardData && (
-              <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-center space-y-2.5 my-2">
-                <p className="text-xs text-[#A6392C] font-serif-th">
+              <div className="p-4 rounded-lg bg-err-wash border border-line-warm text-center space-y-2.5 my-2">
+                <p className="text-xs text-err font-serif-th">
                   {isEnglish
                     ? "Card data for this position could not be found. Please reload."
                     : "ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง"}
@@ -369,7 +369,7 @@ isEnglish
                   <button
                     type="button"
                     onClick={onRetry}
-                    className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
+                    className="px-4 py-1.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
                   >
                     {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
                   </button>
@@ -381,7 +381,7 @@ isEnglish
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between gap-2">
                 {activeCardReading?.headline && (
-                  <h5 className="font-serif-th text-sm font-bold text-[#2E211A]">{activeCardReading.headline}</h5>
+                  <h5 className="font-serif-th text-sm font-bold text-ink-deep">{activeCardReading.headline}</h5>
                 )}
                 {activeCardReading?.reading && (
                   <TTSReaderButton
@@ -401,7 +401,7 @@ isEnglish
               {activeCardReading?.reading ? (
                 <p
                   key={`oracle-${activeCardIndex}`}
-                  className="text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th font-normal"
+                  className="text-xs sm:text-sm text-ink-deep leading-relaxed font-serif-th font-normal"
                   aria-live="polite"
                   aria-label={isEnglish ? "Oracle's interpretation" : "คำทำนายจากแม่หมอ"}
                 >
@@ -424,7 +424,7 @@ isEnglish
                     : activeCardReading.reading}
                 </p>
               ) : (
-                <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed font-serif-th font-normal italic">
+                <p className="text-xs sm:text-sm text-muted leading-relaxed font-serif-th font-normal italic">
                   {isStreaming
                     ? (isEnglish
                         ? "The oracle is attuning to the energetic currents of this card..."
@@ -435,15 +435,15 @@ isEnglish
             </div>
 
             {/* Next / Prev Card Navigation Arrows */}
-            <div className="flex items-center justify-between pt-3 border-t border-[#D9C8AC]/30 text-xs">
+            <div className="flex items-center justify-between pt-3 border-t border-line-warm/30 text-xs">
               <button
                 type="button"
                 onClick={() => onSelectCardIndex(Math.max(0, activeCardIndex - 1))}
                 disabled={activeCardIndex === 0}
                 className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
                   activeCardIndex > 0
-                    ? "border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] hover:bg-[#FAF7F2] hover:border-[#8F5C1A] cursor-pointer"
-                    : "border-transparent text-[#635B4E] cursor-not-allowed"
+                    ? "border-line-warm bg-surface text-ink-deep hover:bg-surface-warm hover:border-gold-ink cursor-pointer"
+                    : "border-transparent text-muted cursor-not-allowed"
                 }`}
               >
                 <span>{isEnglish ? "← Previous Card" : "← ใบก่อนหน้า"}</span>
@@ -455,8 +455,8 @@ isEnglish
                 disabled={activeCardIndex === totalCards - 1}
                 className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition ${
                   activeCardIndex < totalCards - 1
-                    ? "border-[#D9C8AC] bg-[#FFFFFF] text-[#2E211A] hover:bg-[#FAF7F2] hover:border-[#8F5C1A] cursor-pointer"
-                    : "border-transparent text-[#635B4E] cursor-not-allowed"
+                    ? "border-line-warm bg-surface text-ink-deep hover:bg-surface-warm hover:border-gold-ink cursor-pointer"
+                    : "border-transparent text-muted cursor-not-allowed"
                 }`}
               >
                 <span>{isEnglish ? "Next Card →" : "ใบถัดไป →"}</span>
@@ -471,40 +471,40 @@ isEnglish
         <div className="space-y-4">
           {/* Opening Greeting */}
           {reading?.opening && (
-            <div className="p-4 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-xs sm:text-sm text-[#2E211A] font-serif-th leading-relaxed italic">
+            <div className="p-4 rounded-lg bg-inset-warm border border-line-warm text-xs sm:text-sm text-ink-deep font-serif-th leading-relaxed italic">
               “{reading.opening}”
             </div>
           )}
 
           {/* Connections */}
           {reading?.connections && (
-            <div className="p-5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-1.5 ">
-              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-2">
+            <div className="p-5 rounded-lg bg-surface border border-line-warm space-y-1.5 ">
+              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-2">
                  {isEnglish ? "Spread Synergy & Resonance" : "ความเชื่อมโยงของไพ่ทั้งชุด"}
               </h5>
-              <p className="text-xs sm:text-sm text-[#2E211A] leading-relaxed">{reading.connections}</p>
+              <p className="text-xs sm:text-sm text-ink-deep leading-relaxed">{reading.connections}</p>
             </div>
           )}
 
           {/* Core Summary */}
           {reading?.summary && (
-            <div className="relative overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF7] to-[#F7EFE1] p-5 shadow-[0_4px_24px_rgba(143,92,26,0.10)] space-y-3">
+            <div className="relative overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-surface via-[#FDFBF7] to-[#F7EFE1] p-5 shadow-[0_4px_24px_rgba(143,92,26,0.10)] space-y-3">
               {/* Editorial Luxury Top Gold Accent Bar */}
               <div
                 aria-hidden="true"
-                className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8F5C1A] via-[#E2C38A] to-[#8F5C1A]"
+                className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold-ink via-[#E2C38A] to-gold-ink"
               />
 
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8F5C1A]/10 border border-[#8F5C1A]/30 text-[#8F5C1A] font-serif-th font-bold text-xs tracking-wide">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A]" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-ink/10 border border-gold-ink/30 text-gold-ink font-serif-th font-bold text-xs tracking-wide">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gold-ink" />
                     {isEnglish ? "Executive Summary & Trajectory" : "สรุปตรงใจและแนวโน้ม"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   {reading.yesNoAnswer && (
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#8F5C1A] text-[#FFFFFF]">
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-gold-ink text-surface">
                       {isEnglish ? `Answer: ${reading.yesNoAnswer}` : `คำตอบ: ${reading.yesNoAnswer}`}
                     </span>
                   )}
@@ -513,17 +513,17 @@ isEnglish
                       reading.advice ? (isEnglish ? "Actionable guidance: " : "คำแนะนำคือ ") + reading.advice.join(", ") : ""
                     }`}
                     personaId={persona.id}
-                    className="text-xs py-1 px-2.5 bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] shadow-xs"
+                    className="text-xs py-1 px-2.5 bg-surface hover:bg-surface-warm border border-line-warm shadow-xs"
                   />
                 </div>
               </div>
-              <div className="pl-3 sm:pl-4 border-l-2 border-[#8F5C1A]/50">
-                <p className="text-sm sm:text-[15px] font-serif-th text-[#2E211A] font-medium leading-relaxed [text-wrap:pretty]">
+              <div className="pl-3 sm:pl-4 border-l-2 border-gold-ink/50">
+                <p className="text-sm sm:text-[15px] font-serif-th text-ink-deep font-medium leading-relaxed [text-wrap:pretty]">
                   {reading.summary}
                 </p>
               </div>
               {reading.timing && (
-                <p className="text-xs text-[#8F5C1A] pt-1 font-mono font-semibold">
+                <p className="text-xs text-gold-ink pt-1 font-mono font-semibold">
                   {isEnglish ? "Timing: " : "ช่วงเวลา: "}{reading.timing}
                 </p>
               )}
@@ -532,14 +532,14 @@ isEnglish
 
           {/* Actionable Advice Checklist */}
           {reading?.advice && reading.advice.length > 0 && (
-            <div className="p-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] space-y-2.5">
-              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-2">
+            <div className="p-5 rounded-lg bg-inset-warm border border-line-warm space-y-2.5">
+              <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-2">
                 {isEnglish ? "Actionable Guidance & Next Steps" : "คำแนะนำและสิ่งที่ควรทำ"}
               </h5>
               <ul className="space-y-2">
                 {reading.advice.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5 text-xs text-[#2E211A]">
-                    <span className="w-4 h-4 rounded-full bg-[#8F5C1A]/20 text-[#8F5C1A] font-bold flex items-center justify-center flex-shrink-0 text-[13px] mt-0.5">
+                  <li key={idx} className="flex items-start gap-2.5 text-xs text-ink-deep">
+                    <span className="w-4 h-4 rounded-full bg-gold-ink/20 text-gold-ink font-bold flex items-center justify-center flex-shrink-0 text-[13px] mt-0.5">
                       ✓
                     </span>
                     <span>{item}</span>
@@ -584,16 +584,16 @@ isEnglish
           />
 
           {/* Real Human Reader Marketplace Consultation CTA */}
-          <div className="p-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] space-y-3 relative overflow-hidden">
+          <div className="p-5 rounded-lg bg-inset-warm border border-line-warm space-y-3 relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   
-                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] [text-wrap:balance]">
+                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep [text-wrap:balance]">
                     {isEnglish ? "Seek In-Depth Personal Consultation?" : "ต้องการคำปรึกษาเจาะลึกเฉพาะบุคคลเพิ่มเติม?"}
                   </h4>
                 </div>
-                <p className="text-[13px] sm:text-xs text-[#635B4E] leading-relaxed font-serif-th [text-wrap:pretty]">
+                <p className="text-[13px] sm:text-xs text-muted leading-relaxed font-serif-th [text-wrap:pretty]">
                   {isEnglish
                     ? "Consult a certified human tarot master 1-on-1. Send your drawn spread directly to continue the dialogue in private."
                     : "ปรึกษาแม่หมอผู้เชี่ยวชาญแบบตัวต่อตัว พร้อมส่งต่อผลการเปิดไพ่ชุดนี้เพื่อพูดคุยเจาะลึกผ่าน LINE ส่วนตัวได้ทันที"}
@@ -603,7 +603,7 @@ isEnglish
               <Link
                 href="/readers"
                 onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
-                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap"
+                className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap"
               >
                 <span>{isEnglish ? "Consult Human Reader" : "ปรึกษาแม่หมอตัวจริง"}</span>
                 <span>➔</span>
@@ -614,8 +614,8 @@ isEnglish
       )}
 
       {/* AI Disclosure Note & Accuracy Rating */}
-      <div className="mt-4 pt-3 border-t border-[#D9C8AC]/30 space-y-2">
-        <p className="text-[13px] text-[#635B4E] leading-relaxed text-center font-serif-th max-w-2xl mx-auto [text-wrap:balance]">
+      <div className="mt-4 pt-3 border-t border-line-warm/30 space-y-2">
+        <p className="text-[13px] text-muted leading-relaxed text-center font-serif-th max-w-2xl mx-auto [text-wrap:balance]">
           {isEnglish
             ? "This reading is synthesized with AI from your authentic drawn cards. Provided for reflection, introspection, and spiritual guidance."
             : "คำทำนายนี้ประมวลผลด้วยระบบ AI จากหน้าไพ่ที่คุณเปิดจริง จัดทำขึ้นเพื่อเป็นแนวทางและข้อคิดในการดำเนินชีวิต"}

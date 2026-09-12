@@ -192,15 +192,15 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
       onClose={resetModalState}
       title={isEn ? "Sacred Reading Passes (Tarot Pass)" : "เติมรอบดูดวง (Tarot Pass)"}
     >
-      <div className="space-y-6 pt-1 text-[#635B4E]">
+      <div className="space-y-6 pt-1 text-muted">
         {errorMsg && (
-          <div className="p-3.5 rounded-lg bg-[#A6392C]/80 border border-[#A6392C]/50 text-[#A6392C] text-xs font-serif-th text-center">
+          <div className="p-3.5 rounded-lg bg-err/80 border border-err/50 text-err text-xs font-serif-th text-center">
             {errorMsg}
           </div>
         )}
 
         {successMsg && (
-          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-[#D9C8AC] text-[#3A7044] text-sm font-serif-th text-center font-bold ">
+          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-line-warm text-ok text-sm font-serif-th text-center font-bold ">
             {successMsg}
           </div>
         )}
@@ -208,7 +208,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         {!checkoutData ? (
           <>
             <div className="text-center space-y-1">
-              <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed">
+              <p className="text-xs text-muted font-serif-th leading-relaxed">
                 {isEn
                   ? "Unlock grand 10–12 card spreads and unlimited archetypal dialogue · One-time payment, not a subscription · Tokens never expire"
                   : "ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด · จ่ายครั้งเดียว ไม่ใช่รายเดือน · สิทธิ์ไม่มีวันหมดอายุ"}
@@ -225,26 +225,26 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                     type="button"
                     aria-pressed={isSelected}
                     onClick={() => setSelectedPkgId(pkg.id)}
-                    className={`rounded-lg p-4 border transition duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+                    className={`rounded-lg p-4 border transition duration-200 cursor-pointer flex flex-col justify-between text-left relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
                       isSelected
-                        ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/70 scale-[1.02]"
-                        : "bg-[#FFFFFF] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#F3EDE2]"
+                        ? "bg-surface border-line-warm ring-2 ring-gold-ink/70 scale-[1.02]"
+                        : "bg-surface border-line-warm hover:border-gold-ink hover:bg-inset-warm"
                     }`}
                   >
                     {pkg.badge && (
-                      <span className="absolute -top-2.5 right-3 text-[12px] font-bold px-2 py-0.5 rounded-full bg-[#8F5C1A] text-[#FFFFFF] ">
+                      <span className="absolute -top-2.5 right-3 text-[12px] font-bold px-2 py-0.5 rounded-full bg-gold-ink text-surface ">
                         {pkg.badge}
                       </span>
                     )}
 
                     <div>
-                      <h4 className="font-serif-th text-sm font-bold text-[#2E211A] leading-snug">{pkg.name}</h4>
-                      <p className="text-[13px] text-[#635B4E] mt-1 leading-tight font-serif-th">{pkg.tagline}</p>
+                      <h4 className="font-serif-th text-sm font-bold text-ink-deep leading-snug">{pkg.name}</h4>
+                      <p className="text-[13px] text-muted mt-1 leading-tight font-serif-th">{pkg.tagline}</p>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-[#D9C8AC]/30 flex items-baseline justify-between">
-                      <span className="text-lg font-bold font-mono text-[#8F5C1A]">฿{pkg.priceThb}</span>
-                      <span className="text-[13px] text-[#2E211A] font-serif-th font-semibold">
+                    <div className="mt-4 pt-3 border-t border-line-warm/30 flex items-baseline justify-between">
+                      <span className="text-lg font-bold font-mono text-gold-ink">฿{pkg.priceThb}</span>
+                      <span className="text-[13px] text-ink-deep font-serif-th font-semibold">
                         {isEn ? `${pkg.credits} Readings` : `${pkg.credits} ครั้ง`}
                       </span>
                     </div>
@@ -258,7 +258,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               type="button"
               disabled={loading}
               onClick={handleStartCheckout}
-              className="w-full py-3.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span>{isEn ? "Preparing transaction..." : "กำลังเตรียมรายการ..."}</span>
@@ -275,8 +275,8 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
             </button>
 
             {/* Redeem Code Section */}
-            <div className="pt-2 border-t border-[#D9C8AC]/40">
-              <form onSubmit={handleRedeemCode} className="space-y-2 p-3 rounded-xl bg-[#F9F6F0] border border-[#D9C8AC]/60">
+            <div className="pt-2 border-t border-line-warm/40">
+              <form onSubmit={handleRedeemCode} className="space-y-2 p-3 rounded-xl bg-[#F9F6F0] border border-line-warm/60">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-serif-th font-semibold text-[#4A3B2C]">
                     {isEn ? "Redeem Code (Tarot Pass)" : "รหัสแลกสิทธิ์ (Redeem Code)"}
@@ -290,7 +290,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                   )}
 
                   {redeemSuccess && (
-                    <div className="p-2.5 rounded bg-[#3A7044]/10 text-[#3A7044] text-xs font-serif-th font-semibold">
+                    <div className="p-2.5 rounded bg-ok/10 text-ok text-xs font-serif-th font-semibold">
                       {redeemSuccess}
                     </div>
                   )}
@@ -304,12 +304,12 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                         onChange={(e) => setRedeemCode(e.target.value)}
                         placeholder={isEn ? "e.g. VIP3-TAROT-2026" : "เช่น VIP3-TAROT-2026"}
                         disabled={redeemLoading}
-                        className="flex-1 px-3 py-2 text-xs uppercase font-mono tracking-wider rounded-lg bg-white border border-[#D9C8AC] text-[#2E211A] focus:outline-none focus:border-[#8F5C1A]"
+                        className="flex-1 px-3 py-2 text-xs uppercase font-mono tracking-wider rounded-lg bg-white border border-line-warm text-ink-deep focus:outline-none focus:border-gold-ink"
                       />
                       <button
                         type="submit"
                         disabled={redeemLoading || !redeemCode.trim()}
-                        className="px-4 py-2 text-xs font-bold font-serif-th rounded-lg bg-[#8F5C1A] hover:bg-[#74490F] disabled:opacity-50 text-white cursor-pointer transition"
+                        className="px-4 py-2 text-xs font-bold font-serif-th rounded-lg bg-gold-ink hover:bg-gold-ink-deep disabled:opacity-50 text-white cursor-pointer transition"
                       >
                         {redeemLoading ? (isEn ? "Checking..." : "กำลังตรวจ...") : (isEn ? "Redeem" : "แลกสิทธิ์")}
                       </button>
@@ -322,35 +322,35 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         ) : (
           /* Payment Screen */
           <div className="text-center space-y-4">
-            <div className="p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] space-y-3 ">
-              <div className="flex items-center justify-between text-xs text-[#635B4E] font-serif-th border-b border-[#D9C8AC]/30 pb-2">
+            <div className="p-4 rounded-lg bg-surface border border-line-warm space-y-3 ">
+              <div className="flex items-center justify-between text-xs text-muted font-serif-th border-b border-line-warm/30 pb-2">
                 <span>{isEn ? "Selected Item" : "รายการ"}</span>
-                <span className="font-bold text-[#2E211A]">
+                <span className="font-bold text-ink-deep">
                   {selectedPkg.name} ({isEn ? `${selectedPkg.credits} Readings` : `${selectedPkg.credits} ครั้ง`})
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs text-[#635B4E] font-serif-th">
+              <div className="flex items-center justify-between text-xs text-muted font-serif-th">
                 <span>{isEn ? "Total Amount" : "ยอดชำระ"}</span>
-                <span className="text-base font-bold font-mono text-[#8F5C1A]">
+                <span className="text-base font-bold font-mono text-gold-ink">
                   ฿{selectedPkg.priceThb} {isEn ? "THB" : "บาท"}
                 </span>
               </div>
             </div>
 
             {checkoutData.qrCodeUri ? (
-              <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-white text-[#2E211A] max-w-[240px] mx-auto border border-[#D9C8AC]">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-lg bg-white text-ink-deep max-w-[240px] mx-auto border border-line-warm">
                 <img src={checkoutData.qrCodeUri} alt="PromptPay QR Code" className="w-48 h-48 object-contain" />
-                <span className="text-[13px] text-[#635B4E] font-serif-th">
+                <span className="text-[13px] text-muted font-serif-th">
                   {isEn ? "Scan with any Thai mobile banking app" : "สแกนด้วยแอปพลิเคชันธนาคารทุกแห่ง"}
                 </span>
               </div>
             ) : (
-              <div className="p-5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-center space-y-2 ">
+              <div className="p-5 rounded-lg bg-inset-warm border border-line-warm text-center space-y-2 ">
                 
-                <h4 className="font-serif-th text-sm font-bold text-[#2E211A]">
+                <h4 className="font-serif-th text-sm font-bold text-ink-deep">
                   {isEn ? "Payment Gateway Test Simulator" : "ระบบจำลองการชำระเงิน (Test Gateway Simulator)"}
                 </h4>
-                <p className="text-xs text-[#635B4E] font-serif-th">
+                <p className="text-xs text-muted font-serif-th">
                   {isEn
                     ? "Ready to bind with Omise PromptPay QR upon configuring Cloudflare Workers secrets."
                     : "ระบบพร้อมผูกกับ Omise PromptPay QR เมื่อตั้งค่า Secret บน Cloudflare Workers"}
@@ -363,7 +363,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                 type="button"
                 disabled={loading}
                 onClick={handleConfirmPayment}
-                className="w-full py-3.5 rounded-lg bg-[#3A7044] hover:bg-[#3A7044] text-white font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer"
+                className="w-full py-3.5 rounded-lg bg-ok hover:bg-ok text-white font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer"
               >
                 {loading
                   ? (isEn ? "Verifying payment..." : "กำลังตรวจสอบรายการ...")
@@ -373,7 +373,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
               <button
                 type="button"
                 onClick={() => setCheckoutData(null)}
-                className="text-xs text-[#635B4E] hover:text-[#2E211A] py-1 cursor-pointer font-serif-th"
+                className="text-xs text-muted hover:text-ink-deep py-1 cursor-pointer font-serif-th"
               >
                 {isEn ? "← Choose Different Package" : "← เปลี่ยนแพ็กเกจ"}
               </button>

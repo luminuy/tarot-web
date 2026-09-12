@@ -24,25 +24,25 @@ export function RitualHero({
   return (
     <div className="space-y-4">
       {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-[#635B4E]">
+      <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
         <ol className="flex items-center gap-2 flex-wrap">
           {breadcrumbs.map((crumb, idx) => {
             const isLast = idx === breadcrumbs.length - 1;
             return (
               <React.Fragment key={idx}>
                 {idx > 0 && (
-                  <li aria-hidden="true" className="text-[#D5CEC2]">
+                  <li aria-hidden="true" className="text-line">
                     /
                   </li>
                 )}
                 <li
-                  className={isLast ? "font-semibold text-[#29261F]" : ""}
+                  className={isLast ? "font-semibold text-ink" : ""}
                   aria-current={isLast ? "page" : undefined}
                 >
                   {crumb.href && !isLast ? (
                     <Link
                       href={crumb.href}
-                      className="hover:text-[#29261F] transition-colors"
+                      className="hover:text-ink transition-colors"
                     >
                       {crumb.label}
                     </Link>
@@ -59,19 +59,19 @@ export function RitualHero({
       {/* Hero Header */}
       <header className="text-center space-y-3 pt-2 max-w-2xl mx-auto">
         {/* Sacred Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] shadow-raised">
-          <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-line bg-surface shadow-raised">
+          <span className="text-xs font-serif-th font-semibold text-gold-ink">
             {badgeText}
           </span>
         </div>
 
         {/* H1 Title */}
-        <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-tight leading-tight [text-wrap:balance]">
+        <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-tight leading-tight [text-wrap:balance]">
           {title}
         </h1>
 
         {/* Tagline */}
-        <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto leading-relaxed [text-wrap:balance]">
+        <p className="text-xs sm:text-sm text-muted max-w-xl mx-auto leading-relaxed [text-wrap:balance]">
           {tagline}
         </p>
       </header>

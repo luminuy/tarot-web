@@ -37,7 +37,7 @@ export default function ReadingChatPage() {
   const hasSession = !!flow && !!flow.readingId && (flow.drawnCards?.length ?? 0) > 0;
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-[100dvh] bg-[#F3F0EA] text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="min-h-[100dvh] bg-canvas text-ink">
       {/* ตัวกันที่ของแถบหัวที่เป็น `fixed` — สูงเท่า h-14 ของ <header> เป๊ะ ห้ามลบ (INC-0109) */}
       <div aria-hidden="true" className="h-14" />
 
@@ -47,16 +47,16 @@ export default function ReadingChatPage() {
         sticky ต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ซึ่งบน iOS Safari
         ขยับเองระหว่างเลื่อน (แถบ URL ย่อ/ขยาย · rubber-band) ค่าที่ได้จึงแกว่งจนแถบสั่น
       */}
-      <header className="fixed top-0 inset-x-0 z-40 h-14 w-full border-b border-[#D5CEC2] bg-[#FFFFFF] shadow-raised">
+      <header className="fixed top-0 inset-x-0 z-40 h-14 w-full border-b border-line bg-surface shadow-raised">
         <div className="mx-auto flex h-full max-w-2xl items-center justify-between gap-3 px-4">
           <Link
             href="/"
             aria-label={isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
-            className="flex items-center gap-1.5 rounded-lg py-1.5 pr-2 font-serif-th text-xs text-[#29261F] transition-colors hover:text-[#A58A5C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
+            className="flex items-center gap-1.5 rounded-lg py-1.5 pr-2 font-serif-th text-xs text-ink transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
           >
             <span aria-hidden="true">←</span> {isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
           </Link>
-          <span className="flex items-center gap-1.5 font-serif-th text-xs font-bold text-[#29261F]">
+          <span className="flex items-center gap-1.5 font-serif-th text-xs font-bold text-ink">
             
             {isEnglish ? `Chat with ${personaName}` : `แชทกับ${persona.nameTh}`}
           </span>
@@ -65,7 +65,7 @@ export default function ReadingChatPage() {
 
       <div className="mx-auto w-full max-w-2xl px-3 sm:px-4 py-2 sm:py-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
         {flow === undefined ? (
-          <div className="flex h-[60dvh] items-center justify-center font-serif-th text-sm text-[#635B4E]">
+          <div className="flex h-[60dvh] items-center justify-center font-serif-th text-sm text-muted">
             {isEnglish ? "Opening sanctuary chamber..." : "กำลังเปิดห้องแชท..."}
           </div>
         ) : hasSession ? (
@@ -87,18 +87,18 @@ export default function ReadingChatPage() {
             }}
           />
         ) : (
-          <div className="mt-10 space-y-4 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 text-center shadow-xs">
-            <p className="font-serif-th text-sm text-[#29261F]">
+          <div className="mt-10 space-y-4 rounded-xl border border-line bg-surface p-6 text-center shadow-xs">
+            <p className="font-serif-th text-sm text-ink">
               {isEnglish ? "No active tarot session found" : "ยังไม่มีรอบดูดวงที่เปิดค้างไว้"}
             </p>
-            <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+            <p className="font-serif-th text-[13px] leading-relaxed text-muted">
               {isEnglish
                 ? "Please draw your cards and receive your reading first, then click “Chat with Oracle” on the prophecy page to continue."
                 : "เปิดไพ่และอ่านคำทำนายก่อน แล้วจึงกดปุ่ม “แชทออนไลน์กับแม่หมอ” จากหน้าผลไพ่เพื่อคุยต่อ"}
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#29261F] px-6 py-2.5 font-serif-th text-xs font-bold text-[#F3F0EA] transition hover:bg-[#A58A5C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-ink px-6 py-2.5 font-serif-th text-xs font-bold text-canvas transition hover:bg-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
               {isEnglish ? "Begin Tarot Reading" : "ไปเปิดไพ่"}
             </Link>

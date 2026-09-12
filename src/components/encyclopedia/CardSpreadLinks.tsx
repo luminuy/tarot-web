@@ -55,19 +55,19 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
   const relatedArticles = [...directArticles, ...categoryArticles].slice(0, 3);
 
   return (
-    <div className="space-y-8 pt-8 border-t border-[#D5CEC2]/40">
+    <div className="space-y-8 pt-8 border-t border-line/40">
       {/* Spread Links */}
       <section
         aria-label={isEnglish ? "Spreads recommended for this card" : "ผังพยากรณ์ที่แนะนำสำหรับไพ่ใบนี้"}
         className="space-y-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="font-serif-th text-sm font-bold text-[#8F5C1A]">
+          <h2 className="font-serif-th text-sm font-bold text-gold-ink">
             {isEnglish ? "Draw this card in a real spread" : "เปิดไพ่ใบนี้ในผังพยากรณ์จริง"}
           </h2>
           <Link
             href={href("/spreads")}
-            className="text-xs font-serif-th text-[#635B4E] hover:text-[#8F5C1A] transition-colors"
+            className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
           >
             {isEnglish ? "All spreads →" : "ดูผังทั้งหมด →"}
           </Link>
@@ -78,21 +78,21 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
             <Link
               key={spread.id}
               href={href(`/spreads/${spread.id}`)}
-              className="p-3.5 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-colors flex flex-col justify-between group shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
+              className="p-3.5 rounded-xl border border-line bg-surface hover:border-gold-ink hover:bg-surface-warm transition-colors flex flex-col justify-between group shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
             >
               <div>
-                <span className="text-[11px] font-mono font-bold text-[#8F5C1A] block mb-1">
+                <span className="text-[11px] font-mono font-bold text-gold-ink block mb-1">
                   {spread.positions.length} {isEnglish ? "cards" : "ใบ"} · {spread.defaultCategory}
                 </span>
-                <span className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors block">
+                <span className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors block">
                   {isEnglish ? spread.nameEn : spread.nameTh}
                 </span>
-                <p className="font-serif-th text-[11px] text-[#635B4E] mt-1 line-clamp-2">
+                <p className="font-serif-th text-[11px] text-muted mt-1 line-clamp-2">
                   {isEnglish ? spread.taglineEn : spread.tagline}
                 </p>
               </div>
-              <div className="pt-2 mt-2 border-t border-[#D5CEC2]/40 text-right">
-                <span className="text-[11px] font-serif-th text-[#8F5C1A] group-hover:underline">
+              <div className="pt-2 mt-2 border-t border-line/40 text-right">
+                <span className="text-[11px] font-serif-th text-gold-ink group-hover:underline">
                   {isEnglish ? "Start this spread →" : "เริ่มเปิดไพ่ผังนี้ →"}
                 </span>
               </div>
@@ -107,12 +107,12 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
       {!isEnglish && relatedArticles.length > 0 && (
         <section aria-label="บทความคู่มือที่เกี่ยวข้อง" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-serif-th text-sm font-bold text-[#8F5C1A]">
+            <h2 className="font-serif-th text-sm font-bold text-gold-ink">
               บทความและคู่มือการอ่านไพ่ที่เกี่ยวข้อง
             </h2>
             <Link
               href="/blog"
-              className="text-xs font-serif-th text-[#635B4E] hover:text-[#8F5C1A] transition-colors"
+              className="text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
             >
               คลังบทความทั้งหมด →
             </Link>
@@ -123,21 +123,21 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
               <Link
                 key={article.slug}
                 href={`/blog/${article.slug}`}
-                className="p-3.5 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition-colors flex flex-col justify-between group shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
+                className="p-3.5 rounded-xl border border-line bg-surface hover:border-gold-ink hover:bg-surface-warm transition-colors flex flex-col justify-between group shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
               >
                 <div>
-                  <span className="text-[11px] font-serif-th text-[#8F5C1A] block mb-1">
+                  <span className="text-[11px] font-serif-th text-gold-ink block mb-1">
                     {article.categoryTh} · อ่าน {article.readTime}
                   </span>
-                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors line-clamp-2">
+                  <h3 className="font-serif-th text-xs sm:text-sm font-bold text-ink group-hover:text-gold-ink transition-colors line-clamp-2">
                     {article.title}
                   </h3>
-                  <p className="font-serif-th text-[11px] text-[#635B4E] mt-1 line-clamp-2">
+                  <p className="font-serif-th text-[11px] text-muted mt-1 line-clamp-2">
                     {article.description}
                   </p>
                 </div>
-                <div className="pt-2 mt-2 border-t border-[#D5CEC2]/40 text-right">
-                  <span className="text-[11px] font-serif-th text-[#8F5C1A] group-hover:underline">
+                <div className="pt-2 mt-2 border-t border-line/40 text-right">
+                  <span className="text-[11px] font-serif-th text-gold-ink group-hover:underline">
                     อ่านบทความ →
                   </span>
                 </div>

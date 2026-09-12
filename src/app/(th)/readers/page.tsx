@@ -67,7 +67,7 @@ export default async function ReadersPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-x-clip">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep p-4 sm:p-8 font-sans relative overflow-x-clip">
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
@@ -76,25 +76,25 @@ export default async function ReadersPage() {
 
         <div className="max-w-6xl mx-auto space-y-6 relative z-10">
           {/* Top Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#E4D8C4]/40 pb-4 overflow-x-auto whitespace-nowrap">
-            <Link href="/" className="hover:text-[#8F5C1A] transition-colors">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-muted border-b border-[#E4D8C4]/40 pb-4 overflow-x-auto whitespace-nowrap">
+            <Link href="/" className="hover:text-gold-ink transition-colors">
               หน้าแรก
             </Link>
             <span>/</span>
-            <span className="text-[#2E211A] font-bold">ปรึกษาแม่หมอตัวจริง</span>
+            <span className="text-ink-deep font-bold">ปรึกษาแม่หมอตัวจริง</span>
           </nav>
 
           {/* Hero Header */}
           <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
             <div>
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#E4D8C4] bg-[#FFFFFF] text-xs text-[#8F5C1A] font-bold font-serif-th shadow-xs">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#E4D8C4] bg-surface text-xs text-gold-ink font-bold font-serif-th shadow-xs">
                 ตลาดรวมแม่หมอตัวจริง (Tarot Marketplace)
               </span>
             </div>
             <h1 className="font-serif-th text-3xl sm:text-5xl font-bold font-mystic-gold tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
               ปรึกษาแม่หมอตัวจริง
             </h1>
-            <p className="text-xs sm:text-sm text-[#635B4E] max-w-xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
+            <p className="text-xs sm:text-sm text-muted max-w-xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
               เลือกแม่หมอที่มีความถนัดตรงกับเรื่องที่คุณต้องการคำปรึกษา พร้อมระบบ AI ช่วยสังเคราะห์บรีฟคำถามก่อนเริ่มสนทนา
             </p>
           </div>

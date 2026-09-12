@@ -116,12 +116,12 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
   const isQuestionEmpty = touchedQuestion && !question.trim();
 
   return (
-    <div className="w-full rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-8 space-y-6 relative overflow-hidden">
+    <div className="w-full rounded-lg border border-line-warm bg-surface p-5 sm:p-8 space-y-6 relative overflow-hidden">
       {/* Background Sacred Geometric Aura */}
 
       {/* Persona Welcoming Sanctuary Dialogue */}
-      <div className="flex items-start gap-3.5 p-4 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] relative overflow-hidden">
-        <div className="w-10 h-15 rounded-lg border-2 border-[#D9C8AC] overflow-hidden flex-shrink-0 bg-[#FFFFFF]">
+      <div className="flex items-start gap-3.5 p-4 rounded-lg bg-inset-warm border border-line-warm relative overflow-hidden">
+        <div className="w-10 h-15 rounded-lg border-2 border-line-warm overflow-hidden flex-shrink-0 bg-surface">
           <CardImage
             image={persona?.cardImage || "major-02.jpg"}
             /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ข้างภาพพิมพ์ชื่อแม่หมออยู่แล้ว */
@@ -135,11 +135,11 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             <span className="text-xs sm:text-sm font-serif-th font-bold font-mystic-gold">
               {isEnglish ? (persona?.nameEn || persona?.nameTh || "Tarot Reader") : (persona?.nameTh || "แม่หมอประจำวิหาร")}
             </span>
-            <span className="text-[13px] text-[#635B4E] font-serif-th">
+            <span className="text-[13px] text-muted font-serif-th">
               {isEnglish ? "· Initial Intention" : "· ให้ข้อมูลเบื้องต้น"}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th">
+          <p className="text-xs sm:text-sm text-ink-deep leading-relaxed font-serif-th">
             {isEnglish
               ? persona?.id === "direct"
                 ? `"Hello ${nickname.trim() || "seeker"}. Speak freely and tell me what is truly on your mind or what you wish to see clearly. The cards will give you direct, honest answers."`
@@ -162,12 +162,12 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
           <div className="flex justify-between items-center">
             <label
               htmlFor="altar-nickname"
-              className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
+              className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
             >
               {isEnglish ? "1. Your Name or Pseudonym" : "1. ชื่อเล่นของคุณ"}
-              <span className="whitespace-nowrap text-[#635B4E] font-serif-th text-xs font-normal">{isEnglish ? "(Optional)" : "(ไม่บังคับ)"}</span>
+              <span className="whitespace-nowrap text-muted font-serif-th text-xs font-normal">{isEnglish ? "(Optional)" : "(ไม่บังคับ)"}</span>
             </label>
-            <span className="text-[13px] text-[#635B4E] font-mono">{nickname.length}/24</span>
+            <span className="text-[13px] text-muted font-mono">{nickname.length}/24</span>
           </div>
           <input
             id="altar-nickname"
@@ -176,7 +176,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={nickname}
             onChange={(e) => onNicknameChange(e.target.value)}
             placeholder={isEnglish ? "e.g., Alex, Jordan (or leave blank)" : "เช่น ฟ้า, บิ๊ก, พลอย (เว้นว่างได้)"}
-            className="w-full bg-[#FFFFFF] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition duration-200 border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
+            className="w-full bg-surface rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 border border-line-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
           />
         </div>
 
@@ -184,10 +184,10 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         <div className="space-y-1.5">
           <label
             htmlFor="altar-situation"
-            className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
+            className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
           >
             {isEnglish ? "2. Brief Context or Situation" : "2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ"}
-            <span className="whitespace-nowrap text-[13px] text-[#635B4E] font-normal">{isEnglish ? "(Helps ground the reading)" : "(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)"}</span>
+            <span className="whitespace-nowrap text-[13px] text-muted font-normal">{isEnglish ? "(Helps ground the reading)" : "(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)"}</span>
           </label>
           <input
             id="altar-situation"
@@ -196,14 +196,14 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={situation}
             onChange={(e) => onSituationChange(e.target.value)}
             placeholder={isEnglish ? "e.g., Navigating relationship friction / Awaiting job interview results" : "เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"}
-            className="w-full bg-[#FFFFFF] border border-[#D9C8AC] focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A] rounded-lg px-4 py-3 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition"
+            className="w-full bg-surface border border-line-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition"
           />
         </div>
       </div>
 
       {/* Quick Situation Selector Chips */}
       <div className="space-y-2">
-        <span className="text-[13px] text-[#635B4E] font-serif-th">
+        <span className="text-[13px] text-muted font-serif-th">
           {isEnglish ? "Or tap a quick situation:" : "หรือแตะเลือกเรื่องราวด่วน:"}
         </span>
         <div className="flex flex-wrap gap-2">
@@ -227,8 +227,8 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
               onClick={() => onSituationChange(sit)}
               className={`px-3 py-1.5 rounded-lg text-xs font-serif-th transition cursor-pointer ${
                 situation === sit
-                  ? "bg-[#8F5C1A] text-[#FFFFFF] font-bold"
-                  : "bg-[#F3EDE2] text-[#2E211A] hover:bg-[#FFFFFF]/30 border border-[#D9C8AC]"
+                  ? "bg-gold-ink text-surface font-bold"
+                  : "bg-inset-warm text-ink-deep hover:bg-surface/30 border border-line-warm"
               }`}
             >
               {sit}
@@ -242,12 +242,12 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
         <div className="flex justify-between items-center">
           <label
             htmlFor="altar-question"
-            className="text-xs sm:text-sm text-[#2E211A] flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
+            className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
           >
             {isEnglish ? "3. The Core Question on Your Heart" : "3. คำถามที่คุณอยากรู้มากที่สุด"}
-            <span className="whitespace-nowrap text-[#A6392C] font-mono text-xs">{isEnglish ? "(Required *)" : "(จำเป็น *)"}</span>
+            <span className="whitespace-nowrap text-err font-mono text-xs">{isEnglish ? "(Required *)" : "(จำเป็น *)"}</span>
           </label>
-          <span className="text-[13px] text-[#635B4E] font-mono">{question.length}/300</span>
+          <span className="text-[13px] text-muted font-mono">{question.length}/300</span>
         </div>
         <div className="relative group">
           <textarea
@@ -262,18 +262,18 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 ? "Type the inquiry you wish the cards to illuminate, e.g., What is the trajectory of this relationship and how should I best guard my peace? / Will this career move align with my long-term purpose?..."
                 : "พิมพ์คำถามที่คุณอยากให้ไพ่ช่วยชี้ทาง เช่น ความสัมพันธ์กับเขาจะมีทิศทางอย่างไร / งานใหม่ที่กำลังจะย้ายไปจะดีไหม..."
             }
-            className={`w-full bg-[#FFFFFF] rounded-lg p-4 text-xs sm:text-sm text-[#2E211A] placeholder-[#6F5B4A]/70 focus:outline-none transition duration-200 leading-relaxed resize-none ${
+            className={`w-full bg-surface rounded-lg p-4 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 leading-relaxed resize-none ${
               isQuestionEmpty
-                ? "border border-[#A6392C] focus:border-[#A6392C] focus:ring-2 focus:ring-[#A6392C]/30"
-                : "border border-[#D9C8AC] group-hover:border-[#8F5C1A] focus:border-[#8F5C1A] focus:ring-2 focus:ring-[#8F5C1A]/30"
+                ? "border border-err focus:border-err focus:ring-2 focus:ring-err/30"
+                : "border border-line-warm group-hover:border-gold-ink focus:border-gold-ink focus:ring-2 focus:ring-gold-ink/30"
             }`}
           />
         </div>
       </div>
 
       {/* 4 Authentic 1909 Rider-Waite Cards for Quick Question Selection */}
-      <div className="space-y-3 pt-2 border-t border-[#D9C8AC]/30">
-        <label className="text-xs sm:text-sm font-serif-th font-bold text-[#2E211A] tracking-wide flex items-center gap-2 [text-wrap:balance]">
+      <div className="space-y-3 pt-2 border-t border-line-warm/30">
+        <label className="text-xs sm:text-sm font-serif-th font-bold text-ink-deep tracking-wide flex items-center gap-2 [text-wrap:balance]">
           
           {isEnglish
             ? "Or select a preset question (tap to apply):"
@@ -306,26 +306,26 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                     handleSelectSeal(seal);
                   }
                 }}
-                className={`rounded-lg border transition duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+                className={`rounded-lg border transition duration-300 cursor-pointer flex flex-col justify-between p-3 sm:p-4 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
                   isActive
-                    ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-overlay"
-                    : "bg-[#F3EDE2] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
+                    ? "bg-surface border-line-warm ring-2 ring-gold-ink/50 shadow-overlay"
+                    : "bg-inset-warm border-line-warm hover:border-gold-ink hover:bg-surface-warm"
                 }`}
                 style={{ minHeight: "260px" }}
               >
                 {/* Top Card Badge: Roman Numeral & Title */}
-                <div className="flex items-center justify-between text-[13px] text-[#635B4E] font-mono pb-1.5 border-b border-[#D9C8AC]/30">
-                  <span className="text-[#2E211A] font-bold bg-[#F3EDE2]/25 px-1.5 py-0.5 rounded">
+                <div className="flex items-center justify-between text-[13px] text-muted font-mono pb-1.5 border-b border-line-warm/30">
+                  <span className="text-ink-deep font-bold bg-inset-warm/25 px-1.5 py-0.5 rounded">
                     {seal.romanNum}
                   </span>
-                  <span className="tracking-widest uppercase text-[12px] truncate max-w-[90px] text-[#635B4E]">
+                  <span className="tracking-widest uppercase text-[12px] truncate max-w-[90px] text-muted">
                     {seal.majorCard}
                   </span>
                 </div>
 
                 {/* Center Authentic 1909 Rider-Waite Image */}
                 <div className="my-auto py-1 flex items-center justify-center">
-                  <div className="w-18 h-28 sm:w-20 sm:h-30 rounded-lg border border-[#D9C8AC] overflow-hidden ">
+                  <div className="w-18 h-28 sm:w-20 sm:h-30 rounded-lg border border-line-warm overflow-hidden ">
                     <CardImage
                       image={seal.image}
                       /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h4> ใต้ภาพพิมพ์ชื่อชุดเดียวกันอยู่แล้ว */
@@ -337,11 +337,11 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                 </div>
 
                 {/* Bottom Card Title & Subtitle */}
-                <div className="text-center pt-2 border-t border-[#D9C8AC]/30">
-                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] group-hover:text-[#8F5C1A] transition-colors">
+                <div className="text-center pt-2 border-t border-line-warm/30">
+                  <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep group-hover:text-gold-ink transition-colors">
                     {isEnglish ? (seal.titleEn || seal.title) : seal.title}
                   </h4>
-                  <p className="text-[12px] text-[#635B4E] mt-0.5">
+                  <p className="text-[12px] text-muted mt-0.5">
                     {isEnglish ? (seal.subtitleEn || seal.subtitle) : seal.subtitle}
                   </p>
                 </div>

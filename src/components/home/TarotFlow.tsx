@@ -81,7 +81,7 @@ function StepBackButton({ onClick, label }: { onClick: () => void; label?: strin
     <button
       type="button"
       onClick={onClick}
-      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-xs font-serif-th text-[#2E211A] hover:bg-[#FAF7F2] hover:border-[#8F5C1A] transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
+      className="mx-auto flex items-center gap-1.5 py-2 px-4 rounded-lg bg-surface border border-line-warm text-xs font-serif-th text-ink-deep hover:bg-surface-warm hover:border-gold-ink transition-colors duration-150 cursor-pointer touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#F3EDE2]"
     >
       <span aria-hidden="true">←</span> {label || "ย้อนกลับ"}
     </button>
@@ -1269,7 +1269,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-[#F3F0EA] font-bold bg-[#29261F] hover:bg-[#A58A5C] px-4 py-1.5 sm:py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
+                className="text-xs text-canvas font-bold bg-ink hover:bg-gold px-4 py-1.5 sm:py-2 rounded-full transition cursor-pointer whitespace-nowrap hidden sm:flex items-center gap-1.5 font-serif-th shadow-xs"
               >
                 {isEnglish ? "New Reading" : "เริ่มดูดวงใหม่"}
               </button>
@@ -1278,7 +1278,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         }
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen text-[#29261F] relative overflow-x-clip bg-[#F3F0EA]">
+      <main id="main-content" tabIndex={-1} className="min-h-screen text-ink relative overflow-x-clip bg-canvas">
       {/* Hardware Anchor for Immediate Viewport Alignment */}
       <div id="sanctuary-top-anchor" className="absolute top-0 left-0 w-0 h-0 pointer-events-none" />
 
@@ -1293,7 +1293,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (
-          <div className="mb-6 p-4 rounded-xl bg-[#FCEEEA] border border-[#D5CEC2] text-[#A6392C] text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3 shadow-xs">
+          <div className="mb-6 p-4 rounded-xl bg-err-wash border border-line text-err text-xs sm:text-sm text-center flex flex-col sm:flex-row items-center justify-center gap-3 shadow-xs">
             <span>{errorMsg}</span>
             {readingId && drawnCards.length > 0 && !/โควตา|สิทธิ์|สมาชิก|เติมรอบ|quota|credit|member/.test(errorMsg) && (
               <button
@@ -1302,7 +1302,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   setErrorMsg(null);
                   startAIStreaming(readingId, drawnCards);
                 }}
-                className="px-4 py-1.5 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs transition cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
+                className="px-4 py-1.5 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs transition cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
               >
                 {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
               </button>
@@ -1343,15 +1343,15 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
               <div className="space-y-10">
                 <div className="text-center space-y-2.5 sm:space-y-3 pt-2">
-                  <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+                  <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
+                  <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
                     {isEnglish
                       ? "Shuffle and select cards from the authentic 78-card deck with provably-fair SHA-256 randomness and archetypal psychological insights."
                       : "สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง จากสำรับ 1909 Rider-Waite แท้ 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256"}
                   </p>
-                  <h2 className="text-base sm:text-lg font-serif-th font-semibold text-[#8F5C1A] pt-1">
+                  <h2 className="text-base sm:text-lg font-serif-th font-semibold text-gold-ink pt-1">
                     {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
                   </h2>
                 </div>
@@ -1408,10 +1408,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               className="space-y-10"
             >
               <div className="text-center space-y-2 sm:space-y-2.5">
-                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-[#29261F] leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+                <h2 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
                   {isEnglish ? "Set Your Intention & Choose Reader" : "ตั้งคำถาม & เลือกแม่หมอ"}
                 </h2>
-                <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed [text-wrap:balance]">
+                <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed [text-wrap:balance]">
                   {isEnglish
                     ? "Formulate your question and choose your preferred oracle archetype"
                     : "พิมพ์เรื่องที่อยากรู้ พร้อมเลือกสไตล์แม่หมอที่คุณต้องการคุยด้วย"}
@@ -1476,7 +1476,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
               {/* Action Bar */}
               {!clarificationPrompt && (
-                <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3 shadow-xs">
+                <div className="w-full max-w-2xl mx-auto p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-nowrap items-center justify-between gap-2.5 sm:gap-3 shadow-xs">
                 <button
                   type="button"
                   onClick={() => {
@@ -1485,11 +1485,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     navigateStep("SPREAD_SELECT");
                   }}
                   aria-label={isEnglish ? `Change spread (currently ${selectedSpread.nameEn || selectedSpread.nameTh})` : `เปลี่ยนผัง (ตอนนี้เลือก ${selectedSpread.nameTh})`}
-                  className="shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 rounded-full bg-[#EAE7E0] border border-[#D5CEC2] text-xs font-serif-th text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
+                  className="shrink-0 max-w-[42%] py-3 px-3.5 sm:px-5 rounded-full bg-inset border border-line text-xs font-serif-th text-ink hover:border-gold hover:text-gold-ink transition-colors duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
                 >
                   <span aria-hidden="true">←</span>
                   <span>{isEnglish ? "Change Spread" : "เปลี่ยนผัง"}</span>
-                  <span className="hidden lg:inline truncate text-[#635B4E]">({isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh})</span>
+                  <span className="hidden lg:inline truncate text-muted">({isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh})</span>
                 </button>
 
                 <button
@@ -1499,8 +1499,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   aria-label={isEnglish ? "Next: Shuffle and select cards yourself" : "ต่อไป: สับไพ่และเลือกไพ่ด้วยตัวเอง"}
                   className={`flex-1 min-w-0 py-3 px-3 sm:px-7 rounded-full text-xs sm:text-sm font-bold font-serif-th transition-transform duration-150 flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap shadow-sm ${
                     !question.trim()
-                      ? "bg-[#EAE7E0] text-[#635B4E] border border-[#D5CEC2] cursor-not-allowed"
-                      : "bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] active:scale-95 cursor-pointer"
+                      ? "bg-inset text-muted border border-line cursor-not-allowed"
+                      : "bg-ink hover:bg-gold text-canvas active:scale-95 cursor-pointer"
                   }`}
                 >
                   
@@ -1623,10 +1623,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       href="/reading/chat"
                       onClick={() => soundManager.playCardSelectSound()}
                       aria-label={isEnglish ? `Chat online with ${selectedPersona.nameEn || selectedPersona.nameTh}` : `แชทออนไลน์กับ${selectedPersona.nameTh}`}
-                      className="group flex flex-col gap-3 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-5 shadow-xs transition hover:border-[#A58A5C] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A58A5C]"
+                      className="group flex flex-col gap-3 rounded-xl border border-line bg-surface p-4 sm:p-5 shadow-xs transition hover:border-gold hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                     >
                       <span className="flex items-center justify-between gap-2">
-                        <span className="relative flex h-14 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-[#D5CEC2] bg-[#F3EDE2]">
+                        <span className="relative flex h-14 w-11 shrink-0 overflow-hidden rounded-lg border-2 border-line bg-inset-warm">
                           <CardImage
                             image={selectedPersona.cardImage}
                             /* ภาพประกอบล้วน — <Link> มี aria-label และตัวหนังสือข้างในบอกชื่อแม่หมออยู่แล้ว (INC-0125) */
@@ -1635,19 +1635,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                             sizes="44px"
                           />
                         </span>
-                        <span className="flex items-center gap-1 rounded-full border border-[#D5CEC2] bg-[#EBF3ED] px-2 py-0.5 text-[13px] font-medium text-[#3A7044]">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#3A7044] animate-pulse" /> {isEnglish ? "Online" : "ออนไลน์"}
+                        <span className="flex items-center gap-1 rounded-full border border-line bg-[#EBF3ED] px-2 py-0.5 text-[13px] font-medium text-ok">
+                          <span className="h-1.5 w-1.5 rounded-full bg-ok animate-pulse" /> {isEnglish ? "Online" : "ออนไลน์"}
                         </span>
                       </span>
-                      <span className="block font-serif-th text-sm font-bold text-[#29261F]">
+                      <span className="block font-serif-th text-sm font-bold text-ink">
                         {isEnglish ? `Chat Online with ${selectedPersona.nameEn || selectedPersona.nameTh}` : `แชทออนไลน์กับ ${selectedPersona.nameTh}`}
                       </span>
-                      <span className="block font-serif-th text-[13px] leading-relaxed text-[#635B4E] [text-wrap:pretty]">
+                      <span className="block font-serif-th text-[13px] leading-relaxed text-muted [text-wrap:pretty]">
                         {isEnglish
                           ? "Open full-screen chat to delve deeper into these drawn cards with your oracle reader."
                           : "เปิดห้องแชทเต็มจอ พิมพ์ถามเจาะลึกต่อจากไพ่ชุดนี้ได้ทันที"}
                       </span>
-                      <span className="mt-1 flex items-center justify-center gap-2 rounded-full bg-[#29261F] px-4 py-2.5 font-serif-th text-xs font-bold text-[#F3F0EA] transition-colors group-hover:bg-[#A58A5C]">
+                      <span className="mt-1 flex items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 font-serif-th text-xs font-bold text-canvas transition-colors group-hover:bg-gold">
                         {isEnglish ? "Open Chat" : "เปิดห้องแชท"}
                         <span className="transition-transform group-hover:translate-x-0.5">→</span>
                       </span>
@@ -1657,8 +1657,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               </div>
 
               {/* Bottom Quick Luxury Actions Deck */}
-              <div className="p-5 sm:p-6 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] flex flex-wrap items-center justify-between gap-4 shadow-xs">
-                <div className="flex items-center gap-2 text-xs text-[#635B4E] font-serif-th">
+              <div className="p-5 sm:p-6 rounded-xl bg-surface border border-line flex flex-wrap items-center justify-between gap-4 shadow-xs">
+                <div className="flex items-center gap-2 text-xs text-muted font-serif-th">
                   
                   <span>{isEnglish ? "Save or share this tarot reading for future reference" : "บันทึกหรือแชร์คำทำนายนี้เก็บไว้ดูย้อนหลังได้"}</span>
                 </div>
@@ -1670,7 +1670,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       soundManager.playCardSelectSound();
                       setIsShareOpen(true);
                     }}
-                    className="py-3 px-5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] font-serif-th text-xs transition cursor-pointer flex items-center gap-2 shadow-xs"
+                    className="py-3 px-5 rounded-full bg-surface border border-line text-ink hover:border-gold hover:text-gold-ink font-serif-th text-xs transition cursor-pointer flex items-center gap-2 shadow-xs"
                   >
                     {isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
                   </button>
@@ -1678,7 +1678,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="py-3 px-6 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold font-serif-th text-xs active:scale-95 transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    className="py-3 px-6 rounded-full bg-ink hover:bg-gold text-canvas font-bold font-serif-th text-xs active:scale-95 transition cursor-pointer flex items-center gap-1.5 shadow-sm"
                   >
                     {isEnglish ? "Start Another Reading" : "ดูดวงเรื่องอื่นต่อ"}
                   </button>

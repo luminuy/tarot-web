@@ -108,7 +108,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
 
   return (
     <div className="space-y-4 w-full">
-      <label className="text-xs sm:text-sm font-serif-th font-bold text-[#8F5C1A] tracking-wide flex items-center gap-2 [text-wrap:balance]">
+      <label className="text-xs sm:text-sm font-serif-th font-bold text-gold-ink tracking-wide flex items-center gap-2 [text-wrap:balance]">
         
         {isEnglish
           ? `Select Reader Persona (${PERSONAS.length} Archetypes)`
@@ -159,28 +159,28 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                   handlePersonaClick();
                 }
               }}
-              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] group/persona ${
+              className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition duration-300 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/persona ${
                 isSelected
-                  ? "bg-[#FFFFFF] border-[#D9C8AC] ring-2 ring-[#8F5C1A]/50 shadow-overlay"
+                  ? "bg-surface border-line-warm ring-2 ring-gold-ink/50 shadow-overlay"
                   : isLocked
-                    ? "bg-[#FFFFFF]/80 border-[#D9C8AC]/70 hover:border-[#8F5C1A] hover:bg-[#FAF7F2] opacity-90 hover:opacity-100"
-                    : "bg-[#FFFFFF] border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2]"
+                    ? "bg-surface/80 border-line-warm/70 hover:border-gold-ink hover:bg-surface-warm opacity-90 hover:opacity-100"
+                    : "bg-surface border-line-warm hover:border-gold-ink hover:bg-surface-warm"
               }`}
               style={{ minHeight: "315px" }}
             >
               {/* Top Card Archetype Tag */}
-              <div className="text-center pb-1.5 border-b border-[#D9C8AC]/30">
+              <div className="text-center pb-1.5 border-b border-line-warm/30">
                 <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                  <span className="text-[12px] uppercase tracking-widest text-[#8F5C1A] font-mono font-semibold block">
+                  <span className="text-[12px] uppercase tracking-widest text-gold-ink font-mono font-semibold block">
                     {meta.roleTitle}
                   </span>
                   {isLocked && (
-                    <span className="text-[12px] text-[#8F5C1A] bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
+                    <span className="text-[12px] text-gold-ink bg-inset-warm border border-line-warm px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
                       <span>{isEnglish ? "Master Tier" : "ผู้เชี่ยวชาญพิเศษ"}</span>
                     </span>
                   )}
                 </div>
-                <span className="text-[13px] text-[#635B4E] font-serif-th block mt-0.5">
+                <span className="text-[13px] text-muted font-serif-th block mt-0.5">
                   {isEnglish ? meta.archetypeEn : meta.archetypeTh}
                 </span>
               </div>
@@ -195,9 +195,9 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
 
                 {/* ตราผนึกปรมาจารย์ลับ — ป้ายแคปซูลหรูหราใต้ภาพไพ่ (ไม่ปิดทับหน้าไพ่เด็ดขาด) */}
                 {isLocked && (
-                  <div className="z-20 flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 group-hover/persona:border-[#8F5C1A] transition duration-300 shadow-xs">
-                    <SealedLockIcon className="w-3.5 h-3.5 text-[#8F5C1A] flex-shrink-0" />
-                    <span className="text-[13px] font-serif-th font-bold text-[#2E211A] whitespace-nowrap">
+                  <div className="z-20 flex items-center gap-1.5 rounded-full border border-line-warm bg-surface px-3 py-1 group-hover/persona:border-gold-ink transition duration-300 shadow-xs">
+                    <SealedLockIcon className="w-3.5 h-3.5 text-gold-ink flex-shrink-0" />
+                    <span className="text-[13px] font-serif-th font-bold text-ink-deep whitespace-nowrap">
                       {isEnglish ? "Tap to unlock" : "แตะเพื่อปลดล็อก"}
                     </span>
                   </div>
@@ -205,7 +205,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
               </div>
 
               {/* Card Footer Titles */}
-              <div className="pt-2 border-t border-[#D9C8AC]/30 text-center">
+              <div className="pt-2 border-t border-line-warm/30 text-center">
                 <div className="flex items-center justify-center gap-1.5">
                   <h4 className="font-serif-th text-xs sm:text-sm font-bold font-mystic-gold leading-tight [text-wrap:balance]">
                     {isEnglish ? (p.nameEn || p.nameTh) : p.nameTh}
@@ -225,7 +225,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                         : (PERSONA_GREETINGS[p.id] || "สวัสดีค่ะ");
                       soundManager.speakProphecy(greeting, p.id);
                     }}
-                    className="p-1.5 rounded-full text-xs text-[#8F5C1A] hover:text-[#2E211A] hover:bg-[#F3EDE2]/40 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                    className="p-1.5 rounded-full text-xs text-gold-ink hover:text-ink-deep hover:bg-inset-warm/40 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
                     title={
                       isLocked
                         ? (isEnglish ? `Unlock voice greeting of ${p.nameEn || p.nameTh}` : `ปลดล็อกเสียงทักทายของ ${p.nameTh}`)
@@ -240,7 +240,7 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                     <SpeakerTabIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <p className="text-[13px] text-[#635B4E] mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">
+                <p className="text-[13px] text-muted mt-1 leading-relaxed font-serif-th [text-wrap:pretty]">
                   {isEnglish ? (p.taglineEn || p.tagline) : p.tagline}
                 </p>
               </div>
@@ -302,10 +302,10 @@ export const PersonaCardSelector: React.FC<PersonaCardSelectorProps> = ({
                 aria-hidden="true"
                 className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 ${
                   isCurrentActive
-                    ? "w-7 bg-[#8F5C1A]"
+                    ? "w-7 bg-gold-ink"
                     : isSelected
-                      ? "w-3 bg-[#8F5C1A]/60"
-                      : "w-1.5 bg-[#8F5C1A]/20 hover:bg-[#74490F]/45"
+                      ? "w-3 bg-gold-ink/60"
+                      : "w-1.5 bg-gold-ink/20 hover:bg-gold-ink-deep/45"
                 }`}
               />
             </button>

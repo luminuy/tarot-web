@@ -78,20 +78,20 @@ export default async function SharePage({ params }: Props) {
   const valid = ID_RE.test(id);
 
   return (
-    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-[#F3F0EA] px-6 text-center text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-canvas px-6 text-center text-ink">
       <meta httpEquiv="refresh" content="1; url=/" />
       {valid && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={`/api/share/image/${id}`}
           alt="การ์ดคำทำนายไพ่ทาโรต์"
-          className="max-h-[60vh] w-auto rounded-xl border border-[#D5CEC2] shadow-raised"
+          className="max-h-[60vh] w-auto rounded-xl border border-line shadow-raised"
         />
       )}
-      <p className="font-serif-th text-sm text-[#635B4E]">กำลังพาไปเปิดไพ่ของคุณเอง…</p>
+      <p className="font-serif-th text-sm text-muted">กำลังพาไปเปิดไพ่ของคุณเอง…</p>
       <Link
         href="/"
-        className="rounded-full bg-[#29261F] px-6 py-2.5 font-serif-th text-sm font-bold text-[#F3F0EA] hover:bg-[#A58A5C]"
+        className="rounded-full bg-ink px-6 py-2.5 font-serif-th text-sm font-bold text-canvas hover:bg-gold"
       >
         เปิดไพ่ที่ SeerTarot
       </Link>

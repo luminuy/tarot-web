@@ -92,7 +92,7 @@ export function SpreadsIndexBody({ locale }: { locale: Locale }) {
   ]);
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
       {/* Schema.org Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(spreadsJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
@@ -118,16 +118,16 @@ export function SpreadsIndexBody({ locale }: { locale: Locale }) {
         */}
         <nav
           aria-label={copy.directoryTitle}
-          className="rounded-2xl border border-[#E4DED2] bg-[#FAF7F2] px-5 py-6 sm:px-7 sm:py-7"
+          className="rounded-2xl border border-[#E4DED2] bg-surface-warm px-5 py-6 sm:px-7 sm:py-7"
         >
-          <h2 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F]">{copy.directoryTitle}</h2>
-          <p className="mt-1.5 text-xs sm:text-sm text-[#635B4E] leading-relaxed">{copy.directoryLead}</p>
+          <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink">{copy.directoryTitle}</h2>
+          <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">{copy.directoryLead}</p>
           <ul className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2.5">
             {SPREADS.map((spread) => (
               <li key={spread.id}>
                 <a
                   href={localeHref(`/spreads/${spread.id}`, locale)}
-                  className="text-xs sm:text-sm text-[#5E5240] hover:text-[#8F5C1A] underline decoration-[#E4DED2] underline-offset-4 transition-colors"
+                  className="text-xs sm:text-sm text-[#5E5240] hover:text-gold-ink underline decoration-[#E4DED2] underline-offset-4 transition-colors"
                 >
                   {isEnglish ? spread.nameEn : spread.nameTh}
                 </a>

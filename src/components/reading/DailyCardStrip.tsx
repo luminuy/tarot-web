@@ -41,7 +41,7 @@ export function DailyCardStrip() {
     return (
       <div
         aria-hidden="true"
-        className="mx-auto mb-6 h-[92px] max-w-2xl animate-pulse rounded-lg border border-[#D9C8AC]/40 bg-white/60"
+        className="mx-auto mb-6 h-[92px] max-w-2xl animate-pulse rounded-lg border border-line-warm/40 bg-white/60"
       />
     );
   }
@@ -55,10 +55,10 @@ export function DailyCardStrip() {
   return (
     <Link
       href={`/cards/${daily.cardId}`}
-      className="group mx-auto mb-6 flex max-w-2xl items-center gap-4 rounded-lg border border-[#D9C8AC] bg-white px-4 py-3 shadow-raised transition-colors hover:border-[#8F5C1A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+      className="group mx-auto mb-6 flex max-w-2xl items-center gap-4 rounded-lg border border-line-warm bg-white px-4 py-3 shadow-raised transition-colors hover:border-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
     >
-      <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-[#D9C8AC] bg-[#F3EDE2] shadow-xs">
+      <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-line-warm bg-inset-warm shadow-xs">
         <CardImage
           image={daily.image}
           /* ภาพประกอบล้วน — ตัวหนังสือในลิงก์เดียวกันบอก "ไพ่ประจำวันนี้" และชื่อไพ่อยู่แล้ว (INC-0125) */
@@ -69,16 +69,16 @@ export function DailyCardStrip() {
       </div>
 
       <div className="min-w-0 flex-1 space-y-1">
-        <p className="font-serif-th text-xs font-bold text-[#8F5C1A]">
+        <p className="font-serif-th text-xs font-bold text-gold-ink">
           {isEnglish ? "Card of the Day" : "ไพ่ประจำวันนี้"}
         </p>
-        <p className="font-serif-th text-sm font-bold text-[#2E211A]">
+        <p className="font-serif-th text-sm font-bold text-ink-deep">
           {isEnglish ? (
             daily.nameEn
           ) : (
             <>
               {daily.nameTh}{" "}
-              <span className="font-normal text-[#635B4E]">· {daily.nameEn}</span>
+              <span className="font-normal text-muted">· {daily.nameEn}</span>
             </>
           )}
         </p>
@@ -86,7 +86,7 @@ export function DailyCardStrip() {
           {displayKeywords.map((kw) => (
             <span
               key={kw}
-              className="rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-2 py-0.5 font-serif-th text-xs text-[#635B4E]"
+              className="rounded-full border border-line-warm bg-inset-warm px-2 py-0.5 font-serif-th text-xs text-muted"
             >
               {kw}
             </span>
@@ -94,7 +94,7 @@ export function DailyCardStrip() {
         </div>
       </div>
 
-      <span className="hidden shrink-0 font-serif-th text-[13px] font-semibold text-[#8F5C1A] group-hover:underline sm:inline">
+      <span className="hidden shrink-0 font-serif-th text-[13px] font-semibold text-gold-ink group-hover:underline sm:inline">
         {isEnglish ? "Read Full Archetype →" : "อ่านความหมายเต็ม →"}
       </span>
     </Link>

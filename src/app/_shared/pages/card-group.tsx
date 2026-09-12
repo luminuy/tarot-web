@@ -55,7 +55,7 @@ export function CardGroupBody({ groupId }: { groupId: GroupId; locale: Locale })
   const group = CARD_GROUPS[groupId];
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
       <div className="max-w-6xl mx-auto relative z-10">
         <CardGroupView groupInfo={group} cards={cardsInGroup(groupId)} />
       </div>

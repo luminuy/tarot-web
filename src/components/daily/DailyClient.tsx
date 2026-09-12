@@ -176,10 +176,10 @@ export function DailyClient() {
             {/* Chamber Selection */}
             <div className="space-y-3">
               <div className="space-y-1">
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Step 1: Choose Your Daily Chamber" : "ขั้นที่ 1: เลือกวิหารเจตจำนงของวัน"}
                 </span>
-                <h2 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F]">
+                <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink">
                   {isEnglish ? "Select the energy you wish to illuminate today" : "เลือกมิติพลังงานที่ต้องการเปิดรับสารนำทาง"}
                 </h2>
               </div>
@@ -197,20 +197,20 @@ export function DailyClient() {
                       }}
                       className={`group text-left p-4 sm:p-4.5 rounded-2xl border transition duration-200 cursor-pointer relative flex flex-col justify-between ${
                         isSelected
-                          ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-raised"
-                          : "altar-card-porcelain hover:border-[#A58A5C]/60 hover:shadow-xs"
+                          ? "altar-panel-active ring-1 ring-gold shadow-raised"
+                          : "altar-card-porcelain hover:border-gold/60 hover:shadow-xs"
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="text-[11px] font-serif-th font-semibold px-2.5 py-0.5 rounded-full border bg-[#FFFFFF] border-[#D5CEC2] text-[#8F5C1A] shadow-2xs">
+                          <span className="text-[11px] font-serif-th font-semibold px-2.5 py-0.5 rounded-full border bg-surface border-line text-gold-ink shadow-2xs">
                             {isEnglish ? chamber.elementEn : chamber.elementTh}
                           </span>
                           <span
                             className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors ${
                               isSelected
-                                ? "border-[#8F5C1A] bg-[#8F5C1A]"
-                                : "border-[#D5CEC2] bg-transparent"
+                                ? "border-gold-ink bg-gold-ink"
+                                : "border-line bg-transparent"
                             }`}
                           >
                             {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -220,8 +220,8 @@ export function DailyClient() {
                         <div className="flex items-start gap-3">
                           {/* ภาพหน้าไพ่ 1909 Rider-Waite ประจำวิหาร (กฎเหล็กข้อ 8 — ต้องผ่าน <CardImage /> พร้อม sizes) */}
                           <div
-                            className={`shrink-0 w-12 h-18 rounded-lg overflow-hidden border-2 bg-[#F3EDE2] shadow-sm transition duration-300 group-hover:scale-105 ${
-                              isSelected ? "border-[#8F5C1A]" : "border-[#D9C8AC]"
+                            className={`shrink-0 w-12 h-18 rounded-lg overflow-hidden border-2 bg-inset-warm shadow-sm transition duration-300 group-hover:scale-105 ${
+                              isSelected ? "border-gold-ink" : "border-line-warm"
                             }`}
                           >
                             <CardImage
@@ -236,13 +236,13 @@ export function DailyClient() {
                           </div>
 
                           <div className="min-w-0">
-                            <h3 className="font-serif-th font-bold text-sm sm:text-base text-[#29261F]">
+                            <h3 className="font-serif-th font-bold text-sm sm:text-base text-ink">
                               {isEnglish ? chamber.titleEn : chamber.titleTh}
                             </h3>
-                            <span className="block text-[11px] font-mono text-[#8F5C1A] font-semibold mt-0.5">
+                            <span className="block text-[11px] font-mono text-gold-ink font-semibold mt-0.5">
                               {chamber.cardNameEn}
                             </span>
-                            <p className="text-xs font-sans text-[#635B4E] mt-1.5 leading-relaxed line-clamp-2">
+                            <p className="text-xs font-sans text-muted mt-1.5 leading-relaxed line-clamp-2">
                               {isEnglish ? chamber.descEn : chamber.descTh}
                             </p>
                           </div>
@@ -258,7 +258,7 @@ export function DailyClient() {
             <div className="space-y-2">
               <label
                 htmlFor="daily-intention"
-                className="block text-xs sm:text-sm font-serif-th font-semibold text-[#29261F]"
+                className="block text-xs sm:text-sm font-serif-th font-semibold text-ink"
               >
                 {isEnglish
                   ? "Set Your Daily Intention or Focus (Optional)"
@@ -275,18 +275,18 @@ export function DailyClient() {
                     ? "e.g. Guidance on today's presentation, emotional calm, peace..."
                     : "เช่น สิ่งที่ควรระวังในที่ทำงานวันนี้, แนวทางรับมือเรื่องคน, กำลังใจ..."
                 }
-                className="w-full rounded-xl border border-[#D5CEC2] bg-[#FAF7F2] px-4 py-3 text-xs sm:text-sm font-sans text-[#29261F] placeholder-[#635B4E]/60 focus:border-[#A58A5C] focus:outline-hidden focus:ring-1 focus:ring-[#A58A5C] transition-colors"
+                className="w-full rounded-xl border border-line bg-surface-warm px-4 py-3 text-xs sm:text-sm font-sans text-ink placeholder-muted/60 focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
               />
             </div>
           </div>
         }
         renderReading={(card) => (
           <div className="space-y-6">
-            <div className="border-b border-[#D5CEC2] pb-3 text-center sm:text-left">
-              <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+            <div className="border-b border-line pb-3 text-center sm:text-left">
+              <span className="text-xs font-serif-th font-semibold text-gold-ink">
                 {isEnglish ? "Daily Oracle Analysis" : "ถอดรหัสสารทำนาย 5 มิติประจำวัน"}
               </span>
-              <h3 className="text-lg sm:text-xl font-serif-th font-bold text-[#29261F]">
+              <h3 className="text-lg sm:text-xl font-serif-th font-bold text-ink">
                 {isEnglish ? "The 5 Pillars of Today" : "แสงสว่างนำทาง 5 มิติ"}
               </h3>
             </div>
@@ -294,65 +294,65 @@ export function DailyClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Pillar 1: General Energy */}
               <div className="altar-card-porcelain rounded-xl p-5 space-y-2 md:col-span-2">
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Core Energy" : "พลังงานหลักวันนี้"}
                 </span>
-                <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                <h4 className="text-base font-serif-th font-bold text-ink">
                   {isEnglish ? "Atmosphere of the Day" : "พลังงานหลักแห่งรุ่งอรุณ"}
                 </h4>
-                <p className="text-sm font-sans text-[#29261F] leading-relaxed">
+                <p className="text-sm font-sans text-ink leading-relaxed">
                   {card.meanings.general.upright}
                 </p>
               </div>
 
               {/* Pillar 2: Career */}
               <div className="altar-card-porcelain rounded-xl p-5 space-y-2">
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Career & Purpose" : "การงานและภารกิจ"}
                 </span>
-                <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                <h4 className="text-base font-serif-th font-bold text-ink">
                   {isEnglish ? "Work & Decisions" : "การงาน การตัดสินใจ และความก้าวหน้า"}
                 </h4>
-                <p className="text-sm font-sans text-[#29261F] leading-relaxed">
+                <p className="text-sm font-sans text-ink leading-relaxed">
                   {card.meanings.work.upright}
                 </p>
               </div>
 
               {/* Pillar 3: Money */}
               <div className="altar-card-porcelain rounded-xl p-5 space-y-2">
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Wealth & Finance" : "การเงินและโชคลาภ"}
                 </span>
-                <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                <h4 className="text-base font-serif-th font-bold text-ink">
                   {isEnglish ? "Financial Flow" : "การเงิน สภาพคล่อง และโอกาส"}
                 </h4>
-                <p className="text-sm font-sans text-[#29261F] leading-relaxed">
+                <p className="text-sm font-sans text-ink leading-relaxed">
                   {card.meanings.money.upright}
                 </p>
               </div>
 
               {/* Pillar 4: Love */}
               <div className="altar-card-porcelain rounded-xl p-5 space-y-2">
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Love & Relations" : "ความรักและสัมพันธภาพ"}
                 </span>
-                <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                <h4 className="text-base font-serif-th font-bold text-ink">
                   {isEnglish ? "Heartspace & Bonds" : "ความสัมพันธ์และคนใกล้ชิด"}
                 </h4>
-                <p className="text-sm font-sans text-[#29261F] leading-relaxed">
+                <p className="text-sm font-sans text-ink leading-relaxed">
                   {card.meanings.love.upright}
                 </p>
               </div>
 
               {/* Pillar 5: Mindful Reflection */}
               <div className="altar-card-porcelain rounded-xl p-5 space-y-2">
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Mindful Reflection" : "ข้อคิดเตือนใจ"}
                 </span>
-                <h4 className="text-base font-serif-th font-bold text-[#29261F]">
+                <h4 className="text-base font-serif-th font-bold text-ink">
                   {isEnglish ? "Wisdom & Mindfulness" : "สติสัมปชัญญะและสิ่งพึงระวัง"}
                 </h4>
-                <p className="text-sm font-sans text-[#29261F] leading-relaxed">
+                <p className="text-sm font-sans text-ink leading-relaxed">
                   {card.meanings.self.upright}
                 </p>
               </div>
@@ -361,7 +361,7 @@ export function DailyClient() {
         )}
         recommendations={
           <div className="space-y-4">
-            <h3 className="text-base font-serif-th font-bold text-[#29261F] text-center sm:text-left">
+            <h3 className="text-base font-serif-th font-bold text-ink text-center sm:text-left">
               {isEnglish ? "Recommended Sacred Readings" : "ผังพยากรณ์ที่แนะนำเพิ่มเติม"}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -369,13 +369,13 @@ export function DailyClient() {
                 href="/love/1-card"
                 className="altar-card-porcelain rounded-xl p-4 block text-left transition"
               >
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Love Tarot" : "ความรัก"}
                 </span>
-                <h4 className="text-sm font-serif-th font-bold text-[#29261F] mt-1">
+                <h4 className="text-sm font-serif-th font-bold text-ink mt-1">
                   {isEnglish ? "1-Card Love Oracle" : "ดูดวงความรัก 1 ใบ"}
                 </h4>
-                <p className="text-xs text-[#635B4E] mt-1">
+                <p className="text-xs text-muted mt-1">
                   {isEnglish
                     ? "Direct insight tailored to your relationship status"
                     : "เช็กสถานะหัวใจ คนโสด คนคุย หรือมีคู่"}
@@ -386,13 +386,13 @@ export function DailyClient() {
                 href="/cards/birth-card"
                 className="altar-card-porcelain rounded-xl p-4 block text-left transition"
               >
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Numerology" : "เลขศาสตร์"}
                 </span>
-                <h4 className="text-sm font-serif-th font-bold text-[#29261F] mt-1">
+                <h4 className="text-sm font-serif-th font-bold text-ink mt-1">
                   {isEnglish ? "Birth Card Calculator" : "คำนวณไพ่ประจำตัว"}
                 </h4>
-                <p className="text-xs text-[#635B4E] mt-1">
+                <p className="text-xs text-muted mt-1">
                   {isEnglish
                     ? "Discover your personality and soul archetypes"
                     : "ค้นพบตัวตนและพรสวรรค์ติดตัวจากวันเกิด"}
@@ -403,13 +403,13 @@ export function DailyClient() {
                 href="/spreads"
                 className="altar-card-porcelain rounded-xl p-4 block text-left transition"
               >
-                <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                <span className="text-xs font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Spreads" : "ผังพยากรณ์"}
                 </span>
-                <h4 className="text-sm font-serif-th font-bold text-[#29261F] mt-1">
+                <h4 className="text-sm font-serif-th font-bold text-ink mt-1">
                   {isEnglish ? "All 25 Tarot Spreads" : "ผังพยากรณ์ 25 แบบ"}
                 </h4>
-                <p className="text-xs text-[#635B4E] mt-1">
+                <p className="text-xs text-muted mt-1">
                   {isEnglish
                     ? "Golden Ratio spreads for complex life dilemmas"
                     : "เปิดไพ่เชิงลึกด้วยผังสัดส่วนทองคำครบทุกมิติ"}

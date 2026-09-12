@@ -51,7 +51,7 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
       role="group"
       aria-label="Language selector / สลับภาษา"
       aria-busy={isSwitchingLocale}
-      className={`inline-flex items-center rounded-full bg-[#F3F0EA] border border-[#D5CEC2] p-0.5 select-none shadow-xs transition-opacity duration-150 ${
+      className={`inline-flex items-center rounded-full bg-canvas border border-line p-0.5 select-none shadow-xs transition-opacity duration-150 ${
         isSwitchingLocale ? "opacity-70" : ""
       } ${className}`}
     >
@@ -62,8 +62,8 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
         aria-label="เปลี่ยนเป็นภาษาไทย"
         className={`tap-overlay-y px-2 py-1 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer ${
           shownLocale === "th"
-            ? "bg-[#FFFFFF] text-[#29261F] shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-[#D5CEC2]"
-            : "text-[#635B4E] hover:text-[#29261F] border border-transparent"
+            ? "bg-surface text-ink shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-line"
+            : "text-muted hover:text-ink border border-transparent"
         }`}
       >
         TH
@@ -76,8 +76,8 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
         aria-label="Switch to American English"
         className={`tap-overlay-y px-2 py-1 rounded-full text-xs font-mono font-bold transition duration-200 cursor-pointer ${
           shownLocale === "en"
-            ? "bg-[#FFFFFF] text-[#29261F] shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-[#D5CEC2]"
-            : "text-[#635B4E] hover:text-[#29261F] border border-transparent"
+            ? "bg-surface text-ink shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-line"
+            : "text-muted hover:text-ink border border-transparent"
         }`}
       >
         EN

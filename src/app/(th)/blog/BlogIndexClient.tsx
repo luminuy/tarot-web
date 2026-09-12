@@ -110,17 +110,17 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
     <div className="space-y-10">
       {/* Dynamic Bilingual Hero Header */}
       <header className="text-center space-y-4 pt-2">
-        <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#8F5C1A] uppercase font-serif-th">
+        <p className="text-xs sm:text-sm font-semibold tracking-wider text-gold-ink uppercase font-serif-th">
           {isEnglish
             ? "SEERTAROT WISDOM CODEX & ESOTERIC ESSAYS"
             : "คลังความรู้และคู่มือศาสตร์พยากรณ์"}
         </p>
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-[#29261F] tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight">
           {isEnglish
             ? "Tarot Wisdom Codex & Divination Essays"
             : "คัมภีร์บทความดูดวงไพ่ยิปซี ทาโรต์ 1909"}
         </h1>
-        <p className="text-xs sm:text-sm md:text-base text-[#635B4E] max-w-2xl mx-auto leading-relaxed font-serif-th">
+        <p className="text-xs sm:text-sm md:text-base text-muted max-w-2xl mx-auto leading-relaxed font-serif-th">
           {isEnglish
             ? "Explore depth psychology, Jungian archetypes, archetypal symbolism, and master guides for love, career, and 25 sacred spreads rooted in the authentic 1909 Rider-Waite lineage."
             : "เจาะลึกศาสตร์ไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite จิตวิทยาเชิงลึก ปรัชญา คาร์ล ยุง และคู่มือการอ่านไพ่ความรัก การงาน และผังพยากรณ์ทั้ง 25 แบบ โดยวิหาร SeerTarot"}
@@ -141,13 +141,13 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 ? "Search articles, card meanings, love, career, or spreads..."
                 : "ค้นหาบทความ ความหมายไพ่ ความรัก การงาน หรือผังพยากรณ์..."
             }
-            className="w-full bg-[#FFFFFF] border border-[#D5CEC2] rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-[#29261F] placeholder:text-[#635B4E]/70 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A] shadow-[0_2px_8px_rgba(41,38,31,0.03)] transition font-serif-th"
+            className="w-full bg-surface border border-line rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink shadow-[0_2px_8px_rgba(41,38,31,0.03)] transition font-serif-th"
           />
-          <SearchTabIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8F5C1A]" />
+          <SearchTabIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-ink" />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#635B4E] hover:text-[#8F5C1A] cursor-pointer font-serif-th"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-gold-ink cursor-pointer font-serif-th"
             >
               {isEnglish ? "✕ Clear" : "✕ ล้าง"}
             </button>
@@ -167,8 +167,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 }}
                 className={`rounded-full px-4 py-1.5 text-xs font-serif-th font-semibold transition cursor-pointer flex items-center gap-1.5 ${
                   isSelected
-                    ? "bg-[#29261F] text-[#F3F0EA] border border-[#29261F] shadow-xs"
-                    : "bg-[#FFFFFF] border border-[#D5CEC2] text-[#635B4E] hover:border-[#8F5C1A] hover:text-[#8F5C1A] shadow-2xs"
+                    ? "bg-ink text-canvas border border-ink shadow-xs"
+                    : "bg-surface border border-line text-muted hover:border-gold-ink hover:text-gold-ink shadow-2xs"
                 }`}
               >
                 
@@ -198,13 +198,13 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
           : featured.readTime;
 
         return (
-          <div className="rounded-2xl border border-[#D9C8AC] bg-gradient-to-br from-[#FFFFFF] via-[#FAF7F2] to-[#F5EFE4] p-6 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(41,38,31,0.05)] relative overflow-hidden group hover:border-[#8F5C1A] transition duration-300">
+          <div className="rounded-2xl border border-line-warm bg-gradient-to-br from-surface via-surface-warm to-[#F5EFE4] p-6 sm:p-8 lg:p-10 shadow-[0_4px_20px_rgba(41,38,31,0.05)] relative overflow-hidden group hover:border-gold-ink transition duration-300">
             {/* Subtle Ambient Gold Hairline */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-[#8F5C1A]/40 to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-gold-ink/40 to-transparent pointer-events-none" />
 
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 relative z-10">
               {/* 1909 Rider-Waite Card Art Showcase */}
-              <div className="w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-[#D9C8AC] shadow-md group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2] flex-shrink-0 relative">
+              <div className="w-24 h-36 sm:w-28 sm:h-42 rounded-xl overflow-hidden border-2 border-line-warm shadow-md group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm flex-shrink-0 relative">
                 <CardImage
                   image={featArt.image}
                   alt=""
@@ -216,30 +216,30 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               {/* Content */}
               <div className="space-y-3.5 flex-1 text-center sm:text-left">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[11px] font-serif-th font-bold text-[#8F5C1A] shadow-2xs">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-surface border border-line-warm text-[11px] font-serif-th font-bold text-gold-ink shadow-2xs">
                     {isEnglish ? "Featured Codex of the Week" : "บทความแนะนำประจำสัปดาห์"}
                   </span>
-                  <span className="text-[11px] font-serif-th text-[#635B4E] px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/60">
+                  <span className="text-[11px] font-serif-th text-muted px-2.5 py-0.5 rounded-full bg-surface border border-line-warm/60">
                     {featCat}
                   </span>
                 </div>
 
-                <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug">
+                <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug">
                   <Link href={`/blog/${featured.slug}`}>{featTitle}</Link>
                 </h2>
 
-                <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed line-clamp-3">
+                <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed line-clamp-3">
                   {featDesc}
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2">
-                  <span className="text-xs text-[#635B4E] font-serif-th flex items-center gap-1.5">
+                  <span className="text-xs text-muted font-serif-th flex items-center gap-1.5">
                     
                     {isEnglish ? `Reading time ${readTime}` : `เวลาอ่าน ${readTime}`}
                   </span>
                   <Link
                     href={`/blog/${featured.slug}`}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#29261F] hover:bg-[#8F5C1A] text-[#F3F0EA] font-semibold text-xs transition font-serif-th shadow-sm group/btn"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-ink hover:bg-gold-ink text-canvas font-semibold text-xs transition font-serif-th shadow-sm group/btn"
                   >
                     <span>{isEnglish ? "Read Full Codex" : "อ่านคัมภีร์ฉบับเต็ม"}</span>
                     <span className="transition-transform group-hover/btn:translate-x-0.5">→</span>
@@ -253,7 +253,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
       {/* Articles Grid */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between text-xs text-[#635B4E] px-1 font-serif-th">
+        <div className="flex items-center justify-between text-xs text-muted px-1 font-serif-th">
           <span className="flex items-center gap-1.5">
             
             {isEnglish ? `Found ${filtered.length} articles` : `พบบทความ ${filtered.length} เรื่อง`}
@@ -261,7 +261,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
           {selectedCat !== "all" && (
             <button
               onClick={() => setSelectedCat("all")}
-              className="text-[#8F5C1A] hover:underline cursor-pointer font-bold"
+              className="text-gold-ink hover:underline cursor-pointer font-bold"
             >
               {isEnglish ? "Show All" : "แสดงทั้งหมด"}
             </button>
@@ -269,9 +269,9 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="rounded-2xl border border-[#D9C8AC] bg-[#FFFFFF] p-12 text-center space-y-3 shadow-xs">
+          <div className="rounded-2xl border border-line-warm bg-surface p-12 text-center space-y-3 shadow-xs">
             
-            <p className="font-serif-th text-sm text-[#29261F]">
+            <p className="font-serif-th text-sm text-ink">
               {isEnglish
                 ? `No articles found matching "${searchQuery}"`
                 : `ไม่พบบทความที่ตรงกับคำค้นหา “${searchQuery}”`}
@@ -281,7 +281,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 setSearchQuery("");
                 setSelectedCat("all");
               }}
-              className="text-xs text-[#8F5C1A] underline hover:text-[#29261F] cursor-pointer font-serif-th"
+              className="text-xs text-gold-ink underline hover:text-ink cursor-pointer font-serif-th"
             >
               {isEnglish ? "Clear all filters" : "ล้างตัวกรองทั้งหมด"}
             </button>
@@ -300,32 +300,32 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               return (
                 <article
                   key={article.slug}
-                  className="rounded-2xl border border-[#D9C8AC] bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-[#8F5C1A] transition duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
+                  className="rounded-2xl border border-line-warm bg-gradient-to-b from-surface via-surface-warm to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-gold-ink transition duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
                 >
                   <div className="space-y-3.5">
                     {/* Header: Category & Read Time */}
-                    <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#D9C8AC]/40">
-                      <span className="text-[11px] font-serif-th font-bold text-[#8F5C1A] px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/70 shadow-2xs">
+                    <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-line-warm/40">
+                      <span className="text-[11px] font-serif-th font-bold text-gold-ink px-2.5 py-0.5 rounded-full bg-surface border border-line-warm/70 shadow-2xs">
                         {artCat}
                       </span>
-                      <span className="text-xs font-serif-th text-[#635B4E] flex items-center gap-1">
-                        <span className="text-[#8F5C1A]">•</span> {readTime}
+                      <span className="text-xs font-serif-th text-muted flex items-center gap-1">
+                        <span className="text-gold-ink">•</span> {readTime}
                       </span>
                     </div>
 
                     {/* Middle: Content with 1909 Card Companion */}
                     <div className="flex items-start gap-4">
                       <div className="space-y-2 flex-1 min-w-0">
-                        <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug line-clamp-2">
+                        <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug line-clamp-2">
                           <Link href={`/blog/${article.slug}`} prefetch={false}>{artTitle}</Link>
                         </h3>
-                        <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed line-clamp-3">
+                        <p className="text-xs text-muted font-serif-th leading-relaxed line-clamp-3">
                           {artDesc}
                         </p>
                       </div>
 
                       {/* 1909 Card Miniature */}
-                      <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-xs group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2] flex-shrink-0 relative">
+                      <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-line-warm shadow-xs group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm flex-shrink-0 relative">
                         <CardImage
                           image={cardArt.image}
                           alt=""
@@ -337,7 +337,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   </div>
 
                   {/* Footer: Tags & Read More */}
-                  <div className="pt-3 border-t border-[#D9C8AC]/30 flex items-center justify-between gap-2 text-xs">
+                  <div className="pt-3 border-t border-line-warm/30 flex items-center justify-between gap-2 text-xs">
                     {/* ป้ายคีย์เวิร์ดมีเฉพาะภาษาไทย (`keywords` ไม่มีคู่ EN) — ซ่อนบนหน้า `/en/blog`
                         ไม่งั้นจะมีข้อความไทยหลุดไปเป็น 11% ของทั้งหน้าในฉบับภาษาอังกฤษ */}
                     <div className="flex flex-wrap gap-1.5">
@@ -345,7 +345,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                         article.keywords.slice(0, 2).map((kw) => (
                           <span
                             key={kw}
-                            className="text-[11px] text-[#635B4E] font-serif-th bg-[#FFFFFF] px-2.5 py-0.5 rounded-full border border-[#D9C8AC]/60"
+                            className="text-[11px] text-muted font-serif-th bg-surface px-2.5 py-0.5 rounded-full border border-line-warm/60"
                           >
                             #{kw}
                           </span>
@@ -354,7 +354,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                     <Link
                       href={`/blog/${article.slug}`}
                       prefetch={false}
-                      className="inline-flex items-center gap-1 text-xs text-[#29261F] group-hover:text-[#8F5C1A] group-hover:translate-x-0.5 transition font-serif-th font-bold flex-shrink-0"
+                      className="inline-flex items-center gap-1 text-xs text-ink group-hover:text-gold-ink group-hover:translate-x-0.5 transition font-serif-th font-bold flex-shrink-0"
                     >
                       <span>{isEnglish ? "Read Codex" : "อ่านต่อ"}</span>
                       <span>→</span>

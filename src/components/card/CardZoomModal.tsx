@@ -72,14 +72,14 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           exit={{ opacity: 0, y: 16 }}
           ref={panelRef}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-sm max-h-[calc(100svh-2rem)] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] shadow-overlay flex flex-col relative cursor-default overflow-hidden"
+          className="w-full max-w-sm max-h-[calc(100svh-2rem)] rounded-lg bg-surface border-2 border-line-warm shadow-overlay flex flex-col relative cursor-default overflow-hidden"
         >
           {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
             aria-label={isEnglish ? "Close card zoom view" : "ปิดหน้าต่างซูมไพ่"}
-            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] hover:bg-[#8F5C1A] hover:text-[#FFFFFF] text-sm flex items-center justify-center transition cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-inset-warm border border-line-warm text-ink-deep hover:bg-gold-ink hover:text-surface text-sm flex items-center justify-center transition cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
             ✕
           </button>
@@ -89,7 +89,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
 
           {/* Position Name Tag */}
           {positionName && (
-            <span className="text-xs text-[#FFFFFF] font-serif-th font-bold bg-[#8F5C1A] px-3 py-1 rounded-full ">
+            <span className="text-xs text-surface font-serif-th font-bold bg-gold-ink px-3 py-1 rounded-full ">
               {positionName}
             </span>
           )}
@@ -111,17 +111,17 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
             <h3 className="font-serif-th text-lg sm:text-xl font-bold font-mystic-gold">
               {isEnglish ? (card.nameEn || card.nameTh) : card.nameTh}
             </h3>
-            <p className="text-xs text-[#635B4E] font-mono">
+            <p className="text-xs text-muted font-mono">
               {isEnglish
                 ? (isReversed ? "Reversed" : "Upright")
                 : `${card.nameEn} · ${isReversed ? "กลับหัว (Reversed)" : "หัวตั้ง (Upright)"}`}
             </p>
 
             <div className="flex items-center justify-center gap-2 pt-2 flex-wrap text-[13px]">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[#8F5C1A] font-semibold">
+              <span className="px-2.5 py-0.5 rounded-full bg-surface border border-line-warm text-gold-ink font-semibold">
                 {isEnglish ? `Element: ${elementEnMap[card.element] || card.element}` : `ธาตุ: ${card.element}`}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A]">
+              <span className="px-2.5 py-0.5 rounded-full bg-surface border border-line-warm text-ink-deep">
                 {isEnglish ? (card.astrologyEn || card.astrology) : card.astrology}
               </span>
             </div>
@@ -131,7 +131,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           <button
             type="button"
             onClick={() => setFlipped(!flipped)}
-            className="w-full py-2.5 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] text-xs font-serif-th font-semibold text-[#2E211A] hover:bg-[#F3EDE2] transition cursor-pointer "
+            className="w-full py-2.5 rounded-lg bg-surface border border-line-warm text-xs font-serif-th font-semibold text-ink-deep hover:bg-inset-warm transition cursor-pointer "
           >
             {isEnglish ? "Flip Card / View Back" : "พลิกดูหน้าไพ่ / หลังไพ่"}
           </button>

@@ -54,8 +54,8 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
     <div
       className={`relative rounded-lg overflow-hidden border transition duration-300 flex-shrink-0 select-none ${className} ${
         highlight
-          ? "ring-1.5 ring-[#8F5C1A] ring-offset-1 ring-offset-[#FFFFFF] z-10 scale-[1.04]"
-          : "hover:border-[#8F5C1A]"
+          ? "ring-1.5 ring-gold-ink ring-offset-1 ring-offset-[#FFFFFF] z-10 scale-[1.04]"
+          : "hover:border-gold-ink"
       }`}
       style={{
         borderColor: highlight ? "#8F5C1A" : borderColor,
@@ -80,7 +80,7 @@ export const MiniRwsCard: React.FC<MiniCardProps> = ({
 // ============================================================================
 
 export const HighPriestessIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-line-warm ${className}`}>
     <CardImage
       image="major-02.jpg"
       alt="The High Priestess"
@@ -91,7 +91,7 @@ export const HighPriestessIllustration: React.FC<{ className?: string }> = ({ cl
 );
 
 export const JusticeIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-line-warm ${className}`}>
     <CardImage
       image="major-11.jpg"
       alt="Justice"
@@ -102,7 +102,7 @@ export const JusticeIllustration: React.FC<{ className?: string }> = ({ classNam
 );
 
 export const HermitIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-line-warm ${className}`}>
     <CardImage
       image="major-09.jpg"
       alt="The Hermit"
@@ -113,7 +113,7 @@ export const HermitIllustration: React.FC<{ className?: string }> = ({ className
 );
 
 export const TheStarIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-line-warm ${className}`}>
     <CardImage
       image="major-17.jpg"
       alt="The Star"
@@ -124,7 +124,7 @@ export const TheStarIllustration: React.FC<{ className?: string }> = ({ classNam
 );
 
 export const MagicianIllustration: React.FC<{ className?: string }> = ({ className = "w-20 h-32 mx-auto" }) => (
-  <div className={`relative rounded-lg overflow-hidden border-2 border-[#D9C8AC] ${className}`}>
+  <div className={`relative rounded-lg overflow-hidden border-2 border-line-warm ${className}`}>
     <CardImage
       image="major-01.jpg"
       alt="The Magician"
@@ -194,7 +194,7 @@ export const YesNoSpreadArt: React.FC<{ className?: string }> = ({ className = "
 // 4. อดีต ปัจจุบัน อนาคต (3 ใบ)
 export const ThreeCardSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`flex items-center justify-center gap-2 relative ${className}`}>
-    <div className="absolute w-36 h-0.5 border-b border-dashed border-[#D9C8AC]/40 top-1/2 -translate-y-1/2 z-0" />
+    <div className="absolute w-36 h-0.5 border-b border-dashed border-line-warm/40 top-1/2 -translate-y-1/2 z-0" />
     <MiniRwsCard src="/cards/major-09.jpg" className="w-11 h-[75px] sm:w-12 sm:h-[82px] z-10 opacity-90" />
     <MiniRwsCard
       src="/cards/major-17.jpg"
@@ -271,11 +271,11 @@ export const DecisionSpreadArt: React.FC<{ className?: string }> = ({ className 
       highlight
     />
     <div className="flex items-center justify-center gap-2">
-      <div className="flex gap-1 p-0.5 rounded-lg border border-[#D9C8AC]/30 bg-[#F3EDE2]/5">
+      <div className="flex gap-1 p-0.5 rounded-lg border border-line-warm/30 bg-inset-warm/5">
         <MiniRwsCard src="/cards/swords-02.jpg" className="w-8 h-[54px]" />
         <MiniRwsCard src="/cards/wands-07.jpg" className="w-8 h-[54px]" />
       </div>
-      <div className="flex gap-1 p-0.5 rounded-lg border border-[#D9C8AC]/30 bg-[#F3EDE2]/5">
+      <div className="flex gap-1 p-0.5 rounded-lg border border-line-warm/30 bg-inset-warm/5">
         <MiniRwsCard src="/cards/pentacles-02.jpg" className="w-8 h-[54px]" />
         <MiniRwsCard src="/cards/cups-09.jpg" className="w-8 h-[54px]" />
       </div>
@@ -321,7 +321,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
       <div className="relative" style={{ width: CC_BOX_W, height: CC_CROSS_H }}>
         {/* แสงเรืองใต้ใจกลางกางเขน (อยู่หลังไพ่เสมอ ไม่บังหน้าไพ่) */}
         <div
-          className="absolute rounded-full bg-[#8F5C1A]/10 blur-2xl pointer-events-none"
+          className="absolute rounded-full bg-gold-ink/10 blur-2xl pointer-events-none"
           style={{
             left: CC_COL[1] + CC.cardW / 2 - 45,
             top: CC_ROW[1] + CC.cardH / 2 - 45,
@@ -334,7 +334,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
         {arms.map((arm) => (
           <div
             key={arm.image}
-            className="absolute rounded border border-[#D9C8AC]/55 overflow-hidden opacity-95"
+            className="absolute rounded border border-line-warm/55 overflow-hidden opacity-95"
             style={{ left: arm.x, top: arm.y, width: CC.cardW, height: CC.cardH }}
           >
             <CardImage
@@ -348,7 +348,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
 
         {/* ใบที่ 1 สถานการณ์ปัจจุบัน (ใจกลาง) */}
         <div
-          className="absolute z-10 rounded border-2 border-[#D9C8AC] overflow-hidden "
+          className="absolute z-10 rounded border-2 border-line-warm overflow-hidden "
           style={{ left: CC_COL[1], top: CC_ROW[1], width: CC.cardW, height: CC.cardH }}
         >
           <CardImage
@@ -361,7 +361,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
 
         {/* ใบที่ 2 สิ่งที่ขวางอยู่ (วางขวางทับใบกลางตามธรรมเนียมเซลติกครอส) */}
         <div
-          className="absolute z-20 rounded border border-[#D9C8AC]/90 overflow-hidden "
+          className="absolute z-20 rounded border border-line-warm/90 overflow-hidden "
           style={{
             left: CC_COL[1],
             top: CC_ROW[1],
@@ -383,7 +383,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
           <div
             key={image}
             className={`absolute rounded overflow-hidden ${
-              idx === 0 ? "border border-[#D9C8AC]/80" : "border border-[#D9C8AC]/50 opacity-90"
+              idx === 0 ? "border border-line-warm/80" : "border border-line-warm/50 opacity-90"
             }`}
             style={{
               left: CC_STAFF_X,
@@ -403,7 +403,7 @@ export const CelticCrossSpreadArt: React.FC<{ className?: string }> = ({ classNa
 // 10. ผัง 12 เดือน / วงล้อจักรราศี (12 ใบ)
 export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`relative w-28 h-28 mx-auto flex items-center justify-center ${className}`}>
-    <div className="w-6 h-6 rounded-full border-1.5 border-[#D9C8AC] bg-black/90 flex items-center justify-center text-[12px] text-[#8F5C1A] z-10 font-bold">
+    <div className="w-6 h-6 rounded-full border-1.5 border-line-warm bg-black/90 flex items-center justify-center text-[12px] text-gold-ink z-10 font-bold">
       ·
     </div>
     {Array.from({ length: 12 }).map((_, i) => {
@@ -417,7 +417,7 @@ export const TwelveMonthsSpreadArt: React.FC<{ className?: string }> = ({ classN
       return (
         <div
           key={i}
-          className="absolute w-5 h-[34px] rounded border border-[#D9C8AC]/70 overflow-hidden shadow"
+          className="absolute w-5 h-[34px] rounded border border-line-warm/70 overflow-hidden shadow"
           style={{
             transform: `translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
           }}
@@ -567,7 +567,7 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
       {[{ card: "01" }, { card: "04" }, { card: "07" }, { card: "10" }].map((item, idx) => (
         <div
           key={idx}
-          className="w-8.5 h-[58px] rounded-lg border border-[#D9C8AC]/40 overflow-hidden shadow opacity-90 hover:opacity-100 flex-shrink-0"
+          className="w-8.5 h-[58px] rounded-lg border border-line-warm/40 overflow-hidden shadow opacity-90 hover:opacity-100 flex-shrink-0"
         >
           <CardImage
             image={`major-${item.card}.jpg`}
@@ -584,7 +584,7 @@ export const WeeklySpreadArt: React.FC<{ className?: string }> = ({ className = 
         <div
           key={idx}
           className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 transition ${
-            item.highlight ? "border-2 border-[#D9C8AC] scale-105 z-10" : "border border-[#D9C8AC]/40 shadow opacity-90"
+            item.highlight ? "border-2 border-line-warm scale-105 z-10" : "border border-line-warm/40 shadow opacity-90"
           }`}
         >
           <CardImage
@@ -633,7 +633,7 @@ export const ChakraSpreadArt: React.FC<{ className?: string }> = ({ className = 
           <div
             key={chk.num}
             className={`w-8.5 h-[58px] rounded-lg overflow-hidden flex-shrink-0 border transition ${
-              chk.highlight ? "border-2 border-[#3A7044] scale-105 z-10" : ""
+              chk.highlight ? "border-2 border-ok scale-105 z-10" : ""
             }`}
             style={{ borderColor: chk.highlight ? "#8F5C1A" : chk.color }}
           >
@@ -893,9 +893,9 @@ export const TarotSpreadNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3
   >
     <rect x="3" y="6" width="6" height="13" rx="1.2" transform="rotate(-10 6 12.5)" />
     <rect x="15" y="6" width="6" height="13" rx="1.2" transform="rotate(10 18 12.5)" />
-    <rect x="8.5" y="3.5" width="7" height="15" rx="1.4" className="fill-[#8F5C1A]/15 stroke-[#8F5C1A]" />
-    <circle cx="12" cy="9.5" r="1.5" className="fill-[#8F5C1A]" />
-    <path d="M12 13v2.5" className="stroke-[#8F5C1A]" />
+    <rect x="8.5" y="3.5" width="7" height="15" rx="1.4" className="fill-gold-ink/15 stroke-gold-ink" />
+    <circle cx="12" cy="9.5" r="1.5" className="fill-gold-ink" />
+    <path d="M12 13v2.5" className="stroke-gold-ink" />
   </svg>
 );
 
@@ -910,7 +910,7 @@ export const TarotDeckNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5
     className={className}
     aria-hidden="true"
   >
-    <rect x="5.5" y="2.5" width="13" height="19" rx="2" className="fill-[#8F5C1A]/10 stroke-[#8F5C1A]" />
+    <rect x="5.5" y="2.5" width="13" height="19" rx="2" className="fill-gold-ink/10 stroke-gold-ink" />
     <rect
       x="7.5"
       y="4.5"
@@ -919,9 +919,9 @@ export const TarotDeckNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5
       rx="1.2"
       strokeWidth={1}
       strokeDasharray="1.5 1.5"
-      className="stroke-[#8F5C1A]/60"
+      className="stroke-gold-ink/60"
     />
-    <path d="M12 7.5L13 11L16.5 12L13 13L12 16.5L11 13L7.5 12L11 11Z" className="fill-[#8F5C1A] stroke-none" />
+    <path d="M12 7.5L13 11L16.5 12L13 13L12 16.5L11 13L7.5 12L11 11Z" className="fill-gold-ink stroke-none" />
   </svg>
 );
 
@@ -938,10 +938,10 @@ export const JournalScrollNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h
   >
     <path
       d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"
-      className="fill-[#8F5C1A]/10 stroke-[#8F5C1A]"
+      className="fill-gold-ink/10 stroke-gold-ink"
     />
-    <path d="M6 6h10M6 10h10M6 14h6" strokeWidth={1.3} className="stroke-[#8F5C1A]/80" />
-    <path d="M16 14l2 2 3-3" strokeWidth={1.5} className="stroke-[#3A7044]" />
+    <path d="M6 6h10M6 10h10M6 14h6" strokeWidth={1.3} className="stroke-gold-ink/80" />
+    <path d="M16 14l2 2 3-3" strokeWidth={1.5} className="stroke-ok" />
   </svg>
 );
 
@@ -956,9 +956,9 @@ export const MarketplaceReaderNavIcon: React.FC<IconProps> = ({ className = "w-3
     className={className}
     aria-hidden="true"
   >
-    <circle cx="12" cy="7" r="4" className="fill-[#8F5C1A]/15 stroke-[#8F5C1A]" />
-    <path d="M5.5 21a6.5 6.5 0 0 1 13 0" className="stroke-[#8F5C1A]" />
-    <path d="M19 8l1.5 1.5L23 7" strokeWidth={1.4} className="stroke-[#8F5C1A]" />
+    <circle cx="12" cy="7" r="4" className="fill-gold-ink/15 stroke-gold-ink" />
+    <path d="M5.5 21a6.5 6.5 0 0 1 13 0" className="stroke-gold-ink" />
+    <path d="M19 8l1.5 1.5L23 7" strokeWidth={1.4} className="stroke-gold-ink" />
   </svg>
 );
 
@@ -973,7 +973,7 @@ export const DailyTarotNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.
     className={className}
     aria-hidden="true"
   >
-    <circle cx="12" cy="12" r="4" className="fill-[#8F5C1A]/15 stroke-[#8F5C1A]" />
+    <circle cx="12" cy="12" r="4" className="fill-gold-ink/15 stroke-gold-ink" />
     <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" />
   </svg>
 );
@@ -991,7 +991,7 @@ export const LoveTarotNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5
   >
     <path
       d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-      className="fill-[#8F5C1A]/15 stroke-[#8F5C1A]"
+      className="fill-gold-ink/15 stroke-gold-ink"
     />
   </svg>
 );
@@ -1007,8 +1007,8 @@ export const BirthCardNavIcon: React.FC<IconProps> = ({ className = "w-3.5 h-3.5
     className={className}
     aria-hidden="true"
   >
-    <circle cx="12" cy="12" r="8" className="fill-[#8F5C1A]/10 stroke-[#8F5C1A]" />
-    <circle cx="12" cy="12" r="3" className="fill-[#8F5C1A]/25 stroke-[#8F5C1A]" />
+    <circle cx="12" cy="12" r="8" className="fill-gold-ink/10 stroke-gold-ink" />
+    <circle cx="12" cy="12" r="3" className="fill-gold-ink/25 stroke-gold-ink" />
     <path d="M12 4v2M12 18v2M4 12h2M18 12h2" strokeWidth={1.4} />
   </svg>
 );

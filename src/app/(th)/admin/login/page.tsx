@@ -49,8 +49,8 @@ export default function AdminLoginPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
-      <div className="altar-panel rounded-3xl border border-[#D5CEC2] bg-white p-7 shadow-xs">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-[#D5CEC2] bg-[#F8F6F2] shadow-xs">
+      <div className="altar-panel rounded-3xl border border-line bg-white p-7 shadow-xs">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-pale shadow-xs">
           <Image
             src="/logo.webp"
             alt="SeerTarot Logo"
@@ -60,8 +60,8 @@ export default function AdminLoginPage() {
             priority
           />
         </div>
-        <h1 className="text-center text-lg font-bold text-[#29261F]">แผงแอดมิน SeerTarot</h1>
-        <p className="mt-1 text-center text-xs text-[#635B4E]">
+        <h1 className="text-center text-lg font-bold text-ink">แผงแอดมิน SeerTarot</h1>
+        <p className="mt-1 text-center text-xs text-muted">
           ใส่รหัสผ่านผู้ดูแลระบบเพื่อเข้าจัดการ
         </p>
 

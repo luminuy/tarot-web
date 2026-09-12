@@ -50,7 +50,7 @@ export function TikTokFloatingButton() {
         {/* Tooltip Pill บน Desktop (จะเลื่อนโผล่มาเมื่อ Hover) */}
         <span
           aria-hidden="true"
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#110E1B] border border-white/15 text-[#F3F0EA] text-xs font-serif-th font-semibold shadow-lg opacity-0 -translate-x-2 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition duration-300 whitespace-nowrap"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#110E1B] border border-white/15 text-canvas text-xs font-serif-th font-semibold shadow-lg opacity-0 -translate-x-2 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition duration-300 whitespace-nowrap"
         >
           
           <span>{isEnglish ? "Follow Seerada" : "ติดตามแม่หมอ"}</span>
