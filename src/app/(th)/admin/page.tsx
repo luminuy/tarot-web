@@ -39,6 +39,10 @@ const MarketingAudience = dynamic(() => import("@/components/admin/MarketingAudi
   ssr: false,
   loading: () => <AdminLoading label="กำลังโหลดระบบข่าวสาร…" />,
 });
+const RedeemCodesManager = dynamic(() => import("@/components/admin/RedeemCodesManager"), {
+  ssr: false,
+  loading: () => <AdminLoading label="กำลังโหลดระบบรหัสแลกสิทธิ์…" />,
+});
 
 function AdminLoading({ label }: { label: string }) {
   return (
@@ -55,6 +59,7 @@ export type TabId =
   | "health"
   | "content"
   | "entitlement"
+  | "redeem"
   | "readers"
   | "marketing";
 
@@ -98,6 +103,11 @@ const NAV_SECTIONS: NavSection[] = [
         id: "entitlement",
         label: "สิทธิ์ & โควตา",
         description: "ควบคุมสวิตช์ระบบสิทธิ์, โควตาเปิดไพ่ฟรี, และโครงสร้างฐานข้อมูล D1",
+      },
+      {
+        id: "redeem",
+        label: "รหัสแลกสิทธิ์",
+        description: "สร้างและควบคุมรหัสของขวัญ กำหนดโควตา วันหมดอายุ และตรวจสอบการแลก",
       },
     ],
   },
@@ -181,6 +191,17 @@ function TabIcon({ id, className = "w-4 h-4" }: { id: TabId; className?: string 
           />
         </svg>
       );
+    case "redeem":
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+          />
+        </svg>
+      );
     case "readers":
       return (
         <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -230,7 +251,7 @@ function AdminContent() {
       setActiveTab("health");
       setHealthSubTab("ai");
     } else if (
-      ["overview", "stats", "health", "content", "readers", "entitlement", "marketing"].includes(
+      ["overview", "stats", "health", "content", "readers", "entitlement", "redeem", "marketing"].includes(
         rawTab,
       )
     ) {
@@ -265,7 +286,7 @@ function AdminContent() {
         resolvedTab = "health";
         setHealthSubTab("ai");
       } else if (
-        ["overview", "stats", "health", "content", "readers", "entitlement", "marketing"].includes(
+        ["overview", "stats", "health", "content", "readers", "entitlement", "redeem", "marketing"].includes(
           tabId,
         )
       ) {
@@ -561,6 +582,8 @@ function AdminContent() {
             {activeTab === "readers" && <ReadersManager />}
 
             {activeTab === "entitlement" && <EntitlementAdmin />}
+
+            {activeTab === "redeem" && <RedeemCodesManager />}
 
             {activeTab === "marketing" && <MarketingAudience />}
           </div>

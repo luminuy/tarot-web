@@ -82,23 +82,26 @@ Local dev: ใส่ `ADMIN_PASSWORD=...` ใน `.env.local`
 - มีผลกับคำอ่านใหม่ภายใน ~60 วินาที (memo cache TTL)
 - consumer ที่เดินสายผ่าน: `gemini.ts`, `claude.ts`, `api/reading/[id]/read`, `api/reading/[id]/chat`
 
-## รหัสแลกสิทธิ์ (แท็บ "สิทธิ์เปิดไพ่" ➔ การ์ดที่ 5)
+## ระบบรหัสแลกสิทธิ์ (Redeem Codes Manager — /admin?tab=redeem)
 
 | ไฟล์ | หน้าที่ |
 | :-- | :-- |
 | `src/lib/entitlement/redeem.ts` | แกนแลกสิทธิ์ · แยกชนิด `gift` / `premium` จาก `reason_prefix` · จองสิทธิ์แบบอะตอมมิก |
-| `GET/POST/PATCH /api/admin/entitlement/codes` | ดูรายการ · ออกรหัสใหม่ (สุ่มให้) · ปิดรหัส/ขยายเพดาน/เลื่อนวันหมดอายุ |
-| `src/components/admin/EntitlementAdmin.tsx` | การ์ด "5 · รหัสแลกสิทธิ์" พร้อมตารางยอดแลก |
-| `scripts/qa/test-redeem-code.ts` | ชุดทดสอบ 45 ข้อ — ถูกเรียกจากด่าน "🎟 แกนสิทธิ์การเปิดไพ่" |
+| `src/lib/entitlement/redeem-admin.repo.ts` | Repository สำหรับดึง/สร้าง/แก้ไขรหัสแลกสิทธิ์ และรายการประวัติการแลกบน D1 |
+| `src/components/admin/RedeemCodesManager.tsx` | แดชบอร์ดจัดการรหัสแลกสิทธิ์ สร้างรหัส สุ่มรหัส ปิดใช้งาน และดูประวัติ |
+| `GET/POST/PATCH /api/admin/redeem` | REST endpoints สำหรับรายการ, สร้าง, และแก้ไขรหัสแลกสิทธิ์ |
+| `GET /api/admin/redeem/[code]/redemptions` | รายการประวัติผู้ใช้ที่นำรหัสดังกล่าวไปแลก |
+| `scripts/qa/test-redeem-code.ts` | ชุดทดสอบความถูกต้อง กลไก atomic rollback และ rate limit (ผูกในด่านแกนสิทธิ์) |
 
 - **โค้ดแจก (`gift_*`)** — เพิ่มรอบเปิดไพ่เท่านั้น ผังมาตรฐานตามปกติ ไม่ปลดฟีเจอร์พรีเมียม
-- **โค้ด VIP (`purchase_*`)** — นับเป็นเครดิตที่ซื้อ ➔ `hasPaidCredits = true` ปลดผังใหญ่ + ปรมาจารย์ลับ
-  ตราบใดที่ยังมีรอบเหลือ
-- ระบบ**สุ่มรหัสให้เสมอ** และ**บังคับใส่เพดานจำนวนคน + วันหมดอายุ** — ไม่มีตัวเลือก "ไม่จำกัด"
-- ⛔ **ห้าม seed รหัสจริงลงไฟล์ในรีโป** (migration / `db.ts`) — รหัสในซอร์สคือรหัสที่ใครอ่านเจอก็แลกได้
-  ของเดิม `VIP3-TAROT-2026` · `SEER3PASS` เคยเป็นแบบนั้นและถูกรัดเพดานย้อนหลังใน `migrations/0013`
-- ตัวบังคับจริงคือ `UPDATE ... WHERE (max_uses = -1 OR used_count < max_uses)` เงื่อนไขเดียวจบ
-  ส่วนการตรวจก่อนหน้ามีไว้เพื่อ**ข้อความบอกผู้ใช้**เท่านั้น (กัน TOCTOU ตอนคนแย่งแลกพร้อมกัน)
+- **โค้ด VIP (`purchase_*`)** — นับเป็นเครดิตที่ซื้อ ➔ `hasPaidCredits = true` ปลดผังใหญ่ + ปรมาจารย์ลับ ตราบใดที่ยังมีรอบเหลือ
+- **ระบบสุ่มรหัส** — มีปุ่มสุ่มรูปแบบ `SEER-XXXX-XXXX` และบังคับใส่เพดานจำนวนคน + วันหมดอายุ
+- **ข้อกำหนดและความปลอดภัย (Security & Business Rules)**:
+  1. **ห้ามมีปุ่มลบรหัส**: ใช้การ toggle `is_active` (0 หรือ 1) เปิด/ปิดสถานะแทน เพื่อรักษา Audit Trail
+  2. **ห้ามแก้ `code` และ `credits` หากถูกแลกไปแล้ว (`used_count > 0`)**: ป้องกันความผิดพลาดของสิทธิ์
+  3. **ห้ามลบประวัติการแลก (`redeem_redemptions`)**: ประวัติการแลกเป็น immutable
+  4. **PDPA / Zero PII**: บันทึก Audit Log ผ่าน `recordAudit()` โดยเก็บเฉพาะ `code` และ `credits` เท่านั้น ไม่บันทึกข้อมูลส่วนบุคคล
+  5. **ตัวบังคับจริง**: `UPDATE ... WHERE (max_uses = -1 OR used_count < max_uses)` เงื่อนไขเดียวจบ (กัน TOCTOU)
 
 ## ความปลอดภัย / PDPA
 
