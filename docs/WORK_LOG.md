@@ -67,7 +67,7 @@
 - `npm run typecheck` ➔ 0 errors
 - `npx tsx scripts/qa/test-redeem-code.ts` ➔ **58/58 ผ่าน** (เพิ่มเคสชั้น repo 13 ข้อ)
 - `npx tsx scripts/qa/test-entitlement.ts` ➔ **128/128 ผ่าน**
-- `npm run repo:verify` ➔ **ผ่านครบ 49/49 ด่าน** (ด่านพาเลตเพิ่มเข้ามาจากอีกสายระหว่างรอบนี้)
+- `npm run repo:verify` ➔ **ผ่านครบ 50/50 ด่าน** (ด่านพาเลตกับด่านพื้นที่กดเพิ่มเข้ามาจากอีกสายระหว่างรอบนี้)
 
 ### 🗓️ 2026-09-12 (รอบ 48): 🎟️ ยกระดับระบบจัดการรหัสแลกสิทธิ์ (Admin Redeem Code Manager) และสถิติรายวัน (PR #433 MERGED)
 
