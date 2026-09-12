@@ -507,6 +507,8 @@ if (fs.existsSync(appBuildDir)) {
 
   const headerless: string[] = [];
   const footerless: string[] = [];
+  /** หน้าที่มีเนื้อหาโผล่ต่อท้ายฟุตเตอร์ (ฟุตเตอร์ลอยขึ้นมากลางหน้า) */
+  const tailAfterFooter: string[] = [];
   let scanned = 0;
   for (const file of htmlFiles) {
     const route = path.relative(appBuildDir, file).split(path.sep).join("/").replace(/\.html$/, "");
@@ -522,6 +524,25 @@ if (fs.existsSync(appBuildDir)) {
     if (!html.includes('data-site-header="')) headerless.push(`/${route}`);
     // ฟุตเตอร์กลางเป็น <footer> เพียงตัวเดียวของหน้า จึงจับด้วยแท็กตรง ๆ ได้
     if (!html.includes("<footer")) footerless.push(`/${route}`);
+
+    // 7.2 ฟุตเตอร์ต้องเป็น "ท้ายหน้า" จริง ๆ — ห้ามมีเนื้อหาหลักต่อท้ายอีก
+    //
+    // ⚠️ เกิดจริงบนหน้าแรก (INC-0136): บล็อกเนื้อหา SEO ถูกวางไว้ท้าย fragment ของ
+    // `TarotFlow` ซึ่งอยู่ **หลัง** `<SiteFooter />` ผู้ใช้จึงเห็นฟุตเตอร์โผล่กลางหน้า
+    // แล้วมีเนื้อหายาวต่อจากใต้ฟุตเตอร์อีกจอ — ด่านข้อ 7.1 ไม่จับเพราะฟุตเตอร์ "มีอยู่" ครบ
+    //
+    // ⚠️ ตรวจได้เฉพาะหน้าที่ **ไม่ได้สตรีม** เท่านั้น: หน้าที่ React สตรีมจะเขียนเนื้อหาจริง
+    // ไว้ใน `<div hidden id="S:n">` ท้ายไฟล์ แล้วให้สคริปต์ `$RC` ย้ายเข้าที่ตอนรัน
+    // ลำดับไบต์ในไฟล์จึงไม่ใช่ลำดับที่ผู้ใช้เห็น — เช็กแบบนี้กับหน้าพวกนั้นได้ false positive
+    // ทันที 285 หน้า (ลองมาแล้ว) จึงข้ามไปโดยตั้งใจ ดีกว่ามีด่านที่ไม่มีใครเชื่อ
+    const isStreamed = html.includes('id="S:') || html.includes("$RC");
+    if (!isStreamed) {
+      const lastFooterEnd = html.lastIndexOf("</footer>");
+      const lastSection = html.lastIndexOf("<section");
+      if (lastFooterEnd !== -1 && lastSection > lastFooterEnd) {
+        tailAfterFooter.push(`/${route}`);
+      }
+    }
   }
 
   if (headerless.length > 0) {
@@ -538,6 +559,14 @@ if (fs.existsSync(appBuildDir)) {
         `(ผู้ใช้ที่มาจากผลค้นหาจะไม่มีลิงก์ภายในให้เดินต่อเลย — INC-0110)`,
     );
   }
+  if (tailAfterFooter.length > 0) {
+    failures.push(
+      `HTML ที่ build แล้ว: ${tailAfterFooter.length} หน้ามี <section> อยู่ **ใต้** ฟุตเตอร์ — ` +
+        `${tailAfterFooter.slice(0, 5).join(", ")}${tailAfterFooter.length > 5 ? " …" : ""} ` +
+        `(ผู้ใช้เห็นฟุตเตอร์โผล่กลางหน้าแล้วมีเนื้อหาต่อท้ายอีก — INC-0136)`,
+    );
+  }
+
   // กันด่าน "ผ่านเพราะไม่มีอะไรให้ตรวจ" — เว็บนี้มีหน้าที่ prerender ได้หลายร้อยหน้า
   if (scanned < 200) {
     failures.push(

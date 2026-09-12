@@ -1702,6 +1702,15 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
           เปิดครั้งแรกแล้วค้างไว้ตลอด ไม่ถอดออกตอนปิด — อนิเมชันขาออกที่อยู่ข้างใน
           `Modal.tsx` จะได้มีโอกาสเล่นจนจบ (ดูเหตุผลเต็มในหัวไฟล์ use-once-open.ts) */}
+      {/* ═══════════════════════════════════════════════════════════════
+          Rich SEO Editorial Content (Google Helpful Content & Mobile-First)
+          แสดงเฉพาะหน้าเลือกผังพยากรณ์ (SPREAD_SELECT) เพื่อไม่รบกวนสมาธิในพิธีกรรมหน้า 2-5
+
+          ⚠️ ต้องอยู่ **ใน** `<main>` และมาก่อน `<SiteFooter />` เสมอ
+          ของเดิมวางไว้ท้ายสุดของ fragment (หลังฟุตเตอร์) ผู้ใช้จึงเห็นฟุตเตอร์โผล่กลางหน้า
+          แล้วมีเนื้อหา SEO ยาว ๆ ต่อท้ายอยู่ใต้ฟุตเตอร์อีกที
+          ═══════════════════════════════════════════════════════════════ */}
+      {currentStep === "SPREAD_SELECT" ? seoContent : null}
     </main>
 
       <SiteFooter />
@@ -1780,11 +1789,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       />
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════
-          Rich SEO Editorial Content & Fat Footer (Google Helpful Content & Mobile-First)
-          แสดงเฉพาะหน้าเลือกผังพยากรณ์ (SPREAD_SELECT) เพื่อไม่รบกวนสมาธิในพิธีกรรมหน้า 2-5
-          ═══════════════════════════════════════════════════════════════ */}
-      {currentStep === "SPREAD_SELECT" ? seoContent : null}
   </>
   );
 }
