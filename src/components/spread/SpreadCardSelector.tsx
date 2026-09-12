@@ -13,6 +13,17 @@ import { CardImage } from "@/components/card/CardImage";
 import { SealedLockIcon } from "@/components/entitlement/EntitlementIcons";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { soundManager } from "@/lib/utils/audio";
+import { withMotionScope, prefetchMotionScope } from "@/components/providers/with-motion-scope";
+
+/**
+ * `SpreadCardSelector` เป็น static import ตรงเข้า `TarotFlow` (ไม่ได้อยู่หลัง
+ * `next/dynamic` เหมือนหน้าต่างลอยอื่น ๆ เพราะเป็นจอแรกที่ผู้ใช้เห็น) — ถ้า import
+ * `Modal` แบบ static ตรง ๆ จะลาก `motion/react` (40 KB gzip) กลับเข้าบันเดิลตั้งต้น
+ * ของ `/` ทั้งที่ `withMotionScope()` ถอดออกไปแล้วตามคอมเมนต์ในไฟล์นั้น (วัดจริง: งบ JS
+ * ของ `/` พุ่งจาก 229 KB เป็น 292 KB ตอนลืมข้อนี้) — ต้องผ่าน `withMotionScope()` เสมอ
+ */
+const loadModal = () => import("@/components/ui/Modal").then((m) => m.Modal);
+const Modal = withMotionScope(loadModal);
 
 interface SpreadCardSelectorProps {
   selectedSpread: Spread;
@@ -25,6 +36,33 @@ interface SpreadCardSelectorProps {
    * เพื่อบอกล่วงหน้าตั้งแต่ก่อนกดว่าต้องสมัคร/ปลดล็อกก่อน (กันเซอร์ไพรส์ตอนกดแล้วเจอหน้าต่างสิทธิ์)
    */
   proceedLabel?: string;
+}
+
+/**
+ * ภาพไพ่ 1909 Rider-Waite แท้ที่ใช้เป็นตราสัญลักษณ์ประจำผัง —
+ * ดึงออกมาเป็นฟังก์ชันแยกเพราะใช้ทั้งในแถบสรุปด้านล่างและป๊อปอัพยืนยันเริ่มดูดวง
+ */
+function getSpreadEmblemImage(spreadId: string): string {
+  switch (spreadId) {
+    case "daily":
+      return "major-19.jpg";
+    case "quick":
+      return "major-01.jpg";
+    case "yes-no":
+      return "major-10.jpg";
+    case "love":
+      return "major-06.jpg";
+    case "career":
+      return "major-07.jpg";
+    case "money":
+      return "pentacles-01.jpg";
+    case "celtic-cross":
+      return "major-21.jpg";
+    case "decision":
+      return "major-02.jpg";
+    default:
+      return "major-17.jpg";
+  }
 }
 
 type SpreadCategory = "all" | "recommended" | "love" | "career" | "master";
@@ -103,6 +141,13 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
    */
   const [hasSwappedTab, setHasSwappedTab] = useState(false);
   const [activeScrollIndex, setActiveScrollIndex] = useState(0);
+
+  /**
+   * ป๊อปอัพ "เริ่มการดูดวงเลย" — เด้งทันทีที่แตะเลือกการ์ดผัง
+   * เพื่อให้กดเริ่มได้จากตรงนั้นเลย ไม่ต้องเลื่อนจอลงไปกดแถบสรุปด้านล่าง
+   * (คำสั่งเจ้าของโปรเจกต์: ให้เหมือนโฟลว์ "เปิดไพ่ด่วน" ของ QuickFortunePicker)
+   */
+  const [showStartModal, setShowStartModal] = useState(false);
 
   // Sync scroll position with active dot indicator on mobile
   const handleCarouselScroll = () => {
@@ -244,6 +289,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               }
               onSelectSpread(spread);
               scrollToCard(idx);
+              if (onProceed) setShowStartModal(true);
             };
 
             const isCardVisibleOrNear =
@@ -266,6 +312,14 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
                     e.preventDefault();
                     handleCardClick();
                   }
+                }}
+                /* ผู้ใช้ส่อแวว (เมาส์ชี้/โฟกัส) ว่าจะกดการ์ดนี้ — อุ่นเครื่อง chunk ของ
+                   ป๊อปอัพล่วงหน้า กันอาการ "กดแล้วเงียบ แล้วเด้งพรึ่บ" ตอนโหลด motion ครั้งแรก */
+                onPointerEnter={() => {
+                  if (!isLocked && onProceed) prefetchMotionScope(loadModal);
+                }}
+                onFocus={() => {
+                  if (!isLocked && onProceed) prefetchMotionScope(loadModal);
                 }}
                 className={`w-[82vw] max-w-[310px] flex-shrink-0 snap-center sm:w-auto sm:max-w-none sm:flex-shrink rounded-lg border transition duration-300 transform-gpu hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-4 sm:p-5 relative overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink group/card ${
                   isSelected
@@ -410,25 +464,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             {/* Real 1909 Rider-Waite Spread Card Emblem */}
             <div className="w-9 h-14 sm:w-10 sm:h-15 rounded-lg border-2 border-line-warm overflow-hidden bg-surface relative flex-shrink-0">
               <CardImage
-                image={`${
-                  selectedSpread.id === "daily"
-                    ? "major-19.jpg"
-                    : selectedSpread.id === "quick"
-                      ? "major-01.jpg"
-                      : selectedSpread.id === "yes-no"
-                        ? "major-10.jpg"
-                        : selectedSpread.id === "love"
-                          ? "major-06.jpg"
-                          : selectedSpread.id === "career"
-                            ? "major-07.jpg"
-                            : selectedSpread.id === "money"
-                              ? "pentacles-01.jpg"
-                              : selectedSpread.id === "celtic-cross"
-                                ? "major-21.jpg"
-                                : selectedSpread.id === "decision"
-                                  ? "major-02.jpg"
-                                  : "major-17.jpg"
-                }`}
+                image={getSpreadEmblemImage(selectedSpread.id)}
                 /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — แถบสรุปข้างภาพพิมพ์ชื่อผังที่เลือกอยู่แล้ว */
                 alt=""
                 className="w-full h-full object-cover object-top tarot-hd-card-image"
@@ -463,6 +499,63 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
         </div>
+      )}
+
+      {/* ป๊อปอัพ "เริ่มการดูดวงเลย" — เด้งทันทีที่แตะการ์ดผัง (ไม่ต้องเลื่อนลงไปกดแถบสรุปด้านบน) */}
+      {onProceed && (
+        <Modal
+          isOpen={showStartModal}
+          onClose={() => setShowStartModal(false)}
+          title={isEnglish ? "Start This Reading Now?" : "เริ่มการดูดวงเลย?"}
+          maxWidth="sm"
+        >
+          <div className="space-y-5">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-[76px] rounded-lg border-2 border-line-warm overflow-hidden bg-surface relative flex-shrink-0">
+                <CardImage
+                  image={getSpreadEmblemImage(selectedSpread.id)}
+                  /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อผังเดียวกันอยู่แล้ว (INC-0125) */
+                  alt=""
+                  className="w-full h-full object-cover object-top tarot-hd-card-image"
+                  sizes="96px"
+                />
+                <div className="gold-foil-sheen absolute inset-0 opacity-20" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[13px] text-surface bg-gold-ink px-2.5 py-0.2 rounded-full font-bold font-mono inline-block">
+                  {selectedSpread.positions.length} {isEnglish ? "Cards" : "ใบ"}
+                </span>
+                <div className="font-serif-th text-base sm:text-lg font-bold text-ink-deep leading-snug py-0.5 mt-0.5">
+                  {isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
+                </div>
+                <p className="text-xs text-muted font-serif-th leading-relaxed">
+                  {isEnglish ? (selectedSpread.taglineEn || selectedSpread.tagline) : selectedSpread.tagline}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowStartModal(false)}
+                className="w-full sm:w-auto px-5 py-3 rounded-full border border-line-warm text-ink-deep font-serif-th text-sm font-semibold hover:bg-surface-warm transition-colors cursor-pointer"
+              >
+                {isEnglish ? "Browse Other Spreads" : "ดูผังอื่นก่อน"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowStartModal(false);
+                  onProceed();
+                }}
+                className="w-full sm:flex-1 px-6 py-3 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-white font-bold font-serif-th text-sm active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2 group"
+              >
+                <span>{proceedLabel ?? (isEnglish ? "Start Reading Now" : "เริ่มการดูดวงเลย")}</span>
+                <span className="group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );
