@@ -198,7 +198,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
             <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-white shadow-xs">
               <table className="w-full text-left text-xs font-serif-th border-collapse">
                 <thead>
-                  <tr className="border-b border-line bg-surface-mist text-[#5E5240]">
+                  <tr className="border-b border-line bg-surface-warm text-[#5E5240]">
                     <th scope="col" className="py-2.5 px-3 font-mono font-bold w-12 text-center">#</th>
                     <th scope="col" className="py-2.5 px-3 font-bold w-36 sm:w-44">{isEnglish ? "Position Name" : "ชื่อตำแหน่ง"}</th>
                     <th scope="col" className="py-2.5 px-3 font-bold">{isEnglish ? "Divinatory Role & Meaning" : "คำถามที่ตำแหน่งนี้ตอบ / บทบาทการตีความ"}</th>
@@ -206,7 +206,7 @@ export const SpreadDetailClient: React.FC<Props> = ({
                 </thead>
                 <tbody className="divide-y divide-line-soft">
                   {spread.positions.map((pos, idx) => (
-                    <tr key={idx} className="hover:bg-surface-mist/60 transition-colors">
+                    <tr key={idx} className="hover:bg-surface-warm/60 transition-colors">
                       <td className="py-2.5 px-3 font-mono font-bold text-gold-ink text-center">{idx + 1}</td>
                       <td className="py-2.5 px-3 font-bold text-ink align-top">{getPositionName(pos, isEnglish)}</td>
                       <td className="py-2.5 px-3 text-[#5E5240] leading-relaxed align-top">{getPositionMeaning(pos, isEnglish)}</td>

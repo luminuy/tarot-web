@@ -300,7 +300,7 @@ export default function ReadersManager() {
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-surface-pale text-lg font-bold text-ink overflow-hidden">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-surface-warm text-lg font-bold text-ink overflow-hidden">
                       {r.avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={r.avatarUrl} alt="" /* ภาพประกอบล้วน — <h3> ข้าง ๆ พิมพ์ชื่อแม่หมออยู่แล้ว (INC-0125) */ className="h-full w-full object-cover" />
@@ -339,7 +339,7 @@ export default function ReadersManager() {
                   {r.specialties.map((s, idx) => (
                     <span
                       key={idx}
-                      className="rounded-full border border-line bg-surface-pale px-2 py-0.5 text-[12px] font-medium text-ink"
+                      className="rounded-full border border-line bg-surface-warm px-2 py-0.5 text-[12px] font-medium text-ink"
                     >
                       {s}
                     </span>
@@ -347,7 +347,7 @@ export default function ReadersManager() {
                 </div>
 
                 {/* Contact & Meta */}
-                <div className="mt-4 space-y-1 rounded-xl border border-line bg-surface-pale p-2.5 text-[13px] text-muted">
+                <div className="mt-4 space-y-1 rounded-xl border border-line bg-surface-warm p-2.5 text-[13px] text-muted">
                   <div className="flex justify-between">
                     <span>LINE ติดต่อ:</span>
                     <span className="font-mono text-ink truncate max-w-[140px]">{r.lineUrl}</span>
@@ -389,7 +389,7 @@ export default function ReadersManager() {
                 <div className="flex gap-2 text-[13px]">
                   <button
                     onClick={() => copyConsoleLink(r)}
-                    className="tap-overlay-y flex-1 rounded-lg border border-line bg-surface-pale py-1 text-ink hover:bg-[#EAE5DC] transition-colors"
+                    className="tap-overlay-y flex-1 rounded-lg border border-line bg-surface-warm py-1 text-ink hover:bg-[#EAE5DC] transition-colors"
                   >
                     ลิงก์แผงแม่หมอ
                   </button>

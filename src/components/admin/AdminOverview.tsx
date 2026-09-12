@@ -223,7 +223,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
       <div className="rounded-2xl border border-line bg-white p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-mist px-3 py-1 text-xs font-semibold text-ink">
+            <div className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-warm px-3 py-1 text-xs font-semibold text-ink">
               
               <span>ศูนย์บัญชาการวิหารพยากรณ์ (Command Center)</span>
             </div>
@@ -241,7 +241,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               size="sm"
               onClick={loadData}
               disabled={loading}
-              className="border-line bg-surface-mist text-xs font-medium text-ink hover:bg-white hover:border-gold transition"
+              className="border-line bg-surface-warm text-xs font-medium text-ink hover:bg-white hover:border-gold transition"
             >
               {loading ? "กำลังซิงก์ข้อมูล…" : "รีเฟรชข้อมูลสด"}
             </Button>
@@ -264,7 +264,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         <div className="rounded-2xl border border-line bg-white p-5 shadow-xs hover:border-gold transition">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted">สมาชิกทั้งหมดใน D1</span>
-            <span className="rounded-full bg-surface-mist px-2 py-0.5 text-[11px] font-mono text-ink border border-line">
+            <span className="rounded-full bg-surface-warm px-2 py-0.5 text-[11px] font-mono text-ink border border-line">
               D1 Database
             </span>
           </div>
@@ -381,7 +381,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             {/* D1 Database */}
-            <div className="flex items-center justify-between rounded-xl bg-surface-mist p-3.5 border border-line-soft">
+            <div className="flex items-center justify-between rounded-xl bg-surface-warm p-3.5 border border-line-soft">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
@@ -397,7 +397,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             </div>
 
             {/* KV Cache */}
-            <div className="flex items-center justify-between rounded-xl bg-surface-mist p-3.5 border border-line-soft">
+            <div className="flex items-center justify-between rounded-xl bg-surface-warm p-3.5 border border-line-soft">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-600" />
@@ -411,7 +411,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             </div>
 
             {/* AI Models Dual Provider */}
-            <div className="flex items-center justify-between rounded-xl bg-surface-mist p-3.5 border border-line-soft">
+            <div className="flex items-center justify-between rounded-xl bg-surface-warm p-3.5 border border-line-soft">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-600" />
@@ -423,7 +423,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             </div>
 
             {/* Vectorize Semantic Search */}
-            <div className="flex items-center justify-between rounded-xl bg-surface-mist p-3.5 border border-line-soft">
+            <div className="flex items-center justify-between rounded-xl bg-surface-warm p-3.5 border border-line-soft">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-600" />
@@ -448,7 +448,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             <button
               type="button"
               onClick={() => onNavigateTab("stats")}
-              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-warm p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 <div>
@@ -462,7 +462,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             <button
               type="button"
               onClick={() => onNavigateTab("content")}
-              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-warm p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 <div>
@@ -477,7 +477,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               type="button"
               onClick={handleRebuildIndex}
               disabled={rebuildingIndex}
-              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-warm p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 <div>
@@ -493,7 +493,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             <a
               href="/api/admin/marketing?format=csv"
               download
-              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-warm p-3 text-left hover:border-gold hover:bg-white transition shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 <div>
@@ -507,7 +507,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             <button
               type="button"
               onClick={() => onNavigateTab("entitlement")}
-              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-warm p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 <div>
@@ -544,7 +544,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-line text-muted bg-surface-mist">
+                <tr className="border-b border-line text-muted bg-surface-warm">
                   <th className="py-2.5 px-3 font-semibold rounded-l-lg">เวลา</th>
                   <th className="py-2.5 px-3 font-semibold">กิจกรรม / รายการ</th>
                   <th className="py-2.5 px-3 font-semibold rounded-r-lg">รายละเอียดเพิ่มเติม</th>
@@ -554,7 +554,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
                 {stats.audit.slice(0, 8).map((entry, idx) => {
                   const { label, tagColor } = formatAuditAction(entry.action);
                   return (
-                    <tr key={idx} className="hover:bg-surface-mist transition-colors">
+                    <tr key={idx} className="hover:bg-surface-warm transition-colors">
                       <td className="py-3 px-3 text-muted whitespace-nowrap font-mono">
                         {formatThaiTime(entry.ts)}
                       </td>

@@ -185,7 +185,7 @@ export async function SpreadTopicBody({
                 href={`/spreads/topic/${t.slug}`}
                 className={`px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap transition ${
                   isActive
-                    ? "bg-ink text-surface-mist shadow-xs"
+                    ? "bg-ink text-surface-warm shadow-xs"
                     : "bg-surface border border-line text-[#4A4338] hover:border-gold"
                 }`}
               >
