@@ -60,6 +60,7 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
 
       <div className="space-y-2 pt-1">
         <textarea
+            aria-label="คำตอบของคุณสำหรับคำถามจากแม่หมอ"
           rows={2}
           value={answer}
           onChange={(e) => onAnswerChange(e.target.value)}

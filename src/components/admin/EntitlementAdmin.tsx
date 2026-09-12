@@ -186,9 +186,9 @@ export default function EntitlementAdmin() {
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <Field label="วันตัด">
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 type="date"
                 max={todayISO()}
                 value={gfDate}
@@ -217,9 +217,9 @@ export default function EntitlementAdmin() {
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <Field label="เลือกวันเริ่มใช้">
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 type="date"
                 min={todayISO()}
                 value={announceISO}
@@ -231,9 +231,9 @@ export default function EntitlementAdmin() {
             )}
           </Field>
           <Field label="ข้อความที่จะขึ้นในแบนเนอร์ (แก้เองได้)">
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 key={s.announceResetDate}
                 placeholder="15 กันยายน 2569"
                 defaultValue={s.announceResetDate}

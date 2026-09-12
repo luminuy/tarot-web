@@ -420,9 +420,9 @@ export default function ReadersManager() {
           )}
 
           <Field label="ชื่อแม่หมอ (Display Name) *">
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
@@ -432,9 +432,9 @@ export default function ReadersManager() {
           </Field>
 
           <Field label="ประวัติ / สไตล์การทำนาย (Bio)">
-            {(id) => (
+            {(field) => (
               <Textarea
-                id={id}
+                {...field}
                 rows={3}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
@@ -444,9 +444,9 @@ export default function ReadersManager() {
           </Field>
 
           <Field label="URL รูปโปรไฟล์ (Avatar URL)">
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 value={avatarUrl}
                 onChange={(e) => setAvatarUrl(e.target.value)}
                 placeholder="https://example.com/avatar.jpg"
@@ -455,9 +455,9 @@ export default function ReadersManager() {
           </Field>
 
           <Field label="ความถนัด (คั่นด้วยจุลภาค)">
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 value={specialtiesText}
                 onChange={(e) => setSpecialtiesText(e.target.value)}
                 placeholder="ความรัก, การงาน, การเงิน, สุขภาพ, ธุรกิจ"
@@ -466,9 +466,9 @@ export default function ReadersManager() {
           </Field>
 
           <Field label="ช่องทางส่งต่อ LINE (LINE ID หรือ LINE OA URL) *">
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 required
                 value={lineUrl}
                 onChange={(e) => setLineUrl(e.target.value)}
@@ -479,9 +479,9 @@ export default function ReadersManager() {
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="สถานะโปรไฟล์">
-              {(id) => (
+              {(field) => (
                 <select
-                  id={id}
+                  {...field}
                   value={status}
                   onChange={(e) => setStatus(e.target.value as ReaderStatus)}
                   className="w-full rounded-xl border border-[#D5CEC2] bg-white px-3 py-2 text-xs text-[#29261F] outline-none focus:border-[#29261F]"
@@ -494,9 +494,9 @@ export default function ReadersManager() {
             </Field>
 
             <Field label="ส่วนแบ่งแพลตฟอร์ม (%)">
-              {(id) => (
+              {(field) => (
                 <Input
-                  id={id}
+                  {...field}
                   type="number"
                   min={0}
                   max={100}

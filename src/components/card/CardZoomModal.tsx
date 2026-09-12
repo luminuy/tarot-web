@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { TarotCard as TarotCardComponent } from "@/components/card/TarotCard";
 import type { TarotCard } from "@/data/cards/types";
 import { useLocale } from "@/lib/i18n";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
 const elementEnMap: Record<string, string> = {
   "ไฟ": "Fire",
@@ -30,6 +31,14 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
 }) => {
   const { isEnglish } = useLocale();
   const [flipped, setFlipped] = useState(true);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * 🪟 ก่อนหน้านี้หน้าต่างนี้ประกาศ `aria-modal="true"` ไว้ทั้งที่ไม่ได้กักโฟกัสจริง
+   * ปิดด้วย Esc ไม่ได้ · หน้าหลังฉากยังเลื่อนได้ · ปิดแล้วโฟกัสไม่กลับที่เดิม (UX-08)
+   * นี่คือหน้าต่างที่ผู้ใช้เปิดบ่อยที่สุดในพิธีกรรมเปิดไพ่
+   */
+  useDialogBehavior(isOpen && Boolean(card), onClose, panelRef);
 
   return (
     <AnimatePresence>
@@ -61,6 +70,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 16 }}
+          ref={panelRef}
           onClick={(e) => e.stopPropagation()}
           className="w-full max-w-sm max-h-[calc(100svh-2rem)] rounded-lg bg-[#FFFFFF] border-2 border-[#D9C8AC] shadow-overlay flex flex-col relative cursor-default overflow-hidden"
         >

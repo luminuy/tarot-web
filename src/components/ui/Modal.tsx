@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { AppMotionProvider } from "@/components/providers/AppMotionProvider";
 import { SPRING, TWEEN, useMotionSafe } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -29,82 +30,17 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   const { isEnglish } = useLocale();
   const isMotionSafe = useMotionSafe();
-  const previousActiveElement = useRef<HTMLElement | null>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
-  // เก็บ onClose ล่าสุดไว้ใน ref เพื่อไม่ต้องใส่ใน dependency ของ effect ด้านล่าง
-  // ผู้เรียกเกือบทุกที่ส่ง arrow function ใหม่ทุกเรนเดอร์ (`onClose={() => setOpen(false)}`)
-  // ถ้าใส่ไว้ใน deps → effect เปิด/ปิดใหม่ทุกครั้งที่พ่อเรนเดอร์
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  });
-
-  // Focus trap & Esc listener
-  // ⚠️ deps ต้องมีแค่ `isOpen` เท่านั้น — เคยมี `onClose` อยู่ด้วยแล้วเกิด 3 อาการพร้อมกัน:
-  //   1. หน้าเว็บเลื่อนไม่ได้ถาวรหลังปิดโมดัล — `originalOverflow` ถูกจับใหม่ทุกรอบ
-  //      รอบที่ 2 เป็นต้นไปจับได้ค่า "hidden" cleanup ครั้งสุดท้ายจึงคืนค่า "hidden" กลับไป
-  //   2. โฟกัสถูกดึงกลับไปที่ปุ่มปิดทุกครั้งที่พิมพ์ — rAF ตั้งโฟกัสใหม่ทุกรอบที่ effect รัน
-  //      (ฟอร์มแก้ไขแม่หมอในแผงแอดมินพิมพ์ได้ทีละตัวอักษร)
-  //   3. `previousActiveElement` ถูกเขียนทับด้วย element ที่อยู่ "ในโมดัล" คืนโฟกัสผิดที่
-  useEffect(() => {
-    if (!isOpen) return;
-
-    previousActiveElement.current = document.activeElement as HTMLElement | null;
-
-    // Body scroll lock
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onCloseRef.current();
-        return;
-      }
-
-      if (e.key === "Tab" && modalContainerRef.current) {
-        const focusable = modalContainerRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusable.length === 0) return;
-
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    // Initial focus on container or first interactive element
-    const focusRafId = requestAnimationFrame(() => {
-      const focusable = modalContainerRef.current?.querySelector<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable) {
-        focusable.focus();
-      } else {
-        modalContainerRef.current?.focus();
-      }
-    });
-
-    return () => {
-      cancelAnimationFrame(focusRafId);
-      document.body.style.overflow = originalOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-      if (previousActiveElement.current) {
-        previousActiveElement.current.focus();
-      }
-    };
-  }, [isOpen]);
+  /*
+   * 🪟 พฤติกรรม dialog ทั้งชุด (Esc · focus trap · scroll lock · คืนโฟกัส)
+   * ย้ายไปอยู่ใน `useDialogBehavior` แล้ว เพื่อให้หน้าต่างลอยอีก 5 บานที่ไม่ได้ใช้
+   * คอมโพเนนต์นี้ได้พฤติกรรมชุดเดียวกันโดยไม่ต้องคัดลอกโค้ด (UX-08)
+   *
+   * ⚠️ กับดักเรื่อง deps ที่เคยทำให้เกิดบั๊ก 3 อาการ ถูกย้ายไปเขียนไว้ที่หัวไฟล์ของ hook
+   * อ่านที่นั่นก่อนแก้ hook เสมอ
+   */
+  useDialogBehavior(isOpen, onClose, modalContainerRef);
 
   const maxWidthClass = {
     sm: "max-w-sm",

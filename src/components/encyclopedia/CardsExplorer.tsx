@@ -160,6 +160,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
             
             <input
               type="text"
+              aria-label={isEnglish ? "Search 78 tarot cards" : "ค้นหาไพ่ทาโรต์ 78 ใบ"}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isEnglish ? "Search by card name, keyword, zodiac, or element..." : "ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."}
@@ -255,6 +256,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 key={tab.id}
                 role="tab"
                 id={`card-tab-${tab.id}`}
+                aria-controls={`card-panel-${tab.id}`}
                 aria-selected={isActive}
                 tabIndex={isActive ? 0 : -1}
                 type="button"
@@ -353,7 +355,19 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
       {/* 78 Cards Luxury Masterpiece Grid */}
       {/* `key` เปลี่ยน → React remount → คลาส .anim-swap-rise เล่นเฟดขึ้นใหม่ทุกครั้ง
           (เดิมใช้ AnimatePresence ซึ่งลาก motion 39.8 KB เข้ามาทั้งก้อนเพื่ออนิเมชัน 0.2 วิ) */}
-      <div key={activeFilter} className="anim-swap-rise">
+      {/*
+        🔗 แผงนี้คือ "ปลายทาง" ของแท็บด้านบน จึงต้องเป็น `role="tabpanel"` ที่มี
+        `id` ตรงกับ `aria-controls` ของแท็บ และ `aria-labelledby` ชี้กลับไปหาแท็บ (UX-11)
+        ⚠️ `key={activeFilter}` ต้องคงไว้ — มันคือกลไก remount ที่ทำให้คลาส .anim-swap-rise
+        เล่นใหม่ทุกครั้งที่สลับแท็บ (แทน AnimatePresence ที่ลาก motion 39.8 KB เข้ามา)
+      */}
+      <div
+        key={activeFilter}
+        role="tabpanel"
+        id={`card-panel-${activeFilter}`}
+        aria-labelledby={`card-tab-${activeFilter}`}
+        className="anim-swap-rise"
+      >
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 sm:gap-5">
           {filteredCards.map((card, idx) => {
             const elemStyle = (card.element && ELEMENT_STYLES[card.element]) || ELEMENT_STYLES["ไฟ"];

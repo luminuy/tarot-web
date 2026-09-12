@@ -133,6 +133,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               key={cat.id}
               role="tab"
               id={`library-tab-${cat.id}`}
+              aria-controls={`library-panel-${cat.id}`}
               aria-selected={isActive}
               tabIndex={isActive ? 0 : -1}
               type="button"

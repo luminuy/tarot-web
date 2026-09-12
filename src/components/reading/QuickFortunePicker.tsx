@@ -5,6 +5,7 @@ import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 
 import { useLocale } from "@/lib/i18n";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
 export interface QuickTopic {
   id: "love" | "work" | "money" | "general";
@@ -240,6 +241,17 @@ export function QuickFortunePicker({
 
   // สถานะการเลื่อนและ Carousel สำหรับหน้าจอมือถือ
   const carouselRef = useRef<HTMLDivElement>(null);
+  const nicknamePanelRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * 🪟 แผงระบุชื่อเล่น/คำถาม เป็นหน้าต่างลอยเต็มจอที่ขวางทางผู้ใช้จริง
+   * แต่เดิมไม่มีทั้ง `role="dialog"` · Esc · focus trap · scroll lock (UX-08)
+   *
+   * ⚠️ ต้องใช้ `closeNicknameModal` ไม่ใช่ `setShowNicknameModal(false)` ตรง ๆ
+   * เพราะแผงนี้เล่นอนิเมชันขาออกก่อนแล้วค่อยถอดออกจาก DOM (`isNicknameClosing`)
+   * ถ้าถอดทันทีจะดับหายวับ ผิดกฎคุณภาพโมชั่นของบ้านนี้
+   */
+  useDialogBehavior(showNicknameModal, () => closeNicknameModal(), nicknamePanelRef);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleScroll = () => {
@@ -431,13 +443,19 @@ export function QuickFortunePicker({
       {/* โมดัลระบุชื่อเล่นและคำถามสำหรับรอบใหม่ (Fast & Sacred Sacred Popover) */}
       {showNicknameModal && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={isEnglish ? "Set your name and question" : "ระบุชื่อเล่นและคำถามของคุณ"}
           className={`fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim ${
             isNicknameClosing ? "anim-scrim-out" : "anim-scrim-in"
           }`}
         >
-          <div className={`w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
-            isNicknameClosing ? "" : " anim-modal-rise"
-          }`}>
+          <div
+            ref={nicknamePanelRef}
+            className={`w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
+              isNicknameClosing ? "" : " anim-modal-rise"
+            }`}
+          >
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
