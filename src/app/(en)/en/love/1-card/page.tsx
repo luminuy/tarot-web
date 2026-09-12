@@ -122,7 +122,7 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
       />
 
-      <main className="min-h-screen bg-[#F3F0EA] py-6 sm:py-10 px-4 sm:px-6">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
           <LoveOneCardClient />
 

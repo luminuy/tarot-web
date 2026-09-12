@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
@@ -72,6 +72,10 @@ export function LoveOneCardClient() {
   const { isEnglish } = useLocale();
 
   const [selectedStatus, setSelectedStatus] = useState<RelationshipStatus>("single");
+  /* 🏷️ สองช่องนี้มี <label> ที่ตาเห็นอยู่แล้ว แต่ไม่ได้ผูกด้วย htmlFor (UX-10) */
+  const yourNameId = useId();
+  const partnerNameId = useId();
+
   const [yourName, setYourName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [copied, setCopied] = useState(false);
@@ -326,10 +330,11 @@ export function LoveOneCardClient() {
             {/* Names & Intention Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto pt-1">
               <div>
-                <label className="block text-[11px] font-serif-th text-[#635B4E] mb-1">
+                <label htmlFor={yourNameId} className="block text-[11px] font-serif-th text-[#635B4E] mb-1">
                   {isEnglish ? "Your Nickname (Optional)" : "ชื่อเล่นของคุณ (ระบุหรือไม่ก็ได้)"}
                 </label>
                 <input
+                  id={yourNameId}
                   type="text"
                   value={yourName}
                   onChange={(e) => setYourName(e.target.value)}
@@ -338,10 +343,11 @@ export function LoveOneCardClient() {
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-serif-th text-[#635B4E] mb-1">
+                <label htmlFor={partnerNameId} className="block text-[11px] font-serif-th text-[#635B4E] mb-1">
                   {isEnglish ? "Person in Mind (Optional)" : "ชื่อคนในใจ (หรือสิ่งที่กังวล)"}
                 </label>
                 <input
+                  id={partnerNameId}
                   type="text"
                   value={partnerName}
                   onChange={(e) => setPartnerName(e.target.value)}

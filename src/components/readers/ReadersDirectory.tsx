@@ -48,6 +48,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
         <div className="relative flex-1">
           <input
             type="text"
+            aria-label="ค้นหาแม่หมอตามชื่อหรือความถนัด"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาแม่หมอ, ความถนัด (เช่น ความรัก, การงาน)…"

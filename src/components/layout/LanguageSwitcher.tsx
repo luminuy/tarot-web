@@ -60,7 +60,7 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
         onClick={() => handleSelect("th")}
         aria-pressed={shownLocale === "th"}
         aria-label="เปลี่ยนเป็นภาษาไทย"
-        className={`px-2 py-1 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer ${
+        className={`tap-overlay-y px-2 py-1 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer ${
           shownLocale === "th"
             ? "bg-[#FFFFFF] text-[#29261F] shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-[#D5CEC2]"
             : "text-[#635B4E] hover:text-[#29261F] border border-transparent"
@@ -74,7 +74,7 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
         onClick={() => handleSelect("en")}
         aria-pressed={shownLocale === "en"}
         aria-label="Switch to American English"
-        className={`px-2 py-1 rounded-full text-xs font-mono font-bold transition duration-200 cursor-pointer ${
+        className={`tap-overlay-y px-2 py-1 rounded-full text-xs font-mono font-bold transition duration-200 cursor-pointer ${
           shownLocale === "en"
             ? "bg-[#FFFFFF] text-[#29261F] shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-[#D5CEC2]"
             : "text-[#635B4E] hover:text-[#29261F] border border-transparent"

@@ -5,6 +5,7 @@ import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
 
 import { useLocale } from "@/lib/i18n";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
 export interface QuickTopic {
   id: "love" | "work" | "money" | "general";
@@ -240,6 +241,17 @@ export function QuickFortunePicker({
 
   // สถานะการเลื่อนและ Carousel สำหรับหน้าจอมือถือ
   const carouselRef = useRef<HTMLDivElement>(null);
+  const nicknamePanelRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * 🪟 แผงระบุชื่อเล่น/คำถาม เป็นหน้าต่างลอยเต็มจอที่ขวางทางผู้ใช้จริง
+   * แต่เดิมไม่มีทั้ง `role="dialog"` · Esc · focus trap · scroll lock (UX-08)
+   *
+   * ⚠️ ต้องใช้ `closeNicknameModal` ไม่ใช่ `setShowNicknameModal(false)` ตรง ๆ
+   * เพราะแผงนี้เล่นอนิเมชันขาออกก่อนแล้วค่อยถอดออกจาก DOM (`isNicknameClosing`)
+   * ถ้าถอดทันทีจะดับหายวับ ผิดกฎคุณภาพโมชั่นของบ้านนี้
+   */
+  useDialogBehavior(showNicknameModal, () => closeNicknameModal(), nicknamePanelRef);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleScroll = () => {
@@ -386,19 +398,43 @@ export function QuickFortunePicker({
         </div>
 
         {/* Pagination Pills เฉพาะหน้าจอมือถือ */}
-        <div className="flex sm:hidden items-center justify-center gap-1.5 pt-1 pb-1">
+      {/*
+        🎯 จุดบอกตำแหน่งสไลด์ — พื้นที่กดต้อง >= 24x24 px (WCAG 2.2 · SC 2.5.8)
+        ---------------------------------------------------------------------------
+        วัดจริงบน production ก่อนแก้: จุดเหล่านี้กว้าง 6 x 6 px เล็กกว่าเกณฑ์ 4 เท่า
+
+        ⚠️ ข้อนี้ "รักษาหน้าตาเดิมเป๊ะทุกพิกเซล" เป็นไปไม่ได้ และนี่คือเหตุผล:
+        ข้อยกเว้น Spacing ของ SC 2.5.8 บอกว่าเป้าที่เล็กกว่า 24px จะผ่านได้ก็ต่อเมื่อ
+        วงกลมเส้นผ่าศูนย์กลาง 24px ที่วางทับจุดกึ่งกลางของแต่ละเป้า ต้องไม่ทับกัน
+        ของเดิมจุดกึ่งกลางห่างกันแค่ 12px (จุด 6px + gap 6px) วงกลมจึงทับกันแน่นอน
+        => จะผ่านเกณฑ์ได้ จุดกึ่งกลางต้องห่างกันอย่างน้อย 24px ไม่มีทางอื่น
+
+        วิธีที่เลือก: ห่อจุดด้วยปุ่ม 24x24 แล้วตัด gap ของแถวนี้เป็น 0
+        => จุดกึ่งกลางห่างกันพอดี 24px (วงกลมชนขอบกันแต่ไม่ทับ = ผ่าน)
+        => ตัวจุดที่ตาเห็นยังขนาดเดิมทุกประการ เปลี่ยนแค่ระยะห่างจาก 6px เป็น 18px
+
+        ⚠️ ห้ามย้าย `aria-label` ไปไว้ที่ <span> ข้างใน — ชื่อต้องอยู่ที่ปุ่ม
+        ส่วน <span> เป็นของประดับล้วน ๆ จึงต้อง `aria-hidden`
+        ⚠️ ห้ามใส่ `gap-*` กลับเข้าไปในแถวนี้ — จุดกึ่งกลางจะเกิน 24px แล้วดูห่างผิดสัดส่วน
+      */}
+        <div className="flex sm:hidden items-center justify-center pt-1 pb-1">
           {QUICK_TOPICS.map((topic, index) => (
             <button
               key={topic.id}
               type="button"
               onClick={() => scrollToIndex(index)}
               aria-label={isEnglish ? `Navigate to ${topic.titleEn || topic.title}` : `ไปยังหัวข้อ ${topic.title}`}
-              className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 focus:outline-none ${
-                activeIndex === index
-                  ? "w-6 bg-[#8F5C1A] shadow-xs"
-                  : "w-1.5 bg-[#D5CEC2] hover:bg-[#A58A5C]/70"
-              }`}
-            />
+              className="grid h-6 min-w-6 place-items-center focus:outline-none"
+            >
+              <span
+                aria-hidden="true"
+                className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 ${
+                  activeIndex === index
+                    ? "w-6 bg-[#8F5C1A] shadow-xs"
+                    : "w-1.5 bg-[#D5CEC2] hover:bg-[#A58A5C]/70"
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>
@@ -407,13 +443,19 @@ export function QuickFortunePicker({
       {/* โมดัลระบุชื่อเล่นและคำถามสำหรับรอบใหม่ (Fast & Sacred Sacred Popover) */}
       {showNicknameModal && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={isEnglish ? "Set your name and question" : "ระบุชื่อเล่นและคำถามของคุณ"}
           className={`fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim ${
             isNicknameClosing ? "anim-scrim-out" : "anim-scrim-in"
           }`}
         >
-          <div className={`w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
-            isNicknameClosing ? "" : " anim-modal-rise"
-          }`}>
+          <div
+            ref={nicknamePanelRef}
+            className={`w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
+              isNicknameClosing ? "" : " anim-modal-rise"
+            }`}
+          >
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">

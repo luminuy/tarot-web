@@ -37,7 +37,7 @@ export default function ReadingChatPage() {
   const hasSession = !!flow && !!flow.readingId && (flow.drawnCards?.length ?? 0) > 0;
 
   return (
-    <main className="min-h-[100dvh] bg-[#F3F0EA] text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="min-h-[100dvh] bg-[#F3F0EA] text-[#29261F]">
       {/* ตัวกันที่ของแถบหัวที่เป็น `fixed` — สูงเท่า h-14 ของ <header> เป๊ะ ห้ามลบ (INC-0109) */}
       <div aria-hidden="true" className="h-14" />
 

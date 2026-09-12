@@ -11,6 +11,7 @@ import type { Locale } from "@/lib/i18n/types";
 
 import { fontVariables } from "./fonts";
 import { buildSpeculationRules } from "./speculation-rules";
+import { SkipToContent } from "@/components/layout/SkipToContent";
 
 /**
  * 🏛️ โครง `<html>` ของทั้งเว็บ — ใช้ร่วมกันโดย root layout ทั้งสองภาษา
@@ -117,6 +118,11 @@ export function RootHtml({
       </head>
       <body className="min-h-dvh font-sans antialiased">
         <LocaleProvider forcedLocale={pinLocale ? locale : undefined}>
+          {/*
+            ⏭️ ต้องเป็น element แรกสุดใน <body> เสมอ — ห้ามแทรกอะไรไว้ข้างหน้า
+            ถ้าไปอยู่หลังสิ่งที่โฟกัสได้ มันก็ไม่ใช่ทางลัดอีกต่อไป (WCAG SC 2.4.1)
+          */}
+          <SkipToContent />
           <AntiTheftShield />
           <AssetWarmup />
           <ServiceWorkerRegister />

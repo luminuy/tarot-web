@@ -67,9 +67,9 @@ export default function AdminLoginPage() {
 
         <form onSubmit={submit} className="mt-6 flex flex-col gap-4">
           <Field label="รหัสผ่านแอดมิน" error={error}>
-            {(id) => (
+            {(field) => (
               <Input
-                id={id}
+                {...field}
                 type="password"
                 autoComplete="current-password"
                 autoFocus

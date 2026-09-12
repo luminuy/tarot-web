@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function TesterLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-[#05040a] text-[#f5deaa] font-sans selection:bg-[#ffd700]/30">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#05040a] text-[#f5deaa] font-sans selection:bg-[#ffd700]/30">
       {children}
     </main>
   );

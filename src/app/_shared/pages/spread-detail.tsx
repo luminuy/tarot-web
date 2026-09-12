@@ -284,7 +284,7 @@ export async function SpreadDetailBody({
   ];
 
   return (
-    <main className="min-h-screen bg-[#F3F0EA] p-4 font-sans text-[#29261F] sm:p-8">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] p-4 font-sans text-[#29261F] sm:p-8">
       {jsonLd.map((block, i) => (
         <script
           key={i}

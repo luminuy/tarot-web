@@ -85,6 +85,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <input
+          aria-label={isEnglish ? "Search cards in table" : "ค้นหาไพ่ในตาราง"}
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
