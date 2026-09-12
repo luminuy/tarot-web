@@ -1,6 +1,7 @@
 "use client";
 
 import React, { forwardRef } from "react";
+import { useLocale } from "@/lib/i18n";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "gold" | "ghost" | "pill" | "outline";
@@ -10,6 +11,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className = "", variant = "gold", size = "md", isLoading, disabled, ...props }, ref) => {
+    /* ⚠️ ข้อความ loading เคยฮาร์ดโค้ดภาษาไทย — ปุ่มนี้ถูกใช้ในเส้นทาง /en ด้วย (UX-17) */
+    const { isEnglish } = useLocale();
     const baseStyles =
       "inline-flex items-center justify-center font-semibold transition duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] active:scale-[0.97] touch-manipulation cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
 
@@ -36,7 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {isLoading ? (
           <>
             <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            <span>กำลังดำเนินการ…</span>
+            <span>{isEnglish ? "Working…" : "กำลังดำเนินการ…"}</span>
           </>
         ) : (
           children

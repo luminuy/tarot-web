@@ -481,7 +481,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
         aria-modal="true"
         aria-label={isEnglish ? "Share Reading" : "แชร์ผลคำทำนาย"}
         onClick={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim overflow-y-auto"
+        className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-3 sm:p-4 modal-scrim overflow-y-auto"
       >
         <motion.div
           /*

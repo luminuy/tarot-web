@@ -161,7 +161,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
       {/* Category Filter Tabs (Linear / Apple Tier Navigation) */}
       <div
         role="tablist"
-        aria-label="หมวดหมู่ผังพยากรณ์"
+        aria-label={isEnglish ? "Spread categories" : "หมวดหมู่ผังพยากรณ์"}
         className="flex items-center justify-start gap-2 overflow-x-auto pb-1.5 px-1 no-scrollbar select-none"
       >
         {categories.map((cat, catIdx) => {

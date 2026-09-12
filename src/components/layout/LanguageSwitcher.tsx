@@ -49,7 +49,13 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
   return (
     <div
       role="group"
-      aria-label="Language selector / สลับภาษา"
+      /*
+       * ⚠️ ชื่อของตัวสลับภาษาต้องเป็น "ภาษาของหน้าที่กำลังอ่านอยู่" ไม่ใช่สองภาษาปนกัน
+       * ของเดิมเขียน "Language selector / สลับภาษา" และปุ่ม TH ใช้ aria-label ไทยล้วน
+       * ทำให้หน้าอังกฤษ 148 หน้ามีคำไทยอยู่ใน accessibility tree — screen reader
+       * ภาษาอังกฤษอ่านออกเสียงเพี้ยนทั้งหมด (UX-17)
+       */
+      aria-label={shownLocale === "en" ? "Language selector" : "สลับภาษา"}
       aria-busy={isSwitchingLocale}
       className={`inline-flex items-center rounded-full bg-canvas border border-line p-0.5 select-none shadow-xs transition-opacity duration-150 ${
         isSwitchingLocale ? "opacity-70" : ""
@@ -59,7 +65,7 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
         type="button"
         onClick={() => handleSelect("th")}
         aria-pressed={shownLocale === "th"}
-        aria-label="เปลี่ยนเป็นภาษาไทย"
+        aria-label={shownLocale === "en" ? "Switch to Thai" : "เปลี่ยนเป็นภาษาไทย"}
         className={`tap-overlay-y px-2 py-1 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer ${
           shownLocale === "th"
             ? "bg-surface text-ink shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-line"
@@ -73,7 +79,7 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
         type="button"
         onClick={() => handleSelect("en")}
         aria-pressed={shownLocale === "en"}
-        aria-label="Switch to American English"
+        aria-label={shownLocale === "en" ? "Switch to American English" : "เปลี่ยนเป็นภาษาอังกฤษ"}
         className={`tap-overlay-y px-2 py-1 rounded-full text-xs font-mono font-bold transition duration-200 cursor-pointer ${
           shownLocale === "en"
             ? "bg-surface text-ink shadow-[0_1px_3px_rgba(42,38,31,0.1)] border border-line"

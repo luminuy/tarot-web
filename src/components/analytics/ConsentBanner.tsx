@@ -39,7 +39,7 @@ export function ConsentBanner() {
     <div
       role="region"
       aria-label={isEnglish ? "Cookie and analytics consent" : "การขอความยินยอมเก็บสถิติการใช้งาน"}
-      className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 sm:bottom-4 sm:max-w-sm z-100 rounded-xl border border-line bg-surface shadow-[0_10px_30px_rgba(42,38,31,0.14)] p-4"
+      className="fixed bottom-3 left-3 right-[4.75rem] sm:right-4 sm:left-auto sm:right-4 sm:bottom-4 sm:max-w-sm z-[var(--z-consent)] rounded-xl border border-line bg-surface shadow-[0_10px_30px_rgba(42,38,31,0.14)] p-4"
     >
       <p className="text-[13px] font-bold text-gold-ink mb-1.5">
         {isEnglish ? "✦ Before we begin" : "✦ ก่อนเริ่มดูดวง"}

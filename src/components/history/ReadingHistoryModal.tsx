@@ -194,7 +194,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
         role="dialog"
         aria-modal="true"
         aria-label={isEn ? "Tarot Reading Journal" : "สมุดบันทึกดวงชะตา"}
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
+        className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-3 sm:p-4 modal-scrim"
       >
         <motion.div
           /*

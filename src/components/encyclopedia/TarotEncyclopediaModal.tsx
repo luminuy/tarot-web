@@ -91,7 +91,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
         role="dialog"
         aria-modal="true"
         aria-label="สารานุกรมความหมายไพ่ทาโรต์"
-        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-scrim"
+        className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-3 sm:p-4 modal-scrim"
       >
         <motion.div
           /*
@@ -252,7 +252,7 @@ export const TarotEncyclopediaModal: React.FC<TarotEncyclopediaModalProps> = ({ 
               role="dialog"
               aria-modal="true"
               aria-label={`ความหมายไพ่ ${selectedCard.nameTh}`}
-              className="fixed inset-0 z-60 flex items-center justify-center p-3 modal-scrim"
+              className="fixed inset-0 z-[calc(var(--z-modal)+1)] flex items-center justify-center p-3 modal-scrim"
             >
               <motion.div
                 initial={{ opacity: 0, y: 16 }}

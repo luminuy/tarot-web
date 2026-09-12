@@ -103,7 +103,7 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
       role={isError ? "alert" : "status"}
       aria-live={isError ? "assertive" : "polite"}
       className={`${isClosing ? "anim-toast-out" : "anim-toast-in"}
- fixed top-18 sm:top-22 left-1/2 -translate-x-1/2 z-50 pointer-events-auto
+ fixed top-18 sm:top-22 left-1/2 -translate-x-1/2 z-[var(--z-toast)] pointer-events-auto
  max-w-md w-[calc(100%-2rem)] sm:w-auto min-w-[320px] sm:min-w-[420px]
  rounded-lg p-3.5 sm:p-4 overflow-hidden
  ${

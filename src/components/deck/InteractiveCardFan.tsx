@@ -25,10 +25,16 @@ interface FanCardProps {
   isPicked: boolean;
   disabled: boolean;
   onClick: (idx: number) => void;
+  /**
+   * จุดหยุดของ Tab เพียงจุดเดียวของทั้งพัด (roving tabindex — UX-20)
+   * ⚠️ ต้องมี `true` เพียงใบเดียวเสมอ ไม่งั้นจะกลับไปเป็น 78 จุดเหมือนเดิม
+   */
+  isTabStop: boolean;
+  onKeyNav: (from: number, dir: -1 | 1 | "home" | "end") => void;
   isEnglish?: boolean;
 }
 
-const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicked, disabled, onClick, isEnglish }) => {
+const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicked, disabled, onClick, isTabStop, onKeyNav, isEnglish }) => {
   if (isPicked) return null;
 
   // P1-M4: True mathematical arc geometry
@@ -46,7 +52,8 @@ const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicke
   return (
     <motion.div
       role="button"
-      tabIndex={disabled ? -1 : 0}
+      data-fan-card={cardIdx}
+      tabIndex={disabled || !isTabStop ? -1 : 0}
       aria-label={isEnglish ? `Select card #${cardIdx + 1}` : `เลือกไพ่ใบที่ ${cardIdx + 1}`}
       aria-disabled={disabled}
       initial={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -65,6 +72,26 @@ const FanCard = React.memo<FanCardProps>(({ cardIdx, posInTier, tierIdx, isPicke
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           if (!disabled) onClick(cardIdx);
+          return;
+        }
+        /*
+         * 🎹 เลื่อนระหว่างไพ่ด้วยลูกศร (roving tabindex — UX-20)
+         * ก่อนหน้านี้ไพ่ทุกใบมี `tabIndex={0}` ผู้ใช้คีย์บอร์ดจึงต้องกด Tab
+         * **78 ครั้ง** เพื่อผ่านสำรับไปให้ถึงเนื้อหาถัดไป และไม่มีทางลัดใด ๆ
+         * แพตเทิร์นนี้เป็นชุดเดียวกับที่แท็บหมวดผังใช้อยู่แล้วทั้งเว็บ
+         */
+        const map: Record<string, -1 | 1 | "home" | "end"> = {
+          ArrowRight: 1,
+          ArrowDown: 1,
+          ArrowLeft: -1,
+          ArrowUp: -1,
+          Home: "home",
+          End: "end",
+        };
+        const dir = map[e.key];
+        if (dir !== undefined) {
+          e.preventDefault();
+          onKeyNav(cardIdx, dir);
         }
       }}
       className="cursor-pointer relative select-none flex-shrink-0 w-[46px] sm:w-[66px] md:w-[74px] group focus-visible:outline-none"
@@ -178,6 +205,40 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
     onPickCardRef.current(idx);
   }, []);
 
+  /*
+   * 🎹 roving tabindex — ทั้งพัดมีจุดหยุดของ Tab เพียง "ใบเดียว" (UX-20)
+   * เลือกใบแรกที่ยังไม่ถูกหยิบเป็นจุดหยุด แล้วให้ลูกศรเลื่อนโฟกัสไปใบอื่นแทน
+   * ⚠️ ถ้าเผลอให้หลายใบเป็น tab stop พร้อมกัน จะกลับไปเป็น 78 จุดเหมือนเดิมทันที
+   */
+  const tabStopIdx = useMemo(() => {
+    for (let i = 0; i < totalCards; i++) {
+      if (!pickedIndices.includes(i)) return i;
+    }
+    return -1;
+  }, [totalCards, pickedIndices]);
+
+  const handleKeyNav = useCallback(
+    (from: number, dir: -1 | 1 | "home" | "end") => {
+      const available = Array.from({ length: totalCards }, (_, i) => i).filter(
+        (i) => !pickedIndicesRef.current.includes(i)
+      );
+      if (available.length === 0) return;
+
+      let target: number;
+      if (dir === "home") target = available[0];
+      else if (dir === "end") target = available[available.length - 1];
+      else {
+        const pos = available.indexOf(from);
+        // วนกลับหัวท้ายเหมือนแพตเทิร์นแท็บที่ใช้อยู่ทั้งเว็บ
+        target = available[(pos + dir + available.length) % available.length];
+      }
+
+      const el = document.querySelector<HTMLElement>(`[data-fan-card="${target}"]`);
+      el?.focus();
+    },
+    [totalCards]
+  );
+
   // P1-U6: Accessible Auto-Pick Fallback (Randomly select next card)
   const handleAutoPick = () => {
     if (disabled || isComplete) return;
@@ -270,6 +331,8 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
                         isPicked={pickedIndices.includes(cardIdx)}
                         disabled={disabled}
                         onClick={handleCardClick}
+                        isTabStop={cardIdx === tabStopIdx}
+                        onKeyNav={handleKeyNav}
                         isEnglish={isEnglish}
                       />
                     ))}
