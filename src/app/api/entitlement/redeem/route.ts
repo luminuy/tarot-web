@@ -33,10 +33,18 @@ export async function POST(request: Request) {
 
   const entitlement = await getEntitlementSnapshot(request);
 
+  // ⚠️ ถ้อยคำต้องตรงกับชนิดของรหัส — ของเดิมบอกว่า "เปิดไพ่ทุกอย่างในเว็บ" ทุกกรณี
+  // ซึ่งจริงเฉพาะรหัส VIP (`purchase_*`) เท่านั้น · รหัสแจกได้แค่รอบเปิดไพ่ผังมาตรฐาน
+  const message =
+    result.kind === "premium"
+      ? `แลกรับสิทธิ์สำเร็จ คุณได้รับสิทธิ์เปิดไพ่ทุกอย่างในเว็บจำนวน ${result.credits} ครั้ง`
+      : `แลกรับสิทธิ์สำเร็จ คุณได้รับรอบเปิดไพ่เพิ่ม ${result.credits} ครั้ง (ใช้ต่อเมื่อโควตาของวันหมดแล้ว)`;
+
   return NextResponse.json({
     ok: true,
-    message: `แลกรับสิทธิ์สำเร็จ คุณได้รับสิทธิ์เปิดไพ่ทุกอย่างในเว็บจำนวน ${result.credits} ครั้ง`,
+    message,
     credits: result.credits,
+    kind: result.kind,
     code: result.code,
     title: result.title,
     entitlement,

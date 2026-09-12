@@ -318,6 +318,15 @@ async function main() {
   await kvDelete(KEY.flag("entitlement.enforced"));
   check("หลังล้าง flag: isEntitlementEnabled กลับมาเป็น true (default on)", (await isEntitlementEnabled()) === true);
 
+  // ── 13. รหัสแลกสิทธิ์ (โค้ดแจก / โค้ด VIP) ──
+  // รวมไว้ในด่านนี้แทนการเพิ่มด่านใหม่ — `test-redeem-code.ts` เคยเป็นเทสต์กำพร้าที่ไม่มีใครรัน
+  // จึงพังเงียบตอนเพดานโควตาเปลี่ยนเป็น 1 ครั้ง/วัน โดยไม่มีด่านไหนจับได้
+  console.log("\n🎟 รหัสแลกสิทธิ์:");
+  const { runRedeemTests } = await import("./test-redeem-code");
+  const redeem = await runRedeemTests();
+  pass += redeem.passed;
+  fail += redeem.total - redeem.passed;
+
   console.log(`\n${pass}/${pass + fail} ผ่าน`);
   if (fail > 0) process.exit(1);
 }

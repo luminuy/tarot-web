@@ -72,7 +72,13 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
       if (!res.ok) {
         setRedeemError(data.error || (isEn ? "Failed to redeem code" : "ไม่สามารถแลกรับสิทธิ์ได้"));
       } else {
-        setRedeemSuccess(data.message || (isEn ? "Redeemed successfully" : "แลกรับสิทธิ์สำเร็จ"));
+        // ฝั่งอังกฤษประกอบข้อความเอง — เซิร์ฟเวอร์ส่งมาเป็นภาษาไทยชุดเดียว
+        // และต้องแยกตามชนิดรหัส: VIP ปลดทุกผัง · โค้ดแจกได้แค่รอบเปิดไพ่เพิ่ม
+        const enMessage =
+          data.kind === "premium"
+            ? `Redeemed successfully — ${data.credits} premium readings unlocked (all spreads and master oracles).`
+            : `Redeemed successfully — ${data.credits} extra readings added (used once today's quota runs out).`;
+        setRedeemSuccess(isEn ? enMessage : data.message || "แลกรับสิทธิ์สำเร็จ");
         setRedeemCode("");
         mutateEntitlement();
       }
