@@ -199,7 +199,7 @@ function PromptTab({
         <span>{value.length.toLocaleString()} / 24,000</span>
       </div>
       {show ? (
-        <pre className="max-h-64 overflow-auto rounded-xl border border-line bg-surface-pale p-3 font-mono text-[13px] leading-relaxed text-ink">
+        <pre className="max-h-64 overflow-auto rounded-xl border border-line bg-surface-warm p-3 font-mono text-[13px] leading-relaxed text-ink">
           {fallback}
         </pre>
       ) : null}
@@ -450,7 +450,7 @@ function CardTab({
                     className={`tap-overlay-y flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors ${
                       isSelected
                         ? "border border-ink bg-[#F2EFE9] font-medium text-ink"
-                        : "text-ink hover:bg-surface-pale"
+                        : "text-ink hover:bg-surface-warm"
                     }`}
                   >
                     <div className="truncate pr-2">
@@ -539,7 +539,7 @@ function CardTab({
             {/* หมวดความหมาย 5 ด้าน */}
             <div className="space-y-4">
               {CATS.map((cat) => (
-                <div key={cat.id} className="flex flex-col gap-2 rounded-xl bg-surface-pale p-3.5 border border-line">
+                <div key={cat.id} className="flex flex-col gap-2 rounded-xl bg-surface-warm p-3.5 border border-line">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-semibold text-ink">
                       ด้าน{cat.label}

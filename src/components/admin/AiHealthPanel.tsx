@@ -170,7 +170,7 @@ export default function AiHealthPanel() {
                 </p>
               </div>
               {quality && (
-                <span className="rounded-full bg-surface-mist border border-line px-2.5 py-0.5 text-[11px] font-semibold text-ink">
+                <span className="rounded-full bg-surface-warm border border-line px-2.5 py-0.5 text-[11px] font-semibold text-ink">
                   บันทึกทั้งหมด {quality.totalReadings.toLocaleString()} ครั้ง
                 </span>
               )}
@@ -179,7 +179,7 @@ export default function AiHealthPanel() {
             {quality ? (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="rounded-xl border border-line-soft bg-surface-mist p-3 text-center">
+                  <div className="rounded-xl border border-line-soft bg-surface-warm p-3 text-center">
                     <p className="text-[11px] font-medium text-muted">ความแม่นยำรวม</p>
                     <p className="mt-1 text-xl font-bold text-ink">
                       {quality.ratedReadings > 0 ? `${quality.accurateRate}%` : "—"}
@@ -189,7 +189,7 @@ export default function AiHealthPanel() {
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-line-soft bg-surface-mist p-3 text-center">
+                  <div className="rounded-xl border border-line-soft bg-surface-warm p-3 text-center">
                     <p className="text-[11px] font-medium text-muted">เวลาสร้างคำอ่านเฉลี่ย</p>
                     <p className="mt-1 text-xl font-bold text-ink">
                       {quality.avgElapsedMs > 0 ? `${(quality.avgElapsedMs / 1000).toFixed(1)}s` : "—"}
@@ -199,7 +199,7 @@ export default function AiHealthPanel() {
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-line-soft bg-surface-mist p-3 text-center">
+                  <div className="rounded-xl border border-line-soft bg-surface-warm p-3 text-center">
                     <p className="text-[11px] font-medium text-muted">อัตราสลับโมเดล (Failover)</p>
                     <p className="mt-1 text-xl font-bold text-ink">
                       {quality.failoverRate}%
@@ -209,7 +209,7 @@ export default function AiHealthPanel() {
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-line-soft bg-surface-mist p-3 text-center">
+                  <div className="rounded-xl border border-line-soft bg-surface-warm p-3 text-center">
                     <p className="text-[11px] font-medium text-muted">ผลลัพธ์ที่ได้รับ</p>
                     <p className="mt-1 text-xs font-semibold text-ink">
                       แม่น {quality.accurateCount} · ก้ำกึ่ง {quality.partialCount} · ไม่ตรง {quality.notHappenedCount}
@@ -226,7 +226,7 @@ export default function AiHealthPanel() {
                     คุณภาพภาษาไทยของคำอ่าน (Thai Quality Guard)
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div className="rounded-lg border border-line-soft bg-surface-mist p-2.5 text-center">
+                    <div className="rounded-lg border border-line-soft bg-surface-warm p-2.5 text-center">
                       <p className="text-[11px] font-medium text-muted">คะแนนภาษาไทยเฉลี่ย</p>
                       <p className="mt-1 text-xl font-bold text-ink">
                         {quality.avgThaiScore > 0 ? `${quality.avgThaiScore}/100` : "—"}
@@ -234,7 +234,7 @@ export default function AiHealthPanel() {
                       <p className="mt-0.5 text-[10px] text-muted">100 = ไม่พบที่ผิดเลย</p>
                     </div>
 
-                    <div className="rounded-lg border border-line-soft bg-surface-mist p-2.5 text-center">
+                    <div className="rounded-lg border border-line-soft bg-surface-warm p-2.5 text-center">
                       <p className="text-[11px] font-medium text-muted">จุดที่ขัดให้อัตโนมัติ</p>
                       <p className="mt-1 text-xl font-bold text-ink">{quality.avgThaiFixes}</p>
                       <p className="mt-0.5 text-[10px] text-muted">
@@ -242,7 +242,7 @@ export default function AiHealthPanel() {
                       </p>
                     </div>
 
-                    <div className="col-span-2 sm:col-span-1 rounded-lg border border-line-soft bg-surface-mist p-2.5">
+                    <div className="col-span-2 sm:col-span-1 rounded-lg border border-line-soft bg-surface-warm p-2.5">
                       <p className="text-[11px] font-medium text-muted text-center">ปัญหาที่เจอบ่อย</p>
                       {Object.keys(quality.thaiIssueCounts).length > 0 ? (
                         <div className="mt-1 space-y-0.5">
@@ -310,7 +310,7 @@ export default function AiHealthPanel() {
           {data.models.length > 0 && (
             <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-xs">
               <table className="w-full min-w-[560px] text-left text-xs">
-                <thead className="bg-surface-mist text-muted border-b border-line">
+                <thead className="bg-surface-warm text-muted border-b border-line">
                   <tr>
                     <th className="px-3.5 py-2.5 font-semibold">โมเดล</th>
                     <th className="px-3.5 py-2.5 font-semibold">ผล</th>
@@ -320,7 +320,7 @@ export default function AiHealthPanel() {
                 </thead>
                 <tbody className="divide-y divide-line-soft text-ink">
                   {data.models.map((m) => (
-                    <tr key={m.model} className="hover:bg-surface-mist transition-colors align-top">
+                    <tr key={m.model} className="hover:bg-surface-warm transition-colors align-top">
                       <td className="px-3.5 py-3 font-mono text-xs">{m.model}</td>
                       <td className="px-3.5 py-3">
                         <span

@@ -89,7 +89,7 @@ function CopyBadge({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="tap-overlay-y inline-flex items-center gap-1.5 rounded-lg bg-surface-mist px-2.5 py-1 text-xs text-ink hover:bg-white hover:border-gold transition-colors border border-line shadow-2xs"
+      className="tap-overlay-y inline-flex items-center gap-1.5 rounded-lg bg-surface-warm px-2.5 py-1 text-xs text-ink hover:bg-white hover:border-gold transition-colors border border-line shadow-2xs"
       title="คลิกเพื่อคัดลอก"
     >
       <span className="font-mono truncate max-w-[180px] sm:max-w-xs">{text}</span>
@@ -482,7 +482,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                       type="button"
                       onClick={rebuildSearchIndex}
                       disabled={rebuild.busy}
-                      className="tap-overlay-y rounded-lg border border-line bg-surface-mist px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-white hover:border-gold disabled:opacity-50 cursor-pointer transition shadow-2xs"
+                      className="tap-overlay-y rounded-lg border border-line bg-surface-warm px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-white hover:border-gold disabled:opacity-50 cursor-pointer transition shadow-2xs"
                     >
                       {rebuild.busy ? "กำลัง index…" : "สร้าง index ใหม่"}
                     </button>

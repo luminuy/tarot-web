@@ -38,12 +38,12 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
                 {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
               </span>
               {!isStandard ? (
-                <span className="text-xs text-gold-ink bg-surface-mist border border-line px-2.5 py-0.5 rounded-full font-serif-th font-semibold flex items-center gap-1">
+                <span className="text-xs text-gold-ink bg-surface-warm border border-line px-2.5 py-0.5 rounded-full font-serif-th font-semibold flex items-center gap-1">
                   <SealedLockIcon className="w-3 h-3" />
                   <span>{isEnglish ? "Deep Vision" : "ผังญาณลึก"}</span>
                 </span>
               ) : (
-                <span className="text-xs text-[#5E5240] bg-surface-mist border border-line-soft px-2.5 py-0.5 rounded-full font-serif-th">
+                <span className="text-xs text-[#5E5240] bg-surface-warm border border-line-soft px-2.5 py-0.5 rounded-full font-serif-th">
                   {isEnglish ? "Free" : "เปิดฟรี"}
                 </span>
               )}
@@ -80,7 +80,7 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
               </button>
 
               {isExpanded && (
-                <div className="space-y-1.5 pt-2 pb-1 text-xs text-muted bg-surface-mist p-3 rounded-lg border border-line-soft max-h-48 overflow-y-auto">
+                <div className="space-y-1.5 pt-2 pb-1 text-xs text-muted bg-surface-warm p-3 rounded-lg border border-line-soft max-h-48 overflow-y-auto">
                   {spread.positions.map((pos: SpreadPosition) => (
                     <div key={pos.index} className="flex items-start gap-2">
                       <span className="font-mono text-gold-ink font-bold shrink-0">
@@ -105,13 +105,13 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-line-soft z-10">
               <Link
                 href={`/?spread=${spread.id}`}
-                className="w-full py-2 px-3 text-xs font-serif-th font-bold text-center rounded-lg bg-ink text-surface-mist hover:bg-[#3D382E] transition-colors"
+                className="w-full py-2 px-3 text-xs font-serif-th font-bold text-center rounded-lg bg-ink text-surface-warm hover:bg-[#3D382E] transition-colors"
               >
                 {isEnglish ? "Begin Reading" : "เริ่มเปิดไพ่"}
               </Link>
               <Link
                 href={`/spreads/${spread.id}`}
-                className="w-full py-2 px-3 text-xs font-serif-th font-semibold text-center rounded-lg border border-line text-[#4A4338] hover:bg-surface-mist transition-colors"
+                className="w-full py-2 px-3 text-xs font-serif-th font-semibold text-center rounded-lg border border-line text-[#4A4338] hover:bg-surface-warm transition-colors"
               >
                 {isEnglish ? "Spread Details" : "รายละเอียดผัง"}
               </Link>

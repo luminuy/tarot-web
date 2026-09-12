@@ -49,7 +49,7 @@ export default function MarketingAudience() {
         ) : (
           <>
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <div className="rounded-xl border border-line bg-surface-pale px-4 py-3">
+              <div className="rounded-xl border border-line bg-surface-warm px-4 py-3">
                 <p className="text-[13px] text-muted">ยินยอมทั้งหมด</p>
                 <p className="mt-0.5 text-2xl font-bold text-ink">
                   {state.count.toLocaleString("th-TH")}
@@ -85,7 +85,7 @@ export default function MarketingAudience() {
                   </thead>
                   <tbody>
                     {state.users.map((u) => (
-                      <tr key={u.email} className="border-b border-line/60 hover:bg-surface-pale/60 transition-colors">
+                      <tr key={u.email} className="border-b border-line/60 hover:bg-surface-warm/60 transition-colors">
                         <td className="py-2.5 pr-3 font-medium text-ink">{u.email}</td>
                         <td className="py-2.5 pr-3 text-ink">{u.name || "—"}</td>
                         <td className="py-2.5 pr-3 text-muted">{u.provider}</td>

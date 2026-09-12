@@ -365,7 +365,7 @@ export function LoveOneCardClient() {
               <span className="px-3 py-1 rounded-full bg-inset border border-line-warm text-xs font-serif-th font-semibold text-gold-ink">
                 {isEnglish ? `Status: ${currentStatusObj?.titleEn}` : `สถานะ: ${currentStatusObj?.titleTh}`}
               </span>
-              <span className="px-3 py-1 rounded-full bg-surface-mist border border-line-warm text-xs font-sans font-medium text-muted">
+              <span className="px-3 py-1 rounded-full bg-surface-warm border border-line-warm text-xs font-sans font-medium text-muted">
                 {card.arcana === "major" ? "Major Arcana" : "Minor Arcana"} · ธาตุ{card.element}
               </span>
               {savedToHistory && (
