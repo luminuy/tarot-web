@@ -86,6 +86,8 @@ const PersonaCardSelector = withMotionScope(() => import("@/components/reading/P
 const IntentionAltarInput = withMotionScope(() => import("@/components/reading/IntentionAltarInput").then((m) => m.IntentionAltarInput));
 /* ไพ่ไขข้อข้องใจ — ไม่ใช้ `motion` เลย จึงไม่ต้องห่อ `withMotionScope()` (INC-0137) */
 const ClarificationCard = dynamic(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard), { ssr: false });
+/* หน้าต่างสายด่วน — ใช้ `Modal` ซึ่งห่อ AppMotionProvider ให้ในตัวแล้ว จึงไม่ต้องห่อซ้ำเหมือน AccessDialog */
+const CrisisNotice = dynamic(() => import("@/components/safety/CrisisNotice").then((m) => m.CrisisNotice), { ssr: false });
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {
@@ -305,6 +307,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [readingResult, setReadingResult] = useState<Partial<Reading> | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  /**
+   * ข้อความสายด่วนเมื่อด่านความปลอดภัยบล็อกคำถามที่มีสัญญาณวิกฤต (กฎเหล็กข้อ 6)
+   * แยกจาก `errorMsg` เพราะนี่ไม่ใช่ "ระบบขัดข้อง" แต่เป็นข้อความช่วยเหลือที่ต้องเด่นและกดโทรได้
+   * ค่า `""` = ถูกบล็อกแต่เซิร์ฟเวอร์ไม่ได้ส่งถ้อยคำมา (หน้าต่างจะใช้ข้อความมาตรฐานแทน)
+   */
+  const [crisisMessage, setCrisisMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastData | null>(null);
 
@@ -625,6 +633,16 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       });
 
       const data = await res.json().catch(() => ({}));
+      /*
+       * ⚠️ ต้องเช็ก `data.blocked` ก่อนดู `res.ok` เสมอ
+       * ด่านความปลอดภัยคืนสถานะ **200** พร้อม `{ blocked: true, message }` ไม่ใช่ 4xx
+       * ถ้าข้ามไปอ่าน `readingId` เลย ข้อความสายด่วนจะหายเงียบ
+       * แล้วผู้ใช้ที่ส่งสัญญาณวิกฤตจะถูกพาไปหน้าสับไพ่ที่ไม่มีเซสชัน
+       */
+      if (data.blocked) {
+        setCrisisMessage(typeof data.message === "string" ? data.message : "");
+        return;
+      }
       if (!res.ok) {
         // server เป็นผู้ตัดสินสิทธิ์เสมอ — ถ้าโดนกั้นที่นี่ ให้หน้าต่างสิทธิ์อธิบายแทนแถบ error
         const blockedReason = mapBlockedReason(data.reason);
@@ -745,6 +763,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       });
 
       const data = await res.json().catch(() => ({}));
+      // ด่านความปลอดภัยคืน 200 พร้อม `blocked` — ต้องเช็กก่อนใช้ `readingId` (เหตุผลเต็มอยู่ที่ handleStartSession)
+      if (data.blocked) {
+        setCrisisMessage(typeof data.message === "string" ? data.message : "");
+        return;
+      }
       if (!res.ok) {
         const blockedReason = mapBlockedReason(data.reason);
         if (blockedReason) {
@@ -1298,6 +1321,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {/* ไม่ต้องมี <AnimatePresence> แล้ว — ToastNotification เล่นคีย์เฟรมขาออกเองแล้วค่อย
           เรียก onClose เมื่อจบ (ดูหัวไฟล์ ToastNotification.tsx) */}
       {toast && <ToastNotification toast={toast} onClose={() => setToast(null)} />}
+
+      {/* ✦ หน้าต่างสายด่วนเมื่อด่านความปลอดภัยบล็อกคำถาม — ต้องขึ้นก่อนทุกอย่าง ไม่ให้ขั้นตอนเดินต่อ */}
+      {crisisMessage !== null && (
+        <CrisisNotice message={crisisMessage} onClose={() => setCrisisMessage(null)} />
+      )}
 
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">

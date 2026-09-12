@@ -96,6 +96,37 @@ If calling feels too difficult right now, please reach out to someone you trust 
 
 The cards will be here whenever you are ready to return. For now, please let yourself be cared for.`;
 
+/**
+ * สายด่วนที่ต้องกดโทรได้จริงในหน้าจอวิกฤต
+ * -------------------------------------------------
+ * แยกออกมาเป็นข้อมูล ไม่ให้ฝั่ง UI พิมพ์เบอร์เองซ้ำ — เบอร์ในข้อความกับเบอร์บนปุ่ม
+ * ต้องมาจากแหล่งเดียวกันเสมอ ไม่งั้นวันหนึ่งแก้ที่เดียวแล้วอีกที่ค้างเบอร์เก่า
+ */
+export interface CrisisHotline {
+  /** ชื่อหน่วยงานที่แสดงบนปุ่ม */
+  label: string;
+  /** เบอร์สำหรับ `tel:` — ไม่มีเว้นวรรคหรือขีด */
+  tel: string;
+  /** เวลาให้บริการ/หมายเหตุสั้น ๆ */
+  note: string;
+}
+
+const CRISIS_HOTLINES_TH: CrisisHotline[] = [
+  { label: "สายด่วนสุขภาพจิต 1323", tel: "1323", note: "โทรฟรี ตลอด 24 ชั่วโมง" },
+  { label: "สะมาริตันส์ 02-713-6793", tel: "027136793", note: "เที่ยงวัน – ห้าทุ่ม" },
+  { label: "เหตุฉุกเฉิน 1669", tel: "1669", note: "เมื่อตกอยู่ในอันตรายทันที" },
+];
+
+const CRISIS_HOTLINES_EN: CrisisHotline[] = [
+  { label: "988 Suicide & Crisis Lifeline", tel: "988", note: "Free · confidential · 24/7" },
+  { label: "The Trevor Project", tel: "18664887386", note: "24/7 for LGBTQ youth" },
+  { label: "Emergency 911", tel: "911", note: "If you are in immediate danger" },
+];
+
+export function getCrisisHotlines(lang: "th" | "en" = "th"): CrisisHotline[] {
+  return lang === "en" ? CRISIS_HOTLINES_EN : CRISIS_HOTLINES_TH;
+}
+
 export function getCrisisMessage(lang: "th" | "en" = "th"): string {
   return lang === "en" ? CRISIS_MESSAGE_EN : CRISIS_MESSAGE;
 }
