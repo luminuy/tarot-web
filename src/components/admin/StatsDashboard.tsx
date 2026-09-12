@@ -172,85 +172,79 @@ export default function StatsDashboard() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* ─── Top Control Bar: Range Selector & Sub-Tabs ──────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
-        {/* Days Filter Pills */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-xs font-semibold text-muted mr-1">ช่วงเวลา:</span>
-          {[7, 14, 30, 90].map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => setDays(d)}
-              className={`rounded-full px-3.5 py-1 text-xs font-semibold transition cursor-pointer ${
-                days === d
-                  ? "bg-ink text-white shadow-xs"
-                  : "border border-line bg-surface-mist text-muted hover:bg-white hover:text-ink"
-              }`}
-            >
-              {d} วัน
-            </button>
-          ))}
-        </div>
-
-        {/* Sub-view switcher */}
-        <div className="flex items-center gap-1 rounded-xl border border-line bg-surface-mist p-1 text-xs">
+      {/* ─── Top Control Bar: Segmented Switcher & Range Selector ──────── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-line pb-4">
+        {/* Segmented Control Switcher */}
+        <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-canvas p-1 text-xs">
           <button
             type="button"
             onClick={() => setSubView("daily")}
-            className={`rounded-lg px-3 py-1 text-xs font-medium transition cursor-pointer ${
+            className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
               subView === "daily"
                 ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                 : "text-muted hover:text-ink"
             }`}
           >
-            สถิติรายวัน (Day-by-Day)
+            สถิติการใช้งานและรายวัน
           </button>
           <button
             type="button"
             onClick={() => setSubView("summary")}
-            className={`rounded-lg px-3 py-1 text-xs font-medium transition cursor-pointer ${
+            className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
               subView === "summary"
                 ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                 : "text-muted hover:text-ink"
             }`}
           >
-            หมวดหมู่ & แม่หมอยอดนิยม
+            เรื่องยอดนิยม & แม่หมอ
           </button>
           <button
             type="button"
             onClick={() => setSubView("tech")}
-            className={`rounded-lg px-3 py-1 text-xs font-medium transition cursor-pointer ${
+            className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
               subView === "tech"
                 ? "bg-white text-ink shadow-2xs font-semibold border border-line"
                 : "text-muted hover:text-ink"
             }`}
           >
-            เทคนิค & AI
+            ประสิทธิภาพระบบ & AI
           </button>
+        </div>
+
+        {/* Days Filter Pills & Refresh */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1">
+            <span className="text-xs font-semibold text-muted mr-1 hidden sm:inline">ช่วงเวลา:</span>
+            {[7, 14, 30, 90].map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setDays(d)}
+                className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer ${
+                  days === d
+                    ? "bg-ink text-white shadow-xs"
+                    : "border border-line bg-white text-muted hover:bg-canvas hover:text-ink"
+                }`}
+              >
+                {d === 30 ? "30 วัน" : d === 90 ? "90 วัน" : `${d} วัน`}
+              </button>
+            ))}
+          </div>
+
           <button
             type="button"
             onClick={() => load(days)}
-            className="rounded-lg px-2.5 py-1 text-xs text-muted hover:text-ink ml-1 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
             disabled={loading}
-            title="รีเฟรชข้อมูลสด"
+            title="รีเฟรชข้อมูลล่าสุด"
           >
-            {loading ? "…" : "↻"}
+            <span className={loading ? "animate-spin inline-block" : "inline-block"}>↻</span>
+            <span className="hidden sm:inline">โหลดล่าสุด</span>
           </button>
         </div>
       </div>
 
       {err ? <p className="text-sm text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-xl">{err}</p> : null}
-
-      {/* ─── Range KPI Cards ────────────────────────────────────────── */}
-      {view && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard label={`เริ่มดูดวง (${days} วัน)`} value={n(view.started)} />
-          <StatCard label="อ่านจบสมบูรณ์" value={n(view.completed)} sub={`${view.completionRate} ของที่เริ่ม`} />
-          <StatCard label="แชทถามต่อ" value={n(view.chat)} sub="ข้อความคำถาม" />
-          <StatCard label="ถูกบล็อก / สิทธิ์เต็ม" value={`${n(view.blocked)} ครั้ง`} sub="ระบบความปลอดภัย" />
-        </div>
-      )}
 
       {/* ─── Active Sub-Tab Views ──────────────────────────────────── */}
       {data && view ? (
@@ -263,7 +257,13 @@ export default function StatsDashboard() {
           {/* Sub-tab 2: Categories, Spreads, Personas & Flags */}
           {subView === "summary" && (
             <div className="space-y-4">
-              <div className="rounded-2xl border border-line bg-surface-mist p-4 text-xs text-muted">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <StatCard label={`เริ่มเปิดไพ่รวม (${days} วัน)`} value={n(view.started)} />
+                <StatCard label="เปิดจบสมบูรณ์" value={n(view.completed)} sub={`${view.completionRate} ของที่เริ่ม`} />
+                <StatCard label="แชทถามต่อ" value={n(view.chat)} sub="ข้อความคำถาม" />
+                <StatCard label="บล็อกความปลอดภัย" value={`${n(view.blocked)} ครั้ง`} sub="ระบบความปลอดภัย" />
+              </div>
+              <div className="rounded-2xl border border-line bg-canvas p-4 text-xs text-muted">
                 <p className="font-semibold text-ink">สรุปความนิยมในรอบ {days} วัน</p>
                 <p className="mt-0.5">
                   ความถี่ของแต่ละตัวเลือกที่ผู้ใช้งานเลือกเปิดไพ่ ปรึกษาแม่หมอ และสัดส่วนหมวดหมู่
