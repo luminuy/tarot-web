@@ -69,7 +69,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
             />
           </div>
           <div className="space-y-1 min-w-0">
-            <h3 className="text-[13px] font-bold text-gold-ink uppercase tracking-wider font-serif-th">
+            <h3 className="text-[13px] font-bold text-gold-on-dark uppercase tracking-wider font-serif-th">
               {isEnglish ? "Ethical Reading Notice & AI Disclosure" : "ข้อควรทราบเกี่ยวกับการทำนาย"}
             </h3>
             <p className="text-[13px] text-line leading-[1.7] font-serif-th">
@@ -122,7 +122,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                           </Link>
                         ) : (
                           <>
-                            <span className={`${"color" in item ? item.color : "text-gold"} font-semibold`}>{item.title}</span>
+                            <span className={`${"color" in item ? item.color : "text-gold-on-dark"} font-semibold`}>{item.title}</span>
                             {"description" in item && item.description && (
                               <p className="text-[11px] text-line/60">{item.description}</p>
                             )}
