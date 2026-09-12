@@ -1,0 +1,76 @@
+{
+  "promptVersion": "20260911-2",
+  "judgeModel": "gemini-3.6-flash",
+  "startedAt": "2026-09-12T02:39:47.289Z",
+  "cases": [
+    {
+      "id": "gold-001",
+      "category": "love",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": null,
+      "elapsedMs": 208,
+      "ok": false,
+      "consistencyIssues": [],
+      "thaiScore": 0,
+      "thaiIssues": [],
+      "judge": {},
+      "error": "โมเดล Groq ไม่คืนคำอ่านที่สมบูรณ์"
+    },
+    {
+      "id": "gold-002",
+      "category": "work",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "openai/gpt-oss-120b",
+      "elapsedMs": 12115,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {
+        "comment": "คำทำนายตอบตรงคำถามอย่างชัดเจนพร้อมข้อแนะนำที่นำไปปฏิบัติได้จริงในระยะเวลาสั้น ภาพรายละเอียดของไพ่ RWS 1909 และภาษาไทยมีความถูกต้องและเป็นธรรมชาติอย่างมาก",
+        "onQuestion": 5,
+        "cardGrounded": 5,
+        "actionable": 5,
+        "personaFit": 5,
+        "notVague": 5,
+        "thaiNatural": 5,
+        "average": 5
+      }
+    },
+    {
+      "id": "gold-003",
+      "category": "money",
+      "spreadId": "three-card",
+      "personaId": "default",
+      "model": "qwen/qwen3.8-27b",
+      "elapsedMs": 2557,
+      "ok": true,
+      "consistencyIssues": [],
+      "thaiScore": 95,
+      "thaiIssues": [
+        "REPETITIVE_NGRAM"
+      ],
+      "judge": {}
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "succeeded": 2,
+    "avgThaiScore": 95,
+    "avgElapsedMs": 7336,
+    "consistencyIssueRate": 0,
+    "rubric": {
+      "onQuestion": 5,
+      "cardGrounded": 5,
+      "actionable": 5,
+      "personaFit": 5,
+      "notVague": 5,
+      "thaiNatural": 5
+    },
+    "overall": 5
+  }
+}
