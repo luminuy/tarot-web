@@ -276,7 +276,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
         {/* Header Title inside Dropdown */}
         <div className="px-3 py-1 flex items-center justify-between text-[13px] font-serif-th font-semibold text-muted border-b border-line/40 pb-1.5">
-          <span className="flex items-center gap-1.5 text-gold">
+          <span className="flex items-center gap-1.5 text-gold-ink">
             <span className="font-bold">{isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}</span>
           </span>
           <span className="text-ink text-[12px] font-mono tracking-wider bg-inset border border-line px-2 py-0.5 rounded-full font-bold">

@@ -39,9 +39,9 @@ const SRC = path.join(ROOT, "src");
 
 /**
  * เพดานจำนวนสีฮาร์ดโค้ด — **ratchet: ลดได้อย่างเดียว ห้ามเพิ่ม**
- * ค่าเริ่มต้นมาจากจำนวนจริงหลังกวาดรอบแรก (4,232 → 287)
+ * ค่าเริ่มต้นมาจากจำนวนจริงหลังกวาดรอบแรก (4,232 → 286)
  */
-const MAX_HARDCODED_HEX = 287;
+const MAX_HARDCODED_HEX = 286;
 
 /** สีที่ถูกถอดออกจากระบบแล้ว — ห้ามกลับมาไม่ว่ากรณีใด */
 const BANNED: { hex: string; reason: string }[] = [
@@ -57,6 +57,29 @@ const SMALL_TEXT =
   /text-\[1[0-3]px\]|text-\[12px\]|\btext-xs\b|\btext-sm\b|\btext-base\b/;
 
 const GOLD_AS_TEXT = /\btext-gold\b(?!-)|text-\[#A58A5C\]/;
+
+/*
+ * ── กฎ 4 · ทองบนพื้นมืด ────────────────────────────────────────────────────
+ * บทเรียนจากการวัดซ้ำบน production หลัง deploy รอบ UX-14:
+ * กฎข้อ 3 จับ `text-gold` บนพื้นสว่างได้หมด แต่ยังเหลือ 2 จุดที่หลุด เพราะ
+ *
+ *   1. `text-gold-ink` (#8F5C1A) ผ่านเกณฑ์เฉพาะบนพื้นสว่าง — บนฟุตเตอร์พื้นมืด
+ *      (`--color-dark` #171512) มันได้แค่ 3.22:1 ซึ่งตกเกณฑ์ AA เหมือนกัน
+ *      **โทเคนสีไม่ได้ผูกกับความหมายอย่างเดียว แต่ผูกกับพื้นที่มันไปวางด้วย**
+ *      (บทเรียนซ้ำกับ `ok`/`err` ที่ต้องมีคู่ `-on-dark` — INC-0130)
+ *
+ *   2. บางจุด `text-gold` อยู่บน element แม่ ส่วนคลาสขนาดอยู่บนลูกหรือปู่
+ *      การเช็กทีละ element จึงมองไม่เห็น — ต้องเช็กทั้งไฟล์ว่ามีทองคู่กับพื้นมืดไหม
+ *
+ * ⚠️ กฎนี้ตรวจแบบ "ทั้งไฟล์" จึงอาจมี false positive ถ้าไฟล์เดียวมีทั้งโซนมืดและสว่าง
+ * ถ้าเจอเคสแบบนั้นให้แยกคอมโพเนนต์ ไม่ใช่ปิดกฎ
+ *
+ * ⚠️ ต้องไม่จับ `hover:bg-dark` — นั่นคือ "สีปุ่มตอนเอาเมาส์ชี้" ไม่ใช่พื้นของคอนเทนเนอร์
+ * ตัวหนังสือบนปุ่มนั้นเป็นสีขาวอยู่แล้ว ไม่เกี่ยวกับทองเลย
+ * (เจอ false positive จริง 3 ไฟล์ในแผงแอดมินตอนเขียนกฎนี้รอบแรก)
+ */
+const DARK_SURFACE = /(?<![:\w-])bg-dark\b|(?<![:\w-])bg-\[#171512\]/;
+const GOLD_INK_AS_TEXT = /\btext-gold-ink\b(?!-)|text-\[#8F5C1A\]/;
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -136,6 +159,25 @@ if (goldHits.length) {
   );
 } else {
   notes.push("ไม่มี `text-gold` บนตัวอักษรขนาดเล็ก");
+}
+
+// ── กฎ 4 · ทองห้ามเป็นตัวอักษรบนพื้นมืด ───────────────────────────────────
+const darkGoldHits: string[] = [];
+for (const f of files) {
+  const src = fs.readFileSync(f, "utf8");
+  if (!DARK_SURFACE.test(src)) continue;
+  if (!GOLD_INK_AS_TEXT.test(src) && !GOLD_AS_TEXT.test(src)) continue;
+  darkGoldHits.push(path.relative(ROOT, f));
+}
+if (darkGoldHits.length) {
+  problems.push(
+    `ไฟล์ที่มีพื้นมืด (\`bg-dark\`) แต่ยังใช้ทองเป็นสีตัวอักษร ${darkGoldHits.length} ไฟล์\n` +
+      `      \`gold-ink\` บนพื้น #171512 ได้แค่ 3.22:1 · \`gold\` ได้ 2.4:1 — ตกเกณฑ์ AA ทั้งคู่\n` +
+      `      ➔ ใช้ \`text-gold-on-dark\` (#D2A354 = 7.9:1) สำหรับตัวอักษรบนพื้นมืด\n` +
+      darkGoldHits.slice(0, 8).map((h) => `      • ${h}`).join("\n")
+  );
+} else {
+  notes.push("ไม่มีทองเป็นสีตัวอักษรบนพื้นมืด");
 }
 
 // ── สรุปผล ────────────────────────────────────────────────────────────────
