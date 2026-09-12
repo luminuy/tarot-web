@@ -21,6 +21,17 @@
  *
  *  B) ห้ามเขียน <img> ที่ src ชี้ไป /cards/ โดยตรง — ต้องใช้ <CardImage /> แทน
  *
+ *  D) ห้ามพรีโหลดภาพไพ่ด้วย <link rel="preload" as="image"> เด็ดขาด
+ *     <CardImage /> เรนเดอร์เป็น <picture> ที่มี <source type="image/avif"> มาก่อน WebP
+ *     (ตั้งแต่ PR #415) เบราว์เซอร์จึงเจรจาชนิดไฟล์เองทุกครั้ง
+ *     แต่ <link rel="preload"> ระบุ `type` ได้ชนิดเดียว — พอชนิดไม่ตรงกับที่ <picture> เลือก
+ *     ไฟล์ที่พรีโหลดมาจะถูกทิ้งทั้งก้อน แล้วภาพ LCP ตัวจริงก็ไม่ได้พรีโหลดสักนิด
+ *     (วัดจริงบน production 2026-09-12: หน้าแรกเสียเปล่า 40.0 KB · /daily 40.0 KB
+ *      · /love/1-card 43.4 KB ทุกครั้งที่เปิดหน้า ทั้งที่ยิงด้วย fetchPriority="high")
+ *     ✅ วิธีที่ถูก: ใส่ loading="eager" + fetchPriority="high" ที่ <CardImage /> ตัวนั้นเลย
+ *        ตัวสแกนพรีโหลดของเบราว์เซอร์อ่าน <picture> ที่เรนเดอร์มากับ HTML อยู่แล้ว
+ *        จึงได้ทั้งลำดับความสำคัญสูงสุดและชนิดไฟล์ที่ถูกต้องพร้อมกัน
+ *
  * ────────────────────────────────────────────────────────────────
  * 🔒 หลักการ Ratchet (กันถอยหลัง)
  * รายการใน ALLOWLIST คือจุดที่ละเมิดอยู่ "ก่อน" มีด่านตรวจนี้
@@ -99,6 +110,31 @@ for (const entry of ALLOWLIST) {
 }
 
 
+// D) ห้ามพรีโหลดภาพไพ่ด้วย <link rel="preload" as="image"> (อ่านข้ามบรรทัด — JSX เขียนหลายบรรทัด)
+const PRELOAD_LINK_TAG = /<link\b[^>]*?\/>/gs;
+/** ตัวชี้วัดว่า <link> ก้อนนี้กำลังพูดถึง "ภาพไพ่" ไม่ใช่โลโก้หรือภาพแชร์ */
+const CARD_IMAGE_HINT = /getCardWebpSrcSet|getCardAvifSrcSet|getCardWebpVariantSrc|getCardImageSrc|heroCard|\/cards\//;
+
+for (const abs of walk(SRC)) {
+  const file = rel(abs);
+  const raw = fs.readFileSync(abs, "utf-8");
+  if (!raw.includes("rel=\"preload\"")) continue;
+
+  for (const match of raw.matchAll(PRELOAD_LINK_TAG)) {
+    const tag = match[0];
+    if (!/rel="preload"/.test(tag)) continue;
+    if (!/as="image"/.test(tag)) continue;
+    if (!CARD_IMAGE_HINT.test(tag)) continue;
+
+    violations.push({
+      file,
+      line: raw.slice(0, match.index).split("\n").length,
+      rule: 'D: พรีโหลดภาพไพ่ด้วย <link rel="preload" as="image"> (ชนิดไฟล์ไม่มีทางตรงกับที่ <picture> เลือก)',
+      text: tag.replace(/\s+/g, " ").slice(0, 110),
+    });
+  }
+}
+
 // C) ตรวจว่าไฟล์ภาพย่อทั้งหมดตาม CARD_IMAGE_VARIANTS มีอยู่จริงบนดิสก์สำหรับไพ่ทั้ง 78 ใบ
 import { ALL_CARDS } from "../../src/data/cards";
 import { CARD_IMAGE_VARIANTS } from "../../src/lib/tarot/card-image";
@@ -131,8 +167,10 @@ for (const v of violations) {
   console.error(`      ${v.text}`);
 }
 console.error(`
-   วิธีแก้: ใช้ <CardImage image={...} sizes="..." /> จาก src/components/card/CardImage.tsx
+   วิธีแก้ (กฎ A · B): ใช้ <CardImage image={...} sizes="..." /> จาก src/components/card/CardImage.tsx
             หรือ getCardImageSrc(image, id) จาก src/lib/tarot/card-image.ts
+   วิธีแก้ (กฎ D): ลบ <link rel="preload"> ทิ้ง แล้วใส่ loading="eager" fetchPriority="high"
+            ที่ <CardImage /> ใบนั้นแทน — ตัวสแกนพรีโหลดอ่าน <picture> ใน HTML ให้อยู่แล้ว
    เหตุผล: การประกอบ path เองทำให้ (1) resolve ผิดโฟลเดอร์เมื่ออยู่ใน sub-route
            (2) โหลดภาพผิดขนาด และ (3) ชี้ไปโฟลเดอร์ที่ไม่มีอยู่จริงจนยิง 404 (ISSUE-008)
 `);
