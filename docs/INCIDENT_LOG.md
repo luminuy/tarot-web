@@ -72,7 +72,7 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **🛡️ กฎป้องกันถาวร** | **เพิ่มกฎ D ใน scripts/qa/test-image-paths.ts (ด่านที่ 7 ของ repo:verify): ห้ามพรีโหลดภาพไพ่ด้วย <link rel=preload as=image> เด็ดขาด อ่านข้ามบรรทัดได้เพราะ JSX เขียน <link> หลายบรรทัด ทดสอบแล้วว่าตกได้จริงโดยใส่บั๊กกลับเข้าไป — ภาพที่เรนเดอร์มากับ HTML อยู่แล้วให้ใช้ loading=eager + fetchPriority=high ที่ <CardImage /> แทน ซึ่งได้ทั้งลำดับความสำคัญสูงสุดและชนิดไฟล์ที่ถูกต้องพร้อมกัน** |
 | **การพิสูจน์ว่าแก้ได้จริง** | repo:verify ผ่าน 48/48 · next build สำเร็จแล้วสแกน HTML ที่ build ออกมา ยืนยันว่าไม่เหลือ imageSrcSet preload สักจุด · ยืนยันว่าไพ่ hero ของหน้าแรก (DailySpreadArt) ยังมี loading=eager + fetchPriority=high ครบทั้งใน build ใหม่และบน production ปัจจุบัน · ยิงวัดไบต์จริงจาก ImageKit ทีละไฟล์เทียบ AVIF/WebP ทุกขนาด |
 | **บันทึกโดย** | Claude Code · branch `claude/cool-brahmagupta-v1bo82` · PR ตรวจงานแก้ LCP รอบ 22 |
-### INC-0132 · 2026-09-12 09:14 · 🟡 Medium · ด่าน a11y ขึ้นเขียวทั้งที่ไม่ได้ตรวจกฎ 3 ใน 4 ข้อ เมื่อยังไม่มีไฟล์ build
+### INC-0133 · 2026-09-12 09:14 · 🟡 Medium · ด่าน a11y ขึ้นเขียวทั้งที่ไม่ได้ตรวจกฎ 3 ใน 4 ข้อ เมื่อยังไม่มีไฟล์ build
 
 | หัวข้อ | รายละเอียด |
 | :--- | :--- |
