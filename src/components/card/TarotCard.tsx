@@ -40,28 +40,28 @@ const ELEMENT_CONFIG: Record<string, { border: string; glow: string; icon: strin
       glow: "rgba(143, 92, 26, 0.12)",
       icon: "•",
       name: "ธาตุไฟ (Wands)",
-      bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
+      bgGradient: "from-surface via-surface to-surface",
     },
     น้ำ: {
       border: "#D9C8AC",
       glow: "rgba(143, 92, 26, 0.12)",
       icon: "•",
       name: "ธาตุน้ำ (Cups)",
-      bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
+      bgGradient: "from-surface via-surface to-surface",
     },
     ลม: {
       border: "#D9C8AC",
       glow: "rgba(143, 92, 26, 0.12)",
       icon: "•",
       name: "ธาตุลม (Swords)",
-      bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
+      bgGradient: "from-surface via-surface to-surface",
     },
     ดิน: {
       border: "#D9C8AC",
       glow: "rgba(143, 92, 26, 0.12)",
       icon: "•",
       name: "ธาตุดิน (Pentacles)",
-      bgGradient: "from-[#FFFFFF] via-[#FFFFFF] to-[#FFFFFF]",
+      bgGradient: "from-surface via-surface to-surface",
     },
   };
 
@@ -226,7 +226,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         {/* 1. ด้านหลังไพ่ (Sacred Card Back - Obsidian & Gold Filigree) */}
         {/* ========================================================= */}
         <div
-          className={`card-face absolute inset-0 rounded-lg overflow-hidden shadow-overlay border-2 border-[#D9C8AC]/60 card-back-pattern flex flex-col items-center justify-between p-3 transition-opacity duration-300 ${
+          className={`card-face absolute inset-0 rounded-lg overflow-hidden shadow-overlay border-2 border-line-warm/60 card-back-pattern flex flex-col items-center justify-between p-3 transition-opacity duration-300 ${
             isRevealed ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
           style={{
@@ -248,7 +248,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
 
           {/* Top Frame Gold Header */}
           <div className="w-full flex justify-center items-center opacity-85 z-10">
-            <span className="text-[12px] font-serif-th text-[#FFFFFF] tracking-[0.25em] uppercase font-bold">
+            <span className="text-[12px] font-serif-th text-surface tracking-[0.25em] uppercase font-bold">
               SACRED ORACLE
             </span>
           </div>
@@ -256,7 +256,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Center Position Tag & Tap to Reveal Badge */}
           <div className="flex flex-col items-center justify-center my-auto gap-1.5 relative z-10">
             {positionLabel && (
-              <span className="text-[12px] text-[#FFFFFF] font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-[#2E211A]/90 border border-[#D9C8AC] line-clamp-1 max-w-[95%] ">
+              <span className="text-[12px] text-surface font-serif-th font-semibold text-center px-2.5 py-0.5 rounded-full bg-ink-deep/90 border border-line-warm line-clamp-1 max-w-[95%] ">
                 {positionLabel}
               </span>
             )}
@@ -269,8 +269,8 @@ export const TarotCard: React.FC<TarotCardProps> = ({
                * `.anim-badge-pulse` เป็น CSS keyframes ที่แตะเฉพาะ transform → compositor ทำเอง
                * จำนวนไพ่บนจอจึงไม่มีผลกับเฟรมเรตอีกต่อไป (ดู globals.css)
                */
-              <div className="anim-badge-pulse px-2.5 py-1 rounded-full bg-[#FFFFFF] border border-[#D9C8AC] z-20 flex items-center gap-1 text-[12px] text-[#2E211A] font-serif-th font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A] animate-ping" />
+              <div className="anim-badge-pulse px-2.5 py-1 rounded-full bg-surface border border-line-warm z-20 flex items-center gap-1 text-[12px] text-ink-deep font-serif-th font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold-ink animate-ping" />
                 <span>{isEnglish ? "Tap to reveal" : "แตะเพื่อเปิด"}</span>
               </div>
             )}
@@ -278,7 +278,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
 
           {/* Bottom Frame Subtle Border */}
           <div className="w-full flex justify-center items-center opacity-60 z-10">
-            <div className="w-12 h-0.5 bg-[#F3EDE2]/60 rounded-full" />
+            <div className="w-12 h-0.5 bg-inset-warm/60 rounded-full" />
           </div>
 
           {/* Ethereal Dynamic Gold Foil Glint Reflection */}
@@ -295,9 +295,9 @@ export const TarotCard: React.FC<TarotCardProps> = ({
         {/* 2. ด้านหน้าไพ่ (Card Face - Pure 1909 Rider-Waite Luxury) */}
         {/* ========================================================= */}
         <div
-          className={`card-face card-face--back absolute inset-0 rounded-lg overflow-hidden border-2 bg-[#F3EDE2] transition-opacity duration-300 ${
+          className={`card-face card-face--back absolute inset-0 rounded-lg overflow-hidden border-2 bg-inset-warm transition-opacity duration-300 ${
             !isRevealed ? "pointer-events-none opacity-0" : "opacity-100"
-          } ${isHighlighted ? "ring-2 ring-[#8F5C1A] ring-offset-2 ring-offset-[#F3EDE2]" : ""}`}
+          } ${isHighlighted ? "ring-2 ring-gold-ink ring-offset-2 ring-offset-[#F3EDE2]" : ""}`}
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
@@ -327,7 +327,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
                 full={imageFull}
               />
             ) : (
-              <div className="w-full h-full bg-[#FFFFFF] flex items-center justify-center">
+              <div className="w-full h-full bg-surface flex items-center justify-center">
                 
               </div>
             )}
@@ -336,7 +336,7 @@ export const TarotCard: React.FC<TarotCardProps> = ({
           {/* Sleek Floating Reversed Badge if applicable */}
           {isReversed && (
             <div className="absolute top-2 left-2 z-20 pointer-events-none">
-              <span className="text-[12px] font-bold font-serif-th bg-[#2E211A]/90 text-[#FFFFFF] border border-[#D9C8AC]/80 px-2 py-0.5 rounded-full ">
+              <span className="text-[12px] font-bold font-serif-th bg-ink-deep/90 text-surface border border-line-warm/80 px-2 py-0.5 rounded-full ">
                 {isEnglish ? "Reversed" : "กลับหัว"}
               </span>
             </div>

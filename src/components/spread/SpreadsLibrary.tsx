@@ -102,16 +102,16 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       {/* Dynamic Bilingual Hero Header */}
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs text-[#A58A5C] font-serif-th font-bold shadow-xs">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-line bg-surface text-xs text-gold-ink font-serif-th font-bold shadow-xs">
             
             {isEnglish ? "25 CLASSIC DIVINATION SPREADS" : "25 ผังการเปิดไพ่มาตรฐานสากล"}{" "}
             
           </span>
         </div>
-        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-[#29261F] tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
+        <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
           {isEnglish ? "25 Sacred Tarot Spreads & Layouts" : "ผังการเปิดไพ่ทาโรต์ 25 รูปแบบ"}
         </h1>
-        <p className="text-xs sm:text-sm text-[#635B4E] max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
+        <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto leading-relaxed font-serif-th [text-wrap:balance]">
           {isEnglish
             ? "Select a sacred spread attuned to your inquiry. Explore positional dynamics, archetypal geometry, and card interpretations."
             : "เลือกผังที่ตรงกับเรื่องที่คุณอยากรู้ พร้อมดูตัวอย่างการจัดวางและความหมายของแต่ละตำแหน่ง"}
@@ -122,7 +122,7 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       <div
         role="tablist"
         aria-label={isEnglish ? "Spread library categories" : "หมวดหมู่คลังผังพยากรณ์"}
-        className="flex items-center justify-start gap-2 overflow-x-auto pb-3 px-1 no-scrollbar select-none border-b border-[#D5CEC2]/40"
+        className="flex items-center justify-start gap-2 overflow-x-auto pb-3 px-1 no-scrollbar select-none border-b border-line/40"
       >
         {categories.map((cat, catIdx) => {
           const isActive = activeCategory === cat.id;
@@ -149,17 +149,17 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                   nextTab?.focus();
                 }
               }}
-              className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] ${
+              className={`px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
                 isActive
-                  ? "bg-[#29261F] text-[#F3F0EA] shadow-sm"
-                  : "bg-[#EAE7E0] text-[#29261F] hover:text-[#A58A5C] border border-[#D5CEC2] hover:border-[#A58A5C]"
+                  ? "bg-ink text-canvas shadow-sm"
+                  : "bg-inset text-ink hover:text-gold border border-line hover:border-gold"
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#A58A5C]" : "text-[#635B4E]"}`} />
+              <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-gold" : "text-muted"}`} />
               <span>{cat.label}</span>
               <span
                 className={`text-[12px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                  isActive ? "bg-white/20 text-[#F3F0EA]" : "bg-black/5 text-[#635B4E]"
+                  isActive ? "bg-white/20 text-canvas" : "bg-black/5 text-muted"
                 }`}
               >
                 {cat.count}
@@ -185,22 +185,22 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
             return (
               <div
                 key={spread.id}
-                className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-[#A58A5C] transition duration-300 relative overflow-hidden group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
+                className="rounded-xl border border-line bg-surface p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-gold transition duration-300 relative overflow-hidden group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
               >
                 {/* Header Tag */}
                 <div className="flex items-center justify-between z-10">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-mono font-bold text-[#29261F] bg-[#EAE7E0] px-2.5 py-0.5 rounded-full border border-[#D5CEC2]">
+                    <span className="text-[13px] font-mono font-bold text-ink bg-inset px-2.5 py-0.5 rounded-full border border-line">
                       {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
                     </span>
                     {!isStandardSpread(spread.id) && (
-                      <span className="text-[12px] text-[#A58A5C] bg-[#FFFFFF] border border-[#D5CEC2] px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
+                      <span className="text-[12px] text-gold-ink bg-surface border border-line px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
                         <SealedLockIcon className="w-3 h-3" />
                         <span>{isEnglish ? "Grand Spread" : "ญาณพิเศษ"}</span>
                       </span>
                     )}
                   </div>
-                  <span className="text-[13px] text-[#635B4E] font-serif-th">
+                  <span className="text-[13px] text-muted font-serif-th">
                     {isEnglish
                       ? `Category: ${CATEGORY_MAP_EN[spread.defaultCategory] || spread.defaultCategory}`
                       : `หมวด: ${CATEGORY_MAP_TH[spread.defaultCategory] || spread.defaultCategory}`}
@@ -208,27 +208,27 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                 </div>
 
                 {/* Interactive Spread Visual Diagram on Illuminated Pedestal */}
-                <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-xl bg-[#EAE7E0] border border-[#D5CEC2] p-2 group-hover:border-[#A58A5C] transition-colors">
+                <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-xl bg-inset border border-line p-2 group-hover:border-gold transition-colors">
                   {renderSpreadIllustration(spread.id)}
                 </div>
 
                 {/* Titles & Tagline */}
-                <div className="space-y-1.5 z-10 pt-3 border-t border-[#D5CEC2]/40">
+                <div className="space-y-1.5 z-10 pt-3 border-t border-line/40">
                   {/* ชื่อผังแต่ละแบบคือหัวข้อระดับที่สองของหน้า /spreads (h1 = ชื่อหน้า) */}
-                  <h2 className="font-serif-th text-base sm:text-lg font-bold text-[#29261F] leading-snug py-0.5 [text-wrap:balance]">
+                  <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink leading-snug py-0.5 [text-wrap:balance]">
                     {getSpreadName(spread, isEnglish)}
                   </h2>
-                  <p className="text-xs text-[#635B4E] leading-relaxed font-serif-th">{getSpreadTagline(spread, isEnglish)}</p>
+                  <p className="text-xs text-muted leading-relaxed font-serif-th">{getSpreadTagline(spread, isEnglish)}</p>
                 </div>
 
-                <p className="text-[13px] text-[#29261F] leading-relaxed line-clamp-2 z-10 font-serif-th [text-wrap:pretty]">{getSpreadDescription(spread, isEnglish)}</p>
+                <p className="text-[13px] text-ink leading-relaxed line-clamp-2 z-10 font-serif-th [text-wrap:pretty]">{getSpreadDescription(spread, isEnglish)}</p>
 
                 {/* Expandable Positions Breakdown */}
                 <div className="z-10 space-y-2">
                   <button
                     type="button"
                     onClick={() => toggleExpand(spread.id)}
-                    className="w-full text-left text-[13px] font-serif-th text-[#A58A5C] hover:text-[#29261F] flex items-center justify-between py-1.5 border-t border-[#D5CEC2]/40 cursor-pointer transition-colors font-bold"
+                    className="w-full text-left text-[13px] font-serif-th text-gold-ink hover:text-ink flex items-center justify-between py-1.5 border-t border-line/40 cursor-pointer transition-colors font-bold"
                   >
                     <span className="flex items-center gap-1.5">
                        {isEnglish ? `View ${spread.positions.length} card positions` : `ดูรายละเอียด ${spread.positions.length} ตำแหน่งไพ่`}
@@ -250,14 +250,14 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                         {spread.positions.map((pos, idx) => (
                           <div
                             key={idx}
-                            className="text-[13px] p-2 rounded-lg bg-[#EAE7E0] border border-[#D5CEC2] flex items-start gap-2"
+                            className="text-[13px] p-2 rounded-lg bg-inset border border-line flex items-start gap-2"
                           >
-                            <span className="text-[#A58A5C] font-mono font-bold flex-shrink-0 text-[13px]">
+                            <span className="text-gold-ink font-mono font-bold flex-shrink-0 text-[13px]">
                               #{idx + 1}
                             </span>
                             <div>
-                              <strong className="text-[#29261F] font-serif-th">{getPositionName(pos, isEnglish)}:</strong>{" "}
-                              <span className="text-[#635B4E] leading-relaxed font-serif-th">{getPositionMeaning(pos, isEnglish)}</span>
+                              <strong className="text-ink font-serif-th">{getPositionName(pos, isEnglish)}:</strong>{" "}
+                              <span className="text-muted leading-relaxed font-serif-th">{getPositionMeaning(pos, isEnglish)}</span>
                             </div>
                           </div>
                         ))}
@@ -269,14 +269,14 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
                 <Link
                   href={`/?spread=${spread.id}`}
                   prefetch={false}
-                  className="w-full py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
+                  className="w-full py-3 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
                 >
                   <span>{isEnglish ? (isStandardSpread(spread.id) ? "Begin Reading with Spread" : "Unlock Grand Spread") : (isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้")}</span>
                 </Link>
                 <Link
                   href={`/spreads/${spread.id}`}
                   prefetch={false}
-                  className="z-10 -mt-1 text-center text-[13px] font-serif-th text-[#A58A5C] hover:text-[#29261F] transition-colors"
+                  className="z-10 -mt-1 text-center text-[13px] font-serif-th text-gold-ink hover:text-ink transition-colors"
                 >
                   {isEnglish ? "Read Spread Guide →" : "อ่านคู่มือผังนี้ →"}
                 </Link>

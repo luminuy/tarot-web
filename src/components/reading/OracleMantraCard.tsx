@@ -52,12 +52,12 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.32 }}
-      className="relative my-6 overflow-hidden rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-6 text-center "
+      className="relative my-6 overflow-hidden rounded-lg border border-line-warm bg-inset-warm p-6 text-center "
     >
       {/* Decorative Ornaments */}
 
       {/* Card Header Badge */}
-      <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-1 text-xs font-medium text-[#2E211A] ">
+      <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-line-warm bg-surface px-3 py-1 text-xs font-medium text-ink-deep ">
         
         <span className="font-serif-th font-semibold">
           {isEnglish ? "Sacred Oracle Wisdom (Oracle Mantra)" : "คำคมพลังใจศักดิ์สิทธิ์ (Sacred Oracle Mantra)"}
@@ -66,27 +66,27 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
       </div>
 
       {/* Main Quote */}
-      <blockquote className="my-4 font-serif-th text-lg font-bold leading-relaxed text-[#2E211A] sm:text-xl md:text-2xl">
+      <blockquote className="my-4 font-serif-th text-lg font-bold leading-relaxed text-ink-deep sm:text-xl md:text-2xl">
         &ldquo;{quote.replace(/^["“”]|["“”]$/g, "")}&rdquo;
       </blockquote>
 
       {/* Affirmation Box */}
-      <div className="my-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-3.5 text-xs text-[#2E211A] sm:text-sm ">
-        <p className="font-serif-th font-bold text-[#8F5C1A]">
+      <div className="my-4 rounded-lg border border-line-warm bg-surface p-3.5 text-xs text-ink-deep sm:text-sm ">
+        <p className="font-serif-th font-bold text-gold-ink">
           {isEnglish ? "Guiding Affirmation:" : "คำประกาศเจตจำนง (Affirmation):"}
         </p>
-        <p className="mt-1 font-serif-th font-medium text-[#2E211A]">
+        <p className="mt-1 font-serif-th font-medium text-ink-deep">
           {affirmation.replace(/^["“”]|["“”]$/g, "")}
         </p>
       </div>
 
       {/* Source Meta & Action */}
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#D9C8AC]/30 pt-4 text-xs text-[#635B4E]">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-line-warm/30 pt-4 text-xs text-muted">
         <div className="flex items-center gap-2 text-left">
           
           <div>
-            <span className="font-serif-th font-semibold text-[#2E211A]">{cardName}</span>
-            <span className="ml-1.5 text-[#635B4E] font-mono text-[13px]">({elementSymbol})</span>
+            <span className="font-serif-th font-semibold text-ink-deep">{cardName}</span>
+            <span className="ml-1.5 text-muted font-mono text-[13px]">({elementSymbol})</span>
           </div>
         </div>
 
@@ -94,7 +94,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
           type="button"
           onClick={handleCopy}
           aria-label={isEnglish ? "Copy wisdom to clipboard" : "คัดลอกคำคมแชร์ลงสตอรี่"}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3.5 py-1.5 text-xs font-semibold text-[#2E211A] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] hover:text-[#8F5C1A] transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-line-warm bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-deep hover:border-gold-ink hover:bg-surface-warm hover:text-gold-ink transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
         >
           <AnimatePresence mode="wait">
             {copied ? (
@@ -103,7 +103,7 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex items-center gap-1.5 text-[#3A7044] font-bold"
+                className="flex items-center gap-1.5 text-ok font-bold"
               >
                 <span>✓</span>
                 <span>{isEnglish ? "Wisdom Copied!" : "คัดลอกคำคมแล้ว!"}</span>

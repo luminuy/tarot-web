@@ -25,20 +25,20 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
       : "pt-16 sm:pt-20 pb-12 sm:pb-16";
 
   return (
-    <footer className={`w-full bg-[#171512] text-[#D5CEC2] ${paddingClass} border-t border-[#D5CEC2]/30 relative overflow-hidden`}>
+    <footer className={`w-full bg-dark text-line ${paddingClass} border-t border-line/30 relative overflow-hidden`}>
       {/* Ambient Gold Accent Line */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-[#A58A5C]/40 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-gold/40 to-transparent pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-12 relative z-10">
         {/* Brand & Mission Statement — Generous Breathing Room */}
-        <div className="flex flex-col items-center justify-center gap-3.5 border-b border-[#D5CEC2]/20 pb-8 sm:pb-10 pt-2 sm:pt-4 text-center">
+        <div className="flex flex-col items-center justify-center gap-3.5 border-b border-line/20 pb-8 sm:pb-10 pt-2 sm:pt-4 text-center">
           <Link
             href="/"
             prefetch={false}
             aria-label={isEnglish ? "SeerTarot — Home" : "SeerTarot — หน้าแรก"}
-            className="inline-flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
+            className="inline-flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
           >
-            <span className="w-11 h-11 rounded-full border border-[#A58A5C]/40 overflow-hidden bg-[#F3F0EA] flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+            <span className="w-11 h-11 rounded-full border border-gold/40 overflow-hidden bg-canvas flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
               <img
                 src="/logo.webp"
                 alt="SeerTarot"
@@ -48,18 +48,18 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                 loading="lazy"
               />
             </span>
-            <span className="font-serif-th text-xl sm:text-2xl font-bold tracking-wider text-[#FAF7F2]">
+            <span className="font-serif-th text-xl sm:text-2xl font-bold tracking-wider text-surface-warm">
               SeerTarot
             </span>
           </Link>
-          <p className="font-serif-th text-xs sm:text-sm text-[#D5CEC2]/85 max-w-md leading-relaxed">
+          <p className="font-serif-th text-xs sm:text-sm text-line/85 max-w-md leading-relaxed">
             {t.footer.brandMission}
           </p>
         </div>
 
         {/* AI Disclosure Card */}
-        <div className="flex items-start gap-4 p-5 rounded-xl bg-[#1F1C18] border border-[#D5CEC2]/20 shadow-sm">
-          <div className="w-9 h-13 sm:w-10 sm:h-15 rounded-lg overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
+        <div className="flex items-start gap-4 p-5 rounded-xl bg-[#1F1C18] border border-line/20 shadow-sm">
+          <div className="w-9 h-13 sm:w-10 sm:h-15 rounded-lg overflow-hidden border border-line/30 flex-shrink-0 bg-dark">
             <CardImage
               image="major-02.jpg"
               /* ภาพประกอบล้วน — <h3> ข้างภาพพิมพ์หัวข้อเดียวกันอยู่แล้ว (INC-0125) */
@@ -69,10 +69,10 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
             />
           </div>
           <div className="space-y-1 min-w-0">
-            <h3 className="text-[13px] font-bold text-[#A58A5C] uppercase tracking-wider font-serif-th">
+            <h3 className="text-[13px] font-bold text-gold-ink uppercase tracking-wider font-serif-th">
               {isEnglish ? "Ethical Reading Notice & AI Disclosure" : "ข้อควรทราบเกี่ยวกับการทำนาย"}
             </h3>
-            <p className="text-[13px] text-[#D5CEC2] leading-[1.7] font-serif-th">
+            <p className="text-[13px] text-line leading-[1.7] font-serif-th">
               {t.footer.ethicalDisclaimer}
             </p>
           </div>
@@ -94,15 +94,15 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {footerColumns.map((col, idx) => (
             <nav key={idx} aria-label={col.title} className="space-y-3">
-              <h3 className="font-serif-th font-bold text-sm text-[#FAF7F2] tracking-wider uppercase border-b border-[#D5CEC2]/20 pb-2">
+              <h3 className="font-serif-th font-bold text-sm text-surface-warm tracking-wider uppercase border-b border-line/20 pb-2">
                 {col.title}
               </h3>
               {"links" in col && col.links ? (
-                <ul className="space-y-2 text-xs font-serif-th text-[#D5CEC2]/80">
+                <ul className="space-y-2 text-xs font-serif-th text-line/80">
                   {col.links.map((link, lIdx) => {
                     return (
                       <li key={lIdx}>
-                        <Link href={link.href} prefetch={false} className="hover:text-[#FAF7F2] transition-colors">
+                        <Link href={link.href} prefetch={false} className="hover:text-surface-warm transition-colors">
                           {link.label}
                         </Link>
                       </li>
@@ -110,21 +110,21 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                   })}
                 </ul>
               ) : "items" in col && col.items ? (
-                <ul className="space-y-2 text-xs font-serif-th text-[#D5CEC2]/80">
+                <ul className="space-y-2 text-xs font-serif-th text-line/80">
                   {col.items.map((item, iIdx) => {
                     const hasHref = "href" in item && Boolean(item.href);
                     const href = hasHref ? (item as any).href : "";
                     return (
                       <li key={iIdx} className={iIdx > 1 ? "pt-1" : undefined}>
                         {hasHref ? (
-                          <Link href={href} prefetch={false} className="hover:text-[#FAF7F2] transition-colors">
+                          <Link href={href} prefetch={false} className="hover:text-surface-warm transition-colors">
                             {item.title}
                           </Link>
                         ) : (
                           <>
-                            <span className={`${"color" in item ? item.color : "text-[#A58A5C]"} font-semibold`}>{item.title}</span>
+                            <span className={`${"color" in item ? item.color : "text-gold"} font-semibold`}>{item.title}</span>
                             {"description" in item && item.description && (
-                              <p className="text-[11px] text-[#D5CEC2]/60">{item.description}</p>
+                              <p className="text-[11px] text-line/60">{item.description}</p>
                             )}
                           </>
                         )}
@@ -138,9 +138,9 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
         </div>
 
         {/* Bottom Copyright & Disclaimer Strip */}
-        <div className="pt-8 border-t border-[#D5CEC2]/15 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-serif-th text-[#D5CEC2]/70">
+        <div className="pt-8 border-t border-line/15 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-serif-th text-line/70">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-7 rounded overflow-hidden border border-[#D5CEC2]/30 flex-shrink-0 bg-[#171512]">
+            <div className="w-5 h-7 rounded overflow-hidden border border-line/30 flex-shrink-0 bg-dark">
               <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="20px" />
             </div>
             <span>{isEnglish ? "SeerTarot · 1909 Rider-Waite Online Tarot Sanctuary" : "SeerTarot · วิหารพยากรณ์ไพ่ทาโรต์ 1909 Rider-Waite ออนไลน์"}</span>
@@ -151,17 +151,17 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
                 มองหาโดยตรง และเป็นเส้นทางให้บอทเดินไปเจอหน้าทั้งสอง (ยังเป็นหน้าไทยล้วน) */}
             {!isEnglish && (
               <>
-                <Link href="/about" prefetch={false} className="hover:text-[#FAF7F2] transition-colors underline">
+                <Link href="/about" prefetch={false} className="hover:text-surface-warm transition-colors underline">
                   เกี่ยวกับเรา
                 </Link>
                 {" · "}
-                <Link href="/contact" prefetch={false} className="hover:text-[#FAF7F2] transition-colors underline">
+                <Link href="/contact" prefetch={false} className="hover:text-surface-warm transition-colors underline">
                   ติดต่อเรา
                 </Link>
                 {" · "}
               </>
             )}
-            <Link href="/privacy" prefetch={false} className="hover:text-[#FAF7F2] transition-colors underline">
+            <Link href="/privacy" prefetch={false} className="hover:text-surface-warm transition-colors underline">
               {isEnglish ? "Privacy Policy" : "นโยบายความเป็นส่วนตัว"}
             </Link>
           </p>

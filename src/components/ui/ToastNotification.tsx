@@ -108,16 +108,16 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
  rounded-lg p-3.5 sm:p-4 overflow-hidden
  ${
    isError
-     ? "bg-[#FFFFFF] border border-[#A6392C] text-[#A6392C]"
-     : "bg-[#FFFFFF] border border-[#D9C8AC] text-[#2E211A]"
+     ? "bg-surface border border-err text-err"
+     : "bg-surface border border-line-warm text-ink-deep"
  }`}
     >
       {/* Top ambient gold / ruby highlight */}
       <div
         className={`absolute inset-x-4 top-0 h-[1.5px] ${
           isError
-            ? "bg-gradient-to-r from-transparent via-[#A6392C] to-transparent"
-            : "bg-gradient-to-r from-transparent via-[#8F5C1A] to-transparent"
+            ? "bg-gradient-to-r from-transparent via-err to-transparent"
+            : "bg-gradient-to-r from-transparent via-gold-ink to-transparent"
         }`}
       />
 
@@ -126,8 +126,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         <div
           className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-serif ${
             isError
-              ? "bg-[#FCEEEA] border border-[#D9C8AC] text-[#A6392C]"
-              : "bg-[#F3EDE2] border border-[#D9C8AC] text-[#8F5C1A]"
+              ? "bg-err-wash border border-line-warm text-err"
+              : "bg-inset-warm border border-line-warm text-gold-ink"
           }`}
         >
           {isError ? "!" : "✓"}
@@ -136,14 +136,14 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
         {/* Content text */}
         <div className="flex-1 min-w-0 pr-1">
           <h4
-            className={`text-sm font-semibold tracking-wide truncate ${isError ? "text-[#A6392C]" : "text-[#2E211A]"}`}
+            className={`text-sm font-semibold tracking-wide truncate ${isError ? "text-err" : "text-ink-deep"}`}
           >
             {toast.title}
           </h4>
           {toast.subtitle && (
             <p
               className={`text-xs font-serif-th leading-relaxed mt-0.5 line-clamp-2 ${
-                isError ? "text-[#A6392C]" : "text-[#635B4E]"
+                isError ? "text-err" : "text-muted"
               }`}
             >
               {toast.subtitle}
@@ -158,8 +158,8 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
           aria-label={isEnglish ? "Dismiss notification" : "ปิดการแจ้งเตือน"}
           className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-colors cursor-pointer shrink-0 ${
             isError
-              ? "text-[#A6392C] hover:text-[#A6392C] hover:bg-[#FCEEEA]"
-              : "text-[#635B4E] hover:text-[#2E211A] hover:bg-[#F3EDE2]"
+              ? "text-err hover:text-err hover:bg-err-wash"
+              : "text-muted hover:text-ink-deep hover:bg-inset-warm"
           }`}
         >
           ✕
@@ -167,14 +167,14 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onC
       </div>
 
       {/* Micro Progress Bar Countdown */}
-      <div className="absolute bottom-0 inset-x-0 h-[2px] bg-[#F3EDE2] overflow-hidden">
+      <div className="absolute bottom-0 inset-x-0 h-[2px] bg-inset-warm overflow-hidden">
         {/* scaleX แทน width — width ทำให้เบราว์เซอร์คำนวณ layout ใหม่ทุกเฟรมตลอด 3-5 วินาที
             ส่วน transform วิ่งบน compositor ไม่แตะ main thread เลย (กล่องแม่มี overflow-hidden อยู่แล้ว) */}
         <div
           key={toast.id || toast.title}
           data-paused={isPaused ? "true" : "false"}
           style={{ "--toast-duration": `${duration}ms` } as React.CSSProperties}
-          className={`anim-toast-countdown h-full w-full ${isError ? "bg-[#A6392C]" : "bg-[#8F5C1A]"}`}
+          className={`anim-toast-countdown h-full w-full ${isError ? "bg-err" : "bg-gold-ink"}`}
         />
       </div>
     </aside>

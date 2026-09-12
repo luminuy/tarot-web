@@ -73,13 +73,13 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
   const personaTagline = isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline;
 
   return (
-    <div className="w-full rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
+    <div className="w-full rounded-lg border border-line-warm bg-surface p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
       {/* Oracle Guide Header & Streaming Status */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#D9C8AC]/30">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-line-warm/30">
         <div className="flex items-center gap-3.5">
           {/* Authentic 1909 Tarot Card Persona Avatar */}
           <div
-            className="w-10 h-15 rounded-lg border-2 overflow-hidden bg-[#F3EDE2] relative flex-shrink-0"
+            className="w-10 h-15 rounded-lg border-2 overflow-hidden bg-inset-warm relative flex-shrink-0"
             style={{ borderColor: "#D9C8AC" }}
           >
             <CardImage
@@ -94,23 +94,23 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h4 className="font-serif-th text-base font-bold font-mystic-gold">{personaName}</h4>
-              <span className="text-[11px] font-serif-th font-semibold bg-[#F3EDE2] text-[#8F5C1A] border border-[#D9C8AC] px-2 py-0.5 rounded-full">
+              <span className="text-[11px] font-serif-th font-semibold bg-inset-warm text-gold-ink border border-line-warm px-2 py-0.5 rounded-full">
                 {isEnglish ? "Quick 1-Card" : "ทำนายด่วน 1 ใบ"}
               </span>
             </div>
-            <p className="text-xs text-[#635B4E] mt-0.5">{personaTagline}</p>
+            <p className="text-xs text-muted mt-0.5">{personaTagline}</p>
           </div>
         </div>
 
         {/* Live Status Pill */}
         {isStreaming ? (
-          <span className="text-xs font-semibold bg-[#F3EDE2] text-[#2E211A] border border-[#D9C8AC] px-3.5 py-1.5 rounded-full flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#8F5C1A] animate-ping" />{" "}
+          <span className="text-xs font-semibold bg-inset-warm text-ink-deep border border-line-warm px-3.5 py-1.5 rounded-full flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-gold-ink animate-ping" />{" "}
             {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
         ) : (
-          <span className="text-xs font-semibold bg-[#EBF3ED] text-[#3A7044] border border-[#3A7044]/30 px-3.5 py-1.5 rounded-full flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#3A7044]" />{" "}
+          <span className="text-xs font-semibold bg-[#EBF3ED] text-ok border border-ok/30 px-3.5 py-1.5 rounded-full flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-ok" />{" "}
             {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
           </span>
         )}
@@ -124,9 +124,9 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             <div
               role="alert"
               aria-live="assertive"
-              className="anim-page-transition p-4 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="anim-page-transition p-4 rounded-lg bg-surface border border-line-warm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
-              <div className="flex items-start gap-2.5 text-xs sm:text-sm text-[#2E211A] font-serif-th">
+              <div className="flex items-start gap-2.5 text-xs sm:text-sm text-ink-deep font-serif-th">
                 
                 <span className="leading-relaxed">{errorMsg}</span>
               </div>
@@ -134,7 +134,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+                  className="self-end sm:self-auto px-5 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th cursor-pointer active:scale-95 transition flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
                 >
                   
                   {isEnglish
@@ -152,8 +152,8 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
 
       {/* Zero Fabricated Cards Fallback (Rule 14) */}
       {!cardData && (
-        <div className="p-4 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-center space-y-2.5 my-2">
-          <p className="text-xs text-[#A6392C] font-serif-th">
+        <div className="p-4 rounded-lg bg-err-wash border border-line-warm text-center space-y-2.5 my-2">
+          <p className="text-xs text-err font-serif-th">
             {isEnglish
               ? "Card data for this position could not be found. Please reload."
               : "ไม่พบข้อมูลไพ่สำหรับตำแหน่งนี้ กรุณากดโหลดใหม่อีกครั้ง"}
@@ -162,7 +162,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             <button
               type="button"
               onClick={onRetry}
-              className="px-4 py-1.5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface text-xs font-bold font-serif-th shadow cursor-pointer active:scale-95 transition inline-flex items-center gap-1.5"
             >
               {isEnglish ? "Reload Reading" : "โหลดใหม่อีกครั้ง"}
             </button>
@@ -175,18 +175,18 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
         <div className="space-y-5">
           {/* Querent Sacred Question Banner */}
           {question && (
-            <div className="anim-page-transition p-4 rounded-xl bg-[#FAF7F2] border border-[#D9C8AC] space-y-1.5 shadow-2xs">
-              <div className="flex items-center justify-between text-xs text-[#8F5C1A] font-serif-th font-semibold">
+            <div className="anim-page-transition p-4 rounded-xl bg-surface-warm border border-line-warm space-y-1.5 shadow-2xs">
+              <div className="flex items-center justify-between text-xs text-gold-ink font-serif-th font-semibold">
                 <span className="flex items-center gap-1.5">
                   <span>{isEnglish ? "Your Sacred Question" : "คำถามที่คุณตั้งจิตถาม"}</span>
                 </span>
                 {nickname && (
-                  <span className="text-[#635B4E] font-normal">
+                  <span className="text-muted font-normal">
                     {isEnglish ? `Querent: ${nickname}` : `ผู้รับคำทำนาย: ${nickname}`}
                   </span>
                 )}
               </div>
-              <p className="text-sm sm:text-base font-serif-th text-[#2E211A] font-medium leading-relaxed italic">
+              <p className="text-sm sm:text-base font-serif-th text-ink-deep font-medium leading-relaxed italic">
                 “{question}”
               </p>
             </div>
@@ -194,37 +194,37 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
 
           {/* ★ อ่านก่อนใคร: สรุปตรงใจจากแม่หมอ — ยกขึ้นมานำหน้าทุกหัวข้อ ให้เด่นชัดที่สุด */}
           {showCoreSummary && (
-            <div className="anim-page-transition relative overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF7] to-[#F7EFE1] p-5 sm:p-6 shadow-[0_6px_28px_rgba(143,92,26,0.14)]">
+            <div className="anim-page-transition relative overflow-hidden rounded-2xl border-2 border-[#C8A261] bg-gradient-to-br from-surface via-[#FDFBF7] to-[#F7EFE1] p-5 sm:p-6 shadow-[0_6px_28px_rgba(143,92,26,0.14)]">
               {/* Editorial Luxury Top Gold Accent Bar */}
               <div
                 aria-hidden="true"
-                className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#8F5C1A] via-[#E2C38A] to-[#8F5C1A]"
+                className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-gold-ink via-[#E2C38A] to-gold-ink"
               />
 
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="space-y-1.5">
-                  <span className="block text-[11px] font-serif-th font-bold uppercase tracking-[0.18em] text-[#8F5C1A]/80">
+                  <span className="block text-[11px] font-serif-th font-bold uppercase tracking-[0.18em] text-gold-ink/80">
                     {isEnglish ? "Read this first" : "อ่านสรุปนี้ก่อน"}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8F5C1A]/10 border border-[#8F5C1A]/30 text-[#8F5C1A] font-serif-th font-bold text-sm tracking-wide">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#8F5C1A]" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-ink/10 border border-gold-ink/30 text-gold-ink font-serif-th font-bold text-sm tracking-wide">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gold-ink" />
                     {isEnglish ? "Core Oracle Insight" : "สรุปตรงใจจากแม่หมอ"}
                   </span>
                 </div>
                 <TTSReaderButton
                   textToRead={`${isEnglish ? "Core Insight: " : "สรุปตรงใจ: "}${reading!.summary}`}
                   personaId={persona.id}
-                  className="flex-shrink-0 text-xs py-1 px-2.5 bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] shadow-xs"
+                  className="flex-shrink-0 text-xs py-1 px-2.5 bg-surface hover:bg-surface-warm border border-line-warm shadow-xs"
                 />
               </div>
 
-              <div className="pl-3 sm:pl-4 border-l-2 border-[#8F5C1A]/50">
-                <p className="text-[15px] sm:text-lg font-serif-th text-[#2E211A] font-medium leading-relaxed [text-wrap:pretty]">
+              <div className="pl-3 sm:pl-4 border-l-2 border-gold-ink/50">
+                <p className="text-[15px] sm:text-lg font-serif-th text-ink-deep font-medium leading-relaxed [text-wrap:pretty]">
                   {reading!.summary}
                 </p>
               </div>
 
-              <p className="mt-3 text-[11px] font-serif-th text-[#8F5C1A]/70">
+              <p className="mt-3 text-[11px] font-serif-th text-gold-ink/70">
                 {isEnglish
                   ? "Full card interpretation and guidance follow below."
                   : "รายละเอียดไพ่และคำแนะนำแบบเต็มอยู่ด้านล่างนี้"}
@@ -233,13 +233,13 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
           )}
 
           {/* Card Presentation Card */}
-          <div className="anim-page-transition p-5 sm:p-6 rounded-lg bg-[#FAF7F2] border border-[#D9C8AC] space-y-4">
+          <div className="anim-page-transition p-5 sm:p-6 rounded-lg bg-surface-warm border border-line-warm space-y-4">
             {/* Card Identity Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#D9C8AC]/40">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-line-warm/40">
               <div className="flex items-center gap-3.5">
                 {/* 1909 Rider-Waite Authentic Thumbnail */}
                 <div
-                  className={`w-14 h-[95px] rounded-lg overflow-hidden border border-[#D9C8AC] flex-shrink-0 bg-[#FFFFFF] shadow-2xs ${
+                  className={`w-14 h-[95px] rounded-lg overflow-hidden border border-line-warm flex-shrink-0 bg-surface shadow-2xs ${
                     drawnCard?.isReversed ? "rotate-180" : ""
                   }`}
                 >
@@ -252,9 +252,9 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                       sizes="88px"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#F3EDE2] flex flex-col items-center justify-center text-center p-1 border border-dashed border-[#D9C8AC]">
+                    <div className="w-full h-full bg-inset-warm flex flex-col items-center justify-center text-center p-1 border border-dashed border-line-warm">
                       
-                      <span className="text-xs text-[#635B4E] font-serif-th mt-0.5 leading-normal">
+                      <span className="text-xs text-muted font-serif-th mt-0.5 leading-normal">
                         {isEnglish ? "Not Found" : "ไม่พบข้อมูล"}
                       </span>
                     </div>
@@ -262,18 +262,18 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
                 </div>
 
                 <div>
-                  <span className="text-[13px] text-[#8F5C1A] font-serif-th font-semibold">
+                  <span className="text-[13px] text-gold-ink font-serif-th font-semibold">
                     {
 isEnglish
                         ? `Quick Reading: ${drawnCard?.position.nameEn || drawnCard?.position.nameTh || "Oracle Message"}`
                         : `คำทำนายด่วน: ${drawnCard?.position.nameTh || "สารจากไพ่"}`}
                   </span>
-                  <h3 className="font-serif-th text-lg sm:text-xl font-bold text-[#2E211A] mt-0.5">
+                  <h3 className="font-serif-th text-lg sm:text-xl font-bold text-ink-deep mt-0.5">
                     {isEnglish ? (cardData.nameEn || cardData.nameTh) : cardData.nameTh}{" "}
                     {!isEnglish && cardData.nameEn && (
-                      <span className="text-xs font-mono font-normal text-[#635B4E]">({cardData.nameEn})</span>
+                      <span className="text-xs font-mono font-normal text-muted">({cardData.nameEn})</span>
                     )}{" "}
-                    <span className="text-xs font-serif-th font-semibold text-[#8F5C1A]">
+                    <span className="text-xs font-serif-th font-semibold text-gold-ink">
                       {drawnCard?.isReversed
                         ? (isEnglish ? "· Reversed" : "· ไพ่กลับหัว")
                         : (isEnglish ? "· Upright" : "· ไพ่หัวตั้ง")}
@@ -297,7 +297,7 @@ isEnglish
                     {keywords.slice(0, 3).map((kw: string, idx: number) => (
                       <span
                         key={idx}
-                        className="text-xs text-[#2E211A] bg-[#FFFFFF] border border-[#D9C8AC] px-2.5 py-0.5 rounded-full font-serif-th"
+                        className="text-xs text-ink-deep bg-surface border border-line-warm px-2.5 py-0.5 rounded-full font-serif-th"
                       >
                         {kw}
                       </span>
@@ -336,7 +336,7 @@ isEnglish
               {/* Reading Body (สั้น คม ชัด ตรงประเด็น 2-3 ประโยค) */}
               {cardReading?.reading ? (
                 <div
-                  className="text-sm sm:text-base text-[#2E211A] leading-relaxed font-serif-th font-normal"
+                  className="text-sm sm:text-base text-ink-deep leading-relaxed font-serif-th font-normal"
                   aria-live="polite"
                   aria-label={isEnglish ? "Oracle reading" : "คำทำนายจากแม่หมอ"}
                 >
@@ -361,7 +361,7 @@ isEnglish
                   )}
                 </div>
               ) : (
-                <p className="text-xs sm:text-sm text-[#635B4E] leading-relaxed font-serif-th italic">
+                <p className="text-xs sm:text-sm text-muted leading-relaxed font-serif-th italic">
                   {isStreaming
                     ? (isEnglish
                         ? "The oracle is attuning to the energetic currents to formulate a clear, direct answer..."
@@ -374,14 +374,14 @@ isEnglish
 
             {/* Actionable Advice (ไม่เกิน 2 ข้อ) */}
             {reading?.advice && reading.advice.length > 0 && (
-              <div className="pt-3 border-t border-[#D9C8AC]/40 space-y-2">
-                <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-2">
+              <div className="pt-3 border-t border-line-warm/40 space-y-2">
+                <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-2">
                    {isEnglish ? "What to Do Now" : "สิ่งที่ควรทำตอนนี้"}
                 </h5>
                 <ul className="space-y-1.5">
                   {reading.advice.slice(0, 2).map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-[#2E211A] font-serif-th">
-                      <span className="w-4 h-4 rounded-full bg-[#8F5C1A]/20 text-[#8F5C1A] font-bold flex items-center justify-center flex-shrink-0 text-[11px] mt-0.5">
+                    <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-ink-deep font-serif-th">
+                      <span className="w-4 h-4 rounded-full bg-gold-ink/20 text-gold-ink font-bold flex items-center justify-center flex-shrink-0 text-[11px] mt-0.5">
                         ✓
                       </span>
                       <span className="leading-snug">{item}</span>
@@ -396,26 +396,26 @@ isEnglish
           {readingId && (
             <Link
               href="/reading/chat"
-              className="group relative overflow-hidden flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-[#D9C8AC] bg-gradient-to-r from-[#F3EDE2] via-[#FAF7F2] to-[#F3EDE2] hover:bg-[#FFFFFF] p-4 text-left transition hover:border-[#8F5C1A] hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] active:scale-[0.99] lg:hidden"
+              className="group relative overflow-hidden flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-line-warm bg-gradient-to-r from-inset-warm via-surface-warm to-inset-warm hover:bg-surface p-4 text-left transition hover:border-gold-ink hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink active:scale-[0.99] lg:hidden"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#8F5C1A] text-[#FFFFFF] text-sm shadow-sm group-hover:scale-105 group-hover:bg-[#74490F] transition font-sans font-bold">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gold-ink text-surface text-sm shadow-sm group-hover:scale-105 group-hover:bg-gold-ink-deep transition font-sans font-bold">
                   ➔
                 </span>
                 <div>
-                  <span className="block font-serif-th text-sm font-bold text-[#2E211A]">
+                  <span className="block font-serif-th text-sm font-bold text-ink-deep">
                     {isEnglish
                       ? `Have further inquiries? Converse with ${personaName} now`
                       : `มีคำถามเรื่องนี้ต่อไหม? แชทกับ${persona.nameTh}ได้ทันที`}
                   </span>
-                  <span className="block font-serif-th text-xs text-[#635B4E] mt-0.5">
+                  <span className="block font-serif-th text-xs text-muted mt-0.5">
                     {isEnglish
                       ? "Open interactive chat to explore this card and its implications directly."
                       : "เปิดห้องแชทพิมพ์ถามข้อสงสัยเพิ่มเติมต่อจากไพ่ใบนี้ได้เลย"}
                   </span>
                 </div>
               </div>
-              <span className="flex items-center gap-1 font-serif-th text-xs font-bold text-[#8F5C1A] px-2.5 py-1 rounded-full bg-[#8F5C1A]/10 border border-[#8F5C1A]/20 flex-shrink-0 group-hover:translate-x-0.5 transition-transform">
+              <span className="flex items-center gap-1 font-serif-th text-xs font-bold text-gold-ink px-2.5 py-1 rounded-full bg-gold-ink/10 border border-gold-ink/20 flex-shrink-0 group-hover:translate-x-0.5 transition-transform">
                 <span>{isEnglish ? "Continue Chat" : "คุยต่อ"}</span>
                 <span>➔</span>
               </span>
@@ -458,14 +458,14 @@ isEnglish
               />
 
               {/* Real Human Reader Marketplace Consultation CTA */}
-              <div className="p-4 rounded-lg bg-[#FAF7F2] border border-[#D9C8AC] space-y-2.5">
+              <div className="p-4 rounded-lg bg-surface-warm border border-line-warm space-y-2.5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1">
-                    <h5 className="font-serif-th text-xs sm:text-sm font-bold text-[#2E211A] flex items-center gap-1.5">
+                    <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-1.5">
                       
                       {isEnglish ? "Consult a Certified Human Master" : "ปรึกษาแม่หมอตัวจริงเพิ่มเติม"}
                     </h5>
-                    <p className="text-xs text-[#635B4E] font-serif-th leading-relaxed">
+                    <p className="text-xs text-muted font-serif-th leading-relaxed">
                       {isEnglish
                         ? "If you seek deep personal clarity, forward your drawn card directly for a private session."
                         : "หากต้องการพูดคุยเจาะลึกเฉพาะบุคคล สามารถส่งต่อผลไพ่ใบนี้เพื่อปรึกษาแม่หมอผู้เชี่ยวชาญได้"}
@@ -474,7 +474,7 @@ isEnglish
                   <Link
                     href="/readers"
                     onClick={() => trackEvent("reader_consult_click", { source: "stream_end" })}
-                    className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap"
+                    className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap"
                   >
                     <span>{isEnglish ? "Consult Human Reader" : "ปรึกษาแม่หมอตัวจริง"}</span>
                     <span>➔</span>
@@ -487,8 +487,8 @@ isEnglish
       )}
 
       {/* AI Disclosure Note */}
-      <div className="pt-3 border-t border-[#D9C8AC]/30">
-        <p className="text-xs text-[#635B4E] leading-relaxed text-center font-serif-th max-w-2xl mx-auto">
+      <div className="pt-3 border-t border-line-warm/30">
+        <p className="text-xs text-muted leading-relaxed text-center font-serif-th max-w-2xl mx-auto">
           {" "}
           {isEnglish
             ? "This reading is synthesized with AI from your authentic drawn card. Intended for reflection, introspection, and personal guidance."

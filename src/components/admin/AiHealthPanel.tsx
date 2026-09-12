@@ -89,8 +89,8 @@ export default function AiHealthPanel() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-mystic-gold text-base font-bold text-[#29261F]">สุขภาพการเชื่อมต่อ AI</h2>
-          <p className="mt-0.5 text-xs text-[#635B4E]">
+          <h2 className="font-mystic-gold text-base font-bold text-ink">สุขภาพการเชื่อมต่อ AI</h2>
+          <p className="mt-0.5 text-xs text-muted">
             ยิงถาม Gemini จริง 1 ครั้งต่อโมเดล เพื่อดูว่าแม่หมอตอบด้วย AI ได้จริงหรือกำลังใช้คำตอบสำรอง
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function AiHealthPanel() {
           size="sm"
           onClick={run}
           disabled={loading}
-          className="bg-[#29261F] hover:bg-[#171512] text-white font-medium text-xs shadow-xs"
+          className="bg-ink hover:bg-dark text-white font-medium text-xs shadow-xs"
         >
           {loading ? "กำลังตรวจ…" : "ตรวจอีกครั้ง"}
         </Button>
@@ -110,7 +110,7 @@ export default function AiHealthPanel() {
         </p>
       )}
 
-      {loading && !data && <p className="text-sm text-[#635B4E]">กำลังติดต่อ Gemini…</p>}
+      {loading && !data && <p className="text-sm text-muted">กำลังติดต่อ Gemini…</p>}
 
       {data && (
         <>
@@ -128,16 +128,16 @@ export default function AiHealthPanel() {
             >
               {VERDICT_LABEL[data.verdict]}
             </p>
-            <p className="mt-1.5 text-xs leading-relaxed text-[#29261F]">{data.summary}</p>
-            <p className="mt-2 text-xs leading-relaxed text-[#635B4E]">
-              <span className="font-semibold text-[#29261F]">สิ่งที่ต้องทำต่อ:</span> {data.nextStep}
+            <p className="mt-1.5 text-xs leading-relaxed text-ink">{data.summary}</p>
+            <p className="mt-2 text-xs leading-relaxed text-muted">
+              <span className="font-semibold text-ink">สิ่งที่ต้องทำต่อ:</span> {data.nextStep}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-[#D5CEC2] bg-white px-5 py-4 shadow-xs">
-              <p className="text-xs font-semibold text-[#29261F]">คีย์ AI</p>
-              <p className="mt-1 text-xs text-[#635B4E]">
+            <div className="rounded-2xl border border-line bg-white px-5 py-4 shadow-xs">
+              <p className="text-xs font-semibold text-ink">คีย์ AI</p>
+              <p className="mt-1 text-xs text-muted">
                 {data.key.configured
                   ? `ตั้งไว้แล้วที่ ${data.key.envVar} · ยาว ${data.key.length} ตัว${
                       data.key.startsWithAIza ? " · ขึ้นต้น AIza" : ""
@@ -145,9 +145,9 @@ export default function AiHealthPanel() {
                   : "ยังไม่ได้ตั้ง GEMINI_API_KEY / GOOGLE_API_KEY"}
               </p>
             </div>
-            <div className="rounded-2xl border border-[#D5CEC2] bg-white px-5 py-4 shadow-xs">
-              <p className="text-xs font-semibold text-[#29261F]">เพดานเรียก AI วันนี้</p>
-              <p className="mt-1 text-xs text-[#635B4E]">
+            <div className="rounded-2xl border border-line bg-white px-5 py-4 shadow-xs">
+              <p className="text-xs font-semibold text-ink">เพดานเรียก AI วันนี้</p>
+              <p className="mt-1 text-xs text-muted">
                 ใช้ไป {data.budget.usedToday} / {data.budget.dailyCap} ครั้ง
                 {data.budget.memberCapReached
                   ? " · เต็มเพดานแล้ว"
@@ -159,18 +159,18 @@ export default function AiHealthPanel() {
           </div>
 
           {/* 📊 AI Reading Quality Telemetry (AI_INTELLIGENCE_PLAN W1.1) */}
-          <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E8E2D8] pb-3">
+          <div className="rounded-2xl border border-line bg-white p-5 shadow-xs space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-soft pb-3">
               <div>
-                <h3 className="text-sm font-bold text-[#29261F] flex items-center gap-1.5">
+                <h3 className="text-sm font-bold text-ink flex items-center gap-1.5">
                   สถิติคุณภาพและการตอบสนอง AI (Reading Quality Telemetry)
                 </h3>
-                <p className="mt-0.5 text-xs text-[#635B4E]">
+                <p className="mt-0.5 text-xs text-muted">
                   ประมวลผลจากตาราง reading_quality: อัตราความแม่นยำจริง, เวลาหน่วง, อัตราสลับโมเดล และเทียบตามเวอร์ชัน Prompt
                 </p>
               </div>
               {quality && (
-                <span className="rounded-full bg-[#FAF8F5] border border-[#D5CEC2] px-2.5 py-0.5 text-[11px] font-semibold text-[#29261F]">
+                <span className="rounded-full bg-surface-mist border border-line px-2.5 py-0.5 text-[11px] font-semibold text-ink">
                   บันทึกทั้งหมด {quality.totalReadings.toLocaleString()} ครั้ง
                 </span>
               )}
@@ -179,71 +179,71 @@ export default function AiHealthPanel() {
             {quality ? (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="rounded-xl border border-[#E8E2D8] bg-[#FAF8F5] p-3 text-center">
-                    <p className="text-[11px] font-medium text-[#635B4E]">ความแม่นยำรวม</p>
-                    <p className="mt-1 text-xl font-bold text-[#29261F]">
+                  <div className="rounded-xl border border-line-soft bg-surface-mist p-3 text-center">
+                    <p className="text-[11px] font-medium text-muted">ความแม่นยำรวม</p>
+                    <p className="mt-1 text-xl font-bold text-ink">
                       {quality.ratedReadings > 0 ? `${quality.accurateRate}%` : "—"}
                     </p>
-                    <p className="mt-0.5 text-[10px] text-[#756F66]">
+                    <p className="mt-0.5 text-[10px] text-muted">
                       ประเมินแล้ว {quality.ratedReadings} ครั้ง
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-[#E8E2D8] bg-[#FAF8F5] p-3 text-center">
-                    <p className="text-[11px] font-medium text-[#635B4E]">เวลาสร้างคำอ่านเฉลี่ย</p>
-                    <p className="mt-1 text-xl font-bold text-[#29261F]">
+                  <div className="rounded-xl border border-line-soft bg-surface-mist p-3 text-center">
+                    <p className="text-[11px] font-medium text-muted">เวลาสร้างคำอ่านเฉลี่ย</p>
+                    <p className="mt-1 text-xl font-bold text-ink">
                       {quality.avgElapsedMs > 0 ? `${(quality.avgElapsedMs / 1000).toFixed(1)}s` : "—"}
                     </p>
-                    <p className="mt-0.5 text-[10px] text-[#756F66]">
+                    <p className="mt-0.5 text-[10px] text-muted">
                       เฉลี่ย {quality.avgElapsedMs} ms
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-[#E8E2D8] bg-[#FAF8F5] p-3 text-center">
-                    <p className="text-[11px] font-medium text-[#635B4E]">อัตราสลับโมเดล (Failover)</p>
-                    <p className="mt-1 text-xl font-bold text-[#29261F]">
+                  <div className="rounded-xl border border-line-soft bg-surface-mist p-3 text-center">
+                    <p className="text-[11px] font-medium text-muted">อัตราสลับโมเดล (Failover)</p>
+                    <p className="mt-1 text-xl font-bold text-ink">
                       {quality.failoverRate}%
                     </p>
-                    <p className="mt-0.5 text-[10px] text-[#756F66]">
+                    <p className="mt-0.5 text-[10px] text-muted">
                       Groq ➔ Gemini สำรอง
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-[#E8E2D8] bg-[#FAF8F5] p-3 text-center">
-                    <p className="text-[11px] font-medium text-[#635B4E]">ผลลัพธ์ที่ได้รับ</p>
-                    <p className="mt-1 text-xs font-semibold text-[#29261F]">
+                  <div className="rounded-xl border border-line-soft bg-surface-mist p-3 text-center">
+                    <p className="text-[11px] font-medium text-muted">ผลลัพธ์ที่ได้รับ</p>
+                    <p className="mt-1 text-xs font-semibold text-ink">
                       แม่น {quality.accurateCount} · ก้ำกึ่ง {quality.partialCount} · ไม่ตรง {quality.notHappenedCount}
                     </p>
-                    <p className="mt-0.5 text-[10px] text-[#756F66]">
+                    <p className="mt-0.5 text-[10px] text-muted">
                       ไม่เกิดจริง {quality.notHappenedRate}%
                     </p>
                   </div>
                 </div>
 
                 {/* ✍️ คุณภาพภาษาไทย (HANDOFF_AI_ACCURACY_THAI B-01) */}
-                <div className="rounded-xl border border-[#E8E2D8] p-3">
-                  <p className="text-xs font-semibold text-[#29261F] mb-2">
+                <div className="rounded-xl border border-line-soft p-3">
+                  <p className="text-xs font-semibold text-ink mb-2">
                     คุณภาพภาษาไทยของคำอ่าน (Thai Quality Guard)
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div className="rounded-lg border border-[#E8E2D8] bg-[#FAF8F5] p-2.5 text-center">
-                      <p className="text-[11px] font-medium text-[#635B4E]">คะแนนภาษาไทยเฉลี่ย</p>
-                      <p className="mt-1 text-xl font-bold text-[#29261F]">
+                    <div className="rounded-lg border border-line-soft bg-surface-mist p-2.5 text-center">
+                      <p className="text-[11px] font-medium text-muted">คะแนนภาษาไทยเฉลี่ย</p>
+                      <p className="mt-1 text-xl font-bold text-ink">
                         {quality.avgThaiScore > 0 ? `${quality.avgThaiScore}/100` : "—"}
                       </p>
-                      <p className="mt-0.5 text-[10px] text-[#756F66]">100 = ไม่พบที่ผิดเลย</p>
+                      <p className="mt-0.5 text-[10px] text-muted">100 = ไม่พบที่ผิดเลย</p>
                     </div>
 
-                    <div className="rounded-lg border border-[#E8E2D8] bg-[#FAF8F5] p-2.5 text-center">
-                      <p className="text-[11px] font-medium text-[#635B4E]">จุดที่ขัดให้อัตโนมัติ</p>
-                      <p className="mt-1 text-xl font-bold text-[#29261F]">{quality.avgThaiFixes}</p>
-                      <p className="mt-0.5 text-[10px] text-[#756F66]">
+                    <div className="rounded-lg border border-line-soft bg-surface-mist p-2.5 text-center">
+                      <p className="text-[11px] font-medium text-muted">จุดที่ขัดให้อัตโนมัติ</p>
+                      <p className="mt-1 text-xl font-bold text-ink">{quality.avgThaiFixes}</p>
+                      <p className="mt-0.5 text-[10px] text-muted">
                         เฉลี่ยต่อคำอ่าน · เกิน 5 = ควรลดชั้นโมเดล
                       </p>
                     </div>
 
-                    <div className="col-span-2 sm:col-span-1 rounded-lg border border-[#E8E2D8] bg-[#FAF8F5] p-2.5">
-                      <p className="text-[11px] font-medium text-[#635B4E] text-center">ปัญหาที่เจอบ่อย</p>
+                    <div className="col-span-2 sm:col-span-1 rounded-lg border border-line-soft bg-surface-mist p-2.5">
+                      <p className="text-[11px] font-medium text-muted text-center">ปัญหาที่เจอบ่อย</p>
                       {Object.keys(quality.thaiIssueCounts).length > 0 ? (
                         <div className="mt-1 space-y-0.5">
                           {Object.entries(quality.thaiIssueCounts)
@@ -251,13 +251,13 @@ export default function AiHealthPanel() {
                             .slice(0, 4)
                             .map(([code, count]) => (
                               <div key={code} className="flex items-center justify-between text-[10px]">
-                                <span className="font-mono text-[#29261F]">{code}</span>
-                                <span className="text-[#635B4E]">{count}</span>
+                                <span className="font-mono text-ink">{code}</span>
+                                <span className="text-muted">{count}</span>
                               </div>
                             ))}
                         </div>
                       ) : (
-                        <p className="mt-1 text-center text-[10px] text-[#756F66]">ยังไม่พบปัญหา</p>
+                        <p className="mt-1 text-center text-[10px] text-muted">ยังไม่พบปัญหา</p>
                       )}
                     </div>
                   </div>
@@ -265,52 +265,52 @@ export default function AiHealthPanel() {
 
                 {/* Sub-breakdown: Versions & Providers */}
                 <div className="grid sm:grid-cols-2 gap-4 pt-2">
-                  <div className="rounded-xl border border-[#E8E2D8] p-3">
-                    <p className="text-xs font-semibold text-[#29261F] mb-2">เปรียบเทียบตามเวอร์ชัน Prompt</p>
+                  <div className="rounded-xl border border-line-soft p-3">
+                    <p className="text-xs font-semibold text-ink mb-2">เปรียบเทียบตามเวอร์ชัน Prompt</p>
                     {Object.keys(quality.byVersion).length > 0 ? (
                       <div className="space-y-1.5 text-xs">
                         {Object.entries(quality.byVersion).map(([ver, stats]) => (
                           <div key={ver} className="flex items-center justify-between py-1 border-b border-[#F0EBE1] last:border-none">
-                            <span className="font-mono text-[11px] text-[#29261F] font-semibold">{ver}</span>
-                            <span className="text-[11px] text-[#635B4E]">
+                            <span className="font-mono text-[11px] text-ink font-semibold">{ver}</span>
+                            <span className="text-[11px] text-muted">
                               {stats.total} ครั้ง · แม่น {stats.rate}%
                             </span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-[#756F66]">ยังไม่มีข้อมูลเวอร์ชัน</p>
+                      <p className="text-xs text-muted">ยังไม่มีข้อมูลเวอร์ชัน</p>
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-[#E8E2D8] p-3">
-                    <p className="text-xs font-semibold text-[#29261F] mb-2">ผู้ให้บริการ (Provider)</p>
+                  <div className="rounded-xl border border-line-soft p-3">
+                    <p className="text-xs font-semibold text-ink mb-2">ผู้ให้บริการ (Provider)</p>
                     {Object.keys(quality.byProvider).length > 0 ? (
                       <div className="space-y-1.5 text-xs">
                         {Object.entries(quality.byProvider).map(([prov, stats]) => (
                           <div key={prov} className="flex items-center justify-between py-1 border-b border-[#F0EBE1] last:border-none">
-                            <span className="font-mono text-[11px] text-[#29261F] font-semibold uppercase">{prov}</span>
-                            <span className="text-[11px] text-[#635B4E]">
+                            <span className="font-mono text-[11px] text-ink font-semibold uppercase">{prov}</span>
+                            <span className="text-[11px] text-muted">
                               {stats.total} ครั้ง · แม่น {stats.rate}%
                             </span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-[#756F66]">ยังไม่มีข้อมูลผู้ให้บริการ</p>
+                      <p className="text-xs text-muted">ยังไม่มีข้อมูลผู้ให้บริการ</p>
                     )}
                   </div>
                 </div>
               </>
             ) : (
-              <p className="text-xs text-[#635B4E] py-2">กำลังโหลดข้อมูล telemetry...</p>
+              <p className="text-xs text-muted py-2">กำลังโหลดข้อมูล telemetry...</p>
             )}
           </div>
 
           {data.models.length > 0 && (
-            <div className="overflow-x-auto rounded-2xl border border-[#D5CEC2] bg-white shadow-xs">
+            <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-xs">
               <table className="w-full min-w-[560px] text-left text-xs">
-                <thead className="bg-[#FAF8F5] text-[#635B4E] border-b border-[#D5CEC2]">
+                <thead className="bg-surface-mist text-muted border-b border-line">
                   <tr>
                     <th className="px-3.5 py-2.5 font-semibold">โมเดล</th>
                     <th className="px-3.5 py-2.5 font-semibold">ผล</th>
@@ -318,9 +318,9 @@ export default function AiHealthPanel() {
                     <th className="px-3.5 py-2.5 font-semibold">รายละเอียด</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E8E2D8] text-[#29261F]">
+                <tbody className="divide-y divide-line-soft text-ink">
                   {data.models.map((m) => (
-                    <tr key={m.model} className="hover:bg-[#FAF8F5] transition-colors align-top">
+                    <tr key={m.model} className="hover:bg-surface-mist transition-colors align-top">
                       <td className="px-3.5 py-3 font-mono text-xs">{m.model}</td>
                       <td className="px-3.5 py-3">
                         <span
@@ -333,12 +333,12 @@ export default function AiHealthPanel() {
                           {m.ok ? "ผ่าน" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
                         </span>
                       </td>
-                      <td className="px-3.5 py-3 font-mono text-xs text-[#635B4E]">{m.elapsedMs}ms</td>
+                      <td className="px-3.5 py-3 font-mono text-xs text-muted">{m.elapsedMs}ms</td>
                       <td className="px-3.5 py-3 leading-relaxed">
                         {m.ok ? (
                           <>
-                            <span className="text-[#29261F]">ตอบว่า “{m.answerPreview}”</span>
-                            <span className="block text-[11px] text-[#756F66] mt-0.5">
+                            <span className="text-ink">ตอบว่า “{m.answerPreview}”</span>
+                            <span className="block text-[11px] text-muted mt-0.5">
                               parts ทั้งหมด {m.partCount} · เป็น part ความคิด {m.thoughtPartCount}
                               {m.finishReason ? ` · finishReason ${m.finishReason}` : ""}
                             </span>
@@ -357,8 +357,8 @@ export default function AiHealthPanel() {
           {data.chatProbe && data.chatProbe.length > 0 && (
             <div className="space-y-3">
               <div>
-                <h3 className="text-sm font-bold text-[#29261F]">ทดสอบแบบห้องคุยจริง</h3>
-                <p className="mt-0.5 text-xs leading-relaxed text-[#635B4E]">
+                <h3 className="text-sm font-bold text-ink">ทดสอบแบบห้องคุยจริง</h3>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted">
                   ยิงด้วย prompt ชุดเดียวกับที่ห้องคุยใช้จริง (บุคลิกแม่หมอเต็ม + ไพ่ + ประวัติสนทนา)
                   — ผ่าน ping สั้น ๆ ไม่ได้แปลว่าห้องคุยจะผ่าน ช่องนี้คือตัวชี้ขาด
                 </p>
@@ -373,7 +373,7 @@ export default function AiHealthPanel() {
                   }`}
                 >
                   <p className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs font-semibold text-[#29261F]">{m.model}</span>
+                    <span className="font-mono text-xs font-semibold text-ink">{m.model}</span>
                     <span
                       className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${
                         m.ok
@@ -383,12 +383,12 @@ export default function AiHealthPanel() {
                     >
                       {m.ok ? "ตอบได้จริง" : m.status ? `HTTP ${m.status}` : "ล้มเหลว"}
                     </span>
-                    <span className="font-mono text-xs text-[#635B4E]">{m.elapsedMs}ms</span>
+                    <span className="font-mono text-xs text-muted">{m.elapsedMs}ms</span>
                     {m.promptChars ? (
-                      <span className="text-xs text-[#756F66]">prompt {m.promptChars} ตัวอักษร</span>
+                      <span className="text-xs text-muted">prompt {m.promptChars} ตัวอักษร</span>
                     ) : null}
                   </p>
-                  <p className={`mt-2 leading-relaxed ${m.ok ? "text-[#29261F]" : "break-all text-rose-800 font-mono"}`}>
+                  <p className={`mt-2 leading-relaxed ${m.ok ? "text-ink" : "break-all text-rose-800 font-mono"}`}>
                     {m.ok ? `“${m.answerPreview}”` : m.error}
                   </p>
                 </div>
@@ -396,7 +396,7 @@ export default function AiHealthPanel() {
             </div>
           )}
 
-          <p className="text-xs text-[#756F66]">
+          <p className="text-xs text-muted">
             ตรวจเมื่อ {new Date(data.checkedAt).toLocaleString("th-TH")}
           </p>
         </>

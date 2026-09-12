@@ -27,9 +27,9 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
   const { isEnglish } = useLocale();
 
   return (
-    <div className="w-full max-w-2xl mx-auto rounded-xl border border-[#D9C8AC] bg-[#FAF8F5] p-5 sm:p-7 space-y-4 shadow-xs">
+    <div className="w-full max-w-2xl mx-auto rounded-xl border border-line-warm bg-surface-mist p-5 sm:p-7 space-y-4 shadow-xs">
       <div className="flex items-start gap-3.5">
-        <div className="w-10 h-15 rounded-lg border-2 border-[#D9C8AC] overflow-hidden flex-shrink-0 bg-[#FFFFFF]">
+        <div className="w-10 h-15 rounded-lg border-2 border-line-warm overflow-hidden flex-shrink-0 bg-surface">
           <CardImage
             image={persona?.cardImage || "major-02.jpg"}
             alt=""
@@ -45,14 +45,14 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
                 ? persona?.nameEn || persona?.nameTh || "Tarot Reader"
                 : persona?.nameTh || "แม่หมอประจำวิหาร"}
             </span>
-            <span className="text-[12px] text-[#635B4E] font-serif-th">
+            <span className="text-[12px] text-muted font-serif-th">
               {isEnglish
                 ? "· Deep Context Clarification"
                 : "· สอบถามเพิ่มเติมก่อนสับไพ่"}
             </span>
           </div>
 
-          <p className="text-sm sm:text-base font-serif-th font-medium text-[#29261F] leading-relaxed">
+          <p className="text-sm sm:text-base font-serif-th font-medium text-ink leading-relaxed">
             "{question}"
           </p>
         </div>
@@ -69,11 +69,11 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
               ? "Share a brief answer (e.g. we parted 2 months ago, or choosing between 2 specific offers)..."
               : "พิมพ์คำตอบหรือเล่าเพิ่มเติมสั้น ๆ (เช่น เลิกรากันมา 2 เดือนแล้ว หรือ กำลังตัดสินใจระหว่าง 2 ตัวเลือก)..."
           }
-          className="w-full p-3 sm:p-3.5 rounded-lg border border-[#D5CEC2] bg-[#FFFFFF] text-xs sm:text-sm font-serif-th focus:outline-none focus:border-[#8F5C1A] text-[#29261F] placeholder:text-[#8C827A] resize-none leading-relaxed"
+          className="w-full p-3 sm:p-3.5 rounded-lg border border-line bg-surface text-xs sm:text-sm font-serif-th focus:outline-none focus:border-gold-ink text-ink placeholder:text-[#8C827A] resize-none leading-relaxed"
         />
 
         <div className="flex items-center justify-between gap-3 pt-1 flex-wrap">
-          <p className="text-[11px] sm:text-xs text-[#635B4E] font-serif-th">
+          <p className="text-[11px] sm:text-xs text-muted font-serif-th">
             {isEnglish
               ? "Your answer deepens reading precision (skippable anytime)"
               : "คำตอบจะช่วยให้คำทำนายตรงจุดยิ่งขึ้น (กดข้ามได้เสมอ)"}
@@ -84,7 +84,7 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
               type="button"
               onClick={onSkip}
               disabled={loading}
-              className="py-2 px-3.5 sm:px-4 rounded-full border border-[#D5CEC2] bg-[#EAE7E0] text-xs font-serif-th text-[#29261F] hover:border-[#8F5C1A] hover:text-[#8F5C1A] transition-colors cursor-pointer disabled:opacity-50"
+              className="py-2 px-3.5 sm:px-4 rounded-full border border-line bg-inset text-xs font-serif-th text-ink hover:border-gold-ink hover:text-gold-ink transition-colors cursor-pointer disabled:opacity-50"
             >
               {isEnglish ? "Skip" : "ข้ามคำถามนี้"}
             </button>
@@ -93,7 +93,7 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
               type="button"
               onClick={onSubmit}
               disabled={loading}
-              className="py-2 px-4 sm:px-5 rounded-full bg-[#29261F] hover:bg-[#8F5C1A] text-[#F3F0EA] text-xs sm:text-sm font-bold font-serif-th transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+              className="py-2 px-4 sm:px-5 rounded-full bg-ink hover:bg-gold-ink text-canvas text-xs sm:text-sm font-bold font-serif-th transition-colors shadow-xs cursor-pointer disabled:opacity-50"
             >
               {loading
                 ? isEnglish

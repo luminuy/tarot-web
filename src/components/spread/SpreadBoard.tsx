@@ -151,9 +151,9 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       >
         {/* Card Container with Active Glow */}
         <div
-          className={`relative transition duration-300 rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-[#8F5C1A] ${
+          className={`relative transition duration-300 rounded-lg group-focus-visible:ring-2 group-focus-visible:ring-gold-ink ${
             isCurrentReading
-              ? "ring-4 ring-[#8F5C1A] ring-offset-2 ring-offset-[#F3EDE2] shadow-overlay scale-105"
+              ? "ring-4 ring-gold-ink ring-offset-2 ring-offset-[#F3EDE2] shadow-overlay scale-105"
               : "hover:scale-105"
           }`}
         >
@@ -164,10 +164,10 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
                 e.stopPropagation();
                 onZoomCard(drawn);
               }}
-              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-[#FFFFFF] hover:bg-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] text-[#2E211A] hover:text-[#8F5C1A] transition duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
+              className="absolute -top-2.5 -right-2.5 px-2.5 py-1 rounded-full bg-surface hover:bg-surface-warm border border-line-warm hover:border-gold-ink text-ink-deep hover:text-gold-ink transition duration-300 cursor-pointer flex items-center gap-1.5 z-30 group hover:scale-105 active:scale-95"
               title={isEnglish ? "Zoom 3D High-Definition Card" : "ซูมดูไพ่ 3D ความละเอียดสูง"}
             >
-              <ExpandTabIcon className="w-3 h-3 text-[#8F5C1A] group-hover:text-[#74490F] transition-colors" />
+              <ExpandTabIcon className="w-3 h-3 text-gold-ink group-hover:text-gold-ink-deep transition-colors" />
               <span className="text-[12px] font-serif-th font-bold tracking-wide">
                 {isEnglish ? "Zoom" : "ขยาย"}
               </span>
@@ -184,7 +184,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
               className="w-24 h-[163px] sm:w-28 sm:h-[190px]"
             />
           ) : (
-            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-lg border-2 border-dashed border-[#D9C8AC] bg-[#F3EDE2] flex items-center justify-center text-xs text-[#635B4E]">
+            <div className="w-24 h-[163px] sm:w-28 sm:h-[190px] rounded-lg border-2 border-dashed border-line-warm bg-inset-warm flex items-center justify-center text-xs text-muted">
               {pos.index + 1}
             </div>
           )}
@@ -192,11 +192,11 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 
         {/* Slot Position Name Tag */}
         <div className="text-center mt-2.5 w-28 sm:w-32">
-          <span className="text-[13px] text-[#8F5C1A] font-mono block font-semibold">
+          <span className="text-[13px] text-gold-ink font-mono block font-semibold">
             {isEnglish ? `Card #${pos.index + 1}` : `ใบที่ ${pos.index + 1}`}
           </span>
           <span
-            className="text-xs font-serif-th font-bold text-[#2E211A] leading-snug py-0.5 block truncate"
+            className="text-xs font-serif-th font-bold text-ink-deep leading-snug py-0.5 block truncate"
             title={posName}
           >
             {posName}
@@ -209,19 +209,19 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
   const spreadNameLocalized = getSpreadName(spread, isEnglish);
 
   return (
-    <div className="w-full rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-6 flex flex-col justify-between space-y-4 select-none relative overflow-hidden">
+    <div className="w-full rounded-lg border border-line-warm bg-surface p-4 sm:p-6 flex flex-col justify-between space-y-4 select-none relative overflow-hidden">
       {/* Header Bar: Spread Name & Quick Flip Button */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/30 relative z-10">
+      <div className="flex items-center justify-between pb-3 border-b border-line-warm/30 relative z-10">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[13px] text-[#635B4E] font-serif-th font-semibold">
+            <span className="text-[13px] text-muted font-serif-th font-semibold">
               {isEnglish ? "Spread:" : "ผังพยากรณ์:"}
             </span>
-            <span className="text-xs text-[#FFFFFF] bg-[#8F5C1A] px-2.5 py-0.5 rounded-full font-bold font-mono ">
+            <span className="text-xs text-surface bg-gold-ink px-2.5 py-0.5 rounded-full font-bold font-mono ">
               {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
             </span>
           </div>
-          <h3 className="font-serif-th text-base sm:text-lg font-bold text-[#2E211A] mt-0.5">
+          <h3 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep mt-0.5">
             {spreadNameLocalized}
           </h3>
         </div>
@@ -229,7 +229,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
         {/* Reveal All Cards Action Button or Revealed Badge */}
         {drawnCards.length > 0 &&
           (isAllRevealed ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#635B4E] text-xs font-serif-th font-semibold ">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-inset-warm border border-line-warm text-muted text-xs font-serif-th font-semibold ">
               
               <span>{isEnglish ? "All Cards Revealed" : "เปิดไพ่ครบแล้ว"}</span>
             </div>
@@ -237,7 +237,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             <button
               type="button"
               onClick={onRevealAll}
-              className="px-3.5 py-1.5 rounded-full text-xs font-serif-th font-bold bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] transition cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] active:scale-95"
+              className="px-3.5 py-1.5 rounded-full text-xs font-serif-th font-bold bg-gold-ink hover:bg-gold-ink-deep text-surface transition cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink active:scale-95"
             >
               
               <span>{isEnglish ? "Reveal All Cards" : "พลิกดูไพ่ทั้งหมด"}</span>
@@ -265,13 +265,13 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
           {/* ขอบจางซ้าย/ขวา บอกใบ้ว่ายังมีไพ่ต่อไปอีก */}
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-y-0 left-0 w-12 bg-[#FFFFFF] to-transparent transition-opacity duration-300 ${
+            className={`pointer-events-none absolute inset-y-0 left-0 w-12 bg-surface to-transparent transition-opacity duration-300 ${
               canScrollLeft ? "opacity-100" : "opacity-0"
             }`}
           />
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-y-0 right-0 w-12 bg-[#FFFFFF] to-transparent transition-opacity duration-300 ${
+            className={`pointer-events-none absolute inset-y-0 right-0 w-12 bg-surface to-transparent transition-opacity duration-300 ${
               canScrollRight ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -282,7 +282,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(-1)}
             disabled={!canScrollLeft}
             aria-label={isEnglish ? "Scroll left" : "เลื่อนดูไพ่ทางซ้าย"}
-            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[#2E211A] transition hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+            className={`absolute left-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-line-warm bg-inset-warm text-ink-deep transition hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
               canScrollLeft ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -293,7 +293,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
             onClick={() => nudgeRail(1)}
             disabled={!canScrollRight}
             aria-label={isEnglish ? "Scroll right" : "เลื่อนดูไพ่ทางขวา"}
-            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#D9C8AC] bg-[#F3EDE2] text-[#2E211A] transition hover:bg-[#FFFFFF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] ${
+            className={`absolute right-0 top-[45%] -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-line-warm bg-inset-warm text-ink-deep transition hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
               canScrollRight ? "cursor-pointer opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
@@ -308,7 +308,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
       )}
 
       {/* Helpful Hint */}
-      <div className="text-center pt-2 border-t border-[#D9C8AC]/30 text-[13px] text-[#635B4E] relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
+      <div className="text-center pt-2 border-t border-line-warm/30 text-[13px] text-muted relative z-10 flex items-center justify-center gap-1.5 font-serif-th">
         
         <span>
           {useRail

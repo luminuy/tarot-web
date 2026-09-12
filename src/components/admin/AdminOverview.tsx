@@ -87,7 +87,7 @@ function formatAuditAction(action: string): { label: string; tagColor: string } 
     case "vectorize_rebuild":
       return { label: "สร้าง Search Index ใหม่", tagColor: "text-teal-800 bg-teal-50 border-teal-200" };
     default:
-      return { label: action, tagColor: "text-[#635B4E] bg-[#F3F0EA] border-[#D5CEC2]" };
+      return { label: action, tagColor: "text-muted bg-canvas border-line" };
   }
 }
 
@@ -179,9 +179,9 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
     <div className="space-y-6">
       {/* Toast alert */}
       {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-[#D5CEC2] bg-white px-5 py-3 shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-line bg-white px-5 py-3 shadow-lg">
           
-          <span className="text-sm font-medium text-[#29261F]">{toastMsg}</span>
+          <span className="text-sm font-medium text-ink">{toastMsg}</span>
         </div>
       )}
 
@@ -220,17 +220,17 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
       )}
 
       {/* Hero Welcome Banner */}
-      <div className="rounded-2xl border border-[#D5CEC2] bg-white p-6 sm:p-8 shadow-xs">
+      <div className="rounded-2xl border border-line bg-white p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#D5CEC2] bg-[#FAF8F5] px-3 py-1 text-xs font-semibold text-[#29261F]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-mist px-3 py-1 text-xs font-semibold text-ink">
               
               <span>ศูนย์บัญชาการวิหารพยากรณ์ (Command Center)</span>
             </div>
-            <h2 className="font-mystic-gold text-2xl sm:text-3xl font-bold tracking-tight text-[#29261F]">
+            <h2 className="font-mystic-gold text-2xl sm:text-3xl font-bold tracking-tight text-ink">
               ภาพรวมระบบและกิจกรรม
             </h2>
-            <p className="text-sm text-[#635B4E] max-w-xl leading-relaxed">
+            <p className="text-sm text-muted max-w-xl leading-relaxed">
               ติดตามสถิติผู้ใช้งาน ความพร้อมของระบบคลาวด์บน Cloudflare Edge และจัดการข้อมูลวิหารทั้งหมดได้จากจุดเดียว
             </p>
           </div>
@@ -241,7 +241,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               size="sm"
               onClick={loadData}
               disabled={loading}
-              className="border-[#D5CEC2] bg-[#FAF8F5] text-xs font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition"
+              className="border-line bg-surface-mist text-xs font-medium text-ink hover:bg-white hover:border-gold transition"
             >
               {loading ? "กำลังซิงก์ข้อมูล…" : "รีเฟรชข้อมูลสด"}
             </Button>
@@ -249,7 +249,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#29261F] bg-[#29261F] px-4 py-2 text-xs font-semibold text-white hover:bg-[#171512] transition shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-ink bg-ink px-4 py-2 text-xs font-semibold text-white hover:bg-dark transition shadow-xs"
             >
               <span>ดูหน้าเว็บจริง</span>
               <span className="text-[11px] opacity-75">↗</span>
@@ -261,42 +261,42 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
       {/* Primary KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Total Users */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition">
+        <div className="rounded-2xl border border-line bg-white p-5 shadow-xs hover:border-gold transition">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#635B4E]">สมาชิกทั้งหมดใน D1</span>
-            <span className="rounded-full bg-[#FAF8F5] px-2 py-0.5 text-[11px] font-mono text-[#29261F] border border-[#D5CEC2]">
+            <span className="text-xs font-semibold text-muted">สมาชิกทั้งหมดใน D1</span>
+            <span className="rounded-full bg-surface-mist px-2 py-0.5 text-[11px] font-mono text-ink border border-line">
               D1 Database
             </span>
           </div>
-          <p className="mt-2 text-3xl font-bold font-mono text-[#29261F]">
+          <p className="mt-2 text-3xl font-bold font-mono text-ink">
             {loading ? "…" : totalUsers.toLocaleString("th-TH")}
           </p>
-          <div className="mt-3 flex items-center gap-2 text-[11px] text-[#635B4E] border-t border-[#E8E2D8] pt-2.5">
-            <span>Google: <strong className="text-[#29261F] font-semibold">{googleUsers}</strong></span>
+          <div className="mt-3 flex items-center gap-2 text-[11px] text-muted border-t border-line-soft pt-2.5">
+            <span>Google: <strong className="text-ink font-semibold">{googleUsers}</strong></span>
             <span>•</span>
-            <span>LINE: <strong className="text-[#29261F] font-semibold">{lineUsers}</strong></span>
+            <span>LINE: <strong className="text-ink font-semibold">{lineUsers}</strong></span>
             <span>•</span>
-            <span>อีเมล: <strong className="text-[#29261F] font-semibold">{emailUsers}</strong></span>
+            <span>อีเมล: <strong className="text-ink font-semibold">{emailUsers}</strong></span>
           </div>
         </div>
 
         {/* KPI 2: Total Readings */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition">
+        <div className="rounded-2xl border border-line bg-white p-5 shadow-xs hover:border-gold transition">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#635B4E]">การเปิดไพ่สะสม</span>
+            <span className="text-xs font-semibold text-muted">การเปิดไพ่สะสม</span>
             <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-mono text-emerald-700 border border-emerald-200 font-semibold">
               7 วัน: {readings7d}
             </span>
           </div>
-          <p className="mt-2 text-3xl font-bold font-mono text-[#29261F]">
+          <p className="mt-2 text-3xl font-bold font-mono text-ink">
             {loading ? "…" : totalReadings.toLocaleString("th-TH")}
           </p>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-[#635B4E] border-t border-[#E8E2D8] pt-2.5">
+          <div className="mt-3 flex items-center justify-between text-[11px] text-muted border-t border-line-soft pt-2.5">
             <span>ผังพยากรณ์ 25 รูปแบบ</span>
             <button
               type="button"
               onClick={() => onNavigateTab("stats")}
-              className="text-[#A58A5C] hover:text-[#8E754C] font-semibold cursor-pointer"
+              className="text-gold hover:text-gold-deep font-semibold cursor-pointer"
             >
               ดูรายละเอียด ➔
             </button>
@@ -304,9 +304,9 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         </div>
 
         {/* KPI 3: System Health */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition">
+        <div className="rounded-2xl border border-line bg-white p-5 shadow-xs hover:border-gold transition">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#635B4E]">สถานะระบบคลาวด์</span>
+            <span className="text-xs font-semibold text-muted">สถานะระบบคลาวด์</span>
             <span
               className={`rounded-full px-2 py-0.5 text-[11px] font-semibold border ${
                 health?.overallStatus === "healthy"
@@ -317,15 +317,15 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
               {health?.overallStatus === "healthy" ? "ปกติดี 100%" : "ตรวจพบคำเตือน"}
             </span>
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-[#29261F]">
+          <p className="mt-2 text-2xl font-bold font-mono text-ink">
             {loading ? "…" : `${health?.passedCount ?? 0} / ${health?.totalCount ?? 0} ด่าน`}
           </p>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-[#635B4E] border-t border-[#E8E2D8] pt-2.5">
+          <div className="mt-3 flex items-center justify-between text-[11px] text-muted border-t border-line-soft pt-2.5">
             <span>Cloudflare Edge Stack</span>
             <button
               type="button"
               onClick={() => onNavigateTab("health")}
-              className="text-[#A58A5C] hover:text-[#8E754C] font-semibold cursor-pointer"
+              className="text-gold hover:text-gold-deep font-semibold cursor-pointer"
             >
               ดูผลตรวจ ➔
             </button>
@@ -333,22 +333,22 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         </div>
 
         {/* KPI 4: Security & Safety */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs hover:border-[#A58A5C] transition">
+        <div className="rounded-2xl border border-line bg-white p-5 shadow-xs hover:border-gold transition">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#635B4E]">ความปลอดภัย & โควตา</span>
+            <span className="text-xs font-semibold text-muted">ความปลอดภัย & โควตา</span>
             <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-mono text-rose-700 border border-rose-200 font-semibold">
               สายด่วน 1323
             </span>
           </div>
-          <p className="mt-2 text-2xl font-bold font-mono text-[#29261F]">
+          <p className="mt-2 text-2xl font-bold font-mono text-ink">
             {loading ? "…" : `${blocked7d.toLocaleString("th-TH")} ครั้ง`}
           </p>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-[#635B4E] border-t border-[#E8E2D8] pt-2.5">
+          <div className="mt-3 flex items-center justify-between text-[11px] text-muted border-t border-line-soft pt-2.5">
             <span>บล็อกคำถามเสี่ยง / สิทธิ์เต็ม</span>
             <button
               type="button"
               onClick={() => onNavigateTab("entitlement")}
-              className="text-[#A58A5C] hover:text-[#8E754C] font-semibold cursor-pointer"
+              className="text-gold hover:text-gold-deep font-semibold cursor-pointer"
             >
               จัดการสิทธิ์ ➔
             </button>
@@ -359,21 +359,21 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
       {/* Middle Section: Quick Actions & Live Infrastructure Pulse */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Cloud Services Pulse */}
-        <div className="lg:col-span-2 rounded-2xl border border-[#D5CEC2] bg-white p-6 shadow-xs space-y-4">
+        <div className="lg:col-span-2 rounded-2xl border border-line bg-white p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-[#29261F] font-mystic-gold flex items-center gap-2">
+              <h3 className="text-base font-bold text-ink font-mystic-gold flex items-center gap-2">
                 
                 <span>สัญญาณบริการคลาวด์สด (Cloud Infrastructure Pulse)</span>
               </h3>
-              <p className="text-xs text-[#635B4E] mt-0.5">
+              <p className="text-xs text-muted mt-0.5">
                 สถานะการเชื่อมต่อบริการไร้เซิร์ฟเวอร์แบบเรียลไทม์บน Cloudflare Workers
               </p>
             </div>
             <button
               type="button"
               onClick={() => onNavigateTab("health")}
-              className="text-xs text-[#A58A5C] hover:text-[#8E754C] font-semibold underline decoration-dotted cursor-pointer"
+              className="text-xs text-gold-ink hover:text-gold-deep font-semibold underline decoration-dotted cursor-pointer"
             >
               ดูเต็มรูปแบบ
             </button>
@@ -381,13 +381,13 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             {/* D1 Database */}
-            <div className="flex items-center justify-between rounded-xl bg-[#FAF8F5] p-3.5 border border-[#E8E2D8]">
+            <div className="flex items-center justify-between rounded-xl bg-surface-mist p-3.5 border border-line-soft">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
-                  <span className="text-xs font-bold text-[#29261F]">Cloudflare D1 Database</span>
+                  <span className="text-xs font-bold text-ink">Cloudflare D1 Database</span>
                 </div>
-                <p className="text-[11px] text-[#635B4E]">
+                <p className="text-[11px] text-muted">
                   ฐานข้อมูลหลัก: {health?.services?.d1?.metrics?.totalReadings ?? 0} ประวัติดวง
                 </p>
               </div>
@@ -397,13 +397,13 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             </div>
 
             {/* KV Cache */}
-            <div className="flex items-center justify-between rounded-xl bg-[#FAF8F5] p-3.5 border border-[#E8E2D8]">
+            <div className="flex items-center justify-between rounded-xl bg-surface-mist p-3.5 border border-line-soft">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-600" />
-                  <span className="text-xs font-bold text-[#29261F]">KV Incremental Cache</span>
+                  <span className="text-xs font-bold text-ink">KV Incremental Cache</span>
                 </div>
-                <p className="text-[11px] text-[#635B4E]">แคชหน้าเว็บ SSG และ Feature Flags</p>
+                <p className="text-[11px] text-muted">แคชหน้าเว็บ SSG และ Feature Flags</p>
               </div>
               <span className="text-xs font-mono font-semibold text-emerald-700">
                 {health?.services?.kv?.latencyMs ?? 0} ms
@@ -411,25 +411,25 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
             </div>
 
             {/* AI Models Dual Provider */}
-            <div className="flex items-center justify-between rounded-xl bg-[#FAF8F5] p-3.5 border border-[#E8E2D8]">
+            <div className="flex items-center justify-between rounded-xl bg-surface-mist p-3.5 border border-line-soft">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-600" />
-                  <span className="text-xs font-bold text-[#29261F]">AI Providers (Groq & Gemini)</span>
+                  <span className="text-xs font-bold text-ink">AI Providers (Groq & Gemini)</span>
                 </div>
-                <p className="text-[11px] text-[#635B4E]">สตรีมคำอ่านไพ่ & ล่ามทาโรต์อัตโนมัติ</p>
+                <p className="text-[11px] text-muted">สตรีมคำอ่านไพ่ & ล่ามทาโรต์อัตโนมัติ</p>
               </div>
               <span className="text-xs font-semibold text-emerald-700">พร้อมใช้งาน</span>
             </div>
 
             {/* Vectorize Semantic Search */}
-            <div className="flex items-center justify-between rounded-xl bg-[#FAF8F5] p-3.5 border border-[#E8E2D8]">
+            <div className="flex items-center justify-between rounded-xl bg-surface-mist p-3.5 border border-line-soft">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-600" />
-                  <span className="text-xs font-bold text-[#29261F]">Vectorize Semantic Search</span>
+                  <span className="text-xs font-bold text-ink">Vectorize Semantic Search</span>
                 </div>
-                <p className="text-[11px] text-[#635B4E]">ค้นหาความหมายไพ่ 1024 มิติ</p>
+                <p className="text-[11px] text-muted">ค้นหาความหมายไพ่ 1024 มิติ</p>
               </div>
               <span className="text-xs font-semibold text-emerald-700">Index Active</span>
             </div>
@@ -437,115 +437,115 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
         </div>
 
         {/* Right Col: Quick Actions */}
-        <div className="rounded-2xl border border-[#D5CEC2] bg-white p-6 shadow-xs space-y-4">
-          <h3 className="text-base font-bold text-[#29261F] font-mystic-gold flex items-center gap-2">
+        <div className="rounded-2xl border border-line bg-white p-6 shadow-xs space-y-4">
+          <h3 className="text-base font-bold text-ink font-mystic-gold flex items-center gap-2">
             
             <span>คำสั่งด่วน (Quick Actions)</span>
           </h3>
-          <p className="text-xs text-[#635B4E]">ทางลัดสำหรับการดูแลรักษาระบบที่พบบ่อย</p>
+          <p className="text-xs text-muted">ทางลัดสำหรับการดูแลรักษาระบบที่พบบ่อย</p>
 
           <div className="flex flex-col gap-2.5 pt-2">
             <button
               type="button"
               onClick={() => onNavigateTab("content")}
-              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 
                 <div>
-                  <p className="text-xs font-bold text-[#29261F]">แก้ไข Prompt / ไพ่ 78 ใบ</p>
-                  <p className="text-[11px] text-[#635B4E]">ปรับปรุงบุคลิกและคำอ่านไพ่ live</p>
+                  <p className="text-xs font-bold text-ink">แก้ไข Prompt / ไพ่ 78 ใบ</p>
+                  <p className="text-[11px] text-muted">ปรับปรุงบุคลิกและคำอ่านไพ่ live</p>
                 </div>
               </div>
-              <span className="text-xs text-[#635B4E]">➔</span>
+              <span className="text-xs text-muted">➔</span>
             </button>
 
             <button
               type="button"
               onClick={handleRebuildIndex}
               disabled={rebuildingIndex}
-              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 
                 <div>
-                  <p className="text-xs font-bold text-[#29261F]">
+                  <p className="text-xs font-bold text-ink">
                     {rebuildingIndex ? "กำลังสร้าง Index…" : "รีบิลด์ Search Index (Vectorize)"}
                   </p>
-                  <p className="text-[11px] text-[#635B4E]">อัปเดตเวกเตอร์ค้นหาไพ่ 78 ใบ + บทความ</p>
+                  <p className="text-[11px] text-muted">อัปเดตเวกเตอร์ค้นหาไพ่ 78 ใบ + บทความ</p>
                 </div>
               </div>
-              <span className="text-xs text-[#635B4E]">↻</span>
+              <span className="text-xs text-muted">↻</span>
             </button>
 
             <a
               href="/api/admin/marketing?format=csv"
               download
-              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 
                 <div>
-                  <p className="text-xs font-bold text-[#29261F]">ส่งออกผู้ยินยอมรับข่าวสาร (CSV)</p>
-                  <p className="text-[11px] text-[#635B4E]">ดาวน์โหลดรายชื่อสำหรับส่งแคมเปญ</p>
+                  <p className="text-xs font-bold text-ink">ส่งออกผู้ยินยอมรับข่าวสาร (CSV)</p>
+                  <p className="text-[11px] text-muted">ดาวน์โหลดรายชื่อสำหรับส่งแคมเปญ</p>
                 </div>
               </div>
-              <span className="text-xs text-[#635B4E]">⤓</span>
+              <span className="text-xs text-muted">⤓</span>
             </a>
 
             <button
               type="button"
               onClick={() => onNavigateTab("entitlement")}
-              className="flex items-center justify-between w-full rounded-xl border border-[#D5CEC2] bg-[#FAF8F5] p-3 text-left hover:border-[#A58A5C] hover:bg-white transition cursor-pointer shadow-2xs"
+              className="flex items-center justify-between w-full rounded-xl border border-line bg-surface-mist p-3 text-left hover:border-gold hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-3">
                 
                 <div>
-                  <p className="text-xs font-bold text-[#29261F]">ตรวจสอบโครงสร้างสิทธิ์ D1</p>
-                  <p className="text-[11px] text-[#635B4E]">ตรวจความพร้อมของตารางโควตา</p>
+                  <p className="text-xs font-bold text-ink">ตรวจสอบโครงสร้างสิทธิ์ D1</p>
+                  <p className="text-[11px] text-muted">ตรวจความพร้อมของตารางโควตา</p>
                 </div>
               </div>
-              <span className="text-xs text-[#635B4E]">➔</span>
+              <span className="text-xs text-muted">➔</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Bottom Section: Recent Audit Log */}
-      <div className="rounded-2xl border border-[#D5CEC2] bg-white p-6 shadow-xs space-y-4">
+      <div className="rounded-2xl border border-line bg-white p-6 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-[#29261F] font-mystic-gold flex items-center gap-2">
+            <h3 className="text-base font-bold text-ink font-mystic-gold flex items-center gap-2">
               
               <span>บันทึกประวัติกิจกรรมล่าสุด (Audit Activity Log)</span>
             </h3>
-            <p className="text-xs text-[#635B4E]">
+            <p className="text-xs text-muted">
               ประวัติการเปลี่ยนแปลงการตั้งค่าและการเข้าใช้งานระบบโดยผู้ดูแล
             </p>
           </div>
-          <span className="text-xs font-mono text-[#635B4E]">
+          <span className="text-xs font-mono text-muted">
             ล่าสุด {stats?.audit?.length ?? 0} รายการ
           </span>
         </div>
 
         {(!stats?.audit || stats.audit.length === 0) ? (
-          <p className="text-xs text-[#635B4E] py-4 text-center">ยังไม่มีประวัติกิจกรรมที่บันทึกไว้</p>
+          <p className="text-xs text-muted py-4 text-center">ยังไม่มีประวัติกิจกรรมที่บันทึกไว้</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[#D5CEC2] text-[#635B4E] bg-[#FAF8F5]">
+                <tr className="border-b border-line text-muted bg-surface-mist">
                   <th className="py-2.5 px-3 font-semibold rounded-l-lg">เวลา</th>
                   <th className="py-2.5 px-3 font-semibold">กิจกรรม / รายการ</th>
                   <th className="py-2.5 px-3 font-semibold rounded-r-lg">รายละเอียดเพิ่มเติม</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E8E2D8]">
+              <tbody className="divide-y divide-line-soft">
                 {stats.audit.slice(0, 8).map((entry, idx) => {
                   const { label, tagColor } = formatAuditAction(entry.action);
                   return (
-                    <tr key={idx} className="hover:bg-[#FAF8F5] transition-colors">
-                      <td className="py-3 px-3 text-[#756F66] whitespace-nowrap font-mono">
+                    <tr key={idx} className="hover:bg-surface-mist transition-colors">
+                      <td className="py-3 px-3 text-muted whitespace-nowrap font-mono">
                         {formatThaiTime(entry.ts)}
                       </td>
                       <td className="py-3 px-3">
@@ -553,7 +553,7 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
                           {label}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-[#29261F] font-mono text-[11px] truncate max-w-md">
+                      <td className="py-3 px-3 text-ink font-mono text-[11px] truncate max-w-md">
                         {entry.detail || "—"}
                       </td>
                     </tr>

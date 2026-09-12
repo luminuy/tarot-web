@@ -11,19 +11,19 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="th">
-      <body className="min-h-screen bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center p-4 font-sans">
-        <div className="max-w-md w-full p-8 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] shadow-overlay text-center space-y-6">
-          <div className="w-16 h-16 mx-auto rounded-full bg-[#F3EDE2] border border-[#D9C8AC] flex items-center justify-center text-2xl text-[#8F5C1A] font-bold font-mono">!</div>
+      <body className="min-h-screen bg-inset-warm text-ink-deep flex items-center justify-center p-4 font-sans">
+        <div className="max-w-md w-full p-8 rounded-lg bg-surface border border-line-warm shadow-overlay text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-full bg-inset-warm border border-line-warm flex items-center justify-center text-2xl text-gold-ink font-bold font-mono">!</div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold font-serif-th text-[#2E211A]">เกิดข้อผิดพลาดชั่วคราวในการโหลดระบบ</h2>
-            <p className="text-xs text-[#635B4E] leading-relaxed font-serif-th">
+            <h2 className="text-xl font-bold font-serif-th text-ink-deep">เกิดข้อผิดพลาดชั่วคราวในการโหลดระบบ</h2>
+            <p className="text-xs text-muted leading-relaxed font-serif-th">
               แตะปุ่มด้านล่างเพื่อลองโหลดหน้าเว็บใหม่อีกครั้ง
             </p>
           </div>
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold text-sm font-serif-th active:scale-95 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="w-full py-3 px-4 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-bold text-sm font-serif-th active:scale-95 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
             ลองใหม่อีกครั้ง
           </button>

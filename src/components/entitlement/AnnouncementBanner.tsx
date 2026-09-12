@@ -38,7 +38,7 @@ export function AnnouncementBanner() {
   const when = ent!.announceResetDate?.trim();
 
   return (
-    <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 font-serif-th text-xs text-[#2E211A] sm:text-sm">
+    <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-line-warm bg-surface p-4 font-serif-th text-xs text-ink-deep sm:text-sm">
       <span className="flex-1">
         
         {isEn ? (
@@ -74,7 +74,7 @@ export function AnnouncementBanner() {
           setDismissed(true);
         }}
         aria-label={isEn ? "Dismiss announcement" : "ปิดประกาศระบบสิทธิ์"}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#635B4E] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-inset-warm hover:text-ink-deep cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       >
         ✕
       </button>

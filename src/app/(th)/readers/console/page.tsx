@@ -100,10 +100,10 @@ function ReaderConsoleInner() {
 
   if (loading && !data) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
-          <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-[#635B4E]">กำลังเชื่อมต่อแผงควบคุมแม่หมอ…</p>
+          <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-muted">กำลังเชื่อมต่อแผงควบคุมแม่หมอ…</p>
         </div>
       </main>
     );
@@ -111,11 +111,11 @@ function ReaderConsoleInner() {
 
   if (error || !data) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
-        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-[#A6392C]/40">
-          <h2 className="text-base font-bold text-[#A6392C]">ไม่สามารถเข้าใช้งานได้</h2>
-          <p className="text-xs text-[#635B4E]">{error || "โปรดใช้ลิงก์เข้าสู่ระบบเฉพาะบุคคลจากผู้ดูแลระบบ"}</p>
-          <Link href="/" className="inline-block text-xs text-[#8F5C1A] underline">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
+        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40">
+          <h2 className="text-base font-bold text-err">ไม่สามารถเข้าใช้งานได้</h2>
+          <p className="text-xs text-muted">{error || "โปรดใช้ลิงก์เข้าสู่ระบบเฉพาะบุคคลจากผู้ดูแลระบบ"}</p>
+          <Link href="/" className="inline-block text-xs text-gold-ink underline">
             กลับหน้าหลัก
           </Link>
         </div>
@@ -126,7 +126,7 @@ function ReaderConsoleInner() {
   const { reader, isLiveOpen, tickets, totalWaiting } = data;
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden">
       <div className="max-w-5xl mx-auto space-y-6 relative z-10">
         {/* Header Console Bar */}
         <div className="altar-panel rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-[#e5c07b]/30 shadow-xl">
@@ -330,10 +330,10 @@ export default function ReaderConsolePage() {
   return (
     <Suspense
       fallback={
-        <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
+        <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
           <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
-            <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-[#635B4E]">กำลังโหลดแผงควบคุมแม่หมอ…</p>
+            <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs text-muted">กำลังโหลดแผงควบคุมแม่หมอ…</p>
           </div>
         </main>
       }

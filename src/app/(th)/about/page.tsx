@@ -89,40 +89,40 @@ export default function AboutPage() {
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdAbout) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }} />
 
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
-        <div className="text-center space-y-3 pb-6 border-b border-[#D5CEC2]/40">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#29261F] font-serif-th">เกี่ยวกับ SeerTarot</h1>
-          <p className="text-xs text-[#635B4E]">ใครอยู่เบื้องหลัง และคำทำนายมาจากไหน</p>
+        <div className="text-center space-y-3 pb-6 border-b border-line/40">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th">เกี่ยวกับ SeerTarot</h1>
+          <p className="text-xs text-muted">ใครอยู่เบื้องหลัง และคำทำนายมาจากไหน</p>
         </div>
 
         <section className="space-y-3">
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             SeerTarot คือเว็บดูดวงไพ่ยิปซีและไพ่ทาโรต์ออนไลน์ ที่สร้างขึ้นด้วยความตั้งใจเดียว —
             ทำให้การเปิดไพ่บนอินเทอร์เน็ต <strong>ตรวจสอบได้จริง</strong> ไม่ใช่แค่สุ่มภาพขึ้นมาแล้วบอกว่านี่คือดวงของคุณ
           </p>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราเป็นทีมเล็ก ๆ ที่ดูแลเว็บนี้ด้วยตัวเอง ไม่ได้อยู่ในเครือสำนักข่าวหรือบริษัทดูดวงใด
             สิ่งที่เราทำได้และทำมาตลอดคือ เปิดเผยกลไกทุกอย่างให้คุณตรวจสอบเองได้
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">คำทำนายมาจากไหน</h2>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">คำทำนายมาจากไหน</h2>
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             <strong>คำทำนายบนเว็บนี้เขียนโดยปัญญาประดิษฐ์ (AI) ที่เราออกแบบและปรับแต่งเอง</strong> ไม่ใช่หมอดูมนุษย์
             เราบอกเรื่องนี้ตรง ๆ ตั้งแต่ต้น เพราะคิดว่าคุณควรรู้ว่ากำลังอ่านอะไรอยู่
           </p>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             AI ของเราไม่ได้เดาคำตอบลอย ๆ แต่อ่านจากความหมายดั้งเดิมของไพ่แต่ละใบตามตำรา 1909 Rider-Waite-Smith
             ประกอบกับตำแหน่งที่ไพ่ใบนั้นตกในผัง และคำถามที่คุณถาม แล้วเรียบเรียงออกมาเป็นภาษาที่อ่านเข้าใจ
           </p>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             ถ้าคุณอยากคุยกับคนจริง ๆ เรามีหน้า{" "}
-            <Link href="/readers" prefetch={false} className="text-[#8F5C1A] underline hover:text-[#A58A5C]">
+            <Link href="/readers" prefetch={false} className="text-gold-ink underline hover:text-gold">
               แม่หมอตัวจริง
             </Link>{" "}
             แยกไว้ต่างหาก และจะบอกเสมอว่าอันไหนคือ AI อันไหนคือคน
@@ -130,37 +130,37 @@ export default function AboutPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้</h2>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">ไพ่ถูกสุ่มจริงไหม — พิสูจน์ได้</h2>
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             นี่คือเรื่องที่เราให้ความสำคัญที่สุด เว็บดูดวงทั่วไปไม่มีทางให้คุณรู้เลยว่าไพ่ถูกสุ่มจริง
             หรือถูกเลือกมาให้ทีหลังเพื่อให้เข้ากับคำทำนาย
           </p>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราใช้ระบบ <strong>Provably Fair</strong> แบบเดียวกับที่ใช้ตรวจสอบความยุติธรรมในระบบสุ่มระดับสากล
             ก่อนคุณจะเลือกไพ่ ระบบจะ <strong>ล็อกลำดับไพ่ทั้งสำรับไว้ก่อนแล้ว</strong> และแสดงค่าแฮช SHA-256
             ของลำดับนั้นให้คุณเห็น เมื่อเปิดไพ่เสร็จ ระบบจะเปิดเผยลำดับจริงให้คุณนำไปตรวจย้อนได้ว่าตรงกับค่าแฮชเดิม
           </p>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             แปลว่า <strong>เราไม่สามารถเปลี่ยนไพ่ของคุณหลังจากคุณเลือกแล้วได้เลย</strong> แม้จะอยากทำก็ทำไม่ได้
             เพราะค่าแฮชจะไม่ตรงทันที และคุณตรวจเองได้ทุกครั้ง
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">สำรับไพ่ที่เราใช้</h2>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">สำรับไพ่ที่เราใช้</h2>
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             เราใช้ภาพไพ่จากสำรับ <strong>1909 Rider-Waite-Smith</strong> ต้นฉบับ ครบทั้ง 78 ใบ
             ซึ่งเป็นสำรับที่เป็นรากของการอ่านไพ่ทาโรต์สมัยใหม่แทบทั้งหมด
           </p>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             เรามีกฎภายในข้อหนึ่งที่เข้มมาก คือ <strong>ห้ามสร้างไพ่ปลอมขึ้นมาเองเด็ดขาด</strong> ถ้าข้อมูลไพ่ใบไหน
             มีปัญหา ระบบจะแจ้งให้คุณโหลดใหม่ แทนที่จะแอบใส่ไพ่ใบอื่นแทนให้เนียน ๆ
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">สิ่งที่เราไม่ใช่ และไม่รับทำ</h2>
-          <ul className="space-y-2 text-sm text-[#29261F] list-disc list-inside leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">สิ่งที่เราไม่ใช่ และไม่รับทำ</h2>
+          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>ไม่ใช่คำแนะนำทางการแพทย์ กฎหมาย หรือการเงิน</strong> — คำทำนายมีไว้เพื่อทบทวนความคิดและให้กำลังใจ
               ถ้าคุณมีเรื่องสุขภาพ คดีความ หรือการลงทุน โปรดปรึกษาผู้เชี่ยวชาญตัวจริง
@@ -173,7 +173,7 @@ export default function AboutPage() {
             </li>
             <li>
               <strong>ไม่เอาคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — รายละเอียดอยู่ใน{" "}
-              <Link href="/privacy" prefetch={false} className="text-[#8F5C1A] underline hover:text-[#A58A5C]">
+              <Link href="/privacy" prefetch={false} className="text-gold-ink underline hover:text-gold">
                 นโยบายความเป็นส่วนตัว
               </Link>
             </li>
@@ -181,33 +181,33 @@ export default function AboutPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">ถ้าคุณกำลังรู้สึกแย่มาก</h2>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">ถ้าคุณกำลังรู้สึกแย่มาก</h2>
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             ถ้าระบบตรวจพบว่าคำถามของคุณมีสัญญาณของการทำร้ายตัวเอง เราจะหยุดการทำนายทันที
             และแสดงช่องทางขอความช่วยเหลือแทน เพราะเรื่องแบบนี้ไม่ควรฝากไว้กับไพ่
           </p>
-          <div className="rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 space-y-1">
-            <p className="text-sm text-[#29261F] font-serif-th">
+          <div className="rounded-xl border border-line bg-surface p-4 space-y-1">
+            <p className="text-sm text-ink font-serif-th">
               <strong>สายด่วนสุขภาพจิต กรมสุขภาพจิต — โทร 1323</strong> (ฟรี ตลอด 24 ชั่วโมง)
             </p>
-            <p className="text-xs text-[#635B4E] font-serif-th">
+            <p className="text-xs text-muted font-serif-th">
               ถ้าอยู่ต่างประเทศ ใช้สายด่วนในพื้นที่ของคุณ เช่น 988 ในสหรัฐอเมริกา
             </p>
           </div>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">ติดต่อเรา</h2>
-          <p className="text-sm text-[#29261F] leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">ติดต่อเรา</h2>
+          <p className="text-sm text-ink leading-relaxed font-serif-th">
             มีอะไรอยากบอก อยากติ อยากแจ้งปัญหา หรือเจอคำทำนายที่ไม่เหมาะสม เขียนมาได้เลยที่{" "}
             <a
               href={`mailto:${DEFAULT_SUPPORT_EMAIL}`}
-              className="text-[#8F5C1A] underline hover:text-[#A58A5C] break-all"
+              className="text-gold-ink underline hover:text-gold break-all"
             >
               {DEFAULT_SUPPORT_EMAIL}
             </a>{" "}
             เราอ่านทุกฉบับ · ดูช่องทางทั้งหมดได้ที่หน้า{" "}
-            <Link href="/contact" prefetch={false} className="text-[#8F5C1A] underline hover:text-[#A58A5C]">
+            <Link href="/contact" prefetch={false} className="text-gold-ink underline hover:text-gold">
               ติดต่อเรา
             </Link>
           </p>

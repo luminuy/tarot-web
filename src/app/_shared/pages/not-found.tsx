@@ -34,14 +34,14 @@ export function NotFoundBody() {
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-[60vh] bg-[#F3F0EA] text-[#29261F] flex items-center justify-center px-6 py-20">
+      <main id="main-content" tabIndex={-1} className="min-h-[60vh] bg-canvas text-ink flex items-center justify-center px-6 py-20">
         <div className="max-w-lg w-full text-center space-y-8">
           <div className="space-y-4">
-            <span aria-hidden="true" className="block text-4xl font-serif-th font-bold text-[#A58A5C]">404</span>
+            <span aria-hidden="true" className="block text-4xl font-serif-th font-bold text-gold">404</span>
             <h1 className="text-2xl sm:text-3xl font-bold font-serif-th leading-normal pt-1">
               ไม่พบหน้าที่คุณกำลังตามหา
             </h1>
-            <p className="text-sm text-[#635B4E] font-serif-th leading-relaxed">
+            <p className="text-sm text-muted font-serif-th leading-relaxed">
               หน้านี้อาจถูกย้ายหรือไม่เคยมีอยู่ ลองเลือกทางใดทางหนึ่งด้านล่างเพื่อกลับเข้าวิหารอีกครั้ง
             </p>
           </div>
@@ -51,15 +51,15 @@ export function NotFoundBody() {
               <a
                 key={link.href}
                 href={link.href}
-                className="px-5 py-2.5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-sm font-serif-th shadow-xs transition-colors hover:text-[#8F5C1A] hover:border-[#A58A5C]"
+                className="px-5 py-2.5 rounded-full bg-surface border border-line text-sm font-serif-th shadow-xs transition-colors hover:text-gold-ink hover:border-gold"
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          <p className="text-xs text-[#635B4E] font-serif-th">
-            <span className="text-[#3A7044] font-medium">สายด่วนสุขภาพจิต 1323</span>
+          <p className="text-xs text-muted font-serif-th">
+            <span className="text-ok font-medium">สายด่วนสุขภาพจิต 1323</span>
           </p>
         </div>
       </main>

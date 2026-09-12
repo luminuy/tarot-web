@@ -32,7 +32,7 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
     <nav aria-label="ความคืบหน้าการดูดวง" className="w-full max-w-2xl mx-auto mb-10 px-2 select-none">
       <ol className="flex items-center justify-between relative list-none">
         {/* Background Connecting Rail */}
-        <div className="absolute left-0 top-[14px] sm:top-4 w-full h-[1px] bg-[#D9C8AC] z-0" aria-hidden="true" />
+        <div className="absolute left-0 top-[14px] sm:top-4 w-full h-[1px] bg-line-warm z-0" aria-hidden="true" />
 
         {/*
           * Active Golden Progress Rail
@@ -49,7 +49,7 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
           * จึงไม่มีจังหวะกระพริบตอน hydrate (เทียบเท่า `initial={false}` ของเดิม)
           */}
         <div
-          className="absolute left-0 top-[14px] sm:top-4 h-[2px] w-full origin-left bg-[#8F5C1A] z-0 transition-transform duration-400 ease-standard"
+          className="absolute left-0 top-[14px] sm:top-4 h-[2px] w-full origin-left bg-gold-ink z-0 transition-transform duration-400 ease-standard"
           aria-hidden="true"
           style={{ transform: `scaleX(${currentIndex / (STEPS.length - 1)})` }}
         />
@@ -66,10 +66,10 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
             <span
               className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[13px] sm:text-xs font-mono font-bold transition duration-300 ${
                 isActive
-                  ? "bg-[#8F5C1A] border-2 border-[#8F5C1A] text-white ring-4 ring-[rgba(143,92,26,0.15)]"
+                  ? "bg-gold-ink border-2 border-gold-ink text-white ring-4 ring-[rgba(143,92,26,0.15)]"
                   : isPassed
-                    ? "bg-white border-2 border-[#8F5C1A] text-[#8F5C1A] font-bold"
-                    : "bg-[#F3EDE2] border border-[#D9C8AC] text-[#635B4E]"
+                    ? "bg-white border-2 border-gold-ink text-gold-ink font-bold"
+                    : "bg-inset-warm border border-line-warm text-muted"
               }`}
             >
               {isPassed ? "✓" : step.num}
@@ -84,7 +84,7 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
           const label = (
             <span
               className={`text-[13px] sm:text-[13px] font-serif-th mt-1.5 transition-colors whitespace-nowrap ${
-                isActive ? "font-bold text-[#2E211A]" : "text-[#635B4E]"
+                isActive ? "font-bold text-ink-deep" : "text-muted"
               }`}
             >
               {step.title}
@@ -102,7 +102,7 @@ export const RitualStepProgress: React.FC<RitualStepProgressProps> = ({ currentS
                   type="button"
                   onClick={() => onStepClick?.(step.id)}
                   aria-label={`ย้อนกลับไปขั้นที่ ${step.num}: ${step.title}`}
-                  className="flex flex-col items-center cursor-pointer group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] hover:scale-110 transition-transform"
+                  className="flex flex-col items-center cursor-pointer group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] hover:scale-110 transition-transform"
                 >
                   {dot}
                   {label}

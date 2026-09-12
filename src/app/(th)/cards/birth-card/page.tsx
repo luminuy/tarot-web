@@ -149,7 +149,7 @@ export default function BirthCardPage() {
   ];
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F] py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
@@ -197,7 +197,7 @@ export default function BirthCardPage() {
               และ Angeles Arrien ซึ่งผสานศาสตร์แห่งสัญลักษณ์วิทยาโบราณเข้ากับทฤษฎีแม่พิมพ์จิตวิทยาดั้งเดิม (Archetypes) ของ คาร์ล ยุง (Carl Gustav Jung)
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
               กลไกการคำนวณและมิติแห่งตัวเลข (Digit Reduction & Major Arcana)
             </h3>
             <p>
@@ -211,7 +211,7 @@ export default function BirthCardPage() {
               ส่วนผู้ที่มีผลลัพธ์เป็นตัวเลข 1 ถึง 9 ตั้งแต่แรก จะถือว่ามีพลังงานของไพ่บุคลิกภาพและจิตวิญญาณเป็นหนึ่งเดียวกันอย่างลึกซึ้ง
             </p>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
               ความสัมพันธ์ของคู่ไพ่แห่งดวงวิญญาณ (Archetypal Constellations)
             </h3>
             <p>
@@ -264,7 +264,7 @@ export default function BirthCardPage() {
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] pt-3">
+            <h3 className="text-base sm:text-lg font-bold font-serif-th text-ink pt-3">
               วิธีนำพลังงานไพ่ประจำตัวไปปรับใช้เพื่อการพัฒนาตนเอง
             </h3>
             <p>

@@ -58,22 +58,22 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
 
   return (
     <section
-      className={`mx-auto mt-6 max-w-2xl overflow-hidden rounded-lg p-5 sm:p-6 bg-[#FFFFFF] border ${
-        usedUpTrial ? "border-2 border-[#D9C8AC]" : "border border-[#D9C8AC]"
+      className={`mx-auto mt-6 max-w-2xl overflow-hidden rounded-lg p-5 sm:p-6 bg-surface border ${
+        usedUpTrial ? "border-2 border-line-warm" : "border border-line-warm"
       }`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 gap-3">
-          <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] text-[#8F5C1A] sm:flex">
+          <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line-warm bg-inset-warm text-gold-ink sm:flex">
             <SparkSealIcon className="h-4.5 w-4.5" />
           </span>
           <div className="min-w-0 space-y-1.5">
-            <h3 className="font-serif-th text-base font-bold text-[#2E211A]">
+            <h3 className="font-serif-th text-base font-bold text-ink-deep">
               {usedUpTrial
                 ? (isEn ? "This was your free trial reading" : "นี่คือการเปิดไพ่ทดลองฟรีของคุณ")
                 : (isEn ? "Preserve this oracle and continue reading" : "เก็บดวงนี้ไว้ และเปิดไพ่ต่อได้อีก")}
             </h3>
-            <p className="font-serif-th text-sm leading-relaxed text-[#635B4E]">
+            <p className="font-serif-th text-sm leading-relaxed text-muted">
               {usedUpTrial
                 ? (isEn
                   ? `Create a free account to continue with ${DAILY_LIMIT} daily ${READINGS_EN}, explore deep oracle inquiries, and preserve your reading history across all devices.`
@@ -88,7 +88,7 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
           type="button"
           onClick={dismiss}
           aria-label={isEn ? "Dismiss sign up invitation" : "ปิดคำชวนสมัครสมาชิก"}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm text-[#635B4E] transition-colors hover:bg-[#F3EDE2] hover:text-[#2E211A] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm text-muted transition-colors hover:bg-inset-warm hover:text-ink-deep cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
         >
           ✕
         </button>
@@ -96,8 +96,8 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
 
       <ul className="mt-4 grid gap-1.5 sm:grid-cols-2">
         {memberBenefits.map((b) => (
-          <li key={b.title} className="flex items-start gap-2 font-serif-th text-[13px] text-[#2E211A]">
-            <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#8F5C1A]" />
+          <li key={b.title} className="flex items-start gap-2 font-serif-th text-[13px] text-ink-deep">
+            <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-gold-ink" />
             {b.title}
           </li>
         ))}
@@ -109,13 +109,13 @@ export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {
           trackEntitlementEvent("signup_card_clicked");
           onOpenAuth();
         }}
-        className="mt-4 w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+        className="mt-4 w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-6 py-3.5 font-serif-th text-sm font-bold text-surface transition hover:opacity-95 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       >
         
         {isEn ? "Create Free Account (Takes under a minute)" : "สมัครสมาชิกฟรี (ใช้เวลาไม่ถึงนาที)"}
       </button>
 
-      <p className="mt-2.5 text-center font-serif-th text-[13px] text-[#635B4E]">
+      <p className="mt-2.5 text-center font-serif-th text-[13px] text-muted">
         {isEn
           ? "No card required · Current reading will automatically be saved to your new account"
           : "ไม่ต้องผูกบัตร · คำทำนายที่เพิ่งอ่านจะถูกย้ายเข้าบัญชีให้อัตโนมัติ"}

@@ -50,7 +50,7 @@ export default async function ReaderDetailPage({
   return (
     <>
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-x-clip">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F6F1E9] text-ink-deep p-4 sm:p-8 font-sans relative overflow-x-clip">
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
@@ -59,23 +59,23 @@ export default async function ReaderDetailPage({
 
         <div className="max-w-4xl mx-auto space-y-6 relative z-10">
           {/* Top Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-[#635B4E] border-b border-[#E4D8C4]/40 pb-4 overflow-x-auto whitespace-nowrap">
-            <Link href="/" className="hover:text-[#8F5C1A] transition-colors">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-serif-th text-muted border-b border-[#E4D8C4]/40 pb-4 overflow-x-auto whitespace-nowrap">
+            <Link href="/" className="hover:text-gold-ink transition-colors">
               หน้าแรก
             </Link>
             <span>/</span>
-            <Link href="/readers" className="hover:text-[#8F5C1A] transition-colors">
+            <Link href="/readers" className="hover:text-gold-ink transition-colors">
               ปรึกษาแม่หมอตัวจริง
             </Link>
             <span>/</span>
-            <span className="text-[#2E211A] font-bold truncate">{reader.displayName}</span>
+            <span className="text-ink-deep font-bold truncate">{reader.displayName}</span>
           </nav>
 
         {/* Reader Profile Container */}
-        <div className="bg-[#FFFFFF] rounded-lg p-6 sm:p-10 space-y-8 border border-[#E4D8C4]">
+        <div className="bg-surface rounded-lg p-6 sm:p-10 space-y-8 border border-[#E4D8C4]">
           {/* Header info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-            <div className="h-24 w-24 sm:h-28 sm:w-28 shrink-0 rounded-full border-2 border-[#E4D8C4] bg-[#F0E8DB] overflow-hidden flex items-center justify-center text-3xl font-bold text-[#8F5C1A]">
+            <div className="h-24 w-24 sm:h-28 sm:w-28 shrink-0 rounded-full border-2 border-[#E4D8C4] bg-[#F0E8DB] overflow-hidden flex items-center justify-center text-3xl font-bold text-gold-ink">
               {reader.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -104,7 +104,7 @@ export default async function ReaderDetailPage({
                 {reader.specialties.map((s, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-xs text-[#2E211A] font-medium"
+                    className="px-3 py-1 rounded-full bg-[#F0E8DB] border border-[#E4D8C4] text-xs text-ink-deep font-medium"
                   >
                     • {s}
                   </span>
@@ -115,35 +115,35 @@ export default async function ReaderDetailPage({
 
           {/* Bio Section */}
           <div className="space-y-3 border-t border-[#E4D8C4]/30 pt-6">
-            <h2 className="text-sm font-bold text-[#2E211A] font-serif-th flex items-center gap-2">
+            <h2 className="text-sm font-bold text-ink-deep font-serif-th flex items-center gap-2">
               ประวัติและสไตล์การทำนาย
             </h2>
-            <div className="bg-[#FFFFFF] rounded-lg p-5 border border-[#E4D8C4] text-xs sm:text-sm text-[#2E211A] leading-relaxed font-serif-th whitespace-pre-line">
+            <div className="bg-surface rounded-lg p-5 border border-[#E4D8C4] text-xs sm:text-sm text-ink-deep leading-relaxed font-serif-th whitespace-pre-line">
               {reader.bio || "พร้อมให้คำปรึกษาและชี้แนะแนวทางชีวิตอย่างลึกซึ้งผ่านศาสตร์ไพ่ทาโรต์"}
             </div>
           </div>
 
           {/* Consultation Process Steps */}
           <div className="space-y-4 border-t border-[#E4D8C4]/30 pt-6">
-            <h2 className="text-sm font-bold text-[#2E211A] font-serif-th flex items-center gap-2">
+            <h2 className="text-sm font-bold text-ink-deep font-serif-th flex items-center gap-2">
               ขั้นตอนการรับคำปรึกษา
             </h2>
             <div className="grid gap-3 sm:grid-cols-3 text-xs">
-              <div className="rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-4 space-y-1.5">
-                <span className="text-[#8F5C1A] font-bold text-base">1. สับไพ่และตั้งจิต</span>
-                <p className="text-[#635B4E] leading-relaxed">
+              <div className="rounded-lg bg-surface border border-[#E4D8C4] p-4 space-y-1.5">
+                <span className="text-gold-ink font-bold text-base">1. สับไพ่และตั้งจิต</span>
+                <p className="text-muted leading-relaxed">
                   เลือกผังและเปิดไพ่ด้วยตนเองผ่านระบบ หรือระบุหัวข้อคำถามที่ต้องการคำตอบ
                 </p>
               </div>
-              <div className="rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-4 space-y-1.5">
-                <span className="text-[#8F5C1A] font-bold text-base">2. AI สรุปสาระสำคัญ</span>
-                <p className="text-[#635B4E] leading-relaxed">
+              <div className="rounded-lg bg-surface border border-[#E4D8C4] p-4 space-y-1.5">
+                <span className="text-gold-ink font-bold text-base">2. AI สรุปสาระสำคัญ</span>
+                <p className="text-muted leading-relaxed">
                   ระบบช่วยประมวลผลตำแหน่งไพ่และบริบทคำถาม เพื่อเตรียมข้อมูลส่งต่อให้แม่หมอ
                 </p>
               </div>
-              <div className="rounded-lg bg-[#FFFFFF] border border-[#E4D8C4] p-4 space-y-1.5">
-                <span className="text-[#8F5C1A] font-bold text-base">3. สนทนากับแม่หมอ</span>
-                <p className="text-[#635B4E] leading-relaxed">
+              <div className="rounded-lg bg-surface border border-[#E4D8C4] p-4 space-y-1.5">
+                <span className="text-gold-ink font-bold text-base">3. สนทนากับแม่หมอ</span>
+                <p className="text-muted leading-relaxed">
                   เชื่อมต่อไปยัง LINE ส่วนตัวของแม่หมอเพื่อสนทนาเจาะลึกและไขข้อข้องใจ
                 </p>
               </div>
@@ -154,7 +154,7 @@ export default async function ReaderDetailPage({
           <div className="border-t border-[#E4D8C4]/30 pt-6 space-y-3 text-center sm:text-left">
             <ReaderDetailClient reader={reader} isLiveOpen={isLiveOpen} />
 
-            <p className="text-[13px] text-[#635B4E] text-center pt-2 font-serif-th">
+            <p className="text-[13px] text-muted text-center pt-2 font-serif-th">
               🔒 ข้อมูลคำถามจะถูกส่งต่อไปยังแม่หมอโดยตรง และจะถูกลบออกจากระบบภายใน 30 วันตามมาตรฐาน PDPA
             </p>
           </div>

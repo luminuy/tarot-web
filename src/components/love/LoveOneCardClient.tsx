@@ -257,7 +257,7 @@ export function LoveOneCardClient() {
         headerSlot={
           <div className="space-y-5">
             <div className="space-y-2.5">
-              <label className="block text-xs uppercase tracking-wider font-serif-th font-semibold text-[#8F5C1A] text-center">
+              <label className="block text-xs uppercase tracking-wider font-serif-th font-semibold text-gold-ink text-center">
                 {isEnglish
                   ? "Step 1: Select Your Current Love Status"
                   : "ขั้นตอนที่ 1: เลือกสถานะความรักปัจจุบันของคุณ"}
@@ -276,21 +276,21 @@ export function LoveOneCardClient() {
                       }}
                       className={`group p-3.5 sm:p-4 rounded-2xl text-left border transition duration-200 flex flex-col justify-between cursor-pointer relative ${
                         isSelected
-                          ? "altar-panel-active ring-1 ring-[#A58A5C] shadow-raised text-[#29261F]"
-                          : "altar-card-porcelain hover:border-[#A58A5C]/60 text-[#635B4E] hover:shadow-xs"
+                          ? "altar-panel-active ring-1 ring-gold shadow-raised text-ink"
+                          : "altar-card-porcelain hover:border-gold/60 text-muted hover:shadow-xs"
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between gap-1.5 mb-2">
                           {/* ชิปบอกชื่อไพ่ประจำสถานะ — เดิมชิปนี้พิมพ์ชื่อสถานะซ้ำกับหัวข้อข้างล่างเป๊ะ ๆ */}
-                          <span className="text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FFFFFF] border-[#D5CEC2] text-[#8F5C1A] shadow-2xs">
+                          <span className="text-[10px] sm:text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-surface border-line text-gold-ink shadow-2xs">
                             {isEnglish ? opt.cardNameEn : opt.cardNameTh}
                           </span>
                           <span
                             className={`w-3.5 h-3.5 shrink-0 rounded-full border flex items-center justify-center transition-colors ${
                               isSelected
-                                ? "border-[#8F5C1A] bg-[#8F5C1A]"
-                                : "border-[#D5CEC2] bg-transparent"
+                                ? "border-gold-ink bg-gold-ink"
+                                : "border-line bg-transparent"
                             }`}
                           >
                             {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -299,8 +299,8 @@ export function LoveOneCardClient() {
 
                         {/* ภาพหน้าไพ่ 1909 Rider-Waite (กฎเหล็กข้อ 8 — ต้องผ่าน <CardImage /> พร้อม sizes) */}
                         <div
-                          className={`w-12 h-18 rounded-lg overflow-hidden border-2 bg-[#F3EDE2] shadow-sm transition duration-300 group-hover:scale-105 ${
-                            isSelected ? "border-[#8F5C1A]" : "border-[#D9C8AC]"
+                          className={`w-12 h-18 rounded-lg overflow-hidden border-2 bg-inset-warm shadow-sm transition duration-300 group-hover:scale-105 ${
+                            isSelected ? "border-gold-ink" : "border-line-warm"
                           }`}
                         >
                           <CardImage
@@ -314,10 +314,10 @@ export function LoveOneCardClient() {
                           />
                         </div>
 
-                        <div className="font-serif-th font-bold text-xs sm:text-sm text-[#29261F] mt-2.5">
+                        <div className="font-serif-th font-bold text-xs sm:text-sm text-ink mt-2.5">
                           {isEnglish ? opt.titleEn : opt.titleTh}
                         </div>
-                        <p className="text-[11px] font-sans text-[#635B4E] mt-1.5 leading-snug line-clamp-2">
+                        <p className="text-[11px] font-sans text-muted mt-1.5 leading-snug line-clamp-2">
                           {isEnglish ? opt.descEn : opt.descTh}
                         </p>
                       </div>
@@ -330,7 +330,7 @@ export function LoveOneCardClient() {
             {/* Names & Intention Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto pt-1">
               <div>
-                <label htmlFor={yourNameId} className="block text-[11px] font-serif-th text-[#635B4E] mb-1">
+                <label htmlFor={yourNameId} className="block text-[11px] font-serif-th text-muted mb-1">
                   {isEnglish ? "Your Nickname (Optional)" : "ชื่อเล่นของคุณ (ระบุหรือไม่ก็ได้)"}
                 </label>
                 <input
@@ -339,11 +339,11 @@ export function LoveOneCardClient() {
                   value={yourName}
                   onChange={(e) => setYourName(e.target.value)}
                   placeholder={isEnglish ? "e.g. Alex" : "เช่น แพรว, แบงค์"}
-                  className="w-full rounded-xl border border-[#D5CEC2] bg-[#FAF7F2] px-3.5 py-2 text-xs font-sans text-[#29261F] focus:border-[#A58A5C] focus:outline-hidden focus:ring-1 focus:ring-[#A58A5C] transition-colors"
+                  className="w-full rounded-xl border border-line bg-surface-warm px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
                 />
               </div>
               <div>
-                <label htmlFor={partnerNameId} className="block text-[11px] font-serif-th text-[#635B4E] mb-1">
+                <label htmlFor={partnerNameId} className="block text-[11px] font-serif-th text-muted mb-1">
                   {isEnglish ? "Person in Mind (Optional)" : "ชื่อคนในใจ (หรือสิ่งที่กังวล)"}
                 </label>
                 <input
@@ -352,7 +352,7 @@ export function LoveOneCardClient() {
                   value={partnerName}
                   onChange={(e) => setPartnerName(e.target.value)}
                   placeholder={isEnglish ? "e.g. Crush, Ex" : "เช่น คนคุย, คนรักเก่า"}
-                  className="w-full rounded-xl border border-[#D5CEC2] bg-[#FAF7F2] px-3.5 py-2 text-xs font-sans text-[#29261F] focus:border-[#A58A5C] focus:outline-hidden focus:ring-1 focus:ring-[#A58A5C] transition-colors"
+                  className="w-full rounded-xl border border-line bg-surface-warm px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
                 />
               </div>
             </div>
@@ -362,10 +362,10 @@ export function LoveOneCardClient() {
           <div className="space-y-6 text-left">
             {/* Meta Tags */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-[#EAE7E0] border border-[#D9C8AC] text-xs font-serif-th font-semibold text-[#8F5C1A]">
+              <span className="px-3 py-1 rounded-full bg-inset border border-line-warm text-xs font-serif-th font-semibold text-gold-ink">
                 {isEnglish ? `Status: ${currentStatusObj?.titleEn}` : `สถานะ: ${currentStatusObj?.titleTh}`}
               </span>
-              <span className="px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#D9C8AC] text-xs font-sans font-medium text-[#635B4E]">
+              <span className="px-3 py-1 rounded-full bg-surface-mist border border-line-warm text-xs font-sans font-medium text-muted">
                 {card.arcana === "major" ? "Major Arcana" : "Minor Arcana"} · ธาตุ{card.element}
               </span>
               {savedToHistory && (
@@ -379,10 +379,10 @@ export function LoveOneCardClient() {
             <div className="space-y-4">
               {/* 1. Core Love Oracle */}
               <div className="altar-card-porcelain p-5 rounded-xl space-y-1.5">
-                <div className="text-xs uppercase tracking-wider font-serif-th font-semibold text-[#8F5C1A]">
+                <div className="text-xs uppercase tracking-wider font-serif-th font-semibold text-gold-ink">
                   {isEnglish ? "Core Love Oracle" : "สารจากไพ่ถึงดวงใจของคุณ"}
                 </div>
-                <p className="text-xs sm:text-sm font-sans text-[#29261F] leading-relaxed">
+                <p className="text-xs sm:text-sm font-sans text-ink leading-relaxed">
                   {isEnglish && card.meaningsEn?.love.upright
                     ? card.meaningsEn.love.upright
                     : card.meanings.love.upright}
@@ -390,13 +390,13 @@ export function LoveOneCardClient() {
               </div>
 
               {/* 2. Status Specific Advice */}
-              <div className="p-5 rounded-xl bg-gradient-to-br from-[#FFFFFF] via-[#FAF6EE] to-[#F5EEDC] border border-[#8F5C1A]/30 space-y-1.5 shadow-xs">
-                <div className="text-xs uppercase tracking-wider font-serif-th font-semibold text-[#8F5C1A]">
+              <div className="p-5 rounded-xl bg-gradient-to-br from-surface via-[#FAF6EE] to-[#F5EEDC] border border-gold-ink/30 space-y-1.5 shadow-xs">
+                <div className="text-xs uppercase tracking-wider font-serif-th font-semibold text-gold-ink">
                   {isEnglish
                     ? `Guidance for ${currentStatusObj?.titleEn}`
                     : `คำทำนายเฉพาะสำหรับสถานะ: ${currentStatusObj?.titleTh}`}
                 </div>
-                <p className="text-xs sm:text-sm font-sans text-[#29261F] leading-relaxed">
+                <p className="text-xs sm:text-sm font-sans text-ink leading-relaxed">
                   {getContextualLoveAdvice(card, selectedStatus, isEnglish)}
                 </p>
               </div>
@@ -404,10 +404,10 @@ export function LoveOneCardClient() {
               {/* 3. Guidance & Precautions */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="altar-card-porcelain p-4 sm:p-5 rounded-xl space-y-1">
-                  <div className="text-xs font-serif-th font-bold text-[#29261F]">
+                  <div className="text-xs font-serif-th font-bold text-ink">
                     {isEnglish ? "Guiding Wisdom" : "คำแนะนำนำทางหัวใจ"}
                   </div>
-                  <p className="text-xs font-sans text-[#635B4E] leading-relaxed">
+                  <p className="text-xs font-sans text-muted leading-relaxed">
                     {card.arcana === "major"
                       ? isEnglish
                         ? "As a Major Arcana, this card signals a pivotal spiritual lesson. Stay true to your heart and embrace the long-term journey."
@@ -419,10 +419,10 @@ export function LoveOneCardClient() {
                 </div>
 
                 <div className="altar-card-porcelain p-4 sm:p-5 rounded-xl space-y-1">
-                  <div className="text-xs font-serif-th font-bold text-[#8F5C1A]">
+                  <div className="text-xs font-serif-th font-bold text-gold-ink">
                     {isEnglish ? "Mindful Precaution" : "ข้อควรระวังในความสัมพันธ์"}
                   </div>
-                  <p className="text-xs font-sans text-[#635B4E] leading-relaxed">
+                  <p className="text-xs font-sans text-muted leading-relaxed">
                     {isEnglish
                       ? "Avoid letting assumptions guide your reaction. Direct, compassionate communication resolves misunderstandings before they solidify."
                       : "หลีกเลี่ยงการใช้อารมณ์ตัดสิน หรือคาดเดาเจตนาของอีกฝ่ายไปเองโดยไม่ได้เปิดอกพูดคุยอย่างสันติ"}
@@ -432,11 +432,11 @@ export function LoveOneCardClient() {
             </div>
 
             {/* Card Action Buttons */}
-            <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-[#D9C8AC]/40">
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-line-warm/40">
               <button
                 type="button"
                 onClick={() => handleShare(card)}
-                className="px-5 py-2 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#FAF7F2] text-xs font-serif-th font-bold transition-colors cursor-pointer shadow-xs"
+                className="px-5 py-2 rounded-full bg-ink hover:bg-gold text-surface-warm text-xs font-serif-th font-bold transition-colors cursor-pointer shadow-xs"
               >
                 {copied
                   ? isEnglish
@@ -449,7 +449,7 @@ export function LoveOneCardClient() {
 
               <Link
                 href={`/cards/${card.id}`}
-                className="px-5 py-2 rounded-full bg-[#EAE7E0] border border-[#D9C8AC] hover:bg-[#D5CEC2] text-[#29261F] text-xs font-serif-th font-semibold transition-colors shadow-xs"
+                className="px-5 py-2 rounded-full bg-inset border border-line-warm hover:bg-line text-ink text-xs font-serif-th font-semibold transition-colors shadow-xs"
               >
                 {isEnglish ? "Card Meaning" : "อ่านความหมายไพ่ใบนี้"}
               </Link>
@@ -457,9 +457,9 @@ export function LoveOneCardClient() {
           </div>
         )}
         recommendations={
-          <div className="space-y-3 pt-4 border-t border-[#D9C8AC]/40">
+          <div className="space-y-3 pt-4 border-t border-line-warm/40">
             <div className="text-center sm:text-left space-y-1">
-              <h3 className="text-sm sm:text-base font-serif-th font-bold text-[#29261F]">
+              <h3 className="text-sm sm:text-base font-serif-th font-bold text-ink">
                 {isEnglish
                   ? "Seeking Deeper Clarity on Your Relationship?"
                   : "ต้องการคำตอบเรื่องความรักที่ละเอียดและลึกซึ้งยิ่งขึ้น?"}
@@ -474,15 +474,15 @@ export function LoveOneCardClient() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Link
                 href="/spreads/love"
-                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="group p-4 rounded-xl border border-line-warm hover:border-gold-ink bg-surface transition duration-300 hover:-translate-y-0.5 shadow-xs block"
               >
                 <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FBF2EC] text-[#9E4E28] border-[#E8D0C3] inline-block mb-2">
                   5 Cards
                 </div>
-                <div className="text-sm font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                <div className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                   {isEnglish ? "5-Card Love Spread" : "ผังความรัก 5 ใบ"}
                 </div>
-                <p className="text-xs font-sans text-[#635B4E] leading-relaxed mt-1">
+                <p className="text-xs font-sans text-muted leading-relaxed mt-1">
                   {isEnglish
                     ? "Deeply explore your feelings, their intentions, hidden obstacles, and the likely outcome."
                     : "วิเคราะห์ใจคุณ ใจเขา ปัญหาที่ซ่อนอยู่ และแนวโน้มบทสรุป"}
@@ -491,15 +491,15 @@ export function LoveOneCardClient() {
 
               <Link
                 href="/spreads/love-six"
-                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="group p-4 rounded-xl border border-line-warm hover:border-gold-ink bg-surface transition duration-300 hover:-translate-y-0.5 shadow-xs block"
               >
                 <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#FBF2EC] text-[#9E4E28] border-[#E8D0C3] inline-block mb-2">
                   6 Cards
                 </div>
-                <div className="text-sm font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                <div className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                   {isEnglish ? "6-Card Relationship Spread" : "ผังความสัมพันธ์ 6 ใบ"}
                 </div>
-                <p className="text-xs font-sans text-[#635B4E] leading-relaxed mt-1">
+                <p className="text-xs font-sans text-muted leading-relaxed mt-1">
                   {isEnglish
                     ? "Examine emotional balance, mutual influences, and supportive anchors for lasting union."
                     : "เช็กความสมดุล ปัจจัยแวดล้อม และสิ่งเกื้อหนุนให้รักยั่งยืน"}
@@ -508,15 +508,15 @@ export function LoveOneCardClient() {
 
               <Link
                 href="/readers"
-                className="group p-4 rounded-xl border border-[#D9C8AC] hover:border-[#8F5C1A] bg-[#FFFFFF] transition duration-300 hover:-translate-y-0.5 shadow-xs block"
+                className="group p-4 rounded-xl border border-line-warm hover:border-gold-ink bg-surface transition duration-300 hover:-translate-y-0.5 shadow-xs block"
               >
-                <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#EAE7E0] text-[#5E5240] border-[#D5CEC2] inline-block mb-2">
+                <div className="text-[10px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-inset text-[#5E5240] border-line inline-block mb-2">
                   Personal Readers
                 </div>
-                <div className="text-sm font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                <div className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                   {isEnglish ? "Consult Professional Readers" : "ปรึกษาแม่หมอตัวจริง"}
                 </div>
-                <p className="text-xs font-sans text-[#635B4E] leading-relaxed mt-1">
+                <p className="text-xs font-sans text-muted leading-relaxed mt-1">
                   {isEnglish
                     ? "Schedule a 1-on-1 session with an experienced practitioner for bespoke inquiry."
                     : "นัดหมายพูดคุยกับนักพยากรณ์มืออาชีพเพื่อเจาะลึกคำถามเฉพาะตัว"}

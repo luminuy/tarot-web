@@ -101,50 +101,50 @@ export function CardsAllBody({ locale }: { locale: Locale }) {
   ]);
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Breadcrumb Bar */}
-        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-[#635B4E]">
+        <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-muted">
           <ol className="flex items-center gap-1.5 flex-wrap">
             <li>
-              <Link href={href("/")} className="hover:text-[#8F5C1A] transition-colors">
+              <Link href={href("/")} className="hover:text-gold-ink transition-colors">
                 {homeCrumb(locale).name}
               </Link>
             </li>
-            <li aria-hidden="true" className="text-[#A58A5C]">/</li>
+            <li aria-hidden="true" className="text-gold">/</li>
             <li>
-              <Link href={href("/cards")} className="hover:text-[#8F5C1A] transition-colors">
+              <Link href={href("/cards")} className="hover:text-gold-ink transition-colors">
                 {copy.crumbCards}
               </Link>
             </li>
-            <li aria-hidden="true" className="text-[#A58A5C]">/</li>
-            <li aria-current="page" className="font-bold text-[#29261F]">
+            <li aria-hidden="true" className="text-gold">/</li>
+            <li aria-current="page" className="font-bold text-ink">
               {copy.crumbHere}
             </li>
           </ol>
         </nav>
 
         {/* Hero Header */}
-        <header className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-6 sm:p-8 shadow-xs space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#A58A5C]/40 bg-[#FAF7F2] text-[#8F5C1A] text-xs font-serif-th font-bold">
+        <header className="rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/40 bg-surface-warm text-gold-ink text-xs font-serif-th font-bold">
             <span>{copy.badgeLeft}</span>
-            <span className="w-1 h-1 rounded-full bg-[#A58A5C]" />
+            <span className="w-1 h-1 rounded-full bg-gold" />
             <span>{copy.badgeRight}</span>
           </div>
 
-          <h1 className="font-serif-th text-2xl sm:text-3xl font-bold text-[#29261F]">{copy.title}</h1>
+          <h1 className="font-serif-th text-2xl sm:text-3xl font-bold text-ink">{copy.title}</h1>
 
-          <p className="font-serif-th text-xs sm:text-sm text-[#635B4E] leading-relaxed max-w-3xl">{copy.lede}</p>
+          <p className="font-serif-th text-xs sm:text-sm text-muted leading-relaxed max-w-3xl">{copy.lede}</p>
 
           <div className="pt-2 flex flex-wrap gap-2 text-xs font-serif-th">
             {copy.chips.map((chip) => (
               <Link
                 key={chip.href}
                 href={href(chip.href)}
-                className="px-3 py-1 rounded-lg border border-[#D5CEC2] bg-[#FAF7F2] hover:bg-[#FFFFFF] text-[#29261F]"
+                className="px-3 py-1 rounded-lg border border-line bg-surface-warm hover:bg-surface text-ink"
               >
                 {chip.label}
               </Link>

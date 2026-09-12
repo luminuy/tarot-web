@@ -16,7 +16,7 @@ export function SpreadPositionMap({ positions }: { positions: SpreadPosition[] }
 
   return (
     <div
-      className="relative w-full rounded-xl border border-[#D5CEC2] bg-[#EAE7E0]"
+      className="relative w-full rounded-xl border border-line bg-inset"
       style={{ paddingBottom: `${(layout.boxHeight * 100).toFixed(2)}%` }}
       role="img"
       aria-label={`แผนผังการวางไพ่ ${positions.length} ตำแหน่ง`}
@@ -24,7 +24,7 @@ export function SpreadPositionMap({ positions }: { positions: SpreadPosition[] }
       {positions.map((pos, idx) => (
         <div
           key={idx}
-          className="absolute flex items-center justify-center rounded-[4px] border border-[#A58A5C] bg-[#FFFFFF] text-[12px] font-bold text-[#29261F] shadow-sm"
+          className="absolute flex items-center justify-center rounded-[4px] border border-gold bg-surface text-[12px] font-bold text-ink shadow-sm"
           style={{
             left: `${pos.x * 100}%`,
             // แกน y วัดเป็นหน่วยเดียวกับแกน x (เทียบความกว้างกรอบ) แล้วหารด้วยความสูงกรอบ

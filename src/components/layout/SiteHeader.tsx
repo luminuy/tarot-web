@@ -92,16 +92,16 @@ export function SiteHeader({
         ref={headerRef}
         data-site-header=""
         data-variant={variant}
-        className="w-full border-b border-[#D5CEC2] bg-[#FFFFFF] fixed top-0 inset-x-0 z-50 shadow-raised"
+        className="w-full border-b border-line bg-surface fixed top-0 inset-x-0 z-50 shadow-raised"
       >
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Luxury Brand Logo & Return to Home */}
           <Link
             href="/"
             aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
-            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C]"
+            className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
           >
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D5CEC2] overflow-hidden relative flex-shrink-0 bg-[#F3F0EA] group-hover:scale-105 transition duration-300">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-line overflow-hidden relative flex-shrink-0 bg-canvas group-hover:scale-105 transition duration-300">
               <img
                 src="/logo.webp"
                 alt="SeerTarot"
@@ -114,11 +114,11 @@ export function SiteHeader({
 
             <div className="hidden min-w-0 flex-col justify-center sm:flex">
               <div className="flex min-w-0 items-center">
-                <span className="font-serif-th text-sm sm:text-lg font-bold text-[#29261F] tracking-wide leading-snug py-0.5 whitespace-nowrap">
+                <span className="font-serif-th text-sm sm:text-lg font-bold text-ink tracking-wide leading-snug py-0.5 whitespace-nowrap">
                   {isEnglish ? "SeerTarot Sanctuary" : "ดูดวงไพ่ทาโรต์"}
                 </span>
               </div>
-              <span className="hidden sm:block text-[13px] tracking-[0.22em] text-[#635B4E] font-mono uppercase font-semibold">
+              <span className="hidden sm:block text-[13px] tracking-[0.22em] text-muted font-mono uppercase font-semibold">
                 1909 RIDER-WAITE TAROT
               </span>
             </div>

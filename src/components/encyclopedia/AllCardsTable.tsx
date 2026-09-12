@@ -26,10 +26,10 @@ const TABS = [
 ];
 
 const ELEMENT_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  ไฟ: { bg: "bg-[#8F5C1A]/10", text: "text-[#8F5C1A]", border: "border-[#8F5C1A]/30" },
-  น้ำ: { bg: "bg-[#6F5B4A]/10", text: "text-[#635B4E]", border: "border-[#6F5B4A]/30" },
-  ลม: { bg: "bg-[#6F5B4A]/10", text: "text-[#635B4E]", border: "border-[#6F5B4A]/30" },
-  ดิน: { bg: "bg-[#3A7044]/10", text: "text-[#3A7044]", border: "border-[#3A7044]/30" },
+  ไฟ: { bg: "bg-gold-ink/10", text: "text-gold-ink", border: "border-gold-ink/30" },
+  น้ำ: { bg: "bg-ink-soft/10", text: "text-muted", border: "border-ink-soft/30" },
+  ลม: { bg: "bg-ink-soft/10", text: "text-muted", border: "border-ink-soft/30" },
+  ดิน: { bg: "bg-ok/10", text: "text-ok", border: "border-ok/30" },
 };
 
 const ELEMENT_EN: Record<string, string> = {
@@ -81,7 +81,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
   return (
     <div className="space-y-6">
       {/* Controls Bar: Search & Filter Tabs */}
-      <div className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] p-4 sm:p-6 shadow-xs space-y-4">
+      <div className="rounded-2xl border border-line bg-surface p-4 sm:p-6 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <input
@@ -90,24 +90,24 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={isEnglish ? "Search card name, keyword, element..." : "ค้นหาชื่อไพ่, คำสำคัญ, ธาตุ..."}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5CEC2] bg-[#FAF7F2] text-xs sm:text-sm font-serif-th text-[#29261F] placeholder:text-[#635B4E]/60 focus:outline-none focus:border-[#8F5C1A] focus:ring-1 focus:ring-[#8F5C1A]"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-warm text-xs sm:text-sm font-serif-th text-ink placeholder:text-muted/60 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-serif-th text-[#635B4E] hover:text-[#29261F]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-serif-th text-muted hover:text-ink"
               >
                 {isEnglish ? "Clear" : "ล้าง"}
               </button>
             )}
           </div>
 
-          <div className="text-xs font-serif-th text-[#635B4E] self-center sm:self-auto">
+          <div className="text-xs font-serif-th text-muted self-center sm:self-auto">
             {isEnglish ? (
-              <>Showing <strong className="text-[#8F5C1A]">{filteredCards.length}</strong> of 78 cards</>
+              <>Showing <strong className="text-gold-ink">{filteredCards.length}</strong> of 78 cards</>
             ) : (
-              <>แสดง <strong className="text-[#8F5C1A]">{filteredCards.length}</strong> จาก 78 ใบ</>
+              <>แสดง <strong className="text-gold-ink">{filteredCards.length}</strong> จาก 78 ใบ</>
             )}
           </div>
         </div>
@@ -123,8 +123,8 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                 onClick={() => setActiveSuit(tab.id)}
                 className={`px-3 py-1.5 rounded-xl border text-xs font-serif-th font-bold shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer ${
                   isActive
-                    ? "border-[#8F5C1A] bg-[#29261F] text-[#F3F0EA]"
-                    : "border-[#D5CEC2] bg-[#FAF7F2] text-[#635B4E] hover:bg-[#FFFFFF] hover:text-[#29261F]"
+                    ? "border-gold-ink bg-ink text-canvas"
+                    : "border-line bg-surface-warm text-muted hover:bg-surface hover:text-ink"
                 }`}
               >
                 <tab.Icon className="w-3.5 h-3.5" />
@@ -136,11 +136,11 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
       </div>
 
       {/* Master 78-Card Table */}
-      <div className="rounded-2xl border border-[#D5CEC2] bg-[#FFFFFF] shadow-xs overflow-hidden">
+      <div className="rounded-2xl border border-line bg-surface shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs sm:text-sm font-serif-th">
             <thead>
-              <tr className="border-b border-[#D5CEC2] bg-[#FAF7F2] text-[#29261F]">
+              <tr className="border-b border-line bg-surface-warm text-ink">
                 <th className="py-3 px-3 sm:px-4 font-bold w-12 text-center">#</th>
                 <th className="py-3 px-2 sm:px-3 font-bold w-16 sm:w-20 text-center">{isEnglish ? "Card" : "ไพ่"}</th>
                 <th className="py-3 px-3 sm:px-4 font-bold min-w-[140px] sm:min-w-[180px]">{isEnglish ? "Name" : "ชื่อไพ่"}</th>
@@ -149,7 +149,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                 <th className="py-3 px-3 sm:px-4 font-bold min-w-[160px] sm:min-w-[200px]">{isEnglish ? "Reversed Meaning" : "ความหมายกลับหัว"}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#D5CEC2]/60">
+            <tbody className="divide-y divide-line/60">
               {filteredCards.map((card, idx) => {
                 const elemStyle = ELEMENT_STYLES[card.element] || ELEMENT_STYLES["ไฟ"];
                 const kwEn = CARD_KEYWORDS_EN[card.id];
@@ -163,10 +163,10 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                       contentVisibility: "auto",
                       containIntrinsicSize: "auto 60px",
                     }}
-                    className="hover:bg-[#FAF7F2]/70 transition-colors group"
+                    className="hover:bg-surface-warm/70 transition-colors group"
                   >
                     {/* Index */}
-                    <td className="py-3 px-3 sm:px-4 text-center font-mono text-[11px] text-[#635B4E]">
+                    <td className="py-3 px-3 sm:px-4 text-center font-mono text-[11px] text-muted">
                       {idx + 1}
                     </td>
 
@@ -181,7 +181,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                          * เพราะลิงก์จะกลายเป็นลิงก์ไร้ชื่อ ผิด WCAG 2.4.4 (บทเรียน INC-0125)
                          */
                         aria-label={isEnglish ? card.nameEn : card.nameTh}
-                        className="inline-block w-9 h-15 rounded overflow-hidden border border-[#D5CEC2] bg-[#EAE7E0] hover:border-[#8F5C1A] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#8F5C1A]"
+                        className="inline-block w-9 h-15 rounded overflow-hidden border border-line bg-inset hover:border-gold-ink transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
                       >
                         <CardImage
                           image={card.image}
@@ -198,12 +198,12 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                     <td className="py-3 px-3 sm:px-4">
                       <Link
                         href={`/cards/${card.id}`}
-                        className="group-hover:text-[#8F5C1A] transition-colors focus-visible:outline-none focus-visible:underline"
+                        className="group-hover:text-gold-ink transition-colors focus-visible:outline-none focus-visible:underline"
                       >
-                        <span className="font-bold text-[#29261F] block text-xs sm:text-sm">
+                        <span className="font-bold text-ink block text-xs sm:text-sm">
                           {isEnglish ? card.nameEn : card.nameTh}
                         </span>
-                        <span className="text-[11px] font-mono text-[#635B4E] block">
+                        <span className="text-[11px] font-mono text-muted block">
                           {isEnglish ? "" : card.nameEn}
                         </span>
                       </Link>
@@ -224,7 +224,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                         {uprightKws.map((kw, i) => (
                           <span
                             key={i}
-                            className="text-[11px] px-1.5 py-0.5 rounded bg-[#FAF7F2] text-[#29261F] border border-[#D5CEC2]"
+                            className="text-[11px] px-1.5 py-0.5 rounded bg-surface-warm text-ink border border-line"
                           >
                             {kw}
                           </span>
@@ -238,7 +238,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                         {reversedKws.map((kw, i) => (
                           <span
                             key={i}
-                            className="text-[11px] px-1.5 py-0.5 rounded bg-[#FAF7F2]/60 text-[#635B4E] border border-[#D5CEC2]/70"
+                            className="text-[11px] px-1.5 py-0.5 rounded bg-surface-warm/60 text-muted border border-line/70"
                           >
                             {kw}
                           </span>
@@ -254,7 +254,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
 
         {/* Empty Search Result */}
         {filteredCards.length === 0 && (
-          <div className="p-8 text-center text-xs sm:text-sm text-[#635B4E]">
+          <div className="p-8 text-center text-xs sm:text-sm text-muted">
             {isEnglish ? `No cards matched "${query}"` : `ไม่พบไพ่ที่ตรงกับ "${query}"`}
           </div>
         )}

@@ -194,7 +194,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
   const homeFaqs = getHomeFaqs(isEnglish);
 
   return (
-    <div className="w-full mt-4 sm:mt-6 text-[#29261F]">
+    <div className="w-full mt-4 sm:mt-6 text-ink">
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1: วิธีดูดวงไพ่ทาโรต์ 5 ขั้นตอนศักดิ์สิทธิ์ (Ritual Stations)
           ═══════════════════════════════════════════════════════════════ */}
@@ -202,21 +202,21 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
-            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
-            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
+            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-gold/60" />
+            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-gold-ink font-bold">
               {isEnglish ? "THE SACRED ORACLE RITUAL" : "ขั้นตอนพิธีกรรมพยากรณ์"}
             </span>
-            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
+            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
           </div>
           <h2
             id="how-it-works-title"
-            className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide [text-wrap:balance]"
+            className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]"
           >
             {isEnglish
               ? "How It Works: 5 Sacred Steps to Online Tarot Divination"
               : "วิธีดูดวงไพ่ทาโรต์ออนไลน์ 5 ขั้นตอนศักดิ์สิทธิ์"}
           </h2>
-          <p className="text-sm sm:text-base text-[#635B4E] max-w-3xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
+          <p className="text-sm sm:text-base text-muted max-w-3xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
             {isEnglish ? (
               <>
                 Connect directly with your subconscious mind. Shuffle, cut, and draw cards with your own hands under cryptographic transparency—
@@ -238,22 +238,22 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           {ritualSteps.map((step) => (
             <div
               key={step.stepNum}
-              className="rounded-2xl bg-gradient-to-b from-[#FFFFFF] via-[#FAF7F2] to-[#F7F3EB] border border-[#D9C8AC] hover:border-[#8F5C1A] p-5 lg:p-4 xl:p-5 shadow-[0_2px_8px_rgba(41,38,31,0.04)] hover:shadow-[0_8px_24px_rgba(143,92,26,0.10)] transition duration-300 group flex flex-col justify-between relative overflow-hidden select-none"
+              className="rounded-2xl bg-gradient-to-b from-surface via-surface-warm to-[#F7F3EB] border border-line-warm hover:border-gold-ink p-5 lg:p-4 xl:p-5 shadow-[0_2px_8px_rgba(41,38,31,0.04)] hover:shadow-[0_8px_24px_rgba(143,92,26,0.10)] transition duration-300 group flex flex-col justify-between relative overflow-hidden select-none"
             >
               <div className="space-y-3.5">
                 {/* Step Header */}
-                <div className="flex items-center justify-between pb-2.5 border-b border-[#D9C8AC]/40">
-                  <span className="text-xs font-serif-th font-bold tracking-wider text-[#8F5C1A] uppercase flex items-center gap-1.5">
+                <div className="flex items-center justify-between pb-2.5 border-b border-line-warm/40">
+                  <span className="text-xs font-serif-th font-bold tracking-wider text-gold-ink uppercase flex items-center gap-1.5">
                     {isEnglish ? `Step ${step.stepNum}` : `ขั้นที่ ${step.stepNum}`}
                   </span>
-                  <span className="text-[11px] font-serif-th font-medium text-[#635B4E] px-2.5 py-0.5 rounded-full bg-[#FFFFFF] border border-[#D9C8AC]/60 shadow-2xs">
+                  <span className="text-[11px] font-serif-th font-medium text-muted px-2.5 py-0.5 rounded-full bg-surface border border-line-warm/60 shadow-2xs">
                     {step.phase}
                   </span>
                 </div>
 
                 {/* 1909 Rider-Waite Card Art */}
                 <div className="py-1 flex flex-col items-center">
-                  <div className="w-16 h-24 sm:w-18 sm:h-27 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md group-hover:scale-105 group-hover:border-[#8F5C1A] transition duration-300 bg-[#F3EDE2]">
+                  <div className="w-16 h-24 sm:w-18 sm:h-27 rounded-lg overflow-hidden border-2 border-line-warm shadow-md group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm">
                     <CardImage
                       image={step.cardImage}
                       /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — span ใต้ภาพพิมพ์ step.cardName อยู่แล้ว */
@@ -262,23 +262,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                       sizes="72px"
                     />
                   </div>
-                  <span className="text-[11px] font-mono text-[#8F5C1A] font-semibold mt-2.5 text-center">
+                  <span className="text-[11px] font-mono text-gold-ink font-semibold mt-2.5 text-center">
                     {step.cardName}
                   </span>
                 </div>
 
                 {/* Step Title & Subtitle */}
                 <div className="text-center space-y-1">
-                  <h3 className="font-serif-th font-bold text-base text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug">
+                  <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
                     {step.title}
                   </h3>
-                  <p className="text-xs font-serif-th text-[#8F5C1A]/80 font-medium">
+                  <p className="text-xs font-serif-th text-gold-ink/80 font-medium">
                     {step.subtitle}
                   </p>
                 </div>
 
                 {/* Step Description */}
-                <p className="font-serif-th text-xs text-[#635B4E] leading-relaxed text-center pt-2.5 border-t border-[#D9C8AC]/30">
+                <p className="font-serif-th text-xs text-muted leading-relaxed text-center pt-2.5 border-t border-line-warm/30">
                   {step.desc}
                 </p>
               </div>
@@ -297,10 +297,10 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
 
       {/* Decorative Gold Divider */}
       <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+        <div className="flex items-center gap-3 text-line-warm/70">
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
           
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
         </div>
       </div>
 
@@ -311,18 +311,18 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
-            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
-            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
+            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-gold/60" />
+            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-gold-ink font-bold">
               HERITAGE &amp; INTEGRITY
             </span>
-            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
+            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
           </div>
-          <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide [text-wrap:balance]">
+          <h2 id="heritage-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]">
             {isEnglish
               ? "The Heritage of 1909 Rider-Waite & Uncompromising Integrity"
               : "มนต์เสน่ห์ไพ่ 1909 Rider-Waite & ความโปร่งใสระดับสากล"}
           </h2>
-          <p className="text-sm sm:text-base text-[#635B4E] font-serif-th max-w-3xl mx-auto leading-relaxed [text-wrap:balance]">
+          <p className="text-sm sm:text-base text-muted font-serif-th max-w-3xl mx-auto leading-relaxed [text-wrap:balance]">
             {isEnglish ? (
               <>
                 Blending over 110 years of sacred esoteric art with Provably Fair cryptographic randomness
@@ -342,105 +342,105 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         {/* 3 Pillars of Wisdom */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Pillar 1: 1909 Historic Heritage */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-gold-ink transition duration-300 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
                   <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
                   <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
 
               <div className="text-center space-y-1">
-                <span className="text-xs font-serif-th font-bold text-[#8F5C1A] tracking-wider uppercase block">
+                <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
                   {isEnglish ? "Pillar I" : "เสาเอกที่ ๑"}
                 </span>
-                <h3 className="text-lg font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                   {isEnglish ? "Original 1909 Classic Deck" : "สำรับคลาสสิก 1909 ดั้งเดิม"}
                 </h3>
               </div>
 
-              <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed text-left">
+              <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                 {isEnglish
                   ? "The 1909 Rider-Waite-Smith deck, illustrated by Pamela Colman Smith, is a monumental work encoded with esoteric symbols, four elemental energies (Fire, Water, Air, Earth), and expressive body language designed to converse with your subconscious naturally and accurately."
                   : "ไพ่ทาโรต์ชุด 1909 Rider-Waite-Smith รังสรรค์ภาพโดย Pamela Colman Smith เป็นสำรับอันทรงคุณค่าที่บรรจุรหัสสัญลักษณ์ อัญเชิญพลังแห่งธาตุทั้งสี่ (ไฟ น้ำ ลม ดิน) และสะท้อนภาษากาย ทิศทางสายตา เพื่อสื่อสารกับจิตใต้สำนึกได้อย่างแม่นยำและเป็นธรรมชาติที่สุด"}
               </p>
             </div>
 
-            <div className="pt-4 border-t border-[#D9C8AC]/40 text-center">
-              <span className="text-xs font-serif-th text-[#8F5C1A] font-semibold">
+            <div className="pt-4 border-t border-line-warm/40 text-center">
+              <span className="text-xs font-serif-th text-gold-ink font-semibold">
                 {isEnglish ? "Authentic, Unaltered 1909 Artworks" : "ศิลปะต้นฉบับคมชัดไร้การดัดแปลง"}
               </span>
             </div>
           </div>
 
           {/* Pillar 2: Provably Fair Cryptographic Randomness */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-gold-ink transition duration-300 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
                   <CardImage image="major-10.jpg" alt="Wheel of Fortune" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
                   <CardImage image="major-11.jpg" alt="Justice" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
 
               <div className="text-center space-y-1">
-                <span className="text-xs font-serif-th font-bold text-[#8F5C1A] tracking-wider uppercase block">
+                <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
                   {isEnglish ? "Pillar II" : "เสาเอกที่ ๒"}
                 </span>
-                <h3 className="text-lg font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                   {isEnglish ? "Provably Fair Cryptographic Randomness" : "ระบบสุ่มโปร่งใส Provably Fair"}
                 </h3>
               </div>
 
-              <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed text-left">
+              <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                 {isEnglish
                   ? "Unlike conventional computerized tarot simulators, SeerTarot harnesses SHA-256 cryptographic commitments before any cards are drawn (Commit-Reveal) via Web Crypto API. We guarantee 100% zero outcome manipulation—every card drawn comes purely from your own shuffle and touch."
                   : "แตกต่างจากระบบสุ่มทาโรต์ทั่วไป SeerTarot ผสานเทคโนโลยีเข้ารหัส SHA-256 ล็อกลำดับสำรับไพ่ล่วงหน้าก่อนเปิด (Commit-Reveal) ผ่าน Web Crypto API การันตี 100% ว่าไม่มีการแทรกแซง ไม่มีการล็อกผล ทุกใบที่ได้มาจากการสับไพ่และเลือกด้วยมือคุณเองอย่างแท้จริง"}
               </p>
             </div>
 
-            <div className="pt-4 border-t border-[#D9C8AC]/40 text-center">
-              <span className="text-xs font-serif-th text-[#8F5C1A] font-semibold">
+            <div className="pt-4 border-t border-line-warm/40 text-center">
+              <span className="text-xs font-serif-th text-gold-ink font-semibold">
                 {isEnglish ? "Independently Verifiable Audit Hashes" : "ตรวจสอบลำดับแฮชย้อนหลังได้ทุกครั้ง"}
               </span>
             </div>
           </div>
 
           {/* Pillar 3: Jungian Psychology & Empathetic AI */}
-          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-[#8F5C1A] transition duration-300 flex flex-col justify-between space-y-6 group">
+          <div className="p-7 sm:p-8 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-lg hover:border-gold-ink transition duration-300 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
                   <CardImage image="major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-[#D9C8AC] shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
                   <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
 
               <div className="text-center space-y-1">
-                <span className="text-xs font-serif-th font-bold text-[#8F5C1A] tracking-wider uppercase block">
+                <span className="text-xs font-serif-th font-bold text-gold-ink tracking-wider uppercase block">
                   {isEnglish ? "Pillar III" : "เสาเอกที่ ๓"}
                 </span>
-                <h3 className="text-lg font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors">
+                <h3 className="text-lg font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
                   {isEnglish ? "Jungian Psychology & Empathetic AI" : "จิตวิทยาและการพยากรณ์ AI"}
                 </h3>
               </div>
 
-              <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th leading-relaxed text-left">
+              <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed text-left">
                 {isEnglish
                   ? "Our AI oracles are grounded in Carl Jung's analytical psychology (Archetypes & Synchronicity) and Golden Dawn elemental dignities. We illuminate the energies beneath your query to provide compassionate, empowering counsel that honors your agency."
                   : "แม่หมอ AI ของเราได้รับการฝึกฝนบนหลักจิตวิเคราะห์เชิงลึกของ Carl Jung (Archetypes & Synchronicity) และคัมภีร์ Golden Dawn เคมีคู่ธาตุ วิเคราะห์พลังงานใต้คำถามเพื่อให้คำปรึกษาที่โอบอุ้มจิตใจ สร้างมุมมองใหม่ และเสริมพลังเจตจำนงให้คุณก้าวต่อไปได้อย่างมั่นใจ"}
               </p>
             </div>
 
-            <div className="pt-4 border-t border-[#D9C8AC]/40 text-center">
-              <span className="text-xs font-serif-th text-[#8F5C1A] font-semibold">
+            <div className="pt-4 border-t border-line-warm/40 text-center">
+              <span className="text-xs font-serif-th text-gold-ink font-semibold">
                 {isEnglish ? "Empowering Insights & Sovereign Agency" : "คำปรึกษาเชิงบวก เสริมพลังเจตจำนง"}
               </span>
             </div>
@@ -450,10 +450,10 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
 
       {/* Decorative Gold Divider */}
       <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+        <div className="flex items-center gap-3 text-line-warm/70">
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
           
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
         </div>
       </div>
 
@@ -461,15 +461,15 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           SECTION 3: ผังพยากรณ์และสารานุกรม 78 ใบ (Explore Spreads & Cards)
           ═══════════════════════════════════════════════════════════════ */}
       <section aria-labelledby="spreads-and-cards-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-[#D9C8AC]/50">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
           <div className="space-y-2">
-            <span className="text-[#8F5C1A] text-xs font-serif-th tracking-widest uppercase block">
+            <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">
               SPREADS &amp; CARDS
             </span>
-            <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F] [text-wrap:balance]">
+            <h2 id="spreads-and-cards-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]">
               {isEnglish ? "Featured Tarot Spreads & Classic 78-Card Deck" : "ผังการเปิดไพ่พยากรณ์และสำรับไพ่ 78 ใบยอดนิยม"}
             </h2>
-            <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th max-w-2xl">
+            <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl">
               {isEnglish
                 ? "Explore archetypal layouts designed for every life question, and discover the comprehensive meanings of all 78 Rider-Waite cards."
                 : "เลือกผังพยากรณ์ที่ตอบโจทย์ชีวิตของคุณ พร้อมเรียนรู้ความหมายไพ่ทาโรต์ 1909 ครบทั้ง 78 ใบ"}
@@ -479,16 +479,16 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             <Link
               href={href("/spreads")}
               prefetch={false}
-              className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
+              className="text-xs font-serif-th font-semibold text-gold-ink hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
             >
               {isEnglish ? "Explore All Spreads (25) " : "ดูผังทั้งหมด (25 ผัง) "}
               <span className="group-hover:translate-x-0.5 transition-transform">→</span>
             </Link>
-            <span className="text-[#D5CEC2]">|</span>
+            <span className="text-line">|</span>
             <Link
               href={href("/cards")}
               prefetch={false}
-              className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
+              className="text-xs font-serif-th font-semibold text-gold-ink hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
             >
               {isEnglish ? "Card Codex (78 Cards) " : "คลังไพ่ 78 ใบ "}
               <span className="group-hover:translate-x-0.5 transition-transform">→</span>
@@ -501,23 +501,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/celtic-cross")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="p-6 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm hover:border-gold-ink transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
+              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
                 {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
                 <CardImage image="major-10.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-[#8F5C1A] font-bold block">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                   {isEnglish ? "10 CARDS · GRAND SPREAD" : "10 CARDS · ผังใหญ่"}
                 </span>
-                <h3 className="font-serif-th font-bold text-base text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug">
+                <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
                   {isEnglish ? "Celtic Cross Spread" : "ผังเซลติกครอส (Celtic Cross)"}
                 </h3>
               </div>
             </div>
-            <p className="text-xs sm:text-sm font-serif-th text-[#635B4E] leading-relaxed">
+            <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
               {isEnglish
                 ? "The crown jewel of tarot spreads. Delve into 10 dimensions of your situation—from subconscious roots and past influences to obstacles and ultimate resolution."
                 : "ราชาแห่งผังพยากรณ์ ส่องชะตาชีวิตเจาะลึก 10 มิติ ทั้งจิตใต้สำนึก อดีต อุปสรรค และผลลัพธ์สูงสุด"}
@@ -527,23 +527,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/three-card")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="p-6 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm hover:border-gold-ink transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
+              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
                 {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
                 <CardImage image="major-17.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-[#8F5C1A] font-bold block">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                   {isEnglish ? "3 CARDS · POPULAR" : "3 CARDS · ยอดนิยม"}
                 </span>
-                <h3 className="font-serif-th font-bold text-base text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug">
+                <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
                   {isEnglish ? "3-Card: Past, Present, Future" : "ผัง 3 ใบ: อดีต-ปัจจุบัน-อนาคต"}
                 </h3>
               </div>
             </div>
-            <p className="text-xs sm:text-sm font-serif-th text-[#635B4E] leading-relaxed">
+            <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
               {isEnglish
                 ? "The quintessential spread for clarity. Map out your life path, evolving transitions, and emerging trajectories with profound simplicity."
                 : "ผังพยากรณ์สุดคลาสสิก เห็นภาพรวมเส้นทางชีวิต การเปลี่ยนแปลง และแนวโน้มข้างหน้าอย่างชัดเจน"}
@@ -553,23 +553,23 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href={href("/spreads/decision")}
             prefetch={false}
-            className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
+            className="p-6 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm hover:border-gold-ink transition duration-300 shadow-xs hover:shadow-md group block space-y-4"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs">
+              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
                 {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
                 <CardImage image="major-07.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-[#8F5C1A] font-bold block">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-gold-ink font-bold block">
                   {isEnglish ? "5 CARDS · CROSSROADS" : "5 CARDS · ทางแยกชีวิต"}
                 </span>
-                <h3 className="font-serif-th font-bold text-base text-[#29261F] group-hover:text-[#8F5C1A] transition-colors leading-snug">
+                <h3 className="font-serif-th font-bold text-base text-ink group-hover:text-gold-ink transition-colors leading-snug">
                   {isEnglish ? "Two-Path Decision Spread" : "ผังทางแยกการตัดสินใจ"}
                 </h3>
               </div>
             </div>
-            <p className="text-xs sm:text-sm font-serif-th text-[#635B4E] leading-relaxed">
+            <p className="text-xs sm:text-sm font-serif-th text-muted leading-relaxed">
               {isEnglish
                 ? "Weigh outcomes between two critical paths with balanced clarity, illuminating unseen consequences to empower decisive action."
                 : "เปรียบเทียบผลลัพธ์ของ 2 ทางเลือกอย่างเป็นกลาง ช่วยให้ตัดสินใจเรื่องสำคัญได้อย่างกระจ่างแจ้ง"}
@@ -578,16 +578,16 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
         </div>
 
         {/* Featured Major Arcana Cards Grid */}
-        <div className="p-6 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#D9C8AC] shadow-xs space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-[#D9C8AC]/40">
-            <h3 className="font-serif-th font-bold text-base text-[#29261F] flex items-center gap-2">
+        <div className="p-6 sm:p-8 rounded-2xl bg-surface border border-line-warm shadow-xs space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-line-warm/40">
+            <h3 className="font-serif-th font-bold text-base text-ink flex items-center gap-2">
               
               {isEnglish ? "Major Arcana Highlights" : "ไพ่ชุดใหญ่เมเจอร์ อาร์คานา (Major Arcana Highlights)"}
             </h3>
             <Link
               href={href("/cards")}
               prefetch={false}
-              className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:underline"
+              className="text-xs font-serif-th font-semibold text-gold-ink hover:underline"
             >
               {isEnglish ? "View All 78 Cards →" : "ดูทั้งหมด 78 ใบ →"}
             </Link>
@@ -598,16 +598,16 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                 key={card.id}
                 href={`/cards/${card.id}`}
                 prefetch={false}
-                className="group flex flex-col items-center p-3 sm:p-4 rounded-xl border border-[#D9C8AC]/50 hover:border-[#8F5C1A] bg-[#FAF7F2] hover:bg-[#FFFFFF] transition duration-200 shadow-2xs hover:shadow-xs"
+                className="group flex flex-col items-center p-3 sm:p-4 rounded-xl border border-line-warm/50 hover:border-gold-ink bg-surface-warm hover:bg-surface transition duration-200 shadow-2xs hover:shadow-xs"
               >
-                <div className="w-14 h-21 rounded-md overflow-hidden border border-[#D9C8AC] mb-2.5 shadow-2xs group-hover:scale-105 transition-transform duration-200 bg-[#F3EDE2]">
+                <div className="w-14 h-21 rounded-md overflow-hidden border border-line-warm mb-2.5 shadow-2xs group-hover:scale-105 transition-transform duration-200 bg-inset-warm">
                   {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ใต้ภาพพิมพ์ชื่อไพ่อยู่แล้วทั้งสองภาษา */}
                   <CardImage image={card.img} alt="" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <span className="text-xs font-serif-th font-bold text-[#29261F] text-center line-clamp-1">
+                <span className="text-xs font-serif-th font-bold text-ink text-center line-clamp-1">
                   {isEnglish ? card.nameEn : card.nameTh}
                 </span>
-                <span className="text-[10px] text-[#635B4E] font-mono text-center line-clamp-1">
+                <span className="text-[10px] text-muted font-mono text-center line-clamp-1">
                   {isEnglish ? `Major #${card.num}` : card.nameEn}
                 </span>
               </Link>
@@ -618,10 +618,10 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
 
       {/* Decorative Gold Divider */}
       <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+        <div className="flex items-center gap-3 text-line-warm/70">
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
           
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
         </div>
       </div>
 
@@ -629,15 +629,15 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           SECTION 4: บทความและสาระน่ารู้ (Featured Articles with Card Companion)
           ═══════════════════════════════════════════════════════════════ */}
       <section aria-labelledby="articles-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-[#D9C8AC]/50">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
           <div className="space-y-2">
-            <span className="text-[#8F5C1A] text-xs font-serif-th tracking-widest uppercase block">
+            <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">
               WISDOM &amp; ARTICLES
             </span>
-            <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-[#29261F] [text-wrap:balance]">
+            <h2 id="articles-title" className="text-2xl sm:text-3xl font-serif-th font-bold text-ink [text-wrap:balance]">
               {isEnglish ? "Wisdom Codex & Esoteric Articles" : "คัมภีร์บทความและสาระน่ารู้เกี่ยวกับไพ่ทาโรต์"}
             </h2>
-            <p className="text-xs sm:text-sm text-[#635B4E] font-serif-th max-w-2xl [text-wrap:balance]">
+            <p className="text-xs sm:text-sm text-muted font-serif-th max-w-2xl [text-wrap:balance]">
               {isEnglish
                 ? "Deep dives into divination techniques, ancient iconography, and the psychology of archetypal tarot."
                 : "เจาะลึกเทคนิคการเปิดไพ่ ความหมายสัญลักษณ์โบราณ และศาสตร์จิตวิทยาไพ่ทาโรต์"}
@@ -646,7 +646,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <Link
             href="/blog"
             prefetch={false}
-            className="text-xs font-serif-th font-semibold text-[#8F5C1A] hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
+            className="text-xs font-serif-th font-semibold text-gold-ink hover:text-[#5E390A] transition-colors inline-flex items-center gap-1 group"
           >
             {isEnglish ? `Read All Articles (${COUNTS.articles}) ` : `อ่านบทความทั้งหมด (${COUNTS.articles} เรื่อง) `}
             <span className="group-hover:translate-x-0.5 transition-transform">→</span>
@@ -660,24 +660,24 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               key={art.slug}
               href={`/blog/${art.slug}`}
               prefetch={false}
-              className="p-6 rounded-2xl bg-gradient-to-b from-[#FFFFFF] to-[#FAF7F2] border border-[#D9C8AC] hover:border-[#8F5C1A] transition duration-300 shadow-xs hover:shadow-md group flex items-start gap-4 sm:gap-5"
+              className="p-6 rounded-2xl bg-gradient-to-b from-surface to-surface-warm border border-line-warm hover:border-gold-ink transition duration-300 shadow-xs hover:shadow-md group flex items-start gap-4 sm:gap-5"
             >
-              <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-[#D9C8AC] group-hover:border-[#8F5C1A] flex-shrink-0 bg-[#F3EDE2] transition-colors shadow-2xs group-hover:scale-105 duration-300">
+              <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs group-hover:scale-105 duration-300">
                 {/* ภาพประกอบล้วน — ป้ายหมวดหมู่และ <h3> ในลิงก์เดียวกันบอกเรื่องบทความอยู่แล้ว (INC-0125) */}
                 <CardImage image={art.cardImage} alt="" className="w-full h-full object-cover" sizes="64px" />
               </div>
 
               <div className="space-y-2 min-w-0 flex-1">
-                <span className="text-[11px] font-serif-th font-semibold text-[#8F5C1A] bg-[#FFFFFF] px-3 py-0.5 rounded-full border border-[#D9C8AC]/70 inline-block shadow-2xs">
+                <span className="text-[11px] font-serif-th font-semibold text-gold-ink bg-surface px-3 py-0.5 rounded-full border border-line-warm/70 inline-block shadow-2xs">
                   {art.category}
                 </span>
-                <h3 className="font-serif-th font-bold text-base sm:text-lg text-[#29261F] group-hover:text-[#8F5C1A] transition-colors line-clamp-2 leading-snug">
+                <h3 className="font-serif-th font-bold text-base sm:text-lg text-ink group-hover:text-gold-ink transition-colors line-clamp-2 leading-snug">
                   {art.title}
                 </h3>
-                <p className="font-serif-th text-xs sm:text-sm text-[#635B4E] line-clamp-2 leading-relaxed">
+                <p className="font-serif-th text-xs sm:text-sm text-muted line-clamp-2 leading-relaxed">
                   {art.desc}
                 </p>
-                <span className="text-xs font-serif-th font-bold text-[#8F5C1A] inline-flex items-center gap-1 pt-1 group-hover:translate-x-0.5 transition-transform">
+                <span className="text-xs font-serif-th font-bold text-gold-ink inline-flex items-center gap-1 pt-1 group-hover:translate-x-0.5 transition-transform">
                   {isEnglish ? "Read Full Article →" : "อ่านบทความฉบับเต็ม →"}
                 </span>
               </div>
@@ -688,10 +688,10 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
 
       {/* Decorative Gold Divider */}
       <div className="w-full flex items-center justify-center py-10 sm:py-14" aria-hidden="true">
-        <div className="flex items-center gap-3 text-[#D9C8AC]/70">
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-[#D9C8AC]" />
+        <div className="flex items-center gap-3 text-line-warm/70">
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-r from-transparent to-line-warm" />
           
-          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-[#D9C8AC]" />
+          <span className="w-16 sm:w-24 h-[1px] bg-gradient-to-l from-transparent to-line-warm" />
         </div>
       </div>
 
@@ -701,16 +701,16 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       <section aria-labelledby="faq-title" className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10 pb-16 sm:pb-20">
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
-            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-[#A58A5C]/60" />
-            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-[#8F5C1A] font-bold">
+            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-gold/60" />
+            <span className="font-serif-th text-xs uppercase tracking-[0.25em] text-gold-ink font-bold">
               FREQUENTLY ASKED QUESTIONS
             </span>
-            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-[#A58A5C]/60" />
+            <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-gold/60" />
           </div>
-          <h2 id="faq-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-[#29261F] tracking-wide [text-wrap:balance]">
+          <h2 id="faq-title" className="text-2xl sm:text-3xl lg:text-4xl font-serif-th font-bold text-ink tracking-wide [text-wrap:balance]">
             {isEnglish ? "Frequently Asked Questions (FAQ)" : "คำถามที่พบบ่อยเกี่ยวกับการดูดวงไพ่ทาโรต์ (FAQ)"}
           </h2>
-          <p className="text-sm sm:text-base text-[#635B4E] font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">
+          <p className="text-sm sm:text-base text-muted font-serif-th max-w-2xl mx-auto leading-relaxed [text-wrap:balance]">
             {isEnglish
               ? "Clarifying questions about our online divination sanctuary, cryptographic accuracy, and AI methodology."
               : "ไขข้อข้องใจเกี่ยวกับระบบดูดวงออนไลน์ ความแม่นยำ และหลักการทำงานของ SeerTarot"}
@@ -721,21 +721,21 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           {homeFaqs.map((faq) => (
             <details
               key={faq.id}
-              className="group rounded-2xl border bg-[#FFFFFF] border-[#D9C8AC]/80 transition duration-300 overflow-hidden open:border-[#8F5C1A] open:shadow-sm hover:border-[#8F5C1A] hover:shadow-2xs"
+              className="group rounded-2xl border bg-surface border-line-warm/80 transition duration-300 overflow-hidden open:border-gold-ink open:shadow-sm hover:border-gold-ink hover:shadow-2xs"
             >
-              <summary className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-serif-th font-bold text-base text-[#29261F] hover:text-[#8F5C1A] transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+              <summary className="w-full p-5 sm:p-6 flex items-center justify-between gap-4 text-left font-serif-th font-bold text-base text-ink hover:text-gold-ink transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <span className="flex items-center gap-3 sm:gap-3.5">
                   
                   <span className="leading-snug">{faq.question}</span>
                 </span>
                 <span
                   aria-hidden="true"
-                  className="text-xs text-[#8F5C1A] font-mono transition-transform duration-300 flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-[#FAF7F2] border border-[#D9C8AC]/50 group-open:rotate-180 group-open:bg-[#8F5C1A] group-open:text-[#FFFFFF] group-open:border-[#8F5C1A]"
+                  className="text-xs text-gold-ink font-mono transition-transform duration-300 flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-surface-warm border border-line-warm/50 group-open:rotate-180 group-open:bg-gold-ink group-open:text-surface group-open:border-gold-ink"
                 >
                   ▼
                 </span>
               </summary>
-              <div className="px-6 pb-6 pt-2 text-xs sm:text-sm font-serif-th text-[#635B4E] leading-relaxed border-t border-[#D9C8AC]/30 bg-[#FAF7F2]/40">
+              <div className="px-6 pb-6 pt-2 text-xs sm:text-sm font-serif-th text-muted leading-relaxed border-t border-line-warm/30 bg-surface-warm/40">
                 {faq.answer}
               </div>
             </details>

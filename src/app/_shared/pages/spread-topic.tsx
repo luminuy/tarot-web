@@ -132,7 +132,7 @@ export async function SpreadTopicBody({
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans relative overflow-x-clip">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
@@ -151,28 +151,28 @@ export async function SpreadTopicBody({
         <nav aria-label="Breadcrumb" className="text-xs font-serif-th text-[#7A6F5D]">
           <ol className="flex items-center gap-2 flex-wrap">
             <li>
-              <Link href="/" className="hover:text-[#29261F] transition-colors">
+              <Link href="/" className="hover:text-ink transition-colors">
                 {isEnglish ? "Home" : "หน้าแรก"}
               </Link>
             </li>
-            <li aria-hidden="true" className="text-[#D5CEC2]">/</li>
+            <li aria-hidden="true" className="text-line">/</li>
             <li>
-              <Link href="/spreads" className="hover:text-[#29261F] transition-colors">
+              <Link href="/spreads" className="hover:text-ink transition-colors">
                 {isEnglish ? "25 Tarot Spreads" : "ผังพยากรณ์ 25 แบบ"}
               </Link>
             </li>
-            <li aria-hidden="true" className="text-[#D5CEC2]">/</li>
-            <li className="font-semibold text-[#29261F]" aria-current="page">
+            <li aria-hidden="true" className="text-line">/</li>
+            <li className="font-semibold text-ink" aria-current="page">
               {topicName}
             </li>
           </ol>
         </nav>
 
         {/* Category Navigation Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-[#D5CEC2]/60">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-line/60">
           <Link
             href="/spreads"
-            className="px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap bg-[#EAE7E0] text-[#5E5240] hover:bg-[#DDD8CD] transition-colors"
+            className="px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap bg-inset text-[#5E5240] hover:bg-[#DDD8CD] transition-colors"
           >
             {isEnglish ? "All Spreads (25)" : "ผังทั้งหมด (25 ผัง)"}
           </Link>
@@ -185,8 +185,8 @@ export async function SpreadTopicBody({
                 href={`/spreads/topic/${t.slug}`}
                 className={`px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap transition ${
                   isActive
-                    ? "bg-[#29261F] text-[#FAF8F5] shadow-xs"
-                    : "bg-[#FFFFFF] border border-[#D5CEC2] text-[#4A4338] hover:border-[#A58A5C]"
+                    ? "bg-ink text-surface-mist shadow-xs"
+                    : "bg-surface border border-line text-[#4A4338] hover:border-gold"
                 }`}
               >
                 {tName} ({t.spreadIds.length})
@@ -197,22 +197,22 @@ export async function SpreadTopicBody({
 
         {/* Hero Header */}
         <header className="space-y-4 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-xs text-[#8F5C1A] font-serif-th font-semibold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-line bg-surface text-xs text-gold-ink font-serif-th font-semibold">
             {isEnglish
               ? `Topic Category · ${spreads.length} Dedicated Spreads`
               : `หมวดหมู่ผังพยากรณ์ · ${spreads.length} ผังเฉพาะทาง`}
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-[#29261F] tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-serif-th text-ink tracking-tight leading-tight">
             {topicHeading}
           </h1>
-          <p className="text-sm sm:text-base text-[#635B4E] leading-relaxed font-serif-th">
+          <p className="text-sm sm:text-base text-muted leading-relaxed font-serif-th">
             {topicTagline}
           </p>
         </header>
 
         {/* Editorial Guide Prose */}
-        <section className="bg-[#FFFFFF] rounded-2xl border border-[#D5CEC2] p-6 sm:p-8 space-y-4 shadow-xs">
-          <h2 className="text-base sm:text-lg font-bold font-serif-th text-[#29261F] border-b border-[#E8E2D8] pb-3">
+        <section className="bg-surface rounded-2xl border border-line p-6 sm:p-8 space-y-4 shadow-xs">
+          <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink border-b border-line-soft pb-3">
             {isEnglish
               ? `Guide to Reading ${topicName} Tarot Spreads`
               : `คู่มือการอ่านไพ่ทาโรต์หมวด${topic.nameTh}`}
@@ -227,7 +227,7 @@ export async function SpreadTopicBody({
         {/* Spreads Grid */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold font-serif-th text-[#29261F]">
+            <h2 className="text-xl font-bold font-serif-th text-ink">
               {isEnglish
                 ? "Select a Spread for Your Question"
                 : "เลือกผังพยากรณ์ที่ตรงกับคำถามของคุณ"}
@@ -241,9 +241,9 @@ export async function SpreadTopicBody({
 
         {/* FAQ Section */}
         {faqs.length > 0 && (
-          <section className="bg-[#FFFFFF] rounded-2xl border border-[#D5CEC2] p-6 sm:p-8 space-y-6 shadow-xs">
+          <section className="bg-surface rounded-2xl border border-line p-6 sm:p-8 space-y-6 shadow-xs">
             <div className="space-y-1">
-              <h2 className="text-lg sm:text-xl font-bold font-serif-th text-[#29261F]">
+              <h2 className="text-lg sm:text-xl font-bold font-serif-th text-ink">
                 {isEnglish
                   ? `Frequently Asked Questions About ${topicName}`
                   : `คำถามพบบ่อยเกี่ยวกับการดูดวงด้าน${topic.nameTh}`}
@@ -254,10 +254,10 @@ export async function SpreadTopicBody({
                   : "หลักการและข้อแนะนำเพื่อการเปิดไพ่ที่ให้คำตอบชัดเจนที่สุด"}
               </p>
             </div>
-            <div className="divide-y divide-[#E8E2D8] space-y-4 pt-2">
+            <div className="divide-y divide-line-soft space-y-4 pt-2">
               {faqs.map((faq, index) => (
                 <div key={index} className="pt-4 first:pt-0 space-y-1.5">
-                  <h3 className="font-serif-th text-sm sm:text-base font-bold text-[#29261F]">
+                  <h3 className="font-serif-th text-sm sm:text-base font-bold text-ink">
                     {faq.question}
                   </h3>
                   <p className="font-serif-th text-xs sm:text-sm text-[#5E5240] leading-relaxed">
@@ -270,8 +270,8 @@ export async function SpreadTopicBody({
         )}
 
         {/* Cross-Topic Internal Links Footer */}
-        <section className="pt-8 border-t border-[#D5CEC2]/80 space-y-4">
-          <h3 className="text-xs font-mono uppercase tracking-widest text-[#8F5C1A] font-semibold">
+        <section className="pt-8 border-t border-line/80 space-y-4">
+          <h3 className="text-xs font-mono uppercase tracking-widest text-gold-ink font-semibold">
             {isEnglish ? "Explore Other Categories" : "สำรวจหมวดหมู่อื่นๆ ในวิหารพยากรณ์"}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
@@ -281,9 +281,9 @@ export async function SpreadTopicBody({
                 <Link
                   key={t.slug}
                   href={`/spreads/topic/${t.slug}`}
-                  className="p-3 rounded-xl border border-[#D5CEC2] bg-[#FFFFFF] hover:border-[#A58A5C] text-center transition group"
+                  className="p-3 rounded-xl border border-line bg-surface hover:border-gold text-center transition group"
                 >
-                  <div className="text-xs font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A]">
+                  <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink">
                     {tName}
                   </div>
                   <div className="text-[11px] text-[#7A6F5D] font-mono mt-0.5">
@@ -294,15 +294,15 @@ export async function SpreadTopicBody({
             })}
           </div>
           <div className="flex items-center justify-center gap-4 text-xs font-serif-th text-[#7A6F5D] pt-4">
-            <Link href="/cards" className="hover:text-[#29261F] underline underline-offset-4">
+            <Link href="/cards" className="hover:text-ink underline underline-offset-4">
               {isEnglish ? "78-Card Encyclopedia" : "สารานุกรมไพ่ 78 ใบ"}
             </Link>
-            <span className="text-[#D5CEC2]">·</span>
-            <Link href="/blog" className="hover:text-[#29261F] underline underline-offset-4">
+            <span className="text-line">·</span>
+            <Link href="/blog" className="hover:text-ink underline underline-offset-4">
               {isEnglish ? "Tarot Wisdom Codex" : "คัมภีร์บทความดูดวง"}
             </Link>
-            <span className="text-[#D5CEC2]">·</span>
-            <Link href="/" className="hover:text-[#29261F] underline underline-offset-4">
+            <span className="text-line">·</span>
+            <Link href="/" className="hover:text-ink underline underline-offset-4">
               {isEnglish ? "Return to Sanctuary" : "กลับสู่วิหารหลัก"}
             </Link>
           </div>

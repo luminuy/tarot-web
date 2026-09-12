@@ -53,10 +53,10 @@ function breakdown(src: Record<string, number>, prefix: string) {
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-2xl border border-[#D5CEC2] bg-white p-4 shadow-xs">
-      <p className="text-xs font-semibold text-[#635B4E]">{label}</p>
-      <p className="mt-1 text-2xl font-bold font-mono text-[#29261F]">{value}</p>
-      {sub ? <p className="mt-0.5 text-xs text-[#756F66]">{sub}</p> : null}
+    <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+      <p className="text-xs font-semibold text-muted">{label}</p>
+      <p className="mt-1 text-2xl font-bold font-mono text-ink">{value}</p>
+      {sub ? <p className="mt-0.5 text-xs text-muted">{sub}</p> : null}
     </div>
   );
 }
@@ -72,24 +72,24 @@ function BarList({
 }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
   return (
-    <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
-      <h3 className="font-mystic-gold text-sm font-bold text-[#29261F]">{title}</h3>
+    <div className="rounded-2xl border border-line bg-white p-5 shadow-xs">
+      <h3 className="font-mystic-gold text-sm font-bold text-ink">{title}</h3>
       {rows.length === 0 ? (
-        <p className="mt-3 text-xs text-[#756F66]">ยังไม่มีข้อมูล</p>
+        <p className="mt-3 text-xs text-muted">ยังไม่มีข้อมูล</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2.5">
           {rows.map((r) => (
             <li key={r.key} className="flex items-center gap-3">
-              <span className="w-40 shrink-0 truncate text-xs font-medium text-[#29261F]" title={nameMap?.[r.key] ?? r.key}>
+              <span className="w-40 shrink-0 truncate text-xs font-medium text-ink" title={nameMap?.[r.key] ?? r.key}>
                 {nameMap?.[r.key] ?? r.key}
               </span>
-              <span className="h-2 flex-1 overflow-hidden rounded-full bg-[#EAE7E0]">
+              <span className="h-2 flex-1 overflow-hidden rounded-full bg-inset">
                 <span
-                  className="block h-full rounded-full bg-[#A58A5C]"
+                  className="block h-full rounded-full bg-gold"
                   style={{ width: `${(r.count / max) * 100}%` }}
                 />
               </span>
-              <span className="w-12 shrink-0 text-right text-xs font-mono text-[#635B4E]">{n(r.count)}</span>
+              <span className="w-12 shrink-0 text-right text-xs font-mono text-muted">{n(r.count)}</span>
             </li>
           ))}
         </ul>
@@ -178,8 +178,8 @@ export default function StatsDashboard() {
               onClick={() => setDays(d)}
               className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${
                 days === d
-                  ? "bg-[#29261F] text-white shadow-xs"
-                  : "border border-[#D5CEC2] bg-[#FAF8F5] text-[#635B4E] hover:bg-white hover:text-[#29261F]"
+                  ? "bg-ink text-white shadow-xs"
+                  : "border border-line bg-surface-mist text-muted hover:bg-white hover:text-ink"
               }`}
             >
               {d} วัน
@@ -189,7 +189,7 @@ export default function StatsDashboard() {
         <button
           type="button"
           onClick={() => load(days)}
-          className="text-xs text-[#635B4E] hover:text-[#29261F] font-medium"
+          className="text-xs text-muted hover:text-ink font-medium"
           disabled={loading}
         >
           {loading ? "กำลังโหลด…" : "รีเฟรชข้อมูล"}
@@ -231,16 +231,16 @@ export default function StatsDashboard() {
             <BarList title="ธงความปลอดภัยที่ตรวจพบ" rows={view.flags} nameMap={FLAG_NAME} />
           </div>
 
-          <div className="rounded-2xl border border-[#D5CEC2] bg-white p-5 shadow-xs">
-            <h3 className="font-mystic-gold text-sm font-bold text-[#29261F]">บันทึกการเข้าแอดมิน (ล่าสุด)</h3>
+          <div className="rounded-2xl border border-line bg-white p-5 shadow-xs">
+            <h3 className="font-mystic-gold text-sm font-bold text-ink">บันทึกการเข้าแอดมิน (ล่าสุด)</h3>
             <ul className="mt-3 flex flex-col gap-2 text-xs">
               {data!.audit.length === 0 ? (
-                <li className="text-[#756F66]">ยังไม่มีบันทึก</li>
+                <li className="text-muted">ยังไม่มีบันทึก</li>
               ) : (
                 data!.audit.slice(0, 20).map((a, i) => (
-                  <li key={i} className="flex justify-between gap-3 border-b border-[#E8E2D8] pb-1.5 last:border-0 last:pb-0">
-                    <span className="text-[#29261F] font-mono">{a.action}</span>
-                    <span className="tabular-nums text-[#756F66]">{new Date(a.ts).toLocaleString("th-TH")}</span>
+                  <li key={i} className="flex justify-between gap-3 border-b border-line-soft pb-1.5 last:border-0 last:pb-0">
+                    <span className="text-ink font-mono">{a.action}</span>
+                    <span className="tabular-nums text-muted">{new Date(a.ts).toLocaleString("th-TH")}</span>
                   </li>
                 ))
               )}
@@ -248,7 +248,7 @@ export default function StatsDashboard() {
           </div>
         </>
       ) : loading ? (
-        <p className="text-sm text-[#635B4E]">กำลังโหลดสถิติ…</p>
+        <p className="text-sm text-muted">กำลังโหลดสถิติ…</p>
       ) : null}
     </div>
   );

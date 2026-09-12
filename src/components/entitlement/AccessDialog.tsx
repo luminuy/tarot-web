@@ -94,9 +94,9 @@ export function AccessDialog({
       title={copy.title}
       description={<span className="font-serif-th leading-relaxed">{copy.body}</span>}
     >
-      <div className="space-y-6 text-[#2E211A]">
+      <div className="space-y-6 text-ink-deep">
         {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร */}
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D9C8AC] bg-[#F3EDE2] px-3 py-1 font-mono text-[13px] uppercase tracking-[0.18em] text-[#8F5C1A]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-line-warm bg-inset-warm px-3 py-1 font-mono text-[13px] uppercase tracking-[0.18em] text-gold-ink">
           {showCredits ? (
             <HourglassIcon className="h-3.5 w-3.5" />
           ) : reason === "explore" ? (
@@ -109,20 +109,20 @@ export function AccessDialog({
 
         {/* ── สถานะสิทธิ์ปัจจุบัน ─────────────────────────────────── */}
         {view && (
-          <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-4 sm:p-5 ">
+          <div className="rounded-lg border border-line-warm bg-surface p-4 sm:p-5 ">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-[#635B4E]">
+                <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-muted">
                   {isEn ? "Current Status" : "สถานะตอนนี้"}
                 </span>
-                <span className="block font-serif-th text-sm font-bold text-[#2E211A]">{view.statusLine}</span>
+                <span className="block font-serif-th text-sm font-bold text-ink-deep">{view.statusLine}</span>
               </div>
               <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />
             </div>
 
             {!isGuest && (
-              <div className="mt-3 flex items-center gap-2 border-t border-[#D9C8AC]/30 pt-3 font-serif-th text-xs text-[#635B4E]">
-                <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-[#8F5C1A]" />
+              <div className="mt-3 flex items-center gap-2 border-t border-line-warm/30 pt-3 font-serif-th text-xs text-muted">
+                <HourglassIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" />
                 <span>
                   {isEn
                     ? `New daily readings arrive${countdown ? ` in ${countdown}` : ""} · Resets ${resetClockLabel(true)}`
@@ -136,7 +136,7 @@ export function AccessDialog({
         {/* ── สิ่งที่ได้เพิ่ม ─────────────────────────────────────── */}
         {!showCredits && (
           <section className="space-y-3">
-            <h3 className="font-serif-th text-sm font-bold text-[#2E211A]">
+            <h3 className="font-serif-th text-sm font-bold text-ink-deep">
               
               {view?.isMember
                 ? (isEn ? "Your Active Member Benefits" : "สิทธิประโยชน์ที่คุณได้รับ (สมาชิกทั่วไป)")
@@ -144,13 +144,13 @@ export function AccessDialog({
             </h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {memberBenefits.map((b) => (
-                <li key={b.title} className="flex gap-2.5 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-3 ">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8F5C1A]/20 text-[#8F5C1A]">
+                <li key={b.title} className="flex gap-2.5 rounded-lg border border-line-warm bg-inset-warm p-3 ">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold-ink/20 text-gold-ink">
                     <CheckMarkIcon className="h-3 w-3" />
                   </span>
                   <span className="min-w-0">
-                    <span className="block font-serif-th text-xs font-bold text-[#2E211A]">{b.title}</span>
-                    <span className="block font-serif-th text-[13px] leading-relaxed text-[#635B4E]">{b.detail}</span>
+                    <span className="block font-serif-th text-xs font-bold text-ink-deep">{b.title}</span>
+                    <span className="block font-serif-th text-[13px] leading-relaxed text-muted">{b.detail}</span>
                   </span>
                 </li>
               ))}
@@ -161,23 +161,23 @@ export function AccessDialog({
         {/* ── ทางเลือกเมื่อโควตาวันนี้หมด ─────────────────────────── */}
         {showCredits && (
           <section className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] p-4 ">
-              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#2E211A]">
-                <HourglassIcon className="h-4 w-4 text-[#8F5C1A]" />
+            <div className="rounded-lg border border-line-warm bg-inset-warm p-4 ">
+              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-ink-deep">
+                <HourglassIcon className="h-4 w-4 text-gold-ink" />
                 {isEn ? "Wait for Free Daily Renewal" : "รอโควตาฟรีรอบใหม่"}
               </span>
-              <p className="font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+              <p className="font-serif-th text-[13px] leading-relaxed text-muted">
                 {isEn
                   ? `Completely free. Return after midnight for ${DAILY_LIMIT} fresh ${READINGS_EN}${countdown ? ` (${countdown})` : ""}.`
                   : `ไม่ต้องจ่ายอะไร กลับมาหลังเที่ยงคืนแล้วเปิดไพ่ได้อีก ${DAILY_LIMIT} ครั้ง${countdown ? ` (${countdown})` : ""}`}
               </p>
             </div>
-            <div className="rounded-lg border-2 border-[#D9C8AC] bg-[#FFFFFF] p-4 ">
-              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-[#8F5C1A]">
+            <div className="rounded-lg border-2 border-line-warm bg-surface p-4 ">
+              <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-gold-ink">
                 <CoinSealIcon className="h-4 w-4" />
                 {isEn ? "Sacred Tokens (Continue Now)" : "ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)"}
               </span>
-              <p className="font-serif-th text-[13px] leading-relaxed text-[#2E211A]">
+              <p className="font-serif-th text-[13px] leading-relaxed text-ink-deep">
                 {isEn
                   ? `One-time purchase starting at ${CHEAPEST_PACKAGE_THB} THB · Unlock full 10–12 card spreads and unlimited archetypal dialogue. Never expires.`
                   : `จ่ายครั้งเดียวเริ่มต้น ${CHEAPEST_PACKAGE_THB} บาท · ปลดล็อกผังใหญ่ 10–12 ใบ และคุยถามแม่หมอเจาะลึกได้ไม่จำกัด ไม่มีวันหมดอายุ`}
@@ -197,38 +197,38 @@ export function AccessDialog({
                   key={plan.id}
                   className={`relative flex flex-col rounded-lg border p-4 ${
                     isSpecial
-                      ? "border-2 border-[#D9C8AC] bg-[#FFFFFF]"
+                      ? "border-2 border-line-warm bg-surface"
                       : plan.highlight
-                        ? "border border-[#D9C8AC]/80 bg-[#FFFFFF]"
-                        : "border border-[#D9C8AC]/60 bg-[#F3EDE2]"
+                        ? "border border-line-warm/80 bg-surface"
+                        : "border border-line-warm/60 bg-inset-warm"
                   }`}
                 >
                   {isSpecial ? (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#8F5C1A] px-2 py-0.5 font-serif-th text-[12px] font-bold text-[#FFFFFF] ">
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-gold-ink px-2 py-0.5 font-serif-th text-[12px] font-bold text-surface ">
                       {isEn ? "Highest Level" : "ปลดล็อกขั้นสุด"}
                     </span>
                   ) : plan.highlight ? (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-[#F3EDE2] border border-[#D9C8AC] px-2 py-0.5 font-serif-th text-[12px] font-bold text-[#2E211A]">
+                    <span className="absolute -top-2.5 right-3 rounded-full bg-inset-warm border border-line-warm px-2 py-0.5 font-serif-th text-[12px] font-bold text-ink-deep">
                       {plan.highlight}
                     </span>
                   ) : null}
-                  <span className="font-serif-th text-sm font-bold text-[#2E211A]">{plan.name}</span>
-                  <span className="mt-1 font-mono text-lg font-bold text-[#8F5C1A]">{plan.price}</span>
-                  <span className="font-serif-th text-[13px] text-[#635B4E]">{plan.priceNote}</span>
+                  <span className="font-serif-th text-sm font-bold text-ink-deep">{plan.name}</span>
+                  <span className="mt-1 font-mono text-lg font-bold text-gold-ink">{plan.price}</span>
+                  <span className="font-serif-th text-[13px] text-muted">{plan.priceNote}</span>
                   {isCurrent && (
-                    <span className="mt-2 inline-flex w-fit rounded border border-[#D9C8AC] bg-[#F3EDE2] px-1.5 py-0.5 font-serif-th text-[12px] text-[#2E211A]">
+                    <span className="mt-2 inline-flex w-fit rounded border border-line-warm bg-inset-warm px-1.5 py-0.5 font-serif-th text-[12px] text-ink-deep">
                       {isEn ? "Your Current Plan" : "แผนปัจจุบันของคุณ"}
                     </span>
                   )}
-                  <ul className="mt-3 space-y-1.5 border-t border-[#D9C8AC]/30 pt-3">
+                  <ul className="mt-3 space-y-1.5 border-t border-line-warm/30 pt-3">
                     {plan.features.map((f) => (
                       <li
                         key={f.label}
                         className={`flex items-start gap-1.5 font-serif-th text-[13px] leading-snug ${
-                          f.included ? "text-[#2E211A]" : "text-[#635B4E]"
+                          f.included ? "text-ink-deep" : "text-muted"
                         }`}
                       >
-                        <span className={`mt-0.5 shrink-0 ${f.included ? "text-[#8F5C1A]" : "text-[#635B4E]"}`}>
+                        <span className={`mt-0.5 shrink-0 ${f.included ? "text-gold-ink" : "text-muted"}`}>
                           {f.included ? <CheckMarkIcon className="h-3 w-3" /> : <DashMarkIcon className="h-3 w-3" />}
                         </span>
                         {f.label}
@@ -247,7 +247,7 @@ export function AccessDialog({
             <button
               type="button"
               onClick={handlePrimary}
-              className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+              className="w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-6 py-3.5 font-serif-th text-sm font-bold text-surface transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             >
               
               {copy.primaryLabel}
@@ -260,7 +260,7 @@ export function AccessDialog({
                 onClose();
                 onBuyCredits();
               }}
-              className="w-full rounded-full bg-[#8F5C1A] hover:bg-[#74490F] px-6 py-3.5 font-serif-th text-sm font-bold text-[#FFFFFF] transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+              className="w-full rounded-full bg-gold-ink hover:bg-gold-ink-deep px-6 py-3.5 font-serif-th text-sm font-bold text-surface transition active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             >
               
               {isEn
@@ -272,12 +272,12 @@ export function AccessDialog({
           <button
             type="button"
             onClick={handleSecondary}
-            className="w-full rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] hover:bg-[#FFFFFF] hover:border-[#8F5C1A] px-6 py-3 font-serif-th text-xs text-[#2E211A] font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="w-full rounded-lg border border-line-warm bg-inset-warm hover:bg-surface hover:border-gold-ink px-6 py-3 font-serif-th text-xs text-ink-deep font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
             {copy.secondaryLabel}
           </button>
 
-          <p className="pt-1 text-center font-serif-th text-[13px] leading-relaxed text-[#635B4E]">
+          <p className="pt-1 text-center font-serif-th text-[13px] leading-relaxed text-muted">
             {copy.reassurance}
           </p>
 
@@ -288,7 +288,7 @@ export function AccessDialog({
                 onClose();
                 onBuyCredits();
               }}
-              className="text-xs text-[#8F5C1A] hover:text-[#74490F] font-serif-th underline underline-offset-4 cursor-pointer"
+              className="text-xs text-gold-ink hover:text-gold-ink-deep font-serif-th underline underline-offset-4 cursor-pointer"
             >
               {isEn ? "Have a redeem code? Click here" : "มีรหัสแลกสิทธิ์ใช่ไหม? กดที่นี่เพื่อแลกรับสิทธิ์"}
             </button>

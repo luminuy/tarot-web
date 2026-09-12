@@ -85,7 +85,7 @@ export function ChangePasswordCard() {
   };
 
   return (
-    <div className="rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6 space-y-4 text-left">
+    <div className="rounded-lg border border-line-warm bg-surface p-5 sm:p-6 space-y-4 text-left">
       <div className="flex items-center gap-2">
         
         <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
@@ -95,7 +95,7 @@ export function ChangePasswordCard() {
         </h2>
       </div>
 
-      <p className="text-xs text-[#635B4E] leading-relaxed">
+      <p className="text-xs text-muted leading-relaxed">
         {hasPassword
           ? (isEn
             ? "Set a new password for security. You will be automatically signed out from other devices."
@@ -106,13 +106,13 @@ export function ChangePasswordCard() {
       </p>
 
       {errorMsg && (
-        <div className="p-3 rounded-lg bg-[#FCEEEA] border border-[#D9C8AC] text-[#A6392C] text-xs font-serif-th text-center">
+        <div className="p-3 rounded-lg bg-err-wash border border-line-warm text-err text-xs font-serif-th text-center">
           {errorMsg}
         </div>
       )}
 
       {successMsg && (
-        <div className="p-3 rounded-lg bg-[#EBF3ED] border border-[#D9C8AC] text-[#3A7044] text-xs font-serif-th text-center">
+        <div className="p-3 rounded-lg bg-[#EBF3ED] border border-line-warm text-ok text-xs font-serif-th text-center">
           {successMsg}
         </div>
       )}
@@ -120,7 +120,7 @@ export function ChangePasswordCard() {
       <form onSubmit={handleSubmit} className="space-y-3 pt-2">
         {hasPassword && (
           <div className="space-y-1">
-            <label htmlFor={oldPwId} className="block text-xs text-[#2E211A] font-serif-th font-semibold">
+            <label htmlFor={oldPwId} className="block text-xs text-ink-deep font-serif-th font-semibold">
               {isEn ? "Current Password" : "รหัสผ่านเดิม"}
             </label>
             <input
@@ -130,20 +130,20 @@ export function ChangePasswordCard() {
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               placeholder="••••••••••"
-              className="w-full h-10 px-3.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
+              className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
             />
           </div>
         )}
 
         <div className="space-y-1">
           <div className="flex justify-between items-center">
-            <label htmlFor={newPwId} className="block text-xs text-[#2E211A] font-serif-th font-semibold">
+            <label htmlFor={newPwId} className="block text-xs text-ink-deep font-serif-th font-semibold">
               {isEn ? "New Password" : "รหัสผ่านใหม่"}
             </label>
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-xs text-[#635B4E] hover:text-[#2E211A] cursor-pointer"
+              className="text-xs text-muted hover:text-ink-deep cursor-pointer"
             >
               {showPassword ? (isEn ? "Hide" : "ซ่อน") : (isEn ? "Show" : "ดูรหัสผ่าน")}
             </button>
@@ -155,18 +155,18 @@ export function ChangePasswordCard() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder={isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร"}
-            className="w-full h-10 px-3.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
+            className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
           />
           {newPassword.length > 0 && (
             <div className="pt-1.5 space-y-1">
-              <div className="w-full h-1.5 bg-[#F3EDE2]/30 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-inset-warm/30 rounded-full overflow-hidden">
                 <div
                   className={`h-full ${strength.barColor} transition duration-300`}
                   style={{ width: `${(strength.score / 4) * 100}%` }}
                 />
               </div>
               <div className="flex justify-between text-[13px] font-serif-th">
-                <span className="text-[#635B4E]">{isEn ? "Security:" : "ความปลอดภัย:"}</span>
+                <span className="text-muted">{isEn ? "Security:" : "ความปลอดภัย:"}</span>
                 <span className={strength.colorClass}>{strength.label}</span>
               </div>
             </div>
@@ -174,7 +174,7 @@ export function ChangePasswordCard() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor={confirmPwId} className="block text-xs text-[#2E211A] font-serif-th font-semibold">
+          <label htmlFor={confirmPwId} className="block text-xs text-ink-deep font-serif-th font-semibold">
             {isEn ? "Confirm New Password" : "ยืนยันรหัสผ่านใหม่อีกครั้ง"}
           </label>
           <input
@@ -184,14 +184,14 @@ export function ChangePasswordCard() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder={isEn ? "Re-enter new password" : "ระบุรหัสผ่านให้ตรงกัน"}
-            className="w-full h-10 px-3.5 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] text-sm focus:outline-none focus:border-[#8F5C1A] transition-colors"
+            className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="py-2.5 px-5 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-semibold font-serif-th text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
+          className="py-2.5 px-5 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-semibold font-serif-th text-xs transition cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 active:scale-98"
         >
           {loading
             ? (isEn ? "Saving..." : "กำลังบันทึก…")

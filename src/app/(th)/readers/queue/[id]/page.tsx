@@ -69,10 +69,10 @@ export default function CustomerQueuePage() {
 
   if (loading && !data) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
+      <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
         <div className="altar-panel rounded-2xl p-8 text-center space-y-3 z-10">
-          <div className="h-8 w-8 mx-auto border-2 border-[#8F5C1A] border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-[#635B4E]">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
+          <div className="h-8 w-8 mx-auto border-2 border-gold-ink border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-muted">กำลังตรวจสอบข้อมูลคิวของคุณ…</p>
         </div>
       </main>
     );
@@ -80,9 +80,9 @@ export default function CustomerQueuePage() {
 
   if (error || !data) {
     return (
-      <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-[#2E211A] flex items-center justify-center p-4">
-        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-[#A6392C]/40">
-          <p className="text-sm text-[#A6392C]">{error || "ไม่พบตั๋วคิว"}</p>
+      <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-ink-deep flex items-center justify-center p-4">
+        <div className="altar-panel rounded-2xl p-8 text-center space-y-4 max-w-md z-10 border border-err/40">
+          <p className="text-sm text-err">{error || "ไม่พบตั๋วคิว"}</p>
           <Button variant="gold" onClick={() => router.push("/readers")}>
             กลับไปหน้ารวมแม่หมอ
           </Button>
@@ -96,7 +96,7 @@ export default function CustomerQueuePage() {
   const isCrisis = ticket.screening?.flags.includes("self_harm") || ticket.screening?.flags.includes("crisis");
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-[#2E211A] p-4 sm:p-8 font-sans relative overflow-hidden flex items-center justify-center">
+    <main id="main-content" tabIndex={-1} className="min-h-[70vh] bg-[#F6F1E9] text-ink-deep p-4 sm:p-8 font-sans relative overflow-hidden flex items-center justify-center">
       <div className="max-w-xl w-full mx-auto space-y-6 relative z-10">
         {/* Top Header */}
         <div className="flex items-center justify-between border-b border-[#e5c07b]/20 pb-4">

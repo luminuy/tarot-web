@@ -147,7 +147,7 @@ export default function DailyTarotPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
       />
 
-      <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] py-6 sm:py-10 px-4 sm:px-6">
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
           <DailyClient />
 
@@ -165,26 +165,26 @@ export default function DailyTarotPage() {
               และปรากฏการณ์ความพ้องพานของเหตุการณ์ (Synchronicity)
             </p>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
               วิธีรับพลังงานจากไพ่ประจำวันให้เกิดประโยชน์สูงสุด
             </h3>
-            <ul className="list-disc pl-5 space-y-2 text-[#635B4E]">
+            <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
-                <strong className="text-[#29261F]">การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึกๆ
+                <strong className="text-ink">การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึกๆ
                 สังเกตอารมณ์ความรู้สึกปัจจุบัน แล้วจึงแตะเลือกไพ่ด้วยสมาธิที่นิ่งสงบ
               </li>
               <li>
-                <strong className="text-[#29261F]">พิจารณาสัญลักษณ์ในภาพ 1909 Rider-Waite:</strong> สำรับดั้งเดิมของ อาเธอร์ เอ็ดเวิร์ด เวท
+                <strong className="text-ink">พิจารณาสัญลักษณ์ในภาพ 1909 Rider-Waite:</strong> สำรับดั้งเดิมของ อาเธอร์ เอ็ดเวิร์ด เวท
                 และ พาเมลา คอลแมน สมิธ เต็มไปด้วยรหัสสัญลักษณ์ลึกซึ้ง เช่น สีสัน ธาตุประจำไพ่ และท่วงท่าของตัวละคร
                 ซึ่งมักสื่อความหมายตรงกับสถานการณ์ที่คุณกำลังจะเผชิญ
               </li>
               <li>
-                <strong className="text-[#29261F]">การทบทวนเมื่อสิ้นสุดวัน (Evening Reflection):</strong> ก่อนนอน ลองหวนนึกถึงไพ่ที่เปิดได้ในตอนเช้า
+                <strong className="text-ink">การทบทวนเมื่อสิ้นสุดวัน (Evening Reflection):</strong> ก่อนนอน ลองหวนนึกถึงไพ่ที่เปิดได้ในตอนเช้า
                 เทียบกับเหตุการณ์จริงที่เกิดขึ้น เพื่อฝึกฝนสัญชาตญาณและการตระหนักรู้ในตนเอง
               </li>
             </ul>
 
-            <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F] pt-2">
+            <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink pt-2">
               ทำไมต้องใช้ระบบสุ่มแบบ Provably Fair?
             </h3>
             <p>

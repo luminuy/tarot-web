@@ -11,7 +11,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className = "", variant = "gold", size = "md", isLoading, disabled, ...props }, ref) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-semibold transition duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] active:scale-[0.97] touch-manipulation cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
+      "inline-flex items-center justify-center font-semibold transition duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F2] active:scale-[0.97] touch-manipulation cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
 
     const sizeStyles = {
       sm: "px-3 py-1.5 text-xs rounded gap-1.5",
@@ -20,10 +20,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }[size];
 
     const variantStyles = {
-      gold: "bg-[#8F5C1A] hover:bg-[#74490F] text-white font-bold",
-      outline: "bg-white text-[#2E211A] border border-[#D9C8AC] hover:border-[#8F5C1A]",
-      ghost: "bg-transparent text-[#635B4E] hover:bg-[rgba(143,92,26,0.08)] hover:text-[#2E211A]",
-      pill: "bg-[#F3EDE2] text-[#2E211A] border border-[#D9C8AC] rounded-full hover:border-[#8F5C1A]",
+      gold: "bg-gold-ink hover:bg-gold-ink-deep text-white font-bold",
+      outline: "bg-white text-ink-deep border border-line-warm hover:border-gold-ink",
+      ghost: "bg-transparent text-muted hover:bg-[rgba(143,92,26,0.08)] hover:text-ink-deep",
+      pill: "bg-inset-warm text-ink-deep border border-line-warm rounded-full hover:border-gold-ink",
     }[variant];
 
     return (

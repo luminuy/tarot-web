@@ -12,15 +12,15 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#F3EDE2] text-[#2E211A] flex items-center justify-center p-4">
-      <div className="max-w-md w-full p-8 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] shadow-overlay text-center space-y-6">
-        <div className="w-16 h-16 mx-auto rounded-full bg-[#F3EDE2] border border-[#D9C8AC] flex items-center justify-center text-2xl text-[#8F5C1A] font-bold font-mono">!</div>
+    <div className="min-h-screen bg-inset-warm text-ink-deep flex items-center justify-center p-4">
+      <div className="max-w-md w-full p-8 rounded-lg bg-surface border border-line-warm shadow-overlay text-center space-y-6">
+        <div className="w-16 h-16 mx-auto rounded-full bg-inset-warm border border-line-warm flex items-center justify-center text-2xl text-gold-ink font-bold font-mono">!</div>
 
         <div className="space-y-2">
-          <h2 className="text-xl font-bold font-serif-th text-[#2E211A]">
+          <h2 className="text-xl font-bold font-serif-th text-ink-deep">
             {isEnglish ? "Temporary Display Error" : "เกิดข้อผิดพลาดชั่วคราวในการแสดงผล"}
           </h2>
-          <p className="text-xs text-[#635B4E] leading-relaxed font-serif-th">
+          <p className="text-xs text-muted leading-relaxed font-serif-th">
             {isEnglish
               ? "The sanctuary system has safely recorded this occurrence. You may retry or return to the main hall."
               : "ระบบได้บันทึกข้อผิดพลาดไว้เรียบร้อยแล้ว คุณสามารถแตะปุ่มด้านล่างเพื่อเริ่มการทำงานใหม่"}
@@ -30,13 +30,13 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <button
             onClick={() => reset()}
-            className="flex-1 py-3 px-4 rounded-full bg-[#8F5C1A] hover:bg-[#74490F] text-[#FFFFFF] font-bold text-sm font-serif-th active:scale-95 transition cursor-pointer"
+            className="flex-1 py-3 px-4 rounded-full bg-gold-ink hover:bg-gold-ink-deep text-surface font-bold text-sm font-serif-th active:scale-95 transition cursor-pointer"
           >
             {isEnglish ? "Try Again" : "ลองใหม่อีกครั้ง"}
           </button>
           <Link
             href="/"
-            className="flex-1 py-3 px-4 rounded-lg bg-[#F3EDE2] border border-[#D9C8AC] text-[#2E211A] font-bold text-sm font-serif-th hover:bg-[#FFFFFF] transition text-center flex items-center justify-center "
+            className="flex-1 py-3 px-4 rounded-lg bg-inset-warm border border-line-warm text-ink-deep font-bold text-sm font-serif-th hover:bg-surface transition text-center flex items-center justify-center "
           >
             {isEnglish ? "Return to Sanctuary" : "กลับหน้าหลัก"}
           </Link>

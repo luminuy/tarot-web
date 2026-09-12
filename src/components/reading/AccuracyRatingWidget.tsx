@@ -81,13 +81,13 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={SPRING.snappy}
-          className="flex items-center justify-center gap-2 py-3 text-xs text-[#2E211A] font-serif-th bg-[#FFFFFF] border border-[#D9C8AC] rounded-lg px-4 my-2 "
+          className="flex items-center justify-center gap-2 py-3 text-xs text-ink-deep font-serif-th bg-surface border border-line-warm rounded-lg px-4 my-2 "
         >
           
           <span>
             {isEnglish ? "Thank you for your resonance feedback! " : "ขอบคุณสำหรับการให้คะแนน! "}
             {selectedScore !== null && (
-              <span className="text-[#8F5C1A] font-bold">
+              <span className="text-gold-ink font-bold">
                 ({getScoreLabel(selectedScore)})
               </span>
             )}
@@ -101,7 +101,7 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
           exit={{ opacity: 0, scale: 0.95 }}
           className="flex flex-col items-center gap-2.5 py-3 my-2"
         >
-          <span className="text-xs text-[#2E211A] font-serif-th font-semibold flex items-center gap-1.5">
+          <span className="text-xs text-ink-deep font-serif-th font-semibold flex items-center gap-1.5">
             
             <span>
               {isEnglish
@@ -117,14 +117,14 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
                   key={score}
                   type="button"
                   onClick={() => handleRate(score)}
-                  className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-[#FFFFFF] border border-[#D9C8AC] hover:border-[#8F5C1A] hover:bg-[#FAF7F2] transition cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+                  className="flex flex-col items-center gap-1 px-3.5 py-2 rounded-lg bg-surface border border-line-warm hover:border-gold-ink hover:bg-surface-warm transition cursor-pointer active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
                   title={label}
                   aria-label={isEnglish ? `Rating: ${label}` : `ให้คะแนนระดับ: ${label}`}
                 >
-                  <span className="text-[13px] text-[#8F5C1A] font-mono group-hover:scale-115 transition-transform">
+                  <span className="text-[13px] text-gold-ink font-mono group-hover:scale-115 transition-transform">
                     {symbol}
                   </span>
-                  <span className="text-[13px] text-[#635B4E] group-hover:text-[#2E211A] font-serif-th font-medium transition-colors">
+                  <span className="text-[13px] text-muted group-hover:text-ink-deep font-serif-th font-medium transition-colors">
                     {label}
                   </span>
                 </button>

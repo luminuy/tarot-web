@@ -29,7 +29,7 @@ export function SkipToContent() {
     <a
       href="#main-content"
       data-floating=""
-      className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:rounded-lg focus:border focus:border-[#A58A5C] focus:bg-[#FFFFFF] focus:px-4 focus:py-3 focus:text-sm focus:font-serif-th focus:font-bold focus:text-[#29261F] focus:shadow-overlay"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:rounded-lg focus:border focus:border-gold focus:bg-surface focus:px-4 focus:py-3 focus:text-sm focus:font-serif-th focus:font-bold focus:text-ink focus:shadow-overlay"
     >
       {isEnglish ? "Skip to main content" : "ข้ามไปยังเนื้อหาหลัก"}
     </a>

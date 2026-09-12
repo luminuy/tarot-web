@@ -20,8 +20,8 @@ export function RelatedCards({ cardId }: { cardId: string }) {
   if (cards.length === 0) return null;
 
   return (
-    <section className="pt-8 border-t border-[#D5CEC2]/40">
-      <h2 className="font-serif-th text-sm font-bold text-[#8F5C1A] mb-4">
+    <section className="pt-8 border-t border-line/40">
+      <h2 className="font-serif-th text-sm font-bold text-gold-ink mb-4">
         {isEnglish ? "Resonant & Harmonious Cards" : "ไพ่ที่พลังงานใกล้เคียง"}
       </h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -29,9 +29,9 @@ export function RelatedCards({ cardId }: { cardId: string }) {
           <Link
             key={c.id}
             href={`/cards/${c.id}`}
-            className="group flex items-center gap-2.5 p-2.5 rounded-xl border border-[#D5CEC2] bg-white hover:border-[#A58A5C] transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="group flex items-center gap-2.5 p-2.5 rounded-xl border border-line bg-white hover:border-gold transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
-            <div className="w-8 h-12 shrink-0 overflow-hidden rounded border border-[#D5CEC2] bg-[#EAE7E0]">
+            <div className="w-8 h-12 shrink-0 overflow-hidden rounded border border-line bg-inset">
               <CardImage
                 image={c.image}
                 cardId={c.id}
@@ -41,13 +41,13 @@ export function RelatedCards({ cardId }: { cardId: string }) {
               />
             </div>
             <div className="min-w-0">
-              <span className="font-serif-th text-xs font-bold text-[#29261F] group-hover:text-[#A58A5C] block truncate">
+              <span className="font-serif-th text-xs font-bold text-ink group-hover:text-gold-ink block truncate">
                 {isEnglish ? c.nameEn : c.nameTh}
               </span>
               {/* หน้าอังกฤษไม่แสดงชื่อไทยเป็นบรรทัดรอง — เป็นภาษาที่ผู้อ่านไม่ได้ขอ
                   และเจือจางสัญญาณภาษาของหน้า (เหมือนที่ทำใน CardsExplorer / AllCardsTable) */}
               {!isEnglish && (
-                <span className="font-serif-th text-[11px] text-[#635B4E] block truncate">
+                <span className="font-serif-th text-[11px] text-muted block truncate">
                   {c.nameEn}
                 </span>
               )}

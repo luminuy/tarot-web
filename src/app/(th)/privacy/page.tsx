@@ -34,18 +34,18 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink">
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         {/* Header */}
-        <div className="text-center space-y-3 pb-6 border-b border-[#D5CEC2]/40">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#29261F] font-serif-th">นโยบายความเป็นส่วนตัว</h1>
-          <p className="text-xs text-[#635B4E]">Privacy Policy &amp; PDPA Compliance</p>
+        <div className="text-center space-y-3 pb-6 border-b border-line/40">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th">นโยบายความเป็นส่วนตัว</h1>
+          <p className="text-xs text-muted">Privacy Policy &amp; PDPA Compliance</p>
         </div>
 
         {/* Section 1 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">1. ข้อมูลที่เราเก็บ</h2>
-          <ul className="space-y-2 text-sm text-[#29261F] list-disc list-inside leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">1. ข้อมูลที่เราเก็บ</h2>
+          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>ชื่อและรูปโปรไฟล์</strong> — หากคุณเข้าสู่ระบบผ่าน Google หรือ LINE
               เพื่อระบุตัวตนและแสดงผลในสมุดบันทึก
@@ -73,8 +73,8 @@ export default function PrivacyPolicyPage() {
 
         {/* Section 2 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">2. สิ่งที่เราไม่ทำเด็ดขาด</h2>
-          <ul className="space-y-2 text-sm text-[#29261F] list-disc list-inside leading-relaxed font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">2. สิ่งที่เราไม่ทำเด็ดขาด</h2>
+          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               • <strong>ไม่เอาข้อมูลคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — ข้อมูลการดูดวงเป็นเรื่องส่วนบุคคล
             </li>
@@ -92,10 +92,10 @@ export default function PrivacyPolicyPage() {
 
         {/* Section 3 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">
             3. การจัดเก็บข้อมูล (Data Retention &amp; Storage)
           </h2>
-          <div className="text-sm text-[#29261F] leading-relaxed space-y-2 font-serif-th">
+          <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
             <p>
               <strong>สำหรับผู้ใช้ทั่วไป (ไม่เข้าสู่ระบบ):</strong> ข้อมูลทั้งหมดจัดเก็บใน{" "}
               <strong>localStorage บนเบราว์เซอร์ของคุณเท่านั้น</strong>{" "}
@@ -111,10 +111,10 @@ export default function PrivacyPolicyPage() {
 
         {/* Section 4 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">
+          <h2 className="text-lg font-bold text-gold font-serif-th">
             4. สิทธิของคุณตามกฎหมาย PDPA (พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562)
           </h2>
-          <ul className="space-y-2 text-sm text-[#29261F] list-disc list-inside leading-relaxed font-serif-th">
+          <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>สิทธิในการลบข้อมูล (Right to Erasure)</strong> —
               สั่งลบประวัติและบัญชีทั้งหมดได้ทันทีผ่านปุ่มด้านล่าง
@@ -135,11 +135,11 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* Section 5: AI Disclosure */}
-        <section className="space-y-3 p-5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.04)]">
-          <h2 className="text-lg font-bold text-[#A58A5C] font-serif-th">
+        <section className="space-y-3 p-5 rounded-xl bg-surface border border-line shadow-[0_10px_30px_rgba(42,38,31,0.04)]">
+          <h2 className="text-lg font-bold text-gold font-serif-th">
             5. การเปิดเผยเรื่อง AI (AI Transparency Disclosure)
           </h2>
-          <div className="text-sm text-[#29261F] leading-relaxed space-y-2 font-serif-th">
+          <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
             <p>
               • คำทำนายทั้งหมดในวิหารนี้ <strong>สร้างขึ้นโดยปัญญาประดิษฐ์ (AI)</strong>{" "}
               ร่วมกับระบบสุ่มไพ่ทางคณิตศาสตร์ที่ตรวจสอบความโปร่งใสได้ (Provably-Fair)
@@ -152,11 +152,11 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* Section 6: Safety */}
-        <section className="space-y-3 p-5 rounded-xl bg-[#FFFFFF] border border-[#D5CEC2] shadow-[0_10px_30px_rgba(42,38,31,0.04)]">
-          <h2 className="text-lg font-bold text-[#A6392C] font-serif-th">
+        <section className="space-y-3 p-5 rounded-xl bg-surface border border-line shadow-[0_10px_30px_rgba(42,38,31,0.04)]">
+          <h2 className="text-lg font-bold text-err font-serif-th">
             6. ความปลอดภัยของผู้ใช้ (Safety Guardrails)
           </h2>
-          <div className="text-sm text-[#A6392C] leading-relaxed space-y-2 font-serif-th">
+          <div className="text-sm text-err leading-relaxed space-y-2 font-serif-th">
             <p>ระบบของเรามีตัวกรองความปลอดภัยที่ทำงานตลอดเวลา:</p>
             <ul className="space-y-1.5 list-disc list-inside">
               <li>
@@ -170,16 +170,16 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* Section 7: Export & Delete Data */}
-        <section className="pt-4 border-t border-[#D5CEC2]/40 space-y-4 font-serif-th">
-          <h2 className="text-lg font-bold text-[#A58A5C]">7. จัดการข้อมูลส่วนบุคคลของคุณ</h2>
-          <p className="text-xs text-[#635B4E]">
+        <section className="pt-4 border-t border-line/40 space-y-4 font-serif-th">
+          <h2 className="text-lg font-bold text-gold">7. จัดการข้อมูลส่วนบุคคลของคุณ</h2>
+          <p className="text-xs text-muted">
             คุณสามารถดาวน์โหลดสำเนาข้อมูลของคุณ หรือสั่งลบข้อมูลทั้งหมดทั้งในเครื่องและบนระบบเซิร์ฟเวอร์ได้อย่างสมบูรณ์
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <a
               href="/api/account/export"
               download
-              className="px-5 py-2.5 rounded-full bg-[#FFFFFF] border border-[#D5CEC2] text-[#29261F] text-xs font-bold hover:bg-[#F3F0EA] hover:border-[#A58A5C] transition cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+              className="px-5 py-2.5 rounded-full bg-surface border border-line text-ink text-xs font-bold hover:bg-canvas hover:border-gold transition cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
             >
               
               <span>ดาวน์โหลดข้อมูลของฉัน (Export JSON)</span>
@@ -192,7 +192,7 @@ export default function PrivacyPolicyPage() {
         <div className="text-center pt-6 font-serif-th">
           <a
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#29261F] hover:bg-[#A58A5C] text-[#F3F0EA] font-bold text-sm transition shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-ink hover:bg-gold text-canvas font-bold text-sm transition shadow-sm"
           >
             ← กลับสู่วิหารทาโรต์
           </a>

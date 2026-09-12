@@ -60,7 +60,7 @@ export const QUICK_TOPICS: QuickTopic[] = [
     themeColors: {
       border: "border-[#EADFD5]",
       borderHover: "hover:border-[#C48464]",
-      bgGradient: "bg-gradient-to-br from-[#FFFFFF] via-[#FDFBF9] to-[#F7EFE9]",
+      bgGradient: "bg-gradient-to-br from-surface via-[#FDFBF9] to-[#F7EFE9]",
       badgeBg: "bg-[#FBF2EC]",
       badgeText: "text-[#9E4E28]",
       badgeBorder: "border-[#E8D0C3]",
@@ -89,12 +89,12 @@ export const QUICK_TOPICS: QuickTopic[] = [
     elementalGlyphEn: "Fire Element · Agency & Action",
     themeColors: {
       border: "border-[#E6DEC9]",
-      borderHover: "hover:border-[#8F5C1A]",
-      bgGradient: "bg-gradient-to-br from-[#FFFFFF] via-[#FCFAF5] to-[#F5EEE0]",
+      borderHover: "hover:border-gold-ink",
+      bgGradient: "bg-gradient-to-br from-surface via-[#FCFAF5] to-[#F5EEE0]",
       badgeBg: "bg-[#F6EFE0]",
-      badgeText: "text-[#8F5C1A]",
+      badgeText: "text-gold-ink",
       badgeBorder: "border-[#E2D4BE]",
-      accentText: "text-[#8F5C1A]",
+      accentText: "text-gold-ink",
       cardBorder: "#D9C8AC",
       glow: "shadow-[0_4px_20px_-4px_rgba(143,92,26,0.08)] hover:shadow-[0_8px_30px_-4px_rgba(143,92,26,0.18)]",
     },
@@ -120,7 +120,7 @@ export const QUICK_TOPICS: QuickTopic[] = [
     themeColors: {
       border: "border-[#E6E0CB]",
       borderHover: "hover:border-[#B38728]",
-      bgGradient: "bg-gradient-to-br from-[#FFFFFF] via-[#FCFAF2] to-[#F3ECCE]",
+      bgGradient: "bg-gradient-to-br from-surface via-[#FCFAF2] to-[#F3ECCE]",
       badgeBg: "bg-[#F7F3DC]",
       badgeText: "text-[#8C6615]",
       badgeBorder: "border-[#E0D8B4]",
@@ -150,7 +150,7 @@ export const QUICK_TOPICS: QuickTopic[] = [
     themeColors: {
       border: "border-[#E2DED5]",
       borderHover: "hover:border-[#6B6152]",
-      bgGradient: "bg-gradient-to-br from-[#FFFFFF] via-[#F9F8F5] to-[#EFECE3]",
+      bgGradient: "bg-gradient-to-br from-surface via-[#F9F8F5] to-[#EFECE3]",
       badgeBg: "bg-[#F0EEE6]",
       badgeText: "text-[#595042]",
       badgeBorder: "border-[#DAD4C7]",
@@ -278,7 +278,7 @@ export function QuickFortunePicker({
       {/* ส่วนหัวแนะนำการทำนายด่วน สไตล์วิหารพยากรณ์ */}
       <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
         {/* ป้ายกล่องทองคำเปลว */}
-        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full text-[11px] font-serif-th font-semibold tracking-wide bg-[#FBF8F3] border border-[#D5CEC2] text-[#8F5C1A] shadow-xs">
+        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full text-[11px] font-serif-th font-semibold tracking-wide bg-[#FBF8F3] border border-line text-gold-ink shadow-xs">
           
           <span>
             {isEnglish
@@ -294,7 +294,7 @@ export function QuickFortunePicker({
           * "h2 มาก่อน h1" ซึ่งพังทั้งโครงเอกสารของ screen reader และ outline ที่ Google อ่าน
           * ข้อความนี้ทำหน้าที่เกริ่นนำ ไม่ใช่หัวข้อของส่วน — สไตล์เดิมทุกพิกเซล
           */}
-        <p className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-[#29261F] tracking-wide leading-snug [text-wrap:balance]">
+        <p className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
           {isEnglish
             ? "Choose the area calling for clarity today"
             : "เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้"}
@@ -337,7 +337,7 @@ export function QuickFortunePicker({
                 >
                   {isEnglish ? (topic.badgeEn || topic.badge) : topic.badge}
                 </span>
-                <span className="text-[11px] sm:text-xs font-serif-th text-[#A58A5C] flex items-center gap-1 group-hover:text-[#8F5C1A] transition-colors">
+                <span className="text-[11px] sm:text-xs font-serif-th text-gold-ink flex items-center gap-1 group-hover:text-gold-ink transition-colors">
                   <span>{isEnglish ? "1 Card" : "ไพ่ 1 ใบ"}</span>
                   
                 </span>
@@ -348,9 +348,9 @@ export function QuickFortunePicker({
                 {/* ภาพหน้าไพ่ 1909 Rider-Waite ประจำหัวข้อ */}
                 <div className="relative flex-shrink-0">
                   {/* รัศมีแสงทองนุ่มนวลเบื้องหลัง */}
-                  <div className="absolute -inset-1.5 rounded-xl bg-radial from-[#A58A5C]/20 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute -inset-1.5 rounded-xl bg-radial from-gold/20 to-transparent blur-2xs -z-0 opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
                   <div
-                    className="relative w-[92px] h-[152px] sm:w-[104px] sm:h-[172px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition duration-300 transform-gpu bg-[#FFFFFF]"
+                    className="relative w-[92px] h-[152px] sm:w-[104px] sm:h-[172px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition duration-300 transform-gpu bg-surface"
                     style={{ borderColor: topic.themeColors.cardBorder }}
                   >
                     <CardImage
@@ -366,28 +366,28 @@ export function QuickFortunePicker({
 
                 {/* ข้อความและคำอธิบาย */}
                 <div className="w-full min-w-0 space-y-1 px-1">
-                  <div className="text-[10px] sm:text-[11px] font-serif-th text-[#8F5C1A] tracking-wider font-semibold truncate">
+                  <div className="text-[10px] sm:text-[11px] font-serif-th text-gold-ink tracking-wider font-semibold truncate">
                     {isEnglish ? (topic.elementalGlyphEn || topic.elementalGlyph) : topic.elementalGlyph}
                   </div>
                   {/* `<p>` ไม่ใช่ `<h3>` ด้วยเหตุผลเดียวกับข้างบน
                       ชื่อที่ screen reader อ่านมาจาก `aria-label` ของการ์ดทั้งใบ (เพิ่มไว้แล้วด้านบน)
                       จึงไม่เสียข้อมูลอะไรจากการเปลี่ยนแท็ก */}
-                  <p className="text-sm sm:text-base font-serif-th font-bold text-[#29261F] group-hover:text-[#8F5C1A] transition-colors duration-200 leading-snug">
+                  <p className="text-sm sm:text-base font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors duration-200 leading-snug">
                     {isEnglish ? (topic.titleEn || topic.title) : topic.title}
                   </p>
-                  <p className="text-[11px] sm:text-xs font-serif-th text-[#635B4E] leading-relaxed line-clamp-2">
+                  <p className="text-[11px] sm:text-xs font-serif-th text-muted leading-relaxed line-clamp-2">
                     {isEnglish ? (topic.taglineEn || topic.tagline) : topic.tagline}
                   </p>
                 </div>
               </div>
 
               {/* แถบการกระทำด้านล่าง: เชิญชวนเปิดไพ่พร้อมประกายทอง */}
-              <div className="pt-2 border-t border-[#D5CEC2]/40 relative z-10">
-                <div className="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl bg-[#F6F2EA]/70 group-hover:bg-[#29261F] text-[#4A3E31] group-hover:text-[#FAF7F2] transition-colors duration-300 shadow-2xs">
+              <div className="pt-2 border-t border-line/40 relative z-10">
+                <div className="flex items-center justify-between px-3 py-1.5 sm:py-2 rounded-xl bg-[#F6F2EA]/70 group-hover:bg-ink text-[#4A3E31] group-hover:text-surface-warm transition-colors duration-300 shadow-2xs">
                   <span className="text-[11px] sm:text-xs font-serif-th font-medium truncate mr-1">
                     {isEnglish ? (topic.highlightTextEn || topic.highlightText) : topic.highlightText}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-serif-th font-semibold text-[#8F5C1A] group-hover:text-[#E8D5B5] transition-colors shrink-0">
+                  <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-serif-th font-semibold text-gold-ink group-hover:text-[#E8D5B5] transition-colors shrink-0">
                     <span>{isEnglish ? "Begin Reading" : "เริ่มทำนาย"}</span>
                     <span className="group-hover:translate-x-0.5 transition-transform duration-200">➔</span>
                   </span>
@@ -430,8 +430,8 @@ export function QuickFortunePicker({
                 aria-hidden="true"
                 className={`h-1.5 rounded-full transition-[width,background-color,box-shadow] duration-300 ${
                   activeIndex === index
-                    ? "w-6 bg-[#8F5C1A] shadow-xs"
-                    : "w-1.5 bg-[#D5CEC2] hover:bg-[#A58A5C]/70"
+                    ? "w-6 bg-gold-ink shadow-xs"
+                    : "w-1.5 bg-line hover:bg-gold/70"
                 }`}
               />
             </button>
@@ -452,7 +452,7 @@ export function QuickFortunePicker({
         >
           <div
             ref={nicknamePanelRef}
-            className={`w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-[#D5CEC2] bg-gradient-to-b from-[#FFFFFF] via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
+            className={`w-full max-w-md max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-line bg-gradient-to-b from-surface via-[#FDFBF9] to-[#F7F4EE] p-6 shadow-overlay space-y-4 text-left${
               isNicknameClosing ? "" : " anim-modal-rise"
             }`}
           >
@@ -460,26 +460,26 @@ export function QuickFortunePicker({
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   {selectedPendingTopic && (
-                    <span className="text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#F6EFE0] text-[#8F5C1A] border-[#E2D4BE]">
+                    <span className="text-[11px] font-serif-th font-semibold px-2 py-0.5 rounded-full border bg-[#F6EFE0] text-gold-ink border-[#E2D4BE]">
                       {isEnglish
                         ? (selectedPendingTopic.titleEn || selectedPendingTopic.title)
                         : selectedPendingTopic.title}
                     </span>
                   )}
-                  <h3 className="text-base sm:text-lg font-serif-th font-bold text-[#29261F]">
+                  <h3 className="text-base sm:text-lg font-serif-th font-bold text-ink">
                     {isEnglish ? "Your Name & Question" : "ชื่อเล่นและคำถามของคุณ"}
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={closeNicknameModal}
-                  className="text-xs text-[#635B4E] hover:text-[#29261F] p-1 rounded-md hover:bg-[#F0ECE1] transition-colors"
+                  className="text-xs text-muted hover:text-ink p-1 rounded-md hover:bg-[#F0ECE1] transition-colors"
                   aria-label={isEnglish ? "Close" : "ปิด"}
                 >
                   ✕
                 </button>
               </div>
-              <p className="text-xs font-serif-th text-[#635B4E] leading-relaxed">
+              <p className="text-xs font-serif-th text-muted leading-relaxed">
                 {isEnglish
                   ? "Please share your name and what you wish to ask so the AI Oracle can connect with your energy and answer directly."
                   : "ระบุชื่อเล่นและคำถามที่คุณอยากรู้ เพื่อให้แม่หมอ AI เชื่อมจิตและทำนายคำตอบได้ตรงจุดที่สุด"}
@@ -491,7 +491,7 @@ export function QuickFortunePicker({
               <div>
                 <label
                   htmlFor="quick-fortune-nickname"
-                  className="text-xs font-serif-th font-semibold text-[#29261F] block mb-1"
+                  className="text-xs font-serif-th font-semibold text-ink block mb-1"
                 >
                   {isEnglish ? "Your Name or Nickname *" : "ชื่อเล่นของคุณ *"}
                 </label>
@@ -506,10 +506,10 @@ export function QuickFortunePicker({
                   }}
                   placeholder={isEnglish ? "e.g., Alex, Jordan, Taylor..." : "เช่น บี, น้ำ, เจมส์, วิน..."}
                   maxLength={40}
-                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-[#D5CEC2] focus:border-[#A58A5C] focus:outline-none focus:ring-1 focus:ring-[#A58A5C] bg-[#FAF7F2] text-[#29261F]"
+                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold bg-surface-warm text-ink"
                 />
                 {nicknameError && (
-                  <p className="text-[11px] font-serif-th text-[#A6392C] mt-1">
+                  <p className="text-[11px] font-serif-th text-err mt-1">
                     {nicknameError}
                   </p>
                 )}
@@ -520,7 +520,7 @@ export function QuickFortunePicker({
                 <div className="flex items-center justify-between mb-1">
                   <label
                     htmlFor="quick-fortune-question"
-                    className="text-xs font-serif-th font-semibold text-[#29261F]"
+                    className="text-xs font-serif-th font-semibold text-ink"
                   >
                     {isEnglish ? "Your Question" : "คำถามที่คุณอยากรู้"}
                   </label>
@@ -534,7 +534,7 @@ export function QuickFortunePicker({
                             : selectedPendingTopic.defaultQuestion
                         );
                       }}
-                      className="text-[11px] font-serif-th text-[#8F5C1A] hover:text-[#74490F] hover:underline cursor-pointer"
+                      className="text-[11px] font-serif-th text-gold-ink hover:text-gold-ink-deep hover:underline cursor-pointer"
                     >
                       {isEnglish ? "Use suggested question" : "ใช้คำถามแนะนำ"}
                     </button>
@@ -553,9 +553,9 @@ export function QuickFortunePicker({
                       : (isEnglish ? "Type your question here..." : "พิมพ์คำถามของคุณที่นี่...")
                   }
                   maxLength={300}
-                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-[#D5CEC2] focus:border-[#A58A5C] focus:outline-none focus:ring-1 focus:ring-[#A58A5C] bg-[#FAF7F2] text-[#29261F] resize-none"
+                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold bg-surface-warm text-ink resize-none"
                 />
-                <div className="flex items-center justify-between text-[11px] font-serif-th text-[#635B4E] mt-1">
+                <div className="flex items-center justify-between text-[11px] font-serif-th text-muted mt-1">
                   <span>
                     {isEnglish
                       ? "Leave blank to use the suggested question"
@@ -565,18 +565,18 @@ export function QuickFortunePicker({
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#D5CEC2]/40">
+              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-line/40">
                 <button
                   type="button"
                   onClick={closeNicknameModal}
-                  className="px-3.5 py-2 text-xs font-serif-th text-[#635B4E] hover:text-[#29261F] transition-colors cursor-pointer"
+                  className="px-3.5 py-2 text-xs font-serif-th text-muted hover:text-ink transition-colors cursor-pointer"
                 >
                   {isEnglish ? "Cancel" : "ยกเลิก"}
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !inputNickname.trim()}
-                  className="px-5 py-2 text-xs font-serif-th font-semibold rounded-xl bg-[#29261F] text-[#FAF7F2] hover:bg-[#3D372E] border border-[#8F5C1A]/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="px-5 py-2 text-xs font-serif-th font-semibold rounded-xl bg-ink text-surface-warm hover:bg-[#3D372E] border border-gold-ink/40 disabled:opacity-50 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <span>{isEnglish ? "Begin Reading Now" : "เริ่มทำนายทันที"}</span>
                   <span aria-hidden="true">➔</span>

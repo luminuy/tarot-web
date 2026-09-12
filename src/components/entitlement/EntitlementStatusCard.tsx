@@ -45,7 +45,7 @@ export function EntitlementStatusCard() {
   const bonus = ent?.bonusRemaining ?? 0;
 
   return (
-    <div className="space-y-4 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] p-5 sm:p-6">
+    <div className="space-y-4 rounded-lg border border-line-warm bg-surface p-5 sm:p-6">
       <div className="flex items-center gap-2">
         
         <h2 className="font-serif-th text-base font-bold font-mystic-gold sm:text-lg">
@@ -53,9 +53,9 @@ export function EntitlementStatusCard() {
         </h2>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#D9C8AC] bg-[#F3EDE2] px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line-warm bg-inset-warm px-4 py-3">
         <div className="space-y-1">
-          <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-[#635B4E]">
+          <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-muted">
             {view.isAdmin
               ? (isEn ? "Administrator" : "ผู้ดูแลระบบ")
               : view.isUnlimited
@@ -64,28 +64,28 @@ export function EntitlementStatusCard() {
                   ? (isEn ? "Guest Visitor" : "ผู้เยี่ยมชม")
                   : (isEn ? "Member" : "สมาชิก")}
           </span>
-          <span className="block font-serif-th text-sm font-semibold text-[#2E211A]">{view.statusLine}</span>
+          <span className="block font-serif-th text-sm font-semibold text-ink-deep">{view.statusLine}</span>
         </div>
         <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />
       </div>
 
       {view.isMember && !view.isUnlimited && (
         <div className="grid gap-2 sm:grid-cols-2">
-          <div className="flex items-center gap-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[13px] text-[#2E211A]">
-            <HourglassIcon className="h-4 w-4 shrink-0 text-[#8F5C1A]" />
+          <div className="flex items-center gap-2 rounded-lg border border-line-warm bg-surface px-3 py-2.5 font-serif-th text-[13px] text-ink-deep">
+            <HourglassIcon className="h-4 w-4 shrink-0 text-gold-ink" />
             <span>
               {isEn
                 ? `New free quota${countdown ? ` in ${countdown}` : ""} · Resets ${resetClockLabel(true)}`
                 : `โควตาฟรีชุดใหม่${countdown ? ` ${countdown}` : ""} · รีเซ็ต${resetClockLabel(false)}`}
             </span>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-[#D9C8AC] bg-[#FFFFFF] px-3 py-2.5 font-serif-th text-[13px] text-[#2E211A]">
-            <SparkSealIcon className="h-4 w-4 shrink-0 text-[#8F5C1A]" />
+          <div className="flex items-center gap-2 rounded-lg border border-line-warm bg-surface px-3 py-2.5 font-serif-th text-[13px] text-ink-deep">
+            <SparkSealIcon className="h-4 w-4 shrink-0 text-gold-ink" />
             <span>
               {isEn ? (
-                <>Purchased Tokens: <strong className="text-[#8F5C1A] font-bold">{bonus}</strong> · Never expires</>
+                <>Purchased Tokens: <strong className="text-gold-ink font-bold">{bonus}</strong> · Never expires</>
               ) : (
-                <>รอบที่เติมไว้ <strong className="text-[#8F5C1A] font-bold">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ</>
+                <>รอบที่เติมไว้ <strong className="text-gold-ink font-bold">{bonus}</strong> ครั้ง · ไม่มีวันหมดอายุ</>
               )}
             </span>
           </div>
@@ -95,16 +95,16 @@ export function EntitlementStatusCard() {
       {view.isGuest && (
         <ul className="grid gap-1.5 sm:grid-cols-2">
           {memberBenefits.map((b) => (
-            <li key={b.title} className="flex items-start gap-2 font-serif-th text-[13px] text-[#2E211A]">
-              <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-[#8F5C1A]" />
+            <li key={b.title} className="flex items-start gap-2 font-serif-th text-[13px] text-ink-deep">
+              <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-gold-ink" />
               {b.title}
             </li>
           ))}
         </ul>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#D9C8AC]/30 pt-3">
-        <Link href="/" className="text-xs text-[#8F5C1A] underline transition-colors hover:text-[#2E211A] font-bold">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-warm/30 pt-3">
+        <Link href="/" className="text-xs text-gold-ink underline transition-colors hover:text-ink-deep font-bold">
           {view.isGuest
             ? (isEn ? "Return to Tarot & Create Account" : "กลับไปเปิดไพ่และสมัครสมาชิก")
             : (isEn ? "Return to Tarot Reading" : "กลับไปเปิดไพ่")}
@@ -113,7 +113,7 @@ export function EntitlementStatusCard() {
           <button
             type="button"
             onClick={() => setBuyOpen(true)}
-            className="min-h-[40px] rounded-full border border-[#D9C8AC] bg-[#8F5C1A] hover:bg-[#74490F] px-4 py-2 font-serif-th text-xs font-semibold text-[#FFFFFF] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8F5C1A]"
+            className="min-h-[40px] rounded-full border border-line-warm bg-gold-ink hover:bg-gold-ink-deep px-4 py-2 font-serif-th text-xs font-semibold text-surface transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
             
             {isEn ? "Get Reading Passes" : "เติมรอบเปิดไพ่"}

@@ -89,11 +89,11 @@ function CopyBadge({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="inline-flex items-center gap-1.5 rounded-lg bg-[#FAF8F5] px-2.5 py-1 text-xs text-[#29261F] hover:bg-white hover:border-[#A58A5C] transition-colors border border-[#D5CEC2] shadow-2xs"
+      className="inline-flex items-center gap-1.5 rounded-lg bg-surface-mist px-2.5 py-1 text-xs text-ink hover:bg-white hover:border-gold transition-colors border border-line shadow-2xs"
       title="คลิกเพื่อคัดลอก"
     >
       <span className="font-mono truncate max-w-[180px] sm:max-w-xs">{text}</span>
-      <span className="text-[11px] text-[#635B4E]">{copied ? "คัดลอกแล้ว" : "คัดลอก"}</span>
+      <span className="text-[11px] text-muted">{copied ? "คัดลอกแล้ว" : "คัดลอก"}</span>
     </button>
   );
 }
@@ -168,21 +168,21 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="rounded-2xl p-6 sm:p-7 border border-[#D5CEC2] bg-white shadow-xs">
+      <div className="rounded-2xl p-6 sm:p-7 border border-line bg-white shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
               
-              <h2 className="font-mystic-gold text-lg sm:text-xl font-bold text-[#29261F] tracking-tight">
+              <h2 className="font-mystic-gold text-lg sm:text-xl font-bold text-ink tracking-tight">
                 ศูนย์บัญชาการสถานะระบบคลาวด์ (Cloud & Integrations)
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-[#635B4E]">
+            <p className="text-xs sm:text-sm text-muted">
               {data?.summary || "ระบบมอนิเตอร์และตรวจสอบการเชื่อมต่อบริการภายนอก 7 เสาหลักแบบเรียลไทม์"}
             </p>
             {data && (
-              <p className="text-[13px] text-[#635B4E]">
-                ตรวจสัญญาณสดล่าสุด: <span className="text-[#29261F] font-mono font-medium">{formattedTime}</span> · ผ่าน {data.passedCount} จาก {data.totalCount} ระบบ
+              <p className="text-[13px] text-muted">
+                ตรวจสัญญาณสดล่าสุด: <span className="text-ink font-mono font-medium">{formattedTime}</span> · ผ่าน {data.passedCount} จาก {data.totalCount} ระบบ
               </p>
             )}
           </div>
@@ -193,7 +193,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
               size="sm"
               onClick={probe}
               disabled={loading}
-              className="bg-[#29261F] hover:bg-[#171512] text-white font-medium text-xs shadow-xs border-transparent transition"
+              className="bg-ink hover:bg-dark text-white font-medium text-xs shadow-xs border-transparent transition"
             >
               {loading ? "กำลังยิงตรวจสัญญาณ…" : "ยิงตรวจสัญญาณสดทั้งหมด"}
             </Button>
@@ -210,25 +210,25 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
       {data && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* 1. โดเมน & การเข้าถึงเว็บ */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-[#29261F]">โดเมนหลัก & SSL (Domain & Origin)</h3>
+                <h3 className="font-semibold text-sm text-ink">โดเมนหลัก & SSL (Domain & Origin)</h3>
               </div>
               <StatusPill ok={data.services.domain.ok} />
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">โดเมนหลัก:</span>
-                <span className="font-mono text-[#29261F] font-medium">{data.services.domain.configuredDomain}</span>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">โดเมนหลัก:</span>
+                <span className="font-mono text-ink font-medium">{data.services.domain.configuredDomain}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Runtime Origin:</span>
-                <span className="font-mono text-[#29261F] font-medium">{data.services.domain.runtimeOrigin}</span>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Runtime Origin:</span>
+                <span className="font-mono text-ink font-medium">{data.services.domain.runtimeOrigin}</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-[#635B4E]">โปรโตคอลความปลอดภัย:</span>
+                <span className="text-muted">โปรโตคอลความปลอดภัย:</span>
                 <span className="text-emerald-700 font-semibold">
                   {data.services.domain.isHttps ? "HTTPS / TLS 1.2+ (บังคับใช้ 100%)" : "HTTP ธรรมดา"}
                 </span>
@@ -237,164 +237,164 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 2. เข้าสู่ระบบด้วย Google */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-[#29261F]">Google OAuth (เข้าสู่ระบบด้วยกูเกิล)</h3>
+                <h3 className="font-semibold text-sm text-ink">Google OAuth (เข้าสู่ระบบด้วยกูเกิล)</h3>
               </div>
               <StatusPill ok={data.services.google.ok} />
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Client ID:</span>
-                <span className="font-mono text-[#29261F] font-medium">{data.services.google.clientIdMasked ?? "ยังไม่ตั้ง"}</span>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Client ID:</span>
+                <span className="font-mono text-ink font-medium">{data.services.google.clientIdMasked ?? "ยังไม่ตั้ง"}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Client Secret:</span>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Client Secret:</span>
                 <span className={data.services.google.hasSecret ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
                   {data.services.google.hasSecret ? "พร้อมใช้งานใน Secret" : "ไม่มี"}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-1.5 gap-1">
-                <span className="text-[#635B4E]">Redirect URI:</span>
+                <span className="text-muted">Redirect URI:</span>
                 <CopyBadge text={data.services.google.callbackUrl} />
               </div>
             </div>
           </div>
 
           {/* 3. เข้าสู่ระบบด้วย LINE */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-[#29261F]">LINE Login (เข้าสู่ระบบด้วยไลน์)</h3>
+                <h3 className="font-semibold text-sm text-ink">LINE Login (เข้าสู่ระบบด้วยไลน์)</h3>
               </div>
               <StatusPill ok={data.services.line.ok} />
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Channel ID:</span>
-                <span className="font-mono text-[#29261F] font-medium">{data.services.line.channelId ?? "ยังไม่ตั้ง"}</span>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Channel ID:</span>
+                <span className="font-mono text-ink font-medium">{data.services.line.channelId ?? "ยังไม่ตั้ง"}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Channel Secret:</span>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Channel Secret:</span>
                 <span className={data.services.line.hasSecret ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
                   {data.services.line.hasSecret ? "พร้อมใช้งานใน Secret" : "ไม่มี"}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-1.5 gap-1">
-                <span className="text-[#635B4E]">Callback URL:</span>
+                <span className="text-muted">Callback URL:</span>
                 <CopyBadge text={data.services.line.callbackUrl} />
               </div>
             </div>
           </div>
 
           {/* 4. ระบบส่งอีเมลธุรกรรม (Resend) */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-[#29261F]">Resend Email (ระบบส่งอีเมลธุรกรรม)</h3>
+                <h3 className="font-semibold text-sm text-ink">Resend Email (ระบบส่งอีเมลธุรกรรม)</h3>
               </div>
               <StatusPill ok={data.services.email.ok} />
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">ผู้ส่ง (Sender):</span>
-                <span className="font-mono text-[#29261F] truncate max-w-[200px] font-medium">{data.services.email.emailFrom}</span>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">ผู้ส่ง (Sender):</span>
+                <span className="font-mono text-ink truncate max-w-[200px] font-medium">{data.services.email.emailFrom}</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">สถานะการเชื่อมต่อ API:</span>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">สถานะการเชื่อมต่อ API:</span>
                 <span className={data.services.email.pingOk ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
                   {data.services.email.pingOk ? `ปกติ (${data.services.email.latencyMs}ms)` : (data.services.email.error ?? "ไม่สำเร็จ")}
                 </span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-[#635B4E]">โควตาแพ็กเกจฟรี:</span>
-                <span className="text-[#29261F] font-medium">3,000 ฉบับ/เดือน (100 ฉบับ/วัน)</span>
+                <span className="text-muted">โควตาแพ็กเกจฟรี:</span>
+                <span className="text-ink font-medium">3,000 ฉบับ/เดือน (100 ฉบับ/วัน)</span>
               </div>
             </div>
           </div>
 
           {/* 5. ฐานข้อมูล Cloudflare D1 */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-[#29261F]">Cloudflare D1 (ฐานข้อมูลหลัก)</h3>
+                <h3 className="font-semibold text-sm text-ink">Cloudflare D1 (ฐานข้อมูลหลัก)</h3>
               </div>
               <StatusPill ok={data.services.d1.ok} />
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">ความเร็ว Query (Ping):</span>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">ความเร็ว Query (Ping):</span>
                 <span className="font-mono text-emerald-700 font-semibold">{data.services.d1.latencyMs}ms</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">จำนวนสมาชิกทั้งหมด:</span>
-                <span className="font-bold text-[#29261F]">{data.services.d1.metrics.totalUsers} คน</span>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">จำนวนสมาชิกทั้งหมด:</span>
+                <span className="font-bold text-ink">{data.services.d1.metrics.totalUsers} คน</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8] text-[13px] text-[#635B4E]">
+              <div className="flex justify-between py-1.5 border-b border-line-soft text-[13px] text-muted">
                 <span>สัดส่วนช่องทาง:</span>
-                <span className="text-[#29261F]">
+                <span className="text-ink">
                   Google: {data.services.d1.metrics.googleUsers} · LINE: {data.services.d1.metrics.lineUsers} · Email: {data.services.d1.metrics.emailUsers}
                 </span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-[#635B4E]">บันทึกประวัติดวง (Journal):</span>
-                <span className="font-mono text-[#29261F] font-semibold">{data.services.d1.metrics.totalReadings} รายการ</span>
+                <span className="text-muted">บันทึกประวัติดวง (Journal):</span>
+                <span className="font-mono text-ink font-semibold">{data.services.d1.metrics.totalReadings} รายการ</span>
               </div>
             </div>
           </div>
 
           {/* 6. Cloudflare KV Edge Cache */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-[#29261F]">Cloudflare KV (Edge Cache & สถิติ)</h3>
+                <h3 className="font-semibold text-sm text-ink">Cloudflare KV (Edge Cache & สถิติ)</h3>
               </div>
               <StatusPill ok={data.services.kv.ok} />
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">ความเร็วตอบสนอง (KV Read):</span>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">ความเร็วตอบสนอง (KV Read):</span>
                 <span className="font-mono text-emerald-700 font-semibold">{data.services.kv.latencyMs}ms</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">ลักษณะการกระจายข้อมูล:</span>
-                <span className="text-[#29261F]">Global Edge (Eventually Consistent)</span>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">ลักษณะการกระจายข้อมูล:</span>
+                <span className="text-ink">Global Edge (Eventually Consistent)</span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-[#635B4E]">บทบาท:</span>
-                <span className="text-[#29261F]">เก็บ Stat Counters, Config Overrides, Session Backstop</span>
+                <span className="text-muted">บทบาท:</span>
+                <span className="text-ink">เก็บ Stat Counters, Config Overrides, Session Backstop</span>
               </div>
             </div>
           </div>
 
           {/* 7. ระบบความปลอดภัย & การเข้ารหัส */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-[#29261F]">ระบบความปลอดภัย & ถอดรหัส (Security)</h3>
+                <h3 className="font-semibold text-sm text-ink">ระบบความปลอดภัย & ถอดรหัส (Security)</h3>
               </div>
               <StatusPill ok={data.services.security.ok} />
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Web Crypto SHA-256:</span>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Web Crypto SHA-256:</span>
                 <span className="text-emerald-700 font-semibold">สมบูรณ์ (Provably-Fair Sanity Passed)</span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">PASSWORD_PEPPER:</span>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">PASSWORD_PEPPER:</span>
                 <span className={data.services.security.passwordPepperOk ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
                   {data.services.security.passwordPepperOk ? "เปิดใช้งาน (≥24 ตัวอักษร)" : "สั้นเกินไปหรือยังไม่ตั้ง"}
                 </span>
               </div>
               <div className="flex justify-between py-1.5">
-                <span className="text-[#635B4E]">TAROT_SESSION_SECRET:</span>
+                <span className="text-muted">TAROT_SESSION_SECRET:</span>
                 <span className={data.services.security.sessionSecretOk ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
                   {data.services.security.sessionSecretOk ? "แข็งแกร่ง (≥32 ตัวอักษร)" : "สั้นเกินไปหรือยังไม่ตั้ง"}
                 </span>
@@ -403,24 +403,24 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 8. ปัญญาประดิษฐ์ AI Engine */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
-                <h3 className="font-semibold text-sm text-[#29261F]">เครื่องยนต์ AI (AI Engine Overview)</h3>
+                <h3 className="font-semibold text-sm text-ink">เครื่องยนต์ AI (AI Engine Overview)</h3>
               </div>
               <StatusPill ok={data.services.ai.ok} />
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Google Gemini:</span>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Google Gemini:</span>
                 <span className={data.services.ai.geminiConfigured ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
                   {data.services.ai.geminiConfigured ? "พร้อมใช้งาน" : "ไม่มีคีย์"}
                 </span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Groq LPU สำรอง:</span>
-                <span className={data.services.ai.groqConfigured ? "text-emerald-700 font-semibold" : "text-[#756F66]"}>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Groq LPU สำรอง:</span>
+                <span className={data.services.ai.groqConfigured ? "text-emerald-700 font-semibold" : "text-muted"}>
                   {data.services.ai.groqConfigured ? "พร้อมใช้งาน" : "ไม่ได้เปิดใช้ (ใช้อัตโนมัติเมื่อตั้งค่า)"}
                 </span>
               </div>
@@ -429,7 +429,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                   <button
                     type="button"
                     onClick={() => onSwitchTab("ai")}
-                    className="text-[#A58A5C] hover:text-[#8E754C] text-xs font-semibold underline underline-offset-2 flex items-center gap-1 cursor-pointer"
+                    className="text-gold-ink hover:text-gold-deep text-xs font-semibold underline underline-offset-2 flex items-center gap-1 cursor-pointer"
                   >
                     <span>ตรวจสอบเชิงลึกรายโมเดล & วัด Latency ในแท็บสุขภาพ AI →</span>
                   </button>
@@ -439,40 +439,40 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 9. Cloudflare Free Stack */}
-          <div className="rounded-2xl p-5 border border-[#D5CEC2] bg-white shadow-xs space-y-3">
+          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
             <div className="flex items-center gap-2">
               
-              <h3 className="font-semibold text-sm text-[#29261F]">Cloudflare Free Stack (ส่วนเสริม)</h3>
+              <h3 className="font-semibold text-sm text-ink">Cloudflare Free Stack (ส่วนเสริม)</h3>
             </div>
-            <div className="space-y-1.5 text-xs text-[#635B4E]">
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">AI Gateway:</span>
-                <span className={data.services.cloudflareStack.aiGateway.enabled ? "text-emerald-700 font-semibold" : "text-[#756F66]"}>
+            <div className="space-y-1.5 text-xs text-muted">
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">AI Gateway:</span>
+                <span className={data.services.cloudflareStack.aiGateway.enabled ? "text-emerald-700 font-semibold" : "text-muted"}>
                   {data.services.cloudflareStack.aiGateway.enabled
                     ? "เปิดใช้ (route AI ผ่าน gateway)"
                     : `ยังไม่เปิด (${data.services.cloudflareStack.aiGateway.accountIdSet ? "" : "ขาด ACCOUNT_ID "}${data.services.cloudflareStack.aiGateway.gatewayIdSet ? "" : "ขาด GATEWAY_ID"})`.trim() || "ยังไม่เปิด"}
                 </span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Turnstile (กันบอท):</span>
-                <span className={data.services.cloudflareStack.turnstile.enabled ? "text-emerald-700 font-semibold" : "text-[#756F66]"}>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Turnstile (กันบอท):</span>
+                <span className={data.services.cloudflareStack.turnstile.enabled ? "text-emerald-700 font-semibold" : "text-muted"}>
                   {data.services.cloudflareStack.turnstile.enabled
                     ? "เปิดใช้ (signup/login/forgot)"
                     : `ยังไม่เปิด (${data.services.cloudflareStack.turnstile.siteKeySet ? "" : "ขาด SITE_KEY "}${data.services.cloudflareStack.turnstile.secretKeySet ? "" : "ขาด SECRET_KEY"})`.trim() || "ยังไม่เปิด"}
                 </span>
               </div>
-              <div className="flex justify-between py-1.5 border-b border-[#E8E2D8]">
-                <span className="text-[#635B4E]">Workers AI (safety ชั้น 3):</span>
-                <span className={data.services.cloudflareStack.workersAi.bindingAvailable ? "text-emerald-700 font-semibold" : "text-[#756F66]"}>
+              <div className="flex justify-between py-1.5 border-b border-line-soft">
+                <span className="text-muted">Workers AI (safety ชั้น 3):</span>
+                <span className={data.services.cloudflareStack.workersAi.bindingAvailable ? "text-emerald-700 font-semibold" : "text-muted"}>
                   {data.services.cloudflareStack.workersAi.bindingAvailable ? "binding พร้อม" : "ไม่มี binding (dev / ยังไม่ deploy)"}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-3 py-1.5">
-                <span className="text-[#635B4E]">Vectorize (ค้นหาเชิงความหมาย):</span>
+                <span className="text-muted">Vectorize (ค้นหาเชิงความหมาย):</span>
                 <div className="flex items-center gap-2">
                   <span
                     className={
-                      data.services.cloudflareStack.vectorize.bindingAvailable ? "text-emerald-700 font-semibold" : "text-[#756F66]"
+                      data.services.cloudflareStack.vectorize.bindingAvailable ? "text-emerald-700 font-semibold" : "text-muted"
                     }
                   >
                     {data.services.cloudflareStack.vectorize.bindingAvailable ? "binding พร้อม" : "ไม่มี binding"}
@@ -482,14 +482,14 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                       type="button"
                       onClick={rebuildSearchIndex}
                       disabled={rebuild.busy}
-                      className="rounded-lg border border-[#D5CEC2] bg-[#FAF8F5] px-2.5 py-1 text-[11px] font-medium text-[#29261F] hover:bg-white hover:border-[#A58A5C] disabled:opacity-50 cursor-pointer transition shadow-2xs"
+                      className="rounded-lg border border-line bg-surface-mist px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-white hover:border-gold disabled:opacity-50 cursor-pointer transition shadow-2xs"
                     >
                       {rebuild.busy ? "กำลัง index…" : "สร้าง index ใหม่"}
                     </button>
                   )}
                 </div>
               </div>
-              {rebuild.msg && <p className="pt-1 text-[11px] text-[#29261F] font-mono">{rebuild.msg}</p>}
+              {rebuild.msg && <p className="pt-1 text-[11px] text-ink font-mono">{rebuild.msg}</p>}
             </div>
           </div>
         </div>
