@@ -170,7 +170,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
           soundManager.playMenuTapSound();
           onOpenAuthModal();
         }}
-        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] flex items-center justify-center transition-colors duration-150 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] select-none"
+        className="tap-overlay w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#D5CEC2] bg-[#FFFFFF] text-[#29261F] hover:border-[#A58A5C] hover:text-[#A58A5C] flex items-center justify-center transition-colors duration-150 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#A58A5C] select-none"
         aria-label={isEn ? "Sign In" : "เข้าสู่ระบบ"}
         title={isEn ? "Sign In" : "เข้าสู่ระบบ"}
       >
@@ -203,7 +203,7 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
       <button
         type="button"
         onClick={toggleMenu}
-        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-colors duration-150 cursor-pointer flex items-center justify-center relative select-none shadow-xs ${
+        className={`tap-overlay w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-colors duration-150 cursor-pointer flex items-center justify-center relative select-none shadow-xs ${
           menuOpen
             ? "bg-[#EAE7E0] border-[#D5CEC2] text-[#29261F]"
             : "bg-[#FFFFFF] text-[#29261F] hover:text-[#A58A5C] border-[#D5CEC2] hover:border-[#A58A5C]"

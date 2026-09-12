@@ -487,7 +487,7 @@ function AdminContent() {
         </div>
 
         {/* ─── Tab Content Workspace ──────────────────────────────── */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+        <main id="main-content" tabIndex={-1} className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
           {/* Header Description Banner */}
           {activeItem && (
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D5CEC2] pb-4">

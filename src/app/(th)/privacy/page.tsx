@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-[#F3F0EA] text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F]">
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         {/* Header */}
         <div className="text-center space-y-3 pb-6 border-b border-[#D5CEC2]/40">

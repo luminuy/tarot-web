@@ -11,7 +11,7 @@ export function AccountClient() {
   const isEn = isEnglish || locale === "en";
 
   return (
-    <main className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans selection:bg-[#A58A5C]/20 selection:text-[#29261F]">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-[#F3F0EA] text-[#29261F] p-4 sm:p-8 font-sans selection:bg-[#A58A5C]/20 selection:text-[#29261F]">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="text-center space-y-3 sm:space-y-4 py-4 sm:py-6">
           <div>

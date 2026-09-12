@@ -53,21 +53,21 @@ export function ConsentBanner() {
         <button
           type="button"
           onClick={() => decide("granted")}
-          className="flex-1 min-w-[120px] rounded-lg bg-[#29261F] px-3 py-2 text-[13px] font-bold text-[#F3F0EA] hover:bg-[#3D382F] transition-colors"
+          className="tap-target flex-1 min-w-[120px] rounded-lg bg-[#29261F] px-3 py-2 text-[13px] font-bold text-[#F3F0EA] hover:bg-[#3D382F] transition-colors"
         >
           {isEnglish ? "Allow" : "ยินยอม"}
         </button>
         <button
           type="button"
           onClick={() => decide("denied")}
-          className="flex-1 min-w-[120px] rounded-lg border border-[#D5CEC2] px-3 py-2 text-[13px] font-bold text-[#29261F] hover:border-[#A58A5C] transition-colors"
+          className="tap-target flex-1 min-w-[120px] rounded-lg border border-[#D5CEC2] px-3 py-2 text-[13px] font-bold text-[#29261F] hover:border-[#A58A5C] transition-colors"
         >
           {isEnglish ? "Only what's needed" : "เฉพาะที่จำเป็น"}
         </button>
       </div>
       <Link
         href={isEnglish ? "/privacy" : "/privacy"}
-        className="mt-2.5 inline-block text-[12px] text-[#635B4E] underline underline-offset-2 hover:text-[#8F5C1A]"
+        className="tap-overlay-y mt-2.5 inline-block text-[12px] text-[#635B4E] underline underline-offset-2 hover:text-[#8F5C1A]"
       >
         {isEnglish ? "Read our privacy policy" : "อ่านนโยบายความเป็นส่วนตัว"}
       </Link>
