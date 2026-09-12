@@ -185,7 +185,28 @@ for (const file of walkTsx(path.join(ROOT, "src"))) {
 // ── กฎ 4 · ตรวจ HTML ที่ build จริง (ถ้ามี) ────────────────────────────────
 const indexHtmlPath = path.join(ROOT, ".next/server/app/index.html");
 if (!fs.existsSync(indexHtmlPath)) {
-  notes.push("⚠️  ยังไม่มี .next/server/app/index.html — ข้ามการตรวจ HTML จริง (รัน npm run build ก่อนเพื่อตรวจครบ)");
+  /*
+   * 🔴 ไม่มีไฟล์ build = **ตก** ไม่ใช่ "ข้าม"
+   * ---------------------------------------------------------------------------
+   * เดิมจุดนี้แค่ push ข้อความเตือนลง notes แล้วปล่อยผ่าน ผลคือบนเครื่องที่ยังไม่เคย
+   * build ด่านนี้พิมพ์ "✅ ผ่าน" ทั้งที่ **ไม่ได้ตรวจกฎ 3 ใน 4 ข้อเลย** (ลำดับหัวข้อ ·
+   * h1 เดี่ยว · header/footer อยู่นอก <main>) — กฎพวกนี้ตรวจจาก HTML ที่เรนเดอร์จริง
+   * เท่านั้น เพราะโครง JSX อ่านแล้วไม่รู้ว่าสุดท้าย DOM ออกมาหน้าตาแบบไหน
+   *
+   * ด่านที่ผ่านได้ทั้งที่ไม่ได้ตรวจ คือด่านหลอกแบบเดียวกับช่องว่าง G-10
+   * ใน `repo:verify` ไม่มีทางเจอเคสนี้อยู่แล้ว เพราะด่านงบบันเดิล (ลำดับที่ 37)
+   * สั่ง `npm run build` ให้เองเมื่อไม่พบไฟล์ผลลัพธ์ และด่านนี้อยู่ลำดับสุดท้าย
+   * ที่เจอคือตอนรันด่านนี้เดี่ยว ๆ บน checkout ใหม่ ซึ่งควรบอกให้ชัดว่าต้อง build ก่อน
+   */
+  console.error("♿ ตรวจ a11y ระดับวิกฤตของหน้าแรก\n");
+  console.error("❌ ไม่พบ .next/server/app/index.html — ตรวจ HTML ที่เรนเดอร์จริงไม่ได้\n");
+  console.error("   กฎ 3 ข้อนี้ตรวจจาก HTML จริงเท่านั้น จึงยังไม่ได้ตรวจเลย:");
+  console.error("     • หัวข้อแรกของหน้าเป็น h1 และไม่ข้ามลำดับ");
+  console.error("     • หน้าแรกมี <h1> หนึ่งเดียว");
+  console.error("     • <header> / <footer> อยู่นอก <main>");
+  console.error("\n   ➔ รัน `npm run build` ก่อน แล้วรันด่านนี้ใหม่");
+  console.error("   ➔ หรือรัน `npm run repo:verify` ซึ่ง build ให้เองอยู่แล้ว\n");
+  process.exit(1);
 } else {
   const html = fs.readFileSync(indexHtmlPath, "utf-8");
 
