@@ -1,7 +1,14 @@
-import type { Article, ArticleSummary } from "./articles";
+export type ArticleTitleLike = { title: string; titleEn?: string };
+export type ArticleDescriptionLike = { description: string; descriptionEn?: string };
+export type ArticleCategoryLike = {
+  category: "love" | "career" | "spreads" | "cards" | "wisdom";
+  categoryTh: string;
+  categoryEn?: string;
+};
+export type ArticleAuthorLike = { author: string; authorEn?: string };
 
 export function getArticleTitle(
-  article: Article | ArticleSummary,
+  article: ArticleTitleLike,
   localeOrIsEnglish: string | boolean,
 ): string {
   const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
@@ -12,7 +19,7 @@ export function getArticleTitle(
 }
 
 export function getArticleDescription(
-  article: Article | ArticleSummary,
+  article: ArticleDescriptionLike,
   localeOrIsEnglish: string | boolean,
 ): string {
   const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
@@ -23,7 +30,7 @@ export function getArticleDescription(
 }
 
 export function getArticleCategory(
-  article: Article | ArticleSummary,
+  article: ArticleCategoryLike,
   localeOrIsEnglish: string | boolean,
 ): string {
   const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";
@@ -48,7 +55,7 @@ export function getArticleCategory(
 }
 
 export function getArticleAuthor(
-  article: Article | ArticleSummary,
+  article: ArticleAuthorLike,
   localeOrIsEnglish: string | boolean,
 ): string {
   const isEnglish = typeof localeOrIsEnglish === "boolean" ? localeOrIsEnglish : localeOrIsEnglish === "en";

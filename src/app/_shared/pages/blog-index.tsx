@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getArticleSummaries } from "@/data/articles";
-import { BlogIndexClient } from "../../(th)/blog/BlogIndexClient";
+import { BlogIndexClient, type BlogCardItem } from "../../(th)/blog/BlogIndexClient";
 import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Locale } from "@/lib/i18n/types";
@@ -124,13 +124,26 @@ export function BlogIndexBody({ locale }: { locale: Locale }) {
     { name: copy.crumb, path: PATH },
   ]);
 
+  const clientArticles: BlogCardItem[] = articles.map((a) => ({
+    slug: a.slug,
+    category: a.category,
+    categoryTh: a.categoryTh,
+    categoryEn: a.categoryEn,
+    title: a.title,
+    titleEn: a.titleEn,
+    description: a.description,
+    descriptionEn: a.descriptionEn,
+    readTime: a.readTime,
+    keywords: a.keywords,
+  }));
+
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
 
       <div className="max-w-5xl mx-auto space-y-8 pb-16">
-        <BlogIndexClient articles={articles} />
+        <BlogIndexClient articles={clientArticles} />
       </div>
     </main>
   );
