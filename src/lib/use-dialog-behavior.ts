@@ -7,7 +7,7 @@ import { useEffect, useRef, type RefObject } from "react";
  * ---------------------------------------------------------------------------
  * ตรวจจริงเมื่อ 2026-09-11 พบว่ามีหน้าต่างลอย 7 บาน แต่มีแค่ 2 บาน
  * (`Modal.tsx` กับ `AuthModal.tsx`) ที่ทำเรื่องพวกนี้ครบ ส่วนอีก 5 บาน
- * (`ShareModal` · `CardZoomModal` · `TarotEncyclopediaModal` · `ReadingHistoryModal`
+ * (`ShareModal` · `CardZoomModal` · `ReadingHistoryModal`
  * · แผงยืนยันใน `QuickFortunePicker`) **ประกาศ `aria-modal="true"` ไว้ทั้งที่ไม่ได้กักโฟกัสจริง**
  * ซึ่งสำหรับ screen reader แย่กว่าไม่ประกาศเลย เพราะมันสัญญาสิ่งที่ทำไม่ได้
  *
