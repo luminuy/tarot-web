@@ -21,6 +21,9 @@ import {
 import { upsertUserOnLogin, softDeleteUser } from "../../src/lib/users/users.repo";
 import { getAppDB } from "../../src/lib/platform/db";
 import { todayDateKey, getDailyStreak } from "../../src/lib/entitlement/daily";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 let pass = 0;
 let fail = 0;
@@ -299,6 +302,54 @@ async function main() {
   );
   check("streak ถูกบันทึกเป็น 1 วัน", (await getDailyStreak(dailyUser)) >= 1);
   await softDeleteUser(dailyUser);
+
+  // ── 12b. ระบบ streak ต้อง "ถูกเรียกจริง" และ "ถูกแสดงจริง" ──
+  // ⚠️ ทำไมต้องมีด่านนี้: ข้อ 12 ด้านบนผ่านมาตลอด แต่ระบบ streak ตายสนิทบน production
+  // เพราะ (1) หน้า `/daily` ซึ่งเป็นประตูหลักของไพ่ประจำวัน สุ่มไพ่ในเบราว์เซอร์ล้วน
+  // ไม่เคยเรียก consumeReading จึงไม่เคยบันทึกอะไรลง daily_readings
+  // และ (2) ไม่มีไฟล์ .tsx ไหนในเว็บอ่านค่า streak ออกมาแสดงเลยสักจุด
+  // ตรรกะที่ถูกต้อง 100% แต่ไม่มีใครเรียกและไม่มีใครเห็น = ฟีเจอร์ที่ไม่มีอยู่จริง
+  // (หลักการข้อ 0.8: กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน)
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+  const readSrc = (rel: string) => {
+    try {
+      return fs.readFileSync(path.join(repoRoot, rel), "utf-8");
+    } catch {
+      return "";
+    }
+  };
+
+  const checkinRoute = readSrc("src/app/api/daily/checkin/route.ts");
+  check("มีเส้นทางเช็กอินไพ่ประจำวัน `/api/daily/checkin`", checkinRoute.length > 0);
+  // ดูที่ "การ import จริง" ไม่ใช่การเอ่ยชื่อในคอมเมนต์ — ไม่งั้นคอมเมนต์อธิบายที่มาของบั๊กจะทำให้ด่านตก
+  const importsConsumeReading = /import\s*\{[^}]*\bconsumeReading\b[^}]*\}/.test(checkinRoute);
+  check(
+    "เส้นเช็กอินต้องไม่หักโควตา (ห้าม import consumeReading — ไพ่ประจำวันเปิดฟรี)",
+    checkinRoute.length > 0 && !importsConsumeReading,
+  );
+  check(
+    "เส้นเช็กอินต้องด่านตรวจ origin เหมือน API อื่นทั้งเว็บ",
+    checkinRoute.includes("isRequestAuthorizedOrigin"),
+  );
+  check(
+    "หน้า `/daily` ต้องยิงเช็กอินจริงตอนผู้ใช้เปิดไพ่",
+    readSrc("src/components/daily/DailyClient.tsx").includes("/api/daily/checkin"),
+  );
+
+  // ต้องมีอย่างน้อย 1 ไฟล์ .tsx ที่เอา streak ขึ้นจอ ไม่งั้นตัวเลขนี้ไม่มีใครเห็นอีกเหมือนเดิม
+  const tsxWithStreak: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(path.join(repoRoot, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) walk(rel);
+      else if (entry.name.endsWith(".tsx") && readSrc(rel).includes("streak")) tsxWithStreak.push(rel);
+    }
+  };
+  walk("src/components");
+  check(
+    `มีหน้าจอที่แสดง streak ให้ผู้ใช้เห็นจริง (พบ ${tsxWithStreak.length} ไฟล์)`,
+    tsxWithStreak.length > 0,
+  );
 
   // ── 9. ตรวจสอบธงระบบสิทธิ์เปิดใช้งานโดยค่าเริ่มต้น (Fail-Closed Enforcement) ──
   const { isEntitlementEnabled } = await import("../../src/lib/entitlement/flag");
