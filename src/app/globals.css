@@ -1243,7 +1243,7 @@ input.no-focus-ring:focus-visible {
  * ⚠️ ผลข้างเคียงที่ต้องรู้: ปุ่มที่มีพื้นหลังทึบจะบัง overlay ของตัวเอง —
  * ไม่เป็นไรเพราะบริเวณนั้นเป็นตัวปุ่มจริงอยู่แล้ว การกดยังทำงานปกติ
  */
-.tap-overlay {
+.tap-overlay:not(.absolute):not([class*="absolute"]) {
   position: relative;
 }
 
@@ -1259,7 +1259,7 @@ input.no-focus-ring:focus-visible {
 }
 
 /* รุ่นที่ขยายเฉพาะแนวตั้ง — สำหรับปุ่มที่วางชิดกันในแนวนอน */
-.tap-overlay-y {
+.tap-overlay-y:not(.absolute):not([class*="absolute"]) {
   position: relative;
 }
 
