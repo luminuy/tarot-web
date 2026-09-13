@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import LocaleLink from "@/components/ui/LocaleLink";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
@@ -52,13 +52,13 @@ export default function ReadingChatPage() {
     */}
     <header className="fixed top-0 inset-x-0 z-40 h-14 w-full border-b border-line bg-surface shadow-raised">
       <div className="mx-auto flex h-full max-w-2xl items-center justify-between gap-3 px-4">
-        <Link
+        <LocaleLink
           href="/"
           aria-label={isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
           className="flex items-center gap-1.5 rounded-lg py-1.5 pr-2 font-serif-th text-xs text-ink transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
         >
           <span aria-hidden="true">←</span> {isEnglish ? "Back to Reading" : "กลับไปหน้าคำทำนาย"}
-        </Link>
+        </LocaleLink>
         <span className="flex items-center gap-1.5 font-serif-th text-xs font-bold text-ink">
           
           {isEnglish ? `Chat with ${personaName}` : `แชทกับ${persona.nameTh}`}
@@ -118,12 +118,12 @@ export default function ReadingChatPage() {
                 ? "Please draw your cards and receive your reading first, then click “Chat with Oracle” on the prophecy page to continue."
                 : "เปิดไพ่และอ่านคำทำนายก่อน แล้วจึงกดปุ่ม “แชทออนไลน์กับแม่หมอ” จากหน้าผลไพ่เพื่อคุยต่อ"}
             </p>
-            <Link
+            <LocaleLink
               href="/"
               className="inline-flex items-center gap-1.5 rounded-full bg-ink px-6 py-2.5 font-serif-th text-xs font-bold text-canvas transition hover:bg-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
               {isEnglish ? "Begin Tarot Reading" : "ไปเปิดไพ่"}
-            </Link>
+            </LocaleLink>
           </div>
         )}
       </div>

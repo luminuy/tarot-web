@@ -36,6 +36,17 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-13 (รอบ 59): 🛡️ อุดช่องโหว่ไพ่มโนตามกฎข้อ 14 เสริมความถูกต้อง Provably Fair และจำ returnUrl ใน OAuth (INC-0144)
+
+- **เป้าหมาย**: แก้ไขบั๊กเชิงลึก 5 จุดจากการ Audit รอบด้าน เพื่อรักษาหลักการความโปร่งใสเด็ดขาด (Zero Fabricated Cards Policy), รักษาระบบ Provably Fair, ป้องกันการหลุดภาษาในหน้าแชท, และเพิ่มความลื่นไหลในการล็อกอิน OAuth
+- **รายการที่แก้ไข**:
+  1. `LoveOneCardClient.tsx`: ขจัด fallback `cardIndex: cardIdx >= 0 ? cardIdx : 0` และใส่ guard clause `if (cardIdx < 0) return;` ตรงตามกฎเหล็กข้อ 14
+  2. `StreamReader.tsx` & `QuickChatResult.tsx`: กรองเฉพาะไพ่ที่มี `cardIndex` ถูกต้องจริงก่อนส่งให้ `ProvablyFairPanel` ตัด fallback `: 0` ป้องกันคำนวณแฮชเทียบไพ่ The Fool ปลอม
+  3. `scripts/qa/test-no-fake-card.ts`: เพิ่มข้อ 5.7 สแกน Static Analysis ทุกไฟล์ใน `src/` บล็อก ternary / nullish fallback cardIndex เป็น 0 ถาวร
+  4. `(th)/reading/chat/page.tsx`: เปลี่ยนปุ่ม "Back to Reading" และ "Begin Tarot Reading" เป็น `<LocaleLink>` พาผู้ใช้ภาษาอังกฤษกลับ `/en` แทนที่จะหลุดไปหน้าไทย
+  5. `AuthModal.tsx`, `[provider]/route.ts`, `callback/route.ts`: รองรับ `returnUrl` สำหรับ Google / LINE OAuth บันทึกลงใน cookie `tarot_oauth_return` พร้อมตัวตรวจ Relative Path ป้องกัน Open Redirect
+- **ผลการตรวจ**: `repo:verify` ผ่านครบทั้ง **56/56 ด่าน (สมบูรณ์ 100%)**
+
 ### 🗓️ 2026-09-13 (รอบ 58): 🧪 ขยายชุดตรวจความสมบูรณ์สู่ 56 ด่าน (Harness Expansion & 4 Added Suites)
 
 - **เป้าหมาย**: ผูก 4 ชุดตรวจ QA ที่พัฒนาไว้อย่างละเอียดแล้วแต่ยังไม่ได้ต่อเข้า Verification Harness กลาง ให้ทำงานโดยอัตโนมัติทุกครั้งทั้งใน local pre-commit/pre-push และ GitHub Actions CI

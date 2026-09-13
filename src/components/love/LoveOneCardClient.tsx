@@ -158,6 +158,12 @@ export function LoveOneCardClient() {
     try {
       const statusObj = STATUS_OPTIONS.find((s) => s.id === selectedStatus);
       const cardIdx = CARD_SUMMARIES.findIndex((c) => c.id === card.id);
+      // 🃏 กฎเหล็กข้อ 14 — ห้ามกุไพ่แทนใบที่หาไม่เจอเด็ดขาด (Zero Fabricated Cards Policy)
+      // หาก id ไม่ตรงกับ CARD_SUMMARIES ห้ามมโนเป็น The Fool (0) — ข้ามการบันทึกทันที
+      if (cardIdx < 0) {
+        console.error("[Love] หาไพ่ใน CARD_SUMMARIES ไม่เจอ — ข้ามการบันทึก:", card.id);
+        return;
+      }
       saveReading({
         spreadId: "love-one",
         spreadName: isEnglish ? "Love Tarot (1 Card)" : "ดูดวงความรัก 1 ใบ",
@@ -177,7 +183,7 @@ export function LoveOneCardClient() {
             positionName: isEnglish
               ? statusObj?.titleEn || "Core Love"
               : statusObj?.titleTh || "ไพ่ความรักประจำใจ",
-            cardIndex: cardIdx >= 0 ? cardIdx : 0,
+            cardIndex: cardIdx,
             cardNameTh: card.nameTh,
             cardNameEn: card.nameEn,
             isReversed: false,

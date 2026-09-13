@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { getGoogleOAuthUrl, getLineOAuthUrl } from "@/lib/auth/edge-auth";
+import { OAUTH_STATE_COOKIE, OAUTH_RETURN_COOKIE } from "@/lib/auth/cookie-names";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
-
-const OAUTH_STATE_COOKIE = "tarot_oauth_state";
 
 export async function GET(
   request: Request,
@@ -28,6 +27,19 @@ export async function GET(
     return NextResponse.redirect(`${origin}/?auth_error=provider_unavailable`);
   }
 
+  const { searchParams } = new URL(request.url);
+  const rawReturnUrl = searchParams.get("returnUrl");
+  // ตรวจสอบความปลอดภัย: รับเฉพาะ relative path ภายในโดเมน (ขึ้นต้นด้วย "/" และไม่ขึ้นต้นด้วย "//" หรือมี "\") ป้องกัน Open Redirect
+  let safeReturnUrl: string | null = null;
+  if (
+    rawReturnUrl &&
+    rawReturnUrl.startsWith("/") &&
+    !rawReturnUrl.startsWith("//") &&
+    !rawReturnUrl.includes("\\")
+  ) {
+    safeReturnUrl = rawReturnUrl;
+  }
+
   const state = crypto.randomUUID();
   const redirectUri = `${origin}/api/auth/${provider}/callback`;
   const authUrl =
@@ -43,5 +55,18 @@ export async function GET(
     maxAge: 600, // 10 minutes
     path: "/",
   });
+
+  if (safeReturnUrl) {
+    response.cookies.set(OAUTH_RETURN_COOKIE, safeReturnUrl, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 600, // 10 minutes
+      path: "/",
+    });
+  } else {
+    response.cookies.set(OAUTH_RETURN_COOKIE, "", { path: "/", maxAge: 0 });
+  }
+
   return response;
 }

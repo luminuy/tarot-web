@@ -450,11 +450,16 @@ isEnglish
               <ProvablyFairPanel
                 commitment={proof?.commitment ?? ""}
                 proof={proof}
-                drawn={drawnCards.map((c) => ({
-                  order: c.order,
-                  cardIndex: c.cardIndex !== undefined ? c.cardIndex : 0,
-                  isReversed: !!c.isReversed,
-                }))}
+                drawn={drawnCards
+                  .filter(
+                    (c): c is typeof c & { cardIndex: number } =>
+                      typeof c.cardIndex === "number" && c.cardIndex >= 0 && c.cardIndex < 78
+                  )
+                  .map((c) => ({
+                    order: c.order,
+                    cardIndex: c.cardIndex,
+                    isReversed: !!c.isReversed,
+                  }))}
               />
 
               {/* Real Human Reader Marketplace Consultation CTA */}

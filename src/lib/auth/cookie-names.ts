@@ -21,3 +21,10 @@ export const AUTH_COOKIE_NAME = "tarot_auth_session";
  * การบังคับสิทธิ์ยังตรวจจากคุกกี้เซสชันจริงฝั่งเซิร์ฟเวอร์ที่เดิมทุกประการ
  */
 export const AUTH_HINT_COOKIE_NAME = "tarot_has_session";
+
+/** คุกกี้เก็บ state กัน CSRF สำหรับ OAuth Google / LINE */
+export const OAUTH_STATE_COOKIE = "tarot_oauth_state";
+
+/** คุกกี้เก็บ returnUrl สำหรับพากลับหน้าเดิมหลัง OAuth สำเร็จ */
+export const OAUTH_RETURN_COOKIE = "tarot_oauth_return";
+
