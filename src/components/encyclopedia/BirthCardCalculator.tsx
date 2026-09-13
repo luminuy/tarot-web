@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import dynamic from "next/dynamic";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { calculateBirthCard, type BirthCardResult, type BirthCardItem } from "@/lib/tarot/birth-card";
+import { calculateBirthCard, getMaxDaysInMonth, type BirthCardResult, type BirthCardItem } from "@/lib/tarot/birth-card";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 
@@ -98,6 +98,17 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
       return;
     }
 
+    const yearCe = isBe ? parsedYear - 543 : parsedYear;
+    const maxDays = getMaxDaysInMonth(yearCe, month);
+    if (day > maxDays) {
+      setErrorMsg(
+        isEnglish
+          ? `Selected month only has ${maxDays} days. Please select a valid day.`
+          : `เดือนที่คุณเลือกมีเพียง ${maxDays} วัน กรุณาเลือกวันที่ให้ถูกต้อง`
+      );
+      return;
+    }
+
     const calcResult = calculateBirthCard(day, month, parsedYear, isBe, majorCards);
 
     if (!calcResult) {
@@ -185,7 +196,17 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
               onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
               className="w-full rounded-xl border border-line-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+              {Array.from(
+                {
+                  length: getMaxDaysInMonth(
+                    era === "be"
+                      ? (Number.parseInt(yearInput.trim(), 10) || 2540) - 543
+                      : Number.parseInt(yearInput.trim(), 10) || 1997,
+                    month
+                  ),
+                },
+                (_, i) => i + 1
+              ).map((d) => (
                 <option key={d} value={d}>
                   {isEnglish ? `${d}` : `วันที่ ${d}`}
                 </option>
@@ -201,7 +222,16 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             <select
               id="birth-month"
               value={month}
-              onChange={(e) => setMonth(Number.parseInt(e.target.value, 10))}
+              onChange={(e) => {
+                const newMonth = Number.parseInt(e.target.value, 10);
+                setMonth(newMonth);
+                const currentY =
+                  era === "be"
+                    ? (Number.parseInt(yearInput.trim(), 10) || 2540) - 543
+                    : Number.parseInt(yearInput.trim(), 10) || 1997;
+                const maxD = getMaxDaysInMonth(currentY, newMonth);
+                if (day > maxD) setDay(maxD);
+              }}
               className="w-full rounded-xl border border-line-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {MONTHS.map((m) => (

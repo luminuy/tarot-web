@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSessionUser } from "@/lib/auth/session";
 import { listJournal, insertJournal, deleteAllJournal } from "@/lib/journal/journal.repo";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
 export const runtime = "nodejs";
 
@@ -57,6 +58,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   try {
     const userId = await getAuthenticatedUserId();
     if (!userId) {
@@ -86,11 +91,23 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   try {
     const userId = await getAuthenticatedUserId();
     if (!userId) {
       return NextResponse.json({ error: "ต้องเข้าสู่ระบบเพื่อล้างประวัติ" }, { status: 401 });
+    }
+
+    const limit = checkRateLimit(`journal_del_all:${userId}`, {
+      maxRequests: 5,
+      windowSeconds: 60,
+    });
+    if (!limit.allowed) {
+      return createRateLimitResponse(limit.retryAfterSeconds, "คุณทำรายการล้างประวัติถี่เกินไป กรุณารอสักครู่");
     }
 
     const count = await deleteAllJournal(userId);

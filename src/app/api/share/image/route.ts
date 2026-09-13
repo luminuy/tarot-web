@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   }
 
   const clientId = getClientIdentifier(request);
-  const rl = checkRateLimit(clientId, { maxRequests: 12, windowSeconds: 600 });
+  const rl = checkRateLimit(`share_img:${clientId}`, { maxRequests: 12, windowSeconds: 600 });
   if (!rl.allowed) {
     rl.releaseConcurrency();
     return createRateLimitResponse(rl.retryAfterSeconds, "สร้างลิงก์แชร์บ่อยเกินไป รออีกสักครู่นะ");

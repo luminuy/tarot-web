@@ -5,10 +5,25 @@ import { createGatewayCharge } from "@/lib/marketplace/payment-gateway";
 import { createPaymentRecord } from "@/lib/marketplace/payments.repo";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
+  const clientId = getClientIdentifier(request);
+  const limit = checkRateLimit(`chk_out:${clientId}`, {
+    maxRequests: 15,
+    windowSeconds: 60,
+  });
+  if (!limit.allowed) {
+    return createRateLimitResponse(limit.retryAfterSeconds, "คุณทำรายการสั่งซื้อถี่เกินไป กรุณารอสักครู่");
+  }
+
   try {
     const isPrivileged = await isPrivilegedTestRequest(request);
     const user = await getSessionUser();

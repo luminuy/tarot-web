@@ -11,6 +11,8 @@ import {
   readCustomerRefFromCookie,
   attachCustomerRefCookie,
 } from "@/lib/marketplace/customer-ref";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -49,6 +51,22 @@ export async function GET(request: Request) {
  * POST /api/marketplace/tickets - เข้าคิวรับคำปรึกษา
  */
 export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
+  const clientId = getClientIdentifier(request);
+  const limit = checkRateLimit(`mkt_ticket:${clientId}`, {
+    maxRequests: 10,
+    windowSeconds: 600,
+  });
+  if (!limit.allowed) {
+    return createRateLimitResponse(
+      limit.retryAfterSeconds,
+      "คุณทำรายการเข้าคิวบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่นะ"
+    );
+  }
+
   try {
     const body = await request.json();
     const parsed = CreateTicketSchema.safeParse(body);

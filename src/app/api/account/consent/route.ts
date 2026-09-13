@@ -4,6 +4,9 @@ import { getSessionUser } from "@/lib/auth/session";
 import { setMarketingConsent } from "@/lib/users/users.repo";
 import { setDigestEmail } from "@/lib/digest/digest.repo";
 
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/utils/rate-limit";
+
 export const runtime = "nodejs";
 
 /**
@@ -21,10 +24,22 @@ const ConsentSchema = z
   });
 
 export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   try {
     const user = await getSessionUser();
     if (!user) {
       return NextResponse.json({ error: "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
+    }
+
+    const limit = checkRateLimit(`account_consent:${user.id}`, {
+      maxRequests: 20,
+      windowSeconds: 60,
+    });
+    if (!limit.allowed) {
+      return createRateLimitResponse(limit.retryAfterSeconds, "คุณทำรายการถี่เกินไป กรุณารอสักครู่");
     }
 
     const body = await request.json().catch(() => ({}));

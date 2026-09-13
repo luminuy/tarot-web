@@ -3,14 +3,28 @@ import { clearAuthCookie, getSessionUser, invalidateTokenVersionCache } from "@/
 import { invalidateUserTokens } from "@/lib/auth/auth-tokens.repo";
 import { softDeleteUser } from "@/lib/users/users.repo";
 import { deleteAllJournal } from "@/lib/journal/journal.repo";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   try {
     const user = await getSessionUser();
     if (!user) {
       return NextResponse.json({ error: "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
+    }
+
+    const limit = checkRateLimit(`account_del:${user.id}`, {
+      maxRequests: 3,
+      windowSeconds: 3600,
+    });
+    if (!limit.allowed) {
+      return createRateLimitResponse(limit.retryAfterSeconds, "คุณทำรายการลบบัญชีถี่เกินไป กรุณารอสักครู่");
     }
 
     // 1. Delete all reading journal entries for this user

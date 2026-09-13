@@ -4,6 +4,7 @@ import { setAuthCookie } from "@/lib/auth/session";
 import { consumeToken } from "@/lib/auth/auth-tokens.repo";
 import { getUserById, markEmailVerified } from "@/lib/users/users.repo";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
+import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,12 @@ export async function GET(request: Request) {
 
   if (!token) {
     return NextResponse.redirect(`${origin}/?verify_error=invalid`);
+  }
+
+  // กันการยิงสุ่ม token ตรวจสอบอีเมลแบบ brute-force
+  const limit = await checkAuthRateLimit(request, "verify");
+  if (!limit.allowed) {
+    return NextResponse.redirect(`${origin}/?verify_error=ratelimit`);
   }
 
   try {

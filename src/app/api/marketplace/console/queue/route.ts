@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { requireReader } from "@/lib/auth/reader-auth";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import {
   getReaderLiveAvailability,
   listReaderQueueTickets,
@@ -55,6 +56,10 @@ export async function GET(request: Request) {
  * PATCH /api/marketplace/console/queue - จัดการคิวและเปิด/ปิดรับงาน
  */
 export async function PATCH(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   const auth = await requireReader(request);
   if (!auth.success) return auth.response;
 

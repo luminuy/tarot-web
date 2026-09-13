@@ -41,6 +41,14 @@ export function reduceToTarotNumber(num: number): number {
 }
 
 /**
+ * คำนวณจำนวนวันสูงสุดในเดือนและปีที่ระบุตามปฏิทินสากล (รองรับปีอธิกสุรทิน)
+ */
+export function getMaxDaysInMonth(yearCe: number, month: number): number {
+  if (month < 1 || month > 12) return 31;
+  return new Date(Date.UTC(yearCe, month, 0)).getUTCDate();
+}
+
+/**
  * คำนวณไพ่ทาโรต์ประจำตัว (Tarot Birth Card) ตามหลักเลขศาสตร์สากล
  * กฎเหล็กข้อ 14: หากไม่พบไพ่ในสำรับ ต้องคืน undefined ห้ามสุ่มหรือกุไพ่ขึ้นมาเองเด็ดขาด
  */
@@ -60,6 +68,12 @@ export function calculateBirthCard<T extends BirthCardItem = BirthCardItem>(
   const yearBe = isBuddhistEra ? year : year + 543;
 
   if (yearCe < 1800 || yearCe > 2200) {
+    return undefined;
+  }
+
+  // ตรวจสอบความถูกต้องของวันในเดือนตามปฏิทินจริง (เช่น 31 เม.ย. หรือ 29 ก.พ. ในปีที่ไม่ใช่อธิกสุรทิน)
+  const maxDays = getMaxDaysInMonth(yearCe, month);
+  if (day > maxDays) {
     return undefined;
   }
 

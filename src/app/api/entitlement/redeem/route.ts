@@ -5,10 +5,15 @@ import { getEntitlementSnapshot } from "@/lib/entitlement/snapshot";
 import { checkAuthRateLimit } from "@/lib/security/auth-ratelimit";
 import { recordEvent } from "@/lib/stats/record";
 import { createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   const sessionUser = await getSessionUser();
   if (!sessionUser) {
     return NextResponse.json(
