@@ -66,6 +66,7 @@ export async function resolveSession(): Promise<ResolvedSession> {
           email: dbUser.email ?? user.email,
           emailVerified: dbUser.emailVerified,
           marketingConsent: dbUser.marketingConsent,
+          digestEmail: dbUser.digestEmail,
           // ฝั่งหน้าเว็บต้องรู้ว่าบัญชีนี้ "ตั้งรหัสผ่านไว้แล้วหรือยัง" เพื่อเลือกฟอร์มให้ถูก
           // เดาจาก provider ไม่ได้ — บัญชี Google ที่ตั้งรหัสผ่านเพิ่มก็มี hasPassword = true
           hasPassword: dbUser.hasPassword,

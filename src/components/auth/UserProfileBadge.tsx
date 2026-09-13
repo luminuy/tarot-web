@@ -123,6 +123,21 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
     patchSessionUser({ marketingConsent: consent });
   };
 
+  /**
+   * สมัคร/ยกเลิก "ดวงประจำวัน" ทางอีเมล — ค่าเริ่มต้นปิดเสมอ (opt-in เท่านั้น · PDPA)
+   * เปิดตัวนี้แล้วเซิร์ฟเวอร์จะเปิด marketing_consent ให้ครบคู่ด้วย เพราะคิวส่งบังคับทั้งสองธง
+   */
+  const handleUpdateDigest = async (enabled: boolean) => {
+    soundManager.playMenuTapSound();
+    await fetch("/api/account/consent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ digest: enabled }),
+    }).catch(() => {});
+    patchSessionUser(enabled ? { digestEmail: true, marketingConsent: true } : { digestEmail: false });
+  };
+
   const handleResendVerify = async () => {
     soundManager.playMenuTapSound();
     setResendStatus(isEn ? "Sending…" : "กำลังส่ง…");
@@ -430,6 +445,34 @@ export const UserProfileBadge: React.FC<UserProfileBadgeProps> = ({ onOpenAuthMo
                 <div
                   className={`w-4.5 h-4.5 rounded-full transition-transform duration-150 ease-out ${
                     user.marketingConsent ? "bg-canvas translate-x-4" : "bg-muted translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Daily Digest Opt-in — ค่าเริ่มต้นปิด ต้องกดเปิดเองเท่านั้น */}
+            <div className="p-2.5 rounded-xl bg-inset border border-line flex items-center justify-between">
+              <div className="pr-2">
+                <span className="block text-[13px] font-semibold text-ink">
+                  {isEn ? "Daily Card by Email" : "รับดวงประจำวันทางอีเมล"}
+                </span>
+                <span className="text-[12px] text-muted">
+                  {isEn
+                    ? "One card each morning · unsubscribe anytime from any email"
+                    : "ไพ่นำทางวันละ 1 ใบ ทุกเช้า · ยกเลิกได้ทุกเมื่อจากในอีเมล"}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleUpdateDigest(!user.digestEmail)}
+                className={`w-10 h-6 rounded-full transition-colors duration-150 p-0.5 relative cursor-pointer flex-shrink-0 border ${
+                  user.digestEmail ? "bg-ink border-ink" : "bg-surface border-line"
+                }`}
+                aria-label={isEn ? "Toggle daily card email" : "เปิดปิดการรับดวงประจำวันทางอีเมล"}
+              >
+                <div
+                  className={`w-4.5 h-4.5 rounded-full transition-transform duration-150 ease-out ${
+                    user.digestEmail ? "bg-canvas translate-x-4" : "bg-muted translate-x-0"
                   }`}
                 />
               </button>

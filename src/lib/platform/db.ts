@@ -257,6 +257,17 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_user_date ON daily_readings(user_key, date_key);
       CREATE INDEX IF NOT EXISTS idx_daily_user ON daily_readings(user_key, created_at);
 
+      CREATE TABLE IF NOT EXISTS digest_log (
+        user_id    TEXT NOT NULL,
+        send_date  TEXT NOT NULL,
+        channel    TEXT NOT NULL,
+        status     TEXT NOT NULL,
+        reason     TEXT,
+        created_at INTEGER NOT NULL,
+        PRIMARY KEY (user_id, send_date, channel)
+      );
+      CREATE INDEX IF NOT EXISTS idx_digest_log_date ON digest_log(send_date, status);
+
       CREATE TABLE IF NOT EXISTS reading_quality (
         reading_id      TEXT PRIMARY KEY,
         provider        TEXT NOT NULL,
@@ -328,6 +339,10 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
     safeExec("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0");
     safeExec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users(email_lower) WHERE email_lower IS NOT NULL");
+    // 📬 สมัครใจรับดวงประจำวันทางอีเมล (migrations/0014) — ค่าเริ่มต้น 0 เสมอ (opt-in เท่านั้น)
+    safeExec("ALTER TABLE users ADD COLUMN digest_email INTEGER NOT NULL DEFAULT 0");
+    safeExec("ALTER TABLE users ADD COLUMN digest_last_sent_at INTEGER");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_users_digest ON users(digest_email, marketing_consent, deleted_at)");
     // ✍️ คอลัมน์คุณภาพภาษาไทย (migrations/0011) — ฐานข้อมูลเครื่องที่สร้างไว้ก่อนหน้านี้
     // ผ่าน CREATE TABLE IF NOT EXISTS จะไม่ได้คอลัมน์ใหม่ ถ้าไม่ ALTER ตรงนี้เทสต์จะพังแบบงง ๆ
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_score INTEGER");

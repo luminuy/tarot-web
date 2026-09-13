@@ -23,6 +23,8 @@ export interface SessionUser {
   createdAt: string;
   emailVerified?: boolean;
   marketingConsent?: boolean;
+  /** สมัครรับ "ดวงประจำวัน" ทางอีเมลไว้หรือยัง */
+  digestEmail?: boolean;
   /** บัญชีนี้ตั้งรหัสผ่านไว้แล้วหรือยัง — เดาจาก provider ไม่ได้ */
   hasPassword?: boolean;
 }

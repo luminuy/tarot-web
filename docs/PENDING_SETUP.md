@@ -78,6 +78,32 @@
 - `SUPPORT_EMAIL` — ทับ Reply-To ของอีเมลระบบ (ค่าเริ่มต้น `support@seertarot.net`)
 - `CF_AI_GATEWAY_TOKEN` — ใส่เมื่อเปิด Authenticated Gateway
 
+### 📬 รอตั้งเพิ่ม — `CRON_SECRET` (ดวงประจำวันทางอีเมล)
+
+ระบบส่งดวงประจำวันเขียนเสร็จและ deploy ไปแล้ว แต่ **ยังส่งไม่ออกจนกว่าจะตั้งความลับนี้**
+เส้น `/api/cron/daily-digest` เป็นแบบ fail-closed — ไม่มี `CRON_SECRET` = ตอบ 401 ทุกคำขอ
+(ตั้งใจให้เป็นแบบนี้ เพื่อไม่ให้ใครก็ได้ยิงให้ระบบส่งอีเมลหาผู้ใช้ของเรา)
+
+ต้องตั้ง **สองที่ ด้วยค่าเดียวกัน**:
+
+```bash
+# 1) ฝั่ง Cloudflare Worker (ตัวที่ตรวจว่าคำขอมาจากเรา)
+npx wrangler secret put CRON_SECRET
+
+# 2) ฝั่ง GitHub (ตัวจับเวลาที่ยิงเข้ามา)
+#    Settings → Secrets and variables → Actions → New repository secret
+#    Name: CRON_SECRET   Value: <ค่าเดียวกับข้อ 1>
+```
+
+สร้างค่าสุ่มด้วย `openssl rand -base64 32`
+
+**ตรวจว่าใช้ได้จริง**: Actions → `📬 Daily Digest` → Run workflow → ดูผลลัพธ์
+ต้องได้ HTTP 200 พร้อม JSON สรุป `{ scanned, sent, skipped, failed }`
+กดซ้ำในวันเดียวกันต้องได้ `sent = 0` (กันส่งซ้ำทำงาน ไม่ใช่ระบบพัง)
+
+> ⚠️ ต้องรัน `npm run db:migrate` (migration `0014_digest_prefs.sql`) ก่อน ไม่งั้นเส้นนี้จะล้มเพราะไม่มีตาราง `digest_log`
+> ⚠️ เพดานส่ง 80 ฉบับ/รอบ เพราะ Resend แผนฟรีให้ 100 ฉบับ/วัน และต้องเหลือโควตาให้อีเมลยืนยันตัวตนกับรีเซ็ตรหัสผ่านด้วย
+
 > **เอนจินคำอ่าน**: GROQ + GEMINI ตั้งครบ → Tier 1 Groq Qwen3-27B ทำงาน (`src/lib/ai/groq.ts` · fallback → Gemini `src/lib/ai/gemini.ts`) · เฝ้าเมตริก `ai_foreign_trip` / `ai_groq_failover` ใน `/admin`
 > **AI Gateway / Turnstile**: ตั้งครบแล้ว ไม่ใช่รายการค้างอีกต่อไป
 

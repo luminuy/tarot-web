@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 51/51 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 52/52 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -35,6 +35,44 @@
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-13 (รอบ 55): 📬 Daily Digest — ส่งดวงประจำวันทางอีเมล (ปิด retention loop ที่หายไป)
+
+> **คำสั่งเจ้าของ 2026-09-13**: _"Daily Digest — อีเมลอย่างเดียว ตอนนี้แบบนี้ไปก่อน ยังไม่เอา LINE"_
+> จึงทำเฉพาะช่องทางอีเมล · ไม่มีคอลัมน์หรือโค้ดของ LINE ในรอบนี้เลย (เปิดวันหน้าให้เพิ่ม migration ใหม่)
+
+**ทำไมต้องทำ**: ตรวจรอบ 2026-09-13 พบว่าเว็บ **ไม่มีอะไรเรียกผู้ใช้กลับมาเลยสักทาง** — `wrangler.jsonc` ไม่มี `triggers`/`crons` สักบรรทัด ไม่มี web push ไม่มีระบบชวนเพื่อน · ของที่พร้อมอยู่แล้วคือ Resend + ตาราง `users` + ไพ่ประจำวันแบบตรวจสอบได้ ขาดแค่ตัวจับเวลา
+
+**ข้อตัดสินใจสถาปัตยกรรม: ใช้ GitHub Actions ไม่ใช่ Cloudflare Cron Trigger**
+
+`wrangler.jsonc` ชี้ `main` ไปที่ `.open-next/worker.js` ซึ่ง OpenNext สร้างใหม่ทุกครั้งที่ build และ export แค่ `fetch` · การใส่ `scheduled` handler ต้องเขียน wrapper ครอบไฟล์ที่ deploy pipeline ทั้งสายพึ่งอยู่ — ความเสี่ยงไม่คุ้มกับงานส่งอีเมลวันละครั้ง จึงใช้ `.github/workflows/daily-digest.yml` ยิง `POST /api/cron/daily-digest` แทน (01:00 UTC = 08:00 น. ไทย)
+
+**สิ่งที่สร้าง**
+
+| ไฟล์ | หน้าที่ |
+| :--- | :--- |
+| `migrations/0014_digest_prefs.sql` | `users.digest_email` (ค่าเริ่มต้น **0** เสมอ) · `digest_last_sent_at` · ตาราง `digest_log` ที่ `PRIMARY KEY (user_id, send_date, channel)` เป็นกลไกกันส่งซ้ำ |
+| `src/lib/digest/digest.repo.ts` | คิวผู้รับ + จอง/ปิดรอบ + สรุปรายวัน |
+| `src/lib/digest/unsubscribe-token.ts` | โทเคนยกเลิกลงนาม HMAC · **จงใจไม่มีวันหมดอายุ** |
+| `src/app/api/cron/daily-digest/route.ts` | ตัวส่ง — ตรวจ `CRON_SECRET` แบบ fail-closed ก่อนทำอย่างอื่น |
+| `src/app/api/digest/unsubscribe/route.ts` | ยกเลิกกดครั้งเดียวจบ **ไม่ต้องล็อกอิน** |
+| `.github/workflows/daily-digest.yml` | ตัวจับเวลา + กดรันเองได้ |
+| `scripts/qa/test-digest.ts` | **ด่านที่ 51** — 38 ข้อย่อย |
+
+**สี่เรื่องที่กันไว้ตั้งแต่ออกแบบ เพราะพลาดแล้วเรียกคืนไม่ได้**
+
+1. **ส่งหาคนที่ไม่ได้สมัคร** — คิวบังคับครบ **สี่เงื่อนไข**: `digest_email = 1` · `marketing_consent = 1` · `deleted_at IS NULL` · `email_verified = 1` · แยก `digest_email` ออกจาก `marketing_consent` เพราะ "ยินยอมรับข่าวสาร" ไม่ใช่ "ยอมให้ส่งอีเมลทุกเช้า" · ถอนความยินยอมรับข่าวสารเมื่อไร ระบบปิดดวงประจำวันให้ด้วยทันที
+2. **ส่งซ้ำ** — จองสิทธิ์ **ก่อน** ส่งเสมอ (`claimDigestSlot`) ไม่ใช่บันทึกทีหลัง ไม่งั้นสองรอบที่ทำงานพร้อมกันจะส่งซ้ำก่อนที่ใครจะเขียน log ได้ — คลาสเดียวกับ ISSUE-017 (double-spend)
+3. **ส่งไพ่ที่ระบบกุขึ้นเอง** (กฎเหล็กข้อ 14) — ไพ่ในอีเมลมาจาก `computeDailyCard()` เท่านั้น ซึ่งโยน error เมื่อข้อมูลไม่สมบูรณ์ · ดึงไม่ได้ = **ยกเลิกทั้งรอบ ไม่ส่งสักฉบับ** ตอบ 503 · ไม่มี catch แล้วใส่ไพ่สำรองที่ไหนเลย · อีเมลทุกฉบับพา SHA-256 ของวันนั้นไปด้วยให้ตรวจสอบย้อนหลังได้
+4. **โควตา Resend แตก** — เพดาน 80 ฉบับ/รอบ (แผนฟรี 100/วัน) ถ้าทะลุแล้วบัญชีโดนระงับ อีเมลยืนยันตัวตนและรีเซ็ตรหัสผ่านจะล่มตามไปทั้งระบบ ไม่ใช่แค่ digest
+
+**ข้อแลกเปลี่ยนที่รู้ตัวและเลือกแล้ว**: ลิงก์ยกเลิกเป็น `GET` ที่ทำงานทันที ตัวสแกนลิงก์ขององค์กรจึงกดล่วงหน้าเองได้ · เลือกทางนี้เพราะทิศทางของความผิดพลาดปลอดภัยกว่า (หยุดส่ง ≫ ส่งทั้งที่เขาไม่อยากได้) และเปิดกลับเองได้ในหน้าบัญชี ซึ่งหน้าผลลัพธ์บอกทางไว้แล้ว
+
+**ผลตรวจ**: `typecheck` 0 error · `repo:verify` **ผ่านครบ 52/52 ด่าน** · ทดสอบจริงบน dev: ไม่มี header → **401 ตัวเปล่า** · secret ผิด → **401** · secret ถูก → **200** พร้อมสรุป `{scanned, sent, skipped, failed}` · สมัครจริง 1 คนแล้วยิง → **sent = 1** พร้อมอีเมลที่มีชื่อไพ่ คำสำคัญ คำทำนาย และ SHA-256 ครบ · **ยิงซ้ำวันเดียวกัน → scanned = 0, sent = 0** · โทเคนยกเลิกถูกแก้มือ → **400** · กดลิงก์ยกเลิกจริงโดยไม่ล็อกอิน → **200 และหลุดจากคิวทันที**
+
+> ⏳ **ยังส่งไม่ออกจนกว่าเจ้าของจะตั้ง `CRON_SECRET`** ทั้งฝั่ง Cloudflare และ GitHub (ขั้นตอนอยู่ใน `docs/PENDING_SETUP.md`) และรัน `npm run db:migrate` — เส้น API เป็น fail-closed โดยตั้งใจ ไม่มีความลับ = ตอบ 401 ทุกคำขอ ไม่ใช่เปิดให้ใครก็ได้สั่งให้ระบบส่งอีเมลหาผู้ใช้ของเรา
+
+---
 
 ### 🗓️ 2026-09-13 (รอบ 54): 🐛 ระบบนับวันต่อเนื่อง (Streak) ตายสนิทมาตลอด — ไม่เคยถูกบันทึกและไม่เคยขึ้นจอ
 
@@ -165,7 +203,7 @@ npx wrangler kv key put "app:flag:entitlement.enforced" --path <ไฟล์> \
 - **สาเหตุจริง**: `SpreadCardSelector` เป็น static import ตรงเข้า `TarotFlow` (จอแรกที่ผู้ใช้เห็น ไม่ได้อยู่หลัง `next/dynamic` เหมือนหน้าต่างลอยอื่น) ส่วน `Modal.tsx` import `motion/react` ตรง ๆ — พอ import ตรงจึงลาก `motion` (40 KB gzip) กลับเข้าบันเดิลตั้งต้นของ `/` ทั้งที่ `docs/plans/HANDOFF_SMOOTH_FAST_2026-09-06.md`/`with-motion-scope.tsx` ถอดออกไปแล้วโดยเจตนา
 - **แก้**: เปลี่ยนเป็น `const Modal = withMotionScope(() => import("@/components/ui/Modal").then((m) => m.Modal));` (ตัวช่วยเดียวกับที่ `TarotFlow` ใช้ห่อ `AccessDialog`/`ShareModal` ฯลฯ) + เพิ่ม `prefetchMotionScope()` ตอนเมาส์ชี้/โฟกัสการ์ด กันอาการ "กดแล้วเงียบ แล้วเด้งพรึ่บ" ตอนโหลด chunk ครั้งแรก (ป๊อปอัพนี้พิเศษกว่าโมดัลอื่นตรงที่เด้งจากคลิกแรกทันที ไม่มีจังหวะรอเหมือน `AccessDialog`)
 - **บทเรียน**: ตรวจ perf ด่านที่ไวต่อ dependency tree (bundle size) **ต้องรันด้วย `pnpm` เท่านั้น** ให้ตรงกับ CI ห้ามเชื่อผล `npm` เด็ดขาด — ถ้าจะพิสูจน์ว่า "ของเดิมก็เป็นอยู่แล้ว" ต้องเทียบกับ commit ฐานภายใต้ package manager เดียวกับ CI เสมอ (ใช้ `git worktree` เทียบได้โดยไม่ต้องสลับ branch ของจริง)
-- **ผลการทดสอบหลังแก้**: `pnpm run typecheck` ➔ ✅ 0 Errors · `pnpm run repo:verify` ➔ ✅ **ผ่านครบทั้ง 50/50 ด่านจริง** (รวม `test-bundle-budget`: `/` และ `/en` กลับมา 229 KB ≤ 232 KB เท่ากับก่อน PR เป๊ะ)
+- **ผลการทดสอบหลังแก้**: `pnpm run typecheck` ➔ ✅ 0 Errors · `pnpm run repo:verify` ➔ ✅ **ผ่านครบทั้ง 51/51 ด่านจริง** (รวม `test-bundle-budget`: `/` และ `/en` กลับมา 229 KB ≤ 232 KB เท่ากับก่อน PR เป๊ะ)
 ### 🗓️ 2026-09-12 (รอบ 53): 🎨 ปิดเคส "สีแฝด" ด้วยการวัด ΔE — และพบว่าข้อสรุปในรายงานเดิมผิด (หนี้ข้อ 2)
 
 > **คำสั่งเจ้าของ**: "แก้ให้จบไปเลยไม่ได้อ่อ 1-3"
@@ -299,7 +337,7 @@ npx wrangler kv key put "app:flag:entitlement.enforced" --path <ไฟล์> \
 | 10 ใบ | 15,277 | 13,600 | ❌ ยังเกิน 5,600 |
 
 - **ไฟล์ที่แก้ไข**: `src/lib/ai/groq.ts` · `src/lib/ai/prompt.ts`
-- **ผลการทดสอบ**: `npm run repo:verify` ➔ ✅ ผ่านครบ 50/50 ด่าน **บน build สด**
+- **ผลการทดสอบ**: `npm run repo:verify` ➔ ✅ ผ่านครบ 51/51 ด่าน **บน build สด**
 - **กับดักที่เหยียบระหว่างทาง**: ด่าน `test-en-routing` ตก 148 หน้าเพราะ `.next` ค้างจากรอบก่อน (ด่านงบบันเดิล build ให้เฉพาะตอน**ไม่พบ**ไฟล์) พิสูจน์แล้วว่า diff ผมแตะแค่โค้ด AI ไม่เกี่ยวกับ `LanguageSwitcher.tsx` — ล้าง `.next` แล้ว build สดก็ผ่าน · **เป็นกับดักเดียวกับที่เจอตอนด่าน a11y เมื่อวาน** จึงเขียนลงกฎป้องกันของ INC-0136 ด้วย
 - **สิ่งที่ค้างอยู่ / ต้องทำต่อ**: ผัง 5 ใบขึ้นไปยังต้องพึ่ง Gemini — จะแก้ได้ต้อง **Dev Plan ของ Groq** หรือ `groq/compound` (TPM 70K แต่เป็นระบบ agentic มีค้นเว็บในตัว เสี่ยงขัดกฎเหล็กข้อ 5/14 · RPD แค่ 250) **รอเจ้าของเคาะ**
 
@@ -330,7 +368,7 @@ npx wrangler kv key put "app:flag:entitlement.enforced" --path <ไฟล์> \
 #### การตรวจสอบคุณภาพ
 - `npm run typecheck` ➔ 0 errors
 - `npm run build` ใหม่ + `npx tsx scripts/qa/test-sticky-header.ts` ➔ ผ่าน
-- `npm run repo:verify` ➔ **ผ่านครบ 50/50 ด่าน**
+- `npm run repo:verify` ➔ **ผ่านครบ 51/51 ด่าน**
 
 ### 🗓️ 2026-09-12 (รอบ 49): 🎟️ ยุบระบบจัดการรหัสที่ซ้ำกันสองชุด + ปิดรู "ไม่จำกัดคน" ที่กลับมา
 
@@ -363,7 +401,7 @@ npx wrangler kv key put "app:flag:entitlement.enforced" --path <ไฟล์> \
 - `npm run typecheck` ➔ 0 errors
 - `npx tsx scripts/qa/test-redeem-code.ts` ➔ **58/58 ผ่าน** (เพิ่มเคสชั้น repo 13 ข้อ)
 - `npx tsx scripts/qa/test-entitlement.ts` ➔ **128/128 ผ่าน**
-- `npm run repo:verify` ➔ **ผ่านครบ 50/50 ด่าน** (ด่านพาเลตกับด่านพื้นที่กดเพิ่มเข้ามาจากอีกสายระหว่างรอบนี้)
+- `npm run repo:verify` ➔ **ผ่านครบ 51/51 ด่าน** (ด่านพาเลตกับด่านพื้นที่กดเพิ่มเข้ามาจากอีกสายระหว่างรอบนี้)
 ### 🗓️ 2026-09-12 (รอบ 49): 🎨 ปิดหนี้คอนทราสต์ 2 จุดสุดท้าย — "ทองบนพื้นมืด" ที่ด่านมองไม่เห็น
 
 > วัดซ้ำบน production หลัง deploy คลื่น 2–6 ครบแล้ว พบว่ายังเหลือตกเกณฑ์ 2 จุด
