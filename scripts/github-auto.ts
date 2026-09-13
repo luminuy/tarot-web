@@ -140,6 +140,10 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🎨 พาเลตยังเป็นชุดเดียว (สีฮาร์ดโค้ดไม่เพิ่ม · ไม่มีสีที่ถอดไปแล้วกลับมา · gold ห้ามเป็นตัวอักษรเล็ก)", cmd: TSX, args: ["scripts/qa/test-palette-drift.ts"] },
   { label: "🎯 พื้นที่กดขั้นต่ำ (ปุ่มเล็กกว่าเกณฑ์ต้องไม่เพิ่มขึ้น · หัวเว็บต้องใช้ tap-overlay เท่านั้น)", cmd: TSX, args: ["scripts/qa/test-tap-target.ts"] },
   { label: "👻 ของประดับต้องไม่ล่องหน (จุด/เหรียญทรงกลมห้ามใช้สีพื้นเดียวกับกล่องที่ครอบอยู่)", cmd: TSX, args: ["scripts/qa/test-invisible-element.ts"] },
+  { label: "🃏 สารานุกรมไพ่ 78 ใบภาษาอังกฤษ (5 มิติ · โหราศาสตร์ · เลขศาสตร์ · คีย์เวิร์ด)", cmd: TSX, args: ["scripts/qa/test-card-meanings-en.ts"] },
+  { label: "🔮 ระบบถามกลับเพื่อความชัดเจนก่อนสับไพ่ (AI Clarification Engine · B-04)", cmd: TSX, args: ["scripts/qa/test-clarify.ts"] },
+  { label: "🎟️ ระบบรหัสแลกสิทธิ์ VIP3 & จัดการโควตา (59 เคส · Concurrency · D1)", cmd: TSX, args: ["scripts/qa/test-redeem-code.ts"] },
+  { label: "🌐 ความสมบูรณ์ของระบบแปลภาษา (318 หน่วยแปล · i18n Verification)", cmd: TSX, args: ["scripts/i18n-import.ts", "--verify-only"] },
 ];
 
 /**
