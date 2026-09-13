@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { signUserSession, type UserProfile } from "@/lib/auth/edge-auth";
 import { setAuthCookie } from "@/lib/auth/session";
+import { OAUTH_STATE_COOKIE, OAUTH_RETURN_COOKIE } from "@/lib/auth/cookie-names";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
 
 export const runtime = "nodejs";
-
-const OAUTH_STATE_COOKIE = "tarot_oauth_state";
 
 /**
  * รหัสข้อผิดพลาดที่ยอมให้ส่งกลับหน้าเว็บได้ — หน้าเว็บจะแปลงเป็นข้อความไทยเอง
@@ -228,7 +227,19 @@ export async function GET(
     }
 
     const sessionToken = await signUserSession(profile);
-    const redirectUrl = new URL(origin);
+
+    const rawReturnUrl = cookieStore.get(OAUTH_RETURN_COOKIE)?.value;
+    let targetPath = "/";
+    if (
+      rawReturnUrl &&
+      rawReturnUrl.startsWith("/") &&
+      !rawReturnUrl.startsWith("//") &&
+      !rawReturnUrl.includes("\\")
+    ) {
+      targetPath = rawReturnUrl;
+    }
+
+    const redirectUrl = new URL(targetPath, origin);
     redirectUrl.searchParams.set("auth_success", "1");
     if (isNewUser) {
       redirectUrl.searchParams.set("new_user", "1");
@@ -236,6 +247,7 @@ export async function GET(
     const response = NextResponse.redirect(redirectUrl.toString());
     setAuthCookie(response, sessionToken);
     response.cookies.set(OAUTH_STATE_COOKIE, "", { path: "/", maxAge: 0 });
+    response.cookies.set(OAUTH_RETURN_COOKIE, "", { path: "/", maxAge: 0 });
 
     return response;
   } catch (err) {

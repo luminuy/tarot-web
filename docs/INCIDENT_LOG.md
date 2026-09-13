@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0144 · 2026-09-13 21:28 · 🟠 High · อุดช่องโหว่ไพ่มโนตามกฎข้อ 14 เสริมความถูกต้อง Provably Fair และจำ returnUrl ใน OAuth
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | LoveOneCardClient มีการ fallback ไพ่ที่หาไม่เจอเป็น The Fool (index 0) และ StreamReader/QuickChatResult ส่ง cardIndex 0 เข้าไปให้ ProvablyFairPanel ตรวจสอบ รวมถึงลิงก์แชทหลุดไปหน้าไทย และ OAuth ไม่จำหน้าเดิม |
+| **สาเหตุราก** | การคัดลอกโค้ดรุ่นเก่าที่ยังไม่มี guard clause ใน LoveOneCardClient การใช้ ternary default : 0 เพื่อ silence lint ในตัวส่ง ProvablyFairPanel และขาด Static Analysis ดักจับแพทเทิร์น cardIndex zero fallback ใน test-no-fake-card.ts |
+| **การแก้ไข** | 1. ใส่ guard clause ใน LoveOneCardClient.tsx ข้ามการบันทึกหากไม่พบไพ่ 2. กรองเฉพาะ valid cardIndex ใน StreamReader.tsx และ QuickChatResult.tsx ก่อนส่งให้ ProvablyFairPanel 3. เพิ่ม Static Analysis ข้อ 5.7 ใน test-no-fake-card.ts 4. ใช้ LocaleLink ใน (th)/reading/chat/page.tsx 5. เพิ่มการบันทึก returnUrl ลงในคุกกี้ชั่วคราวและ redirect กลับหลังล็อกอิน OAuth |
+| **🛡️ กฎป้องกันถาวร** | **เพิ่มด่านตรวจ Static Analysis ข้อ 5.7 ใน test-no-fake-card.ts สแกนทุกไฟล์ใน src บล็อก ternary และ nullish cardIndex fallback เป็น 0 ใช้ LocaleLink ในห้องแชท และเพิ่มคุกกี้ tarot_oauth_return ป้องกัน Open Redirect** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run typecheck && npx tsx scripts/qa/test-no-fake-card.ts && npm run repo:verify (56/56 gates passed) |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `6fe8302` |
+
+
 ### INC-0143 · 2026-09-13 21:15 · 🟡 Medium · แก้ขนาดช่องรหัสผ่านไม่เท่ากับอีเมล และปรับปรุงโลโก้ LINE ให้คมชัดตามแบรนด์ทางการ
 
 | หัวข้อ | รายละเอียด |

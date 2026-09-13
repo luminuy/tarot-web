@@ -184,12 +184,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleLoginGoogle = () => {
     soundManager.playCardSelectSound();
-    window.location.href = "/api/auth/google";
+    const returnUrl = typeof window !== "undefined"
+      ? encodeURIComponent(window.location.pathname + window.location.search)
+      : "";
+    window.location.href = returnUrl ? `/api/auth/google?returnUrl=${returnUrl}` : "/api/auth/google";
   };
 
   const handleLoginLine = () => {
     soundManager.playCardSelectSound();
-    window.location.href = "/api/auth/line";
+    const returnUrl = typeof window !== "undefined"
+      ? encodeURIComponent(window.location.pathname + window.location.search)
+      : "";
+    window.location.href = returnUrl ? `/api/auth/line?returnUrl=${returnUrl}` : "/api/auth/line";
   };
 
   /**

@@ -141,6 +141,37 @@ function main() {
   }
   check("ทุกไฟล์ใน src/ ไม่มี || DECK[...] หรือ ?? DECK[...] เป็นไพ่สำรอง", scanDirForDeckFallback(rootDir));
 
+  // 5.7 ตรวจสอบไฟล์ทั้งหมดใน src ว่าไม่มีการ fallback ดัชนีไพ่เป็น 0 (The Fool) ทุกรูปแบบ
+  function scanDirForFabricatedCardIndex(dir: string): { ok: boolean; offendingFile?: string; pattern?: string } {
+    const files = fs.readdirSync(dir, { withFileTypes: true });
+    for (const f of files) {
+      const full = path.join(dir, f.name);
+      if (f.isDirectory()) {
+        const sub = scanDirForFabricatedCardIndex(full);
+        if (!sub.ok) return sub;
+      } else if (f.isFile() && /\.(ts|tsx)$/.test(f.name) && !f.name.endsWith(".d.ts")) {
+        const raw = fs.readFileSync(full, "utf-8");
+        // ล้างคอมเมนต์ออกก่อนตรวจ เพื่อไม่ให้ชนกับข้อความเตือน/บันทึกบทเรียนในคอมเมนต์
+        const content = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+        if (content.includes("cardIdx >= 0 ? cardIdx : 0")) {
+          return { ok: false, offendingFile: full, pattern: "cardIdx >= 0 ? cardIdx : 0" };
+        }
+        if (content.includes("cardIndex ?? 0")) {
+          return { ok: false, offendingFile: full, pattern: "cardIndex ?? 0" };
+        }
+        if (/cardIndex\s*:\s*[^,\n]+\?\s*[^,\n]+:\s*0\b/.test(content)) {
+          return { ok: false, offendingFile: full, pattern: "cardIndex: ... ? ... : 0" };
+        }
+      }
+    }
+    return { ok: true };
+  }
+  const zeroFallbackCheck = scanDirForFabricatedCardIndex(rootDir);
+  check(
+    `ทุกไฟล์ใน src/ ไม่มี ternary หรือ nullish fallback ดัชนีไพ่เป็น 0 (Rule 14)${zeroFallbackCheck.ok ? "" : ` [พบใน ${zeroFallbackCheck.offendingFile} (${zeroFallbackCheck.pattern})]`}`,
+    zeroFallbackCheck.ok
+  );
+
   console.log(`\nผลการทดสอบ: ผ่าน ${pass} ข้อ, ไม่ผ่าน ${fail} ข้อ`);
   if (fail > 0) process.exit(1);
 }
