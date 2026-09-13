@@ -64,7 +64,6 @@ const StreamReader = withMotionScope(() => import("@/components/reading/StreamRe
 const QuickChatResult = withMotionScope(() => import("@/components/reading/QuickChatResult").then((m) => m.QuickChatResult));
 const ShareModal = withMotionScope(() => import("@/components/reading/ShareModal").then((m) => m.ShareModal));
 const ReadingHistoryModal = withMotionScope(() => import("@/components/history/ReadingHistoryModal").then((m) => m.ReadingHistoryModal));
-const TarotEncyclopediaModal = withMotionScope(() => import("@/components/encyclopedia/TarotEncyclopediaModal").then((m) => m.TarotEncyclopediaModal));
 /**
  * หน้าต่างเข้าสู่ระบบ — **ไม่ห่อด้วย `withMotionScope()`** โดยตั้งใจ (INC-0128)
  * ตัวมันทำอนิเมชันด้วย CSS keyframes ล้วนแล้ว จึงไม่ต้องลาก `motion` (40 KB gzip) มาด้วย
@@ -189,7 +188,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const [isBuyCreditsOpen, setIsBuyCreditsOpen] = useState(false);
   // เหตุผลที่เปิดหน้าต่างสิทธิ์ — null = ปิดอยู่ (จุดเดียวที่คุมกำแพงสิทธิ์ทั้งเว็บ)
   const [accessReason, setAccessReason] = useState<UpgradeReason | null>(null);
-  const [isEncyclopediaOpen, setIsEncyclopediaOpen] = useState(false);
   const [zoomedCard, setZoomedCard] = useState<DrawnSlotCard | null>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const entitlement = useEntitlement();
@@ -1261,7 +1259,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const authModalMounted = useOnceOpen(isAuthOpen);
   const buyCreditsModalMounted = useOnceOpen(isBuyCreditsOpen);
   const accessDialogMounted = useOnceOpen(accessReason !== null);
-  const encyclopediaModalMounted = useOnceOpen(isEncyclopediaOpen);
   const cardZoomModalMounted = useOnceOpen(!!zoomedCard);
 
   /*
@@ -1813,10 +1810,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         onSignin={() => openAuth("signin", true)}
         onBuyCredits={() => setIsBuyCreditsOpen(true)}
       />
-      )}
-
-      {encyclopediaModalMounted && (
-        <TarotEncyclopediaModal isOpen={isEncyclopediaOpen} onClose={() => setIsEncyclopediaOpen(false)} />
       )}
 
       {cardZoomModalMounted && (

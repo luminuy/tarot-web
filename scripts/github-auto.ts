@@ -139,6 +139,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "♿ a11y ระดับวิกฤตทั้งเว็บ 309 หน้า (สายด่วน 1323/1669 อ่านออกบนพื้นมืด · หัวเว็บ/ฟุตเตอร์นอก <main> · h1 เดี่ยว · ลำดับหัวข้อ)", cmd: TSX, args: ["scripts/qa/test-a11y-critical.ts"] },
   { label: "🎨 พาเลตยังเป็นชุดเดียว (สีฮาร์ดโค้ดไม่เพิ่ม · ไม่มีสีที่ถอดไปแล้วกลับมา · gold ห้ามเป็นตัวอักษรเล็ก)", cmd: TSX, args: ["scripts/qa/test-palette-drift.ts"] },
   { label: "🎯 พื้นที่กดขั้นต่ำ (ปุ่มเล็กกว่าเกณฑ์ต้องไม่เพิ่มขึ้น · หัวเว็บต้องใช้ tap-overlay เท่านั้น)", cmd: TSX, args: ["scripts/qa/test-tap-target.ts"] },
+  { label: "👻 ของประดับต้องไม่ล่องหน (จุด/เหรียญทรงกลมห้ามใช้สีพื้นเดียวกับกล่องที่ครอบอยู่)", cmd: TSX, args: ["scripts/qa/test-invisible-element.ts"] },
 ];
 
 /**

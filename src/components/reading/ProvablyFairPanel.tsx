@@ -302,7 +302,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           /* Success Box */
                           <div className="p-4 rounded-lg bg-[#EBF3ED] border border-ok/50 space-y-2 ">
                             <div className="flex items-center gap-2 text-ok font-serif-th font-bold text-xs sm:text-sm">
-                              <span className="w-5 h-5 rounded-full bg-[#EBF3ED] text-ok flex items-center justify-center text-xs">
+                              <span className="w-5 h-5 rounded-full bg-ok text-white flex items-center justify-center text-xs">
                                 ✓
                               </span>
                               <span>
@@ -342,7 +342,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
                           /* Mismatch Warning Box */
                           <div className="p-4 rounded-lg bg-err-wash border border-line-warm space-y-2 ">
                             <div className="flex items-center gap-2 text-err font-serif-th font-bold text-xs sm:text-sm">
-                              <span className="w-5 h-5 rounded-full bg-err-wash text-err flex items-center justify-center text-xs">
+                              <span className="w-5 h-5 rounded-full bg-err text-white flex items-center justify-center text-xs">
                                 ✕
                               </span>
                               <span>

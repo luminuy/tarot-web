@@ -116,7 +116,7 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
           </span>
         ) : (
           <span className="text-xs font-semibold bg-[#EBF3ED] text-ok border border-ok/30 px-3.5 py-1.5 rounded-full flex items-center gap-2 ">
-            <span className="w-2 h-2 rounded-full bg-[#EBF3ED]" /> {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
+            <span className="w-2 h-2 rounded-full bg-ok" /> {isEnglish ? "Interpretation complete" : "อ่านคำทำนายครบถ้วนแล้ว"}
           </span>
         )}
       </div>
