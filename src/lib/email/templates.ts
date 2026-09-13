@@ -207,3 +207,85 @@ export function accountExistsText(name?: string): string {
     "หากคุณจำรหัสผ่านไม่ได้ สามารถกดขอรีเซ็ตรหัสผ่านได้จากหน้าเข้าสู่ระบบ หรือหากเข้าใช้งานผ่าน Google / LINE สามารถเข้าสู่ระบบได้ตามปกติ",
   ]);
 }
+
+/**
+ * 📬 ดวงประจำวัน (Daily Digest) — ส่งเช้าให้เฉพาะคนที่กดสมัครไว้เอง
+ * -------------------------------------------------------------------
+ * ⚠️ ไม่มีภาพหน้าไพ่ในอีเมลโดยตั้งใจ — กฎเหล็กข้อ 8 บังคับให้ภาพไพ่ทุกใบผ่าน `<CardImage />`
+ * ซึ่งเป็นคอมโพเนนต์ React ใช้ในอีเมลไม่ได้ · การเขียน `<img src="/cards/...">` เองในอีเมล
+ * จะละเมิดกฎ B ของด่าน `test-image-paths` ด้วย · จึงพาผู้อ่านไปดูไพ่ที่หน้า `/daily` แทน
+ *
+ * ⚠️ `proof` (SHA-256 ของวันนั้น) ต้องอยู่ในอีเมลเสมอ — จุดขายของเว็บนี้คือตรวจสอบได้
+ * ถ้าอีเมลบอกว่า "ไพ่วันนี้คือ…" โดยไม่มีหลักฐานให้ตรวจ ก็เป็นการกลืนน้ำลายตัวเอง
+ */
+export function dailyDigestHtml(params: {
+  name?: string;
+  cardNameTh: string;
+  cardNameEn: string;
+  keywords: string[];
+  message: string;
+  proof: string;
+  dateLabel: string;
+  readUrl: string;
+  unsubUrl: string;
+}): string {
+  const greeting = params.name ? `สวัสดีคุณ ${params.name}` : "สวัสดีผู้มีญาณหยั่งรู้";
+  const keywordLine = params.keywords.slice(0, 4).join(" · ");
+  const content = `
+    <h1>ไพ่นำทางของวันนี้</h1>
+    <p>${greeting},</p>
+    <p>พลังงานประจำวันที่ ${params.dateLabel} เปิดออกมาเป็นไพ่</p>
+    <div style="text-align:center;margin:24px 0;padding:20px;background:#F3EDE2;border:1px solid #D9C8AC;border-radius:8px;">
+      <div style="font-size:22px;font-weight:bold;color:#8F5C1A;">${params.cardNameTh}</div>
+      <div style="font-size:13px;color:#6F5B4A;margin-top:4px;">${params.cardNameEn}</div>
+      <div style="font-size:13px;color:#2E211A;margin-top:12px;">${keywordLine}</div>
+    </div>
+    <p>${params.message}</p>
+    <div class="btn-container">
+      <a href="${params.readUrl}" class="btn">เปิดไพ่ของตัวเองวันนี้</a>
+    </div>
+    <div class="fallback">
+      รหัสตรวจสอบความโปร่งใสของไพ่วันนี้ (SHA-256):<br>
+      <span style="font-family:monospace;">${params.proof}</span><br>
+      ไพ่ใบนี้ถูกกำหนดจากวันที่ล่วงหน้า ไม่มีใครแก้ทีหลังได้ ตรวจสอบเองได้ที่หน้าไพ่ประจำวัน
+    </div>
+    <p style="font-size:12px;color:#6F5B4A;margin-top:24px;text-align:center;">
+      คุณได้รับอีเมลนี้เพราะเคยกดสมัครรับดวงประจำวันไว้เอง<br>
+      <a href="${params.unsubUrl}" style="color:#8F5C1A;">ยกเลิกรับดวงประจำวัน</a> — กดครั้งเดียวจบ ไม่ต้องเข้าสู่ระบบ
+    </p>
+  `;
+  return baseLayout(content, `ไพ่นำทางวันนี้ ${params.cardNameTh} — SeerTarot`);
+}
+
+export function dailyDigestText(params: {
+  name?: string;
+  cardNameTh: string;
+  cardNameEn: string;
+  keywords: string[];
+  message: string;
+  proof: string;
+  dateLabel: string;
+  readUrl: string;
+  unsubUrl: string;
+}): string {
+  const greeting = params.name ? `สวัสดีคุณ ${params.name}` : "สวัสดีผู้มีญาณหยั่งรู้";
+  return [
+    "ไพ่นำทางของวันนี้ — SeerTarot",
+    "",
+    `${greeting},`,
+    `พลังงานประจำวันที่ ${params.dateLabel} เปิดออกมาเป็นไพ่`,
+    "",
+    `${params.cardNameTh} (${params.cardNameEn})`,
+    params.keywords.slice(0, 4).join(" · "),
+    "",
+    params.message,
+    "",
+    `เปิดไพ่ของตัวเองวันนี้: ${params.readUrl}`,
+    "",
+    `รหัสตรวจสอบความโปร่งใส (SHA-256): ${params.proof}`,
+    "ไพ่ใบนี้ถูกกำหนดจากวันที่ล่วงหน้า ไม่มีใครแก้ทีหลังได้",
+    "",
+    "คุณได้รับอีเมลนี้เพราะเคยกดสมัครรับดวงประจำวันไว้เอง",
+    `ยกเลิกรับดวงประจำวัน: ${params.unsubUrl}`,
+  ].join("\n");
+}

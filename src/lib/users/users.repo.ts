@@ -10,6 +10,8 @@ export interface AppUser {
   locale: string;
   marketingConsent: boolean;
   consentAt?: number | null;
+  /** สมัครใจรับ "ดวงประจำวัน" ทางอีเมล — คนละเรื่องกับ marketingConsent (migrations/0014) */
+  digestEmail: boolean;
   emailVerified: boolean;
   hasPassword: boolean;
   tokenVersion: number;
@@ -31,6 +33,7 @@ interface RawUserRow {
   locale: string;
   marketing_consent: number;
   consent_at: number | null;
+  digest_email?: number | null;
   created_at: number;
   last_seen_at: number;
   deleted_at: number | null;
@@ -54,6 +57,7 @@ function mapRowToUser(row: RawUserRow): AppUser {
     locale: row.locale || "th",
     marketingConsent: Number(row.marketing_consent) === 1,
     consentAt: row.consent_at,
+    digestEmail: Number(row.digest_email ?? 0) === 1,
     emailVerified: Number(row.email_verified) === 1,
     hasPassword: Boolean(row.password_hash && row.password_hash.length > 0),
     tokenVersion: Number(row.token_version || 0),

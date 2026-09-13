@@ -1,0 +1,58 @@
+name: 📬 Daily Digest — ส่งดวงประจำวันทางอีเมล
+run-name: "📬 Daily Digest ${{ github.event_name == 'workflow_dispatch' && format('(กดเองโดย {0})', github.actor) || '(ตามเวลา)' }}"
+
+# ตัวจับเวลาของ Daily Digest
+# ------------------------------------------------------------------------------
+# ทำไมไม่ใช้ Cloudflare Cron Trigger:
+# `wrangler.jsonc` ชี้ `main` ไปที่ `.open-next/worker.js` ซึ่ง OpenNext สร้างใหม่ทุกครั้งที่
+# build และ export แค่ `fetch` — การใส่ `scheduled` handler ต้องเขียน wrapper ครอบไฟล์ที่
+# deploy pipeline ทั้งสายพึ่งอยู่ ความเสี่ยงไม่คุ้มกับงานส่งอีเมลวันละครั้ง
+#
+# ⚠️ cron ของ GitHub เป็น **UTC เสมอ** และดีเลย์ได้ 5–15 นาทีช่วงพีค
+# ยอมรับได้กับ digest รายวัน — ห้ามเอาแพตเทิร์นนี้ไปใช้กับงานที่ต้องตรงเวลาเป๊ะ
+#
+# ปลายทางกันซ้ำอยู่แล้วที่ฝั่งเซิร์ฟเวอร์ (PRIMARY KEY ของ `digest_log`)
+# กดรันเองซ้ำกี่ครั้งในวันเดียวกันก็ไม่มีใครได้อีเมลซ้ำ
+
+on:
+  schedule:
+    - cron: "0 1 * * *" # 01:00 UTC = 08:00 น. เวลาไทย
+  workflow_dispatch: # ให้กดยิงเองได้ตอนทดสอบหรือตอนรอบที่แล้วล้ม
+
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
+
+jobs:
+  send:
+    name: ส่งดวงประจำวัน
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # ไม่ต้อง checkout และไม่ต้อง setup-node — งานนี้แค่ยิง HTTP เส้นเดียว
+      # ⚠️ ห้ามเติม actions/setup-node พร้อม `cache:` ที่นี่: setup-node@v5 จะ auto-detect
+      # pnpm แล้วล้มทันที เพราะเรโปนี้ไม่มี `pnpm-lock.yaml` (บทเรียนที่บันทึกไว้แล้ว)
+      - name: ยิงเส้น cron ของ digest
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::ยังไม่ได้ตั้ง repository secret ชื่อ CRON_SECRET — เส้น API จะตอบ 401 ทุกครั้ง"
+            exit 1
+          fi
+
+          echo "กำลังยิง POST /api/cron/daily-digest ..."
+          HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST "https://seertarot.net/api/cron/daily-digest" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 300)
+
+          echo "HTTP $HTTP_CODE"
+          echo "--- ผลลัพธ์ ---"
+          cat response.json || true
+          echo ""
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::รอบนี้ล้มเหลว (HTTP $HTTP_CODE) — ดูรายละเอียดในผลลัพธ์ด้านบน"
+            exit 1
+          fi
