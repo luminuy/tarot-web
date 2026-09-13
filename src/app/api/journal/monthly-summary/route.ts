@@ -103,7 +103,11 @@ export async function POST(request: Request) {
       .slice(0, 3)
       .map((c) => `${c.nameTh} (ปรากฏ ${c.count} ครั้ง)`);
 
-    const dominantElement = Object.entries(elementCount).sort((a, b) => b[1] - a[1])[0][0] || "สมดุล";
+    const sortedElements = Object.entries(elementCount).sort((a, b) => b[1] - a[1]);
+    const dominantElement =
+      sortedElements[0] && sortedElements[0][1] > 0 && sortedElements[0][1] > (sortedElements[1]?.[1] ?? 0)
+        ? sortedElements[0][0]
+        : "สมดุล";
 
     // Prepare context for Gemini AI
     const historyText = readings
@@ -122,7 +126,7 @@ export async function POST(request: Request) {
         accurateReadings: accurateCount,
         dominantElement,
         recurringCards: topCards,
-        synthesis: `ตลอดการเปิดไพ่ ${readings.length} ครั้งที่ผ่านมา พลังงานธาตุ${dominantElement} มีอิทธิพลต่อการตัดสินใจและอารมณ์ของคุณอย่างเด่นชัด ไพ่ที่ปรากฏบ่อยเตือนให้คุณรักษาจุดยืน ความสงบในจิตใจ และกล้าที่จะเปลี่ยนแปลงในสิ่งที่ค้างคา`,
+        synthesis: `ตลอดการเปิดไพ่ ${readings.length} ครั้งที่ผ่านมา ${dominantElement === "สมดุล" ? "พลังงานของทุกธาตุมีความสมดุลกลมกลืนกัน" : `พลังงานธาตุ${dominantElement} มีอิทธิพลต่อการตัดสินใจและอารมณ์ของคุณอย่างเด่นชัด`} ไพ่ที่ปรากฏบ่อยเตือนให้คุณรักษาจุดยืน ความสงบในจิตใจ และกล้าที่จะเปลี่ยนแปลงในสิ่งที่ค้างคา`,
         lifeLessons: [
           "ทุกทางเลือกในอดีตได้หล่อหลอมให้คุณมีสติและเข้าใจตนเองลึกซึ้งยิ่งขึ้น",
           "คลื่นพลังงานรอบตัวกำลังเปิดรับโอกาสใหม่ จงเชื่อมั่นในสัญชาตญาณของตนเอง",
@@ -139,7 +143,7 @@ ${historyText}
 
 สถิติเบื้องต้น:
 - ไพ่ที่ออกบ่อย: ${topCards.join(", ") || "กระจายตัวหลากหลาย"}
-- ธาตุเด่นในภาพรวม: ธาตุ${dominantElement}
+- ธาตุเด่นในภาพรวม: ${dominantElement === "สมดุล" ? "พลังงานทุกธาตุสมดุลกัน" : `ธาตุ${dominantElement}`}
 
 จงวิเคราะห์อย่างลึกซึ้ง อบอุ่น มีพลัง ให้กำลังใจ และสร้างแรงบันดาลใจ ตอบกลับเป็น JSON ในรูปแบบนี้เท่านั้น (ห้ามใส่ markdown อื่นนอก JSON):
 {
@@ -206,20 +210,37 @@ ${historyText}
       throw new Error("ทุกโมเดล Gemini เรียกไม่สำเร็จ");
     }
 
-    const resJson = await res.json() as any;
+    const resJson = (await res.json()) as any;
     // ห้ามอ่าน parts[0].text ตรง ๆ — Gemini 3.x แทรก part ความคิดไว้ด้วย (บทเรียน INC-0052)
     const responseText = extractGeminiAnswer(resJson) || "{}";
-    const parsedAI = JSON.parse(responseText);
+    const cleanedText = responseText
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
+
+    let parsedAI: any = {};
+    try {
+      parsedAI = JSON.parse(cleanedText);
+    } catch {
+      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsedAI = JSON.parse(jsonMatch[0]);
+        } catch {
+          parsedAI = {};
+        }
+      }
+    }
 
     return NextResponse.json({
-      title: parsedAI.title || "กระจกสะท้อนพลังงานและบทเรียนชีวิตรอบเดือน",
+      title: typeof parsedAI?.title === "string" ? parsedAI.title : "กระจกสะท้อนพลังงานและบทเรียนชีวิตรอบเดือน",
       totalReadings: readings.length,
       accurateReadings: accurateCount,
-      dominantElement: parsedAI.dominantElement || dominantElement,
-      recurringCards: parsedAI.recurringCards || topCards,
-      synthesis: parsedAI.synthesis || "พลังงานโดยรวมของคุณกำลังเคลื่อนเข้าสู่จุดเปลี่ยนที่สำคัญ",
-      lifeLessons: parsedAI.lifeLessons || ["ความเข้าใจตนเองคือกุญแจสู่ทุกทางออก"],
-      empowermentQuote: parsedAI.empowermentQuote || "โชคชะตาอยู่ในมือของคุณเสมอ",
+      dominantElement: typeof parsedAI?.dominantElement === "string" ? parsedAI.dominantElement : dominantElement,
+      recurringCards: Array.isArray(parsedAI?.recurringCards) && parsedAI.recurringCards.length > 0 ? parsedAI.recurringCards : topCards,
+      synthesis: typeof parsedAI?.synthesis === "string" ? parsedAI.synthesis : "พลังงานโดยรวมของคุณกำลังเคลื่อนเข้าสู่จุดเปลี่ยนที่สำคัญ",
+      lifeLessons: Array.isArray(parsedAI?.lifeLessons) && parsedAI.lifeLessons.length > 0 ? parsedAI.lifeLessons : ["ความเข้าใจตนเองคือกุญแจสู่ทุกทางออก"],
+      empowermentQuote: typeof parsedAI?.empowermentQuote === "string" ? parsedAI.empowermentQuote : "โชคชะตาอยู่ในมือของคุณเสมอ",
     });
   } catch (error) {
     console.error("[Monthly Summary API Error]:", error);

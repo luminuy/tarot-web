@@ -38,6 +38,7 @@ export type AuthRateLimitAction =
   | "forgot"
   | "resend"
   | "reset"
+  | "verify"
   | "admin_login"
   | "tester_login"
   | "redeem";
@@ -65,6 +66,7 @@ const ACTION_CONFIGS: Record<AuthRateLimitAction, AuthRateLimitConfig> = {
   forgot: { ipMax: 15, pairMax: 5, idMax: 10, windowSec: 30 * 60 },
   resend: { ipMax: 15, pairMax: 5, idMax: 10, windowSec: 30 * 60 },
   reset: { ipMax: 20, pairMax: 5, idMax: 20, windowSec: 30 * 60 },
+  verify: { ipMax: 30, pairMax: 10, idMax: 15, windowSec: 15 * 60 },
   /**
    * ⚠️ ทางเข้าแอดมินมีปัจจัยเดียวคือ ADMIN_PASSWORD และไม่มีระบบล็อกบัญชี
    * เดิมใช้ตัวจำกัดที่เก็บใน Map ของหน่วยความจำ ซึ่งบน Workers แต่ละ isolate

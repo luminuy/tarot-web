@@ -6,6 +6,8 @@ import { getAppDB } from "@/lib/platform/db";
 import { getSessionUser } from "@/lib/auth/session";
 import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -131,6 +133,19 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
+  const clientId = getClientIdentifier(request);
+  const limit = checkRateLimit(`chk_conf:${clientId}`, {
+    maxRequests: 20,
+    windowSeconds: 60,
+  });
+  if (!limit.allowed) {
+    return createRateLimitResponse(limit.retryAfterSeconds, "คุณทำรายการยืนยันถี่เกินไป กรุณารอสักครู่");
+  }
+
   try {
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const orderId = typeof body.orderId === "string" ? body.orderId : "";

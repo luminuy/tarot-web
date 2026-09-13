@@ -42,11 +42,13 @@ export function isRequestAuthorizedOrigin(request: Request): boolean {
     }
   }
 
-  const host = request.headers.get("host") || "";
-  if (host && isAllowedHost(host.split(":")[0])) {
-    return true;
+  // Allow GET/HEAD requests for static navigation; reject origin-less mutating requests (POST, etc.)
+  if (request.method === "GET" || request.method === "HEAD") {
+    const host = request.headers.get("host") || "";
+    if (host && isAllowedHost(host.split(":")[0])) {
+      return true;
+    }
   }
 
-  // Allow GET requests for static navigation; reject origin-less POST requests from external callers
-  return request.method === "GET";
+  return false;
 }

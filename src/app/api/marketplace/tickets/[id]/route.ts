@@ -3,6 +3,7 @@ import { cancelQueueTicket, getQueueTicketById } from "@/lib/marketplace/queue.r
 import { getReaderById } from "@/lib/marketplace/readers.repo";
 import { readCustomerRefFromCookie } from "@/lib/marketplace/customer-ref";
 import { requireReader } from "@/lib/auth/reader-auth";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
 export const runtime = "nodejs";
 
@@ -66,6 +67,10 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   const { id } = await params;
   try {
     const customerRef = await readCustomerRefFromCookie(request);

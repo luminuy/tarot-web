@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSessionUser } from "@/lib/auth/session";
 import { updateJournalOutcome, deleteJournalItem } from "@/lib/journal/journal.repo";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,10 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   try {
     const userId = await getAuthenticatedUserId();
     if (!userId) {
@@ -40,7 +45,7 @@ export async function PATCH(
 
     // 📊 Sync outcome to reading_quality for model telemetry (AI_INTELLIGENCE_PLAN W1.1)
     const { updateQualityOutcome } = await import("@/lib/ai/quality.repo");
-    void updateQualityOutcome(id, parsed.data.outcome).catch(() => {});
+    await updateQualityOutcome(id, parsed.data.outcome).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -50,9 +55,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isRequestAuthorizedOrigin(request)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
   try {
     const userId = await getAuthenticatedUserId();
     if (!userId) {

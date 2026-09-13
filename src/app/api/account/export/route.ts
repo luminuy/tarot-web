@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/auth/session";
 import { getUserById } from "@/lib/users/users.repo";
 import { listJournal } from "@/lib/journal/journal.repo";
 import { SITE_DOMAIN, SITE_NAME_TH } from "@/lib/config/site";
+import { checkRateLimit, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,14 @@ export async function GET() {
     const user = await getSessionUser();
     if (!user) {
       return NextResponse.json({ error: "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
+    }
+
+    const limit = checkRateLimit(`account_export:${user.id}`, {
+      maxRequests: 5,
+      windowSeconds: 300,
+    });
+    if (!limit.allowed) {
+      return createRateLimitResponse(limit.retryAfterSeconds, "คุณดาวน์โหลดข้อมูลส่งออกบ่อยเกินไป กรุณารอสักครู่");
     }
 
     const dbUser = await getUserById(user.id);

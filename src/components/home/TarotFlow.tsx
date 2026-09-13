@@ -297,6 +297,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
   // Interactive Card Picking state
   const [pickedIndices, setPickedIndices] = useState<number[]>([]);
+  const isFinalizingRef = useRef(false);
   const [drawnCards, setDrawnCards] = useState<DrawnSlotCard[]>([]);
   const [revealedOrders, setRevealedOrders] = useState<number[]>([]);
   const [activeCardIndex, setActiveCardIndex] = useState<number>(0);
@@ -887,7 +888,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
   // Step 3: Pick a Card from Fan (Self-Directed Card Picking)
   const handlePickCard = (fanIndex: number) => {
+    if (isFinalizingRef.current) return;
     if (pickedIndices.includes(fanIndex)) return;
+    if (pickedIndices.length >= selectedSpread.positions.length) return;
 
     const newPicked = [...pickedIndices, fanIndex];
     setPickedIndices(newPicked);
@@ -901,6 +904,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
     // If picked all required cards for this spread, submit to server
     if (newPicked.length >= selectedSpread.positions.length) {
+      isFinalizingRef.current = true;
       handleFinalizePickedCards(newPicked);
     }
   };
@@ -989,6 +993,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       // Auto start streaming AI interpretation in background
       startAIStreaming(activeId, enrichedCards, data.sessionToken || sessionToken);
     } catch (err: any) {
+      isFinalizingRef.current = false;
       setErrorMsg(err.message || (isEnglish ? "An error occurred while processing the cards." : "เกิดข้อผิดพลาดในการประมวลผลไพ่"));
       // P2-5: ถอยกลับแค่ไพ่ใบสุดท้าย ให้เลือกใหม่ได้ทันทีโดยไม่ต้องเริ่มจับใหม่ทั้งหมด
       setPickedIndices((p) => p.slice(0, -1));
@@ -1213,6 +1218,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     setActiveCardIndex(0);
     setIsStreaming(false);
     setZoomedCard(null);
+    isFinalizingRef.current = false;
     setPickedIndices([]);
     setDrawnCards([]);
     setRevealedOrders([]);
@@ -1236,6 +1242,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     if (currentStep === "SHUFFLE") {
       navigateStep("INTENTION_SELECT"); // เก็บคำถาม/ชื่อเล่น/ผัง/แม่หมอไว้ครบ
     } else if (currentStep === "PICK_CARDS") {
+      isFinalizingRef.current = false;
       setPickedIndices([]);
       setDrawnCards([]);
       setRevealedOrders([]);

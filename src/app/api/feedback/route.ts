@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getDB } from "@/lib/platform/db";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -15,6 +17,22 @@ const feedbackSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  if (!isRequestAuthorizedOrigin(req)) {
+    return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
+  }
+
+  const clientId = getClientIdentifier(req);
+  const limit = checkRateLimit(`feedback:${clientId}`, {
+    maxRequests: 5,
+    windowSeconds: 600,
+  });
+  if (!limit.allowed) {
+    return createRateLimitResponse(
+      limit.retryAfterSeconds,
+      "ส่งความคิดเห็นบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่นะ"
+    );
+  }
+
   try {
     const raw = await req.json().catch(() => null);
     if (!raw) {
