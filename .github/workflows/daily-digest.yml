@@ -43,13 +43,27 @@ jobs:
 
           echo "กำลังยิง POST /api/cron/daily-digest ..."
 
-          # ⚠️ ต้องตั้ง User-Agent เองเสมอ ห้ามปล่อยเป็นค่าเริ่มต้นของ curl
-          # กฎ WAF ข้อ 5 ของโซนนี้ (docs/CLOUDFLARE_OPTIMIZATION_GUIDE.md) บล็อก
-          # User-Agent ที่เป็น curl / python / Postman / Scrapy ที่เส้น `/api/`
-          # ตั้งแต่ชั้น edge — คำขอจะถูกตอบ 403 โดยไม่มีวันไปถึง Worker เลยสักครั้ง
-          # วัดจาก production จริงแล้ว: UA "curl/8.5.0" → 403 · UA นี้ → 200
+          # ⚠️ ยิงเข้า `*.workers.dev` ไม่ใช่ `seertarot.net` — เจตนา ห้ามเปลี่ยนกลับ
+          # โดเมนหลักเปิด **Bot Fight Mode** อยู่ ซึ่งตอบ managed challenge
+          # (หน้า "Just a moment..." ที่ต้องมี JavaScript + คุกกี้) ให้กับคำขอที่มาจาก
+          # IP ของดาต้าเซ็นเตอร์ — IP ของ GitHub runner เข้าข่ายเต็ม ๆ
+          # cron จึงได้ 403 ทุกครั้งไม่ว่าจะตั้ง User-Agent อะไร และไม่ว่าความลับถูกหรือผิด
+          # (พิสูจน์แล้วในรอบ #450: เปลี่ยน UA อย่างเดียวไม่พอ ยังโดน challenge เหมือนเดิม)
+          #
+          # `*.workers.dev` เป็นโดเมนของ Cloudflare เอง ไม่ได้อยู่ในโซน `seertarot.net`
+          # การตั้งค่าระดับโซน (Bot Fight Mode · WAF custom rules) จึงไม่มีผลกับเส้นนี้
+          # โค้ดที่รันคือ Worker ตัวเดียวกันเป๊ะ และลิงก์ในอีเมลยังชี้ `seertarot.net`
+          # เพราะสร้างจาก SITE_ORIGIN ในโค้ด ไม่ได้เอามาจาก host ของคำขอ
+          #
+          # 🔒 เส้นนี้ยังปลอดภัย: `/api/cron/daily-digest` เป็น fail-closed
+          # ไม่มี Bearer ที่ตรงกับ CRON_SECRET = 401 เปล่า ๆ เสมอ
+          #
+          # ⚠️ ถ้าวันหน้าเปลี่ยนชื่อบัญชี Cloudflare หรือปิด workers.dev route ต้องแก้ที่นี่
+          # (URL ตัวจริงพิมพ์อยู่ท้าย log ของ workflow deploy ทุกครั้ง)
+          #
+          # ยังคงตั้ง User-Agent เองไว้เป็นชั้นกันเหนียว — กฎ WAF ข้อ 5 บล็อก curl ที่ /api/
           HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" \
-            -X POST "https://seertarot.net/api/cron/daily-digest" \
+            -X POST "https://tarot-web.bankjack10452.workers.dev/api/cron/daily-digest" \
             -A "SeerTarot-Cron/1.0" \
             -H "Authorization: Bearer $CRON_SECRET" \
             --max-time 300)
@@ -60,8 +74,9 @@ jobs:
           echo ""
 
           if [ "$HTTP_CODE" = "403" ]; then
-            echo "::error::โดน 403 — คำขอถูกกฎ WAF ปัดตกที่ชั้น edge ก่อนถึง Worker (ไม่ใช่เรื่องความลับผิด)"
-            echo "::error::ตรวจว่า Custom Rule ของ Cloudflare ไม่ได้บล็อก User-Agent 'SeerTarot-Cron/1.0' ที่เส้น /api/"
+            echo "::error::โดน 403 — คำขอถูกปัดตกที่ชั้น edge ก่อนถึง Worker (ไม่ใช่เรื่องความลับผิด)"
+            echo "::error::ถ้าผลลัพธ์ด้านบนเป็นหน้า 'Just a moment...' = โดน Bot Fight Mode ของโซน"
+            echo "::error::เส้นนี้ควรยิงเข้า *.workers.dev ซึ่งไม่อยู่ในโซน — ตรวจว่า URL ด้านบนไม่ได้ถูกเปลี่ยนกลับเป็น seertarot.net"
             exit 1
           fi
 
