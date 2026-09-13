@@ -42,8 +42,15 @@ jobs:
           fi
 
           echo "กำลังยิง POST /api/cron/daily-digest ..."
+
+          # ⚠️ ต้องตั้ง User-Agent เองเสมอ ห้ามปล่อยเป็นค่าเริ่มต้นของ curl
+          # กฎ WAF ข้อ 5 ของโซนนี้ (docs/CLOUDFLARE_OPTIMIZATION_GUIDE.md) บล็อก
+          # User-Agent ที่เป็น curl / python / Postman / Scrapy ที่เส้น `/api/`
+          # ตั้งแต่ชั้น edge — คำขอจะถูกตอบ 403 โดยไม่มีวันไปถึง Worker เลยสักครั้ง
+          # วัดจาก production จริงแล้ว: UA "curl/8.5.0" → 403 · UA นี้ → 200
           HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" \
             -X POST "https://seertarot.net/api/cron/daily-digest" \
+            -A "SeerTarot-Cron/1.0" \
             -H "Authorization: Bearer $CRON_SECRET" \
             --max-time 300)
 
@@ -51,6 +58,18 @@ jobs:
           echo "--- ผลลัพธ์ ---"
           cat response.json || true
           echo ""
+
+          if [ "$HTTP_CODE" = "403" ]; then
+            echo "::error::โดน 403 — คำขอถูกกฎ WAF ปัดตกที่ชั้น edge ก่อนถึง Worker (ไม่ใช่เรื่องความลับผิด)"
+            echo "::error::ตรวจว่า Custom Rule ของ Cloudflare ไม่ได้บล็อก User-Agent 'SeerTarot-Cron/1.0' ที่เส้น /api/"
+            exit 1
+          fi
+
+          if [ "$HTTP_CODE" = "401" ]; then
+            echo "::error::โดน 401 — ค่า CRON_SECRET ฝั่ง GitHub กับฝั่ง Cloudflare ไม่ตรงกัน (หรือฝั่ง Worker ยังไม่ได้ตั้ง)"
+            echo "::error::ตั้งด้วย: npx wrangler secret put CRON_SECRET แล้วใส่ค่าเดียวกันใน repository secret"
+            exit 1
+          fi
 
           if [ "$HTTP_CODE" != "200" ]; then
             echo "::error::รอบนี้ล้มเหลว (HTTP $HTTP_CODE) — ดูรายละเอียดในผลลัพธ์ด้านบน"

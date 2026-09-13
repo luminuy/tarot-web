@@ -206,6 +206,18 @@ async function main() {
   );
 
   const badge = readSrc("src/components/auth/UserProfileBadge.tsx");
+  // ⚠️ บทเรียนของจริง (INC-0141): workflow รอบแรกใช้ curl ค่าเริ่มต้น แล้วโดนกฎ WAF ข้อ 5
+  // ของโซนนี้ปัดตกที่ชั้น edge ด้วย 403 ก่อนถึง Worker — ตั้ง CRON_SECRET ถูกแค่ไหนก็ไม่มีทางส่งออก
+  // วัดจาก production จริง: UA "curl/8.5.0" → 403 · UA ที่ตั้งเอง → 200
+  check(
+    "workflow ตั้ง User-Agent เอง (ปล่อยเป็น curl ค่าเริ่มต้น = โดน WAF บล็อก 403 ตลอดกาล)",
+    /-A\s+["']/.test(workflow) || /--user-agent/.test(workflow),
+  );
+  check(
+    "workflow แยกแยะ 403 (โดน WAF) ออกจาก 401 (ความลับไม่ตรง) ให้คนอ่าน log รู้ว่าต้องแก้อะไร",
+    workflow.includes('"403"') && workflow.includes('"401"'),
+  );
+
   check("มีสวิตช์ให้ผู้ใช้กดสมัคร/ยกเลิกเองในหน้าบัญชี", badge.includes("handleUpdateDigest"));
 
   const migration = readSrc("migrations/0014_digest_prefs.sql");
