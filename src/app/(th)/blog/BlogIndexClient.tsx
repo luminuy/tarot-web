@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import type { Article, ArticleSummary } from "@/data/articles";
+import type { ArticleSummary } from "@/data/articles";
 import {
   getArticleTitle,
   getArticleDescription,
@@ -10,11 +10,40 @@ import {
 } from "@/data/article-helpers";
 import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
-import { SearchTabIcon } from "@/components/ui/TarotArtIcons";
 import { useLocale } from "@/lib/i18n";
 
-interface BlogIndexClientProps {
-  articles: ArticleSummary[];
+const SearchIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="10.8" cy="10.8" r="6.3" />
+    <path d="m15.4 15.4 4.1 4.1" />
+  </svg>
+);
+
+export type BlogCardItem = Pick<
+  ArticleSummary,
+  | "slug"
+  | "category"
+  | "categoryTh"
+  | "categoryEn"
+  | "title"
+  | "titleEn"
+  | "description"
+  | "descriptionEn"
+  | "readTime"
+  | "keywords"
+>;
+
+export interface BlogIndexClientProps {
+  articles: BlogCardItem[];
 }
 
 const CATEGORIES = [
@@ -60,7 +89,7 @@ const ARTICLE_CARD_MAP: Record<string, string> = {
 
 /* คืนเฉพาะชื่อไฟล์ภาพ — ไม่คืน alt เพราะภาพไพ่ประจำบทความเป็นภาพประกอบล้วน
    หัวข้อบทความที่พิมพ์อยู่ข้าง ๆ ทำหน้าที่บอกชื่อให้แล้ว (INC-0125) */
-function getArticleCardArt(article: Article | ArticleSummary): { image: string } {
+function getArticleCardArt(article: { slug: string; category: string }): { image: string } {
   const image =
     ARTICLE_CARD_MAP[article.slug] ||
     (article.category === "love"
@@ -83,6 +112,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
+    if (selectedCat === "all" && !q) return articles;
+
     return articles.filter((a) => {
       const matchCat = selectedCat === "all" || a.category === selectedCat;
       if (!matchCat) return false;
@@ -143,7 +174,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
             }
             className="w-full bg-surface border border-line rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink shadow-[0_2px_8px_rgba(41,38,31,0.03)] transition font-serif-th"
           />
-          <SearchTabIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-ink" />
+          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-ink" />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
@@ -210,6 +241,8 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   alt=""
                   className="w-full h-full object-cover"
                   sizes="112px"
+                  loading="eager"
+                  fetchPriority="high"
                 />
               </div>
 
@@ -288,7 +321,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filtered.map((article) => {
+            {filtered.map((article, idx) => {
               const cardArt = getArticleCardArt(article);
               const artTitle = getArticleTitle(article, locale);
               const artDesc = getArticleDescription(article, locale);
@@ -296,10 +329,15 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               const readTime = isEnglish
                 ? article.readTime.replace("นาที", "min read")
                 : article.readTime;
+              const isAboveFold = idx < 4;
 
               return (
                 <article
                   key={article.slug}
+                  style={{
+                    contentVisibility: "auto",
+                    containIntrinsicSize: "auto 260px",
+                  }}
                   className="rounded-2xl border border-line-warm bg-gradient-to-b from-surface via-surface-warm to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-gold-ink transition duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
                 >
                   <div className="space-y-3.5">
@@ -331,6 +369,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                           alt=""
                           className="w-full h-full object-cover"
                           sizes="64px"
+                          loading={isAboveFold ? "eager" : "lazy"}
                         />
                       </div>
                     </div>
