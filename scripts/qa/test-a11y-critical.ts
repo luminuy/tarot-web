@@ -150,7 +150,6 @@ const MODAL_COMPONENTS = [
   "ShareModal",
   "CardZoomModal",
   "ReadingHistoryModal",
-  "TarotEncyclopediaModal",
   "BuyCreditsModal",
   "AccessDialog",
   "BookQueueModal",
