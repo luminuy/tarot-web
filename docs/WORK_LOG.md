@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 52/52 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 56/56 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -35,6 +35,17 @@
 | **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-13 (รอบ 58): 🧪 ขยายชุดตรวจความสมบูรณ์สู่ 56 ด่าน (Harness Expansion & 4 Added Suites)
+
+- **เป้าหมาย**: ผูก 4 ชุดตรวจ QA ที่พัฒนาไว้อย่างละเอียดแล้วแต่ยังไม่ได้ต่อเข้า Verification Harness กลาง ให้ทำงานโดยอัตโนมัติทุกครั้งทั้งใน local pre-commit/pre-push และ GitHub Actions CI
+- **4 ชุดตรวจที่เพิ่มเข้าสู่ CHECKS**:
+  1. `scripts/qa/test-card-meanings-en.ts`: สารานุกรมไพ่ 78 ใบภาษาอังกฤษ (5 มิติความหมาย · โหราศาสตร์ · เลขศาสตร์ · คีย์เวิร์ดทั้งตรงและกลับหัว)
+  2. `scripts/qa/test-clarify.ts`: ระบบถามกลับเพื่อความชัดเจนก่อนสับไพ่ (AI Clarification Engine · B-04 · Fail-Safe · Zero Stars)
+  3. `scripts/qa/test-redeem-code.ts`: ระบบรหัสแลกสิทธิ์ VIP3 & จัดการโควตา (59 เคสทดสอบ · Concurrency · SQLite/D1 · Quota Deduplication)
+  4. `scripts/i18n-import.ts --verify-only`: ความสมบูรณ์ของระบบแปลภาษา (318 หน่วยแปล · i18n Verification สมบูรณ์ 100%)
+- **Docs Numeric Truth Guard**: อัปเดตตัวเลขจำนวนด่านในเอกสารแม่บททั้งหมด (CLAUDE.md, GEMINI.md, README.md, docs/INDEX.md, docs/LOCAL_SETUP.md, docs/AI_COLLABORATION_GUIDELINES.md, docs/WORK_LOG.md) จาก 52 สู่ 56 ด่านตรงตามโค้ดจริง
+- **ผลการตรวจ**: `repo:verify` ผ่านครบทั้ง **56/56 ด่าน (สมบูรณ์ 100%)**
 
 ### 🗓️ 2026-09-13 (รอบ 57): 🐛 cron ยังโดน 403 อยู่ — ตัวจริงคือ Bot Fight Mode ไม่ใช่กฎ WAF (รอบ 56 วินิจฉัยผิด)
 
