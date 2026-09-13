@@ -218,6 +218,15 @@ async function main() {
     workflow.includes('"403"') && workflow.includes('"401"'),
   );
 
+  // ⚠️ บทเรียนของจริง (INC-0142): ยิงเข้าโดเมนหลักไม่ได้ เพราะโซนเปิด Bot Fight Mode
+  // ซึ่งตอบ managed challenge ("Just a moment...") ให้ IP ดาต้าเซ็นเตอร์ทุกตัว
+  // IP ของ GitHub runner เข้าข่ายเต็ม ๆ → 403 ทุกครั้งไม่ว่าตั้ง UA หรือความลับถูกแค่ไหน
+  check(
+    "workflow ยิงเข้า *.workers.dev ไม่ใช่โดเมนหลัก (โดเมนหลักมี Bot Fight Mode คั่นอยู่)",
+    workflow.includes(".workers.dev/api/cron/daily-digest") &&
+      !workflow.includes("https://seertarot.net/api/cron/daily-digest"),
+  );
+
   check("มีสวิตช์ให้ผู้ใช้กดสมัคร/ยกเลิกเองในหน้าบัญชี", badge.includes("handleUpdateDigest"));
 
   const migration = readSrc("migrations/0014_digest_prefs.sql");
