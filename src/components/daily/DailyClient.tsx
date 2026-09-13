@@ -10,6 +10,7 @@ import { saveReading } from "@/lib/utils/history";
 import { soundManager } from "@/lib/utils/audio";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
+import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
 
 type DailyFocus = "general" | "work" | "money" | "love" | "mind";
 
@@ -95,6 +96,8 @@ export function DailyClient() {
 
   const [selectedFocus, setSelectedFocus] = useState<DailyFocus>("general");
   const [intentionText, setIntentionText] = useState("");
+  /** จำนวนวันที่เปิดไพ่ประจำวันติดต่อกัน — มาจากเซิร์ฟเวอร์เท่านั้น ห้ามนับเองฝั่งเบราว์เซอร์ */
+  const [streak, setStreak] = useState(0);
 
   const currentChamber = FOCUS_CHAMBERS.find((c) => c.id === selectedFocus) || FOCUS_CHAMBERS[0];
 
@@ -107,6 +110,18 @@ export function DailyClient() {
   }).format(new Date());
 
   const handleRevealed = (card: TarotCardType) => {
+    // ประทับตรา "วันนี้มาเปิดไพ่แล้ว" ฝั่งเซิร์ฟเวอร์ — ต้องยิงก่อนทุกกรณี
+    // แม้การบันทึกประวัติด้านล่างจะข้ามไป (ไพ่ไม่ตรงกับ CARD_SUMMARIES)
+    // เพราะผู้ใช้ "เปิดไพ่วันนี้" ไปแล้วจริง ๆ ไม่ว่าสมุดบันทึกจะเขียนสำเร็จหรือไม่
+    void fetch("/api/daily/checkin", { method: "POST", cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { streak?: number } | null) => {
+        if (typeof data?.streak === "number") setStreak(data.streak);
+      })
+      .catch(() => {
+        // เช็กอินไม่สำเร็จ = แค่ไม่มีป้ายต่อเนื่องขึ้น ห้ามให้กระทบการอ่านคำทำนาย
+      });
+
     try {
       const cardIdx = CARD_SUMMARIES.findIndex((c) => c.id === card.id);
       // 🃏 กฎเหล็กข้อ 14 — ห้ามกุไพ่แทนใบที่หาไม่เจอเด็ดขาด
@@ -282,6 +297,8 @@ export function DailyClient() {
         }
         renderReading={(card) => (
           <div className="space-y-6">
+            <DailyStreakRibbon streak={streak} isEnglish={isEnglish} />
+
             <div className="border-b border-line pb-3 text-center sm:text-left">
               <span className="text-xs font-serif-th font-semibold text-gold-ink">
                 {isEnglish ? "Daily Oracle Analysis" : "ถอดรหัสสารทำนาย 5 มิติประจำวัน"}

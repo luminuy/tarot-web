@@ -7,6 +7,7 @@ import Link from "next/link";
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import { CheckMarkIcon, HourglassIcon, SparkSealIcon } from "@/components/entitlement/EntitlementIcons";
 import { getMemberBenefits, describeEntitlement, formatResetCountdown, resetClockLabel } from "@/lib/entitlement/copy";
+import { DailyStreakRibbon } from "@/components/daily/DailyStreakRibbon";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useSessionUser } from "@/lib/auth/use-session";
 import { useLocale } from "@/lib/i18n";
@@ -68,6 +69,9 @@ export function EntitlementStatusCard() {
         </div>
         <QuotaPips remaining={view.remaining} limit={view.limit} tone={view.tone} />
       </div>
+
+      {/* วันต่อเนื่องของไพ่ประจำวัน — ซ่อนเองเมื่อยังไม่มี streak (ดู DailyStreakRibbon) */}
+      <DailyStreakRibbon streak={ent?.dailyStreak ?? 0} isEnglish={isEn} />
 
       {view.isMember && !view.isUnlimited && (
         <div className="grid gap-2 sm:grid-cols-2">
