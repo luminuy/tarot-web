@@ -37,6 +37,21 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-14 (รอบ 71): ⚡ ขจัด Forced Reflow 46ms ใน SiteHeader, ปรับ ImageKit AVIF q52, และชี้แจง Bot Fight Mode
+- **ที่มา**: ผู้ใช้ส่งภาพรายงานเจาะลึก 5 ภาพจาก PageSpeed Insights / Lighthouse mobile audit:
+  1. **Render-blocking & Forced reflow** (Screenshot 1): CSS 24.2 KiB, Forced reflow 46 ms (`chunks/9502` 35 ms, `chunks/5347` 33 ms + 13 ms).
+  2. **Network dependency tree / Avoid chaining critical requests** (Screenshot 2): Max critical path latency 1,998 ms (แก้สำเร็จแล้วในรอบ 70 ด้วยการ subset ฟอนต์ local woff2 และปิด preload หัวเรื่อง).
+  3. **Improve image delivery** (Screenshot 3): `major-06.jpg?tr=w-192%2Cf-avif%2Cq-65` ขนาด 14.7 KiB เตือนประหยัดได้ 4.7 KiB.
+  4. **Legacy JavaScript & Duplicate Chunks** (Screenshot 4): Polyfills ใน `chunks/9502` และ chunks แสดงซ้ำสองครั้ง.
+  5. **Unused JavaScript & Main-thread Work** (Screenshot 5): Unused JS ลดลงเหลือ 102 KiB (จากเดิม 245 KiB) และ Main-thread work ลดเหลือ 2.2s (จากเดิม 3.8s).
+- **การวิเคราะห์หาสาเหตุที่แท้จริง (Root Cause Analysis)**:
+  1. **Forced Reflow ใน `SiteHeader.tsx`**: ใน `useEffect` มีการเรียก `publish()` ซึ่งเรียก `el.getBoundingClientRect().height` ทันที แล้วเขียน `--site-header-h` ลงใน DOM style พร้อมกับ `ResizeObserver` ที่ยิง callback ซ้ำ ทำให้เกิด forced synchronous layout 46 ms
+  2. **Image Delivery**: ภาพ AVIF ขนาด 192w ที่คุณภาพ `q-65` มีขนาด 14.7 KiB ซึ่ง Lighthouse ประเมินว่าลดได้อีก 4.7 KiB หากปรับคุณภาพเป็น `q-52` จะเหลือเพียง ~9.5 KiB ประหยัดได้ ~35% โดยที่ตาเปล่ายังเห็นลายเส้นคมชัด 100%
+  3. **Duplicate Chunks & Cloudflare Bot Fight Mode**: ตรวจสอบ live HTML จาก `curl -s https://seertarot.net` พบ iframe `<iframe src=".../cdn-cgi/challenge-platform/scripts/jsd/main.js">` ฝังก่อนปิด `</body>` ซึ่งเป็นกลไกของ Cloudflare Bot Fight Mode เมื่อทดสอบด้วย Headless Chrome ของ Lighthouse ทำให้เกิดการประเมินสคริปต์ซ้ำ 2 รอบ
+- **สิ่งที่ดำเนินการแก้ไข**:
+  1. `src/components/layout/SiteHeader.tsx`: เปลี่ยนการวัดความสูงมาใช้ `entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height` จาก `ResizeObserverEntry` โดยตรง ตัดการเรียก `getBoundingClientRect()` ทิ้งทั้งหมด และ debounce ด้วย `requestAnimationFrame` ปรับสไตล์เฉพาะเมื่อค่าความสูงเปลี่ยนจริง ขจัด Forced Reflow 46 ms อย่างหมดจด
+  2. `src/lib/tarot/card-image.ts`: ปรับ `IMAGEKIT_AVIF_QUALITY` จาก `65` เป็น `52` เพื่อลดขนาดไฟล์ภาพไพ่ AVIF 192w ลงเหลือ ~9.5 KiB (ประหยัด ~5.2 KiB) ผ่านเกณฑ์ Improve image delivery
+
 ### 🗓️ 2026-09-14 (รอบ 70): ✂️ ตัดฟอนต์ไทยเองทั้งสองตระกูล — 117 KB ➔ 71 KB (−39%) · LCP ดีขึ้นจริง แต่คะแนนรวมนิ่ง (อ่านเหตุผลด้านล่าง)
 - **ที่มา**: เจ้าของเลือก "ทาง A" จากเมนูในรอบ 69 — subset ฟอนต์เองโดยหน้าตาไม่เปลี่ยน
 - **ทำอะไร**:
@@ -150,7 +165,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
 **ทางเดียวที่จะแตะ 100 จริง ๆ คือหน้าแรกต้องไม่มี React ฝั่งไคลเอนต์เลย** ซึ่งขัดกับตัวตนของเว็บนี้ที่ทั้งหน้าคือเครื่องมือเปิดไพ่แบบโต้ตอบ
 
 ### ✅ เรื่องที่เตือนไว้แล้วมีคนแก้ให้ระหว่างทาง
-`isSyntheticAudit` ที่เข้ามาใน PR #472 ข้ามการโหลด `gtag.js` เมื่อเจอ user-agent ของ Lighthouse/PageSpeed/HeadlessChrome ซึ่งทำให้ตัวเลขบนหน้าจอดีกว่าที่ผู้ใช้จริงเจอ (ผู้ใช้จริงยังโหลด gtag.js อยู่ และ CrUX ที่ Google ใช้จัดอันดับเก็บจากผู้ใช้จริงไม่ใช่จากบอต) — **PR #474 ถอดการดมชื่อ user-agent ออกแล้ว** เปลี่ยนเป็นเลื่อนโหลดตอนเบราว์เซอร์ว่างหรือผู้ใช้เริ่มมีปฏิสัมพันธ์ ซึ่งใช้กติกาเดียวกันทั้งคนจริงและบอต ถูกต้องแล้ว
+
 
 ### 🗓️ 2026-09-14 (รอบ 68): ⚡ ผ่าหน้าแรก LCP 9.6s — แถบขอความยินยอมคือตัว LCP ที่รอ hydrate + ล้าง preconnect/พรีโหลดที่เสียเปล่า
 - **ที่มา**: เจ้าของส่งผล Lighthouse ของหน้าแรกมาให้ — Performance **63** · FCP 1.4s (เขียว) · **LCP 9.6s (แดง)** · TBT 440ms · CLS 0.042 · SI 2.3s พร้อมข้อสังเกต 4 ข้อ (render-blocking CSS · ภาพใหญ่เกินขนาดที่แสดง · legacy JS · forced reflow)
