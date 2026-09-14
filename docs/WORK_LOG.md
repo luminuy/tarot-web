@@ -36,6 +36,24 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-14 (รอบ 62): 🛡️ กวาดล้างบั๊กเชิงลึกทั่วระบบ — ป้องกัน 500 Error จาก Malformed JSON ใน 11 API Endpoints และหน้าแชร์ /s/[id] รองรับสองภาษา (INC-0147)
+
+- **ที่มา**: ดำเนินการตรวจสอบและเจาะลึกหาบั๊กทั่วทั้งระบบแบบ Zero-Tolerance ตามคำสั่งเจ้าของระบบ "เจาะลึกหา บัคอย่างละเอียดอีก ต้องไม่เหลือเลย"
+- **จุดบกพร่องที่ค้นพบและแก้ไข**:
+  1. **Malformed/Empty JSON Request Crash (HTTP 500 แทนที่จะตอบ 400)**:
+     - ค้นพบ 11 เส้นทาง API ที่เรียก `await request.json()` โดยตรงโดยไม่มี fallback เมื่อได้รับ JSON เสียหาย (SyntaxError) หรือ Empty Body ข้อผิดพลาดจะหลุดไปที่ top-level `catch` block และส่งกลับ HTTP 500 Internal Server Error หลอกให้ระบบ Monitoring แจ้งเตือนข้อผิดพลาดเซิร์ฟเวอร์ทั้งที่เป็น Client-side Input Error
+     - **เส้นทางที่แก้ไข**: `auth/email/login`, `auth/email/signup`, `auth/email/forgot`, `auth/email/reset`, `account/change-password`, `admin/readers`, `admin/readers/[id]`, `admin/redeem` (POST/PATCH), `marketplace/console/queue`, `marketplace/tickets`, `marketplace/payments`
+     - **วิธีแก้**: ใช้ `(await request.json().catch(() => null)) as Record<string, unknown> | null` พร้อมตรวจสอบ `if (!body || typeof body !== "object") return NextResponse.json({ error: ... }, { status: 400 })` ครบทุกจุด
+  2. **หน้าแชร์การ์ดคำทำนาย (`/s/[id]`) รองรับสองภาษาและการเปลี่ยนเส้นทางอัจฉริยะ**:
+     - เดิมทีหน้า `/s/[id]` บังคับใส่ `<meta httpEquiv="refresh" content="1; url=/" />` และเรนเดอร์ภาษาไทยล้วน ทำให้ผู้ใช้ต่างชาติหรือผู้เปิดอ่านที่มีคุกกี้ `seertarot_lang=en` ถูกบังคับกลับไปหน้าแรกภาษาไทย
+     - **วิธีแก้**: เพิ่มฟังก์ชัน `detectIsEnglish(meta?.title)` ที่อ่านทั้งคุกกี้และหัวข้อการ์ด พร้อมห่อหุ้ม `try/catch` ไม่ให้พังเมื่อรันนอก Request Scope นำทางผู้ใช้ไปยัง `/en` หรือ `/` ตามภาษาที่เลือก พร้อมข้อความและ Alt text สองภาษาครบถ้วน
+  3. **เพิ่มด่านตรวจความทนทานอัตโนมัติ (Automated Resilience Regression Gates)**:
+     - เพิ่ม Step 8 ใน `scripts/qa/test-email-auth.ts` ยิงทดสอบ JSON เสียและ Empty Body ต่อ 4 เส้นทาง Auth บังคับให้ต้องตอบ HTTP 400
+     - เพิ่ม Step 14 ใน `scripts/qa/test-marketplace-readers.ts` ยิงทดสอบ JSON เสียและ Empty Body ต่อเส้นทางบัตรคิวและการชำระเงิน บังคับให้ต้องตอบ HTTP 400
+- **ผลการตรวจยืนยัน**:
+  - `npm run typecheck` ➔ 0 errors
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+
 ### 🗓️ 2026-09-14 (รอบ 61): 🗺️ เขียนแผนแม่บทใหม่ทั้งแผ่น — บอกสถานะผิด 4 ข้อเพราะไม่มีด่านไหนส่อง `docs/plans/` (INC-0146)
 
 - **ที่มา**: เจ้าของถามว่านโยบายโควตา guest ที่รันอยู่คืออะไร แล้วพบว่า `MASTER_PLAN` ยังขึ้น "รอเจ้าของเคาะ" ทั้งที่เคาะไปแล้ว 2–5 วัน

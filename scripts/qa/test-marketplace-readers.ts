@@ -282,9 +282,41 @@ async function runTest() {
   const purgedCount = await cleanupExpiredTickets();
   console.log(`  ✓ 13. PDPA Data Retention: Auto-cleanup expired tickets (${purgedCount} purged)`);
 
+  // 14. Malformed JSON Body Resilience (POST /api/marketplace/tickets & POST /api/marketplace/payments)
+  const { POST: postTicketRoute } = await import("../../src/app/api/marketplace/tickets/route");
+  const { POST: postPaymentRoute } = await import("../../src/app/api/marketplace/payments/route");
+
+  for (const [name, handler, url] of [
+    ["tickets", postTicketRoute, "https://seertarot.net/api/marketplace/tickets"],
+    ["payments", postPaymentRoute, "https://seertarot.net/api/marketplace/payments"],
+  ] as const) {
+    const brokenRes = await handler(
+      new Request(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://seertarot.net" },
+        body: "invalid{json",
+      })
+    );
+    if (brokenRes.status !== 400) {
+      throw new Error(`❌ ${name} ไม่ตอบ HTTP 400 เมื่อได้รับ JSON เสีย (ตอบ ${brokenRes.status})`);
+    }
+
+    const emptyRes = await handler(
+      new Request(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://seertarot.net" },
+        body: "",
+      })
+    );
+    if (emptyRes.status !== 400) {
+      throw new Error(`❌ ${name} ไม่ตอบ HTTP 400 เมื่อได้รับ empty body (ตอบ ${emptyRes.status})`);
+    }
+  }
+  console.log("  ✓ 14. Malformed & Empty JSON Resilience: ตอบ HTTP 400 ป้องกัน 500 error ในคิวและการชำระเงิน");
+
   // Cleanup test reader
   await deleteReader(created.id);
-  console.log("  ✓ 13. ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
+  console.log("  ✓ 15. ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
 
   console.log("\n✨ [QA] Marketplace M4-M7 Test ผ่านครบทุกด่าน 100%!");
 }

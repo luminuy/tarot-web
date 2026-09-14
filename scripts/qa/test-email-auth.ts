@@ -129,9 +129,45 @@ async function runEmailAuthQATests() {
   }
   console.log("  ✓ 7. OAuth Account Linking: ผูกและค้นหาบัญชีข้าม Identity สำเร็จ");
 
+  // 8. Malformed & Empty JSON Body Resilience Guard
+  const { POST: loginPost } = await import("../../src/app/api/auth/email/login/route");
+  const { POST: signupPost } = await import("../../src/app/api/auth/email/signup/route");
+  const { POST: forgotPost } = await import("../../src/app/api/auth/email/forgot/route");
+  const { POST: resetPost } = await import("../../src/app/api/auth/email/reset/route");
+
+  for (const [name, handler, url] of [
+    ["login", loginPost, "https://seertarot.net/api/auth/email/login"],
+    ["signup", signupPost, "https://seertarot.net/api/auth/email/signup"],
+    ["forgot", forgotPost, "https://seertarot.net/api/auth/email/forgot"],
+    ["reset", resetPost, "https://seertarot.net/api/auth/email/reset"],
+  ] as const) {
+    const brokenRes = await handler(
+      new Request(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://seertarot.net" },
+        body: "invalid{json",
+      })
+    );
+    if (brokenRes.status !== 400) {
+      throw new Error(`❌ ${name} ไม่ตอบ HTTP 400 เมื่อได้รับ JSON เสีย (ตอบ ${brokenRes.status})`);
+    }
+
+    const emptyRes = await handler(
+      new Request(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://seertarot.net" },
+        body: "",
+      })
+    );
+    if (emptyRes.status !== 400) {
+      throw new Error(`❌ ${name} ไม่ตอบ HTTP 400 เมื่อได้รับ empty body (ตอบ ${emptyRes.status})`);
+    }
+  }
+  console.log("  ✓ 8. Malformed & Empty JSON Resilience: ตอบ HTTP 400 ป้องกัน 500 error ทุกเส้นทาง");
+
   // Cleanup
   await softDeleteUser(newUser.id);
-  console.log("  ✓ 8. Cleanup: ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
+  console.log("  ✓ 9. Cleanup: ทำความสะอาดข้อมูลทดสอบเรียบร้อย");
 
   console.log("\n✨ [QA] Email Auth Routes & Security ผ่านครบทุกด่าน 100%!");
 }

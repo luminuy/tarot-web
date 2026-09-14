@@ -28,11 +28,20 @@ async function readMeta(id: string): Promise<{ title: string; spread: string } |
   }
 }
 
+async function detectIsEnglish(metaTitle?: string): Promise<boolean> {
+  if (metaTitle && /Tarot Reading/i.test(metaTitle)) return true;
+  try {
+    const cookieStore = await cookies();
+    return cookieStore.get("seertarot_lang")?.value === "en";
+  } catch {
+    return false;
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const meta = await readMeta(id);
-  const cookieStore = await cookies();
-  const isEn = cookieStore.get("seertarot_lang")?.value === "en" || /Tarot Reading/i.test(meta?.title || "");
+  const isEn = await detectIsEnglish(meta?.title);
 
   const title = meta?.title || (isEn ? "Tarot Reading 1909 Rider-Waite on SeerTarot" : "คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot");
   const description = meta?.spread
@@ -80,8 +89,7 @@ export default async function SharePage({ params }: Props) {
   const { id } = await params;
   const valid = ID_RE.test(id);
   const meta = await readMeta(id);
-  const cookieStore = await cookies();
-  const isEn = cookieStore.get("seertarot_lang")?.value === "en" || /Tarot Reading/i.test(meta?.title || "");
+  const isEn = await detectIsEnglish(meta?.title);
   const targetUrl = isEn ? "/en" : "/";
 
   return (
