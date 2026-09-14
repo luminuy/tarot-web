@@ -51,13 +51,63 @@ import {
 import type { ReadingEvent } from "@/lib/ai/types";
 
 /**
- * เรียงให้ Qwen มาก่อนด้วยเหตุผลเดียวกับฝั่ง Groq — ภาษาไทยเป็นธรรมชาติที่สุด
- * `gpt-oss-120b` เป็นตัวสำรอง เร็วกว่าแต่สำนวนไทยแข็งกว่า
+ * ⚠️⚠️ โมเดลทั้งสองตัวบน Cerebras เป็น **reasoning model ที่คิดก่อนตอบ**
+ * และเอกสารทางการเขียนชัดว่า **"Reasoning tokens count toward max_completion_tokens"**
+ * ---------------------------------------------------------------------------
+ * แปลว่าถ้าไม่จัดการ โทเค็นความคิดจะไปกินงบที่เรากันไว้ให้ "คำอ่าน" จนคำอ่านโดนตัดกลาง
+ * ซึ่งคืออาการเดียวกับปัญหาที่เราพยายามแก้ตั้งแต่แรกเป๊ะ แค่ย้ายไปโผล่ที่เจ้าใหม่
+ *
+ * ตารางความสามารถจริงจาก inference-docs.cerebras.ai/capabilities/reasoning (2026-09-14)
+ * **แต่ละตัวคุมไม่เหมือนกัน ห้ามตั้งค่าชุดเดียวใช้ทั้งคู่**:
+ *
+ *   โมเดล          reasoning_effort ปริยาย   ปิดความคิด        reasoning_format: hidden
+ *   qwen-3.8-27b    high ⚠️                  ✅ ตั้ง none ได้    ❌ ไม่รองรับ
+ *   gpt-oss-120b    medium                   ❌ ต่ำสุดคือ low    ✅ รองรับ
+ *
+ * ทางที่เลือกและเหตุผล:
+ * - `qwen-3.8-27b` ➔ `reasoning_effort: "none"` ปิดความคิดทิ้งทั้งหมด
+ *   งานนี้คือเขียนร้อยแก้วตามโครงที่ prompt กำหนดไว้ละเอียดแล้ว ไม่ใช่โจทย์ที่ต้องคิดหลายชั้น
+ *   และฝั่ง Groq ก็ซ่อนความคิดทิ้งอยู่แล้วด้วย `reasoning_format: "hidden"` เหมือนกัน
+ * - `gpt-oss-120b` ➔ ปิดไม่ได้ จึงใช้ `low` + `hidden` แล้ว **เผื่องบเป็นสองเท่า**
+ *   ให้โทเค็นความคิดกินไปโดยไม่เบียดคำอ่าน (เรามีเพดาน 30,000 เหลือเฟืออยู่แล้ว)
+ *
+ * อีกเรื่องที่โชคดี: `qwen-3.8-27b` คืนความคิดแยกไว้ที่ `delta.reasoning`
+ * ไม่ปนกับ `delta.content` ➔ ตัวถอด JSON บางส่วนและด่านนับอักษรต่างด้าวของเราปลอดภัย
+ * **ห้ามเปลี่ยนไปอ่าน `delta.reasoning` เข้ามารวมเด็ดขาด** จะพังทั้งสองด่านทันที
  *
  * ⚠️ ชื่อโมเดลบน Cerebras **ไม่มี prefix ผู้ผลิต** ต่างจาก Groq
  *    Groq เขียน `qwen/qwen3.8-27b` · Cerebras เขียน `qwen-3.8-27b`
  */
-export const WORKING_CEREBRAS_MODELS = ["qwen-3.8-27b", "gpt-oss-120b"] as const;
+export interface CerebrasModelConfig {
+  id: string;
+  /** ระดับความคิด — "none" = ปิดสนิท (เฉพาะตัวที่รองรับ) */
+  reasoningEffort: "none" | "low" | "medium" | "high";
+  /** ส่ง `reasoning_format: "hidden"` ได้ไหม (ส่งไปทั้งที่ไม่รองรับอาจโดน 400) */
+  supportsHiddenReasoning: boolean;
+  /**
+   * ตัวคูณงบผลลัพธ์ เผื่อโทเค็นความคิดที่ปิดไม่ได้
+   * ปิดความคิดได้ = 1 (ไม่ต้องเผื่อ) · ปิดไม่ได้ = 2 (เผื่อให้ความคิดกินครึ่งหนึ่ง)
+   */
+  reasoningBudgetMultiplier: number;
+}
+
+/** เรียงให้ Qwen มาก่อนด้วยเหตุผลเดียวกับฝั่ง Groq — ภาษาไทยเป็นธรรมชาติที่สุด */
+export const CEREBRAS_MODEL_CONFIGS: readonly CerebrasModelConfig[] = [
+  {
+    id: "qwen-3.8-27b",
+    reasoningEffort: "none",
+    supportsHiddenReasoning: false,
+    reasoningBudgetMultiplier: 1,
+  },
+  {
+    id: "gpt-oss-120b",
+    reasoningEffort: "low",
+    supportsHiddenReasoning: true,
+    reasoningBudgetMultiplier: 2,
+  },
+] as const;
+
+export const WORKING_CEREBRAS_MODELS = CEREBRAS_MODEL_CONFIGS.map((m) => m.id);
 
 /**
  * เพดานโทเค็นรวมต่อคำขอเดียวของ Cerebras ชั้นฟรี (uncached TPM)
@@ -123,7 +173,13 @@ export async function* streamCerebrasReading(ctx: ReadingContext): AsyncGenerato
    * ทางนี้จึงแทบไม่ถูกใช้ — แต่ต้องมีไว้กันวันที่ prompt โตขึ้นแล้วไม่มีใครทันสังเกต
    */
   let userMessage = buildReadingMessage(ctx);
-  const budget = estTokens(systemInstruction) + maxReadingTokens;
+  // คิดจากตัวที่กินงบมากที่สุด เพื่อให้ prompt ที่ตัดแล้วพอสำหรับทุกโมเดลในสายพาน
+  const worstCaseBudget = Math.max(
+    ...CEREBRAS_MODEL_CONFIGS.map((c) =>
+      Math.min(CEREBRAS_OUTPUT_CEILING * 2, maxReadingTokens * c.reasoningBudgetMultiplier),
+    ),
+  );
+  const budget = estTokens(systemInstruction) + worstCaseBudget;
   if (budget + estTokens(userMessage) > CEREBRAS_TPM_LIMIT) {
     userMessage = buildReadingMessage(ctx, { omitExemplar: true });
     recordEvent(
@@ -133,17 +189,27 @@ export async function* streamCerebrasReading(ctx: ReadingContext): AsyncGenerato
     );
   }
 
-  for (const model of WORKING_CEREBRAS_MODELS) {
+  for (const config of CEREBRAS_MODEL_CONFIGS) {
+    const model = config.id;
     const state = createReadingStreamState();
     const usage = createEmptyUsage();
+
+    /*
+     * งบที่ส่งให้โมเดล = งบคำอ่าน × ตัวคูณเผื่อความคิด
+     * โทเค็นความคิดถูกนับรวมใน max_completion_tokens ➔ ถ้าไม่เผื่อ คำอ่านจะโดนตัดกลาง
+     */
+    const budgetTokens = Math.min(
+      CEREBRAS_OUTPUT_CEILING * 2,
+      maxReadingTokens * config.reasoningBudgetMultiplier,
+    );
 
     try {
       const controller = new AbortController();
       /*
-       * ⏱️ เพดานเวลาโตตามความยาวคำอ่าน คิดที่ ~1,200 tok/s (ต่ำกว่าที่เอกสารแจ้ง
-       * ไว้ ~1,850 เพื่อเผื่อจังหวะที่เซิร์ฟเวอร์แน่น) บวกเวลาเริ่มต้น 5 วินาที
+       * ⏱️ เพดานเวลาโตตามงบจริงที่ส่งไป (รวมโทเค็นความคิดแล้ว) คิดที่ ~1,200 tok/s
+       * ต่ำกว่าที่เอกสารแจ้งไว้ ~1,850 เพื่อเผื่อจังหวะที่เซิร์ฟเวอร์แน่น บวกเริ่มต้น 5 วินาที
        */
-      const timeoutMs = Math.min(45000, 5000 + Math.ceil((maxReadingTokens / 1200) * 1000));
+      const timeoutMs = Math.min(45000, 5000 + Math.ceil((budgetTokens / 1200) * 1000));
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const res = await fetch(cerebrasChatCompletionsEndpoint(), {
@@ -162,8 +228,12 @@ export async function* streamCerebrasReading(ctx: ReadingContext): AsyncGenerato
           ],
           response_format: { type: "json_object" },
           stream: true,
-          max_completion_tokens: maxReadingTokens,
+          max_completion_tokens: budgetTokens,
           temperature: 0.6,
+          // ⚠️ ห้ามตัดสองบรรทัดนี้ทิ้ง — ไม่ส่ง = Qwen คิดระดับ "high" แล้วกินงบคำอ่านจนโดนตัดกลาง
+          reasoning_effort: config.reasoningEffort,
+          // ส่ง hidden เฉพาะตัวที่รองรับ (qwen-3.8-27b ไม่รองรับ ส่งไปเสี่ยงโดน 400)
+          ...(config.supportsHiddenReasoning ? { reasoning_format: "hidden" } : {}),
         }),
       });
 

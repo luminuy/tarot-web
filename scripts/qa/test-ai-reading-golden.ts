@@ -13,7 +13,7 @@ import { ReadingSchema } from "../../src/lib/schema/reading";
 import { ALL_CARDS } from "../../src/data/cards";
 import { getSpread } from "../../src/data/spreads";
 import { WORKING_GROQ_MODELS } from "../../src/lib/ai/groq";
-import { CEREBRAS_MIN_CARDS, WORKING_CEREBRAS_MODELS } from "../../src/lib/ai/cerebras";
+import { CEREBRAS_MIN_CARDS, CEREBRAS_MODEL_CONFIGS, WORKING_CEREBRAS_MODELS } from "../../src/lib/ai/cerebras";
 import { resolveMaxReadingTokens } from "../../src/lib/ai/reading-stream";
 import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
 
@@ -139,6 +139,67 @@ async function main() {
   check(
     "cerebras.ts เพดานผลลัพธ์กว้างพอให้ผัง 12 ใบ (1,600 + 12 × 480 = 7,360) เขียนจบ",
     resolveMaxReadingTokens(12, 8000) === 7360,
+  );
+
+  /*
+   * 2.4 โทเค็นความคิดต้องไม่กินงบคำอ่าน
+   * ---------------------------------------------------------------------------
+   * เอกสาร Cerebras เขียนชัดว่า "Reasoning tokens count toward max_completion_tokens"
+   * และ `qwen-3.8-27b` ตั้งค่าปริยายไว้ที่ `reasoning_effort: "high"`
+   * ➔ ถ้าไม่ส่งค่าคุม โมเดลจะคิดยาวจนคำอ่านโดนตัดกลาง = อาการเดิมที่เรากำลังแก้อยู่
+   *
+   * กติกาถาวร: ตัวที่ปิดความคิดได้ต้องปิด · ตัวที่ปิดไม่ได้ต้องเผื่องบมากกว่าหนึ่งเท่า
+   */
+  check(
+    "cerebras.ts ส่ง reasoning_effort ทุกคำขอ (ไม่ปล่อยให้ Qwen ใช้ค่าปริยาย high)",
+    cerebrasSrc.includes("reasoning_effort: config.reasoningEffort"),
+  );
+  check(
+    "qwen-3.8-27b ปิดความคิดสนิท (reasoning_effort = none) เพราะปิดได้และงานนี้ไม่ต้องคิดหลายชั้น",
+    CEREBRAS_MODEL_CONFIGS.find((c) => c.id === "qwen-3.8-27b")?.reasoningEffort === "none",
+  );
+  check(
+    "qwen-3.8-27b ไม่ส่ง reasoning_format: hidden (เอกสารระบุว่าไม่รองรับ ส่งไปเสี่ยง 400)",
+    CEREBRAS_MODEL_CONFIGS.find((c) => c.id === "qwen-3.8-27b")?.supportsHiddenReasoning === false,
+  );
+  check(
+    "ทุกโมเดลที่ปิดความคิดไม่ได้ ต้องเผื่องบผลลัพธ์มากกว่า 1 เท่า",
+    CEREBRAS_MODEL_CONFIGS.every(
+      (c) => c.reasoningEffort === "none" || c.reasoningBudgetMultiplier > 1,
+    ),
+  );
+  // ต้องตัดคอมเมนต์ทิ้งก่อนตรวจ ไม่งั้นคำเตือนที่เขียนไว้ในคอมเมนต์เองจะทำให้ด่านตกทั้งที่โค้ดถูก
+  const stripComments = (src: string) =>
+    src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+  check(
+    "cerebras.ts อ่านเฉพาะ delta.content ไม่ดูด delta.reasoning เข้ามาปน (จะพังตัวถอด JSON + ด่านอักษรต่างด้าว)",
+    !/delta\??\.reasoning/.test(stripComments(cerebrasSrc)),
+  );
+
+  /*
+   * 2.5 งบรวมของทุกผัง × ทุกโมเดล ต้องอยู่ใต้เพดาน TPM ของ Cerebras
+   * คำนวณด้วยสูตรเดียวกับที่ `cerebras.ts` ใช้จริง — ไม่คัดลอกตัวเลขมาเขียนซ้ำ
+   * (บทเรียน INC-0136: เพดานที่นับ prompt รวมกับ max_tokens ต้องคำนวณก่อนทุกครั้งที่ขยับงบ)
+   */
+  const worstBudget = Math.max(
+    ...CEREBRAS_MODEL_CONFIGS.map((c) =>
+      Math.min(8000 * 2, resolveMaxReadingTokens(12, 8000) * c.reasoningBudgetMultiplier),
+    ),
+  );
+  check(
+    `งบผลลัพธ์หนักสุด (${worstBudget}) บวก prompt ผัง 12 ใบ ยังอยู่ใต้เพดาน TPM 28,000`,
+    worstBudget + 9011 <= 28000,
+  );
+
+  // 2.6 probe ต้องยิงด้วยค่าชุดเดียวกับ production ไม่งั้นวัดคนละอย่างกับของจริง
+  const probeSrc = fs.readFileSync(
+    path.resolve(process.cwd(), "scripts/qa/probe-cerebras.ts"),
+    "utf-8",
+  );
+  check(
+    "probe-cerebras.ts ส่ง reasoning_effort ชุดเดียวกับ production",
+    probeSrc.includes("reasoning_effort: config.reasoningEffort") &&
+      probeSrc.includes("config.reasoningBudgetMultiplier"),
   );
 
   // 3. route — นับ failover Groq → Gemini
