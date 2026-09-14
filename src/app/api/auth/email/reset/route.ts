@@ -24,7 +24,13 @@ export async function POST(request: Request) {
   const isEnglish = /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
 
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { error: isEnglish ? "Invalid request format" : "รูปแบบข้อมูลคำขอไม่ถูกต้อง" },
+        { status: 400 },
+      );
+    }
     const parsed = ResetSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || (isEnglish ? "Invalid input" : "ข้อมูลไม่ถูกต้อง") }, { status: 400 });

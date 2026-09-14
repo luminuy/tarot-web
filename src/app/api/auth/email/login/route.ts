@@ -31,10 +31,17 @@ export async function POST(request: Request) {
   const isEnglish = /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
 
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { error: isEnglish ? "Invalid request format" : "รูปแบบข้อมูลคำขอไม่ถูกต้อง" },
+        { status: 400 },
+      );
+    }
 
     // ด่านกันบอท (Turnstile) — ผ่านตลอดถ้ายังไม่ได้ตั้ง TURNSTILE_SECRET_KEY
-    const ts = await verifyTurnstile(body?.turnstileToken, getRequestIp(request));
+    const turnstileToken = typeof body?.turnstileToken === "string" ? body.turnstileToken : undefined;
+    const ts = await verifyTurnstile(turnstileToken, getRequestIp(request));
     if (!ts.ok) {
       console.warn(`[turnstile] login ปฏิเสธ: ${ts.reason}`);
       return NextResponse.json(
