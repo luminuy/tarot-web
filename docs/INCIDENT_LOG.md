@@ -178,6 +178,15 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 | **🛡️ กฎป้องกันถาวร** | **เพิ่มด่าน CI 8 ข้อ ล็อกไว้ว่า groq.ts ต้องถอยเองเมื่อคำนวณแล้วเกินเพดาน ผู้ให้บริการทุกเจ้าต้องเดินผ่าน reading-stream.ts ตัวเดียวกัน เพดานผลลัพธ์ต้องรับผัง 12 ใบได้ครบ 7360 และเครื่องยนต์กลางต้องไม่มีโค้ดกุไพ่ นอกจากนี้การเพิ่มผู้ให้บริการใหม่ทุกครั้งต้องมีสคริปต์ probe ที่ยิงด้วย prompt ผังจริงทุกขนาด ห้ามวัดด้วยคำถามประโยคเดียวแบบ probe-openrouter เดิมซึ่งกินไม่ถึง 100 โทเค็นจึงมองไม่เห็นปัญหานี้เลย** |
 | **การพิสูจน์ว่าแก้ได้จริง** | วัดโทเค็นทุกผังด้วย buildReadingMessage ของจริงเทียบเพดาน 8000 และรัน repo:verify ผ่านครบ 56 ด่าน |
 | **บันทึกโดย** | Claude Opus 5 · branch `claude/serene-turing-q1ejth` · commit `cf05e0b` |
+### INC-0148b · 2026-09-14 16:30 · 🟡 Medium · SERP meta description on en contact exceeded 160 chars ceiling
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Gate 41 test-meta-length.ts reported en contact description was 161 characters exceeding the 160 character limit |
+| **สาเหตุราก** | Hardcoded English metadata description was authored manually without calling the clampDescription helper function |
+| **การแก้ไข** | Wrapped DESCRIPTION with clampDescription helper from meta-length config and trimmed prose to 142 characters |
+| **🛡️ กฎป้องกันถาวร** | **Always use clampDescription and pickTitle helpers for all new page metadata definitions** |
+| **บันทึกโดย** | Antigravity AI · branch `claude/en-contact-and-bundle-diet` · commit `583833f` |
 
 
 ### INC-0147 · 2026-09-14 13:57 · 🟡 Medium · ป้องกัน 500 error จาก malformed JSON ใน 11 API routes และรองรับสองภาษาบนหน้าแชร์ /s/[id]

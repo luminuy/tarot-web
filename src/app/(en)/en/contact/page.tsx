@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { BRAND_SOCIAL_PROFILES, buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
+import { clampDescription } from "@/lib/config/meta-length";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
 
@@ -21,8 +22,9 @@ const contactOgImages = buildPageOgImage({
 
 /* ⚠️ Do not include "SeerTarot" in TITLE — layout appends " · SeerTarot" automatically */
 const TITLE = "Contact Us — Inquiries, Feedback & Technical Support";
-const DESCRIPTION =
-  "Official contact channels for the SeerTarot Sanctuary. Reach out for technical support, interpretation feedback, personal data privacy requests, or partnerships.";
+const DESCRIPTION = clampDescription(
+  "Official contact channels for SeerTarot Sanctuary. Reach out for technical support, reading feedback, data privacy requests, or partnerships."
+);
 
 const TIKTOK_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com"));
 
