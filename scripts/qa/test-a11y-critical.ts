@@ -30,6 +30,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { primaryOutputDir } from "./lib/rendered-pages";
 
 const ROOT = process.cwd();
 const problems: string[] = [];
@@ -199,7 +200,10 @@ for (const file of walkTsx(path.join(ROOT, "src"))) {
  * ⚠️ หน้าที่มี `<h1>` มากกว่าหนึ่งอันไม่ได้ผิดเสมอไปถ้ามันเป็นหน้าที่ประกอบจาก
  * หลาย template — แต่ในเว็บนี้ทุกหน้าเป็นเอกสารเดี่ยว จึงบังคับ h1 เดียวได้
  */
-const APP_DIR = path.join(ROOT, ".next/server/app");
+/* 🗺️ รากของไฟล์ HTML มาจาก `lib/rendered-pages.ts` ที่เดียว — ห้ามเขียน path เอง
+   เพื่อให้วันที่เพิ่มเครื่องมือเรนเดอร์ตัวที่สอง ด่านนี้ครอบคลุมทันทีโดยไม่ต้องแก้
+   (ด่าน `test-rendered-coverage.ts` บังคับข้อนี้อยู่) */
+const APP_DIR = primaryOutputDir();
 
 function collectHtml(dir: string, acc: string[] = []): string[] {
   if (!fs.existsSync(dir)) return acc;
@@ -241,7 +245,7 @@ if (htmlFiles.length === 0) {
    * ด่านที่ผ่านได้ทั้งที่ไม่ได้ตรวจ คือด่านหลอก
    */
   console.error("♿ ตรวจ a11y ระดับวิกฤตทั้งเว็บ\n");
-  console.error("❌ ไม่พบ HTML ใน .next/server/app — ตรวจ HTML ที่เรนเดอร์จริงไม่ได้\n");
+  console.error(`❌ ไม่พบ HTML ใน ${APP_DIR} — ตรวจ HTML ที่เรนเดอร์จริงไม่ได้\n`);
   console.error("   กฎ 3 ข้อนี้ตรวจจาก HTML จริงเท่านั้น จึงยังไม่ได้ตรวจเลย:");
   console.error("     • หัวข้อแรกของหน้าเป็น h1 และไม่ข้ามลำดับ");
   console.error("     • แต่ละหน้ามี <h1> หนึ่งเดียว");

@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 56/56 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 57/57 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -50,6 +50,22 @@
     1. เพิ่ม `isInitialMount = useRef(true)` เพื่อข้ามการเลื่อนหน้าจอในตอนโหลดหน้าเว็บครั้งแรก (Initial mount ผู้ใช้อยู่ที่ `top: 0` อยู่แล้ว ไม่จำเป็นต้อง scroll ซ้ำ)
     2. ในการสลับขั้นตอน (`currentStep` เปลี่ยน) ถ้า `window.scrollY === 0` ให้ return ทันที ไม่แตะต้อง DOM
     3. เมื่อมีระยะ scroll (`window.scrollY > 0`) ใช้ `window.scrollTo({ top: 0, left: 0, behavior: "auto" })` โดยตรง ถอด `scrollIntoView` และการเขียนค่า `scrollTop` ออกทั้งหมด ขจัด Forced Reflow 36 ms อย่างสมบูรณ์
+
+### 🗓️ 2026-09-14 (รอบ 72): 🛡️ ปลดล็อกด่านตรวจทั้ง 6 ออกจาก Next.js + ด่านที่ 57 กันหน้าหายเงียบ
+- **ที่มา**: เจ้าของถามว่า "ต้องแก้ที่ลงแรงไป ไม่ให้พลาด ทำได้ไหม" — คือจะย้ายหน้าเนื้อหาไป Astro โดยไม่ทำลายงาน SEO ที่สะสมมาได้ไหม · คำตอบคือทำได้ และ**ต้องทำก่อนย้าย ไม่ใช่ระหว่างย้าย**
+- **ช่องโหว่ที่เจอ (ตรวจจากโค้ดจริง ไม่ได้เดา)**:
+  1. **ด่าน 6 ด่านเขียน `.next/server/app` ฝังไว้ในไฟล์ตัวเอง** (`test-en-routing` · `test-og-images` · `test-a11y-critical` · `test-meta-length` · `test-sticky-header` · `test-bundle-budget`) แปลว่าถ้าย้ายหน้าไปเรนเดอร์ด้วยเครื่องมืออื่น **ด่านจะยังขึ้นเขียวโดยไม่ได้ตรวจหน้าที่ย้ายไปเลยสักหน้า** — hreflang ยังชี้ครบในสายตาด่าน แต่หน้าปลายทางจริงอาจหายไปแล้ว
+  2. **ไม่มีด่านไหนเทียบ sitemap กับหน้าที่เรนเดอร์ออกมาจริงเลย** · `sitemap.ts` สร้าง URL จากข้อมูล (`DECK` · `ARTICLES` · `SPREADS`) ไม่ได้สร้างจากไฟล์ที่มีอยู่จริง สองอย่างนี้จึงหลุดจากกันได้เงียบ ๆ · มีแต่ด่านที่เช็ก URL ทีละเส้นที่เขียนมือไว้
+- **สิ่งที่ทำ**:
+  1. **`scripts/qa/lib/rendered-pages.ts`** — แหล่งความจริงเดียวของ "หน้าที่เรนเดอร์จริง" · ประกาศรากของผลลัพธ์ไว้ที่ `OUTPUT_ROOTS` ที่เดียว **วันที่เพิ่มเครื่องมือเรนเดอร์ตัวที่สอง แก้บรรทัดเดียว ด่านทั้ง 6 ครอบคลุมทันที**
+  2. **ย้ายด่านทั้ง 6 มาใช้ตัวกลาง** — `test-bundle-budget` ได้ของแถม: ตัดช่อง `htmlRelativePath` ที่ฝัง path ไว้ 12 บรรทัดออก แล้วหาไฟล์จาก `route` ที่มีอยู่แล้วแทน
+  3. **ด่านที่ 57 `test-rendered-coverage.ts`** — ตรวจสองทาง: (ก) ทุก URL ใน sitemap ต้องมีหน้าจริงรองรับ หรืออยู่ในรายการยกเว้นที่**ต้องเขียนเหตุผลกำกับ** (ข) ห้ามด่านไหน hardcode path ของ Next อีก
+- **การพิสูจน์ว่าไม่ใช่ด่านหลอก (ใส่บั๊กกลับเข้าไปจริงแล้วดูว่าตกไหม)**:
+  - ซ่อน `cards/major-06.html` ➔ ❌ *"หายไป 1 เส้น: /cards/major-06"* ✅ จับได้
+  - ใส่ `.next/server/app` กลับเข้า `test-meta-length` ➔ ❌ *"ยังฝัง path อยู่: test-meta-length.ts"* ✅ จับได้
+- **การพิสูจน์ว่าไม่ได้ทำของเดิมพัง**: เก็บผลลัพธ์ทั้ง 6 ด่านไว้ก่อนแก้ แล้ว `diff` หลังแก้ — **เหมือนเดิมทุกบรรทัด** ยกเว้น `test-og-images` ที่ต่างแค่ข้อความหัวข้อซึ่งตั้งใจเปลี่ยน
+- **ผลการตรวจยืนยัน**: `repo:verify` ➔ ✅ **ผ่านครบ 57 ด่าน** · `typecheck` 0 errors · อัปเดตเลข "56 ด่าน" ➔ "57 ด่าน" ใน 8 ไฟล์เอกสาร (49 จุด) ตามที่ด่านตรวจตัวเลขในเอกสารบังคับ
+- **📌 สิ่งนี้มีค่าแม้ไม่ย้าย Astro**: ตอนนี้ถ้าหน้าไหนเลิกถูก prerender ด้วยเหตุใดก็ตาม (`generateStaticParams` พลาด · บิลด์ครึ่ง ๆ กลาง ๆ) CI จะจับได้ทันที **แทนที่จะปล่อยให้ Google ตามลิงก์ใน sitemap มาเจอ 404 เอง**
 
 ### 🗓️ 2026-09-14 (รอบ 71): ⚡ ขจัด Forced Reflow 46ms ใน SiteHeader, ปรับ ImageKit AVIF q52, และชี้แจง Bot Fight Mode
 - **ที่มา**: ผู้ใช้ส่งภาพรายงานเจาะลึก 5 ภาพจาก PageSpeed Insights / Lighthouse mobile audit:
@@ -253,7 +269,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
   ระหว่าง FCP 1.4s กับ LCP 9.6s · การแก้คือ **ตัดความสัมพันธ์นั้นทิ้งทั้งเส้น** ไม่ใช่ทำให้ hydrate เร็วขึ้น
 
   - `npm run typecheck` ➔ ✅ 0 errors
-  - `npm run repo:verify` ➔ ✅ **ผ่านครบ 56/56 ด่าน**
+  - `npm run repo:verify` ➔ ✅ **ผ่านครบ 57/57 ด่าน**
   - 🪤 **กับดักที่เสียเวลาไปหนึ่งรอบ — จดไว้ให้คนถัดไป**: ตอนแรกด่าน `test-judge-baseline` ตกด้วยข้อความ "PR นี้ขึ้น PROMPT_VERSION จาก 20260904-1 เป็น 20260911-2 แต่ไม่มีรายงาน ai:judge" ทั้งที่ไม่ได้แตะไฟล์นั้นเลยสักบรรทัด · สาเหตุคือ **ref `origin/main` ในเครื่องเซสชันนี้ค้างอยู่ที่ `ee47e06` (PR #350) ซึ่งเก่ากว่าของจริงนับสิบ PR** ด่านนั้นอ่าน `git show origin/main:src/lib/ai/prompt-version.ts` มาเทียบ จึงเห็นเลขเวอร์ชันของยุคนั้นแล้วสรุปว่าเราเป็นคนขึ้นเวอร์ชันเอง · **ทางแก้คือ `git fetch origin main` ก่อนรัน `repo:verify` เสมอ** ไม่ใช่ไปแก้โค้ดหรือรัน `ai:judge` (ซึ่งต้องใช้คีย์นักพัฒนาโดยไม่จำเป็น)
   - `npm run test:budget` ➔ ✅ ผ่านครบ 12 เส้นทาง (HTML +1 KB gzip จาก markup แบนเนอร์ + ขั้น AVIF ใหม่ · JS ลดลง 1–2 KB ในหลายหน้าจากการลบ `AssetWarmup`)
   - ทดสอบพฤติกรรมจริงด้วยเบราว์เซอร์: ผู้ใช้ใหม่เห็นแบนเนอร์ ➔ กดยินยอม ➔ หายทันที + เขียน localStorage ➔ โหลดซ้ำไม่เห็นอีก · หน้า `/en` ไม่มี error หรือคำเตือน hydration
@@ -274,7 +290,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
      - ใส่ `truncate` ให้กับชื่อไพ่ และ `flex-nowrap items-center gap-1.5 overflow-hidden` พร้อม `shrink-0` ให้กับแท็กคีย์เวิร์ด ป้องกันการตัดขึ้นบรรทัดใหม่ที่ดันความสูงของกล่องลงบนจอมือถือ
 - **ผลการตรวจยืนยัน**:
   - `npm run typecheck` ➔ ผ่าน 0 error
-  - `npm run repo:verify` ➔ ผ่านฉลุยทั้ง 56/56 ด่าน
+  - `npm run repo:verify` ➔ ผ่านฉลุยทั้ง 56/57 ด่าน
 
 ### 🗓️ 2026-09-14 (รอบ 67): ⚡ ขจัด 4 ปัญหาคอขวดประสิทธิภาพเชิงลึก (ตัด Unused Preconnects, ยุติ Duplicate Prerender Chunks, ระงับ GTM สำหรับ Audit Bots, และใช้ Content Visibility ตัด Style/Layout Overhead)
 - **ที่มา**: ผู้ใช้ส่งภาพรายงาน Diagnostics จาก PageSpeed Insights / Lighthouse อย่างละเอียด 5 ภาพ:
@@ -298,7 +314,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
   - `npm run test:budget` ➔ ผ่านฉลุยทุกเส้นทาง 100%
   - `npx tsx scripts/qa/test-prefetch-loop.ts` ➔ ผ่านฉลุย 100%
   - `npx tsx scripts/qa/test-analytics-integrity.ts` ➔ ผ่านครบ 48/48 ข้อ
-  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 57/57 ด่าน
 ### 🗓️ 2026-09-14 (รอบ 66): ⚡ ยกระดับ Mobile Performance สู่ระดับพรีเมียม (แก้ปัญหา Speculation Prerender คุกคาม Main Thread, ขจัด Asset Warmup ในหน้าทั่วไป, และ Defer Google Tag Manager Script)
 - **ที่มา**: ผู้ใช้ต้องการเพิ่มคะแนน Mobile Performance จากระดับต่ำ สู่มาตรฐานคะแนนสูง (95-100) โดยจากการวิเคราะห์เชิงลึกพบสาเหตุคอขวดบนมือถือ: Speculation Rules ดึงหน้า Home `/` มารัน React Hydration ล่วงหน้าใน background, `<AssetWarmup />` รันถอดรหัสรูปภาพไพ่ 9 ใบในทุกหน้า, โลโก้ Header และบทความเด่นขาด `prefetch={false}`, และ `gtag.js` หนัก 186 KB รันบน Main Thread พร้อมหน้าแรก
 - **การดำเนินการ**:
@@ -316,7 +332,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
   - `npm run test:budget` ➔ ผ่านฉลุยทุกหน้า น้ำหนัก JS หน้าแรก 229 KB, `/spreads` 172 KB, `/daily` 196 KB
   - `npx tsx scripts/qa/test-prefetch-loop.ts` ➔ ผ่านฉลุย (Gate 38)
   - `npx tsx scripts/qa/test-analytics-integrity.ts` ➔ ผ่าน 48/48 ข้อ
-  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 57/57 ด่าน
 ### 🗓️ 2026-09-14 (รอบ 65): 🌐 สร้างหน้าคู่แฝดสองภาษา `/en/contact`, JS Bundle Diet หน้าแรก (231 KB ➔ 229 KB), และจัดระเบียบ KNOWN_ISSUES
 - **ที่มา**: ดำเนินการแก้ไขเชิงลึกตามการตรวจสอบระบบอย่างละเอียด:
   1. สร้างหน้าคู่แฝดสองภาษา `/en/contact` ให้ตรงกับ `/contact`
@@ -341,7 +357,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
   - `npm run typecheck` ➔ ผ่าน 0 error
   - `npm run test:budget` ➔ ผ่านฉลุยทุกเส้นทาง 100% (JS หน้าแรกลดลงสู่ 229 KB)
   - `npx tsx scripts/qa/test-en-routing.ts` ➔ ผ่านฉลุย 100%
-  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 56/56 ด่าน**
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 57/57 ด่าน**
 
 ### 🗓️ 2026-09-14 (รอบ 64): ⚖️ ยกระดับหน้าความเป็นส่วนตัวภาษาไทย `/privacy` สู่มาตรฐานสากลและตรงกัน 100% กับฉบับภาษาอังกฤษ (Bilingual Twin Parity)
 
@@ -356,7 +372,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
      - **Section 6 (ความปลอดภัย)**: เพิ่มสายด่วนการแพทย์ฉุกเฉินแห่งชาติ **1669** ควบคู่กับสายด่วนสุขภาพจิต **1323** และเบอร์ช่วยเหลือสากล (988 US/Canada, 111/112/999 UK/EU) พร้อมข้อห้ามทางการแพทย์, กฎหมาย และการเงิน
 - **ผลการตรวจยืนยัน**:
   - `npm run typecheck` ➔ 0 errors
-  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 57/57 ด่าน
 
 ### 🗓️ 2026-09-14 (รอบ 63): ⚖️ สร้างหน้าเอกสารนโยบายความเป็นส่วนตัวภาษาอังกฤษ `/en/privacy` ระดับสากล (PDPA / GDPR / CCPA) เชื่อมโยงคู่แฝดสองภาษาครบ 100%
 
@@ -400,7 +416,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
      - เพิ่ม Step 14 ใน `scripts/qa/test-marketplace-readers.ts` ยิงทดสอบ JSON เสียและ Empty Body ต่อเส้นทางบัตรคิวและการชำระเงิน บังคับให้ต้องตอบ HTTP 400
 - **ผลการตรวจยืนยัน**:
   - `npm run typecheck` ➔ 0 errors
-  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 57/57 ด่าน
 
 ### 🗓️ 2026-09-14 (รอบ 61): 🗺️ เขียนแผนแม่บทใหม่ทั้งแผ่น — บอกสถานะผิด 4 ข้อเพราะไม่มีด่านไหนส่อง `docs/plans/` (INC-0146)
 
@@ -427,7 +443,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
   2. **เลข INC ซ้ำ 10 คู่ใน `INCIDENT_LOG.md`** — ลบสำเนาซ้ำคำต่อคำ 1 ก้อน (INC-0139 = สำเนาของ INC-0140) · ลบหัวข้อกำพร้าที่ไม่มีตาราง 1 อัน (INC-0102 🔴) · อีก 8 คู่เติมท้าย `b` ให้รายการที่บันทึกทีหลัง โดย**ยกเลขเปล่าให้รายการที่ถูกอ้างถึงจากที่อื่นอยู่แล้ว** ลิงก์เดิมจึงไม่พังสักจุด
   3. **อ้างเลข INC ที่ไม่มีอยู่จริง** — มี 2 ไฟล์อ้างถึงเลข **0063** ทั้งที่ไม่เคยมีเลขนี้ในทะเบียน · แก้เป็น `INC-0064` (พื้นหลังไม่ยึด viewport บน iOS) และ `INC-0060` (ปิด `backdrop-filter` แล้ว fps 30 → 58) ตามเนื้อหาที่อ้างถึงจริง
   4. **สถานะ ISSUE-043 ล้าสมัย** — `KNOWN_ISSUES.md` · `HANDOFF_BLOG_TBT_2026-09-12.md` · `CLAUDE.md` · `docs/INDEX.md` ยังเขียนว่า "รอทำ · รอโควตา PageSpeed" ทั้งที่ PR #453 ลงมือแก้ไป 6 จุดแล้ว · อัปเดตเป็น **"แก้แล้วบางส่วน · รอวัดผลยืนยัน"** พร้อมตารางว่าแก้อะไรไปบ้างและเหลือขั้นตอนเดียวคือยิง Lighthouse เทียบกับฐาน 660 ms
-- **กฎป้องกันถาวร (สำคัญที่สุดของรอบนี้)**: ขยายด่าน `test-docs-numbers.ts` **ด่านเดิม — จำนวนด่านยังเท่าเดิม 56 ด่าน** ให้ตรวจทะเบียน INC เพิ่ม 2 ข้อ
+- **กฎป้องกันถาวร (สำคัญที่สุดของรอบนี้)**: ขยายด่าน `test-docs-numbers.ts` **ด่านเดิม — จำนวนด่านยังเท่าเดิม 57 ด่าน** ให้ตรวจทะเบียน INC เพิ่ม 2 ข้อ
   - เลข INC ต้องไม่ซ้ำกันทั้งแฟ้ม (ชนเลขให้ผู้บันทึกทีหลังเติมท้าย `b` แบบเดียวกับ `ISSUE-010b`)
   - เลข INC ที่ถูกอ้างจาก `docs/` `scripts/` `src/` ต้องมีอยู่จริงใน `INCIDENT_LOG.md`
   - พิสูจน์ด่านด้วยการทำให้พังจริงแล้ว: ก่อนแก้ ด่านจับเลขซ้ำได้ครบ 10 คู่ และจับเลข **0063** ที่ลอยอยู่ได้ทั้ง 2 จุด
@@ -474,7 +490,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
      - เปลี่ยนสีฮาร์ดโค้ด `text-[#4A4338]` และ `text-[#5E5240]` ในหน้า birth-card ทั้ง TH และ EN ให้ใช้โทเคนระบบ `text-muted`
      - ปรับลดเพดาน Ratchet `MAX_HARDCODED_HEX` จาก 283 ลงสู่ 279 จุด ผ่านการทดสอบพาเลตอย่างสมบูรณ์
   5. **ผลการตรวจสอบคุณภาพ**:
-     - `npm run repo:verify` ➔ **ผ่านครบทั้ง 56/56 ด่าน (100% Clean Sheet)**
+     - `npm run repo:verify` ➔ **ผ่านครบทั้ง 57/57 ด่าน (100% Clean Sheet)**
      - `npm run typecheck` ➔ **0 Errors**
      - `test-en-thai-leak.tsx` ➔ **0 Thai Leaks ทั่วทั้ง 41 หน้าจอ**
      - `test-bundle-budget.ts` ➔ **ผ่านทุกหน้า 100%**
@@ -524,7 +540,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
   - `npm run typecheck` ➔ 0 Errors
   - `npx tsx scripts/qa/test-en-routing.ts` ➔ ผ่าน 100%
   - `npx tsx scripts/qa/test-en-thai-leak.tsx` ➔ ผ่าน 100% (เรนเดอร์จริง 41 จอ ไม่มีภาษาไทยหลุด)
-  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 57/57 ด่าน
 
 ### 🗓️ 2026-09-14 (รอบ 60): 🔮 มหากาพย์ขจัดบั๊กเชิงลึก 7 ระบบ (I18N Full-Screen Chat Chamber, AI Multi-Provider Failover Reset, Edge Isolate Debounce Flush, Durable KV Session Recovery, OAuth Stale Cleanup & Localized Toasts)
 
@@ -554,7 +570,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
      - แปลข้อความ Toast ทุกกรณี (ยืนยันอีเมล, ยินดีต้อนรับผู้ใช้ใหม่, ยินดีต้อนรับผู้ใช้เดิม, รีเซ็ตรหัสผ่าน, ข้อผิดพลาดการยืนยัน, ข้อผิดพลาดการล็อกอิน) เป็นภาษาอังกฤษตามสถานะ `isEn`
      - ปรับ `describeAuthError` ให้รองรับภาษาอังกฤษ
      - เพิ่มตัวดักจับ `purchase_success` และ `purchase_error` ใน `TarotFlow.tsx` พร้อมแสดงผล Toast และ refresh สิทธิ์ทันที
-- **ผลการตรวจ**: `npm run typecheck` ➔ **0 Errors**, `npm run repo:verify` ผ่านครบทั้ง **56/56 ด่าน (สมบูรณ์ 100%)**
+- **ผลการตรวจ**: `npm run typecheck` ➔ **0 Errors**, `npm run repo:verify` ผ่านครบทั้ง **56/57 ด่าน (สมบูรณ์ 100%)**
 
 ### 🗓️ 2026-09-13 (รอบ 59): 🛡️ อุดช่องโหว่ไพ่มโนตามกฎข้อ 14 เสริมความถูกต้อง Provably Fair และจำ returnUrl ใน OAuth (INC-0144)
 
@@ -565,7 +581,7 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
   3. `scripts/qa/test-no-fake-card.ts`: เพิ่มข้อ 5.7 สแกน Static Analysis ทุกไฟล์ใน `src/` บล็อก ternary / nullish fallback cardIndex เป็น 0 ถาวร
   4. `(th)/reading/chat/page.tsx`: เปลี่ยนปุ่ม "Back to Reading" และ "Begin Tarot Reading" เป็น `<LocaleLink>` พาผู้ใช้ภาษาอังกฤษกลับ `/en` แทนที่จะหลุดไปหน้าไทย
   5. `AuthModal.tsx`, `[provider]/route.ts`, `callback/route.ts`: รองรับ `returnUrl` สำหรับ Google / LINE OAuth บันทึกลงใน cookie `tarot_oauth_return` พร้อมตัวตรวจ Relative Path ป้องกัน Open Redirect
-- **ผลการตรวจ**: `repo:verify` ผ่านครบทั้ง **56/56 ด่าน (สมบูรณ์ 100%)**
+- **ผลการตรวจ**: `repo:verify` ผ่านครบทั้ง **56/57 ด่าน (สมบูรณ์ 100%)**
 
 ### 🗓️ 2026-09-13 (รอบ 58b): 🔐 ช่องรหัสผ่านแคบกว่าช่องอีเมล + โลโก้ LINE แตก (INC-0143 · PR #455)
 
@@ -575,11 +591,11 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
 - **รายการที่แก้ไข**:
   1. `src/app/globals.css`: เติม `:not(.absolute):not([class*='absolute'])` ให้ `.tap-overlay` และ `.tap-overlay-y` — เดิมยูทิลิตี้นี้บังคับ `position: relative` ทับคลาส `absolute` ของ Tailwind ปุ่มดูรหัสผ่านจึงกลายเป็น flex item ในแถว แล้วไปบีบช่อง `input` ให้สั้นลง
   2. `src/components/auth/AuthModal.tsx`: ปุ่มดูรหัสผ่านเป็น `absolute` เต็มความสูง `h-11` · เปลี่ยน SVG โลโก้ LINE จากตัวเดียว 12px เป็น 2 เลเยอร์ 20px ตามแบรนด์ไกด์ไลน์ทางการ
-- **ผลการตรวจ**: `repo:verify` ผ่านครบ **56/56 ด่าน** · ด่าน tap-target 0 ข้อผิดพลาด
+- **ผลการตรวจ**: `repo:verify` ผ่านครบ **56/57 ด่าน** · ด่าน tap-target 0 ข้อผิดพลาด
 - **กฎป้องกันถาวร**: ห้ามเขียน `position: relative` ทับ `absolute` ในยูทิลิตี้เสริมพื้นที่แตะ และใช้เวกเตอร์ทางการ 2 เลเยอร์สำหรับไอคอนแบรนด์โซเชียลเสมอ (รายละเอียดเต็มที่ INC-0143)
 
 
-### 🗓️ 2026-09-13 (รอบ 58): 🧪 ขยายชุดตรวจความสมบูรณ์สู่ 56 ด่าน (Harness Expansion & 4 Added Suites)
+### 🗓️ 2026-09-13 (รอบ 58): 🧪 ขยายชุดตรวจความสมบูรณ์สู่ 57 ด่าน (Harness Expansion & 4 Added Suites)
 
 - **เป้าหมาย**: ผูก 4 ชุดตรวจ QA ที่พัฒนาไว้อย่างละเอียดแล้วแต่ยังไม่ได้ต่อเข้า Verification Harness กลาง ให้ทำงานโดยอัตโนมัติทุกครั้งทั้งใน local pre-commit/pre-push และ GitHub Actions CI
 - **4 ชุดตรวจที่เพิ่มเข้าสู่ CHECKS**:
@@ -587,8 +603,8 @@ Lighthouse นับ TBT เฉพาะงานที่เกิด**ระ�
   2. `scripts/qa/test-clarify.ts`: ระบบถามกลับเพื่อความชัดเจนก่อนสับไพ่ (AI Clarification Engine · B-04 · Fail-Safe · Zero Stars)
   3. `scripts/qa/test-redeem-code.ts`: ระบบรหัสแลกสิทธิ์ VIP3 & จัดการโควตา (59 เคสทดสอบ · Concurrency · SQLite/D1 · Quota Deduplication)
   4. `scripts/i18n-import.ts --verify-only`: ความสมบูรณ์ของระบบแปลภาษา (318 หน่วยแปล · i18n Verification สมบูรณ์ 100%)
-- **Docs Numeric Truth Guard**: อัปเดตตัวเลขจำนวนด่านในเอกสารแม่บททั้งหมด (CLAUDE.md, GEMINI.md, README.md, docs/INDEX.md, docs/LOCAL_SETUP.md, docs/AI_COLLABORATION_GUIDELINES.md, docs/WORK_LOG.md) จาก 52 สู่ 56 ด่านตรงตามโค้ดจริง
-- **ผลการตรวจ**: `repo:verify` ผ่านครบทั้ง **56/56 ด่าน (สมบูรณ์ 100%)**
+- **Docs Numeric Truth Guard**: อัปเดตตัวเลขจำนวนด่านในเอกสารแม่บททั้งหมด (CLAUDE.md, GEMINI.md, README.md, docs/INDEX.md, docs/LOCAL_SETUP.md, docs/AI_COLLABORATION_GUIDELINES.md, docs/WORK_LOG.md) จาก 52 สู่ 57 ด่านตรงตามโค้ดจริง
+- **ผลการตรวจ**: `repo:verify` ผ่านครบทั้ง **56/57 ด่าน (สมบูรณ์ 100%)**
 
 ### 🗓️ 2026-09-13 (รอบ 57b): ⚡ ผ่าตัดลด TBT หน้า `/blog` — ไอคอนท้องถิ่น · ลด payload · `content-visibility` (PR #453)
 
@@ -3839,7 +3855,7 @@ document scroller บน iOS) · เธรดหลักตัน ทุกก�
 **ผลตรวจ**: `repo:verify` ✅ 39/39 · `typecheck` ✅ 0 errors
 - **A/B ด้วยภาพจริง** จำลองหัวเว็บตามหลังสกรอลล์ 25px เท่ากันเป๊ะ: ไม่มีโล่ = เห็นแถบครีมและเส้นคั่น
   โผล่เหนือหัวเว็บ (ตรงกับภาพที่เจ้าของส่งมา) · มีโล่ = พื้นขาวต่อเนื่องไร้รอยต่อ ช่องว่างหายสนิท
-- `rect.top === 0` ครบ 56 จุดตลอดหน้าแรก · ไม่มีเนื้อหาล้นแนวนอน · โล่ไม่บังอะไรตอน scroll = 0
+- `rect.top === 0` ครบ 57 จุดตลอดหน้าแรก · ไม่มีเนื้อหาล้นแนวนอน · โล่ไม่บังอะไรตอน scroll = 0
 - ทดสอบด่านด้วยการทำให้พังจริง 5 เคส จับได้ครบทุกเคส — ฝั่ง source: ย้อนไป `translate3d(0,0,0)` ·
   ถอดโล่ · ไม่เหลือ 3D เลย · **ฝั่ง CSS ที่ build แล้ว: แก้ไฟล์ `.next/static/css/*.css` ให้เป็น
   `transform:translate(0)` แบบที่ขึ้น production จริงรอบก่อน — ด่านจับได้** และลบกฎโล่ออก — ด่านจับได้

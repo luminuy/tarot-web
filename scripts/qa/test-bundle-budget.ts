@@ -21,6 +21,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { execSync, spawn, type ChildProcess } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { normalizeRoute, primaryOutputDir, renderedRouteMap } from "./lib/rendered-pages";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +29,6 @@ const ROOT = path.resolve(__dirname, "../..");
 
 export interface RouteBudget {
   route: string;
-  htmlRelativePath: string;
   maxJsGzipKb: number;
   maxHtmlGzipKb: number;
 }
@@ -41,7 +41,6 @@ export interface RouteBudget {
 export const BUDGETS: RouteBudget[] = [
   {
     route: "/",
-    htmlRelativePath: ".next/server/app/index.html",
     /*
      * Motion Shell Diet 2026-09-09: ถอด `motion` ออกจาก **เปลือก** ของหน้าแรกทั้งหมด
      * (`TarotFlow` · `SpreadCardSelector` · `ToastNotification` · `lib/motion`)
@@ -72,45 +71,38 @@ export const BUDGETS: RouteBudget[] = [
      * ฝั่งอังกฤษจะหลุดออก production ไปเงียบ ๆ โดยไม่มีด่านไหนเห็น
      */
     route: "/en",
-    htmlRelativePath: ".next/server/app/en.html",
     maxJsGzipKb: 232,
     maxHtmlGzipKb: 40,
   },
   {
     route: "/cards",
-    htmlRelativePath: ".next/server/app/cards.html",
     // Motion Diet Ratchet 2026-09-07: ถอด motion (39.9 KB gz) ออกจากหน้านี้ · วัดจริง 178 KB
     maxJsGzipKb: 190,
     maxHtmlGzipKb: 40, // Current: 35 KB
   },
   {
     route: "/cards/major-00",
-    htmlRelativePath: ".next/server/app/cards/major-00.html",
     // Motion Diet Ratchet 2026-09-07: ถอด motion ออกจากหน้าไพ่ทั้ง 156 หน้า · วัดจริง 187 KB
     maxJsGzipKb: 198,
     maxHtmlGzipKb: 30, // Current: 23 KB
   },
   {
     route: "/blog",
-    htmlRelativePath: ".next/server/app/blog.html",
     maxJsGzipKb: 180, // W-01/W-02 Ratchet (Actual Real User: 171 KB, total w/ polyfills: 210 KB)
     maxHtmlGzipKb: 65, // Current: 35 KB
   },
   {
     route: "/daily",
-    htmlRelativePath: ".next/server/app/daily.html",
     maxJsGzipKb: 198, // รัดหลังถอด motion ออกจากไพ่+พิธีไพ่ใบเดียว (วัดจริง 194 KB · รวม polyfill 232 KB)
     maxHtmlGzipKb: 25, // Current: 18 KB
   },
   {
     route: "/love/1-card",
-    htmlRelativePath: ".next/server/app/love/1-card.html",
     maxJsGzipKb: 201, // รัดหลังถอด motion ออกจากไพ่+พิธีไพ่ใบเดียว (วัดจริง 197 KB · รวม polyfill 236 KB)
     maxHtmlGzipKb: 25, // Current: 19 KB
   },
   {
     route: "/spreads",
-    htmlRelativePath: ".next/server/app/spreads.html",
     // รัดหลังแยกฟังก์ชันช่วยออกจากข้อมูลผัง 85 KB (วัดจริง 171 KB · เดิม 188 KB)
     maxJsGzipKb: 175,
     maxHtmlGzipKb: 45, // Current: 42 KB
@@ -125,19 +117,16 @@ export const BUDGETS: RouteBudget[] = [
      * คนละเส้นทางกับหน้ารายผัง
      */
     route: "/spreads/celtic-cross",
-    htmlRelativePath: ".next/server/app/spreads/celtic-cross.html",
     maxJsGzipKb: 175,
     maxHtmlGzipKb: 30,
   },
   {
     route: "/cards/all",
-    htmlRelativePath: ".next/server/app/cards/all.html",
     maxJsGzipKb: 178, // W-01/W-02 Ratchet (Actual Real User: 173 KB, total w/ polyfills: 212 KB)
     maxHtmlGzipKb: 45, // Current: 38 KB
   },
   {
     route: "/cards/birth-card",
-    htmlRelativePath: ".next/server/app/cards/birth-card.html",
     maxJsGzipKb: 190, // W-03 Ratchet (Actual Real User: 182 KB, target was <= 200 KB)
     /**
      * ⚠️ ตัวเลขในคอมเมนต์เดิมเขียนว่า "Current: 15 KB" ซึ่ง **ไม่ตรงกับของจริงมานานแล้ว**
@@ -159,15 +148,14 @@ export const BUDGETS: RouteBudget[] = [
   },
   {
     route: "/en/cards/birth-card",
-    htmlRelativePath: ".next/server/app/en/cards/birth-card.html",
     maxJsGzipKb: 190,
     maxHtmlGzipKb: 29,
   },
 ];
 
 function ensureBuildExists(): void {
-  const sampleTh = path.join(ROOT, ".next/server/app/(th)/page.js");
-  const sampleRoot = path.join(ROOT, ".next/server/app/page.js");
+  const sampleTh = path.join(primaryOutputDir(), "(th)/page.js");
+  const sampleRoot = path.join(primaryOutputDir(), "page.js");
   const buildManifest = path.join(ROOT, ".next/build-manifest.json");
   if (!fs.existsSync(sampleTh) && !fs.existsSync(sampleRoot) && !fs.existsSync(buildManifest)) {
     console.log("📦 ไม่พบไฟล์ผลลัพธ์ build — กำลังรัน npm run build...");
@@ -215,7 +203,16 @@ export async function testBundleBudget(): Promise<boolean> {
   ensureBuildExists();
 
   // ตรวจสอบว่าต้องเปิดเซิร์ฟเวอร์ชั่วคราวสำหรับ dynamic SSR routes หรือไม่
-  const needsServer = BUDGETS.some((b) => !fs.existsSync(path.join(ROOT, b.htmlRelativePath)));
+  /*
+ * 🗺️ หาไฟล์ HTML จาก **เส้นทาง** ไม่ใช่จาก path ที่เขียนมือ
+ * ของเดิมตารางงบแบกช่อง `htmlRelativePath` ที่ฝัง `.next/server/app/...` ไว้ 12 บรรทัด
+ * ซึ่งแปลว่าถ้าหน้าไหนย้ายไปเรนเดอร์ด้วยเครื่องมืออื่น ด่านนี้จะหาไฟล์ไม่เจอแล้วถอยไป
+ * ยิงผ่านเซิร์ฟเวอร์แทนแบบเงียบ ๆ · ตอนนี้ map มาจาก `lib/rendered-pages.ts` ที่เดียว
+ */
+const routeToFile = renderedRouteMap();
+const htmlFileFor = (route: string) => routeToFile.get(normalizeRoute(route))?.file;
+
+const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
   let serverProcess: ChildProcess | null = null;
   const TEST_PORT = 3892;
 
@@ -247,8 +244,8 @@ export async function testBundleBudget(): Promise<boolean> {
   try {
     for (const b of BUDGETS) {
       let html = "";
-      const fullHtmlPath = path.join(ROOT, b.htmlRelativePath);
-      if (fs.existsSync(fullHtmlPath)) {
+      const fullHtmlPath = htmlFileFor(b.route) ?? "";
+      if (fullHtmlPath && fs.existsSync(fullHtmlPath)) {
         html = fs.readFileSync(fullHtmlPath, "utf8");
       } else if (serverProcess) {
         html = await fetchHtml(`http://127.0.0.1:${TEST_PORT}${b.route}`);

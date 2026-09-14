@@ -22,11 +22,15 @@ import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { BRAND_SUFFIX, TITLE_MAX, DESCRIPTION_MAX } from "../../src/lib/config/meta-length";
+import { primaryOutputDir } from "./lib/rendered-pages";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "../..");
-const APP_DIR = path.join(ROOT, ".next/server/app");
+/* 🗺️ รากของไฟล์ HTML มาจาก `lib/rendered-pages.ts` ที่เดียว — ห้ามเขียน path เอง
+   เพื่อให้วันที่เพิ่มเครื่องมือเรนเดอร์ตัวที่สอง ด่านนี้ครอบคลุมทันทีโดยไม่ต้องแก้
+   (ด่าน `test-rendered-coverage.ts` บังคับข้อนี้อยู่) */
+const APP_DIR = primaryOutputDir();
 
 /** เผื่อระยะหายใจให้ description ที่ต่อท้ายด้วยข้อมูลจริงของแต่ละหน้า (เช่นชื่อไพ่ยาว) */
 const DESCRIPTION_HARD_MAX = DESCRIPTION_MAX + 5;

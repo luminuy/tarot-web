@@ -21,6 +21,7 @@ import { ARTICLES } from "../../src/data/articles";
 import { SPREAD_TOPICS } from "../../src/data/spread-topics";
 import { buildAlternates, SITE_ORIGIN } from "../../src/lib/config/site";
 import { EN_TWIN_ROUTES, hasEnglishTwin, localeHref } from "../../src/lib/i18n/paths";
+import { primaryOutputDir } from "./lib/rendered-pages";
 
 const ROOT = process.cwd();
 const TH_APP = "src/app/(th)";
@@ -402,8 +403,9 @@ function thaiRatioPercent(htmlFile: string): number {
 
 ensureBuildExists();
 
-const englishHtml = collectHtml(path.join(ROOT, ".next/server/app/en"), []);
-const englishRoot = path.join(ROOT, ".next/server/app/en.html");
+const APP_DIR = primaryOutputDir();
+const englishHtml = collectHtml(path.join(APP_DIR, "en"), []);
+const englishRoot = path.join(APP_DIR, "en.html");
 if (fs.existsSync(englishRoot)) englishHtml.push(englishRoot);
 
 check("build มีหน้าอังกฤษให้ตรวจ (อย่างน้อย 100 หน้า)", englishHtml.length >= 100, `พบ ${englishHtml.length}`);
@@ -416,7 +418,7 @@ check("build มีหน้าอังกฤษให้ตรวจ (อย�
 // ด่านจึงผ่านทั้งที่หัวเว็บหายไปจริง (พลาดมาแล้วตอนทดสอบด่านรอบนี้)
 const headerless = englishHtml
   .filter((file) => !fs.readFileSync(file, "utf-8").includes('data-site-header="'))
-  .map((file) => path.relative(path.join(ROOT, ".next/server/app"), file));
+  .map((file) => path.relative(APP_DIR, file));
 
 check(
   "ทุกหน้าอังกฤษที่ build ออกมามีหัวเว็บอยู่ใน HTML ดิบ",
@@ -425,7 +427,7 @@ check(
 );
 
 const leaking = englishHtml
-  .map((file) => ({ file: path.relative(path.join(ROOT, ".next/server/app"), file), ratio: thaiRatioPercent(file) }))
+  .map((file) => ({ file: path.relative(APP_DIR, file), ratio: thaiRatioPercent(file) }))
   .filter((entry) => entry.ratio > MAX_THAI_RATIO_PERCENT)
   .sort((a, b) => b.ratio - a.ratio);
 
@@ -441,7 +443,7 @@ for (const entry of leaking.slice(0, 10)) {
 // เกณฑ์ที่สอง — จับวลีไทยแม้จะมีจุดเดียวในหน้า (รูรั่วของเกณฑ์สัดส่วน · UX-17)
 const phraseLeaks = englishHtml
   .map((file) => ({
-    file: path.relative(path.join(ROOT, ".next/server/app"), file),
+    file: path.relative(APP_DIR, file),
     phrases: unregisteredThaiPhrases(file),
   }))
   .filter((entry) => entry.phrases.length > 0);

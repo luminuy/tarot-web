@@ -14,17 +14,14 @@
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { encodeOverlayText, truncateForOverlay, buildCloudinaryShareImageUrl } from "../../src/lib/media/cloudinary";
 import { buildPageOgImage } from "../../src/lib/media/og-image";
 import { getCategoryCardImage } from "../../src/lib/media/og-card-art";
 import { DECK } from "../../src/data/cards";
 import { ARTICLES } from "../../src/data/articles";
 import { SPREADS } from "../../src/data/spreads";
+import { primaryOutputDir } from "./lib/rendered-pages";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const ROOT = path.resolve(__dirname, "../..");
 
 console.log("=======================================================");
 console.log("🖼️  OG IMAGE INTEGRITY GUARD — ตรวจสอบมาตรฐานภาพแชร์ทั้งเว็บ");
@@ -113,7 +110,7 @@ console.log(`  ✓ ทดสอบผังพยากรณ์ครบทั�
 // -------------------------------------------------------------
 // 3. Integration Scan: ตรวจสอบ HTML ที่ Prerender จริง
 // -------------------------------------------------------------
-console.log("── 3. ตรวจสอบไฟล์ HTML ใน .next/server/app ──");
+console.log("── 3. ตรวจสอบไฟล์ HTML ที่เรนเดอร์จริง ──");
 
 function collectHtml(dir: string, acc: string[] = []): string[] {
   if (!fs.existsSync(dir)) return acc;
@@ -125,9 +122,12 @@ function collectHtml(dir: string, acc: string[] = []): string[] {
   return acc;
 }
 
-const appHtmlDir = path.join(ROOT, ".next/server/app");
+/* 🗺️ รากของไฟล์ HTML มาจาก `lib/rendered-pages.ts` ที่เดียว — ห้ามเขียน path เอง
+   เพื่อให้วันที่เพิ่มเครื่องมือเรนเดอร์ตัวที่สอง ด่านนี้ครอบคลุมทันทีโดยไม่ต้องแก้
+   (ด่าน `test-rendered-coverage.ts` บังคับข้อนี้อยู่) */
+const appHtmlDir = primaryOutputDir();
 if (!fs.existsSync(appHtmlDir)) {
-  console.log("⚠️ ไม่พบโฟลเดอร์ .next/server/app — กรุณารัน npm run build ก่อน");
+  console.log(`⚠️ ไม่พบโฟลเดอร์ ${appHtmlDir} — กรุณารัน npm run build ก่อน`);
   process.exit(1);
 }
 
