@@ -88,11 +88,9 @@ export function RootHtml({
     <html lang={locale} className={fontVariables}>
       <head>
         <meta charSet="utf-8" />
-        {/* Preconnect & DNS-Prefetch ไปยัง AI Providers เพื่อลด Network Latency ทันที */}
-        <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
-        <link rel="preconnect" href="https://api.groq.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://api.groq.com" />
+        {/* Preconnect & DNS-Prefetch ไปยัง CDN รูปภาพไพ่ (ImageKit) เพื่อเร่งความเร็ว LCP */}
+        <link rel="preconnect" href="https://ik.imagekit.io" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://ik.imagekit.io" />
 
         {/* Speculation Rules API — อุ่นหน้าล่วงหน้าในเบราว์เซอร์
             ⚠️ กฎอยู่ที่ ./speculation-rules.ts ห้ามเขียนออบเจ็กต์ดิบตรงนี้ (ด่านที่ 38 บังคับ)

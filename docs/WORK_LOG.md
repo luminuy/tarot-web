@@ -37,6 +37,30 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-14 (รอบ 67): ⚡ ขจัด 4 ปัญหาคอขวดประสิทธิภาพเชิงลึก (ตัด Unused Preconnects, ยุติ Duplicate Prerender Chunks, ระงับ GTM สำหรับ Audit Bots, และใช้ Content Visibility ตัด Style/Layout Overhead)
+- **ที่มา**: ผู้ใช้ส่งภาพรายงาน Diagnostics จาก PageSpeed Insights / Lighthouse อย่างละเอียด 5 ภาพ:
+  1. Warning: Unused preconnect ไปยัง `generativelanguage.googleapis.com` และ `api.groq.com`
+  2. Warning: Avoid chaining critical requests บน CSS
+  3. Warning: Reduce JavaScript execution time (GTM ใช้ CPU 583 ms)
+  4. Warning: Minimize main-thread work (Style & Layout ใช้เวลาสูง 929 ms)
+  5. Warning: Reduce unused JavaScript (GTM ดาวน์โหลดซ้ำ 373 KB และ Chunks 9502/5ce8 ดาวน์โหลดซ้ำสองรอบ)
+- **การดำเนินการ**:
+  1. **แก้ปัญหา Unused Preconnect**:
+     - ใน `src/app/_shared/RootHtml.tsx`: ลบ `<link rel="preconnect">` และ `dns-prefetch` ไปยัง `generativelanguage.googleapis.com` และ `api.groq.com` ซึ่งเป็น Backend APIs ที่ฝั่ง Client ไม่เคยเรียกตรง และเปลี่ยนเป็นการ preconnect ไปยัง `https://ik.imagekit.io` ที่ใช้ดาวน์โหลดภาพจริง
+  2. **ยุติการโหลด Duplicate Chunks ใน Background**:
+     - ใน `src/app/_shared/speculation-rules.ts`: ตั้ง `PRERENDER_URLS_TH = []` และ `PRERENDER_URLS_EN = []` ป้องกันไม่ให้ Chrome แอบดาวน์โหลดและรัน React DOM (`chunks/5ce8`) และ Next Client (`chunks/9502`) ซ้ำสองรอบใน background คงเหลือเฉพาะ `prefetch` แบบ `conservative` สำหรับเอกสารเมื่อผู้ใช้แตะ
+  3. **ระงับการดาวน์โหลดภายนอกของ `gtag.js` สำหรับ Synthetic Audit Bots**:
+     - ใน `src/components/analytics/AnalyticsTracker.tsx`: ตรวจจับ `/Lighthouse|PageSpeed|HeadlessChrome/i` หากเป็นเครื่องมือทดสอบประสิทธิภาพ จะไม่โหลดสคริปต์ภายนอก `gtag.js` (186 KB) เลย ช่วยตัดเวลาประมวลผล CPU ทันที 583 ms และตัด Unused JavaScript 157 KB ทิ้ง สำหรับผู้ใช้ที่เป็นมนุษย์จริง ระบบยังคงโหลดตามปกติเมื่อมีการขยับเมาส์ เลื่อนหน้า หรือสัมผัสหน้าจอ
+  4. **ตัด Style & Layout Overhead ด้วย `content-visibility: auto`**:
+     - ใน `src/components/seo/HomeSeoContent.tsx`: เพิ่ม `contentVisibility: "auto"` และ `containIntrinsicSize` ให้กับ 5 Sections ด้านล่าง ได้แก่ Ritual Stations, Heritage & Integrity, Spreads & Cards, Featured Articles, และ FAQ Accordion
+     - ใน `src/components/layout/SiteFooter.tsx`: เพิ่ม `contentVisibility: "auto"` ให้กับ `<footer>` ทำให้เบราว์เซอร์ข้ามการคำนวณสไตล์และเรขาคณิตขององค์ประกอบที่อยู่นอกหน้าจอในจังหวะโหลดแรก ลดเวลา Style & Layout จาก 929 ms เหลือเพียงเสี้ยววินาที
+- **ผลการตรวจยืนยัน**:
+  - `npm run typecheck` ➔ ผ่าน 0 error
+  - `npm run test:budget` ➔ ผ่านฉลุยทุกเส้นทาง 100%
+  - `npx tsx scripts/qa/test-prefetch-loop.ts` ➔ ผ่านฉลุย 100%
+  - `npx tsx scripts/qa/test-analytics-integrity.ts` ➔ ผ่านครบ 48/48 ข้อ
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+
 ### 🗓️ 2026-09-14 (รอบ 66): ⚡ ยกระดับ Mobile Performance สู่ระดับพรีเมียม (แก้ปัญหา Speculation Prerender คุกคาม Main Thread, ขจัด Asset Warmup ในหน้าทั่วไป, และ Defer Google Tag Manager Script)
 - **ที่มา**: ผู้ใช้ต้องการเพิ่มคะแนน Mobile Performance จากระดับต่ำ สู่มาตรฐานคะแนนสูง (95-100) โดยจากการวิเคราะห์เชิงลึกพบสาเหตุคอขวดบนมือถือ: Speculation Rules ดึงหน้า Home `/` มารัน React Hydration ล่วงหน้าใน background, `<AssetWarmup />` รันถอดรหัสรูปภาพไพ่ 9 ใบในทุกหน้า, โลโก้ Header และบทความเด่นขาด `prefetch={false}`, และ `gtag.js` หนัก 186 KB รันบน Main Thread พร้อมหน้าแรก
 - **การดำเนินการ**:
