@@ -258,7 +258,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 </div>
 
                 <h2 className="font-serif-th text-xl sm:text-2xl lg:text-3xl font-bold text-ink group-hover:text-gold-ink transition-colors leading-snug">
-                  <Link href={`/blog/${featured.slug}`}>{featTitle}</Link>
+                  <Link href={`/blog/${featured.slug}`} prefetch={false}>{featTitle}</Link>
                 </h2>
 
                 <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed line-clamp-3">
@@ -272,6 +272,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                   </span>
                   <Link
                     href={`/blog/${featured.slug}`}
+                    prefetch={false}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-ink hover:bg-gold-ink text-canvas font-semibold text-xs transition font-serif-th shadow-sm group/btn"
                   >
                     <span>{isEnglish ? "Read Full Codex" : "อ่านคัมภีร์ฉบับเต็ม"}</span>

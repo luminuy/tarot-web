@@ -37,6 +37,25 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-14 (รอบ 66): ⚡ ยกระดับ Mobile Performance สู่ระดับพรีเมียม (แก้ปัญหา Speculation Prerender คุกคาม Main Thread, ขจัด Asset Warmup ในหน้าทั่วไป, และ Defer Google Tag Manager Script)
+- **ที่มา**: ผู้ใช้ต้องการเพิ่มคะแนน Mobile Performance จากระดับต่ำ สู่มาตรฐานคะแนนสูง (95-100) โดยจากการวิเคราะห์เชิงลึกพบสาเหตุคอขวดบนมือถือ: Speculation Rules ดึงหน้า Home `/` มารัน React Hydration ล่วงหน้าใน background, `<AssetWarmup />` รันถอดรหัสรูปภาพไพ่ 9 ใบในทุกหน้า, โลโก้ Header และบทความเด่นขาด `prefetch={false}`, และ `gtag.js` หนัก 186 KB รันบน Main Thread พร้อมหน้าแรก
+- **การดำเนินการ**:
+  1. **แก้ปัญหา Speculation Prerender คุกคาม Main Thread**:
+     - ปรับ `eagerness` ของ Prerender ใน `src/app/_shared/speculation-rules.ts` จาก `"moderate"` เป็น `"conservative"` เพื่อยุติการที่เบราว์เซอร์ Chrome บนมือถือแอบดาวน์โหลดและรัน React Hydration ซ้อนหน้า Home `/` ขนาดใหญ่พร้อมๆ กับที่ผู้ใช้กำลังโหลดหน้าบทความหรือหน้าอื่นๆ ซึ่งผลาญ CPU Main Thread ไปกว่า 13.4 วินาที และคง `eagerness: "moderate"` เฉพาะสำหรับ `prefetch` ตาม Gate 38
+  2. **กำจัด `<AssetWarmup />` จาก Global Layout**:
+     - ย้ายคอมโพเนนต์ `<AssetWarmup />` ออกจาก `src/app/_shared/RootHtml.tsx` และนำไป dynamic import แสดงผลเฉพาะใน `src/components/home/TarotFlow.tsx` เมื่อผู้ใช้เข้าสู่วิหารพยากรณ์หลักเท่านั้น ทำให้หน้าสาระความรู้อย่าง `/blog`, `/privacy`, `/contact` ไม่ต้องโหลดและถอดรหัสรูปภาพไพ่ 9 ใบ (`img.decode()`) โดยไม่จำเป็น
+  3. **เก็บตก `prefetch={false}` บน `<Link>` สำคัญ**:
+     - เพิ่ม `prefetch={false}` ในโลโก้ `<Link href="/">` บน `src/components/layout/SiteHeader.tsx`
+     - เพิ่ม `prefetch={false}` ในการ์ดบทความเด่น (Featured Article) บน `src/app/(th)/blog/BlogIndexClient.tsx`
+  4. **Defer การดาวน์โหลดภายนอกของ `gtag.js`**:
+     - ใน `src/components/analytics/AnalyticsTracker.tsx` ปรับให้สคริปต์ภายนอก Google Tag Manager (`gtag/js?id=...` ขนาด 186 KB) โหลดเฉพาะหลังจากผู้ใช้เริ่มมีปฏิสัมพันธ์ (scroll/touchstart/pointerdown/keydown) หรือเมื่อเบราว์เซอร์อยู่ในสถานะ idle ครบ 3.5 วินาที โดยที่ยังคงนิยาม `window.dataLayer = window.dataLayer || [];` และฟังก์ชัน `gtag(...)` เอาไว้ล่วงหน้าทันที เพื่อรองรับ Consent Mode v2 และ Event Queue โดยไม่ทำให้อีเวนต์ตกหล่น
+- **ผลการตรวจยืนยัน**:
+  - `npm run typecheck` ➔ ผ่าน 0 error
+  - `npm run test:budget` ➔ ผ่านฉลุยทุกหน้า น้ำหนัก JS หน้าแรก 229 KB, `/spreads` 172 KB, `/daily` 196 KB
+  - `npx tsx scripts/qa/test-prefetch-loop.ts` ➔ ผ่านฉลุย (Gate 38)
+  - `npx tsx scripts/qa/test-analytics-integrity.ts` ➔ ผ่าน 48/48 ข้อ
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+
 ### 🗓️ 2026-09-14 (รอบ 65): 🌐 สร้างหน้าคู่แฝดสองภาษา `/en/contact`, JS Bundle Diet หน้าแรก (231 KB ➔ 229 KB), และจัดระเบียบ KNOWN_ISSUES
 - **ที่มา**: ดำเนินการแก้ไขเชิงลึกตามการตรวจสอบระบบอย่างละเอียด:
   1. สร้างหน้าคู่แฝดสองภาษา `/en/contact` ให้ตรงกับ `/contact`

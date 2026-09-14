@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-import { AssetWarmup } from "@/components/performance/AssetWarmup";
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
@@ -124,7 +123,6 @@ export function RootHtml({
           */}
           <SkipToContent />
           <AntiTheftShield />
-          <AssetWarmup />
           <ServiceWorkerRegister />
           <AnalyticsTracker />
           {children}

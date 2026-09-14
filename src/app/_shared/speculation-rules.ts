@@ -74,13 +74,14 @@ function internalLinksExcept(): DocumentRule["where"] {
 
 export function buildSpeculationRules(isEnglish: boolean): SpeculationRules {
   return {
-    // รายการปิด: อุ่นเต็มรูปแบบเฉพาะหน้ายอดนิยม (Chrome จำกัด prerender ที่ 2 หน้าพร้อมกัน
-    // สำหรับ moderate อยู่แล้ว ต้นทุนจึงมีเพดานชัดเจน แลกกับการเปลี่ยนหน้าแบบ 0ms)
+    // รายการปิด: อุ่นเต็มรูปแบบเฉพาะหน้ายอดนิยมด้วยความระมัดระวัง (conservative)
+    // ⚠️ ต้องใช้ conservative เท่านั้น — moderate ทำให้ Chrome แอบโหลดและรัน JS
+    // ของหน้าแรกซ้อนขึ้นมาในเบื้องหลังขณะเปิดหน้าอื่น แย่ง CPU และระเบิดค่า TBT
     prerender: [
       {
         source: "list",
         urls: isEnglish ? PRERENDER_URLS_EN : PRERENDER_URLS_TH,
-        eagerness: "moderate",
+        eagerness: "conservative",
       },
     ],
     // ลิงก์ที่เหลือทั้งเว็บ: ดึงแค่ HTML และเฉพาะตอนผู้ใช้กดลงไปแล้ว
