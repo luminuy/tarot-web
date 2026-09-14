@@ -11,14 +11,14 @@ const privacyOgImages = buildPageOgImage({
 });
 
 export const metadata: Metadata = {
-  title: "นโยบายความเป็นส่วนตัวและ PDPA",
-  description: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
-  // ⚠️ ทุกหน้าต้องประกาศ canonical ของตัวเอง — Next.js สืบทอด metadata จาก layout แม่
-  // หน้านี้อยู่ใน sitemap แต่เคยประกาศ canonical ชี้กลับหน้าแรก = ขัดกันเองจนไม่ถูก index
+  title: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA)",
+  description:
+    "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
   alternates: buildAlternates("/privacy", { englishTwin: true }),
   openGraph: {
     title: "นโยบายความเป็นส่วนตัวและ PDPA · SeerTarot",
-    description: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
+    description:
+      "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
     url: `${SITE_ORIGIN}/privacy`,
     siteName: "SeerTarot",
     type: "website",
@@ -27,7 +27,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "นโยบายความเป็นส่วนตัวและ PDPA · SeerTarot",
-    description: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
+    description:
+      "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA B.E. 2562) และมาตรฐานสากลของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ SeerTarot",
     images: [privacyOgImages[0].url],
   },
 };
@@ -38,8 +39,12 @@ export default function PrivacyPolicyPage() {
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         {/* Header */}
         <div className="text-center space-y-3 pb-6 border-b border-line/40">
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th">นโยบายความเป็นส่วนตัว</h1>
-          <p className="text-xs text-muted">Privacy Policy &amp; PDPA Compliance</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink font-serif-th">
+            นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล
+          </h1>
+          <p className="text-xs text-muted">
+            กรอบการปฏิบัติตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) และมาตรฐานสากล (GDPR / CCPA)
+          </p>
         </div>
 
         {/* Section 1 */}
@@ -47,45 +52,49 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-lg font-bold text-gold font-serif-th">1. ข้อมูลที่เราเก็บ</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
-              <strong>ชื่อและรูปโปรไฟล์</strong> — หากคุณเข้าสู่ระบบผ่าน Google หรือ LINE
-              เพื่อระบุตัวตนและแสดงผลในสมุดบันทึก
+              <strong>การระบุตัวตนและโปรไฟล์ (OAuth)</strong> — หากคุณเข้าสู่ระบบผ่าน Google หรือ LINE
+              เราประมวลผลชื่อที่แสดง รูปโปรไฟล์ และรหัสประจำตัวบัญชีเพื่อระบุตัวตน รักษาความปลอดภัย
+              และซิงก์สมุดบันทึกดวงชะตาข้ามอุปกรณ์ของคุณ
             </li>
             <li>
-              <strong>อีเมล (ไม่บังคับ)</strong> — ใช้สำหรับส่งสรุปดวงหรือการเตือนติดตามผลคำทำนาย{" "}
-              <em>เฉพาะเมื่อคุณให้ความยินยอม (Consent) เท่านั้น</em>
+              <strong>บัญชีอีเมลและรหัสผ่าน (กรณีลงทะเบียนด้วยอีเมล)</strong> — เราจัดเก็บเฉพาะอีเมลและค่าแฮชของรหัสผ่านแบบเค็ม
+              (PBKDF2/SHA-256) โดยไม่มีการจัดเก็บรหัสผ่านจริงในระบบเด็ดขาด
             </li>
             <li>
-              <strong>ชื่อเล่น</strong> — ใช้เรียกคุณในคำทำนายอย่างอบอุ่น
+              <strong>อีเมลสำหรับการแจ้งเตือน (ไม่บังคับ)</strong> — ใช้สำหรับส่งสรุปดวงประจำวัน (Daily Digest)
+              หรือการติดตามผลคำทำนาย <em>เฉพาะเมื่อคุณให้ความยินยอม (Consent) อย่างชัดแจ้งเท่านั้น</em> โดยคุณสามารถยกเลิกได้ตลอดเวลา
             </li>
             <li>
-              <strong>คำถามและไพ่ที่เปิดได้</strong> — ใช้สร้างคำทำนายและบันทึกประวัติการดูดวง
+              <strong>ชื่อเล่นที่ต้องการให้เรียก</strong> — ใช้สำหรับเรียกคุณในคำทำนายอย่างอบอุ่นและเป็นกันเอง
             </li>
             <li>
-              <strong>บันทึกส่วนตัวและผลจริง (Outcome &amp; Note)</strong> — เพื่อให้คุณติดตามผลความแม่นยำในชีวิตจริง
+              <strong>คำถามและไพ่ที่เปิดได้</strong> — ใช้ประมวลผลคำทำนายแบบเรียลไทม์ และบันทึกประวัติในสมุดบันทึกดวงชะตา
             </li>
             <li>
-              <strong>คุกกี้นับสิทธิ์ทดลอง (tarot_guest)</strong> — คุกกี้แบบ first-party (เฉพาะเว็บนี้)
-              เก็บเพียงรหัสสุ่มและจำนวนครั้งที่ทดลองเปิดไพ่ฟรี ไม่มีข้อมูลส่วนบุคคล ไม่ใช้ติดตามข้ามเว็บ ·
-              คุณลบได้จากการตั้งค่าเบราว์เซอร์ (จะได้สิทธิ์ทดลองใหม่)
+              <strong>บันทึกส่วนตัวและผลจริงในชีวิต (Outcome &amp; Note)</strong> — ข้อความสะท้อนความคิดและผลลัพธ์จริงที่คุณบันทึกเพิ่มเติมเพื่อประเมินความแม่นยำในชีวิตจริงของคุณเอง ข้อมูลนี้เป็นความลับส่วนบุคคลสูงสุด
+            </li>
+            <li>
+              <strong>คุกกี้นับสิทธิ์ทดลอง (tarot_guest)</strong> — คุกกี้แบบ first-party ที่จำเป็นต่อการทำงาน (ไม่มีข้อมูลส่วนบุคคล ไม่ใช้ติดตามข้ามเว็บ)
+              เก็บเพียงรหัสสุ่มและจำนวนครั้งที่ทดลองเปิดไพ่ฟรี คุณสามารถลบได้จากการตั้งค่าเบราว์เซอร์ได้ตลอดเวลา
             </li>
           </ul>
         </section>
 
         {/* Section 2 */}
         <section className="space-y-3">
-          <h2 className="text-lg font-bold text-gold font-serif-th">2. สิ่งที่เราไม่ทำเด็ดขาด</h2>
+          <h2 className="text-lg font-bold text-gold font-serif-th">2. สิ่งที่เราไม่ทำเด็ดขาด (คำมั่นสัญญาความปลอดภัย)</h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
-              • <strong>ไม่เอาข้อมูลคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — ข้อมูลการดูดวงเป็นเรื่องส่วนบุคคล
+              <strong>ไม่นำข้อมูลคำถามหรือบันทึกของคุณไปเทรนโมเดล AI</strong> — ข้อมูลการเปิดไพ่และการสะท้อนความคิดเป็นเรื่องส่วนบุคคลสูงสุด จะไม่มีการนำไปใช้ฝึกฝน ปรับแต่ง หรือป้อนเข้าสู่โมเดลปัญญาประดิษฐ์ใดๆ ทั้งสิ้น
             </li>
             <li>
-              • <strong>ไม่ขายหรือส่งต่อข้อมูลส่วนตัวให้บุคคลที่สาม</strong>
+              <strong>ไม่ขาย ให้เช่า หรือเป็นนายหน้าส่งต่อข้อมูลส่วนบุคคล</strong> — เราไม่ขายหรือแลกเปลี่ยนข้อมูลของคุณแก่บริษัทโฆษณา นายหน้าค้าข้อมูล (Data Brokers) หรือบุคคลภายนอกไม่ว่าในกรณีใดทั้งสิ้น
             </li>
             <li>
-              • <strong>ไม่ติดตามตัวตนข้ามเว็บไซต์ (No cross-site tracking)</strong>
+              <strong>ไม่ติดตามตัวตนข้ามเว็บไซต์ (No Cross-Site Tracking)</strong> — เราไม่ใช้คุกกี้บุคคลที่สามหรือเทคโนโลยีติดตามพฤติกรรมของคุณบนเว็บไซต์ภายนอก
             </li>
             <li>
-              • <strong>ไม่ส่งอีเมลโฆษณาโดยที่คุณไม่ยินยอม</strong>
+              <strong>ไม่ส่งอีเมลโฆษณาโดยไม่ได้รับความยินยอม</strong> — เราไม่ส่งข้อความส่งเสริมการขายหรือสแปมใดๆ โดยปราศจากการขอความยินยอมล่วงหน้าอย่างโปร่งใส
             </li>
           </ul>
         </section>
@@ -93,18 +102,18 @@ export default function PrivacyPolicyPage() {
         {/* Section 3 */}
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-gold font-serif-th">
-            3. การจัดเก็บข้อมูล (Data Retention &amp; Storage)
+            3. การจัดเก็บข้อมูลและสถาปัตยกรรมคลาวด์ (Data Retention &amp; Storage)
           </h2>
           <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
             <p>
-              <strong>สำหรับผู้ใช้ทั่วไป (ไม่เข้าสู่ระบบ):</strong> ข้อมูลทั้งหมดจัดเก็บใน{" "}
+              <strong>สำหรับผู้ใช้ทั่วไป (ไม่เข้าสู่ระบบ):</strong> ข้อมูลประวัติการเปิดไพ่ทั้งหมดจัดเก็บใน{" "}
               <strong>localStorage บนเบราว์เซอร์ของคุณเท่านั้น</strong>{" "}
               เซสชันการประมวลผลคำทำนายชั่วคราวบนเซิร์ฟเวอร์จะหมดอายุอัตโนมัติภายใน 2 ชั่วโมง
             </p>
             <p>
-              <strong>สำหรับผู้ใช้ที่เข้าสู่ระบบ:</strong> บันทึกประวัติดูดวงจะถูกจัดเก็บอย่างปลอดภัยบน Cloudflare D1
-              Database เพื่อให้คุณสามารถเปิดอ่านและซิงก์ประวัติข้ามอุปกรณ์ได้
-              โดยคุณสามารถขอดาวน์โหลดหรือสั่งลบข้อมูลทั้งหมดได้ตลอดเวลา
+              <strong>สำหรับผู้ใช้ที่เข้าสู่ระบบ:</strong> บันทึกประวัติดูดวงและข้อมูลบัญชีจะถูกจัดเก็บอย่างปลอดภัยบน Cloudflare D1
+              ฐานข้อมูลแบบกระจายศูนย์ระดับโลก พร้อมการเข้ารหัสความปลอดภัยทั้งขณะจัดเก็บ (Encryption at Rest) และขณะส่งผ่านเครือข่าย (TLS 1.3 In Transit)
+              โดยคุณมีสิทธิสมบูรณ์ในการขอดาวน์โหลดหรือสั่งลบข้อมูลทั้งหมดได้ตลอดเวลา
             </p>
           </div>
         </section>
@@ -112,24 +121,28 @@ export default function PrivacyPolicyPage() {
         {/* Section 4 */}
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-gold font-serif-th">
-            4. สิทธิของคุณตามกฎหมาย PDPA (พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562)
+            4. สิทธิของคุณตามกฎหมาย PDPA และมาตรฐานสากล
           </h2>
           <ul className="space-y-2 text-sm text-ink list-disc list-inside leading-relaxed font-serif-th">
             <li>
               <strong>สิทธิในการลบข้อมูล (Right to Erasure)</strong> —
-              สั่งลบประวัติและบัญชีทั้งหมดได้ทันทีผ่านปุ่มด้านล่าง
+              สั่งลบประวัติ บันทึก และบัญชีทั้งหมดได้อย่างสมบูรณ์ทันทีผ่านระบบบริการตนเองด้านล่าง
             </li>
             <li>
               <strong>สิทธิในการขอรับและโอนย้ายข้อมูล (Data Portability)</strong> —
-              ดาวน์โหลดข้อมูลประวัติดูดวงของคุณเป็นไฟล์ JSON ครบถ้วน
+              ดาวน์โหลดสำเนาข้อมูลประวัติดูดวงและบันทึกทั้งหมดของคุณในรูปแบบไฟล์ JSON ที่สามารถนำไปประมวลผลต่อได้
             </li>
             <li>
               <strong>สิทธิในการถอนความยินยอม (Right to Withdraw Consent)</strong> —
-              ปิดรับอีเมลติดตามผลหรือข่าวสารได้ตลอดเวลาในการตั้งค่าบัญชี
+              ปิดรับอีเมลสรุปดวงประจำวันหรือข่าวสารได้ตลอดเวลาในการตั้งค่าบัญชี หรือผ่านลิงก์ยกเลิกในอีเมล
             </li>
             <li>
-              <strong>สิทธิในการเข้าถึงและแก้ไขข้อมูล (Right of Access)</strong> —
-              ตรวจสอบและแก้ไขบันทึกผลลัพธ์ดวงชะตาได้ในสมุดบันทึก
+              <strong>สิทธิในการเข้าถึงและแก้ไขข้อมูล (Right of Access &amp; Rectification)</strong> —
+              ตรวจสอบและแก้ไขบันทึกผลลัพธ์ดวงชะตาและข้อมูลส่วนตัวได้ในสมุดบันทึก
+            </li>
+            <li>
+              <strong>สิทธิที่จะไม่ถูกเลือกปฏิบัติ (Right to Non-Discrimination)</strong> —
+              การใช้สิทธิทางกฎหมายจะไม่กระทบต่อคุณภาพบริการหรือการคิดค่าบริการใดๆ ทั้งสิ้น
             </li>
           </ul>
         </section>
@@ -137,16 +150,20 @@ export default function PrivacyPolicyPage() {
         {/* Section 5: AI Disclosure */}
         <section className="space-y-3 p-5 rounded-xl bg-surface border border-line shadow-[0_10px_30px_rgba(42,38,31,0.04)]">
           <h2 className="text-lg font-bold text-gold font-serif-th">
-            5. การเปิดเผยเรื่อง AI (AI Transparency Disclosure)
+            5. การเปิดเผยเรื่อง AI และความโปร่งใส (AI Transparency Disclosure)
           </h2>
           <div className="text-sm text-ink leading-relaxed space-y-2 font-serif-th">
             <p>
-              • คำทำนายทั้งหมดในวิหารนี้ <strong>สร้างขึ้นโดยปัญญาประดิษฐ์ (AI)</strong>{" "}
-              ร่วมกับระบบสุ่มไพ่ทางคณิตศาสตร์ที่ตรวจสอบความโปร่งใสได้ (Provably-Fair)
+              คำทำนายทั้งหมดในวิหารนี้ <strong>สร้างขึ้นโดยปัญญาประดิษฐ์ (AI)</strong>{" "}
+              ร่วมกับระบบสุ่มไพ่ทางคณิตศาสตร์ที่ตรวจสอบความโปร่งใสได้ (Provably-Fair SHA-256)
             </p>
             <p>
               &quot;แม่หมอ&quot; ในระบบคือ <strong>บุคลิก AI (Persona)</strong> ที่ถูกออกแบบมาเพื่อมอบมุมมอง
-              คำแนะนำเชิงบวก และพลังใจ ไม่ใช่การคุยกับหมอดูมนุษย์จริง
+              คำแนะนำเชิงบวก การเจริญสติ และข้อคิดทางปรัชญา ไม่ใช่การคุยกับหมอดูมนุษย์จริงหรือผู้ให้คำปรึกษาทางการแพทย์
+            </p>
+            <p>
+              <strong>นโยบายห้ามกุไพ่ปลอมเด็ดขาด (Zero Fabricated Cards Policy):</strong> ทุกการทำนายทำงานบนสำรับไพ่ 1909 Rider-Waite 78 ใบที่แท้จริง
+              ระบบมีกลไกป้องกันการมโนหรือสร้างไพ่ที่ไม่มีอยู่จริง เพื่อรักษาความเที่ยงธรรม 100%
             </p>
           </div>
         </section>
@@ -154,17 +171,29 @@ export default function PrivacyPolicyPage() {
         {/* Section 6: Safety */}
         <section className="space-y-3 p-5 rounded-xl bg-surface border border-line shadow-[0_10px_30px_rgba(42,38,31,0.04)]">
           <h2 className="text-lg font-bold text-err font-serif-th">
-            6. ความปลอดภัยของผู้ใช้ (Safety Guardrails)
+            6. ความปลอดภัยของผู้ใช้และข้อจำกัดความรับผิดชอบ (Safety Guardrails)
           </h2>
           <div className="text-sm text-err leading-relaxed space-y-2 font-serif-th">
-            <p>ระบบของเรามีตัวกรองความปลอดภัยที่ทำงานตลอดเวลา:</p>
+            <p>ระบบของเรามีตัวกรองความปลอดภัยที่ทำงานตรวจจับความเสี่ยงตลอดเวลา:</p>
             <ul className="space-y-1.5 list-disc list-inside">
               <li>
-                ตรวจจับสัญญาณวิกฤตทางจิตใจ → แสดงสายด่วนสุขภาพจิต <strong>1323</strong> ทันที
+                <strong>การตรวจจับวิกฤตทางจิตใจ:</strong> เมื่อพบสัญญาณความทุกข์หรือสภาวะวิกฤต ระบบจะแสดงคำแนะนำและสายด่วนช่วยเหลือทันที:
+                <ul className="pl-5 space-y-1 list-disc list-inside text-xs">
+                  <li>สายด่วนสุขภาพจิต (กรมสุขภาพจิต ประเทศไทย): <strong>1323</strong> (โทรฟรีตลอด 24 ชั่วโมง)</li>
+                  <li>สถาบันการแพทย์ฉุกเฉินแห่งชาติ (ประเทศไทย): <strong>1669</strong></li>
+                  <li>สายด่วนสุขภาพจิตสากล (สหรัฐฯ และแคนาดา): <strong>988</strong></li>
+                  <li>หน่วยบริการฉุกเฉินสหราชอาณาจักรและยุโรป: <strong>111 / 112 / 999</strong></li>
+                </ul>
               </li>
-              <li>ห้าม AI วินิจฉัยโรค ทำนายสุขภาพ การตั้งครรภ์ หรือให้คำแนะนำทางการแพทย์</li>
-              <li>ห้าม AI ให้คำแนะนำทางกฎหมายหรือทำนายผลคดีความ</li>
-              <li>ห้าม AI ชี้แนะหุ้น คริปโต หรือการลงทุนที่มีความเสี่ยงทางการเงิน</li>
+              <li>
+                <strong>ข้อห้ามทางการแพทย์:</strong> ห้าม AI วินิจฉัยโรค ทำนายสุขภาพ การตั้งครรภ์ หรือให้คำแนะนำทางการแพทย์
+              </li>
+              <li>
+                <strong>ข้อห้ามทางกฎหมาย:</strong> ห้าม AI ให้คำแนะนำทางกฎหมาย หรือทำนายผลคดีความในกระบวนการยุติธรรม
+              </li>
+              <li>
+                <strong>ข้อห้ามทางการเงิน:</strong> ห้าม AI ชี้แนะหุ้น คริปโตเคอร์เรนซี หรือการลงทุนที่มีความเสี่ยงทางการเงิน
+              </li>
             </ul>
           </div>
         </section>
@@ -181,7 +210,6 @@ export default function PrivacyPolicyPage() {
               download
               className="px-5 py-2.5 rounded-full bg-surface border border-line text-ink text-xs font-bold hover:bg-canvas hover:border-gold transition cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
             >
-              
               <span>ดาวน์โหลดข้อมูลของฉัน (Export JSON)</span>
             </a>
             <DeleteAllDataButton />
