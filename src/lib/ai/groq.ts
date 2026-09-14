@@ -9,26 +9,25 @@
  */
 
 import {
-  countForeignCharacters,
-  FOREIGN_LEAK_SWITCH_THRESHOLD,
   hasForeignScript,
   isSevereForeignLeak,
   SEVERE_FOREIGN_LEAK_THRESHOLD,
-  objectHasForeignScript,
   sanitizeTarotText,
   stripForeignScript,
-  stripForeignScriptDeep,
   stripThinkingTags,
 } from "@/lib/ai/language";
+import {
+  consumeReadingDelta,
+  createEmptyUsage,
+  createReadingStreamState,
+  finalizeReading,
+  resolveForeignBreaker,
+} from "@/lib/ai/reading-stream";
 import { aiGatewayHeaders, groqChatCompletionsEndpoint } from "@/lib/ai/gateway";
-import { parsePartialReading } from "@/lib/utils/partial-json";
 import { recordEvent } from "@/lib/stats/record";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
-import { ReadingSchema } from "@/lib/schema/reading";
-import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
-import { checkReadingConsistency } from "@/lib/ai/consistency";
-import { enforceThaiQuality } from "@/lib/ai/thai-quality";
+import type { ReadingEvent } from "@/lib/ai/types";
 
 /**
  * ลำดับนี้ตั้งใจให้ Qwen มาก่อน — คุณภาพภาษาไทยดีที่สุดในสี่ตัว (มี QA test ล็อกไว้)
@@ -351,28 +350,41 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
     userMessage = trimmed;
     // เก็บสถิติไว้ดูใน /admin ว่าต้องตัดบ่อยแค่ไหน และตัดแล้วยังไม่พอกี่ครั้ง
     recordEvent(fitsNow ? "ai_prompt_trimmed" : "ai_prompt_over_tpm");
+
+    /*
+     * 🚪 ตัดแล้วยังไม่พอ = ยิงไปก็โดน 429 ทุกโมเดลแน่นอน ให้ถอยทันที
+     * ---------------------------------------------------------------------------
+     * เพดาน TPM ของ Groq นับ prompt + max_tokens รวมกัน **ต่อคำขอเดียว**
+     * (INC-0136) ➔ หมุนโมเดลหรือรอต่อคิวไม่ช่วยอะไรเลยแม้แต่นิดเดียว
+     *
+     * เดิมโค้ดตรงนี้แค่จดสถิติไว้แล้ว "ยิงต่อทั้งที่รู้ว่าไม่รอด" ครบทั้ง 4 โมเดล
+     * ผู้ใช้ผังใหญ่จึงต้องนั่งรอคำขอที่ถูกปฏิเสธ 4 รอบก่อนได้เริ่มอ่านจริงจาก Gemini
+     *
+     * วัดจริงทุกผังแล้ว: 4 ใบเกิน 375 · 5 ใบเกิน 1,258 · 12 ใบเกิน 7,146
+     * ➔ ตั้งแต่ 4 ใบขึ้นไปไม่มีทางผ่านเส้นทางนี้ ต้องไป Cerebras หรือ Gemini เท่านั้น
+     */
+    if (!fitsNow) {
+      console.warn(
+        `[Groq Reading] คำขอผัง ${ctx.drawn.length} ใบใหญ่เกินเพดาน TPM ${GROQ_TPM_LIMIT} แม้ตัดของเสริมแล้ว — ข้าม Groq ทั้งเจ้า`,
+      );
+      return;
+    }
   }
 
   for (const model of readingModels) {
-    let jsonAccumulator = "";
-    let sentOpening = false;
-    let sentConnections = false;
-    let sentSummary = false;
-    let cardsSent = 0;
-    let totalForeignChars = 0;
-    let foreignCircuitBreaker = false;
-
-    let usage: UsageInfo = {
-      inputTokens: 0,
-      outputTokens: 0,
-      cacheReadTokens: 0,
-      cacheWriteTokens: 0,
-    };
+    const state = createReadingStreamState();
+    const usage = createEmptyUsage();
 
     try {
       const controller = new AbortController();
-      // Groq LPU ประมวลผลไวมาก (~300 tok/s) เพดานเวลา 20 วินาทีเพียงพอสำหรับคำอ่านยาว
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      /*
+       * ⏱️ เพดานเวลาต้องโตตามความยาวคำอ่าน — เดิมตรึงไว้ 20 วินาทีตายตัว
+       * Groq LPU เดินราว 300 tok/s ➔ ผัง 10 ใบ (6,400 โทเค็น) ต้องใช้ ~21 วินาที
+       * ตัวเลขตายตัวจึงตัดคำอ่านผังใหญ่ทิ้งกลางคันเสมอ ทั้งที่โมเดลยังเขียนอยู่
+       * คิดจากอัตราจริงแล้วเผื่อเวลาเริ่มต้น 6 วินาที และกันไว้ไม่ให้เกิน 55 วินาที
+       */
+      const timeoutMs = Math.min(55000, 6000 + Math.ceil((maxReadingTokens / 300) * 1000));
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const res = await fetch(groqChatCompletionsEndpoint(), {
         method: "POST",
@@ -431,60 +443,16 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
             }
 
             const delta = chunk.choices?.[0]?.delta?.content || "";
-            if (delta) {
-              // ด่านตรวจจับอักษรต่างด้าว (Circuit Breaker)
-              const foreignCount = countForeignCharacters(delta);
-              if (foreignCount > 0) {
-                totalForeignChars += foreignCount;
-                // reasoning ถูกแยกออกแล้ว (reasoning_format: hidden) → นับเฉพาะเนื้อคำตอบจริง
-                // ถึงเกณฑ์ SWITCH = โมเดลนี้หลุดจีนใน content จริง สลับโมเดลทันที
-                if (totalForeignChars >= FOREIGN_LEAK_SWITCH_THRESHOLD) {
-                  console.warn(
-                    `[Groq Reading ${model}] ⚠️ Circuit Breaker: อักษรต่างด้าวสะสม ${totalForeignChars} ตัว — สลับโมเดล`,
-                  );
-                  recordEvent("ai_foreign_trip:groq");
-                  recordEvent(`ai_foreign_trip:${model}`);
-                  foreignCircuitBreaker = true;
-                  break;
-                }
-              }
-
-              jsonAccumulator += delta;
-              const partial = parsePartialReading(jsonAccumulator);
-
-              if (!sentOpening && partial.opening) {
-                sentOpening = true;
-                yield { type: "opening", text: sanitizeTarotText(partial.opening) };
-              }
-
-              while (cardsSent < partial.cards.length) {
-                const card = partial.cards[cardsSent];
-                cardsSent++;
-                yield {
-                  type: "card",
-                  position: card.position,
-                  headline: sanitizeTarotText(card.headline),
-                  visualAnchor: (card as any).visualAnchor ? sanitizeTarotText((card as any).visualAnchor) : undefined,
-                  reading: sanitizeTarotText(card.reading),
-                };
-              }
-
-              if (!sentConnections && partial.connections) {
-                sentConnections = true;
-                yield { type: "connections", text: sanitizeTarotText(partial.connections) };
-              }
-
-              if (!sentSummary && partial.summary) {
-                sentSummary = true;
-                yield { type: "summary", text: sanitizeTarotText(partial.summary) };
-              }
+            for (const event of consumeReadingDelta(state, delta, { provider: "groq", model })) {
+              yield event;
             }
+            if (state.foreignCircuitBreaker) break;
           } catch {
             // chunk JSON parse ignore
           }
         }
 
-        if (foreignCircuitBreaker) {
+        if (state.foreignCircuitBreaker) {
           try {
             await reader.cancel();
           } catch {}
@@ -492,98 +460,27 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
         }
       }
 
-      if (foreignCircuitBreaker) {
-        if (sentOpening || cardsSent > 0) {
+      if (state.foreignCircuitBreaker) {
+        const outcome = resolveForeignBreaker(state, { provider: "groq", model });
+        if (outcome.needsReset) {
           yield { type: "reset" };
         }
-        if (
-          totalForeignChars >= SEVERE_FOREIGN_LEAK_THRESHOLD ||
-          isSevereForeignLeak(jsonAccumulator)
-        ) {
-          console.warn(
-            `[Groq Reading ${model}] ⚠️ Severe foreign leak (สะสม ${totalForeignChars} ตัว >= ${SEVERE_FOREIGN_LEAK_THRESHOLD}) — ตัดวงจร Groq ข้ามไป Gemini ทันที`,
-          );
-          recordEvent("ai_severe_foreign_leak");
-          recordEvent(`ai_severe_foreign_leak:${model}`);
+        if (outcome.abandonProvider) {
           break; // ข้ามโมเดล Groq ที่เหลือทั้งหมด สลับไป Gemini ทันที
         }
         continue; // ลองโมเดลถัดไปหรือตกไปหา Gemini
       }
 
-      const cleanJson = stripThinkingTags(jsonAccumulator);
-      let parsedJson: any = null;
-      try {
-        parsedJson = JSON.parse(cleanJson);
-      } catch {
-        // loose parse fallback
-      }
+      const finalized = finalizeReading(state, ctx, {
+        provider: "groq",
+        model,
+        usage,
+        promptChars: systemInstruction.length + userMessage.length,
+      });
 
-      const parsed = parsedJson ? ReadingSchema.safeParse(parsedJson) : null;
-      if (parsed && parsed.success) {
-        let readingData = parsed.data;
-        if (!ctx.spread.yesNoMode) {
-          readingData.yesNoAnswer = null;
-        }
-
-        // กวาดล้างอักษรต่างด้าวรอบสุดท้ายให้สะอาดหมดจด 100%
-        if (objectHasForeignScript(readingData)) {
-          readingData = stripForeignScriptDeep(readingData);
-        }
-
-        // 🛡️ ด่านตรวจความสอดคล้อง (AI_INTELLIGENCE_PLAN W1.3)
-        const consistency = checkReadingConsistency(readingData, ctx.cards, {
-          drawnCount: ctx.drawn.length,
-          yesNoMode: ctx.spread.yesNoMode,
-          pastReading: ctx.pastReading,
-        });
-
-        if (consistency.fatal) {
-          const fatalIssue = consistency.issues.find((i) => i.fatal);
-          console.warn(
-            `[Groq Reading ${model}] ⚠️ ความสอดคล้องล้มเหลว (Fatal): ${fatalIssue?.code} - ${fatalIssue?.message} — สลับโมเดลถัดไป`,
-          );
-          if (fatalIssue) {
-            recordEvent(`ai_consistency_fail:${fatalIssue.code.toLowerCase()}`);
-          }
-          continue; // สลับไปโมเดลถัดไป หรือตกไปหา Gemini
-        }
-
-        // ✍️ ด่านภาษาไทย (HANDOFF_AI_ACCURACY_THAI B-01)
-        // แก้คำผิดที่แก้ได้เงียบ ๆ แทนการ failover — failover แลกด้วยเวลาที่ผู้ใช้นั่งรออยู่จริง
-        const thai = enforceThaiQuality(readingData, { personaId: ctx.personaId });
-        readingData = thai.reading;
-        if (thai.fixCount > 0) {
-          recordEvent("ai_thai_fix");
-          recordEvent(`ai_thai_fix:${model}`);
-        }
-        for (const code of thai.issueCodes) {
-          recordEvent(`ai_thai_issue:${code.toLowerCase()}`);
-        }
-
-        if (usage.inputTokens === 0) {
-          usage.inputTokens = Math.round((systemInstruction.length + userMessage.length) / 3.5);
-          usage.outputTokens = Math.round(cleanJson.length / 3.5);
-        }
-
-        yield {
-          type: "done",
-          reading: readingData,
-          usage,
-          model,
-          consistencyOk: consistency.ok,
-          thaiScore: thai.score,
-          thaiIssueCodes: thai.issueCodes,
-          thaiFixCount: thai.fixCount,
-        };
+      if (finalized.ok) {
+        yield finalized.event;
         return; // ทำงานสำเร็จสมบูรณ์!
-      } else {
-        recordEvent("ai_schema_fail:groq");
-        recordEvent(`ai_schema_fail:${model}`);
-        console.warn(
-          `[Groq Reading ${model}] JSON ไม่ตรง ReadingSchema · parseLen=${cleanJson.length} · zodErr=${
-            parsed ? JSON.stringify(parsed.error.issues?.slice(0, 3)) : "JSON.parse failed"
-          }`,
-        );
       }
     } catch (err) {
       console.warn(`[Groq Reading ${model}] stream error:`, err);

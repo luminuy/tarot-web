@@ -273,9 +273,52 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         let activeProvider = "gemini";
 
         async function* streamMultiProviderReading(): AsyncGenerator<
-          import("@/lib/ai/types").ReadingEvent & { provider?: "groq" | "gemini" }
+          import("@/lib/ai/types").ReadingEvent & { provider?: "groq" | "gemini" | "cerebras" }
         > {
+          /*
+           * Tier 0: Cerebras — รับเฉพาะ "ผังใหญ่" ที่ Groq ทำไม่ได้อยู่แล้ว (INC-0136)
+           * ---------------------------------------------------------------------------
+           * Groq มีเพดาน 8,000 โทเค็นต่อคำขอเดียว ผัง 4 ใบขึ้นไปจึงเกินเสมอ
+           * (4 ใบ 8,375 · 5 ใบ 9,258 · 10 ใบ 13,751 · 12 ใบ 15,146)
+           * Cerebras ให้ 30,000 และรันโมเดล Qwen ตัวเดียวกัน = ผังใหญ่ได้ภาษาไทยคุณภาพ
+           * เดียวกับผังเล็กเป็นครั้งแรก แทนที่จะตกไป Gemini ทุกครั้งเหมือนที่ผ่านมา
+           *
+           * ⚠️ ชั้นฟรีมีแค่ 5 คำขอ/นาที จึง **ห้ามเอามารับผังเล็กเด็ดขาด** —
+           *    `shouldUseCerebras()` กันไว้ที่ 4 ใบขึ้นไป ผัง 1-3 ใบเป็นของ Groq ต่อไป
+           */
+          const { shouldUseCerebras } = await import("@/lib/ai/cerebras");
+          if (shouldUseCerebras(readingCtx.drawn.length)) {
+            let emittedAny = false;
+            try {
+              const { streamCerebrasReading } = await import("@/lib/ai/cerebras");
+              let gotDone = false;
+              for await (const event of streamCerebrasReading(readingCtx)) {
+                if (event.type === "done") gotDone = true;
+                if (event.type !== "done") emittedAny = true;
+                yield { ...event, provider: "cerebras" };
+              }
+              if (gotDone) {
+                activeProvider = "cerebras";
+                return;
+              }
+              recordEvent("ai_cerebras_failover");
+              if (emittedAny) {
+                yield { type: "reset", provider: "gemini" };
+              }
+            } catch (err) {
+              recordEvent("ai_cerebras_failover");
+              console.warn(
+                "[read/route] Cerebras stream encountered error, failing over:",
+                err,
+              );
+              if (emittedAny) {
+                yield { type: "reset", provider: "gemini" };
+              }
+            }
+          }
+
           // Tier 1: Groq Qwen (High-speed LPU, deep Thai comprehension, 14.4k req/day free quota)
+          // ผังที่ใหญ่เกินเพดาน TPM จะถูก streamGroqReading() ข้ามเองทันทีโดยไม่ยิงคำขอ
           if (process.env.GROQ_API_KEY) {
             let emittedAny = false;
             try {

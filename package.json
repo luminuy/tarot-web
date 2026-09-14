@@ -27,6 +27,7 @@
     "test:thai": "tsx scripts/qa/test-thai-quality.ts",
     "ai:judge": "tsx scripts/qa/run-golden-judge.ts",
     "ai:probe-openrouter": "tsx scripts/qa/probe-openrouter.ts",
+    "ai:probe-cerebras": "tsx scripts/qa/probe-cerebras.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "cards:variants": "tsx scripts/generate-card-variants.ts",
     "cards:related": "tsx scripts/generate-related-cards.ts",

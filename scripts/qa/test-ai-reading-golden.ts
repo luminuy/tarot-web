@@ -13,6 +13,8 @@ import { ReadingSchema } from "../../src/lib/schema/reading";
 import { ALL_CARDS } from "../../src/data/cards";
 import { getSpread } from "../../src/data/spreads";
 import { WORKING_GROQ_MODELS } from "../../src/lib/ai/groq";
+import { CEREBRAS_MIN_CARDS, WORKING_CEREBRAS_MODELS } from "../../src/lib/ai/cerebras";
+import { resolveMaxReadingTokens } from "../../src/lib/ai/reading-stream";
 import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
 
 let pass = 0;
@@ -64,13 +66,80 @@ async function main() {
     `Circuit breaker threshold (สลับโมเดล) = ${FOREIGN_LEAK_SWITCH_THRESHOLD}`,
     FOREIGN_LEAK_SWITCH_THRESHOLD === 14,
   );
-  check(
-    "groq.ts ใช้ค่าคงที่ FOREIGN_LEAK_SWITCH_THRESHOLD ไม่ฮาร์ดโค้ดตัวเลขเอง",
-    groqSrc.includes("totalForeignChars >= FOREIGN_LEAK_SWITCH_THRESHOLD"),
+  /*
+   * ⚠️ บทเรียนซ้ำรอบสอง (อ่านคอมเมนต์ด้านบนประกอบ):
+   * ด่านสามข้อล่างนี้เคย grep หาสตริงใน `groq.ts` ตรง ๆ พอตรรกะถูกยกออกมาไว้ที่
+   * `reading-stream.ts` เพื่อให้ Cerebras ใช้ร่วมได้ ด่านก็ล้มทันทีทั้งที่พฤติกรรมไม่เปลี่ยน
+   *
+   * คราวนี้จึงตรวจสองชั้นแทน:
+   *   (1) "ด่านนิรภัยมีอยู่จริง" — ตรวจที่เครื่องยนต์กลางซึ่งเป็นแหล่งความจริงเดียว
+   *   (2) "ผู้ให้บริการทุกเจ้าเดินผ่านเครื่องยนต์นั้น" — ตรวจว่าแต่ละไฟล์เรียกใช้จริง
+   * แบบนี้ย้ายโค้ดได้โดยด่านไม่ขวาง แต่ถ้าใครลบด่านนิรภัยออกจริง ๆ จะจับได้ทันที
+   */
+  const engineSrc = fs.readFileSync(
+    path.resolve(process.cwd(), "src/lib/ai/reading-stream.ts"),
+    "utf-8",
   );
-  check("นับสถิติ ai_foreign_trip เมื่อ circuit breaker ตัด", groqSrc.includes('recordEvent("ai_foreign_trip:groq")'));
-  check("นับสถิติ ai_schema_fail เมื่อ JSON ไม่ตรง schema", groqSrc.includes('recordEvent("ai_schema_fail:groq")'));
+  check(
+    "เครื่องยนต์กลางใช้ค่าคงที่ FOREIGN_LEAK_SWITCH_THRESHOLD ไม่ฮาร์ดโค้ดตัวเลขเอง",
+    engineSrc.includes("state.totalForeignChars >= FOREIGN_LEAK_SWITCH_THRESHOLD"),
+  );
+  check(
+    "นับสถิติ ai_foreign_trip เมื่อ circuit breaker ตัด",
+    engineSrc.includes("recordEvent(`ai_foreign_trip:${meta.provider}`)"),
+  );
+  check(
+    "นับสถิติ ai_schema_fail เมื่อ JSON ไม่ตรง schema",
+    engineSrc.includes("recordEvent(`ai_schema_fail:${meta.provider}`)"),
+  );
+  check(
+    "เครื่องยนต์กลางไม่มีโค้ดกุไพ่ — schema ไม่ผ่านต้องคืน retryNextModel (กฎเหล็กข้อ 14)",
+    engineSrc.includes("return { ok: false, retryNextModel: true };") &&
+      !/fallbackCard|mockCard|DEFAULT_CARD/i.test(engineSrc),
+  );
   check('generateGroqChatReply มีเพดาน max_tokens เริ่มต้น (2400)', groqSrc.includes("2400"));
+
+  // 2.1 ผู้ให้บริการทุกเจ้าต้องเดินผ่านเครื่องยนต์กลาง ห้ามเขียนลูปถอดสตรีมของตัวเอง
+  const cerebrasSrc = fs.readFileSync(
+    path.resolve(process.cwd(), "src/lib/ai/cerebras.ts"),
+    "utf-8",
+  );
+  for (const [label, src] of [
+    ["groq.ts", groqSrc],
+    ["cerebras.ts", cerebrasSrc],
+  ] as const) {
+    check(
+      `${label} เดินผ่านเครื่องยนต์กลาง (consumeReadingDelta + finalizeReading)`,
+      src.includes("consumeReadingDelta(") && src.includes("finalizeReading("),
+    );
+  }
+
+  /*
+   * 2.2 Groq ต้องถอยเองเมื่อคำขอใหญ่เกินเพดาน TPM แทนที่จะยิงทิ้งครบทุกโมเดล
+   * เพดานของ Groq นับ prompt + max_tokens รวมกันต่อคำขอเดียวที่ 8,000 (INC-0136)
+   * ผัง 4 ใบขึ้นไปจึงไม่มีทางผ่าน — ยิงไปก็ได้แค่ 429 แลกกับเวลาที่ผู้ใช้นั่งรอ
+   */
+  check(
+    "groq.ts ถอยทันทีเมื่อตัดของเสริมแล้วยังเกินเพดาน TPM (ไม่ยิงคำขอที่รู้ว่าจะโดนปฏิเสธ)",
+    /if \(!fitsNow\) \{[\s\S]{0,400}?return;/.test(groqSrc),
+  );
+
+  /*
+   * 2.3 Cerebras รับเฉพาะผังใหญ่ — ชั้นฟรีมีแค่ 5 คำขอ/นาที
+   * ถ้าเผลอปล่อยให้รับผังเล็กด้วย โควตาจะหมดก่อนที่ผังใหญ่ (ซึ่งไม่มีทางเลือกอื่น) จะได้ใช้
+   */
+  check(
+    "cerebras.ts กันไม่ให้รับผังเล็ก (CEREBRAS_MIN_CARDS = 4)",
+    CEREBRAS_MIN_CARDS === 4 && cerebrasSrc.includes("cardCount >= CEREBRAS_MIN_CARDS"),
+  );
+  check(
+    "cerebras.ts ใช้ชื่อโมเดลแบบไม่มี prefix ผู้ผลิต (ต่างจาก Groq)",
+    (WORKING_CEREBRAS_MODELS as readonly string[]).every((m) => !m.includes("/")),
+  );
+  check(
+    "cerebras.ts เพดานผลลัพธ์กว้างพอให้ผัง 12 ใบ (1,600 + 12 × 480 = 7,360) เขียนจบ",
+    resolveMaxReadingTokens(12, 8000) === 7360,
+  );
 
   // 3. route — นับ failover Groq → Gemini
   const readRouteSrc = fs.readFileSync(
