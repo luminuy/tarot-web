@@ -28,6 +28,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
   }
 
+  const isEnglish = /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
+
   try {
     const body = await request.json();
 
@@ -36,14 +38,14 @@ export async function POST(request: Request) {
     if (!ts.ok) {
       console.warn(`[turnstile] login ปฏิเสธ: ${ts.reason}`);
       return NextResponse.json(
-        { error: "ระบบตรวจพบว่าอาจไม่ใช่การใช้งานจากคนจริง กรุณารีเฟรชหน้าแล้วลองใหม่" },
+        { error: isEnglish ? "Bot verification failed. Please refresh and try again." : "ระบบตรวจพบว่าอาจไม่ใช่การใช้งานจากคนจริง กรุณารีเฟรชหน้าแล้วลองใหม่" },
         { status: 403 },
       );
     }
 
     const parsed = LoginSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
+      return NextResponse.json({ error: isEnglish ? "Invalid email or password" : "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
     }
 
     const { email, password } = parsed.data;
@@ -56,14 +58,14 @@ export async function POST(request: Request) {
     const limit = await peekAuthRateLimit(request, "login", emailLower);
     if (!limit.allowed) {
       return NextResponse.json(
-        { error: `คุณลองเข้าสู่ระบบผิดบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
+        { error: isEnglish ? `Too many failed login attempts. Please wait ${limit.retryAfterSec || 60} seconds.` : `คุณลองเข้าสู่ระบบผิดบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
         { status: 429 }
       );
     }
 
     const invalidCredentials = async () => {
       await recordAuthFailure(request, "login", emailLower);
-      return NextResponse.json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
+      return NextResponse.json({ error: isEnglish ? "Invalid email or password" : "อีเมลหรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
     };
 
     const user = await getUserByEmail(emailLower);
@@ -120,9 +122,9 @@ export async function POST(request: Request) {
     // และเจ้าของระบบจะไล่หาสาเหตุไม่เจอ เพราะหน้าเว็บชี้ไปผิดที่ (บทเรียน INC-0045)
     if (isPasswordConfigError(err)) {
       console.error("[Email Login] ตั้งค่าไม่ครบ:", err.message);
-      return NextResponse.json({ error: "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
+      return NextResponse.json({ error: isEnglish ? "Email sign-in is temporarily unavailable. Please use Google sign-in in the meantime." : "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
     }
     console.error("[Email Login Error]", err);
-    return NextResponse.json({ error: "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้" }, { status: 500 });
+    return NextResponse.json({ error: isEnglish ? "Unable to sign in at this time." : "ไม่สามารถเข้าสู่ระบบได้ในขณะนี้" }, { status: 500 });
   }
 }

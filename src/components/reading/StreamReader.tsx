@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion } from "motion/react";
 import { STAGGER, DUR, EASE } from "@/lib/motion";
 import type { Reading } from "@/lib/schema/reading";

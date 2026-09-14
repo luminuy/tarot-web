@@ -1,13 +1,13 @@
 import { getSpread } from "@/data/spreads";
 import { getContentOverrides, resolveCardByIndex } from "@/lib/content/overrides";
 import { streamGeminiReading } from "@/lib/ai/gemini";
-import { AI_DISCLOSURE } from "@/lib/safety/guardrails";
+import { AI_DISCLOSURE, AI_DISCLOSURE_EN } from "@/lib/safety/guardrails";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getReading, updateReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvents, recordEvent } from "@/lib/stats/record";
 import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
-import { SIGN_IN_GATE_MESSAGE, SIGN_IN_GATE_REASON, isSignInRequired } from "@/lib/entitlement/signin-gate";
+import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
 
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
@@ -52,21 +52,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   if (!record || !record.drawn) {
-    return Response.json({ error: "ยังไม่ได้สับไพ่ หรือการเปิดไพ่นี้หมดอายุแล้ว" }, { status: 404 });
+    const isEn = request.headers.get("referer")?.includes("/en");
+    return Response.json(
+      { error: isEn ? "Cards have not been shuffled, or this reading session has expired." : "ยังไม่ได้สับไพ่ หรือการเปิดไพ่นี้หมดอายุแล้ว" },
+      { status: 404 }
+    );
   }
+
+  const isEn = record.lang === "en" || request.headers.get("referer")?.includes("/en");
 
   // Cryptographic seed & commitment integrity verification gate
   if (record.serverSeed && record.commitment) {
     const { verifyCommitment } = await import("@/lib/tarot/shuffle");
     if (!verifyCommitment(record.serverSeed, record.commitment)) {
       console.error("[PF] commitment mismatch on read route", { id });
-      return Response.json({ error: "ข้อมูลความถูกต้องของไพ่ไม่ตรงกับคำมั่นเดิม" }, { status: 500 });
+      return Response.json(
+        { error: isEn ? "Cryptographic card verification failed (commitment mismatch)." : "ข้อมูลความถูกต้องของไพ่ไม่ตรงกับคำมั่นเดิม" },
+        { status: 500 }
+      );
     }
   }
 
   const spread = getSpread(record.spreadId);
   if (!spread) {
-    return Response.json({ error: "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
+    return Response.json({ error: isEn ? "Spread layout not found." : "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
   }
 
   const clientIp = getClientIdentifier(request);
@@ -81,7 +90,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     if (!limit.allowed) {
-      return createRateLimitResponse(limit.retryAfterSeconds, "คุณกำลังเปิดไพ่อยู่แล้ว หรือเปิดไพ่ถี่เกินไป กรุณารอสักครู่");
+      return createRateLimitResponse(
+        limit.retryAfterSeconds,
+        isEn
+          ? "A reading is already in progress or requests are too frequent. Please wait a moment."
+          : "คุณกำลังเปิดไพ่อยู่แล้ว หรือเปิดไพ่ถี่เกินไป กรุณารอสักครู่"
+      );
     }
 
     const { checkPerIpReadQuota } = await import("@/lib/security/ai-budget");
@@ -92,7 +106,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       // ผู้ใช้คนนั้นจะโดน 429 "คุณกำลังเปิดไพ่อยู่แล้ว" ทุกครั้งจนกว่า isolate จะถูกรีไซเคิล
       // (performLazyCleanup ก็เก็บกวาดไม่ได้ เพราะเงื่อนไขต้องการ concurrent <= 0)
       limit.releaseConcurrency();
-      return createRateLimitResponse(3600, "คุณเปิดไพ่ครบโควตาสูงสุดของวันนี้แล้ว พักผ่อนแล้วกลับมาใหม่พรุ่งนี้นะ");
+      return createRateLimitResponse(
+        3600,
+        isEn
+          ? "You have reached your daily reading quota. Please rest and return tomorrow."
+          : "คุณเปิดไพ่ครบโควตาสูงสุดของวันนี้แล้ว พักผ่อนแล้วกลับมาใหม่พรุ่งนี้นะ"
+      );
     }
   }
 
@@ -118,7 +137,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (isSignInRequired(viewer)) {
       limit.releaseConcurrency();
       recordEvent("entitlement_blocked_signin");
-      return Response.json({ error: SIGN_IN_GATE_MESSAGE, reason: SIGN_IN_GATE_REASON }, { status: 403 });
+      return Response.json({ error: getSignInGateMessage(record.lang), reason: SIGN_IN_GATE_REASON }, { status: 403 });
     }
 
     if (enforced) {
@@ -135,8 +154,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           {
             error:
               viewer.kind === "guest" && REQUIRE_SIGNUP_TO_READ
-                ? "สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อน แล้วเปิดไพ่ได้เลย"
-                : "สิทธิ์เปิดไพ่ของคุณหมดแล้ว",
+                ? (isEn ? "Sign in or create a free account to continue your reading." : "สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อน แล้วเปิดไพ่ได้เลย")
+                : (isEn ? "Your reading quota has been reached." : "สิทธิ์เปิดไพ่ของคุณหมดแล้ว"),
             reason: viewer.kind === "guest" ? GUEST_BLOCK_REASON : "daily_exhausted",
           },
           { status: 403 },
@@ -227,7 +246,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         const resolvedCards = record.drawn!.map((d) => resolveCardByIndex(overrideDoc, d.cardIndex));
         if (resolvedCards.some((c) => !c)) {
           send(controller, "error", {
-            message: "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง",
+            message:
+              record.lang === "en"
+                ? "Card data not found. Please refresh and try again."
+                : "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง",
             code: "CARD_DATA_NOT_FOUND",
           });
           controller.close();
@@ -255,11 +277,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         > {
           // Tier 1: Groq Qwen (High-speed LPU, deep Thai comprehension, 14.4k req/day free quota)
           if (process.env.GROQ_API_KEY) {
+            let emittedAny = false;
             try {
               const { streamGroqReading } = await import("@/lib/ai/groq");
               let gotDone = false;
               for await (const event of streamGroqReading(readingCtx)) {
                 if (event.type === "done") gotDone = true;
+                if (event.type !== "done") emittedAny = true;
                 yield { ...event, provider: "groq" };
               }
               if (gotDone) {
@@ -267,9 +291,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
                 return;
               }
               recordEvent("ai_groq_failover"); // Groq ทุกโมเดลไม่จบ → ตกไป Gemini
+              if (emittedAny) {
+                yield { type: "reset", provider: "gemini" };
+              }
             } catch (err) {
               recordEvent("ai_groq_failover");
               console.warn("[read/route] Groq stream encountered error, failing over to Gemini:", err);
+              if (emittedAny) {
+                yield { type: "reset", provider: "gemini" };
+              }
             }
           }
 
@@ -349,7 +379,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             // เฉลย serverSeed ตอนนี้ — ผู้ใช้ตรวจย้อนหลังได้ว่าไพ่ไม่ได้ถูกเลือกทีหลัง
             send(controller, "done", {
               reading: event.reading,
-              disclosure: AI_DISCLOSURE,
+              disclosure: record.lang === "en" ? AI_DISCLOSURE_EN : AI_DISCLOSURE,
               proof: {
                 serverSeed: record.serverSeed,
                 clientSeed: record.clientSeed,
@@ -426,7 +456,7 @@ function streamCached(
       push("summary", { text: reading.summary });
       push("done", {
         reading,
-        disclosure: AI_DISCLOSURE,
+        disclosure: record.lang === "en" ? AI_DISCLOSURE_EN : AI_DISCLOSURE,
         proof: {
           serverSeed: record.serverSeed,
           clientSeed: record.clientSeed,

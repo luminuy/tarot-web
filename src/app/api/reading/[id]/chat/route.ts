@@ -16,7 +16,7 @@ import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { sanitizeTarotText, stripThinkingTags } from "@/lib/ai/language";
-import { MEMBERS_ONLY_CHAT_MESSAGE, isSignInRequired } from "@/lib/entitlement/signin-gate";
+import { getMembersOnlyChatMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
 
 export const runtime = "nodejs";
 
@@ -194,6 +194,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const { id } = await params;
 
+  const rawBody = await request.json().catch(() => null);
+  const parsed = BodySchema.safeParse(rawBody);
+  const initialLang: "th" | "en" =
+    parsed.success && parsed.data.lang
+      ? parsed.data.lang
+      : (request.headers.get("referer")?.includes("/en") ? "en" : "th");
+
   // Rate Limiting & Concurrency Guard per IP
   const { isPrivilegedTestRequest } = await import("@/lib/security/privileged");
   const privileged = await isPrivilegedTestRequest(request);
@@ -207,7 +214,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if ((enforced || isSignInRequired(viewer)) && viewer.kind !== "member") {
       recordEvent("entitlement_blocked_chat");
       return NextResponse.json(
-        { error: MEMBERS_ONLY_CHAT_MESSAGE, reason: "members_only" },
+        { error: getMembersOnlyChatMessage(initialLang), reason: "members_only" },
         { status: 403 },
       );
     }
@@ -223,27 +230,29 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     if (!limit.allowed) {
-      return createRateLimitResponse(limit.retryAfterSeconds, "คุณส่งข้อความเร็วเกินไป พักหายใจสักครู่แล้วค่อยพิมพ์ใหม่นะ");
+      return createRateLimitResponse(
+        limit.retryAfterSeconds,
+        initialLang === "en"
+          ? "You are sending messages too quickly. Please pause a moment before trying again."
+          : "คุณส่งข้อความเร็วเกินไป พักหายใจสักครู่แล้วค่อยพิมพ์ใหม่นะ"
+      );
     }
   }
 
   try {
-    const rawBody = await request.json().catch(() => null);
-    const parsed = BodySchema.safeParse(rawBody);
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0];
       console.warn("[Chat API] Schema validation failed:", JSON.stringify(firstIssue));
       const errorMessage =
         firstIssue?.path[0] === "message"
-          ? (firstIssue.message || "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม")
-          : "ข้อมูลการสนทนาไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง";
+          ? (firstIssue.message || (initialLang === "en" ? "Please specify your question." : "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม"))
+          : (initialLang === "en" ? "Invalid chat payload. Please try again." : "ข้อมูลการสนทนาไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
     const userQuestion = parsed.data.message;
     const history = parsed.data.history || [];
     const clientSnapshot = parsed.data.readingSnapshot;
-    const initialLang: "th" | "en" = parsed.data.lang || "th";
 
     recordEvent("chat_message");
 
@@ -266,6 +275,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     // Resilient server store resolution with session token and client snapshot fallback (Edge Failover Safe)
     let record: Partial<ReadingRecord> | undefined = getReading(id);
+
+    // Durable KV failover recovery: if memory was lost on edge worker isolate
+    if (!record || !record.drawn) {
+      const { loadReadingFromKV, saveReading } = await import("@/server/store");
+      const fromKv = await loadReadingFromKV(id);
+      if (fromKv) {
+        record = fromKv;
+        saveReading(record as ReadingRecord);
+      }
+    }
 
     if (!record || !record.drawn) {
       const token = request.headers.get("x-reading-token");

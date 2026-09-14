@@ -8,6 +8,7 @@
 class MysticAudioEngine {
   private ctx: AudioContext | null = null;
   private soundEnabled = true;
+  private activeUtterance: SpeechSynthesisUtterance | null = null;
 
   constructor() {
     // ⚠️ ต้องมี try/catch — `soundManager` ถูกสร้างตอน import ระดับโมดูล
@@ -48,7 +49,11 @@ class MysticAudioEngine {
   public toggleSound(): boolean {
     this.soundEnabled = !this.soundEnabled;
     if (typeof window !== "undefined") {
-      localStorage.setItem("tarot_sound_enabled", this.soundEnabled ? "true" : "false");
+      try {
+        localStorage.setItem("tarot_sound_enabled", this.soundEnabled ? "true" : "false");
+      } catch {
+        // เบราว์เซอร์บล็อกที่เก็บข้อมูล (เช่น โหมดส่วนตัวเข้ม)
+      }
     }
     if (this.soundEnabled) {
       this.playCardSelectSound();
@@ -261,8 +266,14 @@ class MysticAudioEngine {
   /** Voice Speech Synthesis (TTS) ปรับจูนเสียงเฉพาะตัวตามบุคลิกแม่หมอ 5 บุคลิก */
   public speakProphecy(text: string, personaId?: string | null, onEnd?: () => void, onError?: () => void): boolean {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
-    window.speechSynthesis.cancel();
-    const cleanText = text.replace(/[*#_`]/g, "").trim();
+    this.stopSpeaking();
+
+    // ทำความสะอาดข้อความ ไม่ให้อ่าน markdown syntax, ลิงก์, หรือ URL ลอย ๆ
+    const cleanText = text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // แปลงลิงก์ markdown ให้เหลือเฉพาะข้อความ
+      .replace(/https?:\/\/\S+/g, "") // ตัด URL ดิบออก
+      .replace(/[*#_`~>]/g, "") // ตัดสัญลักษณ์จัดหน้า
+      .trim();
     if (!cleanText) return false;
 
     const hasThai = /[\u0E00-\u0E7F]/.test(cleanText);
@@ -316,14 +327,26 @@ class MysticAudioEngine {
       }
     }
 
-    if (onEnd) utterance.onend = onEnd;
-    if (onError) utterance.onerror = onError;
+    // ⚠️ Chromium Bug 679437: Utterance โดน Garbage Collector ทำลายกลางคันหากไม่มีตัวแปรอ้างอิง
+    // ต้องถือ reference ไว้ในตัวแปร instance (activeUtterance) จนกว่าจะ onend / onerror
+    this.activeUtterance = utterance;
+
+    utterance.onend = () => {
+      this.activeUtterance = null;
+      onEnd?.();
+    };
+
+    utterance.onerror = () => {
+      this.activeUtterance = null;
+      onError?.();
+    };
 
     window.speechSynthesis.speak(utterance);
     return true;
   }
 
   public stopSpeaking() {
+    this.activeUtterance = null;
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -331,7 +354,7 @@ class MysticAudioEngine {
 
   public isSpeaking(): boolean {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      return window.speechSynthesis.speaking;
+      return Boolean(this.activeUtterance) || window.speechSynthesis.speaking;
     }
     return false;
   }

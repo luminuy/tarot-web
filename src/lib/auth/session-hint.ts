@@ -26,7 +26,11 @@ import { AUTH_HINT_COOKIE_NAME } from "@/lib/auth/cookie-names";
 /** เครื่องนี้เคยล็อกอินและเซสชันยังอยู่หรือไม่ (ดูจากคุกกี้ใบ้) */
 export function hasSessionHint(): boolean {
   if (typeof document === "undefined") return false;
-  return document.cookie.split("; ").some((c) => c.startsWith(`${AUTH_HINT_COOKIE_NAME}=1`));
+  try {
+    return document.cookie.split("; ").some((c) => c.startsWith(`${AUTH_HINT_COOKIE_NAME}=1`));
+  } catch {
+    return false;
+  }
 }
 
 /**

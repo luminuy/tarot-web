@@ -20,10 +20,13 @@ type AuthErrorCode =
   | "profile_unavailable"
   | "server_error";
 
-function fail(origin: string, code: AuthErrorCode) {
-  const response = NextResponse.redirect(`${origin}/?auth_error=${code}`);
-  // ล้าง state ทิ้งทุกทางออก ไม่ให้ค้างไว้ให้ใช้ซ้ำจนกว่าจะครบ 10 นาที
+function fail(origin: string, code: AuthErrorCode, returnUrl?: string | null) {
+  const isEnglish = returnUrl?.startsWith("/en") || returnUrl === "/en";
+  const redirectPath = isEnglish ? `/en?auth_error=${code}` : `/?auth_error=${code}`;
+  const response = NextResponse.redirect(`${origin}${redirectPath}`);
+  // ล้าง state และ return cookie ทิ้งทุกทางออก ไม่ให้ค้างไว้ให้ใช้ซ้ำจนกว่าจะครบ 10 นาที
   response.cookies.set(OAUTH_STATE_COOKIE, "", { path: "/", maxAge: 0 });
+  response.cookies.set(OAUTH_RETURN_COOKIE, "", { path: "/", maxAge: 0 });
   return response;
 }
 
@@ -38,21 +41,22 @@ export async function GET(
   const error = url.searchParams.get("error");
 
   const origin = resolveAppOrigin(request);
+  const cookieStore = await cookies();
+  const rawReturnUrl = cookieStore.get(OAUTH_RETURN_COOKIE)?.value;
 
   if (provider !== "google" && provider !== "line") {
-    return fail(origin, "provider_unavailable");
+    return fail(origin, "provider_unavailable", rawReturnUrl);
   }
   const oauthProvider: "google" | "line" = provider;
 
-  const cookieStore = await cookies();
   const expectedState = cookieStore.get(OAUTH_STATE_COOKIE)?.value;
 
   if (!state || !expectedState || state !== expectedState) {
-    return fail(origin, "state_mismatch");
+    return fail(origin, "state_mismatch", rawReturnUrl);
   }
 
   if (error || !code) {
-    return fail(origin, "access_denied");
+    return fail(origin, "access_denied", rawReturnUrl);
   }
 
   const redirectUri = `${origin}/api/auth/${provider}/callback`;
@@ -65,7 +69,7 @@ export async function GET(
     if (oauthProvider === "google") {
       const clientId = process.env.GOOGLE_CLIENT_ID || "";
       const clientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
-      if (!clientId || !clientSecret) return fail(origin, "provider_unavailable");
+      if (!clientId || !clientSecret) return fail(origin, "provider_unavailable", rawReturnUrl);
 
       const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
@@ -82,7 +86,7 @@ export async function GET(
       const tokens = await tokenRes.json().catch(() => ({}));
       if (!tokenRes.ok || !tokens?.access_token) {
         console.error("[OAuth google] token exchange failed", tokenRes.status, tokens?.error);
-        return fail(origin, "provider_error");
+        return fail(origin, "provider_error", rawReturnUrl);
       }
 
       const userRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
@@ -94,7 +98,7 @@ export async function GET(
       // กลายเป็นบัญชีชื่อ `google_undefined` ที่ผู้ใช้หลายคนใช้ร่วมกัน (เห็นประวัติกันข้ามคน)
       if (!userRes.ok || !userData?.id) {
         console.error("[OAuth google] userinfo failed", userRes.status);
-        return fail(origin, "profile_unavailable");
+        return fail(origin, "profile_unavailable", rawReturnUrl);
       }
       providerUserId = String(userData.id);
 
@@ -111,7 +115,7 @@ export async function GET(
     } else {
       const channelId = process.env.LINE_CHANNEL_ID || "";
       const channelSecret = process.env.LINE_CHANNEL_SECRET || "";
-      if (!channelId || !channelSecret) return fail(origin, "provider_unavailable");
+      if (!channelId || !channelSecret) return fail(origin, "provider_unavailable", rawReturnUrl);
 
       const tokenRes = await fetch("https://api.line.me/oauth2/v2.1/token", {
         method: "POST",
@@ -128,7 +132,7 @@ export async function GET(
       const tokens = await tokenRes.json().catch(() => ({}));
       if (!tokenRes.ok || !tokens?.access_token) {
         console.error("[OAuth line] token exchange failed", tokenRes.status, tokens?.error);
-        return fail(origin, "provider_error");
+        return fail(origin, "provider_error", rawReturnUrl);
       }
 
       const userRes = await fetch("https://api.line.me/v2/profile", {
@@ -137,7 +141,7 @@ export async function GET(
       const userData = await userRes.json().catch(() => ({}));
       if (!userRes.ok || !userData?.userId) {
         console.error("[OAuth line] profile failed", userRes.status);
-        return fail(origin, "profile_unavailable");
+        return fail(origin, "profile_unavailable", rawReturnUrl);
       }
       providerUserId = String(userData.userId);
 
@@ -228,7 +232,6 @@ export async function GET(
 
     const sessionToken = await signUserSession(profile);
 
-    const rawReturnUrl = cookieStore.get(OAUTH_RETURN_COOKIE)?.value;
     let targetPath = "/";
     if (
       rawReturnUrl &&
@@ -252,6 +255,6 @@ export async function GET(
     return response;
   } catch (err) {
     console.error(`[OAuth Callback Error - ${provider}]:`, err);
-    return fail(origin, "server_error");
+    return fail(origin, "server_error", rawReturnUrl);
   }
 }

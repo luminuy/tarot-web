@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 interface ShuffleRitualProps {
   commitment: string;
@@ -14,6 +15,7 @@ interface ShuffleRitualProps {
 export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spreadName, onShuffleComplete }) => {
   const { isEnglish } = useLocale();
   const [shuffling, setShuffling] = useState(false);
+  const [copiedHash, setCopiedHash] = useState(false);
   const [shufflePhase, setShufflePhase] = useState<"idle" | "split" | "riffle" | "bridge" | "gather">("idle");
   const entropyRef = useRef<number[]>([]);
   const rafRef = useRef<number | null>(null);
@@ -238,12 +240,18 @@ export const ShuffleRitual: React.FC<ShuffleRitualProps> = ({ commitment, spread
           </span>
           <button
             type="button"
-            onClick={() => navigator.clipboard.writeText(commitment)}
-            title={isEnglish ? "Copy verification commitment" : "คัดลอกรหัสยืนยันความโปร่งใส"}
-            aria-label={isEnglish ? "Copy verification commitment" : "คัดลอกรหัสยืนยันความโปร่งใส"}
-            className="tap-overlay-y text-gold-ink hover:text-ink-deep cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
+            onClick={async () => {
+              const ok = await copyToClipboard(commitment);
+              if (ok) {
+                setCopiedHash(true);
+                setTimeout(() => setCopiedHash(false), 2000);
+              }
+            }}
+            title={isEnglish ? (copiedHash ? "Copied!" : "Copy verification commitment") : (copiedHash ? "คัดลอกแล้ว!" : "คัดลอกรหัสยืนยันความโปร่งใส")}
+            aria-label={isEnglish ? (copiedHash ? "Copied!" : "Copy verification commitment") : (copiedHash ? "คัดลอกแล้ว!" : "คัดลอกรหัสยืนยันความโปร่งใส")}
+            className="tap-overlay-y text-gold-ink hover:text-ink-deep cursor-pointer px-1 py-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink font-mono text-xs"
           >
-            ⧉
+            {copiedHash ? "✓" : "⧉"}
           </button>
         </div>
       )}

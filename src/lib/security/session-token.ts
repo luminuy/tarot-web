@@ -58,6 +58,7 @@ export function signReadingSessionToken(record: Partial<ReadingRecord>): string 
     question: record.question,
     intake: record.intake,
     nickname: record.nickname,
+    lang: record.lang,
     safetyFlag: record.safetyFlag,
     safetyGuard: record.safetyGuard,
     commitment: record.commitment,

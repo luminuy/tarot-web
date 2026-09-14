@@ -38,6 +38,7 @@ export interface PersistedFlow {
   activeCardIndex: number;
   readingResult: Partial<Reading> | null;
   proof: { serverSeed?: string; clientSeed?: string; commitment?: string };
+  lang?: "th" | "en";
   savedAt: number;
 }
 

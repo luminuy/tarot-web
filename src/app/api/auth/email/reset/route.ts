@@ -21,11 +21,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
   }
 
+  const isEnglish = /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
+
   try {
     const body = await request.json();
     const parsed = ResetSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message || "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || (isEnglish ? "Invalid input" : "ข้อมูลไม่ถูกต้อง") }, { status: 400 });
     }
 
     const { token, password } = parsed.data;
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
     const limit = await checkAuthRateLimit(request, "reset");
     if (!limit.allowed) {
       return NextResponse.json(
-        { error: `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
+        { error: isEnglish ? `Too many requests. Please wait ${limit.retryAfterSec || 60} seconds.` : `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
         { status: 429 }
       );
     }
@@ -43,20 +45,20 @@ export async function POST(request: Request) {
     const tokenResult = await consumeToken(token, "reset");
     if (!tokenResult) {
       return NextResponse.json(
-        { error: "ลิงก์ตั้งรหัสผ่านนี้หมดอายุหรือถูกใช้งานไปแล้ว กรุณากดขอลิงก์ใหม่อีกครั้ง" },
+        { error: isEnglish ? "This password reset link has expired or has already been used. Please request a new one." : "ลิงก์ตั้งรหัสผ่านนี้หมดอายุหรือถูกใช้งานไปแล้ว กรุณากดขอลิงก์ใหม่อีกครั้ง" },
         { status: 400 }
       );
     }
 
     const user = await getUserById(tokenResult.userId);
     if (!user) {
-      return NextResponse.json({ error: "ไม่พบข้อมูลบัญชีผู้ใช้" }, { status: 404 });
+      return NextResponse.json({ error: isEnglish ? "User account not found." : "ไม่พบข้อมูลบัญชีผู้ใช้" }, { status: 404 });
     }
 
     // Password Policy Check
     const policy = validatePasswordPolicy(password, user.email || undefined);
     if (!policy.ok) {
-      return NextResponse.json({ error: policy.reason || "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย" }, { status: 400 });
+      return NextResponse.json({ error: policy.reason || (isEnglish ? "Password does not meet security requirements" : "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย") }, { status: 400 });
     }
 
     // Hash & Save (bumps token_version automatically)
@@ -83,7 +85,7 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({
       ok: true,
-      message: "ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว",
+      message: isEnglish ? "Password reset successfully." : "ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว",
       user: {
         id: user.id,
         name: user.name,
@@ -98,9 +100,9 @@ export async function POST(request: Request) {
   } catch (err) {
     if (isPasswordConfigError(err)) {
       console.error("[Reset Password] ตั้งค่าไม่ครบ:", err.message);
-      return NextResponse.json({ error: "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
+      return NextResponse.json({ error: isEnglish ? "Email sign-in is temporarily unavailable. Please use Google sign-in in the meantime." : "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
     }
     console.error("[Reset Password Error]", err);
-    return NextResponse.json({ error: "ไม่สามารถตั้งรหัสผ่านใหม่ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
+    return NextResponse.json({ error: isEnglish ? "Unable to reset password at this time. Please try again." : "ไม่สามารถตั้งรหัสผ่านใหม่ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
   }
 }

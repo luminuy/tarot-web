@@ -32,6 +32,18 @@ export const SIGN_IN_GATE_REASON = GUEST_BLOCK_REASON;
 /** ข้อความสำหรับด่านเปิดไพ่ */
 export const SIGN_IN_GATE_MESSAGE = `สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ แล้วดูดวงได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`;
 
+export function getSignInGateMessage(lang?: "th" | "en"): string {
+  return lang === "en"
+    ? `Please sign up or sign in for free before drawing cards to receive ${DAILY_LIMIT} free daily readings.`
+    : SIGN_IN_GATE_MESSAGE;
+}
+
 /** ข้อความสำหรับด่านคุยต่อกับแม่หมอ (สมาชิกเท่านั้นมาแต่ไหนแต่ไร) */
 export const MEMBERS_ONLY_CHAT_MESSAGE =
   "สมัครสมาชิกเพื่อถามแม่หมอต่อ และเก็บดวงไว้ดูย้อนหลังได้ทุกเครื่อง";
+
+export function getMembersOnlyChatMessage(lang?: "th" | "en"): string {
+  return lang === "en"
+    ? "Please create a free account or sign in to continue chatting with the Oracle and save your reading history."
+    : MEMBERS_ONLY_CHAT_MESSAGE;
+}

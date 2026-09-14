@@ -3,14 +3,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getSpread } from "@/data/spreads";
-import { checkQuestion, CRISIS_MESSAGE } from "@/lib/safety/guardrails";
+import { checkQuestion, getCrisisMessage } from "@/lib/safety/guardrails";
 import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { DAILY_LIMIT, GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
-import { SIGN_IN_GATE_MESSAGE, SIGN_IN_GATE_REASON, isSignInRequired } from "@/lib/entitlement/signin-gate";
+import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
 import { createCommitment, normalizeClientSeed } from "@/lib/tarot/shuffle";
 
 export const runtime = "nodejs";
@@ -71,7 +71,10 @@ export async function POST(request: Request) {
   const { spreadId, question, personaId, nickname, category, intake } = parsed.data;
   const spread = getSpread(spreadId);
   if (!spread) {
-    return NextResponse.json({ error: "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
+    return NextResponse.json(
+      { error: parsed.data.lang === "en" ? "Spread layout not found" : "ไม่พบรูปแบบการวางไพ่นี้" },
+      { status: 404 }
+    );
   }
 
   // ตรวจความปลอดภัยของคำถามก่อนทำอย่างอื่นทั้งหมด (รวมทุกฟิลด์ที่ผู้ใช้กรอก: P0-5 fix)
@@ -95,7 +98,7 @@ export async function POST(request: Request) {
   // (เรียกเฉพาะเคสคลุมเครือ · fail-open ถ้า Workers AI ไม่พร้อม)
   if (await assessCrisisRisk(textToScan)) {
     recordEvents(["reading_blocked", "safety_flag:crisis_ai"]);
-    return NextResponse.json({ blocked: true, message: CRISIS_MESSAGE }, { status: 200 });
+    return NextResponse.json({ blocked: true, message: getCrisisMessage(parsed.data.lang) }, { status: 200 });
   }
 
   // ── สิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 1: ล็อกขั้น 1 · ยังไม่หัก) ──
@@ -112,7 +115,7 @@ export async function POST(request: Request) {
     if (isSignInRequired(viewer)) {
       recordEvent("entitlement_blocked_signin");
       return NextResponse.json(
-        { error: SIGN_IN_GATE_MESSAGE, reason: SIGN_IN_GATE_REASON },
+        { error: getSignInGateMessage(parsed.data.lang), reason: SIGN_IN_GATE_REASON },
         { status: 403 },
       );
     }
