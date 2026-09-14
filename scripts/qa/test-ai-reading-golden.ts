@@ -13,12 +13,6 @@ import { ReadingSchema } from "../../src/lib/schema/reading";
 import { ALL_CARDS } from "../../src/data/cards";
 import { getSpread } from "../../src/data/spreads";
 import { WORKING_GROQ_MODELS } from "../../src/lib/ai/groq";
-import {
-  activeCerebrasModels,
-  CEREBRAS_MIN_CARDS,
-  CEREBRAS_MODEL_CONFIGS,
-  WORKING_CEREBRAS_MODELS,
-} from "../../src/lib/ai/cerebras";
 import { resolveMaxReadingTokens } from "../../src/lib/ai/reading-stream";
 import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
 
@@ -74,7 +68,7 @@ async function main() {
   /*
    * ⚠️ บทเรียนซ้ำรอบสอง (อ่านคอมเมนต์ด้านบนประกอบ):
    * ด่านสามข้อล่างนี้เคย grep หาสตริงใน `groq.ts` ตรง ๆ พอตรรกะถูกยกออกมาไว้ที่
-   * `reading-stream.ts` เพื่อให้ Cerebras ใช้ร่วมได้ ด่านก็ล้มทันทีทั้งที่พฤติกรรมไม่เปลี่ยน
+   * `reading-stream.ts` (ตอนจะเพิ่มผู้ให้บริการรายที่สอง) ด่านก็ล้มทันทีทั้งที่พฤติกรรมไม่เปลี่ยน
    *
    * คราวนี้จึงตรวจสองชั้นแทน:
    *   (1) "ด่านนิรภัยมีอยู่จริง" — ตรวจที่เครื่องยนต์กลางซึ่งเป็นแหล่งความจริงเดียว
@@ -104,25 +98,11 @@ async function main() {
   );
   check('generateGroqChatReply มีเพดาน max_tokens เริ่มต้น (2400)', groqSrc.includes("2400"));
 
-  // 2.1 ผู้ให้บริการทุกเจ้าต้องเดินผ่านเครื่องยนต์กลาง ห้ามเขียนลูปถอดสตรีมของตัวเอง
-  const cerebrasSrc = fs.readFileSync(
-    path.resolve(process.cwd(), "src/lib/ai/cerebras.ts"),
-    "utf-8",
-  );
-  for (const [label, src] of [
-    ["groq.ts", groqSrc],
-    ["cerebras.ts", cerebrasSrc],
-  ] as const) {
-    check(
-      `${label} เดินผ่านเครื่องยนต์กลาง (consumeReadingDelta + finalizeReading)`,
-      src.includes("consumeReadingDelta(") && src.includes("finalizeReading("),
-    );
-  }
-
   /*
-   * 2.2 Groq ต้องถอยเองเมื่อคำขอใหญ่เกินเพดาน TPM แทนที่จะยิงทิ้งครบทุกโมเดล
+   * 2.1 Groq ต้องถอยเองเมื่อคำขอใหญ่เกินเพดาน TPM แทนที่จะยิงทิ้งครบทุกโมเดล
    * เพดานของ Groq นับ prompt + max_tokens รวมกันต่อคำขอเดียวที่ 8,000 (INC-0136)
    * ผัง 4 ใบขึ้นไปจึงไม่มีทางผ่าน — ยิงไปก็ได้แค่ 429 แลกกับเวลาที่ผู้ใช้นั่งรอ
+   * ➔ ผังใหญ่เป็นของ Gemini ทั้งหมดในตอนนี้
    */
   check(
     "groq.ts ถอยทันทีเมื่อตัดของเสริมแล้วยังเกินเพดาน TPM (ไม่ยิงคำขอที่รู้ว่าจะโดนปฏิเสธ)",
@@ -130,119 +110,18 @@ async function main() {
   );
 
   /*
-   * 2.3 Cerebras รับเฉพาะผังใหญ่ — ชั้นฟรีมีแค่ 5 คำขอ/นาที
-   * ถ้าเผลอปล่อยให้รับผังเล็กด้วย โควตาจะหมดก่อนที่ผังใหญ่ (ซึ่งไม่มีทางเลือกอื่น) จะได้ใช้
+   * 2.2 เพดานผลลัพธ์ต้องเป็นเลข "ของเจ้านั้น" ไม่ใช่เลขตายตัวที่ยืมกันไปมา
+   * เดิมโค้ดเขียน Math.min(7000, ...) ไว้ตรง ๆ ทำให้ผัง 12 ใบซึ่งต้องการ 7,360
+   * ถูกหั่นทิ้ง 360 โทเค็น = ไพ่ใบสุดท้ายเขียนไม่จบ
    */
   check(
-    "cerebras.ts กันไม่ให้รับผังเล็ก (CEREBRAS_MIN_CARDS = 4)",
-    CEREBRAS_MIN_CARDS === 4 && cerebrasSrc.includes("cardCount >= CEREBRAS_MIN_CARDS"),
+    "groq.ts ใช้ resolveMaxReadingTokens() ไม่ฮาร์ดโค้ดเพดานเอง",
+    groqSrc.includes("resolveMaxReadingTokens(ctx.drawn.length, GROQ_OUTPUT_CEILING)") &&
+      !/Math\.min\(7000,/.test(groqSrc),
   );
   check(
-    "cerebras.ts ใช้ชื่อโมเดลแบบไม่มี prefix ผู้ผลิต (ต่างจาก Groq)",
-    (WORKING_CEREBRAS_MODELS as readonly string[]).every((m) => !m.includes("/")),
-  );
-  check(
-    "cerebras.ts เพดานผลลัพธ์กว้างพอให้ผัง 12 ใบ (1,600 + 12 × 480 = 7,360) เขียนจบ",
-    resolveMaxReadingTokens(12, 8000) === 7360,
-  );
-
-  /*
-   * 2.4 โทเค็นความคิดต้องไม่กินงบคำอ่าน
-   * ---------------------------------------------------------------------------
-   * เอกสาร Cerebras เขียนชัดว่า "Reasoning tokens count toward max_completion_tokens"
-   * และ `qwen-3.8-27b` ตั้งค่าปริยายไว้ที่ `reasoning_effort: "high"`
-   * ➔ ถ้าไม่ส่งค่าคุม โมเดลจะคิดยาวจนคำอ่านโดนตัดกลาง = อาการเดิมที่เรากำลังแก้อยู่
-   *
-   * กติกาถาวร: ตัวที่ปิดความคิดได้ต้องปิด · ตัวที่ปิดไม่ได้ต้องเผื่องบมากกว่าหนึ่งเท่า
-   */
-  check(
-    "cerebras.ts ส่ง reasoning_effort ทุกคำขอ (ไม่ปล่อยให้ Qwen ใช้ค่าปริยาย high)",
-    cerebrasSrc.includes("reasoning_effort: config.reasoningEffort"),
-  );
-  check(
-    "qwen-3.8-27b ปิดความคิดสนิท (reasoning_effort = none) เพราะปิดได้และงานนี้ไม่ต้องคิดหลายชั้น",
-    CEREBRAS_MODEL_CONFIGS.find((c) => c.id === "qwen-3.8-27b")?.reasoningEffort === "none",
-  );
-  check(
-    "qwen-3.8-27b ไม่ส่ง reasoning_format: hidden (เอกสารระบุว่าไม่รองรับ ส่งไปเสี่ยง 400)",
-    CEREBRAS_MODEL_CONFIGS.find((c) => c.id === "qwen-3.8-27b")?.supportsHiddenReasoning === false,
-  );
-  check(
-    "ทุกโมเดลที่ปิดความคิดไม่ได้ ต้องเผื่องบผลลัพธ์มากกว่า 1 เท่า",
-    CEREBRAS_MODEL_CONFIGS.every(
-      (c) => c.reasoningEffort === "none" || c.reasoningBudgetMultiplier > 1,
-    ),
-  );
-  // ต้องตัดคอมเมนต์ทิ้งก่อนตรวจ ไม่งั้นคำเตือนที่เขียนไว้ในคอมเมนต์เองจะทำให้ด่านตกทั้งที่โค้ดถูก
-  const stripComments = (src: string) =>
-    src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-  check(
-    "cerebras.ts อ่านเฉพาะ delta.content ไม่ดูด delta.reasoning เข้ามาปน (จะพังตัวถอด JSON + ด่านอักษรต่างด้าว)",
-    !/delta\??\.reasoning/.test(stripComments(cerebrasSrc)),
-  );
-
-  /*
-   * 2.5 งบรวมของทุกผัง × ทุกโมเดล ต้องอยู่ใต้เพดาน TPM ของ Cerebras
-   * คำนวณด้วยสูตรเดียวกับที่ `cerebras.ts` ใช้จริง — ไม่คัดลอกตัวเลขมาเขียนซ้ำ
-   * (บทเรียน INC-0136: เพดานที่นับ prompt รวมกับ max_tokens ต้องคำนวณก่อนทุกครั้งที่ขยับงบ)
-   */
-  const worstBudget = Math.max(
-    ...CEREBRAS_MODEL_CONFIGS.map((c) =>
-      Math.min(8000 * 2, resolveMaxReadingTokens(12, 8000) * c.reasoningBudgetMultiplier),
-    ),
-  );
-  check(
-    `งบผลลัพธ์หนักสุด (${worstBudget}) บวก prompt ผัง 12 ใบ ยังอยู่ใต้เพดาน TPM 28,000`,
-    worstBudget + 9011 <= 28000,
-  );
-
-  // 2.6 probe ต้องยิงด้วยค่าชุดเดียวกับ production ไม่งั้นวัดคนละอย่างกับของจริง
-  const probeSrc = fs.readFileSync(
-    path.resolve(process.cwd(), "scripts/qa/probe-cerebras.ts"),
-    "utf-8",
-  );
-  check(
-    "probe-cerebras.ts ส่ง reasoning_effort ชุดเดียวกับ production",
-    probeSrc.includes("reasoning_effort: config.reasoningEffort") &&
-      probeSrc.includes("config.reasoningBudgetMultiplier"),
-  );
-
-  /*
-   * 2.7 💸 ห้ามใช้โมเดลที่คิดเงินโดยไม่ได้ขอ
-   * ---------------------------------------------------------------------------
-   * โควตา Cerebras แยกรายโมเดลและอยู่คนละชั้นบริการกันได้ในบัญชีเดียว
-   * `qwen-3.8-27b` ของบัญชีนี้อยู่ชั้น PayGo ($0.99/$1.49 ต่อล้านโทเค็น)
-   * ขณะที่ `gpt-oss-120b` ยังเป็น Free Trial
-   *
-   * เจ้าของโปรเจกต์สั่งไว้ชัด (2026-09-14) ว่า **เอาแบบฟรีล้วน ไม่จ่ายเลย**
-   * ด่านนี้จึงล็อกไว้ว่าสายพานปริยายต้องไม่มีโมเดลที่คิดเงินแม้แต่ตัวเดียว
-   * ใครจะเปิดต้องตั้ง CEREBRAS_ALLOW_PAID=1 เองโดยรู้ตัว
-   */
-  const paidInDefault = activeCerebrasModels().filter((c) => c.billed);
-  check(
-    `สายพานปริยายต้องไม่มีโมเดลที่คิดเงิน (พบ ${paidInDefault.length} ตัว)`,
-    paidInDefault.length === 0,
-  );
-  check(
-    "qwen-3.8-27b ถูกทำเครื่องหมายว่าคิดเงิน (บัญชีนี้อยู่ชั้น PayGo)",
-    CEREBRAS_MODEL_CONFIGS.find((c) => c.id === "qwen-3.8-27b")?.billed === true,
-  );
-  check(
-    "gpt-oss-120b เป็นตัวฟรีและอยู่ในสายพานปริยาย",
-    activeCerebrasModels().some((c) => c.id === "gpt-oss-120b" && !c.billed),
-  );
-  check(
-    "ทุกโมเดลต้องระบุราคาไว้ให้คนอ่านโค้ดเห็น (priceNote ไม่ว่าง)",
-    CEREBRAS_MODEL_CONFIGS.every((c) => c.priceNote.trim().length > 0),
-  );
-  check(
-    "cerebras.ts วนลูปบน activeCerebrasModels() ไม่ใช่รายการดิบที่มีตัวคิดเงินปน",
-    cerebrasSrc.includes("for (const config of activeCerebrasModels())") &&
-      !cerebrasSrc.includes("for (const config of CEREBRAS_MODEL_CONFIGS)"),
-  );
-  check(
-    "probe-cerebras.ts ก็ยิงเฉพาะตัวฟรีโดยปริยายเช่นกัน",
-    probeSrc.includes("[...activeCerebrasModels()]"),
+    "สูตรเพดานคืนค่าถูกต้อง (ผัง 12 ใบ = 1,600 + 12 × 480 = 7,360 เมื่อเพดานกว้างพอ)",
+    resolveMaxReadingTokens(12, 8000) === 7360 && resolveMaxReadingTokens(12, 7000) === 7000,
   );
 
   // 3. route — นับ failover Groq → Gemini

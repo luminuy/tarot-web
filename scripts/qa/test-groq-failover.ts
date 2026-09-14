@@ -134,12 +134,11 @@ async function main() {
   check("isSevereForeignLeak: null / undefined → false", !isSevereForeignLeak(null) && !isSevereForeignLeak(undefined));
 
   const groqSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/ai/groq.ts"), "utf-8");
-  const cerebrasSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/ai/cerebras.ts"), "utf-8");
   /*
    * ⚠️ ด่านสามข้อนี้เคยอ่านแต่ `groq.ts` ไฟล์เดียว
-   * พอตรรกะตัดวงจรถูกยกไปไว้ที่ `reading-stream.ts` ให้ทุกผู้ให้บริการใช้ร่วมกัน
-   * ด่านก็ล้มทันทีทั้งที่ด่านนิรภัยยังอยู่ครบ — จึงย้ายมาตรวจที่แหล่งความจริงเดียว
-   * แล้วเพิ่มข้อตรวจว่า "ทุกเจ้าต้องเดินผ่านเครื่องยนต์นั้น" แทนการ grep รายไฟล์
+   * พอตรรกะตัดวงจรถูกยกไปไว้ที่ `reading-stream.ts` ด่านก็ล้มทันที
+   * ทั้งที่ด่านนิรภัยยังอยู่ครบ — จึงย้ายมาตรวจที่แหล่งความจริงเดียว
+   * แล้วเพิ่มข้อตรวจว่า "ผู้เรียกต้องเดินผ่านเครื่องยนต์นั้น" แทนการ grep หาสตริงรายไฟล์
    */
   const engineSrc = fs.readFileSync(
     path.join(process.cwd(), "src/lib/ai/reading-stream.ts"),
@@ -159,13 +158,10 @@ async function main() {
     engineSrc.includes("isSevereForeignLeak("),
   );
   check(
-    "ผู้ให้บริการทุกเจ้าต่อ circuit breaker ผ่านเครื่องยนต์กลาง (groq + cerebras)",
-    [groqSrc, cerebrasSrc].every(
-      (src) =>
-        src.includes("consumeReadingDelta(") &&
-        src.includes("resolveForeignBreaker(") &&
-        src.includes("state.foreignCircuitBreaker"),
-    ),
+    "groq.ts ต่อ circuit breaker ผ่านเครื่องยนต์กลาง ไม่เขียนลูปถอดสตรีมของตัวเอง",
+    groqSrc.includes("consumeReadingDelta(") &&
+      groqSrc.includes("resolveForeignBreaker(") &&
+      groqSrc.includes("state.foreignCircuitBreaker"),
   );
 
   console.log(`\n📊 ผลสรุป: ผ่าน ${pass} / ล้มเหลว ${fail}`);

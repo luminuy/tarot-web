@@ -86,20 +86,3 @@ export function groqChatCompletionsEndpoint(): string {
     ? `${base}/groq/chat/completions`
     : "https://api.groq.com/openai/v1/chat/completions";
 }
-
-
-/**
- * Endpoint chat completions ของ Cerebras (OpenAI-compatible)
- * ผ่าน gateway ถ้าตั้งค่าไว้ ไม่งั้นยิงตรง api.cerebras.ai
- *
- * ยืนยันรูปแบบด้วยการยิงจริงแล้ว (2026-09-14):
- *   GET  /v1/models          → 403 {"detail":"Not authenticated"}
- *   POST /v1/chat/completions → 401 {"code":"wrong_api_key"}
- * ทั้งคู่เป็นรูปแบบ OpenAI ทุกประการ จึงใช้ตัวถอดสตรีมชุดเดียวกับ Groq ได้เลย
- */
-export function cerebrasChatCompletionsEndpoint(): string {
-  const base = gatewayBase();
-  return base
-    ? `${base}/cerebras/chat/completions`
-    : "https://api.cerebras.ai/v1/chat/completions";
-}
