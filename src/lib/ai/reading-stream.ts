@@ -272,3 +272,23 @@ export function finalizeReading(
 export function resolveMaxReadingTokens(cardCount: number, ceiling: number): number {
   return Math.min(ceiling, 1600 + cardCount * 480);
 }
+
+/**
+ * 📏 งบโทเค็นผลลัพธ์สำหรับผู้ให้บริการที่ **ปิดโหมดคิดไม่ได้**
+ * ---------------------------------------------------------------------------
+ * บางเจ้านับโทเค็นความคิดรวมอยู่ในงบผลลัพธ์ และไม่ยอมให้ปิดโหมดคิด
+ * ถ้าให้งบเท่าความยาวคำอ่านพอดี ความคิดจะกินหมดก่อนจะได้เขียนคำอ่านจริง
+ * ➔ คำอ่านโดนตัดกลาง ทั้งที่คำนวณงบไว้ "พอ" แล้ว
+ *
+ * ⚠️ **การตั้งเพดานเองมีความเสี่ยงสองทาง** — ถ้าค่าปริยายของโมเดลสูงกว่าที่เราตั้ง
+ * การตั้งเองจะทำให้โดนตัด "ง่ายขึ้น" ไม่ใช่ยากขึ้น จึงต้องเผื่อหนักเสมอ
+ * และผู้เรียกควรมีทางถอยเมื่อผู้ให้บริการปฏิเสธเพดานที่ส่งไป
+ *
+ * `floor` คือพื้นขั้นต่ำที่ผังเล็กก็ยังได้ (ผังใบเดียวไม่ควรได้งบน้อยจนความคิดกินหมด)
+ */
+export function resolveThinkingOutputBudget(
+  cardCount: number,
+  opts: { ceiling: number; multiplier: number; floor: number },
+): number {
+  return Math.max(opts.floor, resolveMaxReadingTokens(cardCount, opts.ceiling) * opts.multiplier);
+}
