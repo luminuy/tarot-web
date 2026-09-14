@@ -141,13 +141,16 @@ export const MagicianIllustration: React.FC<{ className?: string }> = ({ classNa
 // 1. ไพ่ประจำวัน (1 ใบ)
 export const DailySpreadArt: React.FC<{ className?: string }> = ({ className = "w-full h-36" }) => (
   <div className={`flex items-center justify-center relative ${className}`}>
+    {/* ⚠️ ห้ามฮาร์ดโค้ด `loading="eager" fetchPriority="high"` กลับเข้ามาที่นี่
+        ภาพผังพวกนี้ถูกเรียกจากหลายหน้าซึ่งวางมันไว้คนละตำแหน่ง — บน /spreads อยู่เหนือพับ
+        แต่บนหน้าแรกอยู่ลึกลงไป 1,261px (ใต้พับ) การตีตรา "สำคัญสูงสุด" ตายตัวจึงกลายเป็น
+        การแย่งท่อเน็ตจากภาพ LCP ตัวจริงของหน้าแรกทุกครั้งที่เปิดเว็บ (วัดจริง 2026-09-14)
+        ภาพที่อยู่ในวิวพอร์ตจริงเบราว์เซอร์โหลดให้เองอยู่แล้วแม้เป็น lazy */}
     <MiniRwsCard
       src="/cards/major-19.jpg"
       borderColor="#D9C8AC"
       className="w-16 h-[108px] sm:w-17 sm:h-[115px]"
       highlight
-      loading="eager"
-      fetchPriority="high"
     />
   </div>
 );
@@ -196,13 +199,13 @@ export const ThreeCardSpreadArt: React.FC<{ className?: string }> = ({ className
   <div className={`flex items-center justify-center gap-2 relative ${className}`}>
     <div className="absolute w-36 h-0.5 border-b border-dashed border-line-warm/40 top-1/2 -translate-y-1/2 z-0" />
     <MiniRwsCard src="/cards/major-09.jpg" className="w-11 h-[75px] sm:w-12 sm:h-[82px] z-10 opacity-90" />
+    {/* เหตุผลเดียวกับ DailySpreadArt ด้านบน — ผังนี้อยู่ใต้พับทั้งบน /spreads (2,270px)
+        และบนหน้าแรก (1,272px) การตีตราสำคัญสูงสุดจึงผิดทั้งสองหน้าตั้งแต่ต้น */}
     <MiniRwsCard
       src="/cards/major-17.jpg"
       borderColor="#D9C8AC"
       className="w-13 h-[88px] sm:w-14 sm:h-[95px] z-10"
       highlight
-      loading="eager"
-      fetchPriority="high"
     />
     <MiniRwsCard src="/cards/major-21.jpg" className="w-11 h-[75px] sm:w-12 sm:h-[82px] z-10 opacity-90" />
   </div>

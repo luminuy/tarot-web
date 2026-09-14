@@ -274,9 +274,32 @@ async function runTests() {
     "แบนเนอร์ขอความยินยอมมีทั้งปุ่มยินยอมและปุ่มปฏิเสธ",
     bannerSrc.includes('decide("granted")') && bannerSrc.includes('decide("denied")'),
   );
+  /*
+   * 🛡️ ด่านกัน LCP ของหน้าแรกผูกกลับไปหาเวลา hydrate อีกครั้ง
+   * ---------------------------------------------------------------------------
+   * ของเดิมแบนเนอร์เริ่มที่ `useState(false)` แล้วค่อยเปิดใน `useEffect` markup จึงโผล่
+   * ก็ต่อเมื่อ React hydrate ทั้งหน้าเสร็จ · กล่องข้อความของมันใหญ่กว่าภาพไพ่ใบแรกของ
+   * หน้าแรก มันจึงเป็น **ตัว LCP** ที่วาดช้ากว่า FCP หลายวินาที (วัดจริงบน production
+   * 2026-09-14: FCP 1.4s · LCP 9.6s · คะแนน Performance 63)
+   *
+   * กติกาใหม่: markup ต้องมากับ HTML เสมอ แล้วซ่อน/แสดงด้วย CSS ล้วน ๆ
+   * สถานะความยินยอมห้ามอยู่ใน React state ที่ตัดสินใจตอน render อีก
+   */
   check(
-    "แบนเนอร์อ่านสถานะหลัง mount เท่านั้น (กัน hydration mismatch)",
-    bannerSrc.includes("useEffect(") && bannerSrc.includes("readConsent()"),
+    "แบนเนอร์ต้องเรนเดอร์มากับ HTML เสมอ ห้ามรอ mount (ไม่งั้นมันคือตัว LCP ที่มาช้า)",
+    bannerSrc.includes('data-consent-banner=""') &&
+      !bannerSrc.includes("readConsent()") &&
+      !bannerSrc.includes("useEffect("),
+  );
+
+  const globalCss = readFileSync(
+    resolve(import.meta.dirname, "../../src/app/globals.css"),
+    "utf-8",
+  );
+  check(
+    "แถบยินยอมถูกซ่อนด้วย display:none เป็นค่าเริ่มต้น (ไม่นับเป็นสิ่งที่วาดแล้ว)",
+    /\[data-consent-banner\]\s*\{\s*display:\s*none;/.test(globalCss) &&
+      /html\[data-consent-ask\]\s+\[data-consent-banner\]\s*\{\s*display:\s*block;/.test(globalCss),
   );
 
   // แบนเนอร์อยู่ใต้ AnalyticsTracker ซึ่ง RootHtml ติดตั้งไว้ทุกหน้าอยู่แล้ว
@@ -290,6 +313,29 @@ async function runTests() {
   check(
     "แบนเนอร์ถูกติดตั้งจริงในทุกหน้า (ผ่าน AnalyticsTracker)",
     trackerSrc.includes("<ConsentBanner />") && rootSrc.includes("<AnalyticsTracker />"),
+  );
+  check(
+    "มีสคริปต์ใน <head> เปิดแถบยินยอมก่อนเฟรมแรก เฉพาะเครื่องที่ยังไม่เคยตัดสินใจ",
+    rootSrc.includes("CONSENT_STORAGE_KEY") &&
+      rootSrc.includes("data-consent-ask") &&
+      /localStorage\.getItem/.test(rootSrc),
+  );
+
+  /*
+   * 🔌 preconnect ต้องชี้ไปยังโฮสต์ที่ "เบราว์เซอร์ต่อจริง" เท่านั้น
+   * ของเดิมจองสายไว้ให้ generativelanguage.googleapis.com กับ api.groq.com ซึ่งมีแต่
+   * Worker ฝั่งเซิร์ฟเวอร์เท่านั้นที่ต่อ — ไคลเอนต์คุยกับ /api/... ของโดเมนเราอย่างเดียว
+   * สองบรรทัดนั้นจึงแย่งคิวจากไฟล์ที่ใช้วาดหน้าจริงตั้งแต่วินาทีแรกโดยไม่ได้อะไรกลับมา
+   */
+  check(
+    "ห้าม preconnect ไปยังโฮสต์ของผู้ให้บริการ AI (ฝั่งเซิร์ฟเวอร์ต่อ ไม่ใช่เบราว์เซอร์)",
+    // ตรวจที่ `href=` ของ <link> จริง ไม่ใช่คำในคอมเมนต์ — คอมเมนต์อธิบายบทเรียนนี้
+    // อยู่บรรทัดเดียวกับชื่อโฮสต์ ถ้าจับกว้างกว่านี้จะตกเพราะคำอธิบายของตัวเอง
+    !/href="https:\/\/(generativelanguage\.googleapis\.com|api\.groq\.com)/.test(rootSrc),
+  );
+  check(
+    "preconnect ไปยัง CDN ภาพไพ่ (โฮสต์เดียวที่เบราว์เซอร์ต้องต่อจริงตอนวาดหน้า)",
+    rootSrc.includes("getImageKitOrigin") && rootSrc.includes('rel="preconnect"'),
   );
 
   console.log("\n📋 4. Event Contract Completeness");

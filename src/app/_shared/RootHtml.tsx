@@ -6,6 +6,8 @@ import { TikTokFloatingButton } from "@/components/ui/TikTokFloatingButton";
 import { LocaleProvider } from "@/lib/i18n";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { BRAND_SOCIAL_PROFILES, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
+import { CONSENT_STORAGE_KEY } from "@/lib/analytics-consent";
+import { getImageKitOrigin } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
 
 import { fontVariables } from "./fonts";
@@ -43,6 +45,10 @@ export function RootHtml({
   children: ReactNode;
 }) {
   const isEnglish = locale === "en";
+
+  /* โฮสต์ของ CDN ภาพไพ่ — ว่างเมื่อไม่ได้ตั้งค่า ImageKit (ภาพถูกเสิร์ฟจากโดเมนเราเอง
+     ซึ่งมีสายเปิดอยู่แล้ว จึงไม่ต้อง preconnect อะไรเพิ่ม) */
+  const imageCdnOrigin = getImageKitOrigin();
 
   const organizationJsonLd = {
     "@context": "https://schema.org",
@@ -88,9 +94,54 @@ export function RootHtml({
     <html lang={locale} className={fontVariables}>
       <head>
         <meta charSet="utf-8" />
-        {/* Preconnect & DNS-Prefetch ไปยัง CDN รูปภาพไพ่ (ImageKit) เพื่อเร่งความเร็ว LCP */}
-        <link rel="preconnect" href="https://ik.imagekit.io" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://ik.imagekit.io" />
+
+        {/*
+          🔌 เปิดสายไปยัง CDN ของภาพไพ่ล่วงหน้า — โฮสต์เดียวที่เบราว์เซอร์ต้องต่อจริงตอนวาดหน้า
+
+          ทุกภาพไพ่ในเว็บมาจาก ImageKit (ดู `src/lib/tarot/card-image.ts`) ซึ่งเป็นคนละโฮสต์
+          กับเว็บเรา เบราว์เซอร์จึงต้องทำ DNS + TCP + TLS ใหม่ทั้งชุดก่อนดึงภาพใบแรกได้
+          บนเน็ตมือถือ (RTT ~150ms) นั่นคือเวลาที่เสียไปเปล่า ๆ ~450ms ก่อน LCP ทุกครั้ง
+
+          ⚠️ ห้ามใส่ `crossOrigin` กับบรรทัดนี้เด็ดขาด — `<img>`/`<picture>` ของภาพไพ่
+             ไม่ได้ตั้ง `crossorigin` จึงดึงแบบไม่ใช่ CORS ถ้า preconnect เปิดสายแบบ CORS
+             ไว้ เบราว์เซอร์จะถือเป็นคนละสายและต้องเปิดใหม่อยู่ดี = เสียเปล่าสองต่อ
+
+          🤝 PR #472 (Antigravity AI) สรุปเรื่องโฮสต์ตรงกันและ merge เข้าก่อน แต่เขียนโฮสต์
+             ตายตัวเป็น `https://ik.imagekit.io` พร้อม `crossOrigin="anonymous"` · รอบนี้จึง
+             เก็บข้อสรุปเดียวกันไว้แต่แก้สองจุด: อ่านโฮสต์จาก `getImageKitOrigin()` ให้ตรงกับ
+             ค่าที่ `card-image.ts` ใช้จริง (ไม่ได้ตั้ง ImageKit = ไม่จองสายทิ้งไว้เปล่า ๆ)
+             และถอด `crossOrigin` ออกตามเหตุผลด้านบน
+
+          🗑️ ของเดิมตรงนี้ preconnect ไปที่ `generativelanguage.googleapis.com` และ
+             `api.groq.com` ซึ่ง **เบราว์เซอร์ไม่เคยต่อไปเลยสักครั้ง** — การเรียกโมเดลทั้งหมด
+             เกิดบน Worker ฝั่งเซิร์ฟเวอร์ (`src/lib/ai/*`) ไคลเอนต์คุยกับ `/api/...`
+             ของโดเมนเราเท่านั้น สองบรรทัดนั้นจึงเป็นการจองสายทิ้งไว้เฉย ๆ แย่งคิวกับ
+             ไฟล์ที่ใช้วาดหน้าจริงตั้งแต่วินาทีแรก
+        */}
+        {imageCdnOrigin && (
+          <>
+            <link rel="preconnect" href={imageCdnOrigin} />
+            <link rel="dns-prefetch" href={imageCdnOrigin} />
+          </>
+        )}
+
+        {/*
+          🍪 สวิตช์ของแถบขอความยินยอม PDPA — ต้องรันก่อนเฟรมแรกจะวาดเสมอ
+
+          แถบนั้นถูกเรนเดอร์มากับ HTML แล้วซ่อนด้วย `display:none` ใน `globals.css`
+          สคริปต์บรรทัดเดียวนี้เปิดให้เห็นเฉพาะเครื่องที่ยังไม่เคยตัดสินใจ
+          (เหตุผลเต็มอยู่ใน `src/components/analytics/ConsentBanner.tsx`)
+
+          ⚠️ ห้ามใส่ `defer`/`async` หรือย้ายลงไปท้าย `<body>` — ถ้ามันรันหลังเฟรมแรก
+             เครื่องที่เคยตอบไปแล้วจะเห็นแถบกะพริบขึ้นมาหนึ่งเฟรม
+          ⚠️ อ่าน localStorage ไม่ได้ (โหมดส่วนตัว) = ถือว่ายังไม่เคยตัดสินใจ ต้องถามใหม่
+             ให้ตรงกับ `readConsent()` ที่คืน null ในกรณีเดียวกัน
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STORAGE_KEY)}))document.documentElement.setAttribute('data-consent-ask','')}catch(e){document.documentElement.setAttribute('data-consent-ask','')}`,
+          }}
+        />
 
         {/* Speculation Rules API — อุ่นหน้าล่วงหน้าในเบราว์เซอร์
             ⚠️ กฎอยู่ที่ ./speculation-rules.ts ห้ามเขียนออบเจ็กต์ดิบตรงนี้ (ด่านที่ 38 บังคับ)
