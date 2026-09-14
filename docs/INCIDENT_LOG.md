@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0147 · 2026-09-14 13:57 · 🟡 Medium · ป้องกัน 500 error จาก malformed JSON ใน 11 API routes และรองรับสองภาษาบนหน้าแชร์ /s/[id]
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | เมื่อมีการส่งข้อมูลที่ไม่ใช่ JSON หรือ body ว่างเปล่ามายัง API 11 เส้นทาง ระบบจะโยน SyntaxError และตกเข้าบล็อก catch กลายเป็น HTTP 500 แทนที่จะตอบ 400 Bad Request และหน้า /s/[id] บังคับ redirect ไปหน้าแรกไทยเสมอแม้ผู้ใช้จะเลือกภาษาอังกฤษ |
+| **สาเหตุราก** | API endpoints เรียก await request.json() โดยไม่มี .catch(() => null) ดักจับข้อผิดพลาดของ JSON parser ทำให้ SyntaxError หลุดไปสู่ outer catch handler ที่ตอบ 500 และหน้าแชร์ /s/[id] ไม่ได้อ่านคุกกี้ภาษา seertarot_lang หรือวิเคราะห์ meta title ภาษาอังกฤษ |
+| **การแก้ไข** | ปรับปรุง API ทั้ง 11 เส้นทางให้ใช้ (await request.json().catch(() => null)) พร้อมตรวจสอบ !body || typeof body !== 'object' และส่งกลับ HTTP 400 Bad Request ทันทีเมื่อข้อมูลคำขอผิดรูปแบบ ปรับปรุงหน้า /s/[id] ให้ใช้ detectIsEnglish() ห่อหุ้ม try/catch สำหรับตรวจคุกกี้ seertarot_lang และ meta title และเพิ่มด่านตรวจ Malformed JSON Resilience ใน test-email-auth.ts และ test-marketplace-readers.ts |
+| **🛡️ กฎป้องกันถาวร** | **บังคับใช้แพทเทิร์น await request.json().catch(() => null) พร้อมตรวจสอบชนิดข้อมูลเสมอ และมีด่านตรวจอัตโนมัติใน verification suite คอยยิงคำขอ JSON เสียเพื่อกันถดถอย** |
+| **บันทึกโดย** | Antigravity AI · branch `main` · commit `ed273d5` |
+
+
 ### INC-0146 · 2026-09-14 · 🟠 High · แผนแม่บทที่เจ้าของใช้ตัดสินใจ บอกสถานะผิด 4 ข้อพร้อมกัน เพราะไม่เคยมีด่านไหนส่อง `docs/plans/`
 
 | หัวข้อ | รายละเอียด |
