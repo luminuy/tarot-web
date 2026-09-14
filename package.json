@@ -31,6 +31,7 @@
     "cards:variants": "tsx scripts/generate-card-variants.ts",
     "cards:related": "tsx scripts/generate-related-cards.ts",
     "og:image": "python3 scripts/generate-og-image.py",
+    "fonts:subset": "python3 scripts/subset-fonts.py",
     "og:share-base": "python3 scripts/generate-share-base.py",
     "agent:status": "tsx scripts/agent-guard.ts status",
     "agent:check": "tsx scripts/agent-guard.ts check",
