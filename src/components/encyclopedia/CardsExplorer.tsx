@@ -379,9 +379,14 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
                 key={card.id}
                 href={`/cards/${card.id}`}
                 prefetch={false}
+                /* ⚠️ ตัวเลขนี้ต้องตรงกับความสูงจริงของใบการ์ด ไม่ใช่ค่าเดาลอย ๆ
+                   วัดจริง 2026-09-14 ที่ 412px: 406px (320px: 419px · desktop: 409px)
+                   ของเดิมเขียนไว้ 380px ต่ำกว่าจริง ~26px ต่อแถว — กริด 78 ใบมี 39 แถว
+                   ทุกแถวที่เบราว์เซอร์เรนเดอร์เสร็จจึงหดเข้าหากันแล้วดันของข้างล่างขึ้นมา
+                   กลายเป็นลูกโซ่ของการคำนวณเลย์เอาต์ซ้ำ (forced reflow) ตลอดการโหลดหน้า */
                 style={{
                   contentVisibility: "auto",
-                  containIntrinsicSize: "auto 380px",
+                  containIntrinsicSize: "auto 406px",
                 }}
                 className="rounded-xl border border-line bg-surface p-3 flex flex-col justify-between hover:border-gold transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1.5 shadow-xs"
               >

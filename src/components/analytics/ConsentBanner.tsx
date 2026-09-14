@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 import { useLocale } from "@/lib/i18n";
-import { readConsent, writeConsent } from "@/lib/analytics-consent";
+import { writeConsent } from "@/lib/analytics-consent";
 import { setAnalyticsConsent } from "@/lib/analytics";
 
 /**
@@ -16,27 +16,39 @@ import { setAnalyticsConsent } from "@/lib/analytics";
  *
  * ตั้งใจให้เรียบและไม่บังเนื้อหา — ลอยอยู่มุมล่าง ไม่ใช่ม่านทึบกลางจอ
  * เพราะหน้าแรกคือหน้าที่ผู้ใช้มาเพื่อเปิดไพ่ ไม่ใช่มาอ่านประกาศ
+ *
+ * ⚠️ markup ของแถบนี้ต้องอยู่ใน HTML ตั้งแต่แรกเสมอ ห้ามกลับไปเรนเดอร์หลัง mount
+ * ---------------------------------------------------------------------------
+ * ของเดิมเริ่มด้วย `useState(false)` แล้วค่อยเปิดใน `useEffect` แถบจึงโผล่ก็ต่อเมื่อ
+ * React hydrate ทั้งหน้าเสร็จ · กล่องข้อความของมันกว้างเกือบเต็มจอมือถือ พื้นที่จึง
+ * ใหญ่กว่าภาพไพ่ใบแรกของหน้าแรก (17,703 px² เทียบกับ 13,463 px²) กลายเป็น **ตัว LCP
+ * ของหน้าแรก** ที่วาดหลัง FCP หลายวินาที — วัดจริงบน production 2026-09-14 ได้ LCP 9.6s
+ * ขณะที่ FCP อยู่ที่ 1.4s
+ *
+ * ตอนนี้ทั้งก้อนถูกเรนเดอร์ฝั่งเซิร์ฟเวอร์เสมอ แล้วซ่อนด้วย `display:none` ใน
+ * `globals.css` · สคริปต์สั้น ๆ ใน `<head>` (ดู `RootHtml.tsx`) ตั้ง `data-consent-ask`
+ * บน `<html>` ให้ก่อนเฟรมแรกจะวาด เฉพาะเครื่องที่ยังไม่เคยตัดสินใจเท่านั้น
+ * จึงไม่มีทั้งการกะพริบของเครื่องที่ตอบไปแล้ว และไม่มี hydration mismatch
+ * (สถานะความยินยอมไม่ได้อยู่ใน React state อีกต่อไป)
  */
 export function ConsentBanner() {
   const { isEnglish } = useLocale();
-  const [visible, setVisible] = useState(false);
+  const [decided, setDecided] = useState(false);
 
-  useEffect(() => {
-    // อ่านหลัง mount เท่านั้น — หน้านี้ prerender ไว้ ถ้าอ่านตอน render
-    // HTML ที่บิลด์ไว้จะไม่ตรงกับสิ่งที่เบราว์เซอร์เห็น (hydration mismatch)
-    if (readConsent() === null) setVisible(true);
-  }, []);
-
-  if (!visible) return null;
+  if (decided) return null;
 
   const decide = (choice: "granted" | "denied") => {
     writeConsent(choice); // จำไว้ต่อเครื่อง + ยิง event ให้ Meta Pixel เริ่มทำงาน
     setAnalyticsConsent(choice === "granted"); // Google Consent Mode v2
-    setVisible(false);
+    // ถอดสวิตช์ CSS ทิ้งด้วย ไม่ใช่แค่ถอด markup — กันแถบกะพริบกลับมาหนึ่งเฟรม
+    // ถ้าวันหน้ามีใครเรนเดอร์คอมโพเนนต์นี้ซ้ำในหน้าเดียวกัน
+    document.documentElement.removeAttribute("data-consent-ask");
+    setDecided(true);
   };
 
   return (
     <div
+      data-consent-banner=""
       role="region"
       aria-label={isEnglish ? "Cookie and analytics consent" : "การขอความยินยอมเก็บสถิติการใช้งาน"}
       className="fixed bottom-3 left-3 right-[4.75rem] sm:right-4 sm:left-auto sm:right-4 sm:bottom-4 sm:max-w-sm z-[var(--z-consent)] rounded-xl border border-line bg-surface shadow-[0_10px_30px_rgba(42,38,31,0.14)] p-4"

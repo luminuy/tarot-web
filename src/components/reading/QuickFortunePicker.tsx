@@ -353,12 +353,23 @@ export function QuickFortunePicker({
                     className="relative w-[92px] h-[152px] sm:w-[104px] sm:h-[172px] rounded-lg overflow-hidden border shadow-xs group-hover:shadow-md group-hover:scale-105 transition duration-300 transform-gpu bg-surface"
                     style={{ borderColor: topic.themeColors.cardBorder }}
                   >
+                    {/*
+                      ภาพไพ่ใบแรกของแถวนี้คือ **ตัว LCP ของหน้าแรกบนมือถือ** (วัดจริง 2026-09-14)
+                      จึงต้องบอกลำดับความสำคัญสูงสุดให้เบราว์เซอร์ตั้งแต่สแกน HTML
+
+                      ⚠️ ใบที่เหลือต้องเป็น `lazy` — บนมือถือแถวนี้เป็นสไลด์แนวนอนที่เห็นจริง
+                         แค่ใบเดียวกับเศษของใบที่สอง การสั่ง `eager` ทั้งสี่ใบ (ของเดิม)
+                         คือการดึงภาพ ~23 KB × 4 มาแย่งท่อเน็ตเส้นเดียวกับภาพ LCP
+                         ส่วนบนจอ sm ขึ้นไปที่กลายเป็นกริดเห็นครบทุกใบ เบราว์เซอร์จะโหลด
+                         ใบที่เหลือให้เองทันทีอยู่แล้วเพราะมันอยู่ในวิวพอร์ต
+                    */}
                     <CardImage
                       image={topic.cardImage}
                       alt={isEnglish ? (topic.cardAltEn || topic.cardAlt) : topic.cardAlt}
                       sizes="(min-width: 640px) 104px, 92px"
                       className="w-full h-full object-cover object-center"
-                      loading="eager"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : undefined}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
                   </div>

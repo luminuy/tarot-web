@@ -69,6 +69,26 @@ export function getImageKitEndpoint(): string {
 }
 
 /**
+ * โฮสต์ล้วน ๆ ของ CDN ภาพไพ่ (เช่น `https://ik.imagekit.io`) สำหรับ `<link rel="preconnect">`
+ *
+ * `getImageKitEndpoint()` คืนค่าที่มี path ของบัญชีติดมาด้วย (`.../seertarotweb`)
+ * ซึ่งใส่ใน `preconnect` ไม่ได้ — สเปกรับได้เฉพาะ origin เบราว์เซอร์จะตัด path ทิ้งเอง
+ * แต่เครื่องมือตรวจ (และคนอ่าน) จะสับสนว่าตั้งใจจองสายไปที่ path
+ *
+ * คืนค่าว่างเมื่อยังไม่ได้ตั้งค่า ImageKit หรือค่าที่ตั้งไม่ใช่ URL ที่แปลงได้
+ * (ภาพจะถูกเสิร์ฟจากโดเมนเราเองซึ่งมีสายเปิดอยู่แล้ว จึงไม่ต้องจองอะไรเพิ่ม)
+ */
+export function getImageKitOrigin(): string {
+  const endpoint = getImageKitEndpoint();
+  if (!endpoint) return "";
+  try {
+    return new URL(endpoint).origin;
+  } catch {
+    return "";
+  }
+}
+
+/**
  * Options สำหรับการดึง Path ของภาพไพ่
  */
 export interface CardImageSrcOptions {
@@ -151,12 +171,42 @@ export function getCardWebpSrcSet(
 const IMAGEKIT_AVIF_QUALITY = 65;
 
 /**
+ * ความกว้างของ `srcSet` ฝั่ง AVIF — **กว้างกว่าชุด WebP ได้ เพราะไม่ต้องมีไฟล์จริง**
+ *
+ * ชุด WebP ถูกล็อกไว้ที่ `CARD_IMAGE_VARIANTS` เพราะทุกขนาดต้องมีไฟล์อยู่บนดิสก์จริง
+ * (ด่านที่ 7 กฎ C ตรวจครบทั้ง 78 ใบ) การเพิ่มขั้นหนึ่งขั้น = เพิ่มไฟล์ในรีโป 78 ไฟล์
+ * แต่ AVIF ถูก ImageKit แปลงให้ตอนร้องขอ การเพิ่มขั้นจึงไม่มีต้นทุนฝั่งรีโปเลย
+ *
+ * ✦ ทำไมต้องมี 192 — วัดจริงจากหน้าแรก 2026-09-14
+ *   ไพ่ในแถว "เลือกเรื่องที่คุณอยากรู้" แสดงที่ 92 CSS px ซึ่งเป็น **ตัว LCP ของหน้าแรก
+ *   บนมือถือ** · จอ DPR 1.75 ต้องการ 161 px · DPR 2 ต้องการ 184 px — ทั้งคู่เกิน 128
+ *   อยู่นิดเดียวแต่ไม่มีขั้นกลาง เบราว์เซอร์จึงต้องกระโดดไป 256 (AVIF q65 = 22.7 KB)
+ *   ทั้งที่ใช้จริงไม่ถึงครึ่ง · Lighthouse ชี้จุดนี้ตรง ๆ ว่า "ไฟล์ใหญ่เกินขนาดที่แสดงจริง
+ *   (256×427 เทียบกับที่แสดง 158×277 พิกเซลอุปกรณ์)" ขั้น 192 (~13 KB) ปิดช่องว่างนี้พอดี
+ *
+ * ⚠️ ต้องเรียงจากน้อยไปมากเสมอ และทุกค่าต้องเป็นจำนวนเต็ม
+ * ⚠️ ห้ามใส่ค่าที่ไม่มีหน้าไหนใช้จริง — ทุกขั้นที่เพิ่มคือ HTML ที่ยาวขึ้นทุกใบทุกหน้า
+ *    และเป็นการแปลงชุดใหม่ที่ ImageKit ต้องทำ (78 ใบต่อหนึ่งขั้น)
+ */
+const CARD_AVIF_WIDTHS: readonly number[] = [
+  64,
+  128,
+  192,
+  256,
+  320,
+  512,
+  768,
+];
+
+/**
  * สร้าง `srcSet` ของภาพ AVIF สำหรับ `<source type="image/avif">`
  *
  * ✦ **ไม่มีไฟล์ .avif ในรีโปเลยสักไฟล์** — ImageKit แปลงให้ตอนร้องขอแล้วแคชไว้ที่ CDN ของเขาเอง
- *   (78 ใบ × 6 ขนาด = 468 การแปลง แปลงครั้งเดียวจบ) จึงไม่เพิ่มขนาดรีโปและไม่ต้องแก้
+ *   (78 ใบ × 7 ขนาด = 546 การแปลง แปลงครั้งเดียวจบ) จึงไม่เพิ่มขนาดรีโปและไม่ต้องแก้
  *   `npm run cards:variants` เลย · ถ้าไม่ได้ตั้งค่า ImageKit ฟังก์ชันนี้คืน `null`
  *   แล้ว `<picture>` จะเหลือแต่ WebP เหมือนเดิมทุกประการ
+ *
+ * ✦ ขนาดที่ใช้มาจาก `CARD_AVIF_WIDTHS` ไม่ใช่ `CARD_IMAGE_VARIANTS` — ดูเหตุผลที่นั่น
  *
  * ⚠️ ต้องแปลงจาก **ไฟล์ .jpg ต้นฉบับ** เท่านั้น ห้ามชี้ไปที่ `.webp` ที่ย่อไว้แล้ว
  *    การบีบทับของที่บีบมาแล้วได้ภาพแย่ลงและเล็กลงแค่ 11% (วัดจริง 87.5 KB → 77.8 KB)
@@ -178,9 +228,9 @@ export function getCardAvifSrcSet(
   const endpoint = options?.forceLocal ? "" : getImageKitEndpoint();
   if (!endpoint) return null;
 
-  return CARD_IMAGE_VARIANTS.map(
-    (v) =>
-      `${endpoint}${CARDS_ROOT}${name}.jpg?tr=w-${v.width}%2Cf-avif%2Cq-${IMAGEKIT_AVIF_QUALITY} ${v.width}w`,
+  return CARD_AVIF_WIDTHS.map(
+    (width) =>
+      `${endpoint}${CARDS_ROOT}${name}.jpg?tr=w-${width}%2Cf-avif%2Cq-${IMAGEKIT_AVIF_QUALITY} ${width}w`,
   ).join(", ");
 }
 

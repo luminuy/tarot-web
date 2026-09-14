@@ -1407,3 +1407,24 @@ input.no-focus-ring:focus-visible {
 .anim-toast-countdown[data-paused="true"] {
   animation-play-state: paused;
 }
+
+/* ── แถบขอความยินยอม PDPA: ซ่อน/แสดงด้วย CSS ไม่ใช่ด้วย React (INC: LCP หน้าแรก) ──
+   แถบนี้เคยเรนเดอร์ฝั่งไคลเอนต์ล้วน (`useState(false)` + `useEffect`) จึงโผล่ก็ต่อเมื่อ
+   React hydrate ทั้งหน้าเสร็จ — และเพราะกล่องข้อความของมันมีพื้นที่ใหญ่กว่าภาพไพ่ใบแรก
+   บนหน้าแรก มันจึงกลายเป็น **ตัว LCP ของหน้า** ที่วาดช้ากว่า FCP หลายวินาที
+   (วัดจริงบน production 2026-09-14: FCP 1.4s · LCP 9.6s)
+
+   ตอนนี้ markup มากับ HTML ตั้งแต่แรกและถูกซ่อนด้วย `display:none` เป็นค่าเริ่มต้น
+   สคริปต์สั้น ๆ ใน <head> (ดู `RootHtml.tsx`) เป็นคนเปิดให้เห็นก่อนเฟรมแรกจะวาด
+   เฉพาะเครื่องที่ "ยังไม่เคยตัดสินใจ" เท่านั้น
+
+   ⚠️ ห้ามเปลี่ยนกลับไปเป็นการเรนเดอร์หลัง mount เด็ดขาด — LCP ของหน้าแรกจะผูกกับ
+      เวลา hydrate ทันที และห้ามใช้ `visibility`/`opacity` แทน `display` เพราะสองตัวนั้น
+      ยังนับเป็น "วาดแล้ว" ทำให้เครื่องที่เคยตอบไปแล้วก็ยังมีตัว LCP ก้อนนี้อยู่ดี */
+[data-consent-banner] {
+  display: none;
+}
+
+html[data-consent-ask] [data-consent-banner] {
+  display: block;
+}
