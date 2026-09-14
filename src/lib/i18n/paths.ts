@@ -28,6 +28,7 @@ export const EN_TWIN_ROUTES = [
   "/love/1-card",
   "/blog",
   "/privacy",
+  "/contact",
 ] as const;
 
 /** เส้นทางที่มีพารามิเตอร์ — ลูกทุกใบใต้ prefix นี้มีฝาแฝดครบ */

@@ -154,7 +154,7 @@ for (const withoutTwin of ["/account"]) {
 }
 
 // หน้าที่ "มี" ฝาแฝดใหม่ ต้องประกาศครบ
-for (const withTwin of ["/blog", "/blog/how-to-ask-tarot-questions", "/spreads/topic/love", "/cards/birth-card", "/privacy"]) {
+for (const withTwin of ["/blog", "/blog/how-to-ask-tarot-questions", "/spreads/topic/love", "/cards/birth-card", "/privacy", "/contact"]) {
   check(`${withTwin} ประกาศว่ามีฝาแฝดอังกฤษ`, hasEnglishTwin(withTwin));
   check(`ลิงก์ ${withTwin} ในหน้าอังกฤษถูกเติม /en`, localeHref(withTwin, "en") === `/en${withTwin}`);
 }

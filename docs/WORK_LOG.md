@@ -33,8 +33,35 @@
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **จัดการรหัสแลกสิทธิ์** | `/admin?tab=redeem` | 🟢 **Active / Live** | Dev Server Ready | แดชบอร์ดจัดการรหัสสิทธิ์เต็มรูปแบบ, ค้นหา/กรอง, สุ่มรหัส `SEER-XXXX-XXXX`, ตรวจดูประวัติคนแลก, ปิดการใช้งานทันที | ส่งออกรายงาน CSV |
 | **นโยบายความเป็นส่วนตัวสองภาษา** | `/privacy` & `/en/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA, GDPR, CCPA/CPRA, CalOPPA สองภาษาครบ 100% พร้อมปุ่มดาวน์โหลด JSON และลบข้อมูลจริง | - |
+| **ช่องทางติดต่อสองภาษา** | `/contact` & `/en/contact` | 🟢 **Active / Live** | Dev Server Ready | ช่องทางติดต่อทีมงานอีเมล support@seertarot.net และ TikTok @seerada.tarot พร้อมคำชี้แจงขอบเขตการให้บริการและสายด่วนวิกฤตสากล | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-14 (รอบ 65): 🌐 สร้างหน้าคู่แฝดสองภาษา `/en/contact`, JS Bundle Diet หน้าแรก (231 KB ➔ 229 KB), และจัดระเบียบ KNOWN_ISSUES
+- **ที่มา**: ดำเนินการแก้ไขเชิงลึกตามการตรวจสอบระบบอย่างละเอียด:
+  1. สร้างหน้าคู่แฝดสองภาษา `/en/contact` ให้ตรงกับ `/contact`
+  2. ทำ JS Bundle Diet ขยายระยะปลอดภัยของหน้าแรก (`/` และ `/en`)
+  3. จัดการความสอดคล้องในเอกสาร `docs/KNOWN_ISSUES.md` (ปรับสถานะ ISSUE-017 และ ISSUE-018 เป็นแก้ไขเสร็จสิ้นแล้ว)
+- **การดำเนินการ**:
+  1. **สร้าง `src/app/(en)/en/contact/layout.tsx` และ `src/app/(en)/en/contact/page.tsx`**:
+     - มี Section Layout ที่มี `<SiteHeader />` และ `<SiteFooter spacing="tight" />` ตามมาตรฐาน INC-0110
+     - รองรับ Schema.org `ContactPage` และ `BreadcrumbList`
+     - ให้ข้อมูลการติดต่ออีเมล `support@seertarot.net` และ TikTok ทางการ พร้อมแนวปฏิบัติเรื่องที่รับ/ไม่รับปรึกษา และสายด่วนสากล 988, 911, 111, 112, 999, 1323
+  2. **เชื่อมโยง Bilingual Twin Parity**:
+     - อัปเดต `src/app/(th)/contact/page.tsx` ให้มี `alternates: buildAlternates("/contact", { englishTwin: true })`
+     - เพิ่ม `"/contact"` ลงใน `EN_TWIN_ROUTES` ของ `src/lib/i18n/paths.ts`
+     - เพิ่ม `"/contact"` ลงใน `test-en-routing.ts` เพื่อคุ้มครองด่านตรวจ
+  3. **JS Bundle Diet บนหน้าแรก (`/` และ `/en`)**:
+     - แปลง `PostReadingSignup`, `AnnouncementBanner`, และ `ToastNotification` ใน `src/components/home/TarotFlow.tsx` ให้เป็น `dynamic(..., { ssr: false })`
+     - วัดผลจริงด้วย `npm run test:budget`: ขนาด JS หน้าแรก (`/` และ `/en`) ลดลงจาก **231 KB เหลือ 229 KB** (ขยายระยะปลอดภัยห่างจากเพดาน 232 KB เป็น 3 KB)
+  4. **จัดระเบียบเอกสาร `docs/KNOWN_ISSUES.md`**:
+     - ปรับหัวข้อสถานะ ISSUE-017 (Double-Spend) และ ISSUE-018 (Signed CustomerRef Cookie) ให้เป็น "แก้ไขเสร็จสิ้นแล้ว" ตรงตามความจริงของระบบ
+     - เพิ่มจำนวนหน้า Prerender ใน `docs/plans/MASTER_PLAN_2026-09-06.md` สู่ **315 หน้า**
+- **ผลการตรวจยืนยัน**:
+  - `npm run typecheck` ➔ ผ่าน 0 error
+  - `npm run test:budget` ➔ ผ่านฉลุยทุกเส้นทาง 100% (JS หน้าแรกลดลงสู่ 229 KB)
+  - `npx tsx scripts/qa/test-en-routing.ts` ➔ ผ่านฉลุย 100%
+  - `npm run repo:verify` ➔ **ผ่านครบทั้ง 56/56 ด่าน**
 
 ### 🗓️ 2026-09-14 (รอบ 64): ⚖️ ยกระดับหน้าความเป็นส่วนตัวภาษาไทย `/privacy` สู่มาตรฐานสากลและตรงกัน 100% กับฉบับภาษาอังกฤษ (Bilingual Twin Parity)
 

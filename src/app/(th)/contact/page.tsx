@@ -34,7 +34,7 @@ const TIKTOK_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com"));
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  alternates: buildAlternates("/contact"),
+  alternates: buildAlternates("/contact", { englishTwin: true }),
   openGraph: {
     title: `${TITLE} · SeerTarot`,
     description: DESCRIPTION,
