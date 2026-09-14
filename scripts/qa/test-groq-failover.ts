@@ -134,17 +134,38 @@ async function main() {
   check("isSevereForeignLeak: null / undefined → false", !isSevereForeignLeak(null) && !isSevereForeignLeak(undefined));
 
   const groqSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/ai/groq.ts"), "utf-8");
-  check(
-    "groq.ts ใช้ค่าคงที่จาก language.ts ไม่ฮาร์ดโค้ดตัวเลขเกณฑ์เอง",
-    !/totalForeignChars\s*>=\s*\d/.test(groqSrc),
+  const cerebrasSrc = fs.readFileSync(path.join(process.cwd(), "src/lib/ai/cerebras.ts"), "utf-8");
+  /*
+   * ⚠️ ด่านสามข้อนี้เคยอ่านแต่ `groq.ts` ไฟล์เดียว
+   * พอตรรกะตัดวงจรถูกยกไปไว้ที่ `reading-stream.ts` ให้ทุกผู้ให้บริการใช้ร่วมกัน
+   * ด่านก็ล้มทันทีทั้งที่ด่านนิรภัยยังอยู่ครบ — จึงย้ายมาตรวจที่แหล่งความจริงเดียว
+   * แล้วเพิ่มข้อตรวจว่า "ทุกเจ้าต้องเดินผ่านเครื่องยนต์นั้น" แทนการ grep รายไฟล์
+   */
+  const engineSrc = fs.readFileSync(
+    path.join(process.cwd(), "src/lib/ai/reading-stream.ts"),
+    "utf-8",
   );
   check(
-    "groq.ts import ค่าคงที่เกณฑ์ทั้งสองระดับมาใช้จริง",
-    groqSrc.includes("FOREIGN_LEAK_SWITCH_THRESHOLD") && groqSrc.includes("SEVERE_FOREIGN_LEAK_THRESHOLD"),
+    "เครื่องยนต์กลางใช้ค่าคงที่จาก language.ts ไม่ฮาร์ดโค้ดตัวเลขเกณฑ์เอง",
+    !/totalForeignChars\s*>=\s*\d/.test(engineSrc) && !/totalForeignChars\s*>=\s*\d/.test(groqSrc),
   );
   check(
-    "streamGroqReading ต่อ isSevereForeignLeak ไว้จริง (circuit breaker ไม่ใช่โค้ดตาย)",
-    groqSrc.includes("isSevereForeignLeak("),
+    "เครื่องยนต์กลาง import ค่าคงที่เกณฑ์ทั้งสองระดับมาใช้จริง",
+    engineSrc.includes("FOREIGN_LEAK_SWITCH_THRESHOLD") &&
+      engineSrc.includes("SEVERE_FOREIGN_LEAK_THRESHOLD"),
+  );
+  check(
+    "เครื่องยนต์กลางต่อ isSevereForeignLeak ไว้จริง (circuit breaker ไม่ใช่โค้ดตาย)",
+    engineSrc.includes("isSevereForeignLeak("),
+  );
+  check(
+    "ผู้ให้บริการทุกเจ้าต่อ circuit breaker ผ่านเครื่องยนต์กลาง (groq + cerebras)",
+    [groqSrc, cerebrasSrc].every(
+      (src) =>
+        src.includes("consumeReadingDelta(") &&
+        src.includes("resolveForeignBreaker(") &&
+        src.includes("state.foreignCircuitBreaker"),
+    ),
   );
 
   console.log(`\n📊 ผลสรุป: ผ่าน ${pass} / ล้มเหลว ${fail}`);
