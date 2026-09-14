@@ -68,16 +68,30 @@ export function SiteHeader({
     const el = headerRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
 
-    const publish = () => {
-      // ปัดขึ้นเสมอ — ปัดลงแม้แค่เศษพิกเซลก็แปลว่าตัวกันที่เตี้ยกว่าหัวเว็บ = หัวเว็บกินเนื้อหา
-      const h = Math.ceil(el.getBoundingClientRect().height);
-      if (h > 0) document.documentElement.style.setProperty("--site-header-h", `${h}px`);
-    };
+    let rafId: number | undefined;
+    let lastHeight = 0;
 
-    publish();
-    const observer = new ResizeObserver(publish);
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      // อ่านค่าจาก ResizeObserverEntry โดยตรง ไม่ต้องเรียก getBoundingClientRect() ที่ทำให้เกิด forced reflow
+      const h = Math.ceil(
+        entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
+      );
+      if (h > 0 && h !== lastHeight) {
+        lastHeight = h;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          document.documentElement.style.setProperty("--site-header-h", `${h}px`);
+        });
+      }
+    });
+
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   return (
