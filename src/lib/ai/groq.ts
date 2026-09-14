@@ -22,6 +22,7 @@ import {
   createReadingStreamState,
   finalizeReading,
   resolveForeignBreaker,
+  resolveMaxReadingTokens,
 } from "@/lib/ai/reading-stream";
 import { aiGatewayHeaders, groqChatCompletionsEndpoint } from "@/lib/ai/gateway";
 import { recordEvent } from "@/lib/stats/record";
@@ -44,6 +45,15 @@ export const WORKING_GROQ_MODELS = [
 ] as const;
 
 export const GROQ_DEFAULT_TIMEOUT_MS = 12000;
+
+/**
+ * เพดานโทเค็นผลลัพธ์ฝั่ง Groq
+ *
+ * ในทางปฏิบัติไม่เคยถูกใช้เลย เพราะเพดาน TPM 8,000 ที่นับ prompt รวมด้วย
+ * บีบให้ผลลัพธ์เหลือราว 3,000 อยู่แล้ว — แต่ต้องมีไว้เป็นตัวเลขของ "เจ้านี้"
+ * ห้ามให้ผู้ให้บริการรายอื่นมายืมเลขนี้ไปใช้ (เพดานเป็นของใครของมัน)
+ */
+export const GROQ_OUTPUT_CEILING = 7000;
 
 export interface GroqChatMessage {
   role: "system" | "user" | "assistant";
@@ -340,7 +350,7 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
   const estTokens = (text: string) => Math.ceil(text.length / CHARS_PER_TOKEN);
 
   // เพดานผลลัพธ์: ฐาน 1,600 + 480/ใบ (ผัง 10 ใบ ≈ 6,400) — รองรับ visualAnchor, positionLink, questionLink กันคำอ่านโดนตัดกลาง
-  const maxReadingTokens = Math.min(7000, 1600 + ctx.drawn.length * 480);
+  const maxReadingTokens = resolveMaxReadingTokens(ctx.drawn.length, GROQ_OUTPUT_CEILING);
 
   let userMessage = buildReadingMessage(ctx);
   if (estTokens(systemInstruction) + estTokens(userMessage) + maxReadingTokens > GROQ_TPM_LIMIT) {
@@ -361,7 +371,7 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
      * ผู้ใช้ผังใหญ่จึงต้องนั่งรอคำขอที่ถูกปฏิเสธ 4 รอบก่อนได้เริ่มอ่านจริงจาก Gemini
      *
      * วัดจริงทุกผังแล้ว: 4 ใบเกิน 375 · 5 ใบเกิน 1,258 · 12 ใบเกิน 7,146
-     * ➔ ตั้งแต่ 4 ใบขึ้นไปไม่มีทางผ่านเส้นทางนี้ ต้องไป Cerebras หรือ Gemini เท่านั้น
+     * ➔ ตั้งแต่ 4 ใบขึ้นไปไม่มีทางผ่านเส้นทางนี้ ต้องให้ Gemini รับไปทั้งหมด
      */
     if (!fitsNow) {
       console.warn(
