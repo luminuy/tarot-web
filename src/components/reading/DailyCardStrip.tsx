@@ -66,6 +66,11 @@ export function DailyCardStrip() {
   return (
     <Link
       href={`/cards/${daily.cardId}`}
+      /* ⚠️ `prefetch={false}` ห้ามถอด — แถบนี้อยู่เหนือพับของหน้าแรกตั้งแต่เฟรมแรก
+         ค่าเริ่มต้นของ Next คือพรีเฟตช์ลิงก์ที่มองเห็น ทำให้ทุกคนที่เปิดหน้าแรกดึงหน้าไพ่
+         ของ "ไพ่ประจำวัน" มา 15 KB ทิ้งไว้เฉย ๆ ทั้งที่ส่วนใหญ่ไม่ได้กด
+         (วัดจาก Lighthouse network log 2026-09-14) */
+      prefetch={false}
       className="group mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 rounded-lg border border-line-warm bg-white px-4 py-2.5 shadow-raised transition-colors hover:border-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
     >

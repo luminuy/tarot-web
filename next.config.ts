@@ -54,6 +54,25 @@ const nextConfig: NextConfig = {
     // การอ่านไพ่เป็น streaming ที่ใช้เวลานาน จึงต้องกันไม่ให้ถูกตัดกลางคัน
     proxyTimeout: 120_000,
     optimizePackageImports: ["motion", "motion/react", "zod"],
+    /*
+     * 🚫 อย่าเปิด `inlineCss: true` — **วัดแล้วแย่ลง อย่าเชื่อคำแนะนำทั่วไป** (2026-09-14)
+     *
+     * Lighthouse ขึ้นข้อความ "Render-blocking requests · Est savings of 250 ms" ชี้ไปที่
+     * `<link rel="stylesheet">` สองไฟล์ ทางแก้ที่ทุกคู่มือแนะนำคือฝัง CSS ลง HTML
+     * ลองแล้ววัดจริงบนบิลด์ production ด้วย Lighthouse ตัวเต็ม:
+     *
+     *   |            | ก่อน | เปิด inlineCss |
+     *   | คะแนนรวม    |  74  | **68**        |
+     *   | FCP (จำลอง) | 1326 | **1575**      |
+     *
+     * เหตุผล: เมื่อ CSS แยกไฟล์ ตัวสแกนล่วงหน้าของเบราว์เซอร์เห็น `<link>` ตั้งแต่ต้น HTML
+     * แล้วดึง CSS **ขนานไป**กับที่ HTML ยังสตรีมอยู่ · พอฝังลงไป HTML โตขึ้นราว 20 KB gzip
+     * และเบราว์เซอร์ต้องรอ **ทั้งก้อน**มาถึงก่อนจึงวาดได้ บนเน็ตจำลอง 1.6 Mbps
+     * ไบต์ที่เพิ่มมาแพงกว่ารอบเครือข่ายที่ประหยัดได้
+     *
+     * ⚠️ ถ้าจะลองอีกครั้งในอนาคต ต้องยิง Lighthouse เทียบก่อน/หลังเสมอ ห้ามเปิดทิ้งไว้
+     *    เพราะ "Est savings" ในรายงานบอกแค่ด้านที่ประหยัด ไม่ได้หักต้นทุนที่จ่ายเพิ่ม
+     */
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
