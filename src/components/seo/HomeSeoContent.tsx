@@ -198,7 +198,11 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1: วิธีดูดวงไพ่ทาโรต์ 5 ขั้นตอนศักดิ์สิทธิ์ (Ritual Stations)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="how-it-works-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
+      <section
+        aria-labelledby="how-it-works-title"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 480px" }}
+        className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+      >
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
@@ -307,7 +311,11 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 2: ศาสตร์ 1909 RWS & PROVABLY FAIR (Sacred Triptych)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="heritage-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
+      <section
+        aria-labelledby="heritage-title"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 450px" }}
+        className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+      >
         {/* Section Header */}
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
@@ -460,7 +468,11 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 3: ผังพยากรณ์และสารานุกรม 78 ใบ (Explore Spreads & Cards)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="spreads-and-cards-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
+      <section
+        aria-labelledby="spreads-and-cards-title"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 500px" }}
+        className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+      >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
           <div className="space-y-2">
             <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">
@@ -628,7 +640,11 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 4: บทความและสาระน่ารู้ (Featured Articles with Card Companion)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="articles-title" className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
+      <section
+        aria-labelledby="articles-title"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 450px" }}
+        className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
+      >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
           <div className="space-y-2">
             <span className="text-gold-ink text-xs font-serif-th tracking-widest uppercase block">
@@ -698,7 +714,11 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 5: คำถามที่พบบ่อย (FAQ Accordion)
           ═══════════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="faq-title" className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10 pb-16 sm:pb-20">
+      <section
+        aria-labelledby="faq-title"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 600px" }}
+        className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10 pb-16 sm:pb-20"
+      >
         <div className="text-center space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-center gap-3">
             <span className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-gold/60" />

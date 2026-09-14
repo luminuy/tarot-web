@@ -25,7 +25,10 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
       : "pt-16 sm:pt-20 pb-12 sm:pb-16";
 
   return (
-    <footer className={`w-full bg-dark text-line ${paddingClass} border-t border-line/30 relative overflow-hidden`}>
+    <footer
+      style={{ contentVisibility: "auto", containIntrinsicSize: "auto 450px" }}
+      className={`w-full bg-dark text-line ${paddingClass} border-t border-line/30 relative overflow-hidden`}
+    >
       {/* Ambient Gold Accent Line */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[1px] bg-gradient-to-r from-transparent via-gold/40 to-transparent pointer-events-none" />
 

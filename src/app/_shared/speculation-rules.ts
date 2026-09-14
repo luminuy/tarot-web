@@ -45,9 +45,12 @@ export const SPECULATION_EXCLUDED_PATHS = [
 /** เพดานจำนวนหน้าในรายการ prerender — กันไม่ให้ค่อย ๆ บวมจนกลายเป็นกฎครอบทั้งเว็บ */
 export const MAX_PRERENDER_LIST_URLS = 6;
 
-/** หน้ายอดนิยมที่คุ้มค่าจะ prerender (ผู้ใช้เกือบทุกคนไปต่อที่หน้าเหล่านี้) */
-export const PRERENDER_URLS_TH = ["/", "/cards", "/spreads", "/blog", "/daily"];
-export const PRERENDER_URLS_EN = ["/en", "/en/cards", "/en/spreads", "/en/daily"];
+/** 
+ * หน้ายอดนิยมสำหรับ prerender — ตั้งเป็นว่าง เพื่อป้องกันไม่ให้ Chrome แอบดาวน์โหลด 
+ * และรัน React ซ้ำซ้อนใน background โดยใช้ prefetch แบบ conservative แทน
+ */
+export const PRERENDER_URLS_TH: string[] = [];
+export const PRERENDER_URLS_EN: string[] = [];
 
 type Eagerness = "conservative" | "moderate" | "eager";
 
