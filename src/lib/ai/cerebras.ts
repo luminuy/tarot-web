@@ -14,23 +14,26 @@
  * ➔ ผัง 4 ใบขึ้นไป **ไม่มีทางผ่าน Groq ได้เลย** ไม่ว่าจะรอนานแค่ไหนหรือหมุนโมเดลกี่ตัว
  *   ที่ผ่านมามันจึงตกไป Gemini ทุกครั้ง = ผังใหญ่ไม่เคยได้ Qwen ที่ภาษาไทยดีที่สุดเลย
  *
- * Cerebras แก้ตรงนี้ได้พอดี — **มีโมเดลตัวเดียวกับที่เราใช้บน Groq อยู่แล้ว**
- * (ตัวเลขจากเอกสารทางการ inference-docs.cerebras.ai ดึงสด 2026-09-14):
+ * Cerebras แก้ตรงนี้ได้ด้วยเพดานต่อคำขอที่กว้างกว่ามาก — **30,000 แทน 8,000**
+ * ผัง 12 ใบที่หนักสุดใช้ 23,731 จึงยังเหลือที่ และเร็วระดับ ~3,000 tok/s
+ * ทำให้ไม่ชน timeout แบบที่ Groq เจอ (ผัง 10 ใบบน Groq ต้องใช้ ~21 วินาที)
  *
- *   โมเดล           context ฟรี/จ่าย   ความเร็ว     RPM   TPM (uncached/total)  TPD
- *   qwen-3.8-27b     64k / 128k        ~1,850 t/s    5     30K / 90K             1M
- *   gpt-oss-120b     65k / 131k        ~3,000 t/s    5     30K / 90K             1M
+ * 💸 **แต่ตัวที่ภาษาไทยดีที่สุดคิดเงิน** — ดูรายละเอียดที่ `CEREBRAS_MODEL_CONFIGS`
+ *    เจ้าของโปรเจกต์เลือกแล้วว่าเอาแบบฟรีล้วน (2026-09-14) จึงเหลือ `gpt-oss-120b`
+ *    ซึ่งเป็นคนละโมเดลกับ Qwen ที่ Groq ใช้ **สำนวนไทยแข็งกว่า**
+ *    ➔ อย่าเข้าใจผิดว่าเส้นทางนี้ได้คุณภาพไทยเท่าเดิม มันคือการแลก
+ *      "ผังใหญ่ยิงผ่านและเร็ว" กับ "สำนวนที่อาจสู้ Qwen ไม่ได้"
  *
- * ➔ เพดาน 30,000 ต่อคำขอ = ผัง 12 ใบ (15,502) ยังเหลือที่อีกเท่าตัว
- * ➔ 1,850 tok/s = ผัง 10 ใบเขียนจบใน ~3.5 วินาที (บน Groq ต้อง 21 วินาที)
- *
- * ⚠️ **ข้อจำกัดที่ต้องเคารพ: 5 คำขอ/นาที (RPM) และ 1M โทเค็น/วัน**
+ * ⚠️ **ข้อจำกัดที่ต้องเคารพ: 5 คำขอ/นาที · 2,400 คำขอ/วัน · uncached 1M โทเค็น/วัน**
+ *    (ตัวเลขจริงจากหน้า Limits ของบัญชี ไม่ใช่จากเอกสารทั่วไป)
  *    ต่ำกว่าโควตาของ Groq มาก จึง **ห้ามเอามาแทน Groq ทั้งหมด**
  *    ไฟล์นี้ตั้งใจให้รับเฉพาะผังที่ Groq ทำไม่ได้อยู่แล้ว (ดู `shouldUseCerebras`)
  *    ผัง 1-3 ใบปล่อยให้ Groq ทำต่อไปเพราะโควตาต่อวันเยอะกว่าหลายเท่า
  *
- * ⚠️ ยังไม่มีใครยิงเข้าโมเดลจริงด้วยคีย์ — ต้องรัน `npm run ai:probe-cerebras` ก่อน
- *    แล้วดูผลจริงว่าโมเดลไหนคืน JSON ตาม ReadingSchema ได้ครบ (กฎ INC-0053 ห้ามเดา)
+ * ⚠️ **ยังไม่มีใครยิงเข้าโมเดลจริงด้วยคีย์ — ยังตัดสินไม่ได้ว่าควรเปิดใช้หรือเปล่า**
+ *    ต้องรัน `npm run ai:probe-cerebras` แล้วเทียบคะแนนไทยของ `gpt-oss-120b`
+ *    กับ Gemini ซึ่งเป็นตัวที่รับผังใหญ่อยู่ตอนนี้ (กฎ INC-0053 ห้ามเดา)
+ *    **ถ้าแพ้ Gemini ก็ไม่ต้องเปิดเส้นทางนี้เลย** ปล่อย Gemini ทำต่อดีกว่า
  *    ถ้าไม่ตั้ง `CEREBRAS_API_KEY` ไฟล์นี้จะไม่ทำงานเลย ระบบเดิมไม่เปลี่ยนแปลงแม้แต่นิดเดียว
  *
  * ⚠️ กฎเหล็กข้อ 14: ไม่มีและห้ามมีโค้ดกุไพ่ที่นี่ ล้มเหลว = เงียบแล้วให้ผู้เรียกไปต่อ Gemini
@@ -89,23 +92,75 @@ export interface CerebrasModelConfig {
    * ปิดความคิดได้ = 1 (ไม่ต้องเผื่อ) · ปิดไม่ได้ = 2 (เผื่อให้ความคิดกินครึ่งหนึ่ง)
    */
   reasoningBudgetMultiplier: number;
+  /**
+   * 💸 **โมเดลนี้คิดเงินจริงไหม**
+   *
+   * `true` = อยู่ชั้น PayGo ➔ ทุกคำขอมีค่าใช้จ่ายตามจำนวนโทเค็น
+   * โมเดลที่ตั้ง `true` **จะไม่ถูกใช้โดยปริยาย** ต้องเปิดด้วย `CEREBRAS_ALLOW_PAID=1` เท่านั้น
+   */
+  billed: boolean;
+  /** ราคาไว้อ่านประกอบการตัดสินใจ (USD ต่อล้านโทเค็น) — ไม่ได้ใช้คำนวณอะไรในโค้ด */
+  priceNote: string;
 }
 
-/** เรียงให้ Qwen มาก่อนด้วยเหตุผลเดียวกับฝั่ง Groq — ภาษาไทยเป็นธรรมชาติที่สุด */
+/*
+ * ⚠️⚠️ **อ่านก่อนขยับลำดับหรือเพิ่มโมเดล** ⚠️⚠️
+ * ---------------------------------------------------------------------------
+ * โควตาของ Cerebras **แยกรายโมเดล และคนละชั้นบริการกันได้ในบัญชีเดียว**
+ * ตัวเลขจริงจากหน้า Limits ของบัญชีที่ใช้งาน (2026-09-14):
+ *
+ *   โมเดล          ชั้น          คำขอ/นาที  คำขอ/วัน  uncached/นาที  uncached/วัน
+ *   gpt-oss-120b   Free Trial    5          2,400     30,000         1,000,000
+ *   gemma-4-31b    Free Trial    5          2,400     30,000         1,000,000
+ *   qwen-3.8-27b   💸 PayGo      450        648,000   150,000        216,000,000
+ *
+ * `qwen-3.8-27b` ตัวเลขสวยกว่ามาก **แต่คิดเงิน** ($0.99/$1.49 ต่อล้านโทเค็น
+ * ≈ 0.37 บาทต่อผัง 5 ใบ · 0.60 บาทต่อผัง 12 ใบ) — เจ้าของโปรเจกต์ตัดสินใจแล้วว่า
+ * **เอาแบบฟรีล้วน ไม่จ่ายเลย** (2026-09-14) จึงถูกปิดไว้ด้วย `billed: true`
+ *
+ * 📌 สิ่งที่ต้องรู้และห้ามโฆษณาเกินจริง:
+ * เหตุผลเดิมที่เลือก Cerebras คือ "ได้ `qwen-3.8-27b` ตัวเดียวกับที่ใช้บน Groq
+ * = ภาษาไทยคุณภาพเดียวกัน" ➔ **พอตัดตัวที่คิดเงินออก เหตุผลนั้นหายไป**
+ * เหลือ `gpt-oss-120b` ซึ่งเป็นคนละโมเดล สำนวนไทยแข็งกว่า Qwen
+ *
+ * สิ่งที่ยังได้อยู่จริง ๆ บนเส้นทางฟรี:
+ *   ✅ เพดานต่อคำขอ 30,000 แทน 8,000 ของ Groq ➔ ผังใหญ่ยิงผ่านได้
+ *   ✅ เร็วมาก ~3,000 tok/s ➔ ไม่ชน timeout เหมือน Groq
+ *   ❓ **ภาษาไทยจะดีกว่า Gemini (ตัวสำรองที่รับผังใหญ่อยู่ตอนนี้) หรือเปล่า ยังไม่มีใครวัด**
+ *      ➔ ถ้า `npm run ai:probe-cerebras` ออกมาแล้วคะแนนไทยแพ้ Gemini
+ *        **ก็ไม่ควรเปิดใช้เส้นทางนี้เลย** ปล่อยให้ Gemini รับผังใหญ่ต่อไปดีกว่า
+ *
+ * ⚠️ โควตาฟรีต่อวันแปลเป็นของจริง: uncached 1,000,000 ÷ ~23,700 ต่อผังใหญ่
+ *    ≈ **42 ผังใหญ่/วัน** เกินจากนั้นจะโดน 429 แล้วตกไป Gemini เอง (ไม่พัง)
+ *    ไม่ทำตัวนับโควตาฝั่งเรา เพราะแต่ละ isolate บน Workers นับแยกกัน = นับไม่ตรงอยู่ดี
+ */
 export const CEREBRAS_MODEL_CONFIGS: readonly CerebrasModelConfig[] = [
-  {
-    id: "qwen-3.8-27b",
-    reasoningEffort: "none",
-    supportsHiddenReasoning: false,
-    reasoningBudgetMultiplier: 1,
-  },
   {
     id: "gpt-oss-120b",
     reasoningEffort: "low",
     supportsHiddenReasoning: true,
     reasoningBudgetMultiplier: 2,
+    billed: false,
+    priceNote: "ฟรี (Free Trial) — ราคาชั้นจ่ายคือ $0.35/$1M เข้า · $0.75/$1M ออก",
+  },
+  {
+    id: "qwen-3.8-27b",
+    reasoningEffort: "none",
+    supportsHiddenReasoning: false,
+    reasoningBudgetMultiplier: 1,
+    billed: true,
+    priceNote: "💸 คิดเงิน $0.99/$1M เข้า · $1.49/$1M ออก ≈ 0.37-0.60 บาท/คำอ่าน",
   },
 ] as const;
+
+/**
+ * โมเดลที่จะใช้จริงในรอบนี้ — ตัดตัวที่คิดเงินทิ้งเสมอ
+ * เว้นแต่ตั้ง `CEREBRAS_ALLOW_PAID=1` ไว้ชัดเจน (ต้องเป็นการตัดสินใจของเจ้าของเท่านั้น)
+ */
+export function activeCerebrasModels(): readonly CerebrasModelConfig[] {
+  if (process.env.CEREBRAS_ALLOW_PAID?.trim() === "1") return CEREBRAS_MODEL_CONFIGS;
+  return CEREBRAS_MODEL_CONFIGS.filter((m) => !m.billed);
+}
 
 export const WORKING_CEREBRAS_MODELS = CEREBRAS_MODEL_CONFIGS.map((m) => m.id);
 
@@ -138,7 +193,12 @@ export function getCerebrasApiKey(): string | undefined {
  * แยกออกมาเป็นฟังก์ชันเพื่อให้ชุดทดสอบเรียกตรวจเงื่อนไขได้โดยไม่ต้องมีคีย์
  */
 export function shouldUseCerebras(cardCount: number): boolean {
-  return Boolean(getCerebrasApiKey()) && cardCount >= CEREBRAS_MIN_CARDS;
+  return (
+    Boolean(getCerebrasApiKey()) &&
+    cardCount >= CEREBRAS_MIN_CARDS &&
+    // ปิดตัวที่คิดเงินหมดแล้วอาจไม่เหลือโมเดลเลย — อย่าเสียเวลาเปิดสตรีมเปล่า ๆ
+    activeCerebrasModels().length > 0
+  );
 }
 
 /**
@@ -175,7 +235,7 @@ export async function* streamCerebrasReading(ctx: ReadingContext): AsyncGenerato
   let userMessage = buildReadingMessage(ctx);
   // คิดจากตัวที่กินงบมากที่สุด เพื่อให้ prompt ที่ตัดแล้วพอสำหรับทุกโมเดลในสายพาน
   const worstCaseBudget = Math.max(
-    ...CEREBRAS_MODEL_CONFIGS.map((c) =>
+    ...activeCerebrasModels().map((c) =>
       Math.min(CEREBRAS_OUTPUT_CEILING * 2, maxReadingTokens * c.reasoningBudgetMultiplier),
     ),
   );
@@ -189,7 +249,7 @@ export async function* streamCerebrasReading(ctx: ReadingContext): AsyncGenerato
     );
   }
 
-  for (const config of CEREBRAS_MODEL_CONFIGS) {
+  for (const config of activeCerebrasModels()) {
     const model = config.id;
     const state = createReadingStreamState();
     const usage = createEmptyUsage();

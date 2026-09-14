@@ -13,7 +13,12 @@ import { ReadingSchema } from "../../src/lib/schema/reading";
 import { ALL_CARDS } from "../../src/data/cards";
 import { getSpread } from "../../src/data/spreads";
 import { WORKING_GROQ_MODELS } from "../../src/lib/ai/groq";
-import { CEREBRAS_MIN_CARDS, CEREBRAS_MODEL_CONFIGS, WORKING_CEREBRAS_MODELS } from "../../src/lib/ai/cerebras";
+import {
+  activeCerebrasModels,
+  CEREBRAS_MIN_CARDS,
+  CEREBRAS_MODEL_CONFIGS,
+  WORKING_CEREBRAS_MODELS,
+} from "../../src/lib/ai/cerebras";
 import { resolveMaxReadingTokens } from "../../src/lib/ai/reading-stream";
 import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
 
@@ -200,6 +205,44 @@ async function main() {
     "probe-cerebras.ts ส่ง reasoning_effort ชุดเดียวกับ production",
     probeSrc.includes("reasoning_effort: config.reasoningEffort") &&
       probeSrc.includes("config.reasoningBudgetMultiplier"),
+  );
+
+  /*
+   * 2.7 💸 ห้ามใช้โมเดลที่คิดเงินโดยไม่ได้ขอ
+   * ---------------------------------------------------------------------------
+   * โควตา Cerebras แยกรายโมเดลและอยู่คนละชั้นบริการกันได้ในบัญชีเดียว
+   * `qwen-3.8-27b` ของบัญชีนี้อยู่ชั้น PayGo ($0.99/$1.49 ต่อล้านโทเค็น)
+   * ขณะที่ `gpt-oss-120b` ยังเป็น Free Trial
+   *
+   * เจ้าของโปรเจกต์สั่งไว้ชัด (2026-09-14) ว่า **เอาแบบฟรีล้วน ไม่จ่ายเลย**
+   * ด่านนี้จึงล็อกไว้ว่าสายพานปริยายต้องไม่มีโมเดลที่คิดเงินแม้แต่ตัวเดียว
+   * ใครจะเปิดต้องตั้ง CEREBRAS_ALLOW_PAID=1 เองโดยรู้ตัว
+   */
+  const paidInDefault = activeCerebrasModels().filter((c) => c.billed);
+  check(
+    `สายพานปริยายต้องไม่มีโมเดลที่คิดเงิน (พบ ${paidInDefault.length} ตัว)`,
+    paidInDefault.length === 0,
+  );
+  check(
+    "qwen-3.8-27b ถูกทำเครื่องหมายว่าคิดเงิน (บัญชีนี้อยู่ชั้น PayGo)",
+    CEREBRAS_MODEL_CONFIGS.find((c) => c.id === "qwen-3.8-27b")?.billed === true,
+  );
+  check(
+    "gpt-oss-120b เป็นตัวฟรีและอยู่ในสายพานปริยาย",
+    activeCerebrasModels().some((c) => c.id === "gpt-oss-120b" && !c.billed),
+  );
+  check(
+    "ทุกโมเดลต้องระบุราคาไว้ให้คนอ่านโค้ดเห็น (priceNote ไม่ว่าง)",
+    CEREBRAS_MODEL_CONFIGS.every((c) => c.priceNote.trim().length > 0),
+  );
+  check(
+    "cerebras.ts วนลูปบน activeCerebrasModels() ไม่ใช่รายการดิบที่มีตัวคิดเงินปน",
+    cerebrasSrc.includes("for (const config of activeCerebrasModels())") &&
+      !cerebrasSrc.includes("for (const config of CEREBRAS_MODEL_CONFIGS)"),
+  );
+  check(
+    "probe-cerebras.ts ก็ยิงเฉพาะตัวฟรีโดยปริยายเช่นกัน",
+    probeSrc.includes("[...activeCerebrasModels()]"),
   );
 
   // 3. route — นับ failover Groq → Gemini

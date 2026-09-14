@@ -31,7 +31,11 @@
 import { SPREADS } from "../../src/data/spreads";
 import { DECK } from "../../src/data/cards";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "../../src/lib/ai/prompt";
-import { CEREBRAS_MODEL_CONFIGS, type CerebrasModelConfig } from "../../src/lib/ai/cerebras";
+import {
+  activeCerebrasModels,
+  CEREBRAS_MODEL_CONFIGS,
+  type CerebrasModelConfig,
+} from "../../src/lib/ai/cerebras";
 import { ReadingSchema } from "../../src/lib/schema/reading";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 import { checkThaiQualityDeep } from "../../src/lib/ai/thai-quality";
@@ -232,11 +236,25 @@ async function main() {
     ? arg("spreads")!.split(",").map((n) => Number(n.trim()))
     : DEFAULT_SPREAD_SIZES;
   const delayMs = arg("delay") ? Number(arg("delay")) : DEFAULT_DELAY_MS;
+  /*
+   * 💸 ปริยายยิงเฉพาะโมเดลฟรี — ตัวที่คิดเงินต้องขอเองด้วย CEREBRAS_ALLOW_PAID=1
+   * ระบุ --model ตรง ๆ ก็ยิงตัวที่คิดเงินได้ แต่จะเตือนก่อนเสมอ
+   */
   const models = arg("model")
     ? CEREBRAS_MODEL_CONFIGS.filter((c) => c.id === arg("model"))
-    : [...CEREBRAS_MODEL_CONFIGS];
+    : [...activeCerebrasModels()];
+  const paid = models.filter((c) => c.billed);
+  if (paid.length > 0) {
+    console.log(
+      `💸 เตือน: รอบนี้มีโมเดลที่คิดเงินอยู่ด้วย — ${paid.map((c) => `${c.id} (${c.priceNote})`).join(" · ")}\n`,
+    );
+  }
   if (models.length === 0) {
-    console.error(`❌ ไม่รู้จักโมเดล "${arg("model")}" — มีให้เลือก: ${CEREBRAS_MODEL_CONFIGS.map((c) => c.id).join(", ")}`);
+    console.error(
+      arg("model")
+        ? `❌ ไม่รู้จักโมเดล "${arg("model")}" — มีให้เลือก: ${CEREBRAS_MODEL_CONFIGS.map((c) => c.id).join(", ")}`
+        : "❌ ไม่เหลือโมเดลฟรีให้ทดสอบเลย (ตัวที่คิดเงินถูกปิดไว้) — ตั้ง CEREBRAS_ALLOW_PAID=1 ถ้าต้องการยิงตัวที่คิดเงิน",
+    );
     process.exit(1);
   }
 
