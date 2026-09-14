@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import { CardImage } from "@/components/card/CardImage";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";

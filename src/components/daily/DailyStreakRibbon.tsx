@@ -7,7 +7,7 @@
  * แต่ไม่เคยมีที่ไหนบนหน้าเว็บแสดงค่านี้เลยสักจุด (ค้นทั้งเรโปแล้ว `.tsx` = 0 ผลลัพธ์)
  * ตัวเลขที่ผู้ใช้ไม่เห็น ไม่ทำให้ใครอยากกลับมา — ป้ายนี้คือส่วนที่หายไปของ habit loop
  *
- * กฎเหล็กข้อ 2: ใช้ได้เฉพาะ `✦` และ `✨` เท่านั้น ห้ามอิโมจิการ์ตูน (ไฟ/ถ้วยรางวัล ฯลฯ)
+ * กฎเหล็กข้อ 2: ห้ามใช้อิโมจิหรือสัญลักษณ์ดวงดาวแฟนซี (✦, ✨, ✧, ฯลฯ)
  */
 export function DailyStreakRibbon({ streak, isEnglish }: { streak: number; isEnglish: boolean }) {
   // 0 = ยังไม่เคยเช็กอิน หรือขาดช่วงไปแล้ว — ไม่ต้องทวงให้รู้สึกผิด เงียบไว้ดีกว่า
@@ -33,8 +33,14 @@ export function DailyStreakRibbon({ streak, isEnglish }: { streak: number; isEng
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-line-warm bg-inset-warm px-4 py-3">
-      <span aria-hidden="true" className="text-lg text-gold-ink">
-        ✦
+      <span
+        aria-hidden="true"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line-warm bg-surface text-gold-ink"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 6v6l4 2" />
+        </svg>
       </span>
       <div className="min-w-0">
         <p className="font-serif-th text-sm font-bold text-ink">{headline}</p>

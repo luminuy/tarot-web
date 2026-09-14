@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CardImage } from "@/components/card/CardImage";
 import { cardSummaryById } from "@/data/cards/summary";
 import { useLocale } from "@/lib/i18n";

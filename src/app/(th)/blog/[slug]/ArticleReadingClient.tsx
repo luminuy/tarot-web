@@ -13,6 +13,7 @@ import { soundManager } from "@/lib/utils/audio";
 import { trackEvent } from "@/lib/analytics";
 import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 interface Props {
   article: Article;
@@ -31,12 +32,14 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
     });
   }, [article.slug, article.title, article.category]);
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     soundManager.playMenuTapSound();
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      const ok = await copyToClipboard(window.location.href);
+      if (ok) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      }
     }
   };
 
