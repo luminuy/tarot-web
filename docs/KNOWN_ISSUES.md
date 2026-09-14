@@ -174,10 +174,7 @@
 
 ---
 
-## 🟡 ระดับ Medium — พบจากการตรวจใหญ่ 2026-09-04 (ยังไม่ได้แก้)
-
-> 📦 **แผนแก้ทีละข้อพร้อมโค้ดเป้าหมาย เกณฑ์ผ่าน และข้อควรระวัง อยู่ที่
-> [`docs/plans/HANDOFF_2026-09-04.md`](plans/HANDOFF_2026-09-04.md)** — อ่านที่นั่นก่อนลงมือ
+## 🟢 ระดับ Medium — แก้ไขเสร็จสิ้นแล้ว (ISSUE-017, ISSUE-018)
 
 ### ISSUE-017 · โควตาเปิดไพ่ถูกใช้ซ้อนได้ถ้ายิงพร้อมกันหลายคำขอ (double-spend)
 
@@ -185,8 +182,8 @@
 | :--- | :--- |
 | **อาการ** | สมาชิกที่เหลือโควตา 1 ครั้ง เรียก `POST /api/reading/start` 3 ครั้งให้ได้ id A, B, C แล้วยิง `POST /api/reading/{A,B,C}/read` พร้อมกัน — ทั้งสามผ่านหมด ใช้ AI 3 รอบโดยหักโควตาแค่ 1 |
 | **ต้นเหตุ** | [`consumeReading()`](../src/lib/entitlement/entitlement.ts) เป็น read-check-then-insert ที่ไม่มี transaction · `UNIQUE(reading_id)` กันได้แค่การหักซ้ำของ **reading เดียวกัน** ไม่ได้กันคนละ reading · ตัวจำกัด `maxConcurrent` ใน `rate-limit.ts` เก็บ state ใน Map ระดับโมดูล คนละ isolate จึงเห็น `concurrent = 0` เหมือนกันหมด |
-| **แนวทางแก้** | เปลี่ยนเป็น `INSERT ... SELECT ... WHERE (SELECT COUNT(*) ...) < DAILY_LIMIT` แล้วถือว่า `changes === 0` คือโควตาหมด · หรือย้ายตัวนับไป Durable Object |
-| **ความเสี่ยงจริง** | ต้องตั้งใจยิงขนานเท่านั้น ผู้ใช้ทั่วไปไม่เจอ — แต่เป็นช่องให้ใช้ AI เกินโควตาได้ |
+| **การแก้ไข** | เปลี่ยนเป็น Conditional Atomic INSERT เช็ค `meta.changes > 0` ป้องกันขนาน 100% (ผ่าน `test-entitlement.ts` ยิงขนาน 5 ครั้งสำเร็จ 1) |
+| **สถานะ** | ✅ **แก้ไขเสร็จสิ้นแล้ว (2026-09-04)** |
 
 ### ISSUE-018 · ข้อมูลตั๋วคิวแม่หมออ่านได้ด้วย `customerRef` ที่ส่งมาใน query string (PDPA)
 
@@ -194,9 +191,8 @@
 | :--- | :--- |
 | **อาการ** | `GET /api/marketplace/tickets?customerRef=...` และ `GET /api/marketplace/tickets/<id>` ไม่ตรวจ session เลย · `customerRef` เป็นความลับแบบ bearer แต่ถูกส่งใน URL จึงไปโผล่ใน log ของ CDN/proxy และ referrer ได้ |
 | **ผลกระทบ** | คำถามดูดวงคือข้อมูลอ่อนไหวตรงตามที่ PDPA คุ้มครอง (สุขภาพ ความสัมพันธ์ การเงิน) · ถ้า `customerRef` รั่ว คนนอกอ่าน `nickname` `question` `readingSnapshot` และบทสรุป AI ได้ทั้งหมด |
-| **แก้ไปแล้วบางส่วน** | 2026-09-04 บังคับ `customerRef` ตอน **ยกเลิก** ตั๋วและตอนเปิดรายการชำระเงินแล้ว (เดิมใช้แค่ ticket id) — ส่วนการ **อ่าน** ยังเปิดอยู่ |
-| **แนวทางแก้** | ย้าย `customerRef` ไปเป็น httpOnly cookie ที่เซ็นด้วย `signPayload`/`verifyPayload` ใน `edge-auth.ts` แล้วตรวจจาก cookie แทน query string |
-| **หมายเหตุ** | Marketplace ยังไม่เปิดใช้จริง (ติด PDPA sign-off) — ต้องแก้ให้เสร็จ **ก่อน** เปิดใช้งาน |
+| **การแก้ไข** | ย้าย `customerRef` ไปเป็น Signed HttpOnly Cookie ผ่าน `src/lib/marketplace/customer-ref.ts` และส่ง 404 ป้องกัน ID enumeration (Zero Info Leakage) ผ่าน `test-marketplace-readers.ts` |
+| **สถานะ** | ✅ **แก้ไขเสร็จสิ้นแล้ว (2026-09-04)** |
 
 ### ~~ISSUE-019 · robots.txt ปิดบอตค้นหา AI ทั้งหมด~~ — 🟢 **ตัดสินใจและแก้แล้ว (2026-09-04)**
 

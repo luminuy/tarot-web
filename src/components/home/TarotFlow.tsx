@@ -25,9 +25,7 @@ import { prefetchTurnstile } from "@/lib/auth/turnstile";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { describeAuthError, fetchSessionUser, invalidateSessionCache } from "@/lib/auth/use-session";
-import { PostReadingSignup } from "@/components/entitlement/PostReadingSignup";
-import { AnnouncementBanner } from "@/components/entitlement/AnnouncementBanner";
-import { ToastNotification, type ToastData } from "@/components/ui/ToastNotification";
+import type { ToastData } from "@/components/ui/ToastNotification";
 import { trackEvent } from "@/lib/analytics";
 import {
   DAILY_LIMIT,
@@ -87,6 +85,9 @@ const IntentionAltarInput = withMotionScope(() => import("@/components/reading/I
 const ClarificationCard = dynamic(() => import("@/components/reading/ClarificationCard").then((m) => m.ClarificationCard), { ssr: false });
 /* หน้าต่างสายด่วน — ใช้ `Modal` ซึ่งห่อ AppMotionProvider ให้ในตัวแล้ว จึงไม่ต้องห่อซ้ำเหมือน AccessDialog */
 const CrisisNotice = dynamic(() => import("@/components/safety/CrisisNotice").then((m) => m.CrisisNotice), { ssr: false });
+const PostReadingSignup = dynamic(() => import("@/components/entitlement/PostReadingSignup").then((m) => m.PostReadingSignup), { ssr: false });
+const AnnouncementBanner = dynamic(() => import("@/components/entitlement/AnnouncementBanner").then((m) => m.AnnouncementBanner), { ssr: false });
+const ToastNotification = dynamic(() => import("@/components/ui/ToastNotification").then((m) => m.ToastNotification), { ssr: false });
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {
