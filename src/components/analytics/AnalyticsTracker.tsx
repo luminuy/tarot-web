@@ -172,6 +172,37 @@ export function AnalyticsTracker() {
     }
   }, [googleAdsId]);
 
+  const [shouldLoadScript, setShouldLoadScript] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const trigger = () => {
+      setShouldLoadScript(true);
+      window.removeEventListener("scroll", trigger);
+      window.removeEventListener("touchstart", trigger);
+      window.removeEventListener("mousemove", trigger);
+      if (timer) clearTimeout(timer);
+    };
+
+    window.addEventListener("scroll", trigger, { passive: true, once: true });
+    window.addEventListener("touchstart", trigger, { passive: true, once: true });
+    window.addEventListener("mousemove", trigger, { passive: true, once: true });
+
+    // Fallback: load after 3.5s of idle to give priority to main-thread FCP and LCP
+    timer = setTimeout(() => {
+      setShouldLoadScript(true);
+    }, 3500);
+
+    return () => {
+      window.removeEventListener("scroll", trigger);
+      window.removeEventListener("touchstart", trigger);
+      window.removeEventListener("mousemove", trigger);
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
+
   const primaryGtagId = isMeasurableHost ? gaId || googleAdsId : undefined;
 
   return (
@@ -181,10 +212,12 @@ export function AnalyticsTracker() {
       {/* ======================================================== */}
       {primaryGtagId && (
         <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`}
-            strategy="lazyOnload"
-          />
+          {shouldLoadScript && (
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`}
+              strategy="lazyOnload"
+            />
+          )}
           <Script id="google-analytics-init" strategy="lazyOnload">
             {`
               window.dataLayer = window.dataLayer || [];

@@ -88,6 +88,7 @@ const CrisisNotice = dynamic(() => import("@/components/safety/CrisisNotice").th
 const PostReadingSignup = dynamic(() => import("@/components/entitlement/PostReadingSignup").then((m) => m.PostReadingSignup), { ssr: false });
 const AnnouncementBanner = dynamic(() => import("@/components/entitlement/AnnouncementBanner").then((m) => m.AnnouncementBanner), { ssr: false });
 const ToastNotification = dynamic(() => import("@/components/ui/ToastNotification").then((m) => m.ToastNotification), { ssr: false });
+const AssetWarmup = dynamic(() => import("@/components/performance/AssetWarmup").then((m) => m.AssetWarmup), { ssr: false });
 
 // P1-U1: ปุ่มย้อนกลับทีละขั้น — ใช้ร่วมในขั้นสับไพ่และเลือกไพ่
 function StepBackButton({ onClick, label }: { onClick: () => void; label?: string }) {
@@ -1868,6 +1869,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         onClose={() => setZoomedCard(null)}
       />
       )}
+
+      <AssetWarmup />
 
   </>
   );

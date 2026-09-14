@@ -98,6 +98,7 @@ export function SiteHeader({
           {/* Luxury Brand Logo & Return to Home */}
           <Link
             href="/"
+            prefetch={false}
             aria-label={isEnglish ? "SeerTarot — Return to Home" : "ดูดวงไพ่ทาโรต์ — กลับหน้าแรก"}
             className="flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 cursor-pointer group select-none rounded-lg p-0.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
           >
