@@ -40,6 +40,7 @@
 | **✉️ Resend Email Service** | ✅ **พร้อมใช้งาน** | โดเมน `seertarot.net` ผ่านการ Verify DKIM/SPF ครบ 100%, ผู้ส่ง: `แม่หมอทาโรต์ <noreply@seertarot.net>`, โควตาฟรี 3,000 ฉบับ/เดือน · อีเมลระบบส่ง HTML + plain-text ควบคู่ และตั้ง `Reply-To: support@seertarot.net` (#207) |
 | **📨 Cloudflare Email Routing** | ✅ **พร้อมใช้งาน** | Enabled · `support@` / `noreply@seertarot.net` → forward `bankjack10452@gmail.com` (Verified) · DNS Enabled (MX ×3 + DKIM + SPF root · ไม่ชนกับ Resend) · Catch-all = Drop · ผูกกับ Reply-To (#207) |
 | **🔒 ระบบเข้ารหัสผ่าน (PBKDF2)** | ✅ **พร้อมใช้งาน** | `PASSWORD_PEPPER` ขนาด 32 ไบต์ ติดตั้งบน Worker เรียบร้อย สมัครและล็อกอินด้วยอีเมลได้สมบูรณ์ |
+| **🧠 เครื่องยนต์ AI (Cerebras · ผังใหญ่)** | 🟡 **ยังไม่ได้ตั้งคีย์ — ตั้งใจ** | โค้ดต่อครบแล้ว (PR #464 · #465 · #466) แต่ยังไม่มี `CEREBRAS_API_KEY` ➔ ระบบทำงานเหมือนเดิมทุกประการ<br>**ก่อนตั้งต้องกดรัน `🧠 Probe Cerebras` ใน Actions ก่อน** แล้วเทียบคะแนนไทยกับ Gemini — ถ้าแพ้ Gemini ก็ไม่ต้องเปิดเลย (กฎ INC-0053)<br>💸 ระบบใช้เฉพาะ `gpt-oss-120b` (ฟรี) เท่านั้น · `qwen-3.8-27b` ของบัญชีนี้อยู่ชั้น PayGo จึงถูกปิดไว้ (INC-0151) |
 | **🤖 เครื่องยนต์ AI (Gemini)** | ✅ **พร้อมใช้งาน** | `GEMINI_API_KEY` ติดตั้งแล้ว สตรีมคำทำนายจริง 3 องก์ และคุยต่อเนื่องในห้องแชทได้ 100% |
 | **🗄️ ฐานข้อมูล Cloudflare D1** | ✅ **พร้อมใช้งาน** | รัน Migration 0001–0006 บน Remote DB เรียบร้อย รองรับตาราง `users`, `reading_journal`, `reading_usage` |
 | **⚡ Cloudflare KV Edge Cache** | ✅ **พร้อมใช้งาน** | ผูก `NEXT_INC_CACHE_KV` (prefix `app:`) สำหรับ Stat Counters, Config Overrides และ Session Backstop |
@@ -57,6 +58,7 @@
 ├── ADMIN_PASSWORD            # รหัสผ่านเข้าแผงควบคุม /admin
 ├── APP_ORIGIN                # https://seertarot.net (Callback + ลิงก์รีเซ็ตรหัสผ่าน)
 ├── CF_AI_GATEWAY_ACCOUNT_ID  # Cloudflare Account ID (AI Gateway)
+├── CEREBRAS_API_KEY          # 🟡 ยังไม่ได้ตั้ง — Cerebras เอนจินคำอ่าน Tier 0 (ผังใหญ่ 4 ใบขึ้นไป)
 ├── CF_AI_GATEWAY_ID          # ชื่อ gateway = seertarot-ai
 ├── EMAIL_FROM                # แม่หมอทาโรต์ <noreply@seertarot.net>
 ├── GEMINI_API_KEY            # Google Gemini — เอนจินคำอ่าน Tier 2 (fallback)

@@ -134,6 +134,12 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          # 🧠 Cerebras — เอนจินคำอ่านผังใหญ่ (4 ใบขึ้นไป) ที่ Groq ชนเพดาน TPM ทำไม่ได้
+          # ไม่ตั้ง secret = ค่าว่าง = `shouldUseCerebras()` คืน false = ระบบทำงานเหมือนเดิมทุกประการ
+          # ⚠️ ห้ามลืมบรรทัดนี้ ไม่งั้นต่อให้ตั้ง secret ไว้ Worker ก็ไม่มีวันเห็นคีย์
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          # 💸 เปิดโมเดล Cerebras ที่คิดเงิน (qwen-3.8-27b ชั้น PayGo) — ปกติไม่ตั้ง
+          CEREBRAS_ALLOW_PAID: ${{ secrets.CEREBRAS_ALLOW_PAID || vars.CEREBRAS_ALLOW_PAID || '' }}
           NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
           NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
           NEXT_PUBLIC_GOOGLE_ADS_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_ADS_ID || vars.NEXT_PUBLIC_GOOGLE_ADS_ID || '' }}
