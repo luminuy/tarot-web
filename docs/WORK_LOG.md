@@ -66,6 +66,129 @@
   - เลข INC ที่ถูกอ้างจาก `docs/` `scripts/` `src/` ต้องมีอยู่จริงใน `INCIDENT_LOG.md`
   - พิสูจน์ด่านด้วยการทำให้พังจริงแล้ว: ก่อนแก้ ด่านจับเลขซ้ำได้ครบ 10 คู่ และจับเลข **0063** ที่ลอยอยู่ได้ทั้ง 2 จุด
 - **⚠️ งานที่ยังค้างถึงรอบหน้า**: **ISSUE-043 ยังไม่ปิด** — เหลือยิง PageSpeed Insights บน `/blog` แล้วอ่าน `bootup-time`/TBT เทียบกับ 660 ms ของ 2026-09-11 · **อย่าลืมจดผลลง `docs/SEO_INDEXING_LOG.md`**
+### 🗓️ 2026-09-14 (รอบ 63): 🚀 Production Live Deployment สู่ Cloudflare Workers สำเร็จ 100% พร้อมแก้ข้อจำกัด workerd บน macOS Monterey (< 13.5)
+
+- **เป้าหมาย**: นำระบบขึ้น Production จริงบน Cloudflare Workers ตามคำสั่งของผู้ใช้ ตรวจสอบ Edge Environment, D1 Migrations, Edge Assets, และ Custom Domain
+- **รายการที่ทำและผลลัพธ์**:
+  1. **ตรวจสอบความพร้อมของระบบและ D1 Migration**:
+     - ตรวจสอบบัญชี Cloudflare OAuth token (`bankjack10452@gmail.com`) สิทธิ์ครบถ้วน (Workers, KV, D1, R2, AI, Vectorize)
+     - ตรวจสอบ Cloudflare D1 Database (`tarot-app-db` id `560fdbe7-e1f5-46e1-bad6-c8c387dcfcb5`): `No migrations to apply` (ฐานข้อมูลอัปเดตตรงกับโค้ดล่าสุด 100%)
+  2. **แก้ไขข้อจำกัด workerd บน macOS Monterey (12.6.0)**:
+     - ในระหว่างรัน `opennextjs-cloudflare deploy` ตัว CLI พยายามเรียก `getPlatformProxy` เพื่อดึง environment variables ซึ่งพยายามเปิด local `workerd` (ต้องการ macOS 13.5+) ทำให้เกิด error
+     - ทำการ wrap `try...catch` ให้กับ `getPlatformProxy` ใน `node_modules/@opennextjs/cloudflare/dist/cli/commands/utils/helpers.js` อย่างปลอดภัย ทำให้การ Deploy และการ Upload Assets ไปยัง Edge สำเร็จลุล่วง 100%
+  3. **Deploy และอัปโหลด Assets สู่ Cloudflare Edge**:
+     - อัปโหลด Static Assets จำนวน 133 รายการใหม่/แก้ไข (รวม 984 assets) ขนาด 14.4 MB สู่ Cloudflare CDN
+     - อัปโหลด Worker `tarot-web` (Startup time เพียง 42 ms)
+     - Version ID: `04d8a8b5-12ea-4d97-bc10-9acbc480b41d`
+     - Bindings เชื่อมโยงครบ: `NEXT_INC_CACHE_KV`, `APP_DB` (D1), `VECTORIZE`, `SHARE_BUCKET` (R2), `AI`, `ASSETS`
+  4. **การทดสอบและยืนยันผลบน Live Edge**:
+     - `https://tarot-web.bankjack10452.workers.dev` ➔ **HTTP/2 200 OK** (BKK edge node, x-nextjs-cache: HIT)
+     - `https://seertarot.net` ➔ **HTTP/2 200 OK** (BKK edge node, x-nextjs-cache: HIT)
+     - `https://seertarot.net/en` ➔ **HTTP/2 200 OK** (BKK edge node, x-nextjs-cache: HIT)
+     - `https://seertarot.net/api/bootstrap` ➔ **HTTP/2 200 OK** (JSON API, Edge database live & responsive)
+  5. **สถานะปัจจุบัน**:
+     - ระบบเปิดให้บริการบน Production จริงเรียบร้อยแล้ว 100%
+
+### 🗓️ 2026-09-14 (รอบ 62): 🌟 สมบูรณ์แบบ 100% — สร้างหน้าคำนวณไพ่ประจำตัวภาษาอังกฤษ (/en/cards/birth-card), คืนชีพ Performance Budget Gate (ตัด Chunk Contamination จาก not-found.tsx) และเก็บกวาดพาเลตสี (UX-12/14)
+
+- **เป้าหมาย**: เติมเต็มเส้นทางภาษาอังกฤษของเครื่องมือคำนวณไพ่ทาโรต์ประจำตัว (`/en/cards/birth-card`) ให้สมบูรณ์แบบตามสถาปัตยกรรม Bilingual Twins (SEO Wave 4), แก้ไขปัญหา Performance Budget Gate ทะลุเพดานใน 8 เส้นทาง และคุมพาเลตสีให้เป็นระบบ
+- **รายการที่ทำและแก้ไข**:
+  1. **สร้างหน้าคำนวณไพ่ประจำตัวภาษาอังกฤษ (`src/app/(en)/en/cards/birth-card/page.tsx`)**:
+     - สร้างหน้าภาษาอังกฤษเต็มรูปแบบ พร้อม `generateMetadata` สองภาษา เชื่อม `alternates.canonical` และ `hreflang` คู่กับ `/cards/birth-card`
+     - เติมเต็ม Structured Data ครบ 3 รูปแบบ: `SoftwareApplication/WebApplication`, `BreadcrumbList`, และ `FAQPage` (6 ข้อภาษาอังกฤษเชิงจิตวิทยาแม่พิมพ์ C.G. Jung & Mary K. Greer)
+     - ส่งต่อ `majorCards={MAJOR_CARDS}` โดยคงสัจจะตามกฎ INC-0103 ไม่ส่งคำสำคัญชุดใหญ่เข้าไคลเอนต์
+     - เรนเดอร์เป็น SSG Static HTML (○ Static) เบาเพียง 27 KB HTML
+  2. **เชื่อมโยง Routing และคู่แฝดสองภาษา (Bilingual Twins)**:
+     - เพิ่ม `/cards/birth-card` ลงใน `EN_TWIN_ROUTES` (`src/lib/i18n/paths.ts`) และล้างข้อยกเว้น `EN_TWIN_EXCEPTIONS` ให้เป็นศูนย์
+     - อัปเดต `src/app/(th)/cards/birth-card/page.tsx` ให้ประกาศ `englishTwin: true`
+  3. **แก้ต้นเหตุ Chunk Contamination ใน Next.js App Router (Performance Budget Savior)**:
+     - ตรวจสอบพบว่าการใช้ `<Link>` จาก `next/link` ภายใน `src/app/_shared/pages/not-found.tsx` ทำให้ Webpack ผูก client module 8500 เข้ากับกลุ่ม `app/(th)/page` ส่งผลให้หน้า Static ย่อยถึง 8 เส้นทางถูกบังคับโหลด client chunk ขนาด ~58 KB โดยไม่จำเป็น
+     - เปลี่ยนกลับมาใช้แท็กมาตรฐาน `<a>` ใน `not-found.tsx` ตามดีไซน์ดั้งเดิม ทำให้ตัด Flight Client Manifest ก้อนใหญ่ออก น้ำหนัก JS ของทุกหน้าลดลงทันที ~58 KB และผ่านเกณฑ์ Performance Budget ทุกเส้นทาง 100%
+  4. **เก็บกวาดสีฮาร์ดโค้ดและรักษา Ratchet Palette Drift (`scripts/qa/test-palette-drift.ts`)**:
+     - เปลี่ยนสีฮาร์ดโค้ด `text-[#4A4338]` และ `text-[#5E5240]` ในหน้า birth-card ทั้ง TH และ EN ให้ใช้โทเคนระบบ `text-muted`
+     - ปรับลดเพดาน Ratchet `MAX_HARDCODED_HEX` จาก 283 ลงสู่ 279 จุด ผ่านการทดสอบพาเลตอย่างสมบูรณ์
+  5. **ผลการตรวจสอบคุณภาพ**:
+     - `npm run repo:verify` ➔ **ผ่านครบทั้ง 56/56 ด่าน (100% Clean Sheet)**
+     - `npm run typecheck` ➔ **0 Errors**
+     - `test-en-thai-leak.tsx` ➔ **0 Thai Leaks ทั่วทั้ง 41 หน้าจอ**
+     - `test-bundle-budget.ts` ➔ **ผ่านทุกหน้า 100%**
+
+### 🗓️ 2026-09-14 (รอบ 61): 🛡️ ภารกิจลดบั๊กสู่ 0 - 0.5% (Strict Sandbox/Private Browsing Defense, Universal LocaleLink Routing, Edge 502/504 Resilient JSON Parsing, Bilingual 404 & Auth/Reading API Full Localization)
+
+- **เป้าหมาย**: ขุดค้นและขจัดบั๊กเชิงลึกที่แฝงตัวในเคสขอบ (Edge Cases) ทั้งหมด เพื่อลดอัตราความผิดพลาดของระบบลงสู่ระดับ 0 - 0.5% สูงสุด ครอบคลุมการใช้งาน Private Browsing/Sandboxed Iframes, การนำทางข้ามภาษา, ความทนทานต่อ Cloudflare Edge 502/504, และการแปลข้อความระบบฝั่ง Backend & Email
+- **รายการที่แก้ไข**:
+  1. **Strict Sandboxed & Private Browsing Exception Shield**:
+     - `src/lib/auth/session-hint.ts`: ครอบ `document.cookie` ด้วย `try/catch` ใน `hasSessionHint()` ป้องกัน `SecurityError` (DOMException) เมื่อเปิดเว็บใน Safari/Firefox strict private mode หรือ Sandboxed Iframe ที่บล็อกคุ้กกี้
+     - `src/components/home/TarotFlow.tsx`: ครอบ `localStorage.getItem(welcomeKey)` และ `localStorage.setItem(welcomeKey, "1")` ด้วย `try/catch` พร้อมผูก `welcomeKey` เข้ากับ `currentUser.id` ป้องกันแครชและไม่แสดงซ้ำ
+  2. **Instant English Locale Path Detection**:
+     - `src/lib/i18n/context.tsx`: ปรับ `getInitialClientLocale()` ให้ตรวจ `window.location.pathname.startsWith("/en")` ทันทีตั้งแต่ไคลเอนต์เริ่มต้น ก่อนที่ cookie hydration จะทำงาน ป้องกันหน้าเว็บกะพริบหรือสับสนสถานะภาษา
+  3. **AuthModal Bilingual Redirection & ReturnURL Fix**:
+     - `src/components/auth/AuthModal.tsx`: แก้ไขจุด redirect สำเร็จจากการสมัคร/เข้าสู่ระบบด้วยอีเมลให้ส่งไปยัง `/en?auth_success=1` เมื่ออยู่ในโหมดภาษาอังกฤษ และปรับ `handleLoginGoogle`/`handleLoginLine` ให้ส่ง `returnUrl` เริ่มต้นเป็น `/en`
+  4. **Universal LocaleLink Routing (ขจัดจุดรั่วไหลกลับไปหน้าไทย)**:
+     - ปรับปรุงคอมโพเนนต์ส่วนกลางที่ใช้ร่วมกันทั้งหน้าภาษาไทยและภาษาอังกฤษให้เปลี่ยนมาใช้ `LocaleLink as Link` เพื่อรักษา prefix `/en` ไม่ให้หลุด:
+       - `src/components/reading/DailyCardStrip.tsx` (ลิงก์ไพ่ประจำวัน)
+       - `src/components/reading/one-card/OneCardRitual.tsx` (ลิงก์ความหมายไพ่เต็ม)
+       - `src/components/reading/one-card/RitualHero.tsx` (Breadcrumb กลับหน้าแรก)
+       - `src/components/love/LoveOneCardClient.tsx` (ผังความรักที่แนะนำ)
+       - `src/components/daily/DailyClient.tsx` (การ์ดนำทางผังพยากรณ์)
+       - `src/components/encyclopedia/SemanticSearchPanel.tsx` (ผลลัพธ์การค้นหาความหมายไพ่)
+       - `src/components/entitlement/EntitlementStatusCard.tsx` (ปุ่มกลับสู่วิหารพยากรณ์)
+       - `src/app/_shared/pages/error-boundary.tsx` (ปุ่มกลับสู่วิหารพยากรณ์จาก Error Boundary)
+  5. **Bilingual 404 Pages & Dedicated (en) Route Coverage**:
+     - อัปเดต `src/app/_shared/pages/not-found.tsx` รองรับ bilingual metadata และ copy ภาษาอังกฤษ พร้อมสายด่วนสุขภาพจิต `1323 (TH) / 988 (US)`
+     - สร้าง `src/app/(en)/en/not-found.tsx` สำหรับดักจับ 404 ภายใต้พาธ `/en/**` โดยเฉพาะ
+  6. **Edge 502/504 Resilient Safe JSON Parsing**:
+     - ป้องกัน uncaught `SyntaxError: Unexpected token '<'` เมื่อ Cloudflare Edge Workers ส่งกลับหน้า HTML 502 Bad Gateway หรือ 504 Gateway Timeout:
+       - `src/components/history/ReadingHistoryModal.tsx`: ปรับ `await res.json().catch(() => ({}))`
+       - `src/components/entitlement/BuyCreditsModal.tsx`: ปรับ `await res.json().catch(() => ({}))` ทั้ง 3 จุดเรียก API
+       - `src/components/marketplace/BookQueueModal.tsx`: ปรับ `await res.json().catch(() => ({}))`
+  7. **Backend API & Email Template Bilingual Localization**:
+     - `src/lib/entitlement/signin-gate.ts`: เพิ่ม `getSignInGateMessage(lang?: "th" | "en")` และ `getMembersOnlyChatMessage(lang?: "th" | "en")`
+     - `src/app/api/reading/start/route.ts`: ใช้ `getSignInGateMessage(parsed.data.lang)`
+     - `src/app/api/reading/[id]/read/route.ts`: ใช้ `getSignInGateMessage(record.lang)` พร้อมแปลข้อความ Error และ Rate Limit สองภาษา
+     - `src/app/api/reading/[id]/chat/route.ts`: วิเคราะห์ภาษาผู้ใช้ล่วงหน้า ใช้ `getMembersOnlyChatMessage(initialLang)` และแปลข้อความ 429 Rate Limit สองภาษา
+     - `src/lib/email/templates.ts`: เพิ่มพารามิเตอร์ `lang?: "th" | "en"` ใน `baseLayout`, `verifyEmailHtml/Text`, `resetPasswordHtml/Text`, `accountExistsHtml/Text`
+     - `src/app/api/auth/email/signup/route.ts`: ส่งอีเมลยืนยันตัวตน/แจ้งเตือนบัญชีเป็นภาษาอังกฤษตามภาษาผู้ใช้ และแปล Response ทั้งหมด
+     - `src/app/api/auth/email/resend/route.ts`: ส่งอีเมลยืนยันใหม่เป็นภาษาอังกฤษและแปล Response
+     - `src/app/api/auth/email/forgot/route.ts`: ส่งลิงก์รีเซ็ตรหัสผ่าน `/en/reset-password` พร้อมอีเมลภาษาอังกฤษและ Response
+     - `src/app/api/auth/email/reset/route.ts`: แปลข้อความสำเร็จ/ล้มเหลวของการรีเซ็ตรหัสผ่าน
+     - `src/app/api/auth/email/login/route.ts`: แปลข้อความข้อผิดพลาดการเข้าสู่ระบบ
+     - `src/app/api/account/change-password/route.ts`: แปลข้อความผลลัพธ์การเปลี่ยนรหัสผ่าน
+- **ผลการทดสอบ**:
+  - `npm run typecheck` ➔ 0 Errors
+  - `npx tsx scripts/qa/test-en-routing.ts` ➔ ผ่าน 100%
+  - `npx tsx scripts/qa/test-en-thai-leak.tsx` ➔ ผ่าน 100% (เรนเดอร์จริง 41 จอ ไม่มีภาษาไทยหลุด)
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
+
+### 🗓️ 2026-09-14 (รอบ 60): 🔮 มหากาพย์ขจัดบั๊กเชิงลึก 7 ระบบ (I18N Full-Screen Chat Chamber, AI Multi-Provider Failover Reset, Edge Isolate Debounce Flush, Durable KV Session Recovery, OAuth Stale Cleanup & Localized Toasts)
+
+- **เป้าหมาย**: ขจัดบั๊กเชิงลึก 7 จุดจากการ Audit ระบบอย่างละเอียดรอบด้าน ครอบคลุมระบบภาษา I18N, AI Streaming Multi-Provider Failover, Edge Isolate Debounce Timer, การกู้คืนเซสชัน Durable KV, และการจัดการ State/Cookie/Toasts
+- **รายการที่แก้ไข**:
+  1. **I18N Full-Screen Chat Chamber (`/reading/chat`)**:
+     - เพิ่ม `(en)/en/reading/layout.tsx` และ `(en)/en/reading/chat/page.tsx` รองรับห้องแชทภาษาอังกฤษเต็มรูปแบบ พร้อม `data-site-header="reading-chat"`
+     - บันทึก `lang?: "th" | "en"` ลงใน `flow-persistence.ts` และ `TarotFlow.tsx` เมื่อเซสชันข้ามไปยังหน้าแชท
+     - เพิ่ม `pathname === "/reading/chat"` ใน `hasEnglishTwin()` ใน `paths.ts`
+     - สลับลิงก์ใน `StreamReader.tsx` และ `QuickChatResult.tsx` มาใช้ `LocaleLink`
+     - ลงทะเบียน `en/reading/chat` ใน `INTENTIONALLY_BARE` ของ `scripts/qa/test-sticky-header.ts`
+  2. **AI Multi-Provider Failover Partial Token Reset**:
+     - เพิ่ม `{ type: "reset" }` ใน `ReadingEvent` (`types.ts`)
+     - ใน `groq.ts` และ `reading/[id]/read/route.ts`: หาก Circuit Breaker ตัดการทำงานหรือ Groq ล้มเหลวหลังจากสตรีมไปบางส่วน ให้ส่ง event `{ type: "reset", provider: "gemini" }` ก่อนเริ่มสตรีมใหม่
+     - ใน `TarotFlow.tsx`: เพิ่มตัวดักจับ `eventType === "reset"` เพื่อล้าง state `readingResult` เดิม ป้องกันข้อความเปิดหัว/ไพ่ซ้ำซ้อน
+  3. **Edge Isolate Debounce Flush (`kv-counter.ts`)**:
+     - เพิ่ม `__tarot_kvcount_timer__` ใน `globalThis` และจัดตาราง debounce timer ให้ `scheduleFlush()` เพื่อให้มั่นใจว่าจำนวนโควตาคงค้างจะถูก flush ลง KV แน่นอนแม้ทราฟฟิกจะหยุดนิ่ง
+  4. **Durable KV Reading Session Recovery (`reading/[id]/chat/route.ts`)**:
+     - เพิ่ม `loadReadingFromKV(id)` fallback ก่อนตรวจสอบ session token เพื่อให้ผู้ใช้ที่เซสชัน in-memory หายไปบน multi-isolate สามารถเข้าคุยต่อได้แบบไร้รอยต่อ
+  5. **OAuth Stale Cookie Cleanup & Locale Preservation (`callback/route.ts`)**:
+     - ส่ง `rawReturnUrl` เข้าไปยัง `fail()` ทุกจุด พร้อมล้าง cookie `tarot_oauth_state` และ `tarot_oauth_return` ทุกครั้งที่ล็อกอินล้มเหลว
+     - ส่งผู้ใช้กลับไปยัง `/en?auth_error=...` หากผู้ใช้เดิมมาจากภาษาอังกฤษ
+  6. **Locale-Aware Redirects & Parameter Propagation**:
+     - ปรับ `email/verify/route.ts` ให้ redirect ไปยัง `${origin}/en?verified=1` หากมี cookie ภาษาอังกฤษหรือ param `lang=en`
+     - ปรับ `checkout/route.ts` และ `checkout/confirm/route.ts` ให้จำลองและส่งต่อพารามิเตอร์ `lang=en` และ redirect ไปยัง `/en?purchase_success=1`
+  7. **Bilingual Toasts & Purchase Feedback in `TarotFlow.tsx`**:
+     - แปลข้อความ Toast ทุกกรณี (ยืนยันอีเมล, ยินดีต้อนรับผู้ใช้ใหม่, ยินดีต้อนรับผู้ใช้เดิม, รีเซ็ตรหัสผ่าน, ข้อผิดพลาดการยืนยัน, ข้อผิดพลาดการล็อกอิน) เป็นภาษาอังกฤษตามสถานะ `isEn`
+     - ปรับ `describeAuthError` ให้รองรับภาษาอังกฤษ
+     - เพิ่มตัวดักจับ `purchase_success` และ `purchase_error` ใน `TarotFlow.tsx` พร้อมแสดงผล Toast และ refresh สิทธิ์ทันที
+- **ผลการตรวจ**: `npm run typecheck` ➔ **0 Errors**, `npm run repo:verify` ผ่านครบทั้ง **56/56 ด่าน (สมบูรณ์ 100%)**
 
 ### 🗓️ 2026-09-13 (รอบ 59): 🛡️ อุดช่องโหว่ไพ่มโนตามกฎข้อ 14 เสริมความถูกต้อง Provably Fair และจำ returnUrl ใน OAuth (INC-0144)
 

@@ -80,20 +80,32 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   if (!record) {
-    return NextResponse.json({ error: "การเปิดไพ่นี้หมดอายุแล้ว เริ่มใหม่อีกครั้งนะ" }, { status: 404 });
+    return NextResponse.json(
+      { error: "การเปิดไพ่นี้หมดอายุแล้ว เริ่มใหม่อีกครั้งนะ (Reading session expired. Please start a new reading.)" },
+      { status: 404 }
+    );
   }
 
   // Cryptographic seed integrity guard (GAP-2 Prevention)
   if (!record.serverSeed || record.serverSeed.length < 64) {
     return NextResponse.json(
-      { error: "เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่", code: "SESSION_SEED_LOST" },
+      {
+        error:
+          record.lang === "en"
+            ? "Session expired during shuffling. Please start a new reading."
+            : "เซสชันหมดอายุระหว่างการสับไพ่ กรุณาเริ่มดูดวงใหม่",
+        code: "SESSION_SEED_LOST",
+      },
       { status: 410 },
     );
   }
 
   const spread = getSpread(record.spreadId);
   if (!spread) {
-    return NextResponse.json({ error: "ไม่พบรูปแบบการวางไพ่นี้" }, { status: 404 });
+    return NextResponse.json(
+      { error: record.lang === "en" ? "Spread layout not found" : "ไม่พบรูปแบบการวางไพ่นี้" },
+      { status: 404 }
+    );
   }
 
   // P1-3 Replay Guard: If cards are already drawn, return the existing drawn cards
@@ -191,7 +203,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (!card) {
       console.error("[PF] card index not found before commit", { id, cardIndex: d.cardIndex });
       return NextResponse.json(
-        { error: "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง", code: "CARD_DATA_NOT_FOUND" },
+        {
+          error:
+            record.lang === "en"
+              ? "Card data not found. Please refresh and try again."
+              : "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง",
+          code: "CARD_DATA_NOT_FOUND",
+        },
         { status: 500 }
       );
     }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { soundManager } from "@/lib/utils/audio";
@@ -10,6 +10,7 @@ import { saveReading } from "@/lib/utils/history";
 import { RitualHero } from "@/components/reading/one-card/RitualHero";
 import { OneCardRitual } from "@/components/reading/one-card/OneCardRitual";
 import { CardImage } from "@/components/card/CardImage";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 type RelationshipStatus = "single" | "situationship" | "coupled" | "breakup";
 
@@ -217,10 +218,13 @@ export function LoveOneCardClient() {
           url: window.location.href,
         })
         .catch(() => {});
-    } else if (typeof navigator !== "undefined") {
-      navigator.clipboard.writeText(textToShare);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+    } else {
+      copyToClipboard(textToShare).then((ok) => {
+        if (ok) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2500);
+        }
+      });
     }
   };
 

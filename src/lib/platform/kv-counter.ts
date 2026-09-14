@@ -45,6 +45,7 @@ type CounterGlobal = {
   __tarot_kvcount_read__?: Map<string, { value: number; at: number }>;
   __tarot_kvcount_lastFlush__?: number;
   __tarot_kvcount_flushing__?: boolean;
+  __tarot_kvcount_timer__?: ReturnType<typeof setTimeout> | null;
 };
 
 function g(): CounterGlobal {
@@ -143,11 +144,30 @@ async function scheduleFlush(): Promise<void> {
   const gg = g();
   const now = Date.now();
   if (gg.__tarot_kvcount_flushing__) return;
-  if (gg.__tarot_kvcount_lastFlush__ && now - gg.__tarot_kvcount_lastFlush__ < FLUSH_DEBOUNCE_MS) {
+
+  const timeSinceLast = gg.__tarot_kvcount_lastFlush__ ? now - gg.__tarot_kvcount_lastFlush__ : Infinity;
+  if (timeSinceLast < FLUSH_DEBOUNCE_MS) {
+    if (!gg.__tarot_kvcount_timer__) {
+      const waitTime = Math.max(100, FLUSH_DEBOUNCE_MS - timeSinceLast);
+      gg.__tarot_kvcount_timer__ = setTimeout(() => {
+        gg.__tarot_kvcount_timer__ = null;
+        void doFlush();
+      }, waitTime);
+    }
     return;
   }
 
-  gg.__tarot_kvcount_lastFlush__ = now;
+  if (gg.__tarot_kvcount_timer__) {
+    clearTimeout(gg.__tarot_kvcount_timer__);
+    gg.__tarot_kvcount_timer__ = null;
+  }
+
+  await doFlush();
+}
+
+async function doFlush(): Promise<void> {
+  const gg = g();
+  gg.__tarot_kvcount_lastFlush__ = Date.now();
   try {
     const waitUntil = await getWaitUntil();
     waitUntil(flushCounters());

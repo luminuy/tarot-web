@@ -12,6 +12,7 @@ import { cardSummaryByIndex as cardByIndex } from "@/data/cards/summary";
 import { trackEvent } from "@/lib/analytics";
 import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 import { useLocale } from "@/lib/i18n";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -407,7 +408,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
         }
       }
       // Web fallback
-      await navigator.clipboard.writeText(shareText).catch(() => {});
+      await copyToClipboard(shareText);
       showToast(isEnglish ? "Caption copied! Opening Facebook share window..." : "คัดลอกข้อความแล้ว! กำลังเปิดหน้าแชร์ Facebook...");
       openOrRedirect(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`);
       return;
@@ -443,7 +444,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
         a.download = `SeerTarot-${brand.toUpperCase()}-Story.png`;
         a.click();
         URL.revokeObjectURL(url);
-        await navigator.clipboard.writeText(shareText).catch(() => {});
+        await copyToClipboard(shareText);
         showToast(
           isEnglish
             ? `Story card saved (9:16) and caption copied! Ready to post to ${brand === "instagram" ? "Instagram" : "TikTok"}`

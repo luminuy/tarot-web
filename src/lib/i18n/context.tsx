@@ -35,6 +35,11 @@ function getInitialClientLocale(initialLocale?: Locale): Locale {
   }
 
   try {
+    // 0. Check URL pathname for /en route tree
+    if (window.location.pathname === "/en" || window.location.pathname.startsWith("/en/")) {
+      return "en";
+    }
+
     // 1. Check URL query param e.g. ?lang=en
     const urlParams = new URLSearchParams(window.location.search);
     const queryLang = urlParams.get("lang");

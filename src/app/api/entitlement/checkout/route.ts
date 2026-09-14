@@ -60,7 +60,9 @@ export async function POST(request: Request) {
     const orderId = `ord_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 
     // สร้างรายการชำระเงินผ่าน Gateway (Omise หรือ Simulator)
-    const returnUri = `${origin}/api/entitlement/checkout/confirm?order_id=${orderId}&package_id=${pkg.id}&user_id=${userId}`;
+    const isEnglish = body?.lang === "en" || /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
+    const langQuery = isEnglish ? "&lang=en" : "";
+    const returnUri = `${origin}/api/entitlement/checkout/confirm?order_id=${orderId}&package_id=${pkg.id}&user_id=${userId}${langQuery}`;
     const charge = await createGatewayCharge({
       amountSatang: pkg.amountSatang,
       currency: "THB",

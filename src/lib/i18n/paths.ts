@@ -10,13 +10,14 @@ import type { Locale } from "./types";
  * และ `hreflang` จะกลายเป็นคำโกหกที่ทำให้ Google ทิ้งคำประกาศทั้งชุด
  * มีด่านตรวจใน `scripts/qa/test-en-routing.ts` คอยจับให้
  *
- * หน้าที่ **ยังไม่มี** ฝาแฝดโดยตั้งใจ: `/blog` (เนื้อบทความยังไม่มีฉบับอังกฤษ)
- * · `/privacy` (ข้อความ PDPA ต้องให้ฝ่ายกฎหมายรับรองก่อนแปล) · หน้าที่ปิด index อยู่แล้ว
+ * หน้าที่ **ยังไม่มี** ฝาแฝดโดยตั้งใจ: `/privacy` (ข้อความ PDPA ต้องให้ฝ่ายกฎหมายรับรองก่อนแปล)
+ * · หน้าที่ปิด index อยู่แล้ว
  */
 export const EN_TWIN_ROUTES = [
   "/",
   "/cards",
   "/cards/all",
+  "/cards/birth-card",
   "/cards/major",
   "/cards/minor",
   "/cards/wands",
@@ -34,13 +35,8 @@ const EN_TWIN_DYNAMIC_PREFIXES = ["/cards/", "/spreads/", "/blog/"] as const;
 
 /**
  * เส้นทางที่อยู่ใต้ prefix ข้างบนก็จริง แต่ **ไม่มี** ฝาแฝด — ต้องยกเว้นเป็นรายตัว
- *
- * เหตุผลเดียวกันทุกข้อ: เนื้อหาบรรณาธิการของหน้านั้นยังเป็นภาษาไทยล้วน
- * การเปิดหน้าอังกฤษที่มีแต่โครงแต่เนื้อเป็นไทย = thin content ซึ่ง **แย่กว่าไม่มีหน้าเลย**
- *
- * - `/cards/birth-card` — บทความประกอบเครื่องคำนวณยาวกว่า 800 คำ ยังไม่ได้แปล
  */
-const EN_TWIN_EXCEPTIONS: string[] = ["/cards/birth-card"];
+const EN_TWIN_EXCEPTIONS: string[] = [];
 
 /** prefix ที่ต้องยกเว้นทั้งกิ่ง (ลูกทุกใบไม่มีฝาแฝด) */
 const EN_TWIN_EXCEPTION_PREFIXES: readonly string[] = [];
@@ -59,6 +55,7 @@ export function hasEnglishTwin(href: string): boolean {
   if (pathname === "" || pathname === "/") return true;
   if (EN_TWIN_EXCEPTIONS.includes(pathname)) return false;
   if (EN_TWIN_EXCEPTION_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return false;
+  if (pathname === "/reading/chat") return true;
   if ((EN_TWIN_ROUTES as readonly string[]).includes(pathname)) return true;
   return EN_TWIN_DYNAMIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }

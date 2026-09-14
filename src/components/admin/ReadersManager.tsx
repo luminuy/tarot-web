@@ -6,6 +6,7 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { Field } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import type { Reader, ReaderStatus } from "@/lib/marketplace/readers.repo";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 export default function ReadersManager() {
   const [readers, setReaders] = useState<Reader[]>([]);
@@ -181,13 +182,15 @@ export default function ReadersManager() {
     }
   };
 
-  const copyConsoleLink = (r: Reader) => {
+  const copyConsoleLink = async (r: Reader) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const link = `${origin}/readers/console?id=${r.id}`;
-    navigator.clipboard.writeText(link).then(
-      () => showToast("คัดลอกลิงก์แผงควบคุมแม่หมอแล้ว"),
-      () => alert(`ลิงก์: ${link}`)
-    );
+    const ok = await copyToClipboard(link);
+    if (ok) {
+      showToast("คัดลอกลิงก์แผงควบคุมแม่หมอแล้ว");
+    } else {
+      alert(`ลิงก์: ${link}`);
+    }
   };
 
   const filteredReaders = useMemo(() => {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
 import { grantBonus } from "@/lib/entitlement/entitlement";
 import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
@@ -8,6 +9,7 @@ import { isPrivilegedTestRequest } from "@/lib/security/privileged";
 import { resolveAppOrigin } from "@/lib/security/app-origin";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { LOCALE_COOKIE_KEY } from "@/lib/i18n/types";
 
 export const runtime = "nodejs";
 
@@ -113,21 +115,28 @@ export async function GET(request: Request) {
 
   // ห้ามประกอบ origin จาก host ของ request ตรง ๆ — เปิดช่อง open redirect ผ่าน header
   const origin = resolveAppOrigin(request);
+  const cookieStore = await cookies();
+  const cookieLang = cookieStore.get(LOCALE_COOKIE_KEY)?.value;
+  const paramLang = url.searchParams.get("lang");
+  const isEnglish = paramLang === "en" || cookieLang === "en";
+  const targetPath = isEnglish ? "/en" : "/";
 
   if (!orderId || !packageId || !userId) {
-    return NextResponse.redirect(`${origin}/?purchase_error=${encodeURIComponent("ข้อมูลการชำระเงินไม่ครบถ้วน")}`);
+    const errorMsg = isEnglish ? "Incomplete payment details" : "ข้อมูลการชำระเงินไม่ครบถ้วน";
+    return NextResponse.redirect(`${origin}${targetPath}?purchase_error=${encodeURIComponent(errorMsg)}`);
   }
 
   try {
     const result = await processPaymentGrant(request, orderId, packageId, userId);
     if (!result.ok) {
-      return NextResponse.redirect(`${origin}/?purchase_error=${encodeURIComponent(result.message)}`);
+      return NextResponse.redirect(`${origin}${targetPath}?purchase_error=${encodeURIComponent(result.message)}`);
     }
-    return NextResponse.redirect(`${origin}/?purchase_success=1&credits=${result.credits}`);
+    return NextResponse.redirect(`${origin}${targetPath}?purchase_success=1&credits=${result.credits}`);
   } catch (error) {
     console.error("[Credit Checkout Confirmation Error]:", error);
+    const errorMsg = isEnglish ? "Payment confirmation failed" : "การยืนยันรายการชำระเงินล้มเหลว";
     return NextResponse.redirect(
-      `${origin}/?purchase_error=${encodeURIComponent("การยืนยันรายการชำระเงินล้มเหลว")}`
+      `${origin}${targetPath}?purchase_error=${encodeURIComponent(errorMsg)}`
     );
   }
 }

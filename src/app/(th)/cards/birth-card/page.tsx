@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     "ดูดวงไพ่ยิปซีวันเกิด",
     "ค้นหาไพ่ทาโรต์ประจำตัว",
   ],
-  alternates: buildAlternates("/cards/birth-card"),
+  alternates: buildAlternates("/cards/birth-card", { locale: "th", englishTwin: true }),
   openGraph: {
     title: "คำนวณไพ่ทาโรต์ประจำตัว (Birth Card) · SeerTarot",
     description:
@@ -189,7 +189,7 @@ export default function BirthCardPage() {
             { label: "เริ่มดูดวงที่หน้าแรก", href: "/" },
           ]}
         >
-          <div className="space-y-4 text-xs sm:text-sm text-[#4A4338] font-sans leading-relaxed">
+          <div className="space-y-4 text-xs sm:text-sm text-muted font-sans leading-relaxed">
             <p>
               ในศาสตร์ไพ่ทาโรต์และเลขศาสตร์สากล วันเกิดของมนุษย์แต่ละคนไม่ใช่เรื่องบังเอิญ แต่เป็นหมุดหมายแห่งกาลเวลาที่กำหนดคลื่นความถี่พลังงาน
               (Vibrational Blueprint) และพิมพ์เขียวแห่งจิตวิญญาณ การคำนวณหาไพ่ทาโรต์ประจำตัว (Tarot Birth Card) ได้รับการวางรากฐานทางวิชาการ
@@ -217,7 +217,7 @@ export default function BirthCardPage() {
             <p>
               คู่ไพ่ประจำตัวช่วยให้เราเข้าใจความขัดแย้งและความสมดุลภายในตนเอง ตัวอย่างเช่น:
             </p>
-            <ul className="list-disc pl-5 space-y-2 text-[#5E5240]">
+            <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
                 <strong>The Wheel of Fortune (10) และ The Magician (1):</strong> ผู้ที่ถือครองคู่ไพ่นี้มักเผชิญกับจุดเปลี่ยนและจังหวะชีวิตที่ไม่หยุดนิ่ง
                 แต่มีพรสวรรค์ในการแปรเปลี่ยนวิกฤตให้เป็นโอกาสด้วยสติปัญญาและทักษะรอบด้าน
@@ -270,7 +270,7 @@ export default function BirthCardPage() {
             <p>
               การรู้จักไพ่ทาโรต์ประจำตัวไม่ใช่การทำนายดวงชะตาแบบพยากรณ์ตายตัว แต่เป็นเครื่องมือสำหรับการใคร่ครวญตนเอง (Self-Reflection):
             </p>
-            <ol className="list-decimal pl-5 space-y-2 text-[#5E5240]">
+            <ol className="list-decimal pl-5 space-y-2 text-muted">
               <li>
                 <strong>โอบรับทั้งด้านสว่างและด้านเงา:</strong> ไพ่ทุกใบสะท้อนศักยภาพสูงสุดเมื่อมีสติ (Light Aspect)
                 และความผิดพลาดที่อาจเกิดขึ้นเมื่อตกอยู่ใต้ความกลัว (Shadow Aspect) การตระหนักรู้ในไพ่ของตนเองช่วยให้คุณจับสัญญาณเตือนภัยได้ก่อนก้าวพลาด

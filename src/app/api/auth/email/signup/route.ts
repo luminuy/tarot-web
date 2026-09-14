@@ -39,6 +39,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
   }
 
+  const isEnglish = /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
+  const lang: "th" | "en" = isEnglish ? "en" : "th";
+
   try {
     const body = await request.json();
 
@@ -47,14 +50,14 @@ export async function POST(request: Request) {
     if (!ts.ok) {
       console.warn(`[turnstile] signup ปฏิเสธ: ${ts.reason}`);
       return NextResponse.json(
-        { error: "ระบบตรวจพบว่าอาจไม่ใช่การใช้งานจากคนจริง กรุณารีเฟรชหน้าแล้วลองใหม่" },
+        { error: isEnglish ? "Bot verification failed. Please refresh and try again." : "ระบบตรวจพบว่าอาจไม่ใช่การใช้งานจากคนจริง กรุณารีเฟรชหน้าแล้วลองใหม่" },
         { status: 403 },
       );
     }
 
     const parsed = SignupSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message || "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || (isEnglish ? "Invalid input" : "ข้อมูลไม่ถูกต้อง") }, { status: 400 });
     }
 
     const { email, password, name } = parsed.data;
@@ -64,7 +67,7 @@ export async function POST(request: Request) {
     const limit = await checkAuthRateLimit(request, "signup", emailLower);
     if (!limit.allowed) {
       return NextResponse.json(
-        { error: `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
+        { error: isEnglish ? `Too many requests. Please wait ${limit.retryAfterSec || 60} seconds.` : `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
         { status: 429 }
       );
     }
@@ -72,7 +75,7 @@ export async function POST(request: Request) {
     // Password Policy Check
     const policy = validatePasswordPolicy(password, email);
     if (!policy.ok) {
-      return NextResponse.json({ error: policy.reason || "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย" }, { status: 400 });
+      return NextResponse.json({ error: policy.reason || (isEnglish ? "Password does not meet security requirements" : "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย") }, { status: 400 });
     }
 
     const origin = resolveAppOrigin(request);
@@ -82,7 +85,12 @@ export async function POST(request: Request) {
     if (existingUser) {
       if (existingUser.hasPassword) {
         try {
-          await sendEmail(email, "การแจ้งเตือนเกี่ยวกับบัญชี — SeerTarot", accountExistsHtml(existingUser.name), accountExistsText(existingUser.name));
+          await sendEmail(
+            email,
+            isEnglish ? "Account Notification — SeerTarot" : "การแจ้งเตือนเกี่ยวกับบัญชี — SeerTarot",
+            accountExistsHtml(existingUser.name, lang),
+            accountExistsText(existingUser.name, lang)
+          );
         } catch {
           // ignore email sending errors
         }
@@ -90,8 +98,13 @@ export async function POST(request: Request) {
         // บัญชีเดิมเป็น OAuth-only → ส่งลิงก์ให้ตั้งรหัสผ่าน
         try {
           const resetToken = await issueToken(existingUser.id, "reset", 15 * 60 * 1000);
-          const setupLink = `${origin}/reset-password?token=${encodeURIComponent(resetToken)}`;
-          await sendEmail(email, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", resetPasswordHtml(setupLink, existingUser.name), resetPasswordText(setupLink, existingUser.name));
+          const setupLink = `${origin}${isEnglish ? "/en" : ""}/reset-password?token=${encodeURIComponent(resetToken)}`;
+          await sendEmail(
+            email,
+            isEnglish ? "Reset Your Password — SeerTarot" : "คำขอตั้งรหัสผ่านใหม่ — SeerTarot",
+            resetPasswordHtml(setupLink, existingUser.name, lang),
+            resetPasswordText(setupLink, existingUser.name, lang)
+          );
         } catch {
           // ignore
         }
@@ -99,7 +112,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         ok: true,
-        message: "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว",
+        message: isEnglish ? "If an account exists with this email, confirmation details have been sent." : "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว",
         user: null,
       });
     }
@@ -128,8 +141,13 @@ export async function POST(request: Request) {
     // ออก Token ยืนยันอีเมล (อายุ 24 ชม.)
     try {
       const verifyToken = await issueToken(newUser.id, "verify", 24 * 60 * 60 * 1000);
-      const verifyLink = `${origin}/api/auth/email/verify?token=${encodeURIComponent(verifyToken)}`;
-      await sendEmail(email, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot", verifyEmailHtml(verifyLink, name), verifyEmailText(verifyLink, name));
+      const verifyLink = `${origin}/api/auth/email/verify?token=${encodeURIComponent(verifyToken)}${isEnglish ? "&lang=en" : ""}`;
+      await sendEmail(
+        email,
+        isEnglish ? "Verify Your Email Address — SeerTarot" : "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot",
+        verifyEmailHtml(verifyLink, name, lang),
+        verifyEmailText(verifyLink, name, lang)
+      );
     } catch (emailErr) {
       console.error("[Signup verify email failed]", emailErr);
     }
@@ -146,7 +164,7 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({
       ok: true,
-      message: "สร้างบัญชีสำเร็จ กรุณาตรวจสอบอีเมลเพื่อยืนยันตัวตน",
+      message: isEnglish ? "Account created successfully. Please check your email to verify." : "สร้างบัญชีสำเร็จ กรุณาตรวจสอบอีเมลเพื่อยืนยันตัวตน",
       user: {
         id: newUser.id,
         name: newUser.name,
@@ -162,9 +180,9 @@ export async function POST(request: Request) {
   } catch (err) {
     if (isPasswordConfigError(err)) {
       console.error("[Email Signup] ตั้งค่าไม่ครบ:", err.message);
-      return NextResponse.json({ error: "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
+      return NextResponse.json({ error: isEnglish ? "Email sign-in is temporarily unavailable. Please use Google sign-in in the meantime." : "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
     }
     console.error("[Email Signup Error]", err);
-    return NextResponse.json({ error: "ไม่สามารถสร้างบัญชีได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
+    return NextResponse.json({ error: isEnglish ? "Unable to create account at this time. Please try again." : "ไม่สามารถสร้างบัญชีได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
   }
 }

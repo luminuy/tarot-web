@@ -369,10 +369,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       // ตรวจสอบความสมบูรณ์ของไพ่ที่กู้คืน — ถ้าไพ่สูญหายหรือข้อมูลไม่สมบูรณ์ ห้ามกุ The Fool
       const isCorrupted =
         saved.drawnCards && saved.drawnCards.some((d) => !d || d.cardIndex === undefined || !d.card?.nameTh);
+      const isEn = isEnglish || (typeof window !== "undefined" && window.location.pathname.startsWith("/en"));
       if (isCorrupted) {
-        setErrorMsg("ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+        setErrorMsg(isEn ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
       } else if (saved.currentStep === "READING" && !saved.readingResult?.summary) {
-        setErrorMsg("การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กรุณากดโหลดใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ");
+        setErrorMsg(isEn ? "The reading stream was interrupted. Please click reload to continue." : "การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กรุณากดโหลดใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ");
       }
     } else {
       const searchParams = new URLSearchParams(window.location.search);
@@ -389,22 +390,29 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
     // Auto-sync anonymous history to server upon login or app mount & handle Auth query toasts
     if (typeof window !== "undefined") {
+      const isEn = isEnglish || window.location.pathname.startsWith("/en");
       const searchParams = new URLSearchParams(window.location.search);
       const isAuthSuccess = searchParams.get("auth_success") === "1";
       const isNewUser = searchParams.get("new_user") === "1";
       const isVerified = searchParams.get("verified") === "1";
       const isPwReset = searchParams.get("pw_reset") === "1";
+      const isPurchaseSuccess = searchParams.get("purchase_success") === "1";
+      const purchaseCredits = searchParams.get("credits");
+      const purchaseError = searchParams.get("purchase_error");
       const verifyError = searchParams.get("verify_error");
       const authError = searchParams.get("auth_error");
 
-      // 🧹 ล้าง auth query parameters ออกจาก URL ทันที
+      // 🧹 ล้าง auth และ purchase query parameters ออกจาก URL ทันที
       // ป้องกันไม่ให้ query string ค้างใน address bar ของเบราว์เซอร์ ซึ่งทำให้ผู้ใช้เห็นแบนเนอร์ซ้ำตอนรีเฟรช
-      if (isAuthSuccess || isVerified || isPwReset || verifyError || authError) {
+      if (isAuthSuccess || isVerified || isPwReset || isPurchaseSuccess || purchaseError || verifyError || authError) {
         const cleanUrl = new URL(window.location.href);
         cleanUrl.searchParams.delete("auth_success");
         cleanUrl.searchParams.delete("new_user");
         cleanUrl.searchParams.delete("verified");
         cleanUrl.searchParams.delete("pw_reset");
+        cleanUrl.searchParams.delete("purchase_success");
+        cleanUrl.searchParams.delete("credits");
+        cleanUrl.searchParams.delete("purchase_error");
         cleanUrl.searchParams.delete("verify_error");
         cleanUrl.searchParams.delete("auth_error");
         window.history.replaceState(
@@ -414,11 +422,30 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         );
       }
 
-      if (isVerified) {
+      if (isPurchaseSuccess) {
         setToast({
           type: "success",
-          title: "ยืนยันอีเมลสำเร็จ",
-          subtitle: `รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้งเรียบร้อยแล้ว`,
+          title: isEn ? "Package Purchase Successful" : "เติมรอบเปิดไพ่สำเร็จ",
+          subtitle: isEn
+            ? `Added ${purchaseCredits || ""} credits to your balance.`
+            : `เพิ่มโควตาดูดวง ${purchaseCredits || ""} ครั้งเรียบร้อยแล้ว`,
+          duration: 4500,
+        });
+        refreshEntitlement();
+      } else if (purchaseError) {
+        setToast({
+          type: "error",
+          title: isEn ? "Payment Failed" : "การชำระเงินไม่สำเร็จ",
+          subtitle: decodeURIComponent(purchaseError),
+          duration: 5000,
+        });
+      } else if (isVerified) {
+        setToast({
+          type: "success",
+          title: isEn ? "Email verified successfully" : "ยืนยันอีเมลสำเร็จ",
+          subtitle: isEn
+            ? `You have received ${DAILY_LIMIT} free readings per day.`
+            : `รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้งเรียบร้อยแล้ว`,
           duration: 4500,
         });
         refreshEntitlement();
@@ -428,8 +455,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           fetchSessionUser({ force: true }).then((currentUser) => {
             if (currentUser) {
               refreshEntitlement();
-              const welcomeKey = `tarot_welcomed_${currentUser.id}`;
-              const hasBeenWelcomed = typeof window !== "undefined" && localStorage.getItem(welcomeKey) === "1";
+              const welcomeKey = `welcome_shown_${currentUser.id}`;
+              let hasBeenWelcomed = false;
+              try {
+                hasBeenWelcomed = typeof window !== "undefined" && localStorage.getItem(welcomeKey) === "1";
+              } catch {}
               const isRecentAccount =
                 currentUser.createdAt && Date.now() - new Date(currentUser.createdAt).getTime() < 10 * 60 * 1000;
               const isFirstTimeUser = isNewUser || (isRecentAccount && !hasBeenWelcomed);
@@ -442,16 +472,21 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
                 setToast({
                   type: "welcome",
-                  title: "ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์",
-                  subtitle: `คุณได้รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้งเรียบร้อยแล้ว`,
+                  title: isEn ? "Welcome to the Oracle Sanctuary" : "ยินดีต้อนรับสู่วิหารศักดิ์สิทธิ์",
+                  subtitle: isEn
+                    ? `You have received ${DAILY_LIMIT} free readings per day.`
+                    : `คุณได้รับสิทธิ์เปิดไพ่ฟรีวันละ ${DAILY_LIMIT} ครั้งเรียบร้อยแล้ว`,
                   duration: 4800,
                 });
               } else {
                 // ผู้ใช้เดิมเข้าสู่ระบบ (Returning User Login): ไม่แสดงข้อความสิทธิ์ซ้ำซาก ทักทายกระชับ 2.8 วินาทีแล้วจางหาย
+                const defaultName = isEn ? "Seeker" : "ผู้แสวงหาคำตอบ";
                 setToast({
                   type: "success",
-                  title: "เข้าสู่วิหารเรียบร้อย",
-                  subtitle: `ยินดีต้อนรับกลับสู่ห้วงชะตา คุณ ${currentUser.name || "ผู้แสวงหาคำตอบ"}`,
+                  title: isEn ? "Welcome back" : "เข้าสู่วิหารเรียบร้อย",
+                  subtitle: isEn
+                    ? `Welcome back to the sanctuary, ${currentUser.name || defaultName}`
+                    : `ยินดีต้อนรับกลับสู่ห้วงชะตา คุณ ${currentUser.name || defaultName}`,
                   duration: 2800,
                 });
               }
@@ -471,30 +506,30 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       } else if (isPwReset) {
         setToast({
           type: "success",
-          title: "ตั้งรหัสผ่านใหม่เรียบร้อย",
-          subtitle: "เข้าสู่วิหารศักดิ์สิทธิ์ได้ทันที",
+          title: isEn ? "Password reset successfully" : "ตั้งรหัสผ่านใหม่เรียบร้อย",
+          subtitle: isEn ? "You may now enter the sacred chamber." : "เข้าสู่วิหารศักดิ์สิทธิ์ได้ทันที",
           duration: 3500,
         });
         refreshEntitlement();
       } else if (verifyError === "expired") {
         setToast({
           type: "error",
-          title: "ลิงก์ยืนยันอีเมลหมดอายุ",
-          subtitle: "กรุณาขอลิงก์ใหม่จากเมนูโปรไฟล์ของคุณ",
+          title: isEn ? "Verification link expired" : "ลิงก์ยืนยันอีเมลหมดอายุ",
+          subtitle: isEn ? "Please request a new link from your profile menu." : "กรุณาขอลิงก์ใหม่จากเมนูโปรไฟล์ของคุณ",
           duration: 5000,
         });
       } else if (verifyError) {
         setToast({
           type: "error",
-          title: "การยืนยันอีเมลไม่สำเร็จ",
-          subtitle: "ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือถูกใช้งานไปแล้ว",
+          title: isEn ? "Verification failed" : "การยืนยันอีเมลไม่สำเร็จ",
+          subtitle: isEn ? "The verification link is invalid or has already been used." : "ลิงก์ยืนยันอีเมลไม่ถูกต้องหรือถูกใช้งานไปแล้ว",
           duration: 5000,
         });
       } else if (authError) {
         setToast({
           type: "error",
-          title: "เข้าสู่ระบบไม่สำเร็จ",
-          subtitle: describeAuthError(authError),
+          title: isEn ? "Sign-in failed" : "เข้าสู่ระบบไม่สำเร็จ",
+          subtitle: describeAuthError(authError, isEn ? "en" : "th"),
           duration: 5000,
         });
       }
@@ -544,6 +579,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         activeCardIndex,
         readingResult,
         proof,
+        lang: isEnglish ? "en" : "th",
       });
     }, 400);
     return () => clearTimeout(t);
@@ -565,6 +601,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     activeCardIndex,
     readingResult,
     proof,
+    isEnglish,
   ]);
 
   const executeStartSession = async (finalSituation?: string) => {
@@ -1090,6 +1127,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 setReadingResult((prev) => ({ ...prev, connections: data.text }));
               } else if (eventType === "summary") {
                 setReadingResult((prev) => ({ ...prev, summary: data.text }));
+              } else if (eventType === "reset") {
+                setReadingResult(null);
               } else if (eventType === "done") {
                 streamCompleted = true;
                 setReadingResult(data.reading);

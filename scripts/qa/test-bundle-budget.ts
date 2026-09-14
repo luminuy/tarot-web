@@ -157,6 +157,12 @@ export const BUDGETS: RouteBudget[] = [
      */
     maxHtmlGzipKb: 29, // วัดจริง 2026-09-07 หลังตัด keywords ที่ไม่มีใครใช้: 26 KB
   },
+  {
+    route: "/en/cards/birth-card",
+    htmlRelativePath: ".next/server/app/en/cards/birth-card.html",
+    maxJsGzipKb: 190,
+    maxHtmlGzipKb: 29,
+  },
 ];
 
 function ensureBuildExists(): void {

@@ -23,9 +23,13 @@ export function DeleteAllDataButton() {
       // Ignore network errors
     }
 
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.href = "/";
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch {
+      // Ignore storage restrictions
+    }
+    window.location.href = isEn ? "/en" : "/";
   };
 
   return (

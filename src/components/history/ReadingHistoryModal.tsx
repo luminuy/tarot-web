@@ -153,7 +153,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
         body: JSON.stringify({ readings }),
       });
 
-      const data = await res.json();
+      const data = (await res.json().catch(() => ({}))) as MonthlySummaryResult & { error?: string };
       if (!res.ok) {
         throw new Error(data.error || (isEn ? "Unable to generate monthly reflection" : "ไม่สามารถสรุปบทเรียนดวงได้"));
       }

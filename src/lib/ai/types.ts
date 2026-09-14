@@ -30,6 +30,7 @@ export type ReadingEvent =
       /** จำนวนจุดที่ถูกแก้อัตโนมัติเงียบ ๆ ก่อนส่งถึงผู้ใช้ */
       thaiFixCount?: number;
     }
+  | { type: "reset" }
   | { type: "error"; message: string };
 
 export interface UsageInfo {

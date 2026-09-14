@@ -184,18 +184,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleLoginGoogle = () => {
     soundManager.playCardSelectSound();
-    const returnUrl = typeof window !== "undefined"
-      ? encodeURIComponent(window.location.pathname + window.location.search)
-      : "";
-    window.location.href = returnUrl ? `/api/auth/google?returnUrl=${returnUrl}` : "/api/auth/google";
+    const currentPath = typeof window !== "undefined"
+      ? (window.location.pathname + window.location.search)
+      : (isEn ? "/en" : "/");
+    const returnUrl = encodeURIComponent(currentPath || (isEn ? "/en" : "/"));
+    window.location.href = `/api/auth/google?returnUrl=${returnUrl}`;
   };
 
   const handleLoginLine = () => {
     soundManager.playCardSelectSound();
-    const returnUrl = typeof window !== "undefined"
-      ? encodeURIComponent(window.location.pathname + window.location.search)
-      : "";
-    window.location.href = returnUrl ? `/api/auth/line?returnUrl=${returnUrl}` : "/api/auth/line";
+    const currentPath = typeof window !== "undefined"
+      ? (window.location.pathname + window.location.search)
+      : (isEn ? "/en" : "/");
+    const returnUrl = encodeURIComponent(currentPath || (isEn ? "/en" : "/"));
+    window.location.href = `/api/auth/line?returnUrl=${returnUrl}`;
   };
 
   /**
@@ -251,7 +253,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         );
         soundManager.playCardSelectSound();
         invalidateSessionCache();
-        window.location.href = "/?auth_success=1";
+        window.location.href = isEn ? "/en?auth_success=1" : "/?auth_success=1";
       } else if (mode === "signup") {
         const data = await postJson(
           "/api/auth/email/signup",
@@ -261,7 +263,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         soundManager.playCardSelectSound();
         if (data.user) {
           invalidateSessionCache();
-          window.location.href = "/?auth_success=1&new_user=1";
+          window.location.href = isEn ? "/en?auth_success=1&new_user=1" : "/?auth_success=1&new_user=1";
         } else {
           setSuccessMsg(data.message || (isEn ? "A verification link has been sent to your email." : "ระบบได้ส่งข้อมูลการยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว"));
         }

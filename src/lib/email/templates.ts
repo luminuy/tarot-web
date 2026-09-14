@@ -2,9 +2,10 @@
  * อีเมลเทมเพลตมาตรฐานสไตล์พรีเมียมสีทอง/มูเตลู สำหรับส่งให้ผู้ใช้งาน
  */
 
-function baseLayout(contentHtml: string, title: string): string {
+function baseLayout(contentHtml: string, title: string, lang: "th" | "en" = "th"): string {
+  const isEn = lang === "en";
   return `<!DOCTYPE html>
-<html lang="th">
+<html lang="${lang}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -95,117 +96,145 @@ function baseLayout(contentHtml: string, title: string): string {
     <div class="card">
       <div class="brand">
         <div class="brand-title">SEERTAROT</div>
-        <div class="brand-sub">วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์</div>
+        <div class="brand-sub">${isEn ? "Online Interactive Tarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์"}</div>
       </div>
       ${contentHtml}
     </div>
     <div class="footer">
-      อีเมลนี้ส่งจากระบบอัตโนมัติของ SeerTarot หากท่านไม่ได้เป็นผู้ทำรายการ กรุณาเพิกเฉยต่ออีเมลนี้
+      ${isEn ? "This is an automated email from SeerTarot. If you did not initiate this request, please disregard this email." : "อีเมลนี้ส่งจากระบบอัตโนมัติของ SeerTarot หากท่านไม่ได้เป็นผู้ทำรายการ กรุณาเพิกเฉยต่ออีเมลนี้"}
     </div>
   </div>
 </body>
 </html>`;
 }
 
-export function verifyEmailHtml(link: string, name?: string): string {
-  const greeting = name ? `สวัสดีคุณ ${name}` : "สวัสดีผู้มีญาณหยั่งรู้";
+export function verifyEmailHtml(link: string, name?: string, lang: "th" | "en" = "th"): string {
+  const isEn = lang === "en";
+  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
   const content = `
-    <h1>ยืนยันที่อยู่อีเมลของคุณ</h1>
+    <h1>${isEn ? "Verify Your Email Address" : "ยืนยันที่อยู่อีเมลของคุณ"}</h1>
     <p>${greeting},</p>
-    <p>ขอบคุณที่ร่วมเดินทางสู่การพยากรณ์กับเรา เพื่อความปลอดภัยและความสมบูรณ์ของบัญชี กรุณากดปุ่มด้านล่างเพื่อยืนยันที่อยู่อีเมลของคุณ</p>
+    <p>${isEn ? "Thank you for embarking on this tarot journey with us. To secure your account and access all sanctuary features, please verify your email address by clicking the button below." : "ขอบคุณที่ร่วมเดินทางสู่การพยากรณ์กับเรา เพื่อความปลอดภัยและความสมบูรณ์ของบัญชี กรุณากดปุ่มด้านล่างเพื่อยืนยันที่อยู่อีเมลของคุณ"}</p>
     <div class="btn-container">
-      <a href="${link}" class="btn">ยืนยันอีเมลทันที</a>
+      <a href="${link}" class="btn">${isEn ? "Verify Email Now" : "ยืนยันอีเมลทันที"}</a>
     </div>
-    <p>ลิงก์นี้มีอายุการใช้งาน 24 ชั่วโมง</p>
+    <p>${isEn ? "This link will expire in 24 hours." : "ลิงก์นี้มีอายุการใช้งาน 24 ชั่วโมง"}</p>
     <div class="fallback">
-      หากปุ่มด้านบนใช้งานไม่ได้ กรุณาคัดลอกลิงก์นี้ไปเปิดในเบราว์เซอร์:<br>
+      ${isEn ? "If the button above does not work, copy and paste this link into your browser:" : "หากปุ่มด้านบนใช้งานไม่ได้ กรุณาคัดลอกลิงก์นี้ไปเปิดในเบราว์เซอร์:"}<br>
       <a href="${link}" style="color: #8F5C1A;">${link}</a>
     </div>
   `;
-  return baseLayout(content, "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot");
+  return baseLayout(content, isEn ? "Verify Your Email Address — SeerTarot" : "ยืนยันที่อยู่อีเมลของคุณ — SeerTarot", lang);
 }
 
-export function resetPasswordHtml(link: string, name?: string): string {
-  const greeting = name ? `สวัสดีคุณ ${name}` : "สวัสดีผู้มีญาณหยั่งรู้";
+export function resetPasswordHtml(link: string, name?: string, lang: "th" | "en" = "th"): string {
+  const isEn = lang === "en";
+  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
   const content = `
-    <h1>คำขอตั้งรหัสผ่านใหม่</h1>
+    <h1>${isEn ? "Reset Your Password" : "คำขอตั้งรหัสผ่านใหม่"}</h1>
     <p>${greeting},</p>
-    <p>เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชี SeerTarot ของคุณ หากคุณเป็นผู้ส่งคำขอนี้ สามารถตั้งรหัสผ่านใหม่ได้โดยกดปุ่มด้านล่าง</p>
+    <p>${isEn ? "We received a password reset request for your SeerTarot account. If you initiated this request, you can set a new password by clicking the button below." : "เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชี SeerTarot ของคุณ หากคุณเป็นผู้ส่งคำขอนี้ สามารถตั้งรหัสผ่านใหม่ได้โดยกดปุ่มด้านล่าง"}</p>
     <div class="btn-container">
-      <a href="${link}" class="btn">ตั้งรหัสผ่านใหม่</a>
+      <a href="${link}" class="btn">${isEn ? "Reset Password" : "ตั้งรหัสผ่านใหม่"}</a>
     </div>
-    <p style="color: #A6392C; font-size: 13px;">ลิงก์นี้มีความปลอดภัยระดับสูงและมีอายุการใช้งาน 15 นาที</p>
+    <p style="color: #A6392C; font-size: 13px;">${isEn ? "This secure link expires in 15 minutes." : "ลิงก์นี้มีความปลอดภัยระดับสูงและมีอายุการใช้งาน 15 นาที"}</p>
     <div class="fallback">
-      หากปุ่มด้านบนใช้งานไม่ได้ กรุณาคัดลอกลิงก์นี้ไปเปิดในเบราว์เซอร์:<br>
+      ${isEn ? "If the button above does not work, copy and paste this link into your browser:" : "หากปุ่มด้านบนใช้งานไม่ได้ กรุณาคัดลอกลิงก์นี้ไปเปิดในเบราว์เซอร์:"}<br>
       <a href="${link}" style="color: #8F5C1A;">${link}</a>
     </div>
   `;
-  return baseLayout(content, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot");
+  return baseLayout(content, isEn ? "Reset Your Password — SeerTarot" : "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", lang);
 }
 
-export function accountExistsHtml(name?: string): string {
-  const greeting = name ? `สวัสดีคุณ ${name}` : "สวัสดีผู้มีญาณหยั่งรู้";
+export function accountExistsHtml(name?: string, lang: "th" | "en" = "th"): string {
+  const isEn = lang === "en";
+  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
   const content = `
-    <h1>การแจ้งเตือนเกี่ยวกับบัญชีของคุณ</h1>
+    <h1>${isEn ? "Account Notification" : "การแจ้งเตือนเกี่ยวกับบัญชีของคุณ"}</h1>
     <p>${greeting},</p>
-    <p>มีการพยายามสมัครสมาชิกด้วยอีเมลนี้บน SeerTarot แต่ที่อยู่อีเมลนี้มีบัญชีในระบบเรียบร้อยแล้ว</p>
-    <p>หากคุณจำรหัสผ่านไม่ได้ สามารถกดขอรีเซ็ตรหัสผ่านได้จากหน้าเข้าสู่ระบบ หรือหากเข้าใช้งานผ่าน Google / LINE สามารถเข้าสู่ระบบได้ตามปกติ</p>
+    <p>${isEn ? "An attempt was made to register with this email on SeerTarot, but an account already exists." : "มีการพยายามสมัครสมาชิกด้วยอีเมลนี้บน SeerTarot แต่ที่อยู่อีเมลนี้มีบัญชีในระบบเรียบร้อยแล้ว"}</p>
+    <p>${isEn ? "If you forgot your password, you can request a password reset from the sign-in modal. Or if you use Google / LINE, you can sign in directly." : "หากคุณจำรหัสผ่านไม่ได้ สามารถกดขอรีเซ็ตรหัสผ่านได้จากหน้าเข้าสู่ระบบ หรือหากเข้าใช้งานผ่าน Google / LINE สามารถเข้าสู่ระบบได้ตามปกติ"}</p>
   `;
-  return baseLayout(content, "การแจ้งเตือนเกี่ยวกับบัญชี — SeerTarot");
+  return baseLayout(content, isEn ? "Account Notification — SeerTarot" : "การแจ้งเตือนเกี่ยวกับบัญชี — SeerTarot", lang);
 }
 
 /* ── เวอร์ชันข้อความล้วน (ส่งควบคู่ HTML เสมอ — ลดโอกาสตกโฟลเดอร์สแปม) ────────── */
 
-function textLayout(bodyLines: string[]): string {
+function textLayout(bodyLines: string[], lang: "th" | "en" = "th"): string {
+  const isEn = lang === "en";
   return [
-    "SEERTAROT — วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
+    isEn ? "SEERTAROT — Online Interactive Tarot Sanctuary" : "SEERTAROT — วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
     "",
     ...bodyLines,
     "",
     "—",
-    "อีเมลนี้ส่งจากระบบอัตโนมัติของ SeerTarot หากท่านไม่ได้เป็นผู้ทำรายการ กรุณาเพิกเฉยต่ออีเมลนี้",
+    isEn
+      ? "This is an automated email from SeerTarot. If you did not initiate this request, please disregard this email."
+      : "อีเมลนี้ส่งจากระบบอัตโนมัติของ SeerTarot หากท่านไม่ได้เป็นผู้ทำรายการ กรุณาเพิกเฉยต่ออีเมลนี้",
   ].join("\n");
 }
 
-export function verifyEmailText(link: string, name?: string): string {
-  const greeting = name ? `สวัสดีคุณ ${name}` : "สวัสดีผู้มีญาณหยั่งรู้";
-  return textLayout([
-    "ยืนยันที่อยู่อีเมลของคุณ",
-    "",
-    `${greeting},`,
-    "",
-    "ขอบคุณที่ร่วมเดินทางสู่การพยากรณ์กับเรา กรุณาเปิดลิงก์ด้านล่างเพื่อยืนยันที่อยู่อีเมลของคุณ (ลิงก์มีอายุ 24 ชั่วโมง):",
-    "",
-    link,
-  ]);
+export function verifyEmailText(link: string, name?: string, lang: "th" | "en" = "th"): string {
+  const isEn = lang === "en";
+  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
+  return textLayout(
+    [
+      isEn ? "Verify Your Email Address" : "ยืนยันที่อยู่อีเมลของคุณ",
+      "",
+      `${greeting},`,
+      "",
+      isEn
+        ? "Thank you for embarking on this tarot journey with us. Please open the link below to verify your email address (expires in 24 hours):"
+        : "ขอบคุณที่ร่วมเดินทางสู่การพยากรณ์กับเรา กรุณาเปิดลิงก์ด้านล่างเพื่อยืนยันที่อยู่อีเมลของคุณ (ลิงก์มีอายุ 24 ชั่วโมง):",
+      "",
+      link,
+    ],
+    lang
+  );
 }
 
-export function resetPasswordText(link: string, name?: string): string {
-  const greeting = name ? `สวัสดีคุณ ${name}` : "สวัสดีผู้มีญาณหยั่งรู้";
-  return textLayout([
-    "คำขอตั้งรหัสผ่านใหม่",
-    "",
-    `${greeting},`,
-    "",
-    "เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชี SeerTarot ของคุณ หากคุณเป็นผู้ส่งคำขอนี้ เปิดลิงก์ด้านล่างเพื่อตั้งรหัสผ่านใหม่ (ลิงก์มีอายุ 15 นาที):",
-    "",
-    link,
-    "",
-    "หากคุณไม่ได้ส่งคำขอนี้ กรุณาเพิกเฉยต่ออีเมลนี้ รหัสผ่านเดิมของคุณยังใช้งานได้ตามปกติ",
-  ]);
+export function resetPasswordText(link: string, name?: string, lang: "th" | "en" = "th"): string {
+  const isEn = lang === "en";
+  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
+  return textLayout(
+    [
+      isEn ? "Reset Your Password" : "คำขอตั้งรหัสผ่านใหม่",
+      "",
+      `${greeting},`,
+      "",
+      isEn
+        ? "We received a password reset request for your SeerTarot account. If you initiated this request, open the link below to set a new password (expires in 15 minutes):"
+        : "เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชี SeerTarot ของคุณ หากคุณเป็นผู้ส่งคำขอนี้ เปิดลิงก์ด้านล่างเพื่อตั้งรหัสผ่านใหม่ (ลิงก์มีอายุ 15 นาที):",
+      "",
+      link,
+      "",
+      isEn
+        ? "If you did not request this, please disregard this email. Your current password remains unchanged."
+        : "หากคุณไม่ได้ส่งคำขอนี้ กรุณาเพิกเฉยต่ออีเมลนี้ รหัสผ่านเดิมของคุณยังใช้งานได้ตามปกติ",
+    ],
+    lang
+  );
 }
 
-export function accountExistsText(name?: string): string {
-  const greeting = name ? `สวัสดีคุณ ${name}` : "สวัสดีผู้มีญาณหยั่งรู้";
-  return textLayout([
-    "การแจ้งเตือนเกี่ยวกับบัญชีของคุณ",
-    "",
-    `${greeting},`,
-    "",
-    "มีการพยายามสมัครสมาชิกด้วยอีเมลนี้บน SeerTarot แต่ที่อยู่อีเมลนี้มีบัญชีในระบบเรียบร้อยแล้ว",
-    "",
-    "หากคุณจำรหัสผ่านไม่ได้ สามารถกดขอรีเซ็ตรหัสผ่านได้จากหน้าเข้าสู่ระบบ หรือหากเข้าใช้งานผ่าน Google / LINE สามารถเข้าสู่ระบบได้ตามปกติ",
-  ]);
+export function accountExistsText(name?: string, lang: "th" | "en" = "th"): string {
+  const isEn = lang === "en";
+  const greeting = name ? (isEn ? `Hello ${name}` : `สวัสดีคุณ ${name}`) : (isEn ? "Greetings, Seeker" : "สวัสดีผู้มีญาณหยั่งรู้");
+  return textLayout(
+    [
+      isEn ? "Account Notification" : "การแจ้งเตือนเกี่ยวกับบัญชีของคุณ",
+      "",
+      `${greeting},`,
+      "",
+      isEn
+        ? "An attempt was made to register with this email on SeerTarot, but an account already exists."
+        : "มีการพยายามสมัครสมาชิกด้วยอีเมลนี้บน SeerTarot แต่ที่อยู่อีเมลนี้มีบัญชีในระบบเรียบร้อยแล้ว",
+      "",
+      isEn
+        ? "If you forgot your password, you can reset it from the sign-in modal. Or if you use Google / LINE, you can sign in directly."
+        : "หากคุณจำรหัสผ่านไม่ได้ สามารถกดขอรีเซ็ตรหัสผ่านได้จากหน้าเข้าสู่ระบบ หรือหากเข้าใช้งานผ่าน Google / LINE สามารถเข้าสู่ระบบได้ตามปกติ",
+    ],
+    lang
+  );
 }
 
 /**

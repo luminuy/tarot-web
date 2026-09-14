@@ -68,7 +68,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setRedeemError(data.error || (isEn ? "Failed to redeem code" : "ไม่สามารถแลกรับสิทธิ์ได้"));
       } else {
@@ -119,7 +119,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         body: JSON.stringify({ packageId: selectedPkg.id }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
         throw new Error(data.error || (isEn ? "Unable to initiate payment." : "ไม่สามารถเริ่มการชำระเงินได้"));
       }
@@ -153,7 +153,7 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
         throw new Error(data.error || (isEn ? "Unable to confirm payment." : "ไม่สามารถยืนยันการชำระเงินได้"));
       }

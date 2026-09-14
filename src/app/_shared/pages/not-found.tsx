@@ -22,15 +22,43 @@ export const notFoundMetadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-const LINKS = [
-  { href: "/", label: "เริ่มดูดวงที่หน้าแรก" },
-  { href: "/cards", label: "คัมภีร์ไพ่ 78 ใบ" },
-  { href: "/spreads", label: "ผังพยากรณ์ 25 แบบ" },
-  { href: "/blog", label: "บทความดูดวง" },
-];
+export const notFoundMetadataEn: Metadata = {
+  title: "Page Not Found",
+  description: "The page you are looking for may have been moved or does not exist.",
+  robots: { index: false, follow: true },
+};
+
+const COPY = {
+  th: {
+    title: "ไม่พบหน้าที่คุณกำลังตามหา",
+    desc: "หน้านี้อาจถูกย้ายหรือไม่เคยมีอยู่ ลองเลือกทางใดทางหนึ่งด้านล่างเพื่อกลับเข้าวิหารอีกครั้ง",
+    navLabel: "ทางลัดกลับเข้าเว็บ",
+    links: [
+      { href: "/", label: "เริ่มดูดวงที่หน้าแรก" },
+      { href: "/cards", label: "คัมภีร์ไพ่ 78 ใบ" },
+      { href: "/spreads", label: "ผังพยากรณ์ 25 แบบ" },
+      { href: "/blog", label: "บทความดูดวง" },
+    ],
+    helpline: "สายด่วนสุขภาพจิต 1323",
+  },
+  en: {
+    title: "Page Not Found",
+    desc: "The page you are looking for may have been moved or does not exist. Choose one of the paths below to return to the sanctuary.",
+    navLabel: "Navigation shortcuts",
+    links: [
+      { href: "/en", label: "Home Reading Chamber" },
+      { href: "/en/cards", label: "Tarot Encyclopedia (78 Cards)" },
+      { href: "/en/spreads", label: "Sacred Spreads (25 Spreads)" },
+      { href: "/en/daily", label: "Daily Oracle Card" },
+    ],
+    helpline: "Mental Health Support: Call 1323 (TH) or 988 (US)",
+  },
+} as const;
 
 /** เนื้อหน้า 404 พร้อมหัวเว็บและฟุตเตอร์กลาง — ทางออกจากหน้าต้องมีครบเหมือนหน้าอื่นทั้งเว็บ */
-export function NotFoundBody() {
+export function NotFoundBody({ forcedLocale = "th" }: { forcedLocale?: "th" | "en" } = {}) {
+  const copy = forcedLocale === "en" ? COPY.en : COPY.th;
+
   return (
     <>
       <SiteHeader />
@@ -39,15 +67,15 @@ export function NotFoundBody() {
           <div className="space-y-4">
             <span aria-hidden="true" className="block text-4xl font-serif-th font-bold text-gold">404</span>
             <h1 className="text-2xl sm:text-3xl font-bold font-serif-th leading-normal pt-1">
-              ไม่พบหน้าที่คุณกำลังตามหา
+              {copy.title}
             </h1>
             <p className="text-sm text-muted font-serif-th leading-relaxed">
-              หน้านี้อาจถูกย้ายหรือไม่เคยมีอยู่ ลองเลือกทางใดทางหนึ่งด้านล่างเพื่อกลับเข้าวิหารอีกครั้ง
+              {copy.desc}
             </p>
           </div>
 
-          <nav aria-label="ทางลัดกลับเข้าเว็บ" className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
-            {LINKS.map((link) => (
+          <nav aria-label={copy.navLabel} className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
+            {copy.links.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
@@ -59,7 +87,7 @@ export function NotFoundBody() {
           </nav>
 
           <p className="text-xs text-muted font-serif-th">
-            <span className="text-ok font-medium">สายด่วนสุขภาพจิต 1323</span>
+            <span className="text-ok font-medium">{copy.helpline}</span>
           </p>
         </div>
       </main>

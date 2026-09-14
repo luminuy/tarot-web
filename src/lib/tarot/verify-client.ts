@@ -152,6 +152,7 @@ export async function verifyReading(params: {
   drawn: { order: number; cardIndex: number; isReversed: boolean }[];
   pickedIndices?: number[];
   deckSize?: number;
+  lang?: "th" | "en";
 }): Promise<VerificationResult> {
   const commitmentOk = await verifyCommitmentClient(params.serverSeed, params.commitment);
   const expectedDraw = await drawCardsClient({
@@ -172,7 +173,10 @@ export async function verifyReading(params: {
   for (let i = 0; i < A.length && drawMatches; i++) {
     if (A[i].cardIndex !== B[i].cardIndex || A[i].isReversed !== B[i].isReversed) {
       drawMatches = false;
-      mismatchDetail = `ตำแหน่งที่ ${i + 1}: คาดว่า #${A[i].cardIndex}${A[i].isReversed ? " (กลับหัว)" : ""} แต่ได้รับ #${B[i].cardIndex}${B[i].isReversed ? " (กลับหัว)" : ""}`;
+      mismatchDetail =
+        params.lang === "en"
+          ? `Position ${i + 1}: expected #${A[i].cardIndex}${A[i].isReversed ? " (Reversed)" : ""} but received #${B[i].cardIndex}${B[i].isReversed ? " (Reversed)" : ""}`
+          : `ตำแหน่งที่ ${i + 1}: คาดว่า #${A[i].cardIndex}${A[i].isReversed ? " (กลับหัว)" : ""} แต่ได้รับ #${B[i].cardIndex}${B[i].isReversed ? " (กลับหัว)" : ""}`;
     }
   }
 

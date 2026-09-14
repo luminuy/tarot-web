@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { TarotCard as TarotCardType } from "@/data/cards/types";
 import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 // โหลดสำรับ "ไทยล้วน" — ไม่ลากคำทำนายอังกฤษ (≈126 KB gzip) เข้าบันเดิลหน้าไทย
 let deckPromise: Promise<typeof import("@/data/cards/deck-th")> | null = null;
@@ -146,10 +147,13 @@ export function OneCardRitual({
           url: window.location.href,
         })
         .catch(() => {});
-    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(shareText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+    } else {
+      copyToClipboard(shareText).then((ok) => {
+        if (ok) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2500);
+        }
+      });
     }
   };
 

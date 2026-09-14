@@ -50,7 +50,10 @@ export default function ReadingChatPage() {
       sticky ต้องคำนวณระยะเยื้องใหม่ทุกเฟรมเทียบ layout viewport ซึ่งบน iOS Safari
       ขยับเองระหว่างเลื่อน (แถบ URL ย่อ/ขยาย · rubber-band) ค่าที่ได้จึงแกว่งจนแถบสั่น
     */}
-    <header className="fixed top-0 inset-x-0 z-40 h-14 w-full border-b border-line bg-surface shadow-raised">
+    <header
+      data-site-header="reading-chat"
+      className="fixed top-0 inset-x-0 z-40 h-14 w-full border-b border-line bg-surface shadow-raised"
+    >
       <div className="mx-auto flex h-full max-w-2xl items-center justify-between gap-3 px-4">
         <LocaleLink
           href="/"

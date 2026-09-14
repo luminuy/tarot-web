@@ -493,6 +493,9 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
       }
 
       if (foreignCircuitBreaker) {
+        if (sentOpening || cardsSent > 0) {
+          yield { type: "reset" };
+        }
         if (
           totalForeignChars >= SEVERE_FOREIGN_LEAK_THRESHOLD ||
           isSevereForeignLeak(jsonAccumulator)

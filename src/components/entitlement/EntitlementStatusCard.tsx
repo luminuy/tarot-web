@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 
 import { QuotaPips } from "@/components/entitlement/QuotaPips";
 import { CheckMarkIcon, HourglassIcon, SparkSealIcon } from "@/components/entitlement/EntitlementIcons";

@@ -132,7 +132,23 @@ export function useSessionUser(): {
  * ⚠️ ห้ามเอาค่าดิบจาก query string ไปแสดงตรง ๆ — ผู้โจมตีส่งลิงก์ที่ทำให้เว็บเรา
  * แสดงข้อความอะไรก็ได้ (เช่น เบอร์โทรปลอมให้ผู้ใช้โทรไป) ได้ทันที
  */
-export function describeAuthError(code: string | null | undefined): string {
+export function describeAuthError(code: string | null | undefined, lang: "th" | "en" = "th"): string {
+  if (lang === "en") {
+    switch (code) {
+      case "state_mismatch":
+        return "Sign-in request expired or mismatched. Please try signing in again.";
+      case "access_denied":
+        return "Sign-in authorization was cancelled. You may try again anytime.";
+      case "provider_unavailable":
+        return "This sign-in method is currently unavailable. Please try email or another provider.";
+      case "provider_error":
+        return "Failed to connect to sign-in provider. Please try again.";
+      case "profile_unavailable":
+        return "Failed to retrieve account details from provider. Please try again.";
+      default:
+        return "Sign-in failed. Please try again.";
+    }
+  }
   switch (code) {
     case "state_mismatch":
       return "คำขอเข้าสู่ระบบหมดอายุหรือไม่ตรงกัน กรุณากดเข้าสู่ระบบใหม่อีกครั้ง";

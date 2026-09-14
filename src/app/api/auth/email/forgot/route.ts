@@ -20,6 +20,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
   }
 
+  const isEnglish = /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
+  const lang: "th" | "en" = isEnglish ? "en" : "th";
+
   try {
     const body = await request.json();
 
@@ -28,14 +31,17 @@ export async function POST(request: Request) {
     if (!ts.ok) {
       console.warn(`[turnstile] forgot ปฏิเสธ: ${ts.reason}`);
       return NextResponse.json(
-        { error: "ระบบตรวจพบว่าอาจไม่ใช่การใช้งานจากคนจริง กรุณารีเฟรชหน้าแล้วลองใหม่" },
+        { error: isEnglish ? "Bot verification failed. Please refresh and try again." : "ระบบตรวจพบว่าอาจไม่ใช่การใช้งานจากคนจริง กรุณารีเฟรชหน้าแล้วลองใหม่" },
         { status: 403 },
       );
     }
 
     const parsed = ForgotSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ ok: true, message: "หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปแล้ว" });
+      return NextResponse.json({
+        ok: true,
+        message: isEnglish ? "If this account exists, we have sent a password reset link." : "หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปแล้ว",
+      });
     }
 
     const { email } = parsed.data;
@@ -45,7 +51,7 @@ export async function POST(request: Request) {
     const limit = await checkAuthRateLimit(request, "forgot", emailLower);
     if (!limit.allowed) {
       return NextResponse.json(
-        { error: `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
+        { error: isEnglish ? `Too many requests. Please wait ${limit.retryAfterSec || 60} seconds.` : `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
         { status: 429 }
       );
     }
@@ -58,8 +64,13 @@ export async function POST(request: Request) {
       try {
         await invalidateUserTokens(user.id, "reset");
         const resetToken = await issueToken(user.id, "reset", 15 * 60 * 1000);
-        const resetLink = `${origin}/reset-password?token=${encodeURIComponent(resetToken)}`;
-        await sendEmail(user.email, "คำขอตั้งรหัสผ่านใหม่ — SeerTarot", resetPasswordHtml(resetLink, user.name), resetPasswordText(resetLink, user.name));
+        const resetLink = `${origin}${isEnglish ? "/en" : ""}/reset-password?token=${encodeURIComponent(resetToken)}`;
+        await sendEmail(
+          user.email,
+          isEnglish ? "Reset Your Password — SeerTarot" : "คำขอตั้งรหัสผ่านใหม่ — SeerTarot",
+          resetPasswordHtml(resetLink, user.name, lang),
+          resetPasswordText(resetLink, user.name, lang)
+        );
       } catch (err) {
         console.error("[Forgot password send email failed]", err);
       }
@@ -67,10 +78,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      message: "หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลของคุณเรียบร้อยแล้ว",
+      message: isEnglish ? "If this account exists in our system, a password reset link has been sent to your email." : "หากมีบัญชีนี้อยู่ในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลของคุณเรียบร้อยแล้ว",
     });
   } catch (err) {
     console.error("[Forgot Password Error]", err);
-    return NextResponse.json({ error: "ไม่สามารถดำเนินการได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
+    return NextResponse.json({ error: isEnglish ? "Unable to process request at this time. Please try again." : "ไม่สามารถดำเนินการได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
   }
 }

@@ -37,12 +37,20 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
   // Generate or retrieve persistent customerRef from localStorage
   const getCustomerRef = (): string => {
     if (typeof window === "undefined") return "cust_anon";
-    let ref = localStorage.getItem("tarot_customer_ref");
-    if (!ref) {
-      ref = `cust_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
-      localStorage.setItem("tarot_customer_ref", ref);
+    try {
+      let ref = localStorage.getItem("tarot_customer_ref");
+      if (!ref) {
+        const randomPart =
+          typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+            ? crypto.randomUUID().replace(/-/g, "").slice(0, 16)
+            : Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+        ref = `cust_${randomPart}`;
+        localStorage.setItem("tarot_customer_ref", ref);
+      }
+      return ref;
+    } catch {
+      return `cust_${Math.random().toString(36).substring(2, 18)}`;
     }
-    return ref;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,7 +79,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
         }),
       });
 
-      const data = await res.json();
+      const data = (await res.json().catch(() => ({}))) as { error?: string; redirectUrl?: string };
       if (!res.ok) {
         setError(data.error || "เกิดข้อผิดพลาดในการเข้าคิว");
         setSubmitting(false);

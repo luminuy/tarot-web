@@ -20,17 +20,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ไม่อนุญาตให้เข้าถึงจากภายนอก" }, { status: 403 });
   }
 
+  const isEnglish = /seertarot_lang=en/.test(request.headers.get("cookie") || "") || request.headers.get("referer")?.includes("/en");
+
   try {
     const session = await getSessionUser();
     if (!session?.id) {
-      return NextResponse.json({ error: "เซสชันไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
+      return NextResponse.json({ error: isEnglish ? "Invalid session. Please sign in again." : "เซสชันไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่" }, { status: 401 });
     }
 
     // Rate Limit Check
     const limit = await checkAuthRateLimit(request, "login", session.id);
     if (!limit.allowed) {
       return NextResponse.json(
-        { error: `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
+        { error: isEnglish ? `Too many requests. Please wait ${limit.retryAfterSec || 60} seconds.` : `คุณทำรายการบ่อยเกินไป กรุณารออีก ${limit.retryAfterSec || 60} วินาที` },
         { status: 429 }
       );
     }
@@ -38,31 +40,31 @@ export async function POST(request: Request) {
     const body = await request.json();
     const parsed = ChangePasswordSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message || "ข้อมูลไม่ถูกต้อง" }, { status: 400 });
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || (isEnglish ? "Invalid input" : "ข้อมูลไม่ถูกต้อง") }, { status: 400 });
     }
 
     const { oldPassword, newPassword } = parsed.data;
     const user = await getUserById(session.id);
     if (!user) {
-      return NextResponse.json({ error: "ไม่พบข้อมูลบัญชีผู้ใช้" }, { status: 404 });
+      return NextResponse.json({ error: isEnglish ? "User account not found." : "ไม่พบข้อมูลบัญชีผู้ใช้" }, { status: 404 });
     }
 
     // ถ้าผู้ใช้เคยตั้งรหัสผ่านไว้แล้ว ต้องตรวจรหัสผ่านเดิมก่อน
     if (user.hasPassword) {
       if (!oldPassword) {
-        return NextResponse.json({ error: "กรุณาระบุรหัสผ่านเดิม" }, { status: 400 });
+        return NextResponse.json({ error: isEnglish ? "Please enter your current password." : "กรุณาระบุรหัสผ่านเดิม" }, { status: 400 });
       }
 
       const currentHash = await getUserPasswordHash(user.id);
       if (!currentHash || !(await verifyPassword(oldPassword, currentHash))) {
-        return NextResponse.json({ error: "รหัสผ่านเดิมไม่ถูกต้อง" }, { status: 400 });
+        return NextResponse.json({ error: isEnglish ? "Current password is incorrect." : "รหัสผ่านเดิมไม่ถูกต้อง" }, { status: 400 });
       }
     }
 
     // ตรวจสอบความปลอดภัยของรหัสผ่านใหม่
     const policy = validatePasswordPolicy(newPassword, user.email || undefined);
     if (!policy.ok) {
-      return NextResponse.json({ error: policy.reason || "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย" }, { status: 400 });
+      return NextResponse.json({ error: policy.reason || (isEnglish ? "Password does not meet security requirements" : "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย") }, { status: 400 });
     }
 
     // แฮชและบันทึกรหัสผ่านใหม่ (เพิ่ม token_version อัตโนมัติเพื่อเตะ session เก่าบนเครื่องอื่นออก)
@@ -87,7 +89,7 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({
       ok: true,
-      message: "เปลี่ยนรหัสผ่านสำเร็จเรียบร้อยแล้ว",
+      message: isEnglish ? "Password changed successfully." : "เปลี่ยนรหัสผ่านสำเร็จเรียบร้อยแล้ว",
     });
 
     setAuthCookie(response, newSessionToken);
@@ -96,9 +98,9 @@ export async function POST(request: Request) {
   } catch (err) {
     if (isPasswordConfigError(err)) {
       console.error("[Change Password] ตั้งค่าไม่ครบ:", err.message);
-      return NextResponse.json({ error: "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
+      return NextResponse.json({ error: isEnglish ? "Email sign-in is temporarily unavailable. Please use Google sign-in in the meantime." : "ระบบเข้าสู่ระบบด้วยอีเมลยังไม่พร้อมใช้งาน (ผู้ดูแลระบบยังตั้งค่าไม่ครบ) ระหว่างนี้ใช้ปุ่ม Google เข้าสู่ระบบได้ตามปกติ" }, { status: 503 });
     }
     console.error("[Change Password Error]", err);
-    return NextResponse.json({ error: "ไม่สามารถเปลี่ยนรหัสผ่านได้ในขณะนี้" }, { status: 500 });
+    return NextResponse.json({ error: isEnglish ? "Unable to change password at this time." : "ไม่สามารถเปลี่ยนรหัสผ่านได้ในขณะนี้" }, { status: 500 });
   }
 }

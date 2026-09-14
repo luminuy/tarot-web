@@ -7,6 +7,7 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { calculateBirthCard, getMaxDaysInMonth, type BirthCardResult, type BirthCardItem } from "@/lib/tarot/birth-card";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 const TarotCard = dynamic(
   () => import("@/components/card/TarotCard").then((mod) => mod.TarotCard),
@@ -155,8 +156,8 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
       }
     }
 
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      await navigator.clipboard.writeText(shareUrl);
+    const ok = await copyToClipboard(shareUrl);
+    if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }

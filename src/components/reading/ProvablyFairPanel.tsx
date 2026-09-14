@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { verifyReading, type VerificationResult } from "@/lib/tarot/verify-client";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 export interface ProvablyFairPanelProps {
   commitment: string;
@@ -38,13 +39,11 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
   const isRevealed = Boolean(serverSeed && clientSeed && effectiveCommitment);
 
   const handleCopy = async (text: string, key: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
+    const ok = await copyToClipboard(text);
+    if (ok) {
       setCopiedKey(key);
       trackEvent("provably_fair_verify", { action: "copy_hash" });
       setTimeout(() => setCopiedKey(null), 2000);
-    } catch {
-      // ignore
     }
   };
 
@@ -63,6 +62,7 @@ export const ProvablyFairPanel: React.FC<ProvablyFairPanelProps> = ({ commitment
         drawn,
         pickedIndices,
         deckSize,
+        lang: isEnglish ? "en" : "th",
       });
       setResult(res);
     } catch (err: any) {

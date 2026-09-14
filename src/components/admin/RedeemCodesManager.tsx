@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { copyToClipboard as copyUtil } from "@/lib/utils/clipboard";
 import type {
   RedeemCodeRow,
   RedeemReasonKind,
@@ -104,10 +105,10 @@ export default function RedeemCodesManager() {
   };
 
   const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
+    const ok = await copyUtil(text);
+    if (ok) {
       showToast(`คัดลอกรหัส ${text} แล้ว`);
-    } catch {
+    } else {
       showToast("คัดลอกไม่สำเร็จ");
     }
   };

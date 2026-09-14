@@ -7,6 +7,7 @@ import type { DrawnCard } from "@/lib/tarot/shuffle";
 import { generateSacredMantra } from "@/lib/tarot/mantra";
 import { SITE_ORIGIN } from "@/lib/config/site";
 import { useLocale } from "@/lib/i18n";
+import { copyToClipboard } from "@/lib/utils/clipboard";
 
 interface OracleMantraCardProps {
   cards: TarotCard[];
@@ -38,12 +39,10 @@ export const OracleMantraCard: React.FC<OracleMantraCardProps> = ({ cards, drawn
     const textToCopy = isEnglish
       ? `Sacred Oracle Wisdom from ${personaNameTh}\n${quote}\nGuiding Affirmation: "${affirmation}"\n(Resonant Card: ${cardName} - ${powerWord})\nTarot Sanctuary: ${origin}`
       : `คำคมพลังใจศักดิ์สิทธิ์จาก ${personaNameTh}\n${quote}\nข้อคิดนำทาง: "${affirmation}"\n(ไพ่สะท้อนพลัง: ${cardName} - ${powerWord})\nดูดวงออนไลน์พรีเมียม: ${origin}`;
-    try {
-      await navigator.clipboard.writeText(textToCopy);
+    const ok = await copyToClipboard(textToCopy);
+    if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
-    } catch {
-      // ignore
     }
   };
 

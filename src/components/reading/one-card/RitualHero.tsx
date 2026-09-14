@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 
 export interface BreadcrumbItem {
   label: string;
