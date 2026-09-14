@@ -68,7 +68,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { error: "รูปแบบข้อมูลคำขอไม่ถูกต้อง" },
+        { status: 400 }
+      );
+    }
     const parsed = CreateTicketSchema.safeParse(body);
 
     if (!parsed.success) {

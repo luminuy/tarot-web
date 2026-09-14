@@ -79,7 +79,13 @@ export async function POST(request: Request) {
   if (denied) return denied;
 
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { error: "รูปแบบข้อมูลคำขอไม่ถูกต้อง" },
+        { status: 400 }
+      );
+    }
     const parsed = CreateRedeemSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -115,7 +121,13 @@ export async function PATCH(request: Request) {
   if (denied) return denied;
 
   try {
-    const body = await request.json();
+    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { error: "รูปแบบข้อมูลคำขอไม่ถูกต้อง" },
+        { status: 400 }
+      );
+    }
     const parsed = UpdateRedeemSchema.safeParse(body);
 
     if (!parsed.success) {

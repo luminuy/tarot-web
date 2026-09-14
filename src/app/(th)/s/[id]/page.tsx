@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { getShareBucket } from "@/lib/platform/cf";
@@ -30,11 +31,13 @@ async function readMeta(id: string): Promise<{ title: string; spread: string } |
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const meta = await readMeta(id);
+  const cookieStore = await cookies();
+  const isEn = cookieStore.get("seertarot_lang")?.value === "en" || /Tarot Reading/i.test(meta?.title || "");
 
-  const title = meta?.title || "คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot";
+  const title = meta?.title || (isEn ? "Tarot Reading 1909 Rider-Waite on SeerTarot" : "คำทำนายไพ่ทาโรต์ 1909 Rider-Waite จาก SeerTarot");
   const description = meta?.spread
-    ? `ผัง ${meta.spread} · เปิดไพ่และรับคำทำนายของคุณเองที่ SeerTarot`
-    : "เปิดไพ่ทาโรต์ 1909 Rider-Waite ด้วยตัวคุณเอง พร้อมคำทำนายจากแม่หมอ AI และระบบสับไพ่โปร่งใส Provably-Fair";
+    ? (isEn ? `${meta.spread} Spread · Draw cards and receive your reading at SeerTarot` : `ผัง ${meta.spread} · เปิดไพ่และรับคำทำนายของคุณเองที่ SeerTarot`)
+    : (isEn ? "Interactive 1909 Rider-Waite tarot divination with AI readers and provably-fair shuffling." : "เปิดไพ่ทาโรต์ 1909 Rider-Waite ด้วยตัวคุณเอง พร้อมคำทำนายจากแม่หมอ AI และระบบสับไพ่โปร่งใส Provably-Fair");
 
   const cloudinaryUrl = isCloudinaryEnabled()
     ? buildCloudinaryShareImageUrl({ title, spreadName: meta?.spread })
@@ -76,24 +79,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SharePage({ params }: Props) {
   const { id } = await params;
   const valid = ID_RE.test(id);
+  const meta = await readMeta(id);
+  const cookieStore = await cookies();
+  const isEn = cookieStore.get("seertarot_lang")?.value === "en" || /Tarot Reading/i.test(meta?.title || "");
+  const targetUrl = isEn ? "/en" : "/";
 
   return (
     <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-canvas px-6 text-center text-ink">
-      <meta httpEquiv="refresh" content="1; url=/" />
+      <meta httpEquiv="refresh" content={`1; url=${targetUrl}`} />
       {valid && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={`/api/share/image/${id}`}
-          alt="การ์ดคำทำนายไพ่ทาโรต์"
+          alt={isEn ? "Tarot Reading Card" : "การ์ดคำทำนายไพ่ทาโรต์"}
           className="max-h-[60vh] w-auto rounded-xl border border-line shadow-raised"
         />
       )}
-      <p className="font-serif-th text-sm text-muted">กำลังพาไปเปิดไพ่ของคุณเอง…</p>
+      <p className="font-serif-th text-sm text-muted">
+        {isEn ? "Taking you to draw your own cards…" : "กำลังพาไปเปิดไพ่ของคุณเอง…"}
+      </p>
       <Link
-        href="/"
+        href={targetUrl}
         className="rounded-full bg-ink px-6 py-2.5 font-serif-th text-sm font-bold text-canvas hover:bg-gold"
       >
-        เปิดไพ่ที่ SeerTarot
+        {isEn ? "Draw Cards at SeerTarot" : "เปิดไพ่ที่ SeerTarot"}
       </Link>
     </main>
   );
