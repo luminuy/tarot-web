@@ -31,7 +31,7 @@
 import { SPREADS } from "../../src/data/spreads";
 import { DECK } from "../../src/data/cards";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "../../src/lib/ai/prompt";
-import { WORKING_CEREBRAS_MODELS } from "../../src/lib/ai/cerebras";
+import { CEREBRAS_MODEL_CONFIGS, type CerebrasModelConfig } from "../../src/lib/ai/cerebras";
 import { ReadingSchema } from "../../src/lib/schema/reading";
 import { checkReadingConsistency } from "../../src/lib/ai/consistency";
 import { checkThaiQualityDeep } from "../../src/lib/ai/thai-quality";
@@ -107,7 +107,12 @@ async function listModels(apiKey: string): Promise<void> {
   }
 }
 
-async function probe(apiKey: string, model: string, cardCount: number): Promise<ProbeRow | null> {
+async function probe(
+  apiKey: string,
+  config: CerebrasModelConfig,
+  cardCount: number,
+): Promise<ProbeRow | null> {
+  const model = config.id;
   const ctx = buildContext(cardCount);
   if (!ctx) {
     console.warn(`ข้ามผัง ${cardCount} ใบ — ไม่มีผังขนาดนี้ในระบบ`);
@@ -116,7 +121,15 @@ async function probe(apiKey: string, model: string, cardCount: number): Promise<
 
   const systemInstruction = buildSystemPrompt(ctx.personaId, { persona: undefined as any, lang: "th" });
   const userMessage = buildReadingMessage(ctx);
-  const maxTokens = Math.min(8000, 1600 + cardCount * 480);
+  /*
+   * ⚠️ ต้องคำนวณงบแบบเดียวกับ `cerebras.ts` เป๊ะ รวมตัวคูณเผื่อโทเค็นความคิดด้วย
+   * ถ้า probe ยิงด้วยค่าคนละชุดกับ production ผลที่วัดได้จะไม่ได้ตอบคำถามที่เราถาม
+   * (บทเรียนเดียวกับ probe-openrouter ที่วัดด้วยคำถามประโยคเดียวจนมองไม่เห็นปัญหาผังใหญ่)
+   */
+  const maxTokens = Math.min(
+    16000,
+    Math.min(8000, 1600 + cardCount * 480) * config.reasoningBudgetMultiplier,
+  );
 
   const row: ProbeRow = {
     model,
@@ -148,6 +161,8 @@ async function probe(apiKey: string, model: string, cardCount: number): Promise<
         response_format: { type: "json_object" },
         max_completion_tokens: maxTokens,
         temperature: 0.6,
+        reasoning_effort: config.reasoningEffort,
+        ...(config.supportsHiddenReasoning ? { reasoning_format: "hidden" } : {}),
       }),
     });
     row.status = res.status;
@@ -217,7 +232,13 @@ async function main() {
     ? arg("spreads")!.split(",").map((n) => Number(n.trim()))
     : DEFAULT_SPREAD_SIZES;
   const delayMs = arg("delay") ? Number(arg("delay")) : DEFAULT_DELAY_MS;
-  const models = arg("model") ? [arg("model")!] : [...WORKING_CEREBRAS_MODELS];
+  const models = arg("model")
+    ? CEREBRAS_MODEL_CONFIGS.filter((c) => c.id === arg("model"))
+    : [...CEREBRAS_MODEL_CONFIGS];
+  if (models.length === 0) {
+    console.error(`❌ ไม่รู้จักโมเดล "${arg("model")}" — มีให้เลือก: ${CEREBRAS_MODEL_CONFIGS.map((c) => c.id).join(", ")}`);
+    process.exit(1);
+  }
 
   console.log(
     `🧪 ยิง Cerebras ด้วย prompt ผังจริง — ${models.length} โมเดล × ${sizes.length} ขนาดผัง` +
@@ -230,7 +251,9 @@ async function main() {
     for (const size of sizes) {
       if (!first) await new Promise((r) => setTimeout(r, delayMs));
       first = false;
-      process.stdout.write(`  ยิง ${model} · ผัง ${size} ใบ ... `);
+      process.stdout.write(
+        `  ยิง ${model.id} (คิด: ${model.reasoningEffort}) · ผัง ${size} ใบ ... `,
+      );
       const row = await probe(apiKey, model, size);
       if (!row) {
         console.log("ข้าม");
