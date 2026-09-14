@@ -40,6 +40,7 @@ docs/
 │
 └── 📦 แผนพัฒนาตามหมุดหมาย (Milestone Plans Archive)
     └── plans/
+        ├── MASTER_PLAN_2026-09-06.md      # 🗺️ เริ่มอ่านที่นี่ — ทุกงานที่ค้างในตารางเดียว (ตรวจใหม่ทั้งแผ่น 2026-09-14)
         ├── AI_COST_CONTROL_PLAN.md      # แผนควบคุมต้นทุน AI และ Rate Limit Bypass (PR 1-5)
         ├── EMAIL_AUTH_PLAN.md           # แผนระบบสมัครสมาชิกด้วยอีเมลและรหัสผ่าน (PR 0-5)
         ├── PROVABLY_FAIR_PLAN.md        # แผนระบบสับไพ่ที่ตรวจสอบความยุติธรรมได้ (PR 1-4)
