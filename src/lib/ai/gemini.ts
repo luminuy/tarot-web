@@ -16,6 +16,7 @@ import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { checkReadingConsistency } from "@/lib/ai/consistency";
 import { enforceThaiQuality } from "@/lib/ai/thai-quality";
 import { recordEvent } from "@/lib/stats/record";
+import { resolveThinkingOutputBudget } from "@/lib/ai/reading-stream";
 /**
  * ตัวเชื่อมกับ Google Gemini API (Ultra-Low Latency Streaming)
  * -------------------------------------------------
@@ -158,6 +159,91 @@ function thaiOnly(text: string, where: string): string {
   return stripForeignScript(text);
 }
 
+/**
+ * 📏 งบโทเค็นผลลัพธ์ต่อคำอ่านหนึ่งครั้งฝั่ง Gemini
+ *
+ * Gemini 3.x เปิดโหมดคิดเป็นค่าเริ่มต้นและ **โทเค็นความคิดถูกนับรวมในงบผลลัพธ์**
+ * ปิดไม่ได้ด้วย — `thinkingBudget: 0` ทำให้ได้ 400 มาแล้ว จึงต้องเผื่องบ 3 เท่า
+ * และไม่ต่ำกว่า 8,192 เพื่อให้เพดานนี้แทบไม่มีทางเป็นตัวบีบคำอ่าน
+ *
+ * ถ้าค่านี้ถูกปฏิเสธด้วย 400 ระบบจะยิงซ้ำโดยไม่ส่งเพดานเลย (ดู `fetchGeminiStream`)
+ */
+export const GEMINI_OUTPUT_BUDGET = { ceiling: 8000, multiplier: 3, floor: 8192 } as const;
+
+/** ผลของการขอสตรีมหนึ่งครั้ง */
+interface GeminiFetchResult {
+  response: Response | null;
+  /** true = เพดานผลลัพธ์ถูกปฏิเสธ ต้องยิงซ้ำแบบไม่ส่งเพดาน (บันทึกสถิติไว้ดู) */
+  droppedBudget: boolean;
+}
+
+/**
+ * ยิงขอสตรีมจาก Gemini พร้อมตาข่ายกัน 400 จากเพดานผลลัพธ์
+ *
+ * เคยเจอมาแล้วว่า Gemini 3.x ปฏิเสธ `thinkingBudget: 0` และ `responseSchema` แบบเก่า
+ * ด้วย 400 "invalid argument" — `maxOutputTokens` ก็มีโอกาสโดนแบบเดียวกัน
+ * ถ้าโดน ให้ถอยไปยิงแบบไม่ส่งเพดาน ดีกว่าปล่อยให้ผู้ใช้ตกไปคำอ่านสำรองทั้งที่แก้ได้
+ */
+async function fetchGeminiStream(args: {
+  endpoint: string;
+  apiKey: string;
+  systemInstruction: string;
+  userPrompt: string;
+  maxOutputTokens: number;
+  timeoutMs: number;
+  model: string;
+}): Promise<GeminiFetchResult> {
+  const buildBody = (withBudget: boolean) => ({
+    contents: [{ role: "user", parts: [{ text: args.userPrompt }] }],
+    systemInstruction: { parts: [{ text: args.systemInstruction }] },
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseJsonSchema: READING_JSON_SCHEMA,
+      temperature: 0.7,
+      ...(withBudget ? { maxOutputTokens: args.maxOutputTokens } : {}),
+    },
+  });
+
+  for (const withBudget of [true, false]) {
+    // ⏱️ จับเวลาเฉพาะ "การตอบกลับครั้งแรก" (headers) แล้วเคลียร์ทันทีที่ได้ response
+    // ห้ามปล่อยตัวจับเวลาไว้ข้ามไปตอนอ่านสตรีม ไม่งั้นมันจะไปตัดสตรีมกลางคัน
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), args.timeoutMs);
+    try {
+      const res = await fetch(args.endpoint, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          "X-goog-api-key": args.apiKey,
+          ...aiGatewayHeaders({ cacheTtl: 0 }),
+        },
+        body: JSON.stringify(buildBody(withBudget)),
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) return { response: res, droppedBudget: !withBudget };
+
+      // log body ด้วย (ไม่ใช่แค่ status) — ช่วยแยก "คีย์ผิด" / "โมเดลไม่มี" / "โควตาหมด" ได้ทันทีจาก Worker log
+      const errBody = await res.text().catch(() => "");
+      console.warn(
+        `Gemini Model ${args.model} returned status: ${res.status} · ${errBody.slice(0, 300)}`,
+      );
+      // 400 ตอนส่งเพดาน = น่าจะเป็นเพราะเพดานนั่นแหละ ลองใหม่แบบไม่ส่ง
+      if (withBudget && res.status === 400) {
+        recordEvent("ai_gemini_budget_rejected");
+        continue;
+      }
+      return { response: null, droppedBudget: false };
+    } catch (e) {
+      clearTimeout(timeoutId);
+      console.warn(`Gemini Model ${args.model} fetch failed:`, e);
+      return { response: null, droppedBudget: false };
+    }
+  }
+  return { response: null, droppedBudget: false };
+}
+
 export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<ReadingEvent> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
@@ -179,92 +265,63 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
     lang: ctx.lang,
   });
   const userPrompt = buildReadingMessage(ctx);
+  const maxOutputTokens = resolveThinkingOutputBudget(ctx.drawn.length, GEMINI_OUTPUT_BUDGET);
 
-  let response: Response | null = null;
-  let activeModel: string = WORKING_GEMINI_MODELS[0];
+  /*
+   * 🔁 ลูปนี้ครอบ "ยิง + สตรีม + ตรวจ" ทั้งชุด ไม่ใช่แค่ตอนขอ response
+   * ---------------------------------------------------------------------------
+   * เดิมลูปจบทันทีที่ได้ headers แล้วสตรีมอยู่นอกลูป ➔ **ถ้าเขียนไม่จบก็จบเลย
+   * ไม่มีการลองโมเดลที่สองแม้แต่ครั้งเดียว** แล้วยัดข้อความสำเร็จรูปให้ผู้ใช้แทน
+   * (คำอ่านผังใหญ่จึงออกมาไพ่ไม่ครบแบบเงียบ ๆ — ดู INC-0155)
+   *
+   * ตอนนี้เขียนไม่จบ = ลองโมเดลถัดไปก่อนเสมอ เหมือนที่ฝั่ง Groq ทำอยู่แล้ว
+   */
+  let sawAnyResponse = false;
+  let lastFailure: "truncated" | "schema" | "stream_error" | null = null;
 
   for (const [modelIdx, model] of WORKING_GEMINI_MODELS.entries()) {
-    const endpoint = geminiEndpoint(model, "streamGenerateContent", { sse: true });
-    // camelCase ล้วน + ตัด thinkingConfig/responseSchema ออก —
-    // Gemini 3.x (3.6/3.5-lite) คืน 400 "invalid argument" ถ้ามี thinkingBudget:0 หรือ responseSchema แบบ OpenAPI เก่า
-    // JSON ที่ได้ยัง parse ได้ปกติผ่าน parsePartialReading + ReadingSchema.safeParse + fallback ด้านล่าง
-    const requestBody = {
-      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseJsonSchema: READING_JSON_SCHEMA,
-        temperature: 0.7,
-      },
-    };
+    const { response, droppedBudget } = await fetchGeminiStream({
+      endpoint: geminiEndpoint(model, "streamGenerateContent", { sse: true }),
+      apiKey,
+      systemInstruction,
+      userPrompt,
+      maxOutputTokens,
+      timeoutMs: modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
+      model,
+    });
 
-    // ⏱️ เดิมไม่มี timeout เลยแม้แต่ตัวเดียว — ถ้าโมเดลค้าง คำอ่านจะค้างไปเรื่อย ๆ ไม่มีเพดาน
-    // จับเวลาเฉพาะ "การตอบกลับครั้งแรก" (headers) แล้วเคลียร์ทันทีที่ได้ response
-    // ห้ามปล่อยตัวจับเวลาไว้ข้ามไปตอนอ่านสตรีม ไม่งั้นมันจะไปตัดสตรีมกลางคัน
-    const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
-    );
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          "X-goog-api-key": apiKey,
-          ...aiGatewayHeaders({ cacheTtl: 0 }),
-        },
-        body: JSON.stringify(requestBody),
-      });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        response = res;
-        activeModel = model;
-        break;
-      } else {
-        // log body ด้วย (ไม่ใช่แค่ status) — ช่วยแยก "คีย์ผิด" / "โมเดลไม่มี" / "โควตาหมด" ได้ทันทีจาก Worker log
-        const errBody = await res.text().catch(() => "");
-        console.warn(
-          `Gemini Model ${model} returned status: ${res.status} · ${errBody.slice(0, 300)}`,
-        );
-      }
-    } catch (e) {
-      clearTimeout(timeoutId);
-      console.warn(`Gemini Model ${model} fetch failed:`, e);
+    if (!response || !response.body) continue;
+    sawAnyResponse = true;
+    if (droppedBudget) {
+      console.warn(`[gemini] ${model} ไม่รับ maxOutputTokens — ยิงใหม่แบบไม่ส่งเพดานแล้ว`);
     }
-  }
 
-  if (!response || !response.body) {
-    console.warn("ทุก Gemini Model ไม่ตอบสนอง ทำการสลับไปใช้ Local Reading Stream เพื่อไม่ให้ผู้ใช้ต้องรอนาน");
-    yield* streamMockGeminiReading(ctx);
-    return;
-  }
+    const activeModel = model;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let jsonAccumulator = "";
+    let sentOpening = false;
+    let sentConnections = false;
+    let sentSummary = false;
+    let cardsSent = 0;
+    /** เหตุผลที่โมเดลหยุดเขียน — "MAX_TOKENS" คือหลักฐานตรง ๆ ว่าคำอ่านโดนตัด */
+    let finishReason = "";
+    // เก็บ usageMetadata จริงจาก chunk ล่าสุดที่มันมากับ Gemini stream
+    // (ไม่ใช้ตัวเลขคงที่ เพราะระบบเครดิต/สมาชิกต้องคิดต้นทุนจากของจริง ไม่งั้นบิลกับที่คิดราคาขายไม่ตรงกัน)
+    let usage: UsageInfo = { ...DEFAULT_USAGE };
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let jsonAccumulator = "";
-  let sentOpening = false;
-  let sentConnections = false;
-  let sentSummary = false;
-  let cardsSent = 0;
-  // เก็บ usageMetadata จริงจาก chunk ล่าสุดที่มันมากับ Gemini stream
-  // (ไม่ใช้ตัวเลขคงที่ เพราะระบบเครดิต/สมาชิกต้องคิดต้นทุนจากของจริง ไม่งั้นบิลกับที่คิดราคาขายไม่ตรงกัน)
-  let usage: UsageInfo = { ...DEFAULT_USAGE };
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
 
-  try {
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
           const jsonStr = line.slice(6).trim();
           if (!jsonStr || jsonStr === "[DONE]") continue;
 
@@ -282,6 +339,10 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
                 cacheWriteTokens: 0,
               };
             }
+
+            // เก็บไว้เสมอ ค่าสุดท้ายที่ได้คือคำตอบว่าโมเดลจบเพราะอะไร
+            const reason = chunk.candidates?.[0]?.finishReason;
+            if (reason) finishReason = String(reason);
 
             // ข้าม part ความคิดของ Gemini 3.x — รายละเอียดอยู่ใน joinGeminiAnswerParts()
             const answerText = joinGeminiAnswerParts(chunk.candidates?.[0]?.content?.parts);
@@ -301,7 +362,9 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
                   type: "card",
                   position: card.position,
                   headline: thaiOnly(card.headline, `card[${card.position}].headline`),
-                  visualAnchor: (card as any).visualAnchor ? thaiOnly((card as any).visualAnchor, `card[${card.position}].visualAnchor`) : undefined,
+                  visualAnchor: (card as any).visualAnchor
+                    ? thaiOnly((card as any).visualAnchor, `card[${card.position}].visualAnchor`)
+                    : undefined,
                   reading: thaiOnly(card.reading, `card[${card.position}].reading`),
                 };
               }
@@ -316,106 +379,142 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
                 yield { type: "summary", text: thaiOnly(partial.summary, "summary") };
               }
             }
-          } catch (e) {
+          } catch {
             // Chunk parse ignore
           }
         }
       }
+    } catch (error) {
+      console.error(`[gemini] ${activeModel} สตรีมขัดข้อง:`, error);
+      recordEvent(`ai_stream_error:${activeModel}`);
+      lastFailure = "stream_error";
+      if (sentOpening || cardsSent > 0) yield { type: "reset" };
+      continue;
+    }
+
+    /*
+     * 📊 บันทึกไว้ทุกครั้งที่คำอ่านถูกตัด — เดิมเส้นทางนี้ไม่มีสถิติเลยสักตัว
+     * ทำให้ไม่มีใครรู้ว่าผู้ใช้ได้คำอ่านไพ่ไม่ครบไปกี่คน (ฝั่ง Groq มี ai_schema_fail อยู่แล้ว)
+     */
+    const truncated = finishReason === "MAX_TOKENS";
+    if (truncated) {
+      recordEvent("ai_truncated:gemini");
+      recordEvent(`ai_truncated:${activeModel}`);
+      recordEvent(`ai_truncated_cards:${ctx.drawn.length}`);
+      console.warn(
+        `[gemini] ${activeModel} เขียนไม่จบ (finishReason=MAX_TOKENS) · ผัง ${ctx.drawn.length} ใบ · ได้ไพ่มา ${cardsSent} ใบ · งบที่ให้ ${maxOutputTokens}`,
+      );
     }
 
     let parsedJson: any = null;
     try {
       parsedJson = JSON.parse(jsonAccumulator);
     } catch {
-      // Stream JSON was partial/truncated, handled through graceful fallback below
+      // JSON ไม่ครบ — จัดการรวมกับกรณี schema ไม่ผ่านด้านล่าง
     }
 
     const parsed = parsedJson ? ReadingSchema.safeParse(parsedJson) : null;
     if (!parsed || !parsed.success) {
-      // คำอ่านตกไป fallback filler — log ให้เห็นสาเหตุ (คีย์ผิด / JSON พัง / stream ตัด)
+      recordEvent("ai_schema_fail:gemini");
+      recordEvent(`ai_schema_fail:${activeModel}`);
       console.warn(
-        `[gemini] คำอ่านไม่ผ่าน schema → ใช้ fallback · accLen=${jsonAccumulator.length} · head=${jsonAccumulator.slice(0, 200)} · zodErr=${parsed ? JSON.stringify(parsed.error.issues?.slice(0, 3)) : "JSON.parse failed"}`,
+        `[gemini] คำอ่านไม่ผ่าน schema · accLen=${jsonAccumulator.length} · finishReason=${finishReason || "(ไม่ระบุ)"} · head=${jsonAccumulator.slice(0, 200)} · zodErr=${parsed ? JSON.stringify(parsed.error.issues?.slice(0, 3)) : "JSON.parse failed"}`,
       );
-      const loose = parsePartialReading(jsonAccumulator);
-      const fallbackReading: Reading = {
-        opening: loose.opening || "สวัสดีค่ะ ไพ่ชุดนี้มีพลังงานที่น่าจับตามองมาก",
-        cards: loose.cards.map((c) => ({
-          position: c.position,
-          headline: c.headline,
-          reading: c.reading,
-        })),
-        connections: loose.connections || "ไพ่ทุกใบสะท้อนถึงการเปลี่ยนแปลงที่กำลังดำเนินไป",
-        summary: loose.summary || "จงเชื่อมั่นในสัญชาตญาณและก้าวต่อไปอย่างมีสติ",
-        advice: ["ตั้งสติและลงมือทำสิ่งที่ทำได้จริง", "เปิดรับโอกาสใหม่ ๆ"],
-        timing: "ภายใน 1-3 เดือนนี้",
-        mood: "ครุ่นคิด",
-        yesNoAnswer: ctx.spread.yesNoMode ? "ยังไม่แน่" : null,
-      };
-      yield { type: "done", reading: fallbackReading, usage, model: activeModel, consistencyOk: false };
-    } else {
-      let readingData = parsed.data;
-      if (!ctx.spread.yesNoMode) {
-        readingData.yesNoAnswer = null;
-      }
-      // ผลสุดท้ายคือตัวที่ถูกบันทึกลงสมุดบันทึกดวง — ต้องสะอาดแน่นอน
-      if (objectHasForeignScript(readingData)) {
-        console.warn("[lang] คำทำนายฉบับสมบูรณ์มีอักษรต่างภาษาปน — ล้างก่อนบันทึก");
-        readingData = stripForeignScriptDeep(readingData);
-      }
-
-      // 🛡️ ด่านตรวจความสอดคล้อง (AI_INTELLIGENCE_PLAN W1.3)
-      const consistency = checkReadingConsistency(readingData, ctx.cards, {
-        drawnCount: ctx.drawn.length,
-        yesNoMode: ctx.spread.yesNoMode,
-        pastReading: ctx.pastReading,
-      });
-
-      if (!consistency.ok) {
-        for (const issue of consistency.issues) {
-          recordEvent(`ai_consistency_${issue.fatal ? "fail" : "warn"}:${issue.code.toLowerCase()}`);
-        }
-      }
-
-      // 🃏 กฎเหล็กข้อ 14 — ห้ามส่งคำอ่านที่ตกด่านระดับ fatal ออกไปเด็ดขาด
-      // FOREIGN_CARD (พูดถึงไพ่ที่ไม่ได้อยู่ในสำรับที่จั่วรอบนี้) เป็น fatal
-      // ฝั่ง Groq `continue` ไปโมเดลถัดไปอยู่แล้ว แต่ฝั่ง Gemini เดิมบันทึก stat ทิ้งไว้
-      // แล้ว yield ต่อ → คำอ่านที่มโนไพ่ถูกสตรีม แสดงผล หักสิทธิ์ และบันทึกลงสมุดบันทึก
-      // Gemini ไม่มีโมเดลสำรองถัดไป จึงถอยไปคำอ่านสำรองที่ประกอบจากไพ่ที่จั่วจริงเท่านั้น
-      if (consistency.fatal) {
-        const fatalIssue = consistency.issues.find((i) => i.fatal);
-        console.warn(
-          `[Gemini Reading ${activeModel}] ⚠️ ความสอดคล้องล้มเหลว (Fatal): ${fatalIssue?.code} - ${fatalIssue?.message} — ถอยไปคำอ่านสำรอง`,
-        );
-        yield* streamMockGeminiReading(ctx);
-        return;
-      }
-
-      // ✍️ ด่านภาษาไทย (HANDOFF_AI_ACCURACY_THAI B-01) — แก้เงียบ ๆ ไม่ถอยไปคำอ่านสำรอง
-      const thai = enforceThaiQuality(readingData, { personaId: ctx.personaId });
-      readingData = thai.reading;
-      if (thai.fixCount > 0) {
-        recordEvent("ai_thai_fix");
-        recordEvent(`ai_thai_fix:${activeModel}`);
-      }
-      for (const code of thai.issueCodes) {
-        recordEvent(`ai_thai_issue:${code.toLowerCase()}`);
-      }
-
-      yield {
-        type: "done",
-        reading: readingData,
-        usage,
-        model: activeModel,
-        consistencyOk: consistency.ok,
-        thaiScore: thai.score,
-        thaiIssueCodes: thai.issueCodes,
-        thaiFixCount: thai.fixCount,
-      };
+      lastFailure = truncated ? "truncated" : "schema";
+      // พ่นเนื้อหาไปแล้วบางส่วน ต้องบอกไคลเอนต์ให้ล้างก่อนเริ่มใหม่กับโมเดลถัดไป
+      if (sentOpening || cardsSent > 0) yield { type: "reset" };
+      continue;
     }
-  } catch (error) {
-    console.error("Gemini stream failed:", error);
-    yield* streamMockGeminiReading(ctx);
+
+    let readingData = parsed.data;
+    if (!ctx.spread.yesNoMode) {
+      readingData.yesNoAnswer = null;
+    }
+    // ผลสุดท้ายคือตัวที่ถูกบันทึกลงสมุดบันทึกดวง — ต้องสะอาดแน่นอน
+    if (objectHasForeignScript(readingData)) {
+      console.warn("[lang] คำทำนายฉบับสมบูรณ์มีอักษรต่างภาษาปน — ล้างก่อนบันทึก");
+      readingData = stripForeignScriptDeep(readingData);
+    }
+
+    // 🛡️ ด่านตรวจความสอดคล้อง (AI_INTELLIGENCE_PLAN W1.3)
+    const consistency = checkReadingConsistency(readingData, ctx.cards, {
+      drawnCount: ctx.drawn.length,
+      yesNoMode: ctx.spread.yesNoMode,
+      pastReading: ctx.pastReading,
+    });
+
+    if (!consistency.ok) {
+      for (const issue of consistency.issues) {
+        recordEvent(`ai_consistency_${issue.fatal ? "fail" : "warn"}:${issue.code.toLowerCase()}`);
+      }
+    }
+
+    // 🃏 กฎเหล็กข้อ 14 — ห้ามส่งคำอ่านที่ตกด่านระดับ fatal ออกไปเด็ดขาด
+    // FOREIGN_CARD (พูดถึงไพ่ที่ไม่ได้อยู่ในสำรับที่จั่วรอบนี้) เป็น fatal
+    // เดิมถอยไปคำอ่านสำรอง ตอนนี้ลองโมเดลถัดไปก่อน แล้วค่อยแจ้งผู้ใช้ถ้าไม่เหลือใคร
+    if (consistency.fatal) {
+      const fatalIssue = consistency.issues.find((i) => i.fatal);
+      console.warn(
+        `[gemini] ${activeModel} ⚠️ ความสอดคล้องล้มเหลว (Fatal): ${fatalIssue?.code} - ${fatalIssue?.message} — ลองโมเดลถัดไป`,
+      );
+      lastFailure = "schema";
+      if (sentOpening || cardsSent > 0) yield { type: "reset" };
+      continue;
+    }
+
+    // ✍️ ด่านภาษาไทย (HANDOFF_AI_ACCURACY_THAI B-01) — แก้เงียบ ๆ ไม่ถอยไปโมเดลอื่น
+    const thai = enforceThaiQuality(readingData, { personaId: ctx.personaId });
+    readingData = thai.reading;
+    if (thai.fixCount > 0) {
+      recordEvent("ai_thai_fix");
+      recordEvent(`ai_thai_fix:${activeModel}`);
+    }
+    for (const code of thai.issueCodes) {
+      recordEvent(`ai_thai_issue:${code.toLowerCase()}`);
+    }
+
+    yield {
+      type: "done",
+      reading: readingData,
+      usage,
+      model: activeModel,
+      consistencyOk: consistency.ok,
+      thaiScore: thai.score,
+      thaiIssueCodes: thai.issueCodes,
+      thaiFixCount: thai.fixCount,
+    };
+    return;
   }
+
+  /*
+   * มาถึงตรงนี้ = ไม่มีโมเดลไหนให้คำอ่านที่ครบถ้วนได้เลย
+   * ---------------------------------------------------------------------------
+   * แยกสองกรณีให้ชัด เพราะความหมายต่อผู้ใช้ต่างกันคนละเรื่อง:
+   *
+   * 1. **ไม่มีใครตอบเลย** (เน็ตล่ม / โควตาหมด / คีย์ผิด) ➔ คำอ่านสำรองออฟไลน์
+   *    usage = 0 ระบบจึงไม่หักสิทธิ์ ผู้ใช้ยังได้อ่านอะไรสักอย่างดีกว่าจอว่าง
+   *
+   * 2. **ตอบแต่เขียนไม่จบ** ➔ **ต้องบอกผู้ใช้ตรง ๆ ให้โหลดใหม่ ห้ามเงียบ**
+   *    เดิมตรงนี้ยัดข้อความสำเร็จรูป ("จงเชื่อมั่นในสัญชาตญาณ...") ให้แทน
+   *    แล้วส่ง `done` พร้อม usage จริง ➔ ระบบนับว่าสำเร็จและ **หักโควตาผู้ใช้ไปด้วย**
+   *    ทั้งที่ไพ่มาไม่ครบและคำอ่านไม่ได้เกี่ยวกับไพ่ที่จั่วเลย
+   *    ขัดเจตนากฎเหล็กข้อ 14 ที่ว่า "ข้อมูลไพ่ไม่สมบูรณ์ ➔ แจ้งให้โหลดใหม่ทันที"
+   *    ตอนนี้ส่ง `error` แทน ซึ่ง route จะคืนสิทธิ์ให้เอง (`refundIfConsumed`)
+   */
+  if (!sawAnyResponse) {
+    console.warn("ทุก Gemini Model ไม่ตอบสนอง ทำการสลับไปใช้ Local Reading Stream เพื่อไม่ให้ผู้ใช้ต้องรอนาน");
+    yield* streamMockGeminiReading(ctx);
+    return;
+  }
+
+  recordEvent(`ai_incomplete_reading:${lastFailure ?? "unknown"}`);
+  yield {
+    type: "error",
+    message:
+      ctx.lang === "en"
+        ? "The reading was cut off before every card was covered. Nothing was charged — please reload and draw again."
+        : "คำอ่านขาดกลางคัน ยังเปิดไพ่ได้ไม่ครบทุกใบ ระบบไม่ได้หักสิทธิ์ของคุณ กรุณาโหลดใหม่อีกครั้งนะคะ",
+  };
 }
 
 export async function* streamMockGeminiReading(ctx: ReadingContext): AsyncGenerator<ReadingEvent> {

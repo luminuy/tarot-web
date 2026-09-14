@@ -13,7 +13,10 @@ import { ReadingSchema } from "../../src/lib/schema/reading";
 import { ALL_CARDS } from "../../src/data/cards";
 import { getSpread } from "../../src/data/spreads";
 import { WORKING_GROQ_MODELS } from "../../src/lib/ai/groq";
-import { resolveMaxReadingTokens } from "../../src/lib/ai/reading-stream";
+import {
+  resolveMaxReadingTokens,
+  resolveThinkingOutputBudget,
+} from "../../src/lib/ai/reading-stream";
 import { PROMPT_VERSION } from "../../src/lib/ai/prompt-version";
 
 let pass = 0;
@@ -122,6 +125,72 @@ async function main() {
   check(
     "สูตรเพดานคืนค่าถูกต้อง (ผัง 12 ใบ = 1,600 + 12 × 480 = 7,360 เมื่อเพดานกว้างพอ)",
     resolveMaxReadingTokens(12, 8000) === 7360 && resolveMaxReadingTokens(12, 7000) === 7000,
+  );
+
+  /*
+   * 2.3 🃏 Gemini ต้องไม่เสิร์ฟคำอ่านไพ่ไม่ครบแบบเงียบ ๆ (กฎเหล็กข้อ 14 · INC-0155)
+   * ---------------------------------------------------------------------------
+   * เดิมเมื่อ Gemini เขียนไม่จบ โค้ดจะประกอบคำอ่านสำรองจากไพ่เท่าที่สตรีมมาทัน
+   * แล้วเติมท้ายด้วยข้อความสำเร็จรูปที่ไม่เกี่ยวกับไพ่ที่จั่วเลย จากนั้นส่ง `done`
+   * พร้อม usage จริง ➔ ระบบนับว่าสำเร็จและ **หักโควตาผู้ใช้ไปด้วย**
+   * ผัง 12 ใบที่ถูกตัดตอนใบที่ 7 ผู้ใช้จึงได้ 7 ใบโดยไม่มีใครบอก
+   *
+   * ตอนนี้ต้อง: ลองโมเดลถัดไปก่อน ➔ ถ้ายังไม่ได้ให้ส่ง `error` ให้ผู้ใช้โหลดใหม่
+   * ซึ่ง route จะคืนสิทธิ์ให้เองผ่าน `refundIfConsumed()`
+   */
+  const geminiSrc = fs.readFileSync(path.resolve(process.cwd(), "src/lib/ai/gemini.ts"), "utf-8");
+  for (const filler of [
+    "จงเชื่อมั่นในสัญชาตญาณและก้าวต่อไปอย่างมีสติ",
+    "ไพ่ทุกใบสะท้อนถึงการเปลี่ยนแปลงที่กำลังดำเนินไป",
+    "ตั้งสติและลงมือทำสิ่งที่ทำได้จริง",
+  ]) {
+    check(
+      `gemini.ts ไม่มีข้อความสำเร็จรูปยัดแทนคำอ่านจริง ("${filler.slice(0, 24)}…")`,
+      !geminiSrc.includes(filler),
+    );
+  }
+  check(
+    "gemini.ts อ่าน finishReason เพื่อรู้ว่าคำอ่านโดนตัดหรือเขียนจบจริง",
+    geminiSrc.includes("finishReason") && geminiSrc.includes('=== "MAX_TOKENS"'),
+  );
+  check(
+    "gemini.ts บันทึกสถิติเมื่อคำอ่านโดนตัด (เดิมเส้นทางนี้ไม่มีสถิติเลยสักตัว)",
+    geminiSrc.includes('recordEvent("ai_truncated:gemini")') &&
+      geminiSrc.includes('recordEvent("ai_schema_fail:gemini")'),
+  );
+  check(
+    "gemini.ts ส่ง error ให้ผู้ใช้โหลดใหม่เมื่อไพ่ไม่ครบ แทนการยัดคำอ่านสำรอง",
+    /yield \{\s*type: "error"/.test(geminiSrc) && geminiSrc.includes("ai_incomplete_reading"),
+  );
+  check(
+    "gemini.ts ลองโมเดลถัดไปก่อนยอมแพ้ (ลูปครอบทั้งยิง+สตรีม+ตรวจ ไม่ใช่แค่ตอนขอ response)",
+    /for \(const \[modelIdx, model\] of WORKING_GEMINI_MODELS\.entries\(\)\)[\s\S]*?yield \{\s*type: "done"/.test(
+      geminiSrc,
+    ),
+  );
+  check(
+    "gemini.ts มีตาข่ายกัน 400 จากเพดานผลลัพธ์ (ยิงซ้ำแบบไม่ส่งเพดาน)",
+    geminiSrc.includes("ai_gemini_budget_rejected"),
+  );
+  /*
+   * สูตรงบอยู่ที่ `reading-stream.ts` (กลาง ไม่ผูกกับเจ้าไหน) ส่วนตัวเลขเป็นของ Gemini
+   * จึงตรวจสองชั้น: สูตรคำนวณถูก + gemini.ts ส่งตัวเลขของตัวเองเข้าไปจริง
+   * (`gemini.ts` มี `import "server-only"` จึง import เข้าสคริปต์ตรง ๆ ไม่ได้ ต้องอ่านเป็นข้อความ)
+   */
+  const geminiBudget = { ceiling: 8000, multiplier: 3, floor: 8192 };
+  check(
+    "สูตรงบเผื่อโทเค็นความคิดคำนวณถูก (ผังเล็กได้พื้นขั้นต่ำ · ผัง 12 ใบได้ 3 เท่า)",
+    resolveThinkingOutputBudget(1, geminiBudget) === 8192 &&
+      resolveThinkingOutputBudget(12, geminiBudget) === 7360 * 3,
+  );
+  check(
+    "gemini.ts ประกาศตัวเลขงบของตัวเองและเรียกสูตรกลาง ไม่คำนวณเอง",
+    geminiSrc.includes("GEMINI_OUTPUT_BUDGET = { ceiling: 8000, multiplier: 3, floor: 8192 }") &&
+      geminiSrc.includes("resolveThinkingOutputBudget(ctx.drawn.length, GEMINI_OUTPUT_BUDGET)"),
+  );
+  check(
+    "คำอ่านสำรองออฟไลน์เหลือไว้เฉพาะตอนไม่มีโมเดลไหนตอบเลย (usage = 0 จึงไม่หักสิทธิ์)",
+    geminiSrc.includes("if (!sawAnyResponse)"),
   );
 
   // 3. route — นับ failover Groq → Gemini
