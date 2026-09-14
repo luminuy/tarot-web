@@ -230,7 +230,7 @@ interface SiteHeaderProps {
 - ต้อง `sticky top-0 z-50` ทุกหน้า (ตอนนี้มีแค่หน้าแรก) — ผู้ใช้มือถือที่อ่านหน้าไพ่ยาว ๆ ต้องกดเมนูได้โดยไม่ต้องเลื่อนขึ้นสุด
 - `z-50` ต้องไม่ชนกับ `SacredNavDropdown` panel (`z-50` เหมือนกัน แต่เป็นลูกใน header จึงซ้อนถูก) และต้องต่ำกว่าโมดัลของ `AccessDialog`/`AuthModal` — **ตรวจด้วยการเปิดโมดัลแล้วเลื่อนหน้า ต้องไม่มีหัวเว็บทะลุขึ้นมาทับ**
 - `<img>` โลโก้: `loading="eager"` ที่หน้าแรก, `loading="lazy"` ไม่ต้อง — เป็น LCP candidate ทุกหน้า
-- **ห้ามใช้ `backdrop-blur`** บน header (INC-0063: fps ตกจาก 58 → 30)
+- **ห้ามใช้ `backdrop-blur`** บน header (INC-0060: ปิด `backdrop-filter` แล้ว fps เด้งจาก 30 → 58)
 
 ### 3.4 breadcrumb: เก็บของเดิมไว้ทั้งหมด
 
