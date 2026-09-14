@@ -10,8 +10,7 @@ import type { Locale } from "./types";
  * และ `hreflang` จะกลายเป็นคำโกหกที่ทำให้ Google ทิ้งคำประกาศทั้งชุด
  * มีด่านตรวจใน `scripts/qa/test-en-routing.ts` คอยจับให้
  *
- * หน้าที่ **ยังไม่มี** ฝาแฝดโดยตั้งใจ: `/privacy` (ข้อความ PDPA ต้องให้ฝ่ายกฎหมายรับรองก่อนแปล)
- * · หน้าที่ปิด index อยู่แล้ว
+ * หน้าที่ **ยังไม่มี** ฝาแฝดโดยตั้งใจ: `/account` (หน้าที่ปิด index หรือเฉพาะผู้ใช้ล็อกอิน)
  */
 export const EN_TWIN_ROUTES = [
   "/",
@@ -28,6 +27,7 @@ export const EN_TWIN_ROUTES = [
   "/daily",
   "/love/1-card",
   "/blog",
+  "/privacy",
 ] as const;
 
 /** เส้นทางที่มีพารามิเตอร์ — ลูกทุกใบใต้ prefix นี้มีฝาแฝดครบ */

@@ -143,7 +143,7 @@ for (const dynamicRoute of ["cards/[id]", "spreads/[id]", "blog/[slug]", "spread
 // ── 3. หน้าที่ยัง "ไม่มี" ฝาแฝด ต้องไม่ถูกประกาศว่ามี ─────────────────────
 // เนื้อหาบรรณาธิการของหน้าเหล่านี้ยังเป็นภาษาไทยล้วน — เปิดหน้าอังกฤษตอนนี้
 // = thin content ซึ่งแย่กว่าไม่มีหน้าเลย
-for (const withoutTwin of ["/privacy", "/account"]) {
+for (const withoutTwin of ["/account"]) {
   check(`${withoutTwin} ต้องไม่ประกาศว่ามีฝาแฝดอังกฤษ`, !hasEnglishTwin(withoutTwin));
   check(`ลิงก์ ${withoutTwin} ในหน้าอังกฤษต้องไม่ถูกเติม /en`, localeHref(withoutTwin, "en") === withoutTwin);
   const rel = withoutTwin === "/" ? "" : withoutTwin;
@@ -154,7 +154,7 @@ for (const withoutTwin of ["/privacy", "/account"]) {
 }
 
 // หน้าที่ "มี" ฝาแฝดใหม่ ต้องประกาศครบ
-for (const withTwin of ["/blog", "/blog/how-to-ask-tarot-questions", "/spreads/topic/love", "/cards/birth-card"]) {
+for (const withTwin of ["/blog", "/blog/how-to-ask-tarot-questions", "/spreads/topic/love", "/cards/birth-card", "/privacy"]) {
   check(`${withTwin} ประกาศว่ามีฝาแฝดอังกฤษ`, hasEnglishTwin(withTwin));
   check(`ลิงก์ ${withTwin} ในหน้าอังกฤษถูกเติม /en`, localeHref(withTwin, "en") === `/en${withTwin}`);
 }
@@ -170,7 +170,7 @@ check(
   "buildAlternates ไม่ใช้ ?lang= ในค่า hreflang อีกแล้ว",
   !JSON.stringify(twinAlternates).includes("?lang="),
 );
-const soloAlternates = buildAlternates("/privacy", { locale: "th" });
+const soloAlternates = buildAlternates("/account", { locale: "th" });
 check(
   "หน้าที่ไม่มีฝาแฝด ต้องไม่มี languages เลย (ไม่ประกาศสิ่งที่ไม่มีจริง)",
   !("languages" in soloAlternates),

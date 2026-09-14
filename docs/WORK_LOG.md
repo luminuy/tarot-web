@@ -32,11 +32,37 @@
 | **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **จัดการรหัสแลกสิทธิ์** | `/admin?tab=redeem` | 🟢 **Active / Live** | Dev Server Ready | แดชบอร์ดจัดการรหัสสิทธิ์เต็มรูปแบบ, ค้นหา/กรอง, สุ่มรหัส `SEER-XXXX-XXXX`, ตรวจดูประวัติคนแลก, ปิดการใช้งานทันที | ส่งออกรายงาน CSV |
-| **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
+| **นโยบายความเป็นส่วนตัวสองภาษา** | `/privacy` & `/en/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA, GDPR, CCPA/CPRA, CalOPPA สองภาษาครบ 100% พร้อมปุ่มดาวน์โหลด JSON และลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
-### 🗓️ 2026-09-14 (รอบ 62): 🛡️ กวาดล้างบั๊กเชิงลึกทั่วระบบ — ป้องกัน 500 Error จาก Malformed JSON ใน 11 API Endpoints และหน้าแชร์ /s/[id] รองรับสองภาษา (INC-0147)
+### 🗓️ 2026-09-14 (รอบ 63): ⚖️ สร้างหน้าเอกสารนโยบายความเป็นส่วนตัวภาษาอังกฤษ `/en/privacy` ระดับสากล (PDPA / GDPR / CCPA) เชื่อมโยงคู่แฝดสองภาษาครบ 100%
+
+- **ที่มา**: ตามคำสั่งเจ้าของโปรเจกต์ "งานที่รอคนนอกทีมลดเหลือ 1 งาน (ร่างนโยบาย /privacy ภาษาอังกฤษโดยที่ปรึกษากฎหมาย) ทำได้เลย ทำอย่างละเอียด ไปศึกษา กฏหมายมาเเล้ว เขียน ทำอย่างผู้เชี่ยวชาญ"
+- **การดำเนินการ**:
+  1. **ร่างและสร้างหน้า `/en/privacy` (`src/app/(en)/en/privacy/page.tsx`)**:
+     - อ้างอิงและปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคลระดับสากลอย่างเคร่งครัด: พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA), สหภาพยุโรป General Data Protection Regulation (GDPR EU 2016/679), California Consumer Privacy Act / CPRA, และ California Online Privacy Protection Act (CalOPPA)
+     - แบ่งโครงสร้าง 7 หมวดหมู่อย่างเป็นระเบียบ พร้อมหัวข้อ Accessibility Hierarchy ที่ถูกต้อง:
+       - **1. Information We Collect**: การระบุตัวตนผ่าน OAuth (Google/LINE), อีเมลสำหรับ Daily Digest (ต้องได้รับ Consent เท่านั้น), ชื่อเล่น, คำถามและไพ่ที่เปิดได้, บันทึกผลลัพธ์ดวงชะตา (Outcome & Note), และคุกกี้สิทธิ์ทดลอง first-party `tarot_guest` (ไร้ PII, ไม่ติดตามข้ามเว็บ)
+       - **2. Prohibited Practices & Core Commitments**: คำมั่นสัญญาไม่นำข้อมูลคำถาม/บันทึกไปเทรนโมเดล AI เด็ดขาด, ไม่ขายหรือเป็นนายหน้าซื้อขายข้อมูลกับบุคคลที่สาม (No Sale of Personal Data), ไม่ติดตามตัวตนข้ามเว็บ (No Cross-Site Tracking), ไม่ส่งโฆษณาโดยไม่ได้รับความยินยอม
+       - **3. Data Storage, Retention & Cloud Architecture**: สถาปัตยกรรมแยกจัดเก็บ ผู้ใช้ไม่ล็อกอินเก็บเฉพาะบน browser `localStorage` และเซสชันการประมวลผลบนเซิร์ฟเวอร์หมดอายุใน 2 ชม. ส่วนผู้ใช้ล็อกอินจัดเก็บอย่างปลอดภัยบน Cloudflare D1 เข้ารหัส at rest และ in transit (TLS 1.3)
+       - **4. Your Legal Rights (PDPA, GDPR & CCPA/CPRA)**: สิทธิในการลบข้อมูล (Right to Erasure), สิทธิขอรับและโอนย้ายข้อมูล (Data Portability), สิทธิถอนความยินยอม (Right to Withdraw Consent), สิทธิเข้าถึงและแก้ไขข้อมูล (Right of Access & Rectification), และสิทธิปฏิเสธการเลือกปฏิบัติ (Non-Discrimination)
+       - **5. Algorithmic Transparency & AI Persona Disclosures**: การเปิดเผยความโปร่งใสของระบบ AI ควบคู่การสุ่มไพ่แบบคณิตศาสตร์ตรวจสอบได้ (Provably-Fair SHA-256), บทบาท AI Persona ในฐานะแนวคิดเชิงบวกและข้อคิดทางปรัชญา ไม่ใช่หมอดูมนุษย์, และนโยบาย Zero Fabricated Cards ยึดมั่นไพ่แท้ 78 ใบ 1909 Rider-Waite 100%
+       - **6. User Safety Guardrails & Health Disclaimers**: ระบบตรวจจับสัญญาณวิกฤตทางจิตใจและแนะนำสายด่วนสุขภาพจิต 1323 (กรมสุขภาพจิต ประเทศไทย), สายด่วน 1669, สายด่วน 988 (US/Canada), 111/112/999 (UK/EU) ทันที พร้อมข้อห้าม AI วินิจฉัยโรค ทำนายการตั้งครรภ์ ให้คำแนะนำทางกฎหมาย หรือชี้แนะการลงทุนทางการเงิน
+       - **7. Manage Your Personal Data**: ลิงก์ดาวน์โหลด JSON สำเนาข้อมูลส่วนตัว (`/api/account/export`) และปุ่มลบข้อมูลทั้งหมดและลบบัญชีถาวร (`<DeleteAllDataButton />`)
+  2. **สร้าง Section Layout คู่แฝด (`src/app/(en)/en/privacy/layout.tsx`)**:
+     - มอบ `<SiteHeader />` และ `<SiteFooter spacing="tight" />` ให้ตรงตามกฎของระบบเลย์เอาต์ (INC-0110)
+  3. **เชื่อมโยงระบบเส้นทางสองภาษา (Bilingual Twin Routing)**:
+     - เพิ่ม `"/privacy"` ลงใน `EN_TWIN_ROUTES` ใน `src/lib/i18n/paths.ts`
+     - ตั้งค่า `englishTwin: true` ใน `buildAlternates("/privacy", ...)` ทั้งฝั่งไทยและฝั่งอังกฤษ ทำให้ `sitemap.ts` และแท็ก `<link rel="alternate" hreflang="...">` สอดรับกันครบถ้วนทั้งสองทิศทาง
+     - อัปเดต `scripts/qa/test-en-routing.ts` ให้ทดสอบและรับรองความถูกต้องของ `/privacy` ในฐานะคู่แฝดสองภาษา
+  4. **อัปเดตแผนแม่บทและเอกสารส่งต่องาน**:
+     - ปรับปรุง `docs/plans/MASTER_PLAN_2026-09-06.md` ลดงานที่รอคนนอกทีมจาก 1 งาน เหลือ **0 งาน**!
+     - อัปเดตยอดหน้า Prerendered Static Pages รวมเป็น 314 หน้า (ไทย 164 · อังกฤษ 150)
+- **ผลการตรวจยืนยัน**:
+  - `npm run typecheck` ➔ 0 errors
+  - `scripts/qa/test-en-routing.ts` ➔ ผ่านฉลุย 100% (ทุกหน้าอังกฤษมี layout, hreflang ไม่โกหก, sitemap ชี้กันครบ)
+  - `scripts/qa/test-docs-numbers.ts` ➔ ผ่านครบ 100%
 
 - **ที่มา**: ดำเนินการตรวจสอบและเจาะลึกหาบั๊กทั่วทั้งระบบแบบ Zero-Tolerance ตามคำสั่งเจ้าของระบบ "เจาะลึกหา บัคอย่างละเอียดอีก ต้องไม่เหลือเลย"
 - **จุดบกพร่องที่ค้นพบและแก้ไข**:
