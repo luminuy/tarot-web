@@ -32,9 +32,53 @@
 | **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **จัดการรหัสแลกสิทธิ์** | `/admin?tab=redeem` | 🟢 **Active / Live** | Dev Server Ready | แดชบอร์ดจัดการรหัสสิทธิ์เต็มรูปแบบ, ค้นหา/กรอง, สุ่มรหัส `SEER-XXXX-XXXX`, ตรวจดูประวัติคนแลก, ปิดการใช้งานทันที | ส่งออกรายงาน CSV |
-| **นโยบายความเป็นส่วนตัว** | `/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA ครบถ้วน พร้อมปุ่มลบข้อมูลจริง | - |
+| **นโยบายความเป็นส่วนตัวสองภาษา** | `/privacy` & `/en/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA, GDPR, CCPA/CPRA, CalOPPA สองภาษาครบ 100% พร้อมปุ่มดาวน์โหลด JSON และลบข้อมูลจริง | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-14 (รอบ 63): ⚖️ สร้างหน้าเอกสารนโยบายความเป็นส่วนตัวภาษาอังกฤษ `/en/privacy` ระดับสากล (PDPA / GDPR / CCPA) เชื่อมโยงคู่แฝดสองภาษาครบ 100%
+
+- **ที่มา**: ตามคำสั่งเจ้าของโปรเจกต์ "งานที่รอคนนอกทีมลดเหลือ 1 งาน (ร่างนโยบาย /privacy ภาษาอังกฤษโดยที่ปรึกษากฎหมาย) ทำได้เลย ทำอย่างละเอียด ไปศึกษา กฏหมายมาเเล้ว เขียน ทำอย่างผู้เชี่ยวชาญ"
+- **การดำเนินการ**:
+  1. **ร่างและสร้างหน้า `/en/privacy` (`src/app/(en)/en/privacy/page.tsx`)**:
+     - อ้างอิงและปฏิบัติตามกฎหมายคุ้มครองข้อมูลส่วนบุคคลระดับสากลอย่างเคร่งครัด: พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA), สหภาพยุโรป General Data Protection Regulation (GDPR EU 2016/679), California Consumer Privacy Act / CPRA, และ California Online Privacy Protection Act (CalOPPA)
+     - แบ่งโครงสร้าง 7 หมวดหมู่อย่างเป็นระเบียบ พร้อมหัวข้อ Accessibility Hierarchy ที่ถูกต้อง:
+       - **1. Information We Collect**: การระบุตัวตนผ่าน OAuth (Google/LINE), อีเมลสำหรับ Daily Digest (ต้องได้รับ Consent เท่านั้น), ชื่อเล่น, คำถามและไพ่ที่เปิดได้, บันทึกผลลัพธ์ดวงชะตา (Outcome & Note), และคุกกี้สิทธิ์ทดลอง first-party `tarot_guest` (ไร้ PII, ไม่ติดตามข้ามเว็บ)
+       - **2. Prohibited Practices & Core Commitments**: คำมั่นสัญญาไม่นำข้อมูลคำถาม/บันทึกไปเทรนโมเดล AI เด็ดขาด, ไม่ขายหรือเป็นนายหน้าซื้อขายข้อมูลกับบุคคลที่สาม (No Sale of Personal Data), ไม่ติดตามตัวตนข้ามเว็บ (No Cross-Site Tracking), ไม่ส่งโฆษณาโดยไม่ได้รับความยินยอม
+       - **3. Data Storage, Retention & Cloud Architecture**: สถาปัตยกรรมแยกจัดเก็บ ผู้ใช้ไม่ล็อกอินเก็บเฉพาะบน browser `localStorage` และเซสชันการประมวลผลบนเซิร์ฟเวอร์หมดอายุใน 2 ชม. ส่วนผู้ใช้ล็อกอินจัดเก็บอย่างปลอดภัยบน Cloudflare D1 เข้ารหัส at rest และ in transit (TLS 1.3)
+       - **4. Your Legal Rights (PDPA, GDPR & CCPA/CPRA)**: สิทธิในการลบข้อมูล (Right to Erasure), สิทธิขอรับและโอนย้ายข้อมูล (Data Portability), สิทธิถอนความยินยอม (Right to Withdraw Consent), สิทธิเข้าถึงและแก้ไขข้อมูล (Right of Access & Rectification), และสิทธิปฏิเสธการเลือกปฏิบัติ (Non-Discrimination)
+       - **5. Algorithmic Transparency & AI Persona Disclosures**: การเปิดเผยความโปร่งใสของระบบ AI ควบคู่การสุ่มไพ่แบบคณิตศาสตร์ตรวจสอบได้ (Provably-Fair SHA-256), บทบาท AI Persona ในฐานะแนวคิดเชิงบวกและข้อคิดทางปรัชญา ไม่ใช่หมอดูมนุษย์, และนโยบาย Zero Fabricated Cards ยึดมั่นไพ่แท้ 78 ใบ 1909 Rider-Waite 100%
+       - **6. User Safety Guardrails & Health Disclaimers**: ระบบตรวจจับสัญญาณวิกฤตทางจิตใจและแนะนำสายด่วนสุขภาพจิต 1323 (กรมสุขภาพจิต ประเทศไทย), สายด่วน 1669, สายด่วน 988 (US/Canada), 111/112/999 (UK/EU) ทันที พร้อมข้อห้าม AI วินิจฉัยโรค ทำนายการตั้งครรภ์ ให้คำแนะนำทางกฎหมาย หรือชี้แนะการลงทุนทางการเงิน
+       - **7. Manage Your Personal Data**: ลิงก์ดาวน์โหลด JSON สำเนาข้อมูลส่วนตัว (`/api/account/export`) และปุ่มลบข้อมูลทั้งหมดและลบบัญชีถาวร (`<DeleteAllDataButton />`)
+  2. **สร้าง Section Layout คู่แฝด (`src/app/(en)/en/privacy/layout.tsx`)**:
+     - มอบ `<SiteHeader />` และ `<SiteFooter spacing="tight" />` ให้ตรงตามกฎของระบบเลย์เอาต์ (INC-0110)
+  3. **เชื่อมโยงระบบเส้นทางสองภาษา (Bilingual Twin Routing)**:
+     - เพิ่ม `"/privacy"` ลงใน `EN_TWIN_ROUTES` ใน `src/lib/i18n/paths.ts`
+     - ตั้งค่า `englishTwin: true` ใน `buildAlternates("/privacy", ...)` ทั้งฝั่งไทยและฝั่งอังกฤษ ทำให้ `sitemap.ts` และแท็ก `<link rel="alternate" hreflang="...">` สอดรับกันครบถ้วนทั้งสองทิศทาง
+     - อัปเดต `scripts/qa/test-en-routing.ts` ให้ทดสอบและรับรองความถูกต้องของ `/privacy` ในฐานะคู่แฝดสองภาษา
+  4. **อัปเดตแผนแม่บทและเอกสารส่งต่องาน**:
+     - ปรับปรุง `docs/plans/MASTER_PLAN_2026-09-06.md` ลดงานที่รอคนนอกทีมจาก 1 งาน เหลือ **0 งาน**!
+     - อัปเดตยอดหน้า Prerendered Static Pages รวมเป็น 314 หน้า (ไทย 164 · อังกฤษ 150)
+- **ผลการตรวจยืนยัน**:
+  - `npm run typecheck` ➔ 0 errors
+  - `scripts/qa/test-en-routing.ts` ➔ ผ่านฉลุย 100% (ทุกหน้าอังกฤษมี layout, hreflang ไม่โกหก, sitemap ชี้กันครบ)
+  - `scripts/qa/test-docs-numbers.ts` ➔ ผ่านครบ 100%
+
+- **ที่มา**: ดำเนินการตรวจสอบและเจาะลึกหาบั๊กทั่วทั้งระบบแบบ Zero-Tolerance ตามคำสั่งเจ้าของระบบ "เจาะลึกหา บัคอย่างละเอียดอีก ต้องไม่เหลือเลย"
+- **จุดบกพร่องที่ค้นพบและแก้ไข**:
+  1. **Malformed/Empty JSON Request Crash (HTTP 500 แทนที่จะตอบ 400)**:
+     - ค้นพบ 11 เส้นทาง API ที่เรียก `await request.json()` โดยตรงโดยไม่มี fallback เมื่อได้รับ JSON เสียหาย (SyntaxError) หรือ Empty Body ข้อผิดพลาดจะหลุดไปที่ top-level `catch` block และส่งกลับ HTTP 500 Internal Server Error หลอกให้ระบบ Monitoring แจ้งเตือนข้อผิดพลาดเซิร์ฟเวอร์ทั้งที่เป็น Client-side Input Error
+     - **เส้นทางที่แก้ไข**: `auth/email/login`, `auth/email/signup`, `auth/email/forgot`, `auth/email/reset`, `account/change-password`, `admin/readers`, `admin/readers/[id]`, `admin/redeem` (POST/PATCH), `marketplace/console/queue`, `marketplace/tickets`, `marketplace/payments`
+     - **วิธีแก้**: ใช้ `(await request.json().catch(() => null)) as Record<string, unknown> | null` พร้อมตรวจสอบ `if (!body || typeof body !== "object") return NextResponse.json({ error: ... }, { status: 400 })` ครบทุกจุด
+  2. **หน้าแชร์การ์ดคำทำนาย (`/s/[id]`) รองรับสองภาษาและการเปลี่ยนเส้นทางอัจฉริยะ**:
+     - เดิมทีหน้า `/s/[id]` บังคับใส่ `<meta httpEquiv="refresh" content="1; url=/" />` และเรนเดอร์ภาษาไทยล้วน ทำให้ผู้ใช้ต่างชาติหรือผู้เปิดอ่านที่มีคุกกี้ `seertarot_lang=en` ถูกบังคับกลับไปหน้าแรกภาษาไทย
+     - **วิธีแก้**: เพิ่มฟังก์ชัน `detectIsEnglish(meta?.title)` ที่อ่านทั้งคุกกี้และหัวข้อการ์ด พร้อมห่อหุ้ม `try/catch` ไม่ให้พังเมื่อรันนอก Request Scope นำทางผู้ใช้ไปยัง `/en` หรือ `/` ตามภาษาที่เลือก พร้อมข้อความและ Alt text สองภาษาครบถ้วน
+  3. **เพิ่มด่านตรวจความทนทานอัตโนมัติ (Automated Resilience Regression Gates)**:
+     - เพิ่ม Step 8 ใน `scripts/qa/test-email-auth.ts` ยิงทดสอบ JSON เสียและ Empty Body ต่อ 4 เส้นทาง Auth บังคับให้ต้องตอบ HTTP 400
+     - เพิ่ม Step 14 ใน `scripts/qa/test-marketplace-readers.ts` ยิงทดสอบ JSON เสียและ Empty Body ต่อเส้นทางบัตรคิวและการชำระเงิน บังคับให้ต้องตอบ HTTP 400
+- **ผลการตรวจยืนยัน**:
+  - `npm run typecheck` ➔ 0 errors
+  - `npm run repo:verify` ➔ ผ่านครบทั้ง 56/56 ด่าน
 
 ### 🗓️ 2026-09-14 (รอบ 61): 🗺️ เขียนแผนแม่บทใหม่ทั้งแผ่น — บอกสถานะผิด 4 ข้อเพราะไม่มีด่านไหนส่อง `docs/plans/` (INC-0146)
 

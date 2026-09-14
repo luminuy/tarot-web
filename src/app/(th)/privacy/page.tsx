@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
   // ⚠️ ทุกหน้าต้องประกาศ canonical ของตัวเอง — Next.js สืบทอด metadata จาก layout แม่
   // หน้านี้อยู่ใน sitemap แต่เคยประกาศ canonical ชี้กลับหน้าแรก = ขัดกันเองจนไม่ถูก index
-  alternates: buildAlternates("/privacy"),
+  alternates: buildAlternates("/privacy", { englishTwin: true }),
   openGraph: {
     title: "นโยบายความเป็นส่วนตัวและ PDPA · SeerTarot",
     description: "นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA) ของวิหารพยากรณ์ไพ่ทาโรต์ออนไลน์",
