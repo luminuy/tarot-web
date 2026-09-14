@@ -37,6 +37,20 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-14 (รอบ 72): ⚡ กำจัด Forced Reflow ที่เหลือ 36ms ใน TarotFlow, ยืนยันผล Image Delivery & Duplicate JS ผ่าน 100%
+- **ที่มา & การตรวจสอบ**:
+  1. หลังจาก deploy รอบ 71 ตรวจสอบผล Lighthouse Mobile พบว่า:
+     - **Improve image delivery**: ได้คะแนน **100% (score: 1, wastedBytes: 0)** การปรับ `q-52` ลดขนาดภาพ `major-06.jpg` ลงเหลือ 10.4 KiB (ประหยัด ~4.2 KiB) ผ่านเกณฑ์อย่างสมบูรณ์
+     - **Duplicated JavaScript**: ได้คะแนน **100% (score: 1, wastedBytes: 0)**
+     - **Forced reflow**: พบเหลือ 36 ms ชี้ไปยัง `chunks/5347-a8f74da147091052.js:1:57883` ซึ่งคือฟังก์ชัน `scrollToSanctuaryTop` ใน `TarotFlow.tsx`
+- **การวิเคราะห์หาสาเหตุที่แท้จริง (Root Cause Analysis)**:
+  - ใน `src/components/home/TarotFlow.tsx` ฟังก์ชัน `scrollToSanctuaryTop` ถูกเรียกใน `useEffect` ทุกครั้งที่ mount หรือ `currentStep` เปลี่ยน โดยข้างในมีการสั่ง `anchor.scrollIntoView({ behavior: "auto", block: "start" })` ใน `requestAnimationFrame` และตั้งค่า `scrollTop = 0` บน `documentElement` และ `body` ซ้ำซ้อน ซึ่งการสั่ง `scrollIntoView` บน element ขนาด 0x0 หลัง DOM paint บังคับให้เบราว์เซอร์คำนวณตำแหน่ง layout ใหม่แบบซิงโครนัส เกิด Forced Reflow 36 ms
+- **สิ่งที่ดำเนินการแก้ไข**:
+  - `src/components/home/TarotFlow.tsx`:
+    1. เพิ่ม `isInitialMount = useRef(true)` เพื่อข้ามการเลื่อนหน้าจอในตอนโหลดหน้าเว็บครั้งแรก (Initial mount ผู้ใช้อยู่ที่ `top: 0` อยู่แล้ว ไม่จำเป็นต้อง scroll ซ้ำ)
+    2. ในการสลับขั้นตอน (`currentStep` เปลี่ยน) ถ้า `window.scrollY === 0` ให้ return ทันที ไม่แตะต้อง DOM
+    3. เมื่อมีระยะ scroll (`window.scrollY > 0`) ใช้ `window.scrollTo({ top: 0, left: 0, behavior: "auto" })` โดยตรง ถอด `scrollIntoView` และการเขียนค่า `scrollTop` ออกทั้งหมด ขจัด Forced Reflow 36 ms อย่างสมบูรณ์
+
 ### 🗓️ 2026-09-14 (รอบ 71): ⚡ ขจัด Forced Reflow 46ms ใน SiteHeader, ปรับ ImageKit AVIF q52, และชี้แจง Bot Fight Mode
 - **ที่มา**: ผู้ใช้ส่งภาพรายงานเจาะลึก 5 ภาพจาก PageSpeed Insights / Lighthouse mobile audit:
   1. **Render-blocking & Forced reflow** (Screenshot 1): CSS 24.2 KiB, Forced reflow 46 ms (`chunks/9502` 35 ms, `chunks/5347` 33 ms + 13 ms).
