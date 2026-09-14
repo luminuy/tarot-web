@@ -127,6 +127,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔮 เครื่องมือไพ่ประจำตัว & ตารางตำแหน่ง & SEO แตกต่าง (SEO Wave 4)", cmd: TSX, args: ["scripts/qa/test-seo-wave4.ts"] },
   { label: "⚡ งบน้ำหนักหน้าเว็บและขนาดบันเดิล (Performance Budget Gate)", cmd: TSX, args: ["scripts/qa/test-bundle-budget.ts"] },
   { label: "🌐 เส้นทางสองภาษา /en (ไฟล์จริง · hreflang ไม่โกหก · sitemap ชี้กันครบ)", cmd: TSX, args: ["scripts/qa/test-en-routing.ts"] },
+  { label: "🗺️ หน้าที่ประกาศใน sitemap ต้องมีอยู่จริงทุกเส้น (กันหน้าหายเงียบ · ด่านไม่ผูกกับเครื่องมือเรนเดอร์)", cmd: TSX, args: ["scripts/qa/test-rendered-coverage.ts"] },
   { label: "🖼️  มาตรฐานภาพแชร์ OpenGraph 1200x630 ทั่วเว็บ", cmd: TSX, args: ["scripts/qa/test-og-images.ts"] },
   { label: "🤖 นโยบายบอตสองชั้นพูดตรงกัน (robots.ts ↔ กฎ WAF · บอตค้นหา AI ต้องเข้าได้)", cmd: TSX, args: ["scripts/qa/test-bot-policy.ts"] },
   { label: "🔁 กันลูป prefetch ยิงคำขอไม่รู้จบ (cache interception ปิด · segment prefetch ทำงาน)", cmd: TSX, args: ["scripts/qa/test-prefetch-loop.ts"] },

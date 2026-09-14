@@ -39,6 +39,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { primaryOutputDir } from "./lib/rendered-pages";
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), "../..");
@@ -497,7 +498,8 @@ for (const file of pageFiles) {
 }
 
 // 7.2 ชั้น artifact — HTML ที่ build ออกมาจริง (ครอบคลุมทั้งไทยและอังกฤษ)
-const appBuildDir = path.join(ROOT, ".next/server/app");
+/* ราก HTML มาจาก lib/rendered-pages.ts ที่เดียว (ดู test-rendered-coverage.ts) */
+const appBuildDir = primaryOutputDir();
 if (fs.existsSync(appBuildDir)) {
   const htmlFiles: string[] = [];
   const walk = (dir: string) => {
@@ -578,7 +580,7 @@ if (fs.existsSync(appBuildDir)) {
     );
   }
 } else {
-  console.warn("   ⚠️  ยังไม่มี .next/server/app — ข้ามการตรวจหัวเว็บ/ฟุตเตอร์ใน HTML ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)");
+  console.warn(`   ⚠️  ยังไม่มี ${appBuildDir} — ข้ามการตรวจหัวเว็บ/ฟุตเตอร์ใน HTML ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)`);
 }
 
 // 7.4 หน้า 404 ทั้งสองไฟล์ต้องมีอยู่จริงและต้องมีหัวเว็บ
