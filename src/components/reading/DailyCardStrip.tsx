@@ -41,8 +41,19 @@ export function DailyCardStrip() {
     return (
       <div
         aria-hidden="true"
-        className="mx-auto mb-6 h-[92px] max-w-2xl animate-pulse rounded-lg border border-line-warm/40 bg-white/60"
-      />
+        className="mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 rounded-lg border border-line-warm/40 bg-white/60 px-4 py-2.5 animate-pulse"
+      >
+        <div className="h-14 w-9 shrink-0 rounded border border-line-warm/30 bg-inset-warm/50" />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="h-3 w-20 rounded bg-line-warm/30" />
+          <div className="h-4 w-40 rounded bg-line-warm/40" />
+          <div className="flex gap-1.5 overflow-hidden">
+            <div className="h-5 w-14 rounded-full bg-line-warm/30 shrink-0" />
+            <div className="h-5 w-16 rounded-full bg-line-warm/30 shrink-0" />
+            <div className="hidden sm:block h-5 w-14 rounded-full bg-line-warm/30 shrink-0" />
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -55,7 +66,7 @@ export function DailyCardStrip() {
   return (
     <Link
       href={`/cards/${daily.cardId}`}
-      className="group mx-auto mb-6 flex max-w-2xl items-center gap-4 rounded-lg border border-line-warm bg-white px-4 py-3 shadow-raised transition-colors hover:border-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+      className="group mx-auto mb-6 flex h-[96px] max-w-2xl items-center gap-4 rounded-lg border border-line-warm bg-white px-4 py-2.5 shadow-raised transition-colors hover:border-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
       title={isEnglish ? `Daily Card ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…` : `ไพ่ประจำวัน ${daily.dateKey} · SHA-256 ${daily.proof.slice(0, 16)}…`}
     >
       <div className="relative h-14 w-9 shrink-0 overflow-hidden rounded border border-line-warm bg-inset-warm shadow-xs">
@@ -72,7 +83,7 @@ export function DailyCardStrip() {
         <p className="font-serif-th text-xs font-bold text-gold-ink">
           {isEnglish ? "Card of the Day" : "ไพ่ประจำวันนี้"}
         </p>
-        <p className="font-serif-th text-sm font-bold text-ink-deep">
+        <p className="font-serif-th text-sm font-bold text-ink-deep truncate">
           {isEnglish ? (
             daily.nameEn
           ) : (
@@ -82,11 +93,11 @@ export function DailyCardStrip() {
             </>
           )}
         </p>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-nowrap items-center gap-1.5 overflow-hidden">
           {displayKeywords.map((kw) => (
             <span
               key={kw}
-              className="rounded-full border border-line-warm bg-inset-warm px-2 py-0.5 font-serif-th text-xs text-muted"
+              className="shrink-0 rounded-full border border-line-warm bg-inset-warm px-2 py-0.5 font-serif-th text-xs text-muted"
             >
               {kw}
             </span>
