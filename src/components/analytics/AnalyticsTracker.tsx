@@ -177,17 +177,9 @@ export function AnalyticsTracker() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // ข้ามการโหลดสคริปต์ภายนอก gtag.js สำหรับเครื่องมือทดสอบประสิทธิภาพ (Lighthouse / PageSpeed / HeadlessChrome)
-    // เพื่อไม่ให้รบกวนการวัด Core Web Vitals (TBT/FCP/LCP) และไม่ให้เกิดคำเตือน Unused JavaScript
-    const isSyntheticAudit =
-      /Lighthouse|PageSpeed|HeadlessChrome|bot|crawl|spider/i.test(navigator.userAgent) ||
-      Boolean((window as any).__PRERENDER_INJECTED);
-
-    if (isSyntheticAudit) {
-      return;
-    }
-
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let idleId: number | undefined;
+
     const trigger = () => {
       setShouldLoadScript(true);
       window.removeEventListener("scroll", trigger);
@@ -195,15 +187,30 @@ export function AnalyticsTracker() {
       window.removeEventListener("pointerdown", trigger);
       window.removeEventListener("keydown", trigger);
       if (timer) clearTimeout(timer);
+      if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {
+        (window as any).cancelIdleCallback(idleId);
+      }
     };
 
+    // โหลดเมื่อผู้ใช้เริ่มมีปฏิสัมพันธ์กับหน้าเว็บ (แตะ, เลื่อน, กดปุ่ม)
+    // การแยกโหลดตาม user interaction ช่วยให้ FCP/LCP และ TBT ของผู้ใช้จริงบนมือถือไม่ถูกแย่ง CPU
+    // และสะท้อนคะแนนประสบการณ์ผู้ใช้จริง (CrUX) อย่างถูกต้องและโปร่งใส (ไม่มีการดัก User-Agent)
     window.addEventListener("scroll", trigger, { passive: true, once: true });
     window.addEventListener("touchstart", trigger, { passive: true, once: true });
     window.addEventListener("pointerdown", trigger, { passive: true, once: true });
     window.addEventListener("keydown", trigger, { passive: true, once: true });
 
-    // Fallback: โหลดหลังจากผู้ใช้เปิดหน้าทิ้งไว้นานกว่า 8 วินาที
-    timer = setTimeout(trigger, 8000);
+    // Fallback: โหลดเมื่อเบราว์เซอร์อยู่ในสถานะ Idle หรือหลังจาก 8 วินาที
+    if ("requestIdleCallback" in window) {
+      idleId = (window as any).requestIdleCallback(
+        () => {
+          timer = setTimeout(trigger, 5000);
+        },
+        { timeout: 8000 }
+      );
+    } else {
+      timer = setTimeout(trigger, 8000);
+    }
 
     return () => {
       window.removeEventListener("scroll", trigger);
@@ -211,6 +218,9 @@ export function AnalyticsTracker() {
       window.removeEventListener("pointerdown", trigger);
       window.removeEventListener("keydown", trigger);
       if (timer) clearTimeout(timer);
+      if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {
+        (window as any).cancelIdleCallback(idleId);
+      }
     };
   }, []);
 
