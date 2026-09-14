@@ -77,8 +77,15 @@ export function ConsentBanner() {
           {isEnglish ? "Only what's needed" : "เฉพาะที่จำเป็น"}
         </button>
       </div>
+      {/*
+        ⚠️ `prefetch={false}` ห้ามถอดออก — แบนเนอร์นี้อยู่ในวิวพอร์ตตั้งแต่เฟรมแรกของทุกหน้า
+        ตั้งแต่ย้ายมาเรนเดอร์ฝั่งเซิร์ฟเวอร์ · ค่าเริ่มต้นของ Next คือพรีเฟตช์ลิงก์ที่มองเห็น
+        ทำให้ทุกคนที่เปิดเว็บครั้งแรกดึง `/privacy` มา **3 คำขอ 14 KB** ทิ้งไว้เฉย ๆ
+        แย่งแบนด์วิดท์จากไฟล์ที่ใช้วาดหน้าจริง (วัดจาก Lighthouse network log 2026-09-14)
+      */}
       <Link
         href={isEnglish ? "/privacy" : "/privacy"}
+        prefetch={false}
         className="tap-overlay-y mt-2.5 inline-block text-[12px] text-muted underline underline-offset-2 hover:text-gold-ink"
       >
         {isEnglish ? "Read our privacy policy" : "อ่านนโยบายความเป็นส่วนตัว"}
