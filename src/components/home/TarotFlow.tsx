@@ -316,25 +316,19 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const [loading, setLoading] = useState<boolean>(false);
   const [toast, setToast] = useState<ToastData | null>(null);
 
-  // Instant Hardware Scroll Reset with Multi-Frame Paint Guarantee
+  // Instant Hardware Scroll Reset without Layout Reflow
+  const isInitialMount = useRef(true);
   const scrollToSanctuaryTop = () => {
     if (typeof window === "undefined") return;
+    if (window.scrollY === 0) return;
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    if (document.documentElement) document.documentElement.scrollTop = 0;
-    if (document.body) document.body.scrollTop = 0;
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      const anchor = document.getElementById("sanctuary-top-anchor");
-      if (anchor) {
-        anchor.scrollIntoView({ behavior: "auto", block: "start" });
-      }
-    });
-    setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    }, 40);
   };
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     scrollToSanctuaryTop();
   }, [currentStep]);
 
