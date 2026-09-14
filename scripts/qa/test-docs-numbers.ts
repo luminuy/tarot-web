@@ -224,7 +224,93 @@ function checkDocs() {
   }
   console.log(`✅ COUNTS ใน nav-links.ts ตรงกับ dataset จริง (${COUNTS.cards} ไพ่ / ${COUNTS.articles} บทความ / ${COUNTS.spreads} ผัง)`);
 
+  checkIncidentIds();
+
   console.log(`✅ เอกสารทั้งหมด ${TARGET_FILES.length} ไฟล์ สอดคล้องกับความจริงของระบบ 100%\n`);
+}
+
+/**
+ * ตรวจทะเบียนเลข INC ใน INCIDENT_LOG.md
+ *
+ * ⚠️ ทำไมต้องมี (เจอจริง 2026-09-14)
+ * มีเลข INC ซ้ำกันอยู่ 10 คู่ และมีบล็อกที่ถูกแปะซ้ำคำต่อคำ 1 ก้อน
+ * เพราะหลาย agent เขียนขนานกันแล้วต่างคนต่างหยิบ "เลขถัดไป" จาก snapshot คนละเวลา
+ * ผลคือการอ้าง "INC-0136" ในโค้ดหรือเอกสาร ชี้ไปได้สองเหตุการณ์ที่ไม่เกี่ยวกันเลย
+ * และยังมีการอ้างเลข INC ที่ไม่มีอยู่จริงในแฟ้มด้วย
+ *
+ * บทเรียนเดิมของไฟล์นี้ใช้ได้ตรง ๆ: กฎที่ไม่มีเครื่องตรวจ คือกฎที่จะถูกละเมิดอีกแน่นอน
+ *
+ * กติกา: เลขซ้ำให้ผู้ที่บันทึกทีหลังเติมท้ายด้วย b (เช่น INC-0136b) ตามแบบเดียวกับ ISSUE-010b
+ */
+function checkIncidentIds() {
+  const LOG = "docs/INCIDENT_LOG.md";
+  const logPath = path.join(ROOT, LOG);
+  if (!fs.existsSync(logPath)) return;
+
+  const raw = fs.readFileSync(logPath, "utf8");
+  const lines = raw.split("\n");
+
+  const seen = new Map<string, number>();
+  const dupes: { id: string; line: number; firstLine: number }[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^### (INC-\d{4}[a-z]?) /.exec(lines[i]);
+    if (!m) continue;
+    const id = m[1];
+    const prev = seen.get(id);
+    if (prev !== undefined) {
+      dupes.push({ id, line: i + 1, firstLine: prev });
+      continue;
+    }
+    seen.set(id, i + 1);
+  }
+
+  if (dupes.length > 0) {
+    console.error(`❌ เลข INC ซ้ำใน ${LOG} (${dupes.length} รายการ):`);
+    for (const d of dupes) {
+      console.error(`  - ${LOG}:${d.line} ใช้เลข ${d.id} ซ้ำกับบรรทัด ${d.firstLine}`);
+    }
+    console.error(`\n💡 วิธีแก้: ให้รายการที่บันทึกทีหลังเติมท้ายด้วย b (เช่น ${dupes[0].id}b) แล้วตามแก้จุดที่อ้างถึงให้ตรง\n`);
+    process.exit(1);
+  }
+
+  // เลข INC ที่ถูกอ้างถึงจากที่อื่น ต้องมีอยู่จริงในแฟ้ม
+  const REF_GLOBS = ["CLAUDE.md", "GEMINI.md", "README.md", "docs", "scripts", "src"];
+  const dangling: { file: string; line: number; id: string }[] = [];
+
+  const walk = (rel: string) => {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) return;
+    const stat = fs.statSync(abs);
+    if (stat.isDirectory()) {
+      for (const name of fs.readdirSync(abs)) {
+        if (name === "node_modules" || name.startsWith(".")) continue;
+        walk(path.join(rel, name));
+      }
+      return;
+    }
+    if (!/\.(md|ts|tsx)$/.test(rel)) return;
+    if (rel === LOG) return;
+    const content = fs.readFileSync(abs, "utf8").split("\n");
+    for (let i = 0; i < content.length; i++) {
+      const re = /INC-(\d{4})([a-z]?)/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(content[i])) !== null) {
+        const id = `INC-${m[1]}${m[2]}`;
+        if (!seen.has(id)) dangling.push({ file: rel, line: i + 1, id });
+      }
+    }
+  };
+  for (const g of REF_GLOBS) walk(g);
+
+  if (dangling.length > 0) {
+    console.error(`❌ มีการอ้างเลข INC ที่ไม่มีอยู่จริงใน ${LOG} (${dangling.length} จุด):`);
+    for (const d of dangling) console.error(`  - ${d.file}:${d.line} → ${d.id}`);
+    console.error(`\n💡 วิธีแก้: แก้เลขให้ตรงกับรายการจริง หรือบันทึกเหตุการณ์นั้นลง ${LOG} ให้ครบ\n`);
+    process.exit(1);
+  }
+
+  console.log(`✅ ทะเบียนเลข INC ไม่ซ้ำและไม่มีการอ้างเลขที่ไม่มีอยู่จริง (${seen.size} รายการ)`);
 }
 
 checkDocs();
