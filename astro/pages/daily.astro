@@ -1,0 +1,21 @@
+---
+import { dailyMetadataTh } from "@/app/_shared/pages/daily-th";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { DailyBodyThRoot } from "../components/PageBodies";
+import { DailyRitualRoot } from "../islands/RitualRoots";
+import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+
+/** 🌅 ไพ่ประจำวัน — พิธีเปิดไพ่เป็น island · เนื้อหา SEO ท้ายหน้าเป็น HTML ล้วน */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={dailyMetadataTh}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <DailyBodyThRoot>
+    <Fragment slot="ritual">
+      <DailyRitualRoot locale={locale} client:load />
+    </Fragment>
+  </DailyBodyThRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

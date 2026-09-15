@@ -59,8 +59,8 @@ for (const [href, expected] of [
   ["/en/privacy", true],
   /* หน้าแอปที่ยังเรนเดอร์ด้วย Next (หน้าแรก + หน้าแอป 18 หน้าตามคำสั่งเจ้าของ) */
   ["/", false],
-  ["/daily", false],
-  ["/love/1-card", false],
+  ["/daily", true],
+  ["/love/1-card", true],
   ["/account", false],
   ["/reading/chat", true],
   /* ⚠️ เส้นที่ "ขึ้นต้นเหมือนกันแต่คนละหน้า" ต้องไม่ถูกครอบ */

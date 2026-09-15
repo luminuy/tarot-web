@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LoveOneCardClient } from "@/components/love/LoveOneCardClient";
+import type { ReactNode } from "react";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -11,7 +11,7 @@ const loveOgImages = buildPageOgImage({
   alt: "ดูดวงความรัก 1 ใบ 1909 Rider-Waite",
 });
 
-export const metadata: Metadata = {
+export const loveOneCardMetadataTh: Metadata = {
   // layout เติมท้าย " · SeerTarot" ให้เองอยู่แล้ว — เขียน "| SeerTarot" เองอีกจะซ้ำสองรอบ
   title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบหัวใจ",
   description:
@@ -130,7 +130,8 @@ const softwareApplicationJsonLd = {
   ],
 };
 
-export default function LoveOneCardPage() {
+/** `ritual` = พิธีเปิดไพ่ (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */
+export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
   return (
     <>
       <script
@@ -148,7 +149,7 @@ export default function LoveOneCardPage() {
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">
         <div className="max-w-4xl mx-auto space-y-12">
-          <LoveOneCardClient />
+          {ritual}
 
           <SeoArticleShell
             eyebrow="ศาสตร์แห่งความรัก"

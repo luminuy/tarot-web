@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 
 import { AboutBodyTh } from "@/app/_shared/pages/about-th";
+import { DailyBodyEn } from "@/app/_shared/pages/daily-en";
+import { DailyBodyTh } from "@/app/_shared/pages/daily-th";
+import { LoveOneCardBodyEn } from "@/app/_shared/pages/love-one-card-en";
+import { LoveOneCardBodyTh } from "@/app/_shared/pages/love-one-card-th";
 import { ContactBodyEn } from "@/app/_shared/pages/contact-en";
 import { ContactBodyTh } from "@/app/_shared/pages/contact-th";
 import { PrivacyBodyEn } from "@/app/_shared/pages/privacy-en";
@@ -185,6 +189,40 @@ export function ContactBodyEnRoot() {
   return (
     <LocaleProvider forcedLocale="en">
       <ContactBodyEn />
+    </LocaleProvider>
+  );
+}
+
+/* ── หน้าแอปสาธารณะ (ไพ่ประจำวัน · ไพ่ความรักใบเดียว) ────────────────────── */
+
+export function DailyBodyThRoot({ ritual }: { ritual: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <DailyBodyTh ritual={ritual} />
+    </LocaleProvider>
+  );
+}
+
+export function DailyBodyEnRoot({ ritual }: { ritual: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale="en">
+      <DailyBodyEn ritual={ritual} />
+    </LocaleProvider>
+  );
+}
+
+export function LoveOneCardBodyThRoot({ ritual }: { ritual: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <LoveOneCardBodyTh ritual={ritual} />
+    </LocaleProvider>
+  );
+}
+
+export function LoveOneCardBodyEnRoot({ ritual }: { ritual: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale="en">
+      <LoveOneCardBodyEn ritual={ritual} />
     </LocaleProvider>
   );
 }

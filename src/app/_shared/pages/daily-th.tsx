@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DailyClient } from "@/components/daily/DailyClient";
+import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -11,7 +11,7 @@ const dailyOgImages = buildPageOgImage({
   alt: "ดูดวงไพ่ยิปซีรายวัน 1909 Rider-Waite",
 });
 
-export const metadata: Metadata = {
+export const dailyMetadataTh: Metadata = {
   // layout เติมท้าย " · SeerTarot" ให้เองอยู่แล้ว — เขียน "| SeerTarot" เองอีกจะซ้ำสองรอบ
   title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางวันนี้ ฟรี",
   description:
@@ -131,7 +131,8 @@ const DAILY_LINKS = [
   { href: "/spreads", label: "ผังพยากรณ์ 25 แบบ" },
 ];
 
-export default function DailyTarotPage() {
+/** `ritual` = พิธีเปิดไพ่ (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */
+export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
   return (
     <>
       <script
@@ -149,7 +150,7 @@ export default function DailyTarotPage() {
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
-          <DailyClient />
+          {ritual}
 
           <SeoArticleShell
             eyebrow="ทำความเข้าใจไพ่ยิปซีรายวัน"

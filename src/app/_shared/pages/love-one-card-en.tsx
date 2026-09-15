@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
-import { LoveOneCardClient } from "@/components/love/LoveOneCardClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 
-import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../../../../_shared/seo";
+import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
 
 /**
@@ -26,7 +26,7 @@ const loveOgImages = buildPageOgImage({
   alt: "One-card love tarot reading 1909 Rider-Waite",
 });
 
-export const metadata: Metadata = {
+export const loveOneCardMetadataEn: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   keywords: [
@@ -101,7 +101,8 @@ const breadcrumbJsonLd = buildBreadcrumbJsonLd("en", [
   { name: "One-Card Love Reading", path: PATH },
 ]);
 
-export default function Page() {
+/** `ritual` = พิธีเปิดไพ่ (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */
+export function LoveOneCardBodyEn({ ritual }: { ritual: ReactNode }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
@@ -113,7 +114,7 @@ export default function Page() {
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
-          <LoveOneCardClient />
+          {ritual}
 
           <SeoArticleShell
             eyebrow="Reading for the heart"
