@@ -42,6 +42,44 @@ export const SITE_ROBOTS: Metadata["robots"] = {
   },
 };
 
+
+/**
+ * 🔑 คำค้นระดับรากของแต่ละภาษา — หน้าย่อยที่ไม่ประกาศ `keywords` ของตัวเองจะได้ชุดนี้
+ *
+ * ⚠️ Next ผสาน `keywords` จาก root layout ให้หน้าย่อยโดยอัตโนมัติ
+ *    `BaseLayout.astro` จึงต้องผสานให้เหมือนกัน ไม่งั้นหน้าที่ย้ายมา Astro
+ *    จะ **หายไปหนึ่งแท็กเทียบกับตอนอยู่กับ Next** โดยไม่มีใครเห็น
+ *    (เจอจริงตอนย้าย `/spreads` และ `/spreads/topic/*` — จับได้ด้วยการ diff กับบิลด์เดิม)
+ */
+export const ROOT_KEYWORDS: Record<"th" | "en", string[]> = {
+  th: [
+    "ดูดวงไพ่ยิปซี",
+    "ไพ่ยิปซี",
+    "เปิดไพ่ยิปซี",
+    "ดูดวงไพ่ยิปซีฟรี",
+    "ไพ่ยิปซีรายวัน",
+    "ไพ่ยิปซีรายเดือน",
+    "ไพ่ยิปซีความรัก",
+    "ดูดวงไพ่ทาโรต์",
+    "ไพ่ทาโรต์",
+    "ความหมายไพ่ยิปซี 78 ใบ",
+    "แม่หมอ AI",
+    "SeerTarot",
+  ],
+  en: [
+    "free tarot reading",
+    "online tarot",
+    "tarot card meanings",
+    "rider waite tarot",
+    "AI tarot reader",
+    "tarot spreads",
+    "daily tarot",
+    "love tarot reading",
+    "78 tarot cards",
+    "SeerTarot",
+  ],
+};
+
 /**
  * ช่องที่ root layout ทั้งสองภาษาประกาศเหมือนกันทุกตัว — หน้าย่อยทับได้ทีละช่องตามปกติ
  * (Next ผสาน metadata ของ layout กับของหน้าแบบทีละฟิลด์ · `BaseLayout.astro` ทำแบบเดียวกัน)

@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import "../globals.css";
 import { RootHtml } from "../_shared/RootHtml";
 import {
+  ROOT_KEYWORDS,
   ROOT_SHARED_METADATA,
   SITE_ICONS,
   SITE_VIEWPORT,
@@ -28,18 +29,7 @@ export const metadata: Metadata = {
   },
   description:
     "Free online tarot reading with the original 1909 Rider-Waite deck. Shuffle and draw all 78 cards yourself, then read a live AI interpretation.",
-  keywords: [
-    "free tarot reading",
-    "online tarot",
-    "tarot card meanings",
-    "rider waite tarot",
-    "AI tarot reader",
-    "tarot spreads",
-    "daily tarot",
-    "love tarot reading",
-    "78 tarot cards",
-    "SeerTarot",
-  ],
+  keywords: ROOT_KEYWORDS.en,
   ...ROOT_SHARED_METADATA,
   icons: SITE_ICONS,
   alternates: buildAlternates("/", { locale: "en", englishTwin: true }),

@@ -84,8 +84,15 @@ for (const topicKey of expectedTopics) {
 }
 
 // 5. Check Page Files Exist
-const topicPagePath = path.join(process.cwd(), "src/app/(th)/spreads/topic/[category]/page.tsx");
-assert(fs.existsSync(topicPagePath), `ต้องมีหน้า src/app/(th)/spreads/topic/[category]/page.tsx`);
+/* ⚠️ หน้านี้ย้ายไปเรนเดอร์ด้วย Astro แล้ว — เนื้อหาที่ใช้ร่วมกันสองภาษาอยู่ที่ `_shared/pages/`
+   ส่วนหน้าจริงอยู่ที่ `astro/pages/spreads/topic/[category].astro`
+   (ดู `src/lib/routing/astro-routes.ts` · ด่าน test-astro-routes เทียบกับของจริงให้อีกชั้น) */
+const topicPagePath = path.join(process.cwd(), "src/app/_shared/pages/spread-topic.tsx");
+assert(fs.existsSync(topicPagePath), "ต้องมีเนื้อหาหน้าหมวดผังที่ _shared/pages/spread-topic.tsx");
+assert(
+  fs.existsSync(path.join(process.cwd(), "astro/pages/spreads/topic/[category].astro")),
+  "ต้องมีหน้า astro/pages/spreads/topic/[category].astro",
+);
 const topicListCompPath = path.join(process.cwd(), "src/components/spread/TopicSpreadList.tsx");
 assert(fs.existsSync(topicListCompPath), `ต้องมีคอมโพเนนต์ src/components/spread/TopicSpreadList.tsx`);
 
@@ -132,14 +139,14 @@ assert(
 // 8. Rule 2: Zero Sparkle / Star Emojis in New Files
 const newFiles = [
   "src/data/spread-topics.ts",
-  "src/app/(th)/spreads/topic/[category]/page.tsx",
+  "src/app/_shared/pages/spread-topic.tsx",
   "src/components/spread/TopicSpreadList.tsx",
 ];
 for (const file of newFiles) {
   const filePath = path.join(process.cwd(), file);
   if (fs.existsSync(filePath)) {
     const content = fs.readFileSync(filePath, "utf-8");
-    const hasForbiddenEmoji = /[✦✨✧⭐🌟]/.test(content);
+    const hasForbiddenEmoji = /[✦✨✧⭐🌟]/u.test(content);
     assert(!hasForbiddenEmoji, `ไฟล์ ${file} ต้องไม่มีอิโมจิดวงดาว/แฟนซี (กฎข้อ 2)`);
   }
 }

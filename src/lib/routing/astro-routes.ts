@@ -15,7 +15,7 @@
  */
 
 /** เส้นทาง (ฝั่งไทย) ที่ตัวมันเองและลูกทุกใบถูกเรนเดอร์ด้วย Astro */
-export const ASTRO_ROUTE_PREFIXES = ["/cards"] as const;
+export const ASTRO_ROUTE_PREFIXES = ["/cards", "/blog", "/spreads"] as const;
 
 /** ตัด `/en` นำหน้าออก เพื่อเทียบกับรายการฝั่งไทยชุดเดียว */
 function withoutLocalePrefix(pathname: string): string {

@@ -1,0 +1,21 @@
+---
+import { buildSpreadsIndexMetadata } from "@/app/_shared/pages/spreads-index";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { SpreadsIndexBodyRoot } from "../../../components/PageBodies";
+import { SpreadsLibraryRoot } from "../../../islands/SpreadIslands";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+
+/** 📐 คลังผังพยากรณ์ 25 แบบ — หน้ารวม (ต้นไม้ภาษาอังกฤษ) */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={buildSpreadsIndexMetadata(locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <SpreadsIndexBodyRoot locale={locale}>
+    <Fragment slot="library">
+      <SpreadsLibraryRoot locale={locale} client:idle />
+    </Fragment>
+  </SpreadsIndexBodyRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

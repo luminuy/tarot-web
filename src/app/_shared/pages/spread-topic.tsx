@@ -9,6 +9,7 @@ import {
   getSpreadsForTopic,
 } from "@/data/spread-topics";
 import { TopicSpreadList } from "@/components/spread/TopicSpreadList";
+import type { ReactNode } from "react";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
@@ -23,11 +24,12 @@ export function spreadTopicStaticParams() {
   return getAllTopicSlugs().map((slug) => ({ category: slug }));
 }
 
-export async function buildSpreadTopicMetadata(
-  { params }: SpreadTopicPageProps,
-  locale: Locale,
-): Promise<Metadata> {
-  const { category } = await params;
+/**
+ * ⚙️ แกนกลางแบบซิงโครนัส — ใช้ได้ทั้งสองเครื่องมือเรนเดอร์
+ * (Next ส่ง `params` มาเป็น Promise · Astro รู้ค่าตั้งแต่ `getStaticPaths` แล้ว)
+ * ⚠️ ห้ามก็อปตรรกะ SEO นี้ไปไว้ในไฟล์ `.astro` เด็ดขาด — ต้องมีที่เดียว
+ */
+export function spreadTopicMetadata(category: string, locale: Locale): Metadata {
   const topic = getSpreadTopic(category);
   if (!topic) {
     return {
@@ -71,14 +73,20 @@ export async function buildSpreadTopicMetadata(
   };
 }
 
-export async function SpreadTopicBody({
-  params,
+/**
+ * ⚙️ เนื้อหาหน้าหมวดผังแบบซิงโครนัส — รับหมวดที่หาเจอแล้วเข้ามาตรง ๆ
+ * (Astro เรียกตัวนี้ · React ฝั่ง SSR เรนเดอร์คอมโพเนนต์แบบ async ไม่ได้)
+ */
+export function SpreadTopicContent({
+  topic,
   locale,
-}: SpreadTopicPageProps & { locale: Locale }) {
-  const { category } = await params;
-  const topic = getSpreadTopic(category);
-  if (!topic) notFound();
-
+  list,
+}: {
+  topic: NonNullable<ReturnType<typeof getSpreadTopic>>;
+  locale: Locale;
+  /** island ของรายการผังในหมวดนี้ — ส่งเข้ามาจากข้างนอกเสมอ */
+  list: ReactNode;
+}) {
   const isEnglish = locale === "en";
   const spreads = getSpreadsForTopic(topic);
   const allTopics = Object.values(SPREAD_TOPICS);
@@ -236,7 +244,7 @@ export async function SpreadTopicBody({
               {spreads.length} {isEnglish ? "spreads" : "รูปแบบ"}
             </span>
           </div>
-          <TopicSpreadList spreads={spreads} />
+          {list}
         </section>
 
         {/* FAQ Section */}
@@ -310,4 +318,31 @@ export async function SpreadTopicBody({
       </div>
     </main>
   );
+}
+
+/** ฝั่ง Next — รอ `params` แล้วจัดการ 404 ก่อนส่งต่อให้เนื้อหา */
+export async function SpreadTopicBody({
+  params,
+  locale,
+}: SpreadTopicPageProps & { locale: Locale }) {
+  const { category } = await params;
+  const topic = getSpreadTopic(category);
+  if (!topic) notFound();
+
+  return (
+    <SpreadTopicContent
+      topic={topic}
+      locale={locale}
+      list={<TopicSpreadList spreads={getSpreadsForTopic(topic)} />}
+    />
+  );
+}
+
+/** ฝั่ง Next — รอ `params` แล้วเรียกแกนกลางตัวเดียวกัน */
+export async function buildSpreadTopicMetadata(
+  { params }: SpreadTopicPageProps,
+  locale: Locale,
+): Promise<Metadata> {
+  const { category } = await params;
+  return spreadTopicMetadata(category, locale);
 }

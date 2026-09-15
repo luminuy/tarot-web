@@ -1,5 +1,13 @@
 import type { ReactNode } from "react";
 
+import { BlogDetailContent } from "@/app/_shared/pages/blog-detail";
+import { BlogIndexBody } from "@/app/_shared/pages/blog-index";
+import { SpreadDetailContent } from "@/app/_shared/pages/spread-detail";
+import { SpreadTopicContent } from "@/app/_shared/pages/spread-topic";
+import { SpreadsIndexBody } from "@/app/_shared/pages/spreads-index";
+import type { Article } from "@/data/articles";
+import type { SpreadTopic } from "@/data/spread-topics";
+import type { Spread } from "@/data/spreads-helpers";
 import { BirthCardBodyEn } from "@/app/_shared/pages/birth-card-en";
 import { BirthCardBodyTh } from "@/app/_shared/pages/birth-card-th";
 import { CardsAllBody } from "@/app/_shared/pages/cards-all";
@@ -62,6 +70,74 @@ export function BirthCardBodyEnRoot({ calculator }: { calculator: ReactNode }) {
   return (
     <LocaleProvider forcedLocale="en">
       <BirthCardBodyEn calculator={calculator} />
+    </LocaleProvider>
+  );
+}
+
+/* ── กลุ่มหน้าบทความ ─────────────────────────────────────────────────────── */
+
+export function BlogIndexBodyRoot({ locale, list }: { locale: Locale; list: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <BlogIndexBody locale={locale} list={list} />
+    </LocaleProvider>
+  );
+}
+
+export function BlogDetailContentRoot({
+  article,
+  locale,
+  reader,
+}: {
+  article: Article;
+  locale: Locale;
+  reader: ReactNode;
+}) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <BlogDetailContent article={article} locale={locale} reader={reader} />
+    </LocaleProvider>
+  );
+}
+
+/* ── กลุ่มหน้าผังพยากรณ์ ─────────────────────────────────────────────────── */
+
+export function SpreadsIndexBodyRoot({ locale, library }: { locale: Locale; library: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <SpreadsIndexBody locale={locale} library={library} />
+    </LocaleProvider>
+  );
+}
+
+export function SpreadDetailContentRoot({
+  spread,
+  locale,
+  detail,
+}: {
+  spread: Spread;
+  locale: Locale;
+  detail: ReactNode;
+}) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <SpreadDetailContent spread={spread} locale={locale} detail={detail} />
+    </LocaleProvider>
+  );
+}
+
+export function SpreadTopicContentRoot({
+  topic,
+  locale,
+  list,
+}: {
+  topic: SpreadTopic;
+  locale: Locale;
+  list: ReactNode;
+}) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <SpreadTopicContent topic={topic} locale={locale} list={list} />
     </LocaleProvider>
   );
 }

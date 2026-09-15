@@ -9,6 +9,7 @@ import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import { SpreadDetailClient } from "@/components/spread/SpreadDetailClient";
+import type { ReactNode } from "react";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
@@ -44,11 +45,12 @@ export function spreadStaticParams() {
   return SPREADS.map((spread) => ({ id: spread.id }));
 }
 
-export async function buildSpreadDetailMetadata(
-  { params }: SpreadDetailPageProps,
-  locale: Locale,
-): Promise<Metadata> {
-  const { id } = await params;
+/**
+ * ⚙️ แกนกลางแบบซิงโครนัส — ใช้ได้ทั้งสองเครื่องมือเรนเดอร์
+ * (Next ส่ง `params` มาเป็น Promise · Astro รู้ค่าตั้งแต่ `getStaticPaths` แล้ว)
+ * ⚠️ ห้ามก็อปตรรกะ SEO นี้ไปไว้ในไฟล์ `.astro` เด็ดขาด — ต้องมีที่เดียว
+ */
+export function spreadDetailMetadata(id: string, locale: Locale): Metadata {
   const spread = getSpread(id);
   if (!spread) {
     return {
@@ -141,14 +143,20 @@ export async function buildSpreadDetailMetadata(
   };
 }
 
-export async function SpreadDetailBody({
-  params,
+/**
+ * ⚙️ เนื้อหาหน้าคู่มือผังแบบซิงโครนัส — รับผังที่หาเจอแล้วเข้ามาตรง ๆ
+ * (Astro เรียกตัวนี้ · React ฝั่ง SSR เรนเดอร์คอมโพเนนต์แบบ async ไม่ได้)
+ */
+export function SpreadDetailContent({
+  spread,
   locale,
-}: SpreadDetailPageProps & { locale: Locale }) {
-  const { id } = await params;
-  const spread = getSpread(id);
-  if (!spread) notFound();
-
+  detail,
+}: {
+  spread: NonNullable<ReturnType<typeof getSpread>>;
+  locale: Locale;
+  /** island ของแผงรายละเอียดผัง — ส่งเข้ามาจากข้างนอกเสมอ */
+  detail: ReactNode;
+}) {
   const isEnglish = locale === "en";
   const standard = isStandardSpread(spread.id);
   const cardCount = spread.positions.length;
@@ -156,17 +164,8 @@ export async function SpreadDetailBody({
     ? CATEGORY_EN[spread.defaultCategory] ?? spread.defaultCategory
     : CATEGORY_TH[spread.defaultCategory] ?? spread.defaultCategory;
 
-  // คลังบทความฉบับอังกฤษแสดงเฉพาะบทความที่มี contentEn แล้ว
-  const relatedArticles = isEnglish
-    ? ARTICLES.filter((a) => a.targetSpreadId === spread.id && Boolean(a.contentEn)).slice(0, 6)
-    : ARTICLES.filter((a) => a.targetSpreadId === spread.id).slice(0, 6);
-
-  const otherSpreads = SPREADS.filter(
-    (s) => s.id !== spread.id && s.defaultCategory === spread.defaultCategory,
-  ).slice(0, 4);
-  const fallbackSpreads = otherSpreads.length
-    ? otherSpreads
-    : SPREADS.filter((s) => s.id !== spread.id).slice(0, 4);
+  /* บทความที่เกี่ยวข้องและผังใกล้เคียงย้ายไปอยู่ที่ `spreadDetailProps()` ท้ายไฟล์
+     เพราะเป็น prop ของแผงรายละเอียด ไม่ได้ถูกใช้ในส่วนที่ไฟล์นี้เรนเดอร์เอง */
 
   const topicPhrase = spread.defaultCategory === "general" ? "" : `เรื่อง${categoryLabel}`;
 
@@ -293,12 +292,53 @@ export async function SpreadDetailBody({
         />
       ))}
 
-      <SpreadDetailClient
-        spread={spread}
-        standard={standard}
-        relatedArticles={relatedArticles}
-        fallbackSpreads={fallbackSpreads}
-      />
+      {detail}
     </main>
   );
+}
+
+/** ข้อมูลประกอบที่แผงรายละเอียดผังต้องใช้ — ใช้ร่วมกันทั้งสองเครื่องมือเรนเดอร์ */
+export function spreadDetailProps(spread: NonNullable<ReturnType<typeof getSpread>>, locale: Locale) {
+  const isEnglish = locale === "en";
+  const relatedArticles = isEnglish
+    ? ARTICLES.filter((a) => a.targetSpreadId === spread.id && Boolean(a.contentEn)).slice(0, 6)
+    : ARTICLES.filter((a) => a.targetSpreadId === spread.id).slice(0, 6);
+  const otherSpreads = SPREADS.filter(
+    (s) => s.id !== spread.id && s.defaultCategory === spread.defaultCategory,
+  ).slice(0, 4);
+  return {
+    spread,
+    standard: isStandardSpread(spread.id),
+    relatedArticles,
+    fallbackSpreads: otherSpreads.length
+      ? otherSpreads
+      : SPREADS.filter((s) => s.id !== spread.id).slice(0, 4),
+  };
+}
+
+/** ฝั่ง Next — รอ `params` แล้วจัดการ 404 ก่อนส่งต่อให้เนื้อหา */
+export async function SpreadDetailBody({
+  params,
+  locale,
+}: SpreadDetailPageProps & { locale: Locale }) {
+  const { id } = await params;
+  const spread = getSpread(id);
+  if (!spread) notFound();
+
+  return (
+    <SpreadDetailContent
+      spread={spread}
+      locale={locale}
+      detail={<SpreadDetailClient {...spreadDetailProps(spread, locale)} />}
+    />
+  );
+}
+
+/** ฝั่ง Next — รอ `params` แล้วเรียกแกนกลางตัวเดียวกัน */
+export async function buildSpreadDetailMetadata(
+  { params }: SpreadDetailPageProps,
+  locale: Locale,
+): Promise<Metadata> {
+  const { id } = await params;
+  return spreadDetailMetadata(id, locale);
 }
