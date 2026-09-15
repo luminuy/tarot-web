@@ -375,7 +375,7 @@ async function taskCacheRules() {
   );
 }
 
-// ── ข้อ 3 + 4: นโยบายบอต AI + Bot Fight Mode ────────────────────────────────
+// ── ข้อ 3 + 4: นโยบายบอต AI + ปิด Bot Fight Mode ────────────────────────────
 /**
  * ⚠️ อย่าเชื่อผลทดสอบบอตที่ยิงด้วย user-agent ปลอม — บทเรียน INC-0105
  *
@@ -401,14 +401,43 @@ async function taskCacheRules() {
  *   จึงเป็นตัวบังคับใช้ระยะยาว (รายชื่อต้องตรงกับ `src/app/robots.ts` เสมอ · ด่านที่ 37 คอยตรวจให้)
  *
  * `crawler_protection` เปิดไว้เพราะแทรกสัญญาณ `ai-train=no` ลงหัว robots.txt ให้เอง (ไม่ได้ 403 ใคร)
+ *
+ * ───────────────────────────────────────────────────────────────────────────
+ * ⛔ **Bot Fight Mode ถูกปิดโดยตั้งใจตั้งแต่ 2026-09-15 — ห้ามเปลี่ยนกลับโดยไม่วัดก่อน**
+ *
+ * เมื่อเปิดไว้ Cloudflare จะฉีดสคริปต์ `/cdn-cgi/challenge-platform/scripts/jsd/main.js`
+ * (JavaScript Detections) เข้า HTML **ทุกหน้าที่ผู้ใช้จริงได้รับ** และมันกินเธรดหลักมากกว่า
+ * โค้ดของเราทั้งหน้ารวมกันหลายเท่า · วัดด้วย Lighthouse บน production 2026-09-15
+ * (mobile · simulate) ยิงหน้าเดียวกันสองรอบ ต่างกันแค่บล็อกสคริปต์นั้นทิ้ง:
+ *
+ *   | หน้า      | perf (เปิด ➔ ปิด) | TBT (เปิด ➔ ปิด)      | สคริปต์นั้นกิน |
+ *   | :-------- | :---------------- | :-------------------- | :------------- |
+ *   | `/`       | **52 ➔ 81**       | 1,730 ➔ 130 ms        | 4,002 ms       |
+ *   | `/cards`  | **56 ➔ 81**       | 1,544 ➔ 140 ms        | 3,271 ms       |
+ *   | `/blog`   | **52 ➔ 84**       | 2,461 ➔ 85 ms         | 5,394 ms       |
+ *
+ * ของที่กันค่าใช้จ่ายจริง **ไม่มีข้อไหนอยู่ใน Bot Fight Mode เลย** และยังทำงานครบหลังปิด:
+ *   • rate limit 20 ครั้ง/10 วินาที บนเส้นเปิดไพ่/แชท  (`taskRateLimit` ด้านล่าง)
+ *   • บล็อก `curl`/`python-requests`/`scrapy` บน `/api/*`  (`taskWaf`)
+ *   • บล็อก `wp-*` `.php` `.env` `.git`  (`taskWaf`)
+ *   • บล็อกบอตเทรนโมเดล + สแกนเนอร์ SEO  (`taskWaf`)
+ *   • `ai_bots_protection: "block"` — คนละสวิตช์ ยังเปิดอยู่ (ด่านที่ 37 บังคับ)
+ *
+ * และหน้า HTML ทั้งเว็บย้ายไป Astro เป็นไฟล์สแตติกที่ตอบจากขอบแล้ว (`cf-cache: HIT` ไม่ปลุก Worker)
+ * บอตที่มาดูดหน้าเว็บจึงแทบไม่มีค่าใช้จ่าย — ต่างจากตอนที่ตัดสินใจเปิดไว้เมื่อ 2026-09-08
+ * ซึ่งทุกหน้ายังวิ่งผ่าน Worker
+ *
+ * 🔬 ถ้าจะเปิดกลับ ต้องแนบตัวเลขสองด้าน: บอตที่กันได้เพิ่มจริงกี่คำขอ (Dashboard ➔ Security Events)
+ *    เทียบกับคะแนน/TBT ที่เสียไป (Lighthouse บน production) — ห้ามเปิดกลับเพราะ "น่าจะปลอดภัยกว่า"
+ * ───────────────────────────────────────────────────────────────────────────
  */
 async function taskBots() {
   if (DRY_RUN) {
     record(
       "3+4",
-      "นโยบายบอต AI + Bot Fight Mode",
+      "นโยบายบอต AI + ปิด Bot Fight Mode",
       "OK",
-      "[dry-run] ai_bots_protection=block · crawler_protection=enabled · fight_mode=on",
+      "[dry-run] ai_bots_protection=block · crawler_protection=enabled · fight_mode=OFF (ปิดโดยตั้งใจ)",
     );
     return;
   }
@@ -416,7 +445,8 @@ async function taskBots() {
   const r = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
     ai_bots_protection: "block",
     crawler_protection: "enabled",
-    fight_mode: true,
+    // ⛔ ปิดโดยตั้งใจ — ดูเหตุผลและตัวเลขที่วัดมาในคอมเมนต์หัวฟังก์ชันนี้ (ด่านที่ 37 บังคับให้เป็น false)
+    fight_mode: false,
   });
 
   if (r.success) {
@@ -424,7 +454,7 @@ async function taskBots() {
       "3+4",
       "นโยบายบอต AI + Bot Fight Mode",
       "OK",
-      "ai_bots_protection=block (บอตตัวจริงที่รับรองแล้วยังเข้าได้) · crawler_protection=enabled · fight_mode=on",
+      "ai_bots_protection=block (บอตตัวจริงที่รับรองแล้วยังเข้าได้) · crawler_protection=enabled · fight_mode=OFF (ปิดโดยตั้งใจ — สคริปต์ตรวจบอตกินเธรดหลัก 3.3–5.4 วินาที)",
     );
     return;
   }
@@ -434,12 +464,12 @@ async function taskBots() {
     ai_bots_protection: "block",
   });
   const fight = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
-    fight_mode: true,
+    fight_mode: false,
   });
 
   const parts = [
     ai.success ? "Block AI Scrapers ✔" : `Block AI Scrapers ✘ (${errText(ai)})`,
-    fight.success ? "Bot Fight Mode ✔" : `Bot Fight Mode ✘ (${errText(fight)})`,
+    fight.success ? "Bot Fight Mode ปิดแล้ว ✔" : `ปิด Bot Fight Mode ไม่สำเร็จ ✘ (${errText(fight)})`,
   ];
 
   record(
