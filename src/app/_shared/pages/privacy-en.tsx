@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
+import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 
@@ -10,7 +10,7 @@ const privacyOgImages = buildPageOgImage({
   alt: "SeerTarot Privacy Policy, PDPA and GDPR Compliance",
 });
 
-export const metadata: Metadata = {
+export const privacyMetadataEn: Metadata = {
   title: "Privacy Policy & PDPA / GDPR Compliance",
   description:
     "Comprehensive Privacy Policy, PDPA B.E. 2562, and GDPR compliance framework for SeerTarot online interactive tarot sanctuary.",
@@ -33,7 +33,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function EnPrivacyPolicyPage() {
+/** `deleteButton` = ปุ่มลบข้อมูลทั้งหมด (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */
+export function PrivacyBodyEn({ deleteButton }: { deleteButton: ReactNode }) {
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink">
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
@@ -225,7 +226,7 @@ export default function EnPrivacyPolicyPage() {
             >
               <span>Download My Data (Export JSON)</span>
             </a>
-            <DeleteAllDataButton />
+            {deleteButton}
           </div>
         </section>
 

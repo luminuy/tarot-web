@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 
+import { AboutBodyTh } from "@/app/_shared/pages/about-th";
+import { ContactBodyEn } from "@/app/_shared/pages/contact-en";
+import { ContactBodyTh } from "@/app/_shared/pages/contact-th";
+import { PrivacyBodyEn } from "@/app/_shared/pages/privacy-en";
+import { PrivacyBodyTh } from "@/app/_shared/pages/privacy-th";
 import { BlogDetailContent } from "@/app/_shared/pages/blog-detail";
 import { BlogIndexBody } from "@/app/_shared/pages/blog-index";
 import { SpreadDetailContent } from "@/app/_shared/pages/spread-detail";
@@ -138,6 +143,48 @@ export function SpreadTopicContentRoot({
   return (
     <LocaleProvider forcedLocale={locale}>
       <SpreadTopicContent topic={topic} locale={locale} list={list} />
+    </LocaleProvider>
+  );
+}
+
+/* ── หน้าข้อมูลคงที่ (เกี่ยวกับเรา · ความเป็นส่วนตัว · ติดต่อ) ─────────────── */
+
+export function AboutBodyThRoot() {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <AboutBodyTh />
+    </LocaleProvider>
+  );
+}
+
+export function PrivacyBodyThRoot({ deleteButton }: { deleteButton: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <PrivacyBodyTh deleteButton={deleteButton} />
+    </LocaleProvider>
+  );
+}
+
+export function PrivacyBodyEnRoot({ deleteButton }: { deleteButton: ReactNode }) {
+  return (
+    <LocaleProvider forcedLocale="en">
+      <PrivacyBodyEn deleteButton={deleteButton} />
+    </LocaleProvider>
+  );
+}
+
+export function ContactBodyThRoot() {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <ContactBodyTh />
+    </LocaleProvider>
+  );
+}
+
+export function ContactBodyEnRoot() {
+  return (
+    <LocaleProvider forcedLocale="en">
+      <ContactBodyEn />
     </LocaleProvider>
   );
 }

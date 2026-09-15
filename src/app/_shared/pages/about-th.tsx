@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { RouteLink as Link } from "@/components/ui/RouteLink";
 
 import { buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -37,7 +37,7 @@ const TITLE = "เกี่ยวกับเรา — ใครอยู่เ
 const DESCRIPTION =
   "SeerTarot คือใคร คำทำนายสร้างขึ้นอย่างไร ระบบสุ่มไพ่ตรวจสอบได้จริงแบบไหน และเรารับผิดชอบอะไรบ้าง — เปิดเผยทุกขั้นตอนอย่างตรงไปตรงมา";
 
-export const metadata: Metadata = {
+export const aboutMetadataTh: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: buildAlternates("/about"),
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AboutPage() {
+export function AboutBodyTh() {
   const jsonLdBreadcrumbs = buildBreadcrumbJsonLd("th", [
     homeCrumb("th"),
     { name: "เกี่ยวกับเรา", path: "/about" },

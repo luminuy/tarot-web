@@ -28,7 +28,7 @@ const DESCRIPTION = clampDescription(
 
 const TIKTOK_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com"));
 
-export const metadata: Metadata = {
+export const contactMetadataEn: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: buildAlternates("/contact", { englishTwin: true, locale: "en" }),
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function EnContactPage() {
+export function ContactBodyEn() {
   const jsonLdBreadcrumbs = buildBreadcrumbJsonLd("en", [
     homeCrumb("en"),
     { name: "Contact Us", path: "/en/contact" },

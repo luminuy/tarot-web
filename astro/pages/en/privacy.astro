@@ -1,0 +1,21 @@
+---
+import { privacyMetadataEn } from "@/app/_shared/pages/privacy-en";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { PrivacyBodyEnRoot } from "../../components/PageBodies";
+import { DeleteAllDataRoot } from "../../islands/DeleteAllDataRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** 🔐 นโยบายความเป็นส่วนตัว — ปุ่มลบข้อมูลตาม PDPA เป็น island ตัวเดียวของหน้า */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={privacyMetadataEn}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <PrivacyBodyEnRoot>
+    <Fragment slot="deleteButton">
+      <DeleteAllDataRoot locale={locale} client:idle />
+    </Fragment>
+  </PrivacyBodyEnRoot>
+  <SiteFooterRoot locale={locale} spacing="tight" />
+</BaseLayout>

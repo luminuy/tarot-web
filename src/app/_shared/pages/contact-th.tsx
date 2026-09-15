@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { RouteLink as Link } from "@/components/ui/RouteLink";
 
 import { BRAND_SOCIAL_PROFILES, buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
@@ -31,7 +31,7 @@ const DESCRIPTION =
 
 const TIKTOK_URL = BRAND_SOCIAL_PROFILES.find((u) => u.includes("tiktok.com"));
 
-export const metadata: Metadata = {
+export const contactMetadataTh: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: buildAlternates("/contact", { englishTwin: true }),
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactPage() {
+export function ContactBodyTh() {
   const jsonLdBreadcrumbs = buildBreadcrumbJsonLd("th", [
     homeCrumb("th"),
     { name: "ติดต่อเรา", path: "/contact" },

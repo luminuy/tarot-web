@@ -53,11 +53,16 @@ for (const [href, expected] of [
   ["/blog", true],
   ["/blog/tarot-daily-card-guide", true],
   ["/en/blog/tarot-daily-card-guide", true],
-  /* หน้าแอปที่ยังเรนเดอร์ด้วย Next */
+  ["/about", true],
+  ["/privacy", true],
+  ["/contact", true],
+  ["/en/privacy", true],
+  /* หน้าแอปที่ยังเรนเดอร์ด้วย Next (หน้าแรก + หน้าแอป 18 หน้าตามคำสั่งเจ้าของ) */
   ["/", false],
   ["/daily", false],
   ["/love/1-card", false],
-  ["/about", false],
+  ["/account", false],
+  ["/reading/chat", false],
   /* ⚠️ เส้นที่ "ขึ้นต้นเหมือนกันแต่คนละหน้า" ต้องไม่ถูกครอบ */
   ["/cardsomething", false],
   ["/blogger", false],

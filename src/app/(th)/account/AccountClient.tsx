@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { ChangePasswordCard } from "@/components/account/ChangePasswordCard";
 import { EntitlementStatusCard } from "@/components/entitlement/EntitlementStatusCard";
 import { DeleteAllDataButton } from "@/components/ui/DeleteAllDataButton";
