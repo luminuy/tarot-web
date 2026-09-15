@@ -22,6 +22,7 @@ export const ASTRO_ROUTE_PREFIXES = [
   "/about",
   "/privacy",
   "/contact",
+  "/reading",
 ] as const;
 
 /** ตัด `/en` นำหน้าออก เพื่อเทียบกับรายการฝั่งไทยชุดเดียว */

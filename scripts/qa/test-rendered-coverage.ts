@@ -115,6 +115,36 @@ check(
     : undefined,
 );
 
+// ── 4. ห้ามเทียบ "รันเป็นสคริปต์หลักหรือเปล่า" ด้วยการต่อสตริง file:// เอง ──────
+/*
+ * `import.meta.url` เข้ารหัสอักขระที่ไม่ใช่ ASCII เป็น percent-encoding
+ * ส่วน `process.argv[1]` เป็น path ดิบ — บนเครื่องที่ path ของโปรเจกต์มีภาษาไทย
+ * (โฟลเดอร์ `เว็บไพ่` ของเจ้าของ) สองค่านี้ **ไม่มีวันเท่ากัน** ด่านจึงไม่ทำงานเลย
+ * และเงียบสนิท (exit 0 ทุกครั้ง) แต่ทำงานปกติบน CI ที่ path เป็น ASCII ล้วน
+ *
+ * = ด่านที่ "ผ่านบนเครื่องแต่ตกที่ CI" แบบที่หาสาเหตุยากที่สุด (เจอจริง 2026-09-15)
+ * ต้องใช้ `pathToFileURL(process.argv[1]).href` เสมอ
+ */
+const FRAGILE_MAIN_CHECK = "file://${process.argv[1]}";
+const fragile: string[] = [];
+for (const file of fs.readdirSync(QA_DIR)) {
+  if (!file.endsWith(".ts") || file === SELF) continue;
+  /* มองเฉพาะโค้ดจริง ไม่นับบรรทัดคอมเมนต์ที่อธิบายว่าห้ามเขียนแบบนี้ */
+  const code = fs
+    .readFileSync(path.join(QA_DIR, file), "utf-8")
+    .split("\n")
+    .filter((line) => !/^\s*(\*|\/\/|\/\*)/.test(line))
+    .join("\n");
+  if (code.includes(FRAGILE_MAIN_CHECK)) fragile.push(file);
+}
+check(
+  "ไม่มีด่านไหนเทียบไฟล์หลักด้วยการต่อสตริง `file://` เอง (ต้องใช้ pathToFileURL)",
+  fragile.length === 0,
+  fragile.length
+    ? `ยังใช้อยู่: ${fragile.join(", ")} — ด่านเหล่านี้จะเงียบสนิทบนเครื่องที่ path มีภาษาไทย`
+    : undefined,
+);
+
 console.log(
   failed === 0
     ? "\n✨ ผ่านครบ — sitemap กับหน้าจริงตรงกัน และด่านทุกด่านไม่ผูกกับเครื่องมือเรนเดอร์ตัวใดตัวหนึ่ง\n"

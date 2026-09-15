@@ -1,5 +1,7 @@
 "use client";
 
+import type { Metadata } from "next";
+
 import LocaleLink from "@/components/ui/LocaleLink";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -20,7 +22,18 @@ const FollowUpChat = dynamic(
   { ssr: false }
 );
 
-export default function EnglishReadingChatPage() {
+/**
+ * metadata ของห้องแชท — ย้ายมาจาก `src/app/(th)/reading/layout.tsx` เดิม
+ *
+ * ⚠️ ต้อง `noindex` เสมอ: หน้านี้อ่านสถานะรอบดูดวงจาก sessionStorage ทั้งหมด
+ *    เปิดตรง ๆ จากผลค้นหาจะว่างเปล่าเสมอ
+ */
+export const readingChatMetadataEn: Metadata = {
+  title: "Chat with Tarot Oracle",
+  robots: { index: false, follow: true },
+};
+
+export function ReadingChatBodyEn() {
   const { isEnglish } = useLocale();
   const [flow, setFlow] = useState<PersistedFlow | null | undefined>(undefined);
 

@@ -60,6 +60,7 @@ export default defineConfig({
         "next/link": resolve("./astro/shims/next-link.tsx"),
         "next/navigation": resolve("./astro/shims/next-navigation.ts"),
         "next/script": resolve("./astro/shims/next-script.tsx"),
+        "next/dynamic": resolve("./astro/shims/next-dynamic.tsx"),
       },
     },
     define: {

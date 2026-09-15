@@ -1,0 +1,17 @@
+---
+import { readingChatMetadataEn } from "@/app/_shared/pages/reading-chat-en";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { ReadingChatRootEn } from "../../../islands/ReadingChatRoot";
+
+/**
+ * 💬 ห้องสนทนากับแม่หมอ (ต้นไม้ภาษาอังกฤษ)
+ * ⚠️ หน้านี้ไม่มี SiteHeader/SiteFooter โดยตั้งใจ — มีแถบหัวของตัวเอง (`data-site-header="reading-chat"`)
+ *    เหมือนตอนอยู่กับ Next เป๊ะ · ห้ามเติมเข้ามา ไม่งั้นจะได้หัวเว็บซ้อนสองชั้น
+ */
+const locale = "en" as const;
+---
+
+<BaseLayout hasSiteHeader={false} locale={locale} metadata={readingChatMetadataEn}>
+  <ReadingChatRootEn client:load />
+</BaseLayout>

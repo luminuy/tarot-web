@@ -62,7 +62,7 @@ for (const [href, expected] of [
   ["/daily", false],
   ["/love/1-card", false],
   ["/account", false],
-  ["/reading/chat", false],
+  ["/reading/chat", true],
   /* ⚠️ เส้นที่ "ขึ้นต้นเหมือนกันแต่คนละหน้า" ต้องไม่ถูกครอบ */
   ["/cardsomething", false],
   ["/blogger", false],

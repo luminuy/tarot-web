@@ -4,13 +4,17 @@ import "../globals.css";
 import { RootHtml } from "../_shared/RootHtml";
 import {
   GOOGLE_SITE_VERIFICATION,
+  ROOT_ALTERNATES,
+  ROOT_DESCRIPTION,
   ROOT_KEYWORDS,
+  ROOT_OPEN_GRAPH,
   ROOT_SHARED_METADATA,
+  ROOT_TWITTER,
   SITE_ICONS,
   SITE_VIEWPORT,
   TITLE_TEMPLATE,
 } from "../_shared/root-metadata";
-import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
 /**
  * 🇹🇭 root layout ของต้นไม้ภาษาไทย — ครอบทุก URL ที่ไม่ได้ขึ้นต้นด้วย `/en`
@@ -27,30 +31,16 @@ export const metadata: Metadata = {
     default: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
     template: TITLE_TEMPLATE,
   },
-  description:
-    "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้แม่หมอ AI ทำนายสดทีละใบ มีผัง 25 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
+  description: ROOT_DESCRIPTION.th,
   keywords: ROOT_KEYWORDS.th,
   ...ROOT_SHARED_METADATA,
   icons: SITE_ICONS,
   verification: {
     google: GOOGLE_SITE_VERIFICATION,
   },
-  alternates: buildAlternates("/", { locale: "th", englishTwin: true }),
-  openGraph: {
-    type: "website",
-    locale: "th_TH",
-    siteName: "SeerTarot",
-    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
-    description:
-      "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair",
-    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
-    description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมระบบ Provably-Fair",
-    images: [OG_IMAGE_URL],
-  },
+  alternates: ROOT_ALTERNATES.th,
+  openGraph: ROOT_OPEN_GRAPH.th,
+  twitter: ROOT_TWITTER.th,
 };
 
 export const viewport: Viewport = SITE_VIEWPORT;

@@ -478,7 +478,18 @@ const rendersHeader = (file: string) => rendersComponent(file, "SiteHeader", 0, 
 const rendersFooter = (file: string) => rendersComponent(file, "SiteFooter", 0, new Map());
 
 const pageFiles = listTsxFiles(path.join(ROOT, "src/app")).filter((f) => path.basename(f) === "page.tsx");
-const sourceRoutes = new Set(pageFiles.map(routeIdFromPageFile));
+
+/*
+ * เส้นทางที่ "มีอยู่จริงในโปรเจกต์" — ต้องนับทั้งสองเครื่องมือเรนเดอร์
+ *
+ * ⚠️ เดิมนับจากไฟล์ `page.tsx` ของ Next อย่างเดียว ตั้งแต่หน้าบางกลุ่มย้ายไป Astro
+ *    รายการยกเว้นที่ยังถูกต้องอยู่ (เช่น `reading/chat` ซึ่งมีแถบหัวของตัวเอง)
+ *    จะถูกฟ้องว่า "ค้าง" ทั้งที่หน้านั้นยังอยู่ แค่ย้ายบ้านไปเท่านั้น
+ */
+const sourceRoutes = new Set([
+  ...pageFiles.map(routeIdFromPageFile),
+  ...collectRenderedPages().map((page) => (page.route === "/" ? "" : page.route.slice(1))),
+]);
 
 // 7.1 ชั้น source — ครอบคลุมหน้า dynamic ที่ไม่มี HTML ให้ตรวจตอน build
 for (const file of pageFiles) {

@@ -3,13 +3,17 @@ import type { Metadata, Viewport } from "next";
 import "../globals.css";
 import { RootHtml } from "../_shared/RootHtml";
 import {
+  ROOT_ALTERNATES,
+  ROOT_DESCRIPTION,
   ROOT_KEYWORDS,
+  ROOT_OPEN_GRAPH,
   ROOT_SHARED_METADATA,
+  ROOT_TWITTER,
   SITE_ICONS,
   SITE_VIEWPORT,
   TITLE_TEMPLATE,
 } from "../_shared/root-metadata";
-import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
+import { SITE_ORIGIN } from "@/lib/config/site";
 
 /**
  * 🇬🇧 root layout ของต้นไม้ภาษาอังกฤษ — ครอบทุก URL ใต้ `/en`
@@ -27,27 +31,13 @@ export const metadata: Metadata = {
     default: "Free Online Tarot Reading With an AI Tarot Reader",
     template: TITLE_TEMPLATE,
   },
-  description:
-    "Free online tarot reading with the original 1909 Rider-Waite deck. Shuffle and draw all 78 cards yourself, then read a live AI interpretation.",
+  description: ROOT_DESCRIPTION.en,
   keywords: ROOT_KEYWORDS.en,
   ...ROOT_SHARED_METADATA,
   icons: SITE_ICONS,
-  alternates: buildAlternates("/", { locale: "en", englishTwin: true }),
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    siteName: "SeerTarot",
-    title: "Free Online Tarot Reading · Shuffle & Draw With an AI Tarot Reader",
-    description:
-      "Shuffle and draw all 78 Rider-Waite cards with your own hand, then read a live card-by-card interpretation — provably fair with SHA-256.",
-    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Free Online Tarot Reading · Shuffle & Draw With an AI Tarot Reader",
-    description: "Draw all 78 Rider-Waite cards yourself and read a live, provably fair interpretation.",
-    images: [OG_IMAGE_URL],
-  },
+  alternates: ROOT_ALTERNATES.en,
+  openGraph: ROOT_OPEN_GRAPH.en,
+  twitter: ROOT_TWITTER.en,
 };
 
 export const viewport: Viewport = SITE_VIEWPORT;
