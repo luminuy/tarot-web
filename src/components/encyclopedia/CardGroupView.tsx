@@ -231,14 +231,12 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                 key={card.id}
                 href={`/cards/${card.id}`}
                 prefetch={false}
-                /* ⚠️ ห้ามใส่ `content-visibility` กลับเข้ามาที่กริดนี้ (INC-0174 · ด่านกฎ 10 บล็อกอยู่)
-                   มันเร็วขึ้นจริง (TBT 12–52 ms เทียบกับ 1,319–6,761 ms) แต่แลกมาด้วยหน้าที่กระตุก
-                   15 ครั้งตอนเลื่อนขึ้น · CLS 0.68 ซึ่งตกเกณฑ์ Core Web Vitals (เกณฑ์ผ่านคือต่ำกว่า 0.1)
-                   สาเหตุ: `contain-intrinsic-size` เดาความสูงได้ค่าเดียว แต่ความสูงจริงของการ์ด
-                   เปลี่ยนตามความกว้างจอแบบต่อเนื่อง (วัดจริง 340 · 387 · 419 · 498 · 380 · 351 · 409 px
-                   ที่จอ 320 → 1280px) ➔ ไม่มีตัวเลขไหนถูกสักจอ
-                   ถ้าจะเอาความเร็วคืนต้องทำให้ความสูงการ์ดผูกกับความกว้างด้วย `aspect-ratio` ก่อน — ดู ISSUE-048 */
-                className="rounded-xl border border-line bg-surface p-3 flex flex-col justify-between hover:border-gold transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+                /* ⚡ `card-tile-cv` = กลไกข้ามการวาดของนอกจอที่ปลอดภัยแล้ว (INC-0174)
+                   ความสูงที่จองไว้คำนวณจากความกว้างจอด้วย calc(vw) ต่อ breakpoint ไม่ใช่ตัวเลขเดา
+                   ใช้ได้เพราะแถวคีย์เวิร์ดด้านล่างถูกล็อกความสูงแล้ว การ์ดทุกใบจึงสูงเท่ากัน
+                   ห้ามแก้สัดส่วนภาพ/ระยะห่างของการ์ดโดยไม่อัปเดตสูตรใน globals.css — ด่าน
+                   `test-card-tile-height.ts` จะตกทันทีถ้าของที่สูตรพึ่งพาถูกแก้ (กริด · gap · padding · สัดส่วนภาพ) */
+                className="card-tile-cv rounded-xl border border-line bg-surface p-3 flex flex-col justify-between hover:border-gold transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
               >
                 {/* Card Artwork */}
                 <div className="relative aspect-[7/12] w-full rounded-lg overflow-hidden border border-line bg-inset mb-2.5">
@@ -281,7 +279,12 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                   </h3>
 
                   {/* Top 2 Keywords */}
-                  <div className="flex flex-wrap items-center justify-center gap-1 pt-1">
+                  {/* ⚠️ ความสูงคงที่ 2 บรรทัดโดยตั้งใจ (INC-0174 · ISSUE-048)
+                      คีย์เวิร์ดบางใบยาวจนตกบรรทัดที่สอง บางใบไม่ตก ความสูงการ์ดจึงต่างกัน 31px
+                      ซึ่งทำให้กลไกข้ามการวาดเดาความสูงไม่ได้และหน้าจอกระตุกตอนเลื่อน
+                      ล็อกไว้ที่ 2 บรรทัดเสมอ ➔ การ์ดทุกใบสูงเท่ากันที่ทุกความกว้างจอ
+                      (ด่าน `test-card-tile-height.ts` เฝ้าข้อนี้อยู่ ห้ามถอดความสูงคงที่ออก) */}
+                  <div className="flex flex-wrap items-start justify-center gap-1 pt-1 h-[3.8125rem] overflow-hidden">
                     {(() => {
                       const kwEnList = CARD_KEYWORDS_EN[card.id]?.upright;
                       const displayKws =
