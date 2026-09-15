@@ -38,6 +38,36 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-15 (รอบ 81): 🛡️ ตรวจสอบบั๊กเจาะลึกทั้งระบบ UX/UI, Dead Code, การตรวจสอบสิทธิ์ และโครงสร้างภาษา
+
+**บริบท**: สแกนหาบั๊กทั้งระบบอย่างละเอียดรอบคอบ ทั้ง UX/UI, dead code, โครงสร้างภาษา และแก้ไขให้เสร็จสมบูรณ์
+
+**ปัญหาที่ตรวจพบและแก้ไข (ตรวจโค้ดจริง ไม่ได้มโน)**
+1. **Reader Console 401 Lockout & Missing Token Flow**:
+   - `requireReader()` ใน `src/lib/auth/reader-auth.ts` บังคับรับ token ผ่าน `Authorization: Bearer <token>` หรือคุกกี้เท่านั้น (ห้ามรับจาก query string เพื่อความปลอดภัย ไม่ให้ค้างใน Cloudflare log / Referer header)
+   - หน้า `/readers/console` ยังไม่ส่ง `Authorization` header ทำให้ทุกคำขอ (GET queue, PATCH live toggle, PATCH accept/handoff/cancel) ติด 401 ทันที
+   - แผงแอดมิน (`src/components/admin/ReadersManager.tsx`) คัดลอกลิงก์ `/readers/console?id=${r.id}` โดยไม่มี token ให้แม่หมอ และไม่มี API endpoint สร้าง token
+   - **สิ่งที่แก้**:
+     - เพิ่ม `Authorization: Bearer ${token}` ใน `fetchConsoleData`, `handleToggleLive`, และ `handleTicketAction`
+     - เพิ่มการเซ็น session token 24 ชั่วโมงใน `GET /api/admin/readers/[id]` ผ่าน `signReaderToken`
+     - อัปเดต `copyConsoleLink` ใน `ReadersManager.tsx` ให้ดึง token และสร้างลิงก์พร้อม token ปลอดภัยให้แม่หมอ
+2. **UX/UI Luxury Overhaul & การกำจัด Browser Dialog**:
+   - หน้า `/readers/console` และ `/readers/queue/[id]` เดิมใช้สีมืดฮาร์ดโค้ดสไตล์เก่า (`#130d24`, `#21163b`, `#e5c07b`, `#ffd700`, ฯลฯ) ขัดแย้งกับธีมกระดาษพรีเมียมส่วนรวม (`#F6F1E9`)
+   - พบการเรียกใช้ `alert()` และ `confirm()` บล็อกเบราว์เซอร์ใน `readers/console/page.tsx`, `readers/queue/[id]/page.tsx`, และ `ReadersManager.tsx`
+   - พบอิโมจิต้องห้าม (`🔄`, `🔮`, `⏳`, `🟢`, `⚪`, `⚠️`) ซึ่งขัดกับกฎเหล็กข้อ 2
+   - **สิ่งที่แก้**:
+     - เปลี่ยนชุดสีทั้งหมดเป็น Quiet Luxury Design Tokens (`bg-surface`, `bg-surface-warm`, `border-line`, `text-ink`, `text-gold-ink`, `text-muted`, `border-line-warm`)
+     - แทนที่ `alert()` / `confirm()` ด้วย inline status notice, toast และ inline confirmation flows
+     - ลบอิโมจิทั้งหมดและแทนที่ด้วย typography เรียบหรู
+     - เพิ่ม `tap-overlay-y` สำหรับปุ่มกดบนหน้าคิว เพื่อให้ผ่านมาตรฐาน WCAG 2.2 AAA (ด่าน 🎯 test-tap-target)
+3. **Dead Code Elimination**:
+   - ลบไฟล์ `src/components/providers/AppMotionProvider.tsx` (146 บรรทัด) ซึ่งถูกแทนที่โดย `withMotionScope` ใน PR #453 และไม่มีการ import ใช้งานในโค้ดเบสแล้ว
+4. **โครงสร้างภาษาไทย & Typography**:
+   - ใน `SiteFooter.tsx` ปรับ `uppercase tracking-wider` ให้ทำงานเฉพาะโหมดภาษาอังกฤษ (`isEnglish`) ป้องกันวรรณยุกต์และสระลอย/เยื้องในฟอนต์ Noto Serif Thai
+   - ใน `readers/console/page.tsx` ถอด `uppercase tracking-wider` ออกจากหัวข้อภาษาไทย "สรุปประเด็นโดย AI"
+5. **Astro Telemetry Sandbox Fix**:
+   - เพิ่ม `ASTRO_TELEMETRY_DISABLED=1` ใน `package.json` (`build`, `build:astro`) และใน `scripts/qa/test-bundle-budget.ts` ป้องกันข้อผิดพลาด `EPERM` เมื่อ Astro CLI พยายามเขียนไฟล์ telemetry preferences ในสภาพแวดล้อมจำกัดสิทธิ์ / CI runner
+
 ### 🗓️ 2026-09-15 (รอบ 80): 🛟 คำอ่านสำรองออฟไลน์ที่ไม่มีใครตรวจมา 4 เรื่องพร้อมกัน
 
 **บริบท**: คำอ่านสำรอง (mock) ถึงมือผู้ใช้จริงเมื่อไม่มีคีย์ AI หรือ Gemini ไม่ตอบเลยสักโมเดล

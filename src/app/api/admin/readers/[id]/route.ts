@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { signReaderToken } from "@/lib/auth/reader-auth";
 import {
   deleteReader,
   getReaderById,
@@ -22,7 +23,7 @@ const UpdateReaderSchema = z.object({
 });
 
 /**
- * GET /api/admin/readers/[id] - ดึงข้อมูลแม่หมอรายบุคคล
+ * GET /api/admin/readers/[id] - ดึงข้อมูลแม่หมอรายบุคคล พร้อมสร้าง Console Access Token (24 ชม.)
  */
 export async function GET(
   _request: Request,
@@ -37,7 +38,8 @@ export async function GET(
     if (!reader) {
       return NextResponse.json({ error: "ไม่พบแม่หมอที่ระบุ" }, { status: 404 });
     }
-    return NextResponse.json({ reader });
+    const token = signReaderToken(reader.id, reader.sessionSecret, 24);
+    return NextResponse.json({ reader, token });
   } catch (err) {
     console.error("[API Admin Reader GET ID Error]", err);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการค้นหาแม่หมอ" }, { status: 500 });

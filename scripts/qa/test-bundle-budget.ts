@@ -234,8 +234,11 @@ function ensureBuildExists(): void {
   const sampleRoot = path.join(primaryOutputDir(), "page.js");
   const buildManifest = path.join(ROOT, ".next/build-manifest.json");
   if (!fs.existsSync(sampleTh) && !fs.existsSync(sampleRoot) && !fs.existsSync(buildManifest)) {
-    console.log("📦 ไม่พบไฟล์ผลลัพธ์ build — กำลังรัน npm run build...");
-    execSync("npm run build", { cwd: ROOT, stdio: "inherit" });
+    execSync("npm run build", {
+      cwd: ROOT,
+      stdio: "inherit",
+      env: { ...process.env, ASTRO_TELEMETRY_DISABLED: "1" },
+    });
   }
   const buildIdPath = path.join(ROOT, ".next/BUILD_ID");
   if (!fs.existsSync(buildIdPath) && fs.existsSync(path.join(ROOT, ".next"))) {
