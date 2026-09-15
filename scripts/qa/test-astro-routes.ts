@@ -58,7 +58,8 @@ for (const [href, expected] of [
   ["/contact", true],
   ["/en/privacy", true],
   /* หน้าแอปที่ยังเรนเดอร์ด้วย Next (หน้าแรก + หน้าแอป 18 หน้าตามคำสั่งเจ้าของ) */
-  ["/", false],
+  ["/", true],
+  ["/en", true],
   ["/daily", true],
   ["/love/1-card", true],
   ["/account", false],

@@ -280,7 +280,9 @@ if (fs.existsSync(serverI18nPath)) {
 }
 
 // 14. PERF: หน้าแรกต้องเป็น static prerender — ห้ามดึง locale จากเซิร์ฟเวอร์
-const homePagePath = path.join(process.cwd(), "src/app/(th)/page.tsx");
+/* ⚠️ หน้าแรกย้ายไปเรนเดอร์ด้วย Astro แล้ว — ไฟล์หน้าอยู่ที่ `astro/pages/index.astro`
+   ส่วนเนื้อหาที่ใช้ร่วมกันสองภาษายังอยู่ที่ `_shared/pages/home.tsx` เหมือนเดิม */
+const homePagePath = path.join(process.cwd(), "astro/pages/index.astro");
 const homePageContent = stripComments(fs.readFileSync(homePagePath, "utf-8"));
 const homeBodyContent = stripComments(
   fs.readFileSync(path.join(process.cwd(), "src/app/_shared/pages/home.tsx"), "utf-8"),
@@ -292,8 +294,12 @@ assert(
   "หน้าแรกห้ามเรียก getServerLocale() — ต้อง prerender ได้ และรับภาษาจากเส้นทางเท่านั้น (PERF)",
 );
 assert(
-  homePageContent.includes('HomePageBody locale="th"'),
-  'src/app/(th)/page.tsx ต้องส่ง locale="th" เป็นค่าคงที่',
+  homePageContent.includes('const locale = "th" as const;'),
+  'astro/pages/index.astro ต้องกำหนด locale="th" เป็นค่าคงที่ (ห้ามคำนวณจากคำขอ)',
+);
+assert(
+  fs.existsSync(path.join(process.cwd(), "astro/pages/en/index.astro")),
+  "ต้องมีหน้าแรกภาษาอังกฤษที่ astro/pages/en/index.astro",
 );
 
 console.log(`\n📊 ผลสรุปการทดสอบ: ผ่าน ${passed} ด่าน | ล้มเหลว ${failed} ด่าน\n`);

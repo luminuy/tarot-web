@@ -106,6 +106,13 @@ function robotsTags(robots: NonNullable<Metadata["robots"]>): string[] {
 export interface RenderMetadataOptions {
   /** แม่แบบ title ของ root layout — `"%s · SeerTarot"` */
   titleTemplate: string;
+  /**
+   * title ที่ใช้เมื่อหน้าไม่ได้ประกาศเอง (`title.default` ของ root layout)
+   *
+   * ⚠️ ค่านี้ **ไม่ผ่านแม่แบบ** ตามพฤติกรรมของ Next — ถ้าเผลอต่อแม่แบบให้อีกรอบ
+   *    ชื่อแบรนด์จะซ้ำสองครั้งในหน้าเดียว
+   */
+  defaultTitle?: string;
 }
 
 /**
@@ -142,6 +149,8 @@ export function renderMetadata(metadata: Metadata, options: RenderMetadataOption
       throw new Error("[astro/metadata] title ของหน้าย่อยต้องเป็นสตริงเท่านั้น");
     }
     tags.push(`<title>${esc(options.titleTemplate.replace("%s", metadata.title))}</title>`);
+  } else if (options.defaultTitle) {
+    tags.push(`<title>${esc(options.defaultTitle)}</title>`);
   }
 
   tags.push(...meta("description", metadata.description));

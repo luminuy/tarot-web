@@ -12,6 +12,7 @@ import {
   ROOT_KEYWORDS,
   ROOT_OPEN_GRAPH,
   ROOT_SHARED_METADATA,
+  ROOT_TITLE_DEFAULT,
   ROOT_TWITTER,
   SITE_THEME_COLOR,
   TITLE_TEMPLATE,
@@ -77,7 +78,11 @@ const metaTags = renderMetadata(
     twitter: ROOT_TWITTER[locale],
     ...metadata,
   },
-  { titleTemplate: TITLE_TEMPLATE },
+  {
+    titleTemplate: TITLE_TEMPLATE,
+    /* หน้าที่ไม่ได้ประกาศ title เอง ได้ `title.default` ของราก **โดยไม่ผ่านแม่แบบ** */
+    defaultTitle: ROOT_TITLE_DEFAULT[locale],
+  },
 );
 
 /* ── JSON-LD ที่จริงกับทุกหน้าในเว็บ (คัดลอกตรรกะจาก RootHtml.tsx ไม่ได้ดัดแปลง) ── */

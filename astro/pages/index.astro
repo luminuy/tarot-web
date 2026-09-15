@@ -1,0 +1,26 @@
+---
+import { buildHomeMetadata, homeJsonLdBlocks } from "@/app/_shared/pages/home";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { HomeSeoRoot } from "../components/HomeSeoRoot";
+import { TarotFlowRoot } from "../islands/TarotFlowRoot";
+
+/**
+ * 🏠 หน้าแรก (ต้นไม้ภาษาไทย)
+ *
+ * ⚠️ ห้ามใส่ `SiteHeaderRoot` / `SiteFooterRoot` ที่นี่ — `TarotFlow` เรนเดอร์ทั้งสองอย่าง
+ *    ของตัวเองอยู่ข้างในแล้ว (เหมือนตอนอยู่กับ Next เป๊ะ) ถ้าเติมจะได้หัวเว็บซ้อนสองชั้น
+ */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={buildHomeMetadata(locale)}>
+  {homeJsonLdBlocks(locale).map((block) => (
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(block)} />
+  ))}
+  <TarotFlowRoot locale={locale} client:load>
+    <Fragment slot="seoContent">
+      <HomeSeoRoot locale={locale} />
+    </Fragment>
+  </TarotFlowRoot>
+</BaseLayout>

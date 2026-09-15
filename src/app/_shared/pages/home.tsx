@@ -52,7 +52,7 @@ export function buildHomeMetadata(locale: Locale): Metadata {
   };
 }
 
-function buildWebAppJsonLd(locale: Locale) {
+export function buildWebAppJsonLd(locale: Locale) {
   const isEnglish = locale === "en";
   return {
     "@context": "https://schema.org",
@@ -71,6 +71,15 @@ function buildWebAppJsonLd(locale: Locale) {
     },
     inLanguage: locale,
   };
+}
+
+/**
+ * JSON-LD ทั้งสามก้อนของหน้าแรก — แยกออกมาให้หน้า `.astro` เรียกใช้ชุดเดียวกันได้
+ * (island ของ Astro ต้องอยู่ระดับเทมเพลต จึงเรนเดอร์ `<script>` พวกนี้เองไม่ได้)
+ */
+export function homeJsonLdBlocks(locale: Locale): object[] {
+  const isEnglish = locale === "en";
+  return [buildWebAppJsonLd(locale), generateFaqJsonLd(isEnglish), generateHowToJsonLd(isEnglish)];
 }
 
 export function HomePageBody({ locale }: { locale: Locale }) {

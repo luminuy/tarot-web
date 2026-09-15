@@ -20,6 +20,18 @@ import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL } from "@/lib/config/site";
 /** ต่อท้ายทุก title ของหน้าย่อย — `astro/lib/metadata.ts` ใช้ค่าเดียวกันนี้ */
 export const TITLE_TEMPLATE = "%s · SeerTarot";
 
+/**
+ * title ของหน้าที่ **ไม่ได้ประกาศ title ของตัวเอง** (ตอนนี้มีหน้าเดียวคือหน้าแรก)
+ *
+ * ⚠️ ค่านี้ไม่ผ่านแม่แบบ `TITLE_TEMPLATE` — Next ใช้ `title.default` ตรง ๆ
+ *    ถ้าเผลอต่อ " · SeerTarot" ให้อีกรอบ จะกลายเป็นชื่อแบรนด์ซ้ำสองครั้งในหน้าเดียว
+ *    (ด่าน `test-meta-length` มีข้อตรวจ "ชื่อแบรนด์ซ้ำสองรอบใน title" ไว้แล้ว)
+ */
+export const ROOT_TITLE_DEFAULT: Record<"th" | "en", string> = {
+  th: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
+  en: "Free Online Tarot Reading With an AI Tarot Reader",
+};
+
 export const SITE_AUTHORS: Metadata["authors"] = [{ name: "SeerTarot Sanctuary" }];
 export const SITE_CREATOR = "SeerTarot Sanctuary";
 export const SITE_PUBLISHER = "SeerTarot Sanctuary";
