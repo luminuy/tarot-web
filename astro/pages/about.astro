@@ -1,0 +1,16 @@
+---
+import { aboutMetadataTh } from "@/app/_shared/pages/about-th";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { AboutBodyThRoot } from "../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+
+/** 🏛️ เกี่ยวกับวิหาร — หน้าข้อความล้วน ไม่มีส่วนไหนต้องใช้ JS เลย */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={aboutMetadataTh}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <AboutBodyThRoot />
+  <SiteFooterRoot locale={locale} spacing="tight" />
+</BaseLayout>

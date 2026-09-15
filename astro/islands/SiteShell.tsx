@@ -1,3 +1,5 @@
+import type { ComponentProps } from "react";
+
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { LocaleProvider } from "@/lib/i18n";
@@ -19,10 +21,17 @@ export function SiteHeaderRoot({ locale }: { locale: Locale }) {
   );
 }
 
-export function SiteFooterRoot({ locale }: { locale: Locale }) {
+export function SiteFooterRoot({
+  locale,
+  spacing,
+}: {
+  locale: Locale;
+  /** ต้องส่งให้ตรงกับ section layout เดิมของหน้านั้น ๆ (บางหน้าใช้ `"tight"`) */
+  spacing?: ComponentProps<typeof SiteFooter>["spacing"];
+}) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <SiteFooter />
+      <SiteFooter spacing={spacing} />
     </LocaleProvider>
   );
 }
