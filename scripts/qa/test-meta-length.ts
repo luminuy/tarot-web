@@ -19,10 +19,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { BRAND_SUFFIX, TITLE_MAX, DESCRIPTION_MAX } from "../../src/lib/config/meta-length";
-import { primaryOutputDir } from "./lib/rendered-pages";
+import { collectRenderedPages, primaryOutputDir } from "./lib/rendered-pages";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -56,15 +56,6 @@ function ensureBuildExists(): void {
   }
 }
 
-function collectHtml(dir: string, acc: string[] = []): string[] {
-  if (!fs.existsSync(dir)) return acc;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) collectHtml(full, acc);
-    else if (entry.name.endsWith(".html")) acc.push(full);
-  }
-  return acc;
-}
 
 /** คืนข้อความที่ผู้ใช้เห็นจริง — HTML entity ต้องถูกถอดก่อนนับ ("&amp;" คือ 1 ตัวอักษร ไม่ใช่ 5) */
 function decodeEntities(raw: string): string {
@@ -98,8 +89,14 @@ export function testMetaLength(): boolean {
 
   ensureBuildExists();
 
-  const files = collectHtml(APP_DIR);
-  if (files.length === 0) {
+  /*
+   * ⚠️ ต้องอ่านจาก **ทุกเครื่องมือเรนเดอร์** ไม่ใช่แค่รากแรก
+   * ของเดิมใช้ `primaryOutputDir()` ตัวเดียว ซึ่งคือของ Next — ตั้งแต่หน้าเนื้อหา
+   * 297 หน้าย้ายไป Astro ด่านนี้จึงเลิกตรวจหน้าเหล่านั้นไปเงียบ ๆ ทั้งที่เป็น
+   * หน้าที่คนมาจากผลค้นหาลงจริงเกือบทั้งหมด (ปัญหาเดียวกับ INC-0165 ของด่านงบน้ำหนัก)
+   */
+  const pages = collectRenderedPages();
+  if (pages.length === 0) {
     console.error("❌ ไม่พบไฟล์ HTML ที่ build ออกมาเลย — ด่านนี้ตรวจอะไรไม่ได้");
     return false;
   }
@@ -113,9 +110,11 @@ export function testMetaLength(): boolean {
   let worstTitle = 0;
   let worstDescription = 0;
 
-  for (const file of files) {
-    const rel = path.relative(APP_DIR, file);
-    if (allowed.has(rel)) continue;
+  for (const page of pages) {
+    const file = page.file;
+    /* ชื่อที่ใช้รายงานและเทียบกับรายการยกเว้น — ใช้ path แบบเดิมเพื่อไม่ให้ ALLOW เดิมเพี้ยน */
+    const rel = path.relative(page.renderer === "next" ? APP_DIR : ROOT, file);
+    if (allowed.has(rel) || allowed.has(path.basename(rel))) continue;
 
     const { title, description } = extract(fs.readFileSync(file, "utf-8"));
     checked++;
@@ -141,7 +140,7 @@ export function testMetaLength(): boolean {
     }
   }
 
-  console.log(`\n  ตรวจแล้ว ${checked} หน้า (จาก ${files.length} ไฟล์ HTML)`);
+  console.log(`\n  ตรวจแล้ว ${checked} หน้า (จาก ${pages.length} ไฟล์ HTML)`);
   console.log(`  เพดาน: title ≤ ${TITLE_MAX} · description ≤ ${DESCRIPTION_HARD_MAX}`);
   console.log(`  ยาวสุดที่วัดได้: title ${worstTitle} · description ${worstDescription}`);
 
@@ -172,6 +171,16 @@ export function testMetaLength(): boolean {
   return true;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+/*
+ * ⚠️ ห้ามเทียบด้วย `file://${process.argv[1]}` เด็ดขาด — ต้องผ่าน `pathToFileURL()` เสมอ
+ * ---------------------------------------------------------------------------
+ * `import.meta.url` เข้ารหัสอักขระที่ไม่ใช่ ASCII เป็น percent-encoding
+ * ส่วน `process.argv[1]` เป็น path ดิบ · บนเครื่องที่ path ของโปรเจกต์มีภาษาไทย
+ * (เช่นโฟลเดอร์ `เว็บไพ่` ของเจ้าของ) สองค่านี้ **ไม่มีวันเท่ากัน**
+ * ➔ ด่านนี้จึงไม่ทำงานเลยสักบรรทัดเมื่อรันบนเครื่อง dev และเงียบสนิท (exit 0 ทุกครั้ง)
+ * แต่ทำงานปกติบน CI ซึ่ง path เป็น ASCII ล้วน — เป็นด่านที่ "ผ่านบนเครื่องแต่ตกที่ CI"
+ * แบบที่หาสาเหตุยากที่สุด (เจอจริง 2026-09-15 · ดู INCIDENT_LOG)
+ */
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   process.exit(testMetaLength() ? 0 : 1);
 }

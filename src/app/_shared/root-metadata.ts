@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
+import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL } from "@/lib/config/site";
+
 /**
  * 🏷️ metadata ระดับรากที่ "จริงกับทุกหน้าในเว็บ" — แหล่งความจริงเดียว
  * ===========================================================================
@@ -78,6 +80,75 @@ export const ROOT_KEYWORDS: Record<"th" | "en", string[]> = {
     "78 tarot cards",
     "SeerTarot",
   ],
+};
+
+
+
+/**
+ * 📄 คำอธิบายและ canonical/hreflang ระดับราก
+ *
+ * ⚠️ Next ให้หน้าย่อยที่ไม่ได้ประกาศเองสืบทอดสองช่องนี้ไปด้วย — หน้าเดียวในเว็บที่เข้าข่าย
+ *    คือห้องแชท (`/reading/chat`) ซึ่งประกาศแค่ `title` กับ `robots: noindex`
+ * ⚠️ ข้อความทั้งสองชุดต้อง **คัดลอกมาจาก root layout เดิมแบบเป๊ะทุกตัวอักษร** ห้ามเขียนใหม่เอง
+ *    (รอบแรกเผลอเขียนข้อความอังกฤษขึ้นเองแล้วมันยาวเกินเพดาน SERP จน CI ตก — ดู INC ล่าสุด)
+ *
+ *    ถ้าไม่ผสานให้เหมือนกัน หน้านั้นจะไม่มี `description` และ `canonical` เลย
+ *    (หน้า noindex อยู่แล้วก็จริง แต่ "เหมือนเดิมเป๊ะ" สำคัญกว่าความเห็นของเราตอนย้ายบ้าน
+ *     ถ้าจะแก้ให้ดีขึ้นกว่าเดิม ให้แก้เป็นงานแยกที่ตั้งใจ ไม่ใช่ผลข้างเคียงของการย้าย)
+ */
+export const ROOT_DESCRIPTION: Record<"th" | "en", string> = {
+  th: "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้แม่หมอ AI ทำนายสดทีละใบ มีผัง 25 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
+  en: "Free online tarot reading with the original 1909 Rider-Waite deck. Shuffle and draw all 78 cards yourself, then read a live AI interpretation.",
+};
+
+export const ROOT_ALTERNATES: Record<"th" | "en", Metadata["alternates"]> = {
+  th: buildAlternates("/", { locale: "th", englishTwin: true }),
+  en: buildAlternates("/", { locale: "en", englishTwin: true }),
+};
+
+/**
+ * 🖼️ Open Graph / Twitter ระดับรากของแต่ละภาษา
+ *
+ * ⚠️ Next ให้หน้าย่อยที่ **ไม่ได้ประกาศ `openGraph` ของตัวเอง** สืบทอดชุดนี้ไปทั้งก้อน
+ *    (ถ้าหน้าย่อยประกาศเอง จะ **แทนที่ทั้งก้อน** ไม่ผสานทีละฟิลด์ — ดู `buildAlternates` ใน site.ts)
+ *    `BaseLayout.astro` จึงต้องผสานแบบ "ทั้งก้อน" เหมือนกันเป๊ะ
+ *    ถ้าลืม หน้าอย่าง `/reading/chat` ที่ไม่ได้ประกาศเองจะ **ไม่มีภาพแชร์เลย**
+ *    (เจอจริงตอนย้ายห้องแชท — ด่าน `test-og-images` จับได้)
+ */
+export const ROOT_OPEN_GRAPH: Record<"th" | "en", Metadata["openGraph"]> = {
+  th: {
+    type: "website",
+    locale: "th_TH",
+    siteName: "SeerTarot",
+    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
+    description:
+      "สับไพ่และเลือกหยิบไพ่ 78 ใบด้วยมือคุณเอง ให้แม่หมอ AI พยากรณ์ลึกซึ้งทีละใบ พร้อมหลักฐานความโปร่งใส Provably-Fair",
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+  },
+  en: {
+    type: "website",
+    locale: "en_US",
+    siteName: "SeerTarot",
+    title: "Free Online Tarot Reading · Shuffle & Draw With an AI Tarot Reader",
+    description:
+      "Shuffle and draw all 78 Rider-Waite cards with your own hand, then read a live card-by-card interpretation — provably fair with SHA-256.",
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: OG_IMAGE_ALT }],
+  },
+};
+
+export const ROOT_TWITTER: Record<"th" | "en", Metadata["twitter"]> = {
+  th: {
+    card: "summary_large_image",
+    title: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
+    description: "ดูดวงไพ่ทาโรต์ออนไลน์ สับไพ่และเลือกหยิบไพ่ด้วยมือคุณเอง พร้อมระบบ Provably-Fair",
+    images: [OG_IMAGE_URL],
+  },
+  en: {
+    card: "summary_large_image",
+    title: "Free Online Tarot Reading · Shuffle & Draw With an AI Tarot Reader",
+    description: "Draw all 78 Rider-Waite cards yourself and read a live, provably fair interpretation.",
+    images: [OG_IMAGE_URL],
+  },
 };
 
 /**
