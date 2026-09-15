@@ -38,7 +38,7 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
-### 🗓️ 2026-09-15 (รอบ 79): 🛟 คำอ่านสำรองออฟไลน์ที่ไม่มีใครตรวจมา 4 เรื่องพร้อมกัน
+### 🗓️ 2026-09-15 (รอบ 80): 🛟 คำอ่านสำรองออฟไลน์ที่ไม่มีใครตรวจมา 4 เรื่องพร้อมกัน
 
 **บริบท**: คำอ่านสำรอง (mock) ถึงมือผู้ใช้จริงเมื่อไม่มีคีย์ AI หรือ Gemini ไม่ตอบเลยสักโมเดล
 (`!sawAnyResponse`) ตัวมันเองไม่ได้กุไพ่ — ประกอบจากสารานุกรม 78 ใบจริงและ usage = 0 เสมอ
