@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { localeHref } from "@/lib/i18n/paths";
 import { CardImage } from "@/components/card/CardImage";
 import { getHomeFaqs } from "@/data/home-seo";

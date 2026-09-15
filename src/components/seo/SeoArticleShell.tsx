@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { useLocale } from "@/lib/i18n";
 
 export interface SeoFaqItem {

@@ -18,8 +18,11 @@
  * รันเดี่ยว: npx tsx scripts/qa/test-astro-routes.ts
  */
 
+import fs from "node:fs";
+import path from "node:path";
+
 import { ASTRO_ROUTE_PREFIXES, isAstroRoute } from "../../src/lib/routing/astro-routes";
-import { collectRenderedPages } from "./lib/rendered-pages";
+import { collectRenderedPages, ROOT } from "./lib/rendered-pages";
 
 let failed = 0;
 const check = (label: string, ok: boolean, detail?: string) => {
@@ -109,6 +112,42 @@ check(
   "ฝาแฝดไทย–อังกฤษของหน้าที่ย้ายแล้ว ถูกย้ายไปด้วยกันทั้งคู่",
   orphanTwins.length === 0,
   orphanTwins.slice(0, 5).join(" · "),
+);
+
+// ── 5. ห้ามลิงก์ไปหน้า Astro ด้วย next/link ตรง ๆ ─────────────────────────
+console.log("\n── 5. ลิงก์ข้ามเครื่องมือเรนเดอร์ ──");
+
+function walkSource(dir: string, acc: string[] = []): string[] {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walkSource(full, acc);
+    else if (/\.tsx?$/.test(entry.name)) acc.push(full);
+  }
+  return acc;
+}
+
+/** ไฟล์ที่ได้รับอนุญาตให้นำเข้า `next/link` ตรง ๆ — เป็นตัวห่อที่ตัดสินใจแทนคนอื่น */
+const LINK_WRAPPERS = ["src/components/ui/RouteLink.tsx"];
+
+const rawLinkOffenders: string[] = [];
+for (const file of walkSource(path.join(ROOT, "src"))) {
+  const rel = path.relative(ROOT, file).split(path.sep).join("/");
+  if (LINK_WRAPPERS.includes(rel)) continue;
+  const source = fs.readFileSync(file, "utf-8");
+  if (!/from "next\/link"/.test(source)) continue;
+  /* มีลิงก์ที่ชี้ไปยังกลุ่มหน้าที่ย้ายไป Astro แล้วหรือไม่ (ทั้งสตริงตรงและ template) */
+  const linksToAstro = ASTRO_ROUTE_PREFIXES.some((prefix) =>
+    new RegExp(`href=(?:"|\`|\\{"|\\{\`)${prefix}(?:/|"|\`)`).test(source),
+  );
+  if (linksToAstro) rawLinkOffenders.push(rel);
+}
+
+check(
+  "ไม่มีไฟล์ไหนลิงก์ไปหน้าที่ย้ายไป Astro ด้วย `next/link` ตรง ๆ",
+  rawLinkOffenders.length === 0,
+  rawLinkOffenders.length
+    ? `${rawLinkOffenders.join(" · ")}\n      ➔ เปลี่ยนไปใช้ RouteLink หรือ LocaleLink · ไม่งั้นทุกคลิกจะยิงขอ RSC ที่ไม่มีอยู่จริงก่อนหนึ่งเส้น`
+    : undefined,
 );
 
 console.log(

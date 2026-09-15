@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { RouteLink as Link } from "@/components/ui/RouteLink";
 
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";

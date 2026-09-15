@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { RouteLink as Link } from "@/components/ui/RouteLink";
 import type { TarotCard } from "@/data/cards/types";
 import { SPREADS } from "@/data/spreads";
 import { ARTICLES } from "@/data/articles";
