@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion } from "motion/react";
 import { STAGGER, DUR, EASE } from "@/lib/motion";
-import type { Reading } from "@/lib/schema/reading";
+import { YES_NO_DISPLAY_EN, type Reading } from "@/lib/schema/reading";
 import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { cardByIndex, type TarotCard } from "@/data/cards";
@@ -505,7 +505,9 @@ isEnglish
                 <div className="flex items-center gap-2">
                   {reading.yesNoAnswer && (
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-gold-ink text-surface">
-                      {isEnglish ? `Answer: ${reading.yesNoAnswer}` : `คำตอบ: ${reading.yesNoAnswer}`}
+                      {isEnglish
+                        ? `Answer: ${YES_NO_DISPLAY_EN[reading.yesNoAnswer] ?? reading.yesNoAnswer}`
+                        : `คำตอบ: ${reading.yesNoAnswer}`}
                     </span>
                   )}
                   <TTSReaderButton
