@@ -32,6 +32,7 @@
 | [docs/plans/ENTITLEMENT_PLAN.md](docs/plans/ENTITLEMENT_PLAN.md) | แผนพัฒนาระบบสมาชิกและโควตาเปิดไพ่ |
 | [docs/plans/MASTER_PLAN_2026-09-06.md](docs/plans/MASTER_PLAN_2026-09-06.md) | 🗺️ **แผนแม่บทรวม — เริ่มอ่านที่นี่** · **ตรวจใหม่ทั้งแผ่น 2026-09-14** (ทุกตัวเลขวัดสดจากบิลด์จริง + ยิง production จริง ไม่ได้คัดลอกต่อ) · 7 งานลงมือได้ทันที · 3 งานรอคนนอกทีม · **2 เรื่องที่รอเจ้าของเคาะ** · อยู่ในขอบเขตด่านตรวจตัวเลขแล้ว |
 | [docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md) | 🪶 **แผนย้ายเว็บไปสถาปัตยกรรม Astro + React Island** — คลื่นที่ 1 เสร็จแล้ว (`/cards/**` 174 หน้า · JS ลด 36–49% · แท็ก `<script>` ในหน้าไพ่รายใบจาก 20 ก้อนเหลือ 0) · หน้าที่ย้ายแล้วถูก Cloudflare ตอบจากขอบโดยไม่ปลุก Worker · มีชั้นแปลงปลั๊ก `next/link`·`next/navigation`·`next/script` ทำให้คอมโพเนนต์ทั้ง 90 ตัวใช้ได้สองเครื่องมือโดยไม่ต้องแก้สักบรรทัด · **กติกา island 5 ข้อ** · **กับดัก 7 ข้อที่เหยียบมาแล้ว** (เผลอ import ข้อมูลใน island = บันเดิลพุ่ง 980 KB) · ลำดับคลื่นถัดไปถึงวันถอด Next ทิ้ง |
+| [docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md](docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md) | 📐 **สูตรความสูงการ์ดไพ่ + วิธีวัดใหม่** — กริดไพ่ 78 ใบใช้ `content-visibility` ได้โดยไม่กระตุก เพราะ (1) การ์ดทุกใบสูงเท่ากัน (2) ความสูงที่จองคำนวณจากความกว้างจอด้วย `calc(vw)` ต่อ breakpoint ไม่ใช่ตัวเลขเดา · ผลวัด: `/cards` TBT **~4,200 ➔ 14–42 ms** · perf 50 ➔ 78–79 · CLS 0 · **อ่านก่อนแตะหน้าตาการ์ดไพ่ทุกครั้ง** (ด่านที่ 62 เฝ้าอยู่) · มีกับดัก "ต้องหัก 26px ของ content box" |
 | [docs/plans/HANDOFF_BLOG_TBT_2026-09-12.md](docs/plans/HANDOFF_BLOG_TBT_2026-09-12.md) | ✅ **TBT หน้า `/blog` (ISSUE-043) — ปิดเคสแล้ว 2026-09-15** · วัดด้วย Lighthouse 12.8.2 บน production จริง: TBT **660 ➔ 24 ms** · perf 59 ➔ **85** ➔ จากหน้าที่แย่กว่าหน้าถัดไป 4.1 เท่า กลายเป็น **หน้าที่เบาที่สุดในสี่หน้าที่วัด** (`/` 120 · `/cards` 232 · `/spreads` 335 ms) · 🔴 **แต่เจอเรื่องใหญ่กว่าระหว่างวัด — ISSUE-047**: สคริปต์ตรวจบอตของ Cloudflare (`cdn-cgi/challenge-platform/.../jsd/main.js`) ที่ถูกฉีดเข้า HTML **ทุกหน้า** กินเธรดหลัก **3,707–4,953 ms** มากกว่าโค้ดเราทั้งหน้ารวมกัน (บล็อกทิ้งแล้ว TBT ตกจาก 1,256–2,206 ms ทันที) — **รอเจ้าของตัดสินใจ เป็นสวิตช์ใน Cloudflare Dashboard ไม่ใช่โค้ด** · เก็บไว้เป็นคู่มือ **วิธีวัดที่ไม่ต้องพึ่งโควตา PSI** + **กับดักการวัด 4 ข้อ** + บทเรียน INC-0172 |
 | [docs/plans/HANDOFF_BUNDLE_DIET_2026-09-07.md](docs/plans/HANDOFF_BUNDLE_DIET_2026-09-07.md) | ⚡ **แผนส่งต่อ — ลดน้ำหนัก JS รอบสุดท้าย** · เหลือของหนัก 3 ก้อน (motion 40KB · ข้อมูลผัง 17KB · พจนานุกรม 4KB) ทุกก้อนเป็นบั๊กแบบ P-01 · พร้อมข้อค้นพบว่าตัวเลขเดิมสูงเกินจริง 39KB เพราะนับ polyfills ที่ `noModule` |
 | [docs/plans/HANDOFF_EN_TRANSLATION_2026-09-06.md](docs/plans/HANDOFF_EN_TRANSLATION_2026-09-06.md) | 🌏 **แผนส่งงานแปลไทย → อังกฤษ (ขั้น C)** — 318 หน่วยข้อความ · 8,848 คำ · อภิธานศัพท์บังคับ · เพดานความยาว · เกณฑ์รับงาน · ไฟล์ส่งทีมแปลสร้างด้วย `npm run i18n:export` |
@@ -76,7 +77,7 @@
 10. **Human-First Copywriting**: ภาษาไทยธรรมชาติ เข้าใจง่าย ห้ามศัพท์หุ่นยนต์แข็งทื่อ
 11. **Multi-Agent Collision Guard**: เช็ก `npm run agent:status` + ล็อคด้วย `agent:lock` ก่อนแก้ ปลดล็อคด้วย `agent:unlock` เมื่อเสร็จ
 12. **One Branch per Milestone**: ห้ามแตกกิ่งค้าง ต้อง rebase บน `origin/main` เสมอ จบงานต้องรัน `pr:auto` ➔ `git:tidy` ให้ครบ
-13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 61 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
+13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 62 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
     > ⛔ **`push` แล้วจบ = งานยังไม่เสร็จ** — automation ทั้งชุดเริ่มทำงาน**เมื่อ PR ถูกเปิดเท่านั้น** (ISSUE-005)
     > push เฉย ๆ ไม่มี CI ไม่มี merge ไม่มี deploy งานจะค้างบน branch เงียบ ๆ จนกว่าเจ้าของจะมากดปุ่มเอง
     >
@@ -103,7 +104,7 @@
 - `npm run agent:status` — ดูสถานะ Agent ที่ทำงานอยู่
 - `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` — ล็อคไฟล์ก่อนแก้
 - `npm run agent:unlock -- --agent <ชื่อ>` — ปลดล็อคเมื่อเสร็จ
-- `npm run repo:verify` — ตรวจครบทั้ง 61 ด่าน (ใช้หลัก)
+- `npm run repo:verify` — ตรวจครบทั้ง 62 ด่าน (ใช้หลัก)
 - `npm run typecheck` — typecheck อย่างเดียว
 - `npm run log:sync` — ซิงก์สถานะ/บันทึกงาน (บังคับ)
 - `npm run cards:variants` — สร้างภาพไพ่ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)

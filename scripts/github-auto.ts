@@ -140,6 +140,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🧭 หัวเว็บอยู่นิ่งตอนเลื่อน & ทุกหน้าทั้งเว็บมีหัวเว็บ+ฟุตเตอร์ครบ (เลเยอร์ compositor · safe-area · ไม่มี scroll container ครอบ · 404 ทั้งสองไฟล์)", cmd: TSX, args: ["scripts/qa/test-sticky-header.ts"] },
   { label: "🌐 โหมดอังกฤษไม่มีภาษาไทยหลุด (เรนเดอร์จริง 41 จอทั่วเว็บ · คำสำคัญไพ่ 78 ใบครบสองภาษา)", cmd: TSX, args: ["scripts/qa/test-en-thai-leak.tsx"] },
   { label: "⚡ งบคำขอต่อการเปิดหน้า (ผู้ชมที่ไม่ล็อกอินต้องไม่ยิง /api/* เลย · ล็อกอินแล้วใช้ /api/bootstrap เส้นเดียว)", cmd: TSX, args: ["scripts/qa/test-request-budget.ts"] },
+  { label: "📐 สูตรความสูงการ์ดไพ่ยังตรงกับของจริง (กัน content-visibility จองความสูงผิดแล้วจอกระตุก · INC-0174)", cmd: TSX, args: ["scripts/qa/test-card-tile-height.ts"] },
   { label: "✦ คุณภาพโมชั่นทั้งเว็บ (ไม่มี transition-all · ไม่มี backdrop-filter · ลูปไม่รู้จบต้องเป็น CSS · โทเคนจังหวะกลางผูกอยู่)", cmd: TSX, args: ["scripts/qa/test-motion-quality.ts"] },
   { label: "♿ a11y ระดับวิกฤตทั้งเว็บ 309 หน้า (สายด่วน 1323/1669 อ่านออกบนพื้นมืด · หัวเว็บ/ฟุตเตอร์นอก <main> · h1 เดี่ยว · ลำดับหัวข้อ)", cmd: TSX, args: ["scripts/qa/test-a11y-critical.ts"] },
   { label: "🎨 พาเลตยังเป็นชุดเดียว (สีฮาร์ดโค้ดไม่เพิ่ม · ไม่มีสีที่ถอดไปแล้วกลับมา · gold ห้ามเป็นตัวอักษรเล็ก)", cmd: TSX, args: ["scripts/qa/test-palette-drift.ts"] },
