@@ -159,10 +159,6 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
                 return (
                   <tr
                     key={card.id}
-                    style={{
-                      contentVisibility: "auto",
-                      containIntrinsicSize: "auto 60px",
-                    }}
                     className="hover:bg-surface-warm/70 transition-colors group"
                   >
                     {/* Index */}

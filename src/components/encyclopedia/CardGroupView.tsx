@@ -231,15 +231,13 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
                 key={card.id}
                 href={`/cards/${card.id}`}
                 prefetch={false}
-                /* ⚠️ ตัวเลขนี้ต้องตรงกับความสูงจริงของใบการ์ด ไม่ใช่ค่าเดาลอย ๆ
-                   วัดจริง 2026-09-14 ที่ 412px: 406px (320px: 419px · desktop: 409px)
-                   ของเดิมเขียนไว้ 380px ต่ำกว่าจริง ~26px ต่อแถว — กริด 78 ใบมี 39 แถว
-                   ทุกแถวที่เบราว์เซอร์เรนเดอร์เสร็จจึงหดเข้าหากันแล้วดันของข้างล่างขึ้นมา
-                   กลายเป็นลูกโซ่ของการคำนวณเลย์เอาต์ซ้ำ (forced reflow) ตลอดการโหลดหน้า */
-                style={{
-                  contentVisibility: "auto",
-                  containIntrinsicSize: "auto 406px",
-                }}
+                /* ⚠️ ห้ามใส่ `content-visibility` กลับเข้ามาที่กริดนี้ (INC-0174 · ด่านกฎ 10 บล็อกอยู่)
+                   มันเร็วขึ้นจริง (TBT 12–52 ms เทียบกับ 1,319–6,761 ms) แต่แลกมาด้วยหน้าที่กระตุก
+                   15 ครั้งตอนเลื่อนขึ้น · CLS 0.68 ซึ่งตกเกณฑ์ Core Web Vitals (เกณฑ์ผ่านคือต่ำกว่า 0.1)
+                   สาเหตุ: `contain-intrinsic-size` เดาความสูงได้ค่าเดียว แต่ความสูงจริงของการ์ด
+                   เปลี่ยนตามความกว้างจอแบบต่อเนื่อง (วัดจริง 340 · 387 · 419 · 498 · 380 · 351 · 409 px
+                   ที่จอ 320 → 1280px) ➔ ไม่มีตัวเลขไหนถูกสักจอ
+                   ถ้าจะเอาความเร็วคืนต้องทำให้ความสูงการ์ดผูกกับความกว้างด้วย `aspect-ratio` ก่อน — ดู ISSUE-048 */
                 className="rounded-xl border border-line bg-surface p-3 flex flex-col justify-between hover:border-gold transition duration-300 group cursor-pointer relative overflow-hidden transform-gpu hover:-translate-y-1 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
               >
                 {/* Card Artwork */}
