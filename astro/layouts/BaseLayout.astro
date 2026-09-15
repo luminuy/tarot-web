@@ -1,0 +1,146 @@
+---
+import type { Metadata } from "next";
+
+import "@/app/globals.css";
+
+import { buildSpeculationRules } from "@/app/_shared/speculation-rules";
+import {
+  FONT_PRELOADS,
+  GOOGLE_SITE_VERIFICATION,
+  ROOT_SHARED_METADATA,
+  SITE_THEME_COLOR,
+  TITLE_TEMPLATE,
+  VIEWPORT_CONTENT,
+} from "@/app/_shared/root-metadata";
+import { BRAND_SOCIAL_PROFILES, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
+import { CONSENT_STORAGE_KEY } from "@/lib/analytics-consent";
+import { getImageKitOrigin } from "@/lib/tarot/card-image";
+import type { Locale } from "@/lib/i18n/types";
+
+import { renderMetadata } from "../lib/metadata";
+import { ClientChromeRoot, FloatingChromeRoot, SkipLinkRoot } from "../islands/SiteChrome";
+
+/**
+ * 🏛️ โครง `<html>` ของหน้าที่เรนเดอร์ด้วย Astro — ฝาแฝดของ `src/app/_shared/RootHtml.tsx`
+ * ===========================================================================
+ *
+ * ⚠️ กฎเหล็ก: ของที่อยู่ใน <head> ของสองไฟล์นี้ต้อง **ตรงกันทุกแท็ก**
+ *    ผู้ใช้และบอตไม่รู้ว่าหน้าไหนเรนเดอร์ด้วยอะไร เว็บต้องเป็นเว็บเดียว
+ *    ด่าน `scripts/qa/test-render-parity.ts` เทียบให้อัตโนมัติทุกครั้งที่บิลด์
+ *
+ * 🔒 ภาษาถูก "ตรึง" ตาม URL เสมอในหน้าที่เรนเดอร์ด้วย Astro
+ * -------------------------------------------------------------------------
+ * ใน Next ทั้งหน้าอยู่ใน `LocaleProvider` ต้นเดียว ผู้ใช้ที่เคยเลือกอังกฤษไว้ใน cookie
+ * จึงเห็นทั้งหน้าสลับเป็นอังกฤษได้แม้ยืนอยู่บน URL ไทย
+ *
+ * ใน Astro เนื้อหาส่วนใหญ่เป็น HTML ที่ไม่มี JS กำกับ (นั่นคือทั้งหมดของเรื่อง)
+ * ถ้าปล่อยให้ราก React แต่ละต้นสลับภาษาตาม cookie ได้เอง จะได้หน้าที่หัวเว็บเป็นอังกฤษ
+ * แต่เนื้อหาเป็นไทย — แย่กว่าการตรึงภาษาไว้ตาม URL มาก
+ *
+ * หน้าเหล่านี้มีฝาแฝดอังกฤษครบทุกหน้าอยู่แล้ว (`/cards/x` ↔ `/en/cards/x`)
+ * ปุ่มสลับภาษาจึง **พาไปยัง URL ฝาแฝด** ตามที่ `LanguageSwitcher` ทำอยู่แล้ว
+ * ผู้ใช้ได้ภาษาที่ต้องการครบทั้งหน้า และ canonical ก็ตรงกับสิ่งที่เห็นเสมอ
+ */
+interface Props {
+  locale: Locale;
+  /** metadata ของหน้านี้ — อ็อบเจกต์ชุดเดียวกับที่ `src/app/_shared/pages/*` ส่งให้ Next */
+  metadata: Metadata;
+  /** ภาพที่ต้องมาถึงก่อนใครในหน้านี้ (LCP) — ใส่เมื่อรู้แน่ว่าเป็นภาพไหน */
+  preloadImages?: string[];
+}
+
+const { locale, metadata, preloadImages = [] } = Astro.props;
+
+const isEnglish = locale === "en";
+const imageCdnOrigin = getImageKitOrigin();
+/* ผสาน metadata ของรากกับของหน้าแบบทีละฟิลด์ — หน้าย่อยทับได้ (พฤติกรรมเดียวกับ Next) */
+const metaTags = renderMetadata({ ...ROOT_SHARED_METADATA, ...metadata }, {
+  titleTemplate: TITLE_TEMPLATE,
+});
+
+/* ── JSON-LD ที่จริงกับทุกหน้าในเว็บ (คัดลอกตรรกะจาก RootHtml.tsx ไม่ได้ดัดแปลง) ── */
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "SeerTarot Sanctuary",
+  url: SITE_ORIGIN,
+  logo: {
+    "@type": "ImageObject",
+    url: `${SITE_ORIGIN}/icons/icon-512x512.png`,
+    width: 512,
+    height: 512,
+  },
+  sameAs: [...BRAND_SOCIAL_PROFILES, "https://github.com/luminuy/tarot-web"],
+  email: DEFAULT_SUPPORT_EMAIL,
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    email: DEFAULT_SUPPORT_EMAIL,
+    availableLanguage: ["th", "en"],
+  },
+  description: isEnglish
+    ? "A premium online 1909 Rider-Waite-Smith tarot sanctuary with a provably fair SHA-256 shuffle and an AI tarot reader."
+    : "วิหารพยากรณ์ไพ่ทาโรต์ออนไลน์ระดับพรีเมียม 1909 Rider-Waite-Smith พร้อมระบบสุ่มที่พิสูจน์ความยุติธรรมได้ (Provably Fair) และแม่หมอ AI",
+};
+
+const webSiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "SeerTarot",
+  alternateName: isEnglish ? "SeerTarot Sanctuary" : "วิหารพยากรณ์ไพ่ทาโรต์",
+  url: isEnglish ? `${SITE_ORIGIN}/en` : SITE_ORIGIN,
+  inLanguage: locale,
+};
+
+const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STORAGE_KEY)}))document.documentElement.setAttribute('data-consent-ask','')}catch(e){document.documentElement.setAttribute('data-consent-ask','')}`;
+---
+
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content={VIEWPORT_CONTENT} />
+    <meta name="theme-color" content={SITE_THEME_COLOR} />
+
+    {/* ✒️ ฟอนต์ไทยที่ตัดเอง — เหตุผลที่ต้องพรีโหลดครบทุกไฟล์อยู่ใน src/app/globals.css */}
+    {FONT_PRELOADS.map((href) => (
+      <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />
+    ))}
+    {/* 🖼️ โลโก้ในหัวเว็บ — โหลดแบบ eager ทุกหน้า (React 19 จองคิวให้เองในฝั่ง Next) */}
+    <link rel="preload" href="/logo.webp" as="image" />
+    {preloadImages.map((href) => (
+      <link rel="preload" href={href} as="image" />
+    ))}
+
+    {/* 🔌 CDN ภาพไพ่ — ห้ามใส่ crossorigin (เหตุผลเต็มอยู่ใน RootHtml.tsx) */}
+    {imageCdnOrigin && (
+      <>
+        <link rel="preconnect" href={imageCdnOrigin} />
+        <link rel="dns-prefetch" href={imageCdnOrigin} />
+      </>
+    )}
+
+    {/* 🍪 สวิตช์ของแถบขอความยินยอม PDPA — ต้องรันก่อนเฟรมแรกจะวาดเสมอ ห้ามใส่ defer/async */}
+    <script is:inline set:html={consentScript} />
+
+    {/* Speculation Rules API — กฎอยู่ที่ src/app/_shared/speculation-rules.ts ที่เดียว */}
+    <script type="speculationrules" is:inline set:html={JSON.stringify(buildSpeculationRules(isEnglish))} />
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-icon.png" sizes="180x180" type="image/png" />
+    {!isEnglish && <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />}
+
+    <Fragment set:html={metaTags.join("\n    ")} />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(organizationJsonLd)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webSiteJsonLd)} />
+  </head>
+  <body class="min-h-dvh font-sans antialiased">
+    {/* ⏭️ ต้องเป็น element แรกสุดใน <body> เสมอ — ห้ามแทรกอะไรไว้ข้างหน้า (WCAG SC 2.4.1) */}
+    <SkipLinkRoot locale={locale} />
+    <ClientChromeRoot locale={locale} client:idle />
+    <slot />
+    <FloatingChromeRoot locale={locale} />
+  </body>
+</html>

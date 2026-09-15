@@ -1,0 +1,17 @@
+---
+import { buildCardGroupMetadata } from "@/app/_shared/pages/card-group";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { CardGroupBodyRoot } from "../../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** 🃏 หน้าหมวดหมู่ไพ่ `swords` (ต้นไม้ภาษาไทย) — ไม่มีส่วนที่ต้องใช้ JS เลย */
+const locale = "th" as const;
+const groupId = "swords" as const;
+---
+
+<BaseLayout locale={locale} metadata={buildCardGroupMetadata(groupId, locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <CardGroupBodyRoot groupId={groupId} locale={locale} />
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

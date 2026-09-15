@@ -1,0 +1,21 @@
+---
+import { birthCardMetadataTh, MAJOR_CARDS } from "@/app/_shared/pages/birth-card-th";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { BirthCardBodyThRoot } from "../../components/PageBodies";
+import { BirthCardCalculatorRoot } from "../../islands/BirthCardCalculatorRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** 🎂 คำนวณไพ่ทาโรต์ประจำตัวจากวันเกิด (ต้นไม้ภาษาไทย) */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={birthCardMetadataTh}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <BirthCardBodyThRoot>
+    <Fragment slot="calculator">
+      <BirthCardCalculatorRoot majorCards={MAJOR_CARDS} locale={locale} client:idle />
+    </Fragment>
+  </BirthCardBodyThRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

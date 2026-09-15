@@ -13,14 +13,13 @@
 
 import assert from "node:assert";
 import fs from "node:fs";
-import path from "node:path";
 import { encodeOverlayText, truncateForOverlay, buildCloudinaryShareImageUrl } from "../../src/lib/media/cloudinary";
 import { buildPageOgImage } from "../../src/lib/media/og-image";
 import { getCategoryCardImage } from "../../src/lib/media/og-card-art";
 import { DECK } from "../../src/data/cards";
 import { ARTICLES } from "../../src/data/articles";
 import { SPREADS } from "../../src/data/spreads";
-import { primaryOutputDir } from "./lib/rendered-pages";
+import { collectRenderedPages } from "./lib/rendered-pages";
 
 
 console.log("=======================================================");
@@ -112,36 +111,21 @@ console.log(`  ✓ ทดสอบผังพยากรณ์ครบทั�
 // -------------------------------------------------------------
 console.log("── 3. ตรวจสอบไฟล์ HTML ที่เรนเดอร์จริง ──");
 
-function collectHtml(dir: string, acc: string[] = []): string[] {
-  if (!fs.existsSync(dir)) return acc;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) collectHtml(full, acc);
-    else if (entry.name.endsWith(".html")) acc.push(full);
-  }
-  return acc;
-}
 
 /* 🗺️ รากของไฟล์ HTML มาจาก `lib/rendered-pages.ts` ที่เดียว — ห้ามเขียน path เอง
    เพื่อให้วันที่เพิ่มเครื่องมือเรนเดอร์ตัวที่สอง ด่านนี้ครอบคลุมทันทีโดยไม่ต้องแก้
    (ด่าน `test-rendered-coverage.ts` บังคับข้อนี้อยู่) */
-const appHtmlDir = primaryOutputDir();
-if (!fs.existsSync(appHtmlDir)) {
-  console.log(`⚠️ ไม่พบโฟลเดอร์ ${appHtmlDir} — กรุณารัน npm run build ก่อน`);
-  process.exit(1);
-}
-
-const htmlFiles = collectHtml(appHtmlDir);
+const renderedPages = collectRenderedPages();
 const directCardRegex = /\/cards\/[^/?#]+\.(jpg|jpeg|png|webp)/i;
 
 const ogImages = new Map<string, number>();
 const violations: { file: string; error: string }[] = [];
 
-for (const file of htmlFiles) {
-  const rel = path.relative(appHtmlDir, file);
-
-  // ข้ามหน้า error ภายในของ next.js
-  if (rel.includes("_not-found") || rel.includes("_global-error")) continue;
+for (const page of renderedPages) {
+  const file = page.file;
+  /* ชื่อที่ใช้รายงาน = เส้นทางจริงที่ผู้ใช้เห็น + ชื่อเครื่องมือที่เรนเดอร์มัน
+     (ไฟล์จากสองเครื่องมืออยู่คนละโฟลเดอร์ ถ้ารายงานด้วย path ดิบจะสับสน) */
+  const rel = `${page.route} [${page.renderer}]`;
 
   const content = fs.readFileSync(file, "utf8");
 
@@ -200,7 +184,7 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log(`  ✓ ตรวจสอบหน้า HTML ทั้งหมด ${htmlFiles.length} ไฟล์ — ผ่านกฎ 100%`);
+console.log(`  ✓ ตรวจสอบหน้า HTML ทั้งหมด ${renderedPages.length} ไฟล์ — ผ่านกฎ 100%`);
 console.log(`  ✓ ขนาดภาพทุกหน้าเป็น 1200x630 ตามมาตรฐานสากล`);
 console.log(`  ✓ ไม่มีหน้าใดชี้เข้า /cards/ โดยตรง และไม่มีหน้าใดใช้ .webp`);
 

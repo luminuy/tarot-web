@@ -21,7 +21,7 @@ import { ARTICLES } from "../../src/data/articles";
 import { SPREAD_TOPICS } from "../../src/data/spread-topics";
 import { buildAlternates, SITE_ORIGIN } from "../../src/lib/config/site";
 import { EN_TWIN_ROUTES, hasEnglishTwin, localeHref } from "../../src/lib/i18n/paths";
-import { primaryOutputDir } from "./lib/rendered-pages";
+import { collectRenderedPages, renderedRouteMap } from "./lib/rendered-pages";
 
 const ROOT = process.cwd();
 const TH_APP = "src/app/(th)";
@@ -119,26 +119,30 @@ check(
   `พบ ${enSectionsNeedingLayout.length} หมวด`,
 );
 
-// ── 2. ทุกเส้นทางที่ประกาศว่ามีฝาแฝด ต้องมีไฟล์ page.tsx จริง ──────────────
+/* ── 2. ทุกเส้นทางที่ประกาศว่ามีฝาแฝด ต้องมี "หน้าที่เรนเดอร์ออกมาจริง" ──────
+ *
+ * ⚠️ เดิมด่านนี้เช็กว่ามีไฟล์ `page.tsx` อยู่ตรงนั้นไหม — ซึ่งผูกกับ Next.js
+ *    ตั้งแต่หน้าเนื้อหาบางกลุ่มย้ายไปเรนเดอร์ด้วย Astro ไฟล์ต้นทางอยู่คนละที่กันแล้ว
+ *    และ "มีไฟล์" ก็ไม่เคยพิสูจน์ว่า "หน้าออกมาจริง" อยู่ดี (ไฟล์พังก็ยังมีไฟล์อยู่)
+ *    ตอนนี้เช็กจากผลลัพธ์ที่บิลด์ออกมาจริงทุกเครื่องมือ ผ่าน lib/rendered-pages.ts
+ */
+const routeMap = renderedRouteMap();
+
 for (const route of EN_TWIN_ROUTES) {
-  const rel = route === "/" ? "" : route;
-  check(
-    `มีไฟล์หน้าอังกฤษจริงสำหรับ ${route === "/" ? "/en" : `/en${route}`}`,
-    fs.existsSync(path.join(ROOT, EN_APP, rel, "page.tsx")),
-    `${EN_APP}${rel}/page.tsx`,
-  );
-  check(
-    `มีไฟล์หน้าไทยคู่กันสำหรับ ${route}`,
-    fs.existsSync(path.join(ROOT, TH_APP, rel, "page.tsx")),
-    `${TH_APP}${rel}/page.tsx`,
-  );
+  const englishRoute = route === "/" ? "/en" : `/en${route}`;
+  check(`มีหน้าอังกฤษที่เรนเดอร์ออกมาจริงสำหรับ ${englishRoute}`, routeMap.has(englishRoute));
+  check(`มีหน้าไทยคู่กันที่เรนเดอร์ออกมาจริงสำหรับ ${route}`, routeMap.has(route));
 }
 
-for (const dynamicRoute of ["cards/[id]", "spreads/[id]", "blog/[slug]", "spreads/topic/[category]"]) {
-  check(
-    `มีหน้าอังกฤษของเส้นทางไดนามิก /en/${dynamicRoute}`,
-    fs.existsSync(path.join(ROOT, EN_APP, dynamicRoute, "page.tsx")),
-  );
+/* เส้นทางไดนามิก — ต้องมีลูกอย่างน้อยหนึ่งใบโผล่ออกมาจริงในต้นไม้อังกฤษ */
+for (const [label, prefix] of [
+  ["/en/cards/[id]", "/en/cards/"],
+  ["/en/spreads/[id]", "/en/spreads/"],
+  ["/en/blog/[slug]", "/en/blog/"],
+  ["/en/spreads/topic/[category]", "/en/spreads/topic/"],
+] as const) {
+  const count = [...routeMap.keys()].filter((r) => r.startsWith(prefix)).length;
+  check(`มีหน้าอังกฤษของเส้นทางไดนามิก ${label}`, count > 0, `พบ ${count} หน้า`);
 }
 
 // ── 3. หน้าที่ยัง "ไม่มี" ฝาแฝด ต้องไม่ถูกประกาศว่ามี ─────────────────────
@@ -181,30 +185,41 @@ check(
   buildAlternates("/cards", { locale: "en", englishTwin: true }).canonical === `${SITE_ORIGIN}/en/cards`,
 );
 
-// ── 4b. ทั้งสองฝั่งของทุกคู่ ต้องประกาศ englishTwin: true ─────────────────
-// Google ต้องเห็นคำประกาศชี้กันไป-กลับ ขาดข้างเดียวมันจะทิ้งทั้งคู่
-// เคยพลาดจริงตอนทำ: `/en/daily` ประกาศคู่ แต่ `/daily` ฝั่งไทยลืมเปิด englishTwin
-function metadataSourceFor(group: "(th)" | "(en)", route: string): string {
-  const rel = route === "/" ? "" : route;
-  const base = group === "(th)" ? TH_APP : EN_APP;
-  const pageFile = path.join(ROOT, base, rel, "page.tsx");
-  if (!fs.existsSync(pageFile)) return "";
-  let source = fs.readFileSync(pageFile, "utf-8");
-
-  // ถ้าหน้านั้นดึง metadata มาจากโมดูลที่ใช้ร่วมกัน ให้ตามไปอ่านโมดูลนั้นด้วย
-  for (const match of source.matchAll(/from "([^"]*_shared\/[^"]+)"/g)) {
-    const sharedFile = path.join(ROOT, "src/app/_shared", match[1].split("_shared/")[1] + ".tsx");
-    if (fs.existsSync(sharedFile)) source += fs.readFileSync(sharedFile, "utf-8");
-  }
-  return source;
+/* ── 4b. ทั้งสองฝั่งของทุกคู่ ต้องประกาศ hreflang ชี้กันไป-กลับ ─────────────
+ *
+ * Google ต้องเห็นคำประกาศชี้กันไป-กลับ ขาดข้างเดียวมันจะทิ้งทั้งคู่
+ * เคยพลาดจริงตอนทำ: `/en/daily` ประกาศคู่ แต่ `/daily` ฝั่งไทยลืมเปิด englishTwin
+ *
+ * ⚠️ เดิมด่านนี้ไล่อ่านซอร์สหา `englishTwin: true` — ผูกกับทั้ง Next.js และวิธีเขียนโค้ด
+ *    ตอนนี้ตรวจจาก **HTML ที่เรนเดอร์ออกมาจริง** แทน ซึ่งคือสิ่งที่ Google เห็นจริง ๆ
+ *    แข็งแรงกว่าเดิมด้วย เพราะจับได้แม้ประกาศถูกแต่ถูกอะไรบางอย่างทับหายไปตอนเรนเดอร์
+ */
+function hreflangHrefs(route: string): string[] {
+  const page = routeMap.get(route);
+  if (!page) return [];
+  const html = fs.readFileSync(page.file, "utf-8");
+  return [...html.matchAll(/<link[^>]+rel="alternate"[^>]*>/gi)]
+    .map((m) => m[0])
+    .filter((tag) => /hreflang=/i.test(tag))
+    .map((tag) => tag.match(/href="([^"]+)"/i)?.[1] ?? "")
+    .filter(Boolean);
 }
 
 for (const route of EN_TWIN_ROUTES) {
-  for (const group of ["(th)", "(en)"] as const) {
-    const source = metadataSourceFor(group, route);
+  const thaiRoute = route;
+  const englishRoute = route === "/" ? "/en" : `/en${route}`;
+  const thaiUrl = `${SITE_ORIGIN}${thaiRoute === "/" ? "" : thaiRoute}`;
+  const englishUrl = `${SITE_ORIGIN}${englishRoute}`;
+
+  for (const [label, current] of [
+    [`(th)${thaiRoute}`, thaiRoute],
+    [`(en)${thaiRoute}`, englishRoute],
+  ] as const) {
+    const hrefs = hreflangHrefs(current);
     check(
-      `${group}${route === "/" ? "" : route} ประกาศ englishTwin: true (hreflang ต้องชี้กันครบสองทาง)`,
-      source.includes("englishTwin: true"),
+      `${label} ประกาศ hreflang ชี้กันครบสองทาง (ไทย ↔ อังกฤษ)`,
+      hrefs.includes(thaiUrl) && hrefs.includes(englishUrl),
+      hrefs.length ? hrefs.join(" · ") : "ไม่มีแท็ก hreflang เลย",
     );
   }
 }
@@ -381,15 +396,6 @@ function ensureBuildExists(): void {
   }
 }
 
-function collectHtml(dir: string, acc: string[]): string[] {
-  if (!fs.existsSync(dir)) return acc;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) collectHtml(full, acc);
-    else if (entry.name.endsWith(".html")) acc.push(full);
-  }
-  return acc;
-}
 
 /** สัดส่วนอักขระไทยในเนื้อหาที่ผู้อ่านเห็นจริง (ตัด <script> และแท็กออกก่อน) */
 function thaiRatioPercent(htmlFile: string): number {
@@ -403,10 +409,13 @@ function thaiRatioPercent(htmlFile: string): number {
 
 ensureBuildExists();
 
-const APP_DIR = primaryOutputDir();
-const englishHtml = collectHtml(path.join(APP_DIR, "en"), []);
-const englishRoot = path.join(APP_DIR, "en.html");
-if (fs.existsSync(englishRoot)) englishHtml.push(englishRoot);
+/* หน้าอังกฤษทั้งหมดที่เรนเดอร์ออกมาจริง — รวมทุกเครื่องมือเรนเดอร์ */
+const englishPages = collectRenderedPages().filter(
+  (page) => page.route === "/en" || page.route.startsWith("/en/"),
+);
+const englishHtml = englishPages.map((page) => page.file);
+const routeOf = new Map(englishPages.map((page) => [page.file, page.route]));
+const relOf = (file: string) => routeOf.get(file) ?? file;
 
 check("build มีหน้าอังกฤษให้ตรวจ (อย่างน้อย 100 หน้า)", englishHtml.length >= 100, `พบ ${englishHtml.length}`);
 
@@ -418,7 +427,7 @@ check("build มีหน้าอังกฤษให้ตรวจ (อย�
 // ด่านจึงผ่านทั้งที่หัวเว็บหายไปจริง (พลาดมาแล้วตอนทดสอบด่านรอบนี้)
 const headerless = englishHtml
   .filter((file) => !fs.readFileSync(file, "utf-8").includes('data-site-header="'))
-  .map((file) => path.relative(APP_DIR, file));
+  .map(relOf);
 
 check(
   "ทุกหน้าอังกฤษที่ build ออกมามีหัวเว็บอยู่ใน HTML ดิบ",
@@ -427,7 +436,7 @@ check(
 );
 
 const leaking = englishHtml
-  .map((file) => ({ file: path.relative(APP_DIR, file), ratio: thaiRatioPercent(file) }))
+  .map((file) => ({ file: relOf(file), ratio: thaiRatioPercent(file) }))
   .filter((entry) => entry.ratio > MAX_THAI_RATIO_PERCENT)
   .sort((a, b) => b.ratio - a.ratio);
 
@@ -443,7 +452,7 @@ for (const entry of leaking.slice(0, 10)) {
 // เกณฑ์ที่สอง — จับวลีไทยแม้จะมีจุดเดียวในหน้า (รูรั่วของเกณฑ์สัดส่วน · UX-17)
 const phraseLeaks = englishHtml
   .map((file) => ({
-    file: path.relative(APP_DIR, file),
+    file: relOf(file),
     phrases: unregisteredThaiPhrases(file),
   }))
   .filter((entry) => entry.phrases.length > 0);

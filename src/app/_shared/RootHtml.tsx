@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import ReactDOM from "react-dom";
 
 import { AntiTheftShield } from "@/components/security/AntiTheftShield";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
@@ -10,7 +11,7 @@ import { CONSENT_STORAGE_KEY } from "@/lib/analytics-consent";
 import { getImageKitOrigin } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
 
-import { fontVariables } from "./fonts";
+import { FONT_PRELOADS } from "./root-metadata";
 import { buildSpeculationRules } from "./speculation-rules";
 import { SkipToContent } from "@/components/layout/SkipToContent";
 
@@ -45,6 +46,24 @@ export function RootHtml({
   children: ReactNode;
 }) {
   const isEnglish = locale === "en";
+
+  /*
+   * ✒️ ฟอนต์ไทยที่ตัดเอง — ต้องพรีโหลดทั้งสี่ไฟล์เสมอ ห้ามตัดออกแม้แต่ตัวเดียว
+   * เหตุผลเต็ม (พร้อมตารางคะแนนที่วัดจริงทั้งหน้าแอปและหน้าเนื้อหา) อยู่ที่หัวข้อฟอนต์
+   * ใน `src/app/globals.css` — สรุปสั้น: ถ้าไม่พรีโหลด ข้อความไทยยาว ๆ จะถูกตัดบรรทัดใหม่
+   * ตอนฟอนต์จริงมาถึง แล้วทั้งหน้าขยับ (CLS หน้า /privacy เคยพุ่งเป็น 0.51)
+   *
+   * ⚠️ ต้องเรียกผ่าน `ReactDOM.preload` ห้ามเขียน `<link rel="preload">` ตรง ๆ ใน <head>
+   *    React 19 ยกแท็กทรัพยากรขึ้นไปไว้ต้น <head> ให้เองอยู่แล้ว การเขียนเองด้วยจะได้
+   *    **แท็กซ้ำสองชุดต่อฟอนต์หนึ่งไฟล์** (วัดจริงบนบิลด์: 8 แท็กสำหรับ 4 ไฟล์)
+   * ⚠️ ต้องมี `crossOrigin: "anonymous"` — ฟอนต์ถูกดึงแบบ CORS เสมอตามสเปก
+   *    ถ้าไม่ใส่ เบราว์เซอร์ถือว่าเป็นคนละคำขอกับที่ CSS สั่งโหลด แล้วโหลดซ้ำสองรอบ
+   * ⚠️ รายการนี้ต้องตรงกับ `@font-face` ใน globals.css และกับ `astro/layouts/BaseLayout.astro`
+   *    ทั้งสามที่เสมอ — ด่าน `test-font-pipeline.ts` ตรวจให้อัตโนมัติ
+   */
+  for (const file of FONT_PRELOADS) {
+    ReactDOM.preload(file, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  }
 
   /* โฮสต์ของ CDN ภาพไพ่ — ว่างเมื่อไม่ได้ตั้งค่า ImageKit (ภาพถูกเสิร์ฟจากโดเมนเราเอง
      ซึ่งมีสายเปิดอยู่แล้ว จึงไม่ต้อง preconnect อะไรเพิ่ม) */
@@ -91,9 +110,10 @@ export function RootHtml({
   };
 
   return (
-    <html lang={locale} className={fontVariables}>
+    <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
+
 
         {/*
           🔌 เปิดสายไปยัง CDN ของภาพไพ่ล่วงหน้า — โฮสต์เดียวที่เบราว์เซอร์ต้องต่อจริงตอนวาดหน้า

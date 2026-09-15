@@ -1,0 +1,53 @@
+---
+import {
+  CARD_DETAIL_MAIN_CLASS,
+  cardDetailBreadcrumbJsonLd,
+  cardDetailJsonLd,
+  cardDetailMetadata,
+  cardNeighbors,
+} from "@/app/_shared/pages/card-detail";
+import { DECK, cardById } from "@/data/cards";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { CardDetailRelatedRoot } from "../../components/CardDetailRelated";
+import { CardDetailViewRoot } from "../../islands/CardDetailRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/**
+ * 🃏 ความหมายไพ่รายใบ 78 หน้า (ต้นไม้ภาษาไทย)
+ * ฝาแฝดอังกฤษอยู่ที่ `astro/pages/en/cards/[id].astro` — ต้องแก้คู่กันเสมอ
+ *
+ * ⚠️ `<main>` กับ JSON-LD ถูกเรนเดอร์ที่นี่ ไม่ใช่ใน React
+ *    เพราะ island ของ Astro ต้องอยู่ระดับเทมเพลตเท่านั้น (วางไว้ข้างใน React ไม่ได้)
+ *    คลาสและตัวสร้าง JSON-LD ถูกนำเข้ามาจากไฟล์เดียวกับที่ Next ใช้ จึงไม่มีทางเพี้ยนกัน
+ */
+export function getStaticPaths() {
+  return DECK.map((card) => ({ params: { id: card.id } }));
+}
+
+const locale = "th" as const;
+const card = cardById(Astro.params.id!)!;
+const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
+---
+
+<BaseLayout locale={locale} metadata={cardDetailMetadata(card.id, locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <main id="main-content" tabindex="-1" class={CARD_DETAIL_MAIN_CLASS}>
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailJsonLd(card, locale))} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailBreadcrumbJsonLd(card, locale))} />
+    <CardDetailViewRoot
+      client:idle
+      card={card}
+      prevCard={prevCard}
+      nextCard={nextCard}
+      currentIndex={currentIndex}
+      totalCards={totalCards}
+      locale={locale}
+    >
+      <Fragment slot="related">
+        <CardDetailRelatedRoot card={card} locale={locale} />
+      </Fragment>
+    </CardDetailViewRoot>
+  </main>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

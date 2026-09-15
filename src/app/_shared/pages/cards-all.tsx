@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 
-import { CARD_SUMMARIES } from "@/data/cards/summary";
-import { AllCardsTable } from "@/components/encyclopedia/AllCardsTable";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { localeHref } from "@/lib/i18n/paths";
@@ -81,7 +80,8 @@ export function buildCardsAllMetadata(locale: Locale): Metadata {
   };
 }
 
-export function CardsAllBody({ locale }: { locale: Locale }) {
+/** `table` ถูกส่งเข้ามาจากข้างนอก — เหตุผลเดียวกับ `explorer` ใน cards-index.tsx */
+export function CardsAllBody({ locale, table }: { locale: Locale; table: ReactNode }) {
   const copy = COPY[locale];
   const href = (path: string) => localeHref(path, locale);
 
@@ -153,7 +153,7 @@ export function CardsAllBody({ locale }: { locale: Locale }) {
         </header>
 
         {/* Interactive Master Table */}
-        <AllCardsTable cards={CARD_SUMMARIES} />
+        {table}
       </div>
     </main>
   );

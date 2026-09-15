@@ -46,8 +46,14 @@ export const OUTPUT_ROOTS: Array<{
   optional?: boolean;
 }> = [
   { name: "next", dir: ".next/server/app" },
-  // ตัวอย่างสำหรับอนาคต — ปลดคอมเมนต์เมื่อมีจริง:
-  // { name: "astro", dir: "dist", optional: true },
+  /*
+   * หน้าเนื้อหาที่ย้ายมาเรนเดอร์ด้วย Astro (ดู `src/lib/routing/astro-routes.ts`)
+   *
+   * ⚠️ **ห้ามตั้ง `optional: true`** — `npm run build` บิลด์ทั้งสองตัวเสมอ
+   *    ถ้าปล่อยให้ข้ามได้เมื่อไม่มีโฟลเดอร์ ด่านทั้ง 6 จะเขียวโดยไม่ได้ตรวจหน้าที่ย้ายมา
+   *    เลยสักหน้า ซึ่งคือความล้มเหลวแบบเงียบที่ไฟล์นี้ถูกสร้างขึ้นมาเพื่อป้องกันตั้งแต่แรก
+   */
+  { name: "astro", dir: "dist" },
 ];
 
 export interface RenderedPage {

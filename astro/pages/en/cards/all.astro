@@ -1,0 +1,21 @@
+---
+import { buildCardsAllMetadata } from "@/app/_shared/pages/cards-all";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { CardsAllBodyRoot } from "../../../components/PageBodies";
+import { AllCardsTableRoot } from "../../../islands/AllCardsTableRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+
+/** 📋 ตารางสรุปไพ่ 78 ใบ (ต้นไม้ภาษาอังกฤษ) */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={buildCardsAllMetadata(locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <CardsAllBodyRoot locale={locale}>
+    <Fragment slot="table">
+      <AllCardsTableRoot locale={locale} client:idle />
+    </Fragment>
+  </CardsAllBodyRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 import { CARD_SUMMARIES } from "@/data/cards/summary";
-import { CardsExplorer } from "@/components/encyclopedia/CardsExplorer";
 import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Locale } from "@/lib/i18n/types";
@@ -55,7 +55,15 @@ export function buildCardsIndexMetadata(locale: Locale): Metadata {
   };
 }
 
-export function CardsIndexBody({ locale }: { locale: Locale }) {
+/**
+ * ⚠️ `explorer` ถูกส่งเข้ามาจากข้างนอก ไม่ได้เรนเดอร์เองในไฟล์นี้
+ * ---------------------------------------------------------------------------
+ * ส่วนที่ต้องโต้ตอบกับผู้ใช้ (ช่องค้นหา + ตัวกรอง) เป็นชิ้นเดียวในหน้านี้ที่ต้องใช้ JS
+ * หน้าที่เรนเดอร์ด้วย Astro จึงส่ง **island** เข้ามาทางนี้ ส่วนที่เหลือของหน้า
+ * เป็น HTML ล้วนที่ไม่ต้อง hydrate เลย · ถ้าเรนเดอร์ `<CardsExplorer/>` เองตรงนี้
+ * Astro จะต้อง hydrate ทั้งหน้าเพื่อให้ช่องค้นหาทำงาน (island วางซ้อนใน React ไม่ได้)
+ */
+export function CardsIndexBody({ locale, explorer }: { locale: Locale; explorer: ReactNode }) {
   const copy = COPY[locale];
 
   const collectionJsonLd = {
@@ -91,7 +99,7 @@ export function CardsIndexBody({ locale }: { locale: Locale }) {
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Client Interactive Explorer with dynamic bilingual hero header */}
-        <CardsExplorer cards={CARD_SUMMARIES} />
+        {explorer}
       </div>
     </main>
   );

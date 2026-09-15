@@ -13,16 +13,58 @@
 # เอกสารอ้างอิง: https://developers.cloudflare.com/workers/static-assets/headers/
 # ============================================================================
 
+# 🛡️ ส่วนหัวความปลอดภัยของทุกไฟล์ static — **ต้องตรงกับ `src/lib/config/security-headers.ts` เป๊ะ**
+# ---------------------------------------------------------------------------
+# หน้าเนื้อหาที่เรนเดอร์ด้วย Astro ถูก Cloudflare ตอบเองที่ขอบ **ไม่ผ่าน Worker เลย**
+# ส่วนหัวที่ตั้งไว้ใน `next.config.ts` จึงไปไม่ถึงหน้าเหล่านั้นแม้แต่ตัวเดียว
+# ถ้าไม่มีบล็อกนี้ = เว็บครึ่งหนึ่งไม่มี CSP · ไม่มี HSTS · ฝังใน iframe ได้ โดยไม่มีใครเห็น
+#
+# ⚠️ ห้ามแก้ด้วยมือ — ให้แก้ที่ `src/lib/config/security-headers.ts` แล้วคัดลอกมา
+#    ด่าน `scripts/qa/test-static-headers.ts` เทียบสองที่นี้ทุกครั้งที่รัน repo:verify
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://connect.facebook.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://generativelanguage.googleapis.com https://api.groq.com https://ik.imagekit.io https://res.cloudinary.com https://challenges.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://www.facebook.com https://cloudflareinsights.com https://static.cloudflareinsights.com; frame-src 'self' https://challenges.cloudflare.com; base-uri 'none'; frame-ancestors 'none'; object-src 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
 # ภาพหน้าไพ่ 1909 Rider-Waite-Smith ต้นฉบับ (public domain)
 # ตามกฎเหล็กข้อ 3 ใน docs/AI_COLLABORATION_GUIDELINES.md ภาพชุดนี้ห้ามเปลี่ยนอยู่แล้ว
-/cards/*
+#
+# 🚨 ต้องระบุนามสกุลไฟล์เสมอ ห้ามเขียนเป็น `/cards/*` เฉย ๆ เด็ดขาด (2026-09-15)
+# ---------------------------------------------------------------------------
+# ตั้งแต่หน้าเนื้อหาย้ายไปเรนเดอร์ด้วย Astro หน้า **ไพ่รายใบ 156 หน้า** อยู่ที่
+# `/cards/major-00` ซึ่งเป็นไฟล์ static เหมือนกัน กฎ `/cards/*` แบบเดิมจึงจะครอบ
+# ตัวหน้าเว็บไปด้วย แล้วสั่งให้เบราว์เซอร์แคช **หน้าเว็บ** ไว้หนึ่งปีแบบ `immutable`
+# = แก้คำทำนายแล้วคนที่เคยเข้าเว็บจะไม่มีวันเห็นของใหม่เลยตลอดปี และเรียกคืนไม่ได้ด้วย
+# (ตอนหน้าพวกนี้ยังเรนเดอร์ด้วย Next กฎนี้ไม่เคยแตะมัน เพราะคำขอวิ่งไปที่ Worker ไม่ใช่ assets)
+#
+# ⚠️ ภาพไพ่มีแค่ .jpg (ต้นฉบับ 78 ใบ) กับ .webp (ภาพย่อทุกขนาด) เท่านั้น
+#    ถ้าวันหนึ่งเพิ่มนามสกุลใหม่ (เช่น .avif) ต้องเพิ่มบรรทัดที่นี่ด้วย
+#    ด่าน `scripts/qa/test-static-headers.ts` ตรวจข้อนี้ให้อัตโนมัติแล้ว
+/cards/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/cards/*.webp
   Cache-Control: public, max-age=31536000, immutable
 
 # หมายเหตุ: ไม่ต้องเขียนกฎแยกให้ /cards/w256/* และ /cards/w512/*
 # เพราะ splat (*) ของ Cloudflare เป็นแบบ greedy คือกินข้ามเครื่องหมาย / ไปด้วย
-# กฎ /cards/* ด้านบนจึงครอบภาพย่อทั้งหมดอยู่แล้ว
+# กฎสองบรรทัดด้านบนจึงครอบภาพย่อทั้งหมดอยู่แล้ว
 # ถ้าเขียนซ้ำ Cloudflare จะ "ต่อท้าย" ไม่ใช่ "แทนที่" ทำให้ได้ header ซ้ำสองรอบ:
 #   cache-control: public, max-age=31536000, immutable, public, max-age=31536000, immutable
+
+# ✒️ ฟอนต์ไทยที่ตัดเอง — ชื่อไฟล์ **ไม่มี hash** (ต่างจากยุค next/font)
+# จึงต้องไม่ใช่ `immutable` เพราะถ้าเปลี่ยนชุดอักขระแล้วชื่อไฟล์เท่าเดิม
+# ผู้ใช้เดิมจะติดฟอนต์เก่าไปตลอด · เจ็ดวันคือจุดสมดุล: ผู้ใช้ซ้ำแทบไม่เคยโหลดใหม่
+# (ได้ 304 ครั้งเดียวต่อสัปดาห์) แต่ของใหม่ก็ถึงมือทุกคนภายในหนึ่งสัปดาห์เสมอ
+/fonts/*
+  Cache-Control: public, max-age=604800
+
+# ไฟล์ build ของ Astro (island + CSS) — มี hash อยู่ในชื่อไฟล์แล้ว เหมือน /_next/static
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
 
 # ไฟล์ build ของ Next.js — มี hash อยู่ในชื่อไฟล์แล้ว จึงปลอดภัยที่จะแคชยาว
 /_next/static/*

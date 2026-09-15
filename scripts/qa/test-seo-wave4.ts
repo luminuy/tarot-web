@@ -59,8 +59,15 @@ assert(calculateBirthCard(15, 13, 1995) === undefined, "เดือน 13 ต�
 assert(calculateBirthCard(15, 8, 1500) === undefined, "ปีนอกช่วงต้องคืน undefined (ห้ามกุไพ่ปลอม)");
 
 // 3. Birth Card Page & Sitemap
-const birthCardPagePath = path.join(process.cwd(), "src/app/(th)/cards/birth-card/page.tsx");
-assert(fs.existsSync(birthCardPagePath), "ต้องมีหน้า src/app/cards/birth-card/page.tsx");
+/* ⚠️ หน้านี้ย้ายไปเรนเดอร์ด้วย Astro แล้ว — เนื้อหาอยู่ที่ `_shared/pages/birth-card-th.tsx`
+   และหน้าจริงอยู่ที่ `astro/pages/cards/birth-card.astro` (ดู src/lib/routing/astro-routes.ts)
+   ตรวจ "เนื้อหา" ที่ใช้ร่วมกันทั้งสองภาษา ไม่ใช่ path ของเครื่องมือเรนเดอร์ตัวใดตัวหนึ่ง */
+const birthCardPagePath = path.join(process.cwd(), "src/app/_shared/pages/birth-card-th.tsx");
+assert(fs.existsSync(birthCardPagePath), "ต้องมีเนื้อหาหน้าไพ่ประจำตัวที่ _shared/pages/birth-card-th.tsx");
+assert(
+  fs.existsSync(path.join(process.cwd(), "astro/pages/cards/birth-card.astro")),
+  "ต้องมีหน้า astro/pages/cards/birth-card.astro",
+);
 
 const calcCompPath = path.join(process.cwd(), "src/components/encyclopedia/BirthCardCalculator.tsx");
 assert(fs.existsSync(calcCompPath), "ต้องมีคอมโพเนนต์ src/components/encyclopedia/BirthCardCalculator.tsx");
@@ -121,13 +128,22 @@ assert(
 const wave4Files = [
   "src/lib/tarot/birth-card.ts",
   "src/components/encyclopedia/BirthCardCalculator.tsx",
-  "src/app/(th)/cards/birth-card/page.tsx",
+  "src/app/_shared/pages/birth-card-th.tsx",
+  "src/app/_shared/pages/birth-card-en.tsx",
 ];
 for (const file of wave4Files) {
   const filePath = path.join(process.cwd(), file);
   if (fs.existsSync(filePath)) {
     const content = fs.readFileSync(filePath, "utf-8");
-    const hasForbiddenEmoji = /[✦✨✧⭐🌟]/.test(content);
+    /*
+     * ⚠️ ต้องมีธง `u` — ถ้าไม่มี JavaScript จะมองอิโมจินอกระนาบพื้นฐาน (🌟) เป็น
+     * "คู่ surrogate" สองตัวแยกกัน แล้วยัดตัวหน้า (\uD83C) ลงในคลาสอักขระนี้ด้วย
+     * ผลคือคลาสนี้จับ **อิโมจิทุกตัวที่ขึ้นต้นด้วย \uD83C** (🎂 🃏 🎯 …) ทั้งที่ไม่ได้ตั้งใจ
+     * เจอจริงตอนเพิ่ม `birth-card-en.tsx` เข้ารายการ: ด่านฟ้อง 🎂 ในคอมเมนต์ว่าเป็น
+     * "อิโมจิดวงดาว" ซึ่งไม่จริง · ทั้ง repo ใช้อิโมจิในคอมเมนต์เป็นปกติอยู่แล้ว
+     * กฎข้อ 2 ห้ามอิโมจิการ์ตูนใน **ข้อความที่ผู้ใช้เห็น** ไม่ใช่ในคอมเมนต์ของโค้ด
+     */
+    const hasForbiddenEmoji = /[✦✨✧⭐🌟]/u.test(content);
     assert(!hasForbiddenEmoji, `ไฟล์ ${file} ต้องไม่มีอิโมจิดวงดาว/แฟนซี (กฎข้อ 2)`);
   }
 }

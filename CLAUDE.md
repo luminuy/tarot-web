@@ -31,6 +31,7 @@
 | [docs/specs/ENTITLEMENT_ABUSE_MODEL.md](docs/specs/ENTITLEMENT_ABUSE_MODEL.md) | ระบบกันโกงสิทธิ์ฟรี — threat model |
 | [docs/plans/ENTITLEMENT_PLAN.md](docs/plans/ENTITLEMENT_PLAN.md) | แผนพัฒนาระบบสมาชิกและโควตาเปิดไพ่ |
 | [docs/plans/MASTER_PLAN_2026-09-06.md](docs/plans/MASTER_PLAN_2026-09-06.md) | 🗺️ **แผนแม่บทรวม — เริ่มอ่านที่นี่** · **ตรวจใหม่ทั้งแผ่น 2026-09-14** (ทุกตัวเลขวัดสดจากบิลด์จริง + ยิง production จริง ไม่ได้คัดลอกต่อ) · 7 งานลงมือได้ทันที · 3 งานรอคนนอกทีม · **2 เรื่องที่รอเจ้าของเคาะ** · อยู่ในขอบเขตด่านตรวจตัวเลขแล้ว |
+| [docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md) | 🪶 **แผนย้ายเว็บไปสถาปัตยกรรม Astro + React Island** — คลื่นที่ 1 เสร็จแล้ว (`/cards/**` 174 หน้า · JS ลด 36–49% · แท็ก `<script>` ในหน้าไพ่รายใบจาก 20 ก้อนเหลือ 0) · หน้าที่ย้ายแล้วถูก Cloudflare ตอบจากขอบโดยไม่ปลุก Worker · มีชั้นแปลงปลั๊ก `next/link`·`next/navigation`·`next/script` ทำให้คอมโพเนนต์ทั้ง 90 ตัวใช้ได้สองเครื่องมือโดยไม่ต้องแก้สักบรรทัด · **กติกา island 5 ข้อ** · **กับดัก 7 ข้อที่เหยียบมาแล้ว** (เผลอ import ข้อมูลใน island = บันเดิลพุ่ง 980 KB) · ลำดับคลื่นถัดไปถึงวันถอด Next ทิ้ง |
 | [docs/plans/HANDOFF_BLOG_TBT_2026-09-12.md](docs/plans/HANDOFF_BLOG_TBT_2026-09-12.md) | ⚡ **แผนหา TBT ที่หายไปของหน้า `/blog` (ISSUE-043)** — **งานค้างเหลือข้อเดียวของรอบตรวจ SEO 2026-09-11** · Lighthouse ชี้ `/blog` TBT 660 ms แย่กว่าทุกหน้า 4.1 เท่า · 🆕 **PR #453 ลงมือแก้ไปแล้ว 6 จุด (ไอคอนท้องถิ่น · ลด flight payload · `content-visibility: auto`) แต่ยังไม่มีใครยิง Lighthouse ซ้ำ — เหลือขั้นเดียวคือวัดผลยืนยัน** · ตัดผู้ต้องสงสัยไปแล้ว 6 ข้อพร้อมหลักฐาน · มีขั้นตอนยิง `bootup-time` ชี้เป้าไฟล์ · **กับดัก 4 ข้อที่เหยียบมาแล้ว** (resource-summary นับแบบคลายบีบ · Browser pane วัดเวลาแกว่ง 8 เท่า · โควตา PSI หมดเร็ว · **ฟีเจอร์ SEO ที่ Google ปิดไปแล้วแต่คู่มือยังสอนอยู่**) · ปิดเคสไปแล้ว 3 เรื่องพร้อมเหตุผล (`SearchAction` · `HowTo` · 404 meta ซ้ำ) |
 | [docs/plans/HANDOFF_BUNDLE_DIET_2026-09-07.md](docs/plans/HANDOFF_BUNDLE_DIET_2026-09-07.md) | ⚡ **แผนส่งต่อ — ลดน้ำหนัก JS รอบสุดท้าย** · เหลือของหนัก 3 ก้อน (motion 40KB · ข้อมูลผัง 17KB · พจนานุกรม 4KB) ทุกก้อนเป็นบั๊กแบบ P-01 · พร้อมข้อค้นพบว่าตัวเลขเดิมสูงเกินจริง 39KB เพราะนับ polyfills ที่ `noModule` |
 | [docs/plans/HANDOFF_EN_TRANSLATION_2026-09-06.md](docs/plans/HANDOFF_EN_TRANSLATION_2026-09-06.md) | 🌏 **แผนส่งงานแปลไทย → อังกฤษ (ขั้น C)** — 318 หน่วยข้อความ · 8,848 คำ · อภิธานศัพท์บังคับ · เพดานความยาว · เกณฑ์รับงาน · ไฟล์ส่งทีมแปลสร้างด้วย `npm run i18n:export` |
@@ -75,7 +76,7 @@
 10. **Human-First Copywriting**: ภาษาไทยธรรมชาติ เข้าใจง่าย ห้ามศัพท์หุ่นยนต์แข็งทื่อ
 11. **Multi-Agent Collision Guard**: เช็ก `npm run agent:status` + ล็อคด้วย `agent:lock` ก่อนแก้ ปลดล็อคด้วย `agent:unlock` เมื่อเสร็จ
 12. **One Branch per Milestone**: ห้ามแตกกิ่งค้าง ต้อง rebase บน `origin/main` เสมอ จบงานต้องรัน `pr:auto` ➔ `git:tidy` ให้ครบ
-13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 57 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
+13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 60 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
     > ⛔ **`push` แล้วจบ = งานยังไม่เสร็จ** — automation ทั้งชุดเริ่มทำงาน**เมื่อ PR ถูกเปิดเท่านั้น** (ISSUE-005)
     > push เฉย ๆ ไม่มี CI ไม่มี merge ไม่มี deploy งานจะค้างบน branch เงียบ ๆ จนกว่าเจ้าของจะมากดปุ่มเอง
     >
@@ -102,7 +103,7 @@
 - `npm run agent:status` — ดูสถานะ Agent ที่ทำงานอยู่
 - `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` — ล็อคไฟล์ก่อนแก้
 - `npm run agent:unlock -- --agent <ชื่อ>` — ปลดล็อคเมื่อเสร็จ
-- `npm run repo:verify` — ตรวจครบทั้ง 57 ด่าน (ใช้หลัก)
+- `npm run repo:verify` — ตรวจครบทั้ง 60 ด่าน (ใช้หลัก)
 - `npm run typecheck` — typecheck อย่างเดียว
 - `npm run log:sync` — ซิงก์สถานะ/บันทึกงาน (บังคับ)
 - `npm run cards:variants` — สร้างภาพไพ่ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)
