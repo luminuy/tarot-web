@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0167 · 2026-09-15 10:24 · 🟡 Medium · ลิงก์จากหน้า Next ไปหน้าที่ย้ายไป Astro ยิงขอ RSC ที่ไม่มีอยู่จริงก่อนหนึ่งเส้นทุกคลิก
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | กดลิงก์ 'สารานุกรมไพ่ 78 ใบ' หรือ 'คำนวณไพ่ประจำตัว' จากหน้าแรก /daily /love/1-card แล้วเบราว์เซอร์ยิงคำขอไปที่หน้าปลายทางสองรอบ: รอบแรกขอเพย์โหลด RSC (ได้ HTML ธรรมดากลับมาแล้วทิ้ง) รอบสองโหลดทั้งหน้าใหม่ |
+| **สาเหตุราก** | หน้าที่ย้ายไป Astro เป็นไฟล์ static ที่ Cloudflare ตอบเองที่ขอบ ไม่เคยผ่าน Worker จึงไม่มีเพย์โหลด RSC ให้ router ของ Next ดึง · PR ก่อนหน้าแก้ให้ LocaleLink คืน <a> ธรรมดาแล้ว แต่ยังมีอีก 4 ไฟล์ที่นำเข้า next/link ตรง ๆ ไม่ผ่าน LocaleLink (HomeSeoContent กับ SeoArticleShell เป็น Server Component จึงใช้ LocaleLink ซึ่งเป็น client component ไม่ได้) |
+| **การแก้ไข** | ไฟล์ที่เปลี่ยนมาใช้ RouteLink: HomeSeoContent · SeoArticleShell · CardSpreadLinks · _shared/pages/cards-all |
+| **🛡️ กฎป้องกันถาวร** | **แยกการตัดสินใจออกมาเป็น RouteLink ที่ไม่มี hook เลย จึงเรียกได้ทั้งจาก Server Component และ island ของ Astro · LocaleLink เรียกตัวนี้ต่ออีกชั้น ตรรกะจึงมีที่เดียว · เพิ่มด่านในชุด test-astro-routes ที่สแกนทั้ง src/ แล้วล้มทันทีถ้ามีไฟล์ไหนนำเข้า next/link ตรง ๆ พร้อมลิงก์ไปกลุ่มหน้าที่ย้ายไป Astro แล้ว (พิสูจน์แล้วว่าด่านจับได้จริงด้วยการใส่บั๊กกลับเข้าไป)** |
+| **การพิสูจน์ว่าแก้ได้จริง** | รัน npx tsx scripts/qa/test-astro-routes.ts ต้องผ่าน และต้องล้มทันทีเมื่อเปลี่ยน HomeSeoContent กลับไปใช้ next/link |
+| **บันทึกโดย** | Claude Opus 5 · branch `claude/astro-cross-renderer-links` · commit `c77d04d` |
+
+
 ### INC-0161 · 2026-09-15 08:58 · 🟡 Medium · คอมเมนต์คุณภาพ AVIF ยังบอก q65 ทั้งที่โค้ดใช้ 52 — ไฟล์โกหกมาหนึ่งวัน + ใส่ด่านกันซ้ำ (กฎ E)
 
 | หัวข้อ | รายละเอียด |
