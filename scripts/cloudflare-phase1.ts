@@ -442,8 +442,15 @@ async function taskBots() {
     return;
   }
 
+  /*
+   * ⚠️ ปลายทางนี้เป็น PUT แบบ **แทนที่ทั้งก้อน** ไม่ใช่ PATCH (INC-0179)
+   * ฟิลด์ไหนไม่ส่งไป Cloudflare จะตั้งกลับเป็นค่าเริ่มต้นทันที —
+   * เคยยิงมือแค่ 2 ฟิลด์แล้วทำ `ai_bots_protection` กับ `ai_training` หลุดจาก block เป็น disabled
+   * ➔ ถ้าจะเพิ่มฟิลด์ใหม่ ให้ส่งของเดิมไปครบทุกตัวเสมอ และเทียบผลลัพธ์ทีละฟิลด์หลังเขียน
+   */
   const r = await cf("PUT", `/zones/${ZONE_ID}/bot_management`, {
     ai_bots_protection: "block",
+    ai_training: "block",
     crawler_protection: "enabled",
     // ⛔ ปิดโดยตั้งใจ — ดูเหตุผลและตัวเลขที่วัดมาในคอมเมนต์หัวฟังก์ชันนี้ (ด่านที่ 37 บังคับให้เป็น false)
     fight_mode: false,
@@ -515,6 +522,19 @@ async function taskWaf() {
     'or lower(http.user_agent) contains "httpie"',
     'or lower(http.user_agent) contains "libwww-perl"',
     'or lower(http.user_agent) contains "http_request2"',
+    // — เพิ่ม 2026-09-15 ตอนปิด Bot Fight Mode (INC-0177): ไลบรารี HTTP ที่ถูกใช้ยิงอัตโนมัติบ่อยที่สุด
+    //   ทั้งหมดนี้ไม่มีผู้ใช้จริงคนไหนใช้เปิดเว็บ และไม่มีโค้ดฝั่งเซิร์ฟเวอร์ของเราเรียก /api ตัวเองเลยสักจุด
+    //   (ตรวจแล้ว: ทุกการเรียก /api มาจากเบราว์เซอร์ล้วน · service worker ก็ `return` ข้าม /api ไปเลย)
+    'or lower(http.user_agent) contains "go-http-client"',
+    'or lower(http.user_agent) contains "node-fetch"',
+    'or lower(http.user_agent) contains "axios"',
+    'or lower(http.user_agent) contains "okhttp"',
+    'or lower(http.user_agent) contains "guzzlehttp"',
+    'or lower(http.user_agent) contains "python-httpx"',
+    'or lower(http.user_agent) contains "aiohttp"',
+    'or lower(http.user_agent) contains "headlesschrome"',
+    'or lower(http.user_agent) contains "phantomjs"',
+    'or lower(http.user_agent) contains "selenium"',
     'or http.user_agent eq ""',
   ].join(" ");
 
@@ -575,6 +595,44 @@ async function taskWaf() {
         `and not starts_with(http.request.uri.path, "/api/marketplace/payments/webhook") ` +
         `and (${scriptUa}))`,
       action: "block",
+    },
+    /*
+     * กฎนี้เพิ่มมาแทนงานที่ Bot Fight Mode เคยทำ ตอนปิดมันทิ้ง (INC-0177)
+     * ────────────────────────────────────────────────────────────────────────
+     * หลักคิด: หลังย้ายทุกหน้าไป Astro หน้า HTML เป็นไฟล์สแตติกที่ตอบจากขอบ
+     * บอตมาดูดหน้าเว็บแทบไม่มีค่าใช้จ่าย · **ของที่แพงจริงคือ `/api/*`**
+     * (เรียกโมเดล AI · เขียน D1 · กินโควตาผู้ใช้) จึงกันเฉพาะตรงนั้นให้แน่นแทน
+     *
+     * เงื่อนไข: คำขอที่ "เปลี่ยนสถานะ" (ไม่ใช่ GET/HEAD/OPTIONS) เข้า `/api/`
+     * โดย **ไม่มี Origin ของเว็บเราติดมา**
+     *   • เบราว์เซอร์ส่ง `Origin` มาให้เสมอกับทุกคำขอที่ไม่ใช่ GET/HEAD ตามสเปก Fetch
+     *     ➔ ผู้ใช้จริงผ่านฉลุย 100%
+     *   • สคริปต์ที่ยิงตรงมักไม่ตั้ง `Origin` ➔ โดนด่านนี้ แม้จะปลอม user-agent เนียนแค่ไหน
+     *   • ถ้า header หายไปเลย Cloudflare ถือว่าเงื่อนไขเป็นเท็จ ➔ `not(...)` เป็นจริง ➔ โดนท้าทาย (ตามที่ตั้งใจ)
+     *
+     * ข้อยกเว้นที่ต้องมี (เรียกจากเซิร์ฟเวอร์ภายนอก ไม่มี Origin โดยธรรมชาติ):
+     *   • `/api/marketplace/payments/webhook` — Omise ยิงเข้ามาแบบ server-to-server
+     *   • `/api/cron/` — ตัวตั้งเวลาเรียก
+     * ส่วนเส้น callback ของ OAuth (`/api/auth/<provider>/callback`) เป็น **GET** (เบราว์เซอร์ถูก redirect
+     * กลับมา) จึงไม่โดนอยู่แล้ว — ห้ามเขียนเครื่องหมายดอกจันติดทับขีดในคอมเมนต์บล็อก มันปิดคอมเมนต์กลางคัน
+     *
+     * ใช้ `managed_challenge` ไม่ใช่ `block` เพราะถ้าวันหนึ่งมีเคสที่คาดไม่ถึง
+     * เบราว์เซอร์จริงยังมีทางผ่าน ส่วนสคริปต์จะติดกับดักเหมือนเดิม
+     *
+     * ⚠️ ถ้าเพิ่ม endpoint ที่ถูกเรียกจากเซิร์ฟเวอร์ภายนอกในอนาคต **ต้องมาเติมข้อยกเว้นที่นี่**
+     *    ไม่งั้นมันจะโดนท้าทายแล้วล้มเงียบ ๆ โดยที่ฝั่งเราไม่เห็น error อะไรเลย
+     */
+    {
+      description: `${MARKER} ท้าทายคำขอเปลี่ยนสถานะที่ /api/ ซึ่งไม่มี Origin ของเว็บเรา (แทน Bot Fight Mode)`,
+      expression:
+        `(starts_with(http.request.uri.path, "/api/") ` +
+        `and http.request.method ne "GET" ` +
+        `and http.request.method ne "HEAD" ` +
+        `and http.request.method ne "OPTIONS" ` +
+        `and not starts_with(http.request.uri.path, "/api/marketplace/payments/webhook") ` +
+        `and not starts_with(http.request.uri.path, "/api/cron/") ` +
+        `and not http.request.headers["origin"][0] contains "${DEFAULT_ZONE_NAME}")`,
+      action: "managed_challenge",
     },
   ];
 
