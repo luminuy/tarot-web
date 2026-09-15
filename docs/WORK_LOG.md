@@ -37,6 +37,14 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-15 (รอบ 78): 🏠 คลื่นที่ 4c — ย้าย **หน้าแรก** เป็น React island บน Astro (JS ลด 33%)
+- **ขอบเขต**: `/` และ `/en` — หน้าที่มีทราฟฟิกสูงสุดและซับซ้อนที่สุดของเว็บ
+- **ผลที่วัดได้จริง**: JS **229 ➔ 154 KB** (−33%) · HTML **40 ➔ 27 KB** (−33%)
+- **โครงที่ใช้**: `TarotFlow` ทั้งก้อนเป็น island เดียว (`client:load`) ส่วนเนื้อหา SEO ท้ายหน้าส่งเข้าไปทาง slot เป็น HTML ล้วน — **ห้ามใส่ `SiteHeaderRoot`/`SiteFooterRoot` ในหน้า `.astro` เด็ดขาด** เพราะ `TarotFlow` เรนเดอร์ทั้งสองอย่างของตัวเองอยู่ข้างในแล้ว (INC-0130) ถ้าเติมจะได้หัวเว็บซ้อนสองชั้น
+- **หลักฐานที่แข็งที่สุดของรอบนี้**: เทียบ **ข้อความทั้งหน้า** ของ HTML ที่บิลด์ออกมา กับสแนปช็อตบิลด์ก่อนย้าย ➔ **ตรงกันทุกตัวอักษร** ต่างกันแค่ CSS หนึ่งบรรทัดที่ Astro ใส่ให้ `astro-island{display:contents}`
+- **ของที่ต้องเติมเพราะหน้าแรกไม่ประกาศ title/description เอง**: `ROOT_TITLE_DEFAULT` ต่อภาษา — Next ใช้ `title.default` **โดยไม่ผ่านแม่แบบ** ถ้าเผลอต่อ " · SeerTarot" ให้อีกรอบจะกลายเป็นชื่อแบรนด์ซ้ำสองครั้ง (ด่าน `test-meta-length` มีข้อตรวจนี้อยู่แล้ว)
+- **การพิสูจน์**: `repo:verify` ➔ ✅ ผ่านครบ 60 ด่าน · ยิงจริงผ่านเบราว์เซอร์: หัวเว็บ 1 อัน · ฟุตเตอร์ 1 อัน · `<main>` 1 อัน · island 2 ก้อน hydrate ครบ · เดินขั้นตอน "เลือกผัง ➔ ตั้งคำถาม & เลือกแม่หมอ" ได้ปกติ (พิสูจน์ว่า shim ของ `next/dynamic` + `withMotionScope` ทำงานจริง)
+
 ### 🗓️ 2026-09-15 (รอบ 77): 🌅 คลื่นที่ 4b — ย้าย `/daily` และ `/love/1-card` เป็น React island บน Astro
 - **ขอบเขต**: 4 หน้า (`/daily` · `/en/daily` · `/love/1-card` · `/en/love/1-card`)
 - **ผลที่วัดได้จริง**: `/daily` JS **195 ➔ 122 KB** (−37%) · HTML 19 ➔ **15 KB** · `/love/1-card` **198 ➔ 122 KB**

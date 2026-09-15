@@ -8,6 +8,7 @@ import {
   ROOT_KEYWORDS,
   ROOT_OPEN_GRAPH,
   ROOT_SHARED_METADATA,
+  ROOT_TITLE_DEFAULT,
   ROOT_TWITTER,
   SITE_ICONS,
   SITE_VIEWPORT,
@@ -28,7 +29,7 @@ import { SITE_ORIGIN } from "@/lib/config/site";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
   title: {
-    default: "Free Online Tarot Reading With an AI Tarot Reader",
+    default: ROOT_TITLE_DEFAULT.en,
     template: TITLE_TEMPLATE,
   },
   description: ROOT_DESCRIPTION.en,

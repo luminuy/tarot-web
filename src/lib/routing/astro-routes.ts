@@ -14,6 +14,12 @@
  * 📌 ย้ายกลุ่มหน้าใหม่ไป Astro: เพิ่ม prefix ที่นี่ที่เดียว
  */
 
+/**
+ * หน้าแรกย้ายไป Astro แล้ว — ต้องแยกออกมาจากรายการ prefix
+ * เพราะ `"/"` ในฐานะ prefix จะครอบ **ทั้งเว็บ** รวมหน้าที่ยังอยู่กับ Next ด้วย
+ */
+const ASTRO_EXACT_ROUTES = ["/"] as const;
+
 /** เส้นทาง (ฝั่งไทย) ที่ตัวมันเองและลูกทุกใบถูกเรนเดอร์ด้วย Astro */
 export const ASTRO_ROUTE_PREFIXES = [
   "/cards",
@@ -38,6 +44,7 @@ function withoutLocalePrefix(pathname: string): string {
 export function isAstroRoute(href: string): boolean {
   if (!href.startsWith("/") || href.startsWith("//")) return false;
   const pathname = withoutLocalePrefix(href.split("#")[0].split("?")[0].replace(/\/+$/, "") || "/");
+  if ((ASTRO_EXACT_ROUTES as readonly string[]).includes(pathname)) return true;
   return ASTRO_ROUTE_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
