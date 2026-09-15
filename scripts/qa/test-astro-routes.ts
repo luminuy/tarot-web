@@ -47,11 +47,20 @@ for (const [href, expected] of [
   ["/en/cards/major-00", true],
   ["/cards/major-00?x=1#y", true],
   ["/cards/major-00/", true],
+  ["/spreads", true],
+  ["/spreads/celtic-cross", true],
+  ["/spreads/topic/love", true],
+  ["/blog", true],
+  ["/blog/tarot-daily-card-guide", true],
+  ["/en/blog/tarot-daily-card-guide", true],
+  /* หน้าแอปที่ยังเรนเดอร์ด้วย Next */
   ["/", false],
-  ["/spreads", false],
-  ["/blog/tarot-daily-card-guide", false],
+  ["/daily", false],
+  ["/love/1-card", false],
+  ["/about", false],
   /* ⚠️ เส้นที่ "ขึ้นต้นเหมือนกันแต่คนละหน้า" ต้องไม่ถูกครอบ */
   ["/cardsomething", false],
+  ["/blogger", false],
   ["https://example.com/cards", false],
   ["//evil.com/cards", false],
 ] as const) {

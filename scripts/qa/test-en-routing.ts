@@ -263,8 +263,8 @@ const MUST_USE_LOCALE_LINK = [
   "src/components/spread/SpreadsLibrary.tsx",
   "src/components/spread/SpreadDetailClient.tsx",
   "src/components/home/TarotFlow.tsx",
-  "src/app/(th)/blog/BlogIndexClient.tsx",
-  "src/app/(th)/blog/[slug]/ArticleReadingClient.tsx",
+  "src/components/blog/BlogIndexClient.tsx",
+  "src/components/blog/ArticleReadingClient.tsx",
   "src/components/spread/TopicSpreadList.tsx",
 ];
 for (const file of MUST_USE_LOCALE_LINK) {

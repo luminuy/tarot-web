@@ -4,6 +4,7 @@ import "../globals.css";
 import { RootHtml } from "../_shared/RootHtml";
 import {
   GOOGLE_SITE_VERIFICATION,
+  ROOT_KEYWORDS,
   ROOT_SHARED_METADATA,
   SITE_ICONS,
   SITE_VIEWPORT,
@@ -28,20 +29,7 @@ export const metadata: Metadata = {
   },
   description:
     "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้แม่หมอ AI ทำนายสดทีละใบ มีผัง 25 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
-  keywords: [
-    "ดูดวงไพ่ยิปซี",
-    "ไพ่ยิปซี",
-    "เปิดไพ่ยิปซี",
-    "ดูดวงไพ่ยิปซีฟรี",
-    "ไพ่ยิปซีรายวัน",
-    "ไพ่ยิปซีรายเดือน",
-    "ไพ่ยิปซีความรัก",
-    "ดูดวงไพ่ทาโรต์",
-    "ไพ่ทาโรต์",
-    "ความหมายไพ่ยิปซี 78 ใบ",
-    "แม่หมอ AI",
-    "SeerTarot",
-  ],
+  keywords: ROOT_KEYWORDS.th,
   ...ROOT_SHARED_METADATA,
   icons: SITE_ICONS,
   verification: {

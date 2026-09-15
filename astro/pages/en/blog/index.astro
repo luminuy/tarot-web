@@ -1,0 +1,21 @@
+---
+import { buildBlogIndexMetadata } from "@/app/_shared/pages/blog-index";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { BlogIndexBodyRoot } from "../../../components/PageBodies";
+import { BlogIndexRoot } from "../../../islands/BlogIslands";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+
+/** 📚 คัมภีร์บทความ — หน้ารวม (ต้นไม้ภาษาอังกฤษ) */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={buildBlogIndexMetadata(locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <BlogIndexBodyRoot locale={locale}>
+    <Fragment slot="list">
+      <BlogIndexRoot locale={locale} client:idle />
+    </Fragment>
+  </BlogIndexBodyRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

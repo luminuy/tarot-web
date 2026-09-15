@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { getArticleSummaries } from "@/data/articles";
-import { BlogIndexClient, type BlogCardItem } from "../../(th)/blog/BlogIndexClient";
+import type { BlogCardItem } from "@/components/blog/BlogIndexClient";
 import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Locale } from "@/lib/i18n/types";
@@ -84,7 +85,14 @@ export function buildBlogIndexMetadata(locale: Locale): Metadata {
   };
 }
 
-export function BlogIndexBody({ locale }: { locale: Locale }) {
+/**
+ * ⚠️ `list` ถูกส่งเข้ามาจากข้างนอก ไม่ได้เรนเดอร์เองในไฟล์นี้
+ * (เหตุผลเดียวกับ `explorer` ใน cards-index.tsx — island ของ Astro วางซ้อนใน React ไม่ได้)
+ *
+ * ตัวเรียกต้องส่งรายการที่สร้างจาก `blogCardItems()` เสมอ เพื่อให้ทั้งสองเครื่องมือ
+ * ตัดฟิลด์ออกชุดเดียวกัน (ISSUE-043: เนื้อบทความห้ามรั่วเข้าฝั่งไคลเอนต์)
+ */
+export function BlogIndexBody({ locale, list }: { locale: Locale; list: ReactNode }) {
   const articles = getArticleSummaries();
   const copy = COPY[locale];
   const isEnglish = locale === "en";
@@ -124,7 +132,19 @@ export function BlogIndexBody({ locale }: { locale: Locale }) {
     { name: copy.crumb, path: PATH },
   ]);
 
-  const clientArticles: BlogCardItem[] = articles.map((a) => ({
+  return (
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
+
+      <div className="max-w-5xl mx-auto space-y-8 pb-16">{list}</div>
+    </main>
+  );
+}
+
+/** 10 ฟิลด์ที่การ์ดบทความใช้จริง — ตัดเนื้อบทความทิ้งตั้งแต่ต้นทาง (ISSUE-043) */
+export function blogCardItems(): BlogCardItem[] {
+  return getArticleSummaries().map((a) => ({
     slug: a.slug,
     category: a.category,
     categoryTh: a.categoryTh,
@@ -136,15 +156,4 @@ export function BlogIndexBody({ locale }: { locale: Locale }) {
     readTime: a.readTime,
     keywords: a.keywords,
   }));
-
-  return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }} />
-
-      <div className="max-w-5xl mx-auto space-y-8 pb-16">
-        <BlogIndexClient articles={clientArticles} />
-      </div>
-    </main>
-  );
 }

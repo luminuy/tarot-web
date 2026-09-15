@@ -1,0 +1,29 @@
+---
+import { spreadTopicMetadata, spreadTopicStaticParams } from "@/app/_shared/pages/spread-topic";
+import { getSpreadTopic, getSpreadsForTopic } from "@/data/spread-topics";
+
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import { SpreadTopicContentRoot } from "../../../../components/PageBodies";
+import { TopicSpreadListRoot } from "../../../../islands/SpreadIslands";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../../islands/SiteShell";
+
+/** 📐 ผังพยากรณ์ตามหมวดชีวิต (ต้นไม้ภาษาอังกฤษ) */
+const locale = "en" as const;
+
+export function getStaticPaths() {
+  return spreadTopicStaticParams().map(({ category }) => ({ params: { category } }));
+}
+
+const topic = getSpreadTopic(Astro.params.category!)!;
+const spreads = getSpreadsForTopic(topic);
+---
+
+<BaseLayout locale={locale} metadata={spreadTopicMetadata(topic.slug, locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <SpreadTopicContentRoot topic={topic} locale={locale}>
+    <Fragment slot="list">
+      <TopicSpreadListRoot spreads={spreads} locale={locale} client:idle />
+    </Fragment>
+  </SpreadTopicContentRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

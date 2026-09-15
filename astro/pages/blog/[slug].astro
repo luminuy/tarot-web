@@ -1,0 +1,37 @@
+---
+import { blogDetailStaticParams, blogDetailMetadata } from "@/app/_shared/pages/blog-detail";
+import { getArticleBySlug, getRelatedArticles } from "@/data/articles";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { BlogDetailContentRoot } from "../../components/PageBodies";
+import { ArticleReaderRoot } from "../../islands/BlogIslands";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/**
+ * 📖 บทความรายเรื่อง (ต้นไม้ภาษาไทย)
+ *
+ * ⚠️ ไม่สร้างหน้าให้ slug เก่า (`ARTICLE_SLUG_ALIASES`) โดยตั้งใจ
+ *    คำขอที่ไม่ตรงไฟล์ไหนจะตกไปที่ Worker แล้วโดน `redirects()` ใน `next.config.ts`
+ *    เด้ง 301 ให้ — ดีกว่าเดิมที่ Next สร้างเปลือกหน้าเปล่าแล้วค่อยเด้งฝั่งไคลเอนต์
+ */
+const locale = "th" as const;
+
+export function getStaticPaths() {
+  return blogDetailStaticParams("th")
+    .filter(({ slug }) => Boolean(getArticleBySlug(slug)?.slug === slug))
+    .map(({ slug }) => ({ params: { slug } }));
+}
+
+const article = getArticleBySlug(Astro.params.slug!)!;
+const related = getRelatedArticles(article.slug, 3);
+---
+
+<BaseLayout locale={locale} metadata={blogDetailMetadata(article.slug, locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <BlogDetailContentRoot article={article} locale={locale}>
+    <Fragment slot="reader">
+      <ArticleReaderRoot article={article} relatedArticles={related} locale={locale} client:idle />
+    </Fragment>
+  </BlogDetailContentRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

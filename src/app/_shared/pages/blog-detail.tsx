@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import {
   getAllArticles,
   getArticleBySlug,
@@ -12,7 +13,7 @@ import { buildAlternates, localizedUrl, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
-import { ArticleReadingClient } from "../../(th)/blog/[slug]/ArticleReadingClient";
+import { ArticleReadingClient } from "@/components/blog/ArticleReadingClient";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
 
 export interface BlogDetailPageProps {
@@ -34,11 +35,12 @@ export function blogDetailStaticParams(locale: Locale) {
   ];
 }
 
-export async function buildBlogDetailMetadata(
-  { params }: BlogDetailPageProps,
-  locale: Locale,
-): Promise<Metadata> {
-  const { slug } = await params;
+/**
+ * ⚙️ แกนกลางแบบซิงโครนัส — ใช้ได้ทั้งสองเครื่องมือเรนเดอร์
+ * (Next ส่ง `params` มาเป็น Promise · Astro รู้ค่าตั้งแต่ `getStaticPaths` แล้ว)
+ * ⚠️ ห้ามก็อปตรรกะ SEO นี้ไปไว้ในไฟล์ `.astro` เด็ดขาด — ต้องมีที่เดียว
+ */
+export function blogDetailMetadata(slug: string, locale: Locale): Metadata {
   const article = getArticleBySlug(slug);
 
   if (!article) {
@@ -88,28 +90,22 @@ export async function buildBlogDetailMetadata(
   };
 }
 
-export async function BlogDetailBody({
-  params,
+/**
+ * ⚙️ เนื้อหาบทความแบบซิงโครนัส — รับบทความที่หาเจอแล้วเข้ามาตรง ๆ
+ *
+ * Astro เรียกตัวนี้ (React ฝั่ง SSR เรนเดอร์คอมโพเนนต์แบบ async ไม่ได้)
+ * ส่วน `reader` คือ island ที่ส่งเข้ามาจากข้างนอก — เนื้อบทความทั้งก้อนอยู่ในนั้น
+ */
+export function BlogDetailContent({
+  article,
   locale,
-}: BlogDetailPageProps & { locale: Locale }) {
-  const { slug } = await params;
-  if (slug in ARTICLE_SLUG_ALIASES) {
-    const targetSlug = ARTICLE_SLUG_ALIASES[slug];
-    const targetPath = locale === "en" ? `/en/blog/${targetSlug}` : `/blog/${targetSlug}`;
-    redirect(targetPath);
-  }
-
-  const article = getArticleBySlug(slug);
-  if (!article) {
-    notFound();
-  }
-
-  if (locale === "en" && !article.contentEn) {
-    notFound();
-  }
-
+  reader,
+}: {
+  article: NonNullable<ReturnType<typeof getArticleBySlug>>;
+  locale: Locale;
+  reader: ReactNode;
+}) {
   const isEnglish = locale === "en";
-  const related = getRelatedArticles(slug, 3);
   const articleUrl = localizedUrl(`/blog/${article.slug}`, locale);
   const articleHeadline = isEnglish && article.titleEn ? article.titleEn : article.title;
   const articleDesc = isEnglish && article.descriptionEn ? article.descriptionEn : article.description;
@@ -188,9 +184,45 @@ export async function BlogDetailBody({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }} />
       )}
 
-      <div className="max-w-4xl mx-auto space-y-8 pb-20">
-        <ArticleReadingClient article={article} relatedArticles={related} />
-      </div>
+      <div className="max-w-4xl mx-auto space-y-8 pb-20">{reader}</div>
     </main>
   );
+}
+
+/** ฝั่ง Next — รอ `params` แล้วจัดการ alias/404 ก่อนส่งต่อให้เนื้อหา */
+export async function BlogDetailBody({
+  params,
+  locale,
+}: BlogDetailPageProps & { locale: Locale }) {
+  const { slug } = await params;
+  if (slug in ARTICLE_SLUG_ALIASES) {
+    const targetSlug = ARTICLE_SLUG_ALIASES[slug];
+    const targetPath = locale === "en" ? `/en/blog/${targetSlug}` : `/blog/${targetSlug}`;
+    redirect(targetPath);
+  }
+
+  const article = getArticleBySlug(slug);
+  if (!article) {
+    notFound();
+  }
+  if (locale === "en" && !article.contentEn) {
+    notFound();
+  }
+
+  return (
+    <BlogDetailContent
+      article={article}
+      locale={locale}
+      reader={<ArticleReadingClient article={article} relatedArticles={getRelatedArticles(slug, 3)} />}
+    />
+  );
+}
+
+/** ฝั่ง Next — รอ `params` แล้วเรียกแกนกลางตัวเดียวกัน */
+export async function buildBlogDetailMetadata(
+  { params }: BlogDetailPageProps,
+  locale: Locale,
+): Promise<Metadata> {
+  const { slug } = await params;
+  return blogDetailMetadata(slug, locale);
 }

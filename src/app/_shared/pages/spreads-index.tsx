@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 import { SPREADS } from "@/data/spreads";
-import { SpreadsLibrary } from "@/components/spread/SpreadsLibrary";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { localeHref } from "@/lib/i18n/paths";
@@ -62,7 +62,8 @@ export function buildSpreadsIndexMetadata(locale: Locale): Metadata {
   };
 }
 
-export function SpreadsIndexBody({ locale }: { locale: Locale }) {
+/** `library` = island ของคลังผัง ส่งเข้ามาจากข้างนอก (เหตุผลเดียวกับ `explorer` ใน cards-index.tsx) */
+export function SpreadsIndexBody({ locale, library }: { locale: Locale; library: ReactNode }) {
   const copy = COPY[locale];
   const isEnglish = locale === "en";
 
@@ -99,7 +100,7 @@ export function SpreadsIndexBody({ locale }: { locale: Locale }) {
 
       <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Client Interactive Library with dynamic bilingual hero header */}
-        <SpreadsLibrary spreads={SPREADS} />
+        {library}
 
         {/*
           🔗 สารบัญผังฝั่งเซิร์ฟเวอร์ — ห้ามลบ (เหตุผลอยู่ตรงนี้)

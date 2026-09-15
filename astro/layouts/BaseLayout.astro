@@ -7,6 +7,7 @@ import { buildSpeculationRules } from "@/app/_shared/speculation-rules";
 import {
   FONT_PRELOADS,
   GOOGLE_SITE_VERIFICATION,
+  ROOT_KEYWORDS,
   ROOT_SHARED_METADATA,
   SITE_THEME_COLOR,
   TITLE_TEMPLATE,
@@ -54,9 +55,10 @@ const { locale, metadata, preloadImages = [] } = Astro.props;
 const isEnglish = locale === "en";
 const imageCdnOrigin = getImageKitOrigin();
 /* ผสาน metadata ของรากกับของหน้าแบบทีละฟิลด์ — หน้าย่อยทับได้ (พฤติกรรมเดียวกับ Next) */
-const metaTags = renderMetadata({ ...ROOT_SHARED_METADATA, ...metadata }, {
-  titleTemplate: TITLE_TEMPLATE,
-});
+const metaTags = renderMetadata(
+  { ...ROOT_SHARED_METADATA, keywords: ROOT_KEYWORDS[locale], ...metadata },
+  { titleTemplate: TITLE_TEMPLATE },
+);
 
 /* ── JSON-LD ที่จริงกับทุกหน้าในเว็บ (คัดลอกตรรกะจาก RootHtml.tsx ไม่ได้ดัดแปลง) ── */
 const organizationJsonLd = {

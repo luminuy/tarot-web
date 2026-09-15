@@ -1,0 +1,33 @@
+---
+import {
+  spreadDetailMetadata,
+  spreadDetailProps,
+  spreadStaticParams,
+} from "@/app/_shared/pages/spread-detail";
+import { getSpread } from "@/data/spreads";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { SpreadDetailContentRoot } from "../../components/PageBodies";
+import { SpreadDetailRoot } from "../../islands/SpreadIslands";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** 📐 คู่มือผังพยากรณ์รายผัง 25 หน้า (ต้นไม้ภาษาไทย) */
+const locale = "th" as const;
+
+export function getStaticPaths() {
+  return spreadStaticParams().map(({ id }) => ({ params: { id } }));
+}
+
+const spread = getSpread(Astro.params.id!)!;
+const detailProps = spreadDetailProps(spread, locale);
+---
+
+<BaseLayout locale={locale} metadata={spreadDetailMetadata(spread.id, locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <SpreadDetailContentRoot spread={spread} locale={locale}>
+    <Fragment slot="detail">
+      <SpreadDetailRoot {...detailProps} locale={locale} client:idle />
+    </Fragment>
+  </SpreadDetailContentRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>
