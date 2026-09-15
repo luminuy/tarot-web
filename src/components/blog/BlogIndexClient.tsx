@@ -335,10 +335,6 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               return (
                 <article
                   key={article.slug}
-                  style={{
-                    contentVisibility: "auto",
-                    containIntrinsicSize: "auto 260px",
-                  }}
                   className="rounded-2xl border border-line-warm bg-gradient-to-b from-surface via-surface-warm to-[#F7F3EB] p-5 sm:p-6 space-y-4 hover:border-gold-ink transition duration-300 flex flex-col justify-between group shadow-[0_2px_12px_rgba(41,38,31,0.04)] hover:shadow-[0_10px_28px_rgba(143,92,26,0.10)] relative overflow-hidden"
                 >
                   <div className="space-y-3.5">

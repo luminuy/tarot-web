@@ -83,6 +83,7 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
+const ASTRO = path.join(ROOT, "astro");
 
 interface Violation {
   rule: string;
@@ -97,8 +98,8 @@ interface Violation {
  * ทุกรายการต้องมีเหตุผลที่ "วัดมาแล้ว" หรืออธิบายได้ว่าทำไมทางที่ถูกกว่าใช้ไม่ได้
  */
 const ALLOWLIST: { file: string; needle: string; reason: string }[] = [
-  // ว่างเปล่าคือสถานะที่ถูกต้อง — หนี้ของกฎ 9 (หน้าต่างลอย 4 บานที่ขาออกไม่เล่น)
-  // ถูกเก็บกวาดครบแล้วในรอบเดียวกับ INC-0126 · ห้ามเพิ่มรายการใหม่โดยไม่มีตัวเลขที่วัดมาแล้วกำกับ
+  // หนี้ของกฎ 9 (หน้าต่างลอย 4 บานที่ขาออกไม่เล่น) ถูกเก็บกวาดครบแล้วในรอบเดียวกับ INC-0126
+  // ห้ามเพิ่มรายการใหม่โดยไม่มีตัวเลขที่วัดมาแล้วกำกับ
 ];
 
 /** คุณสมบัติที่ห้ามให้ motion อนิเมต (บังคับ layout หรือ paint ใหม่ทั้งกล่อง) */
@@ -617,6 +618,46 @@ function checkPointlessMotionScope(violations: Violation[]): void {
   }
 }
 
+/**
+ * กฎ 10 — ห้ามใช้ `content-visibility` ทั้งเว็บ (INC-0174)
+ *
+ * ดูเหมือนของฟรี: "ไม่ต้องวาดส่วนที่ยังไม่เข้าจอ" แต่มันมาคู่กับ `contain-intrinsic-size`
+ * ซึ่งเป็น **ความสูงเดาไว้ค่าเดียว** ขณะที่หน้าเว็บนี้ responsive ทั้งเว็บ
+ * ความสูงจริงของกล่องเดียวกันจึงต่างกันตามความกว้างจอเสมอ (การ์ดไพ่วัดได้ 357 · 387 · 432px
+ * ที่จอ 375px ทั้งที่โค้ดเดาไว้ 406px) ทุกครั้งที่กล่องเลื่อนออกจอมันยุบกลับไปใช้ค่าที่เดา
+ * ➔ ความสูงเอกสารเปลี่ยน ➔ เบราว์เซอร์แก้ตำแหน่งสกรอลล์ตาม ➔ **จอกระตุกรัว ๆ ตอนเลื่อนขึ้น**
+ *
+ * วัดจริงบน production 2026-09-15 (มือถือ 375x812 · เลื่อนขึ้นทีละ 200px):
+ *   หน้าแรก ความสูงกระโดด 10,014 ➔ 11,176px · จอถูกลากกลับลง 963px · CLS 1.000
+ *   /cards กระตุก 14 ครั้ง CLS 0.766 · /blog กระตุก 17 ครั้ง · ปิดทิ้ง ➔ กระตุก 0 ครั้ง CLS 0
+ *
+ * ใส่คำว่า `auto` นำหน้าใน `contain-intrinsic-size` ก็ไม่ช่วย — ตัวเลขข้างบนคือของที่ใส่ `auto` ไว้แล้ว
+ * ถ้าอนาคตจะใช้จริง ต้องแนบตัวเลข "กระตุก 0 ครั้ง" ที่วัดครบทุกความกว้างจอมาก่อน แล้วค่อยเพิ่มลง ALLOWLIST
+ */
+function checkContentVisibility(violations: Violation[]): void {
+  const files = [
+    ...walk(SRC, [".tsx", ".ts", ".css"]),
+    ...(fs.existsSync(ASTRO) ? walk(ASTRO, [".astro", ".tsx", ".ts", ".css"]) : []),
+  ];
+  for (const file of files) {
+    const r = rel(file);
+    const lines = fs.readFileSync(file, "utf-8").split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (isCommentLine(line)) continue;
+      if (!/contentVisibility|content-visibility/.test(line)) continue;
+      if (isAllowed(r, "content-visibility")) continue;
+      violations.push({
+        file: r,
+        line: i + 1,
+        code: line.trim().slice(0, 160),
+        rule: "10 · content-visibility (INC-0174)",
+        hint: "ถอดทิ้ง — `contain-intrinsic-size` เดาความสูงได้ค่าเดียวแต่กล่องจริงสูงไม่เท่ากันทุกจอ ผลคือจอกระตุกรัว ๆ ตอนเลื่อนขึ้น",
+      });
+    }
+  }
+}
+
 function run(): void {
   console.log("🔍 ตรวจคุณภาพโมชั่นทั้งเว็บ (Motion Quality Guard)...\n");
 
@@ -632,6 +673,7 @@ function run(): void {
   checkCss(violations);
   checkKeyframeCenteringConflict(violations);
   checkTokens(violations);
+  checkContentVisibility(violations);
 
   if (violations.length > 0) {
     console.error(`❌ พบอนิเมชันที่ผิดกฎ ${violations.length} จุด:\n`);
@@ -648,7 +690,7 @@ function run(): void {
   }
 
   console.log(
-    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · แผงหน้าต่างลอยไม่อนิเมต scale และใช้ svh · ไม่มี withMotionScope() ห่อของที่ไม่ได้ใช้ motion · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่\n"
+    "\n✅ ผ่านทุกเกณฑ์: ไม่มี transition-all · ไม่มี backdrop-filter · ไม่มีลูปไม่รู้จบบนเธรดหลัก · ไม่มี translate3d(0,0,0) · ไม่มี motion อนิเมตคุณสมบัติเชิง layout · ไม่มี mode=\"wait\" ที่ไม่มี exit · ไม่มี return null เหนือ AnimatePresence · ไม่มีคลาสผีของ tailwindcss-animate · แผงหน้าต่างลอยไม่อนิเมต scale และใช้ svh · ไม่มี withMotionScope() ห่อของที่ไม่ได้ใช้ motion · ไม่มีคีย์เฟรมที่จัดกลางซ้ำกับ translate ของ Tailwind · โทเคนจังหวะกลางยังผูกอยู่ · ไม่มี content-visibility ที่ทำให้จอกระตุกตอนเลื่อนขึ้น\n"
   );
   process.exit(0);
 }

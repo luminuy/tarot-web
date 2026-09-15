@@ -200,7 +200,6 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="how-it-works-title"
-        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 480px" }}
         className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
@@ -313,7 +312,6 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="heritage-title"
-        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 450px" }}
         className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         {/* Section Header */}
@@ -470,7 +468,6 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="spreads-and-cards-title"
-        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 500px" }}
         className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
@@ -642,7 +639,6 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="articles-title"
-        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 450px" }}
         className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10"
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-line-warm/50">
@@ -716,7 +712,6 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           ═══════════════════════════════════════════════════════════════ */}
       <section
         aria-labelledby="faq-title"
-        style={{ contentVisibility: "auto", containIntrinsicSize: "auto 600px" }}
         className="max-w-4xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10 pb-16 sm:pb-20"
       >
         <div className="text-center space-y-2.5 sm:space-y-3">
