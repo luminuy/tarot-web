@@ -85,7 +85,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
 
               ⚠️ ห้ามเปลี่ยนกลับเป็น <h*> — ด่าน `test-a11y-critical` ตรวจทั้งเว็บแล้ว
             */}
-            <div className="text-[13px] font-bold text-gold-on-dark uppercase tracking-wider font-serif-th">
+            <div className={`text-[13px] font-bold text-gold-on-dark font-serif-th ${isEnglish ? "uppercase tracking-wider" : ""}`}>
               {isEnglish ? "Ethical Reading Notice & AI Disclosure" : "ข้อควรทราบเกี่ยวกับการทำนาย"}
             </div>
             <p className="text-[13px] text-line leading-[1.7] font-serif-th">
@@ -111,7 +111,7 @@ export function SiteFooter({ spacing = "default" }: SiteFooterProps) {
           {footerColumns.map((col, idx) => (
             <nav key={idx} aria-label={col.title} className="space-y-3">
               {/* ⚠️ ห้ามเป็น <h*> — เหตุผลเดียวกับป้าย "ข้อควรทราบ" ด้านบน */}
-              <div className="font-serif-th font-bold text-sm text-surface-warm tracking-wider uppercase border-b border-line/20 pb-2">
+              <div className={`font-serif-th font-bold text-sm text-surface-warm border-b border-line/20 pb-2 ${isEnglish ? "uppercase tracking-wider" : ""}`}>
                 {col.title}
               </div>
               {"links" in col && col.links ? (

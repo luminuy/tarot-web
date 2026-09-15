@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0181 · 2026-09-15 21:09 · 🟠 High · resolve reader console 401 lockout and restore quiet luxury UI standards
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | แม่หมอเปิดหน้าแผงควบคุม /readers/console แล้วติด 401 ทันที ไม่สามารถดูคิวหรือเปลี่ยนสถานะได้ รวมถึง UI หน้าคิวเรียก alert/confirm และใช้อิโมจิต้องห้าม |
+| **สาเหตุราก** | requireReader ปฏิเสธ token จาก query string เพื่อความปลอดภัย แต่หน้า console ยังไม่ได้ส่ง Authorization Bearer token header และแผงแอดมินสร้างลิงก์โดยไม่มี token พร้อมทั้งมีโค้ดเก่าที่ยังไม่ได้เก็บกวาด AppMotionProvider และใช้ alert modal แบบบล็อกเบราว์เซอร์ |
+| **การแก้ไข** | ส่ง Authorization Bearer token ใน header ของ console fetch และ patch ทุกตัว เพิ่มการ signReaderToken ใน GET api admin readers id สำหรับแจกจ่ายลิงก์เข้าใช้งาน แทนที่ alert confirm ด้วย inline toast และ inline notice ลบอิโมจิต้องห้าม ลบโค้ดไม่ได้ใช้งาน AppMotionProvider และใส่ tap-overlay-y ให้ปุ่มยืนยันยกเลิกคิว |
+| **🛡️ กฎป้องกันถาวร** | **ส่ง Authorization Bearer token ในทุกคำขอของ reader console เสมอ เพิ่มการเซ็น token 24 ชั่วโมงใน admin readers api และบังคับใช้ quiet luxury tokens พร้อม inline toast และ inline status แทน alert** |
+| **การพิสูจน์ว่าแก้ได้จริง** | ผ่านการทดสอบครบทั้ง 62 ด่านของ repo:verify รวมถึง typecheck, agent:check, test-tap-target, และ test-bundle-budget |
+| **บันทึกโดย** | Antigravity AI · branch `fix/reader-console-auth-and-code-health` |
+
+
 ### INC-0180 · 2026-09-15 20:08 · 🟠 High · ปิด Bot Fight Mode บน production จริง + กฎ WAF ที่มาแทน (ปิด ISSUE-047)
 
 | หัวข้อ | รายละเอียด |

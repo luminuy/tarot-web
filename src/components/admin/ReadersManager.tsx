@@ -156,11 +156,11 @@ export default function ReadersManager() {
         showToast(`เปลี่ยนสถานะเป็น ${newStatus} แล้ว`);
         fetchReaders();
       } else {
-        const d = await res.json();
-        alert(d.error || "เปลี่ยนสถานะไม่สำเร็จ");
+        const d = await res.json().catch(() => ({}));
+        showToast(d.error || "เปลี่ยนสถานะไม่สำเร็จ");
       }
     } catch {
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     }
   };
 
@@ -174,22 +174,38 @@ export default function ReadersManager() {
         showToast("ลบแม่หมอเรียบร้อยแล้ว");
         fetchReaders();
       } else {
-        const d = await res.json();
-        alert(d.error || "ลบไม่สำเร็จ");
+        const d = await res.json().catch(() => ({}));
+        showToast(d.error || "ลบไม่สำเร็จ");
       }
     } catch {
-      alert("เกิดข้อผิดพลาดในการลบ");
+      showToast("เกิดข้อผิดพลาดในการลบ");
     }
   };
 
   const copyConsoleLink = async (r: Reader) => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const link = `${origin}/readers/console?id=${r.id}`;
-    const ok = await copyToClipboard(link);
-    if (ok) {
+    try {
+      const res = await fetch(`/api/admin/readers/${r.id}`);
+      if (res.ok) {
+        const d = await res.json().catch(() => ({}));
+        const link = d.token
+          ? `${origin}/readers/console?id=${r.id}&token=${d.token}`
+          : `${origin}/readers/console?id=${r.id}`;
+        const ok = await copyToClipboard(link);
+        if (ok) {
+          showToast("คัดลอกลิงก์แผงควบคุมแม่หมอ (พร้อมรหัสผ่านชั่วคราว 24 ชม.) แล้ว");
+        } else {
+          showToast(`ลิงก์: ${link}`);
+        }
+      } else {
+        const link = `${origin}/readers/console?id=${r.id}`;
+        await copyToClipboard(link);
+        showToast("คัดลอกลิงก์แผงควบคุมแม่หมอแล้ว");
+      }
+    } catch {
+      const link = `${origin}/readers/console?id=${r.id}`;
+      await copyToClipboard(link);
       showToast("คัดลอกลิงก์แผงควบคุมแม่หมอแล้ว");
-    } else {
-      alert(`ลิงก์: ${link}`);
     }
   };
 
