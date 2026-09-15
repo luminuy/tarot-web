@@ -5,10 +5,32 @@
   "compatibility_date": "2026-08-01",
   "compatibility_flags": ["nodejs_compat"],
 
-  // ── Static assets (ภาพไพ่ 1909, _next/static ฯลฯ) ─────────────────────────────
+  // ── Static assets (ภาพไพ่ 1909 · _next/static · หน้าเนื้อหาที่เรนเดอร์ด้วย Astro) ──
+  //
+  // 🚦 ลำดับที่ Cloudflare ใช้ตัดสิน: **ไฟล์ static มาก่อน Worker เสมอ**
+  //    คำขอที่ตรงกับไฟล์ในโฟลเดอร์นี้จะถูกตอบที่ขอบโดย **ไม่ปลุก Worker เลย**
+  //    (ไม่เสียค่าคำขอ · ไม่ต้องบูต runtime ของ Next) ส่วนคำขอที่ไม่ตรงไฟล์ไหนเลย
+  //    จึงค่อยตกไปที่ Worker ตามปกติ — นี่คือกลไกที่ทำให้หน้าเนื้อหา 174 หน้า
+  //    ที่ `scripts/merge-astro-assets.ts` คัดลอกมาไว้ตรงนี้ เสิร์ฟจากขอบได้ทันที
+  //
+  // ⚠️ สามค่าล่างเขียนไว้ตรง ๆ ทั้งที่ตรงกับค่าเริ่มต้นอยู่แล้ว — โดยตั้งใจ
+  //    พฤติกรรมของทั้งเว็บครึ่งหนึ่งไม่ควรขึ้นกับ "ค่าเริ่มต้นที่ผู้ให้บริการอาจเปลี่ยนวันหนึ่ง"
+  //
+  //    html_handling: "auto-trailing-slash"
+  //        `/cards/major-00` ➔ เสิร์ฟไฟล์ `cards/major-00.html`
+  //        ถ้าเป็น "none" หน้าเนื้อหาทั้งหมดจะ 404 ทันที (ต้องพิมพ์ .html เอง)
+  //    not_found_handling: "none"
+  //        ไม่ตรงไฟล์ไหน ➔ ส่งต่อให้ Worker (หน้าแอป · /api/* · sitemap ยังทำงานเหมือนเดิม)
+  //        ห้ามใช้ "404-page" เด็ดขาด — Worker จะไม่ได้รับคำขอที่ไม่ใช่ไฟล์อีกเลยทั้งเว็บ
+  //    run_worker_first: false
+  //        ถ้าเป็น true ทุกคำขอจะวิ่งเข้า Worker ก่อน = จ่ายค่าคำขอเท่าเดิมกับก่อนย้าย
+  //        และหน้าเนื้อหาจะ 404 เพราะ Next ไม่มีเส้นทางเหล่านั้นอีกแล้ว
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none",
+    "run_worker_first": false
   },
 
   // ── OpenNext Edge Caching ────────────────────────────────────────────────────

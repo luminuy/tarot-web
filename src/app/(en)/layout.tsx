@@ -2,6 +2,12 @@ import type { Metadata, Viewport } from "next";
 
 import "../globals.css";
 import { RootHtml } from "../_shared/RootHtml";
+import {
+  ROOT_SHARED_METADATA,
+  SITE_ICONS,
+  SITE_VIEWPORT,
+  TITLE_TEMPLATE,
+} from "../_shared/root-metadata";
 import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 /**
@@ -18,7 +24,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
   title: {
     default: "Free Online Tarot Reading With an AI Tarot Reader",
-    template: "%s · SeerTarot",
+    template: TITLE_TEMPLATE,
   },
   description:
     "Free online tarot reading with the original 1909 Rider-Waite deck. Shuffle and draw all 78 cards yourself, then read a live AI interpretation.",
@@ -34,27 +40,8 @@ export const metadata: Metadata = {
     "78 tarot cards",
     "SeerTarot",
   ],
-  authors: [{ name: "SeerTarot Sanctuary" }],
-  creator: "SeerTarot Sanctuary",
-  publisher: "SeerTarot Sanctuary",
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
+  ...ROOT_SHARED_METADATA,
+  icons: SITE_ICONS,
   alternates: buildAlternates("/", { locale: "en", englishTwin: true }),
   openGraph: {
     type: "website",
@@ -73,13 +60,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#FAF7F2",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
-  viewportFit: "cover",
-};
+export const viewport: Viewport = SITE_VIEWPORT;
 
 export default function EnglishRootLayout({ children }: { children: React.ReactNode }) {
   // pinLocale = true — ทุกหน้าในต้นไม้นี้เป็นภาษาอังกฤษตามเส้นทาง ห้าม client สลับเอง

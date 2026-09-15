@@ -1,0 +1,21 @@
+---
+import { buildCardsIndexMetadata } from "@/app/_shared/pages/cards-index";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { CardsIndexBodyRoot } from "../../components/PageBodies";
+import { CardsExplorerRoot } from "../../islands/CardsExplorerRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** 🃏 สารานุกรมไพ่ 78 ใบ — หน้ารวม (ต้นไม้ภาษาไทย) */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={buildCardsIndexMetadata(locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <CardsIndexBodyRoot locale={locale}>
+    <Fragment slot="explorer">
+      <CardsExplorerRoot locale={locale} client:idle />
+    </Fragment>
+  </CardsIndexBodyRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

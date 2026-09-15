@@ -18,6 +18,87 @@
 @source not "../../scripts";
 
 /*
+ * ✒️ ฟอนต์ของทั้งเว็บ — ประกาศที่นี่ที่เดียว ใช้ร่วมกันทั้ง Next และ Astro
+ * ===========================================================================
+ *
+ * ทำไมย้ายออกจาก `next/font/local` (2026-09-15)
+ * --------------------------------------------
+ * `next/font` สร้าง `@font-face` + ไฟล์ .woff2 ที่มี hash ในชื่อ ให้เฉพาะหน้าที่
+ * Next เรนเดอร์เท่านั้น · หน้าเนื้อหาที่ย้ายไปเรนเดอร์ด้วย Astro จึงเข้าถึงไม่ได้
+ * ถ้าปล่อยให้สองฝั่งประกาศฟอนต์กันเอง ผู้ใช้ที่เดินข้ามระหว่างสองฝั่งจะต้อง
+ * **ดาวน์โหลดฟอนต์ชุดเดิมใหม่ทั้งหมด** เพราะ URL คนละตัว (แคชไม่ถูกใช้ซ้ำ)
+ *
+ * ย้ายมาประกาศเองที่นี่ ทั้งเว็บจึงชี้ไปที่ไฟล์เดียวกันที่ `/fonts/*.woff2` เสมอ
+ *
+ * ⚠️ ตัวเลขชดเชยเมตริก (`ascent-override` · `descent-override` · `size-adjust`)
+ *    **คัดลอกมาจากที่ `next/font` คำนวณให้ตอนบิลด์จริงแบบเป๊ะทุกหลัก** ห้ามแก้ด้วยการเดา
+ *    มันคือสิ่งเดียวที่กันไม่ให้หน้ากระโดด (CLS) ตอนฟอนต์จริงมาถึง
+ *    วิธีตรวจ: `grep -o "@font-face{[^}]*}" .next/static/css/*.css` บนคอมมิตก่อนย้าย
+ *
+ * ⚠️ `local("Arial")` ห้ามเปลี่ยนเป็นชื่อฟอนต์ที่เครื่องผู้ใช้อาจไม่มี — บทเรียนราคาแพง
+ *    อยู่ในหัวไฟล์ `scripts/subset-fonts.py` และในประวัติของ `_shared/fonts.ts` เดิม
+ *    ถ้าตัวสำรองโหลดไม่สำเร็จ ค่าชดเชยทั้งชุดจะไม่ถูกใช้เลย แล้ว CLS จะกลับมาทันที
+ *
+ * ⚠️ ไฟล์ .woff2 ถูกตัดเองด้วย `npm run fonts:subset` และ commit ไว้ในรีโป
+ *    สายพานบิลด์ไม่ได้สร้างใหม่ · ชื่อไฟล์ไม่มี hash จึงตั้งอายุแคชไว้ 7 วัน
+ *    (ดูเหตุผลที่ `public/_headers`) ห้ามตั้ง `immutable` กับพาธนี้เด็ดขาด
+ */
+@font-face {
+  font-family: "notoSerifThai";
+  src: url(/fonts/noto-serif-thai-400.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "notoSerifThai";
+  src: url(/fonts/noto-serif-thai-700.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: "notoSerifThai Fallback";
+  src: local("Arial");
+  ascent-override: 97.64%;
+  descent-override: 49.00%;
+  line-gap-override: 0.00%;
+  size-adjust: 108.97%;
+}
+@font-face {
+  font-family: "sarabun";
+  src: url(/fonts/sarabun-400.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "sarabun";
+  src: url(/fonts/sarabun-600.woff2) format("woff2");
+  font-display: swap;
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: "sarabun Fallback";
+  src: local("Arial");
+  ascent-override: 109.87%;
+  descent-override: 23.87%;
+  line-gap-override: 0.00%;
+  size-adjust: 97.21%;
+}
+
+/*
+ * ตัวแปรที่ `--font-serif-th` / `--font-sans-th` ใน @theme อ้างถึง
+ * ประกาศนอก @theme โดยตั้งใจ — ไม่ต้องการให้ Tailwind สร้างคลาสยูทิลิตี้จากมัน
+ * และไม่ต้องลุ้นว่าตัวเก็บกวาดจะมองว่า "ไม่มีใครใช้" แล้วตัดทิ้ง
+ */
+:root {
+  --font-noto-serif-thai: "notoSerifThai", "notoSerifThai Fallback";
+  --font-sarabun: "sarabun", "sarabun Fallback";
+}
+
+/*
   สเปกระบบดีไซน์ Editorial Quiet Luxury (Warm Ivory & Deep Brown)
   8 Core Tokens:
   1. canvas    : #F3F0EA (Warm Ivory — พื้นหน้าเว็บ)

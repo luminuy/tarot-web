@@ -10,10 +10,19 @@ import { useHasMounted } from "@/lib/use-has-mounted";
 import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 
+export type CardNavRef = Pick<TarotCard, "id" | "image" | "nameTh" | "nameEn">;
+
 interface CardDetailViewProps {
   card: TarotCard;
-  prevCard?: TarotCard;
-  nextCard?: TarotCard;
+  /**
+   * ไพ่ก่อนหน้า/ถัดไป — ใช้แค่ 4 ฟิลด์นี้จริง ๆ (ลิงก์ · ภาพย่อ · ชื่อสองภาษา)
+   *
+   * ⚠️ ห้ามขยายเป็น `TarotCard` เต็มใบ · หน้าที่เรนเดอร์ด้วย Astro ส่ง prop ชุดนี้
+   *    ลงไปใน HTML เพื่อให้ island hydrate ได้ ถ้ารับทั้งใบ คำทำนายทั้ง 5 หมวด
+   *    ของไพ่อีกสองใบจะถูกฝังลงหน้าไปด้วยโดยไม่มีใครได้อ่าน (โตขึ้นราว 12 KB/หน้า)
+   */
+  prevCard?: CardNavRef;
+  nextCard?: CardNavRef;
   totalCards: number;
   currentIndex: number;
   /** ไพ่ที่พลังงานใกล้เคียง — Server Component ส่งเข้ามาเพื่อให้ลิงก์อยู่ใน HTML */

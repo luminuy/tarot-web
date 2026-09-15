@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import { LocaleProvider } from "@/lib/i18n";
-import { fontVariables } from "./_shared/fonts";
 import { NotFoundBody, notFoundMetadata } from "./_shared/pages/not-found";
 
 /**
@@ -16,14 +15,14 @@ import { NotFoundBody, notFoundMetadata } from "./_shared/pages/not-found";
  * ⚠️ ห้ามเรนเดอร์ `<html>`/`<body>` เองที่นี่เด็ดขาด — Next ครอบเปลือก `<html><body>`
  * ของมันเองให้ชั้นนี้อยู่แล้ว (วัดจาก `.next/server/app/_not-found.html` จริง) การเรนเดอร์ซ้ำ
  * ทำให้ได้ `<html>` ซ้อนใน `<body>` ซึ่งเป็น HTML ที่ไม่ถูกต้อง เบราว์เซอร์จะทิ้ง `<head>`
- * ชั้นในทั้งก้อน จึงต้องหยิบเฉพาะของที่จำเป็นมาเอง: `globals.css` · ตัวแปรฟอนต์ ·
+ * ชั้นในทั้งก้อน จึงต้องหยิบเฉพาะของที่จำเป็นมาเอง: `globals.css` ·
  * `LocaleProvider` (หัวเว็บและฟุตเตอร์เรียก `useLocale()` ถ้าไม่มี provider จะพังทั้งหน้า)
  */
 export const metadata: Metadata = notFoundMetadata;
 
 export default function GlobalNotFound() {
   return (
-    <div className={`${fontVariables} min-h-dvh font-sans antialiased`}>
+    <div className={"min-h-dvh font-sans antialiased"}>
       <LocaleProvider>
         <NotFoundBody />
       </LocaleProvider>

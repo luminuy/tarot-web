@@ -1,14 +1,14 @@
 /**
  * SeerTarot Service Worker (Edge-Native PWA Cache Engine)
  * -------------------------------------------------------------
- * 1. Cache-First: Next.js static chunks (/_next/static/*), ภาพไพ่ 78 ใบ (/cards/*), ฟอนต์ และไอคอน
- * 2. Stale-While-Revalidate: หน้าเว็บหลัก (HTML Shell: /, /cards, /spreads, /blog, /daily)
+ * 1. Network-First: ทุกคำขอที่เป็นการเปิดหน้าเว็บ (ตรวจก่อนกฎอื่นเสมอ — ดูเหตุผลในตัวจัดการ fetch)
+ * 2. Cache-First: ไฟล์ทรัพยากรคงที่ — /_next/static/*, /_astro/*, ภาพไพ่ 78 ใบ, ฟอนต์ และไอคอน
  * 3. Network-Only: Dynamic API (/api/*), Admin (/admin/*), Account (/account/*) และ Queue
  * 4. Offline Fallback: เสิร์ฟหน้า /offline.html เมื่อผู้ใช้อยู่นอกสัญญาณเน็ต
  * 5. Cache Invalidation: กำจัดแคชเวอร์ชันเก่าอัตโนมัติเมื่อมีการอัปเดตเวอร์ชัน
  */
 
-const CACHE_VERSION = "v-c5a949a";
+const CACHE_VERSION = "v-da0500b";
 const STATIC_CACHE_NAME = `seertarot-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE_NAME = `seertarot-runtime-${CACHE_VERSION}`;
 
@@ -91,10 +91,63 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 1. Static Assets & Images: Cache-First
-  // ครอบคลุม /_next/static/*, /cards/*, /icons/* และไฟล์ทรัพยากรคงที่
+  /*
+   * 1. คำขอที่เป็น "การเปิดหน้าเว็บ" — ต้องตรวจก่อนกฎไฟล์ static เสมอ
+   * ---------------------------------------------------------------------------
+   * ⚠️ ห้ามสลับลำดับกับบล็อกไฟล์ static ด้านล่างเด็ดขาด (บทเรียน 2026-09-15)
+   *
+   * กฎไฟล์ static จับด้วย **คำนำหน้าเส้นทาง** `/cards/` ซึ่งเดิมหมายถึงภาพไพ่อย่างเดียว
+   * แต่ตอนนี้ `/cards/major-00` คือ **หน้าเว็บ** (เรนเดอร์ด้วย Astro เสิร์ฟเป็นไฟล์ static)
+   * ถ้าปล่อยให้บล็อกนั้นตรวจก่อน หน้าไพ่รายใบ 156 หน้าจะถูกเสิร์ฟแบบ cache-first
+   * = ผู้ใช้เดิมเห็นเนื้อหาเก่าไปจนกว่าจะ deploy รอบถัดไป และตอนออฟไลน์จะได้
+   * Response ว่างสถานะ 408 แทนหน้า `/offline.html` ที่เตรียมไว้
+   */
+  // 1. Navigation / HTML Requests: Network-First with Offline Fallback
+  if (request.mode === "navigate" || request.destination === "document") {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(RUNTIME_CACHE_NAME).then(async (cache) => {
+              await cache.put(request, responseToCache);
+              // เว็บมีหน้า prerender ~299 หน้า ถ้าเก็บทุกหน้าที่ผู้ใช้เดินผ่านโดยไม่จำกัด
+              // โควตาที่เก็บข้อมูลของ origin จะเต็ม แล้วเบราว์เซอร์ล้าง **ทั้งถัง** ทิ้ง
+              // รวมถึง /offline.html ที่ precache ไว้ — หน้าสำรองตอนออฟไลน์จึงเงียบหายไปเฉย ๆ
+              await trimCache(cache, RUNTIME_CACHE_LIMIT);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cachedResponse = await caches.match(request);
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+
+          // หากไม่มีในแคช ให้ส่งหน้า fallback ออฟไลน์
+          const offlinePage = await caches.match("/offline.html");
+          if (offlinePage) {
+            return offlinePage;
+          }
+
+          return new Response("ออฟไลน์ - ไม่สามารถเชื่อมต่อระบบได้ในขณะนี้", {
+            status: 503,
+            headers: { "Content-Type": "text/plain; charset=utf-8" },
+          });
+        })
+    );
+    return;
+  }
+
+  // 2. Static Assets & Images: Cache-First
+  // ครอบคลุม /_next/static/*, /_astro/*, ภาพไพ่ใน /cards/*, /icons/* และไฟล์ทรัพยากรคงที่
+  //
+  // ⚠️ มาถึงตรงนี้ได้เฉพาะคำขอที่ **ไม่ใช่การเปิดหน้าเว็บ** (บล็อกด้านบนคัดไปแล้ว)
+  //    `/cards/` จึงเหลือแต่ไฟล์ภาพจริง ไม่ใช่หน้าไพ่รายใบ
   const isStaticAsset =
     url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/_astro/") ||
     url.pathname.startsWith("/cards/") ||
     url.pathname.startsWith("/icons/") ||
     /\.(?:webp|png|jpg|jpeg|svg|gif|woff2|woff|ttf|css|js)$/i.test(url.pathname);
@@ -132,43 +185,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2. Navigation / HTML Requests: Stale-While-Revalidate with Offline Fallback
-  if (request.mode === "navigate" || request.destination === "document") {
-    event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(RUNTIME_CACHE_NAME).then(async (cache) => {
-              await cache.put(request, responseToCache);
-              // เว็บมีหน้า prerender ~299 หน้า ถ้าเก็บทุกหน้าที่ผู้ใช้เดินผ่านโดยไม่จำกัด
-              // โควตาที่เก็บข้อมูลของ origin จะเต็ม แล้วเบราว์เซอร์ล้าง **ทั้งถัง** ทิ้ง
-              // รวมถึง /offline.html ที่ precache ไว้ — หน้าสำรองตอนออฟไลน์จึงเงียบหายไปเฉย ๆ
-              await trimCache(cache, RUNTIME_CACHE_LIMIT);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(async () => {
-          const cachedResponse = await caches.match(request);
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-
-          // หากไม่มีในแคช ให้ส่งหน้า fallback ออฟไลน์
-          const offlinePage = await caches.match("/offline.html");
-          if (offlinePage) {
-            return offlinePage;
-          }
-
-          return new Response("ออฟไลน์ - ไม่สามารถเชื่อมต่อระบบได้ในขณะนี้", {
-            status: 503,
-            headers: { "Content-Type": "text/plain; charset=utf-8" },
-          });
-        })
-    );
-    return;
-  }
 });
 
 // รองรับข้อความจากไคลเอนต์เพื่อ skip waiting

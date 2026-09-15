@@ -76,15 +76,31 @@ export const BUDGETS: RouteBudget[] = [
   },
   {
     route: "/cards",
-    // Motion Diet Ratchet 2026-09-07: ถอด motion (39.9 KB gz) ออกจากหน้านี้ · วัดจริง 178 KB
-    maxJsGzipKb: 190,
-    maxHtmlGzipKb: 40, // Current: 35 KB
+    /*
+     * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (2026-09-15) — รัดเพดานลงตามของจริงทันที
+     * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
+     * เหลือเฉพาะ island ที่ต้องโต้ตอบจริง และทั้งหมดโหลดแบบ `client:idle`
+     * (หัวเว็บ · เครื่องมือวัดผล · ช่องค้นหาไพ่)
+     *
+     * ⚠️ ตัวเลขนี้คือ "ของจริงที่วัดได้ + ระยะหายใจราว 10%" ตามหลัก ratchet ของบ้านนี้
+     *    ห้ามขยับขึ้นเพื่อให้ผ่าน ให้ไปลดของจริงก่อนเสมอ
+     */
+    maxJsGzipKb: 120, // วัดจริง 2026-09-15 หลังย้ายไป Astro: 109
+    maxHtmlGzipKb: 28, // วัดจริง 2026-09-15: 23 KB
   },
   {
     route: "/cards/major-00",
-    // Motion Diet Ratchet 2026-09-07: ถอด motion ออกจากหน้าไพ่ทั้ง 156 หน้า · วัดจริง 187 KB
-    maxJsGzipKb: 198,
-    maxHtmlGzipKb: 30, // Current: 23 KB
+    /*
+     * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (2026-09-15) — รัดเพดานลงตามของจริงทันที
+     * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
+     * เหลือเฉพาะ island ที่ต้องโต้ตอบจริง และทั้งหมดโหลดแบบ `client:idle`
+     * (หัวเว็บ · เครื่องมือวัดผล · ปุ่มสลับหัวตั้ง/หัวกลับ)
+     *
+     * ⚠️ ตัวเลขนี้คือ "ของจริงที่วัดได้ + ระยะหายใจราว 10%" ตามหลัก ratchet ของบ้านนี้
+     *    ห้ามขยับขึ้นเพื่อให้ผ่าน ให้ไปลดของจริงก่อนเสมอ
+     */
+    maxJsGzipKb: 106, // วัดจริง 2026-09-15 หลังย้ายไป Astro: 96
+    maxHtmlGzipKb: 22, // วัดจริง 2026-09-15: 17 KB
   },
   {
     route: "/blog",
@@ -122,34 +138,45 @@ export const BUDGETS: RouteBudget[] = [
   },
   {
     route: "/cards/all",
-    maxJsGzipKb: 178, // W-01/W-02 Ratchet (Actual Real User: 173 KB, total w/ polyfills: 212 KB)
-    maxHtmlGzipKb: 45, // Current: 38 KB
+    /*
+     * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (2026-09-15) — รัดเพดานลงตามของจริงทันที
+     * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
+     * เหลือเฉพาะ island ที่ต้องโต้ตอบจริง และทั้งหมดโหลดแบบ `client:idle`
+     * (หัวเว็บ · เครื่องมือวัดผล · ตารางค้นหา 78 ใบ)
+     *
+     * ⚠️ ตัวเลขนี้คือ "ของจริงที่วัดได้ + ระยะหายใจราว 10%" ตามหลัก ratchet ของบ้านนี้
+     *    ห้ามขยับขึ้นเพื่อให้ผ่าน ให้ไปลดของจริงก่อนเสมอ
+     */
+    maxJsGzipKb: 115, // วัดจริง 2026-09-15 หลังย้ายไป Astro: 104
+    maxHtmlGzipKb: 32, // วัดจริง 2026-09-15: 27 KB
   },
   {
     route: "/cards/birth-card",
-    maxJsGzipKb: 190, // W-03 Ratchet (Actual Real User: 182 KB, target was <= 200 KB)
-    /**
-     * ⚠️ ตัวเลขในคอมเมนต์เดิมเขียนว่า "Current: 15 KB" ซึ่ง **ไม่ตรงกับของจริงมานานแล้ว**
-     * วัดจริงตอนตั้งงบใหม่นี้ = 30.5 KB (ดิบ 97 KB · flight payload ของ RSC กินไป 49 KB
-     * เพราะหน้านี้เรนเดอร์ตารางไพ่ประจำตัวตามวันเกิดทั้งชุดออกมาเป็นเนื้อหาฝั่งเซิร์ฟเวอร์)
+    /*
+     * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (2026-09-15) — รัดเพดานลงตามของจริงทันที
+     * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
+     * เหลือเฉพาะ island ที่ต้องโต้ตอบจริง และทั้งหมดโหลดแบบ `client:idle`
+     * (หัวเว็บ · เครื่องมือวัดผล · เครื่องคำนวณวันเกิด)
      *
-     * หน้านี้จึงนั่งชนเพดาน 30 KB พอดีเป๊ะมาสักพัก และล้มทันทีที่มีอะไรเพิ่มเข้ามาแม้แต่ 1 KB
-     * (เกิดขึ้นจริงหลัง PR #351 — deploy ของ main ล้มด้วย "31 KB > 30 KB")
-     * ค่าที่วัดได้ต่างกันเล็กน้อยระหว่างเครื่อง dev กับ CI ด้วย เพราะความยาวของค่า env จริง
-     * (GA id / pixel id / ImageKit endpoint) ที่ถูกฝังลงไปไม่เท่ากัน
-     *
-     * ✅ หนี้ก้อนนั้นถูกใช้คืนแล้วใน PR #354 (INC-0103):
-     * หน้านี้ส่ง `keywords` + `keywordsEn` ของไพ่ชุดใหญ่ 22 ใบ (12 KB ดิบ) เป็น prop
-     * ให้ client component `BirthCardCalculator` ทั้งที่คอมโพเนนต์ไม่เคยเรียกใช้เลย
-     * ตัดออกแล้ววัดจริงได้ 26 KB ➔ จึงรัดเพดานกลับลงจาก 34 KB เหลือ 29 KB
-     * (เผื่อระยะหายใจ 3 KB สำหรับความต่างระหว่างเครื่อง dev กับ CI ตามที่อธิบายไว้ข้างบน)
+     * ⚠️ ตัวเลขนี้คือ "ของจริงที่วัดได้ + ระยะหายใจราว 10%" ตามหลัก ratchet ของบ้านนี้
+     *    ห้ามขยับขึ้นเพื่อให้ผ่าน ให้ไปลดของจริงก่อนเสมอ
      */
-    maxHtmlGzipKb: 29, // วัดจริง 2026-09-07 หลังตัด keywords ที่ไม่มีใครใช้: 26 KB
+    maxJsGzipKb: 115, // วัดจริง 2026-09-15 หลังย้ายไป Astro: 104
+    maxHtmlGzipKb: 26, // วัดจริง 2026-09-15: 21 KB
   },
   {
     route: "/en/cards/birth-card",
-    maxJsGzipKb: 190,
-    maxHtmlGzipKb: 29,
+    /*
+     * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (2026-09-15) — รัดเพดานลงตามของจริงทันที
+     * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
+     * เหลือเฉพาะ island ที่ต้องโต้ตอบจริง และทั้งหมดโหลดแบบ `client:idle`
+     * (หัวเว็บ · เครื่องมือวัดผล · เครื่องคำนวณวันเกิด)
+     *
+     * ⚠️ ตัวเลขนี้คือ "ของจริงที่วัดได้ + ระยะหายใจราว 10%" ตามหลัก ratchet ของบ้านนี้
+     *    ห้ามขยับขึ้นเพื่อให้ผ่าน ให้ไปลดของจริงก่อนเสมอ
+     */
+    maxJsGzipKb: 115, // วัดจริง 2026-09-15 หลังย้ายไป Astro: 104
+    maxHtmlGzipKb: 26, // วัดจริง 2026-09-15: 20 KB
   },
 ];
 
@@ -257,16 +284,52 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
       const htmlGzipBytes = zlib.gzipSync(Buffer.from(html)).length;
       const htmlGzipKb = Math.round(htmlGzipBytes / 1024);
 
-      const chunkMatches = html.match(/_next\/static\/chunks\/[^"'\s>]+\.js/g) || [];
-      const uniqueChunks = Array.from(new Set(chunkMatches));
+      /*
+       * 🧮 JS ที่หน้านี้ทำให้เบราว์เซอร์ต้องโหลดจริง — ต้องนับให้ครบ **ทั้งสองเครื่องมือ**
+       * ---------------------------------------------------------------------------
+       * ⚠️ บทเรียน 2026-09-15: ตอนย้ายหน้าไพ่ไป Astro ด่านนี้รายงาน "0 KB" ให้ทุกหน้าที่ย้าย
+       *    แล้วขึ้น ✅ ผ่าน — เพราะมันรู้จักแต่ `_next/static/chunks/*.js` อย่างเดียว
+       *    ด่านที่มองไม่เห็นของที่ควรตรวจ แย่กว่าไม่มีด่าน เพราะมันให้ความมั่นใจปลอม ๆ
+       *
+       * Astro ไม่ได้ใส่ `<script src>` ของ island ไว้ใน HTML ตรง ๆ — มันประกาศไว้เป็น
+       * แอตทริบิวต์ของ `<astro-island>` (`component-url` · `renderer-url`) แล้วโหลดตอน
+       * ถึงเงื่อนไข (`client:idle` ฯลฯ) · แต่ละก้อนยัง `import` ก้อนอื่นต่อเป็นทอด ๆ
+       * จึงต้องไล่กราฟ import ให้จบ ไม่งั้นจะนับขาดไปครึ่งหนึ่ง
+       */
+      const chunkFiles = new Set<string>();
+
+      for (const ref of html.match(/_next\/static\/chunks\/[^"'\s>]+\.js/g) ?? []) {
+        chunkFiles.add(path.join(ROOT, ".next", ref.replace(/^_next\//, "")));
+      }
+
+      const astroEntries = [
+        ...(html.match(/(?:component-url|renderer-url)="([^"]+)"/g) ?? []).map((m) =>
+          m.replace(/^[^"]+"/, "").replace(/"$/, ""),
+        ),
+        ...(html.match(/<script[^>]+src="(\/_astro\/[^"]+)"/g) ?? []).map((m) =>
+          (m.match(/src="([^"]+)"/) as RegExpMatchArray)[1],
+        ),
+      ];
+
+      /** ไล่กราฟ `import` แบบสถิตของก้อน JS ที่ Astro สร้าง จนครบทุกก้อนที่ถูกลากตามมา */
+      const walkAstroImports = (entryUrl: string, seen: Set<string>): void => {
+        const file = path.join(ROOT, "dist", entryUrl.replace(/^\//, ""));
+        if (seen.has(file) || !fs.existsSync(file)) return;
+        seen.add(file);
+        const code = fs.readFileSync(file, "utf8");
+        for (const spec of code.match(/(?:from|import)\s*"(\.[^"]+\.js)"/g) ?? []) {
+          const rel = (spec.match(/"(\.[^"]+)"/) as RegExpMatchArray)[1];
+          walkAstroImports(path.posix.join(path.posix.dirname(entryUrl), rel), seen);
+        }
+      };
+
+      for (const entry of new Set(astroEntries)) walkAstroImports(entry, chunkFiles);
 
       let realJsGzipBytes = 0;
       let totalJsGzipBytes = 0;
       const chunkDetails: { name: string; sizeKb: number; isPolyfill: boolean }[] = [];
 
-      for (const chunkRef of uniqueChunks) {
-        const chunkRel = chunkRef.replace(/^_next\//, "");
-        const chunkFile = path.join(ROOT, ".next", chunkRel);
+      for (const chunkFile of chunkFiles) {
         if (fs.existsSync(chunkFile)) {
           const chunkContent = fs.readFileSync(chunkFile);
           const chunkGz = zlib.gzipSync(chunkContent).length;

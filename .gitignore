@@ -4,6 +4,10 @@ node_modules/
 .wrangler/
 out/
 dist/
+.astro/
+# ⚠️ ห้าม commit — CI ใช้ `pnpm install --no-frozen-lockfile` โดยตั้งใจ (ไม่มี lockfile ในรีโปนี้)
+# lockfile ที่สร้างด้วย pnpm คนละเมเจอร์กับที่ CI ใช้จะทำให้ติดตั้งล้มทันที (บทเรียนหลัง PR #234)
+pnpm-lock.yaml
 .env
 .env.local
 .env.*.local

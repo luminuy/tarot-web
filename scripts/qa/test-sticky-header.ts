@@ -39,7 +39,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { primaryOutputDir } from "./lib/rendered-pages";
+import { collectRenderedPages, renderedOutputDirs } from "./lib/rendered-pages";
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), "../..");
@@ -499,25 +499,20 @@ for (const file of pageFiles) {
 
 // 7.2 ชั้น artifact — HTML ที่ build ออกมาจริง (ครอบคลุมทั้งไทยและอังกฤษ)
 /* ราก HTML มาจาก lib/rendered-pages.ts ที่เดียว (ดู test-rendered-coverage.ts) */
-const appBuildDir = primaryOutputDir();
-if (fs.existsSync(appBuildDir)) {
-  const htmlFiles: string[] = [];
-  const walk = (dir: string) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) walk(full);
-      else if (entry.name.endsWith(".html")) htmlFiles.push(full);
-    }
-  };
-  walk(appBuildDir);
+const outputDirs = renderedOutputDirs();
+if (outputDirs.every((dir) => fs.existsSync(dir))) {
+  /* ครอบคลุมทุกเครื่องมือเรนเดอร์ในคราวเดียว — เส้นทางถอดมาให้แล้วจาก lib/rendered-pages.ts */
+  const renderedPages = collectRenderedPages();
 
   const headerless: string[] = [];
   const footerless: string[] = [];
   /** หน้าที่มีเนื้อหาโผล่ต่อท้ายฟุตเตอร์ (ฟุตเตอร์ลอยขึ้นมากลางหน้า) */
   const tailAfterFooter: string[] = [];
   let scanned = 0;
-  for (const file of htmlFiles) {
-    const route = path.relative(appBuildDir, file).split(path.sep).join("/").replace(/\.html$/, "");
+  for (const page of renderedPages) {
+    const file = page.file;
+    /* `route` ของด่านนี้เป็นแบบ "ไม่มี / นำหน้า" มาแต่เดิม (ใช้เทียบกับ BARE_ROUTES) */
+    const route = page.route === "/" ? "index" : page.route.slice(1);
     if (BARE_ROUTES.has(route)) continue;
     const html = fs.readFileSync(file, "utf-8");
     // ข้ามไฟล์ที่ไม่ใช่ "หน้าจริงที่ prerender สำเร็จ" — สังเกตจาก `id="__next_error__"`
@@ -580,7 +575,7 @@ if (fs.existsSync(appBuildDir)) {
     );
   }
 } else {
-  console.warn(`   ⚠️  ยังไม่มี ${appBuildDir} — ข้ามการตรวจหัวเว็บ/ฟุตเตอร์ใน HTML ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)`);
+  console.warn(`   ⚠️  ยังไม่มี ${outputDirs.join(" / ")} — ข้ามการตรวจหัวเว็บ/ฟุตเตอร์ใน HTML ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)`);
 }
 
 // 7.4 หน้า 404 ทั้งสองไฟล์ต้องมีอยู่จริงและต้องมีหัวเว็บ

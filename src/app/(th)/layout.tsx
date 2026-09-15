@@ -2,6 +2,13 @@ import type { Metadata, Viewport } from "next";
 
 import "../globals.css";
 import { RootHtml } from "../_shared/RootHtml";
+import {
+  GOOGLE_SITE_VERIFICATION,
+  ROOT_SHARED_METADATA,
+  SITE_ICONS,
+  SITE_VIEWPORT,
+  TITLE_TEMPLATE,
+} from "../_shared/root-metadata";
 import { buildAlternates, OG_IMAGE_ALT, OG_IMAGE_URL, SITE_ORIGIN } from "@/lib/config/site";
 
 /**
@@ -17,7 +24,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
   title: {
     default: "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ ออนไลน์ ฟรี · เปิดไพ่กับแม่หมอ AI",
-    template: "%s · SeerTarot",
+    template: TITLE_TEMPLATE,
   },
   description:
     "ดูดวงไพ่ยิปซี (ไพ่ทาโรต์) ออนไลน์ฟรี สับไพ่และหยิบไพ่ด้วยมือคุณเอง 78 ใบ ให้แม่หมอ AI ทำนายสดทีละใบ มีผัง 25 แบบ ทั้งรายวัน ความรัก การงาน การเงิน",
@@ -35,29 +42,10 @@ export const metadata: Metadata = {
     "แม่หมอ AI",
     "SeerTarot",
   ],
-  authors: [{ name: "SeerTarot Sanctuary" }],
-  creator: "SeerTarot Sanctuary",
-  publisher: "SeerTarot Sanctuary",
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
+  ...ROOT_SHARED_METADATA,
+  icons: SITE_ICONS,
   verification: {
-    google: "google2c921e9d8c8c3a55",
+    google: GOOGLE_SITE_VERIFICATION,
   },
   alternates: buildAlternates("/", { locale: "th", englishTwin: true }),
   openGraph: {
@@ -77,13 +65,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#FAF7F2",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
-  viewportFit: "cover",
-};
+export const viewport: Viewport = SITE_VIEWPORT;
 
 export default function ThaiRootLayout({ children }: { children: React.ReactNode }) {
   // pinLocale = false โดยตั้งใจ — หลายหน้าในต้นไม้นี้ยังไม่มีฝาแฝดอังกฤษ (`/blog`, `/privacy`)
