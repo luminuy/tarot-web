@@ -32,6 +32,16 @@
  *        ตัวสแกนพรีโหลดของเบราว์เซอร์อ่าน <picture> ที่เรนเดอร์มากับ HTML อยู่แล้ว
  *        จึงได้ทั้งลำดับความสำคัญสูงสุดและชนิดไฟล์ที่ถูกต้องพร้อมกัน
  *
+ *
+ *  E) ค่าคุณภาพ AVIF ต้องตรงกับตัวเลขที่เขียนอธิบายไว้ในคอมเมนต์เหนือมันเอง
+ *     เกิดจริงมาแล้ว: PR #476 เปลี่ยน `IMAGEKIT_AVIF_QUALITY` 65 ➔ 52 บรรทัดเดียว
+ *     โดยไม่แตะคอมเมนต์ ทั้งที่คอมเมนต์นั้นเขียนห้ามลดโดยไม่วัดใหม่ไว้ชัด ๆ
+ *     ผลคือไฟล์ "โกหก" อยู่ 1 วันเต็ม — คนอ่านรอบถัดไปจะเชื่อว่าค่าที่ใช้คือ 65
+ *     และเชื่อว่ามีผลวัด PSNR รองรับ ทั้งที่ไม่มี
+ *
+ *     ค่าที่ถูกจูนด้วยการวัดคือค่าที่ "เหตุผลของมันอยู่ในคอมเมนต์ ไม่ได้อยู่ในโค้ด"
+ *     พอตัวเลขสองฝั่งหลุดจากกัน เหตุผลทั้งก้อนก็ใช้ไม่ได้ทันทีโดยไม่มีใครรู้
+ *
  * ────────────────────────────────────────────────────────────────
  * 🔒 หลักการ Ratchet (กันถอยหลัง)
  * รายการใน ALLOWLIST คือจุดที่ละเมิดอยู่ "ก่อน" มีด่านตรวจนี้
@@ -156,6 +166,65 @@ for (const card of ALL_CARDS) {
   }
 }
 
+// E) ค่าที่ถูกจูนด้วยการวัด ต้องตรงกับตัวเลขที่คอมเมนต์เหนือมันประกาศไว้
+/*
+ * เขียนให้ตรวจ "บรรทัดพาดหัวของคอมเมนต์" ไม่ใช่แค่หาเลขนั้นที่ไหนก็ได้ในก้อน
+ * เพราะเลขอย่าง 52 ไปโผล่ในตารางเทียบหรือในวันที่ได้ง่ายมาก แล้วด่านจะเขียวทั้งที่พาดหัวยังผิด
+ */
+const TUNED_CONSTANTS: {
+  file: string;
+  constant: string;
+  /** ต้องจับเลขจาก "บรรทัดพาดหัว" ของคอมเมนต์ได้ และเลขนั้นต้องเท่ากับค่าในโค้ด */
+  headline: RegExp;
+  headlineHint: string;
+}[] = [
+  {
+    file: "src/lib/tarot/card-image.ts",
+    constant: "IMAGEKIT_AVIF_QUALITY",
+    headline: /ค่าปัจจุบันคือ\s*\*{0,2}(\d+)/,
+    headlineHint: "คุณภาพ AVIF ที่เลือกใช้ — **ค่าปัจจุบันคือ <เลข>**",
+  },
+];
+
+for (const target of TUNED_CONSTANTS) {
+  const abs = path.join(process.cwd(), target.file);
+  const raw = fs.readFileSync(abs, "utf-8");
+  const declared = new RegExp(`const\\s+${target.constant}\\s*=\\s*(\\d+)`).exec(raw);
+  if (!declared) {
+    violations.push({
+      file: target.file,
+      line: 0,
+      rule: `E: หาค่า ${target.constant} ไม่เจอ`,
+      text: "ถ้าย้าย/เปลี่ยนชื่อค่านี้ ต้องแก้ TUNED_CONSTANTS ใน scripts/qa/test-image-paths.ts ด้วย",
+    });
+    continue;
+  }
+
+  const value = declared[1];
+  const lineNo = raw.slice(0, declared.index).split("\n").length;
+  // คอมเมนต์ก้อนที่อยู่ติดกับค่านั้นพอดี
+  const before = raw.slice(0, declared.index);
+  const start = before.lastIndexOf("/**");
+  const block = start === -1 ? "" : before.slice(start);
+  const headline = target.headline.exec(block);
+
+  if (!headline) {
+    violations.push({
+      file: target.file,
+      line: lineNo,
+      rule: `E: คอมเมนต์เหนือ ${target.constant} ไม่มีบรรทัดพาดหัวที่ประกาศค่า`,
+      text: `ต้องมีข้อความรูปแบบ: ${target.headlineHint}`,
+    });
+  } else if (headline[1] !== value) {
+    violations.push({
+      file: target.file,
+      line: lineNo,
+      rule: `E: ${target.constant} ไม่ตรงกับคอมเมนต์ของตัวเอง`,
+      text: `โค้ดตั้งไว้ ${value} แต่คอมเมนต์ยังประกาศว่า ${headline[1]} — แก้คอมเมนต์ให้ตรง พร้อมเขียนที่มาของค่าใหม่`,
+    });
+  }
+}
+
 if (violations.length === 0) {
   console.log(`\n✅ ไม่พบการละเมิดจุดใหม่ (ยกเว้นชั่วคราว ${allowlistHits.size} ไฟล์)\n`);
   process.exit(0);
@@ -171,6 +240,9 @@ console.error(`
             หรือ getCardImageSrc(image, id) จาก src/lib/tarot/card-image.ts
    วิธีแก้ (กฎ D): ลบ <link rel="preload"> ทิ้ง แล้วใส่ loading="eager" fetchPriority="high"
             ที่ <CardImage /> ใบนั้นแทน — ตัวสแกนพรีโหลดอ่าน <picture> ใน HTML ให้อยู่แล้ว
+   วิธีแก้ (กฎ E): แก้บรรทัดพาดหัวของคอมเมนต์เหนือค่านั้นให้เป็นเลขเดียวกับในโค้ด
+            แล้ว **เขียนที่มาของค่าใหม่ต่อท้ายด้วย** (วัดมาอย่างไร หรือใครเป็นคนเคาะ)
+            การเปลี่ยนค่าเฉย ๆ โดยไม่บอกที่มา = ลบเหตุผลของคนก่อนหน้าทิ้งเงียบ ๆ
    เหตุผล: การประกอบ path เองทำให้ (1) resolve ผิดโฟลเดอร์เมื่ออยู่ใน sub-route
            (2) โหลดภาพผิดขนาด และ (3) ชี้ไปโฟลเดอร์ที่ไม่มีอยู่จริงจนยิง 404 (ISSUE-008)
 `);
