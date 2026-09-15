@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
-import { DailyClient } from "@/components/daily/DailyClient";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 
-import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../../../_shared/seo";
+import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
 
 /**
@@ -28,7 +28,7 @@ const dailyOgImages = buildPageOgImage({
   alt: "Daily tarot card 1909 Rider-Waite",
 });
 
-export const metadata: Metadata = {
+export const dailyMetadataEn: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   keywords: [
@@ -102,7 +102,8 @@ const breadcrumbJsonLd = buildBreadcrumbJsonLd("en", [
   { name: "Daily Tarot", path: PATH },
 ]);
 
-export default function Page() {
+/** `ritual` = พิธีเปิดไพ่ (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */
+export function DailyBodyEn({ ritual }: { ritual: ReactNode }) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
@@ -114,7 +115,7 @@ export default function Page() {
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto space-y-8">
-          <DailyClient />
+          {ritual}
 
           <SeoArticleShell
             eyebrow="Working with a daily card"

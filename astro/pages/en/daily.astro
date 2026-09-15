@@ -1,0 +1,21 @@
+---
+import { dailyMetadataEn } from "@/app/_shared/pages/daily-en";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { DailyBodyEnRoot } from "../../components/PageBodies";
+import { DailyRitualRoot } from "../../islands/RitualRoots";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** 🌅 ไพ่ประจำวัน — พิธีเปิดไพ่เป็น island · เนื้อหา SEO ท้ายหน้าเป็น HTML ล้วน */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={dailyMetadataEn}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <DailyBodyEnRoot>
+    <Fragment slot="ritual">
+      <DailyRitualRoot locale={locale} client:load />
+    </Fragment>
+  </DailyBodyEnRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

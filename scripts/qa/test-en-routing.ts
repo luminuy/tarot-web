@@ -87,38 +87,6 @@ for (const [group, locale] of [["(th)", '"th"'], ["(en)", '"en"']] as const) {
 // แต่ละหมวด (`(th)/cards/layout.tsx` ฯลฯ) ตอนสร้างต้นไม้อังกฤษก๊อปแต่ `page.tsx` มา
 // หน้าอังกฤษ 115 หน้าจึงไม่มีหัวเว็บและไม่มีฟุตเตอร์เลย — เข้าเว็บมาแล้วไปไหนต่อไม่ได้
 // และไม่มีลิงก์ภายในให้บอตเดินต่อสักเส้น
-//
-// ⚠️ ห้ามแก้ด้วยการยกไปไว้ที่ `(en)/en/layout.tsx` — ชั้นนั้นครอบหน้าแรก `/en`
-// ซึ่งเรนเดอร์ <SiteHeader /> เองอยู่แล้วผ่าน TarotFlow จะได้หัวเว็บซ้อนสองอัน
-const thSectionLayouts = fs
-  .readdirSync(path.join(ROOT, TH_APP), { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name)
-  .filter((name) => fs.existsSync(path.join(ROOT, TH_APP, name, "layout.tsx")))
-  .filter((name) =>
-    fs.readFileSync(path.join(ROOT, TH_APP, name, "layout.tsx"), "utf-8").includes("<SiteHeader"),
-  );
-
-// ตรวจเฉพาะหมวดที่ "มีหน้าอังกฤษอยู่จริง" — หมวดที่ยังไม่มีฝาแฝด (เช่น /privacy) ไม่บังคับ
-const enSectionsNeedingLayout = thSectionLayouts.filter((name) =>
-  fs.existsSync(path.join(ROOT, EN_APP, name)),
-);
-
-for (const name of enSectionsNeedingLayout) {
-  const file = path.join(ROOT, EN_APP, name, "layout.tsx");
-  const source = fs.existsSync(file) ? fs.readFileSync(file, "utf-8") : "";
-  check(
-    `/en/${name} มี section layout ที่ให้หัวเว็บ + ฟุตเตอร์ (คู่แฝดของ (th)/${name}/layout.tsx)`,
-    source.includes("<SiteHeader") && source.includes("<SiteFooter"),
-    source ? "มีไฟล์แต่ไม่ได้เรนเดอร์ <SiteHeader /> + <SiteFooter />" : `ไม่มีไฟล์ ${EN_APP}/${name}/layout.tsx`,
-  );
-}
-check(
-  "หมวดอังกฤษที่ต้องมี layout ถูกตรวจครบ (ไม่ใช่ 0 หมวด)",
-  enSectionsNeedingLayout.length > 0,
-  `พบ ${enSectionsNeedingLayout.length} หมวด`,
-);
-
 /* ── 2. ทุกเส้นทางที่ประกาศว่ามีฝาแฝด ต้องมี "หน้าที่เรนเดอร์ออกมาจริง" ──────
  *
  * ⚠️ เดิมด่านนี้เช็กว่ามีไฟล์ `page.tsx` อยู่ตรงนั้นไหม — ซึ่งผูกกับ Next.js
@@ -133,6 +101,43 @@ for (const route of EN_TWIN_ROUTES) {
   check(`มีหน้าอังกฤษที่เรนเดอร์ออกมาจริงสำหรับ ${englishRoute}`, routeMap.has(englishRoute));
   check(`มีหน้าไทยคู่กันที่เรนเดอร์ออกมาจริงสำหรับ ${route}`, routeMap.has(route));
 }
+
+/* ── 1b. หน้าอังกฤษต้องมีหัวเว็บ/ฟุตเตอร์ "เท่ากับ" ฝาแฝดไทยเสมอ ─────────────
+ *
+ * ⚠️ เดิมด่านนี้ไล่อ่านไฟล์ `layout.tsx` ของแต่ละหมวดในต้นไม้ `(en)` เพื่อดูว่า
+ *    เรนเดอร์ `<SiteHeader />` + `<SiteFooter />` ไหม — ผูกกับทั้ง Next.js และ
+ *    วิธีจัดโฟลเดอร์ · พอหน้าเนื้อหาย้ายไป Astro หมด หมวดที่เหลือให้ตรวจกลายเป็น **ศูนย์**
+ *    (ด่านย่อย "ถูกตรวจครบ ไม่ใช่ 0 หมวด" จับได้ ซึ่งเป็นเหตุผลที่มันถูกใส่ไว้ตั้งแต่แรก)
+ *
+ * ตอนนี้เทียบจาก **HTML ที่เรนเดอร์ออกมาจริง** แทน: หน้าไทยกับหน้าอังกฤษของคู่เดียวกัน
+ * ต้องมีหัวเว็บและฟุตเตอร์ "เหมือนกัน" — จับได้ทั้งกรณีอังกฤษขาด และกรณีไทยขาด
+ * และไม่สนใจว่าใครเป็นคนเรนเดอร์
+ */
+const chromeOf = (route: string): { header: boolean; footer: boolean } | null => {
+  const page = routeMap.get(route);
+  if (!page) return null;
+  const html = fs.readFileSync(page.file, "utf-8");
+  return { header: html.includes('data-site-header="'), footer: html.includes("<footer") };
+};
+
+let chromePairsChecked = 0;
+for (const route of EN_TWIN_ROUTES) {
+  const thai = chromeOf(route);
+  const english = chromeOf(route === "/" ? "/en" : `/en${route}`);
+  if (!thai || !english) continue;
+  chromePairsChecked += 1;
+  check(
+    `/en${route === "/" ? "" : route} มีหัวเว็บ/ฟุตเตอร์เท่ากับฝาแฝดไทย`,
+    thai.header === english.header && thai.footer === english.footer,
+    `ไทย: header=${thai.header} footer=${thai.footer} · อังกฤษ: header=${english.header} footer=${english.footer}`,
+  );
+}
+check(
+  "มีคู่ไทย–อังกฤษให้เทียบหัวเว็บ/ฟุตเตอร์จริง (ไม่ใช่ 0 คู่)",
+  chromePairsChecked > 0,
+  `พบ ${chromePairsChecked} คู่`,
+);
+
 
 /* เส้นทางไดนามิก — ต้องมีลูกอย่างน้อยหนึ่งใบโผล่ออกมาจริงในต้นไม้อังกฤษ */
 for (const [label, prefix] of [

@@ -133,13 +133,23 @@ export const BUDGETS: RouteBudget[] = [
   },
   {
     route: "/daily",
-    maxJsGzipKb: 198, // รัดหลังถอด motion ออกจากไพ่+พิธีไพ่ใบเดียว (วัดจริง 194 KB · รวม polyfill 232 KB)
-    maxHtmlGzipKb: 25, // Current: 18 KB
+    /*
+     * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (คลื่นที่ 4b · 2026-09-15) — พิธีเปิดไพ่เป็น island
+     * ส่วนเนื้อหา SEO ยาว ๆ ท้ายหน้าเป็น HTML ล้วนที่ไม่ต้อง hydrate เลย
+     * ⚠️ ตั้งงบจากค่าที่ CI วัดได้ + ระยะหายใจ 10% เสมอ (ดูคำเตือนเหนือตารางนี้)
+     */
+    maxJsGzipKb: 145, // dev 122 KB · เผื่อส่วนต่าง CI ~9 KB
+    maxHtmlGzipKb: 22, // วัดจริง 2026-09-15: 15 KB
   },
   {
     route: "/love/1-card",
-    maxJsGzipKb: 201, // รัดหลังถอด motion ออกจากไพ่+พิธีไพ่ใบเดียว (วัดจริง 197 KB · รวม polyfill 236 KB)
-    maxHtmlGzipKb: 25, // Current: 19 KB
+    /*
+     * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (คลื่นที่ 4b · 2026-09-15) — พิธีเปิดไพ่เป็น island
+     * ส่วนเนื้อหา SEO ยาว ๆ ท้ายหน้าเป็น HTML ล้วนที่ไม่ต้อง hydrate เลย
+     * ⚠️ ตั้งงบจากค่าที่ CI วัดได้ + ระยะหายใจ 10% เสมอ (ดูคำเตือนเหนือตารางนี้)
+     */
+    maxJsGzipKb: 145, // dev 122 KB · เผื่อส่วนต่าง CI ~9 KB
+    maxHtmlGzipKb: 22, // วัดจริง 2026-09-15: 15 KB
   },
   {
     route: "/spreads",

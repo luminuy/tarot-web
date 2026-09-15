@@ -1,0 +1,21 @@
+---
+import { loveOneCardMetadataTh } from "@/app/_shared/pages/love-one-card-th";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { LoveOneCardBodyThRoot } from "../../components/PageBodies";
+import { LoveOneCardRitualRoot } from "../../islands/RitualRoots";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** 💗 ไพ่ความรักใบเดียว — พิธีเปิดไพ่เป็น island · เนื้อหา SEO ท้ายหน้าเป็น HTML ล้วน */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={loveOneCardMetadataTh}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <LoveOneCardBodyThRoot>
+    <Fragment slot="ritual">
+      <LoveOneCardRitualRoot locale={locale} client:load />
+    </Fragment>
+  </LoveOneCardBodyThRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>
