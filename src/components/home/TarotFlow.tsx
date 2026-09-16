@@ -1367,7 +1367,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
       {/* Main Sanctuary Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-12 sm:pb-16 relative z-10">
-        <AnnouncementBanner />
+        {Boolean(entitlement?.announce && !entitlement?.enabled) && <AnnouncementBanner />}
 
         {/* ขั้น SUMMARY มีแบนเนอร์ error ในตัว StreamReader อยู่แล้ว — ไม่ต้องซ้ำด้านบน */}
         {errorMsg && currentStep !== "SUMMARY" && (

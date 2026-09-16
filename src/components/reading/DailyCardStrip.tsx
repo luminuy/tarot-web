@@ -22,16 +22,35 @@ export function DailyCardStrip() {
 
   useEffect(() => {
     let alive = true;
-    fetch("/api/daily-card", { credentials: "same-origin" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((d: DailyCard) => {
-        if (alive) setDaily(d);
-      })
-      .catch(() => {
-        if (alive) setFailed(true);
-      });
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let idleId: number | undefined;
+
+    const loadDaily = () => {
+      fetch("/api/daily-card", { credentials: "same-origin" })
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+        .then((d: DailyCard) => {
+          if (alive) setDaily(d);
+        })
+        .catch(() => {
+          if (alive) setFailed(true);
+        });
+    };
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(
+        loadDaily,
+        { timeout: 2000 }
+      );
+    } else {
+      timer = setTimeout(loadDaily, 300);
+    }
+
     return () => {
       alive = false;
+      if (timer) clearTimeout(timer);
+      if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {
+        (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+      }
     };
   }, []);
 

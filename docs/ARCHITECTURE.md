@@ -12,7 +12,7 @@ graph TD
     Safety -->|ผ่านการตรวจ| Commit[2. Provably-Fair SHA-256 Commitment]
     Commit --> Fan[3. 3D Interactive Card Fan 78 ใบ]
     Fan -->|ผู้ใช้สัมผัสแตะเลือกด้วยตนเอง| Pick[4. User Card Selection & Shuffle Verification]
-    Pick --> Spread[5. 20 Golden Ratio Spreads Engine]
+    Pick --> Spread[5. 25 Golden Ratio Spreads Engine]
     Spread --> AI[6. Real-Time Gemini AI SSE Streamer]
     AI --> Persona[7. 5 Distinct Human-Like Personas]
     Persona --> Reveal[8. Cryptographic Proof Reveal & Audio Synth]
@@ -38,7 +38,7 @@ graph TD
 | **Edge Compute** | **Cloudflare Workers (OpenNext v1.20)** | Zero-Cold-Start Serverless Edge Network ทั่วโลก |
 | **Database & Cache** | **Cloudflare D1 (`APP_DB`) + KV (`NEXT_INC_CACHE_KV`)** | Relational Database (users, journal, usage) และ Edge Key-Value Store |
 | **Storage & Vectors** | **Cloudflare R2 (`SHARE_BUCKET`) + Vectorize (`VECTORIZE`)** | R2 เก็บการ์ดภาพแชร์ 90 วัน + ค้นหาเชิงความหมาย 1024-dim |
-| **Framework** | **Next.js 16.3 (App Router) + React 19** | Hybrid Static/Dynamic Routing + Server-Sent Events (SSE) |
+| **Framework** | **Astro 7 (SSG 305 หน้า + React 19 Islands) + Next.js 16.3 (App Router)** | Hybrid Static SSG ตอบตรงจาก Cloudflare Edge Assets + Dynamic Auth/Admin/SSE Worker |
 | **Language** | **TypeScript 7 (Strict Mode)** | ความปลอดภัยระดับ 0 Type Errors 100% |
 | **Design & UI** | **Tailwind CSS v4 + Hardware GPU Compositor** | Mystical Warm Minimal Sanctuary Theme + 60fps GPU Transitions |
 | **Asset Pipeline** | **4-Tier WebP/AVIF Remastered (`w128`, `w256`, `w512`, `w1024`)** | ลดขนาด Asset 85% คมชัดระดับ Retina |
@@ -112,6 +112,13 @@ sequenceDiagram
 ## 6. สถาปัตยกรรมโครงสร้างไฟล์ในโปรเจกต์ (Codebase Topology)
 
 ```text
+astro/
+├── src/
+│   ├── pages/                       # 305 หน้า SSG (cards, spreads, blog, about, privacy, contact)
+│   ├── components/                  # Astro static presentation components & layouts
+│   ├── islands/                     # React Island wrappers (client:idle hydration)
+│   ├── layouts/                     # BaseLayout.astro (SEO, fonts, metadata, locale)
+│   └── shims/                       # Shims สำหรับ next/link, next/navigation, next/script
 src/
 ├── app/
 │   ├── api/reading/
@@ -119,9 +126,8 @@ src/
 │   │   ├── [id]/shuffle/route.ts    # คำนวณ Shuffle ตาม pickedIndices
 │   │   ├── [id]/read/route.ts       # สตรีมคำอ่านผ่าน Server-Sent Events (SSE)
 │   │   └── [id]/chat/route.ts       # ถามคุยต่อยอดตามบริบทไพ่และ 5 บุคลิก
-│   ├── cards/                       # สารานุกรมไพ่ 78 ใบ (/cards และ /cards/[id])
-│   ├── spreads/                     # คลังผังพยากรณ์ 25 แบบ
-│   ├── blog/, privacy/, account/    # หน้าเนื้อหา นโยบาย PDPA และจัดการบัญชี
+│   ├── (th)/, (en)/                 # Next.js App Router (หน้าที่ต้องมี Auth/Admin/Dynamic)
+│   ├── account/, admin/, readers/   # บัญชีสมาชิก, แผงควบคุมแอดมิน, คิวแม่หมอ
 │   ├── page.tsx                     # วิหารพยากรณ์หลัก (5-Step Ritual Flow)
 │   └── globals.css                  # Obsidian Velvet & Gold Design System + GPU Classes
 ├── components/
@@ -129,7 +135,7 @@ src/
 │   ├── deck/                        # InteractiveCardFan (78 ใบ), ShuffleRitual
 │   ├── spread/                      # SpreadBoard, SpreadCardSelector (25 ผัง)
 │   ├── reading/                     # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector
-│   ├── history/, encyclopedia/      # ReadingHistoryModal, TarotEncyclopediaModal
+│   ├── history/, encyclopedia/      # ReadingHistoryModal, CardsExplorer
 │   └── ui/                          # MysticAltarCanvas, TarotArtIcons, RitualStepProgress
 ├── data/
 │   ├── cards/                       # ข้อมูลไพ่ 78 ใบ (780 ข้อความความหมาย 5 มิติ)
@@ -214,6 +220,8 @@ src/
 * **[ADR-001: สถาปัตยกรรม Marketplace แม่หมอและการคุ้มครองข้อมูลส่วนบุคคล (PDPA Architecture & Compliance)](adr/ADR-001-marketplace-pdpa.md)** — การแยกชั้นข้อมูลอ่อนไหว, Data Minimization, และการส่งต่อ Off-Platform
 * **[ADR-002: กลยุทธ์ป้องกันบอทและการควบคุมต้นทุน AI โดยไม่ทำลายประสบการณ์ผู้ใช้](adr/ADR-002-bot-challenge.md)** — การควบคุมค่าใช้จ่ายและการป้องกันบอท 7 ชั้นโดยไม่ใช้ Captcha รบกวนผู้ใช้
 * **[ADR-003: เหตุผลการเลือกใช้เทคโนโลยีเวอร์ชันล้ำสมัยและการบริหารความเสี่ยง (Cutting-Edge Stack Rationale & Risk Management)](adr/ADR-003-cutting-edge-stack-rationale.md)** — การเลือกใช้ `React 19.2`, `Next.js 16.3`, และ `Motion 13` เพื่อ 60fps Animation บน Edge พร้อมมาตรการรับมือความเสี่ยง
+* **[Astro Migration Blueprint: สถาปัตยกรรมไฮบริด Astro 7 + React 19 Islands](../docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)** — การย้าย 305 หน้าสู่ Zero-Runtime SSG ตอบตรงจาก Cloudflare Edge Assets ลดขนาด JS ลง 36–53% และ TBT เหลือ 14–42 ms
+* **[Card Tile Height & Layout Stability: การคุมความเสถียรของกริดไพ่และ content-visibility](../docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)** — สูตรคำนวณความสูงคงที่และการแบ่งชั้น responsive ป้องกัน Layout Shift / Jittering 100%
 
 ---
 

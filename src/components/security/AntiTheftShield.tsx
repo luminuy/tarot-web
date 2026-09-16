@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { SITE_NAME_TH, SITE_ORIGIN } from "@/lib/config/site";
+import { SITE_NAME_TH, SITE_ORIGIN } from "@/lib/config/site-constants";
 
 /**
  * 🛡️ AntiTheftShield — ระบบคุ้มครองลิขสิทธิ์และป้องกันการคัดลอก/ดูดข้อมูล

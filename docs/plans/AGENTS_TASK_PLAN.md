@@ -32,7 +32,7 @@
    └── Voice & Persona response fine-tuning (SoundManager Web Audio API)
            ↓
 [Agent 5: Quality Assurance & Verification]
-   ├── ตรวจสอบ Typecheck, Lint, Build (24 ด่าน)
+   ├── ตรวจสอบ Typecheck, Lint, Build (62 ด่าน)
    ├── ตรวจสอบ Provable Fair Commitment Math
    └── ทดสอบ Responsiveness ทุกหน้าจอมือถือ/แท็บเล็ต/เดสก์ท็อป
 ```
@@ -64,7 +64,7 @@
      - สัญลักษณ์หัวกลับ (Reversed indicator)
   3. สร้าง `src/components/spread/SpreadBoard.tsx`:
      - แสดงตำแหน่งไพ่ตามพิกัด $(x, y, \text{rotate})$ ใน `spreads.ts`
-     - จัดการทั้ง 20 ผังพยากรณ์ พร้อมสมดุล 2 ชั้นสำหรับผัง 7 ใบขึ้นไป
+     - จัดการทั้ง 25 ผังพยากรณ์ พร้อมสมดุล 2 ชั้นสำหรับผัง 7 ใบขึ้นไป
 
 ---
 
@@ -91,8 +91,8 @@
 
 ### 🧪 Agent 5: Verification, Testing & QA
 - **หน้าที่รับผิดชอบ**:
-  1. รัน `npm run typecheck` และ `npm run repo:verify` (24 ด่าน) ให้ผ่านปราศจาก Error
-  2. ทดสอบความถูกต้องของ Spread ครบทั้ง 20 ผังพยากรณ์ (95 ตำแหน่ง)
+  1. รัน `npm run typecheck` และ `npm run repo:verify` (62 ด่าน) ให้ผ่านปราศจาก Error
+  2. ทดสอบความถูกต้องของ Spread ครบทั้ง 25 ผังพยากรณ์ (124 ตำแหน่ง)
   3. ทดสอบระบบคัดกรองความปลอดภัย (Safety Guardrails) ด้วยคำถามตัวอย่าง และสายด่วน 1323
   4. ทดสอบความถูกต้องทางคณิตศาสตร์ของ Seed verification
   5. ตรวจสอบ UI Accessibility และ Mobile Touch Responsiveness
@@ -108,13 +108,14 @@
 - [x] **Milestone 4**: เชื่อมต่อ SSE Stream Reader, Thai TTS Voice Engine, IG Story 9:16 Export (เสร็จสมบูรณ์)
 - [x] **Milestone 5**: Safety Rails (สายด่วน 1323), PDPA Privacy Page, AI Collaboration Guidelines, A/B Rating (เสร็จสมบูรณ์)
 - [x] **Milestone 6**: Clean Architecture Scaffolding (`src/types/`, `src/lib/platform/db.ts`, `src/server/store.ts`) & Multi-Page Expansion Matrix (`/cards`, `/spreads`, `/blog`, `/account`) (เสร็จสมบูรณ์)
-- [x] **Milestone 7**: Multi-Provider AI Engine (Groq Qwen 2.5 + Gemini Failover), Cloudflare D1/KV/R2/Vectorize, Design System V2 & 24 Automated Quality Gates (เสร็จสมบูรณ์)
+- [x] **Milestone 7**: Multi-Provider AI Engine (Groq Qwen 2.5 + Gemini Failover), Cloudflare D1/KV/R2/Vectorize, Design System V2 & Enterprise Hardening (เสร็จสมบูรณ์)
+- [x] **Milestone 8**: สถาปัตยกรรมไฮบริด Astro 7 + React 19 Islands (305 หน้า SSG) และลด TBT / ปรับปรุงประสิทธิภาพมือถือระดับโลก (เสร็จสมบูรณ์)
 
 ### 🏆 สถานะระบบปัจจุบัน (Production Ready):
 - `npm run typecheck`: **ผ่าน 0 errors**
-- `npm run repo:verify`: **ผ่านครบทั้ง 24/24 ด่านสมบูรณ์ 100%**
+- `npm run repo:verify`: **ผ่านครบทั้ง 62/62 ด่านสมบูรณ์ 100%**
 - `npx tsx scripts/verify-cards.ts`: **ไพ่ 78 ใบ 780 ข้อความสมบูรณ์ 100%**
-- `npx tsx scripts/qa/test-spreads.ts`: **20 ผังพยากรณ์ 95 ตำแหน่ง ผ่าน 541/541 checks**
+- `npx tsx scripts/qa/test-spreads.ts`: **25 ผังพยากรณ์ 124 ตำแหน่ง ผ่าน checks สมบูรณ์ 100%**
 - `http://localhost:3000`: **HTTP 200 OK**
 - `http://localhost:3000/cards`: **HTTP 200 OK**
 - `http://localhost:3000/spreads`: **HTTP 200 OK**

@@ -26,7 +26,7 @@ cd เว็บไพ่  # หรือชื่อโฟลเดอร์ท�
 npm install
 ```
 
-> 💡 **หมายเหตุ**: โปรเจกต์ใช้ React 19.2 และ Next.js 16.3 ล่าสุด หากพบคำเตือน peer dependencies ทั่วไป `npm install` จะจัดการโครงสร้างให้อย่างถูกต้องตาม `package-lock.json` โดยไม่ต้องใส่ `--force` หรือ `--legacy-peer-deps`
+> 💡 **หมายเหตุ**: โปรเจกต์ใช้ React 19.2, Astro 7 และ Next.js 16.3 ล่าสุด หากพบคำเตือน peer dependencies ทั่วไป `npm install` จะจัดการโครงสร้างให้อย่างถูกต้องตาม `package-lock.json` โดยไม่ต้องใส่ `--force` หรือ `--legacy-peer-deps`
 
 ---
 
@@ -100,6 +100,8 @@ PORT=3001 npm run dev
 | :--- | :--- |
 | `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 62 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably Fair, Agent Lock ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Typecheck อย่างเดียว (ต้องได้ 0 errors เสมอ) |
+| `npm run build:astro` | คอมไพล์หน้าสแตติก Astro 305 หน้า (cards, spreads, blog, about, privacy, contact) เข้า `dist/` |
+| `npm run build:worker` | บิลด์ระบบทั้งหมดรวมกัน (Astro + OpenNext Worker) พร้อมรวม assets เตรียม deploy |
 | `npm run cards:variants` | สร้างรูปภาพไพ่ WebP หลายขนาด (`w128`, `w256`, `w512`, `w1024`) อัตโนมัติ (รันเมื่อมีการเพิ่มภาพใหม่ใน `/public/cards/`) |
 | `npm run agent:status` | ตรวจสอบสถานะการล็อคไฟล์ของ AI Agent เพื่อป้องกันการแก้ไขชนกัน |
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงาน `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` |
@@ -114,8 +116,8 @@ PORT=3001 npm run dev
 
 หากต้องการทดสอบระบบในสภาพแวดล้อม Cloudflare Workers เสมือนจริง (รวม Cloudflare D1 และ KV):
 ```bash
-# พรีวิวสภาพแวดล้อม Worker
-npm run preview
+# พรีวิวสภาพแวดล้อม Worker จำลอง (.open-next)
+npm run preview:worker
 # หรือรันผ่าน wrangler
 npx wrangler dev
 ```

@@ -15,11 +15,8 @@ import type { Locale } from "@/lib/i18n/types";
  * จะให้ secret `APP_ORIGIN` ทับได้เสมอ — ดู `src/lib/security/app-origin.ts`
  */
 
-/** โดเมนหลักที่ผูกกับ Cloudflare Workers (custom domain) */
-export const SITE_DOMAIN = "seertarot.net";
-
-/** origin เต็มรูปแบบ เช่น `https://seertarot.net` */
-export const SITE_ORIGIN = `https://${SITE_DOMAIN}` as const;
+import { SITE_DOMAIN, SITE_ORIGIN, SITE_NAME_TH, isMeasurableHostname } from "./site-constants";
+export { SITE_DOMAIN, SITE_ORIGIN, SITE_NAME_TH, isMeasurableHostname };
 
 /**
  * 🖼️ ภาพพรีวิวตอนแชร์ลิงก์ (Open Graph / Twitter Card) — 1200×630 (~1.91:1)
@@ -48,8 +45,6 @@ export const DEFAULT_CLOUDINARY_CLOUD_NAME = "xtgpasdc" as const;
 export const OG_IMAGE_URL = `${SITE_ORIGIN}/og/default.png` as const;
 export const OG_IMAGE_ALT = "SeerTarot · ดูดวงไพ่ทาโรต์ออนไลน์ 1909 Rider-Waite";
 
-/** ชื่อเว็บสำหรับข้อความ/ลายน้ำ/ไฟล์ส่งออกข้อมูล */
-export const SITE_NAME_TH = "วิหารพยากรณ์ไพ่ทาโรต์";
 
 /**
  * 🔗 โปรไฟล์ทางการของแบรนด์บนแพลตฟอร์มอื่น — แหล่งความจริงเดียว
@@ -113,9 +108,6 @@ export function isOwnHostname(hostname: string): boolean {
  * ⚠️ `www.` ไม่นับเป็นโดเมนวัดผล เพราะถูก 301 ไปโดเมนหลักตั้งแต่ที่ `next.config.ts` แล้ว
  *    ถ้าวันหนึ่ง www ยิงแท็กได้ แปลว่ากฎ redirect พัง — ให้ไปแก้ที่ redirect ไม่ใช่ที่นี่
  */
-export function isMeasurableHostname(hostname: string): boolean {
-  return hostname === SITE_DOMAIN;
-}
 
 /**
  * 🔗 ตัวช่วยสร้าง Canonical และ Hreflang สำหรับทุกหน้า (SEO Single Source of Truth)
