@@ -1,0 +1,50 @@
+# คลังทดสอบสัญญาณวิกฤต — ทุกบรรทัดต้องถูก "บล็อก" 100%
+# ---------------------------------------------------------------------------
+# กติกาของไฟล์นี้ (T-35): ห้ามคัดลอกสตริงมาจาก `src/lib/safety/crisis-lexicon.ts`
+# ต้องเขียนเป็นประโยคที่คนจริงพิมพ์ ไม่ใช่ตัวคำในคลัง — ด่านที่เอาเรกเอ็กซ์ไป
+# ทดสอบกับตัวมันเองพิสูจน์อะไรไม่ได้
+# บรรทัดที่ขึ้นต้นด้วย # และบรรทัดว่างถูกข้าม · ส่วนหลัง " |" คือชื่อกลุ่ม
+
+## กลุ่ม 1 — สำนวนไทยที่ด่านเดิมจับไม่ได้ทั้ง 13 แบบ
+ช่วงนี้เครียดมากจนคิดสั้นอยู่หลายครั้ง ไพ่จะบอกอะไรได้บ้าง |th-common
+พี่ชายเคยผูกคอตายไปเมื่อปีที่แล้ว หนูควรทำใจยังไง |th-common
+รู้สึกว่าตายดีกว่าอยู่แบบนี้ต่อไป |th-common
+บางทีก็คิดว่าหายไปเลยดีกว่า จะได้ไม่เป็นภาระใคร |th-common
+ถ้าวันนึงหนูปลิดชีวิตตัวเองไป จะมีใครเสียใจไหม |th-common
+ไม่อยากอยู่บนโลกนี้อีกแล้วจริง ๆ |th-common
+เหนื่อยมากจนอยากหายไปเลย |th-common
+เบื่อชีวิตมาก อยากจบ ๆ ไปทีเถอะ |th-common
+เคยทำร้ายตนเองตอนอยู่คนเดียว ควรบอกใครดี |th-common
+I want to die, please tell me what the cards say |en-common
+I'm suicidal and I don't know who to talk to |en-common
+sometimes I think about unalive myself |en-common
+honestly I just want to end it all |en-common
+
+## กลุ่ม 2 — เว้นวรรค · วรรณยุกต์ผิด · อักษรซ้ำ · อักขระกว้างศูนย์
+อยาก ฆ่า ตัว ตาย มากเลยตอนนี้ |evasion
+คิดจะฆาตัวตายมาหลายวันแล้ว |evasion
+อยากต๊ายยยยย ไม่ไหวแล้ว |evasion
+ฆ่า​ตัว​ตาย ดีไหมคะ |evasion
+ไม่ อยาก มี ชีวิต อยู่ แล้ว |evasion
+ทํารายตัวเองบ่อยมากช่วงนี้ |evasion
+กรีด  ข้อมือ  ไปเมื่อคืน |evasion
+
+## กลุ่ม 3 — คาราโอเกะ (ทับศัพท์ไทยด้วยอักษรอังกฤษ)
+mai wai laew yak tai mak mak |karaoke
+kit sun yu tuk wan leuy |karaoke
+puk kor tai dee mai |karaoke
+kha tua tai ja jeb mai |karaoke
+mai yak yu laew jing jing |karaoke
+tai dee kwa yu bab nee |karaoke
+tam rai tua eng bpen bpra jam |karaoke
+
+## กลุ่ม 4 — อังกฤษ
+I keep thinking about killing myself |en
+I might kms tonight, what do the cards say |en
+I want to take my own life and nobody knows |en
+I wish I was dead every single morning |en
+thinking about cutting myself again |en
+there is no reason to live anymore |en
+I don't want to be alive after what happened |en
+I've been thinking of hanging myself |en
+planning to overdose on my meds |en
