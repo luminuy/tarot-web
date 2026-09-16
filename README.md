@@ -3,6 +3,8 @@
 > **เว็บดูดวงไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite-Smith ที่ผสานศาสตร์พยากรณ์โบราณเข้ากับเทคโนโลยีปัญญาประดิษฐ์ (AI) และระบบสุ่มที่พิสูจน์ความยุติธรรมได้ (Provably Fair) บน Cloudflare Edge Network**
 
 [![Live Production](https://img.shields.io/badge/Production-Live-success?style=for-the-badge&logo=cloudflare&logoColor=white&color=F38020)](https://seertarot.net)
+[![Astro](https://img.shields.io/badge/Astro-7.3-BC52EE?style=for-the-badge&logo=astro&logoColor=white)](https://astro.build/)
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict%200%20Errors-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![AI Engine](https://img.shields.io/badge/AI-Groq%20Qwen%20%2B%20Gemini%20%2B%20Claude-purple?style=for-the-badge)](https://groq.com/)
@@ -30,6 +32,12 @@
    - ระบบสนทนาถามต่อยอด (Contextual Follow-up Chat Engine)
 5. 🛡️ **ระบบความปลอดภัยและการป้องกันข้อมูลส่วนบุคคล (PDPA & Safety Boundaries)**:
    - กรองสัญญาณความทุกข์ใจ/อันตราย พร้อมสายด่วนสุขภาพจิต **1323** และเก็บข้อมูลใน Local Storage ของผู้ใช้ 100%
+6. 🪶 **สถาปัตยกรรมไฮบริด Astro 7 + React 19 Islands + Next.js 16.3**:
+   - หน้าเนื้อหาและสาธารณะ 305 หน้า (`/cards`, `/spreads`, `/blog`, `/privacy`, `/contact` ฯลฯ) ถูกคอมไพล์ด้วย Astro SSG เป็น Zero-Runtime HTML ตอบจาก Cloudflare Assets โดยตรงโดยไม่ปลุก Worker ลดขนาด JS ลง 36–53% และ TBT เหลือ 14–42 ms
+   - หน้าที่ต้องมีสถานะเซสชัน/ระบบสมาชิก/แผงควบคุมหลังบ้าน (`/account`, `/admin`, `/readers`, `/api/*`) ทำงานบน Next.js 16.3 App Router (OpenNext on Cloudflare Workers)
+7. ⚡ **Mobile Performance & Ultra-Fast Edge Caching**:
+   - ไฟล์ฟอนต์ไทยทั้งหมดแคช 1 ปีเต็มบน Edge (`Cache-Control: public, max-age=31536000`)
+   - ตัดวงจร Critical Request Chaining ระหว่างสคริปต์โครม และกำจัด Forced Reflow บนอุปกรณ์พกพา 100%
 
 ---
 

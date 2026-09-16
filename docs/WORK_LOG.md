@@ -19,7 +19,6 @@
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
 - **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 62/62 ด่าน (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 62/62 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -30,7 +29,7 @@
 | **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) + GA4 Event Tracking ครบวงจร | เพิ่มโหมดสลับไพ่กลับหัว Manual |
 | **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป + Card View & Search Analytics | เพิ่ม Audio คำอ่านรายใบ |
 | **คลัง 25 ผังพยากรณ์** | `/spreads` & `/spreads/[id]` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 25 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง + หน้าคู่มือราย spread 25 หน้า (SEO/SSG · JSON-LD HowTo) | แชร์ผังพยากรณ์แบบรูปภาพ |
-| **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 20 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
+| **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 26 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **จัดการรหัสแลกสิทธิ์** | `/admin?tab=redeem` | 🟢 **Active / Live** | Dev Server Ready | แดชบอร์ดจัดการรหัสสิทธิ์เต็มรูปแบบ, ค้นหา/กรอง, สุ่มรหัส `SEER-XXXX-XXXX`, ตรวจดูประวัติคนแลก, ปิดการใช้งานทันที | ส่งออกรายงาน CSV |
 | **นโยบายความเป็นส่วนตัวสองภาษา** | `/privacy` & `/en/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA, GDPR, CCPA/CPRA, CalOPPA สองภาษาครบ 100% พร้อมปุ่มดาวน์โหลด JSON และลบข้อมูลจริง | - |

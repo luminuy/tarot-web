@@ -21,6 +21,13 @@
 5. **[docs/ADMIN_PANEL.md](docs/ADMIN_PANEL.md)**: คู่มือและสถาปัตยกรรมแผงควบคุมผู้ดูแลระบบ (Admin Panel & Cloud Health)
 6. **[docs/specs/INTERACTIVE_CARD_PICKING.md](docs/specs/INTERACTIVE_CARD_PICKING.md)**: รายละเอียดระบบและ Component สำหรับการให้คนจับไพ่ด้วยตนเอง
 7. **[docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
+8. **[docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)**: 🪶 แผนสถาปัตยกรรม Astro 7 + React 19 Islands (305 หน้า SSG Zero-Runtime ตอบจาก Edge)
+9. **[docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md](docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)**: 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62)
+
+> 🪶 **หมายเหตุด้านสถาปัตยกรรม (Astro + Next.js Hybrid)**:
+> หน้าสาธารณะและเนื้อหา 305 หน้า (`/cards/**`, `/spreads/**`, `/blog/**`, `/about`, `/privacy`, `/contact` ฯลฯ) ถูกสร้างด้วย Astro SSG เป็น Zero-Runtime HTML ใน `.open-next/assets` ตอบจาก Cloudflare Edge โดยตรงโดยไม่ปลุก Worker
+> ส่วนหน้าที่ต้องการเซสชัน/ระบบสมาชิก/แผงควบคุมหลังบ้าน (`/account`, `/admin`, `/readers`, `/api/*`) ทำงานบน Next.js 16.3 (OpenNext on Cloudflare Workers)
+> **กติกา Island**: ห้ามนำเข้าชุดข้อมูลก้อนใหญ่ลง Island, ใช้ `client:idle` เป็นหลัก และแยก Static HTML ออกจาก Island เสมอ
 
 ---
 

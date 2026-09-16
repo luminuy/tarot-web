@@ -41,6 +41,9 @@ docs/
 └── 📦 แผนพัฒนาตามหมุดหมาย (Milestone Plans Archive)
     └── plans/
         ├── MASTER_PLAN_2026-09-06.md      # 🗺️ เริ่มอ่านที่นี่ — ทุกงานที่ค้างในตารางเดียว (ตรวจใหม่ทั้งแผ่น 2026-09-14)
+        ├── HANDOFF_ASTRO_MIGRATION_2026-09-15.md # 🪶 แผนสถาปัตยกรรม Astro 7 + React 19 Islands (305 หน้า SSG Zero-Runtime ตอบจาก Edge)
+        ├── HANDOFF_CARD_TILE_CV_2026-09-15.md    # 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62)
+        ├── HANDOFF_ADMIN_REDEEM_2026-09-12.md    # 🎟️ แผนสร้างหน้าจัดการรหัสแลกสิทธิ์ให้แอดมิน (/admin?tab=redeem)
         ├── AI_COST_CONTROL_PLAN.md      # แผนควบคุมต้นทุน AI และ Rate Limit Bypass (PR 1-5)
         ├── EMAIL_AUTH_PLAN.md           # แผนระบบสมัครสมาชิกด้วยอีเมลและรหัสผ่าน (PR 0-5)
         ├── PROVABLY_FAIR_PLAN.md        # แผนระบบสับไพ่ที่ตรวจสอบความยุติธรรมได้ (PR 1-4)

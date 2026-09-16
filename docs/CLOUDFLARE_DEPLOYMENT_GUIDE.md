@@ -107,9 +107,13 @@ npm run preview:worker
 npm run deploy
 ```
 
-> `npm run deploy` = `opennextjs-cloudflare build && opennextjs-cloudflare deploy`
-> ขั้น `deploy` จะ **populateCache** ก่อน: seed หน้า SSG ทั้งหมดลง KV
-> แล้วจึง `wrangler deploy` (ปกติทำผ่าน GitHub Actions อยู่แล้ว)
+> `npm run deploy` = `tsx scripts/bump-sw-version.ts && npm run build:astro && opennextjs-cloudflare build && tsx scripts/merge-astro-assets.ts && opennextjs-cloudflare deploy`
+> กระบวนการ Deploy จะ:
+> 1. อัปเดตเวอร์ชัน Service Worker (`bump-sw-version.ts`)
+> 2. บิลด์หน้าสแตติก Astro 305 หน้า (`build:astro`)
+> 3. บิลด์ Next.js OpenNext Worker (`opennextjs-cloudflare build`)
+> 4. รวมไฟล์ HTML สแตติกของ Astro ทับลง `.open-next/assets` (`merge-astro-assets.ts`)
+> 5. Seed หน้า SSG และ deploy Worker ขึ้น Edge (ปกติทำผ่าน GitHub Actions CI/CD อัตโนมัติอยู่แล้ว)
 
 เมื่อระบบ Deploy เสร็จ จะแสดง URL ของเว็บคุณทันที เช่น:
 ```
@@ -207,7 +211,7 @@ jobs:
 
 - [ ] หน้าแรก `/` โหลดเร็ว ไพ่ 78 ใบแสดงครบถ้วน
 - [ ] หน้า `/cards` และหน้ารายใบ `/cards/major-00` แสดงผลสมบูรณ์
-- [ ] หน้า `/spreads` แสดงผังทั้ง 20 รูปแบบครบถ้วน
+- [ ] หน้า `/spreads` แสดงผังทั้ง 25 รูปแบบครบถ้วน
 - [ ] ทดลองเปิดไพ่และสตรีมคำทำนายจากแม่หมอ AI ไหลลื่นไม่มีสะดุด
 - [ ] หน้า `/privacy` สามารถดาวน์โหลดสำเนา JSON และสั่งลบข้อมูลได้ตามมาตรฐาน PDPA
 - [ ] แผงแอดมิน `/admin` แสดงตัวเลขโควตา AI ประจำวันและสถานะ Rate Limit Bypass
