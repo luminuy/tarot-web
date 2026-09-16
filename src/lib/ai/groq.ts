@@ -83,6 +83,42 @@ export interface GroqProbeResult {
 /**
  * ดึง Groq API Key จาก environment variable
  */
+
+/**
+ * 🕰️ หน่วงก่อนลองโมเดลถัดไปเมื่อเจอ 429 (T-42)
+ * ---------------------------------------------------------------------------
+ * ของเดิมวนลองโมเดลถัดไป **ทันที** เมื่อได้สถานะที่ไม่ใช่ 200 โดยไม่อ่าน `Retry-After`
+ * ไม่มีดีเลย ไม่มี jitter เจอ 429 (ซึ่งคอมเมนต์ในไฟล์นี้เองบันทึกว่าเกิดประจำ)
+ * ก็กระหน่ำโมเดลถัดไปด้วย prompt ก้อนใหญ่ชุดเดิมทันที — ซึ่งเป็นพฤติกรรมที่ทำให้
+ * โควตาของบัญชีถูกกดจนแย่ลงกว่าเดิม ไม่ใช่ดีขึ้น
+ *
+ * jitter จำเป็นเพราะ isolate หลายตัวชน 429 พร้อมกันได้ ถ้าหน่วงเท่ากันเป๊ะ
+ * ทุกตัวจะกลับมายิงพร้อมกันอีกรอบ
+ */
+const GROQ_BACKOFF_BASE_MS = 400;
+const GROQ_BACKOFF_MAX_MS = 4000;
+
+function backoffDelayMs(attempt: number, retryAfterHeader: string | null): number {
+  const retryAfterSec = Number(retryAfterHeader);
+  if (Number.isFinite(retryAfterSec) && retryAfterSec > 0) {
+    return Math.min(GROQ_BACKOFF_MAX_MS, Math.ceil(retryAfterSec * 1000));
+  }
+  const exponential = GROQ_BACKOFF_BASE_MS * 2 ** attempt;
+  const jitter = Math.random() * GROQ_BACKOFF_BASE_MS;
+  return Math.min(GROQ_BACKOFF_MAX_MS, exponential + jitter);
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => {
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => {
+      clearTimeout(timer);
+      resolve();
+    }, { once: true });
+  });
+}
+
 export function getGroqApiKey(): string | undefined {
   return process.env.GROQ_API_KEY;
 }
@@ -120,7 +156,7 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
     })),
   ];
 
-  for (const model of WORKING_GROQ_MODELS) {
+  for (const [attemptIndex, model] of WORKING_GROQ_MODELS.entries()) {
     const startedAt = Date.now();
     try {
       const controller = new AbortController();
@@ -157,6 +193,11 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
       if (!res.ok) {
         const errText = await res.text().catch(() => "");
         console.warn(`[Groq ${model}] status ${res.status}: ${errText.slice(0, 200)}`);
+        // 429 = โควตาเต็ม — ยิงโมเดลถัดไปทันทีคือการซ้ำเติม ไม่ใช่การกู้คืน (T-42)
+        if (res.status === 429 || res.status >= 500) {
+          recordEvent(`ai_groq_backoff:${res.status}`);
+          await sleep(backoffDelayMs(attemptIndex, res.headers.get("retry-after")));
+        }
         continue;
       }
 
@@ -395,7 +436,7 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
     }
   }
 
-  for (const model of readingModels) {
+  for (const [readingAttempt, model] of readingModels.entries()) {
     const state = createReadingStreamState();
     const usage = createEmptyUsage();
     let unlinkAbort: (() => void) | undefined;
@@ -442,6 +483,11 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
       if (!res.ok || !res.body) {
         const errText = await res.text().catch(() => "");
         console.warn(`[Groq Reading ${model}] status ${res.status}: ${errText.slice(0, 200)}`);
+        // หน่วงก่อนลองโมเดลถัดไปเมื่อโดนจำกัดโควตา/เซิร์ฟเวอร์ขัดข้อง (T-42)
+        if (res.status === 429 || res.status >= 500) {
+          recordEvent(`ai_groq_backoff:${res.status}`);
+          await sleep(backoffDelayMs(readingAttempt, res.headers.get("retry-after")), ctx.abortSignal);
+        }
         continue;
       }
 

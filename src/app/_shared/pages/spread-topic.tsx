@@ -281,7 +281,7 @@ export function SpreadTopicContent({
         {/* Cross-Topic Internal Links Footer */}
         <section className="pt-8 border-t border-line/80 space-y-4">
           <h3 className="text-xs font-mono uppercase tracking-widest text-gold-ink font-semibold">
-            {isEnglish ? "Explore Other Categories" : "สำรวจหมวดหมู่อื่นๆ ในวิหารพยากรณ์"}
+            {isEnglish ? "Explore Other Categories" : "สำรวจหมวดหมู่อื่น ๆ ในวิหารพยากรณ์"}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {allTopics.map((t) => {

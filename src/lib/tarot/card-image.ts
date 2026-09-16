@@ -5,7 +5,7 @@
  * ทุกจุดในระบบ ตามกฎเหล็ก 2 ข้อในคู่มือ:
  *
  *  1. Root Image Path Resolution — ต้องการันตี prefix `/cards/` เสมอ
- *     ห้ามเขียน `<img src={card.image} />` เปล่าๆ เพราะเมื่ออยู่ที่ sub-route
+ *     ห้ามเขียน `<img src={card.image} />` เปล่า ๆ เพราะเมื่ออยู่ที่ sub-route
  *     เช่น `/cards` เบราว์เซอร์จะ resolve ผิดโฟลเดอร์จนภาพไม่ขึ้น
  *
  *  2. Responsive Downscaling — ห้ามโหลดภาพต้นฉบับ ~820px (~280KB/ใบ)

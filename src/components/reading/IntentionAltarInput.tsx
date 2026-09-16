@@ -147,9 +147,9 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
                   ? `"Welcome, ${nickname.trim() || "seeker"}. Take a deep, grounding breath, center your spirit, and share whatever situation or question is calling for cosmic guidance."`
                   : `"Hello ${nickname.trim() || "friend"}! Whatever has been weighing on your heart today, take comfort in knowing this is a safe, compassionate space. What would you like to explore?"`
               : persona?.id === "direct"
-                ? `"สวัสดีคุณ ${nickname.trim() || "คนสำคัญ"} เล่าให้แม่หมอฟังตรงๆ ได้เลยนะว่าตอนนี้มีเรื่องอะไรในใจ หรืออยากรู้เรื่องไหนเป็นพิเศษ จะได้เปิดไพ่ตอบให้ชัดเจนตรงประเด็น"`
+                ? `"สวัสดีคุณ ${nickname.trim() || "คนสำคัญ"} เล่าให้แม่หมอฟังตรง ๆ ได้เลยนะว่าตอนนี้มีเรื่องอะไรในใจ หรืออยากรู้เรื่องไหนเป็นพิเศษ จะได้เปิดไพ่ตอบให้ชัดเจนตรงประเด็น"`
                 : persona?.id === "mystic"
-                  ? `"สวัสดีคุณ ${nickname.trim() || "คนสำคัญ"} หายใจเข้าลึกๆ ผ่อนคลาย แล้วพิมพ์เรื่องราวหรือคำถามที่ต้องการคำแนะนำมาได้เลยนะ"`
+                  ? `"สวัสดีคุณ ${nickname.trim() || "คนสำคัญ"} หายใจเข้าลึก ๆ ผ่อนคลาย แล้วพิมพ์เรื่องราวหรือคำถามที่ต้องการคำแนะนำมาได้เลยนะ"`
                   : `"สวัสดีจ้าคุณ ${nickname.trim() || "คนดี"} วันนี้มีเรื่องอะไรที่ทำให้คิดมาก หรืออยากให้แม่หมอช่วยดูและให้กำลังใจ เล่าให้ฟังได้เลยนะ"`}
           </p>
         </div>
@@ -186,7 +186,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             htmlFor="altar-situation"
             className="text-xs sm:text-sm text-ink-deep flex items-center gap-1.5 font-serif-th font-bold [text-wrap:balance]"
           >
-            {isEnglish ? "2. Brief Context or Situation" : "2. เล่าเรื่องราวหรือสถานการณ์คร่าวๆ"}
+            {isEnglish ? "2. Brief Context or Situation" : "2. เล่าเรื่องราวหรือสถานการณ์คร่าว ๆ"}
             <span className="whitespace-nowrap text-[13px] text-muted font-normal">{isEnglish ? "(Helps ground the reading)" : "(ช่วยให้อ่านได้ตรงจุดยิ่งขึ้น)"}</span>
           </label>
           <input

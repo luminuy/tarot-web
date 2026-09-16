@@ -100,7 +100,7 @@ export function calculateElementalBalance(cards: TarotCard[], drawn?: DrawnCard[
       dominantElement = "ดิน";
       dominantTitleTh = "พลังงานธาตุดินโดดเด่น (Earth Stability & Wealth)";
       dominantInsightTh = "เน้นเรื่องความมั่นคง การเงิน ผลลัพธ์ที่จับต้องได้ และความยั่งยืนในระยะยาว";
-      balancingAdviceTh = "เพิ่มพลังธาตุไฟ (ความยืดหยุ่น/ความคิดริเริ่มใหม่ๆ) เพื่อให้ชีวิตไม่ตึงเครียดหรือยึดติดกับกรอบเดิมจนเกินไป";
+      balancingAdviceTh = "เพิ่มพลังธาตุไฟ (ความยืดหยุ่น/ความคิดริเริ่มใหม่ ๆ) เพื่อให้ชีวิตไม่ตึงเครียดหรือยึดติดกับกรอบเดิมจนเกินไป";
       dominantTitleEn = "Dominant Earth Current (Stability & Grounding)";
       dominantInsightEn = "Long-term security, material realities, pragmatic mastery, and grounded durability are in sharp focus.";
       balancingAdviceEn = "Infuse fire (spontaneity and visionary spark) to ensure prudent discipline does not turn into rigid resistance to change.";

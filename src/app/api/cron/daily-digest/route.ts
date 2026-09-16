@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   try {
     daily = await computeDailyCard(sendDate);
   } catch (err) {
-    console.error("[Daily Digest] คำนวณไพ่ประจำวันไม่สำเร็จ — ยกเลิกทั้งรอบ ไม่ส่งอีเมลใดๆ:", err);
+    console.error("[Daily Digest] คำนวณไพ่ประจำวันไม่สำเร็จ — ยกเลิกทั้งรอบ ไม่ส่งอีเมลใด ๆ:", err);
     return NextResponse.json(
       { ok: false, reason: "daily_card_unavailable", sendDate, scanned: 0, sent: 0, skipped: 0, failed: 0 },
       { status: 503 },

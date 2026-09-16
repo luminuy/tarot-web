@@ -3,7 +3,7 @@
  * -------------------------------------------------------------
  * ทำหน้าที่สร้าง URL สำหรับเจนภาพการ์ดแชร์ผลดวงไดนามิก (OpenGraph / Social Share 1200x630)
  * โดยการซ้อนเลเยอร์ผ่าน Cloudinary URL Transformation:
- *  - ไม่ต้องรัน Satori, Resvg-WASM หรือ Canvas หนักๆ บน Cloudflare Workers
+ *  - ไม่ต้องรัน Satori, Resvg-WASM หรือ Canvas หนัก ๆ บน Cloudflare Workers
  *  - ตัดภาระ CPU (0ms) และประหยัดหน่วยความจำ (RAM < 1MB)
  *  - cloud name มีค่าเริ่มต้นฝังไว้ที่ `DEFAULT_CLOUDINARY_CLOUD_NAME` (src/lib/config/site.ts)
  *    จึงทำงานได้ทั้งตอน dev, CI และ production โดยไม่ต้องพึ่ง env ที่อาจลืมตั้ง

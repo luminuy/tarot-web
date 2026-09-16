@@ -9,6 +9,26 @@ import path from "node:path";
 import { cardByIndex, cardById, DECK, TOTAL_CARDS } from "../../src/data/cards";
 import { resolveCardByIndex } from "../../src/lib/content/overrides";
 
+/**
+ * อ่านไฟล์ที่ด่านนี้ "ต้องมี" — ไฟล์หายคือการตกด่าน ไม่ใช่การข้าม
+ *
+ * 🔴 บทเรียน T-36: หัวข้อ 5.1–5.3 และ 5.5 ห่อด้วย `if (fs.existsSync(path)) { check(...) }`
+ * และ **ไม่เรียก `check()` เลย** เมื่อไฟล์หาย ไฟล์ถูกเปลี่ยนชื่อ/ย้ายเมื่อไหร่
+ * ข้อตรวจกฎเหล็กข้อ 14 สำหรับไฟล์นั้นหยุดทำงานถาวรโดย `repo:verify` ยังรายงานผ่าน 100%
+ * (ไฟล์นี้เคยแก้บั๊กเดียวกันนี้ไปแล้วสำหรับ `TarotFlow.tsx` แต่ไม่ได้ไล่แก้อีก 4 จุด
+ * ที่เป็นแพตเทิร์นเดียวกัน)
+ *
+ * @returns เนื้อไฟล์ หรือ `null` เมื่อไฟล์หาย (และบันทึกการตกด่านให้แล้ว)
+ */
+function readRequiredFile(label: string, filePath: string): string | null {
+  if (!fs.existsSync(filePath)) {
+    check(`หาไฟล์ที่ด่านนี้ต้องตรวจเจอ: ${label}`, false);
+    return null;
+  }
+  return fs.readFileSync(filePath, "utf-8");
+}
+
+
 let pass = 0;
 let fail = 0;
 
@@ -79,24 +99,21 @@ function main() {
   const rootDir = path.resolve(process.cwd(), "src");
 
   // 5.1 ตรวจ chat/route.ts ว่าไม่มีการสร้างไพ่ปลอมหรือ mock card
-  const chatRoutePath = path.join(rootDir, "app/api/reading/[id]/chat/route.ts");
-  if (fs.existsSync(chatRoutePath)) {
-    const chatSrc = fs.readFileSync(chatRoutePath, "utf-8");
+  const chatSrc = readRequiredFile("chat/route.ts", path.join(rootDir, "app/api/reading/[id]/chat/route.ts"));
+  if (chatSrc !== null) {
     check("chat/route.ts ไม่มีการ fallback ไพ่ใบใดทั้งสิ้น", !chatSrc.includes("order: 0, cardIndex: 0") && !chatSrc.includes("cardIndex: 0"));
     check("chat/route.ts คืน 404 เมื่อไม่พบสำรับไพ่", chatSrc.includes("reading_not_found"));
   }
 
   // 5.2 ตรวจ shuffle/route.ts ว่าตรวจไพ่ทุกใบ และไม่ปล่อยผ่านข้อมูลที่ไม่สมบูรณ์
-  const shuffleRoutePath = path.join(rootDir, "app/api/reading/[id]/shuffle/route.ts");
-  if (fs.existsSync(shuffleRoutePath)) {
-    const shuffleSrc = fs.readFileSync(shuffleRoutePath, "utf-8");
+  const shuffleSrc = readRequiredFile("shuffle/route.ts", path.join(rootDir, "app/api/reading/[id]/shuffle/route.ts"));
+  if (shuffleSrc !== null) {
     check("shuffle/route.ts ตรวจสอบ CARD_DATA_NOT_FOUND ชัดเจน", shuffleSrc.includes("CARD_DATA_NOT_FOUND"));
   }
 
   // 5.3 ตรวจ read/route.ts ว่าส่ง error ทันทีถ้าไพ่ใบใดใบหนึ่งไม่พบ
-  const readRoutePath = path.join(rootDir, "app/api/reading/[id]/read/route.ts");
-  if (fs.existsSync(readRoutePath)) {
-    const readSrc = fs.readFileSync(readRoutePath, "utf-8");
+  const readSrc = readRequiredFile("read/route.ts", path.join(rootDir, "app/api/reading/[id]/read/route.ts"));
+  if (readSrc !== null) {
     check("read/route.ts ตรวจสอบ resolvedCards และคืน CARD_DATA_NOT_FOUND", readSrc.includes("CARD_DATA_NOT_FOUND"));
   }
 
@@ -104,11 +121,8 @@ function main() {
   // ⚠️ ต้อง fail ถ้าหาไฟล์ไม่เจอ ห้ามใช้ `if (fs.existsSync) {...}` เงียบ ๆ
   // ไม่งั้นวันที่มีคนเปลี่ยนชื่อ/ย้ายไฟล์ ด่านนี้จะ "หายไปเฉย ๆ" แทนที่จะเตือน
   // (เคยเกิดจริงตอนแยก app/page.tsx ออกเป็น server shell + app/TarotFlow.tsx)
-  const flowPath = path.join(rootDir, "components/home/TarotFlow.tsx");
-  if (!fs.existsSync(flowPath)) {
-    check("หาไฟล์พิธีกรรมดูดวง (components/home/TarotFlow.tsx) เจอ", false);
-  } else {
-    const pageSrc = fs.readFileSync(flowPath, "utf-8");
+  const pageSrc = readRequiredFile("components/home/TarotFlow.tsx", path.join(rootDir, "components/home/TarotFlow.tsx"));
+  if (pageSrc !== null) {
     check("TarotFlow.tsx ไม่มี cardIndex ?? 0", !pageSrc.includes("cardIndex ?? 0"));
     check(
       "TarotFlow.tsx มีการตรวจสอบความสมบูรณ์ของไพ่และแจ้งเตือนให้โหลดใหม่",
@@ -117,9 +131,11 @@ function main() {
   }
 
   // 5.5 ตรวจ StreamReader.tsx ว่าไม่มี fallback ภาพไพ่เดี่ยวใดๆ
-  const streamReaderPath = path.join(rootDir, "components/reading/StreamReader.tsx");
-  if (fs.existsSync(streamReaderPath)) {
-    const streamReaderSrc = fs.readFileSync(streamReaderPath, "utf-8");
+  const streamReaderSrc = readRequiredFile(
+    "components/reading/StreamReader.tsx",
+    path.join(rootDir, "components/reading/StreamReader.tsx"),
+  );
+  if (streamReaderSrc !== null) {
     check("StreamReader.tsx ไม่มี fallback image || 'major-00.jpg'", !streamReaderSrc.includes('image || "major-00.jpg"'));
   }
 

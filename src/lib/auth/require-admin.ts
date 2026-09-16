@@ -28,7 +28,7 @@ export async function requireAdmin(): Promise<NextResponse | null> {
   return null;
 }
 
-/** เช็คเฉยๆ ว่า request นี้เป็นแอดมินไหม (สำหรับ page server component) */
+/** เช็คเฉย ๆ ว่า request นี้เป็นแอดมินไหม (สำหรับ page server component) */
 export async function isAdminRequest(): Promise<boolean> {
   if (!isAdminConfigured()) return false;
   const token = (await cookies()).get(ADMIN_COOKIE_NAME)?.value;
