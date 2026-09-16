@@ -78,7 +78,10 @@ export async function POST(request: Request) {
 
     // บันทึกรายการลงในตาราง payments
     await createPaymentRecord({
-      bookingId: orderId,
+      // เติมเครดิตไม่มีการจองแม่หมอ — เขียนเลขออร์เดอร์ลง `order_id` ไม่ใช่ยัดใส่ `booking_id`
+      // ที่เคยประกาศ FK ไป bookings(id) ไว้ทั้งที่ไม่มีวันมีแถวนั้น (T-09)
+      orderId,
+      userId,
       ticketId: undefined,
       provider: charge.isTestMode ? "simulator" : "omise",
       providerRef: charge.chargeId,

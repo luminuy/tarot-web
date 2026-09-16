@@ -3,6 +3,7 @@ import { nextResetAt, weekKey } from "@/lib/entitlement/week";
 import { getDailyStreak, isDailyFreeReadingUsed, recordDailyReading, todayDateKey } from "@/lib/entitlement/daily";
 import { DAILY_LIMIT, GUEST_BLOCK_REASON, GUEST_LIMIT, SIGNUP_BONUS } from "@/lib/entitlement/limits";
 import { recordEvent } from "@/lib/stats/record";
+import { bumpCounter, readCounter } from "@/lib/platform/kv-counter";
 
 /**
  * นโยบายเมื่อ **ฐานข้อมูลสิทธิ์ล่ม** (ตารางหาย / D1 throttle / schema ไม่ตรง)
@@ -22,6 +23,25 @@ import { recordEvent } from "@/lib/stats/record";
  * เปลี่ยนเป็น `"deny"` ได้ด้วยการแก้บรรทัดเดียว ถ้าวันหนึ่งต้นทุนสำคัญกว่าประสบการณ์ผู้ใช้
  */
 const DB_FAILURE_POLICY: "allow" | "deny" = "allow";
+
+/**
+ * ผลของการหักสิทธิ์ — ต้องแยก "คำขอนี้เป็นคนหัก" ออกจาก "หักไปแล้วก่อนหน้านี้"
+ * ให้ชัด ไม่งั้นการคืนสิทธิ์จะไปลบแถวของคำขออื่นทิ้ง (T-02)
+ */
+export type ConsumeOutcome =
+  /** คำขอนี้สร้างแถวเอง — `usageId` คือแถวเดียวที่คำขอนี้มีสิทธิ์คืน */
+  | { status: "inserted"; usageId: string }
+  /** มีแถวอยู่ก่อนแล้ว (ยิงซ้ำ) หรือ DB ล่มแล้วปล่อยผ่าน — ห้ามคืนสิทธิ์ */
+  | { status: "already" }
+  /** ผู้เยี่ยมชมที่ยังมีสิทธิ์ — นับที่คุกกี้ ไม่มีแถวใน DB */
+  | { status: "guest-allowed" }
+  /** สิทธิ์ไม่พอ */
+  | { status: "denied" };
+
+/** true = คำขอผ่านด่านสิทธิ์ (ไม่ว่าจะเป็นคนหักเองหรือหักไปแล้ว) */
+export function isConsumeAllowed(outcome: ConsumeOutcome): boolean {
+  return outcome.status !== "denied";
+}
 
 /** true เฉพาะเมื่อ error คือการชน UNIQUE/constraint จริง ๆ (= เคยหักสิทธิ์ไปแล้ว) */
 function isUniqueViolation(e: unknown): boolean {
@@ -76,6 +96,44 @@ function onDbFailure(where: string, e: unknown): boolean {
 }
 
 /**
+ * เพดานของนโยบาย "ปล่อยผ่านเมื่อ DB ล่ม" (T-08)
+ * ---------------------------------------------------------------------------
+ * นโยบาย `allow` ตั้งใจให้ผู้ใช้ที่ดีไม่ถูกลงโทษเพราะระบบเราพัง แต่ของเดิม
+ * **ไม่มีเพดานของตัวเอง** — D1 ถูก throttle เมื่อไหร่ สมาชิกทุกคนอ่านได้ไม่จำกัด
+ * ตลอดช่วงนั้น เหลือเบรกแค่งบ AI รวมของทั้งเว็บ
+ *
+ * ตัวนับอยู่บน KV/Redis (ไม่ใช่ `Map` ต่อ isolate) จึงบังคับได้จริงข้าม edge
+ * และใช้ `bumpCounter` ชุดเดียวกับโควตาอื่น ๆ จึงไม่กินโควตาเขียน KV เพิ่มอย่างมีนัย
+ */
+const DEGRADED_ALLOW_PER_USER_PER_DAY = 3;
+
+function degradedKey(userId: string, day: string): string {
+  return `app:entq:degraded:${day}:${userId}`;
+}
+
+/**
+ * นโยบายเมื่อ `consumeReading` เขียน DB ไม่ได้
+ * `allow` → ปล่อยผ่านได้ แต่ **นับ** และตัดที่เพดานเล็ก ๆ ต่อผู้ใช้ต่อวัน
+ * คืน `"already"` เสมอเมื่อปล่อยผ่าน เพราะไม่มีแถวจริงให้คืนสิทธิ์
+ */
+async function onConsumeDbFailure(v: Viewer, where: string, e: unknown): Promise<ConsumeOutcome> {
+  const allow = onDbFailure(where, e);
+  if (!allow) return { status: "denied" };
+  if (v.kind !== "member") return { status: "already" };
+
+  const day = todayDateKey();
+  const key = degradedKey(v.userId, day);
+  const used = await readCounter(key).catch(() => 0);
+  if (used >= DEGRADED_ALLOW_PER_USER_PER_DAY) {
+    recordEvent("entitlement_degraded_capped");
+    return { status: "denied" };
+  }
+  bumpCounter(key, 60 * 60 * 36);
+  recordEvent("entitlement_degraded_allowed");
+  return { status: "already" };
+}
+
+/**
  * แกนสิทธิ์การเปิดไพ่ — แหล่งความจริงเดียว (ENTITLEMENT_PLAN ข้อ 5)
  * ห้ามคำนวณสิทธิ์ที่อื่น · ห้ามคำนวณฝั่งเบราว์เซอร์
  *
@@ -126,19 +184,26 @@ export interface Entitlement {
   kind: "guest" | "member";
 }
 
+/**
+ * ยอดการใช้สิทธิ์ของสมาชิก — **หนึ่งรอบเดินทางไป D1 เท่านั้น**
+ *
+ * T-10: ของเดิมยิง `Promise.all` สี่คำสั่งแยกกัน = สี่รอบเดินทางต่อการเช็คโควตาหนึ่งครั้ง
+ * และฟังก์ชันนี้ถูกเรียกแทบทุกการโหลดหน้า · `db.batch()` ส่งทั้งชุดไปรอบเดียว
+ * (ถ้าไดรเวอร์ไหนไม่มี `batch` จะถอยไปใช้ `Promise.all` แบบเดิมอัตโนมัติ)
+ */
 async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGranted: number; bonusUsed: number; paidGranted: number }> {
   const db = await getAppDB();
   const dk = todayDateKey();
   const wk = weekKey();
 
-  const [dailyRow, bonusGrantRow, bonusUsedRow, paidGrantRow] = await Promise.all([
+  const statements = [
+    // ⚠️ `week_key` ของแถวยุคปัจจุบันเก็บ "วันไทยของวันที่เปิดไพ่" ไม่ใช่วันจันทร์ต้นสัปดาห์
+    // (ดู consumeReading ที่ bind `dk`) — ชื่อคอลัมน์เป็นมรดกจากยุคโควตารายสัปดาห์
+    // เงื่อนไขเดิมเขียนว่า `(week_key = dk OR (week_key = wk AND source = 'daily'))`
+    // ซึ่งพังทุกวันจันทร์: วันจันทร์ dk == wk แถวที่เปิดวันจันทร์จึงติดเงื่อนไขที่สอง
+    // ไปตลอดทั้งสัปดาห์ ทำให้สมาชิกที่ใช้โควตาวันจันทร์หมด ถูกล็อกยาวถึงวันอาทิตย์
+    // แถวมรดกจริง ๆ ใช้ source = 'weekly' (ดู migrations/0007) ไม่ใช่ 'daily'
     db
-      // ⚠️ `week_key` ของแถวยุคปัจจุบันเก็บ "วันไทยของวันที่เปิดไพ่" ไม่ใช่วันจันทร์ต้นสัปดาห์
-      // (ดู consumeReading ที่ bind `dk`) — ชื่อคอลัมน์เป็นมรดกจากยุคโควตารายสัปดาห์
-      // เงื่อนไขเดิมเขียนว่า `(week_key = dk OR (week_key = wk AND source = 'daily'))`
-      // ซึ่งพังทุกวันจันทร์: วันจันทร์ dk == wk แถวที่เปิดวันจันทร์จึงติดเงื่อนไขที่สอง
-      // ไปตลอดทั้งสัปดาห์ ทำให้สมาชิกที่ใช้โควตาวันจันทร์หมด ถูกล็อกยาวถึงวันอาทิตย์
-      // แถวมรดกจริง ๆ ใช้ source = 'weekly' (ดู migrations/0007) ไม่ใช่ 'daily'
       .prepare(
         `SELECT COUNT(*) AS n FROM reading_usage
           WHERE user_id = ?
@@ -147,27 +212,47 @@ async function memberUsage(userId: string): Promise<{ dailyUsed: number; bonusGr
               OR (source NOT IN ('weekly', 'bonus') AND week_key = ?)
             )`,
       )
-      .bind(userId, wk, dk)
-      .first<{ n: number }>(),
-    db
-      .prepare(`SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ?`)
-      .bind(userId)
-      .first<{ n: number }>(),
-    db
-      .prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND source = 'bonus'`)
-      .bind(userId)
-      .first<{ n: number }>(),
+      .bind(userId, wk, dk),
+    db.prepare(`SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ?`).bind(userId),
+    db.prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE user_id = ? AND source = 'bonus'`).bind(userId),
     db
       .prepare(`SELECT COALESCE(SUM(granted), 0) AS n FROM user_bonus WHERE user_id = ? AND reason LIKE 'purchase_%'`)
-      .bind(userId)
-      .first<{ n: number }>(),
-  ]);
+      .bind(userId),
+  ];
+
+  const readOneByOne = async (): Promise<number[]> => {
+    const rows = await Promise.all(statements.map((st) => st.first<{ n: number }>()));
+    return rows.map((r) => Number(r?.n ?? 0));
+  };
+
+  const batch = (db as { batch?: (s: unknown[]) => Promise<Array<{ results?: Array<{ n?: number }> }>> }).batch;
+  let counts: number[] | null = null;
+
+  if (typeof batch === "function") {
+    try {
+      const rows = await batch.call(db, statements);
+      const parsed = rows.map((r) => Number(r?.results?.[0]?.n));
+      // ⚠️ ห้ามยอมรับผลที่อ่านไม่ออก — ถ้ารูปร่างที่ไดรเวอร์คืนมาไม่ตรงที่คาด
+      // ค่าจะกลายเป็น NaN แล้วถูกตีเป็น 0 = "ยังไม่ได้ใช้โควตาเลย" = เปิดไพ่ฟรีไม่จำกัด
+      // เจอแบบนั้นให้ถอยไปอ่านทีละคำสั่งซึ่งพิสูจน์แล้วว่าถูกต้อง ไม่ใช่เดาเป็นศูนย์
+      if (parsed.length === statements.length && parsed.every((n) => Number.isFinite(n))) {
+        counts = parsed;
+      } else {
+        recordEvent("entitlement_batch_shape_unexpected");
+      }
+    } catch (e) {
+      recordEvent("entitlement_batch_failed");
+      console.warn("[entitlement] db.batch ใช้ไม่ได้ — ถอยไปอ่านทีละคำสั่ง", e);
+    }
+  }
+
+  if (!counts) counts = await readOneByOne();
 
   return {
-    dailyUsed: Number(dailyRow?.n ?? 0),
-    bonusGranted: Number(bonusGrantRow?.n ?? 0),
-    bonusUsed: Number(bonusUsedRow?.n ?? 0),
-    paidGranted: Number(paidGrantRow?.n ?? 0),
+    dailyUsed: counts[0] ?? 0,
+    bonusGranted: counts[1] ?? 0,
+    bonusUsed: counts[2] ?? 0,
+    paidGranted: counts[3] ?? 0,
   };
 }
 
@@ -282,7 +367,7 @@ export async function consumeReading(
   v: Viewer,
   readingId: string,
   spreadId?: string
-): Promise<boolean> {
+): Promise<ConsumeOutcome> {
   const userKey = v.kind === "member" ? v.userId : `guest_${v.gid}`;
 
   // บันทึก streak สำหรับผัง daily
@@ -292,24 +377,32 @@ export async function consumeReading(
 
   if (v.kind === "guest") {
     // การนับจริงของผู้เยี่ยมชมอยู่ที่คุกกี้ (PR C) — ที่นี่แค่ตรวจว่ายังมีสิทธิ์
-    return v.guestUsed < GUEST_LIMIT;
+    // ไม่มีแถวใน DB ให้คืน จึงไม่ใช่ "inserted" ที่ refund ได้
+    return v.guestUsed < GUEST_LIMIT ? { status: "guest-allowed" } : { status: "denied" };
   }
 
   const db = await getAppDB();
 
-  // fast path: เคยหัก reading นี้แล้ว → ผ่าน ไม่ทำอะไรต่อ
+  // ── fast path: เคยหัก reading นี้แล้ว ──────────────────────────────────────
+  // 🔴 บทเรียน T-02: เดิมคืน `true` เหมือนกรณีที่หักสำเร็จ ผู้เรียกจึงตั้ง `consumed = true`
+  // ทั้งที่คำขอนี้ไม่ได้ insert อะไรเลย พอสตรีมถูกตัดกลางคัน `finally` เรียกคืนสิทธิ์
+  // แล้วลบ**แถวค่าใช้จ่ายของครั้งแรก**ทิ้ง = เปิดไพ่ฟรีไม่จำกัด
+  // "หักไปแล้ว" กับ "คำขอนี้เป็นคนหัก" ต้องเป็นคนละสถานะเสมอ
   const already = await db
     .prepare(`SELECT 1 AS x FROM reading_usage WHERE reading_id = ? LIMIT 1`)
     .bind(readingId)
     .first<{ x: number }>()
     .catch(() => null);
-  if (already) return true;
+  if (already) return { status: "already" };
 
   const now = Date.now();
   const dk = todayDateKey();
   const wk = weekKey();
 
-  const doConditionalInsert = async (): Promise<boolean> => {
+  // id ของแถวที่ **คำขอนี้** สร้าง — ใช้ผูกกับการคืนสิทธิ์ ไม่ให้ไปลบแถวของคำขออื่น
+  const usageId = `ru_${crypto.randomUUID()}`;
+
+  const doConditionalInsert = async (): Promise<ConsumeOutcome> => {
     // ── ชั้นที่ 1: โควตารายวัน (`DAILY_LIMIT` ครั้ง/วัน) ──
     // เงื่อนไขนับต้องตรงกับ memberUsage() เป๊ะ ๆ (ป้องกันปัญหาข้ามวันจันทร์ตาม INC-0074)
     const daily = await db
@@ -325,10 +418,10 @@ export async function consumeReading(
                )
           ) < ?`
       )
-      .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, now, v.userId, wk, dk, DAILY_LIMIT)
+      .bind(usageId, v.userId, readingId, dk, now, v.userId, wk, dk, DAILY_LIMIT)
       .run();
 
-    if ((daily.meta?.changes ?? 0) > 0) return true;
+    if ((daily.meta?.changes ?? 0) > 0) return { status: "inserted", usageId };
 
     // ── ชั้นที่ 2: โควตาโบนัส/ที่ซื้อมา ──
     const bonus = await db
@@ -338,17 +431,18 @@ export async function consumeReading(
           WHERE (SELECT COALESCE(SUM(granted), 0) FROM user_bonus WHERE user_id = ?)
               > (SELECT COUNT(*) FROM reading_usage WHERE user_id = ? AND source = 'bonus')`
       )
-      .bind(`ru_${crypto.randomUUID()}`, v.userId, readingId, dk, now, v.userId, v.userId)
+      .bind(usageId, v.userId, readingId, dk, now, v.userId, v.userId)
       .run();
 
-    return (bonus.meta?.changes ?? 0) > 0;
+    return (bonus.meta?.changes ?? 0) > 0 ? { status: "inserted", usageId } : { status: "denied" };
   };
 
   try {
     return await doConditionalInsert();
   } catch (e) {
     // แยกให้ชัด: ชน UNIQUE(reading_id) = เคยหักไปแล้วจริง ๆ → ผ่าน ไม่หักซ้ำ
-    if (isUniqueViolation(e)) return true;
+    // และ **ไม่ใช่** "inserted" — คำขอนี้ไม่ได้เป็นคนสร้างแถว จึงไม่มีสิทธิ์ลบมันทิ้ง
+    if (isUniqueViolation(e)) return { status: "already" };
 
     // ตารางหาย = ซ่อมได้ → สร้างตารางแล้วหักใหม่อีกครั้งเดียว
     // (ถ้าสำเร็จ ผู้ใช้ถูกหักสิทธิ์ถูกต้องตามจริง ไม่ได้ของฟรีเพราะระบบพัง)
@@ -356,25 +450,33 @@ export async function consumeReading(
       try {
         return await doConditionalInsert();
       } catch (retryErr) {
-        if (isUniqueViolation(retryErr)) return true;
-        return onDbFailure("consumeReading/insert-after-heal", retryErr);
+        if (isUniqueViolation(retryErr)) return { status: "already" };
+        return await onConsumeDbFailure(v, "consumeReading/insert-after-heal", retryErr);
       }
     }
 
     // error อื่น (throttle / schema drift) = โควตาไม่ได้ถูกบันทึก
     // ห้ามกลืนเงียบเหมือนของเดิม — ยิง metric แล้วตัดสินตามนโยบายที่ประกาศไว้
-    return onDbFailure("consumeReading/insert", e);
+    return await onConsumeDbFailure(v, "consumeReading/insert", e);
   }
 }
 
 /**
  * คืนสิทธิ์เมื่อ AI ล้มเหลว — ต้องเรียกทุกเส้นทางที่ error ใน read route
  * ปลอดภัยเมื่อไม่มีแถว (ผู้เยี่ยมชม หรือหักไม่สำเร็จ) — เป็น no-op
+ *
+ * 🔴 `usageId` **บังคับ** และต้องเป็น id ที่ `consumeReading()` คืนมาพร้อม
+ * `status === "inserted"` ของคำขอนี้เท่านั้น — ไม่ใช่ `WHERE reading_id = ?` ลอย ๆ
+ * แบบเดิมที่ทำให้คำขอที่สองลบแถวค่าใช้จ่ายของคำขอแรกทิ้งได้ (T-02)
  */
-export async function refundReading(readingId: string): Promise<void> {
+export async function refundReading(readingId: string, usageId: string): Promise<void> {
+  if (!usageId) return;
   try {
     const db = await getAppDB();
-    await db.prepare(`DELETE FROM reading_usage WHERE reading_id = ?`).bind(readingId).run();
+    await db
+      .prepare(`DELETE FROM reading_usage WHERE reading_id = ? AND id = ?`)
+      .bind(readingId, usageId)
+      .run();
   } catch (e) {
     // คืนสิทธิ์ไม่สำเร็จ = ผู้ใช้เสียสิทธิ์ทั้งที่ระบบเราพัง — ห้ามเงียบ
     // ไม่ throw ต่อ เพราะจุดเรียกอยู่ใน error path ของ stream อยู่แล้ว
@@ -386,9 +488,16 @@ export async function refundReading(readingId: string): Promise<void> {
 
 /**
  * ให้โบนัสก้อนแก่ผู้ใช้ — idempotent ต่อ reason (ให้ซ้ำเหตุผลเดิมไม่ได้)
+ *
+ * 🔴 บทเรียน T-04: ของเดิมคืน `void` และกลืน error ทุกตัวด้วย `catch { console.error }`
+ * เส้นทางยืนยันการจ่ายเงินจึงตอบ `{ ok: true }` ให้ผู้ใช้ทั้งที่เครดิตไม่เคยลงฐานข้อมูล
+ * ไม่มี ticket ไม่มี metric ไม่มีคิวลองใหม่ — เงินเข้าแต่ของไม่ถึงมือโดยไม่มีใครรู้
+ *
+ * ตอนนี้คืน `true` เฉพาะเมื่อ **อ่านกลับมาเจอแถวจริง** (แบบเดียวกับที่ `redeem.ts` ทำอยู่)
+ * แถวที่มีอยู่แล้วจาก reason เดิมก็นับว่าสำเร็จ เพราะ idempotent คือพฤติกรรมที่ตั้งใจ
  */
-export async function grantBonus(userId: string, n: number, reason: string): Promise<void> {
-  if (!userId || n <= 0) return;
+export async function grantBonus(userId: string, n: number, reason: string): Promise<boolean> {
+  if (!userId || n <= 0) return false;
   try {
     const db = await getAppDB();
     await db
@@ -399,8 +508,23 @@ export async function grantBonus(userId: string, n: number, reason: string): Pro
       )
       .bind(`ub_${crypto.randomUUID()}`, userId, Math.floor(n), reason, Date.now())
       .run();
+
+    // อ่านกลับมายืนยันว่าแถวลงจริง — `run()` สำเร็จไม่ได้แปลว่าข้อมูลอยู่ในฐาน
+    const row = await db
+      .prepare(`SELECT granted FROM user_bonus WHERE user_id = ? AND reason = ? LIMIT 1`)
+      .bind(userId, reason)
+      .first<{ granted: number }>();
+
+    if (!row) {
+      recordEvent("entitlement_grant_missing_after_insert");
+      console.error("[entitlement] grantBonus: insert ผ่านแต่ไม่พบแถว", { userId, reason });
+      return false;
+    }
+    return true;
   } catch (err) {
+    recordEvent("entitlement_grant_failed");
     console.error("[entitlement] grantBonus failed:", err);
+    return false;
   }
 }
 

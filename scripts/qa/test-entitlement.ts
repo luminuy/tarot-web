@@ -62,8 +62,8 @@ async function main() {
   check("guest ใหม่: canChat = false", eg1.canChat === false);
   const eg2 = await getEntitlement(guestUsed);
   check("guest ที่มีคุกกี้เก่า: ยังถูกกั้นด้วย signup_required", !eg2.canStartReading && eg2.reason === "signup_required");
-  check("consumeReading(guest ใหม่) = false (หักสิทธิ์ให้ผู้ไม่ล็อกอินไม่ได้)", (await consumeReading(guestFresh, "r_g_1")) === false);
-  check("consumeReading(guest คุกกี้เก่า) = false", (await consumeReading(guestUsed, "r_g_2")) === false);
+  check("consumeReading(guest ใหม่) = denied (หักสิทธิ์ให้ผู้ไม่ล็อกอินไม่ได้)", (await consumeReading(guestFresh, "r_g_1")).status === "denied");
+  check("consumeReading(guest คุกกี้เก่า) = denied", (await consumeReading(guestUsed, "r_g_2")).status === "denied");
 
   // ── 3. สมาชิก — ตั้งผู้ใช้ทดสอบ ──
   const uid = `test_ent_${Date.now()}`;
@@ -96,10 +96,11 @@ async function main() {
   // ⚠️ จำนวนครั้งต้องผูกกับ `DAILY_LIMIT` ห้ามพิมพ์เลขลงไปตรง ๆ
   // (ของเดิมพิมพ์ 3 ไว้ พอเจ้าของเปลี่ยนเพดานเป็น 1 ด่านนี้ตกทั้งที่ระบบถูกต้อง)
   for (let i = 1; i <= DAILY_LIMIT; i++) {
-    check(`หักโควตารายวันครั้งที่ ${i}/${DAILY_LIMIT}`, (await consumeReading(member, `r_${uid}_${i}`)) === true);
+    check(`หักโควตารายวันครั้งที่ ${i}/${DAILY_LIMIT}`, (await consumeReading(member, `r_${uid}_${i}`)).status === "inserted");
   }
   const firstBonusId = `r_${uid}_b1`;
-  check("หักครั้งถัดจากโควตารายวัน (ควรกินโบนัส)", (await consumeReading(member, firstBonusId)) === true);
+  const firstBonusOutcome = await consumeReading(member, firstBonusId);
+  check("หักครั้งถัดจากโควตารายวัน (ควรกินโบนัส)", firstBonusOutcome.status === "inserted");
 
   const db = await getAppDB();
   const dk = todayDateKey();
@@ -133,11 +134,43 @@ async function main() {
   check("มี reading_usage แถวเดียวสำหรับ r_1", Number((await db.prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE reading_id = ?`).bind(`r_${uid}_1`).first<{ n: number }>())?.n) === 1);
 
   // ── 6. refundReading คืนสิทธิ์ ──
-  await refundReading(firstBonusId); // คืน bonus
+  const firstBonusUsageId = firstBonusOutcome.status === "inserted" ? firstBonusOutcome.usageId : "";
+  await refundReading(firstBonusId, firstBonusUsageId); // คืน bonus
   const em3 = await getEntitlement(member);
   check(`refund: bonusRemaining กลับเป็น ${TOPUP_ROUNDS}`, em3.bonusRemaining === TOPUP_ROUNDS);
-  await refundReading("r_nonexistent"); // no-op ปลอดภัย
+  await refundReading("r_nonexistent", "ru_nonexistent"); // no-op ปลอดภัย
   check("refund readingId ที่ไม่มี → ไม่ throw", true);
+
+  // ── 6b. 🔴 T-02: ยิง /read ซ้ำแล้วตัดสาย ต้อง **ไม่** ได้สิทธิ์คืน ────────────
+  // ของเดิม `consumeReading` คืน `true` ทั้งกรณี "หักเอง" และ "หักไปแล้ว" ผู้เรียกจึง
+  // ตั้ง consumed = true แล้ว `finally` ลบแถวค่าใช้จ่ายของครั้งแรกทิ้ง = เปิดไพ่ฟรีไม่จำกัด
+  const replayUid = `test_replay_${Date.now()}`;
+  await upsertUserOnLogin({ id: replayUid, provider: "google", email: `${replayUid}@example.com`, name: "ทดสอบยิงซ้ำ" });
+  const replayMember: Viewer = { kind: "member", userId: replayUid };
+  const replayReadingId = `r_${replayUid}_replay`;
+
+  const firstCall = await consumeReading(replayMember, replayReadingId);
+  check("ยิงครั้งแรก: status = inserted พร้อม usageId", firstCall.status === "inserted" && Boolean((firstCall as { usageId?: string }).usageId));
+
+  const secondCall = await consumeReading(replayMember, replayReadingId);
+  check("ยิงซ้ำ reading id เดิม: status = already (ไม่ใช่ inserted)", secondCall.status === "already");
+  check("ยิงซ้ำ: ไม่มี usageId ให้คืนสิทธิ์เลย", !("usageId" in secondCall));
+
+  // จำลองคำขอที่สองตัดการเชื่อมต่อ — เส้นทางจริงจะเรียก refund เฉพาะเมื่อมี usageId
+  // ซึ่ง "already" ไม่มี จึงไม่มีอะไรให้ลบ · ต่อให้เผลอเรียกด้วย id มั่ว ก็ต้องลบไม่ได้
+  await refundReading(replayReadingId, "ru_ของคำขออื่น");
+  const rowsAfterReplay = (
+    await db.prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE reading_id = ?`).bind(replayReadingId).first<{ n: number }>()
+  )?.n;
+  check("ยิงซ้ำ + ตัดสาย → แถว reading_usage ของครั้งแรกยังอยู่", Number(rowsAfterReplay) === 1);
+
+  // แต่ "ล้มจริง" ต้องยังคืนสิทธิ์ได้เหมือนเดิม — อย่าแก้จนพังอีกทาง
+  await refundReading(replayReadingId, (firstCall as { usageId: string }).usageId);
+  const rowsAfterRealRefund = (
+    await db.prepare(`SELECT COUNT(*) AS n FROM reading_usage WHERE reading_id = ?`).bind(replayReadingId).first<{ n: number }>()
+  )?.n;
+  check("AI ล้มจริง (ใช้ usageId ของตัวเอง) → คืนสิทธิ์ได้ตามเดิม", Number(rowsAfterRealRefund) === 0);
+  await softDeleteUser(replayUid);
 
   // ── 7. สิทธิ์หมด → consumeReading = false ──
   // โควตารายวันหมดไปแล้วจากข้อ 4 — ไล่กินโบนัสที่เหลือให้ครบ
@@ -149,7 +182,7 @@ async function main() {
     `ใช้ครบ ${DAILY_LIMIT + TOPUP_ROUNDS}: canStartReading = false`,
     !em4.canStartReading && (em4.reason === "daily_exhausted" || em4.reason === "weekly_exhausted"),
   );
-  check("consumeReading เมื่อสิทธิ์หมด = false", (await consumeReading(member, `r_${uid}_8`)) === false);
+  check("consumeReading เมื่อสิทธิ์หมด = denied", (await consumeReading(member, `r_${uid}_8`)).status === "denied");
 
   // ── 7b. ป้องกัน Double-Spend เมื่อยิงคำขอเปิดไพ่ขนาน (ISSUE-017) ──
   const concUid = `test_conc_${Date.now()}`;
@@ -171,8 +204,8 @@ async function main() {
     consumeReading(concMember, `r_parallel_d4`),
     consumeReading(concMember, `r_parallel_d5`),
   ]);
-  const dailySuccesses = concDailyResults.filter((r) => r === true).length;
-  const dailyFailures = concDailyResults.filter((r) => r === false).length;
+  const dailySuccesses = concDailyResults.filter((r) => r.status === "inserted").length;
+  const dailyFailures = concDailyResults.filter((r) => r.status === "denied").length;
   check("Double-Spend Daily: ยิงขนาน 5 ครั้งเมื่อเหลือ 1 สิทธิ์ → สำเร็จเพียง 1 ครั้งเท่านั้น", dailySuccesses === 1);
   check("Double-Spend Daily: อีก 4 ครั้งล้มเหลวถูกต้อง", dailyFailures === 4);
 
@@ -188,8 +221,8 @@ async function main() {
     consumeReading(concMember, `r_parallel_b4`),
     consumeReading(concMember, `r_parallel_b5`),
   ]);
-  const bonusSuccesses = concBonusResults.filter((r) => r === true).length;
-  const bonusFailures = concBonusResults.filter((r) => r === false).length;
+  const bonusSuccesses = concBonusResults.filter((r) => r.status === "inserted").length;
+  const bonusFailures = concBonusResults.filter((r) => r.status === "denied").length;
   check("Double-Spend Bonus: ยิงขนาน 5 ครั้งเมื่อเหลือ 1 สิทธิ์โบนัส → สำเร็จเพียง 1 ครั้งเท่านั้น", bonusSuccesses === 1);
   check("Double-Spend Bonus: อีก 4 ครั้งล้มเหลวถูกต้อง", bonusFailures === 4);
 
@@ -293,7 +326,7 @@ async function main() {
 
   const dEnt1 = await getEntitlement(dailyViewer);
   check(`สมาชิกก่อนเปิด: dailyRemaining = ${DAILY_LIMIT}`, dEnt1.dailyRemaining === DAILY_LIMIT);
-  check("เปิดไพ่ครั้งที่ 1 (ผัง daily) → consumeReading คืน true", (await consumeReading(dailyViewer, `r_daily_1`, "daily")) === true);
+  check("เปิดไพ่ครั้งที่ 1 (ผัง daily) → consumeReading คืน inserted", (await consumeReading(dailyViewer, `r_daily_1`, "daily")).status === "inserted");
   
   const dEnt2 = await getEntitlement(dailyViewer);
   check(

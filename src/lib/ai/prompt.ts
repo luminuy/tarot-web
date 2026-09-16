@@ -222,6 +222,11 @@ export interface ReadingContext {
   nickname?: string;
   pastReading?: PastReadingSnapshot;
   lang?: "th" | "en";
+  /**
+   * สัญญาณยกเลิกของคำขอจริง (`request.signal`) — ผู้ใช้ปิดแท็บเมื่อไหร่ต้องหยุดยิงโมเดลทันที
+   * ไม่ส่งมาก็ทำงานได้ แต่จะจ่ายค่าโทเคนให้คำอ่านที่ไม่มีใครได้เห็น (T-06)
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**

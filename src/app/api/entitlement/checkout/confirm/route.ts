@@ -10,6 +10,7 @@ import { resolveAppOrigin } from "@/lib/security/app-origin";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { LOCALE_COOKIE_KEY } from "@/lib/i18n/types";
+import { recordEvent } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
 
@@ -20,14 +21,19 @@ export const runtime = "nodejs";
  * ก่อนแจกต้องผ่านครบ 4 ด่าน:
  *   1. ต้องเป็นเจ้าของบัญชีนั้นจริง (session ตรงกับ `userId` ที่ส่งมา)
  *   2. ต้องมีแถว `payments` ของ `orderId` นั้นอยู่จริง (สร้างตอน /checkout ซึ่งล็อกอินแล้ว)
- *   3. ยอดเงินในแถวต้องตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์ (กันแก้ราคาฝั่งไคลเอนต์)
- *   4. สถานะต้องเป็น `paid` ซึ่งมีแค่ webhook ที่ผ่านการตรวจลายเซ็นเท่านั้นที่ตั้งได้
+ *   3. **แถวนั้นต้องเป็นของผู้ใช้คนนี้** (`payments.user_id` ตรงกับเซสชัน)
+ *   4. ยอดเงินในแถวต้องตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์ (กันแก้ราคาฝั่งไคลเอนต์)
+ *   5. สถานะต้องเป็น `paid` ซึ่งมีแค่ webhook ที่ผ่านการตรวจลายเซ็นเท่านั้นที่ตั้งได้
  * ตัวจำลอง (`provider = 'simulator'`) ผ่านได้เฉพาะนอก production เท่านั้น
+ *
+ * 🔴 ด่านที่ 3 คือของใหม่ (T-07) — ก่อนหน้านี้ไม่มีอะไรพิสูจน์ว่า "เซสชันที่ล็อกอินอยู่"
+ * กับ "ออร์เดอร์ที่จ่ายแล้ว" คือคนเดียวกัน และ `orderId` เดินทางใน query string
+ * ไปโผล่ได้ทั้งใน log ของเกตเวย์ · `Referer` · ประวัติเบราว์เซอร์
  */
 
 type GrantOutcome =
   | { ok: true; credits: number }
-  | { ok: false; status: 400 | 401 | 402 | 404; message: string };
+  | { ok: false; status: 400 | 401 | 402 | 404 | 500; message: string };
 
 async function processPaymentGrant(
   request: Request,
@@ -51,12 +57,13 @@ async function processPaymentGrant(
 
   // ด่าน 2 — ต้องมีคำสั่งซื้อจริงที่สร้างจาก /api/entitlement/checkout
   const db = await getAppDB();
+  // แถวยุคก่อน migrations/0015 เก็บเลขออร์เดอร์ไว้ที่ `booking_id` จึงต้องมองทั้งสองคอลัมน์
   const payRow = await db
     .prepare(
-      `SELECT id, amount_satang, currency, status, provider, ticket_id
-         FROM payments WHERE booking_id = ? LIMIT 1`
+      `SELECT id, amount_satang, currency, status, provider, ticket_id, user_id
+         FROM payments WHERE order_id = ? OR booking_id = ? LIMIT 1`
     )
-    .bind(orderId)
+    .bind(orderId, orderId)
     .first<{
       id: string;
       amount_satang: number;
@@ -64,13 +71,23 @@ async function processPaymentGrant(
       status: string;
       provider: string;
       ticket_id: string | null;
+      user_id: string | null;
     }>();
 
   if (!payRow) {
     return { ok: false, status: 404, message: "ไม่พบรายการสั่งซื้อนี้ในระบบ" };
   }
 
-  // ด่าน 3 — ยอดเงินและสกุลเงินต้องตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์
+  // ด่าน 3 — แถวต้องเป็นของผู้ใช้คนนี้ (T-07)
+  // แถวเก่าที่สร้างก่อน migrations/0015 มี `user_id` เป็น NULL — ปล่อยผ่านได้เฉพาะแถวเหล่านั้น
+  // เพราะข้อมูลความเป็นเจ้าของไม่เคยถูกเก็บไว้เลย · แถวใหม่ทุกแถวมีค่าเสมอ
+  if (payRow.user_id && payRow.user_id !== userId) {
+    recordEvent("purchase_owner_mismatch");
+    console.warn("[Credit Confirmation] ออร์เดอร์นี้ไม่ใช่ของบัญชีที่ล็อกอินอยู่", { orderId });
+    return { ok: false, status: 401, message: "รายการสั่งซื้อนี้ไม่ได้เป็นของบัญชีที่เข้าสู่ระบบอยู่" };
+  }
+
+  // ด่าน 4 — ยอดเงินและสกุลเงินต้องตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์
   // (`ticket_id` ต้องว่าง เพราะรายการที่ผูก ticket คือค่าปรึกษาแม่หมอ ไม่ใช่การเติมโควตา)
   if (
     payRow.ticket_id ||
@@ -80,7 +97,7 @@ async function processPaymentGrant(
     return { ok: false, status: 400, message: "ยอดชำระไม่ตรงกับแพ็กเกจที่สั่งซื้อ" };
   }
 
-  // ด่าน 4 — สถานะต้อง `paid` (ตั้งได้จาก webhook ที่ตรวจลายเซ็นแล้วเท่านั้น)
+  // ด่าน 5 — สถานะต้อง `paid` (ตั้งได้จาก webhook ที่ตรวจลายเซ็นแล้วเท่านั้น)
   const isSimulator = payRow.provider === "simulator" && process.env.NODE_ENV !== "production";
   if (payRow.status !== "paid" && !isSimulator) {
     if (payRow.status === "failed") {
@@ -94,7 +111,19 @@ async function processPaymentGrant(
   }
 
   // ผ่านครบทุกด่าน → แจกโควตา (idempotent ด้วย UNIQUE(user_id, reason))
-  await grantBonus(userId, pkg.credits, `purchase_${orderId}`);
+  // 🔴 T-04: ห้ามตอบสำเร็จโดยไม่ตรวจว่าเครดิตลงจริง — เงินเข้าแล้วแต่ของไม่ถึงมือ
+  // คือความเสียหายที่ผู้ใช้เจอหนักที่สุดและเป็นเคสที่เราต้องรู้ทันทีที่เกิด
+  const granted = await grantBonus(userId, pkg.credits, `purchase_${orderId}`);
+  if (!granted) {
+    recordEvent("purchase_grant_failed");
+    console.error("[Credit Confirmation] จ่ายเงินสำเร็จแต่เขียนเครดิตไม่ลง", { userId, orderId, packageId });
+    return {
+      ok: false,
+      status: 500,
+      message:
+        "ระบบรับชำระเงินเรียบร้อยแล้ว แต่บันทึกโควตาไม่สำเร็จ ทีมงานได้รับแจ้งแล้ว กรุณาติดต่อ support@seertarot.net พร้อมเลขคำสั่งซื้อนี้",
+    };
+  }
 
   if (payRow.status !== "paid") {
     try {

@@ -122,7 +122,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   // ── หักสิทธิ์การเปิดไพ่ (ENTITLEMENT_PLAN ข้อ 6.1) — วางหลังบล็อกอ่านซ้ำ ก่อนเช็คเพดาน AI ──
-  let consumed = false;
+  // 🔴 T-02: เก็บ **id ของแถวที่คำขอนี้สร้างเอง** ไม่ใช่ธง boolean ลอย ๆ
+  // ธง boolean ทำให้คำขอที่ยิงซ้ำ (ซึ่ง `consumeReading` คืน "หักไปแล้ว") เข้าใจว่าตัวเอง
+  // เป็นคนหัก แล้วไปลบแถวค่าใช้จ่ายของคำขอแรกทิ้งตอนสตรีมถูกตัด = เปิดไพ่ฟรีไม่จำกัด
+  let consumedUsageId: string | null = null;
   let capTier: "guest" | "member" = "member"; // ธงปิด → เพดานเต็ม (พฤติกรรมเดิม)
   let guestNeedsConsume = false; // ผู้เยี่ยมชมผ่าน gate → ต้องออก ticket หลังอ่านสำเร็จจริง
   let guestGid: string | null = null; // gid ของผู้เยี่ยมชม — ใช้ mark ฝั่ง server ตอนอ่านจบ
@@ -146,8 +149,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       if (viewer.kind === "member") {
         memberUserId = viewer.userId;
       }
-      consumed = await consumeReading(viewer, id, record.spreadId);
-      if (!consumed) {
+      const outcome = await consumeReading(viewer, id, record.spreadId);
+      if (outcome.status === "inserted") consumedUsageId = outcome.usageId;
+      if (outcome.status === "denied") {
         limit.releaseConcurrency();
         recordEvent("entitlement_blocked_read");
         return Response.json(
@@ -168,8 +172,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       if (viewer.kind === "guest") {
         guestNeedsConsume = true;
         guestGid = viewer.gid !== "anon" ? viewer.gid : null;
-        // guest ไม่มีแถว DB ให้ refund — กันไม่ให้ finally เรียก refundReading เปล่า ๆ
-        consumed = false;
+        // guest ไม่มีแถว DB ให้ refund — `consumeReading` คืน "guest-allowed" จึงไม่มี usageId อยู่แล้ว
 
         // เพดานเฉพาะผู้เยี่ยมชมต่อ IP/ซับเน็ต — เช็คหลัก ๆ ที่ start (UX) · ที่นี่เป็นตาข่ายกันเรียก read ตรง
         const { isGuestReadQuotaReached } = await import("@/lib/security/ai-budget");
@@ -188,14 +191,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   }
 
+  /**
+   * คืนสิทธิ์เฉพาะแถวที่ **คำขอนี้** สร้างเอง
+   * 🔴 T-05: catch เดิมเป็น catch เปล่า ไม่มี event ไม่มี log ทั้งที่เส้นทางล้มอื่นทุกเส้น
+   * มี `recordEvent` — ผู้ใช้เสียสิทธิ์เพราะระบบเราพังโดยไม่มีใครรู้เลยสักครั้ง
+   */
   const refundIfConsumed = async () => {
-    if (!consumed) return;
-    consumed = false;
+    const usageId = consumedUsageId;
+    if (!usageId) return;
+    consumedUsageId = null;
     try {
       const { refundReading } = await import("@/lib/entitlement/entitlement");
-      await refundReading(id);
-    } catch {
-      /* best-effort */
+      await refundReading(id, usageId);
+    } catch (e) {
+      recordEvent("entitlement_refund_failed");
+      console.error("[read/route] คืนสิทธิ์ไม่สำเร็จ", { readingId: id, usageId }, e);
     }
   };
 
@@ -226,6 +236,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const startedAt = Date.now();
   let completedOk = false;
+  /**
+   * สัญญาณ "ลูกค้าไปแล้ว" — ส่งต่อให้ Groq/Gemini เพื่อยกเลิกที่ต้นทาง (T-06)
+   * ใช้ controller ของเราเองแทน `request.signal` ตรง ๆ เพราะต้องยกเลิกได้จาก `cancel()`
+   * ของ ReadableStream ด้วย (บางแพลตฟอร์มไม่ abort `request.signal` ให้เมื่อผู้ใช้ปิดแท็บ)
+   */
+  const clientAbort = new AbortController();
+  const unlinkRequestAbort = (() => {
+    const sig = (request as Request & { signal?: AbortSignal }).signal;
+    if (!sig) return () => {};
+    if (sig.aborted) {
+      clientAbort.abort();
+      return () => {};
+    }
+    const onAbort = () => clientAbort.abort();
+    sig.addEventListener("abort", onAbort, { once: true });
+    return () => sig.removeEventListener("abort", onAbort);
+  })();
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -268,6 +295,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           safety: { flag: record.safetyFlag, block: false, promptGuard: record.safetyGuard },
           pastReading,
           lang: record.lang || "th",
+          // ผู้ใช้ปิดแท็บ → ยกเลิกคำขอไปยังผู้ให้บริการทันที ไม่จ่ายค่าโทเคนให้คำอ่านที่ไม่มีใครเห็น (T-06)
+          abortSignal: clientAbort.signal,
         };
 
         let activeProvider = "gemini";
@@ -339,14 +368,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               await refundIfConsumed();
             }
 
-            // อัปเดตสถานะใน memory พอ — ตั้งใจ "ไม่" เขียน KV ตรงนี้
+            // เก็บผลคำทำนายให้ isolate อื่นอ่านซ้ำได้จริง
             // ---------------------------------------------------------------
-            // ของเดิมเรียก `persistReading(updated)` ที่จุดนี้ = เขียน KV อีก 1 ครั้ง
-            // ต่อการเปิดไพ่ทุกครั้ง ทั้งที่ **ไม่มีโค้ดไหนอ่านเรกคอร์ดหลังอ่านจบเลย**
-            // (`loadReadingFromKV` ถูกเรียกแค่ใน shuffle กับ read ซึ่งเกิดก่อนหน้านี้ไปแล้ว
-            //  ส่วนผลคำทำนายถูกสตรีมให้ client ตรง ๆ และ client บันทึกลงสมุดบันทึกเอง)
-            // เพดาน KV ฟรีคือ 1,000 เขียน/วัน จึงต้องไม่จ่ายค่าเขียนให้ข้อมูลที่ไม่มีใครอ่าน
-            updateReading(id, { status: "COMPLETED", result: event.reading });
+            // 🔴 บทเรียน T-02 — คอมเมนต์เดิมตรงนี้เขียนว่า "ไม่มีโค้ดไหนอ่านเรกคอร์ด
+            // หลังอ่านจบเลย" จึงตั้งใจไม่เขียนลงที่เก็บถาวรเพื่อประหยัดโควตา KV
+            // **แต่มี** — ด่านกันอ่านซ้ำที่ต้นไฟล์ (`if (record.result) return streamCached(...)`)
+            // อ่านฟิลด์นี้ตรง ๆ คำขอที่ไปตกคนละ isolate จึงเห็น `result` ว่าง
+            // แล้วไหลเข้าเส้นหักสิทธิ์ + เรียกโมเดลใหม่ = เว็บจ่ายค่า AI สองรอบ
+            // `persistReading()` เลือก Redis ก่อนเสมอเมื่อตั้ง Upstash ไว้ (ดู server/store.ts)
+            // จึงไม่กินโควตาเขียน KV ฟรีในสภาพแวดล้อมจริง
+            const completed = updateReading(id, { status: "COMPLETED", result: event.reading });
+            if (completed) {
+              const { persistReading } = await import("@/server/store");
+              await persistReading(completed).catch(() => {
+                // เขียนไม่สำเร็จ = ยิงซ้ำจะสร้างคำอ่านใหม่ ต้องเห็นได้บน /admin ไม่ใช่เงียบ
+                recordEvent("reading_persist_failed");
+              });
+            }
             recordEvents([
               "reading_completed",
               `ai_call:${providerUsed}`,
@@ -410,6 +448,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       } finally {
         // สตรีมถูกตัดกลางคัน / ไม่มี done ที่สำเร็จ → คืนสิทธิ์
         if (!completedOk) await refundIfConsumed();
+        unlinkRequestAbort();
         limit.releaseConcurrency();
         if (!isClosed) {
           try {
@@ -427,6 +466,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
      */
     cancel() {
       isClosed = true;
+      // ยกเลิกคำขอที่ต้นทางด้วย ไม่ใช่แค่หยุดเขียนออก — ไม่งั้นโมเดลยังผลิตต่อจนจบ
+      // และเราจ่ายค่าโทเคนเต็มให้คำอ่านที่ไม่มีใครได้เห็น (T-06)
+      clientAbort.abort();
+      recordEvent("reading_client_cancelled");
     },
   });
 

@@ -27,6 +27,7 @@ import {
 import { aiGatewayHeaders, groqChatCompletionsEndpoint } from "@/lib/ai/gateway";
 import { recordEvent } from "@/lib/stats/record";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
+import { linkAbortSignal } from "@/lib/ai/abort";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import type { ReadingEvent } from "@/lib/ai/types";
 
@@ -384,6 +385,7 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
   for (const model of readingModels) {
     const state = createReadingStreamState();
     const usage = createEmptyUsage();
+    let unlinkAbort: (() => void) | undefined;
 
     try {
       const controller = new AbortController();
@@ -395,6 +397,8 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
        */
       const timeoutMs = Math.min(55000, 6000 + Math.ceil((maxReadingTokens / 300) * 1000));
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      // ผู้ใช้ปิดแท็บ → ยกเลิกคำขอที่ต้นทางทันที ไม่ใช่ปล่อยให้โมเดลผลิตจนจบแล้วทิ้ง (T-06)
+      unlinkAbort = linkAbortSignal(controller, ctx.abortSignal);
 
       const res = await fetch(groqChatCompletionsEndpoint(), {
         method: "POST",
@@ -493,7 +497,14 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
         return; // ทำงานสำเร็จสมบูรณ์!
       }
     } catch (err) {
+      // ลูกค้าตัดการเชื่อมต่อ = ไม่ใช่ความล้มเหลวของโมเดล ห้ามไล่ลองโมเดลถัดไปให้เปลืองเงิน
+      if (ctx.abortSignal?.aborted) {
+        recordEvent("ai_client_aborted:groq");
+        return;
+      }
       console.warn(`[Groq Reading ${model}] stream error:`, err);
+    } finally {
+      unlinkAbort?.();
     }
   }
 

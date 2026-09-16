@@ -153,7 +153,7 @@ export async function runRedeemTests(): Promise<{ passed: number; total: number 
   // ── 4. ลำดับการตัดสิทธิ์: โควตารายวันก่อน แล้วค่อยกินโบนัสที่แลกมา ──
   for (let i = 1; i <= DAILY_LIMIT; i++) {
     const r = await consumeReading({ kind: "member", userId: premiumUser }, `read_daily_${i}_${stamp}`, "celtic-cross");
-    assert(r === true, `ใช้สิทธิ์โควตารายวันครั้งที่ ${i}/${DAILY_LIMIT} สำเร็จ`);
+    assert(r.status === "inserted", `ใช้สิทธิ์โควตารายวันครั้งที่ ${i}/${DAILY_LIMIT} สำเร็จ`);
   }
   const entAfterDaily = await getEntitlement({ kind: "member", userId: premiumUser });
   assert(entAfterDaily.dailyRemaining === 0, `โควตารายวัน ${DAILY_LIMIT} ครั้งหมดแล้ว`);
@@ -162,7 +162,7 @@ export async function runRedeemTests(): Promise<{ passed: number; total: number 
 
   for (let i = 1; i <= 3; i++) {
     const ok = await consumeReading({ kind: "member", userId: premiumUser }, `read_bonus_${i}_${stamp}`, "celtic-cross");
-    assert(ok === true, `ใช้สิทธิ์พรีเมียมครั้งที่ ${i} สำเร็จ`);
+    assert(ok.status === "inserted", `ใช้สิทธิ์พรีเมียมครั้งที่ ${i} สำเร็จ`);
     const ent = await getEntitlement({ kind: "member", userId: premiumUser });
     assert(ent.bonusRemaining === 3 - i, `เหลือโบนัส ${3 - i} ครั้ง`);
     assert(
