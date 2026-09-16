@@ -6,6 +6,7 @@ import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { DECK } from "@/data/cards";
 import type { BirthCardItem } from "@/lib/tarot/birth-card";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 /**
  * ⚠️ ส่งเฉพาะฟิลด์ที่ `BirthCardCalculator` ใช้จริงเท่านั้น
@@ -153,15 +154,15 @@ export function BirthCardBodyTh({ calculator }: { calculator: ReactNode }) {
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(webAppJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
 
       <div className="max-w-4xl mx-auto space-y-10">

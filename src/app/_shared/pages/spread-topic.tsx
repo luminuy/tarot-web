@@ -15,6 +15,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 export interface SpreadTopicPageProps {
   params: Promise<{ category: string }>;
@@ -143,15 +144,15 @@ export function SpreadTopicContent({
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans relative overflow-x-clip">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
 
       <div className="max-w-6xl mx-auto space-y-10 py-6">

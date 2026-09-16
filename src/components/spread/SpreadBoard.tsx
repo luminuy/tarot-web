@@ -60,6 +60,13 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 
   const useRail = spread.positions.length >= RAIL_THRESHOLD;
 
+  /**
+   * ♿ T-33: ประกาศผลการพลิกไพ่ผ่านโหนด live region ที่ซ่อนไว้
+   * ของเดิมอาศัยการ "สลับข้อความใน `aria-label` ของอิลิเมนต์ที่โฟกัสอยู่" ซึ่งไม่รับประกัน
+   * ว่าจะถูกประกาศซ้ำในทุกคู่เบราว์เซอร์/โปรแกรมอ่านหน้าจอ — บางคู่อ่าน label แค่ตอนโฟกัสครั้งแรก
+   */
+  const [flipAnnouncement, setFlipAnnouncement] = React.useState("");
+
   const handleCardClick = (order: number) => {
     soundManager.playCardFlipSound();
     if (typeof navigator !== "undefined" && navigator.vibrate) {
@@ -67,6 +74,27 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
     }
     if (onFlipCard) onFlipCard(order);
   };
+
+  // ประกาศเมื่อ "จำนวนไพ่ที่เปิดแล้ว" เปลี่ยนจริง — ไม่ใช่ทุกครั้งที่กด (กดซ้ำใบเดิมไม่ต้องพูด)
+  const lastAnnouncedRef = React.useRef<string>("");
+  React.useEffect(() => {
+    const newest = revealedOrders[revealedOrders.length - 1];
+    if (newest === undefined) {
+      lastAnnouncedRef.current = "";
+      setFlipAnnouncement("");
+      return;
+    }
+    const drawn = drawnCards.find((d) => d.order === newest);
+    const name = isEnglish
+      ? drawn?.card?.nameEn || drawn?.card?.nameTh || "Card"
+      : drawn?.card?.nameTh || "ไพ่";
+    const text = isEnglish ? `Revealed: ${name}` : `เปิดแล้ว: ${name}`;
+    if (text === lastAnnouncedRef.current) return;
+    lastAnnouncedRef.current = text;
+    setFlipAnnouncement("");
+    const timer = setTimeout(() => setFlipAnnouncement(text), 120);
+    return () => clearTimeout(timer);
+  }, [revealedOrders, drawnCards, isEnglish]);
 
   const syncRailEdges = React.useCallback(() => {
     const rail = railRef.current;
@@ -210,6 +238,11 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 
   return (
     <div className="w-full rounded-lg border border-line-warm bg-surface p-4 sm:p-6 flex flex-col justify-between space-y-4 select-none relative overflow-hidden">
+      {/* ♿ ประกาศชื่อไพ่ที่เพิ่งเปิด (T-33) — ซ่อนจากสายตา แต่โปรแกรมอ่านหน้าจอเห็น */}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {flipAnnouncement}
+      </p>
+
       {/* Header Bar: Spread Name & Quick Flip Button */}
       <div className="flex items-center justify-between pb-3 border-b border-line-warm/30 relative z-10">
         <div>

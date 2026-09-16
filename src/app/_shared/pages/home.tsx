@@ -6,6 +6,7 @@ import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { generateFaqJsonLd, generateHowToJsonLd } from "@/data/home-seo";
 import type { Locale } from "@/lib/i18n/types";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 /**
  * 🏠 เนื้อหน้าแรก — ใช้ร่วมกันทั้งสองภาษา (`/` และ `/en`)
@@ -89,15 +90,15 @@ export function HomePageBody({ locale }: { locale: Locale }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebAppJsonLd(locale)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(buildWebAppJsonLd(locale)) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateFaqJsonLd(isEnglish)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(generateFaqJsonLd(isEnglish)) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateHowToJsonLd(isEnglish)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(generateHowToJsonLd(isEnglish)) }}
       />
       <TarotFlow seoContent={<HomeSeoContent isEnglish={isEnglish} />} />
     </>

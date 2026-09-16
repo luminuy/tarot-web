@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 const loveOgImages = buildPageOgImage({
   title: "ดูดวงความรัก 1 ใบ",
@@ -136,15 +137,15 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">

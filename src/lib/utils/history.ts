@@ -32,9 +32,52 @@ export interface SavedReadingItem {
   userNote?: string;
   /** วันที่อัปเดตสถานะผลลัพธ์ล่าสุด */
   outcomeUpdatedAt?: string;
+  /**
+   * แถวนี้อ่านข้อมูลไพ่ไม่ออก (JSON เสียหาย) — UI ต้องบอกผู้ใช้ว่า "ข้อมูลเสียหาย
+   * กรุณาโหลดใหม่" ห้ามแสดงเป็นการอ่านที่ดูเหมือนไม่มีไพ่เลย (กฎเหล็กข้อ 14 · T-47)
+   */
+  corrupted?: boolean;
 }
 
 const STORAGE_KEY = "tarot_reading_journal_v1";
+
+/**
+ * เพดานจำนวนรายการที่เก็บบนเครื่องของผู้ใช้ที่ไม่ได้ล็อกอิน
+ * เกินแล้วตัวเก่าสุดถูกตัดทิ้ง — **ต้องบอกผู้ใช้** เพราะสำหรับคนที่ไม่ได้ซิงก์
+ * นี่คือการสูญหายจริงของสิ่งที่เขาเคยเห็นว่า "บันทึกไว้แล้ว" (T-46)
+ */
+export const LOCAL_HISTORY_LIMIT = 50;
+
+/** true = การบันทึกครั้งล่าสุดทำให้รายการเก่าสุดถูกตัดทิ้งจริง */
+const TRIM_NOTICE_KEY = "tarot_reading_journal_trimmed_v1";
+
+export function wasHistoryTrimmed(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(TRIM_NOTICE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** ผู้ใช้รับทราบการแจ้งเตือนแล้ว — ไม่ต้องบอกซ้ำจนกว่าจะเกิดการตัดรอบใหม่ */
+export function acknowledgeHistoryTrimmed(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(TRIM_NOTICE_KEY);
+  } catch {
+    /* โหมดส่วนตัว — ปล่อยผ่าน */
+  }
+}
+
+function markHistoryTrimmed(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(TRIM_NOTICE_KEY, "1");
+  } catch {
+    /* โหมดส่วนตัว — ปล่อยผ่าน */
+  }
+}
 
 /**
  * ดึงรายการประวัติจาก LocalStorage (Synchronous & Offline-First)
@@ -100,7 +143,7 @@ export async function fetchServerReadings(): Promise<SavedReadingItem[]> {
     }
     const data = (await res.json()) as { readings?: SavedReadingItem[] };
     if (data.readings && Array.isArray(data.readings)) {
-      writeStorage(JSON.stringify(data.readings.slice(0, 50)));
+      writeStorage(JSON.stringify(data.readings.slice(0, LOCAL_HISTORY_LIMIT)));
       return data.readings;
     }
   } catch (err) {
@@ -133,7 +176,10 @@ export function saveReading(item: Omit<SavedReadingItem, "id" | "date">): SavedR
   });
 
   if (!isDuplicate) {
-    const updated = [newItem, ...current].slice(0, 50);
+    const merged = [newItem, ...current];
+    const updated = merged.slice(0, LOCAL_HISTORY_LIMIT);
+    // T-46: ของเดิม `.slice(0, 50)` ตัดตัวเก่าสุดทิ้งเงียบ ๆ โดยไม่มีการแจ้งเลยสักครั้ง
+    if (merged.length > updated.length) markHistoryTrimmed();
     if (typeof window !== "undefined") {
       writeStorage(JSON.stringify(updated));
     }

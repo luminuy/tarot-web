@@ -7,6 +7,7 @@ import { buildPageOgImage } from "@/lib/media/og-image";
 import { DECK } from "@/data/cards";
 import type { BirthCardItem } from "@/lib/tarot/birth-card";
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 /**
  * 🎂 Tarot Birth Card Calculator — English Edition (`/en/cards/birth-card`)
@@ -148,15 +149,15 @@ export function BirthCardBodyEn({ calculator }: { calculator: ReactNode }) {
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(webAppJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
 
       <div className="max-w-4xl mx-auto space-y-10">

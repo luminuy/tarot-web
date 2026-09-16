@@ -8,6 +8,7 @@ import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { DAILY_LIMIT, GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
@@ -51,6 +52,17 @@ export async function POST(request: Request) {
 
   if (!privileged) {
     const clientIp = getClientIdentifier(request);
+    // 🚦 T-11: เพดานจริงอยู่บน KV/Redis — `Map` ต่อ isolate กันอะไรไม่ได้บน Workers
+    const edge = await consumeEdgeRateLimits([
+      { key: edgeRateLimitKey("start:ip", clientIp), config: { max: 20, windowSec: 3600 } },
+    ]);
+    if (!edge.allowed) {
+      return createRateLimitResponse(
+        edge.retryAfterSec,
+        "วันนี้เปิดไพ่ถี่ไปหน่อยแล้วนะ พักสักครู่แล้วค่อยกลับมา",
+      );
+    }
+
     const limit = checkRateLimit(`start:${clientIp}`, {
       maxRequests: 20,
       windowSeconds: 3600,

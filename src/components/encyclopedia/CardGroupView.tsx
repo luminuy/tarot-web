@@ -17,6 +17,7 @@ import {
   SparkleTabIcon,
   WaterElementIcon,
 } from "@/components/ui/TarotArtIcons";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 interface CardGroupViewProps {
   groupInfo: CardGroupInfo;
@@ -103,11 +104,11 @@ export const CardGroupView: React.FC<CardGroupViewProps> = ({ groupInfo, cards }
       {/* Schema.org Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }}
       />
 
       {/* Breadcrumb Bar */}

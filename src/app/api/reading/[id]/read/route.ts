@@ -5,6 +5,7 @@ import { AI_DISCLOSURE, AI_DISCLOSURE_EN } from "@/lib/safety/guardrails";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getReading, updateReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { recordEvents, recordEvent } from "@/lib/stats/record";
 import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
@@ -83,6 +84,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // World-Class Rate Limiter & Single-Flight Concurrency Protection per IP
   let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
   if (!privileged) {
+    // `checkRateLimit` เหลือหน้าที่เดียวคือกันการกดซ้ำซ้อนพร้อมกัน (maxConcurrent)
+    // ซึ่งอยู่ในหน่วยความจำได้ เพราะเป็นตัวกันผู้ใช้คนเดียวกดรัว ไม่ใช่ด่านค่าใช้จ่าย
     limit = checkRateLimit(`read:${clientIp}`, {
       maxRequests: 15,
       windowSeconds: 600,
@@ -95,6 +98,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         isEn
           ? "A reading is already in progress or requests are too frequent. Please wait a moment."
           : "คุณกำลังเปิดไพ่อยู่แล้ว หรือเปิดไพ่ถี่เกินไป กรุณารอสักครู่"
+      );
+    }
+
+    // 🚦 T-11: เพดานจริงที่บังคับได้ข้าม isolate — ของเดิมอยู่ใน `Map` ต่อ isolate
+    const edge = await consumeEdgeRateLimits([
+      { key: edgeRateLimitKey("read:ip", clientIp), config: { max: 15, windowSec: 600 } },
+    ]);
+    if (!edge.allowed) {
+      limit.releaseConcurrency();
+      return createRateLimitResponse(
+        edge.retryAfterSec,
+        isEn
+          ? "You are opening readings too frequently. Please wait a moment."
+          : "คุณเปิดไพ่ถี่เกินไป กรุณารอสักครู่",
       );
     }
 

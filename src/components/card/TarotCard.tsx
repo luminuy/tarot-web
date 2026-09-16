@@ -195,14 +195,34 @@ export const TarotCard: React.FC<TarotCardProps> = ({
 
   const imageSrc = getCardImageSrc(effectiveCard?.image, effectiveCard?.id);
 
+  /**
+   * ♿ T-29: `onClick` บน `<div>` เปล่าคือตัวควบคุมที่คีย์บอร์ดเข้าไม่ถึง
+   * วันนี้ทุกจุดเรียกห่อด้วย wrapper ที่เข้าถึงได้เองอยู่แล้ว **แต่ `onClick` เป็น public API
+   * ของคอมโพเนนต์** คนถัดไปที่ใช้ตามปกติจะปล่อยตัวควบคุมที่โฟกัสไม่ได้ออกไปเงียบ ๆ
+   * จึงติดคุณสมบัติของปุ่มมาให้เองเมื่อมีการส่ง `onClick` เข้ามา
+   */
+  const interactiveProps = onClick
+    ? {
+        role: "button" as const,
+        tabIndex: 0,
+        "aria-pressed": isRevealed,
+        onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+          if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+          e.preventDefault();
+          onClick();
+        },
+      }
+    : {};
+
   return (
     <div
       onClick={onClick}
+      {...interactiveProps}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={`card-scene select-none group relative ${SIZE_MAP[size]} ${className} ${
-        onClick ? "cursor-pointer" : ""
+        onClick ? "cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold rounded-lg" : ""
       }`}
       style={{ perspective: 1800 }}
     >

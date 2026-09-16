@@ -7,6 +7,7 @@ import { buildSystemPrompt } from "@/lib/ai/prompt";
 import { getContentOverrides, resolveCardByIndex, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
 import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
@@ -223,6 +224,38 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let limit = { allowed: true, releaseConcurrency: () => {} } as ReturnType<typeof checkRateLimit>;
   if (!privileged) {
     const clientIp = getClientIdentifier(request);
+
+    /*
+     * 🚦 T-11 + T-12: ปลายทางนี้เรียกโมเดลทุกครั้งแต่เดิมกันด้วย `Map` ต่อ isolate อย่างเดียว
+     * และ **ไม่มีโควตารายวันบน KV เลย** ต่างจาก `/read` ที่มี 40 ครั้ง/วันต่อ IP
+     * คนเดียวจึงถล่มงบ AI รวมของทั้งเว็บจนระบบดับทั้งวันได้ (isAiCapReached คืน true กับทุกคน)
+     * นับทั้งต่อ IP และต่อ userId — สมัครบัญชีฟรีเองได้ การกันแค่ IP จึงไม่พอ
+     */
+    const chatUserId = await (async () => {
+      try {
+        const { getSessionUser } = await import("@/lib/auth/session");
+        return (await getSessionUser())?.id ?? null;
+      } catch {
+        return null;
+      }
+    })();
+
+    const edge = await consumeEdgeRateLimits([
+      { key: edgeRateLimitKey("chat:ip", clientIp), config: { max: 30, windowSec: 60 } },
+      { key: edgeRateLimitKey("chat:ip:day", clientIp), config: { max: 200, windowSec: 86400 } },
+      ...(chatUserId
+        ? [{ key: edgeRateLimitKey("chat:user:day", chatUserId), config: { max: 150, windowSec: 86400 } }]
+        : []),
+    ]);
+    if (!edge.allowed) {
+      return createRateLimitResponse(
+        edge.retryAfterSec,
+        initialLang === "en"
+          ? "You have reached today's follow-up chat limit. Please come back tomorrow."
+          : "วันนี้คุณถามต่อครบโควตาแล้ว กลับมาใหม่พรุ่งนี้นะ",
+      );
+    }
+
     limit = checkRateLimit(`chat:${clientIp}`, {
       maxRequests: 30,
       windowSeconds: 60,

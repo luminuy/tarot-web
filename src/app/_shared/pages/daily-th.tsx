@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 const dailyOgImages = buildPageOgImage({
   title: "ดูดวงไพ่ยิปซีรายวัน",
@@ -137,15 +138,15 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">

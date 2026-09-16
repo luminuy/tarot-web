@@ -6,6 +6,7 @@ import { buildAlternates, localizedUrl } from "@/lib/config/site";
 
 import { buildBreadcrumbJsonLd, buildOpenGraph, homeCrumb } from "../seo";
 import { buildPageOgImage } from "@/lib/media/og-image";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 /**
  * 🌅 ไพ่ประจำวันฉบับภาษาอังกฤษ (`/en/daily`)
@@ -106,11 +107,11 @@ const breadcrumbJsonLd = buildBreadcrumbJsonLd("en", [
 export function DailyBodyEn({ ritual }: { ritual: ReactNode }) {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }} />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">

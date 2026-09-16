@@ -553,31 +553,43 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
   // เขียน flow state ลง sessionStorage ทุกครั้งที่มีการเปลี่ยนแปลง (หลัง resume จบแล้วเท่านั้น)
   // debounce 400ms กันเขียนถี่ ๆ ตอน readingResult อัปเดตรัว ๆ ระหว่าง stream คำทำนาย
+  //
+  // 🔴 T-45: การหน่วง 400 ms หมายความว่าถ้าผู้ใช้ออกจากหน้าภายในช่วงนั้น (กดลิงก์ทันทีที่
+  // พลิกไพ่ใบสุดท้าย หรือทันทีที่ event `done` มาถึง) การเขียนครั้งสุดท้ายหายไปทั้งก้อน
+  // พอกลับมาจะเห็นข้อความ "การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช" ทั้งที่อ่านจบไปแล้ว
+  // จึงเก็บค่าล่าสุดไว้ใน ref แล้ว flush แบบซิงโครนัสทั้งตอน unmount และตอน `pagehide`
+  const latestFlowRef = useRef<Parameters<typeof saveFlowState>[0] | null>(null);
+
   useEffect(() => {
     if (!resumeDoneRef.current) return;
-    const t = setTimeout(() => {
-      saveFlowState({
-        currentStep,
-        spreadId: selectedSpread.id,
-        personaId: selectedPersona.id,
-        category: selectedCategory,
-        question,
-        nickname,
-        situation,
-        readingId,
-        sessionToken,
-        commitment,
-        clientSeed,
-        pickedIndices,
-        drawnCards,
-        revealedOrders,
-        activeCardIndex,
-        readingResult,
-        proof,
-        lang: isEnglish ? "en" : "th",
-      });
-    }, 400);
-    return () => clearTimeout(t);
+    latestFlowRef.current = {
+      currentStep,
+      spreadId: selectedSpread.id,
+      personaId: selectedPersona.id,
+      category: selectedCategory,
+      question,
+      nickname,
+      situation,
+      readingId,
+      sessionToken,
+      commitment,
+      clientSeed,
+      pickedIndices,
+      drawnCards,
+      revealedOrders,
+      activeCardIndex,
+      readingResult,
+      proof,
+      lang: isEnglish ? "en" : "th",
+    };
+    const snapshot = latestFlowRef.current;
+    const t = setTimeout(() => saveFlowState(snapshot), 400);
+    // ⚠️ cleanup ต้อง flush ด้วย ไม่ใช่ `clearTimeout` เฉย ๆ — การยกเลิกตัวจับเวลาอย่างเดียว
+    // คือการทิ้งการเขียนครั้งสุดท้ายทุกครั้งที่คอมโพเนนต์ถูกถอด
+    return () => {
+      clearTimeout(t);
+      if (latestFlowRef.current) saveFlowState(latestFlowRef.current);
+    };
   }, [
     currentStep,
     selectedSpread,
@@ -598,6 +610,27 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     proof,
     isEnglish,
   ]);
+
+  /**
+   * 🔴 T-45 (ต่อ): ทั้งรีโปไม่มี `beforeunload` หรือ `pagehide` เลยสักตัว
+   * `pagehide` คือเหตุการณ์เดียวที่ Safari บนมือถือยิงแน่นอนตอนผู้ใช้ออกจากหน้า
+   * (`beforeunload` ไม่ยิงและยังตัด bfcache ทิ้งด้วย) เสริมด้วย `visibilitychange`
+   * สำหรับกรณีสลับแอปแล้วระบบปฏิบัติการเก็บแท็บทิ้งไปเลย
+   */
+  useEffect(() => {
+    const flush = () => {
+      if (latestFlowRef.current) saveFlowState(latestFlowRef.current);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   const executeStartSession = async (finalSituation?: string) => {
     /**
