@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "รหัสผ่านไม่ถูกต้อง" }, { status: 401 });
   }
 
-  (await cookies()).set(ADMIN_COOKIE_NAME, signAdminSession(), {
+  (await cookies()).set(ADMIN_COOKIE_NAME, await signAdminSession(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

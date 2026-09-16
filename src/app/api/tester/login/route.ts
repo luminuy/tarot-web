@@ -16,7 +16,11 @@ import { recordEvent } from "@/lib/stats/record";
 
 export const runtime = "nodejs";
 
-const BodySchema = z.object({ password: z.string().min(1).max(200) });
+const BodySchema = z.object({
+  password: z.string().min(1).max(200),
+  /** ชื่อผู้ถือ — ใช้ระบุว่าคุกกี้ใบไหนเป็นของใครตอนต้องถอนทีละใบ (T-15) */
+  holder: z.string().max(40).optional(),
+});
 
 /**
  * POST /api/tester/login — ปลดล็อกการใช้งานเว็บแบบไม่จำกัดสำหรับผู้ทดสอบ
@@ -52,7 +56,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "รหัสผ่านไม่ถูกต้อง" }, { status: 401 });
   }
 
-  (await cookies()).set(TESTER_COOKIE_NAME, signTesterSession(), {
+  (await cookies()).set(TESTER_COOKIE_NAME, await signTesterSession(parsed.data.holder), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

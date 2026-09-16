@@ -8,6 +8,7 @@ import { getContentOverrides, resolveCardByIndex, resolvePersona, resolveSystemC
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
 import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
+import { looksLikePromptInjection, sanitizePromptValue } from "@/lib/ai/prompt-guard";
 
 import { formatCardLoreForPrompt } from "@/data/cards/visual-lore";
 import { diagnoseQuestionEnergy } from "@/lib/ai/intent";
@@ -21,21 +22,45 @@ import { getMembersOnlyChatMessage, isSignInRequired } from "@/lib/entitlement/s
 
 export const runtime = "nodejs";
 
+/**
+ * 🧱 T-13: ปฏิเสธข้อความที่ตั้งใจปิดแท็บของ prompt ตั้งแต่ชั้น Zod
+ * ผู้ใช้จริงไม่มีเหตุผลต้องพิมพ์ `</` หรือ `<system>` ในคำถามดูดวง
+ */
+const noInjection = (label: string) =>
+  z.string().refine((v) => !looksLikePromptInjection(v), {
+    message: `${label} มีอักขระที่ไม่อนุญาต กรุณาพิมพ์เป็นข้อความธรรมดา`,
+  });
+
+/**
+ * 📏 T-38: เพดานความยาวของ "หนึ่งตาแชท"
+ * ของเดิมยอมรับ 2,000 ตัวอักษรต่อข้อความ และประวัติป้อนกลับ 50,000 ตัวอักษรต่อตา
+ * (8 เท่าของเพดาน 500 ที่บังคับกับคำถามตอนเปิดไพ่) โดยไม่ผ่านการกรองเช่นกัน
+ * คำสั่งที่ฉีดไว้ตาแรกจึงอยู่ยาวไปทุกตาถัดไป และไม่มีเพดานรวมของขนาด prompt เลย
+ */
+const CHAT_MESSAGE_MAX = 800;
+const CHAT_HISTORY_TURN_MAX = 800;
+/** จำนวนตาที่ replay กลับเข้าโมเดล — ตัดจากท้ายสุด (ตาล่าสุดมีค่าที่สุด) */
+const CHAT_HISTORY_REPLAY_TURNS = 12;
+/** งบอักขระรวมของประวัติทั้งหมดที่ replay ได้ในหนึ่งคำขอ */
+const CHAT_HISTORY_CHAR_BUDGET = 6000;
+
 const BodySchema = z.object({
-  message: z.string().min(1, "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม").max(2000, "คำถามยาวเกิน 2,000 ตัวอักษร"),
+  message: noInjection("คำถาม")
+    .min(1, "กรุณาระบุคำถามที่ต้องการถามเพิ่มเติม")
+    .max(CHAT_MESSAGE_MAX, `คำถามยาวเกิน ${CHAT_MESSAGE_MAX} ตัวอักษร`),
   lang: z.enum(["th", "en"]).optional(),
   history: z
     .array(
       z.object({
         sender: z.enum(["user", "bot"]),
-        text: z.string().max(50000),
+        text: z.string().max(CHAT_HISTORY_TURN_MAX),
       })
     )
     .max(50)
     .optional(),
   readingSnapshot: z
     .object({
-      question: z.string().max(1000).optional(),
+      question: noInjection("คำถามตั้งต้น").max(1000).optional(),
       spreadId: z.string().max(100).optional(),
       summary: z.string().max(10000).optional(),
       personaId: z.string().max(100).optional(),
@@ -52,6 +77,28 @@ const BodySchema = z.object({
     })
     .optional(),
 });
+
+
+/**
+ * 📏 T-38: เลือกตาแชทที่จะ replay กลับเข้าโมเดล ภายใต้ทั้งเพดานจำนวนตาและงบอักขระรวม
+ * ไล่จากตาล่าสุดย้อนขึ้นไป (ตาล่าสุดมีค่าต่อคำตอบมากที่สุด) และ **กรองทุกตา** ด้วย
+ * ตัวกันฉีดคำสั่งชุดเดียวกับคำถามตั้งต้น — ไม่งั้นคำสั่งที่ฉีดไว้ตาแรกจะอยู่ยาวทุกตาถัดไป
+ */
+function selectReplayHistory(
+  history: Array<{ sender: "user" | "bot"; text: string }>,
+): Array<{ sender: "user" | "bot"; text: string }> {
+  const picked: Array<{ sender: "user" | "bot"; text: string }> = [];
+  let budget = CHAT_HISTORY_CHAR_BUDGET;
+
+  for (let i = history.length - 1; i >= 0 && picked.length < CHAT_HISTORY_REPLAY_TURNS; i--) {
+    const text = sanitizePromptValue(history[i].text, CHAT_HISTORY_TURN_MAX);
+    if (!text) continue;
+    if (text.length > budget) break;
+    budget -= text.length;
+    picked.unshift({ sender: history[i].sender, text });
+  }
+  return picked;
+}
 
 function generateContextualTarotChatReply(params: {
   userQuestion: string;
@@ -284,7 +331,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     const userQuestion = parsed.data.message;
-    const history = parsed.data.history || [];
+    /*
+     * 📏 T-38: ประวัติที่จะ replay ถูกกรองและจำกัดงบตั้งแต่ตรงนี้จุดเดียว
+     * ทั้งสองเส้นทางผู้ให้บริการใช้ชุดเดียวกัน — ของเดิมต่างคนต่าง `.slice(-20)` และ
+     * `.slice(0, 4000)` เอง ทำให้ prompt โตได้ถึง 80,000 ตัวอักษรต่อคำขอโดยไม่มีเพดานรวม
+     */
+    const history = selectReplayHistory(parsed.data.history || []);
     const clientSnapshot = parsed.data.readingSnapshot;
 
     recordEvent("chat_message");
@@ -485,12 +537,10 @@ ${questionDiagnosis.promptDirective}
         const groqResult = await generateGroqChatReply({
           systemInstruction,
           messages: [
-            // ตัดความยาวเท่ากับทาง Gemini (4,000 ตัวอักษร/ข้อความ)
-            // ของเดิมส่ง h.text แบบไม่ตัด ทั้งที่ schema ยอมรับได้ถึง 50 ข้อความ × 50,000 ตัวอักษร
-            // = ผู้ใช้คนเดียวยัดข้อความราว 1 MB ต่อคำขอเข้าโมเดลได้
-            ...history.slice(-20).map((h) => ({
+            // ประวัติถูกกรอง ตัดความยาว และจำกัดงบอักขระรวมมาแล้วที่ selectReplayHistory()
+            ...history.map((h) => ({
               role: (h.sender === "user" ? "user" : "assistant") as "user" | "assistant",
-              content: h.text.slice(0, 4000),
+              content: h.text,
             })),
             { role: "user", content: userQuestion },
           ],
@@ -534,10 +584,10 @@ ${questionDiagnosis.promptDirective}
             modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
           );
 
-          // ขยายประวัติสนทนาเป็น 20 ข้อความ เพื่อให้คุยต่อเนื่องได้ยาวนานโดยไม่ลืมบริบท
-          const rawHistory = history.slice(-20).map((h) => ({
+          // ประวัติถูกกรองและจำกัดงบมาแล้วที่ selectReplayHistory() — ที่นี่แค่แปลงรูปแบบ
+          const rawHistory = history.map((h) => ({
             role: h.sender === "user" ? "user" : "model",
-            parts: [{ text: h.text.slice(0, 4000) }],
+            parts: [{ text: h.text }],
           }));
           rawHistory.push({
             role: "user",

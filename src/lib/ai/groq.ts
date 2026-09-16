@@ -88,8 +88,18 @@ export function getGroqApiKey(): string | undefined {
 }
 
 /**
+ * เพดานแข็งของ `max_tokens` บนเส้นทางแชท (T-39)
+ * ---------------------------------------------------------------------------
+ * ของเดิมเชื่อค่าที่ผู้เรียกส่งมาแบบไม่มีขอบเขต โดยมีคอมเมนต์ระบุเจตนาว่า "ไม่กำหนดเพดาน
+ * เพื่อให้ทดสอบและคุยยาวได้เต็มที่" — เจตนาดี แต่เมื่อรวมกับ T-38 (ประวัติป้อนกลับ
+ * ไม่จำกัด) แปลว่าเซสชันเดียวลากค่าโทเคนได้ไม่จำกัดจริง ๆ
+ *
+ * ค่าเริ่มต้นยังเป็น 2,400 เท่าเดิม ผู้เรียกยังทับได้ **แต่ทับได้ไม่เกินเพดานนี้**
+ */
+const GROQ_CHAT_MAX_TOKENS_HARD_CAP = 4096;
+
+/**
  * ยิงข้อความถาม-ตอบกับ Groq LPU รองรับการหมุนเวียน 4 โมเดลอัตโนมัติ
- * ไม่กำหนดเพดาน max_tokens เพื่อให้ทดสอบและคุยบทสนทนายาวได้เต็มที่
  */
 export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
   reply: string;
@@ -123,8 +133,11 @@ export async function generateGroqChatReply(options: GroqChatOptions): Promise<{
         // reasoning model (Qwen3) แยกโทเค็นความคิดออกจาก content — content สะอาดตั้งแต่ต้นทาง
         reasoning_format: "parsed",
         // เพดานเริ่มต้น 2,400 โทเค็น (~ตอบแชทยาว 4 ท่อน) กันโมเดล reasoning เผางบไม่จบ
-        // ผู้เรียกทับได้ด้วย options.maxTokens
-        max_tokens: typeof options.maxTokens === "number" ? options.maxTokens : 2400,
+        // ผู้เรียกทับได้ด้วย options.maxTokens แต่ไม่เกินเพดานแข็งของไฟล์นี้ (T-39)
+        max_tokens: Math.min(
+          typeof options.maxTokens === "number" && options.maxTokens > 0 ? options.maxTokens : 2400,
+          GROQ_CHAT_MAX_TOKENS_HARD_CAP,
+        ),
       };
 
       const res = await fetch(groqChatCompletionsEndpoint(), {

@@ -1,13 +1,25 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+import {
+  isPrivilegedSessionActive,
+  newSessionId,
+  registerPrivilegedSession,
+  revokePrivilegedSession,
+} from "@/lib/auth/privileged-session";
+
 /**
  * Tester session — บัญชี "ผู้ทดสอบ" สำหรับหุ้นส่วน/ทีมงานที่ต้องใช้เว็บได้ไม่จำกัด
  * ---------------------------------------------------------------------------
  * ต่างจากแอดมิน: **ปลดล็อกแค่การใช้งาน** (rate limit / โควตา / เพดาน AI / origin guard / entitlement)
  * ไม่เปิดแผงแอดมิน ไม่แก้ prompt ไม่เห็นสถิติ/ยอดจ่าย
  *
- * เข้าด้วย "รหัสผ่านผู้ทดสอบ" (`TESTER_PASSWORD` secret) → ออก HMAC-signed cookie อายุ 30 วัน
- * ไม่มี role / allowlist — ผู้ทดสอบคือใครก็ตามที่รู้รหัสผ่าน (แจกให้คนใกล้ตัวเท่านั้น)
+ * เข้าด้วย "รหัสผ่านผู้ทดสอบ" (`TESTER_PASSWORD` secret) → ออก HMAC-signed cookie อายุ 7 วัน
+ * ผู้ทดสอบคือใครก็ตามที่รู้รหัสผ่าน (แจกให้คนใกล้ตัวเท่านั้น)
+ *
+ * 🔑 บทเรียน T-15: คุกกี้ใบนี้ข้ามทั้งเพดานอัตรา เพดานพร้อมกัน เพดานค่าใช้จ่าย และด่าน origin
+ * ของเดิมอายุ **30 วัน** และเพิกถอนไม่ได้เลยนอกจากเปลี่ยนรหัสผ่าน (ซึ่งเตะทุกคนออกพร้อมกัน)
+ * ตอนนี้: อายุ 7 วัน · มี `sid` ใน allowlist บน KV จึงถอนทีละใบได้ · ผูกกับชื่อผู้ถือ
+ * เพื่อให้รู้ว่าใบไหนเป็นของใครตอนต้องถอน
  *
  * ตั้ง secret ครั้งเดียว:  npx wrangler secret put TESTER_PASSWORD
  * (dev: ใส่ใน .env.local — ต้อง ≥ 12 ตัวอักษร)
@@ -16,7 +28,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  */
 
 export const TESTER_COOKIE_NAME = "tarot_tester";
-const SESSION_TTL_SEC = 30 * 24 * 60 * 60; // 30 วัน
+const SESSION_TTL_SEC = 7 * 24 * 60 * 60; // 7 วัน (เดิม 30 วัน — ดูบทเรียน T-15 ด้านบน)
 const MIN_PASSWORD_LEN = 12;
 
 function getTesterSecret(): string {
@@ -44,12 +56,45 @@ export function verifyTesterPassword(input: string): boolean {
   return timingSafeEqual(a, b);
 }
 
-export function signTesterSession(): string {
+/**
+ * ออกคุกกี้ผู้ทดสอบใหม่ พร้อมลงทะเบียน `sid` ลง allowlist
+ * @param holder ชื่อผู้ถือ (ไม่บังคับ) — เก็บไว้เพื่อให้รู้ว่าถอนใบไหนของใคร
+ */
+export async function signTesterSession(holder?: string): Promise<string> {
   const nowSec = Math.floor(Date.now() / 1000);
-  const payload = { role: "tester" as const, iat: nowSec, exp: nowSec + SESSION_TTL_SEC };
+  const sid = newSessionId();
+  const payload = {
+    role: "tester" as const,
+    sid,
+    ...(holder ? { holder: holder.slice(0, 40) } : {}),
+    iat: nowSec,
+    exp: nowSec + SESSION_TTL_SEC,
+  };
   const data = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
   const sig = createHmac("sha256", getTesterSecret()).update(data).digest("base64url");
+  await registerPrivilegedSession("tester", sid, SESSION_TTL_SEC);
   return `${data}.${sig}`;
+}
+
+/** อ่าน `sid` ออกจากคุกกี้โดยไม่ตรวจลายเซ็น — ใช้ตอนออกจากระบบเท่านั้น */
+export function readTesterSessionId(token: string | undefined | null): string | undefined {
+  if (!token) return undefined;
+  const dot = token.lastIndexOf(".");
+  if (dot === -1) return undefined;
+  try {
+    const payload = JSON.parse(Buffer.from(token.slice(0, dot), "base64url").toString("utf8")) as {
+      sid?: string;
+    };
+    return payload.sid;
+  } catch {
+    return undefined;
+  }
+}
+
+/** เพิกถอนคุกกี้ผู้ทดสอบใบนี้ให้ใช้ไม่ได้อีกทันที */
+export async function revokeTesterSession(token: string | undefined | null): Promise<void> {
+  const sid = readTesterSessionId(token);
+  if (sid) await revokePrivilegedSession("tester", sid);
 }
 
 export function verifyTesterSession(token: string | undefined | null): boolean {
@@ -76,6 +121,15 @@ export function verifyTesterSession(token: string | undefined | null): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * ด่านจริงของสิทธิ์ผู้ทดสอบ — ลายเซ็น + วันหมดอายุ + ยังอยู่ใน allowlist
+ * `verifyTesterSession` ตรวจแค่ลายเซ็น จึงใช้เป็นด่านสุดท้ายไม่ได้ (T-15)
+ */
+export async function verifyTesterSessionLive(token: string | undefined | null): Promise<boolean> {
+  if (!verifyTesterSession(token)) return false;
+  return isPrivilegedSessionActive("tester", readTesterSessionId(token));
 }
 
 export const TESTER_SESSION_MAX_AGE = SESSION_TTL_SEC;

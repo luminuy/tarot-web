@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { getSessionUser } from "@/lib/auth/session";
-import { TESTER_COOKIE_NAME, verifyTesterSession } from "@/lib/auth/tester-auth";
+import { TESTER_COOKIE_NAME, verifyTesterSessionLive } from "@/lib/auth/tester-auth";
 import { isUnlimitedEmail } from "@/lib/auth/unlimited-users";
 import { recordEvent } from "@/lib/stats/record";
 
@@ -34,7 +34,8 @@ export async function isPrivilegedTestRequest(request: Request): Promise<boolean
     // ⚠️ tarot_admin เป็น cookie แอดมินสำหรับเข้าใช้งานแผง /admin เท่านั้น
     // ต้องแยกขาดจากหน้าเว็บฝั่งผู้ใช้ ไม่นำมาใช้ตรวจสอบสิทธิ์ในหน้าเว็บทั่วไปเด็ดขาด
     const testerCookie = cookieStore.get(TESTER_COOKIE_NAME)?.value;
-    if (testerCookie && verifyTesterSession(testerCookie)) {
+    // ต้องตรวจ allowlist ด้วย (T-15) — คุกกี้ที่ถูกถอนแล้วยังผ่านลายเซ็นได้
+    if (testerCookie && (await verifyTesterSessionLive(testerCookie))) {
       recordEvent("ratelimit_bypass:tester");
       return true;
     }

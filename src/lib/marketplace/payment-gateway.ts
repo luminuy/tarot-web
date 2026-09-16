@@ -84,13 +84,27 @@ export function verifyWebhookSignature(
 ): boolean {
   const secret = signingSecret || process.env.OMISE_WEBHOOK_SECRET || process.env.PAYMENT_WEBHOOK_SECRET;
 
-  // In test mode without secret configured, accept test headers with warning
+  /*
+   * 🔴 บทเรียน T-18: ของเดิม "ไม่มี secret + NODE_ENV ไม่ใช่ production" = ผ่านทุกคำขอ
+   *
+   * `NODE_ENV` ไม่ใช่ตัวบอกว่าปลายทางนี้เข้าถึงจากอินเทอร์เน็ตได้หรือไม่ —
+   * preview / staging / branch deploy ทุกตัวรันด้วย `NODE_ENV !== "production"`
+   * แต่มี URL สาธารณะจริง ใครก็ยิง webhook ปลอมเข้าไปแจกเครดิตฟรีได้
+   *
+   * ตอนนี้ไม่มี secret = ปฏิเสธเสมอ ไม่ว่าจะ environment ไหน
+   * ช่องทดสอบเปิดด้วยธงที่ตั้งใจตั้งเองเท่านั้น ไม่ใช่การเดาจาก environment
+   */
   if (!secret) {
-    if (process.env.NODE_ENV === "production") {
-      console.error("[Payment Webhook] Missing PAYMENT_WEBHOOK_SECRET in production!");
-      return false;
+    if (process.env.ALLOW_UNSIGNED_WEBHOOKS_DEV === "1" && process.env.NODE_ENV !== "production") {
+      console.warn(
+        "[Payment Webhook] ⚠️ รับ webhook ที่ไม่มีลายเซ็นเพราะตั้ง ALLOW_UNSIGNED_WEBHOOKS_DEV=1 — ห้ามตั้งค่านี้นอกเครื่องพัฒนา",
+      );
+      return true;
     }
-    return true;
+    console.error(
+      "[Payment Webhook] ไม่ได้ตั้ง OMISE_WEBHOOK_SECRET / PAYMENT_WEBHOOK_SECRET — ปฏิเสธคำขอทั้งหมด",
+    );
+    return false;
   }
 
   if (!signatureHeader) return false;
