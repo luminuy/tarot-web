@@ -257,10 +257,12 @@ export function QuickFortunePicker({
   const handleScroll = () => {
     const el = carouselRef.current;
     if (!el) return;
-    const scrollLeft = el.scrollLeft;
-    const cardWidth = el.querySelector<HTMLElement>("[data-card-index]")?.offsetWidth || 280;
-    const newIndex = Math.round(scrollLeft / (cardWidth + 12));
-    setActiveIndex(Math.max(0, Math.min(newIndex, QUICK_TOPICS.length - 1)));
+    const cardWidth = Math.min(el.clientWidth * 0.82, 280);
+    const newIndex = Math.round(el.scrollLeft / (cardWidth + 12));
+    const clamped = Math.max(0, Math.min(newIndex, QUICK_TOPICS.length - 1));
+    if (clamped !== activeIndex) {
+      setActiveIndex(clamped);
+    }
   };
 
   const scrollToIndex = (index: number) => {

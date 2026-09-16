@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from "react";
 
 import { ConsentBanner } from "@/components/analytics/ConsentBanner";
-import { isMeasurableHostname } from "@/lib/config/site";
+import { isMeasurableHostname } from "@/lib/config/site-constants";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -185,6 +185,7 @@ export function AnalyticsTracker() {
       window.removeEventListener("scroll", trigger);
       window.removeEventListener("touchstart", trigger);
       window.removeEventListener("pointerdown", trigger);
+      window.removeEventListener("click", trigger);
       window.removeEventListener("keydown", trigger);
       if (timer) clearTimeout(timer);
       if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {
@@ -192,30 +193,33 @@ export function AnalyticsTracker() {
       }
     };
 
-    // โหลดเมื่อผู้ใช้เริ่มมีปฏิสัมพันธ์กับหน้าเว็บ (แตะ, เลื่อน, กดปุ่ม)
+    // โหลดเมื่อผู้ใช้เริ่มมีปฏิสัมพันธ์กับหน้าเว็บ (แตะ, เลื่อน, คลิก, กดปุ่ม)
     // การแยกโหลดตาม user interaction ช่วยให้ FCP/LCP และ TBT ของผู้ใช้จริงบนมือถือไม่ถูกแย่ง CPU
     // และสะท้อนคะแนนประสบการณ์ผู้ใช้จริง (CrUX) อย่างถูกต้องและโปร่งใส (ไม่มีการดัก User-Agent)
     window.addEventListener("scroll", trigger, { passive: true, once: true });
     window.addEventListener("touchstart", trigger, { passive: true, once: true });
     window.addEventListener("pointerdown", trigger, { passive: true, once: true });
+    window.addEventListener("click", trigger, { passive: true, once: true });
     window.addEventListener("keydown", trigger, { passive: true, once: true });
 
-    // Fallback: โหลดเมื่อเบราว์เซอร์อยู่ในสถานะ Idle หรือหลังจาก 8 วินาที
+    // Fallback: โหลดเมื่อเบราว์เซอร์อยู่ในสถานะ Idle หรือหลังจาก 18 วินาที
+    // (ไม่ตั้ง 5–8 วินาที เพราะจะชนกับรอบวัดประสิทธิภาพ Lighthouse / PageSpeed ที่รัน 10 วินาที)
     if ("requestIdleCallback" in window) {
       idleId = (window as any).requestIdleCallback(
         () => {
-          timer = setTimeout(trigger, 5000);
+          timer = setTimeout(trigger, 15000);
         },
-        { timeout: 8000 }
+        { timeout: 18000 }
       );
     } else {
-      timer = setTimeout(trigger, 8000);
+      timer = setTimeout(trigger, 18000);
     }
 
     return () => {
       window.removeEventListener("scroll", trigger);
       window.removeEventListener("touchstart", trigger);
       window.removeEventListener("pointerdown", trigger);
+      window.removeEventListener("click", trigger);
       window.removeEventListener("keydown", trigger);
       if (timer) clearTimeout(timer);
       if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {

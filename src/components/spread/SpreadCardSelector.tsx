@@ -169,6 +169,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
    * (คำสั่งเจ้าของโปรเจกต์: ให้เหมือนโฟลว์ "เปิดไพ่ด่วน" ของ QuickFortunePicker)
    */
   const [showStartModal, setShowStartModal] = useState(false);
+  const [hasEverOpenedModal, setHasEverOpenedModal] = useState(false);
 
   /*
    * Sync scroll position with active dot indicator on mobile
@@ -326,7 +327,10 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
               // ป๊อปอัพกำลังจะมาบังจอ — เลื่อนการ์ดให้เข้าที่แบบตัดภาพทันที
               // ไม่ปล่อยแรงเลื่อนแบบไหลไปทับอนิเมชันขาเข้าของป๊อปอัพ (INC-0137)
               scrollToCard(idx, Boolean(onProceed));
-              if (onProceed) setShowStartModal(true);
+              if (onProceed) {
+                setHasEverOpenedModal(true);
+                setShowStartModal(true);
+              }
             };
 
             const isCardVisibleOrNear =
@@ -539,7 +543,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
       )}
 
       {/* ป๊อปอัพ "เริ่มการดูดวงเลย" — เด้งทันทีที่แตะการ์ดผัง (ไม่ต้องเลื่อนลงไปกดแถบสรุปด้านบน) */}
-      {onProceed && (
+      {onProceed && (hasEverOpenedModal || showStartModal) && (
         <Modal
           isOpen={showStartModal}
           onClose={() => setShowStartModal(false)}

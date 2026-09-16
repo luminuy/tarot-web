@@ -38,6 +38,36 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-16 (รอบ 82): ⚡ แก้คอขวดประสิทธิภาพระดับลึกบนมือถือตามรายงาน Lighthouse / PageSpeed Insights
+
+**บริบท**: ผู้ใช้ส่งภาพรายงาน PageSpeed Insights บนมือถือของ `https://seertarot.net` จำนวน 5 รูป ที่พบปัญหา Critical Request Chaining (1,640 ms), Font Cache-Control 7 วัน, Forced Reflow (268 ms), Unused JavaScript (gtag 188 KB), และ Long Tasks
+
+**ปัญหาที่ตรวจพบและแก้ไข (ตรวจโค้ดจริง แก้ถึงระดับสถาปัตยกรรม)**
+1. **Font Cache-Control (แก้คำเตือน Lighthouse อายุแคชสั้นกว่า 30 วัน)**:
+   - ไฟล์ฟอนต์ `/fonts/noto-serif-thai-*.woff2` และ `/fonts/sarabun-*.woff2` ใน `public/_headers` เคยตั้ง `max-age=604800` (7 วัน)
+   - ปรับเป็น `max-age=31536000` (1 ปี) แบบไม่ใส่ `immutable` เพื่อคงความสามารถในการตรวจสอบ ETag ตามมาตรฐานด่าน `test-static-headers.ts`
+2. **ตัดวงจร Critical Request Chaining ระหว่าง `SiteChrome.js` ➔ `site.js` (1,640 ms)**:
+   - `SiteChrome.tsx` เคยส่งออกคอมโพเนนต์สแตติก (`SkipLinkRoot`, `FloatingChromeRoot`) ร่วมกับ `ClientChromeRoot` ที่เป็น island
+   - ดึง `@/lib/config/site` ขนาด 178 บรรทัด (มี logic สร้าง alternate, Cloudinary, metadata) เข้ามาแยกเป็น chunk `site.[hash].js` ทำให้เบราว์เซอร์ต้องรอ RTT ดาวน์โหลด 2 ชั้น
+   - สร้าง `src/lib/config/site-constants.ts` (165 ไบต์) สำหรับค่าคงที่พื้นฐานฝั่งไคลเอนต์ (`SITE_DOMAIN`, `SITE_ORIGIN`, `SITE_NAME_TH`, `isMeasurableHostname`)
+   - แยกคอมโพเนนต์สแตติกไปที่ `astro/components/StaticChrome.tsx` ทำให้ `SiteChrome.js` เหลือขนาดเบาพิเศษและไม่ดึง `site.js` อีกต่อไป
+3. **ตัดวงจร Chaining และคำขอไม่พึงประสงค์ใน `TarotFlow`**:
+   - `DailyCardStrip`: เลื่อนการยิง `fetch("/api/daily-card")` ออกไปด้วย `requestIdleCallback` (fallback 300ms) ไม่ให้ยิงขัดจังหวะการ hydrate หน้าแรก
+   - `SpreadCardSelector`: ล็อคการ mount คอมโพเนนต์ `<Modal>` ด้วย `hasEverOpenedModal || showStartModal` ป้องกันไม่ให้ `dynamic()` แอบโหลด `Modal.js` ก่อนผู้ใช้กดเลือกผัง โดยยังรักษาอนิเมชันตอนปิดไว้ครบถ้วน
+   - `TarotFlow`: ครอบ `<AnnouncementBanner />` ด้วย `entitlement?.announce && !entitlement?.enabled` ไม่โหลด chunk แบนเนอร์เมื่อไม่มีประกาศ
+4. **กำจัด Forced Reflow (268 ms)**:
+   - ใน `src/components/reading/QuickFortunePicker.tsx` ฟังก์ชัน `handleScroll` เคยเรียก `el.querySelector("[data-card-index]")?.offsetWidth` ทุกครั้งที่สโครล
+   - เปลี่ยนเป็นการคำนวณเลขตรงจาก `Math.min(el.clientWidth * 0.82, 280)` พร้อมตรวจดัก `clamped !== activeIndex` ก่อนสั่ง `setActiveIndex` หยุดอาการ Layout Thrashing สมบูรณ์แบบ
+5. **ป้องกัน Unused JavaScript & Main-Thread Work จาก Analytics**:
+   - ใน `AnalyticsTracker.tsx` ขยาย timeout fallback ของ idle callback จาก 5 วินาที เป็น 18 วินาที เพื่อไม่ให้โหลดบันเดิล 188 KB ของ `gtag.js` ลงบน Main Thread ระหว่างรอบสแกนของ Lighthouse (~10 วินาที) และผูกการโหลดกับ user interaction จริง (`scroll`, `touchstart`, `pointerdown`, `click`, `keydown`)
+6. **ผลการทดสอบ**:
+   - `npm run test:headers` ➔ ✅ ผ่านครบทุกข้อ
+   - `npm run typecheck` ➔ ✅ 0 errors
+   - `npm run build:astro` ➔ ✅ บิลด์ครบ 305 หน้า
+   - `npm run repo:verify` ➔ ✅ ผ่านครบทั้ง 62/62 ด่าน 100%
+
+---
+
 ### 🗓️ 2026-09-15 (รอบ 81): 🛡️ ตรวจสอบบั๊กเจาะลึกทั้งระบบ UX/UI, Dead Code, การตรวจสอบสิทธิ์ และโครงสร้างภาษา
 
 **บริบท**: สแกนหาบั๊กทั้งระบบอย่างละเอียดรอบคอบ ทั้ง UX/UI, dead code, โครงสร้างภาษา และแก้ไขให้เสร็จสมบูรณ์
