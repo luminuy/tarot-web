@@ -1349,6 +1349,65 @@ html {
               visibility 0s linear 160ms;
 }
 
+/*
+ * 🧭 Slide-Out Navigation Drawer (ด้านขวา) สไตล์ Quiet Luxury & GitHub-Inspired
+ * ---------------------------------------------------------------------------
+ * ออกแบบตามมาตรฐาน Hardware-Accelerated 0ms Lag ไม่ใช้ JavaScript Animation Loop
+ * และไม่ใช้ `fixed` ในคอมโพเนนต์ลูก เพื่อให้สอดคล้องกับ Containing Block ของ <header> (INC-0109)
+ */
+.nav-drawer-scrim-base {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100vw;
+  height: 100svh;
+  background-color: rgba(23, 21, 18, 0.45);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.nav-drawer-scrim-entering {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
+}
+
+.nav-drawer-scrim-exiting {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0s linear 180ms;
+}
+
+.nav-drawer-panel-base {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100svh;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: -12px 0 36px rgba(42, 38, 31, 0.14);
+}
+
+.nav-drawer-panel-entering {
+  transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.nav-drawer-panel-exiting {
+  transform: translateX(100%);
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0s linear 200ms;
+}
+
 
 /* FDN-5: Shared Button & Touch Manipulation Utilities */
 button,

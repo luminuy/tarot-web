@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import {
@@ -16,6 +17,8 @@ import { CoinSealIcon } from "@/components/entitlement/EntitlementIcons";
 import { soundManager } from "@/lib/utils/audio";
 import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
+import { stripLocalePrefix } from "@/lib/i18n/paths";
+import { useDialogBehavior } from "@/lib/use-dialog-behavior";
 
 interface SacredNavDropdownProps {
   onOpenHistory?: () => void;
@@ -35,8 +38,16 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   useEffect(() => {
     isOpenRef.current = isOpen;
   }, [isOpen]);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
   const { isEnglish } = useLocale();
+
+  const rawPathname = usePathname() || "/";
+  const currentPath = stripLocalePrefix(rawPathname);
+
+  // 🪟 จัดการ Dialog Behavior ครบวงจร (Esc, Focus Trap, Body Scroll Lock, Return Focus)
+  useDialogBehavior(isOpen, () => setIsOpen(false), drawerRef);
 
   // Close when receiving close event from another open menu
   useEffect(() => {
@@ -50,29 +61,26 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     return () => window.removeEventListener("tarot:close-menus", handleClose);
   }, []);
 
-  // Close dropdown when clicking outside or pressing Escape
+  // Close drawer when clicking outside (safety backstop for desktop/mobile)
   useEffect(() => {
     if (!isOpen) return;
 
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (
+        drawerRef.current &&
+        !drawerRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("touchstart", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
 
@@ -168,22 +176,46 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   ) => {
     const Icon = item.Icon;
     const isAction = typeof item.onClick === "function";
+    const isActive = item.href
+      ? currentPath === item.href || (item.href !== "/" && currentPath.startsWith(item.href + "/"))
+      : false;
 
     const content = (
       <>
-        <div className="w-8.5 h-8.5 rounded-lg bg-inset border border-line flex items-center justify-center text-gold group-hover:text-ink group-hover:border-gold transition-colors duration-150 flex-shrink-0 mt-0.5">
+        {/* Active Route Indicator Bar (GitHub Drawer Style) */}
+        {isActive && (
+          <span
+            className="absolute left-0 top-2.5 bottom-2.5 w-1 bg-gold rounded-r-full"
+            aria-hidden="true"
+          />
+        )}
+
+        <div
+          className={`w-8.5 h-8.5 rounded-lg border flex items-center justify-center transition-colors duration-150 shrink-0 mt-0.5 ${
+            isActive
+              ? "bg-surface border-gold text-gold-ink shadow-xs"
+              : "bg-inset border-line text-gold group-hover:text-ink group-hover:border-gold"
+          }`}
+        >
           <Icon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
         </div>
+
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`text-xs font-serif-th transition-colors leading-tight truncate ${
+                isActive ? "font-bold text-gold-ink" : "font-bold text-ink group-hover:text-gold-ink"
+              }`}
+            >
               {item.label}
             </span>
-            <span className="text-[11px] font-serif-th text-ink bg-inset px-2 py-0.5 rounded-full border border-line">
+            <span className="text-[11px] font-serif-th text-ink bg-inset px-2 py-0.5 rounded-full border border-line shrink-0 font-medium">
               {item.badge}
             </span>
           </div>
-          <p className="text-[12px] font-serif-th text-muted truncate mt-0.5">{item.sublabel}</p>
+          <p className="text-[12px] font-serif-th text-muted truncate mt-0.5 leading-snug">
+            {item.sublabel}
+          </p>
         </div>
       </>
     );
@@ -198,7 +230,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               setIsOpen(false);
               item.onClick?.();
             }}
-            className="tap-overlay-y w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left"
+            className="tap-overlay-y relative w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
           >
             {content}
           </button>
@@ -206,16 +238,16 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           <Link
             href={item.href || "#"}
             // ⛔ ห้ามเปิด prefetch — บทเรียน INC-0106
-            // Next 16 ใช้ Client Segment Cache: ลิงก์ที่ prefetch จะยิงถาม "ผังเส้นทาง"
-            // (header `Next-Router-Segment-Prefetch: /_tree`) แต่ฝั่งเซิร์ฟเวอร์ของเรา
-            // ตอบเป็นเพย์โหลดเต็มหน้าเหมือนเดิมทุกครั้ง ไคลเอนต์จึงหาสิ่งที่ขอไม่เจอ
-            // แล้ววนถามใหม่ไม่มีที่สิ้นสุด — วัดจริงบน production ได้ ~180 คำขอ/วินาที ต่อ 1 แท็บ
             prefetch={false}
             onClick={() => {
               soundManager.playMenuTapSound();
               setIsOpen(false);
             }}
-            className="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer"
+            className={`tap-overlay-y relative w-full flex items-start gap-2.5 p-2 rounded-xl transition-colors duration-150 group cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+              isActive
+                ? "bg-inset/90 border-line shadow-xs"
+                : "hover:bg-inset/60 border-transparent hover:border-line/60"
+            }`}
           >
             {content}
           </Link>
@@ -225,8 +257,8 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
   };
 
   return (
-    <div className="relative select-none" ref={dropdownRef}>
-      {/* Refined Luxury Warm Minimalist Trigger Button — Hamburger Icon */}
+    <div className="select-none" ref={dropdownRef}>
+      {/* Refined Luxury Minimalist Trigger Button — Hamburger Icon */}
       <button
         type="button"
         onClick={toggleDropdown}
@@ -256,92 +288,137 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         </svg>
       </button>
 
-      {/* World-Class Warm Milk Cream Floating Sanctuary Menu — Hardware-Accelerated Zero-Stutter Layer */}
-      {/*
-        🧭 ต้องเป็น <nav> ไม่ใช่ <div role="region"> (UX-05)
-        แผงนี้คือเมนูหลักของทั้งเว็บ แต่เดิมประกาศเป็น region ทำให้ผู้ใช้ screen reader
-        กระโดดมาที่เมนูด้วยคำสั่ง "ไปยัง navigation" ไม่ได้เลยสักหน้า
-        วัดจริงบน production แล้วพบว่าหน้า / · /cards · /blog · /cards/[id] มี <nav> = 0 อัน
-      */}
+      {/* Backdrop Scrim — Obsidian Semi-transparent Overlay */}
+      <div
+        onClick={() => {
+          soundManager.playMenuTapSound();
+          setIsOpen(false);
+        }}
+        aria-hidden="true"
+        className={`nav-drawer-scrim-base z-[var(--z-dropdown)] ${
+          isOpen ? "nav-drawer-scrim-entering" : "nav-drawer-scrim-exiting"
+        }`}
+      />
+
+      {/* Slide-out Navigation Drawer on the Right (GitHub Style) */}
       <nav
         id="sacred-nav-panel"
+        ref={drawerRef}
         aria-label={isEnglish ? "Sanctuary navigation menu" : "เมนูวิหารพยากรณ์"}
         aria-hidden={!isOpen}
-        className={`absolute right-0 top-full mt-2 w-72 sm:w-84 rounded-xl bg-surface border border-line shadow-[0_10px_30px_rgba(42,38,31,0.12)] p-2.5 sm:p-3 z-50 overflow-x-hidden overflow-y-auto overscroll-contain max-h-[calc(100svh-4.5rem)] space-y-1 no-scrollbar dropdown-panel-base ${
-          isOpen ? "dropdown-panel-entering" : "dropdown-panel-exiting"
+        tabIndex={isOpen ? 0 : -1}
+        className={`nav-drawer-panel-base w-full max-w-[340px] sm:max-w-[380px] bg-surface border-l border-line z-[calc(var(--z-dropdown)+1)] flex flex-col ${
+          isOpen ? "nav-drawer-panel-entering" : "nav-drawer-panel-exiting"
         }`}
       >
-        {/* Ambient Top Foil Glow */}
-        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-gold/35 to-transparent -mt-0.5 mb-1.5" />
+        {/* Ambient Top Gold Accent Line */}
+        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent shrink-0" />
 
-        {/* Header Title inside Dropdown */}
-        <div className="px-3 py-1 flex items-center justify-between text-[13px] font-serif-th font-semibold text-muted border-b border-line/40 pb-1.5">
-          <span className="flex items-center gap-1.5 text-gold-ink">
-            <span className="font-bold">{isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}</span>
-          </span>
-          <span className="text-ink text-[12px] font-mono tracking-wider bg-inset border border-line px-2 py-0.5 rounded-full font-bold">
-            1909 RWS
-          </span>
-        </div>
-
-        {/* Section 1: พิธีกรรมยอดนิยม */}
-        <div className="pt-1">
-          <div className="px-2 py-1 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
-            {isEnglish ? "Featured Rituals & Tools" : "พิธีกรรมยอดนิยม & เครื่องมือ"}
-          </div>
-          <div className="space-y-0.5">
-            {featuredItems.map((item, idx) => renderNavCard(item, idx))}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="h-[1px] w-full bg-line/40 my-1" />
-
-        {/* Section 2: คลังความรู้ & ผังพยากรณ์ */}
-        <div>
-          <div className="px-2 py-1 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
-            {isEnglish ? "Knowledge & Spreads" : "คลังความรู้ & ผังพยากรณ์"}
-          </div>
-          <div className="space-y-0.5">
-            {knowledgeItems.map((item, idx) => renderNavCard(item, idx + 10))}
-          </div>
-        </div>
-
-          {/* Reading Journal / History Trigger */}
-          {onOpenHistory && (
-            <div>
-              <button
-                type="button"
-                onClick={() => {
-                  soundManager.playMenuTapSound();
-                  setIsOpen(false);
-                  onOpenHistory();
-                }}
-                className="tap-overlay-y w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left"
-              >
-                <div className="w-9 h-9 rounded-lg bg-inset border border-line flex items-center justify-center text-gold group-hover:text-ink group-hover:border-gold transition-colors duration-150 flex-shrink-0 mt-0.5">
-                  <JournalScrollNavIcon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors">
-                      {isEnglish ? "Reading Journal" : "ประวัติการดูดวง"}
-                    </span>
-                    <span className="text-[12px] font-serif-th text-ink bg-inset px-2 py-0.5 rounded-full border border-line">
-                      {isEnglish ? "History" : "บันทึก"}
-                    </span>
-                  </div>
-                  <p className="text-[13px] font-serif-th text-muted truncate mt-0.5">
-                    {isEnglish ? "Revisit your past cards and oracle counsel" : "ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้"}
-                  </p>
-                </div>
-              </button>
+        {/* Drawer Header: Brand, 1909 RWS Badge & Close Button */}
+        <div className="px-4 py-3 sm:py-3.5 border-b border-line flex items-center justify-between bg-surface shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-full border border-line overflow-hidden relative flex-shrink-0 bg-canvas">
+              <img
+                src="/logo.webp"
+                alt="SeerTarot"
+                width={32}
+                height={32}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
             </div>
-          )}
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-serif-th text-sm font-bold text-ink truncate leading-tight">
+                  {isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}
+                </span>
+                <span className="text-ink text-[10px] font-mono tracking-wider bg-inset border border-line px-1.5 py-0.2 rounded-full font-bold shrink-0">
+                  1909 RWS
+                </span>
+              </div>
+              <span className="text-[10px] tracking-[0.16em] text-muted font-mono uppercase font-semibold truncate mt-0.5">
+                RIDER-WAITE TAROT
+              </span>
+            </div>
+          </div>
 
-        {/* Reset Sanctuary Session Option */}
-        {canReset && onReset && (
-          <div className="pt-1 border-t border-line/40">
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.playMenuTapSound();
+              setIsOpen(false);
+            }}
+            className="tap-overlay w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-inset border border-transparent hover:border-line transition-colors duration-150 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+            aria-label={isEnglish ? "Close navigation menu" : "ปิดเมนู"}
+            title={isEnglish ? "Close" : "ปิดเมนู"}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4 sm:w-5 sm:h-5 transition-colors"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Scrollable Navigation Body */}
+        <div className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-3 no-scrollbar">
+          {/* Section 1: พิธีกรรมยอดนิยม */}
+          <div>
+            <div className="px-2 pb-1.5 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
+              {isEnglish ? "Featured Rituals & Tools" : "พิธีกรรมยอดนิยม & เครื่องมือ"}
+            </div>
+            <div className="space-y-1">
+              {featuredItems.map((item, idx) => renderNavCard(item, idx))}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-[1px] w-full bg-line/50 my-1" />
+
+          {/* Section 2: คลังความรู้ & ผังพยากรณ์ */}
+          <div>
+            <div className="px-2 pb-1.5 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
+              {isEnglish ? "Knowledge & Spreads" : "คลังความรู้ & ผังพยากรณ์"}
+            </div>
+            <div className="space-y-1">
+              {knowledgeItems.map((item, idx) => renderNavCard(item, idx + 10))}
+            </div>
+          </div>
+
+          {/* Section 3: ประวัติการดูดวง (Reading Journal) */}
+          {onOpenHistory && (
+            <>
+              <div className="h-[1px] w-full bg-line/50 my-1" />
+              <div>
+                <div className="px-2 pb-1.5 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
+                  {isEnglish ? "Reading Journal" : "ประวัติ & บันทึกดวง"}
+                </div>
+                {renderNavCard(
+                  {
+                    label: isEnglish ? "Reading Journal" : "ประวัติการดูดวง",
+                    sublabel: isEnglish ? "Revisit your past cards and oracle counsel" : "ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้",
+                    onClick: onOpenHistory,
+                    Icon: JournalScrollNavIcon,
+                    badge: isEnglish ? "History" : "บันทึก",
+                  },
+                  99
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Drawer Footer: Reset (if available) + Quiet Luxury Tagline */}
+        <div className="shrink-0 px-4 py-3 border-t border-line/50 bg-canvas/30 space-y-2.5">
+          {canReset && onReset && (
             <button
               type="button"
               onClick={() => {
@@ -349,13 +426,15 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                 setIsOpen(false);
                 onReset();
               }}
-              className="tap-overlay-y w-full flex items-center justify-center gap-2 py-2 px-3 rounded-full bg-err-wash hover:bg-err-wash border border-line text-err text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer active:scale-98"
+              className="tap-overlay-y w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-err-wash hover:bg-err-wash border border-line text-err text-xs font-serif-th font-bold transition-colors duration-150 cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-err"
             >
-              
               <span>{isEnglish ? "Start New Reading" : "เริ่มดูดวงใหม่"}</span>
             </button>
+          )}
+          <div className="text-[10px] font-mono tracking-widest text-muted text-center uppercase">
+            1909 RIDER-WAITE TAROT · PROVABLY FAIR
           </div>
-        )}
+        </div>
       </nav>
     </div>
   );

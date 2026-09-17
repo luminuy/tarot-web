@@ -37,6 +37,26 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-17 (รอบ 86): 🚀 ปรับปรุง Navbar เป็น Slide-Out Navigation Drawer จากฝั่งขวา (GitHub-Inspired Style)
+
+ปรับปรุงแถบเมนูนำทางหลักจากเดิมที่เป็น Dropdown Popover ขนาดเล็กห้อยใต้ปุ่ม ให้กลายเป็น **Slide-Out Navigation Drawer สไลด์เปิดจากขอบจอด้านขวา** ตามสไตล์ GitHub Side Navigation:
+
+1. **Slide-Out Drawer จากฝั่งขวา พร้อม Obsidian Backdrop Scrim (`src/app/globals.css`, `src/components/ui/SacredNavDropdown.tsx`)**:
+   - ออกแบบ Drawer เต็มความสูงจอ (`height: 100svh`) สไลด์เข้ามาจากขอบขวาด้วย CSS GPU Hardware Acceleration Easing `cubic-bezier(0.16, 1, 0.3, 1)` (240ms)
+   - มีฉากหลัง Obsidian Tint Scrim (`rgba(23, 21, 18, 0.45)`) ครอบคลุมทั่วทั้งหน้าจอ สัมผัสหรือคลิกเพื่อปิดเมนูได้อย่างนุ่มนวล
+   - ปฏิบัติตามกฎ Containing Block ของ `<header>` โดยใช้ `position: absolute; top: 0; right: 0;` ทำให้ตรึงอยู่กับที่ 100% โดยไม่ต้องใช้คลาส `fixed` ซ้อนในต้นไม้หัวเว็บ (ผ่านด่าน `test-sticky-header.ts` ด่าน 39)
+   - ไม่ใช้ Framer Motion ในแถบเมนูเพื่อคงความเร็ว 0ms First-Frame Response และไม่มี `backdrop-filter` รบกวน Main Thread (ผ่านด่าน `test-motion-quality.ts`)
+
+2. **Drawer Header & Active Route Indicator (GitHub Style)**:
+   - ส่วนหัวมีตราสัญลักษณ์ "วิหารพยากรณ์" พร้อมป้าย "1909 RWS" และปุ่มกากบาท `X` ที่มุมขวาบน พร้อม `tap-overlay`
+   - มี **Active Indicator Bar** แถบสีทองขนาด 1px โค้งมนที่ขอบซ้ายของเมนู และไฮไลต์พื้นหลัง `bg-inset/90` เพื่อระบุหน้าที่ผู้ใช้อยู่ในปัจจุบัน (เช่น `/daily`, `/cards`, `/spreads`) สอดคล้องกับแถบสีฟ้าของ GitHub
+   - จัดหมวดหมู่ชัดเจน: พิธีกรรมยอดนิยม, คลังความรู้ & ผังพยากรณ์, ประวัติการดูดวง, และปุ่มเริ่มดูดวงใหม่ พร้อมแท็ก Pill Badges
+
+3. **Accessibility & Two-Way i18n Guard**:
+   - ผูกกับ `useDialogBehavior` ควบคุมการกด `Escape` เพื่อปิด, กักโฟกัส (Focus Trap), ล็อกสกรอลล์บอดี้ (`overflow: hidden`) และคืนโฟกัสกลับมายังปุ่มแฮมเบอร์เกอร์
+   - รองรับสองภาษาครบถ้วน 100% ป้องกันข้อความไทยหลุดในโหมดอังกฤษ (ผ่านด่าน `test-en-thai-leak.tsx`)
+   - ผ่านการทดสอบ `npm run repo:verify` ครบทั้ง 74 ด่านอย่างสมบูรณ์แบบ 100%
+
 ### 🗓️ 2026-09-17 (รอบ 85): 🚀 แผนยุทธศาสตร์ SEO Master Plan & อัตราเร่งดึงดูดผู้ใช้ (SEO Wave 5)
 
 ขับเคลื่อน SEO และ Conversion Architecture ครบวงจรเพื่อยกระดับเว็บไซต์สู่ Top SERP ของประเทศไทย:
