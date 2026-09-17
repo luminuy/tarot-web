@@ -37,6 +37,35 @@
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 
+### 🗓️ 2026-09-17 (รอบ 87): 🔮 ยกระดับ Navigation Drawer ด้วยภาพหน้าไพ่ 1909 RWS, ลดความรกรุงรัง (Declutter) และปรับ Motion นุ่มนวลระดับสากล
+
+ต่อยอดและปรับปรุง Slide-Out Navigation Drawer ตามคำติชมของผู้ใช้ เพื่อเพิ่มความงามสง่า สบายตา และแอนิเมชันที่นุ่มนวลเป็นธรรมชาติสมบูรณ์แบบ:
+
+1. **เปลี่ยนไอคอนเวกเตอร์ทั่วไปเป็นภาพหน้าไพ่ทาโรต์ 1909 RWS ขนาดย่อม (`CardImage`)**:
+   - แทนที่กล่องไอคอนสี่เหลี่ยมเวกเตอร์แบบเดิม ด้วยภาพจำลองหน้าไพ่ทาโรต์ดั้งเดิม 1909 Rider-Waite-Smith สัดส่วนการ์ดแท้ (`w-[32px] h-[52px]`) ผ่านคอมโพเนนต์ `<CardImage />` ตามกฎแม่บทข้อ 8
+   - กำหนดภาพไพ่เฉพาะทางอย่างมีความหมายลึกซึ้ง:
+     - **ไพ่ยิปซีรายวัน**: The Sun (`major-19.jpg`)
+     - **ดูดวงความรัก**: The Lovers (`major-06.jpg`)
+     - **คำนวณไพ่ประจำตัว**: Wheel of Fortune (`major-10.jpg`)
+     - **ผังการเปิดไพ่ (25 แบบ)**: The Hierophant (`major-05.jpg`)
+     - **ความหมายไพ่ (78 ใบ)**: The Magician (`major-01.jpg`)
+     - **บทความความรู้ไพ่**: The Hermit (`major-09.jpg`)
+     - **แพ็กเกจและสิทธิ์**: Ace of Pentacles (`pentacles-01.jpg`)
+     - **ปรึกษาแม่หมอตัวจริง**: The High Priestess (`major-02.jpg`)
+     - **ประวัติการดูดวง**: Temperance (`major-14.jpg`)
+
+2. **ลดความรกรุงรังและจัดลำดับสายตาใหม่ (Declutter & Quiet Luxury)**:
+   - ถอด Pill Badges สีเทาหนาทึบที่อยู่ริมขวาทุกแถวออกทั้งหมด (`เปิดฟรี`, `ความรัก`, `วันเกิด`, `25 ผัง`, ฯลฯ) คืนพื้นที่หายใจให้รายการดูสะอาด โปร่งสบายตา สไตล์ Quiet Luxury
+   - เกลาข้อความหัวเรื่องและคำอธิบายให้กระชับ ชัดเจน ตัดวงเล็บที่ซ้ำซ้อน
+   - เพิ่มตัวชี้บอกทิศทาง Chevron `>` ขวาสุดที่เรียบหรูและตอบสนองต่อการชี้เมาส์อย่างนุ่มนวล
+   - ปรับหัวหมวดเป็นสไตล์ Editorial Typography ตัวพิมพ์เล็กละมุนตา ไม่แย่งความเด่นจากไพ่
+
+3. **ปรับแต่ง Motion การสไลด์ให้นุ่มนวลลื่นไหล 60/120fps (Buttery-Smooth Fluid Deceleration)**:
+   - ปรับช่วงเวลาสไลด์เปิดเป็น `360ms` ด้วยเส้นโค้งลดความเร็วแบบธรรมชาติระดับสากล `cubic-bezier(0.22, 1, 0.36, 1)` สไลด์เลื่อนเนียนตาไร้การสะดุด
+   - ใช้ `translateX(0) translateZ(0)` บังคับ Layer Compositor ของ GPU แยกอิสระโดยสมบูรณ์ ไม่มีการรีโฟลว์หรือรีเพ้นต์
+   - ผสานเงามัลติเลเยอร์ด้านซ้ายแบบลึกละมุน (`-16px 0 48px -12px rgba(23, 21, 18, 0.24)`) ให้มิติสมจริงเหมือนแผงไม้โบราณเลื่อนเปิด
+   - ผ่านการตรวจสอบความเข้ากันได้ `test-motion-quality.ts`, `test-will-change.ts`, `test-palette-drift.ts`, และ `npm run repo:verify` ครบ 74 ด่าน
+
 ### 🗓️ 2026-09-17 (รอบ 86): 🚀 ปรับปรุง Navbar เป็น Slide-Out Navigation Drawer จากฝั่งขวา (GitHub-Inspired Style)
 
 ปรับปรุงแถบเมนูนำทางหลักจากเดิมที่เป็น Dropdown Popover ขนาดเล็กห้อยใต้ปุ่ม ให้กลายเป็น **Slide-Out Navigation Drawer สไลด์เปิดจากขอบจอด้านขวา** ตามสไตล์ GitHub Side Navigation:
