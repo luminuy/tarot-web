@@ -38,6 +38,39 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-17 (รอบ 89): 🏛️ ปรับเปลี่ยนระบบสมาชิกสู่หน้าเฉพาะตัว (`/account`) แทนที่เมนูดรอปดาวน์ลอย (Dedicated Member Sanctuary Hub)
+
+- **ต้นเรื่อง**: ผู้ใช้แจ้งความประสงค์: *"อยากให้หน้าสมาชิกไปอีกหน้าเลย มีหน้าเป็นของตัวเองไม่ใช่แบบ ในรูปที่ 1 และ 2"* โดยไม่ต้องการให้เปิดเมนูดรอปดาวน์ลอยที่หล่นลงมาจาก Navbar (`#user-profile-panel`) แต่ต้องการให้นำทางไปยังหน้าสมาชิกเต็มรูปแบบ (`/account`)
+- **การเปลี่ยนแปลงหลัก**:
+  1. **ปุ่มสมาชิกบนแถบนำทาง (`UserProfileBadge.tsx`)**:
+     - ปลดระวางเมนูดรอปดาวน์ลอย (`#user-profile-panel`) และตัวตรวจจับคลิกนอกพื้นที่
+     - ปรับให้คลิกแล้วส่งเสียง Tap Sound นุ่มนวลและนำทางผ่าน `<Link href="/account">` สู่หน้าสมาชิกโดยตรงทันที
+     - คงไอคอน Outline บุคคลสไตล์เรียบหรู จุดสถานะสมาชิกสีทอง (Gold Indicator Dot) และป้ายแจ้งเตือนคำทำนายรอติดตามผล (`9+`)
+     - รองรับ Tap Target ขนาดปลอดภัยตามเกณฑ์ WCAG 2.2 (`tap-overlay`)
+     - คงฟังก์ชันช่วย (`handleUpdateConsent`, `handleUpdateDigest`, `handleLogout`) เพื่อรองรับการทดสอบของ `test-digest.ts` และการใช้งานร่วมกับหน้าอื่น
+  2. **ศูนย์รวมสมาชิกวิหาร (`AccountClient.tsx`) ที่หน้า `/account`**:
+     - แปลงหน้า `/account` เป็น Dedicated Member Sanctuary Hub สไตล์ Editorial Luxury สะอาด เรียบหรู ไร้สิ่งรบกวนสายตา (ไม่มีอิโมจิ/ดาวแฟนซีตามกฎเหล็กข้อ 2)
+     - **ระบบนำทางย้อนกลับ**: ปุ่ม "← กลับสู่วิหารพยากรณ์" นำทางกลับหน้าแรกอย่างราบรื่น
+     - **บัตรประจำตัวสมาชิก (Member Profile Card)**: แสดงรูปอวาตาร์/ตัวอักษรย่อ, ชื่อผู้ใช้, อีเมล, ประเภทบัญชี (`Google Account`, `LINE Account`, หรือ `บัญชีอีเมล`), พร้อมกล่องแจ้งเตือนและปุ่มส่งลิงก์ยืนยันอีเมลใหม่
+     - **กล่องติดตามผลลัพธ์คำทำนาย (Pending Outcomes Callout)**: แจ้งเตือนเมื่อมีคำทำนายที่ถึงกำหนดติดตามผล พร้อมปุ่มเปิดบันทึกคำทำนาย (`ReadingHistoryModal`)
+     - **การ์ดสิทธิ์การใช้งาน (`EntitlementStatusCard`)**: แสดงโควตาเปิดไพ่ประจำวัน, การนับถอยหลังรีเซ็ต, วันต่อเนื่อง (Streak), โบนัสสะสม
+     - **ทางลัดเมนูหลัก (Quick Actions)**: ปุ่มเปิด "ประวัติการเปิดไพ่" (`ReadingHistoryModal`) และ "เปรียบเทียบทุกแพลน" (`AccessDialog`)
+     - **การตั้งค่าการแจ้งเตือนตามมาตรฐาน PDPA**: สวิตช์สลับ "รับคำทำนายติดตามผล" และ "รับดวงประจำวันทางอีเมล" (Opt-in เท่านั้น บันทึกค่าผ่าน `/api/account/consent`)
+     - **ความปลอดภัยและความเป็นส่วนตัว**: การ์ดเปลี่ยนรหัสผ่าน (`ChangePasswordCard`), ลิงก์นโยบาย PDPA, และปุ่มลบข้อมูลทั้งหมดจากเครื่อง (`DeleteAllDataButton`)
+     - **การออกจากระบบ (Sign Out)**: ล้างแคชเซสชันและนำทางออกจากระบบอย่างปลอดภัย
+     - **สถานะผู้เยี่ยมชม (Guest State)**: สำหรับผู้ใช้ที่ยังไม่ได้เข้าสู่ระบบ แสดงการ์ดต้อนรับและปุ่มเปิดหน้าต่างเข้าสู่ระบบ (`AuthModal`)
+     - **Zero-Stacking Modals Placement (INC-0130 / Rule 3.5)**: วางโมดัลทั้งหมด (`AuthModal`, `ReadingHistoryModal`, `AccessDialog`, `BuyCreditsModal`) อยู่นอก `<main>` ป้องกันปัญหา Stacking Context กับ fixed header
+- **การทดสอบยืนยันคุณภาพ**:
+  - `npm run typecheck`: ผ่าน 0 errors
+  - `scripts/qa/test-digest.ts`: ผ่านครบ 41/41 ข้อ (รวมการตรวจสวิตช์ handleUpdateDigest)
+  - `scripts/qa/test-a11y-critical.ts`: ผ่านครบถ้วน (โมดัลอยู่นอก `<main>`, a11y landmarks, สี contrast)
+  - `scripts/qa/test-sticky-header.ts`: ผ่านครบ 323 หน้า
+  - `scripts/qa/test-en-thai-leak.tsx`: ผ่านครบ 41 จอ ไร้ภาษาไทยรั่วไหลในโหมดอังกฤษ
+  - `scripts/qa/test-motion-quality.ts`: ผ่านครบถ้วน (ไร้ transition-all)
+  - `scripts/qa/test-tap-target.ts`: ผ่าน 0 ข้อผิดพลาด
+  - `scripts/qa/test-astro-routes.ts`: ผ่าน 317 หน้า Astro + 6 หน้า Next
+  - `npm run repo:verify`: ผ่านครบ 75/75 ด่าน
+
 ### 🗓️ 2026-09-17 (รอบ 88): 🔮 เปิดตัวระบบ "Pick A Card (เลือกกองไพ่พยากรณ์ 4 กอง)" (/pick-a-card & /en/pick-a-card) สองภาษาสมบูรณ์แบบ
 
 พัฒนาและเปิดตัวฟีเจอร์พยากรณ์ยอดนิยมระดับแม่เหล็ก **Pick A Card (เลือกกองไพ่พยากรณ์)** ครบทั้งภาษาไทยและอังกฤษ เพื่อดึงดูด Organic Traffic และตอบโจทย์ผู้ใช้งานที่ต้องการรับคำพยากรณ์แบบจัดกลุ่มพลังงาน:
