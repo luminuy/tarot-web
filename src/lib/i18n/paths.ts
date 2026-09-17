@@ -26,6 +26,7 @@ export const EN_TWIN_ROUTES = [
   "/spreads",
   "/daily",
   "/love/1-card",
+  "/pick-a-card",
   "/blog",
   "/privacy",
   "/contact",

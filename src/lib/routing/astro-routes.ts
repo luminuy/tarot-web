@@ -38,6 +38,7 @@ export const ASTRO_ROUTE_PREFIXES = [
   "/reading",
   "/daily",
   "/love",
+  "/pick-a-card",
 ] as const;
 
 /** ตัด `/en` นำหน้าออก เพื่อเทียบกับรายการฝั่งไทยชุดเดียว */
