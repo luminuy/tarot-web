@@ -98,7 +98,7 @@ PORT=3001 npm run dev
 
 | คำสั่ง | วัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 67 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably Fair, Agent Lock ฯลฯ) |
+| `npm run repo:verify` | **(สำคัญที่สุด)** รันชุดตรวจความสมบูรณ์ 68 ด่าน (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably Fair, Agent Lock ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Typecheck อย่างเดียว (ต้องได้ 0 errors เสมอ) |
 | `npm run build:astro` | คอมไพล์หน้าสแตติก Astro 305 หน้า (cards, spreads, blog, about, privacy, contact) เข้า `dist/` |
 | `npm run build:worker` | บิลด์ระบบทั้งหมดรวมกัน (Astro + OpenNext Worker) พร้อมรวม assets เตรียม deploy |
@@ -107,7 +107,7 @@ PORT=3001 npm run dev
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงาน `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` |
 | `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จ |
 | `npm run commit` | บันทึก Commit ผ่านระบบ Git Author Guard |
-| `npm run pr:auto` | ตรวจ 67 ด่าน ➔ Push ➔ สร้าง PR ➔ Auto-Merge ➔ Deploy อัตโนมัติ |
+| `npm run pr:auto` | ตรวจ 68 ด่าน ➔ Push ➔ สร้าง PR ➔ Auto-Merge ➔ Deploy อัตโนมัติ |
 | `npm run git:tidy` | เก็บกวาด Branch ที่ถูก Merge ไปแล้วออกจากเครื่องและ Remote |
 
 ---

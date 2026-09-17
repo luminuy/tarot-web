@@ -155,6 +155,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "✍️ คุณภาพภาษาไทยของข้อความที่เราเขียนเอง (ไม้ยมกเว้นวรรค · นะคะ · สระ แ) ไม่ใช่แค่ผลจากโมเดล", cmd: TSX, args: ["scripts/qa/test-thai-content-quality.ts"] },
   { label: "🔌 Service Worker ไม่ทำให้ผู้ใช้ใหม่โหลดหน้าสองรอบ (controllerchange ครั้งแรกต้องไม่ reload)", cmd: TSX, args: ["scripts/qa/test-sw-reload.ts"] },
   { label: "🛡️ ด่านตรวจด่านด้วยกันเอง (ห้ามข้ามเงียบเมื่อไฟล์หาย · ห้ามวนคลังว่างแล้วขึ้นผ่าน)", cmd: TSX, args: ["scripts/qa/test-gate-integrity.ts"] },
+  { label: "💰 เส้นทางเงิน (เครดิตเพิ่มเท่าขนาดแพ็กพอดี · ยิงซ้ำได้ครั้งเดียว · ล้มเหลวต้องไม่ใช่ 2xx และยอดไม่ขยับ)", cmd: TSX, args: ["scripts/qa/test-money-path.ts"] },
 ];
 
 /**

@@ -4,6 +4,11 @@ import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
 import { getAppDB } from "@/lib/platform/db";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
 import { grantBonus } from "@/lib/entitlement/entitlement";
+import {
+  decidePurchaseGrant,
+  orderIdOfPaymentRow,
+  type PaymentRowForGrant,
+} from "@/lib/entitlement/purchase";
 
 export const runtime = "nodejs";
 
@@ -44,12 +49,18 @@ export async function POST(request: Request) {
 
     // Look up payment by providerRef (chargeId)
     const db = await getAppDB();
+    /*
+     * 🔴 R-08: ต้องดึง `order_id` · `currency` · `status` · `provider` · `user_id` มาด้วย
+     * ของเดิมดึงแค่ 4 คอลัมน์แล้วประกอบกุญแจกันจ่ายซ้ำจาก `booking_id` ซึ่งเป็น NULL
+     * สำหรับการเติมเครดิตทุกรายการ (เลขออร์เดอร์ย้ายไป `order_id` ตั้งแต่ migrations/0015)
+     */
     const paymentRow = await db
       .prepare(
-        "SELECT id, booking_id, ticket_id, amount_satang FROM payments WHERE provider_ref = ? LIMIT 1"
+        `SELECT id, order_id, booking_id, user_id, ticket_id, amount_satang, currency, status, provider
+           FROM payments WHERE provider_ref = ? LIMIT 1`
       )
       .bind(chargeId)
-      .first<{ id: string; booking_id: string; ticket_id: string | null; amount_satang: number }>();
+      .first<PaymentRowForGrant>();
 
     if (!paymentRow) {
       // Return 200 to acknowledge webhook even if event is for untracked charge
@@ -71,16 +82,36 @@ export async function POST(request: Request) {
       const metadata = (data.metadata ?? {}) as Record<string, unknown>;
       const buyerId = typeof metadata.userId === "string" ? metadata.userId : "";
       const boughtPackageId = typeof metadata.packageId === "string" ? metadata.packageId : "";
+      const paidOrderId = orderIdOfPaymentRow(paymentRow);
       if (!paymentRow.ticket_id && buyerId && boughtPackageId) {
-        const pkg = getCreditPackageById(boughtPackageId);
-        // ยอดเงินที่บันทึกไว้ต้องตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์ ไม่งั้นไม่แจก
-        if (pkg && Number(paymentRow.amount_satang) === pkg.amountSatang) {
-          await grantBonus(buyerId, pkg.credits, `purchase_${paymentRow.booking_id}`);
+        /*
+         * ตัดสินด้วยตรรกะก้อนเดียวกับ `checkout/confirm` — กุญแจกันจ่ายซ้ำจึงตรงกันเสมอ
+         * (เส้นทางนี้เห็นสถานะ `paid` ที่เพิ่งเขียนไปเมื่อบรรทัดที่แล้ว จึงส่ง status: "paid")
+         */
+        const decision = decidePurchaseGrant({
+          row: { ...paymentRow, user_id: paymentRow.user_id ?? buyerId, status: "paid" },
+          pkg: getCreditPackageById(boughtPackageId),
+          userId: buyerId,
+          orderId: paidOrderId,
+          allowSimulator: false,
+        });
+
+        if (!decision.ok) {
+          console.warn("[Payment Webhook] ไม่แจกโควตา", { orderId: paidOrderId, code: decision.code });
         } else {
-          console.warn(
-            "[Payment Webhook] ยอดเงินไม่ตรงกับแพ็กเกจ — ไม่แจกโควตา",
-            paymentRow.booking_id
-          );
+          // 🔴 T-04 · R-08: เขียนเครดิตไม่ลง = ต้องตอบไม่ใช่ 2xx ให้เกตเวย์ยิงซ้ำ
+          // ของเดิมทิ้งค่าที่ grantBonus คืนมาแล้วตอบ 200 — "จ่ายแล้วแต่ของไม่ถึงมือ" เงียบสนิท
+          const granted = await grantBonus(buyerId, decision.credits, decision.reason);
+          if (!granted) {
+            console.error("[Payment Webhook] จ่ายเงินสำเร็จแต่เขียนเครดิตไม่ลง", {
+              buyerId,
+              orderId: paidOrderId,
+            });
+            return NextResponse.json(
+              { error: "บันทึกโควตาไม่สำเร็จ", orderId: paidOrderId },
+              { status: 500 }
+            );
+          }
         }
       }
 
