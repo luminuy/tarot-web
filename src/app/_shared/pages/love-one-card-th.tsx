@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 const loveOgImages = buildPageOgImage({
   title: "ดูดวงความรัก 1 ใบ",
@@ -13,7 +14,7 @@ const loveOgImages = buildPageOgImage({
 
 export const loveOneCardMetadataTh: Metadata = {
   // layout เติมท้าย " · SeerTarot" ให้เองอยู่แล้ว — เขียน "| SeerTarot" เองอีกจะซ้ำสองรอบ
-  title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบหัวใจ",
+  title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่น ๆ ไขคำตอบหัวใจ",
   description:
     "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแท้ Rider-Waite 78 ใบ ไขทุกข้อสงสัยหัวใจ ทั้งคนโสด คนคุยสถานะไม่ชัด มีคู่ หรือเพิ่งเลิกรา สับไพ่ด้วยตนเอง",
   keywords: [
@@ -28,7 +29,7 @@ export const loveOneCardMetadataTh: Metadata = {
   ],
   alternates: buildAlternates("/love/1-card", { locale: "th", englishTwin: true }),
   openGraph: {
-    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบหัวใจ · SeerTarot",
+    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่น ๆ ไขคำตอบหัวใจ · SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบตอบคำถามหัวใจ แม่นยำทุกสถานะ: โสดสนิท มีคนคุย มีคนรัก หรือคิดถึงคนเก่า ไร้โฆษณาคั่น",
     url: `${SITE_ORIGIN}/love/1-card`,
@@ -39,7 +40,7 @@ export const loveOneCardMetadataTh: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่นๆ ไขคำตอบหัวใจ · SeerTarot",
+    title: "ดูดวงความรัก 1 ใบ ไพ่ยิปซีแม่น ๆ ไขคำตอบหัวใจ · SeerTarot",
     description:
       "เปิดไพ่ยิปซี 1 ใบตอบคำถามหัวใจ แม่นยำทุกสถานะ โสด/มีคนคุย/มีแฟน/คนเก่า ฟรี 100%",
     images: [loveOgImages[0].url],
@@ -136,15 +137,15 @@ export function LoveOneCardBodyTh({ ritual }: { ritual: ReactNode }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink py-6 sm:py-10 px-4 sm:px-6 font-sans relative overflow-x-clip">

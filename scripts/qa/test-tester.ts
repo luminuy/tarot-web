@@ -36,7 +36,7 @@ async function main() {
   check("verifyTesterPassword: รหัสผิด → false", verifyTesterPassword("wrong") === false);
   check("verifyTesterPassword: รหัสว่าง → false", verifyTesterPassword("") === false);
 
-  const token = signTesterSession();
+  const token = await signTesterSession();
   check("sign→verify session คืน true", verifyTesterSession(token) === true);
   check("verify session: token ขยะ → false", verifyTesterSession("garbage") === false);
   check("verify session: token ถูกแก้ → false", verifyTesterSession(token.slice(0, -4) + "zzzz") === false);
@@ -52,7 +52,31 @@ async function main() {
   // ไม่ตั้งรหัส / รหัสสั้น → ปิดทั้งหมด
   process.env.TESTER_PASSWORD = "short";
   check("รหัสสั้นกว่า 12 → isTesterConfigured = false", isTesterConfigured() === false);
-  check("รหัสสั้น → verifyTesterSession = false", verifyTesterSession(signTesterSession()) === false);
+  check("รหัสสั้น → verifyTesterSession = false", verifyTesterSession(await signTesterSession()) === false);
+
+  // ── T-15: ออกจากระบบแล้วคุกกี้เดิมต้องใช้ไม่ได้ทันที ไม่ต้องรอหมดอายุ ──────────
+  // ของเดิมคุกกี้ไม่มี `sid` เลย `POST /logout` จึงลบได้แค่สำเนาในเบราว์เซอร์เครื่องนั้น
+  // คุกกี้ที่ถูกขโมยไปแล้วยังใช้ได้ครบ 30 วันและเพิกถอนไม่ได้
+  process.env.TESTER_PASSWORD = "revoke-pass-1234567890";
+  const {
+    signTesterSession: signLive,
+    verifyTesterSessionLive,
+    revokeTesterSession,
+    readTesterSessionId,
+  } = await import("../../src/lib/auth/tester-auth");
+
+  const liveToken = await signLive("คุณทดสอบ");
+  check("คุกกี้ผู้ทดสอบมี sid อยู่ข้างใน", Boolean(readTesterSessionId(liveToken)));
+  check("ก่อนถอน: verifyTesterSessionLive = true", (await verifyTesterSessionLive(liveToken)) === true);
+  await revokeTesterSession(liveToken);
+  check(
+    "หลังถอน: verifyTesterSessionLive = false (ลายเซ็นยังถูกแต่ถูกเพิกถอนแล้ว)",
+    (await verifyTesterSessionLive(liveToken)) === false,
+  );
+  check(
+    "หลังถอน: ลายเซ็นยังผ่านอยู่ — พิสูจน์ว่าด่านที่กันได้คือ allowlist ไม่ใช่ลายเซ็น",
+    verifyTesterSession(liveToken) === true,
+  );
 
   // ── allowlist อีเมล UNLIMITED_EMAILS (บัญชีจริงใช้ไม่จำกัด ผ่านหน้าต่างเข้าสู่ระบบ) ──
   const { isUnlimitedEmail, unlimitedEmailCount } = await import("../../src/lib/auth/unlimited-users");

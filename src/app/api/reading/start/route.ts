@@ -8,6 +8,8 @@ import { assessCrisisRisk } from "@/lib/safety/ai-classifier";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { saveReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
+import { looksLikePromptInjection } from "@/lib/ai/prompt-guard";
 import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { DAILY_LIMIT, GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
@@ -15,11 +17,20 @@ import { createCommitment, normalizeClientSeed } from "@/lib/tarot/shuffle";
 
 export const runtime = "nodejs";
 
+/**
+ * 🧱 T-13: ปฏิเสธข้อความที่ตั้งใจปิดแท็บของ prompt ตั้งแต่ชั้น Zod
+ * ทุกฟิลด์ที่เดินทางไปลงใน `<user_profile>` ของ prompt ต้องผ่านตัวนี้
+ */
+const noInjection = (label: string) =>
+  z.string().refine((v) => !looksLikePromptInjection(v), {
+    message: `${label} มีอักขระที่ไม่อนุญาต กรุณาพิมพ์เป็นข้อความธรรมดา`,
+  });
+
 const BodySchema = z.object({
   spreadId: z.string().min(1),
-  question: z.string().max(500).default(""),
+  question: noInjection("คำถาม").max(500).default(""),
   personaId: z.string().default("warm"),
-  nickname: z.string().max(40).optional(),
+  nickname: noInjection("ชื่อเล่น").max(40).optional(),
   category: z.enum(["general", "love", "work", "money", "self"]).optional(),
   lang: z.enum(["th", "en"]).default("th"),
   // เมล็ดสุ่มที่ไคลเอนต์สร้างเองด้วย crypto.getRandomValues — หัวใจของ provably-fair
@@ -28,9 +39,9 @@ const BodySchema = z.object({
   clientSeed: z.string().min(1).max(4096).optional(),
   intake: z
     .object({
-      situation: z.string().max(500).optional(),
-      feeling: z.string().max(300).optional(),
-      hoped: z.string().max(300).optional(),
+      situation: noInjection("สถานการณ์").max(500).optional(),
+      feeling: noInjection("ความรู้สึก").max(300).optional(),
+      hoped: noInjection("สิ่งที่หวัง").max(300).optional(),
     })
     .default({}),
 });
@@ -51,6 +62,17 @@ export async function POST(request: Request) {
 
   if (!privileged) {
     const clientIp = getClientIdentifier(request);
+    // 🚦 T-11: เพดานจริงอยู่บน KV/Redis — `Map` ต่อ isolate กันอะไรไม่ได้บน Workers
+    const edge = await consumeEdgeRateLimits([
+      { key: edgeRateLimitKey("start:ip", clientIp), config: { max: 20, windowSec: 3600 } },
+    ]);
+    if (!edge.allowed) {
+      return createRateLimitResponse(
+        edge.retryAfterSec,
+        "วันนี้เปิดไพ่ถี่ไปหน่อยแล้วนะ พักสักครู่แล้วค่อยกลับมา",
+      );
+    }
+
     const limit = checkRateLimit(`start:${clientIp}`, {
       maxRequests: 20,
       windowSeconds: 3600,

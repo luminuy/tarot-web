@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import type { Metadata } from "next";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,30 @@ export default async function ReaderDetailPage({
     ],
   };
 
+  /**
+   * 🔎 T-48: หน้าโปรไฟล์แม่หมอเคยปล่อยแค่ `BreadcrumbList`
+   *
+   * ⛔ **ห้ามเพิ่ม `AggregateRating` เด็ดขาด** จนกว่าจะมีระบบรีวิวจริงที่ผู้ใช้เห็นบนหน้านี้
+   * structured data ที่ไม่ตรงกับเนื้อหาที่มองเห็นคือเหตุให้ Google ถอด rich result
+   * และลงโทษทั้งโดเมน ไม่ใช่แค่หน้านี้หน้าเดียว
+   */
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${SITE_ORIGIN}/readers/${reader.id}#person`,
+    name: reader.displayName,
+    url: `${SITE_ORIGIN}/readers/${reader.id}`,
+    jobTitle: "นักพยากรณ์ไพ่ทาโรต์",
+    ...(reader.bio ? { description: reader.bio } : {}),
+    ...(reader.avatarUrl ? { image: reader.avatarUrl } : {}),
+    ...(reader.specialties.length > 0 ? { knowsAbout: reader.specialties } : {}),
+    worksFor: {
+      "@type": "Organization",
+      name: "SeerTarot",
+      url: SITE_ORIGIN,
+    },
+  };
+
   return (
     <>
       <SiteHeader />
@@ -54,7 +79,11 @@ export default async function ReaderDetailPage({
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(personJsonLd) }}
         />
 
         <div className="max-w-4xl mx-auto space-y-6 relative z-10">

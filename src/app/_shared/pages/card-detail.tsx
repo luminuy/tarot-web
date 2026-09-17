@@ -13,6 +13,7 @@ import { clampDescription, pickTitle } from "@/lib/config/meta-length";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb, type Crumb } from "../seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 export interface CardDetailPageProps {
   params: Promise<{ id: string }>;
@@ -225,8 +226,8 @@ export function CardDetailContent({
 
   return (
     <main id="main-content" tabIndex={-1} className={CARD_DETAIL_MAIN_CLASS}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(cardDetailJsonLd(card, locale)) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(cardDetailBreadcrumbJsonLd(card, locale)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(cardDetailJsonLd(card, locale)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(cardDetailBreadcrumbJsonLd(card, locale)) }} />
       <CardDetailView
         card={card}
         prevCard={prevCard}

@@ -4,6 +4,7 @@ import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { buildAlternates, DEFAULT_SUPPORT_EMAIL, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { buildBreadcrumbJsonLd, homeCrumb } from "@/app/_shared/seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 /**
  * 🏛️ หน้า "เกี่ยวกับเรา"
@@ -90,8 +91,8 @@ export function AboutBodyTh() {
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdAbout) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdAbout) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         <div className="text-center space-y-3 pb-6 border-b border-line/40">

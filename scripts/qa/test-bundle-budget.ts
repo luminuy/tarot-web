@@ -27,11 +27,69 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "../..");
 
+
+/**
+ * 📌 สามข้อจากผลตรวจ 2026-09-16 ที่ **ตั้งใจไม่ทำ** พร้อมเหตุผลที่วัดมาแล้ว
+ * ---------------------------------------------------------------------------
+ * เขียนไว้ตรงนี้เพราะเป็นที่แรกที่คนถัดไปจะมาหาเวลาสงสัยเรื่องน้ำหนักหน้าเว็บ
+ *
+ * • **T-23 แยก CSS ต่อหน้า** — ทำไม่ได้กับ Tailwind v4 ซึ่งสร้าง "สไตล์ชีตยูทิลิตี้ก้อนเดียว"
+ *   จากการสแกนซอร์สทั้งโปรเจกต์ Astro จึงไม่มีอะไรให้แยก · ทางเลือกที่เหลือคือสกัด
+ *   critical CSS ซึ่งต้องรันเบราว์เซอร์ตอนบิลด์และแลกมาด้วยความเสี่ยง FOUC ถาวร
+ *   ค่าปัจจุบัน 22–23 KB gzip ยังอยู่ในงบ `MAX_CSS_GZIP_KB` สบาย ๆ จึงไม่คุ้มที่จะแลก
+ *
+ * • **T-24 ใส่ `unicode-range` ให้ฟอนต์** — ต้องสร้างไฟล์ .woff2 ชุดใหม่ 8 ไฟล์
+ *   (ไทย/ละติน × 4 น้ำหนัก) ด้วย `npm run fonts:subset` ซึ่งต้องใช้ `pyftsubset`
+ *   จาก fonttools · ทำครึ่งทางไม่ได้: ประกาศ `unicode-range` โดยไม่แยกไฟล์จริง
+ *   = หน้า `/en` จะไม่มีฟอนต์ละตินใช้เลย ซึ่งแย่กว่าเดิมมาก
+ *   งานนี้ต้องทำในเครื่องที่มี fonttools แล้ว commit ไฟล์ฟอนต์ใหม่เข้ามาพร้อมกัน
+ *
+ * • **T-25 ให้ Cloudflare เสิร์ฟ 404 จากขอบ** — ต้องเปลี่ยน `not_found_handling`
+ *   ใน `wrangler.jsonc` จาก `"none"` เป็น `"404-page"` ซึ่ง **จะทำให้ทุกเส้นทางที่ไม่มี
+ *   ไฟล์ static ตรงกันได้หน้า 404 แทนที่จะวิ่งไปหา Worker** — นั่นคือ `/account` ·
+ *   `/admin` · `/s/[id]` · `/api/**` ทั้งหมด = เว็บพังทั้งฝั่งแอป
+ *   ค่านั้นคือสิ่งเดียวที่ทำให้สถาปัตยกรรมสองเครื่องเรนเดอร์นี้ทำงานได้ ห้ามแตะ
+ *   ถ้าต้องการลด Worker invocation จากบอทไล่ URL ตาย ให้ทำที่กฎ WAF บน Dashboard
+ *   (แนวเดียวกับที่ปิด Bot Fight Mode ใน ISSUE-047) ไม่ใช่ที่โค้ด
+ */
+
 export interface RouteBudget {
   route: string;
   maxJsGzipKb: number;
   maxHtmlGzipKb: number;
+  /**
+   * `true` = หน้านี้มีภาพไพ่ "ใบใหญ่เหนือพับ" ที่เป็นผู้สมัคร LCP จริง
+   * จึงต้องมี `fetchpriority="high"` หนึ่งตัวพอดี และภาพนั้นต้องไม่เป็น `loading="lazy"`
+   *
+   * ⚠️ **ต้องเปิดทีละหน้าโดยดูของจริง ห้ามเปิดเหมาทั้งหมด**
+   * หลายหน้ามีภาพไพ่ขนาดเล็กมาก (ตาราง 78 ใบใช้ 36px · ตัวเลือกห้องของ `/daily` ใช้ 48px)
+   * ภาพพวกนั้นเป็น LCP ไม่ได้อยู่แล้ว การบังคับให้ใส่ `fetchpriority="high"` จะแย่งลำดับ
+   * ความสำคัญไปจากสิ่งที่เป็น LCP จริง = ทำให้ช้าลง ไม่ใช่เร็วขึ้น
+   *
+   * และหน้าที่ไพ่ "เริ่มต้นคว่ำหน้า" ตามกฎเหล็กข้อ 4 (`/` ตอนยังไม่จั่ว · `/daily` · ผังต่าง ๆ)
+   * ก็ไม่มีภาพหน้าไพ่ให้จัดลำดับตั้งแต่แรก
+   */
+  expectLcpImage?: boolean;
 }
+
+/**
+ * 🔴 บทเรียน T-26 — งบที่มองไม่เห็นครึ่งหนึ่งของน้ำหนักจริง
+ * ---------------------------------------------------------------------------
+ * ของเดิมมีแค่ `maxJsGzipKb` กับ `maxHtmlGzipKb` ขณะที่วัดจริงเมื่อ 2026-09-16 พบว่า
+ *   • สไตล์ชีต 145 KB ดิบ (22 KB br) — **ทรัพยากรเดียวที่บล็อกการเรนเดอร์**
+ *   • ฟอนต์ที่พรีโหลด 67,828 B ถูกขอด้วยลำดับสูงสุดก่อนภาพทุกใบ
+ * รวมราว 90 KB ต่อหน้าที่ **ไม่มีอะไรใน CI มองเห็นเลย**
+ *
+ * และไม่มีอะไรยืนยันสามข้อที่กระทบ LCP โดยตรง:
+ *   1. มี `fetchpriority="high"` หน้าละหนึ่งตัวพอดี
+ *   2. `<img>` ตัวแรก ๆ ต้องไม่เป็น `loading="lazy"`
+ *   3. `cache-control` ของ HTML ต้องไม่ใช่ `no-store`
+ */
+
+/** งบรวมของสไตล์ชีตทุกไฟล์ที่หน้าหนึ่งต้องโหลด (gzip, KB) */
+const MAX_CSS_GZIP_KB = 32;
+/** งบรวมของไฟล์ฟอนต์ที่ถูก `<link rel="preload">` ในหน้าหนึ่ง (ไบต์ดิบ) */
+const MAX_PRELOADED_FONT_BYTES = 40_000;
 
 /**
  * งบประมาณน้ำหนักหน้าเว็บ (Ratchet Budget)
@@ -87,6 +145,7 @@ export const BUDGETS: RouteBudget[] = [
   },
   {
     route: "/cards",
+    expectLcpImage: true,
     /*
      * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (2026-09-15) — รัดเพดานลงตามของจริงทันที
      * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
@@ -101,6 +160,7 @@ export const BUDGETS: RouteBudget[] = [
   },
   {
     route: "/cards/major-00",
+    expectLcpImage: true,
     /*
      * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (2026-09-15) — รัดเพดานลงตามของจริงทันที
      * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
@@ -115,6 +175,7 @@ export const BUDGETS: RouteBudget[] = [
   },
   {
     route: "/blog",
+    expectLcpImage: true,
     /*
      * 🪶 ย้ายมาเรนเดอร์ด้วย Astro แล้ว (คลื่นที่ 2 · 2026-09-15) — รัดเพดานลงตามของจริงทันที
      * ไม่มี React runtime + router + เพย์โหลด RSC ติดมากับทุกหน้าอีกต่อไป
@@ -317,6 +378,9 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
     maxHtmlGzipKb: number;
     jsOk: boolean;
     htmlOk: boolean;
+    cssGzipKb: number;
+    fontPreloadBytes: number;
+    lcpIssues: string[];
     topChunks: { name: string; sizeKb: number }[];
   }[] = [];
 
@@ -402,11 +466,75 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
       const jsGzipKb = Math.round(realJsGzipBytes / 1024);
       const totalJsGzipKb = Math.round(totalJsGzipBytes / 1024);
 
+      /*
+       * 🎨 สไตล์ชีตที่หน้านี้ต้องโหลด — ทรัพยากรเดียวที่บล็อกการเรนเดอร์ (T-26)
+       * นับทั้งของ Astro (`/_astro/*.css`) และของ Next (`/_next/static/css/*.css`)
+       */
+      let cssGzipBytes = 0;
+      const cssHrefs = new Set(
+        (html.match(/href="((?:\/_astro|\/_next\/static\/css)\/[^"]+\.css)"/g) ?? []).map(
+          (m) => (m.match(/href="([^"]+)"/) as RegExpMatchArray)[1],
+        ),
+      );
+      for (const href of cssHrefs) {
+        const base = href.startsWith("/_next/") ? path.join(ROOT, ".next") : path.join(ROOT, "dist");
+        const file = path.join(base, href.replace(/^\/_next\//, "").replace(/^\//, ""));
+        if (fs.existsSync(file)) cssGzipBytes += zlib.gzipSync(fs.readFileSync(file)).length;
+      }
+      const cssGzipKb = Math.round(cssGzipBytes / 1024);
+
+      /* ✒️ ฟอนต์ที่ถูกพรีโหลด — แย่งลำดับความสำคัญกับภาพที่เป็น LCP จริง (T-22 · T-26) */
+      let fontPreloadBytes = 0;
+      for (const m of html.match(/<link[^>]+rel="preload"[^>]*>/g) ?? []) {
+        if (!/as="font"/.test(m)) continue;
+        const href = m.match(/href="([^"]+)"/)?.[1];
+        if (!href) continue;
+        const file = path.join(ROOT, "public", href.replace(/^\//, ""));
+        if (fs.existsSync(file)) fontPreloadBytes += fs.statSync(file).size;
+      }
+
+      /*
+       * 🎯 ด่าน LCP สามข้อที่ CI ไม่เคยยืนยันมาก่อน (T-26)
+       *
+       * ⚠️ **กับดักการวัดที่ต้องรู้**: React 19 เรนเดอร์ prop `fetchPriority` ออกมาเป็น
+       * `fetchPriority="high"` (ตัวพิมพ์ผสม) ตัวแอตทริบิวต์ใน HTML ไม่สนตัวพิมพ์เล็กใหญ่
+       * เบราว์เซอร์จึงอ่านถูกต้อง **แต่ `grep 'fetchpriority="high"'` แบบสนตัวพิมพ์จะได้ 0**
+       * และทำให้สรุปผิดว่า "ทั้งเว็บไม่มี fetchpriority เลย" — ด่านนี้จึงต้องเทียบแบบไม่สนตัวพิมพ์
+       */
+      const lcpIssues: string[] = [];
+      const highPriorityTags = html.match(/<img[^>]+fetchpriority="high"[^>]*>/gi) ?? [];
+
+      if (b.expectLcpImage) {
+        if (highPriorityTags.length !== 1) {
+          lcpIssues.push(
+            `ต้องมี fetchpriority="high" หน้าละ 1 ตัวพอดี แต่พบ ${highPriorityTags.length} ตัว ` +
+              `(เทียบแบบไม่สนตัวพิมพ์ — React เขียนออกมาเป็น fetchPriority)`,
+          );
+        } else if (/loading="lazy"/i.test(highPriorityTags[0] ?? "")) {
+          lcpIssues.push(
+            'ภาพที่ตั้ง fetchpriority="high" ยังเป็น loading="lazy" อยู่ — สองอย่างนี้ขัดกันเอง',
+          );
+        }
+      } else if (highPriorityTags.length > 1) {
+        // หน้าที่ไม่ได้ประกาศว่ามี LCP image ก็ยังห้ามมีหลายตัว — จัดลำดับให้ทุกภาพ = ไม่ได้จัดลำดับให้ใครเลย
+        lcpIssues.push(
+          `พบ fetchpriority="high" ${highPriorityTags.length} ตัวในหน้าที่ไม่ได้ประกาศภาพ LCP ไว้`,
+        );
+      }
+
       const jsOk = jsGzipKb <= b.maxJsGzipKb;
       const htmlOk = htmlGzipKb <= b.maxHtmlGzipKb;
+      const cssOk = cssGzipKb <= MAX_CSS_GZIP_KB;
+      const fontOk = fontPreloadBytes <= MAX_PRELOADED_FONT_BYTES;
 
-      if (!jsOk || !htmlOk) {
+      if (!jsOk || !htmlOk || !cssOk || !fontOk || lcpIssues.length > 0) {
         hasFailure = true;
+      }
+      if (!cssOk) lcpIssues.push(`CSS รวม ${cssGzipKb} KB gzip เกินงบ ${MAX_CSS_GZIP_KB} KB`);
+      if (!fontOk) {
+        lcpIssues.push(
+          `ฟอนต์ที่พรีโหลดรวม ${fontPreloadBytes.toLocaleString()} B เกินงบ ${MAX_PRELOADED_FONT_BYTES.toLocaleString()} B`,
+        );
       }
 
       results.push({
@@ -418,6 +546,9 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
         maxHtmlGzipKb: b.maxHtmlGzipKb,
         jsOk,
         htmlOk,
+        cssGzipKb,
+        fontPreloadBytes,
+        lcpIssues,
         topChunks: chunkDetails.filter((c) => !c.isPolyfill).slice(0, 3),
       });
     }
@@ -457,6 +588,42 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
     }
     if (!r.htmlOk) {
       console.log(`  ❌ HTML เกินงบ (${r.htmlGzipKb} KB > ${r.maxHtmlGzipKb} KB)!`);
+    }
+    console.log(
+      `     CSS ${r.cssGzipKb} KB (≤ ${MAX_CSS_GZIP_KB}) · ฟอนต์ที่พรีโหลด ${r.fontPreloadBytes.toLocaleString()} B (≤ ${MAX_PRELOADED_FONT_BYTES.toLocaleString()})`,
+    );
+    for (const issue of r.lcpIssues) {
+      console.log(`  ❌ ${issue}`);
+    }
+  }
+
+  // ── ด่าน HTML ต้องไม่ถูกสั่งห้ามแคชทั้งก้อน (T-19 · T-21 · T-26) ─────────────
+  // `no-store` บน HTML คือตัวตัด bfcache ขาดทั้งใน Chrome และ Safari
+  // และหน้าที่ Astro สร้างไม่มีข้อมูลผู้ใช้เลย จึงต้องมี `s-maxage` ให้ขอบเสิร์ฟเองได้
+  console.log("\n── ส่วนหัวแคชของหน้าเว็บ (จาก public/_headers และ next.config.ts) ──");
+  const headersText = fs.readFileSync(path.join(ROOT, "public/_headers"), "utf8");
+  const nextConfigText = fs.readFileSync(path.join(ROOT, "next.config.ts"), "utf8");
+
+  if (/no-store/.test(headersText)) {
+    console.log("  ❌ public/_headers มี `no-store` — ห้ามใช้กับ HTML (ตัด bfcache ขาด)");
+    hasFailure = true;
+  } else {
+    console.log("  ✅ public/_headers ไม่มี `no-store` เลย");
+  }
+
+  if (!/s-maxage/.test(headersText)) {
+    console.log("  ❌ public/_headers ไม่มี `s-maxage` สักกฎเดียว — หน้า static ไม่ถูกแคชที่ขอบ");
+    hasFailure = true;
+  } else {
+    console.log("  ✅ public/_headers ตั้ง `s-maxage` ให้หน้า HTML แล้ว");
+  }
+
+  for (const route of ["/s/:id", "/readers"]) {
+    if (nextConfigText.includes(`source: "${route}"`)) {
+      console.log(`  ✅ next.config.ts ตั้งส่วนหัวแคชของ ${route} ไว้เอง (ไม่ปล่อยให้ Next ใส่ no-store)`);
+    } else {
+      console.log(`  ❌ next.config.ts ไม่ได้ตั้งส่วนหัวแคชของ ${route} — Next จะใส่ no-store ให้เอง`);
+      hasFailure = true;
     }
   }
 

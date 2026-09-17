@@ -1,6 +1,7 @@
 import "server-only";
 import { parsePartialReading } from "@/lib/utils/partial-json";
 import { buildReadingMessage, buildSystemPrompt, type ReadingContext } from "@/lib/ai/prompt";
+import { linkAbortSignal } from "@/lib/ai/abort";
 import { getContentOverrides, resolvePersona, resolveSystemCore } from "@/lib/content/overrides";
 import { ReadingSchema } from "@/lib/schema/reading";
 import type { ReadingEvent, UsageInfo } from "@/lib/ai/types";
@@ -195,6 +196,8 @@ async function fetchGeminiStream(args: {
   maxOutputTokens: number;
   timeoutMs: number;
   model: string;
+  /** สัญญาณยกเลิกของคำขอจริง — ปิดแท็บแล้วต้องหยุดยิง Gemini ทันที (T-06) */
+  abortSignal?: AbortSignal;
 }): Promise<GeminiFetchResult> {
   const buildBody = (withBudget: boolean) => ({
     contents: [{ role: "user", parts: [{ text: args.userPrompt }] }],
@@ -212,6 +215,7 @@ async function fetchGeminiStream(args: {
     // ห้ามปล่อยตัวจับเวลาไว้ข้ามไปตอนอ่านสตรีม ไม่งั้นมันจะไปตัดสตรีมกลางคัน
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), args.timeoutMs);
+    const unlinkAbort = linkAbortSignal(controller, args.abortSignal);
     try {
       const res = await fetch(args.endpoint, {
         method: "POST",
@@ -224,6 +228,7 @@ async function fetchGeminiStream(args: {
         body: JSON.stringify(buildBody(withBudget)),
       });
       clearTimeout(timeoutId);
+      unlinkAbort();
 
       if (res.ok) return { response: res, droppedBudget: !withBudget };
 
@@ -240,6 +245,12 @@ async function fetchGeminiStream(args: {
       return { response: null, droppedBudget: false };
     } catch (e) {
       clearTimeout(timeoutId);
+      unlinkAbort();
+      if (args.abortSignal?.aborted) {
+        // ลูกค้าตัดการเชื่อมต่อ ไม่ใช่ Gemini พัง — ห้ามยิงซ้ำหรือถอยโมเดลให้เปลืองเงิน
+        recordEvent("ai_client_aborted:gemini");
+        return { response: null, droppedBudget: false };
+      }
       console.warn(`Gemini Model ${args.model} fetch failed:`, e);
       return { response: null, droppedBudget: false };
     }
@@ -291,8 +302,10 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
       maxOutputTokens,
       timeoutMs: modelIdx === 0 ? GEMINI_FIRST_MODEL_TIMEOUT_MS : GEMINI_FALLBACK_MODEL_TIMEOUT_MS,
       model,
+      abortSignal: ctx.abortSignal,
     });
 
+    if (ctx.abortSignal?.aborted) return;
     if (!response || !response.body) continue;
     sawAnyResponse = true;
     if (droppedBudget) {
@@ -388,6 +401,10 @@ export async function* streamGeminiReading(ctx: ReadingContext): AsyncGenerator<
         }
       }
     } catch (error) {
+      if (ctx.abortSignal?.aborted) {
+        recordEvent("ai_client_aborted:gemini");
+        return;
+      }
       console.error(`[gemini] ${activeModel} สตรีมขัดข้อง:`, error);
       recordEvent(`ai_stream_error:${activeModel}`);
       lastFailure = "stream_error";

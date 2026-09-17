@@ -22,7 +22,7 @@ export const SPREADS: Spread[] = [
     id: "daily",
     nameTh: "ดวงรายวัน (ไพ่ 1 ใบ)",
     nameEn: "Daily Tarot Guidance (1 Card)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีรายวัน 1 ใบ ฟรี แม่นๆ",
+    seoTitleTh: "ดูดวงไพ่ยิปซีรายวัน 1 ใบ ฟรี แม่น ๆ",
     tagline: "เช็กพลังงานและข้อคิดประจำวันนี้",
     taglineEn: "Check your energetic compass and daily inspiration",
     description:
@@ -258,7 +258,7 @@ export const SPREADS: Spread[] = [
     tagline: "ใจเรา ใจเขา และอนาคตความสัมพันธ์",
     taglineEn: "Your heart, their heart, and relationship outlook",
     description:
-      "เปิดใจดูความสัมพันธ์แบบรอบด้าน เห็นทั้งความรู้สึกลึกๆ ของคุณ ของเขา สิ่งที่ดึงดูดกัน อุปสรรค และทิศทางว่าจะไปต่ออย่างไร",
+      "เปิดใจดูความสัมพันธ์แบบรอบด้าน เห็นทั้งความรู้สึกลึก ๆ ของคุณ ของเขา สิ่งที่ดึงดูดกัน อุปสรรค และทิศทางว่าจะไปต่ออย่างไร",
     descriptionEn:
       "A comprehensive relationship reading unveiling feelings on both sides, mutual ties, friction, and destiny.",
     defaultCategory: "love",
@@ -338,7 +338,7 @@ export const SPREADS: Spread[] = [
       },
       {
         index: 1,
-        nameTh: "2. ความรู้สึกลึกๆ ในใจที่ไม่ได้บอก",
+        nameTh: "2. ความรู้สึกลึก ๆ ในใจที่ไม่ได้บอก",
         nameEn: "2. Hidden Subconscious Feelings",
         meaning: "ความรู้สึก อารมณ์ และความคิดส่วนลึกที่เขาเก็บไว้คนเดียว",
         meaningEn: "Unspoken emotions and vulnerabilities held privately inside",
@@ -462,7 +462,7 @@ export const SPREADS: Spread[] = [
       },
       {
         index: 3,
-        nameTh: "4. สิ่งที่คุณควรปรับเพื่อเปิดรับรักดีๆ",
+        nameTh: "4. สิ่งที่คุณควรปรับเพื่อเปิดรับรักดี ๆ",
         nameEn: "4. Inner Alignment Needed",
         meaning: "การพัฒนาตนเองและการเปิดใจเพื่อดึงดูดความรักที่ดีเข้ามา",
         meaningEn: "What to cultivate within yourself to become an open vessel for healthy love",
@@ -492,7 +492,7 @@ export const SPREADS: Spread[] = [
     tagline: "งานที่ทำอยู่จะรุ่งไหม โอกาสและความสำเร็จ",
     taglineEn: "Will your work flourish? Opportunities and career milestones",
     description:
-      "วิเคราะห์ทิศทางการทำงาน จุดแข็งที่คุณควรดึงมาใช้ อุปสรรคที่ขัดขวาง โอกาสเติบโตใหม่ๆ และคำแนะนำสู่ความก้าวหน้า",
+      "วิเคราะห์ทิศทางการทำงาน จุดแข็งที่คุณควรดึงมาใช้ อุปสรรคที่ขัดขวาง โอกาสเติบโตใหม่ ๆ และคำแนะนำสู่ความก้าวหน้า",
     descriptionEn:
       "Analyze professional trajectory, distinctive superpowers, hurdles, and auspicious avenues for advancement.",
     defaultCategory: "work",
@@ -528,9 +528,9 @@ export const SPREADS: Spread[] = [
       },
       {
         index: 3,
-        nameTh: "4. โอกาสดีๆ ที่กำลังจะเข้ามา",
+        nameTh: "4. โอกาสดี ๆ ที่กำลังจะเข้ามา",
         nameEn: "4. Emerging Windows of Opportunity",
-        meaning: "ลู่ทาง โครงการ หรือโอกาสใหม่ๆ ที่กำลังจะเปิดรับคุณ",
+        meaning: "ลู่ทาง โครงการ หรือโอกาสใหม่ ๆ ที่กำลังจะเปิดรับคุณ",
         meaningEn: "Incoming projects, alliances, or lucrative opportunities",
         x: 0.35,
         y: 0.78,
@@ -808,7 +808,7 @@ export const SPREADS: Spread[] = [
     id: "monthly",
     nameTh: "ดวงรายเดือน 4 สัปดาห์ (ไพ่ 4 ใบ)",
     nameEn: "4-Week Monthly Forecast (4 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีรายเดือน 4 ใบ ฟรี แม่นๆ",
+    seoTitleTh: "ดูดวงไพ่ยิปซีรายเดือน 4 ใบ ฟรี แม่น ๆ",
     tagline: "มองเห็นภาพรวมตลอดทั้งเดือน วางแผนล่วงหน้า",
     taglineEn: "Gain full-month perspective to master life's pacing",
     description:
@@ -820,7 +820,7 @@ export const SPREADS: Spread[] = [
     guestAllowed: false,
     positions: [
       { index: 0, nameTh: "สัปดาห์ที่ 1 (ช่วงต้นเดือน)", nameEn: "Week 1 (Opening Currents)", meaning: "พลังงานเริ่มต้นและเป้าหมายหลักในสัปดาห์แรกของเดือน", meaningEn: "Foundational intentions and emerging energy in week one", x: 0.2, y: 0.5 },
-      { index: 1, nameTh: "สัปดาห์ที่ 2 (ช่วงลุยงาน)", nameEn: "Week 2 (Active Momentum)", meaning: "ความคืบหน้า การปรับตัว และการจัดการกับเรื่องราวต่างๆ", meaningEn: "Progress, adaptation, and sustained effort in week two", x: 0.4, y: 0.5 },
+      { index: 1, nameTh: "สัปดาห์ที่ 2 (ช่วงลุยงาน)", nameEn: "Week 2 (Active Momentum)", meaning: "ความคืบหน้า การปรับตัว และการจัดการกับเรื่องราวต่าง ๆ", meaningEn: "Progress, adaptation, and sustained effort in week two", x: 0.4, y: 0.5 },
       { index: 2, nameTh: "สัปดาห์ที่ 3 (จุดพีคและบททดสอบ)", nameEn: "Week 3 (Pivotal Peak & Test)", meaning: "จุดพีคสำคัญ โอกาส หรือบททดสอบที่ต้องตั้งรับ", meaningEn: "Key turning points, breakthroughs, or tests in week three", x: 0.6, y: 0.5 },
       { index: 3, nameTh: "สัปดาห์ที่ 4 (บทสรุปสิ้นเดือน)", nameEn: "Week 4 (Culmination & Harvest)", meaning: "ผลลัพธ์ การเก็บเกี่ยวผลประโยชน์ และบทสรุปปิดท้ายเดือน", meaningEn: "Harvest, integration, and concluding outcomes for the month", x: 0.8, y: 0.5 },
     ],
@@ -869,10 +869,10 @@ export const SPREADS: Spread[] = [
       { index: 2, nameTh: "3. ปมลึกในใจ (สาเหตุที่ซ่อนอยู่)", nameEn: "3. The Subconscious Root", meaning: "สาเหตุที่อยู่ใต้จิตสำนึก หรือต้นตอที่แท้จริงของเรื่องราว", meaningEn: "Underlying psychological drivers or subconscious origins", x: 0.32, y: 0.72 },
       { index: 3, nameTh: "4. อดีตที่เพิ่งผ่าน (สิ่งที่ส่งผลถึงตอนนี้)", nameEn: "4. The Passing Past", meaning: "เรื่องราวที่เพิ่งเกิดขึ้นและยังส่งแรงกระทบมาถึงปัจจุบัน", meaningEn: "Recent events that are receding but whose echoes still ripple", x: 0.14, y: 0.45 },
       { index: 4, nameTh: "5. สิ่งที่หวังไว้ (เป้าหมายในใจ)", nameEn: "5. Crown & Conscious Aspirations", meaning: "เป้าหมาย ความหวัง หรือสิ่งที่ผู้ถามคิดถึงและปรารถนามากที่สุด", meaningEn: "Conscious goals, highest aspirations, or ideal outcomes held in mind", x: 0.32, y: 0.18 },
-      { index: 5, nameTh: "6. อนาคตอันใกล้ (สิ่งที่จะเกิดขึ้นเร็วๆ นี้)", nameEn: "6. Near Future Horizons", meaning: "เรื่องราวหรือเหตุการณ์ที่กำลังจะเข้ามาในระยะเวลาอันสั้น", meaningEn: "Immediate manifestations and events emerging in the near term", x: 0.5, y: 0.45 },
+      { index: 5, nameTh: "6. อนาคตอันใกล้ (สิ่งที่จะเกิดขึ้นเร็ว ๆ นี้)", nameEn: "6. Near Future Horizons", meaning: "เรื่องราวหรือเหตุการณ์ที่กำลังจะเข้ามาในระยะเวลาอันสั้น", meaningEn: "Immediate manifestations and events emerging in the near term", x: 0.5, y: 0.45 },
       { index: 6, nameTh: "7. ตัวคุณเอง (ท่าทีและพลังงานของคุณ)", nameEn: "7. The Self & Inner Stance", meaning: "ท่าที สภาพจิตใจ และพลังงานที่ผู้ถามกำลังใช้อยู่กับเรื่องนี้", meaningEn: "Your attitude, self-perception, and emotional stance within this dynamic", x: 0.72, y: 0.8 },
       { index: 7, nameTh: "8. คนรอบข้างและสภาพแวดล้อม", nameEn: "8. External Environment & Allies", meaning: "อิทธิพลจากบุคคลรอบตัว มุมมองของผู้อื่น และสิ่งแวดล้อม", meaningEn: "Influence of other people, collective atmosphere, and surrounding energies", x: 0.72, y: 0.6 },
-      { index: 8, nameTh: "9. ความหวังและความกังวลลึกๆ", nameEn: "9. Hopes & Shadow Fears", meaning: "สิ่งที่ผู้ถามทั้งคาดหวังอยากให้เกิด และความกังวลลึกๆ ในใจ", meaningEn: "Deepest yearning intertwined with subconscious anxieties", x: 0.72, y: 0.4 },
+      { index: 8, nameTh: "9. ความหวังและความกังวลลึก ๆ", nameEn: "9. Hopes & Shadow Fears", meaning: "สิ่งที่ผู้ถามทั้งคาดหวังอยากให้เกิด และความกังวลลึก ๆ ในใจ", meaningEn: "Deepest yearning intertwined with subconscious anxieties", x: 0.72, y: 0.4 },
       { index: 9, nameTh: "10. ผลลัพธ์สุดท้าย (บทสรุปปลายทาง)", nameEn: "10. Ultimate Culmination", meaning: "บทสรุปและปลายทางของเรื่องนี้ หากทุกอย่างยังดำเนินต่อไป", meaningEn: "The synthesized resolution and final outcome if trajectory continues", x: 0.72, y: 0.2 },
     ],
   },
@@ -982,7 +982,7 @@ export const SPREADS: Spread[] = [
     id: "monthly-ten",
     nameTh: "ดวงรายเดือนเจาะลึก (ไพ่ 10 ใบ)",
     nameEn: "Monthly Comprehensive Forecast (10 Cards)",
-    seoTitleTh: "ดูดวงไพ่ยิปซีรายเดือน 10 ใบ แม่นๆ ฟรี",
+    seoTitleTh: "ดูดวงไพ่ยิปซีรายเดือน 10 ใบ แม่น ๆ ฟรี",
     tagline: "ผังใหญ่ 10 มิติ เช็กภาพรวมชีวิตในรอบเดือน",
     taglineEn: "10-card grand forecast charting all dimensions of your coming month",
     description:
@@ -1043,7 +1043,7 @@ export const SPREADS: Spread[] = [
         index: 5,
         nameTh: "6. สิ่งที่กำลังจะเข้ามาในครึ่งเดือนหลัง",
         nameEn: "6. Near Future Shift",
-        meaning: "การเปลี่ยนแปลงหรือข่าวสารใหม่ๆ ในช่วงครึ่งหลังของเดือน",
+        meaning: "การเปลี่ยนแปลงหรือข่าวสารใหม่ ๆ ในช่วงครึ่งหลังของเดือน",
         meaningEn: "New developments and energy arriving in the latter half of the month",
         // 0.5 → 0.53: ผังนี้เลื่อนแกนไขว้จาก celtic-cross 0.32 → 0.35 แต่เดิมลืมเลื่อนใบนี้ตาม
         // ทำให้ใบที่ 2 ซึ่งหมุน 90° (กว้าง 19.5%) เบียดใบนี้ 0.0125 (ISSUE-032)
@@ -1072,7 +1072,7 @@ export const SPREADS: Spread[] = [
         index: 8,
         nameTh: "9. ความหวังหรือสิ่งที่ซ่อนเร้น",
         nameEn: "9. Hopes & Hidden Fears",
-        meaning: "ความคาดหวังในใจลึกๆ หรือความกังวลที่ต้องสังเกต",
+        meaning: "ความคาดหวังในใจลึก ๆ หรือความกังวลที่ต้องสังเกต",
         meaningEn: "Subconscious yearnings, unexpressed hopes, or anxieties to be mindful of",
         x: 0.72,
         y: 0.4,

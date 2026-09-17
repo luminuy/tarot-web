@@ -133,8 +133,12 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
     {FONT_PRELOADS.map((href) => (
       <link rel="preload" href={href} as="font" type="font/woff2" crossorigin="anonymous" />
     ))}
-    {/* 🖼️ โลโก้ในหัวเว็บ — โหลดแบบ eager (React 19 จองคิวให้เองในฝั่ง Next) */}
-    {hasSiteHeader && <link rel="preload" href="/logo.webp" as="image" />}
+    {/*
+      🖼️ โลโก้ในหัวเว็บ — **ไม่พรีโหลด** (T-27)
+      ของเดิมพรีโหลด `/logo.webp` ทุกหน้า ทั้งที่มันเป็นภาพ **44×44** ซึ่งเป็น LCP ไม่ได้อยู่แล้ว
+      และในมาร์กอัปก็เป็น `loading="eager"` พร้อมอยู่ใน 2 KB แรกของ HTML อยู่แล้ว
+      = ใช้ช่องลำดับความสำคัญสูงสุดไปกับภาพที่เบราว์เซอร์เจอเองอยู่ดี แย่งคิวกับภาพที่เป็น LCP จริง
+    */}
     {preloadImages.map((href) => (
       <link rel="preload" href={href} as="image" />
     ))}

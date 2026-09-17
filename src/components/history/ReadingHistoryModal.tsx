@@ -5,6 +5,9 @@ import {
   deleteReading,
   clearAllReadings,
   updateReadingOutcome,
+  wasHistoryTrimmed,
+  acknowledgeHistoryTrimmed,
+  LOCAL_HISTORY_LIMIT,
   type SavedReadingItem,
   type ReadingOutcome,
 } from "@/lib/utils/history";
@@ -55,6 +58,8 @@ const CATEGORY_MAP_EN: Record<string, string> = {
 export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen, onClose }) => {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
+  /** T-46: true เมื่อการบันทึกครั้งล่าสุดทำให้รายการเก่าสุดถูกตัดทิ้งจริง */
+  const [trimmedNotice, setTrimmedNotice] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   /*
@@ -83,6 +88,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
   useEffect(() => {
     if (isOpen) {
       setReadings(getReadings());
+      setTrimmedNotice(wasHistoryTrimmed());
       setMonthlySummary(null);
       setSummaryError(null);
       // Dual-mode server sync refresh
@@ -412,6 +418,36 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
             </div>
           )}
 
+          {/*
+            T-46: เพดาน 50 รายการของเครื่องเคยตัดตัวเก่าสุดทิ้งเงียบ ๆ
+            สำหรับคนที่ไม่ได้ซิงก์ นี่คือการสูญหายจริงของสิ่งที่เขาเห็นว่า "บันทึกไว้แล้ว"
+            แจ้งครั้งเดียวตอนเกิดการตัดจริง แล้วพาไปสู่การซิงก์ที่มีอยู่แล้ว
+          */}
+          {trimmedNotice && (
+            <div
+              role="status"
+              className="mb-3 flex items-start justify-between gap-3 rounded-xl border border-line-warm bg-inset-warm px-3.5 py-2.5 text-[13px] font-serif-th text-ink-deep"
+            >
+              <span className="leading-relaxed">
+                <span className="text-gold-ink" aria-hidden="true">✦ </span>
+                {isEn
+                  ? `Your device keeps the latest ${LOCAL_HISTORY_LIMIT} readings — older ones have been removed. Sign in to archive them all.`
+                  : `ประวัติบนเครื่องเต็ม ${LOCAL_HISTORY_LIMIT} รายการ รายการเก่าสุดถูกลบไปแล้ว — เข้าสู่ระบบเพื่อเก็บถาวรไม่จำกัด`}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  acknowledgeHistoryTrimmed();
+                  setTrimmedNotice(false);
+                }}
+                className="tap-overlay-y flex-shrink-0 rounded-full px-2 py-1 text-xs text-muted hover:text-ink transition cursor-pointer"
+                aria-label={isEn ? "Dismiss notice" : "ปิดข้อความแจ้งเตือน"}
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {/* Reading List Scroll Area */}
           <div className="flex-1 overflow-y-auto space-y-3 pr-1 no-scrollbar min-h-[220px]">
             {filtered.length === 0 ? (
@@ -476,6 +512,24 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                     <p className="font-serif-th text-xs sm:text-sm font-bold text-ink">"{item.question}"</p>
 
                     {/* Miniature Cards Preview */}
+                    {item.corrupted ? (
+                      /*
+                       * 🃏 กฎเหล็กข้อ 14 · T-47 — ข้อมูลไพ่อ่านไม่ออกต้องบอกตรง ๆ
+                       * ห้ามแสดงเป็นการอ่านที่ "ไม่มีไพ่" ซึ่งทำให้ผู้ใช้เข้าใจผิดว่าระบบเคยเปิดไพ่
+                       * ให้เขาโดยไม่มีไพ่จริง
+                       */
+                      <div
+                        role="alert"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-inset-warm border border-line-warm text-[13px] font-serif-th text-ink-deep"
+                      >
+                        <span className="text-gold-ink" aria-hidden="true">✦</span>
+                        <span>
+                          {isEn
+                            ? "This entry's card data could not be read. Please refresh the page and try again."
+                            : "ข้อมูลไพ่ของบันทึกนี้เสียหาย กรุณาโหลดใหม่อีกครั้ง"}
+                        </span>
+                      </div>
+                    ) : (
                     <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
                       {item.cards.map((c, i) => (
                         <div
@@ -494,6 +548,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                         </div>
                       ))}
                     </div>
+                    )}
 
                     {/* Summary Quote */}
                     <p className="text-xs text-muted font-serif-th leading-relaxed line-clamp-2">

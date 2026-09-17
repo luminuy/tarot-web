@@ -310,7 +310,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label={isEn ? "Close authentication window" : "ปิดหน้าต่างเข้าสู่ระบบ"}
-            className="tap-overlay-y absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-inset border border-line text-ink hover:text-gold-ink hover:border-gold hover:bg-surface text-xs flex items-center justify-center transition cursor-pointer"
+            /*
+             * 🎯 T-31: 44×44 ไม่ใช่ 32×32 — นี่คือ modal ที่คนเจอบ่อยที่สุด (ผู้ใช้ที่ยังไม่ล็อกอิน
+             * ทุกคนเจอ) และทราฟฟิกเว็บนี้เป็นมือถือ 85%+ · ด่าน tap-target เดิมตั้งเพดานไว้ 24px
+             * จึงปล่อยผ่านมาตลอด · ขนาดไอคอนคงเดิม ขยายเฉพาะพื้นที่กด (ตรงกับ CardZoomModal)
+             */
+            className="tap-overlay-y absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-inset border border-line text-ink hover:text-gold-ink hover:border-gold hover:bg-surface text-xs flex items-center justify-center transition cursor-pointer"
           >
             ✕
           </button>

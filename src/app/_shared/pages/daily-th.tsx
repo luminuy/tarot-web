@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
 import { buildPageOgImage } from "@/lib/media/og-image";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 const dailyOgImages = buildPageOgImage({
   title: "ดูดวงไพ่ยิปซีรายวัน",
@@ -15,7 +16,7 @@ export const dailyMetadataTh: Metadata = {
   // layout เติมท้าย " · SeerTarot" ให้เองอยู่แล้ว — เขียน "| SeerTarot" เองอีกจะซ้ำสองรอบ
   title: "ดูดวงไพ่ยิปซีรายวัน ไพ่ทาโรต์นำทางวันนี้ ฟรี",
   description:
-    "ดูดวงไพ่ยิปซีรายวันแม่นๆ เปิดไพ่ 1 ใบทำนายพลังงานประจำวัน ทั้งการงาน การเงิน ความรัก และข้อคิดเตือนสติ ด้วยไพ่ 1909 Rider-Waite แท้ 78 ใบ ไร้โฆษณา",
+    "ดูดวงไพ่ยิปซีรายวันแม่น ๆ เปิดไพ่ 1 ใบทำนายพลังงานประจำวัน ทั้งการงาน การเงิน ความรัก และข้อคิดเตือนสติ ด้วยไพ่ 1909 Rider-Waite แท้ 78 ใบ ไร้โฆษณา",
   keywords: [
     "ดูดวงไพ่ยิปซีรายวัน",
     "ไพ่ยิปซีรายวัน",
@@ -23,7 +24,7 @@ export const dailyMetadataTh: Metadata = {
     "ไพ่ทาโรต์รายวัน",
     "ดูดวงไพ่ยิปซี 1 ใบ",
     "เปิดไพ่รายวันฟรี",
-    "ดูดวงแม่นๆ วันนี้",
+    "ดูดวงแม่น ๆ วันนี้",
   ],
   alternates: buildAlternates("/daily", { locale: "th", englishTwin: true }),
   openGraph: {
@@ -137,15 +138,15 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(softwareApplicationJsonLd) }}
       />
 
       <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
@@ -171,7 +172,7 @@ export function DailyBodyTh({ ritual }: { ritual: ReactNode }) {
             </h3>
             <ul className="list-disc pl-5 space-y-2 text-muted">
               <li>
-                <strong className="text-ink">การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึกๆ
+                <strong className="text-ink">การตั้งจิตอธิษฐานในตอนเช้า:</strong> ก่อนเริ่มทำงาน ให้หลับตาและหายใจเข้าลึก ๆ
                 สังเกตอารมณ์ความรู้สึกปัจจุบัน แล้วจึงแตะเลือกไพ่ด้วยสมาธิที่นิ่งสงบ
               </li>
               <li>

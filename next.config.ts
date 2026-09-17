@@ -168,6 +168,51 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      /*
+       * 📄 T-21 — ถอด `no-store` ออกจากหน้าที่ Worker เรนเดอร์
+       * ---------------------------------------------------------------------
+       * `dynamic = "force-dynamic"` ทำให้ Next ตั้ง
+       * `private, no-cache, no-store, max-age=0, must-revalidate` ให้เอง
+       * และ **`no-store` บน HTML คือตัวตัด bfcache ขาดทั้งใน Chrome และ Safari**
+       *
+       * `/s/[id]` คือลิงก์แชร์ — หน้าที่คนเปิดเข้ามาแล้วกดย้อนกลับ ทุกครั้งที่กดย้อน
+       * จึงเป็น Worker รอบเต็ม + hydrate ใหม่ แทนที่จะเป็นการคืนสภาพทันที
+       */
+      {
+        source: "/s/:id",
+        headers: [
+          {
+            key: "Cache-Control",
+            /*
+             * ⚠️ ทำไมไม่ใช่ `s-maxage` ตามที่ผลตรวจเสนอ
+             * หน้านี้อ่านคุกกี้ `seertarot_lang` เพื่อเลือกภาษาให้ "คนที่เปิดลิงก์"
+             * คำตอบจึงต่างกันตามคุกกี้ของผู้เปิด — แคชสาธารณะที่ขอบจะเสิร์ฟภาษาผิดข้ามคน
+             * `private` + ไม่มี `no-store` ได้ bfcache กลับมาครบโดยไม่แลกกับความถูกต้อง
+             * (ถ้าวันหนึ่งถอดการอ่านคุกกี้ออก ค่อยเปลี่ยนเป็น s-maxage ยาว ๆ ได้ทันที)
+             */
+            value: "private, max-age=0, must-revalidate",
+          },
+        ],
+      },
+      {
+        // ไดเรกทอรีแม่หมอเป็นข้อมูลสาธารณะล้วน ไม่อ่านคุกกี้/เซสชันเลย → แคชที่ขอบได้จริง
+        source: "/readers",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+          },
+        ],
+      },
+      {
+        source: "/readers/:id",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+          },
+        ],
+      },
       {
         source: "/sitemap.xml",
         headers: [

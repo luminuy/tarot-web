@@ -1,5 +1,12 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+import {
+  isPrivilegedSessionActive,
+  newSessionId,
+  registerPrivilegedSession,
+  revokePrivilegedSession,
+} from "@/lib/auth/privileged-session";
+
 /**
  * Admin session — แยกออกจาก OAuth ผู้ใช้ทั่วไปโดยสิ้นเชิง
  * -------------------------------------------------------
@@ -41,14 +48,45 @@ export function verifyAdminPassword(input: string): boolean {
   return timingSafeEqual(a, b);
 }
 
-export function signAdminSession(): string {
+/**
+ * ออกคุกกี้เซสชันแอดมินใหม่ พร้อมลงทะเบียน `sid` ลง allowlist (T-15)
+ * ต้อง `await` เสมอ — เดิมเป็น sync เพราะคุกกี้ไม่มี sid จึงเพิกถอนไม่ได้เลย
+ */
+export async function signAdminSession(): Promise<string> {
   const nowSec = Math.floor(Date.now() / 1000);
-  const payload = { role: "admin" as const, iat: nowSec, exp: nowSec + SESSION_TTL_SEC };
+  const sid = newSessionId();
+  const payload = { role: "admin" as const, sid, iat: nowSec, exp: nowSec + SESSION_TTL_SEC };
   const data = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
   const sig = createHmac("sha256", getAdminSecret()).update(data).digest("base64url");
+  await registerPrivilegedSession("admin", sid, SESSION_TTL_SEC);
   return `${data}.${sig}`;
 }
 
+/** อ่าน `sid` ออกจากคุกกี้โดยไม่ตรวจลายเซ็น — ใช้ตอนออกจากระบบเท่านั้น */
+export function readAdminSessionId(token: string | undefined | null): string | undefined {
+  if (!token) return undefined;
+  const dot = token.lastIndexOf(".");
+  if (dot === -1) return undefined;
+  try {
+    const payload = JSON.parse(Buffer.from(token.slice(0, dot), "base64url").toString("utf8")) as {
+      sid?: string;
+    };
+    return payload.sid;
+  } catch {
+    return undefined;
+  }
+}
+
+/** เพิกถอนคุกกี้ใบนี้ให้ใช้ไม่ได้อีกทุก isolate ทันที */
+export async function revokeAdminSession(token: string | undefined | null): Promise<void> {
+  const sid = readAdminSessionId(token);
+  if (sid) await revokePrivilegedSession("admin", sid);
+}
+
+/**
+ * ตรวจ "ลายเซ็นและวันหมดอายุ" อย่างเดียว — **ไม่พอสำหรับปลายทางจริง**
+ * ปลายทางต้องเรียก `verifyAdminSessionLive()` ซึ่งตรวจ allowlist ด้วย (T-15)
+ */
 export function verifyAdminSession(token: string | undefined | null): boolean {
   if (!token || typeof token !== "string" || !isAdminConfigured()) return false;
   const dot = token.lastIndexOf(".");
@@ -73,6 +111,15 @@ export function verifyAdminSession(token: string | undefined | null): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * ด่านจริงของทุกปลายทางแอดมิน — ลายเซ็น + วันหมดอายุ + ยังอยู่ใน allowlist
+ * ออกจากระบบแล้วคุกกี้เดิมต้องใช้ไม่ได้ทันที ไม่ต้องรอหมดอายุและไม่ต้องเปลี่ยนรหัสผ่าน
+ */
+export async function verifyAdminSessionLive(token: string | undefined | null): Promise<boolean> {
+  if (!verifyAdminSession(token)) return false;
+  return isPrivilegedSessionActive("admin", readAdminSessionId(token));
 }
 
 export const ADMIN_SESSION_MAX_AGE = SESSION_TTL_SEC;

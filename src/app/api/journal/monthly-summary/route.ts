@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
+import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-ratelimit";
 import { aiGatewayHeaders, geminiEndpoint } from "@/lib/ai/gateway";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getSessionUser } from "@/lib/auth/session";
@@ -59,6 +60,23 @@ export async function POST(request: Request) {
     }
 
     const clientIp = getClientIdentifier(request);
+
+    /*
+     * 🚦 T-11 + T-12: สรุปรายเดือนคือคำขอที่แพงที่สุดต่อครั้ง (prompt ยาวที่สุด)
+     * แต่เดิมกันด้วย `Map` ต่อ isolate ล้วนและไม่มีโควตารายวันบน KV เลย
+     */
+    const edge = await consumeEdgeRateLimits([
+      { key: edgeRateLimitKey("monthly:ip", clientIp), config: { max: 10, windowSec: 300 } },
+      { key: edgeRateLimitKey("monthly:ip:day", clientIp), config: { max: 30, windowSec: 86400 } },
+      { key: edgeRateLimitKey("monthly:user:day", user.id), config: { max: 10, windowSec: 86400 } },
+    ]);
+    if (!edge.allowed) {
+      return createRateLimitResponse(
+        edge.retryAfterSec,
+        "คุณขอสรุปบทเรียนดวงบ่อยเกินไป กรุณารอสักครู่",
+      );
+    }
+
     const limit = checkRateLimit(`monthly_journal:${clientIp}`, {
       maxRequests: 10,
       windowSeconds: 300,

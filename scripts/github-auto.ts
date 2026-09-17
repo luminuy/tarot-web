@@ -150,6 +150,9 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔮 ระบบถามกลับเพื่อความชัดเจนก่อนสับไพ่ (AI Clarification Engine · B-04)", cmd: TSX, args: ["scripts/qa/test-clarify.ts"] },
   { label: "🎟️ ระบบรหัสแลกสิทธิ์ VIP3 & จัดการโควตา (59 เคส · Concurrency · D1)", cmd: TSX, args: ["scripts/qa/test-redeem-code.ts"] },
   { label: "🌐 ความสมบูรณ์ของระบบแปลภาษา (318 หน่วยแปล · i18n Verification)", cmd: TSX, args: ["scripts/i18n-import.ts", "--verify-only"] },
+  { label: "🧾 JSON-LD ทุกบล็อกผ่านตัวเขียนที่ escape แล้ว (ห้าม JSON.stringify เปล่าใน dangerouslySetInnerHTML)", cmd: TSX, args: ["scripts/qa/test-json-ld-escape.ts"] },
+  { label: "🧱 กันการฉีดคำสั่งเข้า prompt (ผู้ใช้ปิดแท็บของ prompt ไม่ได้ · ขอบเขตความเชื่อถืออยู่หลังบล็อกผู้ใช้)", cmd: TSX, args: ["scripts/qa/test-prompt-injection.ts"] },
+  { label: "✍️ คุณภาพภาษาไทยของข้อความที่เราเขียนเอง (ไม้ยมกเว้นวรรค · นะคะ · สระ แ) ไม่ใช่แค่ผลจากโมเดล", cmd: TSX, args: ["scripts/qa/test-thai-content-quality.ts"] },
 ];
 
 /**

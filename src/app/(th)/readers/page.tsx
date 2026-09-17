@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import type { Metadata } from "next";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 export const dynamic = "force-dynamic";
 
@@ -71,7 +72,7 @@ export default async function ReadersPage() {
         {/* Schema.org Structured Data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbsJsonLd) }}
         />
 
         <div className="max-w-6xl mx-auto space-y-6 relative z-10">

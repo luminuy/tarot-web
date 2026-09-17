@@ -41,7 +41,7 @@ const STATUS_OPTIONS: StatusOption[] = [
     id: "situationship",
     titleTh: "คนคุย / ไม่ชัดเจน",
     titleEn: "Situationship",
-    descTh: "มีความรู้สึกดีๆ ให้กัน แต่สถานะยังคลุมเครือ",
+    descTh: "มีความรู้สึกดี ๆ ให้กัน แต่สถานะยังคลุมเครือ",
     descEn: "Ambiguous feelings or unlabelled bond",
     cardImage: "cups-07.jpg",
     cardNameTh: "เจ็ดถ้วย",
@@ -97,7 +97,7 @@ export function LoveOneCardClient() {
         if (isPositive) {
           return en
             ? "Your romantic aura is magnetic right now. The universe is aligning someone whose energy matches yours. Step out, embrace new encounters, and let go of past patterns."
-            : "ออร่าเสน่ห์ของคุณกำลังเปล่งประกาย โลกกำลังจัดสรรคนที่มีระดับพลังงานและทัศนคติตรงกันเข้ามา ให้เปิดโอกาสตัวเองออกไปพบปะผู้คนใหม่ๆ อย่ายึดติดกับกรอบความรักเดิมๆ";
+            : "ออร่าเสน่ห์ของคุณกำลังเปล่งประกาย โลกกำลังจัดสรรคนที่มีระดับพลังงานและทัศนคติตรงกันเข้ามา ให้เปิดโอกาสตัวเองออกไปพบปะผู้คนใหม่ ๆ อย่ายึดติดกับกรอบความรักเดิม ๆ";
         }
         if (isNeutral) {
           return en
@@ -132,7 +132,7 @@ export function LoveOneCardClient() {
         if (isNeutral) {
           return en
             ? "Routine or complacency might be casting a gentle haze over the spark. Try novel shared experiences and practice listening without judgment."
-            : "อาจมีความเฉื่อยชาหรือความเคยชินเข้ามาบดบังความรู้สึก ลองหากิจกรรมใหม่ๆ ทำร่วมกัน และหมั่นรับฟังความรู้สึกของกันและกันโดยปราศจากการตัดสิน";
+            : "อาจมีความเฉื่อยชาหรือความเคยชินเข้ามาบดบังความรู้สึก ลองหากิจกรรมใหม่ ๆ ทำร่วมกัน และหมั่นรับฟังความรู้สึกของกันและกันโดยปราศจากการตัดสิน";
         }
         return en
           ? "Be mindful of external pressures (work or family) spilling into your shared sanctuary. When friction arises, choose compassion over the desire to win."
@@ -424,7 +424,7 @@ export function LoveOneCardClient() {
                         : "ไพ่ชุดใหญ่เตือนว่าเรื่องนี้เป็นจุดเปลี่ยนสำคัญของชีวิต ให้ซื่อสัตย์กับหัวใจตนเองและมองการณ์ไกล"
                       : isEnglish
                       ? "A Minor Arcana card speaks to everyday choices and interactions. Small conscious shifts will promptly harmonise the atmosphere."
-                      : "ไพ่ชุดเล็กชี้ถึงพฤติกรรมในชีวิตประจำวัน การปรับเปลี่ยนท่าทีเล็กๆ น้อยๆ จะช่วยพลิกสถานการณ์ได้ทันที"}
+                      : "ไพ่ชุดเล็กชี้ถึงพฤติกรรมในชีวิตประจำวัน การปรับเปลี่ยนท่าทีเล็ก ๆ น้อย ๆ จะช่วยพลิกสถานการณ์ได้ทันที"}
                   </p>
                 </div>
 

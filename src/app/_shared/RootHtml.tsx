@@ -14,6 +14,7 @@ import type { Locale } from "@/lib/i18n/types";
 import { FONT_PRELOADS } from "./root-metadata";
 import { buildSpeculationRules } from "./speculation-rules";
 import { SkipToContent } from "@/components/layout/SkipToContent";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 /**
  * 🏛️ โครง `<html>` ของทั้งเว็บ — ใช้ร่วมกันโดย root layout ทั้งสองภาษา
@@ -169,7 +170,7 @@ export function RootHtml({
         <script
           type="speculationrules"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(buildSpeculationRules(isEnglish)),
+            __html: jsonLdScript(buildSpeculationRules(isEnglish)),
           }}
         />
 
@@ -177,11 +178,11 @@ export function RootHtml({
             WebApplication / FAQPage / HowTo เป็นความจริงเฉพาะหน้าแรก → อยู่ในหน้าแรกของแต่ละภาษา */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd) }}
         />
       </head>
       <body className="min-h-dvh font-sans antialiased">

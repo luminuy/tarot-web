@@ -34,25 +34,36 @@ function performLazyCleanup() {
 }
 
 /**
- * Extract client IP securely from Cloudflare / Edge request headers
+ * ตัวระบุตัวตนของผู้เรียก — ใช้เป็นคีย์ของทุกบักเก็ตเพดานอัตราในระบบ
+ * ---------------------------------------------------------------------------
+ * 🔴 บทเรียน T-16: ของเดิมถอยไปอ่าน `x-real-ip` แล้ว `x-forwarded-for` เมื่อไม่มี
+ * `cf-connecting-ip` และถ้าไม่มีเลยก็คืน `"127.0.0.1"`
+ *
+ * ทั้งสองหัวนี้ **ไคลเอนต์ตั้งเองได้** ทุกเส้นทางที่เข้าถึง Worker โดยไม่ผ่าน Cloudflare
+ * (เช่นยิงตรงที่โฮสต์ `*.workers.dev`) จึงหมุนค่าหัวรีเซ็ตบักเก็ตได้ทุกคำขอ —
+ * รวมถึงบักเก็ตกันเดารหัสผ่านบน KV ที่ใช้ helper ตัวเดียวกันนี้
+ *
+ * ตอนนี้เชื่อเฉพาะ `cf-connecting-ip` ซึ่ง Cloudflare เขียนทับให้เองเสมอและปลอมไม่ได้
+ * ไม่มีค่านั้น = ไม่รู้ว่าใคร จึงคืนคีย์ `unknown` **ก้อนเดียวร่วมกันทุกคน**
+ * ผลคือคำขอที่ไม่ผ่าน Cloudflare ทั้งหมดแชร์โควตาถังเดียว ซึ่งเป็นพฤติกรรมที่ถูกต้อง:
+ * เข้มกว่าเดิมมากสำหรับผู้โจมตี และไม่กระทบผู้ใช้จริงเลยเพราะทราฟฟิกจริงผ่าน Cloudflare 100%
+ *
+ * ⚠️ ห้ามเติมสาขา `x-real-ip` / `x-forwarded-for` กลับมา เว้นแต่จะมีการตรวจว่า
+ * คำขอมาจาก proxy ที่เชื่อถือได้จริง (ตรวจ IP ต้นทางกับรายการช่วงของ Cloudflare)
  */
 export function getClientIdentifier(request: Request): string {
-  // 1. Cloudflare edge verified IP (Cannot be forged by client)
   const cfIp = request.headers.get("cf-connecting-ip");
   if (cfIp) return cfIp.trim();
 
-  // 2. Real IP from proxy
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) return realIp.trim();
-
-  // 3. Forwarded IP (Take the rightmost untampered hop if multiple exist)
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const parts = forwarded.split(",").map((s) => s.trim()).filter(Boolean);
-    if (parts.length > 0) return parts[parts.length - 1];
+  // นอก Cloudflare (dev server / ทดสอบในเครื่อง) — ยังต้องแยกกันได้พอให้เทสต์ทำงาน
+  if (process.env.NODE_ENV !== "production") {
+    const devIp =
+      request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",").pop();
+    if (devIp) return `dev:${devIp.trim()}`;
+    return "dev:local";
   }
 
-  return "127.0.0.1";
+  return "unknown-origin";
 }
 
 /**

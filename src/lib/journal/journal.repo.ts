@@ -32,15 +32,31 @@ interface RawJournalRow {
 }
 
 function mapRowToItem(row: RawJournalRow): SavedReadingItem {
+  /*
+   * 🃏 กฎเหล็กข้อ 14 · T-47 — JSON ที่พังต้องไม่กลายเป็น "การอ่านที่ไม่มีไพ่"
+   * ของเดิม `try { JSON.parse } catch {}` ทำให้ผู้ใช้เห็นการอ่านในอดีตที่ดูเหมือนไม่มีไพ่เลย
+   * โดยไม่มีปุ่มโหลดใหม่ ซึ่งขัดกับเจตนารมณ์ของกฎข้อ 14 ตรง ๆ (ข้อมูลหาย = ต้องบอก ไม่ใช่เดา)
+   */
+  let corrupted = false;
+
   let cards: SavedCardDetail[] = [];
   try {
-    cards = JSON.parse(row.cards_json);
-  } catch {}
+    const parsed = JSON.parse(row.cards_json);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      cards = parsed;
+    } else {
+      corrupted = true;
+    }
+  } catch {
+    corrupted = true;
+  }
 
   let advice: string[] = [];
   try {
     advice = JSON.parse(row.advice_json);
-  } catch {}
+  } catch {
+    corrupted = true;
+  }
 
   return {
     id: row.id,
@@ -59,6 +75,7 @@ function mapRowToItem(row: RawJournalRow): SavedReadingItem {
     outcome: (row.outcome as ReadingOutcome) || "PENDING",
     userNote: row.user_note || undefined,
     outcomeUpdatedAt: row.outcome_updated_at ? new Date(row.outcome_updated_at).toISOString() : undefined,
+    ...(corrupted ? { corrupted: true } : {}),
   };
 }
 

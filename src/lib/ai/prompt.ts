@@ -13,6 +13,11 @@ import { getPersona, type Persona } from "@/data/personas";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
 import type { SafetyVerdict } from "@/lib/safety/guardrails";
 import { pickExemplar, formatExemplarForPrompt } from "@/data/ai/exemplars";
+import {
+  PROMPT_TRUST_BOUNDARY_EN,
+  PROMPT_TRUST_BOUNDARY_TH,
+  sanitizePromptValue,
+} from "@/lib/ai/prompt-guard";
 
 /**
  * สถาปัตยกรรม Prompt Caching & AI Engine (World-Class Caching Architecture)
@@ -222,6 +227,11 @@ export interface ReadingContext {
   nickname?: string;
   pastReading?: PastReadingSnapshot;
   lang?: "th" | "en";
+  /**
+   * สัญญาณยกเลิกของคำขอจริง (`request.signal`) — ผู้ใช้ปิดแท็บเมื่อไหร่ต้องหยุดยิงโมเดลทันที
+   * ไม่ส่งมาก็ทำงานได้ แต่จะจ่ายค่าโทเคนให้คำอ่านที่ไม่มีใครได้เห็น (T-06)
+   */
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -340,8 +350,17 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
         ? { perCard: "3-4 ประโยค", conn: "4-5 ประโยค", summary: "5-7 ประโยค" }
         : { perCard: "2-3 ประโยค คมชัดตรงแก่น", conn: "4-5 ประโยค", summary: "5-7 ประโยค" };
 
-  const cleanNickname = (nickname || (isEn ? "Querent" : "คุณ (ผู้มาขอคำทำนาย)")).replace(/[\x00-\x1F\x7F]/g, "").trim();
-  const cleanQuestion = (question || (isEn ? "General life direction and current energies" : "ภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้")).replace(/[\x00-\x1F\x7F]/g, "").trim();
+  /*
+   * 🧱 T-13: `.replace(/[\x00-\x1F\x7F]/g, "")` ของเดิมลบแค่อักขระควบคุม
+   * `<` `>` `/` และสตริง `</question>` รอดหมด ผู้ใช้จึงปิดแท็บของตัวเองแล้วเขียนคำสั่งทับได้
+   * `sanitizePromptValue()` แปลงวงเล็บมุมเป็นแบบความกว้างเต็มซึ่งปิดแท็บไม่ได้
+   */
+  const cleanNickname =
+    sanitizePromptValue(nickname, 80) || (isEn ? "Querent" : "คุณ (ผู้มาขอคำทำนาย)");
+  const cleanQuestion =
+    sanitizePromptValue(question, 1000) ||
+    (isEn ? "General life direction and current energies" : "ภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้");
+  const cleanIntakeLines = intakeLines.map((line) => sanitizePromptValue(line, 1000));
 
   const exemplar = pickExemplar(category, drawn.length, spread.yesNoMode);
   const exemplarBlock = !isEn && !options?.omitExemplar ? formatExemplarForPrompt(exemplar) : "";
@@ -364,7 +383,7 @@ ${karmic.karmicNarrative ? `\n${karmic.karmicNarrative}` : ""}
   ${cosmic.promptAnchor}
   <nickname>${cleanNickname}</nickname>
   <question>${cleanQuestion}</question>
-  ${intakeLines.length ? `<context_details>\n  ${intakeLines.join("\n  ").replace(/[\x00-\x1F\x7F]/g, "")}\n  </context_details>` : ""}
+  ${cleanIntakeLines.length ? `<context_details>\n  ${cleanIntakeLines.join("\n  ")}\n  </context_details>` : ""}
 </user_profile>
 
 ## Spread: ${spread.nameEn || spread.nameTh} (${spread.descriptionEn || spread.description})
@@ -403,7 +422,8 @@ ${isQuick ? "" : '    "Concrete, practical micro-action achievable within 24-48 
   "mood": "One of: Radiant | Warm | Serene | Reflective | Challenging"
 }
 Must include "cards" for all positions given, ordered sequentially by position.
-⛔ CRITICAL MANDATE: All string values MUST be written in natural, fluent American English 100%.`;
+⛔ CRITICAL MANDATE: All string values MUST be written in natural, fluent American English 100%.
+${PROMPT_TRUST_BOUNDARY_EN}`;
   }
 
   return `## ข้อมูลผู้มาขอคำทำนายและห้วงเวลาจักรวาล (Cosmic & User Context)
@@ -411,7 +431,7 @@ Must include "cards" for all positions given, ordered sequentially by position.
   ${cosmic.promptAnchor}
   <nickname>${cleanNickname}</nickname>
   <question>${cleanQuestion}</question>
-  ${intakeLines.length ? `<context_details>\n  ${intakeLines.join("\n  ").replace(/[\x00-\x1F\x7F]/g, "")}\n  </context_details>` : ""}
+  ${cleanIntakeLines.length ? `<context_details>\n  ${cleanIntakeLines.join("\n  ")}\n  </context_details>` : ""}
 </user_profile>
 
 ## ผังไพ่ที่ใช้: ${spread.nameTh} (${spread.description})
@@ -451,5 +471,6 @@ ${isQuick ? "" : '    "ข้อแนะนำที่เป็น Micro-Actio
 }
 ต้องมี "cards" ครบทุกตำแหน่งที่ให้มา เรียงตาม position จากน้อยไปมาก
 
-⛔ ย้ำเด็ดขาด: ค่าของทุกคีย์ต้องเป็นภาษาไทยล้วน 100% ห้ามมีอักษรจีน (เช่น 向, 你, 的, 汉字) หรือภาษาต่างด้าวปนแม้แต่ตัวเดียว!`;
+⛔ ย้ำเด็ดขาด: ค่าของทุกคีย์ต้องเป็นภาษาไทยล้วน 100% ห้ามมีอักษรจีน (เช่น 向, 你, 的, 汉字) หรือภาษาต่างด้าวปนแม้แต่ตัวเดียว!
+${PROMPT_TRUST_BOUNDARY_TH}`;
 }

@@ -191,10 +191,22 @@ export const SITE_VIEWPORT: Viewport = {
 export const VIEWPORT_CONTENT =
   "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover";
 
-/** ฟอนต์ที่ทุกหน้าต้องพรีโหลด — ต้องตรงกับ `@font-face` ใน `globals.css` */
+/**
+ * ฟอนต์ที่ทุกหน้าพรีโหลด — ต้องเป็นชุดย่อยของ `@font-face` ใน `globals.css`
+ *
+ * 🔴 บทเรียน T-22: ของเดิมพรีโหลดครบทั้ง 4 ไฟล์ (รวม 67,828 B) ทุกหน้า
+ * ทั้งสี่ถูกขอด้วยลำดับความสำคัญสูงสุด **ก่อนภาพทุกใบ** บนการเชื่อมต่อที่ต้องโหลด
+ * สไตล์ชีต 22 KB พร้อมกันด้วย — เป็นการแย่งแบนด์วิดท์กับภาพที่เป็น LCP จริง
+ *
+ * ตอนนี้เหลือเฉพาะน้ำหนักปกติของทั้งสองตระกูล ซึ่งครอบ "เนื้อความ" ที่กินพื้นที่
+ * มากที่สุดในทุกหน้า · น้ำหนักหนา (700/600) ใช้กับหัวข้อซึ่งมีพื้นที่น้อยกว่ามาก
+ *
+ * ⚠️ ปลอดภัยจาก CLS เพราะ `globals.css` ประกาศฟอนต์สำรองที่ชดเชยเมตริกไว้แล้ว
+ * (`ascent-override` · `descent-override` · `size-adjust` คัดลอกมาจาก next/font)
+ * คู่กับ `font-display: swap` — การสลับฟอนต์จึงไม่ขยับ layout แม้แต่พิกเซลเดียว
+ * ถ้าวันหนึ่งวัดแล้วหัวข้อกระพริบจนน่ารำคาญ ให้เติมสองไฟล์ที่เหลือกลับเข้ามาได้ทันที
+ */
 export const FONT_PRELOADS = [
   "/fonts/noto-serif-thai-400.woff2",
-  "/fonts/noto-serif-thai-700.woff2",
   "/fonts/sarabun-400.woff2",
-  "/fonts/sarabun-600.woff2",
 ] as const;

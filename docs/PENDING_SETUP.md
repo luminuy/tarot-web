@@ -78,6 +78,29 @@
 - `SUPPORT_EMAIL` — ทับ Reply-To ของอีเมลระบบ (ค่าเริ่มต้น `support@seertarot.net`)
 - `CF_AI_GATEWAY_TOKEN` — ใส่เมื่อเปิด Authenticated Gateway
 
+### 💳 ยังไม่ได้ตั้ง — คีย์ระบบรับชำระเงิน (T-37 · บังคับก่อนเปิดขายจริง)
+
+> ⚠️ **บทเรียน T-37** — โค้ด production อ่านสามตัวนี้ใช้จริงมาตลอด (ถึงขั้นมี
+> `console.error("Missing PAYMENT_WEBHOOK_SECRET in production!")` ใน `payment-gateway.ts`)
+> แต่ grep ทั้งรีโปแล้ว **ไม่มีใน `.env.example` · `wrangler.jsonc` · เอกสารนี้เลยสักที่**
+> คนที่มาตั้งค่าต่อจึงไม่มีทางรู้ว่าต้องตั้งอะไรบ้าง และโหมดล้มเหลวเป็นแค่บรรทัด log
+
+| ชื่อ | ใช้ทำอะไร | ไม่ตั้งแล้วเกิดอะไร |
+| :--- | :--- | :--- |
+| `OMISE_SECRET_KEY` | คีย์ฝั่งเซิร์ฟเวอร์ของ Omise (`skey_...`) สำหรับสร้างรายการเรียกเก็บเงินจริง | ระบบใช้ "ตัวจำลอง" (`provider = simulator`) ซึ่งผ่านด่านยืนยันได้เฉพาะนอก production — บน production คือขายของไม่ได้เลย |
+| `OMISE_WEBHOOK_SECRET` | ตรวจลายเซ็น HMAC-SHA256 ของ webhook ที่เกตเวย์ยิงกลับมา | **ปฏิเสธ webhook ทุกใบ** (ตั้งแต่ T-18) → จ่ายเงินสำเร็จแต่สถานะไม่เคยขึ้นเป็น `paid` |
+| `PAYMENT_WEBHOOK_SECRET` | ตัวสำรองของตัวบน (ใช้เมื่อยังไม่ได้ตั้ง `OMISE_WEBHOOK_SECRET`) | เหมือนข้างบน — ต้องตั้งอย่างน้อยหนึ่งในสองตัว |
+
+ตั้งด้วย:
+
+```bash
+npx wrangler secret put OMISE_SECRET_KEY
+npx wrangler secret put OMISE_WEBHOOK_SECRET
+```
+
+> 🚫 `ALLOW_UNSIGNED_WEBHOOKS_DEV=1` เป็นธงสำหรับ **เครื่องพัฒนาเท่านั้น**
+> ห้ามตั้งบน production / preview / staging เด็ดขาด — เท่ากับเปิดให้ใครก็ได้แจกเครดิตให้ตัวเอง
+
 ### 📬 รอตั้งเพิ่ม — `CRON_SECRET` (ดวงประจำวันทางอีเมล)
 
 ระบบส่งดวงประจำวันเขียนเสร็จและ deploy ไปแล้ว แต่ **ยังส่งไม่ออกจนกว่าจะตั้งความลับนี้**

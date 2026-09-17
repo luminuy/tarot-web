@@ -2,7 +2,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 import { CRISIS_MESSAGE, CRISIS_MESSAGE_EN, checkQuestion, getCrisisHotlines } from "../../src/lib/safety/guardrails";
-import { mayNeedDeepCrisisCheck } from "../../src/lib/safety/ai-classifier";
+import { hasSoftDistressSignal, mayNeedDeepCrisisCheck } from "../../src/lib/safety/ai-classifier";
+import { CRISIS_LEXEMES_TH } from "../../src/lib/safety/crisis-lexicon";
 
 /**
  * QA — ทดสอบระบบคัดกรองความปลอดภัยด้วยคำถามตัวอย่างจริง
@@ -63,27 +64,129 @@ for (const c of cases) {
 
 console.log(`\n${pass}/${cases.length} ผ่าน`);
 
-// ── ชั้น 3: ตัวคัดกรองว่า "ควรถาม Workers AI ต่อ" (mayNeedDeepCrisisCheck) ──
-// regex ชั้นแรกไม่จับประโยคอ้อมพวกนี้ แต่ต้องถูกส่งต่อให้ AI จำแนก
-console.log("\n── ชั้น 3: คัดเคสคลุมเครือส่งต่อ Workers AI ──");
-const deepCases: { text: string; expect: boolean }[] = [
-  { text: "ตื่นมาทุกเช้าแล้วรู้สึกว่าไม่มีอะไรให้ทำต่อ", expect: true },
-  { text: "เหนื่อยกับชีวิตมาก ไม่ไหวแล้วจริง ๆ", expect: true },
-  { text: "รู้สึกว่าไม่มีใครต้องการเราเลย อยากหายไป", expect: true },
-  { text: "ทุกอย่างมันมืดไปหมด มองไม่เห็นทางออก", expect: true },
-  { text: "ความรักของฉันจะเป็นยังไงต่อ", expect: false },
-  { text: "เครียดงานนิดหน่อย อยากรู้ว่าเดือนหน้าจะดีขึ้นไหม", expect: false },
-  { text: "งานนี้เหนื่อยจะตาย จะไหวไหม", expect: false },
-];
-for (const c of deepCases) {
-  const got = mayNeedDeepCrisisCheck(c.text);
-  const ok = got === c.expect;
-  if (ok) {
-    pass++;
-    console.log(`✅ "${c.text}" → ${got ? "ส่งต่อ AI" : "ปล่อยผ่าน"}`);
+// ── คลังทดสอบจริง (T-35) ─────────────────────────────────────────────────────
+// กติกา: สตริงในคลัง **ห้ามคัดลอกมาจาก `crisis-lexicon.ts`** ต้องเป็นประโยคที่คนพิมพ์จริง
+// ด่านเดิมมีเคสวิกฤตแค่ 3 ตัวและทั้งสามคัดลอกมาจากตัวเรกเอ็กซ์เอง จึงผ่านตลอดกาล
+// และนั่นคือเหตุผลเดียวที่ T-01 อยู่รอดมาถึงวันนี้
+console.log("\n── คลังทดสอบสัญญาณวิกฤต: ต้องบล็อกครบ 100% ──");
+
+interface CorpusLine {
+  text: string;
+  group: string;
+}
+
+function loadCorpus(file: string): CorpusLine[] {
+  return readFileSync(file, "utf-8")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.startsWith("#"))
+    .map((l) => {
+      const [text, group = "ungrouped"] = l.split(" |");
+      return { text: text.trim(), group: group.trim() };
+    });
+}
+
+const crisisCorpus = loadCorpus("scripts/qa/fixtures/crisis-corpus.txt");
+const safeCorpus = loadCorpus("scripts/qa/fixtures/crisis-safe-corpus.txt");
+
+let corpusPass = 0;
+let corpusTotal = 0;
+const missedByGroup = new Map<string, string[]>();
+
+for (const line of crisisCorpus) {
+  corpusTotal++;
+  if (checkQuestion(line.text).block) {
+    corpusPass++;
   } else {
     fail++;
-    console.log(`❌ "${c.text}" → ได้ ${got} (ควรได้ ${c.expect})`);
+    const list = missedByGroup.get(line.group) ?? [];
+    list.push(line.text);
+    missedByGroup.set(line.group, list);
+  }
+}
+
+// ทุกกลุ่มต้องมีตัวอย่างอย่างน้อย 5 ตัว — กันคนแก้ด่านด้วยการลบเคสที่ตกทิ้ง
+const groupCounts = new Map<string, number>();
+for (const line of crisisCorpus) groupCounts.set(line.group, (groupCounts.get(line.group) ?? 0) + 1);
+for (const required of ["evasion", "karaoke", "en"]) {
+  const n = groupCounts.get(required) ?? 0;
+  if (n >= 5) {
+    corpusPass++;
+    console.log(`✅ กลุ่ม "${required}" มีตัวอย่าง ${n} ตัว (ต้องมี ≥ 5)`);
+  } else {
+    fail++;
+    console.log(`❌ กลุ่ม "${required}" มีตัวอย่างแค่ ${n} ตัว (ต้องมี ≥ 5)`);
+  }
+  corpusTotal++;
+}
+
+if (missedByGroup.size === 0) {
+  console.log(`✅ บล็อกครบ ${crisisCorpus.length}/${crisisCorpus.length} บรรทัดในคลังวิกฤต`);
+} else {
+  for (const [group, texts] of missedByGroup) {
+    console.log(`❌ กลุ่ม "${group}" หลุด ${texts.length} บรรทัด:`);
+    for (const t of texts) console.log(`     · ${t}`);
+  }
+}
+
+// ⛔ ด่านกันด่านหลอก: สตริงในคลังต้องไม่ใช่ "ตัวคำในคลังคำ" ที่คัดลอกมาตรง ๆ
+// ถ้าเคสทดสอบคือคำในลิสต์เอง ด่านนี้จะผ่านตลอดกาลโดยไม่ได้พิสูจน์อะไรเลย (บทเรียน T-35)
+const lexemeSet = new Set(CRISIS_LEXEMES_TH.map((l) => l.trim()));
+const copied = crisisCorpus.filter((l) => lexemeSet.has(l.text));
+corpusTotal++;
+if (copied.length === 0) {
+  corpusPass++;
+  console.log("✅ ไม่มีบรรทัดไหนในคลังที่คัดลอกมาจาก crisis-lexicon.ts ตรง ๆ");
+} else {
+  fail++;
+  console.log(`❌ มี ${copied.length} บรรทัดที่คัดลอกมาจากคลังคำเอง: ${copied.map((c) => c.text).join(" · ")}`);
+}
+
+// คลังกันจับเกิน — ภาษาพูดไทยใช้ "จะตาย" เป็นคำขยายทั่วไป
+for (const line of safeCorpus) {
+  corpusTotal++;
+  const v = checkQuestion(line.text);
+  if (!v.block) {
+    corpusPass++;
+  } else {
+    fail++;
+    console.log(`❌ จับเกิน (${line.group}): "${line.text}" ถูกบล็อกทั้งที่ไม่ควร`);
+  }
+}
+if (safeCorpus.every((l) => !checkQuestion(l.text).block)) {
+  console.log(`✅ ไม่จับเกินสักบรรทัดใน ${safeCorpus.length} บรรทัดของคลังคำปกติ`);
+}
+
+// ── ชั้น 3: ประตูของตัวจำแนก Workers AI ──────────────────────────────────────
+// T-01: ประตูเดิมคือเรกเอ็กซ์อ่อน ๆ ชุดเดียว ทำให้ข้อความที่หลุดชั้น 1
+// ไม่มีทางเดินทางมาถึงตัวจำแนกได้เลย — ตอนนี้ข้อความที่ยาวพอผ่านประตูหมด
+console.log("\n── ชั้น 3: ประตูต้องกว้างพอ และลิสต์ความทุกข์อ่อนต้องยังแยกแยะได้ ──");
+
+const gateCases: { text: string; expectGate: boolean; expectSoft: boolean }[] = [
+  { text: "ตื่นมาทุกเช้าแล้วรู้สึกว่าไม่มีอะไรให้ทำต่อ", expectGate: true, expectSoft: true },
+  { text: "เหนื่อยกับชีวิตมาก ไม่ไหวแล้วจริง ๆ", expectGate: true, expectSoft: true },
+  { text: "รู้สึกว่าไม่มีใครต้องการเราเลย อยากหายไป", expectGate: true, expectSoft: true },
+  { text: "ทุกอย่างมันมืดไปหมด มองไม่เห็นทางออก", expectGate: true, expectSoft: true },
+  { text: "ทำอะไรก็ผิดไปหมด เกลียดตัวเองมาก", expectGate: true, expectSoft: true },
+  { text: "nothing matters to me anymore these days", expectGate: true, expectSoft: true },
+  // ข้อความปกติที่ยาวพอ — ต้องผ่านประตู (ให้ AI ดู) แต่ไม่เข้าลิสต์ความทุกข์อ่อน
+  // ข้อนี้คือหัวใจของ T-01: ประตูต้องไม่ใช่ตัวตัดสินว่า "ไม่ต้องดู"
+  { text: "ความรักของฉันจะเป็นยังไงต่อในปีหน้า", expectGate: true, expectSoft: false },
+  { text: "งานนี้เหนื่อยจะตาย ปีนี้จะได้เลื่อนตำแหน่งไหม", expectGate: true, expectSoft: false },
+  // สั้นเกินกว่าจะมีบริบท และชั้น 1 ดูแลอยู่แล้ว
+  { text: "ดวงวันนี้", expectGate: false, expectSoft: false },
+];
+for (const c of gateCases) {
+  const gate = mayNeedDeepCrisisCheck(c.text);
+  const soft = hasSoftDistressSignal(c.text);
+  if (gate === c.expectGate && soft === c.expectSoft) {
+    pass++;
+    console.log(`✅ "${c.text}" → ${gate ? "ส่งต่อ AI" : "ไม่ส่ง"}${soft ? " · ทุกข์อ่อน (fail-safe)" : ""}`);
+  } else {
+    fail++;
+    console.log(
+      `❌ "${c.text}" → gate=${gate} soft=${soft} (ควรได้ gate=${c.expectGate} soft=${c.expectSoft})`,
+    );
   }
 }
 
@@ -173,5 +276,5 @@ for (const [lang, message] of [
   }
 }
 
-console.log(`\nรวม ${pass + uiPass}/${cases.length + deepCases.length + uiTotal} ผ่าน`);
+console.log(`\nรวม ${pass + uiPass + corpusPass}/${cases.length + gateCases.length + uiTotal + corpusTotal} ผ่าน`);
 if (fail > 0) process.exit(1);

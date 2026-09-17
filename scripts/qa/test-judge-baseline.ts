@@ -116,7 +116,26 @@ const mine = reportsFor(PROMPT_VERSION);
 const mainVersion = versionOnMain();
 
 if (mainVersion === null) {
-  console.log("  ℹ️  เทียบกับ origin/main ไม่ได้ในเครื่องนี้ — ข้ามการตรวจ 'ขึ้นเวอร์ชันแล้วต้องมีผลวัด'");
+  /*
+   * 🔴 บทเรียน T-44: ของเดิมพิมพ์บรรทัด info เฉย ๆ ไม่ `fail()` ไม่ `warn()`
+   * กฎข้อ 2 ของด่านนี้จึงกลายเป็น no-op เงียบ ๆ ทุกครั้งที่หา `origin/main` ไม่เจอ
+   * (shallow clone · ไม่มี remote · worktree ที่ยังไม่ fetch) — `pr.yml` ตั้ง `fetch-depth: 0`
+   * ไว้จึงน่าจะทำงานที่นั่น แต่ `repo:verify` ที่นักพัฒนารันในเครื่องเสื่อมเป็น no-op โดยไม่มีใครรู้
+   *
+   * ตอนนี้: อยู่ใน CI = ตกทันที (CI ต้องมีประวัติ git ครบเสมอ ถ้าไม่มีแปลว่า workflow ตั้งผิด)
+   * รันในเครื่อง = เตือนให้เห็นชัดว่ากฎข้อนี้ "ไม่ได้ตรวจ" ไม่ใช่ "ตรวจแล้วผ่าน"
+   */
+  if (process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true") {
+    fail(
+      "อยู่ใน CI แต่หา origin/main ไม่เจอ — กฎ 'ขึ้นเวอร์ชันแล้วต้องมีผลวัด' ตรวจไม่ได้เลย\n" +
+        "      ➔ workflow ต้องตั้ง `fetch-depth: 0` ใน actions/checkout ไม่งั้นด่านนี้เสื่อมเป็นของประดับ",
+    );
+  } else {
+    warn(
+      "เทียบกับ origin/main ไม่ได้ในเครื่องนี้ — กฎ 'ขึ้นเวอร์ชันแล้วต้องมีผลวัด' **ไม่ได้ถูกตรวจ**\n" +
+        "      (รัน `git fetch origin main` ก่อน ถ้าอยากให้ด่านนี้ตรวจจริงในเครื่อง)",
+    );
+  }
 } else if (mainVersion !== PROMPT_VERSION && mine.length === 0) {
   fail(
     `PR นี้ขึ้น PROMPT_VERSION จาก "${mainVersion}" เป็น "${PROMPT_VERSION}" แต่ไม่มีรายงาน ai:judge ของเวอร์ชันใหม่\n` +

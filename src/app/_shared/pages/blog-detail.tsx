@@ -15,6 +15,7 @@ import { getCategoryCardImage } from "@/lib/media/og-card-art";
 import type { Locale } from "@/lib/i18n/types";
 import { ArticleReadingClient } from "@/components/blog/ArticleReadingClient";
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 export interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -178,10 +179,10 @@ export function BlogDetailContent({
 
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdArticle) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdArticle) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
       {jsonLdFaq && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdFaq) }} />
       )}
 
       <div className="max-w-4xl mx-auto space-y-8 pb-20">{reader}</div>

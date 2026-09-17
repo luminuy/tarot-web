@@ -10,6 +10,9 @@
  * ทั้งสองชั้นต้องมี ชั้นเดียวไม่พอ
  */
 
+import { findCrisisSignal } from "./crisis-lexicon";
+import { matchForms } from "./normalize";
+
 export type SafetyFlag = "crisis" | "medical" | "legal" | "gambling" | "third_party" | "none";
 
 export interface SafetyVerdict {
@@ -24,22 +27,14 @@ export interface SafetyVerdict {
 
 /**
  * สัญญาณการทำร้ายตัวเอง
+ * -------------------------------------------------
+ * คลังคำอยู่ที่ `crisis-lexicon.ts` และ **เทียบบนรูปมาตรฐาน** (ตัดช่องว่าง · ถอดวรรณยุกต์ ·
+ * ยุบอักษรซ้ำ) ไม่ใช่เทียบกับสตริงดิบอย่างเดิม — ดู `normalize.ts` ว่าทำไม
+ *
  * ระวังภาษาพูดไทย: "จะตาย" เป็นคำขยายที่ใช้ทั่วไป ("เหนื่อยจะตาย" "หิวจะตาย")
  * จึงห้ามจับคำว่า "ตาย" ลอย ๆ ต้องจับเฉพาะรูปที่สื่อเจตนาจริง
+ * คลังกันจับเกินอยู่ที่ `scripts/qa/fixtures/crisis-safe-corpus.txt`
  */
-const CRISIS_PATTERNS: RegExp[] = [
-  /ฆ่าตัวตาย/,
-  /อยาก(จะ)?ตาย/,
-  /ไม่อยาก(มีชีวิต|อยู่ต่อ|อยู่แล้ว|ตื่นขึ้นมา)/,
-  /จบชีวิต|จบ ๆ ไปเลย|ปลิดชีพ/,
-  /ทำร้ายตัวเอง|ทำร้ายร่างกายตัวเอง/,
-  /กรีด(แขน|ข้อมือ|ตัวเอง)/,
-  /กินยา(ฆ่าตัวตาย|เกินขนาด|ทั้งขวด)/,
-  /(แขวนคอ|โดดตึก|โดดสะพาน|รมควัน)/,
-  /หายไปจากโลกนี้|ไม่มีใครสนใจถ้าฉันหายไป|โลกนี้ไม่มีที่ให้ฉัน/,
-  /อยู่ไปก็เป็นภาระ/,
-  /\bsuicide\b|\bkill myself\b|\bend my life\b|\bself.?harm\b/i,
-];
 
 const MEDICAL_PATTERNS: RegExp[] = [
   /(เป็น|ป่วย|ติด)(มะเร็ง|เอดส์|เบาหวาน|ซึมเศร้า|ไบโพลาร์|วัณโรค)/,
@@ -144,7 +139,7 @@ export function checkQuestion(rawQuestion: string, lang: "th" | "en" = "th"): Sa
   const text = rawQuestion.normalize("NFC").trim();
   if (!text) return { flag: "none", block: false };
 
-  if (matchAny(CRISIS_PATTERNS, text)) {
+  if (findCrisisSignal(matchForms(text))) {
     return { flag: "crisis", block: true, message: getCrisisMessage(lang) };
   }
 

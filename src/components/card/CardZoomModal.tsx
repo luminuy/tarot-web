@@ -131,6 +131,8 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           <button
             type="button"
             onClick={() => setFlipped(!flipped)}
+            /* ♿ T-34: ผู้ใช้โปรแกรมอ่านหน้าจอต้องรู้ว่าตอนนี้โชว์ด้านไหนอยู่ ไม่ใช่แค่ได้ยินชื่อปุ่ม */
+            aria-pressed={flipped}
             className="tap-overlay-y w-full py-2.5 rounded-lg bg-surface border border-line-warm text-xs font-serif-th font-semibold text-ink-deep hover:bg-inset-warm transition cursor-pointer "
           >
             {isEnglish ? "Flip Card / View Back" : "พลิกดูหน้าไพ่ / หลังไพ่"}

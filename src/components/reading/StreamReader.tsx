@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import { motion } from "motion/react";
-import { STAGGER, DUR, EASE } from "@/lib/motion";
+import { DUR, EASE } from "@/lib/motion";
 import { YES_NO_DISPLAY_EN, type Reading } from "@/lib/schema/reading";
 import type { Persona } from "@/data/personas";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
@@ -17,6 +17,7 @@ import { CollapsibleCard } from "./CollapsibleCard";
 import { CardImage } from "@/components/card/CardImage";
 import { TTSReaderButton } from "./TTSReaderButton";
 import { useLocale } from "@/lib/i18n";
+import { useMotionSafe } from "@/lib/use-motion-safe";
 import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
 
 interface StreamReaderProps {
@@ -39,6 +40,54 @@ interface StreamReaderProps {
   nickname?: string;
   onRetry?: () => void;
 }
+
+/**
+ * ✦ ข้อความคำทำนายที่ทยอยมาทีละก้อน — **หนึ่ง span ต่อหนึ่งก้อนที่สตรีมเข้ามา**
+ * ---------------------------------------------------------------------------
+ * ของเดิมทำ `reading.split(" ").map(...)` สร้าง `motion.span` หนึ่งตัวต่อหนึ่งคำ
+ * ซึ่งมีปัญหาสามชั้นพร้อมกัน (T-03 · T-30 · T-32):
+ *
+ * 1. **ภาษาไทยไม่เว้นวรรคระหว่างคำ** `.split(" ")` จึงตัดได้เป็นก้อนใหญ่ไม่กี่ก้อน
+ *    แอนิเมชันจริงคือ "ทีละวรรค" ไม่ใช่ "ทีละคำ" อย่างที่ออกแบบไว้ตั้งแต่แรก
+ *    ส่วนฝั่งอังกฤษ (`/en`) ตัดได้ทีละคำจริง → `motion.span` หลักร้อยตัวพร้อมกัน
+ *    คูณจำนวนไพ่ที่สตรีมพร้อมกัน (ผังใหญ่มีได้ถึง 10 ใบ) เป็นภาระเธรดหลักที่ด่านเดิม
+ *    มองไม่เห็น เพราะมันตรวจ `animate={{}}` ทีละตัว ไม่ได้ตรวจ**จำนวน**
+ * 2. ทุกคำที่เพิ่มเข้ามาคือการเปลี่ยนแปลงใน live region หนึ่งครั้ง
+ * 3. ไม่มีเส้นทาง `prefers-reduced-motion` เลย
+ *
+ * วิธีใหม่: จำความยาวที่ "นิ่งแล้ว" ไว้ แล้วให้เฉพาะส่วนที่เพิ่งต่อท้ายเข้ามาเป็น span เดียว
+ * พฤติกรรมไทยกับอังกฤษจึงเท่ากัน และจำนวนโหนดเท่ากับจำนวนครั้งที่สตรีมส่งของมา
+ *
+ * ต้องใส่ `key` ที่ผูกกับไพ่ใบที่กำลังแสดง เพื่อให้ตัวนับรีเซ็ตเมื่อสลับใบ
+ */
+const StreamingChunkText: React.FC<{ text: string; animate: boolean }> = ({ text, animate }) => {
+  const settledRef = useRef(0);
+  // ข้อความสั้นลงได้เมื่อผู้ให้บริการส่ง event `reset` แล้วเริ่มใหม่กับโมเดลถัดไป
+  const settled = Math.min(settledRef.current, text.length);
+
+  useEffect(() => {
+    settledRef.current = text.length;
+  }, [text]);
+
+  if (!animate) return <>{text}</>;
+
+  const fresh = text.slice(settled);
+  if (!fresh) return <>{text}</>;
+
+  return (
+    <>
+      {text.slice(0, settled)}
+      <motion.span
+        key={settled}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: DUR.fast, ease: EASE.out }}
+      >
+        {fresh}
+      </motion.span>
+    </>
+  );
+};
 
 export const StreamReader: React.FC<StreamReaderProps> = ({
   reading,
@@ -67,6 +116,29 @@ export const StreamReader: React.FC<StreamReaderProps> = ({
       ? cardByIndex(activeDrawnCard.cardIndex)
       : undefined) || activeDrawnCard?.card;
   const activeCardReading = reading?.cards?.find((c) => c.position === activeCardIndex);
+
+  /** ♿ ผู้ใช้ขอลดการเคลื่อนไหวหรือไม่ — ฮุกนี้ไม่ลาก `motion` เข้าบันเดิลสักไบต์ */
+  const motionSafe = useMotionSafe();
+
+  /**
+   * ♿ ข้อความที่จะถูกประกาศ "ครั้งเดียว" เมื่อคำทำนายของไพ่ใบนี้จบแล้ว (T-03)
+   * ต้องล้างเป็นค่าว่างก่อนเสมอ ไม่งั้นโปรแกรมอ่านหน้าจอที่เห็นสตริงเดิมจะไม่ประกาศซ้ำ
+   */
+  const [announcement, setAnnouncement] = useState("");
+  const finishedReading = !isStreaming ? activeCardReading?.reading ?? "" : "";
+  const finishedHeadline = !isStreaming ? activeCardReading?.headline ?? "" : "";
+
+  useEffect(() => {
+    if (!finishedReading) {
+      setAnnouncement("");
+      return;
+    }
+    setAnnouncement("");
+    const timer = setTimeout(() => {
+      setAnnouncement(`${finishedHeadline ? `${finishedHeadline}. ` : ""}${finishedReading}`);
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [finishedReading, finishedHeadline, activeCardIndex]);
 
   const allCards = useMemo(() => {
     try {
@@ -397,31 +469,26 @@ isEnglish
                 </p>
               )}
 
-              {/* P1-M3: Word-by-word oracle streaming animation */}
+              {/* P1-M3: คำทำนายทยอยโผล่ทีละก้อนที่สตรีมเข้ามา (ดู StreamingChunkText) */}
               {activeCardReading?.reading ? (
                 <p
                   key={`oracle-${activeCardIndex}`}
                   className="text-xs sm:text-sm text-ink-deep leading-relaxed font-serif-th font-normal"
-                  aria-live="polite"
+                  /*
+                   * ♿ ระหว่างสตรีมต้องเป็น "off" (T-03)
+                   * ของเดิมเป็น `aria-live="polite"` ครอบข้อความที่ยาวขึ้นเรื่อย ๆ
+                   * โปรแกรมอ่านหน้าจอจึงประกาศใหม่ทุกครั้งที่ DOM เปลี่ยน — บางตัวอ่านทับซ้อนกัน
+                   * บางตัวอ่านสตริงทั้งก้อนใหม่ตั้งแต่ต้นทุกรอบ คนตาบอดใช้ฟีเจอร์หลักของเว็บไม่ได้เลย
+                   * การประกาศ "ครั้งเดียวตอนจบ" ย้ายไปอยู่ที่โหนดซ่อนด้านล่างแทน
+                   */
+                  aria-live="off"
                   aria-label={isEnglish ? "Oracle's interpretation" : "คำทำนายจากแม่หมอ"}
                 >
-                  {isStreaming
-                    ? activeCardReading.reading.split(" ").map((word, i) => (
-                        <motion.span
-                          key={i}
-                          initial={{ opacity: 0, y: 4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{
-                            duration: DUR.fast,
-                            ease: EASE.out,
-                            delay: i * STAGGER.tight,
-                          }}
-                          className="inline-block mr-[0.25em]"
-                        >
-                          {word}
-                        </motion.span>
-                      ))
-                    : activeCardReading.reading}
+                  <StreamingChunkText
+                    key={`chunk-${activeCardIndex}`}
+                    text={activeCardReading.reading}
+                    animate={isStreaming && motionSafe}
+                  />
                 </p>
               ) : (
                 <p className="text-xs sm:text-sm text-muted leading-relaxed font-serif-th font-normal italic">
@@ -432,6 +499,15 @@ isEnglish
                     : (isEnglish ? "Awaiting oracle revelation" : "รอการเปิดม่านพยากรณ์")}
                 </p>
               )}
+
+              {/*
+                ♿ ประกาศคำทำนาย **ครั้งเดียว** ตอนสตรีมจบ (T-03)
+                โหนดนี้ถูกซ่อนจากสายตาแต่โปรแกรมอ่านหน้าจอเห็น · `aria-atomic` บังคับให้อ่าน
+                ทั้งก้อนเป็นประโยคเดียว ไม่ใช่อ่านเฉพาะส่วนที่เปลี่ยน
+              */}
+              <p className="sr-only" aria-live="polite" aria-atomic="true">
+                {announcement}
+              </p>
             </div>
 
             {/* Next / Prev Card Navigation Arrows */}

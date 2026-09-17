@@ -133,10 +133,14 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
       );
       CREATE INDEX IF NOT EXISTS idx_bookings_reader ON bookings(reader_id, slot_start);
 
+      -- ไม่มี FK ไป bookings อีกแล้ว (migrations/0015 · T-09): เส้นทางเติมเครดิตไม่สร้างแถว
+      -- bookings เลย FK เดิมจึงเป็นจริงไม่ได้และ PRAGMA foreign_key_check รายงานแถวค้างทุกครั้ง
       CREATE TABLE IF NOT EXISTS payments (
         id            TEXT PRIMARY KEY,
-        booking_id    TEXT NOT NULL REFERENCES bookings(id),
-        ticket_id     TEXT REFERENCES queue_tickets(id),
+        booking_id    TEXT,
+        order_id      TEXT,
+        user_id       TEXT,
+        ticket_id     TEXT,
         provider      TEXT NOT NULL DEFAULT 'omise',
         provider_ref  TEXT,
         amount_satang INTEGER NOT NULL,
@@ -147,6 +151,8 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
         updated_at    INTEGER NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
+      CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id);
+      CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
       CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 
       CREATE TABLE IF NOT EXISTS payouts (
@@ -348,6 +354,12 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_score INTEGER");
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_issue_codes TEXT");
     safeExec("ALTER TABLE reading_quality ADD COLUMN thai_fix_count INTEGER");
+    // 💳 เจ้าของรายการชำระเงิน + เลขออร์เดอร์ (migrations/0015 · T-07/T-09)
+    // เครื่องที่มี .dev-marketplace.db อยู่ก่อนแล้วจะไม่ได้คอลัมน์ใหม่จาก CREATE TABLE IF NOT EXISTS
+    safeExec("ALTER TABLE payments ADD COLUMN order_id TEXT");
+    safeExec("ALTER TABLE payments ADD COLUMN user_id TEXT");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id)");
+    safeExec("CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id)");
     // 🎟 รหัสแลกสิทธิ์ตั้งต้นของเครื่อง dev — ต้องมีเพดานและวันหมดอายุเท่ากับ migrations/0013
     // (ห้ามปล่อย max_uses = -1 อีก: รหัสที่เขียนไว้ในรีโปแปลว่าใครอ่านซอร์สเจอก็แลกได้)
     // รหัสสำหรับแจกจริงให้สร้างจากแผงแอดมินซึ่งสุ่มรหัสใหม่ทุกครั้ง — อย่า seed ลงไฟล์

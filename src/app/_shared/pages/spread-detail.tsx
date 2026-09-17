@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import type { Locale } from "@/lib/i18n/types";
 
 import { buildBreadcrumbJsonLd, homeCrumb } from "../seo";
+import { jsonLdScript } from "@/lib/seo/json-ld";
 
 export interface SpreadDetailPageProps {
   params: Promise<{ id: string }>;
@@ -288,7 +289,7 @@ export function SpreadDetailContent({
         <script
           key={i}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(block) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(block) }}
         />
       ))}
 

@@ -14,7 +14,15 @@ export type PayoutStatus = "pending" | "completed" | "cancelled";
 
 export interface PaymentRecord {
   id: string;
-  bookingId: string;
+  /** รหัสการจองแม่หมอ (null สำหรับรายการเติมเครดิต) */
+  bookingId: string | null;
+  /** เลขคำสั่งซื้อของเส้นทางเติมเครดิต (null สำหรับการจองแม่หมอ) */
+  orderId: string | null;
+  /**
+   * เจ้าของรายการ — ด่านยืนยันการซื้อ **ต้อง** เทียบคอลัมน์นี้กับเซสชัน
+   * ไม่ใช่เชื่อ `userId` ที่ไคลเอนต์ส่งมาคู่กับ `orderId` ที่เดินทางผ่าน query string (T-07)
+   */
+  userId: string | null;
   ticketId: string | null;
   provider: string;
   providerRef: string | null;
@@ -39,7 +47,9 @@ export interface PayoutRecord {
 
 interface RawPaymentRow {
   id: string;
-  booking_id: string;
+  booking_id: string | null;
+  order_id: string | null;
+  user_id: string | null;
   ticket_id: string | null;
   provider: string;
   provider_ref: string | null;
@@ -55,6 +65,8 @@ function mapRowToPayment(row: RawPaymentRow): PaymentRecord {
   return {
     id: row.id,
     bookingId: row.booking_id,
+    orderId: row.order_id ?? null,
+    userId: row.user_id ?? null,
     ticketId: row.ticket_id,
     provider: row.provider,
     providerRef: row.provider_ref,
@@ -68,7 +80,12 @@ function mapRowToPayment(row: RawPaymentRow): PaymentRecord {
 }
 
 export interface CreatePaymentInput {
-  bookingId: string;
+  /** การจองแม่หมอ — เว้นไว้สำหรับรายการเติมเครดิต */
+  bookingId?: string | null;
+  /** เลขคำสั่งซื้อของเส้นทางเติมเครดิต */
+  orderId?: string | null;
+  /** เจ้าของรายการ — ต้องส่งมาเสมอสำหรับเส้นทางที่ผูกกับบัญชีผู้ใช้ */
+  userId?: string | null;
   ticketId?: string;
   provider?: string;
   providerRef?: string;
@@ -88,7 +105,9 @@ export async function createPaymentRecord(input: CreatePaymentInput): Promise<Pa
 
   const payment: PaymentRecord = {
     id,
-    bookingId: input.bookingId,
+    bookingId: input.bookingId ?? null,
+    orderId: input.orderId ?? null,
+    userId: input.userId ?? null,
     ticketId: input.ticketId || null,
     provider,
     providerRef: input.providerRef || null,
@@ -103,12 +122,14 @@ export async function createPaymentRecord(input: CreatePaymentInput): Promise<Pa
   await db
     .prepare(
       `INSERT INTO payments (
-        id, booking_id, ticket_id, provider, provider_ref, amount_satang, currency, status, webhook_log, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        id, booking_id, order_id, user_id, ticket_id, provider, provider_ref, amount_satang, currency, status, webhook_log, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       payment.id,
       payment.bookingId,
+      payment.orderId,
+      payment.userId,
       payment.ticketId,
       payment.provider,
       payment.providerRef,
@@ -132,6 +153,20 @@ export async function getPaymentById(id: string): Promise<PaymentRecord | null> 
   const row = await db
     .prepare("SELECT * FROM payments WHERE id = ? LIMIT 1")
     .bind(id)
+    .first<RawPaymentRow>();
+
+  return row ? mapRowToPayment(row) : null;
+}
+
+/**
+ * ดึงรายการเติมเครดิตด้วยเลขคำสั่งซื้อ
+ * แถวยุคก่อน migrations/0015 เก็บเลขออร์เดอร์ไว้ใน `booking_id` จึงต้องมองทั้งสองคอลัมน์
+ */
+export async function getPaymentByOrderId(orderId: string): Promise<PaymentRecord | null> {
+  const db = await getAppDB();
+  const row = await db
+    .prepare("SELECT * FROM payments WHERE order_id = ? OR booking_id = ? ORDER BY created_at DESC LIMIT 1")
+    .bind(orderId, orderId)
     .first<RawPaymentRow>();
 
   return row ? mapRowToPayment(row) : null;
@@ -175,7 +210,8 @@ export async function updatePaymentStatus(
     .run();
 
   // If status marked as 'paid', also confirm booking
-  if (status === "paid") {
+  // (รายการเติมเครดิตไม่มี booking — ข้ามไปเลย ไม่ใช่ยิง UPDATE ที่ไม่มีวันตรงแถวไหน)
+  if (status === "paid" && payment.bookingId) {
     try {
       await db
         .prepare("UPDATE bookings SET status = 'paid' WHERE id = ?")

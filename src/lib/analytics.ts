@@ -304,7 +304,7 @@ export function trackEvent<T extends TarotAnalyticsEvent>(
 
 /**
  * ส่ง Conversion โดยตรงไปยัง Google Ads
- * @param sendTo รูปแบบ 'AW-XXXXXXXXX/AbCdEfGhIjK' หรือรหัส label เดี่ยวๆ เมื่อมี NEXT_PUBLIC_GOOGLE_ADS_ID
+ * @param sendTo รูปแบบ 'AW-XXXXXXXXX/AbCdEfGhIjK' หรือรหัส label เดี่ยว ๆ เมื่อมี NEXT_PUBLIC_GOOGLE_ADS_ID
  */
 export function trackGoogleAdsConversion(
   sendTo: string,
