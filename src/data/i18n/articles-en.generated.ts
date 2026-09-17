@@ -796,5 +796,141 @@ export const ARTICLES_EN: Record<string, ArticleEnData> = {
       }
     ],
     "contentEn": "## When to Choose a Yes/No Tarot Consultation\n\nThe **Yes or No Tarot Spread** is tailored for immediate, single-point practical choices, such as:\n- *\"Is moving forward with this purchase right now advantageous?\"*\n- *\"Will they keep our scheduled appointment today?\"*\n- *\"Is this travel route smooth and favorable?\"*\n\n---\n\n## 3 Sacred Rules for Accurate Yes/No Inquiries\n\n1. **Ask Once per Topic**: The first draw mirrors the purest energetic response.\n2. **Ensure Crystal Clarity**: Avoid compound questions with conflicting conditions in a single sentence.\n3. **Act with Grounded Reason**: The card reveals energetic momentum; your conscious action determines the ultimate outcome."
+  },
+  "tarot-4-cards-love-career": {
+    "titleEn": "4-Card Tarot Spread: Feelings, Obstacles, and Future Paths",
+    "seoTitleEn": "4-Card Tarot Spread: Love & Career Clarity",
+    "descriptionEn": "Master the 4-card tarot spread to understand their feelings, current obstacles, and upcoming trajectory in love and career. Provably fair 1909 Rider-Waite.",
+    "tocEn": [
+      {
+        "id": "why-4-cards",
+        "title": "Why the 4-Card Tarot Spread Excels Across Life Dimensions"
+      },
+      {
+        "id": "positions-meaning",
+        "title": "Understanding Each Position in the 4-Card Spread"
+      },
+      {
+        "id": "interpreting-love-work",
+        "title": "How to Read 4 Cards in Love and Career Inquiries"
+      },
+      {
+        "id": "faq",
+        "title": "Frequently Asked Questions (FAQ)"
+      }
+    ],
+    "faqsEn": [
+      {
+        "question": "What inquiries are best suited for the 4-card spread?",
+        "answer": "Questions seeking to understand emotional currents, present blockages, and emerging trajectories in relationships or major career decisions."
+      },
+      {
+        "question": "What if the final outcome card indicates an obstacle?",
+        "answer": "Tarot reflects energetic momentum, not rigid fate. The third card identifies the root obstacle, revealing how you can adapt to shape a better outcome."
+      }
+    ],
+    "contentEn": "## Why the 4-Card Tarot Spread Excels Across Life Dimensions\n\nThe Four-Card Spread strikes a balanced harmony between the swift clarity of a 3-card layout and the comprehensive depth of the 10-card Celtic Cross.\n\nIts greatest asset is unveiling the **unseen obstacle or hidden blockage**, ensuring the seeker understands not only the present climate, but also the pivotal hurdle shaping the trajectory.\n\n---\n\n## Understanding Each Position in the 4-Card Spread\n\nWhen exploring love and interpersonal connections, the four positions reveal:\n\n1. **Position 1 — Your Core Persona & Emotional State**: What you currently carry, your core expectations, and your stance in the connection.\n2. **Position 2 — Their Thoughts & Genuine Feelings**: What truly resides in their heart, their personal aspirations, or their outlook toward you.\n3. **Position 3 — The Immediate Obstacle or Test**: What creates friction or distance, such as pride, miscommunication, or external obligations.\n4. **Position 4 — Emerging Outcome & Oracle Guidance**: The natural progression of the relationship if present patterns and dynamics persist.\n\n---\n\n## How to Read 4 Cards in Love and Career Inquiries\n\n- **In Love Readings**: Observe the elemental harmony between Position 1 and Position 2. Water and Earth build steady affection, whereas heavy Swords in Position 3 urge honest, gentle dialogue.\n- **In Career Inquiries**: Position 1 reflects your personal strengths, Position 2 denotes workplace environment, Position 3 highlights project risks, and Position 4 foretells the interview or initiative result.\n\n---\n\n## Frequently Asked Questions (FAQ)\n\nThe most rewarding tarot readings arise when you quiet the mind, focus on your heartfelt inquiry, and welcome authentic insight with an open perspective."
+  },
+  "tarot-what-they-think-about-us": {
+    "titleEn": "What They Think About You Tarot: Read Their Mind and Intentions",
+    "seoTitleEn": "What They Think About You: Tarot Love Guide",
+    "descriptionEn": "Discover what your crush or partner truly feels with this tarot guide. Unpack subconscious intentions and emotional bonds with clear oracle wisdom.",
+    "tocEn": [
+      {
+        "id": "signs-they-like-you",
+        "title": "Clear Tarot Signals That They Harbor Genuine Feelings for You"
+      },
+      {
+        "id": "signs-they-hesitate",
+        "title": "Cards Revealing Hesitation, Confusion, or Emotional Barriers"
+      },
+      {
+        "id": "reading-techniques",
+        "title": "Precise Techniques for Inquiring Into Another Person's Mind"
+      },
+      {
+        "id": "faq",
+        "title": "Frequently Asked Questions (FAQ)"
+      }
+    ],
+    "faqsEn": [
+      {
+        "question": "How often should I consult the cards regarding their feelings?",
+        "answer": "Allow at least one to two weeks between consultations, or inquire again when significant interpersonal events unfold. Emotional resonance shifts naturally rather than hourly."
+      },
+      {
+        "question": "Does The Hermit mean they have no romantic interest?",
+        "answer": "Not necessarily. The Hermit often suggests they currently require emotional solitude or must resolve personal responsibilities before opening up to love."
+      }
+    ],
+    "contentEn": "## Clear Tarot Signals That They Harbor Genuine Feelings for You\n\nWhen asking *\"What do they think about me?\"*, drawing these archetypes indicates strong warmth, attraction, and positive regard:\n\n- **The Lovers**: They perceive undeniable magnetism, admire your qualities, and contemplate deeper emotional commitment.\n- **Two of Cups**: They feel safe and understood in your presence, valuing reciprocal trust and emotional honesty.\n- **Knight of Cups**: You occupy their romantic imagination, inspiring warm messages, gestures of affection, or a desire for closer proximity.\n- **The Sun**: You bring vitality and radiant positivity into their world, evoking genuine happiness whenever they think of you.\n\n---\n\n## Cards Revealing Hesitation, Confusion, or Emotional Barriers\n\nConversely, encountering these cards signals that space, patience, and mindful communication are needed:\n\n- **Two of Swords**: They have raised emotional defenses, wrestling with ambivalence or feeling torn between two conflicting paths.\n- **Four of Cups**: They remain emotionally guarded, perhaps dwelling on past disillusionment or not yet ready for fresh vulnerability.\n- **Eight of Swords**: External pressures or personal anxieties constrain them from stepping forward with confidence.\n\n---\n\n## Precise Techniques for Inquiring Into Another Person's Mind\n\n1. **Center on Their Likeness and Energy**: Take deep, deliberate breaths to clear projection and restless assumptions.\n2. **Release Preconceived Hopes**: Hold an impartial, receptive mindset rather than yearning for an idealized card.\n3. **Integrate Insight with Grounded Action**: Translate the oracle's guidance into grace, self-respect, and conscious emotional presence.\n\n---\n\n## Frequently Asked Questions (FAQ)\n\nTarot does not exist to pass judgment, but rather to illuminate prevailing vibrations so you can navigate your connection with poise and wisdom."
+  },
+  "the-moon-love-tarot-guide": {
+    "titleEn": "The Moon Love Tarot: Illusions, Hidden Fears, and True Meaning",
+    "seoTitleEn": "The Moon Tarot Meaning in Love: Upright & Reversed",
+    "descriptionEn": "Understand what The Moon tarot card means in love and relationships. Decode uncertainty, secret anxieties, and subconscious truths upright and reversed.",
+    "tocEn": [
+      {
+        "id": "core-meaning",
+        "title": "The Archetypal Essence of The Moon in Romantic Matters"
+      },
+      {
+        "id": "relationship-status",
+        "title": "Meanings by Relationship Status: Single, Dating, or Committed"
+      },
+      {
+        "id": "upright-reversed",
+        "title": "Deciphering Upright vs Reversed Orientations"
+      },
+      {
+        "id": "faq",
+        "title": "Frequently Asked Questions (FAQ)"
+      }
+    ],
+    "faqsEn": [
+      {
+        "question": "Does The Moon always indicate unfaithfulness or deception?",
+        "answer": "No. The Moon frequently mirrors your own internal anxieties and insecurities rather than external infidelity. Verify facts through calm, honest dialogue before jumping to conclusions."
+      },
+      {
+        "question": "How should I handle the energy of The Moon in my relationship?",
+        "answer": "Anchor yourself in observable reality, refrain from weaving worst-case scenarios, and allow patience to dissolve imagined shadows."
+      }
+    ],
+    "contentEn": "## The Archetypal Essence of The Moon in Romantic Matters\n\nThe Moon (Major Arcana XVIII) represents illusions, the deep subconscious, and fears lurking in shadows. When this card appears in a romance reading, it signals **ambiguity, emotional mist, or mutual mistrust**.\n\nThe wolf and dog baying at the nocturnal celestial sphere, coupled with the crayfish emerging from primordial waters, symbolize primitive doubts stirring from within.\n\n---\n\n## Meanings by Relationship Status: Single, Dating, or Committed\n\n- **Single Seekers**: Exercise discernment with prospective suitors who appear elusive. Grant trust gradually as actions consistently validate words over time.\n- **Dating & Ambiguous Connections**: Ambiguity clouds intentions. Important realities remain unspoken or masked behind polite evasion.\n- **Established Couples**: Emotional distance or unvoiced grievances foster an atmosphere of subtle unease. Reconnect through gentle, non-judgmental honesty.\n\n---\n\n## Deciphering Upright vs Reversed Orientations\n\n- **The Moon Upright**: Confusion, emotional volatility, and projecting irrational fears onto your partner.\n- **The Moon Reversed**: The mist recedes, clarity dawns, deception dissolves, and grounded perception returns with liberating relief.\n\n---\n\n## Frequently Asked Questions (FAQ)\n\nWhen The Moon casts its silver reflection upon your cards, heed the invitation not to panic, but to let time illuminate truth. Real truth alone will set your heart free."
+  },
+  "the-devil-love-tarot-guide": {
+    "titleEn": "The Devil Love Tarot: Toxic Attachments, Passion, and Liberation",
+    "seoTitleEn": "The Devil Tarot Meaning in Love: Toxic Bonds",
+    "descriptionEn": "Unpack The Devil tarot card in romance and passion. Recognize toxic dynamics, obsessive attachment, and discover how to break free toward authentic freedom.",
+    "tocEn": [
+      {
+        "id": "passion-and-attachment",
+        "title": "Intense Magnetism, Passion, and Inescapable Attachments"
+      },
+      {
+        "id": "toxic-dynamics",
+        "title": "Toxic Relationship Signals Highlighted by The Devil"
+      },
+      {
+        "id": "breaking-the-chains",
+        "title": "Dismantling the Chains and Reclaiming Personal Agency"
+      },
+      {
+        "id": "faq",
+        "title": "Frequently Asked Questions (FAQ)"
+      }
+    ],
+    "faqsEn": [
+      {
+        "question": "Does The Devil mean the relationship is purely sexual?",
+        "answer": "The card strongly emphasizes physical magnetism and primal desires, often pointing to connections driven by lust or loneliness rather than emotional depth."
+      },
+      {
+        "question": "What does The Devil indicate in the reversed orientation?",
+        "answer": "Reversed is an encouraging omen. It signals awakening, breaking out of toxic cycles, and reclaiming emotional autonomy with renewed strength."
+      }
+    ],
+    "contentEn": "## Intense Magnetism, Passion, and Inescapable Attachments\n\nThe Devil (Major Arcana XV) depicts a horned archetypal figure perched above two figures bound by loose chains. In romantic inquiries, this card personifies **compelling physical attraction, obsession, and unhealthy dependence**.\n\nYou may feel caught in a magnetic whirlpool that logic warns against, yet emotions struggle to abandon.\n\n---\n\n## Toxic Relationship Signals Highlighted by The Devil\n\nWhen The Devil raises its warning banner, evaluate whether your dynamic exhibits:\n\n- **Control & Manipulation**: One partner exercising dominance, guilt-tripping, or emotional surveillance.\n- **Addictive Dynamics**: A cycle where being together induces distress, yet separation feels unbearable.\n- **Clandestine Affairs**: Hidden liaisons, infidelity, or relationships shielded from the open light of day.\n\n---\n\n## Dismantling the Chains and Reclaiming Personal Agency\n\nNote that the chains encircling the necks of the figures are remarkably loose. They could slip them off at any moment of their own volition.\n\nThis imagery conveys that **the truest bondage is self-imposed through fear or habit**. The moment you honor your inherent self-worth and resolve to step back, you discover your freedom was always intact.\n\n---\n\n## Frequently Asked Questions (FAQ)\n\nLead with conscious awareness rather than fleeting impulse, and you will cultivate relationships anchored in mutual honor and genuine peace."
   }
 };

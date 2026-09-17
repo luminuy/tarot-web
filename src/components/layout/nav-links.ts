@@ -3,7 +3,7 @@
 // มีด่าน scripts/qa/test-docs-numbers.ts คอยตรวจยืนยันว่าตัวเลขตรงกับ dataset จริงเสมอ
 export const COUNTS = {
   cards: 78,
-  articles: 26,
+  articles: 30,
   spreads: 25,
 } as const;
 

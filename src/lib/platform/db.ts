@@ -151,8 +151,6 @@ async function createLocalSQLiteDB(): Promise<AppDB> {
         updated_at    INTEGER NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_payments_booking ON payments(booking_id);
-      CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id);
-      CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
       CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 
       CREATE TABLE IF NOT EXISTS payouts (
