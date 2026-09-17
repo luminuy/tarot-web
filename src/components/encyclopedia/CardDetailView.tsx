@@ -288,10 +288,22 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           {/* Action Button: Start Tarot Ritual with this Card */}
           <div className="pt-4 flex items-center gap-4 flex-wrap">
             <Link
-              href="/"
-              className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-ink hover:bg-gold text-canvas transition flex items-center gap-2 shadow-sm"
+              href={
+                card.suit === "cups" || card.id === "major-06"
+                  ? "/?spread=how-they-feel"
+                  : card.suit === "wands" || card.suit === "pentacles"
+                    ? "/?spread=career"
+                    : "/?spread=three-card"
+              }
+              className="px-7 py-3 rounded-full text-xs sm:text-sm font-serif-th font-bold bg-ink hover:bg-gold-ink text-canvas transition flex items-center gap-2 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold-ink"
             >
-              {isEnglish ? "Begin Tarot Reading" : "ไปหน้าดูดวงหลัก"}
+              {isEnglish ? "Open Interactive Tarot Reading" : "เปิดไพ่พยากรณ์จริงกับแม่หมอ AI"}
+            </Link>
+            <Link
+              href="/spreads"
+              className="text-xs sm:text-sm font-serif-th text-muted hover:text-gold-ink transition underline underline-offset-4"
+            >
+              {isEnglish ? "Explore 25 Spreads →" : "เลือกผังพยากรณ์ (25 แบบ) →"}
             </Link>
           </div>
         </div>

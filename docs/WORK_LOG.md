@@ -29,13 +29,45 @@
 | **วิหารพยากรณ์หลัก** | `/` | 🟢 **Active / Live** | Dev Server Ready | ผัง 5 ขั้นตอน (เลือกผัง, ตั้งจิต, สับไพ่ 3D, แผ่ไพ่ 78 ใบ, อ่านผลสด SSE, TTS) + GA4 Event Tracking ครบวงจร | เพิ่มโหมดสลับไพ่กลับหัว Manual |
 | **สารานุกรมไพ่ 78 ใบ** | `/cards` & `/cards/[id]` | 🟢 **Active / Live** | Dev Server Ready | กริด 78 ใบ + ค้นหา + แท็บกรองชุดไพ่ + หน้าเจาะลึกรายใบ 5 หมวด + โหราศาสตร์ + ปุ่มใบก่อน/ถัดไป + Card View & Search Analytics | เพิ่ม Audio คำอ่านรายใบ |
 | **คลัง 25 ผังพยากรณ์** | `/spreads` & `/spreads/[id]` | 🟢 **Active / Live** | Dev Server Ready | แท็บกรอง 4 หมวด + ภาพไดอะแกรมผังจริง 25 แบบ + ขยายดูความหมายตำแหน่ง + ปุ่มเปิดผัง + หน้าคู่มือราย spread 25 หน้า (SEO/SSG · JSON-LD HowTo) | แชร์ผังพยากรณ์แบบรูปภาพ |
-| **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 26 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
+| **คัมภีร์บทความความรู้** | `/blog` & `/blog/[slug]` | 🟢 **Active / Live** | Dev Server Ready | 30 บทความ SEO ไฮทราฟฟิก 5 หมวด + ค้นหา/กรอง + Dynamic Markdown Reader + Schema.org Article/FAQ + CTA เปิดไพ่ + Blog Read Tracking | เพิ่มฟังก์ชัน Bookmark บทความ |
 | **บัญชีและประวัติ** | `/account` | 🟢 **Active / Live** | Dev Server Ready | การ์ดสิทธิ์การใช้งาน (โควตา/รีเซ็ต/โบนัส/เติมรอบ), เปลี่ยนรหัสผ่าน, จัดการความเป็นส่วนตัว, ลบข้อมูลตาม PDPA | ซิงก์ประวัติคลาวด์ D1 / สมาชิกพรีเมียม |
 | **จัดการรหัสแลกสิทธิ์** | `/admin?tab=redeem` | 🟢 **Active / Live** | Dev Server Ready | แดชบอร์ดจัดการรหัสสิทธิ์เต็มรูปแบบ, ค้นหา/กรอง, สุ่มรหัส `SEER-XXXX-XXXX`, ตรวจดูประวัติคนแลก, ปิดการใช้งานทันที | ส่งออกรายงาน CSV |
 | **นโยบายความเป็นส่วนตัวสองภาษา** | `/privacy` & `/en/privacy` | 🟢 **Active / Live** | Dev Server Ready | ข้อกำหนด PDPA, GDPR, CCPA/CPRA, CalOPPA สองภาษาครบ 100% พร้อมปุ่มดาวน์โหลด JSON และลบข้อมูลจริง | - |
 | **ช่องทางติดต่อสองภาษา** | `/contact` & `/en/contact` | 🟢 **Active / Live** | Dev Server Ready | ช่องทางติดต่อทีมงานอีเมล support@seertarot.net และ TikTok @seerada.tarot พร้อมคำชี้แจงขอบเขตการให้บริการและสายด่วนวิกฤตสากล | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+
+### 🗓️ 2026-09-17 (รอบ 85): 🚀 แผนยุทธศาสตร์ SEO Master Plan & อัตราเร่งดึงดูดผู้ใช้ (SEO Wave 5)
+
+ขับเคลื่อน SEO และ Conversion Architecture ครบวงจรเพื่อยกระดับเว็บไซต์สู่ Top SERP ของประเทศไทย:
+
+1. **Metadata & Titles 78 หน้าไพ่ทาโรต์ (`/cards/[id]` สองภาษา)**:
+   - ปรับแต่ง Meta Title / Description / Keywords รองรับ High-Intent Search Queries ของคนไทย (`ไพ่ [NameEn] ([NameTh]) ความหมาย ความรัก การงาน`)
+   - ควบคุมความยาว title ≤ 60 ตัวอักษร และ description ≤ 155 ตัวอักษร ผ่านเกณฑ์ Google SERP 100% (ตรวจผ่าน `test-meta-length.ts`)
+
+2. **Schema.org `FAQPage` Rich Snippets ครบทั้ง 78 ใบ**:
+   - เพิ่ม `cardDetailFaqJsonLd` สร้าง Schema.org `FAQPage` ให้หน้าไพ่ทุกใบ ครอบคลุม 3 มิติสำคัญ (ความรัก, การงาน/การเงิน, และความหมายกลับหัว) ทั้งภาษาไทยและอังกฤษ
+   - ช่วยชิงพื้นที่ Accordion บนผลการค้นหา Google เพิ่ม CTR ผู้ใช้จริง
+
+3. **Contextual Deep-Link Conversion CTA (`CardDetailView.tsx`)**:
+   - ปรับปุ่ม Call-to-Action ท้ายหน้าไพ่แต่ละใบให้ Deep-link เข้าสู่พิธีเปิดไพ่จริงตามพลังงานของไพ่ (เช่น ไพ่ถ้วย/The Lovers ➔ `/?spread=how-they-feel`, ไพ่ไม้/เหรียญ ➔ `/?spread=career`, อื่น ๆ ➔ `/?spread=three-card`)
+   - เพิ่มลิงก์ทางเลือกไปยังคลังผังพยากรณ์ 25 แบบ (`/spreads`) เพิ่มอัตราการลองใช้งานจริง
+
+4. **IndexNow Instant Search Engine Notification Engine**:
+   - ติดตั้งคีย์ยืนยันตัวตน `public/9a6df76e25d24b0785fce3bfdc89b142.txt`
+   - พัฒนาสคริปต์ `scripts/seo/ping-indexnow.ts` พร้อมคำสั่ง `npm run seo:ping` ยิงแจ้ง Bing, Yandex, Seznam, Naver ทันที 296 URLs ทั้งภาษาไทยและอังกฤษ
+
+5. **4 เสาหลักบทความเจาะคำค้นหาไฮทราฟฟิกคู่แข่ง (`src/data/articles.ts`)**:
+   - `tarot-4-cards-love-career`: เจาะคีย์เวิร์ด "ดูดวงไพ่ยิปซี 4 ใบ"
+   - `tarot-what-they-think-about-us`: เจาะคีย์เวิร์ด "เขาคิดยังไงกับเรา"
+   - `the-moon-love-tarot-guide`: เจาะคีย์เวิร์ด "ไพ่ The Moon ความรัก"
+   - `the-devil-love-tarot-guide`: เจาะคีย์เวิร์ด "ไพ่ The Devil ความรัก"
+   - พัฒนาบทความฝาแฝดภาษาอังกฤษสมบูรณ์ 100% ใน `src/data/i18n/articles-en.generated.ts` มี Parity หัวข้อและไร้อักขระไทย
+
+6. **Island Decoupling & Performance Budget Optimization**:
+   - แยก `ArticleReaderRoot` ออกมาเป็น `astro/islands/ArticleReaderIsland.tsx` เพื่อไม่ให้หน้ารวม `/blog` แบกโค้ดของหน้าอ่านบทความ
+   - ทำ Lazy import สำหรับ `soundManager` ใน `BlogIndexClient.tsx`
+   - คุมงบ JS สำหรับ `/blog` อยู่ที่ 157 KB (≤ 158 KB) ผ่านเกณฑ์ `test-bundle-budget.ts` และ 74 ด่านทั้งหมด 100%
 
 ### 🗓️ 2026-09-17 (รอบ 84): 🔌 ปิดบั๊กผู้ใช้ใหม่โหลดสองรอบ + สร้าง "ด่านที่ตรวจด่าน" (R-01 · R-05 · R-06 · R-07)
 

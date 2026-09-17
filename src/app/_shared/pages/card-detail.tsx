@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { DECK, cardById } from "@/data/cards";
+import { CARD_MEANINGS_EN } from "@/data/cards/meanings-en";
 import type { TarotCard } from "@/data/cards/types";
 import { CardDetailView, type CardNavRef } from "@/components/encyclopedia/CardDetailView";
 import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
@@ -48,42 +49,50 @@ export function cardDetailMetadata(id: string, locale: Locale): Metadata {
   // title จะทะลุเพดานที่ Google แสดงได้ — เรียงจากครบสุดไปสั้นสุดให้ pickTitle เลือกเอง
   const title = isEnglish
     ? pickTitle([
+        `${card.nameEn} Meaning: Love, Career, Upright & Reversed`,
+        `${card.nameEn} Tarot Meaning: Love & Career`,
         `${card.nameEn} Tarot Card Meaning: Upright & Reversed`,
-        `${card.nameEn} Meaning: Upright & Reversed`,
         `${card.nameEn} Tarot Card Meaning`,
       ])
     : pickTitle([
-        `ความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) หัวตั้ง-หัวกลับ`,
-        `ความหมายไพ่ยิปซี ${card.nameTh} หัวตั้ง-หัวกลับ`,
-        `ความหมายไพ่ ${card.nameTh} (${card.nameEn})`,
+        `ไพ่ ${card.nameEn} (${card.nameTh}) ความหมาย ความรัก การงาน`,
+        `ไพ่ ${card.nameEn} (${card.nameTh}) ความหมาย ความรัก`,
+        `ไพ่ ${card.nameEn} (${card.nameTh}) ความหมาย`,
+        `ไพ่ ${card.nameEn} ความหมาย ความรัก การงาน`,
       ]);
 
   const description = isEnglish
     ? clampDescription(
-        `What ${card.nameEn} means upright and reversed — across love, work, money, and self, with its ${card.astrologyEn ?? card.astrology} correspondence.`,
+        `Explore ${card.nameEn} tarot card meanings across love, career, finances, and self-growth, both upright and reversed, with ${card.astrologyEn ?? card.astrology} correspondence.`,
         "Original 1909 Rider-Waite artwork.",
       )
     : clampDescription(
-        `เจาะลึกความหมายไพ่ยิปซี ${card.nameTh} (${card.nameEn}) ทั้งหัวตั้งและหัวกลับ 5 หมวดชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element}`,
-        "ภาพดั้งเดิม 1909",
+        `ความหมายไพ่ยิปซี ${card.nameEn} (${card.nameTh}) ทั้งหัวตั้งและหัวกลับ 5 มิติชีวิต ความรัก การงาน การเงิน โหราศาสตร์ ${card.astrology} ธาตุ${card.element}`,
+        "ภาพดั้งเดิม 1909 Rider-Waite",
       );
 
   const keywords = isEnglish
     ? [
         `${card.nameEn} meaning`,
         `${card.nameEn} tarot`,
-        `${card.nameEn} reversed`,
         `${card.nameEn} love meaning`,
         `${card.nameEn} career meaning`,
+        `${card.nameEn} reversed`,
+        `${card.nameEn} upright and reversed`,
         "rider waite tarot meanings",
       ]
     : [
+        `ไพ่ ${card.nameEn}`,
         `ไพ่ ${card.nameTh}`,
-        card.nameEn,
+        `${card.nameEn} ความหมาย`,
+        `${card.nameEn} ความรัก`,
+        `${card.nameEn} การงาน`,
+        `${card.nameEn} กลับหัว`,
         `ความหมายไพ่ ${card.nameTh}`,
         `${card.nameTh} ความรัก`,
         `${card.nameTh} การงาน`,
         `${card.nameTh} กลับหัว`,
+        "ความหมายไพ่ยิปซี",
         "ไพ่ทาโรต์ 1909 Rider-Waite",
       ];
 
@@ -205,6 +214,76 @@ export function cardDetailBreadcrumbJsonLd(card: TarotCard, locale: Locale) {
   return buildBreadcrumbJsonLd(locale, buildCardCrumbs(card, locale));
 }
 
+/** JSON-LD `FAQPage` สำหรับหน้าไพ่รายใบ (ชิงพื้นที่ Rich Snippet Accordion บน Google) */
+export function cardDetailFaqJsonLd(card: TarotCard, locale: Locale) {
+  const isEnglish = locale === "en";
+  if (isEnglish) {
+    const en = CARD_MEANINGS_EN[card.id]?.meanings ?? card.meanings;
+    const cardSubject = card.nameEn.toLowerCase().startsWith("the ") ? card.nameEn : `the ${card.nameEn}`;
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: `What does ${cardSubject} mean in love?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: en.love.upright,
+          },
+        },
+        {
+          "@type": "Question",
+          name: `What does ${cardSubject} mean in career and finances?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `${en.work.upright} ${en.money.upright}`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: `What does reversed ${card.nameEn} mean?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: en.general.reversed,
+          },
+        },
+      ],
+    };
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: `ไพ่ ${card.nameEn} (${card.nameTh}) ความหมายเรื่องความรักคืออะไร?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: card.meanings.love.upright,
+        },
+      },
+      {
+        "@type": "Question",
+        name: `ไพ่ ${card.nameEn} (${card.nameTh}) เรื่องการงานและการเงิน บอกอะไร?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `${card.meanings.work.upright} ${card.meanings.money.upright}`,
+        },
+      },
+      {
+        "@type": "Question",
+        name: `ไพ่ ${card.nameEn} (${card.nameTh}) กลับหัว (Reversed) มีความหมายอย่างไร?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: card.meanings.general.reversed,
+        },
+      },
+    ],
+  };
+}
+
 /** ลิงก์ท้ายหน้า (ไพ่พลังงานใกล้เคียง + ผังที่เหมาะกับไพ่ใบนี้) — ไม่มีสถานะ ไม่ต้องใช้ JS */
 export function CardDetailRelated({ card, locale }: { card: TarotCard; locale: Locale }) {
   return (
@@ -228,6 +307,7 @@ export function CardDetailContent({
     <main id="main-content" tabIndex={-1} className={CARD_DETAIL_MAIN_CLASS}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(cardDetailJsonLd(card, locale)) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(cardDetailBreadcrumbJsonLd(card, locale)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(cardDetailFaqJsonLd(card, locale)) }} />
       <CardDetailView
         card={card}
         prevCard={prevCard}

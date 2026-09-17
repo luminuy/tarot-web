@@ -8,7 +8,6 @@ import {
   getArticleDescription,
   getArticleCategory,
 } from "@/data/article-helpers";
-import { soundManager } from "@/lib/utils/audio";
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 
@@ -193,7 +192,9 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
               <button
                 key={cat.id}
                 onClick={() => {
-                  soundManager.playMenuTapSound();
+                  import("@/lib/utils/audio")
+                    .then(({ soundManager }) => soundManager.playMenuTapSound())
+                    .catch(() => {});
                   setSelectedCat(cat.id);
                 }}
                 className={`tap-overlay-y rounded-full px-4 py-1.5 text-xs font-serif-th font-semibold transition cursor-pointer flex items-center gap-1.5 ${

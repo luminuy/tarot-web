@@ -2,6 +2,7 @@
 import {
   CARD_DETAIL_MAIN_CLASS,
   cardDetailBreadcrumbJsonLd,
+  cardDetailFaqJsonLd,
   cardDetailJsonLd,
   cardDetailMetadata,
   cardNeighbors,
@@ -35,6 +36,7 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
   <main id="main-content" tabindex="-1" class={CARD_DETAIL_MAIN_CLASS}>
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailJsonLd(card, locale))} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailBreadcrumbJsonLd(card, locale))} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailFaqJsonLd(card, locale))} />
     <CardDetailViewRoot
       client:idle
       card={card}
