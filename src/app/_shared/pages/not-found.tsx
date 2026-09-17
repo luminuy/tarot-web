@@ -55,42 +55,60 @@ const COPY = {
   },
 } as const;
 
-/** เนื้อหน้า 404 พร้อมหัวเว็บและฟุตเตอร์กลาง — ทางออกจากหน้าต้องมีครบเหมือนหน้าอื่นทั้งเว็บ */
-export function NotFoundBody({ forcedLocale = "th" }: { forcedLocale?: "th" | "en" } = {}) {
+/**
+ * เนื้อในของหน้า 404 **ล้วน ๆ ไม่มีหัวเว็บและฟุตเตอร์** (R-25)
+ * ---------------------------------------------------------------------------
+ * แยกออกมาเพราะหน้า 404 ต้องมีสองร่างที่ใช้ข้อความชุดเดียวกัน:
+ *   • ฝั่ง Next  — `NotFoundBody` ข้างล่าง ห่อหัวเว็บ/ฟุตเตอร์ให้เสร็จในตัว
+ *   • ฝั่ง Astro — `astro/pages/404.astro` ประกอบหัวเว็บเองด้วย island `client:idle`
+ *     เพื่อให้เมนูมือถือกดได้จริง (เรนเดอร์ `<SiteHeader />` ตรง ๆ ใน Astro จะได้ HTML
+ *     นิ่ง ๆ ที่กดไม่ได้)
+ *
+ * ⚠️ ข้อความอยู่ใน `COPY` ที่เดียว ห้ามคัดลอกไปเขียนซ้ำในไฟล์ `.astro`
+ * สองหน้านี้ต้องพูดเหมือนกันเสมอ (บทเรียน INC-0112)
+ */
+export function NotFoundMain({ forcedLocale = "th" }: { forcedLocale?: "th" | "en" } = {}) {
   const copy = forcedLocale === "en" ? COPY.en : COPY.th;
 
   return (
-    <>
-      <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="min-h-[60vh] bg-canvas text-ink flex items-center justify-center px-6 py-20">
-        <div className="max-w-lg w-full text-center space-y-8">
-          <div className="space-y-4">
-            <span aria-hidden="true" className="block text-4xl font-serif-th font-bold text-gold">404</span>
-            <h1 className="text-2xl sm:text-3xl font-bold font-serif-th leading-normal pt-1">
-              {copy.title}
-            </h1>
-            <p className="text-sm text-muted font-serif-th leading-relaxed">
-              {copy.desc}
-            </p>
-          </div>
-
-          <nav aria-label={copy.navLabel} className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
-            {copy.links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="px-5 py-2.5 rounded-full bg-surface border border-line text-sm font-serif-th shadow-xs transition-colors hover:text-gold-ink hover:border-gold"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          <p className="text-xs text-muted font-serif-th">
-            <span className="text-ok font-medium">{copy.helpline}</span>
+    <main id="main-content" tabIndex={-1} className="min-h-[60vh] bg-canvas text-ink flex items-center justify-center px-6 py-20">
+      <div className="max-w-lg w-full text-center space-y-8">
+        <div className="space-y-4">
+          <span aria-hidden="true" className="block text-4xl font-serif-th font-bold text-gold">404</span>
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif-th leading-normal pt-1">
+            {copy.title}
+          </h1>
+          <p className="text-sm text-muted font-serif-th leading-relaxed">
+            {copy.desc}
           </p>
         </div>
-      </main>
+
+        <nav aria-label={copy.navLabel} className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
+          {copy.links.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="px-5 py-2.5 rounded-full bg-surface border border-line text-sm font-serif-th shadow-xs transition-colors hover:text-gold-ink hover:border-gold"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+
+        <p className="text-xs text-muted font-serif-th">
+          <span className="text-ok font-medium">{copy.helpline}</span>
+        </p>
+      </div>
+    </main>
+  );
+}
+
+/** เนื้อหน้า 404 พร้อมหัวเว็บและฟุตเตอร์กลาง — ทางออกจากหน้าต้องมีครบเหมือนหน้าอื่นทั้งเว็บ */
+export function NotFoundBody({ forcedLocale = "th" }: { forcedLocale?: "th" | "en" } = {}) {
+  return (
+    <>
+      <SiteHeader />
+      <NotFoundMain forcedLocale={forcedLocale} />
       <SiteFooter spacing="tight" />
     </>
   );

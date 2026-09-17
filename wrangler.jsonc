@@ -21,16 +21,53 @@
   //        ถ้าเป็น "none" หน้าเนื้อหาทั้งหมดจะ 404 ทันที (ต้องพิมพ์ .html เอง)
   //    not_found_handling: "none"
   //        ไม่ตรงไฟล์ไหน ➔ ส่งต่อให้ Worker (หน้าแอป · /api/* · sitemap ยังทำงานเหมือนเดิม)
-  //        ห้ามใช้ "404-page" เด็ดขาด — Worker จะไม่ได้รับคำขอที่ไม่ใช่ไฟล์อีกเลยทั้งเว็บ
-  //    run_worker_first: false
-  //        ถ้าเป็น true ทุกคำขอจะวิ่งเข้า Worker ก่อน = จ่ายค่าคำขอเท่าเดิมกับก่อนย้าย
-  //        และหน้าเนื้อหาจะ 404 เพราะ Next ไม่มีเส้นทางเหล่านั้นอีกแล้ว
+  //    not_found_handling: "404-page"  (เปลี่ยนจาก "none" — R-25)
+  //        ไม่ตรงไฟล์ไหนและไม่อยู่ใน `run_worker_first` ➔ ตอบ `404.html` จากขอบเลย
+  //        **ไม่ปลุก Worker** — เดิมเป็น "none" ทำให้ URL ตายทุกเส้นที่บอตไล่ยิง
+  //        กลายเป็นคำขอที่คิดเงิน (วัดได้ 7,978 B ต่อครั้ง · ไม่มี cf-cache-status เลย)
+  //
+  //        ⚠️ **ห้ามเปลี่ยนค่านี้โดยไม่ดูแลรายการข้างล่างให้ครบ** — นี่คือกับดักที่
+  //        คอมเมนต์ชุดเดิมเตือนไว้ถูกแล้ว: ถ้าใช้ "404-page" เฉย ๆ โดยไม่มี
+  //        `run_worker_first` ทุกเส้นทางที่ Next เป็นคนเรนเดอร์จะ 404 ทั้งหมด
+  //
+  //    run_worker_first: [ ... ]  (เปลี่ยนจาก false — R-25)
+  //        รายการเส้นทางที่ **ต้องวิ่งเข้า Worker เสมอ** ถึงจะไม่ตรงไฟล์ static ก็ตาม
+  //        รองรับตั้งแต่ wrangler 4.x (ยืนยันกับ config-schema.json ของ 4.128.0)
+  //
+  //        📌 **วิธีหาว่าเส้นทางไหนต้องอยู่ในรายการนี้** — ยิงจริงบน production
+  //        แล้วดูหัว `cf-cache-status`:
+  //            มีหัวนี้    = ตอบจากขอบอยู่แล้ว ➔ **ห้ามใส่** (ใส่แล้วจะไปปลุก Worker เปล่า ๆ)
+  //            ไม่มีหัวนี้ = วิ่งเข้า Worker อยู่ ➔ **ต้องใส่** ไม่งั้นพังทันทีที่ deploy
+  //        คำสั่งตรวจ: `curl -sSI https://seertarot.net<path> | grep -i cf-cache-status`
+  //
+  //        ⚠️ เพิ่มหน้าใหม่ที่ Next เป็นคนเรนเดอร์ (มี `page.tsx` หรือ `route.ts`)
+  //        ต้องเติมเส้นทางนั้นที่นี่ด้วยเสมอ มิฉะนั้นหน้านั้นจะ 404 เงียบ ๆ บน production
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "none",
-    "run_worker_first": false
+    "not_found_handling": "404-page",
+    "run_worker_first": [
+      // ปลายทาง API ทั้งหมด
+      "/api/*",
+      // ไฟล์พิเศษของ Next ที่สร้างสด (src/app/{sitemap,robots,manifest}.ts)
+      "/sitemap.xml",
+      "/robots.txt",
+      "/manifest.webmanifest",
+      // ตัวปรับขนาดภาพของ Next — ไม่ใช่ไฟล์ static จึงต้องเข้า Worker
+      "/_next/image*",
+      // หน้าแอปที่เหลืออยู่ฝั่ง Next (ทุกตัวมี page.tsx ใน src/app)
+      "/account",
+      "/account/*",
+      "/admin",
+      "/admin/*",
+      "/readers",
+      "/readers/*",
+      "/reset-password",
+      "/s/*",
+      "/tester",
+      "/tester/*"
+    ]
   },
 
   // ── OpenNext Edge Caching ────────────────────────────────────────────────────
