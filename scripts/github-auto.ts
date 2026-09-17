@@ -131,6 +131,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🗺️ หน้าที่ประกาศใน sitemap ต้องมีอยู่จริงทุกเส้น (กันหน้าหายเงียบ · ด่านไม่ผูกกับเครื่องมือเรนเดอร์)", cmd: TSX, args: ["scripts/qa/test-rendered-coverage.ts"] },
   { label: "🗺️ เส้นทางทุกเส้นมีเจ้าของเครื่องมือเรนเดอร์เดียว (ห้ามหน้าเดียวอยู่สองที่ · ฝาแฝดย้ายตามกัน)", cmd: TSX, args: ["scripts/qa/test-astro-routes.ts"] },
   { label: "🪞 สองเครื่องมือเรนเดอร์ให้ <head> ชุดเดียวกัน (ฟอนต์ · viewport · JSON-LD · PDPA · speculation rules)", cmd: TSX, args: ["scripts/qa/test-render-parity.ts"] },
+  { label: "🚪 หน้า Next ทุกหน้าไปถึง Worker ได้จริง (run_worker_first ครบ · URL ตายตอบจากขอบ · หน้า 404 สองภาษา)", cmd: TSX, args: ["scripts/qa/test-worker-first-routes.ts"] },
   { label: "🛡️ ไฟล์ static ได้ส่วนหัวความปลอดภัยชุดเดียวกับ Worker (CSP/HSTS ไม่หายครึ่งเว็บ · กฎแคชไม่ครอบหน้าเว็บ)", cmd: TSX, args: ["scripts/qa/test-static-headers.ts"] },
   { label: "🖼️  มาตรฐานภาพแชร์ OpenGraph 1200x630 ทั่วเว็บ", cmd: TSX, args: ["scripts/qa/test-og-images.ts"] },
   { label: "🤖 นโยบายบอตสองชั้นพูดตรงกัน (robots.ts ↔ กฎ WAF · บอตค้นหา AI ต้องเข้าได้)", cmd: TSX, args: ["scripts/qa/test-bot-policy.ts"] },

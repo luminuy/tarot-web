@@ -1,0 +1,24 @@
+---
+import { notFoundMetadataEn } from "@/app/_shared/pages/not-found";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { NotFoundMainEnRoot } from "../../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/**
+ * 🚧 หน้า 404 ภาษาอังกฤษที่เสิร์ฟจากขอบ (R-25)
+ * ---------------------------------------------------------------------------
+ * Cloudflare มองหา `404.html` ที่ **ใกล้ที่สุด** ไล่จากโฟลเดอร์ของ URL ขึ้นมา
+ * ไฟล์นี้จึงกลายเป็น `en/404.html` และรับ URL มั่วทุกเส้นใต้ `/en/**`
+ * ส่วนเส้นอื่นตกไปที่ `404.html` ที่รากซึ่งเป็นภาษาไทย
+ *
+ * ถ้าไม่มีไฟล์นี้ คนที่พิมพ์ `/en/zzz` ผิดจะเจอหน้า 404 ภาษาไทย
+ */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={notFoundMetadataEn}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <NotFoundMainEnRoot />
+  <SiteFooterRoot locale={locale} spacing="tight" />
+</BaseLayout>

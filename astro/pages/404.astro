@@ -1,0 +1,30 @@
+---
+import { notFoundMetadata } from "@/app/_shared/pages/not-found";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { NotFoundMainThRoot } from "../components/PageBodies";
+import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+
+/**
+ * 🚧 หน้า 404 ที่ Cloudflare เสิร์ฟจากขอบ (R-25)
+ * ---------------------------------------------------------------------------
+ * `wrangler.jsonc` ตั้ง `not_found_handling: "404-page"` ไว้ ไฟล์นี้จึงถูกสร้างเป็น
+ * `404.html` แล้ววางใน `.open-next/assets` — URL ที่ไม่ตรงไฟล์ไหนและไม่อยู่ใน
+ * `run_worker_first` จะได้หน้านี้ **ตั้งแต่ขอบโดยไม่ปลุก Worker**
+ *
+ * เดิม URL ตายทุกเส้นที่บอตไล่ยิงกลายเป็นคำขอที่คิดเงิน (วัดได้ 7,978 B ต่อครั้ง
+ * ไม่มี `cf-cache-status` เลย)
+ *
+ * ⚠️ ไฟล์ `src/app/(th)/not-found.tsx` และ `src/app/not-found.tsx` **ยังต้องอยู่**
+ * เพราะ `notFound()` ที่ถูกเรียกจากในหน้าที่ Worker เรนเดอร์ (เช่น `/readers/<ไอดีมั่ว>`)
+ * ยังวิ่งผ่าน Next ไม่ได้ผ่านชั้น assets เลย — สองทางนี้ใช้ข้อความชุดเดียวกันจาก
+ * `NotFoundMain` จึงไม่มีทางพูดคนละอย่าง (บทเรียน INC-0112)
+ */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={notFoundMetadata}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <NotFoundMainThRoot />
+  <SiteFooterRoot locale={locale} spacing="tight" />
+</BaseLayout>

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { AboutBodyTh } from "@/app/_shared/pages/about-th";
+import { NotFoundMain } from "@/app/_shared/pages/not-found";
 import { DailyBodyEn } from "@/app/_shared/pages/daily-en";
 import { DailyBodyTh } from "@/app/_shared/pages/daily-th";
 import { LoveOneCardBodyEn } from "@/app/_shared/pages/love-one-card-en";
@@ -157,6 +158,28 @@ export function AboutBodyThRoot() {
   return (
     <LocaleProvider forcedLocale="th">
       <AboutBodyTh />
+    </LocaleProvider>
+  );
+}
+
+/* ── หน้า 404 ที่เสิร์ฟจากขอบ (R-25) ────────────────────────────────────────
+ * ใช้ `NotFoundMain` ซึ่งเป็นเนื้อในล้วน ๆ ไม่มีหัวเว็บ/ฟุตเตอร์ติดมา เพราะไฟล์
+ * `.astro` ประกอบสองส่วนนั้นเองด้วย island — ถ้าดึง `NotFoundBody` มาทั้งก้อน
+ * จะได้หัวเว็บที่เป็น HTML นิ่ง ๆ กดเมนูมือถือไม่ได้
+ */
+
+export function NotFoundMainThRoot() {
+  return (
+    <LocaleProvider forcedLocale="th">
+      <NotFoundMain forcedLocale="th" />
+    </LocaleProvider>
+  );
+}
+
+export function NotFoundMainEnRoot() {
+  return (
+    <LocaleProvider forcedLocale="en">
+      <NotFoundMain forcedLocale="en" />
     </LocaleProvider>
   );
 }
