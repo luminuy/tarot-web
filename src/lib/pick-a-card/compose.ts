@@ -14,11 +14,11 @@
  *
  * | ตำแหน่ง | คลัง | ที่มา |
  * |---|---|---|
- * | 1 · ไพ่หลัก (สมอ) | 4 ใบ | `piles[i].cards[0]` + `readingX.currentSituation` |
- * | 2 · สิ่งที่ซ่อนอยู่ | 4 ใบ | `piles[i].cards[1]` + `readingX.hiddenLayer` |
- * | 3 · คำแนะนำ | 4 ใบ | `piles[i].cards[2]` + `readingX.oracleAdvice` |
+ * | 1 · ไพ่หลัก (สมอ) | ทุกชิ้นในคลัง | `pool[i].cards[0]` + `readingX.currentSituation` |
+ * | 2 · สิ่งที่ซ่อนอยู่ | ทุกชิ้นในคลัง | `pool[i].cards[1]` + `readingX.hiddenLayer` |
+ * | 3 · คำแนะนำ | ทุกชิ้นในคลัง | `pool[i].cards[2]` + `readingX.oracleAdvice` |
  *
- * จั่วอิสระตำแหน่งละใบ ➔ **4 × 4 × 4 = 64 ชุดต่อหัวข้อ** (เดิม 4)
+ * จั่วอิสระตำแหน่งละใบ ➔ **n³ ชุดต่อหัวข้อ** เมื่อคลังมี n ชิ้น (เดิมได้แค่ n)
  *
  * ## "ไพ่หลัก" คือสมอของรอบนั้น
  *
@@ -34,11 +34,11 @@
  *   ต้องจั่วใน `useEffect` เท่านั้น ไม่งั้น hydration ไม่ตรงกับ HTML ที่ส่งมา
  */
 import type { PickACardCardItem, PickACardTopic } from "@/data/pick-a-card";
-import { drawContentOrder } from "./draw-order";
+import { drawAnchors } from "./draw-order";
 
 /** ผลการจั่วหนึ่งรอบ — เก็บแยกตามตำแหน่ง ไม่ได้ผูกเป็นกองอีกแล้ว */
 export interface PickACardDraw {
-  /** ช่องกองที่ N ได้ "ไพ่หลัก" ของกองไหน — เป็นการเรียงสับเปลี่ยน ทุกช่องได้ไพ่หลักไม่ซ้ำกัน */
+  /** ช่องกองที่ N ได้ "ไพ่หลัก" จากคลังชิ้นไหน — ในรอบเดียวกันทุกช่องได้คนละชิ้น */
   anchorOrder: number[];
   /** คลังใบที่ 2 (สิ่งที่ซ่อนอยู่) ที่จั่วได้รอบนี้ */
   hiddenPick: number;
@@ -46,9 +46,9 @@ export interface PickACardDraw {
   advicePick: number;
 }
 
-export function initialDraw(poolSize: number): PickACardDraw {
+export function initialDraw(slotCount: number): PickACardDraw {
   return {
-    anchorOrder: Array.from({ length: poolSize }, (_, i) => i),
+    anchorOrder: Array.from({ length: slotCount }, (_, i) => i),
     hiddenPick: 0,
     advicePick: 0,
   };
@@ -66,9 +66,9 @@ function drawDifferent(poolSize: number, previous: number): number {
  * จั่วรอบใหม่ทั้งสามตำแหน่ง โดย **ทุกตำแหน่งต้องเปลี่ยนจากรอบก่อน**
  * ผู้ใช้ที่เลือกกองเดิมซ้ำจึงไม่มีทางได้ไพ่ใบเดิมแม้แต่ใบเดียว
  */
-export function drawPicks(poolSize: number, previous: PickACardDraw): PickACardDraw {
+export function drawPicks(poolSize: number, slotCount: number, previous: PickACardDraw): PickACardDraw {
   return {
-    anchorOrder: drawContentOrder(poolSize, previous.anchorOrder),
+    anchorOrder: drawAnchors(poolSize, slotCount, previous.anchorOrder),
     hiddenPick: drawDifferent(poolSize, previous.hiddenPick),
     advicePick: drawDifferent(poolSize, previous.advicePick),
   };
@@ -95,10 +95,10 @@ export function composeReading(
   slotIndex: number,
   isEnglish: boolean
 ): ComposedReading {
-  const size = topic.piles.length;
-  const anchor = topic.piles[draw.anchorOrder[slotIndex] ?? slotIndex];
-  const hidden = topic.piles[draw.hiddenPick % size];
-  const advice = topic.piles[draw.advicePick % size];
+  const size = topic.pool.length;
+  const anchor = topic.pool[(draw.anchorOrder[slotIndex] ?? slotIndex) % size];
+  const hidden = topic.pool[draw.hiddenPick % size];
+  const advice = topic.pool[draw.advicePick % size];
 
   const frame = isEnglish ? anchor.readingEn : anchor.readingTh;
 

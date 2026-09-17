@@ -1,9 +1,23 @@
 /**
  * 🔮 ข้อมูลระบบ "Pick A Card (เลือกกองไพ่พยากรณ์)"
  * ===========================================================================
- * บรรจุ 4 หัวข้อยอดนิยมระดับประเทศที่มีการค้นหาสูงสุด
- * แต่ละหัวข้อมี 4 กองไพ่ (16 กอง) พร้อมการ์ด 1909 Rider-Waite แท้ 3 ใบต่อกอง
- * และคำทำนายเจาะลึก 3 มิติ (ปัจจุบัน, สิ่งที่ซ่อนอยู่, คำแนะนำ)
+ * ## โครงสร้าง — แยก "ตัวตนของกอง" ออกจาก "คลังคำอ่าน"
+ *
+ * | ส่วน | คืออะไร | ทำไมต้องแยก |
+ * |---|---|---|
+ * | `slots` | กอง 4 กองที่ผู้ใช้เห็นและเลือก (เลข · ชื่อคริสตัล) | เป็นแค่ "ประตู" ให้ผู้ใช้เลือกตามความรู้สึก ไม่ผูกกับไพ่ใบไหน |
+ * | `pool` | คลังคำอ่าน — แต่ละรายการมีไพ่ 3 ใบ + ย่อหน้าประจำใบ | จั่วอิสระรายตำแหน่ง ทำให้ความหลากหลายเป็น n³ ไม่ใช่ n |
+ *
+ * ตอนแรกทั้งสองส่วนนี้ถูกมัดรวมเป็นก้อนเดียว กองที่ 1 จึงให้ไพ่ชุดเดิมตลอดกาล
+ * (INC-0198b · INC-0199b) — ห้ามมัดกลับ ด่านที่ 76 เฝ้าอยู่
+ *
+ * ## กติกาการเขียนเนื้อหา (ด่านที่ 76 บังคับ)
+ *
+ * - ย่อหน้าใน `currentSituation` / `hiddenLayer` / `oracleAdvice` **อ้างได้เฉพาะไพ่ของตำแหน่งตัวเอง**
+ *   (ใบที่ 1 / 2 / 3 ตามลำดับ) ห้ามพูดถึงไพ่ใบอื่น เพราะใบอื่นถูกจั่วมาจากรายการอื่นในคลัง
+ * - `theme` · `overview` · `affirmation` เดินทางไปกับ **ไพ่ใบแรก** จึงอ้างได้เฉพาะไพ่ใบแรก
+ *
+ * ⚠️ ไฟล์นี้ยาวและเป็นเนื้อหาล้วน — แก้ด้วยมือได้ แต่ต้องรัน `npx tsx scripts/qa/test-pick-a-card.ts` ทุกครั้ง
  */
 
 export interface PickACardCardItem {
@@ -13,30 +27,31 @@ export interface PickACardCardItem {
   positionEn: string;
 }
 
-export interface PickACardPile {
-  id: string; // e.g. "pile-1"
-  number: number; // 1, 2, 3, 4
+export interface PickACardReading {
+  theme: string;
+  overview: string;
+  currentSituation: string;
+  hiddenLayer: string;
+  oracleAdvice: string;
+  affirmation: string;
+}
+
+/** กองที่ผู้ใช้เห็นและกดเลือก — เป็นตัวตน/บรรยากาศ ไม่ได้ผูกกับไพ่ใบใดใบหนึ่ง */
+export interface PickACardSlot {
+  id: string;
+  number: number;
   crystalTh: string;
   crystalEn: string;
   crystalDescTh: string;
   crystalDescEn: string;
+}
+
+/** หนึ่งรายการในคลังคำอ่าน — ไพ่ 3 ใบพร้อมย่อหน้าประจำใบ */
+export interface PickACardEntry {
+  id: string;
   cards: [PickACardCardItem, PickACardCardItem, PickACardCardItem];
-  readingTh: {
-    theme: string;
-    overview: string;
-    currentSituation: string;
-    hiddenLayer: string;
-    oracleAdvice: string;
-    affirmation: string;
-  };
-  readingEn: {
-    theme: string;
-    overview: string;
-    currentSituation: string;
-    hiddenLayer: string;
-    oracleAdvice: string;
-    affirmation: string;
-  };
+  readingTh: PickACardReading;
+  readingEn: PickACardReading;
   targetSpreadId: string;
 }
 
@@ -51,7 +66,10 @@ export interface PickACardTopic {
   coverCardId: string;
   descriptionTh: string;
   descriptionEn: string;
-  piles: [PickACardPile, PickACardPile, PickACardPile, PickACardPile];
+  /** 4 กองที่ผู้ใช้เลือก */
+  slots: readonly PickACardSlot[];
+  /** คลังคำอ่าน — ยิ่งเยอะ ความหลากหลายยิ่งเป็น n³ */
+  pool: readonly PickACardEntry[];
 }
 
 export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
@@ -63,10 +81,10 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
     subtitleTh: "เจาะลึกความรู้สึกในใจ ความคิดที่เขาไม่เคยบอก และทิศทางความสัมพันธ์",
     subtitleEn: "Uncover their inner thoughts, unspoken emotions, and true intentions",
     category: "love",
-    coverCardId: "major-02", // The High Priestess
+    coverCardId: "major-02",
     descriptionTh: "สำหรับคนที่มีคนคุย คนในใจ แฟน หรือความสัมพันธ์ที่ยังคลุมเครือ หลับตา สูดหายใจเข้าลึก ๆ นึกถึงใบหน้าหรือชื่อของเขา แล้วเลือกกองไพ่ที่ดึงดูดใจคุณที่สุด",
     descriptionEn: "For anyone navigating a crush, situationship, partnership, or quiet longing. Close your eyes, take a deep breath, hold their name in your heart, and choose the pile that calls to you.",
-    piles: [
+    slots: [
       {
         id: "pile-1",
         number: 1,
@@ -74,6 +92,35 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         crystalEn: "Rose Quartz",
         crystalDescTh: "หินแห่งความอ่อนโยน การเปิดใจ และการเยียวยาความรู้สึก",
         crystalDescEn: "Stone of unconditional warmth, emotional vulnerability, and healing",
+      },
+      {
+        id: "pile-2",
+        number: 2,
+        crystalTh: "อเมทิสต์ (Amethyst)",
+        crystalEn: "Amethyst",
+        crystalDescTh: "หินแห่งสติปัญญา ลางสังหรณ์ และความเข้าใจในสัจธรรม",
+        crystalDescEn: "Stone of mental clarity, heightened intuition, and honest discernment",
+      },
+      {
+        id: "pile-3",
+        number: 3,
+        crystalTh: "ซิทริน (Citrine)",
+        crystalEn: "Citrine",
+        crystalDescTh: "หินแห่งความกระจ่างใส เปล่งประกาย และพลังใจอันเปี่ยมล้น",
+        crystalDescEn: "Stone of sunny abundance, joyful confidence, and magnetic optimism",
+      },
+      {
+        id: "pile-4",
+        number: 4,
+        crystalTh: "ลาปิส ลาซูลี (Lapis Lazuli)",
+        crystalEn: "Lapis Lazuli",
+        crystalDescTh: "หินแห่งสัจธรรม ความจริงแท้ และการตระหนักรู้ในจิตวิญญาณ",
+        crystalDescEn: "Stone of celestial truth, soul contracts, and unvarnished honesty",
+      },
+    ],
+    pool: [
+      {
+        id: "entry-1",
         cards: [
           { cardId: "cups-02", isReversed: false, positionTh: "ความรู้สึกในใจตอนนี้", positionEn: "Current Heart Space" },
           { cardId: "major-18", isReversed: false, positionTh: "สิ่งที่เขาเก็บซ่อนไว้", positionEn: "Hidden Undercurrents" },
@@ -98,12 +145,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "how-they-feel",
       },
       {
-        id: "pile-2",
-        number: 2,
-        crystalTh: "อเมทิสต์ (Amethyst)",
-        crystalEn: "Amethyst",
-        crystalDescTh: "หินแห่งสติปัญญา ลางสังหรณ์ และความเข้าใจในสัจธรรม",
-        crystalDescEn: "Stone of mental clarity, heightened intuition, and honest discernment",
+        id: "entry-2",
         cards: [
           { cardId: "swords-08", isReversed: false, positionTh: "ความรู้สึกในใจตอนนี้", positionEn: "Current Heart Space" },
           { cardId: "major-01", isReversed: false, positionTh: "สิ่งที่เขาเก็บซ่อนไว้", positionEn: "Hidden Undercurrents" },
@@ -128,12 +170,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "three-card",
       },
       {
-        id: "pile-3",
-        number: 3,
-        crystalTh: "ซิทริน (Citrine)",
-        crystalEn: "Citrine",
-        crystalDescTh: "หินแห่งความกระจ่างใส เปล่งประกาย และพลังใจอันเปี่ยมล้น",
-        crystalDescEn: "Stone of sunny abundance, joyful confidence, and magnetic optimism",
+        id: "entry-3",
         cards: [
           { cardId: "major-19", isReversed: false, positionTh: "ความรู้สึกในใจตอนนี้", positionEn: "Current Heart Space" },
           { cardId: "wands-06", isReversed: false, positionTh: "สิ่งที่เขาเก็บซ่อนไว้", positionEn: "Hidden Undercurrents" },
@@ -158,12 +195,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "how-they-feel",
       },
       {
-        id: "pile-4",
-        number: 4,
-        crystalTh: "ลาปิส ลาซูลี (Lapis Lazuli)",
-        crystalEn: "Lapis Lazuli",
-        crystalDescTh: "หินแห่งสัจธรรม ความจริงแท้ และการตระหนักรู้ในจิตวิญญาณ",
-        crystalDescEn: "Stone of celestial truth, soul contracts, and unvarnished honesty",
+        id: "entry-4",
         cards: [
           { cardId: "major-14", isReversed: false, positionTh: "ความรู้สึกในใจตอนนี้", positionEn: "Current Heart Space" },
           { cardId: "swords-02", isReversed: false, positionTh: "สิ่งที่เขาเก็บซ่อนไว้", positionEn: "Hidden Undercurrents" },
@@ -187,6 +219,106 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         },
         targetSpreadId: "how-they-feel",
       },
+      {
+        id: "entry-5",
+        cards: [
+          { cardId: "cups-06", isReversed: false, positionTh: "ความรู้สึกในใจตอนนี้", positionEn: "Current Heart Space" },
+          { cardId: "swords-07", isReversed: false, positionTh: "สิ่งที่เขาเก็บซ่อนไว้", positionEn: "Hidden Undercurrents" },
+          { cardId: "cups-10", isReversed: false, positionTh: "แนวโน้มและคำแนะนำ", positionEn: "Outcome & Oracle Guidance" },
+        ],
+        readingTh: {
+          theme: "ความทรงจำเก่าที่ยังอุ่นอยู่ในใจเขา",
+          overview: "เขายังเก็บภาพช่วงเวลาดี ๆ ที่เคยมีกับคุณไว้อย่างดี ความรู้สึกตอนนี้จึงผูกกับสิ่งที่เคยเกิดขึ้นมากกว่าสิ่งที่เพิ่งผ่านไป",
+          currentSituation: "ไพ่ Six of Cups บอกว่าเขาหวนคิดถึงช่วงเวลาที่เคยสบายใจเมื่ออยู่กับคุณ บางครั้งเรื่องเล็ก ๆ ในวันธรรมดาก็ทำให้เขานึกถึงคุณขึ้นมาเอง",
+          hiddenLayer: "ไพ่ Seven of Swords เผยว่าเขาเลือกบอกไม่หมด ไม่ใช่เพราะคิดร้าย แต่เพราะกลัวว่าพูดออกไปแล้วจะเสียความสัมพันธ์ที่เป็นอยู่ตอนนี้",
+          oracleAdvice: "ไพ่ Ten of Cups ชี้ว่าปลายทางของความสัมพันธ์นี้ไปทางอบอุ่นได้จริง ถ้าคุณกล้าคุยกันตรง ๆ แทนการเดาใจ ความสบายใจแบบครอบครัวคือสิ่งที่รออยู่",
+          affirmation: "ฉันไม่ต้องเดาใจใคร ความจริงใจที่กล้าพูดออกมาคือทางที่สั้นที่สุดของความสัมพันธ์",
+        },
+        readingEn: {
+          theme: "Old Memories Still Warm In Their Chest",
+          overview: "They still keep the good moments with you carefully. What they feel now is tied to what once happened more than to anything recent.",
+          currentSituation: "The Six of Cups shows them revisiting the ease they felt around you. Small things on ordinary days quietly bring you back to their mind.",
+          hiddenLayer: "Seven of Swords reveals they are not telling you everything — not out of malice, but from fear that speaking plainly would cost what exists now.",
+          oracleAdvice: "Ten of Cups says this connection can genuinely turn warm. Trade guesswork for a direct conversation and a family-like ease is what waits.",
+          affirmation: "I do not need to read minds. Honesty spoken aloud is the shortest road any relationship has.",
+        },
+        targetSpreadId: "how-they-feel",
+      },
+      {
+        id: "entry-6",
+        cards: [
+          { cardId: "cups-13", isReversed: false, positionTh: "ความรู้สึกในใจตอนนี้", positionEn: "Current Heart Space" },
+          { cardId: "major-15", isReversed: false, positionTh: "สิ่งที่เขาเก็บซ่อนไว้", positionEn: "Hidden Undercurrents" },
+          { cardId: "wands-03", isReversed: false, positionTh: "แนวโน้มและคำแนะนำ", positionEn: "Outcome & Oracle Guidance" },
+        ],
+        readingTh: {
+          theme: "ความรู้สึกที่ลึกกว่าที่เขาแสดงออกมาก",
+          overview: "เขารับรู้ความรู้สึกของคุณได้ไวกว่าที่คุณคิด แต่เป็นคนที่เก็บอารมณ์ไว้ข้างในมากกว่าจะพูดออกมาเป็นคำ",
+          currentSituation: "ไพ่ Queen of Cups สะท้อนว่าเขาใส่ใจรายละเอียดเล็ก ๆ ของคุณ จำสิ่งที่คุณเคยพูดได้ และเป็นห่วงคุณในแบบที่ไม่ค่อยแสดงให้เห็น",
+          hiddenLayer: "ไพ่ The Devil เผยว่ามีความผูกพันบางอย่างที่เขาตัดไม่ขาด อาจเป็นนิสัยเดิม ความสัมพันธ์เก่า หรือความกลัวที่เขายอมอยู่กับมันจนชิน",
+          oracleAdvice: "ไพ่ Three of Wands แนะนำให้มองไกลกว่าสัปดาห์นี้ ให้เวลาเป็นเครื่องพิสูจน์ แล้วคุณจะเห็นเองว่าเขาเลือกเดินมาทางคุณจริงหรือไม่",
+          affirmation: "ฉันให้เวลาเป็นคนพิสูจน์ความจริง แทนที่จะเร่งคำตอบจากใคร",
+        },
+        readingEn: {
+          theme: "Feelings Far Deeper Than They Let On",
+          overview: "They read your moods faster than you realise, but they are the kind who holds emotion inside rather than putting it into words.",
+          currentSituation: "Queen of Cups reflects someone attentive to your small details — remembering what you said, worrying about you in ways rarely shown.",
+          hiddenLayer: "The Devil reveals an attachment they have not cut: an old habit, an old relationship, or a fear they have grown comfortable living beside.",
+          oracleAdvice: "Three of Wands advises looking further than this week. Let time do the proving, and you will see whether they truly walk your way.",
+          affirmation: "I let time reveal the truth instead of forcing an answer out of anyone.",
+        },
+        targetSpreadId: "how-they-feel",
+      },
+      {
+        id: "entry-7",
+        cards: [
+          { cardId: "swords-05", isReversed: false, positionTh: "ความรู้สึกในใจตอนนี้", positionEn: "Current Heart Space" },
+          { cardId: "cups-04", isReversed: false, positionTh: "สิ่งที่เขาเก็บซ่อนไว้", positionEn: "Hidden Undercurrents" },
+          { cardId: "major-17", isReversed: false, positionTh: "แนวโน้มและคำแนะนำ", positionEn: "Outcome & Oracle Guidance" },
+        ],
+        readingTh: {
+          theme: "ความรู้สึกที่ปนความน้อยใจและศักดิ์ศรี",
+          overview: "ในใจเขามีทั้งความรู้สึกดีและความไม่พอใจเล็ก ๆ ปนกันอยู่ เรื่องที่ค้างคาทำให้เขาไม่ยอมเป็นฝ่ายเข้าหาก่อน",
+          currentSituation: "ไพ่ Five of Swords สะท้อนว่าเขายังติดใจบางเรื่องที่เคยเกิดขึ้น และเลือกใช้ความเงียบแทนการทะเลาะ เพราะไม่อยากเป็นฝ่ายแพ้ในความสัมพันธ์",
+          hiddenLayer: "ไพ่ Four of Cups เผยว่าเขากำลังเบื่อหน่ายกับสิ่งที่วนซ้ำ และเผลอมองข้ามสิ่งดี ๆ ที่อยู่ตรงหน้าไปโดยไม่ได้ตั้งใจ",
+          oracleAdvice: "ไพ่ The Star สรุปว่าความสัมพันธ์นี้ยังกลับมาดีได้ ถ้าเริ่มจากการให้อภัยเรื่องเก่าและคุยกันใหม่ด้วยใจที่เบาลงกว่าเดิม",
+          affirmation: "ฉันเลือกความสบายใจมากกว่าการเอาชนะ และนั่นทำให้ความรักหายใจได้",
+        },
+        readingEn: {
+          theme: "Affection Tangled With Pride And Hurt",
+          overview: "Warmth and quiet resentment sit side by side in them. Something unresolved keeps them from being the first to reach out.",
+          currentSituation: "Five of Swords shows an old incident they have not let go of. They choose silence over argument because losing in love feels unbearable.",
+          hiddenLayer: "Four of Cups reveals weariness with the same loop, and an accidental blindness to the good already in front of them.",
+          oracleAdvice: "The Star concludes this can heal. Begin with forgiveness for the old chapter and a lighter conversation than the last one.",
+          affirmation: "I choose peace over winning, and that is what lets love breathe.",
+        },
+        targetSpreadId: "how-they-feel",
+      },
+      {
+        id: "entry-8",
+        cards: [
+          { cardId: "cups-12", isReversed: false, positionTh: "ความรู้สึกในใจตอนนี้", positionEn: "Current Heart Space" },
+          { cardId: "pentacles-07", isReversed: false, positionTh: "สิ่งที่เขาเก็บซ่อนไว้", positionEn: "Hidden Undercurrents" },
+          { cardId: "major-21", isReversed: false, positionTh: "แนวโน้มและคำแนะนำ", positionEn: "Outcome & Oracle Guidance" },
+        ],
+        readingTh: {
+          theme: "คนที่กำลังเตรียมใจจะเข้าหาคุณอย่างจริงจัง",
+          overview: "เขาอยู่ในโหมดที่พร้อมแสดงออกมากกว่าเดิม สิ่งที่รออยู่คือจังหวะที่เขามั่นใจพอว่าคุณจะรับไว้",
+          currentSituation: "ไพ่ Knight of Cups บอกว่าเขาตั้งใจจะเข้าหาคุณอย่างจริงจัง อาจกำลังคิดหาวิธีชวนคุยหรือชวนเจอที่ไม่ทำให้คุณอึดอัด",
+          hiddenLayer: "ไพ่ Seven of Pentacles เผยว่าเขากำลังรอดูผลของสิ่งที่ลงแรงไป เขาอยากแน่ใจว่าความรู้สึกนี้คุ้มค่าก่อนจะทุ่มมากกว่านี้",
+          oracleAdvice: "ไพ่ The World สรุปว่าเรื่องนี้กำลังจะครบรอบของมัน ถ้าคุณส่งสัญญาณกลับไปให้ชัด ความสัมพันธ์จะขยับไปอีกขั้นในเวลาไม่นาน",
+          affirmation: "ฉันกล้าบอกให้ชัดว่าฉันรู้สึกอย่างไร ความชัดเจนดึงคนที่ใช่ให้เข้ามาใกล้",
+        },
+        readingEn: {
+          theme: "Someone Getting Ready To Approach You Properly",
+          overview: "They are in a mood to show more than before. What they wait for is the moment they feel sure you would receive it.",
+          currentSituation: "Knight of Cups says their intent is sincere. They are working out how to start a conversation or suggest meeting without crowding you.",
+          hiddenLayer: "Seven of Pentacles reveals them watching for a return on what they have already invested, wanting proof before giving more.",
+          oracleAdvice: "The World concludes this cycle is completing. Signal back clearly and the connection moves up a step before long.",
+          affirmation: "I can say plainly how I feel. Clarity is what brings the right person closer.",
+        },
+        targetSpreadId: "how-they-feel",
+      },
     ],
   },
   {
@@ -197,10 +329,10 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
     subtitleTh: "ความรักของคุณกำลังเดินทางไปทางไหน และอะไรคือสิ่งที่จะช่วยให้ความสัมพันธ์เติบโต",
     subtitleEn: "Where is your love journey heading and what will foster profound harmony?",
     category: "love",
-    coverCardId: "major-06", // The Lovers
+    coverCardId: "major-06",
     descriptionTh: "สำรวจแนวโน้มของหัวใจ ไม่ว่าคุณจะโสด กำลังคุย หรือมีคู่อยู่แล้ว ไพ่ทั้ง 4 กองจะช่วยสะท้อนเส้นทางข้างหน้าและข้อคิดเตือนใจ",
     descriptionEn: "Examine romantic currents ahead whether single, courting, or committed. These 4 piles unveil prospective milestones and intuitive wisdom.",
-    piles: [
+    slots: [
       {
         id: "pile-1",
         number: 1,
@@ -208,6 +340,35 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         crystalEn: "Rose Quartz",
         crystalDescTh: "หินแห่งความอ่อนโยน การเปิดใจ และการเยียวยาความรู้สึก",
         crystalDescEn: "Stone of unconditional warmth, emotional vulnerability, and healing",
+      },
+      {
+        id: "pile-2",
+        number: 2,
+        crystalTh: "อเมทิสต์ (Amethyst)",
+        crystalEn: "Amethyst",
+        crystalDescTh: "หินแห่งสติปัญญา ลางสังหรณ์ และความเข้าใจในสัจธรรม",
+        crystalDescEn: "Stone of mental clarity, heightened intuition, and honest discernment",
+      },
+      {
+        id: "pile-3",
+        number: 3,
+        crystalTh: "ซิทริน (Citrine)",
+        crystalEn: "Citrine",
+        crystalDescTh: "หินแห่งความกระจ่างใส เปล่งประกาย และพลังใจอันเปี่ยมล้น",
+        crystalDescEn: "Stone of sunny abundance, joyful confidence, and magnetic optimism",
+      },
+      {
+        id: "pile-4",
+        number: 4,
+        crystalTh: "ลาปิส ลาซูลี (Lapis Lazuli)",
+        crystalEn: "Lapis Lazuli",
+        crystalDescTh: "หินแห่งสัจธรรม ความจริงแท้ และการตระหนักรู้ในจิตวิญญาณ",
+        crystalDescEn: "Stone of celestial truth, soul contracts, and unvarnished honesty",
+      },
+    ],
+    pool: [
+      {
+        id: "entry-1",
         cards: [
           { cardId: "cups-01", isReversed: false, positionTh: "พลังงานตั้งต้น", positionEn: "Seed Energy" },
           { cardId: "wands-02", isReversed: false, positionTh: "จุดเปลี่ยนสำคัญ", positionEn: "Turning Point" },
@@ -232,12 +393,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "three-card",
       },
       {
-        id: "pile-2",
-        number: 2,
-        crystalTh: "อเมทิสต์ (Amethyst)",
-        crystalEn: "Amethyst",
-        crystalDescTh: "หินแห่งสติปัญญา ลางสังหรณ์ และความเข้าใจในสัจธรรม",
-        crystalDescEn: "Stone of mental clarity, heightened intuition, and honest discernment",
+        id: "entry-2",
         cards: [
           { cardId: "swords-04", isReversed: false, positionTh: "พลังงานตั้งต้น", positionEn: "Seed Energy" },
           { cardId: "major-08", isReversed: false, positionTh: "จุดเปลี่ยนสำคัญ", positionEn: "Turning Point" },
@@ -262,12 +418,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "three-card",
       },
       {
-        id: "pile-3",
-        number: 3,
-        crystalTh: "ซิทริน (Citrine)",
-        crystalEn: "Citrine",
-        crystalDescTh: "หินแห่งความกระจ่างใส เปล่งประกาย และพลังใจอันเปี่ยมล้น",
-        crystalDescEn: "Stone of sunny abundance, joyful confidence, and magnetic optimism",
+        id: "entry-3",
         cards: [
           { cardId: "major-10", isReversed: false, positionTh: "พลังงานตั้งต้น", positionEn: "Seed Energy" },
           { cardId: "pentacles-03", isReversed: false, positionTh: "จุดเปลี่ยนสำคัญ", positionEn: "Turning Point" },
@@ -292,12 +443,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "three-card",
       },
       {
-        id: "pile-4",
-        number: 4,
-        crystalTh: "ลาปิส ลาซูลี (Lapis Lazuli)",
-        crystalEn: "Lapis Lazuli",
-        crystalDescTh: "หินแห่งสัจธรรม ความจริงแท้ และการตระหนักรู้ในจิตวิญญาณ",
-        crystalDescEn: "Stone of celestial truth, soul contracts, and unvarnished honesty",
+        id: "entry-4",
         cards: [
           { cardId: "major-11", isReversed: false, positionTh: "พลังงานตั้งต้น", positionEn: "Seed Energy" },
           { cardId: "cups-08", isReversed: false, positionTh: "จุดเปลี่ยนสำคัญ", positionEn: "Turning Point" },
@@ -321,6 +467,106 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         },
         targetSpreadId: "three-card",
       },
+      {
+        id: "entry-5",
+        cards: [
+          { cardId: "major-03", isReversed: false, positionTh: "พลังงานตั้งต้น", positionEn: "Seed Energy" },
+          { cardId: "cups-02", isReversed: false, positionTh: "จุดเปลี่ยนสำคัญ", positionEn: "Turning Point" },
+          { cardId: "cups-09", isReversed: false, positionTh: "ผลลัพธ์ปลายทาง", positionEn: "Ultimate Horizon" },
+        ],
+        readingTh: {
+          theme: "ช่วงที่หัวใจกลับมาอุดมสมบูรณ์อีกครั้ง",
+          overview: "ทิศทางความรักของคุณเริ่มจากการดูแลตัวเองให้เต็ม เมื่อคุณรู้สึกดีกับชีวิตของตัวเอง ความสัมพันธ์รอบตัวจะนุ่มนวลขึ้นเอง",
+          currentSituation: "ไพ่ The Empress บอกว่าเสน่ห์ของคุณกำลังเด่นเป็นพิเศษ ช่วงนี้เหมาะกับการดูแลตัวเอง ทำสิ่งที่ทำให้ใจเบิกบาน แล้วปล่อยให้คนที่ใช่มองเห็น",
+          hiddenLayer: "ไพ่ Two of Cups ชี้จุดเปลี่ยนที่การได้เจอกันแบบถูกจังหวะ ความสัมพันธ์ที่เริ่มจากความสบายใจทั้งสองฝ่ายจะพาเรื่องไปได้ไกลกว่าที่คิด",
+          oracleAdvice: "ไพ่ Nine of Cups สรุปปลายทางว่าคุณจะได้ในสิ่งที่ขอ ขอเพียงกล้ายอมรับกับตัวเองว่าอยากได้ความรักแบบไหนจริง ๆ",
+          affirmation: "ฉันดูแลใจตัวเองให้เต็มก่อน แล้วความรักที่ดีจะเข้ามาโดยไม่ต้องร้องขอ",
+        },
+        readingEn: {
+          theme: "A Season When Your Heart Grows Full Again",
+          overview: "Your romantic direction begins with tending to yourself. When your own life feels good, everything around it softens too.",
+          currentSituation: "The Empress says your warmth is unusually visible now. Tend to yourself, do what delights you, and let the right person notice.",
+          hiddenLayer: "Two of Cups marks the turning point as a well-timed meeting — a bond starting from mutual ease travels further than you expect.",
+          oracleAdvice: "Nine of Cups concludes you receive what you ask for, provided you admit to yourself what kind of love you actually want.",
+          affirmation: "I fill my own cup first, and good love arrives without being begged.",
+        },
+        targetSpreadId: "three-card",
+      },
+      {
+        id: "entry-6",
+        cards: [
+          { cardId: "swords-06", isReversed: false, positionTh: "พลังงานตั้งต้น", positionEn: "Seed Energy" },
+          { cardId: "major-06", isReversed: false, positionTh: "จุดเปลี่ยนสำคัญ", positionEn: "Turning Point" },
+          { cardId: "wands-04", isReversed: false, positionTh: "ผลลัพธ์ปลายทาง", positionEn: "Ultimate Horizon" },
+        ],
+        readingTh: {
+          theme: "การย้ายออกจากน่านน้ำเดิมที่ไม่เหมาะกับใจ",
+          overview: "จุดเริ่มของทิศทางใหม่คือการยอมออกจากรูปแบบความสัมพันธ์ที่เคยทำให้เหนื่อย ไม่ใช่การรีบหาคนใหม่มาแทนที่",
+          currentSituation: "ไพ่ Six of Swords บอกว่าคุณกำลังพาตัวเองออกจากเรื่องที่ทำให้ใจหนัก การเปลี่ยนผ่านนี้อาจเงียบและช้า แต่ทิศทางถูกต้องแล้ว",
+          hiddenLayer: "ไพ่ The Lovers ชี้จุดเปลี่ยนที่การตัดสินใจเลือก คุณจะต้องเลือกระหว่างสิ่งที่คุ้นเคยกับสิ่งที่ตรงกับหัวใจจริง ๆ",
+          oracleAdvice: "ไพ่ Four of Wands สรุปปลายทางว่าความมั่นคงแบบที่รู้สึกเหมือนบ้านกำลังรออยู่ เมื่อคุณเลือกทางที่ใจสบาย ความสัมพันธ์จะลงหลักปักฐานได้จริง",
+          affirmation: "ฉันมีสิทธิ์เลือกความสัมพันธ์ที่ทำให้ใจได้พัก ไม่ใช่ความสัมพันธ์ที่ต้องอดทน",
+        },
+        readingEn: {
+          theme: "Leaving Waters That Never Suited Your Heart",
+          overview: "This direction starts by stepping out of a pattern that exhausted you — not by rushing to replace the person in it.",
+          currentSituation: "Six of Swords says you are carrying yourself away from what weighed on you. The crossing is quiet and slow, but the heading is right.",
+          hiddenLayer: "The Lovers marks the turning point as a real choice: between what is familiar and what actually matches your heart.",
+          oracleAdvice: "Four of Wands concludes that a home-like steadiness waits. Choose the path where your heart rests and the bond takes root.",
+          affirmation: "I am allowed a relationship where my heart rests, not one I have to endure.",
+        },
+        targetSpreadId: "three-card",
+      },
+      {
+        id: "entry-7",
+        cards: [
+          { cardId: "pentacles-09", isReversed: false, positionTh: "พลังงานตั้งต้น", positionEn: "Seed Energy" },
+          { cardId: "major-13", isReversed: false, positionTh: "จุดเปลี่ยนสำคัญ", positionEn: "Turning Point" },
+          { cardId: "major-19", isReversed: false, positionTh: "ผลลัพธ์ปลายทาง", positionEn: "Ultimate Horizon" },
+        ],
+        readingTh: {
+          theme: "ความรักที่เริ่มจากการมีชีวิตของตัวเองที่ดีอยู่แล้ว",
+          overview: "ทิศทางข้างหน้าไม่ได้ขึ้นกับการรอใครสักคน แต่ขึ้นกับการที่คุณยืนได้ด้วยตัวเองอย่างสง่างามเสียก่อน",
+          currentSituation: "ไพ่ Nine of Pentacles บอกว่าคุณอยู่ในจุดที่ดูแลตัวเองได้ดี ความรักที่เข้ามาหลังจากนี้จึงเป็นส่วนเสริม ไม่ใช่สิ่งที่ต้องพึ่งพา",
+          hiddenLayer: "ไพ่ Death ชี้จุดเปลี่ยนที่การปิดฉากบางอย่างให้จบจริง ๆ เรื่องที่ค้างคาจะไม่ยอมให้เรื่องใหม่เริ่มต้น จนกว่าคุณจะวางมันลง",
+          oracleAdvice: "ไพ่ The Sun สรุปปลายทางว่าความชัดเจนและความสบายใจกำลังมา ความสัมพันธ์ข้างหน้าจะไม่ต้องตีความเยอะเหมือนที่ผ่านมา",
+          affirmation: "ชีวิตฉันเต็มอยู่แล้วในตัวเอง ความรักที่เข้ามาจึงเป็นเรื่องน่ายินดี ไม่ใช่เรื่องจำเป็น",
+        },
+        readingEn: {
+          theme: "Love That Starts From An Already Good Life",
+          overview: "What lies ahead does not depend on waiting for someone. It depends on you standing well on your own first.",
+          currentSituation: "Nine of Pentacles says you can take care of yourself. Whatever love arrives now is an addition, not a dependency.",
+          hiddenLayer: "Death marks the turning point as a proper ending. Something unfinished will keep blocking the new until you set it down.",
+          oracleAdvice: "The Sun concludes clarity is coming. The relationship ahead will not need constant interpreting the way the last one did.",
+          affirmation: "My life is already full. Love that comes is a joy, never a necessity.",
+        },
+        targetSpreadId: "three-card",
+      },
+      {
+        id: "entry-8",
+        cards: [
+          { cardId: "cups-05", isReversed: false, positionTh: "พลังงานตั้งต้น", positionEn: "Seed Energy" },
+          { cardId: "major-12", isReversed: false, positionTh: "จุดเปลี่ยนสำคัญ", positionEn: "Turning Point" },
+          { cardId: "cups-03", isReversed: false, positionTh: "ผลลัพธ์ปลายทาง", positionEn: "Ultimate Horizon" },
+        ],
+        readingTh: {
+          theme: "ใจที่ยังมองสิ่งที่เสียไป มากกว่าสิ่งที่ยังเหลืออยู่",
+          overview: "ความรู้สึกเสียดายกำลังบังทางอยู่ ทิศทางข้างหน้าจะเปลี่ยนทันทีที่คุณหันกลับมามองสิ่งที่ยังอยู่ข้างหลังถ้วยที่ล้ม",
+          currentSituation: "ไพ่ Five of Cups บอกว่าคุณยังเสียดายบางอย่างที่ผ่านไปแล้ว ความรู้สึกนี้เป็นเรื่องปกติ แต่มันบังไม่ให้คุณเห็นโอกาสที่ยังเหลืออยู่",
+          hiddenLayer: "ไพ่ The Hanged Man ชี้จุดเปลี่ยนที่การหยุดพักและเปลี่ยนมุมมอง เมื่อคุณเลิกฝืนดึงเรื่องเก่ากลับมา มุมมองใหม่จะมาเอง",
+          oracleAdvice: "ไพ่ Three of Cups สรุปปลายทางว่าความสุขจะกลับมาผ่านผู้คนรอบตัว วงสังคมใหม่หรือมิตรภาพที่อบอุ่นจะพาคนที่ใช่เข้ามาโดยไม่ได้ตั้งใจ",
+          affirmation: "ฉันขอบคุณสิ่งที่ผ่านไป และหันกลับมามองสิ่งดี ๆ ที่ยังอยู่ตรงนี้",
+        },
+        readingEn: {
+          theme: "Eyes Still On What Spilled, Not What Remains",
+          overview: "Regret is blocking the view. The road ahead changes the moment you turn towards what still stands behind the fallen cups.",
+          currentSituation: "Five of Cups says you are still grieving something that passed. That is fair — but it hides the chances still standing beside you.",
+          hiddenLayer: "The Hanged Man marks the turning point as a deliberate pause. Stop pulling the old story back and a new angle arrives by itself.",
+          oracleAdvice: "Three of Cups concludes that joy returns through people. A new circle or a warm friendship brings the right person in unplanned.",
+          affirmation: "I thank what has passed and turn back towards the good that is still here.",
+        },
+        targetSpreadId: "three-card",
+      },
     ],
   },
   {
@@ -331,10 +577,10 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
     subtitleTh: "ตรวจเช็กจังหวะดวงการงาน การลงทุน และทิศทางสร้างรายได้ระลอกถัดไป",
     subtitleEn: "Discern upcoming professional pivots, financial openings, and strategic moves",
     category: "career",
-    coverCardId: "pentacles-01", // Ace of Pentacles
+    coverCardId: "pentacles-01",
     descriptionTh: "สำหรับคนที่กำลังมองหางานใหม่ คิดจะเริ่มต้นธุรกิจ หรือต้องการความชัดเจนเรื่องเงินและโปรเจกต์ข้างหน้า เลือกกองไพ่ที่ดึงดูดพลังงานคุณที่สุด",
     descriptionEn: "For pioneers seeking career breakthroughs, entrepreneurial leaps, or wealth milestones. Tune your focus and choose your guiding pile.",
-    piles: [
+    slots: [
       {
         id: "pile-1",
         number: 1,
@@ -342,6 +588,35 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         crystalEn: "Rose Quartz",
         crystalDescTh: "หินแห่งความอ่อนโยน การเปิดใจ และการเยียวยาความรู้สึก",
         crystalDescEn: "Stone of unconditional warmth, emotional vulnerability, and healing",
+      },
+      {
+        id: "pile-2",
+        number: 2,
+        crystalTh: "อเมทิสต์ (Amethyst)",
+        crystalEn: "Amethyst",
+        crystalDescTh: "หินแห่งสติปัญญา ลางสังหรณ์ และความเข้าใจในสัจธรรม",
+        crystalDescEn: "Stone of mental clarity, heightened intuition, and honest discernment",
+      },
+      {
+        id: "pile-3",
+        number: 3,
+        crystalTh: "ซิทริน (Citrine)",
+        crystalEn: "Citrine",
+        crystalDescTh: "หินแห่งความกระจ่างใส เปล่งประกาย และพลังใจอันเปี่ยมล้น",
+        crystalDescEn: "Stone of sunny abundance, joyful confidence, and magnetic optimism",
+      },
+      {
+        id: "pile-4",
+        number: 4,
+        crystalTh: "ลาปิส ลาซูลี (Lapis Lazuli)",
+        crystalEn: "Lapis Lazuli",
+        crystalDescTh: "หินแห่งสัจธรรม ความจริงแท้ และการตระหนักรู้ในจิตวิญญาณ",
+        crystalDescEn: "Stone of celestial truth, soul contracts, and unvarnished honesty",
+      },
+    ],
+    pool: [
+      {
+        id: "entry-1",
         cards: [
           { cardId: "pentacles-08", isReversed: false, positionTh: "ทักษะและการลงมือทำ", positionEn: "Mastery & Craft" },
           { cardId: "wands-08", isReversed: false, positionTh: "กระแสโอกาสที่ไหลเข้ามา", positionEn: "Incoming Momentum" },
@@ -366,12 +641,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "career",
       },
       {
-        id: "pile-2",
-        number: 2,
-        crystalTh: "อเมทิสต์ (Amethyst)",
-        crystalEn: "Amethyst",
-        crystalDescTh: "หินแห่งสติปัญญา ลางสังหรณ์ และความเข้าใจในสัจธรรม",
-        crystalDescEn: "Stone of mental clarity, heightened intuition, and honest discernment",
+        id: "entry-2",
         cards: [
           { cardId: "major-04", isReversed: false, positionTh: "ทักษะและการลงมือทำ", positionEn: "Mastery & Craft" },
           { cardId: "swords-06", isReversed: false, positionTh: "กระแสโอกาสที่ไหลเข้ามา", positionEn: "Incoming Momentum" },
@@ -396,12 +666,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "career",
       },
       {
-        id: "pile-3",
-        number: 3,
-        crystalTh: "ซิทริน (Citrine)",
-        crystalEn: "Citrine",
-        crystalDescTh: "หินแห่งความกระจ่างใส เปล่งประกาย และพลังใจอันเปี่ยมล้น",
-        crystalDescEn: "Stone of sunny abundance, joyful confidence, and magnetic optimism",
+        id: "entry-3",
         cards: [
           { cardId: "wands-01", isReversed: false, positionTh: "ทักษะและการลงมือทำ", positionEn: "Mastery & Craft" },
           { cardId: "major-03", isReversed: false, positionTh: "กระแสโอกาสที่ไหลเข้ามา", positionEn: "Incoming Momentum" },
@@ -426,12 +691,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "career",
       },
       {
-        id: "pile-4",
-        number: 4,
-        crystalTh: "ลาปิส ลาซูลี (Lapis Lazuli)",
-        crystalEn: "Lapis Lazuli",
-        crystalDescTh: "หินแห่งสัจธรรม ความจริงแท้ และการตระหนักรู้ในจิตวิญญาณ",
-        crystalDescEn: "Stone of celestial truth, soul contracts, and unvarnished honesty",
+        id: "entry-4",
         cards: [
           { cardId: "major-09", isReversed: false, positionTh: "ทักษะและการลงมือทำ", positionEn: "Mastery & Craft" },
           { cardId: "swords-01", isReversed: false, positionTh: "กระแสโอกาสที่ไหลเข้ามา", positionEn: "Incoming Momentum" },
@@ -455,6 +715,106 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         },
         targetSpreadId: "career",
       },
+      {
+        id: "entry-5",
+        cards: [
+          { cardId: "pentacles-02", isReversed: false, positionTh: "ทักษะและการลงมือทำ", positionEn: "Mastery & Craft" },
+          { cardId: "wands-05", isReversed: false, positionTh: "กระแสโอกาสที่ไหลเข้ามา", positionEn: "Incoming Momentum" },
+          { cardId: "pentacles-06", isReversed: false, positionTh: "ผลลัพธ์และความสำเร็จ", positionEn: "Financial Sovereignty" },
+        ],
+        readingTh: {
+          theme: "การถ่วงดุลหลายเรื่องพร้อมกันโดยไม่ให้ของหล่น",
+          overview: "ตอนนี้คุณบริหารหลายอย่างพร้อมกัน ทักษะที่ต้องใช้จึงไม่ใช่ความขยันอย่างเดียว แต่เป็นการจัดลำดับว่าอะไรวางลงได้บ้าง",
+          currentSituation: "ไพ่ Two of Pentacles สะท้อนว่าคุณกำลังหมุนงานหลายชิ้นและเงินหลายทางพร้อมกัน ทำได้ดีแต่เริ่มตึง ถึงเวลาตัดบางอย่างออกเพื่อให้ที่เหลือไปได้สุด",
+          hiddenLayer: "ไพ่ Five of Wands บอกว่ากระแสที่ไหลเข้ามามีการแข่งขันปนอยู่ อาจมีคนเก่งเข้ามาในสนามเดียวกัน ให้ถือเป็นแรงกระตุ้นมากกว่าแรงกดดัน",
+          oracleAdvice: "ไพ่ Six of Pentacles สรุปว่าเงินจะเริ่มไหลเวียนสมดุลขึ้น สิ่งที่คุณเคยให้หรือเคยช่วยไว้จะกลับมาในรูปของโอกาสหรือการสนับสนุน",
+          affirmation: "ฉันวางบางอย่างลงได้ เพื่อให้สิ่งที่สำคัญที่สุดไปได้ไกลที่สุด",
+        },
+        readingEn: {
+          theme: "Juggling Many Things Without Dropping Any",
+          overview: "You are running several things at once, so the skill required is not diligence but deciding what may be set down.",
+          currentSituation: "Two of Pentacles reflects several projects and income streams spinning at once. You manage, but it is tightening — cut one so the rest can run.",
+          hiddenLayer: "Five of Wands says the incoming current carries competition. Someone capable may enter your field; treat it as fuel, not pressure.",
+          oracleAdvice: "Six of Pentacles concludes money begins circulating fairly again. What you once gave returns as an opening or as backing.",
+          affirmation: "I can put something down so that what matters most can go the furthest.",
+        },
+        targetSpreadId: "career",
+      },
+      {
+        id: "entry-6",
+        cards: [
+          { cardId: "swords-11", isReversed: false, positionTh: "ทักษะและการลงมือทำ", positionEn: "Mastery & Craft" },
+          { cardId: "cups-07", isReversed: false, positionTh: "กระแสโอกาสที่ไหลเข้ามา", positionEn: "Incoming Momentum" },
+          { cardId: "wands-06", isReversed: false, positionTh: "ผลลัพธ์และความสำเร็จ", positionEn: "Financial Sovereignty" },
+        ],
+        readingTh: {
+          theme: "ช่วงของการเรียนรู้เร็วและจับสัญญาณให้ทัน",
+          overview: "จังหวะนี้ข้อมูลคืออาวุธ คนที่รู้ก่อนและกล้าถามก่อนจะได้เปรียบ มากกว่าคนที่รอให้ทุกอย่างชัดเจนแล้วค่อยขยับ",
+          currentSituation: "ไพ่ Page of Swords บอกว่าคุณอยู่ในโหมดเรียนรู้และสังเกต ช่วงนี้เหมาะกับการหาข้อมูล ถามให้เยอะ และจดสิ่งที่ได้ยินไว้ให้ดี",
+          hiddenLayer: "ไพ่ Seven of Cups เตือนว่ากระแสโอกาสที่เข้ามาจะเยอะจนลายตา หลายอย่างดูดีบนกระดาษแต่ไม่จริงทั้งหมด ให้คัดด้วยตัวเลข ไม่ใช่ด้วยความตื่นเต้น",
+          oracleAdvice: "ไพ่ Six of Wands สรุปว่าผลงานของคุณจะถูกมองเห็นในวงกว้าง ชื่อของคุณจะถูกพูดถึงในห้องที่คุณไม่ได้อยู่ด้วย",
+          affirmation: "ฉันถามในสิ่งที่ยังไม่รู้ได้โดยไม่เสียศักดิ์ศรี และนั่นทำให้ฉันไปได้เร็วกว่าเดิม",
+        },
+        readingEn: {
+          theme: "A Season Of Learning Fast And Reading Signals",
+          overview: "Information is the weapon now. Whoever learns first and dares to ask first outruns whoever waits for certainty.",
+          currentSituation: "Page of Swords says you are in observation mode. Gather information, ask plenty of questions, and write down what you hear.",
+          hiddenLayer: "Seven of Cups warns the incoming options will dazzle. Several look good on paper and are not. Filter with numbers, not excitement.",
+          oracleAdvice: "Six of Wands concludes your work gets seen widely. Your name will be spoken in rooms you are not standing in.",
+          affirmation: "Asking about what I do not know costs me nothing and moves me faster.",
+        },
+        targetSpreadId: "career",
+      },
+      {
+        id: "entry-7",
+        cards: [
+          { cardId: "pentacles-05", isReversed: false, positionTh: "ทักษะและการลงมือทำ", positionEn: "Mastery & Craft" },
+          { cardId: "major-08", isReversed: false, positionTh: "กระแสโอกาสที่ไหลเข้ามา", positionEn: "Incoming Momentum" },
+          { cardId: "pentacles-10", isReversed: false, positionTh: "ผลลัพธ์และความสำเร็จ", positionEn: "Financial Sovereignty" },
+        ],
+        readingTh: {
+          theme: "ช่วงตึงมือที่ทำให้ต้องทบทวนทุกบาททุกก้าว",
+          overview: "ความรู้สึกขาดกำลังกดดันการตัดสินใจอยู่ แต่สิ่งที่ขาดจริง ๆ มักเป็นการขอความช่วยเหลือ ไม่ใช่ความสามารถ",
+          currentSituation: "ไพ่ Five of Pentacles สะท้อนช่วงที่การเงินหรือกำลังใจตึงกว่าปกติ คุณอาจกำลังแบกไว้คนเดียว ทั้งที่มีคนพร้อมช่วยอยู่ใกล้ ๆ",
+          hiddenLayer: "ไพ่ Strength บอกว่ากระแสที่เข้ามาจะทดสอบความอดทน แต่คุณมีแรงพอ ความนิ่งและความใจเย็นจะพาผ่านไปได้โดยไม่ต้องฝืนแรง",
+          oracleAdvice: "ไพ่ Ten of Pentacles สรุปว่าปลายทางคือความมั่นคงระยะยาว สิ่งที่สร้างในช่วงยากนี้จะกลายเป็นฐานที่เลี้ยงคุณได้นานกว่างานที่มาง่าย ๆ",
+          affirmation: "การขอความช่วยเหลือไม่ได้แปลว่าฉันอ่อนแอ มันคือทางที่ทำให้ฉันไปต่อได้เร็วขึ้น",
+        },
+        readingEn: {
+          theme: "A Tight Stretch That Makes You Weigh Every Step",
+          overview: "Scarcity is pressing on your decisions, yet what is actually missing is usually help asked for, not ability.",
+          currentSituation: "Five of Pentacles reflects a season where money or morale runs thin. You may be carrying it alone while help stands nearby.",
+          hiddenLayer: "Strength says the incoming current tests your patience. You have the reserves; steadiness carries you through without brute force.",
+          oracleAdvice: "Ten of Pentacles concludes with long-term security. What you build in the hard stretch feeds you longer than anything that came easy.",
+          affirmation: "Asking for help is not weakness. It is what lets me keep going faster.",
+        },
+        targetSpreadId: "career",
+      },
+      {
+        id: "entry-8",
+        cards: [
+          { cardId: "wands-10", isReversed: false, positionTh: "ทักษะและการลงมือทำ", positionEn: "Mastery & Craft" },
+          { cardId: "major-11", isReversed: false, positionTh: "กระแสโอกาสที่ไหลเข้ามา", positionEn: "Incoming Momentum" },
+          { cardId: "major-10", isReversed: false, positionTh: "ผลลัพธ์และความสำเร็จ", positionEn: "Financial Sovereignty" },
+        ],
+        readingTh: {
+          theme: "ภาระที่แบกจนเกินไหล่ และถึงเวลาวางบางมัดลง",
+          overview: "คุณทำได้มากกว่าที่ตัวเองยอมรับ แต่การแบกทุกอย่างไว้คนเดียวกำลังกินแรงที่ควรไปอยู่กับงานที่สร้างรายได้จริง",
+          currentSituation: "ไพ่ Ten of Wands สะท้อนว่าคุณรับผิดชอบไว้เยอะเกินกว่าคนคนเดียวจะถือไหว งานบางส่วนควรถูกส่งต่อหรือปฏิเสธไปตั้งแต่แรก",
+          hiddenLayer: "ไพ่ Justice บอกว่ากระแสที่เข้ามาเกี่ยวกับข้อตกลง สัญญา หรือความเป็นธรรม ให้อ่านเงื่อนไขให้ละเอียดก่อนเซ็นทุกครั้ง",
+          oracleAdvice: "ไพ่ Wheel of Fortune สรุปว่าจังหวะกำลังจะเปลี่ยนมือ สิ่งที่เคยติดขัดจะคลายตัวเร็วกว่าที่คิด ขอเพียงคุณยังอยู่ในเกม",
+          affirmation: "ฉันวางสิ่งที่ไม่ใช่หน้าที่ของฉันลงได้ และเก็บแรงไว้ให้สิ่งที่สร้างอนาคตจริง ๆ",
+        },
+        readingEn: {
+          theme: "A Load Past Your Shoulders, Time To Set Some Down",
+          overview: "You do more than you admit, but carrying all of it alone eats the energy that belongs to the work that actually pays.",
+          currentSituation: "Ten of Wands reflects responsibilities beyond what one person can hold. Some of it should have been delegated or declined at the start.",
+          hiddenLayer: "Justice says the incoming current concerns agreements, contracts, and fairness. Read every condition before you sign anything.",
+          oracleAdvice: "Wheel of Fortune concludes the timing is about to change hands. What was stuck loosens sooner than expected, as long as you stay in the game.",
+          affirmation: "I can put down what was never mine to carry and save my strength for what builds a future.",
+        },
+        targetSpreadId: "career",
+      },
     ],
   },
   {
@@ -465,10 +825,10 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
     subtitleTh: "สิ่งที่จิตวิญญาณของคุณต้องการได้ยินในตอนนี้ เพื่อเยียวยาและปลดล็อกพลังในตัวเอง",
     subtitleEn: "What your spirit needs to hear right now to heal, awaken, and flourish",
     category: "spiritual",
-    coverCardId: "major-17", // The Star
+    coverCardId: "major-17",
     descriptionTh: "พักความวุ่นวายจากภายนอก ทำใจให้สงบ นึกถึงตนเองด้วยความรักและความเมตตา แล้วเลือกกองไพ่ที่ส่องประกายในใจคุณที่สุด",
     descriptionEn: "Quiet external noise, breathe with compassion toward your journey, and select the pile that resonates with your heart's sanctuary.",
-    piles: [
+    slots: [
       {
         id: "pile-1",
         number: 1,
@@ -476,6 +836,35 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         crystalEn: "Rose Quartz",
         crystalDescTh: "หินแห่งความอ่อนโยน การเปิดใจ และการเยียวยาความรู้สึก",
         crystalDescEn: "Stone of unconditional warmth, emotional vulnerability, and healing",
+      },
+      {
+        id: "pile-2",
+        number: 2,
+        crystalTh: "อเมทิสต์ (Amethyst)",
+        crystalEn: "Amethyst",
+        crystalDescTh: "หินแห่งสติปัญญา ลางสังหรณ์ และความเข้าใจในสัจธรรม",
+        crystalDescEn: "Stone of mental clarity, heightened intuition, and honest discernment",
+      },
+      {
+        id: "pile-3",
+        number: 3,
+        crystalTh: "ซิทริน (Citrine)",
+        crystalEn: "Citrine",
+        crystalDescTh: "หินแห่งความกระจ่างใส เปล่งประกาย และพลังใจอันเปี่ยมล้น",
+        crystalDescEn: "Stone of sunny abundance, joyful confidence, and magnetic optimism",
+      },
+      {
+        id: "pile-4",
+        number: 4,
+        crystalTh: "ลาปิส ลาซูลี (Lapis Lazuli)",
+        crystalEn: "Lapis Lazuli",
+        crystalDescTh: "หินแห่งสัจธรรม ความจริงแท้ และการตระหนักรู้ในจิตวิญญาณ",
+        crystalDescEn: "Stone of celestial truth, soul contracts, and unvarnished honesty",
+      },
+    ],
+    pool: [
+      {
+        id: "entry-1",
         cards: [
           { cardId: "major-12", isReversed: false, positionTh: "สภาวะปัจจุบัน", positionEn: "Current State" },
           { cardId: "major-00", isReversed: false, positionTh: "การตื่นรู้", positionEn: "Awakening" },
@@ -500,12 +889,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "three-card",
       },
       {
-        id: "pile-2",
-        number: 2,
-        crystalTh: "อเมทิสต์ (Amethyst)",
-        crystalEn: "Amethyst",
-        crystalDescTh: "หินแห่งสติปัญญา ลางสังหรณ์ และความเข้าใจในสัจธรรม",
-        crystalDescEn: "Stone of mental clarity, heightened intuition, and honest discernment",
+        id: "entry-2",
         cards: [
           { cardId: "major-16", isReversed: false, positionTh: "สภาวะปัจจุบัน", positionEn: "Current State" },
           { cardId: "major-13", isReversed: false, positionTh: "การตื่นรู้", positionEn: "Awakening" },
@@ -530,12 +914,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "three-card",
       },
       {
-        id: "pile-3",
-        number: 3,
-        crystalTh: "ซิทริน (Citrine)",
-        crystalEn: "Citrine",
-        crystalDescTh: "หินแห่งความกระจ่างใส เปล่งประกาย และพลังใจอันเปี่ยมล้น",
-        crystalDescEn: "Stone of sunny abundance, joyful confidence, and magnetic optimism",
+        id: "entry-3",
         cards: [
           { cardId: "swords-03", isReversed: false, positionTh: "สภาวะปัจจุบัน", positionEn: "Current State" },
           { cardId: "major-17", isReversed: false, positionTh: "การตื่นรู้", positionEn: "Awakening" },
@@ -560,12 +939,7 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         targetSpreadId: "three-card",
       },
       {
-        id: "pile-4",
-        number: 4,
-        crystalTh: "ลาปิส ลาซูลี (Lapis Lazuli)",
-        crystalEn: "Lapis Lazuli",
-        crystalDescTh: "หินแห่งสัจธรรม ความจริงแท้ และการตระหนักรู้ในจิตวิญญาณ",
-        crystalDescEn: "Stone of celestial truth, soul contracts, and unvarnished honesty",
+        id: "entry-4",
         cards: [
           { cardId: "major-02", isReversed: false, positionTh: "สภาวะปัจจุบัน", positionEn: "Current State" },
           { cardId: "major-05", isReversed: false, positionTh: "การตื่นรู้", positionEn: "Awakening" },
@@ -589,10 +963,106 @@ export const PICK_A_CARD_TOPICS: readonly PickACardTopic[] = [
         },
         targetSpreadId: "three-card",
       },
+      {
+        id: "entry-5",
+        cards: [
+          { cardId: "swords-09", isReversed: false, positionTh: "สภาวะปัจจุบัน", positionEn: "Current State" },
+          { cardId: "major-18", isReversed: false, positionTh: "การตื่นรู้", positionEn: "Awakening" },
+          { cardId: "major-14", isReversed: false, positionTh: "พรจากจักรวาล", positionEn: "Cosmic Blessing" },
+        ],
+        readingTh: {
+          theme: "คืนที่ความคิดดังกว่าความจริง",
+          overview: "สิ่งที่กวนใจคุณตอนนี้ใหญ่ในหัวมากกว่าในความเป็นจริง จักรวาลกำลังบอกให้แยกความกลัวออกจากข้อเท็จจริง",
+          currentSituation: "ไพ่ Nine of Swords สะท้อนความกังวลที่มาเยือนตอนกลางคืน คุณอาจคิดวนเรื่องเดิมซ้ำ ๆ จนนอนไม่หลับ ทั้งที่หลายเรื่องยังไม่เกิดขึ้นจริงสักอย่าง",
+          hiddenLayer: "ไพ่ The Moon เผยการตื่นรู้ว่าสิ่งที่คุณกลัวส่วนใหญ่คือเงาที่ใจวาดขึ้นเอง เมื่อกล้ามองตรง ๆ มันจะเล็กลงกว่าที่คิดมาก",
+          oracleAdvice: "ไพ่ Temperance คือพรจากจักรวาลเรื่องความสมดุล ค่อย ๆ ปรับทีละนิดโดยไม่ต้องเปลี่ยนทั้งชีวิตในวันเดียว แล้วใจจะกลับมานิ่งเอง",
+          affirmation: "ฉันแยกความกลัวออกจากความจริงได้ และเลือกเชื่อสิ่งที่เกิดขึ้นจริงเท่านั้น",
+        },
+        readingEn: {
+          theme: "Nights When Thoughts Are Louder Than Facts",
+          overview: "What troubles you is larger in your head than in reality. The universe is asking you to separate fear from fact.",
+          currentSituation: "Nine of Swords reflects worry that visits at night. The same loop replays until sleep goes, though most of it has not happened at all.",
+          hiddenLayer: "The Moon reveals that most of what frightens you is a shadow your own mind drew. Looked at directly, it shrinks considerably.",
+          oracleAdvice: "Temperance is the blessing of balance. Adjust in small measures rather than overhauling your life in a day, and calm returns on its own.",
+          affirmation: "I can tell fear apart from fact, and I trust only what has actually happened.",
+        },
+        targetSpreadId: "three-card",
+      },
+      {
+        id: "entry-6",
+        cards: [
+          { cardId: "pentacles-05", isReversed: false, positionTh: "สภาวะปัจจุบัน", positionEn: "Current State" },
+          { cardId: "major-15", isReversed: false, positionTh: "การตื่นรู้", positionEn: "Awakening" },
+          { cardId: "major-01", isReversed: false, positionTh: "พรจากจักรวาล", positionEn: "Cosmic Blessing" },
+        ],
+        readingTh: {
+          theme: "ความรู้สึกว่าถูกทิ้งไว้ข้างนอกในคืนที่หนาว",
+          overview: "จักรวาลเห็นช่วงที่คุณรู้สึกโดดเดี่ยวหรือขาดที่พึ่ง แต่ประตูที่คุณเดินผ่านไปโดยไม่ทันสังเกตนั้นเปิดอยู่จริง",
+          currentSituation: "ไพ่ Five of Pentacles สะท้อนช่วงที่คุณรู้สึกขาด ไม่ว่าจะเป็นเงิน กำลังใจ หรือคนที่เข้าใจ ความรู้สึกนี้จริง แต่มันไม่ใช่ทั้งหมดของความจริง",
+          hiddenLayer: "ไพ่ The Devil เผยการตื่นรู้ว่ากรงที่ขังคุณอยู่ไม่ได้ล็อก มันคือความเคยชินหรือความกลัวที่คุณถือกุญแจไว้เองมาตลอด",
+          oracleAdvice: "ไพ่ The Magician คือพรจากจักรวาลว่าเครื่องมือที่ต้องใช้อยู่ในมือคุณครบแล้ว ขาดเพียงการลงมือทำก้าวแรกเท่านั้น",
+          affirmation: "ฉันถือกุญแจของตัวเองอยู่เสมอ และเลือกเปิดประตูได้ทุกเมื่อที่พร้อม",
+        },
+        readingEn: {
+          theme: "Feeling Left Outside On A Cold Night",
+          overview: "The universe sees the stretch where you feel alone or unsupported — yet the door you keep walking past is genuinely open.",
+          currentSituation: "Five of Pentacles reflects a season of lack, whether money, morale, or someone who understands. The feeling is real, but it is not the whole truth.",
+          hiddenLayer: "The Devil reveals the cage is unlocked. It is habit or fear, and you have been holding the key the entire time.",
+          oracleAdvice: "The Magician is the blessing that every tool you need is already in your hands. All that is missing is the first move.",
+          affirmation: "I hold my own key, and I can open the door whenever I am ready.",
+        },
+        targetSpreadId: "three-card",
+      },
+      {
+        id: "entry-7",
+        cards: [
+          { cardId: "cups-08", isReversed: false, positionTh: "สภาวะปัจจุบัน", positionEn: "Current State" },
+          { cardId: "major-07", isReversed: false, positionTh: "การตื่นรู้", positionEn: "Awakening" },
+          { cardId: "cups-10", isReversed: false, positionTh: "พรจากจักรวาล", positionEn: "Cosmic Blessing" },
+        ],
+        readingTh: {
+          theme: "การลุกเดินออกมาจากสิ่งที่เคยรัก",
+          overview: "จักรวาลกำลังหนุนการเดินออกจากสิ่งที่หมดพลังกับคุณแล้ว การเดินจากไปในกรณีนี้คือความกล้า ไม่ใช่การยอมแพ้",
+          currentSituation: "ไพ่ Eight of Cups สะท้อนว่าคุณรู้อยู่แก่ใจว่าบางอย่างหมดเวลาของมันแล้ว แม้จะยังผูกพัน แต่ใจเริ่มไม่อยู่ที่เดิมอีกต่อไป",
+          hiddenLayer: "ไพ่ The Chariot เผยการตื่นรู้ว่าทันทีที่คุณตัดสินใจ แรงส่งจะมาเอง ความลังเลต่างหากที่กินพลังมากกว่าการเดินจริง",
+          oracleAdvice: "ไพ่ Ten of Cups คือพรจากจักรวาลเรื่องความอบอุ่นที่รออยู่ปลายทาง สิ่งที่คุณตามหาไม่ได้หายไปไหน เพียงแต่ไม่ได้อยู่ที่เดิมเท่านั้น",
+          affirmation: "การเดินออกจากสิ่งที่หมดพลังคือการให้เกียรติตัวเอง ไม่ใช่การทิ้งใคร",
+        },
+        readingEn: {
+          theme: "Walking Away From Something You Once Loved",
+          overview: "The universe backs your leaving of what has run out of life with you. Here, walking away is courage rather than surrender.",
+          currentSituation: "Eight of Cups reflects what you already know: something has reached its end. The attachment remains, but your heart has moved.",
+          hiddenLayer: "The Chariot reveals that momentum arrives the moment you decide. Hesitation, not the walking, is what drains you.",
+          oracleAdvice: "Ten of Cups is the blessing of warmth waiting further along. What you seek has not vanished — it simply is not where it used to be.",
+          affirmation: "Leaving what has run dry honours me. It does not make me someone who abandons.",
+        },
+        targetSpreadId: "three-card",
+      },
+      {
+        id: "entry-8",
+        cards: [
+          { cardId: "wands-07", isReversed: false, positionTh: "สภาวะปัจจุบัน", positionEn: "Current State" },
+          { cardId: "major-21", isReversed: false, positionTh: "การตื่นรู้", positionEn: "Awakening" },
+          { cardId: "pentacles-09", isReversed: false, positionTh: "พรจากจักรวาล", positionEn: "Cosmic Blessing" },
+        ],
+        readingTh: {
+          theme: "ช่วงที่ต้องยืนหยัดในจุดยืนของตัวเอง",
+          overview: "มีแรงกดดันให้คุณเปลี่ยนใจหรือยอมตามคนอื่น จักรวาลกำลังบอกว่าจุดยืนของคุณมีค่าพอที่จะรักษาไว้",
+          currentSituation: "ไพ่ Seven of Wands สะท้อนว่าคุณกำลังยืนสู้เพื่อบางอย่างที่สำคัญ อาจเหนื่อยที่ต้องอธิบายตัวเองซ้ำ ๆ แต่คุณยังอยู่ในที่ที่ถูกแล้ว",
+          hiddenLayer: "ไพ่ The World เผยการตื่นรู้ว่าบทเรียนรอบนี้กำลังจะครบวง สิ่งที่คุณผ่านมาทั้งหมดกำลังประกอบกันเป็นภาพที่เข้าใจได้เสียที",
+          oracleAdvice: "ไพ่ Nine of Pentacles คือพรจากจักรวาลเรื่องความสงบที่ได้มาด้วยตัวเอง ความมั่นคงที่คุณสร้างเองจะไม่มีใครเอาไปจากคุณได้",
+          affirmation: "ฉันไม่ต้องอธิบายตัวเองกับทุกคน การรู้ว่าฉันยืนอยู่ตรงไหนก็เพียงพอแล้ว",
+        },
+        readingEn: {
+          theme: "A Season For Holding Your Ground",
+          overview: "There is pressure to change your mind or fall in line. The universe says your position is worth keeping.",
+          currentSituation: "Seven of Wands reflects you defending something that matters. Explaining yourself repeatedly is tiring, but you are standing in the right place.",
+          hiddenLayer: "The World reveals this lesson completing its circle. Everything you have been through is finally assembling into a picture that makes sense.",
+          oracleAdvice: "Nine of Pentacles is the blessing of hard-earned peace. Security you built yourself is security no one can take from you.",
+          affirmation: "I do not owe everyone an explanation. Knowing where I stand is enough.",
+        },
+        targetSpreadId: "three-card",
+      },
     ],
   },
 ];
-
-export function getPickACardTopicBySlug(slug: string): PickACardTopic | undefined {
-  return PICK_A_CARD_TOPICS.find((t) => t.slug === slug || t.id === slug);
-}

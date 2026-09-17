@@ -18,7 +18,7 @@
  *
  * 1. `drawContentOrder()` คืนลำดับที่ไม่มีช่องไหนซ้ำกับรอบก่อนเลย (ทุกขนาด 2–6 ช่อง)
  * 2. คืนค่าเป็นการเรียงสับเปลี่ยนที่ถูกต้องเสมอ (ครบทุกชุด ไม่มีชุดหาย ไม่มีชุดซ้ำ)
- * 3. เล่นยาว 400 รอบแล้วช่องแรกต้องเคยได้ครบทุกชุด — กันกรณี "สลับไปมาอยู่แค่สองชุด"
+ * 3. เล่นยาวแล้วช่องแรกต้องเข้าถึงคลังได้ครบทุกชิ้น — กันกรณี "สลับไปมาอยู่แค่สองชุด"
  * 4. หน้า Pick A Card ยัง import และเรียก `drawContentOrder()` จริง (กันกลับไปผูกกองตายตัว)
  * 5. ทุกไฟล์ที่วาดไพ่คว่ำหน้าใช้คลาสกลาง `card-back-pattern` (ทะเบียนแบบ ratchet)
  *    และหน้า Pick A Card ต้องไม่ผสมสีหลังไพ่เองด้วยเลขฮาร์ดโค้ดอีก
@@ -33,7 +33,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
-import { drawContentOrder } from "@/lib/pick-a-card/draw-order";
+import { drawAnchors } from "@/lib/pick-a-card/draw-order";
 import { composeReading, drawPicks, initialDraw, possibleCombinations } from "@/lib/pick-a-card/compose";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
@@ -64,26 +64,28 @@ function stripComments(src: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// 1 + 2. ไม่ซ้ำช่องเดิม และเป็นการเรียงสับเปลี่ยนที่ถูกต้อง
+// 1 + 2. ไม่ซ้ำช่องเดิม และในรอบเดียวกันทุกกองต้องได้คนละชิ้น
 // ---------------------------------------------------------------------------
 {
   const offenders: string[] = [];
-  for (let size = 2; size <= 6; size++) {
-    let order = Array.from({ length: size }, (_, i) => i);
+  for (const poolSize of [4, 5, 6, 8, 12]) {
+    const slotCount = 4;
+    let order = Array.from({ length: slotCount }, (_, i) => i);
     for (let round = 0; round < 300; round++) {
-      const next = drawContentOrder(size, order);
+      const next = drawAnchors(poolSize, slotCount, order);
 
-      const sorted = [...next].sort((a, b) => a - b).join(",");
-      const expected = Array.from({ length: size }, (_, i) => i).join(",");
-      if (sorted !== expected) {
-        offenders.push(`   ขนาด ${size} รอบ ${round}: ไม่ใช่การเรียงสับเปลี่ยน → [${next.join(",")}]`);
+      if (next.length !== slotCount || next.some((v) => v < 0 || v >= poolSize)) {
+        offenders.push(`   คลัง ${poolSize} รอบ ${round}: ดัชนีหลุดขอบคลัง → [${next.join(",")}]`);
         break;
       }
-
+      if (new Set(next).size !== slotCount) {
+        offenders.push(`   คลัง ${poolSize} รอบ ${round}: มีสองกองได้คำอ่านชิ้นเดียวกัน → [${next.join(",")}]`);
+        break;
+      }
       const stuck = next.findIndex((value, index) => value === order[index]);
       if (stuck >= 0) {
         offenders.push(
-          `   ขนาด ${size} รอบ ${round}: ช่องที่ ${stuck + 1} ยังถือชุดเดิม (${next[stuck]}) — ผู้ใช้จะเจอไพ่ซ้ำ`
+          `   คลัง ${poolSize} รอบ ${round}: กองที่ ${stuck + 1} ยังได้ชิ้นเดิม (${next[stuck]}) — ผู้ใช้จะเจอไพ่ซ้ำ`
         );
         break;
       }
@@ -91,27 +93,27 @@ function stripComments(src: string): string {
     }
   }
   check(
-    "จั่วลำดับใหม่แล้วไม่มีกองไหนถือไพ่ชุดเดิมซ้ำรอบก่อน (ขนาด 2–6 ช่อง · 300 รอบต่อขนาด)",
+    "จั่วรอบใหม่แล้วไม่มีกองไหนได้คำอ่านชิ้นเดิมซ้ำรอบก่อน และทุกกองได้คนละชิ้น (คลัง 4–12 · 300 รอบต่อขนาด)",
     offenders.length === 0,
     offenders.join("\n")
   );
 }
 
 // ---------------------------------------------------------------------------
-// 3. เล่นยาวแล้วต้องเข้าถึงทุกชุด ไม่ใช่สลับอยู่แค่สองชุด
+// 3. เล่นยาวแล้วกองแรกต้องเข้าถึงคลังได้ครบทุกชิ้น
 // ---------------------------------------------------------------------------
 {
-  const size = 4;
-  let order = Array.from({ length: size }, (_, i) => i);
+  const poolSize = PICK_A_CARD_TOPICS[0].pool.length;
+  let order = Array.from({ length: 4 }, (_, i) => i);
   const seenInFirstSlot = new Set<number>();
-  for (let round = 0; round < 400; round++) {
-    order = drawContentOrder(size, order);
+  for (let round = 0; round < 2000; round++) {
+    order = drawAnchors(poolSize, 4, order);
     seenInFirstSlot.add(order[0]);
   }
   check(
-    `กองแรกเคยได้ครบทุกชุดเมื่อเล่นยาว 400 รอบ (เห็นแล้ว ${seenInFirstSlot.size}/${size} ชุด)`,
-    seenInFirstSlot.size === size,
-    `   เห็นเพียง [${[...seenInFirstSlot].sort().join(", ")}] — ถ้าเข้าถึงได้แค่ไม่กี่ชุด ผู้ใช้จะรู้สึกว่า "ก็ซ้ำอยู่ดี"`
+    `กองแรกเข้าถึงคลังได้ครบทุกชิ้นเมื่อเล่นยาว 2,000 รอบ (เห็นแล้ว ${seenInFirstSlot.size}/${poolSize} ชิ้น)`,
+    seenInFirstSlot.size === poolSize,
+    `   เห็นเพียง [${[...seenInFirstSlot].sort((a, b) => a - b).join(", ")}] — ถ้าเข้าถึงได้แค่ไม่กี่ชิ้น ผู้ใช้จะรู้สึกว่า "ก็ซ้ำอยู่ดี"`
   );
 }
 
@@ -136,13 +138,14 @@ function stripComments(src: string): string {
 // ---------------------------------------------------------------------------
 {
   const topic = PICK_A_CARD_TOPICS[0];
-  const size = topic.piles.length;
+  const size = topic.pool.length;
+  const slots = topic.slots.length;
 
   // (ก) จั่วรอบใหม่แล้วต้องเปลี่ยนทั้งสามตำแหน่ง
-  let draw = initialDraw(size);
+  let draw = initialDraw(slots);
   const stuck: string[] = [];
   for (let round = 0; round < 300; round++) {
-    const next = drawPicks(size, draw);
+    const next = drawPicks(size, slots, draw);
     if (next.hiddenPick === draw.hiddenPick) stuck.push(`รอบ ${round}: ใบที่ 2 ซ้ำเดิม (${next.hiddenPick})`);
     if (next.advicePick === draw.advicePick) stuck.push(`รอบ ${round}: ใบที่ 3 ซ้ำเดิม (${next.advicePick})`);
     if (next.anchorOrder.some((v, i) => v === draw.anchorOrder[i])) stuck.push(`รอบ ${round}: ไพ่หลักของบางช่องซ้ำเดิม`);
@@ -157,9 +160,9 @@ function stripComments(src: string): string {
 
   // (ข) ความหลากหลายที่เข้าถึงได้จริงต้องเท่ากับ poolSize³ ไม่ใช่ poolSize
   const seen = new Set<string>();
-  let probe = initialDraw(size);
+  let probe = initialDraw(slots);
   for (let round = 0; round < 6000; round++) {
-    probe = drawPicks(size, probe);
+    probe = drawPicks(size, slots, probe);
     const r = composeReading(topic, probe, 0, false);
     seen.add(r.cards.map((c) => c.cardId).join("+"));
   }
@@ -173,16 +176,16 @@ function stripComments(src: string): string {
   const FIELDS = ["currentSituation", "hiddenLayer", "oracleAdvice"] as const;
   const mismatched: string[] = [];
   for (const t of PICK_A_CARD_TOPICS) {
-    let d = initialDraw(t.piles.length);
+    let d = initialDraw(t.slots.length);
     for (let round = 0; round < 60; round++) {
-      d = drawPicks(t.piles.length, d);
-      for (let slot = 0; slot < t.piles.length; slot++) {
+      d = drawPicks(t.pool.length, t.slots.length, d);
+      for (let slot = 0; slot < t.slots.length; slot++) {
         for (const isEn of [false, true]) {
           const r = composeReading(t, d, slot, isEn);
           r.cards.forEach((card, idx) => {
-            const home = t.piles.find((pile) => {
-              const reading = isEn ? pile.readingEn : pile.readingTh;
-              return pile.cards[idx].cardId === card.cardId && reading[FIELDS[idx]] === r.bodies[idx];
+            const home = t.pool.find((entry) => {
+              const reading = isEn ? entry.readingEn : entry.readingTh;
+              return entry.cards[idx].cardId === card.cardId && reading[FIELDS[idx]] === r.bodies[idx];
             });
             if (!home) mismatched.push(`${t.id} ช่อง ${slot + 1} ตำแหน่ง ${idx + 1}: ข้อความไม่ใช่ของไพ่ ${card.cardId}`);
           });
@@ -194,6 +197,30 @@ function stripComments(src: string): string {
     "ทุกย่อหน้ามากับไพ่ของตำแหน่งตัวเองเสมอ (สุ่มตรวจ 4 หัวข้อ × 60 รอบ × 2 ภาษา)",
     mismatched.length === 0,
     [...new Set(mismatched)].slice(0, 5).map((l) => `   ${l}`).join("\n")
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 4.55 ไพ่ใบเดียวกันต้องไม่โผล่สองตำแหน่งในหัวข้อเดียว (กันจั่วแล้วเห็นไพ่ซ้ำใบในรอบเดียว)
+// ---------------------------------------------------------------------------
+{
+  const offenders: string[] = [];
+  for (const t of PICK_A_CARD_TOPICS) {
+    const seen = new Map<string, string>();
+    t.pool.forEach((entry, entryIndex) => {
+      entry.cards.forEach((card, position) => {
+        const key = card.cardId;
+        const where = `ชิ้นที่ ${entryIndex + 1} ตำแหน่ง ${position + 1}`;
+        const prev = seen.get(key);
+        if (prev) offenders.push(`${t.id}: ${key} อยู่ทั้ง ${prev} และ ${where}`);
+        else seen.set(key, where);
+      });
+    });
+  }
+  check(
+    "ไพ่ใบเดียวกันไม่โผล่ซ้ำในหัวข้อเดียวกัน (จั่วแล้วไม่มีทางเห็นไพ่ใบเดิมสองช่องพร้อมกัน)",
+    offenders.length === 0,
+    offenders.slice(0, 5).map((l) => `   ${l}`).join("\n")
   );
 }
 
@@ -220,7 +247,7 @@ function stripComments(src: string): string {
 
   const offenders: string[] = [];
   for (const t of PICK_A_CARD_TOPICS) {
-    for (const pile of t.piles) {
+    for (const pile of t.pool) {
       for (const lang of ["readingTh", "readingEn"] as const) {
         const reading = pile[lang];
         for (const field of FRAME_FIELDS) {
