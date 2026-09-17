@@ -1369,8 +1369,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           <UserProfileBadge
             onOpenAuthModal={() => openAuth("signin")}
             onPrefetchAuth={prefetchAuth}
-            onOpenPlans={() => openAccessDialog("explore")}
-            onBuyCredits={() => dispatchOverlay({ type: "openBuyCredits" })}
           />
         }
         nav={

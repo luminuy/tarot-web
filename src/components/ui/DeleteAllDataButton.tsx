@@ -32,14 +32,18 @@ export function DeleteAllDataButton() {
     window.location.href = isEn ? "/en" : "/";
   };
 
+  /*
+   * ⚠️ ของเดิมเป็น `bg-err/80` + `text-err` = ตัวอักษรแดงบนพื้นแดง (คอนทราสต์ ~1.2:1)
+   * ปุ่มลบข้อมูลถาวรเป็นปุ่มที่ต้อง "อ่านออกที่สุด" ในหน้า ไม่ใช่อ่านยากที่สุด
+   * พื้นอ่อน + ตัวอักษรแดงเข้ม ผ่าน AA และยังอ่านเป็นปุ่มอันตรายชัดเจน
+   */
   return (
     <button
       type="button"
       onClick={handleDelete}
       disabled={loading}
-      className="tap-overlay-y px-5 py-2.5 rounded-lg bg-err/80 border border-err/50 text-err text-xs font-bold hover:bg-err/80 transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+      className="tap-overlay-y px-5 py-2.5 rounded-full bg-err-wash border border-err/40 text-err text-xs font-bold hover:bg-err hover:text-surface hover:border-err transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-err"
     >
-      
       <span>
         {loading
           ? (isEn ? "Deleting data..." : "กำลังลบข้อมูล...")
