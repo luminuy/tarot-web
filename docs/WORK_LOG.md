@@ -66,6 +66,9 @@
    - ผสานเงามัลติเลเยอร์ด้านซ้ายแบบลึกละมุน (`-16px 0 48px -12px rgba(23, 21, 18, 0.24)`) ให้มิติสมจริงเหมือนแผงไม้โบราณเลื่อนเปิด
    - ผ่านการตรวจสอบความเข้ากันได้ `test-motion-quality.ts`, `test-will-change.ts`, `test-palette-drift.ts`, และ `npm run repo:verify` ครบ 74 ด่าน
 
+4. **แก้ปัญหาภาพไม่แสดง (404 Not Found) ในโหมด Local Dev (`astro.config.mjs`)**:
+   - ปรับ `publicDir: isBuild ? "./astro/public" : "./public"` ให้ในโหมดพัฒนา (`astro dev`) ตัวเซิร์ฟเวอร์อ่านไฟล์สาธารณะจาก `./public` โดยตรง ทำให้ `/logo.webp`, `/cards/**`, `/fonts/**` โหลดสมบูรณ์แบบ 200 OK และไม่เกิดการคัดลอกไฟล์ซ้ำ 90MB ตอนรัน `astro build` สำหรับ production
+
 ### 🗓️ 2026-09-17 (รอบ 86): 🚀 ปรับปรุง Navbar เป็น Slide-Out Navigation Drawer จากฝั่งขวา (GitHub-Inspired Style)
 
 ปรับปรุงแถบเมนูนำทางหลักจากเดิมที่เป็น Dropdown Popover ขนาดเล็กห้อยใต้ปุ่ม ให้กลายเป็น **Slide-Out Navigation Drawer สไลด์เปิดจากขอบจอด้านขวา** ตามสไตล์ GitHub Side Navigation:

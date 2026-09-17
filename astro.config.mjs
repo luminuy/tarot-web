@@ -32,11 +32,13 @@ const resolve = (p) => fileURLToPath(new URL(p, import.meta.url));
  * 3. ห้ามใส่ adapter — เว็บนี้เสิร์ฟหน้าเนื้อหาเป็นไฟล์สแตติกจาก Cloudflare Assets
  *    ไม่ผ่าน Worker เลย (ไม่เสียค่าคำขอ และไม่ต้องบูต runtime)
  */
+const isBuild = process.argv.includes("build");
+
 export default defineConfig({
   site: "https://seertarot.net",
   outDir: "./dist",
   srcDir: "./astro",
-  publicDir: "./astro/public",
+  publicDir: isBuild ? "./astro/public" : "./public",
   output: "static",
   trailingSlash: "never",
   build: {
