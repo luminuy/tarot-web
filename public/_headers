@@ -73,3 +73,97 @@
 /og/*
   Cache-Control: public, max-age=604800
 
+# ============================================================================
+# 📄 หน้าเว็บ (HTML) ที่ Cloudflare ตอบเองที่ขอบ — T-19
+# ============================================================================
+# วัดจาก production 2026-09-16: HTML **ทุกหน้า** ตอบ `public, max-age=0, must-revalidate`
+# ซึ่งเป็นค่าเริ่มต้นของ Cloudflare ไม่มี `s-maxage` ไม่มี `stale-while-revalidate` เลย
+#   • TTFB เย็น 224–240 ms เทียบอุ่น 41–48 ms → ส่วนต่าง ~180 ms ต่อทุก cache miss
+#   • `max-age=0` บังคับให้เบราว์เซอร์ revalidate ทุกครั้งที่กลับมาหน้าเดิม
+#
+# หน้าเหล่านี้เป็น Astro static ล้วน (ไม่มีข้อมูลผู้ใช้) จึงแคชที่ขอบได้เต็มที่
+#   `max-age=0`            = เบราว์เซอร์ถามทุกครั้ง (เห็นของใหม่ทันทีที่ deploy)
+#   `s-maxage=86400`       = ขอบเสิร์ฟเองได้ 1 วันโดยไม่ต้องไปหาต้นทาง
+#   `stale-while-revalidate=604800` = หลังหมดอายุยังเสิร์ฟของเก่าทันทีแล้วอัปเดตเบื้องหลัง
+# การ invalidate ตอน deploy มาจากแฮชในชื่อไฟล์ `/_astro/*` ที่ HTML อ้างถึงอยู่แล้ว
+#
+# ⚠️ กติกาสำคัญของไฟล์นี้: Cloudflare **ต่อท้าย** ส่วนหัวที่ชื่อซ้ำกัน ไม่ใช่แทนที่
+#    กฎภาพไพ่ (`/cards/*.jpg` · `/cards/*.webp`) จึงต้องอยู่ **เหนือ** บล็อกนี้เสมอ
+#    เพื่อให้ `max-age=31536000, immutable` ถูกอ่านก่อน — ดูหมายเหตุที่กฎ `/cards/:id` ด้านล่าง
+
+/
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/about
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/contact
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/privacy
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/daily
+  Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=86400
+
+/blog
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/blog/*
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/spreads
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/spreads/*
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/love/*
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/reading/*
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+# หน้าหมวดไพ่ — เขียนเป็นเส้นทางตรง ๆ ทุกเส้นโดยตั้งใจ ไม่ใช้ splat
+# เพราะ `/cards/*` จะครอบไฟล์ภาพไพ่ที่อยู่ในเนมสเปซเดียวกันไปด้วย
+/cards
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/cards/all
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/cards/major
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/cards/minor
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/cards/cups
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/cards/wands
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/cards/swords
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/cards/pentacles
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+/cards/birth-card
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+# 🃏 หน้าไพ่รายใบ 78 หน้า (`/cards/major-00` ฯลฯ)
+# ---------------------------------------------------------------------------
+# ⚠️ ข้อแลกเปลี่ยนที่ตั้งใจรับ: ไวยากรณ์ `_headers` ไม่มีวิธีเขียน "เส้นทางที่ไม่มีนามสกุล"
+# `:id` จึงแมตช์ทั้ง `/cards/major-00` (หน้าเว็บ) และ `/cards/major-00.jpg` (ภาพ)
+# เพราะกฎภาพอยู่ **เหนือ** บรรทัดนี้ ภาพจะได้ `max-age=31536000, immutable` มาก่อน
+# ซึ่งเป็นค่าที่เบราว์เซอร์อ่านและใช้จริง (directive แรกชนะ) — อายุแคชฝั่งผู้ใช้จึงไม่เปลี่ยน
+# ที่เปลี่ยนคืออายุแคชที่ "ขอบ" ของภาพลดจาก 1 ปีเหลือ 1 วัน ซึ่งไม่มีผลกับผู้ใช้
+# เพราะต้นทางของภาพคือ Cloudflare Static Assets เอง ไม่ใช่เซิร์ฟเวอร์ที่ไหน
+/cards/:id
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
+
+# หน้าอังกฤษทั้งหมด — ไม่มีไฟล์ static อยู่ใต้ `/en/` เลย จึงใช้ splat ได้ปลอดภัย
+/en/*
+  Cache-Control: public, max-age=0, s-maxage=86400, stale-while-revalidate=604800
