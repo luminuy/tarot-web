@@ -61,85 +61,6 @@ function Shell({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-/** กริดไพ่ — สัดส่วน 300:520 ตรงกับ `<CardImage>` จริง จึงไม่เกิด layout shift */
-function CardsLoadingBody({ label }: { label: string }) {
-  return (
-    <Shell label={label}>
-      <PageHeadSkeleton />
-      <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 sm:gap-5">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="space-y-2">
-            <Bar className="w-full aspect-[300/520]" />
-            <Bar className="h-3 w-3/4" />
-          </div>
-        ))}
-      </div>
-    </Shell>
-  );
-}
-
-export function CardsLoading() {
-  return <CardsLoadingBody label="กำลังโหลดคลังไพ่" />;
-}
-
-export function CardsLoadingEn() {
-  return <CardsLoadingBody label="Loading card library" />;
-}
-
-/** รายการบทความ — การ์ดแนวนอนมีหัวข้อกับคำโปรย */
-function BlogLoadingBody({ label }: { label: string }) {
-  return (
-    <Shell label={label}>
-      <PageHeadSkeleton />
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="space-y-2.5 rounded-xl border border-line bg-surface p-5">
-            <Bar className="h-3 w-20" />
-            <Bar className="h-5 w-full" />
-            <Bar className="h-5 w-4/5" />
-            <Bar className="h-3 w-full" />
-            <Bar className="h-3 w-2/3" />
-          </div>
-        ))}
-      </div>
-    </Shell>
-  );
-}
-
-export function BlogLoading() {
-  return <BlogLoadingBody label="กำลังโหลดบทความ" />;
-}
-
-export function BlogLoadingEn() {
-  return <BlogLoadingBody label="Loading articles" />;
-}
-
-/** คลังผัง — การ์ดที่มีแผนผังสี่เหลี่ยมจัตุรัสอยู่ด้านบน */
-function SpreadsLoadingBody({ label }: { label: string }) {
-  return (
-    <Shell label={label}>
-      <PageHeadSkeleton />
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="space-y-3 rounded-xl border border-line bg-surface p-5">
-            <Bar className="h-32 w-full" />
-            <Bar className="h-5 w-3/4" />
-            <Bar className="h-3 w-full" />
-          </div>
-        ))}
-      </div>
-    </Shell>
-  );
-}
-
-export function SpreadsLoading() {
-  return <SpreadsLoadingBody label="กำลังโหลดคลังผังพยากรณ์" />;
-}
-
-export function SpreadsLoadingEn() {
-  return <SpreadsLoadingBody label="Loading spread library" />;
-}
-
 /** ทำเนียบแม่หมอ — การ์ดที่มีรูปกลมกับข้อความข้าง ๆ */
 function ReadersLoadingBody({ label }: { label: string }) {
   return (
@@ -164,6 +85,3 @@ export function ReadersLoading() {
   return <ReadersLoadingBody label="กำลังโหลดทำเนียบแม่หมอ" />;
 }
 
-export function ReadersLoadingEn() {
-  return <ReadersLoadingBody label="Loading reader directory" />;
-}

@@ -18,7 +18,7 @@ import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
 import { QuickFortunePicker, type QuickTopic } from "@/components/reading/QuickFortunePicker";
-import type { RitualStep } from "@/components/ui/RitualStepProgress";
+import type { RitualStep } from "@/components/home/ritual-step";
 import { SacredNavDropdown } from "@/components/ui/SacredNavDropdown";
 import { soundManager } from "@/lib/utils/audio";
 import { saveReading } from "@/lib/utils/history";

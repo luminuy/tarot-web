@@ -27,7 +27,8 @@ interface MiniCardProps {
   fetchPriority?: "high" | "low" | "auto";
 }
 
-export const MiniRwsCard: React.FC<MiniCardProps> = ({
+/** ใช้ภายในไฟล์นี้เท่านั้น (ภาพผังไพ่ย่อ) — ไม่ใช่ API ของโมดูล */
+const MiniRwsCard: React.FC<MiniCardProps> = ({
   src,
   alt = "",
   className = "w-12 h-[82px]",
@@ -823,13 +824,6 @@ const line = (className: string) => ({
   className,
   "aria-hidden": true as const,
 });
-
-export const SearchTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
-  <svg {...line(className)}>
-    <circle cx="10.8" cy="10.8" r="6.3" />
-    <path d="m15.4 15.4 4.1 4.1" />
-  </svg>
-);
 
 export const SpeakerTabIcon: React.FC<IconProps> = ({ className = "w-4 h-4" }) => (
   <svg {...line(className)}>
