@@ -4,16 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import {
-  TarotSpreadNavIcon,
-  TarotDeckNavIcon,
-  JournalScrollNavIcon,
-  MarketplaceReaderNavIcon,
-  DailyTarotNavIcon,
-  LoveTarotNavIcon,
-  BirthCardNavIcon,
-} from "@/components/ui/TarotArtIcons";
-import { CoinSealIcon } from "@/components/entitlement/EntitlementIcons";
+import { CardImage } from "@/components/card/CardImage";
 import { soundManager } from "@/lib/utils/audio";
 import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
@@ -25,6 +16,14 @@ interface SacredNavDropdownProps {
   onOpenPlans?: () => void;
   onReset?: () => void;
   canReset?: boolean;
+}
+
+interface NavItem {
+  label: string;
+  sublabel: string;
+  href?: string;
+  cardId: string;
+  onClick?: () => void;
 }
 
 export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
@@ -97,51 +96,45 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
     setIsOpen(willOpen);
   };
 
-  const featuredItems = [
+  const featuredItems: NavItem[] = [
     {
       label: isEnglish ? "Daily Tarot (1 Card)" : "ไพ่ยิปซีรายวัน (ไพ่ 1 ใบ)",
       sublabel: isEnglish ? "Check your daily energy, career & love guidance" : "เช็กพลังงานรายวัน การงาน การเงิน และความรัก",
       href: "/daily",
-      Icon: DailyTarotNavIcon,
-      badge: isEnglish ? "Daily Free" : "เปิดฟรี",
+      cardId: "major-19",
     },
     {
       label: isEnglish ? "Love Tarot (1 Card)" : "ดูดวงความรัก (ไพ่ 1 ใบ)",
       sublabel: isEnglish ? "Clarity for singles, talking stages, couples & breakups" : "คนโสด คนคุย มีแฟน หรือเพิ่งเลิกรา ไขคำตอบหัวใจ",
       href: "/love/1-card",
-      Icon: LoveTarotNavIcon,
-      badge: isEnglish ? "Love" : "ความรัก",
+      cardId: "major-06",
     },
     {
       label: isEnglish ? "Tarot Birth Card" : "คำนวณไพ่ประจำตัว (Birth Card)",
       sublabel: isEnglish ? "Calculate your personality & soul tarot archetypes" : "คำนวณไพ่บุคลิกภาพและจิตวิญญาณจากวันเกิด",
       href: "/cards/birth-card",
-      Icon: BirthCardNavIcon,
-      badge: isEnglish ? "Birthday" : "วันเกิด",
+      cardId: "major-10",
     },
   ];
 
-  const knowledgeItems = [
+  const knowledgeItems: NavItem[] = [
     {
       label: isEnglish ? "Tarot Spreads (25 Spreads)" : "ผังการเปิดไพ่ (25 แบบ)",
       sublabel: isEnglish ? "Love, career, finance & destiny spreads" : "ความรัก การงาน การเงิน และดวงชะตา",
       href: "/spreads",
-      Icon: TarotSpreadNavIcon,
-      badge: isEnglish ? "25 Spreads" : "25 ผัง",
+      cardId: "major-05",
     },
     {
       label: isEnglish ? "Card Meanings (78 Cards)" : "ความหมายไพ่ (78 ใบ)",
       sublabel: isEnglish ? "1909 Rider-Waite symbolism & meanings" : "เปิดดูคำแปลและสัญลักษณ์ 1909 RWS",
       href: "/cards",
-      Icon: TarotDeckNavIcon,
-      badge: isEnglish ? "78 Cards" : "78 ใบ",
+      cardId: "major-01",
     },
     {
       label: isEnglish ? `Sanctuary Journal (${COUNTS.articles})` : `บทความดูดวง & ความรู้ไพ่ (${COUNTS.articles} เรื่อง)`,
       sublabel: isEnglish ? "Tarot insights, archetypes, love & career guidance" : "ความรู้ไพ่ทาโรต์ ความรัก การงาน และผังยอดนิยม",
       href: "/blog",
-      Icon: JournalScrollNavIcon,
-      badge: isEnglish ? `${COUNTS.articles} Articles` : `${COUNTS.articles} บทความ`,
+      cardId: "major-09",
     },
     ...(onOpenPlans
       ? [
@@ -149,8 +142,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             label: isEnglish ? "Passes & Entitlements" : "แพ็กเกจเติมรอบ & สิทธิ์ใช้งาน",
             sublabel: isEnglish ? "Compare tiers, unlock 12-House spreads & replenish readings" : "เปรียบเทียบสิทธิ์ ปลดล็อกผังใหญ่ 12 ภพ และเติมรอบดูดวง",
             onClick: onOpenPlans,
-            Icon: CoinSealIcon,
-            badge: isEnglish ? "Plans" : "สิทธิ์/แพลน",
+            cardId: "pentacles-01",
           },
         ]
       : []),
@@ -158,67 +150,74 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       label: isEnglish ? "Consult Live Readers" : "ปรึกษาแม่หมอตัวจริง",
       sublabel: isEnglish ? "Book in-depth consultations with seasoned readers" : "จองคิววิเคราะห์ดวงเชิงลึกกับนักพยากรณ์",
       href: "/readers",
-      Icon: MarketplaceReaderNavIcon,
-      badge: isEnglish ? "Live Readers" : "นักพยากรณ์",
+      cardId: "major-02",
     },
   ];
 
-  const renderNavCard = (
-    item: {
-      label: string;
-      sublabel: string;
-      href?: string;
-      Icon: React.ComponentType<{ className?: string }>;
-      badge: string;
-      onClick?: () => void;
-    },
-    idx: number
-  ) => {
-    const Icon = item.Icon;
+  const renderNavCard = (item: NavItem, idx: number) => {
     const isAction = typeof item.onClick === "function";
     const isActive = item.href
       ? currentPath === item.href || (item.href !== "/" && currentPath.startsWith(item.href + "/"))
       : false;
 
-    const content = (
+    const innerContent = (
       <>
         {/* Active Route Indicator Bar (GitHub Drawer Style) */}
         {isActive && (
           <span
-            className="absolute left-0 top-2.5 bottom-2.5 w-1 bg-gold rounded-r-full"
+            className="absolute left-0 top-2 bottom-2 w-1 bg-gold rounded-r-full"
             aria-hidden="true"
           />
         )}
 
-        <div
-          className={`w-8.5 h-8.5 rounded-lg border flex items-center justify-center transition-colors duration-150 shrink-0 mt-0.5 ${
-            isActive
-              ? "bg-surface border-gold text-gold-ink shadow-xs"
-              : "bg-inset border-line text-gold group-hover:text-ink group-hover:border-gold"
-          }`}
-        >
-          <Icon className="w-4 h-4 transition-transform duration-150 group-hover:scale-105" />
+        {/* 1909 Rider-Waite Authentic Mini Card Archetype */}
+        <div className="relative w-[34px] h-[54px] rounded-[5px] overflow-hidden border border-line/80 shadow-xs shrink-0 bg-canvas group-hover:border-gold/60 transition-colors duration-150">
+          <CardImage
+            cardId={item.cardId}
+            alt={item.label}
+            sizes="34px"
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
         </div>
 
+        {/* Text Details: Title & Subtitle */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <span
-              className={`text-xs font-serif-th transition-colors leading-tight truncate ${
-                isActive ? "font-bold text-gold-ink" : "font-bold text-ink group-hover:text-gold-ink"
+              className={`text-[13px] font-serif-th leading-tight truncate transition-colors ${
+                isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
               }`}
             >
               {item.label}
             </span>
-            <span className="text-[11px] font-serif-th text-ink bg-inset px-2 py-0.5 rounded-full border border-line shrink-0 font-medium">
-              {item.badge}
-            </span>
           </div>
-          <p className="text-[12px] font-serif-th text-muted truncate mt-0.5 leading-snug">
+          <p className="text-[11.5px] font-serif-th text-muted truncate mt-0.5 leading-snug">
             {item.sublabel}
           </p>
         </div>
+
+        {/* Subtle Luxury Affordance Chevron */}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="w-3.5 h-3.5 text-muted/30 group-hover:text-gold transition-colors shrink-0"
+          aria-hidden="true"
+        >
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
       </>
     );
+
+    const buttonClass = `tap-overlay-y relative w-full min-h-[44px] flex items-center gap-3 px-2.5 py-1.5 rounded-xl transition-colors duration-150 group cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+      isActive
+        ? "bg-inset/90 border-line shadow-xs"
+        : "hover:bg-inset/60 border-transparent hover:border-line/60"
+    }`;
 
     return (
       <div key={item.href ? item.href : `action-${idx}`}>
@@ -230,9 +229,9 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               setIsOpen(false);
               item.onClick?.();
             }}
-            className="tap-overlay-y relative w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-inset/60 border border-transparent hover:border-line/60 transition-colors duration-150 group cursor-pointer text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+            className={buttonClass}
           >
-            {content}
+            {innerContent}
           </button>
         ) : (
           <Link
@@ -243,13 +242,9 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
               soundManager.playMenuTapSound();
               setIsOpen(false);
             }}
-            className={`tap-overlay-y relative w-full flex items-start gap-2.5 p-2 rounded-xl transition-colors duration-150 group cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
-              isActive
-                ? "bg-inset/90 border-line shadow-xs"
-                : "hover:bg-inset/60 border-transparent hover:border-line/60"
-            }`}
+            className={buttonClass}
           >
-            {content}
+            {innerContent}
           </Link>
         )}
       </div>
@@ -372,7 +367,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         <div className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-3 no-scrollbar">
           {/* Section 1: พิธีกรรมยอดนิยม */}
           <div>
-            <div className="px-2 pb-1.5 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
+            <div className="px-2 pb-1.5 text-[10.5px] font-mono tracking-[0.16em] uppercase text-muted font-semibold">
               {isEnglish ? "Featured Rituals & Tools" : "พิธีกรรมยอดนิยม & เครื่องมือ"}
             </div>
             <div className="space-y-1">
@@ -381,11 +376,11 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           </div>
 
           {/* Divider */}
-          <div className="h-[1px] w-full bg-line/50 my-1" />
+          <div className="h-[1px] w-full bg-line/40 my-1.5" />
 
           {/* Section 2: คลังความรู้ & ผังพยากรณ์ */}
           <div>
-            <div className="px-2 pb-1.5 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
+            <div className="px-2 pb-1.5 text-[10.5px] font-mono tracking-[0.16em] uppercase text-muted font-semibold">
               {isEnglish ? "Knowledge & Spreads" : "คลังความรู้ & ผังพยากรณ์"}
             </div>
             <div className="space-y-1">
@@ -396,9 +391,9 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           {/* Section 3: ประวัติการดูดวง (Reading Journal) */}
           {onOpenHistory && (
             <>
-              <div className="h-[1px] w-full bg-line/50 my-1" />
+              <div className="h-[1px] w-full bg-line/40 my-1.5" />
               <div>
-                <div className="px-2 pb-1.5 text-[11px] font-serif-th font-bold text-gold-ink uppercase tracking-wider">
+                <div className="px-2 pb-1.5 text-[10.5px] font-mono tracking-[0.16em] uppercase text-muted font-semibold">
                   {isEnglish ? "Reading Journal" : "ประวัติ & บันทึกดวง"}
                 </div>
                 {renderNavCard(
@@ -406,8 +401,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                     label: isEnglish ? "Reading Journal" : "ประวัติการดูดวง",
                     sublabel: isEnglish ? "Revisit your past cards and oracle counsel" : "ย้อนดูไพ่และคำทำนายที่คุณเคยเปิดไว้",
                     onClick: onOpenHistory,
-                    Icon: JournalScrollNavIcon,
-                    badge: isEnglish ? "History" : "บันทึก",
+                    cardId: "major-14",
                   },
                   99
                 )}
