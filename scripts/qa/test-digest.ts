@@ -205,7 +205,6 @@ async function main() {
     !/uses:\s*actions\/setup-node/.test(workflow),
   );
 
-  const badge = readSrc("src/components/auth/UserProfileBadge.tsx");
   // ⚠️ บทเรียนของจริง (INC-0141): workflow รอบแรกใช้ curl ค่าเริ่มต้น แล้วโดนกฎ WAF ข้อ 5
   // ของโซนนี้ปัดตกที่ชั้น edge ด้วย 403 ก่อนถึง Worker — ตั้ง CRON_SECRET ถูกแค่ไหนก็ไม่มีทางส่งออก
   // วัดจาก production จริง: UA "curl/8.5.0" → 403 · UA ที่ตั้งเอง → 200
@@ -227,7 +226,20 @@ async function main() {
       !workflow.includes("https://seertarot.net/api/cron/daily-digest"),
   );
 
-  check("มีสวิตช์ให้ผู้ใช้กดสมัคร/ยกเลิกเองในหน้าบัญชี", badge.includes("handleUpdateDigest"));
+  /*
+   * ⚠️ ด่านนี้เคยชี้ไปที่ `UserProfileBadge.tsx` ซึ่งเป็นแค่ปุ่มไอคอนบนหัวเว็บ
+   * สวิตช์จริงย้ายไปอยู่หน้า `/account` ตั้งแต่ #513 แล้ว การชี้ไฟล์ผิดทำให้ด่านนี้
+   * กลายเป็น "ด่านหลอก" ที่ผ่านได้แม้สวิตช์จะหายไปทั้งตัว — ต้องอ่านหน้าบัญชีของจริง
+   */
+  const accountPage = readSrc("src/app/(th)/account/AccountClient.tsx");
+  check(
+    "มีสวิตช์ให้ผู้ใช้กดสมัคร/ยกเลิกเองในหน้าบัญชี",
+    accountPage.includes("handleUpdateDigest") && accountPage.includes("digestEmail"),
+  );
+  check(
+    "สวิตช์ดวงประจำวันส่งค่าไปที่ /api/account/consent ด้วยธง digest",
+    /digest:\s*enabled/.test(accountPage) && accountPage.includes("/api/account/consent"),
+  );
 
   const migration = readSrc("migrations/0014_digest_prefs.sql");
   check(

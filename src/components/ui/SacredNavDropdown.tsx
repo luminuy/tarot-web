@@ -416,8 +416,39 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
           )}
         </div>
 
-        {/* Drawer Footer: Reset (if available) + Quiet Luxury Tagline */}
+        {/* Drawer Footer: Account · Reset (if available) + Quiet Luxury Tagline */}
         <div className="shrink-0 px-4 py-3 border-t border-line/50 bg-canvas/30 space-y-2.5">
+          {/*
+            🧭 ทางเข้าหน้าบัญชีที่ "มีอยู่ทุกหน้า"
+            ปุ่มไอคอนบัญชีบนหัวเว็บมีเฉพาะหน้าดูดวงหลัก (variant="app") เท่านั้น
+            คนที่อยู่หน้าไพ่ บทความ หรือหน้าบัญชีเอง จึงเคยไม่มีทางกลับไปจัดการบัญชีเลย
+            ลิงก์นี้ไม่ต้องรู้สถานะเซสชัน — หน้า /account จัดการทั้งสถานะสมาชิกและผู้เยี่ยมชมให้เอง
+          */}
+          <Link
+            href="/account"
+            prefetch={false}
+            onClick={() => {
+              soundManager.playMenuTapSound();
+              setIsOpen(false);
+            }}
+            className="tap-overlay-y flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface px-3 py-2.5 font-serif-th text-xs font-bold text-ink transition-colors hover:border-gold hover:text-gold-ink focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4"
+              aria-hidden="true"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span>{isEnglish ? "My Account & Entitlements" : "บัญชีของฉันและสิทธิ์การใช้งาน"}</span>
+          </Link>
+
           {canReset && onReset && (
             <button
               type="button"

@@ -17,19 +17,31 @@ const BuyCreditsModal = dynamic(
   { ssr: false }
 );
 
+export interface EntitlementStatusCardProps {
+  /**
+   * ให้หน้าที่ครอบเป็นคนเปิดหน้าต่าง "เติมรอบเปิดไพ่" เอง
+   *
+   * ⚠️ ส่งมาเมื่อไร การ์ดนี้จะ **ไม่** mount `BuyCreditsModal` ของตัวเอง
+   * หน้าบัญชีมีหน้าต่างเติมรอบของมันอยู่แล้ว ถ้าปล่อยให้ทั้งสองที่ mount พร้อมกัน
+   * จะได้หน้าต่างสองบานทับกันที่ปิดไม่พร้อมกัน (สถานะคนละก้อน)
+   */
+  onBuyCredits?: () => void;
+}
+
 /**
  * การ์ด "สิทธิ์การใช้งานของฉัน" บนหน้าบัญชี
  * ------------------------------------------------------------------
  * ก่อนหน้านี้ผู้ใช้ดูสิทธิ์ตัวเองได้จากป้ายเล็ก ๆ บนแถบหัวเท่านั้น (และมองไม่เห็นบนมือถือ)
  * หน้าบัญชีคือที่ที่คนไปหาคำตอบว่า "ฉันเหลือกี่ครั้ง / รีเซ็ตเมื่อไหร่ / โบนัสอยู่ไหน"
  */
-export function EntitlementStatusCard() {
+export function EntitlementStatusCard({ onBuyCredits }: EntitlementStatusCardProps = {}) {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
   const ent = useEntitlement();
   const view = describeEntitlement(ent, isEn);
   const { user } = useSessionUser();
   const [buyOpen, setBuyOpen] = useState(false);
+  const openBuy = onBuyCredits ?? (() => setBuyOpen(true));
   const [countdown, setCountdown] = useState("");
   const memberBenefits = getMemberBenefits(isEn);
 
@@ -108,24 +120,34 @@ export function EntitlementStatusCard() {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-warm/30 pt-3">
-        <Link href="/" className="text-xs text-gold-ink underline transition-colors hover:text-ink-deep font-bold">
-          {view.isGuest
-            ? (isEn ? "Return to Tarot & Create Account" : "กลับไปเปิดไพ่และสมัครสมาชิก")
-            : (isEn ? "Return to Tarot Reading" : "กลับไปเปิดไพ่")}
-        </Link>
+        {view.isGuest ? (
+          <Link href="/" className="text-xs text-gold-ink underline transition-colors hover:text-ink-deep font-bold">
+            {isEn ? "Return to Tarot & Create Account" : "กลับไปเปิดไพ่และสมัครสมาชิก"}
+          </Link>
+        ) : (
+          /* ทางเข้ารหัสแลกสิทธิ์ — เคยมีในแผงลอยเดิม แล้วหายไปตอนย้ายมาเป็นหน้าเต็ม
+             ช่องกรอกรหัสอยู่ในหน้าต่างเดียวกับการเติมรอบ จึงเปิดบานเดียวกัน */
+          <button
+            type="button"
+            onClick={openBuy}
+            className="tap-overlay-y text-xs text-gold-ink underline transition-colors hover:text-ink-deep font-bold cursor-pointer"
+          >
+            {isEn ? "Have a redeem code? Enter it here" : "มีรหัสแลกสิทธิ์? กดใส่รหัสที่นี่"}
+          </button>
+        )}
         {view.isMember && !view.isUnlimited && (
           <button
             type="button"
-            onClick={() => setBuyOpen(true)}
+            onClick={openBuy}
             className="tap-overlay-y min-h-[40px] rounded-full border border-line-warm bg-gold-ink hover:bg-gold-ink-deep px-4 py-2 font-serif-th text-xs font-semibold text-surface transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
-            
             {isEn ? "Get Reading Passes" : "เติมรอบเปิดไพ่"}
           </button>
         )}
       </div>
 
-      <BuyCreditsModal isOpen={buyOpen} onClose={() => setBuyOpen(false)} user={user} />
+      {/* หน้าที่ครอบไม่ได้ส่ง onBuyCredits มา → การ์ดนี้ต้องยืนได้ด้วยตัวเอง */}
+      {!onBuyCredits && <BuyCreditsModal isOpen={buyOpen} onClose={() => setBuyOpen(false)} user={user} />}
     </div>
   );
 }

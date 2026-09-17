@@ -87,27 +87,41 @@ export function ChangePasswordCard() {
     }
   };
 
+  /*
+   * 🔐 ทำไมการ์ดนี้ต้อง "พับเก็บ" ไม่ใช่กางฟอร์มค้างไว้
+   * ผู้ใช้ส่วนใหญ่เข้าด้วย Google หรือ LINE และไม่เคยตั้งรหัสผ่านเลย
+   * การกางช่องรหัสผ่านสามช่องค้างไว้กลางหน้าบัญชีทำให้คนเข้าใจผิดว่า "ต้องกรอก"
+   * และดันเนื้อหาที่คนมาหาจริง (สิทธิ์ · บันทึกคำทำนาย) ตกจอไปเฉย ๆ
+   * ใช้ <details> ของเบราว์เซอร์เอง — เปิดปิดได้ด้วยคีย์บอร์ดและโปรแกรมอ่านหน้าจอครบโดยไม่ต้องเขียน JS
+   */
   return (
-    <div className="rounded-lg border border-line-warm bg-surface p-5 sm:p-6 space-y-4 text-left">
-      <div className="flex items-center gap-2">
-        
-        <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
-          {hasPassword
-            ? (isEn ? "Change Password" : "เปลี่ยนรหัสผ่าน")
-            : (isEn ? "Set Email Password" : "ตั้งรหัสผ่านสำหรับเข้าสู่ระบบด้วยอีเมล")}
-        </h2>
-      </div>
+    <details className="group rounded-lg border border-line-warm bg-surface p-5 sm:p-6 text-left">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+        <span className="space-y-1">
+          <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">
+            {hasPassword
+              ? (isEn ? "Change Password" : "เปลี่ยนรหัสผ่าน")
+              : (isEn ? "Set Email Password" : "ตั้งรหัสผ่านสำหรับเข้าสู่ระบบด้วยอีเมล")}
+          </h2>
+          <span className="block text-xs text-muted leading-relaxed">
+            {hasPassword
+              ? (isEn
+                ? "Set a new password for security. You will be automatically signed out from other devices."
+                : "กำหนดรหัสผ่านใหม่เพื่อความปลอดภัย ระบบจะลงชื่อออกจากอุปกรณ์อื่นโดยอัตโนมัติ")
+              : (isEn
+                ? "Optional — sign in by email as well as Google or LINE."
+                : "ตัวเลือกเสริม — ตั้งไว้เพื่อเข้าสู่ระบบด้วยอีเมลได้ นอกเหนือจาก Google หรือ LINE")}
+          </span>
+        </span>
+        <span
+          aria-hidden="true"
+          className="shrink-0 font-mono text-xs text-gold-ink transition-transform group-open:rotate-90"
+        >
+          ▸
+        </span>
+      </summary>
 
-      <p className="text-xs text-muted leading-relaxed">
-        {hasPassword
-          ? (isEn
-            ? "Set a new password for security. You will be automatically signed out from other devices."
-            : "กำหนดรหัสผ่านใหม่เพื่อความปลอดภัย ระบบจะลงชื่อออกจากอุปกรณ์อื่นโดยอัตโนมัติ")
-          : (isEn
-            ? "You can set a password to sign in via email in addition to Google or LINE."
-            : "คุณสามารถตั้งรหัสผ่านเพื่อเข้าสู่ระบบด้วยอีเมลได้ นอกเหนือจากการเข้าสู่ระบบผ่าน Google หรือ LINE")}
-      </p>
-
+      <div className="space-y-4 pt-5">
       {/* ♿ R-21: `role="alert"` ทำให้โปรแกรมอ่านหน้าจออ่านข้อความทันทีที่โหนดปรากฏ
           ของเดิมข้อความโผล่บนจออย่างเดียว ผู้ใช้ที่มองไม่เห็นจึงไม่รู้ว่ากรอกผิด */}
       {errorMsg && (
@@ -218,6 +232,7 @@ export function ChangePasswordCard() {
             : (isEn ? "Save Password" : "บันทึกรหัสผ่าน")}
         </button>
       </form>
-    </div>
+      </div>
+    </details>
   );
 }

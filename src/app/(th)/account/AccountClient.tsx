@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useId, useState } from "react";
 import dynamic from "next/dynamic";
 import { RouteLink as Link } from "@/components/ui/RouteLink";
 import { ChangePasswordCard } from "@/components/account/ChangePasswordCard";
@@ -27,6 +27,126 @@ const BuyCreditsModal = dynamic(
   () => import("@/components/entitlement/BuyCreditsModal").then((m) => m.BuyCreditsModal),
   { ssr: false },
 );
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * ชิ้นส่วนหน้าตาที่ใช้ซ้ำทั้งหน้า
+ *
+ * ⚠️ ทั้งหน้าต้องใช้ "เปลือกการ์ดใบเดียวกัน" เสมอ
+ * รอบก่อนหน้านี้หน้านี้มีการ์ดสองระบบปนกัน (`rounded-xl border-line` + เงาหนัก
+ * ของหน้านี้เอง กับ `rounded-lg border-line-warm` ของการ์ดที่นำเข้ามา)
+ * ตาเห็นทันทีว่าเป็นคนละเว็บมาต่อกัน — เปลือกกลางตัวนี้คือสิ่งที่กันไม่ให้เกิดซ้ำ
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+const CARD_SHELL = "rounded-lg border border-line-warm bg-surface p-5 sm:p-6";
+
+function SectionCard({
+  title,
+  description,
+  children,
+  tone = "plain",
+}: {
+  title: string;
+  description?: string;
+  children?: React.ReactNode;
+  tone?: "plain" | "danger";
+}) {
+  return (
+    <section className={`${CARD_SHELL} space-y-4 ${tone === "danger" ? "border-err/30" : ""}`}>
+      <div className="space-y-1">
+        <h2 className="font-serif-th text-base sm:text-lg font-bold font-mystic-gold">{title}</h2>
+        {description && (
+          <p className="text-xs text-muted font-serif-th leading-relaxed">{description}</p>
+        )}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/**
+ * สวิตช์ความยินยอม — ใช้ `role="switch"` จริง ไม่ใช่ `<input>` ซ่อนที่วาดด้วย `peer-*`
+ * เพราะโปรแกรมอ่านหน้าจอต้องได้ยินทั้ง "ชื่อสวิตช์" และ "สถานะเปิด/ปิด" ในจังหวะเดียว
+ * ขนาดแตะ 44x24 ผ่านเกณฑ์ WCAG 2.2 (24px) และมีสถานะกำลังบันทึกเพื่อกันกดรัว
+ */
+function ConsentToggle({
+  label,
+  hint,
+  checked,
+  saving,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  saving: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  const labelId = useId();
+  return (
+    <div className="flex items-start justify-between gap-4 py-3.5">
+      <div className="space-y-0.5">
+        <p id={labelId} className="text-xs font-bold font-serif-th text-ink-deep">
+          {label}
+        </p>
+        <p className="text-xs text-muted leading-relaxed">{hint}</p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-labelledby={labelId}
+        disabled={saving}
+        onClick={() => onChange(!checked)}
+        className={`relative h-6 w-11 shrink-0 rounded-full border transition-colors cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+          checked ? "bg-gold-ink border-gold-ink" : "bg-inset border-line-interactive-warm"
+        }`}
+      >
+        <span
+          aria-hidden="true"
+          className={`absolute top-0.5 left-0.5 h-4.5 w-4.5 rounded-full transition-transform ${
+            checked ? "translate-x-5 bg-surface" : "translate-x-0 bg-muted"
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
+
+/** ทางลัดหนึ่งช่อง — ทั้งช่องกดได้ ไม่ใช่ลิงก์เส้นเล็ก ๆ ในมุมการ์ด */
+function HubTile({
+  eyebrow,
+  title,
+  hint,
+  badge,
+  onClick,
+}: {
+  eyebrow: string;
+  title: string;
+  hint: string;
+  badge?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex w-full flex-col items-start gap-1 rounded-lg border border-line-warm bg-inset-warm p-4 text-left transition-colors hover:border-gold-ink cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+    >
+      <span className="flex w-full items-center justify-between gap-2">
+        <span className="font-mono text-xs uppercase tracking-[0.16em] text-muted">{eyebrow}</span>
+        {badge && (
+          <span className="rounded-full bg-gold-ink px-2 py-0.5 font-serif-th text-xs font-bold text-surface">
+            {badge}
+          </span>
+        )}
+      </span>
+      <span className="font-serif-th text-sm font-bold text-ink-deep group-hover:text-gold-ink transition-colors">
+        {title}
+      </span>
+      <span className="font-serif-th text-xs text-muted leading-relaxed">{hint}</span>
+    </button>
+  );
+}
 
 export function AccountClient() {
   const { locale, isEnglish } = useLocale();
@@ -73,12 +193,16 @@ export function AccountClient() {
       });
       patchSessionUser({ marketingConsent: consent });
     } catch {
-      // ignore
+      // ต่อเซิร์ฟเวอร์ไม่ได้ — คงค่าเดิมไว้ ไม่แกล้งทำเป็นบันทึกสำเร็จ
     } finally {
       setIsUpdatingConsent(false);
     }
   };
 
+  /**
+   * สมัคร/ยกเลิก "ดวงประจำวัน" ทางอีเมล — ค่าเริ่มต้นปิดเสมอ (opt-in เท่านั้น · PDPA)
+   * เปิดตัวนี้แล้วเซิร์ฟเวอร์จะเปิด marketing_consent ให้ครบคู่ด้วย เพราะคิวส่งบังคับทั้งสองธง
+   */
   const handleUpdateDigest = async (enabled: boolean) => {
     soundManager.playMenuTapSound();
     setIsUpdatingDigest(true);
@@ -91,7 +215,7 @@ export function AccountClient() {
       });
       patchSessionUser(enabled ? { digestEmail: true, marketingConsent: true } : { digestEmail: false });
     } catch {
-      // ignore
+      // ต่อเซิร์ฟเวอร์ไม่ได้ — คงค่าเดิมไว้ ไม่แกล้งทำเป็นบันทึกสำเร็จ
     } finally {
       setIsUpdatingDigest(false);
     }
@@ -119,55 +243,81 @@ export function AccountClient() {
     try {
       await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
     } catch {
-      // ignore
+      // ต่อเซิร์ฟเวอร์ไม่ได้ — ยังต้องล้างสถานะฝั่งหน้าเว็บอยู่ดี
     }
     invalidateSessionCache();
-    window.location.href = "/";
+    window.location.href = isEn ? "/en" : "/";
   };
+
+  const openJournal = () => {
+    soundManager.playMenuTapSound();
+    setHistoryModalOpen(true);
+  };
+
+  const openBuyCredits = () => {
+    soundManager.playMenuTapSound();
+    setCreditsModalOpen(true);
+  };
+
+  const providerLabel =
+    user?.provider === "google"
+      ? "Google Account"
+      : user?.provider === "line"
+        ? "LINE Account"
+        : isEn
+          ? "Email Account"
+          : "บัญชีอีเมล";
 
   return (
     <>
       <main
         id="main-content"
         tabIndex={-1}
-        className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink"
+        className="min-h-screen bg-canvas text-ink px-4 py-6 sm:px-8 sm:py-10 font-sans selection:bg-gold/20 selection:text-ink"
       >
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="mx-auto max-w-3xl space-y-5">
           {/* Top back navigation */}
-          <div className="pt-2">
-            <Link
-              href="/"
-              onClick={() => soundManager.playMenuTapSound()}
-              className="inline-flex items-center gap-1.5 text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
-            >
-              <span>←</span>
-              <span>{isEn ? "Return to Sanctuary" : "กลับสู่วิหารพยากรณ์"}</span>
-            </Link>
-          </div>
+          <Link
+            href="/"
+            onClick={() => soundManager.playMenuTapSound()}
+            className="inline-flex items-center gap-1.5 text-xs font-serif-th text-muted hover:text-gold-ink transition-colors"
+          >
+            <span aria-hidden="true">←</span>
+            <span>{isEn ? "Return to Sanctuary" : "กลับสู่วิหารพยากรณ์"}</span>
+          </Link>
 
           {/* Header Title & Intro */}
-          <div className="text-center space-y-3 sm:space-y-4 py-2 sm:py-4">
-            <div>
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-line bg-surface text-[13px] text-gold-ink font-bold shadow-xs">
-                Sacred Sanctuary Profile
-              </span>
-            </div>
-            <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
+          <div className="space-y-3 py-1 text-center sm:py-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-line-warm bg-surface px-3.5 py-1.5 text-xs font-bold text-gold-ink">
+              Sacred Sanctuary Profile
+            </span>
+            <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal [text-wrap:balance]">
               {isEn ? "Your Account & Sacred Archive" : "บัญชีและประวัติของคุณ"}
             </h1>
-            <p className="text-xs sm:text-sm text-muted max-w-lg mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
+            <p className="mx-auto max-w-lg font-serif-th text-xs sm:text-sm text-muted leading-relaxed [text-wrap:balance]">
               {isEn
                 ? "Manage personal privacy, sacred reading archives, and data rights under PDPA & GDPR standards."
                 : "ควบคุมข้อมูลความเป็นส่วนตัว ประวัติคำทำนาย และการตั้งค่าตามสิทธิ์ PDPA"}
             </p>
           </div>
 
-          {/* Guest State Banner */}
+          {/* ── ตัวตนของผู้ใช้ ─────────────────────────────────────────────
+              สามสถานะต้องสูงใกล้เคียงกัน ไม่งั้นหน้ากระโดดตอนเซสชันโหลดเสร็จ */}
+          {loading && (
+            <div className={`${CARD_SHELL} flex items-center gap-4`} aria-hidden="true">
+              <div className="h-14 w-14 shrink-0 rounded-full border border-line-warm bg-inset-warm" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-40 rounded-full bg-inset-warm" />
+                <div className="h-3 w-56 rounded-full bg-inset-warm" />
+              </div>
+            </div>
+          )}
+
           {!loading && !user && (
-            <div className="rounded-xl border border-line bg-surface p-6 sm:p-8 text-center space-y-4 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
-              <div className="w-12 h-12 rounded-full border border-line bg-canvas mx-auto flex items-center justify-center text-muted">
+            <section className={`${CARD_SHELL} space-y-4 text-center`}>
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-line-warm bg-inset-warm text-muted">
                 <svg
-                  className="w-6 h-6"
+                  className="h-6 w-6"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -181,275 +331,204 @@ export function AccountClient() {
                 </svg>
               </div>
               <div className="space-y-1">
-                <h2 className="font-serif-th text-lg font-bold text-ink">
+                <h2 className="font-serif-th text-lg font-bold font-mystic-gold">
                   {isEn ? "Sign In to Access Your Sanctuary Profile" : "เข้าสู่ระบบเพื่อเข้าถึงบัญชีสมาชิกของคุณ"}
                 </h2>
-                <p className="text-xs text-muted max-w-md mx-auto leading-relaxed font-serif-th">
+                <p className="mx-auto max-w-md font-serif-th text-xs text-muted leading-relaxed">
                   {isEn
                     ? "Connect your Google or LINE account to synchronize sacred readings, unlock daily quota benefits, and preserve your reflection history."
                     : "เชื่อมต่อบัญชีเพื่อบันทึกประวัติการเปิดไพ่ รับโควตาคำทำนายประจำวัน และติดตามผลลัพธ์คำทำนายอย่างต่อเนื่อง"}
                 </p>
               </div>
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundManager.playMenuTapSound();
-                    setAuthModalOpen(true);
-                  }}
-                  className="tap-target px-6 py-2.5 rounded-full bg-ink text-canvas hover:bg-gold-ink text-xs font-bold font-serif-th transition-colors shadow-sm"
-                >
-                  {isEn ? "Sign In / Register" : "เข้าสู่ระบบ / สมัครสมาชิก"}
-                </button>
-              </div>
-            </div>
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.playMenuTapSound();
+                  setAuthModalOpen(true);
+                }}
+                className="tap-overlay-y rounded-full bg-gold-ink px-6 py-2.5 font-serif-th text-xs font-bold text-surface transition-colors hover:bg-gold-ink-deep cursor-pointer"
+              >
+                {isEn ? "Sign In / Register" : "เข้าสู่ระบบ / สมัครสมาชิก"}
+              </button>
+            </section>
           )}
 
-          {/* Member Profile Identity Card */}
           {user && (
-            <div className="rounded-xl border border-line bg-surface p-5 sm:p-6 space-y-4 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="relative w-14 h-14 rounded-full border border-line bg-canvas overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <section className={`${CARD_SHELL} space-y-4`}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-3.5">
+                  <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line-warm bg-inset-warm">
                     {user.avatar ? (
                       <img
                         src={user.avatar}
+                        /* ภาพประกอบล้วน — ชื่อผู้ใช้พิมพ์อยู่ข้าง ๆ แล้ว (INC-0125) */
                         alt=""
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                         referrerPolicy="no-referrer"
                       />
                     ) : (
-                      <span className="text-lg font-serif-th font-bold text-ink">
+                      <span className="font-serif-th text-lg font-bold text-ink-deep">
                         {user.name ? user.name.slice(0, 2).toUpperCase() : "M"}
                       </span>
                     )}
-                    <span
-                      className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-gold border-2 border-canvas"
-                      aria-hidden="true"
-                    />
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink">
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep">
                         {user.name || (isEn ? "Sacred Member" : "สมาชิกวิหาร")}
                       </h2>
-                      <span className="px-2 py-0.5 rounded-full border border-line bg-canvas text-[11px] text-muted font-mono">
-                        {user.provider === "google"
-                          ? "Google Account"
-                          : user.provider === "line"
-                            ? "LINE Account"
-                            : isEn
-                              ? "Email Account"
-                              : "บัญชีอีเมล"}
+                      <span className="rounded-full border border-line-warm bg-inset-warm px-2 py-0.5 font-mono text-xs text-muted">
+                        {providerLabel}
                       </span>
                     </div>
-                    <p className="text-xs text-muted font-mono">{user.email}</p>
+                    <p className="font-mono text-xs text-muted break-all">{user.email}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-start sm:self-center">
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="tap-target px-3 py-1.5 rounded-full border border-line hover:border-crimson/40 hover:text-crimson text-xs text-muted font-serif-th transition-colors"
-                  >
-                    {isEn ? "Sign Out" : "ออกจากระบบ"}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="tap-overlay-y shrink-0 self-start rounded-full border border-line-interactive-warm px-4 py-2 font-serif-th text-xs font-semibold text-ink-deep transition-colors hover:border-err hover:text-err cursor-pointer sm:self-center"
+                >
+                  {isEn ? "Sign Out" : "ออกจากระบบ"}
+                </button>
               </div>
 
               {/* Email Verification Status Notice */}
               {user.emailVerified === false && (
-                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex flex-col gap-3 rounded-lg border border-err/30 bg-err-wash p-3 text-xs sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-0.5">
-                    <p className="font-bold text-amber-800 dark:text-amber-300 font-serif-th">
+                    <p className="font-serif-th font-bold text-err">
                       {isEn ? "Email verification required" : "ยังไม่ได้ยืนยันอีเมล"}
                     </p>
-                    <p className="text-muted">
+                    <p className="text-muted leading-relaxed">
                       {isEn
-                        ? "Please verify your email address to receive sacred daily digest updates."
-                        : "โปรดยืนยันอีเมลเพื่อเปิดใช้งานการรับดวงประจำวันทางอีเมล"}
+                        ? "Verify your email address to receive follow-ups and the daily card by email."
+                        : "ยืนยันอีเมลก่อน จึงจะรับคำทำนายติดตามผลและดวงประจำวันทางอีเมลได้"}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={handleResendVerify}
-                    className="tap-target px-3 py-1.5 rounded-full border border-amber-500/40 text-amber-800 dark:text-amber-300 hover:bg-amber-500/10 font-bold font-serif-th transition-colors whitespace-nowrap self-start sm:self-auto"
+                    className="tap-overlay-y shrink-0 self-start whitespace-nowrap rounded-full border border-err/40 px-4 py-2 font-serif-th text-xs font-bold text-err transition-colors hover:bg-err hover:text-surface cursor-pointer sm:self-auto"
                   >
                     {resendStatus || (isEn ? "Resend Link" : "ส่งลิงก์ยืนยันอีกครั้ง")}
                   </button>
                 </div>
               )}
-            </div>
+            </section>
           )}
 
-          {/* Pending Outcome Callout Card */}
-          {user && pendingCount > 0 && (
-            <div className="rounded-xl border border-gold/40 bg-gold/5 p-5 sm:p-6 space-y-3 shadow-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
-                    <h3 className="font-serif-th text-sm sm:text-base font-bold text-ink">
-                      {isEn
-                        ? `${pendingCount} Reading Outcome${pendingCount > 1 ? "s" : ""} Awaiting Review`
-                        : `มีคำทำนายที่ถึงกำหนดติดตามผล ${pendingCount} รายการ`}
-                    </h3>
-                  </div>
-                  <p className="text-xs text-muted font-serif-th leading-relaxed">
-                    {isEn
-                      ? "Reflect on past readings and record actual outcomes to deepen your sacred intuition."
-                      : "คำทำนายที่คุณบันทึกไว้ถึงกำหนดเวลาสังเกตผลแล้ว ร่วมบันทึกความเป็นจริงเพื่อพัฒนาความเข้าใจตนเอง"}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundManager.playMenuTapSound();
-                    setHistoryModalOpen(true);
-                  }}
-                  className="tap-target px-4 py-2 rounded-full bg-ink text-canvas hover:bg-gold-ink text-xs font-bold font-serif-th transition-colors whitespace-nowrap shadow-xs self-start sm:self-auto"
-                >
-                  {isEn ? "Open Reading Journal" : "เปิดบันทึกคำทำนาย"}
-                </button>
-              </div>
+          {/* สิทธิ์การเปิดไพ่คงเหลือ · โควตารายวัน · โบนัสสะสม · ปุ่มเติมรอบ · รหัสแลกสิทธิ์ */}
+          <EntitlementStatusCard onBuyCredits={openBuyCredits} />
+
+          {/* ทางลัดที่คนมาหน้านี้ต้องการจริง — รวมไว้ที่เดียว ไม่กระจายเป็นปุ่มซ้ำทั้งหน้า */}
+          <SectionCard
+            title={isEn ? "Member Shortcuts" : "ทางลัดของสมาชิก"}
+            description={
+              isEn
+                ? "Your reading archive and the benefits of each membership tier."
+                : "คลังคำทำนายของคุณ และสิทธิประโยชน์ของสมาชิกแต่ละระดับ"
+            }
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              <HubTile
+                eyebrow={isEn ? "Sacred Archive" : "บันทึกคำทำนาย"}
+                title={isEn ? "Reading History & Journal" : "ประวัติการเปิดไพ่"}
+                hint={
+                  pendingCount > 0
+                    ? isEn
+                      ? "Readings have reached their reflection date — record what actually happened."
+                      : "มีคำทำนายถึงกำหนดติดตามผลแล้ว บันทึกสิ่งที่เกิดขึ้นจริงได้เลย"
+                    : isEn
+                      ? "Review past readings and insights"
+                      : "ดูผลคำทำนายย้อนหลังและบันทึกข้อคิด"
+                }
+                badge={
+                  pendingCount > 0
+                    ? isEn
+                      ? `${pendingCount} to review`
+                      : `รอติดตามผล ${pendingCount}`
+                    : undefined
+                }
+                onClick={openJournal}
+              />
+              <HubTile
+                eyebrow={isEn ? "Privilege Tiers" : "สิทธิประโยชน์"}
+                title={isEn ? "Compare Membership Plans" : "เปรียบเทียบทุกแพลน"}
+                hint={
+                  isEn
+                    ? "Explore tiers, tokens, and daily limits"
+                    : "ดูโควตารายวันและแพ็กเกจเปิดไพ่พรีเมียม"
+                }
+                onClick={() => {
+                  soundManager.playMenuTapSound();
+                  setExploreReason("explore");
+                }}
+              />
             </div>
-          )}
-
-          {/* สิทธิ์การเปิดไพ่คงเหลือ · โควตารายวัน · โบนัสสะสม */}
-          <EntitlementStatusCard />
-
-          {/* Quick Hub Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                soundManager.playMenuTapSound();
-                setHistoryModalOpen(true);
-              }}
-              className="p-4 rounded-xl border border-line bg-surface hover:border-gold text-left transition-colors shadow-xs group"
-            >
-              <div className="text-xs text-muted font-mono uppercase tracking-wider">
-                {isEn ? "Sacred Archive" : "บันทึกคำทำนาย"}
-              </div>
-              <div className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors mt-0.5">
-                {isEn ? "Reading History & Journal" : "ประวัติการเปิดไพ่"}
-              </div>
-              <div className="text-[11px] text-muted font-serif-th mt-1">
-                {isEn ? "Review past readings and insights" : "ดูผลคำทำนายย้อนหลังและบันทึกข้อคิด"}
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                soundManager.playMenuTapSound();
-                setExploreReason("explore");
-              }}
-              className="p-4 rounded-xl border border-line bg-surface hover:border-gold text-left transition-colors shadow-xs group"
-            >
-              <div className="text-xs text-muted font-mono uppercase tracking-wider">
-                {isEn ? "Privilege Tiers" : "สิทธิประโยชน์"}
-              </div>
-              <div className="text-sm font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors mt-0.5">
-                {isEn ? "Compare Membership Plans" : "เปรียบเทียบทุกแพลน"}
-              </div>
-              <div className="text-[11px] text-muted font-serif-th mt-1">
-                {isEn ? "Explore tiers, tokens, and daily limits" : "ดูโควตารายวันและแพ็กเกจเปิดไพ่พรีเมียม"}
-              </div>
-            </button>
-          </div>
+          </SectionCard>
 
           {/* Notification & Communication Preferences (PDPA Opt-In) */}
           {user && (
-            <div className="rounded-xl border border-line bg-surface p-5 sm:p-6 space-y-4 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
-              <div className="space-y-1">
-                <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink">
-                  {isEn ? "Notification Preferences (PDPA)" : "การแจ้งเตือนและความยินยอม (PDPA)"}
-                </h2>
-                <p className="text-xs text-muted font-serif-th leading-relaxed">
-                  {isEn
-                    ? "Control email notifications. All subscriptions are opt-in only and can be modified anytime."
-                    : "ควบคุมการรับข้อมูลทางอีเมล ระบบปฏิบัติตามมาตรฐาน PDPA โดยต้องได้รับความยินยอมก่อนเสมอ"}
-                </p>
+            <SectionCard
+              title={isEn ? "Notification Preferences (PDPA)" : "การแจ้งเตือนและความยินยอม (PDPA)"}
+              description={
+                isEn
+                  ? "Control email notifications. All subscriptions are opt-in only and can be modified anytime."
+                  : "ควบคุมการรับข้อมูลทางอีเมล ทุกรายการเป็นการสมัครใจ เปิดหรือปิดเมื่อไรก็ได้"
+              }
+            >
+              <div className="divide-y divide-line-warm/50">
+                <ConsentToggle
+                  label={isEn ? "Reading Outcome Follow-ups" : "รับคำทำนายติดตามผล"}
+                  hint={
+                    isEn
+                      ? "Receive email notifications when your readings reach their reflection date."
+                      : "รับการแจ้งเตือนทางอีเมลเมื่อคำทำนายถึงกำหนดติดตามผลลัพธ์"
+                  }
+                  checked={!!user.marketingConsent}
+                  saving={isUpdatingConsent}
+                  onChange={handleUpdateConsent}
+                />
+                <ConsentToggle
+                  label={isEn ? "Daily Tarot Guidance via Email" : "รับดวงประจำวันทางอีเมล"}
+                  hint={
+                    isEn
+                      ? "One card drawn at sunrise each morning · unsubscribe from any email."
+                      : "ไพ่นำทางวันละ 1 ใบทุกเช้า · ยกเลิกได้ทุกเมื่อจากในอีเมล"
+                  }
+                  checked={!!user.digestEmail}
+                  saving={isUpdatingDigest}
+                  onChange={handleUpdateDigest}
+                />
               </div>
-
-              <div className="divide-y divide-line/40 pt-1">
-                {/* Toggle 1: Follow-up outcome notifications */}
-                <div className="py-3 flex items-center justify-between gap-4">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold font-serif-th text-ink">
-                      {isEn ? "Reading Outcome Follow-ups" : "รับคำทำนายติดตามผล"}
-                    </p>
-                    <p className="text-[11px] text-muted leading-relaxed">
-                      {isEn
-                        ? "Receive email notifications when your readings reach their reflection date."
-                        : "รับการแจ้งเตือนทางอีเมลเมื่อคำทำนายถึงกำหนดติดตามผลลัพธ์"}
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={!!user.marketingConsent}
-                      disabled={isUpdatingConsent}
-                      onChange={(e) => handleUpdateConsent(e.target.checked)}
-                      className="sr-only peer"
-                      aria-label={isEn ? "Reading Outcome Follow-ups" : "รับคำทำนายติดตามผล"}
-                    />
-                    <div className="w-10 h-5 bg-line peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-transform peer-checked:bg-gold-ink" />
-                  </label>
-                </div>
-
-                {/* Toggle 2: Daily Tarot Digest */}
-                <div className="py-3 flex items-center justify-between gap-4">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold font-serif-th text-ink">
-                      {isEn ? "Daily Tarot Guidance via Email" : "รับดวงประจำวันทางอีเมล"}
-                    </p>
-                    <p className="text-[11px] text-muted leading-relaxed">
-                      {isEn
-                        ? "Receive a sacred card reading drawn at sunrise every morning (Opt-in only)."
-                        : "รับไพ่ประจำวัน 1 ใบที่เปิดรับอรุณทุกเช้าทางอีเมล (ต้องยินยอมก่อนเสมอ)"}
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={!!user.digestEmail}
-                      disabled={isUpdatingDigest}
-                      onChange={(e) => handleUpdateDigest(e.target.checked)}
-                      className="sr-only peer"
-                      aria-label={isEn ? "Daily Tarot Guidance via Email" : "รับดวงประจำวันทางอีเมล"}
-                    />
-                    <div className="w-10 h-5 bg-line peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-transform peer-checked:bg-gold-ink" />
-                  </label>
-                </div>
-              </div>
-            </div>
+            </SectionCard>
           )}
 
-          {/* Change Password & Security Card */}
+          {/* Change Password & Security Card — พับเก็บไว้ ไม่ใช่ฟอร์มยาวคาหน้า */}
           <ChangePasswordCard />
 
           {/* Privacy & PDPA Control Card */}
-          <div className="rounded-xl border border-line bg-surface p-5 sm:p-6 space-y-4 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
-            <div className="space-y-1">
-              <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink">
-                {isEn ? "Privacy & Data Sovereign Rights" : "ความเป็นส่วนตัวและการจัดเก็บข้อมูล"}
-              </h2>
-              <p className="text-xs text-muted leading-relaxed font-serif-th">
-                {isEn
-                  ? "We uphold the highest standard of privacy. Your personal inquiries and reading reflections are preserved in your secure local storage, ensuring full sovereignty without unnecessary permanent server retention."
-                  : "ระบบของเรายึดหลักความเป็นส่วนตัวระดับสูงสุด ข้อมูลคำถามและประวัติการดูดวงทั้งหมดจะถูกจัดเก็บในเครื่องของคุณ (Local Storage) เท่านั้น โดยไม่มีการเก็บถาวรบนเซิร์ฟเวอร์"}
-              </p>
-            </div>
-            <div className="pt-3 border-t border-line/40 flex items-center justify-between flex-wrap gap-3">
-              <Link href="/privacy" className="text-xs text-gold-ink hover:text-ink underline font-bold">
+          <SectionCard
+            title={isEn ? "Privacy & Data Sovereign Rights" : "ความเป็นส่วนตัวและข้อมูลของคุณ"}
+            description={
+              isEn
+                ? "Your inquiries and reading reflections are preserved in your own device storage — we keep no unnecessary permanent copy on our servers."
+                : "คำถามและประวัติการดูดวงของคุณถูกเก็บไว้ในเครื่องของคุณเอง เราไม่เก็บสำเนาถาวรไว้บนเซิร์ฟเวอร์โดยไม่จำเป็น"
+            }
+            tone="danger"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-warm/50 pt-4">
+              <Link
+                href="/privacy"
+                className="font-serif-th text-xs font-bold text-gold-ink underline transition-colors hover:text-ink-deep"
+              >
                 {isEn ? "Read Privacy Policy (PDPA / GDPR)" : "อ่านนโยบายความเป็นส่วนตัว (PDPA)"}
               </Link>
               <DeleteAllDataButton />
             </div>
-          </div>
+          </SectionCard>
         </div>
       </main>
 
