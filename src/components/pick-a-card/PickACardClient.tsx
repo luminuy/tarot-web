@@ -18,6 +18,9 @@ import {
   initialDraw,
   type PickACardDraw,
 } from "@/lib/pick-a-card/compose";
+// สำรับประจำวัน — วันนี้ทั้งเว็บเห็นชุดเดียวกัน พรุ่งนี้เปลี่ยนใหม่ (คลื่นที่ 3)
+import { dailyDraw, dayLabel } from "@/lib/pick-a-card/daily";
+import { bangkokDayKey } from "@/lib/time/bangkok";
 
 export function PickACardClient() {
   const { isEnglish } = useLocale();
@@ -32,6 +35,10 @@ export function PickACardClient() {
    * แล้วค่อยจั่วใหม่ใน useEffect (ฝั่งเบราว์เซอร์เท่านั้น)
    */
   const [draw, setDraw] = useState<PickACardDraw>(() => initialDraw(activeTopic.slots.length));
+  /** วันของกรุงเทพฯ ตอนที่ผู้ใช้เปิดหน้า — อ่านฝั่งเบราว์เซอร์เท่านั้น (HTML นิ่งบิลด์ไว้คนละวันได้) */
+  const [dayKey, setDayKey] = useState<string>("");
+  /** true = กำลังแสดงสำรับประจำวัน · false = ผู้ใช้กดสับใหม่เองแล้ว */
+  const [isDailyDeck, setIsDailyDeck] = useState(true);
 
   // Selected pile within topic — เก็บ "ช่อง" ที่ผู้ใช้เลือก (ตัวตนของกอง/คริสตัล)
   const [selectedPileId, setSelectedPileId] = useState<string | null>(null);
@@ -43,16 +50,23 @@ export function PickACardClient() {
   const reading =
     slotIndex >= 0 ? composeReading(activeTopic, draw, slotIndex, isEnglish) : null;
 
-  /** จั่วรอบใหม่ทุกครั้งที่กลับมายืนหน้าเลือกกอง (รวมตอนเปิดหน้าครั้งแรก) */
+  /** ผู้ใช้กดสับใหม่เอง — จั่วแบบสุ่มและออกจากสำรับประจำวัน */
   const reshuffle = () => {
     setDraw((prev) => drawPicks(activeTopic.pool.length, activeTopic.slots.length, prev));
+    setIsDailyDeck(false);
   };
 
+  /**
+   * เปิดหน้า (หรือเปลี่ยนหัวข้อ) ➔ เริ่มที่ "สำรับประจำวัน" เสมอ
+   * ⚠️ ต้องอยู่ใน useEffect — หน้านี้เป็น HTML นิ่งที่บิลด์ไว้ล่วงหน้า
+   * วันของตอนบิลด์กับวันของตอนที่ผู้ใช้เปิดหน้าเป็นคนละวันได้ ถ้าคำนวณตอนเรนเดอร์ hydration จะไม่ตรง
+   */
   useEffect(() => {
-    reshuffle();
-    // จั่วใหม่เมื่อเปลี่ยนหัวข้อด้วย — คนละสำรับคนละคำทำนาย
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTopic.id]);
+    const today = bangkokDayKey();
+    setDayKey(today);
+    setDraw(dailyDraw(`${today}:${activeTopic.id}`, activeTopic.pool.length, activeTopic.slots.length));
+    setIsDailyDeck(true);
+  }, [activeTopic.id, activeTopic.pool.length, activeTopic.slots.length]);
 
   // Revealed card indices in current pile (0, 1, 2)
   const [revealedIndices, setRevealedIndices] = useState<Set<number>>(new Set());
@@ -225,9 +239,13 @@ export function PickACardClient() {
               </span>
             </div>
             <p className="mt-2 text-[11.5px] font-serif-th text-muted leading-[1.7]">
-              {isEnglish
-                ? "Every time you step back and choose again, the piles are shuffled anew."
-                : "ทุกครั้งที่ย้อนกลับมาเลือกใหม่ ไพ่ในแต่ละกองจะถูกสับใหม่ ไม่ซ้ำรอบที่แล้ว"}
+              {isDailyDeck && dayKey
+                ? isEnglish
+                  ? `Today's deck for ${dayLabel(dayKey, true)} — it changes at midnight, and you can reshuffle any time.`
+                  : `สำรับประจำวันที่ ${dayLabel(dayKey, false)} เปลี่ยนใหม่ทุกเที่ยงคืน และกดสับใหม่เองได้ทุกเมื่อ`
+                : isEnglish
+                  ? "Freshly shuffled — step back and choose again for another spread."
+                  : "สับไพ่ใหม่แล้ว ย้อนกลับมาเลือกอีกครั้งเมื่อไรก็ได้สำรับใหม่ทุกครั้ง"}
             </p>
           </div>
 
