@@ -1,0 +1,190 @@
+/**
+ * ✂️ ด่านกันหัวสระ/วรรณยุกต์ไทยถูกตัด (Thai Glyph Clipping Gate · INC-0197)
+ * ===========================================================================
+ *
+ * ## ทำไมต้องมีด่านนี้
+ *
+ * 2026-09-17 เจ้าของโปรเจกต์ทักว่าเมนูข้างในลิ้นชักนำทาง "ตัวอักษรขาด สระหาย ไ หัวหาย"
+ * วัดบน production จริงแล้วพบว่า **9 หัวข้อในลิ้นชักโดนตัดยอด 2px ทุกบรรทัด**
+ * เพราะคลาสสามตัวนี้มาอยู่ด้วยกัน:
+ *
+ * ```
+ * text-[13px] leading-tight truncate     ❌ ยอด "ไ" กับสระบนถูกเฉือนหาย
+ * ```
+ *
+ * - `truncate` = `overflow: hidden` → กล่องนี้ "ตัด" ทุกอย่างที่ล้นออกนอกกรอบ
+ * - `leading-tight` (1.25) ทำให้กรอบเตี้ยกว่าตัวอักษรจริง
+ *
+ * ## ตัวเลขที่วัดมาได้จริง (Noto Serif Thai · เบราว์เซอร์จริง · seertarot.net)
+ *
+ * | ค่า | ที่วัดได้ |
+ * |---|---|
+ * | หมึกไทยพุ่งเหนือเส้นฐานสูงสุด (สระอี+ไม้เอก เช่น "ที่") | **1.056em** |
+ * | ascent ของฟอนต์ | 1.077em · descent 0.538em → กล่องฟอนต์ 1.615em |
+ *
+ * กล่องบรรทัดวางเส้นฐานไว้ที่ `(line-height − 1.615em) / 2 + 1.077em`
+ * ดังนั้นจะไม่ตัดหมึกก็ต่อเมื่อ **line-height ≥ 1.615 + 2 × (1.056 − 1.077) ≈ 1.573em**
+ *
+ * บ้านนี้จึงตั้งพื้นขั้นต่ำไว้ที่ **1.6** (เท่ากับ `--text-xs--line-height` / `--text-sm--line-height`
+ * ที่ประกาศไว้ใน `globals.css` อยู่แล้ว) — `leading-tight` 1.25 · `leading-snug` 1.375 ·
+ * `leading-normal` 1.5 **ต่ำกว่าพื้นทั้งสามตัว** จึงใช้คู่กับ `truncate` ไม่ได้
+ *
+ * ## ด่านนี้ตรวจอะไร
+ *
+ * คลาสเดียวกันที่มีทั้ง `truncate` (หรือ `overflow-hidden` + `text-ellipsis`)
+ * และ `leading-*` ที่ต่ำกว่า 1.6 → ตกด่าน
+ *
+ * ## ⚠️ กับดักที่ต้องรู้ก่อนแก้ด่านนี้
+ *
+ * - **ไม่มี `leading-*` เลย = ผ่าน** เพราะจะตกไปใช้ค่าจากธีม (1.6–1.7) ซึ่งปลอดภัยอยู่แล้ว
+ *   ด่านนี้จับเฉพาะคนที่ "ตั้งใจเขียนให้แน่นกว่าเดิม" เท่านั้น
+ * - **มีช่องว่างบน/ล่าง (`py-` · `pt-`+`pb-`) = ยกเว้น** เพราะ `overflow` ตัดที่ขอบ padding box
+ *   ช่องว่างจึงกลายเป็นที่ว่างให้หมึกล้นได้โดยไม่ถูกตัด (เช่น `SpreadBoard.tsx` ที่ใช้ `py-0.5`)
+ * - `line-clamp-*` ไม่อยู่ในด่านนี้ เพราะมันจองความสูงเป็นจำนวนบรรทัดของ line-height เอง
+ *   อาการจึงเป็นคนละแบบ — ถ้าจะเพิ่มต้องวัดใหม่ก่อน ห้ามเดา
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
+
+const ROOT = process.cwd();
+const SRC = path.join(ROOT, "src");
+
+/** พื้นขั้นต่ำของ line-height สำหรับกล่องที่ตัดของล้นทิ้ง — ที่มาของตัวเลขอยู่ในหัวไฟล์ */
+const MIN_LEADING = 1.6;
+
+/** ค่ามาตรฐานของ Tailwind — ตัวที่เป็นสัดส่วน (ไม่ใช่ rem) เท่านั้นที่เทียบกับพื้นนี้ได้ */
+const NAMED_LEADING: Record<string, number> = {
+  none: 1,
+  tight: 1.25,
+  snug: 1.375,
+  normal: 1.5,
+  relaxed: 1.625,
+  loose: 2,
+};
+
+function walkTsx(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...walkTsx(full));
+    else if (entry.name.endsWith(".tsx")) out.push(full);
+  }
+  return out;
+}
+
+/** คลาสทุกตัวที่เป็น string literal บนบรรทัดนั้น (ครอบทุกแบบ quote) */
+function classesOf(line: string): string[] {
+  const out: string[] = [];
+  for (const m of line.matchAll(/["'`]([^"'`]*)["'`]/g)) out.push(...m[1].split(/\s+/));
+  return out.filter(Boolean);
+}
+
+/** กล่องนี้ตัดของที่ล้นทิ้งไหม */
+function clipsOverflow(classes: string[]): boolean {
+  if (classes.includes("truncate")) return true;
+  return classes.includes("overflow-hidden") && classes.includes("text-ellipsis");
+}
+
+/** มีช่องว่างบน/ล่างให้หมึกล้นได้ไหม — overflow ตัดที่ขอบ padding box */
+function hasHeadroom(classes: string[]): boolean {
+  if (classes.some((c) => /^p[yt]-/.test(c))) return true;
+  return classes.some((c) => /^p-/.test(c) && !/^p-(x|y|t|b|l|r)/.test(c));
+}
+
+/** line-height ที่เขียนไว้ตรง ๆ บนบรรทัดนี้ — null เมื่อไม่ได้เขียน (ตกไปใช้ค่าธีม = ปลอดภัย) */
+export function explicitLeading(classes: string[]): { cls: string; value: number } | null {
+  for (const c of classes) {
+    const named = /^leading-([a-z]+)$/.exec(c);
+    if (named && named[1] in NAMED_LEADING) return { cls: c, value: NAMED_LEADING[named[1]] };
+
+    const arbitrary = /^leading-\[(\d*\.?\d+)\]$/.exec(c);
+    if (arbitrary) return { cls: c, value: parseFloat(arbitrary[1]) };
+  }
+  return null;
+}
+
+type Finding = { file: string; line: number; cls: string; value: number };
+
+export function scanClippedThaiText(files: string[]): Finding[] {
+  const findings: Finding[] = [];
+
+  for (const file of files) {
+    const lines = fs.readFileSync(file, "utf-8").split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+      const classes = classesOf(lines[i]);
+      if (!clipsOverflow(classes)) continue;
+      if (hasHeadroom(classes)) continue;
+
+      const leading = explicitLeading(classes);
+      if (!leading || leading.value >= MIN_LEADING) continue;
+
+      findings.push({ file: path.relative(ROOT, file), line: i + 1, cls: leading.cls, value: leading.value });
+    }
+  }
+
+  return findings;
+}
+
+/**
+ * พิสูจน์ว่าด่านนี้จับของจริงได้ ไม่ใช่ด่านที่ผ่านตลอดกาล
+ * (เคสที่ 1 คือคลาสชุดที่ทำให้เกิด INC-0197 จริง ๆ)
+ */
+function selfTest(): boolean {
+  const cases: { label: string; line: string; shouldFlag: boolean }[] = [
+    { label: "ชุดคลาสที่ทำให้หัวสระขาดจริง (INC-0197)", line: `className="text-[13px] font-serif-th leading-tight truncate"`, shouldFlag: true },
+    { label: "leading-snug ก็ยังต่ำกว่าพื้น", line: `className="text-xs truncate leading-snug"`, shouldFlag: true },
+    { label: "leading-normal (1.5) ยังไม่พอสำหรับสระซ้อนวรรณยุกต์", line: `className="truncate leading-normal"`, shouldFlag: true },
+    { label: "overflow-hidden + text-ellipsis คืออาการเดียวกัน", line: `className="overflow-hidden text-ellipsis leading-tight"`, shouldFlag: true },
+    { label: "leading-[1.7] ผ่าน", line: `className="text-[13px] font-serif-th leading-[1.7] truncate"`, shouldFlag: false },
+    { label: "ไม่เขียน leading เลย = ใช้ค่าธีม 1.6–1.7", line: `className="text-sm truncate"`, shouldFlag: false },
+    { label: "มี py- เป็นที่ว่างให้หมึกล้น", line: `className="text-xs leading-snug py-0.5 truncate"`, shouldFlag: false },
+    { label: "leading-tight ที่ไม่ได้ตัดของล้น ไม่ใช่เรื่องของด่านนี้", line: `className="text-xs leading-tight"`, shouldFlag: false },
+  ];
+
+  const tmp = path.join(ROOT, "scripts/qa/.thai-glyph-clipping-selftest.tsx");
+  let ok = true;
+
+  for (const c of cases) {
+    fs.writeFileSync(tmp, `export const X = <div ${c.line} />;\n`, "utf-8");
+    const flagged = scanClippedThaiText([tmp]).length > 0;
+    if (flagged !== c.shouldFlag) {
+      console.error(`   ❌ ตัวตรวจเพี้ยน: "${c.label}" ควร${c.shouldFlag ? "ฟ้อง" : "ผ่าน"} แต่${flagged ? "ฟ้อง" : "ผ่าน"}`);
+      ok = false;
+    }
+  }
+
+  fs.rmSync(tmp, { force: true });
+  return ok;
+}
+
+if (process.argv[1] && process.argv[1].endsWith("test-thai-glyph-clipping.ts")) {
+  if (!fs.existsSync(SRC)) {
+    console.error(`\n❌ ไม่พบโฟลเดอร์ ${SRC} — ด่านนี้ตรวจอะไรไม่ได้เลย จึงถือว่าตก`);
+    process.exit(1);
+  }
+
+  if (!selfTest()) {
+    console.error("\n❌ ด่านนี้ตรวจตัวเองไม่ผ่าน — ตัวตรวจเสียก่อนจะไปตรวจโค้ดจริง");
+    process.exit(1);
+  }
+  console.log("   🧪 ตัวตรวจผ่านเคสพิสูจน์ตัวเอง 8 เคส (ฟ้อง 4 · ผ่าน 4)");
+
+  const tsxFiles = walkTsx(SRC);
+  assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walkTsx() ชี้ไปที่ src/ จริง");
+
+  const findings = scanClippedThaiText(tsxFiles);
+
+  if (findings.length > 0) {
+    console.error(`\n❌ พบกล่องข้อความที่จะเฉือนหัวสระ/วรรณยุกต์ไทยทิ้ง ${findings.length} จุด\n`);
+    for (const f of findings) {
+      console.error(`   ${f.file}:${f.line}`);
+      console.error(`      ${f.cls} (${f.value}) ต่ำกว่าพื้น ${MIN_LEADING} ในกล่องที่ตัดของล้นทิ้ง`);
+      console.error(`      แก้: ใช้ leading-[1.7] (ค่ากลางของบ้านนี้) หรือเพิ่ม py- ให้หมึกมีที่ล้น\n`);
+    }
+    process.exit(1);
+  }
+
+  console.log(`✅ ไม่มีกล่องข้อความที่ตัดของล้นทิ้งพร้อม line-height ต่ำกว่า ${MIN_LEADING}`);
+}

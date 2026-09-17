@@ -185,14 +185,14 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <span
-              className={`text-[13px] font-serif-th leading-tight truncate transition-colors ${
+              className={`text-[13px] font-serif-th leading-[1.7] truncate transition-colors ${
                 isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
               }`}
             >
               {item.label}
             </span>
           </div>
-          <p className="text-[11.5px] font-serif-th text-muted truncate mt-0.5 leading-snug">
+          <p className="text-[11.5px] font-serif-th text-muted truncate mt-0.5 leading-[1.7]">
             {item.sublabel}
           </p>
         </div>
@@ -213,7 +213,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       </>
     );
 
-    const buttonClass = `tap-overlay-y relative w-full min-h-[44px] flex items-center gap-3 px-2.5 py-1.5 rounded-xl transition-colors duration-150 group cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+    const buttonClass = `tap-overlay-y relative w-full min-h-[44px] flex items-center gap-3 px-2.5 py-1.5 rounded-xl text-left transition-colors duration-150 group cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
       isActive
         ? "bg-inset/90 border-line shadow-xs"
         : "hover:bg-inset/60 border-transparent hover:border-line/60"
@@ -324,7 +324,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             </div>
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="font-serif-th text-sm font-bold text-ink truncate leading-tight">
+                <span className="font-serif-th text-sm font-bold text-ink truncate leading-[1.7]">
                   {isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}
                 </span>
                 <span className="text-ink text-[10px] font-mono tracking-wider bg-inset border border-line px-1.5 py-0.2 rounded-full font-bold shrink-0">
