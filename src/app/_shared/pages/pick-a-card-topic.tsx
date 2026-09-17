@@ -1,0 +1,446 @@
+/**
+ * 🔮 หน้า Pick A Card รายหัวข้อ — `/pick-a-card/<slug>` และฝาแฝดอังกฤษ
+ * ===========================================================================
+ * ## ทำไมต้องแตกเป็นหน้าละหัวข้อ
+ *
+ * เดิม 4 หัวข้อกองรวมอยู่ในหน้าเดียว ทั้งที่แต่ละหัวข้อคือ **คีย์เวิร์ดค้นหาคนละตัว**
+ * ("pick a card เขาคิดยังไง" · "pick a card การงาน" · "ข้อความจากจักรวาล")
+ * หน้าเดียวจึงต้องแย่งอันดับกับตัวเองและไม่มีหน้าไหนตรงคำค้นจริงสักหน้า
+ *
+ * โครงใหม่: หน้ารวมยังอยู่ที่ `/pick-a-card` (เลือกหัวข้อไหนก็ได้) ส่วนหน้าหัวข้อ
+ * มี URL ของตัวเอง ชื่อเรื่องของตัวเอง และคำอธิบายที่ตรงกับคำค้นนั้นโดยเฉพาะ
+ *
+ * ## ⚠️ กติกาที่ด่านเฝ้าอยู่
+ *
+ * - ชื่อเรื่องต้องไม่เกินเพดาน SERP **หลังบวก " · SeerTarot" (12 ตัวอักษร) แล้ว** (ด่าน meta-length)
+ * - ฝั่งอังกฤษห้ามมีภาษาไทยหลุดแม้แต่ตัวเดียว (ด่าน en-thai-leak)
+ * - ทุกหน้าต้องมีฝาแฝดสองภาษาและ hreflang ชี้กันครบ (ด่าน en-routing)
+ * - ทุก URL ที่ประกาศใน sitemap ต้องมีไฟล์ที่เรนเดอร์จริง (ด่าน rendered-coverage)
+ */
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { buildAlternates, SITE_ORIGIN } from "@/lib/config/site";
+import { SeoArticleShell } from "@/components/seo/SeoArticleShell";
+import { buildPageOgImage } from "@/lib/media/og-image";
+import { jsonLdScript } from "@/lib/seo/json-ld";
+import { PICK_A_CARD_TOPICS, type PickACardTopic } from "@/data/pick-a-card";
+import type { Locale } from "@/lib/i18n/types";
+
+interface TopicCopy {
+  metaTitleTh: string;
+  metaTitleEn: string;
+  metaDescTh: string;
+  metaDescEn: string;
+  keywordsTh: string[];
+  keywordsEn: string[];
+  articleTitleTh: string;
+  articleTitleEn: string;
+  eyebrowTh: string;
+  eyebrowEn: string;
+  bodyTh: string[];
+  bodyEn: string[];
+  faqsTh: { q: string; a: string }[];
+  faqsEn: { q: string; a: string }[];
+}
+
+/** เนื้อหา SEO ประจำหัวข้อ — คีย์ตรงกับ `PickACardTopic.id` */
+const TOPIC_COPY: Record<string, TopicCopy> = {
+  "love-feelings": {
+    metaTitleTh: "Pick A Card เขาคิดยังไงกับเรา ดูฟรี",
+    metaTitleEn: "Pick A Card: What Are They Thinking?",
+    metaDescTh:
+      "Pick A Card เลือกกองไพ่ดูว่าเขาคิดยังไงกับคุณตอนนี้ ความรู้สึกที่ไม่เคยพูด สิ่งที่เขาเก็บซ่อนไว้ และแนวโน้มความสัมพันธ์ ด้วยไพ่ 1909 Rider-Waite ฟรี",
+    metaDescEn:
+      "Pick 1 of 4 tarot piles to see what they are really thinking about you, the feelings they never say aloud, and where this connection is heading. Free.",
+    keywordsTh: [
+      "pick a card เขาคิดยังไง",
+      "เขาคิดยังไงกับเรา",
+      "ดูดวงความรู้สึกเขา",
+      "pick a card ความรัก",
+      "ไพ่ยิปซีความรัก",
+    ],
+    keywordsEn: [
+      "pick a card what are they thinking",
+      "how do they feel about me tarot",
+      "pick a card love reading",
+      "free love tarot",
+    ],
+    eyebrowTh: "อ่านใจคนที่คุณคิดถึง",
+    eyebrowEn: "Reading The Heart You Wonder About",
+    articleTitleTh: "เขาคิดยังไงกับเรา: อ่านความรู้สึกที่เขาไม่เคยพูดออกมา",
+    articleTitleEn: "What Are They Thinking: Reading The Words They Never Say",
+    bodyTh: [
+      "คำถามที่คนไทยค้นหามากที่สุดเรื่องหนึ่งคือ &quot;เขาคิดยังไงกับเรา&quot; โดยเฉพาะในความสัมพันธ์ที่ยังไม่มีคำนิยาม คนคุยที่หายไปเงียบ ๆ แฟนที่เริ่มตอบสั้นลง หรือคนที่เพิ่งเลิกรากันไปแล้วยังมีเยื่อใย การเลือกกองไพ่แบบ Pick A Card ช่วยให้คุณหยุดเดาใจสักครู่ แล้วมองภาพความสัมพันธ์จากมุมที่ไม่ได้ใช้ความคาดหวังของตัวเองเป็นตัวตั้ง",
+      "กองไพ่ทั้งสี่ในหน้านี้อ่านความรู้สึกของอีกฝ่ายผ่านสามชั้น ชั้นแรกคือความรู้สึกที่เขามีต่อคุณในตอนนี้ ชั้นที่สองคือสิ่งที่เขาเก็บซ่อนไว้และไม่กล้าพูด และชั้นที่สามคือแนวโน้มของความสัมพันธ์พร้อมคำแนะนำว่าคุณควรวางตัวอย่างไรต่อจากนี้ ทุกใบเป็นไพ่ 1909 Rider-Waite แท้ และคำอ่านของแต่ละใบถูกเขียนไว้คู่กับไพ่ใบนั้นโดยเฉพาะ",
+      "วิธีเลือกที่ให้ผลตรงที่สุดคือหลับตา หายใจเข้าลึก ๆ นึกถึงใบหน้าหรือชื่อของเขาให้ชัด แล้วเลือกกองที่สะดุดตาเป็นกองแรกโดยไม่ต้องหาเหตุผล ถ้าอยากได้คำอ่านเจาะลึกเป็นรายกรณี ให้ไปต่อที่การเปิดไพ่เต็มรูปแบบกับแม่หมอ AI ซึ่งจะถามคำถามกลับและอ่านตามสถานการณ์ของคุณโดยตรง",
+    ],
+    bodyEn: [
+      "&quot;What are they thinking about me?&quot; is one of the most searched questions in tarot, and it usually arrives during the undefined stretch of a relationship: the person who went quiet, the partner whose replies got shorter, the ex you have not fully closed the door on. Choosing a pile gives you a pause from guessing and a chance to see the situation without your own hopes narrating it.",
+      "The four piles here read the other person across three layers. First, how they feel about you right now. Second, what they are holding back and have not said. Third, where the connection is heading, with advice on how to carry yourself next. Every card is an authentic 1909 Rider-Waite image, and each paragraph is written for that specific card in that specific position.",
+      "For the clearest result, close your eyes, breathe slowly, hold their name or face in mind, and choose the pile that pulls at you first without reasoning it out. If you want a reading shaped around your exact situation, continue to a full spread with the AI reader, which asks clarifying questions before interpreting.",
+    ],
+    faqsTh: [
+      {
+        q: "Pick A Card เขาคิดยังไงกับเรา แม่นจริงไหม?",
+        a: "ไพ่ทำหน้าที่เป็นกระจกสะท้อนพลังงานและมุมมองในช่วงเวลานั้น ไม่ใช่คำพิพากษาตายตัว สิ่งที่ได้จึงควรใช้เป็นแง่มุมเพิ่มเติมในการตัดสินใจ ควบคู่กับสิ่งที่คุณเห็นจากพฤติกรรมจริงของอีกฝ่าย",
+      },
+      {
+        q: "เปิดซ้ำได้ไหมถ้าคำตอบไม่ถูกใจ?",
+        a: "เปิดซ้ำได้ ทุกครั้งที่กลับมาเลือกใหม่ระบบจะสับไพ่ใหม่ให้เสมอ แต่แนะนำให้เว้นระยะสักหน่อยและตั้งคำถามให้ชัดขึ้น เพราะการเปิดรัว ๆ ด้วยคำถามเดิมมักทำให้ตีความสับสนมากกว่าเดิม",
+      },
+      {
+        q: "ต่างจากการเปิดไพ่กับแม่หมอ AI อย่างไร?",
+        a: "หน้านี้เป็นการเลือกกองสำเร็จรูปที่อ่านได้ทันทีโดยไม่ต้องพิมพ์อะไรเลย ส่วนการเปิดไพ่กับแม่หมอ AI จะถามคำถามกลับ เลือกผังที่เหมาะกับเรื่องของคุณ และอ่านตามบริบทเฉพาะตัวมากกว่า",
+      },
+    ],
+    faqsEn: [
+      {
+        q: "Is a pick a card reading about their feelings accurate?",
+        a: "The cards mirror the energy and perspective of the moment rather than issuing a verdict. Treat the reading as an added angle alongside what their actual behaviour shows you.",
+      },
+      {
+        q: "Can I draw again if I do not like the answer?",
+        a: "Yes. Every time you step back and choose again the piles are reshuffled. Still, leave a little space between readings and sharpen the question, because rapid repeats on the same question usually muddy the interpretation.",
+      },
+      {
+        q: "How is this different from a reading with the AI reader?",
+        a: "This page is an instant pile reading that needs no typing at all. The AI reader asks clarifying questions, picks a spread suited to your situation, and interprets with your specific context in mind.",
+      },
+    ],
+  },
+
+  "love-future": {
+    metaTitleTh: "Pick A Card ทิศทางความรักในอนาคต",
+    metaTitleEn: "Pick A Card: Future Of Your Love Life",
+    metaDescTh:
+      "Pick A Card เลือกกองไพ่ดูทิศทางความรักและความสัมพันธ์ในอนาคต จุดเปลี่ยนสำคัญ และผลลัพธ์ปลายทาง ด้วยไพ่ 1909 Rider-Waite แท้ ฟรี ไม่ต้องสมัคร",
+    metaDescEn:
+      "Pick 1 of 4 tarot piles to see where your love life is heading, the turning point ahead, and the outcome waiting at the end. Free 1909 Rider-Waite reading.",
+    keywordsTh: [
+      "pick a card ความรักอนาคต",
+      "ดูดวงความรักอนาคต",
+      "ทิศทางความสัมพันธ์",
+      "pick a card ความรัก",
+      "ไพ่ทาโรต์ความรัก",
+    ],
+    keywordsEn: [
+      "pick a card love future",
+      "future of my relationship tarot",
+      "love tarot reading free",
+      "where is this relationship going",
+    ],
+    eyebrowTh: "มองทางข้างหน้าของหัวใจ",
+    eyebrowEn: "Looking Down The Road Of The Heart",
+    articleTitleTh: "ทิศทางความรักในอนาคต: จุดเปลี่ยนที่รออยู่และปลายทางที่เป็นไปได้",
+    articleTitleEn: "The Future Of Your Love Life: The Turning Point And What Waits",
+    bodyTh: [
+      "คนที่ค้นหาเรื่องทิศทางความรักส่วนใหญ่ไม่ได้อยากรู้แค่ว่า &quot;จะได้แต่งงานไหม&quot; แต่อยากรู้ว่าสิ่งที่กำลังทำอยู่ตอนนี้กำลังพาไปทางไหน ความสัมพันธ์ที่ยื้ออยู่ควรไปต่อหรือพอแค่นี้ และถ้าปล่อยมือแล้วข้างหน้ามีอะไรรออยู่บ้าง กองไพ่ในหน้านี้จึงวางไว้สามจังหวะ คือพลังงานตั้งต้น จุดเปลี่ยนสำคัญ และผลลัพธ์ปลายทาง",
+      "สิ่งที่ควรรู้ก่อนอ่านคือ ไพ่ทาโรต์อ่าน &quot;แนวโน้มจากพลังงานปัจจุบัน&quot; ไม่ใช่อนาคตที่ถูกล็อกไว้แล้ว ถ้าคุณเปลี่ยนวิธีวางตัว เปลี่ยนสิ่งที่ยอมรับได้ หรือเปลี่ยนคนที่เลือกคบ ปลายทางก็เปลี่ยนตาม คำอ่านจึงมีประโยชน์ที่สุดเมื่อใช้เป็นแผนที่ ไม่ใช่คำพยากรณ์ที่ต้องรอให้เกิด",
+      "หลังอ่านจบ ลองจดหนึ่งประโยคที่สะกิดใจที่สุดเก็บไว้ แล้วกลับมาดูอีกครั้งในอีกสองสัปดาห์ คุณจะเห็นชัดขึ้นว่าอะไรในคำอ่านตรงกับสิ่งที่เกิดขึ้นจริง และถ้าต้องการคำตอบเฉพาะกรณีของคุณจริง ๆ ให้เปิดไพ่เต็มผังกับแม่หมอ AI ต่อได้ทันทีจากปุ่มท้ายคำทำนาย",
+    ],
+    bodyEn: [
+      "Most people asking about the future of their love life are not only asking whether marriage is coming. They want to know where the current situation is actually heading, whether the relationship they are holding on to deserves more time, and what waits if they let go. These piles are laid out in three beats: the seed energy, the turning point, and the outcome.",
+      "Worth knowing before you read: tarot describes a trajectory from present energy, not a locked future. Change how you show up, change what you accept, or change who you give time to, and the destination shifts with it. The reading is most useful as a map rather than a prophecy to wait for.",
+      "After reading, write down the single line that struck you hardest and revisit it in two weeks. You will see clearly which parts matched what actually happened. If you want an answer shaped entirely around your case, continue into a full spread with the AI reader from the button beneath your reading.",
+    ],
+    faqsTh: [
+      {
+        q: "ไพ่บอกอนาคตความรักได้แม่นแค่ไหน?",
+        a: "ไพ่อ่านแนวโน้มจากพลังงานในปัจจุบัน ไม่ได้ล็อกอนาคตไว้ตายตัว ถ้าคุณเปลี่ยนการตัดสินใจหรือเปลี่ยนวิธีวางตัว ทิศทางข้างหน้าย่อมเปลี่ยนตามไปด้วย",
+      },
+      {
+        q: "ควรเปิดดูทิศทางความรักบ่อยแค่ไหน?",
+        a: "แนะนำให้เว้นอย่างน้อยหนึ่งถึงสองสัปดาห์ต่อหนึ่งคำถาม เพราะพลังงานต้องใช้เวลาขยับ การเปิดทุกวันด้วยคำถามเดิมมักทำให้สับสนมากกว่าจะได้ความชัดเจน",
+      },
+      {
+        q: "ถ้าคำทำนายออกมาไม่ดีควรทำอย่างไร?",
+        a: "อ่านส่วน &quot;คำแนะนำ&quot; ให้ละเอียด เพราะไพ่ใบที่สามมักบอกทางออกไว้เสมอ คำอ่านที่ดูหนักมักเป็นสัญญาณให้ปรับบางอย่างก่อนที่เรื่องจะบานปลาย ไม่ใช่คำสาป",
+      },
+    ],
+    faqsEn: [
+      {
+        q: "How accurate is tarot about the future of love?",
+        a: "Tarot reads the trajectory of present energy rather than fixing the future. Change a decision or how you show up and the road ahead changes with it.",
+      },
+      {
+        q: "How often should I check my love direction?",
+        a: "Leave at least one to two weeks per question. Energy needs time to move, and asking the same thing daily usually produces confusion rather than clarity.",
+      },
+      {
+        q: "What if the reading looks discouraging?",
+        a: "Read the advice card closely — the third position almost always points to a way through. A heavy reading is usually a nudge to adjust something early, not a sentence.",
+      },
+    ],
+  },
+
+  "career-finance": {
+    metaTitleTh: "Pick A Card การงานการเงิน ก้าวต่อไป",
+    metaTitleEn: "Pick A Card: Your Career & Money Move",
+    metaDescTh:
+      "Pick A Card เลือกกองไพ่ดูก้าวต่อไปเรื่องงานและโอกาสการเงินใหม่ ทักษะที่ควรใช้ กระแสโอกาสที่ไหลเข้ามา และผลลัพธ์ ด้วยไพ่ 1909 Rider-Waite ฟรี",
+    metaDescEn:
+      "Pick 1 of 4 tarot piles for your next career move: the skill to lean on, the opportunity coming in, and the result ahead. Free 1909 Rider-Waite reading.",
+    keywordsTh: [
+      "pick a card การงาน",
+      "ดูดวงการงาน",
+      "ดูดวงการเงิน",
+      "pick a card เปลี่ยนงาน",
+      "ไพ่ยิปซีการงาน",
+    ],
+    keywordsEn: [
+      "pick a card career",
+      "career tarot reading",
+      "money tarot pick a card",
+      "should i change jobs tarot",
+    ],
+    eyebrowTh: "อ่านจังหวะงานและเงิน",
+    eyebrowEn: "Reading The Timing Of Work And Money",
+    articleTitleTh: "ก้าวต่อไปเรื่องงานและเงิน: ทักษะที่ควรใช้และโอกาสที่กำลังมา",
+    articleTitleEn: "Your Next Step In Work And Money: The Skill And The Opening",
+    bodyTh: [
+      "คำถามเรื่องงานที่คนถามไพ่บ่อยที่สุดมักไม่ใช่ &quot;จะรวยไหม&quot; แต่เป็นคำถามที่จับต้องได้กว่านั้น เช่น ควรย้ายงานตอนนี้หรือรออีกหน่อย ควรลงทุนกับทักษะไหนก่อน หรือควรรับข้อเสนอที่เพิ่งได้มาหรือไม่ กองไพ่ในหน้านี้จึงอ่านสามมุมคือ ทักษะและการลงมือทำ กระแสโอกาสที่ไหลเข้ามา และผลลัพธ์ที่ปลายทาง",
+      "ข้อดีของการดูเรื่องงานด้วยไพ่คือมันบังคับให้คุณมองสถานการณ์เป็นระบบแทนที่จะจมอยู่กับความกังวลรายวัน ไพ่ใบแรกจะบอกว่าจุดแข็งที่ควรใช้ตอนนี้คืออะไร ใบที่สองบอกว่าอะไรกำลังเข้ามาและควรระวังอะไร ส่วนใบที่สามคือปลายทางที่พลังงานชุดนี้กำลังพาไป",
+      "ข้อควรระวังคือ ไพ่ไม่ใช่คำแนะนำทางการเงินและไม่ควรใช้แทนการวางแผนจริง ตัวเลข สัญญา และความเสี่ยงต้องตรวจด้วยข้อมูล ส่วนไพ่ช่วยได้ในมุมของจังหวะ ความพร้อมของตัวเอง และสิ่งที่เรามองข้ามไปเพราะอยู่ใกล้ตัวเกินไป",
+    ],
+    bodyEn: [
+      "The career questions people actually bring to tarot are rarely &quot;will I be rich&quot;. They are far more concrete: should I move now or wait, which skill deserves my next six months, should I accept the offer on the table. These piles answer across three angles: the skill to lean on, the opportunity flowing in, and the result at the end of it.",
+      "The value of reading work questions this way is that it forces a structured look instead of daily anxiety. The first card names the strength worth using now, the second names what is arriving and what to watch, and the third shows where this set of energy is heading.",
+      "One caution: tarot is not financial advice and should never replace real planning. Numbers, contracts, and risk belong to data. What the cards help with is timing, your own readiness, and the thing you have stopped noticing because it sits too close.",
+    ],
+    faqsTh: [
+      {
+        q: "ดูไพ่เรื่องงานควรถามอย่างไรให้ได้คำตอบชัด?",
+        a: "ถามให้เจาะจงและอยู่ในกรอบเวลา เช่น &quot;ภายในสามเดือนนี้ควรโฟกัสอะไรในงาน&quot; จะได้คำตอบที่นำไปใช้ได้จริงมากกว่าคำถามกว้าง ๆ อย่าง &quot;ดวงงานเป็นอย่างไร&quot;",
+      },
+      {
+        q: "ไพ่บอกได้ไหมว่าควรลาออกหรือไม่?",
+        a: "ไพ่ช่วยสะท้อนจังหวะและความพร้อมของคุณ แต่การตัดสินใจลาออกควรพิจารณาร่วมกับข้อมูลจริง เช่น เงินสำรอง ภาระผูกพัน และโอกาสที่มีอยู่ในมือ",
+      },
+      {
+        q: "ใช้ดูเรื่องการลงทุนได้ไหม?",
+        a: "ไม่แนะนำให้ใช้แทนการวิเคราะห์การลงทุน ไพ่ไม่ได้ให้คำแนะนำทางการเงิน ใช้ได้ในมุมของสภาวะจิตใจ ความเสี่ยงที่คุณรับไหว และจังหวะการตัดสินใจเท่านั้น",
+      },
+    ],
+    faqsEn: [
+      {
+        q: "How should I phrase a career question for a clear answer?",
+        a: "Ask specifically and inside a timeframe, such as &quot;what should I focus on at work in the next three months&quot;. Broad questions like &quot;how is my career&quot; return broad answers.",
+      },
+      {
+        q: "Can the cards tell me whether to quit?",
+        a: "They reflect timing and your own readiness. The decision itself should be weighed with real data: savings, obligations, and the options actually in your hand.",
+      },
+      {
+        q: "Can I use this for investment decisions?",
+        a: "No. This is not financial advice and should not replace analysis. Use it for mindset, risk tolerance, and timing only.",
+      },
+    ],
+  },
+
+  "universe-guidance": {
+    metaTitleTh: "Pick A Card ข้อความจากจักรวาลถึงคุณ",
+    metaTitleEn: "Pick A Card: A Message From The Universe",
+    metaDescTh:
+      "Pick A Card เลือกกองไพ่รับข้อความเตือนสติจากจักรวาล สภาวะปัจจุบัน บทเรียนที่กำลังตื่นรู้ และพรที่รออยู่ ด้วยไพ่ 1909 Rider-Waite แท้ ฟรี",
+    metaDescEn:
+      "Pick 1 of 4 tarot piles for the message the universe has for you: where you stand, the lesson waking up, and the blessing ahead. Free 1909 Rider-Waite.",
+    keywordsTh: [
+      "ข้อความจากจักรวาล",
+      "pick a card จักรวาล",
+      "ดูดวงจิตวิญญาณ",
+      "ข้อคิดเตือนสติ",
+      "pick a card ไพ่ทาโรต์",
+    ],
+    keywordsEn: [
+      "message from the universe tarot",
+      "pick a card spiritual message",
+      "universe message pick a card",
+      "spiritual tarot reading free",
+    ],
+    eyebrowTh: "สารจากจักรวาลถึงคุณ",
+    eyebrowEn: "The Message Waiting For You",
+    articleTitleTh: "ข้อความเตือนสติจากจักรวาล: สิ่งที่คุณควรได้ยินในช่วงนี้",
+    articleTitleEn: "A Message From The Universe: What You Need To Hear Now",
+    bodyTh: [
+      "บางช่วงของชีวิตเราไม่ได้ต้องการคำทำนายว่าจะเกิดอะไรขึ้น แต่ต้องการใครสักคนพูดสิ่งที่เรารู้อยู่แล้วให้ชัดขึ้น กองไพ่ในหน้านี้ออกแบบมาเพื่อจังหวะแบบนั้น คือช่วงที่รู้สึกติดขัด เหนื่อยแบบบอกไม่ถูก หรือกำลังอยู่ระหว่างการเปลี่ยนแปลงที่ยังมองไม่เห็นปลายทาง",
+      "คำอ่านแบ่งเป็นสามชั้น ชั้นแรกคือสภาวะปัจจุบันที่จักรวาลมองเห็นในตัวคุณ ชั้นที่สองคือบทเรียนที่กำลังจะตื่นรู้ และชั้นที่สามคือพรหรือสิ่งดี ๆ ที่รออยู่หากคุณเดินต่อ ทั้งหมดใช้ไพ่ 1909 Rider-Waite แท้ และเขียนด้วยภาษาที่ตรงไปตรงมาโดยไม่ตัดสินคุณ",
+      "หากสิ่งที่คุณกำลังเผชิญหนักเกินกว่าคำแนะนำทั่วไป เช่น รู้สึกสิ้นหวังหรือไม่อยากมีชีวิตอยู่ ขอให้พักการดูดวงไว้ก่อนแล้วโทรสายด่วนสุขภาพจิต 1323 เพื่อคุยกับคนจริงที่พร้อมรับฟัง ไพ่ช่วยให้มุมมองได้ แต่ไม่ได้แทนที่การดูแลจากผู้เชี่ยวชาญ",
+    ],
+    bodyEn: [
+      "Some seasons do not call for a forecast of what will happen. They call for someone to say clearly what you already sense. These piles are built for exactly that moment: when things feel stuck, when tiredness has no obvious name, or when you are mid-change with no view of the far side.",
+      "The reading runs in three layers. First, the state the universe sees you in. Second, the lesson waking up right now. Third, the blessing waiting if you keep walking. Every card is an authentic 1909 Rider-Waite image, and the language stays direct without judging you.",
+      "If what you are carrying is heavier than general guidance — hopelessness, or thoughts of not wanting to be here — please set the cards aside and talk to a real person. In Thailand the mental health hotline is 1323; internationally, contact your local crisis line. Tarot can offer perspective, but it never replaces professional care.",
+    ],
+    faqsTh: [
+      {
+        q: "ข้อความจากจักรวาลคืออะไร ต่างจากการดูดวงทั่วไปอย่างไร?",
+        a: "เป็นการอ่านเชิงข้อคิดและมุมมองมากกว่าการทำนายเหตุการณ์ เน้นสะท้อนสภาวะปัจจุบัน บทเรียนที่กำลังเกิด และสิ่งที่ควรโฟกัส แทนที่จะบอกว่าจะเกิดอะไรขึ้นเมื่อไร",
+      },
+      {
+        q: "ควรเปิดอ่านตอนไหนถึงจะได้ประโยชน์ที่สุด?",
+        a: "ตอนที่รู้สึกติดขัดหรือกำลังลังเลจะได้ประโยชน์มากที่สุด เพราะคำอ่านทำหน้าที่เหมือนกระจกช่วยจัดระเบียบความคิด ไม่ใช่การรอคำตอบจากข้างนอก",
+      },
+      {
+        q: "ถ้ารู้สึกแย่มากจนรับไม่ไหวควรทำอย่างไร?",
+        a: "กรุณาพักการดูดวงแล้วโทรสายด่วนสุขภาพจิต 1323 เพื่อคุยกับผู้เชี่ยวชาญที่พร้อมรับฟังทันที การดูไพ่ไม่ได้ออกแบบมาเพื่อรับมือกับภาวะวิกฤตทางใจ",
+      },
+    ],
+    faqsEn: [
+      {
+        q: "What is a message from the universe reading?",
+        a: "It leans towards insight and perspective rather than predicting events. It reflects where you stand, the lesson unfolding, and what deserves your focus.",
+      },
+      {
+        q: "When is the best time to read this?",
+        a: "When you feel stuck or hesitant. The reading works as a mirror that organises your own thinking rather than an answer handed down from outside.",
+      },
+      {
+        q: "What if I feel worse than a reading can help with?",
+        a: "Please set the cards aside and speak to a professional. In Thailand call the mental health hotline 1323; elsewhere, contact your local crisis line. Tarot is not built for a mental health emergency.",
+      },
+    ],
+  },
+};
+
+export function pickACardTopicParams(): { slug: string }[] {
+  return PICK_A_CARD_TOPICS.map((topic) => ({ slug: topic.slug }));
+}
+
+export function pickACardTopicBySlug(slug: string): PickACardTopic | undefined {
+  return PICK_A_CARD_TOPICS.find((topic) => topic.slug === slug);
+}
+
+function copyOf(topic: PickACardTopic): TopicCopy {
+  const copy = TOPIC_COPY[topic.id];
+  if (!copy) {
+    // ⛔ ห้ามเดาเนื้อหาแทน — หัวข้อใหม่ต้องมีเนื้อหา SEO ของตัวเองเสมอ (ด่านที่ 76 ตรวจข้อนี้)
+    throw new Error(`[pick-a-card] ไม่มีเนื้อหา SEO ของหัวข้อ "${topic.id}" — เพิ่มใน TOPIC_COPY ก่อน`);
+  }
+  return copy;
+}
+
+export function pickACardTopicMetadata(topic: PickACardTopic, locale: Locale): Metadata {
+  const copy = copyOf(topic);
+  const isEnglish = locale === "en";
+  const path = `/pick-a-card/${topic.slug}`;
+  const title = isEnglish ? copy.metaTitleEn : copy.metaTitleTh;
+  const description = isEnglish ? copy.metaDescEn : copy.metaDescTh;
+
+  const images = buildPageOgImage({
+    title: isEnglish ? copy.metaTitleEn : copy.metaTitleTh,
+    eyebrow: isEnglish ? copy.eyebrowEn : copy.eyebrowTh,
+    cardImage: `${topic.coverCardId}.jpg`,
+    alt: `${isEnglish ? copy.metaTitleEn : copy.metaTitleTh} · 1909 Rider-Waite`,
+  });
+
+  return {
+    title,
+    description,
+    keywords: isEnglish ? copy.keywordsEn : copy.keywordsTh,
+    alternates: buildAlternates(path, { locale, englishTwin: true }),
+    openGraph: {
+      title: `${title} · SeerTarot`,
+      description,
+      url: `${SITE_ORIGIN}${isEnglish ? "/en" : ""}${path}`,
+      siteName: "SeerTarot",
+      locale: isEnglish ? "en_US" : "th_TH",
+      type: "website",
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} · SeerTarot`,
+      description,
+      images: [images[0].url],
+    },
+  };
+}
+
+export function PickACardTopicBody({
+  topic,
+  locale,
+  ritual,
+}: {
+  topic: PickACardTopic;
+  locale: Locale;
+  ritual: ReactNode;
+}) {
+  const copy = copyOf(topic);
+  const isEnglish = locale === "en";
+  const path = `/pick-a-card/${topic.slug}`;
+  const url = `${SITE_ORIGIN}${isEnglish ? "/en" : ""}${path}`;
+  const hubUrl = `${SITE_ORIGIN}${isEnglish ? "/en" : ""}/pick-a-card`;
+  const faqs = isEnglish ? copy.faqsEn : copy.faqsTh;
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: isEnglish ? "Home" : "หน้าแรก",
+        item: `${SITE_ORIGIN}${isEnglish ? "/en" : ""}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: isEnglish ? "Pick A Card" : "Pick A Card เลือกกองไพ่",
+        item: hubUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: isEnglish ? topic.titleEn : topic.titleTh,
+        item: url,
+      },
+    ],
+  };
+
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q.replace(/&quot;/g, '"'),
+      acceptedAnswer: { "@type": "Answer", text: faq.a.replace(/&quot;/g, '"') },
+    })),
+  };
+
+  const links = PICK_A_CARD_TOPICS.filter((other) => other.id !== topic.id)
+    .map((other) => ({
+      href: `/pick-a-card/${other.slug}`,
+      label: isEnglish ? other.titleEn : other.titleTh,
+    }))
+    .concat([{ href: "/pick-a-card", label: isEnglish ? "All 4 pick a card topics" : "รวมทุกหัวข้อ Pick A Card" }]);
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(faqJsonLd) }}
+      />
+
+      <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas py-6 sm:py-10 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {ritual}
+
+          <SeoArticleShell
+            eyebrow={isEnglish ? copy.eyebrowEn : copy.eyebrowTh}
+            title={isEnglish ? copy.articleTitleEn : copy.articleTitleTh}
+            faqs={faqs}
+            links={links}
+          >
+            {(isEnglish ? copy.bodyEn : copy.bodyTh).map((paragraph, index) => (
+              <p key={index} dangerouslySetInnerHTML={{ __html: paragraph }} />
+            ))}
+          </SeoArticleShell>
+        </div>
+      </main>
+    </>
+  );
+}

@@ -1,0 +1,31 @@
+---
+import {
+  pickACardTopicBySlug,
+  pickACardTopicMetadata,
+  pickACardTopicParams,
+} from "@/app/_shared/pages/pick-a-card-topic";
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { PickACardTopicBodyRoot } from "../../../components/PageBodies";
+import { PickACardIsland } from "../../../islands/PickACardIsland";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
+
+/** 🔮 Pick A Card topic pages (English tree) — one URL per search intent */
+const locale = "en" as const;
+
+export function getStaticPaths() {
+  return pickACardTopicParams().map(({ slug }) => ({ params: { slug } }));
+}
+
+const topic = pickACardTopicBySlug(Astro.params.slug!)!;
+---
+
+<BaseLayout locale={locale} metadata={pickACardTopicMetadata(topic, locale)}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <PickACardTopicBodyRoot topic={topic} locale={locale}>
+    <Fragment slot="ritual">
+      <PickACardIsland locale={locale} topicSlug={topic.slug} client:load />
+    </Fragment>
+  </PickACardTopicBodyRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

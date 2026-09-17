@@ -8,6 +8,8 @@ import { LoveOneCardBodyEn } from "@/app/_shared/pages/love-one-card-en";
 import { LoveOneCardBodyTh } from "@/app/_shared/pages/love-one-card-th";
 import { PickACardBodyEn } from "@/app/_shared/pages/pick-a-card-en";
 import { PickACardBodyTh } from "@/app/_shared/pages/pick-a-card-th";
+import { PickACardTopicBody } from "@/app/_shared/pages/pick-a-card-topic";
+import type { PickACardTopic } from "@/data/pick-a-card";
 import { ContactBodyEn } from "@/app/_shared/pages/contact-en";
 import { ContactBodyTh } from "@/app/_shared/pages/contact-th";
 import { PrivacyBodyEn } from "@/app/_shared/pages/privacy-en";
@@ -264,6 +266,22 @@ export function PickACardBodyEnRoot({ ritual }: { ritual: ReactNode }) {
   return (
     <LocaleProvider forcedLocale="en">
       <PickACardBodyEn ritual={ritual} />
+    </LocaleProvider>
+  );
+}
+
+export function PickACardTopicBodyRoot({
+  topic,
+  locale,
+  ritual,
+}: {
+  topic: PickACardTopic;
+  locale: "th" | "en";
+  ritual: ReactNode;
+}) {
+  return (
+    <LocaleProvider forcedLocale={locale}>
+      <PickACardTopicBody topic={topic} locale={locale} ritual={ritual} />
     </LocaleProvider>
   );
 }

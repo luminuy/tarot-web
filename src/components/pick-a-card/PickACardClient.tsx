@@ -22,11 +22,18 @@ import {
 import { dailyDraw, dayLabel } from "@/lib/pick-a-card/daily";
 import { bangkokDayKey } from "@/lib/time/bangkok";
 
-export function PickACardClient() {
+export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: string } = {}) {
   const { isEnglish } = useLocale();
 
-  // Active topic
-  const [selectedTopicId, setSelectedTopicId] = useState<string>(PICK_A_CARD_TOPICS[0].id);
+  // Active topic — หน้า `/pick-a-card/<slug>` ส่ง slug มาเพื่อเปิดหัวข้อนั้นตั้งแต่เฟรมแรก
+  const [selectedTopicId, setSelectedTopicId] = useState<string>(
+    () =>
+      PICK_A_CARD_TOPICS.find((t) => t.slug === initialTopicSlug)?.id ?? PICK_A_CARD_TOPICS[0].id
+  );
+  /** อยู่บนหน้าหัวข้อเดี่ยวหรือไม่ — ถ้าใช่ การ์ดหัวข้ออื่นจะเป็นลิงก์ไปหน้าของมันเอง */
+  const isTopicPage = Boolean(
+    initialTopicSlug && PICK_A_CARD_TOPICS.some((t) => t.slug === initialTopicSlug)
+  );
   const activeTopic =
     PICK_A_CARD_TOPICS.find((t) => t.id === selectedTopicId) || PICK_A_CARD_TOPICS[0];
 
@@ -161,17 +168,19 @@ export function PickACardClient() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {PICK_A_CARD_TOPICS.map((topic) => {
             const isActive = topic.id === activeTopic.id;
-            return (
-              <button
-                key={topic.id}
-                onClick={() => handleSelectTopic(topic.id)}
-                className={`group relative flex items-center gap-2.5 min-h-[44px] p-2 sm:p-2.5 rounded-xl text-left border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
-                  isActive
-                    ? "bg-surface border-gold shadow-xs"
-                    : "bg-inset/50 hover:bg-inset border-line/60 hover:border-line"
-                }`}
-                aria-pressed={isActive}
-              >
+            const cardClass = `group relative flex items-center gap-2.5 min-h-[44px] p-2 sm:p-2.5 rounded-xl text-left border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+              isActive
+                ? "bg-surface border-gold shadow-xs"
+                : "bg-inset/50 hover:bg-inset border-line/60 hover:border-line"
+            }`;
+
+            /**
+             * บนหน้าหัวข้อเดี่ยว การ์ดอื่นเป็น "ลิงก์จริง" ไปหน้าของหัวข้อนั้น
+             * (ลิงก์ภายในช่วยให้ Google เดินครบทุกหน้า และผู้ใช้แชร์ URL ตรงหัวข้อได้)
+             * บนหน้ารวม การ์ดยังเป็นปุ่มสลับในที่เดิมเพื่อความไวเหมือนเดิม
+             */
+            const inner = (
+              <>
                 <span
                   className={`relative w-[30px] h-[48px] sm:w-[34px] sm:h-[54px] rounded-[5px] overflow-hidden border shrink-0 bg-canvas transition-colors ${
                     isActive ? "border-gold/70" : "border-line/70 group-hover:border-gold/50"
@@ -207,6 +216,32 @@ export function PickACardClient() {
                     aria-hidden="true"
                   />
                 )}
+              </>
+            );
+
+            if (isTopicPage) {
+              return (
+                <Link
+                  key={topic.id}
+                  href={`/pick-a-card/${topic.slug}`}
+                  // ⛔ ห้ามเปิด prefetch — บทเรียน INC-0106
+                  prefetch={false}
+                  className={cardClass}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {inner}
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                key={topic.id}
+                onClick={() => handleSelectTopic(topic.id)}
+                className={cardClass}
+                aria-pressed={isActive}
+              >
+                {inner}
               </button>
             );
           })}
@@ -239,13 +274,21 @@ export function PickACardClient() {
               </span>
             </div>
             <p className="mt-2 text-[11.5px] font-serif-th text-muted leading-[1.7]">
-              {isDailyDeck && dayKey
+              {/*
+                ก่อน hydration ยังไม่รู้ว่าวันนี้วันอะไร (HTML บิลด์ไว้ล่วงหน้า)
+                จึงต้องขึ้นข้อความกลาง ๆ ไว้ก่อน ห้ามขึ้น "สับไพ่ใหม่แล้ว" ทั้งที่ผู้ใช้ยังไม่ได้กดอะไร
+              */}
+              {!dayKey
                 ? isEnglish
-                  ? `Today's deck for ${dayLabel(dayKey, true)} — it changes at midnight, and you can reshuffle any time.`
-                  : `สำรับประจำวันที่ ${dayLabel(dayKey, false)} เปลี่ยนใหม่ทุกเที่ยงคืน และกดสับใหม่เองได้ทุกเมื่อ`
-                : isEnglish
-                  ? "Freshly shuffled — step back and choose again for another spread."
-                  : "สับไพ่ใหม่แล้ว ย้อนกลับมาเลือกอีกครั้งเมื่อไรก็ได้สำรับใหม่ทุกครั้ง"}
+                  ? "Step back and choose again any time — the piles reshuffle every round."
+                  : "ย้อนกลับมาเลือกใหม่ได้ทุกเมื่อ ไพ่ในแต่ละกองจะถูกสับใหม่ทุกรอบ"
+                : isDailyDeck
+                  ? isEnglish
+                    ? `Today's deck for ${dayLabel(dayKey, true)} — it changes at midnight, and you can reshuffle any time.`
+                    : `สำรับประจำวันที่ ${dayLabel(dayKey, false)} เปลี่ยนใหม่ทุกเที่ยงคืน และกดสับใหม่เองได้ทุกเมื่อ`
+                  : isEnglish
+                    ? "Freshly shuffled — step back and choose again for another spread."
+                    : "สับไพ่ใหม่แล้ว ย้อนกลับมาเลือกอีกครั้งเมื่อไรก็ได้สำรับใหม่ทุกครั้ง"}
             </p>
           </div>
 

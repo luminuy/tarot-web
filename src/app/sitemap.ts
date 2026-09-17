@@ -2,6 +2,7 @@ import { MetadataRoute } from "next";
 import { DECK } from "@/data/cards";
 import { ARTICLES } from "@/data/articles";
 import { SPREADS } from "@/data/spreads";
+import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
 
@@ -177,7 +178,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.85,
   }));
 
-  const thaiRoutes = [...staticRoutes, ...cardRoutes, ...blogRoutes, ...spreadRoutes, ...topicRoutes];
+  /** หน้า Pick A Card รายหัวข้อ — หัวข้อละ URL เพราะเป็นคีย์เวิร์ดค้นหาคนละตัว */
+  const pickACardTopicRoutes: MetadataRoute.Sitemap = PICK_A_CARD_TOPICS.map((topic) => ({
+    url: `${baseUrl}/pick-a-card/${topic.slug}`,
+    lastModified: now,
+    changeFrequency: "daily" as const,
+    priority: 0.9,
+  }));
+
+  const thaiRoutes = [
+    ...staticRoutes,
+    ...cardRoutes,
+    ...blogRoutes,
+    ...spreadRoutes,
+    ...topicRoutes,
+    ...pickACardTopicRoutes,
+  ];
 
   return withEnglishTwins(thaiRoutes);
 }
