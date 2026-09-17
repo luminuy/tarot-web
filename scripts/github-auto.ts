@@ -158,6 +158,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "💰 เส้นทางเงิน (เครดิตเพิ่มเท่าขนาดแพ็กพอดี · ยิงซ้ำได้ครั้งเดียว · ล้มเหลวต้องไม่ใช่ 2xx และยอดไม่ขยับ)", cmd: TSX, args: ["scripts/qa/test-money-path.ts"] },
   { label: "🔗 ห่วงโซ่อุปทานของ CI (บังคับ lockfile · แอ็กชันผูก SHA · สิทธิ์แคบ · มีทางถอย · ห้าม import ของที่ไม่ได้ประกาศ)", cmd: TSX, args: ["scripts/qa/test-ci-supply-chain.ts"] },
   { label: "🧱 หนี้โค้ด (เส้นแบ่งวันกรุงเทพฯ ที่เดียว · คีย์ในเบราว์เซอร์มีทะเบียน · ห้าม catch เปล่า · แผงแอดมินแยกพังจากไม่มีข้อมูล)", cmd: TSX, args: ["scripts/qa/test-code-debt.ts"] },
+  { label: "🎛️ สถานะหน้าต่างลอยของ TarotFlow (เปิดสองบานพร้อมกันไม่ได้ · ปิดผิดบานไม่ได้ · useState เป็น ratchet)", cmd: TSX, args: ["scripts/qa/test-flow-overlay.ts"] },
 ];
 
 /**

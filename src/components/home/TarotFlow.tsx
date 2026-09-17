@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { overlayReducer, OVERLAY_INITIAL, isOverlay } from "@/components/home/flow-overlay";
 import dynamic from "next/dynamic";
 import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { useOnceOpen } from "@/lib/use-once-open";
@@ -181,16 +182,25 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     setCurrentStep(next);
   };
 
-  // Modals state
-  const [isShareOpen, setIsShareOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-  const [authFromWall, setAuthFromWall] = useState(false);
-  const [isBuyCreditsOpen, setIsBuyCreditsOpen] = useState(false);
-  // เหตุผลที่เปิดหน้าต่างสิทธิ์ — null = ปิดอยู่ (จุดเดียวที่คุมกำแพงสิทธิ์ทั้งเว็บ)
-  const [accessReason, setAccessReason] = useState<UpgradeReason | null>(null);
-  const [zoomedCard, setZoomedCard] = useState<DrawnSlotCard | null>(null);
+  /*
+   * 🎛️ R-26 ขั้นที่ 1: หน้าต่างลอยทั้ง 8 สถานะยุบเป็น union ตัวเดียว
+   * ---------------------------------------------------------------------------
+   * ของเดิมเป็น boolean อิสระ 6 ตัว + object 2 ตัว ซึ่งแปลว่าสถานะ "เปิดสองบานพร้อมกัน"
+   * เป็นไปได้ในโค้ดโดยไม่มีอะไรห้าม ทั้งที่ทุกบานเป็น modal ที่กินทั้งจอ
+   * ยุบเป็น union แล้วสถานะนั้นหายไปจากประเภทข้อมูลเลย ไม่ใช่แค่ "ไม่ค่อยเกิด"
+   *
+   * ตรรกะอยู่ที่ `flow-overlay.ts` (ไม่มี I/O ไม่พึ่ง React) ด่าน `test-flow-overlay.ts` เฝ้าอยู่
+   */
+  const [overlay, dispatchOverlay] = React.useReducer(overlayReducer, OVERLAY_INITIAL);
+  const isShareOpen = isOverlay(overlay, "share");
+  const isHistoryOpen = isOverlay(overlay, "history");
+  const isAuthOpen = isOverlay(overlay, "auth");
+  const authMode = isOverlay(overlay, "auth") ? overlay.mode : "signin";
+  const authFromWall = isOverlay(overlay, "auth") ? overlay.fromWall : false;
+  const isBuyCreditsOpen = isOverlay(overlay, "buyCredits");
+  /** เหตุผลที่เปิดหน้าต่างสิทธิ์ — null = ปิดอยู่ (จุดเดียวที่คุมกำแพงสิทธิ์ทั้งเว็บ) */
+  const accessReason: UpgradeReason | null = isOverlay(overlay, "upgrade") ? overlay.reason : null;
+  const zoomedCard: DrawnSlotCard | null = isOverlay(overlay, "zoomCard") ? overlay.card : null;
   const [currentUser, setCurrentUser] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const entitlement = useEntitlement();
   const entitlementView = describeEntitlement(entitlement);
@@ -217,7 +227,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       openAuth("signin", false);
       return;
     }
-    setAccessReason(reason);
+    dispatchOverlay({ type: "openUpgrade", reason });
   };
 
   /**
@@ -240,9 +250,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     // กล่องจะโผล่ทีหลังแล้วดันปุ่มขยับ — ขอไว้ตั้งแต่วินาทีที่กด
     prefetchTurnstile();
     void ensureEntitlement();
-    setAuthMode(mode);
-    setAuthFromWall(fromWall);
-    setIsAuthOpen(true);
+    dispatchOverlay({ type: "openAuth", mode, fromWall });
   };
 
   // ดึงสถานะล็อกอินผ่านแคชกลาง — ยิง /api/auth/me ครั้งเดียวต่อหน้า ไม่ใช่ทุกครั้งที่
@@ -556,7 +564,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
   // คอมโพเนนต์ลึก (เช่นช่องแชทที่ล็อกใน FollowUpChat) ขอเปิดหน้าต่างสิทธิ์พร้อม "เหตุผล"
   // จึงเลือกถ้อยคำและปุ่มให้ตรงสถานการณ์ได้ ไม่ใช่เด้งหน้าเข้าสู่ระบบเหมือนกันหมด
-  useEffect(() => onUpgradeRequest((reason) => setAccessReason(reason)), []);
+  useEffect(() => onUpgradeRequest((reason) => dispatchOverlay({ type: "openUpgrade", reason })), []);
 
   // เขียน flow state ลง sessionStorage ทุกครั้งที่มีการเปลี่ยนแปลง (หลัง resume จบแล้วเท่านั้น)
   // debounce 400ms กันเขียนถี่ ๆ ตอน readingResult อัปเดตรัว ๆ ระหว่าง stream คำทำนาย
@@ -1293,7 +1301,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     setProof({});
     setActiveCardIndex(0);
     setIsStreaming(false);
-    setZoomedCard(null);
+    dispatchOverlay({ type: "closeAll" });
     isFinalizingRef.current = false;
     setPickedIndices([]);
     setDrawnCards([]);
@@ -1365,7 +1373,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
             onOpenAuthModal={() => openAuth("signin")}
             onPrefetchAuth={prefetchAuth}
             onOpenPlans={() => openAccessDialog("explore")}
-            onBuyCredits={() => setIsBuyCreditsOpen(true)}
+            onBuyCredits={() => dispatchOverlay({ type: "openBuyCredits" })}
           />
         }
         nav={
@@ -1373,7 +1381,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
             <SacredNavDropdown
               onOpenHistory={() => {
                 soundManager.playCardSelectSound();
-                setIsHistoryOpen(true);
+                dispatchOverlay({ type: "openHistory" });
               }}
               onOpenPlans={() => openAccessDialog("explore")}
               onReset={handleReset}
@@ -1687,7 +1695,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   currentReadingPosition={activeCardIndex}
                   onFlipCard={handleFlipCard}
                   onRevealAll={() => setRevealedOrders(drawnCards.map((c) => c.order))}
-                  onZoomCard={(c) => setZoomedCard(c)}
+                  onZoomCard={(c) => dispatchOverlay({ type: "openZoomCard", card: c })}
                 />
               </section>
 
@@ -1788,7 +1796,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     type="button"
                     onClick={() => {
                       soundManager.playCardSelectSound();
-                      setIsShareOpen(true);
+                      dispatchOverlay({ type: "openShare" });
                     }}
                     className="py-3 px-5 rounded-full bg-surface border border-line text-ink hover:border-gold hover:text-gold-ink font-serif-th text-xs transition cursor-pointer flex items-center gap-2 shadow-xs"
                   >
@@ -1850,7 +1858,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {shareModalMounted && (
       <ShareModal
         isOpen={isShareOpen}
-        onClose={() => setIsShareOpen(false)}
+        onClose={() => dispatchOverlay({ type: "close", kind: "share" })}
         persona={selectedPersona}
         question={question}
         spreadName={isEnglish ? (selectedSpread.nameEn || selectedSpread.nameTh) : selectedSpread.nameTh}
@@ -1860,14 +1868,14 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       )}
 
       {historyModalMounted && (
-        <ReadingHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
+        <ReadingHistoryModal isOpen={isHistoryOpen} onClose={() => dispatchOverlay({ type: "close", kind: "history" })} />
       )}
 
       {authModalMounted && (
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => {
-          setIsAuthOpen(false);
+          dispatchOverlay({ type: "close", kind: "auth" });
           refreshEntitlement(); // ปิดหน้าต่างแล้วสิทธิ์อาจเปลี่ยน (เพิ่งสมัคร/เข้าสู่ระบบ)
         }}
         initialMode={authMode}
@@ -1878,7 +1886,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {buyCreditsModalMounted && (
       <BuyCreditsModal
         isOpen={isBuyCreditsOpen}
-        onClose={() => setIsBuyCreditsOpen(false)}
+        onClose={() => dispatchOverlay({ type: "close", kind: "buyCredits" })}
         user={currentUser}
         onRequireAuth={() => openAuth("signup", true)}
       />
@@ -1888,10 +1896,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       {accessDialogMounted && (
       <AccessDialog
         reason={accessReason}
-        onClose={() => setAccessReason(null)}
+        onClose={() => dispatchOverlay({ type: "close", kind: "upgrade" })}
         onSignup={() => openAuth("signup", true)}
         onSignin={() => openAuth("signin", true)}
-        onBuyCredits={() => setIsBuyCreditsOpen(true)}
+        onBuyCredits={() => dispatchOverlay({ type: "openBuyCredits" })}
       />
       )}
 
@@ -1901,7 +1909,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         positionName={isEnglish ? (zoomedCard?.position.nameEn || zoomedCard?.position.nameTh) : zoomedCard?.position.nameTh}
         isReversed={zoomedCard?.isReversed}
         isOpen={!!zoomedCard}
-        onClose={() => setZoomedCard(null)}
+        onClose={() => dispatchOverlay({ type: "close", kind: "zoomCard" })}
       />
       )}
 
