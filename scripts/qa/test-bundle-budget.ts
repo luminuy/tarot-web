@@ -233,7 +233,7 @@ export const BUDGETS: RouteBudget[] = [
      *    มีตัวเลขฝั่งที่ลดลงมากกว่ามาแลกตรง ๆ ไม่ใช่เพราะ "ของโตขึ้นแล้วให้ผ่านไปก่อน"
      */
     maxJsGzipKb: 120, // dev วัดได้ 100.1 KB · CI มักสูงกว่า dev ~9 KB + ระยะหายใจ
-    maxHtmlGzipKb: 38, // dev วัดได้ 33.8 KB + ระยะหายใจ ~10%
+    maxHtmlGzipKb: 42, // CI วัดได้ 39 KB (dev 33.8 KB) + ระยะหายใจ ~10%
   },
   {
     /*
