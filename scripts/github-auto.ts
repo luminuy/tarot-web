@@ -161,6 +161,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔗 ห่วงโซ่อุปทานของ CI (บังคับ lockfile · แอ็กชันผูก SHA · สิทธิ์แคบ · มีทางถอย · ห้าม import ของที่ไม่ได้ประกาศ)", cmd: TSX, args: ["scripts/qa/test-ci-supply-chain.ts"] },
   { label: "🧱 หนี้โค้ด (เส้นแบ่งวันกรุงเทพฯ ที่เดียว · คีย์ในเบราว์เซอร์มีทะเบียน · ห้าม catch เปล่า · แผงแอดมินแยกพังจากไม่มีข้อมูล)", cmd: TSX, args: ["scripts/qa/test-code-debt.ts"] },
   { label: "🎛️ สถานะหน้าต่างลอยของ TarotFlow (เปิดสองบานพร้อมกันไม่ได้ · ปิดผิดบานไม่ได้ · useState เป็น ratchet)", cmd: TSX, args: ["scripts/qa/test-flow-overlay.ts"] },
+  { label: "🃏 หน้า Pick A Card (กองเดิมต้องไม่ให้ไพ่ชุดเดิมซ้ำ · เข้าถึงได้ทุกชุด · หลังไพ่เป็นลายเดียวกับทั้งเว็บ · INC-0198b)", cmd: TSX, args: ["scripts/qa/test-pick-a-card.ts"] },
   { label: "✂️ หัวสระ/วรรณยุกต์ไทยต้องไม่ถูกกล่องที่ตัดของล้นเฉือนทิ้ง (truncate + leading ต่ำกว่า 1.6 · INC-0197)", cmd: TSX, args: ["scripts/qa/test-thai-glyph-clipping.ts"] },
   { label: "🧭 สถานะการดูดวงของ TarotFlow (สำรับคว่ำหน้าเสมอ · พลิกไพ่ผีไม่ได้ · โทเคนไม่ถูกทับด้วยค่าว่าง · เฟรมที่มาช้าเขียนทับไม่ได้)", cmd: TSX, args: ["scripts/qa/test-flow-state.ts"] },
 ];

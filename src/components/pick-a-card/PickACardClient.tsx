@@ -8,8 +8,11 @@ import {
   type PickACardPile,
 } from "@/data/pick-a-card";
 import { TarotCard } from "@/components/card/TarotCard";
+import { CardImage } from "@/components/card/CardImage";
 import { soundManager } from "@/lib/utils/audio";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+// สลับว่ารอบนี้กองไหนถือคำทำนายชุดไหน — กันไพ่ซ้ำเมื่อเลือกกองเดิมซ้ำ (INC-0198b)
+import { drawContentOrder } from "@/lib/pick-a-card/draw-order";
 
 export function PickACardClient() {
   const { isEnglish } = useLocale();
@@ -19,9 +22,34 @@ export function PickACardClient() {
   const activeTopic =
     PICK_A_CARD_TOPICS.find((t) => t.id === selectedTopicId) || PICK_A_CARD_TOPICS[0];
 
-  // Selected pile within topic
+  /**
+   * ลำดับว่า "ช่องกองที่ N ถือคำทำนายชุดไหน" — เริ่มที่ลำดับตรงเพื่อให้ HTML ที่เสิร์ฟจากขอบ
+   * ตรงกับรอบแรกของ hydration แล้วค่อยจั่วใหม่ใน useEffect (ฝั่งเบราว์เซอร์เท่านั้น)
+   */
+  const [contentOrder, setContentOrder] = useState<number[]>(() =>
+    activeTopic.piles.map((_, index) => index)
+  );
+
+  // Selected pile within topic — เก็บ "ช่อง" ที่ผู้ใช้เลือก (ตัวตนของกอง/คริสตัล)
   const [selectedPileId, setSelectedPileId] = useState<string | null>(null);
-  const selectedPile = activeTopic.piles.find((p) => p.id === selectedPileId) || null;
+  const slotIndex = activeTopic.piles.findIndex((p) => p.id === selectedPileId);
+
+  /** ตัวตนของกองที่เลือก (เลข · ชื่อคริสตัล) */
+  const selectedSlot: PickACardPile | null = slotIndex >= 0 ? activeTopic.piles[slotIndex] : null;
+  /** ไพ่ 3 ใบ + คำทำนายของรอบนี้ — สลับทุกครั้งที่กลับมาหน้าเลือกกอง */
+  const selectedPile: PickACardPile | null =
+    slotIndex >= 0 ? activeTopic.piles[contentOrder[slotIndex] ?? slotIndex] : null;
+
+  /** จั่วลำดับใหม่ทุกครั้งที่กลับมายืนหน้าเลือกกอง (รวมตอนเปิดหน้าครั้งแรก) */
+  const reshuffle = () => {
+    setContentOrder((prev) => drawContentOrder(activeTopic.piles.length, prev));
+  };
+
+  useEffect(() => {
+    reshuffle();
+    // จั่วใหม่เมื่อเปลี่ยนหัวข้อด้วย — คนละสำรับคนละคำทำนาย
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTopic.id]);
 
   // Revealed card indices in current pile (0, 1, 2)
   const [revealedIndices, setRevealedIndices] = useState<Set<number>>(new Set());
@@ -74,14 +102,16 @@ export function PickACardClient() {
     soundManager.playCardSelectSound();
     setSelectedPileId(null);
     setRevealedIndices(new Set());
+    // สลับสำรับใหม่ทุกครั้งที่ถอยกลับมาเลือกกอง — กองเดิมจะไม่ให้ไพ่ชุดเดิมซ้ำ
+    reshuffle();
   };
 
   const handleCopyReading = async () => {
-    if (!selectedPile) return;
+    if (!selectedPile || !selectedSlot) return;
     const reading = isEnglish ? selectedPile.readingEn : selectedPile.readingTh;
-    const crystal = isEnglish ? selectedPile.crystalEn : selectedPile.crystalTh;
+    const crystal = isEnglish ? selectedSlot.crystalEn : selectedSlot.crystalTh;
     const topic = isEnglish ? activeTopic.titleEn : activeTopic.titleTh;
-    const pileLabel = isEnglish ? `Pile ${selectedPile.number}` : `กองที่ ${selectedPile.number}`;
+    const pileLabel = isEnglish ? `Pile ${selectedSlot.number}` : `กองที่ ${selectedSlot.number}`;
 
     const textToCopy = `SeerTarot · Pick A Card (${topic})\n${pileLabel}: ${crystal}\n\n${reading.theme}\n\n${reading.overview}\n\nคำแนะนำ: ${reading.oracleAdvice}\n\nข้อคิดเตือนใจ: "${reading.affirmation}"\n\nเปิดไพ่พยากรณ์: https://seertarot.net/pick-a-card`;
 
@@ -102,25 +132,65 @@ export function PickACardClient() {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
       {/* ── 1. Topic Navigation Tabs ── */}
-      <nav aria-label={isEnglish ? "Pick A Card Topics" : "หัวข้อเลือกกองไพ่"} className="space-y-2">
-        <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-muted text-center">
-          {isEnglish ? "SELECT SACRED TOPIC" : "เลือกหัวข้อพยากรณ์"}
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+      <nav aria-label={isEnglish ? "Pick A Card Topics" : "หัวข้อเลือกกองไพ่"} className="space-y-3">
+        <div className="flex items-center gap-3" aria-hidden="true">
+          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-line" />
+          <span className="text-[10.5px] font-mono uppercase tracking-[0.22em] text-muted whitespace-nowrap">
+            {isEnglish ? "Select Sacred Topic" : "เลือกหัวข้อพยากรณ์"}
+          </span>
+          <span className="h-px flex-1 bg-gradient-to-l from-transparent to-line" />
+        </div>
+
+        {/* การ์ดหัวข้อพร้อมภาพไพ่ 1909 RWS ประจำหัวข้อ — ภาษาเดียวกับลิ้นชักนำทางทั้งเว็บ */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {PICK_A_CARD_TOPICS.map((topic) => {
             const isActive = topic.id === activeTopic.id;
             return (
               <button
                 key={topic.id}
                 onClick={() => handleSelectTopic(topic.id)}
-                className={`min-h-[44px] px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-serif-th transition-colors duration-150 cursor-pointer border ${
+                className={`group relative flex items-center gap-2.5 min-h-[44px] p-2 sm:p-2.5 rounded-xl text-left border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
                   isActive
-                    ? "bg-surface border-gold text-gold-ink shadow-xs font-semibold"
-                    : "bg-inset/70 hover:bg-inset border-line/60 text-muted hover:text-ink"
+                    ? "bg-surface border-gold shadow-xs"
+                    : "bg-inset/50 hover:bg-inset border-line/60 hover:border-line"
                 }`}
                 aria-pressed={isActive}
               >
-                {isEnglish ? topic.titleEn : topic.titleTh}
+                <span
+                  className={`relative w-[30px] h-[48px] sm:w-[34px] sm:h-[54px] rounded-[5px] overflow-hidden border shrink-0 bg-canvas transition-colors ${
+                    isActive ? "border-gold/70" : "border-line/70 group-hover:border-gold/50"
+                  }`}
+                >
+                  <CardImage
+                    cardId={topic.coverCardId}
+                    alt=""
+                    sizes="34px"
+                    loading="lazy"
+                    className={`w-full h-full object-cover transition-[filter,opacity] duration-200 ${
+                      isActive ? "" : "opacity-70 saturate-[0.85] group-hover:opacity-100"
+                    }`}
+                  />
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span
+                    className={`text-[12.5px] sm:text-[13px] font-serif-th leading-[1.7] line-clamp-2 transition-colors ${
+                      isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
+                    }`}
+                  >
+                    {isEnglish ? topic.titleEn : topic.titleTh}
+                  </span>
+                  <span className="block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted mt-0.5">
+                    {isEnglish ? "4 Piles" : "4 กองไพ่"}
+                  </span>
+                </span>
+
+                {isActive && (
+                  <span
+                    className="absolute -top-px left-3 right-3 h-[2px] rounded-full bg-gradient-to-r from-transparent via-gold to-transparent"
+                    aria-hidden="true"
+                  />
+                )}
               </button>
             );
           })}
@@ -152,6 +222,11 @@ export function PickACardClient() {
                   : "เลือก 1 ใน 4 กองไพ่ที่ดึงดูดสายตาและจิตใจคุณมากที่สุด"}
               </span>
             </div>
+            <p className="mt-2 text-[11.5px] font-serif-th text-muted leading-[1.7]">
+              {isEnglish
+                ? "Every time you step back and choose again, the piles are shuffled anew."
+                : "ทุกครั้งที่ย้อนกลับมาเลือกใหม่ ไพ่ในแต่ละกองจะถูกสับใหม่ ไม่ซ้ำรอบที่แล้ว"}
+            </p>
           </div>
 
           {/* 4 Sacred Piles Grid */}
@@ -183,31 +258,34 @@ export function PickACardClient() {
                     <span>{isEnglish ? `Pile ${pile.number}` : `กองที่ ${pile.number}`}</span>
                   </div>
 
-                  {/* 3D Stacked Deck Visual Effect */}
+                  {/*
+                    3D Stacked Deck — ใช้หลังไพ่ชุดเดียวกับทั้งเว็บ (`.card-back-pattern`)
+                    ⛔ ห้ามวาดหลังไพ่ขึ้นมาใหม่เอง: เดิมกองนี้ใช้ `bg-[#1e1b18]` + ตัวหนังสือ
+                    "SEER 1909 / TAROT" ซึ่งไม่ใช่หลังไพ่ของบ้านนี้ (เจ้าของทักว่า "หลังไพ่ไม่เหมือนเรา")
+                    ลายจริงอยู่ที่ `.card-back-pattern` ใน globals.css — ตัวเดียวกับ TarotCard.tsx
+                  */}
                   <div className="relative w-28 h-44 sm:w-32 sm:h-48 my-2 flex items-center justify-center">
                     {/* Background Stack Layers */}
                     <div
-                      className="absolute inset-0 rounded-lg bg-ink/60 border border-line-warm/30 transform translate-x-2 translate-y-2 opacity-50 shadow-xs"
+                      className="absolute inset-0 rounded-lg card-back-pattern border-2 border-line-warm/40 transform translate-x-2 translate-y-2 opacity-45"
                       aria-hidden="true"
                     />
                     <div
-                      className="absolute inset-0 rounded-lg bg-ink/80 border border-line-warm/40 transform translate-x-1 translate-y-1 opacity-75 shadow-xs"
+                      className="absolute inset-0 rounded-lg card-back-pattern border-2 border-line-warm/50 transform translate-x-1 translate-y-1 opacity-70"
                       aria-hidden="true"
                     />
-                    {/* Top Card Back */}
-                    <div className="relative w-full h-full rounded-lg border border-gold-light/50 bg-[#1e1b18] p-2 flex flex-col items-center justify-between shadow-md group-hover:scale-105 transition-transform duration-200">
-                      <div className="w-full text-center py-1">
-                        <span className="text-[10px] font-mono tracking-widest text-gold-light/60 uppercase">
-                          SEER 1909
+                    {/* Top Card Back — ลายเดียวกับไพ่คว่ำหน้าทุกใบในเว็บ */}
+                    <div className="relative w-full h-full rounded-lg card-back-pattern border-2 border-line-warm/60 p-3 flex flex-col items-center justify-between shadow-md group-hover:scale-105 transition-transform duration-200">
+                      <div className="w-full flex justify-center items-center opacity-85">
+                        <span className="text-[9px] sm:text-[10px] font-serif-th text-surface tracking-[0.18em] uppercase font-bold whitespace-nowrap">
+                          Sacred Oracle
                         </span>
                       </div>
-                      <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-gold-light/40 bg-ink/80 flex items-center justify-center text-xs font-serif-th font-bold text-gold-light shadow-xs">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-line-warm bg-ink-deep/90 flex items-center justify-center text-sm font-serif-th font-bold text-surface">
                         {pile.number}
                       </div>
-                      <div className="w-full text-center py-1">
-                        <span className="text-[9px] font-mono tracking-wider text-gold-light/50">
-                          TAROT
-                        </span>
+                      <div className="w-full flex justify-center items-center opacity-60">
+                        <div className="w-12 h-0.5 bg-inset-warm/60 rounded-full" />
                       </div>
                     </div>
                   </div>
@@ -242,14 +320,14 @@ export function PickACardClient() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-surface border border-line">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-inset border border-line flex items-center justify-center text-base font-bold font-serif-th text-gold-ink">
-                {selectedPile.number}
+                {selectedSlot?.number}
               </div>
               <div>
                 <div className="text-xs font-mono text-muted uppercase tracking-wider">
-                  {isEnglish ? `PILE ${selectedPile.number}` : `กองที่ ${selectedPile.number}`}
+                  {isEnglish ? `PILE ${selectedSlot?.number}` : `กองที่ ${selectedSlot?.number}`}
                 </div>
-                <div className="text-base font-serif-th font-bold text-ink">
-                  {isEnglish ? selectedPile.crystalEn : selectedPile.crystalTh}
+                <div className="text-base font-serif-th font-bold text-ink leading-[1.7]">
+                  {isEnglish ? selectedSlot?.crystalEn : selectedSlot?.crystalTh}
                 </div>
               </div>
             </div>
