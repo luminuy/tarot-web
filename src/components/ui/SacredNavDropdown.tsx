@@ -291,6 +291,8 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
       {/* Backdrop Scrim — Obsidian Semi-transparent Overlay */}
       <div
+        /* ป้ายให้สคริปต์ของหน้าที่ Astro เรนเดอร์จับได้ (หน้านั้นไม่ hydrate React) */
+        data-nav-scrim=""
         onClick={() => {
           soundManager.playMenuTapSound();
           setIsOpen(false);
@@ -345,6 +347,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
           <button
             type="button"
+            data-nav-close=""
             onClick={() => {
               soundManager.playMenuTapSound();
               setIsOpen(false);

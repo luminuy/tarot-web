@@ -21,7 +21,7 @@ const topic = pickACardTopicBySlug(Astro.params.slug!)!;
 ---
 
 <BaseLayout locale={locale} metadata={pickACardTopicMetadata(topic, locale)}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <PickACardTopicBodyRoot topic={topic} locale={locale}>
     <Fragment slot="ritual">
       <PickACardIsland locale={locale} topicSlug={topic.slug} client:load />

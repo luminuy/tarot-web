@@ -63,6 +63,7 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
     >
       <button
         type="button"
+        data-locale-switch="th"
         onClick={() => handleSelect("th")}
         aria-pressed={shownLocale === "th"}
         aria-label={shownLocale === "en" ? "Switch to Thai" : "เปลี่ยนเป็นภาษาไทย"}
@@ -77,6 +78,7 @@ export function LanguageSwitcher({ className = "" }: LanguageSwitcherProps) {
 
       <button
         type="button"
+        data-locale-switch="en"
         onClick={() => handleSelect("en")}
         aria-pressed={shownLocale === "en"}
         aria-label={shownLocale === "en" ? "Switch to American English" : "เปลี่ยนเป็นภาษาอังกฤษ"}

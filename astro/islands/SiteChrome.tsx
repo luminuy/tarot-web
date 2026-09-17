@@ -1,24 +1,21 @@
-import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
-import { AntiTheftShield } from "@/components/security/AntiTheftShield";
-import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { ConsentBanner } from "@/components/analytics/ConsentBanner";
 import { LocaleProvider } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n/types";
 
 /**
- * ก้อนที่ต้องมี JS จริง ๆ — เกราะกันดูดเนื้อหา · Service Worker · เครื่องมือวัดผล
- * (แถบขอความยินยอม PDPA ถูกเรนเดอร์อยู่ข้างใน `AnalyticsTracker`)
+ * 🔐 แถบขอความยินยอม PDPA — **เรนเดอร์เป็น HTML อย่างเดียว ห้ามใส่ `client:*`**
  *
- * ⚠️ ต้อง hydrate ด้วย `client:idle` เท่านั้น ห้าม `client:load`
- *    ทั้งสามตัวไม่มีอะไรที่ผู้ใช้ต้องกดทันทีที่เห็นหน้า การแย่งคิวตอนวาดหน้าแรก
- *    คือสิ่งที่ทำให้หน้าแรกเคยมี LCP 9.6 วินาที (บทเรียน #473)
+ * markup ต้องอยู่ใน HTML ตั้งแต่เฟรมแรก (ไม่งั้นแถบจะกลายเป็นตัว LCP ที่วาดช้า)
+ * ส่วนการกดปุ่มมี `astro/scripts/site-chrome.ts` รับไปทำแทน React
+ *
+ * ⚠️ ของเดิมคือ island `ClientChromeRoot` ที่ hydrate ด้วย `client:idle` ทั้งที่ข้างใน
+ * ไม่มี UI เลยนอกจากแถบนี้ — ทำให้ทุกหน้าเนื้อหาต้องโหลด React 184 KB
+ * (วัดจริง `/spreads`: JS 278.7 KB ➔ 1.8 KB หลังถอด island ทั้งสองตัวออก)
  */
-export function ClientChromeRoot({ locale }: { locale: Locale }) {
+export function ConsentBannerRoot({ locale }: { locale: Locale }) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <AntiTheftShield />
-      <ServiceWorkerRegister />
-      <AnalyticsTracker />
+      <ConsentBanner />
     </LocaleProvider>
   );
 }
-
