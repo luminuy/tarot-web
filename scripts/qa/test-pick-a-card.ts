@@ -34,6 +34,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { drawContentOrder } from "@/lib/pick-a-card/draw-order";
+import { composeReading, drawPicks, initialDraw, possibleCombinations } from "@/lib/pick-a-card/compose";
+import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
+import { CARD_SUMMARIES } from "@/data/cards/summary";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -121,11 +124,124 @@ function stripComments(src: string): string {
   } else {
     const src = fs.readFileSync(CLIENT, "utf-8");
     check(
-      "หน้า Pick A Card ยังจั่วลำดับใหม่ทุกรอบ (import + เรียก drawContentOrder จริง)",
-      src.includes("drawContentOrder") && /drawContentOrder\s*\(/.test(src),
-      "   ถ้าเลิกเรียก แปลว่ากองกลับไปผูกไพ่ชุดเดิมตายตัวเหมือนตอนเกิด INC-0198b"
+      "หน้า Pick A Card ยังจั่วใหม่ทุกรอบและประกอบคำอ่านจากคลัง (เรียก drawPicks + composeReading จริง)",
+      /drawPicks\s*\(/.test(src) && /composeReading\s*\(/.test(src),
+      "   ถ้าเลิกเรียก แปลว่ากองกลับไปผูกไพ่ชุดเดิมตายตัวเหมือนตอนเกิด INC-0198b/INC-0199b"
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// 4.5 คลังรายตำแหน่ง — ทุกตำแหน่งต้องเปลี่ยนทุกรอบ และข้อความต้องมากับไพ่ของมันเสมอ
+// ---------------------------------------------------------------------------
+{
+  const topic = PICK_A_CARD_TOPICS[0];
+  const size = topic.piles.length;
+
+  // (ก) จั่วรอบใหม่แล้วต้องเปลี่ยนทั้งสามตำแหน่ง
+  let draw = initialDraw(size);
+  const stuck: string[] = [];
+  for (let round = 0; round < 300; round++) {
+    const next = drawPicks(size, draw);
+    if (next.hiddenPick === draw.hiddenPick) stuck.push(`รอบ ${round}: ใบที่ 2 ซ้ำเดิม (${next.hiddenPick})`);
+    if (next.advicePick === draw.advicePick) stuck.push(`รอบ ${round}: ใบที่ 3 ซ้ำเดิม (${next.advicePick})`);
+    if (next.anchorOrder.some((v, i) => v === draw.anchorOrder[i])) stuck.push(`รอบ ${round}: ไพ่หลักของบางช่องซ้ำเดิม`);
+    if (stuck.length) break;
+    draw = next;
+  }
+  check(
+    "จั่วรอบใหม่แล้วเปลี่ยนครบทั้งสามตำแหน่ง (ไพ่หลัก · สิ่งที่ซ่อนอยู่ · คำแนะนำ) 300 รอบ",
+    stuck.length === 0,
+    stuck.slice(0, 3).map((l) => `   ${l}`).join("\n")
+  );
+
+  // (ข) ความหลากหลายที่เข้าถึงได้จริงต้องเท่ากับ poolSize³ ไม่ใช่ poolSize
+  const seen = new Set<string>();
+  let probe = initialDraw(size);
+  for (let round = 0; round < 6000; round++) {
+    probe = drawPicks(size, probe);
+    const r = composeReading(topic, probe, 0, false);
+    seen.add(r.cards.map((c) => c.cardId).join("+"));
+  }
+  check(
+    `กองเดียวเข้าถึงคำอ่านได้ ${possibleCombinations(size)} ชุด (เจอจริง ${seen.size} ชุดจากการสุ่ม 6,000 รอบ)`,
+    seen.size === possibleCombinations(size),
+    `   ถ้าน้อยกว่านี้แปลว่าคลังรายตำแหน่งถูกมัดกลับเป็นกองเหมือนเดิม`
+  );
+
+  // (ค) ข้อความต้องมากับไพ่ของตำแหน่งนั้นเสมอ — จับคู่ข้ามตำแหน่ง = พูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้า
+  const FIELDS = ["currentSituation", "hiddenLayer", "oracleAdvice"] as const;
+  const mismatched: string[] = [];
+  for (const t of PICK_A_CARD_TOPICS) {
+    let d = initialDraw(t.piles.length);
+    for (let round = 0; round < 60; round++) {
+      d = drawPicks(t.piles.length, d);
+      for (let slot = 0; slot < t.piles.length; slot++) {
+        for (const isEn of [false, true]) {
+          const r = composeReading(t, d, slot, isEn);
+          r.cards.forEach((card, idx) => {
+            const home = t.piles.find((pile) => {
+              const reading = isEn ? pile.readingEn : pile.readingTh;
+              return pile.cards[idx].cardId === card.cardId && reading[FIELDS[idx]] === r.bodies[idx];
+            });
+            if (!home) mismatched.push(`${t.id} ช่อง ${slot + 1} ตำแหน่ง ${idx + 1}: ข้อความไม่ใช่ของไพ่ ${card.cardId}`);
+          });
+        }
+      }
+    }
+  }
+  check(
+    "ทุกย่อหน้ามากับไพ่ของตำแหน่งตัวเองเสมอ (สุ่มตรวจ 4 หัวข้อ × 60 รอบ × 2 ภาษา)",
+    mismatched.length === 0,
+    [...new Set(mismatched)].slice(0, 5).map((l) => `   ${l}`).join("\n")
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 4.6 กติกาเนื้อหา — ย่อหน้าไหนอ้างชื่อไพ่ ต้องเป็นไพ่ของตำแหน่งตัวเองเท่านั้น
+// ---------------------------------------------------------------------------
+{
+  /**
+   * ⭐ นี่คือกฎที่กันไม่ให้ INC-0199b เกิดซ้ำ
+   * ตอนที่เนื้อหายังมัดเป็นกอง ข้อความ "พลังงานหลัก" เล่าอาร์คของไพ่ทั้งสามใบรวมกัน
+   * พอแยกคลังรายตำแหน่ง ข้อความแบบนั้นจะพูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้าผู้ใช้ทันที
+   */
+  const names = CARD_SUMMARIES.map((c) => ({ id: c.id, names: [c.nameEn, c.nameTh].filter(Boolean) }));
+  const FRAME_FIELDS = ["theme", "overview", "affirmation"] as const;
+  const BODY_FIELDS = { currentSituation: 0, hiddenLayer: 1, oracleAdvice: 2 } as const;
+
+  function mentionedCards(text: string): string[] {
+    const hits: string[] = [];
+    for (const card of names) {
+      if (card.names.some((n) => n.length > 4 && text.includes(n))) hits.push(card.id);
+    }
+    return hits;
+  }
+
+  const offenders: string[] = [];
+  for (const t of PICK_A_CARD_TOPICS) {
+    for (const pile of t.piles) {
+      for (const lang of ["readingTh", "readingEn"] as const) {
+        const reading = pile[lang];
+        for (const field of FRAME_FIELDS) {
+          const allowed = [pile.cards[0].cardId]; // กรอบเดินทางไปกับ "ไพ่หลัก" เท่านั้น
+          const foreign = mentionedCards(reading[field]).filter((id) => !allowed.includes(id));
+          if (foreign.length) offenders.push(`${t.id}/${pile.id}/${lang}.${field} อ้างถึง ${foreign.join(",")}`);
+        }
+        for (const [field, index] of Object.entries(BODY_FIELDS)) {
+          const allowed = [pile.cards[index].cardId];
+          const foreign = mentionedCards(reading[field as keyof typeof reading]).filter((id) => !allowed.includes(id));
+          if (foreign.length) offenders.push(`${t.id}/${pile.id}/${lang}.${field} อ้างถึง ${foreign.join(",")}`);
+        }
+      }
+    }
+  }
+  check(
+    "ไม่มีย่อหน้าไหนอ้างชื่อไพ่ที่ไม่ได้อยู่ในตำแหน่งของตัวเอง",
+    offenders.length === 0,
+    offenders.slice(0, 6).map((l) => `   ${l}`).join("\n") +
+      "\n   ➔ เขียนใหม่ให้พูดถึงไพ่ของตำแหน่งนั้นใบเดียว ไม่งั้นผู้ใช้จะอ่านเจอไพ่ที่ไม่ได้อยู่ตรงหน้า"
+  );
 }
 
 // ---------------------------------------------------------------------------

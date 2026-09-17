@@ -11,8 +11,13 @@ import { TarotCard } from "@/components/card/TarotCard";
 import { CardImage } from "@/components/card/CardImage";
 import { soundManager } from "@/lib/utils/audio";
 import { copyToClipboard } from "@/lib/utils/clipboard";
-// สลับว่ารอบนี้กองไหนถือคำทำนายชุดไหน — กันไพ่ซ้ำเมื่อเลือกกองเดิมซ้ำ (INC-0198b)
-import { drawContentOrder } from "@/lib/pick-a-card/draw-order";
+// จั่วไพ่จากคลังรายตำแหน่ง 64 ชุดต่อหัวข้อ — กันไพ่ซ้ำเมื่อเลือกกองเดิมซ้ำ (INC-0198b · INC-0199b)
+import {
+  composeReading,
+  drawPicks,
+  initialDraw,
+  type PickACardDraw,
+} from "@/lib/pick-a-card/compose";
 
 export function PickACardClient() {
   const { isEnglish } = useLocale();
@@ -23,26 +28,24 @@ export function PickACardClient() {
     PICK_A_CARD_TOPICS.find((t) => t.id === selectedTopicId) || PICK_A_CARD_TOPICS[0];
 
   /**
-   * ลำดับว่า "ช่องกองที่ N ถือคำทำนายชุดไหน" — เริ่มที่ลำดับตรงเพื่อให้ HTML ที่เสิร์ฟจากขอบ
-   * ตรงกับรอบแรกของ hydration แล้วค่อยจั่วใหม่ใน useEffect (ฝั่งเบราว์เซอร์เท่านั้น)
+   * ผลจั่วของรอบนี้ — เริ่มที่ลำดับตรงเพื่อให้ HTML ที่เสิร์ฟจากขอบตรงกับรอบแรกของ hydration
+   * แล้วค่อยจั่วใหม่ใน useEffect (ฝั่งเบราว์เซอร์เท่านั้น)
    */
-  const [contentOrder, setContentOrder] = useState<number[]>(() =>
-    activeTopic.piles.map((_, index) => index)
-  );
+  const [draw, setDraw] = useState<PickACardDraw>(() => initialDraw(activeTopic.piles.length));
 
   // Selected pile within topic — เก็บ "ช่อง" ที่ผู้ใช้เลือก (ตัวตนของกอง/คริสตัล)
   const [selectedPileId, setSelectedPileId] = useState<string | null>(null);
   const slotIndex = activeTopic.piles.findIndex((p) => p.id === selectedPileId);
 
-  /** ตัวตนของกองที่เลือก (เลข · ชื่อคริสตัล) */
+  /** ตัวตนของกองที่เลือก (เลข · ชื่อคริสตัล) — เป็นของช่องนี้เสมอ ไม่หมุนตามการจั่ว */
   const selectedSlot: PickACardPile | null = slotIndex >= 0 ? activeTopic.piles[slotIndex] : null;
-  /** ไพ่ 3 ใบ + คำทำนายของรอบนี้ — สลับทุกครั้งที่กลับมาหน้าเลือกกอง */
-  const selectedPile: PickACardPile | null =
-    slotIndex >= 0 ? activeTopic.piles[contentOrder[slotIndex] ?? slotIndex] : null;
+  /** ไพ่ 3 ใบ + คำทำนายของรอบนี้ ประกอบจากคลังรายตำแหน่ง (64 ชุดต่อหัวข้อ) */
+  const reading =
+    slotIndex >= 0 ? composeReading(activeTopic, draw, slotIndex, isEnglish) : null;
 
-  /** จั่วลำดับใหม่ทุกครั้งที่กลับมายืนหน้าเลือกกอง (รวมตอนเปิดหน้าครั้งแรก) */
+  /** จั่วรอบใหม่ทุกครั้งที่กลับมายืนหน้าเลือกกอง (รวมตอนเปิดหน้าครั้งแรก) */
   const reshuffle = () => {
-    setContentOrder((prev) => drawContentOrder(activeTopic.piles.length, prev));
+    setDraw((prev) => drawPicks(activeTopic.piles.length, prev));
   };
 
   useEffect(() => {
@@ -107,13 +110,12 @@ export function PickACardClient() {
   };
 
   const handleCopyReading = async () => {
-    if (!selectedPile || !selectedSlot) return;
-    const reading = isEnglish ? selectedPile.readingEn : selectedPile.readingTh;
+    if (!reading || !selectedSlot) return;
     const crystal = isEnglish ? selectedSlot.crystalEn : selectedSlot.crystalTh;
     const topic = isEnglish ? activeTopic.titleEn : activeTopic.titleTh;
     const pileLabel = isEnglish ? `Pile ${selectedSlot.number}` : `กองที่ ${selectedSlot.number}`;
 
-    const textToCopy = `SeerTarot · Pick A Card (${topic})\n${pileLabel}: ${crystal}\n\n${reading.theme}\n\n${reading.overview}\n\nคำแนะนำ: ${reading.oracleAdvice}\n\nข้อคิดเตือนใจ: "${reading.affirmation}"\n\nเปิดไพ่พยากรณ์: https://seertarot.net/pick-a-card`;
+    const textToCopy = `SeerTarot · Pick A Card (${topic})\n${pileLabel}: ${crystal}\n\n${reading.theme}\n\n${reading.overview}\n\nคำแนะนำ: ${reading.bodies[2]}\n\nข้อคิดเตือนใจ: "${reading.affirmation}"\n\nเปิดไพ่พยากรณ์: https://seertarot.net/pick-a-card`;
 
     const ok = await copyToClipboard(textToCopy);
     if (ok) {
@@ -208,7 +210,7 @@ export function PickACardClient() {
       </header>
 
       {/* ── 3. Main Altar: 4 Piles View vs. Revealed Pile View ── */}
-      {!selectedPile ? (
+      {!reading || !selectedSlot ? (
         <section
           aria-label={isEnglish ? "Card Piles Altar" : "แท่นบูชาเลือกกองไพ่"}
           className="space-y-6 pt-2"
@@ -357,13 +359,13 @@ export function PickACardClient() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
-              {selectedPile.cards.map((item, idx) => {
+              {reading.cards.map((item, idx) => {
                 const isFlipped = revealedIndices.has(idx);
                 const positionLabel = isEnglish ? item.positionEn : item.positionTh;
 
                 return (
                   <div
-                    key={`${selectedPile.id}-card-${idx}`}
+                    key={`${selectedSlot.id}-card-${idx}-${item.cardId}`}
                     className="flex flex-col items-center space-y-2.5 w-full max-w-[220px]"
                   >
                     {/* Position Label Tag */}
@@ -408,58 +410,29 @@ export function PickACardClient() {
                   {isEnglish ? "CORE ENERGY" : "พลังงานหลักประจำกอง"}
                 </span>
                 <h2 className="text-xl sm:text-2xl font-serif-th font-bold text-ink leading-snug">
-                  {isEnglish ? selectedPile.readingEn.theme : selectedPile.readingTh.theme}
+                  {reading.theme}
                 </h2>
                 <p className="text-sm sm:text-base font-serif-th text-muted leading-relaxed pt-1">
-                  {isEnglish ? selectedPile.readingEn.overview : selectedPile.readingTh.overview}
+                  {reading.overview}
                 </p>
               </div>
 
-              {/* 3 Dimensional Breakdown */}
+              {/* 3 Dimensional Breakdown — เดินตามไพ่ที่จั่วได้จริงของรอบนี้ */}
               <div className="space-y-4">
-                {revealedIndices.has(0) && (
-                  <div className="p-4 rounded-xl bg-inset/50 border border-line/60 space-y-1">
-                    <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider">
-                      {isEnglish
-                        ? `1. ${selectedPile.cards[0].positionEn}`
-                        : `1. ${selectedPile.cards[0].positionTh}`}
-                    </h3>
-                    <p className="text-xs sm:text-sm font-serif-th text-ink leading-relaxed">
-                      {isEnglish
-                        ? selectedPile.readingEn.currentSituation
-                        : selectedPile.readingTh.currentSituation}
-                    </p>
-                  </div>
-                )}
-
-                {revealedIndices.has(1) && (
-                  <div className="p-4 rounded-xl bg-inset/50 border border-line/60 space-y-1">
-                    <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider">
-                      {isEnglish
-                        ? `2. ${selectedPile.cards[1].positionEn}`
-                        : `2. ${selectedPile.cards[1].positionTh}`}
-                    </h3>
-                    <p className="text-xs sm:text-sm font-serif-th text-ink leading-relaxed">
-                      {isEnglish
-                        ? selectedPile.readingEn.hiddenLayer
-                        : selectedPile.readingTh.hiddenLayer}
-                    </p>
-                  </div>
-                )}
-
-                {revealedIndices.has(2) && (
-                  <div className="p-4 rounded-xl bg-inset/50 border border-line/60 space-y-1">
-                    <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider">
-                      {isEnglish
-                        ? `3. ${selectedPile.cards[2].positionEn}`
-                        : `3. ${selectedPile.cards[2].positionTh}`}
-                    </h3>
-                    <p className="text-xs sm:text-sm font-serif-th text-ink leading-relaxed">
-                      {isEnglish
-                        ? selectedPile.readingEn.oracleAdvice
-                        : selectedPile.readingTh.oracleAdvice}
-                    </p>
-                  </div>
+                {reading.cards.map((item, idx) =>
+                  revealedIndices.has(idx) ? (
+                    <div
+                      key={`${item.cardId}-body-${idx}`}
+                      className="p-4 rounded-xl bg-inset/50 border border-line/60 space-y-1"
+                    >
+                      <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider">
+                        {`${idx + 1}. ${isEnglish ? item.positionEn : item.positionTh}`}
+                      </h3>
+                      <p className="text-xs sm:text-sm font-serif-th text-ink leading-relaxed">
+                        {reading.bodies[idx]}
+                      </p>
+                    </div>
+                  ) : null
                 )}
               </div>
 
@@ -470,7 +443,7 @@ export function PickACardClient() {
                     {isEnglish ? "AFFIRMATION FOR YOUR SOUL" : "ข้อคิดเตือนใจประจำกองไพ่"}
                   </div>
                   <p className="text-sm sm:text-base font-serif-th italic font-medium text-ink">
-                    “{isEnglish ? selectedPile.readingEn.affirmation : selectedPile.readingTh.affirmation}”
+                    “{reading.affirmation}”
                   </p>
                 </div>
               )}
@@ -504,7 +477,7 @@ export function PickACardClient() {
                 </button>
 
                 <Link
-                  href={`/?spread=${selectedPile.targetSpreadId}`}
+                  href={`/?spread=${reading.targetSpreadId}`}
                   className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-surface-dark text-canvas border border-line text-xs sm:text-sm font-serif-th font-semibold hover:border-gold transition-colors flex items-center justify-center gap-2"
                 >
                   <span>
