@@ -18,7 +18,7 @@
 - **สถานะระบบ**: ✅ **Production-Ready & Fully Polished (เสร็จสมบูรณ์ทุก Core Milestone)**
 - **AI Agent Concurrency**: ✅ [ปลอดภัย] ไม่พบการชนกันของไฟล์หรือ Agent Lock
 - **TypeScript Health**: `npm run typecheck` ➔ **✅ 0 Errors (สมบูรณ์ 100%)**
-- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 68/68 ด่าน (สมบูรณ์ 100%)**
+- **Quality Verification**: `npm run repo:verify` ➔ **✅ ผ่านครบทั้ง 69/69 ด่าน (สมบูรณ์ 100%)**
 - **Database / Cards**: ไพ่ **78 ใบ** (780 ข้อความความหมาย 5 หมวด) สมบูรณ์ 100%
 - **ผังพยากรณ์**: **25 ผังพยากรณ์ยอดนิยม** (124 ตำแหน่งพยากรณ์) สัดส่วนทองคำ ไร้การตัดขอบ 100%
 
@@ -100,7 +100,56 @@
 - รันกับต้นไม้ก่อนแก้ (`0c834d7`) ➔ **ตก 6 ข้อ** (webhook ใช้คีย์จาก `booking_id` · ไม่ตรวจผลของ `grantBonus`)
 - รันกับต้นไม้หลังแก้ ➔ **ผ่าน 34/34**
 
-**ด่านตรวจ**: 67 ➔ **68 ด่าน** · `npm run repo:verify` ผ่านครบ 68/68
+**ด่านตรวจ**: 67 ➔ **68** · `npm run repo:verify` ผ่านครบ 68/68 ตอนปิดล็อตนี้
+
+---
+
+### 🗓️ 2026-09-17 (รอบ 86): 🔗 ห่วงโซ่อุปทานของ CI + ทางถอยเมื่อ deploy พัง (R-13 ถึง R-20)
+
+**R-13 — lockfile ที่ commit ไว้ไม่เคยถูกบังคับใช้เลยสักครั้ง**
+- ทุก workflow (รวม job ที่ถือ `CLOUDFLARE_API_TOKEN` และคีย์ AI) ติดตั้งด้วย
+  `pnpm install --no-frozen-lockfile` ทั้งที่รีโปนี้ **ไม่มี `pnpm-lock.yaml`** เลย
+- เลือกทางที่เปลี่ยนน้อยกว่าตามข้อเสนอของผู้ตรวจ: ย้ายมา **`npm ci`** ซึ่งบังคับ
+  `package-lock.json` ที่มีอยู่แล้ว (ตรวจแล้วครบ 811 แพ็กเกจ ไม่มีตัวไหนขาด)
+- ผลพลอยได้: แคช npm ของ `setup-node` ใช้ได้ทันที กับดัก `package-manager-cache: false` หายไปเอง
+
+**R-14 — ไม่มีทางย้อนกลับเมื่อ deploy พัง**
+- เพิ่ม `.github/workflows/rollback.yml` — กดเองได้ · สั่ง `wrangler rollback` ·
+  วนเช็กหน้าแรกจน HTTP 200 (5 ครั้ง ห่างกัน 10 วินาที) · ใช้ concurrency group เดียวกับ deploy
+- เพิ่มหัวข้อ **8. Rollback Playbook** ใน `CLOUDFLARE_DEPLOYMENT_GUIDE.md`
+  พร้อมตารางสิ่งที่การถอยกลับ **ไม่** ย้อนให้ (migration D1 · KV/R2 · secret)
+
+**R-15** — `deploy.yml` job `quality-check` ตั้ง `fetch-depth: 0` แล้ว (ปิดไปพร้อม R-06 รอบก่อน)
+
+**R-16 — แอ็กชันทั้ง 19 จุดผูกกับ commit SHA เต็มพร้อมคอมเมนต์เวอร์ชัน**
+- `actions/checkout@fbc6f39…` (v5) · `actions/setup-node@a0853c2…` (v5) ·
+  `actions/upload-artifact@ea165f8…` (v4) · `actions/github-script@ed59741…` (v8) ·
+  `softprops/action-gh-release@3bb1273…` (v2.6.2) · `mathieudutour/github-tag-action@a22cf08…` (v6.2) ·
+  `dependabot/fetch-metadata@21025c7…` (v2.5.0)
+- `pnpm/action-setup` หายไปเองเพราะ R-13 ถอดออกทั้งชุด
+
+**R-17** — `daily-digest.yml` ใส่ `permissions: {}` · `deploy.yml` ใส่ `permissions: contents: read`
+
+**R-18** — เพิ่มหัวข้อ **4. ค่าที่อยู่บน Dashboard เท่านั้น** ใน `PENDING_SETUP.md`
+(custom domain · DNS · WAF · Bot Fight Mode · AI Gateway) พร้อมตัวอย่าง `routes` ถ้าจะย้ายเข้าไฟล์
+
+**R-19** — `compatibility_date` 2026-08-01 ➔ **2026-09-15** (ยืนยันด้วย `wrangler deploy --dry-run` แล้ว binding ครบ)
+
+**R-20** — `wrangler` 4.128.0 ➔ **4.133.0** ➔ `miniflare` ขยับตาม ➔ **`sharp` 0.35.2 ที่มีคำเตือน
+GHSA-rgj7-g3m4-5g8c หายไปจากต้นไม้ทั้งหมด** · `npm audit` เหลือ **0 vulnerabilities**
+
+**หนี้ที่ตั้งใจรับมาพร้อมการย้ายไป npm**
+- pnpm ใช้ node_modules แบบไม่แบน จึงกันการ import แพ็กเกจที่ไม่ได้ประกาศให้ฟรี ๆ
+  (เคยจับได้จริงตอนมีคนเผลอ import `lightningcss` ใน PR #368) — npm ไม่มีตัวกันนั้น
+- ด่านใหม่จึงตรวจแทน: **ทุก import ใน `src/` · `scripts/` · `astro/` (541 ไฟล์) ต้องมีชื่ออยู่ใน `package.json`**
+
+**ด่านใหม่ `test-ci-supply-chain.ts` (17 ข้อ)**
+- รันกับต้นไม้ก่อนแก้ (`0c834d7`) ➔ **ตก 7 ข้อ** · รันกับต้นไม้หลังแก้ ➔ **ผ่าน 17/17**
+- ระหว่างเขียนด่านนี้จับบั๊กของตัวเองได้หนึ่งข้อ: ครั้งแรกเช็ก concurrency group ด้วยชื่อที่ฮาร์ดโค้ดไว้เอง
+  จึงผ่านทั้งที่ `rollback.yml` กับ `deploy.yml` ใช้คนละกลุ่มจริง ๆ (ถอยกลับชนกับ deploy ได้)
+  แก้เป็นอ่านค่าจริงจาก `deploy.yml` มาเทียบ
+
+**ด่านตรวจ**: 68 ➔ **69 ด่าน** · `npm run repo:verify` ผ่านครบ 69/69 · `npm run build` + `wrangler deploy --dry-run` ผ่าน
 
 ---
 

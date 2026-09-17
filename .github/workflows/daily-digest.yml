@@ -23,6 +23,12 @@ concurrency:
   group: daily-digest
   cancel-in-progress: false
 
+# 🔒 R-17: สิทธิ์แคบที่สุดเท่าที่งานนี้ใช้จริง
+# งานนี้ไม่ checkout ไม่เขียนอะไรกลับเข้ารีโปเลย ยิง HTTP เส้นเดียวแล้วจบ
+# จึงไม่ต้องการสิทธิ์ใด ๆ ทั้งสิ้น — ปล่อยว่างไว้แปลว่าได้สิทธิ์ดีฟอลต์ของรีโป
+# ซึ่งอาจเป็น `contents: write` ได้ทั้งก้อนโดยไม่มีใครตั้งใจ
+permissions: {}
+
 jobs:
   send:
     name: ส่งดวงประจำวัน
@@ -30,8 +36,6 @@ jobs:
     timeout-minutes: 10
     steps:
       # ไม่ต้อง checkout และไม่ต้อง setup-node — งานนี้แค่ยิง HTTP เส้นเดียว
-      # ⚠️ ห้ามเติม actions/setup-node พร้อม `cache:` ที่นี่: setup-node@v5 จะ auto-detect
-      # pnpm แล้วล้มทันที เพราะเรโปนี้ไม่มี `pnpm-lock.yaml` (บทเรียนที่บันทึกไว้แล้ว)
       - name: ยิงเส้น cron ของ digest
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}

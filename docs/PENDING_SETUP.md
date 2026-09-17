@@ -176,3 +176,31 @@ npx wrangler secret put CRON_SECRET
 1. เข้าสู่ระบบที่ **[https://seertarot.net/admin](https://seertarot.net/admin)**
 2. ไปที่แท็บ **"✦ สถานะระบบ (Cloud Health)"**
 3. กดปุ่ม **"✦ ยิงตรวจสัญญาณสดทั้งหมด"** ระบบจะทดสอบและรายงานสถานะ Latency (ms) ของทุกระบบทันที
+
+---
+
+## 🗺️ 4. ค่าที่อยู่บน Dashboard เท่านั้น — ไม่มีในไฟล์ config (R-18)
+
+> ย้ายบัญชี Cloudflare · สร้าง Worker ใหม่ · กู้คืนจากศูนย์ ➔ **รายการนี้คือสิ่งที่ `wrangler deploy` ไม่ตั้งให้**
+> เพราะ `wrangler.jsonc` ไม่ได้ประกาศ `routes` / `custom_domain` ไว้เลย
+
+| สิ่งที่ต้องตั้ง | ตั้งที่ไหน | ค่าที่ใช้อยู่จริง |
+| :--- | :--- | :--- |
+| **Custom Domain** | Workers & Pages ➔ `tarot-web` ➔ Settings ➔ Domains & Routes | `seertarot.net` และ `www.seertarot.net` |
+| **DNS ของโซน** | DNS ➔ Records | Cloudflare ออกให้เองตอน Add Custom Domain (proxied) |
+| **WAF Rate Limiting** | Security ➔ WAF ➔ Rate limiting rules | ดูกฎทั้งชุดที่ [`CLOUDFLARE_DEPLOYMENT_GUIDE.md`](CLOUDFLARE_DEPLOYMENT_GUIDE.md) หัวข้อ 6 |
+| **Bot Fight Mode / Managed Challenge** | Security ➔ Bots | ⚠️ ดู ISSUE-047 — สคริปต์ตรวจบอตถูกฉีดเข้าทุกหน้าและกินเธรดหลัก 3.7–5.0 วินาที |
+| **AI Gateway** | AI ➔ AI Gateway | ใช้เป็นทางผ่านของ Workers AI (ชื่อ gateway อยู่ใน secret) |
+
+### วิธีทำให้หายเป็นหนี้ถาวร
+
+ย้าย `routes` เข้าไปประกาศใน `wrangler.jsonc` ได้เลยเมื่อสะดวก:
+
+```jsonc
+"routes": [
+  { "pattern": "seertarot.net", "custom_domain": true },
+  { "pattern": "www.seertarot.net", "custom_domain": true }
+]
+```
+
+⚠️ ทำแล้วต้องทดสอบบน Worker ชื่ออื่นก่อนเสมอ — ประกาศ route ผิดแล้ว deploy ทับได้ทั้งโซน

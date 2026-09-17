@@ -62,6 +62,17 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0191 · 2026-09-17 09:31 · 🟠 High · CI ติดตั้ง dependency โดยไม่บังคับ lockfile และแอ็กชันทุกตัวผูกกับแท็กที่ขยับได้
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | ทุก workflow รวมถึง job ที่ถือ CLOUDFLARE_API_TOKEN และคีย์ AI ติดตั้งด้วย pnpm install --no-frozen-lockfile ทั้งที่รีโปไม่มี pnpm-lock.yaml · แอ็กชันทั้ง 19 จุดผูกกับแท็กอย่าง v4/v5 ที่เจ้าของขยับได้ตลอดเวลา · daily-digest.yml และ deploy.yml ไม่มีบล็อก permissions · ไม่มีทางถอยกลับเมื่อ deploy พังเลยทั้งใน workflow และเอกสาร |
+| **สาเหตุราก** | รีโปประกาศ packageManager เป็น pnpm แต่ commit เฉพาะ package-lock.json ของ npm ทีมจึงต้องปิด frozen lockfile เพื่อให้ CI รันผ่าน แล้วบันทึกไว้ในฐานะกับดักของ setup-node ไม่ได้มองว่าเป็นช่องโหว่ของห่วงโซ่อุปทาน |
+| **การแก้ไข** | ย้าย CI ทุกตัวมาใช้ npm ci ซึ่งบังคับ package-lock.json ที่มีอยู่แล้ว (แคชของ setup-node ใช้ได้ทันที) · ผูกแอ็กชันทั้ง 19 จุดกับ commit SHA พร้อมคอมเมนต์เวอร์ชัน · ใส่ permissions แคบที่สุดทุก workflow · เพิ่ม rollback.yml ที่กดเองได้พร้อมหัวข้อ Rollback Playbook ในคู่มือ deploy |
+| **🛡️ กฎป้องกันถาวร** | **ด่าน scripts/qa/test-ci-supply-chain.ts บังคับทั้งสี่เรื่องนี้ และรับช่วงตัวกันที่หายไปพร้อม pnpm ด้วยการตรวจว่าทุก import ในซอร์สมีชื่ออยู่ใน package.json จริง (npm ใช้ node_modules แบบแบนจึงหา transitive dependency เจอทั้งที่ไม่ได้ประกาศ)** |
+| **บันทึกโดย** | ไม่ระบุ · branch `claude/elegant-mayer-xe69fp` · commit `5e61d32` |
+
+
 ### INC-0190 · 2026-09-17 09:18 · 🟠 High · webhook ชำระเงินใช้ booking_id ที่เป็น NULL เป็นกุญแจกันจ่ายซ้ำ — ซื้อรอบสองไม่ได้เครดิต
 
 | หัวข้อ | รายละเอียด |

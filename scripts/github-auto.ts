@@ -156,6 +156,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🔌 Service Worker ไม่ทำให้ผู้ใช้ใหม่โหลดหน้าสองรอบ (controllerchange ครั้งแรกต้องไม่ reload)", cmd: TSX, args: ["scripts/qa/test-sw-reload.ts"] },
   { label: "🛡️ ด่านตรวจด่านด้วยกันเอง (ห้ามข้ามเงียบเมื่อไฟล์หาย · ห้ามวนคลังว่างแล้วขึ้นผ่าน)", cmd: TSX, args: ["scripts/qa/test-gate-integrity.ts"] },
   { label: "💰 เส้นทางเงิน (เครดิตเพิ่มเท่าขนาดแพ็กพอดี · ยิงซ้ำได้ครั้งเดียว · ล้มเหลวต้องไม่ใช่ 2xx และยอดไม่ขยับ)", cmd: TSX, args: ["scripts/qa/test-money-path.ts"] },
+  { label: "🔗 ห่วงโซ่อุปทานของ CI (บังคับ lockfile · แอ็กชันผูก SHA · สิทธิ์แคบ · มีทางถอย · ห้าม import ของที่ไม่ได้ประกาศ)", cmd: TSX, args: ["scripts/qa/test-ci-supply-chain.ts"] },
 ];
 
 /**
