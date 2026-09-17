@@ -388,7 +388,7 @@ export const InteractiveCardFan: React.FC<InteractiveCardFanProps> = ({
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[13px] sm:text-[13px] text-muted font-serif-th leading-normal truncate">
+                <p className="text-[13px] sm:text-[13px] text-muted font-serif-th leading-[1.7] truncate">
                   {isComplete ? (
                     <span className="text-ok font-semibold">
                       {isEnglish
