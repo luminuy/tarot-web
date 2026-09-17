@@ -1,0 +1,21 @@
+---
+import { pickACardMetadataEn } from "@/app/_shared/pages/pick-a-card-en";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { PickACardBodyEnRoot } from "../../components/PageBodies";
+import { PickACardIsland } from "../../islands/PickACardIsland";
+import { SiteFooterRoot, SiteHeaderRoot } from "../../islands/SiteShell";
+
+/** 🔮 Pick A Card — Interactive 4-Pile Oracle Island with Static SEO Content */
+const locale = "en" as const;
+---
+
+<BaseLayout locale={locale} metadata={pickACardMetadataEn}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <PickACardBodyEnRoot>
+    <Fragment slot="ritual">
+      <PickACardIsland locale={locale} client:load />
+    </Fragment>
+  </PickACardBodyEnRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

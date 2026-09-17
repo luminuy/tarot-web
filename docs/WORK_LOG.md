@@ -36,6 +36,36 @@
 | **ช่องทางติดต่อสองภาษา** | `/contact` & `/en/contact` | 🟢 **Active / Live** | Dev Server Ready | ช่องทางติดต่อทีมงานอีเมล support@seertarot.net และ TikTok @seerada.tarot พร้อมคำชี้แจงขอบเขตการให้บริการและสายด่วนวิกฤตสากล | - |
 | **API สับ/เลือก/เฉลย** | `/api/reading/[id]/*` | 🟢 **Active / Live** | Ready | In-Memory Store + Cloudflare D1 (`APP_DB`) + Provably Fair SHA-256 | แคช D1 / KV ถาวร |
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
+| **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
+
+### 🗓️ 2026-09-17 (รอบ 88): 🔮 เปิดตัวระบบ "Pick A Card (เลือกกองไพ่พยากรณ์ 4 กอง)" (/pick-a-card & /en/pick-a-card) สองภาษาสมบูรณ์แบบ
+
+พัฒนาและเปิดตัวฟีเจอร์พยากรณ์ยอดนิยมระดับแม่เหล็ก **Pick A Card (เลือกกองไพ่พยากรณ์)** ครบทั้งภาษาไทยและอังกฤษ เพื่อดึงดูด Organic Traffic และตอบโจทย์ผู้ใช้งานที่ต้องการรับคำพยากรณ์แบบจัดกลุ่มพลังงาน:
+
+1. **สถาปัตยกรรมระดับ Edge (Astro 7 SSG + React 19 Client Island)**:
+   - เสิร์ฟ Static HTML 100% Zero-Runtime สำหรับ SEO, Social Crawlers และ Search Engines จาก Cloudflare Edge แคชโดยตรง
+   - โหลดเฉพาะ Client Island (`PickACardIsland.tsx` ห่อ `PickACardClient.tsx`) ด้วย `client:load` สำหรับอนิเมชันเลือกกองไพ่และพลิกไพ่ 3D
+   - ลงทะเบียนเส้นทาง `/pick-a-card` ใน `ASTRO_ROUTE_PREFIXES`, `EN_TWIN_ROUTES`, `sitemap.ts` (Priority 0.95) และเพิ่มตัวเลือกใน Navigation Drawer (`SacredNavDropdown.tsx`)
+
+2. **ระบบเลือกกองไพ่และคำทำนาย 4 มิติ (`src/data/pick-a-card.ts`)**:
+   - บรรจุ 4 หัวข้อยอดนิยม (ความรู้สึกในใจเขา, อนาคตความสัมพันธ์, จุดเปลี่ยนการงานการเงิน, คำชี้แนะจากจักรวาล)
+   - รวม 16 กองไพ่ พร้อมไพ่ 1909 Rider-Waite-Smith แท้ 48 ใบ (ไม่มีการกุไพ่ปลอมตามกฎข้อ 14)
+   - แต่ละกองผูกกับพลังงานคริสตัลศักดิ์สิทธิ์ 4 ชนิด (Rose Quartz, Amethyst, Citrine, Lapis Lazuli)
+   - คำพยากรณ์แยก 3 ตำแหน่งชัดเจน (สถานการณ์ปัจจุบัน, มิติที่ซ่อนอยู่, คำแนะนำจากแม่หมอ) พร้อมข้อคิดเตือนใจ (Affirmation) ประจำกอง
+
+3. **ประสบการณ์อินเทอร์แอคทีฟและ Visual Luxury ตามระเบียบแม่บท**:
+   - แท่นบูชาเลือกกองไพ่ 3D กราฟิกจำลองสำรับไพ่หนามีมิติเงา
+   - การเปิดไพ่แบบ Manual Self-Reveal พลิกไพ่ 3D ทีละใบพร้อมเสียงประกอบ Tap & Shuffle Sound
+   - ปุ่มคัดลอกคำทำนายลงคลิปบอร์ด และปุ่มนำทางสู่ผังพยากรณ์เชิงลึกกับแม่หมอ AI
+   - ตรงตามกฎ Quiet Luxury: ไร้อิโมจิหรือดาวแฟนซี (กฎ 2), พาเลตสีทองถูกต้องตามเกณฑ์ AA (`text-gold-ink`), WCAG 2.2 AA Contrast ผ่านฉลุย
+
+4. **SEO & Structured Data ระดับ World-Class**:
+   - Metadata ถูกต้องตามเพดาน SERP (TH: 57 ตัวอักษร, EN: 59 ตัวอักษร, คำอธิบาย 140-147 ตัวอักษร)
+   - โครงสร้าง JSON-LD 3 ชั้น: `BreadcrumbList`, `FAQPage`, และ `SoftwareApplication`
+   - คัมภีร์บทความบรรณาธิการท้ายหน้า เสริมโครงสร้างความรู้และ Internal Links สู่สารานุกรมไพ่ 78 ใบและผังพยากรณ์
+
+5. **ผ่านการทดสอบ 100% ครบทั้ง 74 ด่าน (`npm run repo:verify`)**:
+   - ตรวจความยาวหัวข้อ Meta, ห้ามไทยรั่วในหน้าอังกฤษ, a11y ลำดับหัวข้อ, พาเลตสี, และ Motion ผ่านทุกด่าน
 
 ### 🗓️ 2026-09-17 (รอบ 88): ✂️ แก้ลิ้นชักนำทางเฉือนหัวสระไทยทิ้ง + บรรทัดสองของปุ่มไม่ตรงแนว (INC-0197)
 

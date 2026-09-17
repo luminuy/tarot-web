@@ -1,0 +1,21 @@
+---
+import { pickACardMetadataTh } from "@/app/_shared/pages/pick-a-card-th";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { PickACardBodyThRoot } from "../components/PageBodies";
+import { PickACardIsland } from "../islands/PickACardIsland";
+import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+
+/** 🔮 Pick A Card — พิธีเลือกกองไพ่เป็น island · เนื้อหา SEO ท้ายหน้าเป็น HTML ล้วน */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={pickACardMetadataTh}>
+  <SiteHeaderRoot locale={locale} client:idle />
+  <PickACardBodyThRoot>
+    <Fragment slot="ritual">
+      <PickACardIsland locale={locale} client:load />
+    </Fragment>
+  </PickACardBodyThRoot>
+  <SiteFooterRoot locale={locale} />
+</BaseLayout>

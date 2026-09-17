@@ -110,6 +110,12 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
       cardId: "major-06",
     },
     {
+      label: isEnglish ? "Pick A Card (4 Piles)" : "Pick A Card เลือกกองไพ่ (4 กอง)",
+      sublabel: isEnglish ? "Choose a sacred pile for love, career & cosmic guidance" : "เลือกกองไพ่พยากรณ์ความรัก การงาน และข้อคิดเตือนใจ",
+      href: "/pick-a-card",
+      cardId: "major-17",
+    },
+    {
       label: isEnglish ? "Tarot Birth Card" : "คำนวณไพ่ประจำตัว (Birth Card)",
       sublabel: isEnglish ? "Calculate your personality & soul tarot archetypes" : "คำนวณไพ่บุคลิกภาพและจิตวิญญาณจากวันเกิด",
       href: "/cards/birth-card",
@@ -182,7 +188,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         </div>
 
         {/* Text Details: Title & Subtitle */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 text-left">
           <div className="flex items-center justify-between gap-2">
             <span
               className={`text-[13px] font-serif-th leading-[1.7] truncate transition-colors ${
@@ -302,7 +308,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         aria-label={isEnglish ? "Sanctuary navigation menu" : "เมนูวิหารพยากรณ์"}
         aria-hidden={!isOpen}
         tabIndex={isOpen ? 0 : -1}
-        className={`nav-drawer-panel-base w-full max-w-[340px] sm:max-w-[380px] bg-surface border-l border-line z-[calc(var(--z-dropdown)+1)] flex flex-col ${
+        className={`nav-drawer-panel-base w-full max-w-[340px] sm:max-w-[380px] bg-surface border-l border-line z-[calc(var(--z-dropdown)+1)] flex flex-col overflow-hidden ${
           isOpen ? "nav-drawer-panel-entering" : "nav-drawer-panel-exiting"
         }`}
       >
@@ -364,10 +370,10 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
         </div>
 
         {/* Scrollable Navigation Body */}
-        <div className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-3 no-scrollbar">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 py-3 space-y-3 no-scrollbar">
           {/* Section 1: พิธีกรรมยอดนิยม */}
           <div>
-            <div className="px-2 pb-1.5 text-[10.5px] font-mono tracking-[0.16em] uppercase text-muted font-semibold">
+            <div className="px-2.5 pb-1.5 text-xs font-serif-th font-semibold text-muted tracking-normal select-none">
               {isEnglish ? "Featured Rituals & Tools" : "พิธีกรรมยอดนิยม & เครื่องมือ"}
             </div>
             <div className="space-y-1">
@@ -380,7 +386,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
 
           {/* Section 2: คลังความรู้ & ผังพยากรณ์ */}
           <div>
-            <div className="px-2 pb-1.5 text-[10.5px] font-mono tracking-[0.16em] uppercase text-muted font-semibold">
+            <div className="px-2.5 pb-1.5 text-xs font-serif-th font-semibold text-muted tracking-normal select-none">
               {isEnglish ? "Knowledge & Spreads" : "คลังความรู้ & ผังพยากรณ์"}
             </div>
             <div className="space-y-1">
@@ -393,7 +399,7 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
             <>
               <div className="h-[1px] w-full bg-line/40 my-1.5" />
               <div>
-                <div className="px-2 pb-1.5 text-[10.5px] font-mono tracking-[0.16em] uppercase text-muted font-semibold">
+                <div className="px-2.5 pb-1.5 text-xs font-serif-th font-semibold text-muted tracking-normal select-none">
                   {isEnglish ? "Reading Journal" : "ประวัติ & บันทึกดวง"}
                 </div>
                 {renderNavCard(
