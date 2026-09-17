@@ -700,8 +700,9 @@ export default function RedeemCodesManager() {
         maxWidth="lg"
       >
         <form onSubmit={handleCreateSubmit} className="space-y-4 pt-2">
+          {/* ♿ R-21: ประกาศข้อความผิดพลาดให้โปรแกรมอ่านหน้าจอทันทีที่โหนดปรากฏ */}
           {createError && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+            <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
               {createError}
             </div>
           )}
@@ -823,7 +824,7 @@ export default function RedeemCodesManager() {
               min={todayISO()}
               value={createExpiryDate}
               onChange={(e) => setCreateExpiryDate(e.target.value)}
-              className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
+              className="w-full rounded-xl border border-line-interactive bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
             />
             <p className="text-[11px] text-muted">
               หมดอายุ ณ 23:59:59 ของวันที่เลือก (ค่าเริ่มต้น 30 วันนับจากวันนี้)
@@ -856,8 +857,9 @@ export default function RedeemCodesManager() {
       >
         {editingCode && (
           <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
+            {/* ♿ R-21: เหมือนกล่องสร้างรหัส — ต้องประกาศ ไม่ใช่แค่โผล่บนจอ */}
             {editError && (
-              <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+              <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
                 {editError}
               </div>
             )}
@@ -914,7 +916,7 @@ export default function RedeemCodesManager() {
                 required
                 value={editExpiryDate}
                 onChange={(e) => setEditExpiryDate(e.target.value)}
-                className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
+                className="w-full rounded-xl border border-line-interactive bg-white px-3 py-2 text-xs text-ink focus:border-gold focus:outline-none"
               />
               <p className="text-[11px] text-muted">
                 รหัสเก่าที่ยังไม่มีวันหมดอายุ กดบันทึกครั้งเดียวก็ได้วันตายทันที
@@ -927,7 +929,7 @@ export default function RedeemCodesManager() {
                 type="checkbox"
                 checked={editIsActive}
                 onChange={(e) => setEditIsActive(e.target.checked)}
-                className="rounded border-line"
+                className="rounded border-line-interactive"
               />
               เปิดใช้งานรหัสนี้
             </label>

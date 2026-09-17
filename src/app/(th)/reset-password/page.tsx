@@ -108,8 +108,15 @@ function ResetPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-left">
+      {/* ♿ R-21: ข้อความผิดพลาดต้องถูก "ประกาศ" ให้โปรแกรมอ่านหน้าจอ ไม่ใช่แค่โผล่บนจอ
+          `role="alert"` ทำให้อ่านทันทีที่โหนดปรากฏ · `id` ผูกกับช่องกรอกด้วย `aria-describedby`
+          เพื่อให้ผู้ใช้ที่ย้อนกลับไปที่ช่องนั้นได้ยินว่าผิดตรงไหน (ไม่ใช่แค่ว่า "มีอะไรผิด") */}
       {errorMsg && (
-        <div className="p-3 rounded-lg bg-err/60 border border-err/40 text-err text-xs font-serif-th text-center">
+        <div
+          id="reset-password-error"
+          role="alert"
+          className="p-3 rounded-lg bg-err/60 border border-err/40 text-err text-xs font-serif-th text-center"
+        >
           {errorMsg}
         </div>
       )}
@@ -123,11 +130,13 @@ function ResetPasswordForm() {
             id="new-password"
             type={showPassword ? "text" : "password"}
             required
+            aria-invalid={errorMsg ? true : undefined}
+            aria-describedby={errorMsg ? "reset-password-error" : undefined}
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร"}
-            className="w-full h-11 px-3.5 pr-10 rounded-lg bg-inset-warm border border-line-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
+            className="w-full h-11 px-3.5 pr-10 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
           />
           <button
             type="button"
@@ -166,11 +175,13 @@ function ResetPasswordForm() {
           id="confirm-password"
           type={showPassword ? "text" : "password"}
           required
+          aria-invalid={errorMsg ? true : undefined}
+          aria-describedby={errorMsg ? "reset-password-error" : undefined}
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder={isEn ? "Re-enter password to match" : "ระบุรหัสผ่านให้ตรงกัน"}
-          className="w-full h-11 px-3.5 rounded-lg bg-inset-warm border border-line-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
+          className="w-full h-11 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
         />
       </div>
 

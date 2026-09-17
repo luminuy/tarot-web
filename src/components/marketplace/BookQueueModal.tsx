@@ -186,7 +186,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 rounded border-line-warm accent-gold-ink focus:ring-0"
+              className="mt-0.5 rounded border-line-interactive-warm accent-gold-ink focus:ring-0"
             />
             <span className="leading-relaxed">
               ข้าพเจ้ายินยอมให้ส่งต่อข้อมูลชื่อเล่น คำถาม และสรุปไพ่ไปยังแม่หมอ โดยข้อมูลจะถูกลบอัตโนมัติภายใน 30

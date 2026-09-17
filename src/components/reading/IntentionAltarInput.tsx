@@ -176,7 +176,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={nickname}
             onChange={(e) => onNicknameChange(e.target.value)}
             placeholder={isEnglish ? "e.g., Alex, Jordan (or leave blank)" : "เช่น ฟ้า, บิ๊ก, พลอย (เว้นว่างได้)"}
-            className="w-full bg-surface rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 border border-line-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
+            className="w-full bg-surface rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
           />
         </div>
 
@@ -196,7 +196,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={situation}
             onChange={(e) => onSituationChange(e.target.value)}
             placeholder={isEnglish ? "e.g., Navigating relationship friction / Awaiting job interview results" : "เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"}
-            className="w-full bg-surface border border-line-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition"
+            className="w-full bg-surface border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition"
           />
         </div>
       </div>
@@ -265,7 +265,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             className={`w-full bg-surface rounded-lg p-4 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 leading-relaxed resize-none ${
               isQuestionEmpty
                 ? "border border-err focus:border-err focus:ring-2 focus:ring-err/30"
-                : "border border-line-warm group-hover:border-gold-ink focus:border-gold-ink focus:ring-2 focus:ring-gold-ink/30"
+                : "border border-line-interactive-warm group-hover:border-gold-ink focus:border-gold-ink focus:ring-2 focus:ring-gold-ink/30"
             }`}
           />
         </div>

@@ -18,6 +18,9 @@ export function ChangePasswordCard() {
   const oldPwId = useId();
   const newPwId = useId();
   const confirmPwId = useId();
+  /* ♿ R-21: ไอดีของกล่องข้อความผิดพลาด — ผูกกับทุกช่องกรอกด้วย aria-describedby */
+  const errorId = useId();
+  const successId = useId();
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -105,14 +108,25 @@ export function ChangePasswordCard() {
             : "คุณสามารถตั้งรหัสผ่านเพื่อเข้าสู่ระบบด้วยอีเมลได้ นอกเหนือจากการเข้าสู่ระบบผ่าน Google หรือ LINE")}
       </p>
 
+      {/* ♿ R-21: `role="alert"` ทำให้โปรแกรมอ่านหน้าจออ่านข้อความทันทีที่โหนดปรากฏ
+          ของเดิมข้อความโผล่บนจออย่างเดียว ผู้ใช้ที่มองไม่เห็นจึงไม่รู้ว่ากรอกผิด */}
       {errorMsg && (
-        <div className="p-3 rounded-lg bg-err-wash border border-line-warm text-err text-xs font-serif-th text-center">
+        <div
+          id={errorId}
+          role="alert"
+          className="p-3 rounded-lg bg-err-wash border border-line-warm text-err text-xs font-serif-th text-center"
+        >
           {errorMsg}
         </div>
       )}
 
+      {/* ผลสำเร็จใช้ `status` (polite) — ไม่ต้องขัดจังหวะสิ่งที่ผู้ใช้กำลังฟังอยู่ */}
       {successMsg && (
-        <div className="p-3 rounded-lg bg-[#EBF3ED] border border-line-warm text-ok text-xs font-serif-th text-center">
+        <div
+          id={successId}
+          role="status"
+          className="p-3 rounded-lg bg-[#EBF3ED] border border-line-warm text-ok text-xs font-serif-th text-center"
+        >
           {successMsg}
         </div>
       )}
@@ -127,10 +141,12 @@ export function ChangePasswordCard() {
               id={oldPwId}
               type={showPassword ? "text" : "password"}
               required
+              aria-invalid={errorMsg ? true : undefined}
+              aria-describedby={errorMsg ? errorId : undefined}
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               placeholder="••••••••••"
-              className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
+              className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
             />
           </div>
         )}
@@ -152,10 +168,12 @@ export function ChangePasswordCard() {
             id={newPwId}
             type={showPassword ? "text" : "password"}
             required
+            aria-invalid={errorMsg ? true : undefined}
+            aria-describedby={errorMsg ? errorId : undefined}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder={isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร"}
-            className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
+            className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
           />
           {newPassword.length > 0 && (
             <div className="pt-1.5 space-y-1">
@@ -181,10 +199,12 @@ export function ChangePasswordCard() {
             id={confirmPwId}
             type={showPassword ? "text" : "password"}
             required
+            aria-invalid={errorMsg ? true : undefined}
+            aria-describedby={errorMsg ? errorId : undefined}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder={isEn ? "Re-enter new password" : "ระบุรหัสผ่านให้ตรงกัน"}
-            className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
+            className="w-full h-10 px-3.5 rounded-lg bg-inset-warm border border-line-interactive-warm text-ink-deep text-sm focus:outline-none focus:border-gold-ink transition-colors"
           />
         </div>
 

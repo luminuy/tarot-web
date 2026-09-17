@@ -69,7 +69,7 @@ export const ClarificationCard: React.FC<ClarificationCardProps> = ({
               ? "Share a brief answer (e.g. we parted 2 months ago, or choosing between 2 specific offers)..."
               : "พิมพ์คำตอบหรือเล่าเพิ่มเติมสั้น ๆ (เช่น เลิกรากันมา 2 เดือนแล้ว หรือ กำลังตัดสินใจระหว่าง 2 ตัวเลือก)..."
           }
-          className="w-full p-3 sm:p-3.5 rounded-lg border border-line bg-surface text-xs sm:text-sm font-serif-th focus:outline-none focus:border-gold-ink text-ink placeholder:text-[#8C827A] resize-none leading-relaxed"
+          className="w-full p-3 sm:p-3.5 rounded-lg border border-line-interactive bg-surface text-xs sm:text-sm font-serif-th focus:outline-none focus:border-gold-ink text-ink placeholder:text-[#8C827A] resize-none leading-relaxed"
         />
 
         <div className="flex items-center justify-between gap-3 pt-1 flex-wrap">

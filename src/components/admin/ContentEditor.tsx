@@ -242,7 +242,7 @@ function PersonaTab({
           id={readerSelectId}
           value={sel}
           onChange={(e) => setSel(e.target.value)}
-          className="w-full max-w-xs rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+          className="w-full max-w-xs rounded-xl border border-line-interactive bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
         >
           {personas.map((x) => (
             <option key={x.id} value={x.id}>
@@ -515,7 +515,7 @@ function CardTab({
           aria-label="ผลใช่/ไม่ใช่ของไพ่ใบนี้"
                       value={o.yesNo ?? "default"}
                       onChange={(e) => setYesNo(e.target.value)}
-                      className="rounded-lg border border-line bg-white px-2.5 py-1 text-xs text-ink focus:outline-none focus:border-ink"
+                      className="rounded-lg border border-line-interactive bg-white px-2.5 py-1 text-xs text-ink focus:outline-none focus:border-ink"
                     >
                       <option value="default">ค่าเริ่มต้น ({detail.defaults.yesNo})</option>
                       <option value="yes">Yes (ใช่/สำเร็จ)</option>

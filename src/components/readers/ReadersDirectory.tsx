@@ -52,7 +52,7 @@ export const ReadersDirectory: React.FC<ReadersDirectoryProps> = ({ initialReade
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาแม่หมอ, ความถนัด (เช่น ความรัก, การงาน)…"
-            className="w-full bg-surface border border-line rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink placeholder-muted/60 focus:outline-none focus:border-gold transition-colors"
+            className="w-full bg-surface border border-line-interactive rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink placeholder-muted/60 focus:outline-none focus:border-gold transition-colors"
           />
           {search && (
             <button

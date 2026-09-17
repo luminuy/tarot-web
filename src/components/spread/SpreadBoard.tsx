@@ -8,6 +8,7 @@ import { TarotCard } from "@/components/card/TarotCard";
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { ExpandTabIcon } from "@/components/ui/TarotArtIcons";
+import { useMotionSafe } from "@/lib/use-motion-safe";
 
 export interface DrawnSlotCard {
   order: number;
@@ -55,6 +56,10 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
 }) => {
   const { isEnglish } = useLocale();
   const railRef = React.useRef<HTMLDivElement>(null);
+  /* ♿ R-03: ตรรกะ "ผู้ใช้ขอลดการเคลื่อนไหวไหม" ต้องมาจากที่เดียวทั้งเว็บ
+     ของเดิมเขียน matchMedia เองแบบ inline ที่นี่ ทั้งที่ StreamReader ย้ายมาใช้ฮุกนี้แล้ว
+     สองที่ที่เขียนเงื่อนไขเดียวกันเอง = วันหนึ่งจะตอบไม่ตรงกันโดยไม่มีใครรู้ */
+  const motionSafe = useMotionSafe();
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
 
@@ -113,8 +118,6 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
     return () => window.removeEventListener("resize", onResize);
   }, [useRail, syncRailEdges, spread.positions.length]);
 
-  const prefersReducedMotion = () =>
-    typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
   /**
    * เลื่อน "เฉพาะราง" ให้เห็นไพ่ใบที่กำลังอ่าน — ห้ามใช้ scrollIntoView เด็ดขาด
@@ -129,9 +132,9 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
     const target = slot.offsetLeft - (rail.clientWidth - slot.clientWidth) / 2;
     rail.scrollTo({
       left: Math.max(0, target),
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      behavior: motionSafe ? "smooth" : "auto",
     });
-  }, [currentReadingPosition, useRail]);
+  }, [currentReadingPosition, useRail, motionSafe]);
 
   const nudgeRail = (direction: -1 | 1) => {
     const rail = railRef.current;
@@ -139,7 +142,7 @@ export const SpreadBoard: React.FC<SpreadBoardProps> = ({
     const step = rail.clientWidth * 0.7;
     rail.scrollBy({
       left: direction * step,
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      behavior: motionSafe ? "smooth" : "auto",
     });
   };
 
