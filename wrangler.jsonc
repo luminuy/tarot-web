@@ -57,8 +57,8 @@
       // ตัวปรับขนาดภาพของ Next — ไม่ใช่ไฟล์ static จึงต้องเข้า Worker
       "/_next/image*",
       // หน้าแอปที่เหลืออยู่ฝั่ง Next (ทุกตัวมี page.tsx ใน src/app)
-      "/account",
-      "/account/*",
+      // ⚠️ `/account` ย้ายไป Astro แล้ว (astro/pages/account.astro) จึงต้องไม่อยู่ในรายการนี้
+      //    ใส่กลับเมื่อไร = Worker จะขโมยเส้นนั้นคืนจากไฟล์ static ที่ขอบทันที
       "/admin",
       "/admin/*",
       "/readers",

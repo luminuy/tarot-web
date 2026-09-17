@@ -11,7 +11,7 @@ const groupId = "major" as const;
 ---
 
 <BaseLayout locale={locale} metadata={buildCardGroupMetadata(groupId, locale)}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <CardGroupBodyRoot groupId={groupId} locale={locale} />
   <SiteFooterRoot locale={locale} />
 </BaseLayout>

@@ -4,8 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { useLocale } from "@/lib/i18n";
-import { writeConsent } from "@/lib/analytics-consent";
-import { setAnalyticsConsent } from "@/lib/analytics";
+import { applyConsentChoice } from "@/lib/analytics-bootstrap";
 
 /**
  * ✦ แถบขอความยินยอมเก็บสถิติการใช้งาน (PDPA)
@@ -38,11 +37,9 @@ export function ConsentBanner() {
   if (decided) return null;
 
   const decide = (choice: "granted" | "denied") => {
-    writeConsent(choice); // จำไว้ต่อเครื่อง + ยิง event ให้ Meta Pixel เริ่มทำงาน
-    setAnalyticsConsent(choice === "granted"); // Google Consent Mode v2
-    // ถอดสวิตช์ CSS ทิ้งด้วย ไม่ใช่แค่ถอด markup — กันแถบกะพริบกลับมาหนึ่งเฟรม
-    // ถ้าวันหน้ามีใครเรนเดอร์คอมโพเนนต์นี้ซ้ำในหน้าเดียวกัน
-    document.documentElement.removeAttribute("data-consent-ask");
+    // ⚠️ ตรรกะอยู่ที่ `applyConsentChoice` ที่เดียว — สคริปต์ฝั่ง Astro เรียกตัวเดียวกันนี้
+    // ห้ามเขียนซ้ำที่นี่ (ความยินยอม PDPA ที่อยู่สองที่จะหลุดจากกันเสมอ)
+    applyConsentChoice(choice);
     setDecided(true);
   };
 
@@ -64,6 +61,7 @@ export function ConsentBanner() {
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
           type="button"
+          data-consent-accept=""
           onClick={() => decide("granted")}
           className="tap-target flex-1 min-w-[120px] rounded-lg bg-ink px-3 py-2 text-[13px] font-bold text-canvas hover:bg-[#3D382F] transition-colors"
         >
@@ -71,6 +69,7 @@ export function ConsentBanner() {
         </button>
         <button
           type="button"
+          data-consent-reject=""
           onClick={() => decide("denied")}
           className="tap-target flex-1 min-w-[120px] rounded-lg border border-line px-3 py-2 text-[13px] font-bold text-ink hover:border-gold transition-colors"
         >

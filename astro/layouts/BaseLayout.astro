@@ -24,7 +24,7 @@ import { getImageKitOrigin } from "@/lib/tarot/card-image";
 import type { Locale } from "@/lib/i18n/types";
 
 import { renderMetadata } from "../lib/metadata";
-import { ClientChromeRoot } from "../islands/SiteChrome";
+import { ConsentBannerRoot } from "../islands/SiteChrome";
 import { FloatingChromeRoot, SkipLinkRoot } from "../components/StaticChrome";
 
 /**
@@ -171,8 +171,19 @@ const consentScript = `try{if(!localStorage.getItem(${JSON.stringify(CONSENT_STO
   <body class="min-h-dvh font-sans antialiased">
     {/* ⏭️ ต้องเป็น element แรกสุดใน <body> เสมอ — ห้ามแทรกอะไรไว้ข้างหน้า (WCAG SC 2.4.1) */}
     <SkipLinkRoot locale={locale} />
-    <ClientChromeRoot locale={locale} client:idle />
+    <ConsentBannerRoot locale={locale} />
     <slot />
     <FloatingChromeRoot locale={locale} />
+
+    {/*
+      🧩 ของล่องหนของทุกหน้า (เกราะกันดูดเนื้อหา · Service Worker · เครื่องมือวัดผล ·
+      ปุ่มของแถบความยินยอม) และหัวเว็บ — เขียนเป็นสคริปต์ธรรมดา ไม่ใช่ island
+      ⚠️ ห้ามเปลี่ยนกลับไปเป็น island เด็ดขาด: ทั้งสองก้อนรวมกันคือเหตุผลเดียวที่หน้า
+      เนื้อหาเคยต้องโหลด React 184 KB (วัดจริง: JS 278.7 KB ➔ 1.8 KB หลังถอดออก)
+    */}
+    <script>
+      import "../scripts/site-chrome";
+      import "../scripts/site-header";
+    </script>
   </body>
 </html>

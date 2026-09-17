@@ -11,7 +11,7 @@ const locale = "th" as const;
 ---
 
 <BaseLayout locale={locale} metadata={buildBlogIndexMetadata(locale)}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <BlogIndexBodyRoot locale={locale}>
     <Fragment slot="list">
       <BlogIndexRoot locale={locale} client:idle />

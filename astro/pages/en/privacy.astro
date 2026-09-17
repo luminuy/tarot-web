@@ -11,7 +11,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={privacyMetadataEn}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <PrivacyBodyEnRoot>
     <Fragment slot="deleteButton">
       <DeleteAllDataRoot locale={locale} client:idle />

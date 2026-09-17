@@ -11,7 +11,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={loveOneCardMetadataEn}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <LoveOneCardBodyEnRoot>
     <Fragment slot="ritual">
       <LoveOneCardRitualRoot locale={locale} client:load />

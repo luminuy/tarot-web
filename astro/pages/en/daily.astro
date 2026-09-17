@@ -11,7 +11,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={dailyMetadataEn}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <DailyBodyEnRoot>
     <Fragment slot="ritual">
       <DailyRitualRoot locale={locale} client:load />

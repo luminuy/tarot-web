@@ -11,7 +11,7 @@ const locale = "en" as const;
 ---
 
 <BaseLayout locale={locale} metadata={birthCardMetadataEn}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <BirthCardBodyEnRoot>
     <Fragment slot="calculator">
       <BirthCardCalculatorRoot majorCards={MAJOR_CARDS} locale={locale} client:idle />

@@ -231,7 +231,7 @@ async function main() {
    * สวิตช์จริงย้ายไปอยู่หน้า `/account` ตั้งแต่ #513 แล้ว การชี้ไฟล์ผิดทำให้ด่านนี้
    * กลายเป็น "ด่านหลอก" ที่ผ่านได้แม้สวิตช์จะหายไปทั้งตัว — ต้องอ่านหน้าบัญชีของจริง
    */
-  const accountPage = readSrc("src/app/(th)/account/AccountClient.tsx");
+  const accountPage = readSrc("src/components/account/AccountClient.tsx");
   check(
     "มีสวิตช์ให้ผู้ใช้กดสมัคร/ยกเลิกเองในหน้าบัญชี",
     accountPage.includes("handleUpdateDigest") && accountPage.includes("digestEmail"),

@@ -202,22 +202,40 @@ async function runTests() {
     resolve(import.meta.dirname, "../../src/components/analytics/AnalyticsTracker.tsx"),
     "utf-8",
   );
-  // ตรวจเฉพาะในบล็อก `gtag('consent', 'default', {...})` เท่านั้น
-  // (คำว่า 'granted' ยังต้องมีอยู่ในโค้ดกู้สถานะของผู้ที่เคยกดยินยอมไว้แล้ว)
-  const defaultStart = trackerSrc.indexOf("gtag('consent', 'default'");
-  const defaultBlock = trackerSrc.slice(
+  /*
+   * 🧭 ตั้งแต่ 2026-09-17 ตรรกะ gtag/Consent Mode ทั้งก้อนถูกย้ายออกจากคอมโพเนนต์ React
+   * ไปอยู่ที่ `src/lib/analytics-bootstrap.ts` เพื่อให้หน้าที่ Astro เรนเดอร์เรียกใช้ได้
+   * โดยไม่ต้องโหลด React 184 KB — **ด่านชุดนี้จึงต้องตรวจที่โมดูลนั้น ไม่ใช่ที่คอมโพเนนต์**
+   * และต้องตรวจด้วยว่าทั้งสองฝั่ง (React กับสคริปต์ของ Astro) เรียกโมดูลเดียวกันจริง
+   */
+  const bootstrapSrc = readFileSync(
+    resolve(import.meta.dirname, "../../src/lib/analytics-bootstrap.ts"),
+    "utf-8",
+  );
+  const astroChromeSrc = readFileSync(
+    resolve(import.meta.dirname, "../../astro/scripts/site-chrome.ts"),
+    "utf-8",
+  );
+  check(
+    "ทั้งสองเครื่องเรนเดอร์บูตเครื่องมือวัดผลจากโมดูลกลางตัวเดียวกัน (ตรรกะ PDPA ห้ามอยู่สองที่)",
+    trackerSrc.includes("bootstrapAnalytics") && astroChromeSrc.includes("bootstrapAnalytics"),
+  );
+  // ตรวจเฉพาะในบล็อก `gtag("consent", "default", {...})` เท่านั้น
+  // (คำว่า granted ยังต้องมีอยู่ในโค้ดกู้สถานะของผู้ที่เคยกดยินยอมไว้แล้ว)
+  const defaultStart = bootstrapSrc.indexOf('gtag("consent", "default"');
+  const defaultBlock = bootstrapSrc.slice(
     defaultStart,
-    trackerSrc.indexOf("});", defaultStart),
+    bootstrapSrc.indexOf("});", defaultStart),
   );
   check(
     "consent default ตั้ง analytics_storage เป็น denied",
-    /'analytics_storage':\s*'denied'/.test(defaultBlock) &&
-      !/'analytics_storage':\s*'granted'/.test(defaultBlock),
+    /analytics_storage:\s*"denied"/.test(defaultBlock) &&
+      !/analytics_storage:\s*"granted"/.test(defaultBlock),
   );
   check(
     "ค่าโฆษณาทั้งสามยังคงเป็น denied",
-    ["'ad_storage': 'denied'", "'ad_user_data': 'denied'", "'ad_personalization': 'denied'"].every(
-      (t) => trackerSrc.includes(t),
+    ['ad_storage: "denied"', 'ad_user_data: "denied"', 'ad_personalization: "denied"'].every(
+      (t) => defaultBlock.includes(t),
     ),
   );
   /*
@@ -231,29 +249,39 @@ async function runTests() {
     resolve(import.meta.dirname, "../../src/lib/storage/keys.ts"),
     "utf-8",
   );
+  const consentModuleSrc = readFileSync(
+    resolve(import.meta.dirname, "../../src/lib/analytics-consent.ts"),
+    "utf-8",
+  );
   check(
-    "กู้สถานะที่ผู้ใช้เคยเลือกไว้ก่อน React hydrate (อ่านคีย์จากทะเบียน)",
-    trackerSrc.includes("STORAGE_KEYS.analyticsConsent"),
+    "กู้สถานะที่ผู้ใช้เคยเลือกไว้ (อ่านคีย์จากทะเบียน ไม่ได้ประกอบชื่อคีย์เอง)",
+    consentModuleSrc.includes("STORAGE_KEYS.analyticsConsent") &&
+      bootstrapSrc.includes("CONSENT_STORAGE_KEY"),
   );
   check(
     "คีย์ความยินยอมในทะเบียนยังเป็นค่าเดิม (เปลี่ยนแล้วผู้ใช้ทุกคนถูกถามใหม่หมด)",
     /analyticsConsent:\s*"seertarot_analytics_consent_v1"/.test(storageKeysSrc),
   );
   check(
-    "สคริปต์ init กู้สถานะจาก window.__seertarotConsent ด้วย (กันการกดยินยอมหายตอน lazyOnload)",
-    trackerSrc.includes("window.__seertarotConsent"),
+    "ตัวบูตกู้สถานะจาก __seertarotConsent ด้วย (กันการกดยินยอมหายตอนสคริปต์มาถึงทีหลัง)",
+    bootstrapSrc.includes("__seertarotConsent"),
   );
   check(
     "ตั้ง ads_data_redaction ตาม Consent Mode v2",
-    trackerSrc.includes("'ads_data_redaction'"),
+    bootstrapSrc.includes('"ads_data_redaction"'),
   );
   check(
     "ไม่มี anonymize_ip หลงเหลือ (พารามิเตอร์ของ Universal Analytics ที่ GA4 ไม่ใช้แล้ว)",
-    !trackerSrc.includes("anonymize_ip"),
+    !bootstrapSrc.includes("anonymize_ip") && !trackerSrc.includes("anonymize_ip"),
   );
   check(
     "แท็กยิงเฉพาะโดเมนจริง — กัน *.workers.dev โผล่ในรายงานและในหน้าวินิจฉัยแท็ก",
-    trackerSrc.includes("isMeasurableHostname") && trackerSrc.includes("isMeasurableHost &&"),
+    bootstrapSrc.includes("isMeasurableHostname(window.location.hostname)") &&
+      /if\s*\(!isMeasurableHostname\(window\.location\.hostname\)\)\s*return/.test(bootstrapSrc),
+  );
+  check(
+    "ถามเส้น runtime เฉพาะตอนไม่มีรหัสติดมากับ build (ไม่งั้นทุกแท็บยิง /api/config/analytics เพิ่ม)",
+    /buildGaId \|\| buildAdsId \|\| buildPixelId/.test(bootstrapSrc),
   );
 
   const analyticsSrc = readFileSync(
@@ -274,11 +302,11 @@ async function runTests() {
     /window\.dataLayer = window\.dataLayer \|\| \[\]/.test(consentBody),
   );
   // ตัว URL ของสคริปต์ (ไม่ใช่ชื่อโดเมนในคอมเมนต์) ต้องอยู่ **ข้างใน** ฟังก์ชันที่ถูกกั้น
-  const pixelLoaderUrl = "'https://connect.facebook.net/en_US/fbevents.js'";
+  const pixelLoaderUrl = '"https://connect.facebook.net/en_US/fbevents.js"';
   check(
     "Meta Pixel ถูกกั้นตั้งแต่ตัวโหลด ไม่ใช่แค่ fbq('init')",
-    trackerSrc.includes("function seertarotInitPixel") &&
-      trackerSrc.indexOf(pixelLoaderUrl) > trackerSrc.indexOf("function seertarotInitPixel"),
+    bootstrapSrc.includes("function installMetaPixel") &&
+      bootstrapSrc.indexOf(pixelLoaderUrl) > bootstrapSrc.indexOf("function installMetaPixel"),
   );
 
   const bannerSrc = readFileSync(

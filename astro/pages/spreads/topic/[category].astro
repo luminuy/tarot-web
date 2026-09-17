@@ -19,7 +19,7 @@ const spreads = getSpreadsForTopic(topic);
 ---
 
 <BaseLayout locale={locale} metadata={spreadTopicMetadata(topic.slug, locale)}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <SpreadTopicContentRoot topic={topic} locale={locale}>
     <Fragment slot="list">
       <TopicSpreadListRoot spreads={spreads} locale={locale} client:idle />

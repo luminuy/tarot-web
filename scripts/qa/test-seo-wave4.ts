@@ -191,12 +191,21 @@ assert(
   "ห้ามเขียน alternates: { เองใน src/app (ต้องใช้ buildAlternates จาก site.ts เพื่อคง hreflang)",
 );
 
-// 8. S-03: /account/layout.tsx must declare robots noindex
-const accountLayoutPath = path.join(process.cwd(), "src/app/(th)/account/layout.tsx");
-const accountLayoutContent = fs.readFileSync(accountLayoutPath, "utf-8");
+// 8. S-03: หน้า /account ต้องประกาศ robots noindex ในตัวเอง (ไม่พึ่ง robots.txt อย่างเดียว)
+//    ⚠️ หน้านี้ย้ายจาก Next ไป Astro แล้ว metadata จึงอยู่ที่โมดูลกลางที่ Astro อ่าน
+//       ถ้าย้ายกลับหรือย้ายไฟล์อีก ให้แก้พาธตรงนี้ด้วย — ห้ามลบด่านทิ้ง
+const accountMetaPath = path.join(process.cwd(), "src/app/_shared/pages/account-th.ts");
+assert(fs.existsSync(accountMetaPath), "ไม่พบโมดูล metadata ของหน้า /account (src/app/_shared/pages/account-th.ts)");
+const accountMetaContent = fs.readFileSync(accountMetaPath, "utf-8");
 assert(
-  accountLayoutContent.includes("robots:") && accountLayoutContent.includes("index: false"),
-  "src/app/account/layout.tsx ต้องประกาศ robots: { index: false } (S-03)",
+  accountMetaContent.includes("robots:") && accountMetaContent.includes("index: false"),
+  "metadata ของหน้า /account ต้องประกาศ robots: { index: false } (S-03)",
+);
+const accountAstroPath = path.join(process.cwd(), "astro/pages/account.astro");
+assert(
+  fs.existsSync(accountAstroPath) &&
+    fs.readFileSync(accountAstroPath, "utf-8").includes("accountMetadataTh"),
+  "astro/pages/account.astro ต้องใช้ accountMetadataTh (ไม่งั้น noindex จะหายไปเงียบ ๆ)",
 );
 
 // 9. S-04: /tarot must be redirected in next.config.ts and src/app/tarot must not exist

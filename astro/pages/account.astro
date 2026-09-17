@@ -1,0 +1,26 @@
+---
+import { accountMetadataTh } from "@/app/_shared/pages/account-th";
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { AccountRoot } from "../islands/AccountRoot";
+import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
+
+/**
+ * 🔐 บัญชีสมาชิก — ย้ายออกจาก Next มาเป็นไฟล์ static ที่ขอบ (คลื่นที่ 4)
+ *
+ * หน้านี้เป็น **เชลล์เปล่า** อยู่แล้วตั้งแต่อยู่ฝั่ง Next (T-28) — ไม่มีข้อมูลผู้ใช้คนไหน
+ * ถูกเรนเดอร์ฝั่งเซิร์ฟเวอร์เลย ทุกอย่างมาจาก API ที่ตรวจเซสชันของตัวเองหลัง hydrate
+ * จึงย้ายมาเป็นไฟล์ static ได้โดยไม่เปลี่ยนพฤติกรรมและไม่รั่วข้อมูลใคร
+ *
+ * ⚠️ ย้ายหน้านี้แล้วต้องถอด `/account` กับ `/account/*` ออกจาก `run_worker_first`
+ * ใน `wrangler.jsonc` และเติม `/account` เข้า `ASTRO_EXACT_ROUTES` ให้ครบทั้งสองที่เสมอ
+ * (ด่านที่ 32 และ 43 ตรวจให้ — หลุดข้อใดข้อหนึ่งคือหน้า 404 หรือเสิร์ฟซ้ำสองที่)
+ */
+const locale = "th" as const;
+---
+
+<BaseLayout locale={locale} metadata={accountMetadataTh}>
+  <SiteHeaderRoot locale={locale} />
+  <AccountRoot locale={locale} client:load />
+  <SiteFooterRoot locale={locale} spacing="tight" />
+</BaseLayout>

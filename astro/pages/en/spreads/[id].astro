@@ -23,7 +23,7 @@ const detailProps = spreadDetailProps(spread, locale);
 ---
 
 <BaseLayout locale={locale} metadata={spreadDetailMetadata(spread.id, locale)}>
-  <SiteHeaderRoot locale={locale} client:idle />
+  <SiteHeaderRoot locale={locale} />
   <SpreadDetailContentRoot spread={spread} locale={locale}>
     <Fragment slot="detail">
       <SpreadDetailRoot {...detailProps} locale={locale} client:idle />
