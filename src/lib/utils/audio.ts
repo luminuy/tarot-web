@@ -5,6 +5,8 @@
  * ทำงานได้รวดเร็ว ลื่นไหล ไม่ต้องโหลดไฟล์ .mp3 ภายนอก
  */
 
+import { STORAGE_KEYS } from "@/lib/storage/keys";
+
 class MysticAudioEngine {
   private ctx: AudioContext | null = null;
   private soundEnabled = true;
@@ -18,7 +20,7 @@ class MysticAudioEngine {
     // ReadingHistoryModal, AuthModal, AdminOverview) จอขาวโดยไม่มี error UI ให้เห็น
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("tarot_sound_enabled");
+        const saved = localStorage.getItem(STORAGE_KEYS.soundEnabled);
         if (saved !== null) {
           this.soundEnabled = saved === "true";
         }
@@ -50,7 +52,7 @@ class MysticAudioEngine {
     this.soundEnabled = !this.soundEnabled;
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("tarot_sound_enabled", this.soundEnabled ? "true" : "false");
+        localStorage.setItem(STORAGE_KEYS.soundEnabled, this.soundEnabled ? "true" : "false");
       } catch {
         // เบราว์เซอร์บล็อกที่เก็บข้อมูล (เช่น โหมดส่วนตัวเข้ม)
       }

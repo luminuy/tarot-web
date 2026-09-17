@@ -164,7 +164,7 @@ export const CardsExplorer: React.FC<CardsExplorerProps> = ({ cards }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isEnglish ? "Search by card name, keyword, zodiac, or element..." : "ค้นหาชื่อไพ่, ภาษาอังกฤษ, ความหมาย, ราศี หรือธาตุ..."}
-              className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-line bg-surface text-ink placeholder-muted/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+              className="w-full pl-10 pr-10 py-3.5 rounded-xl border border-line-interactive bg-surface text-ink placeholder-muted/60 text-xs sm:text-sm font-sans focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
             />
             {searchQuery && (
               <button

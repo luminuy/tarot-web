@@ -46,21 +46,23 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v5
-
-      - name: ⚡ Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: ⚙️ Setup Node.js 22
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
-          # ⚠️ ต้องปิดไว้เสมอ — repo นี้ไม่มี `pnpm-lock.yaml` ถ้าเปิดแคชจะล้มทันที
-          # ด้วย "Dependencies lock file is not found" (บทเรียนเดียวกับ deploy.yml)
-          package-manager-cache: false
+          cache: npm
 
+      # 🔒 R-13: ติดตั้งด้วย `npm ci` ซึ่ง **บังคับ `package-lock.json`** ที่ commit ไว้
+      # ---------------------------------------------------------------------------
+      # ของเดิมเป็น `pnpm install --no-frozen-lockfile` ทั้งที่รีโปนี้ไม่มี `pnpm-lock.yaml` เลย
+      # ทุกครั้งที่ CI รันจึงแก้กราฟ dependency ใหม่จากศูนย์ และอาจดึงเวอร์ชัน transitive
+      # คนละชุดกับที่ทดสอบในเครื่อง — ใน job ที่ถือ `CLOUDFLARE_API_TOKEN` และคีย์ AI
+      # `npm ci` ล้มทันทีถ้า lockfile ไม่ตรงกับ package.json ซึ่งเป็นสิ่งที่เราต้องการ
+      # และแคชของ setup-node ใช้ได้เลยเพราะ `package-lock.json` มีอยู่จริง (กับดักเดิมหายไปเอง)
       - name: 📦 Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: npm ci
 
       - name: 🔑 ตรวจว่ามีคีย์ครบก่อนเสียเงิน
         env:
@@ -76,7 +78,7 @@ jobs:
           fi
 
       - name: 🧪 ซ้อมแห้งก่อน (ไม่เรียกโมเดล ต้นทุน 0)
-        run: pnpm run ai:judge -- --dry-run
+        run: npm run ai:judge -- --dry-run
 
       - name: 🧑‍⚖️ ยิงจริงแล้วเก็บรายงาน
         env:
@@ -109,8 +111,8 @@ jobs:
             ARGS="$ARGS --compare $JUDGE_COMPARE"
           fi
 
-          echo "รันด้วย: pnpm run ai:judge -- $ARGS"
-          pnpm run ai:judge -- $ARGS 2>&1 | tee judge-output.txt
+          echo "รันด้วย: npm run ai:judge -- $ARGS"
+          npm run ai:judge -- $ARGS 2>&1 | tee judge-output.txt
 
       - name: 📊 สรุปผลขึ้นหน้า workflow (อ่านได้เลยไม่ต้องโหลดไฟล์)
         if: always()
@@ -126,7 +128,7 @@ jobs:
 
       - name: 📎 แนบไฟล์รายงานไว้ให้โหลด (เผื่อขั้นเปิด PR ล้ม)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: judge-report
           path: |

@@ -519,10 +519,11 @@ export function QuickFortunePicker({
                   }}
                   placeholder={isEnglish ? "e.g., Alex, Jordan, Taylor..." : "เช่น บี, น้ำ, เจมส์, วิน..."}
                   maxLength={40}
-                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold bg-surface-warm text-ink"
+                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line-interactive focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold bg-surface-warm text-ink"
                 />
+                {/* ♿ R-21: ชื่อเล่นที่กรอกผิดต้องถูกประกาศ ไม่งั้นผู้ใช้กดต่อไม่ได้โดยไม่รู้สาเหตุ */}
                 {nicknameError && (
-                  <p className="text-[11px] font-serif-th text-err mt-1">
+                  <p role="alert" className="text-[11px] font-serif-th text-err mt-1">
                     {nicknameError}
                   </p>
                 )}
@@ -566,7 +567,7 @@ export function QuickFortunePicker({
                       : (isEnglish ? "Type your question here..." : "พิมพ์คำถามของคุณที่นี่...")
                   }
                   maxLength={300}
-                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold bg-surface-warm text-ink resize-none"
+                  className="w-full px-3.5 py-2 text-sm font-serif-th rounded-xl border border-line-interactive focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold bg-surface-warm text-ink resize-none"
                 />
                 <div className="flex items-center justify-between text-[11px] font-serif-th text-muted mt-1">
                   <span>

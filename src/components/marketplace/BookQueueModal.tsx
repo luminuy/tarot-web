@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 interface BookQueueModalProps {
   isOpen: boolean;
@@ -38,14 +39,14 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
   const getCustomerRef = (): string => {
     if (typeof window === "undefined") return "cust_anon";
     try {
-      let ref = localStorage.getItem("tarot_customer_ref");
+      let ref = localStorage.getItem(STORAGE_KEYS.customerRef);
       if (!ref) {
         const randomPart =
           typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
             ? crypto.randomUUID().replace(/-/g, "").slice(0, 16)
             : Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
         ref = `cust_${randomPart}`;
-        localStorage.setItem("tarot_customer_ref", ref);
+        localStorage.setItem(STORAGE_KEYS.customerRef, ref);
       }
       return ref;
     } catch {
@@ -186,7 +187,7 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5 rounded border-line-warm accent-gold-ink focus:ring-0"
+              className="mt-0.5 rounded border-line-interactive-warm accent-gold-ink focus:ring-0"
             />
             <span className="leading-relaxed">
               ข้าพเจ้ายินยอมให้ส่งต่อข้อมูลชื่อเล่น คำถาม และสรุปไพ่ไปยังแม่หมอ โดยข้อมูลจะถูกลบอัตโนมัติภายใน 30

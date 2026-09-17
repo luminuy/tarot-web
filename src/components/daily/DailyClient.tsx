@@ -290,7 +290,7 @@ export function DailyClient() {
                     ? "e.g. Guidance on today's presentation, emotional calm, peace..."
                     : "เช่น สิ่งที่ควรระวังในที่ทำงานวันนี้, แนวทางรับมือเรื่องคน, กำลังใจ..."
                 }
-                className="w-full rounded-xl border border-line bg-surface-warm px-4 py-3 text-xs sm:text-sm font-sans text-ink placeholder-muted/60 focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
+                className="w-full rounded-xl border border-line-interactive bg-surface-warm px-4 py-3 text-xs sm:text-sm font-sans text-ink placeholder-muted/60 focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
               />
             </div>
           </div>

@@ -90,7 +90,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={isEnglish ? "Search card name, keyword, element..." : "ค้นหาชื่อไพ่, คำสำคัญ, ธาตุ..."}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-warm text-xs sm:text-sm font-serif-th text-ink placeholder:text-muted/60 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-line-interactive bg-surface-warm text-xs sm:text-sm font-serif-th text-ink placeholder:text-muted/60 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
             />
             {query && (
               <button

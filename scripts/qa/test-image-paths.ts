@@ -84,7 +84,10 @@ const rel = (abs: string) => path.relative(process.cwd(), abs).split(path.sep).j
 const violations: { file: string; line: number; rule: string; text: string }[] = [];
 const allowlistHits = new Set<string>();
 
-for (const abs of walk(SRC)) {
+const srcFiles = walk(SRC);
+assertNonEmptyCorpus("ไฟล์ต้นฉบับใน src/", srcFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+
+for (const abs of srcFiles) {
   const file = rel(abs);
   if (INFRASTRUCTURE.includes(file)) continue;
 
@@ -125,7 +128,7 @@ const PRELOAD_LINK_TAG = /<link\b[^>]*?\/>/gs;
 /** ตัวชี้วัดว่า <link> ก้อนนี้กำลังพูดถึง "ภาพไพ่" ไม่ใช่โลโก้หรือภาพแชร์ */
 const CARD_IMAGE_HINT = /getCardWebpSrcSet|getCardAvifSrcSet|getCardWebpVariantSrc|getCardImageSrc|heroCard|\/cards\//;
 
-for (const abs of walk(SRC)) {
+for (const abs of srcFiles) {
   const file = rel(abs);
   const raw = fs.readFileSync(abs, "utf-8");
   if (!raw.includes("rel=\"preload\"")) continue;
@@ -148,6 +151,7 @@ for (const abs of walk(SRC)) {
 // C) ตรวจว่าไฟล์ภาพย่อทั้งหมดตาม CARD_IMAGE_VARIANTS มีอยู่จริงบนดิสก์สำหรับไพ่ทั้ง 78 ใบ
 import { ALL_CARDS } from "../../src/data/cards";
 import { CARD_IMAGE_VARIANTS } from "../../src/lib/tarot/card-image";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 for (const card of ALL_CARDS) {
   const match = /([^/]+)\.jpe?g$/i.exec(card.image);

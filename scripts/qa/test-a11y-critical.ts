@@ -30,7 +30,8 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { primaryOutputDir } from "./lib/rendered-pages";
+import { primaryOutputDir, renderedOutputDirs } from "./lib/rendered-pages";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const ROOT = process.cwd();
 const problems: string[] = [];
@@ -46,6 +47,9 @@ function walkTsx(dir: string, out: string[] = []): string[] {
   }
   return out;
 }
+
+const tsxFiles = walkTsx(path.join(ROOT, "src"));
+assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
 
 /** ความสว่างสัมพัทธ์ตามสูตร WCAG 2.1 */
 function relativeLuminance(hex: string): number {
@@ -87,6 +91,134 @@ for (const [label, value] of [["--color-ok-on-dark", okOnDark], ["--color-err-on
   } else {
     notes.push(`${label} ${value} บน ${dark} = ${ratio.toFixed(2)}:1`);
   }
+}
+
+// ── กฎ 1ข · เส้นขอบของตัวควบคุมต้องผ่าน WCAG 1.4.11 ที่ 3:1 (R-22) ─────────
+/*
+ * `--color-line` / `--color-line-warm` วัดจริงได้แค่ 1.27–1.64 : 1 บนพื้นทุกสีที่ใช้คู่กัน
+ * บนการ์ดกับเส้นคั่นไม่เป็นไร (เป็นของประดับ) แต่บน **ช่องกรอกและปุ่ม** เส้นขอบ
+ * คือสิ่งเดียวที่บอกว่าตัวควบคุมอยู่ตรงไหน — เกณฑ์จึงบังคับ 3:1
+ *
+ * ด่านนี้คำนวณใหม่ทุกครั้ง ไม่ได้ฮาร์ดโค้ดผล ใครแก้ค่าโทเคนให้จางลงจะถูกฟ้องทันที
+ * และเทียบกับ **ทุกพื้นหลังที่ใช้คู่กันจริง** ไม่ใช่เฉพาะพื้นสว่างที่สุด
+ */
+const CONTROL_SURFACES = ["surface", "canvas", "inset", "inset-warm", "surface-warm"] as const;
+for (const token of ["line-interactive", "line-interactive-warm"] as const) {
+  const value = readToken(token);
+  if (!value) {
+    problems.push(
+      `globals.css ไม่มีโทเคน --color-${token} — เส้นขอบของช่องกรอก/ปุ่มจะตกกลับไปใช้สีของประดับที่ไม่ผ่านเกณฑ์`,
+    );
+    continue;
+  }
+  for (const surface of CONTROL_SURFACES) {
+    const bg = readToken(surface);
+    if (!bg) {
+      problems.push(`globals.css ไม่มีโทเคน --color-${surface} — เทียบคอนทราสต์เส้นขอบไม่ได้`);
+      continue;
+    }
+    const ratio = contrastRatio(value, bg);
+    if (ratio < 3) {
+      problems.push(
+        `--color-${token} (${value}) บนพื้น --color-${surface} (${bg}) ได้ ${ratio.toFixed(2)}:1 — ` +
+          "ต่ำกว่าเกณฑ์ WCAG 1.4.11 ที่ 3:1 สำหรับสิ่งที่ไม่ใช่ตัวหนังสือ",
+      );
+    } else {
+      notes.push(`--color-${token} บน --color-${surface} = ${ratio.toFixed(2)}:1`);
+    }
+  }
+}
+
+/*
+ * ช่องกรอกทุกช่องต้องใช้โทเคนเส้นขอบของตัวควบคุม ไม่ใช่โทเคนของประดับ
+ * (ถ้าไม่ตรวจข้อนี้ โทเคนใหม่จะถูกเพิ่มไว้เฉย ๆ แล้วไม่มีใครเอาไปใช้ — เกณฑ์ผ่านแต่ผู้ใช้ไม่ได้อะไร)
+ */
+const ornamentBorderControls: string[] = [];
+for (const file of tsxFiles) {
+  const src = fs.readFileSync(file, "utf-8");
+  const srcLines = src.split("\n");
+  for (let i = 0; i < srcLines.length; i++) {
+    if (!/<\s*(input|select|textarea)\b/.test(srcLines[i])) continue;
+    for (let j = i; j < Math.min(i + 18, srcLines.length); j++) {
+      if (/border-line(-warm|-soft)?(?![-\w])/.test(srcLines[j])) {
+        ornamentBorderControls.push(`${path.relative(ROOT, file)}:${j + 1}`);
+        break;
+      }
+      if (srcLines[j].includes("/>") || srcLines[j].includes("</")) break;
+    }
+  }
+}
+if (ornamentBorderControls.length > 0) {
+  problems.push(
+    `ช่องกรอก ${ornamentBorderControls.length} จุดยังใช้เส้นขอบของประดับที่คอนทราสต์ต่ำกว่า 3:1 ` +
+      `(ต้องใช้ border-line-interactive / border-line-interactive-warm): ${ornamentBorderControls.slice(0, 8).join(", ")}` +
+      (ornamentBorderControls.length > 8 ? " …" : ""),
+  );
+}
+
+// ── กฎ 1ค · ข้อความผิดพลาดในฟอร์มต้องถูกประกาศให้โปรแกรมอ่านหน้าจอ (R-21) ──
+/*
+ * ผู้ใช้ที่มองไม่เห็นกรอกผิดแล้ว **ไม่รู้ว่าผิด** เพราะข้อความโผล่บนจออย่างเดียว
+ * ไม่มี `role="alert"` หรือ `aria-live` ➔ โปรแกรมอ่านหน้าจอไม่รู้ว่ามีอะไรเปลี่ยน
+ *
+ * ตรวจเฉพาะไฟล์ที่มี `<form` จริง (ข้อความ error ในหน้าอื่นเป็นคนละเรื่อง)
+ * และดูเฉพาะการเรนเดอร์แบบมีเงื่อนไขจากตัวแปรสถานะที่ชื่อมีคำว่า error
+ */
+const ERROR_RENDER = /\{\s*([A-Za-z_$][\w$]*(?:[Ee]rror|ERROR)[\w$]*)\s*&&\s*\(/;
+const ANNOUNCES = /role=["']alert["']|aria-live=/;
+const silentErrors: string[] = [];
+for (const file of tsxFiles) {
+  const src = fs.readFileSync(file, "utf-8");
+  if (!/<form\b/.test(src)) continue;
+  const srcLines = src.split("\n");
+  for (let i = 0; i < srcLines.length; i++) {
+    if (!ERROR_RENDER.test(srcLines[i])) continue;
+    const block = srcLines.slice(i, Math.min(i + 8, srcLines.length)).join("\n");
+    if (!ANNOUNCES.test(block)) silentErrors.push(`${path.relative(ROOT, file)}:${i + 1}`);
+  }
+}
+if (silentErrors.length > 0) {
+  problems.push(
+    `ข้อความผิดพลาดในฟอร์ม ${silentErrors.length} จุดไม่ถูกประกาศให้โปรแกรมอ่านหน้าจอ ` +
+      `(ต้องมี role="alert" หรือ aria-live): ${silentErrors.slice(0, 8).join(", ")}` +
+      (silentErrors.length > 8 ? " …" : ""),
+  );
+} else {
+  notes.push("ข้อความผิดพลาดในฟอร์มทุกจุดมี role=\"alert\" / aria-live");
+}
+
+// ── กฎ 1ง · ลิงก์ในรายการต้องมีชื่อที่แยกจากกันได้ (R-23) ───────────────────
+/*
+ * ผู้ใช้ที่ไล่ฟัง "รายการลิงก์" ได้ยินแค่ชื่อลิงก์ — ถ้าทุกการ์ดในรายการใช้คำว่า
+ * "อ่านต่อ" เหมือนกันหมด จะไม่มีทางรู้ว่าลิงก์ไหนไปไหน (WCAG 2.4.4)
+ * แก้ด้วย `aria-label` ที่มีชื่อเรื่องอยู่ด้วย โดยที่คนมองเห็นยังเห็นคำสั้นเหมือนเดิม
+ */
+const GENERIC_LINK_TEXT = /อ่านต่อ|ดูเพิ่มเติม|Read Codex|Read more|Learn more/i;
+const genericLinks: string[] = [];
+for (const file of tsxFiles) {
+  const src = fs.readFileSync(file, "utf-8");
+  const srcLines = src.split("\n");
+  for (let i = 0; i < srcLines.length; i++) {
+    if (!GENERIC_LINK_TEXT.test(srcLines[i])) continue;
+    // ต้องเป็นข้อความที่อยู่ในลิงก์ — ไล่ขึ้นไปหาแท็กเปิดภายใน 10 บรรทัด
+    const above = srcLines.slice(Math.max(0, i - 10), i + 1).join("\n");
+    const openTag = /<(?:Link|a)\b[\s\S]*$/.exec(above);
+    if (!openTag) continue;
+    if (/aria-label=/.test(openTag[0])) continue;
+    // ลิงก์เดี่ยว ๆ ที่ไม่ได้อยู่ในรายการซ้ำ ๆ ไม่เข้าข่ายกฎนี้
+    const context = srcLines.slice(Math.max(0, i - 60), i).join("\n");
+    if (!/\.map\(/.test(context)) continue;
+    genericLinks.push(`${path.relative(ROOT, file)}:${i + 1}`);
+  }
+}
+if (genericLinks.length > 0) {
+  problems.push(
+    `ลิงก์ในรายการ ${genericLinks.length} จุดใช้ชื่อเรียกซ้ำกันทุกใบโดยไม่มี aria-label ` +
+      `(ผู้ใช้ที่ไล่ฟังรายการลิงก์จะไม่รู้ว่าลิงก์ไหนไปไหน): ${genericLinks.slice(0, 8).join(", ")}` +
+      (genericLinks.length > 8 ? " …" : ""),
+  );
+} else {
+  notes.push("ลิงก์ในรายการทุกจุดมีชื่อที่แยกจากกันได้");
 }
 
 // ── กฎ 2 · รายการสายด่วนต้องใช้โทเคนพื้นมืด ────────────────────────────────
@@ -156,7 +288,7 @@ const MODAL_COMPONENTS = [
   "BookQueueModal",
 ];
 
-for (const file of walkTsx(path.join(ROOT, "src"))) {
+for (const file of tsxFiles) {
   const raw = fs.readFileSync(file, "utf-8");
   if (!raw.includes("<main")) continue;
   const text = raw
@@ -203,6 +335,14 @@ for (const file of walkTsx(path.join(ROOT, "src"))) {
 /* 🗺️ รากของไฟล์ HTML มาจาก `lib/rendered-pages.ts` ที่เดียว — ห้ามเขียน path เอง
    เพื่อให้วันที่เพิ่มเครื่องมือเรนเดอร์ตัวที่สอง ด่านนี้ครอบคลุมทันทีโดยไม่ต้องแก้
    (ด่าน `test-rendered-coverage.ts` บังคับข้อนี้อยู่) */
+/*
+ * 🔴 R-24: ของเดิมใช้ `primaryOutputDir()` ซึ่งคืนรากแรกเพียงรากเดียว (`.next/server/app`)
+ * ผลจริงที่วัดได้: ด่านนี้ตรวจแค่ **8 หน้า** ทั้งที่ป้ายของมันบอกว่า "ทั้งเว็บ 309 หน้า"
+ * หน้าเนื้อหา 300 กว่าหน้าที่ Astro เรนเดอร์ (`dist/`) ไม่เคยถูกตรวจเลยสักหน้า
+ *
+ * ตอนนี้ไล่ **ทุกรากที่ `lib/rendered-pages.ts` ประกาศไว้** ➔ ครอบคลุมทั้งสองเครื่องมือเรนเดอร์
+ */
+const APP_DIRS = renderedOutputDirs();
 const APP_DIR = primaryOutputDir();
 
 function collectHtml(dir: string, acc: string[] = []): string[] {
@@ -234,7 +374,7 @@ function isRedirectStub(html: string): boolean {
   return html.includes('http-equiv="refresh"');
 }
 
-const htmlFiles = collectHtml(APP_DIR);
+const htmlFiles = APP_DIRS.flatMap((dir) => collectHtml(dir));
 
 if (htmlFiles.length === 0) {
   /*
@@ -245,7 +385,7 @@ if (htmlFiles.length === 0) {
    * ด่านที่ผ่านได้ทั้งที่ไม่ได้ตรวจ คือด่านหลอก
    */
   console.error("♿ ตรวจ a11y ระดับวิกฤตทั้งเว็บ\n");
-  console.error(`❌ ไม่พบ HTML ใน ${APP_DIR} — ตรวจ HTML ที่เรนเดอร์จริงไม่ได้\n`);
+  console.error(`❌ ไม่พบ HTML ใน ${APP_DIRS.join(" / ")} — ตรวจ HTML ที่เรนเดอร์จริงไม่ได้\n`);
   console.error("   กฎ 3 ข้อนี้ตรวจจาก HTML จริงเท่านั้น จึงยังไม่ได้ตรวจเลย:");
   console.error("     • หัวข้อแรกของหน้าเป็น h1 และไม่ข้ามลำดับ");
   console.error("     • แต่ละหน้ามี <h1> หนึ่งเดียว");
@@ -262,7 +402,9 @@ const pageProblems: string[] = [];
 
 for (const file of htmlFiles) {
   const html = fs.readFileSync(file, "utf-8");
-  const rel = path.relative(APP_DIR, file).split(path.sep).join("/");
+  /* ไฟล์มาจากหลายราก — ถอดชื่อเส้นทางจากรากที่ไฟล์นั้นอยู่จริง ไม่ใช่รากแรกเสมอ */
+  const ownerDir = APP_DIRS.find((dir) => file.startsWith(dir + path.sep)) ?? APP_DIR;
+  const rel = path.relative(ownerDir, file).split(path.sep).join("/");
 
   if (isRedirectStub(html)) {
     skippedStreamed++;

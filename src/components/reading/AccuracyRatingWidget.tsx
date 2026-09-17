@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { SPRING } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n";
+import { STORAGE_KEYS, STORAGE_KEY_BUILDERS } from "@/lib/storage/keys";
 
 interface AccuracyRatingWidgetProps {
   personaId: string;
@@ -33,12 +34,15 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
   useEffect(() => {
     if (!readingId) return;
     try {
-      const stored = localStorage.getItem(`rating_${readingId}`);
+      const stored = localStorage.getItem(STORAGE_KEY_BUILDERS.readingRating(readingId));
       if (stored) {
         setSubmitted(true);
         setSelectedScore(parseInt(stored, 10));
       }
-    } catch {}
+    } catch {
+      /* อ่านที่เก็บข้อมูลไม่ได้ (โหมดส่วนตัว / ผู้ใช้ปิดไว้) — แค่ไม่แสดงคะแนนเดิม
+         ไม่ใช่ความล้มเหลวที่ต้องนับ (R-27) */
+    }
   }, [readingId]);
 
   const handleRate = (score: number) => {
@@ -48,13 +52,15 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
     // บันทึกลง localStorage เพื่อป้องกันให้คะแนนซ้ำ
     if (readingId) {
       try {
-        localStorage.setItem(`rating_${readingId}`, score.toString());
-      } catch {}
+        localStorage.setItem(STORAGE_KEY_BUILDERS.readingRating(readingId), score.toString());
+      } catch {
+        /* เขียนไม่ได้ = ระบบจะถามคะแนนอีกครั้งในอนาคต ยอมรับได้ (R-27) */
+      }
     }
 
     // บันทึก A/B persona accuracy data
     try {
-      const key = "persona_ratings";
+      const key = STORAGE_KEYS.personaRatings;
       const existing = JSON.parse(localStorage.getItem(key) || "[]") as Array<{
         personaId: string;
         score: number;
@@ -70,7 +76,9 @@ export const AccuracyRatingWidget: React.FC<AccuracyRatingWidgetProps> = ({ pers
       // เก็บแค่ 500 รายการล่าสุด
       if (existing.length > 500) existing.splice(0, existing.length - 500);
       localStorage.setItem(key, JSON.stringify(existing));
-    } catch {}
+    } catch {
+      /* เหมือนข้างบน — คะแนนสะสมในเครื่องเป็นของเสริม ไม่ใช่ข้อมูลหลัก (R-27) */
+    }
   };
 
   return (

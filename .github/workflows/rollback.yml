@@ -1,0 +1,124 @@
+name: ⏪ Rollback — ถอย Worker กลับเวอร์ชันก่อนหน้า
+run-name: "⏪ Rollback โดย ${{ github.actor }} → ${{ inputs.version_id || 'เวอร์ชันก่อนหน้า' }}"
+
+# 🔴 R-14: ก่อนหน้านี้ระบบ deploy อัตโนมัติทุกครั้งที่ merge เข้า `main`
+# แต่ **ไม่มีขั้นตอนถอยกลับเขียนไว้ที่ไหนเลย** ทั้งใน workflow และในเอกสาร
+# บิลด์เสียขึ้น production ได้โดยไม่มีปุ่มถอย ต้องรอคนแก้โค้ดแล้ว deploy ใหม่ทั้งรอบ
+#
+# Cloudflare เก็บเวอร์ชันของ Worker ย้อนหลังให้อยู่แล้ว (Workers Versions)
+# workflow นี้จึงแค่สั่ง `wrangler rollback` ไม่ต้อง build อะไรใหม่เลย — ใช้เวลาไม่กี่วินาที
+#
+# วิธีใช้: Actions ➔ "⏪ Rollback" ➔ Run workflow
+#   - เว้น `version_id` ว่างไว้ = ถอยไปเวอร์ชันก่อนหน้าเวอร์ชันที่ใช้อยู่
+#   - ใส่ `version_id` = ถอยไปเวอร์ชันนั้นเจาะจง (ดูรายการได้จากขั้น "ดูเวอร์ชันที่มีอยู่")
+#
+# ⚠️ การถอยกลับ **ไม่ย้อน migration ของ D1** — ถ้ารอบที่พังมี migration ที่เปลี่ยนสคีมา
+#    ต้องเขียน migration ย้อนกลับเองก่อน (ดู docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_id:
+        description: "Version ID ที่จะถอยไป (เว้นว่าง = เวอร์ชันก่อนหน้า)"
+        required: false
+        type: string
+      reason:
+        description: "เหตุผลที่ต้องถอย (บันทึกไว้ในสรุปการรัน)"
+        required: true
+        type: string
+
+concurrency:
+  group: production-deploy # ต้องตรงกับ deploy.yml เป๊ะ ไม่งั้นถอยชนกับ deploy ได้
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    name: ถอย Worker กลับเวอร์ชันก่อนหน้า
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: ⚙️ Setup Node.js 22
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔑 ตรวจว่ามีคีย์ Cloudflare ครบ
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::ยังไม่ได้ตั้ง CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID — ถอยกลับไม่ได้"
+            exit 1
+          fi
+
+      - name: 📜 ดูเวอร์ชันที่มีอยู่ (บันทึกไว้ในสรุปการรัน)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          {
+            echo "### เวอร์ชันของ Worker ที่ Cloudflare เก็บไว้"
+            echo ""
+            echo '```'
+            npx wrangler versions list 2>&1 | head -60 || echo "(อ่านรายการเวอร์ชันไม่ได้ — ข้ามไปขั้นถอยเลย)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: ⏪ สั่งถอยกลับ
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERSION_ID: ${{ inputs.version_id }}
+          REASON: ${{ inputs.reason }}
+        run: |
+          set -euo pipefail
+          if [ -n "$VERSION_ID" ]; then
+            echo "กำลังถอยไปเวอร์ชัน $VERSION_ID"
+            npx wrangler rollback "$VERSION_ID" --message "$REASON" --yes
+          else
+            echo "กำลังถอยไปเวอร์ชันก่อนหน้า"
+            npx wrangler rollback --message "$REASON" --yes
+          fi
+
+      - name: 🔎 ยืนยันว่าเว็บกลับมาตอบ 200
+        run: |
+          set -euo pipefail
+          # ให้ Cloudflare กระจายเวอร์ชันใหม่ไปทั่วขอบก่อน
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://seertarot.net/ || echo "000")
+            echo "ครั้งที่ $i: HTTP $code"
+            if [ "$code" = "200" ]; then
+              echo "✅ เว็บกลับมาตอบ 200 แล้ว"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::ถอยกลับแล้วแต่หน้าแรกยังไม่ตอบ 200 — ต้องเข้าไปดูที่ Cloudflare Dashboard ทันที"
+          exit 1
+
+      - name: 📝 สรุปการถอยกลับ
+        if: always()
+        env:
+          REASON: ${{ inputs.reason }}
+          VERSION_ID: ${{ inputs.version_id }}
+        run: |
+          {
+            echo "### ⏪ สรุปการถอยกลับ"
+            echo ""
+            echo "- ผู้สั่ง: @${{ github.actor }}"
+            echo "- เวอร์ชันปลายทาง: ${VERSION_ID:-เวอร์ชันก่อนหน้า}"
+            echo "- เหตุผล: $REASON"
+            echo ""
+            echo "> ⚠️ อย่าลืมบันทึกเหตุการณ์ลง \`docs/INCIDENT_LOG.md\` ด้วย \`npm run incident\`"
+          } >> "$GITHUB_STEP_SUMMARY"

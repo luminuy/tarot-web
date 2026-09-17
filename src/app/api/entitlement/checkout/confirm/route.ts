@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getCreditPackageById } from "@/lib/entitlement/packages";
 import { grantBonus } from "@/lib/entitlement/entitlement";
+import {
+  decidePurchaseGrant,
+  GRANT_WRITE_FAILED_MESSAGE,
+  type PaymentRowForGrant,
+} from "@/lib/entitlement/purchase";
 import { updatePaymentStatus } from "@/lib/marketplace/payments.repo";
 import { getAppDB } from "@/lib/platform/db";
 import { getSessionUser } from "@/lib/auth/session";
@@ -60,72 +65,47 @@ async function processPaymentGrant(
   // แถวยุคก่อน migrations/0015 เก็บเลขออร์เดอร์ไว้ที่ `booking_id` จึงต้องมองทั้งสองคอลัมน์
   const payRow = await db
     .prepare(
-      `SELECT id, amount_satang, currency, status, provider, ticket_id, user_id
+      `SELECT id, order_id, booking_id, amount_satang, currency, status, provider, ticket_id, user_id
          FROM payments WHERE order_id = ? OR booking_id = ? LIMIT 1`
     )
     .bind(orderId, orderId)
-    .first<{
-      id: string;
-      amount_satang: number;
-      currency: string;
-      status: string;
-      provider: string;
-      ticket_id: string | null;
-      user_id: string | null;
-    }>();
+    .first<PaymentRowForGrant>();
 
-  if (!payRow) {
-    return { ok: false, status: 404, message: "ไม่พบรายการสั่งซื้อนี้ในระบบ" };
-  }
+  /*
+   * ด่าน 3–5 ตัดสินใน `src/lib/entitlement/purchase.ts` ซึ่งไม่แตะ I/O เลย
+   * จึงเรียกจากด่านตรวจได้ตรง ๆ — เส้นทางนี้เคยไม่มีด่านเฝ้าเลยสักตัว (R-08)
+   */
+  const decision = decidePurchaseGrant({
+    row: payRow ?? null,
+    pkg,
+    userId,
+    orderId,
+    allowSimulator: process.env.NODE_ENV !== "production",
+  });
 
-  // ด่าน 3 — แถวต้องเป็นของผู้ใช้คนนี้ (T-07)
-  // แถวเก่าที่สร้างก่อน migrations/0015 มี `user_id` เป็น NULL — ปล่อยผ่านได้เฉพาะแถวเหล่านั้น
-  // เพราะข้อมูลความเป็นเจ้าของไม่เคยถูกเก็บไว้เลย · แถวใหม่ทุกแถวมีค่าเสมอ
-  if (payRow.user_id && payRow.user_id !== userId) {
-    recordEvent("purchase_owner_mismatch");
-    console.warn("[Credit Confirmation] ออร์เดอร์นี้ไม่ใช่ของบัญชีที่ล็อกอินอยู่", { orderId });
-    return { ok: false, status: 401, message: "รายการสั่งซื้อนี้ไม่ได้เป็นของบัญชีที่เข้าสู่ระบบอยู่" };
-  }
-
-  // ด่าน 4 — ยอดเงินและสกุลเงินต้องตรงกับราคาแพ็กเกจฝั่งเซิร์ฟเวอร์
-  // (`ticket_id` ต้องว่าง เพราะรายการที่ผูก ticket คือค่าปรึกษาแม่หมอ ไม่ใช่การเติมโควตา)
-  if (
-    payRow.ticket_id ||
-    payRow.currency !== "THB" ||
-    Number(payRow.amount_satang) !== pkg.amountSatang
-  ) {
-    return { ok: false, status: 400, message: "ยอดชำระไม่ตรงกับแพ็กเกจที่สั่งซื้อ" };
-  }
-
-  // ด่าน 5 — สถานะต้อง `paid` (ตั้งได้จาก webhook ที่ตรวจลายเซ็นแล้วเท่านั้น)
-  const isSimulator = payRow.provider === "simulator" && process.env.NODE_ENV !== "production";
-  if (payRow.status !== "paid" && !isSimulator) {
-    if (payRow.status === "failed") {
-      return { ok: false, status: 402, message: "รายการชำระเงินนี้ไม่สำเร็จ กรุณาสั่งซื้อใหม่อีกครั้ง" };
+  if (!decision.ok) {
+    if (decision.code === "not_owner") {
+      recordEvent("purchase_owner_mismatch");
+      console.warn("[Credit Confirmation] ออร์เดอร์นี้ไม่ใช่ของบัญชีที่ล็อกอินอยู่", { orderId });
     }
-    return {
-      ok: false,
-      status: 402,
-      message: "ระบบยังไม่ได้รับการยืนยันจากผู้ให้บริการชำระเงิน กรุณารอสักครู่แล้วรีเฟรชอีกครั้ง",
-    };
+    return { ok: false, status: decision.status, message: decision.message };
   }
 
   // ผ่านครบทุกด่าน → แจกโควตา (idempotent ด้วย UNIQUE(user_id, reason))
   // 🔴 T-04: ห้ามตอบสำเร็จโดยไม่ตรวจว่าเครดิตลงจริง — เงินเข้าแล้วแต่ของไม่ถึงมือ
   // คือความเสียหายที่ผู้ใช้เจอหนักที่สุดและเป็นเคสที่เราต้องรู้ทันทีที่เกิด
-  const granted = await grantBonus(userId, pkg.credits, `purchase_${orderId}`);
+  const granted = await grantBonus(userId, decision.credits, decision.reason);
   if (!granted) {
     recordEvent("purchase_grant_failed");
     console.error("[Credit Confirmation] จ่ายเงินสำเร็จแต่เขียนเครดิตไม่ลง", { userId, orderId, packageId });
     return {
       ok: false,
       status: 500,
-      message:
-        "ระบบรับชำระเงินเรียบร้อยแล้ว แต่บันทึกโควตาไม่สำเร็จ ทีมงานได้รับแจ้งแล้ว กรุณาติดต่อ support@seertarot.net พร้อมเลขคำสั่งซื้อนี้",
+      message: GRANT_WRITE_FAILED_MESSAGE,
     };
   }
 
-  if (payRow.status !== "paid") {
+  if (payRow && payRow.status !== "paid") {
     try {
       await updatePaymentStatus(payRow.id, "paid");
     } catch (err) {
@@ -133,7 +113,7 @@ async function processPaymentGrant(
     }
   }
 
-  return { ok: true, credits: pkg.credits };
+  return { ok: true, credits: decision.credits };
 }
 
 export async function GET(request: Request) {

@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { CRISIS_MESSAGE, CRISIS_MESSAGE_EN, checkQuestion, getCrisisHotlines } from "../../src/lib/safety/guardrails";
 import { hasSoftDistressSignal, mayNeedDeepCrisisCheck } from "../../src/lib/safety/ai-classifier";
 import { CRISIS_LEXEMES_TH } from "../../src/lib/safety/crisis-lexicon";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 /**
  * QA — ทดสอบระบบคัดกรองความปลอดภัยด้วยคำถามตัวอย่างจริง
@@ -225,7 +226,9 @@ function assertUi(label: string, ok: boolean, detail = "") {
 /** นับเฉพาะการ "ยิง fetch จริง" ไม่นับที่อยู่ในคอมเมนต์หรือข้อความ */
 const startCalls = (src: string) => src.match(/fetch\(\s*["'`]\/api\/reading\/start/g) || [];
 
-const callers = walk("src").filter(
+const safetyScanFiles = walk("src");
+assertNonEmptyCorpus("ไฟล์ต้นฉบับใน src/", safetyScanFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+const callers = safetyScanFiles.filter(
   (f) => !f.includes(`src${"/"}app${"/"}api${"/"}`) && startCalls(readFileSync(f, "utf-8")).length > 0,
 );
 

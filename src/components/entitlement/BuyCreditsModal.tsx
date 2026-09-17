@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { getCreditPackages, type CreditPackage } from "@/lib/entitlement/packages";
 import { mutateEntitlement } from "@/lib/entitlement/use-entitlement";
@@ -37,6 +37,8 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
   const [redeemCode, setRedeemCode] = useState("");
   const [redeemLoading, setRedeemLoading] = useState(false);
   const [redeemError, setRedeemError] = useState<string | null>(null);
+  /* ♿ R-21: ผูกข้อความผิดพลาดของรหัสแลกสิทธิ์เข้ากับช่องกรอกที่ผิด */
+  const redeemErrorId = useId();
   const [redeemSuccess, setRedeemSuccess] = useState<string | null>(null);
 
   const handleRedeemCode = async (e: React.FormEvent) => {
@@ -193,14 +195,22 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
       title={isEn ? "Sacred Reading Passes (Tarot Pass)" : "เติมรอบดูดวง (Tarot Pass)"}
     >
       <div className="space-y-6 pt-1 text-muted">
+        {/* ♿ R-21: ข้อความผิดพลาดในกล่องซื้อสิทธิ์ต้องถูกประกาศทันที
+            ผู้ใช้โปรแกรมอ่านหน้าจอเคยกดจ่ายเงินแล้วไม่รู้เลยว่าล้มเหลวเพราะอะไร */}
         {errorMsg && (
-          <div className="p-3.5 rounded-lg bg-err/80 border border-err/50 text-err text-xs font-serif-th text-center">
+          <div
+            role="alert"
+            className="p-3.5 rounded-lg bg-err/80 border border-err/50 text-err text-xs font-serif-th text-center"
+          >
             {errorMsg}
           </div>
         )}
 
         {successMsg && (
-          <div className="p-4 rounded-lg bg-[#EBF3ED] border border-line-warm text-ok text-sm font-serif-th text-center font-bold ">
+          <div
+            role="status"
+            className="p-4 rounded-lg bg-[#EBF3ED] border border-line-warm text-ok text-sm font-serif-th text-center font-bold "
+          >
             {successMsg}
           </div>
         )}
@@ -284,13 +294,17 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                 </div>
 
                   {redeemError && (
-                    <div className="p-2 rounded bg-[#C43D3D]/10 text-[#C43D3D] text-xs font-serif-th">
+                    <div
+                      id={redeemErrorId}
+                      role="alert"
+                      className="p-2 rounded bg-[#C43D3D]/10 text-[#C43D3D] text-xs font-serif-th"
+                    >
                       {redeemError}
                     </div>
                   )}
 
                   {redeemSuccess && (
-                    <div className="p-2.5 rounded bg-ok/10 text-ok text-xs font-serif-th font-semibold">
+                    <div role="status" className="p-2.5 rounded bg-ok/10 text-ok text-xs font-serif-th font-semibold">
                       {redeemSuccess}
                     </div>
                   )}
@@ -298,13 +312,15 @@ export const BuyCreditsModal: React.FC<BuyCreditsModalProps> = ({ isOpen, onClos
                   {!redeemSuccess && (
                     <div className="flex gap-2">
                       <input
-                aria-label={isEn ? "Redeem code" : "รหัสแลกสิทธิ์"}
+                        aria-label={isEn ? "Redeem code" : "รหัสแลกสิทธิ์"}
+                        aria-invalid={redeemError ? true : undefined}
+                        aria-describedby={redeemError ? redeemErrorId : undefined}
                         type="text"
                         value={redeemCode}
                         onChange={(e) => setRedeemCode(e.target.value)}
                         placeholder={isEn ? "e.g. VIP3-TAROT-2026" : "เช่น VIP3-TAROT-2026"}
                         disabled={redeemLoading}
-                        className="flex-1 px-3 py-2 text-xs uppercase font-mono tracking-wider rounded-lg bg-white border border-line-warm text-ink-deep focus:outline-none focus:border-gold-ink"
+                        className="flex-1 px-3 py-2 text-xs uppercase font-mono tracking-wider rounded-lg bg-white border border-line-interactive-warm text-ink-deep focus:outline-none focus:border-gold-ink"
                       />
                       <button
                         type="submit"

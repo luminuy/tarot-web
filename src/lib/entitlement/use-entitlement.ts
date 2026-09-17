@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { hasSessionHint } from "@/lib/auth/session-hint";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 /**
  * สถานะสิทธิ์ฝั่ง client — ดึงจาก GET /api/entitlement ครั้งเดียว แล้ว cache ระดับโมดูล
@@ -42,7 +43,7 @@ const listeners = new Set<(e: ClientEntitlement | null) => void>();
  * ⚠️ นี่คือค่า "ไว้แสดงผล" เท่านั้น การบังคับสิทธิ์จริงอยู่ฝั่งเซิร์ฟเวอร์ทุกเส้นทาง
  * และทุกจุดที่สิทธิ์ถูกใช้ไปจะเรียก `refreshEntitlement()` ซึ่งเขียนทับแคชนี้ทันที
  */
-const STORE_KEY = "tarot_entitlement_snapshot";
+const STORE_KEY = STORAGE_KEYS.entitlementSnapshot;
 const STORE_TTL_MS = 5 * 60_000;
 
 function readStoredEntitlement(): ClientEntitlement | null {

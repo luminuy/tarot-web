@@ -349,7 +349,7 @@ export function LoveOneCardClient() {
                   value={yourName}
                   onChange={(e) => setYourName(e.target.value)}
                   placeholder={isEnglish ? "e.g. Alex" : "เช่น แพรว, แบงค์"}
-                  className="w-full rounded-xl border border-line bg-surface-warm px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
+                  className="w-full rounded-xl border border-line-interactive bg-surface-warm px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
                 />
               </div>
               <div>
@@ -362,7 +362,7 @@ export function LoveOneCardClient() {
                   value={partnerName}
                   onChange={(e) => setPartnerName(e.target.value)}
                   placeholder={isEnglish ? "e.g. Crush, Ex" : "เช่น คนคุย, คนรักเก่า"}
-                  className="w-full rounded-xl border border-line bg-surface-warm px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
+                  className="w-full rounded-xl border border-line-interactive bg-surface-warm px-3.5 py-2 text-xs font-sans text-ink focus:border-gold focus:outline-hidden focus:ring-1 focus:ring-gold transition-colors"
                 />
               </div>
             </div>

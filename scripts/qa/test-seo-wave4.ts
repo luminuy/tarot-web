@@ -4,6 +4,7 @@ import { calculateBirthCard, reduceToTarotNumber } from "../../src/lib/tarot/bir
 import { ARTICLES } from "../../src/data/articles";
 import sitemap from "../../src/app/sitemap";
 import { SITE_ORIGIN } from "../../src/lib/config/site";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 console.log("\n🧪 กำลังทดสอบระบบ SEO Wave 4: Differentiators (Birth Card, Positions Table, Learn Tarot & Readers)\n");
 
@@ -133,7 +134,11 @@ const wave4Files = [
 ];
 for (const file of wave4Files) {
   const filePath = path.join(process.cwd(), file);
-  if (fs.existsSync(filePath)) {
+  // ⚠️ R-07: ไฟล์หาย = **ตกด่าน** ไม่ใช่ข้ามเงียบ
+  // เปลี่ยนชื่อ/ย้ายไฟล์หน้าเมื่อไหร่ ด่านนี้เคยหายไปเฉย ๆ ซึ่งคือสิ่งที่มันมีไว้จับพอดี
+  if (!fs.existsSync(filePath)) {
+    assert(false, `หาไฟล์ที่ด่านนี้ต้องตรวจไม่เจอ: ${file}`);
+  } else {
     const content = fs.readFileSync(filePath, "utf-8");
     /*
      * ⚠️ ต้องมีธง `u` — ถ้าไม่มี JavaScript จะมองอิโมจินอกระนาบพื้นฐาน (🌟) เป็น
@@ -167,6 +172,7 @@ function walkFiles(dir: string): string[] {
 // จาก `hasEnglishTwin()` ซึ่งเป็นแหล่งความจริงเดียวกับ buildAlternates อยู่แล้ว
 const SITEMAP_EXEMPT = path.join(process.cwd(), "src/app/sitemap.ts");
 const appFiles = walkFiles(path.join(process.cwd(), "src/app")).filter((f) => f !== SITEMAP_EXEMPT);
+assertNonEmptyCorpus("ไฟล์ใน src/app", appFiles, "ตรวจว่า walkFiles() ชี้ไปที่ src/app จริง");
 let rawAlternatesCount = 0;
 for (const file of appFiles) {
   const content = fs.readFileSync(file, "utf-8");

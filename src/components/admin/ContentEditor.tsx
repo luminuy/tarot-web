@@ -62,6 +62,9 @@ export default function ContentEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+  /* 🔴 R-28: ของเดิมเอาทั้ง "บันทึกแล้ว" และ "โหลดไม่สำเร็จ" ไปใส่ตัวแปรเดียวกัน
+     แล้วเรนเดอร์เป็นข้อความสีเทา — ความล้มเหลวจึงหน้าตาเหมือนความสำเร็จ */
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
@@ -71,7 +74,7 @@ export default function ContentEditor() {
         setDoc(d.doc ?? {});
         setDefaults(d.defaults);
       })
-      .catch(() => setMsg("โหลดเนื้อหาไม่สำเร็จ"))
+      .catch(() => setLoadError("โหลดเนื้อหาไม่สำเร็จ"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -92,7 +95,7 @@ export default function ContentEditor() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setMsg(data.error || "บันทึกไม่สำเร็จ");
+        setLoadError(data.error || "บันทึกไม่สำเร็จ");
         return;
       }
       setDirty(false);
@@ -134,6 +137,11 @@ export default function ContentEditor() {
         </div>
         <div className="flex items-center gap-3">
           {msg ? <span className="text-xs text-muted">{msg}</span> : null}
+          {loadError ? (
+            <span role="alert" className="text-xs font-bold text-rose-700">
+              {loadError}
+            </span>
+          ) : null}
           <Button size="sm" onClick={save} isLoading={saving} disabled={!dirty}>
             บันทึกทั้งหมด
           </Button>
@@ -242,7 +250,7 @@ function PersonaTab({
           id={readerSelectId}
           value={sel}
           onChange={(e) => setSel(e.target.value)}
-          className="w-full max-w-xs rounded-xl border border-line bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+          className="w-full max-w-xs rounded-xl border border-line-interactive bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
         >
           {personas.map((x) => (
             <option key={x.id} value={x.id}>
@@ -515,7 +523,7 @@ function CardTab({
           aria-label="ผลใช่/ไม่ใช่ของไพ่ใบนี้"
                       value={o.yesNo ?? "default"}
                       onChange={(e) => setYesNo(e.target.value)}
-                      className="rounded-lg border border-line bg-white px-2.5 py-1 text-xs text-ink focus:outline-none focus:border-ink"
+                      className="rounded-lg border border-line-interactive bg-white px-2.5 py-1 text-xs text-ink focus:outline-none focus:border-ink"
                     >
                       <option value="default">ค่าเริ่มต้น ({detail.defaults.yesNo})</option>
                       <option value="yes">Yes (ใช่/สำเร็จ)</option>

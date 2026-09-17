@@ -193,9 +193,11 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             </label>
             <select
               id="birth-day"
+              aria-invalid={errorMsg ? true : undefined}
+              aria-describedby={errorMsg ? "birth-card-error" : undefined}
               value={day}
               onChange={(e) => setDay(Number.parseInt(e.target.value, 10))}
-              className="w-full rounded-xl border border-line-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="w-full rounded-xl border border-line-interactive-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {Array.from(
                 {
@@ -222,6 +224,8 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             </label>
             <select
               id="birth-month"
+              aria-invalid={errorMsg ? true : undefined}
+              aria-describedby={errorMsg ? "birth-card-error" : undefined}
               value={month}
               onChange={(e) => {
                 const newMonth = Number.parseInt(e.target.value, 10);
@@ -233,7 +237,7 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
                 const maxD = getMaxDaysInMonth(currentY, newMonth);
                 if (day > maxD) setDay(maxD);
               }}
-              className="w-full rounded-xl border border-line-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="w-full rounded-xl border border-line-interactive-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             >
               {MONTHS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -277,17 +281,25 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             </div>
             <input
               id="birth-year"
+              aria-invalid={errorMsg ? true : undefined}
+              aria-describedby={errorMsg ? "birth-card-error" : undefined}
               type="number"
               value={yearInput}
               onChange={(e) => setYearInput(e.target.value)}
               placeholder={era === "be" ? "2540" : "1997"}
-              className="w-full rounded-xl border border-line-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
+              className="w-full rounded-xl border border-line-interactive-warm bg-surface-warm px-3.5 py-2.5 text-xs sm:text-sm font-sans text-ink focus:border-gold-ink focus:outline-hidden transition-colors"
             />
           </div>
         </div>
 
+        {/* ♿ R-21: วันเกิดที่กรอกผิดต้องถูกประกาศทันที ไม่ใช่โผล่เป็นกล่องสีแดงเฉย ๆ
+            ทุกช่องกรอกผูกกับกล่องนี้ด้วย aria-describedby เพื่อบอกว่าผิดตรงไหน */}
         {errorMsg && (
-          <div className="p-3.5 rounded-xl bg-[#FAF0ED] border border-[#E8C5BE] text-xs font-sans text-[#8F2E1A] text-center">
+          <div
+            id="birth-card-error"
+            role="alert"
+            className="p-3.5 rounded-xl bg-[#FAF0ED] border border-[#E8C5BE] text-xs font-sans text-[#8F2E1A] text-center"
+          >
             {errorMsg}
           </div>
         )}

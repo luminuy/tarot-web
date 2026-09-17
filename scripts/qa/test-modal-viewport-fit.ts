@@ -32,6 +32,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const SRC = path.join(process.cwd(), "src");
 
@@ -133,6 +134,7 @@ function run(): void {
   console.log("🔍 ตรวจสอบว่าหน้าต่างลอยทุกบานไม่ตกขอบจอ (Modal Viewport Fit Guard)...\n");
 
   const files = walk(SRC);
+  assertNonEmptyCorpus("ไฟล์ต้นฉบับใน src/", files, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
   const all: Violation[] = [];
   let checked = 0;
 

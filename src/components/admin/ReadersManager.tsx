@@ -432,8 +432,9 @@ export default function ReadersManager() {
         title={editingReader ? "แก้ไขข้อมูลแม่หมอ" : "เพิ่มแม่หมอใหม่"}
       >
         <form onSubmit={handleSave} className="space-y-4 pt-2">
+          {/* ♿ R-21: ประกาศข้อความผิดพลาดให้โปรแกรมอ่านหน้าจอทันทีที่โหนดปรากฏ */}
           {formError && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+            <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
               {formError}
             </div>
           )}
@@ -503,7 +504,7 @@ export default function ReadersManager() {
                   {...field}
                   value={status}
                   onChange={(e) => setStatus(e.target.value as ReaderStatus)}
-                  className="w-full rounded-xl border border-line bg-white px-3 py-2 text-xs text-ink outline-none focus:border-ink"
+                  className="w-full rounded-xl border border-line-interactive bg-white px-3 py-2 text-xs text-ink outline-none focus:border-ink"
                 >
                   <option value="approved">เปิดรับงาน (Approved)</option>
                   <option value="pending">รอตรวจสอบ (Pending)</option>

@@ -412,7 +412,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   placeholder={isEn ? "Search questions, spreads, cards, or notes..." : "ค้นหาตามคำถาม, ผัง, ชื่อไพ่ หรือบันทึกโน้ต..."}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-surface border border-line rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-gold"
+                  className="w-full bg-surface border border-line-interactive rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-gold"
                 />
               </div>
             </div>
@@ -655,7 +655,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                               ? "Record real-world events and reflections that unfolded after this reading..."
                               : "จดบันทึกเหตุการณ์จริงที่เกิดขึ้นหลังจากเปิดไพ่ใบนี้..."
                           }
-                          className="w-full bg-surface border border-line rounded-lg p-2 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-gold"
+                          className="w-full bg-surface border border-line-interactive rounded-lg p-2 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-gold"
                         />
                         <div className="flex items-center justify-end gap-2 text-xs">
                           <button

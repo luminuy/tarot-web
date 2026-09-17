@@ -22,6 +22,7 @@ import zlib from "node:zlib";
 import { execSync, spawn, type ChildProcess } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { normalizeRoute, primaryOutputDir, renderedRouteMap } from "./lib/rendered-pages";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -350,6 +351,7 @@ export async function testBundleBudget(): Promise<boolean> {
  * ยิงผ่านเซิร์ฟเวอร์แทนแบบเงียบ ๆ · ตอนนี้ map มาจาก `lib/rendered-pages.ts` ที่เดียว
  */
 const routeToFile = renderedRouteMap();
+assertNonEmptyCorpus("เส้นทางที่เรนเดอร์แล้ว", routeToFile, "รัน `npm run build` ก่อน");
 const htmlFileFor = (route: string) => routeToFile.get(normalizeRoute(route))?.file;
 
 const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
@@ -393,7 +395,14 @@ const needsServer = BUDGETS.some((b) => !htmlFileFor(b.route));
       } else if (serverProcess) {
         html = await fetchHtml(`http://127.0.0.1:${TEST_PORT}${b.route}`);
       } else {
-        console.warn(`⚠️ ไม่พบไฟล์ HTML สำหรับเส้นทาง: ${b.route}`);
+        /* 🔴 R-07: ไม่มี HTML = **ตก** ไม่ใช่ข้าม
+           ของเดิม `continue` ทิ้งไป ➔ เส้นทางนั้นไม่ถูกวัดเลย แต่สรุปท้ายขึ้น ✅ เหมือนกัน
+           "วัดไม่ได้" กับ "วัดแล้วอยู่ในงบ" ต้องไม่ให้ผลลัพธ์เดียวกัน */
+        console.error(
+          `❌ ไม่พบไฟล์ HTML สำหรับเส้นทาง ${b.route} — งบของเส้นทางนี้ไม่ได้ถูกวัดเลย\n` +
+            "   ➔ รัน `npm run build` ก่อน (repo:verify build ให้เองอยู่แล้ว)",
+        );
+        process.exitCode = 1;
         continue;
       }
 

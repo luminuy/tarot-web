@@ -44,12 +44,7 @@ function pct(part: number, whole: number) {
   return `${Math.round((part / whole) * 100)}%`;
 }
 
-function breakdown(src: Record<string, number>, prefix: string) {
-  return Object.entries(src)
-    .filter(([k]) => k.startsWith(prefix))
-    .map(([k, count]) => ({ key: k.slice(prefix.length), count }))
-    .sort((a, b) => b.count - a.count);
-}
+
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -99,6 +94,10 @@ function BarList({
 }
 
 import DailyStatsTable from "@/components/admin/DailyStatsTable";
+/* 🧹 R-31: สำเนาของ breakdown() ที่เคยประกาศในไฟล์นี้ถูกลบแล้ว — ใช้ตัวกลางตัวเดียว */
+import { breakdown } from "@/lib/stats/read";
+import { readEnvelope } from "@/lib/api/envelope";
+import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 
 export default function StatsDashboard() {
   const [days, setDays] = useState(14);
@@ -112,15 +111,27 @@ export default function StatsDashboard() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
+  /*
+   * 🔴 R-28: ของเดิมตั้งค่า `err` ไว้แต่ **ไม่เคยเรนเดอร์มันเลยสักที่**
+   * API ตอบ 500 ➔ หน้าจอแสดงตารางว่าง ซึ่งผู้ดูแลอ่านว่า "วันนี้ไม่มีใครเข้าเว็บ"
+   * ไม่ใช่ "ระบบสถิติพัง" — สองอย่างนี้ต้องแยกออกจากกันให้ได้บนหน้าจอเฝ้าระบบ
+   */
   const load = useCallback(async (d: number) => {
     setLoading(true);
     setErr("");
     try {
-      const res = await fetch(`/api/admin/stats?days=${d}`);
-      if (!res.ok) throw new Error(String(res.status));
-      setData(await res.json());
-    } catch {
-      setErr("โหลดสถิติไม่สำเร็จ");
+      const res = await fetch(`/api/admin/stats?days=${d}`, { cache: "no-store" });
+      const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      const envelope = readEnvelope(body, res.ok);
+      if (!envelope.ok) {
+        setData(null);
+        setErr(`${envelope.error} (HTTP ${res.status})`);
+        return;
+      }
+      setData(envelope.data as typeof data);
+    } catch (e) {
+      setData(null);
+      setErr(e instanceof Error ? `ติดต่อเซิร์ฟเวอร์ไม่ได้: ${e.message}` : "ติดต่อเซิร์ฟเวอร์ไม่ได้");
     } finally {
       setLoading(false);
     }
@@ -323,6 +334,8 @@ export default function StatsDashboard() {
           <div className="h-7 w-7 animate-spin rounded-full border-2 border-gold border-t-transparent mb-3" />
           <p className="text-xs text-muted">กำลังประมวลผลสถิติการใช้งาน…</p>
         </div>
+      ) : err ? (
+        <AdminErrorBanner error={err} onRetry={() => load(days)} />
       ) : null}
     </div>
   );

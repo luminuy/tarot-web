@@ -1,5 +1,7 @@
 "use client";
 
+
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 export interface SavedCardDetail {
   order: number;
   positionName: string;
@@ -39,7 +41,7 @@ export interface SavedReadingItem {
   corrupted?: boolean;
 }
 
-const STORAGE_KEY = "tarot_reading_journal_v1";
+const STORAGE_KEY = STORAGE_KEYS.journal;
 
 /**
  * เพดานจำนวนรายการที่เก็บบนเครื่องของผู้ใช้ที่ไม่ได้ล็อกอิน
@@ -49,7 +51,7 @@ const STORAGE_KEY = "tarot_reading_journal_v1";
 export const LOCAL_HISTORY_LIMIT = 50;
 
 /** true = การบันทึกครั้งล่าสุดทำให้รายการเก่าสุดถูกตัดทิ้งจริง */
-const TRIM_NOTICE_KEY = "tarot_reading_journal_trimmed_v1";
+const TRIM_NOTICE_KEY = STORAGE_KEYS.journalTrimNotice;
 
 export function wasHistoryTrimmed(): boolean {
   if (typeof window === "undefined") return false;

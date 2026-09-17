@@ -8,6 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { cardByIndex, cardById, DECK, TOTAL_CARDS } from "../../src/data/cards";
 import { resolveCardByIndex } from "../../src/lib/content/overrides";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 /**
  * อ่านไฟล์ที่ด่านนี้ "ต้องมี" — ไฟล์หายคือการตกด่าน ไม่ใช่การข้าม
@@ -138,6 +139,18 @@ function main() {
   if (streamReaderSrc !== null) {
     check("StreamReader.tsx ไม่มี fallback image || 'major-00.jpg'", !streamReaderSrc.includes('image || "major-00.jpg"'));
   }
+
+  /* กันด่านผ่านเพราะสแกนศูนย์ไฟล์ (R-05) — สองฟังก์ชันข้างล่างคืนแค่ boolean
+     ถ้า rootDir ชี้ผิดที่ ทั้งคู่จะคืน "ไม่พบของผิด" เหมือนกันทุกประการ */
+  function listScannedSources(dir: string, out: string[] = []): string[] {
+    for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, f.name);
+      if (f.isDirectory()) listScannedSources(full, out);
+      else if (f.isFile() && /\.(ts|tsx)$/.test(f.name) && !f.name.endsWith(".d.ts")) out.push(full);
+    }
+    return out;
+  }
+  assertNonEmptyCorpus("ไฟล์ .ts/.tsx ใน src/", listScannedSources(rootDir), "ตรวจว่า rootDir ชี้ไปที่ src/ จริง");
 
   // 5.6 ตรวจสอบไฟล์ทั้งหมดใน src ว่าไม่มีการ fallback ไปหา DECK ใดๆ
   function scanDirForDeckFallback(dir: string): boolean {

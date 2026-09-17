@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { APP_TIME_ZONE } from "@/lib/time/bangkok";
+import { readEnvelope } from "@/lib/api/envelope";
+import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 
 interface HealthData {
   overallStatus: "healthy" | "degraded" | "critical";
@@ -101,7 +104,7 @@ function formatThaiTime(ts: number): string {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "Asia/Bangkok",
+    timeZone: APP_TIME_ZONE,
   }).format(new Date(ts));
 }
 
@@ -111,31 +114,48 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
   const [loading, setLoading] = useState(true);
   const [rebuildingIndex, setRebuildingIndex] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 3500);
   };
 
+  /*
+   * 🔴 R-28: ของเดิม `r.ok ? r.json() : null` แล้ว `if (healthRes) setHealth(...)`
+   * แปลว่า API ตอบ 500 ➔ ค่าเดิมค้างอยู่ (หรือว่างเปล่า) โดย **ไม่มีอะไรบอกผู้ดูแลเลย**
+   * หน้าจอเฝ้าระบบที่ "ไม่มีข้อมูล" กับ "พัง" หน้าตาเหมือนกัน คือหน้าจอที่โกหกผู้ดูแล
+   */
   const loadData = useCallback(async () => {
     setLoading(true);
-    try {
-      const [healthRes, statsRes] = await Promise.all([
-        fetch("/api/admin/system-health", { cache: "no-store" }).then((r) =>
-          r.ok ? r.json() : null,
-        ),
-        fetch("/api/admin/stats?days=7", { cache: "no-store" }).then((r) =>
-          r.ok ? r.json() : null,
-        ),
-      ]);
+    setLoadError(null);
+    const failures: string[] = [];
 
-      if (healthRes) setHealth(healthRes);
-      if (statsRes) setStats(statsRes);
-    } catch {
-      showToast("ไม่สามารถโหลดข้อมูลแดชบอร์ดได้");
-    } finally {
-      setLoading(false);
-    }
+    const fetchJson = async (url: string, label: string): Promise<Record<string, unknown> | null> => {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+        const envelope = readEnvelope(body, res.ok);
+        if (!envelope.ok) {
+          failures.push(`${label}: ${envelope.error} (HTTP ${res.status})`);
+          return null;
+        }
+        return envelope.data;
+      } catch (err) {
+        failures.push(`${label}: ${err instanceof Error ? err.message : "ติดต่อเซิร์ฟเวอร์ไม่ได้"}`);
+        return null;
+      }
+    };
+
+    const [healthRes, statsRes] = await Promise.all([
+      fetchJson("/api/admin/system-health", "สุขภาพระบบ"),
+      fetchJson("/api/admin/stats?days=7", "สถิติ 7 วัน"),
+    ]);
+
+    setHealth(healthRes as HealthData | null);
+    setStats(statsRes as StatsData | null);
+    if (failures.length > 0) setLoadError(failures.join(" · "));
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -257,6 +277,8 @@ export default function AdminOverview({ onNavigateTab }: AdminOverviewProps) {
           </div>
         </div>
       </div>
+
+      {loadError && <AdminErrorBanner error={loadError} onRetry={loadData} />}
 
       {/* Primary KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

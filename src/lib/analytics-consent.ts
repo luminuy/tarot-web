@@ -9,7 +9,9 @@
  * และจากแบนเนอร์ · เก็บใน localStorage เพราะเป็นการตัดสินใจต่อเครื่อง
  */
 
-export const CONSENT_STORAGE_KEY = "seertarot_analytics_consent_v1";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
+
+export const CONSENT_STORAGE_KEY = STORAGE_KEYS.analyticsConsent;
 
 /** เหตุการณ์ที่ยิงบน window เมื่อผู้ใช้เพิ่งตัดสินใจ เพื่อให้สคริปต์วัดผลเริ่มทำงานทันที */
 export const CONSENT_CHANGED_EVENT = "seertarot:consent-changed";

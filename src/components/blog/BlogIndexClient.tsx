@@ -172,7 +172,7 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                 ? "Search articles, card meanings, love, career, or spreads..."
                 : "ค้นหาบทความ ความหมายไพ่ ความรัก การงาน หรือผังพยากรณ์..."
             }
-            className="w-full bg-surface border border-line rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink shadow-[0_2px_8px_rgba(41,38,31,0.03)] transition font-serif-th"
+            className="w-full bg-surface border border-line-interactive rounded-2xl px-5 py-3.5 pl-11 text-xs sm:text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-gold-ink focus:ring-1 focus:ring-gold-ink shadow-[0_2px_8px_rgba(41,38,31,0.03)] transition font-serif-th"
           />
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-ink" />
           {searchQuery && (
@@ -387,13 +387,17 @@ export const BlogIndexClient: React.FC<BlogIndexClientProps> = ({ articles }) =>
                           </span>
                         ))}
                     </div>
+                    {/* ♿ R-23: ผู้ใช้ที่ไล่ฟัง "รายการลิงก์" จะได้ยินแค่ชื่อลิงก์เท่านั้น
+                        ถ้าทุกการ์ดใช้คำว่า "อ่านต่อ" เหมือนกันหมด จะไม่มีทางรู้ว่าลิงก์ไหนไปไหน
+                        `aria-label` จึงต้องมีชื่อบทความอยู่ด้วย ส่วนคนที่มองเห็นยังเห็นคำสั้นเหมือนเดิม */}
                     <Link
                       href={`/blog/${article.slug}`}
                       prefetch={false}
+                      aria-label={isEnglish ? `Read Codex: ${artTitle}` : `อ่านต่อ: ${artTitle}`}
                       className="inline-flex items-center gap-1 text-xs text-ink group-hover:text-gold-ink group-hover:translate-x-0.5 transition font-serif-th font-bold flex-shrink-0"
                     >
                       <span>{isEnglish ? "Read Codex" : "อ่านต่อ"}</span>
-                      <span>→</span>
+                      <span aria-hidden="true">→</span>
                     </Link>
                   </div>
                 </article>

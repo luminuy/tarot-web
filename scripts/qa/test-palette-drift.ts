@@ -33,6 +33,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -91,6 +92,7 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 const files = walk(SRC);
+assertNonEmptyCorpus("ไฟล์ต้นฉบับใน src/", files, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
 const problems: string[] = [];
 const notes: string[] = [];
 

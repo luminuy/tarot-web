@@ -426,7 +426,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={isEn ? "e.g. Alex, Sarah, Morgan" : "เช่น ฟ้า, พลอย, บิ๊ก"}
-                    className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-surface border border-line text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+                    className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-surface border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
                   />
                 </div>
               </div>
@@ -449,7 +449,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-surface border border-line text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+                  className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-surface border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
                 />
               </div>
             </div>
@@ -485,7 +485,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={mode === "signup" ? (isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร") : "••••••••••"}
-                    className="w-full h-11 pl-9 pr-12 rounded-xl bg-surface border border-line text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+                    className="w-full h-11 pl-9 pr-12 rounded-xl bg-surface border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
                   />
                   <button
                     type="button"

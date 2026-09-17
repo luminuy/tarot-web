@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 
 interface HealthData {
   overallStatus: "healthy" | "degraded" | "critical";
@@ -162,7 +163,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
 
   const formattedTime = data?.checkedAt
     ? new Intl.DateTimeFormat("th-TH", {
-        timeZone: "Asia/Bangkok",
+        timeZone: APP_TIME_ZONE,
         dateStyle: "medium",
         timeStyle: "medium",
       }).format(new Date(data.checkedAt))
@@ -203,8 +204,12 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
         </div>
 
+        {/* ♿ + R-28: ต้องประกาศให้โปรแกรมอ่านหน้าจอด้วย ไม่ใช่แค่โผล่เป็นกล่องสีแดง */}
         {error && (
-          <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+          <div
+            role="alert"
+            className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800"
+          >
             {error}
           </div>
         )}

@@ -158,7 +158,21 @@ async function fetchLiveRobots(): Promise<string | null> {
       return await res.text();
     } catch (e) {
       if (attempt === 2) {
-        console.log(`  ⏭️  ข้ามกฎ 5: ยิง ${url} ไม่ได้ (${(e as Error).message}) — ถือว่าออฟไลน์ ไม่ใช่นโยบายผิด`);
+        /*
+         * ⚠️ R-07: เน็ตล่ม/ไทม์เอาต์/5xx **ไม่ใช่** "นโยบายถูกต้อง"
+         * กฎ 5 เป็นข้อเดียวที่ดู `robots.txt` ของ production จริง — เป็นชั้นที่รีโปมองไม่เห็น
+         * ปล่อยผ่านเงียบ ๆ แปลว่าวันที่ `robots.txt` บน production เพี้ยนจริง ด่านนี้ก็เขียว
+         *
+         * นโยบายใหม่: อยู่ใน CI = **ตกทันที** (CI ต้องออกเน็ตได้ ถ้าไม่ได้แปลว่า runner ผิดปกติ)
+         * รันในเครื่อง = เตือนให้เห็นชัดว่า "ไม่ได้ตรวจ" ไม่ใช่ "ตรวจแล้วผ่าน"
+         */
+        const inCi = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+        const msg = `ยิง ${url} ไม่ได้ (${(e as Error).message})`;
+        if (inCi) {
+          console.error(`  ❌ กฎ 5 ตรวจไม่ได้: ${msg} — ใน CI ถือว่าตก ไม่ใช่ "ถือว่าออฟไลน์"`);
+          process.exit(1);
+        }
+        console.warn(`  🟡 กฎ 5 **ไม่ได้ถูกตรวจ**: ${msg} (รันในเครื่องจึงเตือนแทนการตก)`);
         return null;
       }
     }

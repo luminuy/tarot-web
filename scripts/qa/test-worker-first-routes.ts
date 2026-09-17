@@ -26,6 +26,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
 
@@ -106,6 +107,8 @@ function walk(dir: string, out: string[] = []): string[] {
 
 const appDir = path.join(ROOT, "src/app");
 const pageFiles = walk(appDir);
+/* 🧮 R-05: คลังว่าง = ด่านนี้จะรายงานผ่านโดยไม่ได้ตรวจอะไรเลย (ด่าน test-gate-integrity เฝ้าอยู่) */
+assertNonEmptyCorpus("ไฟล์หน้าใน src/app", pageFiles, "ตรวจว่า walk() ชี้ไปที่ src/app จริง");
 
 check(
   `หาไฟล์หน้า/ปลายทางใน src/app เจอ (${pageFiles.length} ไฟล์)`,

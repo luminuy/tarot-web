@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 
 interface ModelResult {
   model: string;
@@ -104,11 +105,9 @@ export default function AiHealthPanel() {
         </Button>
       </div>
 
-      {err && (
-        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800">
-          {err}
-        </p>
-      )}
+      {/* ♿ + R-28: ใช้แถบกลางที่มี role="alert" เหมือนทุกแผง
+          ของเดิมเป็น <p> เฉย ๆ ผู้ดูแลที่ใช้โปรแกรมอ่านหน้าจอจึงไม่รู้ว่าการตรวจล้มเหลว */}
+      {err && <AdminErrorBanner error={err} onRetry={run} />}
 
       {loading && !data && <p className="text-sm text-muted">กำลังติดต่อ Gemini…</p>}
 
