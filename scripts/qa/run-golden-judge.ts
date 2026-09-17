@@ -41,6 +41,7 @@ import type { Reading } from "../../src/lib/schema/reading";
 import type { Category } from "../../src/data/cards/types";
 import { RUBRIC, buildComparison } from "./judge-compare";
 import type { RubricKey, CaseResult, JudgeReport } from "./judge-compare";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const REPORT_DIR = path.join(process.cwd(), "scripts/qa/reports");
 const FIXTURE = path.join(process.cwd(), "scripts/qa/fixtures/golden-readings.json");
@@ -370,7 +371,9 @@ async function main() {
   const delayArg = Number(arg("delay") ?? 50000);
 
   const golden: GoldenCase[] = JSON.parse(fs.readFileSync(FIXTURE, "utf-8"));
+  assertNonEmptyCorpus("เคสทองใน fixture", golden, `ไฟล์ ${FIXTURE} ต้องมีเคสอย่างน้อย 1 เคส`);
   const cases = limit > 0 ? golden.slice(0, limit) : golden;
+  assertNonEmptyCorpus("เคสที่จะยิงจริงรอบนี้", cases, "ค่า --limit ตัดจนเหลือศูนย์เคส");
 
   console.log(`\n🧑‍⚖️ Golden Runner + LLM Judge`);
   console.log(`   prompt version : ${PROMPT_VERSION}`);

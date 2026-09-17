@@ -31,6 +31,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { primaryOutputDir } from "./lib/rendered-pages";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const ROOT = process.cwd();
 const problems: string[] = [];
@@ -156,7 +157,9 @@ const MODAL_COMPONENTS = [
   "BookQueueModal",
 ];
 
-for (const file of walkTsx(path.join(ROOT, "src"))) {
+const tsxFiles = walkTsx(path.join(ROOT, "src"));
+assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+for (const file of tsxFiles) {
   const raw = fs.readFileSync(file, "utf-8");
   if (!raw.includes("<main")) continue;
   const text = raw

@@ -20,6 +20,7 @@ import { ARTICLES } from "../../src/data/articles";
 import { STANDARD_SPREAD_IDS } from "../../src/lib/entitlement/limits";
 import { COUNTS } from "../../src/components/layout/nav-links";
 import { CHECKS } from "../github-auto";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -169,7 +170,11 @@ function checkDocs() {
 
   for (const relPath of TARGET_FILES) {
     const fullPath = path.join(ROOT, relPath);
-    if (!fs.existsSync(fullPath)) continue;
+    if (!fs.existsSync(fullPath)) {
+      /* 🔴 R-07: ไฟล์เป้าหมายหาย = ตัวเลขในไฟล์นั้นไม่ถูกตรวจเลย ไม่ใช่ "ไม่มีเลขผิด" */
+      console.error(`❌ ไฟล์ที่ด่านนี้ต้องตรวจหายไป: ${relPath} — แก้ TARGET_FILES ถ้าย้ายไฟล์จริง`);
+      process.exit(1);
+    }
 
     const raw = fs.readFileSync(fullPath, "utf8");
     const lines = raw.split("\n");
@@ -261,7 +266,11 @@ function checkDocs() {
 function checkIncidentIds() {
   const LOG = "docs/INCIDENT_LOG.md";
   const logPath = path.join(ROOT, LOG);
-  if (!fs.existsSync(logPath)) return;
+  if (!fs.existsSync(logPath)) {
+    /* 🔴 R-07: ไม่มีทะเบียน = กฎ "ห้ามอ้างเลข INC ที่ไม่มีจริง" กลายเป็น no-op เงียบ ๆ */
+    console.error(`❌ ไม่พบ ${LOG} — ตรวจทะเบียนเลข INC ไม่ได้เลย (กฎเหล็กข้อ 0 บังคับให้ไฟล์นี้มีอยู่)`);
+    process.exit(1);
+  }
 
   const raw = fs.readFileSync(logPath, "utf8");
   const lines = raw.split("\n");
@@ -293,6 +302,8 @@ function checkIncidentIds() {
   // เลข INC ที่ถูกอ้างถึงจากที่อื่น ต้องมีอยู่จริงในแฟ้ม
   const REF_GLOBS = ["CLAUDE.md", "GEMINI.md", "README.md", "docs", "scripts", "src"];
   const dangling: { file: string; line: number; id: string }[] = [];
+  /** ไฟล์ที่ถูกเปิดอ่านจริง — คลังว่าง = ด่านนี้ไม่ได้ตรวจอะไรเลย (R-05) */
+  const scannedRefFiles: string[] = [];
 
   const walk = (rel: string) => {
     const abs = path.join(ROOT, rel);
@@ -307,6 +318,7 @@ function checkIncidentIds() {
     }
     if (!/\.(md|ts|tsx)$/.test(rel)) return;
     if (rel === LOG) return;
+    scannedRefFiles.push(rel);
     const content = fs.readFileSync(abs, "utf8").split("\n");
     for (let i = 0; i < content.length; i++) {
       const re = /INC-(\d{4})([a-z]?)/g;
@@ -318,6 +330,7 @@ function checkIncidentIds() {
     }
   };
   for (const g of REF_GLOBS) walk(g);
+  assertNonEmptyCorpus("ไฟล์ที่สแกนหาเลข INC", scannedRefFiles, "ตรวจว่า REF_GLOBS ยังชี้ไปที่โฟลเดอร์ที่มีอยู่จริง");
 
   if (dangling.length > 0) {
     console.error(`❌ มีการอ้างเลข INC ที่ไม่มีอยู่จริงใน ${LOG} (${dangling.length} จุด):`);

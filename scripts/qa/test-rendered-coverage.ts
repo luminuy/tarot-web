@@ -31,6 +31,7 @@ import path from "node:path";
 import sitemap from "../../src/app/sitemap";
 import { SITE_ORIGIN } from "../../src/lib/config/site";
 import { collectRenderedPages, normalizeRoute, ROOT } from "./lib/rendered-pages";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 let failed = 0;
 const check = (label: string, ok: boolean, detail?: string) => {
@@ -58,6 +59,7 @@ console.log("\n🗺️  ตรวจความครบถ้วนของ�
 
 // ── 1. sitemap ทุกเส้นต้องมีหน้ารองรับ ──────────────────────────────────────
 const rendered = collectRenderedPages();
+assertNonEmptyCorpus("หน้าที่เรนเดอร์ออกมาจริง", rendered, "รัน `npm run build` ก่อน");
 const renderedRoutes = new Set(rendered.map((p) => p.route));
 const allowed = new Map(DYNAMIC_ROUTES.map((d) => [normalizeRoute(d.route), d.reason]));
 

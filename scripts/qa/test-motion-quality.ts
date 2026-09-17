@@ -80,6 +80,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -134,6 +135,19 @@ function walk(dir: string, exts: string[]): string[] {
   return out;
 }
 
+const TS_TSX_FILES = walk(SRC, [".tsx", ".ts"]);
+const TSX_FILES = walk(SRC, [".tsx"]);
+const CSS_FILES = walk(SRC, [".css"]);
+const CV_FILES = [
+  ...walk(SRC, [".tsx", ".ts", ".css"]),
+  /* 🔴 R-07: โฟลเดอร์ astro หาย = ครึ่งเว็บไม่ถูกตรวจ แต่ด่านยังขึ้น ✅ — ต้องตกแทน */
+  ...walk(ASTRO, [".astro", ".tsx", ".ts", ".css"]),
+];
+assertNonEmptyCorpus("ไฟล์ .ts/.tsx ใน src/", TS_TSX_FILES, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", TSX_FILES, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+assertNonEmptyCorpus("ไฟล์ .css ใน src/", CSS_FILES, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+assertNonEmptyCorpus("ไฟล์ที่ตรวจ content-visibility", CV_FILES, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+
 function rel(p: string): string {
   return path.relative(ROOT, p).split(path.sep).join("/");
 }
@@ -149,7 +163,7 @@ function isCommentLine(line: string): boolean {
 }
 
 function checkTsx(violations: Violation[]): void {
-  for (const file of walk(SRC, [".tsx", ".ts"])) {
+  for (const file of TS_TSX_FILES) {
     const r = rel(file);
     const lines = fs.readFileSync(file, "utf-8").split("\n");
 
@@ -220,7 +234,7 @@ function checkTsx(violations: Violation[]): void {
  * ตรวจจากบล็อกจริง (ตั้งแต่แท็กเปิดถึง `</AnimatePresence>` ที่ใกล้ที่สุด)
  */
 function checkWaitWithoutExit(violations: Violation[]): void {
-  for (const file of walk(SRC, [".tsx"])) {
+  for (const file of TSX_FILES) {
     const r = rel(file);
     const text = fs.readFileSync(file, "utf-8");
     const lines = text.split("\n");
@@ -249,7 +263,7 @@ function checkWaitWithoutExit(violations: Violation[]): void {
  * ไม่งั้น transition จะไม่ทำงานเลยแบบเงียบ ๆ (ดูคำอธิบายกับดักที่หัวไฟล์)
  */
 function checkUnregisteredTransformVars(violations: Violation[]): void {
-  for (const file of walk(SRC, [".css"])) {
+  for (const file of CSS_FILES) {
     const r = rel(file);
     const css = fs.readFileSync(file, "utf-8");
     const registered = new Set(
@@ -287,7 +301,7 @@ function checkUnregisteredTransformVars(violations: Violation[]): void {
 }
 
 function checkCss(violations: Violation[]): void {
-  for (const file of walk(SRC, [".css"])) {
+  for (const file of CSS_FILES) {
     const r = rel(file);
     const lines = fs.readFileSync(file, "utf-8").split("\n");
     for (let i = 0; i < lines.length; i++) {
@@ -344,7 +358,7 @@ function checkKeyframeCenteringConflict(violations: Violation[]): void {
   /** ชื่อคลาส (ไม่มีจุดนำหน้า) → รายชื่อคีย์เฟรมที่มันเรียกใช้ */
   const classAnimations = new Map<string, string[]>();
 
-  for (const file of walk(SRC, [".css"])) {
+  for (const file of CSS_FILES) {
     const css = fs.readFileSync(file, "utf-8");
 
     for (const m of css.matchAll(/@keyframes\s+([\w-]+)\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g)) {
@@ -369,7 +383,7 @@ function checkKeyframeCenteringConflict(violations: Violation[]): void {
   // ── ฝั่ง TSX ────────────────────────────────────────────────────────────
   const TAILWIND_TRANSLATE = /(^|[\s"'`{])-?translate-[xy]-[\w./[\]%-]+/;
 
-  for (const file of walk(SRC, [".tsx"])) {
+  for (const file of TSX_FILES) {
     const r = rel(file);
     const lines = fs.readFileSync(file, "utf-8").split("\n");
 
@@ -434,7 +448,7 @@ function checkExitKilledByEarlyReturn(violations: Violation[]): void {
   // เงื่อนไขที่สื่อถึง "สถานะเปิด/ปิดของหน้าต่าง" เท่านั้น — `if (!mantra) return null` ของการ์ดย่อยไม่เกี่ยว
   const OPEN_STATE_RE = /\b(isOpen|isVisible|isShown|isMounted)\b/;
 
-  for (const file of walk(SRC, [".tsx"])) {
+  for (const file of TSX_FILES) {
     const r = rel(file);
     const lines = fs.readFileSync(file, "utf-8").split("\n");
 
@@ -475,7 +489,7 @@ function checkExitKilledByEarlyReturn(violations: Violation[]): void {
 function checkPhantomAnimateClasses(violations: Violation[]): void {
   const PHANTOM_RE = /\b(animate-in|animate-out|fade-in|fade-out|zoom-in|zoom-out|slide-in-from|slide-out-to)\b/;
 
-  for (const file of walk(SRC, [".tsx"])) {
+  for (const file of TSX_FILES) {
     const r = rel(file);
     const lines = fs.readFileSync(file, "utf-8").split("\n");
     for (let i = 0; i < lines.length; i++) {
@@ -510,7 +524,7 @@ function checkPhantomAnimateClasses(violations: Violation[]): void {
  * ทางที่ถูก: เลื่อนขึ้น (`y`) + จาง (`opacity`) ให้ผลทางสายตาใกล้เคียงกันแต่เบากว่ามาก
  */
 function checkModalScale(violations: Violation[]): void {
-  for (const file of walk(SRC, [".tsx"])) {
+  for (const file of TSX_FILES) {
     const text = fs.readFileSync(file, "utf-8");
     if (!text.includes("modal-scrim")) continue; // ตรวจเฉพาะไฟล์ที่มีหน้าต่างลอยจริง
     const r = rel(file);
@@ -540,7 +554,7 @@ function checkModalScale(violations: Violation[]): void {
  * `svh` = ความสูงที่เล็กที่สุด (แถบ URL โผล่) · ค่าคงที่ ไม่ขยับตามแถบ = ไม่มีรีโฟลว์
  */
 function checkModalViewportUnit(violations: Violation[]): void {
-  for (const file of walk(SRC, [".tsx"])) {
+  for (const file of TSX_FILES) {
     const text = fs.readFileSync(file, "utf-8");
     if (!text.includes("modal-scrim")) continue;
     const r = rel(file);
@@ -602,7 +616,7 @@ function usesMotion(file: string, depth: number): boolean {
 }
 
 function checkPointlessMotionScope(violations: Violation[]): void {
-  for (const file of walk(SRC, [".tsx"])) {
+  for (const file of TSX_FILES) {
     const text = fs.readFileSync(file, "utf-8");
     if (!text.includes("withMotionScope(")) continue;
     const r = rel(file);
@@ -644,11 +658,7 @@ function checkPointlessMotionScope(violations: Violation[]): void {
  * ถ้าอนาคตจะใช้จริง ต้องแนบตัวเลข "กระตุก 0 ครั้ง" ที่วัดครบทุกความกว้างจอมาก่อน แล้วค่อยเพิ่มลง ALLOWLIST
  */
 function checkContentVisibility(violations: Violation[]): void {
-  const files = [
-    ...walk(SRC, [".tsx", ".ts", ".css"]),
-    ...(fs.existsSync(ASTRO) ? walk(ASTRO, [".astro", ".tsx", ".ts", ".css"]) : []),
-  ];
-  for (const file of files) {
+  for (const file of CV_FILES) {
     const r = rel(file);
     const lines = fs.readFileSync(file, "utf-8").split("\n");
     for (let i = 0; i < lines.length; i++) {

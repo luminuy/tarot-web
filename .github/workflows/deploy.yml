@@ -21,6 +21,12 @@ jobs:
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v5
+        with:
+          # ⚠️ R-15: ต้องมี **ประวัติ git ครบ** ไม่ใช่ shallow clone
+          # `test-judge-baseline.ts` เทียบ `PROMPT_VERSION` กับ `origin/main` เพื่อบังคับกฎ
+          # "ขึ้นเวอร์ชัน prompt แล้วต้องแนบผลวัด" — หา ref ไม่เจอเมื่อไหร่ ด่านนั้นเสื่อมเป็น
+          # no-op เงียบ ๆ ทันที (ตรงกับที่ `pr.yml` ตั้งไว้อยู่แล้ว)
+          fetch-depth: 0
 
       - name: ⚡ Setup pnpm
         uses: pnpm/action-setup@v4
@@ -38,15 +44,23 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # ชุดตรวจกลาง 6 ด่าน — นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts
+      # ⚠️ **build ต้องอยู่ก่อน repo:verify เสมอ** (บทเรียน R-06)
+      # ของเดิมรันชุดตรวจก่อน ด่านที่ตรวจไฟล์จากการ build จึงไปตรวจของที่ยังไม่มี
+      # มี 3 ด่านที่เอาตัวรอดด้วยการสั่ง build เอง ที่เหลือข้ามเงียบแล้วรายงานผ่าน
+      - name: ⚡ Build Worker & Next.js Bundle (ต้องมาก่อนชุดตรวจ)
+        run: pnpm run build
+        env:
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
+          NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
+          NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '' }}
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
+
+      # ชุดตรวจกลาง — นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts
       # เพิ่มด่านตรวจใหม่ที่นั่นที่เดียว ทั้ง hooks / PR / Deploy จะตรวจเหมือนกันหมด
-      - name: 🧪 Verification Suite (6 ด่าน)
+      - name: 🧪 Verification Suite
         run: pnpm run repo:verify
-        # ⚠️ ต้องมีที่นี่ด้วย ไม่ใช่แค่ตอน deploy — `repo:verify` มีด่านที่ build เว็บเองเมื่อยังไม่มี
-        # `.next/` (test-en-routing.ts) แล้วด่านภาพแชร์ (test-og-images.ts) ก็อ่านผลนั้นต่อ
-        # `NEXT_PUBLIC_*` ถูกฝังตอน build เท่านั้น ถ้าขั้นนี้ build โดยไม่มีค่าเดียวกับตอน deploy
-        # CI จะไปตรวจอาร์ติแฟกต์คนละก้อนกับที่ขึ้น production
-        # (เกิดขึ้นจริงหลัง PR #348 — deploy ของ main ล้มด้วย "พบ 1 ค่า")
+        # env ต้องตรงกับขั้น build เป๊ะ — `NEXT_PUBLIC_*` ถูกฝังตอน build เท่านั้น
+        # (บทเรียน PR #348 — deploy ของ main ล้มด้วย "พบ 1 ค่า")
         env:
           NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
           NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}

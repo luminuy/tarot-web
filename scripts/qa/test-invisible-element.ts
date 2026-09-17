@@ -35,6 +35,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -115,7 +116,9 @@ export function scanInvisibleOrnaments(files: string[]): Finding[] {
 }
 
 if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
-  const findings = scanInvisibleOrnaments(walkTsx(SRC));
+  const tsxFiles = walkTsx(SRC);
+  assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+  const findings = scanInvisibleOrnaments(tsxFiles);
 
   if (findings.length > 0) {
     console.error(`\n❌ พบของประดับที่กลืนหายไปกับพื้นหลัง ${findings.length} จุด\n`);

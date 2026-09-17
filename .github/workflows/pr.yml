@@ -46,6 +46,27 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      # ⚠️ **build ต้องอยู่ก่อน repo:verify เสมอ** (บทเรียน R-06)
+      # ---------------------------------------------------------------------------
+      # ของเดิมรัน `repo:verify` ก่อนแล้วค่อย build ผลคือด่านที่ตรวจ "ไฟล์ที่เกิดจากการ build"
+      # ไปตรวจของที่ยังไม่มี · มีเพียงสามตัวที่เอาตัวรอดด้วยการสั่ง build เอง
+      # (`test-bundle-budget` · `test-meta-length` · `test-en-routing`) **ที่เหลือข้ามเงียบ**
+      # เช่น `test-a11y-critical` ที่โฆษณาว่า "ตรวจ a11y ทั้งเว็บ 309 หน้า" แต่เมื่อไม่มีโฟลเดอร์
+      # ผลลัพธ์ มันวนอาเรย์ว่างแล้วรายงานผ่าน — ด่านที่ผ่านเพราะไม่มีอะไรให้ตรวจ
+      #
+      # สลับลำดับแล้วทุกด่านได้อาร์ติแฟกต์จริงชุดเดียวกัน และเป็นชุดเดียวกับที่ขึ้น production
+      # (`NEXT_PUBLIC_*` ถูกฝังตอน build เท่านั้น จึงต้องใช้ env ชุดเดียวกันทั้งสองขั้น)
+      - name: ⚡ Build Worker & Next.js Bundle (ต้องมาก่อนชุดตรวจ)
+        id: build_check
+        run: pnpm run build
+        # build ทดสอบต้องใช้ env ชุดเดียวกับตอน deploy จะได้เจอปัญหาตั้งแต่ตอนยังเป็น PR
+        # ไม่ใช่ไปโผล่ตอน deploy ขึ้น production แล้ว (บทเรียนจาก PR #348)
+        env:
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
+          NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
+          NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '' }}
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
+
       # ชุดตรวจกลางทั้งหมด — นิยามอยู่ที่ CHECKS ใน scripts/github-auto.ts ที่เดียว
       # (แหล่งความจริงเดียวร่วมกับ git hooks และ npm run commit · เพิ่มด่านใหม่ให้ไปเพิ่มที่นั่น)
       #
@@ -57,22 +78,9 @@ jobs:
       - name: 🧪 Verification Suite
         id: verify
         run: pnpm run repo:verify
-        # ⚠️ ต้องมีที่นี่ด้วย ไม่ใช่แค่ตอน deploy — `repo:verify` มีด่านที่ build เว็บเองเมื่อยังไม่มี
-        # `.next/` (test-en-routing.ts) แล้วด่านภาพแชร์ (test-og-images.ts) ก็อ่านผลนั้นต่อ
-        # `NEXT_PUBLIC_*` ถูกฝังตอน build เท่านั้น ถ้าขั้นนี้ build โดยไม่มีค่าเดียวกับตอน deploy
-        # CI จะไปตรวจอาร์ติแฟกต์คนละก้อนกับที่ขึ้น production
-        # (เกิดขึ้นจริงหลัง PR #348 — deploy ของ main ล้มด้วย "พบ 1 ค่า")
-        env:
-          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
-          NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}
-          NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: ${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || vars.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '' }}
-          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || vars.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '' }}
-
-      - name: ⚡ Test Build Worker & Next.js Bundle
-        id: build_check
-        run: pnpm run build
-        # build ทดสอบต้องใช้ env ชุดเดียวกับตอน deploy จะได้เจอปัญหาตั้งแต่ตอนยังเป็น PR
-        # ไม่ใช่ไปโผล่ตอน deploy ขึ้น production แล้ว (บทเรียนจาก PR #348)
+        # อาร์ติแฟกต์ถูกสร้างไว้แล้วในขั้นก่อนหน้า (R-06) ด่านที่อ่านผล build จึงได้ของจริงทุกตัว
+        # env ยังต้องตรงกับขั้น build เป๊ะ ไม่งั้นด่านที่ build เองตอนรันในเครื่องจะได้คนละก้อน
+        # (บทเรียน PR #348 — deploy ของ main ล้มด้วย "พบ 1 ค่า")
         env:
           NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID || vars.NEXT_PUBLIC_GA_ID || '' }}
           NEXT_PUBLIC_META_PIXEL_ID: ${{ secrets.NEXT_PUBLIC_META_PIXEL_ID || vars.NEXT_PUBLIC_META_PIXEL_ID || '' }}

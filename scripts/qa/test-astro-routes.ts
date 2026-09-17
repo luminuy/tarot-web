@@ -23,6 +23,7 @@ import path from "node:path";
 
 import { ASTRO_ROUTE_PREFIXES, isAstroRoute } from "../../src/lib/routing/astro-routes";
 import { collectRenderedPages, ROOT } from "./lib/rendered-pages";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 let failed = 0;
 const check = (label: string, ok: boolean, detail?: string) => {
@@ -75,6 +76,7 @@ for (const [href, expected] of [
 
 console.log("\n── 1. ผลลัพธ์ที่บิลด์ออกมาจริง ──");
 const pages = collectRenderedPages().filter((page) => !page.route.startsWith("/_"));
+assertNonEmptyCorpus("หน้าที่เรนเดอร์ออกมาจริง", pages, "รัน `npm run build` ก่อน");
 
 // ── 1. ห้ามมีเส้นทางซ้ำข้ามเครื่องมือ ─────────────────────────────────────
 const seen = new Map<string, string>();

@@ -2,82 +2,40 @@
 
 import { useEffect } from "react";
 
+import {
+  isServiceWorkerAllowed,
+  setupServiceWorker,
+  type SwContainerLike,
+} from "./sw-register";
+
 /**
  * คอมโพเนนต์ลงทะเบียน Service Worker ฝั่งไคลเอนต์ (Progressive Enhancement)
  * -------------------------------------------------------------
- * 1. รันหลัง window.load เสมอเพื่อไม่ให้แย่งทรัพยากรในช่วง Initial Page Load
- * 2. ตรวจจับการรองรับ 'serviceWorker' ใน navigator
- * 3. ตรวจสอบเงื่อนไขความปลอดภัย HTTPS หรือ Localhost
- * 4. ขนาดเบาพิเศษ (<0.2 KB) ไม่เพิ่มภาระให้กับ JavaScript Bundle
+ * ⚠️ **ตรรกะทั้งหมดอยู่ใน `sw-register.ts` โดยตั้งใจ ห้ามย้ายกลับมาที่นี่**
+ *
+ * บทเรียน R-01: บั๊กที่ทำให้ผู้ใช้ใหม่ทุกคนโหลดทั้งหน้าสองรอบ อยู่ในตรรกะ 5 บรรทัด
+ * ที่เคยฝังอยู่ใน `useEffect` ของไฟล์นี้ — ทดสอบไม่ได้เลยถ้าไม่มี jsdom ทั้งชุด
+ * จึงรอดสายตามาตลอดจนมีคนยิง Lighthouse แล้วเห็นว่าเอกสารถูกขอสองครั้ง
+ *
+ * ไฟล์นี้จึงเหลือหน้าที่เดียว: ต่อสภาพแวดล้อมจริงของเบราว์เซอร์เข้ากับตรรกะที่ทดสอบได้
+ * ด่าน `scripts/qa/test-sw-reload.ts` เฝ้าอยู่ว่าตรรกะไม่ย้ายกลับมา
  */
 export function ServiceWorkerRegister() {
   useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      !("serviceWorker" in navigator)
-    ) {
-      return;
-    }
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    if (!isServiceWorkerAllowed(window.location.protocol, window.location.hostname)) return;
 
-    // ทำงานเฉพาะ HTTPS หรือ Local development
-    const isLocalhost = Boolean(
-      window.location.hostname === "localhost" ||
-        window.location.hostname === "[::1]" ||
-        window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
-    );
-
-    if (window.location.protocol !== "https:" && !isLocalhost) {
-      return;
-    }
-
-    // ถ้ามี Service Worker ตัวใหม่ยึดหน้านี้ระหว่างที่ผู้ใช้กำลังใช้งาน (เช่นมีใครส่ง
-    // SKIP_WAITING เข้ามา) เอกสารที่เปิดค้างจะอ้างอิงไฟล์ chunk ชื่อเก่าที่หายไปแล้ว
-    // ต้องโหลดหน้าใหม่หนึ่งครั้งให้ HTML กับไฟล์ static กลับมาเป็นเวอร์ชันเดียวกัน
-    let reloading = false;
-    const onControllerChange = () => {
-      if (reloading) return;
-      reloading = true;
-      window.location.reload();
-    };
-    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
-
-    const registerSW = () => {
-      navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .then((registration) => {
-          // ฟังการอัปเดต Service Worker ใหม่
-          registration.onupdatefound = () => {
-            const installingWorker = registration.installing;
-            if (installingWorker == null) return;
-
-            installingWorker.onstatechange = () => {
-              if (installingWorker.state === "installed") {
-                if (navigator.serviceWorker.controller) {
-                  // มีเวอร์ชันใหม่พร้อมใช้งาน
-                  console.info("SeerTarot: New content available; please refresh.");
-                } else {
-                  // แคชสำเร็จสำหรับการใช้งานออฟไลน์ครั้งแรก
-                  console.info("SeerTarot: Content cached for offline use.");
-                }
-              }
-            };
-          };
-        })
-        .catch((error) => {
-          console.warn("SeerTarot: Service Worker registration failed:", error);
-        });
-    };
-
-    if (document.readyState === "complete") {
-      registerSW();
-    } else {
-      window.addEventListener("load", registerSW, { once: true });
-    }
-
-    return () => {
-      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
-      window.removeEventListener("load", registerSW);
-    };
+    return setupServiceWorker({
+      container: navigator.serviceWorker as unknown as SwContainerLike,
+      reload: () => window.location.reload(),
+      isDocumentReady: () => document.readyState === "complete",
+      onWindowLoad: (fn) => window.addEventListener("load", fn, { once: true }),
+      offWindowLoad: (fn) => window.removeEventListener("load", fn),
+      log: (level, message, detail) => {
+        if (level === "warn") console.warn(message, detail);
+        else console.info(message);
+      },
+    });
   }, []);
 
   return null;

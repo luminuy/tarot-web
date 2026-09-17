@@ -38,6 +38,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const CONFIG_FILE = path.join(process.cwd(), "open-next.config.ts");
 const SRC = path.join(process.cwd(), "src");
@@ -66,6 +67,9 @@ function findTsxFiles(dir: string): string[] {
 async function run(): Promise<void> {
   const errors: string[] = [];
 
+  const tsxFiles = findTsxFiles(SRC);
+  assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+
   // ── กฎ 1: cache interception ต้องปิด ────────────────────────────────────
   const config = codeOnly(fs.readFileSync(CONFIG_FILE, "utf-8"));
   const match = config.match(/enableCacheInterception:\s*(true|false)/);
@@ -86,7 +90,7 @@ async function run(): Promise<void> {
   }
 
   // ── กฎ 2: ห้ามเขียน prefetch={true} ตรง ๆ ───────────────────────────────
-  for (const file of findTsxFiles(SRC)) {
+  for (const file of tsxFiles) {
     const source = codeOnly(fs.readFileSync(file, "utf-8"));
     if (/prefetch=\{true\}/.test(source)) {
       const rel = path.relative(process.cwd(), file);
@@ -168,7 +172,7 @@ async function run(): Promise<void> {
 
   // กฎ 3ข: ห้ามมีใครเขียนออบเจ็กต์ speculationrules ดิบ ๆ ข้ามโมดูลกลางไป
   // (ถ้าข้ามได้ กฎทั้งหมดข้างบนจะกลายเป็นด่านหลอกทันที)
-  for (const file of findTsxFiles(SRC)) {
+  for (const file of tsxFiles) {
     const source = codeOnly(fs.readFileSync(file, "utf-8"));
     if (source.includes("speculationrules") && !source.includes("buildSpeculationRules")) {
       const rel = path.relative(process.cwd(), file);

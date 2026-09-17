@@ -99,6 +99,7 @@ assert(fs.existsSync(topicListCompPath), `ต้องมีคอมโพเ�
 // 6. Check Sitemap Contains All 6 Topic URLs
 import sitemap from "../../src/app/sitemap";
 import { SITE_ORIGIN } from "../../src/lib/config/site";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const generatedSitemap = sitemap();
 const sitemapUrls = new Set(generatedSitemap.map((entry) => entry.url));
@@ -113,6 +114,8 @@ for (const topicKey of expectedTopics) {
 
 // 7. Check 20 -> 25 Spreads Zero Remaining in src/
 const srcDir = path.join(process.cwd(), "src");
+/** ไฟล์ทุกไฟล์ที่ถูกเปิดอ่านจริง — ใช้ยืนยันว่าคลังไม่ว่าง (R-05) */
+const scannedSrcFiles: string[] = [];
 function scanFor20Spreads(dir: string): string[] {
   let matches: string[] = [];
   const files = fs.readdirSync(dir, { withFileTypes: true });
@@ -121,6 +124,7 @@ function scanFor20Spreads(dir: string): string[] {
     if (file.isDirectory()) {
       matches = matches.concat(scanFor20Spreads(fullPath));
     } else if (file.name.endsWith(".ts") || file.name.endsWith(".tsx")) {
+      scannedSrcFiles.push(fullPath);
       const content = fs.readFileSync(fullPath, "utf-8");
       if (/20 (ผัง|แบบ|spreads|รูปแบบ)/i.test(content)) {
         matches.push(fullPath);
@@ -131,6 +135,7 @@ function scanFor20Spreads(dir: string): string[] {
 }
 
 const remainingMatches = scanFor20Spreads(srcDir);
+assertNonEmptyCorpus("ไฟล์ .ts/.tsx ใน src/", scannedSrcFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
 assert(
   remainingMatches.length === 0,
   `ต้องไม่มีคำว่า "20 ผัง / 20 Spreads / 20 แบบ" หลงเหลือใน src/ (พบใน: ${remainingMatches.join(", ")})`,
@@ -144,7 +149,11 @@ const newFiles = [
 ];
 for (const file of newFiles) {
   const filePath = path.join(process.cwd(), file);
-  if (fs.existsSync(filePath)) {
+  // ⚠️ R-07: ไฟล์หาย = **ตกด่าน** ไม่ใช่ข้ามเงียบ
+  // เปลี่ยนชื่อ/ย้ายไฟล์หน้าเมื่อไหร่ ด่านนี้เคยหายไปเฉย ๆ ซึ่งคือสิ่งที่มันมีไว้จับพอดี
+  if (!fs.existsSync(filePath)) {
+    assert(false, `หาไฟล์ที่ด่านนี้ต้องตรวจไม่เจอ: ${file}`);
+  } else {
     const content = fs.readFileSync(filePath, "utf-8");
     const hasForbiddenEmoji = /[✦✨✧⭐🌟]/u.test(content);
     assert(!hasForbiddenEmoji, `ไฟล์ ${file} ต้องไม่มีอิโมจิดวงดาว/แฟนซี (กฎข้อ 2)`);

@@ -22,6 +22,7 @@ import { SPREAD_TOPICS } from "../../src/data/spread-topics";
 import { buildAlternates, SITE_ORIGIN } from "../../src/lib/config/site";
 import { EN_TWIN_ROUTES, hasEnglishTwin, localeHref } from "../../src/lib/i18n/paths";
 import { collectRenderedPages, renderedRouteMap } from "./lib/rendered-pages";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const ROOT = process.cwd();
 const TH_APP = "src/app/(th)";
@@ -95,6 +96,7 @@ for (const [group, locale] of [["(th)", '"th"'], ["(en)", '"en"']] as const) {
  *    ตอนนี้เช็กจากผลลัพธ์ที่บิลด์ออกมาจริงทุกเครื่องมือ ผ่าน lib/rendered-pages.ts
  */
 const routeMap = renderedRouteMap();
+assertNonEmptyCorpus("เส้นทางที่เรนเดอร์แล้ว", routeMap, "รัน `npm run build` ก่อน");
 
 for (const route of EN_TWIN_ROUTES) {
   const englishRoute = route === "/" ? "/en" : `/en${route}`;
@@ -418,6 +420,7 @@ ensureBuildExists();
 const englishPages = collectRenderedPages().filter(
   (page) => page.route === "/en" || page.route.startsWith("/en/"),
 );
+assertNonEmptyCorpus("หน้าอังกฤษที่เรนเดอร์แล้ว", englishPages, "รัน `npm run build` ก่อน");
 const englishHtml = englishPages.map((page) => page.file);
 const routeOf = new Map(englishPages.map((page) => [page.file, page.route]));
 const relOf = (file: string) => routeOf.get(file) ?? file;

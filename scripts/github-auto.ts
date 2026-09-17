@@ -153,6 +153,8 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🧾 JSON-LD ทุกบล็อกผ่านตัวเขียนที่ escape แล้ว (ห้าม JSON.stringify เปล่าใน dangerouslySetInnerHTML)", cmd: TSX, args: ["scripts/qa/test-json-ld-escape.ts"] },
   { label: "🧱 กันการฉีดคำสั่งเข้า prompt (ผู้ใช้ปิดแท็บของ prompt ไม่ได้ · ขอบเขตความเชื่อถืออยู่หลังบล็อกผู้ใช้)", cmd: TSX, args: ["scripts/qa/test-prompt-injection.ts"] },
   { label: "✍️ คุณภาพภาษาไทยของข้อความที่เราเขียนเอง (ไม้ยมกเว้นวรรค · นะคะ · สระ แ) ไม่ใช่แค่ผลจากโมเดล", cmd: TSX, args: ["scripts/qa/test-thai-content-quality.ts"] },
+  { label: "🔌 Service Worker ไม่ทำให้ผู้ใช้ใหม่โหลดหน้าสองรอบ (controllerchange ครั้งแรกต้องไม่ reload)", cmd: TSX, args: ["scripts/qa/test-sw-reload.ts"] },
+  { label: "🛡️ ด่านตรวจด่านด้วยกันเอง (ห้ามข้ามเงียบเมื่อไฟล์หาย · ห้ามวนคลังว่างแล้วขึ้นผ่าน)", cmd: TSX, args: ["scripts/qa/test-gate-integrity.ts"] },
 ];
 
 /**

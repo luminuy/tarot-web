@@ -212,8 +212,27 @@ if (composedAnyImage) {
     `จำนวนภาพแชร์เฉพาะหน้าต้องไม่ต่ำกว่า ${MIN_UNIQUE_OG_URLS} ค่า (พบ ${ogImages.size})`
   );
 } else {
-  console.log("  ⚠️  ข้ามด่านความหลากหลายของภาพแชร์ — build นี้ไม่ได้ตั้ง NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME");
-  console.log("      (ทุกหน้าถอยไป og/default.png ตามทางถอยที่ออกแบบไว้ · กฎ 1200×630 ยังถูกบังคับครบ)");
+  /*
+   * ⚠️ R-07: การไม่ตั้ง `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` ตอน build ทำให้ด่านความหลากหลาย
+   * ของภาพแชร์หายไปทั้งข้อ — ซึ่งเป็นข้อที่มีไว้จับ "ทุกหน้าใช้ภาพเดียวกันหมด" พอดี
+   *
+   * บน CI ต้องตั้งค่านี้เสมอ (workflow ส่งให้ทั้งขั้น build และขั้นตรวจอยู่แล้ว)
+   * ไม่ได้ตั้ง = build ไม่ตรงกับ production = ตกด่าน ไม่ใช่ข้าม
+   */
+  const inCi = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+  if (inCi) {
+    console.error(
+      "  ❌ build นี้ไม่ได้ตั้ง NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME — ด่านความหลากหลายของภาพแชร์ตรวจไม่ได้\n" +
+        "     workflow ต้องส่งค่านี้ให้ขั้น build ไม่งั้น CI ตรวจอาร์ติแฟกต์คนละก้อนกับที่ขึ้น production",
+    );
+    process.exit(1);
+  }
+  console.warn(
+    "  🟡 ด่านความหลากหลายของภาพแชร์ **ไม่ได้ถูกตรวจ** — build นี้ไม่ได้ตั้ง NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME",
+  );
+  console.warn(
+    "      (ทุกหน้าถอยไป og/default.png ตามทางถอยที่ออกแบบไว้ · กฎ 1200×630 ยังถูกบังคับครบ)",
+  );
 }
 
 console.log(`\n✨ ผ่านการตรวจสอบมาตรฐานภาพแชร์ OpenGraph 1200x630 ทั่วทั้งเว็บ 100% Green!\n`);

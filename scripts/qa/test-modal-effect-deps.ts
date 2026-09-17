@@ -29,6 +29,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const SRC = path.join(process.cwd(), "src");
 
@@ -99,6 +100,7 @@ function run(): void {
   console.log("🔍 ตรวจสอบ Modal Effect Dependencies (Modal Trap Guard)...\n");
 
   const files = walk(SRC);
+  assertNonEmptyCorpus("ไฟล์ต้นฉบับใน src/", files, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
   const allViolations: Violation[] = [];
 
   for (const file of files) {

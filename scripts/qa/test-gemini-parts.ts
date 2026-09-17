@@ -29,6 +29,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const SRC = path.join(process.cwd(), "src");
 const HELPER_FILE = "src/lib/ai/gemini.ts";
@@ -52,7 +53,10 @@ function walk(dir: string, out: string[] = []): string[] {
 
 const violations: string[] = [];
 
-for (const file of walk(SRC)) {
+const geminiFiles = walk(SRC);
+assertNonEmptyCorpus("ไฟล์ต้นฉบับใน src/", geminiFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+
+for (const file of geminiFiles) {
   const rel = path.relative(process.cwd(), file).split(path.sep).join("/");
   if (INFRASTRUCTURE.includes(rel)) continue;
 
@@ -67,7 +71,7 @@ for (const file of walk(SRC)) {
 }
 
 // ── ด่าน C + D: สแกนซ้ำอีกรอบด้วยมุมมองทั้งไฟล์ ──
-for (const file of walk(SRC)) {
+for (const file of geminiFiles) {
   const rel = path.relative(process.cwd(), file).split(path.sep).join("/");
   const text = fs.readFileSync(file, "utf-8");
 

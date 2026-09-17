@@ -40,6 +40,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { collectRenderedPages, renderedOutputDirs } from "./lib/rendered-pages";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), "../..");
@@ -289,9 +290,17 @@ if (fs.existsSync(builtCssDir)) {
     );
   }
 } else {
-  // ด่านนี้อยู่ท้ายสุดของ repo:verify ซึ่งด่านก่อนหน้า build ไว้ให้แล้วเสมอ
-  // ถ้ารันเดี่ยว ๆ ตอนยังไม่เคย build ก็ข้ามไป กฎ static ด้านบนคุมไว้อยู่แล้ว (หลัก Ratchet · INC-0007)
-  console.warn("   ⚠️  ยังไม่มี .next/static/css — ข้ามการตรวจ CSS ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)");
+  /*
+   * 🔴 R-07: ไม่มี CSS ที่ build แล้ว = **ตก** ไม่ใช่ "ข้าม"
+   *
+   * INC-0108 คือบทเรียนที่ว่า source ถูกแต่ของที่ build ออกมาผิด — กฎ static ด้านบน
+   * จึงพิสูจน์แทนกันไม่ได้เลย การข้ามตรงนี้คือการปิดตาด่านในกรณีเดียวที่มันมีไว้จับ
+   * (ตั้งแต่ R-06 ทั้ง pr.yml และ deploy.yml build ก่อนชุดตรวจแล้ว)
+   */
+  failures.push(
+    `ยังไม่มี ${builtCssDir} — ตรวจ CSS ที่ build ออกมาจริงไม่ได้เลย (INC-0108 · INC-0109 กลับมาได้โดยไม่มีใครรู้)\n` +
+      "   ➔ รัน `npm run build` ก่อน (repo:verify build ให้เองอยู่แล้ว)",
+  );
 }
 
 // ───────────────────────────────────────────────────────────────
@@ -315,7 +324,9 @@ for (const rel of HEADER_SUBTREE) {
 // ───────────────────────────────────────────────────────────────
 // 6. ห้ามครอบ <SiteHeader> ด้วย scroll container
 // ───────────────────────────────────────────────────────────────
-for (const file of listTsxFiles(path.join(ROOT, "src"))) {
+const allSrcTsx = listTsxFiles(path.join(ROOT, "src"));
+assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", allSrcTsx, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+for (const file of allSrcTsx) {
   const source = fs.readFileSync(file, "utf-8");
   if (!source.includes("<SiteHeader")) continue;
   const rel = path.relative(ROOT, file);
@@ -478,6 +489,7 @@ const rendersHeader = (file: string) => rendersComponent(file, "SiteHeader", 0, 
 const rendersFooter = (file: string) => rendersComponent(file, "SiteFooter", 0, new Map());
 
 const pageFiles = listTsxFiles(path.join(ROOT, "src/app")).filter((f) => path.basename(f) === "page.tsx");
+assertNonEmptyCorpus("ไฟล์ page.tsx ใน src/app", pageFiles, "ตรวจว่า src/app ยังมีหน้าอยู่จริง");
 
 /*
  * เส้นทางที่ "มีอยู่จริงในโปรเจกต์" — ต้องนับทั้งสองเครื่องมือเรนเดอร์
@@ -514,6 +526,7 @@ const outputDirs = renderedOutputDirs();
 if (outputDirs.every((dir) => fs.existsSync(dir))) {
   /* ครอบคลุมทุกเครื่องมือเรนเดอร์ในคราวเดียว — เส้นทางถอดมาให้แล้วจาก lib/rendered-pages.ts */
   const renderedPages = collectRenderedPages();
+  assertNonEmptyCorpus("หน้าที่เรนเดอร์ออกมาจริง", renderedPages, "รัน `npm run build` ก่อน");
 
   const headerless: string[] = [];
   const footerless: string[] = [];
@@ -586,7 +599,11 @@ if (outputDirs.every((dir) => fs.existsSync(dir))) {
     );
   }
 } else {
-  console.warn(`   ⚠️  ยังไม่มี ${outputDirs.join(" / ")} — ข้ามการตรวจหัวเว็บ/ฟุตเตอร์ใน HTML ที่ build แล้ว (รัน npm run build ก่อนเพื่อตรวจครบ)`);
+  /* 🔴 R-07: ไม่มี HTML ที่เรนเดอร์แล้ว = กฎหัวเว็บ/ฟุตเตอร์ทั้งชุดไม่ถูกตรวจเลย */
+  failures.push(
+    `ยังไม่มี ${outputDirs.join(" / ")} — ตรวจหัวเว็บ/ฟุตเตอร์ใน HTML ที่เรนเดอร์จริงไม่ได้เลย\n` +
+      "   ➔ รัน `npm run build` ก่อน (repo:verify build ให้เองอยู่แล้ว)",
+  );
 }
 
 // 7.4 หน้า 404 ทั้งสองไฟล์ต้องมีอยู่จริงและต้องมีหัวเว็บ

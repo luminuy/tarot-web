@@ -33,6 +33,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -100,8 +101,11 @@ function buttonTags(src: string): { tag: string; line: number }[] {
   return out;
 }
 
+const tapFiles = walk(SRC);
+assertNonEmptyCorpus("ไฟล์ต้นฉบับใน src/", tapFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
+
 const offenders: string[] = [];
-for (const file of walk(SRC)) {
+for (const file of tapFiles) {
   const src = fs.readFileSync(file, "utf8");
   for (const { tag, line } of buttonTags(src)) {
     const cls = [...tag.matchAll(/className=\{?[`"']([^`"']*)/g)].map((x) => x[1]).join(" ");

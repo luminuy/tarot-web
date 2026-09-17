@@ -25,6 +25,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
 
 const SRC = path.join(process.cwd(), "src");
 
@@ -124,6 +125,7 @@ function run(): void {
   console.log("🔍 ตรวจสอบ will-change ในไฟล์ CSS ทั้งหมด (GPU Layer Guard)...\n");
 
   const cssFiles = findCssFiles(SRC);
+  assertNonEmptyCorpus("ไฟล์ .css ใน src/", cssFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
   const allViolations: Violation[] = [];
 
   for (const file of cssFiles) {
