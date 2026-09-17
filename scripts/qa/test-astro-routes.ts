@@ -63,7 +63,9 @@ for (const [href, expected] of [
   ["/en", true],
   ["/daily", true],
   ["/love/1-card", true],
-  ["/account", false],
+  /* `/account` ย้ายไป Astro แล้ว (คลื่นที่ 4) — เป็นเส้นเดี่ยว ไม่มีลูก */
+  ["/account", true],
+  ["/accountant", false],
   ["/reading/chat", true],
   /* ⚠️ เส้นที่ "ขึ้นต้นเหมือนกันแต่คนละหน้า" ต้องไม่ถูกครอบ */
   ["/cardsomething", false],
