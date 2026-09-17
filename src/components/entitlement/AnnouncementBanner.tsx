@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { DAILY_LIMIT, GUEST_LIMIT, READINGS_EN, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/copy";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 /**
  * แบนเนอร์ประกาศล่วงหน้า: "ระบบสิทธิ์เปิดไพ่กำลังจะมา" (ENTITLEMENT_PLAN PR F / ข้อ 10)
@@ -14,7 +15,7 @@ import { useLocale } from "@/lib/i18n";
  * ⚠️ ตัวเลขสิทธิ์ต้องดึงจาก `@/lib/entitlement/copy` เสมอ ห้ามพิมพ์เอง
  * (ของเดิมค้างข้อความ "สัปดาห์ละ 3 ครั้ง" ไว้หลังระบบเปลี่ยนเป็นรายวันแล้ว)
  */
-const DISMISS_KEY = "tarot_entitlement_announce_dismissed";
+const DISMISS_KEY = STORAGE_KEYS.announcementDismissed;
 
 export function AnnouncementBanner() {
   const { locale, isEnglish } = useLocale();

@@ -1,0 +1,298 @@
+/**
+ * 🧱 ด่านหนี้โค้ด — เส้นแบ่งวัน · คีย์ที่เก็บในเบราว์เซอร์ · catch ที่กลืนเงียบ (R-25 · R-27 · R-30)
+ * ===========================================================================
+ *
+ * สามเรื่องนี้มีรูปแบบเดียวกัน: **ความรู้ที่กระจายอยู่หลายที่โดยไม่มีอะไรบังคับให้ตรงกัน**
+ * และทั้งสามไม่ทำให้อะไรพังทันที แต่ทำให้คนที่มาแก้ทีหลังแก้ไม่ครบโดยไม่รู้ตัว
+ *
+ * - **R-25** "วันนี้ที่กรุงเทพฯ" เขียนซ้ำ 6 ที่ 3 วิธี — ค่านี้คือ **คีย์โควตาและคีย์สตรีค**
+ *   อาการที่ผู้ใช้เจอเวลาสำเนาเลื่อนออกจากกันคือ "สิทธิ์ฟรีไม่รีเซ็ต" ซึ่งมาถึงเราเป็นตั๋วซัพพอร์ต
+ * - **R-27** `catch` 448 จุด 4 แนวทาง และ **0 จุดที่ยิง telemetry** — ความล้มเหลวบน production
+ *   มองเห็นได้เฉพาะตอนมีคนนั่งดู log อยู่
+ * - **R-30** `localStorage` ถูกเรียกตรงจาก 18 ไฟล์ โดยไม่มีที่ไหนรู้ครบว่าแอปเขียนคีย์อะไรไว้บ้าง
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import { assertNonEmptyCorpus } from "./lib/corpus";
+
+const ROOT = process.cwd();
+
+let pass = 0;
+let fail = 0;
+
+function check(label: string, ok: boolean, detail = ""): void {
+  if (ok) {
+    pass++;
+    console.log(`✅ ${label}`);
+  } else {
+    fail++;
+    console.log(`❌ ${label}${detail ? `\n${detail}` : ""}`);
+  }
+}
+
+/** ตัดคอมเมนต์ออกก่อนวิเคราะห์ — คอมเมนต์ที่อธิบายแพตเทิร์นไม่ใช่การใช้แพตเทิร์น */
+function stripComments(src: string): string {
+  return src
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+}
+
+function walk(dir: string, out: string[] = []): string[] {
+  if (!fs.existsSync(dir)) return out;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walk(full, out);
+    else if (/\.(ts|tsx)$/.test(entry.name)) out.push(full);
+  }
+  return out;
+}
+
+const sources = walk(path.join(ROOT, "src"));
+assertNonEmptyCorpus("ไฟล์ต้นฉบับใน src/", sources, "ตรวจว่า src/ ยังอยู่ที่เดิม");
+
+const rel = (p: string): string => path.relative(ROOT, p).split(path.sep).join("/");
+
+console.log("\n🧱 ด่านหนี้โค้ด — เส้นแบ่งวัน · คีย์ในเบราว์เซอร์ · catch ที่กลืนเงียบ\n");
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. R-25 — เส้นแบ่งวันกรุงเทพฯ ต้องมาจากโมดูลเดียว
+// ─────────────────────────────────────────────────────────────────────────────
+const BANGKOK_MODULE = "src/lib/time/bangkok.ts";
+check(
+  `มีโมดูลกลางของเส้นแบ่งวัน (${BANGKOK_MODULE})`,
+  fs.existsSync(path.join(ROOT, BANGKOK_MODULE)),
+);
+
+/** ไฟล์ที่ได้รับอนุญาตให้เขียนเขตเวลา/ออฟเซ็ตเองได้ — ทุกบรรทัดต้องมีเหตุผล */
+const TZ_EXEMPT: Record<string, string> = {
+  "src/lib/time/bangkok.ts": "โมดูลกลางเอง",
+  "src/lib/platform/db.ts": "ค่า DEFAULT ของคอลัมน์ในสคีมา SQL — ไม่ใช่ตรรกะเส้นแบ่งวัน",
+  "src/lib/marketplace/queue.repo.ts": "ค่าที่เขียนลงคอลัมน์ `timezone` ของแม่หมอ — เป็นข้อมูล ไม่ใช่ตรรกะ",
+};
+
+const tzLiterals: string[] = [];
+const offsetMath: string[] = [];
+for (const file of sources) {
+  const r = rel(file);
+  if (r in TZ_EXEMPT) continue;
+  const src = stripComments(fs.readFileSync(file, "utf-8"));
+  for (const [i, line] of src.split("\n").entries()) {
+    if (/["']Asia\/Bangkok["']/.test(line)) tzLiterals.push(`   · ${r}:${i + 1} — ${line.trim().slice(0, 90)}`);
+    // บวก 7 ชั่วโมงเองในทุกรูปแบบที่เคยเจอในรีโปนี้
+    if (/7\s*\*\s*60\s*\*\s*60\s*\*\s*1000|25200000\b/.test(line)) {
+      offsetMath.push(`   · ${r}:${i + 1} — ${line.trim().slice(0, 90)}`);
+    }
+  }
+}
+
+check(
+  'ไม่มีไฟล์ไหนเขียนสตริง "Asia/Bangkok" เอง (ต้องใช้ APP_TIME_ZONE)',
+  tzLiterals.length === 0,
+  tzLiterals.join("\n") + "\n   ➔ นำเข้าจาก @/lib/time/bangkok — เขตเวลาเป็นค่าคงที่ของระบบ ไม่ใช่ของแต่ละไฟล์",
+);
+
+check(
+  "ไม่มีไฟล์ไหนบวกออฟเซ็ต +7 ชั่วโมงเองเพื่อหาวันที่",
+  offsetMath.length === 0,
+  offsetMath.join("\n") +
+    "\n   ➔ ใช้ bangkokDayKey() · bangkokWeekKey() จาก @/lib/time/bangkok" +
+    "\n   ➔ ประเด็นไม่ใช่ว่าสูตรไหนถูก (ทั้งสามวิธีให้ผลตรงกันวันนี้) แต่คือมีสำเนาให้เลื่อนออกจากกันได้",
+);
+
+/* ห้ามมีฟังก์ชันชื่อ todayISO/todayDateKey/dayKey ที่คำนวณเองอีก — ต้องเป็นชื่อเรียกของโมดูลกลาง */
+const rivalDayFns: string[] = [];
+for (const file of sources) {
+  const r = rel(file);
+  if (r === BANGKOK_MODULE) continue;
+  const src = stripComments(fs.readFileSync(file, "utf-8"));
+  const m = /function\s+(todayISO|todayDateKey|dayKey|yesterdayDateKey|weekKey)\s*\([^)]*\)[^{]*\{([\s\S]{0,400}?)\n\}/g;
+  let hit: RegExpExecArray | null;
+  while ((hit = m.exec(src)) !== null) {
+    const body = hit[2];
+    // ยอมรับได้ถ้าตัวมันเรียกโมดูลกลางต่อ
+    if (/bangkok(DayKey|WeekKey|YesterdayKey|NextMidnightISO)/.test(body)) continue;
+    rivalDayFns.push(`   · ${r} — function ${hit[1]}() คำนวณเส้นแบ่งวันเอง`);
+  }
+}
+check(
+  "ไม่มีฟังก์ชันหาวันที่ของตัวเองนอกโมดูลกลาง",
+  rivalDayFns.length === 0,
+  rivalDayFns.join("\n") + "\n   ➔ เคยมีฟังก์ชันชื่อ `todayISO` อยู่สามไฟล์โดยไม่ใช่ฟังก์ชันเดียวกัน",
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. R-30 — คีย์ที่เขียนลงเบราว์เซอร์ต้องอยู่ในทะเบียนเดียว
+// ─────────────────────────────────────────────────────────────────────────────
+const KEYS_MODULE = "src/lib/storage/keys.ts";
+const keysPath = path.join(ROOT, KEYS_MODULE);
+check(`มีทะเบียนคีย์ (${KEYS_MODULE})`, fs.existsSync(keysPath));
+
+/** ไฟล์ที่เรียกที่เก็บข้อมูลได้โดยไม่ต้องอ้างทะเบียน — พร้อมเหตุผล */
+const STORAGE_EXEMPT: Record<string, string> = {
+  "src/lib/storage/keys.ts": "ทะเบียนเอง",
+  "src/components/ui/DeleteAllDataButton.tsx":
+    "ปุ่ม PDPA — เรียก clear() ซึ่งลบทุกคีย์รวมคีย์ที่ทะเบียนยังไม่รู้จัก · ปลอดภัยกว่าวนจากทะเบียน",
+};
+
+const literalStorageKeys: string[] = [];
+for (const file of sources) {
+  const r = rel(file);
+  if (r in STORAGE_EXEMPT) continue;
+  const src = stripComments(fs.readFileSync(file, "utf-8"));
+  // จับเฉพาะการส่ง "สตริงตายตัว" เป็นคีย์ — ตัวแปรที่มาจากทะเบียนผ่านได้
+  for (const m of src.matchAll(/\b(?:local|session)Storage\s*\.\s*(?:get|set|remove)Item\s*\(\s*(["'`])([^"'`]*)\1/g)) {
+    const line = src.slice(0, m.index ?? 0).split("\n").length;
+    literalStorageKeys.push(`   · ${r}:${line} — "${m[2]}"`);
+  }
+}
+check(
+  "ไม่มีไฟล์ไหนส่งชื่อคีย์เป็นสตริงตายตัวให้ localStorage / sessionStorage",
+  literalStorageKeys.length === 0,
+  literalStorageKeys.join("\n") + `\n   ➔ ประกาศไว้ใน ${KEYS_MODULE} แล้วนำเข้ามาใช้`,
+);
+
+/* ปุ่ม PDPA ต้องยังลบทุกคีย์จริง — ห้ามเปลี่ยนไปวนจากทะเบียน (ทะเบียนที่ขาดหนึ่งคีย์ = ข้อมูลค้าง) */
+const deleteBtn = path.join(ROOT, "src/components/ui/DeleteAllDataButton.tsx");
+if (!fs.existsSync(deleteBtn)) {
+  check("มีปุ่มลบข้อมูลทั้งหมดตาม PDPA", false, "   ➔ DeleteAllDataButton.tsx หายไป");
+} else {
+  const btn = fs.readFileSync(deleteBtn, "utf-8");
+  check(
+    "ปุ่ม PDPA ลบทั้ง localStorage และ sessionStorage ทั้งก้อน",
+    /localStorage\.clear\(\)/.test(btn) && /sessionStorage\.clear\(\)/.test(btn),
+    "   ➔ ห้ามเปลี่ยนไปวนลบจากทะเบียน — ทะเบียนที่ขาดไปหนึ่งคีย์แปลว่าข้อมูลผู้ใช้ยังค้างอยู่จริง",
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. R-27 — ห้าม catch ที่ว่างเปล่าโดยไม่อธิบาย
+// ─────────────────────────────────────────────────────────────────────────────
+check(
+  "มีตัวรายงาน error ที่ถูก catch (src/lib/observability/caught.ts)",
+  fs.existsSync(path.join(ROOT, "src/lib/observability/caught.ts")),
+);
+
+/*
+ * ⚠️ ต้องตรวจจาก **ข้อความดิบ** ไม่ใช่ข้อความที่ตัดคอมเมนต์แล้ว
+ * `catch { /* เหตุผล *\/ }` คือสิ่งที่เราต้องการ ส่วน `catch {}` เปล่า ๆ คือสิ่งที่ห้าม
+ * ถ้าตัดคอมเมนต์ก่อน สองอันนี้จะหน้าตาเหมือนกันทุกประการ — และเราจะไปไล่แก้ของที่ถูกอยู่แล้ว
+ *
+ * ส่วนการจับตำแหน่ง `catch` ยังต้องใช้ข้อความที่ตัดคอมเมนต์แล้ว ไม่งั้นตัวอย่างโค้ด
+ * ที่เขียนอยู่ในคอมเมนต์ (เช่นที่ `journal.repo.ts` อธิบายบั๊กเก่าไว้) จะถูกนับด้วย
+ */
+const bareCatches: string[] = [];
+for (const file of sources) {
+  const raw = fs.readFileSync(file, "utf-8");
+  const masked = stripComments(raw);
+  for (const m of masked.matchAll(/\bcatch\s*(?:\([^)]*\))?\s*\{/g)) {
+    const openBrace = (m.index ?? 0) + m[0].length - 1;
+    // หา `}` ที่ปิดบล็อกนี้จากข้อความที่ตัดคอมเมนต์แล้ว (วงเล็บในคอมเมนต์จึงไม่กวน)
+    let depth = 1;
+    let close = openBrace;
+    while (++close < masked.length && depth > 0) {
+      if (masked[close] === "{") depth++;
+      else if (masked[close] === "}") depth--;
+    }
+    const body = raw.slice(openBrace + 1, close - 1);
+    if (body.trim() === "") {
+      const line = raw.slice(0, openBrace).split("\n").length;
+      bareCatches.push(`   · ${rel(file)}:${line}`);
+    }
+  }
+}
+check(
+  `ไม่มี catch ที่ว่างเปล่าโดยไม่อธิบายเหตุผล (สแกน ${sources.length} ไฟล์)`,
+  bareCatches.length === 0,
+  bareCatches.join("\n") +
+    "\n   ➔ ถ้ากลืนได้จริง ให้เขียนคอมเมนต์ว่าทำไม (โหมดส่วนตัว · ปลายทางปิดไปแล้ว ฯลฯ)" +
+    "\n   ➔ ถ้ากลืนไม่ได้ ให้เรียก recordCaughtError(scope, err) จาก @/lib/observability/caught",
+);
+
+/* เส้นทางที่กฎเหล็กข้อ 14 คุ้มครองอยู่ ห้ามเสื่อมลงเงียบ ๆ */
+const READ_ROUTE = "src/app/api/reading/[id]/read/route.ts";
+const readPath = path.join(ROOT, READ_ROUTE);
+if (!fs.existsSync(readPath)) {
+  check("มีเส้นทางเปิดไพ่ให้ตรวจ", false, `   ➔ ${READ_ROUTE} หายไป`);
+} else {
+  const readSrc = fs.readFileSync(readPath, "utf-8");
+  check(
+    "เส้นทางเปิดไพ่รายงาน error ที่จับได้เข้าท่อสถิติ (ไม่กลืนเงียบ)",
+    readSrc.includes("recordCaughtError("),
+    "   ➔ กฎเหล็กข้อ 14: ข้อมูลหาย = ต้องบอกผู้ใช้/ต้องรู้ ไม่ใช่เสื่อมลงเงียบ ๆ",
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. R-29 — ซองจดหมายของ API (ratchet: รายชื่อของเก่าลดได้อย่างเดียว)
+// ─────────────────────────────────────────────────────────────────────────────
+const ENVELOPE_MODULE = "src/lib/api/envelope.ts";
+check(`มีโมดูลซองจดหมาย (${ENVELOPE_MODULE})`, fs.existsSync(path.join(ROOT, ENVELOPE_MODULE)));
+
+/**
+ * route ที่ยังตอบด้วยรูปเก่า `{ success: ... }` — **ตรึงไว้เป็น ratchet**
+ *
+ * ⚠️ ตัวเลขนี้ **ห้ามเพิ่ม** route ใหม่ทุกเส้นต้องใช้ `apiOk()` / `apiFail()`
+ * ลดได้เมื่อไหร่ให้ลดตัวเลขตาม — การเปลี่ยนรูปคำตอบของเส้นที่มีผู้ใช้อยู่ต้องแก้
+ * ทั้งฝั่งส่งและฝั่งรับพร้อมกัน จึงย้ายทีละกลุ่ม ไม่ใช่ทีเดียวทั้งหมด
+ */
+const LEGACY_SUCCESS_BUDGET = 23;
+
+const apiRoutes = walk(path.join(ROOT, "src/app/api"));
+assertNonEmptyCorpus("ไฟล์ route ใน src/app/api", apiRoutes, "ตรวจว่า src/app/api ยังอยู่ที่เดิม");
+
+const legacySuccess: string[] = [];
+for (const file of apiRoutes) {
+  const src = stripComments(fs.readFileSync(file, "utf-8"));
+  for (const m of src.matchAll(/\bsuccess\s*:\s*(true|false)\b/g)) {
+    const line = src.slice(0, m.index ?? 0).split("\n").length;
+    legacySuccess.push(`   · ${rel(file)}:${line}`);
+  }
+}
+check(
+  `route ที่ยังใช้ซองจดหมายรูปเก่าไม่เพิ่มขึ้น (${legacySuccess.length} / เพดาน ${LEGACY_SUCCESS_BUDGET})`,
+  legacySuccess.length <= LEGACY_SUCCESS_BUDGET,
+  legacySuccess.slice(0, 10).join("\n") +
+    "\n   ➔ route ใหม่ต้องใช้ apiOk() / apiFail() จาก @/lib/api/envelope" +
+    "\n   ➔ ลดจำนวนลงได้ให้ลดเพดานตามทันที (ratchet ห้ามเพิ่ม)",
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. R-28 — ทุกแผงแอดมินต้องแยก "ไม่มีข้อมูล" ออกจาก "พัง" ได้
+// ─────────────────────────────────────────────────────────────────────────────
+check(
+  "มีแถบแจ้งข้อผิดพลาดกลางของแผงแอดมิน (AdminErrorBanner.tsx)",
+  fs.existsSync(path.join(ROOT, "src/components/admin/AdminErrorBanner.tsx")),
+);
+check(
+  "มีฮุกโหลดข้อมูลกลางของแผงแอดมิน (use-admin-resource.ts)",
+  fs.existsSync(path.join(ROOT, "src/lib/admin/use-admin-resource.ts")),
+);
+
+/** แผงที่ดึงข้อมูลจาก API — ทุกตัวต้องมีทางแสดงข้อผิดพลาด */
+const adminDir = path.join(ROOT, "src/components/admin");
+const adminPanels = fs.existsSync(adminDir)
+  ? fs.readdirSync(adminDir).filter((f) => f.endsWith(".tsx") && f !== "AdminErrorBanner.tsx")
+  : [];
+assertNonEmptyCorpus("แผงแอดมินใน src/components/admin", adminPanels, "ตรวจว่าโฟลเดอร์ยังอยู่ที่เดิม");
+
+const panelsWithoutErrorUi: string[] = [];
+for (const name of adminPanels) {
+  const full = path.join(adminDir, name);
+  const src = fs.readFileSync(full, "utf-8");
+  if (!/\bfetch\s*\(/.test(stripComments(src))) continue; // แผงที่ไม่ดึงข้อมูลเองไม่เข้าข่าย
+  const hasErrorUi =
+    /AdminErrorBanner/.test(src) || /role=["']alert["']/.test(src) || /aria-live=/.test(src);
+  if (!hasErrorUi) panelsWithoutErrorUi.push(`   · src/components/admin/${name}`);
+}
+check(
+  `ทุกแผงแอดมินที่ดึงข้อมูลเองมีทางแสดงข้อผิดพลาด (${adminPanels.length} ไฟล์)`,
+  panelsWithoutErrorUi.length === 0,
+  panelsWithoutErrorUi.join("\n") +
+    "\n   ➔ API คืน 500 แล้วเรนเดอร์ตารางว่าง = ผู้ดูแลอ่านว่า 'ไม่มีข้อมูล' ไม่ใช่ 'พัง'" +
+    "\n   ➔ ใช้ <AdminErrorBanner /> จาก @/components/admin/AdminErrorBanner",
+);
+
+console.log(`\n📊 ผ่าน ${pass} ข้อ | ล้มเหลว ${fail} ข้อ\n`);
+if (fail > 0) process.exit(1);

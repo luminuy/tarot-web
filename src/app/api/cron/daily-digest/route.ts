@@ -13,6 +13,7 @@ import { dailyDigestHtml, dailyDigestText } from "@/lib/email/templates";
 import { todayDateKey } from "@/lib/entitlement/daily";
 import { recordEvent } from "@/lib/stats/record";
 import { computeDailyCard } from "@/lib/tarot/daily-card";
+import { APP_TIME_ZONE } from "@/lib/time/bangkok";
 
 export const runtime = "nodejs";
 
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
     year: "numeric",
     month: "long",
     day: "numeric",
-    timeZone: "Asia/Bangkok",
+    timeZone: APP_TIME_ZONE,
   }).format(new Date(`${sendDate}T00:00:00+07:00`));
 
   const readUrl = `${SITE_ORIGIN}/daily?utm_source=digest&utm_medium=email&utm_campaign=daily`;

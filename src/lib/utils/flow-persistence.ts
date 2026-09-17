@@ -4,6 +4,7 @@ import type { RitualStep } from "@/components/ui/RitualStepProgress";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import type { Reading } from "@/lib/schema/reading";
 import type { Category } from "@/data/cards/types";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 /**
  * 🔮 Flow Persistence — กันการดูดวงหลุดกลางคันเวลา refresh / กด back / สลับแท็บ
@@ -15,7 +16,7 @@ import type { Category } from "@/data/cards/types";
  * ปิดแท็บแล้วให้หายไปเอง สอดคล้องนโยบาย PDPA — ไม่เก็บถาวรบนเครื่องหรือเซิร์ฟเวอร์
  */
 
-const STORAGE_KEY = "tarot_flow_state_v1";
+const STORAGE_KEY = STORAGE_KEYS.flowState;
 
 /** อายุสูงสุดที่ยอมให้กู้คืน — ตรงกับอายุ server session */
 const MAX_AGE_MS = 60 * 60 * 1000;

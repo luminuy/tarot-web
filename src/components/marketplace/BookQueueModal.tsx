@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Field } from "@/components/ui/Field";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 interface BookQueueModalProps {
   isOpen: boolean;
@@ -38,14 +39,14 @@ export const BookQueueModal: React.FC<BookQueueModalProps> = ({
   const getCustomerRef = (): string => {
     if (typeof window === "undefined") return "cust_anon";
     try {
-      let ref = localStorage.getItem("tarot_customer_ref");
+      let ref = localStorage.getItem(STORAGE_KEYS.customerRef);
       if (!ref) {
         const randomPart =
           typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
             ? crypto.randomUUID().replace(/-/g, "").slice(0, 16)
             : Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
         ref = `cust_${randomPart}`;
-        localStorage.setItem("tarot_customer_ref", ref);
+        localStorage.setItem(STORAGE_KEYS.customerRef, ref);
       }
       return ref;
     } catch {

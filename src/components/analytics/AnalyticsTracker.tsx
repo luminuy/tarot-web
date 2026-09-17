@@ -15,6 +15,7 @@ import {
   isValidGoogleAdsId,
   trackPageView,
 } from "@/lib/analytics";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 interface RuntimeAnalyticsConfig {
   gaId?: string | null;
@@ -22,7 +23,7 @@ interface RuntimeAnalyticsConfig {
   googleAdsId?: string | null;
 }
 
-const RUNTIME_CONFIG_KEY = "tarot_analytics_config";
+const RUNTIME_CONFIG_KEY = STORAGE_KEYS.analyticsConfig;
 
 /**
  * โหลดรหัสเครื่องมือวัดผลจาก `/api/config/analytics` **ครั้งเดียวต่อการเข้าเว็บหนึ่งครั้ง**
@@ -264,12 +265,15 @@ export function AnalyticsTracker() {
               try {
                 var seertarotChoice = window.__seertarotConsent;
                 if (!seertarotChoice) {
-                  seertarotChoice = localStorage.getItem('seertarot_analytics_consent_v1');
+                  seertarotChoice = localStorage.getItem(${JSON.stringify(STORAGE_KEYS.analyticsConsent)});
                 }
                 if (seertarotChoice === 'granted') {
                   gtag('consent', 'update', { 'analytics_storage': 'granted' });
                 }
-              } catch (e) {}
+              } catch (e) {
+                /* อ่านความยินยอมไม่ได้ ➔ คงค่า denied ตาม consent default ด้านบน
+                   ซึ่งเป็นฝั่งที่ปลอดภัยของ PDPA อยู่แล้ว (R-27) */
+              }
               /* ตัดพารามิเตอร์ระบุตัวตนออกจากคำขอโฆษณาเมื่อยังไม่ได้รับความยินยอม
                  — ข้อบังคับของ Consent Mode v2 ที่หน้าวินิจฉัยแท็กตรวจหา */
               gtag('set', 'ads_data_redaction', true);
@@ -325,10 +329,12 @@ export function AnalyticsTracker() {
               fbq('track', 'PageView');
             }
             try {
-              if (localStorage.getItem('seertarot_analytics_consent_v1') === 'granted') {
+              if (localStorage.getItem(${JSON.stringify(STORAGE_KEYS.analyticsConsent)}) === 'granted') {
                 seertarotInitPixel();
               }
-            } catch (e) {}
+            } catch (e) {
+              /* เหมือนข้างบน — อ่านไม่ได้ = ไม่ยิงพิกเซล ซึ่งเป็นฝั่งที่ปลอดภัย (R-27) */
+            }
             window.addEventListener('seertarot:consent-changed', function (ev) {
               if (ev.detail === 'granted') seertarotInitPixel();
             });

@@ -528,7 +528,10 @@ export async function* streamGroqReading(ctx: ReadingContext): AsyncGenerator<Re
         if (state.foreignCircuitBreaker) {
           try {
             await reader.cancel();
-          } catch {}
+          } catch {
+            /* ตัวอ่านสตรีมถูกปิดไปแล้วจากฝั่งเครือข่าย — `cancel()` ซ้ำโยนเสมอ
+               ไม่ใช่ความล้มเหลว และเรากำลังจะ break ออกอยู่แล้ว (R-27) */
+          }
           break;
         }
       }

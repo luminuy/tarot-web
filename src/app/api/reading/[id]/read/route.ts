@@ -9,6 +9,7 @@ import { consumeEdgeRateLimits, edgeRateLimitKey } from "@/lib/security/edge-rat
 import { recordEvents, recordEvent } from "@/lib/stats/record";
 import { GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
+import { recordCaughtError } from "@/lib/observability/caught";
 
 export const runtime = "nodejs";
 /** การอ่านไพ่ใช้เวลาหลายสิบวินาที ต้องกันไม่ให้ platform ตัดกลางคัน */
@@ -279,7 +280,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             const { getSessionUser } = await import("@/lib/auth/session");
             const user = await getSessionUser();
             if (user?.id) memberUserId = user.id;
-          } catch {}
+          } catch (err) {
+            /* 🔴 R-27: อ่านเซสชันไม่ได้ = ความทรงจำกรรมของสมาชิกหายไปจากคำอ่านรอบนี้
+               ไม่ถึงกับต้องหยุดการเปิดไพ่ แต่ต้องนับไว้ ไม่ใช่กลืนเงียบ */
+            recordCaughtError("read.session_lookup", err);
+          }
         }
 
         const { loadKarmicMemory } = await import("@/lib/ai/memory");
@@ -470,7 +475,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         if (!isClosed) {
           try {
             controller.close();
-          } catch {}
+          } catch {
+            /* ปลายทางปิดสตรีมไปก่อนแล้ว (ผู้ใช้ปิดแท็บ) — `close()` ซ้ำโยนเสมอ
+               ไม่ใช่ความล้มเหลว จึงไม่นับเป็น error (R-27) */
+          }
           isClosed = true;
         }
       }

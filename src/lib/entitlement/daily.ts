@@ -5,21 +5,16 @@
  */
 
 import { getAppDB } from "@/lib/platform/db";
+import { bangkokDayKey, bangkokYesterdayKey } from "@/lib/time/bangkok";
 
-const THAI_OFFSET_MS = 7 * 60 * 60 * 1000;
-
-export function todayDateKey(now: Date = new Date()): string {
-  const thaiTime = new Date(now.getTime() + THAI_OFFSET_MS);
-  const year = thaiTime.getUTCFullYear();
-  const month = String(thaiTime.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(thaiTime.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-export function yesterdayDateKey(now: Date = new Date()): string {
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  return todayDateKey(yesterday);
-}
+/*
+ * 🕗 R-25: เส้นแบ่งวันมาจาก `@/lib/time/bangkok` ที่เดียวทั้งระบบ
+ * ของเดิมบวก 7 ชั่วโมงเองที่นี่ ขณะที่อีก 5 ที่ใช้อีกสองวิธี — ค่านี้เป็น**คีย์โควตา**
+ * ไม่ใช่การจัดรูปแบบวันที่ สำเนาที่เลื่อนออกจากกันคือ "สิทธิ์ฟรีไม่รีเซ็ต"
+ * สองชื่อข้างล่างคงไว้เพื่อไม่ให้จุดเรียกใช้ทั่วระบบต้องแก้ตาม
+ */
+export const todayDateKey = bangkokDayKey;
+export const yesterdayDateKey = bangkokYesterdayKey;
 
 /**
  * ตรวจสอบว่าผู้ใช้นี้ได้ใช้สิทธิ์เปิดไพ่ประจำวันฟรีของวันนี้ไปแล้วหรือยัง

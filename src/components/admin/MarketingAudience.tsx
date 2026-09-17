@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 
 interface AudienceRow {
   email: string;
@@ -42,8 +43,11 @@ export default function MarketingAudience() {
           ดาวน์โหลด CSV ไปใช้กับเครื่องมือส่งอีเมลภายนอกได้ (อย่าลืมใส่ลิงก์ยกเลิกรับข่าวสารทุกฉบับ)
         </p>
 
+        {/* ♿ + R-28: ประกาศข้อผิดพลาดให้โปรแกรมอ่านหน้าจอ และให้กดลองใหม่ได้ */}
         {error ? (
-          <p className="mt-4 text-xs text-rose-700">{error}</p>
+          <div className="mt-4">
+            <AdminErrorBanner error={error} onRetry={load} />
+          </div>
         ) : !state ? (
           <p className="mt-4 text-sm text-muted">กำลังโหลด…</p>
         ) : (

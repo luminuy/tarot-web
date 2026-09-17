@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { APP_TIME_ZONE, bangkokDayKey, bangkokYesterdayKey } from "@/lib/time/bangkok";
 import { PERSONAS } from "@/data/personas";
 import { SPREADS } from "@/data/spreads";
 
@@ -64,11 +65,11 @@ function formatThaiDate(iso: string): { label: string; weekday: string } {
       day: "numeric",
       month: "short",
       year: "numeric",
-      timeZone: "Asia/Bangkok",
+      timeZone: APP_TIME_ZONE,
     }).format(date);
     const weekday = new Intl.DateTimeFormat("th-TH", {
       weekday: "long",
-      timeZone: "Asia/Bangkok",
+      timeZone: APP_TIME_ZONE,
     }).format(date);
     return { label, weekday };
   } catch {
@@ -80,16 +81,11 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const [activeChartDate, setActiveChartDate] = useState<string | null>(null);
 
-  // Today and yesterday ISO strings in Asia/Bangkok time
-  const todayISO = useMemo(() => {
-    return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date());
-  }, []);
-
-  const yesterdayISO = useMemo(() => {
-    const d = new Date();
-    d.setUTCDate(d.getUTCDate() - 1);
-    return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(d);
-  }, []);
+  /* 🕗 R-25: วันนี้/เมื่อวานตามเวลากรุงเทพฯ มาจาก `@/lib/time/bangkok` ที่เดียว
+     ของเดิมเขียน Intl เองที่นี่ และ "เมื่อวาน" ใช้ `setUTCDate(-1)` ซึ่งเป็นคนละตรรกะ
+     กับที่ `entitlement/daily.ts` ใช้ตัดสินสตรีค — หน้าแอดมินจึงเห็นวันไม่ตรงกับเครื่องคิดสิทธิ์ได้ */
+  const todayISO = useMemo(() => bangkokDayKey(), []);
+  const yesterdayISO = useMemo(() => bangkokYesterdayKey(), []);
 
   // Process rows
   const rows: DayRow[] = useMemo(() => {

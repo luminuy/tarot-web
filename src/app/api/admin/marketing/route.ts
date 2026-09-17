@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { recordAudit } from "@/lib/admin/audit";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { listConsentedUsersWithEmail } from "@/lib/users/users.repo";
+import { APP_TIME_ZONE, bangkokDayKey } from "@/lib/time/bangkok";
 
 export const runtime = "nodejs";
 
@@ -10,7 +11,7 @@ export const runtime = "nodejs";
 function thTime(ms?: number | null): string {
   if (!ms) return "";
   return new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "Asia/Bangkok",
+    timeZone: APP_TIME_ZONE,
     dateStyle: "short",
     timeStyle: "short",
   }).format(new Date(ms));
@@ -69,7 +70,8 @@ export async function GET(request: Request) {
     const body = rows
       .map((r) => [r.email, r.name, r.provider, r.consentAt, r.joinedAt].map(csvCell).join(","))
       .join("\n");
-    const stamp = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Bangkok" }).format(new Date());
+    /* 🕗 R-25: เคยใช้ locale `sv-SE` ที่นี่และ `en-CA` ที่อื่น — สองตัวเลือกมาเพราะบังเอิญให้ผลเหมือนกัน */
+    const stamp = bangkokDayKey();
     return new NextResponse(`${header}\n${body}\n`, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",

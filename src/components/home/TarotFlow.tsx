@@ -38,6 +38,7 @@ import {
 import { onUpgradeRequest } from "@/lib/entitlement/upgrade-bus";
 import { ensureEntitlement, refreshEntitlement, useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
+import { STORAGE_KEYS, STORAGE_KEY_BUILDERS } from "@/lib/storage/keys";
 
 /**
  * ✦ Dynamic Code-Splitting — คอมโพเนนต์หนักทั้งหมดโหลดเมื่อถึงขั้นที่ใช้จริง
@@ -378,9 +379,11 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         if (match) setSelectedSpread(match);
       }
       try {
-        const remembered = typeof window !== "undefined" ? localStorage.getItem("seertarot_nickname") : null;
+        const remembered = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.nickname) : null;
         if (remembered) setNickname(remembered);
-      } catch {}
+      } catch {
+        /* จำชื่อเล่นไม่ได้ในโหมดส่วนตัว — ผู้ใช้กรอกใหม่ได้ ไม่ต้องนับเป็นความล้มเหลว (R-27) */
+      }
     }
 
     // Auto-sync anonymous history to server upon login or app mount & handle Auth query toasts
@@ -450,11 +453,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           fetchSessionUser({ force: true }).then((currentUser) => {
             if (currentUser) {
               refreshEntitlement();
-              const welcomeKey = `welcome_shown_${currentUser.id}`;
+              const welcomeKey = STORAGE_KEY_BUILDERS.welcomeShown(currentUser.id);
               let hasBeenWelcomed = false;
               try {
                 hasBeenWelcomed = typeof window !== "undefined" && localStorage.getItem(welcomeKey) === "1";
-              } catch {}
+              } catch {
+                /* อ่านไม่ได้ = ถือว่ายังไม่เคยต้อนรับ · อย่างมากคือทักซ้ำหนึ่งครั้ง (R-27) */
+              }
               const isRecentAccount =
                 currentUser.createdAt && Date.now() - new Date(currentUser.createdAt).getTime() < 10 * 60 * 1000;
               const isFirstTimeUser = isNewUser || (isRecentAccount && !hasBeenWelcomed);
@@ -463,7 +468,9 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 // สมัครครั้งแรก (First-Time Signup Onboarding): แสดงสิทธิ์โควตาต้อนรับเพียงครั้งเดียว
                 try {
                   localStorage.setItem(welcomeKey, "1");
-                } catch {}
+                } catch {
+                  /* เหมือนข้างบน — ผลที่แย่ที่สุดคือทักทายซ้ำ (R-27) */
+                }
 
                 setToast({
                   type: "welcome",
@@ -669,8 +676,10 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
     if (typeof window !== "undefined" && nickname.trim()) {
       try {
-        localStorage.setItem("seertarot_nickname", nickname.trim());
-      } catch {}
+        localStorage.setItem(STORAGE_KEYS.nickname, nickname.trim());
+      } catch {
+        /* จำชื่อเล่นไม่ได้ — รอบหน้าผู้ใช้กรอกใหม่ ไม่กระทบการเปิดไพ่ (R-27) */
+      }
     }
 
     setLoading(true);
@@ -1296,7 +1305,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     setSituation("");
     if (typeof window !== "undefined") {
       try {
-        localStorage.removeItem("seertarot_nickname");
+        localStorage.removeItem(STORAGE_KEYS.nickname);
       } catch {
         // ignore
       }

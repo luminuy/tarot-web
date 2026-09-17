@@ -220,9 +220,24 @@ async function runTests() {
       (t) => trackerSrc.includes(t),
     ),
   );
+  /*
+   * 🗄️ R-30: ชื่อคีย์ย้ายไปอยู่ในทะเบียน `src/lib/storage/keys.ts` แล้ว
+   * ด่านนี้จึงตรวจสองอย่างแทนการ grep สตริงตายตัว:
+   *   1. สคริปต์ inline อ่านค่าจากทะเบียนจริง (ไม่ได้ประกอบชื่อคีย์เอง)
+   *   2. **ค่าในทะเบียนยังเป็นคีย์เดิม** — ข้อนี้สำคัญกว่า เพราะถ้าใครเปลี่ยนชื่อคีย์
+   *      ความยินยอมที่ผู้ใช้เคยกดไว้จะหายทั้งหมด แล้วเว็บจะกลับไปถามใหม่ทุกคน
+   */
+  const storageKeysSrc = readFileSync(
+    resolve(import.meta.dirname, "../../src/lib/storage/keys.ts"),
+    "utf-8",
+  );
   check(
-    "กู้สถานะที่ผู้ใช้เคยเลือกไว้ก่อน React hydrate",
-    trackerSrc.includes("seertarot_analytics_consent_v1"),
+    "กู้สถานะที่ผู้ใช้เคยเลือกไว้ก่อน React hydrate (อ่านคีย์จากทะเบียน)",
+    trackerSrc.includes("STORAGE_KEYS.analyticsConsent"),
+  );
+  check(
+    "คีย์ความยินยอมในทะเบียนยังเป็นค่าเดิม (เปลี่ยนแล้วผู้ใช้ทุกคนถูกถามใหม่หมด)",
+    /analyticsConsent:\s*"seertarot_analytics_consent_v1"/.test(storageKeysSrc),
   );
   check(
     "สคริปต์ init กู้สถานะจาก window.__seertarotConsent ด้วย (กันการกดยินยอมหายตอน lazyOnload)",

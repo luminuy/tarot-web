@@ -7,6 +7,7 @@ import { DAILY_LIMIT, READINGS_EN, REQUIRE_SIGNUP_TO_READ, getMemberBenefits, de
 import { trackEntitlementEvent } from "@/lib/entitlement/track";
 import { useEntitlement } from "@/lib/entitlement/use-entitlement";
 import { useLocale } from "@/lib/i18n";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
 /**
  * การ์ดชวนสมัครหลังอ่านไพ่จบ (ENTITLEMENT_PLAN PR E)
@@ -16,7 +17,7 @@ import { useLocale } from "@/lib/i18n";
  *
  * กติกา: ไม่ป๊อปอัปทับหน้าจอ · ปิดได้ · จำการปิดไว้ 7 วัน (ไม่ตื๊อ)
  */
-const DISMISS_KEY = "tarot_signup_card_dismissed_until";
+const DISMISS_KEY = STORAGE_KEYS.signupCardDismissedUntil;
 const DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function PostReadingSignup({ onOpenAuth }: { onOpenAuth: () => void }) {

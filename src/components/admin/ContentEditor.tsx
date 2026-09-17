@@ -62,6 +62,9 @@ export default function ContentEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+  /* 🔴 R-28: ของเดิมเอาทั้ง "บันทึกแล้ว" และ "โหลดไม่สำเร็จ" ไปใส่ตัวแปรเดียวกัน
+     แล้วเรนเดอร์เป็นข้อความสีเทา — ความล้มเหลวจึงหน้าตาเหมือนความสำเร็จ */
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
@@ -71,7 +74,7 @@ export default function ContentEditor() {
         setDoc(d.doc ?? {});
         setDefaults(d.defaults);
       })
-      .catch(() => setMsg("โหลดเนื้อหาไม่สำเร็จ"))
+      .catch(() => setLoadError("โหลดเนื้อหาไม่สำเร็จ"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -92,7 +95,7 @@ export default function ContentEditor() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setMsg(data.error || "บันทึกไม่สำเร็จ");
+        setLoadError(data.error || "บันทึกไม่สำเร็จ");
         return;
       }
       setDirty(false);
@@ -134,6 +137,11 @@ export default function ContentEditor() {
         </div>
         <div className="flex items-center gap-3">
           {msg ? <span className="text-xs text-muted">{msg}</span> : null}
+          {loadError ? (
+            <span role="alert" className="text-xs font-bold text-rose-700">
+              {loadError}
+            </span>
+          ) : null}
           <Button size="sm" onClick={save} isLoading={saving} disabled={!dirty}>
             บันทึกทั้งหมด
           </Button>

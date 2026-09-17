@@ -11,21 +11,21 @@ import type {
   RedeemReasonKind,
   RedemptionRow,
 } from "@/lib/entitlement/redeem-admin.repo";
+import { APP_TIME_ZONE, bangkokDayKey } from "@/lib/time/bangkok";
 
+/* 🕗 R-25: เส้นแบ่งวันมาจาก `@/lib/time/bangkok` ที่เดียว (เคยเขียน Intl + en-CA เองที่นี่) */
 function todayISO(): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date());
+  return bangkokDayKey();
 }
 
 function timestampToISO(ts: number | null): string {
   if (!ts) return "";
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(new Date(ts));
+  return bangkokDayKey(new Date(ts));
 }
 
 /** วันหมดอายุเริ่มต้นของรหัสใหม่ — 30 วันนับจากวันนี้ (เวลาไทย) */
 function defaultExpiryISO(days = 30): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(
-    new Date(Date.now() + days * 24 * 60 * 60 * 1000),
-  );
+  return bangkokDayKey(new Date(Date.now() + days * 24 * 60 * 60 * 1000));
 }
 
 function isoToEndOfDayEpoch(iso: string): number {
@@ -40,7 +40,7 @@ function formatTimestampThai(ts: number | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
-    timeZone: "Asia/Bangkok",
+    timeZone: APP_TIME_ZONE,
   }).format(new Date(ts));
 }
 
@@ -52,7 +52,7 @@ function formatFullTimeThai(ts: number): string {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    timeZone: "Asia/Bangkok",
+    timeZone: APP_TIME_ZONE,
   }).format(new Date(ts));
 }
 
