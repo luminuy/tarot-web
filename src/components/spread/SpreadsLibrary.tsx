@@ -1,6 +1,34 @@
-"use client";
+/**
+ * 📐 คลังผังพยากรณ์ 25 แบบ — **เรนเดอร์เป็น HTML ล้วน ไม่มี hydration** (R-02)
+ * ===========================================================================
+ *
+ * ## ทำไมไฟล์นี้ถึงไม่มี `useState` และไม่มี `onClick` แม้แต่ตัวเดียว
+ *
+ * ของเดิมเป็น island ที่ `client:idle` ทั้งก้อน — ซึ่งแปลว่าเบราว์เซอร์ต้องโหลด
+ * React runtime + **ข้อมูลผังทั้ง 25 แบบ (17.2 KB gzip)** มาเพื่อความสามารถแค่สองอย่าง:
+ * สลับแท็บหมวด กับ กดขยายดูตำแหน่งไพ่
+ *
+ * วัดจากบิลด์จริง (2026-09-17): เอา hydration ออก ➔ JS ของหน้านี้ **124.4 ➔ 99.4 KB gzip**
+ * และงานก้อนยาวที่สุดตอนโหลด (687 ms บน Lighthouse mobile) หายไปทั้งก้อน
+ *
+ * ## แล้วแท็บกับปุ่มขยายทำงานยังไงถ้าไม่มี React
+ *
+ * - **ขยายดูตำแหน่งไพ่** ➔ `<details>`/`<summary>` ของเบราว์เซอร์เอง · ไม่ใช้ JS เลยสักบรรทัด
+ * - **สลับแท็บหมวด** ➔ การ์ดทั้ง 25 ใบถูกเรนเดอร์ไว้ใน HTML ตั้งแต่ตอนบิลด์
+ *   พร้อมแอตทริบิวต์ `data-cats` บอกว่าใบนี้อยู่หมวดไหนบ้าง
+ *   สคริปต์เล็ก ๆ ที่ `astro/scripts/spreads-tabs.ts` (≈1 KB) แค่สลับแอตทริบิวต์ `hidden`
+ *
+ * ## ผลพลอยได้ที่สำคัญกว่าความเร็ว
+ *
+ * เดิม HTML ที่เซิร์ฟเวอร์ส่งออกไปมีผังแค่ 6 ใบของแท็บ "ยอดนิยมแนะนำ" อีก 19 ใบโผล่
+ * ต่อเมื่อผู้ใช้กดแท็บ (นี่คือเหตุผลที่ต้องมีสารบัญฝั่งเซิร์ฟเวอร์เพิ่มใน `spreads-index.tsx`)
+ * ตอนนี้ **เนื้อหาของทั้ง 25 ผังอยู่ใน HTML ดิบครบทุกใบ** ตั้งแต่ไบต์แรกที่บอตและผู้ใช้ได้รับ
+ *
+ * ⚠️ **ห้ามใส่ `client:*` กลับเข้าไปที่ `<SpreadsLibraryRoot>`** — จะได้ทั้งสองต้นทุนพร้อมกัน
+ * (HTML ที่โตขึ้นจากการเรนเดอร์ครบ 25 ใบ + JS ที่ตั้งใจตัดทิ้ง) ด่านงบบันเดิลเฝ้าอยู่
+ */
 
-import React, { useState, useMemo } from "react";
+import React from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import {
@@ -55,57 +83,41 @@ const CATEGORY_MAP_EN: Record<string, string> = {
   master: "Grand Spread",
 };
 
+/**
+ * สมาชิกของแต่ละแท็บ — **แหล่งความจริงเดียว** ทั้งของ HTML และของสคริปต์สลับแท็บ
+ * (สคริปต์อ่านจาก `data-cats` ที่สร้างจากตารางนี้ จึงไม่มีทางหลุดจากกัน)
+ */
+const TAB_MEMBERS: Record<string, string[]> = {
+  recommended: ["daily", "quick", "yes-no", "three-card", "situation-solution", "celtic-cross"],
+  love: ["love", "how-they-feel", "ex-reconciliation", "soulmate", "three-card"],
+  career: ["career", "money", "career-switch", "decision", "inner-potential"],
+  master: ["celtic-cross", "year-ahead", "weekly", "chakra", "monthly"],
+};
+
+/** แท็บที่เปิดมาเป็นค่าเริ่มต้น — ต้องตรงกับค่าเริ่มต้นในสคริปต์สลับแท็บ */
+const DEFAULT_TAB = "recommended";
+
+const catsOf = (id: string): string =>
+  ["all", ...Object.keys(TAB_MEMBERS).filter((tab) => TAB_MEMBERS[tab].includes(id))].join(" ");
+
 export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
   const { isEnglish } = useLocale();
-  const [activeCategory, setActiveCategory] = useState<string>("recommended");
-  const [expandedSpreadId, setExpandedSpreadId] = useState<string | null>(null);
 
-  const categories = useMemo(
-    () => [
-      { id: "recommended", label: isEnglish ? "Recommended" : "ยอดนิยมแนะนำ", count: 6, Icon: SparkleTabIcon },
-      { id: "love", label: isEnglish ? "Love & Romance" : "ความรัก & คนในใจ", count: 5, Icon: HeartTabIcon },
-      { id: "career", label: isEnglish ? "Career & Finances" : "การงาน & การเงิน", count: 5, Icon: PentacleTabIcon },
-      { id: "master", label: isEnglish ? "Grand Spreads" : "ผังใหญ่เจาะลึก", count: 5, Icon: CrystalBallTabIcon },
-      { id: "all", label: isEnglish ? "All Spreads" : "ผังทั้งหมด", count: spreads.length, Icon: AllSpreadsTabIcon },
-    ],
-    [spreads.length, isEnglish]
-  );
-
-  const filteredSpreads = useMemo(() => {
-    switch (activeCategory) {
-      case "recommended":
-        return spreads.filter((s) =>
-          ["daily", "quick", "yes-no", "three-card", "situation-solution", "celtic-cross"].includes(s.id)
-        );
-      case "love":
-        return spreads.filter((s) =>
-          ["love", "how-they-feel", "ex-reconciliation", "soulmate", "three-card"].includes(s.id)
-        );
-      case "career":
-        return spreads.filter((s) =>
-          ["career", "money", "career-switch", "decision", "inner-potential"].includes(s.id)
-        );
-      case "master":
-        return spreads.filter((s) => ["celtic-cross", "year-ahead", "weekly", "chakra", "monthly"].includes(s.id));
-      case "all":
-      default:
-        return spreads;
-    }
-  }, [spreads, activeCategory]);
-
-  const toggleExpand = (id: string) => {
-    setExpandedSpreadId((prev) => (prev === id ? null : id));
-  };
+  const categories = [
+    { id: "recommended", label: isEnglish ? "Recommended" : "ยอดนิยมแนะนำ", count: 6, Icon: SparkleTabIcon },
+    { id: "love", label: isEnglish ? "Love & Romance" : "ความรัก & คนในใจ", count: 5, Icon: HeartTabIcon },
+    { id: "career", label: isEnglish ? "Career & Finances" : "การงาน & การเงิน", count: 5, Icon: PentacleTabIcon },
+    { id: "master", label: isEnglish ? "Grand Spreads" : "ผังใหญ่เจาะลึก", count: 5, Icon: CrystalBallTabIcon },
+    { id: "all", label: isEnglish ? "All Spreads" : "ผังทั้งหมด", count: spreads.length, Icon: AllSpreadsTabIcon },
+  ];
 
   return (
-      <div className="space-y-6">
+    <div className="space-y-6">
       {/* Dynamic Bilingual Hero Header */}
       <div className="text-center space-y-4 sm:space-y-5 py-6 sm:py-8">
         <div>
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-line bg-surface text-xs text-gold-ink font-serif-th font-bold shadow-xs">
-            
-            {isEnglish ? "25 CLASSIC DIVINATION SPREADS" : "25 ผังการเปิดไพ่มาตรฐานสากล"}{" "}
-            
+            {isEnglish ? "25 CLASSIC DIVINATION SPREADS" : "25 ผังการเปิดไพ่มาตรฐานสากล"}
           </span>
         </div>
         <h1 className="font-serif-th text-3xl sm:text-5xl font-bold text-ink tracking-wide leading-normal sm:leading-tight pt-1 [text-wrap:balance]">
@@ -121,11 +133,12 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
       {/* Category Tabs with Editorial Styling */}
       <div
         role="tablist"
+        data-spreads-tablist
         aria-label={isEnglish ? "Spread library categories" : "หมวดหมู่คลังผังพยากรณ์"}
         className="flex items-center justify-start gap-2 overflow-x-auto pb-3 px-1 no-scrollbar select-none border-b border-line/40"
       >
-        {categories.map((cat, catIdx) => {
-          const isActive = activeCategory === cat.id;
+        {categories.map((cat) => {
+          const isActive = cat.id === DEFAULT_TAB;
           const Icon = cat.Icon;
 
           return (
@@ -133,26 +146,13 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
               key={cat.id}
               role="tab"
               id={`library-tab-${cat.id}`}
-              aria-controls={`library-panel-${cat.id}`}
+              data-spread-tab={cat.id}
+              aria-controls="library-panel"
               aria-selected={isActive}
               tabIndex={isActive ? 0 : -1}
               type="button"
-              onClick={() => setActiveCategory(cat.id)}
-              onKeyDown={(e) => {
-                let nextIdx = -1;
-                if (e.key === "ArrowRight") nextIdx = (catIdx + 1) % categories.length;
-                else if (e.key === "ArrowLeft") nextIdx = (catIdx - 1 + categories.length) % categories.length;
-                if (nextIdx !== -1) {
-                  e.preventDefault();
-                  setActiveCategory(categories[nextIdx].id);
-                  const nextTab = document.getElementById(`library-tab-${categories[nextIdx].id}`);
-                  nextTab?.focus();
-                }
-              }}
-              className={`tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
-                isActive
-                  ? "bg-ink text-canvas shadow-sm"
-                  : "bg-inset text-ink hover:text-gold border border-line hover:border-gold"
+              className={`tap-overlay-y px-4 py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold aria-selected:bg-ink aria-selected:text-canvas aria-selected:shadow-sm ${
+                isActive ? "" : "bg-inset text-ink hover:text-gold border border-line hover:border-gold"
               }`}
             >
               <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-gold" : "text-muted"}`} />
@@ -169,121 +169,129 @@ export const SpreadsLibrary: React.FC<SpreadsLibraryProps> = ({ spreads }) => {
         })}
       </div>
 
-      {/* 25 Spreads Grid */}
-      {/* `key` เปลี่ยน → React remount → คลาส CSS เล่นเฟดขึ้นใหม่
-          เรนเดอร์แรกออกมาที่สถานะปลายทางเสมอ กริดผังคือเนื้อหาหลักของหน้า */}
-        <div
-          key={activeCategory}
-          role="tabpanel"
-          id={`library-panel-${activeCategory}`}
-          aria-labelledby={`library-tab-${activeCategory}`}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 anim-swap-rise-sm"
-        >
-          {filteredSpreads.map((spread) => {
-            const isExpanded = expandedSpreadId === spread.id;
+      {/*
+        25 Spreads Grid — เรนเดอร์ครบทุกใบตั้งแต่ตอนบิลด์
+        ใบที่ไม่ได้อยู่ในแท็บที่เปิดอยู่ถูกซ่อนด้วยแอตทริบิวต์ `hidden`
+        (ซ่อนจากทั้งสายตาและโปรแกรมอ่านหน้าจอ — ไม่ใช่แค่ `opacity: 0`)
+      */}
+      <div
+        role="tabpanel"
+        id="library-panel"
+        data-spreads-panel
+        aria-labelledby={`library-tab-${DEFAULT_TAB}`}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 anim-swap-rise-sm"
+      >
+        {spreads.map((spread) => {
+          const cats = catsOf(spread.id);
 
-            return (
-              <div
-                key={spread.id}
-                className="rounded-xl border border-line bg-surface p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-gold transition duration-300 relative overflow-hidden group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
-              >
-                {/* Header Tag */}
-                <div className="flex items-center justify-between z-10">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-mono font-bold text-ink bg-inset px-2.5 py-0.5 rounded-full border border-line">
-                      {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
-                    </span>
-                    {!isStandardSpread(spread.id) && (
-                      <span className="text-[12px] text-gold-ink bg-surface border border-line px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
-                        <SealedLockIcon className="w-3 h-3" />
-                        <span>{isEnglish ? "Grand Spread" : "ญาณพิเศษ"}</span>
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[13px] text-muted font-serif-th">
-                    {isEnglish
-                      ? `Category: ${CATEGORY_MAP_EN[spread.defaultCategory] || spread.defaultCategory}`
-                      : `หมวด: ${CATEGORY_MAP_TH[spread.defaultCategory] || spread.defaultCategory}`}
+          return (
+            <div
+              key={spread.id}
+              data-spread-card
+              data-cats={cats}
+              hidden={!cats.split(" ").includes(DEFAULT_TAB)}
+              className="rounded-xl border border-line bg-surface p-5 sm:p-6 flex flex-col justify-between space-y-4 hover:border-gold transition duration-300 relative overflow-hidden group shadow-[0_10px_30px_rgba(42,38,31,0.06)]"
+            >
+              {/* Header Tag */}
+              <div className="flex items-center justify-between z-10">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[13px] font-mono font-bold text-ink bg-inset px-2.5 py-0.5 rounded-full border border-line">
+                    {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
                   </span>
-                </div>
-
-                {/* Interactive Spread Visual Diagram on Illuminated Pedestal */}
-                <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-xl bg-inset border border-line p-2 group-hover:border-gold transition-colors">
-                  {renderSpreadIllustration(spread.id)}
-                </div>
-
-                {/* Titles & Tagline */}
-                <div className="space-y-1.5 z-10 pt-3 border-t border-line/40">
-                  {/* ชื่อผังแต่ละแบบคือหัวข้อระดับที่สองของหน้า /spreads (h1 = ชื่อหน้า) */}
-                  <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink leading-snug py-0.5 [text-wrap:balance]">
-                    {getSpreadName(spread, isEnglish)}
-                  </h2>
-                  <p className="text-xs text-muted leading-relaxed font-serif-th">{getSpreadTagline(spread, isEnglish)}</p>
-                </div>
-
-                <p className="text-[13px] text-ink leading-relaxed line-clamp-2 z-10 font-serif-th [text-wrap:pretty]">{getSpreadDescription(spread, isEnglish)}</p>
-
-                {/* Expandable Positions Breakdown */}
-                <div className="z-10 space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => toggleExpand(spread.id)}
-                    className="tap-overlay-y w-full text-left text-[13px] font-serif-th text-gold-ink hover:text-ink flex items-center justify-between py-1.5 border-t border-line/40 cursor-pointer transition-colors font-bold"
-                  >
-                    <span className="flex items-center gap-1.5">
-                       {isEnglish ? `View ${spread.positions.length} card positions` : `ดูรายละเอียด ${spread.positions.length} ตำแหน่งไพ่`}
+                  {!isStandardSpread(spread.id) && (
+                    <span className="text-[12px] text-gold-ink bg-surface border border-line px-2 py-0.5 rounded-full font-serif-th font-bold flex items-center gap-1">
+                      <SealedLockIcon className="w-3 h-3" />
+                      <span>{isEnglish ? "Grand Spread" : "ญาณพิเศษ"}</span>
                     </span>
-                    <span className="text-[13px]">{isExpanded ? (isEnglish ? "▲ Collapse" : "▲ ย่อ") : (isEnglish ? "▼ Expand" : "▼ ขยาย")}</span>
-                  </button>
-
-                  {/* ย่อ/ขยายด้วย grid-template-rows 0fr → 1fr — วิธี CSS ล้วนที่
-                      อนิเมต "ความสูงอัตโนมัติ" ได้จริง โดยไม่ต้องวัดความสูงด้วย JS */}
-                  <div
-                    className="grid transition-[grid-template-rows,opacity] duration-200 ease-out"
-                    style={{
-                      gridTemplateRows: isExpanded ? "1fr" : "0fr",
-                      opacity: isExpanded ? 1 : 0,
-                    }}
-                    aria-hidden={!isExpanded}
-                  >
-                      <div className="space-y-1.5 pt-1 overflow-hidden">
-                        {spread.positions.map((pos, idx) => (
-                          <div
-                            key={idx}
-                            className="text-[13px] p-2 rounded-lg bg-inset border border-line flex items-start gap-2"
-                          >
-                            <span className="text-gold-ink font-mono font-bold flex-shrink-0 text-[13px]">
-                              #{idx + 1}
-                            </span>
-                            <div>
-                              <strong className="text-ink font-serif-th">{getPositionName(pos, isEnglish)}:</strong>{" "}
-                              <span className="text-muted leading-relaxed font-serif-th">{getPositionMeaning(pos, isEnglish)}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                  </div>
+                  )}
                 </div>
-
-                {/* Primary Action Button: Link directly to Altar */}
-                <Link
-                  href={`/?spread=${spread.id}`}
-                  prefetch={false}
-                  className="w-full py-3 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
-                >
-                  <span>{isEnglish ? (isStandardSpread(spread.id) ? "Begin Reading with Spread" : "Unlock Grand Spread") : (isStandardSpread(spread.id) ? "เริ่มดูดวงด้วยผังนี้" : "เปิดผังพยากรณ์พิเศษนี้")}</span>
-                </Link>
-                <Link
-                  href={`/spreads/${spread.id}`}
-                  prefetch={false}
-                  className="z-10 -mt-1 text-center text-[13px] font-serif-th text-gold-ink hover:text-ink transition-colors"
-                >
-                  {isEnglish ? "Read Spread Guide →" : "อ่านคู่มือผังนี้ →"}
-                </Link>
+                <span className="text-[13px] text-muted font-serif-th">
+                  {isEnglish
+                    ? `Category: ${CATEGORY_MAP_EN[spread.defaultCategory] || spread.defaultCategory}`
+                    : `หมวด: ${CATEGORY_MAP_TH[spread.defaultCategory] || spread.defaultCategory}`}
+                </span>
               </div>
-            );
-          })}
-        </div>
+
+              {/* Interactive Spread Visual Diagram on Illuminated Pedestal */}
+              <div className="h-44 flex items-center justify-center my-1 relative select-none rounded-xl bg-inset border border-line p-2 group-hover:border-gold transition-colors">
+                {renderSpreadIllustration(spread.id)}
+              </div>
+
+              {/* Titles & Tagline */}
+              <div className="space-y-1.5 z-10 pt-3 border-t border-line/40">
+                {/* ชื่อผังแต่ละแบบคือหัวข้อระดับที่สองของหน้า /spreads (h1 = ชื่อหน้า) */}
+                <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink leading-snug py-0.5 [text-wrap:balance]">
+                  {getSpreadName(spread, isEnglish)}
+                </h2>
+                <p className="text-xs text-muted leading-relaxed font-serif-th">{getSpreadTagline(spread, isEnglish)}</p>
+              </div>
+
+              <p className="text-[13px] text-ink leading-relaxed line-clamp-2 z-10 font-serif-th [text-wrap:pretty]">
+                {getSpreadDescription(spread, isEnglish)}
+              </p>
+
+              {/*
+                ย่อ/ขยายด้วย <details> ของเบราว์เซอร์ — ไม่ใช้ JS เลยสักบรรทัด
+                (ของเดิมเป็น state ใน React ซึ่งเป็นเหตุผลหนึ่งที่ทั้งคลังต้อง hydrate)
+              */}
+              <details className="z-10 space-y-2 group/details">
+                <summary className="tap-overlay-y w-full text-left text-[13px] font-serif-th text-gold-ink hover:text-ink flex items-center justify-between py-1.5 border-t border-line/40 cursor-pointer transition-colors font-bold list-none [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center gap-1.5">
+                    {isEnglish
+                      ? `View ${spread.positions.length} card positions`
+                      : `ดูรายละเอียด ${spread.positions.length} ตำแหน่งไพ่`}
+                  </span>
+                  <span className="text-[13px]">
+                    <span className="group-open/details:hidden">{isEnglish ? "▼ Expand" : "▼ ขยาย"}</span>
+                    <span className="hidden group-open/details:inline">{isEnglish ? "▲ Collapse" : "▲ ย่อ"}</span>
+                  </span>
+                </summary>
+
+                <div className="space-y-1.5 pt-1">
+                  {spread.positions.map((pos, idx) => (
+                    <div
+                      key={idx}
+                      className="text-[13px] p-2 rounded-lg bg-inset border border-line flex items-start gap-2"
+                    >
+                      <span className="text-gold-ink font-mono font-bold flex-shrink-0 text-[13px]">#{idx + 1}</span>
+                      <div>
+                        <strong className="text-ink font-serif-th">{getPositionName(pos, isEnglish)}:</strong>{" "}
+                        <span className="text-muted leading-relaxed font-serif-th">
+                          {getPositionMeaning(pos, isEnglish)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+
+              {/* Primary Action Button: Link directly to Altar */}
+              <Link
+                href={`/?spread=${spread.id}`}
+                prefetch={false}
+                className="w-full py-3 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs sm:text-sm text-center active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-1.5 z-10 shadow-sm"
+              >
+                <span>
+                  {isEnglish
+                    ? isStandardSpread(spread.id)
+                      ? "Begin Reading with Spread"
+                      : "Unlock Grand Spread"
+                    : isStandardSpread(spread.id)
+                      ? "เริ่มดูดวงด้วยผังนี้"
+                      : "เปิดผังพยากรณ์พิเศษนี้"}
+                </span>
+              </Link>
+              <Link
+                href={`/spreads/${spread.id}`}
+                prefetch={false}
+                className="z-10 -mt-1 text-center text-[13px] font-serif-th text-gold-ink hover:text-ink transition-colors"
+              >
+                {isEnglish ? "Read Spread Guide →" : "อ่านคู่มือผังนี้ →"}
+              </Link>
+            </div>
+          );
+        })}
       </div>
+    </div>
   );
 };

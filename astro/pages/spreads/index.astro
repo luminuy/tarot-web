@@ -14,8 +14,16 @@ const locale = "th" as const;
   <SiteHeaderRoot locale={locale} client:idle />
   <SpreadsIndexBodyRoot locale={locale}>
     <Fragment slot="library">
-      <SpreadsLibraryRoot locale={locale} client:idle />
+      <SpreadsLibraryRoot locale={locale} />
     </Fragment>
   </SpreadsIndexBodyRoot>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!--
+  🗂️ แท็บหมวดของคลังผัง — สคริปต์ ~1 KB แทนการ hydrate คลังทั้งก้อน (R-02)
+  การ์ดทั้ง 25 ใบอยู่ใน HTML แล้ว สคริปต์แค่สลับ `hidden` เท่านั้น
+-->
+<script>
+  import "../../scripts/spreads-tabs";
+</script>

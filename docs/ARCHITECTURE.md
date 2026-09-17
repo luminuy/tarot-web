@@ -136,7 +136,7 @@ src/
 │   ├── spread/                      # SpreadBoard, SpreadCardSelector (25 ผัง)
 │   ├── reading/                     # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector
 │   ├── history/, encyclopedia/      # ReadingHistoryModal, CardsExplorer
-│   └── ui/                          # MysticAltarCanvas, TarotArtIcons, RitualStepProgress
+│   └── ui/                          # MysticAltarCanvas, TarotArtIcons, Modal, Button
 ├── data/
 │   ├── cards/                       # ข้อมูลไพ่ 78 ใบ (780 ข้อความความหมาย 5 มิติ)
 │   ├── spreads.ts                   # ข้อมูล 25 ผังพยากรณ์และ 124 ตำแหน่ง

@@ -1,6 +1,6 @@
 "use client";
 
-import type { RitualStep } from "@/components/ui/RitualStepProgress";
+import type { RitualStep } from "@/components/home/ritual-step";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import type { Reading } from "@/lib/schema/reading";
 import type { Category } from "@/data/cards/types";
