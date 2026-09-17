@@ -1,0 +1,39 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+
+  // 🧹 ตั้งค่าเครื่องมือหาโค้ดตาย (R-31) — รันด้วย `npm run deadcode`
+  //
+  // ## ทำไมต้องมีไฟล์นี้
+  //
+  // รอบตรวจ 2026-09-17 รัน knip แบบไม่มีคอนฟิก แล้วได้ **รายงานผิด 10 จุด**
+  // เพราะค่าเริ่มต้นของ knip ไม่นับ `scripts/**` เป็นจุดเริ่ม — ของที่ถูกใช้โดยด่าน CI จริง
+  // (`CARD_IMAGE_VARIANTS` · `boxOf` · `MAP_MIN_COLUMN_PX` · `generateClientSeed`)
+  // จึงถูกฟ้องว่า "ไม่มีใครใช้" · ลบตามรายงานเมื่อไหร่ = ด่าน CI พังทันที
+  //
+  // ⚠️ **ห้ามตัด `scripts/**` ออกจาก entry เด็ดขาด** — นั่นคือสาเหตุของรายงานผิดทั้ง 10 จุดนั้น
+  //
+  // ไม่ได้ผูกเข้า `repo:verify` เพราะ knip ต้องดึงแพ็กเกจจากเครือข่ายตอนรัน ซึ่งขัดกับ
+  // ด่านห่วงโซ่อุปทานของ CI (ห้าม import ของที่ไม่ได้ประกาศใน package.json)
+
+  "entry": [
+    "src/app/**/{page,layout,route,template,default,loading,error,not-found,sitemap,robots,manifest,opengraph-image}.{ts,tsx}",
+    "src/middleware.ts",
+    "astro/**/*.{astro,ts,tsx}",
+    "scripts/**/*.{ts,tsx}",
+    "next.config.ts",
+    "open-next.config.ts",
+    "astro.config.mjs"
+  ],
+
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}", "astro/**/*.{ts,tsx,astro}"],
+
+  "ignoreBinaries": ["python3"],
+  "ignoreDependencies": ["@types/.*"],
+
+  // type/interface ที่ export ไว้แล้วใช้เฉพาะในไฟล์ตัวเอง = การตั้งชื่อรูปข้อมูลให้คนอ่านเข้าใจ
+  // ไม่ใช่ API ที่ลืมเก็บ · ส่วนที่เป็น **ค่า/ฟังก์ชัน** ยังถูกรายงานตามปกติ
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  }
+}

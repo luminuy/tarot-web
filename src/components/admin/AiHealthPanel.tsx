@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
+import { useAdminResource } from "@/lib/admin/use-admin-resource";
 
 interface ModelResult {
   model: string;
@@ -54,37 +55,23 @@ interface QualityStats {
 }
 
 export default function AiHealthPanel() {
-  const [data, setData] = useState<Health | null>(null);
-  const [quality, setQuality] = useState<QualityStats | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  /*
+   * R-28/R-31: สองเส้นนี้เป็นคนละเรื่องกัน จึงเป็นฮุกคนละตัว
+   *   - `/api/admin/ai-health` = เรื่องหลักของแผงนี้ ล้มเหลวต้องขึ้นแถบแดง
+   *   - `/api/admin/quality`   = ตัวเลขเสริม ล้มเหลวแล้วซ่อนส่วนนั้นไปเฉย ๆ (พฤติกรรมเดิม)
+   * ของเดิมมัดสองเส้นไว้ใน `Promise.all` ก้อนเดียว จึงต้องเขียนกฎ "เส้นไหนสำคัญ" เอง
+   */
+  const { data, loading, error: err, reload: reloadHealth } = useAdminResource<Health>(
+    "/api/admin/ai-health",
+  );
+  const { data: quality, reload: reloadQuality } = useAdminResource<QualityStats>(
+    "/api/admin/quality",
+  );
 
-  const run = useCallback(async () => {
-    setLoading(true);
-    setErr(null);
-    try {
-      const [res, qRes] = await Promise.all([
-        fetch("/api/admin/ai-health", { cache: "no-store" }),
-        fetch("/api/admin/quality", { cache: "no-store" }).catch(() => null),
-      ]);
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
-      setData(json);
-
-      if (qRes && qRes.ok) {
-        const qJson = await qRes.json();
-        setQuality(qJson);
-      }
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "ตรวจไม่สำเร็จ");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void run();
-  }, [run]);
+  const run = useCallback(() => {
+    void reloadHealth();
+    void reloadQuality();
+  }, [reloadHealth, reloadQuality]);
 
   return (
     <div className="space-y-4">

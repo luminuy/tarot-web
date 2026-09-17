@@ -59,6 +59,7 @@
 | [docs/plans/HANDOFF_SEMANTIC_SEARCH_2026-09-06.md](docs/plans/HANDOFF_SEMANTIC_SEARCH_2026-09-06.md) | 🔎 **แผนต่อ UI ค้นหาเชิงความหมาย** — ปลุก Vectorize + Workers AI ที่สร้างไว้ตั้งแต่ PR #199 แต่กำพร้าตั้งแต่ #248 · หลังบ้านพร้อม 100% (ยิงทดสอบบน production ได้ผลตรงความหมาย) · **บังคับทำแคช+โควตาก่อนเปิด UI** ไม่งั้นลาก `ai-classifier` ล้มตาม |
 | [docs/plans/HANDOFF_ADMIN_REDEEM_2026-09-12.md](docs/plans/HANDOFF_ADMIN_REDEEM_2026-09-12.md) | 🎟️ **แผนสร้างหน้าจัดการรหัสแลกสิทธิ์ให้แอดมิน** — PR #418 เปิดระบบแลกรหัสฝั่งผู้ใช้ไว้แล้วแต่ไม่มีหน้าให้แอดมินสร้างรหัสเลย (ต้องเขียน SQL + deploy ทุกครั้ง) · ตรวจโค้ดจริงพบ **ระเบิดเวลา 4 ข้อที่ต้องปิดก่อนเปิดหน้าแอดมิน** (ไม่มีด่านกันเดารหัสเลยสักชั้น · แลกแล้วอาจไม่ได้เครดิตแต่ถูกตีตราว่าแลกแล้วตลอดชีพ · `max_uses` กันไม่อยู่เมื่อแลกพร้อมกัน · ชุดทดสอบ 26 ข้อไม่เคยรันใน CI) · 7 งาน 3 คลื่น · เกณฑ์รับงาน 15 ข้อ · กับดัก “เพิ่มแท็บแอดมินต้องแก้ 6 จุดในไฟล์เดียว” |
 | [docs/plans/HANDOFF_UX_UI_AUDIT_2026-09-11.md](docs/plans/HANDOFF_UX_UI_AUDIT_2026-09-11.md) | ✅ **ผลตรวจ UX/UI ทั้งเว็บ — ปิดครบทั้ง 20 ข้อแล้ว** (PR #416 · #422 · #423 · #427 · #429 · #431 · #436) · วัดบน production หลัง deploy: **คอนทราสต์ตกเกณฑ์ 0 จุด** (สายด่วน 1323/1669 จาก 3.11/2.81 → **6.51/6.58**) · ปุ่มเล็กกว่า 24px **0 จุด** · สีฮาร์ดโค้ด 4,232 → **286 (−93%)** · `<nav>` 0 → **5** · skip link ทุกหน้า · ช่องกรอกไร้ label **0** · ด่าน CI 48 → **50** · เก็บไว้เป็นบันทึก **วิธีตรวจ + บทเรียน 4 ข้อ** และ **หนี้ที่ตั้งใจเหลือไว้ 3 ข้อพร้อมเหตุผล** |
+| [docs/plans/HANDOFF_ROUND2_CLOSEOUT_2026-09-17.md](docs/plans/HANDOFF_ROUND2_CLOSEOUT_2026-09-17.md) | 🧾 **ปิดสี่เรื่องสุดท้ายของผลตรวจรอบ 2 (ISSUE-049)** — ปิดได้ **3 เรื่อง** · ข้อ 9 อ่านค่าจริงจาก KV แล้ว (`entitlement.enforced` = **เปิด**) · R-26 ยุบสถานะ `TarotFlow` ครบสามกลุ่ม (`useState` **28 ➔ 16** · ด่านใหม่ 37 ข้อ ผ่าน mutation test 5 แบบ) · R-31 แก้ต้นตอรายงาน `knip` ที่ผิดด้วย `knip.jsonc` + พบฮุกกำพร้าที่ด่านเดิมจับไม่ได้ (INC-0195) · **เรื่องประสิทธิภาพวัดใหม่ด้วย Lighthouse 13.4.1 บน production แล้ว**: R-10 ปิด · R-11/R-12 เหลือสไตล์ชีตก้อนเดียว (เรื่องเดียวกับ T-23) · **R-02 เปลี่ยนรูป** — `/spreads` Style & Layout 1,357 ms ทั้งที่ element น้อยที่สุด ➔ ไม่ใช่ปัญหาของหน้านั้น · มี `npm run perf:lh` · `npm run flags:show` · `npm run deadcode` ให้ทำซ้ำได้ |
 
 ---
 
@@ -77,7 +78,7 @@
 10. **Human-First Copywriting**: ภาษาไทยธรรมชาติ เข้าใจง่าย ห้ามศัพท์หุ่นยนต์แข็งทื่อ
 11. **Multi-Agent Collision Guard**: เช็ก `npm run agent:status` + ล็อคด้วย `agent:lock` ก่อนแก้ ปลดล็อคด้วย `agent:unlock` เมื่อเสร็จ
 12. **One Branch per Milestone**: ห้ามแตกกิ่งค้าง ต้อง rebase บน `origin/main` เสมอ จบงานต้องรัน `pr:auto` ➔ `git:tidy` ให้ครบ
-13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 73 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
+13. **Auto-Merge Enforcement**: เปิด PR ต้องใช้ `npm run pr:auto` เสมอ เพื่อให้ CI ตรวจ 74 ด่าน ➔ Auto-Merge (Squash) ➔ Auto-Deploy Cloudflare Workers
     > ⛔ **`push` แล้วจบ = งานยังไม่เสร็จ** — automation ทั้งชุดเริ่มทำงาน**เมื่อ PR ถูกเปิดเท่านั้น** (ISSUE-005)
     > push เฉย ๆ ไม่มี CI ไม่มี merge ไม่มี deploy งานจะค้างบน branch เงียบ ๆ จนกว่าเจ้าของจะมากดปุ่มเอง
     >
@@ -104,7 +105,7 @@
 - `npm run agent:status` — ดูสถานะ Agent ที่ทำงานอยู่
 - `npm run agent:lock -- --agent <ชื่อ> --domain <หมวด> --files <ไฟล์>` — ล็อคไฟล์ก่อนแก้
 - `npm run agent:unlock -- --agent <ชื่อ>` — ปลดล็อคเมื่อเสร็จ
-- `npm run repo:verify` — ตรวจครบทั้ง 73 ด่าน (ใช้หลัก)
+- `npm run repo:verify` — ตรวจครบทั้ง 74 ด่าน (ใช้หลัก)
 - `npm run typecheck` — typecheck อย่างเดียว
 - `npm run log:sync` — ซิงก์สถานะ/บันทึกงาน (บังคับ)
 - `npm run cards:variants` — สร้างภาพไพ่ WebP หลายขนาด (รันเมื่อเปลี่ยนภาพต้นฉบับ)

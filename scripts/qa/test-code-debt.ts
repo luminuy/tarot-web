@@ -261,6 +261,11 @@ check(
 // ─────────────────────────────────────────────────────────────────────────────
 // 5. R-28 — ทุกแผงแอดมินต้องแยก "ไม่มีข้อมูล" ออกจาก "พัง" ได้
 // ─────────────────────────────────────────────────────────────────────────────
+const adminDir = path.join(ROOT, "src/components/admin");
+const adminPanelFiles = fs.existsSync(adminDir)
+  ? fs.readdirSync(adminDir).filter((f) => f.endsWith(".tsx") && f !== "AdminErrorBanner.tsx")
+  : [];
+
 check(
   "มีแถบแจ้งข้อผิดพลาดกลางของแผงแอดมิน (AdminErrorBanner.tsx)",
   fs.existsSync(path.join(ROOT, "src/components/admin/AdminErrorBanner.tsx")),
@@ -270,11 +275,42 @@ check(
   fs.existsSync(path.join(ROOT, "src/lib/admin/use-admin-resource.ts")),
 );
 
+/*
+ * 🔴 R-31: ด่านสองข้อบนตรวจแค่ "ไฟล์มีอยู่" ซึ่งตกไม่ได้เลยตราบใดที่ไม่มีใครลบไฟล์ทิ้ง
+ * และมันเคย **ผ่านทั้งที่ของจริงพัง**: `use-admin-resource.ts` ถูกเขียนขึ้นในรอบตรวจก่อนหน้า
+ * แต่ไม่มีแผงไหนเรียกใช้เลยสักแผง (knip รายงานว่าเป็นไฟล์กำพร้า) — แผงทั้งหมดยังลอก
+ * ชุด fetch/loading/error ของตัวเองไว้เหมือนเดิม ซึ่งคือสิ่งที่ R-28 ตั้งใจกำจัดพอดี
+ *
+ * สองข้อล่างนี้จึงตรวจ **การถูกใช้จริง** แทนการมีอยู่
+ */
+const panelsUsingHook = adminPanelFiles.filter((name) =>
+  fs.readFileSync(path.join(adminDir, name), "utf-8").includes("useAdminResource"),
+);
+/** 🔒 ratchet — **เพิ่มได้ ห้ามลด** (ย้ายแผงเข้าฮุกกลางเพิ่มเมื่อไหร่ ให้ขยับเลขนี้ตาม) */
+const HOOK_ADOPTION_FLOOR = 6;
+check(
+  `แผงแอดมินที่โหลดข้อมูลผ่านฮุกกลางจริง (${panelsUsingHook.length} / ขั้นต่ำ ${HOOK_ADOPTION_FLOOR})`,
+  panelsUsingHook.length >= HOOK_ADOPTION_FLOOR,
+  `ที่ใช้อยู่: ${panelsUsingHook.join(", ") || "(ไม่มีเลย)"}\n` +
+    "   ➔ ฮุกที่ไม่มีใครเรียกคือโค้ดตาย ไม่ใช่การรวมศูนย์",
+);
+
+/**
+ * แผงไหนยังยิง `fetch(..., { cache: "no-store" })` โหลดหน้าจอเอง = ลอกตรรกะฮุกมาอีกชุด
+ * (กฎ "ล้มเหลวแล้วล้างของเดิมทิ้ง" ของ R-28 จะอยู่คนละที่กันทันทีที่มีชุดที่สอง)
+ */
+const panelsWithOwnLoader = adminPanelFiles.filter((name) =>
+  /cache:\s*["']no-store["']/.test(fs.readFileSync(path.join(adminDir, name), "utf-8")),
+);
+check(
+  "ไม่มีแผงไหนยิงคำขอโหลดหน้าจอเอง (ทุกการโหลดผ่าน useAdminResource)",
+  panelsWithOwnLoader.length === 0,
+  `พบที่: ${panelsWithOwnLoader.join(", ")}\n` +
+    "   ➔ ใช้ useAdminResource(url) แทน · ปุ่มสั่งงาน (POST/PUT) ไม่เข้าข่ายข้อนี้",
+);
+
 /** แผงที่ดึงข้อมูลจาก API — ทุกตัวต้องมีทางแสดงข้อผิดพลาด */
-const adminDir = path.join(ROOT, "src/components/admin");
-const adminPanels = fs.existsSync(adminDir)
-  ? fs.readdirSync(adminDir).filter((f) => f.endsWith(".tsx") && f !== "AdminErrorBanner.tsx")
-  : [];
+const adminPanels = adminPanelFiles;
 assertNonEmptyCorpus("แผงแอดมินใน src/components/admin", adminPanels, "ตรวจว่าโฟลเดอร์ยังอยู่ที่เดิม");
 
 const panelsWithoutErrorUi: string[] = [];

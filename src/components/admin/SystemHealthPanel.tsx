@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import { APP_TIME_ZONE } from "@/lib/time/bangkok";
+import { useAdminResource } from "@/lib/admin/use-admin-resource";
 
 interface HealthData {
   overallStatus: "healthy" | "degraded" | "critical";
@@ -118,9 +119,10 @@ function StatusPill({ ok, label }: { ok: boolean; label?: string }) {
 }
 
 export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab: "ai" | "stats") => void }) {
-  const [data, setData] = useState<HealthData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // R-28/R-31: โหลดสถานะระบบผ่านฮุกกลาง — ล้มเหลวแล้วล้างของเดิมทิ้งให้เองด้วย
+  const { data, loading, error, reload: probe } = useAdminResource<HealthData>(
+    "/api/admin/system-health",
+  );
   const [rebuild, setRebuild] = useState<{ busy: boolean; msg: string | null }>({ busy: false, msg: null });
 
   const rebuildSearchIndex = useCallback(async () => {
@@ -141,25 +143,6 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
       setRebuild({ busy: false, msg: "❌ เชื่อมต่อไม่ได้" });
     }
   }, []);
-
-  const probe = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/system-health", { cache: "no-store" });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
-      setData(json);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "เรียกข้อมูลสถานะระบบไม่สำเร็จ");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void probe();
-  }, [probe]);
 
   const formattedTime = data?.checkedAt
     ? new Intl.DateTimeFormat("th-TH", {

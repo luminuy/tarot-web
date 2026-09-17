@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { DAILY_LIMIT, GUEST_LIMIT, REQUIRE_SIGNUP_TO_READ } from "@/lib/entitlement/limits";
-import { readEnvelope } from "@/lib/api/envelope";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
+import { useAdminResource } from "@/lib/admin/use-admin-resource";
 
 interface State {
   enabled: boolean;
@@ -63,7 +63,16 @@ async function ops(action: string, before?: string) {
 }
 
 export default function EntitlementAdmin() {
-  const [s, setS] = useState<State | null>(null);
+  /*
+   * 🔴 R-28: ของเดิม `.catch(() => setMsg("โหลดไม่สำเร็จ"))` ปล่อยให้ `s` เป็น null ต่อไป
+   * แต่หน้าจอเรนเดอร์ "กำลังโหลด…" เมื่อ `s === null` — ผลคือ **ค้างที่คำว่ากำลังโหลดตลอดกาล**
+   * ผู้ดูแลจึงนั่งรอสิ่งที่ไม่มีวันมา แทนที่จะเห็นว่ามันพังไปแล้ว
+   *
+   * 🔴 R-31: ตอนนี้โหลดผ่านฮุกกลาง — แผงนี้เป็นแผงสุดท้ายที่ยังยิง `fetch` โหลดเอง
+   */
+  const { data: s, error: loadError, reload: reloadState } = useAdminResource<State>(
+    "/api/admin/entitlement",
+  );
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -76,37 +85,20 @@ export default function EntitlementAdmin() {
 
   // ตัวช่วยเลือกวันสำหรับแบนเนอร์ประกาศ — เก็บ ISO ไว้ในเครื่องเท่านั้น (ฝั่ง server เก็บเป็นข้อความไทย)
   const [announceISO, setAnnounceISO] = useState("");
-  const [loadError, setLoadError] = useState<string | null>(null);
 
-  /*
-   * 🔴 R-28: ของเดิม `.catch(() => setMsg("โหลดไม่สำเร็จ"))` ปล่อยให้ `s` เป็น null ต่อไป
-   * แต่หน้าจอเรนเดอร์ "กำลังโหลด…" เมื่อ `s === null` — ผลคือ **ค้างที่คำว่ากำลังโหลดตลอดกาล**
-   * ผู้ดูแลจึงนั่งรอสิ่งที่ไม่มีวันมา แทนที่จะเห็นว่ามันพังไปแล้ว
-   */
+  /** โหลดสถานะสิทธิ์ + ตรวจว่าตารางฐานข้อมูลพร้อมไหม (คนละเส้น คนละเรื่อง) */
   const load = useCallback(() => {
-    setLoadError(null);
-    fetch("/api/admin/entitlement", { cache: "no-store" })
-      .then(async (r) => {
-        const body = (await r.json().catch(() => ({}))) as Record<string, unknown>;
-        const envelope = readEnvelope(body, r.ok);
-        if (!envelope.ok) throw new Error(`${envelope.error} (HTTP ${r.status})`);
-        return envelope.data as unknown as State;
-      })
-      .then((d) => {
-        setS(d);
-        if (!gfDate && d.announceResetDate) setGfDate("");
-      })
-      .catch((err: unknown) => {
-        setLoadError(err instanceof Error ? err.message : "โหลดไม่สำเร็จ");
-      });
+    void reloadState();
     ops("check_db")
       .then(({ data }) => setDbReady(!!data.ready))
       .catch(() => setDbReady(false));
-  }, [gfDate]);
+  }, [reloadState]);
 
   useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // ฮุกกลางโหลดสถานะสิทธิ์ให้เองตอน mount — ที่นี่เหลือแค่การตรวจฐานข้อมูล
+    ops("check_db")
+      .then(({ data }) => setDbReady(!!data.ready))
+      .catch(() => setDbReady(false));
   }, []);
 
   const save = useCallback(

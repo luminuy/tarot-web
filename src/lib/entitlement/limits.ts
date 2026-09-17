@@ -50,9 +50,6 @@ export const DAILY_LIMIT = 1;
  */
 export const READINGS_EN = DAILY_LIMIT === 1 ? "reading" : "readings";
 
-/** compatibility alias — โค้ดเก่าบางจุดยังเรียกชื่อนี้ */
-export const WEEKLY_LIMIT = DAILY_LIMIT;
-
 /**
  * โบนัสก้อนที่แจกให้ตอนสมัครสมาชิกใหม่
  *

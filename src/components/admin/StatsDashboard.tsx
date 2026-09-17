@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { PERSONAS } from "@/data/personas";
 import { SPREADS } from "@/data/spreads";
@@ -96,50 +96,32 @@ function BarList({
 import DailyStatsTable from "@/components/admin/DailyStatsTable";
 /* 🧹 R-31: สำเนาของ breakdown() ที่เคยประกาศในไฟล์นี้ถูกลบแล้ว — ใช้ตัวกลางตัวเดียว */
 import { breakdown } from "@/lib/stats/read";
-import { readEnvelope } from "@/lib/api/envelope";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
+import { useAdminResource } from "@/lib/admin/use-admin-resource";
 
 export default function StatsDashboard() {
   const [days, setDays] = useState(14);
   const [subView, setSubView] = useState<"daily" | "summary" | "tech">("daily");
-  const [data, setData] = useState<{
-    stats: StatsSnapshot;
-    audit: AuditEntry[];
-    aiCapToday?: number;
-    aiDailyCap?: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState("");
-
   /*
    * 🔴 R-28: ของเดิมตั้งค่า `err` ไว้แต่ **ไม่เคยเรนเดอร์มันเลยสักที่**
    * API ตอบ 500 ➔ หน้าจอแสดงตารางว่าง ซึ่งผู้ดูแลอ่านว่า "วันนี้ไม่มีใครเข้าเว็บ"
    * ไม่ใช่ "ระบบสถิติพัง" — สองอย่างนี้ต้องแยกออกจากกันให้ได้บนหน้าจอเฝ้าระบบ
+   *
+   * 🔴 R-31: ตรรกะชุดนี้เคยถูกลอกไว้ที่นี่ทั้งก้อนทั้งที่ฮุกกลางมีอยู่แล้ว
+   * (`useAdminResource` ถูกเขียนไว้แต่ไม่มีแผงไหนเรียกใช้เลยสักแผง) — ตอนนี้เรียกของกลาง
+   * เปลี่ยนช่วงวัน = `url` เปลี่ยน = ฮุกโหลดใหม่ให้เอง ไม่ต้องมี effect ของตัวเอง
    */
-  const load = useCallback(async (d: number) => {
-    setLoading(true);
-    setErr("");
-    try {
-      const res = await fetch(`/api/admin/stats?days=${d}`, { cache: "no-store" });
-      const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-      const envelope = readEnvelope(body, res.ok);
-      if (!envelope.ok) {
-        setData(null);
-        setErr(`${envelope.error} (HTTP ${res.status})`);
-        return;
-      }
-      setData(envelope.data as typeof data);
-    } catch (e) {
-      setData(null);
-      setErr(e instanceof Error ? `ติดต่อเซิร์ฟเวอร์ไม่ได้: ${e.message}` : "ติดต่อเซิร์ฟเวอร์ไม่ได้");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load(days);
-  }, [days, load]);
+  const {
+    data,
+    loading,
+    error: err,
+    reload,
+  } = useAdminResource<{
+    stats: StatsSnapshot;
+    audit: AuditEntry[];
+    aiCapToday?: number;
+    aiDailyCap?: number;
+  }>(`/api/admin/stats?days=${days}`);
 
   const view = useMemo(() => {
     if (!data) return null;
@@ -244,7 +226,7 @@ export default function StatsDashboard() {
 
           <button
             type="button"
-            onClick={() => load(days)}
+            onClick={reload}
             className="tap-overlay-y inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
             disabled={loading}
             title="รีเฟรชข้อมูลล่าสุด"
@@ -335,7 +317,7 @@ export default function StatsDashboard() {
           <p className="text-xs text-muted">กำลังประมวลผลสถิติการใช้งาน…</p>
         </div>
       ) : err ? (
-        <AdminErrorBanner error={err} onRetry={() => load(days)} />
+        <AdminErrorBanner error={err} onRetry={reload} />
       ) : null}
     </div>
   );
