@@ -5,7 +5,7 @@ import { useLocale } from "@/lib/i18n";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import {
   PICK_A_CARD_TOPICS,
-  type PickACardPile,
+  type PickACardSlot,
 } from "@/data/pick-a-card";
 import { TarotCard } from "@/components/card/TarotCard";
 import { CardImage } from "@/components/card/CardImage";
@@ -31,21 +31,21 @@ export function PickACardClient() {
    * ผลจั่วของรอบนี้ — เริ่มที่ลำดับตรงเพื่อให้ HTML ที่เสิร์ฟจากขอบตรงกับรอบแรกของ hydration
    * แล้วค่อยจั่วใหม่ใน useEffect (ฝั่งเบราว์เซอร์เท่านั้น)
    */
-  const [draw, setDraw] = useState<PickACardDraw>(() => initialDraw(activeTopic.piles.length));
+  const [draw, setDraw] = useState<PickACardDraw>(() => initialDraw(activeTopic.slots.length));
 
   // Selected pile within topic — เก็บ "ช่อง" ที่ผู้ใช้เลือก (ตัวตนของกอง/คริสตัล)
   const [selectedPileId, setSelectedPileId] = useState<string | null>(null);
-  const slotIndex = activeTopic.piles.findIndex((p) => p.id === selectedPileId);
+  const slotIndex = activeTopic.slots.findIndex((p) => p.id === selectedPileId);
 
   /** ตัวตนของกองที่เลือก (เลข · ชื่อคริสตัล) — เป็นของช่องนี้เสมอ ไม่หมุนตามการจั่ว */
-  const selectedSlot: PickACardPile | null = slotIndex >= 0 ? activeTopic.piles[slotIndex] : null;
+  const selectedSlot: PickACardSlot | null = slotIndex >= 0 ? activeTopic.slots[slotIndex] : null;
   /** ไพ่ 3 ใบ + คำทำนายของรอบนี้ ประกอบจากคลังรายตำแหน่ง (64 ชุดต่อหัวข้อ) */
   const reading =
     slotIndex >= 0 ? composeReading(activeTopic, draw, slotIndex, isEnglish) : null;
 
   /** จั่วรอบใหม่ทุกครั้งที่กลับมายืนหน้าเลือกกอง (รวมตอนเปิดหน้าครั้งแรก) */
   const reshuffle = () => {
-    setDraw((prev) => drawPicks(activeTopic.piles.length, prev));
+    setDraw((prev) => drawPicks(activeTopic.pool.length, activeTopic.slots.length, prev));
   };
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export function PickACardClient() {
     setRevealedIndices(new Set());
   };
 
-  const handleSelectPile = (pile: PickACardPile) => {
+  const handleSelectPile = (pile: PickACardSlot) => {
     soundManager.playCardSelectSound();
     setSelectedPileId(pile.id);
     setRevealedIndices(new Set());
@@ -183,7 +183,7 @@ export function PickACardClient() {
                     {isEnglish ? topic.titleEn : topic.titleTh}
                   </span>
                   <span className="block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted mt-0.5">
-                    {isEnglish ? "4 Piles" : "4 กองไพ่"}
+                    {isEnglish ? `${topic.slots.length} Piles` : `${topic.slots.length} กองไพ่`}
                   </span>
                 </span>
 
@@ -233,7 +233,7 @@ export function PickACardClient() {
 
           {/* 4 Sacred Piles Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {activeTopic.piles.map((pile) => {
+            {activeTopic.slots.map((pile) => {
               const styling = crystalColorMap[pile.number] || crystalColorMap[1];
               return (
                 <div
