@@ -67,4 +67,3 @@ export function AntiTheftShield() {
   return null;
 }
 
-export default AntiTheftShield;

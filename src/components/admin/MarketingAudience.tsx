@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
+import { useAdminResource } from "@/lib/admin/use-admin-resource";
 
 interface AudienceRow {
   email: string;
@@ -19,20 +19,10 @@ interface AudienceState {
 }
 
 export default function MarketingAudience() {
-  const [state, setState] = useState<AudienceState | null>(null);
-  const [error, setError] = useState("");
-
-  const load = useCallback(() => {
-    setError("");
-    fetch("/api/admin/marketing")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error())))
-      .then(setState)
-      .catch(() => setError("โหลดรายชื่อไม่สำเร็จ"));
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  // R-28/R-31: โหลด · กำลังโหลด · ผิดพลาด · โหลดใหม่ ใช้ฮุกกลางตัวเดียวกับทุกแผง
+  const { data: state, loading, error, reload: load } = useAdminResource<AudienceState>(
+    "/api/admin/marketing",
+  );
 
   return (
     <div className="flex flex-col gap-5">
@@ -48,7 +38,7 @@ export default function MarketingAudience() {
           <div className="mt-4">
             <AdminErrorBanner error={error} onRetry={load} />
           </div>
-        ) : !state ? (
+        ) : loading || !state ? (
           <p className="mt-4 text-sm text-muted">กำลังโหลด…</p>
         ) : (
           <>

@@ -33,4 +33,3 @@ export function RouteLink({ href, ...rest }: RouteLinkProps) {
   return <NextLink href={href} {...rest} />;
 }
 
-export default RouteLink;

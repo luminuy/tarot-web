@@ -130,4 +130,3 @@ export function CardImage({
   );
 }
 
-export default CardImage;

@@ -62,6 +62,7 @@ docs/
         ├── HANDOFF_HEADER_20260905.md   # 🧭 แผนแก้ "แถบ header ค้าง" (ISSUE-024 ถึง 030) — ปิดครบแล้ว
         ├── HANDOFF_BLOG_TBT_2026-09-12.md    # ✅ TBT หน้า /blog (ISSUE-043) — ปิดเคสแล้ว 2026-09-15 (TBT 660 ➔ 24 ms · เบาที่สุดในเว็บ) · เก็บไว้เป็นวิธีวัด + 4 กับดัก + ที่มาของ ISSUE-047
         ├── HANDOFF_UX_UI_AUDIT_2026-09-11.md # ✅ ผลตรวจ UX/UI ทั้งเว็บ — ปิดครบ 20/20 · เก็บไว้เป็นบันทึกวิธีตรวจ + บทเรียน 4 ข้อ
+        ├── HANDOFF_ROUND2_CLOSEOUT_2026-09-17.md # 🧾 ปิดสี่เรื่องสุดท้ายของผลตรวจรอบ 2 (ISSUE-049) — ปิด 3 · เหลือเรื่องสไตล์ชีต/hydration พร้อมตัวเลข Lighthouse 13.4.1 ที่วัดเอง
         ├── TRAFFIC_CAPTURE_PLAN_2026-09-05.md  # 🎯 แผนแย่งทราฟฟิกจาก MyHora (SERP จริง + 4 คลื่น)
         ├── HANDOFF_SEO_WAVE1_2026-09-05.md     # 🌊 แผนส่งต่อ SEO คลื่น 1 — เติมคำ "ไพ่ยิปซี" ทั่วเว็บ
         ├── HANDOFF_SEO_WAVE2-4_2026-09-05.md   # 🌊 แผนส่งต่อ SEO คลื่น 2–4 — /cards, หมวดหมู่ MyHora, งานระยะยาว
@@ -107,11 +108,11 @@ docs/
 
 | คำสั่ง | หน้าที่และวัตถุประสงค์ |
 | :--- | :--- |
-| `npm run repo:verify` | **ตรวจครบทั้ง 73 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
+| `npm run repo:verify` | **ตรวจครบทั้ง 74 ด่านในคำสั่งเดียว** (Typecheck, ไพ่ 78 ใบ, ผัง 25 แบบ, Provably-Fair, D1, Failover, PDPA ฯลฯ) |
 | `npm run typecheck` | ตรวจสอบความถูกต้องของ TypeScript Types (ต้องผ่าน 0 Errors) |
 | `npm run agent:status` | ตรวจสอบว่ามี Agent ตัวไหนกำลังทำงานหรือล็อคไฟล์อยู่หรือไม่ |
 | `npm run agent:lock` | ล็อคไฟล์ก่อนเริ่มทำงานป้องกันการชนกันของ AI หลายตัว |
 | `npm run agent:unlock` | ปลดล็อคไฟล์เมื่อทำงานเสร็จสมบูรณ์ |
-| `npm run pr:auto` | ตรวจครบ 73 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
+| `npm run pr:auto` | ตรวจครบ 74 ด่าน ➔ Push ➔ เปิด PR ➔ Auto-Merge ➔ Deploy Cloudflare Workers ในคำสั่งเดียว |
 | `npm run git:tidy` | เก็บกวาดกิ่งงานที่ Merge ไปแล้วทั้งในเครื่องและบน Remote ตามกฎ Zero Leftovers |
 | `npm run dev` | รันเซิร์ฟเวอร์จำลองสำหรับพัฒนา (Next.js Local Server) |

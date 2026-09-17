@@ -16,7 +16,7 @@ const KNOWN_INSECURE_SECRETS = new Set([
   "default",
 ]);
 
-export function getAuthSecret(): string {
+function getAuthSecret(): string {
   const secret = process.env.AUTH_SECRET || process.env.TAROT_SESSION_SECRET;
   const isProd = process.env.NODE_ENV === "production";
 

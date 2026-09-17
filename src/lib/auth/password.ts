@@ -11,7 +11,7 @@ const KEYLEN = 32; // 256 bits
 /**
  * แปลง Uint8Array เป็น Base64URL string
  */
-export function b64u(buffer: Uint8Array): string {
+function b64u(buffer: Uint8Array): string {
   let binary = "";
   for (let i = 0; i < buffer.byteLength; i++) {
     binary += String.fromCharCode(buffer[i]);
@@ -25,7 +25,7 @@ export function b64u(buffer: Uint8Array): string {
 /**
  * แปลง Base64URL string กลับเป็น Uint8Array
  */
-export function unb64u(base64url: string): Uint8Array {
+function unb64u(base64url: string): Uint8Array {
   let base64 = base64url.replace(/-/g, "+").replace(/_/g, "/");
   while (base64.length % 4) {
     base64 += "=";
@@ -41,7 +41,7 @@ export function unb64u(base64url: string): Uint8Array {
 /**
  * เปรียบเทียบ Byte Array แบบ Constant-Time เพื่อป้องกัน Timing Attacks
  */
-export function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
+function timingSafeEqualBytes(a: Uint8Array, b: Uint8Array): boolean {
   if (a.length !== b.length) {
     return false;
   }

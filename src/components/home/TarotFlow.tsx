@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { overlayReducer, OVERLAY_INITIAL, isOverlay } from "@/components/home/flow-overlay";
+import { deckReducer, DECK_INITIAL } from "@/components/home/flow-deck";
+import { sessionReducer, SESSION_INITIAL } from "@/components/home/flow-session";
+import { readingReducer, READING_INITIAL } from "@/components/home/flow-reading";
 import dynamic from "next/dynamic";
 import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { useOnceOpen } from "@/lib/use-once-open";
@@ -11,7 +14,6 @@ import { SPREADS, getSpread, type Spread } from "@/data/spreads";
 import { PERSONAS, getPersona, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
-import type { Reading } from "@/lib/schema/reading";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import { SpreadCardSelector } from "@/components/spread/SpreadCardSelector";
 import { DailyCardStrip } from "@/components/reading/DailyCardStrip";
@@ -292,30 +294,34 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     if (hasAttemptedClarify) setHasAttemptedClarify(false);
   };
 
-  // Reading session state
-  const [readingId, setReadingId] = useState<string | null>(null);
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
-  const [commitment, setCommitment] = useState<string>("");
-  const [clientSeed, setClientSeed] = useState<string>("");
-  const [proof, setProof] = useState<{
-    serverSeed?: string;
-    clientSeed?: string;
-    commitment?: string;
-    pickedIndices?: number[];
-    deckSize?: number;
-  }>({});
+  /*
+   * 🔐 R-26 ขั้นที่ 2 — เซสชัน provably-fair ทั้ง 5 ค่ายุบเป็นตัวลดเดียว
+   * (โทเคนถูกทับด้วยค่าว่างไม่ได้ · หลักฐานของรอบที่ทิ้งแล้วไหลเข้ารอบใหม่ไม่ได้)
+   */
+  const [session, dispatchSession] = React.useReducer(sessionReducer, SESSION_INITIAL);
+  const { readingId, token: sessionToken, commitment, clientSeed, proof } = session;
 
-  // Interactive Card Picking state
-  const [pickedIndices, setPickedIndices] = useState<number[]>([]);
+  /*
+   * 🃏 R-26 ขั้นที่ 2 — สำรับไพ่ทั้ง 4 ค่ายุบเป็นตัวลดเดียว
+   * (จั่วใหม่แล้วคว่ำหน้าเสมอ = กฎเหล็กข้อ 4 · พลิกไพ่ที่ไม่มีจริงไม่ได้ = กฎเหล็กข้อ 14)
+   */
+  const [deck, dispatchDeck] = React.useReducer(deckReducer, DECK_INITIAL);
+  const {
+    picked: pickedIndices,
+    cards: drawnCards,
+    revealed: revealedOrders,
+    activeOrder: activeCardIndex,
+  } = deck;
   const isFinalizingRef = useRef(false);
-  const [drawnCards, setDrawnCards] = useState<DrawnSlotCard[]>([]);
-  const [revealedOrders, setRevealedOrders] = useState<number[]>([]);
-  const [activeCardIndex, setActiveCardIndex] = useState<number>(0);
 
-  // Streaming AI state
-  const [isStreaming, setIsStreaming] = useState<boolean>(false);
-  const [readingResult, setReadingResult] = useState<Partial<Reading> | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  /*
+   * 📜 R-26 ขั้นที่ 2 — สถานะคำอ่านทั้ง 3 ค่ายุบเป็นตัวลดเดียว
+   * ("กำลังสตรีมพร้อมกับขึ้นข้อความว่าพัง" เขียนออกมาไม่ได้อีก · เฟรมที่มาช้าเขียนทับไม่ได้)
+   */
+  const [read, dispatchRead] = React.useReducer(readingReducer, READING_INITIAL);
+  const isStreaming = read.status === "streaming";
+  const readingResult = read.reading;
+  const errorMsg = read.error;
   /**
    * ข้อความสายด่วนเมื่อด่านความปลอดภัยบล็อกคำถามที่มีสัญญาณวิกฤต (กฎเหล็กข้อ 6)
    * แยกจาก `errorMsg` เพราะนี่ไม่ใช่ "ระบบขัดข้อง" แต่เป็นข้อความช่วยเหลือที่ต้องเด่นและกดโทรได้
@@ -359,25 +365,32 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       setQuestion(saved.question);
       setNickname(saved.nickname);
       setSituation(saved.situation);
-      setReadingId(saved.readingId);
-      setSessionToken(saved.sessionToken);
-      setCommitment(saved.commitment);
-      setClientSeed(saved.clientSeed);
-      setProof(saved.proof || {});
-      setPickedIndices(saved.pickedIndices || []);
-      setDrawnCards(saved.drawnCards || []);
-      setRevealedOrders(saved.revealedOrders || []);
-      setActiveCardIndex(saved.activeCardIndex || 0);
-      setReadingResult(saved.readingResult);
+      dispatchSession({
+        type: "restore",
+        readingId: saved.readingId,
+        token: saved.sessionToken,
+        commitment: saved.commitment,
+        clientSeed: saved.clientSeed,
+        proof: saved.proof,
+      });
+      // ของที่กู้คืนมาจากนอกโปรแกรม — ตัวลดกรอง `revealed`/`activeOrder` ที่ไม่มีไพ่รองรับทิ้งเอง
+      dispatchDeck({
+        type: "restore",
+        picked: saved.pickedIndices || [],
+        cards: saved.drawnCards || [],
+        revealed: saved.revealedOrders || [],
+        activeOrder: saved.activeCardIndex || 0,
+      });
+      dispatchRead({ type: "restore", reading: saved.readingResult });
       setCurrentStep(saved.currentStep);
       // ตรวจสอบความสมบูรณ์ของไพ่ที่กู้คืน — ถ้าไพ่สูญหายหรือข้อมูลไม่สมบูรณ์ ห้ามกุ The Fool
       const isCorrupted =
         saved.drawnCards && saved.drawnCards.some((d) => !d || d.cardIndex === undefined || !d.card?.nameTh);
       const isEn = isEnglish || (typeof window !== "undefined" && window.location.pathname.startsWith("/en"));
       if (isCorrupted) {
-        setErrorMsg(isEn ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง");
+        dispatchRead({ type: "fail", message: isEn ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณากดโหลดใหม่อีกครั้ง" });
       } else if (saved.currentStep === "READING" && !saved.readingResult?.summary) {
-        setErrorMsg(isEn ? "The reading stream was interrupted. Please click reload to continue." : "การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กรุณากดโหลดใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ");
+        dispatchRead({ type: "fail", message: isEn ? "The reading stream was interrupted. Please click reload to continue." : "การอ่านไพ่ค้างไว้ตอนหน้าเว็บรีเฟรช กรุณากดโหลดใหม่อีกครั้งเพื่ออ่านคำทำนายต่อ" });
       }
     } else {
       const searchParams = new URLSearchParams(window.location.search);
@@ -678,7 +691,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     const trimmedQuestion = question.trim();
 
     if (!trimmedQuestion) {
-      setErrorMsg(isEnglish ? "Please enter your question before beginning." : "กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง");
+      dispatchRead({ type: "fail", message: isEnglish ? "Please enter your question before beginning." : "กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง" });
       return;
     }
 
@@ -691,12 +704,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     }
 
     setLoading(true);
-    setErrorMsg(null);
+    dispatchRead({ type: "clearError" });
     soundManager.playCardSelectSound();
 
     try {
       const freshSeed = createClientSeed();
-      setClientSeed(freshSeed);
+      dispatchSession({ type: "seed", clientSeed: freshSeed });
       const effectiveSituation = (finalSituation !== undefined ? finalSituation : situation).trim();
       const res = await fetch("/api/reading/start", {
         method: "POST",
@@ -736,10 +749,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       }
 
       const sessionReadingId = data.readingId || data.id;
-      setReadingId(sessionReadingId);
-      if (data.sessionToken) setSessionToken(data.sessionToken);
-      setCommitment(data.commitment || "");
-      setClientSeed(data.clientSeed || freshSeed);
+      dispatchSession({
+        type: "started",
+        readingId: sessionReadingId,
+        token: data.sessionToken,
+        commitment: data.commitment,
+        clientSeed: data.clientSeed || freshSeed,
+      });
 
       trackEvent("tarot_session_start", {
         spread_id: selectedSpread.id,
@@ -750,7 +766,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
       navigateStep("SHUFFLE");
     } catch (err: any) {
-      setErrorMsg(err.message || (isEnglish ? "An error occurred while beginning the reading." : "เกิดข้อผิดพลาดในการเริ่มดูดวง"));
+      dispatchRead({ type: "fail", message: err.message || (isEnglish ? "An error occurred while beginning the reading." : "เกิดข้อผิดพลาดในการเริ่มดูดวง") });
     } finally {
       setLoading(false);
     }
@@ -760,7 +776,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const handleStartSession = async () => {
     const trimmedQuestion = question.trim();
     if (!trimmedQuestion) {
-      setErrorMsg(isEnglish ? "Please enter your question before beginning." : "กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง");
+      dispatchRead({ type: "fail", message: isEnglish ? "Please enter your question before beginning." : "กรุณาพิมพ์คำถามหรือเลือกหัวข้อคำถามก่อนเริ่มดูดวง" });
       return;
     }
 
@@ -821,12 +837,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     setNickname(userNickname);
     setQuestion(chosenQuestion);
     setLoading(true);
-    setErrorMsg(null);
+    dispatchRead({ type: "clearError" });
     soundManager.playCardSelectSound();
 
     try {
       const freshSeed = createClientSeed();
-      setClientSeed(freshSeed);
+      dispatchSession({ type: "seed", clientSeed: freshSeed });
       // 1. เริ่มต้นเซสชันด้วย API
       const res = await fetch("/api/reading/start", {
         method: "POST",
@@ -860,11 +876,14 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       }
 
       const sessionReadingId = data.readingId || data.id;
-      setReadingId(sessionReadingId);
       const activeSessionToken = data.sessionToken || "";
-      if (activeSessionToken) setSessionToken(activeSessionToken);
-      setCommitment(data.commitment || "");
-      setClientSeed(data.clientSeed || freshSeed);
+      dispatchSession({
+        type: "started",
+        readingId: sessionReadingId,
+        token: activeSessionToken,
+        commitment: data.commitment,
+        clientSeed: data.clientSeed || freshSeed,
+      });
 
       trackEvent("tarot_session_start", {
         spread_id: quickSpread.id,
@@ -895,7 +914,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       }
 
       const latestToken = shuffleData.sessionToken || activeSessionToken;
-      if (latestToken) setSessionToken(latestToken);
+      dispatchSession({ type: "rotateToken", token: latestToken });
 
       const { cardByIndex } = await import("@/data/cards");
       if (!shuffleData.drawn || !Array.isArray(shuffleData.drawn) || shuffleData.drawn.length === 0) {
@@ -935,9 +954,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         };
       });
 
-      setDrawnCards(enrichedCards);
-      setRevealedOrders([]); // กฎเหล็กข้อ 4: Manual Self-Reveal เริ่มต้นคว่ำหน้าเสมอ ให้ผู้ใช้แตะพลิกเอง
-      setActiveCardIndex(0);
+      // กฎเหล็กข้อ 4 (Manual Self-Reveal) อยู่ในตัวลดแล้ว — `deal` คว่ำไพ่ทุกใบให้เสมอ
+      dispatchDeck({ type: "deal", cards: enrichedCards });
       scrollToSanctuaryTop();
       navigateStep("READING");
 
@@ -949,7 +967,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         nickname: userNickname,
       });
     } catch (err: any) {
-      setErrorMsg(err.message || (isEnglish ? "An error occurred while processing the quick reading." : "เกิดข้อผิดพลาดในการประมวลผลไพ่ด่วน"));
+      dispatchRead({ type: "fail", message: err.message || (isEnglish ? "An error occurred while processing the quick reading." : "เกิดข้อผิดพลาดในการประมวลผลไพ่ด่วน") });
     } finally {
       setLoading(false);
     }
@@ -957,7 +975,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
   // Step 2 -> Step 3: Shuffle Animation Finished
   const handleShuffleComplete = (finalClientSeed: string) => {
-    if (finalClientSeed) setClientSeed(finalClientSeed);
+    dispatchSession({ type: "seed", clientSeed: finalClientSeed });
     soundManager.playShuffleSound();
 
     trackEvent("tarot_shuffle", {
@@ -975,7 +993,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     if (pickedIndices.length >= selectedSpread.positions.length) return;
 
     const newPicked = [...pickedIndices, fanIndex];
-    setPickedIndices(newPicked);
+    dispatchDeck({ type: "pick", fanIndex, capacity: selectedSpread.positions.length });
 
     trackEvent("tarot_draw", {
       spread_id: selectedSpread.id,
@@ -995,12 +1013,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   const handleFinalizePickedCards = async (finalIndices: number[]) => {
     const activeId = readingId;
     if (!activeId) {
-      setErrorMsg("ไม่พบข้อมูลเซสชัน กรุณากดเริ่มใหม่");
+      dispatchRead({ type: "fail", message: "ไม่พบข้อมูลเซสชัน กรุณากดเริ่มใหม่" });
       return;
     }
 
     setLoading(true);
-    setErrorMsg(null);
+    dispatchRead({ type: "clearError" });
 
     try {
       // Gentle pause for pick animation
@@ -1026,7 +1044,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         }
         throw new Error(data.error || (isEnglish ? "Unable to organize the tarot deck." : "ไม่สามารถจัดสำรับไพ่ได้"));
       }
-      if (data.sessionToken) setSessionToken(data.sessionToken);
+      dispatchSession({ type: "rotateToken", token: data.sessionToken });
 
       const { cardByIndex } = await import("@/data/cards");
 
@@ -1067,18 +1085,16 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         };
       });
 
-      setDrawnCards(enrichedCards);
-      setRevealedOrders([]);
-      setActiveCardIndex(0);
+      dispatchDeck({ type: "deal", cards: enrichedCards });
       navigateStep("READING");
 
       // Auto start streaming AI interpretation in background
       startAIStreaming(activeId, enrichedCards, data.sessionToken || sessionToken);
     } catch (err: any) {
       isFinalizingRef.current = false;
-      setErrorMsg(err.message || (isEnglish ? "An error occurred while processing the cards." : "เกิดข้อผิดพลาดในการประมวลผลไพ่"));
+      dispatchRead({ type: "fail", message: err.message || (isEnglish ? "An error occurred while processing the cards." : "เกิดข้อผิดพลาดในการประมวลผลไพ่") });
       // P2-5: ถอยกลับแค่ไพ่ใบสุดท้าย ให้เลือกใหม่ได้ทันทีโดยไม่ต้องเริ่มจับใหม่ทั้งหมด
-      setPickedIndices((p) => p.slice(0, -1));
+      dispatchDeck({ type: "undoLastPick" });
     } finally {
       setLoading(false);
     }
@@ -1111,9 +1127,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     const abortController = new AbortController();
     readStreamAbortRef.current = abortController;
 
-    setIsStreaming(true);
-    setReadingResult({});
-    setErrorMsg(null);
+    dispatchRead({ type: "start" });
     let streamCompleted = false;
 
     try {
@@ -1130,7 +1144,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         const errData = await res.json().catch(() => ({}) as { reason?: string; error?: string });
         const blockedReason = mapBlockedReason(errData.reason);
         if (blockedReason) {
-          setIsStreaming(false);
+          dispatchRead({ type: "stop" });
           refreshEntitlement();
           openAccessDialog(blockedReason);
           return;
@@ -1161,24 +1175,20 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               const data = JSON.parse(dataMatch[1]);
 
               if (eventType === "opening") {
-                setReadingResult((prev) => ({ ...prev, opening: data.text }));
+                dispatchRead({ type: "opening", text: data.text });
               } else if (eventType === "card") {
-                setReadingResult((prev) => {
-                  const existing = prev?.cards || [];
-                  const filtered = existing.filter((c) => c.position !== data.position);
-                  return { ...prev, cards: [...filtered, data].sort((a, b) => a.position - b.position) };
-                });
+                // การรวมคำอ่านรายใบแบบไม่ซ้ำตำแหน่งย้ายไปอยู่ในตัวลดแล้ว
+                dispatchRead({ type: "card", card: data });
               } else if (eventType === "connections") {
-                setReadingResult((prev) => ({ ...prev, connections: data.text }));
+                dispatchRead({ type: "connections", text: data.text });
               } else if (eventType === "summary") {
-                setReadingResult((prev) => ({ ...prev, summary: data.text }));
+                dispatchRead({ type: "summary", text: data.text });
               } else if (eventType === "reset") {
-                setReadingResult(null);
+                dispatchRead({ type: "clearPartial" });
               } else if (eventType === "done") {
                 streamCompleted = true;
-                setReadingResult(data.reading);
-                setProof(data.proof || {});
-                setIsStreaming(false);
+                dispatchRead({ type: "done", reading: data.reading });
+                dispatchSession({ type: "proven", proof: data.proof });
                 navigateStep("SUMMARY");
                 soundManager.playOracleRevealSound();
                 // ผู้เยี่ยมชม: หักสิทธิ์ฟรี "หลัง" อ่านจบจริงเท่านั้น (server ออก ticket เฉพาะตอนนี้)
@@ -1231,8 +1241,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 });
               } else if (eventType === "error") {
                 streamCompleted = true;
-                setIsStreaming(false);
-                setErrorMsg(data.message || (isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง"));
+                dispatchRead({ type: "fail", message: data.message || (isEnglish ? "Card draw data missing. Please reload and try again." : "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง") });
               }
             } catch (parseErr) {
               console.error("Parse event error", parseErr);
@@ -1243,15 +1252,13 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
       // P1-4 Guard: If stream ended without 'done' event
       if (!streamCompleted) {
-        setIsStreaming(false);
-        setErrorMsg(isEnglish ? "The reading stream was interrupted. Please click reload to resume immediately." : "คำทำนายส่งมาไม่ครบสักนิดค่ะ กรุณากดโหลดใหม่อีกครั้ง แม่หมอพร้อมเปิดไพ่ให้ทันที");
+        dispatchRead({ type: "fail", message: isEnglish ? "The reading stream was interrupted. Please click reload to resume immediately." : "คำทำนายส่งมาไม่ครบสักนิดค่ะ กรุณากดโหลดใหม่อีกครั้ง แม่หมอพร้อมเปิดไพ่ให้ทันที" });
       }
     } catch (err: any) {
       // ผู้ใช้ออกจากหน้าไปเอง / เริ่มรอบใหม่ทับ — ไม่ใช่ความผิดพลาด ไม่ต้องขึ้นข้อความ error
       if (err?.name === "AbortError") return;
       console.error("Stream reading failed", err);
-      setIsStreaming(false);
-      setErrorMsg(err.message || (isEnglish ? "The connection momentarily stuttered. Please click reload to continue." : "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กรุณากดโหลดใหม่อีกครั้ง"));
+      dispatchRead({ type: "fail", message: err.message || (isEnglish ? "The connection momentarily stuttered. Please click reload to continue." : "สัญญาณระหว่างอ่านไพ่สะดุดชั่วคราวค่ะ กรุณากดโหลดใหม่อีกครั้ง") });
     }
   };
 
@@ -1267,8 +1274,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         is_reversed: card.isReversed,
       });
     }
-    setRevealedOrders((prev) => (prev.includes(order) ? prev.filter((o) => o !== order) : [...prev, order]));
-    setActiveCardIndex(order);
+    // ตัวลดพลิกให้เฉพาะไพ่ที่มีอยู่จริงในสำรับ (กฎเหล็กข้อ 14) แล้วเลื่อนสายตาไปใบนั้นให้ด้วย
+    dispatchDeck({ type: "toggleReveal", order });
   };
 
   // Reset to start new reading (P1-10: Complete session state purge)
@@ -1294,20 +1301,12 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     clearFlowState();
     soundManager.playCardSelectSound();
     navigateStep("SPREAD_SELECT");
-    setReadingId(null);
-    setSessionToken(null);
-    setCommitment("");
-    setClientSeed("");
-    setProof({});
-    setActiveCardIndex(0);
-    setIsStreaming(false);
+    // ของสามก้อนนี้เกิดพร้อมกันและต้องตายพร้อมกัน — ตอนนี้ล้างได้ก้อนละคำสั่ง ไม่มีทางลืมทีละค่า
+    dispatchSession({ type: "reset" });
+    dispatchDeck({ type: "reset" });
+    dispatchRead({ type: "reset" });
     dispatchOverlay({ type: "closeAll" });
     isFinalizingRef.current = false;
-    setPickedIndices([]);
-    setDrawnCards([]);
-    setRevealedOrders([]);
-    setReadingResult(null);
-    setErrorMsg(null);
     setNickname("");
     setQuestion("");
     setSituation("");
@@ -1327,10 +1326,8 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
       navigateStep("INTENTION_SELECT"); // เก็บคำถาม/ชื่อเล่น/ผัง/แม่หมอไว้ครบ
     } else if (currentStep === "PICK_CARDS") {
       isFinalizingRef.current = false;
-      setPickedIndices([]);
-      setDrawnCards([]);
-      setRevealedOrders([]);
-      setErrorMsg(null);
+      dispatchDeck({ type: "clearDraw" });
+      dispatchRead({ type: "clearError" });
       navigateStep("SHUFFLE");
     }
   };
@@ -1427,7 +1424,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
               <button
                 type="button"
                 onClick={() => {
-                  setErrorMsg(null);
+                  // `startAIStreaming` ยิง `start` ใส่ตัวลดเป็นคำสั่งแรก ซึ่งล้างข้อความผิดพลาดให้แล้ว
                   startAIStreaming(readingId, drawnCards);
                 }}
                 className="tap-overlay-y px-4 py-1.5 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs transition cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1 shadow-xs"
@@ -1694,7 +1691,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                   revealedOrders={revealedOrders}
                   currentReadingPosition={activeCardIndex}
                   onFlipCard={handleFlipCard}
-                  onRevealAll={() => setRevealedOrders(drawnCards.map((c) => c.order))}
+                  onRevealAll={() => dispatchDeck({ type: "revealAll" })}
                   onZoomCard={(c) => dispatchOverlay({ type: "openZoomCard", card: c })}
                 />
               </section>
@@ -1716,7 +1713,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       nickname={nickname}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
-                          setErrorMsg(null);
                           startAIStreaming(readingId, drawnCards);
                         }
                       }}
@@ -1728,7 +1724,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       isStreaming={isStreaming}
                       reading={readingResult}
                       activeCardIndex={activeCardIndex}
-                      onSelectCardIndex={setActiveCardIndex}
+                      onSelectCardIndex={(order) => dispatchDeck({ type: "focus", order })}
                       drawnCards={drawnCards}
                       proof={proof}
                       errorMsg={errorMsg}
@@ -1736,7 +1732,6 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       nickname={nickname}
                       onRetry={() => {
                         if (readingId && drawnCards.length > 0) {
-                          setErrorMsg(null);
                           startAIStreaming(readingId, drawnCards);
                         }
                       }}
