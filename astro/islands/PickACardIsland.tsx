@@ -7,10 +7,17 @@ import type { Locale } from "@/lib/i18n/types";
  *
  * ⚠️ ต้องใช้ client:load เพื่อให้ผู้ใช้ที่เข้ามาพร้อมกดเลือกกองไพ่ได้ทันที
  */
-export function PickACardIsland({ locale }: { locale: Locale }) {
+export function PickACardIsland({
+  locale,
+  topicSlug,
+}: {
+  locale: Locale;
+  /** หน้า `/pick-a-card/<slug>` ส่ง slug มาเพื่อเปิดหัวข้อนั้นทันทีโดยไม่ต้องให้ผู้ใช้กดเอง */
+  topicSlug?: string;
+}) {
   return (
     <LocaleProvider forcedLocale={locale}>
-      <PickACardClient />
+      <PickACardClient initialTopicSlug={topicSlug} />
     </LocaleProvider>
   );
 }

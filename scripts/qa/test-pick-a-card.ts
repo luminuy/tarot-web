@@ -36,6 +36,7 @@ import { assertNonEmptyCorpus } from "./lib/corpus";
 import { drawAnchors } from "@/lib/pick-a-card/draw-order";
 import { composeReading, drawPicks, initialDraw, possibleCombinations } from "@/lib/pick-a-card/compose";
 import { dailyDraw, dayLabel } from "@/lib/pick-a-card/daily";
+import { pickACardTopicMetadata, pickACardTopicParams } from "@/app/_shared/pages/pick-a-card-topic";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 
@@ -325,6 +326,44 @@ function stripComments(src: string): string {
     "หน้า Pick A Card เริ่มด้วยสำรับประจำวัน (เรียก dailyDraw + bangkokDayKey)",
     /dailyDraw\s*\(/.test(clientForDaily) && clientForDaily.includes("bangkokDayKey"),
     "   ถ้าไม่เรียก ผู้ใช้จะเห็นคนละสำรับกันหมดและไม่มีเหตุผลให้กลับมาพรุ่งนี้ (หรือหาไฟล์ไม่เจอ)"
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 4.8 ทุกหัวข้อต้องมีหน้าของตัวเอง พร้อมเนื้อหา SEO สองภาษาและชื่อเรื่องไม่เกินเพดาน
+// ---------------------------------------------------------------------------
+{
+  /** เพดาน SERP 60 ตัวอักษร ลบท้าย " · SeerTarot" ที่ layout เติมให้เอง (12 ตัว) */
+  const TITLE_BUDGET = 60 - " · SeerTarot".length;
+
+  const problems: string[] = [];
+  for (const topic of PICK_A_CARD_TOPICS) {
+    for (const locale of ["th", "en"] as const) {
+      let meta;
+      try {
+        meta = pickACardTopicMetadata(topic, locale);
+      } catch (error) {
+        problems.push(`${topic.id}/${locale}: ${(error as Error).message}`);
+        continue;
+      }
+      const title = String(meta.title ?? "");
+      if (!title) problems.push(`${topic.id}/${locale}: ไม่มีชื่อเรื่อง`);
+      if (title.length > TITLE_BUDGET) {
+        problems.push(`${topic.id}/${locale}: ชื่อเรื่องยาว ${title.length} เกินเพดาน ${TITLE_BUDGET}`);
+      }
+      if (!meta.description) problems.push(`${topic.id}/${locale}: ไม่มีคำอธิบาย`);
+      const canonical = String((meta.alternates as { canonical?: string } | undefined)?.canonical ?? "");
+      if (!canonical.includes(`/pick-a-card/${topic.slug}`)) {
+        problems.push(`${topic.id}/${locale}: canonical ไม่ได้ชี้มาที่หน้าหัวข้อ (${canonical})`);
+      }
+    }
+  }
+
+  check(
+    `ทุกหัวข้อมีหน้าของตัวเองพร้อมเนื้อหา SEO สองภาษา (${PICK_A_CARD_TOPICS.length} หัวข้อ · ${pickACardTopicParams().length} เส้นทาง)`,
+    problems.length === 0 && pickACardTopicParams().length === PICK_A_CARD_TOPICS.length,
+    problems.slice(0, 6).map((l) => `   ${l}`).join("\n") +
+      "\n   ➔ หัวข้อใหม่ต้องเพิ่มเนื้อหาใน TOPIC_COPY ของ src/app/_shared/pages/pick-a-card-topic.tsx ด้วยเสมอ"
   );
 }
 
