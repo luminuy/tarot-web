@@ -35,6 +35,7 @@ import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { drawAnchors } from "@/lib/pick-a-card/draw-order";
 import { composeReading, drawPicks, initialDraw, possibleCombinations } from "@/lib/pick-a-card/compose";
+import { dailyDraw, dayLabel } from "@/lib/pick-a-card/daily";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 
@@ -268,6 +269,62 @@ function stripComments(src: string): string {
     offenders.length === 0,
     offenders.slice(0, 6).map((l) => `   ${l}`).join("\n") +
       "\n   ➔ เขียนใหม่ให้พูดถึงไพ่ของตำแหน่งนั้นใบเดียว ไม่งั้นผู้ใช้จะอ่านเจอไพ่ที่ไม่ได้อยู่ตรงหน้า"
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 4.7 สำรับประจำวัน — เมล็ดเดียวกันต้องได้ชุดเดิมเสมอ และคนละวันต้องได้คนละชุด
+// ---------------------------------------------------------------------------
+{
+  const topic = PICK_A_CARD_TOPICS[0];
+  const poolSize = topic.pool.length;
+  const slotCount = topic.slots.length;
+
+  // (ก) ทำซ้ำได้ — ถ้าเมล็ดเดียวกันให้คนละผล คำว่า "ประจำวัน" จะไม่มีความหมาย
+  const a = dailyDraw("2026-09-17:love-feelings", poolSize, slotCount);
+  const b = dailyDraw("2026-09-17:love-feelings", poolSize, slotCount);
+  check(
+    "สำรับประจำวันทำซ้ำได้ (เมล็ดเดียวกัน ➔ ชุดเดิมเป๊ะ)",
+    JSON.stringify(a) === JSON.stringify(b),
+    `   ${JSON.stringify(a)} ≠ ${JSON.stringify(b)}`
+  );
+
+  // (ข) ดัชนีต้องอยู่ในคลังจริง และกองทั้งสี่ต้องได้คนละชิ้น
+  const valid = (d: typeof a) =>
+    d.anchorOrder.length === slotCount &&
+    new Set(d.anchorOrder).size === slotCount &&
+    d.anchorOrder.every((v) => v >= 0 && v < poolSize) &&
+    d.hiddenPick >= 0 && d.hiddenPick < poolSize &&
+    d.advicePick >= 0 && d.advicePick < poolSize;
+  check("สำรับประจำวันชี้ไปที่คลังจริงและทุกกองได้คนละชิ้น", valid(a), `   ${JSON.stringify(a)}`);
+
+  // (ค) 60 วันติดกันต้องไม่จมอยู่กับชุดเดิมไม่กี่ชุด
+  const seen = new Set<string>();
+  for (let day = 1; day <= 60; day++) {
+    const key = `2026-10-${String(day % 31 || 1).padStart(2, "0")}-${day}:${topic.id}`;
+    const d = dailyDraw(key, poolSize, slotCount);
+    seen.add(`${d.anchorOrder[0]}-${d.hiddenPick}-${d.advicePick}`);
+  }
+  check(
+    `สำรับประจำวัน 60 วันติดกันได้ชุดต่างกัน ${seen.size} ชุด (ต้องมากกว่า 20)`,
+    seen.size > 20,
+    "   ถ้าน้อยกว่านี้แปลว่าเมล็ดกระจายไม่ดี ผู้ใช้จะเจอสำรับเดิมบ่อยเกินไป"
+  );
+
+  // (ง) ป้ายวันที่อ่านออกทั้งสองภาษา
+  check(
+    "ป้ายวันที่ของสำรับประจำวันอ่านออกทั้งสองภาษา",
+    dayLabel("2026-09-17", false) === "17 ก.ย." && dayLabel("2026-09-17", true) === "Sep 17",
+    `   ได้ "${dayLabel("2026-09-17", false)}" / "${dayLabel("2026-09-17", true)}"`
+  );
+
+  // (จ) หน้าเว็บต้องเริ่มที่สำรับประจำวันจริง ไม่ใช่สุ่มทันที
+  // ⚠️ ไฟล์หาย = ตกด่าน ห้ามข้ามเงียบ (กฎของ test-gate-integrity.ts)
+  const clientForDaily = fs.existsSync(CLIENT) ? stripComments(fs.readFileSync(CLIENT, "utf-8")) : "";
+  check(
+    "หน้า Pick A Card เริ่มด้วยสำรับประจำวัน (เรียก dailyDraw + bangkokDayKey)",
+    /dailyDraw\s*\(/.test(clientForDaily) && clientForDaily.includes("bangkokDayKey"),
+    "   ถ้าไม่เรียก ผู้ใช้จะเห็นคนละสำรับกันหมดและไม่มีเหตุผลให้กลับมาพรุ่งนี้ (หรือหาไฟล์ไม่เจอ)"
   );
 }
 
