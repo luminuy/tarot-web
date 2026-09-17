@@ -108,6 +108,52 @@ for (const pattern of ["/cards/*.jpg", "/cards/*.webp", "/_astro/*", "/_next/sta
   );
 }
 
+console.log("\n── 3. Early Hints: ส่วนหัว `Link` ของสไตล์ชีต (R-11/R-12) ──");
+
+/*
+ * เจ้าของเปิด Early Hints ของ Cloudflare ไว้แล้ว (2026-09-17) — ขอบจะอ่านส่วนหัว `Link`
+ * ของหน้า HTML แล้วส่งเป็น `103` ให้เบราว์เซอร์เริ่มโหลดสไตล์ชีตก่อน HTML จะมาถึง
+ *
+ * ส่วนหัวนั้น **สร้างตอนบิลด์** โดย `scripts/merge-astro-assets.ts` เพราะชื่อไฟล์ CSS มีแฮช
+ * ด่านนี้จึงตรวจ "สัญญา" ระหว่างสองไฟล์นี้แทน — สิ่งที่ตัวสร้างต้องพึ่ง ห้ามหายไปเงียบ ๆ:
+ *
+ *   1. ตัวสร้างยังอยู่และยังมองหาบล็อกที่มี `s-maxage`
+ *   2. `public/_headers` ยังมีบล็อกหน้า HTML ให้มันเจอจริง (ถ้าเหลือศูนย์ = พรีโหลดหายทั้งเว็บ)
+ *
+ * ⚠️ ห้ามลดด่านนี้เหลือ `fs.existsSync(...)` เฉย ๆ — บทเรียน INC-0195
+ */
+const mergerPath = path.join(ROOT, "scripts/merge-astro-assets.ts");
+const merger = fs.existsSync(mergerPath) ? fs.readFileSync(mergerPath, "utf-8") : "";
+check(
+  "ตัวสร้างส่วนหัว Link ยังอยู่ใน scripts/merge-astro-assets.ts",
+  merger.includes("EARLY_HINTS_MARKER") && merger.includes("rel=preload; as=style"),
+  "ถ้าถอดออก หน้าเว็บทุกหน้าจะไม่มี Link header ➔ Early Hints ที่เปิดไว้จะไม่มีอะไรให้ส่งเลย",
+);
+
+/** เลียนแบบเงื่อนไขที่ตัวสร้างใช้เลือกเส้นทาง — ต้องได้ผลตรงกันเสมอ */
+const htmlRoutes: string[] = [];
+{
+  let current = "";
+  for (const line of raw.split("\n")) {
+    if (/^\/\S*\s*$/.test(line)) current = line.trim();
+    else if (current && /^\s+\S/.test(line) && line.includes("s-maxage")) {
+      htmlRoutes.push(current);
+      current = "";
+    }
+  }
+}
+check(
+  `เจอเส้นทางหน้า HTML ให้พรีโหลดสไตล์ชีต (${htmlRoutes.length} เส้นทาง)`,
+  htmlRoutes.length >= 20,
+  "บล็อกหน้า HTML ใน public/_headers ต้องตั้ง `s-maxage` เสมอ — ตัวสร้าง Link ใช้ค่านี้เป็นตัวเลือกเส้นทาง",
+);
+for (const mustHave of ["/", "/spreads", "/cards", "/blog", "/en/*"]) {
+  check(
+    `เส้นทางหลัก ${mustHave} อยู่ในชุดที่จะได้ Link header`,
+    htmlRoutes.includes(mustHave),
+  );
+}
+
 console.log("");
 if (failed > 0) {
   console.error(`❌ ล้มเหลว ${failed} ข้อ — แก้ที่ public/_headers ให้ตรงกับโค้ดกลาง\n`);
