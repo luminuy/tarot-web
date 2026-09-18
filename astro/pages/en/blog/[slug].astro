@@ -30,8 +30,15 @@ const related = getRelatedArticles(article.slug, 3);
   <SiteHeaderRoot locale={locale} />
   <BlogDetailContentRoot article={article} locale={locale}>
     <Fragment slot="reader">
-      <ArticleReaderRoot article={article} relatedArticles={related} locale={locale} client:idle />
+      <ArticleReaderRoot article={article} relatedArticles={related} locale={locale} />
     </Fragment>
   </BlogDetailContentRoot>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!--
+  📰 ปุ่มคัดลอกลิงก์ + สถิติการอ่าน — สคริปต์ไม่ถึง 1 KB แทนการ hydrate ทั้งคอมโพเนนต์
+-->
+<script>
+  import "../../../scripts/article-share";
+</script>

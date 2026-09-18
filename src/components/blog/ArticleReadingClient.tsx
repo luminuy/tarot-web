@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { Article } from "@/data/articles";
 import {
@@ -9,11 +9,8 @@ import {
   getArticleCategory,
   getArticleAuthor,
 } from "@/data/article-helpers";
-import { soundManager } from "@/lib/utils/audio";
-import { trackEvent } from "@/lib/analytics";
 import { COUNTS } from "@/components/layout/nav-links";
 import { useLocale } from "@/lib/i18n";
-import { copyToClipboard } from "@/lib/utils/clipboard";
 
 interface Props {
   article: Article;
@@ -22,26 +19,14 @@ interface Props {
 
 export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles }) => {
   const { isEnglish, locale } = useLocale();
-  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    trackEvent("blog_read", {
-      slug: article.slug,
-      title: article.title,
-      category: article.category,
-    });
-  }, [article.slug, article.title, article.category]);
-
-  const handleCopyLink = async () => {
-    soundManager.playMenuTapSound();
-    if (typeof window !== "undefined") {
-      const ok = await copyToClipboard(window.location.href);
-      if (ok) {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2500);
-      }
-    }
-  };
+  /*
+   * 🔇 หน้าบทความ "ไม่ hydrate" แล้ว — ทั้งหน้ามีของที่ต้องใช้ JS อยู่ชิ้นเดียวคือปุ่มคัดลอกลิงก์
+   * (กับสถิติ `blog_read` หนึ่งครั้ง) ไม่คุ้มกับการโหลด React 184 KB ทุกบทความ
+   * ทั้งสองอย่างย้ายไปอยู่ที่ `astro/scripts/article-share.ts` ซึ่งไม่ถึง 1 KB
+   *
+   * ⚠️ ห้ามใส่ `useState` กลับเข้ามาเพื่อสถานะ "คัดลอกแล้ว" — สคริปต์สลับข้อความให้เองแล้ว
+   */
 
   const articleTitle = getArticleTitle(article, locale);
   const articleDesc = getArticleDescription(article, locale);
@@ -226,23 +211,25 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       </div>
 
       {/* Share / Copy Link Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-line/40 text-xs font-serif-th">
+      <div
+        className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-line/40 text-xs font-serif-th"
+        data-article-share=""
+        data-article-slug={article.slug}
+        /* ⚠️ ต้องเป็นภาษาของหน้าเสมอ — ส่ง `article.title` (ไทย) ตรง ๆ จะทำให้อักษรไทย
+           หลุดเข้า HTML ของหน้าอังกฤษ และด่านภาษาอังกฤษจะฟ้องทันที (บทเรียนจากหน้าไพ่รายใบ)
+           `slug` เป็นกุญแจกลางที่ไม่ขึ้นกับภาษาอยู่แล้ว รายงานจึงยังรวมสองภาษาได้ */
+        data-article-title={articleTitle}
+        data-article-category={articleCat}
+      >
         <div className="flex items-center gap-2 text-muted">
           <span>{isEnglish ? "Share this codex:" : "แชร์คัมภีร์นี้:"}</span>
           <button
-            onClick={handleCopyLink}
+            type="button"
+            data-copy-link=""
+            data-label-copied={isEnglish ? "Link Copied!" : "คัดลอกลิงก์สำเร็จ!"}
             className="tap-overlay-y px-3.5 py-1.5 rounded-full border border-line bg-surface text-ink hover:border-gold hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
-            
-            <span>
-              {copied
-                ? isEnglish
-                  ? "Link Copied!"
-                  : "คัดลอกลิงก์สำเร็จ!"
-                : isEnglish
-                  ? "Copy Link"
-                  : "คัดลอกลิงก์"}
-            </span>
+            <span data-copy-label="">{isEnglish ? "Copy Link" : "คัดลอกลิงก์"}</span>
           </button>
         </div>
         <Link href="/blog" className="text-gold hover:underline font-bold">
