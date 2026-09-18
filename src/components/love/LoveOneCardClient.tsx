@@ -84,6 +84,17 @@ export function LoveOneCardClient() {
 
   const currentStatusObj = STATUS_OPTIONS.find((s) => s.id === selectedStatus);
 
+  /** คำถามที่ส่งให้แม่หมออ่าน — สถานะหัวใจที่เลือก บวกชื่อคนในใจถ้าผู้ใช้กรอกมา */
+  const loveQuestion = (() => {
+    const who = partnerName.trim();
+    if (isEnglish) {
+      const base = `Love reading for someone who is ${currentStatusObj?.titleEn || "seeking clarity"}`;
+      return who ? `${base}, asking about ${who}` : base;
+    }
+    const base = `ดูดวงความรักในสถานะ${currentStatusObj?.titleTh || "ที่กำลังหาคำตอบ"}`;
+    return who ? `${base} โดยถามถึง ${who}` : base;
+  })();
+
   const getContextualLoveAdvice = (
     card: TarotCardType,
     relStatus: RelationshipStatus,
@@ -251,6 +262,8 @@ export function LoveOneCardClient() {
       {/* Main Ritual Panel */}
       <OneCardRitual
         spreadId="love-one"
+        category="love"
+        question={loveQuestion}
         spreadName={isEnglish ? "Love Tarot (1 Card)" : "ดูดวงความรัก 1 ใบ"}
         deckLabel={isEnglish ? `Status: ${currentStatusObj?.titleEn}` : `สถานะ: ${currentStatusObj?.titleTh}`}
         drawButtonText={isEnglish ? "Draw Love Card" : "เปิดไพ่ทำนายความรัก"}

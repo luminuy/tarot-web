@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { DECK } from "@/data/cards";
 import { ARTICLES } from "@/data/articles";
-import { SPREADS } from "@/data/spreads";
+import { PUBLIC_SPREADS } from "@/data/spreads";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { hasEnglishTwin } from "@/lib/i18n/paths";
@@ -156,7 +156,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // All 25 Spread Guide Pages
-  const spreadRoutes: MetadataRoute.Sitemap = SPREADS.map((spread) => ({
+  const spreadRoutes: MetadataRoute.Sitemap = PUBLIC_SPREADS.map((spread) => ({
     url: `${baseUrl}/spreads/${spread.id}`,
     lastModified: now,
     changeFrequency: "monthly",

@@ -101,6 +101,13 @@ export function DailyClient() {
 
   const currentChamber = FOCUS_CHAMBERS.find((c) => c.id === selectedFocus) || FOCUS_CHAMBERS[0];
 
+  /** คำถามที่ส่งให้แม่หมออ่าน — เจตจำนงที่ผู้ใช้พิมพ์เอง ถ้าเว้นว่างใช้เรื่องของวิหารที่เลือก */
+  const dailyQuestion =
+    intentionText.trim() ||
+    (isEnglish
+      ? `Daily guidance for ${currentChamber.titleEn}: ${currentChamber.descEn}`
+      : `ขอคำชี้แนะประจำวันเรื่อง${currentChamber.titleTh} — ${currentChamber.descTh}`);
+
   // วันที่ปัจจุบัน
   const todayDateString = new Intl.DateTimeFormat(isEnglish ? "en-US" : "th-TH", {
     weekday: "long",
@@ -179,7 +186,9 @@ export function DailyClient() {
 
       {/* Main Interactive Ritual Canvas */}
       <OneCardRitual
-        spreadId="daily-one"
+        spreadId="daily"
+        category="general"
+        question={dailyQuestion}
         spreadName={isEnglish ? "Daily Tarot" : "ไพ่ยิปซีรายวัน"}
         deckLabel={isEnglish ? `Chamber: ${currentChamber.titleEn}` : `วิหาร: ${currentChamber.titleTh}`}
         drawButtonText={isEnglish ? "Draw Today's Card" : "เปิดไพ่รับสารนำทางวันนี้"}

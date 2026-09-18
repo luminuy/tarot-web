@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { SPREADS } from "../../src/data/spreads";
-import { STANDARD_SPREAD_IDS, isStandardSpread } from "../../src/lib/entitlement/limits";
+import { SPREADS, PUBLIC_SPREADS } from "../../src/data/spreads";
+import { isStandardSpread } from "../../src/lib/entitlement/limits";
 import { SPREAD_TOPICS, getAllTopicSlugs, getSpreadsForTopic } from "../../src/data/spread-topics";
 
 console.log("\n🧪 กำลังทดสอบระบบ SEO Wave 3: Spreads Expansion & Topic Hubs (25 ผัง)\n");
@@ -20,7 +20,11 @@ function assert(condition: boolean, message: string) {
 }
 
 // 1. Spreads Count & Integrity
-assert(SPREADS.length === 25, `ผังพยากรณ์ต้องมีครบ 25 แบบ (ปัจจุบัน: ${SPREADS.length})`);
+// นับเฉพาะผังที่ผู้ใช้เลือกเองได้ — ผังภายในไม่มีหน้าเว็บของตัวเองจึงไม่เกี่ยวกับ SEO
+assert(
+  PUBLIC_SPREADS.length === 25,
+  `ผังพยากรณ์ที่ผู้ใช้เลือกได้ต้องมีครบ 25 แบบ (ปัจจุบัน: ${PUBLIC_SPREADS.length})`
+);
 
 const expectedNewSpreads = ["love-six", "monthly-ten", "family", "luck", "study"];
 for (const id of expectedNewSpreads) {
@@ -52,7 +56,11 @@ for (const id of lockedSpreads) {
   assert(!isStandardSpread(id), `ผัง '${id}' ต้องไม่อยู่ใน STANDARD_SPREAD_IDS`);
 }
 
-assert(STANDARD_SPREAD_IDS.size === 10, `STANDARD_SPREAD_IDS ต้องมี 10 ผัง (ปัจจุบัน: ${STANDARD_SPREAD_IDS.size})`);
+const publicStandardCount = PUBLIC_SPREADS.filter((s) => s.guestAllowed).length;
+assert(
+  publicStandardCount === 10,
+  `ผังมาตรฐานที่ผู้ใช้เลือกได้ต้องมี 10 ผัง (ปัจจุบัน: ${publicStandardCount})`
+);
 
 // 3. Spreads Artworks Check
 const artIconsPath = path.join(process.cwd(), "src/components/ui/TarotArtIcons.tsx");
@@ -176,7 +184,7 @@ assert(
   "หน้าฮับ /spreads ต้องเป็น server component (ห้ามมี \"use client\") ลิงก์ถึงจะอยู่ใน HTML ดิบ",
 );
 assert(
-  /SPREADS\.map\([\s\S]*?<a[\s\S]*?localeHref\(`\/spreads\/\$\{spread\.id\}`/.test(spreadsIndexSource),
+  /PUBLIC_SPREADS\.map\([\s\S]*?<a[\s\S]*?localeHref\(`\/spreads\/\$\{spread\.id\}`/.test(spreadsIndexSource),
   "หน้าฮับ /spreads ต้องเรนเดอร์ <a href> ของผังครบทุกใบจาก SPREADS ฝั่งเซิร์ฟเวอร์",
 );
 assert(

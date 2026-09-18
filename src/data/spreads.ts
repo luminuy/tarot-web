@@ -1256,7 +1256,78 @@ export const SPREADS: Spread[] = [
       },
     ],
   },
+  // ==========================================
+  // ผังภายใน — ไม่โผล่ในคลังผัง (ดูธง internal)
+  // ==========================================
+  {
+    id: "love-one",
+    nameTh: "ดูดวงความรัก (ไพ่ 1 ใบ)",
+    nameEn: "Love Tarot (1 Card)",
+    tagline: "ไขคำตอบสถานะหัวใจด้วยไพ่ใบเดียว",
+    taglineEn: "One card for the question your heart keeps circling",
+    description:
+      "เปิดไพ่ใบเดียวเจาะจงเรื่องหัวใจ ทั้งคนโสด คนคุย คนมีคู่ และคนที่เพิ่งเลิกรา",
+    descriptionEn:
+      "A single card focused on matters of the heart, whether single, talking, partnered, or newly parted.",
+    defaultCategory: "love",
+    credits: 0,
+    guestAllowed: true,
+    internal: true,
+    positions: [
+      {
+        index: 0,
+        nameTh: "ไพ่ความรักประจำใจ",
+        nameEn: "Heart's Core Card",
+        meaning: "แก่นของสถานการณ์หัวใจตอนนี้ และท่าทีที่จะพาความสัมพันธ์ไปต่อได้ดีที่สุด",
+        meaningEn: "The core of the current heart matter and the stance that carries it forward best",
+        x: 0.5,
+        y: 0.5,
+      },
+    ],
+  },
+  {
+    id: "birth-card",
+    nameTh: "ไพ่ประจำตัวจากวันเกิด (ไพ่ 2 ใบ)",
+    nameEn: "Tarot Birth Cards (2 Cards)",
+    tagline: "ไพ่บุคลิกภาพและไพ่จิตวิญญาณที่คำนวณจากวันเกิด",
+    taglineEn: "Personality and Soul archetypes derived from your birth date",
+    description:
+      "ไพ่สองใบนี้ไม่ได้มาจากการสุ่ม แต่คำนวณจากวันเดือนปีเกิดตามหลักเลขศาสตร์ทาโรต์ จึงคงที่ตลอดชีวิตของเจ้าของวันเกิดนั้น",
+    descriptionEn:
+      "These two cards are calculated from your birth date through tarot numerology rather than drawn, so they stay the same for life.",
+    defaultCategory: "self",
+    credits: 0,
+    guestAllowed: true,
+    internal: true,
+    positions: [
+      {
+        index: 0,
+        nameTh: "ไพ่บุคลิกภาพ",
+        nameEn: "Personality Card",
+        meaning: "ตัวตนที่คนรอบข้างสัมผัสได้ จุดแข็งที่หยิบมาใช้ได้ทันที และบทเรียนที่มากับนิสัยนั้น",
+        meaningEn: "The self others meet first, its ready strengths, and the lesson riding along with it",
+        x: 0.33,
+        y: 0.5,
+      },
+      {
+        index: 1,
+        nameTh: "ไพ่จิตวิญญาณ",
+        nameEn: "Soul Card",
+        meaning: "แก่นที่ขับเคลื่อนชีวิตในระยะยาว สิ่งที่ใจโหยหาจริง และทิศทางการเติบโตของทั้งชีวิต",
+        meaningEn: "The long-arc drive beneath the surface, what the heart truly reaches for, and the direction of a lifetime",
+        x: 0.67,
+        y: 0.5,
+      },
+    ],
+  },
 ];
+
+/**
+ * ผังที่แสดงต่อสาธารณะ — ใช้ตัวนี้เสมอเมื่อต้อง "แสดงรายการผัง" ให้ผู้ใช้เห็น
+ * (คลังผัง · sitemap · ตัวเลือกผังบนหน้าแรก) ส่วน `SPREADS` เต็มชุดไว้ใช้ตอน
+ * ค้นหาผังจาก id ซึ่งต้องเจอผังภายในด้วย
+ */
+export const PUBLIC_SPREADS: Spread[] = SPREADS.filter((s) => !s.internal);
 
 export const SPREAD_BY_ID = new Map(SPREADS.map((s) => [s.id, s]));
 

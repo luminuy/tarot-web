@@ -8,6 +8,20 @@ import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+import type { Category } from "@/data/cards/types";
+import { useAiReading } from "@/lib/reading/use-ai-reading";
+/*
+ * 💤 กล่องสิทธิ์และกล่องสมัครสมาชิกโหลดเมื่อถูกเรียกใช้จริงเท่านั้น
+ * ผู้ใช้ส่วนใหญ่ที่ล็อกอินอยู่แล้วไม่เคยเห็นสองกล่องนี้ จึงไม่ควรจ่ายน้ำหนักตั้งแต่เปิดหน้า
+ * (โหลดตรง ๆ ทำให้ `/daily` เกินงบบันเดิล 148/145 KB)
+ */
+const AccessDialog = React.lazy(() =>
+  import("@/components/entitlement/AccessDialog").then((m) => ({ default: m.AccessDialog }))
+);
+const AuthModal = React.lazy(() =>
+  import("@/components/auth/AuthModal").then((m) => ({ default: m.AuthModal }))
+);
+import { OneCardAiReading } from "./OneCardAiReading";
 
 // โหลดสำรับ "ไทยล้วน" — ไม่ลากคำทำนายอังกฤษ (≈126 KB gzip) เข้าบันเดิลหน้าไทย
 let deckPromise: Promise<typeof import("@/data/cards/deck-th")> | null = null;
@@ -36,12 +50,18 @@ const elementEnMap: Record<string, string> = {
 
 export interface OneCardRitualProps {
   spreadId: string;
+  /** หมวดคำถาม — ส่งให้แม่หมอเลือกชุดความหมายไพ่ให้ตรงเรื่อง */
+  category: Category;
+  /** คำถาม/เจตจำนงที่จะส่งให้แม่หมออ่าน */
+  question: string;
+  nickname?: string;
   spreadName: string;
   deckLabel: string;
   intention?: string;
   drawButtonText?: string;
   onRevealed: (card: TarotCardType) => void;
-  renderReading: (card: TarotCardType) => React.ReactNode;
+  /** เนื้อหาเสริมของแต่ละหน้า — วางใต้คำอ่านของแม่หมอ (คำอ่านหลักมาจาก AI แล้ว) */
+  renderReading?: (card: TarotCardType) => React.ReactNode;
   recommendations?: React.ReactNode;
   onReset?: () => void;
   headerSlot?: React.ReactNode;
@@ -49,7 +69,10 @@ export interface OneCardRitualProps {
 }
 
 export function OneCardRitual({
-  spreadId: _spreadId,
+  spreadId,
+  category,
+  question,
+  nickname,
   spreadName,
   deckLabel,
   intention: _intention = "",
@@ -67,6 +90,13 @@ export function OneCardRitual({
   const [status, setStatus] = useState<"idle" | "ready" | "revealed">("idle");
   const [drawnCard, setDrawnCard] = useState<TarotCardType | null>(null);
   const [copied, setCopied] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup" | null>(null);
+
+  /*
+   * ทุกการเปิดไพ่เดินผ่านท่อเดียวกับหน้าแรก (คำสั่งเจ้าของโปรเจกต์ 2026-09-18)
+   * กำแพงสมัครสมาชิกและโควตาจึงถูกบังคับที่เซิร์ฟเวอร์ ไม่ใช่ที่เบราว์เซอร์
+   */
+  const oracle = useAiReading();
 
   // Prefetch deck chunk in idle time so clicking draw is instantaneous
   React.useEffect(() => {
@@ -87,30 +117,43 @@ export function OneCardRitual({
   const handleDraw = async () => {
     soundManager.playCardSelectSound();
 
-    const randomBuffer = new Uint32Array(2);
-    if (typeof window !== "undefined" && window.crypto) {
-      window.crypto.getRandomValues(randomBuffer);
-    } else {
-      randomBuffer[0] = Math.floor(Math.random() * 1000000);
-    }
-
-    const { DECK_TH } = await getDeck();
-    const cardIndex = randomBuffer[0] % DECK_TH.length;
-    const baseCard = DECK_TH[cardIndex];
-
-    // Rule 14: Zero Fabricated Cards Policy — ห้ามกุไพ่ปลอมทุกใบใน 78 ใบเด็ดขาด
-    if (!baseCard) {
-      throw new Error("ไม่พบข้อมูลไพ่ กรุณาโหลดใหม่อีกครั้ง");
-    }
-
-    // เติมเนื้อหาอังกฤษเฉพาะตอนอยู่บนหน้า EN — หน้าไทยไม่ต้องจ่ายน้ำหนักก้อนนี้
-    const card = isEn ? (await getEnEnricher()).enrichCardEn(baseCard) : baseCard;
-
-    startTransition(() => {
-      setDrawnCard(card);
-      setStatus("ready");
+    /*
+     * ⚠️ `resolveCards: false` — ให้ท่อคืนแต่เลขไพ่ แล้วหน้านี้เปิดสำรับ `deck-th` เอง
+     * ถ้าปล่อยให้ท่อแปลงให้ จะลาก `@/data/cards` (พ่วงคำทำนายอังกฤษ ≈126 KB) เข้ามา
+     * ซึ่งเป็นสิ่งที่สำรับไทยล้วนถูกสร้างขึ้นมาเพื่อเลี่ยงตั้งแต่แรก
+     */
+    await oracle.run({
+      spreadId,
+      category,
+      question,
+      nickname,
+      resolveCards: false,
     });
   };
+
+  /* ได้เลขไพ่จากเซิร์ฟเวอร์แล้วค่อยเปิดสำรับไทยมาประกอบเป็นไพ่เต็มใบ */
+  const drawnIndex = oracle.rawDrawn[0]?.cardIndex;
+  React.useEffect(() => {
+    if (drawnIndex === undefined) return;
+    let cancelled = false;
+
+    void (async () => {
+      const { DECK_TH } = await getDeck();
+      const baseCard = DECK_TH[drawnIndex];
+      // 🃏 กฎเหล็กข้อ 14 — ไม่เจอไพ่ใบนั้นห้ามกุใบใหม่ขึ้นมาแทนเด็ดขาด
+      if (!baseCard) throw new Error("ไม่พบข้อมูลไพ่ กรุณาโหลดใหม่อีกครั้ง");
+      const card = isEn ? (await getEnEnricher()).enrichCardEn(baseCard) : baseCard;
+      if (cancelled) return;
+      startTransition(() => {
+        setDrawnCard(card);
+        setStatus("ready");
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [drawnIndex, isEn]);
 
   // เมื่อผู้ใช้แตะพลิกไพ่ 3D
   const handleReveal = () => {
@@ -126,6 +169,7 @@ export function OneCardRitual({
     setStatus("idle");
     setDrawnCard(null);
     setCopied(false);
+    oracle.reset();
     if (onReset) onReset();
   };
 
@@ -168,9 +212,16 @@ export function OneCardRitual({
               <button
                 type="button"
                 onClick={handleDraw}
-                className="w-full sm:w-auto px-10 py-3.5 sm:py-4 rounded-full bg-ink text-surface-warm font-serif-th text-sm sm:text-base font-bold shadow-raised hover:bg-gold active:scale-[0.98] transition cursor-pointer tracking-wide flex items-center justify-center gap-2"
+                disabled={oracle.isPreparing}
+                className="w-full sm:w-auto disabled:opacity-60 disabled:cursor-wait px-10 py-3.5 sm:py-4 rounded-full bg-ink text-surface-warm font-serif-th text-sm sm:text-base font-bold shadow-raised hover:bg-gold active:scale-[0.98] transition cursor-pointer tracking-wide flex items-center justify-center gap-2"
               >
-                <span>{drawButtonText || (isEn ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}</span>
+                <span>
+                  {oracle.isPreparing
+                    ? isEn
+                      ? "Connecting to the Oracle…"
+                      : "กำลังเชื่อมสัญญาณกับแม่หมอ…"
+                    : drawButtonText || (isEn ? "Draw 1 Card" : "เปิดไพ่ 1 ใบ")}
+                </span>
               </button>
               <p className="text-xs text-muted">
                 {isEn
@@ -296,8 +347,11 @@ export function OneCardRitual({
               </div>
             </div>
 
-            {/* Custom Reading Content from Page */}
-            {renderReading(drawnCard)}
+            {/* คำอ่านของแม่หมอ — สตรีมสดจาก AI ทุกครั้ง */}
+            <OneCardAiReading state={oracle.state} isEn={isEn} onRetry={handleDraw} />
+
+            {/* เนื้อหาเสริมเฉพาะหน้า (ถ้ามี) */}
+            {renderReading?.(drawnCard)}
 
             {/* Action Bar (Share & Restart) */}
             <div className="pt-4 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -331,6 +385,41 @@ export function OneCardRitual({
               </div>
             )}
           </div>
+        )}
+
+        {/* ด่านความปลอดภัย: สัญญาณวิกฤต ➔ สายด่วน (กฎเหล็กข้อ 6) */}
+        {oracle.crisisMessage && (
+          <div className="rounded-xl border border-line bg-surface p-5 text-sm leading-relaxed text-ink whitespace-pre-line">
+            {oracle.crisisMessage}
+          </div>
+        )}
+
+        {/* กำแพงสิทธิ์ — เซิร์ฟเวอร์เป็นผู้ตัดสิน หน้าเว็บแค่เล่าให้ฟัง */}
+        {(oracle.gate !== null || authMode !== null) && (
+        <React.Suspense fallback={null}>
+        <AccessDialog
+          reason={oracle.gate}
+          onClose={oracle.clearGate}
+          onSignup={() => {
+            oracle.clearGate();
+            setAuthMode("signup");
+          }}
+          onSignin={() => {
+            oracle.clearGate();
+            setAuthMode("signin");
+          }}
+          onBuyCredits={() => {
+            oracle.clearGate();
+            window.location.href = "/account";
+          }}
+        />
+        <AuthModal
+          isOpen={authMode !== null}
+          onClose={() => setAuthMode(null)}
+          initialMode={authMode ?? "signin"}
+          fromEntitlementWall
+        />
+        </React.Suspense>
         )}
     </div>
   );

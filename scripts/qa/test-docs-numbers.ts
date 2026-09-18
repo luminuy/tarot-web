@@ -14,7 +14,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SPREADS } from "../../src/data/spreads";
+import { PUBLIC_SPREADS } from "../../src/data/spreads";
 import { DECK } from "../../src/data/cards";
 import { ARTICLES } from "../../src/data/articles";
 import { STANDARD_SPREAD_IDS } from "../../src/lib/entitlement/limits";
@@ -28,8 +28,12 @@ const ROOT = path.resolve(__dirname, "../..");
 
 const TRUTH = {
   gates: CHECKS.length,
-  spreads: SPREADS.length,
-  positions: SPREADS.reduce((s, x) => s + x.positions.length, 0),
+  /*
+   * นับเฉพาะผังที่ผู้ใช้เลือกเองได้ — ผังภายใน (`internal: true`) ไม่เคยถูกพูดถึงในเอกสาร
+   * เพราะไม่ใช่สินค้าในคลังผัง แต่เป็นท่อให้หน้าเฉพาะทางเรียก AI (เช่นไพ่ประจำตัวจากวันเกิด)
+   */
+  spreads: PUBLIC_SPREADS.length,
+  positions: PUBLIC_SPREADS.reduce((s, x) => s + x.positions.length, 0),
   cards: DECK.length,
   articles: ARTICLES.length,
   freeSpreads: STANDARD_SPREAD_IDS.size,
@@ -159,7 +163,7 @@ function checkDocs() {
   console.log("=======================================================");
   console.log(`แหล่งความจริงจาก Codebase:`);
   console.log(`  - จำนวนด่านตรวจ (CHECKS.length)    : ${TRUTH.gates}`);
-  console.log(`  - จำนวนผังพยากรณ์ (SPREADS.length) : ${TRUTH.spreads}`);
+  console.log(`  - จำนวนผังพยากรณ์ (PUBLIC_SPREADS)  : ${TRUTH.spreads}`);
   console.log(`  - จำนวนตำแหน่งรวม (positions)      : ${TRUTH.positions}`);
   console.log(`  - จำนวนไพ่ในสำรับ (DECK.length)    : ${TRUTH.cards}`);
   console.log(`  - จำนวนบทความ (ARTICLES.length)    : ${TRUTH.articles}`);
@@ -236,11 +240,11 @@ function checkDocs() {
   // -------------------------------------------------------------
   // ตรวจสอบ P-01: COUNTS ใน nav-links.ts ต้องตรงกับ dataset เสมอ
   // -------------------------------------------------------------
-  if (COUNTS.cards !== DECK.length || COUNTS.articles !== ARTICLES.length || COUNTS.spreads !== SPREADS.length) {
+  if (COUNTS.cards !== DECK.length || COUNTS.articles !== ARTICLES.length || COUNTS.spreads !== PUBLIC_SPREADS.length) {
     console.error(`❌ COUNTS ใน nav-links.ts ไม่ตรงกับ dataset จริง:`);
     console.error(`  - cards: พบ ${COUNTS.cards} (ควรเป็น ${DECK.length})`);
     console.error(`  - articles: พบ ${COUNTS.articles} (ควรเป็น ${ARTICLES.length})`);
-    console.error(`  - spreads: พบ ${COUNTS.spreads} (ควรเป็น ${SPREADS.length})`);
+    console.error(`  - spreads: พบ ${COUNTS.spreads} (ควรเป็น ${PUBLIC_SPREADS.length})`);
     process.exit(1);
   }
   console.log(`✅ COUNTS ใน nav-links.ts ตรงกับ dataset จริง (${COUNTS.cards} ไพ่ / ${COUNTS.articles} บทความ / ${COUNTS.spreads} ผัง)`);

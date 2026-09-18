@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { SPREADS } from "@/data/spreads";
+import { PUBLIC_SPREADS } from "@/data/spreads";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { localeHref } from "@/lib/i18n/paths";
@@ -77,8 +77,8 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
     inLanguage: locale,
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: SPREADS.length,
-      itemListElement: SPREADS.map((spread, index) => ({
+      numberOfItems: PUBLIC_SPREADS.length,
+      itemListElement: PUBLIC_SPREADS.map((spread, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: isEnglish ? spread.nameEn : spread.nameTh,
@@ -130,7 +130,7 @@ export function SpreadsIndexBody({ locale, library }: { locale: Locale; library:
           <h2 className="text-base sm:text-lg font-serif-th font-bold text-ink">{copy.directoryTitle}</h2>
           <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">{copy.directoryLead}</p>
           <ul className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2.5">
-            {SPREADS.map((spread) => (
+            {PUBLIC_SPREADS.map((spread) => (
               <li key={spread.id}>
                 <a
                   href={localeHref(`/spreads/${spread.id}`, locale)}
