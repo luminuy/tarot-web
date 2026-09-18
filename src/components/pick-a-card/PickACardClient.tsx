@@ -503,11 +503,18 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
           <div className="space-y-3">
             <div className="text-center text-xs font-serif-th text-muted">
               {isEnglish
-                ? "Tap each card to flip and unveil its hidden guidance"
-                : "แตะที่ตัวไพ่เพื่อพลิกดูหน้าไพ่และคำทำนายทีละใบ"}
+                ? "Tap each card to flip it — swipe sideways for the next card"
+                : "แตะที่ตัวไพ่เพื่อพลิกดูหน้าไพ่ และปัดไปด้านข้างเพื่อดูใบถัดไป"}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
+            {/*
+              ไพ่ 3 ใบของรอบนี้ — จอเล็กเป็นแถวปัดนิ้วแบบเดียวกับแถบหัวข้อและแท่นกองไพ่
+              เดิมเรียงลงล่างทีละใบ ต้องเลื่อนยาวกว่าจะครบสามใบ
+
+              ⚠️ ไพ่พลิกด้วย 3D (perspective + rotateY) จึงต้องเผื่อช่องว่างบน/ล่าง (pt/pb)
+              ให้เงาและมุมไพ่ตอนพลิกไม่ถูกขอบกล่องเลื่อนเฉือน — ห้ามลด padding ชุดนี้ลง
+            */}
+            <div className="flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pt-1 pb-3 sm:grid sm:grid-cols-3 sm:gap-6 sm:justify-items-center sm:mx-0 sm:px-0 sm:pt-0 sm:pb-0 sm:overflow-visible">
               {reading.cards.map((item, idx) => {
                 const isFlipped = revealedIndices.has(idx);
                 const positionLabel = isEnglish ? item.positionEn : item.positionTh;
@@ -515,7 +522,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 return (
                   <div
                     key={`${selectedSlot.id}-card-${idx}-${item.cardId}`}
-                    className="flex flex-col items-center space-y-2.5 w-full max-w-[220px]"
+                    className="flex flex-col items-center space-y-2.5 w-[70vw] max-w-[220px] shrink-0 snap-center sm:w-full"
                   >
                     {/* Position Label Tag */}
                     <div className="px-3 py-1 rounded-full bg-inset border border-line text-[11.5px] font-serif-th text-muted font-medium text-center truncate w-full">
