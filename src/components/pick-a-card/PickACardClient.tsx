@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocale } from "@/lib/i18n";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import {
@@ -56,6 +56,50 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
   /** ไพ่ 3 ใบ + คำทำนายของรอบนี้ ประกอบจากคลังรายตำแหน่ง (64 ชุดต่อหัวข้อ) */
   const reading =
     slotIndex >= 0 ? composeReading(activeTopic, draw, slotIndex, isEnglish) : null;
+
+  /**
+   * 🫱 แถบหัวข้อแบบปัดนิ้ว (มือถือ) — ใช้แพตเทิร์นเดียวกับ "เปิดไพ่ด่วน" บนหน้าแรก
+   * บนจอเล็กเป็นแถวเลื่อนที่มี scroll-snap · บน sm ขึ้นไปกลายเป็นตารางเหมือนเดิม
+   * จุดบอกตำแหน่งข้างล่างมีเฉพาะจอเล็ก เพราะจอใหญ่เห็นครบทุกใบอยู่แล้ว
+   */
+  const topicRailRef = useRef<HTMLDivElement | null>(null);
+  const [topicIndex, setTopicIndex] = useState(0);
+
+  const handleTopicRailScroll = () => {
+    const rail = topicRailRef.current;
+    if (!rail) return;
+    const cards = rail.querySelectorAll<HTMLElement>("[data-topic-index]");
+    if (!cards.length) return;
+    const center = rail.scrollLeft + rail.clientWidth / 2;
+    let nearest = 0;
+    let best = Number.POSITIVE_INFINITY;
+    cards.forEach((card, index) => {
+      const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      if (distance < best) {
+        best = distance;
+        nearest = index;
+      }
+    });
+    if (nearest !== topicIndex) setTopicIndex(nearest);
+  };
+
+  const scrollTopicIntoView = (index: number, behavior: ScrollBehavior = "smooth") => {
+    const rail = topicRailRef.current;
+    if (!rail) return;
+    const cards = rail.querySelectorAll<HTMLElement>("[data-topic-index]");
+    const card = cards[index];
+    if (!card) return;
+    // ⚠️ ห้ามใช้ scrollIntoView ตรง ๆ — มันจะเลื่อนหน้าทั้งหน้าตามแนวตั้งด้วยบน iOS
+    rail.scrollTo({ left: card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2, behavior });
+    setTopicIndex(index);
+  };
+
+  /** เปิดหน้ามาให้หัวข้อที่กำลังอ่านอยู่ตรงกลางแถบเสมอ (สำคัญกับหน้าหัวข้อเดี่ยว) */
+  useEffect(() => {
+    const index = PICK_A_CARD_TOPICS.findIndex((t) => t.id === activeTopic.id);
+    if (index >= 0) scrollTopicIntoView(index, "auto");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTopic.id]);
 
   /** ผู้ใช้กดสับใหม่เอง — จั่วแบบสุ่มและออกจากสำรับประจำวัน */
   const reshuffle = () => {
@@ -164,11 +208,19 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
           <span className="h-px flex-1 bg-gradient-to-l from-transparent to-line" />
         </div>
 
-        {/* การ์ดหัวข้อพร้อมภาพไพ่ 1909 RWS ประจำหัวข้อ — ภาษาเดียวกับลิ้นชักนำทางทั้งเว็บ */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-          {PICK_A_CARD_TOPICS.map((topic) => {
+        {/*
+          การ์ดหัวข้อพร้อมภาพไพ่ 1909 RWS ประจำหัวข้อ
+          จอเล็ก = แถวปัดนิ้วที่มี scroll-snap (เห็นใบถัดไปโผล่ขอบเป็นสัญญาณว่าปัดได้)
+          จอ sm ขึ้นไป = ตารางเหมือนเดิม ไม่มีการเลื่อนแนวนอน
+        */}
+        <div
+          ref={topicRailRef}
+          onScroll={handleTopicRailScroll}
+          className="flex flex-row gap-2.5 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-3 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible"
+        >
+          {PICK_A_CARD_TOPICS.map((topic, topicCardIndex) => {
             const isActive = topic.id === activeTopic.id;
-            const cardClass = `group relative flex items-center gap-2.5 min-h-[44px] p-2 sm:p-2.5 rounded-xl text-left border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+            const cardClass = `group relative flex items-center gap-2.5 w-[62vw] max-w-[240px] shrink-0 snap-center sm:w-auto sm:max-w-none min-h-[44px] p-2 sm:p-2.5 rounded-xl text-left border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
               isActive
                 ? "bg-surface border-gold shadow-xs"
                 : "bg-inset/50 hover:bg-inset border-line/60 hover:border-line"
@@ -223,6 +275,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
               return (
                 <Link
                   key={topic.id}
+                  data-topic-index={topicCardIndex}
                   href={`/pick-a-card/${topic.slug}`}
                   // ⛔ ห้ามเปิด prefetch — บทเรียน INC-0106
                   prefetch={false}
@@ -237,7 +290,11 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
             return (
               <button
                 key={topic.id}
-                onClick={() => handleSelectTopic(topic.id)}
+                data-topic-index={topicCardIndex}
+                onClick={() => {
+                  scrollTopicIntoView(topicCardIndex);
+                  handleSelectTopic(topic.id);
+                }}
                 className={cardClass}
                 aria-pressed={isActive}
               >
@@ -245,6 +302,34 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
               </button>
             );
           })}
+        </div>
+
+        {/*
+          จุดบอกตำแหน่งของแถบหัวข้อ — เฉพาะจอเล็กที่เห็นทีละใบ
+          ⚠️ ห่อจุดด้วยปุ่มขนาด 24px แล้วไม่ใส่ gap (แพตเทิร์นเดียวกับหน้าแรก)
+          เพื่อให้พื้นที่กดผ่านเกณฑ์โดยที่ตัวจุดยังเล็กเท่าเดิม
+        */}
+        <div className="flex sm:hidden items-center justify-center">
+          {PICK_A_CARD_TOPICS.map((topic, index) => (
+            <button
+              key={topic.id}
+              type="button"
+              onClick={() => scrollTopicIntoView(index)}
+              aria-label={
+                isEnglish
+                  ? `Show topic: ${topic.titleEn}`
+                  : `เลื่อนไปที่หัวข้อ ${topic.titleTh}`
+              }
+              className="grid h-6 min-w-6 place-items-center focus:outline-none"
+            >
+              <span
+                aria-hidden="true"
+                className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
+                  topicIndex === index ? "w-5 bg-gold-ink" : "w-1.5 bg-line"
+                }`}
+              />
+            </button>
+          ))}
         </div>
       </nav>
 
@@ -292,8 +377,11 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
             </p>
           </div>
 
-          {/* 4 Sacred Piles Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/*
+            แท่นกองไพ่ 4 กอง — จอเล็กเป็นแถวปัดนิ้วแบบเดียวกับแถบหัวข้อและหน้าแรก
+            ได้การ์ดใหญ่ขึ้นเต็มตา และเห็นกองถัดไปโผล่ขอบเป็นสัญญาณว่าปัดต่อได้
+          */}
+          <div className="flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible">
             {activeTopic.slots.map((pile) => {
               const styling = crystalColorMap[pile.number] || crystalColorMap[1];
               return (
@@ -308,7 +396,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                   }}
                   role="button"
                   tabIndex={0}
-                  className="group relative flex flex-col items-center text-center p-4 sm:p-5 rounded-2xl bg-surface/80 hover:bg-surface border border-line/80 hover:border-gold transition-colors duration-200 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                  className="group relative flex flex-col items-center text-center w-[62vw] max-w-[240px] shrink-0 snap-center sm:w-auto sm:max-w-none p-4 sm:p-5 rounded-2xl bg-surface/80 hover:bg-surface border border-line/80 hover:border-gold transition-colors duration-200 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                   aria-label={
                     isEnglish
                       ? `Select Pile ${pile.number}: ${pile.crystalEn}`
