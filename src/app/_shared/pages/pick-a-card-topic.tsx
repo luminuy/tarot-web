@@ -300,6 +300,133 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
       },
     ],
   },
+  "ex-return": {
+    metaTitleTh: "Pick A Card เขาจะกลับมาไหม ดูฟรี",
+    metaTitleEn: "Pick A Card: Will They Come Back?",
+    metaDescTh:
+      "Pick A Card เลือกกองไพ่ดูว่าเขาจะกลับมาไหม ใจเขาตอนนี้เป็นอย่างไร อะไรขวางอยู่ตรงกลาง และโอกาสกลับมาคืนดี ด้วยไพ่ 1909 Rider-Waite แท้ ฟรี",
+    metaDescEn:
+      "Pick 1 of 4 tarot piles to see whether they will come back: where their heart is now, what stands between you, and the odds of reconciling. Free reading.",
+    keywordsTh: [
+      "เขาจะกลับมาไหม",
+      "pick a card คนเก่า",
+      "ดูดวงคนเก่าจะกลับมาไหม",
+      "ไพ่ยิปซีคืนดี",
+      "pick a card ความรัก",
+    ],
+    keywordsEn: [
+      "will they come back tarot",
+      "pick a card ex reading",
+      "reconciliation tarot free",
+      "will my ex return",
+    ],
+    eyebrowTh: "อ่านใจคนที่เดินจากไป",
+    eyebrowEn: "Reading The Heart That Walked Away",
+    articleTitleTh: "เขาจะกลับมาไหม: อ่านใจคนที่จากไปและสิ่งที่ขวางอยู่ตรงกลาง",
+    articleTitleEn: "Will They Come Back: Their Heart, And What Stands Between",
+    bodyTh: [
+      "คำถามว่า &quot;เขาจะกลับมาไหม&quot; มักเกิดในช่วงที่ยากที่สุดของความสัมพันธ์ คือช่วงที่เรื่องจบไปแล้วแต่ใจยังไม่จบตาม บางคนเจอการหายไปเงียบ ๆ โดยไม่มีคำอธิบาย บางคนเลิกกันแบบมีเหตุผลครบแต่ยังรู้สึกว่ามีอะไรค้างอยู่ การเลือกกองไพ่ในหน้านี้ช่วยให้คุณได้พักจากการไล่หาคำตอบด้วยตัวเองทั้งวัน แล้วมองภาพรวมจากระยะที่ไกลขึ้นสักหน่อย",
+      "กองไพ่ทั้งสี่อ่านสามชั้นเหมือนกัน ชั้นแรกคือใจเขาในตอนนี้จริง ๆ ไม่ใช่สิ่งที่เขาโพสต์หรือสิ่งที่คนอื่นเล่าให้ฟัง ชั้นที่สองคือสิ่งที่ขวางอยู่ตรงกลาง ซึ่งหลายครั้งไม่ใช่ความรู้สึก แต่เป็นศักดิ์ศรี เงื่อนไขชีวิต หรือคนรอบตัว และชั้นที่สามคือโอกาสกลับมาพร้อมคำแนะนำว่าควรทำอย่างไรต่อจากนี้",
+      "สิ่งที่อยากให้จำไว้คือ คำทำนายไม่ได้มีหน้าที่บอกให้คุณรอ ถ้าคำตอบที่ได้ทำให้คุณใช้ชีวิตไม่ได้ นั่นแปลว่าสิ่งที่ควรดูแลก่อนคือใจของคุณเอง ไม่ใช่การกลับมาของใคร และถ้าอยากได้คำอ่านที่เจาะจงกับเรื่องของคุณ ให้เปิดผังคืนดีเต็มรูปแบบกับแม่หมอ AI ต่อได้จากปุ่มท้ายคำทำนาย",
+    ],
+    bodyEn: [
+      "&quot;Will they come back?&quot; usually arrives in the hardest stretch of a relationship — the part where the story ended but your heart has not caught up. Some people are left with silence and no explanation. Others ended with every reason stated and still feel something unfinished. Choosing a pile gives you a break from chasing the answer alone all day and a chance to see the whole shape from further back.",
+      "All four piles read the same three layers. First, where their heart actually is now — not what they post, not what someone told you. Second, what stands between you, which is often not feeling at all but pride, circumstances, or the people around them. Third, the odds of a return, with advice on what to do next.",
+      "Worth remembering: a reading is not an instruction to wait. If the answer makes it impossible to live your life, the thing that needs care first is your own heart, not their return. For guidance shaped around your specific story, continue into a full reconciliation spread with the AI reader from the button beneath your reading.",
+    ],
+    faqsTh: [
+      {
+        q: "ไพ่บอกได้จริงไหมว่าเขาจะกลับมา?",
+        a: "ไพ่อ่านแนวโน้มจากพลังงานปัจจุบันของทั้งสองฝ่าย ไม่ได้ล็อกอนาคตไว้ตายตัว การกระทำของคุณและของเขาในระหว่างนี้มีผลต่อผลลัพธ์เสมอ",
+      },
+      {
+        q: "ควรทักไปหาเขาก่อนไหม?",
+        a: "ให้อ่านไพ่ใบที่สามซึ่งเป็นคำแนะนำให้ละเอียด บางกองจะชี้ว่าการเริ่มก่อนช่วยได้ บางกองจะบอกให้เว้นระยะ สิ่งสำคัญคือทักเพราะอยากคุย ไม่ใช่ทักเพื่อทดสอบว่าเขาจะตอบไหม",
+      },
+      {
+        q: "ถ้าคำตอบบอกว่าไม่กลับมาควรทำอย่างไร?",
+        a: "ให้ถือว่าเป็นการคืนเวลาให้ตัวเอง คำตอบที่ชัดเจนเจ็บกว่าในวันแรก แต่เบากว่าการรอแบบไม่มีกำหนดในระยะยาว และเปิดทางให้คนที่เหมาะกับคุณจริง ๆ เข้ามาได้",
+      },
+    ],
+    faqsEn: [
+      {
+        q: "Can tarot really say whether they will come back?",
+        a: "It reads the trajectory of present energy on both sides rather than fixing the future. What either of you does in the meantime still changes the outcome.",
+      },
+      {
+        q: "Should I message them first?",
+        a: "Read the third card closely — some piles say reaching out helps, others advise distance. Either way, message because you want to talk, not to test whether they reply.",
+      },
+      {
+        q: "What if the answer says they will not return?",
+        a: "Treat it as time returned to you. A clear answer hurts more on day one and weighs far less than indefinite waiting, and it clears the way for someone who actually fits.",
+      },
+    ],
+  },
+
+  "incoming-person": {
+    metaTitleTh: "Pick A Card คนที่กำลังจะเข้ามา",
+    metaTitleEn: "Pick A Card: Who Is Coming Next?",
+    metaDescTh:
+      "Pick A Card เลือกกองไพ่ดูคนที่กำลังจะเข้ามาในชีวิต พลังงานและนิสัยของเขา สัญญาณที่จะได้เจอ และสิ่งที่ต้องเตรียมใจ ด้วยไพ่ 1909 Rider-Waite ฟรี",
+    metaDescEn:
+      "Pick 1 of 4 tarot piles to meet the energy coming into your life: who they are, the signs of meeting, and what to prepare. Free 1909 Rider-Waite reading.",
+    keywordsTh: [
+      "คนที่กำลังจะเข้ามา",
+      "pick a card คนโสด",
+      "ดูดวงเนื้อคู่",
+      "ดูดวงความรักคนโสด",
+      "pick a card ความรักใหม่",
+    ],
+    keywordsEn: [
+      "who is coming into my life tarot",
+      "pick a card new love",
+      "future partner tarot reading",
+      "soulmate tarot free",
+    ],
+    eyebrowTh: "ทำความรู้จักคนที่ยังไม่ได้เจอ",
+    eyebrowEn: "Meeting Someone You Have Not Met Yet",
+    articleTitleTh: "คนที่กำลังจะเข้ามาในชีวิต: พลังงานของเขาและจังหวะที่จะได้เจอ",
+    articleTitleEn: "Who Is Coming Into Your Life: Their Energy And The Timing",
+    bodyTh: [
+      "หน้านี้ทำมาสำหรับคนโสดที่กำลังรอใครสักคน และสำหรับคนที่เพิ่งปิดบทเก่าไปแล้วอยากรู้ว่าบทใหม่จะหน้าตาเป็นอย่างไร สิ่งที่ไพ่อ่านไม่ใช่ชื่อหรือหน้าตาของคนคนนั้น แต่เป็นพลังงานและนิสัยของคนที่กำลังเดินเข้ามาในชีวิตคุณ รวมถึงบรรยากาศของการได้เจอกัน",
+      "คำอ่านแบ่งเป็นสามชั้น ชั้นแรกคือพลังงานของคนที่กำลังเข้ามา เขาเป็นคนแบบไหน พูดน้อยหรือพูดเยอะ อบอุ่นหรือจริงจัง ชั้นที่สองคือสัญญาณและจังหวะที่จะได้เจอ ว่าจะมาจากวงสังคม จากที่ทำงาน หรือจากที่ไกลตัว และชั้นที่สามคือสิ่งที่คุณต้องเตรียมใจไว้ก่อน เพื่อไม่ให้ความสัมพันธ์รอบใหม่ต้องเริ่มจากแผลเก่า",
+      "ข้อแนะนำจากประสบการณ์คนอ่านไพ่คือ อย่าใช้คำอ่านแบบนี้เป็นเช็กลิสต์ไล่จับผิดคนที่เข้ามา เพราะคนจริงย่อมไม่ตรงทุกข้อ ให้ใช้เป็นเข็มทิศว่าควรเปิดใจกับพลังงานแบบไหน และควรระวังแพตเทิร์นเดิมแบบไหนที่คุณมักเผลอกลับไปเลือกซ้ำ",
+    ],
+    bodyEn: [
+      "This page is for anyone single and waiting, and for anyone who has just closed an old chapter and wonders what the next one looks like. The cards do not read a name or a face. They read the energy and temperament of the person walking towards your life, and the atmosphere of how you meet.",
+      "The reading runs in three layers. First, the energy arriving: quiet or talkative, warm or serious. Second, the signs and timing — through your social circle, through work, or from somewhere far away. Third, what you should prepare, so the new connection does not have to start on top of an old wound.",
+      "One piece of practical advice: do not use a reading like this as a checklist to audit whoever appears. Real people never match every line. Use it as a compass for which energy to stay open to, and which old pattern you tend to choose again without noticing.",
+    ],
+    faqsTh: [
+      {
+        q: "ไพ่บอกได้ไหมว่าจะเจอเขาเมื่อไหร่?",
+        a: "ไพ่บอกบรรยากาศและจังหวะได้ชัดกว่าการระบุวันที่ เช่น จะเจอผ่านวงสังคมหรือช่วงที่คุณเริ่มออกไปทำสิ่งใหม่ การยึดวันที่แน่นอนมักทำให้พลาดสัญญาณจริงที่อยู่ตรงหน้า",
+      },
+      {
+        q: "ถ้าคนที่เข้ามาไม่ตรงกับคำทำนายเป๊ะ ๆ ควรทำอย่างไร?",
+        a: "คนจริงไม่เคยตรงทุกข้อ ให้ดูที่แก่นของพลังงาน เช่น ความสม่ำเสมอ ความจริงใจ และความรู้สึกปลอดภัยเมื่ออยู่ด้วย มากกว่ารายละเอียดปลีกย่อย",
+      },
+      {
+        q: "เปิดดูซ้ำบ่อย ๆ ได้ไหม?",
+        a: "เปิดซ้ำได้และไพ่จะถูกสับใหม่ทุกครั้ง แต่การเปิดทุกวันด้วยคำถามเดิมมักทำให้สับสนมากกว่าชัดเจน แนะนำให้เว้นสักหนึ่งถึงสองสัปดาห์แล้วค่อยกลับมาดู",
+      },
+    ],
+    faqsEn: [
+      {
+        q: "Can the cards tell me when we will meet?",
+        a: "They describe atmosphere and timing better than dates — through your social circle, say, or once you start doing something new. Fixing on a date usually makes you miss the real signal in front of you.",
+      },
+      {
+        q: "What if the person who shows up does not match exactly?",
+        a: "Real people never match every line. Look at the core of the energy — consistency, sincerity, and whether you feel safe — rather than the small details.",
+      },
+      {
+        q: "Can I read this repeatedly?",
+        a: "Yes, and the piles reshuffle every time. Still, asking the same question daily tends to confuse rather than clarify. Leave one to two weeks between readings.",
+      },
+    ],
+  },
 };
 
 export function pickACardTopicParams(): { slug: string }[] {
