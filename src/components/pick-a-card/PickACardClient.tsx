@@ -216,7 +216,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
         <div
           ref={topicRailRef}
           onScroll={handleTopicRailScroll}
-          className="flex flex-row gap-2 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-4 sm:gap-3 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible"
+          className="flex flex-row gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-4 sm:gap-4 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible"
         >
           {PICK_A_CARD_TOPICS.map((topic, topicCardIndex) => {
             const isActive = topic.id === activeTopic.id;
@@ -224,7 +224,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
              * การ์ดหัวข้อเป็น "แนวตั้ง" ตามสัดส่วนไพ่ (ภาพบน ชื่อล่าง)
              * ของเดิมเป็นแถบนอนยาวที่ภาพเล็กนิดเดียว เจ้าของบอกว่าดูยาวและไม่ได้สัดส่วน
              */
-            const cardClass = `group relative flex flex-col w-[33vw] max-w-[128px] shrink-0 snap-center sm:w-full sm:max-w-[132px] sm:mx-auto p-1.5 rounded-xl border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+            const cardClass = `group relative flex flex-col w-[36vw] max-w-[136px] shrink-0 snap-center sm:w-full sm:max-w-[140px] sm:mx-auto p-2 rounded-xl border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
               isActive
                 ? "bg-surface border-gold shadow-xs"
                 : "bg-inset/40 hover:bg-inset border-line/50 hover:border-line"
@@ -387,7 +387,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
             แท่นกองไพ่ 4 กอง — จอเล็กเป็นแถวปัดนิ้วแบบเดียวกับแถบหัวข้อและหน้าแรก
             ได้การ์ดใหญ่ขึ้นเต็มตา และเห็นกองถัดไปโผล่ขอบเป็นสัญญาณว่าปัดต่อได้
           */}
-          <div className="flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible">
+          <div className="flex flex-row gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible">
             {activeTopic.slots.map((pile) => {
               const styling = crystalColorMap[pile.number] || crystalColorMap[1];
               return (
@@ -520,7 +520,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
               ⚠️ ไพ่พลิกด้วย 3D (perspective + rotateY) จึงต้องเผื่อช่องว่างบน/ล่าง (pt/pb)
               ให้เงาและมุมไพ่ตอนพลิกไม่ถูกขอบกล่องเลื่อนเฉือน — ห้ามลด padding ชุดนี้ลง
             */}
-            <div className="flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pt-1 pb-3 sm:grid sm:grid-cols-3 sm:gap-6 sm:justify-items-center sm:mx-0 sm:px-0 sm:pt-0 sm:pb-0 sm:overflow-visible">
+            <div className="flex flex-row gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pt-1 pb-3 sm:grid sm:grid-cols-3 sm:gap-5 sm:justify-items-center sm:mx-0 sm:px-0 sm:pt-0 sm:pb-0 sm:overflow-visible">
               {reading.cards.map((item, idx) => {
                 const isFlipped = revealedIndices.has(idx);
                 const positionLabel = isEnglish ? item.positionEn : item.positionTh;
@@ -528,10 +528,14 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 return (
                   <div
                     key={`${selectedSlot.id}-card-${idx}-${item.cardId}`}
-                    className="flex flex-col items-center space-y-2.5 w-[70vw] max-w-[220px] shrink-0 snap-center sm:w-full"
+                    /*
+                      แต่ละใบมี "ช่องของตัวเอง" — กรอบบาง ๆ พร้อมพื้นหลังอ่อน
+                      ทำให้ไพ่ดูเป็นสัดเป็นส่วนแทนที่จะลอยติดกันเป็นพืด
+                    */
+                    className="flex flex-col items-center space-y-2.5 w-[66vw] max-w-[212px] shrink-0 snap-center sm:w-full p-3 rounded-2xl border border-line/60 bg-surface/50"
                   >
                     {/* Position Label Tag */}
-                    <div className="px-3 py-1 rounded-full bg-inset border border-line text-[11.5px] font-serif-th text-muted font-medium text-center truncate w-full">
+                    <div className="px-3 py-1 rounded-full bg-inset border border-line/80 text-[11.5px] font-serif-th text-muted font-medium text-center truncate w-full">
                       {positionLabel}
                     </div>
 
