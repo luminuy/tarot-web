@@ -14,6 +14,14 @@ import { recordEvent, recordEvents } from "@/lib/stats/record";
 import { DAILY_LIMIT, GUEST_BLOCK_REASON, REQUIRE_SIGNUP_TO_READ, isStandardSpread, isMasterPersona } from "@/lib/entitlement/limits";
 import { SIGN_IN_GATE_REASON, getSignInGateMessage, isSignInRequired } from "@/lib/entitlement/signin-gate";
 import { createCommitment, normalizeClientSeed } from "@/lib/tarot/shuffle";
+import {
+  DERIVED_SPREAD_ID,
+  deriveDrawn,
+  derivedSpreadIdFor,
+  pinDerivedSpec,
+  type DerivedDrawSpec,
+} from "@/lib/reading/derived-draw";
+import { bangkokDayKey } from "@/lib/time/bangkok";
 
 export const runtime = "nodejs";
 
@@ -44,6 +52,30 @@ const BodySchema = z.object({
       hoped: noInjection("สิ่งที่หวัง").max(300).optional(),
     })
     .default({}),
+  /*
+   * 🎯 ข้อมูลตั้งต้นของ "ไพ่ที่คำนวณได้" (คลื่นที่ 2)
+   *
+   * ไคลเอนต์ส่งได้แค่ **ข้อมูลตั้งต้น** เท่านั้น (วันเกิด · รหัสหัวข้อ+กอง)
+   * เซิร์ฟเวอร์เป็นผู้คำนวณว่าไพ่ใบไหนออก และตรึงสเปกนี้ลง record ตั้งแต่ตรงนี้
+   * ห้ามเพิ่มฟิลด์ที่ให้ไคลเอนต์ระบุ "เลขไพ่" หรือ "วันที่" เข้ามาในนี้เด็ดขาด
+   * (วันที่ของสำรับประจำวันอ่านจากนาฬิกาเซิร์ฟเวอร์เท่านั้น ไม่งั้นไล่เลื่อนวันหาไพ่ที่ถูกใจได้)
+   */
+  derive: z
+    .discriminatedUnion("kind", [
+      z.object({
+        kind: z.literal("birth-card"),
+        day: z.number().int().min(1).max(31),
+        month: z.number().int().min(1).max(12),
+        year: z.number().int().min(1800).max(2743),
+        era: z.enum(["be", "ce"]),
+      }),
+      z.object({
+        kind: z.literal("pick-a-card"),
+        topicId: z.string().min(1).max(64),
+        slotIndex: z.number().int().min(0).max(15),
+      }),
+    ])
+    .optional(),
 });
 
 /**
@@ -97,6 +129,41 @@ export async function POST(request: Request) {
       { error: parsed.data.lang === "en" ? "Spread layout not found" : "ไม่พบรูปแบบการวางไพ่นี้" },
       { status: 404 }
     );
+  }
+
+  /* ── 🎯 ไพ่ที่คำนวณได้ — ตรึงสเปกตั้งแต่เปิดเซสชัน (คลื่นที่ 2) ─────────────────
+   *
+   * ต้องจับคู่กันเสมอทั้งสองทาง:
+   *   มีสเปก แต่เปิดผังอื่น  ➔ ปฏิเสธ (ไม่งั้นไพ่ที่คำนวณได้จะไปโผล่ในผังที่ไม่ได้ออกแบบมารับ)
+   *   เปิดผังของสเปก แต่ไม่ส่งสเปก ➔ ปฏิเสธ (ไม่งั้น `/shuffle` จะตกไป "จั่วสุ่ม" เงียบ ๆ
+   *   แล้วหน้าเว็บจะเล่าถึงไพ่วันเกิด/ไพ่ประจำกองที่ไม่ตรงกับไพ่ที่เปิดออกมาจริง)
+   */
+  const derive = parsed.data.derive;
+  const requiresDerivation = (Object.values(DERIVED_SPREAD_ID) as string[]).includes(spreadId);
+  let derivation: DerivedDrawSpec | undefined;
+
+  if (derive) {
+    if (derivedSpreadIdFor(derive.kind) !== spreadId) {
+      return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, { status: 400 });
+    }
+    derivation = pinDerivedSpec(derive, bangkokDayKey());
+    /*
+     * คำนวณทดทันทีตั้งแต่ตรงนี้ — วันเกิดที่ไม่มีอยู่จริง (30 ก.พ.) หรือรหัสกองที่ไม่มี
+     * ต้องถูกปฏิเสธ **ก่อน** ผู้ใช้เสียสิทธิ์เปิดไพ่ของวันไปกับเซสชันที่ยังไงก็เปิดไพ่ไม่ออก
+     */
+    if (!deriveDrawn(derivation)) {
+      return NextResponse.json(
+        {
+          error:
+            parsed.data.lang === "en"
+              ? "Those details do not resolve to a card. Please check and try again."
+              : "ข้อมูลที่กรอกมาคำนวณเป็นไพ่ไม่ได้ กรุณาตรวจสอบแล้วลองใหม่อีกครั้ง",
+        },
+        { status: 400 },
+      );
+    }
+  } else if (requiresDerivation) {
+    return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, { status: 400 });
   }
 
   // ตรวจความปลอดภัยของคำถามก่อนทำอย่างอื่นทั้งหมด (รวมทุกฟิลด์ที่ผู้ใช้กรอก: P0-5 fix)
@@ -220,6 +287,7 @@ export async function POST(request: Request) {
     commitment,
     serverSeed,
     clientSeed: parsed.data.clientSeed ? normalizeClientSeed(parsed.data.clientSeed) : undefined,
+    derivation,
     createdAt: Date.now(),
   };
 

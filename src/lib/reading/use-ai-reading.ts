@@ -31,10 +31,15 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { readingReducer, READING_INITIAL } from "@/components/home/flow-reading";
 import type { DrawnSlotCard } from "@/components/spread/SpreadBoard";
 import type { Category } from "@/data/cards/types";
-import { getSpread } from "@/data/spreads";
 import type { UpgradeReason } from "@/lib/entitlement/copy";
 import { useLocale } from "@/lib/i18n";
 import { createClientSeed } from "@/lib/tarot/client-seed";
+/*
+ * ⚠️ **ต้องเป็น `import type` เท่านั้น** — `derived-draw.ts` เป็นโมดูลฝั่งเซิร์ฟเวอร์ที่ลาก
+ * สำรับไพ่เต็มและคลังคำอ่าน Pick A Card มาด้วย · เปลี่ยนเป็น import ธรรมดาเมื่อไหร่
+ * บันเดิลของทุกหน้าที่ใช้ท่อนี้จะพองขึ้นทันทีหลายร้อย KB (ชนิดข้อมูลถูกลบทิ้งตอนคอมไพล์ แต่ค่าไม่ถูกลบ)
+ */
+import type { DerivedDrawDetail, DerivedDrawInput } from "@/lib/reading/derived-draw";
 
 /** หลักฐาน Provably Fair ที่เซิร์ฟเวอร์เปิดเผยหลังอ่านจบ */
 export interface ReadingProof {
@@ -43,6 +48,8 @@ export interface ReadingProof {
   commitment?: string;
   pickedIndices?: number[];
   deckSize?: number;
+  /** ไม่ว่าง = ไพ่ชุดนี้คำนวณมา ไม่ได้จั่วมา — ห้ามเอาไปตรวจด้วยแผง Provably Fair ของการจั่ว */
+  derivation?: { kind: string };
 }
 
 export interface AiReadingRequest {
@@ -66,6 +73,13 @@ export interface AiReadingRequest {
    * หน้าพวกนั้นอ่าน `rawDrawn` แล้วเปิดสำรับ `deck-th` ของตัวเองแทน
    */
   resolveCards?: boolean;
+  /**
+   * ข้อมูลตั้งต้นของ "ไพ่ที่คำนวณได้" (วันเกิด · หัวข้อ+กองของ Pick A Card)
+   *
+   * ส่งค่านี้เมื่อไหร่ เซิร์ฟเวอร์จะ **คำนวณไพ่เอง** และไม่จั่วสุ่มเลย
+   * `spreadId` ต้องเป็นผังภายในที่คู่กับ `kind` เสมอ ไม่งั้นเซิร์ฟเวอร์ปฏิเสธตั้งแต่ `/start`
+   */
+  derive?: DerivedDrawInput;
 }
 
 /** ไพ่ที่เซิร์ฟเวอร์เปิดให้ ก่อนแปลงเป็นไพ่เต็มใบ */
@@ -75,6 +89,21 @@ export interface RawDrawnCard {
   isReversed: boolean;
 }
 
+/**
+ * ไพ่ที่เซิร์ฟเวอร์แปลงชื่อ/ภาพมาให้แล้วในคำตอบของ `/shuffle`
+ *
+ * หน้าที่ต้องการแค่ "ชื่อกับภาพ" ใช้ชุดนี้ได้เลย ไม่ต้องเปิดสำรับฝั่งเบราว์เซอร์
+ * (ทั้ง `@/data/cards` และ `@/data/cards/deck-th` ล้วนเป็นก้อนใหญ่)
+ */
+export interface ServerDrawnCard {
+  id: string;
+  nameTh: string;
+  nameEn: string;
+  image: string;
+  element: string;
+  keywords: string[];
+}
+
 export interface AiReadingController {
   /** สถานะคำอ่าน (ใช้ตัวลดตัวเดียวกับหน้าแรก จึงกันสถานะขัดแย้งในตัวเองให้แล้ว) */
   state: ReturnType<typeof readingReducer>;
@@ -82,6 +111,10 @@ export interface AiReadingController {
   cards: DrawnSlotCard[];
   /** ไพ่ดิบจากเซิร์ฟเวอร์ (มีเสมอ แม้ตอนสั่งไม่ให้แปลงเป็นไพ่เต็มใบ) */
   rawDrawn: RawDrawnCard[];
+  /** ชื่อ/ภาพไพ่ที่เซิร์ฟเวอร์แปลงมาให้แล้ว (มีเสมอ) — เบากว่าการเปิดสำรับเองในเบราว์เซอร์ */
+  serverCards: ServerDrawnCard[];
+  /** รายละเอียดการคำนวณไพ่ เมื่อรอบนี้เป็น "ไพ่ที่คำนวณได้" — ไม่งั้นเป็น null */
+  derived: DerivedDrawDetail | null;
   readingId: string | null;
   proof: ReadingProof | null;
   /** ไม่ใช่ null = ถูกกำแพงสิทธิ์กั้น ให้หน้าเปิด `AccessDialog` ด้วยเหตุผลนี้ */
@@ -108,6 +141,8 @@ export function useAiReading(): AiReadingController {
   const [state, dispatch] = useReducer(readingReducer, READING_INITIAL);
   const [cards, setCards] = useState<DrawnSlotCard[]>([]);
   const [rawDrawn, setRawDrawn] = useState<RawDrawnCard[]>([]);
+  const [serverCards, setServerCards] = useState<ServerDrawnCard[]>([]);
+  const [derived, setDerived] = useState<DerivedDrawDetail | null>(null);
   const [readingId, setReadingId] = useState<string | null>(null);
   const [proof, setProof] = useState<ReadingProof | null>(null);
   const [gate, setGate] = useState<UpgradeReason | null>(null);
@@ -122,6 +157,8 @@ export function useAiReading(): AiReadingController {
     dispatch({ type: "reset" });
     setCards([]);
     setRawDrawn([]);
+    setServerCards([]);
+    setDerived(null);
     setReadingId(null);
     setProof(null);
     setGate(null);
@@ -133,23 +170,22 @@ export function useAiReading(): AiReadingController {
 
   const run = useCallback(
     async (request: AiReadingRequest) => {
-      const spread = getSpread(request.spreadId);
-      if (!spread) {
-        dispatch({
-          type: "fail",
-          message: isEnglish
-            ? "This spread is unavailable. Please reload and try again."
-            : "ไม่พบผังนี้ กรุณากดโหลดใหม่อีกครั้ง",
-        });
-        return;
-      }
-
       abortRef.current?.abort();
       const abortController = new AbortController();
       abortRef.current = abortController;
 
       setGate(null);
       setCrisisMessage(null);
+      /*
+       * ⚠️ ล้างไพ่ของรอบก่อนทิ้งก่อนเสมอ — ไม่ใช่รอให้ไพ่ชุดใหม่มาทับ
+       * ไม่งั้นระหว่างรอเซิร์ฟเวอร์ หน้าเว็บจะยังถือไพ่ของรอบที่แล้วอยู่ แล้วเอาไปเทียบ/แสดงผิดรอบ
+       * (หน้าไพ่วันเกิดเทียบรหัสไพ่กับผลคำนวณรอบใหม่ ➔ จะฟ้องว่า "ยืนยันไพ่ไม่สำเร็จ" ทั้งที่ยังไม่ได้ไพ่)
+       */
+      setCards([]);
+      setRawDrawn([]);
+      setServerCards([]);
+      setDerived(null);
+      setProof(null);
       setIsPreparing(true);
       dispatch({ type: "clearError" });
 
@@ -170,7 +206,7 @@ export function useAiReading(): AiReadingController {
           signal: abortController.signal,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            spreadId: spread.id,
+            spreadId: request.spreadId,
             question: request.question,
             personaId,
             nickname: request.nickname,
@@ -178,6 +214,7 @@ export function useAiReading(): AiReadingController {
             intake: {},
             lang: locale,
             clientSeed: freshSeed,
+            derive: request.derive,
           }),
         });
         const startData = await startRes.json().catch(() => ({}));
@@ -247,11 +284,24 @@ export function useAiReading(): AiReadingController {
           }
         );
         setRawDrawn(raw);
+        setServerCards(Array.isArray(shuffleData.cards) ? (shuffleData.cards as ServerDrawnCard[]) : []);
+        setDerived((shuffleData.derived as DerivedDrawDetail | undefined) ?? null);
 
         if (request.resolveCards === false) {
           setIsPreparing(false);
         } else {
-        const { cardByIndex } = await import("@/data/cards");
+        /*
+         * ⚠️ ทั้งสำรับไพ่และคลังผังถูกโหลด **ตรงนี้เท่านั้น** ไม่ใช่ตอนเปิดหน้า
+         * ข้อมูลผังทั้งก้อนหนักราว 17 KB gzip · หน้าที่ใช้ `resolveCards: false`
+         * (ไพ่ใบเดียว · Pick A Card · ไพ่วันเกิด) จึงไม่ต้องจ่ายน้ำหนักนี้เลยสักไบต์
+         * ความถูกต้องของรหัสผังยังถูกตรวจที่เซิร์ฟเวอร์อยู่แล้ว (`/start` ตอบ 404 ถ้าไม่มีผังนั้น)
+         */
+        const [{ cardByIndex }, { getSpread }] = await Promise.all([
+          import("@/data/cards"),
+          import("@/data/spreads"),
+        ]);
+        const spread = getSpread(request.spreadId);
+        if (!spread) throw new Error(missingCardMessage);
         const drawn: DrawnSlotCard[] = shuffleData.drawn.map(
           (d: { order?: number; cardIndex?: number | null; isReversed?: boolean }) => {
             // 🃏 กฎเหล็กข้อ 14 — หาไพ่ไม่เจอให้ผู้ใช้โหลดใหม่ ห้ามเดาใบแทนเด็ดขาด
@@ -383,6 +433,8 @@ export function useAiReading(): AiReadingController {
     state,
     cards,
     rawDrawn,
+    serverCards,
+    derived,
     readingId,
     proof,
     gate,

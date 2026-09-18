@@ -4,6 +4,7 @@ import { z } from "zod";
 import { cardByIndex, DECK_SIZE } from "@/data/cards";
 import { getSpread } from "@/data/spreads";
 import { drawCards, normalizeClientSeed, verifyCommitment } from "@/lib/tarot/shuffle";
+import { deriveDrawn, type DerivedDrawDetail } from "@/lib/reading/derived-draw";
 import { isRequestAuthorizedOrigin } from "@/lib/security/anti-theft";
 import { getReading, updateReading, persistReading } from "@/server/store";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/utils/rate-limit";
@@ -108,6 +109,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
   }
 
+  /*
+   * รายละเอียดของไพ่ที่ "คำนวณได้" (ไพ่วันเกิด · สำรับประจำวันของกอง)
+   * คำนวณซ้ำได้เสมอจากสเปกที่ตรึงไว้ จึงส่งกลับได้ทั้งรอบแรกและรอบที่ยิงซ้ำ
+   */
+  const derivedDetail: DerivedDrawDetail | undefined = record.derivation
+    ? deriveDrawn(record.derivation)?.detail
+    : undefined;
+
   // P1-3 Replay Guard: If cards are already drawn, return the existing drawn cards
   if (record.drawn && record.drawn.length > 0) {
     const { signReadingSessionToken } = await import("@/lib/security/session-token");
@@ -136,54 +145,94 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       drawn: record.drawn,
       sessionToken,
       cards: resolvedCards,
+      derived: derivedDetail,
     });
   }
 
-  // 🎲 หลัก provably-fair: เมล็ดของผู้ใช้ต้องมาจากผู้ใช้เท่านั้น
-  // เดิมบรรทัดนี้ตกไป `normalizeClientSeed(undefined)` ซึ่งสุ่มให้เองฝั่งเซิร์ฟเวอร์
-  // ทำให้เซิร์ฟเวอร์คุมทั้งสองเมล็ด → ไล่สุ่มจนได้ผลที่ต้องการแล้วยังโชว์ commitment
-  // ที่ตรวจผ่านได้ · ตอนนี้ถ้าไม่มีเมล็ดทั้งใน record และใน body ให้ปฏิเสธไปเลย
-  // (แนวเดียวกับกฎข้อ 14 — ขอให้โหลดใหม่ ดีกว่าแอบทำอะไรที่ผู้ใช้ตรวจสอบไม่ได้)
+  /* ── 🎯 เส้นทางที่ 1: ไพ่ที่ "คำนวณได้" ไม่ใช่ไพ่ที่จั่ว (คลื่นที่ 2) ──────────────
+   *
+   * เซสชันที่ตรึงสเปกไว้ตั้งแต่ `/start` (ไพ่ประจำตัวจากวันเกิด · สำรับประจำวันของกอง
+   * Pick A Card) **ไม่แตะ `drawCards()` เลยสักครั้ง** และไม่รับ `pickedIndices` ด้วย
+   * เพราะไพ่ชุดนี้ไม่ได้มาจากการสุ่ม การปล่อยให้ปนกันจะทำให้คำว่า "ตรวจสอบได้"
+   * ของทั้งสองเส้นทางเสียความหมายพร้อมกัน (ดู `src/lib/reading/derived-draw.ts`)
+   */
+  let drawn: import("@/lib/tarot/shuffle").DrawnCard[];
   let clientSeed = record.clientSeed;
-  if (!clientSeed) {
-    const supplied = parsed.data.clientSeed;
-    if (typeof supplied !== "string" || supplied.length === 0) {
+  const pickedIndices = record.derivation ? undefined : parsed.data.pickedIndices;
+
+  if (record.derivation) {
+    if (parsed.data.pickedIndices && parsed.data.pickedIndices.length > 0) {
       return NextResponse.json(
         {
-          error: "เซสชันนี้ไม่มีเมล็ดสุ่มของคุณ กรุณาโหลดหน้าใหม่แล้วเริ่มดูดวงอีกครั้ง",
-          code: "CLIENT_SEED_REQUIRED",
+          error:
+            record.lang === "en"
+              ? "This reading's cards are calculated, not picked. Please reload and try again."
+              : "ไพ่ของการเปิดครั้งนี้มาจากการคำนวณ ไม่ได้มาจากการเลือกในพัด กรุณาโหลดใหม่อีกครั้ง",
+          code: "DERIVED_SESSION_NO_PICK",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    // เซสชันเก่าที่เริ่มก่อน /start จะผูกเมล็ดให้ ยังรับได้จาก body
-    // (`updateReading` ด้านล่างจะตรึงเมล็ดลง record ให้เอง คำขอซ้ำจึงได้ผลเดิม)
-    clientSeed = normalizeClientSeed(supplied);
-  }
-  const pickedIndices = parsed.data.pickedIndices;
 
-  let drawn: import("@/lib/tarot/shuffle").DrawnCard[];
-  try {
-    drawn =
-      pickedIndices && pickedIndices.length > 0
-        ? drawCards({
-            serverSeed: record.serverSeed,
-            clientSeed,
-            count: spread.positions.length,
-            pickedIndices,
-            deckSize: DECK_SIZE,
-          })
-        : record.drawn ??
-          drawCards({
-            serverSeed: record.serverSeed,
-            clientSeed,
-            count: spread.positions.length,
-            pickedIndices,
-            deckSize: DECK_SIZE,
-          });
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : "การเลือกไพ่ไม่ถูกต้อง";
-    return NextResponse.json({ error: errorMsg }, { status: 400 });
+    // 🃏 กฎเหล็กข้อ 14 — คำนวณไม่ออก = ขอให้ผู้ใช้โหลดใหม่ ห้ามหยิบไพ่ใบไหนมาแทน
+    const derived = deriveDrawn(record.derivation);
+    if (!derived) {
+      return NextResponse.json(
+        {
+          error:
+            record.lang === "en"
+              ? "Card data not found. Please refresh and try again."
+              : "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง",
+          code: "CARD_DATA_NOT_FOUND",
+        },
+        { status: 500 },
+      );
+    }
+    drawn = derived.drawn;
+  } else {
+    // 🎲 เส้นทางที่ 2 (เส้นหลักของทั้งเว็บ) — หลัก provably-fair: เมล็ดของผู้ใช้ต้องมาจากผู้ใช้เท่านั้น
+    // เดิมบรรทัดนี้ตกไป `normalizeClientSeed(undefined)` ซึ่งสุ่มให้เองฝั่งเซิร์ฟเวอร์
+    // ทำให้เซิร์ฟเวอร์คุมทั้งสองเมล็ด → ไล่สุ่มจนได้ผลที่ต้องการแล้วยังโชว์ commitment
+    // ที่ตรวจผ่านได้ · ตอนนี้ถ้าไม่มีเมล็ดทั้งใน record และใน body ให้ปฏิเสธไปเลย
+    // (แนวเดียวกับกฎข้อ 14 — ขอให้โหลดใหม่ ดีกว่าแอบทำอะไรที่ผู้ใช้ตรวจสอบไม่ได้)
+    if (!clientSeed) {
+      const supplied = parsed.data.clientSeed;
+      if (typeof supplied !== "string" || supplied.length === 0) {
+        return NextResponse.json(
+          {
+            error: "เซสชันนี้ไม่มีเมล็ดสุ่มของคุณ กรุณาโหลดหน้าใหม่แล้วเริ่มดูดวงอีกครั้ง",
+            code: "CLIENT_SEED_REQUIRED",
+          },
+          { status: 400 }
+        );
+      }
+      // เซสชันเก่าที่เริ่มก่อน /start จะผูกเมล็ดให้ ยังรับได้จาก body
+      // (`updateReading` ด้านล่างจะตรึงเมล็ดลง record ให้เอง คำขอซ้ำจึงได้ผลเดิม)
+      clientSeed = normalizeClientSeed(supplied);
+    }
+
+    try {
+      drawn =
+        pickedIndices && pickedIndices.length > 0
+          ? drawCards({
+              serverSeed: record.serverSeed,
+              clientSeed,
+              count: spread.positions.length,
+              pickedIndices,
+              deckSize: DECK_SIZE,
+            })
+          : record.drawn ??
+            drawCards({
+              serverSeed: record.serverSeed,
+              clientSeed,
+              count: spread.positions.length,
+              pickedIndices,
+              deckSize: DECK_SIZE,
+            });
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "การเลือกไพ่ไม่ถูกต้อง";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
+    }
   }
 
   if (!verifyCommitment(record.serverSeed, record.commitment)) {
@@ -235,5 +284,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     drawn,
     sessionToken,
     cards: resolvedCards,
+    derived: derivedDetail,
   });
 }

@@ -33,9 +33,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
-import { drawAnchors } from "@/lib/pick-a-card/draw-order";
-import { composeReading, drawPicks, initialDraw, possibleCombinations } from "@/lib/pick-a-card/compose";
-import { dailyDraw, dayLabel } from "@/lib/pick-a-card/daily";
+import { composeFromDerived, possibleCombinations } from "@/lib/pick-a-card/compose";
+import { dayLabel, seededOrder } from "@/lib/pick-a-card/daily";
+import { deriveDrawn } from "@/lib/reading/derived-draw";
 import { pickACardTopicMetadata, pickACardTopicParams } from "@/app/_shared/pages/pick-a-card-topic";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
@@ -66,140 +66,201 @@ function stripComments(src: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// 1 + 2. ไม่ซ้ำช่องเดิม และในรอบเดียวกันทุกกองต้องได้คนละชิ้น
+// เครื่องมือร่วม — เรียกตัวคำนวณฝั่งเซิร์ฟเวอร์เหมือนที่ `/api/reading/[id]/shuffle` เรียก
+// ---------------------------------------------------------------------------
+/** คีย์วันแบบ `YYYY-MM-DD` ที่เลื่อนจาก 2026-09-18 ไป `offset` วัน */
+function dayKeyAt(offset: number): string {
+  return new Date(Date.UTC(2026, 8, 18 + offset)).toISOString().slice(0, 10);
+}
+
+/** ไพ่ที่เซิร์ฟเวอร์จะเปิดให้กองนั้นในวันนั้น — `null` = คำนวณไม่ออก (ถือว่าตกด่าน) */
+function pileCards(topicId: string, slotIndex: number, dayKey: string): number[] | null {
+  const derived = deriveDrawn({ kind: "pick-a-card", topicId, slotIndex, dayKey });
+  return derived ? derived.drawn.map((d) => d.cardIndex) : null;
+}
+
+// ---------------------------------------------------------------------------
+// 1. คำนวณซ้ำได้เป๊ะ — สเปกเดิมต้องได้ไพ่ชุดเดิมทุกครั้ง
 // ---------------------------------------------------------------------------
 {
   const offenders: string[] = [];
-  for (const poolSize of [4, 5, 6, 8, 12]) {
-    const slotCount = 4;
-    let order = Array.from({ length: slotCount }, (_, i) => i);
-    for (let round = 0; round < 300; round++) {
-      const next = drawAnchors(poolSize, slotCount, order);
+  for (const topic of PICK_A_CARD_TOPICS) {
+    const first = JSON.stringify(deriveDrawn({ kind: "pick-a-card", topicId: topic.id, slotIndex: 0, dayKey: dayKeyAt(0) }));
+    for (let round = 0; round < 50; round++) {
+      const again = JSON.stringify(deriveDrawn({ kind: "pick-a-card", topicId: topic.id, slotIndex: 0, dayKey: dayKeyAt(0) }));
+      if (again !== first) {
+        offenders.push(`   ${topic.id}: รอบที่ ${round + 1} ได้คนละชุดกับรอบแรก`);
+        break;
+      }
+    }
+    if (first === "undefined") offenders.push(`   ${topic.id}: คำนวณไพ่ไม่ออกเลย`);
+  }
+  check(
+    `สำรับของเซิร์ฟเวอร์คำนวณซ้ำได้เป๊ะ (${PICK_A_CARD_TOPICS.length} หัวข้อ × 50 รอบ)`,
+    offenders.length === 0,
+    offenders.join("\n") + "\n   ➔ ถ้าไม่ตรง ผู้ใช้ที่กดซ้ำ/โหลดใหม่จะได้ไพ่คนละชุดกับที่แม่หมอกำลังอ่านอยู่"
+  );
+}
 
-      if (next.length !== slotCount || next.some((v) => v < 0 || v >= poolSize)) {
-        offenders.push(`   คลัง ${poolSize} รอบ ${round}: ดัชนีหลุดขอบคลัง → [${next.join(",")}]`);
+// ---------------------------------------------------------------------------
+// 2. วันเดียวกัน — ทุกกองต้องได้ไพ่คนละชุด
+// ---------------------------------------------------------------------------
+{
+  const offenders: string[] = [];
+  for (const topic of PICK_A_CARD_TOPICS) {
+    for (let dayOffset = 0; dayOffset < 30; dayOffset++) {
+      const dayKey = dayKeyAt(dayOffset);
+      const sets = topic.slots.map((_, slot) => pileCards(topic.id, slot, dayKey));
+      if (sets.some((set) => set === null)) {
+        offenders.push(`   ${topic.id} ${dayKey}: มีกองที่คำนวณไพ่ไม่ออก`);
         break;
       }
-      if (new Set(next).size !== slotCount) {
-        offenders.push(`   คลัง ${poolSize} รอบ ${round}: มีสองกองได้คำอ่านชิ้นเดียวกัน → [${next.join(",")}]`);
+      const keys = sets.map((set) => set!.join("+"));
+      if (new Set(keys).size !== keys.length) {
+        offenders.push(`   ${topic.id} ${dayKey}: มีสองกองได้ไพ่ชุดเดียวกัน → ${keys.join(" | ")}`);
         break;
       }
-      const stuck = next.findIndex((value, index) => value === order[index]);
-      if (stuck >= 0) {
-        offenders.push(
-          `   คลัง ${poolSize} รอบ ${round}: กองที่ ${stuck + 1} ยังได้ชิ้นเดิม (${next[stuck]}) — ผู้ใช้จะเจอไพ่ซ้ำ`
-        );
+      // ไพ่หลัก (ใบแรก) ต้องคนละใบทุกกองด้วย ไม่ใช่แค่ "ชุดไม่เหมือนกัน"
+      const anchors = sets.map((set) => set![0]);
+      if (new Set(anchors).size !== anchors.length) {
+        offenders.push(`   ${topic.id} ${dayKey}: ไพ่หลักซ้ำกันระหว่างกอง → [${anchors.join(",")}]`);
         break;
       }
-      order = next;
     }
   }
   check(
-    "จั่วรอบใหม่แล้วไม่มีกองไหนได้คำอ่านชิ้นเดิมซ้ำรอบก่อน และทุกกองได้คนละชิ้น (คลัง 4–12 · 300 รอบต่อขนาด)",
+    "วันเดียวกันทุกกองได้ไพ่คนละชุด และไพ่หลักไม่ซ้ำกัน (ทุกหัวข้อ × 30 วัน)",
     offenders.length === 0,
-    offenders.join("\n")
+    offenders.slice(0, 5).join("\n")
   );
 }
 
 // ---------------------------------------------------------------------------
-// 3. เล่นยาวแล้วกองแรกต้องเข้าถึงคลังได้ครบทุกชิ้น
+// 3. วันใหม่ต้องไม่ซ้ำเมื่อวาน — คำสัญญาเดิมของ INC-0198b ในเวอร์ชันเซิร์ฟเวอร์
 // ---------------------------------------------------------------------------
 {
-  const poolSize = PICK_A_CARD_TOPICS[0].pool.length;
-  let order = Array.from({ length: 4 }, (_, i) => i);
-  const seenInFirstSlot = new Set<number>();
-  for (let round = 0; round < 2000; round++) {
-    order = drawAnchors(poolSize, 4, order);
-    seenInFirstSlot.add(order[0]);
+  const offenders: string[] = [];
+  for (const topic of PICK_A_CARD_TOPICS) {
+    for (let slot = 0; slot < topic.slots.length; slot++) {
+      for (let dayOffset = 1; dayOffset <= 60; dayOffset++) {
+        const today = pileCards(topic.id, slot, dayKeyAt(dayOffset));
+        const yesterday = pileCards(topic.id, slot, dayKeyAt(dayOffset - 1));
+        if (!today || !yesterday) {
+          offenders.push(`   ${topic.id} กองที่ ${slot + 1}: คำนวณไพ่ไม่ออก`);
+          break;
+        }
+        const repeated = today.filter((cardIndex, i) => cardIndex === yesterday[i]);
+        if (repeated.length > 0) {
+          offenders.push(
+            `   ${topic.id} กองที่ ${slot + 1} วันที่ ${dayKeyAt(dayOffset)}: ตำแหน่งเดิมได้ไพ่เดิมกับเมื่อวาน (${repeated.join(",")})`
+          );
+          break;
+        }
+      }
+    }
   }
   check(
-    `กองแรกเข้าถึงคลังได้ครบทุกชิ้นเมื่อเล่นยาว 2,000 รอบ (เห็นแล้ว ${seenInFirstSlot.size}/${poolSize} ชิ้น)`,
-    seenInFirstSlot.size === poolSize,
-    `   เห็นเพียง [${[...seenInFirstSlot].sort((a, b) => a - b).join(", ")}] — ถ้าเข้าถึงได้แค่ไม่กี่ชิ้น ผู้ใช้จะรู้สึกว่า "ก็ซ้ำอยู่ดี"`
+    "เปิดกองเดิมวันถัดไปต้องไม่ได้ไพ่ใบเดิมในตำแหน่งเดิม (ทุกหัวข้อ × ทุกกอง × 60 วันติด)",
+    offenders.length === 0,
+    offenders.slice(0, 5).join("\n") +
+      "\n   ➔ นี่คือเรื่องที่เจ้าของทักไว้ตรง ๆ ว่า \"เลือกกองเดิม ไพ่ซ้ำ ซ้ำตลอด\" (INC-0198b)"
   );
 }
 
 // ---------------------------------------------------------------------------
-// 4. หน้า Pick A Card ต้องยังใช้ตัวจั่วนี้จริง (กันเผลอกลับไปผูกกองตายตัว)
-// ---------------------------------------------------------------------------
-{
-  if (!fs.existsSync(CLIENT)) {
-    check("หาไฟล์ PickACardClient.tsx เจอ", false, `   ไม่พบ ${path.relative(ROOT, CLIENT)} — ถ้าย้ายไฟล์จริงให้แก้ด่านนี้ด้วย`);
-  } else {
-    const src = fs.readFileSync(CLIENT, "utf-8");
-    check(
-      "หน้า Pick A Card ยังจั่วใหม่ทุกรอบและประกอบคำอ่านจากคลัง (เรียก drawPicks + composeReading จริง)",
-      /drawPicks\s*\(/.test(src) && /composeReading\s*\(/.test(src),
-      "   ถ้าเลิกเรียก แปลว่ากองกลับไปผูกไพ่ชุดเดิมตายตัวเหมือนตอนเกิด INC-0198b/INC-0199b"
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 4.5 คลังรายตำแหน่ง — ทุกตำแหน่งต้องเปลี่ยนทุกรอบ และข้อความต้องมากับไพ่ของมันเสมอ
+// 4. เล่นยาวหลายวัน กองแรกต้องเข้าถึงคลังได้ครบทุกชิ้น
 // ---------------------------------------------------------------------------
 {
   const topic = PICK_A_CARD_TOPICS[0];
-  const size = topic.pool.length;
-  const slots = topic.slots.length;
-
-  // (ก) จั่วรอบใหม่แล้วต้องเปลี่ยนทั้งสามตำแหน่ง
-  let draw = initialDraw(slots);
-  const stuck: string[] = [];
-  for (let round = 0; round < 300; round++) {
-    const next = drawPicks(size, slots, draw);
-    if (next.hiddenPick === draw.hiddenPick) stuck.push(`รอบ ${round}: ใบที่ 2 ซ้ำเดิม (${next.hiddenPick})`);
-    if (next.advicePick === draw.advicePick) stuck.push(`รอบ ${round}: ใบที่ 3 ซ้ำเดิม (${next.advicePick})`);
-    if (next.anchorOrder.some((v, i) => v === draw.anchorOrder[i])) stuck.push(`รอบ ${round}: ไพ่หลักของบางช่องซ้ำเดิม`);
-    if (stuck.length) break;
-    draw = next;
+  const poolSize = topic.pool.length;
+  const seenAnchors = new Set<number>();
+  for (let dayOffset = 0; dayOffset < 400; dayOffset++) {
+    const derived = deriveDrawn({ kind: "pick-a-card", topicId: topic.id, slotIndex: 0, dayKey: dayKeyAt(dayOffset) });
+    if (derived?.detail.kind === "pick-a-card") seenAnchors.add(derived.detail.anchor);
   }
   check(
-    "จั่วรอบใหม่แล้วเปลี่ยนครบทั้งสามตำแหน่ง (ไพ่หลัก · สิ่งที่ซ่อนอยู่ · คำแนะนำ) 300 รอบ",
-    stuck.length === 0,
-    stuck.slice(0, 3).map((l) => `   ${l}`).join("\n")
+    `กองแรกเข้าถึงคลังได้ครบทุกชิ้นเมื่อเดิน 400 วัน (เห็นแล้ว ${seenAnchors.size}/${poolSize} ชิ้น)`,
+    seenAnchors.size === poolSize,
+    `   เห็นเพียง [${[...seenAnchors].sort((a, b) => a - b).join(", ")}] — ถ้าเข้าถึงได้แค่ไม่กี่ชิ้น ผู้ใช้จะรู้สึกว่า "ก็ซ้ำอยู่ดี"`
   );
 
-  // (ข) ความหลากหลายที่เข้าถึงได้จริงต้องเท่ากับ poolSize³ ไม่ใช่ poolSize
-  const seen = new Set<string>();
-  let probe = initialDraw(slots);
-  for (let round = 0; round < 6000; round++) {
-    probe = drawPicks(size, slots, probe);
-    const r = composeReading(topic, probe, 0, false);
-    seen.add(r.cards.map((c) => c.cardId).join("+"));
+  // ความหลากหลายที่เข้าถึงได้จริงของกองเดียว ต้องมากกว่าจำนวนชิ้นในคลัง (ไม่ใช่ผูกเป็นกองตายตัว)
+  const seenSets = new Set<string>();
+  for (let dayOffset = 0; dayOffset < 400; dayOffset++) {
+    const cards = pileCards(topic.id, 0, dayKeyAt(dayOffset));
+    if (cards) seenSets.add(cards.join("+"));
   }
   check(
-    `กองเดียวเข้าถึงคำอ่านได้ ${possibleCombinations(size)} ชุด (เจอจริง ${seen.size} ชุดจากการสุ่ม 6,000 รอบ)`,
-    seen.size === possibleCombinations(size),
-    `   ถ้าน้อยกว่านี้แปลว่าคลังรายตำแหน่งถูกมัดกลับเป็นกองเหมือนเดิม`
+    `กองเดียวเข้าถึงไพ่ได้ ${seenSets.size} ชุดใน 400 วัน (เพดานเชิงทฤษฎี ${possibleCombinations(poolSize)} ชุด · ต้องมากกว่า ${poolSize})`,
+    seenSets.size > poolSize,
+    "   ถ้าเท่ากับจำนวนชิ้นในคลังพอดี แปลว่าไพ่สามใบถูกมัดเป็นกองเหมือนก่อน INC-0199b"
   );
+}
 
-  // (ค) ข้อความต้องมากับไพ่ของตำแหน่งนั้นเสมอ — จับคู่ข้ามตำแหน่ง = พูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้า
+// ---------------------------------------------------------------------------
+// 5. ย่อหน้าที่เขียนไว้ต้องมากับไพ่ของตำแหน่งตัวเองเสมอ
+// ---------------------------------------------------------------------------
+{
   const FIELDS = ["currentSituation", "hiddenLayer", "oracleAdvice"] as const;
   const mismatched: string[] = [];
-  for (const t of PICK_A_CARD_TOPICS) {
-    let d = initialDraw(t.slots.length);
-    for (let round = 0; round < 60; round++) {
-      d = drawPicks(t.pool.length, t.slots.length, d);
-      for (let slot = 0; slot < t.slots.length; slot++) {
+
+  for (const topic of PICK_A_CARD_TOPICS) {
+    for (let dayOffset = 0; dayOffset < 20; dayOffset++) {
+      const dayKey = dayKeyAt(dayOffset);
+      for (let slot = 0; slot < topic.slots.length; slot++) {
+        const derived = deriveDrawn({ kind: "pick-a-card", topicId: topic.id, slotIndex: slot, dayKey });
+        if (!derived || derived.detail.kind !== "pick-a-card") {
+          mismatched.push(`${topic.id} ${dayKey} กอง ${slot + 1}: คำนวณไม่ออก`);
+          continue;
+        }
         for (const isEn of [false, true]) {
-          const r = composeReading(t, d, slot, isEn);
-          r.cards.forEach((card, idx) => {
-            const home = t.pool.find((entry) => {
+          const composed = composeFromDerived(topic, derived.detail, isEn);
+          if (!composed) {
+            mismatched.push(`${topic.id} ${dayKey} กอง ${slot + 1}: ประกอบเนื้อหาไม่ได้`);
+            continue;
+          }
+          composed.cards.forEach((card, idx) => {
+            const home = topic.pool.find((entry) => {
               const reading = isEn ? entry.readingEn : entry.readingTh;
-              return entry.cards[idx].cardId === card.cardId && reading[FIELDS[idx]] === r.bodies[idx];
+              return entry.cards[idx].cardId === card.cardId && reading[FIELDS[idx]] === composed.bodies[idx];
             });
-            if (!home) mismatched.push(`${t.id} ช่อง ${slot + 1} ตำแหน่ง ${idx + 1}: ข้อความไม่ใช่ของไพ่ ${card.cardId}`);
+            if (!home) mismatched.push(`${topic.id} กอง ${slot + 1} ตำแหน่ง ${idx + 1}: ข้อความไม่ใช่ของไพ่ ${card.cardId}`);
           });
         }
       }
     }
   }
   check(
-    "ทุกย่อหน้ามากับไพ่ของตำแหน่งตัวเองเสมอ (สุ่มตรวจ 4 หัวข้อ × 60 รอบ × 2 ภาษา)",
+    "ทุกย่อหน้ามากับไพ่ของตำแหน่งตัวเองเสมอ (ทุกหัวข้อ × 20 วัน × ทุกกอง × 2 ภาษา)",
     mismatched.length === 0,
     [...new Set(mismatched)].slice(0, 5).map((l) => `   ${l}`).join("\n")
   );
+}
+
+// ---------------------------------------------------------------------------
+// 6. หน้า Pick A Card ต้องเปิดไพ่ผ่านท่อ AI เท่านั้น — ห้ามมีตัวจั่วฝั่งเบราว์เซอร์หลงเหลือ
+// ---------------------------------------------------------------------------
+{
+  if (!fs.existsSync(CLIENT)) {
+    check("หาไฟล์ PickACardClient.tsx เจอ", false, `   ไม่พบ ${path.relative(ROOT, CLIENT)} — ถ้าย้ายไฟล์จริงให้แก้ด่านนี้ด้วย`);
+  } else {
+    const src = stripComments(fs.readFileSync(CLIENT, "utf-8"));
+    check(
+      "หน้า Pick A Card เปิดไพ่ผ่านท่อ AI (useAiReading + derive ของ pick-a-card)",
+      /useAiReading\s*\(/.test(src) && /kind:\s*"pick-a-card"/.test(src),
+      "   ถ้าไม่เรียก แปลว่าหน้านี้กลับไปเปิดไพ่เองโดยไม่มีทั้งคำอ่าน AI และกำแพงสมาชิก"
+    );
+    check(
+      "หน้า Pick A Card ไม่มีตัวจั่วฝั่งเบราว์เซอร์หลงเหลือ (dailyDraw / drawPicks / Math.random)",
+      !/dailyDraw\s*\(/.test(src) && !/drawPicks\s*\(/.test(src) && !/Math\.random\s*\(/.test(src),
+      "   ไพ่ที่เบราว์เซอร์จั่วเองจะไม่ใช่ไพ่ใบเดียวกับที่แม่หมอกำลังอ่าน ผู้ใช้จะเห็นไพ่ชุดหนึ่งแต่ได้ยินคำอ่านอีกชุด"
+    );
+    check(
+      "หน้า Pick A Card ต่อกำแพงสิทธิ์และกล่องสมัครสมาชิกไว้ครบ",
+      src.includes("AccessDialog") && src.includes("AuthModal"),
+      "   ถูกเซิร์ฟเวอร์ปฏิเสธแล้วไม่มีกล่องอธิบาย ผู้ใช้จะเจอหน้าค้างโดยไม่รู้ว่าต้องสมัครสมาชิก"
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -279,37 +340,31 @@ function stripComments(src: string): string {
 {
   const topic = PICK_A_CARD_TOPICS[0];
   const poolSize = topic.pool.length;
-  const slotCount = topic.slots.length;
 
-  // (ก) ทำซ้ำได้ — ถ้าเมล็ดเดียวกันให้คนละผล คำว่า "ประจำวัน" จะไม่มีความหมาย
-  const a = dailyDraw("2026-09-17:love-feelings", poolSize, slotCount);
-  const b = dailyDraw("2026-09-17:love-feelings", poolSize, slotCount);
+  // (ก) ทำซ้ำได้ — ถ้าเมล็ดเดียวกันให้คนละลำดับ คำว่า "ประจำวัน" จะไม่มีความหมาย
+  const a = seededOrder(`${topic.id}:anchor`, poolSize);
+  const b = seededOrder(`${topic.id}:anchor`, poolSize);
   check(
-    "สำรับประจำวันทำซ้ำได้ (เมล็ดเดียวกัน ➔ ชุดเดิมเป๊ะ)",
+    "ลำดับประจำตำแหน่งทำซ้ำได้ (เมล็ดเดียวกัน ➔ ลำดับเดิมเป๊ะ)",
     JSON.stringify(a) === JSON.stringify(b),
     `   ${JSON.stringify(a)} ≠ ${JSON.stringify(b)}`
   );
 
-  // (ข) ดัชนีต้องอยู่ในคลังจริง และกองทั้งสี่ต้องได้คนละชิ้น
-  const valid = (d: typeof a) =>
-    d.anchorOrder.length === slotCount &&
-    new Set(d.anchorOrder).size === slotCount &&
-    d.anchorOrder.every((v) => v >= 0 && v < poolSize) &&
-    d.hiddenPick >= 0 && d.hiddenPick < poolSize &&
-    d.advicePick >= 0 && d.advicePick < poolSize;
-  check("สำรับประจำวันชี้ไปที่คลังจริงและทุกกองได้คนละชิ้น", valid(a), `   ${JSON.stringify(a)}`);
-
-  // (ค) 60 วันติดกันต้องไม่จมอยู่กับชุดเดิมไม่กี่ชุด
-  const seen = new Set<string>();
-  for (let day = 1; day <= 60; day++) {
-    const key = `2026-10-${String(day % 31 || 1).padStart(2, "0")}-${day}:${topic.id}`;
-    const d = dailyDraw(key, poolSize, slotCount);
-    seen.add(`${d.anchorOrder[0]}-${d.hiddenPick}-${d.advicePick}`);
-  }
+  // (ข) ต้องเป็นการเรียงสับเปลี่ยนที่สมบูรณ์ — ไม่งั้นมีชิ้นในคลังที่ผู้ใช้ไม่มีวันได้เห็น
   check(
-    `สำรับประจำวัน 60 วันติดกันได้ชุดต่างกัน ${seen.size} ชุด (ต้องมากกว่า 20)`,
-    seen.size > 20,
-    "   ถ้าน้อยกว่านี้แปลว่าเมล็ดกระจายไม่ดี ผู้ใช้จะเจอสำรับเดิมบ่อยเกินไป"
+    `ลำดับประจำตำแหน่งครบทุกชิ้นในคลัง (${poolSize} ชิ้น ไม่ขาดไม่เกิน)`,
+    a.length === poolSize && new Set(a).size === poolSize && a.every((v: number) => v >= 0 && v < poolSize),
+    `   ${JSON.stringify(a)}`
+  );
+
+  // (ค) สามตำแหน่งต้องใช้ลำดับคนละชุด ไม่งั้นไพ่สามใบจะเดินพร้อมกันเป็นชุดเดิมตลอดไป
+  const anchorOrder = JSON.stringify(seededOrder(`${topic.id}:anchor`, poolSize));
+  const hiddenOrder = JSON.stringify(seededOrder(`${topic.id}:hidden`, poolSize));
+  const adviceOrder = JSON.stringify(seededOrder(`${topic.id}:advice`, poolSize));
+  check(
+    "สามตำแหน่งใช้ลำดับคนละชุด (ไพ่สามใบไม่เดินเป็นก้อนเดียวกัน)",
+    new Set([anchorOrder, hiddenOrder, adviceOrder]).size === 3,
+    "   ถ้าลำดับซ้ำกัน คู่ไพ่ 3 ใบจะวนอยู่แค่ไม่กี่ชุดเหมือนก่อน INC-0199b"
   );
 
   // (ง) ป้ายวันที่อ่านออกทั้งสองภาษา
@@ -319,13 +374,20 @@ function stripComments(src: string): string {
     `   ได้ "${dayLabel("2026-09-17", false)}" / "${dayLabel("2026-09-17", true)}"`
   );
 
-  // (จ) หน้าเว็บต้องเริ่มที่สำรับประจำวันจริง ไม่ใช่สุ่มทันที
+  // (จ) สำรับประจำวันต้องถูกคำนวณฝั่งเซิร์ฟเวอร์เท่านั้น และหน้าเว็บยังโชว์ป้ายวันอยู่
   // ⚠️ ไฟล์หาย = ตกด่าน ห้ามข้ามเงียบ (กฎของ test-gate-integrity.ts)
   const clientForDaily = fs.existsSync(CLIENT) ? stripComments(fs.readFileSync(CLIENT, "utf-8")) : "";
   check(
-    "หน้า Pick A Card เริ่มด้วยสำรับประจำวัน (เรียก dailyDraw + bangkokDayKey)",
-    /dailyDraw\s*\(/.test(clientForDaily) && clientForDaily.includes("bangkokDayKey"),
-    "   ถ้าไม่เรียก ผู้ใช้จะเห็นคนละสำรับกันหมดและไม่มีเหตุผลให้กลับมาพรุ่งนี้ (หรือหาไฟล์ไม่เจอ)"
+    "หน้า Pick A Card ยังบอกผู้ใช้ว่าเป็นสำรับประจำวัน (ใช้ dayLabel กับวันที่เซิร์ฟเวอร์ส่งมา)",
+    /dayLabel\s*\(/.test(clientForDaily) && clientForDaily.includes("dayKey"),
+    "   ถ้าป้ายหาย ผู้ใช้จะไม่รู้ว่าพรุ่งนี้สำรับเปลี่ยน — เหตุผลที่ต้องกลับมาพรุ่งนี้หายไปด้วย"
+  );
+
+  const derivedSrc = fs.readFileSync(path.join(SRC, "lib/reading/derived-draw.ts"), "utf-8");
+  check(
+    "ตัวคำนวณฝั่งเซิร์ฟเวอร์เป็นผู้ประกอบสำรับประจำวันแทน (deriveDrawn ใช้ seededOrder + เลขวัน)",
+    /seededOrder\s*\(/.test(derivedSrc) && derivedSrc.includes("dayNumber"),
+    "   ถ้าไม่ได้ใช้ แปลว่าสำรับประจำวันถูกเปลี่ยนเป็นการสุ่มรายครั้ง คำว่า 'ประจำวัน' จะไม่มีความหมาย"
   );
 }
 

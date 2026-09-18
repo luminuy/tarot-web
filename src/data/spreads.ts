@@ -1320,6 +1320,57 @@ export const SPREADS: Spread[] = [
       },
     ],
   },
+  {
+    /*
+     * ผังภายในของหน้า Pick A Card — ไพ่ 3 ใบของกองที่ผู้ใช้เลือก
+     *
+     * ไพ่ไม่ได้มาจากการจั่ว แต่มาจาก "สำรับประจำวัน" ของกองนั้น (ดู `src/lib/reading/derived-draw.ts`)
+     * ชื่อตำแหน่งในนี้จึงเขียนแบบกลาง ๆ ให้ใช้ได้กับทั้ง 8 หัวข้อ ส่วนชื่อตำแหน่งเฉพาะหัวข้อ
+     * (เช่น "สิ่งที่เขาเก็บซ่อนไว้") ยังอยู่ในคลังคำอ่านของหัวข้อนั้นและใช้แสดงบนหน้าเว็บตามเดิม
+     */
+    id: "pick-a-card",
+    nameTh: "เลือกกองไพ่พยากรณ์ (ไพ่ 3 ใบ)",
+    nameEn: "Pick A Card (3 Cards)",
+    tagline: "สามใบประจำกองที่ใจคุณเลือกเอง",
+    taglineEn: "Three cards from the pile your intuition chose",
+    description:
+      "ไพ่สามใบของกองที่เลือก เล่าตั้งแต่สภาพตอนนี้ สิ่งที่ยังไม่ได้พูดออกมา ไปจนถึงสิ่งที่ควรทำต่อ",
+    descriptionEn:
+      "Three cards from the chosen pile: where things stand, what stays unspoken, and what to do next.",
+    defaultCategory: "general",
+    credits: 0,
+    guestAllowed: true,
+    internal: true,
+    positions: [
+      {
+        index: 0,
+        nameTh: "สภาพตอนนี้",
+        nameEn: "Where Things Stand",
+        meaning: "แก่นของเรื่องที่ถามในตอนนี้ สิ่งที่กำลังเกิดขึ้นจริงและสัมผัสได้",
+        meaningEn: "The heart of the matter right now, and what is actually happening on the surface",
+        x: 0.25,
+        y: 0.5,
+      },
+      {
+        index: 1,
+        nameTh: "สิ่งที่ซ่อนอยู่",
+        nameEn: "What Stays Hidden",
+        meaning: "สิ่งที่อยู่ใต้ผิวน้ำ ยังไม่ถูกพูดออกมา หรือยังมองไม่เห็นด้วยตาเปล่า",
+        meaningEn: "What sits beneath the surface — unspoken, unseen, or not yet admitted",
+        x: 0.5,
+        y: 0.5,
+      },
+      {
+        index: 2,
+        nameTh: "คำแนะนำและแนวโน้ม",
+        nameEn: "Guidance & Direction",
+        meaning: "ท่าทีที่จะพาเรื่องนี้ไปต่อได้ดีที่สุด และแนวโน้มที่จะตามมาถ้าทำแบบนั้น",
+        meaningEn: "The stance that carries this forward best, and where it tends to lead",
+        x: 0.75,
+        y: 0.5,
+      },
+    ],
+  },
 ];
 
 /**

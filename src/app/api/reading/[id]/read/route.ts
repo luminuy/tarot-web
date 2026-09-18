@@ -448,6 +448,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
                 commitment: record.commitment,
                 pickedIndices: record.pickedIndices,
                 deckSize: 78,
+                /*
+                 * ไพ่ชุดนี้ "คำนวณมา" ไม่ได้ "จั่วมา" หรือเปล่า — ความจริงข้อนี้ต้องเดินทาง
+                 * ไปกับคำอ่านเสมอ ไม่งั้นวันหนึ่งจะมีคนเอาหลักฐานชุดนี้ไปโชว์คู่กับแผง
+                 * Provably Fair แล้วผู้ใช้กดตรวจ ➔ คำนวณซ้ำไม่ตรง เพราะมันคนละเรื่องกัน
+                 */
+                derivation: record.derivation ? { kind: record.derivation.kind } : undefined,
               },
               usage: event.usage,
               ...(guestConsumeTicket ? { guestConsumeTicket } : {}),
@@ -533,6 +539,7 @@ function streamCached(
           commitment: record.commitment,
           pickedIndices: record.pickedIndices,
           deckSize: 78,
+          derivation: record.derivation ? { kind: record.derivation.kind } : undefined,
         },
         cached: true,
       });
