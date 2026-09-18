@@ -32,7 +32,7 @@ export function OneCardAiReading({
         <button
           type="button"
           onClick={onRetry}
-          className="px-5 py-2.5 rounded-full bg-ink text-surface-warm text-xs font-serif-th font-semibold shadow-raised hover:bg-gold transition cursor-pointer"
+          className="tap-target px-5 py-2.5 rounded-full bg-ink text-surface-warm text-xs font-serif-th font-semibold shadow-raised hover:bg-gold transition cursor-pointer"
         >
           {isEn ? "Reload and try again" : "โหลดใหม่อีกครั้ง"}
         </button>

@@ -10,8 +10,17 @@ import { resolveDisplayKeywords } from "@/lib/tarot/keywords";
 import { copyToClipboard } from "@/lib/utils/clipboard";
 import type { Category } from "@/data/cards/types";
 import { useAiReading } from "@/lib/reading/use-ai-reading";
-import { AccessDialog } from "@/components/entitlement/AccessDialog";
-import { AuthModal } from "@/components/auth/AuthModal";
+/*
+ * 💤 กล่องสิทธิ์และกล่องสมัครสมาชิกโหลดเมื่อถูกเรียกใช้จริงเท่านั้น
+ * ผู้ใช้ส่วนใหญ่ที่ล็อกอินอยู่แล้วไม่เคยเห็นสองกล่องนี้ จึงไม่ควรจ่ายน้ำหนักตั้งแต่เปิดหน้า
+ * (โหลดตรง ๆ ทำให้ `/daily` เกินงบบันเดิล 148/145 KB)
+ */
+const AccessDialog = React.lazy(() =>
+  import("@/components/entitlement/AccessDialog").then((m) => ({ default: m.AccessDialog }))
+);
+const AuthModal = React.lazy(() =>
+  import("@/components/auth/AuthModal").then((m) => ({ default: m.AuthModal }))
+);
 import { OneCardAiReading } from "./OneCardAiReading";
 
 // โหลดสำรับ "ไทยล้วน" — ไม่ลากคำทำนายอังกฤษ (≈126 KB gzip) เข้าบันเดิลหน้าไทย
@@ -386,6 +395,8 @@ export function OneCardRitual({
         )}
 
         {/* กำแพงสิทธิ์ — เซิร์ฟเวอร์เป็นผู้ตัดสิน หน้าเว็บแค่เล่าให้ฟัง */}
+        {(oracle.gate !== null || authMode !== null) && (
+        <React.Suspense fallback={null}>
         <AccessDialog
           reason={oracle.gate}
           onClose={oracle.clearGate}
@@ -408,6 +419,8 @@ export function OneCardRitual({
           initialMode={authMode ?? "signin"}
           fromEntitlementWall
         />
+        </React.Suspense>
+        )}
     </div>
   );
 }
