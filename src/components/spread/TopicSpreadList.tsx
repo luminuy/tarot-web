@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { Spread, SpreadPosition } from "@/data/spreads-helpers";
@@ -13,18 +10,26 @@ interface TopicSpreadListProps {
   spreads: Spread[];
 }
 
+/**
+ * 📐 การ์ดผังพยากรณ์ในหน้าหมวดชีวิต — **ไม่ต้อง hydrate** (2026-09-18)
+ * ---------------------------------------------------------------------------
+ * ของเดิมมี `useState` ตัวเดียวคือ "การ์ดใบไหนกางแผงตำแหน่งไพ่อยู่" แล้วต้องแลกด้วย
+ * การโหลด React ทั้งก้อนลงหน้าหมวดทั้ง 12 หน้า (6 ไทย + 6 อังกฤษ)
+ *
+ * ตอนนี้ใช้ `<details>` ของเบราว์เซอร์แทน ได้ของเท่าเดิมโดยไม่ใช้ JS สักบรรทัด:
+ * เปิด/ปิดด้วยคีย์บอร์ดเอง · ประกาศสถานะให้โปรแกรมอ่านหน้าจอเอง (ไม่ต้องเขียน `aria-expanded`)
+ * · และยังกางได้ตั้งแต่เฟรมแรกก่อน JS ใด ๆ จะโหลด (ท่าเดียวกับ `ChangePasswordCard`)
+ *
+ * ⚠️ พฤติกรรมที่เปลี่ยนโดยตั้งใจ: เดิมกางได้ทีละใบ (กางใบใหม่ = ใบเก่าพับ)
+ *    ตอนนี้กางพร้อมกันหลายใบได้ — การ์ดแต่ละใบมีความสูงของตัวเอง ไม่มีใบไหนดันใบอื่น
+ *    และไม่มีใครเคยขอให้มันพับกันเอง (ถ้าต้องบังคับทีละใบต้องใช้ `name=` ซึ่ง Safari < 17.2 ไม่รองรับ)
+ */
 export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
   const { isEnglish } = useLocale();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const toggleExpand = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {spreads.map((spread) => {
-        const isExpanded = expandedId === spread.id;
         const isStandard = isStandardSpread(spread.id);
 
         return (
@@ -67,39 +72,35 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
               </p>
             </div>
 
-            {/* Positional Breakdown Accordion */}
-            <div className="z-10 pt-2 border-t border-line-soft/60 space-y-2">
-              <button
-                type="button"
-                onClick={() => toggleExpand(spread.id)}
-                className="tap-overlay-y w-full text-left text-xs font-serif-th text-gold-ink hover:text-[#5E390A] flex items-center justify-between py-1 font-semibold cursor-pointer transition-colors"
-                aria-expanded={isExpanded}
-              >
+            {/* Positional Breakdown Accordion — `<details>` ของเบราว์เซอร์ ไม่ใช้ JS */}
+            <details className="group z-10 pt-2 border-t border-line-soft/60 space-y-2">
+              <summary className="tap-overlay-y list-none w-full text-left text-xs font-serif-th text-gold-ink hover:text-[#5E390A] flex items-center justify-between py-1 font-semibold cursor-pointer transition-colors [&::-webkit-details-marker]:hidden">
                 <span>{isEnglish ? `${spread.positions.length} Card Positions` : `ความหมาย ${spread.positions.length} ตำแหน่งไพ่`}</span>
-                <span className="text-[11px]">{isExpanded ? (isEnglish ? "▲ Hide" : "▲ ย่อ") : (isEnglish ? "▼ Details" : "▼ ขยาย")}</span>
-              </button>
+                <span className="text-[11px]">
+                  <span className="group-open:hidden">{isEnglish ? "▼ Details" : "▼ ขยาย"}</span>
+                  <span className="hidden group-open:inline">{isEnglish ? "▲ Hide" : "▲ ย่อ"}</span>
+                </span>
+              </summary>
 
-              {isExpanded && (
-                <div className="space-y-1.5 pt-2 pb-1 text-xs text-muted bg-surface-warm p-3 rounded-lg border border-line-soft max-h-48 overflow-y-auto">
-                  {spread.positions.map((pos: SpreadPosition) => (
-                    <div key={pos.index} className="flex items-start gap-2">
-                      <span className="font-mono text-gold-ink font-bold shrink-0">
-                        {pos.index}.
+              <div className="space-y-1.5 pt-2 pb-1 text-xs text-muted bg-surface-warm p-3 rounded-lg border border-line-soft max-h-48 overflow-y-auto">
+                {spread.positions.map((pos: SpreadPosition) => (
+                  <div key={pos.index} className="flex items-start gap-2">
+                    <span className="font-mono text-gold-ink font-bold shrink-0">
+                      {pos.index}.
+                    </span>
+                    <div>
+                      <span className="font-serif-th font-bold text-ink">
+                        {isEnglish ? (pos.nameEn || pos.nameTh) : pos.nameTh}
                       </span>
-                      <div>
-                        <span className="font-serif-th font-bold text-ink">
-                          {isEnglish ? (pos.nameEn || pos.nameTh) : pos.nameTh}
-                        </span>
-                        <span className="mx-1 text-line">·</span>
-                        <span className="font-serif-th text-[11px] text-[#7A6F5D]">
-                          {isEnglish ? (pos.meaningEn || pos.meaning) : pos.meaning}
-                        </span>
-                      </div>
+                      <span className="mx-1 text-line">·</span>
+                      <span className="font-serif-th text-[11px] text-[#7A6F5D]">
+                        {isEnglish ? (pos.meaningEn || pos.meaning) : pos.meaning}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
+                ))}
+              </div>
+            </details>
 
             {/* CTAs */}
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-line-soft z-10">

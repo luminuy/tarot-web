@@ -6,7 +6,15 @@ import { PrivacyBodyThRoot } from "../components/PageBodies";
 import { DeleteAllDataRoot } from "../islands/DeleteAllDataRoot";
 import { SiteFooterRoot, SiteHeaderRoot } from "../islands/SiteShell";
 
-/** 🔐 นโยบายความเป็นส่วนตัว — ปุ่มลบข้อมูลตาม PDPA เป็น island ตัวเดียวของหน้า */
+/**
+ * 🔐 นโยบายความเป็นส่วนตัว — หน้านี้ **ไม่โหลด React เลยสักไบต์** (2026-09-18)
+ *
+ * ปุ่มลบข้อมูล PDPA เคยเป็น island เดียวของหน้าที่ `client:idle` แลกกับ React 184 KB
+ * ตอนนี้เรนเดอร์เป็น HTML ล้วนจากคอมโพเนนต์ตัวเดิม แล้วให้สคริปต์ข้างล่างผูกพฤติกรรมให้
+ *
+ * ⚠️ ถ้าวันหนึ่งต้องใส่ `client:*` กลับเข้าไป ต้องถอด `import` ของสคริปต์ออกด้วย
+ *    ไม่งั้นปุ่มจะมีตัวจัดการสองตัว = ถามยืนยันการลบสองรอบ
+ */
 const locale = "th" as const;
 ---
 
@@ -14,8 +22,11 @@ const locale = "th" as const;
   <SiteHeaderRoot locale={locale} />
   <PrivacyBodyThRoot>
     <Fragment slot="deleteButton">
-      <DeleteAllDataRoot locale={locale} client:idle />
+      <DeleteAllDataRoot locale={locale} />
     </Fragment>
   </PrivacyBodyThRoot>
   <SiteFooterRoot locale={locale} spacing="tight" />
+  <script>
+    import "../scripts/delete-all-data";
+  </script>
 </BaseLayout>
