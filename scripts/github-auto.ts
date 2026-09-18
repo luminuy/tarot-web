@@ -134,6 +134,8 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🌍 ภาษาต่างด้าวหลุดคำอ่านไม่ได้ รวมภาษาอักษรละติน (โปรตุเกส/สเปน/ฝรั่งเศส/เยอรมัน/เวียดนาม) · อังกฤษต้องไม่ถูกแตะ", cmd: TSX, args: ["scripts/qa/test-foreign-leak.ts"] },
   { label: "🚪 หน้า Next ทุกหน้าไปถึง Worker ได้จริง (run_worker_first ครบ · URL ตายตอบจากขอบ · หน้า 404 สองภาษา)", cmd: TSX, args: ["scripts/qa/test-worker-first-routes.ts"] },
   { label: "🛡️ ไฟล์ static ได้ส่วนหัวความปลอดภัยชุดเดียวกับ Worker (CSP/HSTS ไม่หายครึ่งเว็บ · กฎแคชไม่ครอบหน้าเว็บ)", cmd: TSX, args: ["scripts/qa/test-static-headers.ts"] },
+  { label: "🔌 ชั้นแปลงปลั๊กครบทุก next/* ที่ฝั่ง Astro ใช้ (กัน island ลากรันไทม์ของ Next ติดไปเงียบ ๆ)", cmd: TSX, args: ["scripts/qa/test-astro-shim-coverage.ts"] },
+  { label: "🔗 next กับ @opennextjs/cloudflare เดินคู่กัน (กัน merge ผ่านแต่ deploy ล้มบน main)", cmd: TSX, args: ["scripts/qa/test-next-adapter-pair.ts"] },
   { label: "🖼️  มาตรฐานภาพแชร์ OpenGraph 1200x630 ทั่วเว็บ", cmd: TSX, args: ["scripts/qa/test-og-images.ts"] },
   { label: "🤖 นโยบายบอตสองชั้นพูดตรงกัน (robots.ts ↔ กฎ WAF · บอตค้นหา AI ต้องเข้าได้)", cmd: TSX, args: ["scripts/qa/test-bot-policy.ts"] },
   { label: "🔁 กันลูป prefetch ยิงคำขอไม่รู้จบ (cache interception ปิด · segment prefetch ทำงาน)", cmd: TSX, args: ["scripts/qa/test-prefetch-loop.ts"] },

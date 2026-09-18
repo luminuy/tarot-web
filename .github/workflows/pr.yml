@@ -46,6 +46,33 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
+      # ♻️ แคชผลกลางของตัวคอมไพล์ — ลดเวลาของขั้นที่แพงที่สุดใน PR
+      # ---------------------------------------------------------------------------
+      # เว็บนี้บิลด์ **สองเครื่องมือทุก PR** (`next build --webpack && astro build`)
+      # เพราะยังมี 9 หน้าหลังบ้าน + `/api/*` อยู่กับ Next ส่วนหน้าเนื้อหาทั้งหมดเป็นของ Astro
+      # (เหตุผลที่ยังไม่ถอด Next ทิ้ง: docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md หัวข้อ 3)
+      # ตราบใดที่ยังอยู่สองเครื่องมือ ทางลดเวลาที่ปลอดภัยที่สุดคือแคช "ผลกลาง" ของตัวคอมไพล์
+      #
+      # ⚠️ **แคชได้เฉพาะ `.next/cache` ห้ามแคช `.next` ทั้งก้อนเด็ดขาด**
+      #    `.next/` คือ **ผลลัพธ์ที่ด่านทั้งชุดเอาไปตรวจ** (ผ่าน scripts/qa/lib/rendered-pages.ts)
+      #    แคชทั้งก้อนเมื่อไร ด่านจะตรวจหน้าเว็บของ commit ก่อนหน้าแล้วขึ้นเขียว —
+      #    เป็นความพังตระกูลเดียวกับ R-06 (ด่านตรวจของที่ไม่มีอยู่จริงแล้วรายงานผ่าน)
+      #    ส่วน `.next/cache` เก็บแต่ผลคอมไพล์ระดับโมดูล ไม่ใช่หน้าเว็บที่ deploy
+      #
+      # ℹ️ deploy.yml **ไม่แคช** โดยตั้งใจ — รันครั้งเดียวตอน merge และของที่ขึ้น production
+      #    ควรมาจากการบิลด์สดล้วน ๆ ไม่คุ้มแลกกับความเสี่ยงใด ๆ เพื่อประหยัดเวลาไม่กี่นาที
+      - name: ♻️ Restore compiler caches (Next webpack + Vite ของ Astro)
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            .next/cache
+            node_modules/.vite
+          # กุญแจผูกกับ lockfile + commit — คนละ commit ใช้แคชเดิมได้ผ่าน restore-keys
+          key: compiler-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            compiler-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+            compiler-cache-${{ runner.os }}-
+
       # ⚠️ **build ต้องอยู่ก่อน repo:verify เสมอ** (บทเรียน R-06)
       # ---------------------------------------------------------------------------
       # ของเดิมรัน `repo:verify` ก่อนแล้วค่อย build ผลคือด่านที่ตรวจ "ไฟล์ที่เกิดจากการ build"
