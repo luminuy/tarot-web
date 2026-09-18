@@ -16,7 +16,7 @@ export const pickACardMetadataEn: Metadata = {
   // layout automatically appends " · SeerTarot" (12 chars). 47 + 12 = 59 <= 60 limit.
   title: "Pick A Card Reading: Love, Career & Soul Advice",
   description:
-    "Choose 1 of 4 sacred tarot piles for profound clarity on love, unspoken thoughts, career crossroads, and spiritual guidance with 1909 Rider-Waite.",
+    "Choose 1 of 4 piles across 8 topics: what they think, will they return, who is coming, career, money, and the message the universe has for you. Free.",
   keywords: [
     "pick a card",
     "pick a card tarot",

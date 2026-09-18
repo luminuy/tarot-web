@@ -427,6 +427,133 @@ const TOPIC_COPY: Record<string, TopicCopy> = {
       },
     ],
   },
+  "money-month": {
+    metaTitleTh: "Pick A Card ดวงการเงินเดือนนี้",
+    metaTitleEn: "Pick A Card: Money Luck This Month",
+    metaDescTh:
+      "Pick A Card เลือกกองไพ่ดูดวงการเงินเดือนนี้ กระแสเงินที่กำลังไหล รูรั่วที่มองไม่เห็น และโอกาสรายได้ใหม่ ด้วยไพ่ 1909 Rider-Waite แท้ ฟรี",
+    metaDescEn:
+      "Pick 1 of 4 tarot piles for this month's money: where cash is flowing, the leak you cannot see, and the income opening ahead. Free 1909 Rider-Waite.",
+    keywordsTh: [
+      "ดวงการเงินเดือนนี้",
+      "pick a card การเงิน",
+      "ดูดวงการเงิน",
+      "ไพ่ยิปซีการเงิน",
+      "ดวงเงินเดือนนี้",
+    ],
+    keywordsEn: [
+      "money tarot this month",
+      "pick a card money",
+      "finance tarot reading free",
+      "money luck tarot",
+    ],
+    eyebrowTh: "อ่านกระแสเงินของเดือนนี้",
+    eyebrowEn: "Reading This Month's Cash Flow",
+    articleTitleTh: "ดวงการเงินเดือนนี้: กระแสเงิน รูรั่ว และโอกาสรายได้ที่กำลังมา",
+    articleTitleEn: "Money Luck This Month: Flow, Leaks, And The Opening Ahead",
+    bodyTh: [
+      "คนส่วนใหญ่ที่ดูดวงการเงินไม่ได้อยากรู้ว่าจะถูกหวยไหม แต่อยากรู้ว่าเดือนนี้จะพอใช้หรือเปล่า ควรกล้าใช้เงินก้อนนี้หรือควรเก็บไว้ก่อน และทำไมเงินถึงหายไปทั้งที่รายได้ก็ไม่ได้น้อย กองไพ่ในหน้านี้จึงอ่านสามมุมที่ใช้ตัดสินใจได้จริง คือกระแสเงินตอนนี้ รูรั่วที่มองไม่เห็น และโอกาสรายได้ที่กำลังจะเข้ามา",
+      "จุดที่คนมักได้ประโยชน์มากที่สุดคือไพ่ใบที่สอง เพราะเรื่องเงินส่วนใหญ่ไม่ได้พังเพราะรายได้น้อย แต่พังเพราะรูรั่วที่เกิดขึ้นซ้ำ ๆ โดยไม่มีใครนับ ทั้งค่าบริการรายเดือนที่ลืมยกเลิก เงินที่ให้ยืมแล้วไม่ได้ทวง หรือการใช้จ่ายเวลาเครียดที่กลายเป็นนิสัย",
+      "ข้อควรรู้ที่สำคัญ ไพ่ทาโรต์ไม่ใช่คำแนะนำทางการเงินและไม่ควรใช้แทนการวางแผนจริง ตัวเลข สัญญา และความเสี่ยงต้องตรวจด้วยข้อมูล ส่วนไพ่มีประโยชน์ในมุมของจังหวะ ความพร้อมทางใจ และสิ่งที่เรามองข้ามเพราะมันอยู่ใกล้ตัวเกินไป",
+    ],
+    bodyEn: [
+      "Most people asking about money are not asking whether they will win the lottery. They want to know if this month covers itself, whether to spend or hold a particular amount, and why money disappears even when income is fine. These piles read three usable angles: the flow right now, the leak you cannot see, and the income opening ahead.",
+      "The second card is usually where the value sits. Money problems rarely come from low income — they come from repeated leaks nobody counts: forgotten subscriptions, loans never chased, and stress spending that quietly became a habit.",
+      "Important: tarot is not financial advice and should not replace planning. Numbers, contracts, and risk belong to data. The cards help with timing, readiness, and the thing you stopped noticing because it sits too close.",
+    ],
+    faqsTh: [
+      {
+        q: "ดูดวงการเงินควรดูบ่อยแค่ไหน?",
+        a: "เดือนละครั้งกำลังดี เพราะรอบการเงินของคนส่วนใหญ่เดินเป็นเดือน การเปิดทุกวันด้วยคำถามเดิมมักทำให้ตีความสับสนมากกว่าชัดเจน",
+      },
+      {
+        q: "ไพ่บอกได้ไหมว่าควรลงทุนอะไร?",
+        a: "ไม่ควรใช้ไพ่แทนการวิเคราะห์การลงทุน ไพ่ช่วยได้ในมุมความพร้อมทางใจ ความเสี่ยงที่คุณรับไหว และจังหวะการตัดสินใจเท่านั้น",
+      },
+      {
+        q: "ถ้าไพ่ออกมาไม่ดีควรทำอย่างไร?",
+        a: "ให้อ่านไพ่ใบที่สองให้ละเอียด เพราะมันชี้รูรั่วที่แก้ได้ทันที คำอ่านที่ดูหนักส่วนใหญ่คือสัญญาณให้ปิดรูรั่วก่อนที่จะบานปลาย",
+      },
+    ],
+    faqsEn: [
+      {
+        q: "How often should I read about money?",
+        a: "Once a month suits most people, since financial cycles run monthly. Daily readings on the same question tend to confuse rather than clarify.",
+      },
+      {
+        q: "Can the cards tell me what to invest in?",
+        a: "No. Do not use tarot in place of analysis. It helps with readiness, risk tolerance, and timing only.",
+      },
+      {
+        q: "What if the reading looks bad?",
+        a: "Read the second card closely — it names a leak you can close right away. Heavy readings are usually a signal to fix something before it grows.",
+      },
+    ],
+  },
+
+  "others-view": {
+    metaTitleTh: "Pick A Card คนรอบตัวคิดยังไงกับคุณ",
+    metaTitleEn: "Pick A Card: What People Think Of You",
+    metaDescTh:
+      "Pick A Card เลือกกองไพ่ดูว่าคนรอบตัวคิดยังไงกับคุณ ภาพที่คนอื่นเห็น สิ่งที่พูดกันลับหลัง และสิ่งที่ควรทำต่อ ด้วยไพ่ 1909 Rider-Waite ฟรี",
+    metaDescEn:
+      "Pick 1 of 4 tarot piles to see how people really view you, what is said behind your back, and what to do next. Free 1909 Rider-Waite reading.",
+    keywordsTh: [
+      "คนรอบตัวคิดยังไงกับเรา",
+      "pick a card คนอื่นมองเรายังไง",
+      "ดูดวงคนรอบข้าง",
+      "ดูดวงที่ทำงาน",
+      "pick a card เพื่อน",
+    ],
+    keywordsEn: [
+      "what people think of me tarot",
+      "how others see me pick a card",
+      "workplace tarot reading",
+      "free tarot what they say about me",
+    ],
+    eyebrowTh: "มองตัวเองผ่านสายตาคนอื่น",
+    eyebrowEn: "Seeing Yourself Through Their Eyes",
+    articleTitleTh: "คนรอบตัวคิดยังไงกับคุณ: ภาพที่เขาเห็นและสิ่งที่พูดกันลับหลัง",
+    articleTitleEn: "What People Think Of You: Their View And What Is Said",
+    bodyTh: [
+      "คำถามว่าคนอื่นมองเราอย่างไรมักโผล่มาในช่วงที่ความสัมพันธ์รอบตัวเริ่มคลุมเครือ เช่น บรรยากาศที่ทำงานเปลี่ยนไปโดยไม่มีใครพูด เพื่อนสนิทเริ่มห่าง หรือคนในครอบครัวปฏิบัติกับเราต่างจากเดิม กองไพ่ในหน้านี้ช่วยจัดระเบียบความคิดให้คุณเห็นภาพรวมแทนการเดาเป็นราย ๆ ไป",
+      "คำอ่านแบ่งเป็นสามชั้น ชั้นแรกคือภาพที่คนอื่นเห็นในตัวคุณจริง ๆ ซึ่งหลายครั้งต่างจากภาพที่คุณคิดว่าตัวเองเป็น ชั้นที่สองคือสิ่งที่พูดกันลับหลัง ซึ่งอาจเป็นทั้งคำชมและความเข้าใจผิด และชั้นที่สามคือสิ่งที่ควรทำต่อจากนี้เพื่อให้ความสัมพันธ์เดินต่อได้",
+      "อยากให้ใช้หน้านี้เป็นกระจกมากกว่าเป็นศาลตัดสิน ไพ่ไม่ได้มีหน้าที่บอกว่าใครเป็นศัตรูของคุณ แต่ช่วยให้เห็นว่าภาพลักษณ์ของคุณกำลังสื่อสารอะไรออกไป และมีจุดไหนที่การพูดตรง ๆ เพียงครั้งเดียวจะแก้ได้เร็วกว่าการเก็บไว้คิดเอง",
+    ],
+    bodyEn: [
+      "The question of how others see us usually surfaces when the relationships around us turn unclear: the mood at work changes with nobody saying why, a close friend drifts, or family treats you differently. These piles help organise the picture instead of guessing person by person.",
+      "The reading runs in three layers. First, how people actually see you, which often differs from your own self-image. Second, what is said when you are not there — both praise and misunderstanding. Third, what to do next so the relationships can keep moving.",
+      "Use this page as a mirror rather than a courtroom. The cards are not here to name enemies. They show what your presence is communicating, and where one direct conversation would resolve something faster than months of private theorising.",
+    ],
+    faqsTh: [
+      {
+        q: "ไพ่รู้ได้จริงหรือว่าคนอื่นคิดอะไร?",
+        a: "ไพ่สะท้อนพลังงานและภาพรวมของความสัมพันธ์ในช่วงเวลานั้น ไม่ใช่การอ่านใจรายบุคคล ให้ใช้เป็นมุมมองเพิ่มเติมควบคู่กับสิ่งที่คุณสังเกตเห็นจริง",
+      },
+      {
+        q: "ถ้าคำอ่านบอกว่ามีคนนินทาควรทำอย่างไร?",
+        a: "อย่าเพิ่งเดาว่าเป็นใคร ให้โฟกัสที่คำแนะนำของไพ่ใบที่สาม เพราะการรักษาการกระทำของตัวเองให้สม่ำเสมอมักได้ผลกว่าการไล่หาต้นตอ",
+      },
+      {
+        q: "ใช้ดูเรื่องที่ทำงานได้ไหม?",
+        a: "ได้ เหมาะกับการดูบรรยากาศทีม ภาพลักษณ์ในสายตาหัวหน้า และการสื่อสารที่ควรปรับ แต่ไม่ควรใช้ตัดสินใจเรื่องบุคคลแทนการคุยกันตรง ๆ",
+      },
+    ],
+    faqsEn: [
+      {
+        q: "Can the cards really know what others think?",
+        a: "They reflect the energy and overall shape of your relationships at this moment rather than reading individual minds. Use it alongside what you actually observe.",
+      },
+      {
+        q: "What if the reading says people talk behind my back?",
+        a: "Do not start guessing names. Focus on the third card's advice — consistency in your own behaviour usually settles things faster than hunting for a source.",
+      },
+      {
+        q: "Can I use this for work situations?",
+        a: "Yes, for team atmosphere, how you appear to a manager, and what communication to adjust. It should not replace a direct conversation about a specific person.",
+      },
+    ],
+  },
 };
 
 export function pickACardTopicParams(): { slug: string }[] {
