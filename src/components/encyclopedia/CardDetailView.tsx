@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { TarotCard } from "@/data/cards/types";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
-import { useHasMounted } from "@/lib/use-has-mounted";
-import { trackEvent } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n";
 
 export type CardNavRef = Pick<TarotCard, "id" | "image" | "nameTh" | "nameEn">;
@@ -76,23 +74,36 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   related,
 }) => {
   const { isEnglish } = useLocale();
-  const hasMounted = useHasMounted();
-  const [orientation, setOrientation] = useState<"upright" | "reversed">("upright");
 
-  useEffect(() => {
-    trackEvent("card_detail_view", {
-      card_id: card.id,
-      card_name: card.nameTh,
-      category: card.element,
-    });
-  }, [card.id, card.nameTh, card.element]);
-
-  const isUpright = orientation === "upright";
+  /*
+   * 🔇 หน้านี้ "ไม่ hydrate" แล้ว — ทั้ง 174 หน้าเคยโหลด React 184 KB เพียงเพื่อสวิตช์
+   * หัวตั้ง/หัวกลับสองปุ่ม · ตอนนี้เรนเดอร์เนื้อหาทั้งสองหัวไพ่ลง HTML แล้วสลับด้วย
+   * แอตทริบิวต์ `data-orientation` บนกล่องนอกสุด (CSS ซ่อนอีกฝั่ง) โดยสคริปต์
+   * `astro/scripts/card-orientation.ts` ขนาดไม่ถึง 1 KB
+   *
+   * ผลพลอยได้ที่สำคัญ: ความหมาย "ไพ่หัวกลับ" ของทั้ง 78 ใบ **ไม่เคยอยู่ใน HTML มาก่อนเลย**
+   * (เรนเดอร์เฉพาะหัวที่เลือกอยู่) Google จึงไม่เคยเห็น — ตอนนี้เห็นครบทั้งสองหัว
+   *
+   * ⚠️ ห้ามใส่ `useState` กลับเข้ามาเพื่อสลับหัวไพ่ — มันจะลาก React กลับมาทั้งก้อน
+   */
   const kwEn = CARD_KEYWORDS_EN[card.id];
-  const currentKeywords = isEnglish && kwEn
-    ? (isUpright ? kwEn.upright : kwEn.reversed)
-    : (isUpright ? card.keywords.upright : card.keywords.reversed);
+  const keywordsByOrientation = {
+    upright: isEnglish && kwEn ? kwEn.upright : card.keywords.upright,
+    reversed: isEnglish && kwEn ? kwEn.reversed : card.keywords.reversed,
+  } as const;
   const elem = ELEMENT_CONFIG[card.element] || ELEMENT_CONFIG["ไฟ"];
+  const orientations = [
+    {
+      key: "upright" as const,
+      headingKeywords: isEnglish ? "Symbols & Keywords (Upright)" : "สัญลักษณ์และคีย์เวิร์ด (ไพ่หัวตั้ง)",
+      headingMeanings: isEnglish ? "5 Dimensions of Meaning (Upright)" : "ความหมายและการทำนาย 5 ด้าน (หัวตั้ง)",
+    },
+    {
+      key: "reversed" as const,
+      headingKeywords: isEnglish ? "Symbols & Keywords (Reversed)" : "สัญลักษณ์และคีย์เวิร์ด (ไพ่หัวกลับ)",
+      headingMeanings: isEnglish ? "5 Dimensions of Meaning (Reversed)" : "ความหมายและการทำนาย 5 ด้าน (หัวกลับ)",
+    },
+  ];
 
   const categories = [
     { id: "general" as const, nameTh: "ภาพรวมและเส้นทางชีวิต", nameEn: "Life Overview & Archetypal Journey", icon: "•", color: "#8F5C1A" },
@@ -103,7 +114,18 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
   ];
 
   return (
-      <div className="space-y-8 w-full max-w-5xl mx-auto relative z-10">
+      <div
+        data-card-detail=""
+        data-orientation="upright"
+        data-card-id={card.id}
+        /* ⚠️ ค่าที่ส่งให้สถิติต้องเป็น "ภาษาของหน้าที่ผู้ใช้ยืนอยู่" เสมอ
+           ตอนแรกเขียนเป็น `card.nameTh` / `card.element` ตรง ๆ แล้วด่านภาษาอังกฤษจับได้ทันที
+           ว่ามีอักษรไทยหลุดเข้า HTML ของหน้าอังกฤษ (แม้จะอยู่ในแอตทริบิวต์ก็ตาม)
+           `card_id` เป็นกุญแจที่ไม่ขึ้นกับภาษาอยู่แล้ว รายงานจึงยังรวมสองภาษาเข้าด้วยกันได้ */
+        data-card-name={isEnglish ? card.nameEn : card.nameTh}
+        data-card-element={isEnglish ? ELEMENT_EN[card.element] || card.element : card.element}
+        className="space-y-8 w-full max-w-5xl mx-auto relative z-10"
+      >
       {/* Top Header Bar — Card Counter */}
       <div className="flex items-center justify-end border-b border-line/40 pb-4 text-xs font-mono">
         <span className="text-muted">
@@ -119,16 +141,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           <div className="relative group">
             {/* ใส่คลาสอนิเมชันเฉพาะหลัง mount — เรนเดอร์แรกฝั่งเซิร์ฟเวอร์ต้องออกมา
                 ที่สถานะปลายทางเสมอ ไม่งั้นภาพไพ่ซึ่งเป็น LCP ของหน้าถูกส่งไปแบบ opacity 0 */}
-            <div
-              className={`relative w-64 sm:w-72 aspect-[7/12] rounded-xl overflow-hidden border-2 border-line p-1.5 bg-surface shadow-[0_10px_30px_rgba(42,38,31,0.08)]${
-                hasMounted ? " anim-pop-in" : ""
-              }`}
-            >
+            <div className="relative w-64 sm:w-72 aspect-[7/12] rounded-xl overflow-hidden border-2 border-line p-1.5 bg-surface shadow-[0_10px_30px_rgba(42,38,31,0.08)]">
               <div className="relative w-full h-full rounded-lg overflow-hidden bg-inset">
-                <div
-                  data-reversed={!isUpright}
-                  className="w-full h-full card-orientation-flip"
-                >
+                <div className="w-full h-full card-orientation-flip">
                   <CardImage
                     image={card.image}
                     cardId={card.id}
@@ -166,21 +181,19 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
           <div className="flex items-center justify-center p-1 rounded-full bg-inset border border-line w-full max-w-xs select-none">
             <button
               type="button"
-              onClick={() => setOrientation("upright")}
-              className={`tap-overlay-y flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                isUpright ? "bg-ink text-canvas shadow-xs" : "text-muted hover:text-ink"
-              }`}
+              data-orientation-set="upright"
+              aria-pressed="true"
+              className="orientation-tab tap-overlay-y flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5"
             >
               {isEnglish ? "Upright (Standard)" : "ไพ่หัวตั้ง (ปกติ)"}
             </button>
             <button
               type="button"
-              onClick={() => setOrientation("reversed")}
-              className={`tap-overlay-y flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                !isUpright ? "bg-ink text-canvas shadow-xs" : "text-muted hover:text-ink"
-              }`}
+              data-orientation-set="reversed"
+              aria-pressed="false"
+              className="orientation-tab tap-overlay-y flex-1 py-2 text-xs font-serif-th font-bold rounded-full transition cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <span>↻</span> {isEnglish ? "Reversed" : "ไพ่หัวกลับ"}
+              <span aria-hidden="true">↻</span> {isEnglish ? "Reversed" : "ไพ่หัวกลับ"}
             </button>
           </div>
 
@@ -232,38 +245,38 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
             </p>
           </div>
 
-          {/* Keywords Ribbon */}
-          <div className="space-y-2">
-            <h2 className="text-[13px] font-mono text-gold-ink uppercase tracking-wider flex items-center gap-1.5 font-bold">
-              {isEnglish ? `Symbols & Keywords (${isUpright ? "Upright" : "Reversed"})` : `สัญลักษณ์และคีย์เวิร์ด (${isUpright ? "ไพ่หัวตั้ง" : "ไพ่หัวกลับ"})`}
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {currentKeywords.map((kw, i) => (
-                <span
-                  key={i}
-                  className="text-xs px-3 py-1.5 rounded-full border border-line bg-surface text-ink font-serif-th font-semibold shadow-xs"
-                >
-                  {kw}
-                </span>
-              ))}
+          {/* Keywords Ribbon — มีครบทั้งสองหัวไพ่ใน HTML · CSS ซ่อนฝั่งที่ไม่ได้เลือก */}
+          {orientations.map((o) => (
+            <div key={o.key} data-when={o.key} className="space-y-2">
+              <h2 className="text-[13px] font-mono text-gold-ink uppercase tracking-wider flex items-center gap-1.5 font-bold">
+                {o.headingKeywords}
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {keywordsByOrientation[o.key].map((kw, i) => (
+                  <span
+                    key={i}
+                    className="text-xs px-3 py-1.5 rounded-full border border-line bg-surface text-ink font-serif-th font-semibold shadow-xs"
+                  >
+                    {kw}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          ))}
 
-          {/* 5 Categorized Meanings List */}
-          <div className="space-y-3.5 pt-2">
-            <h2 className="font-serif-th text-base font-bold text-ink flex items-center gap-2">
-              {isEnglish ? `5 Dimensions of Meaning (${isUpright ? "Upright" : "Reversed"})` : `ความหมายและการทำนาย 5 ด้าน (${isUpright ? "หัวตั้ง" : "หัวกลับ"})`}
-            </h2>
+          {/* 5 Categorized Meanings List — ทั้งสองหัวไพ่อยู่ใน HTML ครบ
+              (ของเดิมเรนเดอร์เฉพาะหัวที่เลือกอยู่ ความหมาย "หัวกลับ" ของไพ่ทั้ง 78 ใบ
+               จึงไม่เคยถูกเครื่องมือค้นหาเห็นเลยสักครั้ง) */}
+          {orientations.map((o) => (
+            <div key={o.key} data-when={o.key} className="space-y-3.5 pt-2">
+              <h2 className="font-serif-th text-base font-bold text-ink flex items-center gap-2">
+                {o.headingMeanings}
+              </h2>
 
-            {/* initial={false} — ความหมายไพ่ 5 ด้านคือเนื้อหาหลักของหน้าไพ่ทั้ง 78 ใบ
-                ต้องอยู่ใน HTML แบบมองเห็นได้ · การสลับหัวตั้ง/หัวกลับยังมีอนิเมชันครบ */}
-            <div
-                key={orientation}
-                className="space-y-3 anim-swap-rise-sm"
-              >
+              <div className="space-y-3">
                 {categories.map((cat) => {
                   const interp = isEnglish && card.meaningsEn ? card.meaningsEn[cat.id] : card.meanings[cat.id];
-                  const text = isUpright ? interp?.upright : interp?.reversed;
+                  const text = o.key === "upright" ? interp?.upright : interp?.reversed;
 
                   return (
                     <div
@@ -282,8 +295,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
                     </div>
                   );
                 })}
+              </div>
             </div>
-          </div>
+          ))}
 
           {/* Action Button: Start Tarot Ritual with this Card */}
           <div className="pt-4 flex items-center gap-4 flex-wrap">
