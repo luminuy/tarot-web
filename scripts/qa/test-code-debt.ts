@@ -132,7 +132,7 @@ check(`มีทะเบียนคีย์ (${KEYS_MODULE})`, fs.existsSync(
 /** ไฟล์ที่เรียกที่เก็บข้อมูลได้โดยไม่ต้องอ้างทะเบียน — พร้อมเหตุผล */
 const STORAGE_EXEMPT: Record<string, string> = {
   "src/lib/storage/keys.ts": "ทะเบียนเอง",
-  "src/components/ui/DeleteAllDataButton.tsx":
+  "src/lib/account/delete-all-data.ts":
     "ปุ่ม PDPA — เรียก clear() ซึ่งลบทุกคีย์รวมคีย์ที่ทะเบียนยังไม่รู้จัก · ปลอดภัยกว่าวนจากทะเบียน",
 };
 
@@ -153,12 +153,14 @@ check(
   literalStorageKeys.join("\n") + `\n   ➔ ประกาศไว้ใน ${KEYS_MODULE} แล้วนำเข้ามาใช้`,
 );
 
-/* ปุ่ม PDPA ต้องยังลบทุกคีย์จริง — ห้ามเปลี่ยนไปวนจากทะเบียน (ทะเบียนที่ขาดหนึ่งคีย์ = ข้อมูลค้าง) */
-const deleteBtn = path.join(ROOT, "src/components/ui/DeleteAllDataButton.tsx");
-if (!fs.existsSync(deleteBtn)) {
-  check("มีปุ่มลบข้อมูลทั้งหมดตาม PDPA", false, "   ➔ DeleteAllDataButton.tsx หายไป");
+/* ปุ่ม PDPA ต้องยังลบทุกคีย์จริง — ห้ามเปลี่ยนไปวนจากทะเบียน (ทะเบียนที่ขาดหนึ่งคีย์ = ข้อมูลค้าง)
+   ⚠️ ตรรกะย้ายจาก `DeleteAllDataButton.tsx` มาที่ `src/lib/account/delete-all-data.ts` แล้ว (2026-09-18)
+   เพราะปุ่มเดียวกันถูกเรียกจากสองปลายทาง: island ของ `/account` และสคริปต์ธรรมดาของ `/privacy` */
+const deleteLogic = path.join(ROOT, "src/lib/account/delete-all-data.ts");
+if (!fs.existsSync(deleteLogic)) {
+  check("มีปุ่มลบข้อมูลทั้งหมดตาม PDPA", false, "   ➔ src/lib/account/delete-all-data.ts หายไป");
 } else {
-  const btn = fs.readFileSync(deleteBtn, "utf-8");
+  const btn = fs.readFileSync(deleteLogic, "utf-8");
   check(
     "ปุ่ม PDPA ลบทั้ง localStorage และ sessionStorage ทั้งก้อน",
     /localStorage\.clear\(\)/.test(btn) && /sessionStorage\.clear\(\)/.test(btn),

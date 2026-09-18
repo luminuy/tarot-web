@@ -7,7 +7,12 @@ import { SpreadTopicContentRoot } from "../../../components/PageBodies";
 import { TopicSpreadListRoot } from "../../../islands/SpreadIslands";
 import { SiteFooterRoot, SiteHeaderRoot } from "../../../islands/SiteShell";
 
-/** 📐 ผังพยากรณ์ตามหมวดชีวิต (ต้นไม้ภาษาไทย) */
+/**
+ * 📐 ผังพยากรณ์ตามหมวดชีวิต — หน้านี้ **ไม่โหลด React เลยสักไบต์** (2026-09-18)
+ *
+ * `TopicSpreadList` เคย `client:idle` เพื่อหีบเพลง "ความหมายตำแหน่งไพ่" อย่างเดียว
+ * ตอนนี้หีบเพลงเป็น `<details>` ของเบราว์เซอร์ จึงไม่ต้องมี JS มาเปิดปิดให้
+ */
 const locale = "th" as const;
 
 export function getStaticPaths() {
@@ -22,7 +27,7 @@ const spreads = getSpreadsForTopic(topic);
   <SiteHeaderRoot locale={locale} />
   <SpreadTopicContentRoot topic={topic} locale={locale}>
     <Fragment slot="list">
-      <TopicSpreadListRoot spreads={spreads} locale={locale} client:idle />
+      <TopicSpreadListRoot spreads={spreads} locale={locale} />
     </Fragment>
   </SpreadTopicContentRoot>
   <SiteFooterRoot locale={locale} />

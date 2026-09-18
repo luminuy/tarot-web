@@ -1,35 +1,36 @@
 "use client";
 
 import { useState } from "react";
+import { deleteAllData } from "@/lib/account/delete-all-data";
 import { useLocale } from "@/lib/i18n";
 
+/**
+ * 🗑️ ปุ่มลบข้อมูลและบัญชีทั้งหมดตาม PDPA
+ * ---------------------------------------------------------------------------
+ * ปุ่มเดียวกันนี้ถูกใช้สองแบบโดยตั้งใจ:
+ *
+ *   • `/account` — อยู่ใน island ที่ hydrate จริง ปุ่มทำงานด้วย `onClick` ข้างล่างนี้
+ *   • `/privacy` · `/en/privacy` — เรนเดอร์เป็น HTML ล้วน **ไม่ hydrate** แล้วให้
+ *     `astro/scripts/delete-all-data.ts` (สคริปต์ 20 บรรทัด) ผูกพฤติกรรมให้แทน
+ *     จึงไม่ต้องลาก React 184 KB ลงหน้านโยบายเพื่อปุ่มปุ่มเดียว
+ *
+ * ⚠️ แอตทริบิวต์ `data-delete-all-data` · `data-label-idle` · `data-label-busy`
+ *    คือสัญญากับสคริปต์ตัวนั้น **ห้ามถอดออกหรือเปลี่ยนชื่อโดยไม่แก้สคริปต์ด้วย**
+ * ⚠️ ตรรกะการลบอยู่ที่ `@/lib/account/delete-all-data` ที่เดียว ห้ามคัดลอกมาไว้ที่นี่
+ */
 export function DeleteAllDataButton() {
   const { locale, isEnglish } = useLocale();
   const isEn = isEnglish || locale === "en";
   const [loading, setLoading] = useState(false);
 
+  const labelIdle = isEn ? "Delete All Data & Account" : "ลบข้อมูลและบัญชีทั้งหมด";
+  const labelBusy = isEn ? "Deleting data..." : "กำลังลบข้อมูล...";
+
   const handleDelete = async () => {
-    const confirmMessage = isEn
-      ? "Confirm permanent deletion of all data?\n\nThis action will delete:\n• All reading history (both local and cloud)\n• User account details and personal reflection notes\n• All preferences and settings\n\nThis action cannot be undone."
-      : "ยืนยันการลบข้อมูลทั้งหมด?\n\nการดำเนินการนี้จะลบ:\n• ประวัติการเปิดไพ่ทั้งหมด (ทั้งในเครื่องและบนบัญชี)\n• ข้อมูลบัญชีผู้ใช้และบันทึกส่วนตัว\n• การตั้งค่าทั้งหมด\n\nข้อมูลจะไม่สามารถกู้คืนได้";
-
-    const confirmed = window.confirm(confirmMessage);
-    if (!confirmed) return;
-
     setLoading(true);
-    try {
-      await fetch("/api/account", { method: "DELETE" }).catch(() => {});
-    } catch {
-      // Ignore network errors
-    }
-
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-    } catch {
-      // Ignore storage restrictions
-    }
-    window.location.href = isEn ? "/en" : "/";
+    // ผู้ใช้กดยกเลิกตอนถามยืนยัน → คืนปุ่มให้กดได้เหมือนเดิม
+    const proceeded = await deleteAllData(isEn);
+    if (!proceeded) setLoading(false);
   };
 
   /*
@@ -42,13 +43,13 @@ export function DeleteAllDataButton() {
       type="button"
       onClick={handleDelete}
       disabled={loading}
+      data-delete-all-data=""
+      data-locale={isEn ? "en" : "th"}
+      data-label-idle={labelIdle}
+      data-label-busy={labelBusy}
       className="tap-overlay-y px-5 py-2.5 rounded-full bg-err-wash border border-err/40 text-err text-xs font-bold hover:bg-err hover:text-surface hover:border-err transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-err"
     >
-      <span>
-        {loading
-          ? (isEn ? "Deleting data..." : "กำลังลบข้อมูล...")
-          : (isEn ? "Delete All Data & Account" : "ลบข้อมูลและบัญชีทั้งหมด")}
-      </span>
+      <span data-delete-all-data-label>{loading ? labelBusy : labelIdle}</span>
     </button>
   );
 }
