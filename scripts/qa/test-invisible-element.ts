@@ -115,6 +115,52 @@ export function scanInvisibleOrnaments(files: string[]): Finding[] {
   return findings;
 }
 
+
+/**
+ * 🫥 ข้อความที่ล่องหนเพราะคอลัมน์ยุบเหลือกว้าง 0 (iOS Safari)
+ * ---------------------------------------------------------------------------
+ * INC-0200 · 2026-09-18 เจ้าของเปิดลิ้นชักนำทางบน iPhone แล้วชื่อ "วิหารพยากรณ์" กับบรรทัด
+ * "RIDER-WAITE TAROT" หายไปทั้งคู่ เหลือแต่ป้าย 1909 RWS ลอยอยู่กลางหัวลิ้นชัก
+ *
+ * ต้นเหตุ: คอลัมน์ที่ครอบข้อความเขียนไว้แค่ `flex flex-col min-w-0` โดยไม่มีฐานความกว้าง
+ * ลูกทั้งสองบรรทัดใช้ `truncate` ซึ่งมี **min-content เป็น 0**
+ * Safari คิดความกว้างคอลัมน์แบบ shrink-to-fit แล้วยุบเหลือเท่าป้ายที่เป็น `shrink-0`
+ * ข้อความจึงกว้าง 0 และหายทั้งคู่ · Chrome ใช้ max-content จึงไม่มีใครเห็นอาการตอนรีวิว
+ *
+ * กฎ: คอลัมน์ (`flex-col`) ที่มี `min-w-0` และข้างในมีลูกที่ `truncate`
+ * ต้องมีฐานความกว้างเสมอ — `flex-1` · `grow` · `w-full` · `basis-*`
+ */
+const WIDTH_BASIS = /\b(flex-1|grow|w-full|basis-)/;
+
+type CollapseFinding = { file: string; line: number; truncateLine: number };
+
+export function scanCollapsingColumns(files: string[]): CollapseFinding[] {
+  const findings: CollapseFinding[] = [];
+
+  for (const file of files) {
+    const lines = fs.readFileSync(file, "utf-8").split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+      const classes = classesOf(lines[i]).join(" ");
+      if (!/\bflex-col\b/.test(classes) || !/\bmin-w-0\b/.test(classes)) continue;
+      if (WIDTH_BASIS.test(classes)) continue;
+
+      /* มองหาลูกที่ `truncate` ภายในบล็อกเดียวกัน (ย่อหน้าลึกกว่า) */
+      const ownIndent = indentOf(lines[i]);
+      for (let j = i + 1; j < Math.min(i + 25, lines.length); j++) {
+        if (!lines[j].trim()) continue;
+        if (indentOf(lines[j]) <= ownIndent) break;
+        if (classesOf(lines[j]).includes("truncate")) {
+          findings.push({ file: path.relative(ROOT, file), line: i + 1, truncateLine: j + 1 });
+          break;
+        }
+      }
+    }
+  }
+
+  return findings;
+}
+
 if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   const tsxFiles = walkTsx(SRC);
   assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
@@ -131,4 +177,17 @@ if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   }
 
   console.log("✅ ไม่มีของประดับทรงกลมที่สีพื้นตรงกับกล่องที่ครอบอยู่");
+
+  const collapsing = scanCollapsingColumns(tsxFiles);
+  if (collapsing.length > 0) {
+    console.error(`\n❌ พบคอลัมน์ที่จะยุบเหลือกว้าง 0 บน iOS Safari ${collapsing.length} จุด\n`);
+    for (const f of collapsing) {
+      console.error(`   ${f.file}:${f.line}`);
+      console.error(`      \`flex-col min-w-0\` ไม่มีฐานความกว้าง แต่มีลูกที่ใช้ \`truncate\` (บรรทัด ${f.truncateLine})`);
+      console.error(`      แก้: เติม \`flex-1\` (หรือ \`w-full\`) ให้คอลัมน์นั้น ไม่งั้นข้อความจะหายทั้งบล็อกบน Safari\n`);
+    }
+    process.exit(1);
+  }
+
+  console.log("✅ ไม่มีคอลัมน์ `flex-col min-w-0` ที่ไร้ฐานความกว้างทั้งที่มีลูกใช้ truncate");
 }
