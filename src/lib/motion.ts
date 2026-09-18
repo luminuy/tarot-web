@@ -59,9 +59,7 @@ export const stepVariants: Variants = {
   }),
 };
 
-// `useHasMounted` ย้ายไป `@/lib/use-has-mounted` แล้ว (โมดูลนั้นไม่แตะ motion)
 // re-export ไว้เพื่อไม่ให้ผู้เรียกเดิมพัง
-export { useHasMounted } from "@/lib/use-has-mounted";
 
 /**
  * ♿ ตัวตรวจว่าผู้ใช้ขอลดการเคลื่อนไหวหรือไม่

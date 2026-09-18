@@ -38,7 +38,6 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailBreadcrumbJsonLd(card, locale))} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(cardDetailFaqJsonLd(card, locale))} />
     <CardDetailViewRoot
-      client:idle
       card={card}
       prevCard={prevCard}
       nextCard={nextCard}
@@ -53,3 +52,11 @@ const { currentIndex, totalCards, prevCard, nextCard } = cardNeighbors(card);
   </main>
   <SiteFooterRoot locale={locale} />
 </BaseLayout>
+
+<!--
+  🃏 สวิตช์หัวตั้ง/หัวกลับ — สคริปต์ไม่ถึง 1 KB แทนการ hydrate คอมโพเนนต์ทั้งก้อน
+  เนื้อหาทั้งสองหัวไพ่อยู่ใน HTML แล้ว สคริปต์แค่สลับแอตทริบิวต์เดียว
+-->
+<script>
+  import "../../../scripts/card-orientation";
+</script>

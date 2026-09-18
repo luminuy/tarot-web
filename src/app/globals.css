@@ -960,24 +960,6 @@ html {
   }
 }
 
-/* ปรากฏตัวตอน mount — ใช้กับกรอบไพ่ใหญ่ในหน้าไพ่รายใบ
-   ใส่คลาสนี้เฉพาะหลัง mount เท่านั้น (ดู useHasMounted) เรนเดอร์แรกฝั่งเซิร์ฟเวอร์
-   ต้องออกมาที่สถานะปลายทางเสมอ ไม่งั้นเนื้อหาหลักถูกส่งออกไปแบบ opacity 0 (ISSUE-008) */
-.anim-pop-in {
-  animation: popIn 0.24s var(--ease-out) both;
-}
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 /* ───────────────────────────────────────────────────────────────────────────
    หน้าต่างลอยที่ "ห้ามแตะ motion" — ใช้กับ QuickFortunePicker เท่านั้น
 
@@ -1072,8 +1054,31 @@ html {
   transition: transform 0.55s cubic-bezier(0.34, 1.32, 0.44, 1);
 }
 
-.card-orientation-flip[data-reversed="true"] {
+/* 🃏 สวิตช์หัวตั้ง/หัวกลับของหน้าไพ่รายใบ — ขับด้วยแอตทริบิวต์เดียวบนกล่องนอกสุด
+   เนื้อหาทั้งสองหัวอยู่ใน HTML ครบ (ดีต่อเครื่องมือค้นหา) แล้วซ่อนฝั่งที่ไม่ได้เลือกด้วย CSS
+   ⚠️ ห้ามเปลี่ยนกลับไปให้ React ถือสถานะ — หน้าไพ่ 174 หน้าเคยโหลด React 184 KB
+      เพียงเพื่อปุ่มสองปุ่มนี้ (ดู `astro/scripts/card-orientation.ts`) */
+[data-card-detail][data-orientation="reversed"] .card-orientation-flip {
   transform: rotate(180deg);
+}
+
+[data-card-detail][data-orientation="upright"] [data-when="reversed"],
+[data-card-detail][data-orientation="reversed"] [data-when="upright"] {
+  display: none;
+}
+
+.orientation-tab {
+  color: var(--color-muted);
+}
+
+.orientation-tab:hover {
+  color: var(--color-ink);
+}
+
+.orientation-tab[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  box-shadow: 0 1px 2px rgba(41, 38, 31, 0.06);
 }
 
 /* FDN-3: Animation and Transition Classes */
