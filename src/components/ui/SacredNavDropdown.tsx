@@ -330,7 +330,14 @@ export const SacredNavDropdown: React.FC<SacredNavDropdownProps> = ({
                 loading="lazy"
               />
             </div>
-            <div className="flex flex-col min-w-0">
+            {/*
+              ⚠️ ต้องมี `flex-1` คู่กับ `min-w-0` เสมอ (INC-0200 · หัวลิ้นชักหายบน iOS Safari)
+              ลูกทั้งสองบรรทัดใช้ `truncate` ซึ่งมี min-content เป็น 0
+              Safari คิดความกว้างคอลัมน์นี้แบบ shrink-to-fit แล้วยุบเหลือเท่าป้าย 1909 RWS
+              (ป้ายเป็น shrink-0 จึงรอด) ชื่อ "วิหารพยากรณ์" กับบรรทัด RIDER-WAITE TAROT
+              จึงกว้าง 0 และหายไปทั้งคู่ · Chrome ใช้ max-content จึงไม่เห็นอาการ
+            */}
+            <div className="flex flex-col min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <span className="font-serif-th text-sm font-bold text-ink truncate leading-[1.7]">
                   {isEnglish ? "Tarot Sanctuary" : "วิหารพยากรณ์"}
