@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocale } from "@/lib/i18n";
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import {
@@ -11,16 +11,30 @@ import { TarotCard } from "@/components/card/TarotCard";
 import { CardImage } from "@/components/card/CardImage";
 import { soundManager } from "@/lib/utils/audio";
 import { copyToClipboard } from "@/lib/utils/clipboard";
-// จั่วไพ่จากคลังรายตำแหน่ง 64 ชุดต่อหัวข้อ — กันไพ่ซ้ำเมื่อเลือกกองเดิมซ้ำ (INC-0198b · INC-0199b)
-import {
-  composeReading,
-  drawPicks,
-  initialDraw,
-  type PickACardDraw,
-} from "@/lib/pick-a-card/compose";
-// สำรับประจำวัน — วันนี้ทั้งเว็บเห็นชุดเดียวกัน พรุ่งนี้เปลี่ยนใหม่ (คลื่นที่ 3)
-import { dailyDraw, dayLabel } from "@/lib/pick-a-card/daily";
-import { bangkokDayKey } from "@/lib/time/bangkok";
+// ประกอบเนื้อหาที่เขียนไว้แล้วให้ตรงกับไพ่ที่ "เซิร์ฟเวอร์" คำนวณมา (INC-0198b · INC-0199b)
+import { composeFromDerived } from "@/lib/pick-a-card/compose";
+// ป้ายวันของสำรับประจำวัน — วันนี้ทั้งเว็บเห็นชุดเดียวกัน พรุ่งนี้เปลี่ยนใหม่
+import { dayLabel } from "@/lib/pick-a-card/daily";
+/*
+ * 🔮 ทุกการเปิดไพ่เดินผ่านท่อ AI ท่อเดียวกับทั้งเว็บ (คำสั่งเจ้าของโปรเจกต์ 2026-09-18)
+ * กำแพงสมัครสมาชิกและโควตาจึงถูกบังคับ **ที่เซิร์ฟเวอร์** ไม่ใช่ที่เบราว์เซอร์
+ */
+import { useAiReading } from "@/lib/reading/use-ai-reading";
+import { AiReadingPanel } from "@/components/reading/ai/AiReadingPanel";
+/* 💤 กล่องสิทธิ์/กล่องสมัครสมาชิกโหลดตอนถูกเรียกใช้จริงเท่านั้น (บทเรียนงบบันเดิลของ `/daily`) */
+const AccessDialog = React.lazy(() =>
+  import("@/components/entitlement/AccessDialog").then((m) => ({ default: m.AccessDialog }))
+);
+const AuthModal = React.lazy(() =>
+  import("@/components/auth/AuthModal").then((m) => ({ default: m.AuthModal }))
+);
+
+/** หมวดคำถามที่ส่งให้แม่หมอ — แปลงจากหมวดของหัวข้อ Pick A Card */
+const CATEGORY_BY_TOPIC = {
+  love: "love",
+  career: "work",
+  spiritual: "self",
+} as const;
 
 export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: string } = {}) {
   const { isEnglish } = useLocale();
@@ -37,15 +51,12 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
   const activeTopic =
     PICK_A_CARD_TOPICS.find((t) => t.id === selectedTopicId) || PICK_A_CARD_TOPICS[0];
 
-  /**
-   * ผลจั่วของรอบนี้ — เริ่มที่ลำดับตรงเพื่อให้ HTML ที่เสิร์ฟจากขอบตรงกับรอบแรกของ hydration
-   * แล้วค่อยจั่วใหม่ใน useEffect (ฝั่งเบราว์เซอร์เท่านั้น)
+  /*
+   * ท่อเปิดไพ่ของรอบนี้ — ไพ่ทั้งสามใบมาจากเซิร์ฟเวอร์เสมอ ไม่มีการจั่วในเบราว์เซอร์อีกแล้ว
+   * (เดิมหน้านี้จั่วเองแล้วโชว์คำอ่านที่เขียนไว้ จึงเปิดไพ่ได้โดยไม่ต้องล็อกอินและไม่มี AI เลย)
    */
-  const [draw, setDraw] = useState<PickACardDraw>(() => initialDraw(activeTopic.slots.length));
-  /** วันของกรุงเทพฯ ตอนที่ผู้ใช้เปิดหน้า — อ่านฝั่งเบราว์เซอร์เท่านั้น (HTML นิ่งบิลด์ไว้คนละวันได้) */
-  const [dayKey, setDayKey] = useState<string>("");
-  /** true = กำลังแสดงสำรับประจำวัน · false = ผู้ใช้กดสับใหม่เองแล้ว */
-  const [isDailyDeck, setIsDailyDeck] = useState(true);
+  const oracle = useAiReading();
+  const [authMode, setAuthMode] = useState<"signin" | "signup" | null>(null);
 
   // Selected pile within topic — เก็บ "ช่อง" ที่ผู้ใช้เลือก (ตัวตนของกอง/คริสตัล)
   const [selectedPileId, setSelectedPileId] = useState<string | null>(null);
@@ -53,9 +64,33 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
 
   /** ตัวตนของกองที่เลือก (เลข · ชื่อคริสตัล) — เป็นของช่องนี้เสมอ ไม่หมุนตามการจั่ว */
   const selectedSlot: PickACardSlot | null = slotIndex >= 0 ? activeTopic.slots[slotIndex] : null;
-  /** ไพ่ 3 ใบ + คำทำนายของรอบนี้ ประกอบจากคลังรายตำแหน่ง (64 ชุดต่อหัวข้อ) */
-  const reading =
-    slotIndex >= 0 ? composeReading(activeTopic, draw, slotIndex, isEnglish) : null;
+
+  /** ไพ่ที่ "เปิดออกมาจริง" ตามที่เซิร์ฟเวอร์คำนวณ — แหล่งความจริงเดียวของหน้านี้ */
+  const drawnCards = oracle.serverCards;
+
+  /** วันของสำรับที่เซิร์ฟเวอร์ใช้จริง (ว่างจนกว่าจะเปิดกองแรกของรอบ) */
+  const derivedDetail = oracle.derived?.kind === "pick-a-card" ? oracle.derived : null;
+
+  /**
+   * เนื้อหาที่เขียนไว้แล้วของรอบนี้ — ใช้เป็น "บทเสริม" ใต้คำอ่านของแม่หมอ
+   *
+   * ⚠️ แสดงได้ก็ต่อเมื่อรหัสไพ่ทั้งสามใบตรงกับไพ่ที่เซิร์ฟเวอร์เปิดจริงเท่านั้น
+   * ไม่ตรงเมื่อไหร่ต้องทิ้งทั้งก้อน — ย่อหน้าที่พูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้าคือการกุไพ่ (กฎเหล็กข้อ 14)
+   */
+  const composed = derivedDetail ? composeFromDerived(activeTopic, derivedDetail, isEnglish) : null;
+  const scriptMatchesCards = Boolean(
+    composed &&
+      drawnCards.length === composed.cards.length &&
+      composed.cards.every((item, i) => item.cardId === drawnCards[i]?.id)
+  );
+  const script = scriptMatchesCards ? composed : null;
+
+  /** ชื่อตำแหน่งของไพ่แต่ละใบ — ใช้ชื่อเฉพาะหัวข้อเมื่อเนื้อหาตรงกับไพ่จริง ไม่งั้นใช้ชื่อกลาง */
+  const positionLabels: string[] = script
+    ? script.cards.map((item) => (isEnglish ? item.positionEn : item.positionTh))
+    : isEnglish
+      ? ["Where Things Stand", "What Stays Hidden", "Guidance & Direction"]
+      : ["สภาพตอนนี้", "สิ่งที่ซ่อนอยู่", "คำแนะนำและแนวโน้ม"];
 
   /**
    * 🫱 แถบหัวข้อแบบปัดนิ้ว (มือถือ) — ใช้แพตเทิร์นเดียวกับ "เปิดไพ่ด่วน" บนหน้าแรก
@@ -101,23 +136,12 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTopic.id]);
 
-  /** ผู้ใช้กดสับใหม่เอง — จั่วแบบสุ่มและออกจากสำรับประจำวัน */
-  const reshuffle = () => {
-    setDraw((prev) => drawPicks(activeTopic.pool.length, activeTopic.slots.length, prev));
-    setIsDailyDeck(false);
-  };
-
-  /**
-   * เปิดหน้า (หรือเปลี่ยนหัวข้อ) ➔ เริ่มที่ "สำรับประจำวัน" เสมอ
-   * ⚠️ ต้องอยู่ใน useEffect — หน้านี้เป็น HTML นิ่งที่บิลด์ไว้ล่วงหน้า
-   * วันของตอนบิลด์กับวันของตอนที่ผู้ใช้เปิดหน้าเป็นคนละวันได้ ถ้าคำนวณตอนเรนเดอร์ hydration จะไม่ตรง
+  /*
+   * ⛔ เดิมตรงนี้มีตัวจั่วฝั่งเบราว์เซอร์ (`reshuffle` + สำรับประจำวันใน `useEffect`)
+   * ถอดออกทั้งหมดในคลื่นที่ 2 — เซิร์ฟเวอร์เป็นผู้คำนวณสำรับประจำวันของแต่ละกองแล้ว
+   * (`src/lib/reading/derived-draw.ts`) **ห้ามเอากลับมา** เพราะไพ่ที่เบราว์เซอร์จั่วเอง
+   * จะไม่ใช่ไพ่ใบเดียวกับที่แม่หมอกำลังอ่านอยู่ · ผู้ใช้จะเห็นไพ่ชุดหนึ่งแต่ได้ยินคำอ่านของอีกชุด
    */
-  useEffect(() => {
-    const today = bangkokDayKey();
-    setDayKey(today);
-    setDraw(dailyDraw(`${today}:${activeTopic.id}`, activeTopic.pool.length, activeTopic.slots.length));
-    setIsDailyDeck(true);
-  }, [activeTopic.id, activeTopic.pool.length, activeTopic.slots.length]);
 
   // Revealed card indices in current pile (0, 1, 2)
   const [revealedIndices, setRevealedIndices] = useState<Set<number>>(new Set());
@@ -144,12 +168,42 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
     setSelectedTopicId(topicId);
     setSelectedPileId(null);
     setRevealedIndices(new Set());
+    oracle.reset();
+  };
+
+  /**
+   * แตะเลือกกอง ➔ ขอไพ่กับเซิร์ฟเวอร์ แล้วให้แม่หมออ่านสด
+   *
+   * ไพ่มาจากสำรับประจำวันของกองนั้นซึ่งเซิร์ฟเวอร์คำนวณเอง — หน้าเว็บส่งไปแค่
+   * "หัวข้อไหน กองที่เท่าไร" เท่านั้น (`derive`) ไม่ได้ส่งเลขไพ่ และส่งไม่ได้ด้วย
+   */
+  const runPile = async (topicId: string, slot: number) => {
+    const topic = PICK_A_CARD_TOPICS.find((t) => t.id === topicId) ?? activeTopic;
+    const pile = topic.slots[slot];
+    const crystal = isEnglish ? pile?.crystalEn : pile?.crystalTh;
+    const question = isEnglish
+      ? `Pick A Card — ${topic.titleEn} (Pile ${pile?.number ?? slot + 1}${crystal ? `: ${crystal}` : ""})`
+      : `เลือกกองไพ่ — ${topic.titleTh} (กองที่ ${pile?.number ?? slot + 1}${crystal ? ` · ${crystal}` : ""})`;
+
+    await oracle.run({
+      spreadId: "pick-a-card",
+      category: CATEGORY_BY_TOPIC[topic.category],
+      question,
+      /*
+       * ⚠️ `resolveCards: false` — หน้านี้ใช้ชื่อ/ภาพไพ่ที่เซิร์ฟเวอร์แปลงมาให้ใน `serverCards`
+       * อยู่แล้ว การให้ท่อแปลงให้อีกทีจะลาก `@/data/cards` (พ่วงคำทำนายอังกฤษ ≈126 KB) เข้ามาเปล่า ๆ
+       */
+      resolveCards: false,
+      derive: { kind: "pick-a-card", topicId: topic.id, slotIndex: slot },
+    });
   };
 
   const handleSelectPile = (pile: PickACardSlot) => {
     soundManager.playCardSelectSound();
     setSelectedPileId(pile.id);
     setRevealedIndices(new Set());
+    const slot = activeTopic.slots.findIndex((p) => p.id === pile.id);
+    if (slot >= 0) void runPile(activeTopic.id, slot);
   };
 
   const handleRevealCard = (index: number) => {
@@ -170,17 +224,33 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
     soundManager.playCardSelectSound();
     setSelectedPileId(null);
     setRevealedIndices(new Set());
-    // สลับสำรับใหม่ทุกครั้งที่ถอยกลับมาเลือกกอง — กองเดิมจะไม่ให้ไพ่ชุดเดิมซ้ำ
-    reshuffle();
+    // ยกเลิกสตรีมของกองเดิมด้วย ไม่งั้นคำอ่านของกองก่อนหน้าจะไหลมาทับกองใหม่
+    oracle.reset();
   };
 
   const handleCopyReading = async () => {
-    if (!reading || !selectedSlot) return;
+    if (!selectedSlot || drawnCards.length === 0) return;
     const crystal = isEnglish ? selectedSlot.crystalEn : selectedSlot.crystalTh;
     const topic = isEnglish ? activeTopic.titleEn : activeTopic.titleTh;
     const pileLabel = isEnglish ? `Pile ${selectedSlot.number}` : `กองที่ ${selectedSlot.number}`;
 
-    const textToCopy = `SeerTarot · Pick A Card (${topic})\n${pileLabel}: ${crystal}\n\n${reading.theme}\n\n${reading.overview}\n\nคำแนะนำ: ${reading.bodies[2]}\n\nข้อคิดเตือนใจ: "${reading.affirmation}"\n\nเปิดไพ่พยากรณ์: https://seertarot.net/pick-a-card`;
+    /*
+     * คัดลอก "ของจริงที่อยู่บนหน้าจอ" — ชื่อไพ่ที่เซิร์ฟเวอร์เปิด + คำอ่านของแม่หมอเท่าที่มาถึงแล้ว
+     * (เดิมคัดลอกคำอ่านที่เขียนไว้ล่วงหน้า ซึ่งตอนนี้เป็นแค่บทเสริม ไม่ใช่คำอ่านหลักอีกแล้ว)
+     */
+    const cardLines = drawnCards
+      .map((card, i) => `${positionLabels[i] ?? i + 1}: ${isEnglish ? card.nameEn : `${card.nameTh} (${card.nameEn})`}`)
+      .join("\n");
+    const oracleText = [oracle.state.reading?.opening, oracle.state.reading?.summary]
+      .filter(Boolean)
+      .join("\n\n");
+    const closing = isEnglish
+      ? "Open your own cards: https://seertarot.net/en/pick-a-card"
+      : "เปิดไพ่พยากรณ์: https://seertarot.net/pick-a-card";
+
+    const textToCopy = `SeerTarot · Pick A Card (${topic})\n${pileLabel}: ${crystal}\n\n${cardLines}${
+      oracleText ? `\n\n${oracleText}` : ""
+    }\n\n${closing}`;
 
     const ok = await copyToClipboard(textToCopy);
     if (ok) {
@@ -350,7 +420,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
       </header>
 
       {/* ── 3. Main Altar: 4 Piles View vs. Revealed Pile View ── */}
-      {!reading || !selectedSlot ? (
+      {!selectedSlot ? (
         <section
           aria-label={isEnglish ? "Card Piles Altar" : "แท่นบูชาเลือกกองไพ่"}
           className="space-y-6 pt-2"
@@ -366,20 +436,13 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
             </div>
             <p className="mt-2 text-[11.5px] font-serif-th text-muted leading-[1.7]">
               {/*
-                ก่อน hydration ยังไม่รู้ว่าวันนี้วันอะไร (HTML บิลด์ไว้ล่วงหน้า)
-                จึงต้องขึ้นข้อความกลาง ๆ ไว้ก่อน ห้ามขึ้น "สับไพ่ใหม่แล้ว" ทั้งที่ผู้ใช้ยังไม่ได้กดอะไร
+                สำรับของแต่ละวันคำนวณฝั่งเซิร์ฟเวอร์ (เวลาไทย) หน้าเว็บจึงไม่รู้ว่าวันนี้ได้ชุดไหน
+                จนกว่าจะเปิดกองแรก — ข้อความตรงนี้ต้องเป็นข้อความเดียวทั้งก่อนและหลัง hydration
+                ไม่งั้น HTML ที่เสิร์ฟจากขอบกับรอบแรกของ hydration จะไม่ตรงกัน
               */}
-              {!dayKey
-                ? isEnglish
-                  ? "Step back and choose again any time — the piles reshuffle every round."
-                  : "ย้อนกลับมาเลือกใหม่ได้ทุกเมื่อ ไพ่ในแต่ละกองจะถูกสับใหม่ทุกรอบ"
-                : isDailyDeck
-                  ? isEnglish
-                    ? `Today's deck for ${dayLabel(dayKey, true)} — it changes at midnight, and you can reshuffle any time.`
-                    : `สำรับประจำวันที่ ${dayLabel(dayKey, false)} เปลี่ยนใหม่ทุกเที่ยงคืน และกดสับใหม่เองได้ทุกเมื่อ`
-                  : isEnglish
-                    ? "Freshly shuffled — step back and choose again for another spread."
-                    : "สับไพ่ใหม่แล้ว ย้อนกลับมาเลือกอีกครั้งเมื่อไรก็ได้สำรับใหม่ทุกครั้ง"}
+              {isEnglish
+                ? "Every pile holds a different spread, and the whole set changes at midnight Thai time."
+                : "ทุกกองให้ไพ่คนละชุด และสำรับทั้งหมดเปลี่ยนใหม่ทุกเที่ยงคืนตามเวลาไทย"}
             </p>
           </div>
 
@@ -505,6 +568,45 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
             </div>
           </div>
 
+          {/*
+            ยังไม่ได้ไพ่จากเซิร์ฟเวอร์ — อาจกำลังรอ หรือถูกกำแพงสมาชิกกั้นไว้
+            ⚠️ ห้ามวาดไพ่สำรองขึ้นมาระหว่างรอเด็ดขาด (กฎเหล็กข้อ 14) หน้าจอนี้จึงมีแต่ข้อความ
+          */}
+          {drawnCards.length === 0 ? (
+            <div className="p-6 sm:p-8 rounded-2xl border border-line bg-surface text-center space-y-4">
+              <p className="text-sm sm:text-base font-serif-th text-ink leading-relaxed">
+                {oracle.isPreparing
+                  ? isEnglish
+                    ? "Connecting to the Oracle…"
+                    : "กำลังเชื่อมสัญญาณกับแม่หมอ…"
+                  : oracle.state.error
+                    ? oracle.state.error
+                    : isEnglish
+                      ? "Sign in to open this pile — the Oracle reads every pile personally."
+                      : "เข้าสู่ระบบก่อนเปิดกองนี้ แม่หมอจะอ่านไพ่ให้สดทุกกอง"}
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (slotIndex >= 0) void runPile(activeTopic.id, slotIndex);
+                  }}
+                  disabled={oracle.isPreparing}
+                  className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-ink text-surface-warm text-xs font-serif-th font-semibold shadow-raised hover:bg-gold disabled:opacity-60 disabled:cursor-wait transition cursor-pointer"
+                >
+                  {isEnglish ? "Try again" : "ลองอีกครั้ง"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetPile}
+                  className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-surface hover:bg-inset border border-line text-xs font-serif-th text-muted hover:text-ink transition-colors cursor-pointer"
+                >
+                  {isEnglish ? "Choose Another Pile" : "เลือกกองอื่น"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
           {/* 3 Authentic Rider-Waite Cards (Manual Reveal) */}
           <div className="space-y-3">
             <div className="text-center text-xs font-serif-th text-muted">
@@ -521,13 +623,14 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
               ให้เงาและมุมไพ่ตอนพลิกไม่ถูกขอบกล่องเลื่อนเฉือน — ห้ามลด padding ชุดนี้ลง
             */}
             <div className="flex flex-row gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pt-1 pb-3 sm:grid sm:grid-cols-3 sm:gap-5 sm:justify-items-center sm:mx-0 sm:px-0 sm:pt-0 sm:pb-0 sm:overflow-visible">
-              {reading.cards.map((item, idx) => {
+              {drawnCards.map((card, idx) => {
                 const isFlipped = revealedIndices.has(idx);
-                const positionLabel = isEnglish ? item.positionEn : item.positionTh;
+                const positionLabel = positionLabels[idx] ?? "";
+                const isReversed = Boolean(oracle.rawDrawn[idx]?.isReversed);
 
                 return (
                   <div
-                    key={`${selectedSlot.id}-card-${idx}-${item.cardId}`}
+                    key={`${selectedSlot.id}-card-${idx}-${card.id}`}
                     /*
                       แต่ละใบมี "ช่องของตัวเอง" — กรอบบาง ๆ พร้อมพื้นหลังอ่อน
                       ทำให้ไพ่ดูเป็นสัดเป็นส่วนแทนที่จะลอยติดกันเป็นพืด
@@ -542,8 +645,8 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                     {/* 3D Tarot Card */}
                     <div className="w-[140px] h-[238px] sm:w-[150px] sm:h-[255px]">
                       <TarotCard
-                        card={{ id: item.cardId }}
-                        isReversed={item.isReversed}
+                        card={{ id: card.id }}
+                        isReversed={isReversed}
                         isRevealed={isFlipped}
                         onClick={() => handleRevealCard(idx)}
                         size="responsive"
@@ -562,6 +665,15 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 );
               })}
             </div>
+
+            {/* ป้ายสำรับประจำวันที่เซิร์ฟเวอร์ใช้จริง */}
+            {derivedDetail && (
+              <p className="text-center text-[11.5px] font-serif-th text-muted leading-[1.7]">
+                {isEnglish
+                  ? `Today's deck for ${dayLabel(derivedDetail.dayKey, true)} — every pile changes at midnight Thai time.`
+                  : `สำรับประจำวันที่ ${dayLabel(derivedDetail.dayKey, false)} ทุกกองเปลี่ยนใหม่เที่ยงคืนตามเวลาไทย`}
+              </p>
+            )}
           </div>
 
           {/* ── 5. Detailed Reading Interpretation ── */}
@@ -570,47 +682,76 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
               aria-label={isEnglish ? "Card Pile Reading" : "คำทำนายประจำกองไพ่"}
               className="p-5 sm:p-8 rounded-2xl bg-surface border border-line space-y-6 shadow-sm"
             >
-              {/* Reading Theme Header */}
-              <div className="border-b border-line pb-4 space-y-1.5">
-                <span className="text-[11px] font-mono text-gold-ink uppercase tracking-wider">
-                  {isEnglish ? "CORE ENERGY" : "พลังงานหลักประจำกอง"}
-                </span>
-                <h2 className="text-xl sm:text-2xl font-serif-th font-bold text-ink leading-snug">
-                  {reading.theme}
-                </h2>
-                <p className="text-sm sm:text-base font-serif-th text-muted leading-relaxed pt-1">
-                  {reading.overview}
+              {/*
+                คำอ่านหลักมาจากแม่หมอ AI เสมอ — ขึ้นเมื่อผู้ใช้พลิกครบทั้งสามใบ
+                (กฎเหล็กข้อ 4: ไพ่ต้องถูกเปิดด้วยมือผู้ใช้ก่อน ถึงจะเฉลยคำอ่านของใบนั้นได้)
+              */}
+              {revealedIndices.size < drawnCards.length ? (
+                <p className="text-sm font-serif-th text-muted text-center leading-relaxed">
+                  {isEnglish
+                    ? "Flip all three cards to hear the Oracle's full reading."
+                    : "พลิกไพ่ให้ครบทั้งสามใบ เพื่อฟังคำอ่านเต็มจากแม่หมอ"}
                 </p>
-              </div>
+              ) : (
+                <AiReadingPanel
+                  state={oracle.state}
+                  isEn={isEnglish}
+                  onRetry={() => {
+                    if (slotIndex >= 0) void runPile(activeTopic.id, slotIndex);
+                  }}
+                  cardLabels={positionLabels}
+                  title={isEnglish ? "The Oracle Reads Your Pile" : "คำอ่านจากแม่หมอ"}
+                />
+              )}
 
-              {/* 3 Dimensional Breakdown — เดินตามไพ่ที่จั่วได้จริงของรอบนี้ */}
-              <div className="space-y-4">
-                {reading.cards.map((item, idx) =>
-                  revealedIndices.has(idx) ? (
-                    <div
-                      key={`${item.cardId}-body-${idx}`}
-                      className="p-4 rounded-xl bg-inset/50 border border-line/60 space-y-1"
-                    >
-                      <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider">
-                        {`${idx + 1}. ${isEnglish ? item.positionEn : item.positionTh}`}
-                      </h3>
-                      <p className="text-xs sm:text-sm font-serif-th text-ink leading-relaxed">
-                        {reading.bodies[idx]}
+              {/*
+                บทเสริมที่เขียนไว้ล่วงหน้าของกองนี้ — อยู่ "ใต้" คำอ่านของแม่หมอเสมอ
+                และแสดงได้เฉพาะเมื่อรหัสไพ่ตรงกับไพ่ที่เซิร์ฟเวอร์เปิดจริงทั้งสามใบ (ดู `script`)
+              */}
+              {script && (
+                <div className="space-y-6 pt-2 border-t border-line">
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-mono text-gold-ink uppercase tracking-wider">
+                      {isEnglish ? "CORE ENERGY" : "พลังงานหลักประจำกอง"}
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-serif-th font-bold text-ink leading-snug">
+                      {script.theme}
+                    </h2>
+                    <p className="text-sm sm:text-base font-serif-th text-muted leading-relaxed pt-1">
+                      {script.overview}
+                    </p>
+                  </div>
+
+                  {/* คำอธิบายรายใบ — เดินตามไพ่ที่เปิดจริงของรอบนี้ */}
+                  <div className="space-y-4">
+                    {script.cards.map((item, idx) =>
+                      revealedIndices.has(idx) ? (
+                        <div
+                          key={`${item.cardId}-body-${idx}`}
+                          className="p-4 rounded-xl bg-inset/50 border border-line/60 space-y-1"
+                        >
+                          <h3 className="text-xs font-mono text-gold-ink uppercase tracking-wider">
+                            {`${idx + 1}. ${isEnglish ? item.positionEn : item.positionTh}`}
+                          </h3>
+                          <p className="text-xs sm:text-sm font-serif-th text-ink leading-relaxed">
+                            {script.bodies[idx]}
+                          </p>
+                        </div>
+                      ) : null
+                    )}
+                  </div>
+
+                  {/* Affirmation Frame */}
+                  {revealedIndices.size === drawnCards.length && (
+                    <div className="p-4 sm:p-5 rounded-xl bg-surface border-2 border-line-warm/60 text-center space-y-1.5">
+                      <div className="text-[10.5px] font-mono text-gold-ink uppercase tracking-[0.18em]">
+                        {isEnglish ? "AFFIRMATION FOR YOUR SOUL" : "ข้อคิดเตือนใจประจำกองไพ่"}
+                      </div>
+                      <p className="text-sm sm:text-base font-serif-th italic font-medium text-ink">
+                        “{script.affirmation}”
                       </p>
                     </div>
-                  ) : null
-                )}
-              </div>
-
-              {/* Affirmation Frame */}
-              {revealedIndices.size === 3 && (
-                <div className="p-4 sm:p-5 rounded-xl bg-surface border-2 border-line-warm/60 text-center space-y-1.5">
-                  <div className="text-[10.5px] font-mono text-gold-ink uppercase tracking-[0.18em]">
-                    {isEnglish ? "AFFIRMATION FOR YOUR SOUL" : "ข้อคิดเตือนใจประจำกองไพ่"}
-                  </div>
-                  <p className="text-sm sm:text-base font-serif-th italic font-medium text-ink">
-                    “{reading.affirmation}”
-                  </p>
+                  )}
                 </div>
               )}
 
@@ -643,7 +784,7 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
                 </button>
 
                 <Link
-                  href={`/?spread=${reading.targetSpreadId}`}
+                  href={`/?spread=${script?.targetSpreadId ?? "three-card"}`}
                   className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-surface-dark text-canvas border border-line text-xs sm:text-sm font-serif-th font-semibold hover:border-gold transition-colors flex items-center justify-center gap-2"
                 >
                   <span>
@@ -656,7 +797,44 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
               </div>
             </article>
           )}
+            </>
+          )}
         </section>
+      )}
+
+      {/* ด่านความปลอดภัย: สัญญาณวิกฤต ➔ สายด่วน (กฎเหล็กข้อ 6) */}
+      {oracle.crisisMessage && (
+        <div className="rounded-xl border border-line bg-surface p-5 text-sm leading-relaxed text-ink whitespace-pre-line">
+          {oracle.crisisMessage}
+        </div>
+      )}
+
+      {/* กำแพงสิทธิ์ — เซิร์ฟเวอร์เป็นผู้ตัดสิน หน้าเว็บแค่เล่าให้ฟัง */}
+      {(oracle.gate !== null || authMode !== null) && (
+        <React.Suspense fallback={null}>
+          <AccessDialog
+            reason={oracle.gate}
+            onClose={oracle.clearGate}
+            onSignup={() => {
+              oracle.clearGate();
+              setAuthMode("signup");
+            }}
+            onSignin={() => {
+              oracle.clearGate();
+              setAuthMode("signin");
+            }}
+            onBuyCredits={() => {
+              oracle.clearGate();
+              window.location.href = "/account";
+            }}
+          />
+          <AuthModal
+            isOpen={authMode !== null}
+            onClose={() => setAuthMode(null)}
+            initialMode={authMode ?? "signin"}
+            fromEntitlementWall
+          />
+        </React.Suspense>
       )}
     </div>
   );

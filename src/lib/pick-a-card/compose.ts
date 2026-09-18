@@ -30,11 +30,17 @@
  *
  * - **ห้ามจับคู่ข้อความข้ามตำแหน่ง** — ย่อหน้าของตำแหน่ง 2 ต้องมากับไพ่ของตำแหน่ง 2 เสมอ
  *   ไม่งั้นคำอ่านจะพูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้า = กุไพ่ ผิดกฎเหล็กข้อ 14
- * - **ห้ามสุ่มตอนเรนเดอร์ฝั่งเซิร์ฟเวอร์** หน้านี้เป็น HTML นิ่งที่เสิร์ฟจากขอบ
- *   ต้องจั่วใน `useEffect` เท่านั้น ไม่งั้น hydration ไม่ตรงกับ HTML ที่ส่งมา
+ * ## 🔁 เปลี่ยนมือผู้จั่วแล้ว (คลื่นที่ 2 · 2026-09-18)
+ *
+ * เดิมหน้าเว็บเป็นผู้จั่วเองในเบราว์เซอร์ (`drawPicks` + `dailyDraw`) แล้วแสดงคำอ่านที่เขียนไว้
+ * ตอนนี้ **เซิร์ฟเวอร์เป็นผู้คำนวณว่ากองไหนได้ไพ่ชุดไหน** (`src/lib/reading/derived-draw.ts`)
+ * เพราะทุกทางเข้าเปิดไพ่ต้องผ่านท่อ AI + กำแพงสมาชิก ซึ่งบังคับที่เซิร์ฟเวอร์เท่านั้น
+ *
+ * ไฟล์นี้จึงเหลือหน้าที่เดียว: **ประกอบเนื้อหาที่เขียนไว้แล้วให้ตรงกับผลที่เซิร์ฟเวอร์คำนวณมา**
+ * (`composeFromDerived`) — ตัวจั่วฝั่งเบราว์เซอร์ถูกถอดออกทั้งหมด ห้ามเอากลับมา
+ * เพราะไพ่ที่หน้าเว็บจั่วเองจะไม่ตรงกับไพ่ที่แม่หมอกำลังอ่านอยู่
  */
 import type { PickACardCardItem, PickACardTopic } from "@/data/pick-a-card";
-import { drawAnchors } from "./draw-order";
 
 /** ผลการจั่วหนึ่งรอบ — เก็บแยกตามตำแหน่ง ไม่ได้ผูกเป็นกองอีกแล้ว */
 export interface PickACardDraw {
@@ -44,34 +50,6 @@ export interface PickACardDraw {
   hiddenPick: number;
   /** คลังใบที่ 3 (คำแนะนำ) ที่จั่วได้รอบนี้ */
   advicePick: number;
-}
-
-export function initialDraw(slotCount: number): PickACardDraw {
-  return {
-    anchorOrder: Array.from({ length: slotCount }, (_, i) => i),
-    hiddenPick: 0,
-    advicePick: 0,
-  };
-}
-
-/** สุ่มดัชนีใหม่ที่ไม่ซ้ำกับรอบก่อน — คลังมี ≥ 2 ใบเสมอจึงมีทางเลือกเหลือแน่นอน */
-function drawDifferent(poolSize: number, previous: number): number {
-  if (poolSize < 2) return 0;
-  let next = previous;
-  while (next === previous) next = Math.floor(Math.random() * poolSize);
-  return next;
-}
-
-/**
- * จั่วรอบใหม่ทั้งสามตำแหน่ง โดย **ทุกตำแหน่งต้องเปลี่ยนจากรอบก่อน**
- * ผู้ใช้ที่เลือกกองเดิมซ้ำจึงไม่มีทางได้ไพ่ใบเดิมแม้แต่ใบเดียว
- */
-export function drawPicks(poolSize: number, slotCount: number, previous: PickACardDraw): PickACardDraw {
-  return {
-    anchorOrder: drawAnchors(poolSize, slotCount, previous.anchorOrder),
-    hiddenPick: drawDifferent(poolSize, previous.hiddenPick),
-    advicePick: drawDifferent(poolSize, previous.advicePick),
-  };
 }
 
 /** คำอ่านที่ประกอบเสร็จแล้วสำหรับกองที่ผู้ใช้เลือก (ภาษาเดียว) */
@@ -86,19 +64,26 @@ export interface ComposedReading {
 }
 
 /**
- * ประกอบคำอ่านของช่องกองที่เลือก จากผลจั่วของรอบนี้
- * @param slotIndex ช่องกองที่ผู้ใช้กด (0-3) — ตัวตนของกอง/คริสตัลยังเป็นของช่องนี้เสมอ
+ * ประกอบเนื้อหาที่เขียนไว้แล้ว ให้ตรงกับผลที่ **เซิร์ฟเวอร์** คำนวณมาในรอบนี้
+ *
+ * @param picks ดัชนีคลังของแต่ละตำแหน่งที่ได้จาก `/api/reading/[id]/shuffle`
+ *
+ * ⚠️ ผู้เรียกต้องเทียบรหัสไพ่ที่ได้กับไพ่ที่เซิร์ฟเวอร์เปิดจริงก่อนแสดงย่อหน้าเสมอ
+ * ถ้าไม่ตรง (เช่นคลังถูกแก้คนละรอบกับที่เซิร์ฟเวอร์คำนวณ) ให้ทิ้งย่อหน้าไป ห้ามแสดงคู่กัน
+ * เพราะย่อหน้าจะพูดถึงไพ่ที่ไม่ได้อยู่ตรงหน้า = กุไพ่ ผิดกฎเหล็กข้อ 14
  */
-export function composeReading(
+export function composeFromDerived(
   topic: PickACardTopic,
-  draw: PickACardDraw,
-  slotIndex: number,
+  picks: { anchor: number; hidden: number; advice: number },
   isEnglish: boolean
-): ComposedReading {
+): ComposedReading | null {
   const size = topic.pool.length;
-  const anchor = topic.pool[(draw.anchorOrder[slotIndex] ?? slotIndex) % size];
-  const hidden = topic.pool[draw.hiddenPick % size];
-  const advice = topic.pool[draw.advicePick % size];
+  if (size === 0) return null;
+
+  const anchor = topic.pool[picks.anchor % size];
+  const hidden = topic.pool[picks.hidden % size];
+  const advice = topic.pool[picks.advice % size];
+  if (!anchor || !hidden || !advice) return null;
 
   const frame = isEnglish ? anchor.readingEn : anchor.readingTh;
 

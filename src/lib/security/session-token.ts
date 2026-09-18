@@ -67,6 +67,12 @@ export function signReadingSessionToken(record: Partial<ReadingRecord>): string 
     clientSeed: record.clientSeed,
     drawn: record.drawn,
     pickedIndices: record.pickedIndices,
+    /*
+     * สเปกไพ่ที่คำนวณได้ต้องเดินทางไปกับโทเคนด้วย — ถ้าตกหล่น เซสชันที่กู้คืนด้วยโทเคน
+     * (หน่วยความจำหลุด + KV หาย) จะมองไม่เห็นว่านี่เป็นเซสชัน "ไพ่คำนวณ" แล้วตกไปจั่วสุ่มแทน
+     * ผู้ใช้จะได้ไพ่คนละชุดกับที่หน้าเว็บกำลังเล่าถึงอยู่ · โทเคนมีลายเซ็น HMAC ปลอมไม่ได้
+     */
+    derivation: record.derivation,
     result: record.result,
     createdAt: record.createdAt || Date.now(),
     iat: nowSec,

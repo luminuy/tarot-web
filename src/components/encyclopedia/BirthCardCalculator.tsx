@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import dynamic from "next/dynamic";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
@@ -8,6 +8,22 @@ import { calculateBirthCard, getMaxDaysInMonth, type BirthCardResult, type Birth
 import { soundManager } from "@/lib/utils/audio";
 import { useLocale } from "@/lib/i18n";
 import { copyToClipboard } from "@/lib/utils/clipboard";
+/*
+ * 🔮 ไพ่ประจำตัวเปิดผ่านท่อ AI ท่อเดียวกับทั้งเว็บ (คำสั่งเจ้าของโปรเจกต์ 2026-09-18)
+ *
+ * ไพ่สองใบนี้ไม่ได้มาจากการจั่ว แต่คำนวณจากวันเกิด — **เซิร์ฟเวอร์เป็นผู้คำนวณ** แล้วเปิดให้
+ * (`derive: { kind: "birth-card" }`) หน้าเว็บคำนวณเองด้วยเพื่อโชว์รอยทางเลขศาสตร์เท่านั้น
+ * และต้องตรงกันทั้งสองฝั่งก่อนแสดงผล ไม่ตรงเมื่อไหร่ = ขอให้ผู้ใช้ลองใหม่ (กฎเหล็กข้อ 14)
+ */
+import { useAiReading } from "@/lib/reading/use-ai-reading";
+import { AiReadingPanel } from "@/components/reading/ai/AiReadingPanel";
+/* 💤 กล่องสิทธิ์/กล่องสมัครสมาชิกโหลดตอนถูกเรียกใช้จริงเท่านั้น (บทเรียนงบบันเดิลของ `/daily`) */
+const AccessDialog = React.lazy(() =>
+  import("@/components/entitlement/AccessDialog").then((m) => ({ default: m.AccessDialog }))
+);
+const AuthModal = React.lazy(() =>
+  import("@/components/auth/AuthModal").then((m) => ({ default: m.AuthModal }))
+);
 
 const TarotCard = dynamic(
   () => import("@/components/card/TarotCard").then((mod) => mod.TarotCard),
@@ -48,6 +64,11 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
   const [result, setResult] = useState<BirthCardResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<"signin" | "signup" | null>(null);
+  /** ผลที่คำนวณในเครื่องแล้ว แต่ยังรอให้เซิร์ฟเวอร์ยืนยันก่อนขึ้นจอ */
+  const [pendingResult, setPendingResult] = useState<BirthCardResult | null>(null);
+
+  const oracle = useAiReading();
 
   // ตรวจสอบ query string ใน URL เพื่อคำนวณอัตโนมัติหากมีการแชร์ลิงก์มา
   useEffect(() => {
@@ -63,13 +84,49 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
         setMonth(qm);
         setYearInput(qy.toString());
         setEra(qera);
-        const res = calculateBirthCard(qd, qm, qy, qera === "be", majorCards);
-        if (res) {
-          setResult(res);
-        }
+        /*
+         * ⚠️ เติมช่องให้เฉย ๆ **ห้ามเปิดไพ่ให้เอง** — การเปิดไพ่หนึ่งครั้งกินโควตาของวันไปหนึ่งครั้ง
+         * ลิงก์ที่เพื่อนแชร์มาจึงต้องรอให้เจ้าของเครื่องกดปุ่มเอง ไม่ใช่เสียสิทธิ์ตั้งแต่เปิดหน้า
+         */
       }
     }
   }, [majorCards]);
+
+  /*
+   * เซิร์ฟเวอร์ยืนยันไพ่กลับมาแล้ว ➔ เทียบกับผลที่คำนวณในเครื่องก่อนแสดงผล
+   *
+   * 🃏 กฎเหล็กข้อ 14 — ไม่ตรงกันเมื่อไหร่ **ห้ามแสดงไพ่ใบไหนทั้งสิ้น** ให้ผู้ใช้ลองใหม่แทน
+   * (ต่างกันได้ทางเดียวคือสูตรสองฝั่งเลื่อนออกจากกัน ซึ่งเป็นบั๊กที่ต้องเห็น ไม่ใช่กลบ)
+   */
+  useEffect(() => {
+    if (!pendingResult || oracle.serverCards.length === 0) return;
+
+    const expected = [
+      pendingResult.primaryCard.id,
+      ...(pendingResult.secondaryCard ? [pendingResult.secondaryCard.id] : []),
+    ];
+    const matches =
+      oracle.serverCards.length === expected.length &&
+      expected.every((id, i) => oracle.serverCards[i]?.id === id);
+
+    if (!matches) {
+      setResult(null);
+      setErrorMsg(
+        isEnglish
+          ? "Unable to confirm your birth cards. Please reload and try again."
+          : "ยืนยันไพ่ประจำตัวไม่สำเร็จ กรุณาโหลดใหม่อีกครั้ง"
+      );
+      return;
+    }
+
+    setResult(pendingResult);
+    soundManager.playCardFlipSound();
+    if (typeof window !== "undefined") {
+      const year = era === "be" ? pendingResult.yearBe : pendingResult.yearCe;
+      const newUrl = `${window.location.pathname}?d=${pendingResult.day}&m=${pendingResult.month}&y=${year}&era=${era}`;
+      window.history.replaceState({ path: newUrl }, "", newUrl);
+    }
+  }, [oracle.serverCards, pendingResult, isEnglish, era]);
 
   const handleCalculate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -122,13 +179,27 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
       return;
     }
 
+    /*
+     * ผลที่คำนวณในเครื่องยังไม่ขึ้นจอทันที — ต้องให้เซิร์ฟเวอร์เปิดไพ่ให้ก่อน
+     * (กำแพงสมาชิกและโควตาอยู่ที่นั่น และแม่หมอต้องเป็นคนอ่านไพ่สองใบนี้ให้ฟัง)
+     */
     startTransition(() => {
-      setResult(calcResult);
-      soundManager.playCardFlipSound();
-      if (typeof window !== "undefined") {
-        const newUrl = `${window.location.pathname}?d=${day}&m=${month}&y=${parsedYear}&era=${era}`;
-        window.history.replaceState({ path: newUrl }, "", newUrl);
-      }
+      setResult(null);
+      setPendingResult(calcResult);
+    });
+
+    void oracle.run({
+      spreadId: "birth-card",
+      category: "self",
+      question: isEnglish
+        ? `My tarot birth cards from ${day}/${month}/${parsedYear} (${era === "be" ? "BE" : "CE"})`
+        : `ไพ่ประจำตัวจากวันเกิด ${day}/${month}/${parsedYear} (${era === "be" ? "พ.ศ." : "ค.ศ."})`,
+      /*
+       * ⚠️ `resolveCards: false` — หน้านี้ใช้ข้อมูลไพ่ชุดที่ส่งมากับหน้า (`majorCards`) อยู่แล้ว
+       * ไม่ต้องให้ท่อเปิดสำรับเต็มมาแปลงให้อีก (จะลาก `@/data/cards` เข้าบันเดิลเปล่า ๆ)
+       */
+      resolveCards: false,
+      derive: { kind: "birth-card", day, month, year: parsedYear, era },
     });
   };
 
@@ -306,10 +377,24 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
 
         <button
           type="submit"
-          className="w-full py-3 px-6 rounded-full bg-ink text-surface-warm text-xs sm:text-sm font-serif-th font-bold hover:bg-gold transition duration-200 cursor-pointer shadow-raised active:scale-95 tracking-wide"
+          disabled={oracle.isPreparing}
+          className="w-full py-3 px-6 rounded-full bg-ink text-surface-warm text-xs sm:text-sm font-serif-th font-bold hover:bg-gold transition duration-200 cursor-pointer shadow-raised active:scale-95 tracking-wide disabled:opacity-60 disabled:cursor-wait"
         >
-          {isEnglish ? "Calculate Your Birth Card" : "คำนวณไพ่ประจำตัวของคุณ"}
+          {oracle.isPreparing
+            ? isEnglish
+              ? "Connecting to the Oracle…"
+              : "กำลังเชื่อมสัญญาณกับแม่หมอ…"
+            : isEnglish
+              ? "Calculate Your Birth Card"
+              : "คำนวณไพ่ประจำตัวของคุณ"}
         </button>
+
+        {/* สตรีมสะดุด/เซิร์ฟเวอร์ไม่ตอบ — บอกตรง ๆ ตรงนี้ ไม่ต้องรอให้ผู้ใช้เดาว่าปุ่มเสีย */}
+        {!result && oracle.state.error && (
+          <p role="alert" className="text-xs font-sans text-[#8F2E1A] text-center">
+            {oracle.state.error}
+          </p>
+        )}
       </form>
 
       {/* Result Presentation */}
@@ -442,6 +527,23 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             </div>
           </div>
 
+          {/* คำอ่านของแม่หมอ — สตรีมสดทุกครั้ง ไม่ใช่ข้อความสำเร็จรูป */}
+          <div className="pt-2">
+            <AiReadingPanel
+              state={oracle.state}
+              isEn={isEnglish}
+              onRetry={() => handleCalculate()}
+              cardLabels={
+                isEnglish
+                  ? ["Personality Card", "Soul Card"]
+                  : ["ไพ่บุคลิกภาพ", "ไพ่จิตวิญญาณ"]
+              }
+              title={
+                isEnglish ? "The Oracle Reads Your Birth Cards" : "คำอ่านไพ่ประจำตัวจากแม่หมอ"
+              }
+            />
+          </div>
+
           {/* Action & Next Steps Bar */}
           <div className="space-y-6 pt-2 border-t border-line-warm/40">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -517,6 +619,41 @@ export function BirthCardCalculator({ majorCards }: BirthCardCalculatorProps = {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ด่านความปลอดภัย: สัญญาณวิกฤต ➔ สายด่วน (กฎเหล็กข้อ 6) */}
+      {oracle.crisisMessage && (
+        <div className="rounded-xl border border-line-warm bg-surface-warm p-5 text-sm leading-relaxed text-ink whitespace-pre-line max-w-2xl mx-auto">
+          {oracle.crisisMessage}
+        </div>
+      )}
+
+      {/* กำแพงสิทธิ์ — เซิร์ฟเวอร์เป็นผู้ตัดสิน หน้าเว็บแค่เล่าให้ฟัง */}
+      {(oracle.gate !== null || authMode !== null) && (
+        <React.Suspense fallback={null}>
+          <AccessDialog
+            reason={oracle.gate}
+            onClose={oracle.clearGate}
+            onSignup={() => {
+              oracle.clearGate();
+              setAuthMode("signup");
+            }}
+            onSignin={() => {
+              oracle.clearGate();
+              setAuthMode("signin");
+            }}
+            onBuyCredits={() => {
+              oracle.clearGate();
+              window.location.href = "/account";
+            }}
+          />
+          <AuthModal
+            isOpen={authMode !== null}
+            onClose={() => setAuthMode(null)}
+            initialMode={authMode ?? "signin"}
+            fromEntitlementWall
+          />
+        </React.Suspense>
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 import type { Category } from "@/data/cards/types";
 import type { DrawnCard } from "@/lib/tarot/shuffle";
+import type { DerivedDrawSpec } from "@/lib/reading/derived-draw";
 import type { Reading } from "@/lib/schema/reading";
 import type { SafetyFlag } from "@/lib/safety/guardrails";
 import { kvGetJSON, kvPutJSON, KEY } from "@/lib/platform/kv-store";
@@ -29,6 +30,13 @@ export interface ReadingRecord {
   clientSeed?: string;
   drawn?: DrawnCard[];
   pickedIndices?: number[];
+  /**
+   * ไพ่ชุดนี้ "คำนวณมา" ไม่ได้ "จั่วมา" — สเปกถูกตรึงตั้งแต่ `/start` และเปลี่ยนไม่ได้อีก
+   * (ไพ่ประจำตัวจากวันเกิด · สำรับประจำวันของกอง Pick A Card — ดู `lib/reading/derived-draw.ts`)
+   *
+   * ⚠️ มีค่านี้เมื่อไหร่ แปลว่าห้ามเรียก `drawCards()` และห้ามรับ `pickedIndices` ในเซสชันนั้น
+   */
+  derivation?: DerivedDrawSpec;
 
   result?: Reading;
   createdAt: number;

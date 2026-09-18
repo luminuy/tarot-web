@@ -166,6 +166,7 @@ export const CHECKS: { label: string; cmd: string; args: string[] }[] = [
   { label: "🃏 หน้า Pick A Card (กองเดิมต้องไม่ให้ไพ่ชุดเดิมซ้ำ · เข้าถึงได้ทุกชุด · หลังไพ่เป็นลายเดียวกับทั้งเว็บ · INC-0198b)", cmd: TSX, args: ["scripts/qa/test-pick-a-card.ts"] },
   { label: "✂️ หัวสระ/วรรณยุกต์ไทยต้องไม่ถูกกล่องที่ตัดของล้นเฉือนทิ้ง (truncate + leading ต่ำกว่า 1.6 · INC-0197)", cmd: TSX, args: ["scripts/qa/test-thai-glyph-clipping.ts"] },
   { label: "🧭 สถานะการดูดวงของ TarotFlow (สำรับคว่ำหน้าเสมอ · พลิกไพ่ผีไม่ได้ · โทเคนไม่ถูกทับด้วยค่าว่าง · เฟรมที่มาช้าเขียนทับไม่ได้)", cmd: TSX, args: ["scripts/qa/test-flow-state.ts"] },
+  { label: "🎯 ไพ่ที่คำนวณได้ (ไพ่วันเกิด · สำรับประจำวันของกอง — ตรึงที่เซิร์ฟเวอร์ · ไม่ปนกับการจั่ว · ไม่มีไพ่สำรอง)", cmd: TSX, args: ["scripts/qa/test-derived-draw.ts"] },
 ];
 
 /**

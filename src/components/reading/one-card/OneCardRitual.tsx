@@ -21,7 +21,7 @@ const AccessDialog = React.lazy(() =>
 const AuthModal = React.lazy(() =>
   import("@/components/auth/AuthModal").then((m) => ({ default: m.AuthModal }))
 );
-import { OneCardAiReading } from "./OneCardAiReading";
+import { AiReadingPanel } from "@/components/reading/ai/AiReadingPanel";
 
 // โหลดสำรับ "ไทยล้วน" — ไม่ลากคำทำนายอังกฤษ (≈126 KB gzip) เข้าบันเดิลหน้าไทย
 let deckPromise: Promise<typeof import("@/data/cards/deck-th")> | null = null;
@@ -348,7 +348,7 @@ export function OneCardRitual({
             </div>
 
             {/* คำอ่านของแม่หมอ — สตรีมสดจาก AI ทุกครั้ง */}
-            <OneCardAiReading state={oracle.state} isEn={isEn} onRetry={handleDraw} />
+            <AiReadingPanel state={oracle.state} isEn={isEn} onRetry={handleDraw} />
 
             {/* เนื้อหาเสริมเฉพาะหน้า (ถ้ามี) */}
             {renderReading?.(drawnCard)}
