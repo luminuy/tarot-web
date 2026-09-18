@@ -10,7 +10,9 @@
  */
 
 export const STANDARD_SPREAD_IDS: ReadonlySet<string> = new Set([
+  "birth-card",
   "daily",
+  "love-one",
   "quick",
   "yes-no",
   "three-card",

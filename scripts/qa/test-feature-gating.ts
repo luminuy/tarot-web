@@ -7,7 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SPREADS } from "../../src/data/spreads";
+import { SPREADS, PUBLIC_SPREADS } from "../../src/data/spreads";
 import { PERSONAS } from "../../src/data/personas";
 import {
   STANDARD_SPREAD_IDS,
@@ -40,7 +40,13 @@ function main() {
   console.log("🧪 [QA] ระบบล็อกฟีเจอร์พรีเมียม (ผังใหญ่ & ปรมาจารย์ลับ)\n");
 
   // ── 1. ผังมาตรฐาน 10 ผัง สำหรับบัญชีฟรี ──
-  check("ผังมาตรฐานมีจำนวนตรงตามตารางเปรียบเทียบ (10 ผัง)", STANDARD_SPREAD_IDS.size === 10);
+  /*
+   * นับเฉพาะผังที่ผู้ใช้เลือกเองได้ — ผังภายใน (`internal: true`) ไม่ใช่สินค้าในคลังผัง
+   * มันมีไว้ให้หน้าเฉพาะทางเรียกท่อ AI เท่านั้น (เช่นไพ่ประจำตัวที่คำนวณจากวันเกิด)
+   * ถ้านับรวม ตัวเลข "25 ผัง" ที่ประกาศไว้ทั่วเว็บจะเพี้ยนทันที
+   */
+  const publicStandardIds = PUBLIC_SPREADS.filter((s) => s.guestAllowed).map((s) => s.id);
+  check("ผังมาตรฐานที่ผู้ใช้เลือกได้มีจำนวนตรงตามตารางเปรียบเทียบ (10 ผัง)", publicStandardIds.length === 10);
 
   // ตรวจสอบว่า STANDARD_SPREAD_IDS ตรงกับ guestAllowed ใน SPREADS เสมอ (INC-0005)
   const expectedGuestIds = SPREADS.filter((s) => s.guestAllowed).map((s) => s.id).sort().join(",");
@@ -86,10 +92,10 @@ function main() {
   }
 
   // รวมต้องครบ 25 ผังพอดี
-  check("จำนวนผังทั้งหมดในระบบต้องเท่ากับ 25 ผัง", SPREADS.length === 25);
+  check("จำนวนผังที่ผู้ใช้เลือกได้ต้องเท่ากับ 25 ผัง", PUBLIC_SPREADS.length === 25);
   check(
     "ผังทั้งหมดต้องถูกแบ่งเป็น Standard (10) + Grand (15) ครบ 25 ผัง",
-    STANDARD_SPREAD_IDS.size + (SPREADS.length - STANDARD_SPREAD_IDS.size) === 25
+    publicStandardIds.length + (PUBLIC_SPREADS.length - publicStandardIds.length) === 25
   );
 
   // ── 3. แม่หมอพื้นฐาน 3 ท่าน vs ปรมาจารย์ลับ 2 ท่าน ──

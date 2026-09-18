@@ -60,6 +60,14 @@ export interface Spread {
   yesNoMode?: boolean;
   /** ใช้กับ UI ผลลัพธ์แบบไหน — ไม่ระบุ = "full" (StreamReader เดิม) */
   resultStyle?: "quick" | "full";
+  /**
+   * ผังภายใน — มีไว้ให้หน้าเฉพาะทางเรียกใช้ท่อ AI เท่านั้น ไม่ใช่ผังที่ผู้ใช้เลือกเองได้
+   *
+   * ⚠️ ผังแบบนี้ **ห้ามโผล่** ในคลังผัง `/spreads` · sitemap · ตัวเลือกผังบนหน้าแรก
+   * เพราะผู้ใช้เลือกแล้วจะงง (ไพ่มาจากวันเกิด ไม่ได้มาจากการจั่ว) และจะทำให้
+   * จำนวน "25 ผัง" ที่ประกาศไว้ทั่วเว็บเพี้ยน — ใช้ `PUBLIC_SPREADS` ทุกครั้งที่แสดงรายการ
+   */
+  internal?: boolean;
 }
 
 export function getSpreadName(spread: Spread, isEnglishOrLocale: boolean | string): string {

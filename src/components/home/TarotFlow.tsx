@@ -10,7 +10,7 @@ import { withMotionScope } from "@/components/providers/with-motion-scope";
 import { useOnceOpen } from "@/lib/use-once-open";
 // ลิงก์ภายในต้องอยู่ในต้นไม้ภาษาเดียวกับหน้าที่ผู้ใช้ยืนอยู่ — ดู src/components/ui/LocaleLink.tsx
 import { LocaleLink as Link } from "@/components/ui/LocaleLink";
-import { SPREADS, getSpread, type Spread } from "@/data/spreads";
+import { PUBLIC_SPREADS, getSpread, type Spread } from "@/data/spreads";
 import { PERSONAS, getPersona, type Persona } from "@/data/personas";
 import type { Category } from "@/data/cards/types";
 import { CardImage } from "@/components/card/CardImage";
@@ -274,7 +274,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
   }, [isAuthOpen]);
 
   // Selection state
-  const [selectedSpread, setSelectedSpread] = useState<Spread>(SPREADS[3]); // Default: 3-card
+  const [selectedSpread, setSelectedSpread] = useState<Spread>(PUBLIC_SPREADS[3]); // Default: 3-card
   const [selectedPersona, setSelectedPersona] = useState<Persona>(PERSONAS[0]); // Default: warm
   const [selectedCategory, setSelectedCategory] = useState<Category>("general");
   const [question, setQuestion] = useState("");
@@ -831,7 +831,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
 
     const defaultQ = (isEnglish && topic.defaultQuestionEn) ? topic.defaultQuestionEn : topic.defaultQuestion;
     const chosenQuestion = userQuestion?.trim() || defaultQ;
-    const quickSpread = SPREADS.find((s) => s.id === "quick") || selectedSpread;
+    const quickSpread = PUBLIC_SPREADS.find((s) => s.id === "quick") || selectedSpread;
     setSelectedSpread(quickSpread);
     setSelectedCategory(topic.category);
     setNickname(userNickname);

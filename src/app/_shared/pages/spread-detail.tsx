@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ARTICLES } from "@/data/articles";
-import { SPREADS, getSpread } from "@/data/spreads";
+import { PUBLIC_SPREADS, getSpread } from "@/data/spreads";
 import { isStandardSpread } from "@/lib/entitlement/limits";
 import { clampDescription, headline, pickTitle, stripCardCount } from "@/lib/config/meta-length";
 import { buildAlternates, localizedUrl } from "@/lib/config/site";
@@ -43,7 +43,7 @@ const CATEGORY_EN: Record<string, string> = {
 
 /** พารามิเตอร์ของหน้าผัง 25 แบบ — ใช้ชุดเดียวกันทั้งสองภาษา */
 export function spreadStaticParams() {
-  return SPREADS.map((spread) => ({ id: spread.id }));
+  return PUBLIC_SPREADS.map((spread) => ({ id: spread.id }));
 }
 
 /**
@@ -304,7 +304,7 @@ export function spreadDetailProps(spread: NonNullable<ReturnType<typeof getSprea
   const relatedArticles = isEnglish
     ? ARTICLES.filter((a) => a.targetSpreadId === spread.id && Boolean(a.contentEn)).slice(0, 6)
     : ARTICLES.filter((a) => a.targetSpreadId === spread.id).slice(0, 6);
-  const otherSpreads = SPREADS.filter(
+  const otherSpreads = PUBLIC_SPREADS.filter(
     (s) => s.id !== spread.id && s.defaultCategory === spread.defaultCategory,
   ).slice(0, 4);
   return {
@@ -313,7 +313,7 @@ export function spreadDetailProps(spread: NonNullable<ReturnType<typeof getSprea
     relatedArticles,
     fallbackSpreads: otherSpreads.length
       ? otherSpreads
-      : SPREADS.filter((s) => s.id !== spread.id).slice(0, 4),
+      : PUBLIC_SPREADS.filter((s) => s.id !== spread.id).slice(0, 4),
   };
 }
 
