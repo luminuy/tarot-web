@@ -216,14 +216,18 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
         <div
           ref={topicRailRef}
           onScroll={handleTopicRailScroll}
-          className="flex flex-row gap-2.5 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-3 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible"
+          className="flex flex-row gap-2 overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth px-4 -mx-4 pb-1 sm:grid sm:grid-cols-4 sm:gap-3 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible"
         >
           {PICK_A_CARD_TOPICS.map((topic, topicCardIndex) => {
             const isActive = topic.id === activeTopic.id;
-            const cardClass = `group relative flex items-center gap-2.5 w-[62vw] max-w-[240px] shrink-0 snap-center sm:w-auto sm:max-w-none min-h-[44px] p-2 sm:p-2.5 rounded-xl text-left border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
+            /**
+             * การ์ดหัวข้อเป็น "แนวตั้ง" ตามสัดส่วนไพ่ (ภาพบน ชื่อล่าง)
+             * ของเดิมเป็นแถบนอนยาวที่ภาพเล็กนิดเดียว เจ้าของบอกว่าดูยาวและไม่ได้สัดส่วน
+             */
+            const cardClass = `group relative flex flex-col w-[33vw] max-w-[128px] shrink-0 snap-center sm:w-full sm:max-w-[132px] sm:mx-auto p-1.5 rounded-xl border transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold ${
               isActive
                 ? "bg-surface border-gold shadow-xs"
-                : "bg-inset/50 hover:bg-inset border-line/60 hover:border-line"
+                : "bg-inset/40 hover:bg-inset border-line/50 hover:border-line"
             }`;
 
             /**
@@ -233,38 +237,40 @@ export function PickACardClient({ initialTopicSlug }: { initialTopicSlug?: strin
              */
             const inner = (
               <>
+                {/* ภาพไพ่ประจำหัวข้อ เต็มความกว้างการ์ดตามสัดส่วนไพ่จริง 2:3 */}
                 <span
-                  className={`relative w-[30px] h-[48px] sm:w-[34px] sm:h-[54px] rounded-[5px] overflow-hidden border shrink-0 bg-canvas transition-colors ${
-                    isActive ? "border-gold/70" : "border-line/70 group-hover:border-gold/50"
+                  className={`relative block w-full aspect-[2/3] rounded-lg overflow-hidden border bg-canvas transition-colors ${
+                    isActive ? "border-gold/70" : "border-line/60 group-hover:border-gold/50"
                   }`}
                 >
                   <CardImage
                     cardId={topic.coverCardId}
                     alt=""
-                    sizes="34px"
+                    sizes="(min-width: 640px) 132px, 33vw"
                     loading="lazy"
                     className={`w-full h-full object-cover transition-[filter,opacity] duration-200 ${
-                      isActive ? "" : "opacity-70 saturate-[0.85] group-hover:opacity-100"
+                      isActive ? "" : "opacity-75 saturate-[0.9] group-hover:opacity-100"
                     }`}
                   />
                 </span>
 
-                <span className="min-w-0 flex-1">
+                <span className="block px-0.5 pt-1.5 pb-0.5 text-center">
+                  {/* ⚠️ ห้ามใส่ `block` คู่กับ `line-clamp-*` — ทั้งคู่สั่ง display ชนกัน แล้วการตัดบรรทัดจะไม่ทำงาน */}
                   <span
-                    className={`text-[12.5px] sm:text-[13px] font-serif-th leading-[1.7] line-clamp-2 transition-colors ${
+                    className={`text-[11.5px] font-serif-th leading-[1.65] line-clamp-2 min-h-[38px] transition-colors ${
                       isActive ? "font-bold text-gold-ink" : "font-semibold text-ink group-hover:text-gold-ink"
                     }`}
                   >
                     {isEnglish ? topic.titleEn : topic.titleTh}
                   </span>
-                  <span className="block text-[10.5px] font-mono uppercase tracking-[0.14em] text-muted mt-0.5">
+                  <span className="block text-[9.5px] font-mono uppercase tracking-[0.12em] text-muted mt-0.5">
                     {isEnglish ? `${topic.slots.length} Piles` : `${topic.slots.length} กองไพ่`}
                   </span>
                 </span>
 
                 {isActive && (
                   <span
-                    className="absolute -top-px left-3 right-3 h-[2px] rounded-full bg-gradient-to-r from-transparent via-gold to-transparent"
+                    className="absolute -bottom-px left-1/2 -translate-x-1/2 h-[2px] w-10 rounded-full bg-gradient-to-r from-transparent via-gold to-transparent"
                     aria-hidden="true"
                   />
                 )}
