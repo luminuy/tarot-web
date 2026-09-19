@@ -31,31 +31,56 @@ export interface PasswordValidationResult {
   reason?: string;
 }
 
-export function validatePasswordPolicy(password: string, email?: string): PasswordValidationResult {
+export function validatePasswordPolicy(
+  password: string,
+  email?: string,
+  locale: "th" | "en" = "th"
+): PasswordValidationResult {
+  const isEn = locale === "en";
   if (!password || typeof password !== "string") {
-    return { ok: false, reason: "กรุณาระบุรหัสผ่าน" };
+    return { ok: false, reason: isEn ? "Please provide a password" : "กรุณาระบุรหัสผ่าน" };
   }
 
   const trimmed = password.trim();
 
   if (trimmed.length < 10) {
-    return { ok: false, reason: "รหัสผ่านต้องมีความยาวอย่างน้อย 10 ตัวอักษร" };
+    return {
+      ok: false,
+      reason: isEn
+        ? "Password must be at least 10 characters long"
+        : "รหัสผ่านต้องมีความยาวอย่างน้อย 10 ตัวอักษร",
+    };
   }
 
   if (trimmed.length > 200) {
-    return { ok: false, reason: "รหัสผ่านยาวเกินไป (ไม่เกิน 200 ตัวอักษร)" };
+    return {
+      ok: false,
+      reason: isEn
+        ? "Password is too long (maximum 200 characters)"
+        : "รหัสผ่านยาวเกินไป (ไม่เกิน 200 ตัวอักษร)",
+    };
   }
 
   if (email && typeof email === "string") {
     const emailPrefix = email.split("@")[0]?.toLowerCase().trim();
     const pwLower = trimmed.toLowerCase();
     if (emailPrefix && emailPrefix.length >= 3 && pwLower.includes(emailPrefix)) {
-      return { ok: false, reason: "รหัสผ่านไม่ควรมีส่วนใดส่วนหนึ่งของชื่ออีเมล" };
+      return {
+        ok: false,
+        reason: isEn
+          ? "Password should not contain your email prefix"
+          : "รหัสผ่านไม่ควรมีส่วนใดส่วนหนึ่งของชื่ออีเมล",
+      };
     }
   }
 
   if (COMMON_PASSWORDS.has(trimmed.toLowerCase())) {
-    return { ok: false, reason: "รหัสผ่านนี้ง่ายเกินไปและเป็นที่นิยม กรุณาเลือกรหัสผ่านที่มีความเฉพาะตัวมากขึ้น" };
+    return {
+      ok: false,
+      reason: isEn
+        ? "This password is too common. Please choose a more unique password"
+        : "รหัสผ่านนี้ง่ายเกินไปและเป็นที่นิยม กรุณาเลือกรหัสผ่านที่มีความเฉพาะตัวมากขึ้น",
+    };
   }
 
   return { ok: true };

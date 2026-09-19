@@ -46,7 +46,13 @@ export async function POST(request: Request) {
     }
     const parsed = ChangePasswordSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message || (isEnglish ? "Invalid input" : "ข้อมูลไม่ถูกต้อง") }, { status: 400 });
+      const issue = parsed.error.issues[0];
+      let msg = issue?.message || (isEnglish ? "Invalid input" : "ข้อมูลไม่ถูกต้อง");
+      if (isEnglish) {
+        if (issue?.path[0] === "newPassword") msg = "New password must be at least 10 characters";
+        else msg = "Invalid input";
+      }
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
 
     const { oldPassword, newPassword } = parsed.data;
@@ -68,7 +74,7 @@ export async function POST(request: Request) {
     }
 
     // ตรวจสอบความปลอดภัยของรหัสผ่านใหม่
-    const policy = validatePasswordPolicy(newPassword, user.email || undefined);
+    const policy = validatePasswordPolicy(newPassword, user.email || undefined, isEnglish ? "en" : "th");
     if (!policy.ok) {
       return NextResponse.json({ error: policy.reason || (isEnglish ? "Password does not meet security requirements" : "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย") }, { status: 400 });
     }

@@ -16,8 +16,7 @@
   // ด่านห่วงโซ่อุปทานของ CI (ห้าม import ของที่ไม่ได้ประกาศใน package.json)
 
   "entry": [
-    "src/app/**/{page,layout,route,template,default,loading,error,not-found,sitemap,robots,manifest,opengraph-image}.{ts,tsx}",
-    "src/middleware.ts",
+    "src/app/**/{page,layout,route,template,default,loading,error,not-found,global-not-found,sitemap,robots,manifest,opengraph-image}.{ts,tsx}",
     "astro/**/*.{astro,ts,tsx}",
     "scripts/**/*.{ts,tsx}",
     "next.config.ts",

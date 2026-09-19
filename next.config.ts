@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     // การอ่านไพ่เป็น streaming ที่ใช้เวลานาน จึงต้องกันไม่ให้ถูกตัดกลางคัน
     proxyTimeout: 120_000,
     optimizePackageImports: ["motion", "motion/react", "zod"],
+    // รองรับ root 404 เมื่อแอปแบ่ง layout เป็น route group (th)/(en) โดยไม่มี src/app/layout.tsx (แก้ ISSUE-051)
+    globalNotFound: true,
     /*
      * 🚫 อย่าเปิด `inlineCss: true` — **วัดแล้วแย่ลง อย่าเชื่อคำแนะนำทั่วไป** (2026-09-14)
      *

@@ -5,11 +5,13 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 
 import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
-import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import type { DailyCard } from "@/lib/tarot/daily-card";
 import { bangkokDayKey } from "@/lib/time/bangkok";
+import { STORAGE_KEYS } from "@/lib/storage/keys";
 
-const DAILY_CARD_STORAGE_KEY = "seer:daily-card";
+const DAILY_CARD_STORAGE_KEY = STORAGE_KEYS.dailyCard;
+/** คีย์รุ่นเก่าสำหรับย้ายข้อมูลผู้ใช้ที่เคยแคชไว้เดิมอย่างราบรื่น */
+const LEGACY_DAILY_CARD_STORAGE_KEY = "seer:daily-card";
 
 /**
  * แถบ "ไพ่ประจำวันนี้" บนขั้นเลือกผัง — ไพ่ใบเดียวเหมือนกันทุกคนทั้งเว็บ
@@ -29,7 +31,9 @@ export function DailyCardStrip() {
 
     // 1. อ่านจากแคชในเครื่องทันทีก่อน (0ms — เร่ง LCP เหลือศูนย์สำหรับ repeat view)
     try {
-      const cachedRaw = localStorage.getItem(DAILY_CARD_STORAGE_KEY);
+      const cachedRaw =
+        localStorage.getItem(DAILY_CARD_STORAGE_KEY) ||
+        localStorage.getItem(LEGACY_DAILY_CARD_STORAGE_KEY);
       if (cachedRaw) {
         const cached = JSON.parse(cachedRaw) as { dateKey?: string; card?: DailyCard };
         if (cached?.dateKey === today && cached.card?.proof) {
@@ -49,6 +53,7 @@ export function DailyCardStrip() {
         setDaily(d);
         try {
           localStorage.setItem(DAILY_CARD_STORAGE_KEY, JSON.stringify({ dateKey: today, card: d }));
+          localStorage.removeItem(LEGACY_DAILY_CARD_STORAGE_KEY);
         } catch {
           // ignore quota exceeded
         }
@@ -84,10 +89,10 @@ export function DailyCardStrip() {
     );
   }
 
-  const displayKeywords = isEnglish
+  const displayKeywords: string[] = isEnglish
     ? (daily.keywordsEn && daily.keywordsEn.length > 0
         ? daily.keywordsEn
-        : CARD_KEYWORDS_EN[daily.cardId]?.upright.slice(0, 4) || daily.keywords)
+        : daily.keywords)
     : daily.keywords;
 
   return (
