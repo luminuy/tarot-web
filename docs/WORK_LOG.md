@@ -38,6 +38,40 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-19 (รอบ 106): 🛡️ แก้ไขความปลอดภัย Host Header Injection, สถาปัตยกรรม Storage Key (R-30), i18n Auth, และ Next 16 Dev Runtime (ISSUE-051)
+
+**ที่มาและเหตุผล (การตรวจสอบเชิงลึกและยกระดับมาตรฐาน)**:
+1. **Host Header Validation Security**: ใน `src/lib/security/app-origin.ts` และ `src/lib/config/site.ts` การอนุญาต `*.workers.dev` แบบกว้างเกินไปมีความเสี่ยงต่อ Host Header Injection / Password Reset Poisoning สำหรับผู้ไม่ประสงค์ดีที่สร้าง worker subdomain บน Cloudflare
+2. **Architecture Drift (R-30 Storage Keys)**: ใน `DailyCardStrip.tsx` มีการใช้คีย์สตริงดิบ (`seer:daily-card`) นอกสารบบทะเบียน `STORAGE_KEYS` ใน `src/lib/storage/keys.ts`
+3. **i18n Localization Thai Leaks ใน Auth APIs**: ใน `src/lib/auth/password-policy.ts` และเส้นทาง Auth (`signup`, `reset`, `change-password`) มีข้อความภาษาไทยรั่วไหลใน API Response แม้ผู้ใช้ส่ง `locale: "en"`
+4. **Next 16 Dev Runtime Compilation (ISSUE-051)**: `npm run dev` (`next dev --webpack`) ไม่ยอมรับหน้า 404 เมื่อมีหลาย Root Layouts ใน Route Groups (`(th)` และ `(en)`) โดยไม่เปิดใช้งาน `experimental.globalNotFound`
+5. **Housekeeping (knip.jsonc)**: มีการอ้างอิง `src/middleware.ts` ที่ถูกถอดออกไปแล้ว
+
+**สถาปัตยกรรมและการลงมือทำตามมาตรฐานระดับโลก**:
+1. **Strict Host Header Validation**:
+   - จำกัดโฮสต์ `*.workers.dev` ให้อนุญาตเฉพาะโดเมนของโปรเจกต์: `tarot-web.bankjack10452.workers.dev`, `*.bankjack10452.workers.dev`, และ `tarot-web.*.workers.dev` ทั้งใน `src/lib/security/app-origin.ts` และ `src/lib/config/site.ts`
+2. **Storage Key Centralization (R-30 Compliance)**:
+   - ลงทะเบียน `dailyCard: "tarot_daily_card"` ใน `src/lib/storage/keys.ts`
+   - ปรับ `DailyCardStrip.tsx` ให้อ่านจาก `STORAGE_KEYS.dailyCard` พร้อมกลไก Backward Compatibility Migration จาก `seer:daily-card` อย่างราบรื่น
+3. **Bilingual Auth Error Responses (i18n)**:
+   - อัปเกรด `validatePasswordPolicy` ให้รองรับพารามิเตอร์ `locale: "th" | "en"` ส่งข้อผิดพลาดภาษาอังกฤษเมื่อ `locale === "en"`
+   - เพิ่มการส่งข้อความภาษาอังกฤษใน `src/app/api/auth/email/signup/route.ts`, `src/app/api/auth/email/reset/route.ts`, และ `src/app/api/account/change-password/route.ts` เมื่อ `isEnglish` เป็นจริง
+4. **Next 16 Multi-Root Layout Dev Runtime (ISSUE-051 Resolution)**:
+   - เพิ่ม `experimental: { globalNotFound: true }` ใน `next.config.ts`
+   - สร้าง `src/app/global-not-found.tsx` ครอบ `RootHtml` และ `NotFoundBody` คืนค่า `<html>` และ `<body>` ครบถ้วนตามสเปก Next.js 16
+   - ปิด ISSUE-051 ใน `docs/KNOWN_ISSUES.md` อย่างเป็นทางการ
+5. **Housekeeping (knip.jsonc)**:
+   - ถอด `src/middleware.ts` และเพิ่ม `global-not-found` ใน `entry`
+
+**การพิสูจน์ความสมบูรณ์**:
+- `npm run typecheck` ➔ ผ่าน 100% (0 errors)
+- `npm run lint` ➔ ผ่าน 100% (0 errors, 0 warnings)
+- `npx tsx scripts/qa/test-code-debt.ts` ➔ ผ่าน 17/17 ข้อ
+- `npx tsx scripts/qa/test-sticky-header.ts` & `test-worker-first-routes.ts` ➔ ผ่าน 100%
+- `npx tsx scripts/qa/test-email-auth.ts` & `test-password.ts` ➔ ผ่าน 100%
+- `npm run dev` (`next dev --webpack`) ➔ บูตพร้อมทำงาน, ตอบกลับ 200 และ 404 ถูกต้อง 100%
+- `npm run repo:verify` ➔ ผ่านครบทั้ง 79/79 ด่านสมบูรณ์ 100%
+
 ### 🗓️ 2026-09-19 (รอบ 105): 🚀 ยกระดับประสิทธิภาพ Mobile Lighthouse (ลด LCP จาก 3.3s สู่ <2.0s & ขจัดคอขวด /api/daily-card 4,987ms)
 
 **ที่มาและเหตุผล (มิติความเร็วและประสิทธิภาพ Core Web Vitals)**:

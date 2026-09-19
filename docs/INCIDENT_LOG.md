@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0201 · 2026-09-19 20:34 · 🟠 High · fix host header validation, storage keys, i18n auth errors, and next dev 404
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | Host header check allowed arbitrary *.workers.dev subdomains; dailyCard used raw string outside STORAGE_KEYS; auth error responses leaked Thai messages when locale is en; npm run dev crashed on unmatched routes due to Next 16 multi-root-layout |
+| **สาเหตุราก** | Overly permissive regex in app-origin and site config; missing dailyCard key in storage registry; password-policy did not accept locale parameter; Next 16 requires experimental.globalNotFound and app/global-not-found.tsx when using multiple root layouts in route groups |
+| **การแก้ไข** | จำกัดโฮสต์ workers.dev ให้ตรงกับ subdomain ของโปรเจกต์เท่านั้น; ลงทะเบียนคีย์ dailyCard ใน STORAGE_KEYS และทำ backward compatibility migration ใน DailyCardStrip; เพิ่ม locale parameter ใน validatePasswordPolicy และ localized error handling ใน auth routes; เปิด experimental.globalNotFound ใน next.config.ts และสร้าง src/app/global-not-found.tsx ครอบ RootHtml |
+| **🛡️ กฎป้องกันถาวร** | **Strictly whitelist allowed host patterns; enforce STORAGE_KEYS via test-code-debt gate; provide locale to password-policy and auth endpoints; define global-not-found.tsx with complete html/body wrapper** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify 79/79 gates passed, next dev tested with curl on endpoints and 404 URLs, test-code-debt passed 17/17 |
+| **บันทึกโดย** | Antigravity AI · branch `antigravity/fix-security-storage-dev-runtime` · commit `db07fd97` |
+
+
 ### INC-0200 · 2026-09-18 13:49 · 🟡 Medium · หัวลิ้นชักนำทางหายทั้งชื่อและบรรทัดรองบน iOS Safari เหลือแต่ป้าย 1909 RWS
 
 | หัวข้อ | รายละเอียด |

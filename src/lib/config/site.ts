@@ -91,7 +91,9 @@ export function isOwnHostname(hostname: string): boolean {
     hostname === "127.0.0.1" ||
     hostname === SITE_DOMAIN ||
     hostname.endsWith(`.${SITE_DOMAIN}`) ||
-    hostname.endsWith(".workers.dev")
+    hostname === "tarot-web.bankjack10452.workers.dev" ||
+    hostname.endsWith(".bankjack10452.workers.dev") ||
+    (hostname.startsWith("tarot-web.") && hostname.endsWith(".workers.dev"))
   );
 }
 

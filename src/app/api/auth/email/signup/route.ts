@@ -64,7 +64,15 @@ export async function POST(request: Request) {
 
     const parsed = SignupSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message || (isEnglish ? "Invalid input" : "ข้อมูลไม่ถูกต้อง") }, { status: 400 });
+      const issue = parsed.error.issues[0];
+      let msg = issue?.message || (isEnglish ? "Invalid input" : "ข้อมูลไม่ถูกต้อง");
+      if (isEnglish) {
+        if (issue?.path[0] === "email") msg = "Invalid email format";
+        else if (issue?.path[0] === "password") msg = "Password must be at least 10 characters";
+        else if (issue?.path[0] === "name") msg = "Please provide your name";
+        else msg = "Invalid input";
+      }
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
 
     const { email, password, name } = parsed.data;
@@ -80,7 +88,7 @@ export async function POST(request: Request) {
     }
 
     // Password Policy Check
-    const policy = validatePasswordPolicy(password, email);
+    const policy = validatePasswordPolicy(password, email, isEnglish ? "en" : "th");
     if (!policy.ok) {
       return NextResponse.json({ error: policy.reason || (isEnglish ? "Password does not meet security requirements" : "รหัสผ่านไม่ผ่านเกณฑ์ความปลอดภัย") }, { status: 400 });
     }
