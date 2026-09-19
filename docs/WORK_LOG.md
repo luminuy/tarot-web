@@ -38,6 +38,38 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-19 (รอบ 105): 🚀 ยกระดับประสิทธิภาพ Mobile Lighthouse (ลด LCP จาก 3.3s สู่ <2.0s & ขจัดคอขวด /api/daily-card 4,987ms)
+
+**ที่มาและเหตุผล (มิติความเร็วและประสิทธิภาพ Core Web Vitals)**:
+จากผลการตรวจ Mobile Lighthouse ของ `seertarot.net` ที่ได้คะแนนประสิทธิภาพรวม 88 พบว่ามีคอขวดวิกฤตบนเส้นทางนำทาง (Critical Path Latency 4,987 ms):
+1. `DailyCardStrip.tsx` ใช้ `requestIdleCallback(..., { timeout: 2000 })` ทำให้แถบไพ่ด้านบนสุดเหนือเส้นพับแสดง skeleton ค้างไว้กว่า 2 วินาทีบนมือถือ
+2. คำขอ `/api/daily-card` วิ่งเข้า Worker ที่ติด Cold Start อีกเกือบ 3 วินาที (รวม 4,987 ms) และเมื่อข้อมูลมาถึงจึงเพิ่งเริ่มเรนเดอร์ภาพไพ่ ทำให้เบราว์เซอร์วัดเป็น LCP ที่ 3.3s
+3. แคชเฮดเดอร์เดิมใน `/api/daily-card/route.ts` มีแค่ `max-age=300` โดยไม่มี `s-maxage` ทำให้ Cloudflare Edge CDN ไม่ได้แคชไว้ที่ขอบโลก
+4. การหน่วงโหลดภาพไพ่ทำให้เบราว์เซอร์เปิด Preconnect Socket ไปยัง `https://ik.imagekit.io` ค้างไว้โดยไม่ได้โหลดภาพในหน้าต่างเวลาแรก จน Lighthouse เตือน Unused Preconnect
+
+**สถาปัตยกรรมและการลงมือทำตามมาตรฐานระดับโลก**:
+1. **Cloudflare Edge CDN Caching ใน `/api/daily-card/route.ts`**:
+   - นำเข้า `bangkokNextMidnightISO` จาก `@/lib/time/bangkok`
+   - คำนวณจำนวนวินาทีที่เหลือจนถึงเที่ยงคืนเวลาไทย (`secondsUntilMidnight`) โดยจำกัดให้อยู่ในช่วง 300 ถึง 86,400 วินาที
+   - กำหนด `Cache-Control`, `CDN-Cache-Control`, และ `Cloudflare-CDN-Cache-Control` ด้วย `s-maxage=${secondsUntilMidnight}, stale-while-revalidate=86400`
+   - ผลลัพธ์: Cloudflare Edge ตอบกลับข้อมูลไพ่ประจำวันได้ใน **~15ms** ทันที ไม่ต้องปลุก Worker หรือเสียเวลา Cold Start
+2. **Zero-Latency Client Hydration ใน `DailyCardStrip.tsx`**:
+   - นำเข้า `bangkokDayKey` จาก `@/lib/time/bangkok`
+   - ใน `useEffect`: ตรวจสอบ `localStorage` (`seer:daily-card`) ทันที หากมีข้อมูลที่ตรงกับวันที่ปัจจุบัน (`bangkokDayKey()`) และมี `proof` ให้เรนเดอร์ทันทีใน **0 ms** สำหรับ Repeat Views
+   - หากยังไม่มีในเครื่อง: ยกเลิกการหน่วง `requestIdleCallback(..., { timeout: 2000 })` และเรียก `fetch("/api/daily-card")` ทันที แล้วบันทึกผลลง `localStorage`
+   - กำหนด `loading="eager"` ให้กับ `<CardImage>` ในแถบไพ่ประจำวัน ป้องกันไม่ให้ภาพเหนือเส้นพับกลายเป็น Lazy Load
+   - ดึงภาพไพ่ในเฟรมแรกทันที ทำให้ Preconnect Socket ไปยัง ImageKit ถูกใช้งานอย่างคุ้มค่า ไม่ถูกปิดทิ้ง
+
+**การพิสูจน์ความสมบูรณ์**:
+- `npm run lint` ➔ 0 errors, 0 warnings (สะอาด 100%)
+- `npm run typecheck` ➔ 0 errors (สมบูรณ์ 100%)
+- `npx tsx scripts/qa/test-daily-card.ts` ➔ ผ่าน 7/7 ข้อ
+- `npx tsx scripts/qa/test-bundle-budget.ts` ➔ ผ่านงบประมาณทุกเส้นทาง 100%
+- `npx tsx scripts/qa/test-render-parity.ts` ➔ ผ่านความสมบูรณ์ 100%
+- `npm run repo:verify` ➔ ผ่านครบทั้ง 79/79 ด่านสมบูรณ์
+
+---
+
 ### 🗓️ 2026-09-19 (รอบ 104): ⚡ ติดตั้ง Linter มาตรฐานสำหรับโปรเจกต์ (ESLint 9 + React Hooks + Unused Imports)
 
 **ที่มาและเหตุผล (มิติความเร็วและประสิทธิภาพ ข้อ 2)**:

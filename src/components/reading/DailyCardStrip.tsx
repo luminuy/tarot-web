@@ -7,6 +7,9 @@ import { CardImage } from "@/components/card/CardImage";
 import { useLocale } from "@/lib/i18n";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import type { DailyCard } from "@/lib/tarot/daily-card";
+import { bangkokDayKey } from "@/lib/time/bangkok";
+
+const DAILY_CARD_STORAGE_KEY = "seer:daily-card";
 
 /**
  * แถบ "ไพ่ประจำวันนี้" บนขั้นเลือกผัง — ไพ่ใบเดียวเหมือนกันทุกคนทั้งเว็บ
@@ -22,35 +25,40 @@ export function DailyCardStrip() {
 
   useEffect(() => {
     let alive = true;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let idleId: number | undefined;
+    const today = bangkokDayKey();
 
-    const loadDaily = () => {
-      fetch("/api/daily-card", { credentials: "same-origin" })
-        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-        .then((d: DailyCard) => {
-          if (alive) setDaily(d);
-        })
-        .catch(() => {
-          if (alive) setFailed(true);
-        });
-    };
-
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(
-        loadDaily,
-        { timeout: 2000 }
-      );
-    } else {
-      timer = setTimeout(loadDaily, 300);
+    // 1. อ่านจากแคชในเครื่องทันทีก่อน (0ms — เร่ง LCP เหลือศูนย์สำหรับ repeat view)
+    try {
+      const cachedRaw = localStorage.getItem(DAILY_CARD_STORAGE_KEY);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw) as { dateKey?: string; card?: DailyCard };
+        if (cached?.dateKey === today && cached.card?.proof) {
+          setDaily(cached.card);
+          return;
+        }
+      }
+    } catch {
+      // localStorage ไม่พร้อมหรือโดนบล็อก (เช่น private mode)
     }
+
+    // 2. ดึงจากเซิร์ฟเวอร์ทันที (ไม่หน่วง requestIdleCallback 2 วินาทีซึ่งทำลาย LCP)
+    fetch("/api/daily-card", { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d: DailyCard) => {
+        if (!alive) return;
+        setDaily(d);
+        try {
+          localStorage.setItem(DAILY_CARD_STORAGE_KEY, JSON.stringify({ dateKey: today, card: d }));
+        } catch {
+          // ignore quota exceeded
+        }
+      })
+      .catch(() => {
+        if (alive) setFailed(true);
+      });
 
     return () => {
       alive = false;
-      if (timer) clearTimeout(timer);
-      if (idleId && typeof window !== "undefined" && "cancelIdleCallback" in window) {
-        (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
-      }
     };
   }, []);
 
@@ -100,6 +108,7 @@ export function DailyCardStrip() {
           alt=""
           className="h-full w-full object-cover"
           sizes="36px"
+          loading="eager"
         />
       </div>
 
