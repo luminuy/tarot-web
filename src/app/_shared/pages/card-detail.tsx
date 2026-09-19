@@ -8,6 +8,7 @@ import { CardDetailView, type CardNavRef } from "@/components/encyclopedia/CardD
 import { RelatedCards } from "@/components/encyclopedia/RelatedCards";
 import { CardSpreadLinks } from "@/components/encyclopedia/CardSpreadLinks";
 import { CARD_GROUPS } from "@/data/cards/group-seo";
+import { buildYesNoAnswer } from "@/data/cards/yes-no";
 import { buildAlternates, localizedUrl, SITE_ORIGIN } from "@/lib/config/site";
 import { buildPageOgImage } from "@/lib/media/og-image";
 import { clampDescription, pickTitle } from "@/lib/config/meta-length";
@@ -75,6 +76,7 @@ export function cardDetailMetadata(id: string, locale: Locale): Metadata {
     ? [
         `${card.nameEn} meaning`,
         `${card.nameEn} tarot`,
+        `${card.nameEn} yes or no`,
         `${card.nameEn} love meaning`,
         `${card.nameEn} career meaning`,
         `${card.nameEn} reversed`,
@@ -84,6 +86,8 @@ export function cardDetailMetadata(id: string, locale: Locale): Metadata {
     : [
         `ไพ่ ${card.nameEn}`,
         `ไพ่ ${card.nameTh}`,
+        `${card.nameEn} ใช่หรือไม่`,
+        `${card.nameTh} ใช่หรือไม่`,
         `${card.nameEn} ความหมาย`,
         `${card.nameEn} ความรัก`,
         `${card.nameEn} การงาน`,
@@ -217,6 +221,8 @@ export function cardDetailBreadcrumbJsonLd(card: TarotCard, locale: Locale) {
 /** JSON-LD `FAQPage` สำหรับหน้าไพ่รายใบ (ชิงพื้นที่ Rich Snippet Accordion บน Google) */
 export function cardDetailFaqJsonLd(card: TarotCard, locale: Locale) {
   const isEnglish = locale === "en";
+  const yn = buildYesNoAnswer(card, true, isEnglish);
+
   if (isEnglish) {
     const en = CARD_MEANINGS_EN[card.id]?.meanings ?? card.meanings;
     const cardSubject = card.nameEn.toLowerCase().startsWith("the ") ? card.nameEn : `the ${card.nameEn}`;
@@ -224,6 +230,14 @@ export function cardDetailFaqJsonLd(card: TarotCard, locale: Locale) {
       "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: [
+        {
+          "@type": "Question",
+          name: `Is ${card.nameEn} a Yes or No card?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `${yn.headline}. ${yn.body}`,
+          },
+        },
         {
           "@type": "Question",
           name: `What does ${cardSubject} mean in love?`,
@@ -256,6 +270,14 @@ export function cardDetailFaqJsonLd(card: TarotCard, locale: Locale) {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: [
+      {
+        "@type": "Question",
+        name: `ไพ่ ${card.nameEn} (${card.nameTh}) ใช่หรือไม่?`,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: `${yn.headline}. ${yn.body}`,
+        },
+      },
       {
         "@type": "Question",
         name: `ไพ่ ${card.nameEn} (${card.nameTh}) ความหมายเรื่องความรักคืออะไร?`,

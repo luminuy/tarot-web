@@ -41,7 +41,7 @@ export function CardSpreadLinks({ card, locale = "th" }: CardSpreadLinksProps) {
   ).slice(0, 2);
 
   const classicSpreads = SPREADS.filter(
-    (s) => s.id === "three-card" || s.id === "celtic-cross" || s.id === "daily"
+    (s) => s.id === "yes-no" || s.id === "three-card" || s.id === "celtic-cross" || s.id === "daily"
   ).slice(0, 2);
 
   const targetSpreads = [...categorySpreads, ...classicSpreads].slice(0, 4);

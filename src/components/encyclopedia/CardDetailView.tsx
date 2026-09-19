@@ -6,6 +6,7 @@ import { LocaleLink as Link } from "@/components/ui/LocaleLink";
 import type { TarotCard } from "@/data/cards/types";
 import { CARD_KEYWORDS_EN } from "@/data/cards/keywords-en";
 import { CardImage } from "@/components/card/CardImage";
+import { CardYesNoAnswer } from "./CardYesNoAnswer";
 import { useLocale } from "@/lib/i18n";
 
 export type CardNavRef = Pick<TarotCard, "id" | "image" | "nameTh" | "nameEn">;
@@ -263,6 +264,9 @@ export const CardDetailView: React.FC<CardDetailViewProps> = ({
               </div>
             </div>
           ))}
+
+          {/* คำตอบ ใช่/ไม่ใช่ (Yes / No) — พยากรณ์เชิงฟันธงจากข้อมูล 1909 RWS */}
+          <CardYesNoAnswer card={card} isEnglish={isEnglish} />
 
           {/* 5 Categorized Meanings List — ทั้งสองหัวไพ่อยู่ใน HTML ครบ
               (ของเดิมเรนเดอร์เฉพาะหัวที่เลือกอยู่ ความหมาย "หัวกลับ" ของไพ่ทั้ง 78 ใบ
