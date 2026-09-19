@@ -38,6 +38,36 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-19 (รอบ 104): ⚡ ติดตั้ง Linter มาตรฐานสำหรับโปรเจกต์ (ESLint 9 + React Hooks + Unused Imports)
+
+**ที่มาและเหตุผล (มิติความเร็วและประสิทธิภาพ ข้อ 2)**:
+โปรเจกต์เดิมพึ่งพา `tsc --noEmit` (Typecheck) และ `knip@5` (Deadcode) ร่วมกับ 79 ด่าน CI แต่ยังขาด Linter มาตรฐานอุตสาหกรรมใน `package.json` เพื่อตรวจจับ Unused Imports และ React Hooks Dependency หลุดล่วงหน้าก่อนเข้าสู่ด่าน CI
+
+**สถาปัตยกรรมและการลงมือทำตามมาตรฐานระดับโลก**:
+1. **ESLint 9 Flat Config (`eslint.config.mjs`)**:
+   - ใช้สถาปัตยกรรม Flat Config รุ่นใหม่ล่าสุดของ ESLint 9 รองรับ Next.js, React 19 และ TypeScript
+   - ใช้ `@typescript-eslint/parser` พร้อมการจัดสรร dependency สอดคล้องกับมาตรฐาน npm และ TypeScript
+   - ละเว้นโฟลเดอร์ build/cache/data (`.next/**`, `.open-next/**`, `.astro/**`, `.claude/**`, `src/data/**`, `node_modules/**`, `dist/**`, `public/**`) ป้องกันการสแกนไฟล์ซ้ำซ้อน
+   - เปิดใช้ระบบแคช `--cache` บันทึกใน `.eslintcache` (เพิ่มใน `.gitignore`) ทำให้รันตรวจจับทั้งโปรเจกต์ได้ในเวลาไม่ถึง 3 วินาที
+2. **กฎการตรวจจับโค้ด (Lint Rules)**:
+   - `react-hooks/rules-of-hooks`: "error" — ป้องกันการเรียก Hook ผิดเงื่อนไข
+   - `react-hooks/exhaustive-deps`: "warn" — ควบคุมความครบถ้วนของ Dependency Array
+   - `unused-imports/no-unused-imports`: "warn" — ตรวจจับและเก็บกวาด Import ที่ไม่ได้ใช้งาน
+   - `unused-imports/no-unused-vars`: "warn" — ละเว้นตัวแปรที่ขึ้นต้นด้วย `_`
+3. **การเก็บกวาดและปรับแต่งความสมบูรณ์ของโค้ด**:
+   - `src/components/encyclopedia/AllCardsTable.tsx`: เพิ่ม `cards` ใน dependency array ของ `useMemo`
+   - `src/components/home/TarotFlow.tsx`: เพิ่ม `isEnglish` ใน dependency array ของ `useEffect`
+   - `src/lib/ai/clarify.ts`: เปลี่ยน `catch (_err)` เป็น optional catch binding `catch` ปราศจากตัวแปรเหลือทิ้ง
+4. **การรักษาวินัยห่วงโซ่อุปทาน (CI Supply Chain Guard)**:
+   - บันทึก `package.json` และ `package-lock.json` สอดคล้องกัน 100% สำหรับ `npm ci`
+   - ด่าน `test-ci-supply-chain.ts` ผ่าน 17/17 ข้อสมบูรณ์
+
+**การพิสูจน์ความสมบูรณ์**:
+- `npm run lint` ➔ 0 errors, 0 warnings (สะอาด 100%)
+- `npm run typecheck` ➔ 0 errors
+- `npm run test:budget` ➔ หน้าแรก 157 KB (< 200 KB), หน้าไพ่ 5 KB ผ่าน 100%
+- `npm run repo:verify` ➔ ผ่านครบทั้ง 79/79 ด่าน
+
 ### 🗓️ 2026-09-19 (รอบ 103): 🅰️ เซกชัน "ใช่หรือไม่" (Yes / No) ครบ 78 หน้าไพ่สารานุกรม (SEO Traffic Capture & Rich Snippet)
 
 **ที่มาและเหตุผล (งาน A จาก HANDOFF_OMNI_YESNO_2026-09-06)**:

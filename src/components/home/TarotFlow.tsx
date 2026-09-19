@@ -573,7 +573,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
         });
       }
     }
-  }, []);
+  }, [isEnglish]);
 
   // คอมโพเนนต์ลึก (เช่นช่องแชทที่ล็อกใน FollowUpChat) ขอเปิดหน้าต่างสิทธิ์พร้อม "เหตุผล"
   // จึงเลือกถ้อยคำและปุ่มให้ตรงสถานการณ์ได้ ไม่ใช่เด้งหน้าเข้าสู่ระบบเหมือนกันหมด

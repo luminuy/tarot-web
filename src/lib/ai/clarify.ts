@@ -197,7 +197,7 @@ export async function evaluateClarification(input: ClarifyInput): Promise<Clarif
       question: finalQuestion,
       reason: parsed.reason,
     };
-  } catch (err: any) {
+  } catch {
     // Timeout หรือ Abort หรือ Network error -> ข้ามเงียบตามสเปก
     return { needsClarification: false, skipped: true };
   } finally {

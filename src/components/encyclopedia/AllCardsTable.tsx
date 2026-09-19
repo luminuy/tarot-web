@@ -76,7 +76,7 @@ export const AllCardsTable: React.FC<AllCardsTableProps> = ({ cards }) => {
         allKws.includes(q)
       );
     });
-  }, [activeSuit, query]);
+  }, [cards, activeSuit, query]);
 
   return (
     <div className="space-y-6">
