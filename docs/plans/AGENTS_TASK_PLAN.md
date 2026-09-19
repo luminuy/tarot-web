@@ -32,7 +32,7 @@
    └── Voice & Persona response fine-tuning (SoundManager Web Audio API)
            ↓
 [Agent 5: Quality Assurance & Verification]
-   ├── ตรวจสอบ Typecheck, Lint, Build (62 ด่าน)
+   ├── ตรวจสอบ Typecheck, Lint, Build (79 ด่าน)
    ├── ตรวจสอบ Provable Fair Commitment Math
    └── ทดสอบ Responsiveness ทุกหน้าจอมือถือ/แท็บเล็ต/เดสก์ท็อป
 ```
@@ -91,7 +91,7 @@
 
 ### 🧪 Agent 5: Verification, Testing & QA
 - **หน้าที่รับผิดชอบ**:
-  1. รัน `npm run typecheck` และ `npm run repo:verify` (62 ด่าน) ให้ผ่านปราศจาก Error
+  1. รัน `npm run typecheck` และ `npm run repo:verify` (79 ด่าน) ให้ผ่านปราศจาก Error
   2. ทดสอบความถูกต้องของ Spread ครบทั้ง 25 ผังพยากรณ์ (124 ตำแหน่ง)
   3. ทดสอบระบบคัดกรองความปลอดภัย (Safety Guardrails) ด้วยคำถามตัวอย่าง และสายด่วน 1323
   4. ทดสอบความถูกต้องทางคณิตศาสตร์ของ Seed verification

@@ -32,6 +32,7 @@ docs/
 │       └── ADR-003-cutting-edge-stack-rationale.md # เหตุผลการใช้ React 19.2 + Next 16.3 + Motion 13
 │
 ├── 📐 ข้อกำหนดเชิงฟังก์ชัน (Functional Specifications)
+│   ├── TAROT_CARD_FEATURES.md           # สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติ, ผัง 25 แบบ, Pick A Card 8 หัวข้อ
 │   └── specs/
 │       ├── DESIGN_SYSTEM_V2.md          # สเปกระบบดีไซน์ V2 — พื้นหลังและพาเลตต์สี (Warm Minimal Sanctuary)
 │       ├── INTERACTIVE_CARD_PICKING.md   # ระบบแผ่ไพ่ 78 ใบและการแตะเลือกไพ่ 3D
