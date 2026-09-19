@@ -11,6 +11,7 @@
     "build:astro": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint --cache .",
     "log:sync": "tsx scripts/sync-worklog.ts",
     "sw:version": "tsx scripts/bump-sw-version.ts",
     "build:worker": "tsx scripts/bump-sw-version.ts && npm run build:astro && opennextjs-cloudflare build && tsx scripts/merge-astro-assets.ts",
@@ -63,6 +64,8 @@
   },
   "devDependencies": {
     "@astrojs/react": "6.0.5",
+    "@eslint/js": "^9.39.5",
+    "@next/eslint-plugin-next": "^16.3.5",
     "@opennextjs/cloudflare": "^1.20.4",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "4.3.3",
@@ -70,10 +73,14 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "astro": "7.3.2",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.0",
     "wrangler": "^4.133.0"
   },
   "browserslist": [
