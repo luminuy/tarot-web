@@ -38,6 +38,25 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-19 (รอบ 103): 🅰️ เซกชัน "ใช่หรือไม่" (Yes / No) ครบ 78 หน้าไพ่สารานุกรม (SEO Traffic Capture & Rich Snippet)
+
+**ที่มาและเหตุผล (งาน A จาก HANDOFF_OMNI_YESNO_2026-09-06)**:
+ข้อมูล `card.yesNo` ("yes" | "no" | "maybe") มีครบทั้ง 78 ใบในสำรับดั้งเดิม 1909 RWS อยู่แล้ว แต่เดิมปรากฏเพียงป้ายเล็ก ๆ ไม่เคยมีเซกชันพยากรณ์เชิงฟันธงที่ให้ผู้ใช้และ Google เข้าถึงคำตอบแบบ Yes/No รายใบได้อย่างลึกซึ้ง
+
+**สถาปัตยกรรมและการลงมือทำตามมาตรฐานระดับโลก**:
+1. **`src/data/cards/yes-no.ts` (ใหม่)**: ฟังก์ชันบริสุทธิ์ `buildYesNoAnswer(card, isUpright, isEnglish)` คำนวณคำตอบ Yes/No, พาดหัว, และเนื้อหาจากคีย์เวิร์ดและบริบทจริงของไพ่ 1909 RWS ปราศจากการกุคำตอบ (Zero Fabricated Cards) ทั้งหัวตั้งและหัวกลับ
+2. **`src/components/encyclopedia/CardYesNoAnswer.tsx` (ใหม่)**: ดีไซน์ Quiet Luxury ไร้อิโมจิ/ดวงดาวแฟนซี รองรับการสลับหัวตั้ง/หัวกลับแบบ Zero-Runtime CSS (`data-when="upright"` และ `data-when="reversed"`) ไม่ดึงรันไทม์ React เพิ่ม คงน้ำหนัก JS หน้าไพ่ 5 KB
+3. **`src/components/encyclopedia/CardDetailView.tsx`**: ฝังเซกชัน Yes/No เหนือบาร์ 5 มิติความหมาย พร้อมคำเตือนบริบทและลิงก์ไปยังผัง `/spreads/yes-no`
+4. **`src/app/_shared/pages/card-detail.tsx`**: ขยาย JSON-LD `FAQPage` เพิ่มคำถาม `Is ... a Yes or No card?` / `ไพ่ ... ใช่หรือไม่?` พร้อมคำตอบที่ตรงกับเนื้อหาบนหน้าเว็บ 100% สำหรับ Google Rich Snippet Accordion และเพิ่มคีย์เวิร์ด SEO Yes/No
+5. **`src/components/encyclopedia/CardSpreadLinks.tsx`**: เชื่อมโยงผัง `yes-no` เข้าสู่รายการผังคลาสสิกที่แนะนำในทุกหน้าไพ่
+
+**การพิสูจน์ความสมบูรณ์**:
+- `npm run repo:verify` ผ่านครบทั้ง 79/79 ด่าน
+- `npm run verify:cards` สำรับผ่านการตรวจ 100% (ใช่ 38 / ไม่ใช่ 22 / ไม่แน่ 18)
+- `test-en-thai-leak` โหมดภาษาอังกฤษเรนเดอร์จริง 41 จอ ไร้อักษรไทยหลุด 100%
+- `test-meta-length` ทุกหน้าผ่านเกณฑ์ SERP (title <= 60, description <= 160)
+- `test-bundle-budget` หน้าไพ่ JS 5 KB (เพดาน 8 KB), HTML gzip 15 KB (เพดาน 18 KB)
+
 ### 🗓️ 2026-09-18 (รอบ 102): 🎯 ไพ่ที่ "คำนวณได้" ต่อเข้าท่อ AI — คลื่นที่ 2 (`/pick-a-card` · `/cards/birth-card`)
 
 **โจทย์ที่คลื่นที่ 1 ทิ้งไว้**: สองหน้านี้ไพ่ **ถูกกำหนดไว้ล่วงหน้า** (สำรับประจำวันของกอง · ไพ่จากวันเกิด)
