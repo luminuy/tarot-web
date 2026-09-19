@@ -88,7 +88,7 @@ sequenceDiagram
 
     User->>Server: POST /api/reading/start (คำถาม + ผัง + แม่หมอ)
     Server->>Server: สร้าง serverSeed = CSPRNG(32 bytes)
-    Server->>Server: commitment = SHA256(serverSeed)
+    Server->>Server: commitment = SHA256(serverSeed + ":" + clientSeed)
     Server->>KV: Persist reading session (KEY.reading, 2h TTL)
     Server-->>User: ส่ง sessionToken + commitment (แสดง SHA-256 ให้ผู้ใช้เห็นก่อนสับ)
     
@@ -114,7 +114,7 @@ sequenceDiagram
 ```text
 astro/
 ├── src/
-│   ├── pages/                       # 305 หน้า SSG (cards, spreads, blog, about, privacy, contact)
+│   ├── pages/                       # 305 หน้า SSG (cards, spreads, blog, about, privacy, contact, account)
 │   ├── components/                  # Astro static presentation components & layouts
 │   ├── islands/                     # React Island wrappers (client:idle hydration)
 │   ├── layouts/                     # BaseLayout.astro (SEO, fonts, metadata, locale)
@@ -128,24 +128,33 @@ src/
 │   │   └── [id]/chat/route.ts       # ถามคุยต่อยอดตามบริบทไพ่และ 5 บุคลิก
 │   ├── (th)/, (en)/                 # Next.js App Router (หน้าที่ต้องมี Auth/Admin/Dynamic)
 │   ├── account/, admin/, readers/   # บัญชีสมาชิก, แผงควบคุมแอดมิน, คิวแม่หมอ
+│   ├── pick-a-card/                 # หน้าเลือกกองไพ่พยากรณ์ 8 หัวข้อ
 │   ├── page.tsx                     # วิหารพยากรณ์หลัก (5-Step Ritual Flow)
 │   └── globals.css                  # Obsidian Velvet & Gold Design System + GPU Classes
 ├── components/
 │   ├── card/                        # TarotCard 3D, CardImage (WebP/AVIF), CardZoomModal
 │   ├── deck/                        # InteractiveCardFan (78 ใบ), ShuffleRitual
 │   ├── spread/                      # SpreadBoard, SpreadCardSelector (25 ผัง)
+│   ├── pick-a-card/                 # PickACardClient, TouchCarousel, CrystalPileSelector
 │   ├── reading/                     # StreamReader, FollowUpChat, ShareModal, PersonaCardSelector
 │   ├── history/, encyclopedia/      # ReadingHistoryModal, CardsExplorer
 │   └── ui/                          # MysticAltarCanvas, TarotArtIcons, Modal, Button
 ├── data/
 │   ├── cards/                       # ข้อมูลไพ่ 78 ใบ (780 ข้อความความหมาย 5 มิติ)
 │   ├── spreads.ts                   # ข้อมูล 25 ผังพยากรณ์และ 124 ตำแหน่ง
+│   ├── pick-a-card.ts               # ระบบ Pick A Card 8 หัวข้อ, 4 หินคริสตัล, สำรับหมุนเวียนเที่ยงคืน
 │   └── personas.ts                  # แม่หมอ 5 บุคลิก (warm, playful, direct, master, mystic)
 ├── lib/
-│   ├── ai/                          # Gemini SSE Streaming & Structured Output Parser
+│   ├── ai/                          # Dual-Engine Failover (Groq Qwen 2.5 + Gemini) SSE Streaming
+│   ├── reading/                     # Derived Draw Engine, AI Reading Hook, Telemetry
 │   ├── safety/                      # Guardrails กรองคำถามอันตราย & 1323
 │   ├── security/                    # Session Token & Stateless HMAC Signature
 │   └── tarot/                       # Provably Fair Shuffle & Single Source Card Resolver
+docs/
+├── TAROT_CARD_FEATURES.md           # สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติ, ผัง 25 แบบ, Pick A Card 8 หัวข้อ
+├── ARCHITECTURE.md                  # สถาปัตยกรรมระดับองค์กร (Enterprise Architecture Blueprint)
+├── INCIDENT_LOG.md                  # บันทึกบทเรียนความผิดพลาดและกฎป้องกันถาวร
+└── KNOWN_ISSUES.md                  # ดัชนีสถานะบั๊กค้างและข้อจำกัดระบบ
 ```
 
 ---

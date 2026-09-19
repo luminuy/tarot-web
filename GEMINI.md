@@ -23,6 +23,7 @@
 7. **[docs/plans/AGENTS_TASK_PLAN.md](docs/plans/AGENTS_TASK_PLAN.md)**: แผนการกระจายงาน 5 เอเจนท์เฉพาะทาง และ Milestone การพัฒนา
 8. **[docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)**: 🪶 แผนสถาปัตยกรรม Astro 7 + React 19 Islands (305 หน้า SSG Zero-Runtime ตอบจาก Edge)
 9. **[docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md](docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)**: 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62)
+10. **[docs/TAROT_CARD_FEATURES.md](docs/TAROT_CARD_FEATURES.md)**: 🃏 **(CANONICAL SPEC)** สเปกระบบและสารบบไพ่ทาโรต์ 78 ใบ, 5 มิติความหมาย, ผัง 25 แบบ, Pick A Card 8 หัวข้อ, Provably Fair Flow
 
 > 🪶 **หมายเหตุด้านสถาปัตยกรรม (Astro + Next.js Hybrid)**:
 > หน้าสาธารณะและเนื้อหา 305 หน้า (`/cards/**`, `/spreads/**`, `/blog/**`, `/about`, `/privacy`, `/contact` ฯลฯ) ถูกสร้างด้วย Astro SSG เป็น Zero-Runtime HTML ใน `.open-next/assets` ตอบจาก Cloudflare Edge โดยตรงโดยไม่ปลุก Worker

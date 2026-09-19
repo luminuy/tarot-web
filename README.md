@@ -9,7 +9,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict%200%20Errors-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![AI Engine](https://img.shields.io/badge/AI-Groq%20Qwen%20%2B%20Gemini%20%2B%20Claude-purple?style=for-the-badge)](https://groq.com/)
-[![CI Quality Gates](https://img.shields.io/badge/CI%20Quality%20Gates-62%2F62%20Passed-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/luminuy/tarot-web/actions)
+[![CI Quality Gates](https://img.shields.io/badge/CI%20Quality%20Gates-79%2F79%20Passed-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/luminuy/tarot-web/actions)
 [![Edge Network](https://img.shields.io/badge/Edge%20Network-Cloudflare%20Workers-orange?style=for-the-badge&logo=cloudflare)](https://workers.cloudflare.com/)
 [![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-lightgrey?style=for-the-badge)](LICENSE)
 
@@ -48,27 +48,33 @@
 - รองรับผังพยากรณ์ 25 แบบ (124 ตำแหน่งพยากรณ์) ตั้งแต่ผัง 1 ใบด่วน (Daily Card, Yes/No), ผัง 3 ใบ (อดีต-ปัจจุบัน-อนาคต, จิตใจ-ร่างกาย-วิญญาณ) ไปจนถึงผังมหาศักดิ์สิทธิ์ Celtic Cross 10 ใบ และ Tree of Life
 - ผังที่มีไพ่ 7 ใบขึ้นไป (ผัง 7 วัน และ 7 จักระ) จัดวางแบบ 2 ชั้นสมดุล (4+3 ใบ) คุมความกว้างไม่เกิน 150px ป้องกันการล้นขอบจอทุกขนาด
 
-### 3. 🎲 ระบบสุ่มไพ่ที่ตรวจสอบความโปร่งใสได้ 100% (Provably Fair Cryptography)
+### 3. 🔮 ระบบเลือกกองไพ่พยากรณ์ Pick A Card 8 หัวข้อยอดนิยม (Multi-Topic Oracle Engine)
+- บรรจุ **8 หัวข้อที่มีการค้นหาสูงสุดระดับประเทศ** พร้อม URL Slugs สองภาษา (`/pick-a-card/**` และ `/en/pick-a-card/**`)
+- 4 กองไพ่หินคริสตัลศักดิ์สิทธิ์ (Rose Quartz, Amethyst, Citrine, Lapis Lazuli) สอดคล้องกับคลื่นพลังงานของคำถาม
+- ระบบสำรับประจำวันหมุนเวียนอัตโนมัติทุกเที่ยงคืน (Deterministic Daily Deck Rotation) พร้อมคลังคำทำนายเจาะลึก 64 ถึง 512 ชุดต่อหัวข้อ
+- เชื่อมต่อเข้าท่อคำนวณและสตรีมมิ่งคำอ่าน AI (Derived Draw AI Pipeline) อัตโนมัติ
+
+### 4. 🎲 ระบบสุ่มไพ่ที่ตรวจสอบความโปร่งใสได้ 100% (Provably Fair Cryptography)
 - สับไพ่ด้วย Deterministic Fisher-Yates ควบคู่กับ **SHA-256 Commit-Reveal Cryptographic Verification**
 - เซิร์ฟเวอร์สร้างและส่ง Hash Commitment ให้เบราว์เซอร์ก่อนเริ่มแตะไพ่ และเฉลย Server Seed ให้ผู้ใช้ตรวจคำนวณย้อนหลังผ่าน Client Web Crypto API ได้ 100%
 - **Zero Fabricated Cards Policy**: ข้อมูลไพ่ทุกใบมาจากระบบสุ่มจริง ห้ามโค้ด fallback มโนหรือกุไพ่ใบใดขึ้นมาเองเด็ดขาด หากข้อมูลไม่สมบูรณ์ระบบจะแจ้งให้โหลดใหม่ทันทีเพื่อรักษาความโปร่งใสสูงสุด
 
-### 4. 🤖 แม่หมอ AI สองประสาน (Dual-Engine AI) 5 บุคลิก พร้อมสตรีมมิ่งสด (SSE)
+### 5. 🤖 แม่หมอ AI สองประสาน (Dual-Engine AI) 5 บุคลิก พร้อมสตรีมมิ่งสด (SSE)
 - **เครื่องยนต์สองประสาน (Multi-Provider Failover)**: Groq Cloud LPU (Qwen 2.5 72B/32B Tier 1, ความเร็ว ~400ms) สลับอัตโนมัติสู่ Google Gemini (3.7 / 2.5 Flash Tier 2) ผ่าน Cloudflare AI Gateway
 - แม่หมอ 5 บุคลิกสมจริง: **แม่หมอใจดี** (อบอุ่น), **แม่หมอเพื่อนซี้** (คุยสนุก/เม้าท์มันส์), **แม่หมอพูดตรง** (กระชับเด็ดขาด), **อาจารย์สายฟันธง** (กลยุทธ์ 1-2-3), และ**แม่หมอสายพลัง** (จักรวาล/จิตวิญญาณ)
 - สตรีมคำทำนายสดแบบ Server-Sent Events (SSE) ไหลลื่นไม่มีสะดุด พร้อมระบบสนทนาถามต่อยอด (Contextual Follow-up Chat Engine)
 
-### 5. 🪶 สถาปัตยกรรมไฮบริด Astro 7 + React 19 Islands + Next.js 16.3
-- **Zero-Runtime Edge Delivery**: หน้าเนื้อหาสาธารณะ 305 หน้า (`/cards/**`, `/spreads/**`, `/blog/**`, `/about`, `/privacy`, `/contact` ฯลฯ) คอมไพล์ด้วย Astro SSG เป็น Zero-Runtime HTML ใน `.open-next/assets` ตอบตรงจาก Cloudflare Edge Assets โดยไม่ปลุก Worker ประหยัดต้นทุนและลดน้ำหนัก JS ลง 36–53%
-- **Dynamic App & APIs**: หน้าที่ต้องการสถานะเซสชัน/ระบบสมาชิก/แผงควบคุมหลังบ้าน (`/account`, `/admin`, `/readers`, `/api/*`) ทำงานบน Next.js 16.3 App Router (OpenNext on Cloudflare Workers)
+### 6. 🪶 สถาปัตยกรรมไฮบริด Astro 7 + React 19 Islands + Next.js 16.3
+- **Zero-Runtime Edge Delivery**: หน้าเนื้อหาสาธารณะ 305 หน้า (`/cards/**`, `/spreads/**`, `/blog/**`, `/about`, `/privacy`, `/contact`, `/account` ฯลฯ) คอมไพล์ด้วย Astro SSG เป็น Zero-Runtime HTML ใน `.open-next/assets` ตอบตรงจาก Cloudflare Edge Assets โดยไม่ปลุก Worker ประหยัดต้นทุนและลดน้ำหนัก JS ลง 36–53%
+- **Dynamic App & APIs**: หน้าที่ต้องการสถานะเซสชัน/ระบบสมาชิก/แผงควบคุมหลังบ้าน (`/admin`, `/readers`, `/api/*`) ทำงานบน Next.js 16.3 App Router (OpenNext on Cloudflare Workers)
 - **Universal Component Compatibility**: มีชั้นแปลงปลั๊ก Shims (`next/link`, `next/navigation`) ทำให้คอมโพเนนต์ React ทั้ง 90 ตัวทำงานร่วมกันได้ทั้งบน Astro และ Next.js โดยไม่ต้องแก้โค้ดซ้ำซ้อน
 
-### 6. ⚡ Mobile Performance & Ultra-Fast Edge Caching
+### 7. ⚡ Mobile Performance & Ultra-Fast Edge Caching
 - **แคชฟอนต์ 1 ปีเต็ม**: ไฟล์ฟอนต์ไทยทั้งหมด (`Noto Serif Thai`, `Sarabun`) ใน `public/_headers` ได้รับ `Cache-Control: public, max-age=31536000` ลดการโหลดซ้ำบนมือถือ
 - **ตัดวงจร Critical Request Chaining**: แยกสแตติกโครมออกจากไคลเอนต์โครม และเลื่อนการเรียก API ไพ่ประจำวันด้วย `requestIdleCallback`
 - **ขจัด Forced Reflow 100%**: กำจัด Layout Thrashing ในคอมโพเนนต์เลือกไพ่ด่วน ทำให้คะแนน Lighthouse Mobile และ Total Blocking Time (TBT) ดีเยี่ยม (14–42 ms)
 
-### 7. 🛡️ ความปลอดภัยและการป้องกันข้อมูลส่วนบุคคล (PDPA, Security & Safety Boundaries)
+### 8. 🛡️ ความปลอดภัยและการป้องกันข้อมูลส่วนบุคคล (PDPA, Security & Safety Boundaries)
 - **Safety Guardrails**: ตรวจจับสัญญาณความทุกข์ใจ/อันตราย/การทำร้ายตัวเองทันที พร้อมระงับการทำนายและแสดงสายด่วนสุขภาพจิต **1323** ชัดเจน
 - **PDPA & Privacy by Design**: ข้อมูลการเปิดไพ่เก็บใน Local Storage ของผู้ใช้เป็นหลัก และรองรับการดาวน์โหลดสำเนา JSON หรือสั่งลบข้อมูลถาวรได้ทันที
 - **Enterprise Bot & Abuse Defense**: ผสาน Cloudflare Turnstile, Native WAF Rate Limiting, Origin Anti-Theft Guard, และ PBKDF2-HMAC-SHA256 Password Hashing
@@ -153,6 +159,7 @@ npm run dev
 | | **[`docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md`](docs/CLOUDFLARE_DEPLOYMENT_GUIDE.md)** | ⚡ คู่มือการนำเว็บขึ้น Cloudflare Workers & Custom Domain พร้อมระบบ Secret |
 | | **[`docs/ADMIN_PANEL.md`](docs/ADMIN_PANEL.md)** | 📊 คู่มือและสถาปัตยกรรมแผงควบคุมผู้ดูแลระบบ (Admin Panel & Cloud Health) |
 | | **[`docs/WORK_LOG.md`](docs/WORK_LOG.md)** | 📖 ประวัติการพัฒนาและ Audit Trail ส่งต่องานแบบเรียลไทม์ |
+| **📐 สเปกฟังก์ชัน & สารบบไพ่** | **[`docs/TAROT_CARD_FEATURES.md`](docs/TAROT_CARD_FEATURES.md)** | 🃏 **ข้อกำหนดระบบและสารบบความสามารถไพ่ทาโรต์ระดับเวิลด์คลาส** — สำรับ 78 ใบ, 5 มิติความหมาย, ผัง 25 แบบ, Pick A Card 8 หัวข้อ, Provably Fair |
 | **🪶 สถาปัตยกรรม Astro & ประสิทธิภาพ** | **[`docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md`](docs/plans/HANDOFF_ASTRO_MIGRATION_2026-09-15.md)** | 🪶 แผนย้ายเว็บไปสถาปัตยกรรม Astro 7 + React 19 Islands (305 หน้า SSG Zero-Runtime ตอบจาก Edge) |
 | | **[`docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md`](docs/plans/HANDOFF_CARD_TILE_CV_2026-09-15.md)** | 📐 สูตรความสูงการ์ดไพ่และกฎ content-visibility ต่อ breakpoint (ด่านที่ 62) |
 

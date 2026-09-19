@@ -41,7 +41,7 @@
 เพื่อให้ผู้ใช้เลือกตำแหน่งไพ่เองได้อย่างแท้จริง แต่ยังคงความโปร่งใสแบบ Provably Fair:
 1. **Commitment Phase**:
    - เซิร์ฟเวอร์สร้าง `serverSeed` สุ่มลำดับสำรับ 78 ใบ (Shuffled Deck: `D = [c_0, c_1, ..., c_77]`) และ Reversal flags
-   - เซิร์ฟเวอร์ส่ง `commitment = sha256(serverSeed)` ให้ Client
+   - เซิร์ฟเวอร์ส่ง `commitment = SHA-256(serverSeed + ":" + clientSeed)` ให้ Client บันทึกไว้ก่อนเริ่มเลือกไพ่
 2. **Interactive Pick Phase**:
    - ผู้ใช้เลือก index ในพัด เช่น เลือกไพ่ใบที่ `[14, 38, 7]`
    - Client รวบรวมข้อมูล:
@@ -67,10 +67,11 @@
   - `requiredCount`: จำนวนที่ Spread ต้องการ
   - `onCardPick`: `(index: number) => void`
   - `disabled`: boolean
-- **Interaction**:
+- **Interaction & Performance**:
   - Dragging/Pannable สำรับซ้าย-ขวาบนมือถือ
-  - Smooth Elastic Physics ด้วย `framer-motion` (`motion/react`)
-  - Sound effect เบาๆ ตอน Hover และ Pick
+  - Smooth Elastic Physics ด้วย `motion` (Motion 13)
+  - วินัยการใช้ GPU: กำหนด `will-change: transform` เฉพาะช่วงที่กำลังขยับ (Active Dragging/Animating) และปลดออกเมื่อหยุดนิ่ง (ป้องกัน GPU Layer ค้างถาวรตามกฎ INC-0027)
+  - Sound effect เบาๆ ตอน Hover และ Pick ผ่าน Web Audio API Synthesizer (Zero MP3 Assets)
 
 ### 2. `<CardSlot />` และ `<SpreadBoard />`
 - **หน้าที่**: แสดงผังการวางไพ่ตามพิกัด $(x, y, rotate)$ ที่กำหนดใน `spreads.ts`
