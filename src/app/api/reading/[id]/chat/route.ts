@@ -534,7 +534,11 @@ ${questionDiagnosis.promptDirective}
     const aiCapHit = !privileged && (await isAiCapReached("member"));
     if (aiCapHit) {
       return NextResponse.json(
-        { error: "ระบบให้บริการคำทำนายครบโควตาของวันนี้แล้ว กรุณากลับมาใหม่พรุ่งนี้" },
+        {
+          error: isEnglish
+            ? "The consultation system has reached its daily quota. Please return tomorrow."
+            : "ระบบให้บริการคำทำนายครบโควตาของวันนี้แล้ว กรุณากลับมาใหม่พรุ่งนี้",
+        },
         { status: 429 }
       );
     }

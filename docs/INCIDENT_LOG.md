@@ -62,6 +62,18 @@ npm run incident -- --title "..." --severity high --symptom "..." \
 ## 📜 รายการเหตุการณ์ (ใหม่สุดอยู่บนสุด)
 
 <!-- INCIDENT_ENTRIES_START -->
+### INC-0202 · 2026-09-19 20:54 · 🟡 Medium · Fix API error i18n leaks, PDPA queue cleanup retention, and knip config hygiene
+
+| หัวข้อ | รายละเอียด |
+| :--- | :--- |
+| **อาการที่พบ** | API error responses in shuffle, read, chat, and start routes returned hardcoded Thai strings for English sessions; expired tickets in queue left orphaned ai_screening records violating PDPA retention; knip reported configuration hints on deadcode run |
+| **สาเหตุราก** | Error responses in reading lifecycle routes lacked locale branching on record.lang or request body; cleanupExpiredTickets did not delete corresponding ai_screening table rows; knip.jsonc contained redundant entry and ignore definitions |
+| **การแก้ไข** | Add bilingual error responses across shuffle, read, chat, start, and auth provider routes; detach foreign key and delete ai_screening rows in cleanupExpiredTickets; remove redundant entries from knip.jsonc |
+| **🛡️ กฎป้องกันถาวร** | **Always inspect record.lang/isEn when constructing JSON error responses in API routes; delete all related child and foreign tables in retention cleanup routines; keep knip entries clean and run npm run deadcode periodically** |
+| **การพิสูจน์ว่าแก้ได้จริง** | npm run repo:verify passed all 79 gates; test-shuffle passed 21/21; test-no-fake-card passed 39/39; npm run deadcode runs with 0 configuration warnings |
+| **บันทึกโดย** | ไม่ระบุ · branch `antigravity/deep-audit-fixes` · commit `f005217f` |
+
+
 ### INC-0201 · 2026-09-19 20:34 · 🟠 High · fix host header validation, storage keys, i18n auth errors, and next dev 404
 
 | หัวข้อ | รายละเอียด |
