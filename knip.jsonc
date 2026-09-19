@@ -19,15 +19,12 @@
     "src/app/**/{page,layout,route,template,default,loading,error,not-found,global-not-found,sitemap,robots,manifest,opengraph-image}.{ts,tsx}",
     "astro/**/*.{astro,ts,tsx}",
     "scripts/**/*.{ts,tsx}",
-    "next.config.ts",
-    "open-next.config.ts",
-    "astro.config.mjs"
+    "open-next.config.ts"
   ],
 
   "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}", "astro/**/*.{ts,tsx,astro}"],
 
   "ignoreBinaries": ["python3"],
-  "ignoreDependencies": ["@types/.*"],
 
   // type/interface ที่ export ไว้แล้วใช้เฉพาะในไฟล์ตัวเอง = การตั้งชื่อรูปข้อมูลให้คนอ่านเข้าใจ
   // ไม่ใช่ API ที่ลืมเก็บ · ส่วนที่เป็น **ค่า/ฟังก์ชัน** ยังถูกรายงานตามปกติ

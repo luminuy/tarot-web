@@ -16,17 +16,6 @@ export async function GET(
     return NextResponse.json({ error: "ไม่พบผู้ให้บริการล็อกอินนี้" }, { status: 400 });
   }
 
-  // ตรวจว่าตั้งค่า credential ของผู้ให้บริการนี้ไว้จริงก่อนพาผู้ใช้ออกไป —
-  // ไม่งั้นผู้ใช้จะถูกเด้งไปเจอหน้า error ของ Google/LINE แทนที่จะได้คำอธิบายเป็นภาษาไทย
-  const configured =
-    provider === "google"
-      ? Boolean(process.env.GOOGLE_CLIENT_ID)
-      : Boolean(process.env.LINE_CHANNEL_ID);
-
-  if (!configured) {
-    return NextResponse.redirect(`${origin}/?auth_error=provider_unavailable`);
-  }
-
   const { searchParams } = new URL(request.url);
   const rawReturnUrl = searchParams.get("returnUrl");
   // ตรวจสอบความปลอดภัย: รับเฉพาะ relative path ภายในโดเมน (ขึ้นต้นด้วย "/" และไม่ขึ้นต้นด้วย "//" หรือมี "\") ป้องกัน Open Redirect
@@ -38,6 +27,19 @@ export async function GET(
     !rawReturnUrl.includes("\\")
   ) {
     safeReturnUrl = rawReturnUrl;
+  }
+
+  // ตรวจว่าตั้งค่า credential ของผู้ให้บริการนี้ไว้จริงก่อนพาผู้ใช้ออกไป —
+  // ไม่งั้นผู้ใช้จะถูกเด้งไปเจอหน้า error ของ Google/LINE แทนที่จะได้คำอธิบายเป็นภาษาไทย
+  const configured =
+    provider === "google"
+      ? Boolean(process.env.GOOGLE_CLIENT_ID)
+      : Boolean(process.env.LINE_CHANNEL_ID);
+
+  if (!configured) {
+    const isEnglish = safeReturnUrl?.startsWith("/en") || safeReturnUrl === "/en";
+    const redirectPath = isEnglish ? `/en?auth_error=provider_unavailable` : `/?auth_error=provider_unavailable`;
+    return NextResponse.redirect(`${origin}${redirectPath}`);
   }
 
   const state = crypto.randomUUID();

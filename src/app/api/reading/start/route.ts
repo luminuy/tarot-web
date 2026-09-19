@@ -117,9 +117,14 @@ export async function POST(request: Request) {
     }
   }
 
-  const parsed = BodySchema.safeParse(await request.json().catch(() => null));
+  const rawBody = await request.json().catch(() => null);
+  const parsed = BodySchema.safeParse(rawBody);
+  const isEnInitial = (rawBody && typeof rawBody === "object" && (rawBody as { lang?: string }).lang === "en") || false;
   if (!parsed.success) {
-    return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, { status: 400 });
+    return NextResponse.json(
+      { error: isEnInitial ? "Invalid request data" : "ข้อมูลที่ส่งมาไม่ถูกต้อง" },
+      { status: 400 },
+    );
   }
 
   const { spreadId, question, personaId, nickname, category, intake } = parsed.data;
@@ -144,7 +149,10 @@ export async function POST(request: Request) {
 
   if (derive) {
     if (derivedSpreadIdFor(derive.kind) !== spreadId) {
-      return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, { status: 400 });
+      return NextResponse.json(
+        { error: parsed.data.lang === "en" ? "Invalid request data" : "ข้อมูลที่ส่งมาไม่ถูกต้อง" },
+        { status: 400 },
+      );
     }
     derivation = pinDerivedSpec(derive, bangkokDayKey());
     /*
@@ -163,7 +171,10 @@ export async function POST(request: Request) {
       );
     }
   } else if (requiresDerivation) {
-    return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, { status: 400 });
+    return NextResponse.json(
+      { error: parsed.data.lang === "en" ? "Invalid request data" : "ข้อมูลที่ส่งมาไม่ถูกต้อง" },
+      { status: 400 },
+    );
   }
 
   // ตรวจความปลอดภัยของคำถามก่อนทำอย่างอื่นทั้งหมด (รวมทุกฟิลด์ที่ผู้ใช้กรอก: P0-5 fix)
@@ -219,9 +230,15 @@ export async function POST(request: Request) {
             error:
               ent.kind === "guest"
                 ? REQUIRE_SIGNUP_TO_READ
-                  ? `สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ แล้วดูดวงได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`
-                  : `คุณใช้สิทธิ์ดูดวงฟรีครบแล้ว สมัครสมาชิกเพื่อรับสิทธิ์เปิดไพ่วันละ ${DAILY_LIMIT} ครั้งฟรี`
-                : `คุณใช้โควตาดูดวงครบ ${DAILY_LIMIT} ครั้งของวันนี้แล้ว กลับมาเปิดใหม่ได้ในวันพรุ่งนี้เวลา 00:00 น. หรือเติมรอบเพื่อดูต่อทันที`,
+                  ? (parsed.data.lang === "en"
+                      ? `Sign in or create a free account to continue your reading (${DAILY_LIMIT} free daily readings).`
+                      : `สมัครสมาชิกฟรีหรือเข้าสู่ระบบก่อนเปิดไพ่ แล้วดูดวงได้ฟรีวันละ ${DAILY_LIMIT} ครั้ง`)
+                  : (parsed.data.lang === "en"
+                      ? `You have used your free reading quota. Sign in to receive ${DAILY_LIMIT} free readings daily.`
+                      : `คุณใช้สิทธิ์ดูดวงฟรีครบแล้ว สมัครสมาชิกเพื่อรับสิทธิ์เปิดไพ่วันละ ${DAILY_LIMIT} ครั้งฟรี`)
+                : (parsed.data.lang === "en"
+                    ? `You have reached your daily quota of ${DAILY_LIMIT} readings. Return tomorrow at 00:00 or add credits to continue.`
+                    : `คุณใช้โควตาดูดวงครบ ${DAILY_LIMIT} ครั้งของวันนี้แล้ว กลับมาเปิดใหม่ได้ในวันพรุ่งนี้เวลา 00:00 น. หรือเติมรอบเพื่อดูต่อทันที`),
             reason: ent.reason ?? (ent.kind === "guest" ? GUEST_BLOCK_REASON : "daily_exhausted"),
             resetAt: ent.resetAt,
           },
@@ -234,14 +251,26 @@ export async function POST(request: Request) {
         if (!isStandardSpread(spreadId)) {
           recordEvent("entitlement_blocked_grand_spread");
           return NextResponse.json(
-            { error: "ผังพยากรณ์นี้สงวนไว้สำหรับผู้ถือญาณพยากรณ์พิเศษ", reason: "grand_spread" },
+            {
+              error:
+                parsed.data.lang === "en"
+                  ? "This spread layout is reserved for VIP Seer credits."
+                  : "ผังพยากรณ์นี้สงวนไว้สำหรับผู้ถือญาณพยากรณ์พิเศษ",
+              reason: "grand_spread",
+            },
             { status: 403 },
           );
         }
         if (isMasterPersona(personaId)) {
           recordEvent("entitlement_blocked_master_persona");
           return NextResponse.json(
-            { error: "ปรมาจารย์ท่านนี้สงวนไว้สำหรับผู้ถือญาณพยากรณ์พิเศษ", reason: "master_persona" },
+            {
+              error:
+                parsed.data.lang === "en"
+                  ? "This master reader persona is reserved for VIP Seer credits."
+                  : "ปรมาจารย์ท่านนี้สงวนไว้สำหรับผู้ถือญาณพยากรณ์พิเศษ",
+              reason: "master_persona",
+            },
             { status: 403 },
           );
         }
@@ -253,7 +282,10 @@ export async function POST(request: Request) {
           recordEvent("entitlement_guest_ip_capped");
           return NextResponse.json(
             {
-              error: "วันนี้เปิดไพ่แบบทดลองจากเครือข่ายนี้ครบแล้ว สมัครสมาชิกเพื่อเปิดต่อได้เลย",
+              error:
+                parsed.data.lang === "en"
+                  ? "You have reached the trial reading limit from this network today. Sign in to continue."
+                  : "วันนี้เปิดไพ่แบบทดลองจากเครือข่ายนี้ครบแล้ว สมัครสมาชิกเพื่อเปิดต่อได้เลย",
               reason: "guest_used",
             },
             { status: 403 },
@@ -314,6 +346,7 @@ export async function POST(request: Request) {
     spread: {
       id: spread.id,
       nameTh: spread.nameTh,
+      nameEn: spread.nameEn,
       positions: spread.positions,
     },
   });

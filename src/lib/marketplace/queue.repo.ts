@@ -340,6 +340,12 @@ export async function cancelQueueTicket(ticketId: string, customerRef?: string):
 export async function cleanupExpiredTickets(): Promise<number> {
   const db = await getAppDB();
   const now = Date.now();
+
+  // ปลดการอ้างอิง ai_screen_id ก่อนลบ เพื่อความปลอดภัยกรณีเปิด PRAGMA foreign_keys
+  await db.prepare(`
+    UPDATE queue_tickets SET ai_screen_id = NULL WHERE expires_at < ?
+  `).bind(now).run();
+
   await db.prepare(`
     DELETE FROM payments 
     WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
@@ -348,6 +354,11 @@ export async function cleanupExpiredTickets(): Promise<number> {
     DELETE FROM bookings 
     WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
   `).bind(now).run();
+  await db.prepare(`
+    DELETE FROM ai_screening 
+    WHERE ticket_id IN (SELECT id FROM queue_tickets WHERE expires_at < ?)
+  `).bind(now).run();
+
   const res = await db.prepare("DELETE FROM queue_tickets WHERE expires_at < ?").bind(now).run();
   return res.meta?.changes ?? 0;
 }

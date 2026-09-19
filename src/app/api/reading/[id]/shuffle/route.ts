@@ -126,7 +126,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       const card = cardByIndex(d.cardIndex);
       if (!card) {
         return NextResponse.json(
-          { error: "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง", code: "CARD_DATA_NOT_FOUND" },
+          {
+            error:
+              record.lang === "en"
+                ? "Card data not found. Please refresh and try again."
+                : "ไม่พบข้อมูลไพ่ที่เปิด กรุณาโหลดใหม่อีกครั้ง",
+            code: "CARD_DATA_NOT_FOUND",
+          },
           { status: 500 }
         );
       }
@@ -200,7 +206,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       if (typeof supplied !== "string" || supplied.length === 0) {
         return NextResponse.json(
           {
-            error: "เซสชันนี้ไม่มีเมล็ดสุ่มของคุณ กรุณาโหลดหน้าใหม่แล้วเริ่มดูดวงอีกครั้ง",
+            error:
+              record.lang === "en"
+                ? "This session is missing your client seed. Please reload and start a new reading."
+                : "เซสชันนี้ไม่มีเมล็ดสุ่มของคุณ กรุณาโหลดหน้าใหม่แล้วเริ่มดูดวงอีกครั้ง",
             code: "CLIENT_SEED_REQUIRED",
           },
           { status: 400 }
@@ -230,14 +239,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               deckSize: DECK_SIZE,
             });
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : "การเลือกไพ่ไม่ถูกต้อง";
+      const errorMsg =
+        err instanceof Error
+          ? err.message
+          : record.lang === "en"
+            ? "Invalid card selection"
+            : "การเลือกไพ่ไม่ถูกต้อง";
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
   }
 
   if (!verifyCommitment(record.serverSeed, record.commitment)) {
     console.error("[PF] commitment mismatch on shuffle", { id });
-    return NextResponse.json({ error: "เกิดข้อผิดพลาดด้านความสมบูรณ์ของข้อมูล กรุณาเริ่มใหม่" }, { status: 500 });
+    return NextResponse.json(
+      {
+        error:
+          record.lang === "en"
+            ? "Data integrity verification failed. Please start a new reading."
+            : "เกิดข้อผิดพลาดด้านความสมบูรณ์ของข้อมูล กรุณาเริ่มใหม่",
+      },
+      { status: 500 }
+    );
   }
 
   // ⚠️ ต้องแปลง index → ไพ่จริงให้ครบ **ก่อน** บันทึกผลการเปิดไพ่

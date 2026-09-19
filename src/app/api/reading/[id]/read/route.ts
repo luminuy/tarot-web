@@ -199,7 +199,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           recordEvent("entitlement_guest_ip_capped");
           return Response.json(
             {
-              error: "วันนี้เปิดไพ่แบบทดลองจากเครือข่ายนี้ครบแล้ว สมัครสมาชิกเพื่อเปิดต่อได้เลย",
+              error: isEn
+                ? "You have reached the trial reading limit from this network today. Sign in to continue."
+                : "วันนี้เปิดไพ่แบบทดลองจากเครือข่ายนี้ครบแล้ว สมัครสมาชิกเพื่อเปิดต่อได้เลย",
               reason: "guest_used",
             },
             { status: 403 },
@@ -234,7 +236,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await refundIfConsumed();
     recordEvent("ai_cap_hit");
     return Response.json(
-      { error: "ระบบดูดวงมีผู้ใช้จำนวนมากในวันนี้ กรุณากลับมาใหม่พรุ่งนี้ หรือลองอีกครั้งในภายหลัง" },
+      {
+        error: isEn
+          ? "The reading service is experiencing high demand today. Please return tomorrow or try again later."
+          : "ระบบดูดวงมีผู้ใช้จำนวนมากในวันนี้ กรุณากลับมาใหม่พรุ่งนี้ หรือลองอีกครั้งในภายหลัง",
+      },
       { status: 503 },
     );
   }
@@ -472,7 +478,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         updateReading(id, { status: "FAILED" });
         await refundIfConsumed();
         recordEvent("reading_failed");
-        send(controller, "error", { message: "คำอ่านขัดข้อง ลองใหม่อีกครั้งนะ" });
+        send(controller, "error", {
+          message: isEn ? "The reading service encountered an error. Please try again." : "คำอ่านขัดข้อง ลองใหม่อีกครั้งนะ",
+        });
       } finally {
         // สตรีมถูกตัดกลางคัน / ไม่มี done ที่สำเร็จ → คืนสิทธิ์
         if (!completedOk) await refundIfConsumed();

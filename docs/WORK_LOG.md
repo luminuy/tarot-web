@@ -38,6 +38,40 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-19 (รอบ 107): 🛡️ แก้ไขข้อบกพร่องเชิงลึก i18n API Error Leaks, PDPA Queue Retention Cleanup, และ Knip Config Hygiene (INC-0202)
+
+**ที่มาและเหตุผล (Deep Codebase Audit)**:
+จากการตรวจสอบอย่างละเอียดในระดับซอร์สโค้ดทั่วทั้งระบบ (API Endpoints, Authentication, Session Management, AI Streaming SSE, Rate Limiting, Provably Fair Flow, D1 Database Queries, PDPA Compliance, i18n Localization) พบข้อบกพร่องที่ซ่อนอยู่ 3 ด้าน:
+1. **i18n Localization Leaks ใน API Routes**:
+   - `/api/reading/[id]/shuffle`: ข้อผิดพลาด `CARD_DATA_NOT_FOUND`, `CLIENT_SEED_REQUIRED`, card selection error, และ commitment integrity mismatch คืนข้อความภาษาไทยล้วนแม้เซสชันระบุ `lang: "en"`
+   - `/api/reading/[id]/read`: ข้อความเตือน guest quota จาก IP, AI spend cap, และ error ใน stream catch คืนภาษาไทยในโหมดภาษาอังกฤษ
+   - `/api/reading/[id]/chat`: ข้อความเตือน AI cap hit คืนภาษาไทยในโหมดภาษาอังกฤษ
+   - `/api/reading/start`: ข้อผิดพลาด payload, entitlement block (Guest/Member quota), VIP reserve block (grand_spread, master_persona), และ guest IP limit คืนภาษาไทยในโหมดภาษาอังกฤษ รวมทั้ง response spread object ขาด `nameEn: spread.nameEn`
+   - `/api/auth/[provider]`: การ redirect เมื่อไม่มี credential ของผู้ให้บริการ (provider_unavailable) ส่งไปยัง `/?auth_error=...` เสมอแม้ `returnUrl` มาจากหน้าภาษาอังกฤษ
+2. **PDPA Retention Leak ใน Queue Cleanup (`queue.repo.ts`)**:
+   - `cleanupExpiredTickets()` ลบข้อมูลที่ผูกกับตั๋วคิวที่หมดอายุ (เกิน 7 วัน) จาก `payments`, `bookings`, และ `queue_tickets` แต่ทิ้งข้อมูลในตาราง `ai_screening` ซึ่งเก็บคำถามส่วนตัวและผลการวิเคราะห์ความปลอดภัยของลูกดวงไว้ถาวร
+3. **Knip Dead Code Configuration Hygiene (`knip.jsonc`)**:
+   - มี redundant entry patterns (`next.config.ts`, `astro.config.mjs`) และ unneeded ignore rule (`@types/.*`) ในคอนฟิก
+
+**สถาปัตยกรรมและการลงมือทำ**:
+1. **Bilingual Parity ใน API Responses**:
+   - ปรับปรุง `src/app/api/reading/[id]/shuffle/route.ts` ให้คืนข้อความภาษาอังกฤษเมื่อ `record.lang === "en"`
+   - ปรับปรุง `src/app/api/reading/[id]/read/route.ts` และ `src/app/api/reading/[id]/chat/route.ts` ให้คืนข้อความสองภาษาตามภาษาของผู้ใช้
+   - ปรับปรุง `src/app/api/reading/start/route.ts` ให้คืนข้อความสองภาษาตาม `parsed.data.lang` และส่ง `nameEn: spread.nameEn` ใน response spread
+   - ปรับปรุง `src/app/api/auth/[provider]/route.ts` ให้อ่าน `safeReturnUrl` ก่อน และ redirect ไปยัง `/en?auth_error=provider_unavailable` หากมาจากหน้าภาษาอังกฤษ
+2. **PDPA Retention Compliance ใน Queue Cleanup**:
+   - ใน `src/lib/marketplace/queue.repo.ts` เพิ่มการปลด `ai_screen_id = NULL` บนตั๋วคิวที่หมดอายุ และลบข้อมูลที่สัมพันธ์ในตาราง `ai_screening` เพื่อความปลอดภัยด้าน Foreign Keys และการลบข้อมูลส่วนบุคคลตาม PDPA 7 วันครบวงจร
+3. **Knip Configuration Cleanup**:
+   - ปรับปรุง `knip.jsonc` นำ redundant entries ออก ส่งผลให้ `npm run deadcode` ไม่มี configuration hints
+
+**การพิสูจน์ความสมบูรณ์**:
+- `npm run typecheck` ➔ ผ่าน 100% (0 errors)
+- `npm run lint` ➔ ผ่าน 100% (0 errors, 0 warnings)
+- `npx tsx scripts/qa/test-shuffle.ts` ➔ ผ่านครบ 21/21 ข้อ
+- `npx tsx scripts/qa/test-no-fake-card.ts` ➔ ผ่านครบ 39/39 ข้อ
+- `npm run deadcode` ➔ รันผ่านโดยไม่มี configuration hints
+- `npm run repo:verify` ➔ ผ่านครบทั้ง 79/79 ด่านสมบูรณ์ 100%
+
 ### 🗓️ 2026-09-19 (รอบ 106): 🛡️ แก้ไขความปลอดภัย Host Header Injection, สถาปัตยกรรม Storage Key (R-30), i18n Auth, และ Next 16 Dev Runtime (ISSUE-051)
 
 **ที่มาและเหตุผล (การตรวจสอบเชิงลึกและยกระดับมาตรฐาน)**:
