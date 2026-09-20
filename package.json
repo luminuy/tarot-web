@@ -63,7 +63,7 @@
     "zod": "^4.5.2"
   },
   "devDependencies": {
-    "@astrojs/react": "6.0.5",
+    "@astrojs/react": "6.0.6",
     "@eslint/js": "^9.39.5",
     "@next/eslint-plugin-next": "^16.3.5",
     "@opennextjs/cloudflare": "^1.20.4",
