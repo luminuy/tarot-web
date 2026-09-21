@@ -123,7 +123,7 @@ export function desiredRules(): Rule[] {
 }
 
 /** ยิงจริงดูว่าโฮสต์รองเด้งหรือยัง — ใช้ตรวจหลัง deploy และใช้ในด่าน CI แบบ `--live` */
-async function liveCheck(): Promise<number> {
+async function liveCheck({ quiet = false } = {}): Promise<number> {
   /*
    * เลือกเส้นทางที่ **เสิร์ฟจากชั้น assets** โดยเจตนา — `/robots.txt` เด้งอยู่แล้วเพราะอยู่ใน
    * `run_worker_first` การตรวจด้วยเส้นทางนั้นจะให้ผลเขียวทั้งที่ทั้งเว็บยังซ้ำสองโฮสต์
@@ -141,20 +141,56 @@ async function liveCheck(): Promise<number> {
         status = res.status;
         location = res.headers.get("location") ?? "";
       } catch (e) {
-        console.log(`  ⚠️  ${url} — ยิงไม่ถึง (${String(e)})`);
+        if (!quiet) console.log(`  ⚠️  ${url} — ยิงไม่ถึง (${String(e)})`);
         bad += 1;
         continue;
       }
 
       const ok = status === 301 && location.startsWith(CANONICAL_ORIGIN);
       if (!ok) bad += 1;
-      console.log(
-        `  ${ok ? "✅" : "❌"} ${url} ➔ ${status}${location ? ` ➔ ${location}` : ""}` +
-          (status === 200 ? "  ← เนื้อหาซ้ำ! กฎบนขอบยังไม่ทำงานกับเส้นทางนี้" : "")
-      );
+      if (!quiet)
+        console.log(
+          `  ${ok ? "✅" : "❌"} ${url} ➔ ${status}${location ? ` ➔ ${location}` : ""}` +
+            (status === 200 ? "  ← เนื้อหาซ้ำ! กฎบนขอบยังไม่ทำงานกับเส้นทางนี้" : "")
+        );
     }
   }
   return bad;
+}
+
+/**
+ * รอให้กฎที่เพิ่งเขียนแพร่ไปถึงขอบ แล้วค่อยตัดสินผล
+ *
+ * ## ทำไมต้องรอ (บทเรียน INC-0205)
+ *
+ * รอบแรกที่กฎถูกเขียนสำเร็จจริง ขั้นนี้กลับขึ้นแดง เพราะตรวจผลห่างจากตอนเขียน **0.1 วินาที**:
+ *
+ *   05:36:38.730  ✅ เขียนกฎสำเร็จ
+ *   05:36:38.828  ❌ https://www.seertarot.net/ ➔ 200   ← กฎยังไม่ทันแพร่
+ *   (ยิงซ้ำอีกไม่กี่นาทีต่อมา ➔ 301 ถูกต้องครบทุกเส้น)
+ *
+ * "เขียนสำเร็จแต่ยังไม่เห็นผล" กับ "เขียนไม่สำเร็จ" ถูกรายงานเป็นสีเดียวกัน คนอ่านจึงถูกส่ง
+ * ไปไล่แก้สิทธิ์ทั้งที่งานเสร็จแล้ว — รอบนี้จึงยิงซ้ำแบบถอยหลังก่อนตัดสิน
+ */
+async function waitForPropagation(): Promise<number> {
+  const DELAYS_MS = [0, 5_000, 10_000, 15_000, 20_000];
+
+  for (let attempt = 0; attempt < DELAYS_MS.length; attempt++) {
+    if (DELAYS_MS[attempt] > 0) {
+      console.log(`  ⏳ ยังไม่ครบ — รอ ${DELAYS_MS[attempt] / 1000} วินาทีแล้วยิงซ้ำ (ครั้งที่ ${attempt + 1})`);
+      await new Promise((r) => setTimeout(r, DELAYS_MS[attempt]));
+    }
+
+    // ครั้งสุดท้ายพิมพ์รายละเอียดเต็มเสมอ เพื่อให้ล็อกที่ตกด่านมีข้อมูลพอวินิจฉัย
+    const isLast = attempt === DELAYS_MS.length - 1;
+    const bad = await liveCheck({ quiet: !isLast });
+    if (bad === 0) {
+      if (!isLast) await liveCheck();
+      return 0;
+    }
+    if (isLast) return bad;
+  }
+  return 0;
 }
 
 async function resolveZoneId(): Promise<string> {
@@ -258,10 +294,14 @@ async function main(): Promise<void> {
       ` (แทนที่ของเดิม ${removed} ข้อ) · เก็บกฎของคนอื่นไว้ ${kept.length} ข้อ\n`
   );
 
-  console.log("── ตรวจผลจริง ──");
-  const bad = await liveCheck();
+  console.log("── ตรวจผลจริง (รอกฎแพร่ถึงขอบได้สูงสุดราว 50 วินาที) ──");
+  const bad = await waitForPropagation();
   if (bad > 0) {
-    console.log("\n⚠️  กฎเขียนขึ้นแล้วแต่ยังเห็นผลไม่ครบ — กฎบนขอบใช้เวลาแพร่ไม่กี่วินาที ลองรัน --check ซ้ำ\n");
+    console.log(
+      "\n⚠️  กฎเขียนขึ้นสำเร็จแล้วแต่ยังไม่เห็นผลหลังรอครบ — ไม่ใช่เรื่องสิทธิ์ (ขั้นเขียนผ่านไปแล้ว)\n" +
+        "   ยิงซ้ำด้วย `npm run cf:canonical-host -- --check` อีกสักครู่ · ถ้ายังไม่เด้ง ให้เปิดดูที่\n" +
+        "   Cloudflare ➔ Rules ➔ Redirect Rules ว่ามีกฎอื่นอยู่เหนือกฎ [canonical-host] หรือไม่\n"
+    );
     process.exit(1);
   }
   console.log("\n✨ เรียบร้อย — โฮสต์รองเด้ง 301 กลับโดเมนหลักครบทุกเส้น\n");
