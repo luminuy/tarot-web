@@ -33,7 +33,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
       : `ธาตุ${breakdown.dominantElement}เด่น`;
 
   return (
-    <div className="my-6 rounded-lg border border-line-warm bg-inset-warm p-5 transition duration-300">
+    <div className="glass-tile !rounded-lg my-6 p-5 transition duration-300">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between border-b border-line-warm/30 pb-3">
         <div className="flex items-center gap-2">
@@ -47,7 +47,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </p>
           </div>
         </div>
-        <span className="rounded-full border border-line-warm bg-surface px-2.5 py-1 text-xs font-bold text-gold-ink ">
+        <span className="glass-chip px-2.5 py-1 text-xs font-bold text-gold-ink">
           {dominantPill}
         </span>
       </div>
@@ -63,7 +63,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </span>
             <span className="font-mono font-bold text-ink-deep">{breakdown.fire}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-surface border border-line-warm/40">
+          <div className="glass-chip h-2 w-full overflow-hidden">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: breakdown.fire / 100 }}
@@ -83,7 +83,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </span>
             <span className="font-mono font-bold text-ink-deep">{breakdown.water}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-surface border border-line-warm/40">
+          <div className="glass-chip h-2 w-full overflow-hidden">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: breakdown.water / 100 }}
@@ -103,7 +103,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </span>
             <span className="font-mono font-bold text-ink-deep">{breakdown.air}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-surface border border-line-warm/40">
+          <div className="glass-chip h-2 w-full overflow-hidden">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: breakdown.air / 100 }}
@@ -123,7 +123,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
             </span>
             <span className="font-mono font-bold text-ink-deep">{breakdown.earth}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-surface border border-line-warm/40">
+          <div className="glass-chip h-2 w-full overflow-hidden">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: breakdown.earth / 100 }}
@@ -136,7 +136,7 @@ export const ElementalBalanceWidget: React.FC<ElementalBalanceWidgetProps> = ({ 
       </div>
 
       {/* Dominant & Balancing Advice */}
-      <div className="mt-4 rounded-lg border border-line-warm bg-surface p-3.5 text-xs text-ink-deep ">
+      <div className="altar-card-porcelain !rounded-lg mt-4 p-3.5 text-xs text-ink-deep">
         <p className="font-serif-th font-bold text-gold-ink">
           {isEnglish && breakdown.dominantTitleEn ? breakdown.dominantTitleEn : breakdown.dominantTitleTh}:
         </p>

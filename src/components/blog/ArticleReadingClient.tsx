@@ -61,7 +61,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       {/* Article Header */}
       <header className="space-y-4 text-center sm:text-left">
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs font-mono">
-          <span className="px-3 py-1 rounded-full bg-inset border border-line text-gold font-bold">
+          <span className="glass-chip px-3 py-1 text-gold font-bold">
             {articleCat}
           </span>
           <span className="text-muted">
@@ -84,7 +84,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
       {/* Table of Contents (TOC) */}
       {effectiveToc && effectiveToc.length > 0 && (
-        <div className="rounded-xl border border-line bg-surface p-5 sm:p-6 space-y-3 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
+        <div className="altar-card-porcelain !rounded-xl p-5 sm:p-6 space-y-3">
           <div className="flex items-center gap-2 text-xs font-serif-th font-bold text-ink">
             
             {isEnglish
@@ -106,7 +106,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
 
       {/* Target Card Highlight Box if available */}
       {article.targetCardId && article.cardNameTh && (
-        <div className="rounded-xl border border-line bg-surface p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
+        <div className="altar-card-porcelain !rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center sm:text-left">
             <div className="text-[13px] font-mono text-gold-ink font-bold">
               {isEnglish ? "Explore this card in the 78-Card Encyclopedia" : "สำรวจไพ่ใบนี้ในสารานุกรม 78 ใบ"}
@@ -124,7 +124,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
           </div>
           <Link
             href={`/cards/${article.targetCardId}`}
-            className="shrink-0 px-4 py-2 rounded-full border border-line bg-inset hover:bg-surface text-ink hover:text-gold-ink text-xs font-serif-th font-bold transition shadow-xs"
+            className="glass-chip shrink-0 px-4 py-2 text-ink hover:text-gold-ink text-xs font-serif-th font-bold transition"
           >
             {isEnglish ? "View 78-Card Details →" : "เปิดดูรายละเอียดไพ่ 78 ใบ →"}
           </Link>
@@ -164,7 +164,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             {effectiveFaqs.map((faq, idx) => (
               <details
                 key={idx}
-                className="group rounded-xl border border-line bg-surface overflow-hidden transition shadow-xs"
+                className="altar-card-porcelain !rounded-xl group overflow-hidden transition"
               >
                 <summary className="w-full flex items-center justify-between p-4 text-left font-serif-th text-xs sm:text-sm font-semibold text-ink hover:text-gold-ink transition-colors gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                   <span>{faq.question}</span>
@@ -185,8 +185,8 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
       )}
 
       {/* High-Impact Interactive CTA Box */}
-      <div className="rounded-xl border border-line bg-surface p-6 sm:p-8 text-center space-y-4 relative overflow-hidden shadow-[0_10px_30px_rgba(42,38,31,0.06)]">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-line bg-inset text-[13px] text-gold-ink font-mono font-bold">
+      <div className="altar-card-porcelain !rounded-xl p-6 sm:p-8 text-center space-y-4 relative overflow-hidden">
+        <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-[13px] text-gold-ink font-mono font-bold">
           {isEnglish ? "Interactive Provably-Fair Divination" : "Interactive Provably-Fair Reading"}
         </div>
         <h2 className="font-serif-th text-xl sm:text-3xl font-bold text-ink">
@@ -202,7 +202,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
         <div className="pt-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-ink hover:bg-gold text-canvas font-bold text-sm hover:scale-[1.02] transition font-serif-th cursor-pointer shadow-sm"
+            className="btn-gold-glass inline-flex items-center gap-2 px-7 py-3.5 font-bold text-sm hover:scale-[1.02] font-serif-th cursor-pointer"
           >
             <span>{isEnglish ? "Begin Free Tarot Reading Now" : "เปิดไพ่ทำนายดวงชะตาฟรีทันที"}</span>
             <span>→</span>
@@ -227,7 +227,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
             type="button"
             data-copy-link=""
             data-label-copied={isEnglish ? "Link Copied!" : "คัดลอกลิงก์สำเร็จ!"}
-            className="tap-overlay-y px-3.5 py-1.5 rounded-full border border-line bg-surface text-ink hover:border-gold hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+            className="glass-chip tap-overlay-y px-3.5 py-1.5 text-ink hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <span data-copy-label="">{isEnglish ? "Copy Link" : "คัดลอกลิงก์"}</span>
           </button>
@@ -257,7 +257,7 @@ export const ArticleReadingClient: React.FC<Props> = ({ article, relatedArticles
                 <Link
                   key={rel.slug}
                   href={`/blog/${rel.slug}`}
-                  className="rounded-xl border border-line bg-surface p-4 space-y-2 hover:border-gold transition group flex flex-col justify-between shadow-[0_10px_30px_rgba(42,38,31,0.04)]"
+                  className="altar-card-porcelain !rounded-xl p-4 space-y-2 transition group flex flex-col justify-between"
                 >
                   <div className="space-y-1.5">
                     <div className="text-[13px] font-mono text-gold-ink font-bold">{relCat}</div>

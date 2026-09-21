@@ -256,7 +256,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
 
                 {/* 1909 Rider-Waite Card Art */}
                 <div className="py-1 flex flex-col items-center">
-                  <div className="w-16 h-24 sm:w-18 sm:h-27 rounded-lg overflow-hidden border-2 border-line-warm shadow-md group-hover:scale-105 group-hover:border-gold-ink transition duration-300 bg-inset-warm">
+                  <div className="glass-tile !rounded-lg w-16 h-24 sm:w-18 sm:h-27 overflow-hidden group-hover:scale-105 transition duration-300">
                     <CardImage
                       image={step.cardImage}
                       /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — span ใต้ภาพพิมพ์ step.cardName อยู่แล้ว */
@@ -351,10 +351,10 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
+                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
                   <CardImage image="major-01.jpg" alt="The Magician" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
+                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
                   <CardImage image="major-21.jpg" alt="The World" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
@@ -386,10 +386,10 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
+                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
                   <CardImage image="major-10.jpg" alt="Wheel of Fortune" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
+                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
                   <CardImage image="major-11.jpg" alt="Justice" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
@@ -421,10 +421,10 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
           <div className="altar-card-porcelain p-7 sm:p-8 flex flex-col justify-between space-y-6 group">
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-3 py-2">
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
+                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden -rotate-6 group-hover:-rotate-3 group-hover:scale-105 transition duration-300">
                   <CardImage image="major-02.jpg" alt="The High Priestess" className="w-full h-full object-cover" sizes="56px" />
                 </div>
-                <div className="w-14 h-21 rounded-lg overflow-hidden border-2 border-line-warm shadow-md rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300 bg-inset-warm">
+                <div className="glass-tile !rounded-lg w-14 h-21 overflow-hidden rotate-6 group-hover:rotate-3 group-hover:scale-105 transition duration-300">
                   <CardImage image="major-17.jpg" alt="The Star" className="w-full h-full object-cover" sizes="56px" />
                 </div>
               </div>
@@ -513,7 +513,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             className="altar-card-porcelain p-6 group block space-y-4"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
+              <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
                 {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
                 <CardImage image="major-10.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
@@ -539,7 +539,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             className="altar-card-porcelain p-6 group block space-y-4"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
+              <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
                 {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
                 <CardImage image="major-17.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
@@ -565,7 +565,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
             className="altar-card-porcelain p-6 group block space-y-4"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-17 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs">
+              <div className="glass-tile !rounded-lg w-12 h-17 overflow-hidden flex-shrink-0 transition-colors">
                 {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <h3> ในลิงก์เดียวกันบอกชื่อผังอยู่แล้ว */}
                 <CardImage image="major-07.jpg" alt="" className="w-full h-full object-cover" sizes="48px" />
               </div>
@@ -609,7 +609,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
                 prefetch={false}
                 className="glass-tile group flex flex-col items-center p-3 sm:p-4"
               >
-                <div className="w-14 h-21 rounded-md overflow-hidden border border-line-warm mb-2.5 shadow-2xs group-hover:scale-105 transition-transform duration-200 bg-inset-warm">
+                <div className="glass-tile !rounded-md w-14 h-21 overflow-hidden mb-2.5 group-hover:scale-105 transition-transform duration-200">
                   {/* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ใต้ภาพพิมพ์ชื่อไพ่อยู่แล้วทั้งสองภาษา */}
                   <CardImage image={card.img} alt="" className="w-full h-full object-cover" sizes="56px" />
                 </div>
@@ -674,7 +674,7 @@ export function HomeSeoContent({ isEnglish = false }: { isEnglish?: boolean }) {
               prefetch={false}
               className="altar-card-porcelain p-6 group flex items-start gap-4 sm:gap-5"
             >
-              <div className="w-14 h-21 sm:w-16 sm:h-24 rounded-lg overflow-hidden border-2 border-line-warm group-hover:border-gold-ink flex-shrink-0 bg-inset-warm transition-colors shadow-2xs group-hover:scale-105 duration-300">
+              <div className="glass-tile !rounded-lg w-14 h-21 sm:w-16 sm:h-24 overflow-hidden flex-shrink-0 transition-colors group-hover:scale-105 duration-300">
                 {/* ภาพประกอบล้วน — ป้ายหมวดหมู่และ <h3> ในลิงก์เดียวกันบอกเรื่องบทความอยู่แล้ว (INC-0125) */}
                 <CardImage image={art.cardImage} alt="" className="w-full h-full object-cover" sizes="64px" />
               </div>

@@ -116,12 +116,12 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
   const isQuestionEmpty = touchedQuestion && !question.trim();
 
   return (
-    <div className="w-full rounded-lg border border-line-warm bg-surface p-5 sm:p-8 space-y-6 relative overflow-hidden">
+    <div className="altar-card-porcelain !rounded-lg w-full p-5 sm:p-8 space-y-6 relative overflow-hidden">
       {/* Background Sacred Geometric Aura */}
 
       {/* Persona Welcoming Sanctuary Dialogue */}
-      <div className="flex items-start gap-3.5 p-4 rounded-lg bg-inset-warm border border-line-warm relative overflow-hidden">
-        <div className="w-10 h-15 rounded-lg border-2 border-line-warm overflow-hidden flex-shrink-0 bg-surface">
+      <div className="glass-tile !rounded-lg flex items-start gap-3.5 p-4 relative overflow-hidden">
+        <div className="altar-card-porcelain !rounded-lg w-10 h-15 overflow-hidden flex-shrink-0">
           <CardImage
             image={persona?.cardImage || "major-02.jpg"}
             /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — <span> ข้างภาพพิมพ์ชื่อแม่หมออยู่แล้ว */
@@ -176,7 +176,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={nickname}
             onChange={(e) => onNicknameChange(e.target.value)}
             placeholder={isEnglish ? "e.g., Alex, Jordan (or leave blank)" : "เช่น ฟ้า, บิ๊ก, พลอย (เว้นว่างได้)"}
-            className="w-full bg-surface rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
+            className="glass-field w-full rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition duration-200 border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink"
           />
         </div>
 
@@ -196,7 +196,7 @@ export const IntentionAltarInput: React.FC<IntentionAltarInputProps> = ({
             value={situation}
             onChange={(e) => onSituationChange(e.target.value)}
             placeholder={isEnglish ? "e.g., Navigating relationship friction / Awaiting job interview results" : "เช่น กำลังคุยกับคนเก่า / กำลังรอผลสัมภาษณ์งาน"}
-            className="w-full bg-surface border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition"
+            className="glass-field w-full border border-line-interactive-warm focus:border-gold-ink focus:ring-1 focus:ring-gold-ink rounded-lg px-4 py-3 text-xs sm:text-sm text-ink-deep placeholder-ink-soft/70 focus:outline-none transition"
           />
         </div>
       </div>

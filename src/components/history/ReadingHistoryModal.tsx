@@ -213,7 +213,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
           ref={panelRef}
-          className="w-full max-w-2xl max-h-[88svh] rounded-xl bg-surface border border-line p-5 sm:p-7 shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col relative space-y-4 overflow-hidden"
+          className="altar-modal !rounded-xl w-full max-w-2xl max-h-[88svh] p-5 sm:p-7 flex flex-col relative space-y-4 overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-line/40 pb-3">
@@ -245,7 +245,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 type="button"
                 onClick={onClose}
                 aria-label={isEn ? "Close reading history" : "ปิดประวัติการดูดวง"}
-                className="tap-overlay-y w-9 h-9 rounded-full bg-inset border border-line text-ink hover:bg-ink hover:text-canvas text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
+                className="glass-chip tap-overlay-y w-9 h-9 text-ink hover:bg-ink hover:text-canvas text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
               >
                 ✕
               </button>
@@ -254,7 +254,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
           {/* AI Monthly Synthesis Banner / Trigger */}
           {readings.length >= 1 && (
-            <div className="p-4 rounded-xl bg-surface border border-line flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+            <div className="altar-card-porcelain !rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 text-left">
                 
                 <div>
@@ -273,7 +273,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                 type="button"
                 disabled={isGeneratingSummary}
                 onClick={handleGenerateMonthlySummary}
-                className="tap-overlay-y w-full sm:w-auto px-4 py-2 rounded-full bg-ink hover:bg-gold text-canvas font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 transition cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 flex-shrink-0 shadow-xs"
+                className="btn-gold-glass tap-overlay-y w-full sm:w-auto px-4 py-2 font-serif-th font-bold text-xs hover:opacity-95 active:scale-95 cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5 flex-shrink-0"
               >
                 {isGeneratingSummary ? (
                   <>
@@ -295,7 +295,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-xl bg-surface border-2 border-line space-y-2.5 relative shadow-xs"
+              className="altar-card-porcelain !rounded-xl p-4 space-y-2.5 relative"
             >
               <button
                 type="button"
@@ -307,7 +307,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
               </button>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-ink text-canvas font-bold font-mono text-[13px]">
+                <span className="btn-gold-glass text-xs px-2.5 py-0.5 font-bold font-mono text-[13px]">
                   {isEn ? `Dominant: ${monthlySummary.dominantElement}` : `ธาตุ${monthlySummary.dominantElement}เด่น`}
                 </span>
                 <h4 className="font-serif-th text-xs sm:text-sm font-bold text-ink truncate">
@@ -358,7 +358,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   onClick={() => setOutcomeFilter("ALL")}
                   className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "ALL"
-                      ? "bg-ink text-canvas font-bold shadow-xs"
+                      ? "btn-gold-glass font-bold"
                       : "bg-inset text-muted hover:text-ink border border-line"
                   }`}
                 >
@@ -395,7 +395,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   onClick={() => setOutcomeFilter("PENDING")}
                   className={`tap-overlay-y px-3.5 py-1 rounded-full transition cursor-pointer whitespace-nowrap ${
                     outcomeFilter === "PENDING"
-                      ? "bg-ink text-canvas font-bold"
+                      ? "btn-gold-glass font-bold"
                       : "bg-surface text-muted hover:text-ink border border-line"
                   }`}
                 >
@@ -412,7 +412,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   placeholder={isEn ? "Search questions, spreads, cards, or notes..." : "ค้นหาตามคำถาม, ผัง, ชื่อไพ่ หรือบันทึกโน้ต..."}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-surface border border-line-interactive rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-gold"
+                  className="glass-field w-full border border-line-interactive rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-gold"
                 />
               </div>
             </div>
@@ -426,7 +426,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
           {trimmedNotice && (
             <div
               role="status"
-              className="mb-3 flex items-start justify-between gap-3 rounded-xl border border-line-warm bg-inset-warm px-3.5 py-2.5 text-[13px] font-serif-th text-ink-deep"
+              className="glass-tile !rounded-xl mb-3 flex items-start justify-between gap-3 px-3.5 py-2.5 text-[13px] font-serif-th text-ink-deep"
             >
               <span className="leading-relaxed">
                 <span className="text-gold-ink" aria-hidden="true">✦ </span>
@@ -478,12 +478,12 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                   <div
                     key={item.id}
                     onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                    className="p-4 rounded-xl bg-surface border border-line hover:border-gold transition cursor-pointer space-y-2.5 shadow-xs"
+                    className="altar-card-porcelain !rounded-xl p-4 transition cursor-pointer space-y-2.5"
                   >
                     {/* Top Row: Spread & Date */}
                     <div className="flex items-center justify-between text-[13px]">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="bg-inset text-ink border border-line px-2.5 py-0.5 rounded-full font-serif-th font-bold">
+                        <span className="glass-chip text-ink px-2.5 py-0.5 font-serif-th font-bold">
                           {isEn ? `Spread: ${item.spreadName}` : `ผัง: ${item.spreadName}`}
                         </span>
                         <span className="text-muted">
@@ -520,7 +520,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                        */
                       <div
                         role="alert"
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-inset-warm border border-line-warm text-[13px] font-serif-th text-ink-deep"
+                        className="glass-tile !rounded-lg flex items-center gap-2 px-3 py-2 text-[13px] font-serif-th text-ink-deep"
                       >
                         <span className="text-gold-ink" aria-hidden="true">✦</span>
                         <span>
@@ -534,7 +534,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                       {item.cards.map((c, i) => (
                         <div
                           key={i}
-                          className="px-2.5 py-1 rounded-full bg-inset border border-line flex items-center gap-1.5 flex-shrink-0 text-[13px]"
+                          className="glass-chip px-2.5 py-1 flex items-center gap-1.5 flex-shrink-0 text-[13px]"
                         >
                           
                           <span className="font-serif-th text-ink font-medium">
@@ -591,7 +591,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           onClick={(e) => handleSetOutcome(e, item.id, "PENDING")}
                           className={`tap-overlay-y px-2.5 py-0.5 rounded-full transition cursor-pointer ${
                             outcome === "PENDING"
-                              ? "bg-ink text-canvas font-bold"
+                              ? "btn-gold-glass font-bold"
                               : "bg-surface text-muted border border-line"
                           }`}
                         >
@@ -631,7 +631,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
 
                     {/* Private User Reflection Note Box */}
                     {item.userNote && !isEditingNote && (
-                      <div className="p-2.5 rounded-xl bg-inset border border-line text-[13px] text-ink font-serif-th italic">
+                      <div className="glass-tile !rounded-xl p-2.5 text-[13px] text-ink font-serif-th italic">
                         <span className="font-semibold text-gold">
                           {isEn ? "Real-Life Manifestation:" : "บันทึกผลจริง:"}
                         </span>{" "}
@@ -642,7 +642,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                     {/* Edit Note Input */}
                     {isEditingNote && (
                       <div
-                        className="p-3 rounded-xl bg-surface border border-line space-y-2 shadow-xs"
+                        className="altar-card-porcelain !rounded-xl p-3 space-y-2"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <textarea
@@ -655,7 +655,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                               ? "Record real-world events and reflections that unfolded after this reading..."
                               : "จดบันทึกเหตุการณ์จริงที่เกิดขึ้นหลังจากเปิดไพ่ใบนี้..."
                           }
-                          className="w-full bg-surface border border-line-interactive rounded-lg p-2 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-gold"
+                          className="glass-field w-full border border-line-interactive rounded-lg p-2 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-gold"
                         />
                         <div className="flex items-center justify-end gap-2 text-xs">
                           <button
@@ -668,7 +668,7 @@ export const ReadingHistoryModal: React.FC<ReadingHistoryModalProps> = ({ isOpen
                           <button
                             type="button"
                             onClick={(e) => handleSaveNote(e, item.id, item.outcome)}
-                            className="tap-overlay-y px-4 py-1 rounded-full bg-ink hover:bg-gold text-canvas font-bold font-serif-th cursor-pointer shadow-xs"
+                            className="btn-gold-glass tap-overlay-y px-4 py-1 font-bold font-serif-th cursor-pointer"
                           >
                             {isEn ? "Save Reflection" : "บันทึกโน้ต"}
                           </button>

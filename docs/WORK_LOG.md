@@ -38,6 +38,58 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-21 (รอบ 122): 🪟 ธีมกระจกครบทั้งเว็บ — หน้าต่างลอย · โฟลว์ดูดวง · หน้าหลังบ้าน (387 จุด)
+
+**คำสั่งเจ้าของ**: "เปลี่ยนเลย" (ต่อจากรอบ 121 ที่เหลือหน้าล็อกอินกับหน้าต่างลอยไว้)
+
+#### วิธีทำ — เขียนตัวแปลงที่มีกฎ ไม่ใช่ไล่แก้ด้วยตา
+
+งานรอบนี้ ~35 ไฟล์ · 387 จุด ถ้าไล่แก้ทีละบรรทัดจะทั้งช้าและพลาด จึงเขียน
+`scripts` ชั่วคราวที่แปลง **รายการคลาสทีละก้อน** ด้วยกฎ deterministic 6 ข้อ
+แล้ว **รัน dry-run พิมพ์ทุกจุดออกมาดูก่อน** ค่อยสั่ง `--apply`
+
+| กฎ | เงื่อนไข | ผลลัพธ์ |
+| :--- | :--- | :--- |
+| field | มี `border-line-interactive` + พื้นสว่าง | `glass-field` (**คงเส้นขอบเดิม** ตามกฎ a11y 3:1) |
+| modal | พื้นสว่าง + `border-line*` + เพดานความสูง `svh` หรือเงา overlay | `altar-modal` |
+| card | พื้นสว่าง + `border-line*` + มุมโค้ง | `altar-card-porcelain` |
+| chip | พื้นสว่าง + `border-line*` + `rounded-full` | `glass-chip` |
+| tile | `bg-inset*` + `border-line*` + มุมโค้ง | `glass-tile` |
+| button | `bg-ink*` + ตัวหนังสือสว่าง | `btn-gold-glass` |
+
+#### 🐛 สองบั๊กที่ dry-run จับได้ก่อนเขียนไฟล์ (ถ้าไม่ได้ดูก่อนคือพังเงียบ)
+
+1. **แผงหน้าต่างลอยเกือบได้ความทึบผิดตัว** — กฎ card จับแผงของ `ReadingHistoryModal`
+   ไปเป็น `.altar-card-porcelain` (ทึบ 0.62) ทั้งที่มันวางบนฉากมืด ต้องเป็น `.altar-modal` (0.97)
+   ➔ เพิ่มกฎ modal ที่ดูจาก "เพดานความสูงผูกกับจอ (`svh`)" หรือ "เงาแบบ overlay"
+
+2. **หางแชทจะโดนมุมโค้งทับ** — ฟองข้อความใน `FollowUpChat` ใช้ `rounded-lg rounded-tl-xs`
+   (มุมบนซ้ายเล็กกว่าเพื่อทำหาง) พอเราเติม `!rounded-lg` เข้าไป มันจะ **ทับมุมนั้นทิ้งด้วย `!important`**
+   ➔ เพิ่มกฎให้มุมเฉพาะด้าน (`rounded-tl-*` ฯลฯ) ติด `!` ตามไปด้วยเสมอ
+
+#### จุดที่ตัวแปลงจับไม่ได้ ต้องแก้มือ
+
+`AuthModal` เขียน `className` ด้วย template literal (backtick) ตัวแปลงอ่านเฉพาะสตริงอัญประกาศคู่
+จึงข้ามไป ➔ ไล่หาไฟล์ที่มี `modal-scrim` แล้วเช็กว่าได้ `.altar-modal` ครบทุกบานหรือยัง เจอบานนี้บานเดียว
+
+#### ไฟล์ที่แตะ (36)
+
+หน้าต่างลอยและโฟลว์ดูดวง: `AuthModal` · `ReadingHistoryModal` · `ShareModal` · `CardZoomModal` ·
+`AccessDialog` · `BuyCreditsModal` · `StreamReader` · `FollowUpChat` · `QuickChatResult` ·
+`ProvablyFairPanel` · `IntentionAltarInput` · `OneCardRitual` · `ElementalBalanceWidget` ·
+`AccuracyRatingWidget` · `TTSReaderButton` · `InteractiveCardFan` · `ToastNotification` · `Input`
+
+หน้าสาธารณะที่เหลือ: `BirthCardCalculator` · `SemanticSearchPanel` · `AllCardsTable` ·
+`ArticleReadingClient` · `LoveOneCardClient` · `ReadersDirectory` · `AccountClient` ·
+`TopicSpreadList` · `SacredNavDropdown` · `HomeSeoContent` · `TarotFlow` · `privacy-th/en` · `contact-th/en` · `spread-topic`
+
+หน้าหลังบ้าน: `admin/*` ทั้งหมด · `marketplace/*` · `readers/console` · `readers/queue/[id]`
+
+**ผลตรวจ**: typecheck 0 error · `repo:verify` 80/80 · ดูของจริงจาก Chromium
+(หน้าต่างเข้าสู่ระบบ · เมนูหลัก · ไพ่ประจำตัว · ดูดวงรายวัน · นโยบาย)
+
+---
+
 ### 🗓️ 2026-09-21 (รอบ 121): 🪟 ลากธีมกระจกออกจากหน้าแรกไปทั้งเว็บ (8 หน้าสาธารณะหลัก)
 
 **คำสั่งเจ้าของ**: "ทำไมหน้าอื่นไม่สีเหมือนหน้าแรก ปรับหน้าอื่นให้เข้าธีมกับหน้าแรกด้วย สีและ liquid glass"

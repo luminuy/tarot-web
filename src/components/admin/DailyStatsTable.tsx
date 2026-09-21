@@ -291,7 +291,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Card 1: Today vs Yesterday */}
-          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+          <div className="altar-card-porcelain p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted">ยอดเปิดไพ่วันนี้</span>
               <span className="rounded-full bg-canvas px-2 py-0.5 text-[10px] font-semibold text-ink border border-line">
@@ -322,7 +322,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
           </div>
 
           {/* Card 2: Completion Rate Today */}
-          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+          <div className="altar-card-porcelain p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted">อ่านจบสมบูรณ์</span>
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
@@ -338,7 +338,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
           </div>
 
           {/* Card 3: Chat Messages Today */}
-          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+          <div className="altar-card-porcelain p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted">แชทถามต่อกับแม่หมอ</span>
               <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 border border-sky-200">
@@ -354,7 +354,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
           </div>
 
           {/* Card 4: Top Topic Today */}
-          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+          <div className="altar-card-porcelain p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted">เรื่องยอดนิยมวันนี้</span>
               <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 border border-amber-200">
@@ -374,7 +374,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
       </div>
 
       {/* ─── ชั้นที่ 2: สรุปภาพรวมและแนวโน้มช่วงเวลา ──────────────────── */}
-      <div className="rounded-2xl border border-line bg-white p-5 shadow-xs space-y-5">
+      <div className="altar-card-porcelain p-5 space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -406,7 +406,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
             <button
               type="button"
               onClick={handleExportCSV}
-              className="tap-overlay-y inline-flex items-center gap-2 rounded-xl border border-ink bg-ink px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-dark transition-colors cursor-pointer"
+              className="btn-gold-glass !rounded-xl tap-overlay-y inline-flex items-center gap-2 border-ink px-4 py-2 text-xs font-semibold hover:bg-dark cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -462,7 +462,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                   >
                     {/* Tooltip on hover / selection */}
                     {isSelected && (
-                      <div className="absolute -top-14 z-20 whitespace-nowrap rounded-lg border border-line bg-ink px-2.5 py-1.5 text-[11px] text-white shadow-md pointer-events-none">
+                      <div className="btn-gold-glass !rounded-lg absolute -top-14 z-20 whitespace-nowrap px-2.5 py-1.5 text-[11px] pointer-events-none">
                         <p className="font-semibold">{r.dayLabel}</p>
                         <p className="text-line text-[10px]">
                           เริ่ม {r.started} · สำเร็จ {r.completed} ({r.completionRate})
@@ -498,7 +498,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
       </div>
 
       {/* ─── ชั้นที่ 3: ตารางบันทึกข้อมูลย้อนหลังรายวัน ──────────────── */}
-      <div className="rounded-2xl border border-line bg-white p-5 shadow-xs space-y-4">
+      <div className="altar-card-porcelain p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
           <div>
             <h3 className="text-sm font-bold text-ink font-mystic-gold">
@@ -536,7 +536,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                       </div>
                       <div className="flex items-center gap-1">
                         {row.isToday && (
-                          <span className="rounded-full bg-ink text-white px-2 py-0.5 text-[9px] font-bold">
+                          <span className="btn-gold-glass px-2 py-0.5 text-[9px] font-bold">
                             วันนี้
                           </span>
                         )}
@@ -574,7 +574,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                         onClick={() => setExpandedDate(isExpanded ? null : row.date)}
                         className={`tap-overlay-y rounded-lg border px-2.5 py-1 text-[11px] font-medium transition cursor-pointer shrink-0 ${
                           isExpanded
-                            ? "border-ink bg-ink text-white"
+                            ? "btn-gold-glass border-ink"
                             : "border-line bg-white text-ink hover:bg-canvas"
                         }`}
                       >
@@ -587,7 +587,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
             </div>
 
             {/* Desktop & Tablet Full-Width Responsive Table (Zero Scroll, Fits Entire Page) */}
-            <div className="hidden md:block w-full overflow-hidden rounded-xl border border-line bg-white">
+            <div className="altar-card-porcelain !rounded-xl hidden md:block w-full overflow-hidden">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-line bg-canvas text-muted">
@@ -620,7 +620,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-ink">{row.dayLabel}</span>
                             {row.isToday && (
-                              <span className="rounded-full bg-ink text-white px-2 py-0.5 text-[9px] font-bold whitespace-nowrap">
+                              <span className="btn-gold-glass px-2 py-0.5 text-[9px] font-bold whitespace-nowrap">
                                 วันนี้
                               </span>
                             )}
@@ -688,7 +688,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                             onClick={() => setExpandedDate(isExpanded ? null : row.date)}
                             className={`tap-overlay-y inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-medium transition cursor-pointer whitespace-nowrap ${
                               isExpanded
-                                ? "border-ink bg-ink text-white"
+                                ? "btn-gold-glass border-ink"
                                 : "border-line bg-white text-ink hover:bg-canvas hover:border-gold"
                             }`}
                           >
@@ -717,7 +717,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                     ข้อมูลเจาะลึกประจำ{selectedRow.weekdayLabel}ที่ {selectedRow.dayLabel}
                   </h4>
                   {selectedRow.isToday && (
-                    <span className="rounded-full bg-ink text-white px-2 py-0.5 text-[9px] font-bold">
+                    <span className="btn-gold-glass px-2 py-0.5 text-[9px] font-bold">
                       วันนี้
                     </span>
                   )}
@@ -733,7 +733,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 {/* 1. Categories Breakdown */}
-                <div className="rounded-xl border border-line bg-white p-4 space-y-2.5 shadow-2xs">
+                <div className="altar-card-porcelain !rounded-xl p-4 space-y-2.5">
                   <p className="font-semibold text-ink">สัดส่วนหมวดคำถาม</p>
                   {selectedRow.categories.length === 0 ? (
                     <p className="text-muted">ไม่มีข้อมูลหมวดหมู่ในวันนี้</p>
@@ -760,7 +760,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                 </div>
 
                 {/* 2. Persona Breakdown */}
-                <div className="rounded-xl border border-line bg-white p-4 space-y-2.5 shadow-2xs">
+                <div className="altar-card-porcelain !rounded-xl p-4 space-y-2.5">
                   <p className="font-semibold text-ink">แม่หมอที่ถูกเลือก</p>
                   {selectedRow.personas.length === 0 ? (
                     <p className="text-muted">ไม่มีข้อมูลการเลือกแม่หมอ</p>
@@ -777,7 +777,7 @@ export default function DailyStatsTable({ daily, rangeDays }: DailyStatsTablePro
                 </div>
 
                 {/* 3. Spreads & Safety */}
-                <div className="rounded-xl border border-line bg-white p-4 space-y-2.5 shadow-2xs">
+                <div className="altar-card-porcelain !rounded-xl p-4 space-y-2.5">
                   <p className="font-semibold text-ink">ผังไพ่ & ความปลอดภัย</p>
                   <div className="space-y-2">
                     <p className="text-[11px] font-medium text-muted">ผังยอดนิยม:</p>

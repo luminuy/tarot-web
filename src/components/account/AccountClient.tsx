@@ -37,7 +37,7 @@ const BuyCreditsModal = dynamic(
  * ตาเห็นทันทีว่าเป็นคนละเว็บมาต่อกัน — เปลือกกลางตัวนี้คือสิ่งที่กันไม่ให้เกิดซ้ำ
  * ─────────────────────────────────────────────────────────────────────────── */
 
-const CARD_SHELL = "rounded-lg border border-line-warm bg-surface p-5 sm:p-6";
+const CARD_SHELL = "altar-card-porcelain !rounded-lg p-5 sm:p-6";
 
 function SectionCard({
   title,
@@ -98,7 +98,7 @@ function ConsentToggle({
         disabled={saving}
         onClick={() => onChange(!checked)}
         className={`relative h-6 w-11 shrink-0 rounded-full border transition-colors cursor-pointer disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-          checked ? "bg-gold-ink border-gold-ink" : "bg-inset border-line-interactive-warm"
+          checked ? "bg-gold-ink border-gold-ink" : "glass-field border-line-interactive-warm"
         }`}
       >
         <span
@@ -130,7 +130,7 @@ function HubTile({
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full flex-col items-start gap-1 rounded-lg border border-line-warm bg-inset-warm p-4 text-left transition-colors hover:border-gold-ink cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+      className="glass-tile !rounded-lg group flex w-full flex-col items-start gap-1 p-4 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
     >
       <span className="flex w-full items-center justify-between gap-2">
         <span className="font-mono text-xs uppercase tracking-[0.16em] text-muted">{eyebrow}</span>
@@ -288,7 +288,7 @@ export function AccountClient() {
 
           {/* Header Title & Intro */}
           <div className="space-y-3 py-1 text-center sm:py-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-line-warm bg-surface px-3.5 py-1.5 text-xs font-bold text-gold-ink">
+            <span className="glass-chip inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold text-gold-ink">
               Sacred Sanctuary Profile
             </span>
             <h1 className="font-serif-th text-2xl sm:text-4xl font-bold text-ink leading-snug sm:leading-normal [text-wrap:balance]">
@@ -305,7 +305,7 @@ export function AccountClient() {
               สามสถานะต้องสูงใกล้เคียงกัน ไม่งั้นหน้ากระโดดตอนเซสชันโหลดเสร็จ */}
           {loading && (
             <div className={`${CARD_SHELL} flex items-center gap-4`} aria-hidden="true">
-              <div className="h-14 w-14 shrink-0 rounded-full border border-line-warm bg-inset-warm" />
+              <div className="glass-chip h-14 w-14 shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 w-40 rounded-full bg-inset-warm" />
                 <div className="h-3 w-56 rounded-full bg-inset-warm" />
@@ -315,7 +315,7 @@ export function AccountClient() {
 
           {!loading && !user && (
             <section className={`${CARD_SHELL} space-y-4 text-center`}>
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-line-warm bg-inset-warm text-muted">
+              <div className="glass-chip mx-auto flex h-12 w-12 items-center justify-center text-muted">
                 <svg
                   className="h-6 w-6"
                   viewBox="0 0 24 24"
@@ -357,7 +357,7 @@ export function AccountClient() {
             <section className={`${CARD_SHELL} space-y-4`}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3.5">
-                  <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line-warm bg-inset-warm">
+                  <div className="glass-chip relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden">
                     {user.avatar ? (
                       <img
                         src={user.avatar}
@@ -377,7 +377,7 @@ export function AccountClient() {
                       <h2 className="font-serif-th text-base sm:text-lg font-bold text-ink-deep">
                         {user.name || (isEn ? "Sacred Member" : "สมาชิกวิหาร")}
                       </h2>
-                      <span className="rounded-full border border-line-warm bg-inset-warm px-2 py-0.5 font-mono text-xs text-muted">
+                      <span className="glass-chip px-2 py-0.5 font-mono text-xs text-muted">
                         {providerLabel}
                       </span>
                     </div>

@@ -497,7 +497,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           transition={{ duration: 0.22, ease: "easeOut" }}
           ref={panelRef}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-xl rounded-lg bg-surface border border-line-warm p-4 sm:p-6 shadow-overlay space-y-4 my-auto relative text-ink-deep"
+          className="altar-modal !rounded-lg w-full max-w-xl p-4 sm:p-6 space-y-4 my-auto relative text-ink-deep"
         >
           {/* Modal Header */}
           <div className="flex items-center justify-between pb-3 border-b border-line-warm/30">
@@ -518,7 +518,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               type="button"
               onClick={onClose}
               aria-label={isEnglish ? "Close share dialog" : "ปิดหน้าต่างแชร์ผลคำทำนาย"}
-              className="w-10 h-10 rounded-full bg-inset-warm border border-line-warm text-ink-deep hover:bg-gold-ink hover:text-surface text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+              className="glass-chip w-10 h-10 text-ink-deep hover:text-surface text-sm flex items-center justify-center transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
             >
               ✕
             </button>
@@ -530,7 +530,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="p-2.5 rounded-lg bg-surface border border-line-warm text-center text-xs text-ink-deep font-serif-th "
+              className="altar-card-porcelain !rounded-lg p-2.5 text-center text-xs text-ink-deep font-serif-th"
             >
               
               {toastMessage}
@@ -540,7 +540,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           {/* Social Share Preview Card (Redesigned Layout) */}
           <div
             ref={cardRef}
-            className="w-full rounded-lg bg-surface border-2 border-line-warm p-5 sm:p-6 space-y-4 relative overflow-hidden text-center"
+            className="altar-card-porcelain !rounded-lg w-full p-5 sm:p-6 space-y-4 relative overflow-hidden text-center"
           >
             {/* Ornate Corner Accents */}
             
@@ -559,7 +559,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
                 </span>
                 <span className="h-px w-6 sm:w-10 bg-gradient-to-l from-transparent to-ink-soft" />
               </div>
-              <div className="inline-block px-3 py-0.5 rounded-full bg-inset-warm border border-line-warm">
+              <div className="glass-chip inline-block px-3 py-0.5">
                 <span className="text-[13px] sm:text-xs text-ink-deep font-serif-th font-semibold">
                   {isEnglish ? `Spread: ${spreadName}` : `ผัง: ${spreadName}`}
                 </span>
@@ -651,7 +651,7 @@ Explore the Sanctuary: ${typeof window !== "undefined" ? window.location.origin 
           </div>
 
           {/* Social Sharing Control Bar (5 Official Brand Icons, Perfectly Centered, Zero Clipping) */}
-          <div className="py-3 px-4 rounded-lg bg-surface border border-line-warm flex items-center justify-center gap-3.5 sm:gap-6 ">
+          <div className="altar-card-porcelain !rounded-lg py-3 px-4 flex items-center justify-center gap-3.5 sm:gap-6">
             {/* Facebook (#1877F2) */}
             <button
               type="button"

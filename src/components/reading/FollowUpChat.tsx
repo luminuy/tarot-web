@@ -129,7 +129,7 @@ const ChatMessageRenderer = React.memo<{ text: string; isError?: boolean }>(({ t
                 stiffness: 360,
                 damping: 25,
               }}
-              className="rounded-lg p-3.5 sm:p-4 bg-surface border border-line-warm space-y-1.5 transition duration-300 hover:border-gold-ink"
+              className="altar-card-porcelain !rounded-lg p-3.5 sm:p-4 space-y-1.5 transition duration-300"
             >
               <div className="flex items-center gap-2 text-gold-ink font-bold text-xs sm:text-sm font-serif-th">
                 
@@ -158,7 +158,7 @@ const ChatMessageRenderer = React.memo<{ text: string; isError?: boolean }>(({ t
                 stiffness: 360,
                 damping: 25,
               }}
-              className="flex items-start gap-2.5 p-3 sm:p-3.5 rounded-lg bg-surface border border-line-warm hover:border-gold-ink transition duration-300"
+              className="altar-card-porcelain !rounded-lg flex items-start gap-2.5 p-3 sm:p-3.5 transition duration-300"
             >
               <span className="w-5 h-5 rounded-full bg-gold-ink text-surface flex items-center justify-center text-[13px] font-bold shrink-0 mt-0.5 ">
                 {stepNum}
@@ -182,7 +182,7 @@ const ChatMessageRenderer = React.memo<{ text: string; isError?: boolean }>(({ t
               stiffness: 360,
               damping: 25,
             }}
-            className="rounded-lg rounded-tl-xs bg-surface border border-line-warm p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-ink-deep font-serif-th hover:border-gold-ink transition-colors"
+            className="altar-card-porcelain !rounded-lg !rounded-tl-xs p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed text-ink-deep font-serif-th transition-colors"
           >
             <p className="leading-relaxed">{renderFormattedText(p)}</p>
           </motion.div>
@@ -376,7 +376,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
         </div>
 
         {/* Status Pill */}
-        <span className="hidden sm:inline-flex items-center gap-1 text-[13px] text-ink-deep border border-line-warm bg-inset-warm/25 px-3 py-1 rounded-full font-serif-th shrink-0 font-bold">
+        <span className="glass-chip hidden sm:inline-flex items-center gap-1 text-[13px] text-ink-deep px-3 py-1 font-serif-th shrink-0 font-bold">
           {isEnglish ? "Holding your spread" : "ถือสำรับของคุณอยู่"}
         </span>
       </div>
@@ -385,7 +385,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
       <div ref={chatLogRef} className="flex-1 overflow-y-auto space-y-4 py-3.5 pr-1.5 no-scrollbar scroll-smooth">
         {/* First Persona Welcome Greeting */}
         <div className="flex items-start gap-2.5">
-          <div className="w-7 h-10 rounded border border-line-warm overflow-hidden shrink-0 mt-1 bg-inset-warm">
+          <div className="glass-tile !rounded w-7 h-10 overflow-hidden shrink-0 mt-1">
             <CardImage
               image={`${persona.cardImage || "major-02.jpg"}`}
               /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — หัวแชทบอกชื่อแม่หมออยู่แล้ว ถ้าใส่ซ้ำทุกฟองแชทจะถูกอ่านชื่อก่อนทุกข้อความ */
@@ -395,7 +395,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
             />
           </div>
           <div className="max-w-[88%] space-y-1">
-            <div className="rounded-lg rounded-tl-xs bg-surface border border-line-warm p-3.5 sm:p-4 text-xs sm:text-sm text-ink-deep font-serif-th leading-relaxed [text-wrap:pretty]">
+            <div className="altar-card-porcelain !rounded-lg !rounded-tl-xs p-3.5 sm:p-4 text-xs sm:text-sm text-ink-deep font-serif-th leading-relaxed [text-wrap:pretty]">
               <p>
                 {isEnglish
                   ? "Greetings. It is an honor to read the cards with you. If any nuance of this spread calls for deeper exploration or personalized clarity, please feel free to ask anytime."
@@ -420,7 +420,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                   key={idx}
                   type="button"
                   onClick={() => sendMessage(q)}
-                  className="tap-overlay-y text-left font-serif-th text-xs text-ink-deep hover:text-gold-ink p-2.5 rounded-lg bg-inset-warm hover:bg-surface border border-line-warm hover:border-gold-ink transition cursor-pointer flex items-center justify-between group "
+                  className="glass-tile !rounded-lg tap-overlay-y text-left font-serif-th text-xs text-ink-deep hover:text-gold-ink p-2.5 transition cursor-pointer flex items-center justify-between group"
                 >
                   <span>"{q}"</span>
                   <span className="text-gold-ink text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition font-sans">
@@ -454,7 +454,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                   initial={{ scale: 0.75, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 420, damping: 24 }}
-                  className="w-7 h-10 rounded border border-line-warm overflow-hidden shrink-0 mt-1 bg-inset-warm"
+                  className="glass-tile !rounded w-7 h-10 overflow-hidden shrink-0 mt-1"
                 >
                   <CardImage
                     image={`${persona.cardImage || "major-02.jpg"}`}
@@ -481,7 +481,7 @@ export const FollowUpChat: React.FC<FollowUpChatProps> = ({
                       <button
                         type="button"
                         onClick={() => window.location.reload()}
-                        className="tap-overlay-y mt-3 inline-flex items-center gap-1.5 rounded-lg border border-line-warm bg-surface px-3 py-1.5 text-xs font-semibold text-ink-deep hover:border-gold-ink hover:bg-surface-warm cursor-pointer "
+                        className="altar-card-porcelain !rounded-lg tap-overlay-y mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-ink-deep cursor-pointer"
                       >
                         <span>↻</span> {isEnglish ? "Refresh page to reconnect deck" : "รีเฟรชหน้าเว็บเพื่อเชื่อมต่อสำรับไพ่อีกครั้ง"}
                       </button>
@@ -522,7 +522,7 @@ isEnglish
             aria-live="polite"
             aria-label={isEnglish ? `${personaName} is channeling an answer...` : `${persona.nameTh} กำลังพิมพ์ตอบ`}
           >
-            <div className="w-7 h-10 rounded border border-line-warm overflow-hidden shrink-0 mt-1 bg-inset-warm">
+            <div className="glass-tile !rounded w-7 h-10 overflow-hidden shrink-0 mt-1">
               <CardImage
                 image={`${persona.cardImage || "major-02.jpg"}`}
                 /* ภาพประกอบล้วน — ข้อความข้าง ๆ บอกชื่อเดียวกันอยู่แล้ว (INC-0125) — หัวแชทบอกชื่อแม่หมออยู่แล้ว ถ้าใส่ซ้ำทุกฟองแชทจะถูกอ่านชื่อก่อนทุกข้อความ */
@@ -531,7 +531,7 @@ isEnglish
                 sizes="32px"
               />
             </div>
-            <div className="rounded-lg rounded-tl-xs border border-line-warm bg-surface px-4 py-3 flex items-center gap-3">
+            <div className="altar-card-porcelain !rounded-lg !rounded-tl-xs px-4 py-3 flex items-center gap-3">
               <span className="flex items-center gap-1.5" aria-hidden="true">
                 {/*
                   * ⚠️ ห้ามเปลี่ยนกลับไปใช้ลูป `repeat: Infinity` ของ motion
@@ -591,7 +591,7 @@ isEnglish
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => sendMessage(chip.query)}
-                className="text-[13px] text-ink-deep bg-inset-warm hover:bg-surface hover:text-gold-ink border border-line-warm hover:border-gold-ink rounded-full px-3.5 py-1.5 transition cursor-pointer font-serif-th active:scale-95"
+                className="glass-chip text-[13px] text-ink-deep hover:text-gold-ink px-3.5 py-1.5 transition cursor-pointer font-serif-th active:scale-95"
               >
                 "{chip.label}"
               </motion.button>
@@ -600,9 +600,9 @@ isEnglish
         )}
 
         {chatLocked ? (
-          <div className="space-y-2 rounded-lg border border-line-warm bg-inset-warm p-3.5">
+          <div className="glass-tile !rounded-lg space-y-2 p-3.5">
             <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-line-warm bg-surface text-gold-ink">
+              <span className="altar-card-porcelain !rounded-lg mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center text-gold-ink">
                 <SealedLockIcon className="h-3.5 w-3.5" />
               </span>
               <div className="min-w-0 space-y-0.5">
@@ -625,9 +625,9 @@ isEnglish
             </button>
           </div>
         ) : freeChatLimitReached ? (
-          <div className="space-y-2 rounded-lg border border-line-warm bg-surface p-3.5 ">
+          <div className="altar-card-porcelain !rounded-lg space-y-2 p-3.5">
             <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-line-warm bg-inset-warm text-gold-ink text-xs font-bold">
+              <span className="glass-tile !rounded-lg mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center text-gold-ink text-xs font-bold">
                 ✓
               </span>
               <div className="min-w-0 space-y-0.5">
@@ -659,7 +659,7 @@ isEnglish
             }}
             className="space-y-1.5"
           >
-            <div className="flex items-center gap-2 rounded-full border-2 border-line-warm bg-surface p-1.5 pl-4 sm:pl-5 shadow-[0_2px_12px_rgba(41,38,31,0.06)] focus-within:border-gold-ink focus-within:ring-2 focus-within:ring-gold-ink/20 transition">
+            <div className="glass-chip flex items-center gap-2 p-1.5 pl-4 sm:pl-5 focus-within:border-gold-ink focus-within:ring-2 focus-within:ring-gold-ink/20 transition">
               <input
                 type="text"
                 placeholder={isEnglish ? `Ask ${personaName} anything about your spread...` : `พิมพ์ถาม ${persona.nameTh} ที่นี่...`}

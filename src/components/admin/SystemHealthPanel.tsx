@@ -94,7 +94,7 @@ function CopyBadge({ text }: { text: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="tap-overlay-y inline-flex items-center gap-1.5 rounded-lg bg-surface-warm px-2.5 py-1 text-xs text-ink hover:bg-white hover:border-gold transition-colors border border-line shadow-2xs"
+      className="altar-card-porcelain !rounded-lg tap-overlay-y inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-ink transition-colors"
       title="คลิกเพื่อคัดลอก"
     >
       <span className="font-mono truncate max-w-[180px] sm:max-w-xs">{text}</span>
@@ -155,7 +155,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
   return (
     <div className="space-y-6">
       {/* Top Banner */}
-      <div className="rounded-2xl p-6 sm:p-7 border border-line bg-white shadow-xs">
+      <div className="altar-card-porcelain p-6 sm:p-7">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
@@ -180,7 +180,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
               size="sm"
               onClick={probe}
               disabled={loading}
-              className="bg-ink hover:bg-dark text-white font-medium text-xs shadow-xs border-transparent transition"
+              className="btn-gold-glass hover:bg-dark font-medium text-xs border-transparent"
             >
               {loading ? "กำลังยิงตรวจสัญญาณ…" : "ยิงตรวจสัญญาณสดทั้งหมด"}
             </Button>
@@ -201,7 +201,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
       {data && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* 1. โดเมน & การเข้าถึงเว็บ */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
@@ -228,7 +228,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 2. เข้าสู่ระบบด้วย Google */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
@@ -255,7 +255,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 3. เข้าสู่ระบบด้วย LINE */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
@@ -282,7 +282,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 4. ระบบส่งอีเมลธุรกรรม (Resend) */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
@@ -309,7 +309,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 5. ฐานข้อมูล Cloudflare D1 */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
@@ -340,7 +340,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 6. Cloudflare KV Edge Cache */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
@@ -365,7 +365,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 7. ระบบความปลอดภัย & การเข้ารหัส */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
@@ -394,7 +394,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 8. ปัญญาประดิษฐ์ AI Engine */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 
@@ -430,7 +430,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
           </div>
 
           {/* 9. Cloudflare Free Stack */}
-          <div className="rounded-2xl p-5 border border-line bg-white shadow-xs space-y-3">
+          <div className="altar-card-porcelain p-5 space-y-3">
             <div className="flex items-center gap-2">
               
               <h3 className="font-semibold text-sm text-ink">Cloudflare Free Stack (ส่วนเสริม)</h3>
@@ -473,7 +473,7 @@ export default function SystemHealthPanel({ onSwitchTab }: { onSwitchTab?: (tab:
                       type="button"
                       onClick={rebuildSearchIndex}
                       disabled={rebuild.busy}
-                      className="tap-overlay-y rounded-lg border border-line bg-surface-warm px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-white hover:border-gold disabled:opacity-50 cursor-pointer transition shadow-2xs"
+                      className="altar-card-porcelain !rounded-lg tap-overlay-y px-2.5 py-1 text-[11px] font-medium text-ink disabled:opacity-50 cursor-pointer transition"
                     >
                       {rebuild.busy ? "กำลัง index…" : "สร้าง index ใหม่"}
                     </button>

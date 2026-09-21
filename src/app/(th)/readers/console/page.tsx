@@ -170,7 +170,7 @@ function ReaderConsoleInner() {
         )}
 
         {/* Header Console Bar */}
-        <div className="altar-panel rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-line shadow-card bg-surface">
+        <div className="altar-card-porcelain altar-panel p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4 text-center sm:text-left">
             <div className="h-16 w-16 rounded-full border-2 border-gold-ink/40 bg-surface-warm overflow-hidden flex items-center justify-center text-2xl font-bold text-gold-ink shrink-0">
               {reader.avatarUrl ? (
@@ -192,7 +192,7 @@ function ReaderConsoleInner() {
           </div>
 
           {/* Live Queue Switch */}
-          <div className="flex items-center gap-3 bg-surface-warm p-3 rounded-2xl border border-line">
+          <div className="altar-card-porcelain flex items-center gap-3 p-3">
             <div className="text-right">
               <p className="text-xs font-semibold text-ink flex items-center justify-end gap-1.5">
                 <span className={`inline-block w-2 h-2 rounded-full ${isLiveOpen ? "bg-emerald-500" : "bg-muted"}`} />
@@ -242,8 +242,8 @@ function ReaderConsoleInner() {
 
         {/* Tickets Grid */}
         {tickets.length === 0 ? (
-          <div className="altar-panel rounded-3xl p-12 text-center space-y-3 border border-line bg-surface">
-            <div className="w-10 h-10 mx-auto rounded-full bg-surface-warm border border-line flex items-center justify-center text-gold-ink font-serif text-sm">
+          <div className="altar-card-porcelain altar-panel p-12 text-center space-y-3">
+            <div className="glass-chip w-10 h-10 mx-auto flex items-center justify-center text-gold-ink font-serif text-sm">
               ST
             </div>
             <h3 className="font-serif-th font-bold text-base text-ink">ยังไม่มีคิวที่รอดำเนินการ</h3>
@@ -290,13 +290,13 @@ function ReaderConsoleInner() {
 
                   {/* AI Pre-Screening Summary Card */}
                   {ticket.screening && (
-                    <div className="rounded-2xl bg-surface-warm border border-line p-3.5 space-y-2 text-xs">
+                    <div className="altar-card-porcelain p-3.5 space-y-2 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="text-[13px] font-bold text-gold-ink font-serif-th">
                           สรุปประเด็นโดย AI
                         </span>
                         <div className="flex gap-1.5">
-                          <span className="px-1.5 py-0.5 rounded bg-surface border border-line text-[13px] text-ink">
+                          <span className="altar-card-porcelain !rounded px-1.5 py-0.5 text-[13px] text-ink">
                             {ticket.screening.category}
                           </span>
                           <span

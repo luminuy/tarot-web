@@ -72,14 +72,14 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
           exit={{ opacity: 0, y: 16 }}
           ref={panelRef}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-sm max-h-[calc(100svh-2rem)] rounded-lg bg-surface border-2 border-line-warm shadow-overlay flex flex-col relative cursor-default overflow-hidden"
+          className="altar-modal !rounded-lg w-full max-w-sm max-h-[calc(100svh-2rem)] flex flex-col relative cursor-default overflow-hidden"
         >
           {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
             aria-label={isEnglish ? "Close card zoom view" : "ปิดหน้าต่างซูมไพ่"}
-            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-inset-warm border border-line-warm text-ink-deep hover:bg-gold-ink hover:text-surface text-sm flex items-center justify-center transition cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+            className="glass-chip absolute top-4 right-4 w-11 h-11 text-ink-deep hover:text-surface text-sm flex items-center justify-center transition cursor-pointer z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
             ✕
           </button>
@@ -118,10 +118,10 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
             </p>
 
             <div className="flex items-center justify-center gap-2 pt-2 flex-wrap text-[13px]">
-              <span className="px-2.5 py-0.5 rounded-full bg-surface border border-line-warm text-gold-ink font-semibold">
+              <span className="glass-chip px-2.5 py-0.5 text-gold-ink font-semibold">
                 {isEnglish ? `Element: ${elementEnMap[card.element] || card.element}` : `ธาตุ: ${card.element}`}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-surface border border-line-warm text-ink-deep">
+              <span className="glass-chip px-2.5 py-0.5 text-ink-deep">
                 {isEnglish ? (card.astrologyEn || card.astrology) : card.astrology}
               </span>
             </div>
@@ -133,7 +133,7 @@ export const CardZoomModal: React.FC<CardZoomModalProps> = ({
             onClick={() => setFlipped(!flipped)}
             /* ♿ T-34: ผู้ใช้โปรแกรมอ่านหน้าจอต้องรู้ว่าตอนนี้โชว์ด้านไหนอยู่ ไม่ใช่แค่ได้ยินชื่อปุ่ม */
             aria-pressed={flipped}
-            className="tap-overlay-y w-full py-2.5 rounded-lg bg-surface border border-line-warm text-xs font-serif-th font-semibold text-ink-deep hover:bg-inset-warm transition cursor-pointer "
+            className="altar-card-porcelain !rounded-lg tap-overlay-y w-full py-2.5 text-xs font-serif-th font-semibold text-ink-deep transition cursor-pointer"
           >
             {isEnglish ? "Flip Card / View Back" : "พลิกดูหน้าไพ่ / หลังไพ่"}
           </button>

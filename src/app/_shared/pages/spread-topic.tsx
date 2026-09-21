@@ -194,7 +194,7 @@ export function SpreadTopicContent({
                 href={`/spreads/topic/${t.slug}`}
                 className={`px-4 py-1.5 rounded-full text-xs font-serif-th font-semibold whitespace-nowrap transition ${
                   isActive
-                    ? "bg-ink text-surface-warm shadow-xs"
+                    ? "btn-gold-glass"
                     : "bg-surface border border-line text-[#4A4338] hover:border-gold"
                 }`}
               >
@@ -206,7 +206,7 @@ export function SpreadTopicContent({
 
         {/* Hero Header */}
         <header className="space-y-4 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-line bg-surface text-xs text-gold-ink font-serif-th font-semibold">
+          <div className="glass-chip inline-flex items-center gap-2 px-3 py-1 text-xs text-gold-ink font-serif-th font-semibold">
             {isEnglish
               ? `Topic Category · ${spreads.length} Dedicated Spreads`
               : `หมวดหมู่ผังพยากรณ์ · ${spreads.length} ผังเฉพาะทาง`}
@@ -220,7 +220,7 @@ export function SpreadTopicContent({
         </header>
 
         {/* Editorial Guide Prose */}
-        <section className="bg-surface rounded-2xl border border-line p-6 sm:p-8 space-y-4 shadow-xs">
+        <section className="altar-card-porcelain p-6 sm:p-8 space-y-4">
           <h2 className="text-base sm:text-lg font-bold font-serif-th text-ink border-b border-line-soft pb-3">
             {isEnglish
               ? `Guide to Reading ${topicName} Tarot Spreads`
@@ -250,7 +250,7 @@ export function SpreadTopicContent({
 
         {/* FAQ Section */}
         {faqs.length > 0 && (
-          <section className="bg-surface rounded-2xl border border-line p-6 sm:p-8 space-y-6 shadow-xs">
+          <section className="altar-card-porcelain p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
               <h2 className="text-lg sm:text-xl font-bold font-serif-th text-ink">
                 {isEnglish
@@ -290,7 +290,7 @@ export function SpreadTopicContent({
                 <Link
                   key={t.slug}
                   href={`/spreads/topic/${t.slug}`}
-                  className="p-3 rounded-xl border border-line bg-surface hover:border-gold text-center transition group"
+                  className="altar-card-porcelain !rounded-xl p-3 text-center transition group"
                 >
                   <div className="text-xs font-serif-th font-bold text-ink group-hover:text-gold-ink">
                     {tName}

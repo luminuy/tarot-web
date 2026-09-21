@@ -96,7 +96,7 @@ export function AccessDialog({
     >
       <div className="space-y-6 text-ink-deep">
         {/* ป้ายบอกว่าหน้าต่างนี้เปิดขึ้นเพราะอะไร */}
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-line-warm bg-inset-warm px-3 py-1 font-mono text-[13px] uppercase tracking-[0.18em] text-gold-ink">
+        <span className="glass-chip inline-flex items-center gap-1.5 px-3 py-1 font-mono text-[13px] uppercase tracking-[0.18em] text-gold-ink">
           {showCredits ? (
             <HourglassIcon className="h-3.5 w-3.5" />
           ) : reason === "explore" ? (
@@ -109,7 +109,7 @@ export function AccessDialog({
 
         {/* ── สถานะสิทธิ์ปัจจุบัน ─────────────────────────────────── */}
         {view && (
-          <div className="rounded-lg border border-line-warm bg-surface p-4 sm:p-5 ">
+          <div className="altar-card-porcelain !rounded-lg p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
                 <span className="block font-mono text-[13px] uppercase tracking-[0.16em] text-muted">
@@ -144,7 +144,7 @@ export function AccessDialog({
             </h3>
             <ul className="grid gap-2.5 sm:grid-cols-2">
               {memberBenefits.map((b) => (
-                <li key={b.title} className="flex gap-2.5 rounded-lg border border-line-warm bg-inset-warm p-3 ">
+                <li key={b.title} className="glass-tile !rounded-lg flex gap-2.5 p-3">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold-ink/20 text-gold-ink">
                     <CheckMarkIcon className="h-3 w-3" />
                   </span>
@@ -161,7 +161,7 @@ export function AccessDialog({
         {/* ── ทางเลือกเมื่อโควตาวันนี้หมด ─────────────────────────── */}
         {showCredits && (
           <section className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-line-warm bg-inset-warm p-4 ">
+            <div className="glass-tile !rounded-lg p-4">
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-ink-deep">
                 <HourglassIcon className="h-4 w-4 text-gold-ink" />
                 {isEn ? "Wait for Free Daily Renewal" : "รอโควตาฟรีรอบใหม่"}
@@ -172,7 +172,7 @@ export function AccessDialog({
                   : `ไม่ต้องจ่ายอะไร กลับมาหลังเที่ยงคืนแล้วเปิดไพ่ได้อีก ${DAILY_LIMIT} ครั้ง${countdown ? ` (${countdown})` : ""}`}
               </p>
             </div>
-            <div className="rounded-lg border-2 border-line-warm bg-surface p-4 ">
+            <div className="altar-card-porcelain !rounded-lg p-4">
               <span className="mb-2 flex items-center gap-2 font-serif-th text-xs font-bold text-gold-ink">
                 <CoinSealIcon className="h-4 w-4" />
                 {isEn ? "Sacred Tokens (Continue Now)" : "ญาณพยากรณ์พิเศษ (ใช้ต่อได้ทันที)"}
@@ -208,7 +208,7 @@ export function AccessDialog({
                       {isEn ? "Highest Level" : "ปลดล็อกขั้นสุด"}
                     </span>
                   ) : plan.highlight ? (
-                    <span className="absolute -top-2.5 right-3 rounded-full bg-inset-warm border border-line-warm px-2 py-0.5 font-serif-th text-[12px] font-bold text-ink-deep">
+                    <span className="glass-chip absolute -top-2.5 right-3 px-2 py-0.5 font-serif-th text-[12px] font-bold text-ink-deep">
                       {plan.highlight}
                     </span>
                   ) : null}
@@ -216,7 +216,7 @@ export function AccessDialog({
                   <span className="mt-1 font-mono text-lg font-bold text-gold-ink">{plan.price}</span>
                   <span className="font-serif-th text-[13px] text-muted">{plan.priceNote}</span>
                   {isCurrent && (
-                    <span className="mt-2 inline-flex w-fit rounded border border-line-warm bg-inset-warm px-1.5 py-0.5 font-serif-th text-[12px] text-ink-deep">
+                    <span className="glass-tile !rounded mt-2 inline-flex w-fit px-1.5 py-0.5 font-serif-th text-[12px] text-ink-deep">
                       {isEn ? "Your Current Plan" : "แผนปัจจุบันของคุณ"}
                     </span>
                   )}
@@ -272,7 +272,7 @@ export function AccessDialog({
           <button
             type="button"
             onClick={handleSecondary}
-            className="w-full rounded-lg border border-line-warm bg-inset-warm hover:bg-surface hover:border-gold-ink px-6 py-3 font-serif-th text-xs text-ink-deep font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
+            className="glass-tile !rounded-lg w-full px-6 py-3 font-serif-th text-xs text-ink-deep font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink"
           >
             {copy.secondaryLabel}
           </button>

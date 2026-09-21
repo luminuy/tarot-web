@@ -48,7 +48,7 @@ function pct(part: number, whole: number) {
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+    <div className="altar-card-porcelain p-4">
       <p className="text-xs font-semibold text-muted">{label}</p>
       <p className="mt-1 text-2xl font-bold font-mono text-ink">{value}</p>
       {sub ? <p className="mt-0.5 text-xs text-muted">{sub}</p> : null}
@@ -67,7 +67,7 @@ function BarList({
 }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
   return (
-    <div className="rounded-2xl border border-line bg-white p-5 shadow-xs">
+    <div className="altar-card-porcelain p-5">
       <h3 className="font-mystic-gold text-sm font-bold text-ink">{title}</h3>
       {rows.length === 0 ? (
         <p className="mt-3 text-xs text-muted">ยังไม่มีข้อมูล</p>
@@ -215,7 +215,7 @@ export default function StatsDashboard() {
                 onClick={() => setDays(d)}
                 className={`tap-overlay-y rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer ${
                   days === d
-                    ? "bg-ink text-white shadow-xs"
+                    ? "btn-gold-glass"
                     : "border border-line bg-white text-muted hover:bg-canvas hover:text-ink"
                 }`}
               >
@@ -227,7 +227,7 @@ export default function StatsDashboard() {
           <button
             type="button"
             onClick={reload}
-            className="tap-overlay-y inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
+            className="altar-card-porcelain !rounded-lg tap-overlay-y inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors cursor-pointer disabled:opacity-50"
             disabled={loading}
             title="รีเฟรชข้อมูลล่าสุด"
           >
@@ -293,7 +293,7 @@ export default function StatsDashboard() {
                 <StatCard label="เวลาเฉลี่ย/คำอ่าน" value={view.avgLatency} sub={`Token รวม: ${n(view.tokens)}`} />
               </div>
 
-              <div className="rounded-2xl border border-line bg-white p-5 shadow-xs">
+              <div className="altar-card-porcelain p-5">
                 <h3 className="font-mystic-gold text-sm font-bold text-ink">บันทึกการเข้าแอดมิน (ล่าสุด)</h3>
                 <ul className="mt-3 flex flex-col gap-2 text-xs">
                   {data.audit.length === 0 ? (

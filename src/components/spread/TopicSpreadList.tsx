@@ -35,20 +35,20 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
         return (
           <div
             key={spread.id}
-            className="rounded-2xl border border-line bg-surface p-6 flex flex-col justify-between space-y-4 hover:border-gold transition duration-300 relative overflow-hidden shadow-xs hover:shadow-md"
+            className="altar-card-porcelain p-6 flex flex-col justify-between space-y-4 transition duration-300 relative overflow-hidden hover:shadow-md"
           >
             {/* Badges */}
             <div className="flex items-center justify-between z-10">
-              <span className="text-xs font-mono font-bold text-ink bg-inset px-3 py-1 rounded-full border border-line">
+              <span className="glass-chip text-xs font-mono font-bold text-ink px-3 py-1">
                 {spread.positions.length} {isEnglish ? "Cards" : "ใบ"}
               </span>
               {!isStandard ? (
-                <span className="text-xs text-gold-ink bg-surface-warm border border-line px-2.5 py-0.5 rounded-full font-serif-th font-semibold flex items-center gap-1">
+                <span className="glass-chip text-xs text-gold-ink px-2.5 py-0.5 font-serif-th font-semibold flex items-center gap-1">
                   <SealedLockIcon className="w-3 h-3" />
                   <span>{isEnglish ? "Deep Vision" : "ผังญาณลึก"}</span>
                 </span>
               ) : (
-                <span className="text-xs text-[#5E5240] bg-surface-warm border border-line-soft px-2.5 py-0.5 rounded-full font-serif-th">
+                <span className="glass-chip text-xs text-[#5E5240] px-2.5 py-0.5 font-serif-th">
                   {isEnglish ? "Free" : "เปิดฟรี"}
                 </span>
               )}
@@ -82,7 +82,7 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
                 </span>
               </summary>
 
-              <div className="space-y-1.5 pt-2 pb-1 text-xs text-muted bg-surface-warm p-3 rounded-lg border border-line-soft max-h-48 overflow-y-auto">
+              <div className="altar-card-porcelain !rounded-lg space-y-1.5 pt-2 pb-1 text-xs text-muted p-3 max-h-48 overflow-y-auto">
                 {spread.positions.map((pos: SpreadPosition) => (
                   <div key={pos.index} className="flex items-start gap-2">
                     <span className="font-mono text-gold-ink font-bold shrink-0">
@@ -106,7 +106,7 @@ export function TopicSpreadList({ spreads }: TopicSpreadListProps) {
             <div className="grid grid-cols-2 gap-2 pt-3 border-t border-line-soft z-10">
               <Link
                 href={`/?spread=${spread.id}`}
-                className="w-full py-2 px-3 text-xs font-serif-th font-bold text-center rounded-lg bg-ink text-surface-warm hover:bg-[#3D382E] transition-colors"
+                className="btn-gold-glass !rounded-lg w-full py-2 px-3 text-xs font-serif-th font-bold text-center hover:bg-[#3D382E]"
               >
                 {isEnglish ? "Begin Reading" : "เริ่มเปิดไพ่"}
               </Link>

@@ -356,7 +356,7 @@ function AdminContent() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="tap-overlay-y flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface-warm text-ink lg:hidden hover:bg-white transition-colors"
+            className="altar-card-porcelain !rounded-lg tap-overlay-y flex h-9 w-9 items-center justify-center text-ink lg:hidden transition-colors"
             aria-label="เปิดเมนูนำทาง"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -402,7 +402,7 @@ function AdminContent() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface-warm px-3.5 py-1.5 text-xs font-medium text-ink hover:bg-white hover:border-gold transition shadow-2xs"
+            className="altar-card-porcelain !rounded-xl inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-ink transition"
           >
             <span>เปิดหน้าเว็บจริง</span>
             <span className="text-[11px] text-muted">↗</span>
@@ -454,7 +454,7 @@ function AdminContent() {
                           <span
                             className={`rounded-full px-2 py-0.5 text-[9px] font-medium transition-colors ${
                               isActive
-                                ? "bg-ink text-white"
+                                ? "btn-gold-glass"
                                 : "bg-canvas text-muted border border-line"
                             }`}
                           >
@@ -468,7 +468,7 @@ function AdminContent() {
               </div>
             ))}
 
-            <div className="rounded-xl border border-line bg-surface-warm p-3 text-[11px] text-muted">
+            <div className="altar-card-porcelain !rounded-xl p-3 text-[11px] text-muted">
               <div className="flex items-center gap-1.5 font-semibold text-ink">
                 
                 <span>มาตรฐานระบบ</span>
@@ -499,7 +499,7 @@ function AdminContent() {
                           onClick={() => selectTab(item.id)}
                           className={`tap-overlay-y flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
                             isActive
-                              ? "bg-ink text-white font-semibold"
+                              ? "btn-gold-glass font-semibold"
                               : "bg-surface-warm text-ink border border-line hover:bg-white"
                           }`}
                         >
@@ -531,7 +531,7 @@ function AdminContent() {
                 onClick={() => selectTab(item.id)}
                 className={`tap-overlay-y flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors ${
                   isActive
-                    ? "bg-ink text-white font-semibold shadow-xs"
+                    ? "btn-gold-glass font-semibold"
                     : "border border-line bg-surface-warm text-muted hover:text-ink"
                 }`}
               >
@@ -573,7 +573,7 @@ function AdminContent() {
 
               {/* Special Sub-navigation when on "health" tab */}
               {activeTab === "health" && (
-                <div className="flex items-center gap-1 rounded-xl border border-line bg-surface-warm p-1 text-xs">
+                <div className="altar-card-porcelain !rounded-xl flex items-center gap-1 p-1 text-xs">
                   <button
                     type="button"
                     onClick={() => setHealthSubTab("system")}

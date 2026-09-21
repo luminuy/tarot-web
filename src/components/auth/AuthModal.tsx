@@ -301,7 +301,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       <div
         ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-md max-h-[calc(100svh-1.5rem)] sm:max-h-[calc(100svh-2rem)] rounded-xl bg-surface border border-line shadow-[0_20px_50px_rgba(42,38,31,0.18)] flex flex-col relative overflow-hidden text-ink ${
+        /* 🪟 แผงกระจกของหน้าต่างลอย — ต้องเป็น `.altar-modal` (ทึบ 0.97) ไม่ใช่
+           `.altar-card-porcelain` (0.62) เพราะแผงนี้วางอยู่บน `.modal-scrim` ที่เกือบดำ
+           ถ้าโปร่งเท่าการ์ดในหน้า สีเข้มจะซึมขึ้นมาจนคอนทราสต์ตัวหนังสือตกทั้งใบ */
+        className={`altar-modal !rounded-xl w-full max-w-md max-h-[calc(100svh-1.5rem)] sm:max-h-[calc(100svh-2rem)] flex flex-col relative overflow-hidden text-ink ${
           isClosing ? "anim-modal-sink" : "anim-modal-rise"
         }`}
       >
@@ -315,7 +318,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
              * ทุกคนเจอ) และทราฟฟิกเว็บนี้เป็นมือถือ 85%+ · ด่าน tap-target เดิมตั้งเพดานไว้ 24px
              * จึงปล่อยผ่านมาตลอด · ขนาดไอคอนคงเดิม ขยายเฉพาะพื้นที่กด (ตรงกับ CardZoomModal)
              */
-            className="tap-overlay-y absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-inset border border-line text-ink hover:text-gold-ink hover:border-gold hover:bg-surface text-xs flex items-center justify-center transition cursor-pointer"
+            className="glass-chip tap-overlay-y absolute top-4 right-4 z-10 w-11 h-11 text-ink hover:text-gold-ink text-xs flex items-center justify-center transition cursor-pointer"
           >
             ✕
           </button>
@@ -356,7 +359,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* สิ่งที่จะได้รับ — แสดงเมื่อผู้ใช้ถูกพามาจากกำแพงสิทธิ์ จะได้รู้ว่าสมัครไปเพื่ออะไร */}
           {fromEntitlementWall && mode !== "forgot" && (
-            <ul className="w-full mb-4 grid gap-1.5 rounded-xl border border-line bg-inset p-3 shadow-xs">
+            <ul className="glass-tile !rounded-xl w-full mb-4 grid gap-1.5 p-3">
               {getMemberBenefits(isEn).map((b) => (
                 <li key={b.title} className="flex items-start gap-2 text-[13px] font-serif-th text-ink">
                   <CheckMarkIcon className="mt-0.5 h-3 w-3 shrink-0 text-gold" />
@@ -368,12 +371,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {/* Segmented Mode Switcher (Tab System) */}
           {mode !== "forgot" && (
-            <div className="w-full grid grid-cols-2 p-1 rounded-full bg-inset border border-line mb-4">
+            <div className="glass-chip w-full grid grid-cols-2 p-1 mb-4">
               <button
                 type="button"
                 onClick={() => switchMode("signin")}
                 className={`tap-overlay-y py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-                  mode === "signin" ? "bg-ink text-canvas shadow-xs" : "text-muted hover:text-ink"
+                  mode === "signin" ? "btn-gold-glass" : "text-muted hover:text-ink"
                 }`}
               >
                 
@@ -384,7 +387,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="button"
                 onClick={() => switchMode("signup")}
                 className={`tap-overlay-y py-2 rounded-full text-xs font-serif-th font-bold transition duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
-                  mode === "signup" ? "bg-ink text-canvas shadow-xs" : "text-muted hover:text-ink"
+                  mode === "signup" ? "btn-gold-glass" : "text-muted hover:text-ink"
                 }`}
               >
                 
@@ -426,7 +429,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={isEn ? "e.g. Alex, Sarah, Morgan" : "เช่น ฟ้า, พลอย, บิ๊ก"}
-                    className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-surface border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+                    className="glass-field w-full h-11 pl-9 pr-3.5 rounded-xl border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
                   />
                 </div>
               </div>
@@ -449,7 +452,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full h-11 pl-9 pr-3.5 rounded-xl bg-surface border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+                  className="glass-field w-full h-11 pl-9 pr-3.5 rounded-xl border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
                 />
               </div>
             </div>
@@ -485,7 +488,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={mode === "signup" ? (isEn ? "At least 10 characters" : "อย่างน้อย 10 ตัวอักษร") : "••••••••••"}
-                    className="w-full h-11 pl-9 pr-12 rounded-xl bg-surface border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+                    className="glass-field w-full h-11 pl-9 pr-12 rounded-xl border border-line-interactive text-ink text-xs font-serif-th placeholder-muted/50 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
                   />
                   <button
                     type="button"
@@ -552,7 +555,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="submit"
               disabled={loading || turnstileToken === ""}
               aria-busy={loading}
-              className="w-full h-11.5 mt-2 rounded-full bg-ink hover:bg-gold text-canvas font-bold font-serif-th text-xs sm:text-sm active:scale-[0.98] transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
+              className="btn-gold-glass w-full h-11.5 mt-2 font-bold font-serif-th text-xs sm:text-sm active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <span>{isEn ? "Processing…" : "กำลังดำเนินการ…"}</span>
@@ -598,9 +601,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={handleLoginGoogle}
-              className="tap-overlay-y py-2.5 px-3.5 rounded-full bg-surface hover:bg-inset border border-line hover:border-gold text-ink font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group shadow-xs"
+              className="glass-chip tap-overlay-y py-2.5 px-3.5 text-ink font-serif-th font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 active:scale-95 group"
             >
-              <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 border border-line">
+              <div className="glass-chip w-5 h-5 flex items-center justify-center flex-shrink-0">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"

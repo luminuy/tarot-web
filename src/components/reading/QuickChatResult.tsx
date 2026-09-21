@@ -73,7 +73,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
   const personaTagline = isEnglish ? (persona.taglineEn || persona.tagline) : persona.tagline;
 
   return (
-    <div className="w-full rounded-lg border border-line-warm bg-surface p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
+    <div className="altar-card-porcelain !rounded-lg w-full p-5 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
       {/* Oracle Guide Header & Streaming Status */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-line-warm/30">
         <div className="flex items-center gap-3.5">
@@ -94,7 +94,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h4 className="font-serif-th text-base font-bold font-mystic-gold">{personaName}</h4>
-              <span className="text-[11px] font-serif-th font-semibold bg-inset-warm text-gold-ink border border-line-warm px-2 py-0.5 rounded-full">
+              <span className="glass-chip text-[11px] font-serif-th font-semibold text-gold-ink px-2 py-0.5">
                 {isEnglish ? "Quick 1-Card" : "ทำนายด่วน 1 ใบ"}
               </span>
             </div>
@@ -104,7 +104,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
 
         {/* Live Status Pill */}
         {isStreaming ? (
-          <span className="text-xs font-semibold bg-inset-warm text-ink-deep border border-line-warm px-3.5 py-1.5 rounded-full flex items-center gap-2">
+          <span className="glass-chip text-xs font-semibold text-ink-deep px-3.5 py-1.5 flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-gold-ink animate-ping" />{" "}
             {isEnglish ? "Oracle is channeling the tarot..." : "แม่หมอกำลังอ่านคำทำนาย..."}
           </span>
@@ -124,7 +124,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
             <div
               role="alert"
               aria-live="assertive"
-              className="anim-page-transition p-4 rounded-lg bg-surface border border-line-warm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="altar-card-porcelain !rounded-lg anim-page-transition p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div className="flex items-start gap-2.5 text-xs sm:text-sm text-ink-deep font-serif-th">
                 
@@ -175,7 +175,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
         <div className="space-y-5">
           {/* Querent Sacred Question Banner */}
           {question && (
-            <div className="anim-page-transition p-4 rounded-xl bg-surface-warm border border-line-warm space-y-1.5 shadow-2xs">
+            <div className="altar-card-porcelain !rounded-xl anim-page-transition p-4 space-y-1.5">
               <div className="flex items-center justify-between text-xs text-gold-ink font-serif-th font-semibold">
                 <span className="flex items-center gap-1.5">
                   <span>{isEnglish ? "Your Sacred Question" : "คำถามที่คุณตั้งจิตถาม"}</span>
@@ -233,7 +233,7 @@ export const QuickChatResult: React.FC<QuickChatResultProps> = ({
           )}
 
           {/* Card Presentation Card */}
-          <div className="anim-page-transition p-5 sm:p-6 rounded-lg bg-surface-warm border border-line-warm space-y-4">
+          <div className="altar-card-porcelain !rounded-lg anim-page-transition p-5 sm:p-6 space-y-4">
             {/* Card Identity Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-line-warm/40">
               <div className="flex items-center gap-3.5">
@@ -297,7 +297,7 @@ isEnglish
                     {keywords.slice(0, 3).map((kw: string, idx: number) => (
                       <span
                         key={idx}
-                        className="text-xs text-ink-deep bg-surface border border-line-warm px-2.5 py-0.5 rounded-full font-serif-th"
+                        className="glass-chip text-xs text-ink-deep px-2.5 py-0.5 font-serif-th"
                       >
                         {kw}
                       </span>
@@ -463,7 +463,7 @@ isEnglish
               />
 
               {/* Real Human Reader Marketplace Consultation CTA */}
-              <div className="p-4 rounded-lg bg-surface-warm border border-line-warm space-y-2.5">
+              <div className="altar-card-porcelain !rounded-lg p-4 space-y-2.5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <h5 className="font-serif-th text-xs sm:text-sm font-bold text-ink-deep flex items-center gap-1.5">

@@ -95,7 +95,7 @@ export function ContactBodyTh() {
 
         <section className="space-y-3">
           <h2 className="text-lg font-bold text-gold font-serif-th">อีเมล</h2>
-          <div className="rounded-xl border border-line bg-surface p-4 space-y-2">
+          <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
             <a
               href={`mailto:${DEFAULT_SUPPORT_EMAIL}`}
               className="text-base text-gold-ink underline hover:text-gold-ink-deep font-serif-th break-all"
@@ -111,7 +111,7 @@ export function ContactBodyTh() {
         {TIKTOK_URL && (
           <section className="space-y-3">
             <h2 className="text-lg font-bold text-gold font-serif-th">ติดตามเรา</h2>
-            <div className="rounded-xl border border-line bg-surface p-4 space-y-2">
+            <div className="altar-card-porcelain !rounded-xl p-4 space-y-2">
               <a
                 href={TIKTOK_URL}
                 target="_blank"

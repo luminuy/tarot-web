@@ -14,7 +14,7 @@ export const ReaderDetailClient: React.FC<ReaderDetailClientProps> = ({ reader, 
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface border border-line-warm p-6 rounded-lg ">
+      <div className="altar-card-porcelain !rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 p-6">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-serif-th font-bold text-base text-ink-deep">
