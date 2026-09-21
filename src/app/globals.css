@@ -112,7 +112,7 @@
   9. dark      : #171512 (Near Black — Dark Footer, Deep Reading Mode)
 */
 @theme {
-  --color-canvas: #F3F0EA;
+  --color-canvas: #F2ECE1;
   --color-surface: #FFFFFF;
   --color-inset: #EAE7E0;
   --color-line: #D5CEC2;
@@ -342,11 +342,39 @@
   --z-toast: 90;
 
   /* Shadows (Tailwind v4 Theme Tokens) */
-  --shadow-raised: 0 1px 3px rgba(41, 38, 31, 0.04), 0 6px 16px -2px rgba(41, 38, 31, 0.06);
-  --shadow-overlay: 0 16px 48px -8px rgba(41, 38, 31, 0.16);
+  --shadow-raised: 0 1px 2px rgba(46, 33, 26, 0.05), 0 10px 24px -10px rgba(46, 33, 26, 0.20);
+  --shadow-overlay: 0 20px 52px -10px rgba(46, 33, 26, 0.26);
 }
 
 :root {
+  /* ═══ ธีมกระจกอุ่น (Warm Liquid Glass) — ค่าทั้งหมดคำนวณคอนทราสต์มาแล้ว ดูหัวข้อ 2.4 ═══
+     🚨 ห้ามเติม backdrop-filter / backdrop-blur ที่ใดก็ตามในธีมนี้ (INC-0056 · ด่านที่ 43)
+        ความเป็น "กระจก" มาจากความโปร่ง + ขอบสะท้อนแสง ไม่ได้มาจากการเบลอ */
+
+  /* พื้นของแผงกระจก — ค่านี้คือ "พื้นความทึบขั้นต่ำ" ห้ามลดลงต่ำกว่านี้เด็ดขาด
+     เพราะคอนทราสต์ของตัวอักษรทุกตัวบนแผงคำนวณจากค่านี้ (ดู 2.4) */
+  --glass-fill: rgba(255, 255, 255, 0.58);
+
+  /* ประกายแสงบนผิวกระจก — เป็น background-image ทับบน --glass-fill อีกชั้น
+     บวกความทึบเพิ่มเท่านั้น ไม่เคยลด จึงไม่ทำให้คอนทราสต์ตก */
+  --glass-sheen: linear-gradient(
+    158deg,
+    rgba(255, 255, 255, 0.30) 0%,
+    rgba(255, 255, 255, 0) 55%,
+    rgba(255, 255, 255, 0.14) 100%
+  );
+
+  --glass-edge: rgba(255, 255, 255, 0.78);   /* ขอบกระจกปกติ */
+  --glass-edge-on: #938265;                  /* ขอบตอนถูกเลือก/hover — 3.27:1 ผ่านเกณฑ์ non-text */
+  --glass-radius: 20px;
+
+  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset,
+                  0 -1px 0 rgba(46, 33, 26, 0.06) inset,
+                  0 18px 40px -14px rgba(78, 54, 32, 0.28);
+
+  --glass-shadow-lift: 0 1px 0 rgba(255, 255, 255, 0.95) inset,
+                       0 -1px 0 rgba(46, 33, 26, 0.06) inset,
+                       0 26px 54px -16px rgba(78, 54, 32, 0.38);
 
   --dur-instant: 80ms;
   --dur-fast: 140ms;
@@ -380,7 +408,7 @@
 
 html,
 body {
-  background-color: #F3F0EA;                    /* Warm Ivory canvas */
+  background-color: var(--color-canvas);
   color: #29261F;                               /* Deep Brown ink */
   font-family: var(--font-sans-th);
   line-height: 1.7;                             /* โปร่งขึ้นเพื่อสายตาทุกวัย */
@@ -389,6 +417,20 @@ body {
   text-rendering: optimizeLegibility;
   overflow-wrap: break-word;
   word-break: break-word;
+}
+
+body {
+  background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(60% 42% at 12% 6%,   rgba(255, 214, 150, 0.70) 0%, rgba(255, 214, 150, 0) 68%),
+    radial-gradient(55% 38% at 92% 22%,  rgba(224, 196, 224, 0.38) 0%, rgba(224, 196, 224, 0) 66%),
+    radial-gradient(70% 45% at 50% 104%, rgba(184, 210, 210, 0.42) 0%, rgba(184, 210, 210, 0) 70%),
+    linear-gradient(170deg, #FBF1E2 0%, #EFE2CF 100%);
+  background-repeat: no-repeat;
+  /* 🚨 ห้ามใช้ background-attachment: fixed เด็ดขาด
+     `fixed` บังคับให้เบราว์เซอร์วาดพื้นหลังใหม่ทุกเฟรมที่เลื่อนจอ
+     ซึ่งเป็นความผิดพลาดแบบเดียวกับ backdrop-filter ใน INC-0056 เป๊ะ ๆ
+     ค่าเริ่มต้น `scroll` วาดครั้งเดียวตามความสูงเอกสาร = ฟรีสำหรับ compositor */
 }
 
 /*
@@ -559,13 +601,6 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   pointer-events: none;
 }
 
-/* โซนแท่นบูชา (ผ้าปูไพ่) — ใช้เฉพาะที่ไพ่วางจริง */
-.altar-cloth {
-  background: #EAE7E0;              /* inset — Soft Ivory */
-  border: 1px solid #D5CEC2;        /* line — Taupe Line */
-  border-radius: 12px;
-}
-
 /* ตัวอักษรสีทองศักดิ์สิทธิ์ตามระบบ V2 — คมชัด ผ่าน WCAG AA */
 /*
  * ⚠️ คลาสนี้กำหนด `color` จึงชนะ utility `text-*` ที่ใส่มาคู่กันเสมอ
@@ -579,43 +614,64 @@ body > *:not(.fixed):not([data-floating]):not([data-site-header]) {
   display: inline-block;
 }
 
-/* กรอบแท่นบูชาตามระบบ Editorial Quiet Luxury */
+/* กรอบแท่นบูชาตามระบบ Editorial Quiet Luxury — ธีมกระจกอุ่น */
 .altar-panel {
-  background: #FFFFFF;
-  border: 1px solid #D5CEC2;
-  box-shadow: var(--shadow-raised);
+  background-color: var(--glass-fill);
+  background-image: var(--glass-sheen);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
 }
 
 .altar-panel-active {
-  background: #FFFFFF;
-  border: 1.5px solid #A58A5C;
-  box-shadow: var(--shadow-raised);
+  background-color: var(--glass-fill);
+  background-image: var(--glass-sheen);
+  border: 1.5px solid var(--glass-edge-on);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
 }
 
 /* การ์ดพอร์ซเลนระดับลักชูรี */
 .altar-card-porcelain {
-  background: #FFFFFF;
-  border: 1px solid #D5CEC2;
-  box-shadow: var(--shadow-raised);
-  /*
-   * ⚠️ ห้ามเขียน `transition: all` เด็ดขาด (ของเดิมเขียนไว้แบบนั้น)
-   * `all` ครอบคลุมคุณสมบัติเชิง layout ทุกตัวที่บังเอิญเปลี่ยนพร้อมกัน
-   * (padding · border-width · ขนาดกล่องตอนหน้าจอเปลี่ยนช่วง responsive)
-   * แล้วบังคับให้เบราว์เซอร์คำนวณ layout ใหม่ทุกเฟรมตลอด 200ms โดยไม่มีใครตั้งใจ
-   * และคลาสนี้ถูกใช้ซ้ำ 16 จุด — หน้า `/daily` ใบเดียวมี 11 กล่อง
-   *
-   * ระบุ 3 ตัวที่ hover เปลี่ยนจริง ๆ ตรง ๆ แทน (ดูกฎ :hover ด้านล่าง)
-   * ด่าน `scripts/qa/test-motion-quality.ts` กันไม่ให้ `all` กลับมาอีก
-   */
+  background-color: var(--glass-fill);
+  background-image: var(--glass-sheen);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  /* ⚠️ ห้ามเขียน `transition: all` เด็ดขาด — คงรายชื่อเดิมไว้ทั้งบรรทัด (ด่านที่ 43) */
   transition-property: border-color, box-shadow, transform;
   transition-duration: 0.2s;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .altar-card-porcelain:hover {
-  border-color: #A58A5C;
-  box-shadow: var(--shadow-overlay);
+  border-color: var(--glass-edge-on);
+  box-shadow: var(--glass-shadow-lift);
   transform: translateY(-2px);
+}
+
+/* ผ้าปูไพ่ — โปร่งกว่าแผง เพื่อให้ลำดับสายตาเป็น: ไพ่ > แผง > ผ้าปู */
+.altar-cloth {
+  background-color: rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: var(--glass-radius);
+}
+
+/* ปุ่มหลักและปุ่มโปร่ง ธีมกระจกอุ่น */
+.btn-glass-primary {
+  background-image: linear-gradient(180deg, #4A3526 0%, #33241A 100%);
+  color: #FDF7EC;                 /* 13.99:1 — ผ่าน AAA */
+  border-radius: 16px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) inset,
+              0 12px 26px -10px rgba(51, 36, 26, 0.60);
+}
+
+.btn-glass-ghost {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.50));
+  color: var(--color-ink);
+  border: 1px solid var(--glass-edge);
+  border-radius: 16px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.95) inset;
 }
 
 /* ลวดลายหลังไพ่ศักดิ์สิทธิ์ (Warm Chocolate & Celestial Gold Inset) */

@@ -38,6 +38,40 @@
 | **Provably Fair Badge** | `ProvablyFairBadge.tsx` | 🟢 **Active / Live** | Ready | ปุ่มและ Modal ตรวจสอบ SHA-256 Commit-Reveal + Telemetry Verify Tracking | แสดงตราประทับบนการ์ดผลสรุปคำทำนาย |
 | **Pick A Card (4 กอง)** | `/pick-a-card` & `/en/pick-a-card` | 🟢 **Active / Live** | Edge Ready (Astro SSG + Island) | ระบบเลือกกองไพ่ 4 กอง (ความรัก การงาน จิตวิญญาณ) พร้อมไพ่ 1909 RWS 3 มิติ คริสตัล คำทำนายสองภาษา และ Schema.org | เพิ่มหัวข้อตามเทศกาล |
 
+### 🗓️ 2026-09-21 (รอบ 111): 🪟 ดำเนินการสมบูรณ์ — ธีมกระจกอุ่น (Warm Liquid Glass) + โครงหน้าแรก "ประตูเดียว"
+
+**เป้าหมาย & สเปกที่ปฏิบัติตาม**:
+ดำเนินการตามคู่มือและแผนส่งต่องาน `docs/plans/HANDOFF_GLASS_HOME_2026-09-21.md` ครบถ้วน 100%:
+1. **ธีมกระจกอุ่น (Warm Liquid Glass - Theme C)** โดยไม่ใช้ `backdrop-filter` หรือ `backdrop-blur` (ปฏิบัติตามกฎ INC-0056 / ด่านที่ 43) และไม่ใช้ `background-attachment: fixed`
+2. **โครงหน้าแรก "ประตูเดียว" (Single Door Layout 1)**: `<h1>` บนสุด ➔ ปุ่มเดี่ยว CTA "เริ่มดูดวงฟรี" ➔ ผังยอดนิยม 3 ผัง (`variant="featured"`) พร้อมลิงก์ไปคลังผัง ➔ `DailyCardStrip` ➔ `QuickFortunePicker` (ปลดหนี้ INC-0130 ใช้ `<h2>` และ `<h3>` ถูกต้อง)
+
+**รายละเอียดการแก้ไขในแต่ละไฟล์**:
+1. `src/app/globals.css`:
+   - `@theme`: ปรับ `--color-canvas: #F2ECE1;`
+   - `:root`: เพิ่มโทเคน `--glass-fill` (rgba(255,255,255,0.58)), `--glass-sheen`, `--glass-edge`, `--glass-edge-on`, `--glass-radius`, `--glass-shadow`, `--glass-shadow-lift`
+   - `:root`: เพิ่มมิติความลึกให้ `--shadow-raised` และ `--shadow-overlay` (~3 เท่า)
+   - `body`: กำหนดพื้นหลัง radial gradient 3 จุด + linear gradient โดยไม่มี `background-attachment: fixed`
+   - คลาส `.altar-*`: ปรับ `.altar-panel`, `.altar-panel-active`, `.altar-card-porcelain` (คง whitelist transition property เพื่อป้องกัน CPU thrashing), และ `.altar-cloth`
+   - เพิ่มปุ่มกระจกใหม่ `.btn-glass-primary` (คอนทราสต์ 13.99:1 ผ่าน AAA) และ `.btn-glass-ghost`
+2. `src/components/spread/SpreadCardSelector.tsx`:
+   - เพิ่ม prop `variant?: "featured" | "full"` (default `"full"`)
+   - ในโหมด `"featured"`: กรองแสดง 3 ผังยอดนิยม (`three-card`, `yes-no`, `love`), ซ่อนแถบแท็บหมวดหมู่ (`role="tablist"`), จัดการ ARIA tabpanel ไม่ให้เป็น orphan, ปรับกริดเดสก์ท็อปเป็น `sm:grid-cols-3` และรักษาสไลด์แนวนอนมือถือพร้อมปุ่ม dot 24x24 px
+   - เพิ่มลิงก์ `LocaleLink` ไปยัง `/spreads` ด้วยข้อความไดนามิก `${PUBLIC_SPREADS.length}` ตามกฎข้อ 10 และ Rule 14
+3. `src/components/home/TarotFlow.tsx`:
+   - รวมตรรกะการเริ่มพิธีกรรมเข้าสู่ `handleBeginReading` callback เดียวกัน โดยคงระบบตรวจสอบสิทธิ์ 3 ชั้นครบถ้วน (Guest limit, Grand Spread entitlement, Audio/Scroll/Step)
+   - จัดเรียงลำดับ `SPREAD_SELECT`: Hero `<h1>` + คำโปรยเดิม ➔ ปุ่ม CTA "เริ่มดูดวงฟรี" + คำอธิบายระยะเวลา ➔ `<h2>` เลือกผังการเปิดไพ่พยากรณ์ ➔ `<SpreadCardSelector variant="featured" ... />` ➔ `<DailyCardStrip />` ➔ `<QuickFortunePicker />`
+4. `src/components/reading/QuickFortunePicker.tsx`:
+   - ปลดหนี้ INC-0130 อย่างสมบูรณ์: เลื่อนระดับหัวข้อจาก `<p>` ขึ้นเป็น `<h2>` และหัวข้อการ์ดเป็น `<h3>` ตามลำดับเอกสาร semantic (`h1` ➔ `h2` ➔ `h3` ➔ `h2` ➔ `h3`)
+   - ลบคอมเมนต์ INC-0130 เดิมและบันทึกเหตุผลใหม่ป้องกันการแก้กลับ
+
+**ผลการตรวจสอบคุณภาพระบบ (Verification Results)**:
+- `npm run typecheck`: ผ่าน 0 errors
+- `test-palette-drift.ts`: สีฮาร์ดโค้ด 202 จุด (ต่ำกว่าเพดาน 279)
+- `test-motion-quality.ts`: ผ่านทุกเกณฑ์ ปลอด `backdrop-filter` และ `transition-all`
+- `test-a11y-critical.ts`: ผ่านทั้ง 341 หน้า (HTML เรนเดอร์จริง) ลำดับหัวข้อไม่ข้ามระดับ และ h1 เดี่ยว
+- `test-bundle-budget.ts`: ผ่านทุกเส้นทาง น้ำหนัก HTML หน้าแรก `/` ลดลงจาก 41 KB เหลือ 26 KB gzip
+- `npm run repo:verify`: **ผ่านครบถ้วนทั้ง 80/80 ด่าน 100%**
+
 ### 🗓️ 2026-09-21 (รอบ 110): 🪟 เอกสารส่งต่อ — ธีมกระจกอุ่น (Warm Liquid Glass) + หน้าแรก "ประตูเดียว"
 
 **ที่มาและเหตุผล**:

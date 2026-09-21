@@ -291,16 +291,14 @@ export function QuickFortunePicker({
         </div>
 
         {/*
-          * ⚠️ ต้องเป็น `<p>` ไม่ใช่ `<h2>` (INC-0130)
-          * บล็อกนี้อยู่ **เหนือ** `<h1>` ของหน้าแรก ถ้าเป็นหัวข้อจริงจะกลายเป็น
-          * "h2 มาก่อน h1" ซึ่งพังทั้งโครงเอกสารของ screen reader และ outline ที่ Google อ่าน
-          * ข้อความนี้ทำหน้าที่เกริ่นนำ ไม่ใช่หัวข้อของส่วน — สไตล์เดิมทุกพิกเซล
+          * หัวข้อส่วนทำนายด่วน 1 ใบ: ใช้ `<h2>` ได้ถูกต้องตามลำดับเอกสาร (h1 ➔ h2 ➔ h3)
+          * เนื่องจากบล็อกนี้ถูกย้ายมาอยู่ถัดจากบล็อกเลือกผัง (ใต้ `<h1>` ของหน้าแรก)
           */}
-        <p className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
           {isEnglish
             ? "Choose the area calling for clarity today"
             : "เลือกเรื่องที่คุณอยากรู้มากที่สุดในตอนนี้"}
-        </p>
+        </h2>
       </div>
 
       {/* การ์ด 4 หัวข้อยอดนิยม (Mobile: Horizontal Swipe / Desktop: 4-Column Grid พอเหมาะกับเว็บ) */}
@@ -382,12 +380,10 @@ export function QuickFortunePicker({
                   <div className="text-[10px] sm:text-[11px] font-serif-th text-gold-ink tracking-wider font-semibold truncate">
                     {isEnglish ? (topic.elementalGlyphEn || topic.elementalGlyph) : topic.elementalGlyph}
                   </div>
-                  {/* `<p>` ไม่ใช่ `<h3>` ด้วยเหตุผลเดียวกับข้างบน
-                      ชื่อที่ screen reader อ่านมาจาก `aria-label` ของการ์ดทั้งใบ (เพิ่มไว้แล้วด้านบน)
-                      จึงไม่เสียข้อมูลอะไรจากการเปลี่ยนแท็ก */}
-                  <p className="text-sm sm:text-base font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors duration-200 leading-snug">
+                  {/* หัวข้อของการ์ดแต่ละหัวข้อ ใช้ `<h3>` ภายใต้ `<h2>` ของส่วนทำนายด่วน */}
+                  <h3 className="text-sm sm:text-base font-serif-th font-bold text-ink group-hover:text-gold-ink transition-colors duration-200 leading-snug">
                     {isEnglish ? (topic.titleEn || topic.title) : topic.title}
-                  </p>
+                  </h3>
                   <p className="text-[11px] sm:text-xs font-serif-th text-muted leading-relaxed line-clamp-2">
                     {isEnglish ? (topic.taglineEn || topic.tagline) : topic.tagline}
                   </p>

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { SPREADS, type Spread } from "@/data/spreads";
+import { SPREADS, PUBLIC_SPREADS, type Spread } from "@/data/spreads";
+import { LocaleLink } from "@/components/ui/LocaleLink";
 import {
   SparkleTabIcon,
   HeartTabIcon,
@@ -57,6 +58,12 @@ interface SpreadCardSelectorProps {
    * เพื่อบอกล่วงหน้าตั้งแต่ก่อนกดว่าต้องสมัคร/ปลดล็อกก่อน (กันเซอร์ไพรส์ตอนกดแล้วเจอหน้าต่างสิทธิ์)
    */
   proceedLabel?: string;
+  /**
+   * `"featured"` = โหมดหน้าแรก โชว์ 3 ผังที่คนเลือกบ่อย + ลิงก์ไปหน้ารวม
+   * `"full"` (ค่าเริ่มต้น) = ของเดิมทุกอย่าง แท็บหมวดหมู่ครบ 5 แท็บ
+   * ⚠️ ค่าเริ่มต้นต้องเป็น "full" เพื่อไม่ให้ผู้เรียกเดิมทุกจุดเปลี่ยนพฤติกรรมเอง
+   */
+  variant?: "featured" | "full";
 }
 
 /**
@@ -102,6 +109,8 @@ export { renderSpreadIllustration };
 
 import { useLocale } from "@/lib/i18n";
 
+const FEATURED_SPREAD_IDS = ["three-card", "yes-no", "love"];
+
 export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   selectedSpread,
   onSelectSpread,
@@ -109,6 +118,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   isPassHolder = false,
   onRequireUpgrade,
   proceedLabel,
+  variant = "full",
 }) => {
   const { isEnglish } = useLocale();
   const [activeCategory, setActiveCategory] = useState<SpreadCategory>("recommended");
@@ -125,6 +135,11 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   );
 
   const filteredSpreads = useMemo(() => {
+    if (variant === "featured") {
+      return FEATURED_SPREAD_IDS.map((id) => SPREADS.find((s) => s.id === id)).filter(
+        (s): s is Spread => Boolean(s)
+      );
+    }
     switch (activeCategory) {
       case "recommended":
         return SPREADS.filter((s) =>
@@ -144,7 +159,7 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
       default:
         return SPREADS;
     }
-  }, [activeCategory]);
+  }, [activeCategory, variant]);
 
   const carouselRef = React.useRef<HTMLDivElement>(null);
 
@@ -240,57 +255,59 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
   return (
     <div className="space-y-6 w-full">
       {/* Category Filter Tabs (Linear / Apple Tier Navigation) */}
-      <div
-        role="tablist"
-        aria-label={isEnglish ? "Spread categories" : "หมวดหมู่ผังพยากรณ์"}
-        className="flex items-center justify-start gap-2 overflow-x-auto pb-1.5 px-1 no-scrollbar select-none"
-      >
-        {categories.map((cat, catIdx) => {
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              role="tab"
-              id={`spread-tab-${cat.id}`}
-              aria-controls={`spread-panel-${cat.id}`}
-              aria-selected={isActive}
-              tabIndex={isActive ? 0 : -1}
-              type="button"
-              onClick={() => {
-                setHasSwappedTab(true);
-                setActiveCategory(cat.id);
-              }}
-              onKeyDown={(e) => {
-                let nextIdx = -1;
-                if (e.key === "ArrowRight") nextIdx = (catIdx + 1) % categories.length;
-                else if (e.key === "ArrowLeft") nextIdx = (catIdx - 1 + categories.length) % categories.length;
-                if (nextIdx !== -1) {
-                  e.preventDefault();
+      {variant !== "featured" && (
+        <div
+          role="tablist"
+          aria-label={isEnglish ? "Spread categories" : "หมวดหมู่ผังพยากรณ์"}
+          className="flex items-center justify-start gap-2 overflow-x-auto pb-1.5 px-1 no-scrollbar select-none"
+        >
+          {categories.map((cat, catIdx) => {
+            const isActive = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                role="tab"
+                id={`spread-tab-${cat.id}`}
+                aria-controls={`spread-panel-${cat.id}`}
+                aria-selected={isActive}
+                tabIndex={isActive ? 0 : -1}
+                type="button"
+                onClick={() => {
                   setHasSwappedTab(true);
-                  setActiveCategory(categories[nextIdx].id);
-                  const nextTab = document.getElementById(`spread-tab-${categories[nextIdx].id}`);
-                  nextTab?.focus();
-                }
-              }}
-              className={`tap-overlay-y px-3.5 sm:px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
-                isActive
-                  ? "bg-gold-ink text-surface border border-gold-ink"
-                  : "bg-surface text-ink-deep hover:text-gold-ink border border-line-warm/50 hover:border-gold-ink hover:bg-surface-warm"
-              }`}
-            >
-              <cat.Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-surface" : "text-gold-ink"}`} />
-              <span>{cat.label}</span>
-              <span
-                className={`text-[12px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                  isActive ? "bg-white/20 text-surface" : "bg-surface text-muted border border-line-warm/40"
+                  setActiveCategory(cat.id);
+                }}
+                onKeyDown={(e) => {
+                  let nextIdx = -1;
+                  if (e.key === "ArrowRight") nextIdx = (catIdx + 1) % categories.length;
+                  else if (e.key === "ArrowLeft") nextIdx = (catIdx - 1 + categories.length) % categories.length;
+                  if (nextIdx !== -1) {
+                    e.preventDefault();
+                    setHasSwappedTab(true);
+                    setActiveCategory(categories[nextIdx].id);
+                    const nextTab = document.getElementById(`spread-tab-${categories[nextIdx].id}`);
+                    nextTab?.focus();
+                  }
+                }}
+                className={`tap-overlay-y px-3.5 sm:px-4 py-2 rounded-full text-xs font-serif-th font-bold transition-colors duration-200 cursor-pointer flex items-center gap-2 whitespace-nowrap relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-ink ${
+                  isActive
+                    ? "bg-gold-ink text-surface border border-gold-ink"
+                    : "bg-surface text-ink-deep hover:text-gold-ink border border-line-warm/50 hover:border-gold-ink hover:bg-surface-warm"
                 }`}
               >
-                {cat.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                <cat.Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-surface" : "text-gold-ink"}`} />
+                <span>{cat.label}</span>
+                <span
+                  className={`text-[12px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                    isActive ? "bg-white/20 text-surface" : "bg-surface text-muted border border-line-warm/40"
+                  }`}
+                >
+                  {cat.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* World-Class Responsive Tarot Cards (Mobile Horizontal Swipe / Desktop Grid) */}
       {/* คลาสอนิเมชันจะถูกใส่ก็ต่อเมื่อผู้ใช้สลับแท็บเองแล้วเท่านั้น (`hasSwappedTab`)
@@ -303,13 +320,21 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           `key={activeCategory}` ทำให้ React ถอดของเก่าแล้วสร้างใหม่ คีย์เฟรมจึงเล่นซ้ำทุกครั้ง
           ที่สลับแท็บ โดยไม่ต้องมีไลบรารีคอยคุม lifecycle ให้ */}
       <div
-        key={activeCategory}
-        role="tabpanel"
-        id={`spread-panel-${activeCategory}`}
-        aria-labelledby={`spread-tab-${activeCategory}`}
+        key={variant === "featured" ? "featured" : activeCategory}
+        {...(variant !== "featured"
+          ? {
+              role: "tabpanel",
+              id: `spread-panel-${activeCategory}`,
+              "aria-labelledby": `spread-tab-${activeCategory}`,
+            }
+          : {})}
         ref={carouselRef}
         onScroll={handleCarouselScroll}
-        className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible`}
+        className={`${hasSwappedTab ? "anim-swap-rise-sm" : ""} flex flex-row overflow-x-auto snap-x snap-mandatory gap-4 pb-3 pt-1 px-4 -mx-4 no-scrollbar scroll-smooth sm:grid ${
+          variant === "featured"
+            ? "sm:grid-cols-3"
+            : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        } sm:gap-5 sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:overflow-visible`}
       >
           {filteredSpreads.map((spread, idx) => {
             const isSelected = selectedSpread.id === spread.id;
@@ -497,6 +522,22 @@ export const SpreadCardSelector: React.FC<SpreadCardSelectorProps> = ({
           );
         })}
       </div>
+
+      {variant === "featured" && (
+        <div className="text-center pt-1 pb-1">
+          <LocaleLink
+            href="/spreads"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-line-interactive-warm bg-surface/80 hover:bg-surface text-ink-deep hover:text-gold-ink hover:border-gold-ink font-serif-th text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-2xs"
+          >
+            <span>
+              {isEnglish
+                ? `View all ${PUBLIC_SPREADS.length} spreads`
+                : `ดูผังทั้งหมด ${PUBLIC_SPREADS.length} แบบ`}
+            </span>
+            <span aria-hidden="true">→</span>
+          </LocaleLink>
+        </div>
+      )}
 
       {/* Selected Spread In-Focus Action Bar */}
       {onProceed && (
