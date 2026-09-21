@@ -37,6 +37,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { splitChatParagraphs, stripStrayBoldMarkers } from "../../src/lib/chat/format-chat-text";
+import { splitTocNumber } from "../../src/lib/text/toc-label";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -300,6 +301,78 @@ export function runChatFormatCases(): string[] {
   return failures;
 }
 
+/**
+ * 🔢 สารบัญบทความ — เลขข้อต้องมีชั้นเดียว และจุดต้องไม่ตกบรรทัด (INC-0214)
+ *
+ * สารบัญเรนเดอร์เลขให้เองจากลำดับ แต่ชื่อหัวข้อของบางบทความเขียนเลขนำหน้ามาด้วย
+ * ผู้ใช้จึงเห็น "1. 1. แก่นแท้ของความรัก…" · และป้ายเลขที่ไม่มี `shrink-0`
+ * ถูกบีบจนจุดตกไปอยู่บรรทัดใหม่เฉพาะข้อที่ชื่อยาวสองบรรทัด
+ */
+type TocCase = { label: string; run: () => string | null };
+
+const TOC_CASES: TocCase[] = [
+  {
+    label: "ชื่อหัวข้อที่มีเลขนำหน้าต้องไม่ได้เลขซ้ำสองชั้น",
+    run: () => {
+      const { marker, label } = splitTocNumber("1. แก่นแท้ของความรักในมุมมองไพ่ทาโรต์", 1);
+      if (marker !== "1") return `เลขข้อควรเป็น "1" แต่ได้ "${marker}"`;
+      return label.startsWith("1.") ? `ชื่อหัวข้อยังมีเลขติดมา: "${label}"` : null;
+    },
+  },
+  {
+    label: "ใช้เลขของผู้เขียนเพื่อให้ตรงกับหัวข้อในเนื้อบทความ",
+    run: () => {
+      const { marker } = splitTocNumber("6. ไพ่บอกเนื้อคู่ (Soulmate & Twin Flame) มีจริงไหม?", 3);
+      return marker === "6" ? null : `ควรได้ "6" (เลขของผู้เขียน) แต่ได้ "${marker}"`;
+    },
+  },
+  {
+    label: "ชื่อหัวข้อที่ไม่มีเลขต้องได้เลขจากลำดับ",
+    run: () => {
+      const { marker, label } = splitTocNumber("คำถามที่พบบ่อย (FAQ)", 5);
+      if (marker !== "5") return `ควรได้ "5" แต่ได้ "${marker}"`;
+      return label === "คำถามที่พบบ่อย (FAQ)" ? null : `ชื่อหัวข้อถูกแก้โดยไม่จำเป็น: "${label}"`;
+    },
+  },
+  {
+    label: "ตัวเลขที่เป็นเนื้อหาจริงห้ามถูกตัดทิ้ง",
+    run: () => {
+      /* "3 ใบ" ไม่ได้ตามด้วยจุด/วงเล็บ จึงไม่ใช่เลขข้อ ต้องอยู่ครบ */
+      const { label } = splitTocNumber("ไพ่ยิปซีความรัก 3 ใบ", 2);
+      return label === "ไพ่ยิปซีความรัก 3 ใบ" ? null : `ชื่อหัวข้อถูกตัด: "${label}"`;
+    },
+  },
+];
+
+export function runTocCases(): string[] {
+  const failures: string[] = [];
+  for (const c of TOC_CASES) {
+    const problem = c.run();
+    if (problem) failures.push(`${c.label} — ${problem}`);
+  }
+
+  /* ป้ายเลขข้อต้อง `shrink-0` ไม่งั้นจุดตกบรรทัด */
+  const file = path.join(ROOT, "src/components/blog/ArticleReadingClient.tsx");
+  if (!fs.existsSync(file)) {
+    failures.push("หาไฟล์ ArticleReadingClient.tsx ไม่เจอ — ด่านนี้ตรวจไม่ได้ อย่าปล่อยผ่านเงียบ ๆ (INC-0214)");
+    return failures;
+  }
+  const text = fs.readFileSync(file, "utf-8");
+  const markerSpan = text.match(/<span className="([^"]*)"[^>]*>\s*\{marker\}\./);
+  if (!markerSpan) {
+    failures.push("หา <span> ป้ายเลขข้อในสารบัญไม่เจอ — มาร์กอัปเปลี่ยนไป แก้ด่านให้ตรงก่อน (INC-0214)");
+  } else if (!/\bshrink-0\b/.test(markerSpan[1])) {
+    failures.push(
+      "ป้ายเลขข้อในสารบัญไม่มี `shrink-0` — จะถูกบีบจนจุดตกไปอยู่บรรทัดใหม่ในข้อที่ชื่อยาว (INC-0214)",
+    );
+  }
+  /* ต้องเรียกกับชื่อหัวข้อจริง ไม่ใช่แค่มีบรรทัด import ค้างไว้ */
+  if (!/splitTocNumber\(\s*item\.title/.test(text)) {
+    failures.push("สารบัญไม่ได้เรียก splitTocNumber() — เลขข้อจะซ้ำสองชั้นกับชื่อหัวข้อที่มีเลขนำหน้า (INC-0214)");
+  }
+  return failures;
+}
+
 if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   const tsxFiles = walkTsx(SRC);
   assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
@@ -350,4 +423,13 @@ if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   }
 
   console.log(`✅ ข้อความแชท: ยัติภังค์กลางคำไม่ถูกผ่า · หัวข้อย่อยจริงยังแยกได้ · ไม่มีดาวหลุด (${CHAT_CASES.length} เคส)`);
+
+  const toc = runTocCases();
+  if (toc.length > 0) {
+    console.error(`\n❌ สารบัญบทความ: เลขข้อซ้ำ/จุดตกบรรทัด ${toc.length} จุด\n`);
+    for (const f of toc) console.error(`   ${f}\n`);
+    process.exit(1);
+  }
+
+  console.log(`✅ สารบัญบทความ: เลขข้อมีชั้นเดียวและจุดไม่ตกบรรทัด (${TOC_CASES.length} เคส)`);
 }
