@@ -1873,6 +1873,36 @@ input.no-focus-ring:focus-visible {
   display: none;
 }
 
+/*
+ * 🍪 แถบขอความยินยอม — แถบเดียวยาวเต็มความกว้างที่ขอบล่างจอ (คำสั่งเจ้าของ 2026-09-21)
+ *
+ * `.consent-dock` = ตัวจัดตำแหน่ง เว้นระยะขอบและกัน safe-area ของ iPhone ที่มีแถบล่าง
+ *   ⚠️ ต้องคง `display: block` ของ `[data-consent-banner]` ไว้ (กฎด้านบนคุมการซ่อน/แสดง)
+ *      ห้ามเปลี่ยนตัวนี้เป็น flex — จะทับกฎแสดงผลจนแถบโผล่ทั้งที่ผู้ใช้ตอบไปแล้ว
+ * `.consent-bar` = ตัวแถบกระจกจริง ใช้ผิวชุดเดียวกับหัวเว็บแต่ทึบกว่า (0.88)
+ *   เพราะมันลอยอยู่เหนือเนื้อหาที่เลื่อนผ่านใต้ตลอดเวลา และเป็นข้อความที่ต้องอ่านออกแน่ ๆ
+ */
+.consent-dock {
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 640px) {
+  .consent-dock {
+    padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.consent-bar {
+  background-color: rgba(255, 252, 246, 0.88);
+  background-image: var(--glass-sheen);
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 0 0 1px var(--glass-ring),
+    0 18px 42px -18px rgba(78, 54, 32, 0.50);
+}
+
 html[data-consent-ask] [data-consent-banner] {
   display: block;
 }
