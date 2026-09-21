@@ -161,6 +161,81 @@ export function scanCollapsingColumns(files: string[]): CollapseFinding[] {
   return findings;
 }
 
+/**
+ * 🃏 การ์ดแชร์ผลคำทำนาย — ชื่อตำแหน่งห้าม `whitespace-nowrap` (INC-0211)
+ *
+ * ต้นเหตุ: ชื่อตำแหน่งของผังใหญ่ยาว 160-229px (เช่น "1. แก่นของเรื่อง (หัวใจของสถานการณ์)")
+ * แต่คอลัมน์ของไพ่แต่ละใบกว้างแค่ 96px · `whitespace-nowrap` ทำให้มันล้นออกนอกคอลัมน์
+ * ทั้งซ้ายและขวา แล้วไป **ทับชื่อของไพ่ใบข้าง ๆ** จนอ่านไม่ออกทั้งคู่
+ * (วัดของจริงที่ 430px: ทับกัน 3 คู่ · ใบแรกล้นออกนอกการ์ดไป 7px)
+ *
+ * ลายน้ำท้ายการ์ดเป็นอาการกลับกัน: ไม่มี `whitespace-nowrap` เลย บนจอแคบจึงตัดกลางคำ
+ * เห็นเป็น "SEERTAROT.NE" แล้วขึ้นบรรทัดใหม่เป็น "T"
+ *
+ * กฎ: ในบล็อกโชว์ไพ่ของ ShareModal ชื่อตำแหน่งต้องตัดบรรทัดได้และมี `line-clamp-*`
+ *     ส่วนลายน้ำท้ายการ์ดต้อง `whitespace-nowrap` ทั้งสองก้อน และแถวต้อง `flex-wrap`
+ */
+type ShareFinding = { rule: string; hint: string };
+
+export function scanShareCardText(root: string): ShareFinding[] {
+  const out: ShareFinding[] = [];
+  const file = path.join(root, "src/components/reading/ShareModal.tsx");
+  if (!fs.existsSync(file)) {
+    return [{ rule: "หาไฟล์ ShareModal.tsx ไม่เจอ", hint: "ด่านนี้ตรวจไม่ได้ — อย่าปล่อยผ่านเงียบ ๆ (INC-0211)" }];
+  }
+  const text = fs.readFileSync(file, "utf-8");
+
+  const posSpan = text.match(/<span className="([^"]*)"[^>]*>\s*\{isEnglish \? \(c\.position\.nameEn/);
+  if (!posSpan) {
+    out.push({
+      rule: "หา <span> ชื่อตำแหน่งในการ์ดแชร์ไม่เจอ",
+      hint: "มาร์กอัปเปลี่ยนไป — แก้ด่านให้ตรงก่อน อย่าปล่อยผ่าน (INC-0211)",
+    });
+  } else {
+    const cls = posSpan[1];
+    if (/\bwhitespace-nowrap\b/.test(cls)) {
+      out.push({
+        rule: "ชื่อตำแหน่งในการ์ดแชร์ใช้ `whitespace-nowrap`",
+        hint: "ชื่อยาวกว่าคอลัมน์ 96px เกือบเท่าตัว มันจะล้นไปทับชื่อไพ่ใบข้าง ๆ — เอาออก (INC-0211)",
+      });
+    }
+    if (!/\bline-clamp-\d\b/.test(cls)) {
+      out.push({
+        rule: "ชื่อตำแหน่งในการ์ดแชร์ไม่มี `line-clamp-*`",
+        hint: "ไม่จำกัดจำนวนบรรทัด ความสูงหัวคอลัมน์จะไม่เท่ากัน ไพ่ในแถวเดียวกันเรียงไม่ตรง (INC-0211)",
+      });
+    }
+  }
+  /* `className` เป็น optional ในแพตเทิร์น — ถ้าใครถอดออกทั้งก้อน ด่านต้องฟ้องว่า
+     "ไม่มี whitespace-nowrap" ให้ตรงอาการ ไม่ใช่ฟ้องว่าหามาร์กอัปไม่เจอ */
+  const footerRow = text.match(
+    /<div className="([^"]*)"[^>]*>\s*<span(?: className="([^"]*)")?\s*>PROVABLY-FAIR SHA-256<\/span>\s*<span(?: className="([^"]*)")?\s*>SEERTAROT\.NET<\/span>/,
+  );
+  if (!footerRow) {
+    out.push({
+      rule: "หาแถวลายน้ำท้ายการ์ดแชร์ไม่เจอ",
+      hint: "มาร์กอัปเปลี่ยนไป — แก้ด่านให้ตรงก่อน อย่าปล่อยผ่าน (INC-0211)",
+    });
+  } else {
+    const [, rowCls, a = "", b = ""] = footerRow;
+    if (!/\bflex-wrap\b/.test(rowCls)) {
+      out.push({
+        rule: "แถวลายน้ำท้ายการ์ดแชร์ไม่มี `flex-wrap`",
+        hint: "จอแคบแล้วสองก้อนเบียดกันจนตัดกลางคำ — ต้องให้ย้ายลงบรรทัดใหม่ทั้งก้อน (INC-0211)",
+      });
+    }
+    for (const [cls, label] of [[a, "PROVABLY-FAIR SHA-256"], [b, "SEERTAROT.NET"]] as const) {
+      if (!/\bwhitespace-nowrap\b/.test(cls)) {
+        out.push({
+          rule: `ลายน้ำ "${label}" ไม่มี \`whitespace-nowrap\``,
+          hint: "บนจอแคบจะถูกตัดกลางคำ (เห็นเป็น SEERTAROT.NE แล้วขึ้นบรรทัดใหม่เป็น T) — INC-0211",
+        });
+      }
+    }
+  }
+  return out;
+}
+
 if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   const tsxFiles = walkTsx(SRC);
   assertNonEmptyCorpus("ไฟล์ .tsx ใน src/", tsxFiles, "ตรวจว่า walk() ชี้ไปที่ src/ จริง");
@@ -190,4 +265,16 @@ if (process.argv[1] && process.argv[1].endsWith("test-invisible-element.ts")) {
   }
 
   console.log("✅ ไม่มีคอลัมน์ `flex-col min-w-0` ที่ไร้ฐานความกว้างทั้งที่มีลูกใช้ truncate");
+
+  const share = scanShareCardText(ROOT);
+  if (share.length > 0) {
+    console.error(`\n❌ การ์ดแชร์ผลคำทำนาย: ตัวหนังสือจะซ้อนกัน/ตกบรรทัด ${share.length} จุด\n`);
+    for (const f of share) {
+      console.error(`   ${f.rule}`);
+      console.error(`      ${f.hint}\n`);
+    }
+    process.exit(1);
+  }
+
+  console.log("✅ การ์ดแชร์: ชื่อตำแหน่งตัดบรรทัดได้และจำกัดบรรทัด · ลายน้ำท้ายการ์ดไม่ตัดกลางคำ");
 }
