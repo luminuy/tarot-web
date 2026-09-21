@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { overlayReducer, OVERLAY_INITIAL, isOverlay } from "@/components/home/flow-overlay";
 import { deckReducer, DECK_INITIAL } from "@/components/home/flow-deck";
 import { sessionReducer, SESSION_INITIAL } from "@/components/home/flow-session";
@@ -346,6 +346,24 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
     }
     scrollToSanctuaryTop();
   }, [currentStep]);
+
+  /**
+   * เริ่มพิธีด้วยผังที่เลือกอยู่ — ใช้ร่วมกันระหว่างปุ่มหลักของ hero กับปุ่มใน SpreadCardSelector
+   * ⚠️ ด่านสิทธิ์สามชั้นด้านล่างคือของเดิมทั้งหมด ห้ามตัดออกแม้แต่ชั้นเดียว
+   */
+  const handleBeginReading = useCallback(() => {
+    if (entitlementView?.blocked) {
+      openAccessDialog(entitlementView.blockedReason ?? GUEST_BLOCK_REASON);
+      return;
+    }
+    if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
+      openAccessDialog("grand_spread");
+      return;
+    }
+    soundManager.playCardSelectSound();
+    scrollToSanctuaryTop();
+    navigateStep("INTENTION_SELECT");
+  }, [entitlementView, isPassHolder, selectedSpread, openAccessDialog, navigateStep]);
 
   // ── P1-U4: กู้คืน flow ที่ค้างไว้ + P1-U5: รับผัง `?spread=` จากคลังผัง ──────
   // ก่อนหน้านี้ refresh / back / สลับแท็บ = เด้งกลับขั้น 1 ทั้งที่ server session ยังอยู่ ~60 นาที
@@ -1451,19 +1469,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
           data-dir={stepDirection < 0 ? "back" : "forward"}
         >
           {currentStep === "SPREAD_SELECT" && (
-            <div
-              className="space-y-10"
-            >
-              {/* ไพ่ประจำวัน (รูปที่ 1 นำกลับไว้บนสุดเหมือนเดิม) */}
-              <DailyCardStrip />
-
-              {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) */}
-              <QuickFortunePicker
-                currentNickname={nickname}
-                onSelectTopic={handleQuickFortuneSelect}
-                isLoading={loading}
-              />
-
+            <div className="space-y-10">
               <div className="space-y-10">
                 <div className="text-center space-y-2.5 sm:space-y-3 pt-2">
                   <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
@@ -1474,13 +1480,32 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                       ? "Shuffle and select cards from the authentic 78-card deck with provably-fair SHA-256 randomness and archetypal psychological insights."
                       : "สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง จากสำรับ 1909 Rider-Waite แท้ 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256"}
                   </p>
-                  <h2 className="text-base sm:text-lg font-serif-th font-semibold text-gold-ink pt-1">
-                    {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
-                  </h2>
                 </div>
 
-                {/* Spread Selector Grid */}
-                <SpreadCardSelector
+                {/* Single Door Primary CTA Button */}
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleBeginReading}
+                    className="btn-glass-primary tap-overlay-y w-full max-w-sm min-h-[48px] font-serif-th font-bold text-base cursor-pointer active:scale-[0.99] flex items-center justify-center"
+                  >
+                    {isEnglish ? "Start Free Reading" : "เริ่มดูดวงฟรี"}
+                  </button>
+                  <span className="text-xs text-muted">
+                    {isEnglish ? "About 2 minutes · No sign-up needed to try" : "ใช้เวลา 2 นาที · ไม่ต้องสมัครก็ลองได้"}
+                  </span>
+                </div>
+
+                {/* Featured Spreads Section */}
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h2 className="text-base sm:text-lg font-serif-th font-semibold text-ink-deep pt-1">
+                      {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
+                    </h2>
+                  </div>
+
+                  <SpreadCardSelector
+                    variant="featured"
                     selectedSpread={selectedSpread}
                     onSelectSpread={(sp) => {
                       soundManager.playCardSelectSound();
@@ -1507,21 +1532,20 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     onRequireUpgrade={() => {
                       openAccessDialog("grand_spread");
                     }}
-                    onProceed={() => {
-                      if (entitlementView?.blocked) {
-                        openAccessDialog(entitlementView.blockedReason ?? GUEST_BLOCK_REASON);
-                        return;
-                      }
-                      if (!isPassHolder && !isStandardSpread(selectedSpread.id)) {
-                        openAccessDialog("grand_spread");
-                        return;
-                      }
-                      soundManager.playCardSelectSound();
-                      scrollToSanctuaryTop();
-                      navigateStep("INTENTION_SELECT");
-                    }}
+                    onProceed={handleBeginReading}
                   />
                 </div>
+              </div>
+
+              {/* ไพ่ประจำวัน */}
+              <DailyCardStrip />
+
+              {/* บล็อกทำนายด่วน 1 ใบ (4 การ์ดยอดนิยม) */}
+              <QuickFortunePicker
+                currentNickname={nickname}
+                onSelectTopic={handleQuickFortuneSelect}
+                isLoading={loading}
+              />
             </div>
           )}
 
