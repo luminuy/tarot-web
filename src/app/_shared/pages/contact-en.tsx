@@ -80,7 +80,7 @@ export function ContactBodyEn() {
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdContact) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 

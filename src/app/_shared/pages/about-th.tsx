@@ -90,7 +90,7 @@ export function AboutBodyTh() {
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdAbout) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
 

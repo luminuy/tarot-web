@@ -93,7 +93,7 @@ export default async function SharePage({ params }: Props) {
   const targetUrl = isEn ? "/en" : "/";
 
   return (
-    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-canvas px-6 text-center text-ink">
+    <main id="main-content" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center gap-5 px-6 text-center text-ink">
       <meta httpEquiv="refresh" content={`1; url=${targetUrl}`} />
       {valid && (
         // eslint-disable-next-line @next/next/no-img-element

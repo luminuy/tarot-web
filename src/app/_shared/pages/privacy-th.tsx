@@ -36,7 +36,7 @@ export const privacyMetadataTh: Metadata = {
 /** `deleteButton` = ปุ่มลบข้อมูลทั้งหมด (island ตัวเดียวของหน้านี้) ส่งเข้ามาจากข้างนอก */
 export function PrivacyBodyTh({ deleteButton }: { deleteButton: ReactNode }) {
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink">
       <div className="max-w-3xl mx-auto px-6 py-16 space-y-10">
         {/* Header */}
         <div className="text-center space-y-3 pb-6 border-b border-line/40">

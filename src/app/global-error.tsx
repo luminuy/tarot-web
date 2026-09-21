@@ -11,7 +11,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="th">
-      <body className="min-h-screen bg-inset-warm text-ink-deep flex items-center justify-center p-4 font-sans">
+      <body className="min-h-screen text-ink-deep flex items-center justify-center p-4 font-sans">
         <div className="max-w-md w-full p-8 rounded-lg bg-surface border border-line-warm shadow-overlay text-center space-y-6">
           <div className="w-16 h-16 mx-auto rounded-full bg-inset-warm border border-line-warm flex items-center justify-center text-2xl text-gold-ink font-bold font-mono">!</div>
           <div className="space-y-2">

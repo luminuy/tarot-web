@@ -178,7 +178,7 @@ export function BlogDetailContent({
       : null;
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-canvas text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
+    <main id="main-content" tabIndex={-1} className="min-h-screen text-ink p-4 sm:p-8 font-sans selection:bg-gold/20 selection:text-ink">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdArticle) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLdBreadcrumbs) }} />
       {jsonLdFaq && (

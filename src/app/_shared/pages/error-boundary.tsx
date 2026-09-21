@@ -21,7 +21,7 @@ export function SharedErrorBoundary({ error, reset }: { error: Error & { digest?
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-inset-warm text-ink-deep flex items-center justify-center p-4">
+    <div className="min-h-screen text-ink-deep flex items-center justify-center p-4">
       <div className="max-w-md w-full p-8 rounded-lg bg-surface border border-line-warm shadow-overlay text-center space-y-6">
         <div className="w-16 h-16 mx-auto rounded-full bg-inset-warm border border-line-warm flex items-center justify-center text-2xl text-gold-ink font-bold font-mono">!</div>
 

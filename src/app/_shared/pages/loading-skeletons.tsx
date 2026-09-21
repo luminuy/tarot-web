@@ -54,7 +54,7 @@ function Shell({ label, children }: { label: string; children: React.ReactNode }
       role="status"
       aria-busy="true"
       aria-label={label}
-      className="min-h-screen bg-canvas px-4 py-6 sm:px-6 sm:py-10"
+      className="min-h-screen px-4 py-6 sm:px-6 sm:py-10"
     >
       <div className="mx-auto w-full max-w-6xl space-y-8">{children}</div>
     </main>
