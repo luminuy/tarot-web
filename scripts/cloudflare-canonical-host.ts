@@ -23,7 +23,14 @@
  *
  * สิทธิ์ที่ API Token ต้องมี (Cloudflare ➔ My Profile ➔ API Tokens):
  *   | Zone · Zone          · Read | หา zone id จากชื่อโซน (ข้ามได้ถ้าตั้ง CLOUDFLARE_ZONE_ID) |
- *   | Zone · Transform Rules · Edit | เขียน ruleset เฟส `http_request_dynamic_redirect`        |
+ *   | Zone · Single Redirect · Edit | เขียน ruleset เฟส `http_request_dynamic_redirect`        |
+ *
+ * ⚠️ **กับดักชื่อสิทธิ์** (บทเรียน INC-0204): สิทธิ์ที่ต้องใช้คือ **Single Redirect**
+ *    (บาง dashboard เรียก "Dynamic Redirect") — **ไม่ใช่ "Transform Rules"**
+ *    ทั้งสองชื่ออยู่ใต้หมวด Rules เหมือนกันและฟังดูใกล้เคียงกันมาก แต่ `Transform Rules`
+ *    คุม URL Rewrite กับ Header Transform เท่านั้น ให้สิทธิ์ผิดตัวจะ **อ่าน ruleset ได้
+ *    แต่เขียนไม่ได้** แล้วล้มที่ขั้น PUT ด้วยข้อความ `request is not authorized`
+ *    ซึ่งไม่มีรหัส error ติดมาด้วย (จึงเดาสาเหตุจากรหัสไม่ได้ ต้องอ่านข้อความ)
  *
  * ## ทำไมรันซ้ำได้ไม่จำกัด
  *
@@ -71,14 +78,23 @@ async function cf<T>(method: string, path: string, body?: unknown): Promise<CfRe
   }))) as CfResponse<T>;
 }
 
+/**
+ * แปลง error ของ Cloudflare ให้บอกได้ว่า "ขาดสิทธิ์" ตั้งแต่บรรทัดแรก
+ *
+ * ⚠️ ห้ามตัดสินจากรหัส error อย่างเดียว — ขั้น PUT ที่ถูกปฏิเสธเพราะสิทธิ์ตอบกลับมาเป็น
+ * `request is not authorized` **โดยไม่มี `code` ติดมาเลย** (วัดจริงบน CI 2026-09-21)
+ * ถ้าเช็กแค่ `code === 10000` ข้อความแนะนำจะหายไปพอดีในเคสที่คนอ่านต้องการมันที่สุด
+ */
 function errText(r: CfResponse<unknown>): string {
   if (!r.errors?.length) return "ไม่ทราบสาเหตุ";
+  const PERMISSION_HINT = 'API Token ขาดสิทธิ์ "Zone · Single Redirect · Edit" (ไม่ใช่ "Transform Rules")';
   return r.errors
-    .map((e) =>
-      e.code === 10000
-        ? `${e.message} (code ${e.code} — API Token ขาดสิทธิ์ "Zone · Transform Rules · Edit")`
-        : `${e.message} (code ${e.code})`
-    )
+    .map((e) => {
+      const code = e.code === undefined ? "" : ` (code ${e.code})`;
+      const looksLikePermission =
+        e.code === 10000 || /not authori[sz]ed|authentication error|denied|forbidden/i.test(e.message ?? "");
+      return `${e.message}${code}${looksLikePermission ? ` — ${PERMISSION_HINT}` : ""}`;
+    })
     .join(" · ");
 }
 
@@ -191,7 +207,7 @@ async function main(): Promise<void> {
   if (!TOKEN) {
     console.error(
       "❌ ไม่พบ CLOUDFLARE_API_TOKEN\n" +
-        "   export CLOUDFLARE_API_TOKEN=<token ที่มีสิทธิ์ Zone · Transform Rules · Edit>\n" +
+        "   export CLOUDFLARE_API_TOKEN=<token ที่มีสิทธิ์ Zone · Single Redirect · Edit>\n" +
         "   (อยากดูว่าตอนนี้เด้งหรือยังโดยไม่ใช้ token ➔ `npm run cf:canonical-host -- --check`)\n"
     );
     process.exit(1);

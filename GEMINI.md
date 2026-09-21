@@ -68,5 +68,5 @@
   เติม `--wait` เพื่อให้รอจน PR merge เสร็จแล้วเก็บกวาด branch ให้อัตโนมัติ
 - **เก็บกวาด branch ที่ merge ไปแล้ว (ในเครื่อง + บน remote)**: `npm run git:tidy` (ใส่ `--dry-run` เพื่อดูก่อน)
 - **ตรวจว่าโฮสต์ `www` เด้ง 301 กลับโดเมนหลักหรือยัง**: `npm run cf:canonical-host -- --check`
-  ถอด `--check` = ดันกฎขึ้นชั้นขอบของ Cloudflare (ต้องมี `CLOUDFLARE_API_TOKEN` สิทธิ์ `Zone · Transform Rules · Edit`)
+  ถอด `--check` = ดันกฎขึ้นชั้นขอบของ Cloudflare (ต้องมี `CLOUDFLARE_API_TOKEN` สิทธิ์ `Zone · Single Redirect · Edit`)
 - **รันเซิร์ฟเวอร์สำหรับพัฒนา**: `npm run dev`

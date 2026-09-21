@@ -221,12 +221,12 @@ jobs:
 
           if npm run cf:canonical-host -- --check; then
             echo "::warning::กฎถูกตั้งไว้ด้วยมือแล้ว (ของจริงเด้ง 301 ครบ) แต่ token เขียน ruleset ไม่ได้"
-            echo "::warning::เติมสิทธิ์ 'Zone · Transform Rules · Edit' ให้ CLOUDFLARE_API_TOKEN เพื่อให้ขั้นนี้ดูแลกฎเองได้"
+            echo "::warning::เติมสิทธิ์ 'Zone · Single Redirect · Edit' ให้ CLOUDFLARE_API_TOKEN เพื่อให้ขั้นนี้ดูแลกฎเองได้"
             exit 0
           fi
 
           echo "::error::โฮสต์รองยังตอบ 200 = เว็บถูกจัดทำดัชนีสองโฮสต์ (น้ำหนัก SEO กระจาย · เปลือง crawl budget)"
           echo "::error::โค้ดใหม่ขึ้น production แล้ว ขั้นนี้แดงเพื่อเตือนเรื่องนี้อย่างเดียว"
-          echo "::error::แก้ได้ 2 ทาง — (1) เติมสิทธิ์ 'Zone · Transform Rules · Edit' ให้ token แล้ว re-run"
+          echo "::error::แก้ได้ 2 ทาง — (1) เติมสิทธิ์ 'Zone · Single Redirect · Edit' ให้ token แล้ว re-run"
           echo "::error::                (2) Cloudflare ➔ Rules ➔ Redirect Rules ➔ Create rule ตามที่สคริปต์พิมพ์ไว้ด้านบน"
           exit 1
