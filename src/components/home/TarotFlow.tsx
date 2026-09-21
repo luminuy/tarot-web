@@ -1481,7 +1481,7 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                     1. <h1> + คำโปรย        — ต้องอยู่บนสุดเสมอ (ลำดับหัวข้อ h1 ➔ h2 ของ SEO)
                     2. <DailyCardStrip />   — แถบไพ่ประจำวัน สูงคงที่ 96px ไม่ดันหน้า (CLS 0)
                     3. <QuickFortunePicker />— "เปิดไพ่ด่วน 1 ใบ" คนใช้เยอะที่สุด จึงอยู่ส่วนแรก
-                    4. ปุ่ม "เริ่มดูดวงฟรี" + <SpreadCardSelector /> — ทางเลือกอ่านละเอียด
+                    4. <SpreadCardSelector /> — ทางเลือกอ่านละเอียด (ปุ่มเริ่มอยู่ในแถบ "ผังที่เลือกไว้" ของตัวมันเอง)
                     5. {seoContent}
 
                   ⚠️ ของเดิม (PR #556 "ประตูเดียว") เอาผังขึ้นก่อนและดันสองบล็อกนี้ลงล่าง
@@ -1490,15 +1490,47 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                      ขึ้นก่อน <h1> (ผิดลำดับหัวข้อ และเคยเป็นข้อจำกัดเดิมของไฟล์นั้น)
                   ────────────────────────────────────────────────────────── */}
               <div className="space-y-6">
-                <div className="text-center space-y-2.5 sm:space-y-3 pt-2">
+                <div className="text-center space-y-3 sm:space-y-3.5 pt-2">
                   <h1 className="text-2xl sm:text-4xl font-serif-th font-bold text-ink tracking-wide leading-snug sm:leading-normal pt-1 [text-wrap:balance]">
                     {isEnglish ? "Interactive 1909 Rider-Waite Tarot with AI Oracle" : "ดูดวงไพ่ยิปซี ไพ่ทาโรต์ออนไลน์ ฟรี กับแม่หมอ AI"}
                   </h1>
-                  <p className="text-xs sm:text-sm text-muted max-w-2xl mx-auto font-serif-th leading-relaxed [text-wrap:balance]">
-                    {isEnglish
-                      ? "Shuffle and select cards from the authentic 78-card deck with provably-fair SHA-256 randomness and archetypal psychological insights."
-                      : "สับไพ่และเลือกหยิบไพ่ด้วยตัวคุณเอง จากสำรับ 1909 Rider-Waite แท้ 78 ใบ พร้อมคำพยากรณ์เจาะลึกและระบบสุ่มโปร่งใส Provably-Fair SHA-256"}
+
+                  {/*
+                    ✦ คำโปรยใต้หัวเรื่อง — เขียนใหม่ให้เป็นประโยคเดียวที่อ่านรวดเดียวจบ
+                    ของเดิมยัดสามเรื่อง (วิธีเล่น · สำรับ · ระบบสุ่ม) ไว้ในประโยคเดียวยาว 2 บรรทัด
+                    พอ `text-wrap:balance` จัดสองบรรทัดให้ยาวเท่ากัน มันตัด "78 ใบ" คาไว้คนละบรรทัด
+                    (เจ้าของทักว่าไม่สวย) — ข้อเท็จจริงที่เหลือย้ายลงแถวชิปด้านล่างซึ่งอ่านง่ายกว่า
+                    และยังเป็นข้อความจริงในหน้าเหมือนเดิม ไม่ได้หายไปจาก SEO
+                  */}
+                  {/*
+                    ⚠️ แต่ละวรรคต้องเป็น `inline-block` — ภาษาไทยไม่มีช่องว่างคั่นคำ เบราว์เซอร์จึงตัด
+                       บรรทัดกลางวรรคได้ตามใจ (ลองมาแล้วทั้ง `text-wrap:balance` และปล่อยตามธรรมชาติ
+                       ได้คำโดดท้ายบรรทัดทั้งคู่: "78 / ใบ" · "ให้ / แม่หมอ") กล่อง inline-block
+                       ไม่ถูกตัดข้างในถ้ายังกว้างพอ จึงได้บรรทัดที่จบเป็นวรรคเสมอทุกความกว้างจอ
+                  */}
+                  <p className="text-sm sm:text-base text-muted max-w-md sm:max-w-xl mx-auto font-serif-th leading-relaxed">
+                    <span className="inline-block">
+                      {isEnglish ? "Shuffle the deck and pick every card yourself," : "สับไพ่แล้วหยิบไพ่ด้วยมือคุณเอง"}
+                    </span>{" "}
+                    <span className="inline-block">
+                      {isEnglish ? "then let the AI oracle read them one by one." : "ให้แม่หมอ AI อ่านความหมายให้ทีละใบ"}
+                    </span>
                   </p>
+
+                  {/* แถวชิปความน่าเชื่อถือ — `whitespace-nowrap` กันคำในชิปแตกคนละบรรทัดแบบคำโปรยเดิม */}
+                  <ul className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                    {(isEnglish
+                      ? ["Authentic 1909 Rider-Waite · 78 cards", "Provably-Fair SHA-256 randomness", "Free · No sign-up"]
+                      : ["สำรับ 1909 Rider-Waite แท้ 78 ใบ", "สุ่มโปร่งใส Provably-Fair SHA-256", "ฟรี · ไม่ต้องสมัคร"]
+                    ).map((fact) => (
+                      <li
+                        key={fact}
+                        className="glass-chip whitespace-nowrap px-2.5 sm:px-3 py-1 font-serif-th text-[11px] sm:text-xs font-semibold text-gold-ink"
+                      >
+                        {fact}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
                 {/* ไพ่ประจำวัน — แตะดูเฉย ๆ ไม่กินโควตา จึงเป็นจุดเริ่มที่เบาที่สุดของหน้า */}
@@ -1512,31 +1544,36 @@ export default function TarotFlow({ seoContent }: { seoContent?: React.ReactNode
                 isLoading={loading}
               />
 
-              {/* ผังเต็ม — สำหรับคนที่อยากอ่านละเอียดกว่าไพ่ใบเดียว */}
-              <div className="space-y-6">
-                <div className="text-center space-y-1.5">
-                  <h2 className="text-base sm:text-lg font-serif-th font-semibold text-ink-deep pt-1">
+              {/*
+                ผังเต็ม — สำหรับคนที่อยากอ่านละเอียดกว่าไพ่ใบเดียว
+
+                🎨 หัวบล็อกใช้จังหวะเดียวกับบล็อก "เปิดไพ่ด่วน" ด้านบนเป๊ะ (ชิป ➔ h2 ➔ คำโปรย)
+                   สองบล็อกจึงอ่านเป็นชุดเดียวกัน ไม่ใช่ของสองชิ้นที่มาจากคนละหน้า
+
+                ⚠️ ปุ่มน้ำตาลก้อนใหญ่ "เริ่มดูดวงฟรี" ถูกถอดออกจากตรงนี้ (คำสั่งเจ้าของ: ไม่สวย)
+                   ของเดิมมันเป็นก้อนสีเข้มก้อนเดียวของทั้งหน้าครีม ขวางอยู่ระหว่างหัวข้อกับการ์ดผัง
+                   และซ้ำหน้าที่กับปุ่มทองในแถบ "ผังที่เลือกไว้" ที่ `SpreadCardSelector` วางไว้ใต้กริดอยู่แล้ว
+                   (ทั้งคู่เรียก `handleBeginReading` ตัวเดียวกัน) — ทางเริ่มดูดวงจึงไม่ได้หายไปไหน
+                   ยังมีทั้งแถบนั้นและป๊อปอัพ "เริ่มการดูดวงเลย" ที่เด้งทันทีที่แตะการ์ดผัง
+              */}
+              <div className="space-y-5 sm:space-y-6">
+                <div className="text-center space-y-2.5 sm:space-y-3 max-w-2xl mx-auto px-4">
+                  <div className="glass-chip inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 text-[11px] font-serif-th font-semibold tracking-wide text-gold-ink">
+                    <span>
+                      {isEnglish
+                        ? "Multi-Card Spreads · A Fuller Picture"
+                        : "ผังหลายใบ · เห็นภาพรวมทั้งเรื่อง"}
+                    </span>
+                  </div>
+
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif-th font-bold text-ink tracking-wide leading-snug [text-wrap:balance]">
                     {isEnglish ? "Choose Your Tarot Spread" : "เลือกผังการเปิดไพ่พยากรณ์"}
                   </h2>
-                  <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed max-w-xl mx-auto [text-wrap:balance]">
+                  <p className="text-xs sm:text-sm text-muted font-serif-th leading-relaxed [text-wrap:balance]">
                     {isEnglish
                       ? "Want more depth than a single card? Open several cards at once and let the oracle read the full picture."
                       : "อยากได้คำตอบที่ละเอียดกว่าไพ่ใบเดียว เปิดหลายใบพร้อมกันแล้วให้แม่หมออ่านภาพรวมให้"}
                   </p>
-                </div>
-
-                {/* Single Door Primary CTA Button */}
-                <div className="flex flex-col items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleBeginReading}
-                    className="btn-glass-primary tap-overlay-y w-full max-w-sm min-h-[48px] font-serif-th font-bold text-base cursor-pointer active:scale-[0.99] flex items-center justify-center"
-                  >
-                    {isEnglish ? "Start Free Reading" : "เริ่มดูดวงฟรี"}
-                  </button>
-                  <span className="text-xs text-muted">
-                    {isEnglish ? "About 2 minutes · No sign-up needed to try" : "ใช้เวลา 2 นาที · ไม่ต้องสมัครก็ลองได้"}
-                  </span>
                 </div>
 
                 <SpreadCardSelector
