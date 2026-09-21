@@ -23,6 +23,7 @@ import path from "node:path";
 import { assertNonEmptyCorpus } from "./lib/corpus";
 import { DECK, cardByIndex } from "../../src/data/cards";
 import { PICK_A_CARD_TOPICS } from "../../src/data/pick-a-card";
+import { PICK_A_CARD_POOLS } from "../../src/data/pick-a-card-readings";
 import { PUBLIC_SPREADS, getSpread } from "../../src/data/spreads";
 import { calculateBirthCard } from "../../src/lib/tarot/birth-card";
 import {
@@ -168,7 +169,7 @@ console.log('🧪 [QA] ไพ่ที่ "คำนวณได้" — ไพ�
   const ghosts: string[] = [];
   let cardRefs = 0;
   for (const topic of PICK_A_CARD_TOPICS) {
-    for (const entry of topic.pool) {
+    for (const entry of PICK_A_CARD_POOLS[topic.id] ?? []) {
       for (const card of entry.cards) {
         cardRefs++;
         if (!deckIds.has(card.cardId)) ghosts.push(`   ${topic.id}/${entry.id}: ${card.cardId} ไม่มีในสำรับ`);

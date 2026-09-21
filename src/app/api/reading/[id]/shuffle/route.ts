@@ -114,7 +114,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
    * คำนวณซ้ำได้เสมอจากสเปกที่ตรึงไว้ จึงส่งกลับได้ทั้งรอบแรกและรอบที่ยิงซ้ำ
    */
   const derivedDetail: DerivedDrawDetail | undefined = record.derivation
-    ? deriveDrawn(record.derivation)?.detail
+    ? deriveDrawn(record.derivation, record.lang === "en" ? "en" : "th")?.detail
     : undefined;
 
   // P1-3 Replay Guard: If cards are already drawn, return the existing drawn cards

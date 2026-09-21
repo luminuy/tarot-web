@@ -38,6 +38,7 @@ import { dayLabel, seededOrder } from "@/lib/pick-a-card/daily";
 import { deriveDrawn } from "@/lib/reading/derived-draw";
 import { pickACardTopicMetadata, pickACardTopicParams } from "@/app/_shared/pages/pick-a-card-topic";
 import { PICK_A_CARD_TOPICS } from "@/data/pick-a-card";
+import { PICK_A_CARD_POOLS } from "@/data/pick-a-card-readings";
 import { CARD_SUMMARIES } from "@/data/cards/summary";
 
 const ROOT = process.cwd();
@@ -77,6 +78,63 @@ function dayKeyAt(offset: number): string {
 function pileCards(topicId: string, slotIndex: number, dayKey: string): number[] | null {
   const derived = deriveDrawn({ kind: "pick-a-card", topicId, slotIndex, dayKey });
   return derived ? derived.drawn.map((d) => d.cardIndex) : null;
+}
+
+// ---------------------------------------------------------------------------
+// 0. คลังคำอ่านอยู่คนละไฟล์กับตัวตนของหัวข้อ และต้องครบทุกหัวข้อ (ISSUE-050)
+// ---------------------------------------------------------------------------
+{
+  /*
+   * ⭐ การแยกไฟล์ทำให้เกิดความพังแบบใหม่ที่ของเดิมไม่มี: หัวข้อที่ **ไม่มีคลังคำอ่านคู่กัน**
+   * จะคอมไพล์ผ่านทุกด่านของ TypeScript แต่ผู้ใช้กดเปิดกองนั้นแล้วเปิดไม่ออกเลยสักใบ
+   * (`derivePickACard` คืน undefined ➔ API ตอบ "โหลดใหม่อีกครั้ง") ด่านนี้จึงต้องมี
+   */
+  const missing = PICK_A_CARD_TOPICS.filter((t) => !PICK_A_CARD_POOLS[t.id]?.length).map((t) => t.id);
+  check(
+    `ทุกหัวข้อมีคลังคำอ่านคู่กันครบ (${PICK_A_CARD_TOPICS.length} หัวข้อ)`,
+    missing.length === 0,
+    `   หัวข้อที่ไม่มีคลัง: ${missing.join(", ")} — ผู้ใช้จะกดเปิดกองของหัวข้อนี้ไม่ได้เลย`
+  );
+
+  const orphanPools = Object.keys(PICK_A_CARD_POOLS).filter(
+    (id) => !PICK_A_CARD_TOPICS.some((t) => t.id === id)
+  );
+  check(
+    "ไม่มีคลังคำอ่านกำพร้าที่ไม่มีหัวข้อรองรับ",
+    orphanPools.length === 0,
+    `   คลังที่ไม่มีหัวข้อ: ${orphanPools.join(", ")}`
+  );
+
+  /*
+   * คลังคำอ่านหนักราว 1,600 บรรทัด และผู้ใช้เห็นก็ต่อเมื่อเปิดกองแล้ว
+   * ถ้าไฟล์ฝั่งเบราว์เซอร์ import มันเข้าไป น้ำหนักทั้งก้อนจะกลับเข้าบันเดิลเงียบ ๆ (ISSUE-050)
+   * เซิร์ฟเวอร์เป็นผู้ประกอบย่อหน้าแล้วส่งมากับคำตอบของ `/shuffle` แทน
+   */
+  const CLIENT_SIDE_DIRS = ["src/components", "src/app/_shared", "astro"];
+  const offenders: string[] = [];
+  let scanned = 0;
+  const walk = (dir: string): void => {
+    const full = path.join(ROOT, dir);
+    if (!fs.existsSync(full)) return;
+    for (const entry of fs.readdirSync(full, { withFileTypes: true })) {
+      const rel = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(rel);
+        continue;
+      }
+      if (!/\.(ts|tsx|astro)$/.test(entry.name)) continue;
+      scanned++;
+      const src = fs.readFileSync(path.join(ROOT, rel), "utf-8");
+      if (src.includes("pick-a-card-readings")) offenders.push(`   ${rel}`);
+    }
+  };
+  for (const dir of CLIENT_SIDE_DIRS) walk(dir);
+  check(
+    `ไม่มีไฟล์ฝั่งหน้าจอ import คลังคำอ่านเข้าบันเดิล (สแกน ${scanned} ไฟล์)`,
+    offenders.length === 0 && scanned > 0,
+    offenders.join("\n") +
+      "\n   ➔ ให้เซิร์ฟเวอร์ประกอบแล้วส่งมาใน `derived.script` แทน (ดู src/lib/reading/derived-draw.ts)"
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -172,7 +230,7 @@ function pileCards(topicId: string, slotIndex: number, dayKey: string): number[]
 // ---------------------------------------------------------------------------
 {
   const topic = PICK_A_CARD_TOPICS[0];
-  const poolSize = topic.pool.length;
+  const poolSize = PICK_A_CARD_POOLS[topic.id].length;
   const seenAnchors = new Set<number>();
   for (let dayOffset = 0; dayOffset < 400; dayOffset++) {
     const derived = deriveDrawn({ kind: "pick-a-card", topicId: topic.id, slotIndex: 0, dayKey: dayKeyAt(dayOffset) });
@@ -214,13 +272,13 @@ function pileCards(topicId: string, slotIndex: number, dayKey: string): number[]
           continue;
         }
         for (const isEn of [false, true]) {
-          const composed = composeFromDerived(topic, derived.detail, isEn);
+          const composed = composeFromDerived(PICK_A_CARD_POOLS[topic.id], derived.detail, isEn);
           if (!composed) {
             mismatched.push(`${topic.id} ${dayKey} กอง ${slot + 1}: ประกอบเนื้อหาไม่ได้`);
             continue;
           }
           composed.cards.forEach((card, idx) => {
-            const home = topic.pool.find((entry) => {
+            const home = PICK_A_CARD_POOLS[topic.id].find((entry) => {
               const reading = isEn ? entry.readingEn : entry.readingTh;
               return entry.cards[idx].cardId === card.cardId && reading[FIELDS[idx]] === composed.bodies[idx];
             });
@@ -270,7 +328,7 @@ function pileCards(topicId: string, slotIndex: number, dayKey: string): number[]
   const offenders: string[] = [];
   for (const t of PICK_A_CARD_TOPICS) {
     const seen = new Map<string, string>();
-    t.pool.forEach((entry, entryIndex) => {
+    PICK_A_CARD_POOLS[t.id].forEach((entry, entryIndex) => {
       entry.cards.forEach((card, position) => {
         const key = card.cardId;
         const where = `ชิ้นที่ ${entryIndex + 1} ตำแหน่ง ${position + 1}`;
@@ -310,7 +368,7 @@ function pileCards(topicId: string, slotIndex: number, dayKey: string): number[]
 
   const offenders: string[] = [];
   for (const t of PICK_A_CARD_TOPICS) {
-    for (const pile of t.pool) {
+    for (const pile of PICK_A_CARD_POOLS[t.id]) {
       for (const lang of ["readingTh", "readingEn"] as const) {
         const reading = pile[lang];
         for (const field of FRAME_FIELDS) {
@@ -339,7 +397,7 @@ function pileCards(topicId: string, slotIndex: number, dayKey: string): number[]
 // ---------------------------------------------------------------------------
 {
   const topic = PICK_A_CARD_TOPICS[0];
-  const poolSize = topic.pool.length;
+  const poolSize = PICK_A_CARD_POOLS[topic.id].length;
 
   // (ก) ทำซ้ำได้ — ถ้าเมล็ดเดียวกันให้คนละลำดับ คำว่า "ประจำวัน" จะไม่มีความหมาย
   const a = seededOrder(`${topic.id}:anchor`, poolSize);
